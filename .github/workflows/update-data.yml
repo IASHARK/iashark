@@ -31,6 +31,31 @@ jobs:
           function airtableGet(table, formula) {
             return new Promise((resolve, reject) => {
               const params = new URLSearchParams({ filterByFormula: formula, pageSize: '100' });
+              const url = `/v0/${BASE_ID}/${encodeURIComponent(table)}?${params}`;
+              console.log('GET', table, '|', formula);
+              const options = {
+                hostname: 'api.airtable.com',
+                path: url,
+                headers: { Authorization: `Bearer ${TOKEN}` }
+              };
+              https.get(options, res => {
+                let data = '';
+                res.on('data', chunk => data += chunk);
+                res.on('end', () => {
+                  try {
+                    const parsed = JSON.parse(data);
+                    if (parsed.error) console.log('AIRTABLE ERROR:', JSON.stringify(parsed.error));
+                    resolve(parsed.records || []);
+                  } catch(e) { reject(e); }
+                });
+              }).on('error', reject);
+            });
+          }
+
+          // Récupérer SANS filtre pour voir ce qui existe
+          function airtableGetAll(table) {
+            return new Promise((resolve, reject) => {
+              const params = new URLSearchParams({ pageSize: '5' });
               const options = {
                 hostname: 'api.airtable.com',
                 path: `/v0/${BASE_ID}/${encodeURIComponent(table)}?${params}`,
@@ -59,14 +84,33 @@ jobs:
           }
 
           async function main() {
-            // Utiliser TODAY() directement dans la formule Airtable
-            const [matches, analyses, combis] = await Promise.all([
-              airtableGet('TABLE 1 - MATCHES',   `IS_SAME({date}, TODAY(), 'day')`),
-              airtableGet('TABLE 2 - ANALYSES',  `IS_SAME({date_generation}, TODAY(), 'day')`),
-              airtableGet('TABLE 7 - COMBINES',  `IS_SAME({date}, TODAY(), 'day')`)
-            ]);
+            // DEBUG: voir les 5 premiers enregistrements sans filtre
+            console.log('=== DEBUG: 5 premiers matchs sans filtre ===');
+            const allMatches = await airtableGetAll('TABLE 1 - MATCHES');
+            allMatches.forEach(r => {
+              console.log('MATCH:', JSON.stringify(r.fields).substring(0, 200));
+            });
 
-            console.log(`Matchs: ${matches.length}, Analyses: ${analyses.length}, Combis: ${combis.length}`);
+            console.log('=== DEBUG: 5 premières analyses sans filtre ===');
+            const allAnalyses = await airtableGetAll('TABLE 2 - ANALYSES');
+            allAnalyses.forEach(r => {
+              console.log('ANALYSE:', JSON.stringify(r.fields).substring(0, 200));
+            });
+
+            console.log('=== DEBUG: 5 premiers combis sans filtre ===');
+            const allCombis = await airtableGetAll('TABLE 7 - COMBINES');
+            allCombis.forEach(r => {
+              console.log('COMBI:', JSON.stringify(r.fields).substring(0, 200));
+            });
+
+            // Maintenant avec filtre TODAY()
+            console.log('=== Filtre TODAY() ===');
+            const [matches, analyses, combis] = await Promise.all([
+              airtableGet('TABLE 1 - MATCHES',  `IS_SAME({date}, TODAY(), 'day')`),
+              airtableGet('TABLE 2 - ANALYSES', `IS_SAME({date_generation}, TODAY(), 'day')`),
+              airtableGet('TABLE 7 - COMBINES', `IS_SAME({date}, TODAY(), 'day')`)
+            ]);
+            console.log(`Avec filtre => Matchs: ${matches.length}, Analyses: ${analyses.length}, Combis: ${combis.length}`);
 
             const analysesMap = {};
             analyses.forEach(a => { if (a.fields.match_id) analysesMap[a.fields.match_id] = a.fields; });
@@ -111,10 +155,10 @@ jobs:
             }));
 
             fs.writeFileSync('data.json', JSON.stringify({ matchs: matchsData, combis: combisData, historique: [] }, null, 2));
-            console.log(`OK - ${matchsData.length} matchs, ${combisData.length} combis`);
+            console.log(`FINAL: ${matchsData.length} matchs, ${combisData.length} combis`);
           }
 
-          main().catch(e => { console.error(e); process.exit(0); });
+          main().catch(e => { console.error('ERREUR:', e); process.exit(0); });
           SCRIPT
 
       - name: Commit and push

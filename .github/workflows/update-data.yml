@@ -89,4 +89,72 @@ jobs:
                 id: f.match_id,
                 home: { n: f.home_team, id: f.home_team_id },
                 away: { n: f.away_team, id: f.away_team_id },
-                league: f.league ||
+                league: f.league || '',
+                ligue_icon: '🏆',
+                date: `${f.date} ${f.heure || ''}`.trim(),
+                cat: ['all'],
+                val: true,
+                hot: false,
+                conf: analyse.confiance || 0,
+                po15: analyse.po15 || 0,
+                po25: analyse.po25 || 0,
+                p1: 0, pn: 0, p2: 0,
+                edge: analyse.edge || '',
+                edge_detail: '',
+                risque: analyse.risque || '',
+                pari_rec: analyse.pari_rec || '',
+                mise: '2-3% bankroll',
+                conseil_public: analyse.conseil || '',
+                arg: '',
+                contexte: analyse.contexte || '',
+                enjeux: analyse.enjeux || '',
+                vbet: analyse.vbet || '',
+                scores: (analyse.scores_probables || '').split(',').map(s => s.trim()).filter(Boolean),
+                stade: {
+                  nom: `${f.stade || ''} · ${f.ville_stade || ''}`.trim(),
+                  cap: '',
+                  meteo: '',
+                  temp: ''
+                },
+                crit_home: { att: 0, def: 0, fr: 0, mot: 0, fat: 0 },
+                crit_away: { att: 0, def: 0, fr: 0, mot: 0, fat: 0 }
+              };
+            });
+
+            const combisData = combis.map(c => {
+              const f = c.fields;
+              return {
+                label: f.label || '',
+                type: f.type || '',
+                cote_totale: f.cote_totale || 0,
+                selections: f.selections || '',
+                matchs: f.matchs || '',
+                conseil: f.conseil || ''
+              };
+            });
+
+            const result = {
+              matchs: matchsData,
+              combis: combisData,
+              historique: []
+            };
+
+            const fs = require('fs');
+            fs.writeFileSync('data.json', JSON.stringify(result, null, 2));
+            console.log('data.json written successfully');
+            console.log(`${matchsData.length} matchs, ${combisData.length} combis`);
+          }
+
+          main().catch(e => {
+            console.error(e);
+            process.exit(1);
+          });
+          SCRIPT
+
+      - name: Commit and push
+        run: |
+          git config user.name "IASHARK"
+          git config user.email "yaramode81@gmail.com"
+          git add data.json
+          git diff --staged --quiet || git commit -m "Update daily"
+          git push

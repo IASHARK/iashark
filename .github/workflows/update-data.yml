@@ -52,35 +52,163 @@ jobs:
 
           function getLigueIcon(league) {
             const l = (league || '').toLowerCase();
-            if (l.includes('ligue 1') || l.includes('ligue 2') || l.includes('france')) return '🇫🇷';
-            if (l.includes('liga') || l.includes('espagne') || l.includes('spain')) return '🇪🇸';
-            if (l.includes('serie a') || l.includes('italie')) return '🇮🇹';
-            if (l.includes('bundesliga') || l.includes('allemagne')) return '🇩🇪';
+            if (l.includes('ligue 1') || l.includes('ligue 2')) return '🇫🇷';
+            if (l.includes('liga') || l.includes('spain')) return '🇪🇸';
+            if (l.includes('serie a')) return '🇮🇹';
+            if (l.includes('bundesliga')) return '🇩🇪';
             if (l.includes('premier') || l.includes('championship')) return '🏴󠁧󠁢󠁥󠁮󠁧󠁿';
-            if (l.includes('champions') || l.includes('ldc') || l.includes('ucl')) return '🏆';
+            if (l.includes('champions') || l.includes('ucl')) return '🏆';
             return '🏆';
           }
 
+          // Calcul critères IA depuis les stats (0-100)
+          function calcCriteres(stats, estDomicile) {
+            if (!stats) return { fd: 50, att: 50, def: 50, fr: 50, mot: 50, fat: 50 };
+
+            const f = stats;
+            const total = f.total_matchs || 30;
+
+            // Attaque : buts marqués par match (normalisé)
+            const butsParMatch = (f.buts_marques || 0) / total;
+            const att = Math.min(100, Math.round(butsParMatch * 40));
+
+            // Défense : buts encaissés par match (inversé, moins = mieux)
+            const encParMatch = (f.buts_encaisses || 0) / total;
+            const def = Math.min(100, Math.round((2.5 - encParMatch) * 35));
+
+            // Forme récente : 5 derniers matchs depuis la string forme
+            const forme = (f.forme || '').slice(-5);
+            let fr = 50;
+            if (forme.length > 0) {
+              const pts = forme.split('').reduce((acc, c) => {
+                if (c === 'W') return acc + 3;
+                if (c === 'D') return acc + 1;
+                return acc;
+              }, 0);
+              fr = Math.round((pts / (forme.length * 3)) * 100);
+            }
+
+            // Forme domicile/extérieur
+            const vicDom = f.victoires_dom || 0;
+            const vicExt = f.victoires_ext || 0;
+            const matchsDom = Math.round(total / 2);
+            const matchsExt = total - matchsDom;
+            const fd = estDomicile
+              ? Math.min(100, Math.round((vicDom / Math.max(matchsDom, 1)) * 100))
+              : Math.min(100, Math.round((vicExt / Math.max(matchsExt, 1)) * 100));
+
+            // Motivation : depuis classement si dispo, sinon forme
+            const classement = f.classement || 0;
+            let mot = 70;
+            if (classement > 0) {
+              if (classement <= 3) mot = 95;
+              else if (classement <= 6) mot = 85;
+              else if (classement <= 10) mot = 70;
+              else if (classement >= 17) mot = 90; // lutte relégation
+              else mot = 60;
+            }
+
+            // Fatigue : jours de repos
+            const repos = f.jours_repos || 4;
+            const fat = repos <= 2 ? 80 : repos <= 4 ? 50 : 30;
+
+            return {
+              fd: Math.max(0, Math.min(100, fd)),
+              att: Math.max(0, Math.min(100, att)),
+              def: Math.max(0, Math.min(100, def)),
+              fr: Math.max(0, Math.min(100, fr)),
+              mot: Math.max(0, Math.min(100, mot)),
+              fat: Math.max(0, Math.min(100, fat))
+            };
+          }
+
+          // Calcul probabilités depuis les stats
+          function calcProbas(statsHome, statsAway) {
+            if (!statsHome || !statsAway) return { p1: 40, pn: 25, p2: 35, po15: 70, po25: 50 };
+
+            const totalH = statsHome.total_matchs || 30;
+            const totalA = statsAway.total_matchs || 30;
+
+            // Force offensive/défensive
+            const attH = (statsHome.buts_marques || 0) / totalH;
+            const defH = (statsHome.buts_encaisses || 0) / totalH;
+            const attA = (statsAway.buts_marques || 0) / totalA;
+            const defA = (statsAway.buts_encaisses || 0) / totalA;
+
+            // Buts attendus
+            const xgH = (attH + (2.5 - defA)) / 2;
+            const xgA = (attA + (2.5 - defH)) / 2;
+
+            // Victoires en %
+            const winRateH = ((statsHome.victoires_dom || 0) / Math.max(totalH / 2, 1));
+            const winRateA = ((statsAway.victoires_ext || 0) / Math.max(totalA / 2, 1));
+
+            let p1 = Math.round(winRateH * 100);
+            let p2 = Math.round(winRateA * 100);
+            let pn = 100 - p1 - p2;
+
+            // Normaliser pour que total = 100
+            if (pn < 10) { pn = 10; p1 = Math.round((100 - pn) * (p1 / (p1 + p2))); p2 = 100 - p1 - pn; }
+            if (p1 < 10) p1 = 10;
+            if (p2 < 10) p2 = 10;
+            const total = p1 + pn + p2;
+            p1 = Math.round(p1 / total * 100);
+            p2 = Math.round(p2 / total * 100);
+            pn = 100 - p1 - p2;
+
+            // Over
+            const xgTotal = xgH + xgA;
+            const po15 = Math.min(95, Math.round(70 + (xgTotal - 2) * 10));
+            const po25 = Math.min(90, Math.round(50 + (xgTotal - 2) * 15));
+
+            return {
+              p1: Math.max(5, Math.min(85, p1)),
+              pn: Math.max(5, Math.min(50, pn)),
+              p2: Math.max(5, Math.min(85, p2)),
+              po15: Math.max(40, Math.min(95, po15)),
+              po25: Math.max(20, Math.min(85, po25))
+            };
+          }
+
           async function main() {
-            // Noms exacts des tables Airtable (avec tiret long —)
             const TABLE_MATCHES  = 'TABLE 1 \u2014 MATCHES';
             const TABLE_ANALYSES = 'TABLE 2 \u2014 ANALYSES';
+            const TABLE_STATS    = 'Table 8 -STATISTIQUES';
             const TABLE_COMBINES = 'Table 7 - COMBINES';
 
-            const [matches, analyses, combis] = await Promise.all([
+            const [matches, analyses, statsAll, combis] = await Promise.all([
               airtableGet(TABLE_MATCHES,  `IS_SAME({date}, TODAY(), 'day')`),
               airtableGet(TABLE_ANALYSES, `IS_SAME({date_generation}, TODAY(), 'day')`),
+              airtableGet(TABLE_STATS,    `IS_SAME({date}, TODAY(), 'day')`),
               airtableGet(TABLE_COMBINES, `IS_SAME({date}, TODAY(), 'day')`)
             ]);
 
-            console.log(`Matchs: ${matches.length}, Analyses: ${analyses.length}, Combis: ${combis.length}`);
+            console.log(`Matchs: ${matches.length}, Analyses: ${analyses.length}, Stats: ${statsAll.length}, Combis: ${combis.length}`);
 
+            // Map analyses par match_id
             const analysesMap = {};
             analyses.forEach(a => { if (a.fields.match_id) analysesMap[a.fields.match_id] = a.fields; });
+
+            // Map stats par match_id + equipe
+            const statsMap = {};
+            statsAll.forEach(s => {
+              const key = `${s.fields.match_id}_${s.fields.equipe}`;
+              statsMap[key] = s.fields;
+            });
 
             const matchsData = matches.map(m => {
               const f = m.fields;
               const a = analysesMap[f.match_id] || {};
+
+              // Récupérer les stats home et away
+              const statsHome = statsMap[`${f.match_id}_${f.home_team}`] || null;
+              const statsAway = statsMap[`${f.match_id}_${f.away_team}`] || null;
+
+              // Calculer critères et probas
+              const crit_home = calcCriteres(statsHome, true);
+              const crit_away = calcCriteres(statsAway, false);
+              const probas = calcProbas(statsHome, statsAway);
+
               return {
                 id: f.match_id,
                 home: { n: f.home_team || '?', id: f.home_team_id || 0 },
@@ -92,24 +220,37 @@ jobs:
                 val: (a.confiance || 0) >= 65,
                 hot: (a.confiance || 0) >= 80,
                 conf: a.confiance || 0,
-                po15: a.po15 || 0, po25: a.po25 || 0,
-                p1: 0, pn: 0, p2: 0,
-                edge: a.edge || '', edge_detail: '',
+                p1: probas.p1, pn: probas.pn, p2: probas.p2,
+                po15: probas.po15, po25: probas.po25,
+                c1: '—', cn: '—', c2: '—', co15: '—', co25: '—',
+                edge: a.edge || '',
+                edge_detail: '',
                 risque: a.risque || '',
                 pari_rec: a.pari_rec || '',
                 mise: '2-3% bankroll',
                 conseil_public: a.conseil || '',
-                arg: '', contexte: a.contexte || '', enjeux: a.enjeux || '',
+                arg: '',
+                contexte: a.contexte || '',
+                enjeux: a.enjeux || '',
                 vbet: a.vbet || '',
                 scores: (a.scores_probables || '').split(',').map(s => s.trim()).filter(Boolean),
                 stade: { nom: [f.stade, f.ville_stade].filter(Boolean).join(' · '), cap: '', meteo: '', temp: '' },
-                crit_home: { att: 50, def: 50, fd: 50, fr: 50, mot: 50, fat: 50 },
-                crit_away: { att: 50, def: 50, fd: 50, fr: 50, mot: 50, fat: 50 }
+                crit_home,
+                crit_away,
+                h2h: [], h2h_txt: '',
+                joueurs: [],
+                actu: [],
+                bookies: [{ n: 'Betclic', o: '100€ offerts', c: '—', l: '#' }, { n: 'Winamax', o: '200€ offerts', c: '—', l: '#' }],
+                paris_risque: { bet: '', cote: '', proba: '' },
+                paris_safe: { bet: a.pari_rec || '', cote: '', proba: '' },
+                value_calc: a.edge || '',
+                forme_h: statsHome ? statsHome.forme || '' : '',
+                forme_a: statsAway ? statsAway.forme || '' : ''
               };
             });
 
             const combisData = combis.map(c => ({
-              label: c.fields.label || c.fields.la || '',
+              label: c.fields.label || '',
               type: c.fields.type || '',
               cote_totale: c.fields.cote_totale || 0,
               selections: c.fields.selections || '',

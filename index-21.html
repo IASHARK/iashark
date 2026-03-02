@@ -1,0 +1,1211 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IASHARK — Pronostics IA</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🦈</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#060a0c;--card:#0d1820;--border:rgba(255,255,255,0.06);--blue:#00b4d8;--cyan:#00e5ff;--amber:#ffab00;--red:#ff1744;--green:#00e676;--text:#e8f0f4;--muted:#4a6878;}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;overflow-x:hidden;}
+button{cursor:pointer;border:none;outline:none;}
+input{outline:none;border:none;}
+a{text-decoration:none;color:inherit;}
+
+header{position:fixed;top:0;left:0;right:0;z-index:200;background:rgba(6,10,12,0.97);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:0 20px;height:58px;display:flex;align-items:center;justify-content:space-between;}
+.logo{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:4px;cursor:pointer;display:flex;align-items:center;gap:8px;}
+.hright{display:flex;align-items:center;gap:10px;}
+.live-wrap{display:flex;align-items:center;gap:6px;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--cyan);box-shadow:0 0 8px var(--cyan);animation:blink 2s infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.4}}
+.btn-login{background:transparent;border:1px solid var(--border);color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:1px;padding:7px 12px;border-radius:8px;transition:all 0.2s;}
+.btn-login:hover{border-color:var(--cyan);color:var(--cyan);}
+.btn-vip{background:linear-gradient(135deg,var(--blue),var(--cyan));color:#000;font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:2px;padding:7px 14px;border-radius:8px;}
+.avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--cyan));display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:15px;color:#000;cursor:pointer;}
+
+main{padding:68px 0 100px;max-width:480px;margin:0 auto;}
+.page{display:none;padding:0 16px;}
+.page.active{display:block;}
+
+.hero{padding:20px 0 0;text-align:center;}
+.shark-emoji{font-size:52px;margin-bottom:8px;display:block;animation:float 3s ease-in-out infinite;}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.hero-title{font-family:'Bebas Neue',sans-serif;font-size:44px;letter-spacing:3px;line-height:1;margin-bottom:6px;}
+.hero-title .ia{color:var(--cyan);}
+.hero-sub{font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.6;padding:0 20px;}
+.hero-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:20px;}
+.hstat{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 8px;text-align:center;}
+.hstat-val{font-family:'Bebas Neue',sans-serif;font-size:26px;color:var(--cyan);}
+.hstat-lbl{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-top:2px;}
+
+.filters{display:flex;gap:8px;overflow-x:auto;padding:0 0 16px;scrollbar-width:none;}
+.filters::-webkit-scrollbar{display:none;}
+.fchip{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:1.5px;padding:7px 14px;border-radius:20px;background:var(--card);border:1px solid var(--border);color:var(--muted);white-space:nowrap;transition:all 0.2s;cursor:pointer;}
+.fchip.active{background:rgba(0,229,255,0.1);border-color:rgba(0,229,255,0.3);color:var(--cyan);}
+
+.section-header{display:flex;align-items:center;justify-content:space-between;margin:8px 0 12px;}
+.slabel{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:3px;color:var(--muted);text-transform:uppercase;}
+.sbadge{background:var(--cyan);color:#000;font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;padding:2px 9px;border-radius:20px;}
+
+/* CARDS */
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:18px;margin-bottom:10px;cursor:pointer;transition:all 0.2s;position:relative;overflow:hidden;opacity:0;transform:translateY(16px);animation:up 0.4s forwards;}
+@keyframes up{to{opacity:1;transform:translateY(0);}}
+.card:hover{border-color:rgba(0,229,255,0.2);background:#0f1e28;transform:translateY(-2px);}
+.card.val::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--cyan),transparent);}
+
+/* LOCKED CARD */
+.card-locked{background:var(--card);border:1px solid var(--border);border-radius:16px;margin-bottom:10px;overflow:hidden;opacity:0;transform:translateY(16px);animation:up 0.4s forwards;position:relative;}
+.card-locked::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,rgba(0,229,255,0.4),transparent);z-index:2;}
+.lock-visible{padding:16px 18px 14px;}
+.lock-teams-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+.lock-team{display:flex;align-items:center;gap:6px;}
+.lock-team-logo{width:22px;height:22px;border-radius:50%;object-fit:contain;background:rgba(255,255,255,0.06);padding:2px;}
+.lock-team-name{font-family:'Bebas Neue',sans-serif;font-size:17px;letter-spacing:1px;}
+.lock-vs{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);}
+.lock-meta{font-size:11px;color:var(--muted);margin-bottom:12px;}
+.lock-stats-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:0;}
+.lock-stat{background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:8px;padding:8px;text-align:center;}
+.lock-stat-val{font-family:'Bebas Neue',sans-serif;font-size:18px;color:rgba(0,229,255,0.3);letter-spacing:1px;}
+.lock-stat-lbl{font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;}
+.lock-banner{background:rgba(6,10,12,0.96);border-top:1px solid rgba(0,229,255,0.12);padding:14px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px;}
+.lock-badge{display:flex;align-items:center;gap:10px;}
+.lock-icon-wrap{width:34px;height:34px;border-radius:8px;background:rgba(0,229,255,0.08);border:1px solid rgba(0,229,255,0.15);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+.lock-title{font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:2px;color:var(--text);margin-bottom:2px;}
+.lock-sub{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--cyan);letter-spacing:1px;}
+.lock-cta-btn{background:linear-gradient(135deg,var(--blue),var(--cyan));color:#000;font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:1.5px;padding:10px 16px;border-radius:8px;white-space:nowrap;flex-shrink:0;cursor:pointer;border:none;}
+
+.ctop{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.league-badge{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;}
+.tags{display:flex;gap:6px;}
+.tag{font-family:'JetBrains Mono',monospace;font-size:10px;padding:3px 8px;border-radius:4px;font-weight:600;}
+.tv{background:rgba(0,229,255,0.1);color:var(--cyan);border:1px solid rgba(0,229,255,0.2);}
+.th{background:rgba(255,171,0,0.1);color:var(--amber);border:1px solid rgba(255,171,0,0.2);}
+
+.match-teams{display:flex;align-items:center;gap:8px;margin-bottom:4px;flex-wrap:wrap;}
+.team-item{display:flex;align-items:center;gap:6px;}
+.team-logo{width:20px;height:20px;border-radius:50%;object-fit:contain;background:rgba(255,255,255,0.05);padding:2px;flex-shrink:0;}
+.team-name{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:1px;line-height:1;}
+.vs-sep{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);}
+.mdate{font-size:12px;color:var(--muted);margin-bottom:14px;}
+.s3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
+.sbox{background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:10px;padding:10px;text-align:center;}
+.sv{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:1px;line-height:1;margin-bottom:3px;}
+.sv.c{color:var(--cyan);}.sv.a{color:var(--amber);}.sv.w{color:var(--text);}
+.sl{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;}
+.cstrip{margin-top:12px;padding:10px 12px;background:rgba(0,229,255,0.04);border:1px solid rgba(0,229,255,0.12);border-radius:8px;}
+.clbl2{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--cyan);letter-spacing:2px;margin-bottom:4px;}
+.ctxt{font-size:12px;color:var(--text);line-height:1.5;}
+
+/* COMBINÉ */
+.combi-card{background:var(--card);border:1px solid rgba(255,171,0,0.2);border-radius:16px;padding:18px;margin-bottom:10px;position:relative;overflow:hidden;opacity:0;transform:translateY(16px);animation:up 0.4s forwards;}
+.combi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--amber),transparent);}
+.combi-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.combi-title{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:2px;color:var(--amber);}
+.combi-cote-big{font-family:'Bebas Neue',sans-serif;font-size:36px;color:var(--amber);letter-spacing:1px;}
+.combi-leg{background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:6px;display:flex;align-items:center;justify-content:space-between;}
+.combi-leg-match{font-size:12px;font-weight:600;margin-bottom:2px;}
+.combi-leg-bet{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--cyan);}
+.combi-leg-cote{font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--text);}
+.combi-bottom{display:flex;align-items:center;justify-content:space-between;margin-top:14px;padding-top:12px;border-top:1px solid var(--border);}
+.combi-proba{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);}
+.combi-btn{background:linear-gradient(135deg,#f59e0b,var(--amber));color:#000;font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:1.5px;padding:10px 18px;border-radius:8px;cursor:pointer;border:none;}
+
+/* DETAIL */
+.back{display:flex;align-items:center;gap:8px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);letter-spacing:2px;cursor:pointer;margin:10px 0 20px;transition:color 0.2s;}
+.back:hover{color:var(--cyan);}
+.detail-teams{display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap;}
+.detail-team{display:flex;align-items:center;gap:8px;}
+.detail-logo{width:30px;height:30px;border-radius:50%;object-fit:contain;background:rgba(255,255,255,0.05);padding:3px;}
+.detail-tname{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:2px;line-height:1;}
+.detail-vs{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);padding:0 4px;}
+.dmeta{font-size:12px;color:var(--muted);margin-bottom:14px;}
+
+.stade-meteo{display:flex;align-items:center;justify-content:space-between;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px 16px;margin-bottom:10px;}
+.stade-info{display:flex;align-items:center;gap:10px;}
+.stade-name{font-size:13px;font-weight:600;margin-bottom:2px;}
+.stade-cap{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);}
+.meteo-right{display:flex;align-items:center;gap:8px;}
+.meteo-icon{font-size:22px;}
+.meteo-temp{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--cyan);}
+.meteo-desc{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);text-align:right;}
+
+.bs{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px;}
+.bst{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px 12px;text-align:center;}
+.bv{font-family:'Bebas Neue',sans-serif;font-size:30px;letter-spacing:1px;line-height:1;margin-bottom:5px;}
+.bl{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;}
+
+.blk{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:10px;}
+.bt{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:3px;color:var(--muted);text-transform:uppercase;margin-bottom:12px;}
+
+/* CRITERES IA DOUBLE */
+.crit-section{margin-bottom:14px;}
+.crit-team-label{font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:2px;margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+.crit-team-logo{width:20px;height:20px;border-radius:50%;object-fit:contain;background:rgba(255,255,255,0.05);padding:2px;}
+.ia-crit-row{display:flex;align-items:center;margin-bottom:8px;}
+.ia-crit-label{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;width:110px;flex-shrink:0;}
+.ia-bar-track{flex:1;height:5px;background:rgba(255,255,255,0.05);border-radius:3px;overflow:hidden;margin:0 10px;}
+.ia-bar-fill{height:100%;border-radius:3px;width:0;transition:width 1s ease;}
+.ia-bar-val{font-family:'Bebas Neue',sans-serif;font-size:16px;width:32px;text-align:right;}
+
+/* PARIS RISQUE / SAFE */
+.paris-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;}
+.paris-box{border-radius:12px;padding:14px;}
+.paris-risque{background:rgba(255,23,68,0.05);border:1px solid rgba(255,23,68,0.15);}
+.paris-safe{background:rgba(0,230,118,0.05);border:1px solid rgba(0,230,118,0.15);}
+.paris-box-title{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;}
+.paris-box-title.r{color:var(--red);}
+.paris-box-title.g{color:var(--green);}
+.paris-box-bet{font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:1px;margin-bottom:4px;}
+.paris-box-cote{font-family:'Bebas Neue',sans-serif;font-size:22px;}
+.paris-box-cote.r{color:var(--red);}
+.paris-box-cote.g{color:var(--green);}
+.paris-box-proba{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);margin-top:4px;}
+
+/* JOUEUR DECISIF */
+.joueur-decisif{background:rgba(0,229,255,0.04);border:1px solid rgba(0,229,255,0.12);border-radius:12px;padding:14px;margin-bottom:8px;display:flex;align-items:center;gap:14px;}
+.joueur-num{font-family:'Bebas Neue',sans-serif;font-size:32px;color:rgba(0,229,255,0.3);width:36px;flex-shrink:0;}
+.joueur-info{}
+.joueur-name{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:1px;margin-bottom:2px;}
+.joueur-team{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:4px;}
+.joueur-desc{font-size:12px;color:var(--muted);line-height:1.5;}
+
+.h2h-item{display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,0.02);border-radius:8px;padding:8px 12px;margin-bottom:5px;}
+.h2h-date{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);width:55px;}
+.h2h-match{font-size:11px;color:var(--muted);flex:1;text-align:center;}
+.h2h-score{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:1px;width:45px;text-align:right;}
+.h2h-score.w1{color:var(--cyan);}.h2h-score.wd{color:var(--amber);}.h2h-score.w2{color:var(--muted);}
+
+.pr{display:flex;align-items:center;margin-bottom:9px;}
+.plb{font-size:13px;color:var(--text);width:85px;flex-shrink:0;}
+.pt{flex:1;height:4px;background:rgba(255,255,255,0.05);border-radius:2px;margin:0 10px;overflow:hidden;}
+.pb{height:100%;border-radius:2px;width:0;transition:width 1s ease;}
+.pv{font-family:'JetBrains Mono',monospace;font-size:12px;width:38px;text-align:right;}
+.cg{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
+.cb{text-align:center;padding:12px 8px;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:10px;}
+.cbl{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);margin-bottom:5px;}
+.cvl{font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--text);}
+.sr{display:flex;gap:8px;flex-wrap:wrap;}
+.sp{background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:8px;padding:8px 16px;font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;}
+.sp:first-child{background:rgba(0,229,255,0.08);border-color:rgba(0,229,255,0.3);color:var(--cyan);}
+.arg{font-style:italic;font-size:14px;color:var(--text);line-height:1.7;padding:14px;background:rgba(0,229,255,0.04);border-left:3px solid var(--cyan);border-radius:0 8px 8px 0;}
+
+.mise-box{background:rgba(0,230,118,0.04);border:1px solid rgba(0,230,118,0.15);border-radius:12px;padding:14px;margin-bottom:10px;}
+.pari-rec{background:rgba(0,230,118,0.08);border-radius:8px;padding:12px;border:1px solid rgba(0,230,118,0.2);margin-top:10px;}
+
+.bookie-row{display:flex;flex-direction:column;gap:8px;}
+.bookie-item{display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:12px;padding:12px 14px;transition:all 0.2s;cursor:pointer;}
+.bookie-item:hover{border-color:rgba(0,229,255,0.2);background:#0f1e28;}
+.bookie-left{display:flex;align-items:center;gap:12px;}
+.bookie-logo-img{width:36px;height:36px;border-radius:8px;object-fit:contain;background:#fff;padding:4px;}
+.bookie-name{font-weight:600;font-size:14px;margin-bottom:2px;color:var(--text);}
+.bookie-offer{font-size:11px;color:var(--cyan);}
+.bookie-cote{font-family:'Bebas Neue',sans-serif;font-size:26px;color:var(--cyan);}
+.bookie-btn{background:linear-gradient(135deg,var(--blue),var(--cyan));color:#000;font-family:'Bebas Neue',sans-serif;font-size:12px;letter-spacing:1.5px;padding:8px 14px;border-radius:8px;}
+
+.actu-item{background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:8px;}
+.actu-club{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--cyan);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px;}
+.actu-title{font-size:14px;font-weight:600;margin-bottom:4px;line-height:1.4;}
+.actu-text{font-size:12px;color:var(--muted);line-height:1.6;}
+.actu-time{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);margin-top:6px;}
+
+.suivi-row{display:flex;gap:8px;margin-top:14px;}
+.sbtn{flex:1;padding:10px;border-radius:10px;font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:1px;transition:all 0.2s;}
+.sbtn-g{background:rgba(0,230,118,0.1);color:var(--green);border:1px solid rgba(0,230,118,0.2);}
+.sbtn-g.active{background:var(--green);color:#000;}
+.sbtn-r{background:rgba(255,23,68,0.1);color:var(--red);border:1px solid rgba(255,23,68,0.2);}
+.sbtn-r.active{background:var(--red);color:#fff;}
+
+.cta{width:100%;padding:16px;background:linear-gradient(135deg,var(--blue),var(--cyan));color:#000;border:none;border-radius:12px;font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:3px;cursor:pointer;margin-top:10px;transition:all 0.2s;}
+.cta:hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(0,180,216,0.3);}
+
+.plans{display:flex;flex-direction:column;gap:12px;margin-bottom:20px;}
+.plan{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;position:relative;}
+.plan.popular{border-color:var(--cyan);background:rgba(0,229,255,0.03);}
+.popular-badge{position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,var(--blue),var(--cyan));color:#000;font-family:'Bebas Neue',sans-serif;font-size:12px;letter-spacing:2px;padding:3px 14px;border-radius:20px;}
+.plan-name{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;margin-bottom:4px;}
+.plan-price{font-family:'Bebas Neue',sans-serif;font-size:42px;color:var(--cyan);line-height:1;}
+.plan-price span{font-size:16px;color:var(--muted);}
+.plan-features{margin:14px 0;display:flex;flex-direction:column;gap:8px;}
+.feat{font-size:13px;}
+.plan-btn{width:100%;padding:14px;border-radius:10px;font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:2px;margin-top:6px;transition:all 0.2s;}
+.plan-btn.cyan{background:linear-gradient(135deg,var(--blue),var(--cyan));color:#000;}
+.plan-btn.outline{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.plan-btn.outline:hover{border-color:var(--cyan);color:var(--cyan);}
+
+.dash-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px;}
+.dstat{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;}
+.dstat-val{font-family:'Bebas Neue',sans-serif;font-size:32px;margin-bottom:4px;}
+.dstat-lbl{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;}
+.history-item{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;}
+.hi-result{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:1px;}
+.hi-result.win{color:var(--green);}.hi-result.loss{color:var(--red);}.hi-result.pending{color:var(--amber);}
+
+.auth-wrap{padding:24px 0;display:flex;flex-direction:column;align-items:center;text-align:center;max-width:360px;margin:0 auto;}
+.auth-title{font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:3px;margin-bottom:6px;text-align:center;width:100%;}
+.auth-sub{font-size:13px;color:var(--muted);margin-bottom:24px;text-align:center;width:100%;}
+.inp-group{margin-bottom:14px;width:100%;}
+.inp-label{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:6px;display:block;}
+.inp{width:100%;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 16px;color:var(--text);font-size:15px;font-family:'DM Sans',sans-serif;transition:border-color 0.2s;}
+.inp:focus{border-color:rgba(0,229,255,0.4);}
+.auth-btn{width:100%;padding:15px;background:linear-gradient(135deg,var(--blue),var(--cyan));color:#000;border-radius:10px;font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:3px;margin-top:6px;}
+.auth-switch{text-align:center;margin-top:20px;font-size:13px;color:var(--muted);}
+.auth-switch a{color:var(--cyan);cursor:pointer;}
+.divider{display:flex;align-items:center;gap:12px;margin:20px 0;}
+.div-line{flex:1;height:1px;background:var(--border);}
+.div-text{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:2px;}
+.social-btn{text-align:center;justify-content:center;width:100%;padding:13px;background:var(--card);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:14px;display:flex;align-items:center;justify-content:center;gap:10px;transition:all 0.2s;margin-bottom:10px;cursor:pointer;}
+.social-btn:hover{border-color:rgba(255,255,255,0.15);}
+
+.legal-footer{padding:24px 0 8px;border-top:1px solid var(--border);margin-top:16px;}
+.legal-warning{background:rgba(255,171,0,0.04);border:1px solid rgba(255,171,0,0.14);border-radius:8px;padding:12px;margin-bottom:10px;}
+.legal-links{display:flex;gap:16px;flex-wrap:wrap;margin-top:10px;}
+.legal-link{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:1px;cursor:pointer;transition:color 0.2s;}
+.legal-link:hover{color:var(--cyan);}
+
+.bnav{position:fixed;bottom:0;left:0;right:0;background:rgba(6,10,12,0.97);backdrop-filter:blur(20px);border-top:1px solid var(--border);display:flex;justify-content:space-around;padding:10px 0 18px;}
+.ni{display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;opacity:0.35;transition:opacity 0.2s;padding:4px 16px;}
+.ni.active{opacity:1;}
+.ni.active .nd{background:var(--cyan);}
+.ni-icon{font-size:20px;}
+.ni-lbl{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1px;color:var(--muted);text-transform:uppercase;}
+.ni.active .ni-lbl{color:var(--cyan);}
+.nd{width:4px;height:4px;border-radius:50%;background:transparent;margin-top:2px;}
+
+.tg-bubble{position:fixed;bottom:82px;right:16px;z-index:150;width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#229ED9,#1a7ab5);box-shadow:0 4px 20px rgba(34,158,217,0.5);display:flex;align-items:center;justify-content:center;cursor:pointer;animation:tgpulse 3s ease-in-out infinite;}
+@keyframes tgpulse{0%,100%{box-shadow:0 4px 20px rgba(34,158,217,0.5)}50%{box-shadow:0 4px 30px rgba(34,158,217,0.8)}}
+.tg-bubble:hover{transform:scale(1.1);}
+
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:300;align-items:flex-end;}
+.modal-bg.open{display:flex;}
+.modal{background:#0a1520;border-radius:24px 24px 0 0;padding:28px 20px 40px;width:100%;max-width:480px;margin:0 auto;animation:slideUp 0.3s ease;}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.modal-handle{width:40px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 20px;}
+.modal-btn{width:100%;padding:15px;background:linear-gradient(135deg,var(--blue),var(--cyan));color:#000;border-radius:10px;font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:3px;margin-bottom:10px;cursor:pointer;}
+.modal-btn2{width:100%;padding:13px;background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:10px;font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:2px;cursor:pointer;}
+
+.t-stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+.t-stat{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;text-align:center;position:relative;overflow:hidden;}
+.t-stat::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+.t-stat.cyan::before{background:linear-gradient(90deg,transparent,var(--cyan),transparent);}
+.t-stat.green::before{background:linear-gradient(90deg,transparent,var(--green),transparent);}
+.t-stat.amber::before{background:linear-gradient(90deg,transparent,var(--amber),transparent);}
+.t-val{font-family:'Bebas Neue',sans-serif;font-size:34px;letter-spacing:1px;line-height:1;margin-bottom:4px;}
+.t-lbl{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;}
+.t-sub{font-size:11px;color:var(--muted);margin-top:3px;}
+.t-mini-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px;}
+.t-mini{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px;text-align:center;}
+.t-mini-val{font-family:'Bebas Neue',sans-serif;font-size:24px;margin-bottom:2px;}
+.t-mini-lbl{font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;}
+.t-inp-lbl{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:5px;display:block;}
+.t-rbtn{padding:10px;border-radius:10px;font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:1px;transition:all 0.2s;border:1px solid var(--border);background:rgba(255,255,255,0.03);color:var(--muted);cursor:pointer;}
+.t-rbtn.win.active{background:rgba(0,230,118,0.12);border-color:var(--green);color:var(--green);}
+.t-rbtn.loss.active{background:rgba(255,23,68,0.12);border-color:var(--red);color:var(--red);}
+.t-rbtn.pending.active{background:rgba(255,171,0,0.12);border-color:var(--amber);color:var(--amber);}
+.t-pari{background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:8px;animation:up 0.3s ease;}
+.t-empty{text-align:center;padding:30px 20px;}
+
+.t-stat{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;text-align:center;position:relative;overflow:hidden;}
+.t-stat::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+.t-stat.cyan::before{background:linear-gradient(90deg,transparent,var(--cyan),transparent);}
+.t-stat.green::before{background:linear-gradient(90deg,transparent,var(--green),transparent);}
+.t-stat.amber::before{background:linear-gradient(90deg,transparent,var(--amber),transparent);}
+.t-val{font-family:'Bebas Neue',sans-serif;font-size:34px;letter-spacing:1px;line-height:1;margin-bottom:4px;}
+.t-lbl{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;}
+.t-sub{font-size:11px;color:var(--muted);margin-top:3px;}
+.t-mini{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px;text-align:center;}
+.t-mini-val{font-family:'Bebas Neue',sans-serif;font-size:24px;margin-bottom:2px;}
+.t-mini-lbl{font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;}
+.t-inp-lbl{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:5px;display:block;}
+.t-rbtn{padding:10px;border-radius:10px;font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:1px;transition:all 0.2s;border:1px solid var(--border);background:rgba(255,255,255,0.03);color:var(--muted);cursor:pointer;}
+.t-rbtn.win.active{background:rgba(0,230,118,0.12);border-color:var(--green);color:var(--green);}
+.t-rbtn.loss.active{background:rgba(255,23,68,0.12);border-color:var(--red);color:var(--red);}
+.t-rbtn.pending.active{background:rgba(255,171,0,0.12);border-color:var(--amber);color:var(--amber);}
+.t-pari{background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:8px;animation:up 0.3s ease;}
+.t-empty{text-align:center;padding:30px 20px;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo" onclick="nav('home')"><span style="font-size:22px">🦈</span><span style="color:var(--cyan)">IA</span><span style="color:var(--text)">SHARK</span></div>
+  <div class="hright">
+    <div class="live-wrap"><div class="dot"></div><span id="liveCount">12 MATCHS</span></div>
+    <div id="authBtns" style="display:flex;gap:8px">
+      <button class="btn-login" onclick="nav('login')">CONNEXION</button>
+      <button class="btn-vip" onclick="nav('premium')">VIP</button>
+    </div>
+    <div id="userBtns" style="display:none"><div class="avatar" id="avatarEl" onclick="nav('dashboard')">U</div></div>
+  </div>
+</header>
+
+<main>
+  <!-- HOME -->
+  <div class="page active" id="page-home">
+
+    <!-- BANNIÈRE LANCEMENT OFFICIEL -->
+    <div style="margin:0 -16px 16px;padding:13px 20px;background:linear-gradient(135deg,#001a2e,#002a42,#001a2e);border-bottom:1px solid rgba(0,229,255,0.25);text-align:center;position:relative;overflow:hidden;">
+      <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,#00e5ff,transparent);animation:scan 3s linear infinite;"></div>
+      <style>@keyframes scan{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}</style>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:#00e5ff;letter-spacing:3px;margin-bottom:5px;">⚡ LANCEMENT OFFICIEL ⚡</div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;background:linear-gradient(90deg,#00b4d8,#00e5ff,#fff,#00e5ff,#00b4d8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">ACCÈS 100% GRATUIT</div>
+      <div style="font-size:11px;color:#4a6878;margin-top:3px;">Toutes les analyses ouvertes · <span style="color:#ffab00;">🔒 VIP prochainement dès 9€/mois</span></div>
+    </div>
+
+    <div class="hero">
+      <span class="shark-emoji">🦈</span>
+      <div class="hero-title"><span class="ia">IA</span>SHARK</div>
+      <div class="hero-sub">L'IA qui attaque les cotes. Pronostics alimentés par l'intelligence artificielle, mis à jour chaque jour.</div>
+      <div class="hero-stats">
+        <div class="hstat"><div class="hstat-val">73%</div><div class="hstat-lbl">RÉUSSITE</div></div>
+        <div class="hstat"><div class="hstat-val">+28%</div><div class="hstat-lbl">ROI</div></div>
+        <div class="hstat"><div class="hstat-val">1247</div><div class="hstat-lbl">COTES ANALYSÉES</div></div>
+      </div>
+    </div>
+    <div class="filters">
+      <div class="fchip active" onclick="filter(this,'all')">TOUS</div>
+      <div class="fchip" onclick="filter(this,'value')">⚡ VALUE BETS</div>
+      <div class="fchip" onclick="filter(this,'combi')">🔗 COMBINÉS</div>
+      <div class="fchip" onclick="filter(this,'ldc')">🏆 LDC</div>
+      <div class="fchip" onclick="filter(this,'champ')">🏴󠁧󠁢󠁥󠁮󠁧󠁿 CHAMPIONSHIP</div>
+    </div>
+
+    <div class="section-header"><div class="slabel">⚡ VALUE BETS</div><div class="sbadge" id="vcnt">0</div></div>
+    <div id="valueList"></div>
+
+    <div class="section-header"><div class="slabel">🔗 COMBINÉS IA</div><div class="sbadge" id="ccnt">3</div></div>
+    <div id="combiList"></div>
+
+    <div class="section-header"><div class="slabel">TOUS LES MATCHS</div><div class="sbadge" id="ocnt">0</div></div>
+    <div id="otherList"></div>
+
+    <div style="background:linear-gradient(135deg,rgba(0,229,255,0.08),rgba(0,180,216,0.05));border:1px solid rgba(0,229,255,0.2);border-radius:14px;padding:16px 18px;margin-bottom:16px;text-align:center;">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--cyan);letter-spacing:2px;margin-bottom:6px">⚡ ACCÈS 100% GRATUIT — LANCEMENT OFFICIEL</div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:2px;margin-bottom:4px">TOUTES LES ANALYSES SONT OUVERTES</div>
+      <div style="font-size:12px;color:var(--muted);line-height:1.5">Le site est gratuit pour tous les premiers utilisateurs.<br><span style="color:var(--amber)">🔒 Le VIP arrive prochainement</span> — abonnement à partir de 9€/mois.</div>
+    </div>
+    <div class="legal-footer">
+      <div class="legal-warning">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--amber);letter-spacing:2px;margin-bottom:6px">⚠️ AVERTISSEMENT JEUX D'ARGENT — 18+</div>
+        <div style="font-size:11px;color:var(--muted);line-height:1.6">Les paris sportifs comportent des risques de pertes financières. IASHARK est un service d'analyse statistique uniquement. Aucune garantie de gain. Jouez de façon responsable. Aide : <strong style="color:var(--text)">09 74 75 13 13</strong> (7j/7, gratuit).</div>
+      </div>
+      <div style="font-size:11px;color:var(--muted);line-height:1.7;margin-bottom:8px">© 2025 IASHARK. Service d'analyse par intelligence artificielle. Les paris sportifs sont réservés aux personnes majeures. En France, les opérateurs légaux sont agréés par l'ANJ (Autorité Nationale des Jeux). Les marques des bookmakers citées sont la propriété de leurs détenteurs respectifs.</div>
+      <div class="legal-links">
+        <span class="legal-link">CGU</span>
+        <span class="legal-link">Confidentialité</span>
+        <span class="legal-link">Cookies</span>
+        <span class="legal-link">Contact</span>
+        <span class="legal-link">Jeu responsable</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- DETAIL -->
+  <div class="page" id="page-detail">
+    <div class="back" onclick="nav('home')">← RETOUR</div>
+    <div id="detailContent"></div>
+  </div>
+
+  <!-- PREMIUM -->
+  <div class="page" id="page-premium">
+    <div style="text-align:center;padding:24px 0 16px">
+      <span style="font-size:48px;display:block;margin-bottom:10px">🦈</span>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:34px;letter-spacing:3px;margin-bottom:8px">DEVIENS UN <span style="color:var(--cyan)">SHARK</span></div>
+      <div style="background:rgba(0,229,255,0.08);border:1px solid rgba(0,229,255,0.25);border-radius:12px;padding:14px 20px;margin-bottom:16px;">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--cyan);letter-spacing:2px;margin-bottom:6px">⚡ ACCÈS GRATUIT — LANCEMENT</div>
+        <div style="font-size:13px;color:var(--text);line-height:1.5">Le site est <strong style="color:var(--cyan)">entièrement gratuit</strong> pour le moment.<br>Le VIP arrive prochainement — profites-en avant tout le monde !</div>
+      </div>
+      <div style="font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:20px">Voici un aperçu des fonctionnalités qui arrivent avec l'abonnement VIP.</div>
+    </div>
+    <div class="plans">
+      <div class="plan">
+        <div class="plan-name">STARTER</div>
+        <div class="plan-price">9<span>€ / mois</span></div>
+        <div class="plan-features">
+          <div class="feat">✅ 5 pronostics / jour</div>
+          <div class="feat">✅ Value bets détectés</div>
+          <div class="feat">✅ Probabilités IA</div>
+          <div class="feat">❌ Analyses complètes</div>
+          <div class="feat">❌ Canal VIP Telegram</div>
+        </div>
+        <button class="plan-btn outline" onclick="showPayModal('STARTER — 9€/mois')">CHOISIR</button>
+      </div>
+      <div class="plan popular">
+        <div class="popular-badge">🦈 SHARK</div>
+        <div class="plan-name">PRO</div>
+        <div class="plan-price">19<span>€ / mois</span></div>
+        <div class="plan-features">
+          <div class="feat">✅ Pronostics illimités</div>
+          <div class="feat">✅ Analyses détaillées complètes</div>
+          <div class="feat">✅ Canal VIP Telegram</div>
+          <div class="feat">✅ Alertes temps réel</div>
+          <div class="feat">✅ Suivi & stats personnels</div>
+        </div>
+        <button class="plan-btn cyan" onclick="showPayModal('PRO — 19€/mois')">DEVENIR SHARK</button>
+      </div>
+      <div class="plan">
+        <div class="plan-name">ANNUEL</div>
+        <div class="plan-price">149<span>€ / an</span></div>
+        <div class="plan-features">
+          <div class="feat">✅ Tout le plan PRO</div>
+          <div class="feat">✅ -35% de réduction</div>
+          <div class="feat">✅ Support prioritaire</div>
+          <div class="feat">✅ Accès bêta nouveautés</div>
+        </div>
+        <button class="plan-btn outline" onclick="showPayModal('ANNUEL — 149€/an')">CHOISIR</button>
+      </div>
+    </div>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center;margin-bottom:16px;">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:2px;margin-bottom:6px">🛡️ GARANTIE 7 JOURS</div>
+      <div style="font-size:12px;color:var(--muted);line-height:1.6">Pas satisfait ? Remboursement intégral sans question dans les 7 jours.</div>
+    </div>
+    <div class="legal-warning" style="border-radius:10px;padding:12px">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--amber);letter-spacing:2px;margin-bottom:6px">⚠️ 18+ JEUX D'ARGENT</div>
+      <div style="font-size:11px;color:var(--muted);line-height:1.6">Jouez de façon responsable. Aide : 09 74 75 13 13.</div>
+    </div>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div class="page" id="page-dashboard">
+    <div style="padding:20px 0 16px">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:2px;margin-bottom:4px">MON SHARK SPACE</div>
+      <div style="font-size:13px;color:var(--muted)" id="dashUser">Bienvenue !</div>
+    </div>
+    <div class="dash-stats">
+      <div class="dstat"><div class="dstat-val" style="color:var(--cyan)">73%</div><div class="dstat-lbl">TAUX RÉUSSITE</div><div style="font-size:11px;color:var(--green);margin-top:4px">↑ +3% ce mois</div></div>
+      <div class="dstat"><div class="dstat-val" style="color:var(--cyan)">+28%</div><div class="dstat-lbl">ROI</div><div style="font-size:11px;color:var(--green);margin-top:4px">↑ +5% ce mois</div></div>
+      <div class="dstat"><div class="dstat-val">47</div><div class="dstat-lbl">PARIS SUIVIS</div></div>
+      <div class="dstat"><div class="dstat-val" style="color:var(--green)">+340€</div><div class="dstat-lbl">GAINS ESTIMÉS</div></div>
+    </div>
+    <div class="slabel" style="margin-bottom:12px">HISTORIQUE RÉCENT</div>
+    <div id="historyList"></div>
+    <button style="width:100%;padding:14px;background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:10px;font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:2px;margin-top:10px;cursor:pointer;" onclick="logout()">SE DÉCONNECTER</button>
+  </div>
+
+  <!-- LOGIN -->
+  <div class="page" id="page-login">
+    <div class="auth-wrap">
+      <div class="auth-title">🦈 CONNEXION</div>
+      <div class="auth-sub">Accède à ton espace Shark.</div>
+      <button class="social-btn"><img src="https://www.google.com/favicon.ico" width="20" height="20" alt="">Continuer avec Google</button>
+      <button class="social-btn">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+        Continuer avec Apple
+      </button>
+      <div class="divider"><div class="div-line"></div><div class="div-text">OU</div><div class="div-line"></div></div>
+      <div class="inp-group"><label class="inp-label">EMAIL</label><input class="inp" type="email" id="loginEmail" placeholder="ton@email.com"></div>
+      <div class="inp-group"><label class="inp-label">MOT DE PASSE</label><input class="inp" type="password" id="loginPass" placeholder="••••••••"></div>
+      <button class="auth-btn" onclick="login()">SE CONNECTER</button>
+      <div class="auth-switch">Pas encore de compte ? <a onclick="nav('signup')">S'inscrire</a></div>
+    </div>
+  </div>
+
+  <!-- SIGNUP -->
+  <div class="page" id="page-signup">
+    <div class="auth-wrap">
+      <div class="auth-title">🦈 REJOINDRE</div>
+      <div class="auth-sub">Crée ton compte IASHARK.</div>
+      <div class="inp-group"><label class="inp-label">IDENTIFIANT</label><input class="inp" type="text" id="signupName" placeholder="Ton pseudo ex: shark92"></div>
+      <div class="inp-group"><label class="inp-label">EMAIL</label><input class="inp" type="email" id="signupEmail" placeholder="ton@email.com"></div>
+      <div class="inp-group"><label class="inp-label">MOT DE PASSE</label><input class="inp" type="password" id="signupPass" placeholder="••••••••"></div>
+      <button class="auth-btn" onclick="signup()">CRÉER MON COMPTE</button>
+      <div class="auth-switch">Déjà un compte ? <a onclick="nav('login')">Se connecter</a></div>
+    </div>
+  </div>
+
+  <!-- TRACKER -->
+  <div class="page" id="page-tracker">
+    <div style="padding:12px 0 16px;text-align:center">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:30px;letter-spacing:3px;margin-bottom:4px">MON <span style="color:var(--cyan)">TRACKER</span></div>
+      <div style="font-size:13px;color:var(--muted)">Suis tes paris et visualise ton ROI réel.</div>
+    </div>
+
+    <div class="t-stats-grid">
+      <div class="t-stat cyan"><div class="t-val" id="tReussite">—</div><div class="t-lbl">RÉUSSITE</div><div class="t-sub" id="tReussiteSub">0 paris</div></div>
+      <div class="t-stat green"><div class="t-val" id="tROI">—</div><div class="t-lbl">ROI</div><div class="t-sub" id="tROISub">retour invest.</div></div>
+      <div class="t-stat amber"><div class="t-val" id="tGains">—</div><div class="t-lbl">GAINS NETS</div><div class="t-sub">depuis début</div></div>
+      <div class="t-stat"><div class="t-val" id="tMise">—</div><div class="t-lbl">MISÉ TOTAL</div><div class="t-sub" id="tMiseSub">0 résolus</div></div>
+    </div>
+
+    <div class="t-mini-row">
+      <div class="t-mini"><div class="t-mini-val" id="tW" style="color:var(--green)">0</div><div class="t-mini-lbl">GAGNÉS</div></div>
+      <div class="t-mini"><div class="t-mini-val" id="tL" style="color:var(--red)">0</div><div class="t-mini-lbl">PERDUS</div></div>
+      <div class="t-mini"><div class="t-mini-val" id="tP" style="color:var(--amber)">0</div><div class="t-mini-lbl">EN COURS</div></div>
+    </div>
+
+    <div class="blk" id="tChartCard" style="display:none;margin-bottom:10px">
+      <div class="bt">📈 ÉVOLUTION BANKROLL</div>
+      <div style="position:relative;height:100px"><canvas id="tChart" style="width:100%;height:100px"></canvas></div>
+    </div>
+
+    <div class="blk">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:2px;margin-bottom:14px">➕ AJOUTER UN PARI</div>
+      <div style="margin-bottom:10px"><label class="t-inp-lbl">MATCH</label><input class="inp" id="tMatch" type="text" placeholder="ex: PSG vs Aston Villa"></div>
+      <div style="margin-bottom:10px"><label class="t-inp-lbl">PARI JOUÉ</label><input class="inp" id="tBet" type="text" placeholder="ex: Victoire PSG / Over 2.5"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+        <div><label class="t-inp-lbl">MISE (€)</label><input class="inp" id="tMiseInp" type="number" placeholder="20" min="0" step="0.5"></div>
+        <div><label class="t-inp-lbl">COTE</label><input class="inp" id="tCoteInp" type="number" placeholder="1.75" min="1" step="0.01"></div>
+      </div>
+      <div style="margin-bottom:10px"><label class="t-inp-lbl">BOOKMAKER</label>
+        <select class="inp" id="tBook" style="cursor:pointer;-webkit-appearance:none">
+          <option value="">Sélectionner...</option>
+          <option>Betclic</option><option>Unibet</option><option>Winamax</option>
+          <option>PMU</option><option>Bet365</option><option>Bwin</option><option>Autre</option>
+        </select>
+      </div>
+      <div style="margin-bottom:14px"><label class="t-inp-lbl">RÉSULTAT</label>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:5px">
+          <button class="t-rbtn win" id="tBtnWin" onclick="tSelectResult('win')">✅ GAGNÉ</button>
+          <button class="t-rbtn loss" id="tBtnLoss" onclick="tSelectResult('loss')">❌ PERDU</button>
+          <button class="t-rbtn pending active" id="tBtnPending" onclick="tSelectResult('pending')">⏳ EN COURS</button>
+        </div>
+      </div>
+      <button style="width:100%;padding:14px;background:linear-gradient(135deg,var(--blue),var(--cyan));color:#000;border-radius:10px;font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:2px;cursor:pointer;border:none" onclick="tAddPari()">🦈 ENREGISTRER</button>
+    </div>
+
+    <div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <div class="slabel">HISTORIQUE</div>
+        <button style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--red);letter-spacing:1px;background:transparent;border:1px solid rgba(255,23,68,0.2);padding:4px 10px;border-radius:6px;cursor:pointer" onclick="tConfirmClear()">TOUT EFFACER</button>
+      </div>
+      <div id="tHistorique"></div>
+    </div>
+
+    <div style="margin-top:10px;padding:12px;background:rgba(255,171,0,0.04);border:1px solid rgba(255,171,0,0.12);border-radius:10px;margin-bottom:16px">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--amber);letter-spacing:2px;margin-bottom:6px">⚠️ AVERTISSEMENT</div>
+      <div style="font-size:11px;color:var(--muted);line-height:1.6">Outil de suivi personnel. Les paris comportent des risques. 18+ uniquement. Aide : <strong>09 74 75 13 13</strong></div>
+    </div>
+  </div>
+
+</main>
+
+<a href="https://t.me/iashark" target="_blank" class="tg-bubble" title="Canal VIP Telegram">
+  <svg viewBox="0 0 24 24" width="28" height="28" fill="white"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12L7.17 13.923l-2.93-.918c-.638-.203-.65-.638.136-.943l11.44-4.41c.532-.194.998.13.818.943z"/></svg>
+</a>
+
+<nav class="bnav">
+  <div class="ni active" id="nav-home" onclick="nav('home')"><div class="ni-icon">🦈</div><div class="ni-lbl">MATCHS</div><div class="nd"></div></div>
+  <div class="ni" id="nav-premium" onclick="nav('premium')"><div class="ni-icon">⚡</div><div class="ni-lbl">VIP</div><div class="nd"></div></div>
+  <div class="ni" id="nav-tracker" onclick="nav('tracker')"><div class="ni-icon">📊</div><div class="ni-lbl">TRACKER</div><div class="nd"></div></div>
+  <div class="ni" id="nav-dashboard" onclick="navDash()"><div class="ni-icon">👤</div><div class="ni-lbl">COMPTE</div><div class="nd"></div></div>
+</nav>
+
+<div class="modal-bg" id="payModal" onclick="closeModal()">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-handle"></div>
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:2px;margin-bottom:6px">🦈 DEVIENS SHARK</div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.6" id="modalPlan">Paiement sécurisé. 7 jours satisfait ou remboursé.</div>
+    <button class="modal-btn" onclick="goStripe()">💳 PAYER MAINTENANT</button>
+    <button class="modal-btn2" onclick="closeModal()">ANNULER</button>
+  </div>
+</div>
+
+<script>
+const LOGO_OVERRIDE={
+  95:'https://upload.wikimedia.org/wikipedia/en/thumb/a/a3/FC_Brugge_logo.svg/200px-FC_Brugge_logo.svg.png',
+  4523:'https://upload.wikimedia.org/wikipedia/en/thumb/b/b0/FK_Bodø%2FGlimt_logo.svg/200px-FK_Bodø%2FGlimt_logo.svg.png',
+  680:'https://upload.wikimedia.org/wikipedia/en/thumb/3/36/Qarabag_FK_badge.svg/200px-Qarabag_FK_badge.svg.png',
+};
+const LOGO=id=>LOGO_OVERRIDE[id]||`https://media.api-sports.io/football/teams/${id}.png`;
+const BK={Betclic:'https://www.betclic.fr/favicon.ico',Unibet:'https://www.unibet.fr/favicon.ico',Winamax:'https://www.winamax.fr/favicon.ico',PMU:'https://www.pmu.fr/favicon.ico'};
+
+let MATCHES = [];
+let COMBIS  = [];
+
+async function loadData() {
+  try {
+    const res  = await fetch('data.json?v=' + Date.now());
+    const text = await res.text();
+    const data = JSON.parse(text);
+
+    MATCHES = (data.matchs || []).map((m, i) => ({
+      id: m.id || i + 1,
+      home: m.home || { n: '?', id: 0 },
+      away: m.away || { n: '?', id: 0 },
+      league: m.league || '',
+      ligue_icon: m.ligue_icon || '🏆',
+      date: m.date || '',
+      cat: m.cat || ['all'],
+      val: !!m.val,
+      hot: !!m.hot,
+      premium: false,
+      p1: m.p1 || 0, pn: m.pn || 0, p2: m.p2 || 0,
+      po15: m.po15 || 0, po25: m.po25 || 0,
+      c1: m.c1 || '—', cn: m.cn || '—', c2: m.c2 || '—',
+      co15: m.co15 || '—', co25: m.co25 || '—',
+      conf: m.conf ? +(parseFloat(m.conf) / 10).toFixed(1) : 0,
+      edge: m.edge || '—',
+      edge_detail: m.edge_detail || '',
+      vbet: m.vbet || '—',
+      pari_rec: m.pari_rec || '',
+      mise: m.mise || '2-3% bankroll',
+      risque: m.risque || '',
+      conseil_public: m.conseil_public || '',
+      arg: m.arg || '',
+      contexte: m.contexte || '',
+      enjeux: m.enjeux || '',
+      scores: Array.isArray(m.scores) ? m.scores : [],
+      stade: m.stade || { nom: '', cap: '', desc: '', meteo: '', temp: '' },
+      crit_home: m.crit_home || { fd: 50, att: 50, def: 50, fr: 50, mot: 50, fat: 50 },
+      crit_away: m.crit_away || { fd: 50, att: 50, def: 50, fr: 50, mot: 50, fat: 50 },
+      h2h: m.h2h || [], h2h_txt: m.h2h_txt || '',
+      joueurs: m.joueurs || [],
+      actu: m.actu || [],
+      bookies: m.bookies || [{ n: 'Betclic', o: '100€ offerts', c: '—', l: '#' }],
+      paris_risque: m.paris_risque || { bet: '', cote: '', proba: '' },
+      paris_safe: m.paris_safe || { bet: m.pari_rec || '', cote: '', proba: '' },
+      value_calc: m.value_calc || m.edge || '',
+      forme_h: m.forme_h || '', forme_a: m.forme_a || ''
+    }));
+
+    COMBIS = (data.combis || []).map((c, i) => {
+      const selList   = (c.selections || '').split(',').map(s => s.trim()).filter(Boolean);
+      const matchList = (c.matchs || '').split(',').map(s => s.trim()).filter(Boolean);
+      return {
+        id: 'c' + (i + 1),
+        titre: c.label || ('COMBINÉ ' + (i + 1)),
+        cote_totale: c.cote_totale || '',
+        proba: '',
+        desc: c.conseil || '',
+        legs: selList.map((sel, idx) => ({ match: matchList[idx] || '', bet: sel, cote: '—' }))
+      };
+    });
+
+    document.getElementById('liveCount').textContent = MATCHES.length + ' MATCH' + (MATCHES.length !== 1 ? 'S' : '');
+    renderAll();
+
+  } catch (e) {
+    console.log('Chargement data.json impossible:', e.message);
+    document.getElementById('liveCount').textContent = '0 MATCHS';
+    renderAll();
+  }
+}
+
+let isLoggedIn=false,isPremium=false,currentUser=null,currentFilter='all',suiviState={};
+
+function nav(page){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  const el=document.getElementById('nav-'+page);
+  if(el)el.classList.add('active');
+  window.scrollTo(0,0);
+}
+function navDash(){if(!isLoggedIn){nav('login');return;}nav('dashboard');}
+function login(){
+  const e=document.getElementById('loginEmail').value,p=document.getElementById('loginPass').value;
+  if(!e||!p){alert('Remplis tous les champs !');return;}
+  isLoggedIn=true;currentUser={name:e.split('@')[0],email:e};updateAuthUI();nav('dashboard');
+}
+function signup(){
+  const n=document.getElementById('signupName').value,e=document.getElementById('signupEmail').value,p=document.getElementById('signupPass').value;
+  if(!n||!e||!p){alert('Remplis tous les champs !');return;}
+  isLoggedIn=true;currentUser={name:n,email:e};updateAuthUI();nav('dashboard');
+}
+function logout(){isLoggedIn=false;currentUser=null;updateAuthUI();nav('home');}
+
+function showLoginPrompt(){
+  document.getElementById('loginPromptModal').classList.add('open');
+}
+function closeLoginPrompt(){
+  document.getElementById('loginPromptModal').classList.remove('open');
+}
+function updateAuthUI(){
+  if(isLoggedIn&&currentUser){
+    document.getElementById('authBtns').style.display='none';
+    document.getElementById('userBtns').style.display='block';
+    document.getElementById('avatarEl').textContent=currentUser.name[0].toUpperCase();
+    document.getElementById('dashUser').textContent='Bienvenue '+currentUser.name+' 🦈';
+  }else{
+    document.getElementById('authBtns').style.display='flex';
+    document.getElementById('userBtns').style.display='none';
+  }
+}
+
+function filter(el,cat){
+  document.querySelectorAll('.fchip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');currentFilter=cat;renderAll();
+}
+
+function tHTML(t,size=20){
+  const fs=size===20?17:22;
+  return `<div class="team-item"><img src="${LOGO(t.id)}" width="${size}" height="${size}" style="border-radius:50%;object-fit:contain;background:rgba(255,255,255,0.06);padding:2px;flex-shrink:0" onerror="this.style.display='none'"><span style="font-family:'Bebas Neue',sans-serif;font-size:${fs}px;letter-spacing:1px;line-height:1">${t.n}</span></div>`;
+}
+
+function renderAll(){
+  const show = m => currentFilter==='all' || (currentFilter==='value'&&m.val) || m.cat.includes(currentFilter);
+  const showCombi = currentFilter==='all'||currentFilter==='value'||currentFilter==='combi';
+  const f=MATCHES.filter(show);
+  const vals=f.filter(m=>m.val), others=f.filter(m=>!m.val);
+  document.getElementById('vcnt').textContent=vals.length;
+  document.getElementById('ocnt').textContent=others.length;
+  document.getElementById('ccnt').textContent=showCombi?COMBIS.length:0;
+  const emptyM = '<div style="text-align:center;padding:40px 20px"><div style="font-size:40px;opacity:0.2;margin-bottom:12px">⚽</div><div style="font-family:\'JetBrains Mono\',monospace;font-size:11px;letter-spacing:2px;color:var(--muted)">AUCUN MATCH DISPONIBLE AUJOURD\'HUI</div></div>';
+  const emptyC = '<div style="text-align:center;padding:40px 20px"><div style="font-size:40px;opacity:0.2;margin-bottom:12px">🔗</div><div style="font-family:\'JetBrains Mono\',monospace;font-size:11px;letter-spacing:2px;color:var(--muted)">AUCUN COMBINÉ DISPONIBLE</div></div>';
+  document.getElementById('valueList').innerHTML = vals.length > 0 ? vals.map((m,i)=>cardHTML(m,i)).join('') : '';
+  document.getElementById('otherList').innerHTML = others.length > 0 ? others.map((m,i)=>cardHTML(m,i)).join('') : (vals.length===0 ? emptyM : '');
+  document.getElementById('combiList').innerHTML = showCombi ? (COMBIS.length > 0 ? COMBIS.map((c,i)=>combiHTML(c,i)).join('') : emptyC) : '';
+}
+
+function cardHTML(m,i){
+  var rc=(m.risque||'').toLowerCase();
+  var rcol=rc.indexOf('faible')>=0?'var(--green)':rc.indexOf('lev')>=0||rc.indexOf('ele')>=0?'var(--red)':'var(--amber)';
+  var prono=m.pari_rec?'<div style="margin-top:10px;padding:9px 12px;background:rgba(0,230,118,0.07);border:1px solid rgba(0,230,118,0.2);border-radius:8px"><div style="font-size:9px;color:var(--green);letter-spacing:2px;margin-bottom:3px">NOTRE PRONO</div><div style="font-size:13px;font-weight:600">'+m.pari_rec+'</div></div>':'';
+  return '<div class="card '+(m.val?'val':'')+'" style="animation-delay:'+i*0.07+'s" onclick="showDetail('+m.id+')">'
+    +'<div class="ctop"><div class="league-badge">'+m.ligue_icon+' '+m.league+'</div><div class="tags">'+(m.val?'<div class="tag tv">⚡ VALUE</div>':'')+(m.hot?'<div class="tag th">🔥 HOT</div>':'')+'</div></div>'
+    +'<div class="match-teams">'+tHTML(m.home)+'<span class="vs-sep">—</span>'+tHTML(m.away)+'</div>'
+    +'<div class="mdate">'+m.date+'</div>'
+    +'<div class="s3">'
+    +'<div class="sbox"><div class="sv c">'+m.conf+'/10</div><div class="sl">CONFIANCE IA</div></div>'
+    +'<div class="sbox"><div class="sv a">'+(m.edge||'—')+'</div><div class="sl">EDGE IA</div></div>'
+    +'<div class="sbox"><div class="sv" style="font-size:11px;color:'+rcol+'">'+(m.risque||'—')+'</div><div class="sl">RISQUE</div></div>'
+    +'</div>'
+    +prono
+    +'<div class="cstrip"><div class="clbl2">🦈 CONSEIL IA</div><div class="ctxt">'+(m.conseil_public||m.conseil||'')+'</div></div>'
+    +'</div>';
+}
+function combiHTML(c,i){
+  return `<div class="combi-card" style="animation-delay:${i*0.1}s">
+    <div class="combi-header">
+      <div>
+        <div class="combi-title">${c.titre}</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:2px">Probabilité IA : ${c.proba}</div>
+      </div>
+      <div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:2px;text-align:right;margin-bottom:2px">COTE TOTALE</div>
+        <div class="combi-cote-big">${c.cote_totale}</div>
+      </div>
+    </div>
+    ${c.legs.map(l=>`
+      <div class="combi-leg">
+        <div><div class="combi-leg-match">${l.match}</div><div class="combi-leg-bet">${l.bet}</div></div>
+        <div class="combi-leg-cote">${l.cote}</div>
+      </div>`).join('')}
+    <div style="font-size:12px;color:var(--muted);line-height:1.6;margin-top:10px">${c.desc}</div>
+    <div class="combi-bottom">
+      <div class="combi-proba">Confiance IA : ${c.proba}</div>
+      <button class="combi-btn" onclick="showPayModal('Combiné VIP')">PARIER CE COMBINÉ</button>
+    </div>
+  </div>`;
+}
+
+function radarSVG(stats, color) {
+  // 6 axes: ATT, DEF, MIL(fd), FORME(fr), MOT, PHY(100-fat)
+  const vals = [
+    stats.att / 100,
+    stats.def / 100,
+    stats.fd / 100,
+    stats.fr / 100,
+    stats.mot / 100,
+    (100 - stats.fat) / 100
+  ];
+  const cx = 100, cy = 100, r = 72;
+  const n = 6;
+  const labels = ['ATT','DÉF','MIL','FORME','MOT','PHY'];
+  const angles = vals.map((_, i) => (Math.PI * 2 * i / n) - Math.PI / 2);
+
+  // Background polygon levels
+  let bg = '';
+  [0.25,0.5,0.75,1].forEach(lv => {
+    const pts = angles.map(a => `${cx + Math.cos(a)*r*lv},${cy + Math.sin(a)*r*lv}`).join(' ');
+    bg += `<polygon points="${pts}" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>`;
+  });
+
+  // Axis lines
+  let axes = '';
+  angles.forEach((a, i) => {
+    axes += `<line x1="${cx}" y1="${cy}" x2="${cx + Math.cos(a)*r}" y2="${cy + Math.sin(a)*r}" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>`;
+    const lx = cx + Math.cos(a) * (r + 14);
+    const ly = cy + Math.sin(a) * (r + 14);
+    axes += `<text x="${lx}" y="${ly}" text-anchor="middle" dominant-baseline="middle" fill="rgba(255,255,255,0.35)" font-size="9" font-family="JetBrains Mono,monospace">${labels[i]}</text>`;
+  });
+
+  // Data polygon
+  const pts = vals.map((v, i) => `${cx + Math.cos(angles[i]) * r * v},${cy + Math.sin(angles[i]) * r * v}`).join(' ');
+  const fill = `<polygon points="${pts}" fill="${color}" fill-opacity="0.15" stroke="${color}" stroke-width="1.5"/>`;
+
+  // Dots
+  let dots = '';
+  vals.forEach((v, i) => {
+    dots += `<circle cx="${cx + Math.cos(angles[i]) * r * v}" cy="${cy + Math.sin(angles[i]) * r * v}" r="3" fill="${color}"/>`;
+  });
+
+  return bg + axes + fill + dots;
+}
+
+function criRow(label,val){
+  const col=val>=70?'var(--cyan)':val>=50?'var(--amber)':'var(--red)';
+  return `<div class="ia-crit-row">
+    <div class="ia-crit-label">${label}</div>
+    <div class="ia-bar-track"><div class="ia-bar-fill" data-w="${val}" style="background:${col}"></div></div>
+    <div class="ia-bar-val" style="color:${col}">${val}</div>
+  </div>`;
+}
+
+function showDetail(id){
+  const m=MATCHES.find(x=>x.id===id);if(!m)return;
+  const sv=suiviState[id]||null;
+  const ch=m.crit_home,ca=m.crit_away;
+  document.getElementById('detailContent').innerHTML=`
+    <div class="detail-teams">
+      <div class="detail-team"><img src="${LOGO(m.home.id)}" class="detail-logo" onerror="this.style.display='none'"><span class="detail-tname">${m.home.n}</span></div>
+      <span class="detail-vs">—</span>
+      <div class="detail-team"><img src="${LOGO(m.away.id)}" class="detail-logo" onerror="this.style.display='none'"><span class="detail-tname">${m.away.n}</span></div>
+    </div>
+    <div class="dmeta">${m.league} · ${m.date}</div>
+
+    <div class="stade-meteo">
+      <div class="stade-info"><div style="font-size:20px">🏟️</div><div><div class="stade-name">${m.stade.nom}</div><div class="stade-cap">${m.stade.cap}</div></div></div>
+      <div class="meteo-right"><div><div class="meteo-desc" style="text-align:right">${m.stade.desc}</div></div><div class="meteo-icon">${m.stade.meteo}</div><div class="meteo-temp">${m.stade.temp}</div></div>
+    </div>
+
+    <div class="bs">
+      <div class="bst"><div class="bv" style="color:var(--cyan)">${m.p1}%</div><div class="bl">PROBA 1</div></div>
+      <div class="bst"><div class="bv" style="color:${m.edge?'var(--cyan)':'var(--muted)'}">${m.edge||'—'}</div><div class="bl">EDGE IA</div></div>
+      <div class="bst"><div class="bv" style="color:var(--amber)">${m.conf}/10</div><div class="bl">CONFIANCE</div></div>
+    </div>
+
+    <div class="blk"><div class="bt">🎯 CONTEXTE</div><div style="font-size:13px;color:var(--text);line-height:1.8">${m.contexte}</div></div>
+
+    <div class="blk">
+      <div class="bt">⚽ COMPARAISON ÉQUIPES</div>
+      <div style="display:flex;gap:12px;align-items:flex-start;">
+        <div style="flex:1;text-align:center;">
+          <div style="display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:10px;">
+            <img src="${LOGO(m.home.id)}" width="20" height="20" style="border-radius:50%;object-fit:contain;background:rgba(255,255,255,0.06);padding:2px;" onerror="this.style.display='none'">
+            <span style="font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:1px;">${m.home.n}</span>
+          </div>
+          <svg viewBox="0 0 200 200" width="100%" style="max-width:160px;">
+            ${radarSVG(ch,'#00e5ff')}
+          </svg>
+        </div>
+        <div style="flex:1;text-align:center;">
+          <div style="display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:10px;">
+            <img src="${LOGO(m.away.id)}" width="20" height="20" style="border-radius:50%;object-fit:contain;background:rgba(255,255,255,0.06);padding:2px;" onerror="this.style.display='none'">
+            <span style="font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:1px;">${m.away.n}</span>
+          </div>
+          <svg viewBox="0 0 200 200" width="100%" style="max-width:160px;">
+            ${radarSVG(ca,'#ffab00')}
+          </svg>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:center;flex-wrap:wrap;gap:8px;margin-top:10px;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:1px;">
+        <span>ATT</span><span style="color:var(--border)">•</span>
+        <span>DÉF</span><span style="color:var(--border)">•</span>
+        <span>MIL</span><span style="color:var(--border)">•</span>
+        <span>FORME</span><span style="color:var(--border)">•</span>
+        <span>MOT</span><span style="color:var(--border)">•</span>
+        <span>PHY</span>
+      </div>
+    </div>
+
+    <div class="blk">
+      <div class="bt">🤖 CRITÈRES IA</div>
+      <div class="crit-section">
+        <div class="crit-team-label"><img src="${LOGO(m.home.id)}" class="crit-team-logo" onerror="this.style.display='none'">${m.home.n}</div>
+        ${criRow('FORME DOM.',ch.fd)}${criRow('PUISSANCE ATT.',ch.att)}${criRow('SOLIDITÉ DÉF.',ch.def)}${criRow('FORME RÉCENTE',ch.fr)}${criRow('MOTIVATION',ch.mot)}${criRow('FRAÎCHEUR',100-ch.fat)}
+      </div>
+      <div style="height:1px;background:var(--border);margin:12px 0"></div>
+      <div class="crit-section">
+        <div class="crit-team-label"><img src="${LOGO(m.away.id)}" class="crit-team-logo" onerror="this.style.display='none'">${m.away.n}</div>
+        ${criRow('FORME EXT.',ca.fd)}${criRow('PUISSANCE ATT.',ca.att)}${criRow('SOLIDITÉ DÉF.',ca.def)}${criRow('FORME RÉCENTE',ca.fr)}${criRow('MOTIVATION',ca.mot)}${criRow('FRAÎCHEUR',100-ca.fat)}
+      </div>
+    </div>
+
+    <div class="blk"><div class="bt">PROBABILITÉS IA</div>
+      ${prow('Victoire 1',m.p1)}${prow('Nul',m.pn)}${prow('Victoire 2',m.p2)}${prow('Over 1.5',m.po15)}${prow('Over 2.5',m.po25)}
+    </div>
+
+    <div class="blk"><div class="bt">COTES MARCHÉ</div>
+      <div class="cg">
+        <div class="cb"><div class="cbl">VICTOIRE 1</div><div class="cvl">${m.c1}</div></div>
+        <div class="cb"><div class="cbl">NUL</div><div class="cvl">${m.cn}</div></div>
+        <div class="cb"><div class="cbl">VICTOIRE 2</div><div class="cvl">${m.c2}</div></div>
+        <div class="cb"><div class="cbl">OVER 1.5</div><div class="cvl">${m.co15}</div></div>
+        <div class="cb"><div class="cbl">OVER 2.5</div><div class="cvl">${m.co25}</div></div>
+        <div class="cb"><div class="cbl">VALUE BET</div><div class="cvl" style="color:var(--cyan);font-size:13px">${m.vbet}</div></div>
+      </div>
+    </div>
+
+    <div class="blk"><div class="bt">⚔️ DERNIÈRES CONFRONTATIONS</div>
+      ${m.h2h.map(h=>`<div class="h2h-item"><div class="h2h-date">${h.d}</div><div class="h2h-match">${m.home.n} vs ${m.away.n}</div><div class="h2h-score ${h.w==='1'?'w1':h.w==='2'?'w2':'wd'}">${h.s}</div></div>`).join('')}
+      <div style="margin-top:10px;padding:10px;background:rgba(0,229,255,0.04);border-radius:8px;font-size:12px;color:var(--muted);line-height:1.6">${m.h2h_txt}</div>
+    </div>
+
+    <div class="blk"><div class="bt">SCORES PROBABLES</div>
+      <div class="sr">${m.scores.map(s=>`<div class="sp">${s}</div>`).join('')}</div>
+    </div>
+
+    <div class="blk"><div class="bt">🦈 ARGUMENT CLÉ IA</div><div class="arg">${m.arg}</div></div>
+    ${m.edge_detail?`<div class="blk"><div class="bt">📐 EDGE DÉTAILLÉ</div><div style="font-size:13px;color:var(--text);line-height:1.8">${m.edge_detail}</div></div>`:''}
+    ${m.conseil_public?`<div class="blk"><div class="bt">💡 CONSEIL COMPLET</div><div style="font-size:13px;color:var(--text);line-height:1.8">${m.conseil_public}</div></div>`:''}
+
+    <div class="blk"><div class="bt">⚡ JOUEURS DÉCISIFS CIBLÉS</div>
+      ${m.joueurs.map((j,i)=>`<div class="joueur-decisif"><div class="joueur-num">${i===0?'01':'02'}</div><div class="joueur-info"><div class="joueur-name">${j.nom}</div><div class="joueur-team">${j.club}</div><div class="joueur-desc">${j.desc}</div></div></div>`).join('')}
+    </div>
+
+    <div class="blk"><div class="bt">🎲 PARIS PAR NIVEAU DE RISQUE</div>
+      <div class="paris-grid">
+        <div class="paris-box paris-risque">
+          <div class="paris-box-title r">⚠️ PARIS RISQUÉ</div>
+          <div class="paris-box-bet">${m.paris_risque.bet}</div>
+          <div class="paris-box-cote r">${m.paris_risque.cote}</div>
+          <div class="paris-box-proba">Probabilité IA : ${m.paris_risque.proba}</div>
+        </div>
+        <div class="paris-box paris-safe">
+          <div class="paris-box-title g">✅ PARIS SAFE</div>
+          <div class="paris-box-bet">${m.paris_safe.bet}</div>
+          <div class="paris-box-cote g">${m.paris_safe.cote}</div>
+          <div class="paris-box-proba">Probabilité IA : ${m.paris_safe.proba}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="blk"><div class="bt">🔬 ANALYSE DÉTAILLÉE</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:10px;padding:12px"><div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--cyan);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px">FORME DOM.</div><div style="font-size:11px;color:var(--muted);line-height:1.5">${m.forme_h}</div></div>
+        <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:10px;padding:12px"><div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--cyan);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px">FORME EXT.</div><div style="font-size:11px;color:var(--muted);line-height:1.5">${m.forme_a}</div></div>
+        <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:10px;padding:12px"><div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--cyan);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px">CALCUL VALUE</div><div style="font-size:11px;color:var(--muted);line-height:1.5">${m.value_calc}</div></div>
+        <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:10px;padding:12px"><div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--cyan);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px">NIVEAU RISQUE</div><div style="font-size:11px;line-height:1.5;color:${m.risque.includes('FAIBLE')?'var(--green)':m.risque.includes('ÉLEVÉ')?'var(--red)':'var(--amber)'}">${m.risque}</div></div>
+      </div>
+    </div>
+
+    <div class="mise-box">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:3px;color:var(--green);text-transform:uppercase;margin-bottom:10px">💰 CONSEIL DE MISE</div>
+      <div style="font-size:13px;color:var(--text);line-height:1.7;margin-bottom:10px">${m.mise}</div>
+      <div class="pari-rec"><div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--green);letter-spacing:2px;margin-bottom:4px">PARI RECOMMANDÉ</div><div style="font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--green)">${m.pari_rec}</div></div>
+    </div>
+
+    <div class="blk"><div class="bt">🔥 COMPARER LES COTES</div>
+      <div class="bookie-row">
+        ${m.bookies.map(b=>`<a class="bookie-item" href="${b.l}" target="_blank"><div class="bookie-left"><img class="bookie-logo-img" src="${BK[b.n]||''}" alt="${b.n}" onerror="this.outerHTML='<div style=\'width:36px;height:36px;border-radius:8px;background:rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:var(--text)\'>${b.n[0]}</div>'"><div><div class="bookie-name">${b.n}</div><div class="bookie-offer">${b.o}</div></div></div><div style="display:flex;align-items:center;gap:10px"><div class="bookie-cote">${b.c}</div><div class="bookie-btn">PARIER</div></div></a>`).join('')}
+      </div>
+    </div>
+
+    <div class="blk"><div class="bt">📰 ACTUALITÉS</div>
+      ${m.actu.map(a=>`<div class="actu-item"><div class="actu-club">${a.c}</div><div class="actu-title">${a.t}</div><div class="actu-text">${a.tx}</div><div class="actu-time">${a.tm}</div></div>`).join('')}
+    </div>
+
+    <div class="blk"><div class="bt">MON SUIVI</div>
+      <div style="font-size:13px;color:var(--muted);margin-bottom:10px">J'ai parié sur ce match ?</div>
+      <div class="suivi-row">
+        <button class="sbtn sbtn-g ${sv==='win'?'active':''}" id="btn-win-${id}" onclick="setSuivi(${id},'win')">✅ GAGNÉ</button>
+        <button class="sbtn sbtn-r ${sv==='loss'?'active':''}" id="btn-loss-${id}" onclick="setSuivi(${id},'loss')">❌ PERDU</button>
+      </div>
+    </div>
+
+    <button class="cta" onclick="window.open('${m.bookies[0].l}','_blank')">🦈 PARIER SUR CETTE SÉLECTION</button>
+
+    <div style="margin-top:16px;padding:12px;background:rgba(255,171,0,0.04);border:1px solid rgba(255,171,0,0.12);border-radius:10px">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--amber);letter-spacing:2px;margin-bottom:6px">⚠️ AVERTISSEMENT</div>
+      <div style="font-size:11px;color:var(--muted);line-height:1.6">Analyses fournies à titre informatif. Les paris comportent des risques. Jouez de façon responsable. 18+ uniquement. Aide : <strong>09 74 75 13 13</strong></div>
+    </div>
+  `;
+  nav('detail');
+  setTimeout(()=>{
+    document.querySelectorAll('.pb').forEach(b=>{b.style.width=b.dataset.w+'%';});
+    document.querySelectorAll('.ia-bar-fill').forEach(b=>{b.style.width=b.dataset.w+'%';});
+  },100);
+}
+
+function setSuivi(id,result){
+  suiviState[id]=result;
+  document.getElementById('btn-win-'+id).classList.toggle('active',result==='win');
+  document.getElementById('btn-loss-'+id).classList.toggle('active',result==='loss');
+}
+function prow(label,val){
+  const pct=Math.min(parseFloat(val)||0,100);
+  const col=pct>60?'var(--cyan)':pct>35?'var(--amber)':'var(--muted)';
+  return `<div class="pr"><div class="plb">${label}</div><div class="pt"><div class="pb" data-w="${pct}" style="background:${col}"></div></div><div class="pv" style="color:${col}">${val}%</div></div>`;
+}
+function renderHistory(){
+  document.getElementById('historyList').innerHTML=HISTORY.map(h=>`
+    <div class="history-item">
+      <div><div style="font-weight:600;font-size:14px;margin-bottom:3px">${h.match}</div><div style="font-size:12px;color:var(--muted)">${h.bet} · Cote ${h.cote}</div></div>
+      <div style="text-align:right"><div class="hi-result ${h.result}">${h.result==='win'?'GAGNÉ':h.result==='loss'?'PERDU':'EN COURS'}</div><div style="font-size:11px;color:var(--muted)">${h.gain}</div></div>
+    </div>`).join('');
+}
+function showPayModal(plan){
+  document.getElementById('modalPlan').textContent=`Plan : ${plan} — Paiement sécurisé. 7 jours satisfait ou remboursé.`;
+  document.getElementById('payModal').classList.add('open');
+}
+function closeModal(){document.getElementById('payModal').classList.remove('open');}
+function goStripe(){alert('Remplace cette ligne par ton lien Stripe !');closeModal();}
+
+loadData();
+
+// ── TRACKER ──────────────────────────────────────────────
+const T_KEY = 'iashark_paris';
+let tParis = JSON.parse(localStorage.getItem(T_KEY) || '[]');
+let tResult = 'pending';
+
+function tSelectResult(r){
+  tResult = r;
+  ['Win','Loss','Pending'].forEach(x=>{
+    const el = document.getElementById('tBtn'+x);
+    if(el) el.classList.toggle('active', x.toLowerCase()===r);
+  });
+}
+
+function tAddPari(){
+  const match = document.getElementById('tMatch').value.trim();
+  const bet   = document.getElementById('tBet').value.trim();
+  const mise  = parseFloat(document.getElementById('tMiseInp').value);
+  const cote  = parseFloat(document.getElementById('tCoteInp').value);
+  const book  = document.getElementById('tBook').value;
+  if(!match||!bet||!mise||!cote||mise<=0||cote<1){
+    alert('Remplis tous les champs correctement !'); return;
+  }
+  const gain = tResult==='win' ? +(mise*cote-mise).toFixed(2) : tResult==='loss' ? -mise : 0;
+  tParis.unshift({id:Date.now(),match,bet,mise,cote,book,result:tResult,gain,
+    date:new Date().toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit',year:'numeric'})});
+  localStorage.setItem(T_KEY, JSON.stringify(tParis));
+  document.getElementById('tMatch').value='';
+  document.getElementById('tBet').value='';
+  document.getElementById('tMiseInp').value='';
+  document.getElementById('tCoteInp').value='';
+  document.getElementById('tBook').value='';
+  tSelectResult('pending');
+  tRenderAll();
+}
+
+function tDeletePari(id){
+  tParis = tParis.filter(p=>p.id!==id);
+  localStorage.setItem(T_KEY, JSON.stringify(tParis));
+  tRenderAll();
+}
+
+function tConfirmClear(){
+  if(tParis.length===0){alert('Aucun pari à effacer');return;}
+  if(confirm('Effacer tout l\'historique ?')){ tParis=[];localStorage.setItem(T_KEY,'[]');tRenderAll(); }
+}
+
+function tRenderStats(){
+  const res=tParis.filter(p=>p.result!=='pending');
+  const wins=tParis.filter(p=>p.result==='win');
+  const losses=tParis.filter(p=>p.result==='loss');
+  const pend=tParis.filter(p=>p.result==='pending');
+  const totalMise=res.reduce((a,p)=>a+p.mise,0);
+  const totalGain=res.reduce((a,p)=>a+p.gain,0);
+  const reussite=res.length>0?(wins.length/res.length*100):null;
+  const roi=totalMise>0?(totalGain/totalMise*100):null;
+
+  if(reussite!==null){
+    const col=reussite>=60?'var(--green)':reussite>=45?'var(--amber)':'var(--red)';
+    document.getElementById('tReussite').textContent=reussite.toFixed(0)+'%';
+    document.getElementById('tReussite').style.color=col;
+    document.getElementById('tReussiteSub').textContent=res.length+' paris résolus';
+  }else{document.getElementById('tReussite').textContent='—';}
+
+  if(roi!==null){
+    const col=roi>0?'var(--green)':roi<0?'var(--red)':'var(--muted)';
+    document.getElementById('tROI').textContent=(roi>0?'+':'')+roi.toFixed(1)+'%';
+    document.getElementById('tROI').style.color=col;
+  }else{document.getElementById('tROI').textContent='—';}
+
+  if(res.length>0){
+    const col=totalGain>0?'var(--green)':totalGain<0?'var(--red)':'var(--muted)';
+    document.getElementById('tGains').textContent=(totalGain>0?'+':'')+totalGain.toFixed(0)+'€';
+    document.getElementById('tGains').style.color=col;
+    document.getElementById('tMise').textContent=totalMise.toFixed(0)+'€';
+    document.getElementById('tMiseSub').textContent=res.length+' résolus';
+  }else{document.getElementById('tGains').textContent='—';document.getElementById('tMise').textContent='—';}
+
+  document.getElementById('tW').textContent=wins.length;
+  document.getElementById('tL').textContent=losses.length;
+  document.getElementById('tP').textContent=pend.length;
+}
+
+function tRenderChart(){
+  const res=[...tParis].filter(p=>p.result!=='pending').reverse();
+  const card=document.getElementById('tChartCard');
+  if(res.length<2){card.style.display='none';return;}
+  card.style.display='block';
+  const canvas=document.getElementById('tChart');
+  const ctx=canvas.getContext('2d');
+  const W=canvas.offsetWidth||440,H=100;
+  canvas.width=W;canvas.height=H;
+  let bk=0;
+  const pts=[0,...res.map(p=>{bk+=p.gain;return+bk.toFixed(2);})];
+  const minV=Math.min(...pts),maxV=Math.max(...pts),range=maxV-minV||1,pad=10;
+  const toX=i=>pad+(i/(pts.length-1))*(W-pad*2);
+  const toY=v=>H-pad-((v-minV)/range)*(H-pad*2);
+  ctx.clearRect(0,0,W,H);
+  const isPos=pts[pts.length-1]>=0;
+  const grad=ctx.createLinearGradient(0,0,0,H);
+  grad.addColorStop(0,isPos?'rgba(0,230,118,0.3)':'rgba(255,23,68,0.3)');
+  grad.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.beginPath();
+  pts.forEach((v,i)=>i===0?ctx.moveTo(toX(i),toY(v)):ctx.lineTo(toX(i),toY(v)));
+  ctx.lineTo(toX(pts.length-1),H);ctx.lineTo(toX(0),H);ctx.closePath();
+  ctx.fillStyle=grad;ctx.fill();
+  ctx.beginPath();
+  pts.forEach((v,i)=>i===0?ctx.moveTo(toX(i),toY(v)):ctx.lineTo(toX(i),toY(v)));
+  ctx.strokeStyle=isPos?'var(--green)':'var(--red)';ctx.lineWidth=2;ctx.stroke();
+  if(minV<0&&maxV>0){
+    ctx.beginPath();ctx.moveTo(pad,toY(0));ctx.lineTo(W-pad,toY(0));
+    ctx.strokeStyle='rgba(255,255,255,0.1)';ctx.lineWidth=1;ctx.setLineDash([4,4]);ctx.stroke();ctx.setLineDash([]);
+  }
+  ctx.beginPath();ctx.arc(toX(pts.length-1),toY(pts[pts.length-1]),4,0,Math.PI*2);
+  ctx.fillStyle=isPos?'var(--green)':'var(--red)';ctx.fill();
+}
+
+function tRenderHistorique(){
+  const el=document.getElementById('tHistorique');
+  if(tParis.length===0){
+    el.innerHTML='<div class="t-empty"><div style="font-size:36px;opacity:0.3;margin-bottom:10px">📊</div><div style="font-size:13px;color:var(--muted);line-height:1.6">Aucun pari enregistré.<br>Ajoute ton premier pari ci-dessus.</div></div>';
+    return;
+  }
+  el.innerHTML=tParis.map(p=>{
+    const gainTxt=p.result==='win'?'+'+p.gain.toFixed(2)+'€':p.result==='loss'?p.gain.toFixed(2)+'€':'—';
+    const gainCol=p.result==='win'?'var(--green)':p.result==='loss'?'var(--red)':'var(--muted)';
+    const resTxt=p.result==='win'?'GAGNÉ':p.result==='loss'?'PERDU':'EN COURS';
+    const resCls=p.result==='win'?'win':p.result==='loss'?'loss':'pending';
+    return `<div class="t-pari">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:8px">
+        <div><div style="font-weight:600;font-size:14px;margin-bottom:2px">${p.match}</div><div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--cyan)">${p.bet}</div></div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
+          <div class="pari-result ${resCls}">${resTxt}</div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:18px;color:${gainCol}">${gainTxt}</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <div style="display:flex;gap:10px">
+          <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted)">💰 ${p.mise}€</span>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted)">📈 @${p.cote}</span>
+          ${p.book?`<span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted)">🏦 ${p.book}</span>`:''}
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted)">${p.date}</span>
+          <button onclick="tDeletePari(${p.id})" style="background:transparent;border:none;color:var(--muted);font-size:14px;cursor:pointer;opacity:0.5;padding:4px">🗑</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function tRenderAll(){
+  tRenderStats();
+  tRenderHistorique();
+  setTimeout(tRenderChart,50);
+}
+tRenderAll();
+
+</script>
+
+<!-- LOGIN PROMPT MODAL -->
+<div class="modal-bg" id="loginPromptModal" onclick="closeLoginPrompt()">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-handle"></div>
+    <div style="text-align:center;margin-bottom:20px">
+      <div style="font-size:44px;margin-bottom:10px">🔒</div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:2px;margin-bottom:8px">INSCRIPTION REQUISE</div>
+      <div style="font-size:13px;color:var(--muted);line-height:1.6">Crée ton compte gratuit pour accéder aux analyses complètes de chaque match.</div>
+    </div>
+    <button class="modal-btn" onclick="closeLoginPrompt();nav('signup')">🦈 CRÉER UN COMPTE GRATUIT</button>
+    <button class="modal-btn2" onclick="closeLoginPrompt();nav('login')">J'AI DÉJÀ UN COMPTE</button>
+  </div>
+</div>
+</body>
+</html>

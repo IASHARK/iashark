@@ -1,8 +1,8 @@
-name: Update data.json
+name: Update IASHARK Daily
 
 on:
   schedule:
-    - cron: '0 7 * * *'
+    - cron: '0 6 * * *'
   workflow_dispatch:
 
 jobs:
@@ -14,248 +14,481 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Reset data.json
-        run: echo '{"matchs":[],"combis":[],"historique":[]}' > data.json
-
-      - name: Update data.json
+      - name: Run pipeline
         env:
           AIRTABLE_TOKEN: ${{ secrets.AIRTABLE_TOKEN }}
+          APISPORTS_KEY: ${{ secrets.APISPORTS_KEY }}
+          ODDS_KEY: ${{ secrets.ODDS_KEY }}
+          OPENWEATHER_KEY: ${{ secrets.OPENWEATHER_KEY }}
+          NEWSAPI_KEY: ${{ secrets.NEWSAPI_KEY }}
+          ANTHROPIC_KEY: ${{ secrets.ANTHROPIC_KEY }}
         run: |
           node << 'SCRIPT'
           const https = require('https');
           const fs = require('fs');
 
-          const BASE_ID = 'appWZRYiCM6c4wQfG';
-          const TOKEN = process.env.AIRTABLE_TOKEN;
+          const AT_TOKEN  = process.env.AIRTABLE_TOKEN;
+          const APS_KEY   = process.env.APISPORTS_KEY;
+          const ODDS_KEY  = process.env.ODDS_KEY;
+          const OWM_KEY   = process.env.OPENWEATHER_KEY;
+          const NEWS_KEY  = process.env.NEWSAPI_KEY;
+          const ANT_KEY   = process.env.ANTHROPIC_KEY;
+          const BASE      = 'appWZRYiCM6c4wQfG';
+          const LEAGUES   = [39, 61, 140, 135, 78, 2, 3];
+          const SEASON    = 2025;
+          const TODAY     = new Date().toISOString().split('T')[0];
 
-          function airtableGet(table, formula) {
-            return new Promise((resolve, reject) => {
-              const params = new URLSearchParams({ filterByFormula: formula, pageSize: '100' });
-              const options = {
-                hostname: 'api.airtable.com',
-                path: `/v0/${BASE_ID}/${encodeURIComponent(table)}?${params}`,
-                headers: { Authorization: `Bearer ${TOKEN}` }
-              };
-              https.get(options, res => {
-                let data = '';
-                res.on('data', chunk => data += chunk);
-                res.on('end', () => {
-                  try {
-                    const parsed = JSON.parse(data);
-                    if (parsed.error) console.log('ERREUR', table, ':', JSON.stringify(parsed.error));
-                    resolve(parsed.records || []);
-                  } catch(e) { reject(e); }
-                });
-              }).on('error', reject);
+          // ── HTTP ────────────────────────────────────────────────
+          function get(url, headers={}) {
+            return new Promise(resolve => {
+              const u = new URL(url);
+              https.get({hostname:u.hostname, path:u.pathname+u.search, headers}, res => {
+                let d=''; res.on('data',c=>d+=c);
+                res.on('end',()=>{try{resolve(JSON.parse(d))}catch{resolve({})}});
+              }).on('error',()=>resolve({}));
             });
           }
 
-          function getLigueIcon(league) {
-            const l = (league || '').toLowerCase();
-            if (l.includes('ligue 1') || l.includes('ligue 2')) return '🇫🇷';
-            if (l.includes('liga') || l.includes('spain')) return '🇪🇸';
-            if (l.includes('serie a')) return '🇮🇹';
-            if (l.includes('bundesliga')) return '🇩🇪';
-            if (l.includes('premier') || l.includes('championship')) return '🏴󠁧󠁢󠁥󠁮󠁧󠁿';
-            if (l.includes('champions') || l.includes('ucl')) return '🏆';
+          function postJSON(host, path, body, headers={}) {
+            return new Promise(resolve => {
+              const data = JSON.stringify(body);
+              const req = https.request({
+                hostname:host, path, method:'POST',
+                headers:{'Content-Type':'application/json','Content-Length':Buffer.byteLength(data),...headers}
+              }, res => {
+                let d=''; res.on('data',c=>d+=c);
+                res.on('end',()=>{try{resolve(JSON.parse(d))}catch{resolve({})}});
+              });
+              req.on('error',()=>resolve({}));
+              req.write(data); req.end();
+            });
+          }
+
+          function patchJSON(host, path, body, headers={}) {
+            return new Promise(resolve => {
+              const data = JSON.stringify(body);
+              const req = https.request({
+                hostname:host, path, method:'PATCH',
+                headers:{'Content-Type':'application/json','Content-Length':Buffer.byteLength(data),...headers}
+              }, res => {
+                let d=''; res.on('data',c=>d+=c);
+                res.on('end',()=>{try{resolve(JSON.parse(d))}catch{resolve({})}});
+              });
+              req.on('error',()=>resolve({}));
+              req.write(data); req.end();
+            });
+          }
+
+          const sleep = ms => new Promise(r=>setTimeout(r,ms));
+          const APS = {'x-apisports-key': APS_KEY};
+          const AT  = {Authorization:`Bearer ${AT_TOKEN}`, 'Content-Type':'application/json'};
+
+          // ── AIRTABLE ────────────────────────────────────────────
+          async function atUpsert(table, fields) {
+            return patchJSON('api.airtable.com',
+              `/v0/${BASE}/${encodeURIComponent(table)}`,
+              {records:[{fields}], performUpsert:{fieldsToMergeOn:['match_id']}},
+              AT
+            );
+          }
+
+          // ── API-SPORTS ──────────────────────────────────────────
+          async function getFixtures() {
+            const all = [];
+            for (const lg of LEAGUES) {
+              const r = await get(`https://v3.football.api-sports.io/fixtures?date=${TODAY}&league=${lg}&season=${SEASON}`, APS);
+              if (r.response) all.push(...r.response);
+              await sleep(300);
+            }
+            return all;
+          }
+
+          async function getTeamStats(teamId, leagueId) {
+            const r = await get(`https://v3.football.api-sports.io/teams/statistics?team=${teamId}&league=${leagueId}&season=${SEASON}`, APS);
+            return r.response || null;
+          }
+
+          async function getLast5(teamId) {
+            const r = await get(`https://v3.football.api-sports.io/fixtures?team=${teamId}&last=5&season=${SEASON}`, APS);
+            return r.response || [];
+          }
+
+          async function getStanding(leagueId, teamId) {
+            const r = await get(`https://v3.football.api-sports.io/standings?league=${leagueId}&season=${SEASON}`, APS);
+            const group = r.response?.[0]?.league?.standings?.[0] || [];
+            const entry = group.find(s => s.team.id === teamId);
+            return entry ? entry.rank : null;
+          }
+
+          // ── ODDS API ────────────────────────────────────────────
+          async function getOdds(homeTeam, awayTeam) {
+            const r = await get(
+              `https://api.the-odds-api.com/v4/sports/soccer/odds/?apiKey=${ODDS_KEY}&regions=eu&markets=h2h,totals&bookmakers=betclic,winamax,unibet,pmu,bwin`,
+              {}
+            );
+            if (!Array.isArray(r)) return null;
+            const hn = homeTeam.toLowerCase().split(' ')[0];
+            const an = awayTeam.toLowerCase().split(' ')[0];
+            return r.find(m =>
+              m.home_team?.toLowerCase().includes(hn) ||
+              m.away_team?.toLowerCase().includes(an)
+            ) || null;
+          }
+
+          function parseOdds(o) {
+            if (!o) return {c1:'—',cn:'—',c2:'—',co15:'—',co25:'—',bookies:[]};
+            let c1='—',cn='—',c2='—',co15='—',co25='—';
+            const bookies = [];
+            for (const bk of (o.bookmakers||[])) {
+              const h2h = bk.markets?.find(m=>m.key==='h2h');
+              const tot = bk.markets?.find(m=>m.key==='totals');
+              if (h2h) {
+                const hm = h2h.outcomes?.find(x=>x.name===o.home_team);
+                const dr = h2h.outcomes?.find(x=>x.name==='Draw');
+                const aw = h2h.outcomes?.find(x=>x.name===o.away_team);
+                if (c1==='—' && hm) {
+                  c1 = hm.price?.toFixed(2);
+                  cn = dr?.price?.toFixed(2)||'—';
+                  c2 = aw?.price?.toFixed(2)||'—';
+                }
+                bookies.push({n:bk.title, o:'', c:hm?.price?.toFixed(2)||'—', l:'#'});
+              }
+              if (tot && co25==='—') {
+                const ov25 = tot.outcomes?.find(x=>x.name==='Over'&&x.point===2.5);
+                const ov15 = tot.outcomes?.find(x=>x.name==='Over'&&x.point===1.5);
+                if (ov25) co25 = ov25.price?.toFixed(2);
+                if (ov15) co15 = ov15.price?.toFixed(2);
+              }
+            }
+            return {c1,cn,c2,co15,co25,bookies:bookies.slice(0,4)};
+          }
+
+          // ── WEATHER ─────────────────────────────────────────────
+          async function getWeather(city) {
+            if (!city) return null;
+            const r = await get(
+              `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&appid=${OWM_KEY}&units=metric&lang=fr`,
+              {}
+            );
+            if (!r.main) return null;
+            return {
+              desc: r.weather?.[0]?.description || '',
+              temp: Math.round(r.main.temp)+'°C',
+              icon: r.weather?.[0]?.icon
+                ? `https://openweathermap.org/img/wn/${r.weather[0].icon}@2x.png`
+                : ''
+            };
+          }
+
+          // ── NEWS ────────────────────────────────────────────────
+          async function getNews(team) {
+            const r = await get(
+              `https://newsapi.org/v2/everything?q=${encodeURIComponent(team)}&language=fr&pageSize=2&sortBy=publishedAt&apiKey=${NEWS_KEY}`,
+              {}
+            );
+            return (r.articles||[]).slice(0,2).map(a=>({
+              c: team,
+              t: a.title||'',
+              tx: a.description||'',
+              tm: a.publishedAt?.split('T')[0]||''
+            }));
+          }
+
+          // ── LAST 5 FORMAT ────────────────────────────────────────
+          function formatLast5(fixtures, teamId) {
+            return fixtures.map(f => {
+              const isH = f.teams.home.id === teamId;
+              const gf = isH ? f.goals.home : f.goals.away;
+              const ga = isH ? f.goals.away : f.goals.home;
+              const opp = isH ? f.teams.away.name : f.teams.home.name;
+              const res = gf > ga ? 'W' : gf < ga ? 'L' : 'D';
+              return {match:opp, score:`${gf}-${ga}`, result:res, lieu:isH?'DOM':'EXT'};
+            });
+          }
+
+          // ── CRITÈRES IA ──────────────────────────────────────────
+          function calcCriteres(stats, isDom, rank) {
+            if (!stats) return {fd:50,att:50,def:50,fr:50,mot:70,fat:50};
+            const total = stats.fixtures?.played?.total || 30;
+            const bm = stats.goals?.for?.total?.total || 0;
+            const be = stats.goals?.against?.total?.total || 0;
+            const last5 = (stats.form||'').slice(-5);
+            const pts = last5.split('').reduce((a,c)=>a+(c==='W'?3:c==='D'?1:0),0);
+            const fr = Math.round(pts/Math.max(last5.length*3,1)*100);
+            const att = Math.min(100,Math.round(bm/Math.max(total,1)*40));
+            const def = Math.max(0,Math.min(100,Math.round((2.5-be/Math.max(total,1))*35)));
+            const vd = stats.fixtures?.wins?.home||0;
+            const ve = stats.fixtures?.wins?.away||0;
+            const md = stats.fixtures?.played?.home||Math.round(total/2);
+            const me = stats.fixtures?.played?.away||Math.round(total/2);
+            const fd = isDom
+              ? Math.min(100,Math.round(vd/Math.max(md,1)*100))
+              : Math.min(100,Math.round(ve/Math.max(me,1)*100));
+            let mot = 70;
+            if (rank) {
+              if (rank<=3) mot=95;
+              else if (rank<=6) mot=85;
+              else if (rank<=10) mot=70;
+              else if (rank>=17) mot=90;
+              else mot=60;
+            }
+            return {
+              fd:  Math.max(0,Math.min(100,fd)),
+              att: Math.max(0,Math.min(100,att)),
+              def: Math.max(0,Math.min(100,def)),
+              fr:  Math.max(0,Math.min(100,fr)),
+              mot: Math.max(0,Math.min(100,mot)),
+              fat: 50
+            };
+          }
+
+          // ── CLAUDE ANALYSE ───────────────────────────────────────
+          async function genAnalyse(d) {
+            const prompt = `Tu es un expert en analyse de paris sportifs. Analyse ce match et réponds UNIQUEMENT avec un objet JSON valide, sans backticks, sans texte avant ou après.
+
+MATCH: ${d.home} vs ${d.away}
+LIGUE: ${d.league} | DATE: ${d.date} | STADE: ${d.stade}
+MÉTÉO: ${d.meteo}
+
+${d.home} (DOMICILE) — Classement: #${d.rkH||'N/A'}
+Forme: ${d.fH} | Buts marqués: ${d.bmH} | Encaissés: ${d.beH}
+Victoires dom: ${d.vdH} | Ext: ${d.veH}
+5 derniers: ${d.d5H}
+
+${d.away} (EXTÉRIEUR) — Classement: #${d.rkA||'N/A'}
+Forme: ${d.fA} | Buts marqués: ${d.bmA} | Encaissés: ${d.beA}
+Victoires dom: ${d.vdA} | Ext: ${d.veA}
+5 derniers: ${d.d5A}
+
+COTES MARCHÉ: ${d.cotes}
+
+Réponds avec exactement ce JSON (valeurs basées sur les vraies stats ci-dessus):
+{"confiance":7.2,"pari_rec":"Victoire domicile","risque":"MODÉRÉ","vbet":"OUI","edge":"+6%","conseil":"3-4 phrases d'analyse concrète basée sur les stats","contexte":"1-2 phrases sur le contexte du match","enjeux":"1 phrase sur les enjeux sportifs","scores_probables":"1-0, 0-0, 1-1, 2-0, 0-1","p1":48,"pn":27,"p2":25,"po15":72,"po25":44,"mise":"2-3% bankroll"}
+
+RÈGLES STRICTES:
+- vbet = "OUI" ou "NON" uniquement (jamais de texte long)
+- edge = pourcentage court genre "+5%" ou "-3%" (jamais de texte long)
+- confiance = nombre décimal entre 1.0 et 10.0
+- risque = "FAIBLE", "MODÉRÉ" ou "ÉLEVÉ" uniquement`;
+
+            const r = await postJSON('api.anthropic.com', '/v1/messages', {
+              model: 'claude-haiku-4-5-20251001',
+              max_tokens: 800,
+              messages: [{role:'user', content:prompt}]
+            }, {'x-api-key':ANT_KEY, 'anthropic-version':'2023-06-01'});
+
+            const txt = r.content?.[0]?.text || '{}';
+            try { return JSON.parse(txt.replace(/```json|```/g,'').trim()); }
+            catch(e) { console.log('Parse error:', txt.slice(0,200)); return null; }
+          }
+
+          async function genCombis(list) {
+            if (list.length < 2) return [];
+            const prompt = `Expert paris sportifs. Voici les analyses du jour:
+${list.map(a=>`- ${a.home} vs ${a.away}: ${a.pari} (confiance ${a.conf}/10)`).join('\n')}
+
+Génère 6 combinés. Réponds UNIQUEMENT avec ce JSON sans backticks:
+{"safe1":{"label":"SAFE 1","type":"safe","selections":"pari1, pari2","matchs":"match1, match2","cote_totale":2.1,"conseil":"Explication courte"},"safe2":{"label":"SAFE 2","type":"safe","selections":"","matchs":"","cote_totale":2.5,"conseil":""},"medium1":{"label":"MEDIUM 1","type":"medium","selections":"","matchs":"","cote_totale":8.5,"conseil":""},"medium2":{"label":"MEDIUM 2","type":"medium","selections":"","matchs":"","cote_totale":11.0,"conseil":""},"fun1":{"label":"FUN 1","type":"fun","selections":"","matchs":"","cote_totale":65.0,"conseil":""},"fun2":{"label":"FUN 2","type":"fun","selections":"","matchs":"","cote_totale":120.0,"conseil":""}}`;
+
+            const r = await postJSON('api.anthropic.com', '/v1/messages', {
+              model: 'claude-haiku-4-5-20251001',
+              max_tokens: 1000,
+              messages: [{role:'user', content:prompt}]
+            }, {'x-api-key':ANT_KEY, 'anthropic-version':'2023-06-01'});
+
+            const txt = r.content?.[0]?.text || '{}';
+            try {
+              const raw = JSON.parse(txt.replace(/```json|```/g,'').trim());
+              return Object.values(raw).map(c=>({
+                label: c.label||'',
+                type: c.type||'safe',
+                cote_totale: c.cote_totale||0,
+                desc: c.conseil||'',
+                legs: (c.selections||'').split(',').map((s,i)=>({
+                  match: (c.matchs||'').split(',')[i]?.trim()||'',
+                  bet: s.trim(), cote:'—'
+                }))
+              }));
+            } catch(e) { return []; }
+          }
+
+          function lgIcon(l) {
+            const s=(l||'').toLowerCase();
+            if(s.includes('ligue 1')||s.includes('ligue 2')) return '🇫🇷';
+            if(s.includes('la liga')) return '🇪🇸';
+            if(s.includes('serie a')) return '🇮🇹';
+            if(s.includes('bundesliga')) return '🇩🇪';
+            if(s.includes('premier')) return '🏴󠁧󠁢󠁥󠁮󠁧󠁿';
+            if(s.includes('champions')) return '🏆';
+            if(s.includes('europa')) return '🟠';
             return '🏆';
           }
 
-          function calcCriteres(stats, estDomicile) {
-            if (!stats) return { fd: 50, att: 50, def: 50, fr: 50, mot: 50, fat: 50 };
-            const f = stats;
-            const total = f.total_matchs || 30;
-
-            const butsParMatch = (f.buts_marques || 0) / total;
-            const att = Math.min(100, Math.round(butsParMatch * 40));
-
-            const encParMatch = (f.buts_encaisses || 0) / total;
-            const def = Math.max(0, Math.min(100, Math.round((2.5 - encParMatch) * 35)));
-
-            const forme = (f.forme || '').slice(-5);
-            let fr = 50;
-            if (forme.length > 0) {
-              const pts = forme.split('').reduce((acc, c) => acc + (c==='W'?3:c==='D'?1:0), 0);
-              fr = Math.round((pts / (forme.length * 3)) * 100);
-            }
-
-            const vicDom = f.victoires_dom || 0;
-            const vicExt = f.victoires_ext || 0;
-            const matchsDom = Math.round(total / 2);
-            const matchsExt = total - matchsDom;
-            const fd = estDomicile
-              ? Math.min(100, Math.round((vicDom / Math.max(matchsDom, 1)) * 100))
-              : Math.min(100, Math.round((vicExt / Math.max(matchsExt, 1)) * 100));
-
-            const classement = f.classement || 0;
-            let mot = 70;
-            if (classement > 0) {
-              if (classement <= 3) mot = 95;
-              else if (classement <= 6) mot = 85;
-              else if (classement <= 10) mot = 70;
-              else if (classement >= 17) mot = 90;
-              else mot = 60;
-            }
-
-            const repos = f.jours_repos || 4;
-            const fat = repos <= 2 ? 80 : repos <= 4 ? 50 : 30;
-
-            return {
-              fd: Math.max(0, Math.min(100, fd)),
-              att: Math.max(0, Math.min(100, att)),
-              def: Math.max(0, Math.min(100, def)),
-              fr: Math.max(0, Math.min(100, fr)),
-              mot: Math.max(0, Math.min(100, mot)),
-              fat: Math.max(0, Math.min(100, fat))
-            };
-          }
-
-          function calcProbas(statsHome, statsAway) {
-            if (!statsHome || !statsAway) return { p1: 40, pn: 25, p2: 35, po15: 70, po25: 50 };
-            const totalH = statsHome.total_matchs || 30;
-            const totalA = statsAway.total_matchs || 30;
-            const attH = (statsHome.buts_marques || 0) / totalH;
-            const defH = (statsHome.buts_encaisses || 0) / totalH;
-            const attA = (statsAway.buts_marques || 0) / totalA;
-            const defA = (statsAway.buts_encaisses || 0) / totalA;
-            const xgH = (attH + Math.max(0, 2.5 - defA)) / 2;
-            const xgA = (attA + Math.max(0, 2.5 - defH)) / 2;
-            const winRateH = (statsHome.victoires_dom || 0) / Math.max(Math.round(totalH / 2), 1);
-            const winRateA = (statsAway.victoires_ext || 0) / Math.max(Math.round(totalA / 2), 1);
-            let p1 = Math.round(winRateH * 100);
-            let p2 = Math.round(winRateA * 100);
-            let pn = 100 - p1 - p2;
-            if (pn < 10) { pn = 10; }
-            if (p1 < 10) p1 = 10;
-            if (p2 < 10) p2 = 10;
-            const tot = p1 + pn + p2;
-            p1 = Math.round(p1 / tot * 100);
-            p2 = Math.round(p2 / tot * 100);
-            pn = 100 - p1 - p2;
-            const xgTotal = xgH + xgA;
-            const po15 = Math.min(95, Math.round(70 + (xgTotal - 2) * 10));
-            const po25 = Math.min(90, Math.round(50 + (xgTotal - 2) * 15));
-            return {
-              p1: Math.max(5, Math.min(85, p1)),
-              pn: Math.max(5, Math.min(50, pn)),
-              p2: Math.max(5, Math.min(85, p2)),
-              po15: Math.max(40, Math.min(95, po15)),
-              po25: Math.max(20, Math.min(85, po25))
-            };
-          }
-
+          // ── MAIN ─────────────────────────────────────────────────
           async function main() {
-            const TABLE_MATCHES  = 'TABLE 1 \u2014 MATCHES';
-            const TABLE_ANALYSES = 'TABLE 2 \u2014 ANALYSES';
-            const TABLE_STATS    = 'Table 8 -STATISTIQUES';
-            const TABLE_COMBINES = 'Table 7 - COMBINES';
+            console.log('=== IASHARK', TODAY, '===');
+            const fixtures = await getFixtures();
+            console.log('Fixtures:', fixtures.length);
 
-            const [matches, analyses, statsAll, combis] = await Promise.all([
-              airtableGet(TABLE_MATCHES,  `IS_SAME({date}, TODAY(), 'day')`),
-              airtableGet(TABLE_ANALYSES, `IS_SAME({date_generation}, TODAY(), 'day')`),
-              airtableGet(TABLE_STATS,    '{match_id} != ""'),
-              airtableGet(TABLE_COMBINES, `IS_SAME({date}, TODAY(), 'day')`)
-            ]);
-
-            console.log(`Matchs: ${matches.length}, Analyses: ${analyses.length}, Stats: ${statsAll.length}, Combis: ${combis.length}`);
-
-            // DEBUG - voir les vrais noms dans les stats
-            if (statsAll.length > 0) {
-              console.log('STATS EXEMPLE:', JSON.stringify({
-                match_id: statsAll[0].fields.match_id,
-                equipe: statsAll[0].fields.equipe,
-                att: statsAll[0].fields.att,
-                forme: statsAll[0].fields.forme
-              }));
-            }
-            if (matches.length > 0) {
-              console.log('MATCH EXEMPLE:', JSON.stringify({
-                match_id: matches[0].fields.match_id,
-                home: matches[0].fields.home_team,
-                away: matches[0].fields.away_team
-              }));
+            if (!fixtures.length) {
+              fs.writeFileSync('data.json', JSON.stringify({matchs:[],combis:[],historique:[]},null,2));
+              return;
             }
 
-            const analysesMap = {};
-            analyses.forEach(a => { if (a.fields.match_id) analysesMap[a.fields.match_id] = a.fields; });
+            const matchsData = [];
+            const forCombis = [];
 
-            // Map stats par match_id — grouper home/away par ordre
-            const statsMap = {};
-            statsAll.forEach(s => {
-              const mid = s.fields.match_id;
-              const equipe = (s.fields.equipe || '').toLowerCase().trim();
-              if (!statsMap[mid]) statsMap[mid] = {};
-              statsMap[mid][equipe] = s.fields;
-            });
+            for (const fix of fixtures) {
+              const f   = fix.fixture;
+              const lg  = fix.league;
+              const home = fix.teams.home;
+              const away = fix.teams.away;
+              console.log(`\n→ ${home.name} vs ${away.name} (${lg.name})`);
 
-            const matchsData = matches.map(m => {
-              const f = m.fields;
-              const a = analysesMap[f.match_id] || {};
-              const mid = f.match_id;
-              const homeKey = (f.home_team || '').toLowerCase().trim();
-              const awayKey = (f.away_team || '').toLowerCase().trim();
+              // Toutes les données en parallèle
+              const [sH, sA, l5H, l5A, rkH, rkA, wx, nH, nA, oddsRaw] = await Promise.all([
+                getTeamStats(home.id, lg.id),
+                getTeamStats(away.id, lg.id),
+                getLast5(home.id),
+                getLast5(away.id),
+                getStanding(lg.id, home.id),
+                getStanding(lg.id, away.id),
+                getWeather(f.venue?.city||''),
+                getNews(home.name),
+                getNews(away.name),
+                getOdds(home.name, away.name)
+              ]);
+              await sleep(500);
 
-              const statsHome = (statsMap[mid] && statsMap[mid][homeKey]) || null;
-              const statsAway = (statsMap[mid] && statsMap[mid][awayKey]) || null;
+              const d5H = formatLast5(l5H, home.id);
+              const d5A = formatLast5(l5A, away.id);
+              const odds = parseOdds(oddsRaw);
+              const critH = calcCriteres(sH, true,  rkH);
+              const critA = calcCriteres(sA, false, rkA);
 
-              console.log(`Match ${mid}: home=${homeKey} found=${!!statsHome}, away=${awayKey} found=${!!statsAway}`);
+              const d5Hstr = d5H.map(m=>`${m.result} ${m.score} vs ${m.match} (${m.lieu})`).join(' | ') || 'N/A';
+              const d5Astr = d5A.map(m=>`${m.result} ${m.score} vs ${m.match} (${m.lieu})`).join(' | ') || 'N/A';
+              const cotesStr = odds.c1!=='—'
+                ? `1:${odds.c1} N:${odds.cn} 2:${odds.c2} O1.5:${odds.co15} O2.5:${odds.co25}`
+                : 'Non disponibles';
+              const heure = f.date?.split('T')[1]?.slice(0,5)||'';
 
-              const crit_home = calcCriteres(statsHome, true);
-              const crit_away = calcCriteres(statsAway, false);
-              const probas = calcProbas(statsHome, statsAway);
+              const an = await genAnalyse({
+                home:home.name, away:away.name, league:lg.name,
+                date:`${TODAY} ${heure}`, stade:f.venue?.name||'',
+                meteo: wx ? `${wx.desc} ${wx.temp}` : 'N/A',
+                fH:sH?.form||'', fA:sA?.form||'',
+                rkH, rkA,
+                bmH:sH?.goals?.for?.total?.total||0,
+                beH:sH?.goals?.against?.total?.total||0,
+                bmA:sA?.goals?.for?.total?.total||0,
+                beA:sA?.goals?.against?.total?.total||0,
+                vdH:sH?.fixtures?.wins?.home||0, veH:sH?.fixtures?.wins?.away||0,
+                vdA:sA?.fixtures?.wins?.home||0, veA:sA?.fixtures?.wins?.away||0,
+                d5H:d5Hstr, d5A:d5Astr, cotes:cotesStr
+              });
+              await sleep(600);
 
-              return {
-                id: f.match_id,
-                home: { n: f.home_team || '?', id: f.home_team_id || 0 },
-                away: { n: f.away_team || '?', id: f.away_team_id || 0 },
-                league: f.league || '',
-                ligue_icon: getLigueIcon(f.league || ''),
-                date: `${f.date || ''} ${f.heure || ''}`.trim(),
+              const bookies = odds.bookies.length ? odds.bookies : [
+                {n:'Betclic', o:'100€ offerts', c:odds.c1, l:'https://betclic.fr'},
+                {n:'Winamax', o:'200€ offerts', c:odds.c1, l:'https://winamax.fr'},
+                {n:'Unibet',  o:'100€ offerts', c:odds.c1, l:'https://unibet.fr'}
+              ];
+
+              const matchObj = {
+                id: f.id,
+                home: {n:home.name, id:home.id},
+                away: {n:away.name, id:away.id},
+                league: lg.name,
+                ligue_icon: lgIcon(lg.name),
+                date: `${TODAY} ${heure}`.trim(),
                 cat: ['all'],
-                val: (a.confiance || 0) >= 65,
-                hot: (a.confiance || 0) >= 80,
-                conf: a.confiance || 0,
-                p1: probas.p1, pn: probas.pn, p2: probas.p2,
-                po15: probas.po15, po25: probas.po25,
-                c1: '—', cn: '—', c2: '—', co15: '—', co25: '—',
-                edge: a.edge || '',
+                val:  (an?.confiance||0) >= 6.5,
+                hot:  (an?.confiance||0) >= 8.0,
+                conf: an?.confiance || 0,
+                p1:   an?.p1||0, pn:an?.pn||0, p2:an?.p2||0,
+                po15: an?.po15||0, po25:an?.po25||0,
+                c1:odds.c1, cn:odds.cn, c2:odds.c2, co15:odds.co15, co25:odds.co25,
+                edge: an?.edge||'',
                 edge_detail: '',
-                risque: a.risque || '',
-                pari_rec: a.pari_rec || '',
-                mise: '2-3% bankroll',
-                conseil_public: a.conseil || '',
-                arg: '', contexte: a.contexte || '', enjeux: a.enjeux || '',
-                vbet: a.vbet || '',
-                scores: (a.scores_probables || '').split(',').map(s => s.trim()).filter(Boolean),
-                stade: { nom: [f.stade, f.ville_stade].filter(Boolean).join(' · '), cap: '', meteo: '', temp: '' },
-                crit_home,
-                crit_away,
+                risque: an?.risque||'',
+                pari_rec: an?.pari_rec||'',
+                mise: an?.mise||'2-3% bankroll',
+                conseil_public: an?.conseil||'',
+                arg: '',
+                contexte: an?.contexte||'',
+                enjeux: an?.enjeux||'',
+                vbet: an?.vbet||'NON',
+                scores: (an?.scores_probables||'').split(',').map(s=>s.trim()).filter(Boolean),
+                stade: {
+                  nom: f.venue?.name ? `${f.venue.name} · ${f.venue.city}` : '',
+                  cap: '',
+                  meteo: wx?.icon||'',
+                  temp: wx?.temp||'',
+                  desc: wx?.desc||''
+                },
+                crit_home: critH,
+                crit_away: critA,
                 h2h: [], h2h_txt: '',
                 joueurs: [],
-                actu: [],
-                bookies: [{ n: 'Betclic', o: '100€ offerts', c: '—', l: '#' }, { n: 'Winamax', o: '200€ offerts', c: '—', l: '#' }],
-                paris_risque: { bet: '', cote: '', proba: '' },
-                paris_safe: { bet: a.pari_rec || '', cote: '', proba: '' },
-                value_calc: a.edge || '',
-                forme_h: statsHome ? statsHome.forme || '' : '',
-                forme_a: statsAway ? statsAway.forme || '' : ''
+                actu: [...(nH||[]), ...(nA||[])],
+                bookies,
+                paris_risque: {bet:'', cote:'', proba:''},
+                paris_safe: {bet:an?.pari_rec||'', cote:odds.c1, proba:`${an?.p1||0}%`},
+                value_calc: an?.edge||'',
+                forme_h: sH?.form||'',
+                forme_a: sA?.form||'',
+                derniers_home: d5H,
+                derniers_away: d5A,
+                classement_home: rkH,
+                classement_away: rkA
               };
-            });
 
-            const combisData = combis.map(c => ({
-              label: c.fields.label || '',
-              type: c.fields.type || '',
-              cote_totale: c.fields.cote_totale || 0,
-              selections: c.fields.selections || '',
-              matchs: c.fields.matchs || '',
-              conseil: c.fields.conseil || ''
-            }));
+              matchsData.push(matchObj);
+              if (an) forCombis.push({home:home.name, away:away.name, pari:an.pari_rec, conf:an.confiance});
 
-            fs.writeFileSync('data.json', JSON.stringify({ matchs: matchsData, combis: combisData, historique: [] }, null, 2));
-            console.log(`OK - ${matchsData.length} matchs, ${combisData.length} combis`);
+              // Airtable
+              try {
+                await atUpsert('TABLE 1 \u2014 MATCHES', {
+                  match_id:String(f.id), home_team:home.name, away_team:away.name,
+                  home_team_id:home.id, away_team_id:away.id, league:lg.name,
+                  date:TODAY, heure, stade:f.venue?.name||'', ville_stade:f.venue?.city||''
+                });
+                if (an) await atUpsert('TABLE 2 \u2014 ANALYSES', {
+                  match_id:String(f.id), confiance:an.confiance,
+                  pari_rec:an.pari_rec, risque:an.risque, edge:an.edge,
+                  conseil:an.conseil, contexte:an.contexte, enjeux:an.enjeux,
+                  vbet:an.vbet, scores_probables:an.scores_probables,
+                  po15:an.po15, po25:an.po25, p1:an.p1, pn:an.pn, p2:an.p2,
+                  date_generation:TODAY
+                });
+              } catch(e) { console.log('AT err:', e.message); }
+
+              console.log(`  ✓ conf:${an?.confiance} | ${an?.pari_rec} | edge:${an?.edge} | cotes:${odds.c1}/${odds.cn}/${odds.c2}`);
+            }
+
+            // Combinés
+            console.log('\nGenerating combis...');
+            const combisData = await genCombis(forCombis);
+            for (const cb of combisData) {
+              try {
+                await atUpsert('Table 7 - COMBINES', {
+                  match_id:`combi_${cb.label}_${TODAY}`,
+                  label:cb.label, type:cb.type, cote_totale:cb.cote_totale,
+                  selections:cb.legs.map(l=>l.bet).join(', '),
+                  matchs:cb.legs.map(l=>l.match).join(', '),
+                  conseil:cb.desc, date:TODAY
+                });
+              } catch(e) {}
+            }
+
+            fs.writeFileSync('data.json', JSON.stringify({
+              matchs:matchsData, combis:combisData, historique:[]
+            }, null, 2));
+            console.log(`\n=== DONE: ${matchsData.length} matchs | ${combisData.length} combis ===`);
           }
 
-          main().catch(e => { console.error('ERREUR:', e); process.exit(0); });
+          main().catch(e=>{console.error('FATAL:',e.message);process.exit(0);});
           SCRIPT
 
       - name: Commit and push
@@ -263,5 +496,5 @@ jobs:
           git config user.name "IASHARK"
           git config user.email "yaramode81@gmail.com"
           git add data.json
-          git diff --staged --quiet || git commit -m "Update daily - $(date +%Y-%m-%d)"
+          git diff --staged --quiet || git commit -m "Daily update - $(date +%Y-%m-%d)"
           git push

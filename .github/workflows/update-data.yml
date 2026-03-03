@@ -1,4 +1,3 @@
-
 name: Update IASHARK Daily
 
 on:
@@ -24,7 +23,6 @@ jobs:
           const OWM_KEY  = process.env.OPENWEATHER_KEY;
           const NEWS_KEY = process.env.NEWSAPI_KEY;
           const ANT_KEY  = process.env.ANTHROPIC_KEY;
-          const ODDS_KEY = process.env.ODDS_KEY;
           const APS      = {'x-apisports-key': APS_KEY};
           const LEAGUES  = [39, 61, 140, 135, 78, 2, 3, 40];
           const SEASON   = 2025;
@@ -127,208 +125,82 @@ jobs:
                        r.response[0].league.standings&&r.response[0].league.standings[0]) || [];
             return grp;
           }
-          // ─── 8 BOOKMAKERS FRANÇAIS + EUROPÉENS ──────────────────
-          // Logos via Google Favicon API (sz=64) — toujours disponibles
-          var BOOKS = {
-            betclic:   {name:'Betclic',      domain:'betclic.fr',    promo:'200\u20ac offerts',          affiliate:'#'},
-            winamax:   {name:'Winamax',      domain:'winamax.fr',    promo:'100\u20ac offerts',          affiliate:'#'},
-            unibet:    {name:'Unibet',       domain:'unibet.fr',     promo:'100\u20ac rembours\u00e9s',  affiliate:'#'},
-            parionssport:{name:'Parions Sport',domain:'enligne.pmuparis.fr',promo:'100\u20ac offerts',  affiliate:'#'},
-            pmu:       {name:'PMU',          domain:'pmu.fr',        promo:'100\u20ac offerts',          affiliate:'#'},
-            bet365:    {name:'Bet365',       domain:'bet365.com',    promo:'100\u20ac bonus',            affiliate:'#'},
-            bwin:      {name:'Bwin',         domain:'bwin.fr',       promo:'50\u20ac offerts',           affiliate:'#'},
-            zebet:     {name:'ZEbet',        domain:'zebet.fr',      promo:'100\u20ac offerts',          affiliate:'#'},
-          };
-          // ─── MATCHING ROBUSTE ─────────────────────────────────────────
-          function normName(s) {
-            var ALIASES = {
-              'psg':'paris saint germain','man city':'manchester city',
-              'man utd':'manchester united','man united':'manchester united',
-              'spurs':'tottenham hotspur','atletico':'atletico madrid',
-              'inter':'inter milan','juve':'juventus','roma':'as roma',
-              'lyon':'olympique lyonnais','om':'olympique marseille',
-              'rennes':'stade rennais','ajax':'afc ajax',
-              'bayer':'bayer leverkusen','rb leipzig':'rasenballsport leipzig',
-            };
-            var n = s.toLowerCase()
-              .replace(/[-'\.]/g,' ')
-              .replace(/[éèê]/g,'e').replace(/[àâ]/g,'a')
-              .replace(/[üù]/g,'u').replace(/[öô]/g,'o')
-              .replace(/[îï]/g,'i').trim();
-            return ALIASES[n] || n;
+          // ─── ODDS — API-SPORTS avec fixture ID (zero matching issues) ──
+          async function getOdds(fixtureId) {
+            // Essai 1 : tous les bookmakers disponibles
+            var r = await get(
+              'https://v3.football.api-sports.io/odds?fixture='+fixtureId,
+              APS
+            );
+            if (r.response && r.response.length) return r.response[0];
+            return null;
           }
-          function nameSim(a, b) {
-            var na = normName(a), nb = normName(b);
-            if (na === nb) return 1.0;
-            if (na.includes(nb) || nb.includes(na)) return 0.9;
-            var wa = na.split(' ').filter(function(w){ return w.length > 2; });
-            var wb = nb.split(' ').filter(function(w){ return w.length > 2; });
-            if (!wa.length || !wb.length) return 0;
-            var exact = wa.filter(function(w){ return wb.indexOf(w) >= 0; }).length;
-            var partial = wa.filter(function(w){
-              return wb.some(function(v){ return v !== w && (v.includes(w) || w.includes(v)); });
-            }).length;
-            return Math.min(1.0, (exact + partial * 0.4) / Math.max(wa.length, wb.length));
-          }
-          function findBestOddsEvent(apsHome, apsAway, events) {
-            var best = null, bestScore = 0;
-            events.forEach(function(ev) {
-              var sH = nameSim(apsHome, ev.home_team || '');
-              var sA = nameSim(apsAway, ev.away_team || '');
-              if (sH < 0.4 || sA < 0.4) return;
-              var total = sH * 1.2 + sA; // home pondéré
-              if (total > bestScore) { bestScore = total; best = ev; }
-            });
-            return (bestScore >= 1.0) ? best : null;
-          }
-          // ─── CACHE ODDS PAR LIGUE ─────────────────────────────────────
-          // 1 appel par ligue pour le jour = très économique en crédits
-          var ODDS_CACHE = {};
-          var SPORT_KEYS = {
-            39: 'soccer_england_league1',
-            40: 'soccer_england_league2',
-            61: 'soccer_france_ligue_one',
-            140:'soccer_spain_la_liga',
-            135:'soccer_italy_serie_a',
-            78: 'soccer_germany_bundesliga',
-            2:  'soccer_uefa_champs_league',
-            3:  'soccer_uefa_europa_league',
-          };
-          async function loadOddsForLeague(leagueId) {
-            if (ODDS_CACHE[leagueId] !== undefined) return ODDS_CACHE[leagueId];
-            var sportKey = SPORT_KEYS[leagueId];
-            if (!sportKey || !ODDS_KEY) { ODDS_CACHE[leagueId] = []; return []; }
-            // Bookmakers cibles : les 8 français/européens crédibles
-            var bookList = Object.keys(BOOKS).join(',');
-            var url = 'https://api.the-odds-api.com/v4/sports/'+sportKey+'/odds/'
-              +'?apiKey='+ODDS_KEY
-              +'&regions=eu'
-              +'&markets=h2h,totals,double_chance,btts'
-              +'&oddsFormat=decimal'
-              +'&bookmakers='+bookList;
-            var r = await get(url, {});
-            var events = Array.isArray(r) ? r : [];
-            console.log('  Odds '+sportKey+': '+events.length+' events');
-            ODDS_CACHE[leagueId] = events;
-            await sleep(300);
-            return events;
-          }
-          function parseOddsFromEvent(ev, apsHome, apsAway) {
-            var empty = {
-              c1:'--',cn:'--',c2:'--',
-              co15:'--',co25:'--',cu25:'--',
-              dc1x:'--',dcx2:'--',
-              btts_oui:'--',btts_non:'--',
-              bookies:[]
-            };
-            if (!ev || !ev.bookmakers || !ev.bookmakers.length) return empty;
-            // Agréger les cotes de TOUS les bookmakers disponibles
-            var allC1=[], allCN=[], allC2=[];
-            var allO15=[], allO25=[], allU25=[];
-            var allDC1X=[], allDCX2=[];
-            var allBTTS_Y=[], allBTTS_N=[];
-            var bookiesList = [];
-            ev.bookmakers.forEach(function(bk) {
-              var info = BOOKS[bk.key] || {
-                name:bk.title, domain:bk.key+'.com', promo:'', affiliate:'#'
-              };
-              var bkC1='--', bkCN='--', bkC2='--';
-              (bk.markets||[]).forEach(function(mkt) {
-                if (mkt.key === 'h2h') {
-                  (mkt.outcomes||[]).forEach(function(o) {
-                    // home = même nom que apsHome
-                    if (nameSim(o.name, apsHome) >= 0.5) {
-                      bkC1 = parseFloat(o.price).toFixed(2);
-                      allC1.push(parseFloat(o.price));
-                    } else if (o.name === 'Draw') {
-                      bkCN = parseFloat(o.price).toFixed(2);
-                      allCN.push(parseFloat(o.price));
-                    } else if (nameSim(o.name, apsAway) >= 0.5) {
-                      bkC2 = parseFloat(o.price).toFixed(2);
-                      allC2.push(parseFloat(o.price));
-                    }
+          function parseOdds(o) {
+            var empty = {c1:'--',cn:'--',c2:'--',co15:'--',co25:'--',cu25:'--',
+                         dc1x:'--',dcx2:'--',btts_oui:'--',btts_non:'--',bookies:[]};
+            if (!o || !o.bookmakers || !o.bookmakers.length) return empty;
+            var c1='--',cn='--',c2='--',co15='--',co25='--',cu25='--';
+            var dc1x='--',dcx2='--',btts_oui='--',btts_non='--';
+            var bookies = [];
+            o.bookmakers.forEach(function(bk) {
+              var info = getBkInfo(bk.name);
+              var bkCote1='--', bkCoteN='--', bkCote2='--';
+              (bk.bets||[]).forEach(function(bet) {
+                // 1X2
+                if (bet.name==='Match Winner'||bet.name==='Home/Draw/Away') {
+                  var hm=(bet.values||[]).find(function(v){return v.value==='Home';});
+                  var dr=(bet.values||[]).find(function(v){return v.value==='Draw';});
+                  var aw=(bet.values||[]).find(function(v){return v.value==='Away';});
+                  if (hm) bkCote1 = parseFloat(hm.odd).toFixed(2);
+                  if (dr) bkCoteN = parseFloat(dr.odd).toFixed(2);
+                  if (aw) bkCote2 = parseFloat(aw.odd).toFixed(2);
+                  if (c1==='--'&&hm) { c1=bkCote1; cn=bkCoteN; c2=bkCote2; }
+                }
+                // Over/Under
+                if (bet.name==='Goals Over/Under') {
+                  (bet.values||[]).forEach(function(v) {
+                    if (v.value==='Over 1.5'  && co15==='--') co15 = parseFloat(v.odd).toFixed(2);
+                    if (v.value==='Over 2.5'  && co25==='--') co25 = parseFloat(v.odd).toFixed(2);
+                    if (v.value==='Under 2.5' && cu25==='--') cu25 = parseFloat(v.odd).toFixed(2);
                   });
                 }
-                if (mkt.key === 'totals') {
-                  (mkt.outcomes||[]).forEach(function(o) {
-                    var p = parseFloat(o.point||0);
-                    if (o.name==='Over'  && Math.abs(p-1.5)<0.1) allO15.push(parseFloat(o.price));
-                    if (o.name==='Over'  && Math.abs(p-2.5)<0.1) allO25.push(parseFloat(o.price));
-                    if (o.name==='Under' && Math.abs(p-2.5)<0.1) allU25.push(parseFloat(o.price));
-                  });
+                // Double Chance
+                if (bet.name==='Double Chance') {
+                  var d1x=(bet.values||[]).find(function(v){return v.value==='Home/Draw';});
+                  var dx2=(bet.values||[]).find(function(v){return v.value==='Draw/Away';});
+                  if (d1x && dc1x==='--') dc1x = parseFloat(d1x.odd).toFixed(2);
+                  if (dx2 && dcx2==='--') dcx2 = parseFloat(dx2.odd).toFixed(2);
                 }
-                if (mkt.key === 'double_chance') {
-                  (mkt.outcomes||[]).forEach(function(o) {
-                    if (o.name==='Home/Draw') allDC1X.push(parseFloat(o.price));
-                    if (o.name==='Away/Draw') allDCX2.push(parseFloat(o.price));
-                  });
-                }
-                if (mkt.key === 'btts') {
-                  (mkt.outcomes||[]).forEach(function(o) {
-                    if (o.name==='Yes') allBTTS_Y.push(parseFloat(o.price));
-                    if (o.name==='No')  allBTTS_N.push(parseFloat(o.price));
-                  });
+                // BTTS
+                if (bet.name==='Both Teams Score') {
+                  var by=(bet.values||[]).find(function(v){return v.value==='Yes';});
+                  var bn=(bet.values||[]).find(function(v){return v.value==='No';});
+                  if (by && btts_oui==='--') btts_oui = parseFloat(by.odd).toFixed(2);
+                  if (bn && btts_non==='--') btts_non = parseFloat(bn.odd).toFixed(2);
                 }
               });
-              // Ajoute à la liste bookies si on a la cote 1X2
-              if (bkC1 !== '--') {
-                bookiesList.push({
-                  n:      info.name,
+              // Ajouter aux bookies si on a une cote 1X2
+              if (bkCote1!=='--' && bookies.length < 5) {
+                bookies.push({
+                  n: bk.name,
                   domain: info.domain,
-                  logo:   'https://www.google.com/s2/favicons?domain='+info.domain+'&sz=64',
-                  o:      info.promo,
-                  c:      bkC1,
-                  cn:     bkCN,
-                  c2:     bkC2,
-                  l:      info.affiliate,
+                  o: info.promo,
+                  c: bkCote1,
+                  cn: bkCoteN,
+                  c2: bkCote2,
+                  l: info.l
                 });
               }
             });
-            // Meilleure cote = MAX sur tous les bookmakers (pour le parieur)
-            function best(arr) {
-              if (!arr.length) return '--';
-              return Math.max.apply(null, arr).toFixed(2);
+            // Fallback si aucun bookmaker trouvé — bookies français par défaut
+            if (!bookies.length) {
+              bookies = [
+                {n:'Betclic', domain:'betclic.fr',  o:'200\u20ac offerts',       c:c1, cn:cn, c2:c2, l:'#'},
+                {n:'Winamax', domain:'winamax.fr',  o:'100\u20ac offerts',       c:c1, cn:cn, c2:c2, l:'#'},
+                {n:'Unibet',  domain:'unibet.fr',   o:'100\u20ac rembours\u00e9s', c:c1, cn:cn, c2:c2, l:'#'},
+              ];
             }
-            // Médiane = référence marché
-            function median(arr) {
-              if (!arr.length) return '--';
-              var s = arr.slice().sort(function(a,b){return a-b;});
-              var m = Math.floor(s.length/2);
-              return (s.length%2 ? s[m] : (s[m-1]+s[m])/2).toFixed(2);
-            }
-            // Trier bookies par meilleure cote pour le pari recommandé (1X2)
-            bookiesList.sort(function(a,b){
-              return parseFloat(b.c||0) - parseFloat(a.c||0);
-            });
-            return {
-              c1:      best(allC1),
-              cn:      best(allCN),
-              c2:      best(allC2),
-              c1_med:  median(allC1),
-              cn_med:  median(allCN),
-              c2_med:  median(allC2),
-              co15:    best(allO15),
-              co25:    best(allO25),
-              cu25:    best(allU25),
-              dc1x:    best(allDC1X),
-              dcx2:    best(allDCX2),
-              btts_oui:best(allBTTS_Y),
-              btts_non:best(allBTTS_N),
-              bookies: bookiesList,
-              nb_books: bookiesList.length,
-            };
-          }
-          // Wrapper final : charge le cache de la ligue, trouve le match, parse les cotes
-          async function getOddsForFixture(leagueId, apsHome, apsAway) {
-            var events = await loadOddsForLeague(leagueId);
-            if (!events.length) return parseOddsFromEvent(null, apsHome, apsAway);
-            var ev = findBestOddsEvent(apsHome, apsAway, events);
-            if (!ev) {
-              console.log('  ⚠️  Cotes non trouvées: '+apsHome+' vs '+apsAway);
-              return parseOddsFromEvent(null, apsHome, apsAway);
-            }
-            console.log('  ✅ Cotes: '+ev.bookmakers.length+' bookmakers');
-            return parseOddsFromEvent(ev, apsHome, apsAway);
+            return {c1,cn,c2,co15,co25,cu25,dc1x,dcx2,btts_oui,btts_non,bookies};
           }
           // ─── BLESSURES & SUSPENSIONS ────────────────────────────────────
           async function getInjuries(fixtureId) {
@@ -588,53 +460,40 @@ jobs:
               +'=== MARCHES DISPONIBLES ===\n'
               +'1. Resultat 1X2 | 2. Double chance 1X/X2/12 | 3. Over/Under 0.5/1.5/2.5/3.5\n'
               +'4. BTTS Oui/Non | 5. Combines (Victoire+Over, 1X+Over, etc.)\n\n'
-              +'=== METHODE DE DECISION — ORDRE DE PRIORITE ===\n'
-              +'ETAPE 1 — Trouve le marche avec le plus grand edge reel:\n'
-              +'  → Compare ta probabilite estimee (basee sur toutes les stats) avec la prob. implicite de chaque cote\n'
-              +'  → Edge = prob. estimee - prob. implicite. Le marche avec le plus grand edge positif = ton pari\n'
-              +'  → Tout marche peut gagner: 1, N, 2, 1X, X2, 12, Over/Under, BTTS, Combine\n\n'
-              +'ETAPE 2 — Valide par les stats:\n'
-              +'  → Victoire dom: si dom gagne >55% de ses matchs a domicile ET equipe ext faible ext\n'
-              +'  → Nul: si les deux equipes ont des styles defensifs, H2H souvent nuls, enjeux limites\n'
-              +'  → Under 2.5: si les deux defenses solides (<1 but encaisse/match) ET faibles attaques\n'
-              +'  → Over 2.5: si les deux attaques prolifiques (>1.5 but/match) ET defenses poreuses\n'
-              +'  → BTTS: si les DEUX equipes marquent dans >55% de leurs matchs respectifs\n'
-              +'  → Double chance: si une equipe est favorite mais cote 1 trop basse (faible edge)\n'
-              +'  → Combine: uniquement si les deux paris sont independants ET chacun avec edge positif\n\n'
-              +'ETAPE 3 — Rejette si:\n'
-              +'  → Les stats ne supportent pas le pari (ne force rien)\n'
-              +'  → La cote implicite est deja proche de ta probabilite estimee (edge < 3%)\n'
-              +'  → Blessures majeures non encore pricees par le bookmaker dans le bon sens\n\n'
-              +'ETAPE 4 — Quantifie le risque:\n'
-              +'  → FAIBLE: prob. estimee > 65%, stats convergentes, faible variance\n'
-              +'  → MODERE: prob. estimee 50-65%, quelques facteurs incertains\n'
-              +'  → ELEVE: prob. < 50% mais edge important (value sur cote haute), ou facteurs volatils\n\n'
+              +'=== REGLES ANTI-BOOKMAKER ===\n'
+              +'- Un VALUE BET existe quand ta probabilite estimee depasse la prob. implicite de +5% ou plus\n'
+              +'- Si les deux equipes marquent en moyenne >1.2 buts/match chacune → BTTS Oui est pertinent\n'
+              +'- Si moyenne buts attendus >2.5 ET les deux attaques solides → Over 2.5\n'
+              +'- Si une defense concede <1 but/match → privilegier Under/defense de la faible equipe\n'
+              +'- Privilege TOUJOURS la securite: un pari a 70% a cote 1.40 bat un pari a 45% a cote 2.20\n'
+              +'- Si blessures majeures signalees cotes deja ajustees, cherche le marche non encore ajuste\n'
+              +'- Fatigue: equipe fatiguee (score >60) tend a conceder des buts en fin de match\n'
+              +'- Ne recommande PAS un pari si les stats ne le supportent pas\n\n'
               +'=== FORMAT REPONSE OBLIGATOIRE — JSON STRICT ===\n'
-              +'IMPORTANT: Les exemples ci-dessous sont des STRUCTURES, pas des suggestions de paris. Choisis le VRAI meilleur pari selon les donnees ci-dessus.\n\n'
               +'{\n'
               +'  "confiance": 7.4,\n'
-              +'  "pari_rec": "[LE MEILLEUR PARI SELON LES STATS — peut etre 1, N, 2, 1X, X2, Over, Under, BTTS, Combine...]",\n'
-              +'  "marche": "[RESULTAT | DOUBLE_CHANCE | TOTAL_BUTS | BTTS | COMBINE]",\n'
-              +'  "risque": "[FAIBLE | MODERE | ELEVE]",\n'
-              +'  "vbet": "[OUI si edge reel > +4% sinon NON]",\n'
-              +'  "edge": "[+X% ou -X% calcule depuis prob. IA vs prob. implicite]",\n'
-              +'  "argument": "1. [Argument chiffre specifique a CE match et CE pari]. 2. [Deuxieme argument avec stat concrete]. 3. [Edge exact: cote X implique Y% mais tu estimes Z%].",\n'
-              +'  "analyse_card": "[2-3 phrases fluides qui se lisent comme un article: commencer par le contexte, inclure les stats cles, conclure avec le pari et pourquoi il bat le bookmaker. Pas de liste, vraie phrase.]",\n'
-              +'  "conseil": "[Analyse complete 3-4 phrases. Stats exactes. Pourquoi ce pari gagne. Risques identifies.]",\n'
-              +'  "contexte": "[2-3 phrases: importance du match, dynamique, serie en cours, pression sportive.]",\n'
-              +'  "enjeux": "[1 phrase: lutte titre / maintien / Europe / coupe / rien a jouer.]",\n'
-              +'  "scores_probables": "[3-5 scores les plus probables selon les stats, separees par virgule]",\n'
-              +'  "p1": 0, "pn": 0, "p2": 0,\n'
-              +'  "po15": 0, "po25": 0, "btts": 0,\n'
-              +'  "mise": "[1% a 5% bankroll selon confiance]",\n'
+              +'  "pari_rec": "Over 2.5",\n'
+              +'  "marche": "TOTAL_BUTS",\n'
+              +'  "risque": "MODERE",\n'
+              +'  "vbet": "OUI",\n'
+              +'  "edge": "+8%",\n'
+              +'  "argument": "1. '+d.home+' marque 2.1 buts/match a dom, Over 2.5 sorti 7/10 matchs. 2. '+d.away+' concede 1.4 but/match ext, BTTS sorti 6/10. 3. Cote '+d.co25+' implique '+pio25+'% mais statistiques donnent 62% reel.",\n'
+              +'  "analyse_card": "Phrase complete de 2-3 lignes lisible directement: resumer le verdict IA avec les chiffres cles et le pari recommande. Ex: Arsenal reçoit Chelsea avec une nette superiorite offensive (2.1 buts/match), Chelsea cede regulierement a l exterieur (1.4 encaisse) — l Over 2.5 s impose avec un edge de +8% sur la cote proposee.",\n'
+              +'  "conseil": "Analyse complete 3-4 phrases avec tous les stats, pourquoi ce pari gagne, risques eventuels.",\n'
+              +'  "contexte": "2-3 phrases: importance du match, dynamique actuelle, serie en cours, pression.",\n'
+              +'  "enjeux": "1 phrase: lutte pour le titre / maintien / Europe / rien a jouer.",\n'
+              +'  "scores_probables": "2-1, 1-0, 2-0, 1-1",\n'
+              +'  "p1": 55, "pn": 20, "p2": 25,\n'
+              +'  "po15": 88, "po25": 62, "btts": 48,\n'
+              +'  "mise": "3% bankroll",\n'
               +'  "paris_3": {\n'
-              +'    "safe":   {"bet":"[Pari le plus sur, cote basse, prob elevee]",    "cote":"[cote reelle fournie]", "hint":"[raison chiffree]", "mise":"4-5% bankroll", "bookie":"[bookmaker avec meilleure cote]"},\n'
-              +'    "valeur": {"bet":"[Le VALUE BET identifie, meilleur rapport edge/cote]", "cote":"[cote reelle fournie]", "hint":"[edge calcule precisement]",   "mise":"2-3% bankroll", "bookie":"[bookmaker avec meilleure cote]"},\n'
-              +'    "specu":  {"bet":"[Pari audacieux coherent avec les stats, cote haute]",   "cote":"[cote reelle ou estimee]",  "hint":"[justification courte]",   "mise":"0.5-1% bankroll", "bookie":"[bookmaker]"}\n'
+              +'    "safe":   {"bet":"Over 1.5",    "cote":"1.25", "hint":"Sorti 9/10 derniers matchs",     "mise":"4-5% bankroll", "bookie":"Betclic"},\n'
+              +'    "valeur": {"bet":"Over 2.5",    "cote":"'+d.co25+'", "hint":"Edge +8% vs cote implicite", "mise":"2-3% bankroll", "bookie":"Bet365"},\n'
+              +'    "specu":  {"bet":"'+d.home+' Handicap -1", "cote":"2.80", "hint":"Si domination confirmee", "mise":"0.5-1% bankroll", "bookie":"Pinnacle"}\n'
               +'  }\n'
               +'}\n\n'
               +'CONTRAINTES STRICTES:\n'
-              +'- confiance: decimal 1.0-10.0 AJUSTE AU PARI RECOMMANDE specifiquement (pas une note generale du match)\n'
+              +'- confiance: decimal 1.0-10.0 AJUSTE AU PARI RECOMMANDE (pas une note globale du match)\n'
               +'- p1+pn+p2 = 100 exactement\n'
               +'- vbet = "OUI" uniquement si edge reel > +4%\n'
               +'- risque: exactement "FAIBLE", "MODERE" ou "ELEVE"\n'
@@ -740,7 +599,7 @@ jobs:
               ]);
               await sleep(400);
               var batch2 = await Promise.all([
-                getOddsForFixture(lg.id, home.name, away.name),
+                getOdds(f.id),
                 getInjuries(f.id),
                 getH2H(home.id, away.id),
                 getWeather(f.venue&&f.venue.city?f.venue.city:''),
@@ -755,7 +614,7 @@ jobs:
               // Formatage données
               var last10H = formatLast10(raw10H, home.id);
               var last10A = formatLast10(raw10A, away.id);
-              var odds    = oddsRaw; // déjà parsé par getOddsForFixture
+              var odds    = parseOdds(oddsRaw);
               var critH   = calcCriteres(sH, true,  rkH);
               var critA   = calcCriteres(sA, false, rkA);
               var fatigueH = calcFatigue(last10H, home.name);
@@ -887,7 +746,7 @@ jobs:
                 cat:        ['all'],
                 val:        an?(an.vbet==='OUI'&&(an.confiance||0)>=6.0):false,
                 hot:        an?(an.confiance||0)>=8.0:false,
-                conf:       an&&an.confiance?parseFloat(an.confiance):0,
+                conf:       an?parseFloat(an.confiance||0):0,
                 p1:         an?(an.p1||0):0,
                 pn:         an?(an.pn||0):0,
                 p2:         an?(an.p2||0):0,
@@ -902,7 +761,7 @@ jobs:
                 // Bookmakers avec logo domain
                 bookies: odds.bookies,
                 // Analyse IA
-                edge:           an?(an.edge||'').replace(/^([0-9])/,'+$1'):'', // force + prefix
+                edge:           an?(an.edge||''):'',
                 edge_detail:    an?'Probabilit\u00e9 IA vs probabilit\u00e9 implicite bookmaker = '+(an.edge||''):'',
                 marche:         an?(an.marche||'RESULTAT'):'RESULTAT',
                 risque:         risqueNorm,
@@ -987,7 +846,6 @@ jobs:
       - name: Run pipeline
         env:
           APISPORTS_KEY:   ${{ secrets.APISPORTS_KEY }}
-          ODDS_KEY:        ${{ secrets.ODDS_KEY }}
           OPENWEATHER_KEY: ${{ secrets.OPENWEATHER_KEY }}
           NEWSAPI_KEY:     ${{ secrets.NEWSAPI_KEY }}
           ANTHROPIC_KEY:   ${{ secrets.ANTHROPIC_KEY }}
@@ -1000,5 +858,3 @@ jobs:
           git add data.json
           git diff --staged --quiet || git commit -m "Daily update - $(date +%Y-%m-%d)"
           git push
-Footer
-© 2026 GitHub, Inc.

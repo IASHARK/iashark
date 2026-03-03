@@ -363,11 +363,11 @@ jobs:
 '
               + '- Priorite: securite > rendement. Un pari a 75% de chance a 1.35 est meilleur qu un pari a 45% a 2.10\
 '
-              + '- Si les defenses sont solides (moins de 1 but encaisse/match), joue Under 2.5\
+              + '- Choisis 1/N/2 si l'ecart de niveaux est clair. Choisis Under si les deux defenses solides. Choisis Over si les deux attaques prolifiques. Choisis BTTS si les deux equipes marquent regulierement. Toujours prendre le marche avec le plus grand edge\
 '
-              + '- Si les deux equipes marquent beaucoup (plus de 1.3 buts/match chacune), joue BTTS Oui\
+              + '- Si une equipe domine a domicile (>60% victoires chez elle) et l'adversaire est faible dehors, joue la victoire\
 '
-              + '- Si une equipe domine clairement a domicile (plus de 60% de victoires chez elle), joue sa victoire\
+              + '- Ne force jamais un pari: si les stats ne sont pas claires, prends le pari le plus sur\
 '
               + '- Ne recommande JAMAIS un pari contraire aux statistiques pour faire plaisir\
 \
@@ -381,9 +381,9 @@ jobs:
 '
               + '  "confiance": 7.4,\
 '
-              + '  "pari_rec": "Victoire ' + d.home + ' + Under 2.5",\
+              + '  "pari_rec": "[MEILLEUR PARI selon stats — 1/N/2/Double chance/Over/Under/BTTS/Combine]",\
 '
-              + '  "marche": "COMBINE",\
+              + '  "marche": "[RESULTAT | DOUBLE_CHANCE | TOTAL_BUTS | BTTS | COMBINE]",\
 '
               + '  "risque": "MODERE",\
 '
@@ -391,7 +391,7 @@ jobs:
 '
               + '  "edge": "+8%",\
 '
-              + '  "argument": "3 arguments cles courts et percutants justifiant ce pari avec des chiffres precis. Ex: 1. ' + d.home + ' imbattable a domicile (8V/2N/1D). 2. Under 2.5 sorti dans 7 des 10 derniers matchs de ' + d.away + '. 3. Cote 1.85 sous-evaluee vs probabilite reelle 62%.",\
+              + '  "argument": "3 arguments cles courts et percutants justifiant ce pari avec des chiffres precis. Ex: 1. ' + d.home + ' imbattable a domicile (8V/2N/1D). 2. stat cle sur ' + d.away + ' qui justifie ce pari. 3. Cote 1.85 sous-evaluee vs probabilite reelle 62%.",\
 '
               + '  "conseil": "Analyse detaillee en 3-4 phrases. Cite les stats exactes (moyennes buts, forme, classement). Explique pourquoi ce pari est le meilleur selon les donnees. Mentionne les risques eventuels.",\
 '

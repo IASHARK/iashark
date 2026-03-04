@@ -150,64 +150,62 @@ jobs:
 
           // ─── 5 BOOKMAKERS FR FIXES ─────────────────────────────────────
           var FR_FIXED = [
-            {n:'Betclic', o:'200€ offerts',          l:'#LIEN_BETCLIC'},
-            {n:'Winamax', o:'100€ offerts',          l:'#LIEN_WINAMAX'},
-            {n:'Unibet',  o:'100€ remboursés',  l:'#LIEN_UNIBET'},
-            {n:'PMU',     o:'100€ offerts',          l:'#LIEN_PMU'},
-            {n:'Bet365',  o:'100€ bonus',            l:'#LIEN_BET365'},
+            {n:'Betclic', o:'200€ offerts',         l:'#LIEN_BETCLIC'},
+            {n:'Winamax', o:'100€ offerts',         l:'#LIEN_WINAMAX'},
+            {n:'Unibet',  o:'100€ remboursés', l:'#LIEN_UNIBET'},
+            {n:'PMU',     o:'100€ offerts',         l:'#LIEN_PMU'},
+            {n:'Bet365',  o:'100€ bonus',           l:'#LIEN_BET365'},
           ];
           function parseOdds(o) {
-            var empty = {c1:'--',cn:'--',c2:'--',co15:'--',co25:'--',cu25:'--',
-                         dc1x:'--',dcx2:'--',btts_oui:'--',btts_non:'--',bookies:[]};
-            if (!o || !o.bookmakers || !o.bookmakers.length) return empty;
-            // Collecter toutes les cotes, filtrer aberrations (1.05-15), prendre la médiane
+            var empty={c1:'--',cn:'--',c2:'--',co15:'--',co25:'--',cu25:'--',
+                       dc1x:'--',dcx2:'--',btts_oui:'--',btts_non:'--',bookies:[]};
+            if(!o||!o.bookmakers||!o.bookmakers.length) return empty;
             var arr1=[],arrN=[],arr2=[],arr15=[],arr25=[],arru25=[],arr1x=[],arrx2=[],arrby=[],arrbn=[];
-            o.bookmakers.forEach(function(bk) {
-              (bk.bets||[]).forEach(function(bet) {
-                if (bet.name==='Match Winner'||bet.name==='Home/Draw/Away') {
+            o.bookmakers.forEach(function(bk){
+              (bk.bets||[]).forEach(function(bet){
+                if(bet.name==='Match Winner'||bet.name==='Home/Draw/Away'){
                   var hm=(bet.values||[]).find(function(v){return v.value==='Home';});
                   var dr=(bet.values||[]).find(function(v){return v.value==='Draw';});
                   var aw=(bet.values||[]).find(function(v){return v.value==='Away';});
-                  if (hm&&parseFloat(hm.odd)>=1.05&&parseFloat(hm.odd)<=15) arr1.push(parseFloat(hm.odd));
-                  if (dr&&parseFloat(dr.odd)>=1.05&&parseFloat(dr.odd)<=15) arrN.push(parseFloat(dr.odd));
-                  if (aw&&parseFloat(aw.odd)>=1.05&&parseFloat(aw.odd)<=15) arr2.push(parseFloat(aw.odd));
+                  if(hm&&parseFloat(hm.odd)>=1.05&&parseFloat(hm.odd)<=15) arr1.push(parseFloat(hm.odd));
+                  if(dr&&parseFloat(dr.odd)>=1.05&&parseFloat(dr.odd)<=15) arrN.push(parseFloat(dr.odd));
+                  if(aw&&parseFloat(aw.odd)>=1.05&&parseFloat(aw.odd)<=15) arr2.push(parseFloat(aw.odd));
                 }
-                if (bet.name==='Goals Over/Under') {
-                  (bet.values||[]).forEach(function(v) {
-                    if (v.value==='Over 1.5')  arr15.push(parseFloat(v.odd));
-                    if (v.value==='Over 2.5')  arr25.push(parseFloat(v.odd));
-                    if (v.value==='Under 2.5') arru25.push(parseFloat(v.odd));
+                if(bet.name==='Goals Over/Under'){
+                  (bet.values||[]).forEach(function(v){
+                    if(v.value==='Over 1.5')  arr15.push(parseFloat(v.odd));
+                    if(v.value==='Over 2.5')  arr25.push(parseFloat(v.odd));
+                    if(v.value==='Under 2.5') arru25.push(parseFloat(v.odd));
                   });
                 }
-                if (bet.name==='Double Chance') {
+                if(bet.name==='Double Chance'){
                   var d1x=(bet.values||[]).find(function(v){return v.value==='Home/Draw';});
                   var dx2=(bet.values||[]).find(function(v){return v.value==='Draw/Away';});
-                  if (d1x) arr1x.push(parseFloat(d1x.odd));
-                  if (dx2) arrx2.push(parseFloat(dx2.odd));
+                  if(d1x) arr1x.push(parseFloat(d1x.odd));
+                  if(dx2) arrx2.push(parseFloat(dx2.odd));
                 }
-                if (bet.name==='Both Teams Score') {
+                if(bet.name==='Both Teams Score'){
                   var by=(bet.values||[]).find(function(v){return v.value==='Yes';});
                   var bn=(bet.values||[]).find(function(v){return v.value==='No';});
-                  if (by) arrby.push(parseFloat(by.odd));
-                  if (bn) arrbn.push(parseFloat(bn.odd));
+                  if(by) arrby.push(parseFloat(by.odd));
+                  if(bn) arrbn.push(parseFloat(bn.odd));
                 }
               });
             });
-            function med(a) {
-              if (!a.length) return '--';
+            function med(a){
+              if(!a.length) return '--';
               var s=a.slice().sort(function(x,y){return x-y;});
               var m=Math.floor(s.length/2);
-              return (s.length%2?s[m]:((s[m-1]+s[m])/2)).toFixed(2);
+              return(s.length%2?s[m]:((s[m-1]+s[m])/2)).toFixed(2);
             }
-            var c1=med(arr1), cn=med(arrN), c2=med(arr2);
-            var co15=med(arr15), co25=med(arr25), cu25=med(arru25);
-            var dc1x=med(arr1x), dcx2=med(arrx2);
-            var btts_oui=med(arrby), btts_non=med(arrbn);
-            // Appliquer aux 5 FR fixes — légères variations réalistes entre bookmakers
-            function vary(c,d){ if(!c||c==='--') return '--'; return Math.max(1.01,parseFloat(c)+d).toFixed(2); }
+            var c1=med(arr1),cn=med(arrN),c2=med(arr2);
+            var co15=med(arr15),co25=med(arr25),cu25=med(arru25);
+            var dc1x=med(arr1x),dcx2=med(arrx2);
+            var btts_oui=med(arrby),btts_non=med(arrbn);
+            function vary(c,d){if(!c||c==='--') return '--'; return Math.max(1.01,parseFloat(c)+d).toFixed(2);}
             var deltas=[0,-0.03,-0.02,-0.05,+0.03];
             var bookies=FR_FIXED.map(function(bk,i){
-              return {n:bk.n, o:bk.o, l:bk.l, c:vary(c1,deltas[i]), cn:vary(cn,deltas[i]), c2:vary(c2,deltas[i])};
+              return {n:bk.n,o:bk.o,l:bk.l,c:vary(c1,deltas[i]),cn:vary(cn,deltas[i]),c2:vary(c2,deltas[i])};
             });
             return {c1,cn,c2,co15,co25,cu25,dc1x,dcx2,btts_oui,btts_non,bookies};
           }
@@ -412,162 +410,160 @@ jobs:
             };
           }
 
-          // ─── CLAUDE ANALYSE ─────────────────────────────────────────────
+          // ─── CLAUDE ANALYSE — SONNET SNIPER ────────────────────────────
           async function genAnalyse(d) {
-            // ── MOYENNES GÉNÉRALES ───────────────────────────────────────
-            var moyBmH = d.bmH&&d.totalH?(d.bmH/d.totalH).toFixed(2):'?';
-            var moyBeH = d.beH&&d.totalH?(d.beH/d.totalH).toFixed(2):'?';
-            var moyBmA = d.bmA&&d.totalA?(d.bmA/d.totalA).toFixed(2):'?';
-            var moyBeA = d.beA&&d.totalA?(d.beA/d.totalA).toFixed(2):'?';
-            // ── MOYENNES DOM/EXT RÉELLES ─────────────────────────────────
-            var moyBmHdom = d.bmHdom&&d.mdHdom?(d.bmHdom/d.mdHdom).toFixed(2):'?';
-            var moyBeHdom = d.beHdom&&d.mdHdom?(d.beHdom/d.mdHdom).toFixed(2):'?';
-            var moyBmAext = d.bmAext&&d.meAext?(d.bmAext/d.meAext).toFixed(2):'?';
-            var moyBeAext = d.beAext&&d.meAext?(d.beAext/d.meAext).toFixed(2):'?';
-            // ── SIGNAL DEFENSIF (pour Under & BTTS Non) ─────────────────
-            var defSignalH = (parseFloat(moyBeHdom)||99) < 1.0;  // dom encaisse peu
-            var defSignalA = (parseFloat(moyBeAext)||99) < 1.2;  // ext encaisse peu
-            var attSignalH = (parseFloat(moyBmHdom)||0) > 1.5;   // dom marque beaucoup
-            var attSignalA = (parseFloat(moyBmAext)||0) > 1.3;   // ext marque beaucoup
-            var failSignalH = d.failHdom&&d.mdHdom?(d.failHdom/d.mdHdom)>0.3:false; // dom rate souvent
-            var failSignalA = d.failAext&&d.meAext?(d.failAext/d.meAext)>0.35:false;
-            // ── PROBABILITÉS IMPLICITES TOUS MARCHÉS ────────────────────
-            var pi1   = (d.c1  &&d.c1  !=='--')?Math.round(100/parseFloat(d.c1)):'?';
-            var piN   = (d.cn  &&d.cn  !=='--')?Math.round(100/parseFloat(d.cn)):'?';
-            var pi2   = (d.c2  &&d.c2  !=='--')?Math.round(100/parseFloat(d.c2)):'?';
-            var pio15 = (d.co15&&d.co15!=='--')?Math.round(100/parseFloat(d.co15)):'?';
-            var pio25 = (d.co25&&d.co25!=='--')?Math.round(100/parseFloat(d.co25)):'?';
-            var piu25 = (d.cu25&&d.cu25!=='--')?Math.round(100/parseFloat(d.cu25)):'?';
-            var pi1x  = (d.dc1x&&d.dc1x!=='--')?Math.round(100/parseFloat(d.dc1x)):'?';
-            var pix2  = (d.dcx2&&d.dcx2!=='--')?Math.round(100/parseFloat(d.dcx2)):'?';
-            var piby  = (d.btts_oui&&d.btts_oui!=='--')?Math.round(100/parseFloat(d.btts_oui)):'?';
-            var pibn  = (d.btts_non&&d.btts_non!=='--')?Math.round(100/parseFloat(d.btts_non)):'?';
-            // ── H2H RÉSUMÉ ───────────────────────────────────────────────
-            var h2hStr = 'Historique indisponible.';
-            if (d.h2h && d.h2h.length) {
-              var w1=0,wN=0,w2=0;
-              d.h2h.forEach(function(g){
+            // Moyennes générales saison
+            var moyBmH=d.bmH&&d.totalH?(d.bmH/d.totalH).toFixed(2):'?';
+            var moyBeH=d.beH&&d.totalH?(d.beH/d.totalH).toFixed(2):'?';
+            var moyBmA=d.bmA&&d.totalA?(d.bmA/d.totalA).toFixed(2):'?';
+            var moyBeA=d.beA&&d.totalA?(d.beA/d.totalA).toFixed(2):'?';
+            // Moyennes DOM/EXT spécifiques (chemin API-Sports correct)
+            var bmHdom=(d.sH&&d.sH.goals&&d.sH.goals.for&&d.sH.goals.for.total&&d.sH.goals.for.total.home)||0;
+            var beHdom=(d.sH&&d.sH.goals&&d.sH.goals.against&&d.sH.goals.against.total&&d.sH.goals.against.total.home)||0;
+            var bmAext=(d.sA&&d.sA.goals&&d.sA.goals.for&&d.sA.goals.for.total&&d.sA.goals.for.total.away)||0;
+            var beAext=(d.sA&&d.sA.goals&&d.sA.goals.against&&d.sA.goals.against.total&&d.sA.goals.against.total.away)||0;
+            var mdHdom=d.mdHdom||Math.round(d.totalH/2);
+            var meAext=d.meAext||Math.round(d.totalA/2);
+            var moyBmHdom=bmHdom&&mdHdom?(bmHdom/mdHdom).toFixed(2):'?';
+            var moyBeHdom=beHdom&&mdHdom?(beHdom/mdHdom).toFixed(2):'?';
+            var moyBmAext=bmAext&&meAext?(bmAext/meAext).toFixed(2):'?';
+            var moyBeAext=beAext&&meAext?(beAext/meAext).toFixed(2):'?';
+            // Probabilités implicites TOUS marchés
+            var pi1  =(d.c1     &&d.c1     !=='--')?Math.round(100/parseFloat(d.c1)):'?';
+            var piN  =(d.cn     &&d.cn     !=='--')?Math.round(100/parseFloat(d.cn)):'?';
+            var pi2  =(d.c2     &&d.c2     !=='--')?Math.round(100/parseFloat(d.c2)):'?';
+            var pi1x =(d.dc1x   &&d.dc1x   !=='--')?Math.round(100/parseFloat(d.dc1x)):'?';
+            var pix2 =(d.dcx2   &&d.dcx2   !=='--')?Math.round(100/parseFloat(d.dcx2)):'?';
+            var pio15=(d.co15   &&d.co15   !=='--')?Math.round(100/parseFloat(d.co15)):'?';
+            var pio25=(d.co25   &&d.co25   !=='--')?Math.round(100/parseFloat(d.co25)):'?';
+            var piu25=(d.cu25   &&d.cu25   !=='--')?Math.round(100/parseFloat(d.cu25)):'?';
+            var piby =(d.btts_oui&&d.btts_oui!=='--')?Math.round(100/parseFloat(d.btts_oui)):'?';
+            var pibn =(d.btts_non&&d.btts_non!=='--')?Math.round(100/parseFloat(d.btts_non)):'?';
+            // H2H résumé
+            var h2hStr='Historique indisponible.';
+            var h2hAvgButs='?',h2hNuls=0;
+            if(d.h2h&&d.h2h.length){
+              var w1=0,wN=0,w2=0,h2hTotal=0;
+              d.h2h.slice(0,5).forEach(function(g){
                 var isH=g.teams.home.id===d.homeId;
-                var gfH=g.goals.home||0, gfA=g.goals.away||0;
-                if(gfH>gfA) isH?w1++:w2++; else if(gfH<gfA) isH?w2++:w1++; else wN++;
+                var gfH=g.goals.home||0,gfA=g.goals.away||0;
+                h2hTotal+=gfH+gfA;
+                if(gfH===gfA) wN++;
+                else if(gfH>gfA) isH?w1++:w2++;
+                else isH?w2++:w1++;
               });
-              h2hStr='Sur les 5 derniers H2H: '+d.home+' '+w1+'V / '+wN+'N / '+w2+'D pour '+d.away
-                    +'. Moy. buts H2H: '+d.h2hAvgButs+' | Nuls H2H: '+d.h2hNuls+'/'+d.h2h.length+'.';
+              h2hNuls=wN;
+              h2hAvgButs=(h2hTotal/Math.min(d.h2h.length,5)).toFixed(2);
+              h2hStr='H2H (5 derniers): '+d.home+' '+w1+'V / '+wN+'N / '+w2+'D. Moy buts: '+h2hAvgButs+'. Nuls: '+wN+'/5.';
             }
-            // ── INJURIES ─────────────────────────────────────────────────
-            var injStr = 'Aucune blessure majeure.';
-            if (d.injuries && d.injuries.length) {
+            // Injuries
+            var injStr='Aucune blessure majeure.';
+            if(d.injuries&&d.injuries.length){
               var injH=d.injuries.filter(function(x){return x.team===d.homeId;});
               var injA=d.injuries.filter(function(x){return x.team===d.awayId;});
               injStr='';
-              if(injH.length) injStr+=d.home+' absents: '+injH.map(function(x){return x.name+' ('+x.reason+')';}).join(', ')+'. ';
-              if(injA.length) injStr+=d.away+' absents: '+injA.map(function(x){return x.name+' ('+x.reason+')';}).join(', ')+'. ';
+              if(injH.length) injStr+=d.home+' absents: '+injH.map(function(x){return x.name;}).join(', ')+'. ';
+              if(injA.length) injStr+=d.away+' absents: '+injA.map(function(x){return x.name;}).join(', ')+'. ';
               if(!injStr) injStr='Aucune absence majeure.';
             }
+            // Under/BTTS Non sur 10 derniers
+            var u25H=d.u25H||0, u25A=d.u25A||0;
+            var bttsNonH=d.bttsNonH||0, bttsNonA=d.bttsNonA||0;
+            var csHdom=d.csHdom||0, csAext=d.csAext||0;
+            var failHdom=d.failHdom||0, failAext=d.failAext||0;
 
-            var systemMsg = 'Tu es IASHARK, un système expert de paris sportifs quantitatif. '              +'Tu fonctionnes comme un quant fund: tu analyses des données brutes, tu calcules des probabilités '              +'réelles pour chaque marché, tu identifies les écarts avec le marché bookmaker, et tu ne paries '              +'que si ledge est réel et significatif. Tu nes jamais influencé par le nom des équipes, leur popularité '              +'ou des biais médiatiques. Tu suis uniquement les chiffres.';
-
-            var prompt =
-              'Analyse ce match avec une rigueur quantitative absolue. '              +'Avant de répondre en JSON, réfléchis étape par étape en commentaire interne:\n'              +'1) Calcule la probabilité réelle pour CHAQUE marché (1, N, 2, 1X, X2, O1.5, O2.5, U2.5, BTTS Oui, BTTS Non)\n'              +'2) Compare avec la prob. implicite du bookmaker → calcule ledge exact\n'              +'3) Identifie le marché avec le plus grand edge positif → cest ton pari\n'              +'4) Si aucun edge > 3% → retourne confiance < 5 et risque=ELEVE\n\n'              +'Tu es IASHARK, IA sniper de paris sportifs. Ton unique objectif: trouver le pari avec le PLUS GRAND EDGE REEL sur ce match, peu importe le type de pari. Reponds UNIQUEMENT avec un JSON valide, sans backtick, sans commentaire.\n\n'
-
-              +'=== MATCH ===\n'
-              +d.home+' vs '+d.away+' | '+d.league+' | '+d.date+'\n'
-              +'Stade: '+d.stade+' | Meteo: '+d.meteo+'\n\n'
-
-              +'=== '+d.home.toUpperCase()+' — DOMICILE (classement #'+(d.rkH||'?')+') ===\n'
-              +'Buts marques DOM: '+d.bmHdom+' en '+d.mdHdom+' matchs ('+moyBmHdom+'/match)\n'
-              +'Buts encaisses DOM: '+d.beHdom+' en '+d.mdHdom+' matchs ('+moyBeHdom+'/match)\n'
-              +'Clean sheets DOM: '+d.csHdom+'/'+d.mdHdom+' | Sans marquer DOM: '+d.failHdom+'/'+d.mdHdom+'\n'
-              +'Victoires DOM: '+d.vdH+'/'+d.mdHdom+' | Forme saison: '+d.fH+'\n'
-              +'5 derniers: '+d.d10H+'\n\n'
-
-              +'=== '+d.away.toUpperCase()+' — EXTERIEUR (classement #'+(d.rkA||'?')+') ===\n'
-              +'Buts marques EXT: '+d.bmAext+' en '+d.meAext+' matchs ('+moyBmAext+'/match)\n'
-              +'Buts encaisses EXT: '+d.beAext+' en '+d.meAext+' matchs ('+moyBeAext+'/match)\n'
-              +'Clean sheets EXT: '+d.csAext+'/'+d.meAext+' | Sans marquer EXT: '+d.failAext+'/'+d.meAext+'\n'
-              +'Victoires EXT: '+d.veA+'/'+d.meAext+' | Forme saison: '+d.fA+'\n'
-              +'5 derniers: '+d.d10A+'\n\n'
-
-              +'=== TENDANCES BUTS — 10 DERNIERS MATCHS ===\n'
-              +'Over 2.5 — '+d.home+': '+d.o25H+'/10 | '+d.away+': '+d.o25A+'/10\n'
-              +'Under 2.5 — '+d.home+': '+d.u25H+'/10 | '+d.away+': '+d.u25A+'/10\n'
-              +'BTTS Oui — '+d.home+': '+d.bttsH+'/10 | '+d.away+': '+d.bttsA+'/10\n'
-              +'BTTS Non — '+d.home+': '+d.bttsNonH+'/10 | '+d.away+': '+d.bttsNonA+'/10\n\n'
-
-              +'=== HEAD TO HEAD ===\n'
-              +h2hStr+'\n\n'
-
-              +'=== BLESSURES & SUSPENSIONS ===\n'
-              +injStr+'\n\n'
-
-              +'=== FATIGUE ===\n'
-              +d.home+': '+d.fatH+' (score fatigue '+d.fatScoreH+'/100)\n'
-              +d.away+': '+d.fatA+' (score fatigue '+d.fatScoreA+'/100)\n\n'
-
-              +'=== COTES ET PROBABILITES IMPLICITES (TOUS MARCHES) ===\n'
-              +'1 ('+d.home+'): cote '+d.c1+' → impl. '+pi1+'%\n'
-              +'N (Nul):         cote '+d.cn+' → impl. '+piN+'%\n'
-              +'2 ('+d.away+'):  cote '+d.c2+' → impl. '+pi2+'%\n'
-              +'1X:              cote '+d.dc1x+' → impl. '+pi1x+'%\n'
-              +'X2:              cote '+d.dcx2+' → impl. '+pix2+'%\n'
-              +'Over 1.5:        cote '+d.co15+' → impl. '+pio15+'%\n'
-              +'Over 2.5:        cote '+d.co25+' → impl. '+pio25+'%\n'
-              +'Under 2.5:       cote '+d.cu25+' → impl. '+piu25+'%\n'
-              +'BTTS Oui:        cote '+d.btts_oui+' → impl. '+piby+'%\n'
-              +'BTTS Non:        cote '+d.btts_non+' → impl. '+pibn+'%\n\n'
-
-              +'=== METHODE SNIPER — LECTURE OBJECTIVE DE TOUS LES SIGNAUX ===\n'
-              +'Pour CHAQUE marche, estime une probabilite reelle puis calcule ledge:\n'
-              +'  edge = prob_IA - prob_implicite_bookmaker\n'
-              +'Le marche avec le plus grand edge positif = ton pari. AUCUN BIAIS.\n\n'
-
-              +'SIGNAUX A ANALYSER:\n'
-              +'[VICTOIRE 1] → Win rate dom > 55% ET ext encaisse > 1.5 bg/match EXT\n'
-              +'[VICTOIRE 2] → Win rate ext > 40% ET dom en mauvaise forme (< 2V/5) OU blessures cles\n'
-              +'[NUL]        → Buts encaisses < 1.0/match POUR LES DEUX + H2H souvent nuls (>2/5) + enjeux limites\n'
-              +'[1X]         → Dom solide (clean sheet > 40% dom) mais cote 1 sous-cotee, 1X offre meilleur edge\n'
-              +'[X2]         → Ext de qualite superieure OU dom en crise, cote 2 trop basse → X2 optimal\n'
-              +'[OVER 2.5]   → Les deux attaques > 1.5 bg/match + les deux defenses > 1.2 bg/match + H2H moy > 2.5\n'
-              +'[UNDER 2.5]  → Les deux defenses < 1.0 bg/match (DOM et EXT specifiquement) + H2H moy < 2.2 + u25 > 6/10 pour les deux\n'
-              +'[BTTS OUI]   → Les deux equipes marquent dans > 55% de leurs matchs (btts > 5/10 pour les deux)\n'
-              +'[BTTS NON]   → Au moins une equipe ne marque pas dans > 40% des matchs (bttsNon > 4/10) OU failed_to_score > 30%\n'
-              +'[COMBINE]    → Deux paris independants avec edge > 4% chacun — sinon ne pas forcer\n\n'
-
-              +'INTERDICTIONS STRICTES:\n'
-              +'- Ne pas jouer Over si les deux defenses sont solides (< 1.0 bg/match)\n'
-              +'- Ne pas jouer BTTS Oui si une equipe ne marque pas dans > 40% des matchs\n'
-              +'- Ne pas jouer Victoire 1 si win rate dom < 45%\n'
-              +'- Ne jamais forcer un pari si edge < 3% — retourner risque=ELEVE et confiance < 5\n\n'
-
-              +'=== FORMAT REPONSE JSON STRICT ===\n'
-              +'{\n'
-              +'  "confiance": 7.4,\n'
-              +'  "pari_rec": "[1 | N | 2 | 1X | X2 | Over 1.5 | Over 2.5 | Under 2.5 | BTTS Oui | BTTS Non | Combine...]",\n'
-              +'  "marche": "[RESULTAT | DOUBLE_CHANCE | TOTAL_BUTS | BTTS | COMBINE]",\n'
-              +'  "risque": "[FAIBLE | MODERE | ELEVE]",\n'
-              +'  "vbet": "[OUI si edge > +4% sinon NON]",\n'
-              +'  "edge": "[+X.X% calcule precisement: prob_IA - prob_implicite]",\n'
-              +'  "argument": "1. [Stat chiffree DOM/EXT specifique qui justifie CE pari]. 2. [Deuxieme signal concret]. 3. [Edge: cote X implique Y% mais IA estime Z%].",\n'
-              +'  "analyse_card": "[2-3 phrases article: contexte + stats cles + pourquoi ce pari bat le bookmaker]",\n'
-              +'  "conseil": "[3-4 phrases: stats exactes, risques identifies, pourquoi ce pari specifiquement]",\n'
-              +'  "contexte": "[2-3 phrases: importance du match, dynamique, serie]",\n'
-              +'  "enjeux": "[1 phrase: lutte titre / maintien / Europe / rien a jouer]",\n'
-              +'  "scores_probables": "[3-5 scores les plus probables]",\n'
-              +'  "p1": 0, "pn": 0, "p2": 0,\n'
-              +'  "po15": 0, "po25": 0, "btts": 0,\n'
-              +'  "mise": "[1% a 5% bankroll selon confiance]",\n'
-              +'  "paris_3": {\n'
-              +'    "safe":   {"bet":"[pari le plus sur]", "cote":"[cote reelle]", "hint":"[raison chiffree]", "mise":"4-5% bankroll", "bookie":"[bookmaker]"},\n'
-              +'    "valeur": {"bet":"[value bet: meilleur edge]", "cote":"[cote reelle]", "hint":"[edge calcule]", "mise":"2-3% bankroll", "bookie":"[bookmaker]"},\n'
-              +'    "specu":  {"bet":"[pari audacieux coherent]", "cote":"[cote reelle ou estimee]", "hint":"[justification]", "mise":"0.5-1% bankroll", "bookie":"[bookmaker]"}\n'
-              +'  }\n'
-              +'}\n\n'
-              +'CONTRAINTES: p1+pn+p2=100 | confiance decimal 1.0-10.0 | vbet OUI uniquement si edge>4% | risque exactement FAIBLE/MODERE/ELEVE';
+            var prompt = [
+              'Tu es IASHARK, systeme expert de paris sportifs quantitatif.',
+              'OBJECTIF: trouver le pari avec le PLUS GRAND EDGE REEL sur ce match.',
+              'METHODE: pour chaque marche, estime ta probabilite reelle, calcule edge = prob_IA - prob_implicite_bookmaker.',
+              'Choisis le marche avec le plus grand edge positif. Si aucun edge > 3%: confiance < 5, risque=ELEVE.',
+              'Reponds UNIQUEMENT avec un JSON valide, sans backtick, sans commentaire.',
+              '',
+              '=== MATCH ===',
+              d.home+' vs '+d.away+' | '+d.league+' | '+d.date,
+              'Stade: '+d.stade+' | Meteo: '+d.meteo,
+              '',
+              '=== '+d.home.toUpperCase()+' DOM (rang #'+(d.rkH||'?')+') ===',
+              'Buts marques DOM: '+moyBmHdom+'/match ('+bmHdom+' en '+mdHdom+' matchs)',
+              'Buts encaisses DOM: '+moyBeHdom+'/match | Clean sheets DOM: '+csHdom+'/'+mdHdom,
+              'Sans marquer DOM: '+failHdom+'/'+mdHdom+' | Victoires DOM: '+d.vdH+'/'+mdHdom,
+              'Forme saison: '+d.fH+' | 5 derniers: '+d.d10H,
+              '',
+              '=== '+d.away.toUpperCase()+' EXT (rang #'+(d.rkA||'?')+') ===',
+              'Buts marques EXT: '+moyBmAext+'/match ('+bmAext+' en '+meAext+' matchs)',
+              'Buts encaisses EXT: '+moyBeAext+'/match | Clean sheets EXT: '+csAext+'/'+meAext,
+              'Sans marquer EXT: '+failAext+'/'+meAext+' | Victoires EXT: '+d.veA+'/'+meAext,
+              'Forme saison: '+d.fA+' | 5 derniers: '+d.d10A,
+              '',
+              '=== TENDANCES BUTS (10 derniers matchs) ===',
+              'Over 2.5 — '+d.home+': '+d.o25H+'/10 | '+d.away+': '+d.o25A+'/10',
+              'Under 2.5 — '+d.home+': '+u25H+'/10 | '+d.away+': '+u25A+'/10',
+              'BTTS Oui — '+d.home+': '+d.bttsH+'/10 | '+d.away+': '+d.bttsA+'/10',
+              'BTTS Non — '+d.home+': '+bttsNonH+'/10 | '+d.away+': '+bttsNonA+'/10',
+              '',
+              '=== HEAD TO HEAD ===',
+              h2hStr,
+              '',
+              '=== BLESSURES ===',
+              injStr,
+              '',
+              '=== FATIGUE ===',
+              d.home+': '+d.fatH+' (fatigue '+d.fatScoreH+'/100)',
+              d.away+': '+d.fatA+' (fatigue '+d.fatScoreA+'/100)',
+              '',
+              '=== COTES + PROBABILITES IMPLICITES (TOUS MARCHES) ===',
+              '1 ('+d.home+'): '+d.c1+' → impl '+pi1+'%',
+              'N: '+d.cn+' → impl '+piN+'%',
+              '2 ('+d.away+'): '+d.c2+' → impl '+pi2+'%',
+              '1X: '+d.dc1x+' → impl '+pi1x+'%',
+              'X2: '+d.dcx2+' → impl '+pix2+'%',
+              'Over 1.5: '+d.co15+' → impl '+pio15+'%',
+              'Over 2.5: '+d.co25+' → impl '+pio25+'%',
+              'Under 2.5: '+d.cu25+' → impl '+piu25+'%',
+              'BTTS Oui: '+d.btts_oui+' → impl '+piby+'%',
+              'BTTS Non: '+d.btts_non+' → impl '+pibn+'%',
+              '',
+              '=== SIGNAUX PAR MARCHE ===',
+              '[1] jouer si: win rate DOM > 55% ET ext encaisse > 1.4/match EXT',
+              '[2] jouer si: win rate EXT > 40% OU dom en crise forme < 2V/5',
+              '[N] jouer si: deux defenses < 1.0 bg/match ET h2h nuls > 2/5 ET enjeux faibles',
+              '[1X] jouer si: dom solide (cs > 35%) mais cote 1 sans edge suffisant',
+              '[X2] jouer si: ext superieur OU dom en mauvaise passe, X2 offre meilleur edge',
+              '[Over 2.5] jouer si: deux attaques > 1.5/match ET deux defenses > 1.3/match ET h2h moy > 2.5',
+              '[Under 2.5] jouer si: deux defenses < 1.0/match DOM et EXT + h2h moy < 2.2 + u25 > 6/10 pour les deux',
+              '[BTTS Oui] jouer si: les deux equipes marquent > 55% (btts > 5/10 chacun)',
+              '[BTTS Non] jouer si: au moins une equipe ne marque pas > 40% (bttsNon > 4/10 OU failToScore > 30%)',
+              '[Combine] jouer si: deux paris independants avec edge > 4% chacun',
+              '',
+              '=== JSON ATTENDU ===',
+              '{',
+              '  "confiance": 7.4,',
+              '  "pari_rec": "1 | N | 2 | 1X | X2 | Over 1.5 | Over 2.5 | Under 2.5 | BTTS Oui | BTTS Non | Combine",',
+              '  "marche": "RESULTAT | DOUBLE_CHANCE | TOTAL_BUTS | BTTS | COMBINE",',
+              '  "risque": "FAIBLE | MODERE | ELEVE",',
+              '  "vbet": "OUI si edge > +4% sinon NON",',
+              '  "edge": "+X.X%",',
+              '  "argument": "1. [stat chiffree DOM/EXT]. 2. [signal concret]. 3. [edge: cote X → impl Y% vs IA Z%].",',
+              '  "analyse_card": "[2-3 phrases article pro]",',
+              '  "conseil": "[3-4 phrases stats exactes + risques]",',
+              '  "contexte": "[2-3 phrases dynamique match]",',
+              '  "enjeux": "[1 phrase titre/maintien/Europe]",',
+              '  "scores_probables": "1-0, 2-1, 0-0",',
+              '  "p1": 0, "pn": 0, "p2": 0,',
+              '  "po15": 0, "po25": 0, "btts": 0,',
+              '  "mise": "1% a 5% bankroll",',
+              '  "paris_3": {',
+              '    "safe":   {"bet":"[pari sur]",    "cote":"[cote reelle]", "hint":"[raison]", "mise":"4-5% bankroll", "bookie":"[bookmaker]"},',
+              '    "valeur": {"bet":"[value bet]",   "cote":"[cote reelle]", "hint":"[edge]",   "mise":"2-3% bankroll", "bookie":"[bookmaker]"},',
+              '    "specu":  {"bet":"[pari audace]", "cote":"[cote]",        "hint":"[raison]", "mise":"0.5-1% bankroll","bookie":"[bookmaker]"}',
+              '  }',
+              '}',
+              'CONTRAINTES: p1+pn+p2=100 | confiance decimal | vbet OUI si edge>4% | risque FAIBLE/MODERE/ELEVE'
+            ].join('\n');
 
             var r = await postJSON('api.anthropic.com', '/v1/messages', {
-              model: 'claude-sonnet-4-5-20250514',
-              max_tokens: 2500,
-              system: systemMsg,
+              model: 'claude-sonnet-4-6',
+              max_tokens: 2000,
               messages: [{role:'user', content:prompt}]
             }, {'x-api-key':ANT_KEY, 'anthropic-version':'2023-06-01'});
 
@@ -591,7 +587,7 @@ jobs:
               +'"c3":{"label":"SHARK AUDACE","type":"audace","selections":"pari1, pari2, pari3","matchs":"m1, m2, m3","cote_totale":"7.2","conseil":"..."}}';
 
             var r = await postJSON('api.anthropic.com', '/v1/messages', {
-              model: 'claude-sonnet-4-5-20250514',
+              model: 'claude-sonnet-4-6',
               max_tokens: 800,
               messages: [{role:'user', content:prompt}]
             }, {'x-api-key':ANT_KEY, 'anthropic-version':'2023-06-01'});
@@ -726,33 +722,7 @@ jobs:
                 return m.result+' '+m.score+' vs '+m.match+' ('+m.lieu+')';
               }).join(' | ')||'N/A';
 
-              // ── STATS DÉFENSIVES DÉTAILLÉES ─────────────────────────────
-              var bmHdom=(sH&&sH.goals&&sH.goals.for&&sH.goals.for.home)||0;
-              var beHdom=(sH&&sH.goals&&sH.goals.against&&sH.goals.against.home)||0;
-              var bmAext=(sA&&sA.goals&&sA.goals.for&&sA.goals.for.away)||0;
-              var beAext=(sA&&sA.goals&&sA.goals.against&&sA.goals.against.away)||0;
-              var mdHdom=(sH&&sH.fixtures&&sH.fixtures.played&&sH.fixtures.played.home)||Math.round(totalH/2);
-              var meAext=(sA&&sA.fixtures&&sA.fixtures.played&&sA.fixtures.played.away)||Math.round(totalA/2);
-              // Clean sheets & failed to score
-              var csHdom=(sH&&sH.clean_sheet&&sH.clean_sheet.home)||0;
-              var csAext=(sA&&sA.clean_sheet&&sA.clean_sheet.away)||0;
-              var failHdom=(sH&&sH.failed_to_score&&sH.failed_to_score.home)||0;
-              var failAext=(sA&&sA.failed_to_score&&sA.failed_to_score.away)||0;
-              // Under 2.5 & BTTS Non sur les 10 derniers
-              var u25H=last10H.filter(function(m){var p=m.score.split('-');return(parseInt(p[0]||0)+parseInt(p[1]||0))<3;}).length;
-              var u25A=last10A.filter(function(m){var p=m.score.split('-');return(parseInt(p[0]||0)+parseInt(p[1]||0))<3;}).length;
-              var bttsNonH=last10H.filter(function(m){var p=m.score.split('-');return parseInt(p[0]||0)===0||parseInt(p[1]||0)===0;}).length;
-              var bttsNonA=last10A.filter(function(m){var p=m.score.split('-');return parseInt(p[0]||0)===0||parseInt(p[1]||0)===0;}).length;
-              // Moyenne buts H2H + nuls H2H
-              var h2hAvgButs='?', h2hNuls=0;
-              if(h2hRaw&&h2hRaw.length){
-                var h2hTotal=0;
-                h2hRaw.slice(0,5).forEach(function(g){h2hTotal+=(g.goals.home||0)+(g.goals.away||0);if((g.goals.home||0)===(g.goals.away||0))h2hNuls++;});
-                h2hAvgButs=(h2hTotal/Math.min(h2hRaw.length,5)).toFixed(2);
-              }
-
               var heure = (f.date||'').split('T')[1]?(f.date||'').split('T')[1].slice(0,5):'';
-
               var meteoStr = wx?wx.desc+' '+wx.emoji+' '+wx.temp+' | Vent: '+wx.wind:'N/A';
 
               // Génération analyse Claude
@@ -777,14 +747,6 @@ jobs:
                 o25A:tendances.over25_away,
                 bttsH:tendances.btts_home,
                 bttsA:tendances.btts_away,
-                u25H:u25H, u25A:u25A,
-                bttsNonH:bttsNonH, bttsNonA:bttsNonA,
-                csHdom:csHdom, csAext:csAext,
-                failHdom:failHdom, failAext:failAext,
-                bmHdom:bmHdom, beHdom:beHdom,
-                bmAext:bmAext, beAext:beAext,
-                mdHdom:mdHdom, meAext:meAext,
-                h2hAvgButs:h2hAvgButs, h2hNuls:h2hNuls,
                 c1:odds.c1, cn:odds.cn, c2:odds.c2,
                 co15:odds.co15, co25:odds.co25, cu25:odds.cu25,
                 dc1x:odds.dc1x, dcx2:odds.dcx2,
@@ -793,26 +755,29 @@ jobs:
                 h2h:h2hRaw,
                 fatH:fatigueH.info, fatScoreH:fatigueH.val,
                 fatA:fatigueA.info, fatScoreA:fatigueA.val,
+                sH:sH, sA:sA,
+                mdHdom:mdHdom, meAext:meAext,
+                u25H:u25H, u25A:u25A,
+                bttsNonH:bttsNonH, bttsNonA:bttsNonA,
+                csHdom:csHdom, csAext:csAext,
+                failHdom:failHdom, failAext:failAext,
               });
               await sleep(500);
-
-              // Cote recommandée = cote qui correspond au pari IA
+              // Cote recommandée — bookies[0].c = cote du pari IA
               (function(){
                 var p=(an&&an.pari_rec||'').toLowerCase();
-                var coteRec;
-                if(p.includes(' 2)')||p.includes('away')||p.includes('ext')||p.endsWith('(2)')||p.includes('victoire (2)')) coteRec=odds.c2;
-                else if(p.includes('nul')||p.includes('draw')||p==='n') coteRec=odds.cn;
-                else if(p.includes('over 2.5')||p.includes('plus de 2.5')) coteRec=odds.co25;
-                else if(p.includes('over 1.5')||p.includes('plus de 1.5')) coteRec=odds.co15;
-                else if(p.includes('under')||p.includes('moins de')) coteRec=odds.cu25;
-                else if(p.includes('btts')||p.includes('les deux')) coteRec=odds.btts_oui;
-                else if(p.includes('1x')) coteRec=odds.dc1x;
-                else if(p.includes('x2')) coteRec=odds.dcx2;
-                else coteRec=odds.c1;
-                // bookies[0].c = bonne cote → l'index affiche automatiquement la bonne
-                if(odds.bookies&&odds.bookies.length&&coteRec&&coteRec!=='--') {
-                  odds.bookies[0].c=coteRec;
-                }
+                var c;
+                if(p.includes('(2)')||p.includes('away')||p.includes('ext')||p==='2') c=odds.c2;
+                else if(p.includes('nul')||p.includes('draw')||p==='n') c=odds.cn;
+                else if(p.includes('over 2.5')||p.includes('plus de 2.5')) c=odds.co25;
+                else if(p.includes('over 1.5')||p.includes('plus de 1.5')) c=odds.co15;
+                else if(p.includes('under')||p.includes('moins')) c=odds.cu25;
+                else if(p.includes('btts')||p.includes('les deux')) c=odds.btts_oui;
+                else if(p.includes('btts non')) c=odds.btts_non;
+                else if(p.includes('1x')) c=odds.dc1x;
+                else if(p.includes('x2')) c=odds.dcx2;
+                else c=odds.c1;
+                if(odds.bookies&&odds.bookies.length&&c&&c!=='--') odds.bookies[0].c=c;
               })();
 
               // Kelly criterion

@@ -465,8 +465,10 @@ jobs:
               if(!injStr) injStr='Aucune absence majeure.';
             }
 
+            var systemMsg = 'Tu es IASHARK, un système expert de paris sportifs quantitatif. '              +'Tu fonctionnes comme un quant fund: tu analyses des données brutes, tu calcules des probabilités '              +'réelles pour chaque marché, tu identifies les écarts avec le marché bookmaker, et tu ne paries '              +'que si ledge est réel et significatif. Tu nes jamais influencé par le nom des équipes, leur popularité '              +'ou des biais médiatiques. Tu suis uniquement les chiffres.';
+
             var prompt =
-              'Tu es IASHARK, IA sniper de paris sportifs. Ton unique objectif: trouver le pari avec le PLUS GRAND EDGE REEL sur ce match, peu importe le type de pari. Reponds UNIQUEMENT avec un JSON valide, sans backtick, sans commentaire.\n\n'
+              'Analyse ce match avec une rigueur quantitative absolue. '              +'Avant de répondre en JSON, réfléchis étape par étape en commentaire interne:\n'              +'1) Calcule la probabilité réelle pour CHAQUE marché (1, N, 2, 1X, X2, O1.5, O2.5, U2.5, BTTS Oui, BTTS Non)\n'              +'2) Compare avec la prob. implicite du bookmaker → calcule ledge exact\n'              +'3) Identifie le marché avec le plus grand edge positif → cest ton pari\n'              +'4) Si aucun edge > 3% → retourne confiance < 5 et risque=ELEVE\n\n'              +'Tu es IASHARK, IA sniper de paris sportifs. Ton unique objectif: trouver le pari avec le PLUS GRAND EDGE REEL sur ce match, peu importe le type de pari. Reponds UNIQUEMENT avec un JSON valide, sans backtick, sans commentaire.\n\n'
 
               +'=== MATCH ===\n'
               +d.home+' vs '+d.away+' | '+d.league+' | '+d.date+'\n'
@@ -563,8 +565,9 @@ jobs:
               +'CONTRAINTES: p1+pn+p2=100 | confiance decimal 1.0-10.0 | vbet OUI uniquement si edge>4% | risque exactement FAIBLE/MODERE/ELEVE';
 
             var r = await postJSON('api.anthropic.com', '/v1/messages', {
-              model: 'claude-haiku-4-5-20251001',
-              max_tokens: 1400,
+              model: 'claude-sonnet-4-5-20250514',
+              max_tokens: 2500,
+              system: systemMsg,
               messages: [{role:'user', content:prompt}]
             }, {'x-api-key':ANT_KEY, 'anthropic-version':'2023-06-01'});
 
@@ -588,8 +591,8 @@ jobs:
               +'"c3":{"label":"SHARK AUDACE","type":"audace","selections":"pari1, pari2, pari3","matchs":"m1, m2, m3","cote_totale":"7.2","conseil":"..."}}';
 
             var r = await postJSON('api.anthropic.com', '/v1/messages', {
-              model: 'claude-haiku-4-5-20251001',
-              max_tokens: 600,
+              model: 'claude-sonnet-4-5-20250514',
+              max_tokens: 800,
               messages: [{role:'user', content:prompt}]
             }, {'x-api-key':ANT_KEY, 'anthropic-version':'2023-06-01'});
             var txt = (r.content&&r.content[0]&&r.content[0].text)||'{}';

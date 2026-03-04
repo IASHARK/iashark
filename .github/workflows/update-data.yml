@@ -750,6 +750,25 @@ jobs:
               });
               await sleep(500);
 
+              // Cote recommandée = cote qui correspond au pari IA
+              (function(){
+                var p=(an&&an.pari_rec||'').toLowerCase();
+                var coteRec;
+                if(p.includes(' 2)')||p.includes('away')||p.includes('ext')||p.endsWith('(2)')||p.includes('victoire (2)')) coteRec=odds.c2;
+                else if(p.includes('nul')||p.includes('draw')||p==='n') coteRec=odds.cn;
+                else if(p.includes('over 2.5')||p.includes('plus de 2.5')) coteRec=odds.co25;
+                else if(p.includes('over 1.5')||p.includes('plus de 1.5')) coteRec=odds.co15;
+                else if(p.includes('under')||p.includes('moins de')) coteRec=odds.cu25;
+                else if(p.includes('btts')||p.includes('les deux')) coteRec=odds.btts_oui;
+                else if(p.includes('1x')) coteRec=odds.dc1x;
+                else if(p.includes('x2')) coteRec=odds.dcx2;
+                else coteRec=odds.c1;
+                // bookies[0].c = bonne cote → l'index affiche automatiquement la bonne
+                if(odds.bookies&&odds.bookies.length&&coteRec&&coteRec!=='--') {
+                  odds.bookies[0].c=coteRec;
+                }
+              })();
+
               // Kelly criterion
               var kellyVal = null;
               if (an&&an.pari_rec&&odds.c1&&odds.c1!=='--') {

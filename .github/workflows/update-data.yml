@@ -174,10 +174,18 @@ jobs:
             var co15=med(arr15), co25=med(arr25), cu25=med(arru25);
             var dc1x=med(arr1x), dcx2=med(arrx2);
             var btts_oui=med(arrby), btts_non=med(arrbn);
-            function vary(c,d){ if(!c||c==='--') return '--'; return Math.max(1.01,parseFloat(c)+d).toFixed(2); }
+            // FIX: variations realistes par bookmaker
             var deltas=[0,-0.03,-0.02,-0.05,+0.03];
+            function vary(c,d){ if(!c||c==='--') return '--'; return Math.max(1.01,parseFloat(c)+d).toFixed(2); }
+            // FIX: stocker c1 dans chaque bookie (pour le tableau COMPARER LES COTES colonnes 1/N/2)
             var bookies=FR_FIXED.map(function(bk,i){
-              return {n:bk.n, o:bk.o, l:bk.l, c:vary(c1,deltas[i]), cn:vary(cn,deltas[i]), c2:vary(c2,deltas[i])};
+              return {
+                n:bk.n, o:bk.o, l:bk.l,
+                c:vary(c1,deltas[i]),      // sera ecrase plus tard avec la cote du pari recommande
+                c1:vary(c1,deltas[i]),     // FIX: vraie cote 1x2 pour le tableau comparatif
+                cn:vary(cn,deltas[i]),
+                c2:vary(c2,deltas[i])
+              };
             });
             return {c1,cn,c2,co15,co25,cu25,dc1x,dcx2,btts_oui,btts_non,bookies};
           }
@@ -492,6 +500,27 @@ jobs:
               return {d:(f.fixture.date||'').split('T')[0],home:f.teams.home.name,away:f.teams.away.name,s:gfH+'-'+gfA,w:w};
             });
           }
+          // FIX: convertit une heure UTC en heure Paris (+1h en hiver CET, +2h en ete CEST)
+          function toParisHeure(utcDate) {
+            if (!utcDate) return '';
+            var d = new Date(utcDate);
+            if (isNaN(d.getTime())) return '';
+            // Detecte CEST (dernier dimanche mars -> dernier dimanche octobre)
+            var year = d.getUTCFullYear();
+            function lastSundayOf(month) {
+              var last = new Date(Date.UTC(year, month+1, 0));
+              last.setUTCDate(last.getUTCDate() - last.getUTCDay());
+              return last;
+            }
+            var startCEST = lastSundayOf(2); // dernier dim. mars
+            var endCEST   = lastSundayOf(9); // dernier dim. octobre
+            var offset = (d >= startCEST && d < endCEST) ? 2 : 1;
+            var parisMs = d.getTime() + offset * 3600 * 1000;
+            var paris = new Date(parisMs);
+            var hh = String(paris.getUTCHours()).padStart(2,'0');
+            var mm = String(paris.getUTCMinutes()).padStart(2,'0');
+            return hh+':'+mm;
+          }
           async function main() {
             console.log('=== IASHARK', TODAY, '===');
             var fixtures = await getFixtures();
@@ -582,7 +611,10 @@ jobs:
                 h2hRaw.slice(0,5).forEach(function(g){h2hTotal+=(g.goals.home||0)+(g.goals.away||0);if((g.goals.home||0)===(g.goals.away||0))h2hNuls++;});
                 h2hAvgButs=(h2hTotal/Math.min(h2hRaw.length,5)).toFixed(2);
               }
-              var heure = (f.date||'').split('T')[1]?(f.date||'').split('T')[1].slice(0,5):'';
+              // FIX TIMEZONE: convertir l'heure UTC en heure Paris (CET +1h / CEST +2h)
+              var heureUTC = (f.date||'').split('T')[1]?(f.date||'').split('T')[1].slice(0,5):'';
+              var heure = toParisHeure(f.date||'');
+              if (!heure) heure = heureUTC; // fallback si date invalide
               var meteoStr = wx?wx.desc+' '+wx.emoji+' '+wx.temp+' | Vent: '+wx.wind:'N/A';
               var an = await genAnalyse({
                 home:home.name, away:away.name, homeId:home.id, awayId:away.id,
@@ -612,20 +644,29 @@ jobs:
                 fatA:fatigueA.info, fatScoreA:fatigueA.val,
               });
               await sleep(500);
+              // FIX: determiner la cote du pari recommande et l'appliquer a TOUS les bookmakers
               (function(){
                 var p=(an&&an.pari_rec||'').toLowerCase();
                 var coteRec;
-                if(p.includes('(2)')||p.includes('away')||p.includes('ext')||p==='2') coteRec=odds.c2;
-                else if(p.includes('nul')||p.includes('draw')||p==='n') coteRec=odds.cn;
+                if(p.includes('btts non')||p.includes('les deux equipes ne marquent pas')) coteRec=odds.btts_non;
+                else if(p.includes('btts')||p.includes('les deux equipes marquent')||p.includes('les 2 equipes marquent')) coteRec=odds.btts_oui;
+                else if(p.includes('x2')||(p.includes('double chance')&&(p.includes('nul ou')||p.includes('ou nul'))&&!p.includes('ou nul '+home.name.toLowerCase().slice(0,4)))) coteRec=odds.dcx2;
+                else if(p.includes('1x')||(p.includes('double chance')&&p.includes(home.name.toLowerCase().slice(0,4)))) coteRec=odds.dc1x;
+                else if(p.includes('double chance')) coteRec=odds.dcx2; // fallback DC
                 else if(p.includes('over 2.5')||p.includes('plus de 2.5')) coteRec=odds.co25;
                 else if(p.includes('over 1.5')||p.includes('plus de 1.5')) coteRec=odds.co15;
-                else if(p.includes('under')||p.includes('moins')) coteRec=odds.cu25;
-                else if(p.includes('btts non')) coteRec=odds.btts_non;
-                else if(p.includes('btts')||p.includes('les deux')) coteRec=odds.btts_oui;
-                else if(p.includes('1x')) coteRec=odds.dc1x;
-                else if(p.includes('x2')) coteRec=odds.dcx2;
-                else coteRec=odds.c1;
-                if(odds.bookies&&odds.bookies.length&&coteRec&&coteRec!=='--') odds.bookies[0].c=coteRec;
+                else if(p.includes('under')||p.includes('moins de 2.5')) coteRec=odds.cu25;
+                else if(p.includes('nul')||p.includes('match nul')) coteRec=odds.cn;
+                else if(p.includes('victoire')&&(p.includes(away.name.toLowerCase().slice(0,4))||p.includes('ext')||p.includes('away'))) coteRec=odds.c2;
+                else coteRec=odds.c1; // victoire domicile ou fallback
+                // FIX: mettre a jour la cote recommandee sur TOUS les bookmakers (pas seulement bookies[0])
+                var deltas=[0,-0.03,-0.02,-0.05,+0.03];
+                if(odds.bookies&&odds.bookies.length&&coteRec&&coteRec!=='--') {
+                  odds.bookies.forEach(function(bk, i) {
+                    var delta = deltas[i]||0;
+                    bk.c = Math.max(1.01, parseFloat(coteRec)+delta).toFixed(2);
+                  });
+                }
               })();
               var kellyVal = null;
               if (an&&an.pari_rec&&odds.c1&&odds.c1!=='--') {
@@ -669,6 +710,8 @@ jobs:
                 c1:odds.c1, cn:odds.cn, c2:odds.c2,
                 co15:odds.co15, co25:odds.co25, cu25:odds.cu25,
                 dc1x:odds.dc1x, dcx2:odds.dcx2,
+                cdc1x:odds.dc1x, cdc2x:odds.dcx2,
+                cbtts:odds.btts_oui, cbtts_non:odds.btts_non,
                 btts_oui:odds.btts_oui, btts_non:odds.btts_non,
                 bookies:odds.bookies,
                 edge:an?(an.edge||''):'',

@@ -433,20 +433,20 @@ jobs:
               +'=== METHODE SNIPER ===\n'
               +'Pour CHAQUE marche calcule: edge = prob_IA - prob_implicite. Choisis le plus grand edge positif.\n\n'
               +'SIGNAUX:\n'
-              +'[1] Win rate DOM > 55% ET ext encaisse > 1.5/match\n'
-              +'[2] Win rate EXT > 40% OU dom forme < 2V/5\n'
-              +'[N] Deux defenses < 1.0/match + H2H nuls > 2/5\n'
-              +'[1X] Dom solide (CS > 40%) mais cote 1 sans edge suffisant\n'
-              +'[X2] Ext superieur OU dom en crise\n'
+              +'[Victoire '+d.home+'] Win rate DOM > 55% ET ext encaisse > 1.5/match\n'
+              +'[Victoire '+d.away+'] Win rate EXT > 40% OU dom forme < 2V/5\n'
+              +'[Nul] Deux defenses < 1.0/match + H2H nuls > 2/5\n'
+              +'[Double Chance '+d.home+' ou Nul (1X)] Dom solide (CS > 40%) mais cote 1 sans edge suffisant\n'
+              +'[Double Chance Nul ou '+d.away+' (X2)] Ext superieur OU dom en crise\n'
               +'[Over 2.5] Deux attaques > 1.5/match + deux defenses > 1.3/match + H2H moy > 2.5\n'
               +'[Under 2.5] Deux defenses < 1.0/match + H2H moy < 2.2 + u25 > 6/10 pour les deux\n'
               +'[BTTS Oui] Deux equipes marquent > 55% (btts > 5/10 chacun)\n'
               +'[BTTS Non] Une equipe ne marque pas > 40% (bttsNon > 4/10) OU failToScore > 30%\n'
-              +'[Combine] Deux paris avec edge > 4% chacun\n\n'
+              +'[Combine] Exemples: Victoire DOM+BTTS Non | Double Chance+Under 2.5 | BTTS Oui+Over 1.5. Deux marches independants edge > 4% chacun\n\n'
               +'INTERDICTIONS: Over si deux defenses < 1.0/match | BTTS Oui si une equipe marque < 60% | forcer si edge < 3%\n\n'
               +'=== FORMAT JSON STRICT ===\n'
-              +'{"confiance":7.4,"pari_rec":"1|N|2|1X|X2|Over 1.5|Over 2.5|Under 2.5|BTTS Oui|BTTS Non","marche":"RESULTAT|DOUBLE_CHANCE|TOTAL_BUTS|BTTS|COMBINE","risque":"FAIBLE|MODERE|ELEVE","vbet":"OUI|NON","edge":"+X.X%","argument":"1. stat. 2. stat. 3. edge.","analyse_card":"2-3 phrases","conseil":"3-4 phrases","contexte":"2-3 phrases","enjeux":"1 phrase","scores_probables":"1-0,2-1,0-0","p1":0,"pn":0,"p2":0,"po15":0,"po25":0,"btts":0,"mise":"2-3% bankroll","paris_3":{"safe":{"bet":"","cote":"","hint":"","mise":"4-5% bankroll","bookie":""},"valeur":{"bet":"","cote":"","hint":"","mise":"2-3% bankroll","bookie":""},"specu":{"bet":"","cote":"","hint":"","mise":"0.5-1% bankroll","bookie":""}}}\n\n'
-              +'CONTRAINTES: p1+pn+p2=100 | confiance 1.0-10.0 | vbet OUI si edge>4% | risque FAIBLE/MODERE/ELEVE';
+              +'{"confiance":7.4,"pari_rec":"Victoire [equipe]|Nul|Double Chance [equipe] ou Nul|Double Chance Nul ou [equipe]|Over 1.5|Over 2.5|Under 2.5|BTTS Oui|BTTS Non|Combine: pari1 + pari2","marche":"RESULTAT|DOUBLE_CHANCE|TOTAL_BUTS|BTTS|COMBINE","risque":"FAIBLE|MODERE|ELEVE","vbet":"OUI|NON","edge":"+X.X%","argument":"1. stat. 2. stat. 3. edge.","analyse_card":"2-3 phrases","conseil":"3-4 phrases","contexte":"2-3 phrases","enjeux":"1 phrase","scores_probables":"1-0,2-1,0-0","p1":0,"pn":0,"p2":0,"po15":0,"po25":0,"btts":0,"mise":"2-3% bankroll","paris_3":{"safe":{"bet":"[pari le plus sur: simple ou combo marche ex. Double Chance+Under 2.5]","cote":"[cote reelle]","hint":"[raison chiffree]","mise":"4-5% bankroll","bookie":"[bookmaker]"},"valeur":{"bet":"[value bet: simple ou combo ex. Victoire EXT+BTTS Non]","cote":"[cote reelle]","hint":"[edge calcule]","mise":"2-3% bankroll","bookie":"[bookmaker]"},"specu":{"bet":"[pari audacieux: simple ou combo ex. Nul+Over 2.5]","cote":"[cote reelle]","hint":"[justification]","mise":"0.5-1% bankroll","bookie":"[bookmaker]"}}}\n\n'
+              +'CONTRAINTES: p1+pn+p2=100 | confiance 1.0-10.0 | vbet OUI si edge>4% | risque FAIBLE/MODERE/ELEVE | pari_rec OBLIGATOIREMENT avec nom equipe: Victoire [nom equipe] ou Nul, jamais 1/2/N seul | paris_3.bet peut etre un combo de 2 marches: ex. Double Chance [equipe] ou Nul + Under 2.5';
             var r = await postJSON('api.anthropic.com', '/v1/messages', {
               model: 'claude-sonnet-4-6',
               max_tokens: 2000,

@@ -1,8 +1,11 @@
+
 name: Update IASHARK Daily
+
 on:
   schedule:
     - cron: '0 6 * * *'
   workflow_dispatch:
+
 jobs:
   update:
     runs-on: ubuntu-latest
@@ -11,6 +14,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+
       - name: Write pipeline script
         run: |
           cat > pipeline.js << 'JSEOF'
@@ -24,22 +28,55 @@ jobs:
           const LEAGUES  = [39, 61, 140, 135, 78, 2, 3, 40];
           const SEASON   = 2025;
           const TODAY    = new Date(Date.now() + 3600000).toISOString().split('T')[0];
-
           // ─── LEAGUE KEY MAP ────────────────────────────────────────────
           var LG_KEY = {
             39:'premier', 40:'champ', 61:'ligue1', 140:'laliga',
             135:'seriea', 78:'bundesliga', 2:'ldc', 3:'el'
           };
-
-          // ─── 5 BOOKMAKERS FR FIXES — affichés dans le comparateur ──────
-          var FR_FIXED = [
-            {n:'Betclic',  o:'200\u20ac offerts',       url:'#LIEN_BETCLIC',  anj:true},
-            {n:'Winamax',  o:'100\u20ac offerts',        url:'#LIEN_WINAMAX',  anj:true},
-            {n:'Unibet',   o:'100\u20ac rembours\u00e9s',url:'#LIEN_UNIBET',   anj:true},
-            {n:'PMU',      o:'100\u20ac offerts',        url:'#LIEN_PMU',      anj:true},
-            {n:'Bet365',   o:'100\u20ac bonus',          url:'#LIEN_BET365',   anj:false},
-          ];
-
+          // ─── BOOKMAKER MAP ─────────────────────────────────────────────
+          // anj:true = agréé ANJ France | anj:false = offshore accessible sans VPN
+          var BOOKIE_MAP = {
+            // ── BOOKMAKERS ANJ (légaux France) ─────────────────────────
+            'betclic':    {domain:'betclic.fr',      promo:'200\u20ac offerts',                  url:'https://www.betclic.fr',      anj:true},
+            'winamax':    {domain:'winamax.fr',      promo:'100\u20ac offerts',                  url:'https://www.winamax.fr',      anj:true},
+            'unibet':     {domain:'unibet.fr',       promo:'100\u20ac rembours\u00e9s',          url:'https://www.unibet.fr',       anj:true},
+            'pmu':        {domain:'pmu.fr',          promo:'100\u20ac offerts',                  url:'https://www.pmu.fr',          anj:true},
+            'bwin':       {domain:'bwin.fr',         promo:'50\u20ac offerts',                   url:'https://www.bwin.fr',         anj:true},
+            'zebet':      {domain:'zebet.fr',        promo:'100\u20ac offerts',                  url:'https://www.zebet.fr',        anj:true},
+            'betway':     {domain:'betway.com',      promo:'30\u20ac offerts',                   url:'https://www.betway.com',      anj:true},
+            // ── BOOKMAKERS OFFSHORE — accessibles France sans VPN ──────
+            'betify':     {domain:'betify.com',      promo:'50% jusqu\u2019\u00e0 200\u20ac',    url:'https://betify.com',          anj:false},
+            '1xbet':      {domain:'1xbet.com',       promo:'130\u20ac bonus',                    url:'https://www.1xbet.com',       anj:false},
+            '22bet':      {domain:'22bet.com',       promo:'122\u20ac bonus',                    url:'https://22bet.com',           anj:false},
+            'melbet':     {domain:'melbet.com',      promo:'100% jusqu\u2019\u00e0 100\u20ac',   url:'https://melbet.com',          anj:false},
+            'betwinner':  {domain:'betwinner.com',   promo:'100% jusqu\u2019\u00e0 100\u20ac',   url:'https://betwinner.com',       anj:false},
+            'nixbet':     {domain:'nix.bet',         promo:'200% jusqu\u2019\u00e0 1000\u20ac',  url:'https://nix.bet',             anj:false},
+            'rabona':     {domain:'rabona.com',      promo:'100% jusqu\u2019\u00e0 100\u20ac',   url:'https://rabona.com',          anj:false},
+            'goldenbet':  {domain:'goldenbet.com',   promo:'1500\u20ac sur 3 d\u00e9p\u00f4ts',  url:'https://goldenbet.com',       anj:false},
+            'stake':      {domain:'stake.com',       promo:'Code promo exclusif',                url:'https://stake.com',           anj:false},
+            'betiro':     {domain:'betiro.com',      promo:'500\u20ac + 400 FS',                 url:'https://betiro.com',          anj:false},
+            'likesbet':   {domain:'likes.bet',       promo:'100% jusqu\u2019\u00e0 300\u20ac',   url:'https://likes.bet',           anj:false},
+            'igobet':     {domain:'igo.bet',         promo:'Freebet jusqu\u2019\u00e0 300\u20ac', url:'https://igo.bet',            anj:false},
+            'pinnacle':   {domain:'pinnacle.com',    promo:'Meilleures cotes du march\u00e9',    url:'https://www.pinnacle.com',    anj:false},
+            'bet365':     {domain:'bet365.com',      promo:'100\u20ac bonus',                    url:'https://www.bet365.com',      anj:false},
+            'marathonbet':{domain:'marathonbet.com', promo:'Cotes imbattables',                  url:'https://www.marathonbet.com', anj:false},
+            'williamhill':{domain:'williamhill.com', promo:'30\u20ac bonus',                     url:'https://www.williamhill.com', anj:false},
+            '10bet':      {domain:'10bet.com',       promo:'50% jusqu\u2019\u00e0 50\u20ac',     url:'https://www.10bet.com',       anj:false},
+            'betfair':    {domain:'betfair.com',     promo:'Exchange \u2014 meilleures cotes',   url:'https://www.betfair.com',     anj:false},
+          };
+          function getBkInfo(name) {
+            var k = (name||'').toLowerCase().replace(/[^a-z0-9]/g,'');
+            var found = null;
+            Object.keys(BOOKIE_MAP).forEach(function(key) {
+              if (k.includes(key.replace(/[^a-z0-9]/g,''))) found = BOOKIE_MAP[key];
+            });
+            // Fallback intelligent : vrai favicon depuis le nom du bookmaker
+            if (!found) {
+              var cleanName = k.replace(/[^a-z0-9]/g,'');
+              found = {domain:cleanName+'.com', promo:'', url:'https://www.'+cleanName+'.com', anj:false};
+            }
+            return found;
+          }
           // ─── HTTP HELPERS ───────────────────────────────────────────────
           function get(url, headers) {
             return new Promise(function(resolve) {
@@ -73,7 +110,6 @@ jobs:
             });
           }
           function sleep(ms) { return new Promise(function(r){ setTimeout(r,ms); }); }
-
           // ─── API-SPORTS CALLS ───────────────────────────────────────────
           async function getFixtures() {
             var all = [];
@@ -94,6 +130,7 @@ jobs:
             );
             return r.response || null;
           }
+          // 10 derniers pour fatigue + tendances buts
           async function getLast10(teamId) {
             var r = await get(
               'https://v3.football.api-sports.io/fixtures?team='+teamId+'&last=10&status=FT&season='+SEASON,
@@ -110,7 +147,9 @@ jobs:
                        r.response[0].league.standings&&r.response[0].league.standings[0]) || [];
             return grp;
           }
+          // ─── ODDS — API-SPORTS avec fixture ID (zero matching issues) ──
           async function getOdds(fixtureId) {
+            // Essai 1 : tous les bookmakers disponibles
             var r = await get(
               'https://v3.football.api-sports.io/odds?fixture='+fixtureId,
               APS
@@ -118,72 +157,77 @@ jobs:
             if (r.response && r.response.length) return r.response[0];
             return null;
           }
-
-          // ─── PARSE ODDS — cotes réelles, 5 bookmakers FR fixes ─────────
           function parseOdds(o) {
             var empty = {c1:'--',cn:'--',c2:'--',co15:'--',co25:'--',cu25:'--',
                          dc1x:'--',dcx2:'--',btts_oui:'--',btts_non:'--',bookies:[]};
             if (!o || !o.bookmakers || !o.bookmakers.length) return empty;
-
             var c1='--',cn='--',c2='--',co15='--',co25='--',cu25='--';
             var dc1x='--',dcx2='--',btts_oui='--',btts_non='--';
-
-            // Extraire les meilleures cotes disponibles tous bookmakers confondus
+            var bookies = [];
             o.bookmakers.forEach(function(bk) {
+              var info = getBkInfo(bk.name);
+              var bkCote1='--', bkCoteN='--', bkCote2='--';
               (bk.bets||[]).forEach(function(bet) {
+                // 1X2
                 if (bet.name==='Match Winner'||bet.name==='Home/Draw/Away') {
                   var hm=(bet.values||[]).find(function(v){return v.value==='Home';});
                   var dr=(bet.values||[]).find(function(v){return v.value==='Draw';});
                   var aw=(bet.values||[]).find(function(v){return v.value==='Away';});
-                  // Garder les meilleures cotes (les plus favorables au parieur)
-                  if (hm&&(c1==='--'||parseFloat(hm.odd)>parseFloat(c1))) c1=parseFloat(hm.odd).toFixed(2);
-                  if (dr&&(cn==='--'||parseFloat(dr.odd)>parseFloat(cn))) cn=parseFloat(dr.odd).toFixed(2);
-                  if (aw&&(c2==='--'||parseFloat(aw.odd)>parseFloat(c2))) c2=parseFloat(aw.odd).toFixed(2);
+                  if (hm) bkCote1 = parseFloat(hm.odd).toFixed(2);
+                  if (dr) bkCoteN = parseFloat(dr.odd).toFixed(2);
+                  if (aw) bkCote2 = parseFloat(aw.odd).toFixed(2);
+                  if (c1==='--'&&hm) { c1=bkCote1; cn=bkCoteN; c2=bkCote2; }
                 }
+                // Over/Under
                 if (bet.name==='Goals Over/Under') {
                   (bet.values||[]).forEach(function(v) {
-                    if (v.value==='Over 1.5'  &&(co15==='--'||parseFloat(v.odd)>parseFloat(co15))) co15=parseFloat(v.odd).toFixed(2);
-                    if (v.value==='Over 2.5'  &&(co25==='--'||parseFloat(v.odd)>parseFloat(co25))) co25=parseFloat(v.odd).toFixed(2);
-                    if (v.value==='Under 2.5' &&(cu25==='--'||parseFloat(v.odd)>parseFloat(cu25))) cu25=parseFloat(v.odd).toFixed(2);
+                    if (v.value==='Over 1.5'  && co15==='--') co15 = parseFloat(v.odd).toFixed(2);
+                    if (v.value==='Over 2.5'  && co25==='--') co25 = parseFloat(v.odd).toFixed(2);
+                    if (v.value==='Under 2.5' && cu25==='--') cu25 = parseFloat(v.odd).toFixed(2);
                   });
                 }
+                // Double Chance
                 if (bet.name==='Double Chance') {
                   var d1x=(bet.values||[]).find(function(v){return v.value==='Home/Draw';});
                   var dx2=(bet.values||[]).find(function(v){return v.value==='Draw/Away';});
-                  if (d1x&&dc1x==='--') dc1x=parseFloat(d1x.odd).toFixed(2);
-                  if (dx2&&dcx2==='--') dcx2=parseFloat(dx2.odd).toFixed(2);
+                  if (d1x && dc1x==='--') dc1x = parseFloat(d1x.odd).toFixed(2);
+                  if (dx2 && dcx2==='--') dcx2 = parseFloat(dx2.odd).toFixed(2);
                 }
+                // BTTS
                 if (bet.name==='Both Teams Score') {
                   var by=(bet.values||[]).find(function(v){return v.value==='Yes';});
                   var bn=(bet.values||[]).find(function(v){return v.value==='No';});
-                  if (by&&btts_oui==='--') btts_oui=parseFloat(by.odd).toFixed(2);
-                  if (bn&&btts_non==='--') btts_non=parseFloat(bn.odd).toFixed(2);
+                  if (by && btts_oui==='--') btts_oui = parseFloat(by.odd).toFixed(2);
+                  if (bn && btts_non==='--') btts_non = parseFloat(bn.odd).toFixed(2);
                 }
               });
+              // Ajouter aux bookies avec logo et url
+              if (bkCote1!=='--' && bookies.length < 5) {
+                bookies.push({
+                  n:      bk.name,
+                  domain: info.domain,
+                  logo:   'https://www.google.com/s2/favicons?domain='+info.domain+'&sz=32',
+                  url:    info.url||'#',
+                  o:      info.promo,
+                  anj:    info.anj||false,
+                  c:      bkCote1,
+                  cn:     bkCoteN,
+                  c2:     bkCote2,
+                });
+              }
             });
-
-            // Appliquer les cotes réelles aux 5 bookmakers FR fixes
-            // Légère variation réaliste entre bookmakers (+/-0.03)
-            function vary(cote, delta) {
-              if (!cote||cote==='--') return '--';
-              return Math.max(1.01, parseFloat(cote)+delta).toFixed(2);
+            // Fallback si aucun bookmaker trouvé — mix ANJ + offshore
+            if (!bookies.length) {
+              bookies = [
+                {n:'Betclic', domain:'betclic.fr',  logo:'https://www.google.com/s2/favicons?domain=betclic.fr&sz=32',  url:'https://www.betclic.fr',  o:'200\u20ac offerts',                  anj:true,  c:c1,cn:cn,c2:c2},
+                {n:'Winamax', domain:'winamax.fr',  logo:'https://www.google.com/s2/favicons?domain=winamax.fr&sz=32',  url:'https://www.winamax.fr',  o:'100\u20ac offerts',                  anj:true,  c:c1,cn:cn,c2:c2},
+                {n:'Betify',  domain:'betify.com',  logo:'https://www.google.com/s2/favicons?domain=betify.com&sz=32',  url:'https://betify.com',      o:'50% jusqu\u2019\u00e0 200\u20ac', anj:false, c:c1,cn:cn,c2:c2},
+                {n:'22Bet',   domain:'22bet.com',   logo:'https://www.google.com/s2/favicons?domain=22bet.com&sz=32',   url:'https://22bet.com',       o:'122\u20ac bonus',                    anj:false, c:c1,cn:cn,c2:c2},
+                {n:'Unibet',  domain:'unibet.fr',   logo:'https://www.google.com/s2/favicons?domain=unibet.fr&sz=32',   url:'https://www.unibet.fr',   o:'100\u20ac rembours\u00e9s',         anj:true,  c:c1,cn:cn,c2:c2},
+              ];
             }
-            var deltas = [0, -0.03, -0.02, -0.05, +0.03]; // Betclic ref, variations réalistes
-            var bookies = FR_FIXED.map(function(bk, i) {
-              return {
-                n:   bk.n,
-                o:   bk.o,
-                l:   bk.url,
-                anj: bk.anj,
-                c:   vary(c1, deltas[i]),
-                cn:  vary(cn, deltas[i]),
-                c2:  vary(c2, deltas[i])
-              };
-            });
-
             return {c1,cn,c2,co15,co25,cu25,dc1x,dcx2,btts_oui,btts_non,bookies};
           }
-
           // ─── BLESSURES & SUSPENSIONS ────────────────────────────────────
           async function getInjuries(fixtureId) {
             var r = await get(
@@ -200,6 +244,7 @@ jobs:
               };
             });
           }
+          // ─── HEAD TO HEAD ────────────────────────────────────────────────
           async function getH2H(homeId, awayId) {
             var r = await get(
               'https://v3.football.api-sports.io/fixtures?h2h='+homeId+'-'+awayId+'&last=5',
@@ -207,6 +252,7 @@ jobs:
             );
             return r.response || [];
           }
+          // ─── MÉTÉO ───────────────────────────────────────────────────────
           async function getWeather(city) {
             if (!city||!city.trim()||!OWM_KEY) return null;
             var r = await get(
@@ -218,18 +264,19 @@ jobs:
             var desc = (r.weather&&r.weather[0]&&r.weather[0].description)||'';
             var temp = Math.round(r.main.temp);
             var emoji = '\ud83c\udf24\ufe0f';
-            if (icon==='Thunderstorm')               emoji='\u26c8\ufe0f';
-            else if(icon==='Rain'||icon==='Drizzle') emoji='\ud83c\udf27\ufe0f';
-            else if(icon==='Snow')                   emoji='\u2744\ufe0f';
-            else if(icon==='Clear')                  emoji='\u2600\ufe0f';
-            else if(icon==='Clouds')                 emoji='\u2601\ufe0f';
-            else if(icon==='Mist'||icon==='Fog')     emoji='\ud83c\udf2b\ufe0f';
+            if (icon==='Thunderstorm')         emoji='\u26c8\ufe0f';
+            else if (icon==='Rain'||icon==='Drizzle') emoji='\ud83c\udf27\ufe0f';
+            else if (icon==='Snow')            emoji='\u2744\ufe0f';
+            else if (icon==='Clear')           emoji='\u2600\ufe0f';
+            else if (icon==='Clouds')          emoji='\u2601\ufe0f';
+            else if (icon==='Mist'||icon==='Fog') emoji='\ud83c\udf2b\ufe0f';
             return {
               emoji, temp:temp+'\u00b0C', desc,
               wind: Math.round((r.wind&&r.wind.speed)||0)+' km/h',
               humidity: (r.main.humidity||0)+'%'
             };
           }
+          // ─── NEWS ────────────────────────────────────────────────────────
           async function getNews(team) {
             if (!NEWS_KEY) return [];
             var r = await get(
@@ -240,20 +287,20 @@ jobs:
               return {c:team, t:a.title||'', tx:a.description||'', tm:(a.publishedAt||'').split('T')[0]};
             });
           }
-
           // ─── HELPERS ─────────────────────────────────────────────────────
           function lgIcon(l) {
             var s=(l||'').toLowerCase();
-            if(s.includes('ligue 1'))      return '\uD83C\uDDEB\uD83C\uDDF7';
-            if(s.includes('la liga'))      return '\uD83C\uDDEA\uD83C\uDDF8';
-            if(s.includes('serie a'))      return '\uD83C\uDDEE\uD83C\uDDF9';
-            if(s.includes('bundesliga'))   return '\uD83C\uDDE9\uD83C\uDDEA';
-            if(s.includes('premier'))      return '\uD83C\uDFF4\uDB40\uDC67\uDB40\uDC62\uDB40\uDC65\uDB40\uDC6E\uDB40\uDC67\uDB40\uDC7F';
+            if(s.includes('ligue 1')) return '\uD83C\uDDEB\uD83C\uDDF7';
+            if(s.includes('la liga')) return '\uD83C\uDDEA\uD83C\uDDF8';
+            if(s.includes('serie a')) return '\uD83C\uDDEE\uD83C\uDDF9';
+            if(s.includes('bundesliga')) return '\uD83C\uDDE9\uD83C\uDDEA';
+            if(s.includes('premier league')) return '\uD83C\uDFF4\uDB40\uDC67\uDB40\uDC62\uDB40\uDC65\uDB40\uDC6E\uDB40\uDC67\uDB40\uDC7F';
             if(s.includes('championship')) return '\uD83C\uDFF4\uDB40\uDC67\uDB40\uDC62\uDB40\uDC65\uDB40\uDC6E\uDB40\uDC67\uDB40\uDC7F';
-            if(s.includes('champions'))    return '\uD83C\uDFC6';
+            if(s.includes('champions')) return '\uD83C\uDFC6';
             return '\uD83C\uDFC6';
           }
           function lgKey(lgId) { return LG_KEY[lgId]||'other'; }
+          // Formate last 10 pour form_home / form_away
           function formatLast10(fixtures, teamId) {
             return fixtures.slice(0,10).map(function(f) {
               var isH = f.teams.home.id===teamId;
@@ -263,14 +310,19 @@ jobs:
               var oppId = isH?f.teams.away.id:f.teams.home.id;
               var res = gf>ga?'W':gf<ga?'L':'D';
               return {
-                d:(f.fixture.date||'').split('T')[0],
-                opponent:opp, opp_id:oppId,
-                score:gf+'-'+ga, result:res,
-                home:isH, match:opp, lieu:isH?'DOM':'EXT',
-                date_full:f.fixture.date||''
+                d:       (f.fixture.date||'').split('T')[0],
+                opponent: opp,
+                opp_id:  oppId,
+                score:   gf+'-'+ga,
+                result:  res,
+                home:    isH,
+                match:   opp,
+                lieu:    isH?'DOM':'EXT',
+                date_full: f.fixture.date||''
               };
             });
           }
+          // ─── FATIGUE CALCULÉ ─────────────────────────────────────────────
           function calcFatigue(last10, teamName) {
             if (!last10||!last10.length) return {val:40, info:'Calendrier inconnu'};
             var now = new Date();
@@ -280,6 +332,7 @@ jobs:
               var d = new Date(m.date_full||m.d);
               return (now-d)/(1000*60*60*24) <= 14;
             }).length;
+            // Score fatigue : 0=frais, 100=épuisé
             var score = 0;
             if (daysSince<=2)  score=90;
             else if(daysSince<=4) score=70;
@@ -288,15 +341,20 @@ jobs:
             else score=15;
             if (matchesIn14>=3) score = Math.min(100,score+20);
             var info = daysSince<=7
-              ? 'Dernier match il y a '+daysSince+'j \u2014 '+matchesIn14+' match(s) en 14j'
+              ? 'Dernier match il y a '+daysSince+'j — '+matchesIn14+' match(s) en 14j'
               : 'Repos '+daysSince+' jours';
             return {val:Math.round(score), info:info};
           }
+          // ─── TENDANCES BUTS ──────────────────────────────────────────────
           function calcTendances(last10Home, last10Away, homeId, awayId) {
-            function countOver25(games) {
+            // Over 2.5 sur les 10 derniers de chaque équipe
+            function countOver25(games, tid) {
               return games.filter(function(g){
-                var parts=(g.score||'').split('-');
-                return parseInt(parts[0]||0)+parseInt(parts[1]||0)>2;
+                var isH = g.home;
+                // On utilise le score formaté "2-1"
+                var parts = (g.score||'').split('-');
+                var total = parseInt(parts[0]||0)+parseInt(parts[1]||0);
+                return total>2;
               }).length;
             }
             function countBTTS(games) {
@@ -305,21 +363,31 @@ jobs:
                 return parseInt(parts[0]||0)>0 && parseInt(parts[1]||0)>0;
               }).length;
             }
-            function countCS(games) {
+            function countCS(games) { // clean sheets à domicile
               return games.filter(function(g){
                 var parts=(g.score||'').split('-');
                 if(g.home) return parseInt(parts[1]||0)===0;
                 return parseInt(parts[0]||0)===0;
               }).length;
             }
-            var o25H=countOver25(last10Home), o25A=countOver25(last10Away);
-            var bttsH=countBTTS(last10Home), bttsA=countBTTS(last10Away);
-            var csH=countCS(last10Home.filter(function(g){return g.home===true;}));
+            var o25H = countOver25(last10Home, homeId);
+            var o25A = countOver25(last10Away, awayId);
+            var bttsH = countBTTS(last10Home);
+            var bttsA = countBTTS(last10Away);
+            var csH = countCS(last10Home.filter(function(g){return g.home===true;}));
             return {
-              over25_home:o25H, over25_away:o25A,
-              btts_home:bttsH, btts_away:bttsA, cs_home:csH,
+              over25_home: o25H,
+              over25_away: o25A,
+              over25_home_txt: o25H+'/10 matchs de '+
+                (last10Home[0]?last10Home[0].match:'?')+' termin\u00e9s Over 2.5',
+              over25_away_txt: o25A+'/10 matchs termin\u00e9s Over 2.5',
+              btts_home: bttsH,
+              btts_away: bttsA,
+              cs_home: csH,
+              cs_home_txt: csH+' clean sheets sur les derniers matchs \u00e0 domicile'
             };
           }
+          // ─── CRITÈRES RADAR ──────────────────────────────────────────────
           function calcCriteres(stats, isDom, rank) {
             if (!stats) return {fd:50,att:50,def:50,fr:50,mot:70,fat:50};
             var total=(stats.fixtures&&stats.fixtures.played&&stats.fixtures.played.total)||30;
@@ -338,267 +406,480 @@ jobs:
             var mot=70;
             if(rank){if(rank<=3)mot=95;else if(rank<=6)mot=85;else if(rank<=10)mot=70;else if(rank>=17)mot=90;else mot=60;}
             return {
-              fd:Math.max(0,Math.min(100,fd)), att:Math.max(0,Math.min(100,att)),
-              def:Math.max(0,Math.min(100,def)), fr:Math.max(0,Math.min(100,fr)),
-              mot:Math.max(0,Math.min(100,mot)), fat:50
+              fd:Math.max(0,Math.min(100,fd)),
+              att:Math.max(0,Math.min(100,att)),
+              def:Math.max(0,Math.min(100,def)),
+              fr:Math.max(0,Math.min(100,fr)),
+              mot:Math.max(0,Math.min(100,mot)),
+              fat:50
             };
           }
-
           // ─── CLAUDE ANALYSE ─────────────────────────────────────────────
           async function genAnalyse(d) {
-            var moyBmH=d.bmH&&d.totalH?(d.bmH/d.totalH).toFixed(2):'?';
-            var moyBeH=d.beH&&d.totalH?(d.beH/d.totalH).toFixed(2):'?';
-            var moyBmA=d.bmA&&d.totalA?(d.bmA/d.totalA).toFixed(2):'?';
-            var moyBeA=d.beA&&d.totalA?(d.beA/d.totalA).toFixed(2):'?';
-            var pi1=(d.c1&&d.c1!=='--')?Math.round(100/parseFloat(d.c1)):'?';
-            var piN=(d.cn&&d.cn!=='--')?Math.round(100/parseFloat(d.cn)):'?';
-            var pi2=(d.c2&&d.c2!=='--')?Math.round(100/parseFloat(d.c2)):'?';
-            var pio25=(d.co25&&d.co25!=='--')?Math.round(100/parseFloat(d.co25)):'?';
-            var pibtts=(d.btts_oui&&d.btts_oui!=='--')?Math.round(100/parseFloat(d.btts_oui)):'?';
-            var injStr='Aucune blessure majeure.';
-            if(d.injuries&&d.injuries.length){
-              var injHome=d.injuries.filter(function(x){return x.team===d.homeId;});
-              var injAway=d.injuries.filter(function(x){return x.team===d.awayId;});
-              injStr='';
-              if(injHome.length) injStr+=d.home+' absents: '+injHome.map(function(x){return x.name;}).join(', ')+'. ';
-              if(injAway.length) injStr+=d.away+' absents: '+injAway.map(function(x){return x.name;}).join(', ')+'. ';
-              if(!injStr) injStr='Aucune absence majeure.';
+            var moyBmH = d.bmH&&d.totalH?(d.bmH/d.totalH).toFixed(2):'?';
+            var moyBeH = d.beH&&d.totalH?(d.beH/d.totalH).toFixed(2):'?';
+            var moyBmA = d.bmA&&d.totalA?(d.bmA/d.totalA).toFixed(2):'?';
+            var moyBeA = d.beA&&d.totalA?(d.beA/d.totalA).toFixed(2):'?';
+            var totalButs = ((+moyBmH + +moyBeA)/2 + (+moyBmA + +moyBeH)/2).toFixed(2);
+            // Probabilités implicites depuis les cotes réelles
+            var pi1 = (d.c1&&d.c1!=='--') ? Math.round(100/parseFloat(d.c1)) : '?';
+            var piN = (d.cn&&d.cn!=='--') ? Math.round(100/parseFloat(d.cn)) : '?';
+            var pi2 = (d.c2&&d.c2!=='--') ? Math.round(100/parseFloat(d.c2)) : '?';
+            var pio25 = (d.co25&&d.co25!=='--') ? Math.round(100/parseFloat(d.co25)) : '?';
+            var pibtts = (d.btts_oui&&d.btts_oui!=='--') ? Math.round(100/parseFloat(d.btts_oui)) : '?';
+            // Résumé injuries
+            var injStr = 'Aucune blessure majeure signal\u00e9e.';
+            if (d.injuries && d.injuries.length) {
+              var injHome = d.injuries.filter(function(x){return x.team===d.homeId;});
+              var injAway = d.injuries.filter(function(x){return x.team===d.awayId;});
+              injStr = '';
+              if (injHome.length) injStr += d.home+' absents: '+injHome.map(function(x){return x.name+' ('+x.reason+')';}).join(', ')+'. ';
+              if (injAway.length) injStr += d.away+' absents: '+injAway.map(function(x){return x.name+' ('+x.reason+')';}).join(', ')+'. ';
+              if (!injStr) injStr = 'Aucune absence majeure.';
             }
-            var h2hStr='H2H indisponible.';
-            if(d.h2h&&d.h2h.length){
+            // H2H résumé
+            var h2hStr = 'Historique indisponible.';
+            if (d.h2h && d.h2h.length) {
               var w1=0,wN=0,w2=0;
               d.h2h.forEach(function(g){
                 var isH=g.teams.home.id===d.homeId;
-                var gfH=g.goals.home||0,gfA=g.goals.away||0;
+                var gfH=g.goals.home||0, gfA=g.goals.away||0;
                 if(gfH>gfA) isH?w1++:w2++;
                 else if(gfH<gfA) isH?w2++:w1++;
                 else wN++;
               });
-              h2hStr='5 derniers H2H: '+d.home+' '+w1+'V/'+wN+'N/'+w2+'D.';
+              h2hStr = 'Sur les 5 derniers H2H: '+d.home+' '+w1+'V / '+wN+'N / '+w2+'D pour '+d.away+'.';
             }
-            var prompt=
-              'Tu es IASHARK, IA experte paris sportifs. Analyse ce match pour BATTRE les bookmakers. Reponds UNIQUEMENT avec JSON valide, sans backtick.\n\n'
-              +'MATCH: '+d.home+' vs '+d.away+' | '+d.league+' | '+d.date+'\n'
+            var prompt =
+              'Tu es IASHARK, IA experte en paris sportifs. Analyse ce match avec une precision chirurgicale pour BATTRE les bookmakers. Reponds UNIQUEMENT avec un JSON valide, sans backtick, sans commentaire.\n\n'
+              +'=== MATCH ===\n'
+              +d.home+' vs '+d.away+' | '+d.league+' | '+d.date+'\n'
               +'Stade: '+d.stade+' | Meteo: '+d.meteo+'\n\n'
-              +d.home+' (#'+( d.rkH||'?')+' classement): '+d.totalH+' matchs, '+d.bmH+' buts marques ('+moyBmH+'/m), '+d.beH+' encaisses ('+moyBeH+'/m), Victoires dom: '+d.vdH+'/'+d.mdH+', Forme: '+d.fH+'\n'
-              +'10 derniers: '+d.d10H+'\n\n'
-              +d.away+' (#'+(d.rkA||'?')+'): '+d.totalA+' matchs, '+d.bmA+' buts ('+moyBmA+'/m), '+d.beA+' encaisses ('+moyBeA+'/m), Victoires ext: '+d.veA+'/'+d.meA+', Forme: '+d.fA+'\n'
-              +'10 derniers: '+d.d10A+'\n\n'
-              +'Over2.5: '+d.o25H+'/10 (dom) | '+d.o25A+'/10 (ext) | BTTS: '+d.bttsH+'/10 | '+d.bttsA+'/10\n'
-              +h2hStr+'\n'
-              +injStr+'\n'
-              +'Fatigue: '+d.home+': '+d.fatH+' | '+d.away+': '+d.fatA+'\n\n'
-              +'COTES REELLES:\n'
-              +'1:'+d.c1+'(impl.'+pi1+'%) N:'+d.cn+'('+piN+'%) 2:'+d.c2+'('+pi2+'%)\n'
-              +'O1.5:'+d.co15+' O2.5:'+d.co25+'('+pio25+'%) U2.5:'+d.cu25+'\n'
-              +'1X:'+d.dc1x+' X2:'+d.dcx2+' BTTS:'+d.btts_oui+'('+pibtts+'%)\n\n'
-              +'REGLE: argument = 3 phrases COURTES max 12 mots chacune avec chiffre cle. Pas de blabla.\n\n'
-              +'{"confiance":7.4,"pari_rec":"[meilleur pari]","marche":"[RESULTAT|DOUBLE_CHANCE|TOTAL_BUTS|BTTS|COMBINE]","risque":"[FAIBLE|MODERE|ELEVE]","vbet":"[OUI|NON]","edge":"[+X%]","argument":"1. [stat courte]. 2. [stat courte]. 3. [edge court].","analyse_card":"[2-3 phrases fluides, stats incluses, conclure avec le pari]","conseil":"[3-4 phrases analyse complete]","contexte":"[2-3 phrases importance match]","enjeux":"[1 phrase enjeux]","scores_probables":"1-0,2-1,1-1","p1":0,"pn":0,"p2":0,"po15":0,"po25":0,"btts":0,"mise":"2-3% bankroll","paris_3":{"safe":{"bet":"","cote":"","hint":"","mise":"4-5% bankroll","bookie":"Betclic"},"valeur":{"bet":"","cote":"","hint":"","mise":"2-3% bankroll","bookie":"Winamax"},"specu":{"bet":"","cote":"","hint":"","mise":"0.5-1% bankroll","bookie":"Unibet"}}}';
-            var r=await postJSON('api.anthropic.com','/v1/messages',{
-              model:'claude-haiku-4-5-20251001',
-              max_tokens:1400,
-              messages:[{role:'user',content:prompt}]
-            },{'x-api-key':ANT_KEY,'anthropic-version':'2023-06-01'});
-            var txt=(r.content&&r.content[0]&&r.content[0].text)||'{}';
-            try{return JSON.parse(txt.replace(/```json|```/g,'').trim());}
-            catch(e){console.log('Parse error:',txt.slice(0,200));return null;}
+              +'=== '+d.home.toUpperCase()+' — DOMICILE (classement #'+(d.rkH||'?')+') ===\n'
+              +'Matchs: '+d.totalH+' | Buts marques: '+d.bmH+' ('+moyBmH+'/match) | Buts encaisses: '+d.beH+' ('+moyBeH+'/match)\n'
+              +'Victoires dom: '+d.vdH+'/'+d.mdH+' | Forme saison: '+d.fH+'\n'
+              +'10 derniers matchs: '+d.d10H+'\n\n'
+              +'=== '+d.away.toUpperCase()+' — EXTERIEUR (classement #'+(d.rkA||'?')+') ===\n'
+              +'Matchs: '+d.totalA+' | Buts marques: '+d.bmA+' ('+moyBmA+'/match) | Buts encaisses: '+d.beA+' ('+moyBeA+'/match)\n'
+              +'Victoires ext: '+d.veA+'/'+d.meA+' | Forme saison: '+d.fA+'\n'
+              +'10 derniers matchs: '+d.d10A+'\n\n'
+              +'=== TENDANCES BUTS ===\n'
+              +'Over 2.5 dom ('+d.home+'): '+d.o25H+'/10 matchs\n'
+              +'Over 2.5 ext ('+d.away+'): '+d.o25A+'/10 matchs\n'
+              +'BTTS dom: '+d.bttsH+'/10 | BTTS ext: '+d.bttsA+'/10\n'
+              +'Moyenne buts attendus: '+totalButs+' buts/match\n\n'
+              +'=== HEAD TO HEAD ===\n'
+              +h2hStr+'\n\n'
+              +'=== BLESSURES & SUSPENSIONS ===\n'
+              +injStr+'\n\n'
+              +'=== FATIGUE ===\n'
+              +d.home+': '+d.fatH+' (score fatigue '+d.fatScoreH+'/100)\n'
+              +d.away+': '+d.fatA+' (score fatigue '+d.fatScoreA+'/100)\n\n'
+              +'=== COTES REELLES BOOKMAKERS (utilise ces cotes exactes) ===\n'
+              +'1 (Victoire '+d.home+'): '+d.c1+' — prob. implicite: '+pi1+'%\n'
+              +'N (Nul): '+d.cn+' — prob. implicite: '+piN+'%\n'
+              +'2 (Victoire '+d.away+'): '+d.c2+' — prob. implicite: '+pi2+'%\n'
+              +'Over 1.5: '+d.co15+' | Over 2.5: '+d.co25+' (impl. '+pio25+'%) | Under 2.5: '+d.cu25+'\n'
+              +'Double Chance 1X: '+d.dc1x+' | X2: '+d.dcx2+'\n'
+              +'BTTS Oui: '+d.btts_oui+' (impl. '+pibtts+'%) | BTTS Non: '+d.btts_non+'\n\n'
+              +'=== MARCHES DISPONIBLES ===\n'
+              +'1. Resultat 1X2 | 2. Double chance 1X/X2/12 | 3. Over/Under 0.5/1.5/2.5/3.5\n'
+              +'4. BTTS Oui/Non | 5. Combines (Victoire+Over, 1X+Over, etc.)\n\n'
+              +'=== METHODE DE DECISION — ORDRE DE PRIORITE ===\n'
+              +'ETAPE 1 — Trouve le marche avec le plus grand edge reel:\n'
+              +'  → Compare ta probabilite estimee (basee sur toutes les stats) avec la prob. implicite de chaque cote\n'
+              +'  → Edge = prob. estimee - prob. implicite. Le marche avec le plus grand edge positif = ton pari\n'
+              +'  → Tout marche peut gagner: 1, N, 2, 1X, X2, 12, Over/Under, BTTS, Combine\n\n'
+              +'ETAPE 2 — Valide par les stats:\n'
+              +'  → Victoire dom: si dom gagne >55% de ses matchs a domicile ET equipe ext faible ext\n'
+              +'  → Nul: si les deux equipes ont des styles defensifs, H2H souvent nuls, enjeux limites\n'
+              +'  → Under 2.5: si les deux defenses solides (<1 but encaisse/match) ET faibles attaques\n'
+              +'  → Over 2.5: si les deux attaques prolifiques (>1.5 but/match) ET defenses poreuses\n'
+              +'  → BTTS: si les DEUX equipes marquent dans >55% de leurs matchs respectifs\n'
+              +'  → Double chance: si une equipe est favorite mais cote 1 trop basse (faible edge)\n'
+              +'  → Combine: uniquement si les deux paris sont independants ET chacun avec edge positif\n\n'
+              +'ETAPE 3 — Rejette si:\n'
+              +'  → Les stats ne supportent pas le pari (ne force rien)\n'
+              +'  → La cote implicite est deja proche de ta probabilite estimee (edge < 3%)\n'
+              +'  → Blessures majeures non encore pricees par le bookmaker dans le bon sens\n\n'
+              +'ETAPE 4 — Quantifie le risque:\n'
+              +'  → FAIBLE: prob. estimee > 65%, stats convergentes, faible variance\n'
+              +'  → MODERE: prob. estimee 50-65%, quelques facteurs incertains\n'
+              +'  → ELEVE: prob. < 50% mais edge important (value sur cote haute), ou facteurs volatils\n\n'
+              +'=== FORMAT REPONSE OBLIGATOIRE — JSON STRICT ===\n'
+              +'IMPORTANT: Les exemples ci-dessous sont des STRUCTURES, pas des suggestions de paris. Choisis le VRAI meilleur pari selon les donnees ci-dessus.\n\n'
+              +'{\n'
+              +'  "confiance": 7.4,\n'
+              +'  "pari_rec": "[LE MEILLEUR PARI SELON LES STATS — peut etre 1, N, 2, 1X, X2, Over, Under, BTTS, Combine...]",\n'
+              +'  "marche": "[RESULTAT | DOUBLE_CHANCE | TOTAL_BUTS | BTTS | COMBINE]",\n'
+              +'  "risque": "[FAIBLE | MODERE | ELEVE]",\n'
+              +'  "vbet": "[OUI si edge reel > +4% sinon NON]",\n'
+              +'  "edge": "[+X% ou -X% calcule depuis prob. IA vs prob. implicite]",\n'
+              +'  "argument": "1. [Argument chiffre specifique a CE match et CE pari]. 2. [Deuxieme argument avec stat concrete]. 3. [Edge exact: cote X implique Y% mais tu estimes Z%].",\n'
+              +'  "analyse_card": "[2-3 phrases fluides qui se lisent comme un article: commencer par le contexte, inclure les stats cles, conclure avec le pari et pourquoi il bat le bookmaker. Pas de liste, vraie phrase.]",\n'
+              +'  "conseil": "[Analyse complete 3-4 phrases. Stats exactes. Pourquoi ce pari gagne. Risques identifies.]",\n'
+              +'  "contexte": "[2-3 phrases: importance du match, dynamique, serie en cours, pression sportive.]",\n'
+              +'  "enjeux": "[1 phrase: lutte titre / maintien / Europe / coupe / rien a jouer.]",\n'
+              +'  "scores_probables": "[3-5 scores les plus probables selon les stats, separees par virgule]",\n'
+              +'  "p1": 0, "pn": 0, "p2": 0,\n'
+              +'  "po15": 0, "po25": 0, "btts": 0,\n'
+              +'  "mise": "[1% a 5% bankroll selon confiance]",\n'
+              +'  "paris_3": {\n'
+              +'    "safe":   {"bet":"[Pari le plus sur, cote basse, prob elevee]",    "cote":"[cote reelle fournie]", "hint":"[raison chiffree]", "mise":"4-5% bankroll", "bookie":"[bookmaker avec meilleure cote]"},\n'
+              +'    "valeur": {"bet":"[Le VALUE BET identifie, meilleur rapport edge/cote]", "cote":"[cote reelle fournie]", "hint":"[edge calcule precisement]",   "mise":"2-3% bankroll", "bookie":"[bookmaker avec meilleure cote]"},\n'
+              +'    "specu":  {"bet":"[Pari audacieux coherent avec les stats, cote haute]",   "cote":"[cote reelle ou estimee]",  "hint":"[justification courte]",   "mise":"0.5-1% bankroll", "bookie":"[bookmaker]"}\n'
+              +'  }\n'
+              +'}\n\n'
+              +'CONTRAINTES STRICTES:\n'
+              +'- confiance: decimal 1.0-10.0 AJUSTE AU PARI RECOMMANDE specifiquement (pas une note generale du match)\n'
+              +'- p1+pn+p2 = 100 exactement\n'
+              +'- vbet = "OUI" uniquement si edge reel > +4%\n'
+              +'- risque: exactement "FAIBLE", "MODERE" ou "ELEVE"\n'
+              +'- argument: 3 points numerotes avec chiffres concrets issus des donnees ci-dessus\n'
+              +'- analyse_card: phrase complete 2-3 lignes, vocabulaire pro, chiffres inclus\n'
+              +'- paris_3.safe.cote et valeur.cote doivent venir des cotes reelles fournies\n'
+              +'- mise: entre 1% et 5% bankroll selon confiance';
+            var r = await postJSON('api.anthropic.com', '/v1/messages', {
+              model: 'claude-haiku-4-5-20251001',
+              max_tokens: 1400,
+              messages: [{role:'user', content:prompt}]
+            }, {'x-api-key':ANT_KEY, 'anthropic-version':'2023-06-01'});
+            var txt = (r.content&&r.content[0]&&r.content[0].text)||'{}';
+            try { return JSON.parse(txt.replace(/```json|```/g,'').trim()); }
+            catch(e) { console.log('Parse error:', txt.slice(0,200)); return null; }
           }
-
           // ─── GENERER COMBINÉS ────────────────────────────────────────────
           async function genCombis(list) {
-            if(list.length<2) return [];
-            var lines=list.map(function(a){
-              return '- '+a.home+' vs '+a.away+': '+a.pari+' (conf '+a.conf+'/10, edge '+(a.edge||'?')+')';
+            if (list.length < 2) return [];
+            var lines = list.map(function(a){
+              return '- '+a.home+' vs '+a.away+': '+a.pari+' (confiance '+a.conf+'/10, edge '+(a.edge||'?')+')';
             }).join('\n');
-            var prompt='Expert paris IASHARK. Analyses:\n'+lines+'\n\nGenere 3 combines (confiance >= 7.0 uniquement). JSON sans backticks:\n{"c1":{"label":"SHARK SAFE","type":"safe","selections":"pari1, pari2","matchs":"match1, match2","cote_totale":"2.1","conseil":"Court et percutant"},"c2":{"label":"SHARK VALUE","type":"value","selections":"...","matchs":"...","cote_totale":"3.8","conseil":"..."},"c3":{"label":"SHARK AUDACE","type":"audace","selections":"...","matchs":"...","cote_totale":"7.2","conseil":"..."}}';
-            var r=await postJSON('api.anthropic.com','/v1/messages',{
-              model:'claude-haiku-4-5-20251001',
-              max_tokens:600,
-              messages:[{role:'user',content:prompt}]
-            },{'x-api-key':ANT_KEY,'anthropic-version':'2023-06-01'});
-            var txt=(r.content&&r.content[0]&&r.content[0].text)||'{}';
-            try{
-              var obj=JSON.parse(txt.replace(/```json|```/g,'').trim());
+            var prompt =
+              'Expert paris sportifs IASHARK. Analyses du jour:\n'+lines+'\n\n'
+              +'Genere 3 combines intelligents en combinant uniquement les paris confiance >= 7.0. '
+              +'Reponds UNIQUEMENT avec ce JSON sans backticks:\n'
+              +'{"c1":{"label":"SHARK SAFE","type":"safe","selections":"pari1, pari2","matchs":"match1, match2","cote_totale":"2.1","conseil":"Court et percutant"},'
+              +'"c2":{"label":"SHARK VALUE","type":"value","selections":"pari1, pari2, pari3","matchs":"m1, m2, m3","cote_totale":"3.8","conseil":"..."},'
+              +'"c3":{"label":"SHARK AUDACE","type":"audace","selections":"pari1, pari2, pari3","matchs":"m1, m2, m3","cote_totale":"7.2","conseil":"..."}}';
+            var r = await postJSON('api.anthropic.com', '/v1/messages', {
+              model: 'claude-haiku-4-5-20251001',
+              max_tokens: 600,
+              messages: [{role:'user', content:prompt}]
+            }, {'x-api-key':ANT_KEY, 'anthropic-version':'2023-06-01'});
+            var txt = (r.content&&r.content[0]&&r.content[0].text)||'{}';
+            try {
+              var obj = JSON.parse(txt.replace(/```json|```/g,'').trim());
               return Object.values(obj).filter(Boolean).map(function(c){
-                return{label:c.label||'COMBIN\u00c9',type:c.type||'safe',selections:c.selections||'',matchs:c.matchs||'',cote_totale:c.cote_totale||'',conseil:c.conseil||''};
+                return {
+                  label: c.label||'COMBIN\u00c9',
+                  type: c.type||'safe',
+                  selections: c.selections||'',
+                  matchs: c.matchs||'',
+                  cote_totale: c.cote_totale||'',
+                  conseil: c.conseil||''
+                };
               });
-            }catch(e){return[];}
+            } catch(e) { return []; }
           }
-
           // ─── FORMAT H2H ──────────────────────────────────────────────────
           function formatH2H(fixtures, homeId, awayId) {
             return fixtures.slice(0,5).map(function(f) {
-              var gfH=f.goals.home||0,gfA=f.goals.away||0;
-              var isH=f.teams.home.id===homeId;
+              var gfH=f.goals.home||0, gfA=f.goals.away||0;
+              var isH = f.teams.home.id===homeId;
               var w;
               if(gfH>gfA) w=isH?'1':'2';
               else if(gfH<gfA) w=isH?'2':'1';
               else w='N';
-              return{d:(f.fixture.date||'').split('T')[0],home:f.teams.home.name,away:f.teams.away.name,s:gfH+'-'+gfA,w:w};
+              return {
+                d:    (f.fixture.date||'').split('T')[0],
+                home: f.teams.home.name,
+                away: f.teams.away.name,
+                s:    gfH+'-'+gfA,
+                w:    w
+              };
             });
           }
-
           // ─── MAIN ────────────────────────────────────────────────────────
           async function main() {
             console.log('=== IASHARK', TODAY, '===');
-            var fixtures=await getFixtures();
-            console.log('Fixtures:', fixtures.length);
-            if(!fixtures.length){
-              fs.writeFileSync('data.json',JSON.stringify({matchs:[],combis:[]},null,2));
+            var fixtures = await getFixtures();
+            console.log('Fixtures trouves:', fixtures.length);
+            if (!fixtures.length) {
+              fs.writeFileSync('data.json', JSON.stringify({matchs:[],combis:[]},null,2));
               return;
             }
-            var matchsData=[],forCombis=[],standingsCache={};
-            for(var fi=0;fi<fixtures.length;fi++){
-              var fix=fixtures[fi],f=fix.fixture,lg=fix.league,home=fix.teams.home,away=fix.teams.away;
+            var matchsData = [];
+            var forCombis  = [];
+            var standingsCache = {};
+            for (var fi=0; fi<fixtures.length; fi++) {
+              var fix  = fixtures[fi];
+              var f    = fix.fixture;
+              var lg   = fix.league;
+              var home = fix.teams.home;
+              var away = fix.teams.away;
               console.log('\n-> '+home.name+' vs '+away.name+' ('+lg.name+')');
-              if(!standingsCache[lg.id]){standingsCache[lg.id]=await getFullStanding(lg.id);await sleep(250);}
-              var standings=standingsCache[lg.id];
-              var entryH=standings.find(function(s){return s.team.id===home.id;});
-              var entryA=standings.find(function(s){return s.team.id===away.id;});
-              var rkH=entryH?entryH.rank:null,rkA=entryA?entryA.rank:null;
-              var batch1=await Promise.all([
-                getTeamStats(home.id,lg.id),getTeamStats(away.id,lg.id),
-                getLast10(home.id),getLast10(away.id),
+              // Classement (cache par ligue)
+              if (!standingsCache[lg.id]) {
+                standingsCache[lg.id] = await getFullStanding(lg.id);
+                await sleep(250);
+              }
+              var standings = standingsCache[lg.id];
+              var entryH = standings.find(function(s){return s.team.id===home.id;});
+              var entryA = standings.find(function(s){return s.team.id===away.id;});
+              var rkH = entryH?entryH.rank:null;
+              var rkA = entryA?entryA.rank:null;
+              // Appels parallèles groupés
+              var batch1 = await Promise.all([
+                getTeamStats(home.id, lg.id),
+                getTeamStats(away.id, lg.id),
+                getLast10(home.id),
+                getLast10(away.id),
               ]);
               await sleep(400);
-              var batch2=await Promise.all([
-                getOdds(f.id),getInjuries(f.id),getH2H(home.id,away.id),
+              var batch2 = await Promise.all([
+                getOdds(f.id),
+                getInjuries(f.id),
+                getH2H(home.id, away.id),
                 getWeather(f.venue&&f.venue.city?f.venue.city:''),
-                getNews(home.name),getNews(away.name),
+                getNews(home.name),
+                getNews(away.name),
               ]);
               await sleep(400);
-              var sH=batch1[0],sA=batch1[1],raw10H=batch1[2],raw10A=batch1[3];
-              var oddsRaw=batch2[0],injRaw=batch2[1],h2hRaw=batch2[2],wx=batch2[3],nH=batch2[4],nA=batch2[5];
-              var last10H=formatLast10(raw10H,home.id);
-              var last10A=formatLast10(raw10A,away.id);
-              var odds=parseOdds(oddsRaw);
-              var critH=calcCriteres(sH,true,rkH);
-              var critA=calcCriteres(sA,false,rkA);
-              var fatigueH=calcFatigue(last10H,home.name);
-              var fatigueA=calcFatigue(last10A,away.name);
-              var tendances=calcTendances(last10H,last10A,home.id,away.id);
-              var injuries=(injRaw||[]).map(function(inj){
-                return{name:inj.name,team:inj.team===home.id?'home':'away',reason:inj.reason||'Blessure',
-                  status:(inj.status||'').toLowerCase().includes('suspend')?'suspended':(inj.status||'').toLowerCase().includes('doubt')?'doubt':'out',impact:'medium'};
+              var sH=batch1[0], sA=batch1[1];
+              var raw10H=batch1[2], raw10A=batch1[3];
+              var oddsRaw=batch2[0], injRaw=batch2[1], h2hRaw=batch2[2];
+              var wx=batch2[3], nH=batch2[4], nA=batch2[5];
+              // Formatage données
+              var last10H = formatLast10(raw10H, home.id);
+              var last10A = formatLast10(raw10A, away.id);
+              var odds    = parseOdds(oddsRaw);
+              var critH   = calcCriteres(sH, true,  rkH);
+              var critA   = calcCriteres(sA, false, rkA);
+              var fatigueH = calcFatigue(last10H, home.name);
+              var fatigueA = calcFatigue(last10A, away.name);
+              var tendances = calcTendances(last10H, last10A, home.id, away.id);
+              // Injuries avec team id
+              var injuries = (injRaw||[]).map(function(inj){
+                return {
+                  name:   inj.name,
+                  team:   inj.team===home.id?'home':'away',
+                  reason: inj.reason||'Blessure',
+                  status: (inj.status||'out').toLowerCase().includes('suspend')?'suspended':
+                           (inj.status||'').toLowerCase().includes('doubt')?'doubt':'out',
+                  impact: 'medium'
+                };
               });
-              var h2hFormatted=formatH2H(h2hRaw,home.id,away.id);
+              // H2H formaté
+              var h2hFormatted = formatH2H(h2hRaw, home.id, away.id);
+              // Stats pour le prompt
               var totalH=(sH&&sH.fixtures&&sH.fixtures.played&&sH.fixtures.played.total)||30;
               var totalA=(sA&&sA.fixtures&&sA.fixtures.played&&sA.fixtures.played.total)||30;
               var mdH=(sH&&sH.fixtures&&sH.fixtures.played&&sH.fixtures.played.home)||Math.round(totalH/2);
               var meA=(sA&&sA.fixtures&&sA.fixtures.played&&sA.fixtures.played.away)||Math.round(totalA/2);
-              var d10Hstr=last10H.slice(0,5).map(function(m){return m.result+' '+m.score+' vs '+m.match+' ('+m.lieu+')';}).join(' | ')||'N/A';
-              var d10Astr=last10A.slice(0,5).map(function(m){return m.result+' '+m.score+' vs '+m.match+' ('+m.lieu+')';}).join(' | ')||'N/A';
-              var heure=(f.date||'').split('T')[1]?(f.date||'').split('T')[1].slice(0,5):'';
-              var meteoStr=wx?wx.desc+' '+wx.emoji+' '+wx.temp+' | Vent: '+wx.wind:'N/A';
-              var an=await genAnalyse({
-                home:home.name,away:away.name,homeId:home.id,awayId:away.id,
-                league:lg.name,date:TODAY+' '+heure,stade:(f.venue&&f.venue.name)||'',meteo:meteoStr,
-                fH:(sH&&sH.form)||'',fA:(sA&&sA.form)||'',rkH,rkA,totalH,totalA,mdH,meA,
+              var d10Hstr = last10H.slice(0,5).map(function(m){
+                return m.result+' '+m.score+' vs '+m.match+' ('+m.lieu+')';
+              }).join(' | ')||'N/A';
+              var d10Astr = last10A.slice(0,5).map(function(m){
+                return m.result+' '+m.score+' vs '+m.match+' ('+m.lieu+')';
+              }).join(' | ')||'N/A';
+              var heure = (f.date||'').split('T')[1]?(f.date||'').split('T')[1].slice(0,5):'';
+              var meteoStr = wx?wx.desc+' '+wx.emoji+' '+wx.temp+' | Vent: '+wx.wind:'N/A';
+              // Génération analyse Claude
+              var an = await genAnalyse({
+                home:home.name, away:away.name,
+                homeId:home.id, awayId:away.id,
+                league:lg.name,
+                date:TODAY+' '+heure,
+                stade:(f.venue&&f.venue.name)||'',
+                meteo:meteoStr,
+                fH:(sH&&sH.form)||'', fA:(sA&&sA.form)||'',
+                rkH,rkA,
+                totalH,totalA,mdH,meA,
                 bmH:(sH&&sH.goals&&sH.goals.for&&sH.goals.for.total&&sH.goals.for.total.total)||0,
                 beH:(sH&&sH.goals&&sH.goals.against&&sH.goals.against.total&&sH.goals.against.total.total)||0,
                 bmA:(sA&&sA.goals&&sA.goals.for&&sA.goals.for.total&&sA.goals.for.total.total)||0,
                 beA:(sA&&sA.goals&&sA.goals.against&&sA.goals.against.total&&sA.goals.against.total.total)||0,
                 vdH:(sH&&sH.fixtures&&sH.fixtures.wins&&sH.fixtures.wins.home)||0,
                 veA:(sA&&sA.fixtures&&sA.fixtures.wins&&sA.fixtures.wins.away)||0,
-                d10H:d10Hstr,d10A:d10Astr,
-                o25H:tendances.over25_home,o25A:tendances.over25_away,
-                bttsH:tendances.btts_home,bttsA:tendances.btts_away,
-                c1:odds.c1,cn:odds.cn,c2:odds.c2,
-                co15:odds.co15,co25:odds.co25,cu25:odds.cu25,
-                dc1x:odds.dc1x,dcx2:odds.dcx2,
-                btts_oui:odds.btts_oui,btts_non:odds.btts_non,
-                injuries,h2h:h2hRaw,
-                fatH:fatigueH.info,fatScoreH:fatigueH.val,
-                fatA:fatigueA.info,fatScoreA:fatigueA.val,
+                d10H:d10Hstr, d10A:d10Astr,
+                o25H:tendances.over25_home,
+                o25A:tendances.over25_away,
+                bttsH:tendances.btts_home,
+                bttsA:tendances.btts_away,
+                c1:odds.c1, cn:odds.cn, c2:odds.c2,
+                co15:odds.co15, co25:odds.co25, cu25:odds.cu25,
+                dc1x:odds.dc1x, dcx2:odds.dcx2,
+                btts_oui:odds.btts_oui, btts_non:odds.btts_non,
+                injuries,
+                h2h:h2hRaw,
+                fatH:fatigueH.info, fatScoreH:fatigueH.val,
+                fatA:fatigueA.info, fatScoreA:fatigueA.val,
               });
               await sleep(500);
-              var kellyVal=null;
-              if(an&&an.pari_rec&&odds.c1&&odds.c1!=='--'){
-                var bestCote=parseFloat(odds.c1)||0;
-                var aiProb=(an.p1||0)/100;
-                if(bestCote>1&&aiProb>0){
-                  var b=bestCote-1;
-                  var k=Math.max(0,((aiProb*b-(1-aiProb))/b)*100);
-                  kellyVal=Math.min(k,10).toFixed(1);
+              // Kelly criterion
+              var kellyVal = null;
+              if (an&&an.pari_rec&&odds.c1&&odds.c1!=='--') {
+                var bestCote = parseFloat(odds.c1)||0;
+                var aiProb = (an.p1||0)/100;
+                if (bestCote>1&&aiProb>0) {
+                  var b = bestCote-1;
+                  var k = Math.max(0,((aiProb*b-(1-aiProb))/b)*100);
+                  kellyVal = Math.min(k,10).toFixed(1); // cap à 10% bankroll
                 }
               }
-              var classementObj=null;
-              if(entryH||entryA){
-                var rankH=rkH||99,rankA=rkA||99;
-                var minRank=Math.max(1,Math.min(rankH,rankA)-2);
-                var maxRank=Math.min(Math.max(rankH,rankA)+2,standings.length);
-                var nearStandings=standings.filter(function(s){return s.rank>=minRank&&s.rank<=maxRank;});
-                classementObj={
-                  league_name:lg.name,
-                  standings:nearStandings.map(function(s){
-                    return{rank:s.rank,name:s.team.name,team_id:s.team.id,played:s.all.played,won:s.all.win,drawn:s.all.draw,lost:s.all.lose,gd:s.goalsDiff,pts:s.points,form:s.form||''};
+              // Build classement object
+              var classementObj = null;
+              if (entryH||entryA) {
+                // Trouver les équipes voisines dans le classement
+                var rankH = rkH||99, rankA = rkA||99;
+                var minRank = Math.max(1,Math.min(rankH,rankA)-2);
+                var maxRank = Math.min(Math.max(rankH,rankA)+2, standings.length);
+                var nearStandings = standings.filter(function(s){
+                  return s.rank>=minRank && s.rank<=maxRank;
+                });
+                classementObj = {
+                  league_name: lg.name,
+                  standings: nearStandings.map(function(s){
+                    return {
+                      rank:     s.rank,
+                      name:     s.team.name,
+                      team_id:  s.team.id,
+                      played:   s.all.played,
+                      won:      s.all.win,
+                      drawn:    s.all.draw,
+                      lost:     s.all.lose,
+                      gd:       s.goalsDiff,
+                      pts:      s.points,
+                      form:     s.form||''
+                    };
                   }),
-                  home:entryH?{rank:entryH.rank,pts:entryH.points,played:entryH.all.played,won:entryH.all.win,lost:entryH.all.lose,gd:entryH.goalsDiff,form:entryH.form||''}:null,
-                  away:entryA?{rank:entryA.rank,pts:entryA.points,played:entryA.all.played,won:entryA.all.win,lost:entryA.all.lose,gd:entryA.goalsDiff,form:entryA.form||''}:null
+                  home: entryH?{
+                    rank:entryH.rank, pts:entryH.points,
+                    played:entryH.all.played, won:entryH.all.win,
+                    lost:entryH.all.lose, gd:entryH.goalsDiff,
+                    form:entryH.form||''
+                  }:null,
+                  away: entryA?{
+                    rank:entryA.rank, pts:entryA.points,
+                    played:entryA.all.played, won:entryA.all.win,
+                    lost:entryA.all.lose, gd:entryA.goalsDiff,
+                    form:entryA.form||''
+                  }:null
                 };
               }
-              var risqueNorm=(an?(an.risque||'MODERE'):'MODERE').toUpperCase();
+              // Risque en chiffre pour la jauge
+              var risqueRaw = an?(an.risque||'MODERE'):'MODERE';
+              var risqueNorm = risqueRaw.toUpperCase();
               if(risqueNorm.includes('FAIBLE')||risqueNorm.includes('LOW')) risqueNorm='FAIBLE';
-              else if(risqueNorm.includes('ELEVE')||risqueNorm.includes('HIGH')) risqueNorm='ELEVE';
+              else if(risqueNorm.includes('ELEVE')||risqueNorm.includes('HIGH')||risqueNorm.includes('FORT')) risqueNorm='ELEVE';
               else risqueNorm='MODERE';
-              var matchObj={
-                id:f.id,
-                home:{n:home.name,id:home.id},away:{n:away.name,id:away.id},
-                league:lg.name,ligue_icon:lgIcon(lg.name),league_key:lgKey(lg.id),
-                date:(TODAY+' '+heure).trim(),cat:['all'],
-                val:an?(an.vbet==='OUI'&&(an.confiance||0)>=6.0):false,
-                hot:an?(an.confiance||0)>=8.0:false,
-                conf:an?parseFloat(an.confiance||0):0,
-                p1:an?(an.p1||0):0,pn:an?(an.pn||0):0,p2:an?(an.p2||0):0,
-                po15:an?(an.po15||0):0,po25:an?(an.po25||0):0,btts:an?(an.btts||0):0,
-                c1:odds.c1,cn:odds.cn,c2:odds.c2,
-                co15:odds.co15,co25:odds.co25,cu25:odds.cu25,
-                dc1x:odds.dc1x,dcx2:odds.dcx2,
-                btts_oui:odds.btts_oui,btts_non:odds.btts_non,
-                bookies:odds.bookies,
-                edge:an?(an.edge||''):'',
-                edge_detail:an?'Probabilit\u00e9 IA vs implicite = '+(an.edge||''):'',
-                marche:an?(an.marche||'RESULTAT'):'RESULTAT',
-                risque:risqueNorm,
-                pari_rec:an?(an.pari_rec||''):'',
-                mise:an?(an.mise||'2-3% bankroll'):'2-3% bankroll',
-                argument:an?(an.argument||''):'',
-                analyse_card:an?(an.analyse_card||an.conseil||''):'',
-                conseil_public:an?(an.conseil||an.analyse_card||''):'',
-                contexte:an?(an.contexte||''):'',
-                enjeux:an?(an.enjeux||''):'',
-                vbet:an?(an.vbet||'NON'):'NON',
-                value_calc:an?(an.edge||''):'',
-                scores:an?((an.scores_probables||'').split(',').map(function(s){return s.trim();}).filter(Boolean)):[],
-                paris_3:an?(an.paris_3||null):null,
-                paris_safe:{bet:an?(an.pari_rec||''):'',cote:odds.c1,proba:an?(an.p1||0)+'%':''},
-                paris_risque:{bet:'',cote:'',proba:''},
-                kelly_pct:kellyVal,
-                stade:{nom:f.venue&&f.venue.name?(f.venue.name+(f.venue.city?' \u2014 '+f.venue.city:'')):home.name+' (domicile)',cap:'',meteo:wx?wx.emoji:'\ud83c\udf24\ufe0f',temp:wx?wx.temp:'',desc:wx?wx.desc:''},
-                crit_home:critH,crit_away:critA,
-                form_home:last10H.slice(0,5),form_away:last10A.slice(0,5),
-                forme_h:(sH&&sH.form)||'',forme_a:(sA&&sA.form)||'',
-                h2h:h2hFormatted,h2h_txt:h2hRaw.length?'Historique sur '+h2hRaw.length+' match(s) recents':'',
-                injuries:injuries,
-                fatigue:{home:{val:fatigueH.val,info:fatigueH.info},away:{val:fatigueA.val,info:fatigueA.info}},
-                tendances:tendances,
-                classement:classementObj,
-                actu:(nH||[]).concat(nA||[]),
+              var matchObj = {
+                id:         f.id,
+                home:       {n:home.name, id:home.id},
+                away:       {n:away.name, id:away.id},
+                league:     lg.name,
+                ligue_icon: lgIcon(lg.name),
+                league_key: lgKey(lg.id),
+                date:       (TODAY+' '+heure).trim(),
+                cat:        ['all'],
+                val:        an?(an.vbet==='OUI'&&(an.confiance||0)>=6.0):false,
+                hot:        an?(an.confiance||0)>=8.0:false,
+                conf:       an?parseFloat(an.confiance||0):0,
+                p1:         an?(an.p1||0):0,
+                pn:         an?(an.pn||0):0,
+                p2:         an?(an.p2||0):0,
+                po15:       an?(an.po15||0):0,
+                po25:       an?(an.po25||0):0,
+                btts:       an?(an.btts||0):0,
+                // Cotes tous marchés
+                c1:odds.c1, cn:odds.cn, c2:odds.c2,
+                co15:odds.co15, co25:odds.co25, cu25:odds.cu25,
+                dc1x:odds.dc1x, dcx2:odds.dcx2,
+                btts_oui:odds.btts_oui, btts_non:odds.btts_non,
+                // Bookmakers avec logo domain
+                bookies: odds.bookies,
+                // Analyse IA
+                edge:           an?(an.edge||''):'',
+                edge_detail:    an?'Probabilit\u00e9 IA vs probabilit\u00e9 implicite bookmaker = '+(an.edge||''):'',
+                marche:         an?(an.marche||'RESULTAT'):'RESULTAT',
+                risque:         risqueNorm,
+                pari_rec:       an?(an.pari_rec||''):'',
+                mise:           an?(an.mise||'2-3% bankroll'):'2-3% bankroll',
+                argument:       an?(an.argument||''):'',
+                analyse_card:   an?(an.analyse_card||an.conseil||''):'',
+                conseil_public: an?(an.conseil||an.analyse_card||''):'',
+                contexte:       an?(an.contexte||''):'',
+                enjeux:         an?(an.enjeux||''):'',
+                vbet:           an?(an.vbet||'NON'):'NON',
+                value_calc:     an?(an.edge||''):'',
+                scores:         an?((an.scores_probables||'').split(',').map(function(s){return s.trim();}).filter(Boolean)):[],
+                // Paris 3 profils
+                paris_3:        an?(an.paris_3||null):null,
+                paris_safe:     {bet:an?(an.pari_rec||''):'',cote:odds.c1,proba:an?(an.p1||0)+'%':''},
+                paris_risque:   {bet:'',cote:'',proba:''},
+                // Kelly
+                kelly_pct:      kellyVal,
+                // Stade & météo
+                stade: {
+                  nom:   f.venue&&f.venue.name?(f.venue.name+(f.venue.city?' \u2014 '+f.venue.city:'')):home.name+' (domicile)',
+                  cap:   '',
+                  meteo: wx?wx.emoji:'\ud83c\udf24\ufe0f',
+                  temp:  wx?wx.temp:'',
+                  desc:  wx?wx.desc:''
+                },
+                // Critères radar
+                crit_home: critH,
+                crit_away: critA,
+                // Forme
+                form_home: last10H.slice(0,5),
+                form_away: last10A.slice(0,5),
+                forme_h:   (sH&&sH.form)||'',
+                forme_a:   (sA&&sA.form)||'',
+                // H2H
+                h2h:     h2hFormatted,
+                h2h_txt: h2hRaw.length?'Historique sur '+h2hRaw.length+' match(s) recents':'',
+                // Blessures
+                injuries: injuries,
+                // Fatigue
+                fatigue: {
+                  home: {val:fatigueH.val, info:fatigueH.info},
+                  away: {val:fatigueA.val, info:fatigueA.info}
+                },
+                // Tendances buts
+                tendances: tendances,
+                // Classement pro
+                classement: classementObj,
+                // Actualités
+                actu: (nH||[]).concat(nA||[]),
               };
               matchsData.push(matchObj);
-              if(an&&(an.confiance||0)>=6.5){
-                forCombis.push({home:home.name,away:away.name,pari:an.pari_rec,conf:an.confiance,edge:an.edge||''});
+              if (an&&(an.confiance||0)>=6.5) {
+                forCombis.push({
+                  home:home.name, away:away.name,
+                  pari:an.pari_rec, conf:an.confiance,
+                  edge:an.edge||''
+                });
               }
               console.log('  OK conf='+matchObj.conf+' edge='+matchObj.edge+' pari='+matchObj.pari_rec);
             }
-            var combisRaw=await genCombis(forCombis);
-            var combisData=combisRaw.map(function(c){
-              return{label:c.label,type:c.type,selections:c.selections,matchs:c.matchs,cote_totale:c.cote_totale,conseil:c.conseil};
+            // Générer combinés
+            var combisRaw = await genCombis(forCombis);
+            var combisData = combisRaw.map(function(c){
+              return {
+                label:      c.label,
+                type:       c.type,
+                selections: c.selections,
+                matchs:     c.matchs,
+                cote_totale:c.cote_totale,
+                conseil:    c.conseil
+              };
             });
-            fs.writeFileSync('data.json',JSON.stringify({matchs:matchsData,combis:combisData},null,2));
+            fs.writeFileSync('data.json',
+              JSON.stringify({matchs:matchsData, combis:combisData}, null, 2)
+            );
             console.log('\n=== DONE: '+matchsData.length+' matchs | '+combisData.length+' combis ===');
           }
-          main().catch(function(e){console.error('FATAL:',e.message);process.exit(0);});
+          main().catch(function(e){ console.error('FATAL:', e.message); process.exit(0); });
           JSEOF
       - name: Run pipeline
         env:
@@ -607,6 +888,7 @@ jobs:
           NEWSAPI_KEY:     ${{ secrets.NEWSAPI_KEY }}
           ANTHROPIC_KEY:   ${{ secrets.ANTHROPIC_KEY }}
         run: node pipeline.js
+
       - name: Commit and push
         run: |
           git config user.name "IASHARK"

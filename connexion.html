@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IASHARK — Connexion</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=JetBrains+Mono:wght@400;700&family=DM+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+* { margin:0;padding:0;box-sizing:border-box; }
+:root { --bg:#060a0c;--cyan:#00e5ff;--blue:#00b4d8;--amber:#ffab00;--green:#00e676;--text:#e8f0f4;--muted:#4a6878;--border:rgba(255,255,255,0.06); }
+body { background:var(--bg);min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'DM Sans',sans-serif;padding:20px; }
+body::before { content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,229,255,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(0,229,255,0.025) 1px,transparent 1px);background-size:36px 36px;pointer-events:none;z-index:0; }
+.scan-line { position:fixed;top:-2px;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--cyan),transparent);animation:scanDown 5s linear infinite;opacity:0.3;z-index:50; }
+@keyframes scanDown { 0%{top:-2px} 100%{top:100vh} }
+.page-wrap { position:relative;z-index:1;width:100%;max-width:420px; }
+.auth-back { display:flex;align-items:center;gap:6px;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:1px;text-decoration:none;margin-bottom:20px;transition:color .2s; }
+.auth-back:hover { color:var(--blue); }
+.auth-header { text-align:center;margin-bottom:32px; }
+.auth-logo { display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:6px; }
+.auth-shark { font-size:36px;animation:sharkFloat 2.5s ease-in-out infinite;display:inline-block; }
+@keyframes sharkFloat { 0%,100%{transform:translateY(0) rotate(0deg)} 50%{transform:translateY(-6px) rotate(5deg)} }
+.auth-logo-text { font-family:'Bebas Neue',sans-serif;font-size:44px;letter-spacing:5px;line-height:1; }
+.auth-logo-text .ia { color:var(--cyan); }
+.auth-logo-text .shark { color:var(--text); }
+.auth-tagline { font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:4px;color:var(--muted); }
+.auth-card { background:linear-gradient(135deg,rgba(13,24,32,0.98),rgba(10,18,26,0.96));border:1px solid rgba(0,180,216,0.15);border-radius:24px;padding:32px 28px;position:relative;overflow:hidden; }
+.auth-card::before { content:'';position:absolute;top:0;left:0;width:3px;height:100%;background:linear-gradient(180deg,var(--cyan),rgba(0,180,216,0.1)); }
+.auth-title { font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:3px;color:var(--text);margin-bottom:4px; }
+.auth-sub { font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:2px;margin-bottom:28px; }
+.field { margin-bottom:16px; }
+.field-label { font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:6px;display:block; }
+.field-input { width:100%;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:12px;padding:13px 16px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);outline:none;transition:border-color .2s,background .2s; }
+.field-input::placeholder { color:var(--muted); }
+.field-input:focus { border-color:rgba(0,180,216,0.45);background:rgba(0,180,216,0.04); }
+.field-input.error { border-color:rgba(255,50,50,0.5); }
+.field-error { font-family:'JetBrains Mono',monospace;font-size:8px;color:#ff4444;margin-top:4px;display:none; }
+.auth-btn { width:100%;background:linear-gradient(135deg,var(--blue),#0077aa);border:none;border-radius:12px;padding:15px;font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:3px;color:#fff;cursor:pointer;transition:opacity .2s,transform .1s;margin-top:8px; }
+.auth-btn:hover { opacity:0.88; }
+.auth-btn:active { transform:scale(0.98); }
+.auth-btn:disabled { opacity:0.5;cursor:not-allowed; }
+.auth-divider { display:flex;align-items:center;gap:12px;margin:20px 0; }
+.auth-divider-line { flex:1;height:1px;background:var(--border); }
+.auth-divider-txt { font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--muted);letter-spacing:1px; }
+.auth-link-row { text-align:center;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:1px; }
+.auth-link-row a { color:var(--blue);text-decoration:none; }
+.auth-link-row a:hover { color:var(--cyan); }
+.auth-success { display:none;text-align:center; }
+.auth-success-icon { font-size:40px;margin-bottom:10px; }
+.auth-success-title { font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;color:var(--green);margin-bottom:6px; }
+.auth-success-txt { font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:1px;line-height:1.8; }
+.global-error { background:rgba(255,50,50,0.08);border:1px solid rgba(255,50,50,0.2);border-radius:10px;padding:10px 14px;font-family:'JetBrains Mono',monospace;font-size:9px;color:#ff6666;letter-spacing:1px;margin-bottom:16px;display:none; }
+</style>
+</head>
+<body>
+<div class="scan-line"></div>
+<div class="page-wrap">
+  <a href="index.html" class="auth-back">← RETOUR AU SITE</a>
+
+  <div class="auth-header">
+    <div class="auth-logo">
+      <span class="auth-shark">🦈</span>
+      <div class="auth-logo-text"><span class="ia">IA</span><span class="shark">SHARK</span></div>
+    </div>
+    <div class="auth-tagline">L'IA QUI ATTAQUE LES COTES</div>
+  </div>
+
+  <div class="auth-card">
+    <div id="formWrap">
+      <div class="auth-title">CONNEXION</div>
+      <div class="auth-sub">CONTENT DE TE REVOIR SNIPER 🦈</div>
+
+      <div class="global-error" id="globalErr"></div>
+
+      <div class="field">
+        <label class="field-label">Adresse email</label>
+        <input class="field-input" type="email" id="email" placeholder="ton@email.com" autocomplete="email" />
+        <div class="field-error" id="err-email"></div>
+      </div>
+
+      <div class="field">
+        <label class="field-label">Mot de passe</label>
+        <input class="field-input" type="password" id="password" placeholder="••••••••" autocomplete="current-password" />
+        <div class="field-error" id="err-pwd"></div>
+      </div>
+
+      <button class="auth-btn" onclick="handleLogin()">SE CONNECTER</button>
+
+      <div class="auth-divider">
+        <div class="auth-divider-line"></div>
+        <div class="auth-divider-txt">PAS ENCORE INSCRIT ?</div>
+        <div class="auth-divider-line"></div>
+      </div>
+      <div class="auth-link-row">
+        <a href="inscription.html">CRÉER UN COMPTE →</a>
+      </div>
+    </div>
+
+    <div class="auth-success" id="successMsg">
+      <div class="auth-success-icon">🦈</div>
+      <div class="auth-success-title">CONNECTÉ !</div>
+      <div class="auth-success-txt">
+        Bon retour parmi les snipers.<br><br>
+        <a href="index.html" style="color:var(--blue)">← RETOUR AU SITE</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function showErr(id, msg) {
+  var el = document.getElementById(id);
+  if(el){ el.textContent=msg; el.style.display='block'; }
+}
+function clearAll() {
+  ['err-email','err-pwd'].forEach(function(id){
+    var el=document.getElementById(id);
+    if(el){ el.textContent=''; el.style.display='none'; }
+  });
+  document.querySelectorAll('.field-input').forEach(function(i){ i.classList.remove('error'); });
+  document.getElementById('globalErr').style.display='none';
+}
+
+function handleLogin() {
+  clearAll();
+  var email = document.getElementById('email').value.trim();
+  var pwd   = document.getElementById('password').value;
+  var ok = true;
+
+  if (!email.includes('@')) {
+    showErr('err-email','Email invalide');
+    document.getElementById('email').classList.add('error');
+    ok = false;
+  }
+  if (pwd.length < 1) {
+    showErr('err-pwd','Mot de passe requis');
+    document.getElementById('password').classList.add('error');
+    ok = false;
+  }
+  if (!ok) return;
+
+  // Vérifier si email inscrit
+  var registered = JSON.parse(localStorage.getItem('iashark_emails') || '[]');
+  if (!registered.includes(email.toLowerCase())) {
+    var ge = document.getElementById('globalErr');
+    ge.textContent = 'EMAIL NON RECONNU — INSCRIS-TOI D\'ABORD';
+    ge.style.display = 'block';
+    document.getElementById('email').classList.add('error');
+    return;
+  }
+
+  // Connexion OK
+  localStorage.setItem('iashark_user', email.toLowerCase());
+  document.getElementById('formWrap').style.display = 'none';
+  document.getElementById('successMsg').style.display = 'block';
+  setTimeout(function(){ window.location.href = 'index.html'; }, 2000);
+}
+</script>
+</body>
+</html>

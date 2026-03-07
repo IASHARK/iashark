@@ -469,10 +469,10 @@ jobs:
             try { return JSON.parse(txt.replace(/```json|```/g,'').trim()); }
             catch(e) { console.log('Parse error:', txt.slice(0,200)); return null; }
           }
-          async function genCombis(list, isSamedi, isDimanche) {
+          async function genCombis(list, isSamedi, isDimanche, allMatchs) {
             if (list.length < 2) return [];
             var lines = list.map(function(a){
-              return '- '+a.home+' vs '+a.away+': '+a.pari+' (confiance '+a.conf+'/10, edge '+(a.edge||'?')+')';
+              return '- '+a.home+' vs '+a.away+': '+a.pari+' cote '+a.cote+' (confiance '+a.conf+'/10, edge '+(a.edge||'?')+')';
             }).join('\n');
             // Combinés classiques
             var promptClassic =
@@ -496,34 +496,82 @@ jobs:
                 return {label:c.label||'COMBINE',type:c.type||'safe',selections:c.selections||'',matchs:c.matchs||'',cote_totale:c.cote_totale||'',conseil:c.conseil||''};
               });
             } catch(e) { classics = []; }
-            // Combiné spécial weekend si samedi ou dimanche
+            // Combiné spécial weekend — construction ALGORITHMIQUE avec vraies cotes
             if (!isSamedi && !isDimanche) return classics;
             var labelFou = isSamedi ? '\uD83D\uDD25 SAMEDI FOU \uD83D\uDD25' : '\uD83C\uDF0A DIMANCHE FOU \uD83C\uDF0A';
             var typeFou = isSamedi ? 'samedi_fou' : 'dimanche_fou';
-            // Prend les paris avec les meilleures cotes pour construire un combi cote 50-70
-            var allForFou = list.slice(); // tous les paris du jour
-            var promptFou =
-              'Expert paris sportifs IASHARK. Analyses du jour:\n'+lines+'\n\n'
-              +'MISSION SPECIALE '+labelFou.toUpperCase()+': Construis UN seul combine de type "plaisir et frisson" pour un samedi/dimanche de football.'
-              +' La cote totale du combine DOIT etre entre 50 et 70. '
-              +'Choisis 5 a 7 selections parmi tous les paris du jour (pas seulement ceux en confiance >= 7), en mixant: victoires outsider, scores exacts, BTTS, Over, mi-temps/final.'
-              +' Le but est l\'amusement et le frisson, pas la securite. Mise recommandee: 0.5-1% bankroll.'
-              +' Reponds UNIQUEMENT avec ce JSON sans backticks:\n'
-              +'{"label":"'+labelFou+'","type":"'+typeFou+'","selections":"pari1, pari2, pari3, ...","matchs":"match1, match2, ...","cote_totale":"55.0","conseil":"Phrase accrocheuse et fun pour motiver les joueurs"}\n'
-              +'IMPORTANT: verifier que la multiplication des cotes individuelles donne bien entre 50 et 70.';
-            await sleep(500);
-            var r2 = await postJSON('api.anthropic.com', '/v1/messages', {
-              model: 'claude-sonnet-4-6',
-              max_tokens: 600,
-              messages: [{role:'user', content:promptFou}]
-            }, {'x-api-key':ANT_KEY, 'anthropic-version':'2023-06-01'});
-            var txt2 = (r2.content&&r2.content[0]&&r2.content[0].text)||'{}';
-            try {
-              var fou = JSON.parse(txt2.replace(/```json|```/g,'').trim());
-              if (fou && fou.label) {
-                classics.push({label:fou.label,type:fou.type||typeFou,selections:fou.selections||'',matchs:fou.matchs||'',cote_totale:fou.cote_totale||'55.0',conseil:fou.conseil||''});
+            // Construire un pool de sélections avec vraies cotes depuis tous les matchs du jour
+            var pool = [];
+            (allMatchs||[]).forEach(function(m) {
+              var matchLabel = m.home.n+' vs '+m.away.n;
+              // Victoire domicile
+              if (m.c1&&m.c1!=='--'&&parseFloat(m.c1)>=1.5) pool.push({match:matchLabel, sel:'Victoire '+m.home.n, cote:parseFloat(m.c1)});
+              // Victoire extérieur
+              if (m.c2&&m.c2!=='--'&&parseFloat(m.c2)>=2.0) pool.push({match:matchLabel, sel:'Victoire '+m.away.n, cote:parseFloat(m.c2)});
+              // Nul
+              if (m.cn&&m.cn!=='--'&&parseFloat(m.cn)>=2.5) pool.push({match:matchLabel, sel:'Match Nul', cote:parseFloat(m.cn)});
+              // Over 2.5
+              if (m.co25&&m.co25!=='--'&&parseFloat(m.co25)>=1.5) pool.push({match:matchLabel, sel:'Over 2.5 buts', cote:parseFloat(m.co25)});
+              // BTTS Oui
+              if (m.btts_oui&&m.btts_oui!=='--'&&parseFloat(m.btts_oui)>=1.5) pool.push({match:matchLabel, sel:'BTTS Oui', cote:parseFloat(m.btts_oui)});
+              // Double chance X2 (cote interessante)
+              if (m.dcx2&&m.dcx2!=='--'&&parseFloat(m.dcx2)>=1.5&&parseFloat(m.dcx2)<=3.5) pool.push({match:matchLabel, sel:'Double Chance X2', cote:parseFloat(m.dcx2)});
+            });
+            if (pool.length < 4) {
+              // pas assez de données, fallback basique
+              classics.push({label:labelFou,type:typeFou,selections:'Combiné spécial weekend - données insuffisantes',matchs:'',cote_totale:'--',conseil:'Pas assez de matchs aujourd\'hui pour le combiné fou !'});
+              return classics;
+            }
+            // Mélanger le pool aléatoirement
+            for (var i=pool.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var tmp=pool[i];pool[i]=pool[j];pool[j]=tmp;}
+            // Dédupliquer par match (max 1 sélection par match)
+            var usedMatches = {};
+            var deduped = [];
+            pool.forEach(function(s){
+              if (!usedMatches[s.match]) { usedMatches[s.match]=true; deduped.push(s); }
+            });
+            // Construire le combiné en ajoutant des sélections jusqu'à atteindre cote 50-70
+            var TARGET_MIN = 50, TARGET_MAX = 70;
+            var selected = [];
+            var coteTotale = 1.0;
+            // Trier par cote décroissante pour atteindre la cible plus vite
+            deduped.sort(function(a,b){return b.cote-a.cote;});
+            for (var si=0; si<deduped.length && selected.length<8; si++) {
+              var newCote = coteTotale * deduped[si].cote;
+              if (newCote <= TARGET_MAX || selected.length < 3) {
+                selected.push(deduped[si]);
+                coteTotale = newCote;
+                if (coteTotale >= TARGET_MIN && coteTotale <= TARGET_MAX) break;
               }
-            } catch(e) { console.log('Combine fou parse error'); }
+            }
+            // Si cote trop basse, ajouter des sélections supplémentaires
+            if (coteTotale < TARGET_MIN && deduped.length > selected.length) {
+              for (var si2=0; si2<deduped.length; si2++) {
+                if (selected.find(function(s){return s.match===deduped[si2].match;})) continue;
+                var newCote2 = coteTotale * deduped[si2].cote;
+                if (newCote2 <= TARGET_MAX * 1.3) {
+                  selected.push(deduped[si2]);
+                  coteTotale = newCote2;
+                  if (coteTotale >= TARGET_MIN) break;
+                }
+              }
+            }
+            var coteFinalStr = coteTotale.toFixed(1);
+            var selectionsStr = selected.map(function(s){return s.sel;}).join(', ');
+            var matchsStr = selected.map(function(s){return s.match;}).join(', ');
+            // Demander à Claude juste le texte du conseil (pas la cote)
+            await sleep(300);
+            var promptConseil =
+              'Tu es IASHARK. Ecris UNE phrase accrocheuse et fun en francais pour motiver les joueurs a tenter ce combine weekend: '
+              +selectionsStr+' (cote totale '+coteFinalStr+'x). Max 120 caracteres, style excite et emoji.';
+            var rc = await postJSON('api.anthropic.com', '/v1/messages', {
+              model: 'claude-sonnet-4-6',
+              max_tokens: 100,
+              messages: [{role:'user', content:promptConseil}]
+            }, {'x-api-key':ANT_KEY, 'anthropic-version':'2023-06-01'});
+            var conseil = ((rc.content&&rc.content[0]&&rc.content[0].text)||'Tente ta chance ce weekend ! \uD83E\uDD88\uD83D\uDD25').trim();
+            classics.push({label:labelFou,type:typeFou,selections:selectionsStr,matchs:matchsStr,cote_totale:coteFinalStr,conseil:conseil});
+            console.log('  COMBINE FOU: cote='+coteFinalStr+' ('+selected.length+' selections)');
             return classics;
           }
           function formatH2H(fixtures, homeId, awayId) {
@@ -782,7 +830,18 @@ jobs:
               };
               matchsData.push(matchObj);
               if (an&&(an.confiance||0)>=6.5) {
-                forCombis.push({home:home.name,away:away.name,pari:an.pari_rec,conf:an.confiance,edge:an.edge||''});
+                var coteRec2 = odds.c1;
+                var p2=(an&&an.pari_rec||'').toLowerCase();
+                if(p2.includes('btts non')) coteRec2=odds.btts_non;
+                else if(p2.includes('btts')) coteRec2=odds.btts_oui;
+                else if(p2.includes('x2')) coteRec2=odds.dcx2;
+                else if(p2.includes('1x')) coteRec2=odds.dc1x;
+                else if(p2.includes('over 2.5')) coteRec2=odds.co25;
+                else if(p2.includes('over 1.5')) coteRec2=odds.co15;
+                else if(p2.includes('under')) coteRec2=odds.cu25;
+                else if(p2.includes('nul')) coteRec2=odds.cn;
+                else if(p2.includes('victoire')&&(p2.includes(away.name.toLowerCase().slice(0,4))||p2.includes('ext'))) coteRec2=odds.c2;
+                forCombis.push({home:home.name,away:away.name,pari:an.pari_rec,conf:an.confiance,edge:an.edge||'',cote:coteRec2&&coteRec2!=='--'?parseFloat(coteRec2):1.5});
               }
               console.log('  OK conf='+matchObj.conf+' edge='+matchObj.edge+' pari='+matchObj.pari_rec);
             }
@@ -799,7 +858,7 @@ jobs:
             var dayOfWeek = todayDate.getUTCDay(); // 0=dim, 6=sam
             var isSamedi = (dayOfWeek === 6);
             var isDimanche = (dayOfWeek === 0);
-            var combisRaw = await genCombis(forCombis, isSamedi, isDimanche);
+            var combisRaw = await genCombis(forCombis, isSamedi, isDimanche, matchsData);
             var combisData = combisRaw.map(function(c){
               return {label:c.label,type:c.type,selections:c.selections,matchs:c.matchs,cote_totale:c.cote_totale,conseil:c.conseil};
             });

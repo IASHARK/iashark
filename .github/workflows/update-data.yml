@@ -437,26 +437,26 @@ jobs:
               +d.home+': '+d.fatH+' (score '+d.fatScoreH+'/100)\n'
               +d.away+': '+d.fatA+' (score '+d.fatScoreA+'/100)\n\n'
               +'=== COTES ET PROBABILITES IMPLICITES ===\n'
-              +'1 ('+d.home+'): cote '+d.c1+' → prob implicite '+pi1+'%\n'
-              +'N (Nul): cote '+d.cn+' → prob implicite '+piN+'%\n'
-              +'2 ('+d.away+'): cote '+d.c2+' → prob implicite '+pi2+'%\n'
-              +'1X: cote '+d.dc1x+' → prob implicite '+pi1x+'%\n'
-              +'X2: cote '+d.dcx2+' → prob implicite '+pix2+'%\n'
-              +'Over 1.5: cote '+d.co15+' → prob implicite '+pio15+'%\n'
-              +'Over 2.5: cote '+d.co25+' → prob implicite '+pio25+'%\n'
-              +'Under 2.5: cote '+d.cu25+' → prob implicite '+piu25+'%\n'
-              +'BTTS Oui: cote '+d.btts_oui+' → prob implicite '+piby+'%\n'
-              +'BTTS Non: cote '+d.btts_non+' → prob implicite '+pibn+'%\n\n'
+              +'1 ('+d.home+'): cote '+d.c1+' \u2192 prob implicite '+pi1+'%\n'
+              +'N (Nul): cote '+d.cn+' \u2192 prob implicite '+piN+'%\n'
+              +'2 ('+d.away+'): cote '+d.c2+' \u2192 prob implicite '+pi2+'%\n'
+              +'1X: cote '+d.dc1x+' \u2192 prob implicite '+pi1x+'%\n'
+              +'X2: cote '+d.dcx2+' \u2192 prob implicite '+pix2+'%\n'
+              +'Over 1.5: cote '+d.co15+' \u2192 prob implicite '+pio15+'%\n'
+              +'Over 2.5: cote '+d.co25+' \u2192 prob implicite '+pio25+'%\n'
+              +'Under 2.5: cote '+d.cu25+' \u2192 prob implicite '+piu25+'%\n'
+              +'BTTS Oui: cote '+d.btts_oui+' \u2192 prob implicite '+piby+'%\n'
+              +'BTTS Non: cote '+d.btts_non+' \u2192 prob implicite '+pibn+'%\n\n'
               +'=== METHODE EDGE ===\n'
               +'Pour chaque marche: calcule ta prob reelle basee sur les stats. Edge = prob_IA - prob_implicite.\n'
               +'Choisis le marche avec le PLUS GRAND edge positif. Aucune restriction sur le type.\n'
               +'Si aucun edge > 3%: confiance < 6.0. Ne jamais forcer un pari sans edge reel.\n\n'
               +'EXEMPLES:\n'
-              +'- DOM marque 2.1/match DOM + EXT encaisse 1.8/match → Over 1.5 prob IA 88% vs impl 75% → edge +13%\n'
-              +'- DOM CS 8/14 DOM + EXT failToScore 6/12 → BTTS Non prob IA 65% vs impl 52% → edge +13%\n'
-              +'- H2H 4 nuls/5 + deux defenses < 0.8 but/match → Nul prob IA 45% vs impl 28% → edge +17%\n'
-              +'- DOM gagne 11/14 DOM + EXT perd 8/12 → Victoire DOM prob IA 78% vs impl 58% → edge +20%\n'
-              +'- Pluie + fatigue + H2H fermé → Under 2.5 prob IA 68% vs impl 55% → edge +13%\n\n'
+              +'- DOM marque 2.1/match DOM + EXT encaisse 1.8/match \u2192 Over 1.5 prob IA 88% vs impl 75% \u2192 edge +13%\n'
+              +'- DOM CS 8/14 DOM + EXT failToScore 6/12 \u2192 BTTS Non prob IA 65% vs impl 52% \u2192 edge +13%\n'
+              +'- H2H 4 nuls/5 + deux defenses < 0.8 but/match \u2192 Nul prob IA 45% vs impl 28% \u2192 edge +17%\n'
+              +'- DOM gagne 11/14 DOM + EXT perd 8/12 \u2192 Victoire DOM prob IA 78% vs impl 58% \u2192 edge +20%\n'
+              +'- Pluie + fatigue + H2H ferm\u00e9 \u2192 Under 2.5 prob IA 68% vs impl 55% \u2192 edge +13%\n\n'
               +'=== FORMAT JSON STRICT ===\n'
               +'{"confiance":7.4,"pari_rec":"[NOM EXACT avec equipe si victoire/DC]","marche":"RESULTAT|DOUBLE_CHANCE|TOTAL_BUTS|BTTS|COMBINE|MI_TEMPS|CLEAN_SHEET","risque":"FAIBLE|MODERE|ELEVE","vbet":"OUI|NON","edge":"+X.X%","argument":"1. [stat chiffree]. 2. [stat chiffree]. 3. [edge calcule].","analyse_card":"2-3 phrases analytiques","conseil":"3-4 phrases","contexte":"2-3 phrases","enjeux":"1 phrase","scores_probables":"1-0,0-0,2-1","p1":0,"pn":0,"p2":0,"po15":0,"po25":0,"btts":0,"mise":"2-3% bankroll","paris_3":{"safe":{"bet":"[pari le plus sur - Over/Under/BTTS/Victoire selon stats]","cote":"[cote reelle]","hint":"[raison chiffree]","mise":"4-5% bankroll","bookie":"Betclic"},"valeur":{"bet":"[value bet DIFFERENT du safe]","cote":"[cote reelle]","hint":"[edge calcule]","mise":"2-3% bankroll","bookie":"Winamax"},"specu":{"bet":"[pari audacieux: score exact, Over 3.5, mi-temps/final, clean sheet]","cote":"[cote reelle]","hint":"[justification]","mise":"0.5-1% bankroll","bookie":"Bet365"}}}\n\n'
               +'CONTRAINTES: p1+pn+p2=100 | confiance 1.0-10.0 | vbet OUI si edge>4% | les 3 paris_3 doivent etre differents | specu peut etre score exact ou marche exotique';
@@ -469,12 +469,13 @@ jobs:
             try { return JSON.parse(txt.replace(/```json|```/g,'').trim()); }
             catch(e) { console.log('Parse error:', txt.slice(0,200)); return null; }
           }
-          async function genCombis(list) {
+          async function genCombis(list, isSamedi, isDimanche) {
             if (list.length < 2) return [];
             var lines = list.map(function(a){
               return '- '+a.home+' vs '+a.away+': '+a.pari+' (confiance '+a.conf+'/10, edge '+(a.edge||'?')+')';
             }).join('\n');
-            var prompt =
+            // Combinés classiques
+            var promptClassic =
               'Expert paris sportifs IASHARK. Analyses du jour:\n'+lines+'\n\n'
               +'Genere 3 combines en combinant uniquement les paris confiance >= 7.0. '
               +'Les selections doivent etre VARIEES: melange victoires, Over/Under, BTTS, etc. Pas que des victoires.\n'
@@ -485,15 +486,45 @@ jobs:
             var r = await postJSON('api.anthropic.com', '/v1/messages', {
               model: 'claude-sonnet-4-6',
               max_tokens: 800,
-              messages: [{role:'user', content:prompt}]
+              messages: [{role:'user', content:promptClassic}]
             }, {'x-api-key':ANT_KEY, 'anthropic-version':'2023-06-01'});
             var txt = (r.content&&r.content[0]&&r.content[0].text)||'{}';
+            var classics = [];
             try {
               var obj = JSON.parse(txt.replace(/```json|```/g,'').trim());
-              return Object.values(obj).filter(Boolean).map(function(c){
+              classics = Object.values(obj).filter(Boolean).map(function(c){
                 return {label:c.label||'COMBINE',type:c.type||'safe',selections:c.selections||'',matchs:c.matchs||'',cote_totale:c.cote_totale||'',conseil:c.conseil||''};
               });
-            } catch(e) { return []; }
+            } catch(e) { classics = []; }
+            // Combiné spécial weekend si samedi ou dimanche
+            if (!isSamedi && !isDimanche) return classics;
+            var labelFou = isSamedi ? '\uD83D\uDD25 SAMEDI FOU \uD83D\uDD25' : '\uD83C\uDF0A DIMANCHE FOU \uD83C\uDF0A';
+            var typeFou = isSamedi ? 'samedi_fou' : 'dimanche_fou';
+            // Prend les paris avec les meilleures cotes pour construire un combi cote 50-70
+            var allForFou = list.slice(); // tous les paris du jour
+            var promptFou =
+              'Expert paris sportifs IASHARK. Analyses du jour:\n'+lines+'\n\n'
+              +'MISSION SPECIALE '+labelFou.toUpperCase()+': Construis UN seul combine de type "plaisir et frisson" pour un samedi/dimanche de football.'
+              +' La cote totale du combine DOIT etre entre 50 et 70. '
+              +'Choisis 5 a 7 selections parmi tous les paris du jour (pas seulement ceux en confiance >= 7), en mixant: victoires outsider, scores exacts, BTTS, Over, mi-temps/final.'
+              +' Le but est l\'amusement et le frisson, pas la securite. Mise recommandee: 0.5-1% bankroll.'
+              +' Reponds UNIQUEMENT avec ce JSON sans backticks:\n'
+              +'{"label":"'+labelFou+'","type":"'+typeFou+'","selections":"pari1, pari2, pari3, ...","matchs":"match1, match2, ...","cote_totale":"55.0","conseil":"Phrase accrocheuse et fun pour motiver les joueurs"}\n'
+              +'IMPORTANT: verifier que la multiplication des cotes individuelles donne bien entre 50 et 70.';
+            await sleep(500);
+            var r2 = await postJSON('api.anthropic.com', '/v1/messages', {
+              model: 'claude-sonnet-4-6',
+              max_tokens: 600,
+              messages: [{role:'user', content:promptFou}]
+            }, {'x-api-key':ANT_KEY, 'anthropic-version':'2023-06-01'});
+            var txt2 = (r2.content&&r2.content[0]&&r2.content[0].text)||'{}';
+            try {
+              var fou = JSON.parse(txt2.replace(/```json|```/g,'').trim());
+              if (fou && fou.label) {
+                classics.push({label:fou.label,type:fou.type||typeFou,selections:fou.selections||'',matchs:fou.matchs||'',cote_totale:fou.cote_totale||'55.0',conseil:fou.conseil||''});
+              }
+            } catch(e) { console.log('Combine fou parse error'); }
+            return classics;
           }
           function formatH2H(fixtures, homeId, awayId) {
             return fixtures.slice(0,5).map(function(f) {
@@ -755,7 +786,20 @@ jobs:
               }
               console.log('  OK conf='+matchObj.conf+' edge='+matchObj.edge+' pari='+matchObj.pari_rec);
             }
-            var combisRaw = await genCombis(forCombis);
+            // TRI PAR HEURE CROISSANTE
+            matchsData.sort(function(a, b) {
+              var timeA = (a.date||'').split(' ')[1]||'99:99';
+              var timeB = (b.date||'').split(' ')[1]||'99:99';
+              if (timeA < timeB) return -1;
+              if (timeA > timeB) return 1;
+              return 0;
+            });
+            // DETECTION SAMEDI / DIMANCHE
+            var todayDate = new Date(TODAY+'T12:00:00Z');
+            var dayOfWeek = todayDate.getUTCDay(); // 0=dim, 6=sam
+            var isSamedi = (dayOfWeek === 6);
+            var isDimanche = (dayOfWeek === 0);
+            var combisRaw = await genCombis(forCombis, isSamedi, isDimanche);
             var combisData = combisRaw.map(function(c){
               return {label:c.label,type:c.type,selections:c.selections,matchs:c.matchs,cote_totale:c.cote_totale,conseil:c.conseil};
             });

@@ -470,34 +470,205 @@ jobs:
             catch(e) { console.log('Parse error:', txt.slice(0,200)); return null; }
           }
           async function genCombis(list, isSamedi, isDimanche, allMatchs) {
-            if (list.length < 2) return [];
-            var lines = list.map(function(a){
-              return '- '+a.home+' vs '+a.away+': '+a.pari+' cote '+a.cote+' (confiance '+a.conf+'/10, edge '+(a.edge||'?')+')';
-            }).join('\n');
-            // Combinés classiques
-            var promptClassic =
-              'Expert paris sportifs IASHARK. Analyses du jour:\n'+lines+'\n\n'
-              +'Genere 3 combines en combinant uniquement les paris confiance >= 7.0. '
-              +'Les selections doivent etre VARIEES: melange victoires, Over/Under, BTTS, etc. Pas que des victoires.\n'
-              +'Reponds UNIQUEMENT avec ce JSON sans backticks:\n'
-              +'{"c1":{"label":"SHARK SAFE","type":"safe","selections":"pari1, pari2","matchs":"match1, match2","cote_totale":"2.1","conseil":"Court et percutant"},'
-              +'"c2":{"label":"SHARK VALUE","type":"value","selections":"pari1, pari2, pari3","matchs":"m1, m2, m3","cote_totale":"3.8","conseil":"..."},'
-              +'"c3":{"label":"SHARK AUDACE","type":"audace","selections":"pari1, pari2, pari3","matchs":"m1, m2, m3","cote_totale":"7.2","conseil":"..."}}';
-            var r = await postJSON('api.anthropic.com', '/v1/messages', {
-              model: 'claude-sonnet-4-6',
-              max_tokens: 800,
-              messages: [{role:'user', content:promptClassic}]
-            }, {'x-api-key':ANT_KEY, 'anthropic-version':'2023-06-01'});
-            var txt = (r.content&&r.content[0]&&r.content[0].text)||'{}';
-            var classics = [];
-            try {
-              var obj = JSON.parse(txt.replace(/```json|```/g,'').trim());
-              classics = Object.values(obj).filter(Boolean).map(function(c){
-                return {label:c.label||'COMBINE',type:c.type||'safe',selections:c.selections||'',matchs:c.matchs||'',cote_totale:c.cote_totale||'',conseil:c.conseil||''};
-              });
-            } catch(e) { classics = []; }
+            var result = [];
+            // Parser les edges en nombre (ex: "+7.3%" -> 7.3)
+            var enriched = list.map(function(a) {
+              var edgeNum = parseFloat((a.edge||'0').replace(/[^0-9.\-]/g,'')) || 0;
+              return Object.assign({}, a, {edge_num: edgeNum});
+            });
+            // ================================================================
+            // SHARK SAFE — ALGO PUR + PROMPT MILIMETRE, TOUS LES JOURS
+            // Score = confiance x edge. Criteres: conf >= 7.0, edge >= 6%
+            // Fourchette cote: 1.80 → 3.50
+            // ================================================================
+            var safePool = enriched.filter(function(a){ return a.conf >= 7.0 && a.edge_num >= 6; });
+            safePool.sort(function(a,b){ return (b.conf * b.edge_num) - (a.conf * a.edge_num); });
+            var safeSelected = [];
+            var safeUsedLeagues = {};
+            var safeUsedMatchs = {};
+            var safeCote = 1.0;
+            for (var si=0; si<safePool.length; si++) {
+              var s = safePool[si];
+              if (safeUsedLeagues[s.league||'?']) continue;
+              var newCote = safeCote * (s.cote && s.cote > 1 ? s.cote : 1.5);
+              if (safeSelected.length >= 2 && newCote > 3.50) continue;
+              safeSelected.push(s);
+              safeUsedLeagues[s.league||'?'] = true;
+              safeUsedMatchs[s.home+'_'+s.away] = true;
+              safeCote = newCote;
+              if (safeSelected.length >= 3) break;
+            }
+            if (safeSelected.length === 0 && enriched.length > 0) {
+              var fb = enriched.slice().sort(function(a,b){return b.conf-a.conf;});
+              safeSelected = fb.slice(0,2);
+              safeSelected.forEach(function(s){ safeUsedMatchs[s.home+'_'+s.away]=true; });
+              safeCote = safeSelected.reduce(function(acc,s){return acc*(s.cote&&s.cote>1?s.cote:1.5);},1.0);
+            }
+            var safeCoteStr = safeCote.toFixed(2);
+            var safeSelectionsStr = safeSelected.map(function(s){return s.pari;}).join(', ');
+            var safeMatchsStr = safeSelected.map(function(s){return s.home+' vs '+s.away;}).join(', ');
+            var safeConseil = 'Combiné sécurisé basé sur les meilleures analyses du jour.';
+            if (safeSelected.length > 0) {
+              var safeLines = safeSelected.map(function(s){
+                return '- '+s.home+' vs '+s.away+' ['+s.league+'] | PARI: '+s.pari+' | COTE: '+s.cote.toFixed(2)+' | EDGE: '+s.edge+' | CONFIANCE: '+s.conf+'/10 | MARCHE: '+(s.marche||'?');
+              }).join('\n');
+              var promptSafeConseil =
+                'Tu es IASHARK, systeme d\'analyse football de niveau professionnel. '
+                +'Le moteur algorithmique IASHARK a selectionne ces paris en calculant le score confiance x edge sur l\'ensemble des matchs du jour. '
+                +'Ce sont les paris avec la plus haute probabilite reelle versus probabilite implicite bookmaker.\n\n'
+                +'=== SELECTIONS SHARK SAFE DU JOUR ===\n'
+                +safeLines+'\n'
+                +'Cote totale du ticket: '+safeCoteStr+'x\n\n'
+                +'=== TA MISSION ===\n'
+                +'Redige le conseil du SHARK SAFE. Exactement 2 phrases. Style analytique froid, chiffres obligatoires, zero blabla.\n\n'
+                +'PHRASE 1 — JUSTIFICATION STATISTIQUE:\n'
+                +'Pour chaque selection, cite son edge exact et sa confiance. '
+                +'Exemple du niveau attendu: "Edge algorithmique de +11.2% sur l\'Over 1.5 Arsenal (confiance 8.1/10) et +9.4% sur le DC 1X Bayern (confiance 7.6/10) — les deux marchés sous-evalués par les bookmakers selon notre modele."\n'
+                +'PAS de "il semble que", PAS de "probablement". Seulement des constats chiffres.\n\n'
+                +'PHRASE 2 — CONCLUSION DU TICKET:\n'
+                +'Exprime en une phrase la solidite globale du combiné: nombre de selections, cote totale ('+safeCoteStr+'x), et la logique de diversification des marches. '
+                +'Exemple: "3 marches non correles, cote combinee a '+safeCoteStr+'x — le meilleur ratio risque/gain du jour selon l\'algorithme IASHARK."\n\n'
+                +'INTERDITS ABSOLUS: "n\'hesitez pas", "bonne chance", "je vous conseille", "nous pensons", emojis, point d\'exclamation excessif.\n'
+                +'OBLIGATOIRES: chiffres precis (edges, confiances, cote finale), ton expert froid, 2 phrases maximum.\n\n'
+                +'Reponds uniquement avec le texte du conseil. Aucun JSON, aucune balise, aucun guillemet.';
+              var rSafe = await postJSON('api.anthropic.com', '/v1/messages', {
+                model: 'claude-sonnet-4-6', max_tokens: 250,
+                messages: [{role:'user', content:promptSafeConseil}]
+              }, {'x-api-key':ANT_KEY, 'anthropic-version':'2023-06-01'});
+              safeConseil = ((rSafe.content&&rSafe.content[0]&&rSafe.content[0].text)||safeConseil).trim();
+            }
+            result.push({label:'SHARK SAFE',type:'safe',selections:safeSelectionsStr,matchs:safeMatchsStr,cote_totale:safeCoteStr,conseil:safeConseil});
+            console.log('  SAFE: '+safeSelected.length+' selections, cote='+safeCoteStr);
+            // ================================================================
+            // SHARK VALUE — CONDITIONNEL
+            // EXCLUSION TOTALE des matchs du SAFE
+            // Condition: >= 2 matchs DIFFERENTS du SAFE avec edge >= 10%, conf >= 7.0
+            // Fourchette cote: 3.50 → 6.50
+            // ================================================================
+            var valuePool = enriched.filter(function(a){
+              return a.conf >= 7.0 && a.edge_num >= 10 && !safeUsedMatchs[a.home+'_'+a.away];
+            });
+            var valueUsedMatchs = {};
+            if (valuePool.length >= 2) {
+              var valueLines = valuePool.map(function(a){
+                return '- '+a.home+' vs '+a.away+' ['+a.league+'] | PARI: '+a.pari+' | COTE: '+a.cote.toFixed(2)+' | EDGE: '+a.edge+' | CONFIANCE: '+a.conf+'/10 | MARCHE: '+(a.marche||'?');
+              }).join('\n');
+              var promptValue =
+                'Tu es le moteur de decision IASHARK. Mission: construire le SHARK VALUE avec une rigueur mathematique absolue, ou retourner null si la valeur reelle n\'est pas suffisante.\n\n'
+                +'CONTEXTE: Ces matchs ont ete pre-filtres (edge >= 10%, confiance >= 7.0) et sont DISTINCTS des matchs du SHARK SAFE du jour. '
+                +'Un match dans le VALUE ne peut pas etre dans le SAFE et vice versa — tickets totalement independants.\n\n'
+                +'=== MATCHS DISPONIBLES POUR LE VALUE ===\n'
+                +valueLines+'\n\n'
+                +'=== CRITERES OBLIGATOIRES — SHARK VALUE ===\n'
+                +'1. NOMBRE: exactement 3 selections\n'
+                +'2. EDGE MINIMUM: chaque selection retenue DOIT avoir edge >= 12% dans la liste ci-dessus. Si un paris a edge < 12%: rejette-le.\n'
+                +'3. SELECTION VALUE: au moins 1 pari avec cote >= 1.80 ET edge >= 12% — c\'est la piece maitresse du ticket\n'
+                +'4. VARIETE OBLIGATOIRE: interdiction formelle de 2 paris du meme type (ex: 2 victoires a domicile, 2 Over 2.5). Chaque selection doit etre sur un marche different (melange Victoire/Over/BTTS/DC)\n'
+                +'5. LIGUES: maximum 1 selection par championnat — diversification geographique obligatoire\n'
+                +'6. ANTI-CORRELATION: interdit de combiner Over 2.5 + BTTS Oui (meme information statistique), ou DC 1X + Victoire domicile du meme match\n'
+                +'7. COTE TOTALE: multiplie les 3 cotes. Cible STRICTE entre 3.50 et 6.50. Si < 3.50: cherche un 4e pari. Si > 6.50: retire le moins fiable.\n\n'
+                +'=== REGLE DE DECISION FINALE ===\n'
+                +'GENERE le VALUE si et seulement si: tu trouves 3 selections avec edge >= 12% chacune, marches varies, cote totale dans [3.50, 6.50].\n'
+                +'RETOURNE null si: edges insuffisants, moins de 3 selections qualifiees, ou cote impossible a atteindre dans la fourchette.\n'
+                +'PRINCIPE: un VALUE force sans vraie valeur matematique detruit la credibilite IASHARK. L\'absence de VALUE est un signal de rigueur, pas d\'echec.\n\n'
+                +'=== FORMAT DE REPONSE STRICT ===\n'
+                +'Si VALUE genere:\n'
+                +'{"label":"SHARK VALUE","type":"value","selections":"[pari1], [pari2], [pari3]","matchs":"[match1 vs match1away], [match2 vs match2away], [match3 vs match3away]","cote_totale":"[X.XX]","conseil":"[Phrase 1: edges precis de chaque selection et pourquoi ces marches sont sous-evalues. Phrase 2: logique de la combinaison, cote totale, ratio risque/gain.]"}\n\n'
+                +'Si VALUE absent:\n'
+                +'null\n\n'
+                +'REGLE ABSOLUE: reponds UNIQUEMENT avec le JSON compact ou le mot null. Zero texte supplementaire, zero explication, zero backtick.';
+              await sleep(300);
+              var rValue = await postJSON('api.anthropic.com', '/v1/messages', {
+                model: 'claude-sonnet-4-6', max_tokens: 400,
+                messages: [{role:'user', content:promptValue}]
+              }, {'x-api-key':ANT_KEY, 'anthropic-version':'2023-06-01'});
+              var txtValue = ((rValue.content&&rValue.content[0]&&rValue.content[0].text)||'').trim().replace(/```json|```/g,'').trim();
+              if (txtValue && txtValue !== 'null' && txtValue.startsWith('{')) {
+                try {
+                  var vObj = JSON.parse(txtValue);
+                  if (vObj && vObj.selections) {
+                    result.push({label:vObj.label||'SHARK VALUE',type:'value',selections:vObj.selections||'',matchs:vObj.matchs||'',cote_totale:vObj.cote_totale||'',conseil:vObj.conseil||''});
+                    // Marquer les matchs VALUE comme utilises
+                    var vMatchsList = (vObj.matchs||'').split(',');
+                    vMatchsList.forEach(function(m){ var t=m.trim(); if(t) valueUsedMatchs[t]=true; });
+                    console.log('  VALUE: GENERE cote='+vObj.cote_totale);
+                  }
+                } catch(e) { console.log('  VALUE: parse error'); }
+              } else {
+                console.log('  VALUE: SKIP (IA juge pas assez de valeur)');
+              }
+            } else {
+              console.log('  VALUE: SKIP (seulement '+valuePool.length+' matchs distincts du SAFE eligibles)');
+            }
+            // ================================================================
+            // SHARK AUDACE — CONDITIONNEL
+            // EXCLUSION TOTALE des matchs du SAFE et du VALUE
+            // Condition: >= 2 matchs DISTINCTS avec edge >= 12%, conf >= 6.5
+            // Fourchette cote: 8.00 → 13.00
+            // ================================================================
+            var audacePool = enriched.filter(function(a){
+              var matchKey = a.home+' vs '+a.away;
+              return a.conf >= 6.5 && a.edge_num >= 12
+                && !safeUsedMatchs[a.home+'_'+a.away]
+                && !valueUsedMatchs[matchKey];
+            });
+            if (audacePool.length >= 2) {
+              var audaceLines = audacePool.map(function(a){
+                return '- '+a.home+' vs '+a.away+' ['+a.league+'] | PARI: '+a.pari+' | COTE: '+a.cote.toFixed(2)+' | EDGE: '+a.edge+' | CONFIANCE: '+a.conf+'/10 | MARCHE: '+(a.marche||'?');
+              }).join('\n');
+              var promptAudace =
+                'Tu es le moteur de decision IASHARK. Mission: identifier une asymetrie risque/gain exceptionnelle pour le SHARK AUDACE, ou retourner null si elle n\'existe pas.\n\n'
+                +'CONTEXTE: Ces matchs sont DISTINCTS des matchs du SAFE et du VALUE du jour — trois tickets completement independants. '
+                +'L\'AUDACE vise une cote elevee mais mathematiquement justifiee, pas du hasard.\n\n'
+                +'=== MATCHS DISPONIBLES POUR L\'AUDACE ===\n'
+                +audaceLines+'\n\n'
+                +'=== PHILOSOPHIE SHARK AUDACE ===\n'
+                +'L\'AUDACE n\'est pas un pari fou. C\'est la detection d\'une inefficience de marche que les bookmakers n\'ont pas correctement pricee. '
+                +'Le parieur IASHARK prend un risque calcule parce que les stats indiquent une valeur cachee que le grand public ignore. '
+                +'Si tu ne trouves pas cette inefficience claire: retourne null. Un AUDACE mediocre nuit plus qu\'il n\'aide.\n\n'
+                +'=== CRITERES OBLIGATOIRES — SHARK AUDACE ===\n'
+                +'1. NOMBRE: 3 selections exactement\n'
+                +'2. PIECE MAITRESSE OBLIGATOIRE: au moins 1 selection avec cote >= 2.50 ET edge >= 14% — c\'est le coeur de l\'audace, la vraie inefficience detectee\n'
+                +'3. MARCHE ATYPIQUE OBLIGATOIRE: au moins 1 pari sur un marche non-standard parmi: BTTS Non (equipes defensives), victoire exterieure sous-cotee, outsider en forme, DC X2 avec dominance exterieure, Under sur match a enjeux tendus\n'
+                +'4. EDGE DE LA PIECE MAITRESSE: minimum 15% sinon ce n\'est pas de l\'audace mais du VALUE deguise\n'
+                +'5. LIGUES: maximum 1 selection par championnat\n'
+                +'6. COTE TOTALE: multiplie les 3 cotes. Cible STRICTE entre 8.00 et 13.00. Si < 8.00: cherche une selection plus audacieuse. Si > 13.00: trop risque, retire la moins fiable.\n\n'
+                +'=== REGLE DE DECISION FINALE ===\n'
+                +'GENERE l\'AUDACE si: tu identifies 1 pari a cote >= 2.50 avec edge >= 14%, plus 2 selections complementaires coherentes, cote totale dans [8.00, 13.00].\n'
+                +'RETOURNE null si: pas de vraie piece maitresse, edges insuffisants, ou cote impossible dans la fourchette.\n'
+                +'PRINCIPE CLES: VALUE = plusieurs paris raisonnables assembles. AUDACE = 1 pari que personne n\'ose mais que les statistiques valident, entourne de 2 supports solides.\n\n'
+                +'=== FORMAT DE REPONSE STRICT ===\n'
+                +'Si AUDACE genere:\n'
+                +'{"label":"SHARK AUDACE","type":"audace","selections":"[pari1], [pari2], [pari3]","matchs":"[match1 vs match1away], [match2 vs match2away], [match3 vs match3away]","cote_totale":"[X.XX]","conseil":"[Phrase 1: identifie la piece maitresse et son inefficience avec edge precis. Phrase 2: pourquoi cette prise de risque est mathematiquement justifiee et pas du tout un pari hasardeux.]"}\n\n'
+                +'Si AUDACE absent:\n'
+                +'null\n\n'
+                +'REGLE ABSOLUE: reponds UNIQUEMENT avec le JSON compact ou le mot null. Zero texte supplementaire.';
+              await sleep(300);
+              var rAudace = await postJSON('api.anthropic.com', '/v1/messages', {
+                model: 'claude-sonnet-4-6', max_tokens: 400,
+                messages: [{role:'user', content:promptAudace}]
+              }, {'x-api-key':ANT_KEY, 'anthropic-version':'2023-06-01'});
+              var txtAudace = ((rAudace.content&&rAudace.content[0]&&rAudace.content[0].text)||'').trim().replace(/```json|```/g,'').trim();
+              if (txtAudace && txtAudace !== 'null' && txtAudace.startsWith('{')) {
+                try {
+                  var aObj = JSON.parse(txtAudace);
+                  if (aObj && aObj.selections) {
+                    result.push({label:aObj.label||'SHARK AUDACE',type:'audace',selections:aObj.selections||'',matchs:aObj.matchs||'',cote_totale:aObj.cote_totale||'',conseil:aObj.conseil||''});
+                    console.log('  AUDACE: GENERE cote='+aObj.cote_totale);
+                  }
+                } catch(e) { console.log('  AUDACE: parse error'); }
+              } else {
+                console.log('  AUDACE: SKIP (IA juge pas d\'asymetrie suffisante)');
+              }
+            } else {
+              console.log('  AUDACE: SKIP (seulement '+audacePool.length+' matchs distincts eligibles)');
+            }
+            // ================================================================
+            // SAMEDI FOU / DIMANCHE FOU — ALGO PUR (weekend seulement)
+            // ================================================================
+            var classics = result; // alias pour la suite
             // Combiné spécial weekend — ALGO pur, sans IA pour la cote
-            if (!isSamedi && !isDimanche) return classics;
+            if (!isSamedi && !isDimanche) return result;
             var labelFou = isSamedi ? 'SAMEDI FOU' : 'DIMANCHE FOU';
             var typeFou  = isSamedi ? 'samedi_fou' : 'dimanche_fou';
             // Construire pool: pour chaque match, garder LA sélection la plus probable (cote la plus basse >= 1.20)
@@ -520,8 +691,8 @@ jobs:
               pool.push(candidates[0]);
             });
             if (pool.length < 4) {
-              classics.push({label:labelFou,type:typeFou,selections:'Pas assez de matchs ce jour',matchs:'',cote_totale:'--',conseil:'Reviens demain pour le combiné fou !'});
-              return classics;
+              result.push({label:labelFou,type:typeFou,selections:'Pas assez de matchs ce jour',matchs:'',cote_totale:'--',conseil:'Reviens demain pour le combiné fou !'});
+              return result;
             }
             // Trier par probabilité décroissante (cote croissante = plus probable)
             pool.sort(function(a,b){return a.cote-b.cote;});
@@ -559,9 +730,9 @@ jobs:
             var nbSel = selected.length;
             // Description analytique style SHARK VALUE/AUDACE
             var conseil = nbSel+' s\u00e9lections les plus probables du jour, probabilit\u00e9s IA entre '+probMin+'% et '+probMax+'%, combinaison optimis\u00e9e pour une cote maximale tout en restant bas\u00e9e sur des donn\u00e9es solides';
-            classics.push({label:labelFou,type:typeFou,selections:selectionsStr,matchs:matchsStr,cote_totale:coteFinalStr,conseil:conseil});
+            result.push({label:labelFou,type:typeFou,selections:selectionsStr,matchs:matchsStr,cote_totale:coteFinalStr,conseil:conseil});
             console.log('  COMBINE FOU: cote='+coteFinalStr+' ('+nbSel+' selections, probs '+probMin+'%-'+probMax+'%)');
-            return classics;
+            return result;
           }
           function formatH2H(fixtures, homeId, awayId) {
             return fixtures.slice(0,5).map(function(f) {
@@ -830,7 +1001,7 @@ jobs:
                 else if(p2.includes('under')) coteRec2=odds.cu25;
                 else if(p2.includes('nul')) coteRec2=odds.cn;
                 else if(p2.includes('victoire')&&(p2.includes(away.name.toLowerCase().slice(0,4))||p2.includes('ext'))) coteRec2=odds.c2;
-                forCombis.push({home:home.name,away:away.name,pari:an.pari_rec,conf:an.confiance,edge:an.edge||'',cote:coteRec2&&coteRec2!=='--'?parseFloat(coteRec2):1.5});
+                forCombis.push({home:home.name,away:away.name,league:lg.name,pari:an.pari_rec,marche:an.marche||'',conf:an.confiance,edge:an.edge||'',cote:coteRec2&&coteRec2!=='--'?parseFloat(coteRec2):1.5});
               }
               console.log('  OK conf='+matchObj.conf+' edge='+matchObj.edge+' pari='+matchObj.pari_rec);
             }

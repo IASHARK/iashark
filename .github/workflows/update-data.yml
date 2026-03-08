@@ -1,3 +1,4 @@
+
 name: Update IASHARK Daily
 
 on:
@@ -458,8 +459,8 @@ jobs:
               +'- DOM gagne 11/14 DOM + EXT perd 8/12 \u2192 Victoire DOM prob IA 78% vs impl 58% \u2192 edge +20%\n'
               +'- Pluie + fatigue + H2H ferm\u00e9 \u2192 Under 2.5 prob IA 68% vs impl 55% \u2192 edge +13%\n\n'
               +'=== FORMAT JSON STRICT ===\n'
-              +'{"confiance":6.3,"pari_rec":"[NOM EXACT avec equipe si victoire/DC]","marche":"RESULTAT|DOUBLE_CHANCE|TOTAL_BUTS|BTTS|COMBINE|MI_TEMPS|CLEAN_SHEET","risque":"FAIBLE|MODERE|ELEVE","vbet":"OUI|NON","edge":"+X.X%","argument":"1. [stat chiffree]. 2. [stat chiffree]. 3. [edge calcule].","analyse_card":"2-3 phrases analytiques","conseil":"3-4 phrases","contexte":"2-3 phrases","enjeux":"1 phrase","scores_probables":"1-0,0-0,2-1","p1":0,"pn":0,"p2":0,"po15":0,"po25":0,"btts":0,"mise":"2-3% bankroll","paris_3":{"safe":{"bet":"[pari le plus sur - Over/Under/BTTS/Victoire selon stats]","cote":"[cote reelle]","hint":"[raison chiffree]","mise":"4-5% bankroll","bookie":"Betclic"},"valeur":{"bet":"[value bet DIFFERENT du safe]","cote":"[cote reelle]","hint":"[edge calcule]","mise":"2-3% bankroll","bookie":"Winamax"},"specu":{"bet":"[pari audacieux: score exact, Over 3.5, mi-temps/final, clean sheet]","cote":"[cote reelle]","hint":"[justification]","mise":"0.5-1% bankroll","bookie":"Bet365"}}}\n\n'
-              +'CONTRAINTES: p1+pn+p2=100 | confiance CALCUL OBLIGE sur 1 decimale: base 5.0 + (edge_reel_pct / 3.5), arrondi a 0.1, min 1.0 max 10.0 - EXEMPLES: edge+7%=confiance 7.0 non acceptable, calcule 5.0+7/3.5=7.0 ok si exact sinon 6.9 ou 7.1 - INTERDIRE les .0 et .5 sauf si calcul exact | vbet OUI si edge>4% | les 3 paris_3 doivent etre differents | specu peut etre score exact ou marche exotique';
+              +'{"confiance":7.4,"pari_rec":"[NOM EXACT avec equipe si victoire/DC]","marche":"RESULTAT|DOUBLE_CHANCE|TOTAL_BUTS|BTTS|COMBINE|MI_TEMPS|CLEAN_SHEET","risque":"FAIBLE|MODERE|ELEVE","vbet":"OUI|NON","edge":"+X.X%","argument":"1. [stat chiffree]. 2. [stat chiffree]. 3. [edge calcule].","analyse_card":"2-3 phrases analytiques","conseil":"3-4 phrases","contexte":"2-3 phrases","enjeux":"1 phrase","scores_probables":"1-0,0-0,2-1","p1":0,"pn":0,"p2":0,"po15":0,"po25":0,"btts":0,"mise":"2-3% bankroll","paris_3":{"safe":{"bet":"[pari le plus sur - Over/Under/BTTS/Victoire selon stats]","cote":"[cote reelle]","hint":"[raison chiffree]","mise":"4-5% bankroll","bookie":"Betclic"},"valeur":{"bet":"[value bet DIFFERENT du safe]","cote":"[cote reelle]","hint":"[edge calcule]","mise":"2-3% bankroll","bookie":"Winamax"},"specu":{"bet":"[pari audacieux: score exact, Over 3.5, mi-temps/final, clean sheet]","cote":"[cote reelle]","hint":"[justification]","mise":"0.5-1% bankroll","bookie":"Bet365"}}}\n\n'
+              +'CONTRAINTES: p1+pn+p2=100 | confiance 1.0-10.0 | vbet OUI si edge>4% | les 3 paris_3 doivent etre differents | specu peut etre score exact ou marche exotique';
             var r = await postJSON('api.anthropic.com', '/v1/messages', {
               model: 'claude-sonnet-4-6',
               max_tokens: 2000,
@@ -474,87 +475,104 @@ jobs:
             var lines = list.map(function(a){
               return '- '+a.home+' vs '+a.away+': '+a.pari+' cote '+a.cote+' (confiance '+a.conf+'/10, edge '+(a.edge||'?')+')';
             }).join('\n');
+            // Combinés classiques
             var promptClassic =
               'Expert paris sportifs IASHARK. Analyses du jour:\n'+lines+'\n\n'
-              +'Construis les combines en combinant uniquement les paris confiance >= 7.0. '
-              +'Les selections doivent etre VARIEES: melange victoires, Over/Under, BTTS, DC, etc. Pas que des victoires.\n'
-              +'SHARK SAFE: exactement 2 selections, cote individuelle entre 1.30 et 1.70, cote TOTALE entre 1.90 et 2.50. INTERDIT: BTTS Non, nul, Under, Over 2.5+. AUTORISES: Over 1.5, DC 1X, DC X2, Victoire favorite.\n'
-              +'SHARK VALUE: 3 selections, edge >= 10% chacune, marches varies, cote totale entre 3.50 et 6.50. Si pas assez de valeur: mets "SKIP" dans selections.\n'
-              +'SHARK AUDACE: 3 selections, au moins 1 cote >= 2.50 avec fort edge, cote totale entre 8.00 et 13.00. Si aucune valeur:     mets "SKIP" dans selections.\n'
+              +'Genere 3 combines en combinant uniquement les paris confiance >= 7.0. '
+              +'Les selections doivent etre VARIEES: melange victoires, Over/Under, BTTS, etc. Pas que des victoires.\n'
               +'Reponds UNIQUEMENT avec ce JSON sans backticks:\n'
-              +'{"c1":{"label":"SHARK SAFE","type":"safe","selections":"pari1, pari2","matchs":"match1 vs away1, match2 vs away2","cote_totale":"2.1","conseil":"2 phrases: edges precis + solidite ticket"},'
-              +'"c2":{"label":"SHARK VALUE","type":"value","selections":"pari1, pari2, pari3","matchs":"m1 vs a1, m2 vs a2, m3 vs a3","cote_totale":"4.2","conseil":"..."},'
-              +'"c3":{"label":"SHARK AUDACE","type":"audace","selections":"pari1, pari2, pari3","matchs":"m1 vs a1, m2 vs a2, m3 vs a3","cote_totale":"9.5","conseil":"..."}}';
+              +'{"c1":{"label":"SHARK SAFE","type":"safe","selections":"pari1, pari2","matchs":"match1, match2","cote_totale":"2.1","conseil":"Court et percutant"},'
+              +'"c2":{"label":"SHARK VALUE","type":"value","selections":"pari1, pari2, pari3","matchs":"m1, m2, m3","cote_totale":"3.8","conseil":"..."},'
+              +'"c3":{"label":"SHARK AUDACE","type":"audace","selections":"pari1, pari2, pari3","matchs":"m1, m2, m3","cote_totale":"7.2","conseil":"..."}}';
             var r = await postJSON('api.anthropic.com', '/v1/messages', {
               model: 'claude-sonnet-4-6',
-              max_tokens: 900,
+              max_tokens: 800,
               messages: [{role:'user', content:promptClassic}]
             }, {'x-api-key':ANT_KEY, 'anthropic-version':'2023-06-01'});
-            var txt = (r.content&&r.content[0]&&r.content[0].text)||'{}'
+            var txt = (r.content&&r.content[0]&&r.content[0].text)||'{}';
             var classics = [];
             try {
               var obj = JSON.parse(txt.replace(/```json|```/g,'').trim());
-              Object.values(obj).filter(Boolean).forEach(function(c){
-                if (!c.selections || c.selections === 'SKIP') return;
-                classics.push({label:c.label||'COMBINE',type:c.type||'safe',selections:c.selections||'',matchs:c.matchs||'',cote_totale:c.cote_totale||'',conseil:c.conseil||''});
+              classics = Object.values(obj).filter(Boolean).map(function(c){
+                return {label:c.label||'COMBINE',type:c.type||'safe',selections:c.selections||'',matchs:c.matchs||'',cote_totale:c.cote_totale||'',conseil:c.conseil||''};
               });
             } catch(e) { classics = []; }
-            // SAMEDI FOU / DIMANCHE FOU — ALGO PUR (weekend seulement)
+            // Combiné spécial weekend — construction ALGORITHMIQUE avec vraies cotes
             if (!isSamedi && !isDimanche) return classics;
-            var labelFou = isSamedi ? 'SAMEDI FOU' : 'DIMANCHE FOU';
-            var typeFou  = isSamedi ? 'samedi_fou' : 'dimanche_fou';
+            var labelFou = isSamedi ? '\uD83D\uDD25 SAMEDI FOU \uD83D\uDD25' : '\uD83C\uDF0A DIMANCHE FOU \uD83C\uDF0A';
+            var typeFou = isSamedi ? 'samedi_fou' : 'dimanche_fou';
+            // Construire un pool de sélections avec vraies cotes depuis tous les matchs du jour
             var pool = [];
             (allMatchs||[]).forEach(function(m) {
               var matchLabel = m.home.n+' vs '+m.away.n;
-              var candidates = [];
-              if (m.dc1x &&m.dc1x !=='--'&&parseFloat(m.dc1x )>=1.20) candidates.push({match:matchLabel,sel:'Double Chance 1X',cote:parseFloat(m.dc1x ),prob:Math.round(100/parseFloat(m.dc1x ))});
-              if (m.c1   &&m.c1   !=='--'&&parseFloat(m.c1   )>=1.20) candidates.push({match:matchLabel,sel:'Victoire '+m.home.n,cote:parseFloat(m.c1   ),prob:Math.round(100/parseFloat(m.c1   ))});
-              if (m.co15 &&m.co15 !=='--'&&parseFloat(m.co15 )>=1.20) candidates.push({match:matchLabel,sel:'Over 1.5 buts',cote:parseFloat(m.co15 ),prob:Math.round(100/parseFloat(m.co15 ))});
-              if (m.btts_non&&m.btts_non!=='--'&&parseFloat(m.btts_non)>=1.20) candidates.push({match:matchLabel,sel:'BTTS Non',cote:parseFloat(m.btts_non),prob:Math.round(100/parseFloat(m.btts_non))});
-              if (m.co25 &&m.co25 !=='--'&&parseFloat(m.co25 )>=1.20) candidates.push({match:matchLabel,sel:'Over 2.5 buts',cote:parseFloat(m.co25 ),prob:Math.round(100/parseFloat(m.co25 ))});
-              if (m.btts_oui&&m.btts_oui!=='--'&&parseFloat(m.btts_oui)>=1.20) candidates.push({match:matchLabel,sel:'BTTS Oui',cote:parseFloat(m.btts_oui),prob:Math.round(100/parseFloat(m.btts_oui))});
-              if (m.dcx2 &&m.dcx2 !=='--'&&parseFloat(m.dcx2 )>=1.20) candidates.push({match:matchLabel,sel:'Double Chance X2',cote:parseFloat(m.dcx2 ),prob:Math.round(100/parseFloat(m.dcx2 ))});
-              if (m.c2   &&m.c2   !=='--'&&parseFloat(m.c2   )>=1.20) candidates.push({match:matchLabel,sel:'Victoire '+m.away.n,cote:parseFloat(m.c2   ),prob:Math.round(100/parseFloat(m.c2   ))});
-              if (!candidates.length) return;
-              candidates.sort(function(a,b){return a.cote-b.cote;});
-              pool.push(candidates[0]);
+              // Victoire domicile
+              if (m.c1&&m.c1!=='--'&&parseFloat(m.c1)>=1.5) pool.push({match:matchLabel, sel:'Victoire '+m.home.n, cote:parseFloat(m.c1)});
+              // Victoire extérieur
+              if (m.c2&&m.c2!=='--'&&parseFloat(m.c2)>=2.0) pool.push({match:matchLabel, sel:'Victoire '+m.away.n, cote:parseFloat(m.c2)});
+              // Nul
+              if (m.cn&&m.cn!=='--'&&parseFloat(m.cn)>=2.5) pool.push({match:matchLabel, sel:'Match Nul', cote:parseFloat(m.cn)});
+              // Over 2.5
+              if (m.co25&&m.co25!=='--'&&parseFloat(m.co25)>=1.5) pool.push({match:matchLabel, sel:'Over 2.5 buts', cote:parseFloat(m.co25)});
+              // BTTS Oui
+              if (m.btts_oui&&m.btts_oui!=='--'&&parseFloat(m.btts_oui)>=1.5) pool.push({match:matchLabel, sel:'BTTS Oui', cote:parseFloat(m.btts_oui)});
+              // Double chance X2 (cote interessante)
+              if (m.dcx2&&m.dcx2!=='--'&&parseFloat(m.dcx2)>=1.5&&parseFloat(m.dcx2)<=3.5) pool.push({match:matchLabel, sel:'Double Chance X2', cote:parseFloat(m.dcx2)});
             });
             if (pool.length < 4) {
-              classics.push({label:labelFou,type:typeFou,selections:'Pas assez de matchs ce jour',matchs:'',cote_totale:'--',conseil:'Reviens demain pour le combiné fou !'});
+              // pas assez de données, fallback basique
+              classics.push({label:labelFou,type:typeFou,selections:'Combiné spécial weekend - données insuffisantes',matchs:'',cote_totale:'--',conseil:'Pas assez de matchs aujourd\'hui pour le combiné fou !'});
               return classics;
             }
-            pool.sort(function(a,b){return a.cote-b.cote;});
-            var TARGET_MIN = 40, TARGET_MAX = 70;
+            // Mélanger le pool aléatoirement
+            for (var i=pool.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var tmp=pool[i];pool[i]=pool[j];pool[j]=tmp;}
+            // Dédupliquer par match (max 1 sélection par match)
+            var usedMatches = {};
+            var deduped = [];
+            pool.forEach(function(s){
+              if (!usedMatches[s.match]) { usedMatches[s.match]=true; deduped.push(s); }
+            });
+            // Construire le combiné en ajoutant des sélections jusqu'à atteindre cote 50-70
+            var TARGET_MIN = 50, TARGET_MAX = 70;
             var selected = [];
             var coteTotale = 1.0;
-            for (var si=0; si<pool.length; si++) {
-              var next = coteTotale * pool[si].cote;
-              selected.push(pool[si]);
-              coteTotale = next;
-              if (coteTotale >= TARGET_MIN) break;
+            // Trier par cote décroissante pour atteindre la cible plus vite
+            deduped.sort(function(a,b){return b.cote-a.cote;});
+            for (var si=0; si<deduped.length && selected.length<8; si++) {
+              var newCote = coteTotale * deduped[si].cote;
+              if (newCote <= TARGET_MAX || selected.length < 3) {
+                selected.push(deduped[si]);
+                coteTotale = newCote;
+                if (coteTotale >= TARGET_MIN && coteTotale <= TARGET_MAX) break;
+              }
             }
-            if (coteTotale > TARGET_MAX && selected.length > 2) {
-              selected.pop();
-              coteTotale = selected.reduce(function(acc,s){return acc*s.cote;},1.0);
-              for (var si2=selected.length; si2<pool.length; si2++) {
-                if (selected.find(function(s){return s.match===pool[si2].match;})) continue;
-                var candidate = coteTotale * pool[si2].cote;
-                if (candidate >= TARGET_MIN && candidate <= TARGET_MAX) {
-                  selected.push(pool[si2]);
-                  coteTotale = candidate;
-                  break;
+            // Si cote trop basse, ajouter des sélections supplémentaires
+            if (coteTotale < TARGET_MIN && deduped.length > selected.length) {
+              for (var si2=0; si2<deduped.length; si2++) {
+                if (selected.find(function(s){return s.match===deduped[si2].match;})) continue;
+                var newCote2 = coteTotale * deduped[si2].cote;
+                if (newCote2 <= TARGET_MAX * 1.3) {
+                  selected.push(deduped[si2]);
+                  coteTotale = newCote2;
+                  if (coteTotale >= TARGET_MIN) break;
                 }
               }
             }
-            var coteFinalStr = coteTotale.toFixed(2);
+            var coteFinalStr = coteTotale.toFixed(1);
             var selectionsStr = selected.map(function(s){return s.sel;}).join(', ');
-            var matchsStr     = selected.map(function(s){return s.match;}).join(', ');
-            var probMin = selected.reduce(function(mn,s){return Math.min(mn,s.prob);},100);
-            var probMax = selected.reduce(function(mx,s){return Math.max(mx,s.prob);},0);
-            var nbSel = selected.length;
-            var conseil = nbSel+' sélections les plus probables du jour, probabilités IA entre '+probMin+'% et '+probMax+'%, combinaison optimisée pour une cote maximale tout en restant basée sur des données solides';
+            var matchsStr = selected.map(function(s){return s.match;}).join(', ');
+            // Demander à Claude juste le texte du conseil (pas la cote)
+            await sleep(300);
+            var promptConseil =
+              'Tu es IASHARK. Ecris UNE phrase accrocheuse et fun en francais pour motiver les joueurs a tenter ce combine weekend: '
+              +selectionsStr+' (cote totale '+coteFinalStr+'x). Max 120 caracteres, style excite et emoji.';
+            var rc = await postJSON('api.anthropic.com', '/v1/messages', {
+              model: 'claude-sonnet-4-6',
+              max_tokens: 100,
+              messages: [{role:'user', content:promptConseil}]
+            }, {'x-api-key':ANT_KEY, 'anthropic-version':'2023-06-01'});
+            var conseil = ((rc.content&&rc.content[0]&&rc.content[0].text)||'Tente ta chance ce weekend ! \uD83E\uDD88\uD83D\uDD25').trim();
             classics.push({label:labelFou,type:typeFou,selections:selectionsStr,matchs:matchsStr,cote_totale:coteFinalStr,conseil:conseil});
-            console.log('  COMBINE FOU: cote='+coteFinalStr+' ('+nbSel+' selections, probs '+probMin+'%-'+probMax+'%)');
+            console.log('  COMBINE FOU: cote='+coteFinalStr+' ('+selected.length+' selections)');
             return classics;
           }
           function formatH2H(fixtures, homeId, awayId) {
@@ -824,7 +842,7 @@ jobs:
                 else if(p2.includes('under')) coteRec2=odds.cu25;
                 else if(p2.includes('nul')) coteRec2=odds.cn;
                 else if(p2.includes('victoire')&&(p2.includes(away.name.toLowerCase().slice(0,4))||p2.includes('ext'))) coteRec2=odds.c2;
-                forCombis.push({home:home.name,away:away.name,league:lg.name,pari:an.pari_rec,marche:an.marche||'',conf:an.confiance,edge:an.edge||'',cote:coteRec2&&coteRec2!=='--'?parseFloat(coteRec2):1.5});
+                forCombis.push({home:home.name,away:away.name,pari:an.pari_rec,conf:an.confiance,edge:an.edge||'',cote:coteRec2&&coteRec2!=='--'?parseFloat(coteRec2):1.5});
               }
               console.log('  OK conf='+matchObj.conf+' edge='+matchObj.edge+' pari='+matchObj.pari_rec);
             }

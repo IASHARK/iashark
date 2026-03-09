@@ -175,12 +175,91 @@ jobs:
               +'<script>setTimeout(function(){window.location="https://iashark.com"},5000);</script>\n'
               +'</body></html>';
           }
+          // Textes traduits pour les pages WC
+          var WC_TEXTS = {
+            'en': {
+              desc: 'Complete AI analysis of {name} for the 2026 FIFA World Cup (USA, Canada, Mexico, June–July 2026). Win probabilities, group stage predictions and match analysis by IASHARK.',
+              analyzes: 'IASHARK analyzes 47+ statistical indicators for every team at the 2026 FIFA World Cup.',
+              tournament: 'Tournament', dates: 'Dates', host: 'Host countries', teams: 'Teams',
+              allpreds: 'All 2026 World Cup AI Predictions', live: 'Live AI Football Predictions — IASHARK',
+              indexdesc: 'AI predictions and analysis for all 48 teams at the 2026 FIFA World Cup. Win probabilities, group stages, and match forecasts by IASHARK AI.'
+            },
+            'es': {
+              desc: 'Análisis completo de IA de {name} para la Copa del Mundo 2026 (EE.UU., Canadá, México, junio–julio 2026). Probabilidades de victoria, predicciones de grupos y análisis de partidos por IASHARK.',
+              analyzes: 'IASHARK analiza más de 47 indicadores estadísticos de cada equipo en la Copa del Mundo 2026.',
+              tournament: 'Torneo', dates: 'Fechas', host: 'Países anfitriones', teams: 'Equipos',
+              allpreds: 'Todas las predicciones IA Copa del Mundo 2026', live: 'Predicciones de fútbol en vivo — IASHARK',
+              indexdesc: 'Predicciones y análisis de IA para los 48 equipos de la Copa del Mundo 2026. Probabilidades, grupos y pronósticos por IASHARK.'
+            },
+            'pt': {
+              desc: 'Análise completa de IA de {name} para a Copa do Mundo 2026 (EUA, Canadá, México, junho–julho 2026). Probabilidades de vitória, previsões de grupos e análise de jogos pela IASHARK.',
+              analyzes: 'A IASHARK analisa mais de 47 indicadores estatísticos de todas as equipes da Copa do Mundo 2026.',
+              tournament: 'Torneio', dates: 'Datas', host: 'Países anfitriões', teams: 'Seleções',
+              allpreds: 'Todas as previsões IA Copa do Mundo 2026', live: 'Previsões de futebol ao vivo — IASHARK',
+              indexdesc: 'Previsões e análises de IA para todas as 48 seleções da Copa do Mundo 2026 pela IASHARK.'
+            },
+            'de': {
+              desc: 'Vollständige KI-Analyse von {name} für die WM 2026 (USA, Kanada, Mexiko, Juni–Juli 2026). Siegwahrscheinlichkeiten, Gruppenprognosen und Spielanalysen von IASHARK.',
+              analyzes: 'IASHARK analysiert 47+ statistische Indikatoren für jede Mannschaft bei der WM 2026.',
+              tournament: 'Turnier', dates: 'Termine', host: 'Gastgeberländer', teams: 'Mannschaften',
+              allpreds: 'Alle KI-Prognosen WM 2026', live: 'Live KI Fußballprognosen — IASHARK',
+              indexdesc: 'KI-Prognosen und Analysen für alle 48 Mannschaften der WM 2026 von IASHARK.'
+            },
+            'it': {
+              desc: 'Analisi completa IA di {name} per i Mondiali 2026 (USA, Canada, Messico, giugno–luglio 2026). Probabilità di vittoria, previsioni gironi e analisi partite di IASHARK.',
+              analyzes: 'IASHARK analizza 47+ indicatori statistici per ogni squadra ai Mondiali 2026.',
+              tournament: 'Torneo', dates: 'Date', host: 'Paesi ospitanti', teams: 'Squadre',
+              allpreds: 'Tutte le previsioni IA Mondiali 2026', live: 'Previsioni calcio in tempo reale — IASHARK',
+              indexdesc: 'Previsioni e analisi IA per tutte le 48 squadre dei Mondiali 2026 da IASHARK.'
+            },
+            'ar': {
+              desc: 'تحليل شامل بالذكاء الاصطناعي لـ {name} في كأس العالم 2026 (الولايات المتحدة، كندا، المكسيك، يونيو–يوليو 2026). احتمالات الفوز والتنبؤات من IASHARK.',
+              analyzes: 'تحلل IASHARK أكثر من 47 مؤشراً إحصائياً لكل منتخب في كأس العالم 2026.',
+              tournament: 'البطولة', dates: 'التواريخ', host: 'الدول المضيفة', teams: 'المنتخبات',
+              allpreds: 'جميع تنبؤات الذكاء الاصطناعي لكأس العالم 2026', live: 'تنبؤات كرة القدم المباشرة — IASHARK',
+              indexdesc: 'تنبؤات وتحليلات الذكاء الاصطناعي لجميع المنتخبات الـ48 في كأس العالم 2026 من IASHARK.'
+            },
+            'tr': {
+              desc: '{name} için 2026 FIFA Dünya Kupası (ABD, Kanada, Meksika, Haziran–Temmuz 2026) tam yapay zeka analizi. IASHARK tarafından galibiyet olasılıkları ve maç analizleri.',
+              analyzes: 'IASHARK, 2026 Dünya Kupası\'ndaki her takım için 47+ istatistiksel gösterge analiz eder.',
+              tournament: 'Turnuva', dates: 'Tarihler', host: 'Ev sahibi ülkeler', teams: 'Takımlar',
+              allpreds: '2026 Dünya Kupası AI Tahminlerinin Tamamı', live: 'Canlı AI Futbol Tahminleri — IASHARK',
+              indexdesc: '2026 FIFA Dünya Kupası\'ndaki 48 takımın tamamı için IASHARK AI tahminleri.'
+            },
+            'nl': {
+              desc: 'Volledige AI-analyse van {name} voor het WK 2026 (VS, Canada, Mexico, juni–juli 2026). Winstkansen, groepsvoorspellingen en wedstrijdanalyses door IASHARK.',
+              analyzes: 'IASHARK analyseert 47+ statistische indicatoren voor elk team op het WK 2026.',
+              tournament: 'Toernooi', dates: 'Data', host: 'Gastlanden', teams: 'Teams',
+              allpreds: 'Alle AI-voorspellingen WK 2026', live: 'Live AI voetbalvoorspellingen — IASHARK',
+              indexdesc: 'AI-voorspellingen en analyses voor alle 48 teams op het WK 2026 van IASHARK.'
+            },
+            'pl': {
+              desc: 'Pełna analiza AI {name} na Mistrzostwa Świata 2026 (USA, Kanada, Meksyk, czerwiec–lipiec 2026). Prawdopodobieństwa wygranej i prognozy meczów od IASHARK.',
+              analyzes: 'IASHARK analizuje 47+ wskaźników statystycznych dla każdej drużyny na MŚ 2026.',
+              tournament: 'Turniej', dates: 'Daty', host: 'Kraje gospodarz', teams: 'Drużyny',
+              allpreds: 'Wszystkie prognozy AI MŚ 2026', live: 'Prognozy piłkarskie na żywo — IASHARK',
+              indexdesc: 'Prognozy i analizy AI dla wszystkich 48 drużyn MŚ 2026 od IASHARK.'
+            },
+            'id': {
+              desc: 'Analisis AI lengkap {name} untuk Piala Dunia 2026 (AS, Kanada, Meksiko, Juni–Juli 2026). Probabilitas kemenangan dan prediksi pertandingan oleh IASHARK.',
+              analyzes: 'IASHARK menganalisis 47+ indikator statistik untuk setiap tim di Piala Dunia 2026.',
+              tournament: 'Turnamen', dates: 'Tanggal', host: 'Negara tuan rumah', teams: 'Tim',
+              allpreds: 'Semua prediksi AI Piala Dunia 2026', live: 'Prediksi sepak bola AI langsung — IASHARK',
+              indexdesc: 'Prediksi dan analisis AI untuk 48 tim Piala Dunia 2026 oleh IASHARK.'
+            }
+          };
+          function getWCText(lang, key, name) {
+            var t = WC_TEXTS[lang] || WC_TEXTS['en'];
+            var txt = t[key] || WC_TEXTS['en'][key] || '';
+            return name ? txt.replace('{name}', name) : txt;
+          }
           function genWCTeamPage(team, lang) {
             var name = getTeamName(team, lang);
             var wcTitle = WC_TITLE[lang] || WC_TITLE['en'];
             var title = name + ' - ' + wcTitle;
-            var desc = 'Complete AI analysis of ' + name + ' for the 2026 FIFA World Cup (USA, Canada, Mexico, June-July 2026). Win probabilities, group stage predictions and match analysis by IASHARK.';
+            var desc = getWCText(lang, 'desc', name);
             var safeTitle = title.replace(/</g,'&lt;');
+            var t = WC_TEXTS[lang] || WC_TEXTS['en'];
             return '<!DOCTYPE html><html lang="'+lang+'">\n<head>\n'
               +'<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">\n'
               +'<title>'+safeTitle+' | IASHARK</title>\n'
@@ -195,24 +274,25 @@ jobs:
               +'<h1>'+safeTitle+'</h1>\n'
               +'<h2>'+name+' — 2026 FIFA World Cup</h2>\n'
               +'<p>'+desc+'</p>\n'
-              +'<p>IASHARK analyzes 47+ statistical indicators for every team competing in the 2026 FIFA World Cup.</p>\n'
+              +'<p>'+getWCText(lang,'analyzes')+'</p>\n'
               +'<ul>\n'
-              +'<li><strong>Tournament:</strong> 2026 FIFA World Cup</li>\n'
-              +'<li><strong>Dates:</strong> June 11 – July 19, 2026</li>\n'
-              +'<li><strong>Host countries:</strong> USA, Canada, Mexico</li>\n'
-              +'<li><strong>Teams:</strong> 48 nations</li>\n'
+              +'<li><strong>'+t.tournament+':</strong> 2026 FIFA World Cup</li>\n'
+              +'<li><strong>'+t.dates+':</strong> June 11 – July 19, 2026</li>\n'
+              +'<li><strong>'+t.host+':</strong> USA, Canada, Mexico</li>\n'
+              +'<li><strong>'+t.teams+':</strong> 48</li>\n'
               +'</ul>\n'
-              +'<p><a href="https://iashark.com/'+lang+'/world-cup-2026/">All 2026 World Cup AI Predictions</a></p>\n'
-              +'<p><a href="https://iashark.com">Live AI Football Predictions — IASHARK</a></p>\n'
+              +'<p><a href="https://iashark.com/'+lang+'/world-cup-2026/">'+t.allpreds+'</a></p>\n'
+              +'<p><a href="https://iashark.com">'+t.live+'</a></p>\n'
               +'<script>setTimeout(function(){window.location="https://iashark.com"},6000);</script>\n'
               +'</body></html>';
           }
           function genWCIndexPage(lang) {
             var wcTitle = WC_TITLE[lang] || WC_TITLE['en'];
-            var desc = 'AI predictions and analysis for all 48 teams at the 2026 FIFA World Cup. Win probabilities, group stages, and match forecasts by IASHARK AI.';
-            var links = WC_TEAMS.map(function(t){
-              var name = getTeamName(t, lang);
-              return '<li><a href="https://iashark.com/'+lang+'/world-cup-2026/'+t.slug+'.html">'+name+'</a></li>';
+            var desc = getWCText(lang, 'indexdesc');
+            var t = WC_TEXTS[lang] || WC_TEXTS['en'];
+            var links = WC_TEAMS.map(function(tm){
+              var name = getTeamName(tm, lang);
+              return '<li><a href="https://iashark.com/'+lang+'/world-cup-2026/'+tm.slug+'.html">'+name+'</a></li>';
             }).join('\n');
             return '<!DOCTYPE html><html lang="'+lang+'">\n<head>\n'
               +'<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">\n'
@@ -224,7 +304,7 @@ jobs:
               +'<h1>'+wcTitle+'</h1>\n'
               +'<p>'+desc+'</p>\n'
               +'<ul>\n'+links+'\n</ul>\n'
-              +'<p><a href="https://iashark.com">IASHARK — AI Football Predictions</a></p>\n'
+              +'<p><a href="https://iashark.com">'+t.live+'</a></p>\n'
               +'</body></html>';
           }
           function generateWorldCupPages() {

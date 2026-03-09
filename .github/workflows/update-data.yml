@@ -299,9 +299,7 @@ jobs:
             var desc = getWCText(lang, 'desc', name);
             var safeTitle = title.replace(/</g,'&lt;');
             var t = WC_TEXTS[lang] || WC_TEXTS['en'];
-            return '<!DOCTYPE html><html lang="'+lang+'">
-<head>
-'
+            return '<!DOCTYPE html><html lang="'+lang+'"><head>'
               +'<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 '
               +'<title>'+safeTitle+' | IASHARK</title>
@@ -366,9 +364,7 @@ jobs:
               var name = getTeamName(tm, lang);
               return '<li><a href="https://iashark.com/'+lang+'/world-cup-2026/'+tm.slug+'.html" style="color:#22d3ee;text-decoration:none;">'+name+'</a></li>';
             }).join('\n');
-            return '<!DOCTYPE html><html lang="'+lang+'">
-<head>
-'
+            return '<!DOCTYPE html><html lang="'+lang+'"><head>'
               +'<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 '
               +'<title>'+wcTitle+' | IASHARK</title>
@@ -391,9 +387,7 @@ jobs:
               +'<p style="color:#94a3b8;">'+desc+'</p>
 '
               +'<ul style="list-style:none;padding:0;columns:2;line-height:2.2;">
-'+links+'
-</ul>
-'
+'+links+'</ul>'
               +'<p style="margin-top:30px;"><a href="https://iashark.com" style="background:#22d3ee;color:#0a0e17;text-decoration:none;padding:10px 20px;border-radius:8px;font-weight:bold;">'+t.live+' &rarr;</a></p>
 '
               +'</div>

@@ -54,7 +54,7 @@ jobs:
             'da':'Danish','fi':'Finnish','sw':'Swahili'
           };
           // Langues avec traduction Claude (appel API)
-          var TOP_LANGS = ['en','es','pt','de','it','ar','tr','nl','pl','id'];
+          var TOP_LANGS = ['en','es','pt','de','it','ar','tr','nl','pl','id','ko','vi','th','el','ro','sv','da','ja'];
 
           // Titres Coupe du Monde par langue
           var WC_TITLE = {
@@ -392,6 +392,237 @@ jobs:
             try { return JSON.parse(txt.replace(/```json|```/g,'').trim()); }
             catch(e) { console.log('  Translation parse error for '+lang+', using fallback'); return texts; }
           }
+          // ================================================================
+          // GÉNÉRATION ARTICLES BLOG (J-7 PREVIEW + JOUR J ANALYSE)
+          // ================================================================
+          async function generateBlogArticles(matchsData, upcomingFixtures) {
+            console.log('\n=== GÉNÉRATION ARTICLES BLOG ===');
+            var BLOG_LANGS = ['fr','en','es','pt','de','it','ar','tr','nl','pl','id','ko','vi','th','el','ro','sv','da','ja'];
+            var BLOG_LANG_NAMES = {
+              fr:'French',en:'English',es:'Spanish',pt:'Portuguese',de:'German',
+              it:'Italian',ar:'Arabic',tr:'Turkish',nl:'Dutch',pl:'Polish',
+              id:'Indonesian',ko:'Korean',vi:'Vietnamese',th:'Thai',el:'Greek',
+              ro:'Romanian',sv:'Swedish',da:'Danish',ja:'Japanese'
+            };
+
+            // Créer dossiers blog
+            mkdirSafe('blog');
+            BLOG_LANGS.forEach(function(lg) {
+              if (lg !== 'fr') mkdirSafe(lg+'/blog');
+            });
+
+            // ── ARTICLES JOUR J (analyses complètes) ──
+            if (matchsData.length > 0) {
+              console.log('  Articles Jour J: '+matchsData.length+' matchs...');
+              for (var mi = 0; mi < matchsData.length; mi++) {
+                var m = matchsData[mi];
+                var slug = slugify(m.home.n+'-vs-'+m.away.n+'-'+m.date.split(' ')[0]);
+                var dateStr = m.date ? m.date.split(' ')[0] : TODAY;
+
+                // Générer contenu FR d'abord
+                var blogPrompt = 'Tu es un expert en analyse football et paris sportifs. Ecris un article de blog SEO complet en FRANCAIS pour ce match.\n'
+                  + 'Match: '+m.home.n+' vs '+m.away.n+'\n'
+                  + 'Date: '+m.date+'\n'
+                  + 'Ligue: '+m.league+'\n'
+                  + 'Analyse IA: '+m.analyse_card+'\n'
+                  + 'Pronostic: '+m.pari_rec+'\n'
+                  + 'Confiance: '+m.conf+'/10\n'
+                  + 'Edge: '+m.edge+'\n'
+                  + 'Risque: '+m.risque+'\n'
+                  + 'Conseil: '+m.conseil_public+'\n\n'
+                  + 'STRUCTURE OBLIGATOIRE - reponds UNIQUEMENT en JSON:\n'
+                  + '{"title":"[titre SEO 60 chars max avec mots cles]","meta_desc":"[160 chars max]","intro":"[2 paragraphes intro avec mots cles naturels]","analyse":"[3 paragraphes analyse complete]","stats":"[2 paragraphes stats et forme]","pronostic":"[2 paragraphes pronostic et justification]","faq":[{"q":"[question recherchee sur Google]","a":"[reponse 2-3 phrases]"},{"q":"...","a":"..."},{"q":"...","a":"..."}],"conclusion":"[1 paragraphe conclusion avec CTA]","keywords":["mot1","mot2","mot3","mot4","mot5"]}';
+
+                try {
+                  var blogResp = await postJSON('api.anthropic.com', '/v1/messages', {
+                    model: 'claude-haiku-4-5-20251001',
+                    max_tokens: 1500,
+                    messages: [{role:'user', content: blogPrompt}]
+                  }, {'x-api-key': ANT_KEY, 'anthropic-version': '2023-06-01'});
+
+                  var blogText = (blogResp.content&&blogResp.content[0]&&blogResp.content[0].text)||'{}';
+                  var blogClean = blogText.replace(/```json|```/g,'').trim();
+                  var blogData = JSON.parse(blogClean);
+
+                  // Générer HTML pour FR
+                  var frHTML = genBlogHTML(m, blogData, 'fr', slug, dateStr, 'analyse');
+                  fs.writeFileSync('blog/'+slug+'.html', frHTML);
+
+                  // Traduire et générer pour chaque autre langue
+                  for (var li = 0; li < BLOG_LANGS.length; li++) {
+                    var lg = BLOG_LANGS[li];
+                    if (lg === 'fr') continue;
+                    var lgName = BLOG_LANG_NAMES[lg];
+                    try {
+                      var trPrompt = 'Translate this football blog article data to '+lgName+'. Keep team names, BTTS, Over 2.5, Value Bet unchanged. Return ONLY valid JSON same structure:\n'+JSON.stringify(blogData);
+                      var trResp = await postJSON('api.anthropic.com', '/v1/messages', {
+                        model: 'claude-haiku-4-5-20251001',
+                        max_tokens: 1500,
+                        messages: [{role:'user', content: trPrompt}]
+                      }, {'x-api-key': ANT_KEY, 'anthropic-version': '2023-06-01'});
+                      var trText = (trResp.content&&trResp.content[0]&&trResp.content[0].text)||'{}';
+                      var trClean = trText.replace(/```json|```/g,'').trim();
+                      var trData = JSON.parse(trClean);
+                      var lgSlug = slugify(m.home.n+'-vs-'+m.away.n+'-'+dateStr);
+                      var lgHTML = genBlogHTML(m, trData, lg, lgSlug, dateStr, 'analyse');
+                      fs.writeFileSync(lg+'/blog/'+lgSlug+'.html', lgHTML);
+                    } catch(e) {
+                      console.log('    Blog '+lgName+' erreur: '+e.message);
+                    }
+                    await sleep(200);
+                  }
+                  console.log('  Blog OK: '+m.home.n+' vs '+m.away.n);
+                } catch(e) {
+                  console.log('  Blog erreur '+m.home.n+': '+e.message);
+                }
+              }
+            }
+
+            // ── ARTICLES J-7 PREVIEW (matchs à venir) ──
+            if (upcomingFixtures && upcomingFixtures.length > 0) {
+              console.log('  Articles Preview J-7: '+upcomingFixtures.length+' matchs...');
+              for (var ui = 0; ui < upcomingFixtures.length; ui++) {
+                var uf = upcomingFixtures[ui];
+                var uSlug = slugify(uf.home+'-vs-'+uf.away+'-'+uf.date);
+                var previewPrompt = 'Tu es un expert football. Ecris un article PREVIEW SEO en FRANCAIS pour ce match a venir.\n'
+                  + 'Match: '+uf.home+' vs '+uf.away+'\n'
+                  + 'Date: '+uf.date+'\n'
+                  + 'Ligue: '+(uf.league||'Football')+'\n\n'
+                  + 'IMPORTANT: pas de prédiction définitive car le match na pas encore eu lieu. Focus sur contexte, historique, enjeux.\n'
+                  + 'Reponds UNIQUEMENT en JSON:\n'
+                  + '{"title":"[titre SEO preview]","meta_desc":"[160 chars]","intro":"[2 paragraphes contexte]","analyse":"[2 paragraphes enjeux et historique]","stats":"[1 paragraphe stats recentes]","pronostic":"[1 paragraphe tendances sans prediction ferme]","faq":[{"q":"...","a":"..."},{"q":"...","a":"..."},{"q":"...","a":"..."}],"conclusion":"[CTA vers site pour voir analyse complete]","keywords":["mot1","mot2","mot3"]}';
+
+                try {
+                  var pvResp = await postJSON('api.anthropic.com', '/v1/messages', {
+                    model: 'claude-haiku-4-5-20251001',
+                    max_tokens: 1200,
+                    messages: [{role:'user', content: previewPrompt}]
+                  }, {'x-api-key': ANT_KEY, 'anthropic-version': '2023-06-01'});
+
+                  var pvText = (pvResp.content&&pvResp.content[0]&&pvResp.content[0].text)||'{}';
+                  var pvClean = pvText.replace(/```json|```/g,'').trim();
+                  var pvData = JSON.parse(pvClean);
+                  var pvHTML = genBlogHTML({home:{n:uf.home},away:{n:uf.away},league:uf.league||'',date:uf.date+' 00:00'}, pvData, 'fr', uSlug, uf.date, 'preview');
+                  fs.writeFileSync('blog/preview-'+uSlug+'.html', pvHTML);
+
+                  // Traduire preview en EN/ES/PT/DE/IT + langues haute opportunité
+                  var pvLangs = ['en','es','pt','de','it','id','tr','ko','vi'];
+                  for (var pli = 0; pli < pvLangs.length; pli++) {
+                    var plg = pvLangs[pli];
+                    var plgName = BLOG_LANG_NAMES[plg];
+                    try {
+                      var pvTrResp = await postJSON('api.anthropic.com', '/v1/messages', {
+                        model: 'claude-haiku-4-5-20251001',
+                        max_tokens: 1200,
+                        messages: [{role:'user', content: 'Translate to '+plgName+', return same JSON structure, keep team names unchanged:\n'+JSON.stringify(pvData)}]
+                      }, {'x-api-key': ANT_KEY, 'anthropic-version': '2023-06-01'});
+                      var pvTrText = (pvTrResp.content&&pvTrResp.content[0]&&pvTrResp.content[0].text)||'{}';
+                      var pvTrData = JSON.parse(pvTrText.replace(/```json|```/g,'').trim());
+                      mkdirSafe(plg+'/blog');
+                      fs.writeFileSync(plg+'/blog/preview-'+uSlug+'.html', genBlogHTML({home:{n:uf.home},away:{n:uf.away},league:uf.league||'',date:uf.date+' 00:00'}, pvTrData, plg, uSlug, uf.date, 'preview'));
+                    } catch(e2) {}
+                    await sleep(150);
+                  }
+                  console.log('  Preview OK: '+uf.home+' vs '+uf.away);
+                } catch(e) {
+                  console.log('  Preview erreur: '+e.message);
+                }
+                await sleep(300);
+              }
+            }
+            console.log('  === BLOG TERMINÉ ===');
+          }
+
+          // ── TEMPLATE HTML ARTICLE BLOG ──
+          function genBlogHTML(m, d, lang, slug, dateStr, type) {
+            var isAR = lang === 'ar';
+            var dir = isAR ? 'rtl' : 'ltr';
+            var homeTeam = m.home ? m.home.n : '';
+            var awayTeam = m.away ? m.away.n : '';
+            var title = d.title || (homeTeam+' vs '+awayTeam+' - '+dateStr);
+            var metaDesc = d.meta_desc || title;
+            var keywords = Array.isArray(d.keywords) ? d.keywords.join(',') : '';
+            var canonicalLang = lang === 'fr' ? '' : lang+'/';
+            var previewLabel = type === 'preview' ? 'PREVIEW' : 'ANALYSE IA';
+            var faqHtml = '';
+            if (Array.isArray(d.faq)) {
+              d.faq.forEach(function(f) {
+                faqHtml += '<div class="faq-item"><div class="faq-q">'+f.q+'</div><div class="faq-a">'+f.a+'</div></div>';
+              });
+            }
+            var hreflangs = ['fr','en','es','pt','de','it','ar','tr','nl','pl','id','ko','vi','th','el','ro','sv','da','ja'].map(function(lg) {
+              var prefix = lg === 'fr' ? '' : lg+'/';
+              var filePrefix = type === 'preview' ? 'preview-' : '';
+              return '<link rel="alternate" hreflang="'+lg+'" href="https://iashark.com/'+prefix+'blog/'+filePrefix+slug+'.html">';
+            }).join('\n');
+
+            return '<!DOCTYPE html>\n<html lang="'+lang+'" dir="'+dir+'">\n<head>\n'
+              +'<meta charset="UTF-8">\n'
+              +'<meta name="viewport" content="width=device-width,initial-scale=1">\n'
+              +'<title>'+title+' | IASHARK</title>\n'
+              +'<meta name="description" content="'+metaDesc+'">\n'
+              +'<meta name="keywords" content="'+keywords+'">\n'
+              +'<link rel="canonical" href="https://iashark.com/'+canonicalLang+'blog/'+(type==='preview'?'preview-':'')+slug+'.html">\n'
+              +hreflangs+'\n'
+              +'<script type="application/ld+json">'+JSON.stringify({"@context":"https://schema.org","@type":"Article","headline":title,"description":metaDesc,"author":{"@type":"Organization","name":"IASHARK"},"publisher":{"@type":"Organization","name":"IASHARK","url":"https://iashark.com"},"datePublished":dateStr,"dateModified":TODAY,"mainEntityOfPage":"https://iashark.com/"+canonicalLang+"blog/"+(type==='preview'?'preview-':'')+slug+".html"})+'</script>\n'
+              +'<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=JetBrains+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">\n'
+              +'<style>:root{--bg:#060a0c;--card:#0d1820;--cyan:#00e5ff;--amber:#ffab00;--green:#00e676;--red:#ff1744;--text:#e8f0f4;--muted:#4a6878;--border:rgba(255,255,255,0.06);}*{margin:0;padding:0;box-sizing:border-box;}body{background:var(--bg);color:var(--text);font-family:"DM Sans",sans-serif;line-height:1.7;}'
+              +'a{color:var(--cyan);text-decoration:none;}'
+              +'.hdr{background:rgba(6,10,12,0.97);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:99;}'
+              +'.logo{font-family:"Bebas Neue",sans-serif;font-size:22px;letter-spacing:2px;color:var(--text);}'
+              +'.logo span{color:var(--cyan);}'
+              +'.bk{font-family:"JetBrains Mono",monospace;font-size:10px;color:var(--muted);border:1px solid var(--border);padding:6px 12px;border-radius:6px;}'
+              +'.hero{background:linear-gradient(135deg,#001a2e,#002a42,#001020);border-bottom:1px solid rgba(0,229,255,0.15);padding:48px 24px 36px;}'
+              +'.inner{max-width:780px;margin:0 auto;}'
+              +'.tag{display:inline-flex;align-items:center;gap:6px;background:rgba(0,229,255,0.1);border:1px solid rgba(0,229,255,0.3);color:var(--cyan);font-family:"JetBrains Mono",monospace;font-size:9px;letter-spacing:2px;padding:5px 12px;border-radius:20px;margin-bottom:20px;}'
+              +'h1{font-family:"Bebas Neue",sans-serif;font-size:clamp(26px,5vw,44px);line-height:1.1;margin-bottom:16px;}'
+              +'h1 span{color:var(--cyan);}'
+              +'.meta{display:flex;flex-wrap:wrap;gap:12px;font-family:"JetBrains Mono",monospace;font-size:10px;color:var(--muted);letter-spacing:1px;margin-bottom:24px;}'
+              +'.match-bar{background:var(--card);border:1px solid rgba(0,229,255,0.2);border-radius:14px;padding:20px;margin-top:20px;display:flex;align-items:center;justify-content:space-between;}'
+              +'.tb{text-align:center;flex:1;}'
+              +'.tn{font-family:"Bebas Neue",sans-serif;font-size:22px;}'
+              +'.vs{font-family:"Bebas Neue",sans-serif;font-size:30px;color:var(--muted);text-align:center;}'
+              +'.body{max-width:780px;margin:0 auto;padding:36px 24px;}'
+              +'h2{font-family:"Bebas Neue",sans-serif;font-size:20px;letter-spacing:2px;color:var(--cyan);margin:32px 0 14px;padding-bottom:8px;border-bottom:1px solid var(--border);}'
+              +'p{color:#94a3b8;line-height:1.8;margin-bottom:14px;font-size:15px;}'
+              +'strong{color:var(--text);}'
+              +'.prono{background:linear-gradient(135deg,rgba(0,229,255,0.08),rgba(0,180,216,0.04));border:1px solid rgba(0,229,255,0.3);border-radius:14px;padding:24px;margin:28px 0;}'
+              +'.prono-lbl{font-family:"JetBrains Mono",monospace;font-size:9px;color:var(--cyan);letter-spacing:3px;margin-bottom:10px;}'
+              +'.prono-pick{font-family:"Bebas Neue",sans-serif;font-size:28px;margin-bottom:12px;}'
+              +'.badges{display:flex;gap:12px;flex-wrap:wrap;}'
+              +'.badge{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:8px 14px;text-align:center;}'
+              +'.bv{font-family:"Bebas Neue",sans-serif;font-size:18px;color:var(--amber);}'
+              +'.bl{font-family:"JetBrains Mono",monospace;font-size:8px;color:var(--muted);letter-spacing:1px;}'
+              +'.faq-item{border:1px solid var(--border);border-radius:10px;margin-bottom:8px;}'
+              +'.faq-q{padding:14px 16px;font-weight:600;font-size:14px;}'
+              +'.faq-a{padding:0 16px 14px;font-size:13px;color:#94a3b8;line-height:1.7;}'
+              +'.cta{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:24px;text-align:center;margin:24px 0;}'
+              +'.cta-t{font-family:"Bebas Neue",sans-serif;font-size:22px;margin-bottom:8px;}'
+              +'.cta-btn{display:inline-block;background:var(--cyan);color:#000;font-family:"JetBrains Mono",monospace;font-size:11px;font-weight:700;letter-spacing:2px;padding:12px 28px;border-radius:10px;margin-top:12px;}'
+              +'.tags{display:flex;flex-wrap:wrap;gap:6px;margin:20px 0;}'
+              +'.stag{font-family:"JetBrains Mono",monospace;font-size:8px;color:var(--muted);border:1px solid var(--border);padding:4px 8px;border-radius:4px;letter-spacing:1px;}'
+              +'footer{background:var(--card);border-top:1px solid var(--border);padding:20px;text-align:center;font-family:"JetBrains Mono",monospace;font-size:9px;color:var(--muted);letter-spacing:1px;margin-top:48px;}'
+              +'</style>\n</head>\n<body>\n'
+              +'<header class="hdr"><a href="https://iashark.com" class="logo"><span>IA</span>SHARK</a><a href="https://iashark.com/'+(lang==='fr'?'':lang+'/blog/')+'blog/" class="bk">← BLOG</a></header>\n'
+              +'<div class="hero"><div class="inner">'
+              +'<div class="tag">🏆 '+previewLabel+'</div>'
+              +'<h1>'+homeTeam+' vs <span>'+awayTeam+'</span></h1>'
+              +'<div class="meta"><span>📅 '+dateStr+'</span><span>🤖 IASHARK AI</span></div>'
+              +'<div class="match-bar"><div class="tb"><div class="tn">'+homeTeam+'</div></div><div class="vs">VS</div><div class="tb"><div class="tn">'+awayTeam+'</div></div></div>'
+              +'</div></div>\n'
+              +'<div class="body">'
+              +'<p>'+( d.intro||'' )+'</p>'
+              +'<h2>📊 Analyse</h2><p>'+(d.analyse||'')+'</p>'
+              +'<h2>📈 Statistiques</h2><p>'+(d.stats||'')+'</p>'
+              +(type==='analyse'&&m.pari_rec?'<div class="prono"><div class="prono-lbl">🤖 PRÉDICTION IA IASHARK</div><div class="prono-pick">'+m.pari_rec+'</div><div class="badges"><div class="badge"><div class="bv">'+(m.conf||'—')+'/10</div><div class="bl">CONFIANCE</div></div><div class="badge"><div class="bv">'+(m.edge||'—')+'</div><div class="bl">EDGE</div></div></div><p style="margin-top:14px;font-size:14px;color:#94a3b8;">'+(d.pronostic||'')+'</p></div>':'<h2>🔮 Tendances</h2><p>'+(d.pronostic||'')+'</p>')
+              +'<h2>❓ FAQ</h2>'+faqHtml
+              +'<div class="cta"><div class="cta-t">🦈 IASHARK — Analyses IA</div><p style="font-size:13px;color:#94a3b8;margin-top:6px;">'+(d.conclusion||'')+'</p><a href="https://iashark.com" class="cta-btn">VOIR TOUTES LES ANALYSES →</a></div>'
+              +'<div class="tags">'+(Array.isArray(d.keywords)?d.keywords.map(function(k){return '<span class="stag">'+k.toUpperCase()+'</span>';}).join(''):'')+'</div>'
+              +'</div>\n'
+              +'<footer>IASHARK — AI Football Analysis · Indicative predictions only · Bet responsibly · 18+</footer>\n'
+              +'</body>\n</html>';
+          }
+
           async function generateMultilingualMatchPages(matchsData) {
             if (!matchsData.length) return;
             console.log('\n  Generating multilingual match pages...');
@@ -1234,44 +1465,46 @@ jobs:
             });
 
             // ================================================================
-            // TRADUCTION AUTOMATIQUE — EN/ES/IT/PT/DE
+            // TRADUCTION AUTOMATIQUE — EN/ES/IT/PT/DE/NL/PL/SV/DA/JA
             // ================================================================
             if (matchsData.length > 0) {
               console.log('\n=== TRADUCTION EN COURS ===');
-              var LANGS_TR = ['en','es','it','pt','de'];
-              var textsToTranslate = matchsData.map(function(m) {
-                return {
-                  id: m.id,
-                  analyse_card: m.analyse_card||'',
-                  conseil_public: m.conseil_public||'',
-                  pari_rec: m.pari_rec||''
-                };
-              });
-              var trPrompt = 'Tu es un traducteur expert en paris sportifs. Traduis les analyses suivantes en ' + LANGS_TR.join(', ') + '.\n'
-                + 'IMPORTANT: garde BTTS, Over 2.5, Under 2.5, Double Chance, Edge, Value Bet en anglais. Ne traduis pas les noms des equipes.\n'
-                + 'Reponds UNIQUEMENT avec un JSON valide de ce format exactement:\n'
-                + '[{"id":1,"en":{"analyse_card":"...","conseil_public":"...","pari_rec":"..."},"es":{...},"it":{...},"pt":{...},"de":{...}}]\n\n'
-                + 'Donnees a traduire:\n'
-                + JSON.stringify(textsToTranslate);
-              try {
-                var trResp = await callClaude(trPrompt, 4000);
-                var trClean = trResp.replace(/```json|```/g,'').trim();
-                var trData = JSON.parse(trClean);
-                trData.forEach(function(tr) {
-                  var m = matchsData.find(function(x){return x.id===tr.id;});
-                  if (!m) return;
-                  LANGS_TR.forEach(function(lg) {
-                    if (tr[lg]) {
-                      m['analyse_card_'+lg] = tr[lg].analyse_card||m.analyse_card;
-                      m['conseil_public_'+lg] = tr[lg].conseil_public||m.conseil_public;
-                      m['pari_rec_'+lg] = tr[lg].pari_rec||m.pari_rec;
-                    }
+              var LANGS_TR = ['en','es','it','pt','de','nl','pl','sv','da','ja','ko','vi','th','el','ro','tr','id'];
+              var LANG_NAMES_TR = {en:'English',es:'Spanish',it:'Italian',pt:'Portuguese',de:'German',nl:'Dutch',pl:'Polish',sv:'Swedish',da:'Danish',ja:'Japanese',ko:'Korean',vi:'Vietnamese',th:'Thai',el:'Greek',ro:'Romanian',tr:'Turkish',id:'Indonesian'};
+              // Traduire par batch de 5 matchs max pour eviter timeout
+              for (var li = 0; li < LANGS_TR.length; li++) {
+                var lg = LANGS_TR[li];
+                var lgName = LANG_NAMES_TR[lg];
+                try {
+                  var textsForLang = matchsData.map(function(m) {
+                    return {id:m.id, a:m.analyse_card||'', c:m.conseil_public||'', p:m.pari_rec||''};
                   });
-                });
-                console.log('  Traduction OK pour ' + matchsData.length + ' matchs');
-              } catch(e) {
-                console.log('  Traduction erreur (fallback FR): ' + e.message);
+                  var trPrompt = 'Translate these football betting analyses to ' + lgName + '.\n'
+                    + 'Rules: keep BTTS, Over 2.5, Under 2.5, Double Chance, Edge, Value Bet in English. Do not translate team names.\n'
+                    + 'Return ONLY valid JSON array, no markdown, no explanation:\n'
+                    + '[{"id":1,"a":"translated analyse_card","c":"translated conseil","p":"translated pari_rec"},...]\n\n'
+                    + JSON.stringify(textsForLang);
+                  var trResp = await postJSON('api.anthropic.com', '/v1/messages', {
+                    model: 'claude-haiku-4-5-20251001',
+                    max_tokens: 2000,
+                    messages: [{role:'user', content: trPrompt}]
+                  }, {'x-api-key': ANT_KEY, 'anthropic-version': '2023-06-01'});
+                  var trText = (trResp.content&&trResp.content[0]&&trResp.content[0].text)||'[]';
+                  var trClean = trText.replace(/```json|```/g,'').trim();
+                  var trData = JSON.parse(trClean);
+                  trData.forEach(function(tr) {
+                    var m = matchsData.find(function(x){return x.id===tr.id;});
+                    if (!m) return;
+                    m['analyse_card_'+lg] = tr.a||m.analyse_card;
+                    m['conseil_public_'+lg] = tr.c||m.conseil_public;
+                    m['pari_rec_'+lg] = tr.p||m.pari_rec;
+                  });
+                  console.log('  ' + lgName + ' OK');
+                } catch(e) {
+                  console.log('  ' + lgName + ' erreur: ' + e.message);
+                }
               }
+              console.log('  Traduction terminee pour ' + matchsData.length + ' matchs');
             }
             fs.writeFileSync('data.json', JSON.stringify({matchs:matchsData,combis:combisData},null,2));
             console.log('\n=== DONE: '+matchsData.length+' matchs | '+combisData.length+' combis ===');
@@ -1282,6 +1515,49 @@ jobs:
             console.log('\n=== MULTILINGUAL PIPELINE START ===');
             generateWorldCupPages();
             await generateMultilingualMatchPages(matchsData);
+
+            // ── RÉCUPÉRER MATCHS J+3 à J+10 pour previews ──
+            var upcomingFixtures = [];
+            try {
+              var upcomingLeagues = LEAGUES.slice(0, 8); // Top 8 ligues seulement
+              for (var uli = 0; uli < upcomingLeagues.length; uli++) {
+                var uLg = upcomingLeagues[uli];
+                for (var dayOffset = 3; dayOffset <= 10; dayOffset++) {
+                  var futureDate = new Date(TODAY+'T12:00:00Z');
+                  futureDate.setDate(futureDate.getDate() + dayOffset);
+                  var futureDateStr = futureDate.toISOString().split('T')[0];
+                  var futUrl = 'https://v3.football.api-sports.io/fixtures?league='+uLg.id+'&season='+uLg.season+'&date='+futureDateStr;
+                  var futResp = await get(futUrl, {'x-apisports-key': API_KEY});
+                  if (futResp && futResp.response) {
+                    futResp.response.forEach(function(fx) {
+                      if (fx.teams && fx.fixture) {
+                        upcomingFixtures.push({
+                          home: fx.teams.home.name,
+                          away: fx.teams.away.name,
+                          date: futureDateStr,
+                          league: fx.league ? fx.league.name : ''
+                        });
+                      }
+                    });
+                  }
+                  await sleep(100);
+                }
+              }
+              // Dédoublonner
+              var seen = {};
+              upcomingFixtures = upcomingFixtures.filter(function(f) {
+                var k = f.home+'_'+f.away+'_'+f.date;
+                if (seen[k]) return false;
+                seen[k] = true;
+                return true;
+              });
+              console.log('  Matchs à venir trouvés: '+upcomingFixtures.length);
+            } catch(e) {
+              console.log('  Fixtures à venir erreur: '+e.message);
+            }
+
+            // ── GÉNÉRER ARTICLES BLOG ──
+            await generateBlogArticles(matchsData, upcomingFixtures);
             generateSitemaps(matchsData);
             var totalMatchPages = matchsData.length * Object.keys(LANGS).length;
             var totalWCPages = WC_TEAMS.length * Object.keys(LANGS).length;

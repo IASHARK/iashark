@@ -253,44 +253,23 @@ jobs:
             var txt = t[key] || WC_TEXTS['en'][key] || '';
             return name ? txt.replace('{name}', name) : txt;
           }
-          var LANG_NAMES = {
-            'fr':'FR Français','en':'EN English','es':'ES Español','pt':'PT Português',
-            'de':'DE Deutsch','it':'IT Italiano','ar':'AR العربية','tr':'TR Türkçe',
-            'nl':'NL Nederlands','pl':'PL Polski','id':'ID Indonesia'
-          };
+          var LANG_NAMES = {'fr':'FR Francais','en':'EN English','es':'ES Espanol','pt':'PT Portugues','de':'DE Deutsch','it':'IT Italiano','ar':'AR Arabic','tr':'TR Turkce','nl':'NL Nederlands','pl':'PL Polski','id':'ID Indonesia'};
           var ALL_LANGS_SUPPORTED = ['fr','en','es','pt','de','it','ar','tr','nl','pl','id','ru','ja','ko','no','sv','da','fi','hi','uk','cs','hu','ro','el','sr','ms','th','sw'];
           function langBarHTML(currentLang, teamSlug, pageType) {
             var mainLangs = ['fr','en','es','pt','de','it','ar','tr','nl','pl','id'];
             var opts = mainLangs.map(function(l){
-              var url = l==='fr'
-                ? 'https://iashark.com/'+(pageType==='match'?'match/'+teamSlug+'.html':'world-cup-2026/'+teamSlug+'.html')
-                : 'https://iashark.com/'+l+'/'+pageType+'/'+teamSlug+'.html';
+              var url = l==='fr' ? 'https://iashark.com/'+(pageType==='match'?'match/'+teamSlug+'.html':'world-cup-2026/'+teamSlug+'.html') : 'https://iashark.com/'+l+'/'+pageType+'/'+teamSlug+'.html';
               var sel = l===currentLang?' selected':'';
-              var label = LANG_NAMES[l]||l.toUpperCase();
-              return '<option value="'+url+'"'+sel+'>'+label+'<\/option>';
+              return '<option value="'+url+'"'+sel+'>'+( LANG_NAMES[l]||l.toUpperCase() )+'<\/option>';
             }).join('');
-            return '<div style="position:fixed;top:0;left:0;right:0;background:#0a0e17;padding:8px 16px;display:flex;align-items:center;gap:12px;z-index:999;border-bottom:1px solid #22d3ee33;font-family:monospace;">'
-              +'<a href="https://iashark.com" style="color:#22d3ee;font-weight:bold;font-size:15px;text-decoration:none;">⚡ IASHARK<\/a>'
-              +'<select onchange="window.location=this.value" style="background:#111827;color:#22d3ee;border:1px solid #22d3ee55;padding:4px 10px;border-radius:6px;font-size:13px;cursor:pointer;">'
-              +opts
-              +'<\/select>'
-              +'<span style="margin-left:auto;color:#4b5563;font-size:11px;">AI Football Predictions<\/span>'
-              +'<\/div>';
+            return '<div style="position:fixed;top:0;left:0;right:0;background:#0a0e17;padding:8px 16px;display:flex;align-items:center;gap:12px;z-index:999;border-bottom:1px solid #22d3ee33;font-family:monospace;"><a href=\"https://iashark.com\" style=\"color:#22d3ee;font-weight:bold;font-size:15px;text-decoration:none;\">IASHARK<\/a><select onchange=\"window.location=this.value\" style=\"background:#111827;color:#22d3ee;border:1px solid #22d3ee;padding:4px 10px;border-radius:6px;font-size:13px;cursor:pointer;\">'+opts+'<\/select><\/div>';
           }
           function autoRedirectJS(currentLang, teamSlug, pageType) {
-            var frUrl = pageType==='match'
-              ? 'https://iashark.com/match/'+teamSlug+'.html'
-              : 'https://iashark.com/world-cup-2026/'+teamSlug+'.html';
-            return '<script>(function(){'
-              +'if(sessionStorage.getItem("ias_lc"))return;'
-              +'sessionStorage.setItem("ias_lc","1");'
-              +'var bl=(navigator.language||"en").split("-")[0].toLowerCase();'
-              +'var ok=["fr","en","es","pt","de","it","ar","tr","nl","pl","id","ru","ja","ko","no","sv","da","fi","hi","uk","cs","hu","ro","el","sr","ms","th","sw"];'
-              +'if(bl==="'+currentLang+'"||ok.indexOf(bl)===-1)return;'
-              +'var u=bl==="fr"?"'+frUrl+'"'
-              +':"https://iashark.com/"+bl+"/'+pageType+'/'+teamSlug+'.html";'
-              +'window.location=u;'
-              +'})();<\/script>';
+            var frUrl = pageType==='match' ? 'https://iashark.com/match/'+teamSlug+'.html' : 'https://iashark.com/world-cup-2026/'+teamSlug+'.html';
+            return '<scr'+'ipt>(function(){if(sessionStorage.getItem(\"ias_lc\"))return;sessionStorage.setItem(\"ias_lc\",\"1\");var bl=(navigator.language||"en").split("-")[0].toLowerCase();var ok=["fr","en","es","pt","de","it","ar","tr","nl","pl","id","ru","ja","ko","no","sv","da","fi","hi","uk","cs","hu","ro","el","sr","ms","th","sw"];if(bl===\"'+currentLang+'\"||(ok.indexOf(bl)===-1))return;var u=bl==="fr"?\"'+frUrl+'\":\"https://iashark.com/\"+bl+\"/'+pageType+'/'+teamSlug+'.html\";window.location=u;})();<\/scr'+'ipt>';
+          }
+          function buildWCPage(htmlContent, lang) {
+            return '<!DOCTYPE html><html lang="'+lang+'"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">'+htmlContent+'</html>';
           }
           function genWCTeamPage(team, lang) {
             var name = getTeamName(team, lang);
@@ -299,100 +278,59 @@ jobs:
             var desc = getWCText(lang, 'desc', name);
             var safeTitle = title.replace(/</g,'&lt;');
             var t = WC_TEXTS[lang] || WC_TEXTS['en'];
-            return '<!DOCTYPE html><html lang="'+lang+'"><head>'
-              +'<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-'
-              +'<title>'+safeTitle+' | IASHARK</title>
-'
-              +'<meta name="description" content="'+desc+'">
-'
-              +'<link rel="canonical" href="https://iashark.com/'+lang+'/world-cup-2026/'+team.slug+'.html">
-'
-              +'<meta name="keywords" content="'+name+', World Cup 2026, FIFA 2026, AI prediction">
-'
-              +'<meta property="og:title" content="'+safeTitle+' | IASHARK">
-'
-              +'<meta property="og:description" content="'+desc+'">
-'
-              +'<meta name="robots" content="index,follow">
-'
-              +'</head>
-'
-              +'<body style="margin:0;font-family:Arial,sans-serif;background:#0a0e17;color:#e2e8f0;padding-top:52px;">
-'
+            var head = '<title>'+safeTitle+' | IASHARK</title>'
+              +'<meta name="description" content="'+desc+'">'
+              +'<link rel="canonical" href="https://iashark.com/'+lang+'/world-cup-2026/'+team.slug+'.html">'
+              +'<meta name="keywords" content="'+name+', World Cup 2026, FIFA 2026, AI prediction">'
+              +'<meta property="og:title" content="'+safeTitle+' | IASHARK">'
+              +'<meta property="og:description" content="'+desc+'">'
+              +'<meta name="robots" content="index,follow">'
+              +'</head>';
+            var body = '<body style="margin:0;font-family:Arial,sans-serif;background:#0a0e17;color:#e2e8f0;padding-top:52px;">'
               +autoRedirectJS(lang, team.slug, 'world-cup-2026')
               +langBarHTML(lang, team.slug, 'world-cup-2026')
-              +'<div style="max-width:700px;margin:40px auto;padding:0 20px;">
-'
-              +'<h1 style="color:#22d3ee;font-size:24px;border-bottom:1px solid #22d3ee33;padding-bottom:12px;">'+safeTitle+'</h1>
-'
-              +'<p style="color:#94a3b8;line-height:1.7;">'+desc+'</p>
-'
-              +'<p style="color:#94a3b8;line-height:1.7;">'+getWCText(lang,'analyzes')+'</p>
-'
-              +'<ul style="color:#cbd5e1;line-height:2.2;padding-left:20px;">
-'
-              +'<li><strong style="color:#22d3ee;">'+t.tournament+':</strong> 2026 FIFA World Cup</li>
-'
-              +'<li><strong style="color:#22d3ee;">'+t.dates+':</strong> June 11 – July 19, 2026</li>
-'
-              +'<li><strong style="color:#22d3ee;">'+t.host+':</strong> USA, Canada, Mexico</li>
-'
-              +'<li><strong style="color:#22d3ee;">'+t.teams+':</strong> 48</li>
-'
-              +'</ul>
-'
-              +'<div style="margin-top:30px;display:flex;gap:16px;flex-wrap:wrap;">
-'
-              +'<a href="https://iashark.com/'+lang+'/world-cup-2026/" style="color:#22d3ee;text-decoration:none;border:1px solid #22d3ee44;padding:8px 16px;border-radius:8px;font-size:14px;">'+t.allpreds+' &rarr;</a>
-'
-              +'<a href="https://iashark.com" style="background:#22d3ee;color:#0a0e17;text-decoration:none;padding:8px 16px;border-radius:8px;font-size:14px;font-weight:bold;">'+t.live+' &rarr;</a>
-'
-              +'</div>
-'
-              +'</div>
-'
-              +'<script>setTimeout(function(){window.location="https://iashark.com"},9000);</script>
-'
-              +'</body></html>';
+              +'<div style="max-width:700px;margin:40px auto;padding:0 20px;">'
+              +'<h1 style="color:#22d3ee;font-size:24px;border-bottom:1px solid #22d3ee33;padding-bottom:12px;">'+safeTitle+'</h1>'
+              +'<p style="color:#94a3b8;line-height:1.7;">'+desc+'</p>'
+              +'<p style="color:#94a3b8;line-height:1.7;">'+getWCText(lang,'analyzes')+'</p>'
+              +'<ul style="color:#cbd5e1;line-height:2.2;padding-left:20px;">'
+              +'<li><strong style="color:#22d3ee;">'+t.tournament+':</strong> 2026 FIFA World Cup</li>'
+              +'<li><strong style="color:#22d3ee;">'+t.dates+':</strong> June 11 - July 19, 2026</li>'
+              +'<li><strong style="color:#22d3ee;">'+t.host+':</strong> USA, Canada, Mexico</li>'
+              +'<li><strong style="color:#22d3ee;">'+t.teams+':</strong> 48</li>'
+              +'</ul>'
+              +'<div style="margin-top:30px;display:flex;gap:16px;flex-wrap:wrap;">'
+              +'<a href="https://iashark.com/'+lang+'/world-cup-2026/" style="color:#22d3ee;text-decoration:none;border:1px solid #22d3ee44;padding:8px 16px;border-radius:8px;font-size:14px;">'+t.allpreds+'</a>'
+              +'<a href="https://iashark.com" style="background:#22d3ee;color:#0a0e17;text-decoration:none;padding:8px 16px;border-radius:8px;font-size:14px;font-weight:bold;">'+t.live+'</a>'
+              +'</div>'
+              +'</div>'
+              +'<script>setTimeout(function(){window.location="https://iashark.com"},9000);</script>'
+              +'</body>';
+            return buildWCPage(head+body, lang);
           }
           function genWCIndexPage(lang) {
             var wcTitle = WC_TITLE[lang] || WC_TITLE['en'];
             var desc = getWCText(lang, 'indexdesc');
             var t = WC_TEXTS[lang] || WC_TEXTS['en'];
             var links = WC_TEAMS.map(function(tm){
-              var name = getTeamName(tm, lang);
-              return '<li><a href="https://iashark.com/'+lang+'/world-cup-2026/'+tm.slug+'.html" style="color:#22d3ee;text-decoration:none;">'+name+'</a></li>';
-            }).join('\n');
-            return '<!DOCTYPE html><html lang="'+lang+'"><head>'
-              +'<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-'
-              +'<title>'+wcTitle+' | IASHARK</title>
-'
-              +'<meta name="description" content="'+desc+'">
-'
-              +'<link rel="canonical" href="https://iashark.com/'+lang+'/world-cup-2026/">
-'
-              +'<meta name="robots" content="index,follow">
-'
-              +'</head>
-'
-              +'<body style="margin:0;font-family:Arial,sans-serif;background:#0a0e17;color:#e2e8f0;padding-top:52px;">
-'
+              var n = getTeamName(tm, lang);
+              return '<li><a href="https://iashark.com/'+lang+'/world-cup-2026/'+tm.slug+'.html" style="color:#22d3ee;text-decoration:none;">'+n+'</a></li>';
+            }).join('');
+            var head = '<title>'+wcTitle+' | IASHARK</title>'
+              +'<meta name="description" content="'+desc+'">'
+              +'<link rel="canonical" href="https://iashark.com/'+lang+'/world-cup-2026/">'
+              +'<meta name="robots" content="index,follow">'
+              +'</head>';
+            var body = '<body style="margin:0;font-family:Arial,sans-serif;background:#0a0e17;color:#e2e8f0;padding-top:52px;">'
               +langBarHTML(lang, 'index', 'world-cup-2026')
-              +'<div style="max-width:700px;margin:40px auto;padding:0 20px;">
-'
-              +'<h1 style="color:#22d3ee;">'+wcTitle+'</h1>
-'
-              +'<p style="color:#94a3b8;">'+desc+'</p>
-'
-              +'<ul style="list-style:none;padding:0;columns:2;line-height:2.2;">
-'+links+'</ul>'
-              +'<p style="margin-top:30px;"><a href="https://iashark.com" style="background:#22d3ee;color:#0a0e17;text-decoration:none;padding:10px 20px;border-radius:8px;font-weight:bold;">'+t.live+' &rarr;</a></p>
-'
-              +'</div>
-'
-              +'</body></html>';
+              +'<div style="max-width:700px;margin:40px auto;padding:0 20px;">'
+              +'<h1 style="color:#22d3ee;">'+wcTitle+'</h1>'
+              +'<p style="color:#94a3b8;">'+desc+'</p>'
+              +'<ul style="list-style:none;padding:0;columns:2;line-height:2.2;">'+links+'</ul>'
+              +'<p style="margin-top:30px;"><a href="https://iashark.com" style="background:#22d3ee;color:#0a0e17;text-decoration:none;padding:10px 20px;border-radius:8px;font-weight:bold;">'+t.live+'</a></p>'
+              +'</div>'
+              +'</body>';
+            return buildWCPage(head+body, lang);
           }
           function generateWorldCupPages() {
             console.log('  Generating World Cup 2026 pages...');

@@ -254,9 +254,9 @@ jobs:
             return name ? txt.replace('{name}', name) : txt;
           }
           var LANG_NAMES = {
-            'fr':'🇫🇷 Français','en':'🇬🇧 English','es':'🇪🇸 Español','pt':'🇧🇷 Português',
-            'de':'🇩🇪 Deutsch','it':'🇮🇹 Italiano','ar':'🇸🇦 العربية','tr':'🇹🇷 Türkçe',
-            'nl':'🇳🇱 Nederlands','pl':'🇵🇱 Polski','id':'🇮🇩 Indonesia'
+            'fr':'FR Français','en':'EN English','es':'ES Español','pt':'PT Português',
+            'de':'DE Deutsch','it':'IT Italiano','ar':'AR العربية','tr':'TR Türkçe',
+            'nl':'NL Nederlands','pl':'PL Polski','id':'ID Indonesia'
           };
           var ALL_LANGS_SUPPORTED = ['fr','en','es','pt','de','it','ar','tr','nl','pl','id','ru','ja','ko','no','sv','da','fi','hi','uk','cs','hu','ro','el','sr','ms','th','sw'];
           function langBarHTML(currentLang, teamSlug, pageType) {

@@ -40,6 +40,307 @@ jobs:
             'pmu':       {domain:'pmu.fr',       promo:'100\u20ac offerts',      l:'#'},
             'bet365':    {domain:'bet365.com',   promo:'100\u20ac bonus',        l:'#'},
           };
+
+          // ================================================================
+          // CONFIG MULTILINGUE — 27 langues
+          // ================================================================
+          var LANGS = {
+            'en':'English','es':'Spanish','pt':'Portuguese','de':'German',
+            'it':'Italian','ar':'Arabic','tr':'Turkish','nl':'Dutch',
+            'pl':'Polish','id':'Indonesian','no':'Norwegian','sv':'Swedish',
+            'ro':'Romanian','el':'Greek','cs':'Czech','hu':'Hungarian',
+            'sr':'Serbian','uk':'Ukrainian','ru':'Russian','ja':'Japanese',
+            'ko':'Korean','th':'Thai','hi':'Hindi','ms':'Malay',
+            'da':'Danish','fi':'Finnish','sw':'Swahili'
+          };
+          // Langues avec traduction Claude (appel API)
+          var TOP_LANGS = ['en','es','pt','de','it','ar','tr','nl','pl','id'];
+
+          // Titres Coupe du Monde par langue
+          var WC_TITLE = {
+            'en':'2026 FIFA World Cup AI Predictions & Analysis',
+            'es':'Copa del Mundo 2026 Predicciones IA',
+            'pt':'Copa do Mundo 2026 Previsões IA',
+            'de':'WM 2026 KI Prognosen & Analyse',
+            'it':'Mondiali 2026 Previsioni IA',
+            'ar':'كأس العالم 2026 تنبؤات الذكاء الاصطناعي',
+            'tr':'2026 Dünya Kupası AI Tahminleri',
+            'nl':'WK 2026 AI Voorspellingen & Analyse',
+            'pl':'MŚ 2026 Prognozy AI',
+            'id':'Piala Dunia 2026 Prediksi AI',
+            'no':'VM 2026 AI Analyser',
+            'sv':'VM 2026 AI Analyser & Prognoser',
+            'ro':'CM 2026 Predicții AI',
+            'el':'Μουντιάλ 2026 AI Προβλέψεις',
+            'cs':'MS 2026 AI Analýzy',
+            'hu':'VB 2026 AI Elemzések',
+            'sr':'SP 2026 AI Analize',
+            'uk':'ЧС 2026 Прогнози ШІ',
+            'ru':'ЧМ 2026 Прогнозы ИИ',
+            'ja':'2026 FIFAワールドカップ AI予想',
+            'ko':'2026 FIFA 월드컵 AI 예측',
+            'th':'ฟุตบอลโลก 2026 การทำนาย AI',
+            'hi':'2026 फीफा विश्व कप AI भविष्यवाणी',
+            'ms':'Piala Dunia 2026 Ramalan AI',
+            'da':'VM 2026 AI Analyser',
+            'fi':'MM 2026 AI Analyysit',
+            'sw':'Kombe la Dunia 2026 Utabiri wa AI'
+          };
+
+          // 32 équipes Coupe du Monde 2026
+          var WC_TEAMS = [
+            {slug:'france',       fr:'France',        en:'France',       es:'Francia',      pt:'França',       de:'Frankreich',   it:'Francia',      ar:'فرنسا',         tr:'Fransa',       nl:'Frankrijk'},
+            {slug:'brazil',       fr:'Brésil',        en:'Brazil',       es:'Brasil',       pt:'Brasil',       de:'Brasilien',    it:'Brasile',      ar:'البرازيل',       tr:'Brezilya',     nl:'Brazilië'},
+            {slug:'argentina',    fr:'Argentine',     en:'Argentina',    es:'Argentina',    pt:'Argentina',    de:'Argentinien',  it:'Argentina',    ar:'الأرجنتين',      tr:'Arjantin',     nl:'Argentinië'},
+            {slug:'spain',        fr:'Espagne',       en:'Spain',        es:'España',       pt:'Espanha',      de:'Spanien',      it:'Spagna',       ar:'إسبانيا',        tr:'İspanya',      nl:'Spanje'},
+            {slug:'england',      fr:'Angleterre',    en:'England',      es:'Inglaterra',   pt:'Inglaterra',   de:'England',      it:'Inghilterra',  ar:'إنجلترا',        tr:'İngiltere',    nl:'Engeland'},
+            {slug:'germany',      fr:'Allemagne',     en:'Germany',      es:'Alemania',     pt:'Alemanha',     de:'Deutschland',  it:'Germania',     ar:'ألمانيا',        tr:'Almanya',      nl:'Duitsland'},
+            {slug:'portugal',     fr:'Portugal',      en:'Portugal',     es:'Portugal',     pt:'Portugal',     de:'Portugal',     it:'Portogallo',   ar:'البرتغال',       tr:'Portekiz',     nl:'Portugal'},
+            {slug:'netherlands',  fr:'Pays-Bas',      en:'Netherlands',  es:'Países Bajos', pt:'Holanda',      de:'Niederlande',  it:'Olanda',       ar:'هولندا',         tr:'Hollanda',     nl:'Nederland'},
+            {slug:'usa',          fr:'États-Unis',    en:'USA',          es:'Estados Unidos',pt:'EUA',         de:'USA',          it:'USA',          ar:'الولايات المتحدة',tr:'ABD',         nl:'VS'},
+            {slug:'mexico',       fr:'Mexique',       en:'Mexico',       es:'México',       pt:'México',       de:'Mexiko',       it:'Messico',      ar:'المكسيك',        tr:'Meksika',      nl:'Mexico'},
+            {slug:'canada',       fr:'Canada',        en:'Canada',       es:'Canadá',       pt:'Canadá',       de:'Kanada',       it:'Canada',       ar:'كندا',           tr:'Kanada',       nl:'Canada'},
+            {slug:'morocco',      fr:'Maroc',         en:'Morocco',      es:'Marruecos',    pt:'Marrocos',     de:'Marokko',      it:'Marocco',      ar:'المغرب',         tr:'Fas',          nl:'Marokko'},
+            {slug:'senegal',      fr:'Sénégal',       en:'Senegal',      es:'Senegal',      pt:'Senegal',      de:'Senegal',      it:'Senegal',      ar:'السنغال',        tr:'Senegal',      nl:'Senegal'},
+            {slug:'nigeria',      fr:'Nigeria',       en:'Nigeria',      es:'Nigeria',      pt:'Nigéria',      de:'Nigeria',      it:'Nigeria',      ar:'نيجيريا',        tr:'Nijerya',      nl:'Nigeria'},
+            {slug:'japan',        fr:'Japon',         en:'Japan',        es:'Japón',        pt:'Japão',        de:'Japan',        it:'Giappone',     ar:'اليابان',        tr:'Japonya',      nl:'Japan'},
+            {slug:'south-korea',  fr:'Corée du Sud',  en:'South Korea',  es:'Corea del Sur',pt:'Coreia do Sul',de:'Südkorea',    it:'Corea del Sud',ar:'كوريا الجنوبية', tr:'Güney Kore',   nl:'Zuid-Korea'},
+            {slug:'australia',    fr:'Australie',     en:'Australia',    es:'Australia',    pt:'Austrália',    de:'Australien',   it:'Australia',    ar:'أستراليا',       tr:'Avustralya',   nl:'Australië'},
+            {slug:'colombia',     fr:'Colombie',      en:'Colombia',     es:'Colombia',     pt:'Colômbia',     de:'Kolumbien',    it:'Colombia',     ar:'كولومبيا',       tr:'Kolombiya',    nl:'Colombia'},
+            {slug:'uruguay',      fr:'Uruguay',       en:'Uruguay',      es:'Uruguay',      pt:'Uruguai',      de:'Uruguay',      it:'Uruguay',      ar:'أوروغواي',       tr:'Uruguay',      nl:'Uruguay'},
+            {slug:'croatia',      fr:'Croatie',       en:'Croatia',      es:'Croacia',      pt:'Croácia',      de:'Kroatien',     it:'Croazia',      ar:'كرواتيا',        tr:'Hırvatistan',  nl:'Kroatië'},
+            {slug:'switzerland',  fr:'Suisse',        en:'Switzerland',  es:'Suiza',        pt:'Suíça',        de:'Schweiz',      it:'Svizzera',     ar:'سويسرا',         tr:'İsviçre',      nl:'Zwitserland'},
+            {slug:'poland',       fr:'Pologne',       en:'Poland',       es:'Polonia',      pt:'Polônia',      de:'Polen',        it:'Polonia',      ar:'بولندا',         tr:'Polonya',      nl:'Polen'},
+            {slug:'turkey',       fr:'Turquie',       en:'Turkey',       es:'Turquía',      pt:'Turquia',      de:'Türkei',       it:'Turchia',      ar:'تركيا',          tr:'Türkiye',      nl:'Turkije'},
+            {slug:'ukraine',      fr:'Ukraine',       en:'Ukraine',      es:'Ucrania',      pt:'Ucrânia',      de:'Ukraine',      it:'Ucraina',      ar:'أوكرانيا',       tr:'Ukrayna',      nl:'Oekraïne'},
+            {slug:'ecuador',      fr:'Équateur',      en:'Ecuador',      es:'Ecuador',      pt:'Equador',      de:'Ecuador',      it:'Ecuador',      ar:'الإكوادور',      tr:'Ekvador',      nl:'Ecuador'},
+            {slug:'austria',      fr:'Autriche',      en:'Austria',      es:'Austria',      pt:'Áustria',      de:'Österreich',   it:'Austria',      ar:'النمسا',         tr:'Avusturya',    nl:'Oostenrijk'},
+            {slug:'denmark',      fr:'Danemark',      en:'Denmark',      es:'Dinamarca',    pt:'Dinamarca',    de:'Dänemark',     it:'Danimarca',    ar:'الدنمارك',       tr:'Danimarka',    nl:'Denemarken'},
+            {slug:'serbia',       fr:'Serbie',        en:'Serbia',       es:'Serbia',       pt:'Sérvia',       de:'Serbien',      it:'Serbia',       ar:'صربيا',          tr:'Sırbistan',    nl:'Servië'},
+            {slug:'saudi-arabia', fr:'Arabie Saoudite',en:'Saudi Arabia',es:'Arabia Saudita',pt:'Arábia Saudita',de:'Saudi-Arabien',it:'Arabia Saudita',ar:'السعودية',   tr:'Suudi Arabistan',nl:'Saudi-Arabië'},
+            {slug:'chile',        fr:'Chili',         en:'Chile',        es:'Chile',        pt:'Chile',        de:'Chile',        it:'Cile',         ar:'تشيلي',          tr:'Şili',         nl:'Chili'},
+            {slug:'belgium',      fr:'Belgique',      en:'Belgium',      es:'Bélgica',      pt:'Bélgica',      de:'Belgien',      it:'Belgio',       ar:'بلجيكا',         tr:'Belçika',      nl:'België'},
+            {slug:'iran',         fr:'Iran',          en:'Iran',         es:'Irán',         pt:'Irã',          de:'Iran',         it:'Iran',         ar:'إيران',          tr:'İran',         nl:'Iran'},
+          ];
+
+          // ================================================================
+          // FONCTIONS UTILITAIRES MULTILINGUES
+          // ================================================================
+          function mkdirSafe(p) {
+            try { fs.mkdirSync(p, {recursive:true}); } catch(e) {}
+          }
+          function slugify(s) {
+            return (s||'').toLowerCase()
+              .replace(/[àáâãäå]/g,'a').replace(/[éèêë]/g,'e')
+              .replace(/[íìîï]/g,'i').replace(/[óòôõö]/g,'o')
+              .replace(/[úùûü]/g,'u').replace(/[ç]/g,'c').replace(/[ñ]/g,'n')
+              .replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+          }
+          function getTeamName(team, lang) {
+            return team[lang] || team['en'] || team.slug;
+          }
+          function hreflangTags(slug, type) {
+            var tags = Object.keys(LANGS).map(function(l){
+              return '<link rel="alternate" hreflang="'+l+'" href="https://iashark.com/'+l+'/'+type+'/'+slug+'.html">';
+            });
+            tags.push('<link rel="alternate" hreflang="fr" href="https://iashark.com/match/'+slug+'.html">');
+            tags.push('<link rel="alternate" hreflang="x-default" href="https://iashark.com/'+type+'/'+slug+'.html">');
+            return tags.join('\n');
+          }
+          function genMatchPageHTML(m, lang, title, desc) {
+            var slug = slugify(m.home.n+'-vs-'+m.away.n+'-'+m.date.split(' ')[0]);
+            var safeTitle = (title||'').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+            var safeDesc = (desc||'').replace(/"/g,"'").slice(0,155);
+            return '<!DOCTYPE html><html lang="'+lang+'">\n<head>\n'
+              +'<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">\n'
+              +'<title>'+safeTitle+' | IASHARK</title>\n'
+              +'<meta name="description" content="'+safeDesc+'">\n'
+              +'<link rel="canonical" href="https://iashark.com/'+lang+'/match/'+slug+'.html">\n'
+              +hreflangTags(slug,'match')+'\n'
+              +'<meta property="og:title" content="'+safeTitle+' | IASHARK">\n'
+              +'<meta property="og:description" content="'+safeDesc+'">\n'
+              +'<meta property="og:url" content="https://iashark.com/'+lang+'/match/'+slug+'.html">\n'
+              +'<meta name="robots" content="index,follow">\n'
+              +'<script type="application/ld+json">{"@context":"https://schema.org","@type":"SportsEvent","name":"'+safeTitle+'","startDate":"'+m.date+'","description":"'+safeDesc+'"}</script>\n'
+              +'</head>\n<body>\n'
+              +'<h1>'+safeTitle+'</h1>\n'
+              +'<p>'+safeDesc+'</p>\n'
+              +'<ul>\n'
+              +'<li>'+m.home.n+': '+m.p1+'% | Draw: '+m.pn+'% | '+m.away.n+': '+m.p2+'%</li>\n'
+              +'<li>AI Confidence: '+m.conf+'/10 | Edge: '+m.edge+'</li>\n'
+              +'<li>Best Bet: '+m.pari_rec+'</li>\n'
+              +'<li>'+m.league+' | '+m.date+'</li>\n'
+              +'</ul>\n'
+              +'<p><a href="https://iashark.com">IASHARK — AI Football Predictions</a></p>\n'
+              +'<script>setTimeout(function(){window.location="https://iashark.com"},5000);</script>\n'
+              +'</body></html>';
+          }
+          function genWCTeamPage(team, lang) {
+            var name = getTeamName(team, lang);
+            var wcTitle = WC_TITLE[lang] || WC_TITLE['en'];
+            var title = name + ' - ' + wcTitle;
+            var desc = 'Complete AI analysis of ' + name + ' for the 2026 FIFA World Cup (USA, Canada, Mexico, June-July 2026). Win probabilities, group stage predictions and match analysis by IASHARK.';
+            var safeTitle = title.replace(/</g,'&lt;');
+            return '<!DOCTYPE html><html lang="'+lang+'">\n<head>\n'
+              +'<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">\n'
+              +'<title>'+safeTitle+' | IASHARK</title>\n'
+              +'<meta name="description" content="'+desc+'">\n'
+              +'<link rel="canonical" href="https://iashark.com/'+lang+'/world-cup-2026/'+team.slug+'.html">\n'
+              +'<meta name="keywords" content="'+name+', World Cup 2026, FIFA 2026, AI prediction, football analysis, '+team.slug+'">\n'
+              +'<meta property="og:title" content="'+safeTitle+' | IASHARK">\n'
+              +'<meta property="og:description" content="'+desc+'">\n'
+              +'<meta name="robots" content="index,follow">\n'
+              +'<script type="application/ld+json">{"@context":"https://schema.org","@type":"SportsOrganization","name":"'+name+'","description":"'+desc+'"}</script>\n'
+              +'</head>\n<body>\n'
+              +'<h1>'+safeTitle+'</h1>\n'
+              +'<h2>'+name+' — 2026 FIFA World Cup</h2>\n'
+              +'<p>'+desc+'</p>\n'
+              +'<p>IASHARK analyzes 47+ statistical indicators for every team competing in the 2026 FIFA World Cup.</p>\n'
+              +'<ul>\n'
+              +'<li><strong>Tournament:</strong> 2026 FIFA World Cup</li>\n'
+              +'<li><strong>Dates:</strong> June 11 – July 19, 2026</li>\n'
+              +'<li><strong>Host countries:</strong> USA, Canada, Mexico</li>\n'
+              +'<li><strong>Teams:</strong> 48 nations</li>\n'
+              +'</ul>\n'
+              +'<p><a href="https://iashark.com/'+lang+'/world-cup-2026/">All 2026 World Cup AI Predictions</a></p>\n'
+              +'<p><a href="https://iashark.com">Live AI Football Predictions — IASHARK</a></p>\n'
+              +'<script>setTimeout(function(){window.location="https://iashark.com"},6000);</script>\n'
+              +'</body></html>';
+          }
+          function genWCIndexPage(lang) {
+            var wcTitle = WC_TITLE[lang] || WC_TITLE['en'];
+            var desc = 'AI predictions and analysis for all 48 teams at the 2026 FIFA World Cup. Win probabilities, group stages, and match forecasts by IASHARK AI.';
+            var links = WC_TEAMS.map(function(t){
+              var name = getTeamName(t, lang);
+              return '<li><a href="https://iashark.com/'+lang+'/world-cup-2026/'+t.slug+'.html">'+name+'</a></li>';
+            }).join('\n');
+            return '<!DOCTYPE html><html lang="'+lang+'">\n<head>\n'
+              +'<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">\n'
+              +'<title>'+wcTitle+' | IASHARK</title>\n'
+              +'<meta name="description" content="'+desc+'">\n'
+              +'<link rel="canonical" href="https://iashark.com/'+lang+'/world-cup-2026/">\n'
+              +'<meta name="robots" content="index,follow">\n'
+              +'</head>\n<body>\n'
+              +'<h1>'+wcTitle+'</h1>\n'
+              +'<p>'+desc+'</p>\n'
+              +'<ul>\n'+links+'\n</ul>\n'
+              +'<p><a href="https://iashark.com">IASHARK — AI Football Predictions</a></p>\n'
+              +'</body></html>';
+          }
+          function generateWorldCupPages() {
+            console.log('  Generating World Cup 2026 pages...');
+            Object.keys(LANGS).forEach(function(lang) {
+              mkdirSafe(lang+'/world-cup-2026');
+              // Page index
+              fs.writeFileSync(lang+'/world-cup-2026/index.html', genWCIndexPage(lang));
+              // Page par équipe
+              WC_TEAMS.forEach(function(team) {
+                fs.writeFileSync(lang+'/world-cup-2026/'+team.slug+'.html', genWCTeamPage(team, lang));
+              });
+            });
+            var totalPages = Object.keys(LANGS).length * (WC_TEAMS.length + 1);
+            console.log('  WC pages done: '+totalPages+' pages ('+WC_TEAMS.length+' teams x '+Object.keys(LANGS).length+' langs + index)');
+          }
+          function generateSitemaps(matchsData) {
+            console.log('  Generating sitemaps...');
+            var sitemapFiles = [];
+            // Un sitemap par langue
+            Object.keys(LANGS).forEach(function(lang) {
+              var urls = [];
+              // Page index langue
+              urls.push('<url><loc>https://iashark.com/'+lang+'/</loc><lastmod>'+TODAY+'</lastmod><changefreq>daily</changefreq><priority>0.8</priority></url>');
+              // Pages WC
+              urls.push('<url><loc>https://iashark.com/'+lang+'/world-cup-2026/</loc><lastmod>'+TODAY+'</lastmod><changefreq>weekly</changefreq><priority>0.9</priority></url>');
+              WC_TEAMS.forEach(function(t){
+                urls.push('<url><loc>https://iashark.com/'+lang+'/world-cup-2026/'+t.slug+'.html</loc><lastmod>'+TODAY+'</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>');
+              });
+              // Pages match
+              matchsData.forEach(function(m) {
+                var slug = slugify(m.home.n+'-vs-'+m.away.n+'-'+m.date.split(' ')[0]);
+                urls.push('<url><loc>https://iashark.com/'+lang+'/match/'+slug+'.html</loc><lastmod>'+TODAY+'</lastmod><changefreq>daily</changefreq><priority>1.0</priority></url>');
+              });
+              var xml = '<?xml version="1.0" encoding="UTF-8"?>\n'
+                +'<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+                +urls.join('\n')+'\n</urlset>';
+              var fname = 'sitemap-'+lang+'.xml';
+              fs.writeFileSync(fname, xml);
+              sitemapFiles.push(fname);
+            });
+            // Sitemap français (racine)
+            var urlsFr = ['<url><loc>https://iashark.com/</loc><lastmod>'+TODAY+'</lastmod><changefreq>daily</changefreq><priority>1.0</priority></url>'];
+            matchsData.forEach(function(m) {
+              var slug = slugify(m.home.n+'-vs-'+m.away.n+'-'+m.date.split(' ')[0]);
+              urlsFr.push('<url><loc>https://iashark.com/match/'+slug+'.html</loc><lastmod>'+TODAY+'</lastmod><changefreq>daily</changefreq><priority>0.9</priority></url>');
+            });
+            var xmlFr = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'+urlsFr.join('\n')+'\n</urlset>';
+            fs.writeFileSync('sitemap-fr.xml', xmlFr);
+            sitemapFiles.push('sitemap-fr.xml');
+            // Sitemap index global
+            var entries = sitemapFiles.map(function(f){
+              return '<sitemap><loc>https://iashark.com/'+f+'</loc><lastmod>'+TODAY+'</lastmod></sitemap>';
+            }).join('\n');
+            fs.writeFileSync('sitemap.xml', '<?xml version="1.0" encoding="UTF-8"?>\n<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'+entries+'\n</sitemapindex>');
+            console.log('  Sitemaps done: '+sitemapFiles.length+' files + sitemap.xml index');
+          }
+          async function translateMatchBatch(matchsData, lang, langName) {
+            if (!matchsData.length) return [];
+            var texts = matchsData.map(function(m){
+              return {
+                title: m.home.n+' vs '+m.away.n+' AI Football Prediction '+m.date.split(' ')[0],
+                desc: (m.analyse_card||m.pari_rec||'AI football analysis').slice(0,200)
+              };
+            });
+            var prompt = 'Translate these '+texts.length+' football texts to '+langName+'.'
+              +' Return ONLY a valid JSON array of objects with "title" and "desc" keys.'
+              +' No markdown, no backticks, no explanation. Only the JSON array.\n'
+              +JSON.stringify(texts);
+            var r = await postJSON('api.anthropic.com', '/v1/messages', {
+              model: 'claude-sonnet-4-6',
+              max_tokens: 3000,
+              messages: [{role:'user', content:prompt}]
+            }, {'x-api-key':ANT_KEY, 'anthropic-version':'2023-06-01'});
+            var txt = (r.content&&r.content[0]&&r.content[0].text)||'[]';
+            try { return JSON.parse(txt.replace(/```json|```/g,'').trim()); }
+            catch(e) { console.log('  Translation parse error for '+lang+', using fallback'); return texts; }
+          }
+          async function generateMultilingualMatchPages(matchsData) {
+            if (!matchsData.length) return;
+            console.log('\n  Generating multilingual match pages...');
+            // TOP_LANGS: traduction Claude
+            for (var li=0; li<TOP_LANGS.length; li++) {
+              var lang = TOP_LANGS[li];
+              var langName = LANGS[lang];
+              console.log('  -> '+langName+' (translated)...');
+              var translations = await translateMatchBatch(matchsData, lang, langName);
+              mkdirSafe(lang+'/match');
+              matchsData.forEach(function(m, idx) {
+                var t = translations[idx] || {};
+                var slug = slugify(m.home.n+'-vs-'+m.away.n+'-'+m.date.split(' ')[0]);
+                var title = t.title || (m.home.n+' vs '+m.away.n+' AI Prediction '+m.date.split(' ')[0]);
+                var desc = t.desc || (m.analyse_card||'AI football prediction by IASHARK').slice(0,155);
+                fs.writeFileSync(lang+'/match/'+slug+'.html', genMatchPageHTML(m, lang, title, desc));
+              });
+              await sleep(500);
+            }
+            // Autres langues: fallback anglais (pas d'appel API)
+            var otherLangs = Object.keys(LANGS).filter(function(l){ return TOP_LANGS.indexOf(l)===-1; });
+            console.log('  -> '+otherLangs.length+' remaining languages (EN fallback)...');
+            otherLangs.forEach(function(lang) {
+              mkdirSafe(lang+'/match');
+              matchsData.forEach(function(m) {
+                var slug = slugify(m.home.n+'-vs-'+m.away.n+'-'+m.date.split(' ')[0]);
+                var title = m.home.n+' vs '+m.away.n+' AI Football Prediction '+m.date.split(' ')[0];
+                var desc = (m.analyse_card||'AI football prediction and analysis by IASHARK').slice(0,155);
+                fs.writeFileSync(lang+'/match/'+slug+'.html', genMatchPageHTML(m, lang, title, desc));
+              });
+            });
+            var total = matchsData.length * Object.keys(LANGS).length;
+            console.log('  Match pages done: '+total+' pages');
+          }
+          // ================================================================
+          // FIN CONFIG MULTILINGUE
+          // ================================================================
+
           function getBkInfo(name) {
             var k = name.toLowerCase().replace(/[^a-z0-9]/g,'');
             var found = null;
@@ -474,7 +775,6 @@ jobs:
             var lines = list.map(function(a){
               return '- '+a.home+' vs '+a.away+': '+a.pari+' cote '+a.cote+' (confiance '+a.conf+'/10, edge '+(a.edge||'?')+')';
             }).join('\n');
-            // Combinés classiques
             var promptClassic =
               'Expert paris sportifs IASHARK. Analyses du jour:\n'+lines+'\n\n'
               +'Genere 3 combines en combinant uniquement les paris confiance >= 7.0. '
@@ -496,12 +796,9 @@ jobs:
                 return {label:c.label||'COMBINE',type:c.type||'safe',selections:c.selections||'',matchs:c.matchs||'',cote_totale:c.cote_totale||'',conseil:c.conseil||''};
               });
             } catch(e) { classics = []; }
-            // Combiné spécial weekend — ALGO pur, sans IA pour la cote
             if (!isSamedi && !isDimanche) return classics;
             var labelFou = isSamedi ? 'SAMEDI FOU' : 'DIMANCHE FOU';
             var typeFou  = isSamedi ? 'samedi_fou' : 'dimanche_fou';
-            // Construire pool: pour chaque match, garder LA sélection la plus probable (cote la plus basse >= 1.20)
-            // en priorité: dc1x, c1, co15, btts_non, co25, btts_oui, dcx2, c2
             var pool = [];
             (allMatchs||[]).forEach(function(m) {
               var matchLabel = m.home.n+' vs '+m.away.n;
@@ -515,18 +812,14 @@ jobs:
               if (m.dcx2 &&m.dcx2 !=='--'&&parseFloat(m.dcx2 )>=1.20) candidates.push({match:matchLabel,sel:'Double Chance X2',cote:parseFloat(m.dcx2 ),prob:Math.round(100/parseFloat(m.dcx2 ))});
               if (m.c2   &&m.c2   !=='--'&&parseFloat(m.c2   )>=1.20) candidates.push({match:matchLabel,sel:'Victoire '+m.away.n,cote:parseFloat(m.c2   ),prob:Math.round(100/parseFloat(m.c2   ))});
               if (!candidates.length) return;
-              // Garder la plus probable (cote la plus basse)
               candidates.sort(function(a,b){return a.cote-b.cote;});
               pool.push(candidates[0]);
             });
             if (pool.length < 4) {
-              classics.push({label:labelFou,type:typeFou,selections:'Pas assez de matchs ce jour',matchs:'',cote_totale:'--',conseil:'Reviens demain pour le combiné fou !'});
+              classics.push({label:labelFou,type:typeFou,selections:'Pas assez de matchs ce jour',matchs:'',cote_totale:'--',conseil:'Reviens demain pour le combin\u00e9 fou !'});
               return classics;
             }
-            // Trier par probabilité décroissante (cote croissante = plus probable)
             pool.sort(function(a,b){return a.cote-b.cote;});
-            // Construire le combiné: prendre les N sélections les plus probables
-            // pour que la cote totale soit dans [40, 70]
             var TARGET_MIN = 40, TARGET_MAX = 70;
             var selected = [];
             var coteTotale = 1.0;
@@ -534,13 +827,11 @@ jobs:
               var next = coteTotale * pool[si].cote;
               selected.push(pool[si]);
               coteTotale = next;
-              if (coteTotale >= TARGET_MIN) break; // on a atteint la cible min, on s'arrête
+              if (coteTotale >= TARGET_MIN) break;
             }
-            // Si on dépasse TARGET_MAX, retirer la dernière sélection et en reprendre une moins forte
             if (coteTotale > TARGET_MAX && selected.length > 2) {
               selected.pop();
               coteTotale = selected.reduce(function(acc,s){return acc*s.cote;},1.0);
-              // Chercher une sélection intermédiaire pour rester dans la plage
               for (var si2=selected.length; si2<pool.length; si2++) {
                 if (selected.find(function(s){return s.match===pool[si2].match;})) continue;
                 var candidate = coteTotale * pool[si2].cote;
@@ -557,7 +848,6 @@ jobs:
             var probMin = selected.reduce(function(mn,s){return Math.min(mn,s.prob);},100);
             var probMax = selected.reduce(function(mx,s){return Math.max(mx,s.prob);},0);
             var nbSel = selected.length;
-            // Description analytique style SHARK VALUE/AUDACE
             var conseil = nbSel+' s\u00e9lections les plus probables du jour, probabilit\u00e9s IA entre '+probMin+'% et '+probMax+'%, combinaison optimis\u00e9e pour une cote maximale tout en restant bas\u00e9e sur des donn\u00e9es solides';
             classics.push({label:labelFou,type:typeFou,selections:selectionsStr,matchs:matchsStr,cote_totale:coteFinalStr,conseil:conseil});
             console.log('  COMBINE FOU: cote='+coteFinalStr+' ('+nbSel+' selections, probs '+probMin+'%-'+probMax+'%)');
@@ -599,6 +889,8 @@ jobs:
             console.log('Fixtures trouves:', fixtures.length);
             if (!fixtures.length) {
               fs.writeFileSync('data.json', JSON.stringify({matchs:[],combis:[]},null,2));
+              generateWorldCupPages();
+              generateSitemaps([]);
               return;
             }
             var matchsData = [];
@@ -844,7 +1136,7 @@ jobs:
             });
             // DETECTION SAMEDI / DIMANCHE
             var todayDate = new Date(TODAY+'T12:00:00Z');
-            var dayOfWeek = todayDate.getUTCDay(); // 0=dim, 6=sam
+            var dayOfWeek = todayDate.getUTCDay();
             var isSamedi = (dayOfWeek === 6);
             var isDimanche = (dayOfWeek === 0);
             var combisRaw = await genCombis(forCombis, isSamedi, isDimanche, matchsData);
@@ -853,9 +1145,24 @@ jobs:
             });
             fs.writeFileSync('data.json', JSON.stringify({matchs:matchsData,combis:combisData},null,2));
             console.log('\n=== DONE: '+matchsData.length+' matchs | '+combisData.length+' combis ===');
+
+            // ================================================================
+            // PIPELINE MULTILINGUE
+            // ================================================================
+            console.log('\n=== MULTILINGUAL PIPELINE START ===');
+            generateWorldCupPages();
+            await generateMultilingualMatchPages(matchsData);
+            generateSitemaps(matchsData);
+            var totalMatchPages = matchsData.length * Object.keys(LANGS).length;
+            var totalWCPages = WC_TEAMS.length * Object.keys(LANGS).length;
+            console.log('\n=== MULTILINGUAL DONE ===');
+            console.log('Match pages: '+totalMatchPages);
+            console.log('WC 2026 pages: '+totalWCPages);
+            console.log('Sitemaps: '+(Object.keys(LANGS).length+1)+' files');
           }
           main().catch(function(e){ console.error('FATAL:', e.message); process.exit(0); });
           JSEOF
+
       - name: Run pipeline
         env:
           APISPORTS_KEY:   ${{ secrets.APISPORTS_KEY }}
@@ -868,6 +1175,7 @@ jobs:
         run: |
           git config user.name "IASHARK"
           git config user.email "yaramode81@gmail.com"
-          git add data.json
-          git diff --staged --quiet || git commit -m "Daily update - $(date +%Y-%m-%d)"
+          git add data.json sitemap.xml sitemap-*.xml
+          git add en/ es/ pt/ de/ it/ ar/ tr/ nl/ pl/ id/ no/ sv/ ro/ el/ cs/ hu/ sr/ uk/ ru/ ja/ ko/ th/ hi/ ms/ da/ fi/ sw/ 2>/dev/null || true
+          git diff --staged --quiet || git commit -m "Daily update + multilingual - $(date +%Y-%m-%d)"
           git push

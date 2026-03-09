@@ -41,9 +41,6 @@ jobs:
             'bet365':    {domain:'bet365.com',   promo:'100\u20ac bonus',        l:'#'},
           };
 
-          // ================================================================
-          // CONFIG MULTILINGUE — 27 langues
-          // ================================================================
           var LANGS = {
             'en':'English','es':'Spanish','pt':'Portuguese','de':'German',
             'it':'Italian','ar':'Arabic','tr':'Turkish','nl':'Dutch',
@@ -53,10 +50,8 @@ jobs:
             'ko':'Korean','th':'Thai','hi':'Hindi','ms':'Malay',
             'da':'Danish','fi':'Finnish','sw':'Swahili'
           };
-          // Langues avec traduction Claude (appel API)
           var TOP_LANGS = ['en','es','pt','de','it','ar','tr','nl','pl','id','ko','vi','th','el','ro','sv','da','ja'];
 
-          // Titres Coupe du Monde par langue
           var WC_TITLE = {
             'en':'2026 FIFA World Cup AI Predictions & Analysis',
             'es':'Copa del Mundo 2026 Predicciones IA',
@@ -87,7 +82,6 @@ jobs:
             'sw':'Kombe la Dunia 2026 Utabiri wa AI'
           };
 
-          // 32 équipes Coupe du Monde 2026
           var WC_TEAMS = [
             {slug:'france',       fr:'France',        en:'France',       es:'Francia',      pt:'França',       de:'Frankreich',   it:'Francia',      ar:'فرنسا',         tr:'Fransa',       nl:'Frankrijk'},
             {slug:'brazil',       fr:'Brésil',        en:'Brazil',       es:'Brasil',       pt:'Brasil',       de:'Brasilien',    it:'Brasile',      ar:'البرازيل',       tr:'Brezilya',     nl:'Brazilië'},
@@ -123,9 +117,6 @@ jobs:
             {slug:'iran',         fr:'Iran',          en:'Iran',         es:'Irán',         pt:'Irã',          de:'Iran',         it:'Iran',         ar:'إيران',          tr:'İran',         nl:'Iran'},
           ];
 
-          // ================================================================
-          // FONCTIONS UTILITAIRES MULTILINGUES
-          // ================================================================
           function mkdirSafe(p) {
             try { fs.mkdirSync(p, {recursive:true}); } catch(e) {}
           }
@@ -175,7 +166,7 @@ jobs:
               +'<script>setTimeout(function(){window.location="https://iashark.com"},5000);</script>\n'
               +'</body></html>';
           }
-          // Textes traduits pour les pages WC
+
           var WC_TEXTS = {
             'en': {
               desc: 'Complete AI analysis of {name} for the 2026 FIFA World Cup (USA, Canada, Mexico, June–July 2026). Win probabilities, group stage predictions and match analysis by IASHARK.',
@@ -320,33 +311,36 @@ jobs:
             console.log('  Generating World Cup 2026 pages...');
             Object.keys(LANGS).forEach(function(lang) {
               mkdirSafe(lang+'/world-cup-2026');
-              // Page index
               fs.writeFileSync(lang+'/world-cup-2026/index.html', genWCIndexPage(lang));
-              // Page par équipe
               WC_TEAMS.forEach(function(team) {
                 fs.writeFileSync(lang+'/world-cup-2026/'+team.slug+'.html', genWCTeamPage(team, lang));
               });
             });
             var totalPages = Object.keys(LANGS).length * (WC_TEAMS.length + 1);
-            console.log('  WC pages done: '+totalPages+' pages ('+WC_TEAMS.length+' teams x '+Object.keys(LANGS).length+' langs + index)');
+            console.log('  WC pages done: '+totalPages+' pages');
           }
           function generateSitemaps(matchsData) {
             console.log('  Generating sitemaps...');
             var sitemapFiles = [];
-            // Un sitemap par langue
             Object.keys(LANGS).forEach(function(lang) {
               var urls = [];
-              // Page index langue
               urls.push('<url><loc>https://iashark.com/'+lang+'/</loc><lastmod>'+TODAY+'</lastmod><changefreq>daily</changefreq><priority>0.8</priority></url>');
-              // Pages WC
               urls.push('<url><loc>https://iashark.com/'+lang+'/world-cup-2026/</loc><lastmod>'+TODAY+'</lastmod><changefreq>weekly</changefreq><priority>0.9</priority></url>');
               WC_TEAMS.forEach(function(t){
                 urls.push('<url><loc>https://iashark.com/'+lang+'/world-cup-2026/'+t.slug+'.html</loc><lastmod>'+TODAY+'</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>');
               });
-              // Pages match
               matchsData.forEach(function(m) {
                 var slug = slugify(m.home.n+'-vs-'+m.away.n+'-'+m.date.split(' ')[0]);
                 urls.push('<url><loc>https://iashark.com/'+lang+'/match/'+slug+'.html</loc><lastmod>'+TODAY+'</lastmod><changefreq>daily</changefreq><priority>1.0</priority></url>');
+              });
+              urls.push('<url><loc>https://iashark.com/'+lang+'/blog/</loc><lastmod>'+TODAY+'</lastmod><changefreq>daily</changefreq><priority>0.8</priority></url>');
+              urls.push('<url><loc>https://iashark.com/'+lang+'/blog/guides/</loc><lastmod>'+TODAY+'</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>');
+              GUIDES_CONFIG.forEach(function(g) {
+                urls.push('<url><loc>https://iashark.com/'+lang+'/blog/guides/'+g.slug+'.html</loc><lastmod>'+TODAY+'</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>');
+              });
+              matchsData.forEach(function(m) {
+                var slug = slugify(m.home.n+'-vs-'+m.away.n+'-'+m.date.split(' ')[0]);
+                urls.push('<url><loc>https://iashark.com/'+lang+'/blog/'+slug+'.html</loc><lastmod>'+TODAY+'</lastmod><changefreq>daily</changefreq><priority>0.9</priority></url>');
               });
               var xml = '<?xml version="1.0" encoding="UTF-8"?>\n'
                 +'<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
@@ -355,16 +349,23 @@ jobs:
               fs.writeFileSync(fname, xml);
               sitemapFiles.push(fname);
             });
-            // Sitemap français (racine)
             var urlsFr = ['<url><loc>https://iashark.com/</loc><lastmod>'+TODAY+'</lastmod><changefreq>daily</changefreq><priority>1.0</priority></url>'];
             matchsData.forEach(function(m) {
               var slug = slugify(m.home.n+'-vs-'+m.away.n+'-'+m.date.split(' ')[0]);
               urlsFr.push('<url><loc>https://iashark.com/match/'+slug+'.html</loc><lastmod>'+TODAY+'</lastmod><changefreq>daily</changefreq><priority>0.9</priority></url>');
             });
+            urlsFr.push('<url><loc>https://iashark.com/blog/</loc><lastmod>'+TODAY+'</lastmod><changefreq>daily</changefreq><priority>0.8</priority></url>');
+            urlsFr.push('<url><loc>https://iashark.com/blog/guides/</loc><lastmod>'+TODAY+'</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>');
+            GUIDES_CONFIG.forEach(function(g) {
+              urlsFr.push('<url><loc>https://iashark.com/blog/guides/'+g.slug+'.html</loc><lastmod>'+TODAY+'</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>');
+            });
+            matchsData.forEach(function(m) {
+              var slug = slugify(m.home.n+'-vs-'+m.away.n+'-'+m.date.split(' ')[0]);
+              urlsFr.push('<url><loc>https://iashark.com/blog/'+slug+'.html</loc><lastmod>'+TODAY+'</lastmod><changefreq>daily</changefreq><priority>0.9</priority></url>');
+            });
             var xmlFr = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'+urlsFr.join('\n')+'\n</urlset>';
             fs.writeFileSync('sitemap-fr.xml', xmlFr);
             sitemapFiles.push('sitemap-fr.xml');
-            // Sitemap index global
             var entries = sitemapFiles.map(function(f){
               return '<sitemap><loc>https://iashark.com/'+f+'</loc><lastmod>'+TODAY+'</lastmod></sitemap>';
             }).join('\n');
@@ -392,12 +393,7 @@ jobs:
             try { return JSON.parse(txt.replace(/```json|```/g,'').trim()); }
             catch(e) { console.log('  Translation parse error for '+lang+', using fallback'); return texts; }
           }
-          // ================================================================
-          // GÉNÉRATION ARTICLES BLOG (J-7 PREVIEW + JOUR J ANALYSE)
-          // ================================================================
-          // ══════════════════════════════════════════════════
-          // TRADUCTION GUIDES EVERGREEN EN 19 LANGUES
-          // ══════════════════════════════════════════════════
+
           const GUIDE_LANGS = ['en','es','pt','de','it','ar','nl','pl','sv','da','ja','ko','vi','th','id','tr','el','ro'];
           const GUIDE_LANG_NAMES = {
             en:'English',es:'Español',pt:'Português',de:'Deutsch',it:'Italiano',
@@ -423,7 +419,6 @@ jobs:
                 model:'claude-haiku-4-5-20251001',
                 max_tokens:4000,
                 messages:[{role:'user',content:'Translate this HTML content to '+langName+'. Keep ALL HTML tags exactly as-is. Only translate the visible text. Keep SEO keywords natural in the target language. Return only the translated HTML, nothing else:\n\n'+frText}]
-
               })
             });
             const data = await resp.json();
@@ -440,7 +435,6 @@ jobs:
                 continue;
               }
               const frHTML = fs2.readFileSync(srcPath, 'utf8');
-              // Extraire le contenu entre <body> et </body> seulement pour traduction
               const bodyMatch = frHTML.match(/<body[^>]*>([\s\S]*)<\/body>/);
               if (!bodyMatch) continue;
               const bodyContent = bodyMatch[1];
@@ -449,12 +443,10 @@ jobs:
                 const outDir = lg+'/blog/guides';
                 if (!fs2.existsSync(outDir)) fs2.mkdirSync(outDir, {recursive:true});
                 const outPath = outDir+'/'+guide.slug+'.html';
-                // Skip si déjà traduit ce run
                 if (fs2.existsSync(outPath)) { console.log('  '+lg+'/'+guide.slug+' déjà existant — skip'); continue; }
                 try {
                   const translatedBody = await translateGuideContent(bodyContent, lg);
                   const isRTL = GUIDE_RTL.includes(lg);
-                  const langName = GUIDE_LANG_NAMES[lg];
                   const translatedHTML = frHTML
                     .replace('<html lang="fr">', '<html lang="'+lg+'"'+(isRTL?' dir="rtl"':'')+'>') 
                     .replace(/<body[^>]*>[\s\S]*<\/body>/, '<body>'+translatedBody+'<\/body>')
@@ -462,7 +454,6 @@ jobs:
                              '<link rel="canonical" href="https://iashark.com/blog/guides/'+guide.slug+'.html">\n<link rel="alternate" hreflang="'+lg+'" href="https://iashark.com/'+lg+'/blog/guides/'+guide.slug+'.html">\n<link rel="alternate" hreflang="fr" href="https://iashark.com/blog/guides/'+guide.slug+'.html">');
                   fs2.writeFileSync(outPath, translatedHTML);
                   console.log('  ✓ '+lg+'/blog/guides/'+guide.slug+'.html');
-                  // Pause pour éviter rate limit
                   await new Promise(r=>setTimeout(r,800));
                 } catch(e) {
                   console.log('  ✗ Erreur '+lg+' '+guide.slug+': '+e.message);
@@ -483,13 +474,11 @@ jobs:
               ro:'Romanian',sv:'Swedish',da:'Danish',ja:'Japanese'
             };
 
-            // Créer dossiers blog
             mkdirSafe('blog');
             BLOG_LANGS.forEach(function(lg) {
               if (lg !== 'fr') mkdirSafe(lg+'/blog');
             });
 
-            // ── ARTICLES JOUR J (analyses complètes) ──
             if (matchsData.length > 0) {
               console.log('  Articles Jour J: '+matchsData.length+' matchs...');
               for (var mi = 0; mi < matchsData.length; mi++) {
@@ -497,7 +486,6 @@ jobs:
                 var slug = slugify(m.home.n+'-vs-'+m.away.n+'-'+m.date.split(' ')[0]);
                 var dateStr = m.date ? m.date.split(' ')[0] : TODAY;
 
-                // Générer contenu FR d'abord
                 var blogPrompt = 'Tu es un expert en analyse football et paris sportifs. Ecris un article de blog SEO complet en FRANCAIS pour ce match.\n'
                   + 'Match: '+m.home.n+' vs '+m.away.n+'\n'
                   + 'Date: '+m.date+'\n'
@@ -522,11 +510,9 @@ jobs:
                   var blogClean = blogText.replace(/```json|```/g,'').trim();
                   var blogData = JSON.parse(blogClean);
 
-                  // Générer HTML pour FR
                   var frHTML = genBlogHTML(m, blogData, 'fr', slug, dateStr, 'analyse');
                   fs.writeFileSync('blog/'+slug+'.html', frHTML);
 
-                  // Traduire et générer pour chaque autre langue
                   for (var li = 0; li < BLOG_LANGS.length; li++) {
                     var lg = BLOG_LANGS[li];
                     if (lg === 'fr') continue;
@@ -556,7 +542,6 @@ jobs:
               }
             }
 
-            // ── ARTICLES J-7 PREVIEW (matchs à venir) ──
             if (upcomingFixtures && upcomingFixtures.length > 0) {
               console.log('  Articles Preview J-7: '+upcomingFixtures.length+' matchs...');
               for (var ui = 0; ui < upcomingFixtures.length; ui++) {
@@ -583,7 +568,6 @@ jobs:
                   var pvHTML = genBlogHTML({home:{n:uf.home},away:{n:uf.away},league:uf.league||'',date:uf.date+' 00:00'}, pvData, 'fr', uSlug, uf.date, 'preview');
                   fs.writeFileSync('blog/preview-'+uSlug+'.html', pvHTML);
 
-                  // Traduire preview en EN/ES/PT/DE/IT + langues haute opportunité
                   var pvLangs = ['en','es','pt','de','it','id','tr','ko','vi'];
                   for (var pli = 0; pli < pvLangs.length; pli++) {
                     var plg = pvLangs[pli];
@@ -611,17 +595,38 @@ jobs:
             console.log('  === BLOG TERMINÉ ===');
           }
 
-          // ── TEMPLATE HTML ARTICLE BLOG ──
+          var BLOG_UI = {
+            fr:{analyse:'Analyse',stats:'Statistiques',pronostic:'Prédiction IA',tendances:'Tendances',faq:'FAQ',voir:'VOIR TOUTES LES ANALYSES →',prediction:'PRÉDICTION IA IASHARK',preview:'PREVIEW',tag:'ANALYSE IA',backblog:'← BLOG'},
+            en:{analyse:'Analysis',stats:'Statistics',pronostic:'AI Prediction',tendances:'Trends',faq:'FAQ',voir:'SEE ALL ANALYSES →',prediction:'IASHARK AI PREDICTION',preview:'PREVIEW',tag:'AI ANALYSIS',backblog:'← BLOG'},
+            es:{analyse:'Análisis',stats:'Estadísticas',pronostic:'Predicción IA',tendances:'Tendencias',faq:'Preguntas Frecuentes',voir:'VER TODOS LOS ANÁLISIS →',prediction:'PREDICCIÓN IA IASHARK',preview:'PREVIA',tag:'ANÁLISIS IA',backblog:'← BLOG'},
+            pt:{analyse:'Análise',stats:'Estatísticas',pronostic:'Previsão IA',tendances:'Tendências',faq:'Perguntas Frequentes',voir:'VER TODAS AS ANÁLISES →',prediction:'PREVISÃO IA IASHARK',preview:'PRÉVIA',tag:'ANÁLISE IA',backblog:'← BLOG'},
+            de:{analyse:'Analyse',stats:'Statistiken',pronostic:'KI-Prognose',tendances:'Trends',faq:'Häufige Fragen',voir:'ALLE ANALYSEN ANZEIGEN →',prediction:'IASHARK KI-PROGNOSE',preview:'VORSCHAU',tag:'KI-ANALYSE',backblog:'← BLOG'},
+            it:{analyse:'Analisi',stats:'Statistiche',pronostic:'Previsione IA',tendances:'Tendenze',faq:'Domande Frequenti',voir:'VEDI TUTTE LE ANALISI →',prediction:'PREVISIONE IA IASHARK',preview:'ANTEPRIMA',tag:'ANALISI IA',backblog:'← BLOG'},
+            ar:{analyse:'تحليل',stats:'إحصائيات',pronostic:'توقعات الذكاء الاصطناعي',tendances:'توجهات',faq:'أسئلة شائعة',voir:'عرض كل التحليلات →',prediction:'توقعات ذكاء IASHARK',preview:'معاينة',tag:'تحليل ذكاء اصطناعي',backblog:'← مدونة'},
+            tr:{analyse:'Analiz',stats:'İstatistikler',pronostic:'YZ Tahmini',tendances:'Trendler',faq:'Sıkça Sorulan Sorular',voir:'TÜM ANALİZLERİ GÖR →',prediction:'IASHARK YZ TAHMİNİ',preview:'ÖN İZLEME',tag:'YZ ANALİZİ',backblog:'← BLOG'},
+            nl:{analyse:'Analyse',stats:'Statistieken',pronostic:'AI-Voorspelling',tendances:'Trends',faq:'Veelgestelde Vragen',voir:'ALLE ANALYSES BEKIJKEN →',prediction:'IASHARK AI-VOORSPELLING',preview:'PREVIEW',tag:'AI-ANALYSE',backblog:'← BLOG'},
+            pl:{analyse:'Analiza',stats:'Statystyki',pronostic:'Prognoza AI',tendances:'Trendy',faq:'Często Zadawane Pytania',voir:'ZOBACZ WSZYSTKIE ANALIZY →',prediction:'PROGNOZA AI IASHARK',preview:'PODGLĄD',tag:'ANALIZA AI',backblog:'← BLOG'},
+            id:{analyse:'Analisis',stats:'Statistik',pronostic:'Prediksi AI',tendances:'Tren',faq:'Pertanyaan Umum',voir:'LIHAT SEMUA ANALISIS →',prediction:'PREDIKSI AI IASHARK',preview:'PRATINJAU',tag:'ANALISIS AI',backblog:'← BLOG'},
+            ko:{analyse:'분석',stats:'통계',pronostic:'AI 예측',tendances:'트렌드',faq:'자주 묻는 질문',voir:'모든 분석 보기 →',prediction:'IASHARK AI 예측',preview:'미리보기',tag:'AI 분석',backblog:'← 블로그'},
+            vi:{analyse:'Phân tích',stats:'Thống kê',pronostic:'Dự đoán AI',tendances:'Xu hướng',faq:'Câu hỏi thường gặp',voir:'XEM TẤT CẢ PHÂN TÍCH →',prediction:'DỰ ĐOÁN AI IASHARK',preview:'XEM TRƯỚC',tag:'PHÂN TÍCH AI',backblog:'← BLOG'},
+            th:{analyse:'วิเคราะห์',stats:'สถิติ',pronostic:'การทำนาย AI',tendances:'แนวโน้ม',faq:'คำถามที่พบบ่อย',voir:'ดูการวิเคราะห์ทั้งหมด →',prediction:'การทำนาย AI IASHARK',preview:'ดูตัวอย่าง',tag:'วิเคราะห์ AI',backblog:'← บล็อก'},
+            el:{analyse:'Ανάλυση',stats:'Στατιστικά',pronostic:'Πρόβλεψη AI',tendances:'Τάσεις',faq:'Συχνές Ερωτήσεις',voir:'ΔΕΙΤΕ ΟΛΕΣ ΤΙΣ ΑΝΑΛΥΣΕΙΣ →',prediction:'ΠΡΟΒΛΕΨΗ AI IASHARK',preview:'ΠΡΟΕΠΙΣΚΟΠΗΣΗ',tag:'ΑΝΑΛΥΣΗ AI',backblog:'← BLOG'},
+            ro:{analyse:'Analiză',stats:'Statistici',pronostic:'Predicție AI',tendances:'Tendințe',faq:'Întrebări Frecvente',voir:'VEZI TOATE ANALIZELE →',prediction:'PREDICȚIE AI IASHARK',preview:'PREVIZUALIZARE',tag:'ANALIZĂ AI',backblog:'← BLOG'},
+            sv:{analyse:'Analys',stats:'Statistik',pronostic:'AI-Prognos',tendances:'Trender',faq:'Vanliga Frågor',voir:'SE ALLA ANALYSER →',prediction:'IASHARK AI-PROGNOS',preview:'FÖRHANDSVISNING',tag:'AI-ANALYS',backblog:'← BLOGG'},
+            da:{analyse:'Analyse',stats:'Statistik',pronostic:'AI-Prognose',tendances:'Tendenser',faq:'Ofte Stillede Spørgsmål',voir:'SE ALLE ANALYSER →',prediction:'IASHARK AI-PROGNOSE',preview:'FORHÅNDSVISNING',tag:'AI-ANALYSE',backblog:'← BLOG'},
+            ja:{analyse:'分析',stats:'統計',pronostic:'AI予測',tendances:'トレンド',faq:'よくある質問',voir:'すべての分析を見る →',prediction:'IASHARK AI予測',preview:'プレビュー',tag:'AI分析',backblog:'← ブログ'}
+          };
           function genBlogHTML(m, d, lang, slug, dateStr, type) {
             var isAR = lang === 'ar';
             var dir = isAR ? 'rtl' : 'ltr';
+            var ui = BLOG_UI[lang] || BLOG_UI['en'];
             var homeTeam = m.home ? m.home.n : '';
             var awayTeam = m.away ? m.away.n : '';
             var title = d.title || (homeTeam+' vs '+awayTeam+' - '+dateStr);
             var metaDesc = d.meta_desc || title;
             var keywords = Array.isArray(d.keywords) ? d.keywords.join(',') : '';
             var canonicalLang = lang === 'fr' ? '' : lang+'/';
-            var previewLabel = type === 'preview' ? 'PREVIEW' : 'ANALYSE IA';
+            var previewLabel = type === 'preview' ? ui.preview : ui.tag;
             var faqHtml = '';
             if (Array.isArray(d.faq)) {
               d.faq.forEach(function(f) {
@@ -681,7 +686,7 @@ jobs:
               +'.stag{font-family:"JetBrains Mono",monospace;font-size:8px;color:var(--muted);border:1px solid var(--border);padding:4px 8px;border-radius:4px;letter-spacing:1px;}'
               +'footer{background:var(--card);border-top:1px solid var(--border);padding:20px;text-align:center;font-family:"JetBrains Mono",monospace;font-size:9px;color:var(--muted);letter-spacing:1px;margin-top:48px;}'
               +'</style>\n</head>\n<body>\n'
-              +'<header class="hdr"><a href="https://iashark.com" class="logo"><span>IA</span>SHARK</a><a href="https://iashark.com/'+(lang==='fr'?'':lang+'/blog/')+'blog/" class="bk">← BLOG</a></header>\n'
+              +'<header class="hdr"><a href="https://iashark.com" class="logo"><span>IA</span>SHARK</a><a href="https://iashark.com/'+(lang==='fr'?'':lang+'/')+'blog/" class="bk">'+ui.backblog+'</a></header>\n'
               +'<div class="hero"><div class="inner">'
               +'<div class="tag">🏆 '+previewLabel+'</div>'
               +'<h1>'+homeTeam+' vs <span>'+awayTeam+'</span></h1>'
@@ -690,21 +695,207 @@ jobs:
               +'</div></div>\n'
               +'<div class="body">'
               +'<p>'+( d.intro||'' )+'</p>'
-              +'<h2>📊 Analyse</h2><p>'+(d.analyse||'')+'</p>'
-              +'<h2>📈 Statistiques</h2><p>'+(d.stats||'')+'</p>'
-              +(type==='analyse'&&m.pari_rec?'<div class="prono"><div class="prono-lbl">🤖 PRÉDICTION IA IASHARK</div><div class="prono-pick">'+m.pari_rec+'</div><div class="badges"><div class="badge"><div class="bv">'+(m.conf||'—')+'/10</div><div class="bl">CONFIANCE</div></div><div class="badge"><div class="bv">'+(m.edge||'—')+'</div><div class="bl">EDGE</div></div></div><p style="margin-top:14px;font-size:14px;color:#94a3b8;">'+(d.pronostic||'')+'</p></div>':'<h2>🔮 Tendances</h2><p>'+(d.pronostic||'')+'</p>')
-              +'<h2>❓ FAQ</h2>'+faqHtml
-              +'<div class="cta"><div class="cta-t">🦈 IASHARK — Analyses IA</div><p style="font-size:13px;color:#94a3b8;margin-top:6px;">'+(d.conclusion||'')+'</p><a href="https://iashark.com" class="cta-btn">VOIR TOUTES LES ANALYSES →</a></div>'
+              +'<h2>📊 '+ui.analyse+'</h2><p>'+(d.analyse||'')+'</p>'
+              +'<h2>📈 '+ui.stats+'</h2><p>'+(d.stats||'')+'</p>'
+              +(type==='analyse'&&m.pari_rec?'<div class="prono"><div class="prono-lbl">🤖 '+ui.prediction+'</div><div class="prono-pick">'+m.pari_rec+'</div><div class="badges"><div class="badge"><div class="bv">'+(m.conf||'—')+'/10</div><div class="bl">CONFIDENCE</div></div><div class="badge"><div class="bv">'+(m.edge||'—')+'</div><div class="bl">EDGE</div></div></div><p style="margin-top:14px;font-size:14px;color:#94a3b8;">'+(d.pronostic||'')+'</p></div>':'<h2>🔮 '+ui.tendances+'</h2><p>'+(d.pronostic||'')+'</p>')
+              +'<h2>❓ '+ui.faq+'</h2>'+faqHtml
+              +'<div class="cta"><div class="cta-t">🦈 IASHARK — Analyses IA</div><p style="font-size:13px;color:#94a3b8;margin-top:6px;">'+(d.conclusion||'')+'</p><a href="https://iashark.com" class="cta-btn">'+ui.voir+'</a></div>'
               +'<div class="tags">'+(Array.isArray(d.keywords)?d.keywords.map(function(k){return '<span class="stag">'+k.toUpperCase()+'</span>';}).join(''):'')+'</div>'
               +'</div>\n'
               +'<footer>IASHARK — AI Football Analysis · Indicative predictions only · Bet responsibly · 18+</footer>\n'
               +'</body>\n</html>';
           }
 
+
+          async function generateBlogGuideIndexPages() {
+            console.log('\n=== GÉNÉRATION INDEX BLOG GUIDES TRADUITS ===');
+            var GUIDE_UI = {
+              fr:{title:'Blog IASHARK — Guides Experts',desc:'Guides complets paris sportifs IA, value bets, bookmakers. Contenu expert mis à jour 2026.',guides_lbl:'GUIDES PERMANENTS',read:'LIRE →',coming:'BIENTÔT',home:'← ACCUEIL',analyses:'ANALYSES DU JOUR',stats:['10+','GUIDES EXPERTS'],free:'100% GRATUIT',cta_title:'Analyses IA en Direct',cta_desc:'Prédictions football mises à jour chaque matin. 19 langues. 100% gratuit.',cta_btn:'VOIR LES ANALYSES DU JOUR →',tag_bookie:'BOOKMAKERS',tag_strategy:'STRATÉGIE',tag_ai:'INTELLIGENCE ARTIFICIELLE',tag_wc:'COUPE DU MONDE',tag_beginner:'DÉBUTANT'},
+              en:{title:'IASHARK Blog — Expert Guides',desc:'Complete AI sports betting guides, value bets, bookmakers. Expert content updated 2026.',guides_lbl:'PERMANENT GUIDES',read:'READ →',coming:'COMING SOON',home:'← HOME',analyses:'TODAY'S ANALYSES',stats:['10+','EXPERT GUIDES'],free:'100% FREE',cta_title:'Live AI Analyses',cta_desc:'Football predictions updated every morning. 19 languages. 100% free.',cta_btn:'SEE TODAY'S ANALYSES →',tag_bookie:'BOOKMAKERS',tag_strategy:'STRATEGY',tag_ai:'ARTIFICIAL INTELLIGENCE',tag_wc:'WORLD CUP',tag_beginner:'BEGINNER'},
+              es:{title:'Blog IASHARK — Guías Expertas',desc:'Guías completas de apuestas deportivas IA, value bets, casas de apuestas. Contenido experto 2026.',guides_lbl:'GUÍAS PERMANENTES',read:'LEER →',coming:'PRÓXIMAMENTE',home:'← INICIO',analyses:'ANÁLISIS DE HOY',stats:['10+','GUÍAS EXPERTAS'],free:'100% GRATIS',cta_title:'Análisis IA en Directo',cta_desc:'Predicciones de fútbol actualizadas cada mañana. 19 idiomas. 100% gratis.',cta_btn:'VER ANÁLISIS DE HOY →',tag_bookie:'CASAS DE APUESTAS',tag_strategy:'ESTRATEGIA',tag_ai:'INTELIGENCIA ARTIFICIAL',tag_wc:'COPA DEL MUNDO',tag_beginner:'PRINCIPIANTE'},
+              pt:{title:'Blog IASHARK — Guias Especializados',desc:'Guias completos de apostas desportivas IA, value bets, casas de apostas. Conteúdo especializado 2026.',guides_lbl:'GUIAS PERMANENTES',read:'LER →',coming:'EM BREVE',home:'← INÍCIO',analyses:'ANÁLISES DE HOJE',stats:['10+','GUIAS ESPECIALISTAS'],free:'100% GRATUITO',cta_title:'Análises IA ao Vivo',cta_desc:'Previsões de futebol atualizadas todas as manhãs. 19 idiomas. 100% gratuito.',cta_btn:'VER ANÁLISES DE HOJE →',tag_bookie:'CASAS DE APOSTAS',tag_strategy:'ESTRATÉGIA',tag_ai:'INTELIGÊNCIA ARTIFICIAL',tag_wc:'COPA DO MUNDO',tag_beginner:'INICIANTE'},
+              de:{title:'IASHARK Blog — Expertenguides',desc:'Vollständige KI-Sportwetten-Guides, Value Bets, Buchmacher. Experteninhalte 2026.',guides_lbl:'PERMANENTE GUIDES',read:'LESEN →',coming:'BALD VERFÜGBAR',home:'← STARTSEITE',analyses:'ANALYSEN VON HEUTE',stats:['10+','EXPERTENGUIDES'],free:'100% KOSTENLOS',cta_title:'Live KI-Analysen',cta_desc:'Fußballvorhersagen täglich morgens aktualisiert. 19 Sprachen. 100% kostenlos.',cta_btn:'HEUTIGE ANALYSEN SEHEN →',tag_bookie:'BUCHMACHER',tag_strategy:'STRATEGIE',tag_ai:'KÜNSTLICHE INTELLIGENZ',tag_wc:'WELTMEISTERSCHAFT',tag_beginner:'ANFÄNGER'},
+              it:{title:'Blog IASHARK — Guide Esperte',desc:'Guide complete scommesse sportive IA, value bet, bookmaker. Contenuto esperto aggiornato 2026.',guides_lbl:'GUIDE PERMANENTI',read:'LEGGI →',coming:'PRESTO',home:'← HOME',analyses:'ANALISI DI OGGI',stats:['10+','GUIDE ESPERTE'],free:'100% GRATUITO',cta_title:'Analisi IA in Diretta',cta_desc:'Previsioni calcio aggiornate ogni mattina. 19 lingue. 100% gratuito.',cta_btn:'VEDI ANALISI DI OGGI →',tag_bookie:'BOOKMAKER',tag_strategy:'STRATEGIA',tag_ai:'INTELLIGENZA ARTIFICIALE',tag_wc:'COPPA DEL MONDO',tag_beginner:'PRINCIPIANTE'},
+              ar:{title:'مدونة IASHARK — أدلة الخبراء',desc:'أدلة شاملة لرهانات الذكاء الاصطناعي، value bets، أفضل المراهنين. محتوى خبراء 2026.',guides_lbl:'أدلة دائمة',read:'قراءة →',coming:'قريباً',home:'← الرئيسية',analyses:'تحليلات اليوم',stats:['10+','أدلة الخبراء'],free:'مجاني 100%',cta_title:'تحليلات ذكاء اصطناعي مباشرة',cta_desc:'توقعات كرة القدم يتم تحديثها كل صباح. 19 لغة. مجاني تماماً.',cta_btn:'رؤية تحليلات اليوم →',tag_bookie:'شركات المراهنة',tag_strategy:'الاستراتيجية',tag_ai:'الذكاء الاصطناعي',tag_wc:'كأس العالم',tag_beginner:'مبتدئ'},
+              tr:{title:'IASHARK Blog — Uzman Rehberler',desc:'Eksiksiz YZ spor bahisleri rehberleri, value bet, bahis şirketleri. Uzman içerik 2026.',guides_lbl:'KALICI REHBERLER',read:'OKU →',coming:'YAKINDA',home:'← ANA SAYFA',analyses:'BUGÜNÜN ANALİZLERİ',stats:['10+','UZMAN REHBERLERİ'],free:'%100 ÜCRETSIZ',cta_title:'Canlı YZ Analizleri',cta_desc:'Her sabah güncellenen futbol tahminleri. 19 dil. %100 ücretsiz.',cta_btn:'BUGÜNÜN ANALİZLERİNİ GÖR →',tag_bookie:'BAHİS ŞİRKETLERİ',tag_strategy:'STRATEJİ',tag_ai:'YAPAY ZEKA',tag_wc:'DÜNYA KUPASI',tag_beginner:'YENİ BAŞLAYANLAR'},
+              nl:{title:'IASHARK Blog — Expertgidsen',desc:'Volledige AI sportweddenschappen gidsen, value bets, bookmakers. Expertinhoud 2026.',guides_lbl:'PERMANENTE GIDSEN',read:'LEZEN →',coming:'BINNENKORT',home:'← STARTPAGINA',analyses:'ANALYSES VAN VANDAAG',stats:['10+','EXPERTGIDSEN'],free:'100% GRATIS',cta_title:'Live AI-Analyses',cta_desc:'Voetbalvoorspellingen elke ochtend bijgewerkt. 19 talen. 100% gratis.',cta_btn:'ANALYSES VAN VANDAAG ZIEN →',tag_bookie:'BOOKMAKERS',tag_strategy:'STRATEGIE',tag_ai:'KUNSTMATIGE INTELLIGENTIE',tag_wc:'WERELDKAMPIOENSCHAP',tag_beginner:'BEGINNER'},
+              pl:{title:'Blog IASHARK — Przewodniki Ekspertów',desc:'Kompletne przewodniki zakładów sportowych AI, value bets, bukmacherzy. Treści eksperckie 2026.',guides_lbl:'STAŁE PRZEWODNIKI',read:'CZYTAJ →',coming:'WKRÓTCE',home:'← STRONA GŁÓWNA',analyses:'ANALIZY DNIA',stats:['10+','PRZEWODNIKI EKSPERTÓW'],free:'100% ZA DARMO',cta_title:'Analizy AI na Żywo',cta_desc:'Prognozy piłkarskie aktualizowane co rano. 19 języków. 100% za darmo.',cta_btn:'ZOBACZ ANALIZY DNIA →',tag_bookie:'BUKMACHERZY',tag_strategy:'STRATEGIA',tag_ai:'SZTUCZNA INTELIGENCJA',tag_wc:'MISTRZOSTWA ŚWIATA',tag_beginner:'POCZĄTKUJĄCY'},
+              id:{title:'Blog IASHARK — Panduan Ahli',desc:'Panduan taruhan olahraga AI lengkap, value bet, bandar taruhan. Konten ahli 2026.',guides_lbl:'PANDUAN PERMANEN',read:'BACA →',coming:'SEGERA',home:'← BERANDA',analyses:'ANALISIS HARI INI',stats:['10+','PANDUAN AHLI'],free:'100% GRATIS',cta_title:'Analisis AI Langsung',cta_desc:'Prediksi sepak bola diperbarui setiap pagi. 19 bahasa. 100% gratis.',cta_btn:'LIHAT ANALISIS HARI INI →',tag_bookie:'BANDAR TARUHAN',tag_strategy:'STRATEGI',tag_ai:'KECERDASAN BUATAN',tag_wc:'PIALA DUNIA',tag_beginner:'PEMULA'},
+              ko:{title:'IASHARK 블로그 — 전문가 가이드',desc:'AI 스포츠 베팅 완전 가이드, value bet, 북메이커. 2026 전문가 콘텐츠.',guides_lbl:'영구 가이드',read:'읽기 →',coming:'곧 출시',home:'← 홈',analyses:'오늘의 분석',stats:['10+','전문가 가이드'],free:'100% 무료',cta_title:'실시간 AI 분석',cta_desc:'매일 아침 업데이트되는 축구 예측. 19개 언어. 100% 무료.',cta_btn:'오늘의 분석 보기 →',tag_bookie:'북메이커',tag_strategy:'전략',tag_ai:'인공지능',tag_wc:'월드컵',tag_beginner:'초보자'},
+              vi:{title:'Blog IASHARK — Hướng Dẫn Chuyên Gia',desc:'Hướng dẫn đặt cược thể thao AI đầy đủ, value bet, nhà cái. Nội dung chuyên gia 2026.',guides_lbl:'HƯỚNG DẪN THƯỜNG XUYÊN',read:'ĐỌC →',coming:'SẮP RA MẮT',home:'← TRANG CHỦ',analyses:'PHÂN TÍCH HÔM NAY',stats:['10+','HƯỚNG DẪN CHUYÊN GIA'],free:'100% MIỄN PHÍ',cta_title:'Phân Tích AI Trực Tiếp',cta_desc:'Dự đoán bóng đá cập nhật mỗi sáng. 19 ngôn ngữ. 100% miễn phí.',cta_btn:'XEM PHÂN TÍCH HÔM NAY →',tag_bookie:'NHÀ CÁI',tag_strategy:'CHIẾN LƯỢC',tag_ai:'TRÍ TUỆ NHÂN TẠO',tag_wc:'WORLD CUP',tag_beginner:'NGƯỜI MỚI'},
+              th:{title:'บล็อก IASHARK — คู่มือผู้เชี่ยวชาญ',desc:'คู่มือการแทงบอล AI ครบถ้วน, value bet, เจ้ามือรับแทง. เนื้อหาผู้เชี่ยวชาญ 2026.',guides_lbl:'คู่มือถาวร',read:'อ่าน →',coming:'เร็วๆ นี้',home:'← หน้าหลัก',analyses:'การวิเคราะห์วันนี้',stats:['10+','คู่มือผู้เชี่ยวชาญ'],free:'100% ฟรี',cta_title:'การวิเคราะห์ AI สด',cta_desc:'การทำนายฟุตบอลอัปเดตทุกเช้า 19 ภาษา ฟรี 100%',cta_btn:'ดูการวิเคราะห์วันนี้ →',tag_bookie:'เจ้ามือรับแทง',tag_strategy:'กลยุทธ์',tag_ai:'ปัญญาประดิษฐ์',tag_wc:'ฟุตบอลโลก',tag_beginner:'ผู้เริ่มต้น'},
+              el:{title:'IASHARK Blog — Οδηγοί Ειδικών',desc:'Πλήρεις οδηγοί αθλητικών στοιχημάτων AI, value bets, στοιχηματικές. Περιεχόμενο ειδικών 2026.',guides_lbl:'ΜΟΝΙΜΟΙ ΟΔΗΓΟΙ',read:'ΔΙΑΒΑΣΤΕ →',coming:'ΣΎΝΤΟΜΑ',home:'← ΑΡΧΙΚΗ',analyses:'ΑΝΑΛΥΣΕΙΣ ΣΗΜΕΡΑ',stats:['10+','ΟΔΗΓΟΙ ΕΙΔΙΚΩΝ'],free:'100% ΔΩΡΕΑΝ',cta_title:'Αναλύσεις AI Ζωντανά',cta_desc:'Προβλέψεις ποδοσφαίρου ενημερωμένες κάθε πρωί. 19 γλώσσες. 100% δωρεάν.',cta_btn:'ΔΕΙΤΕ ΑΝΑΛΥΣΕΙΣ ΣΗΜΕΡΑ →',tag_bookie:'ΣΤΟΙΧΗΜΑΤΙΚΕΣ',tag_strategy:'ΣΤΡΑΤΗΓΙΚΗ',tag_ai:'ΤΕΧΝΗΤΗ ΝΟΗΜΟΣΥΝΗ',tag_wc:'ΠΑΓΚΟΣΜΙΟ ΚΥΠΕΛΛΟ',tag_beginner:'ΑΡΧΑΡΙΟΙ'},
+              ro:{title:'Blog IASHARK — Ghiduri Experți',desc:'Ghiduri complete pariuri sportive AI, value bets, case de pariuri. Conținut expert 2026.',guides_lbl:'GHIDURI PERMANENTE',read:'CITEȘTE →',coming:'ÎN CURÂND',home:'← ACASĂ',analyses:'ANALIZE DE AZI',stats:['10+','GHIDURI EXPERȚI'],free:'100% GRATUIT',cta_title:'Analize AI în Direct',cta_desc:'Predicții fotbal actualizate în fiecare dimineață. 19 limbi. 100% gratuit.',cta_btn:'VEZI ANALIZELE DE AZI →',tag_bookie:'CASE DE PARIURI',tag_strategy:'STRATEGIE',tag_ai:'INTELIGENȚĂ ARTIFICIALĂ',tag_wc:'CUPA MONDIALĂ',tag_beginner:'ÎNCEPĂTOR'},
+              sv:{title:'IASHARK Blogg — Expertguider',desc:'Kompletta AI sportspels-guider, value bets, spelbolag. Expertinnehåll 2026.',guides_lbl:'PERMANENTA GUIDER',read:'LÄS →',coming:'SNART',home:'← STARTSIDA',analyses:'DAGENS ANALYSER',stats:['10+','EXPERTGUIDER'],free:'100% GRATIS',cta_title:'Live AI-Analyser',cta_desc:'Fotbollsprognoser uppdaterade varje morgon. 19 språk. 100% gratis.',cta_btn:'SE DAGENS ANALYSER →',tag_bookie:'SPELBOLAG',tag_strategy:'STRATEGI',tag_ai:'ARTIFICIELL INTELLIGENS',tag_wc:'VM',tag_beginner:'NYBÖRJARE'},
+              da:{title:'IASHARK Blog — Ekspertguider',desc:'Komplette AI sportsbetting-guider, value bets, bookmakers. Ekspertindhold 2026.',guides_lbl:'PERMANENTE GUIDER',read:'LÆS →',coming:'SNART',home:'← FORSIDE',analyses:'DAGENS ANALYSER',stats:['10+','EKSPERTGUIDER'],free:'100% GRATIS',cta_title:'Live AI-Analyser',cta_desc:'Fodboldprognoser opdateret hver morgen. 19 sprog. 100% gratis.',cta_btn:'SE DAGENS ANALYSER →',tag_bookie:'BOOKMAKERS',tag_strategy:'STRATEGI',tag_ai:'KUNSTIG INTELLIGENS',tag_wc:'VM',tag_beginner:'BEGYNDER'},
+              ja:{title:'IASHARKブログ — 専門家ガイド',desc:'完全なAIスポーツベッティングガイド、バリューベット、ブックメーカー。専門家コンテンツ2026。',guides_lbl:'永久ガイド',read:'読む →',coming:'近日公開',home:'← ホーム',analyses:'本日の分析',stats:['10+','専門家ガイド'],free:'100%無料',cta_title:'ライブAI分析',cta_desc:'毎朝更新されるサッカー予測。19言語。100%無料。',cta_btn:'本日の分析を見る →',tag_bookie:'ブックメーカー',tag_strategy:'戦略',tag_ai:'人工知能',tag_wc:'ワールドカップ',tag_beginner:'初心者'}
+            };
+            var GUIDE_CARDS_META = [
+              {slug:'meilleurs-bookmakers-monde-2026',icon:'🏦',tag_key:'tag_bookie',titles:{fr:'Top 10 Meilleurs Bookmakers Monde 2026',en:'Top 10 Best Bookmakers World 2026',es:'Top 10 Mejores Casas de Apuestas Mundo 2026',pt:'Top 10 Melhores Casas de Apostas Mundo 2026',de:'Top 10 Beste Buchmacher Welt 2026',it:'Top 10 Migliori Bookmaker Mondo 2026',ar:'أفضل 10 شركات رهان في العالم 2026',tr:'Dünya En İyi 10 Bahis Şirketi 2026',nl:'Top 10 Beste Bookmakers Wereld 2026',pl:'Top 10 Najlepszych Bukmacherów Świata 2026',id:'10 Bandar Taruhan Terbaik Dunia 2026',ko:'세계 최고 북메이커 TOP 10 2026',vi:'Top 10 Nhà Cái Tốt Nhất Thế Giới 2026',th:'10 เจ้ามือรับแทงที่ดีที่สุดในโลก 2026',el:'Top 10 Καλύτερες Στοιχηματικές Κόσμου 2026',ro:'Top 10 Case de Pariuri Lume 2026',sv:'Top 10 Bästa Spelbolag Världen 2026',da:'Top 10 Bedste Bookmakers Verden 2026',ja:'世界ベストブックメーカーTOP10 2026'},descs:{fr:'Comparatif complet et mondial.',en:'Complete global comparison.',es:'Comparación global completa.',pt:'Comparação global completa.',de:'Vollständiger weltweiter Vergleich.',it:'Confronto completo mondiale.',ar:'مقارنة شاملة عالمية.',tr:'Kapsamlı küresel karşılaştırma.',nl:'Volledig wereldwijd vergelijk.',pl:'Pełne globalne porównanie.',id:'Perbandingan global lengkap.',ko:'완전한 글로벌 비교.',vi:'So sánh toàn cầu đầy đủ.',th:'การเปรียบเทียบทั่วโลกที่สมบูรณ์',el:'Πλήρης παγκόσμια σύγκριση.',ro:'Comparație globală completă.',sv:'Fullständig global jämförelse.',da:'Komplet global sammenligning.',ja:'完全なグローバル比較。'}},
+              {slug:'value-bet-guide-complet-2026',icon:'💎',tag_key:'tag_strategy',titles:{fr:'Value Bet — Guide Complet 2026',en:'Value Bet — Complete Guide 2026',es:'Value Bet — Guía Completa 2026',pt:'Value Bet — Guia Completo 2026',de:'Value Bet — Vollständiger Guide 2026',it:'Value Bet — Guida Completa 2026',ar:'Value Bet — الدليل الكامل 2026',tr:'Value Bet — Tam Kılavuz 2026',nl:'Value Bet — Complete Gids 2026',pl:'Value Bet — Kompletny Przewodnik 2026',id:'Value Bet — Panduan Lengkap 2026',ko:'Value Bet — 완전 가이드 2026',vi:'Value Bet — Hướng Dẫn Đầy Đủ 2026',th:'Value Bet — คู่มือครบถ้วน 2026',el:'Value Bet — Πλήρης Οδηγός 2026',ro:'Value Bet — Ghid Complet 2026',sv:'Value Bet — Komplett Guide 2026',da:'Value Bet — Komplet Guide 2026',ja:'Value Bet — 完全ガイド 2026'},descs:{fr:'La stratégie des professionnels.',en:'The professionals strategy.',es:'La estrategia de los profesionales.',pt:'A estratégia dos profissionais.',de:'Die Strategie der Profis.',it:'La strategia dei professionisti.',ar:'استراتيجية المحترفين.',tr:'Profesyonellerin stratejisi.',nl:'De strategie van professionals.',pl:'Strategia profesjonalistów.',id:'Strategi para profesional.',ko:'전문가의 전략.',vi:'Chiến lược của các chuyên gia.',th:'กลยุทธ์ของผู้เชี่ยวชาญ',el:'Η στρατηγική των επαγγελματιών.',ro:'Strategia profesioniștilor.',sv:'Proffsstrategi.',da:'Professionel strategi.',ja:'プロフェッショナルの戦略。'}},
+              {slug:'prediction-ia-football-guide-2026',icon:'🤖',tag_key:'tag_ai',titles:{fr:'Prédiction IA Football 2026',en:'AI Football Prediction 2026',es:'Predicción IA Fútbol 2026',pt:'Previsão IA Futebol 2026',de:'KI Fußballvorhersage 2026',it:'Previsione IA Calcio 2026',ar:'توقعات ذكاء اصطناعي كرة القدم 2026',tr:'YZ Futbol Tahmini 2026',nl:'AI Voetbalvoorspelling 2026',pl:'Prognoza AI Piłka Nożna 2026',id:'Prediksi AI Sepak Bola 2026',ko:'AI 축구 예측 2026',vi:'Dự Đoán AI Bóng Đá 2026',th:'การทำนาย AI ฟุตบอล 2026',el:'AI Πρόβλεψη Ποδοσφαίρου 2026',ro:'Predicție AI Fotbal 2026',sv:'AI Fotbollsprognos 2026',da:'AI Fodboldprognose 2026',ja:'AI サッカー予測 2026'},descs:{fr:'Comment l'IA bat les experts humains.',en:'How AI beats human experts.',es:'Cómo la IA supera a los expertos humanos.',pt:'Como a IA supera especialistas humanos.',de:'Wie KI menschliche Experten schlägt.',it:'Come l'IA batte gli esperti umani.',ar:'كيف يتفوق الذكاء الاصطناعي على الخبراء.',tr:'YZ insan uzmanları nasıl geçer.',nl:'Hoe AI menselijke experts verslaat.',pl:'Jak AI pokonuje ekspertów.',id:'Bagaimana AI mengalahkan pakar manusia.',ko:'AI가 인간 전문가를 이기는 방법.',vi:'AI đánh bại các chuyên gia như thế nào.',th:'AI เอาชนะผู้เชี่ยวชาญมนุษย์ได้อย่างไร',el:'Πώς η AI νικά τους ανθρώπους.',ro:'Cum AI întrece experții umani.',sv:'Hur AI slår mänskliga experter.',da:'Hvordan AI slår menneskelige eksperter.',ja:'AIが人間の専門家に勝つ方法。'}},
+              {slug:'coupe-du-monde-2026-guide-complet',icon:'🌍',tag_key:'tag_wc',titles:{fr:'Coupe du Monde 2026 — Guide Complet',en:'2026 World Cup — Complete Guide',es:'Copa del Mundo 2026 — Guía Completa',pt:'Copa do Mundo 2026 — Guia Completo',de:'WM 2026 — Vollständiger Guide',it:'Coppa del Mondo 2026 — Guida Completa',ar:'كأس العالم 2026 — الدليل الكامل',tr:'2026 Dünya Kupası — Tam Kılavuz',nl:'WK 2026 — Complete Gids',pl:'MŚ 2026 — Kompletny Przewodnik',id:'Piala Dunia 2026 — Panduan Lengkap',ko:'2026 월드컵 — 완전 가이드',vi:'World Cup 2026 — Hướng Dẫn Đầy Đủ',th:'ฟุตบอลโลก 2026 — คู่มือครบถ้วน',el:'Παγκόσμιο Κύπελλο 2026 — Πλήρης Οδηγός',ro:'Cupa Mondială 2026 — Ghid Complet',sv:'VM 2026 — Komplett Guide',da:'VM 2026 — Komplet Guide',ja:'2026 ワールドカップ — 完全ガイド'},descs:{fr:'48 équipes, 3 pays hôtes, favoris IA.',en:'48 teams, 3 host countries, AI favorites.',es:'48 equipos, 3 países anfitriones, favoritos IA.',pt:'48 equipes, 3 países anfitriões, favoritos IA.',de:'48 Teams, 3 Gastgeberländer, KI-Favoriten.',it:'48 squadre, 3 paesi ospitanti, favoriti IA.',ar:'48 فريقاً، 3 دول مضيفة، المفضلون AI.',tr:'48 takım, 3 ev sahibi ülke, YZ favorileri.',nl:'48 teams, 3 gastlanden, AI-favorieten.',pl:'48 drużyn, 3 kraje goszczące, faworyci AI.',id:'48 tim, 3 negara tuan rumah, favorit AI.',ko:'48개 팀, 3개국 개최, AI 우승 후보.',vi:'48 đội, 3 quốc gia chủ nhà, yêu thích AI.',th:'48 ทีม, 3 ประเทศเจ้าภาพ, ตัวเต็ง AI',el:'48 ομάδες, 3 χώρες, αγαπημένες AI.',ro:'48 echipe, 3 țări gazdă, favoriți AI.',sv:'48 lag, 3 värdländer, AI-favoriter.',da:'48 hold, 3 værtslande, AI-favoritter.',ja:'48チーム、3開催国、AI優勝候補。'}},
+              {slug:'guide-paris-sportifs-debutant-complet',icon:'📚',tag_key:'tag_beginner',titles:{fr:'Guide Paris Sportifs Débutant 2026',en:'Sports Betting Beginner Guide 2026',es:'Guía Apuestas Deportivas Principiante 2026',pt:'Guia Apostas Desportivas Iniciante 2026',de:'Sportwetten Anfänger Guide 2026',it:'Guida Scommesse Sportive Principiante 2026',ar:'دليل المبتدئين في الرهانات الرياضية 2026',tr:'Spor Bahisleri Yeni Başlayan Kılavuzu 2026',nl:'Sportweddenschappen Beginner Gids 2026',pl:'Przewodnik Zakładów Sportowych Początkujący 2026',id:'Panduan Taruhan Olahraga Pemula 2026',ko:'스포츠 베팅 초보자 가이드 2026',vi:'Hướng Dẫn Cá Cược Thể Thao Cho Người Mới 2026',th:'คู่มือการแทงกีฬาสำหรับผู้เริ่มต้น 2026',el:'Οδηγός Αθλητικών Στοιχημάτων Αρχαρίων 2026',ro:'Ghid Pariuri Sportive Începători 2026',sv:'Sportvadslagning Nybörjarguide 2026',da:'Sportsbetting Begynderguide 2026',ja:'スポーツベッティング初心者ガイド 2026'},descs:{fr:'Vocabulaire, stratégies, bankroll management.',en:'Vocabulary, strategies, bankroll management.',es:'Vocabulario, estrategias, gestión de bankroll.',pt:'Vocabulário, estratégias, gestão de banca.',de:'Vokabular, Strategien, Bankroll-Management.',it:'Vocabolario, strategie, gestione bankroll.',ar:'المصطلحات، الاستراتيجيات، إدارة البنك.',tr:'Kelime hazinesi, stratejiler, bankroll yönetimi.',nl:'Woordenschat, strategieën, bankroll beheer.',pl:'Słownictwo, strategie, zarządzanie bankrollem.',id:'Kosakata, strategi, manajemen bankroll.',ko:'어휘, 전략, 뱅크롤 관리.',vi:'Từ vựng, chiến lược, quản lý vốn.',th:'คำศัพท์, กลยุทธ์, การจัดการแบงค์โรล',el:'Λεξιλόγιο, στρατηγικές, διαχείριση κεφαλαίου.',ro:'Vocabular, strategii, managementul bankroll.',sv:'Ordförråd, strategier, bankrollhantering.',da:'Ordforråd, strategier, bankroll-styring.',ja:'語彙、戦略、バンクロール管理。'}}
+            ];
+
+            for (var lg of GUIDE_LANGS) {
+              var u = GUIDE_UI[lg] || GUIDE_UI['en'];
+              var isRTL = GUIDE_RTL.includes(lg);
+              var dir = isRTL ? 'rtl' : 'ltr';
+              var outDir = lg+'/blog/guides';
+              mkdirSafe(outDir);
+              var cardsHtml = GUIDE_CARDS_META.map(function(g) {
+                var t = g.titles[lg] || g.titles['en'];
+                var desc = g.descs[lg] || g.descs['en'];
+                var tag = u[g.tag_key] || '';
+                return '<a href="/'+lg+'/blog/guides/'+g.slug+'.html" class="guide-card">'
+                  +'<div class="gc-icon">'+g.icon+'</div>'
+                  +'<span class="gc-tag">'+tag+'</span>'
+                  +'<div class="gc-title">'+t+'</div>'
+                  +'<div class="gc-desc">'+desc+'</div>'
+                  +'<div class="gc-footer"><span class="gc-read">'+u.read+'</span></div>'
+                  +'</a>';
+              }).join('\n');
+              var canonical = 'https://iashark.com/'+lg+'/blog/guides/';
+              var hreflangs = ['fr'].concat(GUIDE_LANGS).map(function(hl) {
+                var hlUrl = hl==='fr' ? 'https://iashark.com/blog/guides/' : 'https://iashark.com/'+hl+'/blog/guides/';
+                return '<link rel="alternate" hreflang="'+hl+'" href="'+hlUrl+'">';
+              }).join('\n');
+              var pageTitle = u.title + ' | IASHARK';
+              var html = '<!DOCTYPE html>\n<html lang="'+lg+'" dir="'+dir+'">\n<head>\n'
+                +'<meta charset="UTF-8">\n<meta name="viewport" content="width=device-width,initial-scale=1">\n'
+                +'<title>'+pageTitle+'</title>\n'
+                +'<meta name="description" content="'+u.desc+'">\n'
+                +'<link rel="canonical" href="'+canonical+'">\n'
+                +hreflangs+'\n'
+                +'<script type="application/ld+json">'+JSON.stringify({"@context":"https://schema.org","@type":"Blog","name":"IASHARK Blog","url":canonical,"description":u.desc,"inLanguage":lg,"publisher":{"@type":"Organization","name":"IASHARK","url":"https://iashark.com"}})+'</script>\n'
+                +'<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=JetBrains+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">\n'
+                +'<style>:root{--bg:#060a0c;--card:#0d1820;--cyan:#00e5ff;--amber:#ffab00;--green:#00e676;--text:#e8f0f4;--muted:#4a6878;--border:rgba(255,255,255,0.06);}*{margin:0;padding:0;box-sizing:border-box;}body{background:var(--bg);color:var(--text);font-family:"DM Sans",sans-serif;}a{color:inherit;text-decoration:none;}.hdr{background:rgba(6,10,12,0.98);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:99;backdrop-filter:blur(10px);}.logo{font-family:"Bebas Neue",sans-serif;font-size:22px;letter-spacing:2px;}.logo span{color:var(--cyan);}.nav{display:flex;gap:12px;}.nav a{font-family:"JetBrains Mono",monospace;font-size:10px;color:var(--muted);border:1px solid var(--border);padding:6px 12px;border-radius:6px;transition:.2s;}.nav a:hover{border-color:var(--cyan);color:var(--cyan);}.hero{background:linear-gradient(135deg,#001220,#002040,#000e1a);border-bottom:1px solid rgba(0,229,255,0.12);padding:60px 24px 48px;text-align:center;}.hero h1{font-family:"Bebas Neue",sans-serif;font-size:clamp(32px,6vw,58px);margin-bottom:14px;line-height:1.05;}.hero h1 span{color:var(--cyan);}.hero p{color:#94a3b8;font-size:15px;max-width:560px;margin:0 auto 24px;line-height:1.7;}.hero-stats{display:flex;justify-content:center;gap:32px;flex-wrap:wrap;}.hs{text-align:center;}.hs-val{font-family:"Bebas Neue",sans-serif;font-size:28px;color:var(--cyan);}.hs-lbl{font-family:"JetBrains Mono",monospace;font-size:8px;color:var(--muted);letter-spacing:1px;}.body{max-width:960px;margin:0 auto;padding:48px 24px;}.section-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;}.section-lbl{font-family:"JetBrains Mono",monospace;font-size:10px;color:var(--cyan);letter-spacing:3px;}.guides-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;margin-bottom:48px;}.guide-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px;display:flex;flex-direction:column;gap:12px;transition:border-color .2s,transform .2s;}.guide-card:hover{border-color:rgba(0,229,255,0.3);transform:translateY(-2px);}.gc-icon{font-size:32px;}.gc-tag{font-family:"JetBrains Mono",monospace;font-size:8px;color:var(--cyan);background:rgba(0,229,255,0.08);border:1px solid rgba(0,229,255,0.2);padding:3px 8px;border-radius:20px;letter-spacing:1px;display:inline-block;}.gc-title{font-family:"Bebas Neue",sans-serif;font-size:18px;letter-spacing:0.5px;line-height:1.2;}.gc-desc{font-size:13px;color:var(--muted);line-height:1.6;flex:1;}.gc-footer{display:flex;align-items:center;justify-content:space-between;margin-top:4px;}.gc-read{font-family:"JetBrains Mono",monospace;font-size:9px;color:var(--cyan);letter-spacing:1px;}.divider{border:none;border-top:1px solid var(--border);margin:40px 0;}.cta{background:linear-gradient(135deg,rgba(0,229,255,0.08),rgba(0,180,216,0.04));border:1px solid rgba(0,229,255,0.25);border-radius:18px;padding:40px;text-align:center;}.cta h2{font-family:"Bebas Neue",sans-serif;font-size:32px;letter-spacing:1px;margin-bottom:10px;}.cta p{font-size:14px;color:#94a3b8;max-width:420px;margin:0 auto 20px;}.cta-btn{display:inline-block;background:var(--cyan);color:#000;font-family:"JetBrains Mono",monospace;font-size:11px;font-weight:700;letter-spacing:2px;padding:14px 36px;border-radius:10px;}footer{background:var(--card);border-top:1px solid var(--border);padding:28px 24px;text-align:center;margin-top:48px;}footer p{font-family:"JetBrains Mono",monospace;font-size:9px;color:var(--muted);letter-spacing:1px;line-height:1.8;}@media(max-width:600px){.guides-grid{grid-template-columns:1fr;}.hero-stats{gap:20px;}}</style>\n'
+                +'</head>\n<body>\n'
+                +'<header class="hdr"><a href="https://iashark.com" class="logo"><span>IA</span>SHARK</a>'
+                +'<nav class="nav"><a href="https://iashark.com/'+lg+'/">'+u.home+'</a><a href="https://iashark.com">'+u.analyses+'</a></nav></header>\n'
+                +'<div class="hero"><h1>Blog <span>IASHARK</span></h1><p>'+u.desc+'</p>'
+                +'<div class="hero-stats"><div class="hs"><div class="hs-val">'+u.stats[0]+'</div><div class="hs-lbl">'+u.stats[1]+'</div></div>'
+                +'<div class="hs"><div class="hs-val">19</div><div class="hs-lbl">LANGUES</div></div>'
+                +'<div class="hs"><div class="hs-val">100%</div><div class="hs-lbl">'+u.free+'</div></div></div></div>\n'
+                +'<div class="body"><div class="section-hdr"><div class="section-lbl">📖 '+u.guides_lbl+'</div></div>'
+                +'<div class="guides-grid">'+cardsHtml+'</div>'
+                +'<hr class="divider">'
+                +'<div class="cta"><h2>🦈 '+u.cta_title+'</h2><p>'+u.cta_desc+'</p>'
+                +'<a href="https://iashark.com" class="cta-btn">'+u.cta_btn+'</a></div></div>\n'
+                +'<footer><p>IASHARK — AI Football Analysis · Indicative predictions only · Bet responsibly · 18+</p></footer>\n'
+                +'</body>\n</html>';
+              require('fs').writeFileSync(outDir+'/index.html', html);
+              console.log('  ✓ '+lg+'/blog/guides/index.html');
+            }
+            console.log('=== BLOG GUIDE INDEX PAGES DONE ===');
+          }
+
+          async function generateBlogIndexPages(matchsData, upcomingFixtures) {
+            console.log('\n=== GÉNÉRATION INDEX BLOG PAR LANGUE ===');
+            var BLOG_INDEX_UI = {
+              fr:{title:'Blog IASHARK — Analyses Football IA du Jour',desc:'Analyses et prédictions football IA quotidiennes. Articles experts pour chaque match. Value bets détectés.',today:'ANALYSES DU JOUR',upcoming:'APERÇUS À VENIR',guides_title:'📖 GUIDES PERMANENTS',guides_btn:'VOIR TOUS LES GUIDES →',home:'← ACCUEIL',cta_btn:'VOIR LES ANALYSES EN DIRECT →',badge:'IA FOOTBALL'},
+              en:{title:'IASHARK Blog — Daily AI Football Analyses',desc:'Daily AI football analyses and predictions. Expert articles for every match. Detected value bets.',today:'TODAY'S ANALYSES',upcoming:'UPCOMING PREVIEWS',guides_title:'📖 PERMANENT GUIDES',guides_btn:'SEE ALL GUIDES →',home:'← HOME',cta_btn:'SEE LIVE ANALYSES →',badge:'AI FOOTBALL'},
+              es:{title:'Blog IASHARK — Análisis IA Fútbol Diarios',desc:'Análisis y predicciones de fútbol IA diarios. Artículos expertos para cada partido. Value bets detectados.',today:'ANÁLISIS DE HOY',upcoming:'PRÓXIMOS AVANCES',guides_title:'📖 GUÍAS PERMANENTES',guides_btn:'VER TODAS LAS GUÍAS →',home:'← INICIO',cta_btn:'VER ANÁLISIS EN DIRECTO →',badge:'IA FÚTBOL'},
+              pt:{title:'Blog IASHARK — Análises IA Futebol Diárias',desc:'Análises e previsões de futebol IA diárias. Artigos especializados para cada partida.',today:'ANÁLISES DE HOJE',upcoming:'PRÉ-VISUALIZAÇÕES',guides_title:'📖 GUIAS PERMANENTES',guides_btn:'VER TODOS OS GUIAS →',home:'← INÍCIO',cta_btn:'VER ANÁLISES AO VIVO →',badge:'IA FUTEBOL'},
+              de:{title:'IASHARK Blog — Tägliche KI Fußball Analysen',desc:'Tägliche KI-Fußballanalysen und -vorhersagen. Expertartikel für jedes Spiel.',today:'HEUTIGE ANALYSEN',upcoming:'VORSCHAU',guides_title:'📖 PERMANENTE GUIDES',guides_btn:'ALLE GUIDES SEHEN →',home:'← STARTSEITE',cta_btn:'LIVE-ANALYSEN SEHEN →',badge:'KI FUSSBALL'},
+              it:{title:'Blog IASHARK — Analisi IA Calcio Quotidiane',desc:'Analisi e previsioni calcio IA quotidiane. Articoli esperti per ogni partita.',today:'ANALISI DI OGGI',upcoming:'ANTEPRIME',guides_title:'📖 GUIDE PERMANENTI',guides_btn:'VEDI TUTTE LE GUIDE →',home:'← HOME',cta_btn:'VEDI ANALISI IN DIRETTA →',badge:'IA CALCIO'},
+              ar:{title:'مدونة IASHARK — تحليلات كرة القدم اليومية',desc:'تحليلات وتوقعات يومية لكرة القدم بالذكاء الاصطناعي.',today:'تحليلات اليوم',upcoming:'معاينات قادمة',guides_title:'📖 أدلة دائمة',guides_btn:'رؤية كل الأدلة →',home:'← الرئيسية',cta_btn:'رؤية التحليلات المباشرة →',badge:'ذكاء اصطناعي'},
+              tr:{title:'IASHARK Blog — Günlük YZ Futbol Analizleri',desc:'Günlük YZ futbol analizleri ve tahminleri.',today:'BUGÜNÜN ANALİZLERİ',upcoming:'YAKLAŞAN ÖNIZLEMELER',guides_title:'📖 KALICI REHBERLER',guides_btn:'TÜM REHBERLERİ GÖR →',home:'← ANA SAYFA',cta_btn:'CANLI ANALİZLERİ GÖR →',badge:'YZ FUTBOL'},
+              nl:{title:'IASHARK Blog — Dagelijkse AI Voetbalanalyses',desc:'Dagelijkse AI voetbalanalyses en voorspellingen.',today:'ANALYSES VAN VANDAAG',upcoming:'AANKOMENDE PREVIEWS',guides_title:'📖 PERMANENTE GIDSEN',guides_btn:'ALLE GIDSEN ZIEN →',home:'← STARTPAGINA',cta_btn:'LIVE ANALYSES ZIEN →',badge:'AI VOETBAL'},
+              pl:{title:'Blog IASHARK — Codzienne Analizy AI Piłka Nożna',desc:'Codzienne analizy i prognozy piłki nożnej AI.',today:'ANALIZY DNIA',upcoming:'NADCHODZĄCE PODGLĄDY',guides_title:'📖 STAŁE PRZEWODNIKI',guides_btn:'WSZYSTKIE PRZEWODNIKI →',home:'← STRONA GŁÓWNA',cta_btn:'ANALIZY NA ŻYWO →',badge:'AI PIŁKA NOŻNA'},
+              id:{title:'Blog IASHARK — Analisis AI Sepak Bola Harian',desc:'Analisis dan prediksi sepak bola AI harian.',today:'ANALISIS HARI INI',upcoming:'PRATINJAU MENDATANG',guides_title:'📖 PANDUAN PERMANEN',guides_btn:'LIHAT SEMUA PANDUAN →',home:'← BERANDA',cta_btn:'LIHAT ANALISIS LANGSUNG →',badge:'AI SEPAK BOLA'},
+              ko:{title:'IASHARK 블로그 — 일일 AI 축구 분석',desc:'일일 AI 축구 분석 및 예측.',today:'오늘의 분석',upcoming:'예정된 프리뷰',guides_title:'📖 영구 가이드',guides_btn:'모든 가이드 보기 →',home:'← 홈',cta_btn:'라이브 분석 보기 →',badge:'AI 축구'},
+              vi:{title:'Blog IASHARK — Phân Tích AI Bóng Đá Hàng Ngày',desc:'Phân tích và dự đoán bóng đá AI hàng ngày.',today:'PHÂN TÍCH HÔM NAY',upcoming:'PREVIEW SẮP TỚI',guides_title:'📖 HƯỚNG DẪN THƯỜNG XUYÊN',guides_btn:'XEM TẤT CẢ HƯỚNG DẪN →',home:'← TRANG CHỦ',cta_btn:'XEM PHÂN TÍCH TRỰC TIẾP →',badge:'AI BÓNG ĐÁ'},
+              th:{title:'IASHARK บล็อก — การวิเคราะห์ AI ฟุตบอลรายวัน',desc:'การวิเคราะห์และการทำนาย AI ฟุตบอลรายวัน',today:'การวิเคราะห์วันนี้',upcoming:'ตัวอย่างที่จะมา',guides_title:'📖 คู่มือถาวร',guides_btn:'ดูทุกคู่มือ →',home:'← หน้าหลัก',cta_btn:'ดูการวิเคราะห์สด →',badge:'AI ฟุตบอล'},
+              el:{title:'IASHARK Blog — Καθημερινές Αναλύσεις AI Ποδοσφαίρου',desc:'Καθημερινές αναλύσεις AI και προβλέψεις ποδοσφαίρου.',today:'ΑΝΑΛΥΣΕΙΣ ΣΗΜΕΡΑ',upcoming:'ΕΠΕΡΧΟΜΕΝΕΣ ΠΡΟΕΠΙΣΚΟΠΗΣΕΙΣ',guides_title:'📖 ΜΟΝΙΜΟΙ ΟΔΗΓΟΙ',guides_btn:'ΟΛΑ ΤΑ ΟΔΗΓΟΙ →',home:'← ΑΡΧΙΚΗ',cta_btn:'LIVE ΑΝΑΛΥΣΕΙΣ →',badge:'AI ΠΟΔΟΣΦΑΙΡΟ'},
+              ro:{title:'Blog IASHARK — Analize AI Fotbal Zilnice',desc:'Analize și predicții fotbal AI zilnice.',today:'ANALIZE DE AZI',upcoming:'PREVIZUALIZĂRI VIITOARE',guides_title:'📖 GHIDURI PERMANENTE',guides_btn:'TOATE GHIDURILE →',home:'← ACASĂ',cta_btn:'ANALIZE LIVE →',badge:'AI FOTBAL'},
+              sv:{title:'IASHARK Blogg — Dagliga AI Fotbollsanalyser',desc:'Dagliga AI fotbollsanalyser och prognoser.',today:'DAGENS ANALYSER',upcoming:'KOMMANDE FÖRHANDSVISNINGAR',guides_title:'📖 PERMANENTA GUIDER',guides_btn:'ALLA GUIDER →',home:'← STARTSIDA',cta_btn:'SE LIVE ANALYSER →',badge:'AI FOTBOLL'},
+              da:{title:'IASHARK Blog — Daglige AI Fodboldanalyser',desc:'Daglige AI fodboldanalyser og prognoser.',today:'DAGENS ANALYSER',upcoming:'KOMMENDE FORHÅNDSVISNINGER',guides_title:'📖 PERMANENTE GUIDER',guides_btn:'ALLE GUIDER →',home:'← FORSIDE',cta_btn:'SE LIVE ANALYSER →',badge:'AI FODBOLD'},
+              ja:{title:'IASHARKブログ — 毎日のAIサッカー分析',desc:'毎日のAIサッカー分析と予測。',today:'本日の分析',upcoming:'今後のプレビュー',guides_title:'📖 永久ガイド',guides_btn:'すべてのガイドを見る →',home:'← ホーム',cta_btn:'ライブ分析を見る →',badge:'AI サッカー'}
+            };
+
+            var allLangs = ['fr'].concat(GUIDE_LANGS);
+            for (var li = 0; li < allLangs.length; li++) {
+              var lg = allLangs[li];
+              var u = BLOG_INDEX_UI[lg] || BLOG_INDEX_UI['en'];
+              var isRTL = GUIDE_RTL.includes(lg);
+              var dir = isRTL ? 'rtl' : 'ltr';
+              var blogDir = lg === 'fr' ? 'blog' : lg+'/blog';
+              mkdirSafe(blogDir);
+
+              var articleCards = '';
+              if (matchsData && matchsData.length > 0) {
+                articleCards += '<div class="section-lbl">⚡ '+u.today+'</div><div class="articles-grid" style="margin-bottom:32px">';
+                matchsData.slice(0,12).forEach(function(m) {
+                  var slug = slugify(m.home.n+'-vs-'+m.away.n+'-'+m.date.split(' ')[0]);
+                  var artTitle = (lg!=='fr'&&m['analyse_card_'+lg]) ? m.home.n+' vs '+m.away.n : m.home.n+' vs '+m.away.n;
+                  var artDesc = (lg!=='fr'&&m['analyse_card_'+lg] ? m['analyse_card_'+lg] : m.analyse_card||'').slice(0,120);
+                  var artUrl = '/'+blogDir+'/'+slug+'.html';
+                  var conf = m.conf||'';
+                  articleCards += '<a href="'+artUrl+'" class="art-card">'
+                    +'<div class="art-badge">'+u.badge+'</div>'
+                    +'<div class="art-title">'+m.home.n+' <span>vs</span> '+m.away.n+'</div>'
+                    +'<div class="art-league">'+m.league+'</div>'
+                    +(conf?'<div class="art-conf">'+conf+'/10</div>':'')
+                    +'<div class="art-desc">'+artDesc+'</div>'
+                    +'<div class="art-read">'+((BLOG_UI[lg]||BLOG_UI['en']).voir)+'</div>'
+                    +'</a>';
+                });
+                articleCards += '</div>';
+              }
+
+              var guideCards = '';
+              GUIDE_CARDS_META.forEach(function(g) {
+                var gTitle = g.titles[lg] || g.titles['en'];
+                var gDesc = g.descs[lg] || g.descs['en'];
+                var gUrl = (lg==='fr'?'/blog/guides/':'/'+lg+'/blog/guides/')+g.slug+'.html';
+                guideCards += '<a href="'+gUrl+'" class="art-card guide-small">'
+                  +'<div class="art-badge guide-badge">'+g.icon+'</div>'
+                  +'<div class="art-title">'+gTitle+'</div>'
+                  +'<div class="art-desc">'+gDesc+'</div>'
+                  +'</a>';
+              });
+
+              var canonical = lg==='fr' ? 'https://iashark.com/blog/' : 'https://iashark.com/'+lg+'/blog/';
+              var hreflangs = allLangs.map(function(hl) {
+                var hlUrl = hl==='fr' ? 'https://iashark.com/blog/' : 'https://iashark.com/'+hl+'/blog/';
+                return '<link rel="alternate" hreflang="'+hl+'" href="'+hlUrl+'">';
+              }).join('\n');
+
+              var html = '<!DOCTYPE html>\n<html lang="'+lg+'" dir="'+dir+'">\n<head>\n'
+                +'<meta charset="UTF-8">\n<meta name="viewport" content="width=device-width,initial-scale=1">\n'
+                +'<title>'+u.title+' | IASHARK</title>\n'
+                +'<meta name="description" content="'+u.desc+'">\n'
+                +'<link rel="canonical" href="'+canonical+'">\n'
+                +hreflangs+'\n'
+                +'<script type="application/ld+json">'+JSON.stringify({"@context":"https://schema.org","@type":"Blog","name":"IASHARK Blog","url":canonical,"description":u.desc,"inLanguage":lg,"publisher":{"@type":"Organization","name":"IASHARK","url":"https://iashark.com"}})+'</script>\n'
+                +'<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=JetBrains+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">\n'
+                +'<style>:root{--bg:#060a0c;--card:#0d1820;--cyan:#00e5ff;--amber:#ffab00;--text:#e8f0f4;--muted:#4a6878;--border:rgba(255,255,255,0.06);}*{margin:0;padding:0;box-sizing:border-box;}body{background:var(--bg);color:var(--text);font-family:"DM Sans",sans-serif;}a{color:inherit;text-decoration:none;}.hdr{background:rgba(6,10,12,0.98);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:99;backdrop-filter:blur(10px);}.logo{font-family:"Bebas Neue",sans-serif;font-size:22px;letter-spacing:2px;}.logo span{color:var(--cyan);}.bk{font-family:"JetBrains Mono",monospace;font-size:10px;color:var(--muted);border:1px solid var(--border);padding:6px 12px;border-radius:6px;}.hero{background:linear-gradient(135deg,#001220,#002040);border-bottom:1px solid rgba(0,229,255,0.12);padding:48px 24px 36px;text-align:center;}.hero h1{font-family:"Bebas Neue",sans-serif;font-size:clamp(28px,5vw,52px);margin-bottom:12px;line-height:1.05;}.hero h1 span{color:var(--cyan);}.hero p{color:#94a3b8;font-size:14px;max-width:500px;margin:0 auto;line-height:1.7;}.body{max-width:960px;margin:0 auto;padding:40px 24px;}.section-lbl{font-family:"JetBrains Mono",monospace;font-size:10px;color:var(--cyan);letter-spacing:3px;margin-bottom:16px;display:block;}.articles-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;}.art-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;display:flex;flex-direction:column;gap:8px;transition:border-color .2s,transform .2s;}.art-card:hover{border-color:rgba(0,229,255,0.3);transform:translateY(-2px);}.art-badge{font-family:"JetBrains Mono",monospace;font-size:8px;color:var(--cyan);background:rgba(0,229,255,0.08);border:1px solid rgba(0,229,255,0.2);padding:3px 8px;border-radius:20px;letter-spacing:1px;display:inline-block;}.guide-badge{font-size:18px;background:none;border:none;}.art-title{font-family:"Bebas Neue",sans-serif;font-size:17px;letter-spacing:0.5px;line-height:1.2;}.art-title span{color:var(--cyan);}.art-league{font-family:"JetBrains Mono",monospace;font-size:9px;color:var(--muted);letter-spacing:1px;}.art-conf{font-family:"Bebas Neue",sans-serif;font-size:22px;color:var(--amber);}.art-desc{font-size:12px;color:var(--muted);line-height:1.6;flex:1;}.art-read{font-family:"JetBrains Mono",monospace;font-size:9px;color:var(--cyan);letter-spacing:1px;margin-top:4px;}.guides-section{margin-top:40px;}.divider{border:none;border-top:1px solid var(--border);margin:32px 0;}footer{background:var(--card);border-top:1px solid var(--border);padding:24px;text-align:center;margin-top:48px;}footer p{font-family:"JetBrains Mono",monospace;font-size:9px;color:var(--muted);letter-spacing:1px;line-height:1.8;}@media(max-width:600px){.articles-grid{grid-template-columns:1fr;}}</style>\n'
+                +'</head>\n<body>\n'
+                +'<header class="hdr"><a href="https://iashark.com" class="logo"><span>IA</span>SHARK</a>'
+                +'<a href="https://iashark.com/'+(lg==='fr'?'':lg+'/').toString()+'" class="bk">'+u.home+'</a></header>\n'
+                +'<div class="hero"><h1>Blog <span>IASHARK</span></h1><p>'+u.desc+'</p></div>\n'
+                +'<div class="body">'+articleCards
+                +'<hr class="divider">'
+                +'<div class="guides-section">'
+                +'<div class="section-lbl">'+u.guides_title+'</div>'
+                +'<div class="articles-grid">'+guideCards+'</div>'
+                +'<div style="text-align:center;margin-top:20px;">'
+                +'<a href="'+(lg==='fr'?'/blog/guides/':'/'+lg+'/blog/guides/')+'" style="font-family:JetBrains Mono,monospace;font-size:10px;color:var(--cyan);border:1px solid rgba(0,229,255,0.3);padding:10px 20px;border-radius:8px;letter-spacing:1px;">'+u.guides_btn+'</a>'
+                +'</div></div></div>\n'
+                +'<footer><p>IASHARK — AI Football Analysis · Indicative predictions only · Bet responsibly · 18+</p></footer>\n'
+                +'</body>\n</html>';
+
+              require('fs').writeFileSync(blogDir+'/index.html', html);
+              console.log('  ✓ '+blogDir+'/index.html');
+            }
+            console.log('=== BLOG INDEX PAGES DONE ===');
+          }
+
           async function generateMultilingualMatchPages(matchsData) {
             if (!matchsData.length) return;
             console.log('\n  Generating multilingual match pages...');
-            // TOP_LANGS: traduction Claude
             for (var li=0; li<TOP_LANGS.length; li++) {
               var lang = TOP_LANGS[li];
               var langName = LANGS[lang];
@@ -720,7 +911,6 @@ jobs:
               });
               await sleep(500);
             }
-            // Autres langues: fallback anglais (pas d'appel API)
             var otherLangs = Object.keys(LANGS).filter(function(l){ return TOP_LANGS.indexOf(l)===-1; });
             console.log('  -> '+otherLangs.length+' remaining languages (EN fallback)...');
             otherLangs.forEach(function(lang) {
@@ -735,9 +925,6 @@ jobs:
             var total = matchsData.length * Object.keys(LANGS).length;
             console.log('  Match pages done: '+total+' pages');
           }
-          // ================================================================
-          // FIN CONFIG MULTILINGUE
-          // ================================================================
 
           function getBkInfo(name) {
             var k = name.toLowerCase().replace(/[^a-z0-9]/g,'');
@@ -1157,8 +1344,8 @@ jobs:
               +'- DOM gagne 11/14 DOM + EXT perd 8/12 \u2192 Victoire DOM prob IA 78% vs impl 58% \u2192 edge +20%\n'
               +'- Pluie + fatigue + H2H ferm\u00e9 \u2192 Under 2.5 prob IA 68% vs impl 55% \u2192 edge +13%\n\n'
               +'=== FORMAT JSON STRICT ===\n'
-              +'{"confiance":6.3,"pari_rec":"[NOM EXACT avec equipe si victoire/DC]","marche":"RESULTAT|DOUBLE_CHANCE|TOTAL_BUTS|BTTS|COMBINE|MI_TEMPS|CLEAN_SHEET","risque":"FAIBLE|MODERE|ELEVE","vbet":"OUI|NON","edge":"+X.X%","argument":"1. [stat chiffree]. 2. [stat chiffree]. 3. [edge calcule].","analyse_card":"2-3 phrases analytiques","conseil":"3-4 phrases","contexte":"2-3 phrases","enjeux":"1 phrase","scores_probables":"1-0,0-0,2-1","p1":0,"pn":0,"p2":0,"po15":0,"po25":0,"btts":0,"mise":"2-3% bankroll","paris_3":{"safe":{"bet":"[pari le plus sur - Over/Under/BTTS/Victoire selon stats]","cote":"[cote reelle]","hint":"[raison chiffree]","mise":"4-5% bankroll","bookie":"Betclic"},"valeur":{"bet":"[value bet DIFFERENT du safe]","cote":"[cote reelle]","hint":"[edge calcule]","mise":"2-3% bankroll","bookie":"Winamax"},"specu":{"bet":"[pari audacieux: score exact, Over 3.5, mi-temps/final, clean sheet]","cote":"[cote reelle]","hint":"[justification]","mise":"0.5-1% bankroll","bookie":"Bet365"}}}\n\n'
-              +'CONTRAINTES: p1+pn+p2=100 | confiance CALCUL OBLIGE sur 1 decimale: base 5.0 + (edge_reel_pct / 3.5), arrondi a 0.1, min 1.0 max 10.0 - EXEMPLES: edge+7%=confiance 7.0 non acceptable, calcule 5.0+7/3.5=7.0 ok si exact sinon 6.9 ou 7.1 - INTERDIRE les .0 et .5 sauf si calcul exact | vbet OUI si edge>4% | les 3 paris_3 doivent etre differents | specu peut etre score exact ou marche exotique';
+              +'{"confiance":6.3,"pari_rec":"[NOM EXACT avec equipe si victoire/DC]","marche":"RESULTAT|DOUBLE_CHANCE|TOTAL_BUTS|BTTS|COMBINE|MI_TEMPS|CLEAN_SHEET","risque":"FAIBLE|MODERE|ELEVE","vbet":"OUI|NON","edge":"+X.X%","argument":"1. [stat chiffree]. 2. [stat chiffree]. 3. [edge calcule].","analyse_card":"2-3 phrases analytiques","conseil":"3-4 phrases","contexte":"2-3 phrases","enjeux":"1 phrase","scores_probables":"1-0,0-0,2-1","p1":0,"pn":0,"p2":0,"po15":0,"po25":0,"btts":0,"mise":"2-3% bankroll","paris_3":{"safe":{"bet":"[pari le plus sur]","cote":"[cote reelle]","hint":"[raison chiffree]","mise":"4-5% bankroll","bookie":"Betclic"},"valeur":{"bet":"[value bet DIFFERENT du safe]","cote":"[cote reelle]","hint":"[edge calcule]","mise":"2-3% bankroll","bookie":"Winamax"},"specu":{"bet":"[pari audacieux]","cote":"[cote reelle]","hint":"[justification]","mise":"0.5-1% bankroll","bookie":"Bet365"}}}\n\n'
+              +'CONTRAINTES: p1+pn+p2=100 | confiance CALCUL OBLIGE sur 1 decimale: base 5.0 + (edge_reel_pct / 3.5) | vbet OUI si edge>4% | les 3 paris_3 doivent etre differents';
             var r = await postJSON('api.anthropic.com', '/v1/messages', {
               model: 'claude-sonnet-4-6',
               max_tokens: 2000,
@@ -1248,7 +1435,6 @@ jobs:
             var nbSel = selected.length;
             var conseil = nbSel+' s\u00e9lections les plus probables du jour, probabilit\u00e9s IA entre '+probMin+'% et '+probMax+'%, combinaison optimis\u00e9e pour une cote maximale tout en restant bas\u00e9e sur des donn\u00e9es solides';
             classics.push({label:labelFou,type:typeFou,selections:selectionsStr,matchs:matchsStr,cote_totale:coteFinalStr,conseil:conseil});
-            console.log('  COMBINE FOU: cote='+coteFinalStr+' ('+nbSel+' selections, probs '+probMin+'%-'+probMax+'%)');
             return classics;
           }
           function formatH2H(fixtures, homeId, awayId) {
@@ -1409,15 +1595,15 @@ jobs:
                 var p=(an&&an.pari_rec||'').toLowerCase();
                 var coteRec;
                 if(p.includes('btts non')||p.includes('les deux equipes ne marquent pas')) coteRec=odds.btts_non;
-                else if(p.includes('btts')||p.includes('les deux equipes marquent')||p.includes('les 2 equipes marquent')) coteRec=odds.btts_oui;
-                else if(p.includes('x2')||(p.includes('double chance')&&(p.includes('nul ou')||p.includes('ou nul'))&&!p.includes('ou nul '+home.name.toLowerCase().slice(0,4)))) coteRec=odds.dcx2;
-                else if(p.includes('1x')||(p.includes('double chance')&&p.includes(home.name.toLowerCase().slice(0,4)))) coteRec=odds.dc1x;
+                else if(p.includes('btts')||p.includes('les deux equipes marquent')) coteRec=odds.btts_oui;
+                else if(p.includes('x2')) coteRec=odds.dcx2;
+                else if(p.includes('1x')) coteRec=odds.dc1x;
                 else if(p.includes('double chance')) coteRec=odds.dcx2;
                 else if(p.includes('over 2.5')||p.includes('plus de 2.5')) coteRec=odds.co25;
                 else if(p.includes('over 1.5')||p.includes('plus de 1.5')) coteRec=odds.co15;
                 else if(p.includes('under')||p.includes('moins de 2.5')) coteRec=odds.cu25;
                 else if(p.includes('nul')||p.includes('match nul')) coteRec=odds.cn;
-                else if(p.includes('victoire')&&(p.includes(away.name.toLowerCase().slice(0,4))||p.includes('ext')||p.includes('away'))) coteRec=odds.c2;
+                else if(p.includes('victoire')&&(p.includes(away.name.toLowerCase().slice(0,4))||p.includes('ext'))) coteRec=odds.c2;
                 else coteRec=odds.c1;
                 var deltas=[0,-0.03,-0.02,-0.05,+0.03];
                 if(odds.bookies&&odds.bookies.length&&coteRec&&coteRec!=='--') {
@@ -1524,7 +1710,6 @@ jobs:
               }
               console.log('  OK conf='+matchObj.conf+' edge='+matchObj.edge+' pari='+matchObj.pari_rec);
             }
-            // TRI PAR HEURE CROISSANTE
             matchsData.sort(function(a, b) {
               var timeA = (a.date||'').split(' ')[1]||'99:99';
               var timeB = (b.date||'').split(' ')[1]||'99:99';
@@ -1532,7 +1717,6 @@ jobs:
               if (timeA > timeB) return 1;
               return 0;
             });
-            // DETECTION SAMEDI / DIMANCHE
             var todayDate = new Date(TODAY+'T12:00:00Z');
             var dayOfWeek = todayDate.getUTCDay();
             var isSamedi = (dayOfWeek === 6);
@@ -1542,14 +1726,10 @@ jobs:
               return {label:c.label,type:c.type,selections:c.selections,matchs:c.matchs,cote_totale:c.cote_totale,conseil:c.conseil};
             });
 
-            // ================================================================
-            // TRADUCTION AUTOMATIQUE — EN/ES/IT/PT/DE/NL/PL/SV/DA/JA
-            // ================================================================
             if (matchsData.length > 0) {
               console.log('\n=== TRADUCTION EN COURS ===');
               var LANGS_TR = ['en','es','it','pt','de','nl','pl','sv','da','ja','ko','vi','th','el','ro','tr','id'];
               var LANG_NAMES_TR = {en:'English',es:'Spanish',it:'Italian',pt:'Portuguese',de:'German',nl:'Dutch',pl:'Polish',sv:'Swedish',da:'Danish',ja:'Japanese',ko:'Korean',vi:'Vietnamese',th:'Thai',el:'Greek',ro:'Romanian',tr:'Turkish',id:'Indonesian'};
-              // Traduire par batch de 5 matchs max pour eviter timeout
               for (var li = 0; li < LANGS_TR.length; li++) {
                 var lg = LANGS_TR[li];
                 var lgName = LANG_NAMES_TR[lg];
@@ -1587,9 +1767,6 @@ jobs:
             fs.writeFileSync('data.json', JSON.stringify({matchs:matchsData,combis:combisData},null,2));
             console.log('\n=== DONE: '+matchsData.length+' matchs | '+combisData.length+' combis ===');
 
-            // ================================================================
-            // PIPELINE MULTILINGUE
-            // ================================================================
             console.log('\n=== MULTILINGUAL PIPELINE START ===');
             generateWorldCupPages();
             await generateMultilingualMatchPages(matchsData);
@@ -1597,15 +1774,15 @@ jobs:
             // ── RÉCUPÉRER MATCHS J+3 à J+10 pour previews ──
             var upcomingFixtures = [];
             try {
-              var upcomingLeagues = LEAGUES.slice(0, 8); // Top 8 ligues seulement
+              var upcomingLeagues = LEAGUES.slice(0, 8);
               for (var uli = 0; uli < upcomingLeagues.length; uli++) {
                 var uLg = upcomingLeagues[uli];
                 for (var dayOffset = 3; dayOffset <= 10; dayOffset++) {
                   var futureDate = new Date(TODAY+'T12:00:00Z');
                   futureDate.setDate(futureDate.getDate() + dayOffset);
                   var futureDateStr = futureDate.toISOString().split('T')[0];
-                  var futUrl = 'https://v3.football.api-sports.io/fixtures?league='+uLg.id+'&season='+uLg.season+'&date='+futureDateStr;
-                  var futResp = await get(futUrl, {'x-apisports-key': API_KEY});
+                  var futUrl = 'https://v3.football.api-sports.io/fixtures?league='+uLg+'&season='+SEASON+'&date='+futureDateStr;
+                  var futResp = await get(futUrl, APS);
                   if (futResp && futResp.response) {
                     futResp.response.forEach(function(fx) {
                       if (fx.teams && fx.fixture) {
@@ -1621,7 +1798,6 @@ jobs:
                   await sleep(100);
                 }
               }
-              // Dédoublonner
               var seen = {};
               upcomingFixtures = upcomingFixtures.filter(function(f) {
                 var k = f.home+'_'+f.away+'_'+f.date;
@@ -1629,21 +1805,17 @@ jobs:
                 seen[k] = true;
                 return true;
               });
-              console.log('  Matchs à venir trouvés: '+upcomingFixtures.length);
+              console.log('  Matchs a venir trouves: '+upcomingFixtures.length);
             } catch(e) {
-              console.log('  Fixtures à venir erreur: '+e.message);
+              console.log('  Fixtures a venir erreur: '+e.message);
             }
 
-            // ── GÉNÉRER ARTICLES BLOG ──
             await generateBlogArticles(matchsData, upcomingFixtures);
             await generateTranslatedGuides();
+            await generateBlogGuideIndexPages();
+            await generateBlogIndexPages(matchsData, upcomingFixtures);
             generateSitemaps(matchsData);
-            var totalMatchPages = matchsData.length * Object.keys(LANGS).length;
-            var totalWCPages = WC_TEAMS.length * Object.keys(LANGS).length;
             console.log('\n=== MULTILINGUAL DONE ===');
-            console.log('Match pages: '+totalMatchPages);
-            console.log('WC 2026 pages: '+totalWCPages);
-            console.log('Sitemaps: '+(Object.keys(LANGS).length+1)+' files');
           }
           main().catch(function(e){ console.error('FATAL:', e.message); process.exit(0); });
           JSEOF

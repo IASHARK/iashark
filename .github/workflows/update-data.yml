@@ -47,7 +47,7 @@ jobs:
             'pl':'Polish','id':'Indonesian','no':'Norwegian','sv':'Swedish',
             'ro':'Romanian','el':'Greek','cs':'Czech','hu':'Hungarian',
             'sr':'Serbian','uk':'Ukrainian','ru':'Russian','ja':'Japanese',
-            'ko':'Korean','th':'Thai','hi':'Hindi','ms':'Malay',
+            'ko':'Korean','vi':'Vietnamese','th':'Thai','hi':'Hindi','ms':'Malay',
             'da':'Danish','fi':'Finnish','sw':'Swahili'
           };
           var TOP_LANGS = ['en','es','pt','de','it','ar','tr','nl','pl','id','ko','vi','th','el','ro','sv','da','ja'];
@@ -479,6 +479,7 @@ jobs:
               if (lg !== 'fr') mkdirSafe(lg+'/blog');
             });
 
+            // Articles Jour J - utilise les données déjà traduites dans data.json, pas d'appel IA
             if (matchsData.length > 0) {
               console.log('  Articles Jour J: '+matchsData.length+' matchs...');
               for (var mi = 0; mi < matchsData.length; mi++) {
@@ -486,116 +487,85 @@ jobs:
                 var slug = slugify(m.home.n+'-vs-'+m.away.n+'-'+m.date.split(' ')[0]);
                 var dateStr = m.date ? m.date.split(' ')[0] : TODAY;
 
-                var blogPrompt = 'Tu es un expert en analyse football et paris sportifs. Ecris un article de blog SEO complet en FRANCAIS pour ce match.\n'
-                  + 'Match: '+m.home.n+' vs '+m.away.n+'\n'
-                  + 'Date: '+m.date+'\n'
-                  + 'Ligue: '+m.league+'\n'
-                  + 'Analyse IA: '+m.analyse_card+'\n'
-                  + 'Pronostic: '+m.pari_rec+'\n'
-                  + 'Confiance: '+m.conf+'/10\n'
-                  + 'Edge: '+m.edge+'\n'
-                  + 'Risque: '+m.risque+'\n'
-                  + 'Conseil: '+m.conseil_public+'\n\n'
-                  + 'STRUCTURE OBLIGATOIRE - reponds UNIQUEMENT en JSON:\n'
-                  + '{"title":"[titre SEO 60 chars max avec mots cles]","meta_desc":"[160 chars max]","intro":"[2 paragraphes intro avec mots cles naturels]","analyse":"[3 paragraphes analyse complete]","stats":"[2 paragraphes stats et forme]","pronostic":"[2 paragraphes pronostic et justification]","faq":[{"q":"[question recherchee sur Google]","a":"[reponse 2-3 phrases]"},{"q":"...","a":"..."},{"q":"...","a":"..."}],"conclusion":"[1 paragraphe conclusion avec CTA]","keywords":["mot1","mot2","mot3","mot4","mot5"]}';
+                // FR - données directes
+                var frData = {
+                  title: m.home.n+' vs '+m.away.n+' — Prédiction IA '+dateStr,
+                  meta_desc: (m.analyse_card||'').slice(0,155),
+                  intro: m.conseil_public||'',
+                  analyse: m.analyse_card||'',
+                  stats: '',
+                  pronostic: m.pari_rec||'',
+                  faq: [],
+                  conclusion: 'Retrouvez toutes les analyses IASHARK sur notre site.',
+                  keywords: [m.home.n, m.away.n, m.league||'football', 'prédiction', 'paris sportifs']
+                };
+                fs.writeFileSync('blog/'+slug+'.html', genBlogHTML(m, frData, 'fr', slug, dateStr, 'analyse'));
 
-                try {
-                  var blogResp = await postJSON('api.anthropic.com', '/v1/messages', {
-                    model: 'claude-haiku-4-5-20251001',
-                    max_tokens: 1500,
-                    messages: [{role:'user', content: blogPrompt}]
-                  }, {'x-api-key': ANT_KEY, 'anthropic-version': '2023-06-01'});
-
-                  var blogText = (blogResp.content&&blogResp.content[0]&&blogResp.content[0].text)||'{}';
-                  var blogClean = blogText.replace(/```json|```/g,'').trim();
-                  var blogData = JSON.parse(blogClean);
-
-                  var frHTML = genBlogHTML(m, blogData, 'fr', slug, dateStr, 'analyse');
-                  fs.writeFileSync('blog/'+slug+'.html', frHTML);
-
-                  for (var li = 0; li < BLOG_LANGS.length; li++) {
-                    var lg = BLOG_LANGS[li];
-                    if (lg === 'fr') continue;
-                    var lgName = BLOG_LANG_NAMES[lg];
-                    try {
-                      var trPrompt = 'Translate this football blog article data to '+lgName+'. Keep team names, BTTS, Over 2.5, Value Bet unchanged. Return ONLY valid JSON same structure:\n'+JSON.stringify(blogData);
-                      var trResp = await postJSON('api.anthropic.com', '/v1/messages', {
-                        model: 'claude-haiku-4-5-20251001',
-                        max_tokens: 1500,
-                        messages: [{role:'user', content: trPrompt}]
-                      }, {'x-api-key': ANT_KEY, 'anthropic-version': '2023-06-01'});
-                      var trText = (trResp.content&&trResp.content[0]&&trResp.content[0].text)||'{}';
-                      var trClean = trText.replace(/```json|```/g,'').trim();
-                      var trData = JSON.parse(trClean);
-                      var lgSlug = slugify(m.home.n+'-vs-'+m.away.n+'-'+dateStr);
-                      var lgHTML = genBlogHTML(m, trData, lg, lgSlug, dateStr, 'analyse');
-                      fs.writeFileSync(lg+'/blog/'+lgSlug+'.html', lgHTML);
-                    } catch(e) {
-                      console.log('    Blog '+lgName+' erreur: '+e.message);
-                    }
-                    await sleep(200);
-                  }
-                  console.log('  Blog OK: '+m.home.n+' vs '+m.away.n);
-                } catch(e) {
-                  console.log('  Blog erreur '+m.home.n+': '+e.message);
+                // Autres langues - utilise les champs traduits déjà dans data.json
+                for (var li = 0; li < BLOG_LANGS.length; li++) {
+                  var lg = BLOG_LANGS[li];
+                  if (lg === 'fr') continue;
+                  var lgSlug = slugify(m.home.n+'-vs-'+m.away.n+'-'+dateStr);
+                  var analyseCard = (m['analyse_card_'+lg]) || m.analyse_card || '';
+                  var pariRec = (m['pari_rec_'+lg]) || m.pari_rec || '';
+                  var conseil = (m['conseil_public_'+lg]) || m.conseil_public || '';
+                  var lgData = {
+                    title: m.home.n+' vs '+m.away.n+' — AI Prediction '+dateStr,
+                    meta_desc: analyseCard.slice(0,155),
+                    intro: conseil,
+                    analyse: analyseCard,
+                    stats: '',
+                    pronostic: pariRec,
+                    faq: [],
+                    conclusion: '',
+                    keywords: [m.home.n, m.away.n, m.league||'football', 'prediction', 'betting']
+                  };
+                  fs.writeFileSync(lg+'/blog/'+lgSlug+'.html', genBlogHTML(m, lgData, lg, lgSlug, dateStr, 'analyse'));
                 }
+                console.log('  Blog OK: '+m.home.n+' vs '+m.away.n);
               }
             }
 
+            // Articles Preview J+3 à J+10 - page minimale avec titre uniquement, pas d'appel IA
             if (upcomingFixtures && upcomingFixtures.length > 0) {
               console.log('  Articles Preview J-7: '+upcomingFixtures.length+' matchs...');
+              var pvLangs = ['en','es','pt','de','it','id','tr','ko','vi'];
               for (var ui = 0; ui < upcomingFixtures.length; ui++) {
                 var uf = upcomingFixtures[ui];
                 var uSlug = slugify(uf.home+'-vs-'+uf.away+'-'+uf.date);
-                var previewPrompt = 'Tu es un expert football. Ecris un article PREVIEW SEO en FRANCAIS pour ce match a venir.\n'
-                  + 'Match: '+uf.home+' vs '+uf.away+'\n'
-                  + 'Date: '+uf.date+'\n'
-                  + 'Ligue: '+(uf.league||'Football')+'\n\n'
-                  + 'IMPORTANT: pas de prédiction définitive car le match na pas encore eu lieu. Focus sur contexte, historique, enjeux.\n'
-                  + 'Reponds UNIQUEMENT en JSON:\n'
-                  + '{"title":"[titre SEO preview]","meta_desc":"[160 chars]","intro":"[2 paragraphes contexte]","analyse":"[2 paragraphes enjeux et historique]","stats":"[1 paragraphe stats recentes]","pronostic":"[1 paragraphe tendances sans prediction ferme]","faq":[{"q":"...","a":"..."},{"q":"...","a":"..."},{"q":"...","a":"..."}],"conclusion":"[CTA vers site pour voir analyse complete]","keywords":["mot1","mot2","mot3"]}';
-
-                try {
-                  var pvResp = await postJSON('api.anthropic.com', '/v1/messages', {
-                    model: 'claude-haiku-4-5-20251001',
-                    max_tokens: 1200,
-                    messages: [{role:'user', content: previewPrompt}]
-                  }, {'x-api-key': ANT_KEY, 'anthropic-version': '2023-06-01'});
-
-                  var pvText = (pvResp.content&&pvResp.content[0]&&pvResp.content[0].text)||'{}';
-                  var pvClean = pvText.replace(/```json|```/g,'').trim();
-                  var pvData = JSON.parse(pvClean);
-                  var pvHTML = genBlogHTML({home:{n:uf.home},away:{n:uf.away},league:uf.league||'',date:uf.date+' 00:00'}, pvData, 'fr', uSlug, uf.date, 'preview');
-                  fs.writeFileSync('blog/preview-'+uSlug+'.html', pvHTML);
-
-                  var pvLangs = ['en','es','pt','de','it','id','tr','ko','vi'];
-                  for (var pli = 0; pli < pvLangs.length; pli++) {
-                    var plg = pvLangs[pli];
-                    var plgName = BLOG_LANG_NAMES[plg];
-                    try {
-                      var pvTrResp = await postJSON('api.anthropic.com', '/v1/messages', {
-                        model: 'claude-haiku-4-5-20251001',
-                        max_tokens: 1200,
-                        messages: [{role:'user', content: 'Translate to '+plgName+', return same JSON structure, keep team names unchanged:\n'+JSON.stringify(pvData)}]
-                      }, {'x-api-key': ANT_KEY, 'anthropic-version': '2023-06-01'});
-                      var pvTrText = (pvTrResp.content&&pvTrResp.content[0]&&pvTrResp.content[0].text)||'{}';
-                      var pvTrData = JSON.parse(pvTrText.replace(/```json|```/g,'').trim());
-                      mkdirSafe(plg+'/blog');
-                      fs.writeFileSync(plg+'/blog/preview-'+uSlug+'.html', genBlogHTML({home:{n:uf.home},away:{n:uf.away},league:uf.league||'',date:uf.date+' 00:00'}, pvTrData, plg, uSlug, uf.date, 'preview'));
-                    } catch(e2) {}
-                    await sleep(150);
-                  }
-                  console.log('  Preview OK: '+uf.home+' vs '+uf.away);
-                } catch(e) {
-                  console.log('  Preview erreur: '+e.message);
+                var pvData = {
+                  title: uf.home+' vs '+uf.away+' — Preview '+uf.date,
+                  meta_desc: 'Preview du match '+uf.home+' vs '+uf.away+' le '+uf.date+'. Analyse IA IASHARK.',
+                  intro: '',
+                  analyse: '',
+                  stats: '',
+                  pronostic: '',
+                  faq: [],
+                  conclusion: '',
+                  keywords: [uf.home, uf.away, uf.league||'football', 'preview', 'prediction']
+                };
+                fs.writeFileSync('blog/preview-'+uSlug+'.html', genBlogHTML(
+                  {home:{n:uf.home},away:{n:uf.away},league:uf.league||'',date:uf.date+' 00:00'},
+                  pvData, 'fr', uSlug, uf.date, 'preview'
+                ));
+                // Titre traduit uniquement pour les langues principales
+                for (var pli = 0; pli < pvLangs.length; pli++) {
+                  var plg = pvLangs[pli];
+                  var plgTitle = uf.home+' vs '+uf.away+' — Preview '+uf.date;
+                  var plgData = Object.assign({}, pvData, {title: plgTitle});
+                  mkdirSafe(plg+'/blog');
+                  fs.writeFileSync(plg+'/blog/preview-'+uSlug+'.html', genBlogHTML(
+                    {home:{n:uf.home},away:{n:uf.away},league:uf.league||'',date:uf.date+' 00:00'},
+                    plgData, plg, uSlug, uf.date, 'preview'
+                  ));
                 }
-                await sleep(300);
               }
+              console.log('  Previews OK: '+upcomingFixtures.length+' matchs');
             }
             console.log('  === BLOG TERMINÉ ===');
           }
 
-          var BLOG_UI = {
+                    var BLOG_UI = {
             fr:{analyse:'Analyse',stats:'Statistiques',pronostic:'Prédiction IA',tendances:'Tendances',faq:'FAQ',voir:'VOIR TOUTES LES ANALYSES →',prediction:'PRÉDICTION IA IASHARK',preview:'PREVIEW',tag:'ANALYSE IA',backblog:'← BLOG'},
             en:{analyse:'Analysis',stats:'Statistics',pronostic:'AI Prediction',tendances:'Trends',faq:'FAQ',voir:'SEE ALL ANALYSES →',prediction:'IASHARK AI PREDICTION',preview:'PREVIEW',tag:'AI ANALYSIS',backblog:'← BLOG'},
             es:{analyse:'Análisis',stats:'Estadísticas',pronostic:'Predicción IA',tendances:'Tendencias',faq:'Preguntas Frecuentes',voir:'VER TODOS LOS ANÁLISIS →',prediction:'PREDICCIÓN IA IASHARK',preview:'PREVIA',tag:'ANÁLISIS IA',backblog:'← BLOG'},
@@ -738,6 +708,12 @@ jobs:
               {slug:'guide-paris-sportifs-debutant-complet',icon:'📚',tag_key:'tag_beginner',titles:{fr:'Guide Paris Sportifs Débutant 2026',en:'Sports Betting Beginner Guide 2026',es:'Guía Apuestas Deportivas Principiante 2026',pt:'Guia Apostas Desportivas Iniciante 2026',de:'Sportwetten Anfänger Guide 2026',it:'Guida Scommesse Sportive Principiante 2026',ar:'دليل المبتدئين في الرهانات الرياضية 2026',tr:'Spor Bahisleri Yeni Başlayan Kılavuzu 2026',nl:'Sportweddenschappen Beginner Gids 2026',pl:'Przewodnik Zakładów Sportowych Początkujący 2026',id:'Panduan Taruhan Olahraga Pemula 2026',ko:'스포츠 베팅 초보자 가이드 2026',vi:'Hướng Dẫn Cá Cược Thể Thao Cho Người Mới 2026',th:'คู่มือการแทงกีฬาสำหรับผู้เริ่มต้น 2026',el:'Οδηγός Αθλητικών Στοιχημάτων Αρχαρίων 2026',ro:'Ghid Pariuri Sportive Începători 2026',sv:'Sportvadslagning Nybörjarguide 2026',da:'Sportsbetting Begynderguide 2026',ja:'スポーツベッティング初心者ガイド 2026'},descs:{fr:'Vocabulaire, stratégies, bankroll management.',en:'Vocabulary, strategies, bankroll management.',es:'Vocabulario, estrategias, gestión de bankroll.',pt:'Vocabulário, estratégias, gestão de banca.',de:'Vokabular, Strategien, Bankroll-Management.',it:'Vocabolario, strategie, gestione bankroll.',ar:'المصطلحات، الاستراتيجيات، إدارة البنك.',tr:'Kelime hazinesi, stratejiler, bankroll yönetimi.',nl:'Woordenschat, strategieën, bankroll beheer.',pl:'Słownictwo, strategie, zarządzanie bankrollem.',id:'Kosakata, strategi, manajemen bankroll.',ko:'어휘, 전략, 뱅크롤 관리.',vi:'Từ vựng, chiến lược, quản lý vốn.',th:'คำศัพท์, กลยุทธ์, การจัดการแบงค์โรล',el:'Λεξιλόγιο, στρατηγικές, διαχείριση κεφαλαίου.',ro:'Vocabular, strategii, managementul bankroll.',sv:'Ordförråd, strategier, bankrollhantering.',da:'Ordforråd, strategier, bankroll-styring.',ja:'語彙、戦略、バンクロール管理。'}}
             ];
 
+            var COMING_SOON_CARDS = [
+              {icon:'⏳',titles:{fr:'Champions League 2025-2026',en:'Champions League 2025-2026',es:'Champions League 2025-2026',pt:'Champions League 2025-2026',de:'Champions League 2025-2026',it:'Champions League 2025-2026',ar:'دوري أبطال أوروبا 2025-2026',tr:'Şampiyonlar Ligi 2025-2026',nl:'Champions League 2025-2026',pl:'Liga Mistrzów 2025-2026',id:'Liga Champions 2025-2026',ko:'챔피언스리그 2025-2026',vi:'Champions League 2025-2026',th:'แชมเปียนส์ลีก 2025-2026',el:'Champions League 2025-2026',ro:'Champions League 2025-2026',sv:'Champions League 2025-2026',da:'Champions League 2025-2026',ja:'チャンピオンズリーグ 2025-2026'},descs:{fr:'Guide complet LDC — favoris, analyses, value bets et prédictions pour chaque match.',en:'Complete UCL guide — favorites, analyses, value bets and predictions for every match.',es:'Guía completa UCL — favoritos, análisis, value bets y predicciones para cada partido.',pt:'Guia completo UCL — favoritos, análises, value bets e previsões.',de:'Vollständiger UCL-Guide — Favoriten, Analysen, Value Bets.',it:'Guida completa UCL — favoriti, analisi, value bet.',ar:'دليل كامل لدوري الأبطال — المفضلون، التحليلات، value bets.',tr:'Tam UCL rehberi — favoriler, analizler, value betler.',nl:'Complete UCL-gids — favorieten, analyses, value bets.',pl:'Kompletny przewodnik UCL — faworyci, analizy, value bety.',id:'Panduan lengkap UCL — favorit, analisis, value bet.',ko:'완전한 UCL 가이드 — 우승 후보, 분석, 가치 베팅.',vi:'Hướng dẫn đầy đủ UCL — yêu thích, phân tích, value bet.',th:'คู่มือ UCL ครบถ้วน — ตัวเต็ง, การวิเคราะห์, value bet.',el:'Πλήρης οδηγός UCL — αγαπημένες, αναλύσεις, value bets.',ro:'Ghid complet UCL — favoriți, analize, value bets.',sv:'Komplett UCL-guide — favoriter, analyser, value bets.',da:'Komplet UCL-guide — favoritter, analyser, value bets.',ja:'完全なUCLガイド — 優勝候補、分析、バリューベット。'}},
+              {icon:'⏳',titles:{fr:'Guide Bankroll Management',en:'Bankroll Management Guide',es:'Guía de Gestión de Bankroll',pt:'Guia de Gestão de Banca',de:'Bankroll-Management-Guide',it:'Guida al Bankroll Management',ar:'دليل إدارة البنك',tr:'Bankroll Yönetimi Kılavuzu',nl:'Bankroll Beheer Gids',pl:'Przewodnik po Zarządzaniu Bankrollem',id:'Panduan Manajemen Bankroll',ko:'뱅크롤 관리 가이드',vi:'Hướng Dẫn Quản Lý Vốn',th:'คู่มือการจัดการแบงค์โรล',el:'Οδηγός Διαχείρισης Κεφαλαίου',ro:'Ghid de Management al Bankroll-ului',sv:'Guide för Bankrollhantering',da:'Bankroll Management Guide',ja:'バンクロール管理ガイド'},descs:{fr:'Gérer son budget comme un pro. Kelly criterion, fractionnement, stop-loss et gestion des séries.',en:'Manage your budget like a pro. Kelly criterion, fractional betting, stop-loss and variance management.',es:'Gestiona tu presupuesto como un pro. Criterio Kelly, apuestas fraccionadas, stop-loss.',pt:'Gira o seu orçamento como um profissional. Critério de Kelly, apostas fracionadas, stop-loss.',de:'Budget wie ein Profi verwalten. Kelly-Kriterium, Fraktionierung, Stop-Loss.',it:'Gestisci il budget come un pro. Criterio Kelly, scommesse frazionate, stop-loss.',ar:'إدارة الميزانية كالمحترفين. معيار كيلي، التجزئة، وقف الخسارة.',tr:'Bütçeni profesyonel gibi yönet. Kelly kriteri, bölünmüş bahisler, stop-loss.',nl:'Beheer je budget als een pro. Kelly-criterium, fractionele weddenschappen, stop-loss.',pl:'Zarządzaj budżetem jak profesjonalista. Kryterium Kelly, frakcjonowanie, stop-loss.',id:'Kelola anggaran seperti profesional. Kriteria Kelly, taruhan fraksional, stop-loss.',ko:'프로처럼 예산 관리하기. 켈리 기준, 분할 베팅, 손절.',vi:'Quản lý ngân sách như chuyên gia. Tiêu chí Kelly, cược phân đoạn, cắt lỗ.',th:'จัดการงบประมาณแบบมืออาชีพ เกณฑ์เคลลี การเดิมพันแบบแบ่งส่วน stop-loss.',el:'Διαχείριση προϋπολογισμού σαν επαγγελματίας. Κριτήριο Kelly, fractionation, stop-loss.',ro:'Gestionează bugetul ca un profesionist. Criteriul Kelly, pariuri fracționate, stop-loss.',sv:'Hantera din budget som ett proffs. Kelly-kriteriet, fraktionerade satsningar, stop-loss.',da:'Administrer dit budget som en professionel. Kelly-kriteriet, fraktionerede væddemål, stop-loss.',ja:'プロのように予算を管理する。ケリー基準、分割ベット、ストップロス。'}},
+              {icon:'⏳',titles:{fr:'Prédiction Premier League 2025-2026',en:'Premier League 2025-2026 Predictions',es:'Predicciones Premier League 2025-2026',pt:'Previsões Premier League 2025-2026',de:'Premier League 2025-2026 Prognosen',it:'Previsioni Premier League 2025-2026',ar:'توقعات الدوري الإنجليزي الممتاز 2025-2026',tr:'Premier Lig 2025-2026 Tahminleri',nl:'Premier League 2025-2026 Voorspellingen',pl:'Prognozy Premier League 2025-2026',id:'Prediksi Premier League 2025-2026',ko:'프리미어리그 2025-2026 예측',vi:'Dự Đoán Premier League 2025-2026',th:'การทำนาย Premier League 2025-2026',el:'Προβλέψεις Premier League 2025-2026',ro:'Predicții Premier League 2025-2026',sv:'Premier League 2025-2026 Prognoser',da:'Premier League 2025-2026 Prognoser',ja:'プレミアリーグ 2025-2026 予測'},descs:{fr:'Analyse complète du championnat anglais — favoris, statistiques avancées et value bets.',en:'Complete English Premier League analysis — favorites, advanced statistics and value bets.',es:'Análisis completo de la Premier League — favoritos, estadísticas avanzadas y value bets.',pt:'Análise completa da Premier League — favoritos, estatísticas avançadas e value bets.',de:'Vollständige Premier-League-Analyse — Favoriten, fortgeschrittene Statistiken, Value Bets.',it:'Analisi completa della Premier League — favoriti, statistiche avanzate, value bet.',ar:'تحليل كامل للدوري الإنجليزي — المفضلون، الإحصائيات المتقدمة، value bets.',tr:'Komple Premier Lig analizi — favoriler, gelişmiş istatistikler, value betler.',nl:'Volledige Premier League analyse — favorieten, geavanceerde statistieken, value bets.',pl:'Pełna analiza Premier League — faworyci, zaawansowane statystyki, value bety.',id:'Analisis lengkap Premier League — favorit, statistik lanjutan, value bet.',ko:'프리미어리그 완전 분석 — 우승 후보, 고급 통계, 가치 베팅.',vi:'Phân tích đầy đủ Premier League — yêu thích, thống kê nâng cao, value bet.',th:'การวิเคราะห์ Premier League ครบถ้วน — ตัวเต็ง, สถิติขั้นสูง, value bet.',el:'Πλήρης ανάλυση Premier League — αγαπημένες, προηγμένα στατιστικά, value bets.',ro:'Analiză completă Premier League — favoriți, statistici avansate, value bets.',sv:'Komplett Premier League-analys — favoriter, avancerad statistik, value bets.',da:'Komplet Premier League-analyse — favoritter, avanceret statistik, value bets.',ja:'プレミアリーグ完全分析 — 優勝候補、高度な統計、バリューベット。'}}
+            ];
+
             for (var lg of GUIDE_LANGS) {
               var u = GUIDE_UI[lg] || GUIDE_UI['en'];
               var isRTL = GUIDE_RTL.includes(lg);
@@ -755,6 +731,17 @@ jobs:
                   +'<div class="gc-desc">'+desc+'</div>'
                   +'<div class="gc-footer"><span class="gc-read">'+u.read+'</span></div>'
                   +'</a>';
+              }).join('\n');
+              cardsHtml += COMING_SOON_CARDS.map(function(g) {
+                var t = g.titles[lg] || g.titles['en'];
+                var desc = g.descs[lg] || g.descs['en'];
+                return '<div class="guide-card" style="border-style:dashed;opacity:0.5;">'
+                  +'<div class="gc-icon">'+g.icon+'</div>'
+                  +'<span class="gc-tag" style="color:var(--muted);border-color:var(--border);">'+u.coming+'</span>'
+                  +'<div class="gc-title" style="opacity:0.6;">'+t+'</div>'
+                  +'<div class="gc-desc">'+desc+'</div>'
+                  +'<div class="gc-footer"><span class="gc-read" style="color:var(--muted);">'+u.coming+' →</span></div>'
+                  +'</div>';
               }).join('\n');
               var canonical = 'https://iashark.com/'+lg+'/blog/guides/';
               var hreflangs = ['fr'].concat(GUIDE_LANGS).map(function(hl) {

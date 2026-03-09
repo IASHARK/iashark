@@ -395,6 +395,84 @@ jobs:
           // ================================================================
           // GÉNÉRATION ARTICLES BLOG (J-7 PREVIEW + JOUR J ANALYSE)
           // ================================================================
+          // ══════════════════════════════════════════════════
+          // TRADUCTION GUIDES EVERGREEN EN 19 LANGUES
+          // ══════════════════════════════════════════════════
+          const GUIDE_LANGS = ['en','es','pt','de','it','ar','nl','pl','sv','da','ja','ko','vi','th','id','tr','el','ro'];
+          const GUIDE_LANG_NAMES = {
+            en:'English',es:'Español',pt:'Português',de:'Deutsch',it:'Italiano',
+            ar:'العربية',nl:'Nederlands',pl:'Polski',sv:'Svenska',da:'Dansk',
+            ja:'日本語',ko:'한국어',vi:'Tiếng Việt',th:'ภาษาไทย',id:'Bahasa Indonesia',
+            tr:'Türkçe',el:'Ελληνικά',ro:'Română'
+          };
+          const GUIDE_RTL = ['ar'];
+          const GUIDES_CONFIG = [
+            {slug:'meilleurs-bookmakers-monde-2026', title_fr:'Top 10 Meilleurs Bookmakers Monde 2026'},
+            {slug:'value-bet-guide-complet-2026', title_fr:'Value Bet — Guide Complet 2026'},
+            {slug:'prediction-ia-football-guide-2026', title_fr:'Prédiction IA Football 2026'},
+            {slug:'coupe-du-monde-2026-guide-complet', title_fr:'Coupe du Monde 2026 — Guide Complet'},
+            {slug:'guide-paris-sportifs-debutant-complet', title_fr:'Guide Paris Sportifs Débutant 2026'}
+          ];
+
+          async function translateGuideContent(frText, targetLang) {
+            const langName = GUIDE_LANG_NAMES[targetLang] || targetLang;
+            const resp = await fetch('https://api.anthropic.com/v1/messages', {
+              method:'POST',
+              headers:{'Content-Type':'application/json','x-api-key':process.env.ANTHROPIC_KEY,'anthropic-version':'2023-06-01'},
+              body: JSON.stringify({
+                model:'claude-haiku-4-5-20251001',
+                max_tokens:4000,
+                messages:[{role:'user',content:'Translate this HTML content to '+langName+'. Keep ALL HTML tags exactly as-is. Only translate the visible text. Keep SEO keywords natural in the target language. Return only the translated HTML, nothing else:\n\n'+frText}]
+
+              })
+            });
+            const data = await resp.json();
+            return data.content&&data.content[0]?data.content[0].text:frText;
+          }
+
+          async function generateTranslatedGuides() {
+            console.log('\n=== TRADUCTION GUIDES EVERGREEN ===');
+            const fs2 = require('fs');
+            for (const guide of GUIDES_CONFIG) {
+              const srcPath = 'blog/guides/'+guide.slug+'.html';
+              if (!fs2.existsSync(srcPath)) {
+                console.log('  Guide introuvable: '+srcPath+' — skip');
+                continue;
+              }
+              const frHTML = fs2.readFileSync(srcPath, 'utf8');
+              // Extraire le contenu entre <body> et </body> seulement pour traduction
+              const bodyMatch = frHTML.match(/<body[^>]*>([\s\S]*)<\/body>/);
+              if (!bodyMatch) continue;
+              const bodyContent = bodyMatch[1];
+
+              for (const lg of GUIDE_LANGS) {
+                const outDir = lg+'/blog/guides';
+                if (!fs2.existsSync(outDir)) fs2.mkdirSync(outDir, {recursive:true});
+                const outPath = outDir+'/'+guide.slug+'.html';
+                // Skip si déjà traduit ce run
+                if (fs2.existsSync(outPath)) { console.log('  '+lg+'/'+guide.slug+' déjà existant — skip'); continue; }
+                try {
+                  const translatedBody = await translateGuideContent(bodyContent, lg);
+                  const isRTL = GUIDE_RTL.includes(lg);
+                  const langName = GUIDE_LANG_NAMES[lg];
+                  const translatedHTML = frHTML
+                    .replace('<html lang="fr">', '<html lang="'+lg+'"'+(isRTL?' dir="rtl"':'')+'>') 
+                    .replace(/<body[^>]*>[\s\S]*<\/body>/, '<body>'+translatedBody+'<\/body>')
+                    .replace('<link rel="canonical" href="https://iashark.com/blog/guides/'+guide.slug+'.html">', 
+                             '<link rel="canonical" href="https://iashark.com/blog/guides/'+guide.slug+'.html">\n<link rel="alternate" hreflang="'+lg+'" href="https://iashark.com/'+lg+'/blog/guides/'+guide.slug+'.html">\n<link rel="alternate" hreflang="fr" href="https://iashark.com/blog/guides/'+guide.slug+'.html">');
+                  fs2.writeFileSync(outPath, translatedHTML);
+                  console.log('  ✓ '+lg+'/blog/guides/'+guide.slug+'.html');
+                  // Pause pour éviter rate limit
+                  await new Promise(r=>setTimeout(r,800));
+                } catch(e) {
+                  console.log('  ✗ Erreur '+lg+' '+guide.slug+': '+e.message);
+                }
+              }
+              console.log('  Guide '+guide.slug+' traduit en '+GUIDE_LANGS.length+' langues');
+            }
+            console.log('=== GUIDES TRADUITS ===');
+          }
+
           async function generateBlogArticles(matchsData, upcomingFixtures) {
             console.log('\n=== GÉNÉRATION ARTICLES BLOG ===');
             var BLOG_LANGS = ['fr','en','es','pt','de','it','ar','tr','nl','pl','id','ko','vi','th','el','ro','sv','da','ja'];
@@ -1558,6 +1636,7 @@ jobs:
 
             // ── GÉNÉRER ARTICLES BLOG ──
             await generateBlogArticles(matchsData, upcomingFixtures);
+            await generateTranslatedGuides();
             generateSitemaps(matchsData);
             var totalMatchPages = matchsData.length * Object.keys(LANGS).length;
             var totalWCPages = WC_TEAMS.length * Object.keys(LANGS).length;
@@ -1583,5 +1662,6 @@ jobs:
           git config user.email "yaramode81@gmail.com"
           git add data.json sitemap.xml sitemap-*.xml
           git add en/ es/ pt/ de/ it/ ar/ tr/ nl/ pl/ id/ no/ sv/ ro/ el/ cs/ hu/ sr/ uk/ ru/ ja/ ko/ th/ hi/ ms/ da/ fi/ sw/ 2>/dev/null || true
+          git add blog/ 2>/dev/null || true
           git diff --staged --quiet || git commit -m "Daily update + multilingual - $(date +%Y-%m-%d)"
           git push

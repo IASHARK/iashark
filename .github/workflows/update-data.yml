@@ -42,15 +42,10 @@ jobs:
           };
 
           var LANGS = {
-            'en':'English','es':'Spanish','pt':'Portuguese','de':'German',
-            'it':'Italian','ar':'Arabic','tr':'Turkish','nl':'Dutch',
-            'pl':'Polish','id':'Indonesian','no':'Norwegian','sv':'Swedish',
-            'ro':'Romanian','el':'Greek','cs':'Czech','hu':'Hungarian',
-            'sr':'Serbian','uk':'Ukrainian','ru':'Russian','ja':'Japanese',
-            'ko':'Korean','vi':'Vietnamese','th':'Thai','hi':'Hindi','ms':'Malay',
-            'da':'Danish','fi':'Finnish','sw':'Swahili'
+            'es':'Spanish','it':'Italian','pt':'Portuguese','de':'German',
+            'nl':'Dutch','ro':'Romanian','sv':'Swedish','pl':'Polish','tr':'Turkish'
           };
-          var TOP_LANGS = ['en','es','pt','de','it','ar','tr','nl','pl','id','ko','vi','th','el','ro','sv','da','ja'];
+          var TOP_LANGS = ['es','it','pt','de','nl','ro','sv','pl','tr'];
 
           var WC_TITLE = {
             'en':'2026 FIFA World Cup AI Predictions & Analysis',
@@ -1754,6 +1749,145 @@ jobs:
             fs.writeFileSync('data.json', JSON.stringify({matchs:matchsData,combis:combisData},null,2));
             console.log('\n=== DONE: '+matchsData.length+' matchs | '+combisData.length+' combis ===');
 
+            // ═══════════════════════════════════════════
+            // HISTORIQUE — Résultats d'hier + ROI mensuel
+            // ═══════════════════════════════════════════
+            async function updateHistorique() {
+              console.log('\n=== HISTORIQUE UPDATE ===');
+              var histoPath = 'historique.json';
+              var histo = {predictions:[], stats:{winrate:0,roi:0,total:0,streak:0}, monthly:[]};
+              try { histo = JSON.parse(fs.readFileSync(histoPath,'utf8')); } catch(e) {}
+
+              // Récupérer les résultats d'hier
+              var yesterday = new Date(TODAY+'T12:00:00Z');
+              yesterday.setDate(yesterday.getDate()-1);
+              var yDate = yesterday.toISOString().split('T')[0];
+
+              try {
+                var yFixtures = await apiGet('/fixtures?date='+yDate+'&timezone=Europe/Paris');
+                var yResults = (yFixtures.response||[]);
+
+                for (var yr=0; yr<yResults.length; yr++) {
+                  var fix = yResults[yr];
+                  var fid = fix.fixture&&fix.fixture.id;
+                  var home = fix.teams&&fix.teams.home&&fix.teams.home.name||'';
+                  var away = fix.teams&&fix.teams.away&&fix.teams.away.name||'';
+                  var gh = fix.goals&&fix.goals.home!=null?fix.goals.home:null;
+                  var ga = fix.goals&&fix.goals.away!=null?fix.goals.away:null;
+                  var status = fix.fixture&&fix.fixture.status&&fix.fixture.status.short||'';
+                  if(status!=='FT'&&status!=='AET'&&status!=='PEN')continue;
+                  if(gh===null||ga===null)continue;
+
+                  // Chercher si on avait une prédiction pour ce match
+                  var existing = histo.predictions.find(function(p){return p.fixture_id===fid;});
+                  if(!existing){
+                    // Chercher dans data.json d'hier par nom d'équipe
+                    // On cherche par home+away dans les prédictions pending
+                    var found = histo.predictions.find(function(p){
+                      return p.result==='pending' && p.home===home && p.away===away;
+                    });
+                    if(found){
+                      // Calculer le résultat
+                      var prediction = found.prediction||'';
+                      var isWin = false;
+                      var pred_lower = prediction.toLowerCase();
+                      if(pred_lower.includes('victoire '+home.toLowerCase())||pred_lower.includes('win '+home.toLowerCase())||pred_lower==='1'){
+                        isWin = (gh>ga);
+                      } else if(pred_lower.includes('victoire '+away.toLowerCase())||pred_lower.includes('win '+away.toLowerCase())||pred_lower==='2'){
+                        isWin = (ga>gh);
+                      } else if(pred_lower.includes('nul')||pred_lower.includes('draw')||pred_lower==='n'){
+                        isWin = (gh===ga);
+                      } else if(pred_lower.includes('over 2.5')||pred_lower.includes('+2.5')){
+                        isWin = ((gh+ga)>2);
+                      } else if(pred_lower.includes('under 2.5')||pred_lower.includes('-2.5')){
+                        isWin = ((gh+ga)<3);
+                      } else if(pred_lower.includes('btts')||pred_lower.includes('les deux')){
+                        isWin = (gh>0&&ga>0);
+                      }
+                      found.result = isWin?'win':'loss';
+                      found.score = gh+'-'+ga;
+                      found.fixture_id = fid;
+                    }
+                  }
+                }
+              } catch(e) {
+                console.log('  Résultats hier erreur:', e.message);
+              }
+
+              // Ajouter les prédictions du jour (pending)
+              for (var mi=0; mi<matchsData.length; mi++) {
+                var m = matchsData[mi];
+                var alreadyExists = histo.predictions.find(function(p){
+                  return p.home===m.home.n && p.away===m.away.n && p.date&&p.date.substring(0,10)===TODAY;
+                });
+                if(!alreadyExists && m.pari_rec) {
+                  histo.predictions.unshift({
+                    match: m.home.n+' vs '+m.away.n,
+                    home: m.home.n,
+                    away: m.away.n,
+                    prediction: m.pari_rec,
+                    conf: m.conf,
+                    edge: m.edge,
+                    date: TODAY,
+                    result: 'pending',
+                    fixture_id: null
+                  });
+                }
+              }
+
+              // Garder max 90 jours
+              histo.predictions = histo.predictions.slice(0, 270);
+
+              // Recalculer les stats globales
+              var resolved = histo.predictions.filter(function(p){return p.result!=='pending';});
+              var wins = resolved.filter(function(p){return p.result==='win';});
+              var total = resolved.length;
+              var winrate = total>0?(wins.length/total*100):0;
+              // ROI simplifié (cote moyenne 1.75)
+              var roi = total>0?((wins.length*0.75 - (total-wins.length))/total*100):0;
+
+              // Série en cours
+              var streak=0;
+              for(var si=0;si<histo.predictions.length;si++){
+                if(histo.predictions[si].result==='pending')continue;
+                if(si===0||(streak>0&&histo.predictions[si].result==='win')||(streak<0&&histo.predictions[si].result==='loss')){
+                  streak += histo.predictions[si].result==='win'?1:-1;
+                } else break;
+              }
+
+              histo.stats = {
+                winrate: Math.round(winrate*10)/10,
+                roi: Math.round(roi*10)/10,
+                total: total,
+                streak: streak,
+                wins: wins.length,
+                losses: total-wins.length
+              };
+
+              // Calcul ROI mensuel
+              var months = {};
+              histo.predictions.forEach(function(p){
+                if(p.result==='pending')return;
+                var key = (p.date||'').substring(0,7); // YYYY-MM
+                if(!months[key])months[key]={wins:0,losses:0,label:''};
+                if(p.result==='win')months[key].wins++;
+                else months[key].losses++;
+              });
+              histo.monthly = Object.keys(months).sort().reverse().slice(0,6).map(function(k){
+                var mo=months[k];
+                var tot=mo.wins+mo.losses;
+                var r=tot>0?((mo.wins*0.75-mo.losses)/tot*100):0;
+                var parts=k.split('-');
+                var mn=['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'];
+                return {month:k,label:(mn[parseInt(parts[1])-1]||parts[1])+' '+parts[0],wins:mo.wins,losses:mo.losses,total:tot,roi:Math.round(r*10)/10};
+              });
+
+              fs.writeFileSync(histoPath, JSON.stringify(histo,null,2));
+              console.log('  Historique: '+total+' paris resolus | Winrate: '+winrate.toFixed(0)+'% | ROI: '+roi.toFixed(1)+'%');
+            }
+            await updateHistorique();
+
+
             console.log('\n=== MULTILINGUAL PIPELINE START ===');
             generateWorldCupPages();
             await generateMultilingualMatchPages(matchsData);
@@ -1819,7 +1953,7 @@ jobs:
         run: |
           git config user.name "IASHARK"
           git config user.email "yaramode81@gmail.com"
-          git add data.json sitemap.xml sitemap-*.xml
+          git add data.json historique.json sitemap.xml sitemap-*.xml
           git add en/ es/ pt/ de/ it/ ar/ tr/ nl/ pl/ id/ no/ sv/ ro/ el/ cs/ hu/ sr/ uk/ ru/ ja/ ko/ th/ hi/ ms/ da/ fi/ sw/ 2>/dev/null || true
           git add blog/ 2>/dev/null || true
           git diff --staged --quiet || git commit -m "Daily update + multilingual - $(date +%Y-%m-%d)"

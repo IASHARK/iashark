@@ -42,10 +42,10 @@ jobs:
           };
 
           var LANGS = {
-            'es':'Spanish','it':'Italian','pt':'Portuguese','de':'German',
+            'en':'English','es':'Spanish','it':'Italian','pt':'Portuguese','de':'German',
             'nl':'Dutch','ro':'Romanian','sv':'Swedish','pl':'Polish','tr':'Turkish'
           };
-          var TOP_LANGS = ['es','it','pt','de','nl','ro','sv','pl','tr'];
+          var TOP_LANGS = ['en','es','it','pt','de','nl','ro','sv','pl','tr'];
 
           var WC_TITLE = {
             'en':'2026 FIFA World Cup AI Predictions & Analysis',
@@ -358,7 +358,7 @@ jobs:
             catch(e) { console.log('  Translation parse error for '+lang+', using fallback'); return texts; }
           }
 
-          const GUIDE_LANGS = ['es','pt','de','it','nl','pl','sv','tr','ro'];
+          const GUIDE_LANGS = ['en','es','pt','de','it','nl','pl','sv','tr','ro'];
           const GUIDE_LANG_NAMES = {
             en:'English',es:'Español',pt:'Português',de:'Deutsch',it:'Italiano',
             nl:'Nederlands',pl:'Polski',sv:'Svenska',
@@ -430,7 +430,7 @@ jobs:
 
           async function generateBlogArticles(matchsData, upcomingFixtures) {
             console.log('\n=== GÉNÉRATION ARTICLES BLOG ===');
-            var BLOG_LANGS = ['fr','es','pt','de','it','tr','nl','pl','ro','sv'];
+            var BLOG_LANGS = ['fr','en','es','pt','de','it','tr','nl','pl','ro','sv'];
             var BLOG_LANG_NAMES = {
               fr:'French',en:'English',es:'Spanish',pt:'Portuguese',de:'German',
               it:'Italian',tr:'Turkish',nl:'Dutch',pl:'Polish',
@@ -1600,7 +1600,7 @@ jobs:
               var matchObj = {
                 id:f.id, sport:'football',
                 home:{n:home.name,id:home.id}, away:{n:away.name,id:away.id},
-                league:lg.name, ligue_icon:lgIcon(lg.name), league_key:lgKey(lg.id),
+                league:lg.name, ligue_icon:lgIcon(lg.name), league_key:lgKey(lg.id), round:lg.round||'',
                 date:(TODAY+' '+heure).trim(), cat:['all'],
                 val:an?(an.vbet==='OUI'&&(an.confiance||0)>=6.0):false,
                 hot:an?(an.confiance||0)>=8.0:false,
@@ -1921,11 +1921,17 @@ jobs:
           ANTHROPIC_KEY:   ${{ secrets.ANTHROPIC_KEY }}
         run: node pipeline.js
 
+      - name: Inject config
+        run: |
+          echo "window.ANT_KEY='$ANTHROPIC_KEY';" > config.js
+        env:
+          ANTHROPIC_KEY: ${{ secrets.ANTHROPIC_KEY }}
+
       - name: Commit and push
         run: |
           git config user.name "IASHARK"
           git config user.email "yaramode81@gmail.com"
-          git add data.json historique.json sitemap.xml sitemap-*.xml
+          git add data.json historique.json sitemap.xml sitemap-*.xml config.js
           git add en/ es/ pt/ de/ it/ tr/ nl/ pl/ sv/ ro/ 2>/dev/null || true
           git add blog/ 2>/dev/null || true
           git diff --staged --quiet || git commit -m "Daily update + multilingual - $(date +%Y-%m-%d)"

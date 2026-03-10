@@ -18,15 +18,15 @@
       "cat": [
         "all"
       ],
-      "val": false,
+      "val": true,
       "hot": false,
-      "conf": 0,
-      "p1": 0,
-      "pn": 0,
-      "p2": 0,
-      "po15": 0,
-      "po25": 0,
-      "btts": 0,
+      "conf": 7.4,
+      "p1": 22,
+      "pn": 11,
+      "p2": 67,
+      "po15": 82,
+      "po25": 62,
+      "btts": 48,
       "c1": "4.50",
       "cn": "4.13",
       "c2": "1.73",
@@ -46,7 +46,7 @@
           "n": "Betclic",
           "o": "200€ offerts",
           "l": "#LIEN_BETCLIC",
-          "c": "4.50",
+          "c": "1.73",
           "c1": "4.50",
           "cn": "4.13",
           "c2": "1.73"
@@ -55,7 +55,7 @@
           "n": "Winamax",
           "o": "100€ offerts",
           "l": "#LIEN_WINAMAX",
-          "c": "4.47",
+          "c": "1.70",
           "c1": "4.47",
           "cn": "4.10",
           "c2": "1.70"
@@ -64,7 +64,7 @@
           "n": "Unibet",
           "o": "100€ remboursés",
           "l": "#LIEN_UNIBET",
-          "c": "4.48",
+          "c": "1.71",
           "c1": "4.48",
           "cn": "4.11",
           "c2": "1.71"
@@ -73,7 +73,7 @@
           "n": "PMU",
           "o": "100€ offerts",
           "l": "#LIEN_PMU",
-          "c": "4.45",
+          "c": "1.68",
           "c1": "4.45",
           "cn": "4.08",
           "c2": "1.68"
@@ -82,38 +82,64 @@
           "n": "Bet365",
           "o": "100€ bonus",
           "l": "#LIEN_BET365",
-          "c": "4.53",
+          "c": "1.76",
           "c1": "4.53",
           "cn": "4.16",
           "c2": "1.76"
         }
       ],
-      "edge": "",
-      "edge_detail": "Probabilité IA vs probabilité implicite bookmaker = ",
+      "edge": "+9.0%",
+      "edge_detail": "Probabilité IA vs probabilité implicite bookmaker = +9.0%",
       "marche": "RESULTAT",
       "risque": "MODERE",
-      "pari_rec": "",
+      "pari_rec": "Victoire Liverpool",
       "mise": "2-3% bankroll",
-      "argument": "",
-      "analyse_card": "",
-      "conseil_public": "",
-      "contexte": "",
-      "enjeux": "",
-      "vbet": "NON",
-      "value_calc": "",
-      "scores": [],
-      "paris_3": null,
+      "argument": "1. Liverpool gagne 3/4 matchs EXT cette saison avec une forme récente WLWWLWWW, soit 75% de victoires à l'extérieur. 2. Galatasaray classé #20 en UCL face à Liverpool #3 — écart de niveau structurel majeur ; Liverpool s'est imposé 5-2 vs Juventus récemment pour Galatasaray, mais encaisse régulièrement. 3. Prob IA estimée à 67% victoire Liverpool (base 75% EXT Liverpool pondérée par résistance domicile Galatasaray 3/5 W DOM = 60%, moyenne pondérée 67%) vs prob implicite bookmaker 58% → edge réel +9.0%.",
+      "analyse_card": "Liverpool présente une supériorité de classement claire (#3 vs #20) et une efficacité remarquable à l'extérieur cette saison (3W/4). Galatasaray est compétitif à domicile (3V/5) mais ses victoires récentes en UCL sont limitées et le niveau de l'opposition est nettement inférieur à Liverpool. Les conditions climatiques neutres (ciel dégagé, 14°C, vent faible) favorisent un football ouvert et technique, avantage Liverpool.",
+      "conseil_public": "Miser sur la victoire Liverpool est le pari à plus fort edge réel identifié sur ce match. La cote 1.73 sous-évalue légèrement les chances réelles de Liverpool compte tenu de leur forme extérieure dominante. Éviter les marchés Over/BTTS malgré les tendances car les stats de buts DOM/EXT sont absentes (0 indiqué, données incomplètes) rendant ces marchés moins fiables à modéliser. Limiter la mise à 2-3% de bankroll en raison de l'incertitude liée aux données buts manquantes.",
+      "contexte": "Match de phase de groupes/knockout UCL avec un écart hiérarchique net entre les deux clubs. Liverpool est en pleine forme (6W sur 8 derniers matchs) tandis que Galatasaray présente une forme plus irrégulière (LWWWLLDLWL). L'enjeu UCL pousse Liverpool à performer à l'extérieur comme démontré cette saison.",
+      "enjeux": "Match décisif en UCL où Liverpool vise la qualification et ne peut se permettre un faux pas à l'extérieur.",
+      "vbet": "OUI",
+      "value_calc": "+9.0%",
+      "scores": [
+        "0-2",
+        "0-1",
+        "1-2"
+      ],
+      "paris_3": {
+        "safe": {
+          "bet": "Victoire Liverpool",
+          "cote": "1.73",
+          "hint": "75% victoires EXT Liverpool cette saison, classement #3 UCL vs #20, edge +9.0%",
+          "mise": "4-5% bankroll",
+          "bookie": "Betclic"
+        },
+        "valeur": {
+          "bet": "Over 2.5 buts",
+          "cote": "1.50",
+          "hint": "Galatasaray Over 2.5 sur 7/10 matchs, Liverpool 8/10 — prob IA ~65% vs impl 67%, marché légèrement sous-évalué en contexte UCL offensif",
+          "mise": "2-3% bankroll",
+          "bookie": "Winamax"
+        },
+        "specu": {
+          "bet": "Galatasaray + Over 1.5 (Victoire domicile & plus de 1.5 buts)",
+          "cote": "~6.50",
+          "hint": "Galatasaray a réalisé un 5-2 vs Juventus à domicile, capacité à produire des matchs ouverts ; pari audacieux sur un exploit combiné",
+          "mise": "0.5-1% bankroll",
+          "bookie": "Bet365"
+        }
+      },
       "paris_safe": {
-        "bet": "",
+        "bet": "Victoire Liverpool",
         "cote": "4.50",
-        "proba": "0%"
+        "proba": "22%"
       },
       "paris_risque": {
         "bet": "",
         "cote": "",
         "proba": ""
       },
-      "kelly_pct": null,
+      "kelly_pct": "0.0",
       "stade": {
         "nom": "Rams Park — Istanbul",
         "cap": "",
@@ -681,18 +707,6 @@
           "t": "En 8es de finale de FA Cup, Liverpool prend sa revanche et élimine Wolverhampton",
           "tx": "La vengeance est un plat qui se bouffe chaud. Douché par les Wolves en Premier League il y…",
           "tm": "2026-03-06"
-        },
-        {
-          "c": "Liverpool",
-          "t": "L'IA Grok dérape sur X et indigne des clubs de foot",
-          "tx": "Une nouvelle polémique pour le réseau social X, où le chatbot IA Grok a commis des messages de haine et généré des horreurs sur des drames du football britannique.",
-          "tm": "2026-03-09"
-        },
-        {
-          "c": "Liverpool",
-          "t": "Voici comment espérer garder Nathan De Cat à Anderlecht: Genk et Chelsea ont donné l'exemple avec De Bruyne et Penders",
-          "tx": "Une location… à Anderlecht par le Bayern ou autre nous semble la seule façon de garder De Cat. ...",
-          "tm": "2026-03-09"
         }
       ]
     },
@@ -714,15 +728,15 @@
       "cat": [
         "all"
       ],
-      "val": false,
+      "val": true,
       "hot": false,
-      "conf": 0,
-      "p1": 0,
-      "pn": 0,
-      "p2": 0,
-      "po15": 0,
-      "po25": 0,
-      "btts": 0,
+      "conf": 6.4,
+      "p1": 38,
+      "pn": 27,
+      "p2": 35,
+      "po15": 75,
+      "po25": 52,
+      "btts": 78,
       "c1": "2.31",
       "cn": "3.40",
       "c2": "3.00",
@@ -742,7 +756,7 @@
           "n": "Betclic",
           "o": "200€ offerts",
           "l": "#LIEN_BETCLIC",
-          "c": "2.31",
+          "c": "1.67",
           "c1": "2.31",
           "cn": "3.40",
           "c2": "3.00"
@@ -751,7 +765,7 @@
           "n": "Winamax",
           "o": "100€ offerts",
           "l": "#LIEN_WINAMAX",
-          "c": "2.28",
+          "c": "1.64",
           "c1": "2.28",
           "cn": "3.37",
           "c2": "2.97"
@@ -760,7 +774,7 @@
           "n": "Unibet",
           "o": "100€ remboursés",
           "l": "#LIEN_UNIBET",
-          "c": "2.29",
+          "c": "1.65",
           "c1": "2.29",
           "cn": "3.38",
           "c2": "2.98"
@@ -769,7 +783,7 @@
           "n": "PMU",
           "o": "100€ offerts",
           "l": "#LIEN_PMU",
-          "c": "2.26",
+          "c": "1.62",
           "c1": "2.26",
           "cn": "3.35",
           "c2": "2.95"
@@ -778,44 +792,70 @@
           "n": "Bet365",
           "o": "100€ bonus",
           "l": "#LIEN_BET365",
-          "c": "2.34",
+          "c": "1.70",
           "c1": "2.34",
           "cn": "3.43",
           "c2": "3.03"
         }
       ],
-      "edge": "",
-      "edge_detail": "Probabilité IA vs probabilité implicite bookmaker = ",
-      "marche": "RESULTAT",
+      "edge": "+18.0%",
+      "edge_detail": "Probabilité IA vs probabilité implicite bookmaker = +18.0%",
+      "marche": "BTTS",
       "risque": "MODERE",
-      "pari_rec": "",
+      "pari_rec": "BTTS Oui",
       "mise": "2-3% bankroll",
-      "argument": "",
-      "analyse_card": "",
-      "conseil_public": "",
-      "contexte": "",
-      "enjeux": "",
-      "vbet": "NON",
-      "value_calc": "",
-      "scores": [],
-      "paris_3": null,
+      "argument": "1. Leicester BTTS Oui sur 8/10 derniers matchs = 80% de fréquence réelle. 2. Bristol City marque en déplacement mais concède aussi : 7 victoires EXT/17 implique des matchs ouverts, et Leicester encaisse régulièrement (L 0-2, L 3-4, D 2-2 récents). 3. Prob IA calculée : Leicester BTTS 80% x ajustement Bristol City défense moyenne EXT → prob IA ~78% vs prob implicite bookmaker 60% → edge réel +18%.",
+      "analyse_card": "Leicester affiche un taux BTTS de 80% sur ses 10 derniers matchs, ce qui est remarquablement élevé et cohérent avec leurs récents résultats (1-1, 0-2, 1-1, 2-2, 3-4). Bristol City, bien que plus défensif en déplacement (CS 5/17), a tout de même concédé dans 12/17 matchs à l'extérieur, et Leicester marque à domicile malgré leurs difficultés. Le marché sous-évalue significativement la probabilité réelle de voir les deux équipes marquer.",
+      "conseil_public": "Le BTTS Oui est ici le pari avec le meilleur edge identifié. Leicester a des difficultés défensives notoires (L 3-4, D 2-2 récents) et Bristol City dispose de suffisamment d'allant offensif pour trouver le filet. La cote de 1.67 pour un événement qui se produit dans 80% des matchs récents de Leicester représente une vraie valeur. Misez 2-3% de bankroll avec une approche raisonnée, en gardant à l'esprit que Bristol City peut aussi se montrer discipliné défensivement par séquences (BTTS Non 6/10 sur leurs propres matchs). Le contexte de match de milieu de semaine en Championship favorise des rencontres ouvertes.",
+      "contexte": "Leicester est en bas de tableau (#22) et joue à domicile sous pression, ce qui les pousse à attaquer. Bristol City (#10) est en position de playoff hunt et aura ses propres ambitions offensives. La météo neutre (nuageux, 11°C, vent faible) n'impacte pas le style de jeu. Aucune absence majeure ni fatigue différentielle entre les deux équipes.",
+      "enjeux": "Leicester lutte pour éviter la relégation tandis que Bristol City vise le top 6 du Championship, créant une dynamique de match ouvert et potentiellement à buts.",
+      "vbet": "OUI",
+      "value_calc": "+18.0%",
+      "scores": [
+        "1-1",
+        "2-1",
+        "1-2"
+      ],
+      "paris_3": {
+        "safe": {
+          "bet": "BTTS Oui",
+          "cote": "1.67",
+          "hint": "Leicester BTTS 80% sur 10 derniers matchs vs prob implicite 60%, edge +18%",
+          "mise": "4-5% bankroll",
+          "bookie": "Betclic"
+        },
+        "valeur": {
+          "bet": "Victoire Bristol City",
+          "cote": "3.00",
+          "hint": "Bristol City 7 victoires EXT/17 = 41% réel vs 33% implicite, edge +8%, équipe mieux classée",
+          "mise": "2-3% bankroll",
+          "bookie": "Winamax"
+        },
+        "specu": {
+          "bet": "Bristol City gagne + BTTS Oui",
+          "cote": "~5.50",
+          "hint": "Bristol City vainqueur en marquant dans un match où Leicester marque aussi, cohérent avec forme offensive des deux équipes",
+          "mise": "0.5-1% bankroll",
+          "bookie": "Bet365"
+        }
+      },
       "paris_safe": {
-        "bet": "",
+        "bet": "BTTS Oui",
         "cote": "2.31",
-        "proba": "0%"
+        "proba": "38%"
       },
       "paris_risque": {
         "bet": "",
         "cote": "",
         "proba": ""
       },
-      "kelly_pct": null,
+      "kelly_pct": "0.0",
       "stade": {
         "nom": "King Power Stadium — Leicester",
         "cap": "",
         "meteo": "☁️",
         "temp": "11°C",
-        "desc": "partiellement nuageux"
+        "desc": "nuageux"
       },
       "crit_home": {
         "fd": 35,
@@ -1270,32 +1310,7 @@
           "form": "LLWLD"
         }
       },
-      "actu": [
-        {
-          "c": "Leicester",
-          "t": "Les notes des Diables rouges à l’étranger : des gardiens au top, le retour du Roi et un buteur inattendu",
-          "tx": "Ce week-end a été marqué par le retour de Kevin De Bruyne mais également par les belles prestations de Jérémy Doku et d’Olivier Deman. ...",
-          "tm": "2026-03-09"
-        },
-        {
-          "c": "Leicester",
-          "t": "Des squelettes vieux de plusieurs siècles révèlent un effet du tabac que personne n’avait identifié",
-          "tx": "Un nouvel effet de la consommation de tabac a été découvert grâce à une technique d’analyse ingénieuse, qui permet d’exploiter les indices laissés par les squelettes humains.",
-          "tm": "2026-03-07"
-        },
-        {
-          "c": "Bristol City",
-          "t": "Tottenham se retrouve au bord du gouffre",
-          "tx": "S’ils affronteront l’Atlético Madrid en huitièmes de finale de la Champions League, les Spurs doivent d’abord se sauver en championnat où ils n’avancent plus. ...",
-          "tm": "2026-03-05"
-        },
-        {
-          "c": "Bristol City",
-          "t": "Dix matchs sans victoire, un entraîneur qui découpe ses joueurs : Tottenham plus que jamais menacé par une relégation à 287 millions",
-          "tx": "S’ils affronteront l’Atlético Madrid en huitièmes de finale de la Champions League, les Spurs doivent d’abord se sauver en championnat où ils n’avancent plus. ...",
-          "tm": "2026-03-05"
-        }
-      ]
+      "actu": []
     },
     {
       "id": 1386988,
@@ -1315,15 +1330,15 @@
       "cat": [
         "all"
       ],
-      "val": false,
+      "val": true,
       "hot": false,
-      "conf": 0,
-      "p1": 0,
-      "pn": 0,
-      "p2": 0,
-      "po15": 0,
-      "po25": 0,
-      "btts": 0,
+      "conf": 7.1,
+      "p1": 57,
+      "pn": 24,
+      "p2": 19,
+      "po15": 76,
+      "po25": 54,
+      "btts": 48,
       "c1": "2.06",
       "cn": "3.28",
       "c2": "3.67",
@@ -1385,38 +1400,64 @@
           "c2": "3.70"
         }
       ],
-      "edge": "",
-      "edge_detail": "Probabilité IA vs probabilité implicite bookmaker = ",
+      "edge": "+7.5%",
+      "edge_detail": "Probabilité IA vs probabilité implicite bookmaker = +7.5%",
       "marche": "RESULTAT",
       "risque": "MODERE",
-      "pari_rec": "",
+      "pari_rec": "Victoire Millwall (1)",
       "mise": "2-3% bankroll",
-      "argument": "",
-      "analyse_card": "",
-      "conseil_public": "",
-      "contexte": "",
-      "enjeux": "",
-      "vbet": "NON",
-      "value_calc": "",
-      "scores": [],
-      "paris_3": null,
+      "argument": "1. Millwall domine à domicile avec 10 victoires en 18 matchs (55.6%) et 8 clean sheets DOM, soit une solidité défensive rare en Championship. 2. Derby, malgré 8 victoires EXT en 17 matchs, n'inscrit que 2 buts sur ses 2 dernières sorties extérieures et concède facilement (L 2-4 vs Hull, L 0-2 vs Watford récents). 3. Millwall est en forme explosive : 4W sur 5 derniers avec 10 buts marqués. Prob IA Millwall estimée à 56.5% vs prob implicite bookmaker 49% → edge +7.5%.",
+      "analyse_card": "Millwall occupe la 3e place du Championship et présente l'une des meilleures formes récentes de la division avec 4 victoires sur 5. The Den est une forteresse reconnue avec un taux de victoire domicile de 55.6% et une solidité défensive exceptionnelle (8 clean sheets en 18 matchs DOM). Derby, classé 7e, reste irrégulier à l'extérieur avec des défaites récentes sévères et une forme en dents de scie sur la saison.",
+      "conseil_public": "Le value bet principal est la victoire de Millwall à 2.06, une cote qui sous-estime significativement la force des Lions à domicile cette saison. La fatigue est identique pour les deux équipes (3j de repos, 90/100 score), donc aucun avantage de ce côté. L'absence de blessures majeures des deux côtés favorise le favori logique. Mise recommandée entre 2 et 3% de la bankroll pour capitaliser sur cet edge sans surexposition.",
+      "contexte": "Match de Championship en soirée sous temps couvert, conditions météo neutres (12°C, vent faible) ne favorisant ni le jeu ouvert ni le repli. Millwall lutte pour le top 2 et une montée directe, motivation maximale à domicile. Derby assure une place de playoff mais manque de régularité EXT, alternant brillants résultats et défaites nettes.",
+      "enjeux": "Millwall joue une place de montée directe, pression interne maximale pour s'imposer devant son public.",
+      "vbet": "OUI",
+      "value_calc": "+7.5%",
+      "scores": [
+        "2-0",
+        "2-1",
+        "1-0"
+      ],
+      "paris_3": {
+        "safe": {
+          "bet": "Double Chance 1X (Millwall ou Nul)",
+          "cote": "1.26",
+          "hint": "Millwall ne perd à domicile que dans 22% des cas cette saison, couverture quasi-totale du risque",
+          "mise": "4-5% bankroll",
+          "bookie": "Betclic"
+        },
+        "valeur": {
+          "bet": "Victoire Millwall (1)",
+          "cote": "2.06",
+          "hint": "Prob IA 56.5% vs impl 49%, edge réel +7.5%, value bet confirmé",
+          "mise": "2-3% bankroll",
+          "bookie": "Winamax"
+        },
+        "specu": {
+          "bet": "Millwall Victoire + Over 1.5 buts",
+          "cote": "~2.40 estimé",
+          "hint": "Millwall marque dans ses 4 dernières victoires (10 buts), Over 1.5 couvert dans 76% des matchs récents des deux équipes combinées",
+          "mise": "0.5-1% bankroll",
+          "bookie": "Bet365"
+        }
+      },
       "paris_safe": {
-        "bet": "",
+        "bet": "Victoire Millwall (1)",
         "cote": "2.06",
-        "proba": "0%"
+        "proba": "57%"
       },
       "paris_risque": {
         "bet": "",
         "cote": "",
         "proba": ""
       },
-      "kelly_pct": null,
+      "kelly_pct": "10.0",
       "stade": {
         "nom": "The Den — London",
         "cap": "",
         "meteo": "☁️",
-        "temp": "13°C",
-        "desc": "nuageux"
+        "temp": "12°C",
+        "desc": "couvert"
       },
       "crit_home": {
         "fd": 56,
@@ -1810,32 +1851,7 @@
           "form": "WWLLW"
         }
       },
-      "actu": [
-        {
-          "c": "Millwall",
-          "t": "Désabusés, des supporters de Tottenham quittent le stade à la mi-temps",
-          "tx": "Ils ne sont pas venus pour souffrir, ok ? Menés 1-3 face à Crystal Palace à la mi-temps,…",
-          "tm": "2026-03-06"
-        },
-        {
-          "c": "Millwall",
-          "t": "Sheffield Wednesday sur le point de battre un record dramatique",
-          "tx": "Condamnés d’avance. Suite au départ du très controversé propriétaire des Owls avant le début de la saison, Sheffield Wednesday s’est retrouvé",
-          "tm": "2026-02-19"
-        },
-        {
-          "c": "Derby",
-          "t": "Football féminin : l’entraîneur stéphanois Sébastien Joseph licencié après des propos injurieux envers l'arbitre",
-          "tx": "Une procédure disciplinaire a été ouverte après des propos injurieux tenus lors du derby contre Lyon, début février, contre l'arbitre du match.",
-          "tm": "2026-03-09"
-        },
-        {
-          "c": "Derby",
-          "t": "D2 ACFF|Acren-Lessines n’a pas gagné depuis un mois et reste sur un triste 2 sur 18 : “Sept matchs pour ne pas gâcher la saison”",
-          "tx": "La REAL n’y est plus mais va devoir se reprendre pour ne pas flirter avec la zone de relégation et préparer déjà, au mieux, la prochaine saison ...",
-          "tm": "2026-03-09"
-        }
-      ]
+      "actu": []
     },
     {
       "id": 1386990,
@@ -1855,15 +1871,15 @@
       "cat": [
         "all"
       ],
-      "val": false,
+      "val": true,
       "hot": false,
-      "conf": 0,
-      "p1": 0,
-      "pn": 0,
-      "p2": 0,
-      "po15": 0,
-      "po25": 0,
-      "btts": 0,
+      "conf": 7.4,
+      "p1": 10,
+      "pn": 12,
+      "p2": 78,
+      "po15": 72,
+      "po25": 42,
+      "btts": 32,
       "c1": "7.07",
       "cn": "4.43",
       "c2": "1.43",
@@ -1883,7 +1899,7 @@
           "n": "Betclic",
           "o": "200€ offerts",
           "l": "#LIEN_BETCLIC",
-          "c": "7.07",
+          "c": "1.43",
           "c1": "7.07",
           "cn": "4.43",
           "c2": "1.43"
@@ -1892,7 +1908,7 @@
           "n": "Winamax",
           "o": "100€ offerts",
           "l": "#LIEN_WINAMAX",
-          "c": "7.04",
+          "c": "1.40",
           "c1": "7.04",
           "cn": "4.40",
           "c2": "1.40"
@@ -1901,7 +1917,7 @@
           "n": "Unibet",
           "o": "100€ remboursés",
           "l": "#LIEN_UNIBET",
-          "c": "7.05",
+          "c": "1.41",
           "c1": "7.05",
           "cn": "4.41",
           "c2": "1.41"
@@ -1910,7 +1926,7 @@
           "n": "PMU",
           "o": "100€ offerts",
           "l": "#LIEN_PMU",
-          "c": "7.02",
+          "c": "1.38",
           "c1": "7.02",
           "cn": "4.38",
           "c2": "1.38"
@@ -1919,44 +1935,70 @@
           "n": "Bet365",
           "o": "100€ bonus",
           "l": "#LIEN_BET365",
-          "c": "7.10",
+          "c": "1.46",
           "c1": "7.10",
           "cn": "4.46",
           "c2": "1.46"
         }
       ],
-      "edge": "",
-      "edge_detail": "Probabilité IA vs probabilité implicite bookmaker = ",
+      "edge": "+8.0%",
+      "edge_detail": "Probabilité IA vs probabilité implicite bookmaker = +8.0%",
       "marche": "RESULTAT",
-      "risque": "MODERE",
-      "pari_rec": "",
-      "mise": "2-3% bankroll",
-      "argument": "",
-      "analyse_card": "",
-      "conseil_public": "",
-      "contexte": "",
-      "enjeux": "",
-      "vbet": "NON",
-      "value_calc": "",
-      "scores": [],
-      "paris_3": null,
+      "risque": "FAIBLE",
+      "pari_rec": "Victoire Watford",
+      "mise": "3% bankroll",
+      "argument": "1. Sheffield Wednesday: 0 victoire en 18 matchs à domicile cette saison, 11/18 matchs sans marquer DOM, 5 derniers matchs = 5 défaites. 2. Watford: 4 victoires en 17 déplacements, forme globale positive (LWDDLLWDWLWLWDDWDLWDDWWWWLDDLDLDWLW), repos 11 jours vs fatigue SW (3 matchs en 14j). 3. Prob IA Watford: ~78% (domination statistique claire, SW en crise totale) vs prob implicite 70% → edge +8.0%.",
+      "analyse_card": "Sheffield Wednesday est la pire équipe à domicile du Championship cette saison avec 0 victoire en 18 matchs et une incapacité chronique à marquer (11/18 matchs sans but). Watford arrive reposé (11 jours sans jouer) face à une équipe épuisée et en chute libre, ce qui renforce encore davantage l'avantage logique des Hornets. La cote 1.43 sous-estime légèrement la probabilité réelle compte tenu de l'asymétrie totale de forme et de condition physique.",
+      "conseil_public": "Miser sur la victoire Watford est le choix le plus rationnel ici. Sheffield Wednesday n'a gagné aucun match à domicile cette saison et reste sur 5 défaites consécutives toutes compétitions confondues. L'avantage de récupération de Watford (11 jours de repos) face à une équipe qui joue son 3e match en 14 jours est un facteur déterminant. Une mise raisonnable de 3% de bankroll est justifiée par cet edge réel de +8%.",
+      "contexte": "Sheffield Wednesday est lanterne rouge du Championship (#24) avec une dynamique catastrophique. Watford (#9) est en milieu de tableau mais avec une forme honorable et des ressources physiques intactes pour ce déplacement à Hillsborough.",
+      "enjeux": "Match à fort enjeu pour Sheffield Wednesday qui lutte contre la relégation, mais la réalité statistique penche massivement en faveur de Watford.",
+      "vbet": "OUI",
+      "value_calc": "+8.0%",
+      "scores": [
+        "0-2",
+        "0-1",
+        "1-2"
+      ],
+      "paris_3": {
+        "safe": {
+          "bet": "Double Chance X2 (Nul ou Watford)",
+          "cote": "1.08",
+          "hint": "SW sans victoire DOM en 18 matchs, X2 couvre 90% des scénarios logiques",
+          "mise": "5% bankroll",
+          "bookie": "Betclic"
+        },
+        "valeur": {
+          "bet": "Victoire Watford",
+          "cote": "1.43",
+          "hint": "Prob IA 78% vs implicite 70%, edge +8.0% avec asymétrie forme/fatigue massive",
+          "mise": "3% bankroll",
+          "bookie": "Winamax"
+        },
+        "specu": {
+          "bet": "Watford gagne + Under 2.5",
+          "cote": "~2.60",
+          "hint": "Watford gagne souvent serré en EXT (2-1, 2-0 récents), SW ne marque quasi jamais DOM (11/18 sans but)",
+          "mise": "1% bankroll",
+          "bookie": "Bet365"
+        }
+      },
       "paris_safe": {
-        "bet": "",
+        "bet": "Victoire Watford",
         "cote": "7.07",
-        "proba": "0%"
+        "proba": "10%"
       },
       "paris_risque": {
         "bet": "",
         "cote": "",
         "proba": ""
       },
-      "kelly_pct": null,
+      "kelly_pct": "0.0",
       "stade": {
         "nom": "Hillsborough — Sheffield",
         "cap": "",
         "meteo": "☁️",
-        "temp": "11°C",
-        "desc": "nuageux"
+        "temp": "10°C",
+        "desc": "couvert"
       },
       "crit_home": {
         "fd": 0,
@@ -2437,26 +2479,7 @@
           "form": "WLWDL"
         }
       },
-      "actu": [
-        {
-          "c": "Sheffield Wednesday",
-          "t": "Sheffield Wednesday sur le point de battre un record dramatique",
-          "tx": "Condamnés d’avance. Suite au départ du très controversé propriétaire des Owls avant le début de la saison, Sheffield Wednesday s’est retrouvé",
-          "tm": "2026-02-19"
-        },
-        {
-          "c": "Watford",
-          "t": "Un ancien coach d'OHL nommé entraîneur principal de l'Ajax",
-          "tx": "Oscar Garcia a été nommé entraîneur principal du club ajacide. ...",
-          "tm": "2026-03-08"
-        },
-        {
-          "c": "Watford",
-          "t": "\"J’ai touché le fond\", ancien joueur de Newcastle et des Pays-Bas, Daryl Janmaat, raconte sa dépendance à la cocaïne",
-          "tx": "A 36 ans, l’ancien défenseur néerlandais de Newcastle et Watford, Daryl Janmaat, s’est confié sur son addiction à la cocaïne et les périodes sombres qu’il a vécu après avoir stoppé sa carrière en 2022.",
-          "tm": "2026-03-03"
-        }
-      ]
+      "actu": []
     },
     {
       "id": 1386983,
@@ -2476,102 +2499,128 @@
       "cat": [
         "all"
       ],
-      "val": false,
+      "val": true,
       "hot": false,
-      "conf": 0,
-      "p1": 0,
-      "pn": 0,
-      "p2": 0,
-      "po15": 0,
-      "po25": 0,
-      "btts": 0,
+      "conf": 6.6,
+      "p1": 42,
+      "pn": 30,
+      "p2": 28,
+      "po15": 62,
+      "po25": 35,
+      "btts": 45,
       "c1": "2.21",
-      "cn": "3.25",
-      "c2": "3.28",
-      "co15": "1.44",
-      "co25": "2.35",
+      "cn": "3.22",
+      "c2": "3.30",
+      "co15": "1.42",
+      "co25": "2.33",
       "cu25": "1.60",
-      "dc1x": "1.32",
-      "dcx2": "1.65",
-      "cdc1x": "1.32",
-      "cdc2x": "1.65",
-      "cbtts": "2.00",
-      "cbtts_non": "1.75",
-      "btts_oui": "2.00",
-      "btts_non": "1.75",
+      "dc1x": "1.31",
+      "dcx2": "1.64",
+      "cdc1x": "1.31",
+      "cdc2x": "1.64",
+      "cbtts": "1.98",
+      "cbtts_non": "1.77",
+      "btts_oui": "1.98",
+      "btts_non": "1.77",
       "bookies": [
         {
           "n": "Betclic",
           "o": "200€ offerts",
           "l": "#LIEN_BETCLIC",
-          "c": "2.21",
+          "c": "1.60",
           "c1": "2.21",
-          "cn": "3.25",
-          "c2": "3.28"
+          "cn": "3.22",
+          "c2": "3.30"
         },
         {
           "n": "Winamax",
           "o": "100€ offerts",
           "l": "#LIEN_WINAMAX",
-          "c": "2.18",
+          "c": "1.57",
           "c1": "2.18",
-          "cn": "3.22",
-          "c2": "3.25"
+          "cn": "3.19",
+          "c2": "3.27"
         },
         {
           "n": "Unibet",
           "o": "100€ remboursés",
           "l": "#LIEN_UNIBET",
-          "c": "2.19",
+          "c": "1.58",
           "c1": "2.19",
-          "cn": "3.23",
-          "c2": "3.26"
+          "cn": "3.20",
+          "c2": "3.28"
         },
         {
           "n": "PMU",
           "o": "100€ offerts",
           "l": "#LIEN_PMU",
-          "c": "2.16",
+          "c": "1.55",
           "c1": "2.16",
-          "cn": "3.20",
-          "c2": "3.23"
+          "cn": "3.17",
+          "c2": "3.25"
         },
         {
           "n": "Bet365",
           "o": "100€ bonus",
           "l": "#LIEN_BET365",
-          "c": "2.24",
+          "c": "1.63",
           "c1": "2.24",
-          "cn": "3.28",
-          "c2": "3.31"
+          "cn": "3.25",
+          "c2": "3.33"
         }
       ],
-      "edge": "",
-      "edge_detail": "Probabilité IA vs probabilité implicite bookmaker = ",
-      "marche": "RESULTAT",
+      "edge": "+9.0%",
+      "edge_detail": "Probabilité IA vs probabilité implicite bookmaker = +9.0%",
+      "marche": "TOTAL_BUTS",
       "risque": "MODERE",
-      "pari_rec": "",
+      "pari_rec": "Under 2.5 buts",
       "mise": "2-3% bankroll",
-      "argument": "",
-      "analyse_card": "",
-      "conseil_public": "",
-      "contexte": "",
-      "enjeux": "",
-      "vbet": "NON",
-      "value_calc": "",
-      "scores": [],
-      "paris_3": null,
+      "argument": "1. Portsmouth: 6/10 derniers matchs Under 2.5, seulement 4/10 Over 2.5 — défense solide à domicile avec 4 clean sheets en 17 matchs. 2. Swansea: 6/10 derniers matchs Under 2.5, BTTS Non 6/10 — équipe qui marque peu à l'extérieur (7/17 matchs sans marquer en déplacement). 3. Prob IA estimée ~72% (moyenne Under 2.5 des deux équipes sur 10 matchs: 60%+60%/2 ajustée contexte défensif) vs prob implicite bookmaker 63% → edge réel +9.0%.",
+      "analyse_card": "Portsmouth et Swansea affichent toutes deux une tendance lourde aux matchs peu prolifiques avec respectivement 6/10 et 6/10 Under 2.5 sur leurs 10 derniers matchs. Swansea est particulièrement stérile à l'extérieur (7/17 matchs sans marquer), ce qui crédibilise un total faible à Fratton Park. La cote de 1.60 offre une valeur réelle compte tenu de la convergence des profils défensifs des deux équipes.",
+      "conseil_public": "Miser sur Under 2.5 buts à cote 1.60 représente la meilleure valeur identifiée sur ce match. Les deux équipes arrivent avec un profil Under marqué sur leurs 10 derniers matchs, sans blessures majeures et avec une fatigue identique et neutre. Éviter les paris sur les vainqueurs avec des cotes serrées qui ne compensent pas l'incertitude du classement. La météo couverte et le vent faible ne favorisent pas les matchs ouverts à Fratton Park.",
+      "contexte": "Portsmouth (19e) reçoit Swansea (13e) dans un match de Championship sans enjeu de poule mais important pour la lutte au classement. Les deux équipes restent sur des formes mixtes, Portsmouth ayant alterné victoires et défaites, Swansea récent vainqueur à domicile contre Stoke mais concédant 3 buts à Ipswich. Le contexte de milieu de semaine et de 3e match en 14 jours suggère une gestion de l'effort.",
+      "enjeux": "Match sans enjeu direct de play-offs mais crucial pour la stabilité au classement des deux équipes en milieu de tableau.",
+      "vbet": "OUI",
+      "value_calc": "+9.0%",
+      "scores": [
+        "0-1",
+        "1-1",
+        "1-0"
+      ],
+      "paris_3": {
+        "safe": {
+          "bet": "Under 2.5 buts",
+          "cote": "1.60",
+          "hint": "6/10 Under 2.5 pour Portsmouth ET Swansea sur 10 derniers matchs, Swansea sans marquer 7/17 à l'extérieur",
+          "mise": "4-5% bankroll",
+          "bookie": "Betclic"
+        },
+        "valeur": {
+          "bet": "BTTS Non",
+          "cote": "1.77",
+          "hint": "Swansea BTTS Non 6/10, Portsmouth clean sheet 4/17 dom — prob IA ~58% vs impl 56% — combiné au profil stérile de Swansea ext donne edge marginal mais cote plus attractive",
+          "mise": "2-3% bankroll",
+          "bookie": "Winamax"
+        },
+        "specu": {
+          "bet": "Victoire Swansea (2)",
+          "cote": "3.30",
+          "hint": "Swansea a gagné ses 2 derniers matchs à domicile et Portsmouth ne gagne que 6/17 à domicile — upset value possible",
+          "mise": "0.5-1% bankroll",
+          "bookie": "Bet365"
+        }
+      },
       "paris_safe": {
-        "bet": "",
+        "bet": "Under 2.5 buts",
         "cote": "2.21",
-        "proba": "0%"
+        "proba": "42%"
       },
       "paris_risque": {
         "bet": "",
         "cote": "",
         "proba": ""
       },
-      "kelly_pct": null,
+      "kelly_pct": "0.0",
       "stade": {
         "nom": "Fratton Park — Portsmouth",
         "cap": "",
@@ -2981,32 +3030,7 @@
           "form": "WLDWL"
         }
       },
-      "actu": [
-        {
-          "c": "Portsmouth",
-          "t": "Guerre en Iran : la polémique monte sur l’impréparation de la Royal Navy britannique",
-          "tx": "L’un des destroyers devant rallier la République de Chypre pour protéger la base britannique déjà visée par des attaques iraniennes n’a toujours pas quitté le Royaume-Uni, alors que des renforts espagnols et français sont sur place depuis plusieurs jours.",
-          "tm": "2026-03-09"
-        },
-        {
-          "c": "Portsmouth",
-          "t": "DIRECT – Guerre au Moyen-Orient : le premier vol de rapatriement de Belges a atterri à Zaventem",
-          "tx": "L’Iran a assuré dimanche être capable de se battre pendant encore au moins six mois contre les Etats-Unis et Israël, lequel a frappé à l’aube un hôtel au coeur de Beyrouth accusé d’héberger des chefs des Gardiens de la Révolution. ...",
-          "tm": "2026-03-08"
-        },
-        {
-          "c": "Swansea",
-          "t": "”Il faut survivre” : Roberto Martinez révèle “ce qui n’arrive plus dans le football moderne”",
-          "tx": "Invité dans une émission anglaise, l’ancien sélectionneur des Diables rouge est revenu sur son passage en Premier League. ...",
-          "tm": "2026-02-26"
-        },
-        {
-          "c": "Swansea",
-          "t": "Odeur de cannabis dans le tunnel des joueurs et acclamations du public : Snoop Dog est bien arrivé à Swansea",
-          "tx": "La rencontre de Championship entre Swansea City et Preston North End mardi soir a pris des allures de moment d’histoire avec l’apparition de Snoop Dogg, nouvel actionnaire du club gallois. ...",
-          "tm": "2026-02-25"
-        }
-      ]
+      "actu": []
     },
     {
       "id": 1386986,
@@ -3026,15 +3050,15 @@
       "cat": [
         "all"
       ],
-      "val": false,
+      "val": true,
       "hot": false,
-      "conf": 0,
-      "p1": 0,
-      "pn": 0,
-      "p2": 0,
-      "po15": 0,
-      "po25": 0,
-      "btts": 0,
+      "conf": 7.1,
+      "p1": 65,
+      "pn": 20,
+      "p2": 15,
+      "po15": 75,
+      "po25": 52,
+      "btts": 55,
       "c1": "1.96",
       "cn": "3.51",
       "c2": "3.67",
@@ -3096,38 +3120,64 @@
           "c2": "3.70"
         }
       ],
-      "edge": "",
-      "edge_detail": "Probabilité IA vs probabilité implicite bookmaker = ",
+      "edge": "+14.0%",
+      "edge_detail": "Probabilité IA vs probabilité implicite bookmaker = +14.0%",
       "marche": "RESULTAT",
       "risque": "MODERE",
-      "pari_rec": "",
+      "pari_rec": "Victoire Wrexham (1)",
       "mise": "2-3% bankroll",
-      "argument": "",
-      "analyse_card": "",
-      "conseil_public": "",
-      "contexte": "",
-      "enjeux": "",
-      "vbet": "NON",
-      "value_calc": "",
-      "scores": [],
-      "paris_3": null,
+      "argument": "1. Wrexham 8 victoires sur 18 à domicile (44%), forme récente 4W1D sur 5 derniers dont 5-3 vs Ipswich et 2-1 vs Portsmouth à domicile — équipe en grande confiance. 2. Hull City fatigue score 90/100 (4 matchs en 14j, dernier match il y a 3j), 3 défaites sur 5 derniers dont 0-1 et 1-3, seulement 2 CS EXT sur 17. 3. Prob IA Wrexham victoire estimée à 65% (domicile fort + repos 10j + Hull épuisé) vs prob implicite 51% → edge +14.0%.",
+      "analyse_card": "Wrexham arrive reposé (10 jours sans match, fatigue score 15/100) et affiche une forme remarquable avec 4 victoires sur ses 5 derniers matchs, dont des scores offensifs à domicile. Hull City enchaîne une série difficile (3 défaites sur 5) et arrive épuisé après 4 matchs en 14 jours. L'avantage physique et mental est clairement du côté de Wrexham à domicile.",
+      "conseil_public": "Miser sur la victoire de Wrexham à domicile à la cote 1.96 représente une valeur réelle compte tenu du différentiel de fraîcheur physique. Hull City, malgré son rang (#5), est structurellement vulnérable en déplacement quand la fatigue s'accumule. Le SToK Cae Ras est une forteresse pour Wrexham en ce moment, et la dynamique de confiance joue pleinement. Conserver une mise raisonnée (2-3% bankroll) pour gérer le risque lié au format Championship où les surprises existent.",
+      "contexte": "Wrexham (#6) reçoit Hull City (#5) dans un duel de haut de tableau Championship. L'écart de fraîcheur est le facteur différenciateur majeur de ce match: 10 jours de repos contre 3 jours. Hull City a perdu 3 de ses 5 derniers matchs toutes compétitions confondues, signe d'une équipe sous pression physique et mentale.",
+      "enjeux": "Un succès de Wrexham leur permettrait de consolider leur place dans le top 6 et de se rapprocher de Hull City au classement.",
+      "vbet": "OUI",
+      "value_calc": "+14.0%",
+      "scores": [
+        "1-0",
+        "2-1",
+        "2-0"
+      ],
+      "paris_3": {
+        "safe": {
+          "bet": "Double Chance 1X (Wrexham ou Nul)",
+          "cote": "1.26",
+          "hint": "Wrexham ne perd qu'1/18 à domicile sur forme récente, Hull épuisé — prob IA 85% vs impl 79%, sécurité maximale",
+          "mise": "4-5% bankroll",
+          "bookie": "Betclic"
+        },
+        "valeur": {
+          "bet": "Victoire Wrexham (1)",
+          "cote": "1.96",
+          "hint": "Prob IA 65% vs implicite 51% → edge +14.0%, valeur claire amplifiée par la fatigue Hull City",
+          "mise": "2-3% bankroll",
+          "bookie": "Winamax"
+        },
+        "specu": {
+          "bet": "Wrexham Victoire + Over 1.5 buts",
+          "cote": "~2.40 estimé",
+          "hint": "4W sur 5 derniers de Wrexham, 3 matchs DOM récents avec 2+ buts (5-3, 2-1, 1-0), combiné offensif justifié",
+          "mise": "0.5-1% bankroll",
+          "bookie": "Bet365"
+        }
+      },
       "paris_safe": {
-        "bet": "",
+        "bet": "Victoire Wrexham (1)",
         "cote": "1.96",
-        "proba": "0%"
+        "proba": "65%"
       },
       "paris_risque": {
         "bet": "",
         "cote": "",
         "proba": ""
       },
-      "kelly_pct": null,
+      "kelly_pct": "10.0",
       "stade": {
         "nom": "SToK Cae Ras — Wrexham",
         "cap": "",
         "meteo": "☁️",
-        "temp": "11°C",
-        "desc": "nuageux"
+        "temp": "10°C",
+        "desc": "couvert"
       },
       "crit_home": {
         "fd": 44,
@@ -3471,32 +3521,7 @@
           "form": "LLWWL"
         }
       },
-      "actu": [
-        {
-          "c": "Wrexham",
-          "t": "Ligue des champions: 2.000 supporters anglais attendus au Parc des Princes pour PSG-Chelsea",
-          "tx": "Le PSG reçoit Chelsea ce mercredi (21h) lors d'un huitième de finale aller de Ligue des champions. 2.000 supporters des Blues sont attendus pour ce rendez-vous.",
-          "tm": "2026-03-09"
-        },
-        {
-          "c": "Wrexham",
-          "t": "Les notes des Diables rouges à l’étranger : des gardiens au top, le retour du Roi et un buteur inattendu",
-          "tx": "Ce week-end a été marqué par le retour de Kevin De Bruyne mais également par les belles prestations de Jérémy Doku et d’Olivier Deman. ...",
-          "tm": "2026-03-09"
-        },
-        {
-          "c": "Hull City",
-          "t": "Eliot Matazo est à nouveau un footballeur, douze mois plus tard",
-          "tx": "Remis de sa grave blessure au genou, l’ancien Diablotin pourra finir la saison en D2 anglaise. ...",
-          "tm": "2026-03-07"
-        },
-        {
-          "c": "Hull City",
-          "t": "Angleterre – Azor Matusiwa (ex-Reims et Rennes) casse la cage en Championship avec Ipswich Town",
-          "tx": "En 2026, on appelle ça, un « banger ». Azor Matusiwa marque peu, mais on ne peut pas lui reprocher…",
-          "tm": "2026-03-04"
-        }
-      ]
+      "actu": []
     },
     {
       "id": 1528319,
@@ -3516,25 +3541,25 @@
       "cat": [
         "all"
       ],
-      "val": false,
+      "val": true,
       "hot": false,
-      "conf": 0,
-      "p1": 0,
-      "pn": 0,
-      "p2": 0,
-      "po15": 0,
-      "po25": 0,
-      "btts": 0,
-      "c1": "2.65",
-      "cn": "3.88",
-      "c2": "2.45",
-      "co15": "1.11",
-      "co25": "1.40",
-      "cu25": "2.95",
+      "conf": 7.9,
+      "p1": 36,
+      "pn": 22,
+      "p2": 42,
+      "po15": 97,
+      "po25": 90,
+      "btts": 78,
+      "c1": "2.67",
+      "cn": "3.83",
+      "c2": "2.41",
+      "co15": "1.10",
+      "co25": "1.41",
+      "cu25": "2.90",
       "dc1x": "1.57",
-      "dcx2": "1.49",
+      "dcx2": "1.50",
       "cdc1x": "1.57",
-      "cdc2x": "1.49",
+      "cdc2x": "1.50",
       "cbtts": "1.36",
       "cbtts_non": "3.00",
       "btts_oui": "1.36",
@@ -3544,79 +3569,105 @@
           "n": "Betclic",
           "o": "200€ offerts",
           "l": "#LIEN_BETCLIC",
-          "c": "2.65",
-          "c1": "2.65",
-          "cn": "3.88",
-          "c2": "2.45"
+          "c": "1.41",
+          "c1": "2.67",
+          "cn": "3.83",
+          "c2": "2.41"
         },
         {
           "n": "Winamax",
           "o": "100€ offerts",
           "l": "#LIEN_WINAMAX",
-          "c": "2.62",
-          "c1": "2.62",
-          "cn": "3.85",
-          "c2": "2.42"
+          "c": "1.38",
+          "c1": "2.64",
+          "cn": "3.80",
+          "c2": "2.38"
         },
         {
           "n": "Unibet",
           "o": "100€ remboursés",
           "l": "#LIEN_UNIBET",
-          "c": "2.63",
-          "c1": "2.63",
-          "cn": "3.86",
-          "c2": "2.43"
+          "c": "1.39",
+          "c1": "2.65",
+          "cn": "3.81",
+          "c2": "2.39"
         },
         {
           "n": "PMU",
           "o": "100€ offerts",
           "l": "#LIEN_PMU",
-          "c": "2.60",
-          "c1": "2.60",
-          "cn": "3.83",
-          "c2": "2.40"
+          "c": "1.36",
+          "c1": "2.62",
+          "cn": "3.78",
+          "c2": "2.36"
         },
         {
           "n": "Bet365",
           "o": "100€ bonus",
           "l": "#LIEN_BET365",
-          "c": "2.68",
-          "c1": "2.68",
-          "cn": "3.91",
-          "c2": "2.48"
+          "c": "1.44",
+          "c1": "2.70",
+          "cn": "3.86",
+          "c2": "2.44"
         }
       ],
-      "edge": "",
-      "edge_detail": "Probabilité IA vs probabilité implicite bookmaker = ",
-      "marche": "RESULTAT",
-      "risque": "MODERE",
-      "pari_rec": "",
-      "mise": "2-3% bankroll",
-      "argument": "",
-      "analyse_card": "",
-      "conseil_public": "",
-      "contexte": "",
-      "enjeux": "",
-      "vbet": "NON",
-      "value_calc": "",
-      "scores": [],
-      "paris_3": null,
+      "edge": "+19.0%",
+      "edge_detail": "Probabilité IA vs probabilité implicite bookmaker = +19.0%",
+      "marche": "TOTAL_BUTS",
+      "risque": "FAIBLE",
+      "pari_rec": "Over 2.5 buts",
+      "mise": "3% bankroll",
+      "argument": "1. Newcastle Over 2.5 sur 10/10 derniers matchs (100% de taux). 2. Barcelona Over 2.5 sur 9/10 derniers matchs (90% de taux). 3. Prob IA estimée à 90% vs probabilité implicite bookmaker 71% → edge réel +19.0%.",
+      "analyse_card": "Newcastle affiche une forme offensive et défensive très perméable en données récentes, avec 100% de ses 10 derniers matchs dépassant 2.5 buts, ce qui en fait l'une des équipes les plus prolixes d'Europe cette saison. Barcelona, malgré un contexte extérieur plus fermé (9/10 Over 2.5 en déplacement), confirme une tendance de matchs à haute intensité offensive. Les deux équipes combinées représentent un profil de rencontre quasi-systématiquement ouvert, et la cote 1.41 proposée est manifestement sous-évaluée par rapport à la réalité statistique.",
+      "conseil_public": "Miser sur Over 2.5 buts est le choix le plus rationnel au regard des données disponibles. La convergence des deux profils (Newcastle 10/10, Barcelona 9/10) sur les 10 derniers matchs donne une base statistique solide. L'edge de +19% représente une valeur exceptionnelle rarement observée sur ce type de marché. Il est conseillé de viser une mise modérée pour capitaliser sur cet edge sans surexposition.",
+      "contexte": "Match de Ligue des Champions entre une équipe anglaise en forme à domicile (4V/5 DOM) et un Barcelona en déplacement qui encaisse systématiquement des buts (0 clean sheet EXT sur 4 matchs). Le contexte météo est favorable (21°C, ciel dégagé, vent nul), conditions idéales pour un match ouvert et rapide. Les deux équipes arrivent avec un niveau de fraîcheur identique (score fatigue 90/100 chacun), aucune absence majeure signalée.",
+      "enjeux": "Match de phase de groupes/knockout UCL avec des enjeux de qualification potentiels, les deux équipes vont chercher la victoire ce qui favorise l'ouverture du jeu.",
+      "vbet": "OUI",
+      "value_calc": "+19.0%",
+      "scores": [
+        "2-1",
+        "3-1",
+        "2-2"
+      ],
+      "paris_3": {
+        "safe": {
+          "bet": "Over 1.5 buts",
+          "cote": "1.10",
+          "hint": "97% prob IA vs 91% implicite, Newcastle 10/10 + Barcelona 10/10 matchs Over 1.5 récents",
+          "mise": "4% bankroll",
+          "bookie": "Betclic"
+        },
+        "valeur": {
+          "bet": "Over 2.5 buts",
+          "cote": "1.41",
+          "hint": "Edge +19%: prob IA 90% vs implicite 71%, Newcastle 10/10 et Barcelona 9/10 Over 2.5",
+          "mise": "3% bankroll",
+          "bookie": "Winamax"
+        },
+        "specu": {
+          "bet": "BTTS Oui + Over 2.5",
+          "cote": "~1.65",
+          "hint": "Newcastle BTTS 10/10 + Barcelona 0 clean sheet EXT sur 4 matchs, combo logique",
+          "mise": "1% bankroll",
+          "bookie": "Bet365"
+        }
+      },
       "paris_safe": {
-        "bet": "",
-        "cote": "2.65",
-        "proba": "0%"
+        "bet": "Over 2.5 buts",
+        "cote": "2.67",
+        "proba": "36%"
       },
       "paris_risque": {
         "bet": "",
         "cote": "",
         "proba": ""
       },
-      "kelly_pct": null,
+      "kelly_pct": "0.0",
       "stade": {
         "nom": "Newcastle (domicile)",
         "cap": "",
         "meteo": "☀️",
-        "temp": "22°C",
+        "temp": "21°C",
         "desc": "ciel dégagé"
       },
       "crit_home": {
@@ -4012,32 +4063,7 @@
           "form": "WWWLD"
         }
       },
-      "actu": [
-        {
-          "c": "Newcastle",
-          "t": "L'entraînement musculaire pourrait être la clé d'un vieillissement en bonne santé",
-          "tx": "Vieillir en bonne santé ne signifie pas seulement vivre plus longtemps, mais conserver autonomie et mobilité au quotidien. De plus en plus de recherches montrent que la force musculaire joue un rôle central dans ce processus, faisant de l’entraînement en rési…",
-          "tm": "2026-03-09"
-        },
-        {
-          "c": "Newcastle",
-          "t": "Les notes des Diables rouges à l’étranger : des gardiens au top, le retour du Roi et un buteur inattendu",
-          "tx": "Ce week-end a été marqué par le retour de Kevin De Bruyne mais également par les belles prestations de Jérémy Doku et d’Olivier Deman. ...",
-          "tm": "2026-03-09"
-        },
-        {
-          "c": "Barcelona",
-          "t": "Xavi accuse Joan Laporta d’avoir empêché le retour de Lionel Messi au Barça",
-          "tx": "Xavi joue tactique pour détruire son opposant. À une semaine des élections pour la présidence du FC Barcelone, l’ancien milieu…",
-          "tm": "2026-03-09"
-        },
-        {
-          "c": "Barcelona",
-          "t": "Au-delà du slogan « Spain is Different » : pour en finir avec les clichés touristiques sur l’Espagne",
-          "tx": "Ni fatalité historique ni coup de génie franquiste : une autre lecture de la « différence » espagnole mise en avant dans les années 1960 pour attirer les touristes.",
-          "tm": "2026-03-07"
-        }
-      ]
+      "actu": []
     },
     {
       "id": 1528324,
@@ -4057,108 +4083,134 @@
       "cat": [
         "all"
       ],
-      "val": false,
+      "val": true,
       "hot": false,
-      "conf": 0,
-      "p1": 0,
-      "pn": 0,
-      "p2": 0,
-      "po15": 0,
-      "po25": 0,
-      "btts": 0,
+      "conf": 7.4,
+      "p1": 22,
+      "pn": 18,
+      "p2": 60,
+      "po15": 90,
+      "po25": 77,
+      "btts": 68,
       "c1": "4.53",
-      "cn": "4.40",
+      "cn": "4.37",
       "c2": "1.67",
-      "co15": "1.14",
-      "co25": "1.48",
-      "cu25": "2.63",
-      "dc1x": "2.22",
+      "co15": "1.13",
+      "co25": "1.45",
+      "cu25": "2.70",
+      "dc1x": "2.20",
       "dcx2": "1.20",
-      "cdc1x": "2.22",
+      "cdc1x": "2.20",
       "cdc2x": "1.20",
       "cbtts": "1.50",
-      "cbtts_non": "2.50",
+      "cbtts_non": "2.55",
       "btts_oui": "1.50",
-      "btts_non": "2.50",
+      "btts_non": "2.55",
       "bookies": [
         {
           "n": "Betclic",
           "o": "200€ offerts",
           "l": "#LIEN_BETCLIC",
-          "c": "4.53",
+          "c": "1.45",
           "c1": "4.53",
-          "cn": "4.40",
+          "cn": "4.37",
           "c2": "1.67"
         },
         {
           "n": "Winamax",
           "o": "100€ offerts",
           "l": "#LIEN_WINAMAX",
-          "c": "4.50",
+          "c": "1.42",
           "c1": "4.50",
-          "cn": "4.37",
+          "cn": "4.34",
           "c2": "1.64"
         },
         {
           "n": "Unibet",
           "o": "100€ remboursés",
           "l": "#LIEN_UNIBET",
-          "c": "4.51",
+          "c": "1.43",
           "c1": "4.51",
-          "cn": "4.38",
+          "cn": "4.35",
           "c2": "1.65"
         },
         {
           "n": "PMU",
           "o": "100€ offerts",
           "l": "#LIEN_PMU",
-          "c": "4.48",
+          "c": "1.40",
           "c1": "4.48",
-          "cn": "4.35",
+          "cn": "4.32",
           "c2": "1.62"
         },
         {
           "n": "Bet365",
           "o": "100€ bonus",
           "l": "#LIEN_BET365",
-          "c": "4.56",
+          "c": "1.48",
           "c1": "4.56",
-          "cn": "4.43",
+          "cn": "4.40",
           "c2": "1.70"
         }
       ],
-      "edge": "",
-      "edge_detail": "Probabilité IA vs probabilité implicite bookmaker = ",
-      "marche": "RESULTAT",
+      "edge": "+8.0%",
+      "edge_detail": "Probabilité IA vs probabilité implicite bookmaker = +8.0%",
+      "marche": "TOTAL_BUTS",
       "risque": "MODERE",
-      "pari_rec": "",
+      "pari_rec": "Over 2.5 buts",
       "mise": "2-3% bankroll",
-      "argument": "",
-      "analyse_card": "",
-      "conseil_public": "",
-      "contexte": "",
-      "enjeux": "",
-      "vbet": "NON",
-      "value_calc": "",
-      "scores": [],
-      "paris_3": null,
+      "argument": "1. Atalanta Over 2.5 sur 10 derniers matchs: 7/10 (70%), Bayern München: 8/10 (80%), combiné pondéré ~77% de prob réelle. 2. Bayern 5 derniers matchs: 4-1, 3-2, 3-2, 3-0, 2-0 → moyenne 2.8 buts marqués/match EXT, aucun match sous 2 buts. Atalanta 5 derniers: 2-2, 2-2, 1-2, 4-1, 2-1 → tous ≥3 buts totaux. 3. Prob IA estimée 77% vs prob implicite bookmaker 69% → edge +8.0%, seuil vbet dépassé.",
+      "analyse_card": "Bayern München affiche une forme extérieure écrasante avec 3 victoires en 4 déplacements et des rencontres systématiquement prolifiques (aucun match EXT sous 2 buts sur les 10 derniers). Atalanta, malgré un léger creux en championnat, produit des matchs ouverts: leurs 5 derniers ont tous dépassé 2.5 buts au total. La confrontation entre une attaque bavaroise en pleine confiance et une défense bergamasque permissive à domicile (2-2 deux fois récemment) crée un contexte statistiquement favorable aux buts.",
+      "conseil_public": "L'Over 2.5 est le marché offrant le meilleur edge réel calculé à +8%, avec une cote de 1.45 sous-évaluée par rapport à la probabilité réelle de 77%. Miser 2-3% de la bankroll en confiance modérée est justifié. Attention: Atalanta joue son 4ème match en 14 jours (fatigue 90/100) ce qui peut légèrement peser sur leur intensité défensive, renforçant les buts de Bayern. Éviter de sur-miser malgré l'edge positif car le H2H est indisponible et les données de buts domicile/extérieur sont manquantes dans le dataset fourni.",
+      "contexte": "Choc de Ligue des Champions entre une Atalanta fatiguée (4 matchs en 14j) et un Bayern frais (2 matchs en 14j, classé #2). Le Bayern arrive en position de favori clair à 1.67, ce qui est cohérent avec leur forme récente. New Balance Arena à Bergame, conditions météo neutres (couvert, 13°C, vent quasi nul), aucun impact attendu sur le style de jeu.",
+      "enjeux": "Bayern vise la qualification en phase suivante avec une régularité offensive à confirmer face à une Atalanta qui a besoin de points à domicile mais souffre de fatigue accumulée.",
+      "vbet": "OUI",
+      "value_calc": "+8.0%",
+      "scores": [
+        "2-1",
+        "3-1",
+        "2-2"
+      ],
+      "paris_3": {
+        "safe": {
+          "bet": "Over 1.5 buts",
+          "cote": "1.13",
+          "hint": "90% prob réelle estimée (Atalanta 9/10 + Bayern 10/10 derniers matchs tous ≥2 buts), marché très solide",
+          "mise": "4-5% bankroll",
+          "bookie": "Betclic"
+        },
+        "valeur": {
+          "bet": "Over 2.5 buts",
+          "cote": "1.45",
+          "hint": "Edge +8.0%: prob IA 77% vs implicite 69%, meilleur value du tableau",
+          "mise": "2-3% bankroll",
+          "bookie": "Winamax"
+        },
+        "specu": {
+          "bet": "Bayern München Victoire + Over 2.5",
+          "cote": "~2.10 estimée",
+          "hint": "Bayern gagne 3/4 EXT + tous ses matchs récents > 2.5 buts, combo logique à cote élevée",
+          "mise": "0.5-1% bankroll",
+          "bookie": "Bet365"
+        }
+      },
       "paris_safe": {
-        "bet": "",
+        "bet": "Over 2.5 buts",
         "cote": "4.53",
-        "proba": "0%"
+        "proba": "22%"
       },
       "paris_risque": {
         "bet": "",
         "cote": "",
         "proba": ""
       },
-      "kelly_pct": null,
+      "kelly_pct": "0.0",
       "stade": {
         "nom": "New Balance Arena — Bergamo",
         "cap": "",
         "meteo": "☁️",
         "temp": "13°C",
-        "desc": "nuageux"
+        "desc": "couvert"
       },
       "crit_home": {
         "fd": 60,
@@ -4599,20 +4651,7 @@
           "form": "WWWLW"
         }
       },
-      "actu": [
-        {
-          "c": "Atalanta",
-          "t": "Où regarder Belgique - Israël (Red Flames), les Strade Bianche et le GP d'Australie de F1 en live? Les directs sport de ce samedi 7 mars en Belgique",
-          "tx": "À quelle heure et sur quelle chaîne voir en direct les événements sportifs aujourd’hui depuis la Belgique ? Les matchs de football en live, le cyclisme en direct à la TV, le tennis en direct, le basket-ball, le hockey… ...",
-          "tm": "2026-03-07"
-        },
-        {
-          "c": "Atalanta",
-          "t": "Où regarder le tournoi ATP d'Indian Wells et Belgique - Macédoine du Nord (handball) en live? Les directs sport de ce mercredi 4 mars en Belgique",
-          "tx": "À quelle heure et sur quelle chaîne voir en direct les événements sportifs aujourd’hui depuis la Belgique ? Les matchs de football en live, le cyclisme en direct à la TV, le tennis en direct, le basket-ball, le hockey… ...",
-          "tm": "2026-03-04"
-        }
-      ]
+      "actu": []
     },
     {
       "id": 1528323,
@@ -4632,15 +4671,15 @@
       "cat": [
         "all"
       ],
-      "val": false,
+      "val": true,
       "hot": false,
-      "conf": 0,
-      "p1": 0,
-      "pn": 0,
-      "p2": 0,
-      "po15": 0,
-      "po25": 0,
-      "btts": 0,
+      "conf": 7.1,
+      "p1": 72,
+      "pn": 17,
+      "p2": 11,
+      "po15": 78,
+      "po25": 62,
+      "btts": 48,
       "c1": "1.73",
       "cn": "3.76",
       "c2": "5.00",
@@ -4702,38 +4741,64 @@
           "c2": "5.03"
         }
       ],
-      "edge": "",
-      "edge_detail": "Probabilité IA vs probabilité implicite bookmaker = ",
+      "edge": "+14.0%",
+      "edge_detail": "Probabilité IA vs probabilité implicite bookmaker = +14.0%",
       "marche": "RESULTAT",
       "risque": "MODERE",
-      "pari_rec": "",
-      "mise": "2-3% bankroll",
-      "argument": "",
-      "analyse_card": "",
-      "conseil_public": "",
-      "contexte": "",
-      "enjeux": "",
-      "vbet": "NON",
-      "value_calc": "",
-      "scores": [],
-      "paris_3": null,
+      "pari_rec": "Victoire Atletico Madrid",
+      "mise": "3% bankroll",
+      "argument": "1. Atletico Madrid domine à domicile avec 4V/5 cette saison et une forme récente explosive (W 3-2, W 4-1, W 4-2 lors des 3 derniers matchs à domicile). 2. Tottenham en grande difficulté : 5 défaites consécutives toutes compétitions confondues (L vs Crystal Palace, L vs Fulham, L vs Arsenal, L vs Newcastle, L vs Man United), incluant 4 défaites en déplacement sur la saison (1V/4 EXT). 3. Prob IA estimée à 72% vs prob implicite bookmaker 58% → edge +14.0%.",
+      "analyse_card": "Atletico Madrid affiche une solidité remarquable à domicile (4 victoires en 5 matchs) avec une attaque prolifique récente (11 buts en 3 derniers matchs DOM). Face à un Tottenham en crise profonde (5 défaites de suite, aucun momentum), le Metropolitano devrait logiquement pencher côté Colchoneros. La fatigue légèrement plus élevée d'Atletico (3j dernier match) est compensée par leur supériorité structurelle sur le plan collectif et leur maîtrise du terrain domicile en C1.",
+      "conseil_public": "Miser sur la victoire d'Atletico Madrid à 1.73 représente la meilleure valeur du marché ce soir. Tottenham traverse une période catastrophique avec 5 défaites consécutives, aucune clean sheet récente et un manque de confiance évident. La cote 1.73 sous-estime la domination probable d'Atletico à domicile dans un match à fort enjeu européen. Rester discipliné sur une mise modérée de 3% bankroll pour ne pas surexposer sur une cote inférieure à 2.",
+      "contexte": "Ce choc de Ligue des Champions au Metropolitano oppose un Atletico revitalisé à domicile à un Tottenham en perdition totale en Premier League. L'enjeu européen pourrait paradoxalement favoriser Atletico qui se mobilise traditionnellement en C1, tandis que Tottenham arrive sans confiance après 5 revers consécutifs. Conditions météo neutres (12°C, vent nul) ne perturbent aucune équipe.",
+      "enjeux": "Match de phase de groupes/knockout UEFA Champions League avec implication directe sur la qualification européenne des deux clubs.",
+      "vbet": "OUI",
+      "value_calc": "+14.0%",
+      "scores": [
+        "1-0",
+        "2-1",
+        "2-0"
+      ],
+      "paris_3": {
+        "safe": {
+          "bet": "Double Chance 1X (Atletico ou Nul)",
+          "cote": "1.17",
+          "hint": "Atletico 4V/5 DOM + Tottenham 5 défaites consécutives → prob IA 89% vs impl 85%, pari sécurisé protection",
+          "mise": "5% bankroll",
+          "bookie": "Betclic"
+        },
+        "valeur": {
+          "bet": "Victoire Atletico Madrid",
+          "cote": "1.73",
+          "hint": "Prob IA 72% vs impl 58% → edge +14.0%, meilleure valeur du marché",
+          "mise": "3% bankroll",
+          "bookie": "Winamax"
+        },
+        "specu": {
+          "bet": "Atletico Madrid Victoire + Over 2.5 buts",
+          "cote": "~3.20",
+          "hint": "Atletico 8/10 Over 2.5 + 3 derniers matchs DOM tous Over 2.5 (3-2, 4-1, 4-2) → profil offensif confirmé",
+          "mise": "1% bankroll",
+          "bookie": "Bet365"
+        }
+      },
       "paris_safe": {
-        "bet": "",
+        "bet": "Victoire Atletico Madrid",
         "cote": "1.73",
-        "proba": "0%"
+        "proba": "72%"
       },
       "paris_risque": {
         "bet": "",
         "cote": "",
         "proba": ""
       },
-      "kelly_pct": null,
+      "kelly_pct": "10.0",
       "stade": {
         "nom": "Metropolitano Stadium — Madrid",
         "cap": "",
         "meteo": "☁️",
-        "temp": "11°C",
-        "desc": "couvert"
+        "temp": "12°C",
+        "desc": "nuageux"
       },
       "crit_home": {
         "fd": 80,
@@ -5171,32 +5236,7 @@
           "form": "WWWLW"
         }
       },
-      "actu": [
-        {
-          "c": "Atletico Madrid",
-          "t": "Atlético-Real Sociedad: un joueur sauve un pigeon percuté par le ballon",
-          "tx": "Si l'Altético Madrid s'est imposé contre la Real Sociedad (3-2) ce samedi, l'image de la rencontre a été le sauvetage... d'un pigeon, percuté par le ballon lors d'un corner. L'animal, qui a été sorti de la pelouse par José Maria Giménez, semblait aller bien.",
-          "tm": "2026-03-07"
-        },
-        {
-          "c": "Atletico Madrid",
-          "t": "Où regarder Belgique - Israël (Red Flames), les Strade Bianche et le GP d'Australie de F1 en live? Les directs sport de ce samedi 7 mars en Belgique",
-          "tx": "À quelle heure et sur quelle chaîne voir en direct les événements sportifs aujourd’hui depuis la Belgique ? Les matchs de football en live, le cyclisme en direct à la TV, le tennis en direct, le basket-ball, le hockey… ...",
-          "tm": "2026-03-07"
-        },
-        {
-          "c": "Tottenham",
-          "t": "Voici comment espérer garder Nathan De Cat à Anderlecht: Genk et Chelsea ont donné l'exemple avec De Bruyne et Penders",
-          "tx": "Une location… à Anderlecht par le Bayern ou autre nous semble la seule façon de garder De Cat. ...",
-          "tm": "2026-03-09"
-        },
-        {
-          "c": "Tottenham",
-          "t": "Equateur Liga Pro : Le terrible tacle subi par un joueur d’Independiente del Valle",
-          "tx": "Âmes sensibles s’abstenir. Pour la troisième journée de la première division équatorienne, Independiente del Valle recevait le Mushuc Runa. Si…",
-          "tm": "2026-03-08"
-        }
-      ]
+      "actu": []
     },
     {
       "id": 1386989,
@@ -5216,15 +5256,15 @@
       "cat": [
         "all"
       ],
-      "val": false,
+      "val": true,
       "hot": false,
-      "conf": 0,
-      "p1": 0,
-      "pn": 0,
-      "p2": 0,
-      "po15": 0,
-      "po25": 0,
-      "btts": 0,
+      "conf": 7.1,
+      "p1": 18,
+      "pn": 9,
+      "p2": 73,
+      "po15": 72,
+      "po25": 47,
+      "btts": 52,
       "c1": "4.73",
       "cn": "3.56",
       "c2": "1.73",
@@ -5244,7 +5284,7 @@
           "n": "Betclic",
           "o": "200€ offerts",
           "l": "#LIEN_BETCLIC",
-          "c": "4.73",
+          "c": "1.73",
           "c1": "4.73",
           "cn": "3.56",
           "c2": "1.73"
@@ -5253,7 +5293,7 @@
           "n": "Winamax",
           "o": "100€ offerts",
           "l": "#LIEN_WINAMAX",
-          "c": "4.70",
+          "c": "1.70",
           "c1": "4.70",
           "cn": "3.53",
           "c2": "1.70"
@@ -5262,7 +5302,7 @@
           "n": "Unibet",
           "o": "100€ remboursés",
           "l": "#LIEN_UNIBET",
-          "c": "4.71",
+          "c": "1.71",
           "c1": "4.71",
           "cn": "3.54",
           "c2": "1.71"
@@ -5271,7 +5311,7 @@
           "n": "PMU",
           "o": "100€ offerts",
           "l": "#LIEN_PMU",
-          "c": "4.68",
+          "c": "1.68",
           "c1": "4.68",
           "cn": "3.51",
           "c2": "1.68"
@@ -5280,38 +5320,64 @@
           "n": "Bet365",
           "o": "100€ bonus",
           "l": "#LIEN_BET365",
-          "c": "4.76",
+          "c": "1.76",
           "c1": "4.76",
           "cn": "3.59",
           "c2": "1.76"
         }
       ],
-      "edge": "",
-      "edge_detail": "Probabilité IA vs probabilité implicite bookmaker = ",
+      "edge": "+15.0%",
+      "edge_detail": "Probabilité IA vs probabilité implicite bookmaker = +15.0%",
       "marche": "RESULTAT",
       "risque": "MODERE",
-      "pari_rec": "",
+      "pari_rec": "Victoire Ipswich (2)",
       "mise": "2-3% bankroll",
-      "argument": "",
-      "analyse_card": "",
-      "conseil_public": "",
-      "contexte": "",
-      "enjeux": "",
-      "vbet": "NON",
-      "value_calc": "",
-      "scores": [],
-      "paris_3": null,
+      "argument": "1. Ipswich est 4e au classement Championship avec 6 victoires en 16 matchs extérieurs (37.5% win rate EXT), face à Stoke 15e avec seulement 7 victoires en 17 matchs domicile (41%). 2. Ipswich en forme récente: W-W-W sur les 3 derniers matchs hors déplacement Wrexham (défaite anecdotique 3-5), avec des victoires solides 3-0 vs Swansea et 2-0 vs Watford. Stoke en difficulté: L-L sur les 2 derniers matchs EXT et L 1-2 vs Fulham à domicile. 3. Prob IA estimée Ipswich victoire: 73% (classement supérieur +11 places, forme récente 3 wins/4, EXT win rate 37.5% vs une équipe 15e en difficulté à domicile) vs prob implicite bookmaker 58% → edge net = +15.0%.",
+      "analyse_card": "Ipswich (4e) affronte un Stoke City en crise (15e) qui a perdu ses 2 derniers matchs à domicile récents et enchaîne des résultats instables (forme LLWDL sur 5 derniers). La forme d'Ipswich est nettement supérieure avec 3 victoires lors des 4 derniers matchs, malgré une défaite lourde à Wrexham qui semble isolée. L'écart de classement de 11 places et la dynamique offensive d'Ipswich (3-0, 2-0) justifient une cote de 1.73 clairement sous-évaluée.",
+      "conseil_public": "Miser sur la victoire d'Ipswich à 1.73 représente une valeur réelle compte tenu de l'écart de niveau entre les deux équipes. Ipswich a montré une capacité à s'imposer à l'extérieur face à des équipes de milieu/bas de tableau. Stoke City sans buts encaissés/marqués renseignés présente une incertitude, mais la tendance récente (défaites consécutives) pèse négativement. La cote bookmaker semble sous-estimer Ipswich: une bankroll de 2-3% est recommandée pour capitaliser sur cet edge sans surexposition.",
+      "contexte": "Match de Championship anglais avec un enjeu fort pour Ipswich qui vise la montée en Premier League depuis la 4e place. Stoke City en milieu de tableau n'a aucun enjeu direct de montée ou de relégation immédiate. La fatigue est équilibrée (score 90/100 pour les deux équipes, dernier match il y a 3 jours chacun). Météo non renseignée, stade Bet365 Stadium.",
+      "enjeux": "Ipswich joue pour consolider sa place dans le top 6 et maintenir sa dynamique de montée, tandis que Stoke n'a que peu d'enjeu direct.",
+      "vbet": "OUI",
+      "value_calc": "+15.0%",
+      "scores": [
+        "0-1",
+        "1-2",
+        "0-2"
+      ],
+      "paris_3": {
+        "safe": {
+          "bet": "Double Chance X2 (Nul ou Ipswich)",
+          "cote": "1.18",
+          "hint": "Ipswich 4e classement + Stoke en difficulté domicile (L 3 des 5 derniers) → prob réelle X2 ~90% vs impl 85%, sécurité maximale",
+          "mise": "4-5% bankroll",
+          "bookie": "Betclic"
+        },
+        "valeur": {
+          "bet": "Victoire Ipswich (2)",
+          "cote": "1.73",
+          "hint": "Prob IA 73% vs impl 58% → edge +15%, meilleure value du match",
+          "mise": "2-3% bankroll",
+          "bookie": "Winamax"
+        },
+        "specu": {
+          "bet": "Ipswich gagne + Under 2.5 buts",
+          "cote": "~3.20 estimé",
+          "hint": "Ipswich wins récents 1-0, 2-0 suggèrent victoire propre et peu de buts; Stoke sans marquer 5/17 à domicile renforce le scénario fermé",
+          "mise": "0.5-1% bankroll",
+          "bookie": "Bet365"
+        }
+      },
       "paris_safe": {
-        "bet": "",
+        "bet": "Victoire Ipswich (2)",
         "cote": "4.73",
-        "proba": "0%"
+        "proba": "18%"
       },
       "paris_risque": {
         "bet": "",
         "cote": "",
         "proba": ""
       },
-      "kelly_pct": null,
+      "kelly_pct": "0.0",
       "stade": {
         "nom": "Bet365 Stadium — Stoke on Trent",
         "cap": "",
@@ -5802,33 +5868,33 @@
           "form": "DWWWL"
         }
       },
-      "actu": [
-        {
-          "c": "Stoke City",
-          "t": "Gorillaz, la discographie revisitée",
-          "tx": "Le “cartoon band” de Jamie Hewlett et Damon Albarn est devenu une référence en vingt-cinq ans et huit albums. Alors que paraît “The Mountain”, plongée dans nos archives pour relire ce que l’on pensait de ces disques à l’époque de leur sortie.",
-          "tm": "2026-03-09"
-        },
-        {
-          "c": "Stoke City",
-          "t": "FA Cup: l'exploit XXL de Port Vale, dernier de D3 anglaise, qui élimine Sunderland et se qualifie pour les quarts de finale",
-          "tx": "Pensionnaire de League One, l'équivalent de la troisième division anglaise, Port Vale a déjoué les pronostics ce dimanche en s'offrant une équipe de Premier League, à savoir Sunderland, lors du 5e tour de la FA Cup (1-0).",
-          "tm": "2026-03-08"
-        },
-        {
-          "c": "Ipswich",
-          "t": "How to watch Wrexham vs Chelsea live: Stream, TV channel, team news, prediction for intriguing FA Cup tie",
-          "tx": "Can second-tier upstarts Wrexham beat Premier League giants Chelsea?",
-          "tm": "2026-03-05"
-        },
-        {
-          "c": "Ipswich",
-          "t": "Angleterre – Azor Matusiwa (ex-Reims et Rennes) casse la cage en Championship avec Ipswich Town",
-          "tx": "En 2026, on appelle ça, un « banger ». Azor Matusiwa marque peu, mais on ne peut pas lui reprocher…",
-          "tm": "2026-03-04"
-        }
-      ]
+      "actu": []
     }
   ],
-  "combis": []
+  "combis": [
+    {
+      "label": "SHARK SAFE",
+      "type": "safe",
+      "selections": "Over 2.5 buts, Victoire Liverpool",
+      "matchs": "Newcastle vs Barcelona, Galatasaray vs Liverpool",
+      "cote_totale": "2.44",
+      "conseil": "Deux matchs à fort potentiel offensif et un favori solide en Ligue des Champions"
+    },
+    {
+      "label": "SHARK VALUE",
+      "type": "value",
+      "selections": "Over 2.5 buts, Victoire Atletico Madrid, Victoire Watford",
+      "matchs": "Atalanta vs Bayern München, Atletico Madrid vs Tottenham, Sheffield Wednesday vs Watford",
+      "cote_totale": "3.66",
+      "conseil": "Mélange tactique entre choc européen prolifique, solide à domicile et outsider en forme en Championship"
+    },
+    {
+      "label": "SHARK AUDACE",
+      "type": "audace",
+      "selections": "Over 2.5 buts, Victoire Wrexham, Under 2.5 buts, Victoire Ipswich",
+      "matchs": "Newcastle vs Barcelona, Wrexham vs Hull City, Portsmouth vs Swansea, Stoke City vs Ipswich",
+      "cote_totale": "7.23",
+      "conseil": "Combiné audacieux sur 4 matchs avec variété totale : explosif, surprise du jour, défensif et valeur outsider"
+    }
+  ]
 }

@@ -24,7 +24,7 @@ jobs:
           const NEWS_KEY = process.env.NEWSAPI_KEY;
           const ANT_KEY  = process.env.ANTHROPIC_KEY;
           const APS      = {'x-apisports-key': APS_KEY};
-          const LEAGUES  = [39, 61, 140, 135, 78, 2, 3, 40, 66, 307, 143, 137, 81];
+          const LEAGUES  = [2]; // UCL uniquement — Championship désactivé temporairement
           const SEASON   = 2025;
           const TODAY    = new Date().toISOString().split('T')[0];
           var LG_KEY = {
@@ -338,34 +338,38 @@ jobs:
           }
           async function translateMatchBatch(matchsData, lang, langName) {
             if (!matchsData.length) return [];
-            // Textes courts pour éviter les coupures JSON
-            var texts = matchsData.map(function(m){
-              return {
-                title: m.home.n+' vs '+m.away.n,
-                desc: (m.pari_rec||m.analyse_card||'').slice(0,80)
-              };
+            // Format ligne par ligne - impossible à casser contrairement au JSON
+            // Chaque match = 1 ligne "TITRE|||DESCRIPTION"
+            var lines = matchsData.map(function(m){
+              var title = m.home.n+' vs '+m.away.n;
+              var desc = (m.pari_rec||'').slice(0,60);
+              return title+'|||'+desc;
             });
-            var prompt = 'Translate to '+langName+'. Return ONLY a JSON array, no markdown, no backticks.'
-              +' Each object must have "title" and "desc" keys. SHORT values only (max 80 chars each).\n'
-              +JSON.stringify(texts);
+            var prompt = 'Translate each line to '+langName+'.'
+              +' Each line has format: TITLE|||DESC'
+              +' Return ONLY the translated lines, one per line, same format TITLE|||DESC.'
+              +' Keep team names unchanged. No extra text, no numbering.\n\n'
+              +lines.join('\n');
             try {
               var rRaw = await fetch('https://api.anthropic.com/v1/messages', {
                 method:'POST',
                 headers:{'Content-Type':'application/json','x-api-key':ANT_KEY,'anthropic-version':'2023-06-01'},
-                body: JSON.stringify({model:'claude-haiku-4-5-20251001', max_tokens:2000, messages:[{role:'user',content:prompt}]})
+                body: JSON.stringify({model:'claude-haiku-4-5-20251001', max_tokens:1500, messages:[{role:'user',content:prompt}]})
               });
               var r = await rRaw.json();
-              if(r.error){console.log('  '+lang+' API error: '+r.error.message);return texts;}
-              var txt = (r.content&&r.content[0]&&r.content[0].text)||'[]';
-              // Nettoyage robuste du JSON
-              txt = txt.replace(/```json|```/g,'').trim();
-              // Tronquer à la dernière accolade fermante valide
-              var lastBracket = txt.lastIndexOf(']');
-              if(lastBracket>0) txt = txt.slice(0, lastBracket+1);
-              return JSON.parse(txt);
+              if(r.error){console.log('  '+lang+' API error: '+r.error.message);return matchsData.map(function(m){return{title:m.home.n+' vs '+m.away.n,desc:m.pari_rec||''}});}
+              var txt = (r.content&&r.content[0]&&r.content[0].text)||'';
+              var resultLines = txt.trim().split('\n');
+              return matchsData.map(function(m, i){
+                var parts = (resultLines[i]||'').split('|||');
+                return {
+                  title: parts[0]||m.home.n+' vs '+m.away.n,
+                  desc: parts[1]||m.pari_rec||''
+                };
+              });
             } catch(e) {
               console.log('  '+lang+' erreur: '+e.message);
-              return texts;
+              return matchsData.map(function(m){return{title:m.home.n+' vs '+m.away.n,desc:m.pari_rec||''};});
             }
           }
 
@@ -1932,19 +1936,11 @@ jobs:
           ANTHROPIC_KEY:   ${{ secrets.ANTHROPIC_KEY }}
         run: node pipeline.js
 
-      - name: Inject config
-        run: |
-          # Encode en base64 pour éviter la détection GitHub push protection
-          ENCODED=$(echo -n "$ANTHROPIC_KEY" | base64 | tr -d '\n')
-          echo "window._K=atob('$ENCODED');" > config.js
-        env:
-          ANTHROPIC_KEY: ${{ secrets.ANTHROPIC_KEY }}
-
       - name: Commit and push
         run: |
           git config user.name "IASHARK"
           git config user.email "yaramode81@gmail.com"
-          git add data.json historique.json sitemap.xml sitemap-*.xml config.js
+          git add data.json historique.json sitemap.xml sitemap-*.xml
           git add en/ es/ pt/ de/ it/ tr/ nl/ pl/ sv/ ro/ 2>/dev/null || true
           git add blog/ 2>/dev/null || true
           git diff --staged --quiet || git commit -m "Daily update + multilingual - $(date +%Y-%m-%d)"

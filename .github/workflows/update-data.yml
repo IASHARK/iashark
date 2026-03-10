@@ -53,28 +53,11 @@ jobs:
             'pt':'Copa do Mundo 2026 Previsões IA',
             'de':'WM 2026 KI Prognosen & Analyse',
             'it':'Mondiali 2026 Previsioni IA',
-            'ar':'كأس العالم 2026 تنبؤات الذكاء الاصطناعي',
             'tr':'2026 Dünya Kupası AI Tahminleri',
             'nl':'WK 2026 AI Voorspellingen & Analyse',
             'pl':'MŚ 2026 Prognozy AI',
-            'id':'Piala Dunia 2026 Prediksi AI',
-            'no':'VM 2026 AI Analyser',
             'sv':'VM 2026 AI Analyser & Prognoser',
-            'ro':'CM 2026 Predicții AI',
-            'el':'Μουντιάλ 2026 AI Προβλέψεις',
-            'cs':'MS 2026 AI Analýzy',
-            'hu':'VB 2026 AI Elemzések',
-            'sr':'SP 2026 AI Analize',
-            'uk':'ЧС 2026 Прогнози ШІ',
-            'ru':'ЧМ 2026 Прогнозы ИИ',
-            'ja':'2026 FIFAワールドカップ AI予想',
-            'ko':'2026 FIFA 월드컵 AI 예측',
-            'th':'ฟุตบอลโลก 2026 การทำนาย AI',
-            'hi':'2026 फीफा विश्व कप AI भविष्यवाणी',
-            'ms':'Piala Dunia 2026 Ramalan AI',
-            'da':'VM 2026 AI Analyser',
-            'fi':'MM 2026 AI Analyysit',
-            'sw':'Kombe la Dunia 2026 Utabiri wa AI'
+            'ro':'CM 2026 Predicții AI'
           };
 
           var WC_TEAMS = [
@@ -197,15 +180,12 @@ jobs:
               tournament: 'Torneo', dates: 'Date', host: 'Paesi ospitanti', teams: 'Squadre',
               allpreds: 'Tutte le previsioni IA Mondiali 2026', live: 'Previsioni calcio in tempo reale — IASHARK',
               indexdesc: 'Previsioni e analisi IA per tutte le 48 squadre dei Mondiali 2026 da IASHARK.'
-            },
-            'ar': {
-              desc: 'تحليل شامل بالذكاء الاصطناعي لـ {name} في كأس العالم 2026 (الولايات المتحدة، كندا، المكسيك، يونيو–يوليو 2026). احتمالات الفوز والتنبؤات من IASHARK.',
-              analyzes: 'تحلل IASHARK أكثر من 47 مؤشراً إحصائياً لكل منتخب في كأس العالم 2026.',
-              tournament: 'البطولة', dates: 'التواريخ', host: 'الدول المضيفة', teams: 'المنتخبات',
-              allpreds: 'جميع تنبؤات الذكاء الاصطناعي لكأس العالم 2026', live: 'تنبؤات كرة القدم المباشرة — IASHARK',
-              indexdesc: 'تنبؤات وتحليلات الذكاء الاصطناعي لجميع المنتخبات الـ48 في كأس العالم 2026 من IASHARK.'
-            },
-            'tr': {
+            } untuk Piala Dunia 2026 (AS, Kanada, Meksiko, Juni–Juli 2026). Probabilitas kemenangan dan prediksi pertandingan oleh IASHARK.',
+              analyzes: 'IASHARK menganalisis 47+ indikator statistik untuk setiap tim di Piala Dunia 2026.',
+              tournament: 'Turnamen', dates: 'Tanggal', host: 'Negara tuan rumah', teams: 'Tim',
+              allpreds: 'Semua prediksi AI Piala Dunia 2026', live: 'Prediksi sepak bola AI langsung — IASHARK',
+              indexdesc: 'Prediksi dan analisis AI untuk 48 tim Piala Dunia 2026 oleh IASHARK.'
+            }
               desc: '{name} için 2026 FIFA Dünya Kupası (ABD, Kanada, Meksika, Haziran–Temmuz 2026) tam yapay zeka analizi. IASHARK tarafından galibiyet olasılıkları ve maç analizleri.',
               analyzes: 'IASHARK, 2026 Dünya Kupası\'ndaki her takım için 47+ istatistiksel gösterge analiz eder.',
               tournament: 'Turnuva', dates: 'Tarihler', host: 'Ev sahibi ülkeler', teams: 'Takımlar',
@@ -225,13 +205,6 @@ jobs:
               tournament: 'Turniej', dates: 'Daty', host: 'Kraje gospodarz', teams: 'Drużyny',
               allpreds: 'Wszystkie prognozy AI MŚ 2026', live: 'Prognozy piłkarskie na żywo — IASHARK',
               indexdesc: 'Prognozy i analizy AI dla wszystkich 48 drużyn MŚ 2026 od IASHARK.'
-            },
-            'id': {
-              desc: 'Analisis AI lengkap {name} untuk Piala Dunia 2026 (AS, Kanada, Meksiko, Juni–Juli 2026). Probabilitas kemenangan dan prediksi pertandingan oleh IASHARK.',
-              analyzes: 'IASHARK menganalisis 47+ indikator statistik untuk setiap tim di Piala Dunia 2026.',
-              tournament: 'Turnamen', dates: 'Tanggal', host: 'Negara tuan rumah', teams: 'Tim',
-              allpreds: 'Semua prediksi AI Piala Dunia 2026', live: 'Prediksi sepak bola AI langsung — IASHARK',
-              indexdesc: 'Prediksi dan analisis AI untuk 48 tim Piala Dunia 2026 oleh IASHARK.'
             }
           };
           function getWCText(lang, key, name) {
@@ -239,9 +212,9 @@ jobs:
             var txt = t[key] || WC_TEXTS['en'][key] || '';
             return name ? txt.replace('{name}', name) : txt;
           }
-          var LANG_NAMES = {'fr':'FR','en':'EN','es':'ES','pt':'PT','de':'DE','it':'IT','ar':'AR','tr':'TR','nl':'NL','pl':'PL','id':'ID'};
+          var LANG_NAMES = {'fr':'FR','en':'EN','es':'ES','pt':'PT','de':'DE','it':'IT','tr':'TR','nl':'NL','pl':'PL','sv':'SV','ro':'RO'};
           function langBarHTML(lang, slug, ptype) {
-            var langs = ['fr','en','es','pt','de','it','ar','tr','nl','pl','id'];
+            var langs = ['fr','en','es','pt','de','it','tr','nl','pl','sv','ro'];
             var opts = langs.map(function(l){
               var url = l==='fr'?'https://iashark.com/'+(ptype==='match'?'match/'+slug+'.html':'world-cup-2026/'+slug+'.html'):'https://iashark.com/'+l+'/'+ptype+'/'+slug+'.html';
               return '<option value="'+url+'"'+(l===lang?' selected':'')+'>'+( LANG_NAMES[l]||l )+'<\/option>';
@@ -250,7 +223,7 @@ jobs:
           }
           function autoRedirectJS(lang, slug, ptype) {
             var frUrl = ptype==='match'?'https://iashark.com/match/'+slug+'.html':'https://iashark.com/world-cup-2026/'+slug+'.html';
-            var all = ['fr','en','es','pt','de','it','ar','tr','nl','pl','id','ru','ja','ko','no','sv','da','fi','hi','uk','cs','hu','ro','el','sr','ms','th','sw'];
+            var all = ['fr','en','es','pt','de','it','tr','nl','pl','sv','ro'];
             return '<scr'+'ipt>(function(){if(sessionStorage.getItem("ias_lc"))return;sessionStorage.setItem("ias_lc","1");var b=(navigator.language||"en").split("-")[0];var ok='+JSON.stringify(all)+';if(b==="'+lang+'"||ok.indexOf(b)===-1)return;var u=b==="fr"?"'+frUrl+'":"https://iashark.com/"+b+"/'+ptype+'/'+slug+'.html";window.location=u;})();<\/scr'+'ipt>';
           }
           function genWCTeamPage(team, lang) {
@@ -389,10 +362,10 @@ jobs:
             catch(e) { console.log('  Translation parse error for '+lang+', using fallback'); return texts; }
           }
 
-          const GUIDE_LANGS = ['en','es','pt','de','it','ar','nl','pl','sv','da','ja','ko','vi','th','id','tr','el','ro'];
+          const GUIDE_LANGS = ['es','pt','de','it','nl','pl','sv','tr','ro'];
           const GUIDE_LANG_NAMES = {
             en:'English',es:'Español',pt:'Português',de:'Deutsch',it:'Italiano',
-            ar:'العربية',nl:'Nederlands',pl:'Polski',sv:'Svenska',da:'Dansk',
+            nl:'Nederlands',pl:'Polski',sv:'Svenska',
             ja:'日本語',ko:'한국어',vi:'Tiếng Việt',th:'ภาษาไทย',id:'Bahasa Indonesia',
             tr:'Türkçe',el:'Ελληνικά',ro:'Română'
           };
@@ -461,11 +434,10 @@ jobs:
 
           async function generateBlogArticles(matchsData, upcomingFixtures) {
             console.log('\n=== GÉNÉRATION ARTICLES BLOG ===');
-            var BLOG_LANGS = ['fr','en','es','pt','de','it','ar','tr','nl','pl','id','ko','vi','th','el','ro','sv','da','ja'];
+            var BLOG_LANGS = ['fr','es','pt','de','it','tr','nl','pl','ro','sv'];
             var BLOG_LANG_NAMES = {
               fr:'French',en:'English',es:'Spanish',pt:'Portuguese',de:'German',
-              it:'Italian',ar:'Arabic',tr:'Turkish',nl:'Dutch',pl:'Polish',
-              id:'Indonesian',ko:'Korean',vi:'Vietnamese',th:'Thai',el:'Greek',
+              it:'Italian',tr:'Turkish',nl:'Dutch',pl:'Polish',
               ro:'Romanian',sv:'Swedish',da:'Danish',ja:'Japanese'
             };
 
@@ -524,7 +496,7 @@ jobs:
             // Articles Preview J+3 à J+10 - page minimale avec titre uniquement, pas d'appel IA
             if (upcomingFixtures && upcomingFixtures.length > 0) {
               console.log('  Articles Preview J-7: '+upcomingFixtures.length+' matchs...');
-              var pvLangs = ['en','es','pt','de','it','id','tr','ko','vi'];
+              var pvLangs = ['es','pt','de','it','tr','nl','pl','sv','ro'];
               for (var ui = 0; ui < upcomingFixtures.length; ui++) {
                 var uf = upcomingFixtures[ui];
                 var uSlug = slugify(uf.home+'-vs-'+uf.away+'-'+uf.date);
@@ -598,7 +570,7 @@ jobs:
                 faqHtml += '<div class="faq-item"><div class="faq-q">'+f.q+'</div><div class="faq-a">'+f.a+'</div></div>';
               });
             }
-            var hreflangs = ['fr','en','es','pt','de','it','ar','tr','nl','pl','id','ko','vi','th','el','ro','sv','da','ja'].map(function(lg) {
+            var hreflangs = ['fr','en','es','pt','de','it','tr','nl','pl','ro','sv'].map(function(lg) {
               var prefix = lg === 'fr' ? '' : lg+'/';
               var filePrefix = type === 'preview' ? 'preview-' : '';
               return '<link rel="alternate" hreflang="'+lg+'" href="https://iashark.com/'+prefix+'blog/'+filePrefix+slug+'.html">';
@@ -1710,8 +1682,8 @@ jobs:
 
             if (matchsData.length > 0) {
               console.log('\n=== TRADUCTION EN COURS ===');
-              var LANGS_TR = ['en','es','it','pt','de','nl','pl','sv','da','ja','ko','vi','th','el','ro','tr','id'];
-              var LANG_NAMES_TR = {en:'English',es:'Spanish',it:'Italian',pt:'Portuguese',de:'German',nl:'Dutch',pl:'Polish',sv:'Swedish',da:'Danish',ja:'Japanese',ko:'Korean',vi:'Vietnamese',th:'Thai',el:'Greek',ro:'Romanian',tr:'Turkish',id:'Indonesian'};
+              var LANGS_TR = ['es','it','pt','de','nl','pl','sv','ro','tr'];
+              var LANG_NAMES_TR = {es:'Spanish',it:'Italian',pt:'Portuguese',de:'German',nl:'Dutch',pl:'Polish',sv:'Swedish',ro:'Romanian',tr:'Turkish'};
               for (var li = 0; li < LANGS_TR.length; li++) {
                 var lg = LANGS_TR[li];
                 var lgName = LANG_NAMES_TR[lg];
@@ -1954,7 +1926,7 @@ jobs:
           git config user.name "IASHARK"
           git config user.email "yaramode81@gmail.com"
           git add data.json historique.json sitemap.xml sitemap-*.xml
-          git add en/ es/ pt/ de/ it/ ar/ tr/ nl/ pl/ id/ no/ sv/ ro/ el/ cs/ hu/ sr/ uk/ ru/ ja/ ko/ th/ hi/ ms/ da/ fi/ sw/ 2>/dev/null || true
+          git add en/ es/ pt/ de/ it/ tr/ nl/ pl/ sv/ ro/ 2>/dev/null || true
           git add blog/ 2>/dev/null || true
           git diff --staged --quiet || git commit -m "Daily update + multilingual - $(date +%Y-%m-%d)"
           git push

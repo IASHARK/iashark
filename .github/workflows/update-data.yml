@@ -997,6 +997,8 @@ jobs:
                     if (v.value==='Over 2.5')  arr25.push(parseFloat(v.odd));
                     if (v.value==='Under 2.5') arru25.push(parseFloat(v.odd));
                   });
+                    if (v.value==='Over 3.5')  arr35.push(parseFloat(v.odd));
+                    if (v.value==='Under 3.5') arru35.push(parseFloat(v.odd));
                 }
                 if (bet.name==='Double Chance') {
                   var d1x=(bet.values||[]).find(function(v){return v.value==='Home/Draw';});
@@ -1337,6 +1339,7 @@ jobs:
             var pio25 = (d.co25&&d.co25!=='--')?Math.round(100/parseFloat(d.co25)):'?';
             var piu25 = (d.cu25&&d.cu25!=='--')?Math.round(100/parseFloat(d.cu25)):'?';
             var pi1x  = (d.dc1x&&d.dc1x!=='--')?Math.round(100/parseFloat(d.dc1x)):'?';
+            var pi12  = (d.dc12&&d.dc12!=='--')?Math.round(100/parseFloat(d.dc12)):'?';
             var pix2  = (d.dc2x&&d.dc2x!=='--')?Math.round(100/parseFloat(d.dc2x)):'?';
             var piby  = (d.btts_oui&&d.btts_oui!=='--')?Math.round(100/parseFloat(d.btts_oui)):'?';
             var pibn  = (d.btts_non&&d.btts_non!=='--')?Math.round(100/parseFloat(d.btts_non)):'?';
@@ -1407,33 +1410,50 @@ jobs:
               +'Victoire '+d.home+': '+d.c1+' → '+pi1+'% impl\\n'
               +'Nul: '+d.cn+' → '+piN+'% impl\\n'
               +'Victoire '+d.away+': '+d.c2+' → '+pi2+'% impl\\n'
-              +'DC 1X: '+d.dc1x+' → '+pi1x+'% impl\\n'
-              +'DC X2: '+d.dc2x+' → '+pix2+'% impl\\n'
-              +'Over 1.5: '+d.co15+' → '+pio15+'% impl\\n'
-              +'Over 2.5: '+d.co25+' → '+pio25+'% impl\\n'
-              +'Under 2.5: '+d.cu25+' → '+piu25+'% impl\\n'
-              +'BTTS Oui: '+d.btts_oui+' → '+piby+'% impl\\n'
-              +'BTTS Non: '+d.btts_non+' → '+pibn+'% impl\\n\\n'
-              +'=== METHODE OBLIGATOIRE ===\\n'
-              +'1. Calcule prob reelle pour CHAQUE marche en croisant: stats DOM/EXT + 20 matchs + xG (si dispo) + H2H + lineups + fatigue + meteo.\\n'
-              +'2. Edge = prob_IA - prob_implicite. Marche avec plus grand edge positif = ton pari.\\n'
-              +'3. Si xG dispo: xG_home+xG_away>2.5 renforce Over. xG<1.0 les deux renforce Under/BTTS Non.\\n'
-              +'4. Si lineups dispo: verifie que attaquants/defenseurs cles jouent. Absent cle = ajuste prob.\\n'
-              +'5. Modele API-Sports = reference secondaire. Si ecart >15% avec tes stats, justifie.\\n\\n'
-              +'REGLES DURES:\\n'
-              +'- Meilleur edge < 5%: confiance <= 5.5, le dire dans verdict_shark.\\n'
-              +'- Cote < 1.30: confiance <= 4.0, vbet=NON.\\n'
-              +'- Ne jamais inventer une stat.\\n'
-              +'- 3 paris_3 = 3 marches DIFFERENTS, cotes exactes du tableau.\\n'
-              +'- Pari SPECU cote >= 2.00.\\n\\n'
-              +'EXEMPLES:\\n'
-              +'- xG_home 1.8 + xG_away 1.4 = total 3.2 → Over 2.5: prob IA 62% vs impl 52% = edge +10%\\n'
-              +'- xG_home 0.6 + xG_away 0.7 = total 1.3 → Under 2.5: prob IA 75% vs impl 55% = edge +20%\\n'
-              +'- Formation 5-3-2 EXT + DOM 0.7 buts DOM → Under 1.5: prob IA 55% vs impl 40% = edge +15%\\n'
-              +'- DOM CS 8/14 + EXT failToScore 6/12 → BTTS Non: prob IA 65% vs impl 52% = edge +13%\\n\\n'
+              +'DC 1X (Victoire '+d.home+' ou Nul): '+d.dc1x+' → '+pi1x+'% impl\\\\n'
+              +'DC X2 (Nul ou Victoire '+d.away+'): '+d.dc2x+' → '+pix2+'% impl\\\\n'
+              +'DC 12 ('+d.home+' ou '+d.away+', exclut nul): '+d.dc12+' → '+pi12+'% impl\\\\n'
+              +'Over 1.5: '+d.co15+' → '+pio15+'% impl\\\\n'
+              +'Over 2.5: '+d.co25+' → '+pio25+'% impl\\\\n'
+              +'Under 2.5: '+d.cu25+' → '+piu25+'% impl\\\\n'
+              +'Over 3.5: '+(d.co35||'--')+' → '+pio35+'% impl\\\\n'
+              +'Under 3.5: '+(d.cu35||'--')+' → '+piu35+'% impl\\\\n'
+              +'BTTS Oui (les deux equipes marquent): '+d.btts_oui+' → '+piby+'% impl\\\\n'
+              +'BTTS Non (au moins un clean sheet): '+d.btts_non+' → '+pibn+'% impl\\\\n\\\\n'
+              +'=== METHODE OBLIGATOIRE ===\\\\n'
+              +'1. Calcule prob reelle pour CHAQUE marche en croisant: stats DOM/EXT + 20 matchs + xG (si dispo) + H2H + lineups + fatigue + meteo.\\\\n'
+              +'2. Edge = prob_IA - prob_implicite. Marche avec plus grand edge positif = ton pari.\\\\n'
+              +'3. Si xG dispo: total xG>3.5 → Over 3.5. xG>2.5 → Over 2.5. xG<1.5 → Under 1.5/BTTS Non. xG 1.5-2.5 → Under 2.5 ou BTTS.\\\\n'
+              +'4. Si lineups dispo: verifie que attaquants/defenseurs cles jouent. Absent cle = ajuste prob.\\\\n'
+              +'5. Modele API-Sports = reference secondaire. Si ecart >15% avec tes stats, justifie.\\\\n'
+              +'6. PASSE TON TOUR si: cotes indisponibles sur meilleur marche OU edge < 3% sur TOUS les marches OU signaux tres contradictoires.\\\\n\\\\n'
+              +'CATALOGUE MARCHES — explore TOUS avant de choisir:\\\\n'
+              +'• Resultats: Victoire DOM / Nul / Victoire EXT\\\\n'
+              +'• Double chance: DC 1X (DOM ou Nul) / DC X2 (Nul ou EXT) / DC 12 (DOM ou EXT, exclut nul)\\\\n'
+              +'• Buts totaux: Over 1.5 / Over 2.5 / Over 3.5 / Under 1.5 / Under 2.5 / Under 3.5\\\\n'
+              +'• BTTS: Les deux marquent (Oui) / Au moins un clean sheet (Non)\\\\n'
+              +'• Mi-temps: score 1ere MT / equipe qui marque en 1ere MT\\\\n'
+              +'• Handicap: si DOM tres fort → Handicap EXT +1 / si EXT tres fort → Handicap DOM +1\\\\n'
+              +'INTERDIT: ne pas choisir systematiquement Victoire DOM ou Over 2.5. Choisis le marche avec le PLUS GRAND EDGE.\\\\n\\\\n'
+              +'REGLES DURES:\\\\n'
+              +'- Meilleur edge < 5%: confiance <= 5.5, le dire dans verdict_shark.\\\\n'
+              +'- Cote < 1.30: confiance <= 4.0, vbet=NON.\\\\n'
+              +'- Ne jamais inventer une stat.\\\\n'
+              +'- 3 paris_3 = 3 marches DIFFERENTS parmi le catalogue, cotes exactes du tableau.\\\\n'
+              +'- Pari SPECU cote >= 2.00.\\\\n'
+              +'- passe_ton_tour=true si aucun marche ne depasse +3% edge reel, justifie dans passe_ton_tour_raison.\\\\n\\\\n'
+              +'EXEMPLES MARCHES VARIES:\\\\n'
+              +'- xG 1.8+1.4=3.2 → Over 2.5: prob IA 62% vs impl 52% = edge +10%\\\\n'
+              +'- xG 2.1+1.6=3.7 → Over 3.5: prob IA 48% vs impl 35% = edge +13%\\\\n'
+              +'- xG 0.6+0.7=1.3 → Under 2.5: prob IA 75% vs impl 55% = edge +20%\\\\n'
+              +'- Formation 5-3-2 EXT + DOM 0.7 buts/match DOM → Under 1.5: prob IA 55% vs impl 40% = edge +15%\\\\n'
+              +'- DOM CS 8/14 + EXT failToScore 6/12 → BTTS Non: prob IA 65% vs impl 52% = edge +13%\\\\n'
+              +'- DOM tres fort mais EXT non nul → DC 1X: prob IA 82% vs impl 72% = edge +10%\\\\n'
+              +'- 4/5 H2H termines sans nul, offensifs → Over 2.5 ou BTTS Oui selon xG\\\\n'
+              +'- DOM marque 1ere MT 70% + EXT encaisse bcp 1ere MT → Score MT DOM gagnant\\\\n\\\\n'
               +'=== JSON STRICT — RIEN D\'AUTRE ===\\n'
-              +'{"confiance":7.2,"verdict_shark":"[MARCHE] a [COTE] — edge +X% : [xG ou stat DOM/EXT cle]. Direct.","scenario":{"phase1":"0-25min: contexte tactique reel (formations, style)","phase2":"25-65min: evolution basee sur stats xG et forme","phase3":"65-90min: fin attendue justifiee par stats"},"facteur_x":"1 seule chose decisive: xG exceptionnel OU blessure cle OU formation defensive OU stat record","pari_rec":"Nom exact: Over 2.5 / BTTS Non / Victoire PSG / DC 1X / Under 1.5 / Nul / etc","cote_rec":"[cote exacte du tableau]","marche":"RESULTAT|DOUBLE_CHANCE|TOTAL_BUTS|BTTS|UNDER|MI_TEMPS","risque":"FAIBLE|MODERE|ELEVE","vbet":"OUI|NON","edge":"+X.X%","argument":"1. [xG ou stat DOM/EXT chiffree]. 2. [stat complementaire]. 3. Prob IA X% vs impl Y% = edge +Z%.","analyse_card":"2-3 phrases avec xG et stats reelles","conseil":"3-4 phrases basees sur xG et stats reelles","contexte":"2-3 phrases classement et forme reelle","enjeux":"1 phrase","scores_probables":"X-X,X-X,X-X","p1":45,"pn":28,"p2":27,"po15":80,"po25":55,"btts":50,"kelly":"2.8","paris_3":{"safe":{"bet":"[securise cote>=1.40]","cote":"[exacte tableau]","hint":"[stat chiffree]","mise":"4-5% bankroll","bookie":"Betclic"},"valeur":{"bet":"[DIFFERENT safe, avec edge]","cote":"[exacte tableau]","hint":"[prob IA X% vs impl Y% = edge +Z%]","mise":"2-3% bankroll","bookie":"Winamax"},"specu":{"bet":"[DIFFERENT des deux, cote>=2.00]","cote":"[exacte tableau]","hint":"[justification xG+stat]","mise":"0.5-1% bankroll","bookie":"Bet365"}}}\\n\\n'
-              +'CONTRAINTES FINALES: p1+pn+p2=100 | confiance=5.0+(edge/3.5) max 9.5 | kelly=(edge/(cote-1))*100 | vbet=OUI si edge>4% ET cote>=1.50 | specu cote>=2.00';
+              +'{"confiance":7.2,"verdict_shark":"[MARCHE] a [COTE] — edge +X% : [xG ou stat DOM/EXT cle]. Direct.","scenario_15min":[{"t":"0-15'","prob":8,"txt":"[comment ca demarre: pressing, possession, qui prend l initiative — base sur style et forme]"},{"t":"15-30'","prob":12,"txt":"[evolution du match: premier danger, zone de pression — base sur xG et stats]"},{"t":"30-45'","prob":10,"txt":"[fin 1ere MT: scenario probable score MT, momentum — base sur stats 1ere MT]"},{"t":"45-60'","prob":15,"txt":"[debut 2eme MT: changements attendus, equipe qui pousse — base sur forme et enjeux]"},{"t":"60-75'","prob":18,"txt":"[moment clé: quand le match peut basculer — base sur fatigue et xG]"},{"t":"75-90'","prob":20,"txt":"[fin de match: scenario final probable — base sur toutes les stats]"}],"passe_ton_tour":false,"passe_ton_tour_raison":"","facteur_x":"1 seule chose decisive: xG exceptionnel OU blessure cle OU formation defensive OU stat record","pari_rec":"Nom exact: Over 2.5 / BTTS Non / Victoire PSG / DC 1X / DC X2 / Under 1.5 / Under 2.5 / Over 3.5 / Under 3.5 / Nul / etc","cote_rec":"[cote exacte du tableau]","marche":"RESULTAT|DOUBLE_CHANCE|TOTAL_BUTS|BTTS|UNDER|OVER_35|UNDER_35|MI_TEMPS|HANDICAP","risque":"FAIBLE|MODERE|ELEVE","vbet":"OUI|NON","edge":"+X.X%","argument":"1. [xG ou stat DOM/EXT chiffree]. 2. [stat complementaire]. 3. Prob IA X% vs impl Y% = edge +Z%.","analyse_card":"2-3 phrases avec xG et stats reelles","conseil":"3-4 phrases basees sur xG et stats reelles","contexte":"2-3 phrases classement et forme reelle","enjeux":"1 phrase","scores_probables":"X-X,X-X,X-X","p1":45,"pn":28,"p2":27,"po15":80,"po25":55,"btts":50,"kelly":"2.8","paris_3":{"safe":{"bet":"[securise cote>=1.40]","cote":"[exacte tableau]","hint":"[stat chiffree]","mise":"4-5% bankroll","bookie":"Betclic"},"valeur":{"bet":"[DIFFERENT safe, avec edge]","cote":"[exacte tableau]","hint":"[prob IA X% vs impl Y% = edge +Z%]","mise":"2-3% bankroll","bookie":"Winamax"},"specu":{"bet":"[DIFFERENT des deux, cote>=2.00]","cote":"[exacte tableau]","hint":"[justification xG+stat]","mise":"0.5-1% bankroll","bookie":"Bet365"}}}\\n\\n'
+              +'CONTRAINTES FINALES: p1+pn+p2=100 | confiance=5.0+(edge/3.5) max 9.5 | kelly=(edge/(cote-1))*100 | vbet=OUI si edge>4% ET cote>=1.50 | specu cote>=2.00 | passe_ton_tour=true/false obligatoire (jamais null) | si passe_ton_tour=true alors confiance<=4.5 et vbet=NON';
             var r = await postJSON('api.anthropic.com', '/v1/messages', {
               model: 'claude-sonnet-4-6',
               max_tokens: 2000,
@@ -1737,7 +1757,7 @@ jobs:
                 bmHdom, beHdom, bmAext, beAext, mdHdom, meAext,
                 h2hAvgButs, h2hNuls,
                 c1:odds.c1, cn:odds.cn, c2:odds.c2,
-                co15:odds.co15, co25:odds.co25, cu25:odds.cu25,
+                co15:odds.co15, co25:odds.co25, cu25:odds.cu25, co35:odds.co35, cu35:odds.cu35,
                 dc1x:odds.dc1x, dc2x:odds.dc2x,
                 btts_oui:odds.btts_oui, btts_non:odds.btts_non,
                 injuries, h2h:h2hRaw,
@@ -1851,6 +1871,10 @@ jobs:
                 mise:an?(an.mise||'2-3% bankroll'):'2-3% bankroll',
                 verdict_shark:an?(an.verdict_shark||''):'',
                 scenario:an?(an.scenario||{phase1:'',phase2:'',phase3:''}):null,
+                scenario_15min:an?(an.scenario_15min||[]):null,
+                passe_ton_tour:an?(an.passe_ton_tour===true):false,
+                passe_ton_tour_raison:an?(an.passe_ton_tour_raison||''):'',
+                score_predit:an?(an.scores_probables?{score:(an.scores_probables.split(',')[0]||'').trim(),prob:'',cote_implicite:''}:null):null,
                 facteur_x:an?(an.facteur_x||''):'',
                 argument:an?(an.argument||''):'',
                 analyse_card:an?(an.analyse_card||an.conseil||''):'',

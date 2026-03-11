@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Historique des Paris — IASHARK</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#080c12;--card:#0d1520;
+  --cyan:#22d3ee;--amber:#f59e0b;--green:#10b981;--red:#ef4444;--purple:#8b5cf6;
+  --text:#e2e8f0;--muted:#4a6580;
+  --border:rgba(255,255,255,0.06);--border-cyan:rgba(34,211,238,0.18);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;padding-bottom:90px;}
+body::before{content:'';position:fixed;top:-200px;left:50%;transform:translateX(-50%);width:800px;height:500px;background:radial-gradient(ellipse,rgba(34,211,238,0.04) 0%,transparent 70%);pointer-events:none;z-index:0;}
+
+/* HEADER */
+.hdr{position:sticky;top:0;z-index:99;background:rgba(8,12,18,0.97);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);padding:0 20px;height:56px;display:flex;align-items:center;gap:14px;}
+.logo{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:3px;color:var(--text);text-decoration:none;user-select:none;}
+.logo span{color:var(--cyan);}
+.hdr-badge{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:3px;color:var(--muted);}
+.hdr-right{margin-left:auto;display:flex;gap:8px;}
+.btn-sm{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1px;padding:6px 14px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:.2s;}
+.btn-sm:hover{border-color:var(--cyan);color:var(--cyan);}
+.btn-pro{border-color:rgba(34,211,238,0.3);background:rgba(34,211,238,0.08);color:var(--cyan);}
+
+/* PAGE */
+.page{max-width:720px;margin:0 auto;padding:0 20px;position:relative;z-index:1;}
+
+/* HERO */
+.hero{padding:24px 0 18px;}
+.hero-tag{display:inline-flex;align-items:center;gap:6px;font-family:'Space Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--cyan);background:rgba(34,211,238,0.06);border:1px solid var(--border-cyan);padding:4px 12px;border-radius:20px;margin-bottom:12px;}
+.dot{width:5px;height:5px;background:var(--green);border-radius:50%;animation:blink 1.5s infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+.hero h1{font-family:'Bebas Neue',sans-serif;font-size:clamp(30px,7vw,46px);letter-spacing:2px;line-height:1;margin-bottom:8px;}
+.hero h1 span{color:var(--cyan);}
+.hero p{font-size:13px;color:#64748b;line-height:1.7;}
+
+/* EXPLAINER BOX */
+.explainer{margin-bottom:16px;}
+.exp-card{background:linear-gradient(135deg,rgba(34,211,238,0.04),rgba(8,12,18,0));border:1px solid var(--border-cyan);border-radius:16px;overflow:hidden;}
+.exp-toggle{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;cursor:pointer;-webkit-tap-highlight-color:transparent;}
+.exp-toggle-left{display:flex;align-items:center;gap:10px;}
+.exp-icon-big{font-size:18px;}
+.exp-toggle-title{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--cyan);}
+.exp-toggle-sub{font-size:11px;color:var(--muted);margin-top:2px;}
+.exp-chevron{font-size:10px;color:var(--muted);transition:transform .25s;}
+.exp-chevron.open{transform:rotate(180deg);}
+.exp-body{display:none;padding:0 18px 18px;}
+.exp-body.open{display:block;}
+.exp-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+@media(max-width:500px){.exp-grid{grid-template-columns:1fr;}}
+.exp-item{background:rgba(0,0,0,0.25);border:1px solid var(--border);border-radius:12px;padding:12px 14px;}
+.exp-item-icon{font-size:18px;margin-bottom:6px;}
+.exp-item-title{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:1px;color:var(--cyan);margin-bottom:5px;}
+.exp-item-text{font-size:12px;color:#94a3b8;line-height:1.65;}
+.exp-item-text strong{color:var(--text);}
+.exp-formula{background:rgba(0,0,0,0.3);border:1px solid var(--border);border-radius:10px;padding:12px 14px;font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);line-height:2;}
+.exp-formula .eg{color:var(--text);font-size:10px;display:block;margin-bottom:4px;}
+.exp-formula .g{color:var(--green);}
+.exp-formula .r{color:var(--red);}
+.exp-formula .c{color:var(--cyan);}
+.exp-formula .a{color:var(--amber);}
+
+/* STATS GLOBALES */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px;}
+@media(max-width:560px){.stats-row{grid-template-columns:repeat(2,1fr);}}
+.s-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;}
+.s-card.c-green{border-color:rgba(16,185,129,0.2);}
+.s-card.c-cyan{border-color:rgba(34,211,238,0.2);}
+.s-card.c-amber{border-color:rgba(245,158,11,0.2);}
+.s-lbl{font-family:'Space Mono',monospace;font-size:7px;letter-spacing:2px;color:var(--muted);margin-bottom:7px;}
+.s-val{font-family:'Bebas Neue',sans-serif;font-size:30px;line-height:1;margin-bottom:2px;}
+.s-card.c-green .s-val{color:var(--green);}
+.s-card.c-cyan .s-val{color:var(--cyan);}
+.s-card.c-amber .s-val{color:var(--amber);}
+.s-sub{font-family:'Space Mono',monospace;font-size:7px;color:var(--muted);letter-spacing:.5px;}
+
+/* TABLEAU PAR TYPE */
+.table-section{margin-bottom:14px;}
+.section-head{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:10px;}
+.section-title{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:3px;color:var(--muted);}
+.section-title span{color:var(--cyan);}
+.section-hint{font-size:11px;color:var(--muted);}
+.tbl-card{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;}
+.tbl-explain{padding:10px 16px;background:rgba(34,211,238,0.03);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;}
+.tbl-explain-text{font-size:11px;color:#64748b;line-height:1.5;}
+.tbl-explain-text strong{color:var(--text);}
+table{width:100%;border-collapse:collapse;}
+thead th{font-family:'Space Mono',monospace;font-size:7px;letter-spacing:1.5px;color:var(--muted);text-align:left;padding:10px 14px;border-bottom:1px solid var(--border);background:rgba(0,0,0,0.2);}
+thead th.th-r{text-align:right;}
+thead th .th-hint{display:block;font-size:6px;color:rgba(74,101,128,0.6);letter-spacing:.5px;margin-top:2px;font-weight:400;}
+tbody tr{border-bottom:1px solid rgba(255,255,255,0.03);transition:background .15s;}
+tbody tr:last-child{border-bottom:none;}
+tbody tr:hover{background:rgba(255,255,255,0.02);}
+tbody tr.total-row{background:rgba(34,211,238,0.03);border-top:1px solid var(--border-cyan);}
+td{padding:11px 14px;font-size:13px;color:#94a3b8;vertical-align:middle;}
+td.td-r{text-align:right;}
+.td-name{display:flex;align-items:center;gap:8px;font-weight:600;color:var(--text);}
+.td-name .ico{font-size:16px;}
+.td-count{font-family:'Space Mono',monospace;font-size:10px;}
+.td-count small{display:block;font-size:8px;color:var(--muted);}
+/* Winrate bar */
+.wr-wrap{display:flex;align-items:center;gap:8px;}
+.wr-bar{flex:1;height:5px;background:rgba(255,255,255,0.06);border-radius:4px;overflow:hidden;min-width:50px;}
+.wr-fill{height:100%;border-radius:4px;transition:width .6s ease;}
+.wr-pct{font-family:'Bebas Neue',sans-serif;font-size:17px;min-width:38px;text-align:right;}
+/* ROI */
+.roi-val{font-family:'Bebas Neue',sans-serif;font-size:17px;}
+.roi-val.pos{color:var(--green);}
+.roi-val.neg{color:var(--red);}
+.roi-val.neu{color:var(--muted);}
+/* Units */
+.units-val{font-family:'Space Mono',monospace;font-size:10px;font-weight:700;}
+.units-val.pos{color:var(--green);}
+.units-val.neg{color:var(--red);}
+.units-val.neu{color:var(--muted);}
+
+/* GRAPHIQUE */
+.chart-card{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:14px;}
+.chart-top{padding:13px 18px 8px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;}
+.chart-title{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--muted);}
+.chart-legend{display:flex;gap:14px;}
+.leg{display:flex;align-items:center;gap:5px;font-family:'Space Mono',monospace;font-size:7px;color:var(--muted);}
+.leg-dot{width:8px;height:8px;border-radius:50%;}
+canvas{display:block;width:100%;}
+
+/* FILTRES */
+.filters{display:flex;gap:7px;overflow-x:auto;scrollbar-width:none;margin-bottom:12px;padding-bottom:2px;}
+.filters::-webkit-scrollbar{display:none;}
+.f-btn{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:1px;padding:6px 14px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:.2s;white-space:nowrap;flex-shrink:0;}
+.f-btn:hover,.f-btn.active{background:rgba(34,211,238,0.1);border-color:var(--border-cyan);color:var(--cyan);}
+.f-btn.a-green{background:rgba(16,185,129,0.1);border-color:rgba(16,185,129,0.3);color:var(--green);}
+.f-btn.a-red{background:rgba(239,68,68,0.08);border-color:rgba(239,68,68,0.25);color:var(--red);}
+
+/* PARIS LIST */
+.list-head{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:3px;color:var(--muted);display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.list-head::after{content:'';flex:1;height:1px;background:var(--border);}
+.list-head span{color:var(--cyan);}
+.paris-list{display:flex;flex-direction:column;gap:8px;}
+.p-row{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;animation:fu .3s ease forwards;opacity:0;}
+@keyframes fu{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.p-row.win{border-left:3px solid var(--green);}
+.p-row.loss{border-left:3px solid var(--red);}
+.p-row.pending{border-left:3px solid var(--muted);}
+.p-row.combi{border-left:3px solid var(--purple);}
+.p-main{padding:11px 14px;display:flex;align-items:center;gap:11px;}
+.p-badge{width:32px;height:32px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
+.p-badge.win{background:rgba(16,185,129,0.15);}
+.p-badge.loss{background:rgba(239,68,68,0.12);}
+.p-badge.pending{background:rgba(74,101,128,0.12);}
+.p-badge.combi{background:rgba(139,92,246,0.15);}
+.p-info{flex:1;min-width:0;}
+.p-match{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:3px;}
+.p-meta{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+.p-date,.p-league{font-family:'Space Mono',monospace;font-size:8px;color:var(--muted);}
+.p-tag{font-family:'Space Mono',monospace;font-size:7px;padding:2px 7px;border-radius:10px;}
+.p-tag.combi{background:rgba(139,92,246,0.1);border:1px solid rgba(139,92,246,0.2);color:var(--purple);}
+.p-tag.pending{background:rgba(74,101,128,0.1);border:1px solid rgba(74,101,128,0.2);color:var(--muted);}
+.p-right{display:flex;flex-direction:column;align-items:flex-end;gap:2px;flex-shrink:0;}
+.p-bet{font-family:'Space Mono',monospace;font-size:8px;color:var(--muted);text-align:right;max-width:130px;}
+.p-cote{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--amber);line-height:1;}
+.p-foot{padding:8px 14px;background:rgba(0,0,0,0.15);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.p-score{font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);}
+.p-score strong{color:var(--text);}
+.p-gain-wrap{text-align:right;}
+.p-gain{font-family:'Bebas Neue',sans-serif;font-size:17px;line-height:1;}
+.p-gain.pos{color:var(--green);}
+.p-gain.neg{color:var(--red);}
+.p-gain.neu{color:var(--muted);}
+.p-gain-lbl{font-family:'Space Mono',monospace;font-size:7px;color:var(--muted);margin-top:1px;}
+
+/* EMPTY / LOADING */
+.center{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:56px 20px;gap:12px;}
+.spinner{width:34px;height:34px;border:2px solid var(--border);border-top-color:var(--cyan);border-radius:50%;animation:spin 1s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.center-lbl{font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:2px;}
+.center-icon{font-size:34px;}
+
+/* ADMIN */
+.admin-panel{display:none;margin-top:20px;}
+.admin-panel.open{display:block;}
+.admin-card{background:var(--card);border:1px solid rgba(245,158,11,0.2);border-radius:14px;padding:16px;}
+.admin-title{font-family:'Space Mono',monospace;font-size:9px;color:var(--amber);letter-spacing:2px;margin-bottom:14px;}
+.admin-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+@media(max-width:480px){.admin-grid{grid-template-columns:1fr;}}
+.a-lbl{font-family:'Space Mono',monospace;font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:4px;}
+.a-input{width:100%;background:rgba(0,0,0,0.3);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;}
+.a-input:focus{outline:none;border-color:var(--border-cyan);}
+.a-input::placeholder{color:var(--muted);}
+.a-btn{background:var(--amber);color:#000;font-family:'Space Mono',monospace;font-size:10px;font-weight:700;letter-spacing:2px;padding:10px;border-radius:8px;border:none;cursor:pointer;grid-column:span 2;width:100%;}
+@media(max-width:480px){.a-btn{grid-column:span 1;}}
+
+/* NAV */
+.nav-bottom{position:fixed;bottom:0;left:0;right:0;background:rgba(8,12,18,0.97);backdrop-filter:blur(14px);border-top:1px solid var(--border);display:flex;z-index:100;}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;padding:10px 4px 8px;gap:3px;cursor:pointer;-webkit-tap-highlight-color:transparent;}
+.nav-ico{font-size:18px;}
+.nav-lbl{font-family:'Space Mono',monospace;font-size:7px;color:var(--muted);letter-spacing:1px;}
+.nav-item.active .nav-lbl{color:var(--cyan);}
+.nav-item.active .nav-ico{filter:drop-shadow(0 0 6px rgba(34,211,238,0.5));}
+</style>
+</head>
+<body>
+
+<header class="hdr">
+  <a href="/" class="logo"><span>IA</span>SHARK</a>
+  <div class="hdr-badge">HISTORIQUE</div>
+  <div class="hdr-right">
+    <button class="btn-sm" onclick="location.href='/'">← ANALYSES</button>
+    <button class="btn-sm btn-pro">PRO ▸</button>
+  </div>
+</header>
+
+<div class="page">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-tag"><span class="dot"></span> TRANSPARENCE TOTALE</div>
+    <h1><span>TRACK</span>RECORD</h1>
+    <p>Tous les paris, tous les résultats — gains et pertes inclus. Rien de caché.</p>
+  </div>
+
+  <!-- EXPLAINER -->
+  <div class="explainer">
+    <div class="exp-card">
+      <div class="exp-toggle" onclick="toggleExp()">
+        <div class="exp-toggle-left">
+          <span class="exp-icon-big">💡</span>
+          <div>
+            <div class="exp-toggle-title">COMMENT LIRE CES STATS ?</div>
+            <div class="exp-toggle-sub">Clique pour comprendre unité, ROI, winrate</div>
+          </div>
+        </div>
+        <div class="exp-chevron" id="expChevron">▼</div>
+      </div>
+      <div class="exp-body" id="expBody">
+        <div class="exp-grid">
+          <div class="exp-item">
+            <div class="exp-item-icon">🎯</div>
+            <div class="exp-item-title">C'EST QUOI 1 UNITÉ ?</div>
+            <div class="exp-item-text">Une unité = <strong>1% de ta bankroll</strong>. Si t'as 300€, 1 unité = 3€. Si t'as 1000€, 1 unité = 10€. On utilise les unités pour que les résultats marchent pour <strong>n'importe quel budget</strong>.</div>
+          </div>
+          <div class="exp-item">
+            <div class="exp-item-icon">📈</div>
+            <div class="exp-item-title">C'EST QUOI LE ROI ?</div>
+            <div class="exp-item-text">ROI = <strong>Retour Sur Investissement</strong>. Un ROI de +20% veut dire : pour 100€ misés sur la période, tu ressors avec <strong>120€</strong>. C'est l'indicateur clé d'un tipster.</div>
+          </div>
+          <div class="exp-item">
+            <div class="exp-item-icon">🏆</div>
+            <div class="exp-item-title">C'EST QUOI LE WINRATE ?</div>
+            <div class="exp-item-text">C'est le <strong>% de paris gagnés</strong>. Attention : un winrate de 60% ne garantit pas de bénéfices — ça dépend aussi des cotes. Le <strong>ROI reste plus important</strong> que le winrate.</div>
+          </div>
+          <div class="exp-item">
+            <div class="exp-item-icon">💰</div>
+            <div class="exp-item-title">COMMENT JE CALCULE MON GAIN ?</div>
+            <div class="exp-item-text">Si tu mises <strong>1% de ta bankroll</strong> sur chaque pari et que le ROI est +18%, alors sur 500€ de bankroll tu génères environ <strong>+90€ de profit</strong> sur la période.</div>
+          </div>
+        </div>
+        <div class="exp-formula">
+          <span class="eg">EXEMPLE — Paris : Over 2.5 · Cote <span class="a">1.68</span> · Mise <span class="c">1 unité</span></span>
+          ✅ Gagné → gain = 1 × (1.68 − 1) = <span class="g">+0.68u</span><br>
+          ❌ Perdu → perte = <span class="r">−1.00u</span> (tu perds uniquement ta mise)<br><br>
+          <span class="eg">RÉSULTAT SUR 10 PARIS (ex: 7 gagnés · 3 perdus)</span>
+          Total misé : <span class="c">10u</span> · Gains nets : <span class="g">+4.8u</span> · Pertes : <span class="r">−3u</span><br>
+          ROI = (4.8 − 3) ÷ 10 × 100 = <span class="g">+18% 🎯</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STATS GLOBALES -->
+  <div class="stats-row" id="statsRow">
+    <div class="s-card c-green"><div class="s-lbl">WINRATE</div><div class="s-val" id="sWr">—</div><div class="s-sub" id="sWrSub">—</div></div>
+    <div class="s-card c-cyan"><div class="s-lbl">ROI</div><div class="s-val" id="sRoi" style="font-size:26px">—</div><div class="s-sub">PAR UNITÉ MISÉE</div></div>
+    <div class="s-card c-amber"><div class="s-lbl">SÉRIE</div><div class="s-val" id="sStreak">—</div><div class="s-sub" id="sStreakSub">—</div></div>
+    <div class="s-card"><div class="s-lbl">TOTAL</div><div class="s-val" id="sTotal">—</div><div class="s-sub" id="sTotalSub">—</div></div>
+  </div>
+
+  <!-- TABLEAU PAR TYPE -->
+  <div class="table-section">
+    <div class="section-head">
+      <div class="section-title">📊 <span>RÉSULTATS PAR TYPE</span></div>
+      <div class="section-hint" style="font-family:'Space Mono',monospace;font-size:8px;color:var(--muted)">BASE : 1 UNITÉ / PARI</div>
+    </div>
+    <div class="tbl-card">
+      <div class="tbl-explain">
+        <span style="font-size:16px">👇</span>
+        <div class="tbl-explain-text">Ce tableau compare les <strong>singles</strong> (1 pari sur 1 match) et les <strong>combinés</strong> (plusieurs matchs liés). Les combinés ont une cote plus haute mais sont plus risqués — le ROI le reflète.</div>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>TYPE</th>
+            <th>PARIS<span class="th-hint">TOTAL · TERMINÉS</span></th>
+            <th>WINRATE<span class="th-hint">% GAGNÉS</span></th>
+            <th class="th-r">ROI<span class="th-hint">RENTABILITÉ</span></th>
+            <th class="th-r">UNITÉS<span class="th-hint">GAIN NET</span></th>
+          </tr>
+        </thead>
+        <tbody id="tblBody">
+          <tr><td colspan="5" style="text-align:center;color:var(--muted);font-size:12px;padding:20px">Chargement...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- GRAPHIQUE -->
+  <div class="chart-card">
+    <div class="chart-top">
+      <div class="chart-title">📈 BANKROLL CUMULÉE (unités)</div>
+      <div class="chart-legend">
+        <div class="leg"><div class="leg-dot" style="background:var(--cyan)"></div>SINGLES</div>
+        <div class="leg"><div class="leg-dot" style="background:var(--purple)"></div>COMBINÉS</div>
+      </div>
+    </div>
+    <canvas id="chart" height="160"></canvas>
+  </div>
+
+  <!-- FILTRES -->
+  <div class="filters">
+    <button class="f-btn active" data-f="all">🌐 TOUS</button>
+    <button class="f-btn" data-f="win">✅ GAGNÉS</button>
+    <button class="f-btn" data-f="loss">❌ PERDUS</button>
+    <button class="f-btn" data-f="single">⚡ SINGLES</button>
+    <button class="f-btn" data-f="combi">🎰 COMBINÉS</button>
+    <button class="f-btn" data-f="pending">⏳ EN ATTENTE</button>
+  </div>
+
+  <!-- LISTE -->
+  <div class="list-head" id="listHead">📅 <span>TOUS LES PARIS</span></div>
+  <div class="paris-list" id="parisList">
+    <div class="center"><div class="spinner"></div><div class="center-lbl">CHARGEMENT...</div></div>
+  </div>
+
+  <!-- ADMIN (5 clics logo) -->
+  <div class="admin-panel" id="adminPanel">
+    <div class="admin-card">
+      <div class="admin-title">⚙️ SAISIE MANUELLE — ADMIN</div>
+      <div class="admin-grid">
+        <div><div class="a-lbl">MATCH</div><input class="a-input" id="aMatch" placeholder="PSG vs Lyon"></div>
+        <div><div class="a-lbl">DATE</div><input class="a-input" id="aDate" type="date"></div>
+        <div><div class="a-lbl">PARI RECOMMANDÉ</div><input class="a-input" id="aBet" placeholder="Over 2.5 buts"></div>
+        <div><div class="a-lbl">COTE</div><input class="a-input" id="aCote" type="number" step="0.01" placeholder="1.68"></div>
+        <div><div class="a-lbl">SCORE RÉEL</div><input class="a-input" id="aScore" placeholder="2-1"></div>
+        <div><div class="a-lbl">RÉSULTAT</div>
+          <select class="a-input" id="aResult">
+            <option value="win">✅ Gagné</option>
+            <option value="loss">❌ Perdu</option>
+            <option value="pending">⏳ En attente</option>
+          </select>
+        </div>
+        <div><div class="a-lbl">LIGUE</div><input class="a-input" id="aLeague" placeholder="Ligue 1"></div>
+        <div><div class="a-lbl">TYPE</div>
+          <select class="a-input" id="aType">
+            <option value="single">⚡ Single</option>
+            <option value="combi">🎰 Combiné</option>
+          </select>
+        </div>
+        <button class="a-btn" onclick="adminAdd()">+ AJOUTER CE PARI</button>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /page -->
+
+<nav class="nav-bottom">
+  <div class="nav-item" onclick="location.href='/'"><div class="nav-ico">⚡</div><div class="nav-lbl">ANALYSES</div></div>
+  <div class="nav-item active"><div class="nav-ico">📊</div><div class="nav-lbl">HISTORIQUE</div></div>
+  <div class="nav-item" onclick="location.href='/combis.html'"><div class="nav-ico">🎰</div><div class="nav-lbl">COMBINÉS</div></div>
+  <div class="nav-item" onclick="location.href='/blog/'"><div class="nav-ico">📖</div><div class="nav-lbl">GUIDES</div></div>
+  <div class="nav-item" onclick="location.href='/compte.html'"><div class="nav-ico">👤</div><div class="nav-lbl">COMPTE</div></div>
+</nav>
+
+<script>
+var ALL = [];
+var currentFilter = 'all';
+
+// ── EXPLAINER ────────────────────────────────────────────
+function toggleExp(){
+  document.getElementById('expBody').classList.toggle('open');
+  document.getElementById('expChevron').classList.toggle('open');
+}
+
+// ── ADMIN SECRET (5 taps logo) ──────────────────────────
+var taps = 0;
+document.querySelector('.logo').addEventListener('click', function(){
+  if(++taps >= 5){ document.getElementById('adminPanel').classList.toggle('open'); taps=0; }
+  setTimeout(function(){ taps=0; }, 2000);
+});
+
+// ── CALCULS ─────────────────────────────────────────────
+function gain(p){
+  if(p.gain != null) return p.gain;
+  if(p.result === 'win')  return parseFloat((parseFloat(p.cote||1) - 1).toFixed(2));
+  if(p.result === 'loss') return -1;
+  return 0;
+}
+
+function catStats(preds, type){
+  var list = type === 'all' ? preds : preds.filter(function(p){ return (p.type||'single') === type; });
+  var done = list.filter(function(p){ return p.result==='win'||p.result==='loss'; });
+  var wins = done.filter(function(p){ return p.result==='win'; }).length;
+  var wr   = done.length ? Math.round(wins/done.length*100) : 0;
+  var net  = done.reduce(function(s,p){ return s+gain(p); }, 0);
+  var roi  = done.length ? parseFloat((net/done.length*100).toFixed(1)) : 0;
+  return { total:list.length, done:done.length, wins:wins, losses:done.length-wins, pending:list.length-done.length, wr:wr, roi:roi, units:parseFloat(net.toFixed(2)) };
+}
+
+function streak(preds){
+  var n=0, dir=null;
+  for(var i=0;i<preds.length;i++){
+    var r=preds[i].result;
+    if(r==='pending') continue;
+    if(!dir) dir=r;
+    if(r===dir) n++; else break;
+  }
+  return {n:n, dir:dir};
+}
+
+// ── STATS GLOBALES ───────────────────────────────────────
+function renderStats(){
+  var s = catStats(ALL,'all');
+  var st = streak(ALL);
+
+  document.getElementById('sWr').textContent = s.wr + '%';
+  document.getElementById('sWrSub').textContent = s.wins + ' GAGNÉS · ' + s.losses + ' PERDUS';
+
+  var roiEl = document.getElementById('sRoi');
+  roiEl.textContent = (s.roi>=0?'+':'') + s.roi + '%';
+  roiEl.style.color = s.roi>0 ? 'var(--green)' : s.roi<0 ? 'var(--red)' : 'var(--cyan)';
+
+  var stEl = document.getElementById('sStreak');
+  stEl.textContent = st.n + (st.dir==='win' ? ' 🔥' : st.dir==='loss' ? ' 🧊' : '');
+  stEl.style.color = st.dir==='win' ? 'var(--amber)' : 'var(--muted)';
+  document.getElementById('sStreakSub').textContent = st.dir==='win' ? 'CONSÉCUTIFS GAGNÉS' : st.dir==='loss' ? 'CONSÉCUTIFS PERDUS' : '—';
+
+  document.getElementById('sTotal').textContent = s.total;
+  document.getElementById('sTotalSub').textContent = s.done + ' TERMINÉS · ' + s.pending + ' EN ATTENTE';
+}
+
+// ── TABLEAU ──────────────────────────────────────────────
+function renderTable(){
+  var rows = [
+    { key:'single', icon:'⚡', name:'Singles',   hint:'1 pari · 1 match' },
+    { key:'combi',  icon:'🎰', name:'Combinés',  hint:'plusieurs matchs liés' },
+    { key:'all',    icon:'📊', name:'TOTAL',     hint:'tous types confondus', bold:true },
+  ];
+  var html = rows.map(function(r){
+    var s = catStats(ALL, r.key);
+    if(!r.bold && s.total === 0) return '';
+    var wrCol = s.wr>=65 ? 'var(--green)' : s.wr>=50 ? 'var(--cyan)' : 'var(--amber)';
+    var wrCls = s.wr>=65 ? 'style="background:linear-gradient(90deg,#059669,var(--green))"'
+              : s.wr>=50 ? 'style="background:linear-gradient(90deg,var(--cyan2,#06b6d4),var(--cyan))"'
+              : 'style="background:linear-gradient(90deg,#d97706,var(--amber))"';
+    var roiCls = s.roi>0 ? 'pos' : s.roi<0 ? 'neg' : 'neu';
+    var uCls   = s.units>0 ? 'pos' : s.units<0 ? 'neg' : 'neu';
+    var rowStyle = r.bold ? 'class="total-row"' : '';
+    return '<tr ' + rowStyle + '>'
+      + '<td><div class="td-name"><span class="ico">' + r.icon + '</span>' + r.name + '</div>'
+      +     '<div style="font-family:\'Space Mono\',monospace;font-size:8px;color:var(--muted);margin-top:2px">' + r.hint + '</div></td>'
+      + '<td class="td-count">' + s.done + '<small>' + s.total + ' TOTAL</small></td>'
+      + '<td><div class="wr-wrap"><div class="wr-bar"><div class="wr-fill" ' + wrCls + ' style="width:' + s.wr + '%"></div></div><span class="wr-pct" style="color:' + wrCol + '">' + s.wr + '%</span></div></td>'
+      + '<td class="td-r"><span class="roi-val ' + roiCls + '">' + (s.roi>=0?'+':'') + s.roi + '%</span></td>'
+      + '<td class="td-r"><span class="units-val ' + uCls + '">' + (s.units>=0?'+':'') + s.units + 'u</span></td>'
+      + '</tr>';
+  }).join('');
+  document.getElementById('tblBody').innerHTML = html || '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:20px">Aucune donnée</td></tr>';
+}
+
+// ── GRAPHIQUE ────────────────────────────────────────────
+function renderChart(){
+  var canvas = document.getElementById('chart');
+  var ctx = canvas.getContext('2d');
+  var dpr = window.devicePixelRatio||1;
+  var w = canvas.offsetWidth||680, h=160;
+  canvas.width=w*dpr; canvas.height=h*dpr; ctx.scale(dpr,dpr); ctx.clearRect(0,0,w,h);
+
+  function buildPts(list){
+    var pts=[{y:0}], c=0;
+    list.forEach(function(p){ c+=gain(p); pts.push({y:c}); });
+    return pts;
+  }
+  var singles = ALL.filter(function(p){return (p.type||'single')==='single'&&(p.result==='win'||p.result==='loss');}).slice().reverse();
+  var combis  = ALL.filter(function(p){return p.type==='combi'&&(p.result==='win'||p.result==='loss');}).slice().reverse();
+  var ptS=buildPts(singles), ptC=buildPts(combis);
+  var allY=ptS.concat(ptC).map(function(p){return p.y;});
+  if(!allY.length){ ctx.fillStyle='rgba(74,101,128,0.4)';ctx.font='11px Space Mono,monospace';ctx.textAlign='center';ctx.fillText('Les données apparaîtront ici',w/2,h/2);return; }
+
+  var minY=Math.min(0,Math.min.apply(null,allY)), maxY=Math.max(0,Math.max.apply(null,allY)), rng=maxY-minY||1;
+  var pad={t:16,b:24,l:44,r:16};
+  function tx(pts,i){ return pad.l+(pts.length<2?0:i/(pts.length-1))*(w-pad.l-pad.r); }
+  function ty(y){ return pad.t+(1-(y-minY)/rng)*(h-pad.t-pad.b); }
+
+  // Grid
+  ctx.strokeStyle='rgba(255,255,255,0.04)';ctx.lineWidth=1;
+  for(var g=0;g<4;g++){var gy=pad.t+g*(h-pad.t-pad.b)/3;ctx.beginPath();ctx.moveTo(pad.l,gy);ctx.lineTo(w-pad.r,gy);ctx.stroke();}
+  ctx.setLineDash([4,4]);ctx.strokeStyle='rgba(255,255,255,0.07)';
+  ctx.beginPath();ctx.moveTo(pad.l,ty(0));ctx.lineTo(w-pad.r,ty(0));ctx.stroke();ctx.setLineDash([]);
+
+  function drawLine(pts,color,fillAlpha){
+    if(pts.length<2)return;
+    var yZ=ty(0);
+    var grad=ctx.createLinearGradient(0,pad.t,0,h-pad.b);
+    grad.addColorStop(0,color.replace(')',','+fillAlpha+')').replace('rgb','rgba'));
+    grad.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.beginPath();ctx.moveTo(tx(pts,0),yZ);
+    pts.forEach(function(p,i){ctx.lineTo(tx(pts,i),ty(p.y));});
+    ctx.lineTo(tx(pts,pts.length-1),yZ);ctx.closePath();ctx.fillStyle=grad;ctx.fill();
+    ctx.strokeStyle=color;ctx.lineWidth=2;ctx.lineJoin='round';
+    ctx.beginPath();pts.forEach(function(p,i){i?ctx.lineTo(tx(pts,i),ty(p.y)):ctx.moveTo(tx(pts,i),ty(p.y));});ctx.stroke();
+    var last=pts[pts.length-1];ctx.fillStyle=color;ctx.beginPath();ctx.arc(tx(pts,pts.length-1),ty(last.y),4,0,Math.PI*2);ctx.fill();
+  }
+  if(ptS.length>1) drawLine(ptS,'rgb(34,211,238)',0.12);
+  if(ptC.length>1) drawLine(ptC,'rgb(139,92,246)',0.08);
+
+  ctx.fillStyle='rgba(74,101,128,0.7)';ctx.font='9px Space Mono,monospace';ctx.textAlign='right';
+  [maxY,0,minY].forEach(function(v){ctx.fillText((v>=0?'+':'')+v.toFixed(1)+'u',pad.l-5,ty(v)+3);});
+}
+
+// ── LISTE ────────────────────────────────────────────────
+function filtered(){
+  var f=currentFilter;
+  if(f==='win')     return ALL.filter(function(p){return p.result==='win';});
+  if(f==='loss')    return ALL.filter(function(p){return p.result==='loss';});
+  if(f==='single')  return ALL.filter(function(p){return (p.type||'single')==='single';});
+  if(f==='combi')   return ALL.filter(function(p){return p.type==='combi';});
+  if(f==='pending') return ALL.filter(function(p){return p.result==='pending';});
+  return ALL;
+}
+
+function fmtDate(d){
+  if(!d)return '—';
+  var p=d.split('-');
+  return p.length<3?d:p[2]+'/'+p[1]+'/'+p[0].slice(2);
+}
+
+function buildRow(p,i){
+  var isWin=p.result==='win', isLoss=p.result==='loss', isPend=p.result==='pending', isCom=p.type==='combi';
+  var g=gain(p);
+  var gainStr=isPend?'—':(g>=0?'+':'')+g.toFixed(2)+'u';
+  var gainCls=isPend?'neu':g>=0?'pos':'neg';
+  var rowCls='p-row '+(isCom?'combi':isWin?'win':isLoss?'loss':'pending');
+  var ico=isWin?'✅':isLoss?'❌':'⏳';
+  var badgeCls=isCom?'combi':isWin?'win':isLoss?'loss':'pending';
+  var delay=Math.min(i*0.04,0.6);
+  return '<div class="'+rowCls+'" style="animation-delay:'+delay+'s">'
+    +'<div class="p-main">'
+    +  '<div class="p-badge '+badgeCls+'">'+ico+'</div>'
+    +  '<div class="p-info">'
+    +    '<div class="p-match">'+(p.home||'—')+' <span style="color:var(--muted);font-weight:400">vs</span> '+(p.away||'—')+'</div>'
+    +    '<div class="p-meta">'
+    +      '<span class="p-date">'+fmtDate(p.date)+'</span>'
+    +      (p.league?'<span class="p-league">· '+p.league+'</span>':'')
+    +      (isCom?'<span class="p-tag combi">COMBINÉ</span>':'')
+    +      (isPend?'<span class="p-tag pending">EN ATTENTE</span>':'')
+    +    '</div>'
+    +  '</div>'
+    +  '<div class="p-right">'
+    +    '<div class="p-bet">'+(p.prediction||p.pari||'')+'</div>'
+    +    '<div class="p-cote">'+(p.cote||'—')+'</div>'
+    +  '</div>'
+    +'</div>'
+    +'<div class="p-foot">'
+    +  '<span class="p-score">Score : <strong>'+(p.score||'—')+'</strong></span>'
+    +  '<div class="p-gain-wrap">'
+    +    '<div class="p-gain '+gainCls+'">'+gainStr+'</div>'
+    +    '<div class="p-gain-lbl">PAR UNITÉ MISÉE</div>'
+    +  '</div>'
+    +'</div>'
+    +'</div>';
+}
+
+function renderList(){
+  var list=filtered();
+  var el=document.getElementById('parisList');
+  var lbl=document.getElementById('listHead');
+  if(!list.length){
+    el.innerHTML='<div class="center"><div class="center-icon">🦈</div><div class="center-lbl">AUCUN RÉSULTAT</div></div>';
+    lbl.innerHTML='📅 <span>0 RÉSULTAT</span>';
+    return;
+  }
+  lbl.innerHTML='📅 <span>'+list.length+' '+(list.length>1?'PARIS':'PARI')+'</span>';
+  el.innerHTML=list.map(buildRow).join('');
+}
+
+// ── FILTRES ──────────────────────────────────────────────
+document.querySelectorAll('.f-btn').forEach(function(btn){
+  btn.addEventListener('click',function(){
+    document.querySelectorAll('.f-btn').forEach(function(b){b.className='f-btn';});
+    currentFilter=btn.dataset.f;
+    btn.className='f-btn '+(currentFilter==='win'?'a-green':currentFilter==='loss'?'a-red':'active');
+    renderList();
+  });
+});
+
+// ── ADMIN ────────────────────────────────────────────────
+function adminAdd(){
+  var match=document.getElementById('aMatch').value.trim();
+  if(!match){alert('Remplis le match');return;}
+  var parts=match.split(' vs ');
+  var cote=parseFloat(document.getElementById('aCote').value)||1;
+  var result=document.getElementById('aResult').value;
+  var g=result==='win'?parseFloat((cote-1).toFixed(2)):result==='loss'?-1:0;
+  ALL.unshift({home:parts[0]||match,away:parts[1]||'',date:document.getElementById('aDate').value,
+    prediction:document.getElementById('aBet').value,cote:cote,
+    score:document.getElementById('aScore').value,result:result,gain:g,
+    league:document.getElementById('aLeague').value,type:document.getElementById('aType').value});
+  renderAll();
+  ['aMatch','aBet','aCote','aScore','aLeague'].forEach(function(id){document.getElementById(id).value='';});
+}
+
+function renderAll(){
+  renderStats(); renderTable(); renderChart(); renderList();
+}
+
+// ── DÉMO DATA ────────────────────────────────────────────
+function demoData(){
+  return [
+    {home:'Galatasaray',away:'Liverpool',date:'2026-03-10',prediction:'BTTS Non',cote:2.40,score:'0-2',result:'win',league:'LDC',type:'single'},
+    {home:'PSG',away:'Marseille',date:'2026-03-09',prediction:'Victoire PSG',cote:1.45,score:'2-0',result:'win',league:'Ligue 1',type:'single'},
+    {home:'Real Madrid',away:'Atletico',date:'2026-03-08',prediction:'Over 2.5',cote:1.72,score:'1-1',result:'loss',league:'La Liga',type:'single'},
+    {home:'Bayern',away:'Dortmund',date:'2026-03-07',prediction:'BTTS Oui',cote:1.65,score:'3-1',result:'win',league:'Bundesliga',type:'single'},
+    {home:'Arsenal',away:'Chelsea',date:'2026-03-06',prediction:'Double Chance 1X',cote:1.30,score:'2-0',result:'win',league:'Premier League',type:'single'},
+    {home:'Combiné du jour',away:'3 sélections',date:'2026-03-05',prediction:'PSG + Bayern + Arsenal',cote:3.85,score:'—',result:'loss',league:'MULTI',type:'combi'},
+    {home:'Inter',away:'Juventus',date:'2026-03-04',prediction:'Under 2.5',cote:1.90,score:'1-0',result:'win',league:'Serie A',type:'single'},
+    {home:'Man City',away:'Liverpool',date:'2026-03-03',prediction:'Over 1.5',cote:1.20,score:'3-1',result:'win',league:'Premier League',type:'single'},
+    {home:'Barcelone',away:'Séville',date:'2026-03-01',prediction:'Victoire Barcelone',cote:1.35,score:'0-1',result:'loss',league:'La Liga',type:'single'},
+    {home:'Lyon',away:'Nice',date:'2026-02-28',prediction:'BTTS Non',cote:2.10,score:'0-0',result:'win',league:'Ligue 1',type:'single'},
+    {home:'Combiné VALUE',away:'2 sélections',date:'2026-02-27',prediction:'Real + Inter',cote:2.45,score:'—',result:'win',league:'MULTI',type:'combi'},
+    {home:'Dortmund',away:'Stuttgart',date:'2026-02-26',prediction:'Over 2.5',cote:1.55,score:'3-2',result:'win',league:'Bundesliga',type:'single'},
+  ];
+}
+
+// ── INIT ─────────────────────────────────────────────────
+async function init(){
+  try{
+    var r=await fetch('historique.json?t='+Date.now());
+    if(!r.ok) throw new Error();
+    var d=await r.json();
+    ALL=(d.predictions||[]).sort(function(a,b){return (b.date||'')>(a.date||'')?1:-1;});
+  }catch(e){
+    ALL=demoData();
+  }
+  renderAll();
+}
+init();
+window.addEventListener('resize',function(){renderChart();});
+</script>
+</body>
+</html>

@@ -1390,7 +1390,7 @@ jobs:
               +'=== ABSENCES & SUSPENSIONS ===\\n'
               +injStr+'\\n\\n'
               +'=== FATIGUE ===\\n'
-              +d.home+': '+d.fatH+' (score '+d.fatScoreH+'/100) | '+d.away+': '+d.fatA+' (score '+d.fatScoreA+'/100)+'\\n\\n'
+              +d.home+': '+d.fatH+' (score '+d.fatScoreH+'/100) | '+d.away+': '+d.fatA+' (score '+d.fatScoreA+'/100)\\n\\n'
               +(d.lineup_home_formation||d.lineup_away_formation?'=== COMPOSITIONS CE SOIR ===\\n'
               +(d.lineup_home_formation?d.home+' : '+d.lineup_home_formation+' | '+d.lineup_home_xi+'\\n':d.home+': non publiee\\n')
               +(d.lineup_away_formation?d.away+' : '+d.lineup_away_formation+' | '+d.lineup_away_xi+'\\n':d.away+': non publiee\\n')+'\\n':'')

@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mon Compte — IASHARK</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{
+  --bg:#080c12;--card:#0d1520;
+  --cyan:#22d3ee;--amber:#f59e0b;--green:#10b981;--red:#ef4444;--purple:#8b5cf6;
+  --text:#e2e8f0;--muted:#4a6580;
+  --border:rgba(255,255,255,0.06);--border-cyan:rgba(34,211,238,0.18);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;padding-bottom:90px;}
+body::before{content:'';position:fixed;top:-200px;left:50%;transform:translateX(-50%);width:800px;height:500px;background:radial-gradient(ellipse,rgba(34,211,238,0.04),transparent 70%);pointer-events:none;z-index:0;}
+
+/* HEADER */
+.hdr{position:sticky;top:0;z-index:99;background:rgba(8,12,18,0.97);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);height:56px;padding:0 20px;display:flex;align-items:center;gap:14px;}
+.logo{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:3px;color:var(--text);text-decoration:none;}
+.logo span{color:var(--cyan);}
+.hdr-badge{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:3px;color:var(--muted);}
+.hdr-right{margin-left:auto;}
+.btn-back{font-family:'Space Mono',monospace;font-size:9px;padding:6px 14px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:.2s;}
+.btn-back:hover{border-color:var(--cyan);color:var(--cyan);}
+
+/* PAGE */
+.page{max-width:640px;margin:0 auto;padding:0 20px;position:relative;z-index:1;}
+
+/* ══════════════════════════════════════
+   LOADING
+══════════════════════════════════════ */
+#sLoad{padding:80px 0;display:flex;flex-direction:column;align-items:center;gap:14px;}
+.spinner{width:34px;height:34px;border:2px solid var(--border);border-top-color:var(--cyan);border-radius:50%;animation:spin 1s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.spin-lbl{font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:2px;}
+
+/* ══════════════════════════════════════
+   NON CONNECTÉ — FORMULAIRE SIMPLE
+══════════════════════════════════════ */
+#sGuest{display:none;}
+
+.auth-wrap{padding:32px 0 0;}
+.auth-logo-wrap{text-align:center;margin-bottom:28px;}
+.auth-shark{font-size:40px;margin-bottom:10px;}
+.auth-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(28px,6vw,38px);letter-spacing:2px;margin-bottom:4px;}
+.auth-title span{color:var(--cyan);}
+.auth-subtitle{font-size:13px;color:var(--muted);}
+
+.auth-card{background:var(--card);border:1px solid var(--border);border-radius:18px;overflow:hidden;}
+.auth-tabs{display:flex;border-bottom:1px solid var(--border);}
+.a-tab{flex:1;padding:14px;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:2px;text-align:center;cursor:pointer;color:var(--muted);border:none;background:transparent;transition:.2s;position:relative;}
+.a-tab.active{color:var(--cyan);}
+.a-tab.active::after{content:'';position:absolute;bottom:-1px;left:0;right:0;height:2px;background:var(--cyan);}
+.auth-body{padding:22px 20px;}
+.a-panel{display:none;}
+.a-panel.active{display:block;}
+
+.a-head{margin-bottom:20px;}
+.a-head h2{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:1px;margin-bottom:3px;}
+.a-head p{font-size:12px;color:var(--muted);line-height:1.5;}
+
+.f-msg{font-size:12px;padding:10px 14px;border-radius:10px;margin-bottom:14px;display:none;line-height:1.5;}
+.f-msg.err{background:rgba(239,68,68,0.07);border:1px solid rgba(239,68,68,0.2);color:var(--red);}
+.f-msg.ok{background:rgba(16,185,129,0.07);border:1px solid rgba(16,185,129,0.2);color:var(--green);}
+
+.f-group{margin-bottom:14px;}
+.f-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
+.f-lbl{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:1px;color:var(--muted);}
+.f-link{font-family:'Space Mono',monospace;font-size:8px;color:var(--muted);cursor:pointer;transition:.15s;}
+.f-link:hover{color:var(--cyan);}
+.f-input{width:100%;background:rgba(0,0,0,0.25);border:1px solid var(--border);border-radius:10px;padding:12px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;transition:.2s;}
+.f-input:focus{outline:none;border-color:var(--border-cyan);background:rgba(34,211,238,0.02);}
+.f-input::placeholder{color:rgba(74,101,128,0.6);}
+.f-input.err-input{border-color:rgba(239,68,68,0.4);}
+
+.f-submit{width:100%;padding:13px;border-radius:12px;font-family:'Space Mono',monospace;font-size:10px;letter-spacing:2px;font-weight:700;cursor:pointer;border:none;background:linear-gradient(135deg,#22d3ee,#0ea5e9);color:#000;transition:.2s;margin-top:2px;}
+.f-submit:hover{opacity:.9;transform:translateY(-1px);}
+.f-submit:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+
+.auth-footer{text-align:center;padding:14px 20px;border-top:1px solid var(--border);font-size:12px;color:var(--muted);}
+.auth-footer span{color:var(--cyan);cursor:pointer;}
+.auth-footer span:hover{text-decoration:underline;}
+
+/* ══════════════════════════════════════
+   CONNECTÉ — DASHBOARD
+══════════════════════════════════════ */
+#sUser{display:none;}
+
+/* PROFIL HEADER */
+.profile-head{padding:24px 0 20px;display:flex;align-items:center;gap:14px;}
+.avatar{width:52px;height:52px;border-radius:14px;background:linear-gradient(135deg,rgba(34,211,238,0.12),rgba(139,92,246,0.08));border:1px solid var(--border-cyan);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;}
+.profile-info{flex:1;min-width:0;}
+.profile-name{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.profile-email{font-size:12px;color:var(--muted);margin-bottom:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.plan-pill{display:inline-flex;align-items:center;gap:5px;font-family:'Space Mono',monospace;font-size:7px;letter-spacing:1px;padding:3px 10px;border-radius:20px;}
+.plan-pill.free{background:rgba(74,101,128,0.12);border:1px solid rgba(74,101,128,0.2);color:var(--muted);}
+.plan-pill.pro{background:rgba(34,211,238,0.1);border:1px solid rgba(34,211,238,0.25);color:var(--cyan);}
+.plan-dot{width:4px;height:4px;border-radius:50%;background:currentColor;}
+
+/* ONGLETS DASHBOARD */
+.dash-tabs{display:flex;gap:6px;margin-bottom:20px;overflow-x:auto;scrollbar-width:none;}
+.dash-tabs::-webkit-scrollbar{display:none;}
+.d-tab{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:1px;padding:8px 16px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;white-space:nowrap;flex-shrink:0;transition:.2s;}
+.d-tab:hover{border-color:var(--cyan);color:var(--cyan);}
+.d-tab.active{background:rgba(34,211,238,0.1);border-color:var(--border-cyan);color:var(--cyan);}
+
+.d-panel{display:none;}
+.d-panel.active{display:block;}
+
+/* SECTION TITLE */
+.sec-t{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:3px;color:var(--muted);display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+.sec-t::after{content:'';flex:1;height:1px;background:var(--border);}
+.sec-t span{color:var(--cyan);}
+
+/* ── ONGLET VUE D'ENSEMBLE ── */
+.overview-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px;}
+@media(max-width:400px){.overview-stats{grid-template-columns:repeat(2,1fr);}}
+.o-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px 12px;}
+.o-lbl{font-family:'Space Mono',monospace;font-size:7px;letter-spacing:1.5px;color:var(--muted);margin-bottom:6px;}
+.o-val{font-family:'Bebas Neue',sans-serif;font-size:26px;line-height:1;margin-bottom:2px;}
+.o-sub{font-family:'Space Mono',monospace;font-size:7px;color:var(--muted);}
+
+/* Plan card dans overview */
+.plan-overview{border-radius:16px;padding:18px;margin-bottom:20px;}
+.plan-overview.free{background:var(--card);border:1px solid var(--border);}
+.plan-overview.pro{background:linear-gradient(145deg,#0d1a22,#0a1218);border:1px solid rgba(34,211,238,0.25);}
+.po-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.po-name{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:1px;}
+.free .po-name{color:var(--text);}
+.pro .po-name{color:var(--cyan);}
+.po-status{font-family:'Space Mono',monospace;font-size:7px;padding:3px 10px;border-radius:20px;}
+.po-status.on{background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.2);color:var(--green);}
+.po-status.off{background:rgba(74,101,128,0.1);border:1px solid rgba(74,101,128,0.2);color:var(--muted);}
+.po-desc{font-size:12px;color:var(--muted);line-height:1.55;margin-bottom:14px;}
+.po-btn{width:100%;padding:12px;border-radius:12px;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:2px;font-weight:700;cursor:pointer;border:none;transition:.2s;}
+.free .po-btn{background:linear-gradient(135deg,var(--cyan),#0ea5e9);color:#000;}
+.free .po-btn:hover{opacity:.9;}
+.pro .po-btn{background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);color:var(--red);}
+.po-renewal{font-family:'Space Mono',monospace;font-size:8px;color:var(--muted);margin-bottom:10px;}
+.po-renewal strong{color:var(--text);}
+
+/* Accès rapides */
+.quick-links{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px;}
+.ql-item{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;cursor:pointer;transition:.2s;display:flex;align-items:center;gap:10px;}
+.ql-item:hover{border-color:var(--border-cyan);}
+.ql-ico{font-size:22px;}
+.ql-text .ql-title{font-size:13px;font-weight:600;margin-bottom:2px;}
+.ql-text .ql-sub{font-size:11px;color:var(--muted);}
+
+/* ── ONGLET PARAMÈTRES ── */
+.settings-card{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:14px;}
+.s-row{padding:14px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);transition:background .15s;}
+.s-row:last-child{border-bottom:none;}
+.s-row:hover{background:rgba(255,255,255,0.02);}
+.sr-left{display:flex;align-items:center;gap:12px;}
+.sr-ico{font-size:18px;width:28px;text-align:center;}
+.sr-label{font-size:13px;font-weight:500;}
+.sr-sub{font-size:11px;color:var(--muted);margin-top:1px;}
+.sr-btn{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:1px;padding:6px 12px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:.2s;flex-shrink:0;}
+.sr-btn:hover{border-color:var(--cyan);color:var(--cyan);}
+.sr-btn.red:hover{border-color:var(--red);color:var(--red);}
+.sr-val{font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:200;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s;}
+.modal-overlay.open{opacity:1;pointer-events:all;}
+.modal{background:#0d1520;border:1px solid var(--border);border-radius:18px 18px 0 0;padding:24px 20px 32px;width:100%;max-width:640px;transform:translateY(20px);transition:transform .25s;}
+.modal-overlay.open .modal{transform:translateY(0);}
+.modal-title{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:1px;margin-bottom:4px;}
+.modal-sub{font-size:12px;color:var(--muted);margin-bottom:18px;line-height:1.5;}
+.modal-close{position:absolute;top:18px;right:20px;font-size:20px;cursor:pointer;color:var(--muted);}
+.modal-close:hover{color:var(--text);}
+
+/* LOGOUT */
+.logout-wrap{margin-bottom:6px;}
+.logout-btn{width:100%;padding:13px;border-radius:12px;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:2px;cursor:pointer;border:1px solid rgba(239,68,68,0.2);background:rgba(239,68,68,0.05);color:var(--red);transition:.2s;}
+.logout-btn:hover{background:rgba(239,68,68,0.1);border-color:rgba(239,68,68,0.4);}
+
+/* NAV */
+.nav-bottom{position:fixed;bottom:0;left:0;right:0;background:rgba(8,12,18,0.97);backdrop-filter:blur(14px);border-top:1px solid var(--border);display:flex;z-index:100;}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;padding:10px 4px 8px;gap:3px;cursor:pointer;-webkit-tap-highlight-color:transparent;}
+.nav-ico{font-size:18px;}
+.nav-lbl{font-family:'Space Mono',monospace;font-size:7px;color:var(--muted);letter-spacing:1px;}
+.nav-item.active .nav-lbl{color:var(--cyan);}
+.nav-item.active .nav-ico{filter:drop-shadow(0 0 6px rgba(34,211,238,0.5));}
+</style>
+</head>
+<body>
+
+<header class="hdr">
+  <a href="/" class="logo"><span>IA</span>SHARK</a>
+  <div class="hdr-badge" id="hdrBadge">COMPTE</div>
+  <div class="hdr-right">
+    <button class="btn-back" onclick="location.href='/'">← ANALYSES</button>
+  </div>
+</header>
+
+<div class="page">
+
+  <!-- LOADING -->
+  <div id="sLoad">
+    <div class="spinner"></div>
+    <div class="spin-lbl">CHARGEMENT...</div>
+  </div>
+
+  <!-- ══════════════════════════════
+       NON CONNECTÉ
+  ══════════════════════════════ -->
+  <div id="sGuest">
+    <div class="auth-wrap">
+      <div class="auth-logo-wrap">
+        <div class="auth-shark">🦈</div>
+        <div class="auth-title"><span>IA</span>SHARK</div>
+        <div class="auth-subtitle">Connecte-toi pour accéder à ton espace</div>
+      </div>
+
+      <div class="auth-card">
+        <div class="auth-tabs">
+          <button class="a-tab active" id="tabL" onclick="switchTab('login')">CONNEXION</button>
+          <button class="a-tab" id="tabR" onclick="switchTab('register')">INSCRIPTION</button>
+        </div>
+        <div class="auth-body">
+
+          <!-- LOGIN -->
+          <div class="a-panel active" id="pLogin">
+            <div class="a-head">
+              <h2>Content de te revoir 👋</h2>
+              <p>Entre tes identifiants pour accéder à ton compte.</p>
+            </div>
+            <div class="f-msg" id="msgLogin"></div>
+            <div class="f-group">
+              <div class="f-row"><label class="f-lbl">EMAIL</label></div>
+              <input class="f-input" id="lEmail" type="email" placeholder="ton@email.com" autocomplete="email">
+            </div>
+            <div class="f-group">
+              <div class="f-row">
+                <label class="f-lbl">MOT DE PASSE</label>
+                <span class="f-link" onclick="doForgot()">Oublié ?</span>
+              </div>
+              <input class="f-input" id="lPass" type="password" placeholder="••••••••" autocomplete="current-password">
+            </div>
+            <button class="f-submit" id="btnLogin" onclick="doLogin()">SE CONNECTER</button>
+          </div>
+
+          <!-- REGISTER -->
+          <div class="a-panel" id="pRegister">
+            <div class="a-head">
+              <h2>Crée ton compte 🚀</h2>
+              <p>Gratuit, sans CB requise. Upgrade PRO quand tu veux.</p>
+            </div>
+            <div class="f-msg" id="msgRegister"></div>
+            <div class="f-group">
+              <div class="f-row"><label class="f-lbl">EMAIL</label></div>
+              <input class="f-input" id="rEmail" type="email" placeholder="ton@email.com" autocomplete="email">
+            </div>
+            <div class="f-group">
+              <div class="f-row"><label class="f-lbl">MOT DE PASSE</label></div>
+              <input class="f-input" id="rPass" type="password" placeholder="8 caractères minimum" autocomplete="new-password">
+            </div>
+            <div class="f-group">
+              <div class="f-row"><label class="f-lbl">CONFIRMER</label></div>
+              <input class="f-input" id="rConfirm" type="password" placeholder="Répète le mot de passe" autocomplete="new-password">
+            </div>
+            <button class="f-submit" id="btnRegister" onclick="doRegister()">CRÉER MON COMPTE</button>
+          </div>
+
+        </div>
+        <div class="auth-footer" id="authFooter">
+          Pas encore de compte ? <span onclick="switchTab('register')">S'inscrire gratuitement</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════
+       CONNECTÉ — DASHBOARD
+  ══════════════════════════════ -->
+  <div id="sUser">
+
+    <!-- PROFIL -->
+    <div class="profile-head">
+      <div class="avatar">🦈</div>
+      <div class="profile-info">
+        <div class="profile-email" id="uEmail">—</div>
+        <div class="profile-name" id="uName">—</div>
+        <div class="plan-pill free" id="uPill"><span class="plan-dot"></span> <span id="uPillTxt">FREE</span></div>
+      </div>
+    </div>
+
+    <!-- ONGLETS -->
+    <div class="dash-tabs">
+      <button class="d-tab active" onclick="switchDash('overview')">🏠 VUE D'ENSEMBLE</button>
+      <button class="d-tab" onclick="switchDash('settings')">⚙️ PARAMÈTRES</button>
+    </div>
+
+    <!-- ── OVERVIEW ── -->
+    <div class="d-panel active" id="dOverview">
+
+      <div class="sec-t">📊 <span>MES STATS</span></div>
+      <div class="overview-stats">
+        <div class="o-card"><div class="o-lbl">WINRATE</div><div class="o-val" id="oWr" style="color:var(--green)">—</div><div class="o-sub">GLOBAL</div></div>
+        <div class="o-card"><div class="o-lbl">ROI</div><div class="o-val" id="oRoi" style="font-size:22px;color:var(--cyan)">—</div><div class="o-sub">PAR UNITÉ</div></div>
+        <div class="o-card"><div class="o-lbl">PARIS</div><div class="o-val" id="oParis">—</div><div class="o-sub">TERMINÉS</div></div>
+      </div>
+
+      <div class="sec-t">💳 <span>MON PLAN</span></div>
+      <div id="planCard"><!-- injecté --></div>
+
+      <div class="sec-t">🔗 <span>ACCÈS RAPIDE</span></div>
+      <div class="quick-links">
+        <div class="ql-item" onclick="location.href='/historique.html'">
+          <div class="ql-ico">📊</div>
+          <div class="ql-text"><div class="ql-title">Historique</div><div class="ql-sub">Résultats passés</div></div>
+        </div>
+        <div class="ql-item" onclick="location.href='/combis.html'">
+          <div class="ql-ico">🎰</div>
+          <div class="ql-text"><div class="ql-title">Combinés</div><div class="ql-sub">Du jour</div></div>
+        </div>
+        <div class="ql-item" onclick="location.href='/'">
+          <div class="ql-ico">⚡</div>
+          <div class="ql-text"><div class="ql-title">Analyses</div><div class="ql-sub">Matchs du jour</div></div>
+        </div>
+        <div class="ql-item" onclick="location.href='/blog/'">
+          <div class="ql-ico">📖</div>
+          <div class="ql-text"><div class="ql-title">Guides</div><div class="ql-sub">Stratégies paris</div></div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ── PARAMÈTRES ── -->
+    <div class="d-panel" id="dSettings">
+
+      <div class="sec-t">👤 <span>MON COMPTE</span></div>
+      <div class="settings-card">
+        <div class="s-row">
+          <div class="sr-left">
+            <div class="sr-ico">📧</div>
+            <div><div class="sr-label">Email</div><div class="sr-sub" id="setEmail">—</div></div>
+          </div>
+          <button class="sr-btn" onclick="openModal('email')">MODIFIER</button>
+        </div>
+        <div class="s-row">
+          <div class="sr-left">
+            <div class="sr-ico">🔐</div>
+            <div><div class="sr-label">Mot de passe</div><div class="sr-sub">Modifier ton mot de passe</div></div>
+          </div>
+          <button class="sr-btn" onclick="openModal('password')">MODIFIER</button>
+        </div>
+        <div class="s-row">
+          <div class="sr-left">
+            <div class="sr-ico">📅</div>
+            <div><div class="sr-label">Membre depuis</div><div class="sr-sub" id="setSince">—</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sec-t">💳 <span>ABONNEMENT</span></div>
+      <div class="settings-card">
+        <div class="s-row">
+          <div class="sr-left">
+            <div class="sr-ico">⚡</div>
+            <div><div class="sr-label">Plan actuel</div><div class="sr-sub" id="setPlan">—</div></div>
+          </div>
+          <button class="sr-btn" id="setBtnPlan" onclick="handlePlanBtn()">—</button>
+        </div>
+        <div class="s-row" id="setRenewRow" style="display:none">
+          <div class="sr-left">
+            <div class="sr-ico">🔄</div>
+            <div><div class="sr-label">Renouvellement</div><div class="sr-sub" id="setRenew">—</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sec-t">⚠️ <span>ZONE DANGER</span></div>
+      <div class="settings-card">
+        <div class="s-row">
+          <div class="sr-left">
+            <div class="sr-ico">🗑️</div>
+            <div><div class="sr-label">Supprimer mon compte</div><div class="sr-sub">Action irréversible</div></div>
+          </div>
+          <button class="sr-btn red" onclick="confirmDelete()">SUPPRIMER</button>
+        </div>
+      </div>
+
+      <div class="logout-wrap">
+        <button class="logout-btn" onclick="doLogout()">⏻ SE DÉCONNECTER</button>
+      </div>
+
+    </div><!-- /dSettings -->
+
+  </div><!-- /sUser -->
+
+</div><!-- /page -->
+
+<!-- MODAL MODIFIER EMAIL / MDP -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal" style="position:relative;">
+    <span class="modal-close" onclick="closeModal()">✕</span>
+    <div class="modal-title" id="modalTitle">—</div>
+    <div class="modal-sub" id="modalSub">—</div>
+    <div class="f-msg" id="modalMsg"></div>
+    <div id="modalFields"></div>
+    <button class="f-submit" id="modalBtn" onclick="doModalAction()">CONFIRMER</button>
+  </div>
+</div>
+
+<nav class="nav-bottom">
+  <div class="nav-item" onclick="location.href='/'"><div class="nav-ico">⚡</div><div class="nav-lbl">ANALYSES</div></div>
+  <div class="nav-item" onclick="location.href='/historique.html'"><div class="nav-ico">📊</div><div class="nav-lbl">HISTORIQUE</div></div>
+  <div class="nav-item" onclick="location.href='/combis.html'"><div class="nav-ico">🎰</div><div class="nav-lbl">COMBINÉS</div></div>
+  <div class="nav-item" onclick="location.href='/blog/'"><div class="nav-ico">📖</div><div class="nav-lbl">GUIDES</div></div>
+  <div class="nav-item active"><div class="nav-ico">👤</div><div class="nav-lbl">COMPTE</div></div>
+</nav>
+
+<script>
+// ── SUPABASE ─────────────────────────────────────────────
+const SB_URL = 'https://ksvjraqitxouwiabecai.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtzdmpyYXFpdHhvdXdpYWJlY2FpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEzNTAyOTQsImV4cCI6MjA1NjkyNjI5NH0.fgKhVOq3TKWB_B-MeFZ97PBQ_2xFpO_pHC7TA4RFARM';
+const sb = supabase.createClient(SB_URL, SB_KEY);
+
+var currentUser = null;
+var currentPlan = 'free';
+var modalAction = null;
+
+// ── STATES ───────────────────────────────────────────────
+function show(id){
+  ['sLoad','sGuest','sUser'].forEach(function(s){
+    document.getElementById(s).style.display = s===id ? 'block' : 'none';
+  });
+  if(id==='sLoad') document.getElementById(id).style.display='flex';
+}
+
+// ── AUTH TABS ────────────────────────────────────────────
+function switchTab(t){
+  var isL = t==='login';
+  document.getElementById('tabL').classList.toggle('active',isL);
+  document.getElementById('tabR').classList.toggle('active',!isL);
+  document.getElementById('pLogin').classList.toggle('active',isL);
+  document.getElementById('pRegister').classList.toggle('active',!isL);
+  document.getElementById('authFooter').innerHTML = isL
+    ? 'Pas encore de compte ? <span onclick="switchTab(\'register\')">S\'inscrire gratuitement</span>'
+    : 'Déjà un compte ? <span onclick="switchTab(\'login\')">Se connecter</span>';
+}
+
+// ── DASH TABS ────────────────────────────────────────────
+function switchDash(t){
+  document.querySelectorAll('.d-tab').forEach(function(b,i){
+    b.classList.toggle('active', (i===0&&t==='overview')||(i===1&&t==='settings'));
+  });
+  document.getElementById('dOverview').classList.toggle('active', t==='overview');
+  document.getElementById('dSettings').classList.toggle('active', t==='settings');
+}
+
+// ── MSG ──────────────────────────────────────────────────
+function msg(id, type, txt){
+  var el=document.getElementById(id);
+  el.className='f-msg '+(type==='err'?'err':'ok');
+  el.textContent=txt; el.style.display='block';
+}
+
+// ── LOGIN ────────────────────────────────────────────────
+async function doLogin(){
+  var email=document.getElementById('lEmail').value.trim();
+  var pass=document.getElementById('lPass').value;
+  if(!email||!pass){msg('msgLogin','err','Remplis tous les champs.');return;}
+  var btn=document.getElementById('btnLogin');
+  btn.disabled=true;btn.textContent='CONNEXION...';
+  var {error}=await sb.auth.signInWithPassword({email,password:pass});
+  btn.disabled=false;btn.textContent='SE CONNECTER';
+  if(error) msg('msgLogin','err',error.message.includes('Invalid')?'Email ou mot de passe incorrect.':error.message);
+}
+
+// ── REGISTER ─────────────────────────────────────────────
+async function doRegister(){
+  var email=document.getElementById('rEmail').value.trim();
+  var pass=document.getElementById('rPass').value;
+  var conf=document.getElementById('rConfirm').value;
+  if(!email||!pass){msg('msgRegister','err','Remplis tous les champs.');return;}
+  if(pass.length<8){msg('msgRegister','err','Mot de passe : 8 caractères minimum.');return;}
+  if(pass!==conf){msg('msgRegister','err','Les mots de passe ne correspondent pas.');return;}
+  var btn=document.getElementById('btnRegister');
+  btn.disabled=true;btn.textContent='CRÉATION...';
+  var {error}=await sb.auth.signUp({email,password:pass});
+  btn.disabled=false;btn.textContent='CRÉER MON COMPTE';
+  if(error) msg('msgRegister','err',error.message);
+  else msg('msgRegister','ok','✅ Compte créé ! Vérifie ton email pour confirmer.');
+}
+
+// ── FORGOT ───────────────────────────────────────────────
+async function doForgot(){
+  var email=document.getElementById('lEmail').value.trim();
+  if(!email){msg('msgLogin','err','Entre ton email d\'abord.');return;}
+  await sb.auth.resetPasswordForEmail(email,{redirectTo:'https://iashark.com/compte.html'});
+  msg('msgLogin','ok','✅ Email de réinitialisation envoyé !');
+}
+
+// ── LOGOUT ───────────────────────────────────────────────
+async function doLogout(){
+  if(!confirm('Se déconnecter ?')) return;
+  await sb.auth.signOut();
+}
+
+// ── LOAD USER ────────────────────────────────────────────
+async function loadUser(user){
+  currentUser = user;
+  var name = user.email.split('@')[0].toUpperCase();
+  document.getElementById('uEmail').textContent = user.email;
+  document.getElementById('uName').textContent = name;
+  document.getElementById('setEmail').textContent = user.email;
+
+  // Membre depuis
+  var d = new Date(user.created_at);
+  var ms = ['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'];
+  var sinceStr = ms[d.getMonth()]+' '+d.getFullYear();
+  document.getElementById('setSince').textContent = sinceStr;
+
+  // Plan depuis Supabase
+  try {
+    var {data:profile} = await sb.from('users').select('plan').eq('id',user.id).single();
+    currentPlan = profile?.plan || 'free';
+  } catch(e){ currentPlan='free'; }
+
+  var isPro = currentPlan==='pro';
+
+  // Badge
+  var pill = document.getElementById('uPill');
+  pill.className = 'plan-pill '+(isPro?'pro':'free');
+  document.getElementById('uPillTxt').textContent = isPro?'⚡ PRO':'FREE';
+
+  // Plan card (overview)
+  renderPlanCard(isPro);
+
+  // Plan settings
+  document.getElementById('setPlan').textContent = isPro ? 'IASHARK PRO — Actif' : 'Gratuit — Plan FREE';
+  var planBtn = document.getElementById('setBtnPlan');
+  if(isPro){
+    planBtn.textContent = 'GÉRER';
+    document.getElementById('setRenewRow').style.display = 'flex';
+  } else {
+    planBtn.textContent = 'UPGRADE';
+  }
+
+  // Stats depuis historique.json
+  try {
+    var r = await fetch('historique.json?t='+Date.now());
+    if(!r.ok) throw new Error();
+    var histo = await r.json();
+    var preds = (histo.predictions||[]).filter(function(p){return p.result==='win'||p.result==='loss';});
+    var wins = preds.filter(function(p){return p.result==='win';}).length;
+    var wr = preds.length?Math.round(wins/preds.length*100):0;
+    var net = preds.reduce(function(s,p){
+      var g=p.gain!=null?p.gain:p.result==='win'?parseFloat((parseFloat(p.cote||1)-1).toFixed(2)):-1;
+      return s+g;
+    },0);
+    var roi = preds.length?parseFloat((net/preds.length*100).toFixed(1)):0;
+    document.getElementById('oWr').textContent = wr+'%';
+    document.getElementById('oParis').textContent = preds.length;
+    var roiEl = document.getElementById('oRoi');
+    roiEl.textContent = (roi>=0?'+':'')+roi+'%';
+    roiEl.style.color = roi>0?'var(--green)':roi<0?'var(--red)':'var(--cyan)';
+  } catch(e){
+    ['oWr','oRoi','oParis'].forEach(function(id){document.getElementById(id).textContent='—';});
+  }
+
+  show('sUser');
+}
+
+function renderPlanCard(isPro){
+  var el = document.getElementById('planCard');
+  if(isPro){
+    el.innerHTML='<div class="plan-overview pro">'
+      +'<div class="po-top"><div class="po-name">⚡ IASHARK PRO</div><div class="po-status on">ACTIF</div></div>'
+      +'<div class="po-desc">Tu as accès à tout — analyses complètes, paris AUDACE, combinés exclusifs, score probable IA.</div>'
+      +'<div class="po-renewal">Renouvellement automatique · <strong id="poDate">—</strong></div>'
+      +'<button class="po-btn" onclick="handlePlanBtn()">GÉRER L\'ABONNEMENT</button>'
+      +'</div>';
+  } else {
+    el.innerHTML='<div class="plan-overview free">'
+      +'<div class="po-top"><div class="po-name">PLAN FREE</div><div class="po-status off">GRATUIT</div></div>'
+      +'<div class="po-desc">Analyses de base incluses. Passe à PRO pour débloquer score probable IA, paris AUDACE et combinés exclusifs — 5€/mois sans engagement.</div>'
+      +'<button class="po-btn" onclick="goCheckout()">⚡ PASSER À PRO — 5€/MOIS</button>'
+      +'</div>';
+  }
+}
+
+// ── STRIPE ACTIONS ───────────────────────────────────────
+function handlePlanBtn(){
+  if(currentPlan==='pro') manageSubscription();
+  else goCheckout();
+}
+function goCheckout(){
+  // À remplacer par l'URL Stripe Checkout quand prêt
+  alert('Stripe sera disponible dès que le compte auto-entrepreneur est activé.\n\nPrix : 5€/mois · Sans engagement · Annulable à tout moment.');
+}
+function manageSubscription(){
+  // À remplacer par l'URL du portail Stripe Customer Portal
+  alert('Portail de gestion Stripe à venir. Pour annuler maintenant, contacte contact@iashark.com');
+}
+
+// ── MODAL ────────────────────────────────────────────────
+function openModal(type){
+  var overlay = document.getElementById('modalOverlay');
+  var fields = document.getElementById('modalFields');
+  document.getElementById('modalMsg').style.display='none';
+
+  if(type==='email'){
+    document.getElementById('modalTitle').textContent = 'Modifier l\'email';
+    document.getElementById('modalSub').textContent = 'Entre ton nouvel email. Un lien de confirmation sera envoyé.';
+    fields.innerHTML = '<div class="f-group"><div class="f-row"><label class="f-lbl">NOUVEL EMAIL</label></div><input class="f-input" id="mField1" type="email" placeholder="nouveau@email.com"></div>';
+    modalAction = 'email';
+  } else if(type==='password'){
+    document.getElementById('modalTitle').textContent = 'Modifier le mot de passe';
+    document.getElementById('modalSub').textContent = 'Choisis un nouveau mot de passe (8 caractères minimum).';
+    fields.innerHTML = '<div class="f-group"><div class="f-row"><label class="f-lbl">NOUVEAU MOT DE PASSE</label></div><input class="f-input" id="mField1" type="password" placeholder="••••••••"></div>'
+      +'<div class="f-group"><div class="f-row"><label class="f-lbl">CONFIRMER</label></div><input class="f-input" id="mField2" type="password" placeholder="••••••••"></div>';
+    modalAction = 'password';
+  }
+  overlay.classList.add('open');
+}
+function closeModal(e){
+  if(e && e.target !== document.getElementById('modalOverlay')) return;
+  document.getElementById('modalOverlay').classList.remove('open');
+}
+async function doModalAction(){
+  var btn = document.getElementById('modalBtn');
+  btn.disabled=true; btn.textContent='EN COURS...';
+  if(modalAction==='email'){
+    var val = document.getElementById('mField1').value.trim();
+    if(!val){msg('modalMsg','err','Entre un email valide.');btn.disabled=false;btn.textContent='CONFIRMER';return;}
+    var {error} = await sb.auth.updateUser({email:val});
+    if(error) msg('modalMsg','err',error.message);
+    else { msg('modalMsg','ok','✅ Email mis à jour ! Vérifie ta boîte mail.'); document.getElementById('uEmail').textContent=val; document.getElementById('setEmail').textContent=val; }
+  } else if(modalAction==='password'){
+    var p1=document.getElementById('mField1').value;
+    var p2=document.getElementById('mField2').value;
+    if(p1.length<8){msg('modalMsg','err','8 caractères minimum.');btn.disabled=false;btn.textContent='CONFIRMER';return;}
+    if(p1!==p2){msg('modalMsg','err','Les mots de passe ne correspondent pas.');btn.disabled=false;btn.textContent='CONFIRMER';return;}
+    var {error} = await sb.auth.updateUser({password:p1});
+    if(error) msg('modalMsg','err',error.message);
+    else msg('modalMsg','ok','✅ Mot de passe mis à jour !');
+  }
+  btn.disabled=false; btn.textContent='CONFIRMER';
+}
+
+// ── DELETE ───────────────────────────────────────────────
+function confirmDelete(){
+  if(confirm('⚠️ Supprimer définitivement ton compte IASHARK ?\nCette action est irréversible.')){
+    alert('Pour supprimer ton compte, envoie un email à contact@iashark.com depuis l\'adresse de ton compte.');
+  }
+}
+
+// ── INIT ─────────────────────────────────────────────────
+show('sLoad');
+sb.auth.onAuthStateChange(function(event, session){
+  if(session && session.user) loadUser(session.user);
+  else show('sGuest');
+});
+</script>
+</body>
+</html>

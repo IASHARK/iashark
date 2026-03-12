@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>IASHARK — Pronostics Football IA · Analyses Quotidiennes</title>
+<meta name="description" content="Pronostics football alimentés par l'intelligence artificielle. Analyses statistiques, edge IA et value bets quotidiens.">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23080c12'/%3E%3Ctext x='50%25' y='54%25' dominant-baseline='middle' text-anchor='middle' font-size='40' fill='%2322d3ee'%3E🦈%3C/text%3E%3C/svg%3E">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#080c12;--card:#0d1520;--card2:#0f1a28;--cyan:#22d3ee;--cyan2:#06b6d4;--amber:#f59e0b;--green:#10b981;--red:#ef4444;--purple:#8b5cf6;--text:#e2e8f0;--muted:#4a6580;--border:rgba(255,255,255,0.06);--border-cyan:rgba(34,211,238,0.18);}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;padding-bottom:90px;}
+body::before{content:'';position:fixed;top:-300px;left:50%;transform:translateX(-50%);width:900px;height:600px;background:radial-gradient(ellipse,rgba(34,211,238,0.03) 0%,transparent 65%);pointer-events:none;z-index:0;}
+
+/* HEADER */
+.hdr{position:sticky;top:0;z-index:99;background:rgba(8,12,18,0.96);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);padding:0 20px;height:56px;display:flex;align-items:center;justify-content:space-between;}
+.logo{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:3px;color:var(--text);text-decoration:none;}
+.logo span{color:var(--cyan);}
+.hdr-right{display:flex;gap:8px;align-items:center;}
+.hdr-count{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:1px;color:var(--muted);padding:5px 12px;border:1px solid var(--border);border-radius:20px;}
+.hdr-count span{color:var(--cyan);}
+.btn-login{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1px;padding:6px 14px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:.2s;}
+.btn-login:hover{border-color:var(--cyan);color:var(--cyan);}
+.btn-pro{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1px;padding:6px 14px;border-radius:8px;border:1px solid rgba(34,211,238,0.3);background:rgba(34,211,238,0.08);color:var(--cyan);cursor:pointer;transition:.2s;}
+.btn-pro:hover{background:rgba(34,211,238,0.15);}
+
+/* HERO — centré */
+.hero{padding:32px 20px 24px;max-width:720px;margin:0 auto;position:relative;z-index:1;text-align:center;display:flex;flex-direction:column;align-items:center;}
+.hero-shark{font-size:48px;margin-bottom:10px;display:inline-block;animation:float 3s ease-in-out infinite;}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+.hero-tag{display:inline-flex;align-items:center;gap:6px;font-family:'Space Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--cyan);background:rgba(34,211,238,0.06);border:1px solid var(--border-cyan);padding:4px 12px;border-radius:20px;margin-bottom:14px;}
+.hero-tag .dot{width:5px;height:5px;background:var(--cyan);border-radius:50%;animation:blink 1.2s infinite;}
+.hero-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(36px,8vw,56px);letter-spacing:3px;line-height:1.0;margin-bottom:8px;}
+.hero-title span{color:var(--cyan);}
+.hero-sub{font-size:13px;color:#64748b;line-height:1.7;margin-bottom:20px;max-width:400px;}
+.hero-count{display:flex;flex-direction:column;align-items:center;gap:2px;}
+.hero-count-num{font-family:'Bebas Neue',sans-serif;font-size:42px;color:var(--cyan);line-height:1;}
+.hero-count-lbl{font-family:'Space Mono',monospace;font-size:8px;color:var(--muted);letter-spacing:2px;}
+
+/* FILTERS */
+.filters{max-width:720px;margin:0 auto 14px;padding:0 20px;display:flex;gap:7px;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;position:relative;z-index:1;}
+.filters::-webkit-scrollbar{display:none;}
+.filter-btn{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:1px;padding:6px 14px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:.2s;white-space:nowrap;flex-shrink:0;}
+.filter-btn:hover,.filter-btn.active{background:rgba(34,211,238,0.1);border-color:var(--border-cyan);color:var(--cyan);}
+
+/* SECTION LABEL */
+.section-lbl{max-width:720px;margin:0 auto 10px;padding:0 20px;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:3px;color:var(--muted);display:flex;align-items:center;gap:10px;position:relative;z-index:1;}
+.section-lbl::after{content:'';flex:1;height:1px;background:var(--border);}
+.section-lbl span{color:var(--cyan);}
+
+/* CARDS */
+.cards-list{max-width:720px;margin:0 auto;padding:0 20px;display:flex;flex-direction:column;gap:10px;position:relative;z-index:1;}
+.mc{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;cursor:pointer;transition:border-color .2s,transform .2s,box-shadow .2s;animation:fadeup .4s ease forwards;opacity:0;}
+.mc:nth-child(1){animation-delay:.05s}.mc:nth-child(2){animation-delay:.10s}.mc:nth-child(3){animation-delay:.15s}.mc:nth-child(4){animation-delay:.20s}.mc:nth-child(5){animation-delay:.25s}.mc:nth-child(n+6){animation-delay:.30s}
+@keyframes fadeup{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.mc:hover{border-color:rgba(34,211,238,0.25);transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,0.3);}
+.mc.value{border-color:rgba(34,211,238,0.18);}
+.mc.hot{border-color:rgba(245,158,11,0.25);}
+.mc.hot:hover{border-color:rgba(245,158,11,0.45);}
+
+/* CARD TOP */
+.mc-top{padding:8px 14px;background:rgba(0,0,0,0.18);display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);}
+.mc-league{display:flex;align-items:center;gap:6px;font-family:'Space Mono',monospace;font-size:8px;color:var(--muted);letter-spacing:1px;}
+.mc-badges{display:flex;gap:5px;align-items:center;flex-wrap:wrap;}
+.badge{font-family:'Space Mono',monospace;font-size:7px;letter-spacing:1px;padding:3px 8px;border-radius:20px;}
+.badge-value{background:rgba(34,211,238,0.08);border:1px solid var(--border-cyan);color:var(--cyan);}
+.badge-hot{background:linear-gradient(135deg,rgba(245,158,11,0.15),rgba(239,68,68,0.08));border:1px solid rgba(245,158,11,0.3);color:var(--amber);}
+.badge-free{background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.2);color:var(--green);}
+
+/* CARD BODY avec logos clubs */
+.mc-body{padding:14px 14px 10px;display:flex;align-items:center;gap:12px;}
+.mc-left{flex:1;min-width:0;}
+.mc-teams{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.mc-team{display:flex;flex-direction:column;align-items:center;gap:4px;min-width:0;}
+.mc-team-logo{width:32px;height:32px;border-radius:50%;object-fit:contain;background:rgba(255,255,255,0.03);flex-shrink:0;}
+.mc-team-logo-placeholder{width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,0.05);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:11px;color:var(--muted);flex-shrink:0;}
+.mc-team-name{font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:1px;color:var(--text);text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:90px;}
+.mc-team.away .mc-team-name{color:rgba(226,232,240,0.6);}
+.mc-teams-sep{display:flex;flex-direction:column;align-items:center;gap:2px;flex-shrink:0;}
+.mc-vs{font-family:'Bebas Neue',sans-serif;font-size:13px;color:var(--muted);}
+.mc-time{font-family:'Space Mono',monospace;font-size:9px;color:var(--cyan);}
+.mc-pari{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.mc-pari-label{font-family:'Space Mono',monospace;font-size:7px;color:var(--amber);letter-spacing:1px;}
+.mc-pari-bet{font-size:13px;font-weight:600;color:var(--text);}
+.mc-pari-cote{font-family:'Bebas Neue',sans-serif;font-size:17px;color:var(--amber);}
+.mc-pari-edge{font-family:'Space Mono',monospace;font-size:8px;color:var(--green);background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.18);padding:2px 7px;border-radius:10px;}
+
+/* CONFIANCE CIRCLE */
+.mc-right{display:flex;flex-direction:column;align-items:center;gap:8px;flex-shrink:0;}
+.conf-circle{width:52px;height:52px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;border:2px solid rgba(255,255,255,0.08);}
+.conf-circle.high{border-color:rgba(245,158,11,0.4);background:rgba(245,158,11,0.06);}
+.conf-circle.med{border-color:rgba(34,211,238,0.35);background:rgba(34,211,238,0.05);}
+.conf-num{font-family:'Bebas Neue',sans-serif;font-size:18px;line-height:1;color:var(--amber);}
+.conf-circle.med .conf-num{color:var(--cyan);}
+.conf-circle.low .conf-num{color:var(--muted);}
+.conf-sub{font-family:'Space Mono',monospace;font-size:7px;color:var(--muted);margin-top:-2px;}
+.mc-cta{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:1px;padding:5px 10px;border-radius:8px;border:1px solid var(--border-cyan);background:rgba(34,211,238,0.08);color:var(--cyan);cursor:pointer;transition:.2s;white-space:nowrap;}
+.mc-cta:hover{background:rgba(34,211,238,0.15);}
+
+/* PROBA BAR */
+.mc-probas{padding:8px 14px 12px;border-top:1px solid var(--border);}
+.prob-bar-wrap{height:5px;border-radius:5px;overflow:hidden;display:flex;margin-bottom:7px;}
+.pb-1{background:linear-gradient(90deg,var(--cyan2),var(--cyan));height:100%;}
+.pb-n{background:rgba(255,255,255,0.1);height:100%;}
+.pb-2{background:rgba(226,232,240,0.2);height:100%;}
+.prob-labels{display:flex;justify-content:space-between;}
+.prob-lbl-item{display:flex;flex-direction:column;align-items:center;gap:1px;}
+.prob-lbl-pct{font-family:'Bebas Neue',sans-serif;font-size:14px;line-height:1;}
+.prob-lbl-txt{font-family:'Space Mono',monospace;font-size:7px;color:var(--muted);letter-spacing:1px;max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+
+/* PRO WALL SECTION */
+.pro-section{max-width:720px;margin:28px auto 0;padding:0 20px;position:relative;z-index:1;}
+.pro-wall-idx{background:#0a0f1a;border:1px solid rgba(255,255,255,0.06);border-radius:20px;overflow:hidden;cursor:pointer;}
+.pro-wall-idx:hover .pw-cta-btn{opacity:.85;}
+.pw-topbar{background:rgba(255,255,255,0.02);border-bottom:1px solid rgba(255,255,255,0.05);padding:14px 20px;display:flex;align-items:center;justify-content:space-between;}
+.pw-topbar-label{font-family:'Space Mono',monospace;font-size:9px;color:#f59e0b;letter-spacing:3px;text-transform:uppercase;}
+.pw-topbar-lock{width:26px;height:26px;border:1px solid rgba(255,255,255,0.1);border-radius:6px;display:flex;align-items:center;justify-content:center;}
+.pw-topbar-lock svg{width:11px;height:11px;fill:none;stroke:rgba(255,255,255,0.3);stroke-width:2;stroke-linecap:round;}
+.pw-header{padding:20px 20px 16px;border-bottom:1px solid rgba(255,255,255,0.04);}
+.pw-title{font-family:'Bebas Neue',sans-serif;font-size:28px;color:#f1f5f9;letter-spacing:2px;line-height:1;margin-bottom:5px;}
+.pw-title span{color:#22d3ee;}
+.pw-subtitle{font-family:'DM Sans',sans-serif;font-size:12px;color:rgba(148,163,184,0.6);font-weight:300;line-height:1.5;}
+.pw-features{padding:0 20px;}
+.pw-feat{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid rgba(255,255,255,0.04);gap:12px;}
+.pw-feat:last-child{border-bottom:none;}
+.pw-feat-left{display:flex;align-items:flex-start;gap:12px;flex:1;}
+.pw-feat-index{font-family:'Space Mono',monospace;font-size:8px;color:#f59e0b;opacity:.7;letter-spacing:1px;padding-top:2px;min-width:16px;}
+.pw-feat-name{font-family:'Space Mono',monospace;font-size:10px;color:#22d3ee;letter-spacing:1px;margin-bottom:3px;font-weight:700;}
+.pw-feat-desc{font-family:'DM Sans',sans-serif;font-size:11px;color:rgba(148,163,184,0.5);font-weight:300;line-height:1.4;}
+.pw-feat-badge{font-family:'Space Mono',monospace;font-size:7px;letter-spacing:1.5px;padding:3px 7px;border-radius:4px;white-space:nowrap;flex-shrink:0;}
+.pw-feat-badge.c1{background:rgba(245,158,11,0.08);color:rgba(245,158,11,0.7);border:1px solid rgba(245,158,11,0.2);}
+.pw-feat-badge.c2{background:rgba(34,211,238,0.06);color:rgba(34,211,238,0.45);border:1px solid rgba(34,211,238,0.12);}
+.pw-pricing{margin:0 20px;padding:16px 0 0;border-top:1px solid rgba(255,255,255,0.05);display:flex;align-items:center;justify-content:space-between;gap:16px;}
+.pw-price-amount{font-family:'Bebas Neue',sans-serif;font-size:50px;color:#f59e0b;line-height:1;}
+.pw-price-amount span{font-size:24px;color:rgba(245,158,11,0.4);}
+.pw-price-period{font-family:'Space Mono',monospace;font-size:8px;color:rgba(148,163,184,0.35);letter-spacing:2px;margin-bottom:8px;}
+.pw-price-item{font-family:'DM Sans',sans-serif;font-size:11px;color:rgba(148,163,184,0.5);display:flex;align-items:center;gap:7px;font-weight:300;padding:2px 0;}
+.pw-price-item::before{content:'';width:4px;height:4px;border-radius:50%;background:#22d3ee;opacity:.5;flex-shrink:0;}
+.pw-cta-wrap{padding:16px 20px 20px;}
+.pw-cta-btn{width:100%;background:#22d3ee;color:#080c12;font-family:'Space Mono',monospace;font-size:10px;letter-spacing:2.5px;font-weight:700;padding:15px;border:none;border-radius:10px;cursor:pointer;transition:opacity .2s;text-align:center;display:block;}
+.pw-note{font-family:'Space Mono',monospace;font-size:7px;color:rgba(148,163,184,0.25);text-align:center;margin-top:8px;letter-spacing:1px;}
+
+/* LOADING / EMPTY */
+.loading-state{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 20px;gap:16px;}
+.loading-spinner{width:40px;height:40px;border:2px solid var(--border);border-top-color:var(--cyan);border-radius:50%;animation:spin 1s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-text{font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:2px;}
+.empty-state{text-align:center;padding:48px 20px;}
+.empty-state h3{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:1px;color:var(--muted);margin-bottom:6px;}
+.empty-state p{font-size:13px;color:var(--muted);}
+
+/* BOTTOM NAV */
+.nav-bottom{position:fixed;bottom:0;left:0;right:0;background:rgba(8,12,18,0.97);backdrop-filter:blur(14px);border-top:1px solid var(--border);display:flex;z-index:100;}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px 4px 8px;gap:3px;cursor:pointer;transition:.2s;-webkit-tap-highlight-color:transparent;}
+.nav-icon{font-size:18px;transition:.2s;}
+.nav-lbl{font-family:'Space Mono',monospace;font-size:7px;color:var(--muted);letter-spacing:1px;}
+.nav-item.active .nav-lbl{color:var(--cyan);}
+.nav-item.active .nav-icon{filter:drop-shadow(0 0 6px rgba(34,211,238,0.5));}
+
+/* LANG */
+.lang-wrap{position:relative;}
+.lang-btn{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:1px;padding:6px 10px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:.2s;}
+.lang-btn:hover{border-color:var(--cyan);color:var(--cyan);}
+.lang-menu{display:none;position:absolute;top:calc(100% + 6px);right:0;background:#0d1520;border:1px solid var(--border);border-radius:10px;overflow:hidden;z-index:200;min-width:140px;}
+.lang-menu.open{display:block;}
+.lang-opt{padding:9px 14px;font-family:'DM Sans',sans-serif;font-size:12px;color:var(--muted);cursor:pointer;transition:.15s;}
+.lang-opt:hover{background:rgba(34,211,238,0.06);color:var(--cyan);}
+
+@media(max-width:480px){
+  .mc-team-name{font-size:13px;max-width:70px;}
+  .mc-team-logo,.mc-team-logo-placeholder{width:26px;height:26px;}
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="hdr">
+  <a href="/" class="logo"><span>IA</span>SHARK</a>
+  <div class="hdr-right">
+    <div class="hdr-count" id="matchCount">⟳</div>
+    <div class="lang-wrap" id="langWrap">
+      <button class="lang-btn" onclick="toggleLang(event)">🌐 FR</button>
+      <div class="lang-menu" id="langMenu">
+        <div class="lang-opt" onclick="setLang('fr')">🇫🇷 Français</div>
+        <div class="lang-opt" onclick="setLang('en')">🇬🇧 English</div>
+        <div class="lang-opt" onclick="setLang('es')">🇪🇸 Español</div>
+        <div class="lang-opt" onclick="setLang('pt')">🇧🇷 Português</div>
+        <div class="lang-opt" onclick="setLang('de')">🇩🇪 Deutsch</div>
+        <div class="lang-opt" onclick="setLang('it')">🇮🇹 Italiano</div>
+        <div class="lang-opt" onclick="setLang('ar')">🇸🇦 عربي</div>
+      </div>
+    </div>
+    <button class="btn-login" onclick="location.href='/compte.html'">CONNEXION</button>
+    <button class="btn-pro" onclick="location.href='/compte.html'">PRO ▸</button>
+  </div>
+</header>
+
+<!-- HERO centré -->
+<div class="hero">
+  <div class="hero-shark">🦈</div>
+  <div class="hero-tag"><span class="dot"></span> ANALYSES IA EN DIRECT</div>
+  <h1 class="hero-title"><span>IA</span>SHARK</h1>
+  <p class="hero-sub">L'IA qui attaque les cotes. Analyses statistiques quotidiennes alimentées par l'intelligence artificielle.</p>
+  <div class="hero-count">
+    <div class="hero-count-num" id="statMatchs">—</div>
+    <div class="hero-count-lbl">ANALYSES DU JOUR</div>
+  </div>
+</div>
+
+<!-- FILTRES -->
+<div class="filters" id="filters">
+  <button class="filter-btn active" data-filter="all">🌐 TOUS</button>
+  <button class="filter-btn" data-filter="value">⚡ VALUE</button>
+  <button class="filter-btn" data-filter="ldc">🏆 LDC</button>
+  <button class="filter-btn" data-filter="ligue1">🇫🇷 LIGUE 1</button>
+  <button class="filter-btn" data-filter="premier">🏴󠁧󠁢󠁥󠁮󠁧󠁿 PREMIER</button>
+  <button class="filter-btn" data-filter="laliga">🇪🇸 LA LIGA</button>
+  <button class="filter-btn" data-filter="seriea">🇮🇹 SERIE A</button>
+  <button class="filter-btn" data-filter="bundesliga">🇩🇪 BUNDESLIGA</button>
+</div>
+
+<!-- MATCHES -->
+<div class="section-lbl" id="sectionLbl">📅 <span>MATCHS DU JOUR</span></div>
+<div class="cards-list" id="cardsList">
+  <div class="loading-state">
+    <div class="loading-spinner"></div>
+    <div class="loading-text">CHARGEMENT DES ANALYSES...</div>
+  </div>
+</div>
+
+<!-- FOOTER LÉGAL -->
+<div style="max-width:720px;margin:24px auto 0;padding:0 20px 20px;text-align:center;">
+  <div style="font-family:'Space Mono',monospace;font-size:8px;color:rgba(74,101,128,0.5);line-height:2;letter-spacing:1px;">
+    <div>⚠️ LE JEU PEUT ÊTRE DANGEREUX — JOUEZ RESPONSABLE · INTERDIT AUX MOINS DE 18 ANS</div>
+    <div>Aide : <a href="https://www.joueurs-info-service.fr" style="color:rgba(34,211,238,0.4);text-decoration:none;">joueurs-info-service.fr</a> · 09 74 75 13 13 (appel non surtaxé)</div>
+    <div style="margin-top:8px;">
+      <a href="/mentions-legales.html" style="color:rgba(74,101,128,0.6);text-decoration:none;margin:0 8px;">Mentions légales</a>
+      <a href="/cgv.html" style="color:rgba(74,101,128,0.6);text-decoration:none;margin:0 8px;">CGV</a>
+      <a href="/confidentialite.html" style="color:rgba(74,101,128,0.6);text-decoration:none;margin:0 8px;">Confidentialité</a>
+    </div>
+  </div>
+</div>
+
+<!-- NAV BAS -->
+<nav class="nav-bottom">
+  <div class="nav-item active"><div class="nav-icon">⚡</div><div class="nav-lbl">ANALYSES</div></div>
+  <div class="nav-item" onclick="window.location='/historique.html'"><div class="nav-icon">📊</div><div class="nav-lbl">HISTORIQUE</div></div>
+  <div class="nav-item" onclick="window.location='/combis.html'"><div class="nav-icon">🎰</div><div class="nav-lbl">COMBINÉS</div></div>
+  <div class="nav-item" onclick="window.location='/blog/'"><div class="nav-icon">📖</div><div class="nav-lbl">GUIDES</div></div>
+  <div class="nav-item" onclick="window.location='/compte.html'"><div class="nav-icon">👤</div><div class="nav-lbl">COMPTE</div></div>
+</nav>
+
+<script>
+var allMatchs=[], currentFilter='all';
+
+function goMatch(id){window.location='match.html?id='+id;}
+function confClass(c){return c>=7.5?'high':c>=6.0?'med':'low';}
+function leagueKey(m){return (m.league_key||'').toLowerCase();}
+function filterMatchs(matchs,f){
+  if(f==='all') return matchs;
+  if(f==='value') return matchs.filter(function(m){return m.val||m.vbet==='OUI';});
+  return matchs.filter(function(m){return leagueKey(m)===f;});
+}
+
+function teamLogo(team){
+  if(!team) return '';
+  if(team.logo) return '<img class="mc-team-logo" src="'+team.logo+'" onerror="this.outerHTML=\'<div class=mc-team-logo-placeholder>\'+(this.getAttribute(\'data-ini\')||\'?\')+\'</div>\'" data-ini="'+(team.n||'').slice(0,2).toUpperCase()+'" alt="">';
+  if(team.id) return '<img class="mc-team-logo" src="https://media.api-sports.io/football/teams/'+team.id+'.png" onerror="this.outerHTML=\'<div class=mc-team-logo-placeholder>\'+(this.getAttribute(\'data-ini\')||\'?\')+\'</div>\'" data-ini="'+(team.n||'').slice(0,2).toUpperCase()+'" alt="">';
+  var ini=(team.n||'?').slice(0,2).toUpperCase();
+  return '<div class="mc-team-logo-placeholder">'+ini+'</div>';
+}
+
+function buildCard(m){
+  var p1=m.p1||0,pn=m.pn||0,p2=m.p2||0;
+  var cc=confClass(m.conf||0);
+  var heure=(m.date||'').split(' ')[1]||'';
+  var isHot=m.hot||(m.conf||0)>=8.0;
+  var isVal=m.val||m.vbet==='OUI';
+  var badges='';
+  if(isVal) badges+='<span class="badge badge-value">⚡ VALUE BET</span>';
+  if(isHot) badges+='<span class="badge badge-hot">🔥 SHARK LOCK</span>';
+  if(!isVal&&!isHot) badges+='<span class="badge badge-free">✓ GRATUIT</span>';
+
+  // Cote du pari recommandé
+  var coteStr='';
+  if(m.pari_rec){
+    var pr=(m.pari_rec||'').toLowerCase();
+    if(pr.includes('btts non')&&m.btts_non&&m.btts_non!=='--') coteStr=m.btts_non;
+    else if(pr.includes('btts')&&m.btts_oui&&m.btts_oui!=='--') coteStr=m.btts_oui;
+    else if(pr.includes('x2')&&m.dc2x&&m.dc2x!=='--') coteStr=m.dc2x;
+    else if(pr.includes('1x')&&m.dc1x&&m.dc1x!=='--') coteStr=m.dc1x;
+    else if(pr.includes('over 3.5')&&m.co35&&m.co35!=='--') coteStr=m.co35;
+    else if(pr.includes('under 3.5')&&m.cu35&&m.cu35!=='--') coteStr=m.cu35;
+    else if(pr.includes('over 2.5')&&m.co25&&m.co25!=='--') coteStr=m.co25;
+    else if(pr.includes('under 2.5')&&m.cu25&&m.cu25!=='--') coteStr=m.cu25;
+    else if(pr.includes('over 1.5')&&m.co15&&m.co15!=='--') coteStr=m.co15;
+    else if(pr.includes('under')&&m.cu25&&m.cu25!=='--') coteStr=m.cu25;
+    else if(pr.includes('nul')&&m.cn&&m.cn!=='--') coteStr=m.cn;
+    else if(m.cote_rec&&m.cote_rec!=='--') coteStr=m.cote_rec;
+    else if(m.c1&&m.c1!=='--') coteStr=m.c1;
+  }
+
+  var edgeStr=m.edge?'<span class="mc-pari-edge">EDGE '+m.edge+'</span>':'';
+  var cssClass='mc'+(isHot?' hot':'')+(isVal?' value':'');
+
+  return '<div class="'+cssClass+'" onclick="goMatch('+m.id+')">'
+    +'<div class="mc-top">'
+    +  '<div class="mc-league">'+(m.ligue_icon||'🏆')+' '+(m.league||'').toUpperCase()+(m.round?' · '+m.round:'')+'</div>'
+    +  '<div class="mc-badges">'+badges+'</div>'
+    +'</div>'
+    +'<div class="mc-body">'
+    +  '<div class="mc-left">'
+    +    '<div class="mc-teams">'
+    +      '<div class="mc-team home">'+teamLogo(m.home)+'<div class="mc-team-name">'+(m.home&&m.home.n||'').toUpperCase()+'</div></div>'
+    +      '<div class="mc-teams-sep"><div class="mc-vs">VS</div><div class="mc-time">'+heure+'</div></div>'
+    +      '<div class="mc-team away">'+teamLogo(m.away)+'<div class="mc-team-name">'+(m.away&&m.away.n||'').toUpperCase()+'</div></div>'
+    +    '</div>'
+    +    '<div class="mc-pari">'
+    +      '<span class="mc-pari-label">🦈 IASHARK</span>'
+    +      '<span class="mc-pari-bet">'+(m.pari_rec||'Analyse en cours')+'</span>'
+    +      (coteStr?'<span class="mc-pari-cote">'+coteStr+'</span>':'')
+    +      edgeStr
+    +    '</div>'
+    +  '</div>'
+    +  '<div class="mc-right">'
+    +    '<div class="conf-circle '+cc+'"><div class="conf-num">'+(m.conf||0).toFixed(1)+'</div><div class="conf-sub">/10</div></div>'
+    +    '<button class="mc-cta">VOIR →</button>'
+    +  '</div>'
+    +'</div>'
+    +'<div class="mc-probas">'
+    +  '<div class="prob-bar-wrap"><div class="pb-1" style="width:'+p1+'%"></div><div class="pb-n" style="width:'+pn+'%"></div><div class="pb-2" style="width:'+p2+'%"></div></div>'
+    +  '<div class="prob-labels">'
+    +    '<div class="prob-lbl-item"><div class="prob-lbl-pct" style="color:var(--cyan)">'+p1+'%</div><div class="prob-lbl-txt">'+(m.home&&m.home.n||'').toUpperCase().slice(0,8)+'</div></div>'
+    +    '<div class="prob-lbl-item"><div class="prob-lbl-pct" style="color:var(--muted)">'+pn+'%</div><div class="prob-lbl-txt">NUL</div></div>'
+    +    '<div class="prob-lbl-item"><div class="prob-lbl-pct" style="color:rgba(226,232,240,0.45)">'+p2+'%</div><div class="prob-lbl-txt">'+(m.away&&m.away.n||'').toUpperCase().slice(0,8)+'</div></div>'
+    +  '</div>'
+    +'</div>'
+    +'</div>';
+}
+
+function renderMatchs(){
+  var list=filterMatchs(allMatchs,currentFilter);
+  var el=document.getElementById('cardsList');
+  var lbl=document.getElementById('sectionLbl');
+  if(!list.length){
+    el.innerHTML='<div class="empty-state"><h3>AUCUN MATCH TROUVÉ</h3><p>Essaie un autre filtre ou reviens demain.</p></div>';
+    if(lbl) lbl.innerHTML='📅 <span>0 MATCH</span>';
+    return;
+  }
+  if(lbl) lbl.innerHTML='📅 <span>'+list.length+' MATCH'+(list.length>1?'S':'')+' AUJOURD\'HUI</span>';
+  el.innerHTML=list.map(buildCard).join('');
+}
+
+function setupFilters(){
+  document.querySelectorAll('.filter-btn').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      document.querySelectorAll('.filter-btn').forEach(function(b){b.classList.remove('active');});
+      btn.classList.add('active');
+      currentFilter=btn.dataset.filter;
+      renderMatchs();
+    });
+  });
+}
+
+async function loadData(){
+  try{
+    var resp=await fetch('data.json?t='+Date.now());
+    var data=await resp.json();
+    allMatchs=data.matchs||[];
+    var total=allMatchs.length;
+    document.getElementById('statMatchs').textContent=total;
+    document.getElementById('matchCount').innerHTML='<span>'+total+'</span> MATCHS';
+    renderMatchs();
+  }catch(e){
+    document.getElementById('cardsList').innerHTML='<div class="empty-state"><h3>ERREUR CHARGEMENT</h3><p>Impossible de charger les analyses. Réessaie dans un instant.</p></div>';
+  }
+}
+
+// LANG
+var LG=localStorage.getItem('lg')||'fr';
+function toggleLang(e){e.stopPropagation();document.getElementById('langMenu').classList.toggle('open');}
+function setLang(lg){LG=lg;localStorage.setItem('lg',lg);document.getElementById('langMenu').classList.remove('open');document.querySelector('.lang-btn').textContent='🌐 '+lg.toUpperCase();if(lg!=='fr') window.location='/'+lg+'/';}
+document.addEventListener('click',function(){document.getElementById('langMenu').classList.remove('open');});
+
+setupFilters();
+loadData();
+</script>
+</body>
+</html>

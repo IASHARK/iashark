@@ -996,9 +996,9 @@ jobs:
                     if (v.value==='Over 1.5')  arr15.push(parseFloat(v.odd));
                     if (v.value==='Over 2.5')  arr25.push(parseFloat(v.odd));
                     if (v.value==='Under 2.5') arru25.push(parseFloat(v.odd));
-                  });
                     if (v.value==='Over 3.5')  arr35.push(parseFloat(v.odd));
                     if (v.value==='Under 3.5') arru35.push(parseFloat(v.odd));
+                  });
                 }
                 if (bet.name==='Double Chance') {
                   var d1x=(bet.values||[]).find(function(v){return v.value==='Home/Draw';});

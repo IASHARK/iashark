@@ -977,10 +977,10 @@ jobs:
             {n:'Bet365',  o:'100\u20ac bonus',           l:'#LIEN_BET365'},
           ];
           function parseOdds(o) {
-            var empty = {c1:'--',cn:'--',c2:'--',co15:'--',co25:'--',cu25:'--',
+            var empty = {c1:'--',cn:'--',c2:'--',co15:'--',co25:'--',cu25:'--',co35:'--',cu35:'--',
                          dc1x:'--',dc2x:'--',dc12:'--',btts_oui:'--',btts_non:'--',bookies:[]};
             if (!o || !o.bookmakers || !o.bookmakers.length) return empty;
-            var arr1=[],arrN=[],arr2=[],arr15=[],arr25=[],arru25=[],arr1x=[],arrx2=[],arr12=[],arrby=[],arrbn=[];
+            var arr1=[],arrN=[],arr2=[],arr15=[],arr25=[],arru25=[],arr35=[],arru35=[],arr1x=[],arrx2=[],arr12=[],arrby=[],arrbn=[];
             o.bookmakers.forEach(function(bk) {
               (bk.bets||[]).forEach(function(bet) {
                 if (bet.name==='Match Winner'||bet.name==='Home/Draw/Away') {
@@ -1024,6 +1024,7 @@ jobs:
             }
             var c1=med(arr1), cn=med(arrN), c2=med(arr2);
             var co15=med(arr15), co25=med(arr25), cu25=med(arru25);
+            var co35=med(arr35), cu35=med(arru35);
             var dc1x=med(arr1x), dc2x=med(arrx2), dc12=med(arr12);
             var btts_oui=med(arrby), btts_non=med(arrbn);
             var deltas=[0,-0.03,-0.02,-0.05,+0.03];
@@ -1037,7 +1038,7 @@ jobs:
                 c2:vary(c2,deltas[i])
               };
             });
-            return {c1,cn,c2,co15,co25,cu25,dc1x,dc2x,dc12,btts_oui,btts_non,bookies};
+            return {c1,cn,c2,co15,co25,cu25,co35,cu35,dc1x,dc2x,dc12,btts_oui,btts_non,bookies};
           }
           async function getInjuries(fixtureId) {
             var r = await get(
@@ -1857,7 +1858,7 @@ jobs:
                 p1:an?(an.p1||0):0, pn:an?(an.pn||0):0, p2:an?(an.p2||0):0,
                 po15:an?(an.po15||0):0, po25:an?(an.po25||0):0, btts:an?(an.btts||0):0,
                 c1:odds.c1, cn:odds.cn, c2:odds.c2,
-                co15:odds.co15, co25:odds.co25, cu25:odds.cu25,
+                co15:odds.co15, co25:odds.co25, cu25:odds.cu25, co35:odds.co35, cu35:odds.cu35,
                 dc1x:odds.dc1x, dc2x:odds.dc2x, dc12:odds.dc12,
                 cdc1x:odds.dc1x, cdc2x:odds.dc2x,
                 cbtts:odds.btts_oui, cbtts_non:odds.btts_non,

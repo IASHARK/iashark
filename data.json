@@ -21,12 +21,12 @@
       "val": true,
       "hot": false,
       "conf": 6.8,
-      "p1": 22,
+      "p1": 32,
       "pn": 28,
-      "p2": 50,
-      "po15": 80,
-      "po25": 55,
-      "btts": 64,
+      "p2": 40,
+      "po15": 75,
+      "po25": 58,
+      "btts": 70,
       "c1": "3.45",
       "cn": "3.33",
       "c2": "2.22",
@@ -95,82 +95,82 @@
       "risque": "MODERE",
       "pari_rec": "Over 2.5",
       "mise": "2-3% bankroll",
-      "verdict_shark": "Over 2.5 à 2.01 — edge +12% : xG combiné 3.31 (Alaves 1.89 + Villarreal 1.42), BTTS Oui 70% sur 10 derniers matchs Villarreal EXT, Alaves 1.60 buts DOM moy. Direct.",
+      "verdict_shark": "Over 2.5 à 2.01 — edge +12% : xG total 2.9 (Alaves 1.5 + Villarreal 1.4) + BTTS 70% sur 10 derniers matchs (7/10 pour chaque équipe) + buts mi-temps élevés (Alaves 24 en 20, Villarreal 49 en 20) + forme Villarreal dominante (3 matchs en 14j, score fatigue 100/100).",
       "scenario": {
-        "phase1": "0-25min: Villarreal pose le jeu (48.6% possession), Alaves contre-attaque via Boyé-Martínez. Moleiro dangereux côté gauche.",
-        "phase2": "25-65min: Montée en puissance attendue, xG combiné favorise buts. Villarreal encaisse 2.20 buts EXT/match. Alaves score 1.60 DOM/match. Phase 2eme mi-temps décisive (13 buts Alaves + 27 buts Villarreal sur 2eme MT en 10 matchs).",
-        "phase3": "65-90min: Villarreal accélère (pattern buts tardifs limité à 2 en 10 matchs EXT vs Alaves 4), Alaves fatigue possible (1 match en 14j). Over 2.5 probable via 2-1 ou 1-2."
+        "phase1": "0-25min: Villarreal impose possession (47.8% moy) et pressing haut. Alaves défend bas en 3-5-2, cherche transition via Toni Martínez (5 buts). Contexte pluie → jeu plus direct, moins de contrôle.",
+        "phase2": "25-65min: Villarreal accumule xG (1.4 moy sur 6 matchs EXT). Moleiro (9 buts, titulaire) et Moreno (7 buts en 13) créent du danger. Alaves encaisse 1.8/match DOM mais marque 1.4 → scénario ouvert, probabilité BTTS élevée (7/10 sur 10 derniers).",
+        "phase3": "65-90min: Phase décisive. Villarreal fraîche (3 matchs en 14j vs 2 pour Alaves), cherche la victoire. Alaves contre-attaque via Boyé-Martínez. Buts probables après 70min (3 chacun sur 10 derniers) = total dépasse 2.5."
       },
       "scenario_15min": [
         {
           "t": "0-15min",
           "prob": 8,
-          "txt": "Alaves 3-5-2 agressif, Villarreal 4-4-2 compact. Poco acceleration."
+          "txt": "Villarreal domine possession, Alaves positionne en bloc 3-5-2. Rythme lent, météo pluie ralentit jeu."
         },
         {
           "t": "15-30min",
           "prob": 12,
-          "txt": "Villarreal cherche Pépé-Mikautadze, Alaves Carles Aleñá milieu relais."
+          "txt": "Première occasion : Villarreal via Pépé ou Moleiro. Alaves cherche transition directe."
         },
         {
           "t": "30-45min",
           "prob": 10,
-          "txt": "Fin 1ere MT équilibrée, xG déjà présent (moyenne 1.89 vs 1.42)."
+          "txt": "Match ouvert. Villarreal accumule tirs (4 cadres moy), Alaves répond par contra (5.3 tirs cadres moy)."
         },
         {
           "t": "45-60min",
           "prob": 15,
-          "txt": "Début 2eme MT critique, Villarreal renforce attaque EXT (score 1V/1N/3D sur 5 récents)."
+          "txt": "Début 2e MT : Villarreal aggrave le pressing. Moleiro/Moreno en évidence. Alaves perd possession mais encaisse peu (1.8/match)."
         },
         {
           "t": "60-75min",
           "prob": 18,
-          "txt": "Phase cruciale buts (xG cumulé +3.3), Moleiro vs Tenaglia."
+          "txt": "Phase cruciale. Buts probables (3 chacun après 70min sur 10 derniers). BTTS devient très probable."
         },
         {
           "t": "75-90min",
           "prob": 20,
-          "txt": "Villarreal encaisse 2.20 EXT/match, Alaves marque 1.60 DOM/match = dénouement Over 2.5."
+          "txt": "Fin ouverte. Villarreal cherche victoire, Alaves défend puis contre. Contexte 70% BTTS sur 10 derniers garantit buts des deux côtés."
         }
       ],
       "score_predit": {
-        "score": "1-1",
-        "prob": "24%",
-        "cote_implicite": "4.17"
+        "score": "2-1",
+        "prob": "26%",
+        "cote_implicite": "3.85"
       },
-      "facteur_x": "xG combiné 3.31 bien au-dessus seuil 2.5 buts. Villarreal 7/10 derniers matchs EXT avec BTTS Oui.",
-      "argument": "1. xG combiné 3.31 (Alaves 1.89 DOM + Villarreal 1.42 EXT) vs seuil 2.5. 2. Villarreal BTTS Oui 7/10 derniers matchs EXT, Alaves 6/10 DOM. 3. Probabilité IA 62% vs implicite 50% = edge +12%. Kelly 6.0%.",
-      "analyse_card": "xG Alaves 1.89 moy DOM (5.20 tirs cadres) vs Villarreal 1.42 EXT (3.60 tirs cadres). Over 2.5 a 5/10 matchs Alaves DOM + 8/10 matchs Villarreal EXT. Pluie légère favorise buts rapides (drainage Estadio Mendizorrotza).",
-      "conseil_public": "Over 2.5 offre edge significatif via xG combiné > 3.2 et pattern BTTS des deux équipes. Villarreal attaque mieux EXT (Moleiro 9 buts), Alaves fragile défense (1.60 buts encaissés DOM). Mise 3% bankroll sur cote 2.01 (Kelly 6.0%).",
-      "contexte": "Alaves 16e (5V dom), Villarreal 4e (6V ext). Alaves 5 derniers LLDDL, Villarreal WLWWL. Fatigue égale (50/100 les deux). Absence: aucune majeure.",
-      "enjeux": "Villarreal cherche 3pts pour conserver 4e place, Alaves lutte pour rester à flot en 16e.",
+      "facteur_x": "xG combiné 2.9 (>2.5) + BTTS 70% (7/10 chaque équipe) + buts mi-temps élevés (Villarreal 49 en 20 matchs) + Villarreal fraîche (3 matchs en 14j, fatigue 100/100).",
+      "argument": "1. xG total 2.9 (Alaves 1.5 DOM + Villarreal 1.4 EXT) dépasse seuil 2.5, renforce Over. 2. BTTS 70% (7/10 matchs sur 10 derniers pour chaque équipe) : Alaves encaisse 1.8/match DOM, Villarreal marque 1.0/match EXT mais avec Moleiro (9 buts) et Moreno (7 buts) titulaires. 3. Prob IA 62% vs impl 50% = edge +12%. Kelly 6.2%.",
+      "analyse_card": "xG combiné 2.9 indique total >2.5 probable. Villarreal forte offensivement (Moleiro + Moreno) face à Alaves qui encaisse 1.8/match. BTTS pattern 70% sur 10 derniers scelle le scénario : deux équipes butent.",
+      "conseil_public": "Over 2.5 offre edge +12% basé sur xG cumulé 2.9 et pattern BTTS 70% sur 10 derniers. Villarreal fraîche avec fatigue 100/100 vs Alaves 90/100. Moleiro (9 buts) et Moreno (7 buts) sur le terrain apportent danger constant. Cote 2.01 valide la value bet (edge>4%, cote>1.40).",
+      "contexte": "Villarreal #4 en forme (3V/1D/1L sur 5), Alaves #16 en crise (1V/2N/2D sur 5). Villarreal 6V/13 EXT, Alaves 5V/13 DOM. Écart classement et dynamique favorise but offensif collectif.",
+      "enjeux": "Villarreal consolide podium, Alaves lutte pour l'Europe. Contexte offensive des deux côtés.",
       "vbet": "OUI",
       "value_calc": "+12%",
       "scores": [
-        "1-1",
         "2-1",
-        "1-2"
+        "1-2",
+        "2-2"
       ],
       "paris_3": {
         "safe": {
-          "bet": "Over 2.5",
-          "cote": "2.01",
-          "hint": "xG 3.31 > 2.5. BTTS Oui 7/10 EXT Villarreal.",
-          "mise": "3%",
+          "bet": "Over 1.5",
+          "cote": "1.28",
+          "hint": "Over 1.5 : 78% prob implicite vs 85% prob IA (xG 2.9, BTTS 70%). Edge +7% mais cote basse.",
+          "mise": "5% bankroll",
           "bookie": "Betclic"
         },
         "valeur": {
-          "bet": "BTTS Oui",
-          "cote": "1.75",
-          "hint": "Prob IA 64% vs impl 57% = edge +7%. Villarreal 2.2 encaissés EXT/match.",
-          "mise": "2%",
+          "bet": "Over 2.5",
+          "cote": "2.01",
+          "hint": "xG 2.9 + BTTS 70% sur 10 derniers : prob IA 62% vs impl 50% = edge +12%. Véritable value.",
+          "mise": "3% bankroll",
           "bookie": "Winamax"
         },
         "specu": {
-          "bet": "Victoire Villarreal",
-          "cote": "2.22",
-          "hint": "xG Villarreal 1.42 EXT vs Alaves 1.89 DOM équilibré. Moleiro 9 buts. Prob IA 48% vs impl 45% = edge +3% (specu acceptée cote 2.22).",
-          "mise": "1%",
+          "bet": "BTTS Oui",
+          "cote": "1.75",
+          "hint": "BTTS 70% (7/10 chaque équipe) + Moleiro 9 buts + Moreno 7 buts + Alaves encaisse 1.8/match = prob IA 75% vs impl 57% = edge +18%. Edge exceptionnel.",
+          "mise": "1% bankroll",
           "bookie": "Bet365"
         }
       },
@@ -178,26 +178,26 @@
         "nom": "Alberto Moleiro",
         "equipe": "EXT",
         "marche": "Buteur dans le match",
-        "cote_estimee": "3.50-4.20",
-        "raison": "9 buts en 26 matchs saison (0.35/match), xG Villarreal EXT 1.42 centré sur lui. Alaves D fragile (1.60 buts encaissés DOM).",
+        "cote_estimee": "3.20-4.00",
+        "raison": "9 buts en 26 matchs (0.35/match), xG contribution Villarreal dominante, titulaire confirmé, face à Alaves défense fragile (1.8 buts encaissés/match DOM).",
         "absent": false
       },
       "paris_safe": {
         "bet": "Over 2.5",
         "cote": "3.45",
-        "proba": "22%"
+        "proba": "32%"
       },
       "paris_risque": {
         "bet": "",
         "cote": "",
         "proba": ""
       },
-      "kelly": "0.0",
+      "kelly": "11.9",
       "stade": {
         "nom": "Estadio Mendizorrotza — Vitoria-Gasteiz",
         "cap": "",
         "meteo": "🌧️",
-        "temp": "9°C",
+        "temp": "8°C",
         "desc": "pluie modérée"
       },
       "crit_home": {
@@ -217,6 +217,17 @@
         "fat": 50
       },
       "form_home": [
+        {
+          "d": "2026-03-13",
+          "opponent": "Villarreal",
+          "opp_id": 533,
+          "score": "1-1",
+          "result": "D",
+          "home": true,
+          "match": "Villarreal",
+          "lieu": "DOM",
+          "date_full": "2026-03-13T20:00:00+00:00"
+        },
         {
           "d": "2026-03-08",
           "opponent": "Valencia",
@@ -260,20 +271,20 @@
           "match": "Sevilla",
           "lieu": "EXT",
           "date_full": "2026-02-14T17:30:00+00:00"
-        },
-        {
-          "d": "2026-02-08",
-          "opponent": "Getafe",
-          "opp_id": 546,
-          "score": "0-2",
-          "result": "L",
-          "home": true,
-          "match": "Getafe",
-          "lieu": "DOM",
-          "date_full": "2026-02-08T13:00:00+00:00"
         }
       ],
       "form_away": [
+        {
+          "d": "2026-03-13",
+          "opponent": "Alaves",
+          "opp_id": 542,
+          "score": "1-1",
+          "result": "D",
+          "home": false,
+          "match": "Alaves",
+          "lieu": "EXT",
+          "date_full": "2026-03-13T20:00:00+00:00"
+        },
         {
           "d": "2026-03-08",
           "opponent": "Elche",
@@ -317,17 +328,6 @@
           "match": "Levante",
           "lieu": "EXT",
           "date_full": "2026-02-18T19:00:00+00:00"
-        },
-        {
-          "d": "2026-02-14",
-          "opponent": "Getafe",
-          "opp_id": 546,
-          "score": "1-2",
-          "result": "L",
-          "home": false,
-          "match": "Getafe",
-          "lieu": "EXT",
-          "date_full": "2026-02-14T15:15:00+00:00"
         }
       ],
       "forme_h": "WLDWLDLWDLWLLLWLLDLLWWLDDLL",
@@ -394,31 +394,31 @@
       ],
       "fatigue": {
         "home": {
-          "val": 50,
-          "info": "Dernier match il y a 5j — 1 match(s) en 14j"
+          "val": 90,
+          "info": "Dernier match il y a 0j — 2 match(s) en 14j"
         },
         "away": {
-          "val": 50,
-          "info": "Dernier match il y a 5j — 2 match(s) en 14j"
+          "val": 100,
+          "info": "Dernier match il y a 0j — 3 match(s) en 14j"
         }
       },
       "fatigue_home": {
-        "val": 50,
-        "info": "Dernier match il y a 5j — 1 match(s) en 14j"
+        "val": 90,
+        "info": "Dernier match il y a 0j — 2 match(s) en 14j"
       },
       "fatigue_away": {
-        "val": 50,
-        "info": "Dernier match il y a 5j — 2 match(s) en 14j"
+        "val": 100,
+        "info": "Dernier match il y a 0j — 3 match(s) en 14j"
       },
       "tendances": {
         "over25_home": 5,
-        "over25_away": 8,
+        "over25_away": 7,
         "over25_home_txt": "5/10 matchs terminés Over 2.5",
-        "over25_away_txt": "8/10 matchs terminés Over 2.5",
-        "btts_home": 6,
+        "over25_away_txt": "7/10 matchs terminés Over 2.5",
+        "btts_home": 7,
         "btts_away": 7,
-        "cs_home": 1,
-        "cs_home_txt": "1 clean sheets sur les derniers matchs à domicile"
+        "cs_home": 0,
+        "cs_home_txt": "0 clean sheets sur les derniers matchs à domicile"
       },
       "classement": {
         "league_name": "La Liga",
@@ -651,7 +651,7 @@
       "arbitre": null,
       "odds_movement": null,
       "events_home": {
-        "goals_total": 13,
+        "goals_total": 12,
         "slots": [
           {
             "t": "0-15",
@@ -663,11 +663,11 @@
           },
           {
             "t": "30-45",
-            "n": 0
+            "n": 1
           },
           {
             "t": "45-60",
-            "n": 2
+            "n": 1
           },
           {
             "t": "60-75",
@@ -675,13 +675,13 @@
           },
           {
             "t": "75-90",
-            "n": 2
+            "n": 1
           }
         ],
         "corners_per_game": "0.0",
         "red_cards": 3,
-        "yellow_per_game": "2.5",
-        "goals_after70": 4,
+        "yellow_per_game": "2.6",
+        "goals_after70": 3,
         "goals_before30": 6,
         "games": 10
       },
@@ -702,7 +702,7 @@
           },
           {
             "t": "45-60",
-            "n": 6
+            "n": 5
           },
           {
             "t": "60-75",
@@ -710,43 +710,49 @@
           },
           {
             "t": "75-90",
-            "n": 1
+            "n": 2
           }
         ],
         "corners_per_game": "0.0",
         "red_cards": 0,
-        "yellow_per_game": "2.5",
-        "goals_after70": 2,
+        "yellow_per_game": "2.4",
+        "goals_after70": 3,
         "goals_before30": 1,
         "games": 10
       },
       "top_scorers_home": [
-        {
-          "id": 187214,
-          "name": "Carlos Vicente",
-          "photo": "https://media.api-sports.io/football/players/187214.png",
-          "goals": 5,
-          "assists": 0,
-          "games": 21,
-          "rating": "6.95"
-        },
         {
           "id": 47181,
           "name": "Toni Martínez",
           "photo": "https://media.api-sports.io/football/players/47181.png",
           "goals": 5,
           "assists": 2,
+          "shots_total": 47,
+          "shots_on": 19,
           "games": 26,
           "rating": "6.84"
         },
         {
-          "id": 6233,
-          "name": "N. Tenaglia",
-          "photo": "https://media.api-sports.io/football/players/6233.png",
-          "goals": 1,
+          "id": 187214,
+          "name": "Carlos Vicente",
+          "photo": "https://media.api-sports.io/football/players/187214.png",
+          "goals": 5,
           "assists": 0,
-          "games": 25,
-          "rating": "6.82"
+          "shots_total": 10,
+          "shots_on": 6,
+          "games": 21,
+          "rating": "6.95"
+        },
+        {
+          "id": 143,
+          "name": "Carles Aleñá",
+          "photo": "https://media.api-sports.io/football/players/143.png",
+          "goals": 0,
+          "assists": 4,
+          "shots_total": 15,
+          "shots_on": 5,
+          "games": 27,
+          "rating": "6.62"
         }
       ],
       "top_scorers_away": [
@@ -756,8 +762,21 @@
           "photo": "https://media.api-sports.io/football/players/182519.png",
           "goals": 9,
           "assists": 4,
+          "shots_total": 35,
+          "shots_on": 17,
           "games": 26,
           "rating": "6.95"
+        },
+        {
+          "id": 3246,
+          "name": "N. Pépé",
+          "photo": "https://media.api-sports.io/football/players/3246.png",
+          "goals": 3,
+          "assists": 4,
+          "shots_total": 29,
+          "shots_on": 16,
+          "games": 26,
+          "rating": "7.11"
         },
         {
           "id": 1707,
@@ -765,24 +784,17 @@
           "photo": "https://media.api-sports.io/football/players/1707.png",
           "goals": 7,
           "assists": 0,
+          "shots_total": 17,
+          "shots_on": 10,
           "games": 13,
           "rating": "7.24"
-        },
-        {
-          "id": 51016,
-          "name": "T. Buchanan",
-          "photo": "https://media.api-sports.io/football/players/51016.png",
-          "goals": 6,
-          "assists": 1,
-          "games": 25,
-          "rating": "6.87"
         }
       ],
-      "analyse_card_en": "xG Alaves 1.89 moy DOM (5.20 tirs cadres) vs Villarreal 1.42 EXT (3.60 tirs cadres). Over 2.5 a 5/10 matchs Alaves DOM + 8/10 matchs Villarreal EXT. Pluie légère favorise buts rapides (drainage Estadio Mendizorrotza).",
-      "conseil_public_en": "Over 2.5 offre edge significatif via xG combiné > 3.2 et pattern BTTS des deux équipes. Villarreal attaque mieux EXT (Moleiro 9 buts), Alaves fragile défense (1.60 buts encaissés DOM). Mise 3% bankroll sur cote 2.01 (Kelly 6.0%).",
+      "analyse_card_en": "Combined xG 2.9 indicates total >2.5 probable. Villarreal strong offensively (Moleiro + Moreno) facing Alaves who concedes 1.8/match. BTTS pattern 70% over last 10 seals the scenario: both teams score.",
+      "conseil_public_en": "Over 2.5 offers edge +12% based on cumulative xG 2.9 and BTTS pattern 70% over last 10. Villarreal fresh with fatigue 100/100 vs Alaves 90/100. Moleiro (9 goals) and Moreno (7 goals) on the field bring constant danger. Odds 2.01 validate the Value Bet (edge>4%, odds>1.40).",
       "pari_rec_en": "Over 2.5",
-      "verdict_shark_en": "Over 2.5 à 2.01 — edge +12% : xG combiné 3.31 (Alaves 1.89 + Villarreal 1.42), BTTS Oui 70% sur 10 derniers matchs Villarreal EXT, Alaves 1.60 buts DOM moy. Direct.",
-      "facteur_x_en": "xG combiné 3.31 bien au-dessus seuil 2.5 buts. Villarreal 7/10 derniers matchs EXT avec BTTS Oui."
+      "verdict_shark_en": "Over 2.5 at 2.01 — edge +12% : total xG 2.9 (Alaves 1.5 + Villarreal 1.4) + BTTS 70% over last 10 matches (7/10 for each team) + high goals first half (Alaves 24 in 20, Villarreal 49 in 20) + Villarreal dominant form (3 matches in 14d, fatigue score 100/100).",
+      "facteur_x_en": "Combined xG 2.9 (>2.5) + BTTS 70% (7/10 each team) + high goals first half (Villarreal 49 in 20 matches) + Villarreal fresh (3 matches in 14d, fatigue 100/100)."
     }
   ],
   "combis": []

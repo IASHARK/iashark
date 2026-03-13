@@ -1087,10 +1087,13 @@ jobs:
             var players = (r&&r.response)||[];
             if (!players.length) return [];
             var scored = players.filter(function(p){
-              return p.statistics&&p.statistics[0]&&(p.statistics[0].goals&&p.statistics[0].goals.total>0);
+              return p.statistics&&p.statistics[0]&&(p.statistics[0].goals&&(p.statistics[0].goals.total>0||p.statistics[0].goals.assists>0));
             });
+            // Tri par buts + passes D cumulés
             scored.sort(function(a,b){
-              return (b.statistics[0].goals.total||0)-(a.statistics[0].goals.total||0);
+              var sa=(b.statistics[0].goals.total||0)+(b.statistics[0].goals.assists||0);
+              var sb=(a.statistics[0].goals.total||0)+(a.statistics[0].goals.assists||0);
+              return sa-sb;
             });
             return scored.slice(0,3).map(function(p){
               var s=p.statistics[0];
@@ -1100,6 +1103,8 @@ jobs:
                 photo: p.player.photo||('https://media.api-sports.io/football/players/'+p.player.id+'.png'),
                 goals: s.goals.total||0,
                 assists: s.goals.assists||0,
+                shots_total: s.shots&&s.shots.total||0,
+                shots_on: s.shots&&s.shots.on||0,
                 games: s.games.appearences||0,
                 rating: s.games.rating||null
               };
@@ -1252,20 +1257,23 @@ jobs:
             };
           }
           function calcXGStats(fixtureStatsList, teamSide) {
-            // Average xG, shots on target, possession from last N matches
-            var xgs=[], shots=[], poss=[];
+            var xgs=[], shots=[], shotsTotal=[], poss=[], fouls=[];
             fixtureStatsList.forEach(function(fs){
               var side = fs[teamSide];
               if (!side) return;
               if (side.xg !== null) xgs.push(side.xg);
               if (side.shots_on) shots.push(side.shots_on);
+              if (side.shots_total) shotsTotal.push(side.shots_total);
               if (side.possession) poss.push(side.possession);
+              if (side.fouls) fouls.push(side.fouls);
             });
-            function avg(arr){ return arr.length?( arr.reduce(function(a,b){return a+b;},0)/arr.length ).toFixed(2):null; }
+            function avg(arr){ return arr.length?( arr.reduce(function(a,b){return a+b;},0)/arr.length ).toFixed(1):null; }
             return {
               xg_avg: avg(xgs),
               shots_on_avg: avg(shots),
+              shots_total_avg: avg(shotsTotal),
               possession_avg: avg(poss),
+              fouls_avg: avg(fouls),
               n: fixtureStatsList.length
             };
           }
@@ -1655,6 +1663,7 @@ jobs:
           async function main() {
             console.log('=== IASHARK', TODAY, '===');
             var fixtures = await getFixtures();
+            fixtures = fixtures.slice(0, 1); // TEST
             console.log('Fixtures trouves:', fixtures.length);
             if (!fixtures.length) {
               fs.writeFileSync('data.json', JSON.stringify({matchs:[],combis:[]},null,2));
@@ -1892,8 +1901,8 @@ jobs:
                 half1bH, half2bH, half1bA, half2bA,
                 half1beH, half1beA,
                 // xG derniers 5 matchs
-                xgH_avg: xgH.xg_avg, xgH_shots: xgH.shots_on_avg, xgH_poss: xgH.possession_avg,
-                xgA_avg: xgA.xg_avg, xgA_shots: xgA.shots_on_avg, xgA_poss: xgA.possession_avg,
+                xgH_avg: xgH.xg_avg, xgH_shots: xgH.shots_on_avg, xgH_shots_total: xgH.shots_total_avg, xgH_poss: xgH.possession_avg, xgH_fouls: xgH.fouls_avg,
+                xgA_avg: xgA.xg_avg, xgA_shots: xgA.shots_on_avg, xgA_shots_total: xgA.shots_total_avg, xgA_poss: xgA.possession_avg, xgA_fouls: xgA.fouls_avg,
                 // Predictions API-Sports
                 pred_winner: predictions?predictions.winner:null,
                 pred_advice: predictions?predictions.advice:null,
@@ -1944,13 +1953,14 @@ jobs:
                 }
               })();
               var kellyVal = null;
-              if (an&&an.pari_rec&&odds.c1&&odds.c1!=='--') {
-                var bestCote = parseFloat(odds.c1)||0;
-                var aiProb = (an.p1||0)/100;
-                if (bestCote>1&&aiProb>0) {
-                  var b = bestCote-1;
-                  var k = Math.max(0,((aiProb*b-(1-aiProb))/b)*100);
-                  kellyVal = Math.min(k,10).toFixed(1);
+              if (an) {
+                // Utilise l'edge généré par l'IA (ex: "+12%") et la cote recommandée
+                var edgeRaw = (an.edge||'').replace(/[^0-9.]/g,'');
+                var edgeNum = parseFloat(edgeRaw)||0;
+                var coteRaw = parseFloat(an.cote_rec)||parseFloat(odds.c1)||0;
+                if (edgeNum>0 && coteRaw>1) {
+                  var k = edgeNum / (coteRaw - 1);
+                  kellyVal = Math.min(k, 15).toFixed(1);
                 }
               }
               var classementObj = null;

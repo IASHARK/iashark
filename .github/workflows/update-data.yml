@@ -2248,7 +2248,7 @@ jobs:
         run: |
           git config user.name "IASHARK"
           git config user.email "yaramode81@gmail.com"
-          git add data.json historique.json sitemap.xml sitemap-*.xml
+          git add data.json historique.json sitemap.xml sitemap-*.xml index.html
           git add en/ es/ pt/ de/ it/ ar/ tr/ nl/ pl/ id/ no/ sv/ ro/ el/ cs/ hu/ sr/ uk/ ru/ ja/ ko/ th/ hi/ ms/ da/ fi/ sw/ 2>/dev/null || true
           git add blog/ 2>/dev/null || true
           git diff --staged --quiet || git commit -m "Daily update + multilingual - $(date +%Y-%m-%d)"

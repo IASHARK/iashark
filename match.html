@@ -585,11 +585,10 @@ async function checkSession() {
     var res = await sb.auth.getSession();
     var session = res.data && res.data.session;
     if (!session) return false;
-    // Vérifier le plan dans la table users
     var userRes = await sb.from('users')
       .select('plan')
       .eq('id', session.user.id)
-      .single();
+      .maybeSingle(); // maybeSingle() → pas de 406 si row absente
     var plan = userRes.data && userRes.data.plan;
     return plan === 'pro';
   } catch(e) {
@@ -601,16 +600,20 @@ async function init(){
   var el=document.getElementById('root');
   if(!fId){el.innerHTML='<div style="text-align:center;padding:60px 20px"><div style="font-size:40px;margin-bottom:16px">⚠️</div><div style="font-family:\'Space Mono\',monospace;color:var(--muted)">ID MANQUANT</div><div style="margin-top:16px"><a href="/" style="color:var(--cyan);font-family:\'Space Mono\',monospace;font-size:10px">← RETOUR</a></div></div>';return;}
   try{
-    // Charger les données ET vérifier la session en parallèle
     var results = await Promise.all([
       fetch('data.json?t='+Date.now()).then(function(r){return r.json();}),
       checkSession()
     ]);
     var data = results[0];
-    isPro = true; // Stripe non configuré — tout gratuit (results[1] ignoré pour l instant)
+    isPro = true;
 
     var m=(data.matchs||[]).find(function(x){return String(x.id)===String(fId);});
-    if(!m){el.innerHTML='<div style="text-align:center;padding:60px 20px"><div style="font-size:40px;margin-bottom:16px">🦈</div><div style="font-family:\'Space Mono\',monospace;color:var(--muted)">MATCH INTROUVABLE</div><div style="margin-top:16px"><a href="/" style="color:var(--cyan);font-family:\'Space Mono\',monospace;font-size:10px">← RETOUR AUX ANALYSES</a></div></div>';return;}
+    if(!m){
+      var ids=(data.matchs||[]).map(function(x){return x.id+'';}).join(', ')||'aucun';
+      console.log('IDs disponibles dans data.json:', ids);
+      el.innerHTML='<div style="text-align:center;padding:60px 20px"><div style="font-size:40px;margin-bottom:16px">🦈</div><div style="font-family:\'Space Mono\',monospace;color:var(--muted)">MATCH INTROUVABLE</div><div style="font-family:\'Space Mono\',monospace;font-size:9px;color:var(--muted);margin-top:10px">ID cherché: '+fId+'</div><div style="font-family:\'Space Mono\',monospace;font-size:8px;color:var(--muted);margin-top:6px;padding:0 20px">IDs dispo: '+ids+'</div><div style="margin-top:16px"><a href="/" style="color:var(--cyan);font-family:\'Space Mono\',monospace;font-size:10px">← RETOUR AUX ANALYSES</a></div></div>';
+      return;
+    }
     el.innerHTML=render(m);
     setTimeout(function(){
       document.querySelectorAll('.comp-fill[data-w]').forEach(function(b){var w=b.getAttribute('data-w');b.style.width='0%';requestAnimationFrame(function(){setTimeout(function(){b.style.width=w+'%';},60);});});

@@ -21,12 +21,12 @@
       "val": true,
       "hot": false,
       "conf": 6.8,
-      "p1": 32,
+      "p1": 22,
       "pn": 28,
-      "p2": 40,
+      "p2": 50,
       "po15": 80,
-      "po25": 62,
-      "btts": 63,
+      "po25": 55,
+      "btts": 64,
       "c1": "3.45",
       "cn": "3.33",
       "c2": "2.22",
@@ -95,82 +95,82 @@
       "risque": "MODERE",
       "pari_rec": "Over 2.5",
       "mise": "2-3% bankroll",
-      "verdict_shark": "Over 2.5 à 2.01 — edge +12% : xG combiné 3.31 (Alaves 1.89 + Villarreal 1.42) + BTTS 57% implicite vs 63% réelle (Alaves 1.60 buts DOM, Villarreal 2.20 encaissés EXT) + 10 derniers: Alaves 11 buts en 5 matchs DOM, Villarreal 22 buts en 5 matchs EXT. Pluie favorable aux échanges.",
+      "verdict_shark": "Over 2.5 à 2.01 — edge +12% : xG combiné 3.31 (Alaves 1.89 + Villarreal 1.42), BTTS Oui 70% sur 10 derniers matchs Villarreal EXT, Alaves 1.60 buts DOM moy. Direct.",
       "scenario": {
-        "phase1": "0-25min: Alaves 3-5-2 agressif à domicile vs Villarreal 4-4-2 en transition. Possession équilibrée (48% vs 49%). Alaves cherche percussion rapide (Carlos Vicente/Toni Martínez), Villarreal contrôle bas.",
-        "phase2": "25-65min: Villarreal augmente xG offensif (Moleiro 9 buts, Buchanan 6). Alaves encaisse 1.60/match DOM mais marque aussi. Villarreal défend à 2.20 buts encaissés EXT donc fragilité. Échanges nombreux, pluie fluidifie le jeu.",
-        "phase3": "65-90min: Villarreal renforce attaque en 2ème mi-temps (27 buts vs 22 1ère MT). Alaves buts tardifs fréquents (4 après 70min sur 10 matchs). Scénario Over très probable. Fin ouverte."
+        "phase1": "0-25min: Villarreal pose le jeu (48.6% possession), Alaves contre-attaque via Boyé-Martínez. Moleiro dangereux côté gauche.",
+        "phase2": "25-65min: Montée en puissance attendue, xG combiné favorise buts. Villarreal encaisse 2.20 buts EXT/match. Alaves score 1.60 DOM/match. Phase 2eme mi-temps décisive (13 buts Alaves + 27 buts Villarreal sur 2eme MT en 10 matchs).",
+        "phase3": "65-90min: Villarreal accélère (pattern buts tardifs limité à 2 en 10 matchs EXT vs Alaves 4), Alaves fatigue possible (1 match en 14j). Over 2.5 probable via 2-1 ou 1-2."
       },
       "scenario_15min": [
         {
           "t": "0-15min",
-          "prob": 6,
-          "txt": "Mise en place, Alaves pression initiale, Villarreal prudent. Peu de danger."
+          "prob": 8,
+          "txt": "Alaves 3-5-2 agressif, Villarreal 4-4-2 compact. Poco acceleration."
         },
         {
           "t": "15-30min",
-          "prob": 11,
-          "txt": "Alaves crée occasion (xG 1.89), Villarreal contre-attaque (Moleiro dangereux)."
+          "prob": 12,
+          "txt": "Villarreal cherche Pépé-Mikautadze, Alaves Carles Aleñá milieu relais."
         },
         {
           "t": "30-45min",
-          "prob": 13,
-          "txt": "Première mi-temps : 1-0 ou 0-1 probable. Alaves 11 buts 1ère MT, Villarreal 12 encaissés."
+          "prob": 10,
+          "txt": "Fin 1ere MT équilibrée, xG déjà présent (moyenne 1.89 vs 1.42)."
         },
         {
           "t": "45-60min",
-          "prob": 16,
-          "txt": "Début 2ème mi-temps : ajustements tactiques, Villarreal monte (27 buts 2ème MT)."
+          "prob": 15,
+          "txt": "Début 2eme MT critique, Villarreal renforce attaque EXT (score 1V/1N/3D sur 5 récents)."
         },
         {
           "t": "60-75min",
-          "prob": 22,
-          "txt": "Phase cruciale. Alaves buts fréquents après 70min (4/10). Villarreal crée (xG 1.42)."
+          "prob": 18,
+          "txt": "Phase cruciale buts (xG cumulé +3.3), Moleiro vs Tenaglia."
         },
         {
           "t": "75-90min",
-          "prob": 21,
-          "txt": "Fin ouverte, pressing final, 3e but très probable (xG 3.31 total, Over 2.5 tendance)."
+          "prob": 20,
+          "txt": "Villarreal encaisse 2.20 EXT/match, Alaves marque 1.60 DOM/match = dénouement Over 2.5."
         }
       ],
       "score_predit": {
         "score": "1-1",
-        "prob": "26%",
-        "cote_implicite": "3.85"
+        "prob": "24%",
+        "cote_implicite": "4.17"
       },
-      "facteur_x": "xG combiné 3.31 > seuil 2.5 + Villarreal 6 victoires EXT sur 13 (vs Alaves 5 victoires DOM) + pluie favorise buts rapides et contre-attaques.",
-      "argument": "1. xG Alaves 1.89 + Villarreal 1.42 = 3.31 total vs seuil 2.5 (Over 2.5: prob IA 62% vs impl 50% = edge +12%). 2. Villarreal 8/10 derniers Over 2.5 (80%), Alaves 5/10 (50%) = moyenne 65% vs impl 50%. 3. Villarreal défense EXT faible (2.20 buts encaissés/match), Alaves attaque DOM solide (1.60 buts/match). BTTS Oui 57% implicite mais 63% réelle (Alaves encaisse DOM 1.60, Villarreal marque EXT 1.00).",
-      "analyse_card": "xG combiné 3.31 supérieur au seuil 2.5. Villarreal en déplacement fragile défensivement (2.20 buts EXT). Alaves à domicile crée régulièrement (1.89 xG, 5 victoires/13). Pattern 10 matchs: Villarreal 27 buts 2ème mi-temps = dynamique offensive tardive. Pluie fluidifie transitions et enchaîne les opportunités.",
-      "conseil_public": "Over 2.5 est le meilleur edge (62% IA vs 50% impl). Villarreal domine offensivement (58% force attaque vs Alaves 42%) mais encaisse trop EXT pour un match fermé. Alaves défense DOM correcte (44% force) mais Villarreal possède 3 clean sheets seulement en 13 matchs EXT. Pattern: 1ère mi-temps 1-0 ou 0-1, puis montée Villarreal 2ème mi-temps pousse à 1-1 ou 1-2. xG 3.31 = très haut, over justifié.",
-      "contexte": "Alaves #16 ligue, 5 victoires DOM/13, forme LLDDL (fragile). Villarreal #4 ligue, 6 victoires EXT/13, forme WLWWL (solide mais 1V/1N/3D sur 5 EXT = instabilité). Fatigue égale (50/50), dernier match -5j pour les deux.",
-      "enjeux": "Alaves lutte pour points, Villarreal cherche maintenir 4ème place avant EL.",
+      "facteur_x": "xG combiné 3.31 bien au-dessus seuil 2.5 buts. Villarreal 7/10 derniers matchs EXT avec BTTS Oui.",
+      "argument": "1. xG combiné 3.31 (Alaves 1.89 DOM + Villarreal 1.42 EXT) vs seuil 2.5. 2. Villarreal BTTS Oui 7/10 derniers matchs EXT, Alaves 6/10 DOM. 3. Probabilité IA 62% vs implicite 50% = edge +12%. Kelly 6.0%.",
+      "analyse_card": "xG Alaves 1.89 moy DOM (5.20 tirs cadres) vs Villarreal 1.42 EXT (3.60 tirs cadres). Over 2.5 a 5/10 matchs Alaves DOM + 8/10 matchs Villarreal EXT. Pluie légère favorise buts rapides (drainage Estadio Mendizorrotza).",
+      "conseil_public": "Over 2.5 offre edge significatif via xG combiné > 3.2 et pattern BTTS des deux équipes. Villarreal attaque mieux EXT (Moleiro 9 buts), Alaves fragile défense (1.60 buts encaissés DOM). Mise 3% bankroll sur cote 2.01 (Kelly 6.0%).",
+      "contexte": "Alaves 16e (5V dom), Villarreal 4e (6V ext). Alaves 5 derniers LLDDL, Villarreal WLWWL. Fatigue égale (50/100 les deux). Absence: aucune majeure.",
+      "enjeux": "Villarreal cherche 3pts pour conserver 4e place, Alaves lutte pour rester à flot en 16e.",
       "vbet": "OUI",
       "value_calc": "+12%",
       "scores": [
         "1-1",
-        "1-2",
-        "0-1"
+        "2-1",
+        "1-2"
       ],
       "paris_3": {
         "safe": {
-          "bet": "Over 1.5",
-          "cote": "1.28",
-          "hint": "Villarreal 8/10 Over 1.5 EXT, xG 3.31 total",
-          "mise": "4-5% bankroll",
+          "bet": "Over 2.5",
+          "cote": "2.01",
+          "hint": "xG 3.31 > 2.5. BTTS Oui 7/10 EXT Villarreal.",
+          "mise": "3%",
           "bookie": "Betclic"
         },
         "valeur": {
-          "bet": "Over 2.5",
-          "cote": "2.01",
-          "hint": "xG 3.31 vs seuil 2.5, prob IA 62% vs impl 50%, edge +12%",
-          "mise": "2-3% bankroll",
+          "bet": "BTTS Oui",
+          "cote": "1.75",
+          "hint": "Prob IA 64% vs impl 57% = edge +7%. Villarreal 2.2 encaissés EXT/match.",
+          "mise": "2%",
           "bookie": "Winamax"
         },
         "specu": {
-          "bet": "BTTS Oui",
-          "cote": "1.75",
-          "hint": "Alaves marque 1.60 DOM, Villarreal 1.00 EXT, BTTS 63% IA vs 57% impl, xG 3.31",
-          "mise": "1% bankroll",
+          "bet": "Victoire Villarreal",
+          "cote": "2.22",
+          "hint": "xG Villarreal 1.42 EXT vs Alaves 1.89 DOM équilibré. Moleiro 9 buts. Prob IA 48% vs impl 45% = edge +3% (specu acceptée cote 2.22).",
+          "mise": "1%",
           "bookie": "Bet365"
         }
       },
@@ -179,26 +179,26 @@
         "equipe": "EXT",
         "marche": "Buteur dans le match",
         "cote_estimee": "3.50-4.20",
-        "raison": "9 buts en 26 matchs (0.35/match), xG contribution EXT 22 buts 2ème mi-temps Villarreal, forma WLWWL, dominant offensif.",
+        "raison": "9 buts en 26 matchs saison (0.35/match), xG Villarreal EXT 1.42 centré sur lui. Alaves D fragile (1.60 buts encaissés DOM).",
         "absent": false
       },
       "paris_safe": {
         "bet": "Over 2.5",
         "cote": "3.45",
-        "proba": "32%"
+        "proba": "22%"
       },
       "paris_risque": {
         "bet": "",
         "cote": "",
         "proba": ""
       },
-      "kelly": "4.2",
+      "kelly": "0.0",
       "stade": {
         "nom": "Estadio Mendizorrotza — Vitoria-Gasteiz",
         "cap": "",
         "meteo": "🌧️",
         "temp": "9°C",
-        "desc": "forte pluie"
+        "desc": "pluie modérée"
       },
       "crit_home": {
         "fd": 38,
@@ -686,7 +686,7 @@
         "games": 10
       },
       "events_away": {
-        "goals_total": 12,
+        "goals_total": 14,
         "slots": [
           {
             "t": "0-15",
@@ -698,7 +698,7 @@
           },
           {
             "t": "30-45",
-            "n": 3
+            "n": 5
           },
           {
             "t": "45-60",
@@ -715,7 +715,7 @@
         ],
         "corners_per_game": "0.0",
         "red_cards": 0,
-        "yellow_per_game": "2.4",
+        "yellow_per_game": "2.5",
         "goals_after70": 2,
         "goals_before30": 1,
         "games": 10
@@ -778,11 +778,11 @@
           "rating": "6.87"
         }
       ],
-      "analyse_card_en": "Combined xG 3.31 above 2.5 threshold. Villarreal away fragile defensively (2.20 goals EXT). Alaves at home creates regularly (1.89 xG, 5 wins/13). 10-match pattern: Villarreal 27 goals 2nd half = late offensive dynamic. Rain fluidi­fies transitions and chains opportunities.",
-      "conseil_public_en": "Over 2.5 is best Edge (62% AI vs 50% implied). Villarreal dominates offensively (58% attack force vs Alaves 42%) but concedes too much EXT for a closed match. Alaves home defense decent (44% force) but Villarreal has only 3 clean sheets in 13 EXT matches. Pattern: 1st half 1-0 or 0-1, then Villarreal rise 2nd half pushes to 1-1 or 1-2. xG 3.31 = very high, over justified.",
+      "analyse_card_en": "xG Alaves 1.89 moy DOM (5.20 tirs cadres) vs Villarreal 1.42 EXT (3.60 tirs cadres). Over 2.5 a 5/10 matchs Alaves DOM + 8/10 matchs Villarreal EXT. Pluie légère favorise buts rapides (drainage Estadio Mendizorrotza).",
+      "conseil_public_en": "Over 2.5 offre edge significatif via xG combiné > 3.2 et pattern BTTS des deux équipes. Villarreal attaque mieux EXT (Moleiro 9 buts), Alaves fragile défense (1.60 buts encaissés DOM). Mise 3% bankroll sur cote 2.01 (Kelly 6.0%).",
       "pari_rec_en": "Over 2.5",
-      "verdict_shark_en": "Over 2.5 at 2.01 — Edge +12%: combined xG 3.31 (Alaves 1.89 + Villarreal 1.42) + BTTS 57% implied vs 63% actual (Alaves 1.60 goals HOME, Villarreal 2.20 conceded EXT) + last 10: Alaves 11 goals in 5 HOME matches, Villarreal 22 goals in 5 EXT matches. Rain favours exchanges.",
-      "facteur_x_en": "Combined xG 3.31 > 2.5 threshold + Villarreal 6 wins EXT out of 13 (vs Alaves 5 wins HOME) + rain favours quick goals and counter-attacks."
+      "verdict_shark_en": "Over 2.5 à 2.01 — edge +12% : xG combiné 3.31 (Alaves 1.89 + Villarreal 1.42), BTTS Oui 70% sur 10 derniers matchs Villarreal EXT, Alaves 1.60 buts DOM moy. Direct.",
+      "facteur_x_en": "xG combiné 3.31 bien au-dessus seuil 2.5 buts. Villarreal 7/10 derniers matchs EXT avec BTTS Oui."
     }
   ],
   "combis": []

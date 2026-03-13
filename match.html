@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Analyse Match — IASHARK</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <style>
 :root{--bg:#060a10;--card:#0c1520;--card2:#101d2a;--cyan:#22d3ee;--cyan2:#06b6d4;--amber:#f59e0b;--green:#10b981;--red:#ef4444;--text:#e2e8f0;--muted:#4a6580;--muted2:#2a3f55;--border:rgba(255,255,255,0.05);--bc:rgba(34,211,238,0.18);}
@@ -313,64 +312,60 @@ function buildComp(hn,an,ch,ca){
 
 function buildPatterns(hn,an,evH,evA,m){
   if(!evH&&!evA&&!m) return '';
-  function sv(n,cls,team){return '<div class="psv"><div class="psv-n '+cls+'">'+(n!=null?n:'—')+'</div><div class="psv-t">'+team+'</div></div>';}
-  function statRow(lbl,nh,na){return '<div class="pat-stat-row"><span class="pat-stat-lbl">'+lbl+'</span><div class="pat-stat-vals">'+sv(nh,'h',hn.slice(0,3).toUpperCase())+'<span class="pat-sep">/</span>'+sv(na,'a',an.slice(0,3).toUpperCase())+'</div></div>';}
+  var hn3=hn.slice(0,3).toUpperCase(), an3=an.slice(0,3).toUpperCase();
 
-  var xgH=m&&m.xgH_avg,xgA=m&&m.xgA_avg;
-  var stH=m&&m.xgH_shots_total,stA=m&&m.xgA_shots_total;
-  var scH=m&&m.xgH_shots,scA=m&&m.xgA_shots;
-  var fH=m&&m.xgH_fouls,fA=m&&m.xgA_fouls;
-  var jaH=evH&&evH.yellow_per_game,jaA=evA&&evA.yellow_per_game;
-  var roH=evH&&evH.red_cards,roA=evA&&evA.red_cards;
-
+  // Grille stats
+  function statRow(lbl,nh,na){
+    if(!nh&&!na) return '';
+    return '<div class="pat-stat-row"><span class="pat-stat-lbl">'+lbl+'</span><div class="pat-stat-vals">'
+      +'<div class="psv"><div class="psv-n h">'+(nh||'—')+'</div><div class="psv-t">'+hn3+'</div></div>'
+      +'<span class="pat-sep">/</span>'
+      +'<div class="psv"><div class="psv-n a">'+(na||'—')+'</div><div class="psv-t">'+an3+'</div></div>'
+      +'</div></div>';
+  }
   var statsHtml='<div class="pat-stats-grid">'
-    +(xgH||xgA?statRow('xG moyen / match',xgH,xgA):'')
-    +(stH||stA?statRow('Tirs totaux / match',stH,stA):'')
-    +(scH||scA?statRow('Tirs cadrés / match',scH,scA):'')
-    +(fH||fA?statRow('Fautes / match',fH,fA):'')
+    +statRow('xG moyen / match', m&&m.xgH_avg, m&&m.xgA_avg)
+    +statRow('Tirs totaux / match', m&&m.xgH_shots_total, m&&m.xgA_shots_total)
+    +statRow('Tirs cadrés / match', m&&m.xgH_shots, m&&m.xgA_shots)
+    +statRow('Fautes / match', m&&m.xgH_fouls, m&&m.xgA_fouls)
+    +statRow('Cartons jaunes / match', evH&&evH.yellow_per_game, evA&&evA.yellow_per_game)
+    +statRow('Cartons rouges (total)', evH&&evH.red_cards, evA&&evA.red_cards)
     +'</div>';
 
-  // Cartons par mi-temps
-  var evH10=evH,evA10=evA;
-  var halvesHtml='';
-  if(evH10||evA10){
-    var j1H=evH10&&evH10.yellow_first_half||'—',j1A=evA10&&evA10.yellow_first_half||'—';
-    var r1H=evH10&&evH10.red_first_half||'—',r1A=evA10&&evA10.red_first_half||'—';
-    var j2H=evH10&&evH10.yellow_second_half||'—',j2A=evA10&&evA10.yellow_second_half||'—';
-    var r2H=evH10&&evH10.red_second_half||'—',r2A=evA10&&evA10.red_second_half||'—';
-    var totJH=evH10&&evH10.yellow_per_game||'—',totJA=evA10&&evA10.yellow_per_game||'—';
-    var totRH=evH10&&evH10.red_cards||'—',totRA=evA10&&evA10.red_cards||'—';
-    halvesHtml='<div style="font-family:Space Mono,monospace;font-size:7px;color:var(--muted);letter-spacing:1px;margin-bottom:6px;">CARTONS PAR MI-TEMPS — <span style="color:var(--cyan)">'+hn.slice(0,3).toUpperCase()+'</span> / <span style="color:var(--text)">'+an.slice(0,3).toUpperCase()+'</span></div>'
-      +'<div class="halves">'
-      +'<div class="half-card"><div class="half-lbl">1ERE MI-TEMPS</div><div class="half-row"><span class="half-rl">Jaunes</span><div class="half-vals"><span class="hv am h">'+j1H+'</span><span class="hv am a">'+j1A+'</span></div></div><div class="half-row"><span class="half-rl">Rouges</span><div class="half-vals"><span class="hv r h">'+r1H+'</span><span class="hv r a">'+r1A+'</span></div></div></div>'
-      +'<div class="half-card"><div class="half-lbl">2EME MI-TEMPS</div><div class="half-row"><span class="half-rl">Jaunes</span><div class="half-vals"><span class="hv am h">'+j2H+'</span><span class="hv am a">'+j2A+'</span></div></div><div class="half-row"><span class="half-rl">Rouges</span><div class="half-vals"><span class="hv r h">'+r2H+'</span><span class="hv r a">'+r2A+'</span></div></div></div>'
-      +'</div>'
-      +'<div class="half-card" style="margin-bottom:12px"><div class="half-lbl">TOTAL SUR 10 MATCHS</div><div class="half-row"><span class="half-rl">Jaunes / match</span><div class="half-vals"><span class="hv am h">'+totJH+'</span><span class="hv am a">'+totJA+'</span></div></div><div class="half-row"><span class="half-rl">Rouges (total)</span><div class="half-vals"><span class="hv r h">'+totRH+'</span><span class="hv r a">'+totRA+'</span></div></div></div>';
-  }
-
-  // Chart buts 15min — rendu après DOM via chart ID unique
-  var chartId='pat-chart-'+Date.now();
+  // SVG bar chart — buts par tranche 15min (pur SVG, pas de Chart.js)
   var slotsH=evH&&evH.slots||[];
   var slotsA=evA&&evA.slots||[];
-  var chartHtml='';
+  var svgHtml='';
   if(slotsH.length||slotsA.length){
-    var dataH=JSON.stringify(slotsH.map(function(s){return s.n||0;}));
-    var dataA=JSON.stringify(slotsA.map(function(s){return s.n||0;}));
-    var labels=JSON.stringify(slotsH.length?slotsH.map(function(s){return s.t;}):['0-15','15-30','30-45','45-60','60-75','75-90']);
-    chartHtml='<div class="pat-chart-lbl">BUTS PAR TRANCHE DE 15 MIN (10 MATCHS)</div>'
+    var labels=['0-15','15-30','30-45','45-60','60-75','75-90'];
+    var dH=slotsH.length?slotsH.map(function(s){return s.n||0;}):[0,0,0,0,0,0];
+    var dA=slotsA.length?slotsA.map(function(s){return s.n||0;}):[0,0,0,0,0,0];
+    var maxV=Math.max.apply(null,dH.concat(dA).concat([1]));
+    var W=100, H=60, n=6;
+    var bw=8, gap=5;
+    var totalW=n*(bw*2+gap)+(n-1)*4;
+    var startX=(W-totalW)/2;
+    var bars='';
+    for(var i=0;i<n;i++){
+      var x=startX+i*(bw*2+gap+4);
+      var hh=Math.max(1,Math.round((dH[i]/maxV)*(H-18)));
+      var ha=Math.max(1,Math.round((dA[i]/maxV)*(H-18)));
+      var yh=H-14-hh, ya=H-14-ha;
+      bars+='<rect x="'+x+'" y="'+yh+'" width="'+bw+'" height="'+hh+'" rx="2" fill="'+(dH[i]>0?'#22d3ee':'rgba(34,211,238,0.15)')+'"/>';
+      bars+='<rect x="'+(x+bw+2)+'" y="'+ya+'" width="'+bw+'" height="'+ha+'" rx="2" fill="'+(dA[i]>0?'#4a6580':'rgba(74,101,128,0.2)')+'"/>';
+      if(dH[i]>0) bars+='<text x="'+(x+bw/2)+'" y="'+(yh-2)+'" font-family="Bebas Neue,sans-serif" font-size="8" fill="#22d3ee" text-anchor="middle">'+dH[i]+'</text>';
+      if(dA[i]>0) bars+='<text x="'+(x+bw+2+bw/2)+'" y="'+(ya-2)+'" font-family="Bebas Neue,sans-serif" font-size="8" fill="#4a6580" text-anchor="middle">'+dA[i]+'</text>';
+      var lx=x+bw+1;
+      bars+='<text x="'+lx+'" y="'+(H-2)+'" font-family="Space Mono,monospace" font-size="5.5" fill="#2a3f55" text-anchor="middle">'+labels[i]+'</text>';
+    }
+    svgHtml='<div style="margin-top:12px">'
+      +'<div class="pat-chart-lbl">BUTS PAR TRANCHE DE 15 MIN — 10 MATCHS</div>'
       +'<div class="pat-legend"><div class="pat-leg"><div class="pat-leg-dot" style="background:#22d3ee"></div>'+hn+'</div><div class="pat-leg"><div class="pat-leg-dot" style="background:#4a6580"></div>'+an+'</div></div>'
-      +'<div class="chart-wrap"><canvas id="'+chartId+'"></canvas></div>'
-      +'<script>'
-      +'(function(){var ctx=document.getElementById("'+chartId+'");'
-      +'if(!ctx||typeof Chart==="undefined")return;'
-      +'new Chart(ctx,{type:"bar",data:{labels:'+labels+',datasets:['
-      +'{label:"'+hn+'",data:'+dataH+',backgroundColor:"#22d3ee",borderRadius:4,barPercentage:0.45},'
-      +'{label:"'+an+'",data:'+dataA+',backgroundColor:"#4a6580",borderRadius:4,barPercentage:0.45}'
-      +']},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return " "+c.dataset.label+" : "+c.parsed.y+" buts";}}}},scales:{x:{grid:{display:false},ticks:{font:{size:10},color:"#4a6580"}},y:{beginAtZero:true,ticks:{stepSize:1,font:{size:10},color:"#4a6580"},grid:{color:"rgba(255,255,255,0.04)"}}}}})'
-      +'})();<\/script>';
+      +'<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;height:110px;" preserveAspectRatio="xMidYMid meet">'+bars+'</svg>'
+      +'</div>';
   }
 
-  return '<div class="s"><div class="stitle">PATTERNS — 10 MATCHS</div>'+statsHtml+halvesHtml+chartHtml+'</div><div class="sep"></div>';
+  return '<div class="s"><div class="stitle">PATTERNS — 10 MATCHS</div>'+statsHtml+svgHtml+'</div><div class="sep"></div>';
 }
 
 function buildScen(m){
@@ -487,17 +482,6 @@ function render(m){
     +buildPlayers(hn,an,m.top_scorers_home||[],m.top_scorers_away||[])
     // FIFA CARD
     +buildFifa(m.joueur_decisif||null,m.top_scorers_home||[],m.top_scorers_away||[])
-    // MUR PRO
-    +(isPro?proContent:'<div class="pro-wall"><div class="pro-wall-inner">'+proContent+'</div><div class="pro-wall-overlay" onclick="location.href=\'/compte.html\'">'
-      +'<div class="pw-top"><div class="pw-top-lbl">ACCES EXCLUSIF</div><div class="pw-lock"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div></div>'
-      +'<div class="pw-body"><div class="pw-title">IASHARK <span>PRO</span></div><div class="pw-sub">Accès à l\'intégralité de l\'analyse pour chaque match.</div><div class="pw-feats">'
-      +'<div class="pw-feat"><div class="pw-feat-l"><div class="pw-feat-i">01</div><div><div class="pw-feat-name">SCENARIO 15MIN</div><div class="pw-feat-desc">Déroulement prédit tranche par tranche.</div></div></div><div class="pw-badge c2">MODELE IA</div></div>'
-      +'<div class="pw-feat"><div class="pw-feat-l"><div class="pw-feat-i">02</div><div><div class="pw-feat-name">SCORE PREDIT</div><div class="pw-feat-desc">Score le plus probable avec probabilité.</div></div></div><div class="pw-badge c2">MODELE IA</div></div>'
-      +'<div class="pw-feat"><div class="pw-feat-l"><div class="pw-feat-i">03</div><div><div class="pw-feat-name">MISE KELLY</div><div class="pw-feat-desc">Montant optimal calculé sur l\'edge réel.</div></div></div><div class="pw-badge c1">KELLY</div></div>'
-      +'</div></div><div class="pw-pricing"><div><div class="pw-price">5<span>€</span></div><div class="pw-price-sub">/ MOIS · SANS ENGAGEMENT</div></div><div><div class="pw-item">Tous les matchs, chaque soir</div><div class="pw-item">Analyses actualisées chaque matin</div><div class="pw-item">Résiliation immédiate</div></div></div>'
-      +'<div class="pw-cta-wrap"><div class="pw-cta">DEBLOQUER IASHARK PRO</div><div class="pw-note">PAIEMENT SECURISE · ANNULABLE A TOUT MOMENT</div></div></div></div>')
-    // ALERTE SECURITE
-    +'<div class="sep"></div><div class="s"><div class="stitle">ALERTE SECURITE</div>'+skipHtml+'</div>'
     +'<div class="card-footer"></div></div></div>';
 }
 

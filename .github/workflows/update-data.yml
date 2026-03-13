@@ -977,10 +977,12 @@ jobs:
             {n:'Bet365',  o:'100\u20ac bonus',           l:'#LIEN_BET365'},
           ];
           function parseOdds(o) {
-            var empty = {c1:'--',cn:'--',c2:'--',co15:'--',co25:'--',cu25:'--',
-                         dc1x:'--',dc2x:'--',dc12:'--',btts_oui:'--',btts_non:'--',bookies:[]};
+            var empty = {c1:'--',cn:'--',c2:'--',co15:'--',co25:'--',co35:'--',cu15:'--',cu25:'--',cu35:'--',
+                         dc1x:'--',dc2x:'--',dc12:'--',btts_oui:'--',btts_non:'--',
+                         ht1:'--',htn:'--',ht2:'--',bookies:[]};
             if (!o || !o.bookmakers || !o.bookmakers.length) return empty;
-            var arr1=[],arrN=[],arr2=[],arr15=[],arr25=[],arru25=[],arr1x=[],arrx2=[],arr12=[],arrby=[],arrbn=[];
+            var arr1=[],arrN=[],arr2=[],arr15=[],arr25=[],arr35=[],arru15=[],arru25=[],arru35=[],
+                arr1x=[],arrx2=[],arr12=[],arrby=[],arrbn=[],arrht1=[],arrhtn=[],arrht2=[];
             o.bookmakers.forEach(function(bk) {
               (bk.bets||[]).forEach(function(bet) {
                 if (bet.name==='Match Winner'||bet.name==='Home/Draw/Away') {
@@ -995,7 +997,10 @@ jobs:
                   (bet.values||[]).forEach(function(v) {
                     if (v.value==='Over 1.5')  arr15.push(parseFloat(v.odd));
                     if (v.value==='Over 2.5')  arr25.push(parseFloat(v.odd));
+                    if (v.value==='Over 3.5')  arr35.push(parseFloat(v.odd));
+                    if (v.value==='Under 1.5') arru15.push(parseFloat(v.odd));
                     if (v.value==='Under 2.5') arru25.push(parseFloat(v.odd));
+                    if (v.value==='Under 3.5') arru35.push(parseFloat(v.odd));
                   });
                 }
                 if (bet.name==='Double Chance') {
@@ -1012,6 +1017,14 @@ jobs:
                   if (by) arrby.push(parseFloat(by.odd));
                   if (bn) arrbn.push(parseFloat(bn.odd));
                 }
+                if (bet.name==='First Half Winner'||bet.name==='HT/FT'||bet.name==='Halftime') {
+                  var hh=(bet.values||[]).find(function(v){return v.value==='Home'||v.value==='1';});
+                  var hd=(bet.values||[]).find(function(v){return v.value==='Draw'||v.value==='X';});
+                  var ha=(bet.values||[]).find(function(v){return v.value==='Away'||v.value==='2';});
+                  if (hh&&parseFloat(hh.odd)>=1.05) arrht1.push(parseFloat(hh.odd));
+                  if (hd&&parseFloat(hd.odd)>=1.05) arrhtn.push(parseFloat(hd.odd));
+                  if (ha&&parseFloat(ha.odd)>=1.05) arrht2.push(parseFloat(ha.odd));
+                }
               });
             });
             function med(a) {
@@ -1021,9 +1034,11 @@ jobs:
               return (s.length%2?s[m]:((s[m-1]+s[m])/2)).toFixed(2);
             }
             var c1=med(arr1), cn=med(arrN), c2=med(arr2);
-            var co15=med(arr15), co25=med(arr25), cu25=med(arru25);
+            var co15=med(arr15), co25=med(arr25), co35=med(arr35);
+            var cu15=med(arru15), cu25=med(arru25), cu35=med(arru35);
             var dc1x=med(arr1x), dc2x=med(arrx2), dc12=med(arr12);
             var btts_oui=med(arrby), btts_non=med(arrbn);
+            var ht1=med(arrht1), htn=med(arrhtn), ht2=med(arrht2);
             var deltas=[0,-0.03,-0.02,-0.05,+0.03];
             function vary(c,d){ if(!c||c==='--') return '--'; return Math.max(1.01,parseFloat(c)+d).toFixed(2); }
             var bookies=FR_FIXED.map(function(bk,i){
@@ -1035,7 +1050,7 @@ jobs:
                 c2:vary(c2,deltas[i])
               };
             });
-            return {c1,cn,c2,co15,co25,cu25,dc1x,dc2x,dc12,btts_oui,btts_non,bookies};
+            return {c1,cn,c2,co15,co25,co35,cu15,cu25,cu35,dc1x,dc2x,dc12,btts_oui,btts_non,ht1,htn,ht2,bookies};
           }
           async function getInjuries(fixtureId) {
             var r = await get(
@@ -1403,37 +1418,48 @@ jobs:
               +'Buts predits: '+d.home+' '+(d.pred_goals_home||'?')+' — '+d.away+' '+(d.pred_goals_away||'?')+'\\n'
               +'Forces: Attaque '+d.home+' '+(d.pred_att_home||'?')+' / '+d.away+' '+(d.pred_att_away||'?')+' | Defense '+d.home+' '+(d.pred_def_home||'?')+' / '+d.away+' '+(d.pred_def_away||'?')+'\\n'
               +'NB: si tes stats donnent un edge different, suis tes stats pas ce modele.\\n\\n':'')
-              +'=== COTES + PROBABILITES IMPLICITES (TOUS LES MARCHES) ===\\n'
-              +'Victoire '+d.home+': '+d.c1+' → '+pi1+'% impl\\n'
-              +'Nul: '+d.cn+' → '+piN+'% impl\\n'
-              +'Victoire '+d.away+': '+d.c2+' → '+pi2+'% impl\\n'
-              +'DC 1X: '+d.dc1x+' → '+pi1x+'% impl\\n'
-              +'DC X2: '+d.dc2x+' → '+pix2+'% impl\\n'
-              +'Over 1.5: '+d.co15+' → '+pio15+'% impl\\n'
-              +'Over 2.5: '+d.co25+' → '+pio25+'% impl\\n'
-              +'Under 2.5: '+d.cu25+' → '+piu25+'% impl\\n'
-              +'BTTS Oui: '+d.btts_oui+' → '+piby+'% impl\\n'
-              +'BTTS Non: '+d.btts_non+' → '+pibn+'% impl\\n\\n'
+              +'=== COTES MEDIANES (TOUS LES MARCHES DISPONIBLES) ===\\n'
+              +'Victoire '+d.home+': '+(d.c1||'--')+' → '+pi1+'% impl\\n'
+              +'Nul: '+(d.cn||'--')+' → '+piN+'% impl\\n'
+              +'Victoire '+d.away+': '+(d.c2||'--')+' → '+pi2+'% impl\\n'
+              +'DC 1X ('+d.home+' ou Nul): '+(d.dc1x||'--')+' → '+pi1x+'% impl\\n'
+              +'DC X2 (Nul ou '+d.away+'): '+(d.dc2x||'--')+' → '+pix2+'% impl\\n'
+              +'DC 12 ('+d.home+' ou '+d.away+'): '+(d.dc12||'--')+'\\n'
+              +'Over 1.5: '+(d.co15||'--')+' → '+pio15+'% impl\\n'
+              +'Over 2.5: '+(d.co25||'--')+' → '+pio25+'% impl\\n'
+              +'Over 3.5: '+(d.co35||'--')+'\\n'
+              +'Under 1.5: '+(d.cu15||'--')+'\\n'
+              +'Under 2.5: '+(d.cu25||'--')+' → '+piu25+'% impl\\n'
+              +'Under 3.5: '+(d.cu35||'--')+'\\n'
+              +'BTTS Oui: '+(d.btts_oui||'--')+' → '+piby+'% impl\\n'
+              +'BTTS Non: '+(d.btts_non||'--')+' → '+pibn+'% impl\\n'
+              +((d.ht1&&d.ht1!=='--')?'MT Victoire '+d.home+': '+(d.ht1||'--')+' | MT Nul: '+(d.htn||'--')+' | MT Victoire '+d.away+': '+(d.ht2||'--')+'\\n':'')
+              +'\\n'
               +'=== METHODE OBLIGATOIRE ===\\n'
-              +'1. Calcule prob reelle pour CHAQUE marche en croisant: stats DOM/EXT + 20 matchs + xG (si dispo) + H2H + lineups + fatigue + meteo.\\n'
-              +'2. Edge = prob_IA - prob_implicite. Marche avec plus grand edge positif = ton pari.\\n'
-              +'3. Si xG dispo: xG_home+xG_away>2.5 renforce Over. xG<1.0 les deux renforce Under/BTTS Non.\\n'
-              +'4. Si lineups dispo: verifie que attaquants/defenseurs cles jouent. Absent cle = ajuste prob.\\n'
-              +'5. Modele API-Sports = reference secondaire. Si ecart >15% avec tes stats, justifie.\\n\\n'
+              +'ETAPE 1 — ANALYSE DES STATS (avant de regarder les cotes):\\n'
+              +'  a. Calcule la probabilite reelle de chaque scenario possible en croisant TOUTES les stats disponibles: forme DOM/EXT, 20 matchs, xG, H2H, absences, fatigue, meteo, compositions.\\n'
+              +'  b. Le scenario le plus probable dicte le type de pari. Ne pars pas des cotes.\\n'
+              +'  c. Si xG dispo: utilise xG_home + xG_away pour estimer le total de buts attendu.\\n'
+              +'  d. Si compositions dispo: verifie que les joueurs cles sont presents.\\n'
+              +'ETAPE 2 — CONFRONTATION AVEC LES COTES:\\n'
+              +'  a. Pour chaque marche du tableau ci-dessus: Edge = prob_IA - prob_implicite_bookmaker.\\n'
+              +'  b. Retiens uniquement les marches avec edge positif.\\n'
+              +'ETAPE 3 — SELECTION DES 3 PARIS (fourchettes strictes):\\n'
+              +'  SAFE: marche avec la prob IA la plus elevee, cote obligatoirement entre 1.40 et 1.70.\\n'
+              +'  VALEUR: marche avec le meilleur edge positif, cote obligatoirement entre 1.80 et 2.20.\\n'
+              +'  AUDACE: marche justifie par les stats, cote obligatoirement > 2.20.\\n'
+              +'  REGLE UNIQUE: les 3 libelles doivent etre differents. Ils peuvent etre coherents entre eux.\\n'
+              +'  Si aucune cote disponible dans une fourchette: choisis le marche le plus proche avec le meilleur edge.\\n\\n'
               +'REGLES DURES:\\n'
+              +'- Ne jamais inventer une stat ou une cote.\\n'
+              +'- Utilise uniquement les cotes exactes du tableau ci-dessus.\\n'
               +'- Meilleur edge < 5%: confiance <= 5.5, le dire dans verdict_shark.\\n'
               +'- Cote < 1.30: confiance <= 4.0, vbet=NON.\\n'
-              +'- Ne jamais inventer une stat.\\n'
-              +'- 3 paris_3 = 3 marches DIFFERENTS, cotes exactes du tableau.\\n'
-              +'- Pari SPECU cote >= 2.00.\\n\\n'
-              +'EXEMPLES:\\n'
-              +'- xG_home 1.8 + xG_away 1.4 = total 3.2 → Over 2.5: prob IA 62% vs impl 52% = edge +10%\\n'
-              +'- xG_home 0.6 + xG_away 0.7 = total 1.3 → Under 2.5: prob IA 75% vs impl 55% = edge +20%\\n'
-              +'- Formation 5-3-2 EXT + DOM 0.7 buts DOM → Under 1.5: prob IA 55% vs impl 40% = edge +15%\\n'
-              +'- DOM CS 8/14 + EXT failToScore 6/12 → BTTS Non: prob IA 65% vs impl 52% = edge +13%\\n\\n'
+              +'- p1+pn+p2 doit etre calcule depuis les stats reelles, total = 100.\\n'
+              +'- Le scenario (phase1/phase2/phase3) doit etre coherent avec le pari safe choisi.\\n\\n'
               +'=== JSON STRICT — RIEN D\'AUTRE ===\\n'
-              +'{"confiance":7.2,"verdict_shark":"[MARCHE] a [COTE] — edge +X% : [xG ou stat DOM/EXT cle]. Direct.","scenario":{"phase1":"0-25min: contexte tactique reel (formations, style)","phase2":"25-65min: evolution basee sur stats xG et forme","phase3":"65-90min: fin attendue justifiee par stats"},"facteur_x":"1 seule chose decisive: xG exceptionnel OU blessure cle OU formation defensive OU stat record","pari_rec":"Nom exact: Over 2.5 / BTTS Non / Victoire PSG / DC 1X / Under 1.5 / Nul / etc","cote_rec":"[cote exacte du tableau]","marche":"RESULTAT|DOUBLE_CHANCE|TOTAL_BUTS|BTTS|UNDER|MI_TEMPS","risque":"FAIBLE|MODERE|ELEVE","vbet":"OUI|NON","edge":"+X.X%","argument":"1. [xG ou stat DOM/EXT chiffree]. 2. [stat complementaire]. 3. Prob IA X% vs impl Y% = edge +Z%.","analyse_card":"2-3 phrases avec xG et stats reelles","conseil":"3-4 phrases basees sur xG et stats reelles","contexte":"2-3 phrases classement et forme reelle","enjeux":"1 phrase","scores_probables":"X-X,X-X,X-X","p1":45,"pn":28,"p2":27,"po15":80,"po25":55,"btts":50,"kelly":"2.8","paris_3":{"safe":{"bet":"[securise cote>=1.40]","cote":"[exacte tableau]","hint":"[stat chiffree]","mise":"4-5% bankroll","bookie":"Betclic"},"valeur":{"bet":"[DIFFERENT safe, avec edge]","cote":"[exacte tableau]","hint":"[prob IA X% vs impl Y% = edge +Z%]","mise":"2-3% bankroll","bookie":"Winamax"},"specu":{"bet":"[DIFFERENT des deux, cote>=2.00]","cote":"[exacte tableau]","hint":"[justification xG+stat]","mise":"0.5-1% bankroll","bookie":"Bet365"}}}\\n\\n'
-              +'CONTRAINTES FINALES: p1+pn+p2=100 | confiance=5.0+(edge/3.5) max 9.5 | kelly=(edge/(cote-1))*100 | vbet=OUI si edge>4% ET cote>=1.50 | specu cote>=2.00';
+              +'{"confiance":7.2,"verdict_shark":"[MARCHE SAFE] a [COTE] — edge +X% : [stat cle issue des donnees]. Direct.","scenario":{"phase1":"0-25min: contexte tactique reel coherent avec le pari safe","phase2":"25-65min: evolution basee sur stats et forme","phase3":"65-90min: fin attendue justifiee par les stats"},"facteur_x":"1 seule chose decisive issue des donnees","pari_rec":"Nom exact du pari safe","cote_rec":"[cote exacte du tableau]","marche":"RESULTAT|DOUBLE_CHANCE|TOTAL_BUTS|BTTS|UNDER|MI_TEMPS","risque":"FAIBLE|MODERE|ELEVE","vbet":"OUI|NON","edge":"+X.X%","argument":"1. [stat DOM/EXT chiffree]. 2. [stat complementaire]. 3. Prob IA X% vs impl Y% = edge +Z%.","analyse_card":"2-3 phrases avec stats reelles","conseil":"3-4 phrases basees sur stats reelles","contexte":"2-3 phrases classement et forme reelle","enjeux":"1 phrase","scores_probables":"X-X,X-X,X-X","p1":[calculer depuis stats reelles],"pn":[calculer depuis stats reelles],"p2":[calculer depuis stats reelles],"po15":80,"po25":55,"btts":50,"kelly":"2.8","paris_3":{"safe":{"bet":"[pari le plus probable, cote 1.40-1.70]","cote":"[exacte tableau]","hint":"[stat chiffree qui justifie]","mise":"4-5% bankroll","bookie":"Betclic"},"valeur":{"bet":"[meilleur edge, cote 1.80-2.20, libelle different du safe]","cote":"[exacte tableau]","hint":"[prob IA X% vs impl Y% = edge +Z%]","mise":"2-3% bankroll","bookie":"Winamax"},"specu":{"bet":"[cote>2.20, libelle different des deux autres]","cote":"[exacte tableau]","hint":"[justification par les stats]","mise":"0.5-1% bankroll","bookie":"Bet365"}}}\\n\\n'
+              +'CONTRAINTES FINALES: p1+pn+p2=100 (calcules depuis stats reelles) | confiance=5.0+(edge/3.5) max 9.5 | kelly=(edge/(cote-1))*100 | vbet=OUI si edge>4% ET cote>=1.50';
             var r = await postJSON('api.anthropic.com', '/v1/messages', {
               model: 'claude-sonnet-4-6',
               max_tokens: 2000,
@@ -1738,8 +1764,10 @@ jobs:
                 h2hAvgButs, h2hNuls,
                 c1:odds.c1, cn:odds.cn, c2:odds.c2,
                 co15:odds.co15, co25:odds.co25, cu25:odds.cu25,
-                dc1x:odds.dc1x, dc2x:odds.dc2x,
+                co35:odds.co35, cu15:odds.cu15, cu35:odds.cu35,
+                dc1x:odds.dc1x, dc2x:odds.dc2x, dc12:odds.dc12,
                 btts_oui:odds.btts_oui, btts_non:odds.btts_non,
+                ht1:odds.ht1, htn:odds.htn, ht2:odds.ht2,
                 injuries, h2h:h2hRaw,
                 fatH:fatigueH.info, fatScoreH:fatigueH.val,
                 fatA:fatigueA.info, fatScoreA:fatigueA.val,
@@ -1781,10 +1809,16 @@ jobs:
                 else if(p.includes('btts')||p.includes('les deux equipes marquent')) coteRec=odds.btts_oui;
                 else if(p.includes('x2')) coteRec=odds.dc2x;
                 else if(p.includes('1x')) coteRec=odds.dc1x;
+                else if(p.includes('12')||p.includes('home/away')) coteRec=odds.dc12;
                 else if(p.includes('double chance')) coteRec=odds.dc2x;
+                else if(p.includes('over 3.5')||p.includes('plus de 3.5')) coteRec=odds.co35;
                 else if(p.includes('over 2.5')||p.includes('plus de 2.5')) coteRec=odds.co25;
                 else if(p.includes('over 1.5')||p.includes('plus de 1.5')) coteRec=odds.co15;
+                else if(p.includes('under 1.5')||p.includes('moins de 1.5')) coteRec=odds.cu15;
+                else if(p.includes('under 3.5')||p.includes('moins de 3.5')) coteRec=odds.cu35;
                 else if(p.includes('under')||p.includes('moins de 2.5')) coteRec=odds.cu25;
+                else if(p.includes('mt nul')||p.includes('mi-temps nul')) coteRec=odds.htn;
+                else if(p.includes('mt victoire')||p.includes('mi-temps victoire')) coteRec=p.includes(away.name.toLowerCase().slice(0,4))?odds.ht2:odds.ht1;
                 else if(p.includes('nul')||p.includes('match nul')) coteRec=odds.cn;
                 else if(p.includes('victoire')&&(p.includes(away.name.toLowerCase().slice(0,4))||p.includes('ext'))) coteRec=odds.c2;
                 else coteRec=odds.c1;
@@ -1838,10 +1872,12 @@ jobs:
                 po15:an?(an.po15||0):0, po25:an?(an.po25||0):0, btts:an?(an.btts||0):0,
                 c1:odds.c1, cn:odds.cn, c2:odds.c2,
                 co15:odds.co15, co25:odds.co25, cu25:odds.cu25,
+                co35:odds.co35, cu15:odds.cu15, cu35:odds.cu35,
                 dc1x:odds.dc1x, dc2x:odds.dc2x, dc12:odds.dc12,
                 cdc1x:odds.dc1x, cdc2x:odds.dc2x,
                 cbtts:odds.btts_oui, cbtts_non:odds.btts_non,
                 btts_oui:odds.btts_oui, btts_non:odds.btts_non,
+                ht1:odds.ht1, htn:odds.htn, ht2:odds.ht2,
                 bookies:odds.bookies,
                 edge:an?(an.edge||''):'',
                 edge_detail:an?'Probabilit\u00e9 IA vs probabilit\u00e9 implicite bookmaker = '+(an.edge||''):'',
@@ -1861,7 +1897,12 @@ jobs:
                 value_calc:an?(an.edge||''):'',
                 scores:an?((an.scores_probables||'').split(',').map(function(s){return s.trim();}).filter(Boolean)):[],
                 paris_3:an?(an.paris_3||null):null,
-                paris_safe:{bet:an?(an.pari_rec||''):'',cote:odds.c1,proba:an?(an.p1||0)+'%':''},
+                paris_safe:{
+                  bet:an&&an.paris_3&&an.paris_3.safe?an.paris_3.safe.bet:(an?(an.pari_rec||''):''),
+                  cote:an&&an.paris_3&&an.paris_3.safe?an.paris_3.safe.cote:odds.c1,
+                  hint:an&&an.paris_3&&an.paris_3.safe?an.paris_3.safe.hint:'',
+                  proba:an?(an.p1||0)+'%':''
+                },
                 paris_risque:{bet:'',cote:'',proba:''},
                 kelly:kellyVal,
                 stade:{

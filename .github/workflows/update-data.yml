@@ -1441,11 +1441,12 @@ jobs:
               +'{"confiance":7.2,"verdict_shark":"[MARCHE] a [COTE] — edge +X% : [xG ou stat DOM/EXT cle]. Direct.","passe_ton_tour":false,"passe_ton_tour_raison":"","scenario":{"phase1":"0-25min: contexte tactique reel (formations, style)","phase2":"25-65min: evolution basee sur stats xG et forme","phase3":"65-90min: fin attendue justifiee par stats"},"scenario_15min":[{"t":"0-15min","prob":8,"txt":"Debut de match: contexte tactique, pression initiale"},{"t":"15-30min","prob":12,"txt":"Montee en puissance, premiere occasion franche"},{"t":"30-45min","prob":10,"txt":"Fin de 1ere mi-temps, equipe dominante?"},{"t":"45-60min","prob":15,"txt":"Debut 2eme mi-temps, changement tactique attendu"},{"t":"60-75min","prob":18,"txt":"Phase cruciale, substitutions et buts probables"},{"t":"75-90min","prob":20,"txt":"Fin de match, gestion ou pressing final"}],"score_top":{"score":"1-0","prob":28},"facteur_x":"1 seule chose decisive: xG exceptionnel OU blessure cle OU formation defensive OU stat record","pari_rec":"Nom exact: Over 2.5 / BTTS Non / BTTS Oui / Victoire PSG / DC 1X / DC X2 / Under 2.5 / Nul / etc","cote_rec":"[cote exacte du tableau]","marche":"RESULTAT|DOUBLE_CHANCE|TOTAL_BUTS|BTTS|UNDER|MI_TEMPS","risque":"FAIBLE|MODERE|ELEVE","vbet":"OUI|NON","edge":"+7.7%","argument":"1. [xG ou stat DOM/EXT chiffree]. 2. [stat complementaire]. 3. Prob IA X% vs impl Y% = edge +Z%.","analyse_card":"2-3 phrases avec xG et stats reelles","conseil":"3-4 phrases basees sur xG et stats reelles","contexte":"2-3 phrases classement et forme reelle","enjeux":"1 phrase","scores_probables":"X-X,X-X,X-X","p1":45,"pn":28,"p2":27,"po15":80,"po25":55,"btts":50,"kelly":"9.6","paris_3":{"safe":{"bet":"[securise cote>=1.40]","cote":"[exacte tableau]","hint":"[stat chiffree]","mise":"4-5% bankroll","bookie":"Betclic"},"valeur":{"bet":"[DIFFERENT safe, avec edge]","cote":"[exacte tableau]","hint":"[prob IA X% vs impl Y% = edge +Z%]","mise":"2-3% bankroll","bookie":"Winamax"},"specu":{"bet":"[DIFFERENT des deux, cote>=2.00]","cote":"[exacte tableau]","hint":"[justification xG+stat]","mise":"0.5-1% bankroll","bookie":"Bet365"}}}\\n\\n'
               +'CONTRAINTES FINALES: p1+pn+p2=100 | confiance=5.0+(edge/3.5) max 9.5 | kelly=edge/(cote-1) [edge en %, resultat en %] | vbet=OUI si edge>4% ET cote>=1.40 | vbet=NON si cote<1.40 OU edge<=4% | specu cote>=2.00';
             var r = await postJSON('api.anthropic.com', '/v1/messages', {
-              model: 'claude-sonnet-4-6',
-              max_tokens: 2000,
+              model: 'claude-opus-4-6',
+              max_tokens: 16000,
+              thinking: {type:'enabled', budget_tokens:10000},
               messages: [{role:'user', content:prompt}]
-            }, {'x-api-key':ANT_KEY, 'anthropic-version':'2023-06-01'});
-            var txt = (r.content&&r.content[0]&&r.content[0].text)||'{}';
+            }, {'x-api-key':ANT_KEY, 'anthropic-version':'2023-06-01', 'anthropic-beta':'interleaved-thinking-2025-05-14'});
+            var txt = ((r.content||[]).find(function(b){return b.type==='text';})||{}).text||'{}';
             try { return JSON.parse(txt.replace(/```json|```/g,'').trim()); }
             catch(e) { console.log('Parse error:', txt.slice(0,200)); return null; }
           }
@@ -1463,7 +1464,7 @@ jobs:
               +'"c2":{"label":"SHARK VALUE","type":"value","selections":"pari1, pari2, pari3","matchs":"m1, m2, m3","cote_totale":"3.8","conseil":"..."},'
               +'"c3":{"label":"SHARK AUDACE","type":"audace","selections":"pari1, pari2, pari3","matchs":"m1, m2, m3","cote_totale":"7.2","conseil":"..."}}';
             var r = await postJSON('api.anthropic.com', '/v1/messages', {
-              model: 'claude-sonnet-4-6',
+              model: 'claude-opus-4-6',
               max_tokens: 800,
               messages: [{role:'user', content:promptClassic}]
             }, {'x-api-key':ANT_KEY, 'anthropic-version':'2023-06-01'});

@@ -18,15 +18,15 @@
       "cat": [
         "all"
       ],
-      "val": false,
+      "val": true,
       "hot": false,
-      "conf": 0,
-      "p1": 0,
-      "pn": 0,
-      "p2": 0,
-      "po15": 0,
-      "po25": 0,
-      "btts": 0,
+      "conf": 6.1,
+      "p1": 28,
+      "pn": 38,
+      "p2": 34,
+      "po15": 18,
+      "po25": 48,
+      "btts": 42,
       "c1": "3.45",
       "cn": "3.33",
       "c2": "2.22",
@@ -47,7 +47,7 @@
           "n": "Betclic",
           "o": "200€ offerts",
           "l": "#LIEN_BETCLIC",
-          "c": "3.45",
+          "c": "2.01",
           "c1": "3.45",
           "cn": "3.33",
           "c2": "2.22"
@@ -56,7 +56,7 @@
           "n": "Winamax",
           "o": "100€ offerts",
           "l": "#LIEN_WINAMAX",
-          "c": "3.42",
+          "c": "1.98",
           "c1": "3.42",
           "cn": "3.30",
           "c2": "2.19"
@@ -65,7 +65,7 @@
           "n": "Unibet",
           "o": "100€ remboursés",
           "l": "#LIEN_UNIBET",
-          "c": "3.43",
+          "c": "1.99",
           "c1": "3.43",
           "cn": "3.31",
           "c2": "2.20"
@@ -74,7 +74,7 @@
           "n": "PMU",
           "o": "100€ offerts",
           "l": "#LIEN_PMU",
-          "c": "3.40",
+          "c": "1.96",
           "c1": "3.40",
           "cn": "3.28",
           "c2": "2.17"
@@ -83,44 +83,116 @@
           "n": "Bet365",
           "o": "100€ bonus",
           "l": "#LIEN_BET365",
-          "c": "3.48",
+          "c": "2.04",
           "c1": "3.48",
           "cn": "3.36",
           "c2": "2.25"
         }
       ],
-      "edge": "",
-      "edge_detail": "",
-      "marche": "RESULTAT",
+      "edge": "+8.1%",
+      "edge_detail": "Probabilité IA vs probabilité implicite bookmaker = +8.1%",
+      "marche": "BTTS",
       "risque": "MODERE",
-      "pari_rec": "",
+      "pari_rec": "BTTS Non",
       "mise": "2-3% bankroll",
-      "verdict_shark": "",
-      "scenario": null,
-      "scenario_15min": null,
-      "score_predit": null,
-      "facteur_x": "",
-      "argument": "",
-      "analyse_card": "",
-      "conseil_public": "",
-      "contexte": "",
-      "enjeux": "",
-      "vbet": "NON",
-      "value_calc": "",
-      "scores": [],
-      "paris_3": null,
-      "joueur_decisif": null,
+      "verdict_shark": "BTTS Non a 2.01 — edge +8% : Alaves 0 but en 3 derniers DOM, Villarreal 0 but en 2 derniers EXT, clean sheets EXT 3/13. Direct.",
+      "scenario": {
+        "phase1": "0-25min: Alaves 3-5-2 defensif, Villarreal 4-4-2 offensif mais faible scoring EXT (1.00 buts/match). Debut prudent attendu.",
+        "phase2": "25-65min: Villarreal domine possession/xG mais Alaves joue en bloc. Peu d'occasions franches. Moleiro (9 buts) peu actif en deplacement (pattern: 0 but avant 30min sur 10 matchs).",
+        "phase3": "65-90min: Villarreal pousse mais Alaves tient defensivement (2 CS DOM/13). Pattern: Villarreal 1 but apres 70min sur 10 matchs. Match ferme, 0-0 ou 1-0 probable."
+      },
+      "scenario_15min": [
+        {
+          "t": "0-15min",
+          "prob": 7,
+          "txt": "Installation tactique: Alaves ultra-defensif (3 defenseurs), Villarreal cherche couloir droit"
+        },
+        {
+          "t": "15-30min",
+          "prob": 10,
+          "txt": "Villarreal 60% possession, xG accumule mais tirs faibles. Alaves contre-attaque sur Toni Martinez"
+        },
+        {
+          "t": "30-45min",
+          "prob": 12,
+          "txt": "Fin 1ere MT: aucun but probable. Villarreal manque precision en zone de finition"
+        },
+        {
+          "t": "45-60min",
+          "prob": 15,
+          "txt": "Debut 2e MT: Villarreal renforce attaque, Alaves accepte le pressing faible"
+        },
+        {
+          "t": "60-75min",
+          "prob": 20,
+          "txt": "Phase cruciale: Villarreal fatigue (3 matchs/14j), Alaves resist avec forme D/D/D/L/D (serie passive)"
+        },
+        {
+          "t": "75-90min",
+          "prob": 36,
+          "txt": "Fin de match: 0-0 ou 1-0 Villarreal. Pattern Villarreal: 1 but apres 70min/10 matchs confirme peu de scoring tardif"
+        }
+      ],
+      "score_predit": {
+        "score": "0-0",
+        "prob": "32%",
+        "cote_implicite": "3.13"
+      },
+      "facteur_x": "Villarreal EXT moyenne 1.00 but/match + Pattern Moleiro 0 but avant 30min + Alaves 3 sans marquer DOM = probabilite BTTS exceptionnellement basse",
+      "argument": "1. Villarreal EXT: moyenne 1.00 but/match (lowest tier), clean sheets 3/13 mais scoring tres faible. 2. Alaves DOM: 3/13 sans marquer, derniers matchs D 1-1, D 2-2, L 0-2 (tendance low-scoring). 3. xG absent mais stats 20 matchs: Villarreal EXT Over 2.5 = 7/20 (35%) suggere total buts bas. Pattern Villarreal buts: 0 avant 30min sur 10 matchs. Prob IA BTTS Non 58% vs impl 50% = +8.1%.",
+      "analyse_card": "Villarreal encaisse 2.00 buts/match EXT mais Alaves ne marque que 1.40/match DOM. Moleiro (9 buts saison) decline en depays. Alaves sans marquer 3/13 DOM. Pattern Villarreal: 1 seul but apres 70min sur 10 matchs recent = faible scoring tardif.",
+      "conseil_public": "BTTS Non capture l'asymetrie offensiv: Villarreal dominera possession mais manquera finition (xG absent, stats scoring faibles). Alaves joue bloc defensif 3-5-2, absorbe la pression. Over 2.5 a 2.01 cote basse (50% impl) confirme marche doute. Mise conservative 2-3% sur cette value.",
+      "contexte": "Alaves #16 (5V/13 DOM), serie D/L/L/D/D montre fatigue. Villarreal #4 (6V/13 EXT) mais xG faible en deplacement, derniers EXT: L 1-4 Barcelona (domination subie). Match precedent: D 1-1 confirme faible scoring.",
+      "enjeux": "Villarreal en chasse top 3, Alaves lutte relégation → Villarreal veut points mais manque clinique EXT.",
+      "vbet": "OUI",
+      "value_calc": "+8.1%",
+      "scores": [
+        "0-0",
+        "1-0",
+        "0-1"
+      ],
+      "paris_3": {
+        "safe": {
+          "bet": "Nul",
+          "cote": "3.33",
+          "hint": "Alaves D/D/D patterns + Villarreal 0 but avant 30min recent = match ferme probable",
+          "mise": "4%",
+          "bookie": "Betclic"
+        },
+        "valeur": {
+          "bet": "BTTS Non",
+          "cote": "2.01",
+          "hint": "Villarreal 1.00 but/match EXT vs Alaves 1.40 DOM = total buts 2.40 expected, bien sous 2.5. Prob IA 58% vs impl 50% = +8.1% edge",
+          "mise": "3%",
+          "bookie": "Winamax"
+        },
+        "specu": {
+          "bet": "Under 2.5",
+          "cote": "1.89",
+          "hint": "Villarreal Over 2.5 EXT = 7/20 (35% base), Alaves Over 2.5 DOM = 5/20 (25% base). Combinaison: 35% x 25% = ~8.75% both teams surpass 2.5 threshold solo, mais scoring cross-team < 3 probab 68%. Cote 1.89 impl 53% vs IA 68% = +15% edge specu (marge faible mais structure coherente)",
+          "mise": "1.5%",
+          "bookie": "Bet365"
+        }
+      },
+      "joueur_decisif": {
+        "nom": "Alberto Moleiro",
+        "equipe": "EXT",
+        "marche": "Buteur dans le match",
+        "cote_estimee": "2.80-3.40",
+        "raison": "9 buts saison (leader Villarreal), mais pattern EXT: scoring faible, 0 but avant 30min sur 10 matchs recent. Dangereux apres 70min (probabilite 25-30% buteur tardif)",
+        "absent": false
+      },
       "paris_safe": {
-        "bet": "",
+        "bet": "BTTS Non",
         "cote": "3.45",
-        "proba": ""
+        "proba": "28%"
       },
       "paris_risque": {
         "bet": "",
         "cote": "",
         "proba": ""
       },
-      "kelly": null,
+      "kelly": "8.0",
       "stade": {
         "nom": "Estadio Mendizorrotza — Vitoria-Gasteiz",
         "cap": "",
@@ -604,26 +676,26 @@
           },
           {
             "t": "60-75",
-            "n": 5,
-            "avg": "0.25"
+            "n": 4,
+            "avg": "0.20"
           },
           {
             "t": "75-90",
-            "n": 2,
-            "avg": "0.10"
+            "n": 3,
+            "avg": "0.15"
           }
         ],
         "corners_per_game": "0.0",
-        "red_cards": 4,
-        "red_per_game": "0.20",
-        "yellow_per_game": "2.0",
-        "goals_after70": 4,
+        "red_cards": 3,
+        "red_per_game": "0.15",
+        "yellow_per_game": "1.9",
+        "goals_after70": 5,
         "goals_before30": 7,
         "games": 20
       },
       "events_away": {
-        "goals_total": 6,
-        "goals_avg": "0.30",
+        "goals_total": 7,
+        "goals_avg": "0.35",
         "slots": [
           {
             "t": "0-15",
@@ -632,18 +704,18 @@
           },
           {
             "t": "15-30",
-            "n": 1,
-            "avg": "0.05"
+            "n": 0,
+            "avg": "0.00"
           },
           {
             "t": "30-45",
-            "n": 3,
-            "avg": "0.15"
+            "n": 1,
+            "avg": "0.05"
           },
           {
             "t": "45-60",
-            "n": 1,
-            "avg": "0.05"
+            "n": 4,
+            "avg": "0.20"
           },
           {
             "t": "60-75",
@@ -652,16 +724,16 @@
           },
           {
             "t": "75-90",
-            "n": 0,
-            "avg": "0.00"
+            "n": 1,
+            "avg": "0.05"
           }
         ],
         "corners_per_game": "0.0",
-        "red_cards": 2,
-        "red_per_game": "0.10",
-        "yellow_per_game": "0.5",
+        "red_cards": 1,
+        "red_per_game": "0.05",
+        "yellow_per_game": "1.0",
         "goals_after70": 1,
-        "goals_before30": 1,
+        "goals_before30": 0,
         "games": 20
       },
       "top_scorers_home": [
@@ -734,11 +806,11 @@
           "rating": "7.24"
         }
       ],
-      "analyse_card_en": "",
-      "conseil_public_en": "",
-      "pari_rec_en": "",
-      "verdict_shark_en": "",
-      "facteur_x_en": ""
+      "analyse_card_en": "Villarreal encaisse 2.00 buts/match EXT mais Alaves ne marque que 1.40/match DOM. Moleiro (9 buts saison) decline en depays. Alaves sans marquer 3/13 DOM. Pattern Villarreal: 1 seul but apres 70min sur 10 matchs recent = faible scoring tardif.",
+      "conseil_public_en": "BTTS No capture l'asymetrie offensiv: Villarreal dominera possession mais manquera finition (xG absent, stats scoring faibles). Alaves joue bloc defensif 3-5-2, absorbe la pression. Over 2.5 a 2.01 cote basse (50% impl) confirme marche doute. Mise conservative 2-3% sur cette Value Bet.",
+      "pari_rec_en": "BTTS No",
+      "verdict_shark_en": "BTTS No a 2.01 — Edge +8% : Alaves 0 but en 3 derniers DOM, Villarreal 0 but en 2 derniers EXT, clean sheets EXT 3/13. Direct.",
+      "facteur_x_en": "Villarreal EXT moyenne 1.00 but/match + Pattern Moleiro 0 but avant 30min + Alaves 3 sans marquer DOM = probabilite BTTS exceptionnellement basse"
     }
   ],
   "combis": []

@@ -158,6 +158,27 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 .pat-legend{display:flex;gap:14px;margin-bottom:8px;}
 .pat-leg{font-family:'Space Mono',monospace;font-size:8px;color:var(--muted);display:flex;align-items:center;gap:5px;}
 .pat-leg-dot{width:10px;height:10px;border-radius:2px;flex-shrink:0;}
+/* JAUGES */
+.jauge-wrap{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px;}
+.jauge-col{}
+.jauge-team-lbl{font-family:'Space Mono',monospace;font-size:7px;letter-spacing:1px;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--border);}
+.jauge-row{display:flex;align-items:center;gap:7px;padding:4px 0;border-radius:5px;}
+.jauge-row.jauge-hot{background:rgba(34,211,238,0.04);padding:4px 6px;border-radius:6px;margin:0 -6px;}
+.jauge-row.jauge-warm{background:rgba(245,158,11,0.03);padding:4px 6px;border-radius:6px;margin:0 -6px;}
+.jauge-lbl{font-family:'Space Mono',monospace;font-size:7px;color:var(--muted);width:32px;flex-shrink:0;}
+.jauge-track{flex:1;height:6px;background:rgba(255,255,255,0.04);border-radius:3px;overflow:hidden;}
+.jauge-fill{height:100%;border-radius:3px;transition:width .8s ease;}
+.jauge-fill.h{background:linear-gradient(90deg,var(--cyan2),var(--cyan));}
+.jauge-fill.a{background:linear-gradient(90deg,#3a5070,#4a6580);}
+.jauge-fill.h.jauge-hot{background:var(--cyan);}
+.jauge-val{font-family:'Bebas Neue',sans-serif;font-size:14px;color:var(--text);line-height:1;width:30px;text-align:right;flex-shrink:0;}
+.jauge-unit{font-family:'Space Mono',monospace;font-size:7px;color:var(--muted);}
+.jauge-tag{font-family:'Space Mono',monospace;font-size:6px;letter-spacing:1px;padding:2px 5px;border-radius:3px;flex-shrink:0;background:rgba(34,211,238,0.1);color:var(--cyan);border:1px solid rgba(34,211,238,0.2);}
+.jauge-tag.warm{background:rgba(245,158,11,0.08);color:var(--amber);border-color:rgba(245,158,11,0.2);}
+/* Commentaire auto */
+.pat-comment{background:rgba(34,211,238,0.04);border:1px solid rgba(34,211,238,0.1);border-radius:9px;padding:11px 13px;margin-top:12px;font-size:12px;color:#94a3b8;line-height:1.7;}
+.pat-comment strong{color:var(--text);}
+@media(max-width:480px){.jauge-wrap{grid-template-columns:1fr;}}
 .chart-wrap{position:relative;width:100%;height:150px;}
 /* SCENARIO */
 .scen-list{display:flex;flex-direction:column;}
@@ -313,14 +334,16 @@ function buildComp(hn,an,ch,ca){
 function buildPatterns(hn,an,evH,evA,m){
   if(!evH&&!evA&&!m) return '';
   var hn3=hn.slice(0,3).toUpperCase(), an3=an.slice(0,3).toUpperCase();
+  var games=(evH&&evH.games)||20;
 
-  // Grille stats
-  function statRow(lbl,nh,na){
+  // ── Grille stats moy/match ──────────────────────────────
+  function statRow(lbl,nh,na,clsH,clsA){
     if(!nh&&!na) return '';
-    return '<div class="pat-stat-row"><span class="pat-stat-lbl">'+lbl+'</span><div class="pat-stat-vals">'
-      +'<div class="psv"><div class="psv-n h">'+(nh||'—')+'</div><div class="psv-t">'+hn3+'</div></div>'
+    return '<div class="pat-stat-row"><span class="pat-stat-lbl">'+lbl+'</span>'
+      +'<div class="pat-stat-vals">'
+      +'<div class="psv"><div class="psv-n '+(clsH||'h')+'">'+(nh||'—')+'</div><div class="psv-t">'+hn3+'</div></div>'
       +'<span class="pat-sep">/</span>'
-      +'<div class="psv"><div class="psv-n a">'+(na||'—')+'</div><div class="psv-t">'+an3+'</div></div>'
+      +'<div class="psv"><div class="psv-n '+(clsA||'a')+'">'+(na||'—')+'</div><div class="psv-t">'+an3+'</div></div>'
       +'</div></div>';
   }
   var statsHtml='<div class="pat-stats-grid">'
@@ -328,44 +351,72 @@ function buildPatterns(hn,an,evH,evA,m){
     +statRow('Tirs totaux / match', m&&m.xgH_shots_total, m&&m.xgA_shots_total)
     +statRow('Tirs cadrés / match', m&&m.xgH_shots, m&&m.xgA_shots)
     +statRow('Fautes / match', m&&m.xgH_fouls, m&&m.xgA_fouls)
-    +statRow('Cartons jaunes / match', evH&&evH.yellow_per_game, evA&&evA.yellow_per_game)
-    +statRow('Cartons rouges (total)', evH&&evH.red_cards, evA&&evA.red_cards)
+    +statRow('Cartons jaunes / match', evH&&evH.yellow_per_game, evA&&evA.yellow_per_game,'am','am')
+    +statRow('Cartons rouges / match', evH&&evH.red_per_game, evA&&evA.red_per_game,'r','r')
     +'</div>';
 
-  // SVG bar chart — buts par tranche 15min (pur SVG, pas de Chart.js)
+  // ── Jauges buts par tranche ─────────────────────────────
   var slotsH=evH&&evH.slots||[];
   var slotsA=evA&&evA.slots||[];
-  var svgHtml='';
+  var jaugesHtml='';
   if(slotsH.length||slotsA.length){
-    var labels=['0-15','15-30','30-45','45-60','60-75','75-90'];
-    var dH=slotsH.length?slotsH.map(function(s){return s.n||0;}):[0,0,0,0,0,0];
-    var dA=slotsA.length?slotsA.map(function(s){return s.n||0;}):[0,0,0,0,0,0];
-    var maxV=Math.max.apply(null,dH.concat(dA).concat([1]));
-    var W=100, H=60, n=6;
-    var bw=8, gap=5;
-    var totalW=n*(bw*2+gap)+(n-1)*4;
-    var startX=(W-totalW)/2;
-    var bars='';
-    for(var i=0;i<n;i++){
-      var x=startX+i*(bw*2+gap+4);
-      var hh=Math.max(1,Math.round((dH[i]/maxV)*(H-18)));
-      var ha=Math.max(1,Math.round((dA[i]/maxV)*(H-18)));
-      var yh=H-14-hh, ya=H-14-ha;
-      bars+='<rect x="'+x+'" y="'+yh+'" width="'+bw+'" height="'+hh+'" rx="2" fill="'+(dH[i]>0?'#22d3ee':'rgba(34,211,238,0.15)')+'"/>';
-      bars+='<rect x="'+(x+bw+2)+'" y="'+ya+'" width="'+bw+'" height="'+ha+'" rx="2" fill="'+(dA[i]>0?'#4a6580':'rgba(74,101,128,0.2)')+'"/>';
-      if(dH[i]>0) bars+='<text x="'+(x+bw/2)+'" y="'+(yh-2)+'" font-family="Bebas Neue,sans-serif" font-size="8" fill="#22d3ee" text-anchor="middle">'+dH[i]+'</text>';
-      if(dA[i]>0) bars+='<text x="'+(x+bw+2+bw/2)+'" y="'+(ya-2)+'" font-family="Bebas Neue,sans-serif" font-size="8" fill="#4a6580" text-anchor="middle">'+dA[i]+'</text>';
-      var lx=x+bw+1;
-      bars+='<text x="'+lx+'" y="'+(H-2)+'" font-family="Space Mono,monospace" font-size="5.5" fill="#2a3f55" text-anchor="middle">'+labels[i]+'</text>';
+    // Trouver le max pour normaliser
+    var allAvgs=slotsH.concat(slotsA).map(function(s){return parseFloat(s.avg)||0;});
+    var maxAvg=Math.max.apply(null,allAvgs.concat([0.01]));
+
+    function jauge(slot,col,label){
+      var avg=parseFloat(slot&&slot.avg)||0;
+      var pct=Math.round((avg/maxAvg)*100);
+      var heat=avg>=0.4?'hot':avg>=0.25?'warm':'';
+      return '<div class="jauge-row '+(heat==='hot'?'jauge-hot':heat==='warm'?'jauge-warm':'')+'">'
+        +'<div class="jauge-lbl">'+slot.t+'</div>'
+        +'<div class="jauge-track"><div class="jauge-fill '+col+'" style="width:'+pct+'%"></div></div>'
+        +'<div class="jauge-val">'+avg.toFixed(2)+'<span class="jauge-unit">/m</span></div>'
+        +(heat==='hot'?'<div class="jauge-tag">CHAUD</div>':heat==='warm'?'<div class="jauge-tag warm">ACTIF</div>':'')
+        +'</div>';
     }
-    svgHtml='<div style="margin-top:12px">'
-      +'<div class="pat-chart-lbl">BUTS PAR TRANCHE DE 15 MIN — 10 MATCHS</div>'
-      +'<div class="pat-legend"><div class="pat-leg"><div class="pat-leg-dot" style="background:#22d3ee"></div>'+hn+'</div><div class="pat-leg"><div class="pat-leg-dot" style="background:#4a6580"></div>'+an+'</div></div>'
-      +'<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;height:110px;" preserveAspectRatio="xMidYMid meet">'+bars+'</svg>'
+
+    var slots6=slotsH.length>=6?slotsH:[{t:'0-15',avg:'0'},{t:'15-30',avg:'0'},{t:'30-45',avg:'0'},{t:'45-60',avg:'0'},{t:'60-75',avg:'0'},{t:'75-90',avg:'0'}];
+    var slots6A=slotsA.length>=6?slotsA:slots6.map(function(s){return {t:s.t,avg:'0'};});
+
+    jaugesHtml='<div class="jauge-wrap">'
+      // DOM
+      +'<div class="jauge-col">'
+      +'<div class="jauge-team-lbl" style="color:var(--cyan)">'+hn.slice(0,14).toUpperCase()+' — buts moy/match</div>'
+      +slots6.map(function(s){return jauge(s,'h',hn);}).join('')
+      +'</div>'
+      // EXT
+      +'<div class="jauge-col">'
+      +'<div class="jauge-team-lbl">'+an.slice(0,14).toUpperCase()+' — buts moy/match</div>'
+      +slots6A.map(function(s){return jauge(s,'a',an);}).join('')
+      +'</div>'
       +'</div>';
+
+    // ── Commentaire auto-généré ─────────────────────────
+    function topSlot(slots){
+      var best=null,bestV=0;
+      (slots||[]).forEach(function(s){var v=parseFloat(s.avg)||0;if(v>bestV){bestV=v;best=s;}});
+      return best;
+    }
+    function halfLabel(t){
+      if(!t) return '';
+      var min=parseInt(t.split('-')[0]);
+      return min<45?'1ère mi-temps':'2ème mi-temps';
+    }
+    var topH=topSlot(slotsH), topA=topSlot(slotsA);
+    var allSlots=slotsH.map(function(s,i){return {t:s.t,avgH:parseFloat(s.avg)||0,avgA:parseFloat((slotsA[i]||{}).avg)||0,total:(parseFloat(s.avg)||0)+(parseFloat((slotsA[i]||{}).avg)||0)};});
+    allSlots.sort(function(a,b){return b.total-a.total;});
+    var hotSlot=allSlots[0];
+
+    var commentLines=[];
+    if(topH) commentLines.push('<strong>'+hn+'</strong> marque surtout entre <strong>'+topH.t+'</strong> ('+parseFloat(topH.avg).toFixed(2)+' but/match) — principalement en '+halfLabel(topH.t)+'.');
+    if(topA) commentLines.push('<strong>'+an+'</strong> est le plus dangereux sur la tranche <strong>'+topA.t+'</strong> ('+parseFloat(topA.avg).toFixed(2)+' but/match) — en '+halfLabel(topA.t)+'.');
+    if(hotSlot) commentLines.push('La tranche la plus à risque pour les buts des deux équipes réunies : <strong>'+hotSlot.t+'</strong>.');
+
+    jaugesHtml+='<div class="pat-comment">'+commentLines.join(' ')+'</div>';
   }
 
-  return '<div class="s"><div class="stitle">PATTERNS — 10 MATCHS</div>'+statsHtml+svgHtml+'</div><div class="sep"></div>';
+  return '<div class="s"><div class="stitle">PATTERNS — 20 MATCHS</div>'+statsHtml+jaugesHtml+'</div><div class="sep"></div>';
 }
 
 function buildScen(m){

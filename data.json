@@ -20,13 +20,13 @@
       ],
       "val": false,
       "hot": false,
-      "conf": 0,
-      "p1": 0,
-      "pn": 0,
-      "p2": 0,
-      "po15": 0,
-      "po25": 0,
-      "btts": 0,
+      "conf": 5.5,
+      "p1": 50,
+      "pn": 24,
+      "p2": 26,
+      "po15": 87,
+      "po25": 58,
+      "btts": 55,
       "c1": "2.25",
       "cn": "3.23",
       "c2": "2.84",
@@ -89,37 +89,102 @@
           "c2": "2.87"
         }
       ],
-      "edge": "",
-      "edge_detail": "",
+      "edge": "+6.0%",
+      "edge_detail": "Probabilité IA vs probabilité implicite bookmaker = +6.0%",
       "marche": "RESULTAT",
-      "risque": "MODERE",
-      "pari_rec": "",
+      "risque": "ELEVE",
+      "pari_rec": "Victoire Al-Qadisiyah FC",
       "mise": "2-3% bankroll",
-      "verdict_shark": "",
-      "scenario": null,
-      "scenario_15min": null,
-      "score_predit": null,
-      "facteur_x": "",
-      "argument": "",
-      "analyse_card": "",
-      "conseil_public": "",
-      "contexte": "",
-      "enjeux": "",
-      "vbet": "NON",
-      "value_calc": "",
-      "scores": [],
-      "paris_3": null,
+      "verdict_shark": "[Victoire Al-Qadisiyah FC] a [2.25] — edge +6% : xG 1.84 DOM vs 1.03 EXT, 8V/13 à domicile, forme WDWWW. Edge réel mais modéré sur un choc #4 vs #2.",
+      "scenario": {
+        "phase1": "0-25min: Qadisiyah en 4-4-2 impose le pressing haut avec Quiñones et Retegui. Ahli en 4-3-3 tente de contrôler via Kessié. Phase d'observation tendue, Qadisiyah prend progressivement le dessus en possession (53% attendu).",
+        "phase2": "25-65min: Qadisiyah augmente l'intensité offensive — xG 1.84 se matérialise avec des combinaisons Baah-Quiñones côté gauche. Ahli réplique via Mahrez et Toney en transitions rapides. Premier but probable entre 30-55min, deuxième entre 50-70min.",
+        "phase3": "65-90min: Qadisiyah pousse pour le break (32 buts marqués en 2ème MT sur la saison). Ahli aussi dangereux en fin de match (31 buts 2ème MT). Phase ouverte avec remplacements offensifs des deux côtés."
+      },
+      "scenario_15min": [
+        {
+          "t": "0-15min",
+          "prob": 7,
+          "txt": "Mise en place tactique. Qadisiyah impose le tempo, Ahli compact derrière Ibañez. Peu d'occasions franches."
+        },
+        {
+          "t": "15-30min",
+          "prob": 13,
+          "txt": "Qadisiyah augmente la pression. Premières occasions via Retegui et Quiñones. Nández contrôle le milieu."
+        },
+        {
+          "t": "30-45min",
+          "prob": 15,
+          "txt": "Phase décisive 1ère MT — 24 buts DOM marqués en 1ère MT sur la saison. But probable de Qadisiyah."
+        },
+        {
+          "t": "45-60min",
+          "prob": 18,
+          "txt": "Ahli revient des vestiaires avec ajustements. Toney et Mahrez combinent davantage. Réponse visiteur possible."
+        },
+        {
+          "t": "60-75min",
+          "prob": 25,
+          "txt": "Phase cruciale — les deux équipes marquent le plus en 2ème MT (32+31 buts). Remplacements offensifs, match ouvert."
+        },
+        {
+          "t": "75-90min",
+          "prob": 22,
+          "txt": "Qadisiyah pousse pour sécuriser. Ahli prend des risques. 3ème but probable dans cette phase."
+        }
+      ],
+      "score_predit": {
+        "score": "2-1",
+        "prob": "19%",
+        "cote_implicite": "5.26"
+      },
+      "facteur_x": "xG différentiel massif: 1.84 vs 1.03 — Qadisiyah produit 78% de plus d'xG que Ahli. À domicile avec Retegui et Quiñones alignés, cette supériorité offensive est le facteur déterminant.",
+      "argument": "1. xG DOM 1.84 vs xG EXT 1.03 — différentiel de +0.81 massivement en faveur de Qadisiyah. 2. 8V/13 à domicile (62%), invaincu sur les 6 derniers DOM, forme WDWWW avec 14 buts en 5 matchs. 3. Prob IA 50% vs implicite 44% = edge +6%.",
+      "analyse_card": "Qadisiyah domine en xG (1.84 vs 1.03) et affiche un bilan DOM de 8V/13 avec une forme explosive (4-1, 4-0, 4-2). Ahli est solide en EXT (9V/12) mais leur xG modeste de 1.03 suggère des victoires étriquées (1-0 x2 récemment). Le rapport qualité/cote favorise nettement le DOM.",
+      "conseil_public": "La cote de 2.25 sous-estime Qadisiyah à domicile face à un Ahli dont les victoires EXT reposent sur des scores serrés. Le xG de 1.84 DOM traduit une machine offensive bien huilée avec Retegui-Quiñones. Privilégiez la victoire DOM en mise principale et Over 2.5 en complément vu les 14 buts en 5 matchs de Qadisiyah.",
+      "contexte": "Choc entre le 4ème (Qadisiyah, en embuscade) et le 2ème (Ahli, prétendant au titre). Qadisiyah invaincu à domicile sur les 6 derniers matchs et en pleine confiance offensive. Ahli sur série parfaite de 5V consécutives mais avec un profil EXT plus défensif.",
+      "enjeux": "Match crucial pour la course au podium et au titre en Pro League saoudienne.",
+      "vbet": "OUI",
+      "value_calc": "+6.0%",
+      "scores": [
+        "2-1",
+        "1-0",
+        "3-1"
+      ],
+      "paris_3": {
+        "safe": {
+          "bet": "BTTS Oui",
+          "cote": "1.59",
+          "hint": "BTTS 7/10 derniers matchs Qadisiyah + Qadisiyah ne reste muet que 1/13 DOM + Ahli concède dans 3/5 derniers matchs",
+          "mise": "4% bankroll",
+          "bookie": "Betclic"
+        },
+        "valeur": {
+          "bet": "Victoire Al-Qadisiyah FC",
+          "cote": "2.25",
+          "hint": "Prob IA 50% vs implicite 44% = edge +6% — xG 1.84 DOM vs 1.03 EXT, 8V/13 domicile",
+          "mise": "3% bankroll",
+          "bookie": "Winamax"
+        },
+        "specu": {
+          "bet": "Over 2.5",
+          "cote": "1.77",
+          "hint": "xG total 2.87, Over 2.5 dans 6/10 derniers matchs des deux équipes, 14 buts en 5 matchs pour Qadisiyah — prob IA 58% vs impl 56%",
+          "mise": "1% bankroll",
+          "bookie": "Bet365"
+        }
+      },
       "paris_safe": {
-        "bet": "",
+        "bet": "Victoire Al-Qadisiyah FC",
         "cote": "2.25",
-        "proba": ""
+        "proba": "50%"
       },
       "paris_risque": {
         "bet": "",
         "cote": "",
         "proba": ""
       },
-      "kelly": null,
+      "kelly": "10.0",
       "stade": {
         "nom": "Prince Saud bin Jalawi Stadium — Dammam",
         "cap": "",
@@ -398,12 +463,7 @@
           "tx": "Le milieu d’Al-Rayyan nous raconte son quotidien à Doha et revient sur les raisons de son départ. ...",
           "tm": "2026-03-06"
         }
-      ],
-      "analyse_card_en": "",
-      "conseil_public_en": "",
-      "pari_rec_en": "",
-      "verdict_shark_en": "",
-      "facteur_x_en": ""
+      ]
     },
     {
       "id": 1436142,
@@ -423,15 +483,15 @@
       "cat": [
         "all"
       ],
-      "val": false,
+      "val": true,
       "hot": false,
-      "conf": 0,
-      "p1": 0,
-      "pn": 0,
-      "p2": 0,
-      "po15": 0,
-      "po25": 0,
-      "btts": 0,
+      "conf": 7.9,
+      "p1": 53,
+      "pn": 25,
+      "p2": 22,
+      "po15": 75,
+      "po25": 48,
+      "btts": 39,
       "c1": "2.13",
       "cn": "3.17",
       "c2": "3.13",
@@ -452,7 +512,7 @@
           "n": "Betclic",
           "o": "200€ offerts",
           "l": "#LIEN_BETCLIC",
-          "c": "2.13",
+          "c": "1.98",
           "c1": "2.13",
           "cn": "3.17",
           "c2": "3.13"
@@ -461,7 +521,7 @@
           "n": "Winamax",
           "o": "100€ offerts",
           "l": "#LIEN_WINAMAX",
-          "c": "2.10",
+          "c": "1.95",
           "c1": "2.10",
           "cn": "3.14",
           "c2": "3.10"
@@ -470,7 +530,7 @@
           "n": "Unibet",
           "o": "100€ remboursés",
           "l": "#LIEN_UNIBET",
-          "c": "2.11",
+          "c": "1.96",
           "c1": "2.11",
           "cn": "3.15",
           "c2": "3.11"
@@ -479,7 +539,7 @@
           "n": "PMU",
           "o": "100€ offerts",
           "l": "#LIEN_PMU",
-          "c": "2.08",
+          "c": "1.93",
           "c1": "2.08",
           "cn": "3.12",
           "c2": "3.08"
@@ -488,43 +548,108 @@
           "n": "Bet365",
           "o": "100€ bonus",
           "l": "#LIEN_BET365",
-          "c": "2.16",
+          "c": "2.01",
           "c1": "2.16",
           "cn": "3.20",
           "c2": "3.16"
         }
       ],
-      "edge": "",
-      "edge_detail": "",
-      "marche": "RESULTAT",
+      "edge": "+10%",
+      "edge_detail": "Probabilité IA vs probabilité implicite bookmaker = +10%",
+      "marche": "BTTS",
       "risque": "MODERE",
-      "pari_rec": "",
+      "pari_rec": "BTTS Non",
       "mise": "2-3% bankroll",
-      "verdict_shark": "",
-      "scenario": null,
-      "scenario_15min": null,
-      "score_predit": null,
-      "facteur_x": "",
-      "argument": "",
-      "analyse_card": "",
-      "conseil_public": "",
-      "contexte": "",
-      "enjeux": "",
-      "vbet": "NON",
-      "value_calc": "",
-      "scores": [],
-      "paris_3": null,
+      "verdict_shark": "[BTTS Non] a [1.98] — edge +10% : Ettifaq 0.60 buts/match EXT + 2/3 derniers déplacements sans marquer + Fayha 5/12 CS DOM. Verrouillé.",
+      "scenario": {
+        "phase1": "0-25min: Fayha en 5-4-1 compact impose sa structure. Ettifaq en 4-4-2 tente de tenir le ballon mais Wijnaldum et Medrán sont isolés. Peu d'occasions franches, Fayha contrôle la profondeur.",
+        "phase2": "25-65min: Fayha accélère par Sakala et Benzia sur les transitions. But probable entre 30-55min sur une faille défensive d'Ettifaq (2.80 buts encaissés/match EXT). Ettifaq peine à construire, xG away très faible.",
+        "phase3": "65-90min: Fayha gère son avance, Smalling et Kaabi verrouillent. Ettifaq pousse mollement mais sans créer de réel danger. Score final 1-0 ou 2-0."
+      },
+      "scenario_15min": [
+        {
+          "t": "0-15min",
+          "prob": 5,
+          "txt": "Mise en place tactique. Fayha impose le tempo, Ettifaq regroupé. Pas de but attendu."
+        },
+        {
+          "t": "15-30min",
+          "prob": 12,
+          "txt": "Fayha monte en puissance, premiers centres dangereux de Bamasud. Pression croissante."
+        },
+        {
+          "t": "30-45min",
+          "prob": 18,
+          "txt": "Phase la plus dangereuse de la 1MT. Fayha marque 15 buts en 1MT cette saison. Premier but probable."
+        },
+        {
+          "t": "45-60min",
+          "prob": 20,
+          "txt": "Fayha repart fort. Ettifaq encaisse 21 buts en 1MT, fragile à la reprise. Deuxième but possible."
+        },
+        {
+          "t": "60-75min",
+          "prob": 25,
+          "txt": "Remplacements offensifs Fayha. Ettifaq fatigue et ouvre des espaces. Phase cruciale pour le 2-0."
+        },
+        {
+          "t": "75-90min",
+          "prob": 20,
+          "txt": "Fayha gère. Ettifaq tente sans conviction (0.60 buts/match EXT). Clean sheet préservé."
+        }
+      ],
+      "score_predit": {
+        "score": "1-0",
+        "prob": "22%",
+        "cote_implicite": "4.55"
+      },
+      "facteur_x": "Al-Ettifaq n'a marqué que 0.60 but/match en déplacement sur 20 matchs et a été blanchi dans 2 de ses 3 derniers déplacements (0-4, 0-2). Mur défensif Smalling-Kaabi.",
+      "argument": "1. Ettifaq 0.60 buts/match EXT (20 derniers), blanchi 2/3 derniers déplacements. 2. Fayha 5/12 clean sheets DOM (42%). 3. Poisson λ_away=0.65 → P(Ettifaq ne marque pas)=52%. P(BTTS Non)=61% vs impl 51% = edge +10%.",
+      "analyse_card": "Ettifaq est l'une des pires attaques en déplacement (0.60 but/match, xG global 1.22 mais gonflé par les matchs DOM). Fayha à domicile affiche 42% de CS avec Smalling et Villanueva en charnière dans un 5-4-1 compact. Le profil défensif de ce match pointe clairement vers un BTTS Non.",
+      "conseil_public": "Misez sur BTTS Non à 1.98 comme pari principal. Ettifaq est en chute libre en déplacement (1V/4D sur 5 derniers EXT) et incapable de marquer régulièrement. Fayha a les armes défensives pour tenir le zéro. Complétez avec une victoire Al-Fayha en spéculatif à 2.13.",
+      "contexte": "Al-Fayha (11e) reçoit Al-Ettifaq (7e) dans un match de milieu de tableau. Fayha reste sur une forme DOM solide (3V/1N/1D sur 5), tandis qu'Ettifaq s'effondre en déplacement avec 4 défaites sur 5 derniers matchs EXT.",
+      "enjeux": "Match de classement sans pression extrême, mais Fayha joue sa survie au classement et sera motivé devant son public.",
+      "vbet": "OUI",
+      "value_calc": "+10%",
+      "scores": [
+        "1-0",
+        "2-0",
+        "1-1"
+      ],
+      "paris_3": {
+        "safe": {
+          "bet": "BTTS Non",
+          "cote": "1.98",
+          "hint": "Ettifaq 0.60 buts/match EXT, blanchi 2/3 derniers déplacements. Prob IA 61% vs impl 51% = edge +10%",
+          "mise": "4% bankroll",
+          "bookie": "Betclic"
+        },
+        "valeur": {
+          "bet": "Under 2.5",
+          "cote": "1.80",
+          "hint": "xG combiné 2.11, Ettifaq 0.60 buts EXT + Fayha défense solide DOM. Prob IA 55% vs impl 56% = cohérent avec scénario défensif",
+          "mise": "2% bankroll",
+          "bookie": "Winamax"
+        },
+        "specu": {
+          "bet": "Victoire Al-Fayha",
+          "cote": "2.13",
+          "hint": "3V/5 DOM récents, Ettifaq 1V/5 EXT. Prob IA 53% vs impl 47% = edge +6%",
+          "mise": "1% bankroll",
+          "bookie": "Bet365"
+        }
+      },
       "paris_safe": {
-        "bet": "",
+        "bet": "BTTS Non",
         "cote": "2.13",
-        "proba": ""
+        "proba": "53%"
       },
       "paris_risque": {
         "bet": "",
         "cote": "",
         "proba": ""
       },
-      "kelly": null,
+      "kelly": "10.0",
       "stade": {
         "nom": "King Abdullah Sports City Stadium — Buraidah",
         "cap": "",
@@ -826,25 +951,7 @@
           "form": "DLLWL"
         }
       },
-      "actu": [
-        {
-          "c": "Al-Fayha",
-          "t": "\"Une blessure plus grave que prévu\": mauvaise nouvelle pour Cristiano Ronaldo, obligé de rentrer en Espagne à trois mois de la Coupe du monde",
-          "tx": "L’entraîneur d’Al-Nassr Jorge Jesus a annoncé vendredi que la blessure de Cristiano Ronaldo à la cuisse droite est plus sérieuse que prévu et que sa star doit retourner à Madrid pour consulter son kinésithérapeute personnel. CR7, 41 ans, devrait être absent a…",
-          "tm": "2026-03-06"
-        },
-        {
-          "c": "Al-Fayha",
-          "t": "Al-Nassr : Cristiano Ronaldo touché aux ischios",
-          "tx": "Allô maman bobo. Le club d’Al Nassr a communiqué ce mardi sur la blessure de sa…",
-          "tm": "2026-03-03"
-        }
-      ],
-      "analyse_card_en": "",
-      "conseil_public_en": "",
-      "pari_rec_en": "",
-      "verdict_shark_en": "",
-      "facteur_x_en": ""
+      "actu": []
     },
     {
       "id": 1436138,
@@ -864,15 +971,15 @@
       "cat": [
         "all"
       ],
-      "val": false,
-      "hot": false,
-      "conf": 0,
-      "p1": 0,
-      "pn": 0,
-      "p2": 0,
-      "po15": 0,
-      "po25": 0,
-      "btts": 0,
+      "val": true,
+      "hot": true,
+      "conf": 8.7,
+      "p1": 12,
+      "pn": 30,
+      "p2": 58,
+      "po15": 76,
+      "po25": 42,
+      "btts": 50,
       "c1": "4.95",
       "cn": "4.30",
       "c2": "1.50",
@@ -893,7 +1000,7 @@
           "n": "Betclic",
           "o": "200€ offerts",
           "l": "#LIEN_BETCLIC",
-          "c": "4.95",
+          "c": "2.23",
           "c1": "4.95",
           "cn": "4.30",
           "c2": "1.50"
@@ -902,7 +1009,7 @@
           "n": "Winamax",
           "o": "100€ offerts",
           "l": "#LIEN_WINAMAX",
-          "c": "4.92",
+          "c": "2.20",
           "c1": "4.92",
           "cn": "4.27",
           "c2": "1.47"
@@ -911,7 +1018,7 @@
           "n": "Unibet",
           "o": "100€ remboursés",
           "l": "#LIEN_UNIBET",
-          "c": "4.93",
+          "c": "2.21",
           "c1": "4.93",
           "cn": "4.28",
           "c2": "1.48"
@@ -920,7 +1027,7 @@
           "n": "PMU",
           "o": "100€ offerts",
           "l": "#LIEN_PMU",
-          "c": "4.90",
+          "c": "2.18",
           "c1": "4.90",
           "cn": "4.25",
           "c2": "1.45"
@@ -929,49 +1036,114 @@
           "n": "Bet365",
           "o": "100€ bonus",
           "l": "#LIEN_BET365",
-          "c": "4.98",
+          "c": "2.26",
           "c1": "4.98",
           "cn": "4.33",
           "c2": "1.53"
         }
       ],
-      "edge": "",
-      "edge_detail": "",
-      "marche": "RESULTAT",
+      "edge": "+13%",
+      "edge_detail": "Probabilité IA vs probabilité implicite bookmaker = +13%",
+      "marche": "UNDER",
       "risque": "MODERE",
-      "pari_rec": "",
+      "pari_rec": "Under 2.5",
       "mise": "2-3% bankroll",
-      "verdict_shark": "",
-      "scenario": null,
-      "scenario_15min": null,
-      "score_predit": null,
-      "facteur_x": "",
-      "argument": "",
-      "analyse_card": "",
-      "conseil_public": "",
-      "contexte": "",
-      "enjeux": "",
-      "vbet": "NON",
-      "value_calc": "",
-      "scores": [],
-      "paris_3": null,
+      "verdict_shark": "[UNDER 2.5] a [2.23] — edge +13% : Al Riyadh marque 0.50 but/match DOM + 5-3-2 defensif + Over 2.5 seulement 15% sur 20 matchs. Ittihad xG 1.04 seulement. Match ferme.",
+      "scenario": {
+        "phase1": "0-25min: Al Riyadh en 5-3-2 verrouille le centre, Ittihad monopolise le ballon mais peine a trouver des espaces. Fabinho distribue sans percee decisive, Bergwijn isole sur le cote.",
+        "phase2": "25-65min: Ittihad augmente la pression, En-Nesyri provoque le premier vrai danger. But probable autour de la 40e-55e sur une erreur defensive ou un coup franc. Al Riyadh tres bas, 0.50 but/match DOM, ne sort quasiment pas.",
+        "phase3": "65-90min: Si Ittihad mene 1-0, gestion totale. Al Riyadh tente de sortir mais manque de qualite offensive (Okou, Antunes limites). Match se ferme, 1-0 ou 0-1 final le plus probable."
+      },
+      "scenario_15min": [
+        {
+          "t": "0-15min",
+          "prob": 5,
+          "txt": "Mise en place tactique, Al Riyadh compact en 5-3-2, Ittihad cherche les couloirs sans grande occasion"
+        },
+        {
+          "t": "15-30min",
+          "prob": 12,
+          "txt": "Ittihad installe son jeu, Aouar et Bergwijn combinent, premiere frappe cadrée probable"
+        },
+        {
+          "t": "30-45min",
+          "prob": 15,
+          "txt": "Phase la plus dangereuse de la 1ere MT, En-Nesyri en position, but possible avant la pause"
+        },
+        {
+          "t": "45-60min",
+          "prob": 20,
+          "txt": "Laurent Blanc ajuste tactiquement, Ittihad pousse fort, but le plus probable dans cette fenetre"
+        },
+        {
+          "t": "60-75min",
+          "prob": 18,
+          "txt": "Si 1-0 Ittihad, gestion du rythme. Al Riyadh tente des contres sporadiques sans conviction"
+        },
+        {
+          "t": "75-90min",
+          "prob": 13,
+          "txt": "Match fermé, Al Riyadh n'a pas les ressources pour revenir, Ittihad gere son avance"
+        }
+      ],
+      "score_predit": {
+        "score": "0-1",
+        "prob": "24%",
+        "cote_implicite": "4.17"
+      },
+      "facteur_x": "Al Riyadh en 5-3-2 ultra defensif avec 0.50 but/match a domicile — formation conçue pour limiter la casse, pas pour marquer. Combined xG 2.57 mais output reel bien plus bas.",
+      "argument": "1. Al Riyadh Over 2.5 sur 20 matchs: 3/20 (15%), moy buts DOM 0.50/match. 2. Ittihad xG moyen 1.04 seulement, 5/20 Over 2.5 (25%). 3. Formation 5-3-2 defensive = verrou. Prob IA 58% vs impl 45% = edge +13%.",
+      "analyse_card": "Al Riyadh est la pire equipe a domicile du championnat (0V en 4 matchs, 0.50 but/match). Ittihad a un xG de seulement 1.04 sur 5 matchs et ne marque pas en masse en deplacement (1.50/match avec 1.67 encaisses). Total xG combine 2.57 mais le 5-3-2 d'Al Riyadh va comprimer ce total.",
+      "conseil_public": "Privilegiez le Under 2.5 a 2.23 qui offre une value reelle. Al Riyadh joue en 5-3-2 clairement pour limiter les degats, et Ittihad n'explose pas les defenses en deplacement (4V en 13 matchs EXT). Un 0-1 ou 1-0 est le scenario le plus realiste. Evitez de surjouer Ittihad a 1.50.",
+      "contexte": "Al Riyadh 16e lutte pour le maintien et adopte une strategie ultra-defensive a domicile. Al-Ittihad 6e traverse une periode irreguliere en deplacement (1V/3N/2D sur 6 matchs). Le Prince Faisal bin Fahd Stadium n'est pas une forteresse.",
+      "enjeux": "Maintien vs course au top 4 — Al Riyadh joue sa survie et va fermer le jeu au maximum.",
+      "vbet": "OUI",
+      "value_calc": "+13%",
+      "scores": [
+        "0-1",
+        "1-1",
+        "0-2"
+      ],
+      "paris_3": {
+        "safe": {
+          "bet": "Under 2.5",
+          "cote": "2.23",
+          "hint": "Over 2.5 seulement 3/20 matchs Al Riyadh (15%) + 5-3-2 defensif. Prob IA 58% vs impl 45% = edge +13%",
+          "mise": "4% bankroll",
+          "bookie": "Betclic"
+        },
+        "valeur": {
+          "bet": "Nul",
+          "cote": "4.30",
+          "hint": "Ittihad 3N sur 6 matchs EXT (50%) + Al Riyadh 2N sur 4 DOM. Prob IA 30% vs impl 23% = edge +7%",
+          "mise": "2% bankroll",
+          "bookie": "Winamax"
+        },
+        "specu": {
+          "bet": "BTTS Non",
+          "cote": "2.06",
+          "hint": "Al Riyadh 0.50 but/match DOM + sans marquer 3/12 DOM (25%) + 5-3-2 bloque. Prob IA 50% vs impl 49% = edge speculatif",
+          "mise": "1% bankroll",
+          "bookie": "Bet365"
+        }
+      },
       "paris_safe": {
-        "bet": "",
+        "bet": "Under 2.5",
         "cote": "4.95",
-        "proba": ""
+        "proba": "12%"
       },
       "paris_risque": {
         "bet": "",
         "cote": "",
         "proba": ""
       },
-      "kelly": null,
+      "kelly": "0.0",
       "stade": {
         "nom": "Prince Faisal bin Fahd Stadium — Riyadh",
         "cap": "",
-        "meteo": "☁️",
+        "meteo": "☀️",
         "temp": "24°C",
-        "desc": "peu nuageux"
+        "desc": "ciel dégagé"
       },
       "crit_home": {
         "fd": 17,
@@ -1339,25 +1511,7 @@
           "form": "LWDDW"
         }
       },
-      "actu": [
-        {
-          "c": "Al Riyadh",
-          "t": "14 ans après, les Carolos qui ont côtoyé Yannick Ferrera lui posent chacun une question : “Javier, j’ai réussi à implanter le jeu du Barça au RWDM”",
-          "tx": "En 2012, Yannick Ferrera débutait sa carrière d’entraîneur à Charleroi à 31 ans. 14 ans après, ses anciens joueurs et Mehdi Bayat avaient des questions à lui poser. ...",
-          "tm": "2026-03-07"
-        },
-        {
-          "c": "Al Riyadh",
-          "t": "14 ans après, les Carolos qui ont côtoyé Yannick Ferrera lui posent chacun une question : “Javier, j’ai réussi à implanter le jeu du Barça au RWDM”",
-          "tx": "En 2012, Yannick Ferrera débutait sa carrière d’entraîneur à Charleroi à 31 ans. 14 ans après, ses anciens joueurs et Mehdi Bayat avaient des questions à lui poser. ...",
-          "tm": "2026-03-07"
-        }
-      ],
-      "analyse_card_en": "",
-      "conseil_public_en": "",
-      "pari_rec_en": "",
-      "verdict_shark_en": "",
-      "facteur_x_en": ""
+      "actu": []
     },
     {
       "id": 1388534,
@@ -1377,15 +1531,15 @@
       "cat": [
         "all"
       ],
-      "val": false,
-      "hot": false,
-      "conf": 0,
-      "p1": 0,
-      "pn": 0,
-      "p2": 0,
-      "po15": 0,
-      "po25": 0,
-      "btts": 0,
+      "val": true,
+      "hot": true,
+      "conf": 8.4,
+      "p1": 55,
+      "pn": 24,
+      "p2": 21,
+      "po15": 80,
+      "po25": 57,
+      "btts": 45,
       "c1": "1.94",
       "cn": "3.41",
       "c2": "4.30",
@@ -1406,7 +1560,7 @@
           "n": "Betclic",
           "o": "200€ offerts",
           "l": "#LIEN_BETCLIC",
-          "c": "1.94",
+          "c": "2.22",
           "c1": "1.94",
           "cn": "3.41",
           "c2": "4.30"
@@ -1415,7 +1569,7 @@
           "n": "Winamax",
           "o": "100€ offerts",
           "l": "#LIEN_WINAMAX",
-          "c": "1.91",
+          "c": "2.19",
           "c1": "1.91",
           "cn": "3.38",
           "c2": "4.27"
@@ -1424,7 +1578,7 @@
           "n": "Unibet",
           "o": "100€ remboursés",
           "l": "#LIEN_UNIBET",
-          "c": "1.92",
+          "c": "2.20",
           "c1": "1.92",
           "cn": "3.39",
           "c2": "4.28"
@@ -1433,7 +1587,7 @@
           "n": "PMU",
           "o": "100€ offerts",
           "l": "#LIEN_PMU",
-          "c": "1.89",
+          "c": "2.17",
           "c1": "1.89",
           "cn": "3.36",
           "c2": "4.25"
@@ -1442,43 +1596,108 @@
           "n": "Bet365",
           "o": "100€ bonus",
           "l": "#LIEN_BET365",
-          "c": "1.97",
+          "c": "2.25",
           "c1": "1.97",
           "cn": "3.44",
           "c2": "4.33"
         }
       ],
-      "edge": "",
-      "edge_detail": "",
-      "marche": "RESULTAT",
+      "edge": "+12%",
+      "edge_detail": "Probabilité IA vs probabilité implicite bookmaker = +12%",
+      "marche": "TOTAL_BUTS",
       "risque": "MODERE",
-      "pari_rec": "",
+      "pari_rec": "Over 2.5",
       "mise": "2-3% bankroll",
-      "verdict_shark": "",
-      "scenario": null,
-      "scenario_15min": null,
-      "score_predit": null,
-      "facteur_x": "",
-      "argument": "",
-      "analyse_card": "",
-      "conseil_public": "",
-      "contexte": "",
-      "enjeux": "",
-      "vbet": "NON",
-      "value_calc": "",
-      "scores": [],
-      "paris_3": null,
+      "verdict_shark": "[OVER 2.5] a [2.22] — edge +12% : xG combiné 2.85 (Gladbach 2.04 + St. Pauli 0.81) + St. Pauli encaisse 2.40/match en déplacement. Over 2.5 dans 6/10 derniers matchs des deux équipes. Direct.",
+      "scenario": {
+        "phase1": "0-25min: Gladbach en 3-4-2-1 presse haut face au 3-4-2-1 compact de St. Pauli. Stöger et Bolin cherchent Tabaković. St. Pauli bas et compact, transition rapide via Sinani/Fujita. Début tendu, peu d'espaces.",
+        "phase2": "25-65min: Gladbach ouvre le score — leur xG 2.04 et 7.4 tirs cadrés/match finissent par payer. St. Pauli doit sortir, laisse des espaces. 2e but probable entre 45-65min. Gladbach marque 18 buts en 2e MT vs 10 en 1re.",
+        "phase3": "65-90min: St. Pauli pousse pour réduire le score — ils marquent dans 62% de leurs matchs EXT. Substitutions offensives. Gladbach gère mais concède. Score final 2-1 ou 3-1."
+      },
+      "scenario_15min": [
+        {
+          "t": "0-15min",
+          "prob": 7,
+          "txt": "Mise en place tactique, Gladbach impose la possession, St. Pauli compact et discipliné"
+        },
+        {
+          "t": "15-30min",
+          "prob": 12,
+          "txt": "Gladbach augmente la pression, premières occasions franches via Stöger/Bolin, xG monte"
+        },
+        {
+          "t": "30-45min",
+          "prob": 14,
+          "txt": "Premier but probable côté Gladbach — 10 buts marqués en 1re MT, St. Pauli concède 16 en 1re MT EXT"
+        },
+        {
+          "t": "45-60min",
+          "prob": 20,
+          "txt": "Gladbach accélère en début de 2e MT — 18 buts en 2e MT saison. 2e but attendu"
+        },
+        {
+          "t": "60-75min",
+          "prob": 25,
+          "txt": "Phase décisive: St. Pauli pousse, réduit le score. Substitutions offensives des deux côtés"
+        },
+        {
+          "t": "75-90min",
+          "prob": 22,
+          "txt": "Fin ouverte, Gladbach gère ou enfonce le clou. 3e but possible dans le money time"
+        }
+      ],
+      "score_predit": {
+        "score": "2-1",
+        "prob": "23%",
+        "cote_implicite": "4.35"
+      },
+      "facteur_x": "xG Gladbach 2.04 vs seulement 1.50 buts/match réels à domicile — sous-performance offensive qui doit se corriger face à la pire défense extérieure du bas de tableau (2.40 encaissés/match EXT)",
+      "argument": "1. xG combiné 2.85 (Gladbach 2.04 + St. Pauli 0.81) dépasse nettement le seuil 2.5. 2. St. Pauli encaisse 2.40 buts/match en déplacement sur 20 matchs — pire ratio EXT. 3. Over 2.5 atteint dans 6/10 derniers matchs pour les deux équipes. Prob IA 57% vs impl 45% = edge +12%.",
+      "analyse_card": "xG combiné à 2.85 avec un Gladbach qui génère 2.04 xG et 7.4 tirs cadrés/match contre un St. Pauli qui concède 2.40/match en déplacement. Les 10 derniers matchs montrent 60% d'Over 2.5 pour les deux équipes. La sous-performance offensive de Gladbach (1.50 buts réels vs 2.04 xG) suggère une régression positive imminente.",
+      "conseil_public": "Miser sur Over 2.5 à 2.22 offre un edge réel de +12%. Le xG de Gladbach (2.04) face à la fragile défense extérieure de St. Pauli (2.40 encaissés/match) crée les conditions idéales pour 3+ buts. Gladbach marque 18 buts en 2e MT — attendez-vous à un match qui s'ouvre après la pause.",
+      "contexte": "Gladbach (12e) reçoit St. Pauli (16e, lutte pour le maintien). St. Pauli n'a que 2 victoires en 13 déplacements cette saison. Gladbach a un xG dominant (2.04) mais convertit mal — correction attendue face à une défense faible.",
+      "enjeux": "Match crucial pour le maintien de St. Pauli et pour la dynamique de Gladbach qui veut s'éloigner de la zone rouge.",
+      "vbet": "OUI",
+      "value_calc": "+12%",
+      "scores": [
+        "2-1",
+        "2-0",
+        "3-1"
+      ],
+      "paris_3": {
+        "safe": {
+          "bet": "Victoire Borussia Mönchengladbach",
+          "cote": "1.94",
+          "hint": "xG 2.04 à domicile vs St. Pauli 1V/4D sur 5 derniers EXT, concède 2.40/match. Prob IA 55% vs impl 52% = edge +3%",
+          "mise": "4% bankroll",
+          "bookie": "Betclic"
+        },
+        "valeur": {
+          "bet": "Over 2.5",
+          "cote": "2.22",
+          "hint": "xG combiné 2.85 + Over 2.5 dans 6/10 derniers matchs des deux. Prob IA 57% vs impl 45% = edge +12%",
+          "mise": "3% bankroll",
+          "bookie": "Winamax"
+        },
+        "specu": {
+          "bet": "BTTS Oui",
+          "cote": "1.98",
+          "hint": "St. Pauli marque dans 62% de ses matchs EXT + Gladbach xG 2.04 devrait convertir. Scénario 2-1 ou 3-1 cohérent",
+          "mise": "1% bankroll",
+          "bookie": "Bet365"
+        }
+      },
       "paris_safe": {
-        "bet": "",
+        "bet": "Over 2.5",
         "cote": "1.94",
-        "proba": ""
+        "proba": "55%"
       },
       "paris_risque": {
         "bet": "",
         "cote": "",
         "proba": ""
       },
-      "kelly": null,
+      "kelly": "7.1",
       "stade": {
         "nom": "BORUSSIA-PARK",
         "cap": "",
@@ -1864,12 +2083,7 @@
           "tx": "Il fallait bien un nuage noir dans cette soirée. Le succès sans appel du Bayern Munich face au…",
           "tm": "2026-03-07"
         }
-      ],
-      "analyse_card_en": "",
-      "conseil_public_en": "",
-      "pari_rec_en": "",
-      "verdict_shark_en": "",
-      "facteur_x_en": ""
+      ]
     },
     {
       "id": 1387926,
@@ -1890,14 +2104,14 @@
         "all"
       ],
       "val": true,
-      "hot": false,
-      "conf": 7.1,
-      "p1": 58,
-      "pn": 22,
-      "p2": 20,
-      "po15": 80,
-      "po25": 52,
-      "btts": 38,
+      "hot": true,
+      "conf": 9,
+      "p1": 72,
+      "pn": 18,
+      "p2": 10,
+      "po15": 88,
+      "po25": 72,
+      "btts": 45,
       "c1": "1.44",
       "cn": "4.86",
       "c2": "7.10",
@@ -1918,7 +2132,7 @@
           "n": "Betclic",
           "o": "200€ offerts",
           "l": "#LIEN_BETCLIC",
-          "c": "1.90",
+          "c": "1.73",
           "c1": "1.44",
           "cn": "4.86",
           "c2": "7.10"
@@ -1927,7 +2141,7 @@
           "n": "Winamax",
           "o": "100€ offerts",
           "l": "#LIEN_WINAMAX",
-          "c": "1.87",
+          "c": "1.70",
           "c1": "1.41",
           "cn": "4.83",
           "c2": "7.07"
@@ -1936,7 +2150,7 @@
           "n": "Unibet",
           "o": "100€ remboursés",
           "l": "#LIEN_UNIBET",
-          "c": "1.88",
+          "c": "1.71",
           "c1": "1.42",
           "cn": "4.84",
           "c2": "7.08"
@@ -1945,7 +2159,7 @@
           "n": "PMU",
           "o": "100€ offerts",
           "l": "#LIEN_PMU",
-          "c": "1.85",
+          "c": "1.68",
           "c1": "1.39",
           "cn": "4.81",
           "c2": "7.05"
@@ -1954,108 +2168,108 @@
           "n": "Bet365",
           "o": "100€ bonus",
           "l": "#LIEN_BET365",
-          "c": "1.93",
+          "c": "1.76",
           "c1": "1.47",
           "cn": "4.89",
           "c2": "7.13"
         }
       ],
-      "edge": "+12%",
-      "edge_detail": "Probabilité IA vs probabilité implicite bookmaker = +12%",
-      "marche": "BTTS",
+      "edge": "+14%",
+      "edge_detail": "Probabilité IA vs probabilité implicite bookmaker = +14%",
+      "marche": "TOTAL_BUTS",
       "risque": "MODERE",
-      "pari_rec": "BTTS Non",
+      "pari_rec": "Over 2.5",
       "mise": "2-3% bankroll",
-      "verdict_shark": "BTTS Non à 1.90 — edge +12% : Auxerre sans marquer 7/12 à l'extérieur, Marseille CS 4/12 DOM, xG combiné 3.08 mais Auxerre xG_away 1.04 trompeur sur 20 matchs où BTTS Non 7/10. Edge réel solide.",
+      "verdict_shark": "[OVER 2.5] a [1.73] — edge +14% : xG total 3.08 (2.04+1.04) + Marseille Over 2.5 dans 8/10 derniers matchs DOM + 2.20 buts/match DOM. Direct.",
       "scenario": {
-        "phase1": "0-25min: Marseille en 4-3-3 offensif à domicile, pression haute prévisible. Auxerre en bloc médian 4-4-2 défensif, cherche à limiter les espaces. L'OM dominant au Vélodrome (8V/12 DOM) imposera son rythme mais Auxerre solide défensivement à l'extérieur (65% force défensive modèle).",
-        "phase2": "25-65min: Marseille accumule les occasions (5.20 tirs cadrés moy), xG 2.04/match. Auxerre peine à créer (1.00 but EXT/match, 7/12 sans marquer EXT). La probabilité qu'Auxerre marque reste faible malgré possession élevée (53.6% — possession stérile).",
-        "phase3": "65-90min: Marseille gérera son avantage. Auxerre, 16e du classement, sans réelle menace offensive à l'extérieur (1V/12 EXT). Fin de match attendue avec victoire OM, Auxerre sans marquer — scénario BTTS Non confirmé par stats."
+        "phase1": "0-25min: Marseille impose son pressing haut a domicile, Auxerre tente de resister en bloc bas mais concede rapidement des occasions. xG DOM de 2.04 se manifeste par des combinaisons rapides sur les cotes. Premier but probable avant la 25e.",
+        "phase2": "25-65min: Marseille mene et pousse pour le break. Auxerre obligé de sortir offre des espaces. 2eme MT = phase la plus prolifique de Marseille (32 buts 2eMT vs 21 en 1eMT). 2e but attendu entre 50-65min.",
+        "phase3": "65-90min: Marseille gere mais continue d'attaquer. Auxerre tente un baroud d'honneur tardif. Marseille peut scorer un 3e en contre. Score final 3-0 ou 2-1."
       },
       "scenario_15min": [
         {
           "t": "0-15min",
           "prob": 8,
-          "txt": "Marseille impose sa pression au Vélodrome, Auxerre en bloc défensif 4-4-2, peu d'espaces. Aucun but attendu mais domination territoriale OM."
+          "txt": "Marseille installe la possession, pression haute. Auxerre compact mais sous pression constante."
         },
         {
           "t": "15-30min",
-          "prob": 12,
-          "txt": "Première occasion franche pour Marseille (xG 2.04/match). Auxerre défend bas, transition difficile. Probabilité d'un premier but OM croissante."
+          "prob": 14,
+          "txt": "1er but Marseille probable. 21 buts en 1eMT, Auxerre concede 17 buts en 1eMT EXT. Brèche trouvée."
         },
         {
           "t": "30-45min",
-          "prob": 10,
-          "txt": "Marseille domine la possession dans le dernier tiers. Auxerre 7/12 sans marquer EXT — risque offensif minimal pour l'OM. Score probable 1-0 à la pause."
+          "prob": 12,
+          "txt": "Marseille controle, peut doubler la mise avant la pause. Auxerre fragile sur les coups de pied arrêtés."
         },
         {
           "t": "45-60min",
-          "prob": 15,
-          "txt": "Début 2e MT: Auxerre pourrait sortir légèrement mais leur xG_away 1.04 reste limité. Marseille cherche le 2e but pour sécuriser."
+          "prob": 18,
+          "txt": "Marseille historiquement devastateur en 2eMT (32 buts). Changements offensifs, rythme qui augmente."
         },
         {
           "t": "60-75min",
-          "prob": 18,
-          "txt": "Phase cruciale: substitutions OM pour maintenir l'intensité. Auxerre épuisé défensivement après 65min de pressing. But probable de Marseille ici."
+          "prob": 25,
+          "txt": "Phase decisive: 2e ou 3e but Marseille. Auxerre desorganisé. xG DOM de 2.04 se concretise pleinement."
         },
         {
           "t": "75-90min",
-          "prob": 20,
-          "txt": "Fin de match: Marseille gère, Auxerre sans ressources offensives réelles (BTTS Non 7/10 sur 10 derniers matchs). Score final 2-0 ou 1-0 attendu."
+          "prob": 23,
+          "txt": "Score deja acquis. Marseille peut relacher, possible reduction Auxerre en toute fin ou 3e but en contre."
         }
       ],
       "score_predit": {
         "score": "2-0",
-        "prob": "26%",
-        "cote_implicite": "3.85"
+        "prob": "24%",
+        "cote_implicite": "4.17"
       },
-      "facteur_x": "Auxerre sans marquer 7/12 à l'extérieur cette saison — statistique record qui verrouille le scénario BTTS Non",
-      "argument": "1. Auxerre sans marquer 7/12 matchs EXT cette saison, BTTS Non 7/10 sur les 10 derniers matchs. 2. Marseille CS 4/12 DOM + Auxerre xG_away moyen 1.04/match = attaque extérieure très limitée. 3. Prob IA estimée 65% vs impl 53% = edge +12%.",
-      "analyse_card": "Auxerre présente la pire efficacité offensive à l'extérieur de Ligue 1 avec seulement 1 victoire en 12 déplacements et 7 matchs sans marquer. Marseille affiche 4 clean sheets à domicile et un xG offensif de 2.04 qui écrase les 1.04 d'Auxerre. Le différentiel défensif (Auxerre 65% force DEF vs OM 35%) confirme un match à sens unique offensivement.",
-      "conseil_public": "BTTS Non à 1.90 représente la meilleure value du marché sur ce match. La combinaison Auxerre 7/12 sans marquer EXT + Marseille 4/12 clean sheets DOM génère une probabilité réelle de 65% contre 53% implicite. Mise recommandée 2-3% bankroll. Eviter Over 2.5 malgré xG total 3.08 car Auxerre contribue peu réellement.",
-      "contexte": "Marseille 3e de Ligue 1 avec 8 victoires en 12 matchs à domicile, en position de force au Vélodrome. Auxerre 16e, en grande difficulté à l'extérieur (1V/12 EXT), sans réelle menace offensive démontrée hors de ses bases. Forme Auxerre (DDLWD) sans conviction.",
-      "enjeux": "Marseille vise le podium et ne peut se permettre de perdre de points au Vélodrome contre un relégable virtuel.",
+      "facteur_x": "Marseille a inscrit 32 buts en 2eme mi-temps (60% de ses buts) — la 2eMT est systematiquement explosive au Velodrome, Over 2.5 dans 80% des 10 derniers matchs.",
+      "argument": "1. xG total 3.08 (Marseille 2.04 + Auxerre 1.04) — seuil Over 2.5 largement depassé. 2. Marseille Over 2.5 dans 8/10 derniers matchs (80%), moy 3.80 buts totaux DOM. 3. Prob IA 72% vs impl 58% = edge +14%.",
+      "analyse_card": "xG total a 3.08 indique clairement un match a 3+ buts. Marseille produit 2.20 buts/match DOM et en concede 1.60, soit 3.80 total. Over 2.5 dans 80% de leurs 10 derniers — la tendance est massive.",
+      "conseil_public": "Over 2.5 est le pari avec le plus grand edge detecté (+14%). Marseille est une machine offensive a domicile et meme Auxerre contribue au spectacle en concedant regulierement. Mise recommandee 3-4% de votre bankroll sur ce marche, la probabilite reelle est nettement superieure a ce que la cote suggere.",
+      "contexte": "Marseille 3e cherche a rester au contact du podium au Velodrome ou il gagne 67% de ses matchs. Auxerre 16e lutte pour le maintien avec seulement 1 victoire en 12 deplacements et 7 clean sheets adverses subies. Le rapport de force est tres net.",
+      "enjeux": "Match crucial pour Marseille dans la course a la Ligue des Champions, Auxerre joue sa survie en Ligue 1.",
       "vbet": "OUI",
-      "value_calc": "+12%",
+      "value_calc": "+14%",
       "scores": [
         "2-0",
-        "1-0",
-        "2-1"
+        "2-1",
+        "3-0"
       ],
       "paris_3": {
         "safe": {
           "bet": "Victoire Marseille",
           "cote": "1.44",
-          "hint": "8V/12 DOM cette saison, Auxerre 1V/12 EXT — domination statistique claire",
+          "hint": "8V/12 DOM (67%) + Auxerre 1V/12 EXT (8%) + xG 2.04 vs 1.04. Prob IA 72% vs impl 69%.",
           "mise": "4-5% bankroll",
           "bookie": "Betclic"
         },
         "valeur": {
-          "bet": "BTTS Non",
-          "cote": "1.90",
-          "hint": "Prob IA 65% vs impl 53% = edge +12% — Auxerre sans marquer 7/12 EXT",
-          "mise": "2-3% bankroll",
+          "bet": "Over 2.5",
+          "cote": "1.73",
+          "hint": "Prob IA 72% vs impl 58% = edge +14%. xG total 3.08 + Over 2.5 dans 8/10 derniers Marseille.",
+          "mise": "3-4% bankroll",
           "bookie": "Winamax"
         },
         "specu": {
-          "bet": "Nul",
-          "cote": "4.86",
-          "hint": "Auxerre DDLWD en forme récente + Marseille WWLDL instable, scénario surprise 22% prob IA vs 21% impl — spéculatif",
-          "mise": "0.5-1% bankroll",
+          "bet": "BTTS Oui",
+          "cote": "1.87",
+          "hint": "Marseille concede 1.60/match DOM + xG Auxerre 1.04 + match ouvert si Marseille mene. Pari speculatif sur la capacite d'Auxerre a scorer.",
+          "mise": "1% bankroll",
           "bookie": "Bet365"
         }
       },
       "paris_safe": {
-        "bet": "BTTS Non",
+        "bet": "Over 2.5",
         "cote": "1.44",
-        "proba": "58%"
+        "proba": "72%"
       },
       "paris_risque": {
         "bet": "",
         "cote": "",
         "proba": ""
       },
-      "kelly": "0.0",
+      "kelly": "8.4",
       "stade": {
         "nom": "Orange Vélodrome — Marseille",
         "cap": "",
@@ -2540,12 +2754,7 @@
           "tx": "Les fumeurs fumés. Voici le constat pour l’AS Nancy-Lorraine, sanctionnée de deux matchs à huis clos ce mercredi",
           "tm": "2026-03-12"
         }
-      ],
-      "analyse_card_en": "Auxerre présente la pire efficacité offensive à l'extérieur de Ligue 1 avec seulement 1 victoire en 12 déplacements et 7 matchs sans marquer. Marseille affiche 4 clean sheets à domicile et un xG offensif de 2.04 qui écrase les 1.04 d'Auxerre. Le différentiel défensif (Auxerre 65% force DEF vs OM 35%) confirme un match à sens unique offensivement.",
-      "conseil_public_en": "BTTS No à 1.90 représente la meilleure Value Bet du marché sur ce match. La combinaison Auxerre 7/12 sans marquer EXT + Marseille 4/12 clean sheets DOM génère une probabilité réelle de 65% contre 53% implicite. Mise recommandée 2-3% bankroll. Eviter Over 2.5 malgré xG total 3.08 car Auxerre contribue peu réellement.",
-      "pari_rec_en": "BTTS No",
-      "verdict_shark_en": "BTTS No à 1.90 — Edge +12% : Auxerre sans marquer 7/12 à l'extérieur, Marseille CS 4/12 DOM, xG combiné 3.08 mais Auxerre xG_away 1.04 trompeur sur 20 matchs où BTTS No 7/10. Edge réel solide.",
-      "facteur_x_en": "Auxerre sans marquer 7/12 à l'extérieur cette saison — statistique record qui verrouille le scénario BTTS No"
+      ]
     },
     {
       "id": 1378151,
@@ -2566,14 +2775,14 @@
         "all"
       ],
       "val": true,
-      "hot": false,
-      "conf": 6.8,
+      "hot": true,
+      "conf": 8.1,
       "p1": 42,
-      "pn": 28,
-      "p2": 30,
-      "po15": 75,
-      "po25": 45,
-      "btts": 35,
+      "pn": 30,
+      "p2": 28,
+      "po15": 53,
+      "po25": 28,
+      "btts": 33,
       "c1": "2.25",
       "cn": "3.01",
       "c2": "3.88",
@@ -2636,87 +2845,87 @@
           "c2": "3.91"
         }
       ],
-      "edge": "+9%",
-      "edge_detail": "Probabilité IA vs probabilité implicite bookmaker = +9%",
+      "edge": "+11%",
+      "edge_detail": "Probabilité IA vs probabilité implicite bookmaker = +11%",
       "marche": "BTTS",
       "risque": "MODERE",
       "pari_rec": "BTTS Non",
       "mise": "2-3% bankroll",
-      "verdict_shark": "BTTS Non à 1.77 — edge +9% : Parma sans marquer EXT 7/14 (50%), xG_away 0.46, Torino xG_home 1.12 mais forme irrégulière. Scénario bas scoring confirmé par les deux équipes.",
+      "verdict_shark": "[BTTS Non] a [1.77] — edge +11% : xG Parma 0.46 (P(0 but)=63%), Parma ne marque pas 50% EXT saison, Torino CS 5/14 DOM. Match fermé.",
       "scenario": {
-        "phase1": "0-25min: Torino en 3-5-2 tente d'imposer sa possession (54.6%) face à un Parma en bloc bas 5-3-2. Les granata pressent haut mais Parma défend avec discipline, xG faible attendu en ouverture. Peu d'espaces dans les 20 premières minutes.",
-        "phase2": "25-65min: Torino domine la possession sans créer en volume (5.2 tirs cadrés moy mais xG 1.12 seulement). Parma en transition rapide (0.46 xG away) mais efficace défensivement — CS 7/14 en déplacement. Le match reste fermé, 0-0 ou 1-0 probable à la pause.",
-        "phase3": "65-90min: Parma gère son résultat ou Torino pousse pour forcer le score. Compte tenu de la série défensive de Parma (DDWWW, 3 clean sheets sur 5) et de l'incapacité des visiteurs à marquer (7/14 sans marquer EXT), BTTS Non est le scénario dominant en fin de match."
+        "phase1": "0-25min: Parma compact en 3-5-2 bas, possession Torino stérile (54.6% moy). Peu d'occasions franches, Parma xG 0.46 indique quasi-absence de danger offensif. Torino tente de poser le jeu sans précipitation.",
+        "phase2": "25-65min: Torino pousse davantage, 1 but probable autour de la 35e-55e (1.06 xG estimé). Parma reste verrouillé, 2.5 tirs cadrés/match seulement en EXT. Le bloc bas de Parma absorbe mais ne crée rien.",
+        "phase3": "65-90min: Si Torino mène, Parma tente d'ouvrir mais manque de qualité offensive (0.67 buts/match EXT). Score final 1-0 le plus probable. Match qui reste sous 2.5 buts."
       },
       "scenario_15min": [
         {
           "t": "0-15min",
-          "prob": 6,
-          "txt": "Début fermé, Torino cherche à s'installer, Parma en bloc bas — peu de situations nettes"
+          "prob": 5,
+          "txt": "Phase d'observation, Parma compact, Torino circule sans urgence. Aucun but attendu."
         },
         {
           "t": "15-30min",
           "prob": 10,
-          "txt": "Torino augmente la pression, premières occasions sur phases arrêtées, Parma compact"
+          "txt": "Torino commence à trouver des espaces, première occasion franche possible. Parma contre rarement."
         },
         {
           "t": "30-45min",
-          "prob": 9,
-          "txt": "Fin de 1ère MT calme, 0-0 probable, Parma sans marquer (xG away 0.46)"
+          "prob": 15,
+          "txt": "Meilleure fenêtre de but pour Torino en 1ère MT (13 buts marqués 1ère MT saison). Parma seulement 7 buts marqués 1ère MT."
         },
         {
           "t": "45-60min",
-          "prob": 13,
-          "txt": "Reprise avec Torino qui accélère, Parma défend en bloc, xG total faible"
+          "prob": 18,
+          "txt": "Torino maintient la pression, ajustements tactiques. Parma tente de rester compact après la pause."
         },
         {
           "t": "60-75min",
-          "prob": 17,
-          "txt": "Phase cruciale, Torino pousse — 1 but possible mais Parma ne répond pas offensivement"
+          "prob": 20,
+          "txt": "Phase décisive, remplacements offensifs Torino. Si 0-0, pressing intensifié. Parma en danger."
         },
         {
           "t": "75-90min",
-          "prob": 18,
-          "txt": "Fin de match, Parma gère ou contre — BTTS Non se confirme statistiquement"
+          "prob": 15,
+          "txt": "Gestion du score si Torino mène. Parma pousse tardivement mais xG trop faible (0.46) pour égaliser."
         }
       ],
       "score_predit": {
         "score": "1-0",
-        "prob": "30%",
-        "cote_implicite": "3.33"
+        "prob": "24%",
+        "cote_implicite": "4.17"
       },
-      "facteur_x": "Parma : 7/14 matchs EXT sans marquer + xG_away 0.46 = profil ultra-défensif en déplacement, facteur décisif pour BTTS Non",
-      "argument": "1. Parma sans marquer EXT 7/14 (50%) + xG_away 0.46/match = attaque très faible en déplacement. 2. BTTS Oui sur 20 matchs Parma EXT : 4/20 (20%) — très bas. 3. Prob IA estimée à 65% vs impl 56% = edge +9%.",
-      "analyse_card": "Torino produit un xG de 1.12 à domicile mais avec seulement 5/20 BTTS Oui toutes situations confondues. Parma en déplacement affiche 7 clean sheets sur 14 matchs et ne marque que dans 7 des 14 matchs EXT. Le profil combiné des deux équipes favorise nettement un match où l'une des deux — probablement Parma — ne marque pas.",
-      "conseil_public": "Le marché BTTS Non à 1.77 offre le meilleur edge de cette rencontre. Les statistiques de Parma en déplacement sont parmi les plus défensives de Serie A (50% sans marquer EXT, xG 0.46). Torino marque à domicile mais avec régularité moyenne (1.00 but/match sur 20 matchs). Miser sur BTTS Non est cohérent avec les deux profils d'équipes dans ce match de mi-tableau.",
-      "contexte": "Torino (15e) reçoit Parma (12e) dans un match de milieu de tableau sans enjeu direct pour le titre. Torino est en mauvaise forme (LWLLD) malgré une victoire contre la Lazio. Parma est en bonne dynamique (DDWWW) mais avec des victoires serrées et une attaque extérieure très limitée.",
-      "enjeux": "Match de milieu de tableau : ni la relégation ni l'Europe directement en jeu, favorisant un match fermé.",
+      "facteur_x": "xG Parma 0.46 sur 5 matchs = production offensive quasi inexistante. Probabilité Poisson de 0 but Parma: 63%. Même en forme (DDWWW), les scores sont 0-0, 1-1, 1-0, 2-1, 1-0 — jamais explosifs.",
+      "argument": "1. xG Parma 0.46 → P(Parma=0 but) Poisson = 63%. 2. Parma ne marque pas 50% matchs EXT (7/14), BTTS Non EXT 80% sur 20 matchs. 3. Torino clean sheet DOM 5/14 (36%). Prob IA BTTS Non 67% vs impl 56% = edge +11%.",
+      "analyse_card": "Match à profil très défensif côté Parma: xG cumulé 1.58 (1.12+0.46). Parma est la 2ème équipe la plus muette en déplacement avec 0.67 but/match et un xG de 0.46. Torino à domicile encaisse et marque 1.00/match. Le scénario 1-0 ou 0-0 concentre 44% de probabilité combinée.",
+      "conseil_public": "BTTS Non à 1.77 offre un edge solide de +11%. Le xG de Parma (0.46) est le signal le plus fort: cette attaque ne produit presque rien en déplacement. Torino est irrégulier mais possède assez de qualité pour marquer 1 but. Miser 3-4% de bankroll sur BTTS Non.",
+      "contexte": "Torino 15ème en forme médiocre (LWLLD) reçoit un Parma 12ème en série positive (DDWWW) mais qui ne marque pas souvent en déplacement. Match de milieu-bas de tableau sans enjeu brûlant, propice à un match fermé.",
+      "enjeux": "Maintien en jeu pour les deux équipes, tension modérée mais pas de pression extrême.",
       "vbet": "OUI",
-      "value_calc": "+9%",
+      "value_calc": "+11%",
       "scores": [
         "1-0",
         "0-0",
-        "1-1"
+        "2-0"
       ],
       "paris_3": {
         "safe": {
-          "bet": "BTTS Non",
-          "cote": "1.77",
-          "hint": "Parma sans marquer EXT 7/14 + BTTS Oui Parma EXT 4/20 (20%) — scénario défensif dominant",
-          "mise": "4% bankroll",
+          "bet": "Under 2.5",
+          "cote": "1.62",
+          "hint": "xG total 1.58, Parma Over 2.5 EXT seulement 20% (4/20). Prob IA 72% vs impl 62% = edge +10%",
+          "mise": "4-5% bankroll",
           "bookie": "Betclic"
         },
         "valeur": {
-          "bet": "Under 2.5",
-          "cote": "1.62",
-          "hint": "Over 2.5 Parma sur 20 matchs : 4/20 (20%) | xG total 1.12+0.46=1.58 — prob IA 65% vs impl 62% = edge +3% (marché complémentaire)",
-          "mise": "2% bankroll",
+          "bet": "BTTS Non",
+          "cote": "1.77",
+          "hint": "xG Parma 0.46, ne marque pas 50% EXT. Prob IA 67% vs impl 56% = edge +11%",
+          "mise": "3-4% bankroll",
           "bookie": "Winamax"
         },
         "specu": {
           "bet": "Victoire Torino",
           "cote": "2.25",
-          "hint": "Torino DOM 5V/14 + forme récente W 2-0 vs Lazio + Parma xG_away 0.46 = prob IA 42% vs impl 44% — spéculatif, cote correcte",
+          "hint": "Torino DOM 1.12 xG vs Parma 0.46 xG. Avantage terrain, Parma ne crée rien offensivement. Prob IA 42% vs impl 44% = edge léger mais cohérent scénario 1-0",
           "mise": "1% bankroll",
           "bookie": "Bet365"
         }
@@ -3082,12 +3291,7 @@
           "tx": "Paris, le 24 février 2026  La déclaration des transactions sur actions propres réalisées du 16 au 20 février 2026 a été adressée à l’Autorité des Marchés...",
           "tm": "2026-02-24"
         }
-      ],
-      "analyse_card_en": "Torino produit un xG de 1.12 à domicile mais avec seulement 5/20 BTTS Oui toutes situations confondues. Parma en déplacement affiche 7 clean sheets sur 14 matchs et ne marque que dans 7 des 14 matchs EXT. Le profil combiné des deux équipes favorise nettement un match où l'une des deux — probablement Parma — ne marque pas.",
-      "conseil_public_en": "Le marché BTTS No à 1.77 offre le meilleur Edge de cette rencontre. Les statistiques de Parma en déplacement sont parmi les plus défensives de Serie A (50% sans marquer EXT, xG 0.46). Torino marque à domicile mais avec régularité moyenne (1.00 but/match sur 20 matchs). Miser sur BTTS No est cohérent avec les deux profils d'équipes dans ce match de mi-tableau.",
-      "pari_rec_en": "BTTS No",
-      "verdict_shark_en": "BTTS No à 1.77 — Edge +9% : Parma sans marquer EXT 7/14 (50%), xG_away 0.46, Torino xG_home 1.12 mais forme irrégulière. Scénario bas scoring confirmé par les deux équipes.",
-      "facteur_x_en": "Parma : 7/14 matchs EXT sans marquer + xG_away 0.46 = profil ultra-défensif en déplacement, facteur décisif pour BTTS No"
+      ]
     },
     {
       "id": 1391089,
@@ -3108,14 +3312,14 @@
         "all"
       ],
       "val": true,
-      "hot": false,
-      "conf": 6.8,
+      "hot": true,
+      "conf": 8.7,
       "p1": 32,
-      "pn": 27,
-      "p2": 41,
-      "po15": 80,
-      "po25": 55,
-      "btts": 50,
+      "pn": 28,
+      "p2": 40,
+      "po15": 85,
+      "po25": 62,
+      "btts": 66,
       "c1": "3.32",
       "cn": "3.40",
       "c2": "2.25",
@@ -3178,88 +3382,88 @@
           "c2": "2.28"
         }
       ],
-      "edge": "+6%",
-      "edge_detail": "Probabilité IA vs probabilité implicite bookmaker = +6%",
+      "edge": "+13%",
+      "edge_detail": "Probabilité IA vs probabilité implicite bookmaker = +13%",
       "marche": "TOTAL_BUTS",
       "risque": "MODERE",
       "pari_rec": "Over 2.5",
       "mise": "2-3% bankroll",
-      "verdict_shark": "Over 2.5 à 2.03 — edge +6% : xG combiné 3.31 (1.89+1.42), Villarreal 8/10 derniers matchs Over 2.5, Alaves 5/10 Over 2.5, total offensif supporte le dépassement du seuil.",
+      "verdict_shark": "[OVER 2.5] a [2.03] — edge +13% : xG combiné 3.31 (1.89+1.42) + Villarreal encaisse 2.20/match EXT sur 20 derniers + 8/10 Over 2.5 récents Villarreal. Gros potentiel offensif. Direct.",
       "scenario": {
-        "phase1": "0-25min: Villarreal (#4) en 4-4-2 ou 4-3-3 offensif tente d'imposer son jeu en déplacement malgré un bilan EXT récent décevant (1V/3D sur 5). Alaves (#16) en 4-5-1 compact cherche à contenir, mais encaisse en moyenne 1.60 buts/match à domicile. Tempo modéré, vent quasi nul (1 km/h) favorable aux transitions.",
-        "phase2": "25-65min: Le xG combiné de 3.31 indique une pression offensive soutenue des deux côtés. Alaves marque 1.60/match DOM, Villarreal inscrit 22 buts en 1ère MT sur 20 matchs — pression croissante. Les deux équipes montrent des lignes défensives perméables: Alaves 1.60 encaissés DOM, Villarreal 2.20 encaissés EXT. Phase de buts probable entre 30 et 65min.",
-        "phase3": "65-90min: Villarreal (27 buts en 2ème MT sur 20 matchs EXT) tend à scorer en fin de match. Alaves en mauvaise forme (LLDDL) ne saura pas verrouiller. Le scénario 2-1 ou 1-2 avec 3+ buts total est cohérent avec les deux xG et les historiques récents."
+        "phase1": "0-25min: Alaves pousse à domicile (xG 1.89) face à un Villarreal qui concède beaucoup en déplacement (2.20/match). Pressing initial, premières occasions franches des deux côtés.",
+        "phase2": "25-65min: Le match s'ouvre. Villarreal marque 22 buts en 1ère MT cette saison et reste dangereux. Alaves profite des failles défensives adverses (2.20 encaissés EXT). 2-3 buts attendus à la pause ou peu après.",
+        "phase3": "65-90min: Les deux équipes ont leurs pics offensifs en 2ème MT (Alaves 13, Villarreal 27 buts en 2ème MT). Remplacements offensifs, espaces, buts tardifs probables. Score final 2-1 ou 2-2."
       },
       "scenario_15min": [
         {
           "t": "0-15min",
-          "prob": 8,
-          "txt": "Début prudent, Villarreal cherche à prendre le contrôle du ballon, Alaves défend en bloc. Peu d'occasions franches."
+          "prob": 12,
+          "txt": "Mise en place tactique, Alaves agressif à domicile, Villarreal en transition. Première occasion probable."
         },
         {
           "t": "15-30min",
-          "prob": 12,
-          "txt": "Première occasion franche probable côté Alaves sur transition rapide, xG Alaves 1.89 signale une attaque active à domicile."
+          "prob": 15,
+          "txt": "Montée en intensité, Villarreal commence à trouver des espaces. Premier but probable dans cette tranche."
         },
         {
           "t": "30-45min",
-          "prob": 10,
-          "txt": "Villarreal monte en puissance, 22 buts marqués en 1ère MT sur 20 matchs — pression sur la défense d'Alaves perméable."
+          "prob": 15,
+          "txt": "Fin de 1ère MT active — Alaves 11 buts marqués en 1ère MT, Villarreal 22. Deuxième but attendu."
         },
         {
           "t": "45-60min",
-          "prob": 15,
-          "txt": "Début 2ème MT, Villarreal ajuste tactiquement, pression accrue. Alaves vulnérable après la pause (13 buts encaissés en 2ème MT)."
+          "prob": 18,
+          "txt": "Reprise de 2ème MT dynamique. Villarreal ajuste tactiquement. Les deux attaques sont en confiance."
         },
         {
           "t": "60-75min",
-          "prob": 18,
-          "txt": "Phase cruciale: substitutions des deux côtés, espaces ouverts. 8/10 derniers matchs de Villarreal Over 2.5 — buts attendus ici."
+          "prob": 20,
+          "txt": "Phase décisive : remplacements offensifs, fatigue défensive. Pic de probabilité de but des deux côtés."
         },
         {
           "t": "75-90min",
           "prob": 20,
-          "txt": "Fin de match ouverte: Alaves (LLDDL) en détresse défensive, Villarreal 27 buts en 2ème MT EXT sur 20 matchs. 3ème but probable."
+          "txt": "Fin de match ouverte. Villarreal 27 buts en 2ème MT, Alaves 13. But tardif très probable."
         }
       ],
       "score_predit": {
-        "score": "1-2",
-        "prob": "24%",
-        "cote_implicite": "4.17"
+        "score": "2-1",
+        "prob": "16%",
+        "cote_implicite": "6.25"
       },
-      "facteur_x": "Villarreal 8/10 derniers matchs Over 2.5 combiné au xG total de 3.31 — stat record offensive qui force le dépassement du seuil.",
-      "argument": "1. xG combiné 3.31 (Alaves 1.89 + Villarreal 1.42) dépasse largement le seuil 2.5 et indique 3+ buts attendus. 2. Villarreal Over 2.5 dans 8/10 derniers matchs toutes confrontations; Alaves 5/10 — convergence des deux équipes vers des matchs à buts. 3. Prob IA 55% vs impl 49% = edge +6%.",
-      "analyse_card": "Le xG combiné de 3.31 est le signal le plus fort de cette rencontre. Villarreal produit 8/10 Over 2.5 sur ses 10 derniers matchs, et Alaves encaisse 1.60 buts/match à domicile tout en en marquant autant — les deux équipes contribuent au volume offensif. Les défenses sont perméables des deux côtés, ce qui soutient le scénario de 3+ buts.",
-      "conseil_public": "L'Over 2.5 à 2.03 représente le meilleur edge disponible sur ce match. Avec un xG total de 3.31 et Villarreal Over 2.5 dans 80% de ses 10 derniers matchs, la probabilité réelle de 55% dépasse l'implicite de 49%. Misez modérément, car Villarreal EXT est en forme mitigée (1V/3D sur 5) ce qui introduit un risque de match fermé. Combiné avec le BTTS Oui pour sécuriser, le scénario offensif reste cohérent.",
-      "contexte": "Alaves est 16ème avec une forme récente alarmante (LLDDL), 5V/13 à domicile. Villarreal est 4ème avec 6V/13 en déplacement sur la saison mais seulement 1V/3D sur ses 5 derniers EXT. L'écart de classement (4ème vs 16ème) favorise Villarreal mais la forme récente EXT tempère l'enthousiasme.",
-      "enjeux": "Villarreal vise le top 4 et ne peut pas se permettre de perdre des points en déplacement, ce qui génère une pression offensive réelle.",
+      "facteur_x": "Villarreal encaisse 2.20 buts/match en déplacement sur 20 matchs — la pire stat défensive EXT d'un top 4, combinée au xG offensif d'Alaves (1.89) = cocktail explosif pour l'Over.",
+      "argument": "1. xG combiné 3.31 (Alaves 1.89 + Villarreal 1.42) dépasse nettement le seuil Over 2.5. 2. Villarreal 8/10 Over 2.5 derniers matchs (80%), Alaves 5/10 (50%), moyenne empirique 65%. 3. Villarreal concède 2.20/match EXT, Alaves marque 1.60/match DOM. 4. Poisson λ=3.0 donne 58%, pondéré empirique = 62%. Prob IA 62% vs impl 49% = edge +13%.",
+      "analyse_card": "xG combiné 3.31 très supérieur au seuil 2.5. Villarreal en déplacement est une passoire (2.20 encaissés/match sur 20) malgré son classement #4. Alaves génère du danger à domicile (xG 1.89, 1.60 buts/match). 8/10 derniers matchs Villarreal passent Over 2.5.",
+      "conseil_public": "Le marché Over 2.5 à 2.03 offre un edge substantiel de 13%. La cote reflète une vision trop conservatrice de ce match. Les deux équipes produisent du jeu offensif (xG combiné 3.31) et Villarreal souffre défensivement en déplacement. Miser 2-3% de bankroll sur Over 2.5 est optimal.",
+      "contexte": "Alaves (#16) lutte pour le maintien avec une forme LLDDL mais reste dangereux à domicile (xG 1.89). Villarreal (#4) vise la C1 mais traverse une mauvaise passe en déplacement (1V/1N/3D sur 5, 2.20 encaissés). Match à enjeux pour les deux camps.",
+      "enjeux": "Alaves a besoin de points pour le maintien, Villarreal pour sécuriser sa place en C1 — match ouvert et engagé garanti.",
       "vbet": "OUI",
-      "value_calc": "+6%",
+      "value_calc": "+13%",
       "scores": [
-        "1-2",
+        "2-1",
         "1-1",
-        "0-2"
+        "2-2"
       ],
       "paris_3": {
         "safe": {
-          "bet": "DC X2 (Nul ou Villarreal)",
-          "cote": "1.36",
-          "hint": "Villarreal #4 vs Alaves #16, 6V/13 EXT saison, modèle API 45% Villarreal + 45% nul — mais cote 1.36 trop basse pour value bet",
-          "mise": "4-5% bankroll",
+          "bet": "BTTS Oui",
+          "cote": "1.75",
+          "hint": "BTTS 6/10 Alaves + 7/10 Villarreal récents. Prob IA 66% vs impl 57% = edge +9%. Les deux attaques produisent (xG 1.89+1.42).",
+          "mise": "4% bankroll",
           "bookie": "Betclic"
         },
         "valeur": {
           "bet": "Over 2.5",
           "cote": "2.03",
-          "hint": "Prob IA 55% vs impl 49% = edge +6% | xG combiné 3.31 | Villarreal 8/10 Over 2.5",
-          "mise": "2-3% bankroll",
+          "hint": "Prob IA 62% vs impl 49% = edge +13%. xG combiné 3.31, Villarreal 8/10 Over 2.5, 2.20 encaissés EXT.",
+          "mise": "3% bankroll",
           "bookie": "Winamax"
         },
         "specu": {
-          "bet": "Victoire Villarreal",
-          "cote": "2.25",
-          "hint": "Villarreal #4 avec 6V/13 EXT saison, xG défense Alaves perméable 1.60 enc/match DOM, cote 2.25 offre value si Villarreal retrouve sa forme",
-          "mise": "0.5-1% bankroll",
+          "bet": "Victoire Alaves",
+          "cote": "3.32",
+          "hint": "xG 1.89 + Villarreal 1V/3D sur 5 EXT + 2.20 encaissés EXT. Domicile + enjeu maintien. Prob IA 32% vs impl 30% = edge +2%.",
+          "mise": "0.5% bankroll",
           "bookie": "Bet365"
         }
       },
@@ -3753,12 +3957,7 @@
           "tx": "Préféré à Robert Sanchez dans le but de Cheslea, le gardien Filip Jörgensen a commis une erreur qui a pesé lourd dans la défaite contre le PSG (5-2), mercredi en Ligue des champions. Cela a agacé ses coéquipiers, provoqué des critiques dans la presse et pouss…",
           "tm": "2026-03-12"
         }
-      ],
-      "analyse_card_en": "Le xG combiné de 3.31 est le signal le plus fort de cette rencontre. Villarreal produit 8/10 Over 2.5 sur ses 10 derniers matchs, et Alaves encaisse 1.60 buts/match à domicile tout en en marquant autant — les deux équipes contribuent au volume offensif. Les défenses sont perméables des deux côtés, ce qui soutient le scénario de 3+ buts.",
-      "conseil_public_en": "L'Over 2.5 à 2.03 représente le meilleur Edge disponible sur ce match. Avec un xG total de 3.31 et Villarreal Over 2.5 dans 80% de ses 10 derniers matchs, la probabilité réelle de 55% dépasse l'implicite de 49%. Misez modérément, car Villarreal EXT est en forme mitigée (1V/3D sur 5) ce qui introduit un risque de match fermé. Combiné avec le BTTS Oui pour sécuriser, le scénario offensif reste cohérent.",
-      "pari_rec_en": "Over 2.5",
-      "verdict_shark_en": "Over 2.5 à 2.03 — Edge +6% : xG combiné 3.31 (1.89+1.42), Villarreal 8/10 derniers matchs Over 2.5, Alaves 5/10 Over 2.5, total offensif supporte le dépassement du seuil.",
-      "facteur_x_en": "Villarreal 8/10 derniers matchs Over 2.5 combiné au xG total de 3.31 — stat record offensive qui force le dépassement du seuil."
+      ]
     },
     {
       "id": 1386996,
@@ -3780,13 +3979,13 @@
       ],
       "val": true,
       "hot": false,
-      "conf": 6.8,
-      "p1": 45,
-      "pn": 28,
-      "p2": 27,
+      "conf": 6.4,
+      "p1": 48,
+      "pn": 27,
+      "p2": 25,
       "po15": 80,
-      "po25": 52,
-      "btts": 50,
+      "po25": 55,
+      "btts": 58,
       "c1": "2.25",
       "cn": "3.30",
       "c2": "3.10",
@@ -3807,7 +4006,7 @@
           "n": "Betclic",
           "o": "200€ offerts",
           "l": "#LIEN_BETCLIC",
-          "c": "1.99",
+          "c": "2.00",
           "c1": "2.25",
           "cn": "3.30",
           "c2": "3.10"
@@ -3816,7 +4015,7 @@
           "n": "Winamax",
           "o": "100€ offerts",
           "l": "#LIEN_WINAMAX",
-          "c": "1.96",
+          "c": "1.97",
           "c1": "2.22",
           "cn": "3.27",
           "c2": "3.07"
@@ -3825,7 +4024,7 @@
           "n": "Unibet",
           "o": "100€ remboursés",
           "l": "#LIEN_UNIBET",
-          "c": "1.97",
+          "c": "1.98",
           "c1": "2.23",
           "cn": "3.28",
           "c2": "3.08"
@@ -3834,7 +4033,7 @@
           "n": "PMU",
           "o": "100€ offerts",
           "l": "#LIEN_PMU",
-          "c": "1.94",
+          "c": "1.95",
           "c1": "2.20",
           "cn": "3.25",
           "c2": "3.05"
@@ -3843,108 +4042,108 @@
           "n": "Bet365",
           "o": "100€ bonus",
           "l": "#LIEN_BET365",
-          "c": "2.02",
+          "c": "2.03",
           "c1": "2.28",
           "cn": "3.33",
           "c2": "3.13"
         }
       ],
-      "edge": "+13%",
-      "edge_detail": "Probabilité IA vs probabilité implicite bookmaker = +13%",
-      "marche": "BTTS",
+      "edge": "+5%",
+      "edge_detail": "Probabilité IA vs probabilité implicite bookmaker = +5%",
+      "marche": "TOTAL_BUTS",
       "risque": "MODERE",
-      "pari_rec": "BTTS Non",
+      "pari_rec": "Over 2.5",
       "mise": "2-3% bankroll",
-      "verdict_shark": "BTTS Non à 1.99 — edge +13% : Swansea sans marquer 7/18 déplacements (39%), Wrexham CS 3/19 à domicile, xG combiné 2.15 mais profils défensifs convergents. Edge réel identifié.",
+      "verdict_shark": "[OVER 2.5] a [2.00] — edge +5% : Wrexham DOM avg 3.17 buts totaux/match + Swansea EXT avg 2.60 buts totaux/match. Combiné 2.89 attendu. xG modéré (2.15) mais stats réelles et forme récente (5-3, 2-2, 2-1) poussent clairement l'over. Direct.",
       "scenario": {
-        "phase1": "0-25min: Wrexham en 4-3-3 presse haut à domicile, Swansea en bloc médian 4-2-3-1. Wrexham contrôle la possession (51% moy) et cherche à exploiter les espaces. Swansea défend prudemment, leurs attaquants peu tranchants en déplacement (1.00 but/match EXT).",
-        "phase2": "25-65min: Wrexham domine territorialement, xG moy 1.13 vs 1.02 Swansea. Swansea marque seulement 30 buts en 2e MT sur toute la saison mais reste muet en déplacement dans 39% des cas. Un but de Wrexham probable, Swansea peine à concrétiser ses rares occasions.",
-        "phase3": "65-90min: Wrexham gérant l'avantage ou cherchant le break, Swansea incapable de répondre offensivement en déplacement (2V/5 matchs EXT récents). Fin de match sur un score net, BTTS Non confirmé."
+        "phase1": "0-25min: Wrexham impose le rythme à domicile, pressing haut avec xG 1.13 supérieur. Swansea compact mais vulnérable en transition (1.60 buts encaissés EXT). Tempo élevé, première occasion franche avant la 20e.",
+        "phase2": "25-65min: Le match s'ouvre. Wrexham marque 23 buts en 1ère MT et 30 en 2nde — leur puissance offensive se déploie. Swansea, 30 buts en 2ème MT, peut répondre. Fatigue de Swansea (3 matchs en 14j) commence à peser après la 55e.",
+        "phase3": "65-90min: Phase décisive. Wrexham pousse pour le break, Swansea tente de réagir. Les deux équipes marquent davantage en 2ème MT. Substitutions offensives des deux côtés. Score final 2-1 ou 2-2 le plus probable."
       },
       "scenario_15min": [
         {
           "t": "0-15min",
           "prob": 8,
-          "txt": "Wrexham impose son pressing à domicile, Swansea défend en bloc. Peu d'occasions franches des deux côtés."
+          "txt": "Wrexham installe la pression à domicile, Swansea se structure. Peu de buts attendus, reconnaissance tactique."
         },
         {
           "t": "15-30min",
-          "prob": 12,
-          "txt": "Wrexham commence à créer via le côté gauche, première occasion cadrée probable. Swansea reste dangereux sur transition."
+          "prob": 14,
+          "txt": "Premier temps fort de Wrexham. xG 1.13 se traduit par des occasions nettes. Swansea vulnérable sur les côtés, 1er but probable."
         },
         {
           "t": "30-45min",
-          "prob": 10,
-          "txt": "Wrexham domine sans trouver la faille. Swansea économise ses forces, 1ere MT souvent stérile (16 buts marqués en 1ere MT seulement)."
+          "prob": 13,
+          "txt": "Fin de 1ère MT intense. Wrexham 23 buts marqués en 1ère MT saison — danger constant. Possible 2e but."
         },
         {
           "t": "45-60min",
-          "prob": 15,
-          "txt": "Reprise avec Wrexham plus agressif. Swansea fragile en début de 2e MT, buts encaissés concentrés en 2e période (30 encaissés 2e MT)."
+          "prob": 18,
+          "txt": "Reprise énergique. Swansea 30 buts en 2ème MT — ajustements tactiques, phase offensive renforcée."
         },
         {
           "t": "60-75min",
-          "prob": 18,
-          "txt": "Phase cruciale: Wrexham pousse, substitutions probables. Swansea sous pression, risque de concéder sans pouvoir répliquer offensivement."
+          "prob": 25,
+          "txt": "Phase cruciale. Fatigue Swansea (90/100) se manifeste. Espaces s'ouvrent, buts probables des deux côtés. Substitutions offensives."
         },
         {
           "t": "75-90min",
-          "prob": 20,
-          "txt": "Fin de match: Wrexham gère ou appuie selon le score. Swansea sans ressources offensives suffisantes pour égaliser (1.00 but/match EXT)."
+          "prob": 22,
+          "txt": "Fin de match ouverte. Les deux équipes ont marqué 30 buts en 2ème MT. Pressing final, dernier but probable."
         }
       ],
       "score_predit": {
-        "score": "1-0",
-        "prob": "26%",
-        "cote_implicite": "3.85"
+        "score": "2-1",
+        "prob": "22%",
+        "cote_implicite": "4.55"
       },
-      "facteur_x": "Swansea sans marquer dans 39% de ses déplacements (7/18) — le facteur décisif pour BTTS Non",
-      "argument": "1. Swansea sans marquer en déplacement 7/18 matchs (39%), moyenne de seulement 1.00 but/match EXT sur les 20 derniers matchs. 2. Wrexham 3 clean sheets à domicile sur 19 matchs saison, xG combiné 2.15 (1.13+1.02) — insuffisant pour garantir BTTS, surtout avec Swansea très discret offensivement en déplacement. 3. Sur 10 derniers matchs BTTS Non: Wrexham 4/10, Swansea 6/10 — prob IA estimée à 63% vs implicite 50% = edge +13%.",
-      "analyse_card": "Wrexham produit un xG moyen de 1.13 à domicile avec 4.60 tirs cadrés/match, suffisant pour scorer. Swansea génère seulement 1.02 xG en déplacement et 2.60 tirs cadrés — profil offensif insuffisant pour garantir un but. Le BTTS Non est soutenu par la convergence des statistiques défensives des deux équipes.",
-      "conseil_public": "Miser sur BTTS Non à 1.99 représente la meilleure value de ce match. Swansea est muet dans 39% de ses déplacements et n'a que 2 victoires sur ses 5 derniers matchs extérieurs. Wrexham peut scorer (forme récente 4V/5) mais la probabilité que les deux équipes trouvent le chemin des filets reste sous 50% selon les stats réelles. L'edge de +13% justifie l'investissement à hauteur de 2-3% de la bankroll.",
-      "contexte": "Wrexham 6e au classement Championship, solide à domicile (8V/19) avec une bonne forme récente (3V sur 5 derniers). Swansea 11e, correct à domicile mais fragile en déplacement (2V/5 récents, 5V/18 sur la saison). L'écart de niveau et le contexte extérieur défavorisent clairement les Gallois visiteurs.",
-      "enjeux": "Match de milieu de tableau Championship avec Wrexham visant le top 6 et Swansea cherchant à consolider sa position mid-table.",
+      "facteur_x": "Wrexham 3.17 buts totaux par match à domicile sur 20 matchs — le SToK Cae Ras est un terrain de buts, pas de verrouillage défensif en vue.",
+      "argument": "1. Wrexham DOM 20 matchs: 1.67 marqués + 1.50 encaissés = 3.17 buts/match total. 2. Swansea EXT 20 matchs: 1.00 + 1.60 = 2.60 buts/match total. Moyenne combinée 2.89. 3. Over 2.5 sur 10 derniers: 50% Wrexham + 50% Swansea. Forme récente Wrexham (1-2, 2-1, 5-3, 2-2) = 4/5 matchs Over 2.5. Prob IA 55% vs impl 50% = edge +5%.",
+      "analyse_card": "Match entre un Wrexham prolifique à domicile (3.17 buts totaux/match) et un Swansea qui concède 1.60 buts en déplacement. Le xG combiné de 2.15 est modéré mais les stats réelles des 20 derniers matchs pointent vers 2.89 buts attendus. 4 des 5 derniers matchs de Wrexham ont dépassé les 2.5 buts.",
+      "conseil_public": "Over 2.5 à 2.00 offre un edge de +5%. Wrexham est une machine à buts à domicile avec 3.17 buts totaux par match. Swansea encaisse 1.60 en déplacement et marque aussi en 2ème MT (30 buts). Miser 2-3% de la bankroll, match ouvert attendu dès la 2ème MT.",
+      "contexte": "Wrexham 6e pousse pour les playoffs, Swansea 11e en quête de points pour se rapprocher du top 6. Les deux équipes ont besoin de la victoire, aucun intérêt à verrouiller. Wrexham invaincu 4 des 5 derniers, Swansea 3V sur 5 derniers.",
+      "enjeux": "Course aux playoffs: victoire cruciale pour les deux équipes, match ouvert garanti.",
       "vbet": "OUI",
-      "value_calc": "+13%",
+      "value_calc": "+5%",
       "scores": [
-        "1-0",
-        "2-0",
-        "1-1"
+        "2-1",
+        "1-1",
+        "2-2"
       ],
       "paris_3": {
         "safe": {
-          "bet": "DC 1X",
-          "cote": "1.35",
-          "hint": "Wrexham 8V/19 DOM + forme 3V/5 récents, Swansea seulement 2V/5 EXT récents — DC 1X couvre domicile + nul",
-          "mise": "4-5% bankroll",
+          "bet": "BTTS Oui",
+          "cote": "1.75",
+          "hint": "Wrexham fail to score DOM 1/19 (5%) + Swansea concède 78% à l'ext. BTTS 6/10 derniers Wrexham.",
+          "mise": "4% bankroll",
           "bookie": "Betclic"
         },
         "valeur": {
-          "bet": "BTTS Non",
-          "cote": "1.99",
-          "hint": "Prob IA 63% vs implicite 50% = edge +13% — Swansea sans marquer 7/18 déplacements (39%)",
+          "bet": "Over 2.5",
+          "cote": "2.00",
+          "hint": "Prob IA 55% vs impl 50% = edge +5%. Moy combinée 2.89 buts/match.",
           "mise": "2-3% bankroll",
           "bookie": "Winamax"
         },
         "specu": {
           "bet": "Victoire Wrexham",
           "cote": "2.25",
-          "hint": "Wrexham xG 1.13 + 8V/19 DOM + forme WWWD récente vs Swansea 2V/5 EXT — prob IA 45% vs impl 44% avec value sur cote",
-          "mise": "0.5-1% bankroll",
+          "hint": "DOM 48% estimé vs 44% impl. 8W/19 à domicile, xG 1.13 supérieur, moins fatigué.",
+          "mise": "1% bankroll",
           "bookie": "Bet365"
         }
       },
       "paris_safe": {
-        "bet": "BTTS Non",
+        "bet": "Over 2.5",
         "cote": "2.25",
-        "proba": "45%"
+        "proba": "48%"
       },
       "paris_risque": {
         "bet": "",
         "cote": "",
         "proba": ""
       },
-      "kelly": "1.0",
+      "kelly": "6.4",
       "stade": {
         "nom": "SToK Cae Ras — Wrexham",
         "cap": "",
@@ -4347,38 +4546,33 @@
           "tx": "La rencontre de Championship entre Swansea City et Preston North End mardi soir a pris des allures de moment d’histoire avec l’apparition de Snoop Dogg, nouvel actionnaire du club gallois. ...",
           "tm": "2026-02-25"
         }
-      ],
-      "analyse_card_en": "Wrexham produit un xG moyen de 1.13 à domicile avec 4.60 tirs cadrés/match, suffisant pour scorer. Swansea génère seulement 1.02 xG en déplacement et 2.60 tirs cadrés — profil offensif insuffisant pour garantir un but. Le BTTS No est soutenu par la convergence des statistiques défensives des deux équipes.",
-      "conseil_public_en": "Miser sur BTTS No à 1.99 représente la meilleure Value Bet de ce match. Swansea est muet dans 39% de ses déplacements et n'a que 2 victoires sur ses 5 derniers matchs extérieurs. Wrexham peut scorer (forme récente 4V/5) mais la probabilité que les deux équipes trouvent le chemin des filets reste sous 50% selon les stats réelles. L'Edge de +13% justifie l'investissement à hauteur de 2-3% de la bankroll.",
-      "pari_rec_en": "BTTS No",
-      "verdict_shark_en": "BTTS No à 1.99 — Edge +13% : Swansea sans marquer 7/18 déplacements (39%), Wrexham CS 3/19 à domicile, xG combiné 2.15 mais profils défensifs convergents. Edge réel identifié.",
-      "facteur_x_en": "Swansea sans marquer dans 39% de ses déplacements (7/18) — le facteur décisif pour BTTS No"
+      ]
     }
   ],
   "combis": [
     {
       "label": "SHARK SAFE",
       "type": "safe",
-      "selections": "BTTS Non, BTTS Non",
-      "matchs": "Marseille vs Auxerre, Wrexham vs Swansea",
-      "cote_totale": "1.90",
-      "conseil": "Deux défenses solides, peu de buts attendus des deux côtés. Combo court et fiable."
+      "selections": "Marseille vs Auxerre Over 2.5, Torino vs Parma BTTS Non",
+      "matchs": "Marseille vs Auxerre, Torino vs Parma",
+      "cote_totale": "3.06",
+      "conseil": "Marseille machine offensive à domicile + Parma muselé par le Torino. Duo solide à confiance max."
     },
     {
       "label": "SHARK VALUE",
       "type": "value",
-      "selections": "BTTS Non, Over 2.5, BTTS Non",
-      "matchs": "Marseille vs Auxerre, Alaves vs Villarreal, Wrexham vs Swansea",
-      "cote_totale": "3.86",
-      "conseil": "Mix BTTS/Over pour maximiser la valeur. Edge cumulé intéressant sur ces trois rencontres."
+      "selections": "Marseille vs Auxerre Over 2.5, Al Riyadh vs Al-Ittihad Under 2.5, Alaves vs Villarreal Over 2.5",
+      "matchs": "Marseille vs Auxerre, Al Riyadh vs Al-Ittihad, Alaves vs Villarreal",
+      "cote_totale": "7.08",
+      "conseil": "Mix Over/Under parfait. Buts à Marseille et Alaves, verrouillage à Riyadh. Edge cumulé explosif."
     },
     {
       "label": "SHARK AUDACE",
       "type": "audace",
-      "selections": "BTTS Non, Over 2.5, BTTS Non, BTTS Non",
-      "matchs": "Marseille vs Auxerre, Alaves vs Villarreal, Torino vs Parma, Wrexham vs Swansea",
-      "cote_totale": "6.84",
-      "conseil": "Combo 4 sélections à haut risque/haute récompense. Toutes les analyses convergent mais la moindre surprise fait sauter le ticket."
+      "selections": "Alaves vs Villarreal Over 2.5, Gladbach vs St. Pauli Over 2.5, Al-Fayha vs Al-Ettifaq BTTS Non, Al Riyadh vs Al-Ittihad Under 2.5, Torino vs Parma BTTS Non",
+      "matchs": "Alaves vs Villarreal, Gladbach vs St. Pauli, Al-Fayha vs Al-Ettifaq, Al Riyadh vs Al-Ittihad, Torino vs Parma",
+      "cote_totale": "15.72",
+      "conseil": "5 legs haute conviction. Over européens + verrouillage saoudien + BTTS Non italien. Shark mode activé, mise réduite conseillée."
     }
   ]
 }

@@ -1036,9 +1036,75 @@ jobs:
                 c2:vary(c2,deltas[i])
               };
             });
-            return {c1,cn,c2,co15,co25,cu25,co35:med(arr35),cu35:med(arru35),dc1x,dc2x,dc12,btts_oui,btts_non,bookies};
+            return {c1,cn,c2,co15,co25,cu25,co35:med(arr35),cu35:med(arru35),dc1x,dc2x,dc12,btts_oui,btts_non,bookies,
+              odds_movement: (function(){
+                var updates = o.updates||[];
+                if(updates.length<2) return null;
+                var first=updates[0], last=updates[updates.length-1];
+                var fBk=(first.bookmakers||[])[0]; var lBk=(last.bookmakers||[])[0];
+                if(!fBk||!lBk) return null;
+                var fBet=(fBk.bets||[]).find(function(b){return b.name==='Match Winner'||b.name==='Home/Draw/Away';})||{};
+                var lBet=(lBk.bets||[]).find(function(b){return b.name==='Match Winner'||b.name==='Home/Draw/Away';})||{};
+                var fH=(fBet.values||[]).find(function(v){return v.value==='Home';});
+                var lH=(lBet.values||[]).find(function(v){return v.value==='Home';});
+                var fA=(fBet.values||[]).find(function(v){return v.value==='Away';});
+                var lA=(lBet.values||[]).find(function(v){return v.value==='Away';});
+                return {
+                  open_c1: fH?parseFloat(fH.odd).toFixed(2):null,
+                  open_c2: fA?parseFloat(fA.odd).toFixed(2):null,
+                  curr_c1: lH?parseFloat(lH.odd).toFixed(2):null,
+                  curr_c2: lA?parseFloat(lA.odd).toFixed(2):null,
+                };
+              })()
+            };
           }
-          async function getInjuries(fixtureId) {
+          async function getFixtureEvents(fixtureId) {
+            var r = await get('https://v3.football.api-sports.io/fixtures/events?fixture='+fixtureId, APS);
+            return (r&&r.response)||[];
+          }
+          async function getRefereeStats(refName) {
+            if (!refName) return null;
+            var r = await get('https://v3.football.api-sports.io/fixtures?referee='+encodeURIComponent(refName)+'&last=20', APS);
+            var games = (r&&r.response)||[];
+            if (!games.length) return null;
+            var totalCards=0, totalPens=0;
+            games.forEach(function(g){
+              var evts=(g.events||[]);
+              evts.forEach(function(e){
+                if(e.type==='Card') totalCards++;
+                if(e.detail&&e.detail.toLowerCase().includes('penalty')) totalPens++;
+              });
+            });
+            return {
+              name: refName,
+              games: games.length,
+              cards_per_game: (totalCards/games.length).toFixed(1),
+              pens_per_game: (totalPens/games.length).toFixed(1)
+            };
+          }
+          async function getTopScorers(teamId, leagueId) {
+            var r = await get('https://v3.football.api-sports.io/players?team='+teamId+'&season='+SEASON+'&league='+leagueId, APS);
+            var players = (r&&r.response)||[];
+            if (!players.length) return [];
+            var scored = players.filter(function(p){
+              return p.statistics&&p.statistics[0]&&(p.statistics[0].goals&&p.statistics[0].goals.total>0);
+            });
+            scored.sort(function(a,b){
+              return (b.statistics[0].goals.total||0)-(a.statistics[0].goals.total||0);
+            });
+            return scored.slice(0,3).map(function(p){
+              var s=p.statistics[0];
+              return {
+                id: p.player.id,
+                name: p.player.name,
+                photo: p.player.photo||('https://media.api-sports.io/football/players/'+p.player.id+'.png'),
+                goals: s.goals.total||0,
+                assists: s.goals.assists||0,
+                games: s.games.appearences||0,
+                rating: s.games.rating||null
+              };
+            });
+          }
             var r = await get(
               'https://v3.football.api-sports.io/injuries?fixture='+fixtureId,
               APS
@@ -1341,6 +1407,8 @@ jobs:
             var pix2  = (d.dc2x&&d.dc2x!=='--')?Math.round(100/parseFloat(d.dc2x)):'?';
             var piby  = (d.btts_oui&&d.btts_oui!=='--')?Math.round(100/parseFloat(d.btts_oui)):'?';
             var pibn  = (d.btts_non&&d.btts_non!=='--')?Math.round(100/parseFloat(d.btts_non)):'?';
+            var pio35 = (d.co35&&d.co35!=='--')?Math.round(100/parseFloat(d.co35)):'?';
+            var piu35 = (d.cu35&&d.cu35!=='--')?Math.round(100/parseFloat(d.cu35)):'?';
             var h2hStr = 'Historique indisponible.';
             if (d.h2h && d.h2h.length) {
               var w1=0,wN=0,w2=0;
@@ -1390,6 +1458,18 @@ jobs:
               +h2hStr+'\\n\\n'
               +'=== ABSENCES & SUSPENSIONS ===\\n'
               +injStr+'\\n\\n'
+              +(d.topScorersH&&d.topScorersH.length?'=== BUTEURS CLES '+d.home.toUpperCase()+' (saison) ===\\n'
+              +d.topScorersH.map(function(p){
+                var injH=(d.injuries||[]).find(function(x){return x.team===d.homeId&&x.name===p.name;});
+                var status=injH?'⛔ ABSENT':'titularisation probable';
+                return p.name+' — '+p.goals+' buts / '+p.games+' matchs ('+status+')';
+              }).join(' | ')+'\\n\\n':'')
+              +(d.topScorersA&&d.topScorersA.length?'=== BUTEURS CLES '+d.away.toUpperCase()+' (saison) ===\\n'
+              +d.topScorersA.map(function(p){
+                var injA=(d.injuries||[]).find(function(x){return x.team===d.awayId&&x.name===p.name;});
+                var status=injA?'⛔ ABSENT':'titularisation probable';
+                return p.name+' — '+p.goals+' buts / '+p.games+' matchs ('+status+')';
+              }).join(' | ')+'\\n\\n':'')
               +'=== FATIGUE ===\\n'
               +d.home+': '+d.fatH+' (score '+d.fatScoreH+'/100) | '+d.away+': '+d.fatA+' (score '+d.fatScoreA+'/100)\\n\\n'
               +(d.lineup_home_formation||d.lineup_away_formation?'=== COMPOSITIONS CE SOIR ===\\n'
@@ -1414,13 +1494,23 @@ jobs:
               +'Over 2.5: '+d.co25+' → '+pio25+'% impl\\n'
               +'Under 2.5: '+d.cu25+' → '+piu25+'% impl\\n'
               +'BTTS Oui: '+d.btts_oui+' → '+piby+'% impl\\n'
-              +'BTTS Non: '+d.btts_non+' → '+pibn+'% impl\\n\\n'
+              +'BTTS Non: '+d.btts_non+' → '+pibn+'% impl\\n'
+              +(d.co35&&d.co35!=='--'?'Over 3.5: '+d.co35+' → '+pio35+'% impl\\n':'')
+              +(d.cu35&&d.cu35!=='--'?'Under 3.5: '+d.cu35+' → '+piu35+'% impl\\n':'')+('\\n')
               +'=== METHODE OBLIGATOIRE ===\\n'
               +'1. Calcule prob reelle pour CHAQUE marche en croisant: stats DOM/EXT + 20 matchs + xG (si dispo) + H2H + lineups + fatigue + meteo.\\n'
               +'2. Edge = prob_IA - prob_implicite. Marche avec plus grand edge positif = ton pari.\\n'
               +'3. Si xG dispo: xG_home+xG_away>2.5 renforce Over et BTTS Oui. xG<1.0 les deux renforce Under et BTTS Non. xG entre 1.0 et 2.5 = calcule edge sur chaque marche sans biais.\\n'
               +'4. Si lineups dispo: verifie que attaquants/defenseurs cles jouent. Absent cle = ajuste prob.\\n'
               +'5. Modele API-Sports = reference secondaire. Si ecart >15% avec tes stats, justifie.\\n\\n'
+              +(d.odds_movement&&d.odds_movement.open_c1?'=== MOUVEMENT DE COTES (signal marche) ===\\n'
+              +'Ouverture: DOM '+d.odds_movement.open_c1+' / EXT '+d.odds_movement.open_c2+' → Actuel: DOM '+d.odds_movement.curr_c1+' / EXT '+d.odds_movement.curr_c2+'\\n'
+              +'NB: si cote baisse fort = argent des sharps sur ce camp = signal fort.\\n\\n':'')
+              +(d.referee?'=== ARBITRE ===\\n'
+              +d.referee.name+' | '+d.referee.games+' matchs | '+d.referee.cards_per_game+' cartons/match | '+d.referee.pens_per_game+' penaltys/match\\n\\n':'')
+              +(d.evPatH||d.evPatA?'=== PATTERNS RECENTS (10 derniers matchs) ===\\n'
+              +d.home+': buts apres 70min='+d.evPatH.goals_after70+' | buts avant 30min='+d.evPatH.goals_before30+' | cartons rouges='+d.evPatH.red_cards+' | jaunes/match='+d.evPatH.yellow_per_game+'\\n'
+              +d.away+': buts apres 70min='+d.evPatA.goals_after70+' | buts avant 30min='+d.evPatA.goals_before30+' | cartons rouges='+d.evPatA.red_cards+' | jaunes/match='+d.evPatA.yellow_per_game+'\\n\\n':'')
               +'REGLES DURES:\\n'
               +'- Meilleur edge < 5%: confiance <= 5.5, le dire dans verdict_shark.\\n'
               +'- Cote < 1.30: vbet=NON, signaler dans verdict_shark que la cote est trop basse pour une value bet.\\n'
@@ -1438,7 +1528,7 @@ jobs:
               +'- Les deux attaques xG > 1.2 + defensives fragiles → BTTS Oui: prob IA 68% vs impl 55% = edge +13%\\n'
               +'IMPORTANT: choisis le marche avec le VRAI meilleur edge, pas systematiquement le defensif.\\n\\n'
               +'=== JSON STRICT — RIEN D\'AUTRE ===\\n'
-              +'{"confiance":7.2,"verdict_shark":"[MARCHE] a [COTE] — edge +X% : [xG ou stat DOM/EXT cle]. Direct.","passe_ton_tour":false,"passe_ton_tour_raison":"","scenario":{"phase1":"0-25min: contexte tactique reel (formations, style)","phase2":"25-65min: evolution basee sur stats xG et forme","phase3":"65-90min: fin attendue justifiee par stats"},"scenario_15min":[{"t":"0-15min","prob":8,"txt":"Debut de match: contexte tactique, pression initiale"},{"t":"15-30min","prob":12,"txt":"Montee en puissance, premiere occasion franche"},{"t":"30-45min","prob":10,"txt":"Fin de 1ere mi-temps, equipe dominante?"},{"t":"45-60min","prob":15,"txt":"Debut 2eme mi-temps, changement tactique attendu"},{"t":"60-75min","prob":18,"txt":"Phase cruciale, substitutions et buts probables"},{"t":"75-90min","prob":20,"txt":"Fin de match, gestion ou pressing final"}],"score_top":{"score":"1-0","prob":28},"facteur_x":"1 seule chose decisive: xG exceptionnel OU blessure cle OU formation defensive OU stat record","pari_rec":"Nom exact: Over 2.5 / BTTS Non / BTTS Oui / Victoire PSG / DC 1X / DC X2 / Under 2.5 / Nul / etc","cote_rec":"[cote exacte du tableau]","marche":"RESULTAT|DOUBLE_CHANCE|TOTAL_BUTS|BTTS|UNDER|MI_TEMPS","risque":"FAIBLE|MODERE|ELEVE","vbet":"OUI|NON","edge":"+7.7%","argument":"1. [xG ou stat DOM/EXT chiffree]. 2. [stat complementaire]. 3. Prob IA X% vs impl Y% = edge +Z%.","analyse_card":"2-3 phrases avec xG et stats reelles","conseil":"3-4 phrases basees sur xG et stats reelles","contexte":"2-3 phrases classement et forme reelle","enjeux":"1 phrase","scores_probables":"X-X,X-X,X-X","p1":45,"pn":28,"p2":27,"po15":80,"po25":55,"btts":50,"kelly":"9.6","paris_3":{"safe":{"bet":"[securise cote>=1.40]","cote":"[exacte tableau]","hint":"[stat chiffree]","mise":"4-5% bankroll","bookie":"Betclic"},"valeur":{"bet":"[DIFFERENT safe, avec edge]","cote":"[exacte tableau]","hint":"[prob IA X% vs impl Y% = edge +Z%]","mise":"2-3% bankroll","bookie":"Winamax"},"specu":{"bet":"[DIFFERENT des deux, cote>=2.00]","cote":"[exacte tableau]","hint":"[justification xG+stat]","mise":"0.5-1% bankroll","bookie":"Bet365"}}}\\n\\n'
+              +'{"confiance":7.2,"verdict_shark":"[MARCHE] a [COTE] — edge +X% : [xG ou stat DOM/EXT cle]. Direct.","passe_ton_tour":false,"passe_ton_tour_raison":"","scenario":{"phase1":"0-25min: contexte tactique reel (formations, style)","phase2":"25-65min: evolution basee sur stats xG et forme","phase3":"65-90min: fin attendue justifiee par stats"},"scenario_15min":[{"t":"0-15min","prob":8,"txt":"Debut de match: contexte tactique, pression initiale"},{"t":"15-30min","prob":12,"txt":"Montee en puissance, premiere occasion franche"},{"t":"30-45min","prob":10,"txt":"Fin de 1ere mi-temps, equipe dominante?"},{"t":"45-60min","prob":15,"txt":"Debut 2eme mi-temps, changement tactique attendu"},{"t":"60-75min","prob":18,"txt":"Phase cruciale, substitutions et buts probables"},{"t":"75-90min","prob":20,"txt":"Fin de match, gestion ou pressing final"}],"score_top":{"score":"1-0","prob":28},"facteur_x":"1 seule chose decisive: xG exceptionnel OU blessure cle OU formation defensive OU stat record","pari_rec":"Nom exact: Over 2.5 / BTTS Non / BTTS Oui / Victoire PSG / DC 1X / DC X2 / Under 2.5 / Nul / etc","cote_rec":"[cote exacte du tableau]","marche":"RESULTAT|DOUBLE_CHANCE|TOTAL_BUTS|BTTS|UNDER|MI_TEMPS","risque":"FAIBLE|MODERE|ELEVE","vbet":"OUI|NON","edge":"+7.7%","argument":"1. [xG ou stat DOM/EXT chiffree]. 2. [stat complementaire]. 3. Prob IA X% vs impl Y% = edge +Z%.","analyse_card":"2-3 phrases avec xG et stats reelles","conseil":"3-4 phrases basees sur xG et stats reelles","contexte":"2-3 phrases classement et forme reelle","enjeux":"1 phrase","scores_probables":"X-X,X-X,X-X","p1":45,"pn":28,"p2":27,"po15":80,"po25":55,"btts":50,"kelly":"9.6","paris_3":{"safe":{"bet":"[securise cote>=1.40]","cote":"[exacte tableau]","hint":"[stat chiffree]","mise":"4-5% bankroll","bookie":"Betclic"},"valeur":{"bet":"[DIFFERENT safe, avec edge]","cote":"[exacte tableau]","hint":"[prob IA X% vs impl Y% = edge +Z%]","mise":"2-3% bankroll","bookie":"Winamax"},"specu":{"bet":"[DIFFERENT des deux, cote>=2.00]","cote":"[exacte tableau]","hint":"[justification xG+stat]","mise":"0.5-1% bankroll","bookie":"Bet365"}},"joueur_decisif":{"nom":"[prenom nom du joueur le plus dangereux selon stats buts/match et xG]","equipe":"DOM|EXT","marche":"Premier buteur|Buteur dans le match","cote_estimee":"[fourchette ex: 3.50-4.50]","raison":"[1 stat cle: X buts en Y matchs, rating Z, xG contribution]","absent":false}}\\n\\n'
               +'CONTRAINTES FINALES: p1+pn+p2=100 | confiance=5.0+(edge/3.5) max 9.5 | kelly=edge/(cote-1) [edge en %, resultat en %] | vbet=OUI si edge>4% ET cote>=1.40 | vbet=NON si cote<1.40 OU edge<=4% | specu cote>=2.00';
             var r = await postJSON('api.anthropic.com', '/v1/messages', {
               model: 'claude-opus-4-6',
@@ -1607,6 +1697,9 @@ jobs:
                 getNews(away.name),
                 getPredictions(f.id),
                 getLineups(f.id),
+                getRefereeStats(f.referee||null),
+                getTopScorers(home.id, lg.id),
+                getTopScorers(away.id, lg.id),
               ]);
               await sleep(400);
               var sH=batch1[0], sA=batch1[1];
@@ -1614,6 +1707,33 @@ jobs:
               var oddsRaw=batch2[0], injRaw=batch2[1], h2hRaw=batch2[2];
               var wx=batch2[3], nH=batch2[4], nA=batch2[5];
               var predictions=batch2[6]||null, lineups=batch2[7]||null;
+              var refStats=batch2[8]||null;
+              var topScorersH=batch2[9]||[], topScorersA=batch2[10]||[];
+              // Events des 10 derniers matchs de chaque equipe
+              var last10IdsH = (raw10H||[]).slice(0,10).map(function(fx){return fx.fixture.id;});
+              var last10IdsA = (raw10A||[]).slice(0,10).map(function(fx){return fx.fixture.id;});
+              var eventsH_raw = await Promise.all(last10IdsH.map(function(id){return getFixtureEvents(id);}));
+              await sleep(300);
+              var eventsA_raw = await Promise.all(last10IdsA.map(function(id){return getFixtureEvents(id);}));
+              await sleep(300);
+              function calcEventsPattern(eventsArr, teamId) {
+                var allEvts=[].concat.apply([],eventsArr);
+                var teamEvts=allEvts.filter(function(e){return e.team&&e.team.id===teamId;});
+                var goalsAfter70=teamEvts.filter(function(e){return e.type==='Goal'&&(e.time&&e.time.elapsed>=70);}).length;
+                var goalsBefore30=teamEvts.filter(function(e){return e.type==='Goal'&&(e.time&&e.time.elapsed<=30);}).length;
+                var redCards=teamEvts.filter(function(e){return e.type==='Card'&&e.detail==='Red Card';}).length;
+                var yellowCards=teamEvts.filter(function(e){return e.type==='Card'&&e.detail==='Yellow Card';}).length;
+                var games=eventsArr.length||1;
+                return {
+                  goals_after70: goalsAfter70,
+                  goals_before30: goalsBefore30,
+                  red_cards: redCards,
+                  yellow_per_game: (yellowCards/games).toFixed(1),
+                  games: games
+                };
+              }
+              var evPatH = calcEventsPattern(eventsH_raw, home.id);
+              var evPatA = calcEventsPattern(eventsA_raw, away.id);
               var last10H = formatLast10(raw10H, home.id);
               var last10A = formatLast10(raw10A, away.id);
               // xG: get stats from last 5 finished matches
@@ -1779,6 +1899,12 @@ jobs:
                 lineup_home_xi: lineups&&lineups.home?(lineups.home.startXI||[]).map(function(p){return p.name+' ('+p.pos+')';}).join(', '):null,
                 lineup_away_xi: lineups&&lineups.away?(lineups.away.startXI||[]).map(function(p){return p.name+' ('+p.pos+')';}).join(', '):null,
                 streakH, streakA, forme5H, forme5A,
+                // Nouveaux champs
+                co35:odds.co35, cu35:odds.cu35,
+                odds_movement: odds.odds_movement||null,
+                referee: refStats,
+                evPatH, evPatA,
+                topScorersH, topScorersA,
               });
               await sleep(500);
               (function(){
@@ -1870,6 +1996,7 @@ jobs:
                 value_calc:an?(an.edge||''):'',
                 scores:an?((an.scores_probables||'').split(',').map(function(s){return s.trim();}).filter(Boolean)):[],
                 paris_3:an?(an.paris_3||null):null,
+                joueur_decisif:an?(an.joueur_decisif||null):null,
                 paris_safe:{bet:an?(an.pari_rec||''):'',cote:odds.c1,proba:an?(an.p1||0)+'%':''},
                 paris_risque:{bet:'',cote:'',proba:''},
                 kelly:kellyVal,
@@ -1889,6 +2016,12 @@ jobs:
                 tendances:tendances,
                 classement:classementObj,
                 actu:(nH||[]).concat(nA||[]),
+                arbitre:refStats?{nom:refStats.name,cartons:refStats.cards_per_game,penaltys:refStats.pens_per_game,matchs:refStats.games}:null,
+                odds_movement:odds.odds_movement||null,
+                events_home:evPatH||null,
+                events_away:evPatA||null,
+                top_scorers_home:topScorersH||[],
+                top_scorers_away:topScorersA||[],
               };
               matchsData.push(matchObj);
               if (an&&(an.confiance||0)>=6.5) {

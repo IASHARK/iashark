@@ -350,7 +350,7 @@ function render(m){
     var min, raison;
     if(type==='safe'){min=(c-0.15).toFixed(2);raison='En dessous, la valeur ne couvre plus le risque réel.';}
     else if(type==='valeur'){min=(c-0.20).toFixed(2);raison='L\'edge identifié disparaît si la cote chute trop.';}
-    else{min=(c-0.30).toFixed(2);raison='Sur ce type de pari, une cote trop basse annule tout le potentiel.');}
+    else{min=(c-0.30).toFixed(2);raison='Sur ce type de pari, une cote trop basse annule tout le potentiel.';}
     return '<div style="margin-top:6px;font-family:\'Space Mono\',monospace;font-size:8px;color:var(--amber);letter-spacing:0.5px">⚠️ Si la cote passe sous <strong>'+min+'</strong> — ne pas jouer<br><span style="color:var(--muted);font-size:7px">'+raison+'</span></div>';
   }
   var parisProHtml='<div class="paris-list">';

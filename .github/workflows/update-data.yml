@@ -1194,14 +1194,30 @@ jobs:
               away: extract(r.response[1]||r.response[0])
             };
           }
-          async function getRecentFixtureStats(teamId, last5Ids) {
-            // Get stats from last 5 finished matches for a team
+          async function getRecentFixtureStats(teamId, fixtureIds) {
             var results = [];
-            for (var i=0; i<Math.min(last5Ids.length,5); i++) {
+            for (var i=0; i<Math.min(fixtureIds.length,10); i++) {
               try {
-                var s = await getFixtureStats(last5Ids[i]);
-                if (s) results.push(s);
-                await sleep(200);
+                var r = await get('https://v3.football.api-sports.io/fixtures/statistics?fixture='+fixtureIds[i], APS);
+                if (!r.response||!r.response.length){await sleep(150);continue;}
+                // Trouver le bon côté via team.id, pas via position home/away
+                var teamBlock = r.response.find(function(b){return b.team&&b.team.id===teamId;});
+                if (!teamBlock){await sleep(150);continue;}
+                var s={};
+                (teamBlock.statistics||[]).forEach(function(x){
+                  var k=(x.type||'').toLowerCase().replace(/ /g,'_');
+                  s[k]=x.value;
+                });
+                results.push({
+                  home: {
+                    possession: parseInt(s['ball_possession'])||0,
+                    shots_on:   parseInt(s['shots_on_goal'])||0,
+                    shots_total:parseInt(s['total_shots'])||0,
+                    xg:         parseFloat(s['expected_goals'])||null,
+                    fouls:      parseInt(s['fouls'])||0,
+                  }
+                });
+                await sleep(150);
               } catch(e) {}
             }
             return results;

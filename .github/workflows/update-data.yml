@@ -40,13 +40,11 @@ jobs:
             'pmu':       {domain:'pmu.fr',       promo:'100\u20ac offerts',      l:'#'},
             'bet365':    {domain:'bet365.com',   promo:'100\u20ac bonus',        l:'#'},
           };
-
           var LANGS = {
             'es':'Spanish','it':'Italian','pt':'Portuguese','de':'German',
             'nl':'Dutch','ro':'Romanian','sv':'Swedish','pl':'Polish','tr':'Turkish'
           };
           var TOP_LANGS = ['es','it','pt','de','nl','ro','sv','pl','tr'];
-
           var WC_TITLE = {
             'en':'2026 FIFA World Cup AI Predictions & Analysis',
             'es':'Copa del Mundo 2026 Predicciones IA',
@@ -76,7 +74,6 @@ jobs:
             'fi':'MM 2026 AI Analyysit',
             'sw':'Kombe la Dunia 2026 Utabiri wa AI'
           };
-
           var WC_TEAMS = [
             {slug:'france',       fr:'France',        en:'France',       es:'Francia',      pt:'França',       de:'Frankreich',   it:'Francia',      ar:'فرنسا',         tr:'Fransa',       nl:'Frankrijk'},
             {slug:'brazil',       fr:'Brésil',        en:'Brazil',       es:'Brasil',       pt:'Brasil',       de:'Brasilien',    it:'Brasile',      ar:'البرازيل',       tr:'Brezilya',     nl:'Brazilië'},
@@ -111,7 +108,6 @@ jobs:
             {slug:'belgium',      fr:'Belgique',      en:'Belgium',      es:'Bélgica',      pt:'Bélgica',      de:'Belgien',      it:'Belgio',       ar:'بلجيكا',         tr:'Belçika',      nl:'België'},
             {slug:'iran',         fr:'Iran',          en:'Iran',         es:'Irán',         pt:'Irã',          de:'Iran',         it:'Iran',         ar:'إيران',          tr:'İran',         nl:'Iran'},
           ];
-
           function mkdirSafe(p) {
             try { fs.mkdirSync(p, {recursive:true}); } catch(e) {}
           }
@@ -161,7 +157,6 @@ jobs:
               +'<script>setTimeout(function(){window.location="https://iashark.com"},5000);</script>\n'
               +'</body></html>';
           }
-
           var WC_TEXTS = {
             'en': {
               desc: 'Complete AI analysis of {name} for the 2026 FIFA World Cup (USA, Canada, Mexico, June–July 2026). Win probabilities, group stage predictions and match analysis by IASHARK.',
@@ -388,7 +383,6 @@ jobs:
             try { return JSON.parse(txt.replace(/```json|```/g,'').trim()); }
             catch(e) { console.log('  Translation parse error for '+lang+', using fallback'); return texts; }
           }
-
           const GUIDE_LANGS = ['en','es','pt','de','it','ar','nl','pl','sv','da','ja','ko','vi','th','id','tr','el','ro'];
           const GUIDE_LANG_NAMES = {
             en:'English',es:'Español',pt:'Português',de:'Deutsch',it:'Italiano',
@@ -404,7 +398,6 @@ jobs:
             {slug:'coupe-du-monde-2026-guide-complet', title_fr:'Coupe du Monde 2026 — Guide Complet'},
             {slug:'guide-paris-sportifs-debutant-complet', title_fr:'Guide Paris Sportifs Débutant 2026'}
           ];
-
           async function translateGuideContent(frText, targetLang) {
             const langName = GUIDE_LANG_NAMES[targetLang] || targetLang;
             const resp = await fetch('https://api.anthropic.com/v1/messages', {
@@ -419,7 +412,6 @@ jobs:
             const data = await resp.json();
             return data.content&&data.content[0]?data.content[0].text:frText;
           }
-
           async function generateTranslatedGuides() {
             console.log('\n=== TRADUCTION GUIDES EVERGREEN ===');
             const fs2 = require('fs');
@@ -433,7 +425,6 @@ jobs:
               const bodyMatch = frHTML.match(/<body[^>]*>([\s\S]*)<\/body>/);
               if (!bodyMatch) continue;
               const bodyContent = bodyMatch[1];
-
               for (const lg of GUIDE_LANGS) {
                 const outDir = lg+'/blog/guides';
                 if (!fs2.existsSync(outDir)) fs2.mkdirSync(outDir, {recursive:true});
@@ -458,7 +449,6 @@ jobs:
             }
             console.log('=== GUIDES TRADUITS ===');
           }
-
           async function generateBlogArticles(matchsData, upcomingFixtures) {
             console.log('\n=== GÉNÉRATION ARTICLES BLOG ===');
             var BLOG_LANGS = ['fr','en','es','pt','de','it','ar','tr','nl','pl','id','ko','vi','th','el','ro','sv','da','ja'];
@@ -468,12 +458,10 @@ jobs:
               id:'Indonesian',ko:'Korean',vi:'Vietnamese',th:'Thai',el:'Greek',
               ro:'Romanian',sv:'Swedish',da:'Danish',ja:'Japanese'
             };
-
             mkdirSafe('blog');
             BLOG_LANGS.forEach(function(lg) {
               if (lg !== 'fr') mkdirSafe(lg+'/blog');
             });
-
             // Articles Jour J - utilise les données déjà traduites dans data.json, pas d'appel IA
             if (matchsData.length > 0) {
               console.log('  Articles Jour J: '+matchsData.length+' matchs...');
@@ -481,7 +469,6 @@ jobs:
                 var m = matchsData[mi];
                 var slug = slugify(m.home.n+'-vs-'+m.away.n+'-'+m.date.split(' ')[0]);
                 var dateStr = m.date ? m.date.split(' ')[0] : TODAY;
-
                 // FR - données directes
                 var frData = {
                   title: m.home.n+' vs '+m.away.n+' — Prédiction IA '+dateStr,
@@ -495,7 +482,6 @@ jobs:
                   keywords: [m.home.n, m.away.n, m.league||'football', 'prédiction', 'paris sportifs']
                 };
                 fs.writeFileSync('blog/'+slug+'.html', genBlogHTML(m, frData, 'fr', slug, dateStr, 'analyse'));
-
                 // Autres langues - utilise les champs traduits déjà dans data.json
                 for (var li = 0; li < BLOG_LANGS.length; li++) {
                   var lg = BLOG_LANGS[li];
@@ -520,7 +506,6 @@ jobs:
                 console.log('  Blog OK: '+m.home.n+' vs '+m.away.n);
               }
             }
-
             // Articles Preview J+3 à J+10 - page minimale avec titre uniquement, pas d'appel IA
             if (upcomingFixtures && upcomingFixtures.length > 0) {
               console.log('  Articles Preview J-7: '+upcomingFixtures.length+' matchs...');
@@ -559,7 +544,6 @@ jobs:
             }
             console.log('  === BLOG TERMINÉ ===');
           }
-
                     var BLOG_UI = {
             fr:{analyse:'Analyse',stats:'Statistiques',pronostic:'Prédiction IA',tendances:'Tendances',faq:'FAQ',voir:'VOIR TOUTES LES ANALYSES →',prediction:'PRÉDICTION IA IASHARK',preview:'PREVIEW',tag:'ANALYSE IA',backblog:'← BLOG'},
             en:{analyse:'Analysis',stats:'Statistics',pronostic:'AI Prediction',tendances:'Trends',faq:'FAQ',voir:'SEE ALL ANALYSES →',prediction:'IASHARK AI PREDICTION',preview:'PREVIEW',tag:'AI ANALYSIS',backblog:'← BLOG'},
@@ -603,7 +587,6 @@ jobs:
               var filePrefix = type === 'preview' ? 'preview-' : '';
               return '<link rel="alternate" hreflang="'+lg+'" href="https://iashark.com/'+prefix+'blog/'+filePrefix+slug+'.html">';
             }).join('\n');
-
             return '<!DOCTYPE html>\n<html lang="'+lang+'" dir="'+dir+'">\n<head>\n'
               +'<meta charset="UTF-8">\n'
               +'<meta name="viewport" content="width=device-width,initial-scale=1">\n'
@@ -670,16 +653,6 @@ jobs:
               +'<footer>IASHARK — AI Football Analysis · Indicative predictions only · Bet responsibly · 18+</footer>\n'
               +'</body>\n</html>';
           }
-
-
-          var GUIDE_CARDS_META = [
-            {slug:'meilleurs-bookmakers-monde-2026',icon:'🏦',tag_key:'tag_bookie',titles:{fr:'Top 10 Meilleurs Bookmakers Monde 2026',en:'Top 10 Best Bookmakers World 2026',es:'Top 10 Mejores Casas de Apuestas Mundo 2026',pt:'Top 10 Melhores Casas de Apostas Mundo 2026',de:'Top 10 Beste Buchmacher Welt 2026',it:'Top 10 Migliori Bookmaker Mondo 2026',ar:'أفضل 10 شركات رهان في العالم 2026',tr:'Dünya En İyi 10 Bahis Şirketi 2026',nl:'Top 10 Beste Bookmakers Wereld 2026',pl:'Top 10 Najlepszych Bukmacherów Świata 2026',id:'10 Bandar Taruhan Terbaik Dunia 2026',ko:'세계 최고 북메이커 TOP 10 2026',vi:'Top 10 Nhà Cái Tốt Nhất Thế Giới 2026',th:'10 เจ้ามือรับแทงที่ดีที่สุดในโลก 2026',el:'Top 10 Καλύτερες Στοιχηματικές Κόσμου 2026',ro:'Top 10 Case de Pariuri Lume 2026',sv:'Top 10 Bästa Spelbolag Världen 2026',da:'Top 10 Bedste Bookmakers Verden 2026',ja:'世界ベストブックメーカーTOP10 2026'},descs:{fr:'Comparatif complet et mondial.',en:'Complete global comparison.',es:'Comparación global completa.',pt:'Comparação global completa.',de:'Vollständiger weltweiter Vergleich.',it:'Confronto completo mondiale.',ar:'مقارنة شاملة عالمية.',tr:'Kapsamlı küresel karşılaştırma.',nl:'Volledig wereldwijd vergelijk.',pl:'Pełne globalne porównanie.',id:'Perbandingan global lengkap.',ko:'완전한 글로벌 비교.',vi:'So sánh toàn cầu đầy đủ.',th:'การเปรียบเทียบทั่วโลกที่สมบูรณ์',el:'Πλήρης παγκόσμια σύγκριση.',ro:'Comparație globală completă.',sv:'Fullständig global jämförelse.',da:'Komplet global sammenligning.',ja:'完全なグローバル比較。'}},
-            {slug:'value-bet-guide-complet-2026',icon:'💎',tag_key:'tag_strategy',titles:{fr:'Value Bet — Guide Complet 2026',en:'Value Bet — Complete Guide 2026',es:'Value Bet — Guía Completa 2026',pt:'Value Bet — Guia Completo 2026',de:'Value Bet — Vollständiger Guide 2026',it:'Value Bet — Guida Completa 2026',ar:'Value Bet — الدليل الكامل 2026',tr:'Value Bet — Tam Kılavuz 2026',nl:'Value Bet — Complete Gids 2026',pl:'Value Bet — Kompletny Przewodnik 2026',id:'Value Bet — Panduan Lengkap 2026',ko:'Value Bet — 완전 가이드 2026',vi:'Value Bet — Hướng Dẫn Đầy Đủ 2026',th:'Value Bet — คู่มือครบถ้วน 2026',el:'Value Bet — Πλήρης Οδηγός 2026',ro:'Value Bet — Ghid Complet 2026',sv:'Value Bet — Komplett Guide 2026',da:'Value Bet — Komplet Guide 2026',ja:'Value Bet — 完全ガイド 2026'},descs:{fr:'La stratégie des professionnels.',en:'The professionals strategy.',es:'La estrategia de los profesionales.',pt:'A estratégia dos profissionais.',de:'Die Strategie der Profis.',it:'La strategia dei professionisti.',ar:'استراتيجية المحترفين.',tr:'Profesyonellerin stratejisi.',nl:'De strategie van professionals.',pl:'Strategia profesjonalistów.',id:'Strategi para profesional.',ko:'전문가의 전략.',vi:'Chiến lược của các chuyên gia.',th:'กลยุทธ์ของผู้เชี่ยวชาญ',el:'Η στρατηγική των επαγγελματιών.',ro:'Strategia profesioniștilor.',sv:'Proffsstrategi.',da:'Professionel strategi.',ja:'プロフェッショナルの戦略。'}},
-            {slug:'prediction-ia-football-guide-2026',icon:'🤖',tag_key:'tag_ai',titles:{fr:'Prédiction IA Football 2026',en:'AI Football Prediction 2026',es:'Predicción IA Fútbol 2026',pt:'Previsão IA Futebol 2026',de:'KI Fußballvorhersage 2026',it:'Previsione IA Calcio 2026',ar:'توقعات ذكاء اصطناعي كرة القدم 2026',tr:'YZ Futbol Tahmini 2026',nl:'AI Voetbalvoorspelling 2026',pl:'Prognoza AI Piłka Nożna 2026',id:'Prediksi AI Sepak Bola 2026',ko:'AI 축구 예측 2026',vi:'Dự Đoán AI Bóng Đá 2026',th:'การทำนาย AI ฟุตบอล 2026',el:'AI Πρόβλεψη Ποδοσφαίρου 2026',ro:'Predicție AI Fotbal 2026',sv:'AI Fotbollsprognos 2026',da:'AI Fodboldprognose 2026',ja:'AI サッカー予測 2026'},descs:{fr:'Comment l\u0027IA bat les experts humains.',en:'How AI beats human experts.',es:'Cómo la IA supera a los expertos humanos.',pt:'Como a IA supera especialistas humanos.',de:'Wie KI menschliche Experten schlägt.',it:'Come l\u0027IA batte gli esperti umani.',ar:'كيف يتفوق الذكاء الاصطناعي على الخبراء.',tr:'YZ insan uzmanları nasıl geçer.',nl:'Hoe AI menselijke experts verslaat.',pl:'Jak AI pokonuje ekspertów.',id:'Bagaimana AI mengalahkan pakar manusia.',ko:'AI가 인간 전문가를 이기는 방법.',vi:'AI đánh bại các chuyên gia như thế nào.',th:'AI เอาชนะผู้เชี่ยวชาญมนุษย์ได้อย่างไร',el:'Πώς η AI νικά τους ανθρώπους.',ro:'Cum AI întrece experții umani.',sv:'Hur AI slår mänskliga experter.',da:'Hvordan AI slår menneskelige eksperter.',ja:'AIが人間の専門家に勝つ方法。'}},
-            {slug:'coupe-du-monde-2026-guide-complet',icon:'🌍',tag_key:'tag_wc',titles:{fr:'Coupe du Monde 2026 — Guide Complet',en:'2026 World Cup — Complete Guide',es:'Copa del Mundo 2026 — Guía Completa',pt:'Copa do Mundo 2026 — Guia Completo',de:'WM 2026 — Vollständiger Guide',it:'Coppa del Mondo 2026 — Guida Completa',ar:'كأس العالم 2026 — الدليل الكامل',tr:'2026 Dünya Kupası — Tam Kılavuz',nl:'WK 2026 — Complete Gids',pl:'MŚ 2026 — Kompletny Przewodnik',id:'Piala Dunia 2026 — Panduan Lengkap',ko:'2026 월드컵 — 완전 가이드',vi:'World Cup 2026 — Hướng Dẫn Đầy Đủ',th:'ฟุตบอลโลก 2026 — คู่มือครบถ้วน',el:'Παγκόσμιο Κύπελλο 2026 — Πλήρης Οδηγός',ro:'Cupa Mondială 2026 — Ghid Complet',sv:'VM 2026 — Komplett Guide',da:'VM 2026 — Komplet Guide',ja:'2026 ワールドカップ — 完全ガイド'},descs:{fr:'48 équipes, 3 pays hôtes, favoris IA.',en:'48 teams, 3 host countries, AI favorites.',es:'48 equipos, 3 países anfitriones, favoritos IA.',pt:'48 equipes, 3 países anfitriões, favoritos IA.',de:'48 Teams, 3 Gastgeberländer, KI-Favoriten.',it:'48 squadre, 3 paesi ospitanti, favoriti IA.',ar:'48 فريقاً، 3 دول مضيفة، المفضلون AI.',tr:'48 takım, 3 ev sahibi ülke, YZ favorileri.',nl:'48 teams, 3 gastlanden, AI-favorieten.',pl:'48 drużyn, 3 kraje goszczące, faworyci AI.',id:'48 tim, 3 negara tuan rumah, favorit AI.',ko:'48개 팀, 3개국 개최, AI 우승 후보.',vi:'48 đội, 3 quốc gia chủ nhà, yêu thích AI.',th:'48 ทีม, 3 ประเทศเจ้าภาพ, ตัวเต็ง AI',el:'48 ομάδες, 3 χώρες, αγαπημένες AI.',ro:'48 echipe, 3 țări gazdă, favoriți AI.',sv:'48 lag, 3 värdländer, AI-favoriter.',da:'48 hold, 3 værtslande, AI-favoritter.',ja:'48チーム、3開催国、AI優勝候補。'}},
-            {slug:'guide-paris-sportifs-debutant-complet',icon:'📚',tag_key:'tag_beginner',titles:{fr:'Guide Paris Sportifs Débutant 2026',en:'Sports Betting Beginner Guide 2026',es:'Guía Apuestas Deportivas Principiante 2026',pt:'Guia Apostas Desportivas Iniciante 2026',de:'Sportwetten Anfänger Guide 2026',it:'Guida Scommesse Sportive Principiante 2026',ar:'دليل المبتدئين في الرهانات الرياضية 2026',tr:'Spor Bahisleri Yeni Başlayan Kılavuzu 2026',nl:'Sportweddenschappen Beginner Gids 2026',pl:'Przewodnik Zakładów Sportowych Początkujący 2026',id:'Panduan Taruhan Olahraga Pemula 2026',ko:'스포츠 베팅 초보자 가이드 2026',vi:'Hướng Dẫn Cá Cược Thể Thao Cho Người Mới 2026',th:'คู่มือการแทงกีฬาสำหรับผู้เริ่มต้น 2026',el:'Οδηγός Αθλητικών Στοιχημάτων Αρχαρίων 2026',ro:'Ghid Pariuri Sportive Începători 2026',sv:'Sportvadslagning Nybörjarguide 2026',da:'Sportsbetting Begynderguide 2026',ja:'スポーツベッティング初心者ガイド 2026'},descs:{fr:'Vocabulaire, stratégies, bankroll management.',en:'Vocabulary, strategies, bankroll management.',es:'Vocabulario, estrategias, gestión de bankroll.',pt:'Vocabulário, estratégias, gestão de banca.',de:'Vokabular, Strategien, Bankroll-Management.',it:'Vocabolario, strategie, gestione bankroll.',ar:'المصطلحات، الاستراتيجيات، إدارة البنك.',tr:'Kelime hazinesi, stratejiler, bankroll yönetimi.',nl:'Woordenschat, strategieën, bankroll beheer.',pl:'Słownictwo, strategie, zarządzanie bankrollem.',id:'Kosakata, strategi, manajemen bankroll.',ko:'어휘, 전략, 뱅크롤 관리.',vi:'Từ vựng, chiến lược, quản lý vốn.',th:'คำศัพท์, กลยุทธ์, การจัดการแบงค์โรล',el:'Λεξιλόγιο, στρατηγικές, διαχείριση κεφαλαίου.',ro:'Vocabular, strategii, managementul bankroll.',sv:'Ordförråd, strategier, bankrollhantering.',da:'Ordforråd, strategier, bankroll-styring.',ja:'語彙、戦略、バンクロール管理。'}}
-            ];
-
           async function generateBlogGuideIndexPages() {
             console.log('\n=== GÉNÉRATION INDEX BLOG GUIDES TRADUITS ===');
             var GUIDE_UI = {
@@ -703,14 +676,18 @@ jobs:
               da:{title:'IASHARK Blog — Ekspertguider',desc:'Komplette AI sportsbetting-guider, value bets, bookmakers. Ekspertindhold 2026.',guides_lbl:'PERMANENTE GUIDER',read:'LÆS →',coming:'SNART',home:'← FORSIDE',analyses:'DAGENS ANALYSER',stats:['10+','EKSPERTGUIDER'],free:'100% GRATIS',cta_title:'Live AI-Analyser',cta_desc:'Fodboldprognoser opdateret hver morgen. 19 sprog. 100% gratis.',cta_btn:'SE DAGENS ANALYSER →',tag_bookie:'BOOKMAKERS',tag_strategy:'STRATEGI',tag_ai:'KUNSTIG INTELLIGENS',tag_wc:'VM',tag_beginner:'BEGYNDER'},
               ja:{title:'IASHARKブログ — 専門家ガイド',desc:'完全なAIスポーツベッティングガイド、バリューベット、ブックメーカー。専門家コンテンツ2026。',guides_lbl:'永久ガイド',read:'読む →',coming:'近日公開',home:'← ホーム',analyses:'本日の分析',stats:['10+','専門家ガイド'],free:'100%無料',cta_title:'ライブAI分析',cta_desc:'毎朝更新されるサッカー予測。19言語。100%無料。',cta_btn:'本日の分析を見る →',tag_bookie:'ブックメーカー',tag_strategy:'戦略',tag_ai:'人工知能',tag_wc:'ワールドカップ',tag_beginner:'初心者'}
             };
-
-
+            var GUIDE_CARDS_META = [
+              {slug:'meilleurs-bookmakers-monde-2026',icon:'🏦',tag_key:'tag_bookie',titles:{fr:'Top 10 Meilleurs Bookmakers Monde 2026',en:'Top 10 Best Bookmakers World 2026',es:'Top 10 Mejores Casas de Apuestas Mundo 2026',pt:'Top 10 Melhores Casas de Apostas Mundo 2026',de:'Top 10 Beste Buchmacher Welt 2026',it:'Top 10 Migliori Bookmaker Mondo 2026',ar:'أفضل 10 شركات رهان في العالم 2026',tr:'Dünya En İyi 10 Bahis Şirketi 2026',nl:'Top 10 Beste Bookmakers Wereld 2026',pl:'Top 10 Najlepszych Bukmacherów Świata 2026',id:'10 Bandar Taruhan Terbaik Dunia 2026',ko:'세계 최고 북메이커 TOP 10 2026',vi:'Top 10 Nhà Cái Tốt Nhất Thế Giới 2026',th:'10 เจ้ามือรับแทงที่ดีที่สุดในโลก 2026',el:'Top 10 Καλύτερες Στοιχηματικές Κόσμου 2026',ro:'Top 10 Case de Pariuri Lume 2026',sv:'Top 10 Bästa Spelbolag Världen 2026',da:'Top 10 Bedste Bookmakers Verden 2026',ja:'世界ベストブックメーカーTOP10 2026'},descs:{fr:'Comparatif complet et mondial.',en:'Complete global comparison.',es:'Comparación global completa.',pt:'Comparação global completa.',de:'Vollständiger weltweiter Vergleich.',it:'Confronto completo mondiale.',ar:'مقارنة شاملة عالمية.',tr:'Kapsamlı küresel karşılaştırma.',nl:'Volledig wereldwijd vergelijk.',pl:'Pełne globalne porównanie.',id:'Perbandingan global lengkap.',ko:'완전한 글로벌 비교.',vi:'So sánh toàn cầu đầy đủ.',th:'การเปรียบเทียบทั่วโลกที่สมบูรณ์',el:'Πλήρης παγκόσμια σύγκριση.',ro:'Comparație globală completă.',sv:'Fullständig global jämförelse.',da:'Komplet global sammenligning.',ja:'完全なグローバル比較。'}},
+              {slug:'value-bet-guide-complet-2026',icon:'💎',tag_key:'tag_strategy',titles:{fr:'Value Bet — Guide Complet 2026',en:'Value Bet — Complete Guide 2026',es:'Value Bet — Guía Completa 2026',pt:'Value Bet — Guia Completo 2026',de:'Value Bet — Vollständiger Guide 2026',it:'Value Bet — Guida Completa 2026',ar:'Value Bet — الدليل الكامل 2026',tr:'Value Bet — Tam Kılavuz 2026',nl:'Value Bet — Complete Gids 2026',pl:'Value Bet — Kompletny Przewodnik 2026',id:'Value Bet — Panduan Lengkap 2026',ko:'Value Bet — 완전 가이드 2026',vi:'Value Bet — Hướng Dẫn Đầy Đủ 2026',th:'Value Bet — คู่มือครบถ้วน 2026',el:'Value Bet — Πλήρης Οδηγός 2026',ro:'Value Bet — Ghid Complet 2026',sv:'Value Bet — Komplett Guide 2026',da:'Value Bet — Komplet Guide 2026',ja:'Value Bet — 完全ガイド 2026'},descs:{fr:'La stratégie des professionnels.',en:'The professionals strategy.',es:'La estrategia de los profesionales.',pt:'A estratégia dos profissionais.',de:'Die Strategie der Profis.',it:'La strategia dei professionisti.',ar:'استراتيجية المحترفين.',tr:'Profesyonellerin stratejisi.',nl:'De strategie van professionals.',pl:'Strategia profesjonalistów.',id:'Strategi para profesional.',ko:'전문가의 전략.',vi:'Chiến lược của các chuyên gia.',th:'กลยุทธ์ของผู้เชี่ยวชาญ',el:'Η στρατηγική των επαγγελματιών.',ro:'Strategia profesioniștilor.',sv:'Proffsstrategi.',da:'Professionel strategi.',ja:'プロフェッショナルの戦略。'}},
+              {slug:'prediction-ia-football-guide-2026',icon:'🤖',tag_key:'tag_ai',titles:{fr:'Prédiction IA Football 2026',en:'AI Football Prediction 2026',es:'Predicción IA Fútbol 2026',pt:'Previsão IA Futebol 2026',de:'KI Fußballvorhersage 2026',it:'Previsione IA Calcio 2026',ar:'توقعات ذكاء اصطناعي كرة القدم 2026',tr:'YZ Futbol Tahmini 2026',nl:'AI Voetbalvoorspelling 2026',pl:'Prognoza AI Piłka Nożna 2026',id:'Prediksi AI Sepak Bola 2026',ko:'AI 축구 예측 2026',vi:'Dự Đoán AI Bóng Đá 2026',th:'การทำนาย AI ฟุตบอล 2026',el:'AI Πρόβλεψη Ποδοσφαίρου 2026',ro:'Predicție AI Fotbal 2026',sv:'AI Fotbollsprognos 2026',da:'AI Fodboldprognose 2026',ja:'AI サッカー予測 2026'},descs:{fr:'Comment l\u0027IA bat les experts humains.',en:'How AI beats human experts.',es:'Cómo la IA supera a los expertos humanos.',pt:'Como a IA supera especialistas humanos.',de:'Wie KI menschliche Experten schlägt.',it:'Come l\u0027IA batte gli esperti umani.',ar:'كيف يتفوق الذكاء الاصطناعي على الخبراء.',tr:'YZ insan uzmanları nasıl geçer.',nl:'Hoe AI menselijke experts verslaat.',pl:'Jak AI pokonuje ekspertów.',id:'Bagaimana AI mengalahkan pakar manusia.',ko:'AI가 인간 전문가를 이기는 방법.',vi:'AI đánh bại các chuyên gia như thế nào.',th:'AI เอาชนะผู้เชี่ยวชาญมนุษย์ได้อย่างไร',el:'Πώς η AI νικά τους ανθρώπους.',ro:'Cum AI întrece experții umani.',sv:'Hur AI slår mänskliga experter.',da:'Hvordan AI slår menneskelige eksperter.',ja:'AIが人間の専門家に勝つ方法。'}},
+              {slug:'coupe-du-monde-2026-guide-complet',icon:'🌍',tag_key:'tag_wc',titles:{fr:'Coupe du Monde 2026 — Guide Complet',en:'2026 World Cup — Complete Guide',es:'Copa del Mundo 2026 — Guía Completa',pt:'Copa do Mundo 2026 — Guia Completo',de:'WM 2026 — Vollständiger Guide',it:'Coppa del Mondo 2026 — Guida Completa',ar:'كأس العالم 2026 — الدليل الكامل',tr:'2026 Dünya Kupası — Tam Kılavuz',nl:'WK 2026 — Complete Gids',pl:'MŚ 2026 — Kompletny Przewodnik',id:'Piala Dunia 2026 — Panduan Lengkap',ko:'2026 월드컵 — 완전 가이드',vi:'World Cup 2026 — Hướng Dẫn Đầy Đủ',th:'ฟุตบอลโลก 2026 — คู่มือครบถ้วน',el:'Παγκόσμιο Κύπελλο 2026 — Πλήρης Οδηγός',ro:'Cupa Mondială 2026 — Ghid Complet',sv:'VM 2026 — Komplett Guide',da:'VM 2026 — Komplet Guide',ja:'2026 ワールドカップ — 完全ガイド'},descs:{fr:'48 équipes, 3 pays hôtes, favoris IA.',en:'48 teams, 3 host countries, AI favorites.',es:'48 equipos, 3 países anfitriones, favoritos IA.',pt:'48 equipes, 3 países anfitriões, favoritos IA.',de:'48 Teams, 3 Gastgeberländer, KI-Favoriten.',it:'48 squadre, 3 paesi ospitanti, favoriti IA.',ar:'48 فريقاً، 3 دول مضيفة، المفضلون AI.',tr:'48 takım, 3 ev sahibi ülke, YZ favorileri.',nl:'48 teams, 3 gastlanden, AI-favorieten.',pl:'48 drużyn, 3 kraje goszczące, faworyci AI.',id:'48 tim, 3 negara tuan rumah, favorit AI.',ko:'48개 팀, 3개국 개최, AI 우승 후보.',vi:'48 đội, 3 quốc gia chủ nhà, yêu thích AI.',th:'48 ทีม, 3 ประเทศเจ้าภาพ, ตัวเต็ง AI',el:'48 ομάδες, 3 χώρες, αγαπημένες AI.',ro:'48 echipe, 3 țări gazdă, favoriți AI.',sv:'48 lag, 3 värdländer, AI-favoriter.',da:'48 hold, 3 værtslande, AI-favoritter.',ja:'48チーム、3開催国、AI優勝候補。'}},
+              {slug:'guide-paris-sportifs-debutant-complet',icon:'📚',tag_key:'tag_beginner',titles:{fr:'Guide Paris Sportifs Débutant 2026',en:'Sports Betting Beginner Guide 2026',es:'Guía Apuestas Deportivas Principiante 2026',pt:'Guia Apostas Desportivas Iniciante 2026',de:'Sportwetten Anfänger Guide 2026',it:'Guida Scommesse Sportive Principiante 2026',ar:'دليل المبتدئين في الرهانات الرياضية 2026',tr:'Spor Bahisleri Yeni Başlayan Kılavuzu 2026',nl:'Sportweddenschappen Beginner Gids 2026',pl:'Przewodnik Zakładów Sportowych Początkujący 2026',id:'Panduan Taruhan Olahraga Pemula 2026',ko:'스포츠 베팅 초보자 가이드 2026',vi:'Hướng Dẫn Cá Cược Thể Thao Cho Người Mới 2026',th:'คู่มือการแทงกีฬาสำหรับผู้เริ่มต้น 2026',el:'Οδηγός Αθλητικών Στοιχημάτων Αρχαρίων 2026',ro:'Ghid Pariuri Sportive Începători 2026',sv:'Sportvadslagning Nybörjarguide 2026',da:'Sportsbetting Begynderguide 2026',ja:'スポーツベッティング初心者ガイド 2026'},descs:{fr:'Vocabulaire, stratégies, bankroll management.',en:'Vocabulary, strategies, bankroll management.',es:'Vocabulario, estrategias, gestión de bankroll.',pt:'Vocabulário, estratégias, gestão de banca.',de:'Vokabular, Strategien, Bankroll-Management.',it:'Vocabolario, strategie, gestione bankroll.',ar:'المصطلحات، الاستراتيجيات، إدارة البنك.',tr:'Kelime hazinesi, stratejiler, bankroll yönetimi.',nl:'Woordenschat, strategieën, bankroll beheer.',pl:'Słownictwo, strategie, zarządzanie bankrollem.',id:'Kosakata, strategi, manajemen bankroll.',ko:'어휘, 전략, 뱅크롤 관리.',vi:'Từ vựng, chiến lược, quản lý vốn.',th:'คำศัพท์, กลยุทธ์, การจัดการแบงค์โรล',el:'Λεξιλόγιο, στρατηγικές, διαχείριση κεφαλαίου.',ro:'Vocabular, strategii, managementul bankroll.',sv:'Ordförråd, strategier, bankrollhantering.',da:'Ordforråd, strategier, bankroll-styring.',ja:'語彙、戦略、バンクロール管理。'}}
+            ];
             var COMING_SOON_CARDS = [
               {icon:'⏳',titles:{fr:'Champions League 2025-2026',en:'Champions League 2025-2026',es:'Champions League 2025-2026',pt:'Champions League 2025-2026',de:'Champions League 2025-2026',it:'Champions League 2025-2026',ar:'دوري أبطال أوروبا 2025-2026',tr:'Şampiyonlar Ligi 2025-2026',nl:'Champions League 2025-2026',pl:'Liga Mistrzów 2025-2026',id:'Liga Champions 2025-2026',ko:'챔피언스리그 2025-2026',vi:'Champions League 2025-2026',th:'แชมเปียนส์ลีก 2025-2026',el:'Champions League 2025-2026',ro:'Champions League 2025-2026',sv:'Champions League 2025-2026',da:'Champions League 2025-2026',ja:'チャンピオンズリーグ 2025-2026'},descs:{fr:'Guide complet LDC — favoris, analyses, value bets et prédictions pour chaque match.',en:'Complete UCL guide — favorites, analyses, value bets and predictions for every match.',es:'Guía completa UCL — favoritos, análisis, value bets y predicciones para cada partido.',pt:'Guia completo UCL — favoritos, análises, value bets e previsões.',de:'Vollständiger UCL-Guide — Favoriten, Analysen, Value Bets.',it:'Guida completa UCL — favoriti, analisi, value bet.',ar:'دليل كامل لدوري الأبطال — المفضلون، التحليلات، value bets.',tr:'Tam UCL rehberi — favoriler, analizler, value betler.',nl:'Complete UCL-gids — favorieten, analyses, value bets.',pl:'Kompletny przewodnik UCL — faworyci, analizy, value bety.',id:'Panduan lengkap UCL — favorit, analisis, value bet.',ko:'완전한 UCL 가이드 — 우승 후보, 분석, 가치 베팅.',vi:'Hướng dẫn đầy đủ UCL — yêu thích, phân tích, value bet.',th:'คู่มือ UCL ครบถ้วน — ตัวเต็ง, การวิเคราะห์, value bet.',el:'Πλήρης οδηγός UCL — αγαπημένες, αναλύσεις, value bets.',ro:'Ghid complet UCL — favoriți, analize, value bets.',sv:'Komplett UCL-guide — favoriter, analyser, value bets.',da:'Komplet UCL-guide — favoritter, analyser, value bets.',ja:'完全なUCLガイド — 優勝候補、分析、バリューベット。'}},
               {icon:'⏳',titles:{fr:'Guide Bankroll Management',en:'Bankroll Management Guide',es:'Guía de Gestión de Bankroll',pt:'Guia de Gestão de Banca',de:'Bankroll-Management-Guide',it:'Guida al Bankroll Management',ar:'دليل إدارة البنك',tr:'Bankroll Yönetimi Kılavuzu',nl:'Bankroll Beheer Gids',pl:'Przewodnik po Zarządzaniu Bankrollem',id:'Panduan Manajemen Bankroll',ko:'뱅크롤 관리 가이드',vi:'Hướng Dẫn Quản Lý Vốn',th:'คู่มือการจัดการแบงค์โรล',el:'Οδηγός Διαχείρισης Κεφαλαίου',ro:'Ghid de Management al Bankroll-ului',sv:'Guide för Bankrollhantering',da:'Bankroll Management Guide',ja:'バンクロール管理ガイド'},descs:{fr:'Gérer son budget comme un pro. Kelly criterion, fractionnement, stop-loss et gestion des séries.',en:'Manage your budget like a pro. Kelly criterion, fractional betting, stop-loss and variance management.',es:'Gestiona tu presupuesto como un pro. Criterio Kelly, apuestas fraccionadas, stop-loss.',pt:'Gira o seu orçamento como um profissional. Critério de Kelly, apostas fracionadas, stop-loss.',de:'Budget wie ein Profi verwalten. Kelly-Kriterium, Fraktionierung, Stop-Loss.',it:'Gestisci il budget come un pro. Criterio Kelly, scommesse frazionate, stop-loss.',ar:'إدارة الميزانية كالمحترفين. معيار كيلي، التجزئة، وقف الخسارة.',tr:'Bütçeni profesyonel gibi yönet. Kelly kriteri, bölünmüş bahisler, stop-loss.',nl:'Beheer je budget als een pro. Kelly-criterium, fractionele weddenschappen, stop-loss.',pl:'Zarządzaj budżetem jak profesjonalista. Kryterium Kelly, frakcjonowanie, stop-loss.',id:'Kelola anggaran seperti profesional. Kriteria Kelly, taruhan fraksional, stop-loss.',ko:'프로처럼 예산 관리하기. 켈리 기준, 분할 베팅, 손절.',vi:'Quản lý ngân sách như chuyên gia. Tiêu chí Kelly, cược phân đoạn, cắt lỗ.',th:'จัดการงบประมาณแบบมืออาชีพ เกณฑ์เคลลี การเดิมพันแบบแบ่งส่วน stop-loss.',el:'Διαχείριση προϋπολογισμού σαν επαγγελματίας. Κριτήριο Kelly, fractionation, stop-loss.',ro:'Gestionează bugetul ca un profesionist. Criteriul Kelly, pariuri fracționate, stop-loss.',sv:'Hantera din budget som ett proffs. Kelly-kriteriet, fraktionerade satsningar, stop-loss.',da:'Administrer dit budget som en professionel. Kelly-kriteriet, fraktionerede væddemål, stop-loss.',ja:'プロのように予算を管理する。ケリー基準、分割ベット、ストップロス。'}},
               {icon:'⏳',titles:{fr:'Prédiction Premier League 2025-2026',en:'Premier League 2025-2026 Predictions',es:'Predicciones Premier League 2025-2026',pt:'Previsões Premier League 2025-2026',de:'Premier League 2025-2026 Prognosen',it:'Previsioni Premier League 2025-2026',ar:'توقعات الدوري الإنجليزي الممتاز 2025-2026',tr:'Premier Lig 2025-2026 Tahminleri',nl:'Premier League 2025-2026 Voorspellingen',pl:'Prognozy Premier League 2025-2026',id:'Prediksi Premier League 2025-2026',ko:'프리미어리그 2025-2026 예측',vi:'Dự Đoán Premier League 2025-2026',th:'การทำนาย Premier League 2025-2026',el:'Προβλέψεις Premier League 2025-2026',ro:'Predicții Premier League 2025-2026',sv:'Premier League 2025-2026 Prognoser',da:'Premier League 2025-2026 Prognoser',ja:'プレミアリーグ 2025-2026 予測'},descs:{fr:'Analyse complète du championnat anglais — favoris, statistiques avancées et value bets.',en:'Complete English Premier League analysis — favorites, advanced statistics and value bets.',es:'Análisis completo de la Premier League — favoritos, estadísticas avanzadas y value bets.',pt:'Análise completa da Premier League — favoritos, estatísticas avançadas e value bets.',de:'Vollständige Premier-League-Analyse — Favoriten, fortgeschrittene Statistiken, Value Bets.',it:'Analisi completa della Premier League — favoriti, statistiche avanzate, value bet.',ar:'تحليل كامل للدوري الإنجليزي — المفضلون، الإحصائيات المتقدمة، value bets.',tr:'Komple Premier Lig analizi — favoriler, gelişmiş istatistikler, value betler.',nl:'Volledige Premier League analyse — favorieten, geavanceerde statistieken, value bets.',pl:'Pełna analiza Premier League — faworyci, zaawansowane statystyki, value bety.',id:'Analisis lengkap Premier League — favorit, statistik lanjutan, value bet.',ko:'프리미어리그 완전 분석 — 우승 후보, 고급 통계, 가치 베팅.',vi:'Phân tích đầy đủ Premier League — yêu thích, thống kê nâng cao, value bet.',th:'การวิเคราะห์ Premier League ครบถ้วน — ตัวเต็ง, สถิติขั้นสูง, value bet.',el:'Πλήρης ανάλυση Premier League — αγαπημένες, προηγμένα στατιστικά, value bets.',ro:'Analiză completă Premier League — favoriți, statistici avansate, value bets.',sv:'Komplett Premier League-analys — favoriter, avancerad statistik, value bets.',da:'Komplet Premier League-analyse — favoritter, avanceret statistik, value bets.',ja:'プレミアリーグ完全分析 — 優勝候補、高度な統計、バリューベット。'}}
             ];
-
             for (var lg of GUIDE_LANGS) {
               var u = GUIDE_UI[lg] || GUIDE_UI['en'];
               var isRTL = GUIDE_RTL.includes(lg);
@@ -774,7 +751,6 @@ jobs:
             }
             console.log('=== BLOG GUIDE INDEX PAGES DONE ===');
           }
-
           async function generateBlogIndexPages(matchsData, upcomingFixtures) {
             console.log('\n=== GÉNÉRATION INDEX BLOG PAR LANGUE ===');
             var BLOG_INDEX_UI = {
@@ -798,7 +774,6 @@ jobs:
               da:{title:'IASHARK Blog — Daglige AI Fodboldanalyser',desc:'Daglige AI fodboldanalyser og prognoser.',today:'DAGENS ANALYSER',upcoming:'KOMMENDE FORHÅNDSVISNINGER',guides_title:'📖 PERMANENTE GUIDER',guides_btn:'ALLE GUIDER →',home:'← FORSIDE',cta_btn:'SE LIVE ANALYSER →',badge:'AI FODBOLD'},
               ja:{title:'IASHARKブログ — 毎日のAIサッカー分析',desc:'毎日のAIサッカー分析と予測。',today:'本日の分析',upcoming:'今後のプレビュー',guides_title:'📖 永久ガイド',guides_btn:'すべてのガイドを見る →',home:'← ホーム',cta_btn:'ライブ分析を見る →',badge:'AI サッカー'}
             };
-
             var allLangs = ['fr'].concat(GUIDE_LANGS);
             for (var li = 0; li < allLangs.length; li++) {
               var lg = allLangs[li];
@@ -807,7 +782,6 @@ jobs:
               var dir = isRTL ? 'rtl' : 'ltr';
               var blogDir = lg === 'fr' ? 'blog' : lg+'/blog';
               mkdirSafe(blogDir);
-
               var guideCards = '';
               GUIDE_CARDS_META.forEach(function(g) {
                 var gTitle = g.titles[lg] || g.titles['en'];
@@ -819,13 +793,11 @@ jobs:
                   +'<div class="art-desc">'+gDesc+'</div>'
                   +'</a>';
               });
-
               var canonical = lg==='fr' ? 'https://iashark.com/blog/' : 'https://iashark.com/'+lg+'/blog/';
               var hreflangs = allLangs.map(function(hl) {
                 var hlUrl = hl==='fr' ? 'https://iashark.com/blog/' : 'https://iashark.com/'+hl+'/blog/';
                 return '<link rel="alternate" hreflang="'+hl+'" href="'+hlUrl+'">';
               }).join('\n');
-
               var html = '<!DOCTYPE html>\n<html lang="'+lg+'" dir="'+dir+'">\n<head>\n'
                 +'<meta charset="UTF-8">\n<meta name="viewport" content="width=device-width,initial-scale=1">\n'
                 +'<title>'+u.title+' | IASHARK</title>\n'
@@ -848,13 +820,11 @@ jobs:
                 +'</div></div></div>\n'
                 +'<footer><p>IASHARK — AI Football Analysis · Indicative predictions only · Bet responsibly · 18+</p></footer>\n'
                 +'</body>\n</html>';
-
               require('fs').writeFileSync(blogDir+'/index.html', html);
               console.log('  ✓ '+blogDir+'/index.html');
             }
             console.log('=== BLOG INDEX PAGES DONE ===');
           }
-
           async function generateMultilingualMatchPages(matchsData) {
             if (!matchsData.length) return;
             console.log('\n  Generating multilingual match pages...');
@@ -887,7 +857,6 @@ jobs:
             var total = matchsData.length * Object.keys(LANGS).length;
             console.log('  Match pages done: '+total+' pages');
           }
-
           function getBkInfo(name) {
             var k = name.toLowerCase().replace(/[^a-z0-9]/g,'');
             var found = null;
@@ -979,12 +948,10 @@ jobs:
             {n:'Bet365',  o:'100\u20ac bonus',           l:'#LIEN_BET365'},
           ];
           function parseOdds(o) {
-            var empty = {c1:'--',cn:'--',c2:'--',co15:'--',co25:'--',co35:'--',cu15:'--',cu25:'--',cu35:'--',
-                         dc1x:'--',dc2x:'--',dc12:'--',btts_oui:'--',btts_non:'--',
-                         ht1:'--',htn:'--',ht2:'--',bookies:[]};
+            var empty = {c1:'--',cn:'--',c2:'--',co15:'--',co25:'--',cu25:'--',
+                         dc1x:'--',dc2x:'--',dc12:'--',btts_oui:'--',btts_non:'--',bookies:[]};
             if (!o || !o.bookmakers || !o.bookmakers.length) return empty;
-            var arr1=[],arrN=[],arr2=[],arr15=[],arr25=[],arr35=[],arru15=[],arru25=[],arru35=[],
-                arr1x=[],arrx2=[],arr12=[],arrby=[],arrbn=[],arrht1=[],arrhtn=[],arrht2=[];
+            var arr1=[],arrN=[],arr2=[],arr15=[],arr25=[],arru25=[],arr1x=[],arrx2=[],arr12=[],arrby=[],arrbn=[];
             o.bookmakers.forEach(function(bk) {
               (bk.bets||[]).forEach(function(bet) {
                 if (bet.name==='Match Winner'||bet.name==='Home/Draw/Away') {
@@ -999,11 +966,10 @@ jobs:
                   (bet.values||[]).forEach(function(v) {
                     if (v.value==='Over 1.5')  arr15.push(parseFloat(v.odd));
                     if (v.value==='Over 2.5')  arr25.push(parseFloat(v.odd));
-                    if (v.value==='Over 3.5')  arr35.push(parseFloat(v.odd));
-                    if (v.value==='Under 1.5') arru15.push(parseFloat(v.odd));
                     if (v.value==='Under 2.5') arru25.push(parseFloat(v.odd));
-                    if (v.value==='Under 3.5') arru35.push(parseFloat(v.odd));
                   });
+                    if (v.value==='Over 3.5')  arr35.push(parseFloat(v.odd));
+                    if (v.value==='Under 3.5') arru35.push(parseFloat(v.odd));
                 }
                 if (bet.name==='Double Chance') {
                   var d1x=(bet.values||[]).find(function(v){return v.value==='Home/Draw';});
@@ -1019,14 +985,6 @@ jobs:
                   if (by) arrby.push(parseFloat(by.odd));
                   if (bn) arrbn.push(parseFloat(bn.odd));
                 }
-                if (bet.name==='First Half Winner'||bet.name==='HT/FT'||bet.name==='Halftime') {
-                  var hh=(bet.values||[]).find(function(v){return v.value==='Home'||v.value==='1';});
-                  var hd=(bet.values||[]).find(function(v){return v.value==='Draw'||v.value==='X';});
-                  var ha=(bet.values||[]).find(function(v){return v.value==='Away'||v.value==='2';});
-                  if (hh&&parseFloat(hh.odd)>=1.05) arrht1.push(parseFloat(hh.odd));
-                  if (hd&&parseFloat(hd.odd)>=1.05) arrhtn.push(parseFloat(hd.odd));
-                  if (ha&&parseFloat(ha.odd)>=1.05) arrht2.push(parseFloat(ha.odd));
-                }
               });
             });
             function med(a) {
@@ -1036,11 +994,9 @@ jobs:
               return (s.length%2?s[m]:((s[m-1]+s[m])/2)).toFixed(2);
             }
             var c1=med(arr1), cn=med(arrN), c2=med(arr2);
-            var co15=med(arr15), co25=med(arr25), co35=med(arr35);
-            var cu15=med(arru15), cu25=med(arru25), cu35=med(arru35);
+            var co15=med(arr15), co25=med(arr25), cu25=med(arru25);
             var dc1x=med(arr1x), dc2x=med(arrx2), dc12=med(arr12);
             var btts_oui=med(arrby), btts_non=med(arrbn);
-            var ht1=med(arrht1), htn=med(arrhtn), ht2=med(arrht2);
             var deltas=[0,-0.03,-0.02,-0.05,+0.03];
             function vary(c,d){ if(!c||c==='--') return '--'; return Math.max(1.01,parseFloat(c)+d).toFixed(2); }
             var bookies=FR_FIXED.map(function(bk,i){
@@ -1052,7 +1008,7 @@ jobs:
                 c2:vary(c2,deltas[i])
               };
             });
-            return {c1,cn,c2,co15,co25,co35,cu15,cu25,cu35,dc1x,dc2x,dc12,btts_oui,btts_non,ht1,htn,ht2,bookies};
+            return {c1,cn,c2,co15,co25,cu25,dc1x,dc2x,dc12,btts_oui,btts_non,bookies};
           }
           async function getInjuries(fixtureId) {
             var r = await get(
@@ -1354,6 +1310,7 @@ jobs:
             var pio25 = (d.co25&&d.co25!=='--')?Math.round(100/parseFloat(d.co25)):'?';
             var piu25 = (d.cu25&&d.cu25!=='--')?Math.round(100/parseFloat(d.cu25)):'?';
             var pi1x  = (d.dc1x&&d.dc1x!=='--')?Math.round(100/parseFloat(d.dc1x)):'?';
+            var pi12  = (d.dc12&&d.dc12!=='--')?Math.round(100/parseFloat(d.dc12)):'?';
             var pix2  = (d.dc2x&&d.dc2x!=='--')?Math.round(100/parseFloat(d.dc2x)):'?';
             var piby  = (d.btts_oui&&d.btts_oui!=='--')?Math.round(100/parseFloat(d.btts_oui)):'?';
             var pibn  = (d.btts_non&&d.btts_non!=='--')?Math.round(100/parseFloat(d.btts_non)):'?';
@@ -1420,48 +1377,54 @@ jobs:
               +'Buts predits: '+d.home+' '+(d.pred_goals_home||'?')+' — '+d.away+' '+(d.pred_goals_away||'?')+'\\n'
               +'Forces: Attaque '+d.home+' '+(d.pred_att_home||'?')+' / '+d.away+' '+(d.pred_att_away||'?')+' | Defense '+d.home+' '+(d.pred_def_home||'?')+' / '+d.away+' '+(d.pred_def_away||'?')+'\\n'
               +'NB: si tes stats donnent un edge different, suis tes stats pas ce modele.\\n\\n':'')
-              +'=== COTES MEDIANES (TOUS LES MARCHES DISPONIBLES) ===\\n'
-              +'Victoire '+d.home+': '+(d.c1||'--')+' → '+pi1+'% impl\\n'
-              +'Nul: '+(d.cn||'--')+' → '+piN+'% impl\\n'
-              +'Victoire '+d.away+': '+(d.c2||'--')+' → '+pi2+'% impl\\n'
-              +'DC 1X ('+d.home+' ou Nul): '+(d.dc1x||'--')+' → '+pi1x+'% impl\\n'
-              +'DC X2 (Nul ou '+d.away+'): '+(d.dc2x||'--')+' → '+pix2+'% impl\\n'
-              +'DC 12 ('+d.home+' ou '+d.away+'): '+(d.dc12||'--')+'\\n'
-              +'Over 1.5: '+(d.co15||'--')+' → '+pio15+'% impl\\n'
-              +'Over 2.5: '+(d.co25||'--')+' → '+pio25+'% impl\\n'
-              +'Over 3.5: '+(d.co35||'--')+'\\n'
-              +'Under 1.5: '+(d.cu15||'--')+'\\n'
-              +'Under 2.5: '+(d.cu25||'--')+' → '+piu25+'% impl\\n'
-              +'Under 3.5: '+(d.cu35||'--')+'\\n'
-              +'BTTS Oui: '+(d.btts_oui||'--')+' → '+piby+'% impl\\n'
-              +'BTTS Non: '+(d.btts_non||'--')+' → '+pibn+'% impl\\n'
-              +((d.ht1&&d.ht1!=='--')?'MT Victoire '+d.home+': '+(d.ht1||'--')+' | MT Nul: '+(d.htn||'--')+' | MT Victoire '+d.away+': '+(d.ht2||'--')+'\\n':'')
-              +'\\n'
-              +'=== METHODE OBLIGATOIRE ===\\n'
-              +'ETAPE 1 — ANALYSE DES STATS (avant de regarder les cotes):\\n'
-              +'  a. Calcule la probabilite reelle de chaque scenario possible en croisant TOUTES les stats disponibles: forme DOM/EXT, 20 matchs, xG, H2H, absences, fatigue, meteo, compositions.\\n'
-              +'  b. Le scenario le plus probable dicte le type de pari. Ne pars pas des cotes.\\n'
-              +'  c. Si xG dispo: utilise xG_home + xG_away pour estimer le total de buts attendu.\\n'
-              +'  d. Si compositions dispo: verifie que les joueurs cles sont presents.\\n'
-              +'ETAPE 2 — CONFRONTATION AVEC LES COTES:\\n'
-              +'  a. Pour chaque marche du tableau ci-dessus: Edge = prob_IA - prob_implicite_bookmaker.\\n'
-              +'  b. Retiens uniquement les marches avec edge positif.\\n'
-              +'ETAPE 3 — SELECTION DES 3 PARIS (fourchettes strictes):\\n'
-              +'  SAFE: marche avec la prob IA la plus elevee, cote obligatoirement entre 1.40 et 1.70.\\n'
-              +'  VALEUR: marche avec le meilleur edge positif, cote obligatoirement entre 1.80 et 2.20.\\n'
-              +'  AUDACE: marche justifie par les stats, cote obligatoirement > 2.20.\\n'
-              +'  REGLE UNIQUE: les 3 libelles doivent etre differents. Ils peuvent etre coherents entre eux.\\n'
-              +'  Si aucune cote disponible dans une fourchette: choisis le marche le plus proche avec le meilleur edge.\\n\\n'
-              +'REGLES DURES:\\n'
-              +'- Ne jamais inventer une stat ou une cote.\\n'
-              +'- Utilise uniquement les cotes exactes du tableau ci-dessus.\\n'
-              +'- Meilleur edge < 5%: confiance <= 5.5, le dire dans verdict_shark.\\n'
-              +'- Cote < 1.30: confiance <= 4.0, vbet=NON.\\n'
-              +'- p1+pn+p2 doit etre calcule depuis les stats reelles, total = 100.\\n'
-              +'- Le scenario (phase1/phase2/phase3) doit etre coherent avec le pari safe choisi.\\n\\n'
+              +'=== COTES + PROBABILITES IMPLICITES (TOUS LES MARCHES) ===\\n'
+              +'Victoire '+d.home+': '+d.c1+' → '+pi1+'% impl\\n'
+              +'Nul: '+d.cn+' → '+piN+'% impl\\n'
+              +'Victoire '+d.away+': '+d.c2+' → '+pi2+'% impl\\n'
+              +'DC 1X (Victoire '+d.home+' ou Nul): '+d.dc1x+' → '+pi1x+'% impl\\\\n'
+              +'DC X2 (Nul ou Victoire '+d.away+'): '+d.dc2x+' → '+pix2+'% impl\\\\n'
+              +'DC 12 ('+d.home+' ou '+d.away+', exclut nul): '+d.dc12+' → '+pi12+'% impl\\\\n'
+              +'Over 1.5: '+d.co15+' → '+pio15+'% impl\\\\n'
+              +'Over 2.5: '+d.co25+' → '+pio25+'% impl\\\\n'
+              +'Under 2.5: '+d.cu25+' → '+piu25+'% impl\\\\n'
+              +'Over 3.5: '+(d.co35||'--')+' → '+pio35+'% impl\\\\n'
+              +'Under 3.5: '+(d.cu35||'--')+' → '+piu35+'% impl\\\\n'
+              +'BTTS Oui (les deux equipes marquent): '+d.btts_oui+' → '+piby+'% impl\\\\n'
+              +'BTTS Non (au moins un clean sheet): '+d.btts_non+' → '+pibn+'% impl\\\\n\\\\n'
+              +'=== METHODE OBLIGATOIRE ===\\\\n'
+              +'1. Calcule prob reelle pour CHAQUE marche en croisant: stats DOM/EXT + 20 matchs + xG (si dispo) + H2H + lineups + fatigue + meteo.\\\\n'
+              +'2. Edge = prob_IA - prob_implicite. Marche avec plus grand edge positif = ton pari.\\\\n'
+              +'3. Si xG dispo: total xG>3.5 → Over 3.5. xG>2.5 → Over 2.5. xG<1.5 → Under 1.5/BTTS Non. xG 1.5-2.5 → Under 2.5 ou BTTS.\\\\n'
+              +'4. Si lineups dispo: verifie que attaquants/defenseurs cles jouent. Absent cle = ajuste prob.\\\\n'
+              +'5. Modele API-Sports = reference secondaire. Si ecart >15% avec tes stats, justifie.\\\\n'
+              +'6. PASSE TON TOUR si: cotes indisponibles sur meilleur marche OU edge < 3% sur TOUS les marches OU signaux tres contradictoires.\\\\n\\\\n'
+              +'CATALOGUE MARCHES — explore TOUS avant de choisir:\\\\n'
+              +'• Resultats: Victoire DOM / Nul / Victoire EXT\\\\n'
+              +'• Double chance: DC 1X (DOM ou Nul) / DC X2 (Nul ou EXT) / DC 12 (DOM ou EXT, exclut nul)\\\\n'
+              +'• Buts totaux: Over 1.5 / Over 2.5 / Over 3.5 / Under 1.5 / Under 2.5 / Under 3.5\\\\n'
+              +'• BTTS: Les deux marquent (Oui) / Au moins un clean sheet (Non)\\\\n'
+              +'• Mi-temps: score 1ere MT / equipe qui marque en 1ere MT\\\\n'
+              +'• Handicap: si DOM tres fort → Handicap EXT +1 / si EXT tres fort → Handicap DOM +1\\\\n'
+              +'INTERDIT: ne pas choisir systematiquement Victoire DOM ou Over 2.5. Choisis le marche avec le PLUS GRAND EDGE.\\\\n\\\\n'
+              +'REGLES DURES:\\\\n'
+              +'- Meilleur edge < 5%: confiance <= 5.5, le dire dans verdict_shark.\\\\n'
+              +'- Cote < 1.30: confiance <= 4.0, vbet=NON.\\\\n'
+              +'- Ne jamais inventer une stat.\\\\n'
+              +'- 3 paris_3 = 3 marches DIFFERENTS parmi le catalogue, cotes exactes du tableau.\\\\n'
+              +'- Pari SPECU cote >= 2.00.\\\\n'
+              +'- passe_ton_tour=true si aucun marche ne depasse +3% edge reel, justifie dans passe_ton_tour_raison.\\\\n\\\\n'
+              +'EXEMPLES MARCHES VARIES:\\\\n'
+              +'- xG 1.8+1.4=3.2 → Over 2.5: prob IA 62% vs impl 52% = edge +10%\\\\n'
+              +'- xG 2.1+1.6=3.7 → Over 3.5: prob IA 48% vs impl 35% = edge +13%\\\\n'
+              +'- xG 0.6+0.7=1.3 → Under 2.5: prob IA 75% vs impl 55% = edge +20%\\\\n'
+              +'- Formation 5-3-2 EXT + DOM 0.7 buts/match DOM → Under 1.5: prob IA 55% vs impl 40% = edge +15%\\\\n'
+              +'- DOM CS 8/14 + EXT failToScore 6/12 → BTTS Non: prob IA 65% vs impl 52% = edge +13%\\\\n'
+              +'- DOM tres fort mais EXT non nul → DC 1X: prob IA 82% vs impl 72% = edge +10%\\\\n'
+              +'- 4/5 H2H termines sans nul, offensifs → Over 2.5 ou BTTS Oui selon xG\\\\n'
+              +'- DOM marque 1ere MT 70% + EXT encaisse bcp 1ere MT → Score MT DOM gagnant\\\\n\\\\n'
               +'=== JSON STRICT — RIEN D\'AUTRE ===\\n'
-              +'{"confiance":7.2,"verdict_shark":"[MARCHE SAFE] a [COTE] — edge +X% : [stat cle issue des donnees]. Direct.","scenario":{"phase1":"0-25min: contexte tactique reel coherent avec le pari safe","phase2":"25-65min: evolution basee sur stats et forme","phase3":"65-90min: fin attendue justifiee par les stats"},"facteur_x":"1 seule chose decisive issue des donnees","pari_rec":"Nom exact du pari safe","cote_rec":"[cote exacte du tableau]","marche":"RESULTAT|DOUBLE_CHANCE|TOTAL_BUTS|BTTS|UNDER|MI_TEMPS","risque":"FAIBLE|MODERE|ELEVE","vbet":"OUI|NON","edge":"+X.X%","argument":"1. [stat DOM/EXT chiffree]. 2. [stat complementaire]. 3. Prob IA X% vs impl Y% = edge +Z%.","analyse_card":"2-3 phrases avec stats reelles","conseil":"3-4 phrases basees sur stats reelles","contexte":"2-3 phrases classement et forme reelle","enjeux":"1 phrase","scores_probables":"X-X,X-X,X-X","p1":[calculer depuis stats reelles],"pn":[calculer depuis stats reelles],"p2":[calculer depuis stats reelles],"po15":80,"po25":55,"btts":50,"kelly":"2.8","paris_3":{"safe":{"bet":"[pari le plus probable, cote 1.40-1.70]","cote":"[exacte tableau]","hint":"[stat chiffree qui justifie]","mise":"4-5% bankroll","bookie":"Betclic"},"valeur":{"bet":"[meilleur edge, cote 1.80-2.20, libelle different du safe]","cote":"[exacte tableau]","hint":"[prob IA X% vs impl Y% = edge +Z%]","mise":"2-3% bankroll","bookie":"Winamax"},"specu":{"bet":"[cote>2.20, libelle different des deux autres]","cote":"[exacte tableau]","hint":"[justification par les stats]","mise":"0.5-1% bankroll","bookie":"Bet365"}}}\\n\\n'
-              +'CONTRAINTES FINALES: p1+pn+p2=100 (calcules depuis stats reelles) | confiance=5.0+(edge/3.5) max 9.5 | kelly=(edge/(cote-1))*100 | vbet=OUI si edge>4% ET cote>=1.50';
+              +'{"confiance":7.2,"verdict_shark":"[MARCHE] a [COTE] — edge +X% : [xG ou stat DOM/EXT cle]. Direct.","scenario_15min":[{"t":"0-15min","prob":8,"txt":"[comment ca demarre: pressing, possession, qui prend l initiative — base sur style et forme]"},{"t":"15-30min","prob":12,"txt":"[evolution du match: premier danger, zone de pression — base sur xG et stats]"},{"t":"30-45min","prob":10,"txt":"[fin 1ere MT: scenario probable score MT, momentum — base sur stats 1ere MT]"},{"t":"45-60min","prob":15,"txt":"[debut 2eme MT: changements attendus, equipe qui pousse — base sur forme et enjeux]"},{"t":"60-75min","prob":18,"txt":"[moment clé: quand le match peut basculer — base sur fatigue et xG]"},{"t":"75-90min","prob":20,"txt":"[fin de match: scenario final probable — base sur toutes les stats]"}],"passe_ton_tour":false,"passe_ton_tour_raison":"","facteur_x":"1 seule chose decisive: xG exceptionnel OU blessure cle OU formation defensive OU stat record","pari_rec":"Nom exact: Over 2.5 / BTTS Non / Victoire PSG / DC 1X / DC X2 / Under 1.5 / Under 2.5 / Over 3.5 / Under 3.5 / Nul / etc","cote_rec":"[cote exacte du tableau]","marche":"RESULTAT|DOUBLE_CHANCE|TOTAL_BUTS|BTTS|UNDER|OVER_35|UNDER_35|MI_TEMPS|HANDICAP","risque":"FAIBLE|MODERE|ELEVE","vbet":"OUI|NON","edge":"+X.X%","argument":"1. [xG ou stat DOM/EXT chiffree]. 2. [stat complementaire]. 3. Prob IA X% vs impl Y% = edge +Z%.","analyse_card":"2-3 phrases avec xG et stats reelles","conseil":"3-4 phrases basees sur xG et stats reelles","contexte":"2-3 phrases classement et forme reelle","enjeux":"1 phrase","scores_probables":"X-X,X-X,X-X","p1":45,"pn":28,"p2":27,"po15":80,"po25":55,"btts":50,"kelly":"2.8","paris_3":{"safe":{"bet":"[securise cote>=1.40]","cote":"[exacte tableau]","hint":"[stat chiffree]","mise":"4-5% bankroll","bookie":"Betclic"},"valeur":{"bet":"[DIFFERENT safe, avec edge]","cote":"[exacte tableau]","hint":"[prob IA X% vs impl Y% = edge +Z%]","mise":"2-3% bankroll","bookie":"Winamax"},"specu":{"bet":"[DIFFERENT des deux, cote>=2.00]","cote":"[exacte tableau]","hint":"[justification xG+stat]","mise":"0.5-1% bankroll","bookie":"Bet365"}}}\\n\\n'
+              +'CONTRAINTES FINALES: p1+pn+p2=100 | confiance=5.0+(edge/3.5) max 9.5 | kelly=(edge/(cote-1))*100 | vbet=OUI si edge>4% ET cote>=1.50 | specu cote>=2.00 | passe_ton_tour=true/false obligatoire (jamais null) | si passe_ton_tour=true alors confiance<=4.5 et vbet=NON';
             var r = await postJSON('api.anthropic.com', '/v1/messages', {
               model: 'claude-sonnet-4-6',
               max_tokens: 2000,
@@ -1765,11 +1728,9 @@ jobs:
                 bmHdom, beHdom, bmAext, beAext, mdHdom, meAext,
                 h2hAvgButs, h2hNuls,
                 c1:odds.c1, cn:odds.cn, c2:odds.c2,
-                co15:odds.co15, co25:odds.co25, cu25:odds.cu25,
-                co35:odds.co35, cu15:odds.cu15, cu35:odds.cu35,
-                dc1x:odds.dc1x, dc2x:odds.dc2x, dc12:odds.dc12,
+                co15:odds.co15, co25:odds.co25, cu25:odds.cu25, co35:odds.co35, cu35:odds.cu35,
+                dc1x:odds.dc1x, dc2x:odds.dc2x,
                 btts_oui:odds.btts_oui, btts_non:odds.btts_non,
-                ht1:odds.ht1, htn:odds.htn, ht2:odds.ht2,
                 injuries, h2h:h2hRaw,
                 fatH:fatigueH.info, fatScoreH:fatigueH.val,
                 fatA:fatigueA.info, fatScoreA:fatigueA.val,
@@ -1811,16 +1772,10 @@ jobs:
                 else if(p.includes('btts')||p.includes('les deux equipes marquent')) coteRec=odds.btts_oui;
                 else if(p.includes('x2')) coteRec=odds.dc2x;
                 else if(p.includes('1x')) coteRec=odds.dc1x;
-                else if(p.includes('12')||p.includes('home/away')) coteRec=odds.dc12;
                 else if(p.includes('double chance')) coteRec=odds.dc2x;
-                else if(p.includes('over 3.5')||p.includes('plus de 3.5')) coteRec=odds.co35;
                 else if(p.includes('over 2.5')||p.includes('plus de 2.5')) coteRec=odds.co25;
                 else if(p.includes('over 1.5')||p.includes('plus de 1.5')) coteRec=odds.co15;
-                else if(p.includes('under 1.5')||p.includes('moins de 1.5')) coteRec=odds.cu15;
-                else if(p.includes('under 3.5')||p.includes('moins de 3.5')) coteRec=odds.cu35;
                 else if(p.includes('under')||p.includes('moins de 2.5')) coteRec=odds.cu25;
-                else if(p.includes('mt nul')||p.includes('mi-temps nul')) coteRec=odds.htn;
-                else if(p.includes('mt victoire')||p.includes('mi-temps victoire')) coteRec=p.includes(away.name.toLowerCase().slice(0,4))?odds.ht2:odds.ht1;
                 else if(p.includes('nul')||p.includes('match nul')) coteRec=odds.cn;
                 else if(p.includes('victoire')&&(p.includes(away.name.toLowerCase().slice(0,4))||p.includes('ext'))) coteRec=odds.c2;
                 else coteRec=odds.c1;
@@ -1874,12 +1829,10 @@ jobs:
                 po15:an?(an.po15||0):0, po25:an?(an.po25||0):0, btts:an?(an.btts||0):0,
                 c1:odds.c1, cn:odds.cn, c2:odds.c2,
                 co15:odds.co15, co25:odds.co25, cu25:odds.cu25,
-                co35:odds.co35, cu15:odds.cu15, cu35:odds.cu35,
                 dc1x:odds.dc1x, dc2x:odds.dc2x, dc12:odds.dc12,
                 cdc1x:odds.dc1x, cdc2x:odds.dc2x,
                 cbtts:odds.btts_oui, cbtts_non:odds.btts_non,
                 btts_oui:odds.btts_oui, btts_non:odds.btts_non,
-                ht1:odds.ht1, htn:odds.htn, ht2:odds.ht2,
                 bookies:odds.bookies,
                 edge:an?(an.edge||''):'',
                 edge_detail:an?'Probabilit\u00e9 IA vs probabilit\u00e9 implicite bookmaker = '+(an.edge||''):'',
@@ -1889,6 +1842,10 @@ jobs:
                 mise:an?(an.mise||'2-3% bankroll'):'2-3% bankroll',
                 verdict_shark:an?(an.verdict_shark||''):'',
                 scenario:an?(an.scenario||{phase1:'',phase2:'',phase3:''}):null,
+                scenario_15min:an?(an.scenario_15min||[]):null,
+                passe_ton_tour:an?(an.passe_ton_tour===true):false,
+                passe_ton_tour_raison:an?(an.passe_ton_tour_raison||''):'',
+                score_predit:an?(an.scores_probables?{score:(an.scores_probables.split(',')[0]||'').trim(),prob:'',cote_implicite:''}:null):null,
                 facteur_x:an?(an.facteur_x||''):'',
                 argument:an?(an.argument||''):'',
                 analyse_card:an?(an.analyse_card||an.conseil||''):'',
@@ -1899,12 +1856,7 @@ jobs:
                 value_calc:an?(an.edge||''):'',
                 scores:an?((an.scores_probables||'').split(',').map(function(s){return s.trim();}).filter(Boolean)):[],
                 paris_3:an?(an.paris_3||null):null,
-                paris_safe:{
-                  bet:an&&an.paris_3&&an.paris_3.safe?an.paris_3.safe.bet:(an?(an.pari_rec||''):''),
-                  cote:an&&an.paris_3&&an.paris_3.safe?an.paris_3.safe.cote:odds.c1,
-                  hint:an&&an.paris_3&&an.paris_3.safe?an.paris_3.safe.hint:'',
-                  proba:an?(an.p1||0)+'%':''
-                },
+                paris_safe:{bet:an?(an.pari_rec||''):'',cote:odds.c1,proba:an?(an.p1||0)+'%':''},
                 paris_risque:{bet:'',cote:'',proba:''},
                 kelly:kellyVal,
                 stade:{
@@ -1956,7 +1908,6 @@ jobs:
             var combisData = combisRaw.map(function(c){
               return {label:c.label,type:c.type,selections:c.selections,matchs:c.matchs,cote_totale:c.cote_totale,conseil:c.conseil};
             });
-
             if (matchsData.length > 0) {
               console.log('\n=== TRADUCTION EN COURS ===');
               var LANGS_TR = ['en','es','it','pt','de','nl','pl','sv','da','ja','ko','vi','th','el','ro','tr','id'];
@@ -1999,7 +1950,6 @@ jobs:
             }
             fs.writeFileSync('data.json', JSON.stringify({matchs:matchsData,combis:combisData},null,2));
             console.log('\n=== DONE: '+matchsData.length+' matchs | '+combisData.length+' combis ===');
-
             // ═══════════════════════════════════════════
             // HISTORIQUE — Résultats d'hier + ROI mensuel
             // ═══════════════════════════════════════════
@@ -2008,16 +1958,13 @@ jobs:
               var histoPath = 'historique.json';
               var histo = {predictions:[], stats:{winrate:0,roi:0,total:0,streak:0}, monthly:[]};
               try { histo = JSON.parse(fs.readFileSync(histoPath,'utf8')); } catch(e) {}
-
               // Récupérer les résultats d'hier
               var yesterday = new Date(TODAY+'T12:00:00Z');
               yesterday.setDate(yesterday.getDate()-1);
               var yDate = yesterday.toISOString().split('T')[0];
-
               try {
-                var yFixtures = await get('https://v3.football.api-sports.io/fixtures?date='+yDate+'&timezone=Europe/Paris', APS);
+                var yFixtures = await apiGet('/fixtures?date='+yDate+'&timezone=Europe/Paris');
                 var yResults = (yFixtures.response||[]);
-
                 for (var yr=0; yr<yResults.length; yr++) {
                   var fix = yResults[yr];
                   var fid = fix.fixture&&fix.fixture.id;
@@ -2028,7 +1975,6 @@ jobs:
                   var status = fix.fixture&&fix.fixture.status&&fix.fixture.status.short||'';
                   if(status!=='FT'&&status!=='AET'&&status!=='PEN')continue;
                   if(gh===null||ga===null)continue;
-
                   // Chercher si on avait une prédiction pour ce match
                   var existing = histo.predictions.find(function(p){return p.fixture_id===fid;});
                   if(!existing){
@@ -2052,16 +1998,8 @@ jobs:
                         isWin = ((gh+ga)>2);
                       } else if(pred_lower.includes('under 2.5')||pred_lower.includes('-2.5')){
                         isWin = ((gh+ga)<3);
-                      } else if(pred_lower.includes('btts non')||pred_lower.includes('les deux equipes ne marquent pas')){
-                        isWin = (gh===0||ga===0);
-                      } else if(pred_lower.includes('btts')||pred_lower.includes('les deux equipes marquent')){
+                      } else if(pred_lower.includes('btts')||pred_lower.includes('les deux')){
                         isWin = (gh>0&&ga>0);
-                      } else if(pred_lower.includes('double chance 1x')||pred_lower.includes('dc 1x')){
-                        isWin = (gh>=ga);
-                      } else if(pred_lower.includes('double chance x2')||pred_lower.includes('dc x2')){
-                        isWin = (ga>=gh);
-                      } else if(pred_lower.includes('over 1.5')){
-                        isWin = ((gh+ga)>1);
                       }
                       found.result = isWin?'win':'loss';
                       found.score = gh+'-'+ga;
@@ -2072,75 +2010,35 @@ jobs:
               } catch(e) {
                 console.log('  Résultats hier erreur:', e.message);
               }
-
-              // Ajouter les prédictions du jour (pending) — paris safe depuis paris_3.safe
+              // Ajouter les prédictions du jour (pending)
               for (var mi=0; mi<matchsData.length; mi++) {
                 var m = matchsData[mi];
                 var alreadyExists = histo.predictions.find(function(p){
-                  return p.fixture_id===m.id || (p.home===m.home.n && p.away===m.away.n && p.date&&p.date.substring(0,10)===TODAY);
+                  return p.home===m.home.n && p.away===m.away.n && p.date&&p.date.substring(0,10)===TODAY;
                 });
-                if(!alreadyExists) {
-                  var safeEntry = m.paris_3 && m.paris_3.safe;
-                  var betLabel = safeEntry && safeEntry.bet ? safeEntry.bet : m.pari_rec;
-                  var betCote  = safeEntry && safeEntry.cote ? parseFloat(safeEntry.cote)||null : null;
-                  if(betLabel) {
-                    histo.predictions.unshift({
-                      match: m.home.n+' vs '+m.away.n,
-                      home: m.home.n,
-                      away: m.away.n,
-                      prediction: betLabel,
-                      cote: betCote,
-                      conf: m.conf,
-                      edge: m.edge,
-                      date: TODAY,
-                      result: 'pending',
-                      fixture_id: m.id,
-                      type: 'single',
-                      league: m.league||''
-                    });
-                  }
-                }
-              }
-
-              // Ajouter les combinés du jour
-              for (var ci=0; ci<combisData.length; ci++) {
-                var combi = combisData[ci];
-                var alreadyCombi = histo.predictions.find(function(p){
-                  return p.type==='combi' && p.label===combi.label && p.date&&p.date.substring(0,10)===TODAY;
-                });
-                if(!alreadyCombi && combi.selections) {
+                if(!alreadyExists && m.pari_rec) {
                   histo.predictions.unshift({
-                    match: combi.label+' — '+combi.matchs,
-                    home: combi.label,
-                    away: '',
-                    prediction: combi.selections,
-                    cote: parseFloat(combi.cote_totale)||null,
+                    match: m.home.n+' vs '+m.away.n,
+                    home: m.home.n,
+                    away: m.away.n,
+                    prediction: m.pari_rec,
+                    conf: m.conf,
+                    edge: m.edge,
                     date: TODAY,
                     result: 'pending',
-                    fixture_id: null,
-                    type: 'combi',
-                    label: combi.label,
-                    conseil: combi.conseil||''
+                    fixture_id: null
                   });
                 }
               }
-
               // Garder max 90 jours
               histo.predictions = histo.predictions.slice(0, 270);
-
               // Recalculer les stats globales
               var resolved = histo.predictions.filter(function(p){return p.result!=='pending';});
               var wins = resolved.filter(function(p){return p.result==='win';});
               var total = resolved.length;
               var winrate = total>0?(wins.length/total*100):0;
-              // ROI basé sur les vraies cotes (fallback 1.75)
-              var roiTotal = 0;
-              resolved.forEach(function(p){
-                var c = parseFloat(p.cote)||1.75;
-                roiTotal += p.result==='win' ? (c-1) : -1;
-              });
-              var roi = total>0?(roiTotal/total*100):0;
-
+              // ROI simplifié (cote moyenne 1.75)
+              var roi = total>0?((wins.length*0.75 - (total-wins.length))/total*100):0;
               // Série en cours
               var streak=0;
               for(var si=0;si<histo.predictions.length;si++){
@@ -2149,7 +2047,6 @@ jobs:
                   streak += histo.predictions[si].result==='win'?1:-1;
                 } else break;
               }
-
               histo.stats = {
                 winrate: Math.round(winrate*10)/10,
                 roi: Math.round(roi*10)/10,
@@ -2158,7 +2055,6 @@ jobs:
                 wins: wins.length,
                 losses: total-wins.length
               };
-
               // Calcul ROI mensuel
               var months = {};
               histo.predictions.forEach(function(p){
@@ -2176,17 +2072,13 @@ jobs:
                 var mn=['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'];
                 return {month:k,label:(mn[parseInt(parts[1])-1]||parts[1])+' '+parts[0],wins:mo.wins,losses:mo.losses,total:tot,roi:Math.round(r*10)/10};
               });
-
               fs.writeFileSync(histoPath, JSON.stringify(histo,null,2));
               console.log('  Historique: '+total+' paris resolus | Winrate: '+winrate.toFixed(0)+'% | ROI: '+roi.toFixed(1)+'%');
             }
             await updateHistorique();
-
-
             console.log('\n=== MULTILINGUAL PIPELINE START ===');
             generateWorldCupPages();
             await generateMultilingualMatchPages(matchsData);
-
             // ── RÉCUPÉRER MATCHS J+3 à J+10 pour previews ──
             var upcomingFixtures = [];
             try {
@@ -2225,7 +2117,6 @@ jobs:
             } catch(e) {
               console.log('  Fixtures a venir erreur: '+e.message);
             }
-
             await generateBlogArticles(matchsData, upcomingFixtures);
             await generateTranslatedGuides();
             await generateBlogGuideIndexPages();
@@ -2235,7 +2126,6 @@ jobs:
           }
           main().catch(function(e){ console.error('FATAL:', e.message); process.exit(0); });
           JSEOF
-
       - name: Run pipeline
         env:
           APISPORTS_KEY:   ${{ secrets.APISPORTS_KEY }}
@@ -2248,7 +2138,7 @@ jobs:
         run: |
           git config user.name "IASHARK"
           git config user.email "yaramode81@gmail.com"
-          git add data.json historique.json sitemap.xml sitemap-*.xml index.html
+          git add data.json historique.json sitemap.xml sitemap-*.xml
           git add en/ es/ pt/ de/ it/ ar/ tr/ nl/ pl/ id/ no/ sv/ ro/ el/ cs/ hu/ sr/ uk/ ru/ ja/ ko/ th/ hi/ ms/ da/ fi/ sw/ 2>/dev/null || true
           git add blog/ 2>/dev/null || true
           git diff --staged --quiet || git commit -m "Daily update + multilingual - $(date +%Y-%m-%d)"

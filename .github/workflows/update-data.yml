@@ -1718,37 +1718,38 @@ jobs:
               var predictions=batch2[6]||null, lineups=batch2[7]||null;
               var refStats=batch2[8]||null;
               var topScorersH=batch2[9]||[], topScorersA=batch2[10]||[];
-              // Events des 10 derniers matchs de chaque equipe
-              var last10IdsH = (raw10H||[]).slice(0,10).map(function(fx){return fx.fixture.id;});
-              var last10IdsA = (raw10A||[]).slice(0,10).map(function(fx){return fx.fixture.id;});
-              var eventsH_raw = await Promise.all(last10IdsH.map(function(id){return getFixtureEvents(id);}));
+              // Events des 20 derniers matchs de chaque equipe
+              var last20IdsH = (raw10H||[]).slice(0,20).map(function(fx){return fx.fixture.id;});
+              var last20IdsA = (raw10A||[]).slice(0,20).map(function(fx){return fx.fixture.id;});
+              var eventsH_raw = await Promise.all(last20IdsH.map(function(id){return getFixtureEvents(id);}));
               await sleep(300);
-              var eventsA_raw = await Promise.all(last10IdsA.map(function(id){return getFixtureEvents(id);}));
+              var eventsA_raw = await Promise.all(last20IdsA.map(function(id){return getFixtureEvents(id);}));
               await sleep(300);
               function calcEventsPattern(eventsArr, teamId) {
                 var allEvts=[].concat.apply([],eventsArr);
                 var teamEvts=allEvts.filter(function(e){return e.team&&e.team.id===teamId;});
                 var allGoals=teamEvts.filter(function(e){return e.type==='Goal'&&e.detail!=='Missed Penalty';});
-                var games=eventsArr.length||1;
-                // Tranches 15min
+                var games=Math.max(eventsArr.length,1);
                 function goalsIn(min1,min2){return allGoals.filter(function(e){var m=e.time&&e.time.elapsed||0;return m>=min1&&m<min2;}).length;}
-                // Corners (all teams)
-                var allCorners=[].concat.apply([],eventsArr).filter(function(e){return e.type==='subst'?false:e.detail==='Corner';});
-                var cornersTotal=allCorners.filter(function(e){return e.team&&e.team.id===teamId;}).length;
+                var allCorners=[].concat.apply([],eventsArr).filter(function(e){return e.detail==='Corner'&&e.team&&e.team.id===teamId;});
                 var redCards=teamEvts.filter(function(e){return e.type==='Card'&&e.detail==='Red Card';}).length;
                 var yellowCards=teamEvts.filter(function(e){return e.type==='Card'&&e.detail==='Yellow Card';}).length;
+                // Slots en moyenne par match (1 décimale)
+                function avg(n){return (n/games).toFixed(2);}
                 return {
                   goals_total: allGoals.length,
+                  goals_avg: avg(allGoals.length),
                   slots: [
-                    {t:'0-15',n:goalsIn(0,15)},
-                    {t:'15-30',n:goalsIn(15,30)},
-                    {t:'30-45',n:goalsIn(30,45)},
-                    {t:'45-60',n:goalsIn(45,60)},
-                    {t:'60-75',n:goalsIn(60,75)},
-                    {t:'75-90',n:goalsIn(75,91)}
+                    {t:'0-15', n:goalsIn(0,15), avg:avg(goalsIn(0,15))},
+                    {t:'15-30',n:goalsIn(15,30),avg:avg(goalsIn(15,30))},
+                    {t:'30-45',n:goalsIn(30,45),avg:avg(goalsIn(30,45))},
+                    {t:'45-60',n:goalsIn(45,60),avg:avg(goalsIn(45,60))},
+                    {t:'60-75',n:goalsIn(60,75),avg:avg(goalsIn(60,75))},
+                    {t:'75-90',n:goalsIn(75,91),avg:avg(goalsIn(75,91))}
                   ],
-                  corners_per_game: (cornersTotal/games).toFixed(1),
+                  corners_per_game: (allCorners.length/games).toFixed(1),
                   red_cards: redCards,
+                  red_per_game: (redCards/games).toFixed(2),
                   yellow_per_game: (yellowCards/games).toFixed(1),
                   goals_after70: allGoals.filter(function(e){return (e.time&&e.time.elapsed)>=70;}).length,
                   goals_before30: allGoals.filter(function(e){return (e.time&&e.time.elapsed)<=30;}).length,
@@ -1759,11 +1760,11 @@ jobs:
               var evPatA = calcEventsPattern(eventsA_raw, away.id);
               var last10H = formatLast10(raw10H, home.id);
               var last10A = formatLast10(raw10A, away.id);
-              // xG: get stats from last 5 finished matches
-              var last5IdsH = raw10H.slice(0,5).map(function(fx){return fx.fixture.id;});
-              var last5IdsA = raw10A.slice(0,5).map(function(fx){return fx.fixture.id;});
-              var xgStatsH_raw = await getRecentFixtureStats(home.id, last5IdsH);
-              var xgStatsA_raw = await getRecentFixtureStats(away.id, last5IdsA);
+              // xG: get stats from last 10 finished matches
+              var last10IdsH_xg = raw10H.slice(0,10).map(function(fx){return fx.fixture.id;});
+              var last10IdsA_xg = raw10A.slice(0,10).map(function(fx){return fx.fixture.id;});
+              var xgStatsH_raw = await getRecentFixtureStats(home.id, last10IdsH_xg);
+              var xgStatsA_raw = await getRecentFixtureStats(away.id, last10IdsA_xg);
               var xgH = calcXGStats(xgStatsH_raw, 'home');
               var xgA = calcXGStats(xgStatsA_raw, 'away');
               await sleep(300);

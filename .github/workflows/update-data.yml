@@ -1105,6 +1105,7 @@ jobs:
               };
             });
           }
+          async function getInjuries(fixtureId) {
             var r = await get(
               'https://v3.football.api-sports.io/injuries?fixture='+fixtureId,
               APS

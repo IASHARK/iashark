@@ -139,6 +139,11 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 .resume-soir{background:linear-gradient(135deg,rgba(34,211,238,0.05),rgba(15,23,42,0));border:1px solid rgba(34,211,238,0.12);border-radius:12px;padding:14px 16px;margin-top:4px;}
 .resume-verdict{font-size:14px;color:var(--cyan);font-weight:600;line-height:1.6;margin-bottom:8px;}
 .resume-ctx{font-size:12px;color:#64748b;line-height:1.7;border-top:1px solid rgba(255,255,255,0.05);padding-top:8px;margin-top:4px;}
+/* Verdict Shark final */
+.verdict-shark-block{background:rgba(245,158,11,0.04);border:1px solid rgba(245,158,11,0.18);border-radius:12px;padding:16px;}
+.verdict-shark-badge{display:inline-block;font-family:'Space Mono',monospace;font-size:7px;letter-spacing:2px;color:var(--amber);background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.25);padding:3px 10px;border-radius:20px;margin-bottom:10px;}
+.verdict-shark-title{font-size:14px;color:var(--cyan);font-weight:600;line-height:1.6;margin-bottom:10px;}
+.verdict-shark-body{font-size:12px;color:#64748b;line-height:1.75;}
 .conseil-lbl{font-family:'Space Mono',monospace;font-size:7px;color:var(--muted);letter-spacing:2px;margin-bottom:5px;}
 .conseil-txt{font-size:12px;color:#94a3b8;line-height:1.65;font-style:italic;}
 .conseil-txt strong{color:var(--text);font-style:normal;}
@@ -548,12 +553,16 @@ function render(m){
     +buildPatterns(hn,an,m.events_home||null,m.events_away||null,m)
     // 5. SCENARIO
     +buildScen(m)
-    // 6. RÉSUMÉ PERCUTANT
-    +resumeHtml
-    // 7. BUTEURS CLES
+    // 6. BUTEURS CLES
     +buildPlayers(hn,an,m.top_scorers_home||[],m.top_scorers_away||[])
     // 8. FIFA CARD
     +buildFifa(m.joueur_decisif||null,m.top_scorers_home||[],m.top_scorers_away||[])
+    // 9. VERDICT SHARK — tout en bas
+    +(m.verdict_shark||m.contexte||m.enjeux?'<div class="s"><div class="verdict-shark-block">'
+      +'<div class="verdict-shark-badge">🦈 VERDICT DU SHARK</div>'
+      +(m.verdict_shark?'<div class="verdict-shark-title">'+m.verdict_shark+'</div>':'')
+      +((m.contexte||m.enjeux)?'<div class="verdict-shark-body">'+(m.contexte?m.contexte+' ':'')+( m.enjeux||'')+'</div>':'')
+      +'</div></div>':'')
     +'<div class="card-footer"></div></div></div>';
 }
 

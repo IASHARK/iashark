@@ -206,13 +206,6 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
       <div id="profilePlan" class="profile-plan plan-free">● FREE</div>
     </div>
 
-    <!-- PRO CTA (si free) -->
-    <div id="proCta" class="pro-cta-card" style="display:none;">
-      <div class="pro-cta-title">⚡ PASSER PRO</div>
-      <div class="pro-cta-sub">Accède à tous les paris PRO, combinés, scénarios et mises Kelly pour 5€/mois.</div>
-      <button class="btn-pro" onclick="location.href='#paiement'">DÉBLOQUER IASHARK PRO — 5€/MOIS</button>
-    </div>
-
     <!-- MENU : MON ABONNEMENT -->
     <div class="menu-section">
       <div class="menu-label">MON ABONNEMENT</div>
@@ -313,7 +306,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
             <div class="menu-icon mi-green">📨</div>
             <div class="menu-row-text">
               <div class="menu-row-name">Nous contacter</div>
-              <div class="menu-row-sub">contact@iashark.com</div>
+              <div class="menu-row-sub"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="e1828e8f95808295a18880928980938acf828e8c">[email&#160;protected]</a></div>
             </div>
           </div>
           <div class="menu-arrow">›</div>
@@ -447,7 +440,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
   <div class="nav-item active"><div class="nav-icon">👤</div><div class="nav-lbl">COMPTE</div></div>
 </nav>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 var SUPA_URL='https://ksvjraqitxouwiabecai.supabase.co';
 var SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtzdmpyYXFpdHhvdXdpYWJlY2FpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3ODcwMjMsImV4cCI6MjA4ODM2MzAyM30.Eh3qk4tATM40hoYxdErAllLEo1y8KNt4BSCET_fAgT8';
 var sb=supabase.createClient(SUPA_URL,SUPA_KEY);
@@ -563,16 +556,16 @@ async function loadProfile(){
   if(userPlan==='pro'){
     planEl.className='profile-plan plan-pro';
     planEl.textContent='⚡ PRO';
-    hide('proCta');
+    hide(// removed;
   } else if(role==='admin'){
     planEl.className='profile-plan plan-admin';
     planEl.textContent='⚙️ ADMIN';
-    hide('proCta');
+    hide(// removed;
     loadAdmin();
   } else {
     planEl.className='profile-plan plan-free';
     planEl.textContent='● FREE';
-    show('proCta');
+    show(// removed;
   }
 }
 
@@ -655,18 +648,4 @@ document.querySelectorAll('.modal-overlay').forEach(function(overlay){
 // Si on arrive depuis un lien de reset (hash #access_token...)
 if(window.location.hash.includes('access_token')||new URLSearchParams(window.location.search).get('reset')){
   sb.auth.getSession().then(function(r){
-    if(r.data.session){
-      hide('stateLoading');
-      hide('stateGuest');
-      hide('stateForgot');
-      show('stateLogged');
-      loadProfile();
-      openModal('modalChangePassword');
-    }
-  });
-}
-
-init();
-</script>
-</body>
-</html>
+    if(r.dat

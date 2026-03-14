@@ -414,7 +414,9 @@ function buildPatterns(hn,an,evH,evA,m){
     jaugesHtml+='<div class="pat-comment">'+commentLines.join(' ')+'</div>';
   }
 
-  return '<div class="s"><div class="stitle">PATTERNS — 20 MATCHS</div>'+statsHtml+jaugesHtml+'</div><div class="sep"></div>';
+  return '<div class="s"><div class="stitle">PATTERNS — DOM / EXT</div>'
+    +'<div style="font-family:Space Mono,monospace;font-size:7px;color:var(--muted);margin-bottom:10px;">'+hn.slice(0,12).toUpperCase()+' : '+((evH&&evH.games)||0)+' matchs à domicile · '+an.slice(0,12).toUpperCase()+' : '+((evA&&evA.games)||0)+' matchs à l\'extérieur</div>'
+    +statsHtml+jaugesHtml+'</div><div class="sep"></div>';
 }
 
 function buildScen(m){

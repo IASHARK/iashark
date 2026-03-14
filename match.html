@@ -362,38 +362,38 @@ function buildPatterns(hn,an,evH,evA,m){
     var allAvgs=slotsH.concat(slotsA).map(function(s){return parseFloat(s.avg)||0;});
     var maxAvg=Math.max.apply(null,allAvgs.concat([0.01]));
 
-    function jauge(slot,col,label){
-      var avg=parseFloat(slot&&slot.avg)||0;
-      var pct=Math.round((avg/maxAvg)*100);
-      var heat=avg>=0.4?'hot':avg>=0.25?'warm':'';
+    function jauge(slot, totalGoals, col){
+      var n=slot.n||0;
+      var pct=totalGoals>0?Math.round((n/totalGoals)*100):0;
+      var heat=pct>=25?'hot':pct>=15?'warm':'';
       return '<div class="jauge-row '+(heat==='hot'?'jauge-hot':heat==='warm'?'jauge-warm':'')+'">'
         +'<div class="jauge-lbl">'+slot.t+'</div>'
         +'<div class="jauge-track"><div class="jauge-fill '+col+'" style="width:'+pct+'%"></div></div>'
-        +'<div class="jauge-val">'+avg.toFixed(2)+'<span class="jauge-unit">/m</span></div>'
+        +'<div class="jauge-val">'+n+'<span class="jauge-unit">/'+totalGoals+'</span></div>'
         +(heat==='hot'?'<div class="jauge-tag">CHAUD</div>':heat==='warm'?'<div class="jauge-tag warm">ACTIF</div>':'')
         +'</div>';
     }
 
-    var slots6=slotsH.length>=6?slotsH:[{t:'0-15',avg:'0'},{t:'15-30',avg:'0'},{t:'30-45',avg:'0'},{t:'45-60',avg:'0'},{t:'60-75',avg:'0'},{t:'75-90',avg:'0'}];
-    var slots6A=slotsA.length>=6?slotsA:slots6.map(function(s){return {t:s.t,avg:'0'};});
+    var slots6=slotsH.length>=6?slotsH:[{t:'0-15',n:0,avg:'0'},{t:'15-30',n:0,avg:'0'},{t:'30-45',n:0,avg:'0'},{t:'45-60',n:0,avg:'0'},{t:'60-75',n:0,avg:'0'},{t:'75-90',n:0,avg:'0'}];
+    var slots6A=slotsA.length>=6?slotsA:slots6.map(function(s){return {t:s.t,n:0,avg:'0'};});
+    var totalH=evH&&evH.goals_total||0;
+    var totalA=evA&&evA.goals_total||0;
 
     jaugesHtml='<div class="jauge-wrap">'
-      // DOM
       +'<div class="jauge-col">'
-      +'<div class="jauge-team-lbl" style="color:var(--cyan)">'+hn.slice(0,14).toUpperCase()+' — buts moy/match</div>'
-      +slots6.map(function(s){return jauge(s,'h',hn);}).join('')
+      +'<div class="jauge-team-lbl" style="color:var(--cyan)">'+hn.slice(0,14).toUpperCase()+' <span style="color:var(--muted);font-weight:400">— '+totalH+' buts / '+games+' matchs</span></div>'
+      +slots6.map(function(s){return jauge(s,totalH,'h');}).join('')
       +'</div>'
-      // EXT
       +'<div class="jauge-col">'
-      +'<div class="jauge-team-lbl">'+an.slice(0,14).toUpperCase()+' — buts moy/match</div>'
-      +slots6A.map(function(s){return jauge(s,'a',an);}).join('')
+      +'<div class="jauge-team-lbl">'+an.slice(0,14).toUpperCase()+' <span style="color:var(--muted);font-weight:400">— '+totalA+' buts / '+games+' matchs</span></div>'
+      +slots6A.map(function(s){return jauge(s,totalA,'a');}).join('')
       +'</div>'
       +'</div>';
 
     // ── Commentaire auto-généré ─────────────────────────
     function topSlot(slots){
-      var best=null,bestV=0;
-      (slots||[]).forEach(function(s){var v=parseFloat(s.avg)||0;if(v>bestV){bestV=v;best=s;}});
+      var best=null,bestN=0;
+      (slots||[]).forEach(function(s){if((s.n||0)>bestN){bestN=s.n;best=s;}});
       return best;
     }
     function halfLabel(t){
@@ -402,14 +402,14 @@ function buildPatterns(hn,an,evH,evA,m){
       return min<45?'1ère mi-temps':'2ème mi-temps';
     }
     var topH=topSlot(slotsH), topA=topSlot(slotsA);
-    var allSlots=slotsH.map(function(s,i){return {t:s.t,avgH:parseFloat(s.avg)||0,avgA:parseFloat((slotsA[i]||{}).avg)||0,total:(parseFloat(s.avg)||0)+(parseFloat((slotsA[i]||{}).avg)||0)};});
+    var allSlots=slotsH.map(function(s,i){return {t:s.t,nH:s.n||0,nA:(slotsA[i]||{}).n||0,total:(s.n||0)+((slotsA[i]||{}).n||0)};});
     allSlots.sort(function(a,b){return b.total-a.total;});
     var hotSlot=allSlots[0];
 
     var commentLines=[];
-    if(topH) commentLines.push('<strong>'+hn+'</strong> marque surtout entre <strong>'+topH.t+'</strong> ('+parseFloat(topH.avg).toFixed(2)+' but/match) — principalement en '+halfLabel(topH.t)+'.');
-    if(topA) commentLines.push('<strong>'+an+'</strong> est le plus dangereux sur la tranche <strong>'+topA.t+'</strong> ('+parseFloat(topA.avg).toFixed(2)+' but/match) — en '+halfLabel(topA.t)+'.');
-    if(hotSlot) commentLines.push('La tranche la plus à risque pour les buts des deux équipes réunies : <strong>'+hotSlot.t+'</strong>.');
+    if(topH&&topH.n>0) commentLines.push('<strong>'+hn+'</strong> marque surtout entre <strong>'+topH.t+'</strong> — '+topH.n+' buts sur '+totalH+' au total ('+halfLabel(topH.t)+').');
+    if(topA&&topA.n>0) commentLines.push('<strong>'+an+'</strong> est le plus dangereux sur <strong>'+topA.t+'</strong> — '+topA.n+' buts sur '+totalA+' ('+halfLabel(topA.t)+').');
+    if(hotSlot&&hotSlot.total>0) commentLines.push('Tranche la plus à risque ce soir : <strong>'+hotSlot.t+'</strong> ('+hotSlot.total+' buts cumulés des deux équipes sur 20 matchs).');
 
     jaugesHtml+='<div class="pat-comment">'+commentLines.join(' ')+'</div>';
   }

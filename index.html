@@ -367,8 +367,10 @@ async function loadData(){
     var data=await resp.json();
     allMatchs=data.matchs||[];
     var total=allMatchs.length;
-    document.getElementById('statMatchs').textContent=total;
-    document.getElementById('matchCount').innerHTML='<span>'+total+'</span> MATCHS';
+    var statEl=document.getElementById('statMatchs');
+    if(statEl) statEl.textContent=total;
+    var countEl=document.getElementById('matchCount');
+    if(countEl) countEl.innerHTML='<span>'+total+'</span> MATCHS';
     renderMatchs();
   }catch(e){
     document.getElementById('cardsList').innerHTML='<div class="empty-state"><h3>ERREUR CHARGEMENT</h3><p>Impossible de charger les analyses. Réessaie dans un instant.</p></div>';

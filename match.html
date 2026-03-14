@@ -125,6 +125,20 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 .conf-scale span{font-family:'Space Mono',monospace;font-size:6px;color:var(--muted2);letter-spacing:1px;}
 /* CONSEIL */
 .conseil{background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:10px;padding:12px 14px;}
+/* Conseil orange */
+.conseil-orange{display:flex;gap:12px;align-items:flex-start;background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.25);border-radius:11px;padding:13px 14px;}
+.conseil-orange-icon{font-size:18px;flex-shrink:0;margin-top:1px;}
+.conseil-orange-lbl{font-family:'Space Mono',monospace;font-size:7px;color:var(--amber);letter-spacing:2px;margin-bottom:5px;}
+.conseil-orange-txt{font-size:13px;color:var(--text);line-height:1.7;font-style:italic;}
+/* Jauge inline dans paris */
+.conf-inline{margin:10px 0;padding:10px 0 4px;}
+.conf-inline .conf-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+.conf-inline .conf-score{font-family:'Bebas Neue',sans-serif;font-size:36px;color:var(--cyan);line-height:1;}
+.conf-inline .conf-score sup{font-size:14px;color:var(--muted);}
+/* Résumé percutant */
+.resume-soir{background:linear-gradient(135deg,rgba(34,211,238,0.05),rgba(15,23,42,0));border:1px solid rgba(34,211,238,0.12);border-radius:12px;padding:14px 16px;margin-top:4px;}
+.resume-verdict{font-size:14px;color:var(--cyan);font-weight:600;line-height:1.6;margin-bottom:8px;}
+.resume-ctx{font-size:12px;color:#64748b;line-height:1.7;border-top:1px solid rgba(255,255,255,0.05);padding-top:8px;margin-top:4px;}
 .conseil-lbl{font-family:'Space Mono',monospace;font-size:7px;color:var(--muted);letter-spacing:2px;margin-bottom:5px;}
 .conseil-txt{font-size:12px;color:#94a3b8;line-height:1.65;font-style:italic;}
 .conseil-txt strong{color:var(--text);font-style:normal;}
@@ -411,8 +425,7 @@ function buildPatterns(hn,an,evH,evA,m){
     if(topA) commentLines.push('<strong>'+an+'</strong> est le plus dangereux sur la tranche <strong>'+topA.t+'</strong> ('+parseFloat(topA.avg).toFixed(2)+' but/match) — en '+halfLabel(topA.t)+'.');
     if(hotSlot) commentLines.push('La tranche la plus à risque pour les buts des deux équipes réunies : <strong>'+hotSlot.t+'</strong>.');
 
-    var commentHtml=commentLines.length?'<div class="pat-comment">'+commentLines.join(' ')+'</div>':'';
-    jaugesHtml=commentHtml+jaugesHtml;
+    jaugesHtml+='<div class="pat-comment">'+commentLines.join(' ')+'</div>';
   }
 
   return '<div class="s"><div class="stitle">PATTERNS — 20 MATCHS</div>'+statsHtml+jaugesHtml+'</div><div class="sep"></div>';
@@ -471,7 +484,7 @@ function render(m){
   var meteo='';
   if(m.meteo)meteo='<div class="meteo">'+(m.meteo.temp?'<span class="meteo-item">'+m.meteo.temp+'°C</span>':'')+(m.meteo.desc?'<span class="meteo-item">'+m.meteo.desc+'</span>':'')+(m.meteo.vent?'<span class="meteo-item">'+m.meteo.vent+' km/h</span>':'')+'</div>';
 
-  // PARIS RECOMMANDE — pari principal + score prédit intégré
+  // PARIS RECOMMANDE — pari + jauge intégrée + score
   var pv=p3&&p3.valeur||null;
   var sp=m.score_predit||null;
   var pmHtml='';
@@ -479,20 +492,22 @@ function render(m){
   var pariCote=pv?pv.cote:(m.cote_rec||'—');
   var pariBk=pv?pv.bookie:(bk?bk.n:'');
   var pariHint=pv?pv.hint:'';
-  var pariMise=pv?pv.mise:'2-3% bankroll';
   var cMin=pariCote&&pariCote!=='—'?((parseFloat(pariCote)-0.20).toFixed(2)):'';
   if(pariRec){
-    var scoreBlock='';
-    if(sp){
-      var spScore=(sp.score||'?-?').replace('-','—');
-      scoreBlock='<div class="pm-score-band"><div><div class="pm-score-lbl">SCORE LE PLUS PROBABLE</div><div class="pm-score">'+spScore+'</div>'+(sp.prob?'<div class="pm-score-sub">'+sp.prob+' de probabilité</div>':'')+'</div>'+(sp.cote_implicite?'<div><div class="pm-ci-lbl">COTE IMPLICITE</div><div class="pm-ci">'+sp.cote_implicite+'</div></div>':'')+'</div>';
-    }
+    var spScore=sp?((sp.score||'?-?').replace('-','—')):'';
+    var scoreBlock=sp?'<div class="pm-score-band"><div><div class="pm-score-lbl">SCORE LE PLUS PROBABLE</div><div class="pm-score">'+spScore+'</div>'+(sp.prob?'<div class="pm-score-sub">'+sp.prob+' de probabilité</div>':'')+'</div>'+(sp.cote_implicite?'<div><div class="pm-ci-lbl">COTE IMPLICITE</div><div class="pm-ci">'+sp.cote_implicite+'</div></div>':'')+'</div>':'';
+    // Jauge intégrée (sans titre)
+    var jaugeInline='<div class="conf-inline">'
+      +'<div class="conf-top"><div><div class="conf-score">'+(m.conf||0).toFixed(1)+'<sup>/10</sup></div></div><div style="text-align:right"><div class="conf-badge"'+confStyle+'>'+confLvl+'</div></div></div>'
+      +'<div class="conf-track"><div class="conf-fill" style="width:'+confPct+'%"></div></div>'
+      +'<div class="conf-scale"><span>PRUDENT</span><span>CONFIANT</span><span>ELEVE</span><span>LOCK</span></div>'
+      +'</div>';
     pmHtml='<div class="s"><div class="stitle">PARIS RECOMMANDE</div>'
       +'<div class="pari-main">'
       +'<div class="pm-top"><div class="pm-left"><div class="pm-lbl">SELECTION IA DU SOIR</div><div class="pm-bet">'+pariRec.toUpperCase()+'</div>'+(pariHint?'<div class="pm-hint">'+pariHint+'</div>':'')+'</div><div class="pm-right"><div class="pm-cote">'+pariCote+'</div><div class="pm-bk">'+pariBk+'</div></div></div>'
-      +scoreBlock
-      +'<div class="pm-foot">'+(m.edge?'<span class="pm-tag edge">EDGE '+m.edge+'</span>':'')+(m.kelly?'<span class="pm-tag kelly">KELLY '+m.kelly+'%</span>':'')+'<span class="pm-tag mise">'+pariMise+'</span></div>'
+      +jaugeInline
       +(cMin?'<div class="pm-warn">Si la cote passe sous '+cMin+' — ne pas jouer</div>':'')
+      +scoreBlock
       +'</div>'
       +'</div><div class="sep"></div>';
   }
@@ -503,36 +518,42 @@ function render(m){
   // Pro content
   var proContent='<div class="s pt"><div class="stitle">PARIS RECOMMANDES</div>'+(pv?'<div class="pro-pari"><div class="pro-pari-l"><div class="pro-pari-lbl">VALEUR</div><div class="pro-pari-bet">'+(pv.bet||'')+'</div><div class="pro-pari-hint">'+(pv.hint||'')+'</div></div><div class="pro-pari-cote">'+(pv.cote||'—')+'</div></div>':'')+'</div>';
 
+  // RÉSUMÉ PERCUTANT après scénario
+  var resumeHtml='';
+  if(m.verdict_shark||m.contexte||m.enjeux){
+    var ctx=m.contexte||''; var enj=m.enjeux||''; var vrd=m.verdict_shark||'';
+    var resumeTxt='';
+    if(ctx) resumeTxt+=ctx+' ';
+    if(enj) resumeTxt+=enj+' ';
+    resumeHtml='<div class="resume-soir">'
+      +(vrd?'<div class="resume-verdict">🦈 '+vrd+'</div>':'')
+      +(resumeTxt.trim()?'<div class="resume-ctx">'+resumeTxt.trim()+'</div>':'')
+      +'</div><div class="sep"></div>';
+  }
+
   document.title=hn+' vs '+an+' — IASHARK';
   return '<div class="wrap"><div class="card '+(isHot?'hot':'')+'">'
     // TOPBAR
     +'<div class="topbar"><div class="lg-row"><span style="font-size:14px">'+(m.ligue_icon||'🏆')+'</span><span class="lg-name">'+(m.league||'').toUpperCase()+(m.round?' · '+m.round:'')+'</span></div><div class="badges">'+(heure?'<span class="badge time">'+heure+'</span>':'')+(isHot?'<span class="badge hot">SHARK LOCK</span>':isVal?'<span class="badge val">VALUE BET</span>':'')+'</div></div>'
-    // TEAMS + PROBAS + FORME
+    // TEAMS + PROBAS
     +'<div class="teams"><div class="teams-row"><div class="team home">'+lgImg(m.home,hn.slice(0,2).toUpperCase())+'<div class="team-name">'+hn.toUpperCase()+'</div><div class="team-sub">DOMICILE</div>'+(forme(m.forme_h)?'<div class="team-form">'+forme(m.forme_h)+'</div>':'')+'</div><div class="vs-col"><span class="vs">VS</span>'+(heure?'<div class="vs-hr">'+heure+'</div>':'')+'</div><div class="team away">'+lgImg(m.away,an.slice(0,2).toUpperCase())+'<div class="team-name">'+an.toUpperCase()+'</div><div class="team-sub">EXTERIEUR</div>'+(forme(m.forme_a)?'<div class="team-form">'+forme(m.forme_a)+'</div>':'')+'</div></div><div class="pbar"><div class="pb1" style="width:'+(m.p1||0)+'%"></div><div class="pbn" style="width:'+(m.pn||0)+'%"></div><div class="pb2" style="width:'+(m.p2||0)+'%"></div></div><div class="plabels"><div class="pi"><div class="pi-pct" style="color:var(--cyan)">'+(m.p1||0)+'%</div><div class="pi-lbl">'+hn.slice(0,8).toUpperCase()+'</div></div><div class="pi"><div class="pi-pct" style="color:var(--muted)">'+(m.pn||0)+'%</div><div class="pi-lbl">NUL</div></div><div class="pi"><div class="pi-pct" style="color:rgba(226,232,240,0.45)">'+(m.p2||0)+'%</div><div class="pi-lbl">'+an.slice(0,8).toUpperCase()+'</div></div></div>'+meteo+'</div>'
-    // 1. PARIS RECOMMANDE — juste après les probas
+    // 1. PARIS RECOMMANDE (jauge intégrée)
     +'<div class="sep"></div>'
     +pmHtml
-    // 2. JAUGE DE CONFIANCE
-    +'<div class="s"><div class="stitle">JAUGE DE CONFIANCE</div><div class="conf"><div class="conf-top"><div><div class="conf-score">'+(m.conf||0).toFixed(1)+'<sup>/10</sup></div></div><div style="text-align:right"><div class="conf-badge"'+confStyle+'>'+confLvl+'</div><div class="conf-hint">'+(m.argument?(m.argument.split('.')[0]):'')+'</div></div></div><div class="conf-track"><div class="conf-fill" style="width:'+confPct+'%"></div></div><div class="conf-scale"><span>PRUDENT</span><span>CONFIANT</span><span>ELEVE</span><span>LOCK</span></div></div></div>'
-    +'<div class="sep"></div>'
-    // 3. CONSEIL IA
-    +((m.conseil_public||m.analyse)?'<div class="s"><div class="conseil"><div class="conseil-lbl">CONSEIL IA</div><div class="conseil-txt">'+(m.conseil_public||m.analyse)+'</div></div></div><div class="sep"></div>':'')
-    // 4. ANALYSE COMPARATIVE
+    // 2. CONSEIL IA — style orange
+    +((m.conseil_public||m.analyse)?'<div class="s"><div class="conseil-orange"><div class="conseil-orange-icon">💡</div><div><div class="conseil-orange-lbl">CONSEIL IA</div><div class="conseil-orange-txt">'+(m.conseil_public||m.analyse)+'</div></div></div></div><div class="sep"></div>':'')
+    // 3. ANALYSE COMPARATIVE
     +'<div class="s"><div class="stitle">ANALYSE COMPARATIVE</div>'+buildComp(hn,an,m.crit_home,m.crit_away)+'</div><div class="sep"></div>'
-    // 5. PATTERNS (commentaire déjà en haut dans buildPatterns)
+    // 4. PATTERNS
     +buildPatterns(hn,an,m.events_home||null,m.events_away||null,m)
-    // 6. SCENARIO ATTENDU
+    // 5. SCENARIO
     +buildScen(m)
+    // 6. RÉSUMÉ PERCUTANT
+    +resumeHtml
     // 7. BUTEURS CLES
     +buildPlayers(hn,an,m.top_scorers_home||[],m.top_scorers_away||[])
-    // 8. BONUS JOUEUR DU SOIR
+    // 8. FIFA CARD
     +buildFifa(m.joueur_decisif||null,m.top_scorers_home||[],m.top_scorers_away||[])
-    // 9. RESUME CONTEXTE + ENJEUX + MATCH ATTENDU (en bas)
-    +((m.contexte||m.enjeux||m.verdict_shark)?'<div class="sep"></div><div class="s"><div class="stitle">RÉSUMÉ DU MATCH</div><div class="ctx">'
-      +(m.contexte?'<div class="ctx-c"><div class="ctx-l">SITUATION</div><div class="ctx-t">'+m.contexte+'</div></div>':'')
-      +(m.enjeux?'<div class="ctx-c"><div class="ctx-l">ENJEUX</div><div class="ctx-t">'+m.enjeux+'</div></div>':'')
-      +(m.verdict_shark?'<div class="ctx-c"><div class="ctx-l">VERDICT SHARK</div><div class="ctx-t" style="color:var(--cyan)">'+m.verdict_shark+'</div></div>':'')
-      +'</div></div>':'')
     +'<div class="card-footer"></div></div></div>';
 }
 

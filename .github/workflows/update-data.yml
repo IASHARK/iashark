@@ -1734,9 +1734,11 @@ jobs:
               var predictions=batch2[6]||null, lineups=batch2[7]||null;
               var refStats=batch2[8]||null;
               var topScorersH=batch2[9]||[], topScorersA=batch2[10]||[];
-              // Events des 20 derniers matchs de chaque equipe
-              var last20IdsH = (raw10H||[]).slice(0,20).map(function(fx){return fx.fixture.id;});
-              var last20IdsA = (raw10A||[]).slice(0,20).map(function(fx){return fx.fixture.id;});
+              // Events filtrés : DOM pour home team, EXT pour away team — 10 matchs max
+              var homeFixtures = (raw10H||[]).filter(function(fx){return fx.teams&&fx.teams.home&&fx.teams.home.id===home.id;}).slice(0,10);
+              var awayFixtures = (raw10A||[]).filter(function(fx){return fx.teams&&fx.teams.away&&fx.teams.away.id===away.id;}).slice(0,10);
+              var last20IdsH = homeFixtures.map(function(fx){return fx.fixture.id;});
+              var last20IdsA = awayFixtures.map(function(fx){return fx.fixture.id;});
               var eventsH_raw = await Promise.all(last20IdsH.map(function(id){return getFixtureEvents(id);}));
               await sleep(300);
               var eventsA_raw = await Promise.all(last20IdsA.map(function(id){return getFixtureEvents(id);}));

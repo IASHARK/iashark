@@ -20,13 +20,13 @@
       ],
       "val": true,
       "hot": false,
-      "conf": 7.1,
-      "p1": 62,
-      "pn": 19,
-      "p2": 19,
-      "po15": 81,
-      "po25": 67,
-      "btts": 27,
+      "conf": 6.8,
+      "p1": 49,
+      "pn": 29,
+      "p2": 22,
+      "po15": 82,
+      "po25": 58,
+      "btts": 26,
       "c1": "1.35",
       "cn": "5.53",
       "c2": "8.15",
@@ -95,97 +95,99 @@
       "risque": "MODERE",
       "pari_rec": "Under 2.5",
       "mise": "2-3% bankroll",
-      "verdict_shark": "Under 2.5 à 2.69 — Real Madrid dominera mais Elche défendra en bloc ; peu de créations nettes attendues malgré la supériorité madrilène",
+      "verdict_shark": "Under 2.5 à 2.69 — Real Madrid dominant mais Elche ultra-défensif en 5-4-1 bloque le flux offensif; xG attendus très bas (0.852 vs 0.636), conditions nuageuses ralentissent le tempo.",
       "scenario": {
-        "phase1": "0-25min: Real Madrid impose un pressing haut et contrôle la possession. Elche se replie en défense compacte et cherche les transitions rapides via Á. Rodríguez. Le Real crée des occasions mais sans finition claire.",
-        "phase2": "25-65min: Le Real Madrid augmente l'intensité et génère du xG (1.68), mais la défense d'Elche (xGA 2.52) reste étonnamment solide en bloc. Les buts tardent à venir malgré une domination tactique claire. Quelques contre-attaques dangereuses d'Elche (1.27 buts/match) créent du suspense.",
-        "phase3": "65-90min: Real Madrid accélère enfin mais Elche, galvanisé par l'enjeu de relégation, défend avec discipline. Un but du Real devient probable en fin de match, mais un deuxième butsemble difficile vu la structure défensive visiteur. Score final probable: 1-0 ou 2-0."
+        "phase1": "0-25min: Real Madrid impose son pressing haut, possession 60%+. Elche se replie en 5-4-1, laisse les ailes libres mais se ferme au centre. Peu d'occasions franches, Real contrôle mais sans percussion.",
+        "phase2": "25-65min: Real augmente l'intensité après 30min, Mbappé et Vinícius cherchent les brèches latérales. Elche résiste avec 2 blocs compacts, quelques contre via Cepeda/Valera. Un but possible entre 35-55min mais Dituro (2.47 xGA encaissée/match) tient bon.",
+        "phase3": "65-90min: Real Madrid force mais fatigue cumulée (3 matchs en 14j). Elche ne craque pas (0 victoires ext mais défense consolidée). Match fermé, 1 seul but ou nul 0-0 très probable. Pas de débordement offensif d'Elche (1.27 buts/match ext)."
       },
       "scenario_15min": [
         {
           "t": "0-15min",
           "prob": 8,
-          "txt": "Real Madrid domine le ballon (50% possession moyenne), Elche se positionne en 5-4-1 défensif pour contrer le pressing haut madrilène"
+          "txt": "Real Madrid d'emblée haut, possession 65%. Elche bloc complet 5-4-1, aucun tir cadré."
         },
         {
           "t": "15-30min",
           "prob": 12,
-          "txt": "Premières actions dangereuses du Real via les ailes, Elche attend et teste les transitions : match équilibré en création malgré la supériorité technique"
+          "txt": "Première vraie phase: Vinícius sur l'aile gauche crée du danger, Carvajal monte à droite. Elche ferme les couloirs, 1-2 tirs non cadrés Madrid."
         },
         {
           "t": "30-45min",
           "prob": 10,
-          "txt": "Fin de première mi-temps : Real accumule le xG mais pas de but. Elche rentre aux vestiaires sans avoir concédé, confiance renforcée en défense"
+          "txt": "Fin première MI: Real cherche l'ouverture, xG 0.35-0.45. Elche chancelle mais pas de break. Repos 0-0 ou 1-0 Madrid 60%."
         },
         {
           "t": "45-60min",
           "prob": 15,
-          "txt": "Début deuxième mi-temps : intensité accrue du Real, mais Elche reste discipliné. Quelques contre-attaques rapides crédibles (Rodríguez dangereux)"
+          "txt": "Début 2e MI: Real revient au même rythme. Mbappé se rapproche du but. Elche tente 1 contre mais André Silva isole. Tension défensive max Elche."
         },
         {
           "t": "60-75min",
           "prob": 18,
-          "txt": "Phase décisive : le Real perce enfin la défense, 1-0 probable. Elche fatigue mais continue de bloquer les espaces centraux"
+          "txt": "Phase décisive: Real fait entrer la fraîcheur, pression s'accroît. Elche perd balle, contre-attaque mal géré. 1 but probable ici (Real) ou 0-0 résiste."
         },
         {
           "t": "75-90min",
           "prob": 20,
-          "txt": "Final : Real Madrid cherche le deuxième mais Elche ferme le match. Très peu de ballons traînent en zone centrale, Under 2.5 confirmé"
+          "txt": "Fin de match: Elche s'enferme à 10 derrière, pas de 2e but. Real manque la clarté (fatigue). Match 0-0, 1-0 ou rare 2-0. Zéro BTTS."
         }
       ],
       "score_predit": {
         "score": "1-0",
-        "prob": "28%",
-        "cote_implicite": "3.57"
+        "prob": "32%",
+        "cote_implicite": "3.13"
       },
-      "facteur_x": "Motivation extrême d'Elche en zone de relégation (#17) : défense très disciplinée et compacte qui pénalise les créations du Real Madrid malgré sa domination tactique",
-      "argument": "1. Elche encaisse 1.82 buts/match en extérieur mais joue ici pour sa survie (relégation) : défense ultra-compacte attendue malgré la supériorité Real. 2. Real Madrid crée 1.68 xG mais a manqué 2 des 5 derniers matchs (L vs Getafe DOM, L vs Osasuna EXT) : finition inconstante. 3. xGA très asymétrique (Real 1.29 vs Elche 2.52) mais Elche rentre en bloc et pénalise les espaces : peu de « vraies » situations de 2-3 buts.",
-      "analyse_card": "Real Madrid domine techniquement (pressing haut, 50% possession moyenne, 2.89 buts/match en 20 matchs DOM) mais Elche joue pour sa survie en L1 : ce type d'équipe en danger repose sur une défense minimaliste très efficace. Le Real n'a pas écrasé Benfica (2-1 à DOM) ni Celta (2-1 en EXT) : il ne gagne pas par 3-4 buts systématiquement. Elche, malgré 0 victoires en 13 déplacements, a tenu 0-0 à Osasuna (DOM) et 2-2 à Espanyol (DOM) : elle peut tenir un bloc si bien structurée.",
-      "conseil_public": "Under 2.5 cote 2.69 est le pari le plus sûr : le Real Madrid gagnera très probablement (68% = 1X DC) mais en limitant les buts (81% under selon le modèle). Elche va se barricader en défense car la relégation la menace directement. Vous attendez 1-0 ou 2-0, rarement plus. C'est une victoire sèche du Real, pas un match offensif ouvert.",
-      "contexte": "Real Madrid est 2e à 4 points du titre : un succès ici le rapproche beaucoup de la course. Elche est 17e, en zone rouge : ce match est une finale de saison pour elle. L'enjeu crée deux profils opposés : le Real attaque, Elche défend farouchement.",
-      "enjeux": "Real Madrid vise le titre (jeu offensif), Elche vise la survie (blocage défensif extrême) : cette asymétrie motive les plans tactiques opposés.",
+      "facteur_x": "Style défensif ultra-fermé d'Elche en 5-4-1 (0 victoires ext mais 1.52 xGA subi) face à xG bas de Madrid (0.852) = récit Under 2.5.",
+      "argument": "1. Real Madrid xG moyen 1.68 sur 10 matchs mais 0.852 aujourd'hui (adversaire fermé). 2. Elche 0 victoires ext en 13 matchs mais n'encaisse que 1.52/match en bloc 5-4-1 (signal défensif solide). 3. Enjeu relégation d'Elche = ultra-conservateur, Real fatigué (3j repos post-Man City). Probabilité Poisson Under 2.5 validée à 81%.",
+      "analyse_card": "Real Madrid domine en possession et xG théorique mais xG attendu aujourd'hui est anormalement bas (0.852) car Elche joue ultra-défensif. Mbappé (23 buts) et Vinícius (9 buts) manquent d'espace face au bloc 5-4-1. Elche en zone rouge (#17) adopte la survival strategy: fermeture totale, 0 clean sheets ext mais défense compact qui tient. André Silva seul en pointe, zéro créativité offensive. Match scénario = domination Madrid mais sous-conversion.",
+      "conseil_public": "L'Under 2.5 est le pari idéal ici. Real Madrid est poussif (fatigue 3 matchs en 14j), Elche ultra-bloqué en 5-4-1 (relégation oblige). Les xG attendus (0.852 + 0.636) = 1.488 total, loin des 2.5 buts requis. Même avec 1 but Madrid probable, Elche ne score presque jamais (1.27/match ext), donc 1-0 ou 0-0 domine à 60%+ de probabilité. La cote 2.69 offre +44% d'edge sur le modèle Poisson (81% probas Under).",
+      "contexte": "Real Madrid #2 au classement, 4 points du titre, 2 victoires d'affilée (3-0 Man City à domicile). Elche #17 en zone de relégation avec 0 victoires à l'extérieur en 13 matchs. Enjeu asymétrique : Real doit gagner, Elche doit survivre en se défendant.",
+      "enjeux": "Real Madrid chasse le titre à domicile avec urgence (4 pts de retard), Elche joue sa vie en L1 et ne peut se permettre que de défendre.",
       "vbet": "OUI",
       "value_calc": "+44%",
       "scores": [
         "1-0",
+        "0-0",
         "2-0",
-        "1-1"
+        "1-1",
+        "2-1"
       ],
       "paris_3": {
         "safe": {
-          "bet": "DC 1X",
-          "cote": 1.09,
-          "hint": "Real Madrid gagne 62% + nul 19% = 81% sans risque relégation. Cote basse mais quasi certaine.",
-          "mise": "5-6% bankroll",
+          "bet": "DC 1X (Real Madrid ou nul)",
+          "cote": "1.09",
+          "hint": "Real #2 au classement, 11V/13DOM, Elche 0V ext. Pari ultra-safe.",
+          "mise": "5% bankroll",
           "bookie": "Betclic"
         },
         "valeur": {
           "bet": "Under 2.5",
-          "cote": 2.69,
-          "hint": "Edge +44% vs Poisson : Elche compacte + Real imprécis = peu de buts. Meilleur rapport cote/probabilité.",
-          "mise": "3-4% bankroll",
+          "cote": "2.69",
+          "hint": "xG attendus 1.488, Poisson 81% Under, +44% edge. Meilleur rapport certitude/cote.",
+          "mise": "3% bankroll",
           "bookie": "Winamax"
         },
         "specu": {
-          "bet": "Victoire Real Madrid 2-0",
-          "cote": 3.8,
-          "hint": "Real domine mais ne casse pas Elche : 2-0 plus probable que 3-0 ou 4-0. Équilibre entre confiance DOM et compacité EXT.",
-          "mise": "0.8-1.2% bankroll",
+          "bet": "BTTS Non (pas de but pour les deux)",
+          "cote": "2.08",
+          "hint": "Elche 1.27 buts ext et 0 clean sheets mais xG très bas (0.636). Pari spéculatif sur l'absence totale du 2e but.",
+          "mise": "1% bankroll",
           "bookie": "Bet365"
         }
       },
       "joueur_decisif": {
-        "nom": "Á. Rodríguez",
-        "equipe": "EXT",
-        "marche": "Buteur dans le match",
-        "cote_estimee": 4.2,
-        "raison": "5 buts en 24 matchs, seul buteur crédible d'Elche. Real doit s'ouvrir en fin de match : contre-attaque possible.",
+        "nom": "Kylian Mbappé",
+        "equipe": "DOM",
+        "marche": "Premier buteur",
+        "cote_estimee": "3.80",
+        "raison": "23 buts en 23 matchs, buteur dominant de Real. Sera prioritaire contre bloc défensif Elche.",
         "absent": false
       },
       "paris_safe": {
         "bet": "Under 2.5",
         "cote": "1.35",
-        "proba": "62%"
+        "proba": "49%"
       },
       "paris_risque": {
         "bet": "",
@@ -603,13 +605,13 @@
             "rank": 13,
             "name": "Valencia",
             "team_id": 532,
-            "played": 27,
+            "played": 28,
             "won": 8,
             "drawn": 8,
-            "lost": 11,
-            "gd": -11,
+            "lost": 12,
+            "gd": -12,
             "pts": 32,
-            "form": "WWLWL"
+            "form": "LWWLW"
           },
           {
             "rank": 14,
@@ -732,8 +734,8 @@
       "arbitre": null,
       "odds_movement": null,
       "events_home": {
-        "goals_total": 30,
-        "goals_avg": "1.50",
+        "goals_total": 31,
+        "goals_avg": "1.55",
         "slots": [
           {
             "t": "0-15",
@@ -747,46 +749,46 @@
           },
           {
             "t": "30-45",
-            "n": 2,
-            "avg": "0.10"
+            "n": 4,
+            "avg": "0.20"
           },
           {
             "t": "45-60",
-            "n": 9,
-            "avg": "0.45"
+            "n": 8,
+            "avg": "0.40"
           },
           {
             "t": "60-75",
-            "n": 3,
-            "avg": "0.15"
+            "n": 2,
+            "avg": "0.10"
           },
           {
             "t": "75-90",
-            "n": 8,
-            "avg": "0.40"
+            "n": 9,
+            "avg": "0.45"
           }
         ],
         "corners_per_game": "0.0",
-        "red_cards": 1,
-        "red_per_game": "0.05",
-        "yellow_per_game": "1.4",
-        "goals_after70": 9,
-        "goals_before30": 8,
+        "red_cards": 3,
+        "red_per_game": "0.15",
+        "yellow_per_game": "1.5",
+        "goals_after70": 10,
+        "goals_before30": 9,
         "games": 20
       },
       "events_away": {
-        "goals_total": 11,
-        "goals_avg": "0.55",
+        "goals_total": 13,
+        "goals_avg": "0.65",
         "slots": [
           {
             "t": "0-15",
-            "n": 2,
-            "avg": "0.10"
+            "n": 1,
+            "avg": "0.05"
           },
           {
             "t": "15-30",
-            "n": 2,
-            "avg": "0.10"
+            "n": 1,
+            "avg": "0.05"
           },
           {
             "t": "30-45",
@@ -795,29 +797,63 @@
           },
           {
             "t": "45-60",
+            "n": 2,
+            "avg": "0.10"
+          },
+          {
+            "t": "60-75",
             "n": 3,
             "avg": "0.15"
           },
           {
-            "t": "60-75",
-            "n": 0,
-            "avg": "0.00"
-          },
-          {
             "t": "75-90",
-            "n": 2,
-            "avg": "0.10"
+            "n": 4,
+            "avg": "0.20"
           }
         ],
         "corners_per_game": "0.0",
         "red_cards": 0,
         "red_per_game": "0.00",
-        "yellow_per_game": "0.8",
-        "goals_after70": 2,
-        "goals_before30": 5,
+        "yellow_per_game": "0.5",
+        "goals_after70": 5,
+        "goals_before30": 2,
         "games": 20
       },
-      "top_scorers_home": [],
+      "top_scorers_home": [
+        {
+          "id": 278,
+          "name": "Kylian Mbappé",
+          "photo": "https://media.api-sports.io/football/players/278.png",
+          "goals": 23,
+          "assists": 4,
+          "shots_total": 83,
+          "shots_on": 51,
+          "games": 23,
+          "rating": "7.78"
+        },
+        {
+          "id": 762,
+          "name": "Vinícius Júnior",
+          "photo": "https://media.api-sports.io/football/players/762.png",
+          "goals": 9,
+          "assists": 5,
+          "shots_total": 55,
+          "shots_on": 31,
+          "games": 26,
+          "rating": "7.39"
+        },
+        {
+          "id": 291964,
+          "name": "A. Güler",
+          "photo": "https://media.api-sports.io/football/players/291964.png",
+          "goals": 3,
+          "assists": 8,
+          "shots_total": 30,
+          "shots_on": 16,
+          "games": 27,
+          "rating": "7.15"
+        }
+      ],
       "top_scorers_away": [
         {
           "id": 343202,
@@ -859,11 +895,11 @@
       "elo_signal": null,
       "dropping_odds": null,
       "pinnacle_snapshot": null,
-      "analyse_card_en": "Real Madrid dominates technically (high pressing, 50% average possession, 2.89 goals/match in 20 home matches) but Elche is playing for L1 survival: this type of endangered team relies on a minimalist but very effective defense. Real Madrid did not crush Benfica (2-1 at home) or Celta (2-1 away): it does not win by 3-4 goals systematically. Elche, despite 0 wins in 13 away matches, held 0-0 at Osasuna (home) and 2-2 at Espanyol (home): it can hold a well-structured block.",
-      "conseil_public_en": "Under 2.5 at 2.69 is the safest bet: Real Madrid will very likely win (68% = 1X Double Chance) but limiting goals (81% under according to the model). Elche will barricade in defense because relegation directly threatens them. You expect 1-0 or 2-0, rarely more. It's a clean Real Madrid victory, not an open offensive match.",
+      "analyse_card_en": "Real Madrid dominates in possession and theoretical xG but expected xG today is abnormally low (0.852) because Elche plays ultra-defensive. Mbappé (23 goals) and Vinícius (9 goals) lack space against the 5-4-1 block. Elche in red zone (#17) adopts survival strategy: total closure, 0 away clean sheets but compact defense that holds. André Silva alone up front, zero offensive creativity. Match scenario = Madrid domination but under-conversion.",
+      "conseil_public_en": "Under 2.5 is the ideal bet here. Real Madrid is sluggish (fatigue 3 matches in 14 days), Elche ultra-blocked in 5-4-1 (relegation compels). Expected xG (0.852 + 0.636) = 1.488 total, far from the 2.5 goals required. Even with 1 probable Madrid goal, Elche almost never scores (1.27/away match), so 1-0 or 0-0 dominates at 60%+ probability. The 2.69 odds offers +44% Edge on Poisson model (81% Under probabilities).",
       "pari_rec_en": "Under 2.5",
-      "verdict_shark_en": "Under 2.5 at 2.69 — Real Madrid will dominate but Elche will defend in a block; few clear-cut chances expected despite Madrid's superiority",
-      "facteur_x_en": "Extreme motivation for Elche in relegation zone (#17): very disciplined and compact defense that penalizes Real Madrid's chances despite their tactical dominance"
+      "verdict_shark_en": "Under 2.5 at 2.69 — Real Madrid dominant but Elche ultra-defensive in 5-4-1 blocks the offensive flow; expected xG very low (0.852 vs 0.636), cloudy conditions slow the tempo.",
+      "facteur_x_en": "Elche's ultra-closed defensive style in 5-4-1 (0 away wins but 1.52 xGA conceded) against Madrid's low xG (0.852) = Under 2.5 narrative."
     }
   ],
   "combis": []

@@ -362,38 +362,38 @@ function buildPatterns(hn,an,evH,evA,m){
     var allAvgs=slotsH.concat(slotsA).map(function(s){return parseFloat(s.avg)||0;});
     var maxAvg=Math.max.apply(null,allAvgs.concat([0.01]));
 
-    function jauge(slot, totalGoals, col){
-      var n=slot.n||0;
-      var pct=totalGoals>0?Math.round((n/totalGoals)*100):0;
-      var heat=pct>=25?'hot':pct>=15?'warm':'';
+    function jauge(slot,col,label){
+      var avg=parseFloat(slot&&slot.avg)||0;
+      var pct=Math.round((avg/maxAvg)*100);
+      var heat=avg>=0.4?'hot':avg>=0.25?'warm':'';
       return '<div class="jauge-row '+(heat==='hot'?'jauge-hot':heat==='warm'?'jauge-warm':'')+'">'
         +'<div class="jauge-lbl">'+slot.t+'</div>'
         +'<div class="jauge-track"><div class="jauge-fill '+col+'" style="width:'+pct+'%"></div></div>'
-        +'<div class="jauge-val">'+n+'<span class="jauge-unit">/'+totalGoals+'</span></div>'
+        +'<div class="jauge-val">'+avg.toFixed(2)+'<span class="jauge-unit">/m</span></div>'
         +(heat==='hot'?'<div class="jauge-tag">CHAUD</div>':heat==='warm'?'<div class="jauge-tag warm">ACTIF</div>':'')
         +'</div>';
     }
 
-    var slots6=slotsH.length>=6?slotsH:[{t:'0-15',n:0,avg:'0'},{t:'15-30',n:0,avg:'0'},{t:'30-45',n:0,avg:'0'},{t:'45-60',n:0,avg:'0'},{t:'60-75',n:0,avg:'0'},{t:'75-90',n:0,avg:'0'}];
-    var slots6A=slotsA.length>=6?slotsA:slots6.map(function(s){return {t:s.t,n:0,avg:'0'};});
-    var totalH=evH&&evH.goals_total||0;
-    var totalA=evA&&evA.goals_total||0;
+    var slots6=slotsH.length>=6?slotsH:[{t:'0-15',avg:'0'},{t:'15-30',avg:'0'},{t:'30-45',avg:'0'},{t:'45-60',avg:'0'},{t:'60-75',avg:'0'},{t:'75-90',avg:'0'}];
+    var slots6A=slotsA.length>=6?slotsA:slots6.map(function(s){return {t:s.t,avg:'0'};});
 
     jaugesHtml='<div class="jauge-wrap">'
+      // DOM
       +'<div class="jauge-col">'
-      +'<div class="jauge-team-lbl" style="color:var(--cyan)">'+hn.slice(0,14).toUpperCase()+' <span style="color:var(--muted);font-weight:400">— '+totalH+' buts / '+games+' matchs</span></div>'
-      +slots6.map(function(s){return jauge(s,totalH,'h');}).join('')
+      +'<div class="jauge-team-lbl" style="color:var(--cyan)">'+hn.slice(0,14).toUpperCase()+' — buts moy/match</div>'
+      +slots6.map(function(s){return jauge(s,'h',hn);}).join('')
       +'</div>'
+      // EXT
       +'<div class="jauge-col">'
-      +'<div class="jauge-team-lbl">'+an.slice(0,14).toUpperCase()+' <span style="color:var(--muted);font-weight:400">— '+totalA+' buts / '+games+' matchs</span></div>'
-      +slots6A.map(function(s){return jauge(s,totalA,'a');}).join('')
+      +'<div class="jauge-team-lbl">'+an.slice(0,14).toUpperCase()+' — buts moy/match</div>'
+      +slots6A.map(function(s){return jauge(s,'a',an);}).join('')
       +'</div>'
       +'</div>';
 
     // ── Commentaire auto-généré ─────────────────────────
     function topSlot(slots){
-      var best=null,bestN=0;
-      (slots||[]).forEach(function(s){if((s.n||0)>bestN){bestN=s.n;best=s;}});
+      var best=null,bestV=0;
+      (slots||[]).forEach(function(s){var v=parseFloat(s.avg)||0;if(v>bestV){bestV=v;best=s;}});
       return best;
     }
     function halfLabel(t){
@@ -402,21 +402,20 @@ function buildPatterns(hn,an,evH,evA,m){
       return min<45?'1ère mi-temps':'2ème mi-temps';
     }
     var topH=topSlot(slotsH), topA=topSlot(slotsA);
-    var allSlots=slotsH.map(function(s,i){return {t:s.t,nH:s.n||0,nA:(slotsA[i]||{}).n||0,total:(s.n||0)+((slotsA[i]||{}).n||0)};});
+    var allSlots=slotsH.map(function(s,i){return {t:s.t,avgH:parseFloat(s.avg)||0,avgA:parseFloat((slotsA[i]||{}).avg)||0,total:(parseFloat(s.avg)||0)+(parseFloat((slotsA[i]||{}).avg)||0)};});
     allSlots.sort(function(a,b){return b.total-a.total;});
     var hotSlot=allSlots[0];
 
     var commentLines=[];
-    if(topH&&topH.n>0) commentLines.push('<strong>'+hn+'</strong> marque surtout entre <strong>'+topH.t+'</strong> — '+topH.n+' buts sur '+totalH+' au total ('+halfLabel(topH.t)+').');
-    if(topA&&topA.n>0) commentLines.push('<strong>'+an+'</strong> est le plus dangereux sur <strong>'+topA.t+'</strong> — '+topA.n+' buts sur '+totalA+' ('+halfLabel(topA.t)+').');
-    if(hotSlot&&hotSlot.total>0) commentLines.push('Tranche la plus à risque ce soir : <strong>'+hotSlot.t+'</strong> ('+hotSlot.total+' buts cumulés des deux équipes sur 20 matchs).');
+    if(topH) commentLines.push('<strong>'+hn+'</strong> marque surtout entre <strong>'+topH.t+'</strong> ('+parseFloat(topH.avg).toFixed(2)+' but/match) — principalement en '+halfLabel(topH.t)+'.');
+    if(topA) commentLines.push('<strong>'+an+'</strong> est le plus dangereux sur la tranche <strong>'+topA.t+'</strong> ('+parseFloat(topA.avg).toFixed(2)+' but/match) — en '+halfLabel(topA.t)+'.');
+    if(hotSlot) commentLines.push('La tranche la plus à risque pour les buts des deux équipes réunies : <strong>'+hotSlot.t+'</strong>.');
 
-    jaugesHtml+='<div class="pat-comment">'+commentLines.join(' ')+'</div>';
+    var commentHtml=commentLines.length?'<div class="pat-comment">'+commentLines.join(' ')+'</div>':'';
+    jaugesHtml=commentHtml+jaugesHtml;
   }
 
-  return '<div class="s"><div class="stitle">PATTERNS — DOM / EXT</div>'
-    +'<div style="font-family:Space Mono,monospace;font-size:7px;color:var(--muted);margin-bottom:10px;">'+hn.slice(0,12).toUpperCase()+' : '+((evH&&evH.games)||0)+' matchs à domicile · '+an.slice(0,12).toUpperCase()+' : '+((evA&&evA.games)||0)+' matchs à l\'extérieur</div>'
-    +statsHtml+jaugesHtml+'</div><div class="sep"></div>';
+  return '<div class="s"><div class="stitle">PATTERNS — 20 MATCHS</div>'+statsHtml+jaugesHtml+'</div><div class="sep"></div>';
 }
 
 function buildScen(m){
@@ -508,31 +507,32 @@ function render(m){
   return '<div class="wrap"><div class="card '+(isHot?'hot':'')+'">'
     // TOPBAR
     +'<div class="topbar"><div class="lg-row"><span style="font-size:14px">'+(m.ligue_icon||'🏆')+'</span><span class="lg-name">'+(m.league||'').toUpperCase()+(m.round?' · '+m.round:'')+'</span></div><div class="badges">'+(heure?'<span class="badge time">'+heure+'</span>':'')+(isHot?'<span class="badge hot">SHARK LOCK</span>':isVal?'<span class="badge val">VALUE BET</span>':'')+'</div></div>'
-    // TEAMS
+    // TEAMS + PROBAS + FORME
     +'<div class="teams"><div class="teams-row"><div class="team home">'+lgImg(m.home,hn.slice(0,2).toUpperCase())+'<div class="team-name">'+hn.toUpperCase()+'</div><div class="team-sub">DOMICILE</div>'+(forme(m.forme_h)?'<div class="team-form">'+forme(m.forme_h)+'</div>':'')+'</div><div class="vs-col"><span class="vs">VS</span>'+(heure?'<div class="vs-hr">'+heure+'</div>':'')+'</div><div class="team away">'+lgImg(m.away,an.slice(0,2).toUpperCase())+'<div class="team-name">'+an.toUpperCase()+'</div><div class="team-sub">EXTERIEUR</div>'+(forme(m.forme_a)?'<div class="team-form">'+forme(m.forme_a)+'</div>':'')+'</div></div><div class="pbar"><div class="pb1" style="width:'+(m.p1||0)+'%"></div><div class="pbn" style="width:'+(m.pn||0)+'%"></div><div class="pb2" style="width:'+(m.p2||0)+'%"></div></div><div class="plabels"><div class="pi"><div class="pi-pct" style="color:var(--cyan)">'+(m.p1||0)+'%</div><div class="pi-lbl">'+hn.slice(0,8).toUpperCase()+'</div></div><div class="pi"><div class="pi-pct" style="color:var(--muted)">'+(m.pn||0)+'%</div><div class="pi-lbl">NUL</div></div><div class="pi"><div class="pi-pct" style="color:rgba(226,232,240,0.45)">'+(m.p2||0)+'%</div><div class="pi-lbl">'+an.slice(0,8).toUpperCase()+'</div></div></div>'+meteo+'</div>'
-    // CONTEXTE
-    +((m.contexte||m.enjeux)?'<div class="s pt"><div class="stitle">CONTEXTE</div><div class="ctx">'+(m.contexte?'<div class="ctx-c"><div class="ctx-l">SITUATION</div><div class="ctx-t">'+m.contexte+'</div></div>':'')+(m.enjeux?'<div class="ctx-c"><div class="ctx-l">ENJEUX</div><div class="ctx-t">'+m.enjeux+'</div></div>':'')+'</div></div>':'<div style="height:13px"></div>')
+    // 1. PARIS RECOMMANDE — juste après les probas
     +'<div class="sep"></div>'
-    // COMP
-    +'<div class="s"><div class="stitle">ANALYSE COMPARATIVE</div>'+buildComp(hn,an,m.crit_home,m.crit_away)+'</div><div class="sep"></div>'
-    // PARIS RECOMMANDE (avec score prédit intégré)
     +pmHtml
-    // FACTEUR
-    +(m.facteur_x?'<div class="s"><div class="facteur"><div class="fact-icon">⚡</div><div><div class="fact-lbl">FACTEUR DECISIF</div><div class="fact-txt">'+m.facteur_x+'</div></div></div></div>':'')
-    +'<div class="sep"></div>'
-    // CONFIANCE
+    // 2. JAUGE DE CONFIANCE
     +'<div class="s"><div class="stitle">JAUGE DE CONFIANCE</div><div class="conf"><div class="conf-top"><div><div class="conf-score">'+(m.conf||0).toFixed(1)+'<sup>/10</sup></div></div><div style="text-align:right"><div class="conf-badge"'+confStyle+'>'+confLvl+'</div><div class="conf-hint">'+(m.argument?(m.argument.split('.')[0]):'')+'</div></div></div><div class="conf-track"><div class="conf-fill" style="width:'+confPct+'%"></div></div><div class="conf-scale"><span>PRUDENT</span><span>CONFIANT</span><span>ELEVE</span><span>LOCK</span></div></div></div>'
-    // CONSEIL
-    +((m.conseil_public||m.analyse)?'<div class="s"><div class="conseil"><div class="conseil-lbl">CONSEIL IA</div><div class="conseil-txt">'+(m.conseil_public||m.analyse)+'</div></div></div>':'')
     +'<div class="sep"></div>'
-    // PATTERNS
+    // 3. CONSEIL IA
+    +((m.conseil_public||m.analyse)?'<div class="s"><div class="conseil"><div class="conseil-lbl">CONSEIL IA</div><div class="conseil-txt">'+(m.conseil_public||m.analyse)+'</div></div></div><div class="sep"></div>':'')
+    // 4. ANALYSE COMPARATIVE
+    +'<div class="s"><div class="stitle">ANALYSE COMPARATIVE</div>'+buildComp(hn,an,m.crit_home,m.crit_away)+'</div><div class="sep"></div>'
+    // 5. PATTERNS (commentaire déjà en haut dans buildPatterns)
     +buildPatterns(hn,an,m.events_home||null,m.events_away||null,m)
-    // SCENARIO
+    // 6. SCENARIO ATTENDU
     +buildScen(m)
-    // JOUEURS
+    // 7. BUTEURS CLES
     +buildPlayers(hn,an,m.top_scorers_home||[],m.top_scorers_away||[])
-    // FIFA CARD
+    // 8. BONUS JOUEUR DU SOIR
     +buildFifa(m.joueur_decisif||null,m.top_scorers_home||[],m.top_scorers_away||[])
+    // 9. RESUME CONTEXTE + ENJEUX + MATCH ATTENDU (en bas)
+    +((m.contexte||m.enjeux||m.verdict_shark)?'<div class="sep"></div><div class="s"><div class="stitle">RÉSUMÉ DU MATCH</div><div class="ctx">'
+      +(m.contexte?'<div class="ctx-c"><div class="ctx-l">SITUATION</div><div class="ctx-t">'+m.contexte+'</div></div>':'')
+      +(m.enjeux?'<div class="ctx-c"><div class="ctx-l">ENJEUX</div><div class="ctx-t">'+m.enjeux+'</div></div>':'')
+      +(m.verdict_shark?'<div class="ctx-c"><div class="ctx-l">VERDICT SHARK</div><div class="ctx-t" style="color:var(--cyan)">'+m.verdict_shark+'</div></div>':'')
+      +'</div></div>':'')
     +'<div class="card-footer"></div></div></div>';
 }
 

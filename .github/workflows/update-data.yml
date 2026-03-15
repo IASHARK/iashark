@@ -2315,15 +2315,6 @@ jobs:
           async function main() {
             console.log('=== IASHARK', TODAY, '===');
             var fixtures = await getFixtures();
-            var nowParis = new Date(new Date().toLocaleString('en-US', {timeZone:'Europe/Paris'}));
-            var nowTotal = nowParis.getHours()*60+nowParis.getMinutes();
-            fixtures = fixtures.filter(function(fix){
-              var dateStr = fix.fixture&&fix.fixture.date||'';
-              if(!dateStr) return true;
-              var dParis = new Date(new Date(dateStr).toLocaleString('en-US', {timeZone:'Europe/Paris'}));
-              return dParis.getHours()*60+dParis.getMinutes() > nowTotal+30;
-            });
-            console.log('Matchs restants:', fixtures.length);
             console.log('Fixtures trouves:', fixtures.length);
             if (!fixtures.length) {
               fs.writeFileSync('data.json', JSON.stringify({matchs:[],combis:[]},null,2));

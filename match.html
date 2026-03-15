@@ -161,6 +161,25 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 /* JAUGES */
 .jauge-wrap{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px;}
 .jauge-col{}
+/* Double bar patterns */
+.pat-double-wrap{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px;}
+.pat-double-col{}
+.pat-col-hdr{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:1px;margin-bottom:10px;padding-bottom:7px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.pat-legend{display:flex;gap:8px;}
+.pat-leg{font-family:'Space Mono',monospace;font-size:6px;letter-spacing:0.5px;opacity:0.7;}
+.pat-leg-blue{color:var(--cyan);}
+.pat-leg-red{color:#ef4444;}
+.pat-double-row{display:flex;align-items:flex-start;gap:6px;padding:3px 0;}
+.pat-slot-lbl{font-family:'Space Mono',monospace;font-size:7px;color:var(--muted);width:32px;flex-shrink:0;padding-top:3px;}
+.pat-bars{flex:1;display:flex;flex-direction:column;gap:3px;}
+.pat-bar-row{display:flex;align-items:center;gap:5px;}
+.pat-bar-track{flex:1;height:5px;background:rgba(255,255,255,0.04);border-radius:3px;overflow:hidden;}
+.pat-bar-fill{height:100%;border-radius:3px;transition:width .8s ease;}
+.pf-blue{background:linear-gradient(90deg,rgba(34,211,238,0.5),rgba(34,211,238,0.9));}
+.pf-red{background:linear-gradient(90deg,rgba(239,68,68,0.4),rgba(239,68,68,0.8));}
+.pat-bar-val{font-family:'Bebas Neue',sans-serif;font-size:12px;color:var(--text);line-height:1;width:24px;text-align:right;flex-shrink:0;}
+.pat-bar-unit{font-family:'Space Mono',monospace;font-size:6px;color:var(--muted);}
+@media(max-width:480px){.pat-double-wrap{grid-template-columns:1fr;}}
 .jauge-team-lbl{font-family:'Space Mono',monospace;font-size:7px;letter-spacing:1px;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--border);}
 .jauge-sub-lbl{font-family:'Space Mono',monospace;font-size:7px;color:var(--muted);letter-spacing:1px;margin-bottom:5px;margin-top:4px;}
 .jauge-row{display:flex;align-items:center;gap:7px;padding:4px 0;border-radius:5px;}
@@ -336,11 +355,11 @@ function buildComp(hn,an,ch,ca){
 
 function buildPatterns(hn,an,evH,evA,m){
   if(!evH&&!evA&&!m) return '';
-  var hn3=hn.slice(0,3).toUpperCase(), an3=an.slice(0,3).toUpperCase();
   var gamesH=(evH&&evH.games)||20;
   var gamesA=(evA&&evA.games)||20;
 
-  // ── Grille stats moy/match ──────────────────────────────
+  // ── Grille stats ────────────────────────────────────────
+  var hn3=hn.slice(0,3).toUpperCase(), an3=an.slice(0,3).toUpperCase();
   function statRow(lbl,nh,na){
     if(!nh&&!na) return '';
     return '<div class="pat-stat-row"><span class="pat-stat-lbl">'+lbl+'</span>'
@@ -357,7 +376,7 @@ function buildPatterns(hn,an,evH,evA,m){
     +statRow('Fautes / match', m&&m.xgH_fouls, m&&m.xgA_fouls)
     +'</div>';
 
-  // ── Jauges buts marqués + encaissés par tranche ──────────
+  // ── Tableau patterns ────────────────────────────────────
   var slotsH=evH&&evH.slots||[];
   var slotsA=evA&&evA.slots||[];
   var slotsCH=evH&&evH.slots_conceded||[];
@@ -365,77 +384,67 @@ function buildPatterns(hn,an,evH,evA,m){
   var jaugesHtml='';
 
   if(slotsH.length||slotsA.length){
-    // Max global pour normaliser les barres
     var allNs=slotsH.concat(slotsA).concat(slotsCH).concat(slotsCA).map(function(s){return parseInt(s.n)||0;});
     var maxN=Math.max.apply(null,allNs.concat([1]));
 
-    function jauge(slot, games, col, isConceded){
-      var n=parseInt(slot&&slot.n)||0;
-      var pct=Math.round((n/maxN)*100);
-      // Seuils sur n/games ratio
-      var ratio=n/Math.max(games,1);
-      var heat=ratio>=0.4?'hot':ratio>=0.25?'warm':'';
-      var fillCls=isConceded?(col==='h'?'h-conc':'a-conc'):col;
-      return '<div class="jauge-row '+(heat==='hot'?'jauge-hot':heat==='warm'?'jauge-warm':'')+'">'
-        +'<div class="jauge-lbl">'+slot.t+'</div>'
-        +'<div class="jauge-track"><div class="jauge-fill '+fillCls+'" style="width:'+pct+'%"></div></div>'
-        +'<div class="jauge-val">'+n+'<span class="jauge-unit">/'+games+'m</span></div>'
-        +(heat==='hot'?'<div class="jauge-tag">CHAUD</div>':heat==='warm'?'<div class="jauge-tag warm">ACTIF</div>':'')
+    function doubleRow(slotM, slotC, games){
+      var nm=parseInt(slotM&&slotM.n)||0;
+      var nc=parseInt(slotC&&slotC.n)||0;
+      var pctM=Math.round((nm/maxN)*100);
+      var pctC=Math.round((nc/maxN)*100);
+      var t=slotM?slotM.t:'—';
+      return '<div class="pat-double-row">'
+        +'<div class="pat-slot-lbl">'+t+'</div>'
+        +'<div class="pat-bars">'
+        // Ligne bleue — marqués
+        +'<div class="pat-bar-row">'
+        +'<div class="pat-bar-track"><div class="pat-bar-fill pf-blue" style="width:'+pctM+'%"></div></div>'
+        +'<div class="pat-bar-val">'+nm+'<span class="pat-bar-unit">/'+games+'</span></div>'
+        +'</div>'
+        // Ligne rouge — encaissés
+        +'<div class="pat-bar-row">'
+        +'<div class="pat-bar-track"><div class="pat-bar-fill pf-red" style="width:'+pctC+'%"></div></div>'
+        +'<div class="pat-bar-val">'+nc+'<span class="pat-bar-unit">/'+games+'</span></div>'
+        +'</div>'
+        +'</div>'
         +'</div>';
     }
 
-    var slots6H=slotsH.length>=6?slotsH:[{t:'0-15',n:0,avg:'0'},{t:'15-30',n:0,avg:'0'},{t:'30-45',n:0,avg:'0'},{t:'45-60',n:0,avg:'0'},{t:'60-75',n:0,avg:'0'},{t:'75-90',n:0,avg:'0'}];
-    var slots6A=slotsA.length>=6?slotsA:slots6H.map(function(s){return {t:s.t,n:0,avg:'0'};});
-    var slots6CH=slotsCH.length>=6?slotsCH:slots6H.map(function(s){return {t:s.t,n:0,avg:'0'};});
-    var slots6CA=slotsCA.length>=6?slotsCA:slots6H.map(function(s){return {t:s.t,n:0,avg:'0'};});
+    var s6H=slotsH.length>=6?slotsH:[{t:'0-15',n:0},{t:'15-30',n:0},{t:'30-45',n:0},{t:'45-60',n:0},{t:'60-75',n:0},{t:'75-90',n:0}];
+    var s6A=slotsA.length>=6?slotsA:s6H.map(function(s){return {t:s.t,n:0};});
+    var s6CH=slotsCH.length>=6?slotsCH:s6H.map(function(s){return {t:s.t,n:0};});
+    var s6CA=slotsCA.length>=6?slotsCA:s6H.map(function(s){return {t:s.t,n:0};});
 
-    jaugesHtml='<div class="jauge-wrap">'
-      // DOM — marqués + encaissés
-      +'<div class="jauge-col">'
-      +'<div class="jauge-team-lbl" style="color:var(--cyan)">'+hn.slice(0,14).toUpperCase()+'</div>'
-      +'<div class="jauge-sub-lbl">⚽ Buts marqués / '+gamesH+' matchs</div>'
-      +slots6H.map(function(s){return jauge(s,gamesH,'h',false);}).join('')
-      +'<div class="jauge-sub-lbl" style="margin-top:10px">🛡 Buts encaissés / '+gamesH+' matchs</div>'
-      +slots6CH.map(function(s){return jauge(s,gamesH,'h',true);}).join('')
+    jaugesHtml='<div class="pat-double-wrap">'
+      // DOM
+      +'<div class="pat-double-col">'
+      +'<div class="pat-col-hdr"><span style="color:var(--cyan)">'+hn.slice(0,12).toUpperCase()+'</span>'
+      +'<div class="pat-legend"><span class="pat-leg pat-leg-blue">⚽ Marqués</span><span class="pat-leg pat-leg-red">🛡 Encaissés</span></div>'
       +'</div>'
-      // EXT — marqués + encaissés
-      +'<div class="jauge-col">'
-      +'<div class="jauge-team-lbl">'+an.slice(0,14).toUpperCase()+'</div>'
-      +'<div class="jauge-sub-lbl">⚽ Buts marqués / '+gamesA+' matchs</div>'
-      +slots6A.map(function(s){return jauge(s,gamesA,'a',false);}).join('')
-      +'<div class="jauge-sub-lbl" style="margin-top:10px">🛡 Buts encaissés / '+gamesA+' matchs</div>'
-      +slots6CA.map(function(s){return jauge(s,gamesA,'a',true);}).join('')
+      +s6H.map(function(s,i){return doubleRow(s,s6CH[i],gamesH);}).join('')
+      +'</div>'
+      // EXT
+      +'<div class="pat-double-col">'
+      +'<div class="pat-col-hdr"><span>'+an.slice(0,12).toUpperCase()+'</span>'
+      +'<div class="pat-legend"><span class="pat-leg pat-leg-blue">⚽ Marqués</span><span class="pat-leg pat-leg-red">🛡 Encaissés</span></div>'
+      +'</div>'
+      +s6A.map(function(s,i){return doubleRow(s,s6CA[i],gamesA);}).join('')
       +'</div>'
       +'</div>';
 
-    // ── Commentaire auto ────────────────────────────────────
-    function topSlotN(slots){
-      var best=null,bestN=-1;
-      (slots||[]).forEach(function(s){var n=parseInt(s.n)||0;if(n>bestN){bestN=n;best=s;}});
-      return best;
-    }
-    function halfLabel(t){
-      if(!t) return '';
-      return parseInt(t.split('-')[0])<45?'1ère mi-temps':'2ème mi-temps';
-    }
-    var topH=topSlotN(slotsH), topA=topSlotN(slotsA);
-    var allSlots=slots6H.map(function(s,i){
-      return {t:s.t,nH:parseInt(s.n)||0,nA:parseInt((slots6A[i]||{}).n)||0,total:(parseInt(s.n)||0)+(parseInt((slots6A[i]||{}).n)||0)};
-    });
-    allSlots.sort(function(a,b){return b.total-a.total;});
-    var hotSlot=allSlots[0];
-
-    var commentLines=[];
-    if(topH&&parseInt(topH.n)>0) commentLines.push('<strong>'+hn+'</strong> marque surtout entre <strong>'+topH.t+'</strong> ('+topH.n+' buts sur '+gamesH+' matchs) — '+halfLabel(topH.t)+'.');
-    if(topA&&parseInt(topA.n)>0) commentLines.push('<strong>'+an+'</strong> est le plus dangereux entre <strong>'+topA.t+'</strong> ('+topA.n+' buts sur '+gamesA+' matchs) — '+halfLabel(topA.t)+'.');
-    if(hotSlot&&hotSlot.total>0) commentLines.push('Tranche la plus à risque combinée : <strong>'+hotSlot.t+'</strong> ('+hotSlot.total+' buts au total).');
-
-    var commentHtml=commentLines.length?'<div class="pat-comment">'+commentLines.join(' ')+'</div>':'';
-    jaugesHtml=commentHtml+jaugesHtml;
+    // Commentaire
+    function topN(slots){var b=null,bv=-1;(slots||[]).forEach(function(s){var n=parseInt(s.n)||0;if(n>bv){bv=n;b=s;}});return b;}
+    function half(t){return t&&parseInt(t.split('-')[0])<45?'1ère MT':'2ème MT';}
+    var tH=topN(slotsH),tA=topN(slotsA);
+    var lines=[];
+    if(tH&&parseInt(tH.n)>0) lines.push('<strong>'+hn+'</strong> marque surtout <strong>'+tH.t+'</strong> ('+tH.n+'/'+gamesH+' matchs) — '+half(tH.t)+'.');
+    if(tA&&parseInt(tA.n)>0) lines.push('<strong>'+an+'</strong> le plus dangereux <strong>'+tA.t+'</strong> ('+tA.n+'/'+gamesA+' matchs) — '+half(tA.t)+'.');
+    if(lines.length) jaugesHtml='<div class="pat-comment">'+lines.join(' ')+'</div>'+jaugesHtml;
   }
 
   return '<div class="s"><div class="stitle">PATTERNS — DOM / EXT</div>'+statsHtml+jaugesHtml+'</div><div class="sep"></div>';
 }
+
 
 function buildScen(m){
   var sc15=m.scenario_15min||null;

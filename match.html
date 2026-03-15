@@ -499,28 +499,29 @@ function render(m){
   var meteo='';
   if(m.meteo)meteo='<div class="meteo">'+(m.meteo.temp?'<span class="meteo-item">'+m.meteo.temp+'°C</span>':'')+(m.meteo.desc?'<span class="meteo-item">'+m.meteo.desc+'</span>':'')+(m.meteo.vent?'<span class="meteo-item">'+m.meteo.vent+' km/h</span>':'')+'</div>';
 
-  // PARIS RECOMMANDE — pari principal + score prédit intégré
+  // PARIS RECOMMANDE — jauge intégrée, sans edge/kelly/bankroll
   var pv=p3&&p3.valeur||null;
   var sp=m.score_predit||null;
   var pmHtml='';
-  var pariRec=pv?pv.bet:(m.pari_rec||'');
-  var pariCote=pv?pv.cote:(m.cote_rec||'—');
-  var pariBk=pv?pv.bookie:(bk?bk.n:'');
+  var pariRec=m.pari_rec||'';
+  var pariCote=m.cote_rec||'—';
+  var pariBk=bk?bk.n:'';
   var pariHint=pv?pv.hint:'';
-  var pariMise=pv?pv.mise:'2-3% bankroll';
   var cMin=pariCote&&pariCote!=='—'?((parseFloat(pariCote)-0.20).toFixed(2)):'';
   if(pariRec){
-    var scoreBlock='';
-    if(sp){
-      var spScore=(sp.score||'?-?').replace('-','—');
-      scoreBlock='<div class="pm-score-band"><div><div class="pm-score-lbl">SCORE LE PLUS PROBABLE</div><div class="pm-score">'+spScore+'</div>'+(sp.prob?'<div class="pm-score-sub">'+sp.prob+' de probabilité</div>':'')+'</div>'+(sp.cote_implicite?'<div><div class="pm-ci-lbl">COTE IMPLICITE</div><div class="pm-ci">'+sp.cote_implicite+'</div></div>':'')+'</div>';
-    }
+    var spScore=sp?((sp.score||'?-?').replace('-','—')):'';
+    var scoreBlock=sp?'<div class="pm-score-band"><div><div class="pm-score-lbl">SCORE LE PLUS PROBABLE</div><div class="pm-score">'+spScore+'</div>'+(sp.prob?'<div class="pm-score-sub">'+sp.prob+' de probabilité</div>':'')+'</div>'+(sp.cote_implicite?'<div><div class="pm-ci-lbl">COTE IMPLICITE</div><div class="pm-ci">'+sp.cote_implicite+'</div></div>':'')+'</div>':'';
+    var jaugeInline='<div class="conf-inline">'
+      +'<div class="conf-top"><div><div class="conf-score">'+(m.conf||0).toFixed(1)+'<sup>/10</sup></div></div><div style="text-align:right"><div class="conf-badge"'+confStyle+'>'+confLvl+'</div></div></div>'
+      +'<div class="conf-track"><div class="conf-fill" style="width:'+confPct+'%"></div></div>'
+      +'<div class="conf-scale"><span>PRUDENT</span><span>CONFIANT</span><span>ELEVE</span><span>LOCK</span></div>'
+      +'</div>';
     pmHtml='<div class="s"><div class="stitle">PARIS RECOMMANDE</div>'
       +'<div class="pari-main">'
       +'<div class="pm-top"><div class="pm-left"><div class="pm-lbl">SELECTION IA DU SOIR</div><div class="pm-bet">'+pariRec.toUpperCase()+'</div>'+(pariHint?'<div class="pm-hint">'+pariHint+'</div>':'')+'</div><div class="pm-right"><div class="pm-cote">'+pariCote+'</div><div class="pm-bk">'+pariBk+'</div></div></div>'
-      +scoreBlock
-      +'<div class="pm-foot">'+(m.edge?'<span class="pm-tag edge">EDGE '+m.edge+'</span>':'')+(m.kelly?'<span class="pm-tag kelly">KELLY '+m.kelly+'%</span>':'')+'<span class="pm-tag mise">'+pariMise+'</span></div>'
+      +jaugeInline
       +(cMin?'<div class="pm-warn">Si la cote passe sous '+cMin+' — ne pas jouer</div>':'')
+      +scoreBlock
       +'</div>'
       +'</div><div class="sep"></div>';
   }
@@ -535,31 +536,29 @@ function render(m){
   return '<div class="wrap"><div class="card '+(isHot?'hot':'')+'">'
     // TOPBAR
     +'<div class="topbar"><div class="lg-row"><span style="font-size:14px">'+(m.ligue_icon||'🏆')+'</span><span class="lg-name">'+(m.league||'').toUpperCase()+(m.round?' · '+m.round:'')+'</span></div><div class="badges">'+(heure?'<span class="badge time">'+heure+'</span>':'')+(isHot?'<span class="badge hot">SHARK LOCK</span>':isVal?'<span class="badge val">VALUE BET</span>':'')+'</div></div>'
-    // TEAMS
+    // TEAMS + PROBAS
     +'<div class="teams"><div class="teams-row"><div class="team home">'+lgImg(m.home,hn.slice(0,2).toUpperCase())+'<div class="team-name">'+hn.toUpperCase()+'</div><div class="team-sub">DOMICILE</div>'+(forme(m.forme_h)?'<div class="team-form">'+forme(m.forme_h)+'</div>':'')+'</div><div class="vs-col"><span class="vs">VS</span>'+(heure?'<div class="vs-hr">'+heure+'</div>':'')+'</div><div class="team away">'+lgImg(m.away,an.slice(0,2).toUpperCase())+'<div class="team-name">'+an.toUpperCase()+'</div><div class="team-sub">EXTERIEUR</div>'+(forme(m.forme_a)?'<div class="team-form">'+forme(m.forme_a)+'</div>':'')+'</div></div><div class="pbar"><div class="pb1" style="width:'+(m.p1||0)+'%"></div><div class="pbn" style="width:'+(m.pn||0)+'%"></div><div class="pb2" style="width:'+(m.p2||0)+'%"></div></div><div class="plabels"><div class="pi"><div class="pi-pct" style="color:var(--cyan)">'+(m.p1||0)+'%</div><div class="pi-lbl">'+hn.slice(0,8).toUpperCase()+'</div></div><div class="pi"><div class="pi-pct" style="color:var(--muted)">'+(m.pn||0)+'%</div><div class="pi-lbl">NUL</div></div><div class="pi"><div class="pi-pct" style="color:rgba(226,232,240,0.45)">'+(m.p2||0)+'%</div><div class="pi-lbl">'+an.slice(0,8).toUpperCase()+'</div></div></div>'+meteo+'</div>'
-    // CONTEXTE
-    +((m.contexte||m.enjeux)?'<div class="s pt"><div class="stitle">CONTEXTE</div><div class="ctx">'+(m.contexte?'<div class="ctx-c"><div class="ctx-l">SITUATION</div><div class="ctx-t">'+m.contexte+'</div></div>':'')+(m.enjeux?'<div class="ctx-c"><div class="ctx-l">ENJEUX</div><div class="ctx-t">'+m.enjeux+'</div></div>':'')+'</div></div>':'<div style="height:13px"></div>')
     +'<div class="sep"></div>'
-    // COMP
-    +'<div class="s"><div class="stitle">ANALYSE COMPARATIVE</div>'+buildComp(hn,an,m.crit_home,m.crit_away)+'</div><div class="sep"></div>'
-    // PARIS RECOMMANDE (avec score prédit intégré)
+    // 1. PARIS RECOMMANDE (jauge intégrée, sans badges)
     +pmHtml
-    // FACTEUR
-    +(m.facteur_x?'<div class="s"><div class="facteur"><div class="fact-icon">⚡</div><div><div class="fact-lbl">FACTEUR DECISIF</div><div class="fact-txt">'+m.facteur_x+'</div></div></div></div>':'')
-    +'<div class="sep"></div>'
-    // CONFIANCE
-    +'<div class="s"><div class="stitle">JAUGE DE CONFIANCE</div><div class="conf"><div class="conf-top"><div><div class="conf-score">'+(m.conf||0).toFixed(1)+'<sup>/10</sup></div></div><div style="text-align:right"><div class="conf-badge"'+confStyle+'>'+confLvl+'</div><div class="conf-hint">'+(m.argument?(m.argument.split('.')[0]):'')+'</div></div></div><div class="conf-track"><div class="conf-fill" style="width:'+confPct+'%"></div></div><div class="conf-scale"><span>PRUDENT</span><span>CONFIANT</span><span>ELEVE</span><span>LOCK</span></div></div></div>'
-    // CONSEIL
-    +((m.conseil_public||m.analyse)?'<div class="s"><div class="conseil"><div class="conseil-lbl">CONSEIL IA</div><div class="conseil-txt">'+(m.conseil_public||m.analyse)+'</div></div></div>':'')
-    +'<div class="sep"></div>'
-    // PATTERNS
+    // 2. FACTEUR IA (style facteur décisif, renommé)
+    +((m.conseil_public||m.analyse)?'<div class="s"><div class="facteur"><div class="fact-icon">⚡</div><div><div class="fact-lbl">FACTEUR IA</div><div class="fact-txt">'+(m.conseil_public||m.analyse)+'</div></div></div></div><div class="sep"></div>':'')
+    // 3. ANALYSE COMPARATIVE
+    +'<div class="s"><div class="stitle">ANALYSE COMPARATIVE</div>'+buildComp(hn,an,m.crit_home,m.crit_away)+'</div><div class="sep"></div>'
+    // 4. PATTERNS
     +buildPatterns(hn,an,m.events_home||null,m.events_away||null,m)
-    // SCENARIO
+    // 5. SCENARIO
     +buildScen(m)
-    // JOUEURS
+    // 6. BUTEURS CLES
     +buildPlayers(hn,an,m.top_scorers_home||[],m.top_scorers_away||[])
-    // FIFA CARD
+    // 7. BONUS JOUEUR DU SOIR
     +buildFifa(m.joueur_decisif||null,m.top_scorers_home||[],m.top_scorers_away||[])
+    // 8. VERDICT DU SHARK — situation + enjeux + résumé mélangés en 1 bloc
+    +((m.contexte||m.enjeux||m.verdict_shark)?'<div class="sep"></div><div class="s"><div class="verdict-shark-block">'
+      +'<div class="verdict-shark-badge">🦈 VERDICT DU SHARK</div>'
+      +(m.verdict_shark?'<div class="verdict-shark-title">'+m.verdict_shark+'</div>':'')
+      +((m.contexte||m.enjeux)?'<div class="verdict-shark-body">'+(m.contexte||'')+( m.contexte&&m.enjeux?' ':'')+(m.enjeux||'')+'</div>':'')
+      +'</div></div>':'')
     +'<div class="card-footer"></div></div></div>';
 }
 

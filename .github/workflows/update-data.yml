@@ -130,7 +130,7 @@ jobs:
             if(kelly<=0) return null; // pas de valeur
             return Math.min(kelly*fraction*100, 5).toFixed(1); // max 5% bankroll
           }
-          const LEAGUES  = [140]; // TEST La Liga only
+          const LEAGUES  = [140]; // TEST
           const SEASON   = 2025;
           const TODAY    = new Date().toISOString().split('T')[0];
           var LG_KEY = {
@@ -2304,7 +2304,7 @@ jobs:
           async function main() {
             console.log('=== IASHARK', TODAY, '===');
             var fixtures = await getFixtures();
-            fixtures = fixtures.slice(0, 1); // TEST 1 match only
+            fixtures = fixtures.slice(0, 1); // TEST
             console.log('Fixtures trouves:', fixtures.length);
             if (!fixtures.length) {
               fs.writeFileSync('data.json', JSON.stringify({matchs:[],combis:[]},null,2));
@@ -2414,24 +2414,35 @@ jobs:
               function calcEventsPattern(eventsArr, teamId) {
                 var allEvts=[].concat.apply([],eventsArr);
                 var teamEvts=allEvts.filter(function(e){return e.team&&e.team.id===teamId;});
+                var oppEvts=allEvts.filter(function(e){return e.team&&e.team.id!==teamId;});
                 var allGoals=teamEvts.filter(function(e){return e.type==='Goal'&&e.detail!=='Missed Penalty';});
+                var concGoals=oppEvts.filter(function(e){return e.type==='Goal'&&e.detail!=='Missed Penalty';});
                 var games=Math.max(eventsArr.length,1);
-                function goalsIn(min1,min2){return allGoals.filter(function(e){var m=e.time&&e.time.elapsed||0;return m>=min1&&m<min2;}).length;}
+                function goalsIn(min1,min2,arr){return arr.filter(function(e){var m=e.time&&e.time.elapsed||0;return m>=min1&&m<min2;}).length;}
                 var allCorners=[].concat.apply([],eventsArr).filter(function(e){return e.detail==='Corner'&&e.team&&e.team.id===teamId;});
                 var redCards=teamEvts.filter(function(e){return e.type==='Card'&&e.detail==='Red Card';}).length;
                 var yellowCards=teamEvts.filter(function(e){return e.type==='Card'&&e.detail==='Yellow Card';}).length;
-                // Slots en moyenne par match (1 décimale)
                 function avg(n){return (n/games).toFixed(2);}
                 return {
                   goals_total: allGoals.length,
                   goals_avg: avg(allGoals.length),
+                  conceded_total: concGoals.length,
+                  conceded_avg: avg(concGoals.length),
                   slots: [
-                    {t:'0-15', n:goalsIn(0,15), avg:avg(goalsIn(0,15))},
-                    {t:'15-30',n:goalsIn(15,30),avg:avg(goalsIn(15,30))},
-                    {t:'30-45',n:goalsIn(30,45),avg:avg(goalsIn(30,45))},
-                    {t:'45-60',n:goalsIn(45,60),avg:avg(goalsIn(45,60))},
-                    {t:'60-75',n:goalsIn(60,75),avg:avg(goalsIn(60,75))},
-                    {t:'75-90',n:goalsIn(75,91),avg:avg(goalsIn(75,91))}
+                    {t:'0-15', n:goalsIn(0,15,allGoals), avg:avg(goalsIn(0,15,allGoals))},
+                    {t:'15-30',n:goalsIn(15,30,allGoals),avg:avg(goalsIn(15,30,allGoals))},
+                    {t:'30-45',n:goalsIn(30,45,allGoals),avg:avg(goalsIn(30,45,allGoals))},
+                    {t:'45-60',n:goalsIn(45,60,allGoals),avg:avg(goalsIn(45,60,allGoals))},
+                    {t:'60-75',n:goalsIn(60,75,allGoals),avg:avg(goalsIn(60,75,allGoals))},
+                    {t:'75-90',n:goalsIn(75,91,allGoals),avg:avg(goalsIn(75,91,allGoals))}
+                  ],
+                  slots_conceded: [
+                    {t:'0-15', n:goalsIn(0,15,concGoals), avg:avg(goalsIn(0,15,concGoals))},
+                    {t:'15-30',n:goalsIn(15,30,concGoals),avg:avg(goalsIn(15,30,concGoals))},
+                    {t:'30-45',n:goalsIn(30,45,concGoals),avg:avg(goalsIn(30,45,concGoals))},
+                    {t:'45-60',n:goalsIn(45,60,concGoals),avg:avg(goalsIn(45,60,concGoals))},
+                    {t:'60-75',n:goalsIn(60,75,concGoals),avg:avg(goalsIn(60,75,concGoals))},
+                    {t:'75-90',n:goalsIn(75,91,concGoals),avg:avg(goalsIn(75,91,concGoals))}
                   ],
                   corners_per_game: (allCorners.length/games).toFixed(1),
                   red_cards: redCards,

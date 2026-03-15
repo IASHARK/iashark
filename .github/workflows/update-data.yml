@@ -1448,9 +1448,9 @@ jobs:
           async function loadClubElo() {
             if(clubEloCache) return clubEloCache;
             try {
-              var https = require('https');
+              var http = require('http');
               var csv = await new Promise(function(resolve, reject){
-                https.get('http://api.clubelo.com/'+TODAY, function(res){
+                http.get('http://api.clubelo.com/'+TODAY, function(res){
                   var data='';
                   res.on('data',function(c){data+=c;});
                   res.on('end',function(){resolve(data);});
@@ -2307,7 +2307,7 @@ jobs:
                 var played=rs&&rs.response&&rs.response.fixtures&&rs.response.fixtures.played&&rs.response.fixtures.played.total||null;
                 var conceded=rs&&rs.response&&rs.response.goals&&rs.response.goals.against&&rs.response.goals.against.total&&rs.response.goals.against.total.total||null;
                 xgConcededCache[tid]=(played&&conceded&&played>0)?(conceded/played):null;
-                await sleep(120);
+                await sleep(80);
               }catch(e){xgConcededCache[allTeamIds[ti]]=null;}
             }
             console.log('Cache xG prêt. Valeurs nulles:', Object.values(xgConcededCache).filter(function(v){return v===null;}).length+'/'+allTeamIds.length);
@@ -2468,10 +2468,10 @@ jobs:
               // ── CALCUL POISSON ────────────────────────────────────
               var mdHdom_p=(sH&&sH.fixtures&&sH.fixtures.played&&sH.fixtures.played.home)||10;
               var meAext_p=(sA&&sA.fixtures&&sA.fixtures.played&&sA.fixtures.played.away)||10;
-              var bmHdom_p=(sH&&sH.goals&&sH.goals.for&&sH.goals.for.home)||0;
-              var beHdom_p=(sH&&sH.goals&&sH.goals.against&&sH.goals.against.home)||0;
-              var bmAext_p=(sA&&sA.goals&&sA.goals.for&&sA.goals.for.away)||0;
-              var beAext_p=(sA&&sA.goals&&sA.goals.against&&sA.goals.against.away)||0;
+              var bmHdom_p=(sH&&sH.goals&&sH.goals.for&&sH.goals.for.total&&sH.goals.for.total.home)||0;
+              var beHdom_p=(sH&&sH.goals&&sH.goals.against&&sH.goals.against.total&&sH.goals.against.total.home)||0;
+              var bmAext_p=(sA&&sA.goals&&sA.goals.for&&sA.goals.for.total&&sA.goals.for.total.away)||0;
+              var beAext_p=(sA&&sA.goals&&sA.goals.against&&sA.goals.against.total&&sA.goals.against.total.away)||0;
               var lambdas = calcLambdas(bmHdom_p, beHdom_p, mdHdom_p, bmAext_p, beAext_p, meAext_p);
               // Ajustement xG si disponible
               if(xgH.xg_avg&&xgA.xg_avg){

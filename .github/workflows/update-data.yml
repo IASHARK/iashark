@@ -130,7 +130,7 @@ jobs:
             if(kelly<=0) return null; // pas de valeur
             return Math.min(kelly*fraction*100, 5).toFixed(1); // max 5% bankroll
           }
-          const LEAGUES  = [39, 61, 140, 135, 78, 2, 3, 40, 66, 307, 143, 137, 81];
+          const LEAGUES  = [140]; // TEST La Liga only
           const SEASON   = 2025;
           const TODAY    = new Date().toISOString().split('T')[0];
           var LG_KEY = {
@@ -2173,12 +2173,12 @@ jobs:
               +'Si le match est très incertain : garde un pari simple (DC, Under), confiance ≤ 5/10, risque = ÉLEVÉ.\\n'
               +'passe_ton_tour = true UNIQUEMENT si les cotes sont toutes absentes ou illisibles.\\n\\n'
               +'RÈGLES ABSOLUES:\\n'
-              +'- conseil, verdict_shark, facteur_x parlent TOUS du même pari que pari_rec.\\n'
+              +'- conseil, verdict_shark et facteur_x parlent TOUS du MÊME ET UNIQUE pari que pari_rec.\\n'
               +'- paris_3: 3 marchés différents, même scénario. INTERDITS ensemble: BTTS Oui + Under 1.5 | BTTS Non + Over 2.5 | Over 2.5 + Under 2.5.\\n'
               +'- specu cote >= 2.00. Cote > 3.00: uniquement avec une raison tactique explicite.\\n'
               +'- Ne jamais inventer une stat.\\n\\n'
               +'=== JSON STRICT — RIEN D\'AUTRE ===\\n'
-              +'{"confiance":7.2,"verdict_shark":"[pari] à [cote] — [raison tactique en 1 phrase directe]","passe_ton_tour":false,"passe_ton_tour_raison":"","scenario":{"phase1":"0-25min: comment le match démarre tactiquement","phase2":"25-65min: comment le match évolue","phase3":"65-90min: comment le match se finit"},"scenario_15min":[{"t":"0-15min","prob":8,"txt":"contexte tactique du début"},{"t":"15-30min","prob":12,"txt":"première vraie phase"},{"t":"30-45min","prob":10,"txt":"fin de première mi-temps"},{"t":"45-60min","prob":15,"txt":"début deuxième mi-temps"},{"t":"60-75min","prob":18,"txt":"phase décisive"},{"t":"75-90min","prob":20,"txt":"fin de match"}],"score_top":{"score":"1-0","prob":28},"facteur_x":"1 seul facteur décisif: absence clé OU série en cours OU style tactique dominant","pari_rec":"Over 2.5 / BTTS Non / BTTS Oui / Victoire X / DC 1X / DC X2 / Under 2.5 / Nul","cote_rec":"[cote exacte du tableau ci-dessus]","marche":"RESULTAT|DOUBLE_CHANCE|TOTAL_BUTS|BTTS|UNDER","risque":"FAIBLE|MODERE|ELEVE","vbet":"OUI|NON","edge":"+X%","argument":"1. [stat tactique DOM/EXT]. 2. [stat complémentaire]. 3. [raison contextuelle si pertinente].","analyse_card":"2-3 phrases sur les forces/faiblesses des deux équipes","conseil":"3-4 phrases qui expliquent le pari de façon simple, sans jargon financier","contexte":"2-3 phrases sur le classement et la situation des équipes","enjeux":"1 phrase sur ce que représente ce match","scores_probables":"X-X,X-X,X-X","p1":45,"pn":28,"p2":27,"po15":80,"po25":55,"btts":50,"kelly":"2.1","paris_3":{"safe":{"bet":"[pari le plus sûr cote>=1.40]","cote":"[exacte]","hint":"[stat qui justifie]","mise":"4-5% bankroll","bookie":"Betclic"},"valeur":{"bet":"[pari différent du safe avec edge]","cote":"[exacte]","hint":"[pourquoi ce marché est sous-évalué]","mise":"2-3% bankroll","bookie":"Winamax"},"specu":{"bet":"[pari différent des deux, cote>=2.00]","cote":"[exacte]","hint":"[raison tactique]","mise":"0.5-1% bankroll","bookie":"Bet365"}},"joueur_decisif":{"nom":"[joueur le plus dangereux selon stats]","equipe":"DOM|EXT","marche":"Premier buteur|Buteur dans le match","cote_estimee":"3.50-4.50","raison":"[1 stat clé]","absent":false}}\\n\\n'
+              +'{"confiance":7.2,"verdict_shark":"[pari] à [cote] — [raison tactique en 1 phrase directe]","passe_ton_tour":false,"passe_ton_tour_raison":"","scenario":{"phase1":"0-25min: comment le match démarre tactiquement","phase2":"25-65min: comment le match évolue","phase3":"65-90min: comment le match se finit"},"scenario_15min":[{"t":"0-15min","prob":8,"txt":"contexte tactique du début"},{"t":"15-30min","prob":12,"txt":"première vraie phase"},{"t":"30-45min","prob":10,"txt":"fin de première mi-temps"},{"t":"45-60min","prob":15,"txt":"début deuxième mi-temps"},{"t":"60-75min","prob":18,"txt":"phase décisive"},{"t":"75-90min","prob":20,"txt":"fin de match"}],"score_top":{"score":"1-0","prob":28},"facteur_x":"1 seul facteur décisif: absence clé OU série en cours OU style tactique dominant","pari_rec":"Over 2.5 / BTTS Non / BTTS Oui / Victoire X / DC 1X / DC X2 / Under 2.5 / Nul","cote_rec":"[cote exacte du tableau ci-dessus]","marche":"RESULTAT|DOUBLE_CHANCE|TOTAL_BUTS|BTTS|UNDER","risque":"FAIBLE|MODERE|ELEVE","vbet":"OUI|NON","edge":"+X%","argument":"1. [stat tactique DOM/EXT]. 2. [stat complémentaire]. 3. [raison contextuelle si pertinente].","analyse_card":"2-3 phrases sur les forces/faiblesses des deux équipes","conseil":"3-4 phrases qui expliquent le pari de façon simple, sans jargon financier","contexte":"2-3 phrases sur le classement et la situation des équipes","enjeux":"1 phrase sur ce que représente ce match","scores_probables":"X-X,X-X,X-X","p1":45,"pn":28,"p2":27,"po15":80,"po25":55,"btts":50,"kelly":"2.1","joueur_decisif":{"nom":"[joueur le plus dangereux selon stats]","equipe":"DOM|EXT","marche":"Premier buteur|Buteur dans le match","cote_estimee":"3.50-4.50","raison":"[1 stat clé]","absent":false}}\\n\\n'
               +'CONTRAINTES FINALES: p1+pn+p2=100 | confiance max 8.5 | kelly = valeur du modèle si disponible sinon edge/(cote-1)*0.25 | vbet=OUI si edge>=5% ET 1.40<=cote<=3.00 | specu cote>=2.00';
             var r = await postJSONWithRetry('api.anthropic.com', '/v1/messages', {
               model: 'claude-sonnet-4-6',
@@ -2304,6 +2304,7 @@ jobs:
           async function main() {
             console.log('=== IASHARK', TODAY, '===');
             var fixtures = await getFixtures();
+            fixtures = fixtures.slice(0, 1); // TEST 1 match only
             console.log('Fixtures trouves:', fixtures.length);
             if (!fixtures.length) {
               fs.writeFileSync('data.json', JSON.stringify({matchs:[],combis:[]},null,2));
@@ -2829,9 +2830,9 @@ jobs:
                 vbet:an?(an.vbet||'NON'):'NON',
                 value_calc:an?(an.edge||''):'',
                 scores:an?((an.scores_probables||'').split(',').map(function(s){return s.trim();}).filter(Boolean)):[],
-                paris_3:an?(an.paris_3||null):null,
+                paris_3: null,
                 joueur_decisif:an?(an.joueur_decisif||null):null,
-                paris_safe:{bet:an?(an.pari_rec||''):'',cote:odds.c1,proba:an?(an.p1||0)+'%':''},
+                paris_safe:{bet:an?(an.pari_rec||''):'', cote:an?(parseFloat(an.cote_rec)||odds.c1):odds.c1, proba:an?(an.p1||0)+'%':''},
                 paris_risque:{bet:'',cote:'',proba:''},
                 kelly:kellyVal,
                 stade:{
@@ -2897,46 +2898,6 @@ jobs:
               return {label:c.label,type:c.type,selections:c.selections,matchs:c.matchs,cote_totale:c.cote_totale,conseil:c.conseil};
             });
 
-            if (matchsData.length > 0) {
-              console.log('\n=== TRADUCTION EN COURS ===');
-              var LANGS_TR = ['en'];
-              var LANG_NAMES_TR = {en:'English'};
-              for (var li = 0; li < LANGS_TR.length; li++) {
-                var lg = LANGS_TR[li];
-                var lgName = LANG_NAMES_TR[lg];
-                try {
-                  var textsForLang = matchsData.map(function(m) {
-                    return {id:m.id, a:m.analyse_card||'', c:m.conseil_public||'', p:m.pari_rec||'', v:m.verdict_shark||'', fx:m.facteur_x||''};
-                  });
-                  var trPrompt = 'Translate these football betting analyses to ' + lgName + '.\n'
-                    + 'Rules: keep BTTS, Over 2.5, Under 2.5, Double Chance, Edge, Value Bet in English. Do not translate team names.\n'
-                    + 'Return ONLY valid JSON array, no markdown, no explanation:\n'
-                    + '[{"id":1,"a":"analyse_card","c":"conseil","p":"pari_rec","v":"verdict_shark","fx":"facteur_x"},...]\n\n'
-                    + JSON.stringify(textsForLang);
-                  var trResp = await postJSONWithRetry('api.anthropic.com', '/v1/messages', {
-                    model: 'claude-haiku-4-5-20251001',
-                    max_tokens: 2000,
-                    messages: [{role:'user', content: trPrompt}]
-                  }, {'x-api-key': ANT_KEY, 'anthropic-version': '2023-06-01'});
-                  var trText = (trResp.content&&trResp.content[0]&&trResp.content[0].text)||'[]';
-                  var trClean = trText.replace(/```json|```/g,'').trim();
-                  var trData = JSON.parse(trClean);
-                  trData.forEach(function(tr) {
-                    var m = matchsData.find(function(x){return x.id===tr.id;});
-                    if (!m) return;
-                    m['analyse_card_'+lg] = tr.a||m.analyse_card;
-                    m['conseil_public_'+lg] = tr.c||m.conseil_public;
-                    m['pari_rec_'+lg] = tr.p||m.pari_rec;
-                    m['verdict_shark_'+lg] = tr.v||m.verdict_shark;
-                    m['facteur_x_'+lg] = tr.fx||m.facteur_x;
-                  });
-                  console.log('  ' + lgName + ' OK');
-                } catch(e) {
-                  console.log('  ' + lgName + ' erreur: ' + e.message);
-                }
-              }
-              console.log('  Traduction terminee pour ' + matchsData.length + ' matchs');
-            }
             fs.writeFileSync('data.json', JSON.stringify({matchs:matchsData,combis:combisData},null,2));
             console.log('\n=== DONE: '+matchsData.length+' matchs | '+combisData.length+' combis ===');
 
@@ -3019,9 +2980,8 @@ jobs:
                   return p.fixture_id===m.id || (p.home===m.home.n && p.away===m.away.n && p.date&&p.date.substring(0,10)===TODAY);
                 });
                 if(!alreadyExists) {
-                  var safeEntry = m.paris_3 && m.paris_3.safe;
-                  var betLabel = safeEntry && safeEntry.bet ? safeEntry.bet : m.pari_rec;
-                  var betCote  = safeEntry && safeEntry.cote ? parseFloat(safeEntry.cote)||null : parseFloat(m.cote_rec)||null;
+                  var betLabel = m.pari_rec;
+                  var betCote  = parseFloat(m.cote_rec) || null;
                   // Marché normalisé pour le backtesting
                   var marketType = 'autre';
                   if(betLabel){
@@ -3214,7 +3174,7 @@ jobs:
 
             console.log('\n=== MULTILINGUAL PIPELINE START ===');
             generateWorldCupPages();
-            await generateMultilingualMatchPages(matchsData);
+            // await generateMultilingualMatchPages(matchsData);
 
             // ── RÉCUPÉRER MATCHS J+3 à J+10 pour previews ──
             var upcomingFixtures = [];
@@ -3255,10 +3215,10 @@ jobs:
               console.log('  Fixtures a venir erreur: '+e.message);
             }
 
-            await generateBlogArticles(matchsData, upcomingFixtures);
-            await generateTranslatedGuides();
-            await generateBlogGuideIndexPages();
-            await generateBlogIndexPages(matchsData, upcomingFixtures);
+            // await generateBlogArticles(matchsData, upcomingFixtures);
+            // await generateTranslatedGuides();
+            // await generateBlogGuideIndexPages();
+            // await generateBlogIndexPages(matchsData, upcomingFixtures);
             generateSitemaps(matchsData);
             console.log('\n=== MULTILINGUAL DONE ===');
           }
@@ -3279,7 +3239,5 @@ jobs:
           git config user.name "IASHARK"
           git config user.email "yaramode81@gmail.com"
           git add data.json historique.json sitemap.xml sitemap-*.xml
-          git add en/ es/ pt/ de/ it/ ar/ tr/ nl/ pl/ id/ no/ sv/ ro/ el/ cs/ hu/ sr/ uk/ ru/ ja/ ko/ th/ hi/ ms/ da/ fi/ sw/ 2>/dev/null || true
-          git add blog/ 2>/dev/null || true
-          git diff --staged --quiet || git commit -m "Daily update + multilingual - $(date +%Y-%m-%d)"
+          git diff --staged --quiet || git commit -m "Daily update - $(date +%Y-%m-%d)"
           git push

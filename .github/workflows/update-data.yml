@@ -2118,34 +2118,28 @@ jobs:
               +'\\n=== H2H ===\\n'+h2hStr+'\\n\\n'
               +'=== FATIGUE ===\\n'
               +d.home+': '+d.fatH+' | '+d.away+': '+d.fatA+'\\n\\n'
-              // INDICE DE MOTIVATION
               +(d.motivH||d.motivA?'=== ENJEU DU MATCH ===\\n'
               +(d.motivH&&d.motivH.alerts&&d.motivH.alerts.length?d.home+' ('+d.motivH.label+'): '+d.motivH.alerts.join(' | ')+'\\n':d.home+': Enjeu standard\\n')
               +(d.motivA&&d.motivA.alerts&&d.motivA.alerts.length?d.away+' ('+d.motivA.label+'): '+d.motivA.alerts.join(' | ')+'\\n':d.away+': Enjeu standard\\n')
               +(d.motivH&&d.motivH.isDerby?'🔥 DERBY DÉTECTÉ — résultat imprévisible, prudence sur les favoris\\n':'')
               +'\\n':'')
-              // MATCHUP TACTIQUE
               +(d.matchup?'=== OPPOSITION TACTIQUE ===\\n'
               +d.home+' joue: '+d.matchup.styleH+' (possession moy: '+d.matchup.possH+'% | def: '+d.matchup.defH+' buts encaissés/match)\\n'
               +d.away+' joue: '+d.matchup.styleA+' (possession moy: '+d.matchup.possA+'% | def: '+d.matchup.defA+' buts encaissés/match)\\n'
               +(d.matchup.insights&&d.matchup.insights.length?d.matchup.insights.join('\\n')+'\\n':'')
               +'\\n':'')
-              // ALERTES ABSENCES CLÉS + GARDIEN
               +(d.keyAbsenceAlerts&&d.keyAbsenceAlerts.length?'=== ABSENCES CLÉS ===\\n'
               +d.keyAbsenceAlerts.join('\\n')+'\\n\\n':'')
-              // RISQUE DISCIPLINAIRE
               +(d.disciplineRisk&&d.disciplineRisk.alerts&&d.disciplineRisk.alerts.length?'=== RISQUE DISCIPLINAIRE ===\\n'
               +d.disciplineRisk.alerts.join('\\n')+'\\n'
               +'Conseil: '+d.disciplineRisk.conseil+'\\n\\n':'')
               +'=== CE QUE LE MODÈLE MATHÉMATIQUE A CALCULÉ ===\\n'
               +'(Tu n\'as PAS à recalculer ces chiffres. Ils sont donnés pour information.)'+'\\n'
-              // ELO
               +(d.eloH&&d.eloA?'Score ELO: '+d.home+' '+Math.round(d.eloH)+' pts | '+d.away+' '+Math.round(d.eloA)+' pts | Écart: '+(d.eloStats?d.eloStats.diff:0)+' pts (signal '+(d.eloStats?d.eloStats.signal:'?')+')\\n'
               +(d.eloStats?'Bonus domicile appliqué: +'+d.eloStats.homeBonus+' pts (basé sur bilan DOM réel)\\n':'')
               +(d.eloStats&&Math.abs(d.eloStats.diff)>=100?'⚠️ ELO: écart de force SIGNIFICATIF — méfie-toi des paris sur l\'équipe la plus faible\\n':'')
               +(d.eloStats&&d.eloStats.diff<-100?'🔔 ELO: '+d.away+' (EXT) est objectivement plus fort — pari sur l\'outsider DOM risqué\\n':'')
               :'')
-              // Dropping odds
               +(d.droppingOdds&&d.droppingOdds.length?'💰 SMART MONEY — Mouvement de cotes Pinnacle depuis hier:\\n'
               +d.droppingOdds.map(function(dr){return '  → '+dr.team+': cote '+dr.dir+' de '+dr.coteOuv+' → '+dr.coteCurr+' ('+Math.abs(dr.pct)+'%) — signal '+(Math.abs(dr.pct)>=10?'FORT':'MODÉRÉ');}).join('\\n')+'\\n'
               +'  Note: une baisse de cote = argent des pros misé dans ce sens — signal très fiable\\n'
@@ -2153,10 +2147,9 @@ jobs:
               +'Buts attendus: '+d.home+' '+d.poisson_lambdaH+' | '+d.away+' '+d.poisson_lambdaA+'\\n'
               +'Probas Poisson: DOM '+d.poisson_p1+'% | Nul '+d.poisson_pN+'% | EXT '+d.poisson_p2+'%\\n'
               +'Over 2.5: '+d.poisson_over25+'% | Under 2.5: '+d.poisson_under25+'% | BTTS Oui: '+d.poisson_bttsY+'% | BTTS Non: '+d.poisson_bttsN+'%\\n'
-              // xGA
-              +(d.xgH_xga||d.xgA_xga?'xGA (buts qu\'ils auraient dû encaisser/match): '+d.home+' '+( d.xgH_xga||'N/A')+' | '+d.away+' '+(d.xgA_xga||'N/A')+'\\n'
-              +(d.xgH_defense_surchauffe?'⚠️ ALERTE: Défense '+d.home+' en SURCHAUFFE — concède beaucoup d\'occasions malgré peu de buts — risque de craquer\\n':'')
-              +(d.xgA_defense_surchauffe?'⚠️ ALERTE: Défense '+d.away+' en SURCHAUFFE — même signal\\n':'')
+              +(d.xgH_xga||d.xgA_xga?'xGA (buts qu\'ils auraient dû encaisser/match): '+d.home+' '+(d.xgH_xga||'N/A')+' | '+d.away+' '+(d.xgA_xga||'N/A')+'\\n'
+              +(d.xgH_defense_surchauffe?'⚠️ ALERTE: Défense '+d.home+' en SURCHAUFFE\\n':'')
+              +(d.xgA_defense_surchauffe?'⚠️ ALERTE: Défense '+d.away+' en SURCHAUFFE\\n':'')
               :'')
               +(d.pinnacle_p1?'Pinnacle (marché sharp): DOM '+d.pinnacle_p1+'% (cote '+d.pinnacle_c1+') | Nul '+d.pinnacle_pN+'% | EXT '+d.pinnacle_p2+'% (cote '+d.pinnacle_c2+')\\n':'')
               +(d.best_edge?'Meilleur pari détecté: '+d.best_edge_market+' à '+d.best_edge_cote+' | Edge: +'+d.best_edge+'% | Kelly: '+d.node_kelly+'% bankroll\\n'
@@ -2169,28 +2162,24 @@ jobs:
               +(d.dc1x&&d.dc1x!=='--'?'DC 1X: '+d.dc1x+' | DC X2: '+d.dc2x+'\\n':'')+'\\n'
               +'=== TA MISSION ===\\n'
               +'ÉTAPE 1 — Ton point de départ est le "Meilleur pari détecté" ci-dessus (basé sur l\'Edge mathématique).\\n'
-              +'C\'est le pari le plus solide selon le modèle. Commence toujours par lui.\\n\\n'
               +'ÉTAPE 2 — Vérifie si le monde réel casse ce calcul. Pose-toi ces 4 questions dans l\'ordre :\\n'
-              +'  → [DÉFENSE] Les stats défensives (buts encaissés/match, clean sheets, xGA, slots_conceded) contredisent-elles un pari offensif (Over, BTTS Oui) ? Si les deux équipes encaissent peu → privilégier Under ou BTTS Non.\\n'
-              +'  → [ABSENCES] Un absent clé (buteur principal, gardien titulaire) change-t-il radicalement le scénario ?\\n'
+              +'  → [DÉFENSE] Les stats défensives (buts encaissés, clean sheets) contredisent-elles un pari offensif (Over, BTTS) ? Si les deux équipes encaissent peu → privilégier Under ou BTTS Non.\\n'
+              +'  → [ABSENCES] Un absent clé change-t-il radicalement le scénario ?\\n'
               +'  → [MOTIVATION] La motivation (relégation, derby, titre) favorise-t-elle ou défavorise-t-elle l\'équipe qu\'on parie ?\\n'
-              +'  → [PERTURBATION] L\'arbitre sévère, la météo ou un risque disciplinaire crée-t-il une perturbation majeure ?\\n'
-              +'Si OUI à 1 question → ajuste légèrement ou baisse la confiance de 1 à 2 points.\\n'
-              +'Si OUI à 2 questions ou plus → change de marché pour un plus sûr (Double Chance ou Under 2.5) et baisse la confiance à ≤ 5/10.\\n\\n'
+              +'  → [PERTURBATION] L\'arbitre sévère ou la météo crée-t-il une perturbation majeure ?\\n'
+              +'Si OUI à 1 question → ajuste légèrement ou baisse la confiance de 1 à 2 points.\\n\\n'
               +'ÉTAPE 3 — Donne TOUJOURS un pronostic. La cote choisie DOIT OBLIGATOIREMENT être comprise entre 1.50 et 3.00.\\n'
-              +'Si le pari le plus "safe" (ex: Victoire du grand favori ou Double Chance) a une cote "poubelle" inférieure à 1.50 (ex: 1.22), il t\'est STRICTEMENT INTERDIT de le choisir.\\n'
+              +'Si le pari le plus "safe" a une cote "poubelle" inférieure à 1.50 (ex: 1.22), il t\'est STRICTEMENT INTERDIT de le choisir.\\n'
               +'Dans ce cas, tu dois te rabattre sur un autre de tes 6 marchés autorisés (Over, Under, BTTS, DC) dont la cote est bien entre 1.50 et 3.00.\\n'
               +'Comme ce pari est choisi "par défaut" pour respecter la règle des cotes minimales et s\'avère très risqué tactiquement, tu DOIS OBLIGATOIREMENT lui mettre une TRÈS MAUVAISE NOTE de confiance (ex: 2/10, 3/10 ou 4/10) et définir le risque sur "ELEVE" pour alerter l\'utilisateur qu\'il ne faut pas le jouer.\\n'
               +'passe_ton_tour = false en permanence.\\n\\n'
               +'RÈGLES ABSOLUES:\\n'
               +'- SEULS CES 6 MARCHÉS SONT AUTORISÉS : Over 2.5, Under 2.5, BTTS Oui, BTTS Non, DC 1X, DC X2. Les victoires sèches (1 ou 2) et les Nuls sont STRICTEMENT INTERDITS.\\n'
               +'- conseil, verdict_shark et facteur_x parlent TOUS du MÊME ET UNIQUE pari que pari_rec.\\n'
-              +'- paris_3: 3 marchés différents, même scénario. INTERDITS ensemble: BTTS Oui + Under 1.5 | BTTS Non + Over 2.5 | Over 2.5 + Under 2.5.\\n'
-              +'- specu cote >= 2.00. Cote > 2.30: uniquement avec une raison tactique explicite.\\n'
               +'- Ne jamais inventer une stat.\\n\\n'
               +'=== JSON STRICT — RIEN D\'AUTRE ===\\n'
-              +'{"confiance":7.2,"verdict_shark":"[pari] à [cote] — [raison tactique en 1 phrase directe]","passe_ton_tour":false,"passe_ton_tour_raison":"","scenario":{"phase1":"0-25min: comment le match démarre tactiquement","phase2":"25-65min: comment le match évolue","phase3":"65-90min: comment le match se finit"},"scenario_15min":[{"t":"0-15min","prob":8,"txt":"contexte tactique du début"},{"t":"15-30min","prob":12,"txt":"première vraie phase"},{"t":"30-45min","prob":10,"txt":"fin de première mi-temps"},{"t":"45-60min","prob":15,"txt":"début deuxième mi-temps"},{"t":"60-75min","prob":18,"txt":"phase décisive"},{"t":"75-90min","prob":20,"txt":"fin de match"}],"score_top":{"score":"1-0","prob":28},"facteur_x":"1 seul facteur décisif: absence clé OU série en cours OU style tactique dominant","pari_rec":"Over 2.5 / Under 2.5 / BTTS Oui / BTTS Non / DC 1X / DC X2","cote_rec":"[cote exacte du tableau ci-dessus]","marche":"DOUBLE_CHANCE|TOTAL_BUTS|BTTS","risque":"FAIBLE|MODERE|ELEVE","vbet":"OUI|NON","edge":"+X%","argument":"1. [stat tactique DOM/EXT]. 2. [stat complémentaire]. 3. [raison contextuelle si pertinente].","analyse_card":"2-3 phrases sur les forces/faiblesses des deux équipes","conseil":"3-4 phrases qui expliquent le pari de façon simple, sans jargon financier","contexte":"2-3 phrases sur le classement et la situation des équipes","enjeux":"1 phrase sur ce que représente ce match","scores_probables":"X-X,X-X,X-X","p1":45,"pn":28,"p2":27,"po15":80,"po25":55,"btts":50,"kelly":"2.1","joueur_decisif":{"nom":"[joueur le plus dangereux selon stats]","equipe":"DOM|EXT","marche":"Premier buteur|Buteur dans le match","cote_estimee":"3.50-4.50","raison":"[1 stat clé]","absent":false}}\\n\\n'
-              +'CONTRAINTES FINALES: p1+pn+p2=100 | confiance max 8.5 | La cote_rec DOIT être entre 1.50 et 3.00 | vbet=OUI si edge>=5%';
+              +\'{"confiance":7.2,"verdict_shark":"[pari] à [cote] — [raison tactique en 1 phrase directe]","passe_ton_tour":false,"scenario":{"phase1":"0-25min: comment le match démarre tactiquement","phase2":"25-65min: comment le match évolue","phase3":"65-90min: comment le match se finit"},"scenario_15min":[{"t":"0-15min","prob":8,"txt":"contexte tactique du début"},{"t":"15-30min","prob":12,"txt":"première vraie phase"},{"t":"30-45min","prob":10,"txt":"fin de première mi-temps"},{"t":"45-60min","prob":15,"txt":"début deuxième mi-temps"},{"t":"60-75min","prob":18,"txt":"phase décisive"},{"t":"75-90min","prob":20,"txt":"fin de match"}],"facteur_x":"1 seul facteur décisif: absence clé OU série en cours OU style tactique dominant","pari_rec":"Over 2.5 / Under 2.5 / BTTS Oui / BTTS Non / DC 1X / DC X2","cote_rec":"[cote exacte du tableau ci-dessus]","marche":"DOUBLE_CHANCE|TOTAL_BUTS|BTTS","risque":"FAIBLE|MODERE|ELEVE","vbet":"OUI|NON","edge":"+X%","analyse_card":"2-3 phrases sur les forces/faiblesses des deux équipes","conseil":"3-4 phrases qui expliquent le pari de façon simple, sans jargon financier","contexte":"2-3 phrases sur le classement et la situation des équipes","enjeux":"1 phrase sur ce que représente ce match","scores_probables":"X-X,X-X,X-X","kelly":"2.1","joueur_decisif":{"nom":"[joueur le plus dangereux selon stats]","equipe":"DOM|EXT","marche":"Buteur dans le match","cote_estimee":"3.50-4.50","raison":"[1 stat clé]","absent":false}}\\n\\n\'
+              +\'CONTRAINTES FINALES: confiance max 8.5 | La cote_rec DOIT être entre 1.50 et 3.00 | vbet=OUI si edge>=5% ET cote>=1.50 ET confiance>=6.5\';
             var r = await postJSONWithRetry('api.anthropic.com', '/v1/messages', {
               model: 'claude-sonnet-4-6',
               max_tokens: 8000,

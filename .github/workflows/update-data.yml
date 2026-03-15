@@ -484,11 +484,11 @@ jobs:
               +' Return ONLY a valid JSON array of objects with "title" and "desc" keys.'
               +' No markdown, no backticks, no explanation. Only the JSON array.\n'
               +JSON.stringify(texts);
-            var r = await postJSON('api.anthropic.com', '/v1/messages', {
+            var r = await postJSONWithRetry('api.anthropic.com', '/v1/messages', {
               model: 'claude-sonnet-4-6',
               max_tokens: 3000,
               messages: [{role:'user', content:prompt}]
-            }, {'x-api-key':ANT_KEY, 'anthropic-version':'2023-06-01'});
+            }, {'x-api-key':ANT_KEY, 'anthropic-version':'2023-06-01', 'anthropic-beta':'interleaved-thinking-2025-05-14'});
             var txt = (r.content&&r.content[0]&&r.content[0].text)||'[]';
             try { return JSON.parse(txt.replace(/```json|```/g,'').trim()); }
             catch(e) { console.log('  Translation parse error for '+lang+', using fallback'); return texts; }
@@ -1017,7 +1017,7 @@ jobs:
           function get(url, headers) {
             return new Promise(function(resolve) {
               var u = new URL(url);
-              var timer = setTimeout(function(){ resolve({}); }, 20000);
+              var timer = setTimeout(function(){ resolve({}); }, 8000);
               https.get({
                 hostname:u.hostname, path:u.pathname+u.search,
                 headers:Object.assign({'User-Agent':'IASHARK/1.0'}, headers||{})
@@ -1031,7 +1031,7 @@ jobs:
           function postJSON(host, path, body, headers) {
             return new Promise(function(resolve) {
               var data = JSON.stringify(body);
-              var timer = setTimeout(function(){ resolve({}); }, 180000); // 180s pour Opus
+              var timer = setTimeout(function(){ console.log('  TIMEOUT 180s'); resolve({}); }, 180000);
               var req = https.request({
                 hostname:host, path:path, method:'POST',
                 headers:Object.assign({
@@ -1041,11 +1041,31 @@ jobs:
               }, function(res) {
                 var d='';
                 res.on('data',function(c){d+=c;});
-                res.on('end',function(){ clearTimeout(timer); try{resolve(JSON.parse(d));}catch(e){resolve({});} });
+                res.on('end',function(){
+                  clearTimeout(timer);
+                  try{
+                    var parsed=JSON.parse(d);
+                    if(parsed.error) console.log('  API ERROR type='+parsed.error.type+' msg='+(parsed.error.message||'').slice(0,100));
+                    resolve(parsed);
+                  }catch(e){ console.log('  Parse error status='+res.statusCode); resolve({}); }
+                });
               });
-              req.on('error',function(){ clearTimeout(timer); resolve({}); });
+              req.on('error',function(e){ clearTimeout(timer); console.log('  req error:'+e.message); resolve({}); });
               req.write(data); req.end();
             });
+          }
+          async function postJSONWithRetry(host, path, body, headers) {
+            for(var attempt=1; attempt<=4; attempt++){
+              var r = await postJSON(host, path, body, headers);
+              if(r.error && (r.error.type==='overloaded_error'||r.error.type==='rate_limit_error')){
+                var wait=attempt*30000;
+                console.log('  Rate limit — attente '+(wait/1000)+'s tentative '+attempt+'/4');
+                await sleep(wait);
+                continue;
+              }
+              return r;
+            }
+            return {};
           }
           function sleep(ms) { return new Promise(function(r){ setTimeout(r,ms); }); }
           async function getFixtures() {
@@ -2160,7 +2180,7 @@ jobs:
               +'=== JSON STRICT — RIEN D\'AUTRE ===\\n'
               +'{"confiance":7.2,"verdict_shark":"[pari] à [cote] — [raison tactique en 1 phrase directe]","passe_ton_tour":false,"passe_ton_tour_raison":"","scenario":{"phase1":"0-25min: comment le match démarre tactiquement","phase2":"25-65min: comment le match évolue","phase3":"65-90min: comment le match se finit"},"scenario_15min":[{"t":"0-15min","prob":8,"txt":"contexte tactique du début"},{"t":"15-30min","prob":12,"txt":"première vraie phase"},{"t":"30-45min","prob":10,"txt":"fin de première mi-temps"},{"t":"45-60min","prob":15,"txt":"début deuxième mi-temps"},{"t":"60-75min","prob":18,"txt":"phase décisive"},{"t":"75-90min","prob":20,"txt":"fin de match"}],"score_top":{"score":"1-0","prob":28},"facteur_x":"1 seul facteur décisif: absence clé OU série en cours OU style tactique dominant","pari_rec":"Over 2.5 / BTTS Non / BTTS Oui / Victoire X / DC 1X / DC X2 / Under 2.5 / Nul","cote_rec":"[cote exacte du tableau ci-dessus]","marche":"RESULTAT|DOUBLE_CHANCE|TOTAL_BUTS|BTTS|UNDER","risque":"FAIBLE|MODERE|ELEVE","vbet":"OUI|NON","edge":"+X%","argument":"1. [stat tactique DOM/EXT]. 2. [stat complémentaire]. 3. [raison contextuelle si pertinente].","analyse_card":"2-3 phrases sur les forces/faiblesses des deux équipes","conseil":"3-4 phrases qui expliquent le pari de façon simple, sans jargon financier","contexte":"2-3 phrases sur le classement et la situation des équipes","enjeux":"1 phrase sur ce que représente ce match","scores_probables":"X-X,X-X,X-X","p1":45,"pn":28,"p2":27,"po15":80,"po25":55,"btts":50,"kelly":"2.1","paris_3":{"safe":{"bet":"[pari le plus sûr cote>=1.40]","cote":"[exacte]","hint":"[stat qui justifie]","mise":"4-5% bankroll","bookie":"Betclic"},"valeur":{"bet":"[pari différent du safe avec edge]","cote":"[exacte]","hint":"[pourquoi ce marché est sous-évalué]","mise":"2-3% bankroll","bookie":"Winamax"},"specu":{"bet":"[pari différent des deux, cote>=2.00]","cote":"[exacte]","hint":"[raison tactique]","mise":"0.5-1% bankroll","bookie":"Bet365"}},"joueur_decisif":{"nom":"[joueur le plus dangereux selon stats]","equipe":"DOM|EXT","marche":"Premier buteur|Buteur dans le match","cote_estimee":"3.50-4.50","raison":"[1 stat clé]","absent":false}}\\n\\n'
               +'CONTRAINTES FINALES: p1+pn+p2=100 | confiance max 8.5 | kelly = valeur du modèle si disponible sinon edge/(cote-1)*0.25 | vbet=OUI si edge>=5% ET 1.40<=cote<=3.00 | specu cote>=2.00';
-            var r = await postJSON('api.anthropic.com', '/v1/messages', {
+            var r = await postJSONWithRetry('api.anthropic.com', '/v1/messages', {
               model: 'claude-opus-4-6',
               max_tokens: 16000,
               thinking: {type:'enabled', budget_tokens:10000},
@@ -2191,11 +2211,11 @@ jobs:
               +'{"c1":{"label":"SHARK SAFE","type":"safe","selections":"[Ex: Over 1.5 + Double Chance 1X]","matchs":"match1, match2","cote_totale":"1.85","conseil":"Explication courte basée sur la sécurité des marchés"},'
               +'"c2":{"label":"SHARK VALUE","type":"value","selections":"[Ex: BTTS Oui + Over 1.5 + Under 3.5]","matchs":"m1, m2, m3","cote_totale":"3.20","conseil":"..."},'
               +'"c3":{"label":"SHARK EXPERT","type":"audace","selections":"[Ex: BTTS Oui + Over 1.5 + DC 1X + Over 1.5]","matchs":"m1, m2, m3, m4","cote_totale":"5.50","conseil":"..."}}';
-            var r = await postJSON('api.anthropic.com', '/v1/messages', {
+            var r = await postJSONWithRetry('api.anthropic.com', '/v1/messages', {
               model: 'claude-opus-4-6',
               max_tokens: 800,
               messages: [{role:'user', content:promptClassic}]
-            }, {'x-api-key':ANT_KEY, 'anthropic-version':'2023-06-01'});
+            }, {'x-api-key':ANT_KEY, 'anthropic-version':'2023-06-01', 'anthropic-beta':'interleaved-thinking-2025-05-14'});
             var txt = (r.content&&r.content[0]&&r.content[0].text)||'{}';
             var classics = [];
             try {
@@ -2894,7 +2914,7 @@ jobs:
                     + 'Return ONLY valid JSON array, no markdown, no explanation:\n'
                     + '[{"id":1,"a":"analyse_card","c":"conseil","p":"pari_rec","v":"verdict_shark","fx":"facteur_x"},...]\n\n'
                     + JSON.stringify(textsForLang);
-                  var trResp = await postJSON('api.anthropic.com', '/v1/messages', {
+                  var trResp = await postJSONWithRetry('api.anthropic.com', '/v1/messages', {
                     model: 'claude-haiku-4-5-20251001',
                     max_tokens: 2000,
                     messages: [{role:'user', content: trPrompt}]

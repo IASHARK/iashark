@@ -1031,7 +1031,7 @@ jobs:
           function postJSON(host, path, body, headers) {
             return new Promise(function(resolve) {
               var data = JSON.stringify(body);
-              var timer = setTimeout(function(){ resolve({}); }, 180000); // 180s pour Opus
+              var timer = setTimeout(function(){ console.log('  TIMEOUT postJSON après 180s'); resolve({}); }, 180000);
               var req = https.request({
                 hostname:host, path:path, method:'POST',
                 headers:Object.assign({
@@ -1041,9 +1041,19 @@ jobs:
               }, function(res) {
                 var d='';
                 res.on('data',function(c){d+=c;});
-                res.on('end',function(){ clearTimeout(timer); try{resolve(JSON.parse(d));}catch(e){resolve({});} });
+                res.on('end',function(){
+                  clearTimeout(timer);
+                  try{
+                    var parsed=JSON.parse(d);
+                    if(parsed.error) console.log('  API ERROR:', JSON.stringify(parsed.error));
+                    resolve(parsed);
+                  }catch(e){
+                    console.log('  JSON parse error, status:'+res.statusCode+' body:'+d.slice(0,300));
+                    resolve({});
+                  }
+                });
               });
-              req.on('error',function(){ clearTimeout(timer); resolve({}); });
+              req.on('error',function(e){ clearTimeout(timer); console.log('  req error:'+e.message); resolve({}); });
               req.write(data); req.end();
             });
           }

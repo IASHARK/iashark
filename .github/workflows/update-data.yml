@@ -2159,7 +2159,7 @@ jobs:
               +'- Ne jamais inventer une stat.\\n\\n'
               +'=== JSON STRICT — RIEN D\'AUTRE ===\\n'
               +'{"confiance":7.2,"verdict_shark":"[pari] à [cote] — [raison tactique en 1 phrase directe]","passe_ton_tour":false,"passe_ton_tour_raison":"","scenario":{"phase1":"0-25min: comment le match démarre tactiquement","phase2":"25-65min: comment le match évolue","phase3":"65-90min: comment le match se finit"},"scenario_15min":[{"t":"0-15min","prob":8,"txt":"contexte tactique du début"},{"t":"15-30min","prob":12,"txt":"première vraie phase"},{"t":"30-45min","prob":10,"txt":"fin de première mi-temps"},{"t":"45-60min","prob":15,"txt":"début deuxième mi-temps"},{"t":"60-75min","prob":18,"txt":"phase décisive"},{"t":"75-90min","prob":20,"txt":"fin de match"}],"score_top":{"score":"1-0","prob":28},"facteur_x":"1 seul facteur décisif: absence clé OU série en cours OU style tactique dominant","pari_rec":"Over 2.5 / BTTS Non / BTTS Oui / Victoire X / DC 1X / DC X2 / Under 2.5 / Nul","cote_rec":"[cote exacte du tableau ci-dessus]","marche":"RESULTAT|DOUBLE_CHANCE|TOTAL_BUTS|BTTS|UNDER","risque":"FAIBLE|MODERE|ELEVE","vbet":"OUI|NON","edge":"+X%","argument":"1. [stat tactique DOM/EXT]. 2. [stat complémentaire]. 3. [raison contextuelle si pertinente].","analyse_card":"2-3 phrases sur les forces/faiblesses des deux équipes","conseil":"3-4 phrases qui expliquent le pari de façon simple, sans jargon financier","contexte":"2-3 phrases sur le classement et la situation des équipes","enjeux":"1 phrase sur ce que représente ce match","scores_probables":"X-X,X-X,X-X","p1":45,"pn":28,"p2":27,"po15":80,"po25":55,"btts":50,"kelly":"2.1","paris_3":{"safe":{"bet":"[pari le plus sûr cote>=1.40]","cote":"[exacte]","hint":"[stat qui justifie]","mise":"4-5% bankroll","bookie":"Betclic"},"valeur":{"bet":"[pari différent du safe avec edge]","cote":"[exacte]","hint":"[pourquoi ce marché est sous-évalué]","mise":"2-3% bankroll","bookie":"Winamax"},"specu":{"bet":"[pari différent des deux, cote>=2.00]","cote":"[exacte]","hint":"[raison tactique]","mise":"0.5-1% bankroll","bookie":"Bet365"}},"joueur_decisif":{"nom":"[joueur le plus dangereux selon stats]","equipe":"DOM|EXT","marche":"Premier buteur|Buteur dans le match","cote_estimee":"3.50-4.50","raison":"[1 stat clé]","absent":false}}\\n\\n'
-              +'CONTRAINTES FINALES: p1+pn+p2=100 | confiance max 8.5 | kelly = valeur du modèle si disponible sinon edge/(cote-1)*0.25 | vbet=OUI si edge>=5% ET 1.40<=cote<=3.00 | specu cote>=2.00';
+              +'CONTRAINTES FINALES: p1+pn+p2=100 | confiance max 8.5 | kelly = valeur du modèle si disponible sinon edge/(cote-1)*0.25 | vbet=OUI si edge>=5% ET 1.40<=cote<=3.00 | specu cote>=2.00 | COTE MINIMUM ABSOLUE: cote_rec >= 1.40 — si le seul pari valide est sous 1.40 (ex: victoire PSG à 1.20) → choisir un autre marché (Over 1.5, BTTS Non, DC) avec cote >= 1.40';
             var r = await postJSON('api.anthropic.com', '/v1/messages', {
               model: 'claude-opus-4-6',
               max_tokens: 16000,
@@ -2178,19 +2178,21 @@ jobs:
             var promptClassic =
               'Expert paris sportifs IASHARK. Analyses du jour:\n'+lines+'\n\n'
               +'MISSION : Génère 3 combinés optimisés pour un TAUX DE RÉUSSITE MAXIMAL.\n'
-              +'RÈGLES D\'OR (À RESPECTER ABSOLUMENT) :\n'
-              +'- Armes absolues : Utilise massivement le "Over 1.5 Buts", le "Under 3.5 Buts" et le "BTTS Oui/Non". Les Double Chances sont autorisées.\n'
-              +'- BANNIS les victoires sèches (1 ou 2) dans le combiné SAFE.\n'
-              +'- AUCUNE OBLIGATION DE VARIÉTÉ : Si les 3 meilleurs paris sont des "Over 1.5", fais un combiné 100% Over 1.5. Concentre-toi sur la probabilité de gain, pas sur l\'esthétique.\n'
-              +'- Utilise UNIQUEMENT les paris avec confiance >= 7.0 de la liste ci-dessus.\n\n'
-              +'STRUCTURE REQUISE :\n'
-              +'- c1 "SHARK SAFE" : EXACTEMENT 2 matchs très sûrs. Cote totale entre 1.50 et 2.00.\n'
-              +'- c2 "SHARK VALUE" : 3 matchs maximum. Cote totale entre 2.50 et 4.00.\n'
-              +'- c3 "SHARK EXPERT" : 3 à 4 matchs maximum. Cote totale entre 4.00 et 6.00 maximum.\n\n'
+              +'RÈGLES D\'OR :\n'
+              +'- Utilise Over 1.5, Under 3.5, BTTS Oui/Non, Double Chance. Bannis les victoires sèches dans le SAFE.\n'
+              +'- COTE MINIMUM par sélection : 1.40. Jamais de sélection sous 1.40.\n'
+              +'- Chaque sélection = 1 match différent. Pas 2 sélections sur le même match.\n'
+              +'- AUCUNE OBLIGATION DE VARIÉTÉ : concentre-toi sur la probabilité de gain.\n\n'
+              +'STRUCTURE :\n'
+              +'- c1 "SHARK SAFE" : EXACTEMENT 2 matchs différents. Cote totale entre 1.50 et 2.20.\n'
+              +'- c2 "SHARK VALUE" : 3 matchs différents. Cote totale entre 2.50 et 4.00.\n'
+              +'- c3 "SHARK EXPERT" : 3 à 4 matchs différents. Cote totale entre 4.00 et 6.00 max.\n\n'
+              +'FORMAT OBLIGATOIRE pour "selections" : une ligne par sélection, format "Match : Pari (cote)"\n'
+              +'Exemple: "Rennes vs Lille : Over 1.5 (1.28)\\nLiverpool vs Tottenham : BTTS Oui (1.62)"\n\n'
               +'Reponds UNIQUEMENT avec ce JSON sans backticks:\n'
-              +'{"c1":{"label":"SHARK SAFE","type":"safe","selections":"[Ex: Over 1.5 + Double Chance 1X]","matchs":"match1, match2","cote_totale":"1.85","conseil":"Explication courte basée sur la sécurité des marchés"},'
-              +'"c2":{"label":"SHARK VALUE","type":"value","selections":"[Ex: BTTS Oui + Over 1.5 + Under 3.5]","matchs":"m1, m2, m3","cote_totale":"3.20","conseil":"..."},'
-              +'"c3":{"label":"SHARK EXPERT","type":"audace","selections":"[Ex: BTTS Oui + Over 1.5 + DC 1X + Over 1.5]","matchs":"m1, m2, m3, m4","cote_totale":"5.50","conseil":"..."}}';
+              +'{"c1":{"label":"SHARK SAFE","type":"safe","selections":"Match1 : Pari1 (cote1)\\nMatch2 : Pari2 (cote2)","cote_totale":"1.85","conseil":"1 phrase simple sur pourquoi ces 2 matchs sont sûrs"},'
+              +'"c2":{"label":"SHARK VALUE","type":"value","selections":"Match1 : Pari1 (cote1)\\nMatch2 : Pari2 (cote2)\\nMatch3 : Pari3 (cote3)","cote_totale":"3.20","conseil":"1 phrase simple"},'
+              +'"c3":{"label":"SHARK EXPERT","type":"audace","selections":"Match1 : Pari1 (cote1)\\nMatch2 : Pari2 (cote2)\\nMatch3 : Pari3 (cote3)","cote_totale":"5.50","conseil":"1 phrase simple"}}';
             var r = await postJSON('api.anthropic.com', '/v1/messages', {
               model: 'claude-opus-4-6',
               max_tokens: 800,
@@ -3000,9 +3002,9 @@ jobs:
                   return p.fixture_id===m.id || (p.home===m.home.n && p.away===m.away.n && p.date&&p.date.substring(0,10)===TODAY);
                 });
                 if(!alreadyExists) {
-                  var safeEntry = m.paris_3 && m.paris_3.safe;
-                  var betLabel = safeEntry && safeEntry.bet ? safeEntry.bet : m.pari_rec;
-                  var betCote  = safeEntry && safeEntry.cote ? parseFloat(safeEntry.cote)||null : parseFloat(m.cote_rec)||null;
+                  // TOUJOURS utiliser pari_rec — même pari partout (index + page match + historique)
+                  var betLabel = m.pari_rec || '';
+                  var betCote  = parseFloat(m.cote_rec)||null;
                   // Marché normalisé pour le backtesting
                   var marketType = 'autre';
                   if(betLabel){

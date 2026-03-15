@@ -130,7 +130,7 @@ jobs:
             if(kelly<=0) return null; // pas de valeur
             return Math.min(kelly*fraction*100, 5).toFixed(1); // max 5% bankroll
           }
-          const LEAGUES  = [140]; // TEST
+          const LEAGUES  = [39, 61, 140, 135, 78, 2, 3, 40, 66, 307, 143, 137, 81];
           const SEASON   = 2025;
           const TODAY    = new Date().toISOString().split('T')[0];
           var LG_KEY = {
@@ -2185,10 +2185,11 @@ jobs:
               +'{"confiance":7.2,"verdict_shark":"[pari] à [cote] — [raison tactique en 1 phrase directe]","passe_ton_tour":false,"passe_ton_tour_raison":"","scenario":{"phase1":"0-25min: comment le match démarre tactiquement","phase2":"25-65min: comment le match évolue","phase3":"65-90min: comment le match se finit"},"scenario_15min":[{"t":"0-15min","prob":8,"txt":"contexte tactique du début"},{"t":"15-30min","prob":12,"txt":"première vraie phase"},{"t":"30-45min","prob":10,"txt":"fin de première mi-temps"},{"t":"45-60min","prob":15,"txt":"début deuxième mi-temps"},{"t":"60-75min","prob":18,"txt":"phase décisive"},{"t":"75-90min","prob":20,"txt":"fin de match"}],"score_top":{"score":"1-0","prob":28},"facteur_x":"1 seul facteur décisif: absence clé OU série en cours OU style tactique dominant","pari_rec":"Over 2.5 / BTTS Non / BTTS Oui / Victoire X / DC 1X / DC X2 / Under 2.5 / Nul","cote_rec":"[cote exacte du tableau ci-dessus]","marche":"RESULTAT|DOUBLE_CHANCE|TOTAL_BUTS|BTTS|UNDER","risque":"FAIBLE|MODERE|ELEVE","vbet":"OUI|NON","edge":"+X%","argument":"1. [stat tactique DOM/EXT]. 2. [stat complémentaire]. 3. [raison contextuelle si pertinente].","analyse_card":"2-3 phrases sur les forces/faiblesses des deux équipes","conseil":"3-4 phrases qui expliquent le pari de façon simple, sans jargon financier","contexte":"2-3 phrases sur le classement et la situation des équipes","enjeux":"1 phrase sur ce que représente ce match","scores_probables":"X-X,X-X,X-X","p1":45,"pn":28,"p2":27,"po15":80,"po25":55,"btts":50,"kelly":"2.1","joueur_decisif":{"nom":"[joueur le plus dangereux selon stats]","equipe":"DOM|EXT","marche":"Premier buteur|Buteur dans le match","cote_estimee":"3.50-4.50","raison":"[1 stat clé]","absent":false}}\\n\\n'
               +'CONTRAINTES FINALES: p1+pn+p2=100 | confiance max 8.5 | kelly = valeur du modèle si disponible sinon edge/(cote-1)*0.25 | vbet=OUI si edge>=5% ET 1.40<=cote<=3.00 | specu cote>=2.00';
             var r = await postJSONWithRetry('api.anthropic.com', '/v1/messages', {
-              model: 'claude-sonnet-4-6',
-              max_tokens: 8000,
+              model: 'claude-opus-4-6',
+              max_tokens: 16000,
+              thinking: {type:'enabled', budget_tokens:16000},
               messages: [{role:'user', content:prompt}]
-            }, {'x-api-key':ANT_KEY, 'anthropic-version':'2023-06-01'});
+            }, {'x-api-key':ANT_KEY, 'anthropic-version':'2023-06-01', 'anthropic-beta':'interleaved-thinking-2025-05-14'});
             var txt = ((r.content||[]).find(function(b){return b.type==='text';})||{}).text||'{}';
             try { return JSON.parse(txt.replace(/```json|```/g,'').trim()); }
             catch(e) { console.log('Parse error:', txt.slice(0,200)); return null; }
@@ -2308,7 +2309,23 @@ jobs:
           async function main() {
             console.log('=== IASHARK', TODAY, '===');
             var fixtures = await getFixtures();
-            fixtures = fixtures.slice(0, 1); // TEST
+            // ── FILTRE SOIR — ne garder que les matchs pas encore joués ──
+            var nowParis = new Date(new Date().toLocaleString('en-US', {timeZone:'Europe/Paris'}));
+            var nowH = nowParis.getHours();
+            var nowM = nowParis.getMinutes();
+            var nowTotal = nowH * 60 + nowM;
+            fixtures = fixtures.filter(function(fix){
+              var dateStr = fix.fixture && fix.fixture.date || '';
+              if(!dateStr) return true;
+              var d = new Date(dateStr);
+              var dParis = new Date(d.toLocaleString('en-US', {timeZone:'Europe/Paris'}));
+              var fH = dParis.getHours();
+              var fM = dParis.getMinutes();
+              var fTotal = fH * 60 + fM;
+              // Garder si le match commence dans + de 30 min
+              return fTotal > (nowTotal + 30);
+            });
+            console.log('Matchs restants apres filtrage soir:', fixtures.length);
             console.log('Fixtures trouves:', fixtures.length);
             if (!fixtures.length) {
               fs.writeFileSync('data.json', JSON.stringify({matchs:[],combis:[]},null,2));

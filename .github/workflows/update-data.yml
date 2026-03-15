@@ -2426,10 +2426,16 @@ jobs:
               // Events des 20 derniers matchs de chaque equipe
               var last20IdsH = (raw10H||[]).slice(0,20).map(function(fx){return fx.fixture.id;});
               var last20IdsA = (raw10A||[]).slice(0,20).map(function(fx){return fx.fixture.id;});
-              var eventsH_raw = await Promise.all(last20IdsH.map(function(id){return getFixtureEvents(id);}));
-              await sleep(300);
-              var eventsA_raw = await Promise.all(last20IdsA.map(function(id){return getFixtureEvents(id);}));
-              await sleep(300);
+              var eventsH_raw = [];
+              for(var evi=0; evi<last20IdsH.length; evi++){
+                eventsH_raw.push(await getFixtureEvents(last20IdsH[evi]));
+                await sleep(150);
+              }
+              var eventsA_raw = [];
+              for(var evi=0; evi<last20IdsA.length; evi++){
+                eventsA_raw.push(await getFixtureEvents(last20IdsA[evi]));
+                await sleep(150);
+              }
               function calcEventsPattern(eventsArr, teamId) {
                 var allEvts=[].concat.apply([],eventsArr);
                 var teamEvts=allEvts.filter(function(e){return e.team&&e.team.id===teamId;});

@@ -2079,28 +2079,30 @@ jobs:
               if(!injStr) injStr='Aucune absence majeure.';
             }
             var prompt =
-              'Tu es le meilleur analyste tactique de football au monde. Tu vas lire ce match, comprendre comment il va se dérouler sur le terrain, et valider ou ajuster le pronostic que le modèle mathématique a déjà calculé. Réponds UNIQUEMENT avec un JSON valide, sans backtick, sans commentaire.\\n\\n'
+              'Tu es le meilleur analyste tactique de football au monde. Tu analyses AUSSI BIEN l\'attaque que la défense — tu ne favorises jamais un marché offensif si les stats défensives ne le justifient pas. Valide ou ajuste le pronostic du modèle. Réponds UNIQUEMENT avec un JSON valide, sans backtick, sans commentaire.\\n\\n'
               +'=== MATCH ===\\n'
               +d.home+' vs '+d.away+' | '+d.league+' | '+d.date+'\\n'
               +'Stade: '+d.stade+' | Météo: '+d.meteo+'\\n\\n'
               +'=== '+d.home.toUpperCase()+' — DOMICILE (classement #'+(d.rkH||'?')+') ===\\n'
-              +'Saison DOM: '+d.vdH+' victoires / '+d.mdHdom+' matchs | Buts marqués: '+moyBmHdom+'/match | Buts encaissés: '+moyBeHdom+'/match\\n'
-              +'Clean sheets DOM: '+d.csHdom+'/'+d.mdHdom+' | Matchs sans marquer DOM: '+d.failHdom+'/'+d.mdHdom+'\\n'
-              +'20 matchs DOM: '+d.domH20w+'V/'+d.domH20d+'N/'+d.domH20l+'D | Buts marqués: '+d.domH20bm+'/match | Encaissés: '+d.domH20be+'/match\\n'
+              +'[OFFENSIF DOM] Buts marqués: '+moyBmHdom+'/match | Matchs sans marquer: '+d.failHdom+'/'+d.mdHdom+' | Saison: '+d.vdH+'V/'+d.mdHdom+'matchs\\n'
+              +'[DÉFENSIF DOM] Buts encaissés: '+moyBeHdom+'/match | Clean sheets: '+d.csHdom+'/'+d.mdHdom+'\\n'
+              +'20 matchs DOM: '+d.domH20w+'V/'+d.domH20d+'N/'+d.domH20l+'D | Marqués: '+d.domH20bm+'/match | Encaissés: '+d.domH20be+'/match\\n'
               +'Forme récente (5 matchs): '+d.forme5H+' | '+d.d10H+'\\n'
               +(d.streakH?'Série en cours: '+d.streakH+'\\n':'')
-              +(d.evPatH&&d.evPatH.slots?'Dynamique sur 20 matchs -> Marqués par 15min: '+d.evPatH.slots.map(function(s){return s.t+':'+s.n;}).join(', ')+(d.evPatH.slots_conceded?' | Encaissés: '+d.evPatH.slots_conceded.map(function(s){return s.t+':'+s.n;}).join(', '):'')+'\\n':'')
-              +(d.evPatH?'Dynamique (20 matchs) -> Buts rapides (avant 30e): '+d.evPatH.goals_before30+' | Buts tardifs (après 70e): '+d.evPatH.goals_after70+'\\n':'')
-              +(d.xgH_avg?'xG moyen (10 matchs): '+d.xgH_avg+' | xG pondéré (difficulté adversaire): '+(d.xgH_weighted||'N/A')+'\\n':'')+'\\n'
+              +(d.evPatH&&d.evPatH.slots?'[OFFENSIF 15min] Marqués: '+d.evPatH.slots.map(function(s){return s.t+':'+s.n;}).join(', ')+'\\n':'')
+              +(d.evPatH&&d.evPatH.slots_conceded?'[DÉFENSIF 15min] Encaissés: '+d.evPatH.slots_conceded.map(function(s){return s.t+':'+s.n;}).join(', ')+'\\n':'')
+              +(d.evPatH?'Buts rapides (avant 30e): '+d.evPatH.goals_before30+' | Buts tardifs (après 70e): '+d.evPatH.goals_after70+'\\n':'')
+              +(d.xgH_avg?'xG offensif moy: '+d.xgH_avg+(d.xgH_xga?' | xGA défensif moy: '+d.xgH_xga:'')+(d.xgH_defense_surchauffe?' ⚠️ DÉFENSE EN SURCHAUFFE':'')+' | xG pondéré: '+(d.xgH_weighted||'N/A')+'\\n':'')+'\\n'
               +'=== '+d.away.toUpperCase()+' — EXTÉRIEUR (classement #'+(d.rkA||'?')+') ===\\n'
-              +'Saison EXT: '+d.veA+' victoires / '+d.meAext+' matchs | Buts marqués: '+moyBmAext+'/match | Buts encaissés: '+moyBeAext+'/match\\n'
-              +'Clean sheets EXT: '+d.csAext+'/'+d.meAext+' | Matchs sans marquer EXT: '+d.failAext+'/'+d.meAext+'\\n'
-              +'20 matchs EXT: '+d.extA20w+'V/'+d.extA20d+'N/'+d.extA20l+'D | Buts marqués: '+d.extA20bm+'/match | Encaissés: '+d.extA20be+'/match\\n'
+              +'[OFFENSIF EXT] Buts marqués: '+moyBmAext+'/match | Matchs sans marquer: '+d.failAext+'/'+d.meAext+' | Saison: '+d.veA+'V/'+d.meAext+'matchs\\n'
+              +'[DÉFENSIF EXT] Buts encaissés: '+moyBeAext+'/match | Clean sheets: '+d.csAext+'/'+d.meAext+'\\n'
+              +'20 matchs EXT: '+d.extA20w+'V/'+d.extA20d+'N/'+d.extA20l+'D | Marqués: '+d.extA20bm+'/match | Encaissés: '+d.extA20be+'/match\\n'
               +'Forme récente (5 matchs): '+d.forme5A+' | '+d.d10A+'\\n'
               +(d.streakA?'Série en cours: '+d.streakA+'\\n':'')
-              +(d.evPatA&&d.evPatA.slots?'Dynamique sur 20 matchs -> Marqués par 15min: '+d.evPatA.slots.map(function(s){return s.t+':'+s.n;}).join(', ')+(d.evPatA.slots_conceded?' | Encaissés: '+d.evPatA.slots_conceded.map(function(s){return s.t+':'+s.n;}).join(', '):'')+'\\n':'')
-              +(d.evPatA?'Dynamique (20 matchs) -> Buts rapides (avant 30e): '+d.evPatA.goals_before30+' | Buts tardifs (après 70e): '+d.evPatA.goals_after70+'\\n':'')
-              +(d.xgA_avg?'xG moyen (10 matchs): '+d.xgA_avg+' | xG pondéré (difficulté adversaire): '+(d.xgA_weighted||'N/A')+'\\n':'')+'\\n'
+              +(d.evPatA&&d.evPatA.slots?'[OFFENSIF 15min] Marqués: '+d.evPatA.slots.map(function(s){return s.t+':'+s.n;}).join(', ')+'\\n':'')
+              +(d.evPatA&&d.evPatA.slots_conceded?'[DÉFENSIF 15min] Encaissés: '+d.evPatA.slots_conceded.map(function(s){return s.t+':'+s.n;}).join(', ')+'\\n':'')
+              +(d.evPatA?'Buts rapides (avant 30e): '+d.evPatA.goals_before30+' | Buts tardifs (après 70e): '+d.evPatA.goals_after70+'\\n':'')
+              +(d.xgA_avg?'xG offensif moy: '+d.xgA_avg+(d.xgA_xga?' | xGA défensif moy: '+d.xgA_xga:'')+(d.xgA_defense_surchauffe?' ⚠️ DÉFENSE EN SURCHAUFFE':'')+' | xG pondéré: '+(d.xgA_weighted||'N/A')+'\\n':'')+'\\n'
               +'=== ABSENTS & SUSPENSIONS ===\\n'
               +injStr+'\\n\\n'
               +(d.topScorersH&&d.topScorersH.length?'Buteurs clés '+d.home+': '+d.topScorersH.map(function(p){
@@ -2157,7 +2159,8 @@ jobs:
               +(d.xgA_defense_surchauffe?'⚠️ ALERTE: Défense '+d.away+' en SURCHAUFFE — même signal\\n':'')
               :'')
               +(d.pinnacle_p1?'Pinnacle (marché sharp): DOM '+d.pinnacle_p1+'% (cote '+d.pinnacle_c1+') | Nul '+d.pinnacle_pN+'% | EXT '+d.pinnacle_p2+'% (cote '+d.pinnacle_c2+')\\n':'')
-              +(d.best_edge?'Meilleur pari détecté: '+d.best_edge_market+' à '+d.best_edge_cote+' | Edge mathématique: +'+d.best_edge+'% | Kelly recommandé: '+d.node_kelly+'% bankroll\\n'
+              +(d.best_edge?'Meilleur pari détecté: '+d.best_edge_market+' à '+d.best_edge_cote+' | Edge: +'+d.best_edge+'% | Kelly: '+d.node_kelly+'% bankroll\\n'
+              +(d.all_edges&&d.all_edges.length>1?'Tous les marchés avec edge >= 5%: '+d.all_edges.map(function(e){return e.market+' (edge +'+e.edge+'%, cote '+e.cote+', type:'+e.type+')';}).join(' | ')+'\\n':'')
               :'Aucun edge >= 5% détecté automatiquement.\\n')+'\\n'
               +'=== COTES DISPONIBLES ===\\n'
               +d.home+': '+d.c1+' | Nul: '+d.cn+' | '+d.away+': '+d.c2+'\\n'
@@ -2167,13 +2170,15 @@ jobs:
               +'=== TA MISSION ===\\n'
               +'ÉTAPE 1 — Ton point de départ est le "Meilleur pari détecté" ci-dessus (basé sur l\'Edge mathématique).\\n'
               +'C\'est le pari le plus solide selon le modèle. Commence toujours par lui.\\n\\n'
-              +'ÉTAPE 2 — Vérifie si le monde réel casse ce calcul. Pose-toi ces 3 questions dans l\'ordre :\\n'
-              +'  → Un absent clé (buteur principal, gardien titulaire) change-t-il radicalement le scénario ?\\n'
-              +'  → La motivation (relégation, derby, titre) favorise-t-elle ou défavorise-t-elle l\'équipe qu\'on parie ?\\n'
-              +'  → L\'arbitre sévère, la météo ou un risque disciplinaire crée-t-il une perturbation majeure ?\\n'
+              +'ÉTAPE 2 — Vérifie si le monde réel casse ce calcul. Pose-toi ces 4 questions dans l\'ordre :\\n'
+              +'  → [DÉFENSE] Les stats défensives (buts encaissés/match, clean sheets, xGA, slots_conceded) contredisent-elles un pari offensif (Over, BTTS Oui) ? Si les deux équipes encaissent peu → privilégier Under ou BTTS Non.\\n'
+              +'  → [ABSENCES] Un absent clé (buteur principal, gardien titulaire) change-t-il radicalement le scénario ?\\n'
+              +'  → [MOTIVATION] La motivation (relégation, derby, titre) favorise-t-elle ou défavorise-t-elle l\'équipe qu\'on parie ?\\n'
+              +'  → [PERTURBATION] L\'arbitre sévère, la météo ou un risque disciplinaire crée-t-il une perturbation majeure ?\\n'
               +'Si OUI à 1 question → ajuste légèrement ou baisse la confiance de 1 à 2 points.\\n'
               +'Si OUI à 2 questions ou plus → change de marché pour un plus sûr (Double Chance ou Under 2.5) et baisse la confiance à ≤ 5/10.\\n\\n'
               +'ÉTAPE 3 — Donne TOUJOURS un pronostic. Ne passe JAMAIS ton tour.\\n'
+              +'RÈGLE D\'OR DÉFENSIVE: Si les deux équipes ont moins de 1.0 but encaissé/match en moyenne → ne jamais recommander Over 2.5 ou BTTS Oui sans edge >= 8%.\\n'
               +'Si le match est très incertain : garde un pari simple (DC, Under), confiance ≤ 5/10, risque = ÉLEVÉ.\\n'
               +'passe_ton_tour = true UNIQUEMENT si les cotes sont toutes absentes ou illisibles.\\n\\n'
               +'RÈGLES ABSOLUES:\\n'
@@ -2310,17 +2315,13 @@ jobs:
             var fixtures = await getFixtures();
             // ── FILTRE SOIR — ne garder que les matchs pas encore joués ──
             var nowParis = new Date(new Date().toLocaleString('en-US', {timeZone:'Europe/Paris'}));
-            var nowH = nowParis.getHours();
-            var nowM = nowParis.getMinutes();
-            var nowTotal = nowH * 60 + nowM;
+            var nowH = nowParis.getHours(); var nowM = nowParis.getMinutes(); var nowTotal = nowH * 60 + nowM;
             fixtures = fixtures.filter(function(fix){
               var dateStr = fix.fixture && fix.fixture.date || '';
               if(!dateStr) return true;
               var d = new Date(dateStr);
               var dParis = new Date(d.toLocaleString('en-US', {timeZone:'Europe/Paris'}));
-              var fH = dParis.getHours();
-              var fM = dParis.getMinutes();
-              var fTotal = fH * 60 + fM;
+              var fTotal = dParis.getHours()*60+dParis.getMinutes();
               return fTotal > (nowTotal + 30);
             });
             console.log('Matchs restants apres filtrage soir:', fixtures.length);
@@ -2556,28 +2557,41 @@ jobs:
                 if(!probIA||!cote||cote==='--') return null;
                 var probImpl = 1/parseFloat(cote);
                 var edge = probIA/100 - probImpl;
-                return edge>0 ? Math.round(edge*100) : null; // edge en %
+                return edge>0 ? Math.round(edge*100) : null;
               }
-              var edgeOver25 = calcEdge(poissonProbs.over25, odds.co25);
+              var edgeOver15  = calcEdge(poissonProbs.over15,  odds.co15);
+              var edgeOver25  = calcEdge(poissonProbs.over25,  odds.co25);
               var edgeUnder25 = calcEdge(poissonProbs.under25, odds.cu25);
-              var edgeBttsY = calcEdge(poissonProbs.bttsY, odds.btts_oui);
-              var edgeBttsN = calcEdge(poissonProbs.bttsN, odds.btts_non);
-              var edgeP1 = calcEdge(shinProbs?shinProbs.p1:poissonProbs.p1, odds.c1);
-              var edgePN = calcEdge(shinProbs?shinProbs.pN:poissonProbs.pN, odds.cn);
-              var edgeP2 = calcEdge(shinProbs?shinProbs.p2:poissonProbs.p2, odds.c2);
+              var edgeUnder35 = calcEdge(100-poissonProbs.over35, odds.cu35); // under 3.5 = 1 - over 3.5
+              var edgeBttsY   = calcEdge(poissonProbs.bttsY,   odds.btts_oui);
+              var edgeBttsN   = calcEdge(poissonProbs.bttsN,   odds.btts_non);
+              var edgeP1      = calcEdge(shinProbs?shinProbs.p1:poissonProbs.p1, odds.c1);
+              var edgePN      = calcEdge(shinProbs?shinProbs.pN:poissonProbs.pN, odds.cn);
+              var edgeP2      = calcEdge(shinProbs?shinProbs.p2:poissonProbs.p2, odds.c2);
+              var edgeDC1X    = calcEdge((shinProbs?shinProbs.p1:poissonProbs.p1)+(shinProbs?shinProbs.pN:poissonProbs.pN), odds.dc1x);
+              var edgeDCX2    = calcEdge((shinProbs?shinProbs.p2:poissonProbs.p2)+(shinProbs?shinProbs.pN:poissonProbs.pN), odds.dc2x);
 
-              // Trouver le meilleur edge
+              // Tous les marchés traités à égalité — offensifs ET défensifs
               var allEdges = [
-                {market:'Victoire '+home.name, edge:edgeP1, cote:odds.c1, prob:shinProbs?shinProbs.p1:poissonProbs.p1},
-                {market:'Nul', edge:edgePN, cote:odds.cn, prob:shinProbs?shinProbs.pN:poissonProbs.pN},
-                {market:'Victoire '+away.name, edge:edgeP2, cote:odds.c2, prob:shinProbs?shinProbs.p2:poissonProbs.p2},
-                {market:'Over 2.5', edge:edgeOver25, cote:odds.co25, prob:poissonProbs.over25},
-                {market:'Under 2.5', edge:edgeUnder25, cote:odds.cu25, prob:poissonProbs.under25},
-                {market:'BTTS Oui', edge:edgeBttsY, cote:odds.btts_oui, prob:poissonProbs.bttsY},
-                {market:'BTTS Non', edge:edgeBttsN, cote:odds.btts_non, prob:poissonProbs.bttsN},
+                {market:'Victoire '+home.name, edge:edgeP1,    cote:odds.c1,        prob:shinProbs?shinProbs.p1:poissonProbs.p1,    type:'resultat'},
+                {market:'Nul',                  edge:edgePN,    cote:odds.cn,        prob:shinProbs?shinProbs.pN:poissonProbs.pN,    type:'resultat'},
+                {market:'Victoire '+away.name,  edge:edgeP2,    cote:odds.c2,        prob:shinProbs?shinProbs.p2:poissonProbs.p2,    type:'resultat'},
+                {market:'Double Chance 1X',     edge:edgeDC1X,  cote:odds.dc1x,      prob:(shinProbs?shinProbs.p1+shinProbs.pN:poissonProbs.p1+poissonProbs.pN), type:'dc'},
+                {market:'Double Chance X2',     edge:edgeDCX2,  cote:odds.dc2x,      prob:(shinProbs?shinProbs.p2+shinProbs.pN:poissonProbs.p2+poissonProbs.pN), type:'dc'},
+                {market:'Over 1.5',             edge:edgeOver15, cote:odds.co15,     prob:poissonProbs.over15,  type:'offensif'},
+                {market:'Over 2.5',             edge:edgeOver25, cote:odds.co25,     prob:poissonProbs.over25,  type:'offensif'},
+                {market:'Under 2.5',            edge:edgeUnder25,cote:odds.cu25,     prob:poissonProbs.under25, type:'defensif'},
+                {market:'Under 3.5',            edge:edgeUnder35,cote:odds.cu35,     prob:100-poissonProbs.over35, type:'defensif'},
+                {market:'BTTS Oui',             edge:edgeBttsY,  cote:odds.btts_oui, prob:poissonProbs.bttsY,  type:'offensif'},
+                {market:'BTTS Non',             edge:edgeBttsN,  cote:odds.btts_non, prob:poissonProbs.bttsN,  type:'defensif'},
               ].filter(function(e){return e.edge!==null&&e.edge>=5&&e.cote&&e.cote!=='--'&&parseFloat(e.cote)<=3.0;});
               allEdges.sort(function(a,b){return b.edge-a.edge;});
               var bestEdge = allEdges[0]||null;
+
+              // Compter offensif vs défensif pour le log
+              var edgesOff = allEdges.filter(function(e){return e.type==='offensif';}).length;
+              var edgesDef = allEdges.filter(function(e){return e.type==='defensif';}).length;
+              if(allEdges.length) console.log('  Edges détectés: '+allEdges.length+' (offensif:'+edgesOff+' | défensif:'+edgesDef+' | résultat:'+(allEdges.length-edgesOff-edgesDef)+')');
 
               // Kelly fractionnel 1/4 basé sur prob Poisson
               var nodeKelly = null;
@@ -2750,6 +2764,7 @@ jobs:
                 pinnacle_c1: pinnacleOdds?pinnacleOdds.c1:null, pinnacle_cn: pinnacleOdds?pinnacleOdds.cn:null, pinnacle_c2: pinnacleOdds?pinnacleOdds.c2:null,
                 best_edge: bestEdge?bestEdge.edge:null, best_edge_market: bestEdge?bestEdge.market:null,
                 best_edge_cote: bestEdge?bestEdge.cote:null, best_edge_prob: bestEdge?bestEdge.prob:null,
+                all_edges: allEdges.slice(0,5), // top 5 edges tous marchés confondus
                 all_edges: allEdges.slice(0,3), node_kelly: nodeKelly,
                 pred_winner: predictions?predictions.winner:null, pred_advice: predictions?predictions.advice:null,
                 pred_pct_home: predictions?predictions.percent_home:null, pred_pct_draw: predictions?predictions.percent_draw:null,

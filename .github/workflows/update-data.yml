@@ -2556,45 +2556,35 @@ jobs:
                 var edge = probIA/100 - probImpl;
                 return edge>0 ? Math.round(edge*100) : null;
               }
-              var edgeOver15  = calcEdge(poissonProbs.over15,  odds.co15);
-              var edgeOver25  = calcEdge(poissonProbs.over25,  odds.co25);
+              // Calcul des probabilités pour la Double Chance
+              var prob1X = (shinProbs?shinProbs.p1:poissonProbs.p1) + (shinProbs?shinProbs.pN:poissonProbs.pN);
+              var probX2 = (shinProbs?shinProbs.p2:poissonProbs.p2) + (shinProbs?shinProbs.pN:poissonProbs.pN);
+              var edgeOver25 = calcEdge(poissonProbs.over25, odds.co25);
               var edgeUnder25 = calcEdge(poissonProbs.under25, odds.cu25);
-              var edgeUnder35 = calcEdge(100-poissonProbs.over35, odds.cu35); // under 3.5 = 1 - over 3.5
-              var edgeBttsY   = calcEdge(poissonProbs.bttsY,   odds.btts_oui);
-              var edgeBttsN   = calcEdge(poissonProbs.bttsN,   odds.btts_non);
-              var edgeP1      = calcEdge(shinProbs?shinProbs.p1:poissonProbs.p1, odds.c1);
-              var edgePN      = calcEdge(shinProbs?shinProbs.pN:poissonProbs.pN, odds.cn);
-              var edgeP2      = calcEdge(shinProbs?shinProbs.p2:poissonProbs.p2, odds.c2);
-              var edgeDC1X    = calcEdge((shinProbs?shinProbs.p1:poissonProbs.p1)+(shinProbs?shinProbs.pN:poissonProbs.pN), odds.dc1x);
-              var edgeDCX2    = calcEdge((shinProbs?shinProbs.p2:poissonProbs.p2)+(shinProbs?shinProbs.pN:poissonProbs.pN), odds.dc2x);
-
-              // Tous les marchés traités à égalité — offensifs ET défensifs
+              var edgeBttsY = calcEdge(poissonProbs.bttsY, odds.btts_oui);
+              var edgeBttsN = calcEdge(poissonProbs.bttsN, odds.btts_non);
+              var edgeDC1X = calcEdge(prob1X, odds.dc1x);
+              var edgeDCX2 = calcEdge(probX2, odds.dc2x);
+              // On ne garde que les marchés ciblés
               var allEdges = [
-                {market:'Victoire '+home.name, edge:edgeP1,    cote:odds.c1,        prob:shinProbs?shinProbs.p1:poissonProbs.p1,    type:'resultat'},
-                {market:'Nul',                  edge:edgePN,    cote:odds.cn,        prob:shinProbs?shinProbs.pN:poissonProbs.pN,    type:'resultat'},
-                {market:'Victoire '+away.name,  edge:edgeP2,    cote:odds.c2,        prob:shinProbs?shinProbs.p2:poissonProbs.p2,    type:'resultat'},
-                {market:'Double Chance 1X',     edge:edgeDC1X,  cote:odds.dc1x,      prob:(shinProbs?shinProbs.p1+shinProbs.pN:poissonProbs.p1+poissonProbs.pN), type:'dc'},
-                {market:'Double Chance X2',     edge:edgeDCX2,  cote:odds.dc2x,      prob:(shinProbs?shinProbs.p2+shinProbs.pN:poissonProbs.p2+poissonProbs.pN), type:'dc'},
-                {market:'Over 1.5',             edge:edgeOver15, cote:odds.co15,     prob:poissonProbs.over15,  type:'offensif'},
-                {market:'Over 2.5',             edge:edgeOver25, cote:odds.co25,     prob:poissonProbs.over25,  type:'offensif'},
-                {market:'Under 2.5',            edge:edgeUnder25,cote:odds.cu25,     prob:poissonProbs.under25, type:'defensif'},
-                {market:'Under 3.5',            edge:edgeUnder35,cote:odds.cu35,     prob:100-poissonProbs.over35, type:'defensif'},
-                {market:'BTTS Oui',             edge:edgeBttsY,  cote:odds.btts_oui, prob:poissonProbs.bttsY,  type:'offensif'},
-                {market:'BTTS Non',             edge:edgeBttsN,  cote:odds.btts_non, prob:poissonProbs.bttsN,  type:'defensif'},
-              ].filter(function(e){return e.edge!==null&&e.edge>=5&&e.cote&&e.cote!=='--'&&parseFloat(e.cote)>=1.40&&parseFloat(e.cote)<=2.30;});
+                {market:'Over 2.5', edge:edgeOver25, cote:odds.co25, prob:poissonProbs.over25, type:'offensif'},
+                {market:'Under 2.5', edge:edgeUnder25, cote:odds.cu25, prob:poissonProbs.under25, type:'defensif'},
+                {market:'BTTS Oui', edge:edgeBttsY, cote:odds.btts_oui, prob:poissonProbs.bttsY, type:'offensif'},
+                {market:'BTTS Non', edge:edgeBttsN, cote:odds.btts_non, prob:poissonProbs.bttsN, type:'defensif'},
+                {market:'DC 1X', edge:edgeDC1X, cote:odds.dc1x, prob:prob1X, type:'dc'},
+                {market:'DC X2', edge:edgeDCX2, cote:odds.dc2x, prob:probX2, type:'dc'}
+              ].filter(function(e){
+                return e.edge!==null && e.edge>=5 && e.cote && e.cote!=='--' && parseFloat(e.cote)>=1.40 && parseFloat(e.cote)<=2.30;
+              });
               allEdges.sort(function(a,b){return b.edge-a.edge;});
               var bestEdge = allEdges[0]||null;
-
-              // Compter offensif vs défensif pour le log
+              // Log
               var edgesOff = allEdges.filter(function(e){return e.type==='offensif';}).length;
               var edgesDef = allEdges.filter(function(e){return e.type==='defensif';}).length;
-              if(allEdges.length) console.log('  Edges détectés: '+allEdges.length+' (offensif:'+edgesOff+' | défensif:'+edgesDef+' | résultat:'+(allEdges.length-edgesOff-edgesDef)+')');
-
-              // Kelly fractionnel 1/4 basé sur prob Poisson
+              if(allEdges.length) console.log('  Edges: '+allEdges.length+' (off:'+edgesOff+' def:'+edgesDef+' dc:'+(allEdges.length-edgesOff-edgesDef)+')');
+              // Kelly fractionnel 1/4
               var nodeKelly = null;
-              if(bestEdge){
-                nodeKelly = fractionalKelly(bestEdge.prob/100, parseFloat(bestEdge.cote), 0.25);
-              }
+              if(bestEdge) nodeKelly = fractionalKelly(bestEdge.prob/100, parseFloat(bestEdge.cote), 0.25);
 
               var injuries = (injRaw||[]).map(function(inj){
                 return {

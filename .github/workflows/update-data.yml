@@ -1016,19 +1016,21 @@ jobs:
           function get(url, headers) {
             return new Promise(function(resolve) {
               var u = new URL(url);
+              var timer = setTimeout(function(){ resolve({}); }, 8000);
               https.get({
                 hostname:u.hostname, path:u.pathname+u.search,
                 headers:Object.assign({'User-Agent':'IASHARK/1.0'}, headers||{})
               }, function(res) {
                 var d='';
                 res.on('data',function(c){d+=c;});
-                res.on('end',function(){ try{resolve(JSON.parse(d));}catch(e){resolve({});} });
-              }).on('error',function(){ resolve({}); });
+                res.on('end',function(){ clearTimeout(timer); try{resolve(JSON.parse(d));}catch(e){resolve({});} });
+              }).on('error',function(){ clearTimeout(timer); resolve({}); });
             });
           }
           function postJSON(host, path, body, headers) {
             return new Promise(function(resolve) {
               var data = JSON.stringify(body);
+              var timer = setTimeout(function(){ resolve({}); }, 30000); // 30s pour Opus
               var req = https.request({
                 hostname:host, path:path, method:'POST',
                 headers:Object.assign({
@@ -1038,9 +1040,9 @@ jobs:
               }, function(res) {
                 var d='';
                 res.on('data',function(c){d+=c;});
-                res.on('end',function(){ try{resolve(JSON.parse(d));}catch(e){resolve({});} });
+                res.on('end',function(){ clearTimeout(timer); try{resolve(JSON.parse(d));}catch(e){resolve({});} });
               });
-              req.on('error',function(){ resolve({}); });
+              req.on('error',function(){ clearTimeout(timer); resolve({}); });
               req.write(data); req.end();
             });
           }
@@ -1450,11 +1452,12 @@ jobs:
             try {
               var http = require('http');
               var csv = await new Promise(function(resolve, reject){
+                var timer=setTimeout(function(){resolve('');},5000);
                 http.get('http://api.clubelo.com/'+TODAY, function(res){
                   var data='';
                   res.on('data',function(c){data+=c;});
-                  res.on('end',function(){resolve(data);});
-                }).on('error',function(e){reject(e);});
+                  res.on('end',function(){clearTimeout(timer);resolve(data);});
+                }).on('error',function(e){clearTimeout(timer);reject(e);});
               });
               // Parser le CSV : Rank,Club,Country,Level,Elo,From,To
               var lines=csv.split('\n').slice(1);

@@ -2177,10 +2177,11 @@ jobs:
               +'  → [PERTURBATION] L\'arbitre sévère, la météo ou un risque disciplinaire crée-t-il une perturbation majeure ?\\n'
               +'Si OUI à 1 question → ajuste légèrement ou baisse la confiance de 1 à 2 points.\\n'
               +'Si OUI à 2 questions ou plus → change de marché pour un plus sûr (Double Chance ou Under 2.5) et baisse la confiance à ≤ 5/10.\\n\\n'
-              +'ÉTAPE 3 — Donne TOUJOURS un pronostic. Ne passe JAMAIS ton tour.\\n'
-              +'RÈGLE D\'OR DÉFENSIVE: Si les deux équipes ont moins de 1.0 but encaissé/match en moyenne → ne jamais recommander Over 2.5 ou BTTS Oui sans edge >= 8%.\\n'
-              +'Si le match est très incertain : garde un pari simple (DC, Under), confiance ≤ 5/10, risque = ÉLEVÉ.\\n'
-              +'passe_ton_tour = true UNIQUEMENT si les cotes sont toutes absentes ou illisibles.\\n\\n'
+              +'ÉTAPE 3 — Donne TOUJOURS un pronostic. La cote choisie DOIT OBLIGATOIREMENT être comprise entre 1.50 et 3.00.\\n'
+              +'Si le pari le plus "safe" (ex: Victoire du grand favori ou Double Chance) a une cote "poubelle" inférieure à 1.50 (ex: 1.22), il t\'est STRICTEMENT INTERDIT de le choisir.\\n'
+              +'Dans ce cas, tu dois te rabattre sur un marché plus difficile (ex: Nul, BTTS, Under/Over) dont la cote est bien entre 1.50 et 3.00.\\n'
+              +'Comme ce pari est choisi "par défaut" pour respecter la règle des cotes minimales et s\'avère très risqué tactiquement, tu DOIS OBLIGATOIREMENT lui mettre une TRÈS MAUVAISE NOTE de confiance (ex: 2/10, 3/10 ou 4/10) et définir le risque sur "ELEVE" pour alerter l\'utilisateur qu\'il ne faut pas le jouer.\\n'
+              +'passe_ton_tour = false en permanence.\\n\\n'
               +'RÈGLES ABSOLUES:\\n'
               +'- conseil, verdict_shark et facteur_x parlent TOUS du MÊME ET UNIQUE pari que pari_rec.\\n'
               +'- paris_3: 3 marchés différents, même scénario. INTERDITS ensemble: BTTS Oui + Under 1.5 | BTTS Non + Over 2.5 | Over 2.5 + Under 2.5.\\n'
@@ -2188,7 +2189,7 @@ jobs:
               +'- Ne jamais inventer une stat.\\n\\n'
               +'=== JSON STRICT — RIEN D\'AUTRE ===\\n'
               +'{"confiance":7.2,"verdict_shark":"[pari] à [cote] — [raison tactique en 1 phrase directe]","passe_ton_tour":false,"passe_ton_tour_raison":"","scenario":{"phase1":"0-25min: comment le match démarre tactiquement","phase2":"25-65min: comment le match évolue","phase3":"65-90min: comment le match se finit"},"scenario_15min":[{"t":"0-15min","prob":8,"txt":"contexte tactique du début"},{"t":"15-30min","prob":12,"txt":"première vraie phase"},{"t":"30-45min","prob":10,"txt":"fin de première mi-temps"},{"t":"45-60min","prob":15,"txt":"début deuxième mi-temps"},{"t":"60-75min","prob":18,"txt":"phase décisive"},{"t":"75-90min","prob":20,"txt":"fin de match"}],"score_top":{"score":"1-0","prob":28},"facteur_x":"1 seul facteur décisif: absence clé OU série en cours OU style tactique dominant","pari_rec":"Over 2.5 / BTTS Non / BTTS Oui / Victoire X / DC 1X / DC X2 / Under 2.5 / Nul","cote_rec":"[cote exacte du tableau ci-dessus]","marche":"RESULTAT|DOUBLE_CHANCE|TOTAL_BUTS|BTTS|UNDER","risque":"FAIBLE|MODERE|ELEVE","vbet":"OUI|NON","edge":"+X%","argument":"1. [stat tactique DOM/EXT]. 2. [stat complémentaire]. 3. [raison contextuelle si pertinente].","analyse_card":"2-3 phrases sur les forces/faiblesses des deux équipes","conseil":"3-4 phrases qui expliquent le pari de façon simple, sans jargon financier","contexte":"2-3 phrases sur le classement et la situation des équipes","enjeux":"1 phrase sur ce que représente ce match","scores_probables":"X-X,X-X,X-X","p1":45,"pn":28,"p2":27,"po15":80,"po25":55,"btts":50,"kelly":"2.1","joueur_decisif":{"nom":"[joueur le plus dangereux selon stats]","equipe":"DOM|EXT","marche":"Premier buteur|Buteur dans le match","cote_estimee":"3.50-4.50","raison":"[1 stat clé]","absent":false}}\\n\\n'
-              +'CONTRAINTES FINALES: p1+pn+p2=100 | confiance max 8.5 | kelly = valeur du modèle si disponible sinon edge/(cote-1)*0.25 | vbet=OUI si edge>=5% ET 1.40<=cote<=2.30 | specu cote>=2.00';
+              +'CONTRAINTES FINALES: p1+pn+p2=100 | confiance max 8.5 | La cote_rec DOIT être entre 1.50 et 3.00 | vbet=OUI si edge>=5%';
             var r = await postJSONWithRetry('api.anthropic.com', '/v1/messages', {
               model: 'claude-sonnet-4-6',
               max_tokens: 8000,
@@ -2574,7 +2575,7 @@ jobs:
                 {market:'DC 1X', edge:edgeDC1X, cote:odds.dc1x, prob:prob1X, type:'dc'},
                 {market:'DC X2', edge:edgeDCX2, cote:odds.dc2x, prob:probX2, type:'dc'}
               ].filter(function(e){
-                return e.edge!==null && e.edge>=5 && e.cote && e.cote!=='--' && parseFloat(e.cote)>=1.40 && parseFloat(e.cote)<=2.30;
+                return e.edge!==null && e.edge>=5 && e.cote && e.cote!=='--' && parseFloat(e.cote)>=1.50 && parseFloat(e.cote)<=3.00;
               });
               allEdges.sort(function(a,b){return b.edge-a.edge;});
               var bestEdge = allEdges[0]||null;

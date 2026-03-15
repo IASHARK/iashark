@@ -2089,6 +2089,8 @@ jobs:
               +'20 matchs DOM: '+d.domH20w+'V/'+d.domH20d+'N/'+d.domH20l+'D | Buts marqués: '+d.domH20bm+'/match | Encaissés: '+d.domH20be+'/match\\n'
               +'Forme récente (5 matchs): '+d.forme5H+' | '+d.d10H+'\\n'
               +(d.streakH?'Série en cours: '+d.streakH+'\\n':'')
+              +(d.evPatH&&d.evPatH.slots?'Dynamique sur 20 matchs -> Marqués par 15min: '+d.evPatH.slots.map(function(s){return s.t+':'+s.n;}).join(', ')+(d.evPatH.slots_conceded?' | Encaissés: '+d.evPatH.slots_conceded.map(function(s){return s.t+':'+s.n;}).join(', '):'')+'\\n':'')
+              +(d.evPatH?'Dynamique (20 matchs) -> Buts rapides (avant 30e): '+d.evPatH.goals_before30+' | Buts tardifs (après 70e): '+d.evPatH.goals_after70+'\\n':'')
               +(d.xgH_avg?'xG moyen (10 matchs): '+d.xgH_avg+' | xG pondéré (difficulté adversaire): '+(d.xgH_weighted||'N/A')+'\\n':'')+'\\n'
               +'=== '+d.away.toUpperCase()+' — EXTÉRIEUR (classement #'+(d.rkA||'?')+') ===\\n'
               +'Saison EXT: '+d.veA+' victoires / '+d.meAext+' matchs | Buts marqués: '+moyBmAext+'/match | Buts encaissés: '+moyBeAext+'/match\\n'
@@ -2096,6 +2098,8 @@ jobs:
               +'20 matchs EXT: '+d.extA20w+'V/'+d.extA20d+'N/'+d.extA20l+'D | Buts marqués: '+d.extA20bm+'/match | Encaissés: '+d.extA20be+'/match\\n'
               +'Forme récente (5 matchs): '+d.forme5A+' | '+d.d10A+'\\n'
               +(d.streakA?'Série en cours: '+d.streakA+'\\n':'')
+              +(d.evPatA&&d.evPatA.slots?'Dynamique sur 20 matchs -> Marqués par 15min: '+d.evPatA.slots.map(function(s){return s.t+':'+s.n;}).join(', ')+(d.evPatA.slots_conceded?' | Encaissés: '+d.evPatA.slots_conceded.map(function(s){return s.t+':'+s.n;}).join(', '):'')+'\\n':'')
+              +(d.evPatA?'Dynamique (20 matchs) -> Buts rapides (avant 30e): '+d.evPatA.goals_before30+' | Buts tardifs (après 70e): '+d.evPatA.goals_after70+'\\n':'')
               +(d.xgA_avg?'xG moyen (10 matchs): '+d.xgA_avg+' | xG pondéré (difficulté adversaire): '+(d.xgA_weighted||'N/A')+'\\n':'')+'\\n'
               +'=== ABSENTS & SUSPENSIONS ===\\n'
               +injStr+'\\n\\n'

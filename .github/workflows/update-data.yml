@@ -2184,11 +2184,11 @@ jobs:
               +'RÈGLES ABSOLUES:\\n'
               +'- conseil, verdict_shark et facteur_x parlent TOUS du MÊME ET UNIQUE pari que pari_rec.\\n'
               +'- paris_3: 3 marchés différents, même scénario. INTERDITS ensemble: BTTS Oui + Under 1.5 | BTTS Non + Over 2.5 | Over 2.5 + Under 2.5.\\n'
-              +'- specu cote >= 2.00. Cote > 3.00: uniquement avec une raison tactique explicite.\\n'
+              +'- specu cote >= 2.00. Cote > 2.30: uniquement avec une raison tactique explicite.\\n'
               +'- Ne jamais inventer une stat.\\n\\n'
               +'=== JSON STRICT — RIEN D\'AUTRE ===\\n'
               +'{"confiance":7.2,"verdict_shark":"[pari] à [cote] — [raison tactique en 1 phrase directe]","passe_ton_tour":false,"passe_ton_tour_raison":"","scenario":{"phase1":"0-25min: comment le match démarre tactiquement","phase2":"25-65min: comment le match évolue","phase3":"65-90min: comment le match se finit"},"scenario_15min":[{"t":"0-15min","prob":8,"txt":"contexte tactique du début"},{"t":"15-30min","prob":12,"txt":"première vraie phase"},{"t":"30-45min","prob":10,"txt":"fin de première mi-temps"},{"t":"45-60min","prob":15,"txt":"début deuxième mi-temps"},{"t":"60-75min","prob":18,"txt":"phase décisive"},{"t":"75-90min","prob":20,"txt":"fin de match"}],"score_top":{"score":"1-0","prob":28},"facteur_x":"1 seul facteur décisif: absence clé OU série en cours OU style tactique dominant","pari_rec":"Over 2.5 / BTTS Non / BTTS Oui / Victoire X / DC 1X / DC X2 / Under 2.5 / Nul","cote_rec":"[cote exacte du tableau ci-dessus]","marche":"RESULTAT|DOUBLE_CHANCE|TOTAL_BUTS|BTTS|UNDER","risque":"FAIBLE|MODERE|ELEVE","vbet":"OUI|NON","edge":"+X%","argument":"1. [stat tactique DOM/EXT]. 2. [stat complémentaire]. 3. [raison contextuelle si pertinente].","analyse_card":"2-3 phrases sur les forces/faiblesses des deux équipes","conseil":"3-4 phrases qui expliquent le pari de façon simple, sans jargon financier","contexte":"2-3 phrases sur le classement et la situation des équipes","enjeux":"1 phrase sur ce que représente ce match","scores_probables":"X-X,X-X,X-X","p1":45,"pn":28,"p2":27,"po15":80,"po25":55,"btts":50,"kelly":"2.1","joueur_decisif":{"nom":"[joueur le plus dangereux selon stats]","equipe":"DOM|EXT","marche":"Premier buteur|Buteur dans le match","cote_estimee":"3.50-4.50","raison":"[1 stat clé]","absent":false}}\\n\\n'
-              +'CONTRAINTES FINALES: p1+pn+p2=100 | confiance max 8.5 | kelly = valeur du modèle si disponible sinon edge/(cote-1)*0.25 | vbet=OUI si edge>=5% ET 1.40<=cote<=3.00 | specu cote>=2.00';
+              +'CONTRAINTES FINALES: p1+pn+p2=100 | confiance max 8.5 | kelly = valeur du modèle si disponible sinon edge/(cote-1)*0.25 | vbet=OUI si edge>=5% ET 1.40<=cote<=2.30 | specu cote>=2.00';
             var r = await postJSONWithRetry('api.anthropic.com', '/v1/messages', {
               model: 'claude-sonnet-4-6',
               max_tokens: 8000,
@@ -2313,18 +2313,15 @@ jobs:
           async function main() {
             console.log('=== IASHARK', TODAY, '===');
             var fixtures = await getFixtures();
-            // ── FILTRE SOIR — ne garder que les matchs pas encore joués ──
             var nowParis = new Date(new Date().toLocaleString('en-US', {timeZone:'Europe/Paris'}));
-            var nowH = nowParis.getHours(); var nowM = nowParis.getMinutes(); var nowTotal = nowH * 60 + nowM;
+            var nowTotal = nowParis.getHours()*60+nowParis.getMinutes();
             fixtures = fixtures.filter(function(fix){
-              var dateStr = fix.fixture && fix.fixture.date || '';
+              var dateStr = fix.fixture&&fix.fixture.date||'';
               if(!dateStr) return true;
-              var d = new Date(dateStr);
-              var dParis = new Date(d.toLocaleString('en-US', {timeZone:'Europe/Paris'}));
-              var fTotal = dParis.getHours()*60+dParis.getMinutes();
-              return fTotal > (nowTotal + 30);
+              var dParis = new Date(new Date(dateStr).toLocaleString('en-US', {timeZone:'Europe/Paris'}));
+              return dParis.getHours()*60+dParis.getMinutes() > nowTotal+30;
             });
-            console.log('Matchs restants apres filtrage soir:', fixtures.length);
+            console.log('Matchs restants:', fixtures.length);
             console.log('Fixtures trouves:', fixtures.length);
             if (!fixtures.length) {
               fs.writeFileSync('data.json', JSON.stringify({matchs:[],combis:[]},null,2));
@@ -2584,7 +2581,7 @@ jobs:
                 {market:'Under 3.5',            edge:edgeUnder35,cote:odds.cu35,     prob:100-poissonProbs.over35, type:'defensif'},
                 {market:'BTTS Oui',             edge:edgeBttsY,  cote:odds.btts_oui, prob:poissonProbs.bttsY,  type:'offensif'},
                 {market:'BTTS Non',             edge:edgeBttsN,  cote:odds.btts_non, prob:poissonProbs.bttsN,  type:'defensif'},
-              ].filter(function(e){return e.edge!==null&&e.edge>=5&&e.cote&&e.cote!=='--'&&parseFloat(e.cote)<=3.0;});
+              ].filter(function(e){return e.edge!==null&&e.edge>=5&&e.cote&&e.cote!=='--'&&parseFloat(e.cote)>=1.40&&parseFloat(e.cote)<=2.30;});
               allEdges.sort(function(a,b){return b.edge-a.edge;});
               var bestEdge = allEdges[0]||null;
 

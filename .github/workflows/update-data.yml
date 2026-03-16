@@ -145,6 +145,7 @@ jobs:
             128,       // Primera División Argentine
             253,       // MLS
             119,       // Superliga Danemark
+            357,       // League of Ireland
             98,        // J-League Japon
             292,       // K-League Corée
             66, 307, 143, 137, 81
@@ -175,6 +176,8 @@ jobs:
             98: ['Vissel Kobe','Kawasaki Frontale','Gamba Osaka','Urawa Reds','Nagoya Grampus'],
             // K-League — top 5
             292: ['Jeonbuk Motors','Ulsan Hyundai','Suwon Samsung','Seongnam FC','FC Seoul'],
+            // League of Ireland — top 4
+            357: ['Shamrock Rovers','Bohemian','Shelbourne','Dundalk'],
           };
 
           function isTeamAllowed(leagueId, teamName) {
@@ -1125,15 +1128,29 @@ jobs:
           function sleep(ms) { return new Promise(function(r){ setTimeout(r,ms); }); }
           async function getFixtures() {
             var all = [];
+            // Dates à couvrir : aujourd'hui + demain (pour matchs nuit/décalage horaire)
+            var dates = [TODAY];
+            var tomorrow = new Date(TODAY+'T12:00:00Z');
+            tomorrow.setDate(tomorrow.getDate()+1);
+            dates.push(tomorrow.toISOString().split('T')[0]);
+
             for (var i = 0; i < LEAGUES.length; i++) {
-              var r = await get(
-                'https://v3.football.api-sports.io/fixtures?date='+TODAY+'&league='+LEAGUES[i]+'&season='+SEASON,
-                APS
-              );
-              if (r.response) all = all.concat(r.response);
-              await sleep(250);
+              for (var di = 0; di < dates.length; di++) {
+                var r = await get(
+                  'https://v3.football.api-sports.io/fixtures?date='+dates[di]+'&league='+LEAGUES[i]+'&season='+SEASON+'&timezone=Europe%2FParis',
+                  APS
+                );
+                if (r.response) all = all.concat(r.response);
+                await sleep(200);
+              }
             }
-            return all;
+            // Dédoublonner par fixture ID
+            var seen = {};
+            return all.filter(function(f){
+              if(seen[f.fixture.id]) return false;
+              seen[f.fixture.id] = true;
+              return true;
+            });
           }
           async function getTeamStats(teamId, leagueId) {
             var r = await get(

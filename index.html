@@ -454,7 +454,7 @@ function buildChocCard(m){
     else if((pr.includes('dc 1x')||pr.includes('1x'))&&m.dc1x&&m.dc1x!=='--') pariCote=m.dc1x;
     else if((pr.includes('dc x2')||pr.includes('x2'))&&m.dc2x&&m.dc2x!=='--') pariCote=m.dc2x;
   }
-  function logoH(team,ini){if(!team)return '';var url=team.logo||(team.id?'https://media.api-sports.io/football/teams/'+team.id+'.png':'');if(!url)return '<div class="choc-logo-ph">'+ini+'</div>';return '<img class="choc-logo" src="'+url+'" onerror="this.outerHTML='<div class=choc-logo-ph>'+ini+'</div>'">';}
+  function logoH(team,ini){if(!team)return '';var url=team.logo||(team.id?'https://media.api-sports.io/football/teams/'+team.id+'.png':'');if(!url)return '<div class="choc-logo-ph">'+ini+'</div>';return '<img class="choc-logo" src="'+url+'" onerror="this.outerHTML=\'<div class=choc-logo-ph>'+ini+'</div>\'">';}
   return '<div class="choc-card-wrap"><div class="choc-card" onclick="goMatch('+m.id+')">'
     +'<div class="choc-inner">'
     +'<div class="choc-league"><span class="choc-dot"></span>'+(m.ligue_icon||'')+(m.league||'').toUpperCase()+'</div>'

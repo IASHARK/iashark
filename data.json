@@ -20,13 +20,13 @@
       ],
       "val": true,
       "hot": false,
-      "conf": 7.2,
-      "p1": 0,
-      "pn": 0,
-      "p2": 0,
-      "po15": 0,
-      "po25": 0,
-      "btts": 0,
+      "conf": 6.8,
+      "p1": 29,
+      "pn": 28,
+      "p2": 43,
+      "po15": 62,
+      "po25": 39,
+      "btts": 45,
       "c1": "4.00",
       "cn": "3.42",
       "c2": "1.95",
@@ -95,42 +95,42 @@
       "risque": "MODERE",
       "pari_rec": "Under 2.5",
       "mise": "2-3% bankroll",
-      "verdict_shark": "Under 2.5 à 1.81 — deux équipes en crise offensive (Cremonese sans marquer 6/13, Fiorentina sans marquer 6/14) dans un choc de bas de tableau où la prudence prime sur la prise de risque",
+      "verdict_shark": "Under 2.5 à 1.81 — deux équipes en zone de relégation aux attaques limitées (xG offensif combiné sous 2.3) et une Fiorentina en déplacement avec seulement 2 clean sheets mais une défense solide (xGA 0.94) face à une attaque crémonaise anémique (xG 0.94, 6 matchs sans marquer sur 13)",
       "scenario": {
-        "phase1": "0-25min: Les deux équipes, dos au mur en zone de relégation, s'observent avec une grande prudence tactique. Cremonese tente de verrouiller leur défense malgré leur xGA catastrophique de 1.85. Fiorentina tâte le terrain avec Kean en pointe isolée, sans prendre de risques excessifs en déplacement.",
-        "phase2": "25-65min: Le match reste fermé, les deux blocs équilibrés (50% possession chacun) se neutralisent. Les transitions rapides de Fiorentina via Guðmundsson restent la principale menace, mais Cremonese, poussé par son public et l'enjeu de survie, résiste tactiquement. L'absence de Baschirotto fragilise la défense cremonaise mais Fiorentina manque de punch offensif à l'extérieur (2V/14 EXT).",
-        "phase3": "65-90min: La tension de l'enjeu freine les prises de risque offensives. Les équipes préfèrent ne pas se découvrir plutôt que de chercher un but décisif. Un éventuel but unique suffirait à clôturer le match sous le seuil des 2.5 buts, scénario cohérent avec les faibles totaux offensifs des deux équipes."
+        "phase1": "0-25min: Match tendu et fermé, les deux équipes en survie évitent les risques défensifs. Cremonese s'organise en bloc bas, Fiorentina cherche à contrôler le tempo sans s'exposer. Peu d'occasions franches, jeu haché.",
+        "phase2": "25-65min: Fiorentina prend progressivement le dessus grâce à Kean et Gudmundsson mais sans parvenir à créer la supériorité numérique suffisante. Cremonese défend avec une intensité maximale liée à l'enjeu. Un but unique est plausible dans cette phase.",
+        "phase3": "65-90min: Si Fiorentina mène, elle gèrera. Si match nul, les deux équipes resteront prudentes. Le scénario 1-0 ou 0-1 est dominant. Un deuxième but nécessiterait une erreur défensive ou un contre fatal."
       },
       "scenario_15min": [
         {
           "t": "0-15min",
           "prob": 8,
-          "txt": "Démarrage prudent et tactique, les deux équipes en zone de relégation craignent de concéder en premier. Peu d'occasions franches malgré 3 buts rapides encaissés par Cremonese avant la 15e cette saison."
+          "txt": "Entrée prudente des deux équipes, enjeu de relégation oblige chacun à ne pas concéder en premier. Peu de volume offensif, duels au milieu."
         },
         {
           "t": "15-30min",
           "prob": 12,
-          "txt": "Fiorentina commence à occuper le terrain mais sans tranchant offensif notable à l'extérieur. Cremonese tente de s'appuyer sur son public pour presser haut."
+          "txt": "Fiorentina monte en puissance, Kean commence à peser. Cremonese tente de contre-attaquer mais sans danger réel. Jeu ouvert mais sans finalisation."
         },
         {
           "t": "30-45min",
           "prob": 10,
-          "txt": "Phase la plus calme attendue, les deux équipes gèrent leur énergie. xG combiné modeste, peu de situations nettes malgré la fragilité défensive cremonaise."
+          "txt": "Fin de première mi-temps équilibrée, les deux équipes conservent leur organisation. Score probable : 0-0 ou 1-0 Fiorentina."
         },
         {
           "t": "45-60min",
           "prob": 15,
-          "txt": "La deuxième mi-temps voit un léger réveil offensif, Fiorentina marque le plus souvent sur cette tranche (9 buts 45-60min cette saison). Risque de premier but du match dans cette phase."
+          "txt": "Reprise avec intensité. Fiorentina frappe fort en début de seconde période — phase historiquement prolifique pour eux (9 buts marqués sur ce créneau). Risque d'ouverture du score ici."
         },
         {
           "t": "60-75min",
           "prob": 18,
-          "txt": "Phase la plus intense tactiquement, Fiorentina avec Mandragora au milieu cherche à faire la différence. Cremonese, si elle est menée, pousse et s'expose."
+          "txt": "Phase décisive : si Fiorentina mène, le match se ferme. Cremonese doit s'ouvrir et s'expose en contre. Mais la qualité offensive crémonaise reste très faible sans Baschirotto."
         },
         {
           "t": "75-90min",
           "prob": 20,
-          "txt": "Fin de match tendue mais le faible potentiel offensif des deux équipes et l'enjeu défensif de la relégation maintiennent le total sous 2.5 buts dans le scénario le plus probable."
+          "txt": "Fin de match gérée par l'équipe qui mène. Fiorentina encaisse beaucoup après 75e (8 buts) mais Cremonese n'a pas les ressources pour égaliser. Scénario 1-0 tenu."
         }
       ],
       "score_predit": {
@@ -138,17 +138,17 @@
         "prob": "",
         "cote_implicite": ""
       },
-      "facteur_x": "Cremonese sans marquer lors de 6 matchs sur 13 à domicile et Fiorentina sans marquer lors de 6 matchs sur 14 à l'extérieur — deux équipes structurellement indigentes offensivement dans un match à enjeu maximal qui favorise la prudence.",
+      "facteur_x": "Cremonese n'a marqué que dans 7 de ses 13 matchs à domicile cette saison (xG offensif 0.94) — leur incapacité à scorer rend le BTTS très improbable et renforce l'Under 2.5",
       "argument": "",
-      "analyse_card": "Cremonese est l'équipe la plus faible de Serie A sur la forme récente (3 défaites consécutives, LLLDL sur 5 matchs) avec un xG offensif anémique à 0.94 et une défense en surchauffe à 1.85 xGA, mais leur manque criant de buts marqués (0.67/match DOM) tempère tout scénario à haute intensité offensive. Fiorentina, malgré un meilleur xG offensif (1.61) et une défense plus solide (0.94 xGA), reste catastrophique à l'extérieur en Serie A (seulement 2V/14 matchs EXT) et échoue à marquer dans 6 matchs sur 14 en déplacement. L'affrontement de deux équipes en zone de relégation, tactiquement équilibrées et défensivement prudentes face à l'enjeu, converge vers un match fermé.",
-      "conseil_public": "Le pari Under 2.5 est soutenu par les statistiques offensives réelles des deux équipes, qui peinent toutes les deux à marquer régulièrement — particulièrement Cremonese à domicile et Fiorentina à l'extérieur. L'enjeu de relégation pousse les deux coachs à la prudence tactique et à éviter de se découvrir. Le modèle mathématique accorde 61% de probabilité à ce scénario, avec un edge positif de 6% sur la cote de 1.81. La cote est raisonnable et le scénario défensivement cohérent, mais une vigilance s'impose sur la tranche 45-60min où Fiorentina marque le plus souvent cette saison.",
-      "contexte": "Cremonese est 18e en Serie A, en pleine zone de relégation avec seulement 2 victoires en 13 matchs de championnat, sur une série de 3 défaites consécutives. Fiorentina, classée 17e, est elle aussi directement menacée de descente avec seulement 2 victoires en 14 matchs à l'extérieur. Les deux clubs vivent une saison catastrophique bien loin de leurs ambitions initiales.",
-      "enjeux": "Ce derby de la survie met en jeu des points absolument vitaux pour deux équipes en zone de relégation directe, ce qui en fait un match à fort enjeu psychologique et tactique.",
+      "analyse_card": "Cremonese est la pire attaque du groupe analysé : 6 matchs sans marquer sur 13 à domicile, xG offensif à seulement 0.94, et leur buteur principal Baschirotto est absent. Fiorentina a certes une meilleure dynamique offensive (xG 1.61) mais ses statistiques extérieures sont décevantes : 6 matchs sans marquer sur 14 déplacements, seulement 2 clean sheets concédées côté défensif EXT mais aussi une défense poreuse après 75e. Dans un match à enjeu de relégation des deux côtés, la prudence tactique devrait étouffer le potentiel offensif.",
+      "conseil_public": "Le modèle favorise Under 2.5 car les deux équipes combinent une faiblesse offensive marquée et un contexte de survie qui pousse à ne pas prendre de risques défensifs. Cremonese est incapable de marquer régulièrement et son absent défensif réduit encore ses chances de contribution offensive. Fiorentina en déplacement marque peu (6 matchs muets sur 14 à l'extérieur). Un match à 0-1 ou 1-0 est le scénario le plus probable selon les probabilités Poisson calculées.",
+      "contexte": "Cremonese est 18e et en pleine spirale négative avec 3 défaites consécutives et une attaque en panne. Fiorentina est 17e, aussi en zone rouge, mais avec une légère supériorité ELO (+108 pts) et un buteur en forme en Kean (8 buts). Les deux clubs jouent leur survie en Serie A, ce qui rend le match âpre et tactiquement prudent.",
+      "enjeux": "Un véritable match de survie entre deux équipes en zone de relégation — chaque point est potentiellement décisif pour le maintien.",
       "vbet": "OUI",
       "value_calc": "+6%",
       "scores": [
         "0-1",
-        "1-1",
+        "1-0",
         "0-0"
       ],
       "paris_3": null,
@@ -156,14 +156,14 @@
         "nom": "M. Kean",
         "equipe": "EXT",
         "marche": "Buteur dans le match",
-        "cote_estimee": "2.80-3.20",
-        "raison": "Meilleur buteur de Fiorentina avec 8 buts en 24 matchs, seul attaquant de référence dans une équipe qui peine à scorer à l'extérieur",
+        "cote_estimee": "2.50-3.20",
+        "raison": "8 buts en 24 matchs cette saison, principal vecteur offensif de Fiorentina, phase 45-60min historiquement favorable à son équipe",
         "absent": false
       },
       "paris_safe": {
         "bet": "Under 2.5",
         "cote": 1.81,
-        "proba": "0%"
+        "proba": "29%"
       },
       "paris_risque": {
         "bet": "",
@@ -777,12 +777,12 @@
       "val": true,
       "hot": false,
       "conf": 7.2,
-      "p1": 0,
-      "pn": 0,
-      "p2": 0,
-      "po15": 0,
-      "po25": 0,
-      "btts": 0,
+      "p1": 67,
+      "pn": 22,
+      "p2": 11,
+      "po15": 80,
+      "po25": 43,
+      "btts": 37,
       "c1": "1.57",
       "cn": "4.22",
       "c2": "5.60",
@@ -851,75 +851,75 @@
       "risque": "MODERE",
       "pari_rec": "BTTS Non",
       "mise": "2-3% bankroll",
-      "verdict_shark": "BTTS Non à 2.00 — Wolves scoreless dans 9/14 matchs à l'extérieur face à une défense de Brentford qui tient à domicile, la probabilité que les deux équipes marquent reste faible",
+      "verdict_shark": "BTTS Non à 2.00 — Wolves scoreless dans 9/14 matchs extérieurs et défense Brentford tient à domicile (3 clean sheets/14), le scénario 1-0 ou 2-0 est dominant",
       "scenario": {
-        "phase1": "0-25min: Brentford impose son pressing haut à domicile, Wolves en difficulté pour sortir le ballon proprement. Les Wolves, dos au mur en zone de relégation, vont bloquer le bloc et tenter de résister. Peu d'occasions franches dans ce début de match.",
-        "phase2": "25-65min: Brentford domine la possession et crée des situations via Thiago, buteur prolifique. Les Wolves se replient en bloc bas, leur attaque reste stérile (0.63 but/match à l'EXT). La pression monte mais les Wolves défendent par nécessité de survie.",
-        "phase3": "65-90min: Brentford finit par convertir au moins une occasion, les Wolves peinent à créer le danger offensif. Avec 9 clean sheets refusés à l'EXT sur 14 matchs, les visiteurs ne marquent probablement pas. Le match se termine sans buts des deux équipes ou avec seulement Brentford au score."
+        "phase1": "0-25min: Brentford impose son pressing haut à domicile, Wolves en bloc défensif bas pour survivre. Les Wolves, dos au mur en zone de relégation, vont sacrifier le ballon et tenter de tenir. Brentford circule proprement mais sans encore trouver la faille.",
+        "phase2": "25-65min: Brentford monte en pression, Thiago et Schade combinent pour créer du danger répété. Les Wolves, épuisés tactiquement par l'intensité de Brentford, commencent à souffrir. Premier but probable de Brentford dans cette phase. Les Wolves, acculés, peinent à construire offensivement (0.63 but/match en ext).",
+        "phase3": "65-90min: Brentford gère ou double la mise. Les Wolves n'ont ni les ressources offensives (9 matchs sans marquer sur 14 en ext) ni la qualité pour revenir. Brentford ferme le match proprement malgré quelques buts tardifs habituels (8 encaissés sur 75-90min en saison)."
       },
       "scenario_15min": [
         {
           "t": "0-15min",
           "prob": 8,
-          "txt": "Brentford tente d'imposer son rythme mais les Wolves ferment les espaces, peu de buts dans ce créneau historiquement (3 encaissés/3 marqués)."
+          "txt": "Match fermé, Wolves en bloc défensif, Brentford tâte la défense adverse sans précipitation. Peu de buts dans cette fenêtre (3 marqués/2 encaissés en saison)."
         },
         {
           "t": "15-30min",
           "prob": 12,
-          "txt": "La phase la plus stérile offensivement pour les Wolves (0 but marqué en EXT sur ce créneau). Brentford cherche sans trouver l'ouverture."
+          "txt": "Brentford accélère, pression accrue sur la défense Wolves. Première vraie occasion côté Brentford. Wolves dangereux sur contre uniquement, mais leur xG offensif ext est très faible."
         },
         {
           "t": "30-45min",
           "prob": 10,
-          "txt": "Brentford accumule les corners et coups de pied arrêtés, Thiago représente la principale menace. Les Wolves résistent."
+          "txt": "Fin de première mi-temps souvent productive pour Brentford (4 buts marqués en 30-45). Un but Brentford plausible avant la pause. Wolves peu menaçants."
         },
         {
           "t": "45-60min",
           "prob": 15,
-          "txt": "Début de seconde mi-temps, les Wolves sortent un peu plus mais leur xG offensif à 0.95 trahit leur incapacité à concrétiser. Brentford reste dangereux."
+          "txt": "Retour des vestiaires dynamique, phase la plus active du match. Brentford marque souvent dans ce créneau (5 buts marqués en 45-60). Wolves toujours stériles offensivement."
         },
         {
           "t": "60-75min",
           "prob": 18,
-          "txt": "Phase décisive: Brentford pousse pour ouvrir le score, les Wolves commencent à s'épuiser. Le bloc bas des visiteurs commence à craquer."
+          "txt": "Phase décisive : Brentford à son meilleur (7 buts marqués en 60-75). Les Wolves poussés à l'ouverture commencent à prendre des risques défensifs. Score 1-0 ou 2-0 probable."
         },
         {
           "t": "75-90min",
           "prob": 20,
-          "txt": "Fin de match: historiquement la période la plus prolifique pour Brentford (8 buts marqués, 8 encaissés). Si Brentford mène, les Wolves ne marquent pas — BTTS Non tient."
+          "txt": "Brentford peut encore marquer (8 buts en 75-90) mais attention aux contre-attaques tardives des Wolves désespérés. Risque de but encaissé en toute fin mais BTTS Non reste probable car Wolves n'ont pas les finisseurs."
         }
       ],
       "score_predit": {
-        "score": "1-0",
+        "score": "2-0",
         "prob": "",
         "cote_implicite": ""
       },
-      "facteur_x": "Wolves sans victoire en 14 matchs à l'extérieur cette saison (0V) et muets dans 9 de ces 14 déplacements — l'incapacité chronique à marquer à l'EXT est le facteur décisif contre le BTTS Oui",
+      "facteur_x": "Wolves sans victoire en 14 matchs extérieurs (0V/14) et muets dans 9/14 matchs à l'extérieur — leur incapacité chronique à marquer hors de leurs bases est le facteur décisif qui valide BTTS Non",
       "argument": "",
-      "analyse_card": "Brentford est une équipe solide à domicile avec un xG offensif de 1.69 et un buteur de classe en Thiago (18 buts en 29 matchs), mais leur défense reste perfectible (seulement 3 clean sheets en 14 matchs DOM). Les Wolves sont en grande détresse offensive à l'extérieur: 9 matchs sans marquer sur 14 déplacements, un xG offensif moyen de seulement 0.95 et une attaque limitée à 0.63 but par match à l'EXT — leur seule vraie chance reste un contre ou un coup de pied arrêté.",
-      "conseil_public": "Le pari BTTS Non à 2.00 repose sur une réalité statistique criante: les Wolves n'arrivent pas à marquer en déplacement, c'est leur talon d'Achille toute la saison. Même si la motivation de la survie peut les pousser à défendre avec acharnement, cette même peur de perdre les rend encore plus défensifs et peu dangereux offensivement. Brentford devrait marquer au moins une fois grâce à Thiago, mais les visiteurs resteront probablement muets, validant le BTTS Non. L'edge de +13% calculé par le modèle est solide et cohérent avec l'analyse qualitative.",
-      "contexte": "Brentford est 7e au classement et lorgne une place européenne, ce qui leur donne une motivation positive mais sans pression excessive. Les Wolves sont derniers (20e) avec un enjeu de survie absolue en Premier League, ce qui les pousse à défendre coûte que coûte plutôt qu'à prendre des risques offensifs en déplacement.",
-      "enjeux": "Pour les Wolves, c'est un match de survie absolue — perdre encore ici les enfonce un peu plus en zone de relégation avec peu de matchs pour s'en sortir.",
+      "analyse_card": "Brentford est une machine offensive à domicile portée par Thiago (18 buts/29 matchs) avec un xG de 1.819 contre des Wolves qui ne marquent quasiment jamais à l'extérieur (0.63 but/match, 9 matchs sans marquer sur 14). La défense de Wolves est en surchauffe (xGA 1.75) mais leur attaque extérieure est trop indigente pour inquiéter Brentford — le scénario victoire propre de Brentford est largement dominant.",
+      "conseil_public": "Le pari BTTS Non signifie qu'au moins une des deux équipes ne marquera pas — ici c'est quasi-certainement les Wolves. Avec 9 matchs sans marquer sur 14 à l'extérieur cette saison et zéro victoire en déplacement, les Wolves n'ont tout simplement pas les ressources offensives pour trouver le filet de Brentford. La cote de 2.00 offre une valeur réelle par rapport à la probabilité réelle estimée à environ 63%. C'est le pari le plus cohérent avec toutes les données disponibles.",
+      "contexte": "Brentford est 7e et vise l'Europe, jouant à domicile avec une forme solide et un attaquant de pointe en forme (Thiago, 18 buts). Les Wolves sont derniers (20e) avec une crise profonde : aucune victoire en 14 matchs extérieurs cette saison, une attaque extérieure atone et une défense qui encaisse régulièrement. L'écart ELO de 141 points confirme une différence de niveau très significative.",
+      "enjeux": "Pour Brentford c'est une chance de consolider une place européenne, pour les Wolves c'est une finale de survie — mais leur manque de ressources offensives à l'extérieur rend un but des Wolves très improbable.",
       "vbet": "OUI",
       "value_calc": "+13%",
       "scores": [
-        "1-0",
         "2-0",
-        "1-1"
+        "1-0",
+        "3-0"
       ],
       "paris_3": null,
       "joueur_decisif": {
         "nom": "Thiago",
         "equipe": "DOM",
         "marche": "Buteur dans le match",
-        "cote_estimee": "2.20-2.80",
-        "raison": "18 buts en 29 matchs cette saison, meilleur buteur de Brentford de loin, face à une défense Wolves avec xGA de 1.75 — la pire défense extérieure du lot",
+        "cote_estimee": "1.80-2.20",
+        "raison": "18 buts en 29 matchs cette saison, principal menace offensive de Brentford face à une défense Wolves en surchauffe (xGA 1.75)",
         "absent": false
       },
       "paris_safe": {
         "bet": "BTTS Non",
         "cote": 2,
-        "proba": "0%"
+        "proba": "67%"
       },
       "paris_risque": {
         "bet": "",
@@ -932,7 +932,7 @@
         "cap": "",
         "meteo": "☁️",
         "temp": "12°C",
-        "desc": "peu nuageux"
+        "desc": "nuageux"
       },
       "crit_home": {
         "fd": 50,
@@ -1660,12 +1660,12 @@
       "val": true,
       "hot": false,
       "conf": 7.2,
-      "p1": 0,
-      "pn": 0,
-      "p2": 0,
-      "po15": 0,
-      "po25": 0,
-      "btts": 0,
+      "p1": 45,
+      "pn": 28,
+      "p2": 27,
+      "po15": 80,
+      "po25": 55,
+      "btts": 43,
       "c1": "1.70",
       "cn": "3.80",
       "c2": "5.13",
@@ -1734,42 +1734,42 @@
       "risque": "MODERE",
       "pari_rec": "Under 2.5",
       "mise": "2-3% bankroll",
-      "verdict_shark": "Under 2.5 à 1.88 — Rayo défend bien à domicile (5 clean sheets/13) et Levante est muet offensivement en déplacement (5 matchs sans marquer/13), les xG combinés ne justifient pas 3 buts.",
+      "verdict_shark": "Under 2.5 à 1.88 — match serré entre deux équipes en crise offensive, avec Rayo solide à domicile (5 clean sheets/13) et Levante incapable de marquer régulièrement à l'extérieur (5 matchs sans but sur 13)",
       "scenario": {
-        "phase1": "0-25min: Rayo impose son pressing à Vallecas, Levante se replie en bloc bas défensif pour limiter les espaces. Peu de situations franches, les deux équipes se testent avec prudence vu les enjeux de relégation.",
-        "phase2": "25-65min: Rayo prend progressivement le contrôle sans créer énormément (xG offensif dom 1.14). Levante tente des contre-attaques ponctuelles mais reste stérile à l'extérieur (1.10 but/match EXT). Un but Rayo probable mais le match reste fermé.",
-        "phase3": "65-90min: Levante, dos au mur, monte légèrement dans le jeu mais son attaque manque de punch (Romero 4 buts en 23 matchs). Rayo gère et protège le résultat — le total reste sous 2.5 buts dans la majorité des scénarios."
+        "phase1": "0-25min: Rayo s'impose tactiquement à domicile avec un bloc médian compact, Levante en difficulté à construire loin de ses bases — les deux équipes sont prudentes face à l'enjeu de la relégation, peu de prise de risque en début de match",
+        "phase2": "25-65min: Rayo domine les zones centrales et tente d'exploiter les flancs via De Frutos et Álvaro García, mais Levante se replie en 4-4-2 défensif pour limiter les espaces — le score reste serré, les chances nettes rares malgré une légère pression de Rayo",
+        "phase3": "65-90min: Levante, dos au mur, pousse en fin de match (9 buts marqués après 75min cette saison) mais Rayo gère son avantage au score ou le nul — le match se termine sous les 2.5 buts dans la majorité des scénarios probables"
       },
       "scenario_15min": [
         {
           "t": "0-15min",
           "prob": 8,
-          "txt": "Entrée prudente des deux équipes, pression de Rayo sans grosses occasions. Levante sécurise sa défense — 0-0 très probable."
+          "txt": "Démarrage prudent, les deux équipes sondent l'adversaire — enjeu relégation oblige à ne pas s'exposer en début de match, Rayo laisse peu d'espaces"
         },
         {
           "t": "15-30min",
           "prob": 12,
-          "txt": "Rayo commence à accélérer sur les côtés via De Frutos et Palazón. Levante souffre mais tient. Risque d'un premier but de Rayo."
+          "txt": "Rayo monte en puissance sur ses flancs, De Frutos commence à peser — Levante encaisse beaucoup en début de match à l'extérieur (6 buts encaissés 0-15min), risque d'ouverture du score"
         },
         {
           "t": "30-45min",
           "prob": 10,
-          "txt": "Phase la plus productive de Rayo (8 buts marqués sur ce créneau saison). Pression maximale avant la pause, possible 1-0 ou 2-0."
+          "txt": "Phase la plus productive de Rayo cette saison (8 buts marqués 30-45min) — pression accrue mais Levante peut tenir grâce à son bloc bas défensif"
         },
         {
           "t": "45-60min",
           "prob": 15,
-          "txt": "Levante marque souvent sur ce créneau (6 buts saison 45-60min). Risque de réduction du score si Rayo se relâche en sortie de vestiaire."
+          "txt": "Reprise avec énergie, Levante marque souvent entre 45-60min (6 buts) — période de danger réciproque, possible égalisation ou second but"
         },
         {
           "t": "60-75min",
           "prob": 18,
-          "txt": "Phase décisive : Rayo tente de tuer le match, Levante joue son va-tout. Possibilité d'un 2e but mais match toujours sous les 3 buts."
+          "txt": "Phase décisive tactique — Rayo tente de fermer le match, Levante cherche l'égalisation, duels physiques intenses avec enjeu maximal pour les deux clubs"
         },
         {
           "t": "75-90min",
           "prob": 20,
-          "txt": "Levante marque beaucoup en fin de match (9 buts 75-90min saison) mais l'enjeu défensif de Rayo et la tension du match limitent l'ouverture. Score final sous 2.5 buts tenu."
+          "txt": "Levante très dangereux en fin de match (10 buts encaissés 75-90min, 9 marqués) — possible but tardif mais score global restera probablement contenu sous 2.5"
         }
       ],
       "score_predit": {
@@ -1777,18 +1777,18 @@
         "prob": "",
         "cote_implicite": ""
       },
-      "facteur_x": "La stérilité offensive de Levante à l'extérieur (5 matchs sans marquer sur 13 EXT) combinée aux 5 clean sheets de Rayo à domicile plafonne naturellement le total de buts.",
+      "facteur_x": "La solidité défensive de Rayo à domicile (5 clean sheets, seulement 0.78 but encaissé/match sur 20 matchs DOM) est le facteur clé qui valide l'Under 2.5 malgré la vulnérabilité défensive de Levante",
       "argument": "",
-      "analyse_card": "Rayo Vallecano est une équipe solide à domicile avec un ratio défensif honorable (0.78 but encaissé/match DOM, 5 clean sheets) mais son attaque reste limitée (xG 1.14). Levante est en grande difficulté à l'extérieur avec seulement 3 victoires en 13 matchs EXT, une défense poreuse (1.90 but encaissé/match EXT) mais une attaque bien trop irrégulière pour menacer Rayo ce soir.",
-      "conseil_public": "Le pari Under 2.5 est soutenu par les deux réalités défensives du match : Rayo protège bien son stade et Levante ne marque presque pas en déplacement. Les xG combinés (1.14 + 1.07 = 2.21) indiquent mathématiquement moins de 2.5 buts attendus. La pression de la relégation pousse les deux équipes à ne pas prendre de risques défensifs inutiles, ce qui favorise un match serré et peu prolifique.",
-      "contexte": "Rayo Vallecano est 15e et cherche à s'éloigner de la zone rouge avec une victoire à domicile. Levante est 19e, en pleine zone de relégation, et arrive en visiteur avec une forme inquiétante (3 défaites consécutives dont 0-3 vs Barcelone et 0-2 vs Valencia). Le différentiel ELO de 70 points confirme l'avantage Rayo.",
-      "enjeux": "Un match à six points entre deux équipes qui luttent pour leur survie en Liga, où la peur de perdre prime souvent sur l'envie de marquer.",
+      "analyse_card": "Rayo Vallecano est une équipe solide à domicile avec un xGA de 1.22 et 5 clean sheets sur 13 matchs, montrant une vraie discipline défensive à Vallecas. Levante en revanche est la pire équipe à l'extérieur avec 1.90 but encaissé/match, un xGA de 1.7 et seulement 3 victoires en 13 déplacements — leur attaque est également très limitée (5 matchs sans marquer en déplacement). Le match se joue entre une défense de Rayo disciplinée et une attaque de Levante en grande difficulté loin de ses bases.",
+      "conseil_public": "L'Under 2.5 s'appuie sur deux réalités concrètes : Rayo ne prend quasiment pas de buts à domicile (0.78/match sur 20 rencontres, 5 clean sheets) et Levante est incapable de marquer régulièrement à l'extérieur (5 matchs sans but sur 13). Les deux équipes jouent leur survie en Liga, ce qui encourage la prudence plutôt que l'attaque ouverte. Le modèle mathématique donne 62% de chances pour l'Under 2.5 avec un edge de +9% sur la cote proposée à 1.88, ce qui en fait le pari le mieux valorisé du match.",
+      "contexte": "Rayo Vallecano est 15e et cherche à s'éloigner de la zone rouge lors de ce match à domicile où il reste sur une série solide (4V/4N/1D sur 20 matchs). Levante est directement en zone de relégation (19e) et enchaîne les mauvais résultats : 3 défaites consécutives dont 0-3 contre Barcelone et 0-1 contre Villarreal. L'équipe de Levante marque peu et encaisse beaucoup à l'extérieur, ce qui rend un score fleuve très improbable.",
+      "enjeux": "Un match de survie où Rayo doit gagner pour s'éloigner de la relégation et Levante doit impérativement prendre des points pour ne pas être condamné — les deux équipes joueront prudemment ce qui limite naturellement le nombre de buts",
       "vbet": "OUI",
       "value_calc": "+9%",
       "scores": [
         "1-0",
-        "2-0",
-        "1-1"
+        "1-1",
+        "2-0"
       ],
       "paris_3": null,
       "joueur_decisif": {
@@ -1796,13 +1796,13 @@
         "equipe": "DOM",
         "marche": "Buteur dans le match",
         "cote_estimee": "3.50-4.00",
-        "raison": "Meilleur buteur de Rayo avec 10 buts en 25 matchs, décisif dans les rencontres à enjeu à domicile.",
+        "raison": "Meilleur buteur de Rayo avec 10 buts en 25 matchs, actif sur les flancs contre une défense de Levante qui encaisse 1.7 xGA/match",
         "absent": false
       },
       "paris_safe": {
         "bet": "Under 2.5",
         "cote": 1.88,
-        "proba": "0%"
+        "proba": "45%"
       },
       "paris_risque": {
         "bet": "",
@@ -1814,7 +1814,7 @@
         "nom": "Campo de Futbol de Vallecas — Madrid",
         "cap": "",
         "meteo": "☀️",
-        "temp": "16°C",
+        "temp": "17°C",
         "desc": "ciel dégagé"
       },
       "crit_home": {
@@ -2433,12 +2433,12 @@
       "val": true,
       "hot": false,
       "conf": 7.2,
-      "p1": 0,
-      "pn": 0,
-      "p2": 0,
-      "po15": 0,
-      "po25": 0,
-      "btts": 0,
+      "p1": 29,
+      "pn": 26,
+      "p2": 45,
+      "po15": 80,
+      "po25": 49,
+      "btts": 53,
       "c1": "2.16",
       "cn": "3.19",
       "c2": "3.44",
@@ -2507,75 +2507,75 @@
       "risque": "MODERE",
       "pari_rec": "DC X2",
       "mise": "2-3% bankroll",
-      "verdict_shark": "DC X2 à 1.67 — Derby, mieux classé et plus efficace offensivement, ne devrait pas perdre face à un Portsmouth en crise de relégation malgré la pression du Fratton Park",
+      "verdict_shark": "DC X2 à 1.67 — Derby, mieux classé et plus efficace offensivement à l'extérieur, ne devrait pas perdre contre une équipe en crise de relégation",
       "scenario": {
-        "phase1": "0-25min: Portsmouth sort avec une intensité maximale imposée par la pression de la relégation, pressing haut dès le coup d'envoi. Derby absorbe et cherche à exploiter les espaces dans le dos de la défense adverse, vulnérable en début de match (2 buts encaissés 0-15min côté Portsmouth).",
-        "phase2": "25-65min: Derby prend progressivement le contrôle du milieu grâce à son jeu équilibré et à la supériorité de Morris (10 buts en 22 matchs). Portsmouth s'épuise dans ses efforts défensifs, et les transitions rapides de Derby deviennent de plus en plus dangereuses. Plusieurs occasions probables des deux côtés.",
-        "phase3": "65-90min: Portsmouth, sous la pression du score ou d'un match serré, ouvre des espaces en cherchant à forcer le résultat. Derby, solide défensivement en 60-75min (seulement 2 buts encaissés), peut gérer et contre-attaquer. Les buts tardifs sont une constante pour les deux équipes (Portsmouth 6 encaissés 75-90, Derby 7 encaissés 75-90)."
+        "phase1": "0-25min: Portsmouth, dos au mur, sort en pressing haut pour imposer son jeu à domicile. Derby, discipliné et équilibré, absorbe la pression et cherche à exploiter les espaces laissés par l'agressivité du pressing adverse. Tension élevée, rythme haché.",
+        "phase2": "25-65min: Derby prend progressivement le contrôle du ballon. Morris et Brereton commencent à peser sur une défense de Portsmouth qui encaisse en moyenne 1.30 but/match à domicile. Portsmouth crée peu (xG 1.14) malgré la pression de l'enjeu. Risque de but derby dans cette phase centrale.",
+        "phase3": "65-90min: Portsmouth, en besoin absolu de points, s'ouvre davantage et s'expose aux contres de Derby qui a marqué 6 buts en 60-75min cette saison. Derby gérera en bloc bas ou frappera en transition. Le résultat final favorise Derby ou le nul."
       },
       "scenario_15min": [
         {
           "t": "0-15min",
           "prob": 8,
-          "txt": "Portsmouth presse fort, ambiance électrique à Fratton Park. Derby subit mais reste organisé. Risque de but rapide des deux côtés (Derby 6 buts encaissés 0-15min cette saison, Portsmouth 2)."
+          "txt": "Portsmouth press haut, Derby compact, peu d'occasions franches mais agressivité marquée"
         },
         {
           "t": "15-30min",
           "prob": 12,
-          "txt": "Le match se stabilise. Derby commence à trouver des espaces dans le pressing haut de Portsmouth. Morris et Brereton cherchent les combinaisons. Portsmouth tente de se projeter rapidement."
+          "txt": "Derby commence à sortir proprement, Portsmouth vulnérable sur les transitions — 5 buts rapides Derby avant 30min cette saison"
         },
         {
           "t": "30-45min",
           "prob": 10,
-          "txt": "Phase plus équilibrée, les deux équipes gèrent l'énergie. Derby marque souvent en 30-45min (6 buts offensifs). Possibilité d'un but avant la mi-temps qui changerait l'orientation du match."
+          "txt": "Fin de première mi-temps équilibrée, Portsmouth tente de tenir mais encaisse souvent (4 buts en 30-45 en saison)"
         },
         {
           "t": "45-60min",
           "prob": 15,
-          "txt": "Portsmouth revient avec les mêmes intentions offensives. C'est la période la plus prolifique pour Portsmouth (6 buts marqués 45-60min). Derby doit rester vigilant défensivement sur les phases arrêtées."
+          "txt": "Portsmouth sort fort après la pause (6 buts marqués 45-60), Derby doit absorber — phase critique"
         },
         {
           "t": "60-75min",
           "prob": 18,
-          "txt": "Phase décisive: Derby est le plus dangereux en 60-75min (8 buts marqués cette saison dans ce créneau). Portsmouth s'allonge sous la pression du besoin de points. Le match s'ouvre davantage."
+          "txt": "Phase décisive: Derby dominant offensivement ici (8 buts 60-75 en saison), Portsmouth s'ouvre par nécessité"
         },
         {
           "t": "75-90min",
           "prob": 20,
-          "txt": "Les deux équipes encaissent beaucoup en fin de match (Portsmouth 6, Derby 7 buts encaissés 75-90min). Intensité maximale, Portsmouth pousse tout en s'exposant en contre. Dénouement probable dans ce créneau."
+          "txt": "Portsmouth cherche le résultat coûte que coûte, Derby contre efficacement — 7 buts encaissés Derby 75-90 mais aussi 4 marqués, fin ouverte"
         }
       ],
       "score_predit": {
-        "score": "1-1",
+        "score": "1-2",
         "prob": "",
         "cote_implicite": ""
       },
-      "facteur_x": "Callum Morris (10 buts en 22 matchs pour Derby) est le joueur le plus décisif — sa moyenne de plus d'un but toutes les deux rencontres représente une menace constante pour une défense de Portsmouth classée 20e et encaissant 1.30 but/match à domicile.",
+      "facteur_x": "La supériorité de Callum Morris (10 buts en 22 matchs) face à une défense de Portsmouth parmi les plus poreuses du Championship est le facteur décisif.",
       "argument": "",
-      "analyse_card": "Portsmouth (#20) est en grande difficulté avec seulement 6 victoires en 18 matchs à domicile et une forme récente alarmante (3 défaites sur les 4 derniers matchs). Leurs buteurs clés sont peu prolifiques (Segecic et Devlin à 5 buts chacun sur toute la saison). Derby (#8) affiche une solidité offensive réelle avec 1.67 but/match à l'extérieur et un Morris en grande forme, même si leur irrégularité récente (3 défaites sur 5) invite à la prudence.",
-      "conseil_public": "Derby n'a pas besoin de gagner pour que ce pari soit gagnant — un nul suffit. Face à un Portsmouth en crise (3 défaites sur 4 matchs, lanterne rouge virtuelle), Derby a les ressources offensives et la stabilité tactique pour ne pas repartir sans rien. Le Fratton Park sera bouillant mais Portsmouth manque de finisseurs réguliers pour inquiéter une défense de Championship de milieu de tableau.",
-      "contexte": "Portsmouth occupe la 20e place et se trouve à une position de la zone de relégation directe, ce qui génère une pression psychologique immense sur les joueurs et le staff. Derby, 8e au classement, joue pour consolider sa place dans la course aux play-offs sans enjeu existentiel immédiat. L'écart de qualité entre les deux effectifs est réel malgré l'avantage du terrain pour Portsmouth.",
-      "enjeux": "Un match à enjeu asymétrique: Portsmouth joue sa survie en Championship, Derby joue pour maintenir ses ambitions de play-offs — la pression favorise paradoxalement l'équipe visiteuse plus sereine.",
+      "analyse_card": "Derby (#8) est une équipe solide à l'extérieur (4V/1N/4D, 1.67 but/match), portée par un Morris en grande forme. Portsmouth (#20) est en crise : 1 victoire sur les 5 derniers matchs, 6 matchs sans marquer sur la saison, et une défense qui encaisse régulièrement. Le pressing haut de Portsmouth peut créer du chaos mais expose aussi ses lignes défensives.",
+      "conseil_public": "Derby ne peut pas perdre ce match selon les probabilités (45% victoire extérieure vs 29% domicile). Le double chance X2 couvre à la fois la victoire de Derby et le nul, offrant un filet de sécurité solide. Avec un edge de +11% et une cote à 1.67, c'est le pari le mieux équilibré risque/rendement. Portsmouth est en relégation et manque cruellement de finisseurs (Morris seul vaut plus que tout l'attaque Portsmouth réunie).",
+      "contexte": "Portsmouth est 20e, à une place de la zone de relégation directe, avec seulement 6 victoires en 18 matchs à domicile cette saison. Derby occupe la 8e place et lutte pour les playoffs. L'écart de qualité entre les deux effectifs est réel malgré l'avantage du terrain.",
+      "enjeux": "Pour Portsmouth, c'est une finale de survie ; pour Derby, une opportunité de confirmer ses ambitions de top 6.",
       "vbet": "OUI",
       "value_calc": "+11%",
       "scores": [
-        "1-1",
+        "1-2",
         "0-1",
-        "1-2"
+        "1-1"
       ],
       "paris_3": null,
       "joueur_decisif": {
         "nom": "C. Morris",
         "equipe": "EXT",
         "marche": "Buteur dans le match",
-        "cote_estimee": "2.80-3.20",
-        "raison": "10 buts en seulement 22 matchs cette saison, soit la meilleure moyenne de buteur dans ce match — presque 1 but toutes les 2 rencontres",
+        "cote_estimee": "2.50-3.00",
+        "raison": "10 buts en 22 matchs cette saison, meilleur ratio par match de ce choc",
         "absent": false
       },
       "paris_safe": {
         "bet": "DC X2",
         "cote": 1.67,
-        "proba": "0%"
+        "proba": "29%"
       },
       "paris_risque": {
         "bet": "",
@@ -3371,30 +3371,5 @@
       "pinnacle_snapshot": null
     }
   ],
-  "combis": [
-    {
-      "label": "SHARK SAFE",
-      "type": "safe",
-      "selections": "[Under 2.5 + DC X2]",
-      "matchs": "Cremonese vs Fiorentina, Rayo Vallecano vs Levante",
-      "cote_totale": "1.81",
-      "conseil": "Deux marchés Under 2.5 sur des rencontres à faible scoring attendu. Fiorentina en déplacement et Levante en reconstruction limitent les échanges offensifs. Cote cible atteinte avec sécurité maximale."
-    },
-    {
-      "label": "SHARK VALUE",
-      "type": "value",
-      "selections": "[Under 2.5 + Under 2.5 + DC X2]",
-      "matchs": "Rayo Vallecano vs Levante, Brentford vs Wolves, Portsmouth vs Derby",
-      "cote_totale": "3.14",
-      "conseil": "Combiné 3 sélections croisant les meilleures valeurs du jour. BTTS Non sur Brentford-Wolves (défenses solides, edge +13%), Under 2.5 Rayo-Levante et DC X2 Portsmouth-Derby pour une cote value dans la fenêtre cible."
-    },
-    {
-      "label": "SHARK EXPERT",
-      "type": "audace",
-      "selections": "[BTTS Non + Under 2.5 + Under 2.5 + DC X2]",
-      "matchs": "Brentford vs Wolves, Rayo Vallecano vs Levante, Cremonese vs Fiorentina, Portsmouth vs Derby",
-      "cote_totale": "5.70",
-      "conseil": "Le combiné ultime regroupe les 4 analyses du jour avec confiance 7.2/10 sur chaque sélection. BTTS Non Brentford-Wolves (meilleur edge +13%), deux Under 2.5 confirmés par les contextes tactiques défensifs, et DC X2 Portsmouth-Derby pour sécuriser le résultat. Rapport risque/rendement optimal pour un profil expert."
-    }
-  ]
+  "combis": []
 }

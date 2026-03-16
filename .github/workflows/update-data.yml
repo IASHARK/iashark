@@ -153,41 +153,7 @@ jobs:
           const SEASON   = 2025;
           const TODAY    = new Date().toISOString().split('T')[0];
 
-          // ── LISTE BLANCHE PAR LIGUE ─────────────────────────────
-          // Si une ligue est dans TEAM_WHITELIST, seules ces équipes
-          // sont traitées. Les autres matchs sont ignorés.
-          // Ligues non listées = toutes les équipes autorisées.
-          var TEAM_WHITELIST = {
-            // Eredivisie — top 5
-            88: ['Ajax','PSV','Feyenoord','AZ Alkmaar','FC Utrecht'],
-            // Primeira Liga — top 5
-            94: ['Benfica','Porto','Sporting CP','Braga','Vitoria Guimaraes'],
-            // Süper Lig — top 5
-            203: ['Galatasaray','Fenerbahce','Besiktas','Trabzonspor','Basaksehir'],
-            // Brasileirão — top 5
-            71: ['Flamengo','Palmeiras','Atletico Mineiro','São Paulo','Internacional'],
-            // Primera División Argentine — top 5
-            128: ['Boca Juniors','River Plate','Racing Club','Independiente','San Lorenzo'],
-            // MLS — top 8
-            253: ['LA Galaxy','Inter Miami','NYCFC','Atlanta United','Seattle Sounders','Portland Timbers','Toronto FC','Philadelphia Union'],
-            // Superliga Danemark — top 4
-            119: ['FC Copenhagen','Brondby','FC Midtjylland','AGF'],
-            // J-League — top 5
-            98: ['Vissel Kobe','Kawasaki Frontale','Gamba Osaka','Urawa Reds','Nagoya Grampus'],
-            // K-League — top 5
-            292: ['Jeonbuk Motors','Ulsan Hyundai','Suwon Samsung','Seongnam FC','FC Seoul'],
-            // League of Ireland — top 4
-            357: ['Shamrock Rovers','Bohemian','Shelbourne','Dundalk'],
-          };
-
-          function isTeamAllowed(leagueId, teamName) {
-            if(!TEAM_WHITELIST[leagueId]) return true; // ligue non filtrée = tout OK
-            var list = TEAM_WHITELIST[leagueId];
-            return list.some(function(t){
-              return teamName.toLowerCase().includes(t.toLowerCase()) ||
-                     t.toLowerCase().includes(teamName.toLowerCase().slice(0,5));
-            });
-          }
+          // ── FILTRE LISTE BLANCHE DÉSACTIVÉ — toutes les équipes ──
           var LG_KEY = {
             39:'premier', 40:'champ', 61:'ligue1', 62:'ligue2', 140:'laliga',
             135:'seriea', 78:'bundesliga', 2:'ldc', 3:'el',
@@ -1128,29 +1094,15 @@ jobs:
           function sleep(ms) { return new Promise(function(r){ setTimeout(r,ms); }); }
           async function getFixtures() {
             var all = [];
-            // Dates à couvrir : aujourd'hui + demain (pour matchs nuit/décalage horaire)
-            var dates = [TODAY];
-            var tomorrow = new Date(TODAY+'T12:00:00Z');
-            tomorrow.setDate(tomorrow.getDate()+1);
-            dates.push(tomorrow.toISOString().split('T')[0]);
-
             for (var i = 0; i < LEAGUES.length; i++) {
-              for (var di = 0; di < dates.length; di++) {
-                var r = await get(
-                  'https://v3.football.api-sports.io/fixtures?date='+dates[di]+'&league='+LEAGUES[i]+'&season='+SEASON+'&timezone=Europe%2FParis',
-                  APS
-                );
-                if (r.response) all = all.concat(r.response);
-                await sleep(200);
-              }
+              var r = await get(
+                'https://v3.football.api-sports.io/fixtures?date='+TODAY+'&league='+LEAGUES[i]+'&season='+SEASON+'&timezone=Europe%2FParis',
+                APS
+              );
+              if (r.response) all = all.concat(r.response);
+              await sleep(200);
             }
-            // Dédoublonner par fixture ID
-            var seen = {};
-            return all.filter(function(f){
-              if(seen[f.fixture.id]) return false;
-              seen[f.fixture.id] = true;
-              return true;
-            });
+            return all;
           }
           async function getTeamStats(teamId, leagueId) {
             var r = await get(
@@ -2376,28 +2328,7 @@ jobs:
           async function main() {
             console.log('=== IASHARK', TODAY, '===');
             var fixtures = await getFixtures();
-            console.log('Fixtures bruts:', fixtures.length);
-
-            // ── FENÊTRE TEMPORELLE — matchs des 30h à venir ──────
-            // Capture matchs du matin jusqu'à minuit+6h le lendemain
-            var now = new Date();
-            var limit = new Date(now.getTime() + 30*60*60*1000);
-            fixtures = fixtures.filter(function(fix){
-              if(!fix.fixture||!fix.fixture.date) return true;
-              var d = new Date(fix.fixture.date);
-              return d >= new Date(now.getTime() - 2*60*60*1000) && d <= limit;
-            });
-            console.log('Fixtures dans fenetre 30h:', fixtures.length);
-
-            // ── FILTRE LISTE BLANCHE PAR ÉQUIPE ─────────────────
-            fixtures = fixtures.filter(function(fix){
-              var lgId = fix.league&&fix.league.id;
-              var hn = fix.teams&&fix.teams.home&&fix.teams.home.name||'';
-              var an = fix.teams&&fix.teams.away&&fix.teams.away.name||'';
-              return isTeamAllowed(lgId, hn) || isTeamAllowed(lgId, an);
-            });
-            console.log('Fixtures apres filtre equipes:', fixtures.length);
-
+            console.log('Fixtures trouves:', fixtures.length);
             if (!fixtures.length) {
               fs.writeFileSync('data.json', JSON.stringify({matchs:[],combis:[]},null,2));
               generateWorldCupPages();

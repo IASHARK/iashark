@@ -130,12 +130,67 @@ jobs:
             if(kelly<=0) return null; // pas de valeur
             return Math.min(kelly*fraction*100, 5).toFixed(1); // max 5% bankroll
           }
-          const LEAGUES  = [39, 61, 140, 135, 78, 2, 3, 40, 66, 307, 143, 137, 81];
+          const LEAGUES  = [
+            39, 40,    // Premier League, Championship
+            61,        // Ligue 1
+            62,        // Ligue 2
+            140,       // La Liga
+            135,       // Serie A
+            78,        // Bundesliga
+            2, 3,      // LDC, Europa League
+            88,        // Eredivisie
+            94,        // Primeira Liga Portugal
+            203,       // Süper Lig Turquie
+            71,        // Brasileirão
+            128,       // Primera División Argentine
+            253,       // MLS
+            119,       // Superliga Danemark
+            98,        // J-League Japon
+            292,       // K-League Corée
+            66, 307, 143, 137, 81
+          ];
           const SEASON   = 2025;
           const TODAY    = new Date().toISOString().split('T')[0];
+
+          // ── LISTE BLANCHE PAR LIGUE ─────────────────────────────
+          // Si une ligue est dans TEAM_WHITELIST, seules ces équipes
+          // sont traitées. Les autres matchs sont ignorés.
+          // Ligues non listées = toutes les équipes autorisées.
+          var TEAM_WHITELIST = {
+            // Eredivisie — top 5
+            88: ['Ajax','PSV','Feyenoord','AZ Alkmaar','FC Utrecht'],
+            // Primeira Liga — top 5
+            94: ['Benfica','Porto','Sporting CP','Braga','Vitoria Guimaraes'],
+            // Süper Lig — top 5
+            203: ['Galatasaray','Fenerbahce','Besiktas','Trabzonspor','Basaksehir'],
+            // Brasileirão — top 5
+            71: ['Flamengo','Palmeiras','Atletico Mineiro','São Paulo','Internacional'],
+            // Primera División Argentine — top 5
+            128: ['Boca Juniors','River Plate','Racing Club','Independiente','San Lorenzo'],
+            // MLS — top 8
+            253: ['LA Galaxy','Inter Miami','NYCFC','Atlanta United','Seattle Sounders','Portland Timbers','Toronto FC','Philadelphia Union'],
+            // Superliga Danemark — top 4
+            119: ['FC Copenhagen','Brondby','FC Midtjylland','AGF'],
+            // J-League — top 5
+            98: ['Vissel Kobe','Kawasaki Frontale','Gamba Osaka','Urawa Reds','Nagoya Grampus'],
+            // K-League — top 5
+            292: ['Jeonbuk Motors','Ulsan Hyundai','Suwon Samsung','Seongnam FC','FC Seoul'],
+          };
+
+          function isTeamAllowed(leagueId, teamName) {
+            if(!TEAM_WHITELIST[leagueId]) return true; // ligue non filtrée = tout OK
+            var list = TEAM_WHITELIST[leagueId];
+            return list.some(function(t){
+              return teamName.toLowerCase().includes(t.toLowerCase()) ||
+                     t.toLowerCase().includes(teamName.toLowerCase().slice(0,5));
+            });
+          }
           var LG_KEY = {
-            39:'premier', 40:'champ', 61:'ligue1', 140:'laliga',
+            39:'premier', 40:'champ', 61:'ligue1', 62:'ligue2', 140:'laliga',
             135:'seriea', 78:'bundesliga', 2:'ldc', 3:'el',
+            88:'eredivisie', 94:'primeira', 203:'superlig',
+            71:'brasileirao', 128:'primera-arg', 253:'mls',
+            119:'superliga-dk', 98:'jleague', 292:'kleague',
             66:'coupe-france', 307:'saudi',
             143:'copa-rey', 137:'coppa-italia', 81:'dfb-pokal'
           };
@@ -2304,7 +2359,28 @@ jobs:
           async function main() {
             console.log('=== IASHARK', TODAY, '===');
             var fixtures = await getFixtures();
-            console.log('Fixtures trouves:', fixtures.length);
+            console.log('Fixtures bruts:', fixtures.length);
+
+            // ── FENÊTRE TEMPORELLE — matchs des 30h à venir ──────
+            // Capture matchs du matin jusqu'à minuit+6h le lendemain
+            var now = new Date();
+            var limit = new Date(now.getTime() + 30*60*60*1000);
+            fixtures = fixtures.filter(function(fix){
+              if(!fix.fixture||!fix.fixture.date) return true;
+              var d = new Date(fix.fixture.date);
+              return d >= new Date(now.getTime() - 2*60*60*1000) && d <= limit;
+            });
+            console.log('Fixtures dans fenetre 30h:', fixtures.length);
+
+            // ── FILTRE LISTE BLANCHE PAR ÉQUIPE ─────────────────
+            fixtures = fixtures.filter(function(fix){
+              var lgId = fix.league&&fix.league.id;
+              var hn = fix.teams&&fix.teams.home&&fix.teams.home.name||'';
+              var an = fix.teams&&fix.teams.away&&fix.teams.away.name||'';
+              return isTeamAllowed(lgId, hn) || isTeamAllowed(lgId, an);
+            });
+            console.log('Fixtures apres filtre equipes:', fixtures.length);
+
             if (!fixtures.length) {
               fs.writeFileSync('data.json', JSON.stringify({matchs:[],combis:[]},null,2));
               generateWorldCupPages();
@@ -3171,26 +3247,6 @@ jobs:
               fs.writeFileSync(histoPath, JSON.stringify(histo,null,2));
               console.log('  Historique: '+total+' paris resolus | Winrate: '+winrate.toFixed(0)+'% | ROI: '+roi.toFixed(1)+'%');
             }
-            // ── RESET HISTORIQUE PROPRE pour repartir de zéro demain ──
-            // On vide les anciennes prédictions mais on garde la structure
-            try {
-              var histoReset = {
-                predictions: [],
-                stats: {winrate:0,roi:0,total:0,streak:0,wins:0,losses:0},
-                monthly: [],
-                backtesting: {},
-                reset_date: TODAY,
-                note: 'Historique réinitialisé le '+TODAY+' — nouveau pipeline actif'
-              };
-              // Lire l'existant pour ne pas écraser si déjà reset aujourd'hui
-              var existHisto = null;
-              try { existHisto = JSON.parse(fs.readFileSync('historique.json','utf8')); } catch(e){}
-              if(!existHisto||!existHisto.reset_date||existHisto.reset_date!==TODAY) {
-                fs.writeFileSync('historique.json', JSON.stringify(histoReset,null,2));
-                console.log('=== HISTORIQUE RÉINITIALISÉ — Nouveau départ propre ===');
-              }
-            } catch(e){ console.log('Reset historique erreur:', e.message); }
-
             await updateHistorique();
 
 

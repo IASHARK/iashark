@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
+<meta name="ga-site-verification" content="DluMMCMDwqkPA0QjmbkJ02L1" />
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>IASHARK — Pronostics Football IA · Analyses Quotidiennes</title>
@@ -30,7 +31,7 @@ body::before{content:'';position:fixed;top:-300px;left:50%;transform:translateX(
 .hero-shark{font-size:48px;margin-bottom:10px;display:inline-block;animation:float 3s ease-in-out infinite;}
 @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
-.hero-tag{display:inline-flex;align-items:center;gap:6px;font-family:'Space Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--cyan);background:rgba(34,211,238,0.06);border:1px solid var(--border-cyan);padding:4px 12px;border-radius:20px;margin-top:8px;}
+.hero-tag{display:inline-flex;align-items:center;gap:6px;font-family:'Space Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--cyan);background:rgba(34,211,238,0.06);border:1px solid var(--border-cyan);padding:4px 12px;border-radius:20px;margin-bottom:14px;}
 .hero-tag .dot{width:5px;height:5px;background:var(--cyan);border-radius:50%;animation:blink 1.2s infinite;}
 .hero-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(36px,8vw,56px);letter-spacing:3px;line-height:1.0;margin-bottom:8px;}
 .hero-title span{color:var(--cyan);}
@@ -201,9 +202,13 @@ body::before{content:'';position:fixed;top:-300px;left:50%;transform:translateX(
 <!-- HERO centré -->
 <div class="hero">
   <div class="hero-shark">🦈</div>
+  <div class="hero-tag"><span class="dot"></span> ANALYSES IA EN DIRECT</div>
   <h1 class="hero-title"><span>IA</span>SHARK</h1>
   <p class="hero-sub">L'IA qui attaque les cotes. Analyses statistiques quotidiennes alimentées par l'intelligence artificielle.</p>
-  <div class="hero-tag"><span class="dot"></span> ANALYSES IA EN DIRECT</div>
+  <div class="hero-count">
+    <div class="hero-count-num" id="statMatchs">—</div>
+    <div class="hero-count-lbl">ANALYSES DU JOUR</div>
+  </div>
 </div>
 
 <!-- FILTRES -->
@@ -242,7 +247,7 @@ body::before{content:'';position:fixed;top:-300px;left:50%;transform:translateX(
 
 <!-- NAV BAS -->
 <nav class="nav-bottom">
-  <div class="nav-item active"><div class="nav-icon">🦈</div><div class="nav-lbl">ACCUEIL</div></div>
+  <div class="nav-item active"><div class="nav-icon">⚡</div><div class="nav-lbl">ANALYSES</div></div>
   <div class="nav-item" onclick="window.location='/historique.html'"><div class="nav-icon">📊</div><div class="nav-lbl">HISTORIQUE</div></div>
   <div class="nav-item" onclick="window.location='/combis.html'"><div class="nav-icon">🎰</div><div class="nav-lbl">COMBINÉS</div></div>
   <div class="nav-item" onclick="window.location='/blog/'"><div class="nav-icon">📖</div><div class="nav-lbl">GUIDES</div></div>
@@ -367,10 +372,8 @@ async function loadData(){
     var data=await resp.json();
     allMatchs=data.matchs||[];
     var total=allMatchs.length;
-    var statEl=document.getElementById('statMatchs');
-    if(statEl) statEl.textContent=total;
-    var countEl=document.getElementById('matchCount');
-    if(countEl) countEl.innerHTML='<span>'+total+'</span> MATCHS';
+    document.getElementById('statMatchs').textContent=total;
+    document.getElementById('matchCount').innerHTML='<span>'+total+'</span> MATCHS';
     renderMatchs();
   }catch(e){
     document.getElementById('cardsList').innerHTML='<div class="empty-state"><h3>ERREUR CHARGEMENT</h3><p>Impossible de charger les analyses. Réessaie dans un instant.</p></div>';

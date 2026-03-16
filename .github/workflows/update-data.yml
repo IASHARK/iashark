@@ -150,7 +150,9 @@ jobs:
             292,       // K-League Corée
             66, 307, 143, 137, 81
           ];
-          const SEASON   = 2025;
+          const SEASON   = 2024; // Europe saison 2024/2025
+          // Ligues qui tournent sur l'année calendaire 2026
+          var SEASON_2026 = [71, 128, 253, 357, 98, 292]; // Brésil, Argentine, MLS, Irlande, Japon, Corée
           const TODAY    = new Date().toISOString().split('T')[0];
 
           // ── FILTRE LISTE BLANCHE DÉSACTIVÉ — toutes les équipes ──
@@ -1094,15 +1096,30 @@ jobs:
           function sleep(ms) { return new Promise(function(r){ setTimeout(r,ms); }); }
           async function getFixtures() {
             var all = [];
-            for (var i = 0; i < LEAGUES.length; i++) {
-              var r = await get(
-                'https://v3.football.api-sports.io/fixtures?date='+TODAY+'&league='+LEAGUES[i]+'&season='+SEASON+'&timezone=Europe%2FParis',
-                APS
-              );
-              if (r.response) all = all.concat(r.response);
-              await sleep(200);
+            var tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            var TOMORROW = tomorrow.toISOString().split('T')[0];
+            var dates = [TODAY, TOMORROW];
+
+            for (var d = 0; d < dates.length; d++) {
+              for (var i = 0; i < LEAGUES.length; i++) {
+                var lgId = LEAGUES[i];
+                var season = SEASON_2026.indexOf(lgId) !== -1 ? 2026 : SEASON;
+                var r = await get(
+                  'https://v3.football.api-sports.io/fixtures?date='+dates[d]+'&league='+lgId+'&season='+season+'&timezone=Europe%2FParis',
+                  APS
+                );
+                if (r.response) all = all.concat(r.response);
+                await sleep(200);
+              }
             }
-            return all;
+            // Dédoublonner
+            var seen = {};
+            return all.filter(function(f){
+              if(seen[f.fixture.id]) return false;
+              seen[f.fixture.id] = true;
+              return true;
+            });
           }
           async function getTeamStats(teamId, leagueId) {
             var r = await get(
@@ -2103,7 +2120,7 @@ jobs:
               if(!injStr) injStr='Aucune absence majeure.';
             }
             var prompt =
-              'Tu es le meilleur analyste tactique de football au monde. Tu analyses AUSSI BIEN l\'attaque que la défense — tu ne favorises jamais un marché offensif si les stats défensives ne le justifient pas. Valide ou ajuste le pronostic du modèle. Réponds UNIQUEMENT avec un JSON valide, sans backtick, sans commentaire.\\n\\n'
+              'Tu es l\'Intelligence Artificielle IASHARK, le meilleur analyste tactique de football au monde. Ta mission est de définir le scénario le plus probable d\'un match en étant TOTALEMENT NEUTRE. Réponds UNIQUEMENT avec un JSON valide, sans backtick.\\n\\n'
               +'=== MATCH ===\\n'
               +d.home+' vs '+d.away+' | '+d.league+' | '+d.date+'\\n'
               +'Stade: '+d.stade+' | Météo: '+d.meteo+'\\n\\n'
@@ -2129,14 +2146,22 @@ jobs:
               +(d.xgA_avg?'xG offensif moy: '+d.xgA_avg+(d.xgA_xga?' | xGA défensif moy: '+d.xgA_xga:'')+(d.xgA_defense_surchauffe?' ⚠️ DÉFENSE EN SURCHAUFFE':'')+' | xG pondéré: '+(d.xgA_weighted||'N/A')+'\\n':'')+'\\n'
               +'=== ABSENTS & SUSPENSIONS ===\\n'
               +injStr+'\\n\\n'
-              +(d.topScorersH&&d.topScorersH.length?'Buteurs clés '+d.home+': '+d.topScorersH.map(function(p){
-                var inj=(d.injuries||[]).find(function(x){return x.team===d.homeId&&x.name===p.name;});
-                return p.name+' ('+p.goals+' buts/'+p.games+'match'+(inj?' ⛔ ABSENT':'')+')';
-              }).join(' | ')+'\\n':'')
-              +(d.topScorersA&&d.topScorersA.length?'Buteurs clés '+d.away+': '+d.topScorersA.map(function(p){
-                var inj=(d.injuries||[]).find(function(x){return x.team===d.awayId&&x.name===p.name;});
-                return p.name+' ('+p.goals+' buts/'+p.games+'match'+(inj?' ⛔ ABSENT':'')+')';
-              }).join(' | ')+'\\n':'')
+              +(d.topScorersH&&d.topScorersH.length?(function(){
+                var dispo=d.topScorersH.filter(function(p){return !(d.injuries||[]).some(function(x){var pn=p.name.toLowerCase();var xn=x.name.toLowerCase();return xn.includes(pn)||pn.includes(xn);});});
+                var absents=d.topScorersH.filter(function(p){return (d.injuries||[]).some(function(x){var pn=p.name.toLowerCase();var xn=x.name.toLowerCase();return xn.includes(pn)||pn.includes(xn);});});
+                var r='';
+                if(dispo.length) r+='Buteurs DISPONIBLES '+d.home+': '+dispo.map(function(p){return p.name+' ('+p.goals+' buts/'+p.games+'match)';}).join(' | ')+'\\n';
+                if(absents.length) r+='Buteurs ABSENTS '+d.home+' (NE PAS CHOISIR): '+absents.map(function(p){return '⛔ '+p.name;}).join(', ')+'\\n';
+                return r;
+              })():'')
+              +(d.topScorersA&&d.topScorersA.length?(function(){
+                var dispo=d.topScorersA.filter(function(p){return !(d.injuries||[]).some(function(x){var pn=p.name.toLowerCase();var xn=x.name.toLowerCase();return xn.includes(pn)||pn.includes(xn);});});
+                var absents=d.topScorersA.filter(function(p){return (d.injuries||[]).some(function(x){var pn=p.name.toLowerCase();var xn=x.name.toLowerCase();return xn.includes(pn)||pn.includes(xn);});});
+                var r='';
+                if(dispo.length) r+='Buteurs DISPONIBLES '+d.away+': '+dispo.map(function(p){return p.name+' ('+p.goals+' buts/'+p.games+'match)';}).join(' | ')+'\\n';
+                if(absents.length) r+='Buteurs ABSENTS '+d.away+' (NE PAS CHOISIR): '+absents.map(function(p){return '⛔ '+p.name;}).join(', ')+'\\n';
+                return r;
+              })():'')
               +(d.lineup_home_formation?'\\nCompositions ce soir:\\n'+d.home+': '+d.lineup_home_formation+' — '+d.lineup_home_xi+'\\n':'')
               +(d.lineup_away_formation?d.away+': '+d.lineup_away_formation+' — '+d.lineup_away_xi+'\\n':'')
               +'\\n=== H2H ===\\n'+h2hStr+'\\n\\n'
@@ -2186,23 +2211,21 @@ jobs:
               +(d.dc1x&&d.dc1x!=='--'?'DC 1X: '+d.dc1x+' | DC X2: '+d.dc2x+'\\n':'')+'\\n'
               +'=== TA MISSION ===\\n'
               +'ÉTAPE 1 — Ton point de départ est le "Meilleur pari détecté" ci-dessus (basé sur l\'Edge mathématique).\\n'
-              +'ÉTAPE 2 — Vérifie si le monde réel casse ce calcul. Pose-toi ces 4 questions dans l\'ordre :\\n'
-              +'  → [DÉFENSE] Les stats défensives (buts encaissés, clean sheets) contredisent-elles un pari offensif (Over, BTTS) ? Si les deux équipes encaissent peu → privilégier Under ou BTTS Non.\\n'
-              +'  → [ABSENCES] Un absent clé change-t-il radicalement le scénario ?\\n'
-              +'  → [MOTIVATION] La motivation (relégation, derby, titre) favorise-t-elle ou défavorise-t-elle l\'équipe qu\'on parie ?\\n'
-              +'  → [PERTURBATION] L\'arbitre sévère ou la météo crée-t-il une perturbation majeure ?\\n'
-              +'Si OUI à 1 question → ajuste légèrement ou baisse la confiance de 1 à 2 points.\\n\\n'
-              +'ÉTAPE 3 — Donne TOUJOURS un pronostic. La cote choisie DOIT OBLIGATOIREMENT être comprise entre 1.50 et 3.00.\\n'
-              +'Si le pari le plus "safe" a une cote "poubelle" inférieure à 1.50 (ex: 1.22), il t\'est STRICTEMENT INTERDIT de le choisir.\\n'
-              +'Dans ce cas, tu dois te rabattre sur un autre de tes 6 marchés autorisés (Over, Under, BTTS, DC) dont la cote est bien entre 1.50 et 3.00.\\n'
-              +'Comme ce pari est choisi "par défaut" pour respecter la règle des cotes minimales et s\'avère très risqué tactiquement, tu DOIS OBLIGATOIREMENT lui mettre une TRÈS MAUVAISE NOTE de confiance (ex: 2/10, 3/10 ou 4/10) et définir le risque sur "ELEVE" pour alerter l\'utilisateur qu\'il ne faut pas le jouer.\\n'
-              +'passe_ton_tour = false en permanence.\\n\\n'
+              +'ÉTAPE 2 — Ton analyse doit être TOTALEMENT NEUTRE. Ne favorise aucun marché (offensif ou défensif) par défaut.\\n'
+              +'Utilise les statistiques (xG, buts par 15min, absences) pour déterminer le scénario le plus probable, qu\'il y ait beaucoup ou peu de buts.\\n'
+              +'Supprime tout biais de prudence excessive : si les stats montrent un match ouvert, choisis l\'offensif. Si elles montrent un match fermé, choisis le défensif.\\n\\n'
+              +'ÉTAPE 3 — Applique la règle de la cote :\\n'
+              +'1. Ton premier choix doit être le pari le plus probable.\\n'
+              +'2. Si sa cote est inférieure à 1.50, il est INTERDIT de le choisir.\\n'
+              +'3. Dans ce cas uniquement, choisis un pari alternatif parmi tes 6 marchés autorisés dont la cote est entre 1.50 et 3.00.\\n'
+              +'4. CRITIQUE : Si tu fais ce choix "par défaut" (parce que le pari le plus sûr avait une cote trop basse), tu DOIS mettre une note de confiance TRÈS MAUVAISE (entre 2/10 et 4/10) et un risque "ELEVE".\\n\\n'
               +'RÈGLES ABSOLUES:\\n'
               +'- SEULS CES 6 MARCHÉS SONT AUTORISÉS : Over 2.5, Under 2.5, BTTS Oui, BTTS Non, DC 1X, DC X2. Les victoires sèches (1 ou 2) et les Nuls sont STRICTEMENT INTERDITS.\\n'
               +'- conseil, verdict_shark et facteur_x parlent TOUS du MÊME ET UNIQUE pari que pari_rec.\\n'
+              +'- RÈGLE CRITIQUE JOUEUR : Dans "joueur_decisif", il est STRICTEMENT INTERDIT de choisir un joueur marqué ⛔ ABSENT. Si le meilleur buteur est absent, choisis le joueur DISPONIBLE le plus dangereux. Ajoute toujours "Sous réserve de titularisation officielle" dans le champ raison.\\n'
               +'- Ne jamais inventer une stat.\\n\\n'
               +'=== JSON STRICT — RIEN D\'AUTRE ===\\n'
-              +'{"confiance":7.2,"verdict_shark":"[pari] à [cote] — [raison tactique en 1 phrase directe]","passe_ton_tour":false,"scenario":{"phase1":"0-25min: comment le match démarre tactiquement","phase2":"25-65min: comment le match évolue","phase3":"65-90min: comment le match se finit"},"scenario_15min":[{"t":"0-15min","prob":8,"txt":"contexte tactique du début"},{"t":"15-30min","prob":12,"txt":"première vraie phase"},{"t":"30-45min","prob":10,"txt":"fin de première mi-temps"},{"t":"45-60min","prob":15,"txt":"début deuxième mi-temps"},{"t":"60-75min","prob":18,"txt":"phase décisive"},{"t":"75-90min","prob":20,"txt":"fin de match"}],"facteur_x":"1 seul facteur décisif: absence clé OU série en cours OU style tactique dominant","pari_rec":"Over 2.5 / Under 2.5 / BTTS Oui / BTTS Non / DC 1X / DC X2","cote_rec":"[cote exacte du tableau ci-dessus]","marche":"DOUBLE_CHANCE|TOTAL_BUTS|BTTS","risque":"FAIBLE|MODERE|ELEVE","vbet":"OUI|NON","edge":"+X%","analyse_card":"2-3 phrases sur les forces/faiblesses des deux équipes","conseil":"3-4 phrases qui expliquent le pari de façon simple, sans jargon financier","contexte":"2-3 phrases sur le classement et la situation des équipes","enjeux":"1 phrase sur ce que représente ce match","scores_probables":"X-X,X-X,X-X","p1":45,"pn":28,"p2":27,"po15":80,"po25":55,"btts":50,"kelly":"2.1","joueur_decisif":{"nom":"[joueur le plus dangereux selon stats]","equipe":"DOM|EXT","marche":"Buteur dans le match","cote_estimee":"3.50-4.50","raison":"[1 stat clé]","absent":false}}\\n\\n'
+              +'{"confiance":7.2,"verdict_shark":"[pari] à [cote] — [raison tactique en 1 phrase directe]","passe_ton_tour":false,"scenario":{"phase1":"0-25min: comment le match démarre tactiquement","phase2":"25-65min: comment le match évolue","phase3":"65-90min: comment le match se finit"},"scenario_15min":[{"t":"0-15min","prob":8,"txt":"contexte tactique du début"},{"t":"15-30min","prob":12,"txt":"première vraie phase"},{"t":"30-45min","prob":10,"txt":"fin de première mi-temps"},{"t":"45-60min","prob":15,"txt":"début deuxième mi-temps"},{"t":"60-75min","prob":18,"txt":"phase décisive"},{"t":"75-90min","prob":20,"txt":"fin de match"}],"facteur_x":"1 seul facteur décisif: absence clé OU série en cours OU style tactique dominant","pari_rec":"Over 2.5 / Under 2.5 / BTTS Oui / BTTS Non / DC 1X / DC X2","cote_rec":"[cote exacte du tableau ci-dessus]","marche":"DOUBLE_CHANCE|TOTAL_BUTS|BTTS","risque":"FAIBLE|MODERE|ELEVE","vbet":"OUI|NON","edge":"+X%","analyse_card":"2-3 phrases sur les forces/faiblesses des deux équipes","conseil":"3-4 phrases qui expliquent le pari de façon simple, sans jargon financier","contexte":"2-3 phrases sur le classement et la situation des équipes","enjeux":"1 phrase sur ce que représente ce match","scores_probables":"X-X,X-X,X-X","p1":45,"pn":28,"p2":27,"po15":80,"po25":55,"btts":50,"kelly":"2.1","joueur_decisif":{"nom":"[joueur DISPONIBLE le plus dangereux]","equipe":"DOM|EXT","marche":"Buteur dans le match","cote_estimee":"3.50-4.50","raison":"[1 stat clé] — Sous réserve de titularisation officielle","absent":false}}\\n\\n'
               +'CONTRAINTES FINALES: confiance max 8.5 | La cote_rec DOIT être entre 1.50 et 3.00 | vbet=OUI si edge>=5% ET cote>=1.50 ET confiance>=6.5';
             var r = await postJSONWithRetry('api.anthropic.com', '/v1/messages', {
               model: 'claude-sonnet-4-6',
@@ -2214,26 +2237,34 @@ jobs:
             catch(e) { console.log('Parse error:', txt.slice(0,200)); return null; }
           }
           async function genCombis(list, isSamedi, isDimanche, allMatchs) {
-            if (list.length < 2) return [];
-            var lines = list.map(function(a){
+            // Si moins de 2 matchs → Fun Bets au lieu d'annuler
+            if (list.length < 1) return [];
+
+            // 1. Top 10 par confiance — supprime la barrière conf >= 7.0
+            var sortedForCombis = list.slice().sort(function(a,b){return b.conf-a.conf;});
+            var topPicks = sortedForCombis.slice(0, 10);
+
+            var lines = topPicks.map(function(a){
               return '- '+a.home+' vs '+a.away+': '+a.pari+' cote '+a.cote+' (confiance '+a.conf+'/10, edge '+(a.edge||'?')+')';
             }).join('\n');
+
             var promptClassic =
-              'Expert paris sportifs IASHARK. Analyses du jour:\n'+lines+'\n\n'
+              'Expert paris sportifs IASHARK. Meilleurs signaux du jour (triés par confiance):\n'+lines+'\n\n'
               +'MISSION : Génère 3 combinés optimisés pour un TAUX DE RÉUSSITE MAXIMAL.\n'
-              +'RÈGLES D\'OR (À RESPECTER ABSOLUMENT) :\n'
-              +'- Armes absolues : Utilise massivement le "Over 1.5 Buts", le "Under 3.5 Buts" et le "BTTS Oui/Non". Les Double Chances sont autorisées.\n'
-              +'- BANNIS les victoires sèches (1 ou 2) dans le combiné SAFE.\n'
-              +'- AUCUNE OBLIGATION DE VARIÉTÉ : Si les 3 meilleurs paris sont des "Over 1.5", fais un combiné 100% Over 1.5. Concentre-toi sur la probabilité de gain, pas sur l\'esthétique.\n'
-              +'- Utilise UNIQUEMENT les paris avec confiance >= 7.0 de la liste ci-dessus.\n\n'
-              +'STRUCTURE REQUISE :\n'
-              +'- c1 "SHARK SAFE" : EXACTEMENT 2 matchs très sûrs. Cote totale entre 1.50 et 2.00.\n'
-              +'- c2 "SHARK VALUE" : 3 matchs maximum. Cote totale entre 2.50 et 4.00.\n'
-              +'- c3 "SHARK EXPERT" : 3 à 4 matchs maximum. Cote totale entre 4.00 et 6.00 maximum.\n\n'
+              +'RÈGLES D\'OR :\n'
+              +'- Armes autorisées : Over 1.5, Under 2.5, BTTS Oui/Non, Double Chance.\n'
+              +'- BANNIS les victoires sèches dans le SAFE.\n'
+              +'- RÈGLE ANTI-CORRÉLATION : Dans un même combiné, pas plus de 2 paris du même type (ex: pas 3x Under 2.5). Si tu as 2 Under 2.5, le 3e DOIT être un Over 1.5 ou une Double Chance.\n'
+              +'- Si tu as moins de 4 matchs disponibles, génère des "Fun Bets" simples à la place.\n\n'
+              +'STRUCTURE :\n'
+              +'- c1 "SHARK SAFE" : EXACTEMENT 2 matchs très sûrs. Cote totale 1.50-2.00.\n'
+              +'- c2 "SHARK VALUE" : 3 matchs max. Cote totale 2.50-4.00. Varie les marchés.\n'
+              +'- c3 "SHARK EXPERT" : 3-4 matchs max. Cote totale 4.00-6.00. Mix BTTS + Over + DC.\n\n'
               +'Reponds UNIQUEMENT avec ce JSON sans backticks:\n'
-              +'{"c1":{"label":"SHARK SAFE","type":"safe","selections":"[Ex: Over 1.5 + Double Chance 1X]","matchs":"match1, match2","cote_totale":"1.85","conseil":"Explication courte basée sur la sécurité des marchés"},'
-              +'"c2":{"label":"SHARK VALUE","type":"value","selections":"[Ex: BTTS Oui + Over 1.5 + Under 3.5]","matchs":"m1, m2, m3","cote_totale":"3.20","conseil":"..."},'
-              +'"c3":{"label":"SHARK EXPERT","type":"audace","selections":"[Ex: BTTS Oui + Over 1.5 + DC 1X + Over 1.5]","matchs":"m1, m2, m3, m4","cote_totale":"5.50","conseil":"..."}}';
+              +'{"c1":{"label":"SHARK SAFE","type":"safe","selections":"Over 1.5 + DC 1X","matchs":"match1, match2","cote_totale":"1.85","conseil":"..."},'
+              +'"c2":{"label":"SHARK VALUE","type":"value","selections":"BTTS Non + Over 1.5 + DC X2","matchs":"m1, m2, m3","cote_totale":"3.20","conseil":"..."},'
+              +'"c3":{"label":"SHARK EXPERT","type":"audace","selections":"Over 1.5 + BTTS Non + DC 1X","matchs":"m1, m2, m3","cote_totale":"5.50","conseil":"..."}}';
+
             var r = await postJSONWithRetry('api.anthropic.com', '/v1/messages', {
               model: 'claude-sonnet-4-6',
               max_tokens: 800,
@@ -2253,30 +2284,31 @@ jobs:
             var pool = [];
             (allMatchs||[]).forEach(function(m) {
               var matchLabel = m.home.n+' vs '+m.away.n;
+              var edgeNum = parseFloat((m.edge||'').replace(/[^0-9.]/g,''))||0;
               var candidates = [];
-              // Priorité aux marchés sûrs pour le Fou aussi
-              if (m.co15 &&m.co15 !=='--'&&parseFloat(m.co15)>=1.20&&parseFloat(m.co15)<=2.50) candidates.push({match:matchLabel,sel:'Over 1.5 buts',cote:parseFloat(m.co15),prob:Math.round(100/parseFloat(m.co15))});
-              if (m.dc1x &&m.dc1x !=='--'&&parseFloat(m.dc1x)>=1.20&&parseFloat(m.dc1x)<=2.00) candidates.push({match:matchLabel,sel:'Double Chance 1X',cote:parseFloat(m.dc1x),prob:Math.round(100/parseFloat(m.dc1x))});
-              if (m.dc2x &&m.dc2x !=='--'&&parseFloat(m.dc2x)>=1.20&&parseFloat(m.dc2x)<=2.00) candidates.push({match:matchLabel,sel:'Double Chance X2',cote:parseFloat(m.dc2x),prob:Math.round(100/parseFloat(m.dc2x))});
-              if (m.btts_non&&m.btts_non!=='--'&&parseFloat(m.btts_non)>=1.20&&parseFloat(m.btts_non)<=2.00) candidates.push({match:matchLabel,sel:'BTTS Non',cote:parseFloat(m.btts_non),prob:Math.round(100/parseFloat(m.btts_non))});
-              if (m.co25 &&m.co25 !=='--'&&parseFloat(m.co25)>=1.20&&parseFloat(m.co25)<=2.50) candidates.push({match:matchLabel,sel:'Over 2.5 buts',cote:parseFloat(m.co25),prob:Math.round(100/parseFloat(m.co25))});
-              if (m.btts_oui&&m.btts_oui!=='--'&&parseFloat(m.btts_oui)>=1.20&&parseFloat(m.btts_oui)<=2.00) candidates.push({match:matchLabel,sel:'BTTS Oui',cote:parseFloat(m.btts_oui),prob:Math.round(100/parseFloat(m.btts_oui))});
+              if (m.co15 &&m.co15 !=='--'&&parseFloat(m.co15)>=1.20&&parseFloat(m.co15)<=2.50) candidates.push({match:matchLabel,sel:'Over 1.5 buts',cote:parseFloat(m.co15),edge:edgeNum,prob:Math.round(100/parseFloat(m.co15))});
+              if (m.dc1x &&m.dc1x !=='--'&&parseFloat(m.dc1x)>=1.20&&parseFloat(m.dc1x)<=2.00) candidates.push({match:matchLabel,sel:'Double Chance 1X',cote:parseFloat(m.dc1x),edge:edgeNum,prob:Math.round(100/parseFloat(m.dc1x))});
+              if (m.dc2x &&m.dc2x !=='--'&&parseFloat(m.dc2x)>=1.20&&parseFloat(m.dc2x)<=2.00) candidates.push({match:matchLabel,sel:'Double Chance X2',cote:parseFloat(m.dc2x),edge:edgeNum,prob:Math.round(100/parseFloat(m.dc2x))});
+              if (m.btts_non&&m.btts_non!=='--'&&parseFloat(m.btts_non)>=1.20&&parseFloat(m.btts_non)<=2.00) candidates.push({match:matchLabel,sel:'BTTS Non',cote:parseFloat(m.btts_non),edge:edgeNum,prob:Math.round(100/parseFloat(m.btts_non))});
+              if (m.co25 &&m.co25 !=='--'&&parseFloat(m.co25)>=1.20&&parseFloat(m.co25)<=2.50) candidates.push({match:matchLabel,sel:'Over 2.5 buts',cote:parseFloat(m.co25),edge:edgeNum,prob:Math.round(100/parseFloat(m.co25))});
+              if (m.btts_oui&&m.btts_oui!=='--'&&parseFloat(m.btts_oui)>=1.20&&parseFloat(m.btts_oui)<=2.00) candidates.push({match:matchLabel,sel:'BTTS Oui',cote:parseFloat(m.btts_oui),edge:edgeNum,prob:Math.round(100/parseFloat(m.btts_oui))});
               if (!candidates.length) return;
-              candidates.sort(function(a,b){return a.cote-b.cote;});
+              candidates.sort(function(a,b){return b.edge-a.edge||a.cote-b.cote;});
               pool.push(candidates[0]);
             });
             if (pool.length < 3) {
               classics.push({label:labelFou,type:typeFou,selections:'Pas assez de matchs ce jour',matchs:'',cote_totale:'--',conseil:'Reviens demain pour le combiné fou !'});
               return classics;
             }
-            pool.sort(function(a,b){return a.cote-b.cote;});
+            // 3. Trier par edge pour le Fou
+            pool.sort(function(a,b){return b.edge-a.edge;});
             var TARGET_MIN = 5, TARGET_MAX = 10;
             var selected = [];
             var coteTotale = 1.0;
             for (var si=0; si<pool.length; si++) {
-              if(selected.length>=5) break; // max 5 sélections
+              if(selected.length>=5) break;
               var next = coteTotale * pool[si].cote;
-              if(next > TARGET_MAX) break; // s'arrête dès qu'on dépasse 10
+              if(next > TARGET_MAX) break;
               selected.push(pool[si]);
               coteTotale = next;
               if (coteTotale >= TARGET_MIN) break;
@@ -2291,7 +2323,7 @@ jobs:
             var probMin = selected.reduce(function(mn,s){return Math.min(mn,s.prob);},100);
             var probMax = selected.reduce(function(mx,s){return Math.max(mx,s.prob);},0);
             var nbSel = selected.length;
-            var conseil = nbSel+' sélections parmi les plus sécurisées du jour (Over 1.5 & DC uniquement), probabilités IA entre '+probMin+'% et '+probMax+'% — combiné réaliste à cote '+coteFinalStr;
+            var conseil = nbSel+' sélections triées par edge IA, probabilités entre '+probMin+'% et '+probMax+'% — combiné réaliste à cote '+coteFinalStr;
             classics.push({label:labelFou,type:typeFou,selections:selectionsStr,matchs:matchsStr,cote_totale:coteFinalStr,conseil:conseil});
             return classics;
           }
@@ -2328,6 +2360,14 @@ jobs:
           async function main() {
             console.log('=== IASHARK', TODAY, '===');
             var fixtures = await getFixtures();
+            var nowParisMs = new Date().getTime();
+            fixtures = fixtures.filter(function(fix){
+              var dateStr = fix.fixture&&fix.fixture.date||'';
+              if(!dateStr) return true;
+              var matchTimeMs = new Date(dateStr).getTime();
+              return matchTimeMs > (nowParisMs + 30 * 60000);
+            });
+            console.log('Matchs restants:', fixtures.length);
             console.log('Fixtures trouves:', fixtures.length);
             if (!fixtures.length) {
               fs.writeFileSync('data.json', JSON.stringify({matchs:[],combis:[]},null,2));
@@ -2378,6 +2418,14 @@ jobs:
               }
             } catch(e){ console.log('Dropping odds: pas de données précédentes'); }
 
+            // ── CACHE — charger les anciennes données pour éviter de reanalyser ──
+            var oldData = {matchs:[]};
+            try {
+              if(fs.existsSync('data.json')){
+                oldData = JSON.parse(fs.readFileSync('data.json','utf8'));
+              }
+            } catch(e){}
+
             var matchsData = [];
             var forCombis  = [];
             var standingsCache = {};
@@ -2387,6 +2435,16 @@ jobs:
               var lg   = fix.league;
               var home = fix.teams.home;
               var away = fix.teams.away;
+
+              // VÉRIFICATION DU CACHE
+              var cached = (oldData.matchs||[]).find(function(m){return m.id===f.id&&m.verdict_shark&&m.verdict_shark!=='';});
+              if(cached){
+                console.log('-> '+home.name+' vs '+away.name+' : cache (0 appel API)');
+                matchsData.push(cached);
+                if(cached.conf>=6.5) forCombis.push({home:cached.home.n,away:cached.away.n,pari:cached.pari_rec,conf:cached.conf,edge:cached.edge||'',cote:parseFloat(cached.cote_rec)||1.5});
+                continue;
+              }
+
               console.log('\n-> '+home.name+' vs '+away.name+' ('+lg.name+')');
               if (!standingsCache[lg.id]) {
                 standingsCache[lg.id] = await getFullStanding(lg.id);
@@ -2944,6 +3002,8 @@ jobs:
               return {label:c.label,type:c.type,selections:c.selections,matchs:c.matchs,cote_totale:c.cote_totale,conseil:c.conseil};
             });
 
+            // Tri chronologique sur 2 jours
+            matchsData.sort(function(a,b){ return (a.date||'').localeCompare(b.date||''); });
             fs.writeFileSync('data.json', JSON.stringify({matchs:matchsData,combis:combisData},null,2));
             console.log('\n=== DONE: '+matchsData.length+' matchs | '+combisData.length+' combis ===');
 

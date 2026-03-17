@@ -1,0 +1,21 @@
+name: Test Creatomate Video
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test_video:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Récupérer le code
+        uses: actions/checkout@v3
+
+      - name: Installer Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Lancer le test vidéo
+        env:
+          CREATOMATE_KEY: ${{ secrets.CREATOMATE_KEY }}
+        run: node test-video.js

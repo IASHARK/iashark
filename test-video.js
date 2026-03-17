@@ -1,152 +1,159 @@
 const https = require('https');
 const fs = require('fs');
 
-// Fonction pour nettoyer les noms pour la voix (on enlève les détails inutiles)
-function nomOral(nom) {
-    if (!nom) return '';
-    const map = {
-        'Manchester City FC': 'Manchester City',
-        'Bayern München': 'le Bayern Munich',
-        'Real Madrid CF': 'le Real Madrid',
-        'Paris Saint-Germain FC': 'le PSG',
-        'Sporting CP': 'le Sporting Lisbonne',
-    };
-    for (const key in map) { if (nom.includes(key)) return map[key]; }
-    return nom;
+function nomNaturel(nom) {
+  if (!nom) return '';
+  const map = {
+    'Bayern München': 'le Bayern', 'Bayern Munchen': 'le Bayern', 'FC Bayern': 'le Bayern',
+    'Real Madrid': 'le Real', 'Real Madrid CF': 'le Real',
+    'Manchester City': 'City', 'Manchester City FC': 'City',
+    'Manchester United': 'United', 'Manchester United FC': 'United',
+    'Paris Saint Germain': 'le PSG', 'Paris Saint-Germain': 'le PSG',
+    'Sporting CP': 'le Sporting',
+    'Atletico Madrid': "l'Atlético", 'Club Atletico de Madrid': "l'Atlético",
+    'Borussia Dortmund': 'Dortmund',
+    'Inter Milan': "l'Inter", 'FC Internazionale': "l'Inter",
+    'AC Milan': 'le Milan', 'Juventus': 'la Juve', 'Juventus FC': 'la Juve',
+    'FC Barcelona': 'le Barça', 'Barcelona': 'le Barça',
+    'Bayer Leverkusen': 'Leverkusen',
+    'Tottenham Hotspur': 'Tottenham',
+    'Newcastle United': 'Newcastle',
+    'Galatasaray': 'Galatasaray', 'Fenerbahce': 'Fener', 'Fenerbahçe': 'Fener',
+    'Chapecoense-sc': 'Chapecoense', 'Racing Club': 'Racing',
+  };
+  for (const key of Object.keys(map)) {
+    if (nom.toLowerCase().includes(key.toLowerCase())) return map[key];
+  }
+  return nom;
 }
 
-// ÉTAPE 1 : Claude génère un script oral de 25s
-async function genererScript(match) {
-    return new Promise((resolve) => {
-        const home = nomOral(match.home.n);
-        const away = nomOral(match.away.n);
-        const analyseBrute = match.analyse_card || match.verdict_shark || "";
+function genererScript(match) {
+  return new Promise((resolve) => {
+    const homeNom = nomNaturel(match.home.n);
+    const awayNom = nomNaturel(match.away.n);
+    const scoreProb = (match.scores || []).slice(0, 3).join(', ') || '1-0';
+    const verdict = match.verdict_shark || '';
+    const facteur = match.facteur_x || '';
+    const conseil = match.conseil_public || match.analyse_card || '';
+    const edge = match.edge || '';
+    const conf = match.conf || '';
+    const pari = match.pari_rec || '';
 
-        // PROMPT SHARK : On lui donne le persona et les données
-        const prompt = `Tu es "The Shark", le meilleur analyste foot sur TikTok. Écris un script vocal de 25 secondes maximum pour une vidéo.
+    const prompt = `Tu es le meilleur analyste data football sur TikTok. Écris le script vocal d'une vidéo de vingt-cinq secondes maximum.
 
-DONNÉES :
-- Match : ${home} vs ${away}
-- Analyse du site : ${analyseBrute}
-- Confiance : ${match.conf || 'moyenne'} / 10
+RÈGLES STRICTES :
+1. Utilise UNIQUEMENT "${homeNom}" et "${awayNom}" — jamais les noms officiels complets.
+2. ZÉRO jargon de parieur : bannis "cote", "bookmaker", "pari", "mise", "ticket", "pronostic". Utilise "probabilités", "data", "scénario", "tendance".
+3. Écris les chiffres en lettres. Utilise des points de suspension pour les pauses.
+4. Commence DIRECTEMENT avec la stat la plus forte. Jamais "Bonjour" ou "Bienvenue".
+5. Structure : hook percutant → data qui explique → verdict annoncé cash.
 
-RÈGLES DE SCRIPT :
-1. **Persona** : Énergique, percutant, parle direct. Pas de bla-bla.
-2. **Oral** : Écris exactement comment ça doit être dit. Utilise "..." pour les pauses. Pas d'abréviations.
-3. **Contenu** : Donne le scénario du match et ton verdict, mais ne dis pas "expected goals". Dis "data offensives".
-4. **Conclusion** : Termine par une phrase qui engage.
+DONNÉES RÉELLES DU MATCH :
+- ${homeNom} reçoit ${awayNom}
+- Verdict IA : ${verdict}
+- Facteur clé : ${facteur}
+- Analyse : ${conseil}
+- Scores probables : ${scoreProb}
+- Edge mathématique : ${edge}
+- Confiance IA : ${conf} sur dix
 
-Rédige UNIQUEMENT le texte vocal du script, rien d'autre.`;
+Rédige UNIQUEMENT le texte brut que la voix lira. Zéro titre, zéro hashtag, zéro markdown. Une seule ligne de texte continu.`;
 
-        const body = JSON.stringify({
-            model: 'claude-3-5-sonnet-20241022',
-            max_tokens: 300,
-            messages: [{ role: 'user', content: prompt }]
-        });
-
-        const req = https.request({
-            hostname: 'api.anthropic.com',
-            path: '/v1/messages',
-            method: 'POST',
-            headers: {
-                'x-api-key': process.env.ANTHROPIC_KEY,
-                'anthropic-version': '2023-06-01',
-                'Content-Type': 'application/json',
-                'Content-Length': Buffer.byteLength(body)
-            }
-        }, (res) => {
-            let data = '';
-            res.on('data', chunk => data += chunk);
-            res.on('end', () => {
-                try {
-                    const r = JSON.parse(data);
-                    if (r.content && r.content[0] && r.content[0].text) {
-                        resolve(r.content[0].text);
-                    } else { resolve(analyseBrute.slice(0, 300)); } // Repli
-                } catch(e) { resolve(analyseBrute.slice(0, 300)); }
-            });
-        });
-        req.on('error', () => resolve(analyseBrute.slice(0, 300)));
-        req.write(body);
-        req.end();
+    const body = JSON.stringify({
+      model: 'claude-haiku-4-5-20251001',
+      max_tokens: 250,
+      messages: [{ role: 'user', content: prompt }]
     });
+
+    const req = https.request({
+      hostname: 'api.anthropic.com',
+      path: '/v1/messages',
+      method: 'POST',
+      headers: {
+        'x-api-key': process.env.ANTHROPIC_KEY,
+        'anthropic-version': '2023-06-01',
+        'Content-Type': 'application/json',
+        'Content-Length': Buffer.byteLength(body)
+      }
+    }, (res) => {
+      let data = '';
+      res.on('data', chunk => data += chunk);
+      res.on('end', () => {
+        try { resolve((JSON.parse(data).content[0] || {}).text || ''); }
+        catch(e) { resolve(''); }
+      });
+    });
+    req.on('error', () => resolve(''));
+    req.write(body);
+    req.end();
+  });
 }
 
-// ÉTAPE 2 : Envoi à Creatomate
-async function envoyerVersCreatomate(match, script) {
-    return new Promise((resolve) => {
-        // CORRECTION LOGOS : On utilise l'ID principal de l'équipe (API-Sports)
-        // Les logos sans fond sont souvent des PNG. Si tu as un carré blanc,
-        // c'est que ton template Creatomate n'a pas un masque rond ou que l'image source est un JPG.
-        const idHome = match.home.id;
-        const idAway = match.away.id;
+function envoyerVersCreatomate(match, script) {
+  return new Promise((resolve) => {
+    const logoHome = `https://media.api-sports.io/football/teams/${match.home.id}.png`;
+    const logoAway = `https://media.api-sports.io/football/teams/${match.away.id}.png`;
+    const score = (match.scores || ['1-0'])[0];
 
-        console.log(`📡 Envoi à Creatomate...`);
-        console.log(`🎙️ Script vocal : ${script}`);
-
-        const data = JSON.stringify({
-            template_id: '00468af0-fdc7-4490-81ad-d56b15f773d1',
-            modifications: {
-                // Liens direct vers les logos officiels (PNG transparents normalement)
-                "Logo_Domicile": `https://media.api-sports.io/football/teams/${idHome}.png`,
-                "Logo_Exterieur": `https://media.api-sports.io/football/teams/${idAway}.png`,
-                "Equipe_Dom": match.home.n, // On garde le nom complet pour l'affichage
-                "Equipe_Ext": match.away.n,
-                "Score_Probable": (match.scores_probables || "1-0").split(',')[0].trim(),
-                "Voix_IA": script // Maintenant c'est le script de Claude !
-            }
-        });
-
-        const req = https.request({
-            hostname: 'api.creatomate.com',
-            path: '/v1/renders',
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${process.env.CREATOMATE_KEY}`,
-                'Content-Type': 'application/json',
-                'Content-Length': Buffer.byteLength(data)
-            }
-        }, (res) => {
-            let body = '';
-            res.on('data', (chunk) => body += chunk);
-            res.on('end', () => resolve(JSON.parse(body)));
-        });
-
-        req.on('error', () => resolve(null));
-        req.write(data);
-        req.end();
+    const data = JSON.stringify({
+      template_id: '00468af0-fdc7-4490-81ad-d56b15f773d1',
+      modifications: {
+        'Voix_IA': script,
+        'Logo_Domicile': logoHome,
+        'Logo_Exterieur': logoAway,
+        'Text-59T': score,
+      }
     });
+
+    const req = https.request({
+      hostname: 'api.creatomate.com',
+      path: '/v1/renders',
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${process.env.CREATOMATE_KEY}`,
+        'Content-Type': 'application/json',
+        'Content-Length': Buffer.byteLength(data)
+      }
+    }, (res) => {
+      let body = '';
+      res.on('data', chunk => body += chunk);
+      res.on('end', () => { try { resolve(JSON.parse(body)); } catch(e) { resolve(null); } });
+    });
+    req.on('error', () => resolve(null));
+    req.write(data);
+    req.end();
+  });
 }
 
 async function run() {
-    try {
-        if (!fs.existsSync('data.json')) throw new Error("data.json absent.");
-        const content = JSON.parse(fs.readFileSync('data.json', 'utf8'));
-        
-        // On cible uniquement les matchs LDC
-        const ldcMatchs = (content.matchs || []).filter(m => m.league_key === 'ldc');
+  try {
+    if (!fs.existsSync('data.json')) throw new Error('data.json introuvable.');
+    const content = JSON.parse(fs.readFileSync('data.json', 'utf8'));
+    const ldcMatchs = (content.matchs || []).filter(m => m.league_key === 'ldc');
 
-        if (ldcMatchs.length > 0) {
-            // On prend LE meilleur match (plus haute confiance)
-            const match = ldcMatchs.sort((a, b) => (b.conf || 0) - (a.conf || 0))[0];
-            
-            console.log(`🦈 SHARK MODE ACTIVÉ : ${match.home.n} vs ${match.away.n}`);
-            
-            // 1. On demande à Claude d'écrire le script
-            console.log("✍️ Génération du script vocal par Claude...");
-            const scriptVocal = await genererScript(match);
-            
-            // 2. On envoie tout à Creatomate
-            const res = await envoyerVersCreatomate(match, scriptVocal);
-            
-            if (res && res[0]) {
-                console.log(`✅ VIDÉO EN COURS : ${res[0].url}`);
-            } else {
-                console.log("⚠️ Erreur :", JSON.stringify(res, null, 2));
-            }
-        }
-    } catch (err) {
-        console.error("❌ Erreur :", err.message);
+    if (!ldcMatchs.length) { console.log('Aucun match LDC aujourd\'hui.'); return; }
+
+    const match = ldcMatchs.sort((a, b) => (b.conf || 0) - (a.conf || 0))[0];
+    console.log(`Match : ${match.home.n} vs ${match.away.n} (conf: ${match.conf})`);
+
+    let script = await genererScript(match);
+    script = script.replace(/^[#\*\-].*/gm, '').replace(/\n+/g, ' ').trim();
+    console.log('\n=== SCRIPT ===\n' + script + '\n==============\n');
+
+    if (!script) throw new Error('Script vide.');
+
+    const res = await envoyerVersCreatomate(match, script);
+    if (res && res[0]) {
+      console.log(`Statut : ${res[0].status}`);
+      if (res[0].url) console.log(`Vidéo : ${res[0].url}`);
+      else console.log(`ID : ${res[0].id}`);
+    } else {
+      console.log(JSON.stringify(res, null, 2));
     }
+  } catch(err) {
+    console.error('Erreur :', err.message);
+    process.exit(1);
+  }
 }
+
 run();

@@ -27,15 +27,15 @@ function nomNaturel(nom) {
 }
 
 function formeEnTexte(forme) {
-  if (!forme) return '';
+  if (!forme) return 'forme moyenne';
   const map = { 'W': 'victoire', 'D': 'nul', 'L': 'défaite' };
-  const mots = forme.split('').map(c => map[c] || c);
-  const wins = forme.split('').filter(c => c === 'W').length;
+  const mots = (forme || '').split('').map(c => map[c] || c);
+  const wins = (forme || '').split('').filter(c => c === 'W').length;
   return `${wins} victoire${wins > 1 ? 's' : ''} sur les ${mots.length} derniers matchs`;
 }
 
 function nombreEnTexte(n) {
-  if (!n) return '?';
+  if (!n || n === '?') return 'zéro';
   const m = { '0.5': 'zéro virgule cinq', '1.5': 'un but et demi', '2.5': 'deux buts et demi', '3.5': 'trois buts et demi', '4.5': 'quatre buts et demi' };
   return m[String(n)] || String(n).replace('.', ' virgule ');
 }
@@ -45,12 +45,11 @@ async function genererScript(match) {
     const homeNom = nomNaturel(match.home.n || match.home);
     const awayNom = nomNaturel(match.away.n || match.away);
     
-    const prompt = `Tu es le meilleur analyste data football sur TikTok. Écris un script vocal de 25s max.
+    const prompt = `Tu es le meilleur analyste foot TikTok. Écris un script vocal de 25s max.
 RÈGLES : 
 - Utilise uniquement "${homeNom}" et "${awayNom}". 
-- PAS de jargon de parieur (cote, pari, miser). Parle de "data", "probabilités".
-- Écrit pour l'oral : pas d'abréviation, chiffres en lettres, "..." pour les pauses.
-- Cash et direct.
+- PAS de jargon de parieur. Parle de "data" et "scénario".
+- Oral uniquement : pas d'abréviation, "..." pour les pauses.
 
 DONNÉES :
 - Domicile : ${homeNom} (xG: ${nombreEnTexte(match.xgH_avg)}, forme: ${formeEnTexte(match.forme5H)})
@@ -60,7 +59,7 @@ DONNÉES :
 Rédige UNIQUEMENT le script vocal.`;
 
     const body = JSON.stringify({
-      model: 'claude-3-5-sonnet-latest',
+      model: 'claude-sonnet-4-6', // LE NOM EXACT PRIS DANS TON WORKFLOW
       max_tokens: 500,
       messages: [{ role: 'user', content: prompt }]
     });
@@ -140,13 +139,13 @@ async function run() {
     console.log(`Sélection : ${match.home.n} vs ${match.away.n}`);
 
     const script = await genererScript(match);
-    if (!script) throw new Error('Script vide.');
+    if (!script) throw new Error('Script non généré.');
 
     console.log('=== SCRIPT ===\n' + script + '\n==============');
 
     const res = await envoyerCreatomate(match, script);
-    if (res && res[0] && res[0].url) console.log(`✅ Vidéo : ${res[0].url}`);
-    else console.log('⏳ Rendu lancé.');
+    if (res && res[0] && res[0].url) console.log(`✅ Vidéo OK : ${res[0].url}`);
+    else console.log('⏳ Rendu envoyé à Creatomate.');
 
   } catch(err) {
     console.error('Erreur :', err.message);

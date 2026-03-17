@@ -3314,6 +3314,7 @@ jobs:
           NEWSAPI_KEY:     ${{ secrets.NEWSAPI_KEY }}
           ANTHROPIC_KEY:   ${{ secrets.ANTHROPIC_KEY }}
           ODDS_API_KEY:    ${{ secrets.ODDS_API_KEY }}
+          CREATOMATE_KEY:  ${{ secrets.CREATOMATE_KEY }}
         run: node pipeline.js
 
       - name: Commit and push

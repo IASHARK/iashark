@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mon Compte — IASHARK</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg:#080c12;--card:#0d1520;--card2:#111a26;
+  --border:rgba(255,255,255,0.07);--bc:rgba(34,211,238,0.2);
+  --cyan:#22d3ee;--amber:#f59e0b;--green:#10b981;--red:#ef4444;--purple:#8b5cf6;
+  --text:#e2e8f0;--muted:#4a6580;
+}
+*{box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;padding-bottom:90px;}
+
+/* HEADER */
+.hdr{position:sticky;top:0;z-index:99;background:rgba(8,12,18,0.96);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;}
+.logo{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;color:var(--text);text-decoration:none;}
+.logo span{color:var(--cyan);}
+.hdr-badge{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--cyan);border:1px solid var(--bc);padding:4px 10px;border-radius:6px;background:rgba(34,211,238,0.05);}
+
+/* LAYOUT */
+.wrap{max-width:480px;margin:0 auto;padding:24px 20px;}
+
+/* LOADING */
+.loading{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;gap:14px;}
+.spinner{width:34px;height:34px;border:2px solid var(--border);border-top-color:var(--cyan);border-radius:50%;animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-lbl{font-family:'Space Mono',monospace;font-size:8px;color:var(--muted);letter-spacing:2px;}
+
+/* AUTH */
+.auth-box{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:28px;margin-top:16px;}
+.auth-icon{font-size:36px;text-align:center;margin-bottom:12px;}
+.auth-title{font-family:'Bebas Neue',sans-serif;font-size:26px;color:var(--cyan);letter-spacing:2px;text-align:center;margin-bottom:4px;}
+.auth-sub{font-size:13px;color:var(--muted);text-align:center;margin-bottom:24px;}
+
+/* TABS */
+.tabs{display:flex;border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:22px;}
+.tab-btn{flex:1;padding:11px;font-family:'Space Mono',monospace;font-size:11px;letter-spacing:1px;background:transparent;border:none;color:var(--muted);cursor:pointer;transition:.2s;}
+.tab-btn.active{background:var(--cyan);color:#000;font-weight:700;}
+
+/* FORM */
+.form-group{margin-bottom:16px;}
+.form-label{display:block;font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:1px;margin-bottom:7px;}
+.form-input{width:100%;background:#060a10;border:1px solid var(--border);border-radius:10px;padding:13px 16px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:15px;outline:none;transition:border-color .2s;}
+.form-input:focus{border-color:var(--cyan);}
+.form-input::placeholder{color:var(--muted);}
+.forgot-row{text-align:right;margin-top:5px;}
+.link-btn{background:none;border:none;color:var(--cyan);font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;}
+
+/* BUTTONS */
+.btn-main{width:100%;background:var(--cyan);color:#000;border:none;border-radius:10px;padding:14px;font-family:'Space Mono',monospace;font-size:11px;font-weight:700;letter-spacing:1px;cursor:pointer;margin-top:4px;transition:opacity .2s;}
+.btn-main:hover{opacity:.85;}
+.btn-main:disabled{opacity:.4;cursor:not-allowed;}
+.btn-sec{width:100%;background:transparent;color:var(--muted);border:1px solid var(--border);border-radius:10px;padding:13px;font-family:'Space Mono',monospace;font-size:10px;letter-spacing:1px;cursor:pointer;margin-top:8px;transition:.2s;}
+.btn-sec:hover{border-color:var(--cyan);color:var(--cyan);}
+.btn-red{width:100%;background:transparent;color:var(--red);border:1px solid rgba(239,68,68,0.3);border-radius:10px;padding:13px;font-family:'Space Mono',monospace;font-size:10px;letter-spacing:1px;cursor:pointer;margin-top:8px;transition:.2s;}
+.btn-red:hover{background:rgba(239,68,68,0.05);}
+
+/* MESSAGES */
+.msg{padding:12px 16px;border-radius:10px;font-size:13px;margin-top:12px;display:none;line-height:1.5;}
+.msg.ok{background:rgba(16,185,129,0.07);border:1px solid rgba(16,185,129,0.2);color:var(--green);display:block;}
+.msg.err{background:rgba(239,68,68,0.07);border:1px solid rgba(239,68,68,0.2);color:var(--red);display:block;}
+.msg.info{background:rgba(34,211,238,0.05);border:1px solid var(--bc);color:var(--cyan);display:block;}
+
+/* PROFILE */
+.profile-top{background:linear-gradient(135deg,#0a1628,var(--card));border:1px solid var(--border);border-radius:18px;padding:24px;margin-top:16px;text-align:center;}
+.avatar{width:66px;height:66px;background:linear-gradient(135deg,var(--cyan),#0891b2);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-family:'Bebas Neue',sans-serif;font-size:26px;color:#000;}
+.profile-email{font-size:15px;font-weight:500;margin-bottom:10px;}
+.plan-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 14px;border-radius:20px;font-family:'Space Mono',monospace;font-size:9px;font-weight:700;}
+.plan-free{background:rgba(74,101,128,0.12);border:1px solid var(--muted);color:var(--muted);}
+.plan-admin{background:rgba(34,211,238,0.1);border:1px solid var(--cyan);color:var(--cyan);}
+
+/* MENU */
+.section{margin-top:20px;}
+.section-lbl{font-family:'Space Mono',monospace;font-size:8px;color:var(--muted);letter-spacing:2px;margin-bottom:8px;padding-left:4px;}
+.menu-card{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;}
+.menu-row{display:flex;align-items:center;justify-content:space-between;padding:15px 18px;border-bottom:1px solid rgba(255,255,255,0.04);cursor:pointer;transition:.15s;gap:12px;text-decoration:none;color:inherit;}
+.menu-row:last-child{border-bottom:none;}
+.menu-row:hover{background:rgba(255,255,255,0.02);}
+.row-left{display:flex;align-items:center;gap:12px;}
+.row-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
+.ic-cyan{background:rgba(34,211,238,0.08);}
+.ic-amber{background:rgba(245,158,11,0.08);}
+.ic-purple{background:rgba(139,92,246,0.08);}
+.ic-green{background:rgba(16,185,129,0.08);}
+.ic-red{background:rgba(239,68,68,0.06);}
+.row-name{font-size:14px;font-weight:500;margin-bottom:2px;}
+.row-sub{font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);}
+.row-arrow{font-size:14px;color:var(--muted);}
+
+/* MODAL */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);backdrop-filter:blur(4px);z-index:200;align-items:center;justify-content:center;padding:20px;}
+.overlay.on{display:flex;}
+.modal{background:#0d1520;border:1px solid var(--border);border-radius:18px;padding:28px;width:100%;max-width:400px;position:relative;}
+.modal-title{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--cyan);letter-spacing:2px;margin-bottom:4px;}
+.modal-sub{font-size:13px;color:var(--muted);margin-bottom:22px;}
+.modal-x{position:absolute;top:14px;right:16px;background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer;line-height:1;}
+
+/* ADMIN */
+.admin-wrap{background:rgba(34,211,238,0.03);border:1px solid rgba(34,211,238,0.15);border-radius:14px;padding:18px;margin-top:20px;}
+.admin-lbl{font-family:'Space Mono',monospace;font-size:8px;color:var(--cyan);letter-spacing:2px;margin-bottom:14px;}
+.admin-table{width:100%;border-collapse:collapse;font-size:12px;}
+.admin-table th{text-align:left;color:var(--muted);font-family:'Space Mono',monospace;font-size:8px;padding:6px 8px;border-bottom:1px solid var(--border);}
+.admin-table td{padding:9px 8px;border-bottom:1px solid rgba(30,45,64,0.4);}
+.btn-sm{font-size:9px;padding:4px 9px;border-radius:5px;border:1px solid var(--border);background:transparent;color:var(--text);cursor:pointer;font-family:'Space Mono',monospace;}
+.btn-sm:hover{border-color:var(--cyan);color:var(--cyan);}
+
+/* BOTTOM NAV */
+.nav-bottom{position:fixed;bottom:0;left:0;right:0;background:rgba(8,12,18,0.97);backdrop-filter:blur(14px);border-top:1px solid var(--border);display:flex;z-index:100;}
+.ni{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px 4px 8px;gap:3px;cursor:pointer;-webkit-tap-highlight-color:transparent;}
+.ni-icon{font-size:18px;}
+.ni-lbl{font-family:'Space Mono',monospace;font-size:7px;color:var(--muted);letter-spacing:1px;}
+.ni.active .ni-lbl{color:var(--cyan);}
+.ni.active .ni-icon{filter:drop-shadow(0 0 6px rgba(34,211,238,.5));}
+</style>
+</head>
+<body>
+
+<header class="hdr">
+  <a href="/" class="logo"><span>IA</span>SHARK</a>
+  <span class="hdr-badge">COMPTE</span>
+</header>
+
+<div class="wrap">
+
+  <!-- CHARGEMENT -->
+  <div id="vLoad" class="loading">
+    <div class="spinner"></div>
+    <div class="loading-lbl">CHARGEMENT...</div>
+  </div>
+
+  <!-- NON CONNECTÉ -->
+  <div id="vGuest" style="display:none">
+    <div class="auth-box">
+      <div class="auth-icon">🦈</div>
+      <div class="auth-title">MON COMPTE</div>
+      <div class="auth-sub">Connecte-toi pour accéder à tes analyses</div>
+
+      <div class="tabs">
+        <button class="tab-btn active" id="tLogin" onclick="switchTab('login')">CONNEXION</button>
+        <button class="tab-btn" id="tSignup" onclick="switchTab('signup')">INSCRIPTION</button>
+      </div>
+
+      <!-- LOGIN -->
+      <div id="fLogin">
+        <div class="form-group">
+          <label class="form-label">ADRESSE EMAIL</label>
+          <input type="email" id="loginEmail" class="form-input" placeholder="ton@email.com">
+        </div>
+        <div class="form-group">
+          <label class="form-label">MOT DE PASSE</label>
+          <input type="password" id="loginPw" class="form-input" placeholder="••••••••">
+          <div class="forgot-row"><button class="link-btn" onclick="showForgot()">Mot de passe oublié ?</button></div>
+        </div>
+        <div id="msgLogin" class="msg"></div>
+        <button class="btn-main" id="btnLogin" onclick="doLogin()">SE CONNECTER</button>
+      </div>
+
+      <!-- SIGNUP -->
+      <div id="fSignup" style="display:none">
+        <div class="form-group">
+          <label class="form-label">ADRESSE EMAIL</label>
+          <input type="email" id="signupEmail" class="form-input" placeholder="ton@email.com">
+        </div>
+        <div class="form-group">
+          <label class="form-label">MOT DE PASSE (min. 8 caractères)</label>
+          <input type="password" id="signupPw" class="form-input" placeholder="Minimum 8 caractères">
+        </div>
+        <div class="form-group">
+          <label class="form-label">CONFIRMER LE MOT DE PASSE</label>
+          <input type="password" id="signupPw2" class="form-input" placeholder="Répète ton mot de passe">
+        </div>
+        <div id="msgSignup" class="msg"></div>
+        <button class="btn-main" id="btnSignup" onclick="doSignup()">CRÉER MON COMPTE</button>
+        <p style="font-size:11px;color:var(--muted);text-align:center;margin-top:12px;line-height:1.6;">En créant un compte, tu acceptes nos <a href="/cgv.html" style="color:var(--cyan)">CGV</a> et notre <a href="/mentions-legales.html" style="color:var(--cyan)">politique de confidentialité</a>.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- MOT DE PASSE OUBLIÉ -->
+  <div id="vForgot" style="display:none">
+    <div class="auth-box">
+      <div class="auth-icon">🔑</div>
+      <div class="auth-title">MOT DE PASSE OUBLIÉ</div>
+      <div class="auth-sub">Entre ton email pour recevoir un lien de réinitialisation</div>
+      <div class="form-group">
+        <label class="form-label">ADRESSE EMAIL</label>
+        <input type="email" id="forgotEmail" class="form-input" placeholder="ton@email.com">
+      </div>
+      <div id="msgForgot" class="msg"></div>
+      <button class="btn-main" id="btnForgot" onclick="doForgot()">ENVOYER LE LIEN</button>
+      <button class="btn-sec" onclick="backLogin()">← RETOUR À LA CONNEXION</button>
+    </div>
+  </div>
+
+  <!-- CONNECTÉ -->
+  <div id="vLogged" style="display:none">
+
+    <div class="profile-top">
+      <div class="avatar" id="avatar">?</div>
+      <div class="profile-email" id="profEmail">—</div>
+      <div class="plan-badge plan-free" id="profPlan">● UTILISATEUR</div>
+    </div>
+
+    <!-- ABONNEMENT -->
+    <div class="section">
+      <div class="section-lbl">MON ABONNEMENT</div>
+      <div class="menu-card">
+        <div class="menu-row" onclick="openM('mPaiement')">
+          <div class="row-left">
+            <div class="row-icon ic-amber">💳</div>
+            <div><div class="row-name">Mode de paiement</div><div class="row-sub">Gérer ta carte ou ton abonnement</div></div>
+          </div>
+          <div class="row-arrow">›</div>
+        </div>
+        <div class="menu-row" onclick="openM('mHisto')">
+          <div class="row-left">
+            <div class="row-icon ic-cyan">📋</div>
+            <div><div class="row-name">Historique des paiements</div><div class="row-sub">Consulter tes factures</div></div>
+          </div>
+          <div class="row-arrow">›</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SÉCURITÉ -->
+    <div class="section">
+      <div class="section-lbl">SÉCURITÉ</div>
+      <div class="menu-card">
+        <div class="menu-row" onclick="openM('mPw')">
+          <div class="row-left">
+            <div class="row-icon ic-cyan">🔒</div>
+            <div><div class="row-name">Changer le mot de passe</div><div class="row-sub">Modifier ton mot de passe actuel</div></div>
+          </div>
+          <div class="row-arrow">›</div>
+        </div>
+        <div class="menu-row" onclick="openM('mEmail')">
+          <div class="row-left">
+            <div class="row-icon ic-purple">✉️</div>
+            <div><div class="row-name">Changer l'adresse email</div><div class="row-sub" id="subEmail">—</div></div>
+          </div>
+          <div class="row-arrow">›</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RÉSEAUX -->
+    <div class="section">
+      <div class="section-lbl">RÉSEAUX &amp; COMMUNAUTÉ</div>
+      <div class="menu-card">
+        <div class="menu-row" onclick="window.open('https://t.me/iashark','_blank')">
+          <div class="row-left">
+            <div class="row-icon ic-cyan">✈️</div>
+            <div><div class="row-name">Telegram</div><div class="row-sub">Alertes en temps réel · @iashark</div></div>
+          </div>
+          <div class="row-arrow">↗</div>
+        </div>
+        <div class="menu-row" onclick="window.open('https://twitter.com/iashark','_blank')">
+          <div class="row-left">
+            <div class="row-icon ic-cyan">🐦</div>
+            <div><div class="row-name">Twitter / X</div><div class="row-sub">Analyses publiques · @iashark</div></div>
+          </div>
+          <div class="row-arrow">↗</div>
+        </div>
+        <div class="menu-row" onclick="window.open('https://tiktok.com/@iashark','_blank')">
+          <div class="row-left">
+            <div class="row-icon ic-purple">🎵</div>
+            <div><div class="row-name">TikTok</div><div class="row-sub">Contenus vidéo · @iashark</div></div>
+          </div>
+          <div class="row-arrow">↗</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ASSISTANCE -->
+    <div class="section">
+      <div class="section-lbl">ASSISTANCE</div>
+      <div class="menu-card">
+        <a class="menu-row" href="mailto:contact@iashark.com">
+          <div class="row-left">
+            <div class="row-icon ic-green">📨</div>
+            <div><div class="row-name">Nous contacter</div><div class="row-sub">contact@iashark.com</div></div>
+          </div>
+          <div class="row-arrow">›</div>
+        </a>
+        <a class="menu-row" href="/mentions-legales.html">
+          <div class="row-left">
+            <div class="row-icon ic-purple">⚖️</div>
+            <div><div class="row-name">Mentions légales &amp; CGV</div><div class="row-sub">Conditions générales</div></div>
+          </div>
+          <div class="row-arrow">›</div>
+        </a>
+        <div class="menu-row" onclick="openM('mDelete')">
+          <div class="row-left">
+            <div class="row-icon ic-red">🗑️</div>
+            <div><div class="row-name" style="color:var(--red)">Supprimer mon compte</div><div class="row-sub">Action irréversible</div></div>
+          </div>
+          <div class="row-arrow" style="color:var(--red)">›</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:20px">
+      <button class="btn-red" onclick="doLogout()">SE DÉCONNECTER</button>
+    </div>
+
+    <div id="adminWrap" style="display:none" class="admin-wrap">
+      <div class="admin-lbl">⚙️ PANNEAU ADMIN</div>
+      <div id="adminContent">Chargement...</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- MODAL MDP -->
+<div id="mPw" class="overlay" onclick="bgClose(event,'mPw')">
+  <div class="modal">
+    <button class="modal-x" onclick="closeM('mPw')">✕</button>
+    <div class="modal-title">CHANGER LE MOT DE PASSE</div>
+    <div class="modal-sub">Minimum 8 caractères</div>
+    <div class="form-group"><label class="form-label">NOUVEAU MOT DE PASSE</label><input type="password" id="newPw" class="form-input" placeholder="Minimum 8 caractères"></div>
+    <div class="form-group"><label class="form-label">CONFIRMER</label><input type="password" id="newPw2" class="form-input" placeholder="Répète le nouveau mot de passe"></div>
+    <div id="msgPw" class="msg"></div>
+    <button class="btn-main" onclick="doChangePw()">CHANGER LE MOT DE PASSE</button>
+    <button class="btn-sec" onclick="closeM('mPw')">ANNULER</button>
+  </div>
+</div>
+
+<!-- MODAL EMAIL -->
+<div id="mEmail" class="overlay" onclick="bgClose(event,'mEmail')">
+  <div class="modal">
+    <button class="modal-x" onclick="closeM('mEmail')">✕</button>
+    <div class="modal-title">CHANGER L'EMAIL</div>
+    <div class="modal-sub">Un lien de confirmation sera envoyé à ta nouvelle adresse</div>
+    <div class="form-group"><label class="form-label">NOUVELLE ADRESSE EMAIL</label><input type="email" id="newEmail" class="form-input" placeholder="nouvelle@adresse.com"></div>
+    <div id="msgEmail" class="msg"></div>
+    <button class="btn-main" onclick="doChangeEmail()">ENVOYER LE LIEN</button>
+    <button class="btn-sec" onclick="closeM('mEmail')">ANNULER</button>
+  </div>
+</div>
+
+<!-- MODAL PAIEMENT -->
+<div id="mPaiement" class="overlay" onclick="bgClose(event,'mPaiement')">
+  <div class="modal">
+    <button class="modal-x" onclick="closeM('mPaiement')">✕</button>
+    <div class="modal-title">MODE DE PAIEMENT</div>
+    <div class="modal-sub">Gère ton abonnement via Stripe</div>
+    <p style="font-size:14px;color:var(--muted);line-height:1.7;margin-bottom:16px">Le paiement est géré de manière sécurisée via <strong style="color:var(--text)">Stripe</strong>. Pour modifier ta carte ou résilier :</p>
+    <div id="msgPaiement" class="msg"></div>
+    <button class="btn-main" onclick="goStripe()">GÉRER MON ABONNEMENT (STRIPE)</button>
+    <button class="btn-sec" onclick="closeM('mPaiement')">FERMER</button>
+  </div>
+</div>
+
+<!-- MODAL HISTO -->
+<div id="mHisto" class="overlay" onclick="bgClose(event,'mHisto')">
+  <div class="modal">
+    <button class="modal-x" onclick="closeM('mHisto')">✕</button>
+    <div class="modal-title">HISTORIQUE DES PAIEMENTS</div>
+    <div class="modal-sub">Tes dernières factures IASHARK</div>
+    <p style="font-size:13px;color:var(--muted);text-align:center;padding:20px 0">Aucun paiement enregistré.<br>Disponible dès l'activation de Stripe.</p>
+    <button class="btn-sec" onclick="closeM('mHisto')">FERMER</button>
+  </div>
+</div>
+
+<!-- MODAL SUPPRIMER -->
+<div id="mDelete" class="overlay" onclick="bgClose(event,'mDelete')">
+  <div class="modal">
+    <button class="modal-x" onclick="closeM('mDelete')">✕</button>
+    <div class="modal-title" style="color:var(--red)">SUPPRIMER MON COMPTE</div>
+    <div class="modal-sub">Cette action est irréversible.</div>
+    <div style="background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.2);border-radius:10px;padding:14px;font-size:13px;color:rgba(239,68,68,0.8);line-height:1.6;margin-bottom:16px">⚠️ Résilie d'abord ton abonnement Stripe avant de supprimer ton compte.</div>
+    <div id="msgDelete" class="msg"></div>
+    <button class="btn-red" onclick="doDelete()">CONFIRMER LA SUPPRESSION</button>
+    <button class="btn-sec" onclick="closeM('mDelete')">ANNULER</button>
+  </div>
+</div>
+
+<!-- NAV BAS -->
+<nav class="nav-bottom">
+  <div class="ni" onclick="location='/'"><div class="ni-icon">🦈</div><div class="ni-lbl">ACCUEIL</div></div>
+  <div class="ni" onclick="location='/historique.html'"><div class="ni-icon">📊</div><div class="ni-lbl">HISTORIQUE</div></div>
+  <div class="ni" onclick="location='/combis.html'"><div class="ni-icon">🎰</div><div class="ni-lbl">COMBINÉS</div></div>
+  <div class="ni" onclick="location='/blog/'"><div class="ni-icon">📖</div><div class="ni-lbl">GUIDES</div></div>
+  <div class="ni active"><div class="ni-icon">👤</div><div class="ni-lbl">COMPTE</div></div>
+</nav>
+
+<script>
+var SUPA_URL='https://ksvjraqitxouwiabecai.supabase.co';
+var SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtzdmpyYXFpdHhvdXdpYWJlY2FpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3ODcwMjMsImV4cCI6MjA4ODM2MzAyM30.Eh3qk4tATM40hoYxdErAllLEo1y8KNt4BSCET_fAgT8';
+var sb = supabase.createClient(SUPA_URL, SUPA_KEY);
+var currentUser = null;
+
+// ── UTILS ──────────────────────────────────────────
+function show(id){ document.getElementById(id).style.display='block'; }
+function hide(id){ document.getElementById(id).style.display='none'; }
+function msg(id, type, txt){
+  var el=document.getElementById(id);
+  el.className='msg '+type; el.textContent=txt; el.style.display='block';
+}
+function clearMsg(id){ var el=document.getElementById(id); el.style.display='none'; }
+
+// ── INIT ───────────────────────────────────────────
+async function init(){
+  try {
+    var res = await sb.auth.getSession();
+    var session = res.data && res.data.session;
+    hide('vLoad');
+    if(!session){ show('vGuest'); return; }
+    currentUser = session.user;
+    await loadProfile();
+  } catch(e){
+    hide('vLoad');
+    show('vGuest');
+  }
+}
+
+// ── TABS AUTH ──────────────────────────────────────
+function switchTab(tab){
+  document.getElementById('tLogin').className  = 'tab-btn'+(tab==='login'?' active':'');
+  document.getElementById('tSignup').className = 'tab-btn'+(tab==='signup'?' active':'');
+  document.getElementById('fLogin').style.display  = tab==='login'?'block':'none';
+  document.getElementById('fSignup').style.display = tab==='signup'?'block':'none';
+}
+
+// ── FORGOT ─────────────────────────────────────────
+function showForgot(){ hide('vGuest'); show('vForgot'); }
+function backLogin(){ hide('vForgot'); show('vGuest'); switchTab('login'); }
+
+async function doForgot(){
+  var email = document.getElementById('forgotEmail').value.trim();
+  if(!email){ msg('msgForgot','err','Saisis ton adresse email.'); return; }
+  clearMsg('msgForgot');
+  var btn=document.getElementById('btnForgot');
+  btn.disabled=true; btn.textContent='ENVOI...';
+  var res = await sb.auth.resetPasswordForEmail(email,{ redirectTo: location.origin+'/compte.html?reset=1' });
+  btn.disabled=false; btn.textContent='ENVOYER LE LIEN';
+  if(res.error){ msg('msgForgot','err',res.error.message); return; }
+  msg('msgForgot','ok','✓ Email envoyé ! Vérifie ta boîte mail.');
+}
+
+// ── LOGIN ──────────────────────────────────────────
+async function doLogin(){
+  var email = document.getElementById('loginEmail').value.trim();
+  var pw    = document.getElementById('loginPw').value;
+  if(!email||!pw){ msg('msgLogin','err','Remplis tous les champs.'); return; }
+  clearMsg('msgLogin');
+  var btn=document.getElementById('btnLogin');
+  btn.disabled=true; btn.textContent='CONNEXION...';
+  var res = await sb.auth.signInWithPassword({email, password:pw});
+  btn.disabled=false; btn.textContent='SE CONNECTER';
+  if(res.error){
+    var m = res.error.message==='Invalid login credentials'?'Email ou mot de passe incorrect.':res.error.message;
+    msg('msgLogin','err',m); return;
+  }
+  currentUser = res.data.user;
+  hide('vGuest');
+  await loadProfile();
+}
+
+// ── SIGNUP ─────────────────────────────────────────
+async function doSignup(){
+  var email = document.getElementById('signupEmail').value.trim();
+  var pw    = document.getElementById('signupPw').value;
+  var pw2   = document.getElementById('signupPw2').value;
+  if(!email||!pw||!pw2){ msg('msgSignup','err','Remplis tous les champs.'); return; }
+  if(pw.length<8){ msg('msgSignup','err','Minimum 8 caractères.'); return; }
+  if(pw!==pw2){ msg('msgSignup','err','Les mots de passe ne correspondent pas.'); return; }
+  clearMsg('msgSignup');
+  var btn=document.getElementById('btnSignup');
+  btn.disabled=true; btn.textContent='CRÉATION...';
+  var res = await sb.auth.signUp({email, password:pw});
+  btn.disabled=false; btn.textContent='CRÉER MON COMPTE';
+  if(res.error){ msg('msgSignup','err',res.error.message); return; }
+  msg('msgSignup','ok','✓ Compte créé ! Vérifie ton email pour confirmer.');
+}
+
+// ── PROFIL ─────────────────────────────────────────
+async function loadProfile(){
+  show('vLogged');
+  var email = currentUser.email||'—';
+  document.getElementById('profEmail').textContent = email;
+  document.getElementById('subEmail').textContent  = email;
+  document.getElementById('avatar').textContent    = (email[0]||'?').toUpperCase();
+
+  try {
+    var res = await sb.from('users').select('plan,role').eq('id',currentUser.id).single();
+    var data = res.data || {};
+    if(data.role==='admin'){
+      var pl=document.getElementById('profPlan');
+      pl.className='plan-badge plan-admin'; pl.textContent='⚙️ ADMIN';
+      loadAdmin();
+    }
+  } catch(e){}
+}
+
+// ── CHANGE PW ──────────────────────────────────────
+async function doChangePw(){
+  var pw  = document.getElementById('newPw').value;
+  var pw2 = document.getElementById('newPw2').value;
+  if(!pw||!pw2){ msg('msgPw','err','Remplis les deux champs.'); return; }
+  if(pw.length<8){ msg('msgPw','err','Minimum 8 caractères.'); return; }
+  if(pw!==pw2){ msg('msgPw','err','Les mots de passe ne correspondent pas.'); return; }
+  clearMsg('msgPw');
+  var res = await sb.auth.updateUser({password:pw});
+  if(res.error){ msg('msgPw','err',res.error.message); return; }
+  msg('msgPw','ok','✓ Mot de passe modifié avec succès.');
+  document.getElementById('newPw').value='';
+  document.getElementById('newPw2').value='';
+}
+
+// ── CHANGE EMAIL ───────────────────────────────────
+async function doChangeEmail(){
+  var email = document.getElementById('newEmail').value.trim();
+  if(!email){ msg('msgEmail','err','Saisis une adresse email.'); return; }
+  clearMsg('msgEmail');
+  var res = await sb.auth.updateUser({email});
+  if(res.error){ msg('msgEmail','err',res.error.message); return; }
+  msg('msgEmail','ok','✓ Confirmation envoyée à '+email);
+}
+
+// ── STRIPE ─────────────────────────────────────────
+function goStripe(){
+  msg('msgPaiement','info','⚡ Stripe bientôt disponible. Contact : contact@iashark.com');
+}
+
+// ── DELETE ─────────────────────────────────────────
+async function doDelete(){
+  clearMsg('msgDelete');
+  msg('msgDelete','info','Demande envoyée. Ton compte sera supprimé sous 48h.');
+}
+
+// ── LOGOUT ─────────────────────────────────────────
+async function doLogout(){
+  await sb.auth.signOut();
+  hide('vLogged'); show('vGuest'); switchTab('login');
+}
+
+// ── ADMIN ──────────────────────────────────────────
+async function loadAdmin(){
+  show('adminWrap');
+  try {
+    var res = await sb.from('users').select('id,email,plan,created_at').order('created_at',{ascending:false}).limit(20);
+    var users = res.data||[];
+    if(!users.length){ document.getElementById('adminContent').textContent='Aucun utilisateur.'; return; }
+    var html='<table class="admin-table"><thead><tr><th>EMAIL</th><th>PLAN</th><th>ACTION</th></tr></thead><tbody>';
+    users.forEach(function(u){
+      html+='<tr><td>'+u.email+'</td><td>'+(u.plan||'free')+'</td><td><button class="btn-sm">GÉRER</button></td></tr>';
+    });
+    html+='</tbody></table>';
+    document.getElementById('adminContent').innerHTML=html;
+  } catch(e){ document.getElementById('adminContent').textContent='Erreur chargement admin.'; }
+}
+
+// ── MODALS ─────────────────────────────────────────
+function openM(id){ document.getElementById(id).classList.add('on'); }
+function closeM(id){ document.getElementById(id).classList.remove('on'); }
+function bgClose(e,id){ if(e.target===document.getElementById(id)) closeM(id); }
+
+// ── RESET PASSWORD FLOW ────────────────────────────
+sb.auth.onAuthStateChange(function(event, session){
+  if(event==='PASSWORD_RECOVERY'){
+    hide('vGuest'); hide('vForgot'); show('vLogged');
+    openM('mPw');
+    msg('msgPw','info','Définis ton nouveau mot de passe ci-dessous.');
+  }
+});
+
+init();
+</script>
+</body>
+</html>

@@ -32,12 +32,18 @@ function genererScript(match) {
     const homeNom = nomNaturel(match.home.n);
     const awayNom = nomNaturel(match.away.n);
     const scoreProb = (match.scores || []).slice(0, 3).join(', ') || '1-0';
-    const verdict = match.verdict_shark || '';
-    const facteur = match.facteur_x || '';
-    const conseil = match.conseil_public || match.analyse_card || '';
+    const verdict = match.verdict_shark || match.conseil || match.analyse_card || '';
+    const facteur = match.facteur_x || match.argument || '';
+    const conseil = match.conseil_public || match.analyse_card || match.contexte || '';
     const edge = match.edge || '';
     const conf = match.conf || '';
     const pari = match.pari_rec || '';
+    const p1 = match.p1 || 0, pn = match.pn || 0, p2 = match.p2 || 0;
+
+    // Si vraiment tout est vide, construire un contexte minimal
+    const contexteMinimal = verdict || facteur || conseil ||
+      (pari ? `Scénario ${pari} avec edge ${edge} et confiance ${conf}/10` : '') ||
+      `${homeNom} reçoit ${awayNom}, probabilités : domicile ${p1}%, nul ${pn}%, extérieur ${p2}%`;
 
     const prompt = `Tu es le meilleur analyste data football sur TikTok. Écris le script vocal d'une vidéo de quinze secondes maximum.
 
@@ -51,9 +57,9 @@ RÈGLES STRICTES :
 
 DONNÉES DU MATCH :
 - \${homeNom} reçoit \${awayNom}
-- Verdict IA : \${verdict}
-- Facteur clé : \${facteur}
+- Analyse : \${contexteMinimal}
 - Edge : \${edge} — Confiance : \${conf} sur dix
+- Scénario le plus probable : \${pari}
 
 Maximum quarante mots. Zéro titre, zéro hashtag, zéro markdown. Une seule ligne de texte continu.`;
 
@@ -130,7 +136,10 @@ async function run() {
 
     if (!ldcMatchs.length) { console.log('Aucun match LDC aujourd\'hui.'); return; }
 
-    const match = ldcMatchs.sort((a, b) => (b.conf || 0) - (a.conf || 0))[0];
+    // Prendre le match LDC avec analyse complète, sinon le meilleur par conf
+    const ldcComplets = ldcMatchs.filter(m => m.verdict_shark || m.analyse_card || m.conseil_public);
+    const pool = ldcComplets.length ? ldcComplets : ldcMatchs;
+    const match = pool.sort((a, b) => (b.conf || 0) - (a.conf || 0))[0];
     console.log(`Match : ${match.home.n} vs ${match.away.n} (conf: ${match.conf})`);
 
     let script = await genererScript(match);

@@ -150,7 +150,7 @@ jobs:
             292,       // K-League Corée
             66, 307, 143, 137, 81
           ];
-          const SEASON   = 2024; // Europe saison 2024/2025
+          const SEASON   = 2025;
           // Ligues qui tournent sur l'année calendaire 2026
           var SEASON_2026 = [71, 128, 253, 357, 98, 292]; // Brésil, Argentine, MLS, Irlande, Japon, Corée
           const TODAY    = new Date().toISOString().split('T')[0];
@@ -2892,9 +2892,9 @@ jobs:
                 id:f.id, sport:'football',
                 home:{n:home.name,id:home.id}, away:{n:away.name,id:away.id},
                 league:lg.name, ligue_icon:lgIcon(lg.name), league_key:lgKey(lg.id),
-                date:(TODAY+' '+heure).trim(), cat:['all'],
+                date:((f.date || TODAY).split('T')[0] + ' ' + heure).trim(), cat:['all'],
                 val:an?(an.vbet==='OUI'&&(an.confiance||0)>=6.0):false,
-                hot:an?(an.confiance||0)>=8.0:false,
+                hot:an ? ((an.confiance||0)>=8.0 || ((an.confiance||0)>=7.0 && ['ldc', 'premier', 'laliga', 'seriea', 'bundesliga', 'ligue1'].includes(lgKey(lg.id)))) : false,
                 conf:an?parseFloat(an.confiance||0):0,
                 p1:an&&(an.p1||0)>0?(an.p1||0):(shinProbs?shinProbs.p1:poissonProbs.p1)||0,
                 pn:an&&(an.pn||0)>0?(an.pn||0):(shinProbs?shinProbs.pN:poissonProbs.pN)||0,

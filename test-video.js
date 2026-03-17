@@ -1,7 +1,6 @@
 const https = require('https');
 const fs = require('fs');
 
-// Convertit les noms d'équipes en noms naturels pour la voix
 function nomNaturel(nom) {
   if (!nom) return '';
   const map = {
@@ -27,73 +26,51 @@ function nomNaturel(nom) {
   return nom;
 }
 
-// Convertit la forme WWWDW en texte oral
 function formeEnTexte(forme) {
   if (!forme) return '';
   const map = { 'W': 'victoire', 'D': 'nul', 'L': 'défaite' };
   const mots = forme.split('').map(c => map[c] || c);
-  const nb = mots.length;
   const wins = forme.split('').filter(c => c === 'W').length;
-  return `${wins} victoire${wins > 1 ? 's' : ''} sur les ${nb} derniers matchs`;
+  return `${wins} victoire${wins > 1 ? 's' : ''} sur les ${mots.length} derniers matchs`;
 }
 
-// Convertit un décimal en texte oral
 function nombreEnTexte(n) {
   if (!n) return '?';
   const m = { '0.5': 'zéro virgule cinq', '1.5': 'un but et demi', '2.5': 'deux buts et demi', '3.5': 'trois buts et demi', '4.5': 'quatre buts et demi' };
   return m[String(n)] || String(n).replace('.', ' virgule ');
 }
 
-// Appel Claude pour générer le script vocal
-function genererScript(match) {
+async function genererScript(match) {
   return new Promise((resolve) => {
-    const nomDomStr = match.home.n || match.home || 'Domicile';
-    const nomExtStr = match.away.n || match.away || 'Extérieur';
-    const homeNom = nomNaturel(nomDomStr);
-    const awayNom = nomNaturel(nomExtStr);
-    const scoreProb = match.scores_probables || '1-0, 2-0, 2-1';
-    const scenarioIA = match.pari_rec || 'victoire à domicile';
-    const xgH = match.xgH_avg || match.xg_home || match.xg || '?';
-    const xgA = match.xgA_avg || match.xg_away || '?';
-    const formeH = formeEnTexte(match.forme5H || match.forme_home || match.formeH || '');
-    const formeA = formeEnTexte(match.forme5A || match.forme_away || match.formeA || '');
-    const conseil = match.conseil || '';
+    const homeNom = nomNaturel(match.home.n || match.home);
+    const awayNom = nomNaturel(match.away.n || match.away);
+    
+    const prompt = `Tu es le meilleur analyste data football sur TikTok. Écris un script vocal de 25s max.
+RÈGLES : 
+- Utilise uniquement "${homeNom}" et "${awayNom}". 
+- PAS de jargon de parieur (cote, pari, miser). Parle de "data", "probabilités".
+- Écrit pour l'oral : pas d'abréviation, chiffres en lettres, "..." pour les pauses.
+- Cash et direct.
 
-    const prompt = `Tu es le meilleur analyste data football sur TikTok. Ton but est d'écrire le script vocal d'une vidéo courte de vingt-cinq secondes maximum pour prédire le scénario d'un match.
+DONNÉES :
+- Domicile : ${homeNom} (xG: ${nombreEnTexte(match.xgH_avg)}, forme: ${formeEnTexte(match.forme5H)})
+- Extérieur : ${awayNom} (xG: ${nombreEnTexte(match.xgA_avg)}, forme: ${formeEnTexte(match.forme5A)})
+- Scénario IA : ${match.pari_rec} | Scores: ${match.scores_probables}
 
-RÈGLES STRICTES :
-1. NOMS D'ÉQUIPES : Utilise uniquement "${homeNom}" et "${awayNom}". Jamais les noms officiels complets.
-2. ZÉRO JARGON DE PARIEUR : Bannis totalement "cote", "bookmaker", "pari", "mise", "ticket", "pronostic". Utilise uniquement "probabilités", "data", "scénario", "tendance".
-3. ÉCRIT POUR L'ORAL : Zéro abréviation. Écris les chiffres en lettres. Utilise des points de suspension (...) pour les pauses.
-4. TON : Cash, expert, direct. Commence DIRECTEMENT avec une stat choc ou l'enjeu. Jamais "Bonjour" ou "Bienvenue".
-5. STRUCTURE EN 3 TEMPS :
-   - Phrase 1 (hook) : une stat ou un fait qui arrête le scroll
-   - Phrase 2-3 : la tendance data qui explique le scénario
-   - Phrase finale : le score le plus probable annoncé avec conviction
-
-DONNÉES DU MATCH :
-- Équipe domicile : ${homeNom} (xG moyen : ${nombreEnTexte(xgH)}, forme : ${formeH})
-- Équipe extérieur : ${awayNom} (xG moyen : ${nombreEnTexte(xgA)}, forme : ${formeA})
-- Scénario calculé par l'IA : ${scenarioIA}
-- Scores les plus probables : ${scoreProb}
-- Analyse : ${conseil}
-
-Rédige UNIQUEMENT le script que la voix off va lire. Zéro blabla avant ou après. Maximum vingt-cinq secondes à l'oral.`;
+Rédige UNIQUEMENT le script vocal.`;
 
     const body = JSON.stringify({
-      model: 'claude-3-5-sonnet-20240620',
+      model: 'claude-3-5-sonnet-latest',
       max_tokens: 500,
       messages: [{ role: 'user', content: prompt }]
     });
-
-    const apiKey = process.env.ANTHROPIC_KEY || '';
 
     const req = https.request({
       hostname: 'api.anthropic.com',
       path: '/v1/messages',
       method: 'POST',
       headers: {
-        'x-api-key': apiKey,
+        'x-api-key': process.env.ANTHROPIC_KEY,
         'anthropic-version': '2023-06-01',
         'Content-Type': 'application/json',
         'Content-Length': Buffer.byteLength(body)
@@ -105,43 +82,31 @@ Rédige UNIQUEMENT le script que la voix off va lire. Zéro blabla avant ou apr�
         try {
           const r = JSON.parse(data);
           if (r.error) {
-             console.log("❌ Erreur API Claude :", r.error.message);
-             resolve('');
+            console.log("❌ Erreur API Claude :", r.error.message);
+            resolve('');
           } else {
-             resolve((r.content && r.content[0] && r.content[0].text) || '');
+            resolve((r.content && r.content[0] && r.content[0].text) || '');
           }
         } catch(e) { resolve(''); }
       });
     });
-    req.on('error', (e) => {
-      console.log('❌ Erreur connexion Anthropic :', e.message);
-      resolve('');
-    });
+    req.on('error', () => resolve(''));
     req.write(body);
     req.end();
   });
 }
 
-function envoyerVersCreatomate(match, scriptVocal) {
+async function envoyerCreatomate(match, script) {
   return new Promise((resolve) => {
-    const idHome = match.home.id || match.home_id || 85;
-    const idAway = match.away.id || match.away_id || 85;
-    const logoHome = `https://media.api-sports.io/football/teams/${idHome}.png`;
-    const logoAway = `https://media.api-sports.io/football/teams/${idAway}.png`;
-    const scoreProb = (match.scores_probables || '1-0').split(',')[0].trim();
-    
-    const nomDomStr = match.home.n || match.home || 'Domicile';
-    const nomExtStr = match.away.n || match.away || 'Extérieur';
-
     const data = JSON.stringify({
       template_id: '00468af0-fdc7-4490-81ad-d56b15f773d1',
       modifications: {
-        'Logo_Domicile': logoHome,
-        'Logo_Exterieur': logoAway,
-        'Voix_IA': scriptVocal,
-        'Score_Probable': scoreProb,
-        'Equipe_Dom': nomNaturel(nomDomStr),
-        'Equipe_Ext': nomNaturel(nomExtStr),
+        'Logo_Domicile': `https://media.api-sports.io/football/teams/${match.home.id || 85}.png`,
+        'Logo_Exterieur': `https://media.api-sports.io/football/teams/${match.away.id || 85}.png`,
+        'Voix_IA': script,
+        'Score_Probable': (match.scores_probables || '1-0').split(',')[0].trim(),
+        'Equipe_Dom': nomNaturel(match.home.n || match.home),
+        'Equipe_Ext': nomNaturel(match.away.n || match.away)
       }
     });
 
@@ -155,12 +120,9 @@ function envoyerVersCreatomate(match, scriptVocal) {
         'Content-Length': Buffer.byteLength(data)
       }
     }, (res) => {
-      let body = '';
-      res.on('data', chunk => body += chunk);
-      res.on('end', () => {
-        try { resolve(JSON.parse(body)); }
-        catch(e) { resolve(null); }
-      });
+      let b = '';
+      res.on('data', c => b += c);
+      res.on('end', () => resolve(JSON.parse(b)));
     });
     req.on('error', () => resolve(null));
     req.write(data);
@@ -170,26 +132,24 @@ function envoyerVersCreatomate(match, scriptVocal) {
 
 async function run() {
   try {
-    if (!fs.existsSync('data.json')) throw new Error('data.json introuvable.');
     const content = JSON.parse(fs.readFileSync('data.json', 'utf8'));
-    const ldcMatchs = (content.matchs || []).filter(m => m.league_key === 'ldc');
-    if (!ldcMatchs.length) return console.log('Aucun match LDC.');
+    const ldc = (content.matchs || []).filter(m => m.league_key === 'ldc');
+    if (!ldc.length) return console.log('Aucun match LDC.');
 
-    const match = ldcMatchs.sort((a, b) => (b.conf || 0) - (a.conf || 0))[0];
-    console.log(`Match sélectionné : ${match.home.n || match.home} vs ${match.away.n || match.away}`);
+    const match = ldc.sort((a, b) => (b.conf || 0) - (a.conf || 0))[0];
+    console.log(`Sélection : ${match.home.n} vs ${match.away.n}`);
 
     const script = await genererScript(match);
     if (!script) throw new Error('Script vide.');
 
-    console.log('\n=== SCRIPT GÉNÉRÉ ===\n' + script + '\n=====================\n');
+    console.log('=== SCRIPT ===\n' + script + '\n==============');
 
-    const res = await envoyerVersCreatomate(match, script);
-    if (res && res[0] && res[0].url) console.log(`✅ Succès ! Vidéo : ${res[0].url}`);
-    else console.log('⏳ Rendu lancé ou erreur.');
+    const res = await envoyerCreatomate(match, script);
+    if (res && res[0] && res[0].url) console.log(`✅ Vidéo : ${res[0].url}`);
+    else console.log('⏳ Rendu lancé.');
 
   } catch(err) {
     console.error('Erreur :', err.message);
-    process.exit(1);
   }
 }
 

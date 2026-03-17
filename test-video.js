@@ -81,17 +81,20 @@ DONNÉES DU MATCH :
 Rédige UNIQUEMENT le script que la voix off va lire. Zéro blabla avant ou après. Maximum vingt-cinq secondes à l'oral.`;
 
     const body = JSON.stringify({
-      model: 'claude-3-haiku-20240307', // CORRECTION : Le vrai modèle API qui fonctionne
+      model: 'claude-3-haiku-20240307',
       max_tokens: 300,
       messages: [{ role: 'user', content: prompt }]
     });
+
+    const apiKey = process.env.ANTHROPIC_KEY || '';
+    if (!apiKey) console.log("⚠️ ATTENTION : La clé ANTHROPIC_KEY semble vide dans GitHub !");
 
     const req = https.request({
       hostname: 'api.anthropic.com',
       path: '/v1/messages',
       method: 'POST',
       headers: {
-        'x-api-key': process.env.ANTHROPIC_KEY,
+        'x-api-key': apiKey,
         'anthropic-version': '2023-06-01',
         'Content-Type': 'application/json',
         'Content-Length': Buffer.byteLength(body)
@@ -100,13 +103,19 @@ Rédige UNIQUEMENT le script que la voix off va lire. Zéro blabla avant ou apr�
       let data = '';
       res.on('data', chunk => data += chunk);
       res.on('end', () => {
+        console.log('\n--- RÉPONSE BRUTE API CLAUDE ---');
+        console.log(data);
+        console.log('--------------------------------\n');
         try {
           const r = JSON.parse(data);
           resolve((r.content && r.content[0] && r.content[0].text) || '');
         } catch(e) { resolve(''); }
       });
     });
-    req.on('error', () => resolve(''));
+    req.on('error', (e) => {
+      console.log('❌ Erreur de connexion Anthropic :', e.message);
+      resolve('');
+    });
     req.write(body);
     req.end();
   });
@@ -115,7 +124,6 @@ Rédige UNIQUEMENT le script que la voix off va lire. Zéro blabla avant ou apr�
 // Envoi vers Creatomate
 function envoyerVersCreatomate(match, scriptVocal) {
   return new Promise((resolve) => {
-    // CORRECTION : Sécurité si le format JSON change un peu
     const idHome = match.home.id || match.home_id || 85;
     const idAway = match.away.id || match.away_id || 85;
     const logoHome = `https://media.api-sports.io/football/teams/${idHome}.png`;
@@ -128,3 +136,84 @@ function envoyerVersCreatomate(match, scriptVocal) {
     const data = JSON.stringify({
       template_id: '00468af0-fdc7-4490-81ad-d56b15f773d1',
       modifications: {
+        'Logo_Domicile': logoHome,
+        'Logo_Exterieur': logoAway,
+        'Voix_IA': scriptVocal,
+        'Score_Probable': scoreProb,
+        'Equipe_Dom': nomNaturel(nomDomStr),
+        'Equipe_Ext': nomNaturel(nomExtStr),
+      }
+    });
+
+    const req = https.request({
+      hostname: 'api.creatomate.com',
+      path: '/v1/renders',
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${process.env.CREATOMATE_KEY}`,
+        'Content-Type': 'application/json',
+        'Content-Length': Buffer.byteLength(data)
+      }
+    }, (res) => {
+      let body = '';
+      res.on('data', chunk => body += chunk);
+      res.on('end', () => {
+        try { resolve(JSON.parse(body)); }
+        catch(e) { resolve(null); }
+      });
+    });
+    req.on('error', () => resolve(null));
+    req.write(data);
+    req.end();
+  });
+}
+
+async function run() {
+  try {
+    console.log('Lecture de data.json...');
+    if (!fs.existsSync('data.json')) {
+      throw new Error('data.json introuvable. Lance le pipeline principal d\'abord.');
+    }
+
+    const content = JSON.parse(fs.readFileSync('data.json', 'utf8'));
+    const ldcMatchs = (content.matchs || []).filter(m => m.league_key === 'ldc');
+
+    if (!ldcMatchs.length) {
+      console.log('Aucun match LDC trouvé aujourd\'hui.');
+      return;
+    }
+
+    const match = ldcMatchs.sort((a, b) => (b.conf || 0) - (a.conf || 0))[0];
+    const nomDomStr = match.home.n || match.home || 'Domicile';
+    const nomExtStr = match.away.n || match.away || 'Extérieur';
+    console.log(`Match sélectionné : ${nomDomStr} vs ${nomExtStr}`);
+
+    console.log('Génération du script vocal avec Claude...');
+    const script = await genererScript(match);
+
+    if (!script) {
+      throw new Error('Script vide — regarde la réponse brute de Claude juste au-dessus pour comprendre l\'erreur.');
+    }
+
+    console.log('\n=== SCRIPT GÉNÉRÉ ===');
+    console.log(script);
+    console.log('=====================\n');
+
+    console.log('Envoi vers Creatomate...');
+    const res = await envoyerVersCreatomate(match, script);
+
+    if (res && res[0] && res[0].url) {
+      console.log(`✅ Succès ! Vidéo disponible : ${res[0].url}`);
+    } else if (res && res[0] && res[0].id) {
+      console.log(`⏳ Rendu lancé. ID : ${res[0].id} — Statut : ${res[0].status}`);
+    } else {
+      console.log('❌ Réponse Creatomate :', JSON.stringify(res, null, 2));
+    }
+
+  } catch(err) {
+    console.error('Erreur :', err.message);
+    process.exit(1);
+  }
+}
+
+run();

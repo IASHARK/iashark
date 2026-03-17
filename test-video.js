@@ -16,8 +16,7 @@ function nomNaturel(nom) {
     'AC Milan': 'le Milan', 'Juventus': 'la Juve', 'Juventus FC': 'la Juve',
     'FC Barcelona': 'le Barça', 'Barcelona': 'le Barça',
     'Bayer Leverkusen': 'Leverkusen',
-    'Tottenham Hotspur': 'Tottenham',
-    'Newcastle United': 'Newcastle',
+    'Tottenham Hotspur': 'Tottenham', 'Newcastle United': 'Newcastle',
     'Galatasaray': 'Galatasaray', 'Fenerbahce': 'Fener', 'Fenerbahçe': 'Fener',
     'Chapecoense-sc': 'Chapecoense', 'Racing Club': 'Racing',
   };
@@ -31,37 +30,31 @@ function genererScript(match) {
   return new Promise((resolve) => {
     const homeNom = nomNaturel(match.home.n);
     const awayNom = nomNaturel(match.away.n);
-    const scoreProb = (match.scores || []).slice(0, 3).join(', ') || '1-0';
-    const verdict = match.verdict_shark || match.conseil || match.analyse_card || '';
-    const facteur = match.facteur_x || match.argument || '';
-    const conseil = match.conseil_public || match.analyse_card || match.contexte || '';
+    const verdict = match.verdict_shark || match.analyse_card || match.conseil_public || '';
+    const facteur = match.facteur_x || '';
     const edge = match.edge || '';
     const conf = match.conf || '';
     const pari = match.pari_rec || '';
     const p1 = match.p1 || 0, pn = match.pn || 0, p2 = match.p2 || 0;
 
-    // Si vraiment tout est vide, construire un contexte minimal
-    const contexteMinimal = verdict || facteur || conseil ||
-      (pari ? `Scénario ${pari} avec edge ${edge} et confiance ${conf}/10` : '') ||
-      `${homeNom} reçoit ${awayNom}, probabilités : domicile ${p1}%, nul ${pn}%, extérieur ${p2}%`;
+    const contexte = verdict || facteur ||
+      (pari ? 'Scenario ' + pari + ' edge ' + edge + ' confiance ' + conf + '/10' : '') ||
+      homeNom + ' recoit ' + awayNom + ' probas dom ' + p1 + '% nul ' + pn + '% ext ' + p2 + '%';
 
-    const prompt = `Tu es le meilleur analyste data football sur TikTok. Écris le script vocal d'une vidéo de quinze secondes maximum.
-
-RÈGLES STRICTES :
-1. Utilise UNIQUEMENT "\${homeNom}" et "\${awayNom}".
-2. ZÉRO jargon de parieur : bannis "cote", "bookmaker", "pari", "mise", "ticket", "pronostic". Utilise "probabilités", "data", "scénario", "tendance".
-3. ZÉRO mention de joueurs ou de buteurs.
-4. Écris les chiffres en lettres. Utilise des points de suspension pour les pauses.
-5. Commence avec UNE stat choc. Jamais "Bonjour" ou "Bienvenue".
-6. Structure : stat choc → pourquoi ce scénario → verdict cash.
-
-DONNÉES DU MATCH :
-- \${homeNom} reçoit \${awayNom}
-- Analyse : \${contexteMinimal}
-- Edge : \${edge} — Confiance : \${conf} sur dix
-- Scénario le plus probable : \${pari}
-
-Maximum quarante mots. Zéro titre, zéro hashtag, zéro markdown. Une seule ligne de texte continu.`;
+    const prompt = 'Tu es le meilleur analyste data football sur TikTok. Ecris le script vocal d\'une video de quinze secondes maximum.\n\n'
+      + 'REGLES STRICTES :\n'
+      + '1. Utilise UNIQUEMENT "' + homeNom + '" et "' + awayNom + '".\n'
+      + '2. ZERO jargon de parieur : bannis cote, bookmaker, pari, mise, ticket, pronostic. Utilise probabilites, data, scenario, tendance.\n'
+      + '3. ZERO mention de joueurs ou de buteurs.\n'
+      + '4. Ecris les chiffres en lettres. Utilise des points de suspension pour les pauses.\n'
+      + '5. Commence avec UNE stat choc. Jamais Bonjour ou Bienvenue.\n'
+      + '6. Structure : stat choc > pourquoi ce scenario > verdict cash.\n\n'
+      + 'DONNEES DU MATCH :\n'
+      + '- ' + homeNom + ' recoit ' + awayNom + '\n'
+      + '- Analyse : ' + contexte + '\n'
+      + '- Edge : ' + edge + ' — Confiance : ' + conf + ' sur dix\n'
+      + '- Scenario : ' + pari + '\n\n'
+      + 'Maximum quarante mots. Zero titre, zero hashtag, zero markdown. Une seule ligne de texte continu.';
 
     const body = JSON.stringify({
       model: 'claude-haiku-4-5-20251001',
@@ -95,9 +88,8 @@ Maximum quarante mots. Zéro titre, zéro hashtag, zéro markdown. Une seule lig
 
 function envoyerVersCreatomate(match, script) {
   return new Promise((resolve) => {
-    const logoHome = `https://media.api-sports.io/football/teams/${match.home.id}.png`;
-    const logoAway = `https://media.api-sports.io/football/teams/${match.away.id}.png`;
-    const score = (match.scores || ['1-0'])[0];
+    const logoHome = 'https://media.api-sports.io/football/teams/' + match.home.id + '.png';
+    const logoAway = 'https://media.api-sports.io/football/teams/' + match.away.id + '.png';
 
     const data = JSON.stringify({
       template_id: '00468af0-fdc7-4490-81ad-d56b15f773d1',
@@ -113,7 +105,7 @@ function envoyerVersCreatomate(match, script) {
       path: '/v1/renders',
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${process.env.CREATOMATE_KEY}`,
+        'Authorization': 'Bearer ' + process.env.CREATOMATE_KEY,
         'Content-Type': 'application/json',
         'Content-Length': Buffer.byteLength(data)
       }
@@ -132,15 +124,14 @@ async function run() {
   try {
     if (!fs.existsSync('data.json')) throw new Error('data.json introuvable.');
     const content = JSON.parse(fs.readFileSync('data.json', 'utf8'));
-    const ldcMatchs = (content.matchs || []).filter(m => m.league_key === 'ldc');
+    const ldcMatchs = (content.matchs || []).filter(function(m){ return m.league_key === 'ldc'; });
 
     if (!ldcMatchs.length) { console.log('Aucun match LDC aujourd\'hui.'); return; }
 
-    // Prendre le match LDC avec analyse complète, sinon le meilleur par conf
-    const ldcComplets = ldcMatchs.filter(m => m.verdict_shark || m.analyse_card || m.conseil_public);
+    const ldcComplets = ldcMatchs.filter(function(m){ return m.verdict_shark || m.analyse_card || m.conseil_public; });
     const pool = ldcComplets.length ? ldcComplets : ldcMatchs;
-    const match = pool.sort((a, b) => (b.conf || 0) - (a.conf || 0))[0];
-    console.log(`Match : ${match.home.n} vs ${match.away.n} (conf: ${match.conf})`);
+    const match = pool.sort(function(a, b){ return (b.conf || 0) - (a.conf || 0); })[0];
+    console.log('Match : ' + match.home.n + ' vs ' + match.away.n + ' (conf: ' + match.conf + ')');
 
     let script = await genererScript(match);
     script = script.replace(/^[#\*\-].*/gm, '').replace(/\n+/g, ' ').trim();
@@ -150,9 +141,9 @@ async function run() {
 
     const res = await envoyerVersCreatomate(match, script);
     if (res && res[0]) {
-      console.log(`Statut : ${res[0].status}`);
-      if (res[0].url) console.log(`Vidéo : ${res[0].url}`);
-      else console.log(`ID : ${res[0].id}`);
+      console.log('Statut : ' + res[0].status);
+      if (res[0].url) console.log('Video : ' + res[0].url);
+      else console.log('ID : ' + res[0].id);
     } else {
       console.log(JSON.stringify(res, null, 2));
     }

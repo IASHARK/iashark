@@ -82,6 +82,7 @@ body::before{content:'';position:fixed;top:-300px;left:50%;transform:translateX(
 .mc-teams-sep{display:flex;flex-direction:column;align-items:center;gap:2px;flex-shrink:0;}
 .mc-vs{font-family:'Bebas Neue',sans-serif;font-size:13px;color:var(--muted);}
 .mc-time{font-family:'Space Mono',monospace;font-size:9px;color:var(--cyan);}
+.mc-date{font-family:'Space Mono',monospace;font-size:8px;color:var(--muted);margin-top:2px;}
 .mc-pari{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
 .mc-pari-label{font-family:'Space Mono',monospace;font-size:7px;color:var(--amber);letter-spacing:1px;}
 .mc-pari-bet{font-size:13px;font-weight:600;color:var(--text);}
@@ -248,27 +249,16 @@ body::before{content:'';position:fixed;top:-300px;left:50%;transform:translateX(
 <!-- HERO centré -->
 <div class="hero">
   <div class="hero-shark">🦈</div>
-  <div class="hero-tag"><span class="dot"></span> ANALYSES IA EN DIRECT</div>
   <h1 class="hero-title"><span>IA</span>SHARK</h1>
   <p class="hero-sub">L'IA qui attaque les cotes. Analyses statistiques quotidiennes alimentées par l'intelligence artificielle.</p>
-  <div class="hero-count">
-    <div class="hero-count-num" id="statMatchs">—</div>
-    <div class="hero-count-lbl">ANALYSES DU JOUR</div>
-  </div>
+  <div class="hero-tag"><span class="dot"></span> ANALYSES IA EN DIRECT</div>
 </div>
 
 <!-- FILTRES -->
 <div class="filters" id="filters">
   <button class="filter-btn active" data-filter="all">🌐 TOUS</button>
   <button class="filter-btn" data-filter="value">⚡ VALUE</button>
-  <button class="filter-btn" data-filter="ldc">🏆 LDC</button>
-  <button class="filter-btn" data-filter="top5">🇪🇺 TOP 5</button>
-  <div class="explorer-wrap" id="explorerWrap">
-    <button class="filter-btn explorer-btn" id="explorerBtn" onclick="toggleExplorer(event)">🏟 LIGUES ▾</button>
-    <div class="explorer-panel" id="explorerPanel">
-      <div id="explorerContent"><div style="padding:12px 14px;font-family:Space Mono,monospace;font-size:8px;color:var(--muted)">Chargement...</div></div>
-    </div>
-  </div>
+  <div id="leagueBtns"></div>
 </div>
 
 <!-- ONGLETS AUJOURD'HUI / DEMAIN -->
@@ -424,7 +414,7 @@ function buildCard(m){
     +  '<div class="mc-left">'
     +    '<div class="mc-teams">'
     +      '<div class="mc-team home">'+teamLogo(m.home)+'<div class="mc-team-name">'+(m.home&&m.home.n||'').toUpperCase()+'</div></div>'
-    +      '<div class="mc-teams-sep"><div class="mc-vs">VS</div><div class="mc-time">'+heure+(typeof showDemain!=='undefined'&&showDemain?'<span class="badge-demain">J+1</span>':'')+'</div></div>'
+    +      '<div class="mc-teams-sep"><div class="mc-vs">VS</div>'+'<div class="mc-time">'+heure+'</div>'+'<div class="mc-date">'+((m.date||'').split(' ')[0]||'')+'</div>'+(typeof showDemain!=='undefined'&&showDemain?'<span class="badge-demain">J+1</span>':'')+'</div>'
     +      '<div class="mc-team away">'+teamLogo(m.away)+'<div class="mc-team-name">'+(m.away&&m.away.n||'').toUpperCase()+'</div></div>'
     +    '</div>'
     +    '<div class="mc-pari">'
@@ -561,20 +551,57 @@ var LEAGUE_LABELS = {
   'laliga':       {flag:'🇪🇸', name:'La Liga'},
   'seriea':       {flag:'🇮🇹', name:'Serie A'},
   'bundesliga':   {flag:'🇩🇪', name:'Bundesliga'},
-  'ldc':          {flag:'🏆', name:'Ligue des Champions'},
+  'ldc':          {flag:'🏆', name:'Champions League'},
   'el':           {flag:'🏆', name:'Europa League'},
   'eredivisie':   {flag:'🇳🇱', name:'Eredivisie'},
   'primeira':     {flag:'🇵🇹', name:'Primeira Liga'},
   'superlig':     {flag:'🇹🇷', name:'Süper Lig'},
   'brasileirao':  {flag:'🇧🇷', name:'Brasileirão'},
-  'primera-arg':  {flag:'🇦🇷', name:'Primera División'},
+  'primera-arg':  {flag:'🇦🇷', name:'Liga Profesional'},
   'mls':          {flag:'🇺🇸', name:'MLS'},
   'superliga-dk': {flag:'🇩🇰', name:'Superliga'},
   'ireland':      {flag:'🇮🇪', name:'League of Ireland'},
-  'jleague':      {flag:'🇯🇵', name:'J-League'},
-  'kleague':      {flag:'🇰🇷', name:'K-League'},
+  'jleague':      {flag:'🇯🇵', name:'J1 League'},
+  'kleague':      {flag:'🇰🇷', name:'K League'},
   'saudi':        {flag:'🇸🇦', name:'Saudi Pro League'},
+  'coupe-france': {flag:'🇫🇷', name:'Coupe de France'},
+  'copa-rey':     {flag:'🇪🇸', name:'Copa del Rey'},
+  'coppa-italia': {flag:'🇮🇹', name:'Coppa Italia'},
+  'dfb-pokal':    {flag:'🇩🇪', name:'DFB Pokal'},
 };
+
+// Construit les boutons de ligues dynamiquement depuis les matchs du jour filtré
+function buildLeagueBtns(matchs){
+  var seen = {};
+  matchs.forEach(function(m){
+    var k = leagueKey(m);
+    if(!k) return;
+    if(!seen[k]){
+      var lbl = LEAGUE_LABELS[k];
+      seen[k] = {
+        key: k,
+        flag: lbl ? lbl.flag : (m.ligue_icon||'🏆'),
+        name: lbl ? lbl.name : (m.league||k)
+      };
+    }
+  });
+  var keys = Object.keys(seen);
+  var wrap = document.getElementById('leagueBtns');
+  if(!wrap) return;
+  wrap.innerHTML = keys.map(function(k){
+    var info = seen[k];
+    return '<button class="filter-btn" data-filter="'+k+'">'+info.flag+' '+info.name+'</button>';
+  }).join('');
+  // Rebind click events
+  wrap.querySelectorAll('.filter-btn').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      document.querySelectorAll('.filter-btn').forEach(function(b){b.classList.remove('active');});
+      btn.classList.add('active');
+      currentFilter = btn.dataset.filter;
+      renderMatchs();
+    });
+  });
+}
 
 function buildExplorerDynamic(matchs){
   var seen = {};
@@ -603,7 +630,6 @@ async function loadData(){
     var data=await resp.json();
     allMatchs=data.matchs||[];
     var total=allMatchs.length;
-    document.getElementById('statMatchs').textContent=total;
     document.getElementById('matchCount').innerHTML='<span>'+total+'</span> MATCHS';
     var cToday=allMatchs.filter(isToday).length;
     var cTomorrow=allMatchs.filter(isTomorrow).length;

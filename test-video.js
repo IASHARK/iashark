@@ -1,15 +1,17 @@
 const https = require('https');
 const fs = require('fs');
 
-// 1. La fonction qui envoie la commande à Creatomate
 async function envoyerVersCreatomate(match) {
     return new Promise((resolve) => {
+        // Sécurité : on vérifie que le texte existe
+        const texte = match.analyse_card || match.conseil_public || "Analyse en cours pour ce match de Ligue des Champions.";
+
         const data = JSON.stringify({
             template_id: '00468af0-fdc7-4490-81ad-d56b15f773d1',
             modifications: {
-                "Equipe_Domicile": match.home.n.toUpperCase(),
-                "Equipe_Exterieur": match.away.n.toUpperCase(),
-                "Voix_IA": match.analyse_card
+                "Equipe_Domicile": (match.home.n || "DOMICILE").toUpperCase(),
+                "Equipe_Exterieur": (match.away.n || "EXTERIEUR").toUpperCase(),
+                "Voix_IA": texte
             }
         });
 
@@ -20,50 +22,49 @@ async function envoyerVersCreatomate(match) {
             headers: {
                 'Authorization': `Bearer ${process.env.CREATOMATE_KEY}`,
                 'Content-Type': 'application/json',
-                'Content-Length': data.length
+                'Content-Length': Buffer.byteLength(data)
             }
         }, (res) => {
             let body = '';
             res.on('data', (chunk) => body += chunk);
-            res.on('end', () => resolve(JSON.parse(body)));
+            res.on('end', () => {
+                const parsed = JSON.parse(body);
+                if (res.statusCode >= 200 && res.statusCode < 300) {
+                    resolve({ success: true, data: parsed });
+                } else {
+                    resolve({ success: false, error: parsed });
+                }
+            });
         });
 
-        req.on('error', (e) => {
-            console.error(`❌ Erreur pour ${match.home.n}:`, e.message);
-            resolve(null);
-        });
-
+        req.on('error', (e) => resolve({ success: false, error: e.message }));
         req.write(data);
         req.end();
     });
 }
 
-// 2. La fonction principale (Main) qui orchestre tout
 async function run() {
     try {
-        console.log("📂 Lecture des données de data.json...");
+        console.log("📂 Lecture de data.json...");
         const rawData = fs.readFileSync('data.json');
         const content = JSON.parse(rawData);
-        const matchsData = content.matchs || [];
+        const ldcMatchs = (content.matchs || []).filter(m => m.league_key === 'ldc');
 
-        // Filtre pour ne prendre QUE la Ligue des Champions (ldc)
-        const ldcMatchs = matchsData.filter(m => m.league_key === 'ldc');
-
-        console.log(`🔎 Shark a trouvé ${ldcMatchs.length} match(s) de LDC aujourd'hui.`);
+        console.log(`🔎 Shark a trouvé ${ldcMatchs.length} match(s).`);
 
         for (const m of ldcMatchs) {
-            console.log(`🎬 Envoi vidéo : ${m.home.n} vs ${m.away.n}...`);
-            const res = await envoyerVersCreatomate(m);
-            if (res && res[0]) {
-                console.log(`✅ Succès ! Lien : ${res[0].url}`);
+            console.log(`🎬 Envoi : ${m.home.n} vs ${m.away.n}...`);
+            const result = await envoyerVersCreatomate(m);
+            
+            if (result.success) {
+                console.log(`✅ SUCCÈS ! Lien : ${result.data[0].url}`);
+            } else {
+                console.log(`❌ ÉCHEC :`, JSON.stringify(result.error));
             }
         }
-        
-        console.log("🏁 Fin du processus.");
     } catch (err) {
-        console.error("❌ Erreur critique :", err.message);
+        console.error("❌ ERREUR CRITIQUE :", err.message);
     }
 }
 
-// 3. LANCEMENT (C'est ici qu'on évite l'erreur de tout à l'heure)
 run();

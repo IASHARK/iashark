@@ -81,13 +81,12 @@ DONNÉES DU MATCH :
 Rédige UNIQUEMENT le script que la voix off va lire. Zéro blabla avant ou après. Maximum vingt-cinq secondes à l'oral.`;
 
     const body = JSON.stringify({
-      model: 'claude-3-haiku-20240307',
-      max_tokens: 300,
+      model: 'claude-3-5-sonnet-20240620',
+      max_tokens: 500,
       messages: [{ role: 'user', content: prompt }]
     });
 
     const apiKey = process.env.ANTHROPIC_KEY || '';
-    if (!apiKey) console.log("⚠️ ATTENTION : La clé ANTHROPIC_KEY semble vide dans GitHub !");
 
     const req = https.request({
       hostname: 'api.anthropic.com',
@@ -103,17 +102,19 @@ Rédige UNIQUEMENT le script que la voix off va lire. Zéro blabla avant ou apr�
       let data = '';
       res.on('data', chunk => data += chunk);
       res.on('end', () => {
-        console.log('\n--- RÉPONSE BRUTE API CLAUDE ---');
-        console.log(data);
-        console.log('--------------------------------\n');
         try {
           const r = JSON.parse(data);
-          resolve((r.content && r.content[0] && r.content[0].text) || '');
+          if (r.error) {
+             console.log("❌ Erreur API Claude :", r.error.message);
+             resolve('');
+          } else {
+             resolve((r.content && r.content[0] && r.content[0].text) || '');
+          }
         } catch(e) { resolve(''); }
       });
     });
     req.on('error', (e) => {
-      console.log('❌ Erreur de connexion Anthropic :', e.message);
+      console.log('❌ Erreur connexion Anthropic :', e.message);
       resolve('');
     });
     req.write(body);
@@ -121,7 +122,6 @@ Rédige UNIQUEMENT le script que la voix off va lire. Zéro blabla avant ou apr�
   });
 }
 
-// Envoi vers Creatomate
 function envoyerVersCreatomate(match, scriptVocal) {
   return new Promise((resolve) => {
     const idHome = match.home.id || match.home_id || 85;
@@ -170,45 +170,22 @@ function envoyerVersCreatomate(match, scriptVocal) {
 
 async function run() {
   try {
-    console.log('Lecture de data.json...');
-    if (!fs.existsSync('data.json')) {
-      throw new Error('data.json introuvable. Lance le pipeline principal d\'abord.');
-    }
-
+    if (!fs.existsSync('data.json')) throw new Error('data.json introuvable.');
     const content = JSON.parse(fs.readFileSync('data.json', 'utf8'));
     const ldcMatchs = (content.matchs || []).filter(m => m.league_key === 'ldc');
-
-    if (!ldcMatchs.length) {
-      console.log('Aucun match LDC trouvé aujourd\'hui.');
-      return;
-    }
+    if (!ldcMatchs.length) return console.log('Aucun match LDC.');
 
     const match = ldcMatchs.sort((a, b) => (b.conf || 0) - (a.conf || 0))[0];
-    const nomDomStr = match.home.n || match.home || 'Domicile';
-    const nomExtStr = match.away.n || match.away || 'Extérieur';
-    console.log(`Match sélectionné : ${nomDomStr} vs ${nomExtStr}`);
+    console.log(`Match sélectionné : ${match.home.n || match.home} vs ${match.away.n || match.away}`);
 
-    console.log('Génération du script vocal avec Claude...');
     const script = await genererScript(match);
+    if (!script) throw new Error('Script vide.');
 
-    if (!script) {
-      throw new Error('Script vide — regarde la réponse brute de Claude juste au-dessus pour comprendre l\'erreur.');
-    }
+    console.log('\n=== SCRIPT GÉNÉRÉ ===\n' + script + '\n=====================\n');
 
-    console.log('\n=== SCRIPT GÉNÉRÉ ===');
-    console.log(script);
-    console.log('=====================\n');
-
-    console.log('Envoi vers Creatomate...');
     const res = await envoyerVersCreatomate(match, script);
-
-    if (res && res[0] && res[0].url) {
-      console.log(`✅ Succès ! Vidéo disponible : ${res[0].url}`);
-    } else if (res && res[0] && res[0].id) {
-      console.log(`⏳ Rendu lancé. ID : ${res[0].id} — Statut : ${res[0].status}`);
-    } else {
-      console.log('❌ Réponse Creatomate :', JSON.stringify(res, null, 2));
-    }
+    if (res && res[0] && res[0].url) console.log(`✅ Succès ! Vidéo : ${res[0].url}`);
+    else console.log('⏳ Rendu lancé ou erreur.');
 
   } catch(err) {
     console.error('Erreur :', err.message);

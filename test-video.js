@@ -39,25 +39,23 @@ function genererScript(match) {
     const conf = match.conf || '';
     const pari = match.pari_rec || '';
 
-    const prompt = `Tu es le meilleur analyste data football sur TikTok. Écris le script vocal d'une vidéo de vingt-cinq secondes maximum.
+    const prompt = `Tu es le meilleur analyste data football sur TikTok. Écris le script vocal d'une vidéo de quinze secondes maximum.
 
 RÈGLES STRICTES :
-1. Utilise UNIQUEMENT "${homeNom}" et "${awayNom}" — jamais les noms officiels complets.
+1. Utilise UNIQUEMENT "\${homeNom}" et "\${awayNom}".
 2. ZÉRO jargon de parieur : bannis "cote", "bookmaker", "pari", "mise", "ticket", "pronostic". Utilise "probabilités", "data", "scénario", "tendance".
-3. Écris les chiffres en lettres. Utilise des points de suspension pour les pauses.
-4. Commence DIRECTEMENT avec la stat la plus forte. Jamais "Bonjour" ou "Bienvenue".
-5. Structure : hook percutant → data qui explique → verdict annoncé cash.
+3. ZÉRO mention de joueurs ou de buteurs.
+4. Écris les chiffres en lettres. Utilise des points de suspension pour les pauses.
+5. Commence avec UNE stat choc. Jamais "Bonjour" ou "Bienvenue".
+6. Structure : stat choc → pourquoi ce scénario → verdict cash.
 
-DONNÉES RÉELLES DU MATCH :
-- ${homeNom} reçoit ${awayNom}
-- Verdict IA : ${verdict}
-- Facteur clé : ${facteur}
-- Analyse : ${conseil}
-- Scores probables : ${scoreProb}
-- Edge mathématique : ${edge}
-- Confiance IA : ${conf} sur dix
+DONNÉES DU MATCH :
+- \${homeNom} reçoit \${awayNom}
+- Verdict IA : \${verdict}
+- Facteur clé : \${facteur}
+- Edge : \${edge} — Confiance : \${conf} sur dix
 
-Rédige UNIQUEMENT le texte brut que la voix lira. Zéro titre, zéro hashtag, zéro markdown. Une seule ligne de texte continu.`;
+Maximum quarante mots. Zéro titre, zéro hashtag, zéro markdown. Une seule ligne de texte continu.`;
 
     const body = JSON.stringify({
       model: 'claude-haiku-4-5-20251001',
@@ -101,7 +99,6 @@ function envoyerVersCreatomate(match, script) {
         'Voix_IA': script,
         'Logo_Domicile': logoHome,
         'Logo_Exterieur': logoAway,
-        'Text-59T': score,
       }
     });
 

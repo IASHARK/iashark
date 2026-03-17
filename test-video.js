@@ -3,6 +3,7 @@ const fs = require('fs');
 
 // Convertit les noms d'équipes en noms naturels pour la voix
 function nomNaturel(nom) {
+  if (!nom) return '';
   const map = {
     'Bayern München': 'le Bayern', 'Bayern Munchen': 'le Bayern', 'FC Bayern': 'le Bayern',
     'Real Madrid': 'le Real', 'Real Madrid CF': 'le Real',
@@ -23,7 +24,6 @@ function nomNaturel(nom) {
   for (const key of Object.keys(map)) {
     if (nom.toLowerCase().includes(key.toLowerCase())) return map[key];
   }
-  // Par défaut : "le [nom]" ou juste le nom
   return nom;
 }
 
@@ -39,6 +39,7 @@ function formeEnTexte(forme) {
 
 // Convertit un décimal en texte oral
 function nombreEnTexte(n) {
+  if (!n) return '?';
   const m = { '0.5': 'zéro virgule cinq', '1.5': 'un but et demi', '2.5': 'deux buts et demi', '3.5': 'trois buts et demi', '4.5': 'quatre buts et demi' };
   return m[String(n)] || String(n).replace('.', ' virgule ');
 }
@@ -46,14 +47,16 @@ function nombreEnTexte(n) {
 // Appel Claude pour générer le script vocal
 function genererScript(match) {
   return new Promise((resolve) => {
-    const homeNom = nomNaturel(match.home.n);
-    const awayNom = nomNaturel(match.away.n);
+    const nomDomStr = match.home.n || match.home || 'Domicile';
+    const nomExtStr = match.away.n || match.away || 'Extérieur';
+    const homeNom = nomNaturel(nomDomStr);
+    const awayNom = nomNaturel(nomExtStr);
     const scoreProb = match.scores_probables || '1-0, 2-0, 2-1';
     const scenarioIA = match.pari_rec || 'victoire à domicile';
-    const xgH = match.xg_home || match.xg || '?';
-    const xgA = match.xg_away || '?';
-    const formeH = formeEnTexte(match.forme_home || match.formeH || '');
-    const formeA = formeEnTexte(match.forme_away || match.formeA || '');
+    const xgH = match.xgH_avg || match.xg_home || match.xg || '?';
+    const xgA = match.xgA_avg || match.xg_away || '?';
+    const formeH = formeEnTexte(match.forme5H || match.forme_home || match.formeH || '');
+    const formeA = formeEnTexte(match.forme5A || match.forme_away || match.formeA || '');
     const conseil = match.conseil || '';
 
     const prompt = `Tu es le meilleur analyste data football sur TikTok. Ton but est d'écrire le script vocal d'une vidéo courte de vingt-cinq secondes maximum pour prédire le scénario d'un match.
@@ -78,7 +81,7 @@ DONNÉES DU MATCH :
 Rédige UNIQUEMENT le script que la voix off va lire. Zéro blabla avant ou après. Maximum vingt-cinq secondes à l'oral.`;
 
     const body = JSON.stringify({
-      model: 'claude-haiku-4-5-20251001',
+      model: 'claude-3-haiku-20240307', // CORRECTION : Le vrai modèle API qui fonctionne
       max_tokens: 300,
       messages: [{ role: 'user', content: prompt }]
     });
@@ -112,9 +115,15 @@ Rédige UNIQUEMENT le script que la voix off va lire. Zéro blabla avant ou apr�
 // Envoi vers Creatomate
 function envoyerVersCreatomate(match, scriptVocal) {
   return new Promise((resolve) => {
-    const logoHome = `https://media.api-sports.io/football/teams/${match.home.id}.png`;
-    const logoAway = `https://media.api-sports.io/football/teams/${match.away.id}.png`;
+    // CORRECTION : Sécurité si le format JSON change un peu
+    const idHome = match.home.id || match.home_id || 85;
+    const idAway = match.away.id || match.away_id || 85;
+    const logoHome = `https://media.api-sports.io/football/teams/${idHome}.png`;
+    const logoAway = `https://media.api-sports.io/football/teams/${idAway}.png`;
     const scoreProb = (match.scores_probables || '1-0').split(',')[0].trim();
+    
+    const nomDomStr = match.home.n || match.home || 'Domicile';
+    const nomExtStr = match.away.n || match.away || 'Extérieur';
 
     const data = JSON.stringify({
       template_id: '00468af0-fdc7-4490-81ad-d56b15f773d1',
@@ -123,8 +132,8 @@ function envoyerVersCreatomate(match, scriptVocal) {
         'Logo_Exterieur': logoAway,
         'Voix_IA': scriptVocal,
         'Score_Probable': scoreProb,
-        'Equipe_Dom': nomNaturel(match.home.n),
-        'Equipe_Ext': nomNaturel(match.away.n),
+        'Equipe_Dom': nomNaturel(nomDomStr),
+        'Equipe_Ext': nomNaturel(nomExtStr),
       }
     });
 
@@ -168,7 +177,9 @@ async function run() {
 
     // Un seul match — le meilleur par confiance
     const match = ldcMatchs.sort((a, b) => (b.conf || 0) - (a.conf || 0))[0];
-    console.log(`Match sélectionné : ${match.home.n} vs ${match.away.n}`);
+    const nomDomStr = match.home.n || match.home || 'Domicile';
+    const nomExtStr = match.away.n || match.away || 'Extérieur';
+    console.log(`Match sélectionné : ${nomDomStr} vs ${nomExtStr}`);
 
     console.log('Génération du script vocal avec Claude...');
     const script = await genererScript(match);

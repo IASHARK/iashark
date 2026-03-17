@@ -2888,11 +2888,15 @@ jobs:
               if(risqueNorm.includes('FAIBLE')||risqueNorm.includes('LOW')) risqueNorm='FAIBLE';
               else if(risqueNorm.includes('ELEVE')||risqueNorm.includes('HIGH')||risqueNorm.includes('FORT')) risqueNorm='ELEVE';
               else risqueNorm='MODERE';
+
+              var parisDateObj = new Date(new Date(f.date || TODAY).toLocaleString("en-US", {timeZone: "Europe/Paris"}));
+              var dateVraieParis = parisDateObj.getFullYear() + '-' + String(parisDateObj.getMonth() + 1).padStart(2, '0') + '-' + String(parisDateObj.getDate()).padStart(2, '0');
+
               var matchObj = {
                 id:f.id, sport:'football',
                 home:{n:home.name,id:home.id}, away:{n:away.name,id:away.id},
                 league:lg.name, ligue_icon:lgIcon(lg.name), league_key:lgKey(lg.id),
-                date:((f.date || TODAY).split('T')[0] + ' ' + heure).trim(), cat:['all'],
+                date: (dateVraieParis + ' ' + heure).trim(), cat:['all'],
                 val:an?(an.vbet==='OUI'&&(an.confiance||0)>=6.0):false,
                 hot:an ? ((an.confiance||0)>=8.0 || ((an.confiance||0)>=7.0 && ['ldc', 'premier', 'laliga', 'seriea', 'bundesliga', 'ligue1'].includes(lgKey(lg.id)))) : false,
                 conf:an?parseFloat(an.confiance||0):0,

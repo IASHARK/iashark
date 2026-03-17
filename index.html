@@ -111,38 +111,6 @@ body::before{content:'';position:fixed;top:-300px;left:50%;transform:translateX(
 .prob-lbl-pct{font-family:'Bebas Neue',sans-serif;font-size:14px;line-height:1;}
 .prob-lbl-txt{font-family:'Space Mono',monospace;font-size:7px;color:var(--muted);letter-spacing:1px;max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 
-/* PRO WALL SECTION */
-.pro-section{max-width:720px;margin:28px auto 0;padding:0 20px;position:relative;z-index:1;}
-.pro-wall-idx{background:#0a0f1a;border:1px solid rgba(255,255,255,0.06);border-radius:20px;overflow:hidden;cursor:pointer;}
-.pro-wall-idx:hover .pw-cta-btn{opacity:.85;}
-.pw-topbar{background:rgba(255,255,255,0.02);border-bottom:1px solid rgba(255,255,255,0.05);padding:14px 20px;display:flex;align-items:center;justify-content:space-between;}
-.pw-topbar-label{font-family:'Space Mono',monospace;font-size:9px;color:#f59e0b;letter-spacing:3px;text-transform:uppercase;}
-.pw-topbar-lock{width:26px;height:26px;border:1px solid rgba(255,255,255,0.1);border-radius:6px;display:flex;align-items:center;justify-content:center;}
-.pw-topbar-lock svg{width:11px;height:11px;fill:none;stroke:rgba(255,255,255,0.3);stroke-width:2;stroke-linecap:round;}
-.pw-header{padding:20px 20px 16px;border-bottom:1px solid rgba(255,255,255,0.04);}
-.pw-title{font-family:'Bebas Neue',sans-serif;font-size:28px;color:#f1f5f9;letter-spacing:2px;line-height:1;margin-bottom:5px;}
-.pw-title span{color:#22d3ee;}
-.pw-subtitle{font-family:'DM Sans',sans-serif;font-size:12px;color:rgba(148,163,184,0.6);font-weight:300;line-height:1.5;}
-.pw-features{padding:0 20px;}
-.pw-feat{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid rgba(255,255,255,0.04);gap:12px;}
-.pw-feat:last-child{border-bottom:none;}
-.pw-feat-left{display:flex;align-items:flex-start;gap:12px;flex:1;}
-.pw-feat-index{font-family:'Space Mono',monospace;font-size:8px;color:#f59e0b;opacity:.7;letter-spacing:1px;padding-top:2px;min-width:16px;}
-.pw-feat-name{font-family:'Space Mono',monospace;font-size:10px;color:#22d3ee;letter-spacing:1px;margin-bottom:3px;font-weight:700;}
-.pw-feat-desc{font-family:'DM Sans',sans-serif;font-size:11px;color:rgba(148,163,184,0.5);font-weight:300;line-height:1.4;}
-.pw-feat-badge{font-family:'Space Mono',monospace;font-size:7px;letter-spacing:1.5px;padding:3px 7px;border-radius:4px;white-space:nowrap;flex-shrink:0;}
-.pw-feat-badge.c1{background:rgba(245,158,11,0.08);color:rgba(245,158,11,0.7);border:1px solid rgba(245,158,11,0.2);}
-.pw-feat-badge.c2{background:rgba(34,211,238,0.06);color:rgba(34,211,238,0.45);border:1px solid rgba(34,211,238,0.12);}
-.pw-pricing{margin:0 20px;padding:16px 0 0;border-top:1px solid rgba(255,255,255,0.05);display:flex;align-items:center;justify-content:space-between;gap:16px;}
-.pw-price-amount{font-family:'Bebas Neue',sans-serif;font-size:50px;color:#f59e0b;line-height:1;}
-.pw-price-amount span{font-size:24px;color:rgba(245,158,11,0.4);}
-.pw-price-period{font-family:'Space Mono',monospace;font-size:8px;color:rgba(148,163,184,0.35);letter-spacing:2px;margin-bottom:8px;}
-.pw-price-item{font-family:'DM Sans',sans-serif;font-size:11px;color:rgba(148,163,184,0.5);display:flex;align-items:center;gap:7px;font-weight:300;padding:2px 0;}
-.pw-price-item::before{content:'';width:4px;height:4px;border-radius:50%;background:#22d3ee;opacity:.5;flex-shrink:0;}
-.pw-cta-wrap{padding:16px 20px 20px;}
-.pw-cta-btn{width:100%;background:#22d3ee;color:#080c12;font-family:'Space Mono',monospace;font-size:10px;letter-spacing:2.5px;font-weight:700;padding:15px;border:none;border-radius:10px;cursor:pointer;transition:opacity .2s;text-align:center;display:block;}
-.pw-note{font-family:'Space Mono',monospace;font-size:7px;color:rgba(148,163,184,0.25);text-align:center;margin-top:8px;letter-spacing:1px;}
-
 /* LOADING / EMPTY */
 .loading-state{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 20px;gap:16px;}
 .loading-spinner{width:40px;height:40px;border:2px solid var(--border);border-top-color:var(--cyan);border-radius:50%;animation:spin 1s linear infinite;}
@@ -169,13 +137,6 @@ body::before{content:'';position:fixed;top:-300px;left:50%;transform:translateX(
 .lang-opt{padding:9px 14px;font-family:'DM Sans',sans-serif;font-size:12px;color:var(--muted);cursor:pointer;transition:.15s;}
 .lang-opt:hover{background:rgba(34,211,238,0.06);color:var(--cyan);}
 
-.explorer-wrap{position:relative;flex-shrink:0;}
-.explorer-btn{position:relative;}
-.explorer-panel{display:none;position:absolute;top:calc(100% + 8px);left:0;background:var(--card);border:1px solid var(--border-cyan);border-radius:12px;min-width:200px;z-index:200;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,0.4);}
-.explorer-panel.open{display:block;}
-.ep-section{font-family:'Space Mono',monospace;font-size:7px;color:var(--muted);letter-spacing:2px;padding:10px 14px 4px;}
-.ep-opt{font-family:'Space Mono',monospace;font-size:8px;color:var(--muted);padding:8px 14px;cursor:pointer;letter-spacing:1px;transition:.15s;}
-.ep-opt:hover,.ep-opt.active{background:rgba(34,211,238,0.06);color:var(--cyan);}
 .sec-hdr{max-width:720px;margin:0 auto 10px;padding:0 20px;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:3px;color:var(--muted);display:flex;align-items:center;gap:10px;position:relative;z-index:1;}
 .sec-hdr::after{content:'';flex:1;height:1px;background:var(--border);}
 .sec-hdr.s-choc{color:var(--amber);}
@@ -200,15 +161,7 @@ body::before{content:'';position:fixed;top:-300px;left:50%;transform:translateX(
 .choc-pari-lbl{font-family:'Space Mono',monospace;font-size:7px;color:rgba(245,158,11,0.6);letter-spacing:1px;margin-bottom:3px;}
 .choc-pari-bet{font-size:15px;font-weight:500;color:var(--text);}
 .choc-cote{font-family:'Bebas Neue',sans-serif;font-size:36px;color:var(--amber);line-height:1;}
-.dossier-wrap{max-width:720px;margin:0 auto 8px;padding:0 20px;}
-.dossier{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;}
-.dossier-hdr{padding:12px 16px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;transition:.15s;}
-.dossier-hdr:hover{background:rgba(255,255,255,0.02);}
-.dossier-title{font-family:'Space Mono',monospace;font-size:8px;color:var(--muted);letter-spacing:2px;display:flex;align-items:center;gap:10px;}
-.dossier-count{font-size:7px;color:var(--muted);background:rgba(255,255,255,0.03);border:1px solid var(--border);padding:2px 7px;border-radius:10px;}
-.dossier-arrow{font-size:9px;color:var(--muted);transition:.3s;}
-.dossier-body{display:none;border-top:1px solid var(--border);padding:10px 20px;}
-.dossier-body.open{display:block;}
+
 @media(max-width:480px){
   .mc-team-name{font-size:13px;max-width:70px;}
   .mc-team-logo,.mc-team-logo-placeholder{width:26px;height:26px;}
@@ -223,7 +176,6 @@ body::before{content:'';position:fixed;top:-300px;left:50%;transform:translateX(
 </head>
 <body>
 
-<!-- HEADER -->
 <header class="hdr">
   <a href="/" class="logo"><span>IA</span>SHARK</a>
   <div class="hdr-right">
@@ -245,7 +197,6 @@ body::before{content:'';position:fixed;top:-300px;left:50%;transform:translateX(
   </div>
 </header>
 
-<!-- HERO centré -->
 <div class="hero">
   <div class="hero-shark">🦈</div>
   <div class="hero-tag"><span class="dot"></span> ANALYSES IA EN DIRECT</div>
@@ -257,22 +208,19 @@ body::before{content:'';position:fixed;top:-300px;left:50%;transform:translateX(
   </div>
 </div>
 
-<!-- FILTRES -->
 <div class="filters" id="filters">
   <button class="filter-btn active" data-filter="all">🌐 TOUS</button>
   <button class="filter-btn" data-filter="value">⚡ VALUE</button>
   <div id="leagueBtns" style="display:contents"></div>
 </div>
 
-<!-- ONGLETS AUJOURD'HUI / DEMAIN -->
 <div class="day-tabs">
   <button class="day-tab active" id="tabToday" onclick="setDayTab('today')">AUJOURD'HUI <span class="tab-count" id="countToday">—</span></button>
   <button class="day-tab" id="tabTomorrow" onclick="setDayTab('tomorrow')">DEMAIN <span class="tab-count" id="countTomorrow">—</span></button>
 </div>
-<!-- CONTENU PRINCIPAL AVEC HIÉRARCHIE -->
+
 <div id="mainContent"></div>
 
-<!-- MATCHES -->
 <div id="cardsList">
   <div class="loading-state">
     <div class="loading-spinner"></div>
@@ -280,7 +228,6 @@ body::before{content:'';position:fixed;top:-300px;left:50%;transform:translateX(
   </div>
 </div>
 
-<!-- FOOTER LÉGAL -->
 <div style="max-width:720px;margin:24px auto 0;padding:0 20px 20px;text-align:center;">
   <div style="font-family:'Space Mono',monospace;font-size:8px;color:rgba(74,101,128,0.5);line-height:2;letter-spacing:1px;">
     <div>⚠️ LE JEU PEUT ÊTRE DANGEREUX — JOUEZ RESPONSABLE · INTERDIT AUX MOINS DE 18 ANS</div>
@@ -293,7 +240,6 @@ body::before{content:'';position:fixed;top:-300px;left:50%;transform:translateX(
   </div>
 </div>
 
-<!-- NAV BAS -->
 <nav class="nav-bottom">
   <div class="nav-item active"><div class="nav-icon">🦈</div><div class="nav-lbl">ACCUEIL</div></div>
   <div class="nav-item" onclick="window.location='/historique.html'"><div class="nav-icon">📊</div><div class="nav-lbl">HISTORIQUE</div></div>
@@ -336,13 +282,6 @@ function filterMatchs(matchs,f){
   if(f==='value') return matchs.filter(function(m){return m.val||m.vbet==='OUI';});
   if(f==='top5') return matchs.filter(function(m){ return ['premier','laliga','seriea','bundesliga','ligue1'].indexOf(leagueKey(m))!==-1; });
   return matchs.filter(function(m){return leagueKey(m)===f;});
-}
-
-function toggleDossier(hdr){
-  var body=hdr.nextElementSibling;
-  var arrow=hdr.querySelector('.dossier-arrow');
-  body.classList.toggle('open');
-  arrow.style.transform=body.classList.contains('open')?'rotate(180deg)':'';
 }
 
 function teamLogo(team){
@@ -457,61 +396,6 @@ function buildChocCard(m){
     +'</div></div></div>';
 }
 
-function renderMatchs(){
-  var list = applyDayFilter(filterMatchs(allMatchs, currentFilter));
-  var isDemain = currentDayFilter==='tomorrow';
-  var el = document.getElementById('cardsList');
-  if(!list.length){
-    el.innerHTML='<div class="cards-list"><div class="empty-state"><h3>'+(isDemain?'AUCUN MATCH DEMAIN':'AUCUN MATCH TROUVÉ')+'</h3><p>'+(isDemain?'Reviens ce soir pour les analyses de demain.':'Essaie un autre filtre ou reviens demain.')+'</p></div></div>';
-    return;
-  }
-
-  var html = '';
-
-  // MODE TOUS — hiérarchie
-  if(currentFilter === 'all'){
-    var choc = getChoc(list);
-    var valueMatchs = list.filter(function(m){ return m.id !== choc.id && ((m.val||m.vbet==='OUI') || (parseFloat((m.edge||'').replace(/[^0-9.]/g,''))||0)>=8) && (m.conf||0)>=7; });
-    var rest = list.filter(function(m){ return m.id !== choc.id && valueMatchs.indexOf(m)===-1; });
-    rest.sort(function(a,b){ return ((a.date||'').split(' ')[1]||'') < ((b.date||'').split(' ')[1]||'') ? -1:1; });
-
-    // CHOC
-    html += '<div class="sec-hdr s-choc">CHOC DU SOIR</div>';
-    html += buildChocCard(choc);
-
-    // VALUE
-    if(valueMatchs.length){
-      html += '<div class="sec-hdr s-val" style="margin-top:16px;">ALERTES VALUE</div>';
-      html += '<div class="cards-list">'+valueMatchs.map(buildCard).join('')+'</div>';
-    }
-
-    // RESTE
-    if(rest.length){
-      html += '<div class="sec-hdr s-rest" style="margin-top:16px;">RESTE DU JOUR — '+rest.length+' MATCHS</div>';
-      // Dossier si > 4
-      if(rest.length > 4){
-        var visible = rest.slice(0,3);
-        var hidden = rest.slice(3);
-        html += '<div class="cards-list">'+visible.map(buildCard).join('')+'</div>';
-        html += '<div class="dossier-wrap"><div class="dossier">'
-          +'<div class="dossier-hdr" onclick="toggleDossier(this)">'
-          +'<div class="dossier-title">VOIR PLUS <span class="dossier-count">+'+hidden.length+' MATCHS</span></div>'
-          +'<div class="dossier-arrow">▾</div></div>'
-          +'<div class="dossier-body"><div class="cards-list">'+hidden.map(buildCard).join('')+'</div></div>'
-          +'</div></div>';
-      } else {
-        html += '<div class="cards-list">'+rest.map(buildCard).join('')+'</div>';
-      }
-    }
-  } else {
-    // Filtre simple — affichage normal
-    html += '<div class="sec-hdr">'+list.length+' MATCH'+(list.length>1?'S':'')+' TROUVÉS</div>';
-    html += '<div class="cards-list">'+list.map(buildCard).join('')+'</div>';
-  }
-
-  el.innerHTML = html;
-}
-
 function setupFilters(){
   document.querySelectorAll('.filter-btn').forEach(function(btn){
     btn.addEventListener('click',function(){
@@ -569,6 +453,79 @@ function buildLeagueBtns(matchs){
       renderMatchs();
     });
   });
+}
+
+// --- NOUVELLE FONCTION : Donne l'heure de Paris en direct ---
+function getParisNowStr() {
+  var d = new Date();
+  var f = new Intl.DateTimeFormat('fr-FR', {
+    timeZone: 'Europe/Paris',
+    year: 'numeric', month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit', hour12: false
+  }).formatToParts(d);
+  var r = {};
+  f.forEach(function(x){ r[x.type] = x.value; });
+  return r.year + '-' + r.month + '-' + r.day + ' ' + r.hour + ':' + r.minute;
+}
+
+// --- FONCTION RENDERMATCHS (ÉPURÉE & CHRONOLOGIQUE) ---
+function renderMatchs() {
+  var list = applyDayFilter(filterMatchs(allMatchs, currentFilter));
+  var isDemain = currentDayFilter === 'tomorrow';
+  var el = document.getElementById('cardsList');
+  
+  if(!list.length){
+    el.innerHTML='<div class="cards-list"><div class="empty-state"><h3>'+(isDemain?'AUCUN MATCH DEMAIN':'AUCUN MATCH TROUVÉ')+'</h3><p>'+(isDemain?'Reviens ce soir pour les analyses de demain.':'Essaie un autre filtre ou reviens demain.')+'</p></div></div>';
+    return;
+  }
+
+  var nowStr = getParisNowStr();
+  var listAvenir = [];
+  var listPasses = [];
+
+  list.forEach(function(m) {
+    if ((m.date||'') < nowStr) {
+      listPasses.push(m);
+    } else {
+      listAvenir.push(m);
+    }
+  });
+
+  listAvenir.sort(function(a,b){ return (a.date||'') < (b.date||'') ? -1:1; });
+  listPasses.sort(function(a,b){ return (a.date||'') < (b.date||'') ? -1:1; });
+
+  var html = '';
+
+  if (currentFilter === 'all') {
+    var activeList = listAvenir.length > 0 ? listAvenir : listPasses;
+    var choc = getChoc(activeList);
+    var rest = activeList.filter(function(m){ return m.id !== choc.id; });
+
+    html += '<div class="sec-hdr s-choc">' + (listAvenir.length === 0 ? 'CHOC (TERMINÉ)' : 'CHOC DU SOIR') + '</div>';
+    html += buildChocCard(choc);
+
+    if(rest.length){
+      html += '<div class="sec-hdr s-rest" style="margin-top:16px;">PROCHAINS MATCHS — '+rest.length+' MATCHS</div>';
+      html += '<div class="cards-list">'+rest.map(buildCard).join('')+'</div>';
+    }
+
+    if(listAvenir.length > 0 && listPasses.length > 0){
+      html += '<div class="sec-hdr" style="margin-top:32px;opacity:0.5;">MATCHS PASSÉS / EN COURS</div>';
+      html += '<div class="cards-list" style="opacity:0.6; filter:grayscale(0.4);">'+listPasses.map(buildCard).join('')+'</div>';
+    }
+
+  } else {
+    if(listAvenir.length > 0){
+      html += '<div class="sec-hdr">'+listAvenir.length+' MATCH'+(listAvenir.length>1?'S':'')+' À VENIR</div>';
+      html += '<div class="cards-list">'+listAvenir.map(buildCard).join('')+'</div>';
+    }
+    if(listPasses.length > 0){
+      html += '<div class="sec-hdr" style="margin-top:24px;opacity:0.5;">'+listPasses.length+' MATCH'+(listPasses.length>1?'S':'')+' PASSÉS</div>';
+      html += '<div class="cards-list" style="opacity:0.6; filter:grayscale(0.4);">'+listPasses.map(buildCard).join('')+'</div>';
+    }
+  }
+
+  el.innerHTML = html;
 }
 
 async function loadData(){

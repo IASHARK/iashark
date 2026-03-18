@@ -47,11 +47,10 @@ function genererScript(match) {
     const edge = match.edge || '';
     const conf = match.conf || '';
     const pari = match.pari_rec || '';
-    const p1 = match.p1 || 0, pn = match.pn || 0, p2 = match.p2 || 0;
 
     const contexte = verdict || facteur ||
       (pari ? 'Scenario ' + pari + ' edge ' + edge + ' confiance ' + conf + '/10' : '') ||
-      homeNom + ' recoit ' + awayNom + ' probas dom ' + p1 + '% nul ' + pn + '% ext ' + p2 + '%';
+      homeNom + ' recoit ' + awayNom;
 
     const prompt = 'Tu es le meilleur analyste data football sur TikTok. Ecris le script vocal d\'une video ultra-courte.\n\n'
       + 'REGLES STRICTES :\n'
@@ -143,33 +142,52 @@ async function run() {
   try {
     if (!fs.existsSync('data.json')) throw new Error('data.json introuvable.');
     const content = JSON.parse(fs.readFileSync('data.json', 'utf8'));
-    const ldcMatchs = (content.matchs || []).filter(function(m){ return m.league_key === 'ldc'; });
-
-    if (!ldcMatchs.length) { console.log('Aucun match LDC aujourd\'hui.'); return; }
-
-    const ldcComplets = ldcMatchs.filter(function(m){ return m.verdict_shark || m.analyse_card || m.conseil_public; });
-    const pool = ldcComplets.length ? ldcComplets : ldcMatchs;
-    const match = pool.sort(function(a, b){ return (b.conf || 0) - (a.conf || 0); })[0];
     
-    console.log('Match Selectionne : ' + match.home.n + ' vs ' + match.away.n);
+    // On filtre tous les matchs LDC
+    const ldcMatchs = (content.matchs || []).filter(m => m.league_key === 'ldc');
 
-    let script = await genererScript(match);
-    script = script.replace(/^[#\*\-].*/gm, '').replace(/\n+/g, ' ').trim();
-    
-    console.log('\n=== SCRIPT CLAUDE ===\n' + script + '\n=====================\n');
-
-    if (!script) throw new Error('Script vide.');
-
-    console.log('Envoi vers Creatomate avec nettoyage des accents...');
-    const res = await envoyerVersCreatomate(match, script);
-    
-    if (res && res[0]) {
-      console.log('Statut Creatomate : ' + res[0].status);
-      if (res[0].url) console.log('Lien de la video : ' + res[0].url);
-      else console.log('ID du rendu : ' + res[0].id);
-    } else {
-      console.log('Erreur retour Creatomate:', JSON.stringify(res, null, 2));
+    if (!ldcMatchs.length) { 
+      console.log('Aucun match LDC aujourd\'hui.'); 
+      return; 
     }
+
+    console.log(`🚀 Demarrage de la creation de ${ldcMatchs.length} videos LDC...`);
+
+    // BOUCLE : Pour chaque match LDC, on fait le processus
+    for (const match of ldcMatchs) {
+      console.log('\n--- TRAITEMENT : ' + match.home.n + ' vs ' + match.away.n + ' ---');
+
+      try {
+        // 1. Generation du script par Claude
+        let script = await genererScript(match);
+        script = script.replace(/^[#\*\-].*/gm, '').replace(/\n+/g, ' ').trim();
+        
+        if (!script) {
+          console.log('⚠️ Script vide pour ce match, on l\'ignore.');
+          continue;
+        }
+
+        console.log('Script genere (extrait) : ' + script.substring(0, 50) + '...');
+
+        // 2. Envoi a Creatomate
+        console.log('Envoi a Creatomate...');
+        const res = await envoyerVersCreatomate(match, script);
+        
+        if (res && res[0]) {
+          console.log('✅ Video lancee ! Statut : ' + res[0].status);
+          if (res[0].url) console.log('🔗 Lien : ' + res[0].url);
+        } else {
+          console.log('❌ Erreur Creatomate pour ce match.');
+        }
+
+      } catch (matchError) {
+        console.error(`❌ Erreur sur le match ${match.home.n} :`, matchError.message);
+      }
+    }
+
+    console.log('\n=========================================');
+    console.log('TERMINE ! Toutes les videos ont ete traitees.');
+
   } catch(err) {
     console.error('Erreur CRITIQUE :', err.message);
     process.exit(1);

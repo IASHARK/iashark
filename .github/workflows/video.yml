@@ -14,9 +14,6 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: '20'
-          
-      - name: Installer les dépendances
-        run: npm install
 
       - name: Lancer la vidéo
         env:

@@ -1,6 +1,7 @@
 const https = require('https');
 const fs = require('fs');
 
+// Fonction pour rendre les noms de clubs plus naturels à l'oral
 function nomNaturel(nom) {
   if (!nom) return '';
   const map = {
@@ -26,6 +27,17 @@ function nomNaturel(nom) {
   return nom;
 }
 
+// Fonction magique pour supprimer les accents et éviter les bugs de la police Bayon
+function nettoyerTexte(texte) {
+  if (!texte) return '';
+  return texte
+    .normalize("NFD")               // Sépare l'accent de la lettre (é -> e + ´)
+    .replace(/[\u0300-\u036f]/g, "") // Supprime les morceaux d'accents
+    .replace(/ç/g, "c")             // Cas particulier du ç
+    .replace(/Ç/g, "C")
+    .toUpperCase();                 // Force tout en MAJUSCULES pour le look "Bayon"
+}
+
 function genererScript(match) {
   return new Promise((resolve) => {
     const homeNom = nomNaturel(match.home.n);
@@ -44,7 +56,7 @@ function genererScript(match) {
     const prompt = 'Tu es le meilleur analyste data football sur TikTok. Ecris le script vocal d\'une video ultra-courte.\n\n'
       + 'REGLES STRICTES :\n'
       + '1. MAXIMUM 35 MOTS. Vital pour tenir en 15 secondes.\n'
-      + '2. Utilise des points de suspension (...) pour forcer l\'IA vocale à faire des pauses naturelles.\n'
+      + '2. Utilise des points de suspension (...) pour les pauses.\n'
       + '3. Utilise UNIQUEMENT "' + homeNom + '" et "' + awayNom + '".\n'
       + '4. ZERO jargon de parieur (bannis cote, bookmaker, ticket). Utilise probabilites, data, scenario.\n'
       + '5. ZERO mention de joueurs ou de buteurs.\n'
@@ -57,7 +69,6 @@ function genererScript(match) {
       + 'Une seule ligne de texte continu. Zero hashtag.';
 
     const body = JSON.stringify({
-      // ✅ RETOUR À TON ANCIEN MODÈLE COMME DEMANDÉ
       model: 'claude-haiku-4-5-20251001', 
       max_tokens: 200,
       messages: [{ role: 'user', content: prompt }]
@@ -89,18 +100,20 @@ function genererScript(match) {
 
 function envoyerVersCreatomate(match, script) {
   return new Promise((resolve) => {
-    const homeNom = nomNaturel(match.home.n);
-    const awayNom = nomNaturel(match.away.n);
+    // Nettoyage des textes avant envoi
+    const scriptNettoye = nettoyerTexte(script);
+    const nomDomNettoye = nettoyerTexte(nomNaturel(match.home.n));
+    const nomExtNettoye = nettoyerTexte(nomNaturel(match.away.n));
+
     const logoHome = 'https://media.api-sports.io/football/teams/' + match.home.id + '.png';
     const logoAway = 'https://media.api-sports.io/football/teams/' + match.away.id + '.png';
 
     const data = JSON.stringify({
-      // ✅ TON NOUVEL ID DE TEMPLATE EST INTÉGRÉ ICI
       template_id: 'f5ff0fec-0cf2-41a2-bc4d-23c94c858b35', 
       modifications: {
-        'VoiceOver_Audio': script, // On envoie le texte, Creatomate fait l'audio avec tes nouveaux réglages !
-        'Equipe_Dom_Nom': homeNom,
-        'Equipe_Ext_Nom': awayNom,
+        'VoiceOver_Audio': scriptNettoye,
+        'Equipe_Dom_Nom': nomDomNettoye,
+        'Equipe_Ext_Nom': nomExtNettoye,
         'Equipe_Dom_Logo': logoHome,
         'Equipe_Ext_Logo': logoAway
       }
@@ -137,15 +150,17 @@ async function run() {
     const ldcComplets = ldcMatchs.filter(function(m){ return m.verdict_shark || m.analyse_card || m.conseil_public; });
     const pool = ldcComplets.length ? ldcComplets : ldcMatchs;
     const match = pool.sort(function(a, b){ return (b.conf || 0) - (a.conf || 0); })[0];
-    console.log('Match : ' + match.home.n + ' vs ' + match.away.n + ' (conf: ' + match.conf + ')');
+    
+    console.log('Match Selectionne : ' + match.home.n + ' vs ' + match.away.n);
 
     let script = await genererScript(match);
     script = script.replace(/^[#\*\-].*/gm, '').replace(/\n+/g, ' ').trim();
+    
     console.log('\n=== SCRIPT CLAUDE ===\n' + script + '\n=====================\n');
 
     if (!script) throw new Error('Script vide.');
 
-    console.log('Envoi vers Creatomate en cours...');
+    console.log('Envoi vers Creatomate avec nettoyage des accents...');
     const res = await envoyerVersCreatomate(match, script);
     
     if (res && res[0]) {

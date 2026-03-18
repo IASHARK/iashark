@@ -1,7 +1,7 @@
 const https = require('https');
 const fs = require('fs');
 
-// Fonction pour rendre les noms de clubs plus naturels à l'oral
+// 1. Rend les noms des clubs naturels pour l'IA (oral)
 function nomNaturel(nom) {
   if (!nom) return '';
   const map = {
@@ -27,45 +27,30 @@ function nomNaturel(nom) {
   return nom;
 }
 
-// Fonction magique pour supprimer les accents et éviter les bugs de la police Bayon
-function nettoyerTexte(texte) {
+// 2. Nettoie les noms pour l'affichage (haut d'écran) pour éviter les bugs de police
+function nettoyerPourAffichage(texte) {
   if (!texte) return '';
-  return texte
-    .normalize("NFD")               // Sépare l'accent de la lettre (é -> e + ´)
-    .replace(/[\u0300-\u036f]/g, "") // Supprime les morceaux d'accents
-    .replace(/ç/g, "c")             // Cas particulier du ç
-    .replace(/Ç/g, "C")
-    .toUpperCase();                 // Force tout en MAJUSCULES pour le look "Bayon"
+  return texte.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/ç/g, "c").replace(/Ç/g, "C").toUpperCase();
 }
 
+// 3. Demande à Claude de générer un script humain avec accents
 function genererScript(match) {
   return new Promise((resolve) => {
     const homeNom = nomNaturel(match.home.n);
     const awayNom = nomNaturel(match.away.n);
-    const verdict = match.verdict_shark || match.analyse_card || match.conseil_public || '';
-    const facteur = match.facteur_x || '';
-    const edge = match.edge || '';
-    const conf = match.conf || '';
-    const pari = match.pari_rec || '';
+    const contexte = match.verdict_shark || match.analyse_card || (homeNom + ' contre ' + awayNom);
 
-    const contexte = verdict || facteur ||
-      (pari ? 'Scenario ' + pari + ' edge ' + edge + ' confiance ' + conf + '/10' : '') ||
-      homeNom + ' recoit ' + awayNom;
-
-    const prompt = 'Tu es le meilleur analyste data football sur TikTok. Ecris le script vocal d\'une video ultra-courte.\n\n'
-      + 'REGLES STRICTES :\n'
-      + '1. MAXIMUM 35 MOTS. Vital pour tenir en 15 secondes.\n'
-      + '2. Utilise des points de suspension (...) pour les pauses.\n'
-      + '3. Utilise UNIQUEMENT "' + homeNom + '" et "' + awayNom + '".\n'
-      + '4. ZERO jargon de parieur (bannis cote, bookmaker, ticket). Utilise probabilites, data, scenario.\n'
-      + '5. ZERO mention de joueurs ou de buteurs.\n'
-      + '6. Ecris les chiffres en lettres.\n'
-      + '7. Commence avec UNE stat choc. Jamais Bonjour. Fini par "Abonne-toi !"\n\n'
-      + 'DONNEES DU MATCH :\n'
-      + '- ' + homeNom + ' recoit ' + awayNom + '\n'
-      + '- Analyse : ' + contexte + '\n'
-      + '- Scenario : ' + pari + '\n\n'
-      + 'Une seule ligne de texte continu. Zero hashtag.';
+    const prompt = `Tu es un analyste foot data. Tu parles de manière naturelle et calme à ton audience.
+    STYLE : Conversationnel, simple, fluide. Pas de cris.
+    REGLES :
+    1. MAXIMUM 35 MOTS (pour tenir en 15 secondes).
+    2. UTILISE LES ACCENTS (é, à, ç) normalement. C'est vital pour la prononciation de l'IA.
+    3. Phrases courtes. Utilise des "..." pour les petites pauses.
+    4. Commence par une stat ou un fait direct.
+    5. Termine par : "Tous les détails sont sur le site. À bientôt."
+    
+    MATCH : ${homeNom} vs ${awayNom}. ANALYSE : ${contexte}.
+    Une seule ligne de texte continu.`;
 
     const body = JSON.stringify({
       model: 'claude-haiku-4-5-20251001', 
@@ -80,8 +65,7 @@ function genererScript(match) {
       headers: {
         'x-api-key': process.env.ANTHROPIC_KEY,
         'anthropic-version': '2023-06-01',
-        'Content-Type': 'application/json',
-        'Content-Length': Buffer.byteLength(body)
+        'Content-Type': 'application/json'
       }
     }, (res) => {
       let data = '';
@@ -91,28 +75,23 @@ function genererScript(match) {
         catch(e) { resolve(''); }
       });
     });
-    req.on('error', () => resolve(''));
     req.write(body);
     req.end();
   });
 }
 
+// 4. Envoie les données à Creatomate (Voix humaine + Noms propres)
 function envoyerVersCreatomate(match, script) {
   return new Promise((resolve) => {
-    // Nettoyage des textes avant envoi
-    const scriptNettoye = nettoyerTexte(script);
-    const nomDomNettoye = nettoyerTexte(nomNaturel(match.home.n));
-    const nomExtNettoye = nettoyerTexte(nomNaturel(match.away.n));
-
     const logoHome = 'https://media.api-sports.io/football/teams/' + match.home.id + '.png';
     const logoAway = 'https://media.api-sports.io/football/teams/' + match.away.id + '.png';
 
     const data = JSON.stringify({
       template_id: 'f5ff0fec-0cf2-41a2-bc4d-23c94c858b35', 
       modifications: {
-        'VoiceOver_Audio': scriptNettoye,
-        'Equipe_Dom_Nom': nomDomNettoye,
-        'Equipe_Ext_Nom': nomExtNettoye,
+        'VoiceOver_Audio': script, // On garde les ACCENTS pour que Donny parle bien !
+        'Equipe_Dom_Nom': nettoyerPourAffichage(nomNaturel(match.home.n)),
+        'Equipe_Ext_Nom': nettoyerPourAffichage(nomNaturel(match.away.n)),
         'Equipe_Dom_Logo': logoHome,
         'Equipe_Ext_Logo': logoAway
       }
@@ -124,72 +103,48 @@ function envoyerVersCreatomate(match, script) {
       method: 'POST',
       headers: {
         'Authorization': 'Bearer ' + process.env.CREATOMATE_KEY,
-        'Content-Type': 'application/json',
-        'Content-Length': Buffer.byteLength(data)
+        'Content-Type': 'application/json'
       }
     }, (res) => {
       let body = '';
       res.on('data', chunk => body += chunk);
       res.on('end', () => { try { resolve(JSON.parse(body)); } catch(e) { resolve(null); } });
     });
-    req.on('error', () => resolve(null));
     req.write(data);
     req.end();
   });
 }
 
+// 5. La boucle principale qui traite tous les matchs LDC
 async function run() {
   try {
     if (!fs.existsSync('data.json')) throw new Error('data.json introuvable.');
     const content = JSON.parse(fs.readFileSync('data.json', 'utf8'));
-    
-    // On filtre tous les matchs LDC
     const ldcMatchs = (content.matchs || []).filter(m => m.league_key === 'ldc');
 
-    if (!ldcMatchs.length) { 
-      console.log('Aucun match LDC aujourd\'hui.'); 
-      return; 
-    }
+    if (!ldcMatchs.length) { console.log('Aucun match LDC aujourd\'hui.'); return; }
 
-    console.log(`🚀 Demarrage de la creation de ${ldcMatchs.length} videos LDC...`);
+    console.log(`🦈 IA SHARK : Lancement de ${ldcMatchs.length} vidéos...`);
 
-    // BOUCLE : Pour chaque match LDC, on fait le processus
     for (const match of ldcMatchs) {
-      console.log('\n--- TRAITEMENT : ' + match.home.n + ' vs ' + match.away.n + ' ---');
+      console.log(`\n--- Match : ${match.home.n} vs ${match.away.n} ---`);
+      
+      let script = await genererScript(match);
+      script = script.replace(/\n+/g, ' ').trim();
+      
+      if (!script) { console.log('⚠️ Script vide, match sauté.'); continue; }
+      
+      console.log('Script (humain) : ' + script);
 
-      try {
-        // 1. Generation du script par Claude
-        let script = await genererScript(match);
-        script = script.replace(/^[#\*\-].*/gm, '').replace(/\n+/g, ' ').trim();
-        
-        if (!script) {
-          console.log('⚠️ Script vide pour ce match, on l\'ignore.');
-          continue;
-        }
-
-        console.log('Script genere (extrait) : ' + script.substring(0, 50) + '...');
-
-        // 2. Envoi a Creatomate
-        console.log('Envoi a Creatomate...');
-        const res = await envoyerVersCreatomate(match, script);
-        
-        if (res && res[0]) {
-          console.log('✅ Video lancee ! Statut : ' + res[0].status);
-          if (res[0].url) console.log('🔗 Lien : ' + res[0].url);
-        } else {
-          console.log('❌ Erreur Creatomate pour ce match.');
-        }
-
-      } catch (matchError) {
-        console.error(`❌ Erreur sur le match ${match.home.n} :`, matchError.message);
+      const res = await envoyerVersCreatomate(match, script);
+      if (res && res[0]) {
+        console.log(`✅ Vidéo envoyée au rendu !`);
+        if (res[0].url) console.log(`🔗 Lien direct : ${res[0].url}`);
       }
     }
-
-    console.log('\n=========================================');
-    console.log('TERMINE ! Toutes les videos ont ete traitees.');
-
+    console.log('\nFinit ! Les vidéos arrivent dans ton dashboard Creatomate.');
   } catch(err) {
-    console.error('Erreur CRITIQUE :', err.message);
+    console.error('Erreur :', err.message);
     process.exit(1);
   }
 }

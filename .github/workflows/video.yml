@@ -14,9 +14,13 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: '20'
+          
+      - name: Installer les dépendances
+        run: npm install
 
       - name: Lancer la vidéo
         env:
-          ANTHROPIC_KEY:  ${{ secrets.ANTHROPIC_KEY }}
+          ANTHROPIC_KEY: ${{ secrets.ANTHROPIC_KEY }}
           CREATOMATE_KEY: ${{ secrets.CREATOMATE_KEY }}
+          ELEVENLABS_KEY: ${{ secrets.ELEVENLABS_KEY }}
         run: node test-video.js

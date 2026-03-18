@@ -41,24 +41,25 @@ function genererScript(match) {
       (pari ? 'Scenario ' + pari + ' edge ' + edge + ' confiance ' + conf + '/10' : '') ||
       homeNom + ' recoit ' + awayNom + ' probas dom ' + p1 + '% nul ' + pn + '% ext ' + p2 + '%';
 
-    const prompt = 'Tu es le meilleur analyste data football sur TikTok. Ecris le script vocal d\'une video de quinze secondes maximum.\n\n'
+    const prompt = 'Tu es le meilleur analyste data football sur TikTok. Ecris le script vocal d\'une video ultra-courte.\n\n'
       + 'REGLES STRICTES :\n'
-      + '1. Utilise UNIQUEMENT "' + homeNom + '" et "' + awayNom + '".\n'
-      + '2. ZERO jargon de parieur : bannis cote, bookmaker, pari, mise, ticket, pronostic. Utilise probabilites, data, scenario, tendance.\n'
-      + '3. ZERO mention de joueurs ou de buteurs.\n'
-      + '4. Ecris les chiffres en lettres. Utilise des points de suspension pour les pauses.\n'
-      + '5. Commence avec UNE stat choc. Jamais Bonjour ou Bienvenue.\n'
-      + '6. Structure : stat choc > pourquoi ce scenario > verdict cash.\n\n'
+      + '1. MAXIMUM 35 MOTS. Vital pour tenir en 15 secondes.\n'
+      + '2. Utilise des points de suspension (...) pour forcer l\'IA vocale à faire des pauses naturelles.\n'
+      + '3. Utilise UNIQUEMENT "' + homeNom + '" et "' + awayNom + '".\n'
+      + '4. ZERO jargon de parieur (bannis cote, bookmaker, ticket). Utilise probabilites, data, scenario.\n'
+      + '5. ZERO mention de joueurs ou de buteurs.\n'
+      + '6. Ecris les chiffres en lettres.\n'
+      + '7. Commence avec UNE stat choc. Jamais Bonjour. Fini par "Abonne-toi !"\n\n'
       + 'DONNEES DU MATCH :\n'
       + '- ' + homeNom + ' recoit ' + awayNom + '\n'
       + '- Analyse : ' + contexte + '\n'
-      + '- Edge : ' + edge + ' — Confiance : ' + conf + ' sur dix\n'
       + '- Scenario : ' + pari + '\n\n'
-      + 'Maximum quarante mots. Zero titre, zero hashtag, zero markdown. Une seule ligne de texte continu.';
+      + 'Une seule ligne de texte continu. Zero hashtag.';
 
     const body = JSON.stringify({
-      model: 'claude-haiku-4-5-20251001',
-      max_tokens: 250,
+      // ✅ RETOUR À TON ANCIEN MODÈLE COMME DEMANDÉ
+      model: 'claude-haiku-4-5-20251001', 
+      max_tokens: 200,
       messages: [{ role: 'user', content: prompt }]
     });
 
@@ -88,15 +89,20 @@ function genererScript(match) {
 
 function envoyerVersCreatomate(match, script) {
   return new Promise((resolve) => {
+    const homeNom = nomNaturel(match.home.n);
+    const awayNom = nomNaturel(match.away.n);
     const logoHome = 'https://media.api-sports.io/football/teams/' + match.home.id + '.png';
     const logoAway = 'https://media.api-sports.io/football/teams/' + match.away.id + '.png';
 
     const data = JSON.stringify({
-      template_id: '00468af0-fdc7-4490-81ad-d56b15f773d1',
+      // ✅ TON NOUVEL ID DE TEMPLATE EST INTÉGRÉ ICI
+      template_id: 'f5ff0fec-0cf2-41a2-bc4d-23c94c858b35', 
       modifications: {
-        'Voix_IA': script,
-        'Logo_Domicile': logoHome,
-        'Logo_Exterieur': logoAway,
+        'VoiceOver_Audio': script, // On envoie le texte, Creatomate fait l'audio avec tes nouveaux réglages !
+        'Equipe_Dom_Nom': homeNom,
+        'Equipe_Ext_Nom': awayNom,
+        'Equipe_Dom_Logo': logoHome,
+        'Equipe_Ext_Logo': logoAway
       }
     });
 
@@ -135,20 +141,22 @@ async function run() {
 
     let script = await genererScript(match);
     script = script.replace(/^[#\*\-].*/gm, '').replace(/\n+/g, ' ').trim();
-    console.log('\n=== SCRIPT ===\n' + script + '\n==============\n');
+    console.log('\n=== SCRIPT CLAUDE ===\n' + script + '\n=====================\n');
 
     if (!script) throw new Error('Script vide.');
 
+    console.log('Envoi vers Creatomate en cours...');
     const res = await envoyerVersCreatomate(match, script);
+    
     if (res && res[0]) {
-      console.log('Statut : ' + res[0].status);
-      if (res[0].url) console.log('Video : ' + res[0].url);
-      else console.log('ID : ' + res[0].id);
+      console.log('Statut Creatomate : ' + res[0].status);
+      if (res[0].url) console.log('Lien de la video : ' + res[0].url);
+      else console.log('ID du rendu : ' + res[0].id);
     } else {
-      console.log(JSON.stringify(res, null, 2));
+      console.log('Erreur retour Creatomate:', JSON.stringify(res, null, 2));
     }
   } catch(err) {
-    console.error('Erreur :', err.message);
+    console.error('Erreur CRITIQUE :', err.message);
     process.exit(1);
   }
 }

@@ -1,7 +1,7 @@
 const https = require('https');
 const fs = require('fs');
 
-// 1. Rend les noms des clubs naturels (On garde ta fonction)
+// 1. Rend les noms des clubs naturels
 function nomNaturel(nom) {
   if (!nom) return '';
   const map = {
@@ -30,13 +30,13 @@ function nomNaturel(nom) {
   return nom;
 }
 
-// 2. Nettoie les noms pour l'affichage (On garde ta fonction)
+// 2. Nettoie les noms pour l'affichage
 function nettoyerPourAffichage(texte) {
   if (!texte) return '';
   return texte.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/ç/g, "c").replace(/Ç/g, "C").toUpperCase();
 }
 
-// 3. Demande à Claude HAIKU de générer les STATS exactes basées sur ton fichier
+// 3. Demande à Claude HAIKU de générer les STATS exactes
 function genererStatsJSON(match) {
   return new Promise((resolve) => {
     const homeNom = nomNaturel(match.home.n);
@@ -48,7 +48,6 @@ function genererStatsJSON(match) {
       scenariosText = match.scenario_15min.map(s => `Tranche ${s.t}: ${s.txt}`).join('\n');
     }
 
-    // Le prompt est modifié : on demande à Claude de sortir un JSON strict avec des chiffres
     const prompt = `Agis comme un analyste data IA. Voici les données et scénarios du match entre ${homeNom} et ${awayNom} :
     Score de base prévu : ${scorePredit}
     Scénarios :
@@ -69,7 +68,7 @@ function genererStatsJSON(match) {
       "cartons_rouges": 0
     }`;
 
-    // On garde EXACTEMENT le modèle que tu m'as demandé
+    // Le modèle exact que tu as demandé
     const body = JSON.stringify({
       model: 'claude-haiku-4-5-20251001', 
       max_tokens: 300,
@@ -95,13 +94,21 @@ function genererStatsJSON(match) {
                 console.log("🚨 ERREUR CLAUDE :", parsed.error.message);
                 resolve(null);
             } else {
-                // On parse le texte de Claude qui doit être un JSON
-                const statsJSON = JSON.parse(parsed.content[0].text);
-                resolve(statsJSON);
+                // Le Nettoyeur
+                let texteClaude = parsed.content[0].text;
+                let extraction = texteClaude.match(/\{[\s\S]*\}/);
+                
+                if (extraction) {
+                    const statsJSON = JSON.parse(extraction[0]);
+                    resolve(statsJSON);
+                } else {
+                    console.log("🚨 ERREUR : Claude n'a pas renvoyé de JSON. Voici ce qu'il a dit :", texteClaude);
+                    resolve(null);
+                }
             }
         }
         catch(e) { 
-            console.log("🚨 ERREUR PARSING CLAUDE : L'IA n'a pas renvoyé un JSON valide.");
+            console.log("🚨 ERREUR PARSING CLAUDE : Le JSON est cassé malgré le nettoyage.", e.message);
             resolve(null); 
         }
       });
@@ -118,23 +125,16 @@ function envoyerVersCreatomateImage(match, stats) {
     const logoAway = 'https://media.api-sports.io/football/teams/' + match.away.id + '.png';
 
     const data = JSON.stringify({
-      template_id: 'c9cdb560-9789-469c-8ba1-3658cb15c50b', // Ton nouveau template IMAGE
+      template_id: 'c9cdb560-9789-469c-8ba1-3658cb15c50b',
       modifications: {
-        // Les Logos et Noms
         'Logo_Domicile': logoHome,
         'Logo_Exterieur': logoAway,
         'Nom_EquipeDom': nettoyerPourAffichage(nomNaturel(match.home.n)),
         'Nom_EquipeExt': nettoyerPourAffichage(nomNaturel(match.away.n)),
-        
-        // Les Scores
         'Score_Prediction_Dom': stats.score_dom.toString(),
         'Score_Prediction_Ext': stats.score_ext.toString(),
-
-        // Les Textes
         'Prediction_Buts25': stats.plus_de_25_buts ? "+ 2.5 BUTS" : "- 2.5 BUTS",
         'Prediction_BTTS': stats.btts ? "OUI" : "NON",
-
-        // LES CHIFFRES PURS
         'Prediction_TirsTotaux': stats.tirs_totaux.toString(),
         'Prediction_TirsCadres': stats.tirs_cadres.toString(),
         'Prediction_Corners': stats.corners.toString(),
@@ -167,7 +167,6 @@ async function run() {
     if (!fs.existsSync('data.json')) throw new Error('data.json introuvable.');
     const content = JSON.parse(fs.readFileSync('data.json', 'utf8'));
     
-    // Filtre : Exclure Braga et chercher Lille OU Lyon (On garde ta logique)
     const matchsCibles = (content.matchs || []).filter(m => {
       const home = m.home.n.toLowerCase();
       const away = m.away.n.toLowerCase();
@@ -187,7 +186,6 @@ async function run() {
     for (const match of matchsCibles) {
       console.log(`\n--- Analyse Claude Haiku : ${match.home.n} vs ${match.away.n} ---`);
       
-      // On demande les stats à Claude
       const statsGenerees = await genererStatsJSON(match);
       
       if (!statsGenerees) { 
@@ -197,7 +195,6 @@ async function run() {
       
       console.log('Stats extraites du data.json par Claude :', statsGenerees);
 
-      // On envoie à Creatomate
       const res = await envoyerVersCreatomateImage(match, statsGenerees);
       
       if (res && res[0]) {

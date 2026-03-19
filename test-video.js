@@ -22,7 +22,7 @@ function nettoyerPourAffichage(texte) {
   return texte.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase();
 }
 
-// 3. Le Cerveau IA
+// 3. Le Cerveau IA (35 secondes + Données 15-15)
 function genererScript(match) {
   return new Promise((resolve) => {
     const homeNom = nomNaturel(match.home.n);
@@ -61,8 +61,7 @@ function genererScript(match) {
       path: '/v1/messages',
       method: 'POST',
       headers: {
-        // ⚠️ REMPLACE 'sk-ant-...' PAR TA VRAIE CLÉ CI-DESSOUS :
-        'x-api-key': process.env.ANTHROPIC_KEY || 'sk-ant-api03-METS_TA_CLE_ICI', 
+        'x-api-key': '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', 
         'anthropic-version': '2023-06-01',
         'Content-Type': 'application/json'
       }
@@ -72,6 +71,7 @@ function genererScript(match) {
       res.on('end', () => {
         try {
           const parsed = JSON.parse(data);
+          if (parsed.error) console.log("🚨 ERREUR CLAUDE :", parsed.error.message);
           resolve((parsed.content && parsed.content[0]) ? parsed.content[0].text : '');
         } catch(e) { resolve(''); }
       });
@@ -85,7 +85,7 @@ function genererScript(match) {
 function envoyerVersCreatomate(match, script) {
   return new Promise((resolve) => {
     const payload = JSON.stringify({
-      template_id: 'f5ff0fec-0cf2-41a2-bc4d-23c94c858b35', // ID déjà mis à jour !
+      template_id: 'f5ff0fec-0cf2-41a2-bc4d-23c94c858b35', 
       modifications: {
         'Hook_Texte': "SIMULATION TERMINÉE ⏳",
         'VoiceOver_Audio': script,
@@ -126,7 +126,7 @@ async function run() {
 
     const script = await genererScript(match);
     if (!script) {
-        console.log("❌ Le script est vide. Vérifie ta clé API Anthropic à la ligne 58.");
+        console.log("❌ Le script est vide. Vérifie ton compte Anthropic.");
         return;
     }
     console.log(`\n🗣️ SCRIPT GÉNÉRÉ :\n${script}`);

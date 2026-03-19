@@ -22,5 +22,6 @@ jobs:
       - name: Lancement du script de génération d'images
         run: node generate_tiktok_images.js
         env:
-          CREATOMATE_API_KEY: ${{ secrets.CREATOMATE_API_KEY }}
-          API_SPORTS_KEY: ${{ secrets.API_SPORTS_KEY }}
+          # Noms EXACTS attendus par ton fichier generate_tiktok_images.js
+          CREATOMATE_KEY: ${{ secrets.CREATOMATE_KEY }}
+          ANTHROPIC_KEY: ${{ secrets.ANTHROPIC_KEY }}

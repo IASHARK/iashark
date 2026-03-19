@@ -1,14 +1,13 @@
 const https = require('https');
 const fs = require('fs');
 
-// 1. Noms naturels pour l'oral
+// 1. Rend les noms des clubs naturels pour l'IA (oral)
 function nomNaturel(nom) {
   if (!nom) return '';
   const map = {
     'Bayern München': 'le Bayern', 'Real Madrid': 'le Real', 'Manchester City': 'City',
     'Paris Saint Germain': 'le PSG', 'Atletico Madrid': "l'Atlético", 'Inter Milan': "l'Inter",
-    'AC Milan': 'le Milan', 'Juventus': 'la Juve', 'FC Barcelona': 'le Barça',
-    'SC Braga': 'Braga', 'Ferencvarosi TC': 'Ferencvaros'
+    'FC Barcelona': 'le Barça', 'SC Braga': 'Braga', 'Ferencvarosi TC': 'Ferencvaros'
   };
   for (const key of Object.keys(map)) {
     if (nom.toLowerCase().includes(key.toLowerCase())) return map[key];
@@ -16,43 +15,39 @@ function nomNaturel(nom) {
   return nom;
 }
 
-// 2. Nettoyage pour l'affichage visuel
+// 2. Nettoie les noms pour l'affichage
 function nettoyerPourAffichage(texte) {
   if (!texte) return '';
-  return texte.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase();
+  return texte.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/ç/g, "c").toUpperCase();
 }
 
-// 3. Le Cerveau IA (35 secondes + Données 15-15)
+// 3. Demande à Claude de générer le script (35 secondes + Scénarios 15min)
 function genererScript(match) {
   return new Promise((resolve) => {
     const homeNom = nomNaturel(match.home.n);
     const awayNom = nomNaturel(match.away.n);
-    const scorePredit = match.score_predit ? match.score_predit.score : "Inconnu";
-    const nomLigue = match.league || "Europa League";
-
-    let scenariosText = "";
-    if (match.scenario_15min) {
-      scenariosText = match.scenario_15min.map(s => 
-        `Tranche ${s.t} | Probabilité: ${s.prob} | Analyse: ${s.txt}`
-      ).join('\n');
-    }
-
-    const prompt = `Tu es l'IA Shark. Écris un script TikTok de 35 secondes (environ 85 mots).
-    COMPÉTITION : ${nomLigue}
-    STRUCTURE STRICTE :
-    1. Hook OBLIGATOIRE : "Dix mille stats analysées. Voici le scénario EXACT du match."
-    2. Intro : Parle du match de ${nomLigue} entre ${homeNom} et ${awayNom}.
-    3. Le Match : Raconte le scénario minute par minute basé sur ces données :
-    ${scenariosText}
-    (Sois percutant, marque les pauses avec des points).
-    4. Score : "Le score prédit par l'algorithme est de : ${scorePredit}."
-    5. Outro OBLIGATOIRE : "Tous les autres matchs sont dispos sur I A SHARK point com."
+    const scorePredit = match.score_predit ? match.score_predit.score : "0-0";
     
-    IMPORTANT : Utilise les accents. Écris les nombres en lettres.`;
+    // On prépare le texte des tranches de 15 minutes pour Claude
+    const scenariosText = (match.scenario_15min || []).map(s => 
+      `Tranche ${s.t} (Intensité ${s.prob}): ${s.txt}`
+    ).join('\n');
+
+    const prompt = `Tu es l'IA Shark. Fais un script de 35 secondes (environ 85 mots).
+    STYLE : Expert, percutant, monte en pression.
+    
+    RÈGLES :
+    1. HOOK OBLIGATOIRE : "Dix mille stats analysées. Voici le scénario EXACT du match."
+    2. ANALYSE : Utilise ces données pour détailler le match minute par minute :
+    ${scenariosText}
+    3. SCORE : Annonce le score prédit de ${scorePredit}.
+    4. OUTRO OBLIGATOIRE : "Tous les autres matchs sont dispos sur I A SHARK point com."
+    
+    Utilise les accents normalement. Écris les nombres en lettres. Un seul bloc de texte.`;
 
     const body = JSON.stringify({
-      model: 'claude-3-5-haiku-20241022', 
-      max_tokens: 500,
+      model: 'claude-haiku-4-5-20251001', 
+      max_tokens: 400,
       messages: [{ role: 'user', content: prompt }]
     });
 
@@ -61,7 +56,7 @@ function genererScript(match) {
       path: '/v1/messages',
       method: 'POST',
       headers: {
-        'x-api-key': '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', 
+        'x-api-key': process.env.ANTHROPIC_KEY,
         'anthropic-version': '2023-06-01',
         'Content-Type': 'application/json'
       }
@@ -69,11 +64,8 @@ function genererScript(match) {
       let data = '';
       res.on('data', chunk => data += chunk);
       res.on('end', () => {
-        try {
-          const parsed = JSON.parse(data);
-          if (parsed.error) console.log("🚨 ERREUR CLAUDE :", parsed.error.message);
-          resolve((parsed.content && parsed.content[0]) ? parsed.content[0].text : '');
-        } catch(e) { resolve(''); }
+        try { resolve((JSON.parse(data).content[0] || {}).text || ''); }
+        catch(e) { resolve(''); }
       });
     });
     req.write(body);
@@ -81,13 +73,12 @@ function genererScript(match) {
   });
 }
 
-// 4. Envoi à Creatomate
+// 4. Envoie à Creatomate
 function envoyerVersCreatomate(match, script) {
   return new Promise((resolve) => {
-    const payload = JSON.stringify({
+    const data = JSON.stringify({
       template_id: 'f5ff0fec-0cf2-41a2-bc4d-23c94c858b35', 
       modifications: {
-        'Hook_Texte': "SIMULATION TERMINÉE ⏳",
         'VoiceOver_Audio': script,
         'Equipe_Dom_Nom': nettoyerPourAffichage(nomNaturel(match.home.n)),
         'Equipe_Ext_Nom': nettoyerPourAffichage(nomNaturel(match.away.n)),
@@ -109,33 +100,33 @@ function envoyerVersCreatomate(match, script) {
       res.on('data', chunk => body += chunk);
       res.on('end', () => { try { resolve(JSON.parse(body)); } catch(e) { resolve(null); } });
     });
-    req.write(payload);
+    req.write(data);
     req.end();
   });
 }
 
-// 5. Exécution
+// 5. Run (Filtre Europa League 'el' + Test sur 1 match)
 async function run() {
   try {
     const content = JSON.parse(fs.readFileSync('data.json', 'utf8'));
     const matches = (content.matchs || content).filter(m => m.league_key === 'el');
-    if (!matches.length) { console.log("Aucun match EL trouvé."); return; }
 
-    const match = matches[0];
-    console.log(`\n🦈 TEST EUROPA LEAGUE : ${match.home.n} vs ${match.away.n}`);
+    if (!matches.length) { console.log('Aucun match Europa League trouvé.'); return; }
 
-    const script = await genererScript(match);
-    if (!script) {
-        console.log("❌ Le script est vide. Vérifie ton compte Anthropic.");
-        return;
-    }
-    console.log(`\n🗣️ SCRIPT GÉNÉRÉ :\n${script}`);
+    const match = matches[0]; // On prend le premier pour le test
+    console.log(`\n🚀 TEST EUROPA LEAGUE : ${match.home.n} vs ${match.away.n}`);
+
+    let script = await genererScript(match);
+    script = script.replace(/\n+/g, ' ').trim();
+    
+    if (!script) { console.log('⚠️ Script vide.'); return; }
+    console.log('🗣️ Script généré : ' + script);
 
     const res = await envoyerVersCreatomate(match, script);
-    console.log(`\n✅ Réponse Creatomate :`, JSON.stringify(res));
+    console.log(`✅ Envoyé ! Lien :`, JSON.stringify(res));
 
   } catch(err) {
-    console.error('❌ ERREUR :', err.message);
+    console.error('Erreur :', err.message);
   }
 }
 

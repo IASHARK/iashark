@@ -20,7 +20,10 @@ function nomNaturel(nom) {
     'Tottenham Hotspur': 'Tottenham', 'Newcastle United': 'Newcastle',
     'Galatasaray': 'Galatasaray', 'Fenerbahce': 'Fener', 'Fenerbahçe': 'Fener',
     'Chapecoense-sc': 'Chapecoense', 'Racing Club': 'Racing',
-    'SC Braga': 'Braga', 'Ferencvarosi TC': 'Ferencvaros'
+    'SC Braga': 'Braga', 'Ferencvarosi TC': 'Ferencvaros',
+    // Ajouts pour ce soir
+    'LOSC Lille': 'Lille', 'LOSC': 'Lille',
+    'Olympique Lyonnais': 'Lyon', 'Olympique Lyon': 'Lyon'
   };
   for (const key of Object.keys(map)) {
     if (nom.toLowerCase().includes(key.toLowerCase())) return map[key];
@@ -46,13 +49,21 @@ function genererScript(match) {
       scenariosText = match.scenario_15min.map(s => `Tranche ${s.t}: ${s.txt}`).join('\n');
     }
 
-    const prompt = `Tu es l'IA Shark. Fais un script de 35 secondes (environ 85 mots).
-    HOOK OBLIGATOIRE : "10 000 stats analysées. Voici le scénario EXACT du match."
-    ANALYSE : Détaille le match de ${match.league || "Europa League"} entre ${homeNom} et ${awayNom} avec ces données minute par minute :
+    const prompt = `Agis comme l'IA Shark. Rédige UNIQUEMENT le texte à prononcer pour une voix off.
+    LONGUEUR IMPÉRATIVE : Le texte doit durer 40 secondes MAXIMUM à l'oral (environ 90 à 100 mots). Sois concis.
+    RÈGLE ABSOLUE : Ne mets aucun titre, aucune introduction du type "Voici le script". Commence directement par le Hook.
+
+    HOOK : Invente une phrase d'accroche très percutante pour lancer la vidéo ! Utilise des points d'exclamation pour obliger la voix off à mettre un maximum d'énergie !
+    
+    ANALYSE : Détaille de manière fluide le match de ${match.league || "Europa League"} entre ${homeNom} et ${awayNom} avec ces données minute par minute :
     ${scenariosText}
-    SCORE : "Le score prédit est de : ${scorePredit}."
-    OUTRO : "Tous les autres matchs sont dispos sur I A SHARK point com."
-    Utilise les accents normalement. Écris les nombres en lettres.`;
+    
+    SCORE : Enchaîne avec : "Le score prédit est de : ${scorePredit}."
+    OUTRO OBLIGATOIRE (dernière phrase exacte) : "Tous les autres matchs sont dispos sur I A SHARK point com."
+    
+    CONTRAINTES DE FORMAT : 
+    - Écris ABSOLUMENT TOUS les nombres en toutes lettres (ex: "quarante-cinquième").
+    - Fais un texte fluide et naturel à l'oral, sans puces ni tirets.`;
 
     const body = JSON.stringify({
       model: 'claude-haiku-4-5-20251001', 
@@ -126,26 +137,43 @@ async function run() {
   try {
     if (!fs.existsSync('data.json')) throw new Error('data.json introuvable.');
     const content = JSON.parse(fs.readFileSync('data.json', 'utf8'));
-    const matchsEL = (content.matchs || []).filter(m => m.league_key === 'el');
-
-    if (!matchsEL.length) { console.log('Aucun match EL aujourd\'hui.'); return; }
-
-    console.log(`🦈 IA SHARK : Lancement...`);
-
-    const match = matchsEL[0];
-    console.log(`\n--- Match : ${match.home.n} vs ${match.away.n} ---`);
     
-    let script = await genererScript(match);
-    script = script.replace(/\n+/g, ' ').trim();
-    
-    if (!script) { console.log('⚠️ Script vide.'); return; }
-    
-    console.log('Script (humain) : ' + script);
+    // Filtre : Exclure Braga et chercher Lille OU Lyon
+    const matchsCibles = (content.matchs || []).filter(m => {
+      const home = m.home.n.toLowerCase();
+      const away = m.away.n.toLowerCase();
+      
+      if (home.includes('braga') || away.includes('braga')) return false;
+      return home.includes('lille') || away.includes('lille') || 
+             home.includes('lyon') || away.includes('lyon');
+    });
 
-    const res = await envoyerVersCreatomate(match, script);
-    if (res && res[0]) {
-      console.log(`✅ Vidéo envoyée au rendu !`);
-      if (res[0].url) console.log(`🔗 Lien direct : ${res[0].url}`);
+    if (!matchsCibles.length) { 
+        console.log('Aucun match de Lille ou Lyon trouvé dans data.json.'); 
+        return; 
+    }
+
+    console.log(`🦈 IA SHARK : Lancement pour ${matchsCibles.length} match(s) ciblé(s)...`);
+
+    // On traite tous les matchs trouvés (Lille et/ou Lyon)
+    for (const match of matchsCibles) {
+      console.log(`\n--- Match : ${match.home.n} vs ${match.away.n} ---`);
+      
+      let script = await genererScript(match);
+      script = script.replace(/\n+/g, ' ').trim();
+      
+      if (!script) { 
+        console.log('⚠️ Script vide pour ce match.'); 
+        continue; 
+      }
+      
+      console.log('Script (généré) : \n' + script);
+
+      const res = await envoyerVersCreatomate(match, script);
+      if (res && res[0]) {
+        console.log(`✅ Vidéo envoyée au rendu pour ${match.home.n} vs ${match.away.n} !`);
+        if (res[0].url) console.log(`🔗 Lien direct : ${res[0].url}`);
+      }
     }
   } catch(err) {
     console.error('Erreur :', err.message);

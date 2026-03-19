@@ -22,7 +22,7 @@ function nettoyerPourAffichage(texte) {
   return texte.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase();
 }
 
-// 3. Le Cerveau IA (35 secondes + Données 15-15)
+// 3. Le Cerveau IA
 function genererScript(match) {
   return new Promise((resolve) => {
     const homeNom = nomNaturel(match.home.n);
@@ -61,7 +61,8 @@ function genererScript(match) {
       path: '/v1/messages',
       method: 'POST',
       headers: {
-        'x-api-key': process.env.ANTHROPIC_KEY,
+        // ⚠️ REMPLACE 'sk-ant-...' PAR TA VRAIE CLÉ CI-DESSOUS :
+        'x-api-key': process.env.ANTHROPIC_KEY || 'sk-ant-api03-METS_TA_CLE_ICI', 
         'anthropic-version': '2023-06-01',
         'Content-Type': 'application/json'
       }
@@ -80,11 +81,11 @@ function genererScript(match) {
   });
 }
 
-// 4. Envoi à Creatomate avec TON ID TEMPLATE
+// 4. Envoi à Creatomate
 function envoyerVersCreatomate(match, script) {
   return new Promise((resolve) => {
     const payload = JSON.stringify({
-      template_id: 'f5ff0fec-0cf2-41a2-bc4d-23c94c858b35', // ID Mis à jour !
+      template_id: 'f5ff0fec-0cf2-41a2-bc4d-23c94c858b35', // ID déjà mis à jour !
       modifications: {
         'Hook_Texte': "SIMULATION TERMINÉE ⏳",
         'VoiceOver_Audio': script,
@@ -113,7 +114,7 @@ function envoyerVersCreatomate(match, script) {
   });
 }
 
-// 5. Run (Test sur Braga vs Ferencvaros)
+// 5. Exécution
 async function run() {
   try {
     const content = JSON.parse(fs.readFileSync('data.json', 'utf8'));
@@ -125,7 +126,7 @@ async function run() {
 
     const script = await genererScript(match);
     if (!script) {
-        console.log("❌ Le script est encore vide. Vérifie ton ANTHROPIC_KEY.");
+        console.log("❌ Le script est vide. Vérifie ta clé API Anthropic à la ligne 58.");
         return;
     }
     console.log(`\n🗣️ SCRIPT GÉNÉRÉ :\n${script}`);

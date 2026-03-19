@@ -19,13 +19,8 @@ jobs:
         with:
           node-version: '18'
 
-      - name: Installation des dépendances
-        run: npm install
-
       - name: Lancement du script de génération d'images
-        # Appelle exactement le nom de ton nouveau fichier à la racine
         run: node generate_tiktok_images.js
         env:
-          # Tes clés secrètes déjà configurées sur GitHub
           CREATOMATE_API_KEY: ${{ secrets.CREATOMATE_API_KEY }}
           API_SPORTS_KEY: ${{ secrets.API_SPORTS_KEY }}

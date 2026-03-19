@@ -1,13 +1,13 @@
 const https = require('https');
 const fs = require('fs');
 
-// 1. Rend les noms des clubs naturels pour l'IA (oral)
 function nomNaturel(nom) {
   if (!nom) return '';
   const map = {
     'Bayern München': 'le Bayern', 'Real Madrid': 'le Real', 'Manchester City': 'City',
     'Paris Saint Germain': 'le PSG', 'Atletico Madrid': "l'Atlético", 'Inter Milan': "l'Inter",
-    'FC Barcelona': 'le Barça', 'SC Braga': 'Braga', 'Ferencvarosi TC': 'Ferencvaros'
+    'AC Milan': 'le Milan', 'Juventus': 'la Juve', 'FC Barcelona': 'le Barça',
+    'SC Braga': 'Braga', 'Ferencvarosi TC': 'Ferencvaros'
   };
   for (const key of Object.keys(map)) {
     if (nom.toLowerCase().includes(key.toLowerCase())) return map[key];
@@ -15,38 +15,29 @@ function nomNaturel(nom) {
   return nom;
 }
 
-// 2. Nettoie les noms pour l'affichage
 function nettoyerPourAffichage(texte) {
   if (!texte) return '';
   return texte.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/ç/g, "c").toUpperCase();
 }
 
-// 3. Demande à Claude de générer le script (35 secondes + Scénarios 15min)
 function genererScript(match) {
   return new Promise((resolve) => {
     const homeNom = nomNaturel(match.home.n);
     const awayNom = nomNaturel(match.away.n);
-    const scorePredit = match.score_predit ? match.score_predit.score : "0-0";
+    const scorePredit = match.score_predit ? match.score_predit.score : "Inconnu";
     
-    // On prépare le texte des tranches de 15 minutes pour Claude
-    const scenariosText = (match.scenario_15min || []).map(s => 
-      `Tranche ${s.t} (Intensité ${s.prob}): ${s.txt}`
-    ).join('\n');
+    // On prend tes données 15min
+    const scenariosText = (match.scenario_15min || []).map(s => `Tranche ${s.t}: ${s.txt}`).join('\n');
 
     const prompt = `Tu es l'IA Shark. Fais un script de 35 secondes (environ 85 mots).
-    STYLE : Expert, percutant, monte en pression.
-    
-    RÈGLES :
-    1. HOOK OBLIGATOIRE : "Dix mille stats analysées. Voici le scénario EXACT du match."
-    2. ANALYSE : Utilise ces données pour détailler le match minute par minute :
-    ${scenariosText}
-    3. SCORE : Annonce le score prédit de ${scorePredit}.
-    4. OUTRO OBLIGATOIRE : "Tous les autres matchs sont dispos sur I A SHARK point com."
-    
-    Utilise les accents normalement. Écris les nombres en lettres. Un seul bloc de texte.`;
+    HOOK : "Dix mille stats analysées. Voici le scénario EXACT du match."
+    ANALYSE : Détaille le match de ${match.league} entre ${homeNom} et ${awayNom} avec ces données : ${scenariosText}. Fais monter la pression.
+    SCORE : "Le score prédit est de : ${scorePredit}."
+    OUTRO : "Tous les autres matchs sont dispos sur I A SHARK point com."
+    Utilise les accents, écris les nombres en lettres.`;
 
     const body = JSON.stringify({
-      model: 'claude-haiku-4-5-20251001', 
+      model: 'claude-3-5-haiku-20241022', 
       max_tokens: 400,
       messages: [{ role: 'user', content: prompt }]
     });
@@ -56,7 +47,7 @@ function genererScript(match) {
       path: '/v1/messages',
       method: 'POST',
       headers: {
-        'x-api-key': process.env.ANTHROPIC_KEY,
+        'x-api-key': process.env.ANTHROPIC_KEY, // <-- C'EST REVENU COMME AVANT
         'anthropic-version': '2023-06-01',
         'Content-Type': 'application/json'
       }
@@ -64,7 +55,11 @@ function genererScript(match) {
       let data = '';
       res.on('data', chunk => data += chunk);
       res.on('end', () => {
-        try { resolve((JSON.parse(data).content[0] || {}).text || ''); }
+        try { 
+            const parsed = JSON.parse(data);
+            if(parsed.error) console.log("🚨 ERREUR CLAUDE :", parsed.error.message);
+            resolve((parsed.content && parsed.content[0]) ? parsed.content[0].text : ''); 
+        }
         catch(e) { resolve(''); }
       });
     });
@@ -73,7 +68,6 @@ function genererScript(match) {
   });
 }
 
-// 4. Envoie à Creatomate
 function envoyerVersCreatomate(match, script) {
   return new Promise((resolve) => {
     const data = JSON.stringify({
@@ -92,7 +86,7 @@ function envoyerVersCreatomate(match, script) {
       path: '/v1/renders',
       method: 'POST',
       headers: {
-        'Authorization': 'Bearer ' + process.env.CREATOMATE_KEY,
+        'Authorization': 'Bearer ' + process.env.CREATOMATE_KEY, // <-- COMME AVANT
         'Content-Type': 'application/json'
       }
     }, (res) => {
@@ -105,23 +99,19 @@ function envoyerVersCreatomate(match, script) {
   });
 }
 
-// 5. Run (Filtre Europa League 'el' + Test sur 1 match)
 async function run() {
   try {
     const content = JSON.parse(fs.readFileSync('data.json', 'utf8'));
     const matches = (content.matchs || content).filter(m => m.league_key === 'el');
-
-    if (!matches.length) { console.log('Aucun match Europa League trouvé.'); return; }
-
-    const match = matches[0]; // On prend le premier pour le test
-    console.log(`\n🚀 TEST EUROPA LEAGUE : ${match.home.n} vs ${match.away.n}`);
+    if (!matches.length) return;
+    
+    const match = matches[0];
+    console.log(`\n🦈 TEST EUROPA LEAGUE : ${match.home.n} vs ${match.away.n}`);
 
     let script = await genererScript(match);
-    script = script.replace(/\n+/g, ' ').trim();
+    if (!script) { console.log('⚠️ Erreur script vide.'); return; }
     
-    if (!script) { console.log('⚠️ Script vide.'); return; }
-    console.log('🗣️ Script généré : ' + script);
-
+    console.log('🗣️ Script : ' + script);
     const res = await envoyerVersCreatomate(match, script);
     console.log(`✅ Envoyé ! Lien :`, JSON.stringify(res));
 

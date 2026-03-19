@@ -1,0 +1,31 @@
+name: Generate IA Shark TikTok Images
+
+# Tourne tous les jours à 12h00, et bouton manuel disponible
+on:
+  schedule:
+    - cron: '0 12 * * *' 
+  workflow_dispatch: 
+
+jobs:
+  generate_tiktok_images:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout du code
+        uses: actions/checkout@v3
+
+      - name: Installation de Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Installation des dépendances
+        run: npm install
+
+      - name: Lancement du script de génération d'images
+        # Appelle exactement le nom de ton nouveau fichier à la racine
+        run: node generate_tiktok_images.js
+        env:
+          # Tes clés secrètes déjà configurées sur GitHub
+          CREATOMATE_API_KEY: ${{ secrets.CREATOMATE_API_KEY }}
+          API_SPORTS_KEY: ${{ secrets.API_SPORTS_KEY }}

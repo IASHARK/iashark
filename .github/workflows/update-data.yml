@@ -1074,8 +1074,8 @@ jobs:
             var bttsNonCondition = failHpct >= 35 || failApct >= 35;
 
             // ── PRÉ-CALCUL score central Poisson (fix #5 — pas de biais narratif de Claude) ──
-            var poissonScoreH = Math.round(lambdas ? (d.poisson_lambdaH||1.2) : 1.2);
-            var poissonScoreA = Math.round(lambdas ? (d.poisson_lambdaA||1.0) : 1.0);
+            var poissonScoreH = Math.round(d.poisson_lambdaH||1.2);
+            var poissonScoreA = Math.round(d.poisson_lambdaA||1.0);
             var scoreCentral = poissonScoreH + '-' + poissonScoreA;
 
             var prompt =

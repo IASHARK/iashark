@@ -1162,30 +1162,43 @@ jobs:
               +'kelly = (edge_decimal * (cote-1) - (1-edge_decimal)) / (cote-1) * 0.25 * 100, max 5%\n\n'
 
               +'Réponds UNIQUEMENT avec ce JSON valide. Aucun texte avant ou après. Aucun backtick.\n'
+              +'RÈGLE ABSOLUE : Les champs de CONTENU (analyse_card, conseil, contexte, facteur_x, scenario, scenario_15min) doivent TOUJOURS être remplis même si passe_ton_tour = true. Ce contenu enrichit la page match pour l\'utilisateur même sans pari.\n\n'
               +'{\n'
               +'"passe_ton_tour": false,\n'
-              +'"confiance": [7.0 à 8.5 selon convergence des signaux, ou 0 si passe_ton_tour],\n'
+              +'"confiance": [7.0 à 8.5 selon convergence, ou 0 si passe_ton_tour],\n'
               +'"pari_rec": "[DC 1X | DC X2 | Over 2.5 | BTTS Non] ou vide si passe_ton_tour",\n'
-              +'"cote_rec": "[COPIE EXACTE de la cote dans le tableau ci-dessus pour ce marché — pas d\'arrondi, pas d\'invention]",\n'
+              +'"cote_rec": "[COPIE EXACTE de la cote dans le tableau ci-dessus — pas d\'arrondi ni d\'invention]",\n'
               +'"marche": "[DOUBLE_CHANCE | TOTAL_BUTS | BTTS] ou vide si passe_ton_tour",\n'
               +'"risque": "[FAIBLE | MODERE | ELEVE]",\n'
-              +'"verdict_shark": "[pari_rec] à [cote_rec] — [raison factuelle en 1 phrase, basée sur 1 stat précise]",\n'
-              +'"analyse_card": "[2-3 phrases sur les forces/faiblesses des deux équipes qui justifient CE pari]",\n'
-              +'"conseil": "[2-3 phrases simples pour l\'utilisateur, sans jargon, qui expliquent pourquoi ce pari]",\n'
-              +'"contexte": "[1-2 phrases sur la situation classement des équipes]",\n'
-              +'"facteur_x": "[1 seul facteur décisif parmi : xG / ELO / absence confirmée / série en cours / Pinnacle signal]",\n'
+              +'"verdict_shark": "[pari] à [cote] — [1 phrase factuelle] ou vide si passe_ton_tour",\n'
+              +'"analyse_card": "[TOUJOURS REMPLI — 2-3 phrases sur forces/faiblesses des deux équipes pour ce match]",\n'
+              +'"conseil": "[TOUJOURS REMPLI — 2-3 phrases simples pour l\'utilisateur sur ce match, sans jargon]",\n'
+              +'"contexte": "[TOUJOURS REMPLI — 1-2 phrases sur la situation classement des deux équipes]",\n'
+              +'"facteur_x": "[TOUJOURS REMPLI — 1 seul facteur clé : xG / ELO / absence / enjeu / série]",\n'
               +'"score_central": "'+scoreCentral+'",\n'
               +'"p1": '+d.poisson_p1+', "pn": '+d.poisson_pN+', "p2": '+d.poisson_p2+',\n'
               +'"po25": '+d.poisson_over25+', "btts": '+d.poisson_bttsY+',\n'
-              +'"edge": "[calcule : ta_prob_estimée - 1/cote_rec, exprime en +X%]",\n'
+              +'"edge": "[ta_prob_estimée - 1/cote_rec en %, ou 0% si passe_ton_tour]",\n'
               +'"vbet": "[OUI si edge>=5% ET conf>=7.0 ET passe_ton_tour=false, sinon NON]",\n'
-              +'"kelly": "[calcule le 1/4 Kelly en %, max 5%, ou 0 si pas de value]",\n'
-              +'"scenario": {"phase1": "0-30min: [comment le match démarre]", "phase2": "30-70min: [évolution]", "phase3": "70-90min: [fin de match]"}\n'
+              +'"kelly": "[1/4 Kelly en %, max 5%, ou 0 si pas de value]",\n'
+              +'"scenario": {\n'
+              +'"phase1": "[TOUJOURS REMPLI — 0-30min : comment le match démarre tactiquement]",\n'
+              +'"phase2": "[TOUJOURS REMPLI — 30-70min : comment le match évolue]",\n'
+              +'"phase3": "[TOUJOURS REMPLI — 70-90min : comment le match se termine]"\n'
+              +'},\n'
+              +'"scenario_15min": [\n'
+              +'  {"t":"0-15min","prob":8,"txt":"[TOUJOURS REMPLI — contexte tactique du début, pressing, mise en place]"},\n'
+              +'  {"t":"15-30min","prob":12,"txt":"[TOUJOURS REMPLI — première vraie phase, qui domine et pourquoi]"},\n'
+              +'  {"t":"30-45min","prob":10,"txt":"[TOUJOURS REMPLI — fin de première mi-temps, fatigue, occasions]"},\n'
+              +'  {"t":"45-60min","prob":15,"txt":"[TOUJOURS REMPLI — début deuxième mi-temps, ajustements tactiques]"},\n'
+              +'  {"t":"60-75min","prob":18,"txt":"[TOUJOURS REMPLI — phase décisive, substitutions, momentum]"},\n'
+              +'  {"t":"75-90min","prob":20,"txt":"[TOUJOURS REMPLI — fin de match, gestion du score, derniers assauts]"}\n'
+              +']\n'
               +'}';
 
             var r = await postJSONWithRetry('api.anthropic.com', '/v1/messages', {
               model: 'claude-sonnet-4-6',
-              max_tokens: 1500,
+              max_tokens: 2500,
               // FIX #6 — System prompt séparé pour stabiliser le comportement
               system: 'Tu es IASHARK, un système d\'analyse statistique de football. Tu réponds EXCLUSIVEMENT en JSON valide. Aucun backtick, aucun texte avant ou après le JSON. Tu n\'inventes jamais de statistiques. Tu es factuel, neutre, calibré. Quand les données sont insuffisantes, tu passes ton tour plutôt que de forcer une prédiction.',
               messages: [{role:'user', content:prompt}]
@@ -1690,21 +1703,20 @@ jobs:
               });
               await sleep(500);
 
-              // FIX #3 — Appliquer passe_ton_tour : vider les champs analytiques si Claude passe
+              // FIX #3 — Appliquer passe_ton_tour : vider UNIQUEMENT les champs de pari
+              // Les champs de contenu (analyse_card, conseil, scenario, etc.) restent intacts pour la page match
               if (an && an.passe_ton_tour === true) {
-                console.log('  \u23ed PASS: '+home.name+' vs '+away.name+' — pas de signal suffisant');
+                console.log('  \u23ed PASS: '+home.name+' vs '+away.name+' — pas de signal suffisant, page enrichie sans pari');
                 an.pari_rec = '';
                 an.cote_rec = '';
                 an.confiance = 0;
                 an.vbet = 'NON';
                 an.verdict_shark = '';
-                an.analyse_card = '';
-                an.conseil = '';
-                an.facteur_x = '';
                 an.edge = '';
                 an.kelly = '0';
                 an.marche = '';
                 an.risque = 'ELEVE';
+                // analyse_card, conseil, contexte, facteur_x, scenario, scenario_15min : CONSERVÉS
               }
 
               (function(){
@@ -1783,9 +1795,12 @@ jobs:
                 marche:an?(an.marche||'RESULTAT'):'RESULTAT',
                 risque:risqueNorm,
                 pari_rec:an?(an.pari_rec||''):'',
+                no_signal: an&&an.passe_ton_tour===true ? true : !(an&&an.pari_rec),
+                no_signal_label: (an&&an.passe_ton_tour===true)||(!(an&&an.pari_rec)) ? 'Aucun signal clair sur ce match' : '',
                 mise:'2-3% bankroll',
                 verdict_shark:an?(an.verdict_shark||''):'',
                 scenario:an?(an.scenario||{phase1:'',phase2:'',phase3:''}):null,
+                scenario_15min:an?(an.scenario_15min||null):null,
                 facteur_x:an?(an.facteur_x||''):'',
                 analyse_card:an?(an.analyse_card||an.conseil||''):'',
                 conseil_public:an?(an.conseil||an.analyse_card||''):'',

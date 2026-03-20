@@ -12870,8 +12870,8 @@
         "all"
       ],
       "val": false,
-      "hot": false,
-      "conf": 7.2,
+      "hot": true,
+      "conf": 7.5,
       "p1": 33,
       "pn": 23,
       "p2": 44,
@@ -12945,7 +12945,7 @@
       "risque": "ELEVE",
       "pari_rec": "DC X2",
       "mise": "2-3% bankroll",
-      "verdict_shark": "",
+      "verdict_shark": "passe_ton_tour forcé car DC X2 à 1.36 est hors fourchette 1.60-2.20",
       "scenario": {
         "phase1": "",
         "phase2": "",
@@ -12974,8 +12974,8 @@
         "nom": "Amex Stadium — Brighton",
         "cap": "",
         "meteo": "☁️",
-        "temp": "4°C",
-        "desc": "couvert"
+        "temp": "9°C",
+        "desc": "nuageux"
       },
       "crit_home": {
         "fd": 40,
@@ -13182,7 +13182,7 @@
         },
         "away": {
           "val": 100,
-          "info": "Dernier match il y a 1j — 4 match(s) en 14j"
+          "info": "Dernier match il y a 2j — 4 match(s) en 14j"
         }
       },
       "fatigue_home": {
@@ -13191,7 +13191,7 @@
       },
       "fatigue_away": {
         "val": 100,
-        "info": "Dernier match il y a 1j — 4 match(s) en 14j"
+        "info": "Dernier match il y a 2j — 4 match(s) en 14j"
       },
       "tendances": {
         "over25_home": 2,
@@ -13371,32 +13371,7 @@
           "form": "DLWWW"
         }
       },
-      "actu": [
-        {
-          "c": "Brighton",
-          "t": "Chelsea vs. Brighton, Women’s Super League: Confirmed lineups; how to watch",
-          "tx": "League action",
-          "tm": "2026-03-18"
-        },
-        {
-          "c": "Brighton",
-          "t": "Ligue des champions : Pour Mohamed Salah, une campagne qui sent la fin de parcours avec Liverpool",
-          "tx": "Et si Mohamed Salah disputait son dernier match européen avec Liverpool ?",
-          "tm": "2026-03-18"
-        },
-        {
-          "c": "Liverpool",
-          "t": "Ligue des champions: \"Je ne vois pas comment Liverpool peut inquiéter le PSG\", Riolo très confiant pour les quarts de finale",
-          "tx": "Battu à l’aller en Turquie, Liverpool a renversé Galatasaray ce mercredi à Anfield (4-0, 4-1 en cumulé) et défiera le Paris Saint-Germain lors des quarts de finale de la Ligue des champions. Dans l’émission l’After Foot sur RMC, Daniel Riolo a expliqué pourqu…",
-          "tm": "2026-03-19"
-        },
-        {
-          "c": "Liverpool",
-          "t": "Sale soirée pour Noa Lang: le Néerlandais opéré d'urgence à Liverpool après s'être coupé un doigt sur un panneau publicitaire",
-          "tx": "Le Néerlandais ne gardera pas un bon souvenir de son déplacement à Liverpool. ...",
-          "tm": "2026-03-19"
-        }
-      ],
+      "actu": [],
       "arbitre": null,
       "odds_movement": null,
       "events_home": {
@@ -13607,10 +13582,10 @@
           "rating": "6.98"
         }
       ],
-      "elo_home": null,
-      "elo_away": null,
-      "elo_diff": null,
-      "elo_signal": null,
+      "elo_home": 1830,
+      "elo_away": 1932,
+      "elo_diff": -102,
+      "elo_signal": "FORT",
       "dropping_odds": null,
       "pinnacle_snapshot": null
     },
@@ -14328,13 +14303,13 @@
       ],
       "val": false,
       "hot": false,
-      "conf": 0,
+      "conf": 7.6,
       "p1": 18,
       "pn": 21,
       "p2": 61,
       "po15": 0,
-      "po25": 0,
-      "btts": 0,
+      "po25": 56,
+      "btts": 53,
       "c1": "4.00",
       "cn": "3.60",
       "c2": "1.85",
@@ -14355,7 +14330,7 @@
           "n": "Betclic",
           "o": "200€ offerts",
           "l": "#LIEN_BETCLIC",
-          "c": "4.00",
+          "c": "1.22",
           "c1": "4.00",
           "cn": "3.60",
           "c2": "1.85"
@@ -14364,7 +14339,7 @@
           "n": "Winamax",
           "o": "100€ offerts",
           "l": "#LIEN_WINAMAX",
-          "c": "3.97",
+          "c": "1.19",
           "c1": "3.97",
           "cn": "3.57",
           "c2": "1.82"
@@ -14373,7 +14348,7 @@
           "n": "Unibet",
           "o": "100€ remboursés",
           "l": "#LIEN_UNIBET",
-          "c": "3.98",
+          "c": "1.20",
           "c1": "3.98",
           "cn": "3.58",
           "c2": "1.83"
@@ -14382,7 +14357,7 @@
           "n": "PMU",
           "o": "100€ offerts",
           "l": "#LIEN_PMU",
-          "c": "3.95",
+          "c": "1.17",
           "c1": "3.95",
           "cn": "3.55",
           "c2": "1.80"
@@ -14391,43 +14366,49 @@
           "n": "Bet365",
           "o": "100€ bonus",
           "l": "#LIEN_BET365",
-          "c": "4.03",
+          "c": "1.25",
           "c1": "4.03",
           "cn": "3.63",
           "c2": "1.88"
         }
       ],
-      "edge": "",
-      "marche": "RESULTAT",
-      "risque": "MODERE",
-      "pari_rec": "",
+      "edge": "La cote 1.22 implique une prob implicite de 82%. Prob IA estimée pour X2 : 82% (61%+21%). Edge = +0%. Cote hors fourchette 1.60-2.20.",
+      "marche": "DOUBLE_CHANCE",
+      "risque": "FAIBLE",
+      "pari_rec": "DC X2",
       "mise": "2-3% bankroll",
-      "verdict_shark": "",
-      "scenario": null,
-      "facteur_x": "",
-      "analyse_card": "",
-      "conseil_public": "",
-      "contexte": "",
+      "verdict_shark": "DC X2 à 1.22 — Middlesbrough (#2) affiche 10 victoires extérieures sur 19 et un xG offensif de 1.9 contre un xGA de 0.77, appuyés par un écart ELO de -121 pts en faveur de Boro",
+      "scenario": {
+        "phase1": "0-30min: Middlesbrough impose son pressing et son jeu de possession, Blackburn défend bas avec peu de transitions offensives.",
+        "phase2": "30-70min: Boro crée les meilleures occasions, leur supériorité technique se manifeste progressivement, risque d'un ou deux buts.",
+        "phase3": "70-90min: Blackburn, sous pression du classement, peut tenter de forcer mais manque de ressources offensives; Middlesbrough gère."
+      },
+      "facteur_x": "ELO",
+      "analyse_card": "Blackburn est 19e avec seulement 4 victoires à domicile sur 19 matchs et un xG offensif domestique limité à 1.15. Middlesbrough présente l'une des meilleures performances extérieures du championnat avec 10 victoires en déplacement, un xG offensif solide à 1.9 et une défense très efficace à 0.77 xGA. L'écart ELO de 121 points est un signal fort qui statistiquement place Blackburn en nette infériorité.",
+      "conseil_public": "Middlesbrough est l'une des meilleures équipes à l'extérieur en Championship cette saison et fait face à une équipe en grande difficulté à domicile. Le pari DC X2 couvre à la fois la victoire de Boro et le nul, ce qui limite le risque. La cote est basse mais le signal est très fiable — c'est un pari de sécurité, pas de valeur.",
+      "contexte": "Blackburn est 19e au classement et lutte pour se maintenir en Championship. Middlesbrough occupe la 2e place et vise une montée directe en Premier League, ce qui renforce sa motivation à prendre des points.",
       "vbet": "NON",
-      "scores": [],
+      "scores": [
+        "1-2"
+      ],
       "paris_3": null,
       "joueur_decisif": null,
       "paris_safe": {
-        "bet": "",
-        "cote": "4.00",
-        "proba": ""
+        "bet": "DC X2",
+        "cote": 1.22,
+        "proba": "18%"
       },
       "paris_risque": {
         "bet": "",
         "cote": "",
         "proba": ""
       },
-      "kelly": null,
+      "kelly": "1.4",
       "stade": {
         "nom": "Ewood Park — Blackburn",
         "cap": "",
         "meteo": "☁️",
-        "temp": "5°C",
+        "temp": "7°C",
         "desc": "couvert"
       },
       "crit_home": {
@@ -14960,32 +14941,7 @@
           "form": "DLWWD"
         }
       },
-      "actu": [
-        {
-          "c": "Blackburn",
-          "t": "Un joueur de Millwall victime de racisme après un carton rouge",
-          "tx": "Encore une fois, des racistes parasitent le football… Le défenseur de Millwall, Zak Sturge, a été victime de racisme sur…",
-          "tm": "2026-03-16"
-        },
-        {
-          "c": "Blackburn",
-          "t": "Onur Cinel, un boulimique du foot qui se partage entre le Cercle et l’Autriche",
-          "tx": "Mis sur la sellette par le Cercle, Cinel est toujours bien là et partage son temps entre Bruges et l’Autriche où il est assistant. ...",
-          "tm": "2026-03-15"
-        },
-        {
-          "c": "Middlesbrough",
-          "t": "PSG-Chelsea: \"Roy Keane faisait probablement ça 20 fois par match\", Rosenior défend Enzo Fernandez après sa soufflante sur Jorgensen",
-          "tx": "Deux jours après la défaite de Chelsea face au PSG en huitième de finale aller de la Ligue des champions, l’entraîneur des Blues Liam Rosenior est revenu sur le moment de tension entre Enzo Fernandez et son gardien Filip Jorgensen en fin de rencontre. Le coac…",
-          "tm": "2026-03-13"
-        },
-        {
-          "c": "Middlesbrough",
-          "t": "Thomas Meunier vient de franchir le cap des 500 matchs parmi l’élite : “Mourinho me voulait à Tottenham ; à refaire, je ferais un autre choix”",
-          "tx": "En montant au jeu contre Lorient dimanche, Thomas Meunier a disputé son 500e match en club, parmi l’élite. Un 501e s’est ajouté jeudi, face à Aston Villa. L’occasion d’un coup d’œil dans le rétro. ...",
-          "tm": "2026-03-13"
-        }
-      ],
+      "actu": [],
       "arbitre": null,
       "odds_movement": null,
       "events_home": {
@@ -15196,10 +15152,10 @@
           "rating": "6.77"
         }
       ],
-      "elo_home": null,
-      "elo_away": null,
-      "elo_diff": null,
-      "elo_signal": null,
+      "elo_home": 1466,
+      "elo_away": 1587,
+      "elo_diff": -121,
+      "elo_signal": "FORT",
       "dropping_odds": null,
       "pinnacle_snapshot": null
     },
@@ -15223,13 +15179,13 @@
       ],
       "val": false,
       "hot": false,
-      "conf": 0,
+      "conf": 7.2,
       "p1": 48,
       "pn": 26,
       "p2": 26,
       "po15": 0,
-      "po25": 0,
-      "btts": 0,
+      "po25": 46,
+      "btts": 50,
       "c1": "2.73",
       "cn": "3.27",
       "c2": "2.51",
@@ -15250,7 +15206,7 @@
           "n": "Betclic",
           "o": "200€ offerts",
           "l": "#LIEN_BETCLIC",
-          "c": "2.73",
+          "c": "1.93",
           "c1": "2.73",
           "cn": "3.27",
           "c2": "2.51"
@@ -15259,7 +15215,7 @@
           "n": "Winamax",
           "o": "100€ offerts",
           "l": "#LIEN_WINAMAX",
-          "c": "2.70",
+          "c": "1.90",
           "c1": "2.70",
           "cn": "3.24",
           "c2": "2.48"
@@ -15268,7 +15224,7 @@
           "n": "Unibet",
           "o": "100€ remboursés",
           "l": "#LIEN_UNIBET",
-          "c": "2.71",
+          "c": "1.91",
           "c1": "2.71",
           "cn": "3.25",
           "c2": "2.49"
@@ -15277,7 +15233,7 @@
           "n": "PMU",
           "o": "100€ offerts",
           "l": "#LIEN_PMU",
-          "c": "2.68",
+          "c": "1.88",
           "c1": "2.68",
           "cn": "3.22",
           "c2": "2.46"
@@ -15286,35 +15242,37 @@
           "n": "Bet365",
           "o": "100€ bonus",
           "l": "#LIEN_BET365",
-          "c": "2.76",
+          "c": "1.96",
           "c1": "2.76",
           "cn": "3.30",
           "c2": "2.54"
         }
       ],
-      "edge": "",
-      "marche": "RESULTAT",
-      "risque": "ELEVE",
-      "pari_rec": "",
+      "edge": "La prob Poisson donne 46%, ma prob IA estimée est 50% (Derby marque 95% matchs dom, Birmingham clean sheet seulement 3/19 ext) → prob implicite cote 1.93 = 52% → edge = -2%",
+      "marche": "TOTAL_BUTS",
+      "risque": "MODERE",
+      "pari_rec": "Over 2.5",
       "mise": "2-3% bankroll",
-      "verdict_shark": "",
+      "verdict_shark": "Over 2.5 à 1.93 — Derby ne reste sans marquer que 5% de ses matchs à domicile et Birmingham concède en moyenne 1.15 xG offensifs par match",
       "scenario": {
-        "phase1": "",
-        "phase2": "",
-        "phase3": ""
+        "phase1": "0-30min: Derby impose son jeu à domicile, cherche à exploiter les espaces laissés par un Birmingham en manque de ressources offensives. Pression dominante mais prudence défensive adverse.",
+        "phase2": "30-70min: Derby marque sur phase de jeu offensive (xG favorable), Birmingham tente de répondre en contre mais peine à convertir ses rares occasions extérieures (42% matchs sans marquer).",
+        "phase3": "70-90min: L'équipe qui mène gère, mais une réduction du score ou un but tardif est probable vu que Birmingham ne reste clean sheet que 3 fois sur 19 à l'extérieur. Score final autour de 2-1."
       },
-      "facteur_x": "",
-      "analyse_card": "",
-      "conseil_public": "",
-      "contexte": "",
+      "facteur_x": "xG",
+      "analyse_card": "Derby est une équipe prolifique à domicile (seulement 1 match sans marquer sur 19) avec un xG offensif de 1.43, signal solide d'une équipe qui crée régulièrement. Birmingham à l'extérieur laisse passer des buts (xGA 0.83 mais clean sheet seulement 3/19) et reste muet dans 42% de ses matchs, ce qui favorise un match déséquilibré où Derby marque au moins une fois. Les absences nombreuses côté Derby (8 joueurs) pèsent mais Birmingham est aussi diminué, ce qui réduit l'impact relatif.",
+      "conseil_public": "Derby marque presque à chaque match chez lui (95% du temps), et Birmingham encaisse régulièrement à l'extérieur. Un match à 3+ buts est plausible, surtout que les deux équipes ont des xG combinés de 2.56 par match. La cote de 1.93 représente une légère valeur par rapport au modèle Poisson qui donne 46% pour Over 2.5.",
+      "contexte": "Derby (#8) et Birmingham (#10) sont deux équipes de milieu de tableau en Championship, séparées de seulement 40 points ELO, signal faible. L'enjeu est modéré mais les deux équipes cherchent à se rapprocher du top 6.",
       "vbet": "NON",
-      "scores": [],
+      "scores": [
+        "2-1"
+      ],
       "paris_3": null,
       "joueur_decisif": null,
       "paris_safe": {
-        "bet": "",
-        "cote": "2.73",
-        "proba": "0%"
+        "bet": "Over 2.5",
+        "cote": 1.93,
+        "proba": "48%"
       },
       "paris_risque": {
         "bet": "",
@@ -15325,9 +15283,9 @@
       "stade": {
         "nom": "Pride Park — Derby",
         "cap": "",
-        "meteo": "☁️",
-        "temp": "4°C",
-        "desc": "couvert"
+        "meteo": "🌤️",
+        "temp": "7°C",
+        "desc": "brume sèche"
       },
       "crit_home": {
         "fd": 37,
@@ -15544,7 +15502,7 @@
       "fatigue": {
         "home": {
           "val": 90,
-          "info": "Dernier match il y a 3j — 3 match(s) en 14j"
+          "info": "Dernier match il y a 4j — 3 match(s) en 14j"
         },
         "away": {
           "val": 70,
@@ -15553,7 +15511,7 @@
       },
       "fatigue_home": {
         "val": 90,
-        "info": "Dernier match il y a 3j — 3 match(s) en 14j"
+        "info": "Dernier match il y a 4j — 3 match(s) en 14j"
       },
       "fatigue_away": {
         "val": 70,
@@ -15677,32 +15635,7 @@
           "form": "DWLLL"
         }
       },
-      "actu": [
-        {
-          "c": "Derby",
-          "t": "Volley-ball (play-off Ligue dames): Tchalou file en demi-finale !",
-          "tx": "C'est dans une salle enflammée que ce derby s'est soldé par la victoire de Tchalou. Cette équipe affrontera donc Astérix Beveren en demi-finale ! ...",
-          "tm": "2026-03-18"
-        },
-        {
-          "c": "Derby",
-          "t": "Futsal| Toujours plus de jeunesse à la Squadra Mouscron qui a lancé deux gamins de quinze ans: \"Thiago et Younes montraient de belles choses avec les jeunes\"",
-          "tx": "De la large victoire des Hurlus du côté de Jette (1-8), il y avait bien plus à retenir que la troisième victoire en déplacement. Car dans le noyau mouscronnois, on retrouvait deux gamins, Younes Ouazrhari et Thiago Depreux, qui viennent de fêter leurs quinze …",
-          "tm": "2026-03-18"
-        },
-        {
-          "c": "Birmingham",
-          "t": "L’essentiel à retenir avant de découvrir Peaky Blinders : L’Immortel",
-          "tx": "Avant de découvrir Peaky Blinders: The Immortal Man, il est essentiel de se remémorer les événements marquants de la série, les évolutions des personnages et les intrigues principales qui ont façonné l’univers des Shelby.",
-          "tm": "2026-03-17"
-        },
-        {
-          "c": "Birmingham",
-          "t": "Après le “Nafigate”, Rutger Smith fait son retour : le Néerlandais va accompagner les athlètes belges aux Mondiaux en salle de Torun",
-          "tx": "Le coordinateur flamand du Haut niveau est demeuré en poste malgré la rupture de confiance qui a émaillé la saison dernière. ...",
-          "tm": "2026-03-16"
-        }
-      ],
+      "actu": [],
       "arbitre": null,
       "odds_movement": null,
       "events_home": {
@@ -15913,10 +15846,10 @@
           "rating": "6.73"
         }
       ],
-      "elo_home": null,
-      "elo_away": null,
-      "elo_diff": null,
-      "elo_signal": null,
+      "elo_home": 1523,
+      "elo_away": 1483,
+      "elo_diff": 40,
+      "elo_signal": "FAIBLE",
       "dropping_odds": null,
       "pinnacle_snapshot": null
     },
@@ -15940,7 +15873,7 @@
       ],
       "val": false,
       "hot": false,
-      "conf": 0,
+      "conf": 7.2,
       "p1": 25,
       "pn": 24,
       "p2": 51,
@@ -15967,7 +15900,7 @@
           "n": "Betclic",
           "o": "200€ offerts",
           "l": "#LIEN_BETCLIC",
-          "c": "2.70",
+          "c": "1.43",
           "c1": "2.70",
           "cn": "3.25",
           "c2": "2.50"
@@ -15976,7 +15909,7 @@
           "n": "Winamax",
           "o": "100€ offerts",
           "l": "#LIEN_WINAMAX",
-          "c": "2.67",
+          "c": "1.40",
           "c1": "2.67",
           "cn": "3.22",
           "c2": "2.47"
@@ -15985,7 +15918,7 @@
           "n": "Unibet",
           "o": "100€ remboursés",
           "l": "#LIEN_UNIBET",
-          "c": "2.68",
+          "c": "1.41",
           "c1": "2.68",
           "cn": "3.23",
           "c2": "2.48"
@@ -15994,7 +15927,7 @@
           "n": "PMU",
           "o": "100€ offerts",
           "l": "#LIEN_PMU",
-          "c": "2.65",
+          "c": "1.38",
           "c1": "2.65",
           "cn": "3.20",
           "c2": "2.45"
@@ -16003,16 +15936,16 @@
           "n": "Bet365",
           "o": "100€ bonus",
           "l": "#LIEN_BET365",
-          "c": "2.73",
+          "c": "1.46",
           "c1": "2.73",
           "cn": "3.28",
           "c2": "2.53"
         }
       ],
       "edge": "",
-      "marche": "RESULTAT",
+      "marche": "DOUBLE_CHANCE",
       "risque": "ELEVE",
-      "pari_rec": "",
+      "pari_rec": "DC X2",
       "mise": "2-3% bankroll",
       "verdict_shark": "",
       "scenario": {
@@ -16029,8 +15962,8 @@
       "paris_3": null,
       "joueur_decisif": null,
       "paris_safe": {
-        "bet": "",
-        "cote": "2.70",
+        "bet": "DC X2",
+        "cote": 1.43,
         "proba": "0%"
       },
       "paris_risque": {
@@ -16043,7 +15976,7 @@
         "nom": "Stade de Roudourou — Guingamp",
         "cap": "",
         "meteo": "☁️",
-        "temp": "5°C",
+        "temp": "7°C",
         "desc": "couvert"
       },
       "crit_home": {
@@ -16352,32 +16285,7 @@
           "form": "LDDDD"
         }
       },
-      "actu": [
-        {
-          "c": "Guingamp",
-          "t": "\"On sait qu'il y a des facteurs environnementaux\" : la Bretagne, l'Occitanie et l'Auvergne plus touchées par la maladie de Charcot que les autres",
-          "tx": "Si la fréquence de cette maladie rare reste stable depuis une dizaine d’années, ces trois régions semblent plus touchées que les autres, avec des zones de \"surrisque\".",
-          "tm": "2026-03-18"
-        },
-        {
-          "c": "Guingamp",
-          "t": "Le Mans sur le podium, Montpellier toujours dans la course, Bastia, Laval, Nancy et Clermont peuvent s’inquiéter",
-          "tx": "Et si la remontée de l’année venait de Montpellier ? Vainqueur de Laval (2-0) grâce à deux buts de Théo…",
-          "tm": "2026-03-13"
-        },
-        {
-          "c": "Reims",
-          "t": "Liverpool: \"Un bon test pour moi et l'équipe\", Ekitike lance le choc face au PSG",
-          "tx": "Interrogé sur Canal+ après la qualification de Liverpool pour les quarts de finale de Ligue des champions, l'attaquant des Reds Hugo Ekitike se dit prêt à affronter son ancienne équipe, le PSG.",
-          "tm": "2026-03-18"
-        },
-        {
-          "c": "Reims",
-          "t": "\"L'union des droites est inéluctable, elle avance\", assure Éric Ciotti, candidat à la mairie de Nice",
-          "tx": "Arrivé en tête du premier tour des élections municipales à Nice, Éric Ciotti, patron de l'Union des droites pour la République (UDR), réagit dans le \"20 Heures\" du mercredi 18 mars à la prise de position des Républicains, son ancien parti, et réaffirme sa vol…",
-          "tm": "2026-03-18"
-        }
-      ],
+      "actu": [],
       "arbitre": null,
       "odds_movement": null,
       "events_home": {
@@ -16588,10 +16496,10 @@
           "rating": "6.68"
         }
       ],
-      "elo_home": null,
-      "elo_away": null,
-      "elo_diff": null,
-      "elo_signal": null,
+      "elo_home": 1443,
+      "elo_away": 1537,
+      "elo_diff": -93,
+      "elo_signal": "MODÉRÉ",
       "dropping_odds": null,
       "pinnacle_snapshot": null
     },
@@ -18767,10 +18675,10 @@
       "btts": 0,
       "c1": "1.17",
       "cn": "8.00",
-      "c2": "14.04",
+      "c2": "14.02",
       "co15": "1.08",
       "co25": "1.30",
-      "cu25": "3.33",
+      "cu25": "3.27",
       "dc1x": "1.03",
       "dc2x": "5.00",
       "dc12": "1.08",
@@ -18788,7 +18696,7 @@
           "c": "1.17",
           "c1": "1.17",
           "cn": "8.00",
-          "c2": "14.04"
+          "c2": "14.02"
         },
         {
           "n": "Winamax",
@@ -18797,7 +18705,7 @@
           "c": "1.14",
           "c1": "1.14",
           "cn": "7.97",
-          "c2": "14.01"
+          "c2": "13.99"
         },
         {
           "n": "Unibet",
@@ -18806,7 +18714,7 @@
           "c": "1.15",
           "c1": "1.15",
           "cn": "7.98",
-          "c2": "14.02"
+          "c2": "14.00"
         },
         {
           "n": "PMU",
@@ -18815,7 +18723,7 @@
           "c": "1.12",
           "c1": "1.12",
           "cn": "7.95",
-          "c2": "13.99"
+          "c2": "13.97"
         },
         {
           "n": "Bet365",
@@ -18824,7 +18732,7 @@
           "c": "1.20",
           "c1": "1.20",
           "cn": "8.03",
-          "c2": "14.07"
+          "c2": "14.05"
         }
       ],
       "edge": "",
@@ -18861,8 +18769,8 @@
         "nom": "Allianz Arena — Munich",
         "cap": "",
         "meteo": "☁️",
-        "temp": "1°C",
-        "desc": "partiellement nuageux"
+        "temp": "5°C",
+        "desc": "nuageux"
       },
       "crit_home": {
         "fd": 85,
@@ -19100,7 +19008,7 @@
       "fatigue": {
         "home": {
           "val": 100,
-          "info": "Dernier match il y a 1j — 4 match(s) en 14j"
+          "info": "Dernier match il y a 2j — 4 match(s) en 14j"
         },
         "away": {
           "val": 50,
@@ -19109,7 +19017,7 @@
       },
       "fatigue_home": {
         "val": 100,
-        "info": "Dernier match il y a 1j — 4 match(s) en 14j"
+        "info": "Dernier match il y a 2j — 4 match(s) en 14j"
       },
       "fatigue_away": {
         "val": 50,
@@ -19281,20 +19189,7 @@
           "form": "WLLWL"
         }
       },
-      "actu": [
-        {
-          "c": "Union Berlin",
-          "t": ":: Il y a 60 ans Osendé Afana,docteur en économie a été tué et décapité par les français",
-          "tx": "Il y a 60 ans, Osendé Afana, premier docteur en économie en Afrique\nNoire Francophone et militant de l&#039;UPC, a été capturé, tué et\ndécapité à l&#039;âge de 36 ans. So...",
-          "tm": "2026-03-16"
-        },
-        {
-          "c": "Union Berlin",
-          "t": "L’administration étudie un poste de travail sous Linux, une circulaire prône l’open source quand «c’est pertinent»",
-          "tx": "La Dinum étudie le développement d’un poste de travail sous GNU/Linux. Sébastien Lecornu a publié le 5 février une circulaire qui «recommande de privilégier, lorsque c’est pertinent, le recours à des produits open source».",
-          "tm": "2026-03-15"
-        }
-      ],
+      "actu": [],
       "arbitre": null,
       "odds_movement": null,
       "events_home": {
@@ -19506,7 +19401,7 @@
         }
       ],
       "elo_home": null,
-      "elo_away": null,
+      "elo_away": 1613,
       "elo_diff": null,
       "elo_signal": null,
       "dropping_odds": null,
@@ -19530,15 +19425,15 @@
       "cat": [
         "all"
       ],
-      "val": false,
+      "val": true,
       "hot": false,
-      "conf": 0,
+      "conf": 7.1,
       "p1": 35,
       "pn": 22,
       "p2": 44,
       "po15": 0,
-      "po25": 0,
-      "btts": 0,
+      "po25": 71,
+      "btts": 71,
       "c1": "2.32",
       "cn": "3.60",
       "c2": "2.82",
@@ -19559,7 +19454,7 @@
           "n": "Betclic",
           "o": "200€ offerts",
           "l": "#LIEN_BETCLIC",
-          "c": "2.32",
+          "c": "1.72",
           "c1": "2.32",
           "cn": "3.60",
           "c2": "2.82"
@@ -19568,7 +19463,7 @@
           "n": "Winamax",
           "o": "100€ offerts",
           "l": "#LIEN_WINAMAX",
-          "c": "2.29",
+          "c": "1.69",
           "c1": "2.29",
           "cn": "3.57",
           "c2": "2.79"
@@ -19577,7 +19472,7 @@
           "n": "Unibet",
           "o": "100€ remboursés",
           "l": "#LIEN_UNIBET",
-          "c": "2.30",
+          "c": "1.70",
           "c1": "2.30",
           "cn": "3.58",
           "c2": "2.80"
@@ -19586,7 +19481,7 @@
           "n": "PMU",
           "o": "100€ offerts",
           "l": "#LIEN_PMU",
-          "c": "2.27",
+          "c": "1.67",
           "c1": "2.27",
           "cn": "3.55",
           "c2": "2.77"
@@ -19595,35 +19490,37 @@
           "n": "Bet365",
           "o": "100€ bonus",
           "l": "#LIEN_BET365",
-          "c": "2.35",
+          "c": "1.75",
           "c1": "2.35",
           "cn": "3.63",
           "c2": "2.85"
         }
       ],
-      "edge": "",
-      "marche": "RESULTAT",
-      "risque": "ELEVE",
-      "pari_rec": "",
+      "edge": "+12.8%",
+      "marche": "TOTAL_BUTS",
+      "risque": "MODERE",
+      "pari_rec": "Over 2.5",
       "mise": "2-3% bankroll",
-      "verdict_shark": "",
+      "verdict_shark": "Over 2.5 à 1.72 — Wolfsburg encaisse sur 100% de ses matchs à domicile (0 clean sheet sur 13) avec un xGA de 1.98, face à une équipe de Brême à 1.52 xG offensif.",
       "scenario": {
-        "phase1": "",
-        "phase2": "",
-        "phase3": ""
+        "phase1": "0-30min: Wolfsburg sous pression dès le coup d'envoi, tenté de presser haut pour exister dans ce match décisif. Brême défend en bloc compact mais cherche la transition rapide grâce à son xG offensif.",
+        "phase2": "30-70min: La défense de Wolfsburg commence à craquer sous la pression combinée de l'urgence classement et de ses lacunes structurelles. Au moins un but probable de chaque côté dans cette tranche, les absences nombreuses dans les deux équipes fragilisant les blocs défensifs.",
+        "phase3": "70-90min: Wolfsburg en difficulté psychologique (DLLLD), risque de se désunir en fin de match. Brême peut punir sur transition. Le scénario 2+ buts au total est très probable dès la 70e minute."
       },
-      "facteur_x": "",
-      "analyse_card": "",
-      "conseil_public": "",
-      "contexte": "",
-      "vbet": "NON",
-      "scores": [],
+      "facteur_x": "xG",
+      "analyse_card": "Wolfsburg est la pire défense à domicile de l'analyse : zéro clean sheet en 13 matchs, xGA de 1.98 signalant une défense structurellement poreuse, et une forme catastrophique (DLLLD). Brême dispose du meilleur xG offensif des deux équipes (1.52) et arrive en confiance relative (LWWLL). Le modèle Poisson converge fortement avec un Over 2.5 à 71%, reflétant les deux profils offensifs viables face à des défenses fragilisées des deux côtés.",
+      "conseil_public": "Ce pari mise sur des buts dans un match entre deux équipes qui ont du mal à ne pas en encaisser. Wolfsburg n'a pas gardé son but une seule fois à domicile cette saison, et Brême attaque bien en déplacement. Les deux équipes luttent contre la relégation, ce qui peut pousser à l'attaque plutôt qu'à la prudence.",
+      "contexte": "Wolfsburg est 17e (zone de relégation directe) et Brême 15e, les deux dans la zone rouge. Un match à enjeu symétrique pour la survie, mais sans signal qui annule la tendance aux buts — la pression peut libérer l'attaque des deux côtés.",
+      "vbet": "OUI",
+      "scores": [
+        "2-2"
+      ],
       "paris_3": null,
       "joueur_decisif": null,
       "paris_safe": {
-        "bet": "",
-        "cote": "2.32",
-        "proba": "0%"
+        "bet": "Over 2.5",
+        "cote": 1.72,
+        "proba": "35%"
       },
       "paris_risque": {
         "bet": "",
@@ -19635,7 +19532,7 @@
         "nom": "Volkswagen Arena — Wolfsburg",
         "cap": "",
         "meteo": "☁️",
-        "temp": "5°C",
+        "temp": "9°C",
         "desc": "nuageux"
       },
       "crit_home": {
@@ -20009,20 +19906,7 @@
           "form": "LWWLL"
         }
       },
-      "actu": [
-        {
-          "c": "VfL Wolfsburg",
-          "t": "Dieter Hecking arrive au chevet de Wolfsburg",
-          "tx": "Danse avec les Loups, saison 2. La réaction ne s’est pas fait attendre. Battu à domicile par Hambourg…",
-          "tm": "2026-03-08"
-        },
-        {
-          "c": "VfL Wolfsburg",
-          "t": "Bundesliga : Leipzig se fait peur, Wolfsburg s’enfonce dans la crise",
-          "tx": "Après le nouveau triomphe du Bayern ce vendredi soir face à Mönchengladbach et en attendant le Topspiel entre…",
-          "tm": "2026-03-07"
-        }
-      ],
+      "actu": [],
       "arbitre": null,
       "odds_movement": null,
       "events_home": {
@@ -20233,7 +20117,7 @@
           "rating": "6.63"
         }
       ],
-      "elo_home": null,
+      "elo_home": 1587,
       "elo_away": null,
       "elo_diff": null,
       "elo_signal": null,
@@ -20260,13 +20144,13 @@
       ],
       "val": false,
       "hot": false,
-      "conf": 7.2,
+      "conf": 0,
       "p1": 15,
       "pn": 16,
       "p2": 69,
       "po15": 0,
-      "po25": 79,
-      "btts": 70,
+      "po25": 0,
+      "btts": 0,
       "c1": "5.14",
       "cn": "4.35",
       "c2": "1.57",
@@ -20287,7 +20171,7 @@
           "n": "Betclic",
           "o": "200€ offerts",
           "l": "#LIEN_BETCLIC",
-          "c": "1.52",
+          "c": "5.14",
           "c1": "5.14",
           "cn": "4.35",
           "c2": "1.57"
@@ -20296,7 +20180,7 @@
           "n": "Winamax",
           "o": "100€ offerts",
           "l": "#LIEN_WINAMAX",
-          "c": "1.49",
+          "c": "5.11",
           "c1": "5.11",
           "cn": "4.32",
           "c2": "1.54"
@@ -20305,7 +20189,7 @@
           "n": "Unibet",
           "o": "100€ remboursés",
           "l": "#LIEN_UNIBET",
-          "c": "1.50",
+          "c": "5.12",
           "c1": "5.12",
           "cn": "4.33",
           "c2": "1.55"
@@ -20314,7 +20198,7 @@
           "n": "PMU",
           "o": "100€ offerts",
           "l": "#LIEN_PMU",
-          "c": "1.47",
+          "c": "5.09",
           "c1": "5.09",
           "cn": "4.30",
           "c2": "1.52"
@@ -20323,16 +20207,16 @@
           "n": "Bet365",
           "o": "100€ bonus",
           "l": "#LIEN_BET365",
-          "c": "1.55",
+          "c": "5.17",
           "c1": "5.17",
           "cn": "4.38",
           "c2": "1.60"
         }
       ],
       "edge": "",
-      "marche": "TOTAL_BUTS",
+      "marche": "RESULTAT",
       "risque": "ELEVE",
-      "pari_rec": "Over 2.5",
+      "pari_rec": "",
       "mise": "2-3% bankroll",
       "verdict_shark": "",
       "scenario": {
@@ -20349,9 +20233,9 @@
       "paris_3": null,
       "joueur_decisif": null,
       "paris_safe": {
-        "bet": "Over 2.5",
-        "cote": 1.52,
-        "proba": "15%"
+        "bet": "",
+        "cote": "5.14",
+        "proba": "0%"
       },
       "paris_risque": {
         "bet": "",
@@ -20363,8 +20247,8 @@
         "nom": "Voith-Arena — Heidenheim",
         "cap": "",
         "meteo": "☁️",
-        "temp": "2°C",
-        "desc": "partiellement nuageux"
+        "temp": "7°C",
+        "desc": "peu nuageux"
       },
       "crit_home": {
         "fd": 15,
@@ -20577,8 +20461,8 @@
           "info": "Dernier match il y a 6j — 2 match(s) en 14j"
         },
         "away": {
-          "val": 100,
-          "info": "Dernier match il y a 2j — 4 match(s) en 14j"
+          "val": 90,
+          "info": "Dernier match il y a 3j — 4 match(s) en 14j"
         }
       },
       "fatigue_home": {
@@ -20586,8 +20470,8 @@
         "info": "Dernier match il y a 6j — 2 match(s) en 14j"
       },
       "fatigue_away": {
-        "val": 100,
-        "info": "Dernier match il y a 2j — 4 match(s) en 14j"
+        "val": 90,
+        "info": "Dernier match il y a 3j — 4 match(s) en 14j"
       },
       "tendances": {
         "over25_home": 7,
@@ -20803,20 +20687,7 @@
           "form": "DDWDL"
         }
       },
-      "actu": [
-        {
-          "c": "Bayer Leverkusen",
-          "t": "Ligue des champions: PSG-Liverpool, Real Madrid-Bayern Munich... Le tableau complet des quarts de finale",
-          "tx": "Les quatre derniers 8es de finale de la Ligue des champions ont livré leur verdict ce mercredi. Après le Paris Saint-Germain, le Real Madrid, le Sporting et Arsenal mardi, on connaît les quatre derniers qualifiés pour les quarts de finale.",
-          "tm": "2026-03-18"
-        },
-        {
-          "c": "Bayer Leverkusen",
-          "t": "Arsenal-Leverkusen: le joli geste de Saliba pour un ramasseur de balles à qui il a fait très peur",
-          "tx": "Après la qualification des Gunners pour les quarts de finale de la Ligue des champions suite au succès contre Leverkusen (2-0) mardi soir, William Saliba est allé donner après le coup de sifflet final l'un de ses maillots à un jeune supporter d'Arsenal.",
-          "tm": "2026-03-18"
-        }
-      ],
+      "actu": [],
       "arbitre": null,
       "odds_movement": null,
       "events_home": {
@@ -21825,7 +21696,7 @@
         "nom": "Etihad Stadium — Manchester",
         "cap": "",
         "meteo": "☁️",
-        "temp": "5°C",
+        "temp": "7°C",
         "desc": "couvert"
       },
       "crit_home": {
@@ -22209,27 +22080,15 @@
       "actu": [
         {
           "c": "Manchester City",
-          "t": "Trossard contre Debast, Courtois retrouve Kompany: voici les affiches des quarts de finale de la Ligue des Champions",
-          "tx": "De belles affiches sont au programme des quarts de finale de la Ligue des Champions. ...",
-          "tm": "2026-03-18"
+          "t": "\"Liga-Premier League: 3-0\", la presse espagnole savoure le sans-faute de ses clubs face aux Anglais",
+          "tx": "La presse espagnole se réjouit d'avoir déjà une équipe assurée de jouer les demi-finales de la Ligue des champions avec une affiche Barça-Atlético en quart. Elle savoure surtout le 3/3 contre les clubs anglais en huitièmes.",
+          "tm": "2026-03-19"
         },
         {
           "c": "Manchester City",
-          "t": "Ligue des champions : PSG-Liverpool, une affiche Real-Bayern, un choc 100% espagnol... Les affiches des quarts de finale",
-          "tx": "Les huitièmes de finale se sont achevés, mercredi soir, avec la qualification de presque tous les favoris à la victoire finale.",
+          "t": "Trossard contre Debast, Courtois retrouve Kompany: voici les affiches des quarts de finale de la Ligue des Champions",
+          "tx": "De belles affiches sont au programme des quarts de finale de la Ligue des Champions. ...",
           "tm": "2026-03-18"
-        },
-        {
-          "c": "Crystal Palace",
-          "t": "Mercato: la folle rumeur qui envoie Olise au Real Madrid... pour 160 millions d'euros",
-          "tx": "Le journal allemand Bild a publié ces derniers jours une rumeur concernant une offre en provenance du Real Madrid avoisinant les 160 millions d’euros pour Michael Olise, joueur dont serait fan le président madrilène: Florentino Pérez.",
-          "tm": "2026-03-16"
-        },
-        {
-          "c": "Crystal Palace",
-          "t": "Haïti ou les Bleus : le dilemme d’Odsonne Édouard, attaquant du RC Lens",
-          "tx": "Haïti aimerait attirer l’attaquant du RC Lens pour le Mondial 2026.",
-          "tm": "2026-03-13"
         }
       ],
       "arbitre": null,
@@ -22443,7 +22302,7 @@
         }
       ],
       "elo_home": null,
-      "elo_away": null,
+      "elo_away": 1785,
       "elo_diff": null,
       "elo_signal": null,
       "dropping_odds": null,
@@ -27546,7 +27405,7 @@
         "nom": "Loftus Road — London",
         "cap": "",
         "meteo": "☁️",
-        "temp": "3°C",
+        "temp": "6°C",
         "desc": "couvert"
       },
       "crit_home": {
@@ -27803,7 +27662,7 @@
         },
         "away": {
           "val": 90,
-          "info": "Dernier match il y a 3j — 3 match(s) en 14j"
+          "info": "Dernier match il y a 4j — 3 match(s) en 14j"
         }
       },
       "fatigue_home": {
@@ -27812,7 +27671,7 @@
       },
       "fatigue_away": {
         "val": 90,
-        "info": "Dernier match il y a 3j — 3 match(s) en 14j"
+        "info": "Dernier match il y a 4j — 3 match(s) en 14j"
       },
       "tendances": {
         "over25_home": 9,
@@ -27956,32 +27815,7 @@
           "form": "LLDLL"
         }
       },
-      "actu": [
-        {
-          "c": "QPR",
-          "t": "Joey Barton arrêté pour avoir tabassé un homme, la victime présumée est grièvement blessée",
-          "tx": "L'ancien footballeur Joey Barton a été inculpé pour agression près d'un club de golf dans le nord-ouest de l'Angleterre, ce mardi. Un homme aurait été grièvement blessé dans l'affaire.",
-          "tm": "2026-03-10"
-        },
-        {
-          "c": "QPR",
-          "t": "Football : L’ancien joueur de l’OM Joey Barton arrêté pour « coups et blessures volontaires »",
-          "tx": "L’ex-milieu de terrain anglais, qui avait effectué une saison à Marseille en 2012-2013, vient d’être inculpé pour une agression près d’un club de golf, dans le nord-ouest de l’Angleterre. La victime se trouve à l’hôpital « dans un état grave »",
-          "tm": "2026-03-10"
-        },
-        {
-          "c": "Portsmouth",
-          "t": "Mafia, naturalisation, guerre contre l’Ukraine… Le roman russe de Nikita Haikin, gardien de 30 ans chez la surprise Bodø/Glimt",
-          "tx": "Son père, qui a dû fuir la Russie, se fait petit, contrairement à Nikita Haikin qui rêve en grand avec Bodø/Glimt.",
-          "tm": "2026-03-17"
-        },
-        {
-          "c": "Portsmouth",
-          "t": "Pourquoi le vendredi 13 a porté malheur aux Templiers et à leur héritage",
-          "tx": "L'ordre des Templiers fut fondé le jour de Noël 1119, incarnant une chevalerie révolutionnaire où les chevaliers vivaient comme des moines, prononçant des vœux de pauvreté et de piété.",
-          "tm": "2026-03-13"
-        }
-      ],
+      "actu": [],
       "arbitre": null,
       "odds_movement": null,
       "events_home": {
@@ -28192,10 +28026,10 @@
           "rating": "6.65"
         }
       ],
-      "elo_home": null,
-      "elo_away": null,
-      "elo_diff": null,
-      "elo_signal": null,
+      "elo_home": 1476,
+      "elo_away": 1458,
+      "elo_diff": 17,
+      "elo_signal": "FAIBLE",
       "dropping_odds": null,
       "pinnacle_snapshot": null
     },
@@ -28224,8 +28058,8 @@
       "pn": 26,
       "p2": 49,
       "po15": 0,
-      "po25": 0,
-      "btts": 0,
+      "po25": 44,
+      "btts": 48,
       "c1": "3.30",
       "cn": "3.34",
       "c2": "2.15",
@@ -28310,7 +28144,7 @@
       "paris_safe": {
         "bet": "DC X2",
         "cote": 1.31,
-        "proba": "0%"
+        "proba": "24%"
       },
       "paris_risque": {
         "bet": "",
@@ -28322,7 +28156,7 @@
         "nom": "The Valley — London",
         "cap": "",
         "meteo": "☁️",
-        "temp": "3°C",
+        "temp": "6°C",
         "desc": "couvert"
       },
       "crit_home": {
@@ -28600,7 +28434,7 @@
         },
         "away": {
           "val": 100,
-          "info": "Dernier match il y a 1j — 4 match(s) en 14j"
+          "info": "Dernier match il y a 2j — 4 match(s) en 14j"
         }
       },
       "fatigue_home": {
@@ -28609,7 +28443,7 @@
       },
       "fatigue_away": {
         "val": 100,
-        "info": "Dernier match il y a 1j — 4 match(s) en 14j"
+        "info": "Dernier match il y a 2j — 4 match(s) en 14j"
       },
       "tendances": {
         "over25_home": 3,
@@ -28777,20 +28611,7 @@
           "form": "LWWWW"
         }
       },
-      "actu": [
-        {
-          "c": "Norwich",
-          "t": "Cet entraîneur belge bien connu dans notre championnat fait sensation en Angleterre",
-          "tx": "Philippe Clément enchaîne les bons résultats et a complètement relancé la saison de son équipe, Norwich City. ...",
-          "tm": "2026-03-15"
-        },
-        {
-          "c": "Norwich",
-          "t": "Santé. Enfants entrés en maternelle en 2020 : le Covid a-t-il eu des effets sur leur comportement ?",
-          "tx": "La pandémie de Covid-19 a entravé la capacité des jeunes enfants à réguler leur comportement, à rester concentrés et à s'adapter à de nouvelles situations. C'est ce qui ressort d’une étude menée par l'Université d'East Anglia, en Angleterre.",
-          "tm": "2026-03-12"
-        }
-      ],
+      "actu": [],
       "arbitre": null,
       "odds_movement": null,
       "events_home": {
@@ -29001,10 +28822,10 @@
           "rating": "6.74"
         }
       ],
-      "elo_home": null,
-      "elo_away": null,
-      "elo_diff": null,
-      "elo_signal": null,
+      "elo_home": 1467,
+      "elo_away": 1536,
+      "elo_diff": -68,
+      "elo_signal": "MODÉRÉ",
       "dropping_odds": null,
       "pinnacle_snapshot": null
     },
@@ -29028,13 +28849,13 @@
       ],
       "val": false,
       "hot": false,
-      "conf": 0,
+      "conf": 7.2,
       "p1": 52,
       "pn": 24,
       "p2": 24,
       "po15": 0,
-      "po25": 0,
-      "btts": 0,
+      "po25": 53,
+      "btts": 54,
       "c1": "1.90",
       "cn": "3.55",
       "c2": "3.80",
@@ -29055,7 +28876,7 @@
           "n": "Betclic",
           "o": "200€ offerts",
           "l": "#LIEN_BETCLIC",
-          "c": "1.90",
+          "c": "1.78",
           "c1": "1.90",
           "cn": "3.55",
           "c2": "3.80"
@@ -29064,7 +28885,7 @@
           "n": "Winamax",
           "o": "100€ offerts",
           "l": "#LIEN_WINAMAX",
-          "c": "1.87",
+          "c": "1.75",
           "c1": "1.87",
           "cn": "3.52",
           "c2": "3.77"
@@ -29073,7 +28894,7 @@
           "n": "Unibet",
           "o": "100€ remboursés",
           "l": "#LIEN_UNIBET",
-          "c": "1.88",
+          "c": "1.76",
           "c1": "1.88",
           "cn": "3.53",
           "c2": "3.78"
@@ -29082,7 +28903,7 @@
           "n": "PMU",
           "o": "100€ offerts",
           "l": "#LIEN_PMU",
-          "c": "1.85",
+          "c": "1.73",
           "c1": "1.85",
           "cn": "3.50",
           "c2": "3.75"
@@ -29091,48 +28912,50 @@
           "n": "Bet365",
           "o": "100€ bonus",
           "l": "#LIEN_BET365",
-          "c": "1.93",
+          "c": "1.81",
           "c1": "1.93",
           "cn": "3.58",
           "c2": "3.83"
         }
       ],
-      "edge": "",
-      "marche": "RESULTAT",
-      "risque": "ELEVE",
-      "pari_rec": "",
+      "edge": "+3.8%",
+      "marche": "TOTAL_BUTS",
+      "risque": "MODERE",
+      "pari_rec": "Over 2.5",
       "mise": "2-3% bankroll",
-      "verdict_shark": "",
+      "verdict_shark": "Over 2.5 à 1.78 — les deux défenses sont en surchauffe (xGA DOM 2.2, xGA EXT 2.09) dans un match à enjeu direct entre deux équipes en zone de relégation",
       "scenario": {
-        "phase1": "",
-        "phase2": "",
-        "phase3": ""
+        "phase1": "0-30min: Match tendu, les deux équipes cherchent le pressing, Kilmarnock tente d'exploiter son avantage à domicile et son xG offensif supérieur (1.52). Premiers xG créés, possibilité d'un but tôt.",
+        "phase2": "30-70min: La défense de Livingston, structurellement fragile, commence à craquer sous la pression. Kilmarnock pousse mais reste exposé en contre. Deux ou trois buts probables sur cette période.",
+        "phase3": "70-90min: La pression de la relégation ouvre le jeu. Livingston, dos au mur en déplacement, risque une tentative désespérée. Le match se termine probablement sur 3+ buts cumulés."
       },
-      "facteur_x": "",
-      "analyse_card": "",
-      "conseil_public": "",
-      "contexte": "",
+      "facteur_x": "xG",
+      "analyse_card": "Kilmarnock présente un xGA de 2.2, bien au-dessus de ce qu'ils encaissent réellement, signalant une défense fragile à venir. Livingston n'a gagné aucun match en déplacement en 15 sorties et reste sans clean sheet dans 87% de ses matchs à l'extérieur. Les deux blocs défensifs sont objectivement poreux selon les xG concédés, et la pression du bas de tableau pousse les deux équipes à prendre des risques offensifs.",
+      "conseil_public": "Le pari porte sur au moins 3 buts dans ce match, ce qui paraît réaliste vu les défenses trouées des deux équipes. Avec un Poisson à 53% pour l'Over 2.5 et deux gardiens exposés, la cote de 1.78 offre une valeur légère. Ce n'est pas un lock, mais les conditions statistiques sont favorables.",
+      "contexte": "Kilmarnock (#11) et Livingston (#12) sont tous deux en zone de relégation, ce qui rend ce derby de bas de tableau potentiellement ouvert et disputé, avec les deux équipes contraintes de chercher la victoire.",
       "vbet": "NON",
-      "scores": [],
+      "scores": [
+        "2-1"
+      ],
       "paris_3": null,
       "joueur_decisif": null,
       "paris_safe": {
-        "bet": "",
-        "cote": "1.90",
-        "proba": "0%"
+        "bet": "Over 2.5",
+        "cote": 1.78,
+        "proba": "52%"
       },
       "paris_risque": {
         "bet": "",
         "cote": "",
         "proba": ""
       },
-      "kelly": null,
+      "kelly": "1.2",
       "stade": {
         "nom": "Rugby Park — Kilmarnock",
         "cap": "",
-        "meteo": "☁️",
-        "temp": "4°C",
-        "desc": "couvert"
+        "meteo": "☀️",
+        "temp": "6°C",
+        "desc": "ciel dégagé"
       },
       "crit_home": {
         "fd": 27,
@@ -29271,7 +29094,7 @@
       "fatigue": {
         "home": {
           "val": 50,
-          "info": "Dernier match il y a 5j — 1 match(s) en 14j"
+          "info": "Dernier match il y a 6j — 1 match(s) en 14j"
         },
         "away": {
           "val": 50,
@@ -29280,7 +29103,7 @@
       },
       "fatigue_home": {
         "val": 50,
-        "info": "Dernier match il y a 5j — 1 match(s) en 14j"
+        "info": "Dernier match il y a 6j — 1 match(s) en 14j"
       },
       "fatigue_away": {
         "val": 50,
@@ -29368,20 +29191,7 @@
           "form": "DDDDL"
         }
       },
-      "actu": [
-        {
-          "c": "Livingston",
-          "t": "JO 2026 de Milan Cortina : Goldblum, Brady, Megan Thee Stallion… quand les stars, le Roi et les Princesses volent la vedette aux athlètes (VIDEOS)",
-          "tx": "Du cinéma au hip-hop : les stars qui ont fait briller les tribunes des JO de Milan Cortina. ...",
-          "tm": "2026-02-23"
-        },
-        {
-          "c": "Livingston",
-          "t": "Et si la démence n’était pas une fatalité ? Les 14 facteurs sur lesquels vous pouvez agir",
-          "tx": "Avec plus de 55 millions de personnes atteintes de démence dans le monde et un nombre de nouveaux cas en constante augmentation, une étude scientifique souligne l'importance de la prévention tout au long de la vie. En ciblant quatorze facteurs de risque, dont…",
-          "tm": "2026-02-21"
-        }
-      ],
+      "actu": [],
       "arbitre": null,
       "odds_movement": null,
       "events_home": {
@@ -29592,10 +29402,10 @@
           "rating": "6.86"
         }
       ],
-      "elo_home": null,
-      "elo_away": null,
-      "elo_diff": null,
-      "elo_signal": null,
+      "elo_home": 1253,
+      "elo_away": 1162,
+      "elo_diff": 91,
+      "elo_signal": "MODÉRÉ",
       "dropping_odds": null,
       "pinnacle_snapshot": null
     },
@@ -31991,32 +31801,7 @@
           "form": "LWWLW"
         }
       },
-      "actu": [
-        {
-          "c": "Espanyol",
-          "t": "Où regarder les Jeux Paralympiques d'Hiver (clôture) et le Grand Prix de Chine de F1 en live? Les directs sport de ce dimanche 15 mars en Belgique",
-          "tx": "À quelle heure et sur quelle chaîne voir en direct les événements sportifs aujourd’hui depuis la Belgique ? Les matchs de football en live, le cyclisme en direct à la TV, le tennis en direct, le basket-ball, le hockey… ...",
-          "tm": "2026-03-15"
-        },
-        {
-          "c": "Espanyol",
-          "t": "Où regarder les Jeux Paralympiques d'Hiver et la 2e étape de Paris-Nice en live? Les directs sport de ce lundi 9 mars en Belgique",
-          "tx": "À quelle heure et sur quelle chaîne voir en direct les événements sportifs aujourd’hui depuis la Belgique ? Les matchs de football en live, le cyclisme en direct à la TV, le tennis en direct, le basket-ball, le hockey… ...",
-          "tm": "2026-03-09"
-        },
-        {
-          "c": "Getafe",
-          "t": "Liga : La sanction est tombée pour Abdel Abqar, qui a touché le sexe d’Alexander Sørloth en plein match",
-          "tx": "Main baladeuse et tête en l’air, ça rime avec retour aux vestiaires. Abdel Abqar connaît désormais la chanson. Après avoir…",
-          "tm": "2026-03-18"
-        },
-        {
-          "c": "Getafe",
-          "t": "Liga: Abqar suspendu deux matchs pour avoir pincé le sexe de Sorloth",
-          "tx": "Expulsé après avoir touché les parties intimes d'Alexander Sorloth en plein milieu du match Atlético de Madrid-Getafe (1-0), samedi dernier, Abdel Abqar a écopé de deux matchs de suspension.",
-          "tm": "2026-03-18"
-        }
-      ],
+      "actu": [],
       "arbitre": null,
       "odds_movement": null,
       "events_home": {
@@ -32227,10 +32012,10 @@
           "rating": "6.81"
         }
       ],
-      "elo_home": null,
-      "elo_away": null,
-      "elo_diff": null,
-      "elo_signal": null,
+      "elo_home": 1633,
+      "elo_away": 1654,
+      "elo_diff": -21,
+      "elo_signal": "FAIBLE",
       "dropping_odds": null,
       "pinnacle_snapshot": null
     },
@@ -32356,9 +32141,9 @@
       "stade": {
         "nom": "Fortuna Sittard Stadion — Sittard",
         "cap": "",
-        "meteo": "☁️",
-        "temp": "5°C",
-        "desc": "nuageux"
+        "meteo": "☀️",
+        "temp": "6°C",
+        "desc": "ciel dégagé"
       },
       "crit_home": {
         "fd": 46,
@@ -32749,20 +32534,7 @@
           "form": "LWWWD"
         }
       },
-      "actu": [
-        {
-          "c": "Twente",
-          "t": "En Espagne, une joueuse de Tenerife folle de rage après avoir été victime de racisme",
-          "tx": "Ce mardi, la demi-finale de la Coupe de la Reine entre Tenerife et l’Atletico de Madrid s’est terminée dans la…",
-          "tm": "2026-03-18"
-        },
-        {
-          "c": "Twente",
-          "t": "Les Belges à l'étranger: le Celtic élimine les Rangers aux tirs au but en quart de finale de la Coupe d'Écosse",
-          "tx": "Voici les performances des joueurs belges engagés à l'étranger. ...",
-          "tm": "2026-03-08"
-        }
-      ],
+      "actu": [],
       "arbitre": null,
       "odds_movement": null,
       "events_home": {
@@ -32974,7 +32746,7 @@
         }
       ],
       "elo_home": null,
-      "elo_away": null,
+      "elo_away": 1546,
       "elo_diff": null,
       "elo_signal": null,
       "dropping_odds": null,
@@ -33659,7 +33431,7 @@
       ],
       "val": false,
       "hot": false,
-      "conf": 7.1,
+      "conf": 0,
       "p1": 50,
       "pn": 27,
       "p2": 22,
@@ -33686,7 +33458,7 @@
           "n": "Betclic",
           "o": "200€ offerts",
           "l": "#LIEN_BETCLIC",
-          "c": "1.18",
+          "c": "1.70",
           "c1": "1.70",
           "cn": "3.80",
           "c2": "4.60"
@@ -33695,7 +33467,7 @@
           "n": "Winamax",
           "o": "100€ offerts",
           "l": "#LIEN_WINAMAX",
-          "c": "1.15",
+          "c": "1.67",
           "c1": "1.67",
           "cn": "3.77",
           "c2": "4.57"
@@ -33704,7 +33476,7 @@
           "n": "Unibet",
           "o": "100€ remboursés",
           "l": "#LIEN_UNIBET",
-          "c": "1.16",
+          "c": "1.68",
           "c1": "1.68",
           "cn": "3.78",
           "c2": "4.58"
@@ -33713,7 +33485,7 @@
           "n": "PMU",
           "o": "100€ offerts",
           "l": "#LIEN_PMU",
-          "c": "1.13",
+          "c": "1.65",
           "c1": "1.65",
           "cn": "3.75",
           "c2": "4.55"
@@ -33722,23 +33494,19 @@
           "n": "Bet365",
           "o": "100€ bonus",
           "l": "#LIEN_BET365",
-          "c": "1.21",
+          "c": "1.73",
           "c1": "1.73",
           "cn": "3.83",
           "c2": "4.63"
         }
       ],
       "edge": "",
-      "marche": "DOUBLE_CHANCE",
-      "risque": "FAIBLE",
-      "pari_rec": "DC 1X",
+      "marche": "RESULTAT",
+      "risque": "MODERE",
+      "pari_rec": "",
       "mise": "2-3% bankroll",
       "verdict_shark": "",
-      "scenario": {
-        "phase1": "",
-        "phase2": "",
-        "phase3": ""
-      },
+      "scenario": null,
       "facteur_x": "",
       "analyse_card": "",
       "conseil_public": "",
@@ -33748,9 +33516,9 @@
       "paris_3": null,
       "joueur_decisif": null,
       "paris_safe": {
-        "bet": "DC 1X",
-        "cote": 1.18,
-        "proba": "0%"
+        "bet": "",
+        "cote": "1.70",
+        "proba": ""
       },
       "paris_risque": {
         "bet": "",
@@ -33762,7 +33530,7 @@
         "nom": "Estadio Municipal de Famalicao — Vila Nova de Famalicao",
         "cap": "",
         "meteo": "🌧️",
-        "temp": "11°C",
+        "temp": "14°C",
         "desc": "forte pluie"
       },
       "crit_home": {
@@ -34131,20 +33899,7 @@
           "form": "LDLLL"
         }
       },
-      "actu": [
-        {
-          "c": "Nacional",
-          "t": "Mafia, naturalisation, guerre contre l’Ukraine… Le roman russe de Nikita Haikin, gardien de 30 ans chez la surprise Bodø/Glimt",
-          "tx": "Son père, qui a dû fuir la Russie, se fait petit, contrairement à Nikita Haikin qui rêve en grand avec Bodø/Glimt.",
-          "tm": "2026-03-17"
-        },
-        {
-          "c": "Nacional",
-          "t": "Cent tableaux à voir et à revoir : le musée idéal de “Télérama”",
-          "tx": "Chacun a, quelque part, son musée imaginaire. À l’heure où rouvrent enfin les musées, voici le nôtre : vingt natures mortes, vingt portraits, vingt tableaux religieux, vingt paysages et vingt tableaux de genre. Une sélection éminemment subjective, évidemment …",
-          "tm": "2026-03-16"
-        }
-      ],
+      "actu": [],
       "arbitre": null,
       "odds_movement": null,
       "events_home": {
@@ -34355,10 +34110,10 @@
           "rating": "6.91"
         }
       ],
-      "elo_home": null,
-      "elo_away": null,
-      "elo_diff": null,
-      "elo_signal": null,
+      "elo_home": 1563,
+      "elo_away": 1424,
+      "elo_diff": 139,
+      "elo_signal": "FORT",
       "dropping_odds": null,
       "pinnacle_snapshot": null
     },
@@ -35900,7 +35655,7 @@
       ],
       "val": false,
       "hot": false,
-      "conf": 7.2,
+      "conf": 7.6,
       "p1": 30,
       "pn": 23,
       "p2": 48,
@@ -36003,8 +35758,8 @@
         "nom": "Swansea.com Stadium — Swansea",
         "cap": "",
         "meteo": "☁️",
-        "temp": "4°C",
-        "desc": "nuageux"
+        "temp": "8°C",
+        "desc": "partiellement nuageux"
       },
       "crit_home": {
         "fd": 53,
@@ -36171,8 +35926,8 @@
       ],
       "fatigue": {
         "home": {
-          "val": 70,
-          "info": "Dernier match il y a 6j — 3 match(s) en 14j"
+          "val": 50,
+          "info": "Dernier match il y a 7j — 3 match(s) en 14j"
         },
         "away": {
           "val": 70,
@@ -36180,8 +35935,8 @@
         }
       },
       "fatigue_home": {
-        "val": 70,
-        "info": "Dernier match il y a 6j — 3 match(s) en 14j"
+        "val": 50,
+        "info": "Dernier match il y a 7j — 3 match(s) en 14j"
       },
       "fatigue_away": {
         "val": 70,
@@ -36377,32 +36132,7 @@
           "form": "LWWWW"
         }
       },
-      "actu": [
-        {
-          "c": "Swansea",
-          "t": "”Il faut survivre” : Roberto Martinez révèle “ce qui n’arrive plus dans le football moderne”",
-          "tx": "Invité dans une émission anglaise, l’ancien sélectionneur des Diables rouge est revenu sur son passage en Premier League. ...",
-          "tm": "2026-02-26"
-        },
-        {
-          "c": "Swansea",
-          "t": "Odeur de cannabis dans le tunnel des joueurs et acclamations du public : Snoop Dog est bien arrivé à Swansea",
-          "tx": "La rencontre de Championship entre Swansea City et Preston North End mardi soir a pris des allures de moment d’histoire avec l’apparition de Snoop Dogg, nouvel actionnaire du club gallois. ...",
-          "tm": "2026-02-25"
-        },
-        {
-          "c": "Coventry",
-          "t": "HBO Max : toutes les sorties de la semaine avec une excellente série",
-          "tx": "La plateforme de SVOD HBO Max fait des propositions audacieuses cette semaine. Au programme : du divertissement, un film sur une figure mythique et une série à ne pas louper.",
-          "tm": "2026-03-16"
-        },
-        {
-          "c": "Coventry",
-          "t": "Ce Français a inventé une selle pour deux personnes qui s’adapte sur « 99 % des vélos »",
-          "tx": "Stanislas Jallot a conçu un modèle permettant d’embarquer deux adultes sur un seul deux-roues",
-          "tm": "2026-03-10"
-        }
-      ],
+      "actu": [],
       "arbitre": null,
       "odds_movement": null,
       "events_home": {
@@ -36613,10 +36343,10 @@
           "rating": "7.1"
         }
       ],
-      "elo_home": null,
-      "elo_away": null,
-      "elo_diff": null,
-      "elo_signal": null,
+      "elo_home": 1508,
+      "elo_away": 1624,
+      "elo_diff": -115,
+      "elo_signal": "FORT",
       "dropping_odds": null,
       "pinnacle_snapshot": null
     },
@@ -37455,7 +37185,7 @@
         "nom": "Estadio Ciudad de Valencia — Valencia",
         "cap": "",
         "meteo": "☁️",
-        "temp": "10°C",
+        "temp": "11°C",
         "desc": "couvert"
       },
       "crit_home": {
@@ -37666,7 +37396,7 @@
       "fatigue": {
         "home": {
           "val": 70,
-          "info": "Dernier match il y a 3j — 2 match(s) en 14j"
+          "info": "Dernier match il y a 4j — 2 match(s) en 14j"
         },
         "away": {
           "val": 50,
@@ -37675,7 +37405,7 @@
       },
       "fatigue_home": {
         "val": 70,
-        "info": "Dernier match il y a 3j — 2 match(s) en 14j"
+        "info": "Dernier match il y a 4j — 2 match(s) en 14j"
       },
       "fatigue_away": {
         "val": 50,
@@ -37763,32 +37493,7 @@
           "form": "WDLLD"
         }
       },
-      "actu": [
-        {
-          "c": "Levante",
-          "t": "Genly: La fermeture du pont de la rue Grande devrait être maintenue",
-          "tx": "Les habitants ont été sondés et à l’unanimité, ils saluent la mesure. ...",
-          "tm": "2026-03-17"
-        },
-        {
-          "c": "Levante",
-          "t": "La fermeture du pont de la rue Grande, à Genly, devrait être prolongée : “Nous y sommes en tout cas favorables”",
-          "tx": "Les habitants ont été sondés et à l’unanimité, ils saluent la mesure. ...",
-          "tm": "2026-03-17"
-        },
-        {
-          "c": "Oviedo",
-          "t": "Avant le record à Dunkerque, voici les principales saisies de cocaïne depuis vingt ans en France",
-          "tx": "Des Antilles à Dunkerque, les saisies de cocaïne en France se multiplient depuis vingt ans avec une progression continue des volumes interceptés, culminant avec des records en 2025",
-          "tm": "2026-03-17"
-        },
-        {
-          "c": "Oviedo",
-          "t": "Aida Quilcué, une femme indigène candidate à la vice-présidence colombienne",
-          "tx": "Originaire du département du Cauca, Aida Quilcué est la colistière du candidat de gauche Iván Cepeda à la prochaine élection présidentielle. Son parcours de militante des droits humains, marqué par l’assassinat de son mari, l’oppose en tout point à la candida…",
-          "tm": "2026-03-16"
-        }
-      ],
+      "actu": [],
       "arbitre": null,
       "odds_movement": null,
       "events_home": {
@@ -37999,10 +37704,10 @@
           "rating": "6.66"
         }
       ],
-      "elo_home": null,
-      "elo_away": null,
-      "elo_diff": null,
-      "elo_signal": null,
+      "elo_home": 1600,
+      "elo_away": 1566,
+      "elo_diff": 34,
+      "elo_signal": "FAIBLE",
       "dropping_odds": null,
       "pinnacle_snapshot": null
     },
@@ -39463,7 +39168,7 @@
       ],
       "val": false,
       "hot": false,
-      "conf": 7.2,
+      "conf": 7.5,
       "p1": 52,
       "pn": 26,
       "p2": 22,
@@ -39566,7 +39271,7 @@
         "nom": "Sparta Stadion Het Kasteel — Rotterdam",
         "cap": "",
         "meteo": "☁️",
-        "temp": "6°C",
+        "temp": "8°C",
         "desc": "couvert"
       },
       "crit_home": {
@@ -39742,7 +39447,7 @@
       "fatigue": {
         "home": {
           "val": 50,
-          "info": "Dernier match il y a 5j — 2 match(s) en 14j"
+          "info": "Dernier match il y a 6j — 2 match(s) en 14j"
         },
         "away": {
           "val": 50,
@@ -39751,7 +39456,7 @@
       },
       "fatigue_home": {
         "val": 50,
-        "info": "Dernier match il y a 5j — 2 match(s) en 14j"
+        "info": "Dernier match il y a 6j — 2 match(s) en 14j"
       },
       "fatigue_away": {
         "val": 50,
@@ -40122,10 +39827,10 @@
           "rating": "6.77"
         }
       ],
-      "elo_home": null,
-      "elo_away": null,
-      "elo_diff": null,
-      "elo_signal": null,
+      "elo_home": 1444,
+      "elo_away": 1339,
+      "elo_diff": 106,
+      "elo_signal": "FORT",
       "dropping_odds": null,
       "pinnacle_snapshot": null
     },
@@ -40147,15 +39852,15 @@
       "cat": [
         "all"
       ],
-      "val": false,
+      "val": true,
       "hot": false,
-      "conf": 0,
+      "conf": 7.5,
       "p1": 66,
       "pn": 21,
       "p2": 13,
       "po15": 0,
-      "po25": 0,
-      "btts": 0,
+      "po25": 50,
+      "btts": 44,
       "c1": "1.28",
       "cn": "5.40",
       "c2": "9.50",
@@ -40176,7 +39881,7 @@
           "n": "Betclic",
           "o": "200€ offerts",
           "l": "#LIEN_BETCLIC",
-          "c": "1.28",
+          "c": "1.86",
           "c1": "1.28",
           "cn": "5.40",
           "c2": "9.50"
@@ -40185,7 +39890,7 @@
           "n": "Winamax",
           "o": "100€ offerts",
           "l": "#LIEN_WINAMAX",
-          "c": "1.25",
+          "c": "1.83",
           "c1": "1.25",
           "cn": "5.37",
           "c2": "9.47"
@@ -40194,7 +39899,7 @@
           "n": "Unibet",
           "o": "100€ remboursés",
           "l": "#LIEN_UNIBET",
-          "c": "1.26",
+          "c": "1.84",
           "c1": "1.26",
           "cn": "5.38",
           "c2": "9.48"
@@ -40203,7 +39908,7 @@
           "n": "PMU",
           "o": "100€ offerts",
           "l": "#LIEN_PMU",
-          "c": "1.23",
+          "c": "1.81",
           "c1": "1.23",
           "cn": "5.35",
           "c2": "9.45"
@@ -40212,48 +39917,50 @@
           "n": "Bet365",
           "o": "100€ bonus",
           "l": "#LIEN_BET365",
-          "c": "1.31",
+          "c": "1.89",
           "c1": "1.31",
           "cn": "5.43",
           "c2": "9.53"
         }
       ],
-      "edge": "",
-      "marche": "RESULTAT",
-      "risque": "ELEVE",
-      "pari_rec": "",
+      "edge": "+10%",
+      "marche": "BTTS",
+      "risque": "MODERE",
+      "pari_rec": "BTTS Non",
       "mise": "2-3% bankroll",
-      "verdict_shark": "",
+      "verdict_shark": "BTTS Non à 1.86 — Aberdeen ne marque pas dans 67% de ses déplacements, rendant l'absence de buts des deux côtés très probable",
       "scenario": {
-        "phase1": "",
-        "phase2": "",
-        "phase3": ""
+        "phase1": "0-30min: Rangers prend le contrôle dès l'entame, Aberdeen se replie défensivement et subit la pression à domicile d'Ibrox. Peu d'espaces pour les visiteurs.",
+        "phase2": "30-70min: Rangers ouvre le score et gère son avantage. Aberdeen, en manque de créativité offensive (forme DLLLD), peine à créer des occasions franches face à une défense Rangers solide.",
+        "phase3": "70-90min: Aberdeen tente de réagir mais manque de ressources offensives. Rangers contrôle et peut aggraver la marque. Aberdeen repart sans avoir trouvé le chemin des filets."
       },
-      "facteur_x": "",
-      "analyse_card": "",
-      "conseil_public": "",
-      "contexte": "",
-      "vbet": "NON",
-      "scores": [],
+      "facteur_x": "série en cours",
+      "analyse_card": "Rangers domicile affiche un xGA de seulement 1.05 et concède peu (6 clean sheets sur 15), ce qui limite fortement les chances d'Aberdeen de scorer. De son côté, Aberdeen ne marque pas dans 67% de ses déplacements (10/15), avec un xG offensif extérieur très modeste de 1.25. L'écart ELO de 278 points confirme une asymétrie nette en faveur de Rangers, renforçant l'idée qu'Aberdeen repartira muet.",
+      "conseil_public": "Ce pari mise sur le fait qu'Aberdeen ne marquera pas à Ibrox ce soir. Avec 2 matchs sur 3 à l'extérieur sans marquer, c'est une tendance solide. Rangers défend bien à domicile et Aberdeen traverse une mauvaise passe (D-L-L-L-D sur les 5 derniers matchs).",
+      "contexte": "Rangers est à 3 points du titre et joue à domicile avec une forte pression de performance. Aberdeen est en zone de relégation et doit gérer un déplacement très difficile à Ibrox.",
+      "vbet": "OUI",
+      "scores": [
+        "2-0"
+      ],
       "paris_3": null,
       "joueur_decisif": null,
       "paris_safe": {
-        "bet": "",
-        "cote": "1.28",
-        "proba": "0%"
+        "bet": "BTTS Non",
+        "cote": 1.86,
+        "proba": "66%"
       },
       "paris_risque": {
         "bet": "",
         "cote": "",
         "proba": ""
       },
-      "kelly": null,
+      "kelly": "2.9",
       "stade": {
         "nom": "Ibrox Stadium — Glasgow",
         "cap": "",
         "meteo": "☁️",
-        "temp": "6°C",
-        "desc": "couvert"
+        "temp": "4°C",
+        "desc": "peu nuageux"
       },
       "crit_home": {
         "fd": 60,
@@ -40573,26 +40280,7 @@
           "form": "DLLDL"
         }
       },
-      "actu": [
-        {
-          "c": "Rangers",
-          "t": "Les notes des Diables rouges à l’étranger : des retours en fanfare, Godts le magicien et des ailiers qui cartonnent",
-          "tx": "Ce week-end a été marqué par le retour de Kevin De Bruyne mais également par les belles prestations de Jérémy Doku et d’Olivier Deman. ...",
-          "tm": "2026-03-16"
-        },
-        {
-          "c": "Rangers",
-          "t": "La légende irlandaise Robbie Keane bientôt sur le banc du Celtic ?",
-          "tx": "Class Craic ! Le Celtic songerait à un Irlandais pour reprendre la tête de l’équipe : Robbie Keane. La légende…",
-          "tm": "2026-03-13"
-        },
-        {
-          "c": "Aberdeen",
-          "t": "Coupe de France : Un penaltygate à Strasbourg après un accrochage entre Enciso et Panichelli ?",
-          "tx": "Le groupe vit-il si bien que le laissent supposer les vidéos de danse dans les vestiaires ? Après avoir été…",
-          "tm": "2026-03-04"
-        }
-      ],
+      "actu": [],
       "arbitre": null,
       "odds_movement": null,
       "events_home": {
@@ -40803,10 +40491,10 @@
           "rating": "6.81"
         }
       ],
-      "elo_home": null,
-      "elo_away": null,
-      "elo_diff": null,
-      "elo_signal": null,
+      "elo_home": 1541,
+      "elo_away": 1262,
+      "elo_diff": 278,
+      "elo_signal": "FORT",
       "dropping_odds": null,
       "pinnacle_snapshot": null
     },
@@ -42263,13 +41951,13 @@
       ],
       "val": false,
       "hot": false,
-      "conf": 0,
+      "conf": 7.2,
       "p1": 26,
       "pn": 27,
       "p2": 47,
       "po15": 0,
-      "po25": 0,
-      "btts": 0,
+      "po25": 41,
+      "btts": 45,
       "c1": "2.70",
       "cn": "2.92",
       "c2": "2.78",
@@ -42290,7 +41978,7 @@
           "n": "Betclic",
           "o": "200€ offerts",
           "l": "#LIEN_BETCLIC",
-          "c": "2.70",
+          "c": "1.67",
           "c1": "2.70",
           "cn": "2.92",
           "c2": "2.78"
@@ -42299,7 +41987,7 @@
           "n": "Winamax",
           "o": "100€ offerts",
           "l": "#LIEN_WINAMAX",
-          "c": "2.67",
+          "c": "1.64",
           "c1": "2.67",
           "cn": "2.89",
           "c2": "2.75"
@@ -42308,7 +41996,7 @@
           "n": "Unibet",
           "o": "100€ remboursés",
           "l": "#LIEN_UNIBET",
-          "c": "2.68",
+          "c": "1.65",
           "c1": "2.68",
           "cn": "2.90",
           "c2": "2.76"
@@ -42317,7 +42005,7 @@
           "n": "PMU",
           "o": "100€ offerts",
           "l": "#LIEN_PMU",
-          "c": "2.65",
+          "c": "1.62",
           "c1": "2.65",
           "cn": "2.87",
           "c2": "2.73"
@@ -42326,47 +42014,49 @@
           "n": "Bet365",
           "o": "100€ bonus",
           "l": "#LIEN_BET365",
-          "c": "2.73",
+          "c": "1.70",
           "c1": "2.73",
           "cn": "2.95",
           "c2": "2.81"
         }
       ],
-      "edge": "",
-      "marche": "RESULTAT",
+      "edge": "+3%",
+      "marche": "BTTS",
       "risque": "ELEVE",
-      "pari_rec": "",
+      "pari_rec": "BTTS Non",
       "mise": "2-3% bankroll",
-      "verdict_shark": "",
+      "verdict_shark": "BTTS Non à 1.67 — Santa Clara ne marque pas dans 38% de ses matchs à domicile, signal suffisant pour valider le critère BTTS Non.",
       "scenario": {
-        "phase1": "",
-        "phase2": "",
-        "phase3": ""
+        "phase1": "0-30min: Début prudent, Santa Clara défend en bloc, Gil Vicente cherche des espaces sans forcer. Peu de situations franches des deux côtés.",
+        "phase2": "30-70min: Gil Vicente prend progressivement le contrôle du jeu grâce à sa meilleure qualité technique, pression sur la défense adverse. Santa Clara en difficulté pour construire.",
+        "phase3": "70-90min: Gil Vicente gère son avantage ou cherche le but de la victoire. Santa Clara peine à réagir offensivement, score final probablement serré."
       },
-      "facteur_x": "",
-      "analyse_card": "",
-      "conseil_public": "",
-      "contexte": "",
+      "facteur_x": "xG",
+      "analyse_card": "Santa Clara présente une attaque à domicile timide (xG offensif 1.16) et reste sans marquer dans plus d'un tiers de ses matchs, ce qui limite le risque d'un double marquage. Gil Vicente affiche de meilleures statistiques offensives (xG 1.51) mais encaisse autant (xGA 1.26), et arrive sur une série de 2 nuls consécutifs, signe d'une certaine prudence. Le modèle Poisson confirme une probabilité de 55% pour BTTS Non, légèrement au-dessus de l'implicite de la cote.",
+      "conseil_public": "Ce pari mise sur le fait qu'au moins une des deux équipes ne marquera pas. Santa Clara peine à marquer à domicile et Gil Vicente n'a pas toujours brillé offensif en déplacement (23% de matchs sans marquer). La cote est courte et le signal reste modeste, donc mise prudemment et ne dépasse pas 1-2% de ta bankroll.",
+      "contexte": "Gil Vicente (#5) est en course pour l'Europe et cherche des points à l'extérieur, tandis que Santa Clara (#13) lutte pour se stabiliser dans le milieu de tableau. L'enjeu est asymétrique, ce qui peut pousser Gil Vicente à être plus prudent en déplacement.",
       "vbet": "NON",
-      "scores": [],
+      "scores": [
+        "0-1"
+      ],
       "paris_3": null,
       "joueur_decisif": null,
       "paris_safe": {
-        "bet": "",
-        "cote": "2.70",
-        "proba": "0%"
+        "bet": "BTTS Non",
+        "cote": 1.67,
+        "proba": "26%"
       },
       "paris_risque": {
         "bet": "",
         "cote": "",
         "proba": ""
       },
-      "kelly": null,
+      "kelly": "1.1",
       "stade": {
         "nom": "Estádio de São Miguel — Ponta Delgada",
         "cap": "",
         "meteo": "🌧️",
-        "temp": "13°C",
+        "temp": "14°C",
         "desc": "légère pluie"
       },
       "crit_home": {
@@ -42711,32 +42401,7 @@
           "form": "DDLLW"
         }
       },
-      "actu": [
-        {
-          "c": "Santa Clara",
-          "t": "Actualité : Plus de FPS sans plus de cœurs ? Le secret d'Intel pour ses nouveaux processeurs Core Ultra 200HX Plus",
-          "tx": "Intel lance ses Core Ultra 200HX Plus : le très haut de gamme mobile passe à l'offensive\nAprès avoir secoué le marché du desktop la semaine dernière, Intel décline son architecture \"Plus\" sur PC portables. Les nouveaux Core Ultra 200HX Plus promettent des gai…",
-          "tm": "2026-03-17"
-        },
-        {
-          "c": "Santa Clara",
-          "t": "Actualité : « Moment GPT pour le graphisme », Nvidia dévoile le DLSS 5 pour un photoréalisme absolu en temps réel dès cet automne",
-          "tx": "Lors de la conférence GTC, Nvidia a dévoilé DLSS 5, une avancée majeure promettant de transformer le rendu visuel des jeux vidéo. Cette technologie s'appuie sur un modèle de rendu neuronal pour fusionner graphismes traditionnels et IA générative.",
-          "tm": "2026-03-16"
-        },
-        {
-          "c": "GIL Vicente",
-          "t": "Benfica: après les accusations de racisme, Prestianni a fait son retour sur les terrains et reçu une ovation des supporters",
-          "tx": "Alors que le Benfica Lisbonne se déplaçait sur la pelouse de Gil Vicente ce lundi à l'occasion de la 24e journée du championnat portugais, l'Argentin Gianluca Prestianni, suspecté d'insultes racistes à l'encontre de Vinicius, a été chaleureusement accueilli p…",
-          "tm": "2026-03-03"
-        },
-        {
-          "c": "GIL Vicente",
-          "t": "Le Real Madrid surpris par Getafe, Christian Kabasele buteur avec l’Udinese contre la Fiorentina",
-          "tx": "La 26e journée de Liga a vu le Real Madrid perdre face à Getafe, ce lundi 2 mars 2026. ...",
-          "tm": "2026-03-03"
-        }
-      ],
+      "actu": [],
       "arbitre": null,
       "odds_movement": null,
       "events_home": {
@@ -42947,10 +42612,10 @@
           "rating": "7.02"
         }
       ],
-      "elo_home": null,
-      "elo_away": null,
-      "elo_diff": null,
-      "elo_signal": null,
+      "elo_home": 1467,
+      "elo_away": 1538,
+      "elo_diff": -71,
+      "elo_signal": "MODÉRÉ",
       "dropping_odds": null,
       "pinnacle_snapshot": null
     },
@@ -46563,23 +46228,23 @@
       "pn": 18,
       "p2": 65,
       "po15": 0,
-      "po25": 73,
-      "btts": 66,
+      "po25": 0,
+      "btts": 0,
       "c1": "7.70",
       "cn": "5.40",
-      "c2": "1.33",
+      "c2": "1.35",
       "co15": "1.10",
-      "co25": "1.38",
+      "co25": "1.37",
       "cu25": "2.95",
       "dc1x": "3.23",
       "dc2x": "1.09",
       "dc12": "1.15",
       "cdc1x": "3.23",
       "cdc2x": "1.09",
-      "cbtts": "1.62",
-      "cbtts_non": "2.20",
-      "btts_oui": "1.62",
-      "btts_non": "2.20",
+      "cbtts": "1.61",
+      "cbtts_non": "2.23",
+      "btts_oui": "1.61",
+      "btts_non": "2.23",
       "bookies": [
         {
           "n": "Betclic",
@@ -46588,7 +46253,7 @@
           "c": "7.70",
           "c1": "7.70",
           "cn": "5.40",
-          "c2": "1.33"
+          "c2": "1.35"
         },
         {
           "n": "Winamax",
@@ -46597,7 +46262,7 @@
           "c": "7.67",
           "c1": "7.67",
           "cn": "5.37",
-          "c2": "1.30"
+          "c2": "1.32"
         },
         {
           "n": "Unibet",
@@ -46606,7 +46271,7 @@
           "c": "7.68",
           "c1": "7.68",
           "cn": "5.38",
-          "c2": "1.31"
+          "c2": "1.33"
         },
         {
           "n": "PMU",
@@ -46615,7 +46280,7 @@
           "c": "7.65",
           "c1": "7.65",
           "cn": "5.35",
-          "c2": "1.28"
+          "c2": "1.30"
         },
         {
           "n": "Bet365",
@@ -46624,7 +46289,7 @@
           "c": "7.73",
           "c1": "7.73",
           "cn": "5.43",
-          "c2": "1.36"
+          "c2": "1.38"
         }
       ],
       "edge": "",
@@ -46649,7 +46314,7 @@
       "paris_safe": {
         "bet": "",
         "cote": "7.70",
-        "proba": "17%"
+        "proba": "0%"
       },
       "paris_risque": {
         "bet": "",
@@ -46661,7 +46326,7 @@
         "nom": "Allianz Riviera — Nice",
         "cap": "",
         "meteo": "☀️",
-        "temp": "0°C",
+        "temp": "2°C",
         "desc": "ciel dégagé"
       },
       "crit_home": {
@@ -46882,8 +46547,8 @@
           "info": "Dernier match il y a 6j — 2 match(s) en 14j"
         },
         "away": {
-          "val": 100,
-          "info": "Dernier match il y a 2j — 3 match(s) en 14j"
+          "val": 90,
+          "info": "Dernier match il y a 3j — 3 match(s) en 14j"
         }
       },
       "fatigue_home": {
@@ -46891,8 +46556,8 @@
         "info": "Dernier match il y a 6j — 2 match(s) en 14j"
       },
       "fatigue_away": {
-        "val": 100,
-        "info": "Dernier match il y a 2j — 3 match(s) en 14j"
+        "val": 90,
+        "info": "Dernier match il y a 3j — 3 match(s) en 14j"
       },
       "tendances": {
         "over25_home": 7,
@@ -47132,32 +46797,7 @@
           "form": "LWWLW"
         }
       },
-      "actu": [
-        {
-          "c": "Nice",
-          "t": "Municipales 2026. Après les finalistes à Paris, Franck Allisio et Benoît Payan vont débattre à Marseille",
-          "tx": "Quatre jours après le premier tour des élections municipales, la campagne se poursuit à l'approche du second tour, dimanche. Suivez l'actualité politique en direct.",
-          "tm": "2026-03-19"
-        },
-        {
-          "c": "Nice",
-          "t": "RÉSULTATS ANNUELS 2025 - Groupe Transdev en 2025 : croissance solide, visibilité renforcée et robustesse financière",
-          "tx": "Résultats annuels 2025, dynamique commerciale soutenue du Groupe Transdev sur tous ses marchés, exécution rigoureuse : CA +4%, RN à 96 M€....",
-          "tm": "2026-03-19"
-        },
-        {
-          "c": "Paris Saint Germain",
-          "t": "Ligue des champions: \"Je ne vois pas comment Liverpool peut inquiéter le PSG\", Riolo très confiant pour les quarts de finale",
-          "tx": "Battu à l’aller en Turquie, Liverpool a renversé Galatasaray ce mercredi à Anfield (4-0, 4-1 en cumulé) et défiera le Paris Saint-Germain lors des quarts de finale de la Ligue des champions. Dans l’émission l’After Foot sur RMC, Daniel Riolo a expliqué pourqu…",
-          "tm": "2026-03-19"
-        },
-        {
-          "c": "Paris Saint Germain",
-          "t": "Lionel Messi a inscrit le 900e but de sa carrière",
-          "tx": "La superstar argentine Lionel Messi a inscrit mercredi le 900e but de sa carrière, en marquant pour l'Inter Miami contre Nashville en 8e de finale retour de la Ligue des champions Concacaf. ...",
-          "tm": "2026-03-19"
-        }
-      ],
+      "actu": [],
       "arbitre": null,
       "odds_movement": null,
       "events_home": {
@@ -47368,7 +47008,7 @@
           "rating": "7.64"
         }
       ],
-      "elo_home": null,
+      "elo_home": 1588,
       "elo_away": null,
       "elo_diff": null,
       "elo_signal": null,
@@ -47497,9 +47137,9 @@
       "stade": {
         "nom": "Estádio João Cardoso — Tondela",
         "cap": "",
-        "meteo": "🌧️",
-        "temp": "11°C",
-        "desc": "légère pluie"
+        "meteo": "☁️",
+        "temp": "12°C",
+        "desc": "couvert"
       },
       "crit_home": {
         "fd": 8,
@@ -47735,20 +47375,7 @@
           "form": "LDDLW"
         }
       },
-      "actu": [
-        {
-          "c": "AVS",
-          "t": "Un couple de retraités fraude une assurance et avoue la supercherie 10 ans plus tard : ils avaient amassé plus d’un million d’euros !",
-          "tx": "L’histoire est à peine croyable. En Suisse, un couple de retraités a réussi à frauder une assurance. ...",
-          "tm": "2026-02-25"
-        },
-        {
-          "c": "AVS",
-          "t": "José Mourinho répond aux critiques après Benfica-Real",
-          "tx": "José Mourinho n’a pas vraiment cherché l’escalade dans l’affaire Vinícius-Prestianni. Critiqué par Vincent Kompany ou",
-          "tm": "2026-02-22"
-        }
-      ],
+      "actu": [],
       "arbitre": null,
       "odds_movement": null,
       "events_home": {
@@ -47959,7 +47586,7 @@
           "rating": "6.59"
         }
       ],
-      "elo_home": null,
+      "elo_home": 1395,
       "elo_away": null,
       "elo_diff": null,
       "elo_signal": null,
@@ -47967,5 +47594,30 @@
       "pinnacle_snapshot": null
     }
   ],
-  "combis": []
+  "combis": [
+    {
+      "label": "SHARK SAFE",
+      "type": "safe",
+      "selections": "BTTS Non",
+      "matchs": "Rangers vs Aberdeen",
+      "cote_totale": "1.86",
+      "conseil": "Signal unique disponible mais solide. Rangers vs Aberdeen présente un profil défensif favorable avec un edge de +10%. Mise recommandée : 3-5% de la bankroll. Seul match qualifié ce jour, combiné réduit à 1 sélection."
+    },
+    {
+      "label": "SHARK VALUE",
+      "type": "value",
+      "selections": "BTTS Non",
+      "matchs": "Rangers vs Aberdeen",
+      "cote_totale": "1.86",
+      "conseil": "Données insuffisantes pour construire un vrai combiné VALUE aujourd'hui. Signal Rangers vs Aberdeen reconduit seul : confiance 7.5/10, edge +10%. Évitez de forcer des matchs non validés par l'analyse. Discipline = rentabilité long terme."
+    },
+    {
+      "label": "SHARK EXPERT",
+      "type": "audace",
+      "selections": "BTTS Non",
+      "matchs": "Rangers vs Aberdeen",
+      "cote_totale": "1.86",
+      "conseil": "Journée pauvre en signaux qualifiés. Aucun combiné EXPERT fiable ne peut être généré sans compromettre la rigueur d'analyse. Recommandation IASHARK : jouer uniquement le signal Rangers/Aberdeen en simple. Ne jamais forcer un combiné pour atteindre une cote cible."
+    }
+  ]
 }

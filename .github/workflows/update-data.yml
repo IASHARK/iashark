@@ -1382,19 +1382,24 @@ jobs:
                 });
               } catch(e) { console.log('  Erreur résolution hier:', e.message); }
 
-              // Recalculer stats globales
-              var resolvedE = histoEarly.predictions.filter(function(p){return p.result!=='pending';});
-              var winsE = resolvedE.filter(function(p){return p.result==='win';});
-              var totalE = resolvedE.length;
+              // Nettoyage one-shot des combinés existants
+              var beforeCleanE = histoEarly.predictions.length;
+              histoEarly.predictions = histoEarly.predictions.filter(function(p){ return p.type !== 'combi'; });
+              var cleanedE = beforeCleanE - histoEarly.predictions.length;
+              if(cleanedE > 0) console.log('  Nettoyage: '+cleanedE+' combinés supprimés de l\'historique');
+
+              // Stats sur SINGLES uniquement
+              var singlesE = histoEarly.predictions.filter(function(p){return p.type==='single'&&p.result!=='pending';});
+              var winsE = singlesE.filter(function(p){return p.result==='win';});
+              var totalE = singlesE.length;
               var winrateE = totalE>0?(winsE.length/totalE*100):0;
               var roiTotalE = 0;
-              resolvedE.forEach(function(p){
+              singlesE.forEach(function(p){
                 var c = parseFloat(p.cote)||1.75;
                 roiTotalE += p.result==='win' ? (c-1) : -1;
               });
               var roiE = totalE>0?(roiTotalE/totalE*100):0;
               var streakE=0;
-              var singlesE=histoEarly.predictions.filter(function(p){return p.type==='single'&&p.result!=='pending';});
               for(var si=0;si<singlesE.length;si++){
                 var isW=singlesE[si].result==='win';
                 if(si===0){ streakE=isW?1:-1; }
@@ -1408,10 +1413,9 @@ jobs:
                 total: totalE, streak: streakE,
                 wins: winsE.length, losses: totalE-winsE.length
               };
-              // ROI mensuel
+              // ROI mensuel sur singles uniquement
               var monthsE = {};
-              histoEarly.predictions.forEach(function(p){
-                if(p.result==='pending') return;
+              singlesE.forEach(function(p){
                 var key = (p.date||'').substring(0,7);
                 if(!monthsE[key]) monthsE[key]={wins:0,losses:0};
                 if(p.result==='win') monthsE[key].wins++; else monthsE[key].losses++;
@@ -1424,7 +1428,7 @@ jobs:
                 return {month:k,label:(mn[parseInt(parts[1])-1]||parts[1])+' '+parts[0],wins:mo.wins,losses:mo.losses,total:tot,roi:Math.round(r*10)/10};
               });
               fs.writeFileSync(histoPathEarly, JSON.stringify(histoEarly,null,2));
-              console.log('  Historique mis à jour: '+totalE+' résolus | Winrate: '+winrateE.toFixed(0)+'% | ROI: '+roiE.toFixed(1)+'%');
+              console.log('  Historique mis à jour: '+totalE+' singles résolus | Winrate: '+winrateE.toFixed(0)+'% | ROI: '+roiE.toFixed(1)+'%');
               return;
             }
 
@@ -2100,38 +2104,30 @@ jobs:
                 }
               }
 
-              for (var ci=0; ci<combisData.length; ci++) {
-                var combi = combisData[ci];
-                var alreadyCombi = histo.predictions.find(function(p){
-                  return p.type==='combi' && p.label===combi.label && p.date&&p.date.substring(0,10)===TODAY;
-                });
-                if(!alreadyCombi && combi.selections) {
-                  histo.predictions.unshift({
-                    match: combi.label+' — '+combi.matchs,
-                    home: combi.label, away: '',
-                    prediction: combi.selections,
-                    cote: parseFloat(combi.cote_totale)||null,
-                    date: TODAY, result: 'pending',
-                    fixture_id: null, type: 'combi', label: combi.label, conseil: combi.conseil||''
-                  });
-                }
-              }
+              // COMBINÉS : ne jamais tracker dans l'historique (faussent les stats)
+              // Les combinés restent sur le site comme outil de jeu mais ne sont pas suivis
 
               histo.predictions = histo.predictions.slice(0, 270);
 
-              var resolved = histo.predictions.filter(function(p){return p.result!=='pending';});
-              var wins = resolved.filter(function(p){return p.result==='win';});
-              var total = resolved.length;
+              // ── NETTOYAGE ONE-SHOT : supprimer tous les combinés pending existants ──
+              var beforeClean = histo.predictions.length;
+              histo.predictions = histo.predictions.filter(function(p){ return p.type !== 'combi'; });
+              var cleaned = beforeClean - histo.predictions.length;
+              if(cleaned > 0) console.log('  Nettoyage: '+cleaned+' combinés supprimés de l\'historique');
+
+              // Stats calculées sur les SINGLES uniquement
+              var singles = histo.predictions.filter(function(p){return p.type==='single'&&p.result!=='pending';});
+              var wins = singles.filter(function(p){return p.result==='win';});
+              var total = singles.length;
               var winrate = total>0?(wins.length/total*100):0;
               var roiTotal = 0;
-              resolved.forEach(function(p){
+              singles.forEach(function(p){
                 var c = parseFloat(p.cote)||1.75;
                 roiTotal += p.result==='win' ? (c-1) : -1;
               });
               var roi = total>0?(roiTotal/total*100):0;
 
               var streak=0;
-              var singles=histo.predictions.filter(function(p){return p.type==='single'&&p.result!=='pending';});
               for(var si=0;si<singles.length;si++){
                 var isW=singles[si].result==='win';
                 if(si===0){ streak=isW?1:-1; }
@@ -2181,8 +2177,7 @@ jobs:
               });
 
               var months = {};
-              histo.predictions.forEach(function(p){
-                if(p.result==='pending')return;
+              singles.forEach(function(p){
                 var key = (p.date||'').substring(0,7);
                 if(!months[key])months[key]={wins:0,losses:0};
                 if(p.result==='win')months[key].wins++; else months[key].losses++;

@@ -1327,6 +1327,104 @@ jobs:
               fs.writeFileSync('data.json', JSON.stringify({matchs:[],combis:[]},null,2));
               generateWorldCupPages();
               generateSitemaps([]);
+
+              // ── PAS DE MATCHS AUJOURD'HUI — résoudre quand même les résultats d'hier ──
+              console.log('\n=== JOUR SANS MATCHS — Résolution historique d\'hier ===');
+              var histoPathEarly = 'historique.json';
+              var histoEarly = {predictions:[], stats:{winrate:0,roi:0,total:0,streak:0,wins:0,losses:0}, monthly:[], backtesting:{}};
+              try { histoEarly = JSON.parse(fs.readFileSync(histoPathEarly,'utf8')); } catch(e) {}
+              var yesterdayEarly = new Date(TODAY+'T12:00:00Z');
+              yesterdayEarly.setDate(yesterdayEarly.getDate()-1);
+              var yDateEarly = yesterdayEarly.toISOString().split('T')[0];
+              try {
+                var yFixEarly = await get('https://v3.football.api-sports.io/fixtures?date='+yDateEarly+'&timezone=Europe/Paris', APS);
+                var yResEarly = (yFixEarly.response||[]);
+                console.log('  Résultats d\'hier récupérés: '+yResEarly.length+' matchs');
+                yResEarly.forEach(function(fix) {
+                  var fid = fix.fixture&&fix.fixture.id;
+                  var homeN = fix.teams&&fix.teams.home&&fix.teams.home.name||'';
+                  var awayN = fix.teams&&fix.teams.away&&fix.teams.away.name||'';
+                  var gh = fix.goals&&fix.goals.home!=null?fix.goals.home:null;
+                  var ga = fix.goals&&fix.goals.away!=null?fix.goals.away:null;
+                  var status = fix.fixture&&fix.fixture.status&&fix.fixture.status.short||'';
+                  if(status!=='FT'&&status!=='AET'&&status!=='PEN') return;
+                  if(gh===null||ga===null) return;
+                  var found = histoEarly.predictions.find(function(p){return p.result==='pending' && p.fixture_id===fid;});
+                  if(!found) {
+                    found = histoEarly.predictions.find(function(p){
+                      return p.result==='pending' && p.type==='single'
+                        && p.date&&p.date.substring(0,10)===yDateEarly
+                        && levenshtein((p.home||'').toLowerCase(), homeN.toLowerCase()) <= 3
+                        && levenshtein((p.away||'').toLowerCase(), awayN.toLowerCase()) <= 3;
+                    });
+                  }
+                  if(!found) return;
+                  var pred = (found.prediction||'').toLowerCase();
+                  var isWin = false;
+                  if(pred.includes('over 2.5'))                      isWin=(gh+ga)>2;
+                  else if(pred.includes('over 1.5'))                 isWin=(gh+ga)>1;
+                  else if(pred.includes('over 3.5'))                 isWin=(gh+ga)>3;
+                  else if(pred.includes('under 2.5'))                isWin=(gh+ga)<3;
+                  else if(pred.includes('btts non'))                 isWin=(gh===0||ga===0);
+                  else if(pred.includes('btts'))                     isWin=(gh>0&&ga>0);
+                  else if(pred.includes('1x')||pred.includes('dc 1x')) isWin=(gh>=ga);
+                  else if(pred.includes('x2')||pred.includes('dc x2')) isWin=(ga>=gh);
+                  else if(pred.includes('nul')||pred.includes('draw'))  isWin=(gh===ga);
+                  else if(pred.includes('victoire')||pred.includes(homeN.toLowerCase().slice(0,4))) {
+                    if(pred.includes(awayN.toLowerCase().slice(0,4))||pred.includes('ext')) isWin=(ga>gh);
+                    else isWin=(gh>ga);
+                  }
+                  found.result = isWin?'win':'loss';
+                  found.score  = gh+'-'+ga;
+                  found.fixture_id = fid;
+                  found.resolved_date = yDateEarly;
+                  console.log('  \u2192 '+found.match+' : '+found.result.toUpperCase()+' ('+gh+'-'+ga+')');
+                });
+              } catch(e) { console.log('  Erreur résolution hier:', e.message); }
+
+              // Recalculer stats globales
+              var resolvedE = histoEarly.predictions.filter(function(p){return p.result!=='pending';});
+              var winsE = resolvedE.filter(function(p){return p.result==='win';});
+              var totalE = resolvedE.length;
+              var winrateE = totalE>0?(winsE.length/totalE*100):0;
+              var roiTotalE = 0;
+              resolvedE.forEach(function(p){
+                var c = parseFloat(p.cote)||1.75;
+                roiTotalE += p.result==='win' ? (c-1) : -1;
+              });
+              var roiE = totalE>0?(roiTotalE/totalE*100):0;
+              var streakE=0;
+              var singlesE=histoEarly.predictions.filter(function(p){return p.type==='single'&&p.result!=='pending';});
+              for(var si=0;si<singlesE.length;si++){
+                var isW=singlesE[si].result==='win';
+                if(si===0){ streakE=isW?1:-1; }
+                else if(isW&&streakE>0){ streakE++; }
+                else if(!isW&&streakE<0){ streakE--; }
+                else break;
+              }
+              histoEarly.stats = {
+                winrate: Math.round(winrateE*10)/10,
+                roi: Math.round(roiE*10)/10,
+                total: totalE, streak: streakE,
+                wins: winsE.length, losses: totalE-winsE.length
+              };
+              // ROI mensuel
+              var monthsE = {};
+              histoEarly.predictions.forEach(function(p){
+                if(p.result==='pending') return;
+                var key = (p.date||'').substring(0,7);
+                if(!monthsE[key]) monthsE[key]={wins:0,losses:0};
+                if(p.result==='win') monthsE[key].wins++; else monthsE[key].losses++;
+              });
+              histoEarly.monthly = Object.keys(monthsE).sort().reverse().slice(0,6).map(function(k){
+                var mo=monthsE[k]; var tot=mo.wins+mo.losses;
+                var r=tot>0?((mo.wins*0.75-mo.losses)/tot*100):0;
+                var parts=k.split('-');
+                var mn=['Jan','F\u00e9v','Mar','Avr','Mai','Jun','Jul','Ao\u00fb','Sep','Oct','Nov','D\u00e9c'];
+                return {month:k,label:(mn[parseInt(parts[1])-1]||parts[1])+' '+parts[0],wins:mo.wins,losses:mo.losses,total:tot,roi:Math.round(r*10)/10};
+              });
+              fs.writeFileSync(histoPathEarly, JSON.stringify(histoEarly,null,2));
+              console.log('  Historique mis à jour: '+totalE+' résolus | Winrate: '+winrateE.toFixed(0)+'% | ROI: '+roiE.toFixed(1)+'%');
               return;
             }
 

@@ -3,6 +3,14 @@
 <head>
 <meta name="ga-site-verification" content="DluMMCMDwqkPA0QjmbkJ02L1" />
 <meta charset="UTF-8">
+<!-- Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-R30ZBHG8J0"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-R30ZBHG8J0');
+</script>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>IASHARK — Pronostics Football IA · Analyses Quotidiennes</title>
 <meta name="description" content="Pronostics football alimentés par l'intelligence artificielle. Analyses statistiques, edge IA et value bets quotidiens.">
@@ -303,7 +311,6 @@ function buildCard(m){
   if(isHot) badges+='<span class="badge badge-hot">🔥 SHARK LOCK</span>';
   if(!isVal&&!isHot) badges+='<span class="badge badge-free">✓ GRATUIT</span>';
 
-  // Cote du pari recommandé
   var coteStr='';
   if(m.pari_rec){
     var pr=(m.pari_rec||'').toLowerCase();
@@ -334,12 +341,12 @@ function buildCard(m){
     +  '<div class="mc-left">'
     +    '<div class="mc-teams">'
     +      '<div class="mc-team home">'+teamLogo(m.home)+'<div class="mc-team-name">'+(m.home&&m.home.n||'').toUpperCase()+'</div></div>'
-    +      '<div class="mc-teams-sep"><div class="mc-vs">VS</div><div class="mc-time">'+heure+(typeof showDemain!=='undefined'&&showDemain?'<span class="badge-demain">J+1</span>':'')+'</div></div>'
+    +      '<div class="mc-teams-sep"><div class="mc-vs">VS</div><div class="mc-time">'+heure+'</div></div>'
     +      '<div class="mc-team away">'+teamLogo(m.away)+'<div class="mc-team-name">'+(m.away&&m.away.n||'').toUpperCase()+'</div></div>'
     +    '</div>'
     +    '<div class="mc-pari">'
     +      '<span class="mc-pari-label">🦈 IASHARK</span>'
-    +      '<span class="mc-pari-bet">'+(m.pari_rec||'Analyse en cours')+'</span>'
+    +      '<span class="mc-pari-bet">'+(m.pari_rec||'Aucun signal clair sur ce match')+'</span>'
     +      (coteStr?'<span class="mc-pari-cote">'+coteStr+'</span>':'')
     +      edgeStr
     +    '</div>'
@@ -391,7 +398,7 @@ function buildChocCard(m){
     +'<div><span class="choc-vs">VS</span><div class="choc-hr">'+heure+'</div></div>'
     +'<div class="choc-team">'+logoH(m.away,an.slice(0,2).toUpperCase())+'<div class="choc-name" style="color:rgba(226,232,240,0.65)">'+an.toUpperCase()+'</div><div class="choc-sub-lbl">EXTÉRIEUR</div></div>'
     +'</div></div>'
-    +'<div class="choc-pari-strip"><div><div class="choc-pari-lbl">SELECTION IA DU SOIR</div><div class="choc-pari-bet">'+(m.pari_rec||'')+'</div></div>'
+    +'<div class="choc-pari-strip"><div><div class="choc-pari-lbl">SELECTION IA DU SOIR</div><div class="choc-pari-bet">'+(m.pari_rec||'Aucun signal clair sur ce match')+'</div></div>'
     +(pariCote?'<div class="choc-cote">'+pariCote+'</div>':'')
     +'</div></div></div>';
 }
@@ -407,7 +414,6 @@ function setupFilters(){
   });
 }
 
-// Map league_key → nom + drapeau
 var LEAGUE_LABELS = {
   'premier':      {flag:'🏴󠁧󠁢󠁥󠁮󠁧󠁿', name:'Premier League'},
   'champ':        {flag:'🏴󠁧󠁢󠁥󠁮󠁧󠁿', name:'Championship'},
@@ -431,9 +437,7 @@ var LEAGUE_LABELS = {
   'saudi':        {flag:'🇸🇦', name:'Saudi Pro League'},
 };
 
-function buildExplorerDynamic(matchs){
-  buildLeagueBtns(matchs);
-}
+function buildExplorerDynamic(matchs){ buildLeagueBtns(matchs); }
 
 function buildLeagueBtns(matchs){
   var seen={};
@@ -455,7 +459,6 @@ function buildLeagueBtns(matchs){
   });
 }
 
-// --- NOUVELLE FONCTION : Donne l'heure de Paris en direct ---
 function getParisNowStr() {
   var d = new Date();
   var f = new Intl.DateTimeFormat('fr-FR', {
@@ -468,63 +471,49 @@ function getParisNowStr() {
   return r.year + '-' + r.month + '-' + r.day + ' ' + r.hour + ':' + r.minute;
 }
 
-// --- FONCTION RENDERMATCHS (ÉPURÉE & CHRONOLOGIQUE) ---
 function renderMatchs() {
   var list = applyDayFilter(filterMatchs(allMatchs, currentFilter));
   var isDemain = currentDayFilter === 'tomorrow';
   var el = document.getElementById('cardsList');
-  
+
   if(!list.length){
     el.innerHTML='<div class="cards-list"><div class="empty-state"><h3>'+(isDemain?'AUCUN MATCH DEMAIN':'AUCUN MATCH TROUVÉ')+'</h3><p>'+(isDemain?'Reviens ce soir pour les analyses de demain.':'Essaie un autre filtre ou reviens demain.')+'</p></div></div>';
     return;
   }
 
   var nowStr = getParisNowStr();
-  var listAvenir = [];
-  var listPasses = [];
-
-  list.forEach(function(m) {
-    if ((m.date||'') < nowStr) {
-      listPasses.push(m);
-    } else {
-      listAvenir.push(m);
-    }
+  var listAvenir = [], listPasses = [];
+  list.forEach(function(m){
+    if((m.date||'')<nowStr) listPasses.push(m); else listAvenir.push(m);
   });
-
-  listAvenir.sort(function(a,b){ return (a.date||'') < (b.date||'') ? -1:1; });
-  listPasses.sort(function(a,b){ return (a.date||'') < (b.date||'') ? -1:1; });
+  listAvenir.sort(function(a,b){return (a.date||'')<(b.date||'')?-1:1;});
+  listPasses.sort(function(a,b){return (a.date||'')<(b.date||'')?-1:1;});
 
   var html = '';
-
-  if (currentFilter === 'all') {
-    var activeList = listAvenir.length > 0 ? listAvenir : listPasses;
+  if(currentFilter==='all'){
+    var activeList = listAvenir.length>0?listAvenir:listPasses;
     var choc = getChoc(activeList);
-    var rest = activeList.filter(function(m){ return m.id !== choc.id; });
-
-    html += '<div class="sec-hdr s-choc">' + (listAvenir.length === 0 ? 'CHOC (TERMINÉ)' : 'CHOC DU SOIR') + '</div>';
+    var rest = activeList.filter(function(m){return m.id!==choc.id;});
+    html += '<div class="sec-hdr s-choc">'+(listAvenir.length===0?'CHOC (TERMINÉ)':'CHOC DU SOIR')+'</div>';
     html += buildChocCard(choc);
-
     if(rest.length){
       html += '<div class="sec-hdr s-rest" style="margin-top:16px;">PROCHAINS MATCHS — '+rest.length+' MATCHS</div>';
       html += '<div class="cards-list">'+rest.map(buildCard).join('')+'</div>';
     }
-
-    if(listAvenir.length > 0 && listPasses.length > 0){
+    if(listAvenir.length>0&&listPasses.length>0){
       html += '<div class="sec-hdr" style="margin-top:32px;opacity:0.5;">MATCHS PASSÉS / EN COURS</div>';
-      html += '<div class="cards-list" style="opacity:0.6; filter:grayscale(0.4);">'+listPasses.map(buildCard).join('')+'</div>';
+      html += '<div class="cards-list" style="opacity:0.6;filter:grayscale(0.4);">'+listPasses.map(buildCard).join('')+'</div>';
     }
-
   } else {
-    if(listAvenir.length > 0){
+    if(listAvenir.length>0){
       html += '<div class="sec-hdr">'+listAvenir.length+' MATCH'+(listAvenir.length>1?'S':'')+' À VENIR</div>';
       html += '<div class="cards-list">'+listAvenir.map(buildCard).join('')+'</div>';
     }
-    if(listPasses.length > 0){
+    if(listPasses.length>0){
       html += '<div class="sec-hdr" style="margin-top:24px;opacity:0.5;">'+listPasses.length+' MATCH'+(listPasses.length>1?'S':'')+' PASSÉS</div>';
-      html += '<div class="cards-list" style="opacity:0.6; filter:grayscale(0.4);">'+listPasses.map(buildCard).join('')+'</div>';
+      html += '<div class="cards-list" style="opacity:0.6;filter:grayscale(0.4);">'+listPasses.map(buildCard).join('')+'</div>';
     }
   }
-
   el.innerHTML = html;
 }
 
@@ -548,7 +537,6 @@ async function loadData(){
   }
 }
 
-// LANG
 var LG=localStorage.getItem('lg')||'fr';
 function toggleLang(e){e.stopPropagation();document.getElementById('langMenu').classList.toggle('open');}
 function setLang(lg){LG=lg;localStorage.setItem('lg',lg);document.getElementById('langMenu').classList.remove('open');document.querySelector('.lang-btn').textContent='🌐 '+lg.toUpperCase();if(lg!=='fr') window.location='/'+lg+'/';}

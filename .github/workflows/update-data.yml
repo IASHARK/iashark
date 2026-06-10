@@ -614,6 +614,15 @@ jobs:
               +'  "set3": "3ème set si serré (null sinon) : facteur mental et physique"\n'
               +'}\n'
               +'}';
+
+            var r = await postJSONWithRetry('api.anthropic.com', '/v1/messages', {
+              model: 'claude-sonnet-4-6',
+              max_tokens: 1500,
+              system: 'Tu es IASHARK, un système expert en analyse tennis. Tu réponds EXCLUSIVEMENT en JSON valide. Zéro backtick, zéro texte avant ou après. Tu es tranchant et factuel. Tu cites des stats précises. Tu prends position.',
+              messages: [{role:'user', content:prompt}]
+            }, {'x-api-key':ANT_KEY, 'anthropic-version':'2023-06-01'});
+
+            var txt = ((r.content||[]).find(function(b){return b.type==='text';})||{}).text||'{}';
             try { return JSON.parse(txt.replace(/```json|```/g,'').trim()); }
             catch(e) { console.log('Parse error genAnalyseTennis:', txt.slice(0,200)); return null; }
           }
@@ -668,8 +677,9 @@ jobs:
               var bestOdds = batch[8];
 
               // Classement depuis profile
-              var rank1 = profile1&&profile1.currentRank||null;
-              var rank2 = profile2&&profile2.currentRank||null;
+              var rank1 = profile1&&(profile1.currentRank||profile1.data&&profile1.data.currentRank)||null;
+              var rank2 = profile2&&(profile2.currentRank||profile2.data&&profile2.data.currentRank)||null;
+              console.log('  Profile p1:', profile1?'ok rank='+rank1:'null', '| Profile p2:', profile2?'ok rank='+rank2:'null');
 
               // Forme globale + sur cette surface
               var form1 = calcTennisForm(matches1, parsed.p1Id);
@@ -690,8 +700,9 @@ jobs:
               var c2 = (bestOdds&&bestOdds.c2)||parsed.c2;
               console.log('  #'+rank1+' vs #'+rank2+' | Cotes: '+c1+'/'+c2+' | Forme: '+form1+'/'+form2+' | Surface: '+(surf1?surf1.winrate+'%':'?')+'/'+(surf2?surf2.winrate+'%':'?'));
 
-              // Skip si vraiment aucune donnée
-              if(c1==='--'&&c2==='--'&&!rank1&&!rank2){
+              // Skip seulement si VRAIMENT rien — ni cotes ni classement ni forme
+              var hasData = (c1!=='--'&&c2!=='--')||(rank1||rank2)||(form1.length>0)||(form2.length>0);
+              if(!hasData){
                 console.log('  Skip (aucune donnée): '+p1Name+' vs '+p2Name);
                 continue;
               }

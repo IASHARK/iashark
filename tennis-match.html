@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Analyse Tennis — IASHARK</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#060a10;--card:#0c1520;--card2:#101d2a;
+  --tennis:#a3e635;--tennis2:#84cc16;--tennis3:rgba(163,230,53,0.08);
+  --amber:#f59e0b;--green:#10b981;--red:#ef4444;--cyan:#22d3ee;
+  --text:#e2e8f0;--muted:#4a6580;--muted2:#2a3f55;
+  --border:rgba(255,255,255,0.05);--bt:rgba(163,230,53,0.2);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;padding-bottom:80px;}
+
+/* HEADER */
+.hdr{position:sticky;top:0;z-index:99;background:rgba(6,10,16,0.96);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);height:50px;display:flex;align-items:center;padding:0 16px;gap:12px;}
+.hdr-back{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:1px;color:var(--muted);border:1px solid var(--border);padding:5px 10px;border-radius:6px;background:none;cursor:pointer;transition:.15s;}
+.hdr-back:hover{color:var(--tennis);border-color:var(--bt);}
+.logo{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:3px;text-decoration:none;color:var(--text);}
+.logo span{color:var(--tennis);}
+.hdr-pill{margin-left:auto;font-family:'Space Mono',monospace;font-size:7px;letter-spacing:2px;color:var(--tennis);border:1px solid var(--bt);padding:3px 8px;border-radius:20px;background:var(--tennis3);}
+
+/* WRAP */
+.wrap{max-width:660px;margin:16px auto 0;padding:0 14px;}
+.card{border:1px solid var(--border);border-radius:18px;overflow:hidden;animation:up .4s ease forwards;}
+@keyframes up{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+.s{padding:0 18px 13px;}
+.s.pt{padding-top:14px;}
+.sep{height:1px;background:var(--border);margin:0 18px 13px;}
+.stitle{font-family:'Space Mono',monospace;font-size:8px;color:var(--muted);letter-spacing:2px;margin-bottom:9px;display:flex;align-items:center;gap:5px;}
+.stitle::after{content:'';flex:1;height:1px;background:var(--border);}
+
+/* TOPBAR */
+.topbar{background:linear-gradient(135deg,#070d0c,#091510);padding:12px 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);gap:8px;flex-wrap:wrap;}
+.lg-row{display:flex;align-items:center;gap:7px;}
+.lg-name{font-family:'Space Mono',monospace;font-size:8px;color:var(--muted);letter-spacing:1px;}
+.surface-badge{font-family:'Space Mono',monospace;font-size:7px;letter-spacing:1px;padding:3px 8px;border-radius:10px;}
+.sc-clay{background:rgba(234,88,12,0.12);border:1px solid rgba(234,88,12,0.25);color:#f97316;}
+.sc-grass{background:rgba(163,230,53,0.08);border:1px solid var(--bt);color:var(--tennis);}
+.sc-hard{background:rgba(59,130,246,0.08);border:1px solid rgba(59,130,246,0.2);color:#60a5fa;}
+.badge{font-family:'Space Mono',monospace;font-size:7px;letter-spacing:1.5px;padding:3px 9px;border-radius:20px;}
+.badge-val{background:rgba(163,230,53,0.06);border:1px solid var(--bt);color:var(--tennis);}
+.badge-hot{background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);color:var(--amber);}
+
+/* PLAYERS HERO */
+.players-hero{padding:22px 18px 16px;background:linear-gradient(180deg,#070d0c,var(--card));}
+.players-row{display:grid;grid-template-columns:1fr 56px 1fr;align-items:center;gap:8px;margin-bottom:16px;}
+.player{text-align:center;}
+.player-photo{width:64px;height:64px;border-radius:50%;object-fit:cover;margin:0 auto 8px;display:block;border:2px solid var(--border);}
+.player-photo-ph{width:64px;height:64px;border-radius:50%;background:rgba(255,255,255,0.04);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:18px;color:var(--muted);margin:0 auto 8px;}
+.player-name{font-family:'Bebas Neue',sans-serif;font-size:clamp(14px,4vw,22px);letter-spacing:1px;line-height:1;margin-bottom:3px;}
+.player.p2 .player-name{color:rgba(226,232,240,0.65);}
+.player-country{font-family:'Space Mono',monospace;font-size:8px;color:var(--muted);margin-bottom:5px;}
+.player-seed{font-family:'Space Mono',monospace;font-size:7px;color:var(--tennis);background:var(--tennis3);border:1px solid var(--bt);padding:2px 7px;border-radius:10px;display:inline-block;margin-bottom:4px;}
+.player-form{display:flex;justify-content:center;gap:2px;margin-top:4px;}
+.fd{width:14px;height:14px;border-radius:2px;font-size:6px;font-weight:700;display:flex;align-items:center;justify-content:center;font-family:'Space Mono',monospace;}
+.fw{background:rgba(16,185,129,0.18);color:var(--green);}
+.fl{background:rgba(239,68,68,0.13);color:var(--red);}
+.vs-col{text-align:center;}
+.vs{font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--muted2);display:block;}
+.vs-hr{font-family:'Space Mono',monospace;font-size:10px;color:var(--tennis);margin-top:2px;}
+
+/* PROBA BAR (2 issues tennis) */
+.pbar{display:flex;height:4px;border-radius:3px;overflow:hidden;margin-bottom:8px;}
+.pb1{background:linear-gradient(90deg,var(--tennis2),var(--tennis));}
+.pb2{background:rgba(226,232,240,0.15);}
+.plabels{display:flex;justify-content:space-between;}
+.pi{text-align:center;}
+.pi-pct{font-family:'Bebas Neue',sans-serif;font-size:20px;line-height:1;}
+.pi-lbl{font-family:'Space Mono',monospace;font-size:6px;color:var(--muted);letter-spacing:1px;}
+
+/* PARIS RECOMMANDE */
+.pari-main{background:linear-gradient(135deg,rgba(163,230,53,0.06),rgba(132,204,22,0.01));border:1px solid var(--bt);border-radius:13px;padding:16px;position:relative;overflow:hidden;}
+.pari-main::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,var(--tennis),transparent);}
+.pm-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px;}
+.pm-lbl{font-family:'Space Mono',monospace;font-size:7px;color:var(--tennis);letter-spacing:2px;margin-bottom:3px;}
+.pm-bet{font-family:'Bebas Neue',sans-serif;font-size:26px;color:var(--text);line-height:1;margin-bottom:3px;}
+.pm-hint{font-size:11px;color:var(--muted);line-height:1.5;max-width:240px;}
+.pm-cote{font-family:'Bebas Neue',sans-serif;font-size:46px;color:var(--tennis);line-height:1;}
+.pm-foot{display:flex;align-items:center;gap:7px;padding-top:9px;border-top:1px solid var(--border);flex-wrap:wrap;}
+.pm-tag{font-family:'Space Mono',monospace;font-size:8px;padding:3px 8px;border-radius:4px;}
+.pm-tag.edge{background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.18);color:var(--green);}
+.pm-tag.kelly{background:var(--tennis3);border:1px solid var(--bt);color:var(--tennis);}
+.pm-tag.mise{background:rgba(255,255,255,0.03);border:1px solid var(--border);color:var(--muted);}
+.pm-warn{margin-top:7px;font-family:'Space Mono',monospace;font-size:7px;color:var(--amber);}
+
+/* CONFIANCE */
+.conf-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+.conf-score{font-family:'Bebas Neue',sans-serif;font-size:48px;line-height:1;color:var(--tennis);}
+.conf-score sup{font-size:18px;color:var(--muted);}
+.conf-badge{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:2px;padding:5px 12px;border-radius:20px;background:var(--tennis3);border:1px solid var(--bt);color:var(--tennis);display:inline-block;margin-bottom:3px;}
+.conf-track{background:rgba(255,255,255,0.03);border-radius:5px;height:5px;overflow:hidden;}
+.conf-fill{height:100%;border-radius:5px;background:linear-gradient(90deg,var(--tennis2),var(--tennis));}
+.conf-scale{display:flex;justify-content:space-between;margin-top:5px;}
+.conf-scale span{font-family:'Space Mono',monospace;font-size:6px;color:var(--muted2);letter-spacing:1px;}
+
+/* H2H */
+.h2h-block{background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:14px;}
+.h2h-row{display:flex;align-items:center;gap:8px;}
+.h2h-player{flex:1;text-align:center;}
+.h2h-name{font-family:'Space Mono',monospace;font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:6px;}
+.h2h-wins{font-family:'Bebas Neue',sans-serif;font-size:52px;line-height:1;}
+.h2h-wins.p1{color:var(--tennis);}
+.h2h-wins.p2{color:rgba(226,232,240,0.5);}
+.h2h-vs{font-family:'Bebas Neue',sans-serif;font-size:18px;color:var(--muted2);}
+.h2h-bar-wrap{margin-top:12px;}
+.h2h-bar{height:5px;border-radius:5px;overflow:hidden;display:flex;}
+.h2h-bar-p1{background:linear-gradient(90deg,var(--tennis2),var(--tennis));}
+.h2h-bar-p2{background:rgba(226,232,240,0.15);}
+.h2h-note{font-family:'Space Mono',monospace;font-size:7px;color:var(--muted);margin-top:6px;text-align:center;}
+
+/* SURFACE STATS */
+.surf-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.surf-card{background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:12px;}
+.surf-player{font-family:'Space Mono',monospace;font-size:7px;letter-spacing:1px;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--border);}
+.surf-player.p1{color:var(--tennis);}
+.surf-player.p2{color:var(--muted);}
+.surf-stat{display:flex;justify-content:space-between;align-items:center;padding:3px 0;}
+.surf-lbl{font-family:'Space Mono',monospace;font-size:7px;color:var(--muted);}
+.surf-val{font-family:'Bebas Neue',sans-serif;font-size:16px;line-height:1;}
+.surf-bar-wrap{margin-top:8px;}
+.surf-bar{height:4px;background:rgba(255,255,255,0.04);border-radius:3px;overflow:hidden;}
+.surf-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--tennis2),var(--tennis));transition:width .8s ease;}
+.surf-fill.p2-fill{background:linear-gradient(90deg,#3a5070,#4a6580);}
+
+/* COTES */
+.cotes-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.cote-card{background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center;}
+.cote-card.best{border-color:var(--bt);background:var(--tennis3);}
+.cote-player{font-family:'Space Mono',monospace;font-size:7px;color:var(--muted);letter-spacing:1px;margin-bottom:4px;}
+.cote-val{font-family:'Bebas Neue',sans-serif;font-size:36px;line-height:1;color:var(--text);}
+.cote-val.best{color:var(--tennis);}
+.cote-prob{font-family:'Space Mono',monospace;font-size:8px;color:var(--muted);margin-top:3px;}
+
+/* FACTEUR */
+.facteur{background:rgba(163,230,53,0.03);border:1px solid rgba(163,230,53,0.12);border-radius:10px;padding:11px 14px;display:flex;gap:10px;align-items:flex-start;}
+.fact-icon{font-size:18px;flex-shrink:0;}
+.fact-lbl{font-family:'Space Mono',monospace;font-size:7px;color:var(--tennis);letter-spacing:2px;margin-bottom:3px;}
+.fact-txt{font-size:12px;color:var(--text);line-height:1.5;}
+
+/* SCENARIO */
+.scen-list{display:flex;flex-direction:column;}
+.scen-phase{display:flex;align-items:stretch;}
+.scen-l{display:flex;flex-direction:column;align-items:center;width:46px;flex-shrink:0;}
+.scen-badge{font-family:'Space Mono',monospace;font-size:7px;color:var(--tennis);background:var(--tennis3);border:1px solid var(--bt);padding:3px 4px;border-radius:4px;text-align:center;line-height:1.3;white-space:nowrap;}
+.scen-line{flex:1;width:1px;background:linear-gradient(180deg,rgba(163,230,53,0.18),rgba(163,230,53,0.02));margin:3px auto 0;}
+.scen-body{flex:1;padding:0 0 12px 10px;}
+.scen-txt{font-size:11px;color:#94a3b8;line-height:1.6;}
+
+/* SKIP */
+.skip{border-radius:10px;padding:12px 14px;display:flex;gap:10px;align-items:flex-start;}
+.skip.danger{background:rgba(239,68,68,0.05);border:1px solid rgba(239,68,68,0.17);}
+.skip.ok{background:rgba(16,185,129,0.04);border:1px solid rgba(16,185,129,0.13);}
+.skip-icon{font-size:18px;flex-shrink:0;}
+.skip-lbl{font-family:'Space Mono',monospace;font-size:7px;letter-spacing:2px;margin-bottom:4px;}
+.skip.danger .skip-lbl{color:var(--red);}
+.skip.ok .skip-lbl{color:var(--green);}
+.skip-txt{font-size:12px;color:#94a3b8;line-height:1.55;}
+.skip-txt strong{color:var(--text);}
+
+/* CONSEIL */
+.conseil{background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:10px;padding:12px 14px;}
+.conseil-lbl{font-family:'Space Mono',monospace;font-size:7px;color:var(--muted);letter-spacing:2px;margin-bottom:5px;}
+.conseil-txt{font-size:12px;color:#94a3b8;line-height:1.65;font-style:italic;}
+
+/* TOURNOI INFO */
+.tour-info{background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;display:flex;gap:16px;align-items:center;flex-wrap:wrap;}
+.tour-item{display:flex;flex-direction:column;gap:2px;}
+.tour-lbl{font-family:'Space Mono',monospace;font-size:7px;color:var(--muted);letter-spacing:1px;}
+.tour-val{font-family:'Bebas Neue',sans-serif;font-size:16px;line-height:1;color:var(--text);}
+
+/* LOADING / NAV */
+.loading{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 20px;gap:14px;}
+.spinner{width:36px;height:36px;border:2px solid var(--border);border-top-color:var(--tennis);border-radius:50%;animation:spin 1s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-lbl{font-family:'Space Mono',monospace;font-size:8px;color:var(--muted);letter-spacing:2px;}
+.card-footer{padding:10px 18px;border-top:1px solid var(--border);background:rgba(0,0,0,0.1);}
+.nav{position:fixed;bottom:0;left:0;right:0;z-index:50;background:rgba(6,10,16,0.97);backdrop-filter:blur(14px);border-top:1px solid var(--border);display:flex;height:60px;}
+.ni{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;-webkit-tap-highlight-color:transparent;}
+.ni-icon{font-size:17px;transition:.2s;}
+.ni:hover .ni-icon{transform:translateY(-2px);}
+.ni-lbl{font-family:'Space Mono',monospace;font-size:6px;letter-spacing:1px;color:var(--muted);}
+</style>
+</head>
+<body>
+
+<header class="hdr">
+  <button class="hdr-back" onclick="history.back()">← RETOUR</button>
+  <a class="logo" href="/">IA<span>SHARK</span></a>
+  <span class="hdr-pill">🎾 TENNIS IA</span>
+</header>
+
+<div id="root">
+  <div class="loading">
+    <div class="spinner"></div>
+    <div class="loading-lbl">CHARGEMENT...</div>
+  </div>
+</div>
+
+<nav class="nav">
+  <div class="ni" onclick="location='/'"><div class="ni-icon">🦈</div><div class="ni-lbl">ACCUEIL</div></div>
+  <div class="ni" onclick="location='/historique.html'"><div class="ni-icon">📊</div><div class="ni-lbl">HISTORIQUE</div></div>
+  <div class="ni" onclick="location='/combis.html'"><div class="ni-icon">🎰</div><div class="ni-lbl">COMBINÉS</div></div>
+  <div class="ni" onclick="location='/blog/'"><div class="ni-icon">📖</div><div class="ni-lbl">GUIDES</div></div>
+  <div class="ni" onclick="location='/compte.html'"><div class="ni-icon">👤</div><div class="ni-lbl">COMPTE</div></div>
+</nav>
+
+<script>
+var fId = new URLSearchParams(location.search).get('id');
+
+function forme(str) {
+  if(!str) return '';
+  return str.split('').slice(0,5).map(function(c){
+    var cls = c==='W'?'fw':'fl';
+    return '<div class="fd '+cls+'">'+c+'</div>';
+  }).join('');
+}
+
+function surfaceClass(s) {
+  var sl = (s||'').toLowerCase();
+  if(sl.includes('clay')||sl.includes('terre')) return 'sc-clay';
+  if(sl.includes('grass')||sl.includes('gazon')) return 'sc-grass';
+  return 'sc-hard';
+}
+
+function surfaceLabel(s) {
+  var sl = (s||'').toLowerCase();
+  if(sl.includes('clay')||sl.includes('terre')) return '🟤 TERRE BATTUE';
+  if(sl.includes('grass')||sl.includes('gazon')) return '🟢 GAZON';
+  return '🔵 DUR';
+}
+
+function playerPhoto(name) {
+  var ini = (name||'??').split(' ').map(function(w){return w[0]||'';}).join('').slice(0,2).toUpperCase();
+  return '<div class="player-photo-ph">'+ini+'</div>';
+}
+
+function render(m) {
+  var p1n = m.home&&m.home.n || 'Joueur 1';
+  var p2n = m.away&&m.away.n || 'Joueur 2';
+  var p1Country = m.home&&m.home.country || '';
+  var p2Country = m.away&&m.away.country || '';
+  var seed1 = m.home&&m.home.seed;
+  var seed2 = m.away&&m.away.seed;
+  var heure = (m.date||'').split(' ')[1]||'';
+  var surface = m.surface||'hard';
+  var tourRank = m.tour_rank||'';
+  var league = m.league||'';
+  var p1 = m.p1||50;
+  var p2 = m.p2||50;
+  var c1 = m.c1||'--';
+  var c2 = m.c2||'--';
+  var isVal = m.val||m.vbet==='OUI';
+  var isHot = m.hot||(m.conf||0)>=8.0;
+  var confPct = Math.round(((m.conf||0)/10)*100);
+  var confLvl = (m.conf||0)>=7.5?'SHARK LOCK':(m.conf||0)>=6.5?'SIGNAL FORT':'MODERE';
+  var pariRec = m.pari_rec||'';
+  var pariCote = m.cote_rec||'—';
+  var h2h = m.h2h_tennis||{};
+  var h2hP1 = h2h.p1Wins||0;
+  var h2hP2 = h2h.p2Wins||0;
+  var h2hTotal = h2hP1 + h2hP2;
+  var surf1 = m.surf_stats_p1;
+  var surf2 = m.surf_stats_p2;
+
+  document.title = p1n + ' vs ' + p2n + ' — IASHARK Tennis';
+
+  // Surface badge
+  var surfBadge = '<span class="surface-badge '+surfaceClass(surface)+'">'+surfaceLabel(surface)+'</span>';
+
+  // TOPBAR
+  var topbar = '<div class="topbar">'
+    +'<div class="lg-row"><span style="font-size:14px">🎾</span><span class="lg-name">'+league.toUpperCase()+'</span></div>'
+    +'<div style="display:flex;gap:6px;align-items:center">'
+    +surfBadge
+    +(heure?'<span style="font-family:Space Mono,monospace;font-size:10px">'+heure+'</span>':'')
+    +(isHot?'<span class="badge badge-hot">🔥 LOCK</span>':isVal?'<span class="badge badge-val">⚡ VALUE</span>':'')
+    +'</div>'
+    +'</div>';
+
+  // PLAYERS HERO
+  var playersHero = '<div class="players-hero">'
+    +'<div class="players-row">'
+    // P1
+    +'<div class="player p1">'
+    +playerPhoto(p1n)
+    +(seed1?'<div class="player-seed">TÊTE DE SÉRIE #'+seed1+'</div>':'')
+    +'<div class="player-name">'+p1n.split(' ').pop().toUpperCase()+'</div>'
+    +'<div class="player-country">'+p1n.split(' ').slice(0,-1).join(' ').toUpperCase()+(p1Country?' · '+p1Country:'')+'</div>'
+    +(m.form_p1?'<div class="player-form">'+forme(m.form_p1)+'</div>':'')
+    +'</div>'
+    // VS
+    +'<div class="vs-col"><span class="vs">VS</span>'+(heure?'<div class="vs-hr">'+heure+'</div>':'')+'</div>'
+    // P2
+    +'<div class="player p2">'
+    +playerPhoto(p2n)
+    +(seed2?'<div class="player-seed">TÊTE DE SÉRIE #'+seed2+'</div>':'')
+    +'<div class="player-name">'+p2n.split(' ').pop().toUpperCase()+'</div>'
+    +'<div class="player-country">'+p2n.split(' ').slice(0,-1).join(' ').toUpperCase()+(p2Country?' · '+p2Country:'')+'</div>'
+    +(m.form_p2?'<div class="player-form">'+forme(m.form_p2)+'</div>':'')
+    +'</div>'
+    +'</div>'
+    // PROBA BAR
+    +'<div class="pbar">'
+    +'<div class="pb1" style="width:'+p1+'%"></div>'
+    +'<div class="pb2" style="width:'+p2+'%"></div>'
+    +'</div>'
+    +'<div class="plabels">'
+    +'<div class="pi"><div class="pi-pct" style="color:var(--tennis)">'+p1+'%</div><div class="pi-lbl">'+p1n.split(' ').pop().toUpperCase().slice(0,8)+'</div></div>'
+    +'<div class="pi"><div class="pi-pct" style="color:rgba(226,232,240,0.45)">'+p2+'%</div><div class="pi-lbl">'+p2n.split(' ').pop().toUpperCase().slice(0,8)+'</div></div>'
+    +'</div>'
+    +'</div>';
+
+  // PARIS RECOMMANDE
+  var pmHtml = '';
+  if(pariRec) {
+    var edgeStr = m.edge ? '<span class="pm-tag edge">EDGE '+m.edge+'</span>' : '';
+    var kellyStr = m.kelly&&m.kelly!=='0' ? '<span class="pm-tag kelly">KELLY '+m.kelly+'%</span>' : '';
+    pmHtml = '<div class="s pt"><div class="stitle">PARIS RECOMMANDE</div>'
+      +'<div class="pari-main">'
+      +'<div class="pm-top">'
+      +'<div><div class="pm-lbl">🦈 SELECTION IASHARK</div><div class="pm-bet">'+pariRec.toUpperCase()+'</div></div>'
+      +'<div style="text-align:right"><div class="pm-cote">'+pariCote+'</div></div>'
+      +'</div>'
+      // Confiance inline
+      +'<div class="conf-top" style="margin-top:10px;"><div><div class="conf-score">'+(m.conf||0).toFixed(1)+'<sup>/10</sup></div></div><div style="text-align:right"><div class="conf-badge">'+confLvl+'</div></div></div>'
+      +'<div class="conf-track"><div class="conf-fill" id="confFill" style="width:0%"></div></div>'
+      +'<div class="conf-scale"><span>PRUDENT</span><span>CONFIANT</span><span>ELEVE</span><span>LOCK</span></div>'
+      +(edgeStr||kellyStr?'<div class="pm-foot">'+edgeStr+kellyStr+'<span class="pm-tag mise">MISE: '+( m.mise||'1-2% bankroll')+'</span></div>':'')
+      +'</div>'
+      +'</div><div class="sep"></div>';
+  }
+
+  // FACTEUR IA
+  var factHtml = '';
+  if(m.facteur_x) {
+    factHtml = '<div class="s"><div class="facteur"><div class="fact-icon">⚡</div><div><div class="fact-lbl">FACTEUR DÉCISIF</div><div class="fact-txt">'+m.facteur_x+'</div></div></div></div><div class="sep"></div>';
+  }
+
+  // ANALYSE
+  var analyseHtml = '';
+  if(m.analyse_card||m.conseil_public) {
+    analyseHtml = '<div class="s"><div class="stitle">ANALYSE IA</div>'
+      +'<div class="conseil"><div class="conseil-lbl">LECTURE DU MATCH</div><div class="conseil-txt">'+(m.analyse_card||m.conseil_public)+'</div></div>'
+      +'</div><div class="sep"></div>';
+  }
+
+  // COTES
+  var cotesHtml = '';
+  if(c1!=='--'||c2!=='--') {
+    var bestPlayer = pariRec.toLowerCase().includes(p1n.toLowerCase().split(' ')[0].toLowerCase())||pariRec===p1n?1:2;
+    cotesHtml = '<div class="s"><div class="stitle">COTES DU MATCH</div>'
+      +'<div class="cotes-row">'
+      +'<div class="cote-card'+(bestPlayer===1?' best':'')+'">'
+      +'<div class="cote-player">'+p1n.split(' ').pop().toUpperCase()+'</div>'
+      +'<div class="cote-val'+(bestPlayer===1?' best':'')+'">'+c1+'</div>'
+      +(p1?'<div class="cote-prob">'+p1+'% implied</div>':'')
+      +'</div>'
+      +'<div class="cote-card'+(bestPlayer===2?' best':'')+'">'
+      +'<div class="cote-player">'+p2n.split(' ').pop().toUpperCase()+'</div>'
+      +'<div class="cote-val'+(bestPlayer===2?' best':'')+'">'+c2+'</div>'
+      +(p2?'<div class="cote-prob">'+p2+'% implied</div>':'')
+      +'</div>'
+      +'</div>'
+      +'</div><div class="sep"></div>';
+  }
+
+  // H2H
+  var h2hHtml = '';
+  if(h2hTotal > 0) {
+    var p1Pct = Math.round(h2hP1/h2hTotal*100);
+    var p2Pct = 100 - p1Pct;
+    h2hHtml = '<div class="s"><div class="stitle">HEAD TO HEAD</div>'
+      +'<div class="h2h-block">'
+      +'<div class="h2h-row">'
+      +'<div class="h2h-player"><div class="h2h-name">'+p1n.split(' ').pop().toUpperCase()+'</div><div class="h2h-wins p1">'+h2hP1+'</div></div>'
+      +'<div class="h2h-vs">VS</div>'
+      +'<div class="h2h-player"><div class="h2h-name">'+p2n.split(' ').pop().toUpperCase()+'</div><div class="h2h-wins p2">'+h2hP2+'</div></div>'
+      +'</div>'
+      +'<div class="h2h-bar-wrap">'
+      +'<div class="h2h-bar"><div class="h2h-bar-p1" style="width:'+p1Pct+'%"></div><div class="h2h-bar-p2" style="width:'+p2Pct+'%"></div></div>'
+      +'<div class="h2h-note">'+h2hTotal+' confrontations historiques</div>'
+      +'</div>'
+      +'</div>'
+      +'</div><div class="sep"></div>';
+  }
+
+  // STATS SURFACE
+  var surfHtml = '';
+  if(surf1||surf2) {
+    function surfCard(player, stats, cls) {
+      if(!stats) return '<div class="surf-card"><div class="surf-player '+cls+'">'+player.split(' ').pop().toUpperCase()+'</div><div style="font-family:Space Mono,monospace;font-size:8px;color:var(--muted)">Stats non disponibles</div></div>';
+      var wr = stats.winrate||0;
+      var color = wr>=65?'var(--green)':wr>=50?'var(--tennis)':wr>=40?'var(--amber)':'var(--red)';
+      return '<div class="surf-card">'
+        +'<div class="surf-player '+cls+'">'+player.split(' ').pop().toUpperCase()+'</div>'
+        +'<div class="surf-stat"><span class="surf-lbl">Victoires</span><span class="surf-val" style="color:var(--tennis)">'+stats.wins+'</span></div>'
+        +'<div class="surf-stat"><span class="surf-lbl">Matchs</span><span class="surf-val">'+stats.total+'</span></div>'
+        +'<div class="surf-bar-wrap">'
+        +'<div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="font-family:Space Mono,monospace;font-size:7px;color:var(--muted)">WINRATE</span><span style="font-family:Bebas Neue,sans-serif;font-size:14px;color:'+color+'">'+wr+'%</span></div>'
+        +'<div class="surf-bar"><div class="surf-fill'+(cls==='p2'?' p2-fill':'')+'" data-w="'+wr+'" style="width:0%"></div></div>'
+        +'</div>'
+        +'</div>';
+    }
+    surfHtml = '<div class="s"><div class="stitle">STATS SUR '+surfaceLabel(surface)+'</div>'
+      +'<div class="surf-grid">'
+      +surfCard(p1n, surf1, 'p1')
+      +surfCard(p2n, surf2, 'p2')
+      +'</div>'
+      +'</div><div class="sep"></div>';
+  }
+
+  // SCENARIO
+  var scenHtml = '';
+  if(m.scenario) {
+    var phases = [
+      {t:'DÉBUT', txt:m.scenario.phase1},
+      {t:'MILIEU', txt:m.scenario.phase2},
+      {t:'FIN', txt:m.scenario.phase3}
+    ].filter(function(p){return p.txt;});
+    if(phases.length) {
+      var list = phases.map(function(p, i){
+        var last = i===phases.length-1;
+        return '<div class="scen-phase">'
+          +'<div class="scen-l"><div class="scen-badge">'+p.t+'</div>'+(!last?'<div class="scen-line"></div>':'')+'</div>'
+          +'<div class="scen-body"><div class="scen-txt">'+p.txt+'</div></div>'
+          +'</div>';
+      }).join('');
+      scenHtml = '<div class="s"><div class="stitle">SCÉNARIO ATTENDU</div><div class="scen-list">'+list+'</div></div><div class="sep"></div>';
+    }
+  }
+
+  // CONTEXTE
+  var ctxHtml = '';
+  if(m.contexte) {
+    ctxHtml = '<div class="s"><div class="stitle">CONTEXTE</div>'
+      +'<div class="conseil"><div class="conseil-txt">'+m.contexte+'</div></div>'
+      +'</div><div class="sep"></div>';
+  }
+
+  // CONSEIL
+  var conseilHtml = '';
+  if(m.conseil_public&&m.conseil_public!==m.analyse_card) {
+    conseilHtml = '<div class="s"><div class="stitle">CONSEIL</div>'
+      +'<div class="conseil"><div class="conseil-txt"><em>'+m.conseil_public+'</em></div></div>'
+      +'</div><div class="sep"></div>';
+  }
+
+  // SKIP / PASS
+  var skipHtml = m.no_signal
+    ? '<div class="skip danger"><div class="skip-icon">🚨</div><div><div class="skip-lbl">PASSE TON TOUR</div><div class="skip-txt">'+(m.no_signal_label||'Signaux insuffisants. Ne pas jouer.')+'</div></div></div>'
+    : '<div class="skip ok"><div class="skip-icon">✅</div><div><div class="skip-lbl">FEU VERT</div><div class="skip-txt">Signal identifié. <strong>Configuration favorable.</strong></div></div></div>';
+
+  return '<div class="wrap"><div class="card">'
+    + topbar
+    + playersHero
+    + '<div class="sep"></div>'
+    + pmHtml
+    + factHtml
+    + analyseHtml
+    + cotesHtml
+    + h2hHtml
+    + surfHtml
+    + scenHtml
+    + ctxHtml
+    + conseilHtml
+    + '<div class="s"><div class="stitle">VERDICT</div>'+skipHtml+'</div>'
+    + '<div class="card-footer"></div>'
+    + '</div></div>';
+}
+
+async function init() {
+  var el = document.getElementById('root');
+  if(!fId) {
+    el.innerHTML = '<div style="text-align:center;padding:60px 20px;font-family:Space Mono,monospace;font-size:10px;color:var(--muted)">ID MANQUANT<br><br><a href="/" style="color:var(--tennis)">← RETOUR</a></div>';
+    return;
+  }
+  try {
+    var res = await fetch('data.json?t='+Date.now());
+    var data = await res.json();
+    var m = (data.matchs||[]).find(function(x){ return String(x.id)===String(fId); });
+    if(!m) {
+      el.innerHTML = '<div style="text-align:center;padding:60px 20px"><div style="font-family:Space Mono,monospace;font-size:10px;color:var(--muted)">MATCH INTROUVABLE · ID: '+fId+'</div><br><a href="/" style="color:var(--tennis);font-family:Space Mono,monospace;font-size:9px">← RETOUR</a></div>';
+      return;
+    }
+    el.innerHTML = render(m);
+    // Animer les barres
+    setTimeout(function(){
+      var confFill = document.getElementById('confFill');
+      if(confFill) confFill.style.width = Math.round(((m.conf||0)/10)*100)+'%';
+      document.querySelectorAll('.surf-fill[data-w]').forEach(function(b){
+        requestAnimationFrame(function(){
+          setTimeout(function(){ b.style.width = b.getAttribute('data-w')+'%'; }, 60);
+        });
+      });
+    }, 100);
+  } catch(e) {
+    console.error(e);
+    el.innerHTML = '<div style="text-align:center;padding:60px 20px;color:var(--muted)">Erreur de chargement</div>';
+  }
+}
+
+init();
+</script>
+</body>
+</html>

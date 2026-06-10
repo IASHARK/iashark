@@ -346,31 +346,44 @@ jobs:
           // Infos joueur : classement + stats surface (getPlayerInfo)
           // ── TENNIS API FUNCTIONS ─────────────────────────────────
 
-          // getPlayerInfo → classement + stats surface par année
+          // /player/profile/{id} → classement, points, surface points
           async function getTennisPlayerInfo(playerId, tour) {
             if(!TENNIS_KEY||!playerId) return null;
             try {
-              var r = await get(TENNIS_BASE+'/tennis/v2/'+tour+'/player/'+playerId, TENNIS_HEADERS);
+              var r = await get(TENNIS_BASE+'/tennis/v2/'+tour+'/player/profile/'+playerId, TENNIS_HEADERS);
               return r||null;
             } catch(e){ return null; }
           }
 
-          // getPlayerMatchStats → stats service/retour carrière
+          // /player/match-stats/{id} → stats service/retour carrière
           async function getTennisMatchStats(playerId, tour) {
             if(!TENNIS_KEY||!playerId) return null;
             try {
-              var r = await get(TENNIS_BASE+'/tennis/v2/'+tour+'/player/'+playerId+'/stats', TENNIS_HEADERS);
+              var r = await get(TENNIS_BASE+'/tennis/v2/'+tour+'/player/match-stats/'+playerId, TENNIS_HEADERS);
               return (r&&r.data)||null;
             } catch(e){ return null; }
           }
 
-          // getPlayerPastMatches → derniers matchs joués
+          // /player/past-matches/{id} → derniers matchs joués (player1 = winner)
           async function getTennisRecentForm(playerId, tour) {
             if(!TENNIS_KEY||!playerId) return [];
             try {
-              var r = await get(TENNIS_BASE+'/tennis/v2/'+tour+'/player/'+playerId+'/matches?pageSize=10', TENNIS_HEADERS);
-              return Array.isArray(r)?r:((r&&r.data)||[]);
+              var r = await get(
+                TENNIS_BASE+'/tennis/v2/'+tour+'/player/past-matches/'+playerId
+                +'?include=tournament.court,tournament.rank&pageSize=10',
+                TENNIS_HEADERS
+              );
+              return (r&&r.data)||[];
             } catch(e){ return []; }
+          }
+
+          // /player/surface-summary/{id} → wins/losses par surface par année
+          async function getTennisSurfaceSummary(playerId, tour) {
+            if(!TENNIS_KEY||!playerId) return null;
+            try {
+              var r = await get(TENNIS_BASE+'/tennis/v2/'+tour+'/player/surface-summary/'+playerId, TENNIS_HEADERS);
+              return (r&&r.data)||null;
+            } catch(e){ return null; }
           }
 
           function parseTennisFixture(f) {
@@ -418,27 +431,36 @@ jobs:
             return res.slice(0,5).join('');
           }
 
-          // Stats surface depuis playerInfo.data[].surfaces[]
-          // Agrège 2024+2025+2026 pour être récent mais significatif
-          function calcSurfaceStats(playerInfo, surface) {
-            if(!playerInfo||!surface) return null;
+          // Stats surface depuis surface-summary → data[].surfaces[]
+          // surface-summary retourne les valeurs en string, profile retourne en int
+          function calcSurfaceStats(surfData, surface) {
+            if(!surfData||!surface) return null;
             var surfLow=(surface||'').toLowerCase();
-            var target=surfLow.includes('clay')?'clay':surfLow.includes('grass')?'grass':
-                       surfLow.includes('i.hard')||surfLow.includes('indoor')?'i.hard':'hard';
+            var target=surfLow.includes('clay')?'Clay':surfLow.includes('grass')?'Grass':
+                       surfLow.includes('i.hard')||surfLow.includes('indoor')?'I.hard':'Hard';
             var wins=0,losses=0;
-            var years=Array.isArray(playerInfo.data)?playerInfo.data:[];
-            years.slice(0,3).forEach(function(yr){ // 3 dernières années
+            var years=Array.isArray(surfData)?surfData:[];
+            years.slice(0,3).forEach(function(yr){
               (yr.surfaces||[]).forEach(function(s){
-                var cn=(s.court||'').toLowerCase();
-                var match=target==='hard'?(cn==='hard'):
-                          target==='grass'?(cn==='grass'):
-                          target==='clay'?(cn==='clay'):
-                          cn.includes('i.hard');
-                if(match){wins+=(s.courtWins||0);losses+=(s.courtLosses||0);}
+                var cn=(s.court||'');
+                if(cn===target||cn.toLowerCase()===target.toLowerCase()){
+                  wins+=parseInt(s.courtWins)||0;
+                  losses+=parseInt(s.courtLosses)||0;
+                }
               });
             });
             if(wins+losses===0) return null;
             return {wins:wins,losses:losses,total:wins+losses,winrate:Math.round(wins/(wins+losses)*100)};
+          }
+
+          // Stats surface depuis playerInfo (profile) — utilise grassPoints/clayPoints etc
+          function calcSurfaceStatsFromProfile(profile, surface) {
+            if(!profile||!surface) return null;
+            var sl=(surface||'').toLowerCase();
+            var wins=0,losses=0;
+            // profile a grassTournament, hardTournament, clayTournament
+            // mais pas les losses — on utilise surface-summary si dispo
+            return null; // fallback vers calcSurfaceStats
           }
 
           // Calcul des stats service depuis getPlayerMatchStats
@@ -621,41 +643,45 @@ jobs:
 
               console.log('\n[TENNIS] -> '+p1Name+' vs '+p2Name+' ('+tour.toUpperCase()+' | '+parsed.tourRank+' | '+parsed.surface+')');
 
-              // Fetch tout en parallèle : infos joueurs + matchs récents + stats service + cotes
+              // Fetch tout en parallèle : profil + surface-summary + matchs récents + match-stats + cotes
               var batch = await Promise.all([
-                getTennisPlayerInfo(parsed.p1Id, tour),
+                getTennisPlayerInfo(parsed.p1Id, tour),      // profile
                 getTennisPlayerInfo(parsed.p2Id, tour),
-                getTennisRecentForm(parsed.p1Id, tour),
+                getTennisSurfaceSummary(parsed.p1Id, tour),  // surface-summary
+                getTennisSurfaceSummary(parsed.p2Id, tour),
+                getTennisRecentForm(parsed.p1Id, tour),      // past-matches
                 getTennisRecentForm(parsed.p2Id, tour),
-                getTennisMatchStats(parsed.p1Id, tour),
+                getTennisMatchStats(parsed.p1Id, tour),      // match-stats
                 getTennisMatchStats(parsed.p2Id, tour),
-                getTennisOddsBest(parsed.id),
+                getTennisOddsBest(parsed.id),                // best odds
               ]);
-              await sleep(600);
+              await sleep(700);
 
-              var info1    = batch[0];
-              var info2    = batch[1];
-              var matches1 = batch[2]||[];
-              var matches2 = batch[3]||[];
-              var mstats1  = batch[4];
-              var mstats2  = batch[5];
-              var bestOdds = batch[6];
+              var profile1 = batch[0];
+              var profile2 = batch[1];
+              var surfData1 = batch[2];
+              var surfData2 = batch[3];
+              var matches1 = batch[4]||[];
+              var matches2 = batch[5]||[];
+              var mstats1  = batch[6];
+              var mstats2  = batch[7];
+              var bestOdds = batch[8];
 
-              // Classement
-              var rank1 = info1&&info1.currentRank||null;
-              var rank2 = info2&&info2.currentRank||null;
+              // Classement depuis profile
+              var rank1 = profile1&&profile1.currentRank||null;
+              var rank2 = profile2&&profile2.currentRank||null;
 
-              // Forme globale + forme sur cette surface
+              // Forme globale + sur cette surface
               var form1 = calcTennisForm(matches1, parsed.p1Id);
               var form2 = calcTennisForm(matches2, parsed.p2Id);
               var formSurf1 = calcTennisFormOnSurface(matches1, parsed.p1Id, parsed.surface);
               var formSurf2 = calcTennisFormOnSurface(matches2, parsed.p2Id, parsed.surface);
 
-              // Stats surface (wins/losses 3 dernières années)
-              var surf1 = calcSurfaceStats(info1, parsed.surface);
-              var surf2 = calcSurfaceStats(info2, parsed.surface);
+              // Stats surface depuis surface-summary
+              var surf1 = calcSurfaceStats(surfData1, parsed.surface);
+              var surf2 = calcSurfaceStats(surfData2, parsed.surface);
 
-              // Stats service/retour/breaks
+              // Stats service/retour/breaks depuis match-stats
               var svStats1 = calcServiceStats(mstats1);
               var svStats2 = calcServiceStats(mstats2);
 

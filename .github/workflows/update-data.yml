@@ -124,34 +124,32 @@ jobs:
             return Math.min(kelly*fraction*100, 5).toFixed(1);
           }
 
-          // ── CHANGEMENT 1 : LEAGUES FILTRÉES ─────────────────────
-          // Supprimé : Brésil(71), Argentine(128), MLS(253), Irlande(357), Japon(98)
-          // Gardé    : K-League(292) — 66.7% winrate dans les données réelles
-          // Ajouté   : Scottish Premiership(179), Belgian Pro League(144)
-          // Portuguesa(94) gardée mais avec détection saison automatique
+          // ── MODIFICATION 1 : LEAGUES + COUPE DU MONDE ───────────
+          // Inchangé pour les ligues clubs — ajout FIFA World Cup (1)
           const LEAGUES  = [
-            39, 40,   // Premier League, Championship
-            61, 62,   // Ligue 1, Ligue 2
-            140,      // La Liga
-            135,      // Serie A
-            78,       // Bundesliga
-            2, 3,     // LDC, Europa League
-            88,       // Eredivisie
-            94,       // Primeira Liga Portugal
-            203,      // Süper Lig Turquie
-            119,      // Superliga Danemark
-            179,      // Scottish Premiership — NOUVEAU
-            144,      // Belgian Pro League — NOUVEAU
-            292,      // K-League Corée — gardée (66.7% winrate)
+            1,            // FIFA World Cup 2026 — NOUVEAU
+            39, 40,       // Premier League, Championship
+            61, 62,       // Ligue 1, Ligue 2
+            140,          // La Liga
+            135,          // Serie A
+            78,           // Bundesliga
+            2, 3,         // LDC, Europa League
+            88,           // Eredivisie
+            94,           // Primeira Liga Portugal
+            203,          // Süper Lig Turquie
+            119,          // Superliga Danemark
+            179,          // Scottish Premiership
+            144,          // Belgian Pro League
+            292,          // K-League Corée
             66, 307, 143, 137, 81
           ];
           const SEASON   = 2025;
-          // Plus de ligues à saison calendaire dans le scope actif
-          // K-League (292) : saison 2025 terminée en nov 2025, saison 2026 a démarré en fév 2026
-          var SEASON_2026 = [292];
+          // MODIFICATION 1 : World Cup (1) ajouté en saison 2026, comme K-League
+          var SEASON_2026 = [292, 1];
           const TODAY    = new Date().toISOString().split('T')[0];
 
           var LG_KEY = {
+            1:'worldcup',   // NOUVEAU
             39:'premier', 40:'champ', 61:'ligue1', 62:'ligue2', 140:'laliga',
             135:'seriea', 78:'bundesliga', 2:'ldc', 3:'el',
             88:'eredivisie', 94:'primeira', 203:'superlig',
@@ -572,6 +570,7 @@ jobs:
               'seriea':'soccer_italy_serie_a','bundesliga':'soccer_germany_bundesliga',
               'ldc':'soccer_uefa_champs_league','el':'soccer_uefa_europa_league',
               'scottish':'soccer_scotland_premiership','belgique':'soccer_belgium_first_div_a',
+              'worldcup':'soccer_fifa_world_cup',
             };
             var sport=sportMap[leagueKey]||'soccer_uefa_champs_league';
             try {
@@ -822,6 +821,7 @@ jobs:
           }
           function lgIcon(l) {
             var s=(l||'').toLowerCase();
+            if(s.includes('world cup')||s.includes('fifa')) return '\uD83C\uDFC6\uD83C\uDF0D';
             if(s.includes('ligue 1')) return '\uD83C\uDDEB\uD83C\uDDF7';
             if(s.includes('la liga')) return '\uD83C\uDDEA\uD83C\uDDF8';
             if(s.includes('serie a')) return '\uD83C\uDDEE\uD83C\uDDF9';
@@ -1006,11 +1006,9 @@ jobs:
             return {styleH, styleA, possH, possA, defH, defA, insights};
           }
 
-          // ── CHANGEMENT 4A : calcKeyAbsences — correction IDs ────
           function calcKeyAbsences(injuries, topScorersH, topScorersA, homeId, awayId, bmHdom, mdHdom, bmAext, meAext) {
             var alerts=[];
             if(!injuries||!injuries.length) return alerts;
-            // CORRECTION BUG : utilisation de homeId/awayId (number) au lieu de 'home'/'away' (string)
             var injH=injuries.filter(function(x){return x.team===homeId;});
             var injA=injuries.filter(function(x){return x.team===awayId;});
             function checkAbsence(injList, scorers, teamGoals, teamGames, teamLabel){
@@ -1037,14 +1035,15 @@ jobs:
             return alerts;
           }
 
-          // ── CHANGEMENT 3 : REFONTE genAnalyse ───────────────────
+          // ── MODIFICATION 2 : genAnalyse avec détection Coupe du Monde ──
           async function genAnalyse(d) {
+            var isWorldCup = (d.leagueId === 1);
+
             var moyBmHdom = d.bmHdom&&d.mdHdom?(d.bmHdom/d.mdHdom).toFixed(2):'?';
             var moyBeHdom = d.beHdom&&d.mdHdom?(d.beHdom/d.mdHdom).toFixed(2):'?';
             var moyBmAext = d.bmAext&&d.meAext?(d.bmAext/d.meAext).toFixed(2):'?';
             var moyBeAext = d.beAext&&d.meAext?(d.beAext/d.meAext).toFixed(2):'?';
 
-            // Détection edge aberrant — signal de bug Poisson
             var edgeAberrant = d.best_edge && d.best_edge > 15;
 
             var injStr = 'Aucune absence majeure confirmée.';
@@ -1068,138 +1067,225 @@ jobs:
               h2hStr = d.home+' '+w1+'V / '+wN+'N / '+w2+'D | Moy buts: '+d.h2hAvgButs;
             }
 
-            // BTTS Non condition : au moins une équipe a scored dans < 65% de ses matchs
             var failHpct = d.mdHdom>0 ? Math.round((d.failHdom/d.mdHdom)*100) : 0;
             var failApct = d.meAext>0 ? Math.round((d.failAext/d.meAext)*100) : 0;
             var bttsNonCondition = failHpct >= 35 || failApct >= 35;
 
-            // ── PRÉ-CALCUL score central Poisson (fix #5 — pas de biais narratif de Claude) ──
             var poissonScoreH = Math.round(d.poisson_lambdaH||1.2);
             var poissonScoreA = Math.round(d.poisson_lambdaA||1.0);
             var scoreCentral = poissonScoreH + '-' + poissonScoreA;
 
-            var prompt =
-              '=== MATCH ===\n'
-              +d.home+' (DOM, #'+(d.rkH||'?')+') vs '+d.away+' (EXT, #'+(d.rkA||'?')+')\n'
-              +d.league+' | '+d.date+' | '+d.stade+'\n\n'
+            var prompt;
 
-              +'=== PHASE 1 — ANALYSE INDÉPENDANTE ===\n'
-              +'Analyse ces données SANS regarder les probas Poisson. Forme-toi une opinion sur le scénario le plus probable avant de passer à la Phase 2.\n\n'
+            // ── MODIFICATION 2 : PROMPT COUPE DU MONDE ──────────────
+            if (isWorldCup) {
+              prompt =
+                '=== COUPE DU MONDE FIFA 2026 ===\n'
+                +d.home+' vs '+d.away+'\n'
+                +d.league+' | '+d.date+' | '+d.stade+'\n\n'
 
-              +'DOM — Bilan domicile: '+d.vdH+'V / '+d.mdHdom+' matchs | Marqués: '+moyBmHdom+'/match | Encaissés: '+moyBeHdom+'/match\n'
-              +'DOM — Sans marquer: '+d.failHdom+'/'+d.mdHdom+' ('+failHpct+'%) | Clean sheets: '+d.csHdom+'/'+d.mdHdom+'\n'
-              +'DOM — Forme 5 derniers: '+d.forme5H+(d.streakH?' | Série: '+d.streakH:'')+'\n'
-              +(d.xgH_avg?'DOM — xG offensif: '+d.xgH_avg+' | xGA défensif: '+(d.xgH_xga||'N/A')+(d.xgH_defense_surchauffe?' ⚠️ DÉFENSE EN SURCHAUFFE — elle devrait encaisser plus':'')+'\n':'')
-              +'\n'
-              +'EXT — Bilan extérieur: '+d.veA+'V / '+d.meAext+' matchs | Marqués: '+moyBmAext+'/match | Encaissés: '+moyBeAext+'/match\n'
-              +'EXT — Sans marquer: '+d.failAext+'/'+d.meAext+' ('+failApct+'%) | Clean sheets: '+d.csAext+'/'+d.meAext+'\n'
-              +'EXT — Forme 5 derniers: '+d.forme5A+(d.streakA?' | Série: '+d.streakA:'')+'\n'
-              +(d.xgA_avg?'EXT — xG offensif: '+d.xgA_avg+' | xGA défensif: '+(d.xgA_xga||'N/A')+(d.xgA_defense_surchauffe?' ⚠️ DÉFENSE EN SURCHAUFFE — elle devrait encaisser plus':'')+'\n':'')
-              +'\n'
-              +'H2H: '+h2hStr+'\n'
-              +'Absences confirmées: '+injStr+'\n'
-              +(d.eloH&&d.eloA
-                ?'ELO: '+d.home+' '+Math.round(d.eloH)+' pts vs '+d.away+' '+Math.round(d.eloA)+' pts | Écart: '+(d.eloStats?d.eloStats.diff:0)+' pts (signal '+(d.eloStats?d.eloStats.signal:'?')+')\n'
-                 +(d.eloStats&&Math.abs(d.eloStats.diff)>=100?'→ Écart ELO significatif : l\'équipe plus faible a statistiquement moins de 35% de chances de ne pas perdre\n':'')
-                :'ELO: non disponible — poids du signal réduit\n')
-              +(d.motivH&&d.motivH.alerts&&d.motivH.alerts.length?'Enjeu DOM: '+d.motivH.alerts.join(' | ')+'\n':'')
-              +(d.motivA&&d.motivA.alerts&&d.motivA.alerts.length?'Enjeu EXT: '+d.motivA.alerts.join(' | ')+'\n':'')
-              +(d.matchup&&d.matchup.insights&&d.matchup.insights.length?'Opposition tactique: '+d.matchup.insights.join(' | ')+'\n':'')
-              +'\n'
+                +'⚠️ CONTEXTE ÉQUIPES NATIONALES — règles spéciales :\n'
+                +'- Pas de stats DOM/EXT (terrain neutre)\n'
+                +'- ClubElo non disponible pour les sélections nationales\n'
+                +'- Les stats de forme incluent qualifications + matchs amicaux récents\n'
+                +'- Le classement FIFA est le meilleur indicateur de niveau global\n\n'
 
-              +'=== PHASE 2 — MODÈLE MATHÉMATIQUE ===\n'
-              +'Ces chiffres CONFIRMENT ou INFIRMENT ton analyse Phase 1. Si contradiction → passe ton tour.\n\n'
-              +'Buts attendus Poisson: DOM '+d.poisson_lambdaH+' | EXT '+d.poisson_lambdaA+'\n'
-              +'Poisson: DOM '+d.poisson_p1+'% | Nul '+d.poisson_pN+'% | EXT '+d.poisson_p2+'%\n'
-              +'Poisson Over 2.5: '+d.poisson_over25+'% | BTTS Non: '+d.poisson_bttsN+'%\n'
-              +(d.pinnacle_p1
-                ?'Pinnacle (marché sharp, très fiable): DOM '+d.pinnacle_p1+'% | Nul '+d.pinnacle_pN+'% | EXT '+d.pinnacle_p2+'%\n'
-                 +'→ Si Pinnacle et Poisson divergent de plus de 15 pts sur un marché : méfie-toi, donne priorité à Pinnacle\n'
-                :'Pinnacle: non disponible\n')
-              +(edgeAberrant?'⚠️ ALERTE : Edge calculé à +'+d.best_edge+'% — edge > 15% = probablement un bug Poisson, pas une vraie opportunité. Ignore-le et base-toi sur Phase 1.\n':'')
-              +'\n'
-              +'Cotes réelles disponibles (UTILISE CES VALEURS EXACTES dans cote_rec) :\n'
-              +(d.dc1x&&d.dc1x!=='--'?'DC 1X: '+d.dc1x+'\n':'DC 1X: non disponible\n')
-              +(d.dc2x&&d.dc2x!=='--'?'DC X2: '+d.dc2x+'\n':'DC X2: non disponible\n')
-              +(d.co25&&d.co25!=='--'?'Over 2.5: '+d.co25+'\n':'Over 2.5: non disponible\n')
-              +(d.btts_non&&d.btts_non!=='--'?'BTTS Non: '+d.btts_non+'\n':'BTTS Non: non disponible\n')
-              +'\n'
+                +'=== DONNÉES DISPONIBLES ===\n'
+                +'Forme récente '+d.home+': '+d.forme5H+(d.streakH?' | Série: '+d.streakH:'')+'\n'
+                +'Forme récente '+d.away+': '+d.forme5A+(d.streakA?' | Série: '+d.streakA:'')+'\n'
+                +'H2H historique: '+h2hStr+'\n'
+                +'Absences confirmées: '+injStr+'\n'
+                +(d.rkH?'Rang FIFA '+d.home+': #'+d.rkH+'\n':'')
+                +(d.rkA?'Rang FIFA '+d.away+': #'+d.rkA+'\n':'')
+                +'\n'
+                +'=== MODÈLE MATHÉMATIQUE ===\n'
+                +'Buts attendus Poisson: '+d.home+' '+d.poisson_lambdaH+' | '+d.away+' '+d.poisson_lambdaA+'\n'
+                +'Poisson: '+d.home+' '+d.poisson_p1+'% | Nul '+d.poisson_pN+'% | '+d.away+' '+d.poisson_p2+'%\n'
+                +'Poisson Over 2.5: '+d.poisson_over25+'% | BTTS Non: '+d.poisson_bttsN+'%\n'
+                +(d.pinnacle_p1
+                  ?'Pinnacle (très fiable): '+d.home+' '+d.pinnacle_p1+'% | Nul '+d.pinnacle_pN+'% | '+d.away+' '+d.pinnacle_p2+'%\n'
+                  :'Pinnacle: non disponible\n')
+                +'\n'
+                +'Cotes disponibles (UTILISE CES VALEURS EXACTES) :\n'
+                +(d.dc1x&&d.dc1x!=='--'?'DC 1X: '+d.dc1x+'\n':'DC 1X: non disponible\n')
+                +(d.dc2x&&d.dc2x!=='--'?'DC X2: '+d.dc2x+'\n':'DC X2: non disponible\n')
+                +(d.co25&&d.co25!=='--'?'Over 2.5: '+d.co25+'\n':'Over 2.5: non disponible\n')
+                +(d.btts_non&&d.btts_non!=='--'?'BTTS Non: '+d.btts_non+'\n':'BTTS Non: non disponible\n')
+                +'\n'
 
-              +'=== PHASE 3 — DÉCISION ===\n\n'
-              +'RÈGLE 1 — QUAND PASSER TON TOUR (passe_ton_tour: true) :\n'
-              +'- Phase 1 et Phase 2 pointent dans des directions opposées (ex: stats DOM faibles mais Poisson dom favorable)\n'
-              +'- Derby ou match à enjeu symétrique des deux côtés → résultat imprévisible\n'
-              +'- ELO non disponible ET Pinnacle non disponible → signal trop faible\n'
-              +'- Moins de 8 matchs joués par une des deux équipes → stats insuffisantes\n'
-              +'- Aucune des 4 cotes autorisées n\'est dans la fourchette 1.60-2.20\n'
-              +'→ Si passe_ton_tour: true, TOUS les autres champs analytiques doivent être vides (""), confiance = 0, vbet = "NON"\n\n'
+                +'=== DÉCISION ===\n\n'
+                +'SIGNAUX FIABLES pour la Coupe du Monde :\n'
+                +'1. Écart de classement FIFA important (> 20 places) → DC pour la meilleure équipe\n'
+                +'2. Pinnacle disponible ET confirme le signal → confiance élevée\n'
+                +'3. H2H défavorable à une équipe + forme récente mauvaise → combinaison forte\n'
+                +'4. Absences majeures confirmées (titulaire clé absent)\n\n'
+                +'QUAND PASSER TON TOUR :\n'
+                +'- Match équilibré (classements proches, forme similaire, pas de Pinnacle)\n'
+                +'- Derby continental (ex: France vs Espagne) — résultat imprévisible\n'
+                +'- Phase de groupe : si une équipe est déjà qualifiée, rotation possible → pari risqué\n'
+                +'- Aucune cote entre 1.60 et 2.20\n\n'
+                +'MARCHÉS AUTORISÉS : DC 1X, DC X2, Over 2.5, BTTS Non\n'
+                +'COTE obligatoire : entre 1.60 et 2.20\n'
+                +'CONFIANCE max : 8.5\n\n'
+                +'RÈGLE ABSOLUE : Les champs de CONTENU (analyse_card, conseil, contexte, facteur_x, scenario, scenario_15min) doivent TOUJOURS être remplis même si passe_ton_tour = true.\n\n'
+                +'Réponds UNIQUEMENT avec ce JSON valide. Aucun texte avant ou après. Aucun backtick.\n'
+                +'{\n'
+                +'"passe_ton_tour": false,\n'
+                +'"confiance": [7.0 à 8.5 ou 0 si passe_ton_tour],\n'
+                +'"pari_rec": "[DC 1X | DC X2 | Over 2.5 | BTTS Non] ou vide si passe_ton_tour",\n'
+                +'"cote_rec": "[COPIE EXACTE de la cote ci-dessus]",\n'
+                +'"marche": "[DOUBLE_CHANCE | TOTAL_BUTS | BTTS] ou vide",\n'
+                +'"risque": "[FAIBLE | MODERE | ELEVE]",\n'
+                +'"verdict_shark": "[pari] à [cote] — [1 phrase factuelle]",\n'
+                +'"analyse_card": "[TOUJOURS REMPLI — analyse des deux sélections nationales]",\n'
+                +'"conseil": "[TOUJOURS REMPLI — explication simple pour l\'utilisateur]",\n'
+                +'"contexte": "[TOUJOURS REMPLI — contexte du match dans la compétition]",\n'
+                +'"facteur_x": "[TOUJOURS REMPLI — 1 facteur clé : classement FIFA / Pinnacle / absence / H2H]",\n'
+                +'"score_central": "'+scoreCentral+'",\n'
+                +'"p1": '+d.poisson_p1+', "pn": '+d.poisson_pN+', "p2": '+d.poisson_p2+',\n'
+                +'"po25": '+d.poisson_over25+', "btts": '+d.poisson_bttsY+',\n'
+                +'"edge": "[ta_prob_estimée - 1/cote_rec en %]",\n'
+                +'"vbet": "[OUI si edge>=5% ET conf>=7.0, sinon NON]",\n'
+                +'"kelly": "[1/4 Kelly en %, max 5%]",\n'
+                +'"scenario": {\n'
+                +'"phase1": "[TOUJOURS REMPLI — 0-30min : entrée dans le match]",\n'
+                +'"phase2": "[TOUJOURS REMPLI — 30-70min : évolution tactique]",\n'
+                +'"phase3": "[TOUJOURS REMPLI — 70-90min : fin de match]"\n'
+                +'},\n'
+                +'"scenario_15min": [\n'
+                +'  {"t":"0-15min","prob":8,"txt":"[TOUJOURS REMPLI]"},\n'
+                +'  {"t":"15-30min","prob":12,"txt":"[TOUJOURS REMPLI]"},\n'
+                +'  {"t":"30-45min","prob":10,"txt":"[TOUJOURS REMPLI]"},\n'
+                +'  {"t":"45-60min","prob":15,"txt":"[TOUJOURS REMPLI]"},\n'
+                +'  {"t":"60-75min","prob":18,"txt":"[TOUJOURS REMPLI]"},\n'
+                +'  {"t":"75-90min","prob":20,"txt":"[TOUJOURS REMPLI]"}\n'
+                +']\n'
+                +'}';
 
-              +'RÈGLE 2 — MARCHÉS AUTORISÉS (basés sur backtesting réel — ne pas déroger) :\n'
-              +'1. DC 1X — autorisé si cote entre 1.60 et 2.20\n'
-              +'2. DC X2 — autorisé si cote entre 1.60 et 2.20\n'
-              +'3. Over 2.5 — autorisé si cote entre 1.60 et 2.20\n'
-              +'4. BTTS Non — autorisé UNIQUEMENT si '+bttsNonCondition+' (au moins une équipe sans marquer dans 35%+ matchs) ET cote entre 1.60 et 2.20\n'
-              +'⛔ STRICTEMENT INTERDITS (ROI négatif prouvé) : Under 2.5, BTTS Oui, victoire sèche 1 ou 2, nul sec\n\n'
+            } else {
+              // ── PROMPT CLUBS — inchangé ──────────────────────────
+              prompt =
+                '=== MATCH ===\n'
+                +d.home+' (DOM, #'+(d.rkH||'?')+') vs '+d.away+' (EXT, #'+(d.rkA||'?')+')\n'
+                +d.league+' | '+d.date+' | '+d.stade+'\n\n'
 
-              +'RÈGLE 3 — COTE : entre 1.60 et 2.20 OBLIGATOIRE\n'
-              +'Si le meilleur marché a une cote hors fourchette → passe ton tour. Ne pas forcer.\n\n'
+                +'=== PHASE 1 — ANALYSE INDÉPENDANTE ===\n'
+                +'Analyse ces données SANS regarder les probas Poisson. Forme-toi une opinion sur le scénario le plus probable avant de passer à la Phase 2.\n\n'
 
-              +'RÈGLE 4 — CONFIANCE (sois honnête, pas optimiste) :\n'
-              +'7.0-7.4 : 1-2 signaux convergent, incertitude notable\n'
-              +'7.5-7.9 : 3+ signaux convergent, scénario assez clair\n'
-              +'8.0-8.5 : 4+ signaux convergent dont ELO + Pinnacle, très haute certitude\n'
-              +'MAX ABSOLU 8.5 — toute valeur > 8.5 sera ignorée\n\n'
+                +'DOM — Bilan domicile: '+d.vdH+'V / '+d.mdHdom+' matchs | Marqués: '+moyBmHdom+'/match | Encaissés: '+moyBeHdom+'/match\n'
+                +'DOM — Sans marquer: '+d.failHdom+'/'+d.mdHdom+' ('+failHpct+'%) | Clean sheets: '+d.csHdom+'/'+d.mdHdom+'\n'
+                +'DOM — Forme 5 derniers: '+d.forme5H+(d.streakH?' | Série: '+d.streakH:'')+'\n'
+                +(d.xgH_avg?'DOM — xG offensif: '+d.xgH_avg+' | xGA défensif: '+(d.xgH_xga||'N/A')+(d.xgH_defense_surchauffe?' ⚠️ DÉFENSE EN SURCHAUFFE — elle devrait encaisser plus':'')+'\n':'')
+                +'\n'
+                +'EXT — Bilan extérieur: '+d.veA+'V / '+d.meAext+' matchs | Marqués: '+moyBmAext+'/match | Encaissés: '+moyBeAext+'/match\n'
+                +'EXT — Sans marquer: '+d.failAext+'/'+d.meAext+' ('+failApct+'%) | Clean sheets: '+d.csAext+'/'+d.meAext+'\n'
+                +'EXT — Forme 5 derniers: '+d.forme5A+(d.streakA?' | Série: '+d.streakA:'')+'\n'
+                +(d.xgA_avg?'EXT — xG offensif: '+d.xgA_avg+' | xGA défensif: '+(d.xgA_xga||'N/A')+(d.xgA_defense_surchauffe?' ⚠️ DÉFENSE EN SURCHAUFFE — elle devrait encaisser plus':'')+'\n':'')
+                +'\n'
+                +'H2H: '+h2hStr+'\n'
+                +'Absences confirmées: '+injStr+'\n'
+                +(d.eloH&&d.eloA
+                  ?'ELO: '+d.home+' '+Math.round(d.eloH)+' pts vs '+d.away+' '+Math.round(d.eloA)+' pts | Écart: '+(d.eloStats?d.eloStats.diff:0)+' pts (signal '+(d.eloStats?d.eloStats.signal:'?')+')\n'
+                   +(d.eloStats&&Math.abs(d.eloStats.diff)>=100?'→ Écart ELO significatif : l\'équipe plus faible a statistiquement moins de 35% de chances de ne pas perdre\n':'')
+                  :'ELO: non disponible — poids du signal réduit\n')
+                +(d.motivH&&d.motivH.alerts&&d.motivH.alerts.length?'Enjeu DOM: '+d.motivH.alerts.join(' | ')+'\n':'')
+                +(d.motivA&&d.motivA.alerts&&d.motivA.alerts.length?'Enjeu EXT: '+d.motivA.alerts.join(' | ')+'\n':'')
+                +(d.matchup&&d.matchup.insights&&d.matchup.insights.length?'Opposition tactique: '+d.matchup.insights.join(' | ')+'\n':'')
+                +'\n'
 
-              +'RÈGLE 5 — RISQUE :\n'
-              +'FAIBLE : cote < 1.75 ET ELO confirme ET Pinnacle confirme\n'
-              +'MODERE : cote 1.75-2.10 ET stats majoritairement convergentes\n'
-              +'ELEVE : cote > 2.10 OU stats contradictoires OU ELO/Pinnacle absents\n\n'
+                +'=== PHASE 2 — MODÈLE MATHÉMATIQUE ===\n'
+                +'Ces chiffres CONFIRMENT ou INFIRMENT ton analyse Phase 1. Si contradiction → passe ton tour.\n\n'
+                +'Buts attendus Poisson: DOM '+d.poisson_lambdaH+' | EXT '+d.poisson_lambdaA+'\n'
+                +'Poisson: DOM '+d.poisson_p1+'% | Nul '+d.poisson_pN+'% | EXT '+d.poisson_p2+'%\n'
+                +'Poisson Over 2.5: '+d.poisson_over25+'% | BTTS Non: '+d.poisson_bttsN+'%\n'
+                +(d.pinnacle_p1
+                  ?'Pinnacle (marché sharp, très fiable): DOM '+d.pinnacle_p1+'% | Nul '+d.pinnacle_pN+'% | EXT '+d.pinnacle_p2+'%\n'
+                   +'→ Si Pinnacle et Poisson divergent de plus de 15 pts sur un marché : méfie-toi, donne priorité à Pinnacle\n'
+                  :'Pinnacle: non disponible\n')
+                +(edgeAberrant?'⚠️ ALERTE : Edge calculé à +'+d.best_edge+'% — edge > 15% = probablement un bug Poisson, pas une vraie opportunité. Ignore-le et base-toi sur Phase 1.\n':'')
+                +'\n'
+                +'Cotes réelles disponibles (UTILISE CES VALEURS EXACTES dans cote_rec) :\n'
+                +(d.dc1x&&d.dc1x!=='--'?'DC 1X: '+d.dc1x+'\n':'DC 1X: non disponible\n')
+                +(d.dc2x&&d.dc2x!=='--'?'DC X2: '+d.dc2x+'\n':'DC X2: non disponible\n')
+                +(d.co25&&d.co25!=='--'?'Over 2.5: '+d.co25+'\n':'Over 2.5: non disponible\n')
+                +(d.btts_non&&d.btts_non!=='--'?'BTTS Non: '+d.btts_non+'\n':'BTTS Non: non disponible\n')
+                +'\n'
 
-              +'RÈGLE 6 — EDGE ET VBET (calcule toi-même, ne copie pas un exemple) :\n'
-              +'edge = ta prob IA estimée pour ce marché MOINS prob implicite de la cote (1/cote)\n'
-              +'Exemple : tu estimes 65% pour DC X2 à cote 1.85 → prob implicite = 54% → edge = +11%\n'
-              +'vbet = "OUI" uniquement si edge >= 5% ET confiance >= 7.0 ET passe_ton_tour = false\n'
-              +'kelly = (edge_decimal * (cote-1) - (1-edge_decimal)) / (cote-1) * 0.25 * 100, max 5%\n\n'
+                +'=== PHASE 3 — DÉCISION ===\n\n'
+                +'RÈGLE 1 — QUAND PASSER TON TOUR (passe_ton_tour: true) :\n'
+                +'- Phase 1 et Phase 2 pointent dans des directions opposées (ex: stats DOM faibles mais Poisson dom favorable)\n'
+                +'- Derby ou match à enjeu symétrique des deux côtés → résultat imprévisible\n'
+                +'- ELO non disponible ET Pinnacle non disponible → signal trop faible\n'
+                +'- Moins de 8 matchs joués par une des deux équipes → stats insuffisantes\n'
+                +'- Aucune des 4 cotes autorisées n\'est dans la fourchette 1.60-2.20\n'
+                +'→ Si passe_ton_tour: true, TOUS les autres champs analytiques doivent être vides (""), confiance = 0, vbet = "NON"\n\n'
 
-              +'Réponds UNIQUEMENT avec ce JSON valide. Aucun texte avant ou après. Aucun backtick.\n'
-              +'RÈGLE ABSOLUE : Les champs de CONTENU (analyse_card, conseil, contexte, facteur_x, scenario, scenario_15min) doivent TOUJOURS être remplis même si passe_ton_tour = true. Ce contenu enrichit la page match pour l\'utilisateur même sans pari.\n\n'
-              +'{\n'
-              +'"passe_ton_tour": false,\n'
-              +'"confiance": [7.0 à 8.5 selon convergence, ou 0 si passe_ton_tour],\n'
-              +'"pari_rec": "[DC 1X | DC X2 | Over 2.5 | BTTS Non] ou vide si passe_ton_tour",\n'
-              +'"cote_rec": "[COPIE EXACTE de la cote dans le tableau ci-dessus — pas d\'arrondi ni d\'invention]",\n'
-              +'"marche": "[DOUBLE_CHANCE | TOTAL_BUTS | BTTS] ou vide si passe_ton_tour",\n'
-              +'"risque": "[FAIBLE | MODERE | ELEVE]",\n'
-              +'"verdict_shark": "[pari] à [cote] — [1 phrase factuelle] ou vide si passe_ton_tour",\n'
-              +'"analyse_card": "[TOUJOURS REMPLI — 2-3 phrases sur forces/faiblesses des deux équipes pour ce match]",\n'
-              +'"conseil": "[TOUJOURS REMPLI — 2-3 phrases simples pour l\'utilisateur sur ce match, sans jargon]",\n'
-              +'"contexte": "[TOUJOURS REMPLI — 1-2 phrases sur la situation classement des deux équipes]",\n'
-              +'"facteur_x": "[TOUJOURS REMPLI — 1 seul facteur clé : xG / ELO / absence / enjeu / série]",\n'
-              +'"score_central": "'+scoreCentral+'",\n'
-              +'"p1": '+d.poisson_p1+', "pn": '+d.poisson_pN+', "p2": '+d.poisson_p2+',\n'
-              +'"po25": '+d.poisson_over25+', "btts": '+d.poisson_bttsY+',\n'
-              +'"edge": "[ta_prob_estimée - 1/cote_rec en %, ou 0% si passe_ton_tour]",\n'
-              +'"vbet": "[OUI si edge>=5% ET conf>=7.0 ET passe_ton_tour=false, sinon NON]",\n'
-              +'"kelly": "[1/4 Kelly en %, max 5%, ou 0 si pas de value]",\n'
-              +'"scenario": {\n'
-              +'"phase1": "[TOUJOURS REMPLI — 0-30min : comment le match démarre tactiquement]",\n'
-              +'"phase2": "[TOUJOURS REMPLI — 30-70min : comment le match évolue]",\n'
-              +'"phase3": "[TOUJOURS REMPLI — 70-90min : comment le match se termine]"\n'
-              +'},\n'
-              +'"scenario_15min": [\n'
-              +'  {"t":"0-15min","prob":8,"txt":"[TOUJOURS REMPLI — contexte tactique du début, pressing, mise en place]"},\n'
-              +'  {"t":"15-30min","prob":12,"txt":"[TOUJOURS REMPLI — première vraie phase, qui domine et pourquoi]"},\n'
-              +'  {"t":"30-45min","prob":10,"txt":"[TOUJOURS REMPLI — fin de première mi-temps, fatigue, occasions]"},\n'
-              +'  {"t":"45-60min","prob":15,"txt":"[TOUJOURS REMPLI — début deuxième mi-temps, ajustements tactiques]"},\n'
-              +'  {"t":"60-75min","prob":18,"txt":"[TOUJOURS REMPLI — phase décisive, substitutions, momentum]"},\n'
-              +'  {"t":"75-90min","prob":20,"txt":"[TOUJOURS REMPLI — fin de match, gestion du score, derniers assauts]"}\n'
-              +']\n'
-              +'}';
+                +'RÈGLE 2 — MARCHÉS AUTORISÉS (basés sur backtesting réel — ne pas déroger) :\n'
+                +'1. DC 1X — autorisé si cote entre 1.60 et 2.20\n'
+                +'2. DC X2 — autorisé si cote entre 1.60 et 2.20\n'
+                +'3. Over 2.5 — autorisé si cote entre 1.60 et 2.20\n'
+                +'4. BTTS Non — autorisé UNIQUEMENT si '+bttsNonCondition+' (au moins une équipe sans marquer dans 35%+ matchs) ET cote entre 1.60 et 2.20\n'
+                +'⛔ STRICTEMENT INTERDITS (ROI négatif prouvé) : Under 2.5, BTTS Oui, victoire sèche 1 ou 2, nul sec\n\n'
+
+                +'RÈGLE 3 — COTE : entre 1.60 et 2.20 OBLIGATOIRE\n'
+                +'Si le meilleur marché a une cote hors fourchette → passe ton tour. Ne pas forcer.\n\n'
+
+                +'RÈGLE 4 — CONFIANCE (sois honnête, pas optimiste) :\n'
+                +'7.0-7.4 : 1-2 signaux convergent, incertitude notable\n'
+                +'7.5-7.9 : 3+ signaux convergent, scénario assez clair\n'
+                +'8.0-8.5 : 4+ signaux convergent dont ELO + Pinnacle, très haute certitude\n'
+                +'MAX ABSOLU 8.5 — toute valeur > 8.5 sera ignorée\n\n'
+
+                +'RÈGLE 5 — RISQUE :\n'
+                +'FAIBLE : cote < 1.75 ET ELO confirme ET Pinnacle confirme\n'
+                +'MODERE : cote 1.75-2.10 ET stats majoritairement convergentes\n'
+                +'ELEVE : cote > 2.10 OU stats contradictoires OU ELO/Pinnacle absents\n\n'
+
+                +'RÈGLE 6 — EDGE ET VBET (calcule toi-même, ne copie pas un exemple) :\n'
+                +'edge = ta prob IA estimée pour ce marché MOINS prob implicite de la cote (1/cote)\n'
+                +'Exemple : tu estimes 65% pour DC X2 à cote 1.85 → prob implicite = 54% → edge = +11%\n'
+                +'vbet = "OUI" uniquement si edge >= 5% ET confiance >= 7.0 ET passe_ton_tour = false\n'
+                +'kelly = (edge_decimal * (cote-1) - (1-edge_decimal)) / (cote-1) * 0.25 * 100, max 5%\n\n'
+
+                +'Réponds UNIQUEMENT avec ce JSON valide. Aucun texte avant ou après. Aucun backtick.\n'
+                +'RÈGLE ABSOLUE : Les champs de CONTENU (analyse_card, conseil, contexte, facteur_x, scenario, scenario_15min) doivent TOUJOURS être remplis même si passe_ton_tour = true. Ce contenu enrichit la page match pour l\'utilisateur même sans pari.\n\n'
+                +'{\n'
+                +'"passe_ton_tour": false,\n'
+                +'"confiance": [7.0 à 8.5 selon convergence, ou 0 si passe_ton_tour],\n'
+                +'"pari_rec": "[DC 1X | DC X2 | Over 2.5 | BTTS Non] ou vide si passe_ton_tour",\n'
+                +'"cote_rec": "[COPIE EXACTE de la cote dans le tableau ci-dessus — pas d\'arrondi ni d\'invention]",\n'
+                +'"marche": "[DOUBLE_CHANCE | TOTAL_BUTS | BTTS] ou vide si passe_ton_tour",\n'
+                +'"risque": "[FAIBLE | MODERE | ELEVE]",\n'
+                +'"verdict_shark": "[pari] à [cote] — [1 phrase factuelle] ou vide si passe_ton_tour",\n'
+                +'"analyse_card": "[TOUJOURS REMPLI — 2-3 phrases sur forces/faiblesses des deux équipes pour ce match]",\n'
+                +'"conseil": "[TOUJOURS REMPLI — 2-3 phrases simples pour l\'utilisateur sur ce match, sans jargon]",\n'
+                +'"contexte": "[TOUJOURS REMPLI — 1-2 phrases sur la situation classement des deux équipes]",\n'
+                +'"facteur_x": "[TOUJOURS REMPLI — 1 seul facteur clé : xG / ELO / absence / enjeu / série]",\n'
+                +'"score_central": "'+scoreCentral+'",\n'
+                +'"p1": '+d.poisson_p1+', "pn": '+d.poisson_pN+', "p2": '+d.poisson_p2+',\n'
+                +'"po25": '+d.poisson_over25+', "btts": '+d.poisson_bttsY+',\n'
+                +'"edge": "[ta_prob_estimée - 1/cote_rec en %, ou 0% si passe_ton_tour]",\n'
+                +'"vbet": "[OUI si edge>=5% ET conf>=7.0 ET passe_ton_tour=false, sinon NON]",\n'
+                +'"kelly": "[1/4 Kelly en %, max 5%, ou 0 si pas de value]",\n'
+                +'"scenario": {\n'
+                +'"phase1": "[TOUJOURS REMPLI — 0-30min : comment le match démarre tactiquement]",\n'
+                +'"phase2": "[TOUJOURS REMPLI — 30-70min : comment le match évolue]",\n'
+                +'"phase3": "[TOUJOURS REMPLI — 70-90min : comment le match se termine]"\n'
+                +'},\n'
+                +'"scenario_15min": [\n'
+                +'  {"t":"0-15min","prob":8,"txt":"[TOUJOURS REMPLI — contexte tactique du début, pressing, mise en place]"},\n'
+                +'  {"t":"15-30min","prob":12,"txt":"[TOUJOURS REMPLI — première vraie phase, qui domine et pourquoi]"},\n'
+                +'  {"t":"30-45min","prob":10,"txt":"[TOUJOURS REMPLI — fin de première mi-temps, fatigue, occasions]"},\n'
+                +'  {"t":"45-60min","prob":15,"txt":"[TOUJOURS REMPLI — début deuxième mi-temps, ajustements tactiques]"},\n'
+                +'  {"t":"60-75min","prob":18,"txt":"[TOUJOURS REMPLI — phase décisive, substitutions, momentum]"},\n'
+                +'  {"t":"75-90min","prob":20,"txt":"[TOUJOURS REMPLI — fin de match, gestion du score, derniers assauts]"}\n'
+                +']\n'
+                +'}';
+            }
 
             var r = await postJSONWithRetry('api.anthropic.com', '/v1/messages', {
               model: 'claude-sonnet-4-6',
               max_tokens: 2500,
-              // FIX #6 — System prompt séparé pour stabiliser le comportement
               system: 'Tu es IASHARK, un système d\'analyse statistique de football. Tu réponds EXCLUSIVEMENT en JSON valide. Aucun backtick, aucun texte avant ou après le JSON. Tu n\'inventes jamais de statistiques. Tu es factuel, neutre, calibré. Quand les données sont insuffisantes, tu passes ton tour plutôt que de forcer une prédiction.',
               messages: [{role:'user', content:prompt}]
             }, {'x-api-key':ANT_KEY, 'anthropic-version':'2023-06-01'});
@@ -1328,7 +1414,6 @@ jobs:
               generateWorldCupPages();
               generateSitemaps([]);
 
-              // ── PAS DE MATCHS AUJOURD'HUI — résoudre quand même les résultats d'hier ──
               console.log('\n=== JOUR SANS MATCHS — Résolution historique d\'hier ===');
               var histoPathEarly = 'historique.json';
               var histoEarly = {predictions:[], stats:{winrate:0,roi:0,total:0,streak:0,wins:0,losses:0}, monthly:[], backtesting:{}};
@@ -1382,13 +1467,11 @@ jobs:
                 });
               } catch(e) { console.log('  Erreur résolution hier:', e.message); }
 
-              // Nettoyage one-shot des combinés existants
               var beforeCleanE = histoEarly.predictions.length;
               histoEarly.predictions = histoEarly.predictions.filter(function(p){ return p.type !== 'combi'; });
               var cleanedE = beforeCleanE - histoEarly.predictions.length;
               if(cleanedE > 0) console.log('  Nettoyage: '+cleanedE+' combinés supprimés de l\'historique');
 
-              // Stats sur SINGLES uniquement
               var singlesE = histoEarly.predictions.filter(function(p){return p.type==='single'&&p.result!=='pending';});
               var winsE = singlesE.filter(function(p){return p.result==='win';});
               var totalE = singlesE.length;
@@ -1413,7 +1496,6 @@ jobs:
                 total: totalE, streak: streakE,
                 wins: winsE.length, losses: totalE-winsE.length
               };
-              // ROI mensuel sur singles uniquement
               var monthsE = {};
               singlesE.forEach(function(p){
                 var key = (p.date||'').substring(0,7);
@@ -1485,23 +1567,27 @@ jobs:
               var home = fix.teams.home;
               var away = fix.teams.away;
 
+              // MODIFICATION 2 : détecter Coupe du Monde pour ce fixture
+              var isWorldCupMatch = (lg.id === 1);
+
               var cached = (oldData.matchs||[]).find(function(m){return m.id===f.id&&m.verdict_shark&&m.verdict_shark!=='';});
               if(cached){
                 console.log('-> '+home.name+' vs '+away.name+' : cache');
                 matchsData.push(cached);
-                // Cache : appliquer aussi les filtres qualité pour forCombis
                 var cachedEdgeNum = parseFloat((cached.edge||'').replace(/[^0-9.]/g,''))||0;
                 var cachedCote = parseFloat(cached.cote_rec)||0;
                 var cachedPariLow = (cached.pari_rec||'').toLowerCase();
                 var cachedMarcheOk = cachedPariLow.includes('dc 1x') || cachedPariLow.includes('dc x2') ||
                                      cachedPariLow.includes('over 2.5') || cachedPariLow.includes('btts non');
-                if(cached.conf>=7.0 && cachedEdgeNum>=5 && cachedEdgeNum<=15 && cachedCote>=1.55 && cachedCote<=2.40 && cached.elo_home && cachedMarcheOk) {
+                // MODIFICATION 3 : pas de filtre eloOk pour la Coupe du Monde
+                var cachedEloOk = cached.league_key === 'worldcup' ? true : !!(cached.elo_home && cached.elo_away);
+                if(cached.conf>=7.0 && cachedEdgeNum>=5 && cachedEdgeNum<=15 && cachedCote>=1.55 && cachedCote<=2.40 && cachedEloOk && cachedMarcheOk) {
                   forCombis.push({home:cached.home.n,away:cached.away.n,pari:cached.pari_rec,conf:cached.conf,edge:cached.edge||'',cote:parseFloat(cached.cote_rec)||1.5});
                 }
                 continue;
               }
 
-              console.log('\n-> '+home.name+' vs '+away.name+' ('+lg.name+')');
+              console.log('\n-> '+home.name+' vs '+away.name+' ('+lg.name+')'+(isWorldCupMatch?' 🌍 COUPE DU MONDE':''));
               if (!standingsCache[lg.id]) {
                 standingsCache[lg.id] = await getFullStanding(lg.id);
                 await sleep(250);
@@ -1613,7 +1699,6 @@ jobs:
               var motivH = calcMotivation(rkH, totalTeams, entryH?entryH.points:0, standings[0]?standings[0].points:0, matchsLeft, true, lg.name, home.name, away.name);
               var motivA = calcMotivation(rkA, totalTeams, entryA?entryA.points:0, standings[0]?standings[0].points:0, matchsLeft, false, lg.name, home.name, away.name);
 
-              // ── CHANGEMENT 4C : ELO corrigé — mdHdom défini avant eloStats ──
               var totalH=(sH&&sH.fixtures&&sH.fixtures.played&&sH.fixtures.played.total)||30;
               var totalA=(sA&&sA.fixtures&&sA.fixtures.played&&sA.fixtures.played.total)||30;
               var mdHdom_elo = (sH&&sH.fixtures&&sH.fixtures.played&&sH.fixtures.played.home)||Math.round(totalH/2);
@@ -1693,14 +1778,13 @@ jobs:
 
               var matchup = calcMatchup(xgH, xgA, sH, sA);
 
-              // CHANGEMENT 4A : correction IDs dans calcKeyAbsences
               var bmHdom=(sH&&sH.goals&&sH.goals.for&&sH.goals.for.home)||0;
               var beHdom=(sH&&sH.goals&&sH.goals.against&&sH.goals.against.home)||0;
               var bmAext=(sA&&sA.goals&&sA.goals.for&&sA.goals.for.away)||0;
               var beAext=(sA&&sA.goals&&sA.goals.against&&sA.goals.against.away)||0;
               var keyAbsenceAlerts = calcKeyAbsences(
                 injuries, topScorersH, topScorersA,
-                home.id, away.id,   // ← CORRIGÉ : IDs numériques, pas strings
+                home.id, away.id,
                 bmHdom, mdHdom,
                 bmAext, meAext
               );
@@ -1750,6 +1834,7 @@ jobs:
               if (!heure) heure = heureUTC;
               var meteoStr = wx?wx.desc+' '+wx.emoji+' '+wx.temp+' | Vent: '+wx.wind:'N/A';
               var an = await genAnalyse({
+                leagueId: lg.id,  // MODIFICATION 2 : passer l'ID pour détecter WC dans genAnalyse
                 home:home.name, away:away.name, homeId:home.id, awayId:away.id,
                 league:lg.name, date:TODAY+' '+heure,
                 stade:(f.venue&&f.venue.name)||'', meteo:meteoStr,
@@ -1785,7 +1870,7 @@ jobs:
                 pinnacle_c1: pinnacleOdds?pinnacleOdds.c1:null, pinnacle_c2: pinnacleOdds?pinnacleOdds.c2:null,
                 best_edge: bestEdge?bestEdge.edge:null, best_edge_market: bestEdge?bestEdge.market:null,
                 best_edge_cote: bestEdge?bestEdge.cote:null,
-                all_edges: allEdges.slice(0,3), node_kelly: nodeKelly,  // CORRECTION BUG 4B : une seule déclaration
+                all_edges: allEdges.slice(0,3), node_kelly: nodeKelly,
                 lineup_home_formation: lineups&&lineups.home?lineups.home.formation:null,
                 lineup_away_formation: lineups&&lineups.away?lineups.away.formation:null,
                 lineup_home_xi: lineups&&lineups.home?(lineups.home.startXI||[]).map(function(p){return p.name+' ('+p.pos+')';}).join(', '):null,
@@ -1805,8 +1890,6 @@ jobs:
               });
               await sleep(500);
 
-              // FIX #3 — Appliquer passe_ton_tour : vider UNIQUEMENT les champs de pari
-              // Les champs de contenu (analyse_card, conseil, scenario, etc.) restent intacts pour la page match
               if (an && an.passe_ton_tour === true) {
                 console.log('  \u23ed PASS: '+home.name+' vs '+away.name+' — pas de signal suffisant, page enrichie sans pari');
                 an.pari_rec = '';
@@ -1818,7 +1901,6 @@ jobs:
                 an.kelly = '0';
                 an.marche = '';
                 an.risque = 'ELEVE';
-                // analyse_card, conseil, contexte, facteur_x, scenario, scenario_15min : CONSERVÉS
               }
 
               (function(){
@@ -1880,7 +1962,7 @@ jobs:
                 league:lg.name, ligue_icon:lgIcon(lg.name), league_key:lgKey(lg.id),
                 date: (dateVraieParis + ' ' + heure).trim(), cat:['all'],
                 val:an?(an.vbet==='OUI'&&(an.confiance||0)>=7.0):false,
-                hot:an ? ((an.confiance||0)>=8.0 || ((an.confiance||0)>=7.5 && ['ldc', 'premier', 'laliga', 'seriea', 'bundesliga', 'ligue1'].includes(lgKey(lg.id)))) : false,
+                hot:an ? ((an.confiance||0)>=8.0 || ((an.confiance||0)>=7.5 && ['worldcup','ldc', 'premier', 'laliga', 'seriea', 'bundesliga', 'ligue1'].includes(lgKey(lg.id)))) : false,
                 conf:an?parseFloat(an.confiance||0):0,
                 p1:an&&(an.p1||0)>0?(an.p1||0):(shinProbs?shinProbs.p1:poissonProbs.p1)||0,
                 pn:an&&(an.pn||0)>0?(an.pn||0):(shinProbs?shinProbs.pN:poissonProbs.pN)||0,
@@ -1944,14 +2026,13 @@ jobs:
               };
               matchsData.push(matchObj);
 
-              // ── CHANGEMENT 2 : FILTRES QUALITÉ STRICTS ──────────
-              // Basés sur le backtesting réel : edge 5-15%, cote 1.55-2.40, ELO requis, marchés performants uniquement
+              // MODIFICATION 3 : filtre eloOk désactivé pour Coupe du Monde
               if (an && (an.confiance||0) >= 7.0) {
                 var edgeNumCheck = parseFloat((an.edge||'').replace(/[^0-9.]/g,''))||0;
                 var coteRecCheck = parseFloat(an.cote_rec)||0;
                 var edgeOk  = edgeNumCheck >= 5 && edgeNumCheck <= 15;
                 var coteOk  = coteRecCheck >= 1.55 && coteRecCheck <= 2.40;
-                var eloOk   = !!(matchObj.elo_home && matchObj.elo_away);
+                var eloOk   = isWorldCupMatch ? true : !!(matchObj.elo_home && matchObj.elo_away);
                 var pariLow = (an.pari_rec||'').toLowerCase();
                 var marcheOk = pariLow.includes('dc 1x') || pariLow.includes('dc x2') ||
                                pariLow.includes('over 2.5') || pariLow.includes('btts non');
@@ -1968,7 +2049,7 @@ jobs:
                     edge: an.edge||'',
                     cote: coteRec2 && coteRec2 !== '--' ? parseFloat(coteRec2) : 1.5
                   });
-                  console.log('  \u2705 QUALIFI\u00c9: conf='+an.confiance+' edge='+edgeNumCheck+'% cote='+coteRecCheck);
+                  console.log('  \u2705 QUALIFI\u00c9: conf='+an.confiance+' edge='+edgeNumCheck+'% cote='+coteRecCheck+(isWorldCupMatch?' [WC]':''));
                 } else {
                   console.log('  \u26d4 Filtr\u00e9: conf='+an.confiance
                     +' edge='+edgeNumCheck+'%(ok:'+edgeOk+')'
@@ -2104,12 +2185,10 @@ jobs:
                 }
               }
 
-              // COMBINÉS : ne jamais tracker dans l'historique (faussent les stats)
-              // Les combinés restent sur le site comme outil de jeu mais ne sont pas suivis
-
+              // COMBINÉS : ne jamais tracker dans l'historique
               histo.predictions = histo.predictions.slice(0, 270);
 
-              // ── NETTOYAGE ONE-SHOT : supprimer tous les combinés pending existants ──
+              // Nettoyage one-shot des combinés existants
               var beforeClean = histo.predictions.length;
               histo.predictions = histo.predictions.filter(function(p){ return p.type !== 'combi'; });
               var cleaned = beforeClean - histo.predictions.length;
@@ -2143,9 +2222,10 @@ jobs:
                 wins: wins.length, losses: total-wins.length
               };
 
+              // BUGFIX : breakdown utilisait 'resolved' non défini — corrigé avec 'singles'
               function breakdown(field) {
                 var groups={};
-                resolved.filter(function(p){return p.type==='single';}).forEach(function(p){
+                singles.forEach(function(p){
                   var k=p[field]||'inconnu';
                   if(!groups[k])groups[k]={wins:0,losses:0,roi:0};
                   if(p.result==='win'){groups[k].wins++;groups[k].roi+=(parseFloat(p.cote)||1.75)-1;}

@@ -532,8 +532,8 @@ jobs:
             }
 
             // Stats surface
-            var surf1Str=d.surf1?d.surf1.wins+'V/'+d.surf1.losses+'D sur '+surfaceLabel+' ('+d.surf1.winrate+'% winrate, 3 dernières années)':'Non disponible';
-            var surf2Str=d.surf2?d.surf2.wins+'V/'+d.surf2.losses+'D sur '+surfaceLabel+' ('+d.surf2.winrate+'% winrate, 3 dernières années)':'Non disponible';
+            var surf1Str=d.surf1?d.surf1.wins+'V/'+d.surf1.losses+'D sur '+surfaceLabel+' cette saison ('+d.surf1.winrate+'% winrate)':'Non disponible';
+            var surf2Str=d.surf2?d.surf2.wins+'V/'+d.surf2.losses+'D sur '+surfaceLabel+' cette saison ('+d.surf2.winrate+'% winrate)':'Non disponible';
 
             // H2H
             var h2hTotal=(d.h2hP1Wins||0)+(d.h2hP2Wins||0);
@@ -589,21 +589,21 @@ jobs:
                 'TERRE : le retour est roi. Checke dans cet ordre :\n1. Qui convertit le plus de BP ? > 45% = retourneur dangereux\n2. Qui gagne le plus de pts sur 2eme balle adverse ?\n3. Winrate terre cette saison — la forme physique prime\n4. Les echanges longs favorisent les defenseurs de fond de court\n':
                 'DUR : surface neutre. Checke dans cet ordre :\n1. Ecart classement > 20 places = signal fort\n2. Forme recente 10 derniers matchs\n3. % 1ere balle + BP sauves\n4. H2H si disponible\n'
               )+'\n'
-              +'MARCHÉ : Match Winner uniquement (J1 ou J2). Pas de handicap.\n'
-              +'COTE : minimum 1.45. Pas de maximum — un ultra favori peut être joué si les signaux sont forts.\n'
-              +'EDGE MINIMUM : 4%. En dessous → passe ton tour sauf si écart classement > 50 places.\n'
+              +'MARCHE : Match Winner uniquement. Cote minimum 1.45, pas de maximum.\n'
               +'CONFIANCE : 6.0 minimum. Max 9.0.\n\n'
-              +'JOUER si : edge >= 4% ET au moins 2 signaux convergents ET cote >= 1.45\n'
-              +'PASSER si : aucune cote ET classement inconnu | tous les signaux contradictoires | edge < 4% sur les deux\n\n'
-              +'SIGNAUX PAR SURFACE :\n'
-              +'→ GAZON : % 1ère balle > 65% + winrate gazon > 60% = signal fort. Grands serveurs avantagés.\n'
-              +'→ TERRE : % 2ème balle > 55% + BP convertis > 45% + winrate terre > 65% = signal fort.\n'
-              +'→ DUR : écart classement > 20 places + forme récente dominante = signal fort.\n\n'
-              +'TON STYLE : Sois TRANCHANT. Pas de "peut-être". Cite UNE stat qui fait la différence.\n'
-              +'Si le favori est à 1.25 mais a 85% winrate sur cette surface et mène 5-0 en H2H → joue-le.\n'
-              +'Si deux joueurs sont proches en tout → passe ton tour sans hésiter.\n\n'
-              +'RÈGLE ABSOLUE : analyse_card, conseil, contexte, facteur_x, scenario_match TOUJOURS remplis même si passe_ton_tour=true.\n\n'
-              +'Réponds UNIQUEMENT avec ce JSON valide. Zéro texte avant ou après. Zéro backtick.\n'
+              +'DECISION SANS COTES : Ne pas avoir de cote nest PAS une raison de passer son tour.\n'
+              +'Si 2 signaux ou plus pointent vers le meme joueur, tu DOIS le jouer.\n'
+              +'Sans cote, estime-la dans cote_rec (ex: ~1.65) et mets vbet=OUI si conf >= 6.5.\n\n'
+              +'SIGNAUX — chacun vaut 1 point pour un joueur :\n'
+              +'H2H dominant >= 3-1 = 1 signal fort\n'
+              +'Meilleur winrate surface cette saison = 1 signal\n'
+              +'Forme recente superieure (WWW vs LLL) = 1 signal\n'
+              +'Ecart classement > 20 places = 1 signal\n'
+              +'Points ATP sur cette surface > 2x adversaire = 1 signal\n\n'
+              +'REGLE ABSOLUE : 2 signaux ou plus vers le meme joueur = JOUER. Pas de passe ton tour.\n'
+              +'1 signal ou moins, signaux contradictoires = passe ton tour.\n\n'
+              +'EXEMPLE CONCRET : Bonzi H2H 3-1 (signal 1) + winrate gazon 60%>56% (signal 2) + forme WWW (signal 3) = 3 signaux = JOUER BONZI sans hesiter.\n\n'
+              +'STYLE : UNE decision tranchante. UNE stat qui justifie. Jamais de peut-etre.\n\n'
               +'{\n'
               +'"passe_ton_tour": false,\n'
               +'"confiance": 0.0,\n'

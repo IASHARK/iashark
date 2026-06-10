@@ -325,7 +325,7 @@ jobs:
             var wcFixtures = [];
             try {
               var wcResp = await get(
-                'https://v3.football.api-sports.io/fixtures?league=1&season=2026',
+                'https://v3.football.api-sports.io/fixtures?league=1&season=2025',
                 APS
               );
               if (wcResp.response && wcResp.response.length) {
@@ -2319,6 +2319,10 @@ jobs:
       - name: Commit and push
         run: |
           git config user.name "IASHARK"
+          git config user.email "yaramode81@gmail.com"
+          git add data.json historique.json sitemap.xml sitemap-*.xml
+          git diff --staged --quiet || git commit -m "Daily update - $(date +%Y-%m-%d)"
+          git push
           git config user.email "yaramode81@gmail.com"
           git add data.json historique.json sitemap.xml sitemap-*.xml
           git diff --staged --quiet || git commit -m "Daily update - $(date +%Y-%m-%d)"

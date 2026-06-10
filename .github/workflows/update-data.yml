@@ -319,13 +319,18 @@ jobs:
             var tomorrow = new Date();
             tomorrow.setDate(tomorrow.getDate() + 1);
             var TOMORROW = tomorrow.toISOString().split('T')[0];
-            var dates = [TODAY, TOMORROW];
+            var dayAfter = new Date();
+            dayAfter.setDate(dayAfter.getDate() + 2);
+            var DAYAFTER = dayAfter.toISOString().split('T')[0];
+            var dates = [TODAY, TOMORROW, DAYAFTER];
             for (var d = 0; d < dates.length; d++) {
               for (var i = 0; i < LEAGUES.length; i++) {
                 var lgId = LEAGUES[i];
                 var season = SEASON_2026.indexOf(lgId) !== -1 ? 2026 : SEASON;
+                // Coupe du Monde : pas de timezone (matchs sur 3 fuseaux horaires)
+                var tzParam = lgId === 1 ? '' : '&timezone=Europe%2FParis';
                 var r = await get(
-                  'https://v3.football.api-sports.io/fixtures?date='+dates[d]+'&league='+lgId+'&season='+season+'&timezone=Europe%2FParis',
+                  'https://v3.football.api-sports.io/fixtures?date='+dates[d]+'&league='+lgId+'&season='+season+tzParam,
                   APS
                 );
                 if (r.response) all = all.concat(r.response);

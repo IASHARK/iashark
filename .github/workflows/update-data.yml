@@ -124,10 +124,8 @@ jobs:
             return Math.min(kelly*fraction*100, 5).toFixed(1);
           }
 
-          // ── MODIFICATION 1 : LEAGUES + COUPE DU MONDE ───────────
-          // Inchangé pour les ligues clubs — ajout FIFA World Cup (1)
+          // ── MODIFICATION 1 : LEAGUES — World Cup retirée (non incluse dans l'abonnement) ──
           const LEAGUES  = [
-            1,            // FIFA World Cup 2026 — NOUVEAU
             39, 40,       // Premier League, Championship
             61, 62,       // Ligue 1, Ligue 2
             140, 141,     // La Liga, La Liga 2
@@ -144,8 +142,7 @@ jobs:
             66, 307, 143, 137, 81
           ];
           const SEASON   = 2025;
-          // MODIFICATION 1 : World Cup (1) ajouté en saison 2026, comme K-League
-          var SEASON_2026 = [292, 1];
+          var SEASON_2026 = [292];
           const TODAY    = new Date().toISOString().split('T')[0];
 
           var LG_KEY = {
@@ -323,14 +320,34 @@ jobs:
             dayAfter.setDate(dayAfter.getDate() + 2);
             var DAYAFTER = dayAfter.toISOString().split('T')[0];
             var dates = [TODAY, TOMORROW, DAYAFTER];
+
+            // ── Coupe du Monde : fetch tous les matchs d'un coup puis filtre par date ──
+            var wcFixtures = [];
+            try {
+              var wcResp = await get(
+                'https://v3.football.api-sports.io/fixtures?league=1&season=2026',
+                APS
+              );
+              if (wcResp.response && wcResp.response.length) {
+                console.log('World Cup fixtures total:', wcResp.response.length);
+                wcFixtures = wcResp.response.filter(function(f) {
+                  var fDate = (f.fixture.date||'').split('T')[0];
+                  return dates.indexOf(fDate) !== -1;
+                });
+                console.log('World Cup fixtures today/tomorrow:', wcFixtures.length);
+                all = all.concat(wcFixtures);
+              }
+            } catch(e) { console.log('WC fetch error:', e.message); }
+            await sleep(300);
+
+            // ── Autres ligues : fetch par date comme avant ──
+            var otherLeagues = LEAGUES.filter(function(id){ return id !== 1; });
             for (var d = 0; d < dates.length; d++) {
-              for (var i = 0; i < LEAGUES.length; i++) {
-                var lgId = LEAGUES[i];
+              for (var i = 0; i < otherLeagues.length; i++) {
+                var lgId = otherLeagues[i];
                 var season = SEASON_2026.indexOf(lgId) !== -1 ? 2026 : SEASON;
-                // Coupe du Monde : pas de timezone (matchs sur 3 fuseaux horaires)
-                var tzParam = lgId === 1 ? '' : '&timezone=Europe%2FParis';
                 var r = await get(
-                  'https://v3.football.api-sports.io/fixtures?date='+dates[d]+'&league='+lgId+'&season='+season+tzParam,
+                  'https://v3.football.api-sports.io/fixtures?date='+dates[d]+'&league='+lgId+'&season='+season+'&timezone=Europe%2FParis',
                   APS
                 );
                 if (r.response) all = all.concat(r.response);

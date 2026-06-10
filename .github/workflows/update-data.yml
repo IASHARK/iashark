@@ -332,13 +332,15 @@ jobs:
                 TENNIS_HEADERS
               );
               if(!r||!r.result) return null;
-              var ftr = r.result['Full Time Result']||r.result['Match Winner']||r.result['1X2']||null;
-              if(!ftr){var keys=Object.keys(r.result);if(keys.length)ftr=r.result[keys[0]];}
+              // Uniquement Match Winner — jamais de fallback sur un autre marché
+              var ftr = r.result['Full Time Result']||r.result['Match Winner']||null;
               if(!ftr) return null;
-              var o1=parseFloat(ftr.od1||ftr.odd1||0);
-              var o2=parseFloat(ftr.od2||ftr.odd2||0);
-              if(o1>1&&o2>1) return {c1:o1.toFixed(2),c2:o2.toFixed(2)};
-              return null;
+              var o1=parseFloat(ftr.od1||0);
+              var o2=parseFloat(ftr.od2||0);
+              // Cotes valides : entre 1.01 et 50, et pas aberrantes (ratio max 20x)
+              if(o1<1.01||o2<1.01||o1>50||o2>50) return null;
+              if(Math.max(o1,o2)/Math.min(o1,o2)>15) return null; // ratio trop extrême = mauvais marché
+              return {c1:o1.toFixed(2), c2:o2.toFixed(2)};
             } catch(e){ return null; }
           }
 
@@ -440,7 +442,11 @@ jobs:
                        surfLow.includes('i.hard')||surfLow.includes('indoor')?'I.hard':'Hard';
             var wins=0,losses=0;
             var years=Array.isArray(surfData)?surfData:[];
-            years.slice(0,3).forEach(function(yr){
+            var currentYear=new Date().getFullYear();
+            // 1 an uniquement — stats récentes, pas la carrière entière
+            var filtered=years.filter(function(yr){ return parseInt(yr.year)>=currentYear-1; });
+            if(!filtered.length) filtered=years.slice(0,1); // fallback année la plus récente
+            filtered.forEach(function(yr){
               (yr.surfaces||[]).forEach(function(s){
                 var cn=(s.court||'');
                 if(cn===target||cn.toLowerCase()===target.toLowerCase()){
@@ -545,38 +551,44 @@ jobs:
               +d.p1+(d.seed1?' [Seed #'+d.seed1+']':'')+' vs '+d.p2+(d.seed2?' [Seed #'+d.seed2+']':'')+' — '+(d.tournament||'')+(d.round?' ('+d.round+')':'')+'\n'
               +'Date: '+d.date+' | Surface: '+surfaceLabel+' | '+d.tourRank+'\n\n'
 
+
               +'=== CONTEXTE SURFACE ===\n'
               +surfContext+'\n\n'
 
               +'=== CLASSEMENT & PROFIL ===\n'
-              +d.p1+' : Classement #'+(d.rank1||'N/C')+(d.seed1?' — Tête de série #'+d.seed1:'')+' — Pays: '+d.p1Country+'\n'
-              +d.p2+' : Classement #'+(d.rank2||'N/C')+(d.seed2?' — Tête de série #'+d.seed2:'')+' — Pays: '+d.p2Country+'\n'
-              +(d.rank1&&d.rank2?'→ Écart classement: '+Math.abs(d.rank1-d.rank2)+' places\n':'')
+              +d.p1+' : #'+(d.rank1||'N/C')+(d.seed1?' [Seed #'+d.seed1+']':'')+' | Main: '+(d.plays1||'?')+' | Pts gazon:'+(d.grassPts1||0)+' terre:'+(d.clayPts1||0)+' dur:'+(d.hardPts1||0)+'\n'
+              +d.p2+' : #'+(d.rank2||'N/C')+(d.seed2?' [Seed #'+d.seed2+']':'')+' | Main: '+(d.plays2||'?')+' | Pts gazon:'+(d.grassPts2||0)+' terre:'+(d.clayPts2||0)+' dur:'+(d.hardPts2||0)+'\n'
+              +(d.rank1&&d.rank2?'→ Ecart classement: '+Math.abs(d.rank1-d.rank2)+' places\n':'')
               +'\n'
 
-              +'=== FORME RÉCENTE ===\n'
-              +d.p1+' (5 derniers matchs): '+(d.form1||'N/A')+(d.formSurf1?' | Sur '+surfaceLabel+': '+d.formSurf1:'')+' \n'
-              +d.p2+' (5 derniers matchs): '+(d.form2||'N/A')+(d.formSurf2?' | Sur '+surfaceLabel+': '+d.formSurf2:'')+' \n\n'
+              +'=== FORME RECENTE (toutes surfaces) ===\n'
+              +d.p1+': '+(d.form1||'N/A')+(d.formSurf1?' | Sur '+surfaceLabel+': '+d.formSurf1:'')+'\n'
+              +d.p2+': '+(d.form2||'N/A')+(d.formSurf2?' | Sur '+surfaceLabel+': '+d.formSurf2:'')+'\n\n'
 
-              +'=== STATS SURFACE (3 dernières années) ===\n'
+              +'=== STATS SURFACE 1 AN ===\n'
               +d.p1+': '+surf1Str+'\n'
               +d.p2+': '+surf2Str+'\n\n'
 
-              +'=== STATS SERVICE & RETOUR (carrière) ===\n'
+              +'=== STATS SERVICE & RETOUR ===\n'
               +fmtSv(d.svStats1,d.p1)+'\n'
               +fmtSv(d.svStats2,d.p2)+'\n\n'
 
               +'=== HEAD TO HEAD ===\n'
               +h2hStr+'\n\n'
 
-              +'=== COTES & PROBABILITÉS ===\n'
-              +(d.c1&&d.c1!=='--'?d.p1+': '+d.c1:''+d.p1+': cote non disponible')+'\n'
-              +(d.c2&&d.c2!=='--'?d.p2+': '+d.c2:''+d.p2+': cote non disponible')+'\n'
-              +(shinProbs?'→ Probabilités Shin: '+d.p1+' '+shinProbs.p1+'% | '+d.p2+' '+shinProbs.p2+'%\n':'')
-              +'Edge calculé: '+d.p1+' '+(edgeP1!==null?'+'+edgeP1+'%':'0%')+' | '+d.p2+' '+(edgeP2!==null?'+'+edgeP2+'%':'0%')+'\n\n'
+              +'=== COTES ===\n'
+              +(d.c1&&d.c1!=='--'?d.p1+': '+d.c1:d.p1+': non disponible')+'\n'
+              +(d.c2&&d.c2!=='--'?d.p2+': '+d.c2:d.p2+': non disponible')+'\n'
+              +(shinProbs?'Shin: '+d.p1+' '+shinProbs.p1+'% | '+d.p2+' '+shinProbs.p2+'%\n':'')
+              +'Edge: '+d.p1+' '+(edgeP1!==null?'+'+edgeP1+'%':'0%')+' | '+d.p2+' '+(edgeP2!==null?'+'+edgeP2+'%':'0%')+'\n\n'
 
-
-              +'=== RÈGLES DE DÉCISION ===\n'
+              +'=== COMMENT RAISONNER SUR '+surfaceLabel.toUpperCase()+' ===\n'
+              +(surfaceLabel==='Gazon'?
+                'GAZON : le service est roi. Checke dans cet ordre :\n1. Qui a le meilleur % 1ere balle ? > 65% = service imbrisable\n2. Qui a le meilleur winrate gazon cette saison ?\n3. Les breaks sont rares — le set se joue souvent au tie-break\n4. Un gaucher ou un grand serveur est structurellement avantagé\n5. Les points ATP gazon confirment qui est specialiste gazon\n':
+              surfaceLabel==='Terre battue'?
+                'TERRE : le retour est roi. Checke dans cet ordre :\n1. Qui convertit le plus de BP ? > 45% = retourneur dangereux\n2. Qui gagne le plus de pts sur 2eme balle adverse ?\n3. Winrate terre cette saison — la forme physique prime\n4. Les echanges longs favorisent les defenseurs de fond de court\n':
+                'DUR : surface neutre. Checke dans cet ordre :\n1. Ecart classement > 20 places = signal fort\n2. Forme recente 10 derniers matchs\n3. % 1ere balle + BP sauves\n4. H2H si disponible\n'
+              )+'\n'
               +'MARCHÉ : Match Winner uniquement (J1 ou J2). Pas de handicap.\n'
               +'COTE : minimum 1.45. Pas de maximum — un ultra favori peut être joué si les signaux sont forts.\n'
               +'EDGE MINIMUM : 4%. En dessous → passe ton tour sauf si écart classement > 50 places.\n'
@@ -618,7 +630,7 @@ jobs:
             var r = await postJSONWithRetry('api.anthropic.com', '/v1/messages', {
               model: 'claude-sonnet-4-6',
               max_tokens: 1500,
-              system: 'Tu es IASHARK, un système expert en analyse tennis. Tu réponds EXCLUSIVEMENT en JSON valide. Zéro backtick, zéro texte avant ou après. Tu es tranchant et factuel. Tu cites des stats précises. Tu prends position.',
+              system: 'Tu es un analyste tennis professionnel. Tu réponds EXCLUSIVEMENT en JSON valide. Zéro backtick. RÈGLES : (1) Sois ultra direct — une phrase = un fait chiffré. (2) verdict_shark = "JOUE [joueur] à [cote] — [1 stat clé]". (3) analyse_card = forces concrètes sur CETTE surface. (4) facteur_x = LA stat qui fait gagner sur cette surface. (5) conseil = une seule phrase actionnable. JAMAIS de "il est difficile de dire", JAMAIS de "peut-être". Si tu hésites → passe_ton_tour=true.',
               messages: [{role:'user', content:prompt}]
             }, {'x-api-key':ANT_KEY, 'anthropic-version':'2023-06-01'});
 
@@ -727,6 +739,15 @@ jobs:
                 svStats1:svStats1, svStats2:svStats2,
                 h2hP1Wins:parsed.h2hP1Wins, h2hP2Wins:parsed.h2hP2Wins,
                 c1:c1, c2:c2, shinProbs:shinProbs,
+                // Données profile
+                plays1: profile1&&profile1.ep&&profile1.ep.plays||null,
+                plays2: profile2&&profile2.ep&&profile2.ep.plays||null,
+                grassPts1: profile1&&profile1.grassPoints||null,
+                grassPts2: profile2&&profile2.grassPoints||null,
+                clayPts1: profile1&&profile1.clayPoints||null,
+                clayPts2: profile2&&profile2.clayPoints||null,
+                hardPts1: profile1&&profile1.hardPoints||null,
+                hardPts2: profile2&&profile2.hardPoints||null,
               });
               await sleep(300);
 

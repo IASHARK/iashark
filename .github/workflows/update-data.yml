@@ -295,7 +295,7 @@ jobs:
                   var hasMore = true;
                   while(hasMore){
                     var url = TENNIS_BASE+'/tennis/v2/'+tour+'/fixtures/'+dates[d]
-                      +'?include=tournament.court,tournament.rank,h2h'
+                      +'?include=tournament.court,tournament.rank,h2h,odds'
                       +'&filter=PlayerGroup:singles'
                       +'&pageSize=50&pageNo='+pageNo;
                     console.log('Tennis fetch: '+tour.toUpperCase()+' '+dates[d]+' page'+pageNo);
@@ -323,53 +323,58 @@ jobs:
             });
           }
 
-          // Ranking ATP/WTA — pour enrichir le prompt avec le classement actuel
-          async function getTennisRanking(playerId, tour) {
-            if(!TENNIS_KEY||!playerId) return null;
+          // Cotes tennis — endpoint séparé Best Odds
+          async function getTennisOddsBest(fixtureId) {
+            if(!TENNIS_KEY||!fixtureId) return null;
             try {
-              var r = await getArr(
-                TENNIS_BASE+'/tennis/v2/'+tour+'/rankings/player/'+playerId,
+              var r = await get(
+                TENNIS_BASE+'/tennis/v2/extend/api/event/odds/best/'+fixtureId,
                 TENNIS_HEADERS
               );
-              var items = Array.isArray(r)?r:(r.data||[]);
-              return items&&items[0]?items[0]:null;
-            } catch(e) { return null; }
+              if(!r||!r.result) return null;
+              var ftr = r.result['Full Time Result']||r.result['Match Winner']||r.result['1X2']||null;
+              if(!ftr){var keys=Object.keys(r.result);if(keys.length)ftr=r.result[keys[0]];}
+              if(!ftr) return null;
+              var o1=parseFloat(ftr.od1||ftr.odd1||0);
+              var o2=parseFloat(ftr.od2||ftr.odd2||0);
+              if(o1>1&&o2>1) return {c1:o1.toFixed(2),c2:o2.toFixed(2)};
+              return null;
+            } catch(e){ return null; }
           }
 
-          // Stats joueur par surface — endpoint player stats
-          async function getTennisPlayerSurfaceStats(playerId, tour) {
+          // Ranking ATP/WTA — pour enrichir le prompt avec le classement actuel
+          // Infos joueur : classement + stats surface (getPlayerInfo)
+          async function getTennisPlayerInfo(playerId, tour) {
             if(!TENNIS_KEY||!playerId) return null;
             try {
               var r = await get(
-                TENNIS_BASE+'/tennis/v2/'+tour+'/player/'+playerId+'?include=stats',
+                TENNIS_BASE+'/tennis/v2/'+tour+'/player/'+playerId,
                 TENNIS_HEADERS
               );
               return r||null;
-            } catch(e) { return null; }
+            } catch(e){ return null; }
           }
 
-          // Forme récente — derniers matchs du joueur
+          // Derniers matchs joués (getPlayerPastMatches)
           async function getTennisRecentForm(playerId, tour) {
             if(!TENNIS_KEY||!playerId) return [];
             try {
-              var r = await getArr(
-                TENNIS_BASE+'/tennis/v2/'+tour+'/fixtures/player/'+playerId+'?pageSize=10',
+              var r = await get(
+                TENNIS_BASE+'/tennis/v2/'+tour+'/player/'+playerId+'/matches?pageSize=10',
                 TENNIS_HEADERS
               );
-              // Cet endpoint retourne les matchs historiques (Game table) — player1 = winner
-              return Array.isArray(r)?r:(r.data||[]);
-            } catch(e) { return []; }
+              var items = Array.isArray(r)?r:(r.data||[]);
+              return items;
+            } catch(e){ return []; }
           }
 
           function parseTennisFixture(f) {
-            // Extraire toutes les données du fixture enrichi
             var p1 = f.player1||{};
             var p2 = f.player2||{};
             var tournament = f.tournament||{};
             var court = tournament.court||{};
             var rank = tournament.rank||{};
             var h2h = f.h2h||{};
-
             return {
               id: f.id,
               p1Id: f.player1Id||p1.id,
@@ -380,16 +385,12 @@ jobs:
               p2Country: p2.countryAcr||'',
               seed1: f.seed1||null,
               seed2: f.seed2||null,
-              // Cotes directement disponibles dans la réponse
-              c1: f.odd1&&parseFloat(f.odd1)>1 ? f.odd1 : '--',
-              c2: f.odd2&&parseFloat(f.odd2)>1 ? f.odd2 : '--',
-              // Surface
+              c1: f.odd1&&parseFloat(f.odd1)>1 ? String(f.odd1) : '--',
+              c2: f.odd2&&parseFloat(f.odd2)>1 ? String(f.odd2) : '--',
               surface: court.name||'Hard',
-              // Rang tournoi (Grand Slam, ATP500, etc.)
               tourRank: rank.name||'',
               tournament: tournament.name||'',
               tournamentId: f.tournamentId,
-              // H2H pré-calculé
               h2hP1Wins: h2h.player1AllWins||0,
               h2hP2Wins: h2h.player2AllWins||0,
               date: f.date||'',
@@ -397,30 +398,49 @@ jobs:
             };
           }
 
-          function calcTennisFormFromHistory(history, playerId) {
-            // Dans l'historique, player1 = WINNER toujours
+          // Forme depuis getPlayerPastMatches — match_winner est l'id du gagnant
+          function calcTennisForm(matches, playerId) {
             var results = [];
-            history.slice(0,10).forEach(function(m){
-              if(!m.result||m.result==='') return; // pas terminé
-              var isWinner = m.player1Id === playerId;
-              results.push(isWinner?'W':'L');
+            (matches||[]).slice(0,10).forEach(function(m){
+              if(!m.result_type||m.result_type==='upcoming') return;
+              if(m.result_type==='retired'&&!m.match_winner) return;
+              var won = String(m.match_winner)===String(playerId);
+              results.push(won?'W':'L');
             });
             return results.slice(0,5).join('');
           }
 
-          function calcTennisSurfaceWinrate(history, playerId, surface) {
-            if(!history||!history.length||!surface) return null;
+          // Stats surface depuis getPlayerInfo — data[].surfaces[]
+          function calcSurfaceStats(playerInfo, surface) {
+            if(!playerInfo||!surface) return null;
             var surfLow = surface.toLowerCase();
-            var filtered = history.filter(function(m){
-              var mSurf = (m.tournament&&m.tournament.court&&m.tournament.court.name||'').toLowerCase();
-              return mSurf.includes(surfLow)||
-                (surfLow.includes('clay')&&mSurf.includes('clay'))||
-                (surfLow.includes('grass')&&mSurf.includes('grass'))||
-                (surfLow.includes('hard')&&mSurf.includes('hard'));
+            // Normalise la surface recherchée
+            var targetCourt = surfLow.includes('clay')?'Clay':
+                              surfLow.includes('grass')?'Grass':
+                              surfLow.includes('hard')?'Hard':null;
+            if(!targetCourt) return null;
+            var wins=0, losses=0;
+            // Agréger sur 2026+2025
+            var years = Array.isArray(playerInfo.data)?playerInfo.data:[];
+            years.slice(0,2).forEach(function(yr){
+              (yr.surfaces||[]).forEach(function(s){
+                var cn=(s.court||'').toLowerCase();
+                if(cn.includes(targetCourt.toLowerCase())){
+                  wins += (s.courtWins||0);
+                  losses += (s.courtLosses||0);
+                }
+              });
             });
-            if(!filtered.length) return null;
-            var wins = filtered.filter(function(m){return m.player1Id===playerId;}).length;
-            return {wins:wins, total:filtered.length, winrate:Math.round(wins/filtered.length*100)};
+            if(wins+losses===0) return null;
+            return {wins:wins, losses:losses, total:wins+losses, winrate:Math.round(wins/(wins+losses)*100)};
+          }
+
+          // Filtre tournoi Main tour uniquement (ATP/WTA 250+)
+          function isMainTourMatch(parsed) {
+            var tr = (parsed.tourRank||'').toLowerCase();
+            return tr.includes('main tour')||tr.includes('grand slam')||
+                   tr.includes('1000')||tr.includes('500')||tr.includes('250')||
+                   tr.includes('finals');
           }
 
           // ── PROMPT TENNIS ────────────────────────────────────────
@@ -467,7 +487,9 @@ jobs:
               +(d.tournament||'')+' ('+(d.tourRank||'')+(d.round?' — '+d.round:'')+') | Surface: '+surfaceLabel+' | '+d.date+'\n\n'
 
               +'=== DONNÉES DISPONIBLES ===\n'
-              +(d.seed1||d.seed2?'Têtes de série : '+d.p1+' #'+(d.seed1||'NS')+' | '+d.p2+' #'+(d.seed2||'NS')+'\n':'Aucune tête de série disponible\n')
+              +'Classement ATP/WTA : '+d.p1+' #'+(d.rank1||'N/C')+' | '+d.p2+' #'+(d.rank2||'N/C')+'\n'
+              +(d.rank1&&d.rank2?'Écart classement: '+Math.abs(d.rank1-d.rank2)+' places\n':'')
+              +(d.seed1||d.seed2?'Têtes de série : '+d.p1+' '+(d.seed1?'#'+d.seed1:'NS')+' | '+d.p2+' '+(d.seed2?'#'+d.seed2:'NS')+'\n':'')
               +'Forme 5 derniers '+d.p1+': '+(d.form1||'N/A')+'\n'
               +'Forme 5 derniers '+d.p2+': '+(d.form2||'N/A')+'\n'
               +'Stats surface '+d.p1+' ('+surfaceLabel+'): '+surf1Str+'\n'
@@ -519,9 +541,9 @@ jobs:
               +'"vbet": "[OUI si edge>=5% ET conf>=7.0 ET passe_ton_tour=false, sinon NON]",\n'
               +'"kelly": "[1/4 Kelly en %, max 5%, ou 0 si pas de value]",\n'
               +'"scenario_match": {\n'
-              +'"debut": "[TOUJOURS REMPLI — comment le match démarre, qui prend l\'initiative]",\n'
-              +'"milieu": "[TOUJOURS REMPLI — évolution tactique, breaks, momentum]",\n'
-              +'"fin": "[TOUJOURS REMPLI — comment le match se finit probablement]"\n'
+              +'"set1": "[TOUJOURS REMPLI — qui domine le 1er set, service, breaks attendus]",\n'
+              +'"set2": "[TOUJOURS REMPLI — évolution au 2ème set, momentum, réaction],",\n'
+              +'"set3": "[3ème set si le match est serré — sinon null]"\n'
               +'}\n'
               +'}';
 
@@ -548,31 +570,61 @@ jobs:
               var p1Name = parsed.p1Name;
               var p2Name = parsed.p2Name;
 
-              // Ignorer les doubles
+              // Skip doubles
               if(p1Name.includes('/')&&p2Name.includes('/')){
                 console.log('[TENNIS] Skip doubles: '+p1Name);
                 continue;
               }
 
-              console.log('\n[TENNIS] -> '+p1Name+' vs '+p2Name+' ('+tour.toUpperCase()+' | '+parsed.tourRank+' | '+parsed.surface+' | cotes: '+parsed.c1+'/'+parsed.c2+')');
+              // Skip tournois inférieurs à 250 (Challenger, ITF, Futures)
+              if(!isMainTourMatch(parsed)){
+                console.log('[TENNIS] Skip (non Main tour): '+p1Name+' vs '+p2Name+' — '+parsed.tourRank);
+                continue;
+              }
 
-              // Forme récente — derniers matchs historiques des deux joueurs
+              console.log('\n[TENNIS] -> '+p1Name+' vs '+p2Name+' ('+tour.toUpperCase()+' | '+parsed.tourRank+' | '+parsed.surface+')');
+
+              // Fetcher cotes + infos joueurs + forme en parallèle
               var batch = await Promise.all([
+                getTennisPlayerInfo(parsed.p1Id, tour),
+                getTennisPlayerInfo(parsed.p2Id, tour),
                 getTennisRecentForm(parsed.p1Id, tour),
                 getTennisRecentForm(parsed.p2Id, tour),
+                getTennisOddsBest(parsed.id),
               ]);
-              await sleep(300);
+              await sleep(500);
 
-              var history1 = batch[0]||[];
-              var history2 = batch[1]||[];
-              var form1 = calcTennisFormFromHistory(history1, parsed.p1Id);
-              var form2 = calcTennisFormFromHistory(history2, parsed.p2Id);
-              var surf1 = calcTennisSurfaceWinrate(history1, parsed.p1Id, parsed.surface);
-              var surf2 = calcTennisSurfaceWinrate(history2, parsed.p2Id, parsed.surface);
+              var info1    = batch[0];
+              var info2    = batch[1];
+              var matches1 = batch[2]||[];
+              var matches2 = batch[3]||[];
+              var bestOdds = batch[4];
+
+              // Classement
+              var rank1 = info1&&info1.currentRank ? info1.currentRank : null;
+              var rank2 = info2&&info2.currentRank ? info2.currentRank : null;
+
+              // Forme 5 derniers matchs
+              var form1 = calcTennisForm(matches1, parsed.p1Id);
+              var form2 = calcTennisForm(matches2, parsed.p2Id);
+
+              // Stats surface 2025+2026
+              var surf1 = calcSurfaceStats(info1, parsed.surface);
+              var surf2 = calcSurfaceStats(info2, parsed.surface);
+
+              // Cotes : Best Odds prioritaire sinon fixture
+              var c1 = (bestOdds&&bestOdds.c1)||parsed.c1;
+              var c2 = (bestOdds&&bestOdds.c2)||parsed.c2;
+              console.log('  Classement: '+rank1+' / '+rank2+' | Cotes: '+c1+'/'+c2+' | Forme: '+form1+'/'+form2);
+
+              // Skip si aucune cote ET aucun classement (aucune donnée)
+              if(c1==='--'&&c2==='--'&&!rank1&&!rank2){
+                console.log('  Skip (aucune donnée): '+p1Name+' vs '+p2Name);
+                continue;
+              }
 
               // Shin sur les cotes
               var shinProbs = null;
-              var c1 = parsed.c1, c2 = parsed.c2;
               if(c1!=='--'&&c2!=='--'){
                 var raw=shinProbabilities([parseFloat(c1),parseFloat(c2)]);
                 if(raw&&raw.length===2)shinProbs={p1:Math.round(raw[0]*100),p2:Math.round(raw[1]*100)};
@@ -580,6 +632,7 @@ jobs:
 
               var an = await genAnalyseTennis({
                 p1:p1Name, p2:p2Name, p1Id:parsed.p1Id, p2Id:parsed.p2Id,
+                rank1:rank1, rank2:rank2,
                 seed1:parsed.seed1, seed2:parsed.seed2,
                 tournament:parsed.tournament, tourRank:parsed.tourRank,
                 surface:parsed.surface, round:parsed.round,
@@ -633,7 +686,7 @@ jobs:
                 conseil_public: an?(an.conseil||an.analyse_card||''):'',
                 contexte: an?(an.contexte||''):'',
                 facteur_x: an?(an.facteur_x||''):'',
-                scenario: an&&an.scenario_match?{phase1:an.scenario_match.debut||'',phase2:an.scenario_match.milieu||'',phase3:an.scenario_match.fin||''}:null,
+                scenario: an&&an.scenario_match?{phase1:an.scenario_match.set1||'',phase2:an.scenario_match.set2||'',phase3:an.scenario_match.set3||null}:null,
                 no_signal: an&&an.passe_ton_tour===true?true:!(an&&an.pari_rec),
                 no_signal_label: (an&&an.passe_ton_tour===true)||(!(an&&an.pari_rec))?'Aucun signal clair sur ce match':'',
                 h2h_tennis: {p1Wins:parsed.h2hP1Wins, p2Wins:parsed.h2hP2Wins},

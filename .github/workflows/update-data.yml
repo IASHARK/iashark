@@ -282,27 +282,29 @@ jobs:
             var tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate()+1);
             var TOMORROW = tomorrow.toISOString().split('T')[0];
             var tours = ['atp','wta'];
+            var dates = [TODAY, TOMORROW];
 
             for(var t=0; t<tours.length; t++){
               var tour = tours[t];
-              try {
-                var fixtures = await getArr(
-                  TENNIS_BASE+'/tennis/v2/'+tour+'/fixtures?PlayerGroup=singles',
-                  TENNIS_HEADERS
-                );
-                console.log('Tennis '+tour.toUpperCase()+' fixtures bruts: '+fixtures.length);
-                var filtered = fixtures.filter(function(f){
-                  if(!f.date) return false;
-                  var fDate = f.date.split('T')[0];
-                  return fDate === TODAY || fDate === TOMORROW;
-                });
-                console.log('Tennis '+tour.toUpperCase()+' today/tomorrow: '+filtered.length);
-                filtered.forEach(function(f){ f._tour = tour; });
-                all = all.concat(filtered);
-              } catch(e) { console.log('Tennis fixtures error '+tour+':', e.message); }
-              await sleep(500);
+              for(var d=0; d<dates.length; d++){
+                try {
+                  // Format correct : /tennis/v2/atp/fixtures/2026-06-10
+                  var url = TENNIS_BASE+'/tennis/v2/'+tour+'/fixtures/'+dates[d];
+                  console.log('Tennis fetch: GET '+url);
+                  var fixtures = await getArr(url, TENNIS_HEADERS);
+                  console.log('Tennis '+tour.toUpperCase()+' '+dates[d]+': '+fixtures.length+' fixtures');
+                  fixtures.forEach(function(f){ f._tour = tour; });
+                  all = all.concat(fixtures);
+                } catch(e) { console.log('Tennis fixtures error '+tour+' '+dates[d]+':', e.message); }
+                await sleep(400);
+              }
             }
-            return all;
+            // Dédoublonner
+            var seen={};
+            return all.filter(function(f){
+              var k=String(f.id||f.fixtureId||f.fixture_id||JSON.stringify(f));
+              if(seen[k])return false;seen[k]=true;return true;
+            });
           }
 
           async function getTennisPlayerStats(playerId, tour) {
@@ -1981,10 +1983,6 @@ jobs:
       - name: Commit and push
         run: |
           git config user.name "IASHARK"
-          git config user.email "yaramode81@gmail.com"
-          git add data.json historique.json sitemap.xml sitemap-*.xml
-          git diff --staged --quiet || git commit -m "Daily update - $(date +%Y-%m-%d)"
-          git push
           git config user.email "yaramode81@gmail.com"
           git add data.json historique.json sitemap.xml sitemap-*.xml
           git diff --staged --quiet || git commit -m "Daily update - $(date +%Y-%m-%d)"

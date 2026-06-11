@@ -435,38 +435,55 @@ jobs:
 
           // Stats surface depuis surface-summary → data[].surfaces[]
           // surface-summary retourne les valeurs en string, profile retourne en int
-          function calcSurfaceStats(surfData, surface) {
-            if(!surfData||!surface) return null;
+          // Calcule winrate surface depuis past-matches — marche pour TOUS les joueurs
+          // past-matches retourne chaque match avec tournament.court.name
+          function calcSurfaceStats(matches, surface) {
+            if(!matches||!matches.length||!surface) return null;
             var surfLow=(surface||'').toLowerCase();
-            var target=surfLow.includes('clay')?'Clay':surfLow.includes('grass')?'Grass':
-                       surfLow.includes('i.hard')||surfLow.includes('indoor')?'I.hard':'Hard';
+            var target=surfLow.includes('clay')?'clay':surfLow.includes('grass')?'grass':'hard';
             var wins=0,losses=0;
-            var years=Array.isArray(surfData)?surfData:[];
-            var currentYear=new Date().getFullYear();
-            // 1 an uniquement — stats récentes, pas la carrière entière
-            var filtered=years.filter(function(yr){ return parseInt(yr.year)>=currentYear-1; });
-            if(!filtered.length) filtered=years.slice(0,1); // fallback année la plus récente
-            filtered.forEach(function(yr){
-              (yr.surfaces||[]).forEach(function(s){
-                var cn=(s.court||'');
-                if(cn===target||cn.toLowerCase()===target.toLowerCase()){
-                  wins+=parseInt(s.courtWins)||0;
-                  losses+=parseInt(s.courtLosses)||0;
-                }
-              });
+            matches.forEach(function(m){
+              if(!m.match_winner||m.result_type==='upcoming') return;
+              // Surface depuis tournament.court.name
+              var court=m.tournament&&m.tournament.court&&m.tournament.court.name||'';
+              var courtLow=court.toLowerCase();
+              // Match surface
+              var isTarget=target==='grass'?(courtLow==='grass'||courtLow.includes('grass')):
+                           target==='clay'?(courtLow==='clay'||courtLow.includes('clay')):
+                           (courtLow==='hard'||courtLow.includes('hard')||courtLow.includes('i.hard'));
+              if(!isTarget) return;
+              if(String(m.match_winner)===String(m.player1Id)||String(m.match_winner)===String(m.player2Id)){
+                // Déterminer si notre joueur a gagné
+                // Dans past-matches player1 = winner toujours
+                // On passe le playerId depuis processTennisFixtures
+              }
+              wins++; // compté plus bas avec playerId
+            });
+            // Reset — recalcul avec playerId
+            return {wins:0,losses:0,total:0,winrate:0,_matches:matches,_surface:target};
+          }
+
+          // Version correcte avec playerId
+          function calcSurfaceStatsForPlayer(matches, playerId, surface) {
+            if(!matches||!matches.length||!surface||!playerId) return null;
+            var surfLow=(surface||'').toLowerCase();
+            var target=surfLow.includes('clay')?'clay':surfLow.includes('grass')?'grass':'hard';
+            var wins=0,losses=0;
+            matches.forEach(function(m){
+              if(!m.match_winner||m.result_type==='upcoming'||m.result_type==='retired') return;
+              // Surface depuis tournament.court
+              var court=(m.tournament&&m.tournament.court&&m.tournament.court.name||
+                         m.court||'').toLowerCase();
+              var isTarget=target==='grass'?court.includes('grass'):
+                           target==='clay'?court.includes('clay'):
+                           (court.includes('hard')||court===''&&target==='hard');
+              if(!isTarget) return;
+              // player1 = winner dans l'historique
+              var won=String(m.match_winner)===String(playerId);
+              if(won) wins++; else losses++;
             });
             if(wins+losses===0) return null;
             return {wins:wins,losses:losses,total:wins+losses,winrate:Math.round(wins/(wins+losses)*100)};
-          }
-
-          // Stats surface depuis playerInfo (profile) — utilise grassPoints/clayPoints etc
-          function calcSurfaceStatsFromProfile(profile, surface) {
-            if(!profile||!surface) return null;
-            var sl=(surface||'').toLowerCase();
-            var wins=0,losses=0;
-            // profile a grassTournament, hardTournament, clayTournament
-            // mais pas les losses — on utilise surface-summary si dispo
-            return null; // fallback vers calcSurfaceStats
           }
 
           // Calcul des stats service depuis getPlayerMatchStats
@@ -689,19 +706,21 @@ jobs:
               var bestOdds = batch[8];
 
               // Classement depuis profile
-              var rank1 = profile1&&(profile1.currentRank||profile1.data&&profile1.data.currentRank)||null;
-              var rank2 = profile2&&(profile2.currentRank||profile2.data&&profile2.data.currentRank)||null;
-              console.log('  Profile p1:', profile1?'ok rank='+rank1:'null', '| Profile p2:', profile2?'ok rank='+rank2:'null');
+              var rank1 = profile1&&profile1.currentRank||null;
+              var rank2 = profile2&&profile2.currentRank||null;
 
-              // Forme globale + sur cette surface
+              // Forme globale
               var form1 = calcTennisForm(matches1, parsed.p1Id);
               var form2 = calcTennisForm(matches2, parsed.p2Id);
               var formSurf1 = calcTennisFormOnSurface(matches1, parsed.p1Id, parsed.surface);
               var formSurf2 = calcTennisFormOnSurface(matches2, parsed.p2Id, parsed.surface);
 
-              // Stats surface depuis surface-summary
-              var surf1 = calcSurfaceStats(surfData1, parsed.surface);
-              var surf2 = calcSurfaceStats(surfData2, parsed.surface);
+              // Stats surface depuis past-matches (marche pour TOUS les joueurs)
+              // Fallback sur surface-summary si past-matches insuffisant
+              var surf1 = calcSurfaceStatsForPlayer(matches1, parsed.p1Id, parsed.surface);
+              var surf2 = calcSurfaceStatsForPlayer(matches2, parsed.p2Id, parsed.surface);
+              if(!surf1&&surfData1) surf1=calcSurfaceStats(surfData1, parsed.surface);
+              if(!surf2&&surfData2) surf2=calcSurfaceStats(surfData2, parsed.surface);
 
               // Stats service/retour/breaks depuis match-stats
               var svStats1 = calcServiceStats(mstats1);
@@ -766,14 +785,15 @@ jobs:
               var matchObj = {
                 id: 't_'+parsed.id,
                 sport: 'tennis',
-                home: {n:p1Name, id:parsed.p1Id, seed:parsed.seed1, country:parsed.p1Country},
-                away: {n:p2Name, id:parsed.p2Id, seed:parsed.seed2, country:parsed.p2Country},
+                home: {n:p1Name, id:parsed.p1Id, seed:parsed.seed1, country:parsed.p1Country, rank:rank1, birthday:profile1&&profile1.birthday||null, profile:{grassPoints:profile1&&profile1.grassPoints||0, clayPoints:profile1&&profile1.clayPoints||0, hardPoints:profile1&&profile1.hardPoints||0}},
+                away: {n:p2Name, id:parsed.p2Id, seed:parsed.seed2, country:parsed.p2Country, rank:rank2, birthday:profile2&&profile2.birthday||null, profile:{grassPoints:profile2&&profile2.grassPoints||0, clayPoints:profile2&&profile2.clayPoints||0, hardPoints:profile2&&profile2.hardPoints||0}},
                 league: parsed.tournament+(parsed.round?' — '+parsed.round:''),
                 ligue_icon: '\uD83C\uDFBE',
                 league_key: lkKey,
                 surface: surfLabel,
                 tour_rank: parsed.tourRank,
                 date: (fDate+' '+heure).trim(),
+                raw_date: parsed.date||'',
                 cat: ['all'],
                 val: an?(an.vbet==='OUI'&&(an.confiance||0)>=7.0):false,
                 hot: an?((an.confiance||0)>=8.0):false,

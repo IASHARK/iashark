@@ -392,6 +392,26 @@ jobs:
             } catch(e){ return null; }
           }
 
+          // Titres du joueur par niveau de tournoi
+          async function getTennisTitles(playerId, tour) {
+            if(!TENNIS_KEY||!playerId) return null;
+            try {
+              var r = await get(TENNIS_BASE+'/tennis/v2/'+tour+'/player/titles/'+playerId, TENNIS_HEADERS);
+              var data=(r&&r.data)||[];
+              if(!data.length) return null;
+              var grandSlams=0, masters=0, other=0;
+              data.forEach(function(t){
+                var rank=(t.tourRank||'').toLowerCase();
+                var won=parseInt(t.titlesWon)||0;
+                if(rank.includes('grand slam')) grandSlams+=won;
+                else if(rank.includes('1000')||rank.includes('masters')) masters+=won;
+                else other+=won;
+              });
+              return {grandSlams:grandSlams, masters:masters, other:other,
+                      total:grandSlams+masters+other};
+            } catch(e){ return null; }
+          }
+
           // Palmarès du joueur dans CE tournoi spécifiquement
           async function getTennisTournamentRecord(playerId, tournamentId, tour) {
             if(!TENNIS_KEY||!playerId||!tournamentId) return null;
@@ -491,26 +511,37 @@ jobs:
             return {wins:wins,losses:losses,total:wins+losses,winrate:Math.round(wins/(wins+losses)*100)};
           }
 
-          // Stats surface depuis surface-summary (fallback)
+          // Stats surface depuis surface-summary — années adaptées par surface
+          // Gazon : 3 ans (saison courte de 3 semaines)
+          // Terre/Dur : 2 ans (saison plus longue)
           function calcSurfaceStats(surfData, surface) {
             if(!surfData||!surface) return null;
             var surfLow=(surface||'').toLowerCase();
-            var target=surfLow.includes('clay')?'Clay':surfLow.includes('grass')?'Grass':'Hard';
+            var isGrass=surfLow.includes('grass');
+            var isClay=surfLow.includes('clay');
+            var target=isClay?'Clay':isGrass?'Grass':'Hard';
+            var yearsBack=isGrass?3:2; // gazon 3 ans, reste 2 ans
             var wins=0,losses=0;
             var years=Array.isArray(surfData)?surfData:[];
             var currentYear=new Date().getFullYear();
-            var filtered=years.filter(function(yr){return parseInt(yr.year)>=currentYear-1;});
-            if(!filtered.length) filtered=years.slice(0,1);
+            var filtered=years.filter(function(yr){return parseInt(yr.year)>=currentYear-yearsBack;});
+            if(!filtered.length) filtered=years.slice(0,yearsBack);
             filtered.forEach(function(yr){
               (yr.surfaces||[]).forEach(function(s){
-                if((s.court||'').toLowerCase()===target.toLowerCase()){
+                var cn=(s.court||'').toLowerCase();
+                // Matcher Hard et I.hard ensemble
+                var match=target==='Hard'?(cn==='hard'||cn==='i.hard'):cn===target.toLowerCase();
+                if(match){
                   wins+=parseInt(s.courtWins)||0;
                   losses+=parseInt(s.courtLosses)||0;
                 }
               });
             });
             if(wins+losses===0) return null;
-            return {wins:wins,losses:losses,total:wins+losses,winrate:Math.round(wins/(wins+losses)*100)};
+            var label=isGrass?'3 ans':isClay?'2 ans':'2 ans';
+            return {wins:wins,losses:losses,total:wins+losses,
+                    winrate:Math.round(wins/(wins+losses)*100),
+                    label:label};
           }
 
           // Calcul des stats service depuis getPlayerMatchStats
@@ -600,14 +631,25 @@ jobs:
               +surfContext+'\n\n'
 
               +'=== CLASSEMENT & PROFIL ===\n'
-              +d.p1+' : #'+(d.rank1||'N/C')+(d.seed1?' [Seed #'+d.seed1+']':'')+' | Main: '+(d.plays1||'?')+' | Pts gazon:'+(d.grassPts1||0)+' terre:'+(d.clayPts1||0)+' dur:'+(d.hardPts1||0)+'\n'
-              +d.p2+' : #'+(d.rank2||'N/C')+(d.seed2?' [Seed #'+d.seed2+']':'')+' | Main: '+(d.plays2||'?')+' | Pts gazon:'+(d.grassPts2||0)+' terre:'+(d.clayPts2||0)+' dur:'+(d.hardPts2||0)+'\n'
-              +(d.rank1&&d.rank2?'→ Ecart classement: '+Math.abs(d.rank1-d.rank2)+' places\n':'')
+              +'⚠ IMPORTANT : Le classement ATP/WTA est calculé sur TOUTES surfaces. Un joueur bien classé peut être mauvais sur cette surface spécifique. Ne pas utiliser le classement seul comme signal fort.\n\n'
+              +d.p1+' : ATP/WTA #'+(d.rank1||'N/C')+'\n'
+              +(d.seed1?'  Statut : Tête de série #'+d.seed1+'\n':'')
+              +(d.seed1==='LL'||d.seed1==='ll'?'  → Lucky Loser : a perdu en qualifications mais rentré suite désistement. Peut être en reprise de rythme.\n':'')
+              +(d.seed1==='WC'||d.seed1==='wc'?'  → Wild Card : invitation du tournoi. Souvent joueur local ou revenant de blessure — ne pas sous-estimer.\n':'')
+              +(d.seed1==='Q'||d.seed1==='q'?'  → Qualifier : a dû passer les qualifs. Classement bas mais peut être en très grande forme.\n':'')
+              +(d.seed1==='PR'||d.seed1==='pr'?'  → Protected Ranking : revient de blessure avec ancien classement protégé. Niveau réel peut être bien supérieur au classement actuel.\n':'')
+              +(d.titles1&&d.titles1.total>0?'  Palmarès : '+d.titles1.grandSlams+' Grand Chelem, '+d.titles1.masters+' Masters 1000, '+d.titles1.other+' autres titres\n':'  Palmarès : Aucun titre majeur\n')
               +'\n'
+              +d.p2+' : ATP/WTA #'+(d.rank2||'N/C')+'\n'
+              +(d.seed2?'  Statut : Tête de série #'+d.seed2+'\n':'')
+              +(d.seed2==='LL'||d.seed2==='ll'?'  → Lucky Loser : a perdu en qualifications mais rentré suite désistement. Peut être en reprise de rythme.\n':'')
+              +(d.seed2==='WC'||d.seed2==='wc'?'  → Wild Card : invitation du tournoi. Souvent joueur local ou revenant de blessure — ne pas sous-estimer.\n':'')
+              +(d.seed2==='Q'||d.seed2==='q'?'  → Qualifier : a dû passer les qualifs. Classement bas mais peut être en très grande forme.\n':'')
+              +(d.seed2==='PR'||d.seed2==='pr'?'  → Protected Ranking : revient de blessure avec ancien classement protégé. Niveau réel peut être bien supérieur au classement actuel.\n':'')
+              +(d.titles2&&d.titles2.total>0?'  Palmarès : '+d.titles2.grandSlams+' Grand Chelem, '+d.titles2.masters+' Masters 1000, '+d.titles2.other+' autres titres\n':'  Palmarès : Aucun titre majeur\n')
+              +'\n'
+              +(d.rank1&&d.rank2?'Ecart classement brut: '+Math.abs(d.rank1-d.rank2)+' places (signal FAIBLE sur surface spécifique)\n':'')+'\n'
 
-              +'=== FORME RECENTE (toutes surfaces) ===\n'
-              +d.p1+': '+(d.form1||'N/A')+(d.formSurf1?' | Sur '+surfaceLabel+': '+d.formSurf1:'')+'\n'
-              +d.p2+': '+(d.form2||'N/A')+(d.formSurf2?' | Sur '+surfaceLabel+': '+d.formSurf2:'')+'\n\n'
 
               +'=== STATS SURFACE 1 AN ===\n'
               +d.p1+': '+surf1Str+'\n'
@@ -725,8 +767,10 @@ jobs:
                 getTennisOddsBest(parsed.id),
                 getTennisTournamentRecord(parsed.p1Id, parsed.tournamentId, tour),
                 getTennisTournamentRecord(parsed.p2Id, parsed.tournamentId, tour),
+                getTennisTitles(parsed.p1Id, tour),
+                getTennisTitles(parsed.p2Id, tour),
               ]);
-              await sleep(500);
+              await sleep(600);
 
               var surfData1 = batch[0];
               var surfData2 = batch[1];
@@ -737,6 +781,8 @@ jobs:
               var bestOdds  = batch[6];
               var tourRec1  = batch[7];
               var tourRec2  = batch[8];
+              var titles1   = batch[9];
+              var titles2   = batch[10];
 
               // Classement depuis RANK_MAP global (fiable pour tous les joueurs)
               var rank1 = RANK_MAP[String(parsed.p1Id)]||null;
@@ -794,6 +840,7 @@ jobs:
                 h2hP1Wins:parsed.h2hP1Wins, h2hP2Wins:parsed.h2hP2Wins,
                 c1:c1, c2:c2, shinProbs:shinProbs,
                 tourRec1:tourRec1, tourRec2:tourRec2,
+                titles1:titles1, titles2:titles2,
               });
               await sleep(300);
 

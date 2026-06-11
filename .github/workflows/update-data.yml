@@ -353,7 +353,11 @@ jobs:
             if(!TENNIS_KEY||!playerId) return null;
             try {
               var r = await get(TENNIS_BASE+'/tennis/v2/'+tour+'/player/profile/'+playerId, TENNIS_HEADERS);
-              return r||null;
+              // L'API peut retourner le profil directement ou dans un champ data
+              var profile = (r&&r.data)?r.data:r;
+              if(profile&&profile.currentRank) return profile;
+              // Fallback: chercher dans la liste des joueurs
+              return profile||null;
             } catch(e){ return null; }
           }
 
@@ -385,6 +389,36 @@ jobs:
             try {
               var r = await get(TENNIS_BASE+'/tennis/v2/'+tour+'/player/surface-summary/'+playerId, TENNIS_HEADERS);
               return (r&&r.data)||null;
+            } catch(e){ return null; }
+          }
+
+          // Palmarès du joueur dans CE tournoi spécifiquement
+          async function getTennisTournamentRecord(playerId, tournamentId, tour) {
+            if(!TENNIS_KEY||!playerId||!tournamentId) return null;
+            try {
+              var r = await get(
+                TENNIS_BASE+'/tennis/v2/'+tour+'/player/tournament-record/'+playerId+'/'+tournamentId,
+                TENNIS_HEADERS
+              );
+              var data = (r&&r.data)||[];
+              if(!data.length) return null;
+              // Agréger victoires/défaites toutes années
+              var totalWins=0, totalLosses=0, bestRound='', appearances=data.length;
+              data.forEach(function(yr){
+                totalWins += parseInt(yr.wins)||0;
+                totalLosses += parseInt(yr.losses)||0;
+                // Garder le meilleur round atteint
+                if(!bestRound||(yr.bestRoundId&&parseInt(yr.bestRoundId)>parseInt(bestRound.id||0))){
+                  bestRound = yr.bestRound||'';
+                }
+              });
+              return {
+                wins: totalWins,
+                losses: totalLosses,
+                appearances: appearances,
+                bestRound: bestRound,
+                winrate: totalWins+totalLosses>0?Math.round(totalWins/(totalWins+totalLosses)*100):null
+              };
             } catch(e){ return null; }
           }
 
@@ -437,33 +471,7 @@ jobs:
           // surface-summary retourne les valeurs en string, profile retourne en int
           // Calcule winrate surface depuis past-matches — marche pour TOUS les joueurs
           // past-matches retourne chaque match avec tournament.court.name
-          function calcSurfaceStats(matches, surface) {
-            if(!matches||!matches.length||!surface) return null;
-            var surfLow=(surface||'').toLowerCase();
-            var target=surfLow.includes('clay')?'clay':surfLow.includes('grass')?'grass':'hard';
-            var wins=0,losses=0;
-            matches.forEach(function(m){
-              if(!m.match_winner||m.result_type==='upcoming') return;
-              // Surface depuis tournament.court.name
-              var court=m.tournament&&m.tournament.court&&m.tournament.court.name||'';
-              var courtLow=court.toLowerCase();
-              // Match surface
-              var isTarget=target==='grass'?(courtLow==='grass'||courtLow.includes('grass')):
-                           target==='clay'?(courtLow==='clay'||courtLow.includes('clay')):
-                           (courtLow==='hard'||courtLow.includes('hard')||courtLow.includes('i.hard'));
-              if(!isTarget) return;
-              if(String(m.match_winner)===String(m.player1Id)||String(m.match_winner)===String(m.player2Id)){
-                // Déterminer si notre joueur a gagné
-                // Dans past-matches player1 = winner toujours
-                // On passe le playerId depuis processTennisFixtures
-              }
-              wins++; // compté plus bas avec playerId
-            });
-            // Reset — recalcul avec playerId
-            return {wins:0,losses:0,total:0,winrate:0,_matches:matches,_surface:target};
-          }
-
-          // Version correcte avec playerId
+          // Stats surface depuis past-matches — marche pour TOUS les joueurs
           function calcSurfaceStatsForPlayer(matches, playerId, surface) {
             if(!matches||!matches.length||!surface||!playerId) return null;
             var surfLow=(surface||'').toLowerCase();
@@ -471,16 +479,35 @@ jobs:
             var wins=0,losses=0;
             matches.forEach(function(m){
               if(!m.match_winner||m.result_type==='upcoming'||m.result_type==='retired') return;
-              // Surface depuis tournament.court
-              var court=(m.tournament&&m.tournament.court&&m.tournament.court.name||
-                         m.court||'').toLowerCase();
+              var court=(m.tournament&&m.tournament.court&&m.tournament.court.name||'').toLowerCase();
               var isTarget=target==='grass'?court.includes('grass'):
                            target==='clay'?court.includes('clay'):
-                           (court.includes('hard')||court===''&&target==='hard');
+                           (court.includes('hard'));
               if(!isTarget) return;
-              // player1 = winner dans l'historique
               var won=String(m.match_winner)===String(playerId);
               if(won) wins++; else losses++;
+            });
+            if(wins+losses===0) return null;
+            return {wins:wins,losses:losses,total:wins+losses,winrate:Math.round(wins/(wins+losses)*100)};
+          }
+
+          // Stats surface depuis surface-summary (fallback)
+          function calcSurfaceStats(surfData, surface) {
+            if(!surfData||!surface) return null;
+            var surfLow=(surface||'').toLowerCase();
+            var target=surfLow.includes('clay')?'Clay':surfLow.includes('grass')?'Grass':'Hard';
+            var wins=0,losses=0;
+            var years=Array.isArray(surfData)?surfData:[];
+            var currentYear=new Date().getFullYear();
+            var filtered=years.filter(function(yr){return parseInt(yr.year)>=currentYear-1;});
+            if(!filtered.length) filtered=years.slice(0,1);
+            filtered.forEach(function(yr){
+              (yr.surfaces||[]).forEach(function(s){
+                if((s.court||'').toLowerCase()===target.toLowerCase()){
+                  wins+=parseInt(s.courtWins)||0;
+                  losses+=parseInt(s.courtLosses)||0;
+                }
+              });
             });
             if(wins+losses===0) return null;
             return {wins:wins,losses:losses,total:wins+losses,winrate:Math.round(wins/(wins+losses)*100)};
@@ -592,6 +619,11 @@ jobs:
 
               +'=== HEAD TO HEAD ===\n'
               +h2hStr+'\n\n'
+              +h2hStr+'\n\n'
+
+              +'=== PALMARES DANS CE TOURNOI ===\n'
+              +(d.tourRec1?d.p1+' : '+d.tourRec1.wins+'V/'+d.tourRec1.losses+'D en '+d.tourRec1.appearances+' participations | Meilleur tour: '+d.tourRec1.bestRound:(d.p1+' : Aucun historique'))+'\n'
+              +(d.tourRec2?d.p2+' : '+d.tourRec2.wins+'V/'+d.tourRec2.losses+'D en '+d.tourRec2.appearances+' participations | Meilleur tour: '+d.tourRec2.bestRound:(d.p2+' : Aucun historique'))+'\n\n'
 
               +'=== COTES ===\n'
               +(d.c1&&d.c1!=='--'?d.p1+': '+d.c1:d.p1+': non disponible')+'\n'
@@ -681,33 +713,35 @@ jobs:
 
               console.log('\n[TENNIS] -> '+p1Name+' vs '+p2Name+' ('+tour.toUpperCase()+' | '+parsed.tourRank+' | '+parsed.surface+')');
 
-              // Fetch tout en parallèle : profil + surface-summary + matchs récents + match-stats + cotes
+              // Fetch : surface-summary + matchs récents + match-stats + cotes + palmarès tournoi
               var batch = await Promise.all([
-                getTennisPlayerInfo(parsed.p1Id, tour),      // profile
-                getTennisPlayerInfo(parsed.p2Id, tour),
-                getTennisSurfaceSummary(parsed.p1Id, tour),  // surface-summary
+                getTennisSurfaceSummary(parsed.p1Id, tour),
                 getTennisSurfaceSummary(parsed.p2Id, tour),
-                getTennisRecentForm(parsed.p1Id, tour),      // past-matches
+                getTennisRecentForm(parsed.p1Id, tour),
                 getTennisRecentForm(parsed.p2Id, tour),
-                getTennisMatchStats(parsed.p1Id, tour),      // match-stats
+                getTennisMatchStats(parsed.p1Id, tour),
                 getTennisMatchStats(parsed.p2Id, tour),
-                getTennisOddsBest(parsed.id),                // best odds
+                getTennisOddsBest(parsed.id),
+                getTennisTournamentRecord(parsed.p1Id, parsed.tournamentId, tour),
+                getTennisTournamentRecord(parsed.p2Id, parsed.tournamentId, tour),
               ]);
-              await sleep(700);
+              await sleep(500);
 
-              var profile1 = batch[0];
-              var profile2 = batch[1];
-              var surfData1 = batch[2];
-              var surfData2 = batch[3];
-              var matches1 = batch[4]||[];
-              var matches2 = batch[5]||[];
-              var mstats1  = batch[6];
-              var mstats2  = batch[7];
-              var bestOdds = batch[8];
+              var surfData1 = batch[0];
+              var surfData2 = batch[1];
+              var matches1  = batch[2]||[];
+              var matches2  = batch[3]||[];
+              var mstats1   = batch[4];
+              var mstats2   = batch[5];
+              var bestOdds  = batch[6];
+              var tourRec1  = batch[7];
+              var tourRec2  = batch[8];
 
-              // Classement depuis profile
-              var rank1 = profile1&&profile1.currentRank||null;
-              var rank2 = profile2&&profile2.currentRank||null;
+              // Classement depuis RANK_MAP global (fiable pour tous les joueurs)
+              var rank1 = RANK_MAP[String(parsed.p1Id)]||null;
+              var rank2 = RANK_MAP[String(parsed.p2Id)]||null;
+              var profile1 = null; // plus utilisé
+              var profile2 = null;
 
               // Forme globale
               var form1 = calcTennisForm(matches1, parsed.p1Id);
@@ -758,15 +792,7 @@ jobs:
                 svStats1:svStats1, svStats2:svStats2,
                 h2hP1Wins:parsed.h2hP1Wins, h2hP2Wins:parsed.h2hP2Wins,
                 c1:c1, c2:c2, shinProbs:shinProbs,
-                // Données profile
-                plays1: profile1&&profile1.ep&&profile1.ep.plays||null,
-                plays2: profile2&&profile2.ep&&profile2.ep.plays||null,
-                grassPts1: profile1&&profile1.grassPoints||null,
-                grassPts2: profile2&&profile2.grassPoints||null,
-                clayPts1: profile1&&profile1.clayPoints||null,
-                clayPts2: profile2&&profile2.clayPoints||null,
-                hardPts1: profile1&&profile1.hardPoints||null,
-                hardPts2: profile2&&profile2.hardPoints||null,
+                tourRec1:tourRec1, tourRec2:tourRec2,
               });
               await sleep(300);
 
@@ -794,6 +820,8 @@ jobs:
                 tour_rank: parsed.tourRank,
                 date: (fDate+' '+heure).trim(),
                 raw_date: parsed.date||'',
+                tour_record_p1: tourRec1||null,
+                tour_record_p2: tourRec2||null,
                 cat: ['all'],
                 val: an?(an.vbet==='OUI'&&(an.confiance||0)>=7.0):false,
                 hot: an?((an.confiance||0)>=8.0):false,
@@ -1675,12 +1703,30 @@ jobs:
           async function main(){
             console.log('=== IASHARK',TODAY,'===');
 
-            // ── 1. FETCH TENNIS EN PARALLÈLE avec le football ──
+            // ── 1. FETCH TENNIS + RANKINGS EN PARALLÈLE avec le football ──
             var tennisFixturesPromise = getTennisFixtures();
             var footballFixturesPromise = getFixtures();
+            // Fetch rankings ATP+WTA en une seule fois pour tous les joueurs
+            var rankingsPromise = Promise.all([
+              get(TENNIS_BASE+'/tennis/v2/atp/ranking/singles/?pageSize=300', TENNIS_HEADERS).catch(function(){return null;}),
+              get(TENNIS_BASE+'/tennis/v2/wta/ranking/singles/?pageSize=300', TENNIS_HEADERS).catch(function(){return null;})
+            ]);
 
             var tennisFixtures = await tennisFixturesPromise;
             var fixtures = await footballFixturesPromise;
+            var rankingsRaw = await rankingsPromise;
+
+            // Construire un dictionnaire {playerId: position} pour ATP et WTA
+            var RANK_MAP = {};
+            [rankingsRaw[0], rankingsRaw[1]].forEach(function(r){
+              var items = (r&&r.data)||[];
+              items.forEach(function(item){
+                if(item&&item.player&&item.player.id&&item.position){
+                  RANK_MAP[String(item.player.id)] = item.position;
+                }
+              });
+            });
+            console.log('Rankings loaded: '+Object.keys(RANK_MAP).length+' joueurs');
 
             console.log('Football fixtures:', fixtures.length);
             console.log('Tennis fixtures:', tennisFixtures.length);

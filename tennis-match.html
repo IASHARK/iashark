@@ -15,54 +15,39 @@
 }
 *{margin:0;padding:0;box-sizing:border-box;}
 body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;padding-bottom:80px;}
-
-/* HEADER */
 .hdr{position:sticky;top:0;z-index:99;background:rgba(4,8,13,0.97);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);height:48px;display:flex;align-items:center;padding:0 16px;gap:10px;}
 .hdr-back{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:1px;color:var(--muted);border:1px solid var(--border);padding:5px 10px;border-radius:5px;background:none;cursor:pointer;}
 .hdr-back:hover{color:var(--lime);border-color:var(--bl);}
 .logo{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:3px;text-decoration:none;color:var(--text);}
 .logo span{color:var(--lime);}
 .hdr-sport{margin-left:auto;font-family:'Space Mono',monospace;font-size:7px;letter-spacing:2px;color:var(--lime);border:1px solid var(--bl);padding:3px 9px;border-radius:20px;background:var(--lime3);}
-
 .wrap{max-width:680px;margin:0 auto;padding:0 12px;}
-
-/* ═══ HERO MATCH ═══ */
 .hero{background:linear-gradient(160deg,#060e0a 0%,#04080d 60%);border:1px solid var(--border);border-radius:20px;margin:12px 0 10px;overflow:hidden;}
-
 .hero-top{padding:10px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;}
 .tour-name{font-family:'Space Mono',monospace;font-size:8px;color:var(--muted);letter-spacing:1px;}
 .surf-pill{font-family:'Space Mono',monospace;font-size:7px;letter-spacing:1px;padding:3px 9px;border-radius:20px;}
 .surf-clay{background:rgba(234,88,12,0.1);border:1px solid rgba(234,88,12,0.2);color:#fb923c;}
 .surf-grass{background:var(--lime3);border:1px solid var(--bl);color:var(--lime);}
 .surf-hard{background:rgba(56,189,248,0.08);border:1px solid rgba(56,189,248,0.18);color:var(--blue);}
-.round-tag{font-family:'Space Mono',monospace;font-size:7px;color:var(--muted);}
-
 .players-grid{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:12px;padding:20px 16px 14px;}
-
-.player-col{display:flex;flex-direction:column;align-items:center;gap:6px;}
+.player-col{display:flex;flex-direction:column;align-items:center;gap:4px;}
 .player-col.away{opacity:.75;}
-
-.p-avatar{width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:17px;position:relative;}
+.p-avatar{width:60px;height:60px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:18px;position:relative;flex-shrink:0;}
 .p-avatar.p1{background:linear-gradient(135deg,#0d2010,#182a0e);border:2px solid var(--lime2);}
 .p-avatar.p2{background:linear-gradient(135deg,#0e1520,#182030);border:2px solid rgba(255,255,255,0.1);color:var(--muted);}
-.p-avatar img{width:100%;height:100%;border-radius:50%;object-fit:cover;}
 .p-seed{position:absolute;bottom:-4px;right:-4px;font-family:'Space Mono',monospace;font-size:6px;background:var(--lime);color:#000;padding:1px 4px;border-radius:4px;font-weight:700;}
-
-.p-name{font-family:'Bebas Neue',sans-serif;font-size:clamp(14px,3.5vw,22px);letter-spacing:1px;line-height:1;text-align:center;}
-.p-country{font-family:'Space Mono',monospace;font-size:7px;color:var(--muted);letter-spacing:1px;}
+.p-lastname{font-family:'Bebas Neue',sans-serif;font-size:clamp(14px,3.5vw,22px);letter-spacing:1px;line-height:1;text-align:center;}
+.p-firstname{font-size:10px;color:var(--muted);text-align:center;line-height:1;}
+.p-age{font-family:'Space Mono',monospace;font-size:7px;color:var(--muted);text-align:center;}
 .p-rank{font-family:'Space Mono',monospace;font-size:8px;color:var(--lime);background:var(--lime3);border:1px solid var(--bl);padding:2px 8px;border-radius:10px;}
-.p-rank.p2-rank{color:var(--muted);background:transparent;border-color:var(--border);}
-
-.p-form{display:flex;gap:2px;}
+.p-rank.p2r{color:var(--muted);background:transparent;border-color:var(--border);}
+.p-form{display:flex;gap:2px;justify-content:center;}
 .fd{width:13px;height:13px;border-radius:2px;font-size:6px;font-weight:700;display:flex;align-items:center;justify-content:center;font-family:'Space Mono',monospace;}
 .fw{background:rgba(16,185,129,0.2);color:#10b981;}
 .fl{background:rgba(255,45,45,0.15);color:#ff2d2d;}
-
 .vs-center{display:flex;flex-direction:column;align-items:center;gap:4px;}
 .vs-txt{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--muted2);}
-.vs-time{font-family:'Space Mono',monospace;font-size:10px;color:var(--lime);}
-
-/* PROBA BAR */
+.vs-time{font-family:'Space Mono',monospace;font-size:11px;color:var(--lime);font-weight:700;}
 .proba-wrap{padding:0 16px 14px;}
 .proba-labels{display:flex;justify-content:space-between;margin-bottom:5px;}
 .proba-pct{font-family:'Bebas Neue',sans-serif;font-size:22px;line-height:1;}
@@ -71,8 +56,6 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 .proba-bar{height:5px;border-radius:5px;overflow:hidden;display:flex;background:rgba(255,255,255,0.04);}
 .pb-p1{background:linear-gradient(90deg,var(--lime2),var(--lime));transition:width 1s ease;}
 .pb-p2{background:rgba(255,255,255,0.1);}
-
-/* ═══ VERDICT SHARK ═══ */
 .verdict{border-radius:14px;padding:14px 16px;margin:10px 0;position:relative;overflow:hidden;}
 .verdict.go{background:linear-gradient(135deg,rgba(200,255,0,0.05),rgba(163,230,53,0.02));border:1px solid var(--bl);}
 .verdict.go::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,var(--lime),transparent);}
@@ -91,8 +74,6 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 .vtag.kelly{background:var(--lime3);border:1px solid var(--bl);color:var(--lime);}
 .vtag.conf{background:rgba(245,158,11,0.07);border:1px solid rgba(245,158,11,0.2);color:var(--amber);}
 .vtag.risk{background:rgba(255,45,45,0.06);border:1px solid rgba(255,45,45,0.15);color:var(--red);}
-
-/* ═══ CONFIANCE JAUGE ═══ */
 .conf-block{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin:10px 0;}
 .conf-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px;}
 .conf-num{font-family:'Bebas Neue',sans-serif;font-size:52px;color:var(--lime);line-height:1;}
@@ -102,31 +83,30 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 .conf-fill{height:100%;border-radius:6px;background:linear-gradient(90deg,var(--lime2),var(--lime),var(--amber));transition:width 1s ease;}
 .conf-scale{display:flex;justify-content:space-between;}
 .conf-scale span{font-family:'Space Mono',monospace;font-size:6px;color:var(--muted2);}
-
-/* ═══ SECTION GÉNÉRIQUE ═══ */
 .section{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px 16px;margin:8px 0;}
 .sec-title{font-family:'Space Mono',monospace;font-size:8px;color:var(--muted);letter-spacing:2px;margin-bottom:12px;display:flex;align-items:center;gap:6px;}
 .sec-title::after{content:'';flex:1;height:1px;background:var(--border);}
-
-/* ═══ RADAR STATS SERVICE ═══ */
-.stats-duel{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
-.stat-col{display:flex;flex-direction:column;gap:6px;}
-.stat-col-hdr{font-family:'Space Mono',monospace;font-size:7px;letter-spacing:1px;padding-bottom:7px;border-bottom:1px solid var(--border);}
-.stat-col-hdr.p1h{color:var(--lime);}
-.stat-col-hdr.p2h{color:var(--muted);}
-
-.stat-row{display:flex;flex-direction:column;gap:3px;}
-.stat-lbl{font-family:'Space Mono',monospace;font-size:6px;color:var(--muted);letter-spacing:.5px;}
-.stat-bar-wrap{display:flex;align-items:center;gap:6px;}
-.stat-track{flex:1;height:4px;background:rgba(255,255,255,0.04);border-radius:2px;overflow:hidden;}
-.stat-fill{height:100%;border-radius:2px;transition:width 1s ease;}
-.stat-fill.p1f{background:linear-gradient(90deg,var(--lime2),var(--lime));}
-.stat-fill.p2f{background:linear-gradient(90deg,#2a4060,#3a5070);}
-.stat-val{font-family:'Bebas Neue',sans-serif;font-size:14px;color:var(--text);line-height:1;width:28px;text-align:right;flex-shrink:0;}
-.stat-val.good{color:var(--lime);}
-.stat-val.bad{color:var(--red);}
-
-/* ═══ SURFACE WINRATE ═══ */
+/* SIGNAUX ENRICHIS */
+.signals{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+.signal{background:var(--card2);border:1px solid var(--border);border-radius:9px;padding:10px 12px;}
+.signal-ico{font-size:14px;margin-bottom:4px;}
+.signal-lbl{font-family:'Space Mono',monospace;font-size:6px;color:var(--muted);letter-spacing:1px;margin-bottom:3px;}
+.signal-val{font-family:'Bebas Neue',sans-serif;font-size:18px;line-height:1;}
+.signal-val.green{color:var(--lime);}
+.signal-val.amber{color:var(--amber);}
+.signal-val.red{color:var(--red);}
+.signal-sub{font-family:'Space Mono',monospace;font-size:7px;color:var(--muted);margin-top:2px;}
+/* AVANTAGES */
+.avantages{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px;}
+.avantage-col{background:var(--card2);border:1px solid var(--border);border-radius:9px;padding:10px 12px;}
+.avantage-col.p1a{border-color:rgba(200,255,0,0.15);}
+.avantage-hdr{font-family:'Space Mono',monospace;font-size:7px;letter-spacing:1px;margin-bottom:6px;padding-bottom:5px;border-bottom:1px solid var(--border);}
+.avantage-hdr.p1h{color:var(--lime);}
+.avantage-hdr.p2h{color:var(--muted);}
+.avantage-item{font-size:10px;color:#8aaabf;line-height:1.6;display:flex;align-items:flex-start;gap:4px;}
+.avantage-item::before{content:'→';color:var(--lime);font-size:9px;flex-shrink:0;margin-top:2px;}
+.avantage-col.p2a .avantage-item::before{color:var(--muted);}
+/* SURFACE */
 .surf-duel{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
 .surf-box{background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:12px;}
 .surf-box-hdr{font-family:'Space Mono',monospace;font-size:7px;letter-spacing:1px;margin-bottom:10px;padding-bottom:7px;border-bottom:1px solid var(--border);}
@@ -139,8 +119,13 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 .surf-detail{font-family:'Space Mono',monospace;font-size:7px;color:var(--muted);}
 .surf-minibar{height:3px;border-radius:3px;overflow:hidden;background:rgba(255,255,255,0.04);margin-top:8px;}
 .surf-minibar-fill{height:100%;border-radius:3px;transition:width 1s ease;}
-
-/* ═══ H2H ═══ */
+/* SURF PRÉDILECTION */
+.surf-pred{display:flex;gap:4px;margin-top:6px;flex-wrap:wrap;}
+.surf-pred-tag{font-family:'Space Mono',monospace;font-size:6px;padding:2px 6px;border-radius:3px;}
+.surf-pred-tag.best{background:var(--lime3);border:1px solid var(--bl);color:var(--lime);}
+.surf-pred-tag.ok{background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.15);color:var(--amber);}
+.surf-pred-tag.bad{background:rgba(255,45,45,0.05);border:1px solid rgba(255,45,45,0.12);color:var(--red);}
+/* H2H */
 .h2h-block{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:12px;padding:4px 0;}
 .h2h-side{text-align:center;}
 .h2h-wins{font-family:'Bebas Neue',sans-serif;font-size:60px;line-height:1;}
@@ -152,8 +137,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 .h2h-fill1{background:linear-gradient(90deg,var(--lime2),var(--lime));}
 .h2h-fill2{background:rgba(255,255,255,0.08);}
 .h2h-note{font-family:'Space Mono',monospace;font-size:7px;color:var(--muted);text-align:center;margin-top:6px;}
-
-/* ═══ FORME RÉCENTE ═══ */
+/* FORME */
 .form-duel{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
 .form-col{background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:12px;}
 .form-col-hdr{font-family:'Space Mono',monospace;font-size:7px;letter-spacing:1px;margin-bottom:8px;}
@@ -164,8 +148,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 .fdot.fw{background:rgba(16,185,129,0.15);color:var(--green);border:1px solid rgba(16,185,129,0.2);}
 .fdot.fl{background:rgba(255,45,45,0.1);color:var(--red);border:1px solid rgba(255,45,45,0.15);}
 .form-record{font-family:'Space Mono',monospace;font-size:8px;color:var(--muted);margin-top:6px;}
-
-/* ═══ SCENARIO SETS ═══ */
+/* SCENARIO */
 .sets-list{display:flex;flex-direction:column;gap:0;}
 .set-item{display:flex;gap:10px;align-items:stretch;padding:0 0 10px;}
 .set-item:last-child{padding-bottom:0;}
@@ -175,29 +158,12 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 .set-line{flex:1;width:1px;background:linear-gradient(180deg,var(--bl),transparent);margin:3px auto 0;}
 .set-body{flex:1;padding-top:2px;}
 .set-txt{font-size:12px;color:#8aaabf;line-height:1.65;}
-
-/* ═══ FACTEUR ═══ */
 .facteur{background:var(--lime3);border:1px solid var(--bl);border-radius:12px;padding:13px 15px;display:flex;gap:10px;align-items:flex-start;}
 .fact-icon{font-size:20px;flex-shrink:0;line-height:1;}
 .fact-lbl{font-family:'Space Mono',monospace;font-size:7px;color:var(--lime);letter-spacing:2px;margin-bottom:4px;}
 .fact-txt{font-size:12px;color:var(--text);line-height:1.55;font-weight:500;}
-
-/* ═══ ANALYSE ═══ */
 .analyse-txt{font-size:12px;color:#8aaabf;line-height:1.7;font-style:italic;}
 .analyse-txt strong{color:var(--text);font-style:normal;}
-
-/* ═══ SIGNALS GRID ═══ */
-.signals{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
-.signal{background:var(--card2);border:1px solid var(--border);border-radius:9px;padding:10px 12px;}
-.signal-ico{font-size:14px;margin-bottom:4px;}
-.signal-lbl{font-family:'Space Mono',monospace;font-size:6px;color:var(--muted);letter-spacing:1px;margin-bottom:3px;}
-.signal-val{font-family:'Bebas Neue',sans-serif;font-size:18px;line-height:1;}
-.signal-val.green{color:var(--lime);}
-.signal-val.amber{color:var(--amber);}
-.signal-val.red{color:var(--red);}
-.signal-sub{font-family:'Space Mono',monospace;font-size:7px;color:var(--muted);margin-top:2px;}
-
-/* ═══ NAV ═══ */
 .loading{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px 20px;gap:14px;}
 .spinner{width:36px;height:36px;border:2px solid var(--border);border-top-color:var(--lime);border-radius:50%;animation:spin 1s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -207,7 +173,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 .ni-icon{font-size:17px;transition:.2s;}
 .ni:hover .ni-icon{transform:translateY(-2px);}
 .ni-lbl{font-family:'Space Mono',monospace;font-size:6px;letter-spacing:1px;color:var(--muted);}
-@media(max-width:440px){.stats-duel,.surf-duel,.form-duel,.signals{grid-template-columns:1fr;}}
+@media(max-width:440px){.stats-duel,.surf-duel,.form-duel,.signals,.avantages{grid-template-columns:1fr;}}
 </style>
 </head>
 <body>
@@ -216,11 +182,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
   <a class="logo" href="/">IA<span>SHARK</span></a>
   <span class="hdr-sport">🎾 TENNIS</span>
 </header>
-
-<div id="root">
-  <div class="loading"><div class="spinner"></div><div class="loading-lbl">ANALYSE EN COURS...</div></div>
-</div>
-
+<div id="root"><div class="loading"><div class="spinner"></div><div class="loading-lbl">ANALYSE EN COURS...</div></div></div>
 <nav class="nav">
   <div class="ni" onclick="location='/'"><div class="ni-icon">🦈</div><div class="ni-lbl">ACCUEIL</div></div>
   <div class="ni" onclick="location='/historique.html'"><div class="ni-icon">📊</div><div class="ni-lbl">HISTORIQUE</div></div>
@@ -228,95 +190,109 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
   <div class="ni" onclick="location='/blog/'"><div class="ni-icon">📖</div><div class="ni-lbl">GUIDES</div></div>
   <div class="ni" onclick="location='/compte.html'"><div class="ni-icon">👤</div><div class="ni-lbl">COMPTE</div></div>
 </nav>
-
 <script>
-var fId = new URLSearchParams(location.search).get('id');
+var fId=new URLSearchParams(location.search).get('id');
 
-function surfClass(s){
-  var sl=(s||'').toLowerCase();
-  return sl.includes('clay')||sl.includes('terre')?'surf-clay':sl.includes('grass')||sl.includes('gazon')?'surf-grass':'surf-hard';
-}
-function surfLabel(s){
-  var sl=(s||'').toLowerCase();
-  return sl.includes('clay')||sl.includes('terre')?'🟤 TERRE':sl.includes('grass')||sl.includes('gazon')?'🟢 GAZON':'🔵 DUR';
-}
+function surfClass(s){var sl=(s||'').toLowerCase();return sl.includes('clay')||sl.includes('terre')?'surf-clay':sl.includes('grass')||sl.includes('gazon')?'surf-grass':'surf-hard';}
+function surfLabel(s){var sl=(s||'').toLowerCase();return sl.includes('clay')||sl.includes('terre')?'🟤 TERRE':sl.includes('grass')||sl.includes('gazon')?'🟢 GAZON':'🔵 DUR';}
 function ini(name){return (name||'??').split(' ').map(function(w){return w[0]||'';}).join('').slice(0,2).toUpperCase();}
-function lastName(name){return (name||'').split(' ').pop().toUpperCase();}
+function lastName(n){return (n||'').split(' ').pop().toUpperCase();}
+function firstName(n){var parts=(n||'').split(' ');parts.pop();return parts.join(' ');}
 
-function formHTML(str,cls){
-  if(!str) return '<span style="font-family:Space Mono,monospace;font-size:8px;color:var(--muted)">N/A</span>';
-  var html='';
-  str.split('').forEach(function(c){
-    html+='<div class="fdot '+(c==='W'?'fw':'fl')+'">'+c+'</div>';
-  });
-  return html;
+// Calcule l'âge depuis birthday ISO
+function calcAge(birthday){
+  if(!birthday) return null;
+  var b=new Date(birthday), now=new Date();
+  var age=now.getFullYear()-b.getFullYear();
+  var m=now.getMonth()-b.getMonth();
+  if(m<0||(m===0&&now.getDate()<b.getDate())) age--;
+  return age>0&&age<60?age:null;
 }
 
+// UTC → Paris (UTC+2 été)
+function toParisTime(isoStr){
+  if(!isoStr) return '';
+  try{
+    var d=new Date(isoStr);
+    return d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit',timeZone:'Europe/Paris'});
+  }catch(e){return '';}
+}
+
+function formHTML(str){
+  if(!str) return '<span style="font-family:Space Mono,monospace;font-size:8px;color:var(--muted)">N/A</span>';
+  return str.split('').map(function(c){return '<div class="fdot '+(c==='W'?'fw':'fl')+'">'+c+'</div>';}).join('');
+}
 function formRecord(str){
   if(!str) return '';
-  var w=0,l=0;
-  str.split('').forEach(function(c){c==='W'?w++:l++;});
+  var w=0,l=0;str.split('').forEach(function(c){c==='W'?w++:l++;});
   return w+'V / '+l+'D';
 }
-
-function statBar(lbl,val,cls,max){
-  if(!val&&val!==0) return '';
-  var pct=Math.min(Math.round((val/(max||100))*100),100);
-  var color=val>=65?'good':val<=40?'bad':'';
-  return '<div class="stat-row">'
-    +'<div class="stat-lbl">'+lbl+'</div>'
-    +'<div class="stat-bar-wrap">'
-    +'<div class="stat-track"><div class="stat-fill '+cls+'" data-w="'+pct+'" style="width:0%"></div></div>'
-    +'<div class="stat-val '+color+'">'+val+'%</div>'
-    +'</div></div>';
-}
-
-function confLabel(c){
-  return c>=8?'SHARK LOCK':c>=7?'SIGNAL FORT':c>=6?'MODÉRÉ':'FAIBLE';
-}
+function confLabel(c){return c>=8?'SHARK LOCK':c>=7?'SIGNAL FORT':c>=6?'MODÉRÉ':'FAIBLE';}
 function confColor(c){
   return c>=8?'background:rgba(200,255,0,0.08);border:1px solid var(--bl);color:var(--lime)':
          c>=7?'background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);color:var(--amber)':
          'background:rgba(255,255,255,0.03);border:1px solid var(--border);color:var(--muted)';
 }
 
+// Surface de prédilection depuis les pts ATP surface
+function surfPred(profile, surf){
+  if(!profile) return null;
+  var pts={
+    'grass': parseInt(profile.grassPoints)||0,
+    'clay': parseInt(profile.clayPoints)||0,
+    'hard': parseInt(profile.hardPoints)||0
+  };
+  var total=pts.grass+pts.clay+pts.hard;
+  if(!total) return null;
+  var surfLow=(surf||'').toLowerCase();
+  var current=surfLow.includes('grass')?pts.grass:surfLow.includes('clay')?pts.clay:pts.hard;
+  var pct=Math.round(current/total*100);
+  // Trouver meilleure surface
+  var best=Object.keys(pts).reduce(function(a,b){return pts[a]>pts[b]?a:b;});
+  return {best:best, pct:pct, pts:pts};
+}
+
 function render(m){
   var p1n=m.home&&m.home.n||'J1', p2n=m.away&&m.away.n||'J2';
   var p1last=lastName(p1n), p2last=lastName(p2n);
-  var p1ini=ini(p1n), p2ini=ini(p2n);
+  var p1first=firstName(p1n), p2first=firstName(p2n);
   var seed1=m.home&&m.home.seed, seed2=m.away&&m.away.seed;
   var rank1=m.home&&m.home.rank, rank2=m.away&&m.away.rank;
-  var p1c=m.home&&m.home.country||'', p2c=m.away&&m.away.country||'';
-  var surf=m.surface||'hard', heure=(m.date||'').split(' ')[1]||'';
+  var age1=calcAge(m.home&&m.home.birthday), age2=calcAge(m.away&&m.away.birthday);
+  var surf=m.surface||'hard';
+  // Heure UTC+2
+  var rawDate=m.raw_date||m.date||'';
+  var heure=rawDate.includes('T')?toParisTime(rawDate):(m.date||'').split(' ')[1]||'';
   var p1=m.p1||50, p2=m.p2||50;
   var c1=m.c1||'--', c2=m.c2||'--';
   var conf=parseFloat(m.conf||0);
-  var confPct=Math.round((conf/10)*100);
   var sv1=m.surf_stats_p1, sv2=m.surf_stats_p2;
   var h2h=m.h2h_tennis||{};
   var h2hP1=h2h.p1Wins||0, h2hP2=h2h.p2Wins||0, h2hTot=h2hP1+h2hP2;
   var pariRec=m.pari_rec||'', pariCote=m.cote_rec||'—';
   var isGo=pariRec&&!m.no_signal;
   var scen=m.scenario||{};
+  var prof1=m.home&&m.home.profile, prof2=m.away&&m.away.profile;
+  var pred1=surfPred(prof1, surf), pred2=surfPred(prof2, surf);
 
   document.title=p1last+' vs '+p2last+' — IASHARK Tennis';
 
   // HERO
   var heroHTML='<div class="hero">'
     +'<div class="hero-top">'
-    +'<span class="tour-name">'+(m.league||'').toUpperCase()+'</span>'
+    +'<span class="tour-name">'+(m.league||'').toUpperCase()+(m.league&&m.round?' — ':'')+( m.round||'')+'</span>'
     +'<div style="display:flex;gap:6px;align-items:center">'
     +'<span class="surf-pill '+surfClass(surf)+'">'+surfLabel(surf)+'</span>'
-    +(heure?'<span style="font-family:Space Mono,monospace;font-size:10px;color:var(--text)">'+heure+'</span>':'')
+    +(heure?'<span style="font-family:Space Mono,monospace;font-size:11px;color:var(--lime);font-weight:700">'+heure+'</span>':'')
     +(m.tour_rank?'<span style="font-family:Space Mono,monospace;font-size:6px;color:var(--muted)">'+m.tour_rank.toUpperCase()+'</span>':'')
     +'</div></div>'
-    // PLAYERS
     +'<div class="players-grid">'
     // P1
     +'<div class="player-col">'
-    +'<div class="p-avatar p1">'+p1ini+(seed1?'<span class="p-seed">'+seed1+'</span>':'')+'</div>'
-    +'<div class="p-name">'+p1last+'</div>'
-    +'<div style="font-size:11px;color:var(--muted);text-align:center">'+p1n.replace(p1last,'').trim()+'</div>'
+    +'<div class="p-avatar p1">'+ini(p1n)+(seed1?'<span class="p-seed">#'+seed1+'</span>':'')+'</div>'
+    +'<div class="p-lastname">'+p1last+'</div>'
+    +(p1first?'<div class="p-firstname">'+p1first+'</div>':'')
+    +(age1?'<div class="p-age">'+age1+' ans</div>':'')
     +(rank1?'<div class="p-rank">ATP #'+rank1+'</div>':'')
     +(m.form_p1?'<div class="p-form">'+formHTML(m.form_p1)+'</div>':'')
     +'</div>'
@@ -324,25 +300,27 @@ function render(m){
     +'<div class="vs-center"><div class="vs-txt">VS</div>'+(heure?'<div class="vs-time">'+heure+'</div>':'')+'</div>'
     // P2
     +'<div class="player-col away">'
-    +'<div class="p-avatar p2">'+p2ini+(seed2?'<span class="p-seed" style="background:var(--muted);color:#000">'+seed2+'</span>':'')+'</div>'
-    +'<div class="p-name">'+p2last+'</div>'
-    +'<div style="font-size:11px;color:var(--muted);text-align:center">'+p2n.replace(p2last,'').trim()+'</div>'
-    +(rank2?'<div class="p-rank p2-rank">ATP #'+rank2+'</div>':'')
+    +'<div class="p-avatar p2">'+ini(p2n)+(seed2?'<span class="p-seed" style="background:var(--muted);color:#000">#'+seed2+'</span>':'')+'</div>'
+    +'<div class="p-lastname">'+p2last+'</div>'
+    +(p2first?'<div class="p-firstname">'+p2first+'</div>':'')
+    +(age2?'<div class="p-age">'+age2+' ans</div>':'')
+    +(rank2?'<div class="p-rank p2r">ATP #'+rank2+'</div>':rank2===null?'<div class="p-rank p2r">N/C</div>':'')
     +(m.form_p2?'<div class="p-form">'+formHTML(m.form_p2)+'</div>':'')
     +'</div>'
     +'</div>'
     // PROBA
     +'<div class="proba-wrap">'
-    +'<div class="proba-labels"><div><div class="proba-pct p1c">'+p1+'%</div><div style="font-family:Space Mono,monospace;font-size:7px;color:var(--muted)">'+p1last.slice(0,8)+'</div></div>'
-    +'<div style="text-align:right"><div class="proba-pct p2c">'+p2+'%</div><div style="font-family:Space Mono,monospace;font-size:7px;color:var(--muted)">'+p2last.slice(0,8)+'</div></div></div>'
-    +'<div class="proba-bar"><div class="pb-p1" id="pb1" style="width:0%"></div><div class="pb-p2" style="flex:1"></div></div>'
+    +'<div class="proba-labels">'
+    +'<div><div class="proba-pct p1c">'+p1+'%</div><div style="font-family:Space Mono,monospace;font-size:7px;color:var(--muted)">'+p1last.slice(0,8)+'</div></div>'
+    +'<div style="text-align:right"><div class="proba-pct p2c">'+p2+'%</div><div style="font-family:Space Mono,monospace;font-size:7px;color:var(--muted)">'+p2last.slice(0,8)+'</div></div>'
     +'</div>'
-    +'</div>';
+    +'<div class="proba-bar"><div class="pb-p1" id="pb1" style="width:0%"></div><div class="pb-p2" style="flex:1"></div></div>'
+    +'</div></div>';
 
   // VERDICT
   var verdictHTML='';
   if(isGo){
-    var cMin=pariCote&&pariCote!=='—'?(parseFloat(pariCote)-0.2).toFixed(2):'';
+    var cMin=pariCote&&pariCote!=='—'&&!isNaN(parseFloat(pariCote))?(parseFloat(pariCote)-0.2).toFixed(2):'';
     verdictHTML='<div class="verdict go">'
       +'<div class="verdict-row">'
       +'<div><div class="verdict-eyebrow">🦈 SELECTION IASHARK</div>'
@@ -352,17 +330,17 @@ function render(m){
       +'<div class="verdict-cote">'+pariCote+'</div>'
       +'</div>'
       +'<div class="verdict-tags">'
-      +(m.edge?'<span class="vtag edge">EDGE '+m.edge+'</span>':'')
-      +(m.kelly&&m.kelly!=='0'?'<span class="vtag kelly">KELLY '+m.kelly+'%</span>':'')
+      +(m.edge&&m.edge!=='0%'?'<span class="vtag edge">EDGE '+m.edge+'</span>':'')
+      +(m.kelly&&m.kelly!=='0%'&&m.kelly!=='0'?'<span class="vtag kelly">KELLY '+m.kelly+'</span>':'')
       +'<span class="vtag conf">CONF '+conf.toFixed(1)+'/10</span>'
       +(m.risque?'<span class="vtag risk">'+m.risque+'</span>':'')
       +'</div>'
-      +(cMin?'<div style="margin-top:7px;font-family:Space Mono,monospace;font-size:7px;color:var(--amber)">⚠ Si cote tombe sous '+cMin+' — ne pas jouer</div>':'')
+      +(cMin?'<div style="margin-top:7px;font-family:Space Mono,monospace;font-size:7px;color:var(--amber)">⚠ Cote min: '+cMin+' — ne pas jouer en dessous</div>':'')
       +'</div>';
   } else {
     verdictHTML='<div class="verdict pass">'
       +'<div class="verdict-eyebrow">🚨 PASSE TON TOUR</div>'
-      +'<div style="font-size:13px;color:#8aaabf;line-height:1.5">'+(m.no_signal_label||m.conseil_public||'Signaux insuffisants — aucun pari recommandé.')+'</div>'
+      +'<div style="font-size:13px;color:#8aaabf;line-height:1.5">'+(m.no_signal_label||m.conseil_public||'Signaux contradictoires — aucun pari recommandé.')+'</div>'
       +'</div>';
   }
 
@@ -379,126 +357,132 @@ function render(m){
   // FACTEUR
   var factHTML=m.facteur_x?'<div class="facteur"><div class="fact-icon">⚡</div><div><div class="fact-lbl">FACTEUR DÉCISIF</div><div class="fact-txt">'+m.facteur_x+'</div></div></div>':'';
 
-  // SIGNALS GRID
-  var signalsHTML='<div class="section"><div class="sec-title">SIGNAUX CLÉS</div>'
-    +'<div class="signals">';
-  // Classement
+  // SIGNAUX CLÉS
+  var signalsHTML='<div class="section"><div class="sec-title">SIGNAUX CLÉS</div><div class="signals">';
   if(rank1||rank2){
     var gap=rank1&&rank2?Math.abs(rank1-rank2):null;
-    signalsHTML+='<div class="signal"><div class="signal-ico">🏆</div><div class="signal-lbl">ÉCART CLASSEMENT</div>'
-      +'<div class="signal-val '+(gap&&gap>30?'green':gap&&gap>10?'amber':'red')+'">'+( gap?'+'+gap:'N/A')+'</div>'
-      +'<div class="signal-sub">#'+(rank1||'?')+' vs #'+(rank2||'?')+'</div></div>';
+    signalsHTML+='<div class="signal"><div class="signal-ico">🏆</div><div class="signal-lbl">CLASSEMENT</div>'
+      +'<div class="signal-val '+(gap&&gap>30?'green':gap&&gap>10?'amber':'red')+'">'+(gap?gap+' PL':rank1?'#'+rank1:'N/C')+'</div>'
+      +'<div class="signal-sub">'+(rank1?'#'+rank1:'N/C')+' vs '+(rank2?'#'+rank2:'N/C')+'</div></div>';
   }
-  // Cotes
-  if(c1!=='--'){
+  if(c1!=='--'||c2!=='--'){
     signalsHTML+='<div class="signal"><div class="signal-ico">💰</div><div class="signal-lbl">COTES</div>'
-      +'<div class="signal-val amber">'+c1+' / '+c2+'</div>'
-      +(m.edge?'<div class="signal-sub">Edge '+m.edge+'</div>':'')+'</div>';
+      +'<div class="signal-val amber">'+(c1!=='--'?c1:'?')+' / '+(c2!=='--'?c2:'?')+'</div>'
+      +(m.edge&&m.edge!=='0%'?'<div class="signal-sub">Edge '+m.edge+'</div>':'<div class="signal-sub">Marché</div>')+'</div>';
   }
-  // Surface winrate
   if(sv1||sv2){
     var wr1=sv1?sv1.winrate:null, wr2=sv2?sv2.winrate:null;
-    if(wr1||wr2){
-      signalsHTML+='<div class="signal"><div class="signal-ico">🎾</div><div class="signal-lbl">WINRATE '+surfLabel(surf)+'</div>'
-        +'<div class="signal-val '+(wr1&&wr1>=65?'green':wr1&&wr1<45?'red':'amber')+'">'+(wr1?wr1+'%':'?')+' / '+(wr2?wr2+'%':'?')+'</div>'
-        +'<div class="signal-sub">'+p1last.slice(0,8)+' / '+p2last.slice(0,8)+'</div></div>';
-    }
+    signalsHTML+='<div class="signal"><div class="signal-ico">🎾</div><div class="signal-lbl">WINRATE '+surfLabel(surf)+'</div>'
+      +'<div class="signal-val '+(wr1&&wr2?(wr1>wr2?'green':'amber'):'amber')+'">'+(wr1?wr1+'%':'?')+' / '+(wr2?wr2+'%':'?')+'</div>'
+      +'<div class="signal-sub">'+p1last.slice(0,7)+' / '+p2last.slice(0,7)+'</div></div>';
   }
-  // H2H
   if(h2hTot>0){
     signalsHTML+='<div class="signal"><div class="signal-ico">⚔️</div><div class="signal-lbl">HEAD TO HEAD</div>'
-      +'<div class="signal-val '+(Math.abs(h2hP1-h2hP2)>=3?'green':'amber')+'">'+h2hP1+' — '+h2hP2+'</div>'
+      +'<div class="signal-val '+(Math.abs(h2hP1-h2hP2)>=3?'green':Math.abs(h2hP1-h2hP2)>=1?'amber':'red')+'">'+h2hP1+' — '+h2hP2+'</div>'
       +'<div class="signal-sub">'+h2hTot+' confrontations</div></div>';
   }
-  signalsHTML+='</div></div>';
+  signalsHTML+='</div>';
 
-  // STATS SERVICE
+  // AVANTAGES DE CHAQUE JOUEUR
+  var avantP1=[], avantP2=[];
+  if(rank1&&rank2){rank1<rank2?avantP1.push('Classement ATP supérieur (#'+rank1+')'):avantP2.push('Classement ATP supérieur (#'+rank2+')');}
+  if(sv1&&sv2){sv1.winrate>sv2.winrate?avantP1.push('Meilleur winrate '+surfLabel(surf)+' ('+sv1.winrate+'%)'):avantP2.push('Meilleur winrate '+surfLabel(surf)+' ('+sv2.winrate+'%)');}
+  if(h2hP1>h2hP2)avantP1.push('Domine le H2H ('+h2hP1+'-'+h2hP2+')');
+  else if(h2hP2>h2hP1)avantP2.push('Domine le H2H ('+h2hP2+'-'+h2hP1+')');
+  if(m.form_p1&&m.form_p2){
+    var w1=m.form_p1.split('').filter(function(c){return c==='W';}).length;
+    var w2=m.form_p2.split('').filter(function(c){return c==='W';}).length;
+    if(w1>w2)avantP1.push('Meilleure forme récente ('+w1+'/5)');
+    else if(w2>w1)avantP2.push('Meilleure forme récente ('+w2+'/5)');
+  }
+  if(pred1&&pred2){
+    var surfLow=(surf||'').toLowerCase().includes('grass')?'grass':(surf||'').toLowerCase().includes('clay')?'clay':'hard';
+    if(pred1.pts[surfLow]>pred2.pts[surfLow]*1.5)avantP1.push('Spécialiste '+surfLabel(surf)+' (pts ATP)');
+    else if(pred2.pts[surfLow]>pred1.pts[surfLow]*1.5)avantP2.push('Spécialiste '+surfLabel(surf)+' (pts ATP)');
+  }
+  if(avantP1.length||avantP2.length){
+    signalsHTML+='<div class="avantages">'
+      +'<div class="avantage-col p1a"><div class="avantage-hdr p1h">'+p1last.slice(0,12).toUpperCase()+'</div>'
+      +(avantP1.length?avantP1.map(function(a){return '<div class="avantage-item">'+a+'</div>';}).join(''):'<div style="font-family:Space Mono,monospace;font-size:8px;color:var(--muted)">Aucun avantage clair</div>')
+      +'</div>'
+      +'<div class="avantage-col p2a"><div class="avantage-hdr p2h">'+p2last.slice(0,12).toUpperCase()+'</div>'
+      +(avantP2.length?avantP2.map(function(a){return '<div class="avantage-item">'+a+'</div>';}).join(''):'<div style="font-family:Space Mono,monospace;font-size:8px;color:var(--muted)">Aucun avantage clair</div>')
+      +'</div></div>';
+  }
+  signalsHTML+='</div>';
+
+  // STATS SURFACE
   var svHtml='';
-  // On affiche les stats surface si dispo
   if(sv1||sv2){
-    svHtml='<div class="section"><div class="sec-title">STATS SUR '+surfLabel(surf)+'</div>'
-      +'<div class="surf-duel">';
-    function surfBox(sv,cls,hcls,name){
-      if(!sv) return '<div class="surf-box"><div class="surf-box-hdr '+hcls+'">'+name+'</div><div style="font-family:Space Mono,monospace;font-size:8px;color:var(--muted)">Non disponible</div></div>';
+    function surfBox(sv,hcls,name,pred){
+      var predTag='';
+      if(pred){
+        var surfLow=(surf||'').toLowerCase().includes('grass')?'grass':(surf||'').toLowerCase().includes('clay')?'clay':'hard';
+        var isBest=pred.best===surfLow;
+        var pct=pred.pct;
+        predTag='<div class="surf-pred"><span class="surf-pred-tag '+(isBest?'best':pct>=30?'ok':'bad')+'">'+(isBest?'SURFACE FÉTICHE':pct+'% des pts ATP ici')+'</span></div>';
+      }
+      if(!sv) return '<div class="surf-box"><div class="surf-box-hdr '+hcls+'">'+name+'</div><div style="font-family:Space Mono,monospace;font-size:8px;color:var(--muted)">Non disponible</div>'+predTag+'</div>';
       var wr=sv.winrate, col=wr>=65?'hi':wr>=50?'mid':'lo';
       var fillCol=wr>=65?'background:var(--lime)':wr>=50?'background:var(--amber)':'background:var(--red)';
       return '<div class="surf-box"><div class="surf-box-hdr '+hcls+'">'+name+'</div>'
         +'<div class="surf-wr '+col+'">'+wr+'%</div>'
-        +'<div class="surf-detail">'+sv.wins+'V / '+sv.losses+'D sur 3 ans</div>'
+        +'<div class="surf-detail">'+sv.wins+'V / '+sv.losses+'D cette saison</div>'
         +'<div class="surf-minibar"><div class="surf-minibar-fill" data-w="'+wr+'" style="'+fillCol+';width:0%"></div></div>'
-        +'</div>';
+        +predTag+'</div>';
     }
-    svHtml+=surfBox(sv1,'p1','p1h',p1last.slice(0,12))+surfBox(sv2,'p2','p2h',p2last.slice(0,12));
-    svHtml+='</div></div>';
+    svHtml='<div class="section"><div class="sec-title">STATS '+surfLabel(surf)+' CETTE SAISON</div>'
+      +'<div class="surf-duel">'
+      +surfBox(sv1,'p1h',p1last.slice(0,12),pred1)
+      +surfBox(sv2,'p2h',p2last.slice(0,12),pred2)
+      +'</div></div>';
   }
 
-  // FORME RÉCENTE
+  // FORME
   var formeHTML='<div class="section"><div class="sec-title">FORME RÉCENTE</div>'
     +'<div class="form-duel">'
     +'<div class="form-col"><div class="form-col-hdr p1h">'+p1last.slice(0,12).toUpperCase()+'</div>'
     +'<div class="form-dots">'+formHTML(m.form_p1)+'</div>'
-    +'<div class="form-record">'+formRecord(m.form_p1)+'</div>'
-    +'</div>'
+    +'<div class="form-record">'+formRecord(m.form_p1)+'</div></div>'
     +'<div class="form-col"><div class="form-col-hdr p2h">'+p2last.slice(0,12).toUpperCase()+'</div>'
     +'<div class="form-dots">'+formHTML(m.form_p2)+'</div>'
-    +'<div class="form-record">'+formRecord(m.form_p2)+'</div>'
-    +'</div>'
+    +'<div class="form-record">'+formRecord(m.form_p2)+'</div></div>'
     +'</div></div>';
 
-  // H2H BLOCK
+  // H2H
   var h2hHTML='';
   if(h2hTot>0){
     var p1pct=Math.round(h2hP1/h2hTot*100);
     h2hHTML='<div class="section"><div class="sec-title">HEAD TO HEAD</div>'
       +'<div class="h2h-block">'
-      +'<div class="h2h-side"><div class="h2h-wins p1w">'+h2hP1+'</div><div class="h2h-name">'+p1last.slice(0,10).toUpperCase()+'</div></div>'
+      +'<div class="h2h-side"><div class="h2h-wins p1w">'+h2hP1+'</div><div class="h2h-name">'+p1last.slice(0,10)+'</div></div>'
       +'<div class="h2h-sep">VS</div>'
-      +'<div class="h2h-side"><div class="h2h-wins p2w">'+h2hP2+'</div><div class="h2h-name">'+p2last.slice(0,10).toUpperCase()+'</div></div>'
+      +'<div class="h2h-side"><div class="h2h-wins p2w">'+h2hP2+'</div><div class="h2h-name">'+p2last.slice(0,10)+'</div></div>'
       +'</div>'
       +'<div class="h2h-bar"><div class="h2h-fill1" style="width:'+p1pct+'%"></div><div class="h2h-fill2" style="flex:1"></div></div>'
-      +'<div class="h2h-note">'+h2hTot+' confrontations historiques</div>'
-      +'</div>';
+      +'<div class="h2h-note">'+h2hTot+' confrontations historiques</div></div>';
   }
 
   // ANALYSE
   var analyseHTML=m.analyse_card||m.conseil_public?'<div class="section"><div class="sec-title">ANALYSE IA</div>'
     +'<div class="analyse-txt">'+(m.analyse_card||m.conseil_public)+'</div></div>':'';
 
-  // SCENARIO PAR SETS
+  // SCENARIO SETS
   var scenHTML='';
   if(scen.phase1||scen.phase2){
-    var phases=[
-      {t:'1ER SET',txt:scen.phase1,cls:''},
-      {t:'2ÈME SET',txt:scen.phase2,cls:''},
-    ];
+    var phases=[{t:'1ER SET',txt:scen.phase1,cls:''},{t:'2ÈME SET',txt:scen.phase2,cls:''}];
     if(scen.phase3&&scen.phase3!=='null') phases.push({t:'3ÈME SET',txt:scen.phase3,cls:'set3'});
     var list=phases.filter(function(p){return p.txt&&p.txt!=='null';}).map(function(p,i,arr){
       var last=i===arr.length-1;
-      return '<div class="set-item">'
-        +'<div class="set-l"><div class="set-badge '+p.cls+'">'+p.t+'</div>'+(!last?'<div class="set-line"></div>':'')+'</div>'
-        +'<div class="set-body"><div class="set-txt">'+p.txt+'</div></div>'
-        +'</div>';
+      return '<div class="set-item"><div class="set-l"><div class="set-badge '+p.cls+'">'+p.t+'</div>'+(!last?'<div class="set-line"></div>':'')+'</div><div class="set-body"><div class="set-txt">'+p.txt+'</div></div></div>';
     }).join('');
     scenHTML='<div class="section"><div class="sec-title">SCÉNARIO PAR SET</div><div class="sets-list">'+list+'</div></div>';
   }
 
   // CONTEXTE
-  var ctxHTML=m.contexte?'<div class="section"><div class="sec-title">CONTEXTE</div>'
-    +'<div class="analyse-txt">'+m.contexte+'</div></div>':'';
+  var ctxHTML=m.contexte?'<div class="section"><div class="sec-title">CONTEXTE</div><div class="analyse-txt">'+m.contexte+'</div></div>':'';
 
-  return '<div class="wrap">'
-    +heroHTML
-    +verdictHTML
-    +confHTML
-    +factHTML
-    +signalsHTML
-    +svHtml
-    +formeHTML
-    +h2hHTML
-    +analyseHTML
-    +scenHTML
-    +ctxHTML
-    +'</div>';
+  return '<div class="wrap">'+heroHTML+verdictHTML+confHTML+factHTML+signalsHTML+svHtml+formeHTML+h2hHTML+analyseHTML+scenHTML+ctxHTML+'</div>';
 }
 
 async function init(){
@@ -508,17 +492,12 @@ async function init(){
     var res=await fetch('data.json?t='+Date.now());
     var data=await res.json();
     var m=(data.matchs||[]).find(function(x){return String(x.id)===String(fId);});
-    if(!m){el.innerHTML='<div style="text-align:center;padding:60px;font-family:Space Mono,monospace;font-size:10px;color:var(--muted)">MATCH INTROUVABLE<br><br><a href="/" style="color:var(--lime);font-family:Space Mono,monospace">← RETOUR</a></div>';return;}
+    if(!m){el.innerHTML='<div style="text-align:center;padding:60px;font-family:Space Mono,monospace;font-size:10px;color:var(--muted)">MATCH INTROUVABLE<br><br><a href="/" style="color:var(--lime)">← RETOUR</a></div>';return;}
     el.innerHTML=render(m);
-    // Animations
     setTimeout(function(){
-      var pb1=document.getElementById('pb1');
-      if(pb1) pb1.style.width=(m.p1||50)+'%';
-      var cf=document.getElementById('confFill');
-      if(cf) cf.style.width=Math.round(((m.conf||0)/10)*100)+'%';
-      document.querySelectorAll('[data-w]').forEach(function(b){
-        requestAnimationFrame(function(){setTimeout(function(){b.style.width=b.getAttribute('data-w')+'%';},80);});
-      });
+      var pb1=document.getElementById('pb1');if(pb1)pb1.style.width=(m.p1||50)+'%';
+      var cf=document.getElementById('confFill');if(cf)cf.style.width=Math.round(((m.conf||0)/10)*100)+'%';
+      document.querySelectorAll('[data-w]').forEach(function(b){requestAnimationFrame(function(){setTimeout(function(){b.style.width=b.getAttribute('data-w')+'%';},80);});});
     },150);
   }catch(e){console.error(e);el.innerHTML='<div style="text-align:center;padding:60px;color:var(--muted)">Erreur</div>';}
 }

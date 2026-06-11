@@ -688,7 +688,8 @@ jobs:
             catch(e) { console.log('Parse error genAnalyseTennis:', txt.slice(0,200)); return null; }
           }
 
-          async function processTennisFixtures(fixtures) {
+          async function processTennisFixtures(fixtures, RANK_MAP) {
+            RANK_MAP = RANK_MAP||{};
             var tennisMatchs = [];
             console.log('\n=== TENNIS PIPELINE: '+fixtures.length+' matchs à analyser ===');
 
@@ -2136,7 +2137,7 @@ jobs:
             // ── 3. TENNIS PROCESSING ──
             var tennisMatchs = [];
             if(tennisFixtures.length){
-              tennisMatchs = await processTennisFixtures(tennisFixtures);
+              tennisMatchs = await processTennisFixtures(tennisFixtures, RANK_MAP);
             }
 
             // ── 4. MERGE football + tennis dans matchsData ──

@@ -25,6 +25,7 @@ jobs:
           const ANT_KEY    = process.env.ANTHROPIC_KEY;
           const ODDS_KEY   = process.env.ODDS_API_KEY;
           const TENNIS_KEY = process.env.RAPIDAPI_TENNIS_KEY;
+          const ODDS_IO_KEY = process.env.ODDS_API_IO_KEY;
           const APS        = {'x-apisports-key': APS_KEY};
           const TENNIS_HEADERS = {
             'x-rapidapi-key':  TENNIS_KEY,
@@ -321,6 +322,65 @@ jobs:
               var k=String(f.id||JSON.stringify(f));
               if(seen[k])return false;seen[k]=true;return true;
             });
+          }
+
+          // Cotes tennis depuis Odds-API.io
+          // Fetch tous les events tennis une seule fois et construit un index par nom
+          var ODDS_IO_INDEX = null;
+          async function loadOddsIOIndex() {
+            if(!ODDS_IO_KEY) return;
+            if(ODDS_IO_INDEX!==null) return;
+            ODDS_IO_INDEX = {};
+            try {
+              var r = await get('https://api.odds-api.io/v3/events?apiKey='+ODDS_IO_KEY+'&sport=tennis&status=pending&limit=200', {});
+              var events = Array.isArray(r)?r:(r&&r.data)||[];
+              events.forEach(function(e){
+                if(!e.home||!e.away) return;
+                var key = (e.home+'|'+e.away).toLowerCase().replace(/\s+/g,'');
+                var key2 = (e.away+'|'+e.home).toLowerCase().replace(/\s+/g,'');
+                ODDS_IO_INDEX[key] = e;
+                ODDS_IO_INDEX[key2] = e;
+              });
+              console.log('OddsIO index: '+events.length+' events tennis');
+            } catch(e) { console.log('OddsIO load error:', e.message); ODDS_IO_INDEX={}; }
+          }
+
+          async function getTennisOddsIO(p1Name, p2Name) {
+            if(!ODDS_IO_KEY||!ODDS_IO_INDEX) return null;
+            // Matching par nom — nettoyage des accents et espaces
+            function clean(n){ return (n||'').toLowerCase().replace(/[^a-z]/g,''); }
+            var c1=clean(p1Name), c2=clean(p2Name);
+            var found=null;
+            Object.values(ODDS_IO_INDEX).forEach(function(e){
+              if(found) return;
+              var eh=clean(e.home), ea=clean(e.away);
+              // Match si les 6 premiers caractères correspondent
+              if((eh.slice(0,6)===c1.slice(0,6)&&ea.slice(0,6)===c2.slice(0,6))||
+                 (eh.slice(0,6)===c2.slice(0,6)&&ea.slice(0,6)===c1.slice(0,6))) {
+                found=e;
+              }
+            });
+            if(!found) return null;
+            try {
+              var r = await get('https://api.odds-api.io/v3/odds?apiKey='+ODDS_IO_KEY+'&eventId='+found.id+'&bookmakers=Bet365,Unibet,Pinnacle', {});
+              if(!r||!r.bookmakers) return null;
+              // Prendre Pinnacle en priorité sinon Bet365
+              var bk = r.bookmakers['Pinnacle']||r.bookmakers['Bet365']||r.bookmakers[Object.keys(r.bookmakers)[0]];
+              if(!bk) return null;
+              var ml = bk.find(function(m){return m.name==='ML'||m.name==='Match Winner'||m.name==='1X2';});
+              if(!ml||!ml.odds||!ml.odds[0]) return null;
+              var o = ml.odds[0];
+              // Tennis = pas de draw, home=p1, away=p2
+              var c1val = parseFloat(o.home||o['1']||0);
+              var c2val = parseFloat(o.away||o['2']||0);
+              if(c1val>1&&c2val>1) {
+                // Si les noms sont inversés dans l'index, inverser les cotes
+                var eh=clean(found.home);
+                var needSwap = eh.slice(0,6)===c2.slice(0,6);
+                return needSwap?{c1:c2val.toFixed(2),c2:c1val.toFixed(2)}:{c1:c1val.toFixed(2),c2:c2val.toFixed(2)};
+              }
+              return null;
+            } catch(e){ return null; }
           }
 
           // Cotes tennis — endpoint séparé Best Odds
@@ -730,8 +790,9 @@ jobs:
             catch(e) { console.log('Parse error genAnalyseTennis:', txt.slice(0,200)); return null; }
           }
 
-          async function processTennisFixtures(fixtures, RANK_MAP) {
+          async function processTennisFixtures(fixtures, RANK_MAP, PHOTOS) {
             RANK_MAP = RANK_MAP||{};
+            PHOTOS = PHOTOS||{};
             var tennisMatchs = [];
             console.log('\n=== TENNIS PIPELINE: '+fixtures.length+' matchs à analyser ===');
 
@@ -765,6 +826,7 @@ jobs:
                 getTennisMatchStats(parsed.p1Id, tour),
                 getTennisMatchStats(parsed.p2Id, tour),
                 getTennisOddsBest(parsed.id),
+                getTennisOddsIO(p1Name, p2Name),
                 getTennisTournamentRecord(parsed.p1Id, parsed.tournamentId, tour),
                 getTennisTournamentRecord(parsed.p2Id, parsed.tournamentId, tour),
                 getTennisTitles(parsed.p1Id, tour),
@@ -779,6 +841,7 @@ jobs:
               var mstats1   = batch[4];
               var mstats2   = batch[5];
               var bestOdds  = batch[6];
+              var oddsIO    = batch[7];
               var tourRec1  = batch[7];
               var tourRec2  = batch[8];
               var titles1   = batch[9];
@@ -807,9 +870,10 @@ jobs:
               var svStats1 = calcServiceStats(mstats1);
               var svStats2 = calcServiceStats(mstats2);
 
-              // Cotes
-              var c1 = (bestOdds&&bestOdds.c1)||parsed.c1;
-              var c2 = (bestOdds&&bestOdds.c2)||parsed.c2;
+              // Cotes : OddsIO (Pinnacle/Bet365) prioritaire, sinon best odds API tennis
+              var c1 = (oddsIO&&oddsIO.c1)||(bestOdds&&bestOdds.c1)||parsed.c1;
+              var c2 = (oddsIO&&oddsIO.c2)||(bestOdds&&bestOdds.c2)||parsed.c2;
+              if(oddsIO) console.log('  OddsIO cotes: '+c1+'/'+c2);
               console.log('  #'+rank1+' vs #'+rank2+' | Cotes: '+c1+'/'+c2+' | Forme: '+form1+'/'+form2+' | Surface: '+(surf1?surf1.winrate+'%':'?')+'/'+(surf2?surf2.winrate+'%':'?'));
 
               // Skip seulement si VRAIMENT rien — ni cotes ni classement ni forme
@@ -859,8 +923,8 @@ jobs:
               var matchObj = {
                 id: 't_'+parsed.id,
                 sport: 'tennis',
-                home: {n:p1Name, id:parsed.p1Id, seed:parsed.seed1, country:parsed.p1Country, rank:rank1, birthday:profile1&&profile1.birthday||null, profile:{grassPoints:profile1&&profile1.grassPoints||0, clayPoints:profile1&&profile1.clayPoints||0, hardPoints:profile1&&profile1.hardPoints||0}},
-                away: {n:p2Name, id:parsed.p2Id, seed:parsed.seed2, country:parsed.p2Country, rank:rank2, birthday:profile2&&profile2.birthday||null, profile:{grassPoints:profile2&&profile2.grassPoints||0, clayPoints:profile2&&profile2.clayPoints||0, hardPoints:profile2&&profile2.hardPoints||0}},
+                home: {n:p1Name, id:parsed.p1Id, seed:parsed.seed1, country:parsed.p1Country, rank:rank1, photo:PHOTOS[String(parsed.p1Id)]||null},
+                away: {n:p2Name, id:parsed.p2Id, seed:parsed.seed2, country:parsed.p2Country, rank:rank2, photo:PHOTOS[String(parsed.p2Id)]||null},
                 league: parsed.tournament+(parsed.round?' — '+parsed.round:''),
                 ligue_icon: '\uD83C\uDFBE',
                 league_key: lkKey,
@@ -1634,7 +1698,7 @@ jobs:
                 var tours=['atp','wta'];
                 for(var t=0;t<tours.length;t++){
                   var tour=tours[t];
-                  var yTennisFixtures=await getArr(TENNIS_BASE+'/tennis/v2/'+tour+'/fixtures?date='+yDate,TENNIS_HEADERS);
+                  var yTennisFixtures=await getArr(TENNIS_BASE+'/tennis/v2/'+tour+'/fixtures/'+yDate+'?include=h2h&filter=PlayerGroup:singles&pageSize=50',TENNIS_HEADERS);
                   for(var ytf=0;ytf<yTennisFixtures.length;ytf++){
                     var tf=yTennisFixtures[ytf];
                     var tfId='t_'+(tf.id||tf.fixtureId||ytf);
@@ -1754,7 +1818,8 @@ jobs:
             // ── 1. FETCH TENNIS + RANKINGS EN PARALLÈLE avec le football ──
             var tennisFixturesPromise = getTennisFixtures();
             var footballFixturesPromise = getFixtures();
-            // Fetch rankings ATP+WTA en une seule fois pour tous les joueurs
+            // Fetch rankings ATP+WTA + OddsIO index en parallèle
+            if(ODDS_IO_KEY) await loadOddsIOIndex();
             var rankingsPromise = Promise.all([
               get(TENNIS_BASE+'/tennis/v2/atp/ranking/singles/?pageSize=300', TENNIS_HEADERS).catch(function(){return null;}),
               get(TENNIS_BASE+'/tennis/v2/wta/ranking/singles/?pageSize=300', TENNIS_HEADERS).catch(function(){return null;})
@@ -1766,6 +1831,14 @@ jobs:
 
             // Construire un dictionnaire {playerId: position} pour ATP et WTA
             var RANK_MAP = {};
+            // Charger le mapping photos
+            var PHOTOS = {};
+            try {
+              var photosRaw = require('fs').readFileSync('photos.json','utf8');
+              var photosData = JSON.parse(photosRaw);
+              PHOTOS = Object.assign({}, photosData.atp||{}, photosData.wta||{});
+              console.log('Photos loaded: '+Object.keys(PHOTOS).length+' joueurs');
+            } catch(e) { console.log('Photos file not found — using initials'); }
             [rankingsRaw[0], rankingsRaw[1]].forEach(function(r){
               var items = (r&&r.data)||[];
               items.forEach(function(item){
@@ -2184,7 +2257,7 @@ jobs:
             // ── 3. TENNIS PROCESSING ──
             var tennisMatchs = [];
             if(tennisFixtures.length){
-              tennisMatchs = await processTennisFixtures(tennisFixtures, RANK_MAP);
+              tennisMatchs = await processTennisFixtures(tennisFixtures, RANK_MAP, PHOTOS);
             }
 
             // ── 4. MERGE football + tennis dans matchsData ──
@@ -2219,6 +2292,7 @@ jobs:
           NEWSAPI_KEY:        ${{ secrets.NEWSAPI_KEY }}
           ANTHROPIC_KEY:      ${{ secrets.ANTHROPIC_KEY }}
           ODDS_API_KEY:       ${{ secrets.ODDS_API_KEY }}
+          ODDS_API_IO_KEY:    ${{ secrets.ODDS_API_IO_KEY }}
           RAPIDAPI_TENNIS_KEY: ${{ secrets.RAPIDAPI_TENNIS_KEY }}
           CREATOMATE_KEY:     ${{ secrets.CREATOMATE_KEY }}
         run: node pipeline.js

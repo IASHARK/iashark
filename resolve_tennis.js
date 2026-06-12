@@ -95,30 +95,44 @@ async function main() {
     const pariDate = pari.date;
 
     // Trouver l'ID du joueur home
-    const playerId = findPlayerId(pari.home, rankMap) || findPlayerId(pari.away, rankMap);
+    // Essayer home puis away, et aussi chercher les deux joueurs
+    const homeId = findPlayerId(pari.home, rankMap);
+    const awayId = findPlayerId(pari.away, rankMap);
+    const playerId = homeId || awayId;
+    const playerIds = [homeId, awayId].filter(Boolean);
     if(!playerId) {
       console.log(`  ⚠ ${pari.match} — joueur introuvable dans rankings`);
       continue;
     }
 
     try {
-      // past-matches retourne les vrais résultats avec match_winner
-      const r = await get(`${TENNIS_BASE}/tennis/v2/${tour}/player/past-matches/${playerId}?pageSize=20`);
-      const matches = (r&&r.data)||[];
+      // Essayer les deux joueurs pour trouver le match
+      let matches = [];
+      for(const pid of playerIds) {
+        const r = await get(`${TENNIS_BASE}/tennis/v2/${tour}/player/past-matches/${pid}?pageSize=50`);
+        const m = (r&&r.data)||[];
+        if(m.length > matches.length) matches = m;
+        await sleep(300);
+      }
 
       // Chercher le match correspondant par date et adversaire
       const awayClean = clean(pari.away);
       const homeClean = clean(pari.home);
 
-      const found = matches.find(m => {
-        if(m.result_type==='upcoming') return false;
-        const mDate = (m.date||'').substring(0,10);
-        if(mDate !== pariDate) return false;
-        const p1 = clean(m.player1&&m.player1.name||'');
-        const p2 = clean(m.player2&&m.player2.name||'');
-        return (p1.includes(homeClean.slice(0,5)) || p2.includes(homeClean.slice(0,5))) &&
-               (p1.includes(awayClean.slice(0,5)) || p2.includes(awayClean.slice(0,5)));
-      });
+      // Date flexible +-1 jour (décalage UTC)
+        const pDate = new Date(pariDate);
+        const dM1 = new Date(pDate); dM1.setDate(dM1.getDate()-1);
+        const dP1 = new Date(pDate); dP1.setDate(dP1.getDate()+1);
+        const validDates = [dM1.toISOString().substring(0,10), pariDate, dP1.toISOString().substring(0,10)];
+        const found = matches.find(m => {
+          if(m.result_type==='upcoming') return false;
+          const mDate = (m.date||'').substring(0,10);
+          if(!validDates.includes(mDate)) return false;
+          const p1 = clean(m.player1&&m.player1.name||'');
+          const p2 = clean(m.player2&&m.player2.name||'');
+          return (p1.includes(homeClean.slice(0,5)) || p2.includes(homeClean.slice(0,5))) &&
+                 (p1.includes(awayClean.slice(0,5)) || p2.includes(awayClean.slice(0,5)));
+        });
 
       if(!found) {
         console.log(`  ⏳ ${pari.match} (${pariDate}) — match non trouvé dans past-matches`);

@@ -155,6 +155,20 @@ async function main() {
       pari.result = isWin ? 'win' : 'loss';
       pari.score = winnerName + ' | ' + found.result;
       pari.resolved_date = today;
+
+      // Récupérer les vraies cotes depuis past-matches
+      // odd1 = cote player1, odd2 = cote player2
+      const odd1 = parseFloat(found.odd1)||null;
+      const odd2 = parseFloat(found.odd2)||null;
+      if(odd1 && odd2) {
+        // La cote du joueur prédit
+        const predClean = clean(pari.prediction);
+        const p1Clean = clean(found.player1&&found.player1.name||'');
+        const isPredP1 = p1Clean.includes(predClean.slice(0,5)) || predClean.includes(p1Clean.slice(0,5));
+        pari.cote = isPredP1 ? odd1 : odd2;
+        console.log(`     Cote récupérée: ${pari.cote}`);
+      }
+
       resolved++;
       console.log(`  ${isWin?'✅':'❌'} ${pari.match} → ${pari.result} (${winnerName} | ${found.result})`);
 
@@ -172,16 +186,22 @@ async function main() {
   const losses = singles.filter(p => p.result==='loss').length;
   const total = wins + losses;
   let roi = 0;
+  let roiCount = 0;
   singles.forEach(p => {
-    if(p.result==='win') roi += (parseFloat(p.cote)||2)-1;
+    if(p.result==='pending') return;
+    const cote = parseFloat(p.cote)||null;
+    if(!cote) return; // pas de cote = pas dans le ROI
+    roiCount++;
+    if(p.result==='win') roi += cote - 1;
     else if(p.result==='loss') roi -= 1;
   });
+  console.log(`ROI calculé sur ${roiCount} paris avec cotes réelles`);
 
   histo.stats.wins = wins;
   histo.stats.losses = losses;
   histo.stats.total = total;
   histo.stats.winrate = total>0 ? Math.round(wins/total*100) : 0;
-  histo.stats.roi = total>0 ? Math.round(roi/total*1000)/10 : 0;
+  histo.stats.roi = roiCount>0 ? Math.round(roi/roiCount*1000)/10 : 0;
 
   fs.writeFileSync(histoPath, JSON.stringify(histo, null, 2));
   console.log(`Stats: ${wins}W/${losses}L | Winrate: ${histo.stats.winrate}% | ROI: ${histo.stats.roi}%`);

@@ -22,8 +22,36 @@ function get(url) {
   });
 }
 
+// Mapping nom joueur → ID depuis le classement ATP/WTA
+// On fetch les rankings pour avoir les IDs
+async function getRankings(tour) {
+  try {
+    const r = await get(`${TENNIS_BASE}/tennis/v2/${tour}/ranking/singles/?pageSize=300`);
+    const items = (r&&r.data)||[];
+    const map = {};
+    items.forEach(item => {
+      if(item.player) map[item.player.name.toLowerCase()] = item.player.id;
+    });
+    return map;
+  } catch(e) { return {}; }
+}
+
+function clean(n){ return (n||'').toLowerCase().replace(/[^a-z]/g,''); }
+
+function findPlayerId(name, rankMap) {
+  const nl = name.toLowerCase();
+  if(rankMap[nl]) return rankMap[nl];
+  // Cherche par correspondance partielle
+  for(const [rname, rid] of Object.entries(rankMap)) {
+    if(clean(rname).includes(clean(nl).slice(0,6)) || clean(nl).includes(clean(rname).slice(0,6))) {
+      return rid;
+    }
+  }
+  return null;
+}
+
 function getWinner(result, p1Name, p2Name) {
-  if(!result || result === '') return null;
+  if(!result || result==='' || result.includes('walkover')) return null;
   const sets = result.split(' ');
   let p1=0, p2=0;
   sets.forEach(s => {
@@ -38,10 +66,9 @@ function getWinner(result, p1Name, p2Name) {
 }
 
 function nameMatch(pred, winner) {
-  const p = pred.toLowerCase();
-  const w = winner.toLowerCase();
-  const wLast = w.split(' ').pop();
-  return p.includes(w.slice(0,5)) || p.includes(wLast.slice(0,5)) || w.includes(p.split(' ').pop().slice(0,5));
+  const p = clean(pred), w = clean(winner);
+  const wLast = winner.split(' ').pop();
+  return p.includes(w.slice(0,6)) || p.includes(clean(wLast).slice(0,5));
 }
 
 async function main() {
@@ -52,44 +79,75 @@ async function main() {
 
   const today = new Date().toISOString().split('T')[0];
   const pending = histo.predictions.filter(p => p.result==='pending' && p.sport==='tennis' && p.date < today);
-  console.log(`${pending.length} paris tennis pending à résoudre (avant ${today})`);
+  console.log(`${pending.length} paris tennis pending à résoudre`);
+
+  // Charger rankings ATP + WTA pour avoir les IDs joueurs
+  console.log('Chargement rankings...');
+  const atpMap = await getRankings('atp');
+  const wtaMap = await getRankings('wta');
+  console.log(`ATP: ${Object.keys(atpMap).length} joueurs | WTA: ${Object.keys(wtaMap).length} joueurs`);
 
   let resolved = 0;
+
   for(const pari of pending) {
-    const fixtureId = String(pari.fixture_id||'').replace('t_','');
-    if(!fixtureId) continue;
     const tour = (pari.league_key||'atp').toLowerCase();
+    const rankMap = tour==='wta' ? wtaMap : atpMap;
+    const pariDate = pari.date;
+
+    // Trouver l'ID du joueur home
+    const playerId = findPlayerId(pari.home, rankMap) || findPlayerId(pari.away, rankMap);
+    if(!playerId) {
+      console.log(`  ⚠ ${pari.match} — joueur introuvable dans rankings`);
+      continue;
+    }
 
     try {
-      const r = await get(`${TENNIS_BASE}/tennis/v2/${tour}/fixtures/${fixtureId}`);
-      const fx = r && (r.data || r);
+      // past-matches retourne les vrais résultats avec match_winner
+      const r = await get(`${TENNIS_BASE}/tennis/v2/${tour}/player/past-matches/${playerId}?pageSize=20`);
+      const matches = (r&&r.data)||[];
 
-      if(!fx || !fx.result || fx.result==='') {
-        console.log(`  ⏳ ${pari.match} — résultat non disponible`);
-        await sleep(300);
+      // Chercher le match correspondant par date et adversaire
+      const awayClean = clean(pari.away);
+      const homeClean = clean(pari.home);
+
+      const found = matches.find(m => {
+        if(m.result_type==='upcoming') return false;
+        const mDate = (m.date||'').substring(0,10);
+        if(mDate !== pariDate) return false;
+        const p1 = clean(m.player1&&m.player1.name||'');
+        const p2 = clean(m.player2&&m.player2.name||'');
+        return (p1.includes(homeClean.slice(0,5)) || p2.includes(homeClean.slice(0,5))) &&
+               (p1.includes(awayClean.slice(0,5)) || p2.includes(awayClean.slice(0,5)));
+      });
+
+      if(!found) {
+        console.log(`  ⏳ ${pari.match} (${pariDate}) — match non trouvé dans past-matches`);
+        await sleep(400);
         continue;
       }
 
-      const p1Name = fx.player1 && fx.player1.name || pari.home;
-      const p2Name = fx.player2 && fx.player2.name || pari.away;
-      const winner = getWinner(fx.result, p1Name, p2Name);
-
-      if(!winner) {
-        console.log(`  ⚠ ${pari.match} — impossible de déterminer le gagnant (${fx.result})`);
-        await sleep(300);
+      if(!found.match_winner) {
+        console.log(`  ⏳ ${pari.match} — pas encore de gagnant`);
+        await sleep(400);
         continue;
       }
 
-      const isWin = nameMatch(pari.prediction, winner);
+      // Déterminer le nom du gagnant
+      const winnerName = found.match_winner === found.player1Id
+        ? (found.player1&&found.player1.name||pari.home)
+        : (found.player2&&found.player2.name||pari.away);
+
+      const isWin = nameMatch(pari.prediction, winnerName);
       pari.result = isWin ? 'win' : 'loss';
-      pari.score = winner + ' | ' + fx.result;
+      pari.score = winnerName + ' | ' + found.result;
       pari.resolved_date = today;
       resolved++;
-      console.log(`  ${isWin?'✅':'❌'} ${pari.match} → ${pari.result} (${winner})`);
+      console.log(`  ${isWin?'✅':'❌'} ${pari.match} → ${pari.result} (${winnerName} | ${found.result})`);
+
     } catch(e) {
       console.log(`  ⚠ Erreur ${pari.match}:`, e.message);
     }
-    await sleep(400);
+    await sleep(500);
   }
 
   console.log(`\n${resolved} paris résolus sur ${pending.length} pending`);
@@ -112,7 +170,7 @@ async function main() {
   histo.stats.roi = total>0 ? Math.round(roi/total*1000)/10 : 0;
 
   fs.writeFileSync(histoPath, JSON.stringify(histo, null, 2));
-  console.log(`\nStats: ${wins}W/${losses}L | Winrate: ${histo.stats.winrate}% | ROI: ${histo.stats.roi}%`);
+  console.log(`Stats: ${wins}W/${losses}L | Winrate: ${histo.stats.winrate}% | ROI: ${histo.stats.roi}%`);
 }
 
 main().catch(e => { console.error('FATAL:', e.message); process.exit(1); });

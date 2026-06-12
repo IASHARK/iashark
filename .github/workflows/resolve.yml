@@ -20,6 +20,8 @@ jobs:
       - name: Run resolution script
         env:
           RAPIDAPI_TENNIS_KEY: ${{ secrets.RAPIDAPI_TENNIS_KEY }}
+          ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
+          ODDS_API_IO_KEY: ${{ secrets.ODDS_API_IO_KEY }}
         run: node resolve_tennis.js
 
       - name: Commit historique

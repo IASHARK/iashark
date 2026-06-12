@@ -332,29 +332,46 @@ jobs:
             if(ODDS_IO_INDEX!==null) return;
             ODDS_IO_INDEX = {};
             try {
-              var r = await get('https://api.odds-api.io/v3/events?apiKey='+ODDS_IO_KEY+'&sport=tennis&status=pending&limit=200', {});
-              var events = Array.isArray(r)?r:(r&&r.data)||[];
-              events.forEach(function(e){
-                if(!e.home||!e.away) return;
-                var key = (e.home+'|'+e.away).toLowerCase().replace(/\s+/g,'');
-                var key2 = (e.away+'|'+e.home).toLowerCase().replace(/\s+/g,'');
-                ODDS_IO_INDEX[key] = e;
+              // 1. Fetch la liste des sports actifs et filtrer tennis
+              var sportsR = await get('https://api.the-odds-api.com/v4/sports/?apiKey='+ODDS_KEY, {});
+              var sports = Array.isArray(sportsR)?sportsR:[];
+              var tennisSports = sports.filter(function(s){ return s.key&&s.key.toLowerCase().includes('tennis'); });
+              console.log('OddsIO tennis sports: '+tennisSports.map(function(s){return s.key;}).join(', '));
+
+              // 2. Fetch les cotes pour chaque tournoi tennis actif
+              var allEvents = [];
+              for(var i=0;i<tennisSports.length;i++){
+                try {
+                  var sport = tennisSports[i].key;
+                  var r = await get('https://api.the-odds-api.com/v4/sports/'+sport+'/odds/?apiKey='+ODDS_KEY+'&regions=eu&markets=h2h&bookmakers=pinnacle,bet365&oddsFormat=decimal', {});
+                  var evts = Array.isArray(r)?r:[];
+                  allEvents = allEvents.concat(evts);
+                  console.log('OddsIO '+sport+': '+evts.length+' events');
+                } catch(e2){}
+                await sleep(300);
+              }
+
+              // 3. Indexer par nom joueur
+              allEvents.forEach(function(e){
+                if(!e.home_team||!e.away_team) return;
+                function ck(n){ return (n||'').toLowerCase().replace(/[^a-z]/g,''); }
+                var key1 = ck(e.home_team).slice(0,6)+'|'+ck(e.away_team).slice(0,6);
+                var key2 = ck(e.away_team).slice(0,6)+'|'+ck(e.home_team).slice(0,6);
+                ODDS_IO_INDEX[key1] = e;
                 ODDS_IO_INDEX[key2] = e;
               });
-              console.log('OddsIO index: '+events.length+' events tennis');
+              console.log('OddsIO index total: '+allEvents.length+' events tennis');
             } catch(e) { console.log('OddsIO load error:', e.message); ODDS_IO_INDEX={}; }
           }
 
           async function getTennisOddsIO(p1Name, p2Name) {
-            if(!ODDS_IO_KEY||!ODDS_IO_INDEX) return null;
-            // Matching par nom — nettoyage des accents et espaces
-            function clean(n){ return (n||'').toLowerCase().replace(/[^a-z]/g,''); }
-            var c1=clean(p1Name), c2=clean(p2Name);
+            if(!ODDS_IO_INDEX) return null;
+            function ck(n){ return (n||'').toLowerCase().replace(/[^a-z]/g,''); }
+            var c1=ck(p1Name), c2=ck(p2Name);
             var found=null;
             Object.values(ODDS_IO_INDEX).forEach(function(e){
               if(found) return;
-              var eh=clean(e.home), ea=clean(e.away);
-              // Match si les 6 premiers caractères correspondent
+              var eh=ck(e.home_team||''), ea=ck(e.away_team||'');
               if((eh.slice(0,6)===c1.slice(0,6)&&ea.slice(0,6)===c2.slice(0,6))||
                  (eh.slice(0,6)===c2.slice(0,6)&&ea.slice(0,6)===c1.slice(0,6))) {
                 found=e;
@@ -362,17 +379,19 @@ jobs:
             });
             if(!found) return null;
             try {
-              var r = await get('https://api.odds-api.io/v3/odds?apiKey='+ODDS_IO_KEY+'&eventId='+found.id+'&bookmakers=Bet365,Unibet,Pinnacle', {});
-              if(!r||!r.bookmakers) return null;
-              // Prendre Pinnacle en priorité sinon Bet365
-              var bk = r.bookmakers['Pinnacle']||r.bookmakers['Bet365']||r.bookmakers[Object.keys(r.bookmakers)[0]];
+              // Les cotes sont déjà dans l'event The Odds API
+              var bks = found.bookmakers||[];
+              var bk = bks.find(function(b){return b.key==='pinnacle';}) ||
+                       bks.find(function(b){return b.key==='bet365';}) ||
+                       bks[0];
               if(!bk) return null;
-              var ml = bk.find(function(m){return m.name==='ML'||m.name==='Match Winner'||m.name==='1X2';});
-              if(!ml||!ml.odds||!ml.odds[0]) return null;
-              var o = ml.odds[0];
-              // Tennis = pas de draw, home=p1, away=p2
-              var c1val = parseFloat(o.home||o['1']||0);
-              var c2val = parseFloat(o.away||o['2']||0);
+              var ml = (bk.markets||[]).find(function(m){return m.key==='h2h';});
+              if(!ml||!ml.outcomes||!ml.outcomes[0]) return null;
+              // Tennis h2h = 2 outcomes : home et away
+              var o1 = ml.outcomes.find(function(o){return ck(o.name).slice(0,6)===c1.slice(0,6);});
+              var o2 = ml.outcomes.find(function(o){return ck(o.name).slice(0,6)===c2.slice(0,6);});
+              var c1val = o1?parseFloat(o1.price):0;
+              var c2val = o2?parseFloat(o2.price):0;
               if(c1val>1&&c2val>1) {
                 // Si les noms sont inversés dans l'index, inverser les cotes
                 var eh=clean(found.home);

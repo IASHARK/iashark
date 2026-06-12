@@ -3,6 +3,9 @@ name: Resolve Tennis History
 on:
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   resolve:
     runs-on: ubuntu-latest

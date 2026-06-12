@@ -12,6 +12,20 @@ jobs:
       contents: write
     steps:
       - name: Checkout
+        uses: actions/checkout@v3name: Update IASHARK Daily
+
+on:
+  schedule:
+    - cron: '0 6 * * *'
+  workflow_dispatch:
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
         uses: actions/checkout@v3
 
       - name: Write pipeline script
@@ -1690,33 +1704,73 @@ jobs:
               }
             }catch(e){console.log('  Résultats hier erreur:',e.message);}
 
-            // Résolution tennis (résultats d'hier)
-            // On cherche les paris tennis pending d'hier et on les marque comme non-résolus si pas de résultat API
-            // (le résultat tennis sera résolu par l'API tennis le lendemain)
+            // Résolution tennis — utilise past-matches car fixtures ne contient pas le winner
+            // past-matches retourne match_winner = id du gagnant
             try{
               if(TENNIS_KEY){
-                var tours=['atp','wta'];
-                for(var t=0;t<tours.length;t++){
-                  var tour=tours[t];
-                  var yTennisFixtures=await getArr(TENNIS_BASE+'/tennis/v2/'+tour+'/fixtures/'+yDate+'?include=h2h&filter=PlayerGroup:singles&pageSize=50',TENNIS_HEADERS);
-                  for(var ytf=0;ytf<yTennisFixtures.length;ytf++){
-                    var tf=yTennisFixtures[ytf];
-                    var tfId='t_'+(tf.id||tf.fixtureId||ytf);
-                    var winnerId=tf.winnerId||tf.winner_id||(tf.winner&&tf.winner.id);
-                    if(!winnerId)continue;
-                    var p1Id=tf.player1&&tf.player1.id||tf.player1Id;
-                    var p2Id=tf.player2&&tf.player2.id||tf.player2Id;
-                    var p1Name=tf.player1&&tf.player1.name||'';
-                    var p2Name=tf.player2&&tf.player2.name||'';
-                    var foundT=histo.predictions.find(function(p){return p.result==='pending'&&p.sport==='tennis'&&(p.fixture_id===tfId||(p.home===p1Name&&p.away===p2Name&&p.date&&p.date.substring(0,10)===yDate));});
-                    if(!foundT)continue;
-                    var winnerName=winnerId===p1Id?p1Name:p2Name;
-                    var predName=(foundT.prediction||'').toLowerCase();
-                    var isWinT=predName.toLowerCase().includes(winnerName.toLowerCase().slice(0,4));
-                    foundT.result=isWinT?'win':'loss';foundT.score=winnerName+' W';foundT.resolved_date=yDate;
-                    console.log('  Résolu tennis: '+foundT.match+' \u2192 '+foundT.result);
+                // Chercher les paris tennis pending d'hier
+                var pendingTennis=histo.predictions.filter(function(p){
+                  return p.result==='pending'&&p.sport==='tennis'&&p.date&&p.date.substring(0,10)===yDate;
+                });
+                console.log('  Paris tennis pending à résoudre: '+pendingTennis.length);
+
+                if(pendingTennis.length>0){
+                  // Pour chaque pari pending, chercher le résultat via past-matches d'un des joueurs
+                  var resolvedIds={};
+                  for(var pt=0;pt<pendingTennis.length;pt++){
+                    var pending=pendingTennis[pt];
+                    if(resolvedIds[pending.fixture_id]) continue;
+
+                    // Extraire l'ID joueur depuis fixture_id (format t_12345)
+                    var fxId=String(pending.fixture_id||'').replace('t_','');
+                    var tour=(pending.league_key||'atp').toLowerCase().includes('wta')?'wta':'atp';
+
+                    // Chercher via l'endpoint fixtures d'hier avec result
+                    try {
+                      var dayFixtures=await getArr(
+                        TENNIS_BASE+'/tennis/v2/'+tour+'/fixtures/'+yDate+'?filter=PlayerGroup:singles&pageSize=50',
+                        TENNIS_HEADERS
+                      );
+                      for(var df=0;df<dayFixtures.length;df++){
+                        var fx=dayFixtures[df];
+                        var fxMatchId='t_'+fx.id;
+                        var p1n=fx.player1&&fx.player1.name||'';
+                        var p2n=fx.player2&&fx.player2.name||'';
+                        // Match par fixture_id ou par noms
+                        var isMatch=fxMatchId===pending.fixture_id||
+                          (p1n&&p2n&&pending.home&&pending.away&&
+                           p1n.toLowerCase().includes(pending.home.split(' ').pop().toLowerCase().slice(0,4))&&
+                           p2n.toLowerCase().includes(pending.away.split(' ').pop().toLowerCase().slice(0,4)));
+                        if(!isMatch) continue;
+                        // Vérifier si le match est terminé (result non vide)
+                        if(!fx.result||fx.result==='') continue;
+                        // Déterminer le gagnant depuis le score (sets)
+                        // Format: "6-3 6-4" = player1 gagne, "3-6 4-6" = player2 gagne
+                        var sets=fx.result.split(' ');
+                        var p1sets=0,p2sets=0;
+                        sets.forEach(function(s){
+                          var parts=s.replace(/\([^)]*\)/g,'').split('-');
+                          if(parts.length===2){
+                            var a=parseInt(parts[0])||0,b=parseInt(parts[1])||0;
+                            if(a>b)p1sets++;else if(b>a)p2sets++;
+                          }
+                        });
+                        var winnerName=p1sets>p2sets?p1n:p2n;
+                        var predLow=(pending.prediction||'').toLowerCase();
+                        var winnerLow=winnerName.toLowerCase();
+                        // Match si le nom du gagnant est dans la prédiction (4 premiers chars)
+                        var isWinT=predLow.includes(winnerLow.slice(0,4))||
+                                   predLow.includes(winnerLow.split(' ').pop().slice(0,4));
+                        pending.result=isWinT?'win':'loss';
+                        pending.score=winnerName+' W '+fx.result;
+                        pending.resolved_date=yDate;
+                        resolvedIds[pending.fixture_id]=true;
+                        console.log('  Résolu tennis: '+pending.match+' → '+pending.result+' ('+winnerName+')');
+                        break;
+                      }
+                    } catch(e2){ console.log('  Erreur résolution tennis match:', e2.message); }
+                    await sleep(200);
                   }
-                  await sleep(300);
                 }
               }
             }catch(e){console.log('  Résultats tennis erreur:',e.message);}

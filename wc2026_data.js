@@ -214,7 +214,66 @@ const HOME_BONUS = {
   'Canada': 3,
 };
 
+
+
+
+
+// Valeur marchande par ligne (M€) — attaque / milieu / défense
+// Source : Transfermarkt juin 2026 estimée
+const SQUAD_VALUE_BY_LINE = {
+  'France':      { att: 480, mid: 420, def: 280 },
+  'England':     { att: 420, mid: 380, def: 250 },
+  'Brazil':      { att: 380, mid: 340, def: 260 },
+  'Spain':       { att: 350, mid: 380, def: 190 },
+  'Germany':     { att: 320, mid: 350, def: 200 },
+  'Portugal':    { att: 380, mid: 280, def: 160 },
+  'Netherlands': { att: 280, mid: 280, def: 190 },
+  'Argentina':   { att: 310, mid: 250, def: 160 },
+  'Belgium':     { att: 250, mid: 220, def: 150 },
+  'Norway':      { att: 120, mid: 70,  def: 40  },
+  'Colombia':    { att: 130, mid: 110, def: 70  },
+  'Uruguay':     { att: 140, mid: 110, def: 70  },
+  'Croatia':     { att: 90,  mid: 120, def: 70  },
+  'Switzerland': { att: 90,  mid: 110, def: 70  },
+  'Morocco':     { att: 90,  mid: 100, def: 70  },
+  'Ivory Coast': { att: 120, mid: 100, def: 70  },
+  'Japan':       { att: 80,  mid: 100, def: 60  },
+  'USA':         { att: 190, mid: 170, def: 120 },
+  'Mexico':      { att: 60,  mid: 60,  def: 40  },
+  'Senegal':     { att: 50,  mid: 40,  def: 25  },
+  'South Korea': { att: 80,  mid: 80,  def: 50  },
+  'Turkey':      { att: 80,  mid: 80,  def: 40  },
+  'Ecuador':     { att: 50,  mid: 45,  def: 25  },
+  'Australia':   { att: 40,  mid: 45,  def: 25  },
+  'Canada':      { att: 30,  mid: 28,  def: 17  },
+  'Ghana':       { att: 40,  mid: 35,  def: 20  },
+  'Algeria':     { att: 25,  mid: 22,  def: 15  },
+  'Austria':     { att: 65,  mid: 65,  def: 40  },
+  'Sweden':      { att: 75,  mid: 80,  def: 40  },
+  'Scotland':    { att: 65,  mid: 75,  def: 40  },
+  'Serbia':      { att: 70,  mid: 70,  def: 40  },
+  'Tunisia':     { att: 30,  mid: 28,  def: 22  },
+  'Egypt':       { att: 28,  mid: 22,  def: 15  },
+  'Iran':        { att: 30,  mid: 28,  def: 22  },
+  'Saudi Arabia':{ att: 25,  mid: 25,  def: 20  },
+  'Paraguay':    { att: 18,  mid: 15,  def: 9   },
+  'Panama':      { att: 12,  mid: 12,  def: 11  },
+  'Qatar':       { att: 10,  mid: 10,  def: 5   },
+  'Cape Verde':  { att: 6,   mid: 5,   def: 4   },
+  'Haiti':       { att: 4,   mid: 3,   def: 3   },
+  'Curacao':     { att: 3,   mid: 3,   def: 2   },
+  'New Zealand': { att: 7,   mid: 6,   def: 5   },
+  'Bosnia':      { att: 35,  mid: 30,  def: 20  },
+  'Czech Republic':{ att: 38, mid: 35, def: 22  },
+  'South Africa':{ att: 18,  mid: 15,  def: 12  },
+  'DR Congo':    { att: 20,  mid: 18,  def: 10  },
+  'Uzbekistan':  { att: 20,  mid: 18,  def: 14  },
+  'Jordan':      { att: 12,  mid: 12,  def: 11  },
+  'Iraq':        { att: 15,  mid: 13,  def: 10  },
+  'Croatia':     { att: 100, mid: 120, def: 60  },
+};
+
 module.exports = {
-  WC2026_STADIUMS, FIFA_POINTS, SQUAD_VALUE, TOP5_DENSITY,
-  QUALS_XG, WC_EXPERIENCE, HOME_BONUS, ALTITUDE_ADAPTED
+  WC2026_STADIUMS, FIFA_POINTS, SQUAD_VALUE, SQUAD_VALUE_BY_LINE,
+  TOP5_DENSITY, QUALS_XG, WC_EXPERIENCE, HOME_BONUS, ALTITUDE_ADAPTED
 };

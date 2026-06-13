@@ -861,10 +861,10 @@ jobs:
               var mstats2   = batch[5];
               var bestOdds  = batch[6];
               var oddsIO    = batch[7];
-              var tourRec1  = batch[7];
-              var tourRec2  = batch[8];
-              var titles1   = batch[9];
-              var titles2   = batch[10];
+              var tourRec1  = batch[8];
+              var tourRec2  = batch[9];
+              var titles1   = batch[10];
+              var titles2   = batch[11];
 
               // Classement depuis RANK_MAP global (fiable pour tous les joueurs)
               var rank1 = RANK_MAP[String(parsed.p1Id)]||null;
@@ -1018,7 +1018,7 @@ jobs:
 
             // Coupe du Monde — fetch global puis filtre
             try {
-              var wcResp = await get('https://v3.football.api-sports.io/fixtures?league=1&season=2025', APS);
+              var wcResp = await get('https://v3.football.api-sports.io/fixtures?league=1&season=2026', APS);
               if(wcResp.response&&wcResp.response.length){
                 console.log('World Cup fixtures total:', wcResp.response.length);
                 var wcFiltered = wcResp.response.filter(function(f){

@@ -1953,7 +1953,7 @@ jobs:
             console.log('=== IASHARK',TODAY,'===');
 
             // ── 1. FETCH TENNIS + RANKINGS EN PARALLÈLE avec le football ──
-            var tennisFixturesPromise = getTennisFixtures();
+            var tennisFixturesPromise = Promise.resolve([]); // Tennis bloqué temporairement
             var footballFixturesPromise = getFixtures();
             // Fetch rankings ATP+WTA + OddsIO index en parallèle
             if(ODDS_IO_KEY) await loadOddsIOIndex();

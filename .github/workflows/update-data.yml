@@ -1510,8 +1510,8 @@ jobs:
               // Modèle WC2026 — calcul des probabilités et marchés
               var wcProbs=null, wcMarkets=null, wcFatH=null, wcFatA=null;
               if(WC_MODEL&&WC_DATA){
-                // Trouver le stade depuis le fixture
-                var stadeName=f.venue&&f.venue.name||'';
+                // Trouver le stade depuis les données passées
+                var stadeName=d.stade||'';
                 // Mapper le stade API-Sports vers notre clé
                 var stadeKey=null;
                 if(WC_DATA.WC2026_STADIUMS){
@@ -1520,7 +1520,7 @@ jobs:
                   });
                 }
                 // Mapper les noms d'équipes API-Sports vers nos clés
-                var homeKey=home.name, awayKey=away.name;
+                var homeKey=d.home, awayKey=d.away;
                 var nameMap={'United States':'USA','Korea Republic':'South Korea','Czech Republic':'Czech Republic','Ivory Coast':'Ivory Coast','DR Congo':'DR Congo','Bosnia and Herzegovina':'Bosnia'};
                 homeKey=nameMap[homeKey]||homeKey;
                 awayKey=nameMap[awayKey]||awayKey;

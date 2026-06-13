@@ -1016,16 +1016,20 @@ jobs:
             var DAYAFTER = dayAfter.toISOString().split('T')[0];
             var dates = [TODAY, TOMORROW, DAYAFTER];
 
-            // Coupe du Monde — fetch global puis filtre
+            // Coupe du Monde — fetch par date directement
             try {
-              var wcResp = await get('https://v3.football.api-sports.io/fixtures?league=1&season=2026', APS);
-              if(wcResp.response&&wcResp.response.length){
-                console.log('World Cup fixtures total:', wcResp.response.length);
-                var wcFiltered = wcResp.response.filter(function(f){
-                  return dates.indexOf((f.fixture.date||'').split('T')[0]) !== -1;
-                });
-                console.log('World Cup today/tomorrow:', wcFiltered.length);
-                all = all.concat(wcFiltered);
+              for(var wd=0; wd<dates.length; wd++){
+                var wcResp = await get('https://v3.football.api-sports.io/fixtures?league=1&season=2026&date='+dates[wd]+'&timezone=Europe%2FParis', APS);
+                console.log('WC raw response keys:', Object.keys(wcResp||{}));
+                console.log('WC errors:', JSON.stringify(wcResp.errors||{}));
+                console.log('WC results:', wcResp.results||0);
+                if(wcResp.response&&wcResp.response.length){
+                  console.log('World Cup '+dates[wd]+':', wcResp.response.length+' matchs');
+                  all = all.concat(wcResp.response);
+                } else {
+                  console.log('World Cup '+dates[wd]+': 0 matchs (response='+JSON.stringify(wcResp.response)+')');
+                }
+                await sleep(300);
               }
             } catch(e) { console.log('WC fetch error:', e.message); }
             await sleep(300);
@@ -1875,7 +1879,7 @@ jobs:
             console.log('=== IASHARK',TODAY,'===');
 
             // ── 1. FETCH TENNIS + RANKINGS EN PARALLÈLE avec le football ──
-            var tennisFixturesPromise = getTennisFixtures();
+            var tennisFixturesPromise = Promise.resolve([]); // Tennis désactivé temporairement
             var footballFixturesPromise = getFixtures();
             // Fetch rankings ATP+WTA + OddsIO index en parallèle
             if(ODDS_IO_KEY) await loadOddsIOIndex();

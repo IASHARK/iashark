@@ -4,8 +4,8 @@
 // ═══════════════════════════════════════════════════════
 const https = require('https');
 const {
-  WC2026_STADIUMS, FIFA_POINTS, SQUAD_VALUE, TOP5_DENSITY,
-  QUALS_XG, WC_EXPERIENCE, HOME_BONUS, ALTITUDE_ADAPTED
+  WC2026_STADIUMS, FIFA_POINTS, SQUAD_VALUE, SQUAD_VALUE_BY_LINE,
+  TOP5_DENSITY, QUALS_XG, WC_EXPERIENCE, HOME_BONUS, ALTITUDE_ADAPTED
 } = require('./wc2026_data.js');
 
 // ── Haversine distance en km ──────────────────────────
@@ -178,78 +178,162 @@ function calcDependanceStar(goals_star, goals_total) {
   };
 }
 
+// ── Logique marchés WC ───────────────────────────────────────────
+function calcWCMarkets(homeTeam, awayTeam, probs) {
+  const xgH = QUALS_XG[homeTeam] || { xg_for: 1.2, xg_against: 1.1 };
+  const xgA = QUALS_XG[awayTeam] || { xg_for: 1.2, xg_against: 1.1 };
+  const vH  = SQUAD_VALUE_BY_LINE[homeTeam] || { att: 50, mid: 50, def: 50 };
+  const vA  = SQUAD_VALUE_BY_LINE[awayTeam] || { att: 50, mid: 50, def: 50 };
+
+  const offCombined = xgH.xg_for + xgA.xg_for;
+  const defAvg = (xgH.xg_against + xgA.xg_against) / 2;
+  const defStrengthH = vH.def / Math.max(vA.att, 1);
+  const defStrengthA = vA.def / Math.max(vH.att, 1);
+  const ecart = Math.abs(probs.p1 - probs.p2);
+  const favori = probs.p1 > probs.p2 ? 'home' : 'away';
+
+  // Signal Over/Under
+  let overSignal = 0;
+  if(offCombined > 2.8)     overSignal += 2;
+  if(defAvg > 1.0)          overSignal += 1;
+  if(xgH.xg_against > 1.1) overSignal += 1;
+  if(xgA.xg_against > 1.1) overSignal += 1;
+  if(defStrengthH > 1.5)    overSignal -= 1;
+  if(defStrengthA > 1.5)    overSignal -= 1;
+  if(offCombined < 2.2)     overSignal -= 2;
+
+  // Signal BTTS
+  let bttsSignal = 0;
+  if(xgH.xg_for > 1.4 && xgA.xg_for > 1.2) bttsSignal += 2;
+  if(xgH.xg_against > 0.95) bttsSignal += 1;
+  if(xgA.xg_against > 0.95) bttsSignal += 1;
+  if(xgH.xg_for < 1.1 || xgA.xg_for < 1.1) bttsSignal -= 2;
+
+  // Marché recommandé — cote attendue 1.60-2.20
+  let market_rec = null;
+  if(overSignal >= 2)       market_rec = 'Over 2.5';
+  else if(overSignal <= -2) market_rec = 'Under 2.5';
+  else if(bttsSignal >= 3)  market_rec = 'BTTS Oui';
+  else if(bttsSignal <= -1) market_rec = 'BTTS Non';
+  else if(ecart > 20)       market_rec = favori==='home' ? 'DC 1X' : 'DC X2';
+
+  return {
+    over_signal: overSignal, btts_signal: bttsSignal,
+    dc_signal: ecart > 20, favori,
+    off_combined: Math.round(offCombined*100)/100,
+    def_avg: Math.round(defAvg*100)/100,
+    val_att_h: vH.att, val_def_h: vH.def,
+    val_att_a: vA.att, val_def_a: vA.def,
+    market_rec
+  };
+}
+
 // ── Prompt Claude WC ──────────────────────────────────
 // Correction Gemini : pas d'injection JSON en fin de prompt
 function buildWCPrompt(data) {
   const {
-    home, away, league, date, stade, phase, probs,
+    home, away, league, date, stade, phase, probs, markets,
     fatigueH, fatigueA, h2h, absences,
     tournoi_xg_h, tournoi_xg_a,
     pinnacle_p1, pinnacle_pN, pinnacle_p2,
-    dc1x, dcx2, over25, dependanceH, dependanceA
+    dc1x, dcx2, over25, under25, btts_oui, btts_non,
   } = data;
 
   const isElim = phase === 'elimination';
   const phaseLabel = isElim ? 'PHASE ÉLIMINATOIRE' : 'PHASE DE GROUPES';
+  const mkt = markets || {};
 
-  return `Tu es l'ingénieur IA principal de iashark.com. Analyse les données de notre modèle et génère un verdict JSON strict.
+  // Choisir les cotes selon le marché recommandé
+  const mkCotes = {
+    'Over 2.5':  over25   && over25!=='--'  ? over25   : null,
+    'Under 2.5': under25  && under25!=='--' ? under25  : null,
+    'BTTS Oui':  btts_oui && btts_oui!=='--'? btts_oui : null,
+    'BTTS Non':  btts_non && btts_non!=='--'? btts_non : null,
+    'DC 1X':     dc1x     && dc1x!=='--'    ? dc1x     : null,
+    'DC X2':     dcx2     && dcx2!=='--'    ? dcx2     : null,
+  };
+
+  return `Tu es l'ingénieur IA principal de iashark.com. Analyse les données du modèle et génère un verdict JSON strict.
 
 === CONTEXTE MATCH ===
 ${home} vs ${away} — Coupe du Monde 2026 (${phaseLabel})
 Stade: ${stade} | Date: ${date}
 
-=== OUTPUTS DU MODÈLE IASHARK ===
-Force brute ${home}: ${probs.scoreH.total}/100 | Fatigue: ${probs.fatigueH}/100 (${fatigueH?fatigueH.km:0}km, ${fatigueH?fatigueH.jours:3}j repos)${probs.altMalusH>0?' | Malus altitude: -'+probs.altMalusH+'%':''}
-Force brute ${away}: ${probs.scoreA.total}/100 | Fatigue: ${probs.fatigueA}/100 (${fatigueA?fatigueA.km:0}km, ${fatigueA?fatigueA.jours:3}j repos)${probs.altMalusA>0?' | Malus altitude: -'+probs.altMalusA+'%':''}
+=== SCORES MODÈLE IASHARK ===
+${home}: Force ${probs.scoreH.total}/100 | Fatigue ${probs.fatigueH}/100 (${fatigueH?fatigueH.km:0}km, ${fatigueH?fatigueH.jours:3}j récup)${probs.altMalusH>0?' | ⚠️ Malus altitude -'+probs.altMalusH+'%':''}
+${away}: Force ${probs.scoreA.total}/100 | Fatigue ${probs.fatigueA}/100 (${fatigueA?fatigueA.km:0}km, ${fatigueA?fatigueA.jours:3}j récup)${probs.altMalusA>0?' | ⚠️ Malus altitude -'+probs.altMalusA+'%':''}
 
 === PROBABILITÉS MOTEUR ===
 ${home}: ${probs.p1}%${!isElim?' | Nul: '+probs.pN+'%':''} | ${away}: ${probs.p2}%
 
-=== SIGNAUX DÉTAILLÉS ===
-${home}: FIFA ${probs.scoreH.details.fifa_pts}pts | Valeur ${probs.scoreH.details.valeur_m}M€ | Top5 ${probs.scoreH.details.top5_pct}% | xG qualifs +${probs.scoreH.details.xg_for}/-${probs.scoreH.details.xg_against} | Expérience CM: ${probs.scoreH.details.wc_exp} joueurs
-${away}: FIFA ${probs.scoreA.details.fifa_pts}pts | Valeur ${probs.scoreA.details.valeur_m}M€ | Top5 ${probs.scoreA.details.top5_pct}% | xG qualifs +${probs.scoreA.details.xg_for}/-${probs.scoreA.details.xg_against} | Expérience CM: ${probs.scoreA.details.wc_exp} joueurs
-${tournoi_xg_h?`\nxG dans ce tournoi — ${home}: +${tournoi_xg_h.for}/-${tournoi_xg_h.against} | ${away}: +${tournoi_xg_a.for}/-${tournoi_xg_a.against}`:''}
-${dependanceH&&dependanceH.risque==='ÉLEVÉ'?`\n⚠️ ${home} DÉPENDANCE STAR: ${dependanceH.label}`:''}
-${dependanceA&&dependanceA.risque==='ÉLEVÉ'?`\n⚠️ ${away} DÉPENDANCE STAR: ${dependanceA.label}`:''}
+=== ANALYSE ATTAQUE / DÉFENSE ===
+${home}:
+  Valeur attaque: ${mkt.val_att_h}M€ | Valeur défense: ${mkt.val_def_h}M€
+  xG généré qualifs: ${probs.scoreH.details.xg_for} / xG concédé: ${probs.scoreH.details.xg_against}
+  FIFA: ${probs.scoreH.details.fifa_pts}pts | Top5: ${probs.scoreH.details.top5_pct}% | Exp CM: ${probs.scoreH.details.wc_exp} joueurs
+
+${away}:
+  Valeur attaque: ${mkt.val_att_a}M€ | Valeur défense: ${mkt.val_def_a}M€
+  xG généré qualifs: ${probs.scoreA.details.xg_for} / xG concédé: ${probs.scoreA.details.xg_against}
+  FIFA: ${probs.scoreA.details.fifa_pts}pts | Top5: ${probs.scoreA.details.top5_pct}% | Exp CM: ${probs.scoreA.details.wc_exp} joueurs
+${tournoi_xg_h?`
+xG dans ce tournoi — ${home}: +${tournoi_xg_h.for}/-${tournoi_xg_h.against} | ${away}: +${tournoi_xg_a.for}/-${tournoi_xg_a.against}`:''}
+
+=== SIGNAUX MARCHÉS (calculés par le modèle) ===
+xG offensif combiné: ${mkt.off_combined} ${mkt.off_combined>2.8?'→ SIGNAL OVER FORT':mkt.off_combined<2.2?'→ SIGNAL UNDER FORT':'→ neutre'}
+xG défensif moyen concédé: ${mkt.def_avg} ${mkt.def_avg>1.0?'→ défenses perméables':'→ défenses solides'}
+Signal Over/Under: ${mkt.over_signal>0?'+'+mkt.over_signal+' (Over)':mkt.over_signal+'(Under)'}
+Signal BTTS: ${mkt.btts_signal>0?'+'+mkt.btts_signal+' (Oui)':mkt.btts_signal+' (Non)'}
+Marché recommandé par le modèle: ${mkt.market_rec||'Aucun signal clair'}
+
+=== COTES DISPONIBLES ===
+Over 2.5: ${mkCotes['Over 2.5']||'N/A'} | Under 2.5: ${mkCotes['Under 2.5']||'N/A'}
+BTTS Oui: ${mkCotes['BTTS Oui']||'N/A'} | BTTS Non: ${mkCotes['BTTS Non']||'N/A'}
+DC 1X: ${mkCotes['DC 1X']||'N/A'} | DC X2: ${mkCotes['DC X2']||'N/A'}
 
 === H2H & ABSENCES ===
-H2H compétitions officielles: ${h2h||'Pas d\'historique récent'}
-Absences confirmées: ${absences||'Aucune absence majeure'}
+H2H officiel: ${h2h||'Pas d historique recent en competition officielle'}
+Absences confirmées: ${absences||'Aucune absence majeure confirmée'}
 
 === VALIDATION PINNACLE ===
-${pinnacle_p1?`${home}: ${pinnacle_p1}% | Nul: ${pinnacle_pN||'N/A'}% | ${away}: ${pinnacle_p2}%\nAlignement modèle/marché: ${Math.abs(probs.p1-pinnacle_p1)<=10?'✅ Cohérent (écart <10%)':'⚠️ DIVERGENCE >10% — passe ton tour si inexpliqué'}`:'Pinnacle non disponible'}
+${pinnacle_p1?`${home}: ${pinnacle_p1}% | Nul: ${pinnacle_pN||'N/A'}% | ${away}: ${pinnacle_p2}%
+Alignement: ${Math.abs(probs.p1-pinnacle_p1)<=10?'✅ Cohérent':'⚠️ DIVERGENCE >10% → passe ton tour sauf explication logistique'}`:'Pinnacle non disponible — baser la décision sur le modèle seul'}
 
-=== MARCHÉS ===
-${dc1x&&dc1x!=='--'?'DC 1X: '+dc1x:'DC 1X: N/A'} | ${dcx2&&dcx2!=='--'?'DC X2: '+dcx2:'DC X2: N/A'} | ${over25&&over25!=='--'?'Over 2.5: '+over25:'Over 2.5: N/A'}
+=== RÈGLES ABSOLUES ===
+1. COTE MINIMUM 1.60 — si aucun marché n'atteint 1.60, passe_ton_tour = true
+2. MARCHÉ PRIORITAIRE : Over/Under 2.5 et BTTS en premier — DC en dernier recours
+3. Si signal Over ET signal BTTS Oui → choisir Over 2.5 (plus de valeur)
+4. Fatigue >60 → l'équipe fatiguée marque moins → renforce Under ou BTTS Non
+5. Altitude >1500m + équipe non acclimatée → renforce Under (fatigue physique)
+6. Pinnacle diverge >10% → passe_ton_tour = true SAUF si fatigue ou altitude l'explique
+7. ${isElim?'ÉLIMINATION: qualifier_h + qualifier_a obligatoires. Expérience CM décisive aux TAB':'3ème journée: équipe déjà qualifiée → rotation → décote attaque -30%'}
+Tu peux ajuster les probabilités de ±5% max si absences majeures le justifient.
 
-=== RÈGLES CRITIQUES ===
-1. Fatigue >60 + voyage côte-à-côte → pénalise l'attaque de cette équipe
-2. 3ème journée groupes: équipe déjà qualifiée → rotation (-30% valeur effective)
-3. Altitude >1500m → vérifier si équipe non acclimatée (malus déjà appliqué)
-4. Divergence Pinnacle >10% → passe_ton_tour sauf explication logistique claire
-5. ${isElim?'ÉLIMINATION: exprimer en qualification_h/qualification_a. Tirs au but: favoriser l\'expérience CM':'GROUPES: 1N2 + Over/Under 2.5'}
-Tu peux ajuster les probabilités de ±5% maximum si une absence majeure ou la fatigue le justifie.
-Cote minimum 1.60. Réponds UNIQUEMENT en JSON valide sans markdown:
+Réponds UNIQUEMENT en JSON valide sans markdown:
 {
   "passe_ton_tour": false,
-  "confiance": 7.5,
+  "confiance": 0.0,
   "pari_rec": "",
-  "cote_rec": "1.75",
+  "cote_rec": "",
+  "marche": "Over 2.5|Under 2.5|BTTS Oui|BTTS Non|DC 1X|DC X2",
   "risque": "FAIBLE|MODERE|ELEVE",
-  "verdict_shark": "1 phrase avec chiffre clé",
-  "analyse_card": "2-3 phrases techniques basées sur les données",
+  "verdict_shark": "1 phrase avec stat clé chiffrée",
+  "analyse_card": "2-3 phrases attaque/défense basées sur les données",
   "conseil": "1 directive directe",
-  "contexte": "enjeux du groupe ou bracket",
-  "facteur_x": "stat ou fait logistique décisif",
+  "contexte": "enjeux groupe ou bracket",
+  "facteur_x": "le signal chiffré décisif",
   "p1": 0, "pN": 0, "p2": 0,
   "qualification_h": ${isElim?0:'null'},
   "qualification_a": ${isElim?0:'null'},
+  "edge": "",
   "vbet": "OUI|NON",
-  "kelly": "3.5%"
+  "kelly": ""
 }`;
 }
 
+
 module.exports = {
   calcFatigueLogistique, calcTeamScore, calcMatchProbs,
-  calcDependanceStar, buildWCPrompt, haversine, calcAltitudeMalus
+  calcDependanceStar, calcWCMarkets, buildWCPrompt,
+  haversine, calcAltitudeMalus
 };

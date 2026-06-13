@@ -33,6 +33,14 @@ jobs:
           };
           const TENNIS_BASE = 'https://tennis-api-atp-wta-itf.p.rapidapi.com';
 
+          // ── MODÈLE COUPE DU MONDE 2026 ──────────────────────────
+          var WC_DATA = null, WC_MODEL = null;
+          try {
+            WC_DATA  = require('./wc2026_data.js');
+            WC_MODEL = require('./wc2026_model.js');
+            console.log('WC2026 model loaded OK');
+          } catch(e) { console.log('WC2026 model not found:', e.message); }
+
           // ── HELPERS ──────────────────────────────────────────────
           function sleep(ms) { return new Promise(function(r){ setTimeout(r,ms); }); }
 
@@ -1499,18 +1507,84 @@ jobs:
 
             var prompt;
             if(isWorldCup){
-              prompt='=== COUPE DU MONDE FIFA 2026 ===\n'+d.home+' vs '+d.away+'\n'+d.league+' | '+d.date+' | '+d.stade+'\n\n'
-                +'⚠️ CONTEXTE ÉQUIPES NATIONALES — pas de stats DOM/EXT, pas de ClubElo\n\n'
-                +'Forme récente '+d.home+': '+d.forme5H+(d.streakH?' | Série: '+d.streakH:'')+'\n'
-                +'Forme récente '+d.away+': '+d.forme5A+(d.streakA?' | Série: '+d.streakA:'')+'\n'
-                +'H2H: '+h2hStr+'\nAbsences: '+injStr+'\n'
-                +(d.rkH?'Rang FIFA '+d.home+': #'+d.rkH+'\n':'')
-                +(d.rkA?'Rang FIFA '+d.away+': #'+d.rkA+'\n':'')
-                +'Poisson: '+d.home+' '+d.poisson_p1+'% | Nul '+d.poisson_pN+'% | '+d.away+' '+d.poisson_p2+'%\n'
-                +(d.pinnacle_p1?'Pinnacle: '+d.home+' '+d.pinnacle_p1+'% | Nul '+d.pinnacle_pN+'% | '+d.away+' '+d.pinnacle_p2+'%\n':'Pinnacle: non disponible\n')
-                +'DC 1X: '+(d.dc1x&&d.dc1x!=='--'?d.dc1x:'N/A')+' | DC X2: '+(d.dc2x&&d.dc2x!=='--'?d.dc2x:'N/A')+' | Over 2.5: '+(d.co25&&d.co25!=='--'?d.co25:'N/A')+'\n\n'
-                +'MARCHÉS AUTORISÉS: DC 1X, DC X2, Over 2.5, BTTS Non — cote 1.60-2.20\n'
-                +'CONFIANCE max 8.5\n\n';
+              // Modèle WC2026 — calcul des probabilités et marchés
+              var wcProbs=null, wcMarkets=null, wcFatH=null, wcFatA=null;
+              if(WC_MODEL&&WC_DATA){
+                // Trouver le stade depuis le fixture
+                var stadeName=f.venue&&f.venue.name||'';
+                // Mapper le stade API-Sports vers notre clé
+                var stadeKey=null;
+                if(WC_DATA.WC2026_STADIUMS){
+                  Object.keys(WC_DATA.WC2026_STADIUMS).forEach(function(k){
+                    if(stadeName.toLowerCase().includes(k.toLowerCase().slice(0,6))||k.toLowerCase().includes(stadeName.toLowerCase().slice(0,6))) stadeKey=k;
+                  });
+                }
+                // Mapper les noms d'équipes API-Sports vers nos clés
+                var homeKey=home.name, awayKey=away.name;
+                var nameMap={'United States':'USA','Korea Republic':'South Korea','Czech Republic':'Czech Republic','Ivory Coast':'Ivory Coast','DR Congo':'DR Congo','Bosnia and Herzegovina':'Bosnia'};
+                homeKey=nameMap[homeKey]||homeKey;
+                awayKey=nameMap[awayKey]||awayKey;
+
+                wcProbs = WC_MODEL.calcMatchProbs(homeKey, awayKey, 'group', null, null, stadeKey);
+                wcMarkets = WC_MODEL.calcWCMarkets(homeKey, awayKey, wcProbs);
+              }
+
+              // Calculer edge pour chaque marché depuis les vraies cotes API-Sports
+              function calcEdgeWC(probPct, cote){
+                if(!probPct||!cote||cote==='--') return null;
+                var c=parseFloat(cote);
+                if(c<1.01||c>20) return null;
+                var edge=probPct/100-1/c;
+                return edge>0?Math.round(edge*1000)/10:null; // en %
+              }
+
+              var wcOddsAll=[];
+              if(wcProbs&&wcMarkets){
+                var p1=wcProbs.p1, pN=wcProbs.pN, p2=wcProbs.p2;
+                var p1x=p1+pN, px2=p2+pN;
+                // Tous les marchés avec edge calculé
+                if(odds.co25&&odds.co25!=='--'){var e=calcEdgeWC(wcMarkets.off_combined>2.6?60:40,odds.co25);wcOddsAll.push({market:'Over 2.5',cote:odds.co25,prob_modele:wcMarkets.off_combined>2.6?60:40,edge:e});}
+                if(odds.cu25&&odds.cu25!=='--'){var e=calcEdgeWC(wcMarkets.off_combined<2.3?60:40,odds.cu25);wcOddsAll.push({market:'Under 2.5',cote:odds.cu25,prob_modele:wcMarkets.off_combined<2.3?60:40,edge:e});}
+                if(odds.btts_oui&&odds.btts_oui!=='--'){var e=calcEdgeWC(wcMarkets.btts_signal>=2?55:35,odds.btts_oui);wcOddsAll.push({market:'BTTS Oui',cote:odds.btts_oui,prob_modele:wcMarkets.btts_signal>=2?55:35,edge:e});}
+                if(odds.btts_non&&odds.btts_non!=='--'){var e=calcEdgeWC(wcMarkets.btts_signal<=-1?60:40,odds.btts_non);wcOddsAll.push({market:'BTTS Non',cote:odds.btts_non,prob_modele:wcMarkets.btts_signal<=-1?60:40,edge:e});}
+                if(odds.dc1x&&odds.dc1x!=='--'){var e=calcEdgeWC(p1x,odds.dc1x);wcOddsAll.push({market:'DC 1X',cote:odds.dc1x,prob_modele:p1x,edge:e});}
+                if(odds.dc2x&&odds.dc2x!=='--'){var e=calcEdgeWC(px2,odds.dc2x);wcOddsAll.push({market:'DC X2',cote:odds.dc2x,prob_modele:px2,edge:e});}
+                // Filtrer cotes valides (1.30 min) et trier par edge
+                wcOddsAll=wcOddsAll.filter(function(x){return parseFloat(x.cote)>=1.30;});
+                wcOddsAll.sort(function(a,b){return (b.edge||0)-(a.edge||0);});
+              }
+
+              var wcLinesMarkets=wcOddsAll.map(function(x){
+                return x.market+': '+x.cote+' | prob modèle: '+x.prob_modele+'% | edge: '+(x.edge!==null?'+'+x.edge+'%':'non calculé');
+              }).join('\n');
+
+              prompt='=== COUPE DU MONDE FIFA 2026 — MODÈLE IASHARK ===\n'
+                +d.home+' vs '+d.away+'\n'
+                +d.league+' | '+d.date+' | '+d.stade+'\n\n'
+
+                +(wcProbs?
+                  '=== PROBABILITÉS MODÈLE ===\n'
+                  +d.home+': '+wcProbs.p1+'% | Nul: '+wcProbs.pN+'% | '+d.away+': '+wcProbs.p2+'%\n'
+                  +(wcProbs.altMalusH>0?'⚠️ Malus altitude '+d.home+': -'+wcProbs.altMalusH+'%\n':'')
+                  +(wcProbs.altMalusA>0?'⚠️ Malus altitude '+d.away+': -'+wcProbs.altMalusA+'%\n':'')
+                  +'\n=== SIGNAUX ATTAQUE / DÉFENSE ===\n'
+                  +d.home+': FIFA '+wcProbs.scoreH.details.fifa_pts+'pts | Valeur att '+wcMarkets.val_att_h+'M€ / déf '+wcMarkets.val_def_h+'M€ | xG qualifs +'+wcProbs.scoreH.details.xg_for+'/-'+wcProbs.scoreH.details.xg_against+'\n'
+                  +d.away+': FIFA '+wcProbs.scoreA.details.fifa_pts+'pts | Valeur att '+wcMarkets.val_att_a+'M€ / déf '+wcMarkets.val_def_a+'M€ | xG qualifs +'+wcProbs.scoreA.details.xg_for+'/-'+wcProbs.scoreA.details.xg_against+'\n'
+                  +'xG offensif combiné: '+wcMarkets.off_combined+' | xG défensif moyen: '+wcMarkets.def_avg+'\n'
+                  :'⚠️ Modèle WC non disponible — analyse basique\n')
+
+                +(d.pinnacle_p1?'\n=== VALIDATION PINNACLE ===\n'+d.home+' '+d.pinnacle_p1+'% | Nul '+d.pinnacle_pN+'% | '+d.away+' '+d.pinnacle_p2+'%\n':'')
+                +'\nH2H: '+h2hStr+'\nAbsences: '+injStr+'\n'
+
+                +'\n=== TOUS LES MARCHÉS AVEC EDGE CALCULÉ ===\n'
+                +(wcLinesMarkets||'Cotes non disponibles')+'\n\n'
+
+                +'=== RÈGLES DE DÉCISION ===\n'
+                +'1. Choisis LE marché avec le meilleur edge ET une cote ≥ 1.50 (acceptable jusqu\u0027à 1.30 si edge > 12%)\n'
+                +'2. Tu es NEUTRE — pas de marché favorisé. Choisis uniquement basé sur l\u0027edge calculé\n'
+                +'3. Si aucun marché n\u0027a d\u0027edge positif → passe_ton_tour = true\n'
+                +'4. Si Pinnacle et modèle divergent > 12% → passe_ton_tour = true sauf si logistique explique\n'
+                +'5. Confiance max 8.5 | CONFIANCE min 6.5 pour jouer\n\n';
             } else {
               prompt='=== MATCH ===\n'+d.home+' (DOM, #'+(d.rkH||'?')+') vs '+d.away+' (EXT, #'+(d.rkA||'?')+')\n'+d.league+' | '+d.date+' | '+d.stade+'\n\n'
                 +'=== PHASE 1 — ANALYSE INDÉPENDANTE ===\n'
@@ -1879,7 +1953,7 @@ jobs:
             console.log('=== IASHARK',TODAY,'===');
 
             // ── 1. FETCH TENNIS + RANKINGS EN PARALLÈLE avec le football ──
-            var tennisFixturesPromise = Promise.resolve([]); // Tennis désactivé temporairement
+            var tennisFixturesPromise = getTennisFixtures();
             var footballFixturesPromise = getFixtures();
             // Fetch rankings ATP+WTA + OddsIO index en parallèle
             if(ODDS_IO_KEY) await loadOddsIOIndex();

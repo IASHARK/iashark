@@ -1542,14 +1542,13 @@ jobs:
               if(wcProbs&&wcMarkets){
                 var p1=wcProbs.p1, pN=wcProbs.pN, p2=wcProbs.p2;
                 var p1x=p1+pN, px2=p2+pN;
-                // Tous les marchés avec edge calculé
-                if(odds.co25&&odds.co25!=='--'){var e=calcEdgeWC(wcMarkets.off_combined>2.6?60:40,odds.co25);wcOddsAll.push({market:'Over 2.5',cote:odds.co25,prob_modele:wcMarkets.off_combined>2.6?60:40,edge:e});}
-                if(odds.cu25&&odds.cu25!=='--'){var e=calcEdgeWC(wcMarkets.off_combined<2.3?60:40,odds.cu25);wcOddsAll.push({market:'Under 2.5',cote:odds.cu25,prob_modele:wcMarkets.off_combined<2.3?60:40,edge:e});}
-                if(odds.btts_oui&&odds.btts_oui!=='--'){var e=calcEdgeWC(wcMarkets.btts_signal>=2?55:35,odds.btts_oui);wcOddsAll.push({market:'BTTS Oui',cote:odds.btts_oui,prob_modele:wcMarkets.btts_signal>=2?55:35,edge:e});}
-                if(odds.btts_non&&odds.btts_non!=='--'){var e=calcEdgeWC(wcMarkets.btts_signal<=-1?60:40,odds.btts_non);wcOddsAll.push({market:'BTTS Non',cote:odds.btts_non,prob_modele:wcMarkets.btts_signal<=-1?60:40,edge:e});}
-                if(odds.dc1x&&odds.dc1x!=='--'){var e=calcEdgeWC(p1x,odds.dc1x);wcOddsAll.push({market:'DC 1X',cote:odds.dc1x,prob_modele:p1x,edge:e});}
-                if(odds.dc2x&&odds.dc2x!=='--'){var e=calcEdgeWC(px2,odds.dc2x);wcOddsAll.push({market:'DC X2',cote:odds.dc2x,prob_modele:px2,edge:e});}
-                // Filtrer cotes valides (1.30 min) et trier par edge
+                // Tous les marchés avec edge calculé — utiliser d.co25 etc
+                if(d.co25&&d.co25!=='--'){var e=calcEdgeWC(wcMarkets.off_combined>2.6?60:40,d.co25);wcOddsAll.push({market:'Over 2.5',cote:d.co25,prob_modele:wcMarkets.off_combined>2.6?60:40,edge:e});}
+                if(d.cu25&&d.cu25!=='--'){var e=calcEdgeWC(wcMarkets.off_combined<2.3?60:40,d.cu25);wcOddsAll.push({market:'Under 2.5',cote:d.cu25,prob_modele:wcMarkets.off_combined<2.3?60:40,edge:e});}
+                if(d.btts_oui&&d.btts_oui!=='--'){var e=calcEdgeWC(wcMarkets.btts_signal>=2?55:35,d.btts_oui);wcOddsAll.push({market:'BTTS Oui',cote:d.btts_oui,prob_modele:wcMarkets.btts_signal>=2?55:35,edge:e});}
+                if(d.btts_non&&d.btts_non!=='--'){var e=calcEdgeWC(wcMarkets.btts_signal<=-1?60:40,d.btts_non);wcOddsAll.push({market:'BTTS Non',cote:d.btts_non,prob_modele:wcMarkets.btts_signal<=-1?60:40,edge:e});}
+                if(d.dc1x&&d.dc1x!=='--'){var e=calcEdgeWC(p1x,d.dc1x);wcOddsAll.push({market:'DC 1X',cote:d.dc1x,prob_modele:p1x,edge:e});}
+                if(d.dc2x&&d.dc2x!=='--'){var e=calcEdgeWC(px2,d.dc2x);wcOddsAll.push({market:'DC X2',cote:d.dc2x,prob_modele:px2,edge:e});}
                 wcOddsAll=wcOddsAll.filter(function(x){return parseFloat(x.cote)>=1.30;});
                 wcOddsAll.sort(function(a,b){return (b.edge||0)-(a.edge||0);});
               }

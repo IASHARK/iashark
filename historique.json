@@ -1,6 +1,78 @@
 {
   "predictions": [
     {
+      "match": "France vs Senegal",
+      "home": "France",
+      "away": "Senegal",
+      "prediction": "DC X2",
+      "cote": 2.64,
+      "conf": 7.4,
+      "conf_bucket": "7-8",
+      "edge": "+9.1% (prob modèle 47% vs implicite 37.9% à cote 2.64)",
+      "edge_num": 9.14737,
+      "edge_bucket": "7-10%",
+      "market": "dc_x2",
+      "league": "World Cup",
+      "league_key": "other",
+      "sport": "football",
+      "elo_diff": null,
+      "has_pinnacle": false,
+      "has_elo": false,
+      "date": "2026-06-14",
+      "result": "pending",
+      "fixture_id": 1489383,
+      "type": "single",
+      "score": null
+    },
+    {
+      "match": "Iran vs New Zealand",
+      "home": "Iran",
+      "away": "New Zealand",
+      "prediction": "DC X2",
+      "cote": 1.95,
+      "conf": 7,
+      "conf_bucket": "7-8",
+      "edge": "+0.7%",
+      "edge_num": 0.7,
+      "edge_bucket": "1-5%",
+      "market": "dc_x2",
+      "league": "World Cup",
+      "league_key": "other",
+      "sport": "football",
+      "elo_diff": null,
+      "has_pinnacle": false,
+      "has_elo": false,
+      "date": "2026-06-14",
+      "result": "pending",
+      "fixture_id": 1489378,
+      "type": "single",
+      "score": null
+    },
+    {
+      "match": "Saudi Arabia vs Uruguay",
+      "home": "Saudi Arabia",
+      "away": "Uruguay",
+      "prediction": "DC 1X",
+      "cote": 2.8,
+      "conf": 7.5,
+      "conf_bucket": "7-8",
+      "edge": "+12.3% (prob modèle 48% — cote implicite 35.7%)",
+      "edge_num": 12.34835,
+      "edge_bucket": "10%+",
+      "market": "dc1x",
+      "league": "World Cup",
+      "league_key": "other",
+      "sport": "football",
+      "elo_diff": null,
+      "has_pinnacle": false,
+      "has_elo": false,
+      "date": "2026-06-14",
+      "result": "pending",
+      "fixture_id": 1489379,
+      "type": "single",
+      "score": null
+    },
+    {
       "match": "Caty McNally vs Mika Stojsavljevic",
       "home": "Caty McNally",
       "away": "Mika Stojsavljevic",
@@ -547,10 +619,11 @@
       "has_pinnacle": false,
       "has_elo": false,
       "date": "2026-06-13",
-      "result": "pending",
+      "result": "win",
       "fixture_id": 1489373,
       "type": "single",
-      "score": null
+      "score": "1-1",
+      "resolved_date": "2026-06-13"
     },
     {
       "match": "USA vs Paraguay",
@@ -571,10 +644,11 @@
       "has_pinnacle": false,
       "has_elo": false,
       "date": "2026-06-13",
-      "result": "pending",
+      "result": "win",
       "fixture_id": 1489370,
       "type": "single",
-      "score": null
+      "score": "4-1",
+      "resolved_date": "2026-06-13"
     },
     {
       "match": "Xinyu Wang vs Dalma Galfi",
@@ -2306,21 +2380,21 @@
     }
   ],
   "stats": {
-    "winrate": 70.8,
-    "roi": 24,
-    "total": 24,
-    "streak": 5,
-    "wins": 17,
+    "winrate": 73.1,
+    "roi": 23.2,
+    "total": 26,
+    "streak": 7,
+    "wins": 19,
     "losses": 7
   },
   "monthly": [
     {
       "month": "2026-06",
       "label": "Jun 2026",
-      "wins": 17,
+      "wins": 19,
       "losses": 7,
-      "total": 24,
-      "roi": 24
+      "total": 26,
+      "roi": 27.9
     }
   ],
   "backtesting": {
@@ -2332,6 +2406,22 @@
         "total": 24,
         "winrate": 70.8,
         "roi": 24
+      },
+      {
+        "key": "dc1x",
+        "wins": 1,
+        "losses": 0,
+        "total": 1,
+        "winrate": 100,
+        "roi": 25
+      },
+      {
+        "key": "dc_x2",
+        "wins": 1,
+        "losses": 0,
+        "total": 1,
+        "winrate": 100,
+        "roi": 3
       }
     ],
     "by_league": [
@@ -2350,6 +2440,14 @@
         "total": 10,
         "winrate": 70,
         "roi": 22.5
+      },
+      {
+        "key": "other",
+        "wins": 2,
+        "losses": 0,
+        "total": 2,
+        "winrate": 100,
+        "roi": 14
       }
     ],
     "by_conf": [
@@ -2363,11 +2461,11 @@
       },
       {
         "key": "7-8",
-        "wins": 6,
+        "wins": 8,
         "losses": 2,
-        "total": 8,
-        "winrate": 75,
-        "roi": 31.3
+        "total": 10,
+        "winrate": 80,
+        "roi": 27.8
       }
     ],
     "by_edge": [
@@ -2380,20 +2478,20 @@
         "roi": 53.1
       },
       {
+        "key": "10%+",
+        "wins": 6,
+        "losses": 1,
+        "total": 7,
+        "winrate": 85.7,
+        "roi": 32.6
+      },
+      {
         "key": "0%",
         "wins": 3,
         "losses": 2,
         "total": 5,
         "winrate": 60,
         "roi": 5
-      },
-      {
-        "key": "10%+",
-        "wins": 4,
-        "losses": 1,
-        "total": 5,
-        "winrate": 80,
-        "roi": 40
       },
       {
         "key": "1-5%",
@@ -2420,28 +2518,36 @@
         "total": 24,
         "winrate": 70.8,
         "roi": 24
+      },
+      {
+        "key": "football",
+        "wins": 2,
+        "losses": 0,
+        "total": 2,
+        "winrate": 100,
+        "roi": 14
       }
     ],
     "by_has_pinnacle": [
       {
         "key": "inconnu",
-        "wins": 17,
+        "wins": 19,
         "losses": 7,
-        "total": 24,
-        "winrate": 70.8,
-        "roi": 24
+        "total": 26,
+        "winrate": 73.1,
+        "roi": 23.2
       }
     ],
     "by_has_elo": [
       {
         "key": "inconnu",
-        "wins": 17,
+        "wins": 19,
         "losses": 7,
-        "total": 24,
-        "winrate": 70.8,
-        "roi": 24
+        "total": 26,
+        "winrate": 73.1,
+        "roi": 23.2
       }
     ],
-    "updated": "2026-06-13"
+    "updated": "2026-06-14"
   }
 }

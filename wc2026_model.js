@@ -11,14 +11,23 @@ const {
 } = require('./wc2026_data.js');
 
 // ── Bornes de cote acceptées pour un pari CM ──────────
-const WC_COTE_MIN = 1.40;
-const WC_COTE_MAX = 2.90;
+// Objectif : maximiser le taux de réussite, pas l'edge théorique.
+// On garde une cote minimum pour que le pari reste "publiable",
+// mais aucune borne maximum n'est imposée ici (un favori net
+// avec une cote à 1.15 peut très bien être le pari le plus fiable).
+const WC_COTE_MIN = 1.30;
 
-// ── Edge minimum pour considérer un marché comme "value" ──
-// En dessous, on considère que ce n'est pas un signal exploitable
-// (le bruit du modèle CM — basé sur du xG de qualifs — est trop
-// important pour distinguer un edge de +1-2% d'un edge nul).
-const WC_EDGE_MIN = 3; // en points de %
+// ── Seuils de probabilité minimum par marché ──────────
+// DC 1X/DC X2 couvrent structurellement 2 résultats sur 3 et ont donc
+// mécaniquement une proba modèle plus haute que Over/Under ou BTTS.
+// Pour rester neutre sans laisser DC dominer systématiquement, chaque
+// famille de marché a son propre seuil minimum de proba pour être
+// considérée comme un pari "fiable".
+const WC_PROB_MIN = {
+  'DC 1X': 70, 'DC X2': 70,
+  'Over 2.5': 55, 'Under 2.5': 55,
+  'BTTS Oui': 55, 'BTTS Non': 55,
+};
 
 // ── Haversine distance en km ──────────────────────────
 function haversine(lat1, lng1, lat2, lng2) {
@@ -226,7 +235,8 @@ function calcPoissonMarketProbs(lambdaH, lambdaA) {
 
 // ── Logique marchés WC — version neutre ───────────────────────────
 // Produit pour chaque marché : prob_modele (continue, via Poisson + 1X/X2 du moteur)
-// et edge = prob_modele - 1/cote, filtré sur la fourchette WC_COTE_MIN-WC_COTE_MAX.
+// produit pour chaque marché une probabilité continue (via Poisson + 1X/X2 du moteur),
+// utilisée ensuite par calcWCBestBet pour sélectionner le marché le plus probable.
 // Aucun marché n'est favorisé a priori : même formule d'edge pour les 6.
 function calcWCMarkets(homeTeam, awayTeam, probs) {
   const xgH = QUALS_XG[homeTeam] || { xg_for: 1.2, xg_against: 1.1 };
@@ -265,11 +275,16 @@ function calcWCMarkets(homeTeam, awayTeam, probs) {
   };
 }
 
-// ── Edge neutre par marché ─────────────────────────────────────────
-// Pour chaque marché : edge = prob_modele/100 - 1/cote (si cote dans la fourchette).
-// Retourne la liste triée : edge décroissant, puis (à edge proche) proba la plus
-// haute en premier — privilégie le "plus sûr" parmi les value bets.
-function calcWCEdges(markets, cotes) {
+// ── Sélection neutre par probabilité — version "winrate max" ──────
+// Au lieu de chercher un edge (écart proba vs cote bookmaker), on
+// cherche directement le marché le plus PROBABLE selon le modèle,
+// parmi les 6 marchés traités à parfaite égalité. Un marché n'est
+// retenu que si :
+//   - sa cote est >= WC_COTE_MIN (reste publiable)
+//   - sa proba modèle dépasse le seuil minimum de sa famille (WC_PROB_MIN)
+// Parmi les marchés qui passent ces deux filtres, on prend celui
+// avec la proba la plus haute, tout court.
+function calcWCBestBet(markets, cotes) {
   const candidats = [
     { marche: 'Over 2.5',  prob: markets.prob_over25,  cote: cotes.over25 },
     { marche: 'Under 2.5', prob: markets.prob_under25, cote: cotes.under25 },
@@ -279,37 +294,32 @@ function calcWCEdges(markets, cotes) {
     { marche: 'DC X2',     prob: markets.prob_dcx2,     cote: cotes.dcx2 },
   ];
 
-  const valides = candidats
-    .map(function(c){
-      const cote = parseFloat(c.cote);
-      if(!c.cote || c.cote==='--' || isNaN(cote)) return null;
-      if(cote < WC_COTE_MIN || cote > WC_COTE_MAX) return null;
-      const probDec = c.prob/100;
-      const edge = probDec - (1/cote);
-      const edgePct = Math.round(edge*1000)/10; // en %
-      return {
-        marche: c.marche,
-        cote: cote.toFixed(2),
-        prob_modele: c.prob,
-        edge: edgePct,
-        value: edgePct >= WC_EDGE_MIN, // au-dessus du seuil minimum exploitable
-      };
-    })
-    .filter(Boolean);
-
-  // Tri neutre : edge décroissant. À edge proche (<1 point), la proba la plus
-  // haute (= le plus "sûr") passe devant — pas de favoritisme de marché.
-  valides.sort(function(a,b){
-    if(Math.abs(b.edge - a.edge) < 1) return b.prob_modele - a.prob_modele;
-    return b.edge - a.edge;
+  const tous = candidats.map(function(c){
+    const cote = parseFloat(c.cote);
+    const coteValide = c.cote && c.cote!=='--' && !isNaN(cote) && cote >= WC_COTE_MIN;
+    const seuil = WC_PROB_MIN[c.marche] || 50;
+    const fiable = coteValide && c.prob >= seuil;
+    return {
+      marche: c.marche,
+      cote: coteValide ? cote.toFixed(2) : (c.cote||'--'),
+      prob_modele: c.prob,
+      seuil: seuil,
+      fiable: fiable,
+    };
   });
 
-  return valides;
+  // Tri neutre : proba modèle décroissante, peu importe le marché.
+  const fiables = tous.filter(function(c){ return c.fiable; });
+  fiables.sort(function(a,b){ return b.prob_modele - a.prob_modele; });
+
+  return { tous: tous, fiables: fiables, meilleur: fiables[0] || null };
 }
 
 // ── Prompt Claude WC ──────────────────────────────────
-// Version neutre : aucun marché n'est priorisé par défaut, le choix se fait
-// sur l'edge calculé en JS (calcWCEdges) dans la fourchette 1.40-2.90.
+// Version "winrate max" : aucun marché n'est priorisé par défaut, le choix
+// se fait sur la probabilité modèle la plus haute (calcWCBestBet), filtrée
+// par cote minimum (WC_COTE_MIN) et par seuil de probabilité par famille
+// (WC_PROB_MIN) — pas de notion d'edge / value bet.
 function buildWCPrompt(data) {
   const {
     home, away, league, date, stade, phase, probs, markets,
@@ -324,16 +334,13 @@ function buildWCPrompt(data) {
   const mkt = markets || {};
 
   const cotes = { dc1x, dcx2, over25, under25, btts_oui, btts_non };
-  const edges = calcWCEdges(mkt, cotes);
+  const sel = calcWCBestBet(mkt, cotes);
 
-  const edgesLines = edges.length
-    ? edges.map(function(e){
-        return e.marche+': cote '+e.cote+' | prob modèle '+e.prob_modele+'% | edge '+(e.edge>=0?'+':'')+e.edge+'%'+(e.value?' ✅ VALUE (>= seuil '+WC_EDGE_MIN+'%)':'');
-      }).join('\n')
-    : 'Aucun marché avec une cote entre '+WC_COTE_MIN.toFixed(2)+' et '+WC_COTE_MAX.toFixed(2)+'.';
+  const marchesLines = sel.tous.map(function(c){
+    return c.marche+': cote '+c.cote+' | prob modèle '+c.prob_modele+'% (seuil requis '+c.seuil+'%)'+(c.fiable?' ✅ FIABLE':'');
+  }).join('\n');
 
-  const meilleur = edges.length ? edges[0] : null;
-  const aUnValue = edges.some(function(e){ return e.value; });
+  const meilleur = sel.meilleur;
 
   return `Tu es l'ingénieur IA principal de iashark.com. Analyse les données du modèle et génère un verdict JSON strict.
 
@@ -365,11 +372,11 @@ xG dans ce tournoi — ${home}: +${tournoi_xg_h.for}/-${tournoi_xg_h.against} | 
 xG offensif combiné: ${mkt.off_combined} | xG défensif moyen concédé: ${mkt.def_avg}
 Lambdas Poisson estimés pour ce match: ${home} ${mkt.lambda_h} buts | ${away} ${mkt.lambda_a} buts
 
-=== TOUS LES MARCHÉS AVEC EDGE CALCULÉ (cote entre ${WC_COTE_MIN.toFixed(2)} et ${WC_COTE_MAX.toFixed(2)}) ===
-Seuil minimum d'edge pour qu'un marché soit jouable: ${WC_EDGE_MIN}%
-${edgesLines}
+=== TOUS LES MARCHÉS (cote >= ${WC_COTE_MIN.toFixed(2)}) — PROBABILITÉ MODÈLE ===
+${marchesLines}
 ${meilleur?`
-Meilleur edge actuel: ${meilleur.marche} (cote ${meilleur.cote}, edge ${meilleur.edge>=0?'+':''}${meilleur.edge}%, prob modèle ${meilleur.prob_modele}%)${aUnValue?'':' — sous le seuil minimum, donc PAS une value bet'}`:''}
+Marché le plus probable et fiable: ${meilleur.marche} (cote ${meilleur.cote}, prob modèle ${meilleur.prob_modele}%, seuil requis ${meilleur.seuil}%)`:`
+Aucun marché n'atteint son seuil de probabilité minimum — ce match est trop incertain pour un pari fiable.`}
 
 === H2H & ABSENCES ===
 H2H officiel: ${h2h||'Pas d historique recent en competition officielle'}
@@ -379,13 +386,14 @@ Absences confirmées: ${absences||'Aucune absence majeure confirmée'}
 ${pinnacle_p1?`${home}: ${pinnacle_p1}% | Nul: ${pinnacle_pN||'N/A'}% | ${away}: ${pinnacle_p2}%
 Alignement: ${Math.abs(probs.p1-pinnacle_p1)<=10?'✅ Cohérent':'⚠️ DIVERGENCE >10% → passe ton tour sauf explication logistique'}`:'Pinnacle non disponible — baser la décision sur le modèle seul'}
 
-=== RÈGLES ABSOLUES (NEUTRALITÉ) ===
-1. COTE ENTRE ${WC_COTE_MIN.toFixed(2)} ET ${WC_COTE_MAX.toFixed(2)} ET EDGE >= ${WC_EDGE_MIN}% (marqué ✅ VALUE ci-dessus) — c'est la condition pour jouer. Si la liste "TOUS LES MARCHÉS AVEC EDGE CALCULÉ" est vide OU si AUCUN marché n'est marqué ✅ VALUE → passe_ton_tour = true. Un edge positif mais inférieur à ${WC_EDGE_MIN}% n'est PAS suffisant pour jouer.
-2. NEUTRALITÉ TOTALE ENTRE MARCHÉS : Over 2.5, Under 2.5, BTTS Oui, BTTS Non, DC 1X, DC X2 sont à traiter exactement à égalité. Tu ne dois JAMAIS préférer un type de marché par défaut (par ex. ne pas privilégier Over/BTTS sur DC, ni l'inverse). Le seul critère est l'edge calculé ci-dessus.
-3. CHOIX DU MARCHÉ : parmi les marchés ✅ VALUE, prends celui avec le edge le plus élevé. Si deux marchés ✅ VALUE ont un edge proche (écart < 1 point), choisis celui avec la probabilité modèle la plus haute (= le plus sûr).
+=== RÈGLES ABSOLUES (NEUTRALITÉ — OBJECTIF: TAUX DE RÉUSSITE MAXIMUM) ===
+1. L'OBJECTIF EST LE TAUX DE RÉUSSITE, PAS LE GAIN POTENTIEL. Ignore complètement la cote pour juger de la qualité du pari — la cote ne sert qu'à vérifier qu'elle est >= ${WC_COTE_MIN.toFixed(2)} (publiable). Le seul critère de choix est la probabilité que l'événement se produise réellement.
+2. NEUTRALITÉ TOTALE ENTRE MARCHÉS : Over 2.5, Under 2.5, BTTS Oui, BTTS Non, DC 1X, DC X2 sont à traiter exactement à égalité. Tu ne dois JAMAIS préférer un type de marché par défaut.
+3. CHOIX DU MARCHÉ : prends le marché marqué ✅ FIABLE avec la probabilité modèle la plus haute (indiqué ci-dessus comme "le plus probable et fiable"). Si aucun marché n'est ✅ FIABLE → passe_ton_tour = true.
 4. Fatigue >60 → l'équipe fatiguée marque moins → cela doit déjà être reflété dans les lambdas/probabilités ci-dessus, ne pas appliquer de correction supplémentaire.
 5. Altitude >1500m + équipe non acclimatée → idem, déjà reflété dans les probabilités, ne pas dupliquer la correction.
 6. Pinnacle diverge >10% du modèle → passe_ton_tour = true SAUF si fatigue ou altitude l'explique clairement.
+
 7. ${isElim?'ÉLIMINATION: qualifier_h + qualifier_a obligatoires. Expérience CM décisive aux TAB':'3ème journée: équipe déjà qualifiée → rotation → décote attaque -30% (ajuste ta confiance en conséquence)'}
 Tu peux ajuster les probabilités de ±5% max si absences majeures le justifient — recalcule alors mentalement l'edge avant de répondre.
 RÈGLE ABSOLUE: analyse_card, conseil, contexte, facteur_x, scenario, scenario_15min TOUJOURS remplis même si passe_ton_tour=true.
@@ -426,7 +434,7 @@ Réponds UNIQUEMENT en JSON valide sans markdown:
 
 module.exports = {
   calcFatigueLogistique, calcTeamScore, calcMatchProbs,
-  calcDependanceStar, calcWCMarkets, calcWCEdges, calcPoissonMarketProbs,
+  calcDependanceStar, calcWCMarkets, calcWCBestBet, calcPoissonMarketProbs,
   buildWCPrompt, haversine, calcAltitudeMalus,
-  WC_COTE_MIN, WC_COTE_MAX, WC_EDGE_MIN
+  WC_COTE_MIN, WC_PROB_MIN
 };

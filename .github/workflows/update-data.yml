@@ -1506,84 +1506,42 @@ jobs:
             }
 
             var prompt;
+            var wcPromptIsComplete = false;
             if(isWorldCup){
-              // Modèle WC2026 — calcul des probabilités et marchés
-              var wcProbs=null, wcMarkets=null, wcFatH=null, wcFatA=null;
-              if(WC_MODEL&&WC_DATA){
-                // Trouver le stade depuis les données passées
-                var stadeName=d.stade||'';
-                // Mapper le stade API-Sports vers notre clé
-                var stadeKey=null;
+              wcPromptIsComplete = true;
+              prompt = '⚠️ Modèle WC non disponible — analyse basique\n';
+
+              if(WC_MODEL && WC_DATA){
+                var stadeName = d.stade || '';
+                var stadeKey = null;
                 if(WC_DATA.WC2026_STADIUMS){
                   Object.keys(WC_DATA.WC2026_STADIUMS).forEach(function(k){
-                    if(stadeName.toLowerCase().includes(k.toLowerCase().slice(0,6))||k.toLowerCase().includes(stadeName.toLowerCase().slice(0,6))) stadeKey=k;
+                    if(stadeName.toLowerCase().includes(k.toLowerCase().slice(0,6))||k.toLowerCase().includes(stadeName.toLowerCase().slice(0,6))) stadeKey = k;
                   });
                 }
-                // Mapper les noms d'équipes API-Sports vers nos clés
-                var homeKey=d.home, awayKey=d.away;
-                var nameMap={'United States':'USA','Korea Republic':'South Korea','Czech Republic':'Czech Republic','Ivory Coast':'Ivory Coast','DR Congo':'DR Congo','Bosnia and Herzegovina':'Bosnia'};
-                homeKey=nameMap[homeKey]||homeKey;
-                awayKey=nameMap[awayKey]||awayKey;
 
-                wcProbs = WC_MODEL.calcMatchProbs(homeKey, awayKey, 'group', null, null, stadeKey);
-                wcMarkets = WC_MODEL.calcWCMarkets(homeKey, awayKey, wcProbs);
+                var homeKey = d.home, awayKey = d.away;
+                var nameMap = {'United States':'USA','Korea Republic':'South Korea','Czech Republic':'Czech Republic','Ivory Coast':'Ivory Coast','DR Congo':'DR Congo','Bosnia and Herzegovina':'Bosnia'};
+                homeKey = nameMap[homeKey] || homeKey;
+                awayKey = nameMap[awayKey] || awayKey;
+
+                var wcProbs = WC_MODEL.calcMatchProbs(homeKey, awayKey, 'group', null, null, stadeKey);
+                var wcMarkets = WC_MODEL.calcWCMarkets(homeKey, awayKey, wcProbs);
+
+                prompt = WC_MODEL.buildWCPrompt({
+                  home: d.home, away: d.away,
+                  league: d.league, date: d.date, stade: d.stade,
+                  phase: 'group',
+                  probs: wcProbs, markets: wcMarkets,
+                  fatigueH: null, fatigueA: null,
+                  h2h: h2hStr, absences: injStr,
+                  tournoi_xg_h: null, tournoi_xg_a: null,
+                  pinnacle_p1: d.pinnacle_p1, pinnacle_pN: d.pinnacle_pN, pinnacle_p2: d.pinnacle_p2,
+                  dc1x: d.dc1x, dcx2: d.dc2x,
+                  over25: d.co25, under25: d.cu25,
+                  btts_oui: d.btts_oui, btts_non: d.btts_non,
+                });
               }
-
-              // Calculer edge pour chaque marché depuis les vraies cotes API-Sports
-              function calcEdgeWC(probPct, cote){
-                if(!probPct||!cote||cote==='--') return null;
-                var c=parseFloat(cote);
-                if(c<1.01||c>20) return null;
-                var edge=probPct/100-1/c;
-                return edge>0?Math.round(edge*1000)/10:null; // en %
-              }
-
-              var wcOddsAll=[];
-              if(wcProbs&&wcMarkets){
-                var p1=wcProbs.p1, pN=wcProbs.pN, p2=wcProbs.p2;
-                var p1x=p1+pN, px2=p2+pN;
-                // Tous les marchés avec edge calculé — utiliser d.co25 etc
-                if(d.co25&&d.co25!=='--'){var e=calcEdgeWC(wcMarkets.off_combined>2.6?60:40,d.co25);wcOddsAll.push({market:'Over 2.5',cote:d.co25,prob_modele:wcMarkets.off_combined>2.6?60:40,edge:e});}
-                if(d.cu25&&d.cu25!=='--'){var e=calcEdgeWC(wcMarkets.off_combined<2.3?60:40,d.cu25);wcOddsAll.push({market:'Under 2.5',cote:d.cu25,prob_modele:wcMarkets.off_combined<2.3?60:40,edge:e});}
-                if(d.btts_oui&&d.btts_oui!=='--'){var e=calcEdgeWC(wcMarkets.btts_signal>=2?55:35,d.btts_oui);wcOddsAll.push({market:'BTTS Oui',cote:d.btts_oui,prob_modele:wcMarkets.btts_signal>=2?55:35,edge:e});}
-                if(d.btts_non&&d.btts_non!=='--'){var e=calcEdgeWC(wcMarkets.btts_signal<=-1?60:40,d.btts_non);wcOddsAll.push({market:'BTTS Non',cote:d.btts_non,prob_modele:wcMarkets.btts_signal<=-1?60:40,edge:e});}
-                if(d.dc1x&&d.dc1x!=='--'){var e=calcEdgeWC(p1x,d.dc1x);wcOddsAll.push({market:'DC 1X',cote:d.dc1x,prob_modele:p1x,edge:e});}
-                if(d.dc2x&&d.dc2x!=='--'){var e=calcEdgeWC(px2,d.dc2x);wcOddsAll.push({market:'DC X2',cote:d.dc2x,prob_modele:px2,edge:e});}
-                wcOddsAll=wcOddsAll.filter(function(x){return parseFloat(x.cote)>=1.30;});
-                wcOddsAll.sort(function(a,b){return (b.edge||0)-(a.edge||0);});
-              }
-
-              var wcLinesMarkets=wcOddsAll.map(function(x){
-                return x.market+': '+x.cote+' | prob modèle: '+x.prob_modele+'% | edge: '+(x.edge!==null?'+'+x.edge+'%':'non calculé');
-              }).join('\n');
-
-              prompt='=== COUPE DU MONDE FIFA 2026 — MODÈLE IASHARK ===\n'
-                +d.home+' vs '+d.away+'\n'
-                +d.league+' | '+d.date+' | '+d.stade+'\n\n'
-
-                +(wcProbs?
-                  '=== PROBABILITÉS MODÈLE ===\n'
-                  +d.home+': '+wcProbs.p1+'% | Nul: '+wcProbs.pN+'% | '+d.away+': '+wcProbs.p2+'%\n'
-                  +(wcProbs.altMalusH>0?'⚠️ Malus altitude '+d.home+': -'+wcProbs.altMalusH+'%\n':'')
-                  +(wcProbs.altMalusA>0?'⚠️ Malus altitude '+d.away+': -'+wcProbs.altMalusA+'%\n':'')
-                  +'\n=== SIGNAUX ATTAQUE / DÉFENSE ===\n'
-                  +d.home+': FIFA '+wcProbs.scoreH.details.fifa_pts+'pts | Valeur att '+wcMarkets.val_att_h+'M€ / déf '+wcMarkets.val_def_h+'M€ | xG qualifs +'+wcProbs.scoreH.details.xg_for+'/-'+wcProbs.scoreH.details.xg_against+'\n'
-                  +d.away+': FIFA '+wcProbs.scoreA.details.fifa_pts+'pts | Valeur att '+wcMarkets.val_att_a+'M€ / déf '+wcMarkets.val_def_a+'M€ | xG qualifs +'+wcProbs.scoreA.details.xg_for+'/-'+wcProbs.scoreA.details.xg_against+'\n'
-                  +'xG offensif combiné: '+wcMarkets.off_combined+' | xG défensif moyen: '+wcMarkets.def_avg+'\n'
-                  :'⚠️ Modèle WC non disponible — analyse basique\n')
-
-                +(d.pinnacle_p1?'\n=== VALIDATION PINNACLE ===\n'+d.home+' '+d.pinnacle_p1+'% | Nul '+d.pinnacle_pN+'% | '+d.away+' '+d.pinnacle_p2+'%\n':'')
-                +'\nH2H: '+h2hStr+'\nAbsences: '+injStr+'\n'
-
-                +'\n=== TOUS LES MARCHÉS AVEC EDGE CALCULÉ ===\n'
-                +(wcLinesMarkets||'Cotes non disponibles')+'\n\n'
-
-                +'=== RÈGLES DE DÉCISION ===\n'
-                +'1. Choisis LE marché avec le meilleur edge ET une cote ≥ 1.50 (acceptable jusqu\u0027à 1.30 si edge > 12%)\n'
-                +'2. Tu es NEUTRE — pas de marché favorisé. Choisis uniquement basé sur l\u0027edge calculé\n'
-                +'3. Si aucun marché n\u0027a d\u0027edge positif → passe_ton_tour = true\n'
-                +'4. Si Pinnacle et modèle divergent > 12% → passe_ton_tour = true sauf si logistique explique\n'
-                +'5. Confiance max 8.5 | CONFIANCE min 6.5 pour jouer\n\n';
             } else {
               prompt='=== MATCH ===\n'+d.home+' (DOM, #'+(d.rkH||'?')+') vs '+d.away+' (EXT, #'+(d.rkA||'?')+')\n'+d.league+' | '+d.date+' | '+d.stade+'\n\n'
                 +'=== PHASE 1 — ANALYSE INDÉPENDANTE ===\n'
@@ -1653,11 +1611,16 @@ jobs:
               +']\n'
               +'}';
 
+            var finalContent = wcPromptIsComplete ? prompt : (prompt + jsonTpl);
+            var systemMsg = isWorldCup
+              ? 'Tu es IASHARK, un système d\'analyse statistique de football. Tu réponds EXCLUSIVEMENT en JSON valide. Aucun backtick, aucun texte avant ou après le JSON. Tu n\'inventes jamais de statistiques. Tu es factuel, NEUTRE entre tous les marchés (Over/Under, BTTS, DC), et tu choisis uniquement sur la base de l\'edge calculé fourni. Quand aucun marché n\'a d\'edge suffisant dans la fourchette de cote donnée, tu passes ton tour.'
+              : 'Tu es IASHARK, un système d\'analyse statistique de football. Tu réponds EXCLUSIVEMENT en JSON valide. Aucun backtick, aucun texte avant ou après le JSON. Tu n\'inventes jamais de statistiques. Tu es factuel, neutre, calibré. Quand les données sont insuffisantes, tu passes ton tour.';
+
             var r = await postJSONWithRetry('api.anthropic.com', '/v1/messages', {
               model: 'claude-sonnet-4-6',
               max_tokens: 2500,
-              system: 'Tu es IASHARK, un système d\'analyse statistique de football. Tu réponds EXCLUSIVEMENT en JSON valide. Aucun backtick, aucun texte avant ou après le JSON. Tu n\'inventes jamais de statistiques. Tu es factuel, neutre, calibré. Quand les données sont insuffisantes, tu passes ton tour.',
-              messages: [{role:'user', content:prompt+jsonTpl}]
+              system: systemMsg,
+              messages: [{role:'user', content:finalContent}]
             }, {'x-api-key':ANT_KEY, 'anthropic-version':'2023-06-01'});
 
             var txt=((r.content||[]).find(function(b){return b.type==='text';})||{}).text||'{}';

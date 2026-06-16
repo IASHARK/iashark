@@ -2054,6 +2054,14 @@ jobs:
               var isWorldCupMatch=(lg.id===1);
 
               var cached=(oldData.matchs||[]).find(function(m){return m.id===f.id&&m.sport==='football'&&m.verdict_shark&&m.verdict_shark!=='';});
+              // PATCH TEMPORAIRE : on ignore le cache pour les matchs World Cup afin de
+              // forcer leur régénération avec le nouveau wc2026_model.js (sélection par
+              // probabilité, plus d'edge). À retirer une fois tous les matchs WC déjà
+              // analysés régénérés au moins une fois.
+              if(cached&&isWorldCupMatch){
+                console.log('-> '+home.name+' vs '+away.name+' : cache WC ignoré (régénération forcée)');
+                cached=null;
+              }
               if(cached){
                 console.log('-> '+home.name+' vs '+away.name+' : cache');
                 matchsData.push(cached);

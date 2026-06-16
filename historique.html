@@ -62,19 +62,16 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 .pred-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px 16px;display:grid;grid-template-columns:1fr auto;align-items:center;gap:12px;}
 .pred-card.win{border-left:3px solid var(--green);}
 .pred-card.loss{border-left:3px solid var(--red);}
-.pred-card.pending{border-left:3px solid var(--amber);}
 .pred-match{font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:1px;margin-bottom:4px;}
 .pred-meta{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
 .pred-tag{font-family:'Space Mono',monospace;font-size:7px;letter-spacing:1px;padding:2px 8px;border-radius:10px;}
 .tag-market{background:rgba(34,211,238,0.08);border:1px solid var(--border-cyan);color:var(--cyan);}
 .tag-league{background:rgba(255,255,255,0.04);border:1px solid var(--border);color:var(--muted);}
 .tag-date{color:var(--muted);font-family:'Space Mono',monospace;font-size:7px;}
-.pred-conf{font-family:'Space Mono',monospace;font-size:8px;color:var(--muted);}
 .pred-right{text-align:right;}
 .pred-result{font-family:'Bebas Neue',sans-serif;font-size:20px;}
 .pred-result.win{color:var(--green);}
 .pred-result.loss{color:var(--red);}
-.pred-result.pending{color:var(--amber);}
 .pred-score{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);margin-top:2px;}
 .pred-cote{font-family:'Bebas Neue',sans-serif;font-size:14px;color:var(--amber);}
 
@@ -123,7 +120,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 
   <div class="hero">
     <div class="hero-title"><span>HISTO</span>RIQUE</div>
-    <div class="hero-sub">Performance des pronostics IA — singles uniquement</div>
+    <div class="hero-sub">Performance des pronostics IA — singles uniquement, matchs terminés</div>
 
     <div class="stats-grid">
       <div class="stat-card green">
@@ -168,7 +165,6 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
       <button class="filter-btn active" onclick="setFilter('all',this)">TOUS</button>
       <button class="filter-btn" onclick="setFilter('win',this)">✅ GAGNÉS</button>
       <button class="filter-btn" onclick="setFilter('loss',this)">❌ PERDUS</button>
-      <button class="filter-btn" onclick="setFilter('pending',this)">⏳ EN ATTENTE</button>
     </div>
     <div class="section-lbl" id="countLbl">CHARGEMENT</div>
     <div class="pred-list" id="predList">
@@ -211,6 +207,13 @@ var MARKET_LABELS = {
   'btts_oui':'BTTS Oui','dc1x':'DC 1X','dc_x2':'DC X2','autre':'Autre'
 };
 
+// Statuts considérés comme "résolus" donc affichables dans l'historique.
+// 'scheduled' (match pas encore joué) et l'ancien 'pending' (compat avec
+// les entrées déjà existantes générées avant ce correctif) ne sont JAMAIS
+// affichés ici : l'historique ne montre que des paris dont on connaît déjà
+// le résultat réel.
+var RESOLVED_STATUSES = ['win','loss'];
+
 function setTab(tab) {
   currentTab = tab;
   document.getElementById('tabParis').style.display = tab==='paris'?'block':'none';
@@ -228,11 +231,21 @@ function setFilter(f, btn) {
 }
 
 function renderPredictions() {
-  var list = allPredictions.filter(function(p){ return p.type==='single'; });
+  // On ne garde que les singles déjà résolus (win/loss) — jamais les
+  // matchs pas encore joués (scheduled/pending), peu importe le filtre actif.
+  var list = allPredictions.filter(function(p){
+    return p.type==='single' && RESOLVED_STATUSES.indexOf(p.result)!==-1;
+  });
   if (currentFilter !== 'all') list = list.filter(function(p){ return p.result === currentFilter; });
 
+  // Tri du plus récent au plus ancien pour une lecture cohérente
+  list = list.slice().sort(function(a,b){
+    return (b.resolved_date||b.date||'').localeCompare(a.resolved_date||a.date||'');
+  });
+
+  var resolvedTotal = allPredictions.filter(function(p){return p.type==='single'&&RESOLVED_STATUSES.indexOf(p.result)!==-1;}).length;
   document.getElementById('countLbl').textContent = list.length + ' PARIS';
-  document.getElementById('totalBadge').textContent = allPredictions.filter(function(p){return p.type==='single';}).length + ' PARIS';
+  document.getElementById('totalBadge').textContent = resolvedTotal + ' PARIS';
 
   if (!list.length) {
     document.getElementById('predList').innerHTML = '<div class="empty"><h3>AUCUN PARIS</h3><p>Aucun résultat pour ce filtre.</p></div>';
@@ -240,7 +253,7 @@ function renderPredictions() {
   }
 
   document.getElementById('predList').innerHTML = list.map(function(p) {
-    var resultLabel = p.result==='win'?'WIN':p.result==='loss'?'LOSS':'EN ATTENTE';
+    var resultLabel = p.result==='win'?'WIN':'LOSS';
     var scoreStr = p.score ? p.score : '—';
     var marketLabel = MARKET_LABELS[p.market] || p.prediction || '';
     var coteStr = p.cote ? parseFloat(p.cote).toFixed(2) : '';
@@ -251,9 +264,8 @@ function renderPredictions() {
       +(marketLabel?'<span class="pred-tag tag-market">'+marketLabel+'</span>':'')
       +(coteStr?'<span class="pred-cote">'+coteStr+'</span>':'')
       +(p.league?'<span class="pred-tag tag-league">'+p.league+'</span>':'')
-      +'<span class="tag-date">'+p.date+'</span>'
+      +'<span class="tag-date">'+(p.resolved_date||p.date)+'</span>'
       +'</div>'
-      +(p.conf?'<div class="pred-conf" style="margin-top:4px;">Confiance '+p.conf+'/10'+(p.edge?' · Edge '+p.edge:'')+'</div>':'')
       +'</div>'
       +'<div class="pred-right">'
       +'<div class="pred-result '+p.result+'">'+resultLabel+'</div>'
@@ -294,7 +306,6 @@ function renderBacktesting(bt) {
     + section('PAR MARCHÉ', bt.by_market)
     + section('PAR LIGUE', bt.by_league)
     + section('PAR CONFIANCE', bt.by_conf)
-    + section('PAR EDGE', bt.by_edge)
     +'</div>';
 }
 

@@ -90,13 +90,14 @@ function calcAltitudeMalus(stadeName, teamName) {
 
 // ── Score modèle par équipe ───────────────────────────
 // Correction Gemini : normalisation logarithmique valeur marchande
-function calcTeamScore(teamName, phase, stadeName) {
+function calcTeamScore(teamName, phase, stadeName, dynXg) {
   const isElim = phase === 'elimination';
 
   const fifa   = FIFA_POINTS[teamName]  || 1400;
   const valeur = SQUAD_VALUE[teamName]  || 50;
   const top5   = TOP5_DENSITY[teamName] || 30;
-  const xg     = QUALS_XG[teamName]     || { xg_for: 1.2, xg_against: 1.1 };
+  const xg     = (dynXg && dynXg.xg_for!=null && dynXg.xg_against!=null)
+    ? dynXg : (QUALS_XG[teamName] || { xg_for: 1.2, xg_against: 1.1 });
   const wcExp  = WC_EXPERIENCE[teamName]|| 5;
 
   // Normalisation
@@ -150,9 +151,9 @@ function calcTeamScore(teamName, phase, stadeName) {
 
 // ── Probabilités match ────────────────────────────────
 // Correction Gemini : fatigue augmente probN au lieu de s'annuler
-function calcMatchProbs(homeTeam, awayTeam, phase, fatigueHome, fatigueAway, stadeName) {
-  const scoreH = calcTeamScore(homeTeam, phase, stadeName);
-  const scoreA = calcTeamScore(awayTeam, phase, stadeName);
+function calcMatchProbs(homeTeam, awayTeam, phase, fatigueHome, fatigueAway, stadeName, dynXgH, dynXgA) {
+  const scoreH = calcTeamScore(homeTeam, phase, stadeName, dynXgH);
+  const scoreA = calcTeamScore(awayTeam, phase, stadeName, dynXgA);
 
   // Malus altitude
   const altMalusH = calcAltitudeMalus(stadeName, homeTeam);
@@ -234,13 +235,19 @@ function calcPoissonMarketProbs(lambdaH, lambdaA) {
 }
 
 // ── Logique marchés WC — version neutre ───────────────────────────
-// Produit pour chaque marché : prob_modele (continue, via Poisson + 1X/X2 du moteur)
 // produit pour chaque marché une probabilité continue (via Poisson + 1X/X2 du moteur),
 // utilisée ensuite par calcWCBestBet pour sélectionner le marché le plus probable.
-// Aucun marché n'est favorisé a priori : même formule d'edge pour les 6.
-function calcWCMarkets(homeTeam, awayTeam, probs) {
-  const xgH = QUALS_XG[homeTeam] || { xg_for: 1.2, xg_against: 1.1 };
-  const xgA = QUALS_XG[awayTeam] || { xg_for: 1.2, xg_against: 1.1 };
+// Aucun marché n'est favorisé a priori : même formule pour les 6 marchés.
+//
+// dynXgH / dynXgA (optionnels) : xG calculés dynamiquement par le pipeline
+// (qualifs réelles via API + tournoi en cours, cf getTeamWCStats côté
+// pipeline.js). Si fournis, ils remplacent QUALS_XG statique. Sinon on
+// retombe sur QUALS_XG (fallback Océanie / équipe non mappée / erreur API).
+function calcWCMarkets(homeTeam, awayTeam, probs, dynXgH, dynXgA) {
+  const xgH = (dynXgH && dynXgH.xg_for!=null && dynXgH.xg_against!=null)
+    ? dynXgH : (QUALS_XG[homeTeam] || { xg_for: 1.2, xg_against: 1.1 });
+  const xgA = (dynXgA && dynXgA.xg_for!=null && dynXgA.xg_against!=null)
+    ? dynXgA : (QUALS_XG[awayTeam] || { xg_for: 1.2, xg_against: 1.1 });
   const vH  = SQUAD_VALUE_BY_LINE[homeTeam] || { att: 50, mid: 50, def: 50 };
   const vA  = SQUAD_VALUE_BY_LINE[awayTeam] || { att: 50, mid: 50, def: 50 };
 
@@ -261,7 +268,9 @@ function calcWCMarkets(homeTeam, awayTeam, probs) {
     lambda_a: Math.round(lambdaA*100)/100,
     val_att_h: vH.att, val_def_h: vH.def,
     val_att_a: vA.att, val_def_a: vA.def,
-    // Probabilités continues par marché — base neutre pour le calcul d'edge
+    xg_source_h: (dynXgH && dynXgH.xg_for!=null) ? (dynXgH.source||'dynamique') : 'statique_qualifs',
+    xg_source_a: (dynXgA && dynXgA.xg_for!=null) ? (dynXgA.source||'dynamique') : 'statique_qualifs',
+    // Probabilités continues par marché — base neutre, aucun favoritisme
     prob_over25: poissonMkt.over25,
     prob_under25: poissonMkt.under25,
     prob_btts_oui: poissonMkt.bttsY,
@@ -358,12 +367,12 @@ ${home}: ${probs.p1}%${!isElim?' | Nul: '+probs.pN+'%':''} | ${away}: ${probs.p2
 === ANALYSE ATTAQUE / DÉFENSE ===
 ${home}:
   Valeur attaque: ${mkt.val_att_h}M€ | Valeur défense: ${mkt.val_def_h}M€
-  xG généré qualifs: ${probs.scoreH.details.xg_for} / xG concédé: ${probs.scoreH.details.xg_against}
+  xG généré: ${probs.scoreH.details.xg_for} / xG concédé: ${probs.scoreH.details.xg_against} (source: ${mkt.xg_source_h||'statique_qualifs'})
   FIFA: ${probs.scoreH.details.fifa_pts}pts | Top5: ${probs.scoreH.details.top5_pct}% | Exp CM: ${probs.scoreH.details.wc_exp} joueurs
 
 ${away}:
   Valeur attaque: ${mkt.val_att_a}M€ | Valeur défense: ${mkt.val_def_a}M€
-  xG généré qualifs: ${probs.scoreA.details.xg_for} / xG concédé: ${probs.scoreA.details.xg_against}
+  xG généré: ${probs.scoreA.details.xg_for} / xG concédé: ${probs.scoreA.details.xg_against} (source: ${mkt.xg_source_a||'statique_qualifs'})
   FIFA: ${probs.scoreA.details.fifa_pts}pts | Top5: ${probs.scoreA.details.top5_pct}% | Exp CM: ${probs.scoreA.details.wc_exp} joueurs
 ${tournoi_xg_h?`
 xG dans ce tournoi — ${home}: +${tournoi_xg_h.for}/-${tournoi_xg_h.against} | ${away}: +${tournoi_xg_a.for}/-${tournoi_xg_a.against}`:''}

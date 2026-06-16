@@ -49,57 +49,6 @@ jobs:
               var u = new URL(url);
               var timer = setTimeout(function(){ resolve({}); }, 10000);
               https.get({
-                hostname: u.hostname, path: u.pathname+u.search,name: Update IASHARK Daily
-
-on:
-  schedule:
-    - cron: '0 6 * * *'
-  workflow_dispatch:
-
-jobs:
-  update:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-
-      - name: Write pipeline script
-        run: |
-          cat > pipeline.js << 'JSEOF'
-          const https = require('https');
-          const fs    = require('fs');
-          const APS_KEY    = process.env.APISPORTS_KEY;
-          const OWM_KEY    = process.env.OPENWEATHER_KEY;
-          const NEWS_KEY   = process.env.NEWSAPI_KEY;
-          const ANT_KEY    = process.env.ANTHROPIC_KEY;
-          const ODDS_KEY   = process.env.ODDS_API_KEY;
-          const TENNIS_KEY = process.env.RAPIDAPI_TENNIS_KEY;
-          const ODDS_IO_KEY = process.env.ODDS_API_IO_KEY;
-          const APS        = {'x-apisports-key': APS_KEY};
-          const TENNIS_HEADERS = {
-            'x-rapidapi-key':  TENNIS_KEY,
-            'x-rapidapi-host': 'tennis-api-atp-wta-itf.p.rapidapi.com'
-          };
-          const TENNIS_BASE = 'https://tennis-api-atp-wta-itf.p.rapidapi.com';
-
-          // ── MODÈLE COUPE DU MONDE 2026 ──────────────────────────
-          var WC_DATA = null, WC_MODEL = null;
-          try {
-            WC_DATA  = require('./wc2026_data.js');
-            WC_MODEL = require('./wc2026_model.js');
-            console.log('WC2026 model loaded OK');
-          } catch(e) { console.log('WC2026 model not found:', e.message); }
-
-          // ── HELPERS ──────────────────────────────────────────────
-          function sleep(ms) { return new Promise(function(r){ setTimeout(r,ms); }); }
-
-          function get(url, headers) {
-            return new Promise(function(resolve) {
-              var u = new URL(url);
-              var timer = setTimeout(function(){ resolve({}); }, 10000);
-              https.get({
                 hostname: u.hostname, path: u.pathname+u.search,
                 headers: Object.assign({'User-Agent':'IASHARK/1.0'}, headers||{})
               }, function(res) {

@@ -1,6 +1,102 @@
 {
   "predictions": [
     {
+      "match": "Switzerland vs Bosnia & Herzegovina",
+      "home": "Switzerland",
+      "away": "Bosnia & Herzegovina",
+      "prediction": "Under 2.5 buts",
+      "cote": 1.73,
+      "conf": 0.72,
+      "conf_bucket": "<6",
+      "edge": "+4pts (59% modèle vs 58% implicite cote 1.73)",
+      "edge_num": 459581.73,
+      "edge_bucket": "10%+",
+      "market": "autre",
+      "league": "World Cup",
+      "league_key": "other",
+      "sport": "football",
+      "elo_diff": null,
+      "has_pinnacle": false,
+      "has_elo": false,
+      "date": "2026-06-16",
+      "result": "pending",
+      "fixture_id": 1539005,
+      "type": "single",
+      "score": null
+    },
+    {
+      "match": "Czechia vs South Africa",
+      "home": "Czechia",
+      "away": "South Africa",
+      "prediction": "Under 2.5 buts",
+      "cote": 1.75,
+      "conf": 0.61,
+      "conf_bucket": "<6",
+      "edge": "+6% au-dessus du seuil (61% modèle vs 55% requis)",
+      "edge_num": 66155,
+      "edge_bucket": "10%+",
+      "market": "autre",
+      "league": "World Cup",
+      "league_key": "other",
+      "sport": "football",
+      "elo_diff": null,
+      "has_pinnacle": false,
+      "has_elo": true,
+      "date": "2026-06-16",
+      "result": "pending",
+      "fixture_id": 1539004,
+      "type": "single",
+      "score": null
+    },
+    {
+      "match": "Uzbekistan vs Colombia",
+      "home": "Uzbekistan",
+      "away": "Colombia",
+      "prediction": "Under 2.5 buts",
+      "cote": 1.88,
+      "conf": 0.56,
+      "conf_bucket": "<6",
+      "edge": "+1pp (prob modèle 56% vs seuil 55% — edge minimal mais positif)",
+      "edge_num": 15655,
+      "edge_bucket": "10%+",
+      "market": "autre",
+      "league": "World Cup",
+      "league_key": "other",
+      "sport": "football",
+      "elo_diff": null,
+      "has_pinnacle": false,
+      "has_elo": false,
+      "date": "2026-06-16",
+      "result": "pending",
+      "fixture_id": 1489386,
+      "type": "single",
+      "score": null
+    },
+    {
+      "match": "Ghana vs Panama",
+      "home": "Ghana",
+      "away": "Panama",
+      "prediction": "Under 2.5 buts",
+      "cote": 1.64,
+      "conf": 0.61,
+      "conf_bucket": "<6",
+      "edge": "+6pts vs seuil requis (61% modèle vs 55% seuil) | cote implicite bookmaker 61% = edge neutre/conforme",
+      "edge_num": 6615561,
+      "edge_bucket": "10%+",
+      "market": "autre",
+      "league": "World Cup",
+      "league_key": "other",
+      "sport": "football",
+      "elo_diff": null,
+      "has_pinnacle": false,
+      "has_elo": false,
+      "date": "2026-06-16",
+      "result": "pending",
+      "fixture_id": 1489385,
+      "type": "single",
+      "score": null
+    },
+    {
       "match": "England vs Croatia",
       "home": "England",
       "away": "Croatia",
@@ -211,10 +307,11 @@
       "has_pinnacle": false,
       "has_elo": false,
       "date": "2026-06-15",
-      "result": "pending",
+      "result": "loss",
       "fixture_id": 1489377,
       "type": "single",
-      "score": null
+      "score": "1-1",
+      "resolved_date": "2026-06-15"
     },
     {
       "match": "Spain vs Cape Verde Islands",
@@ -235,10 +332,11 @@
       "has_pinnacle": false,
       "has_elo": false,
       "date": "2026-06-15",
-      "result": "pending",
+      "result": "win",
       "fixture_id": 1489380,
       "type": "single",
-      "score": null
+      "score": "0-0",
+      "resolved_date": "2026-06-15"
     },
     {
       "match": "Sweden vs Tunisia",
@@ -259,10 +357,11 @@
       "has_pinnacle": false,
       "has_elo": false,
       "date": "2026-06-15",
-      "result": "pending",
+      "result": "win",
       "fixture_id": 1539002,
       "type": "single",
-      "score": null
+      "score": "5-1",
+      "resolved_date": "2026-06-15"
     },
     {
       "match": "Ivory Coast vs Ecuador",
@@ -283,29 +382,118 @@
       "has_pinnacle": false,
       "has_elo": false,
       "date": "2026-06-15",
-      "result": "pending",
+      "result": "loss",
       "fixture_id": 1489375,
       "type": "single",
-      "score": null
+      "score": "1-0",
+      "resolved_date": "2026-06-15"
     }
   ],
   "stats": {
-    "winrate": 0,
-    "roi": 0,
-    "total": 0,
-    "streak": 0,
-    "wins": 0,
-    "losses": 0
+    "winrate": 50,
+    "roi": 142.8,
+    "total": 4,
+    "streak": -1,
+    "wins": 2,
+    "losses": 2
   },
-  "monthly": [],
+  "monthly": [
+    {
+      "month": "2026-06",
+      "label": "Jun 2026",
+      "wins": 2,
+      "losses": 2,
+      "total": 4,
+      "roi": -12.5
+    }
+  ],
   "backtesting": {
-    "by_market": [],
-    "by_league": [],
-    "by_conf": [],
-    "by_edge": [],
-    "by_sport": [],
-    "by_has_pinnacle": [],
-    "by_has_elo": [],
-    "updated": "2026-06-15"
+    "by_market": [
+      {
+        "key": "over25",
+        "wins": 1,
+        "losses": 2,
+        "total": 3,
+        "winrate": 33.3,
+        "roi": -26.3
+      },
+      {
+        "key": "dc_x2",
+        "wins": 1,
+        "losses": 0,
+        "total": 1,
+        "winrate": 100,
+        "roi": 650
+      }
+    ],
+    "by_league": [
+      {
+        "key": "other",
+        "wins": 2,
+        "losses": 2,
+        "total": 4,
+        "winrate": 50,
+        "roi": 142.8
+      }
+    ],
+    "by_conf": [
+      {
+        "key": "7-8",
+        "wins": 2,
+        "losses": 2,
+        "total": 4,
+        "winrate": 50,
+        "roi": 142.8
+      }
+    ],
+    "by_edge": [
+      {
+        "key": "10%+",
+        "wins": 2,
+        "losses": 1,
+        "total": 3,
+        "winrate": 66.7,
+        "roi": 223.7
+      },
+      {
+        "key": "7-10%",
+        "wins": 0,
+        "losses": 1,
+        "total": 1,
+        "winrate": 0,
+        "roi": -100
+      }
+    ],
+    "by_sport": [
+      {
+        "key": "football",
+        "wins": 2,
+        "losses": 2,
+        "total": 4,
+        "winrate": 50,
+        "roi": 142.8
+      }
+    ],
+    "by_has_pinnacle": [
+      {
+        "key": "inconnu",
+        "wins": 2,
+        "losses": 2,
+        "total": 4,
+        "winrate": 50,
+        "roi": 142.8
+      }
+    ],
+    "by_has_elo": [
+      {
+        "key": "inconnu",
+        "wins": 2,
+        "losses": 2,
+        "total": 4,
+        "winrate": 50,
+        "roi": 142.8
+      }
+    ],
+    "updated": "2026-06-16"
   }
 }

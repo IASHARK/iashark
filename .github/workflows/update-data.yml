@@ -49,6 +49,57 @@ jobs:
               var u = new URL(url);
               var timer = setTimeout(function(){ resolve({}); }, 10000);
               https.get({
+                hostname: u.hostname, path: u.pathname+u.search,name: Update IASHARK Daily
+
+on:
+  schedule:
+    - cron: '0 6 * * *'
+  workflow_dispatch:
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Write pipeline script
+        run: |
+          cat > pipeline.js << 'JSEOF'
+          const https = require('https');
+          const fs    = require('fs');
+          const APS_KEY    = process.env.APISPORTS_KEY;
+          const OWM_KEY    = process.env.OPENWEATHER_KEY;
+          const NEWS_KEY   = process.env.NEWSAPI_KEY;
+          const ANT_KEY    = process.env.ANTHROPIC_KEY;
+          const ODDS_KEY   = process.env.ODDS_API_KEY;
+          const TENNIS_KEY = process.env.RAPIDAPI_TENNIS_KEY;
+          const ODDS_IO_KEY = process.env.ODDS_API_IO_KEY;
+          const APS        = {'x-apisports-key': APS_KEY};
+          const TENNIS_HEADERS = {
+            'x-rapidapi-key':  TENNIS_KEY,
+            'x-rapidapi-host': 'tennis-api-atp-wta-itf.p.rapidapi.com'
+          };
+          const TENNIS_BASE = 'https://tennis-api-atp-wta-itf.p.rapidapi.com';
+
+          // ── MODÈLE COUPE DU MONDE 2026 ──────────────────────────
+          var WC_DATA = null, WC_MODEL = null;
+          try {
+            WC_DATA  = require('./wc2026_data.js');
+            WC_MODEL = require('./wc2026_model.js');
+            console.log('WC2026 model loaded OK');
+          } catch(e) { console.log('WC2026 model not found:', e.message); }
+
+          // ── HELPERS ──────────────────────────────────────────────
+          function sleep(ms) { return new Promise(function(r){ setTimeout(r,ms); }); }
+
+          function get(url, headers) {
+            return new Promise(function(resolve) {
+              var u = new URL(url);
+              var timer = setTimeout(function(){ resolve({}); }, 10000);
+              https.get({
                 hostname: u.hostname, path: u.pathname+u.search,
                 headers: Object.assign({'User-Agent':'IASHARK/1.0'}, headers||{})
               }, function(res) {
@@ -82,6 +133,283 @@ jobs:
               }).on('error',function(){ clearTimeout(timer); resolve([]); });
             });
           }
+
+          // ═══════════════════════════════════════════════════════
+          // ── DONNÉES DYNAMIQUES WC2026 — qualifs réelles + tournoi en cours ──
+          // ═══════════════════════════════════════════════════════
+
+          // Mapping équipe → ligue de qualifs API-Sports (par confédération).
+          // Océanie (id 33) n'a pas statistics_fixtures actif → pas de fallback API,
+          // on reste sur wc2026_data.js (QUALS_XG statique) pour ces équipes.
+          var WC_QUALIF_LEAGUE = {
+            // Europe (id 32)
+            'France':32,'Germany':32,'Spain':32,'England':32,'Portugal':32,'Italy':32,
+            'Netherlands':32,'Belgium':32,'Croatia':32,'Switzerland':32,'Austria':32,
+            'Denmark':32,'Norway':32,'Sweden':32,'Poland':32,'Ukraine':32,'Czech Republic':32,
+            'Scotland':32,'Wales':32,'Serbia':32,'Slovakia':32,'Slovenia':32,'Romania':32,
+            'Hungary':32,'Bosnia':32,'Bosnia and Herzegovina':32,'Albania':32,'Kosovo':32,
+            'Greece':32,'Turkey':32,'Iceland':32,'Finland':32,'Ireland':32,'Northern Ireland':32,
+            'Montenegro':32,'North Macedonia':32,'Israel':32,'Georgia':32,'Luxembourg':32,
+            'Cyprus':32,'Faroe Islands':32,'Gibraltar':32,'San Marino':32,'Andorra':32,
+            'Malta':32,'Moldova':32,'Belarus':32,'Armenia':32,'Azerbaijan':32,'Kazakhstan':32,
+            'Estonia':32,'Latvia':32,'Lithuania':32,'Bulgaria':32,'Liechtenstein':32,
+
+            // CONCACAF (id 31)
+            'USA':31,'Mexico':31,'Canada':31,'Costa Rica':31,'Jamaica':31,'Panama':31,
+            'Honduras':31,'El Salvador':31,'Curacao':31,'Haiti':31,'Trinidad and Tobago':31,
+            'Guatemala':31,'Nicaragua':31,'Suriname':31,
+
+            // Asie (id 30)
+            'Iran':30,'South Korea':30,'Korea Republic':30,'Japan':30,'Australia':30,
+            'Saudi Arabia':30,'Qatar':30,'Iraq':30,'UAE':30,'United Arab Emirates':30,
+            'Uzbekistan':30,'Jordan':30,'Oman':30,'Bahrain':30,'Kyrgyzstan':30,
+            'North Korea':30,'China':30,'Indonesia':30,'Palestine':30,
+
+            // Afrique (id 29)
+            'Morocco':29,'Senegal':29,'Tunisia':29,'Egypt':29,'Algeria':29,'Nigeria':29,
+            'Ghana':29,'Cameroon':29,'Ivory Coast':29,'South Africa':29,'DR Congo':29,
+            'Mali':29,'Cape Verde':29,'Gabon':29,'Mozambique':29,'Benin':29,'Uganda':29,
+            'Burkina Faso':29,'Guinea':29,
+
+            // Amérique du Sud (id 34)
+            'Brazil':34,'Argentina':34,'Uruguay':34,'Colombia':34,'Ecuador':34,
+            'Paraguay':34,'Bolivia':34,'Venezuela':34,'Chile':34,'Peru':34,
+
+            // Océanie (id 33) — pas de stats fixtures, volontairement absent du mapping
+            // 'New Zealand', 'Fiji', etc. tomberont sur le fallback statique.
+          };
+
+          // Cache mémoire pour éviter de refetch la même équipe plusieurs fois dans le run
+          var WC_TEAM_STATS_CACHE = {};
+
+          // Calcule un xG approximatif à partir des buts réels + tirs cadrés.
+          // Pondération : 65% buts réels (résultat brut, ce qui compte au final),
+          // 35% tirs cadrés convertis en "buts attendus" via un taux de conversion
+          // moyen de 32% (taux observé en moyenne dans le football international —
+          // un tir cadré sur trois finit globalement au fond des filets).
+          function calcApproxXG(goalsAvg, shotsOnTargetAvg) {
+            if(goalsAvg==null) return null;
+            if(shotsOnTargetAvg==null) return Math.round(goalsAvg*100)/100;
+            var xgFromShots = shotsOnTargetAvg * 0.32;
+            var blended = goalsAvg*0.65 + xgFromShots*0.35;
+            return Math.round(blended*100)/100;
+          }
+
+          // Récupère les 8 derniers matchs de qualifs d'une équipe + leurs stats
+          // (buts réels + tirs cadrés, expected_goals étant systématiquement null
+          // pour les qualifs d'après vérification manuelle sur 3 matchs Asie 2026).
+          async function getTeamQualifStats(teamId, teamName) {
+            var cacheKey = 'qualif_'+teamId;
+            if(WC_TEAM_STATS_CACHE[cacheKey]) return WC_TEAM_STATS_CACHE[cacheKey];
+
+            var leagueId = WC_QUALIF_LEAGUE[teamName];
+            if(!leagueId) {
+              console.log('  [WC qualif] '+teamName+': pas de ligue de qualifs mappée (Océanie ou inconnu) — fallback statique');
+              WC_TEAM_STATS_CACHE[cacheKey] = null;
+              return null;
+            }
+
+            try {
+              // On tente la saison "current" pour ce cycle de qualifs (2024/2023/2026
+              // selon confédération — cf ids constatés). On essaie season 2026 puis
+              // 2024 puis 2023 en fallback, car l'API-Sports a des conventions de
+              // numérotation de saison différentes par confédération pour ce cycle.
+              var seasonsToTry = [2026, 2024, 2023];
+              var fixturesRaw = null;
+              for(var si=0; si<seasonsToTry.length; si++){
+                var r = await get('https://v3.football.api-sports.io/fixtures?league='+leagueId+'&season='+seasonsToTry[si]+'&team='+teamId, APS);
+                if(r.response && r.response.length){ fixturesRaw = r.response; break; }
+                await sleep(150);
+              }
+              if(!fixturesRaw || !fixturesRaw.length) {
+                console.log('  [WC qualif] '+teamName+': aucun match de qualifs trouvé — fallback statique');
+                WC_TEAM_STATS_CACHE[cacheKey] = null;
+                return null;
+              }
+
+              // Garder seulement les matchs terminés, triés du plus récent au plus ancien
+              var played = fixturesRaw.filter(function(f){
+                var st=(f.fixture.status&&f.fixture.status.short)||'';
+                return st==='FT'||st==='AET'||st==='PEN';
+              }).sort(function(a,b){ return (b.fixture.timestamp||0)-(a.fixture.timestamp||0); });
+
+              var last8 = played.slice(0, 8);
+              if(!last8.length) {
+                console.log('  [WC qualif] '+teamName+': 0 match terminé trouvé — fallback statique');
+                WC_TEAM_STATS_CACHE[cacheKey] = null;
+                return null;
+              }
+
+              // Buts réels (toujours disponibles, jamais null)
+              var goalsFor=[], goalsAgainst=[];
+              last8.forEach(function(f){
+                var isHome = f.teams.home.id===teamId;
+                var gf = isHome ? f.goals.home : f.goals.away;
+                var ga = isHome ? f.goals.away : f.goals.home;
+                if(gf!=null) goalsFor.push(gf);
+                if(ga!=null) goalsAgainst.push(ga);
+              });
+
+              // Tirs cadrés via fixtures/statistics (peut être null par match, on ignore les null)
+              var shotsOnFor=[], shotsOnAgainst=[];
+              for(var mi=0; mi<last8.length; mi++){
+                try {
+                  var statR = await get('https://v3.football.api-sports.io/fixtures/statistics?fixture='+last8[mi].fixture.id, APS);
+                  var blocks = statR.response||[];
+                  var teamBlock = blocks.find(function(b){ return b.team && b.team.id===teamId; });
+                  var oppBlock = blocks.find(function(b){ return b.team && b.team.id!==teamId; });
+                  if(teamBlock){
+                    var sot = (teamBlock.statistics||[]).find(function(s){ return s.type==='Shots on Goal'; });
+                    if(sot && sot.value!=null) shotsOnFor.push(parseFloat(sot.value));
+                  }
+                  if(oppBlock){
+                    var sotOpp = (oppBlock.statistics||[]).find(function(s){ return s.type==='Shots on Goal'; });
+                    if(sotOpp && sotOpp.value!=null) shotsOnAgainst.push(parseFloat(sotOpp.value));
+                  }
+                } catch(e){}
+                await sleep(120);
+              }
+
+              function avg(arr){ return arr.length ? arr.reduce(function(a,b){return a+b;},0)/arr.length : null; }
+              var goalsForAvg = avg(goalsFor);
+              var goalsAgainstAvg = avg(goalsAgainst);
+              var shotsOnForAvg = avg(shotsOnFor);
+              var shotsOnAgainstAvg = avg(shotsOnAgainst);
+
+              // Forme récente V/N/D sur ces 8 matchs (signal complémentaire, pas utilisé
+              // dans le calcul de lambdas mais utile à afficher dans le prompt pour Claude)
+              var form = last8.map(function(f){
+                var isHome = f.teams.home.id===teamId;
+                var gf = isHome ? f.goals.home : f.goals.away;
+                var ga = isHome ? f.goals.away : f.goals.home;
+                if(gf==null||ga==null) return '?';
+                return gf>ga?'V':gf<ga?'D':'N';
+              }).join('');
+
+              var result = {
+                xg_for: calcApproxXG(goalsForAvg, shotsOnForAvg),
+                xg_against: calcApproxXG(goalsAgainstAvg, shotsOnAgainstAvg),
+                goals_for_avg: goalsForAvg!=null?Math.round(goalsForAvg*100)/100:null,
+                goals_against_avg: goalsAgainstAvg!=null?Math.round(goalsAgainstAvg*100)/100:null,
+                shots_on_for_avg: shotsOnForAvg!=null?Math.round(shotsOnForAvg*100)/100:null,
+                shots_on_against_avg: shotsOnAgainstAvg!=null?Math.round(shotsOnAgainstAvg*100)/100:null,
+                form: form,
+                n_matches: last8.length,
+                source: 'qualifs_api',
+              };
+              console.log('  [WC qualif] '+teamName+': xg_for≈'+result.xg_for+' xg_against≈'+result.xg_against+' ('+last8.length+' matchs, forme '+form+')');
+              WC_TEAM_STATS_CACHE[cacheKey] = result;
+              return result;
+            } catch(e) {
+              console.log('  [WC qualif] '+teamName+' erreur:', e.message);
+              WC_TEAM_STATS_CACHE[cacheKey] = null;
+              return null;
+            }
+          }
+
+          // Récupère les matchs déjà joués par l'équipe dans le tournoi WC2026 en cours,
+          // avec leur expected_goals réel (disponible et fiable pour les matchs WC,
+          // contrairement aux qualifs — vérifié manuellement).
+          async function getTeamTournamentStats(teamId, teamName) {
+            var cacheKey = 'tournoi_'+teamId;
+            if(WC_TEAM_STATS_CACHE[cacheKey]!==undefined) return WC_TEAM_STATS_CACHE[cacheKey];
+
+            try {
+              var r = await get('https://v3.football.api-sports.io/fixtures?league=1&season=2026&team='+teamId, APS);
+              var fixturesRaw = r.response||[];
+              var played = fixturesRaw.filter(function(f){
+                var st=(f.fixture.status&&f.fixture.status.short)||'';
+                return st==='FT'||st==='AET'||st==='PEN';
+              });
+
+              if(!played.length) {
+                WC_TEAM_STATS_CACHE[cacheKey] = null;
+                return null;
+              }
+
+              var xgFor=[], xgAgainst=[], goalsFor=[], goalsAgainst=[];
+              for(var mi=0; mi<played.length; mi++){
+                var f = played[mi];
+                var isHome = f.teams.home.id===teamId;
+                if(f.goals.home!=null) goalsFor.push(isHome?f.goals.home:f.goals.away);
+                if(f.goals.away!=null) goalsAgainst.push(isHome?f.goals.away:f.goals.home);
+
+                try {
+                  var statR = await get('https://v3.football.api-sports.io/fixtures/statistics?fixture='+f.fixture.id, APS);
+                  var blocks = statR.response||[];
+                  var teamBlock = blocks.find(function(b){ return b.team && b.team.id===teamId; });
+                  var oppBlock = blocks.find(function(b){ return b.team && b.team.id!==teamId; });
+                  if(teamBlock){
+                    var xg = (teamBlock.statistics||[]).find(function(s){ return s.type==='expected_goals'; });
+                    if(xg && xg.value!=null) xgFor.push(parseFloat(xg.value));
+                  }
+                  if(oppBlock){
+                    var xgOpp = (oppBlock.statistics||[]).find(function(s){ return s.type==='expected_goals'; });
+                    if(xgOpp && xgOpp.value!=null) xgAgainst.push(parseFloat(xgOpp.value));
+                  }
+                } catch(e){}
+                await sleep(120);
+              }
+
+              function avg(arr){ return arr.length ? arr.reduce(function(a,b){return a+b;},0)/arr.length : null; }
+
+              // Si expected_goals n'a jamais été dispo malgré le match joué (cas rare),
+              // on retombe sur les buts réels du tournoi en cours plutôt que rien.
+              var xgForAvg = avg(xgFor);
+              var xgAgainstAvg = avg(xgAgainst);
+              var result = {
+                xg_for: xgForAvg!=null ? Math.round(xgForAvg*100)/100 : avg(goalsFor),
+                xg_against: xgAgainstAvg!=null ? Math.round(xgAgainstAvg*100)/100 : avg(goalsAgainst),
+                games: played.length,
+                source: xgForAvg!=null ? 'tournoi_xg_reel' : 'tournoi_buts_reels',
+              };
+              console.log('  [WC tournoi] '+teamName+': xg_for='+result.xg_for+' xg_against='+result.xg_against+' ('+played.length+' matchs joués, source='+result.source+')');
+              WC_TEAM_STATS_CACHE[cacheKey] = result;
+              return result;
+            } catch(e) {
+              console.log('  [WC tournoi] '+teamName+' erreur:', e.message);
+              WC_TEAM_STATS_CACHE[cacheKey] = null;
+              return null;
+            }
+          }
+
+          // Point d'entrée unique : combine qualifs + tournoi en cours pour une équipe,
+          // avec pondération qui évolue selon le nombre de matchs déjà joués dans le
+          // tournoi (plus le tournoi avance, plus son poids augmente face aux qualifs).
+          async function getTeamWCStats(teamId, teamName) {
+            var qualif = await getTeamQualifStats(teamId, teamName);
+            var tournoi = await getTeamTournamentStats(teamId, teamName);
+
+            // Aucune donnée dynamique disponible (Océanie, équipe non mappée, API vide) :
+            // signal clair au code appelant pour utiliser le fallback statique QUALS_XG.
+            if(!qualif && !tournoi) return null;
+
+            // Seulement des données qualifs (cas le plus fréquent : match 1 de poule)
+            if(qualif && !tournoi) {
+              return { xg_for: qualif.xg_for, xg_against: qualif.xg_against, source: 'qualifs_seul', detail: qualif };
+            }
+
+            // Seulement le tournoi (cas rare : pas de mapping qualifs mais déjà joué en CM)
+            if(!qualif && tournoi) {
+              return { xg_for: tournoi.xg_for, xg_against: tournoi.xg_against, source: 'tournoi_seul', detail: tournoi };
+            }
+
+            // Hybridation qualifs + tournoi, poids croissant pour le tournoi au fil des matchs
+            var nGames = tournoi.games||0;
+            var poidsTournoi = nGames>=2 ? 0.70 : 0.40; // 1 match joué → 40%, 2-3 matchs → 70%
+            var poidsQualif = 1 - poidsTournoi;
+
+            var xgFor = (qualif.xg_for*poidsQualif) + (tournoi.xg_for*poidsTournoi);
+            var xgAgainst = (qualif.xg_against*poidsQualif) + (tournoi.xg_against*poidsTournoi);
+
+            return {
+              xg_for: Math.round(xgFor*100)/100,
+              xg_against: Math.round(xgAgainst*100)/100,
+              source: 'hybride_qualif'+Math.round(poidsQualif*100)+'_tournoi'+Math.round(poidsTournoi*100),
+              detail: { qualif: qualif, tournoi: tournoi },
+            };
+          }
+
 
           function postJSON(host, path, body, headers) {
             return new Promise(function(resolve) {
@@ -1525,8 +1853,16 @@ jobs:
                 homeKey = nameMap[homeKey] || homeKey;
                 awayKey = nameMap[awayKey] || awayKey;
 
-                var wcProbs = WC_MODEL.calcMatchProbs(homeKey, awayKey, 'group', null, null, stadeKey);
-                var wcMarkets = WC_MODEL.calcWCMarkets(homeKey, awayKey, wcProbs);
+                // xG dynamiques : qualifs réelles (buts + tirs cadrés via API,
+                // expected_goals étant systématiquement null pour les qualifs)
+                // hybridées avec le xG réel du tournoi en cours dès qu'il est
+                // disponible. Fallback automatique sur QUALS_XG statique si
+                // aucune donnée dynamique n'est trouvée (ex: Océanie).
+                var dynStatsH = await getTeamWCStats(d.homeId, homeKey);
+                var dynStatsA = await getTeamWCStats(d.awayId, awayKey);
+
+                var wcProbs = WC_MODEL.calcMatchProbs(homeKey, awayKey, 'group', null, null, stadeKey, dynStatsH, dynStatsA);
+                var wcMarkets = WC_MODEL.calcWCMarkets(homeKey, awayKey, wcProbs, dynStatsH, dynStatsA);
 
                 prompt = WC_MODEL.buildWCPrompt({
                   home: d.home, away: d.away,

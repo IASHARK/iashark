@@ -153,7 +153,7 @@ jobs:
 
             var leagueId = WC_QUALIF_LEAGUE[teamName];
             if(!leagueId) {
-              console.log('  [WC qualif] '+teamName+': pas de ligue de qualifs mappée (Océanie ou inconnu) — fallback statique');
+              console.log('  [WC qualif] '+teamName+': clé absente de WC_QUALIF_LEAGUE (vérifier orthographe exacte / Océanie) — fallback statique');
               WC_TEAM_STATS_CACHE[cacheKey] = null;
               return null;
             }
@@ -1798,7 +1798,11 @@ jobs:
                 }
 
                 var homeKey = d.home, awayKey = d.away;
-                var nameMap = {'United States':'USA','Korea Republic':'South Korea','Czech Republic':'Czech Republic','Ivory Coast':'Ivory Coast','DR Congo':'DR Congo','Bosnia and Herzegovina':'Bosnia'};
+                var nameMap = {
+                  'United States':'USA','Korea Republic':'South Korea','Czechia':'Czech Republic',
+                  'Czech Republic':'Czech Republic','Ivory Coast':'Ivory Coast','DR Congo':'DR Congo',
+                  'Bosnia and Herzegovina':'Bosnia','Bosnia & Herzegovina':'Bosnia','Bosnia-Herzegovina':'Bosnia',
+                };
                 homeKey = nameMap[homeKey] || homeKey;
                 awayKey = nameMap[awayKey] || awayKey;
 
@@ -2001,10 +2005,31 @@ jobs:
             var yesterday=new Date(TODAY+'T12:00:00Z');yesterday.setDate(yesterday.getDate()-1);
             var yDate=yesterday.toISOString().split('T')[0];
 
-            // Résolution football (résultats d'hier)
+            // Fenêtre de résolution élargie à 4 jours en arrière (pas seulement
+            // "hier") : un match bloqué en pending à cause d'un bug ponctuel
+            // (ex: WC absent de l'endpoint générique) doit pouvoir être rattrapé
+            // au run suivant, au lieu de rester pending indéfiniment.
+            var resolveDates=[];
+            for(var dback=1; dback<=4; dback++){
+              var dd=new Date(TODAY+'T12:00:00Z'); dd.setDate(dd.getDate()-dback);
+              resolveDates.push(dd.toISOString().split('T')[0]);
+            }
+
+            // Résolution football — championnats classiques + Coupe du Monde
+            // 2026 explicitement (l'endpoint générique par date ne renvoie pas
+            // systématiquement les matchs WC, il faut les fetch à part avec
+            // league=1&season=2026 comme dans getFixtures()). On couvre les
+            // 4 derniers jours pour rattraper les éventuels pending bloqués.
             try{
-              var yFixtures=await get('https://v3.football.api-sports.io/fixtures?date='+yDate+'&timezone=Europe/Paris',APS);
-              var yResults=(yFixtures.response||[]);
+              var yResults=[];
+              for(var rdi=0; rdi<resolveDates.length; rdi++){
+                var rDate=resolveDates[rdi];
+                var fClassic=await get('https://v3.football.api-sports.io/fixtures?date='+rDate+'&timezone=Europe/Paris',APS);
+                var fWC=await get('https://v3.football.api-sports.io/fixtures?league=1&season=2026&date='+rDate+'&timezone=Europe/Paris',APS);
+                yResults=yResults.concat(fClassic.response||[], fWC.response||[]);
+                console.log('  Résultats '+rDate+': '+(fClassic.response||[]).length+' classique + '+(fWC.response||[]).length+' World Cup');
+                await sleep(150);
+              }
               for(var yr=0;yr<yResults.length;yr++){
                 var fix=yResults[yr];
                 var fid=fix.fixture&&fix.fixture.id;
@@ -2015,8 +2040,8 @@ jobs:
                 var status=fix.fixture&&fix.fixture.status&&fix.fixture.status.short||'';
                 if(status!=='FT'&&status!=='AET'&&status!=='PEN')continue;
                 if(gh===null||ga===null)continue;
-                var found=histo.predictions.find(function(p){return p.result==='pending'&&p.fixture_id===fid;});
-                if(!found)found=histo.predictions.find(function(p){return p.result==='pending'&&p.type==='single'&&p.sport!=='tennis'&&p.date&&p.date.substring(0,10)===yDate&&levenshtein((p.home||'').toLowerCase(),homeN.toLowerCase())<=3&&levenshtein((p.away||'').toLowerCase(),awayN.toLowerCase())<=3;});
+                var found=histo.predictions.find(function(p){return p.result==='scheduled'&&p.fixture_id===fid;});
+                if(!found)found=histo.predictions.find(function(p){return p.result==='scheduled'&&p.type==='single'&&p.sport!=='tennis'&&p.date&&resolveDates.indexOf(p.date.substring(0,10))!==-1&&levenshtein((p.home||'').toLowerCase(),homeN.toLowerCase())<=3&&levenshtein((p.away||'').toLowerCase(),awayN.toLowerCase())<=3;});
                 if(!found)continue;
                 var pred=(found.prediction||'').toLowerCase();
                 var isWin=false;
@@ -2029,7 +2054,7 @@ jobs:
                 else if(pred.includes('1x')||pred.includes('dc 1x'))isWin=(gh>=ga);
                 else if(pred.includes('x2')||pred.includes('dc x2'))isWin=(ga>=gh);
                 else if(pred.includes('nul')||pred.includes('draw'))isWin=(gh===ga);
-                found.result=isWin?'win':'loss';found.score=gh+'-'+ga;found.fixture_id=fid;found.resolved_date=yDate;
+                found.result=isWin?'win':'loss';found.score=gh+'-'+ga;found.fixture_id=fid;found.resolved_date=TODAY;
                 console.log('  Résolu foot: '+found.match+' \u2192 '+found.result+' ('+gh+'-'+ga+')');
               }
             }catch(e){console.log('  Résultats hier erreur:',e.message);}
@@ -2040,7 +2065,7 @@ jobs:
               if(TENNIS_KEY){
                 // Chercher les paris tennis pending d'hier
                 var pendingTennis=histo.predictions.filter(function(p){
-                  return p.result==='pending'&&p.sport==='tennis'&&p.date&&p.date.substring(0,10)===yDate;
+                  return p.result==='scheduled'&&p.sport==='tennis'&&p.date&&p.date.substring(0,10)===yDate;
                 });
                 console.log('  Paris tennis pending à résoudre: '+pendingTennis.length);
 
@@ -2105,7 +2130,12 @@ jobs:
               }
             }catch(e){console.log('  Résultats tennis erreur:',e.message);}
 
-            // Ajouter les nouveaux paris d'aujourd'hui
+            // Ajouter les nouveaux paris d'aujourd'hui avec le statut "scheduled"
+            // (= match pas encore joué). Ce statut n'est JAMAIS affiché sur le
+            // site (filtré côté génération de historique.html) — il sert
+            // uniquement de mémoire interne pour pouvoir résoudre le pari une
+            // fois le match terminé. Dès la résolution, le statut devient
+            // 'win' ou 'loss' et l'entrée apparaît alors dans l'historique.
             for(var mi=0;mi<matchsData.length;mi++){
               var m=matchsData[mi];
               var alreadyExists=histo.predictions.find(function(p){return p.fixture_id===m.id||(p.home===m.home.n&&p.away===m.away.n&&p.date&&p.date.substring(0,10)===TODAY);});
@@ -2124,17 +2154,15 @@ jobs:
                   else if(m.sport==='tennis')marketType='match_winner';
                 }
                 var confBucket=m.conf>=8?'8+':m.conf>=7?'7-8':m.conf>=6?'6-7':'<6';
-                var edgeNum=parseFloat((m.edge||'').replace(/[^0-9.]/g,''))||0;
-                var edgeBucket=edgeNum>=10?'10%+':edgeNum>=7?'7-10%':edgeNum>=5?'5-7%':edgeNum>0?'1-5%':'0%';
                 histo.predictions.unshift({
                   match:m.home.n+' vs '+m.away.n,
                   home:m.home.n,away:m.away.n,
                   prediction:betLabel,cote:betCote,conf:m.conf,
-                  conf_bucket:confBucket,edge:m.edge,edge_num:edgeNum,edge_bucket:edgeBucket,
+                  conf_bucket:confBucket,
                   market:marketType,league:m.league||'',league_key:m.league_key||'',
                   sport:m.sport||'football',
                   elo_diff:m.elo_diff||null,has_pinnacle:!!(m.pinnacle_snapshot),has_elo:!!(m.elo_home),
-                  date:TODAY,result:'pending',fixture_id:m.id,type:'single',score:null
+                  date:TODAY,result:'scheduled',fixture_id:m.id,type:'single',score:null
                 });
               }
             }
@@ -2145,7 +2173,7 @@ jobs:
             var cleaned=beforeClean-histo.predictions.length;
             if(cleaned>0)console.log('  Nettoyage: '+cleaned+' combinés supprimés');
 
-            var singles=histo.predictions.filter(function(p){return p.type==='single'&&p.result!=='pending';});
+            var singles=histo.predictions.filter(function(p){return p.type==='single'&&p.result!=='pending'&&p.result!=='scheduled';});
             var wins=singles.filter(function(p){return p.result==='win';});
             var total=singles.length;
             var winrate=total>0?(wins.length/total*100):0;
@@ -2175,7 +2203,7 @@ jobs:
                 return{key:k,wins:g.wins,losses:g.losses,total:tot,winrate:tot>0?Math.round(g.wins/tot*1000)/10:0,roi:tot>0?Math.round(g.roi/tot*1000)/10:0};
               }).sort(function(a,b){return b.total-a.total;});
             }
-            histo.backtesting={by_market:breakdown('market'),by_league:breakdown('league_key'),by_conf:breakdown('conf_bucket'),by_edge:breakdown('edge_bucket'),by_sport:breakdown('sport'),by_has_pinnacle:breakdown('has_pinnacle'),by_has_elo:breakdown('has_elo'),updated:TODAY};
+            histo.backtesting={by_market:breakdown('market'),by_league:breakdown('league_key'),by_conf:breakdown('conf_bucket'),by_sport:breakdown('sport'),by_has_pinnacle:breakdown('has_pinnacle'),by_has_elo:breakdown('has_elo'),updated:TODAY};
 
             var mktStats=histo.backtesting.by_market;
             console.log('  === BACKTESTING INSIGHTS ===');
@@ -2244,12 +2272,21 @@ jobs:
               var histoPathEarly='historique.json';
               var histoEarly={predictions:[],stats:{winrate:0,roi:0,total:0,streak:0,wins:0,losses:0},monthly:[],backtesting:{}};
               try{histoEarly=JSON.parse(fs.readFileSync(histoPathEarly,'utf8'));}catch(e){}
-              var yesterdayEarly=new Date(TODAY+'T12:00:00Z');yesterdayEarly.setDate(yesterdayEarly.getDate()-1);
-              var yDateEarly=yesterdayEarly.toISOString().split('T')[0];
+              var resolveDatesEarly=[];
+              for(var dbackE=1; dbackE<=4; dbackE++){
+                var ddE=new Date(TODAY+'T12:00:00Z'); ddE.setDate(ddE.getDate()-dbackE);
+                resolveDatesEarly.push(ddE.toISOString().split('T')[0]);
+              }
               try{
-                var yFixEarly=await get('https://v3.football.api-sports.io/fixtures?date='+yDateEarly+'&timezone=Europe/Paris',APS);
-                var yResEarly=(yFixEarly.response||[]);
-                console.log('  Résultats d\'hier: '+yResEarly.length+' matchs');
+                var yResEarly=[];
+                for(var rdiE=0; rdiE<resolveDatesEarly.length; rdiE++){
+                  var rDateE=resolveDatesEarly[rdiE];
+                  var fClassicE=await get('https://v3.football.api-sports.io/fixtures?date='+rDateE+'&timezone=Europe/Paris',APS);
+                  var fWCE=await get('https://v3.football.api-sports.io/fixtures?league=1&season=2026&date='+rDateE+'&timezone=Europe/Paris',APS);
+                  yResEarly=yResEarly.concat(fClassicE.response||[], fWCE.response||[]);
+                  console.log('  Résultats '+rDateE+': '+(fClassicE.response||[]).length+' classique + '+(fWCE.response||[]).length+' World Cup');
+                  await sleep(150);
+                }
                 yResEarly.forEach(function(fix){
                   var fid=fix.fixture&&fix.fixture.id;
                   var homeN=fix.teams&&fix.teams.home&&fix.teams.home.name||'';
@@ -2259,8 +2296,8 @@ jobs:
                   var status=fix.fixture&&fix.fixture.status&&fix.fixture.status.short||'';
                   if(status!=='FT'&&status!=='AET'&&status!=='PEN')return;
                   if(gh===null||ga===null)return;
-                  var found=histoEarly.predictions.find(function(p){return p.result==='pending'&&p.fixture_id===fid;});
-                  if(!found)found=histoEarly.predictions.find(function(p){return p.result==='pending'&&p.type==='single'&&p.sport!=='tennis'&&p.date&&p.date.substring(0,10)===yDateEarly&&levenshtein((p.home||'').toLowerCase(),homeN.toLowerCase())<=3&&levenshtein((p.away||'').toLowerCase(),awayN.toLowerCase())<=3;});
+                  var found=histoEarly.predictions.find(function(p){return p.result==='scheduled'&&p.fixture_id===fid;});
+                  if(!found)found=histoEarly.predictions.find(function(p){return p.result==='scheduled'&&p.type==='single'&&p.sport!=='tennis'&&p.date&&resolveDatesEarly.indexOf(p.date.substring(0,10))!==-1&&levenshtein((p.home||'').toLowerCase(),homeN.toLowerCase())<=3&&levenshtein((p.away||'').toLowerCase(),awayN.toLowerCase())<=3;});
                   if(!found)return;
                   var pred=(found.prediction||'').toLowerCase();
                   var isWin=false;
@@ -2269,7 +2306,7 @@ jobs:
                   else if(pred.includes('btts non'))isWin=(gh===0||ga===0);
                   else if(pred.includes('1x')||pred.includes('dc 1x'))isWin=(gh>=ga);
                   else if(pred.includes('x2')||pred.includes('dc x2'))isWin=(ga>=gh);
-                  found.result=isWin?'win':'loss';found.score=gh+'-'+ga;found.fixture_id=fid;found.resolved_date=yDateEarly;
+                  found.result=isWin?'win':'loss';found.score=gh+'-'+ga;found.fixture_id=fid;found.resolved_date=TODAY;
                   console.log('  \u2192 '+found.match+' : '+found.result.toUpperCase()+' ('+gh+'-'+ga+')');
                 });
               }catch(e){console.log('  Erreur résolution hier:',e.message);}
@@ -2277,7 +2314,7 @@ jobs:
               histoEarly.predictions=histoEarly.predictions.filter(function(p){return p.type!=='combi';});
               var cleanedE=beforeCleanE-histoEarly.predictions.length;
               if(cleanedE>0)console.log('  Nettoyage: '+cleanedE+' combinés supprimés');
-              var singlesE=histoEarly.predictions.filter(function(p){return p.type==='single'&&p.result!=='pending';});
+              var singlesE=histoEarly.predictions.filter(function(p){return p.type==='single'&&p.result!=='pending'&&p.result!=='scheduled';});
               var winsE=singlesE.filter(function(p){return p.result==='win';});
               var totalE=singlesE.length;
               var winrateE=totalE>0?(winsE.length/totalE*100):0;
@@ -2616,7 +2653,7 @@ jobs:
                 fatigue_home:{val:fatigueH.val,info:fatigueH.info},fatigue_away:{val:fatigueA.val,info:fatigueA.info},
                 tendances,classement:classementObj,actu:(nH||[]).concat(nA||[]),
                 arbitre:refStats?{nom:refStats.name,cartons:refStats.cards_per_game,penaltys:refStats.pens_per_game,matchs:refStats.games}:null,
-                events_home:evPatH||null,events_away:evPatA||null,
+                events_home:isWorldCupMatch?null:(evPatH||null),events_away:isWorldCupMatch?null:(evPatA||null),
                 top_scorers_home:topScorersH||[],top_scorers_away:topScorersA||[],
                 elo_home:eloH?Math.round(eloH):null,elo_away:eloA?Math.round(eloA):null,
                 elo_diff:eloStats?eloStats.diff:null,elo_signal:eloStats?eloStats.signal:null,

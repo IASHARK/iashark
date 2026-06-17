@@ -277,10 +277,11 @@
       "has_pinnacle": false,
       "has_elo": false,
       "date": "2026-06-15",
-      "result": "pending",
+      "result": "loss",
       "fixture_id": 1489383,
       "type": "single",
-      "score": null
+      "score": "3-1",
+      "resolved_date": "2026-06-17"
     },
     {
       "match": "Iran vs New Zealand",
@@ -301,10 +302,11 @@
       "has_pinnacle": false,
       "has_elo": false,
       "date": "2026-06-15",
-      "result": "pending",
+      "result": "win",
       "fixture_id": 1489378,
       "type": "single",
-      "score": null
+      "score": "2-2",
+      "resolved_date": "2026-06-17"
     },
     {
       "match": "Saudi Arabia vs Uruguay",
@@ -325,10 +327,11 @@
       "has_pinnacle": false,
       "has_elo": false,
       "date": "2026-06-15",
-      "result": "pending",
+      "result": "win",
       "fixture_id": 1489379,
       "type": "single",
-      "score": null
+      "score": "1-1",
+      "resolved_date": "2026-06-17"
     },
     {
       "match": "Belgium vs Egypt",
@@ -432,25 +435,33 @@
     }
   ],
   "stats": {
-    "winrate": 50,
-    "roi": 142.8,
-    "total": 4,
+    "winrate": 57.1,
+    "roi": 106.6,
+    "total": 7,
     "streak": -1,
-    "wins": 2,
-    "losses": 2
+    "wins": 4,
+    "losses": 3
   },
   "monthly": [
     {
       "month": "2026-06",
       "label": "Jun 2026",
-      "wins": 2,
-      "losses": 2,
-      "total": 4,
-      "roi": -12.5
+      "wins": 4,
+      "losses": 3,
+      "total": 7,
+      "roi": 0
     }
   ],
   "backtesting": {
     "by_market": [
+      {
+        "key": "dc_x2",
+        "wins": 2,
+        "losses": 1,
+        "total": 3,
+        "winrate": 66.7,
+        "roi": 215
+      },
       {
         "key": "over25",
         "wins": 1,
@@ -460,62 +471,62 @@
         "roi": -26.3
       },
       {
-        "key": "dc_x2",
+        "key": "dc1x",
         "wins": 1,
         "losses": 0,
         "total": 1,
         "winrate": 100,
-        "roi": 650
+        "roi": 180
       }
     ],
     "by_league": [
       {
         "key": "other",
-        "wins": 2,
-        "losses": 2,
-        "total": 4,
-        "winrate": 50,
-        "roi": 142.8
+        "wins": 4,
+        "losses": 3,
+        "total": 7,
+        "winrate": 57.1,
+        "roi": 106.6
       }
     ],
     "by_conf": [
       {
         "key": "7-8",
-        "wins": 2,
-        "losses": 2,
-        "total": 4,
-        "winrate": 50,
-        "roi": 142.8
+        "wins": 4,
+        "losses": 3,
+        "total": 7,
+        "winrate": 57.1,
+        "roi": 106.6
       }
     ],
     "by_sport": [
       {
         "key": "football",
-        "wins": 2,
-        "losses": 2,
-        "total": 4,
-        "winrate": 50,
-        "roi": 142.8
+        "wins": 4,
+        "losses": 3,
+        "total": 7,
+        "winrate": 57.1,
+        "roi": 106.6
       }
     ],
     "by_has_pinnacle": [
       {
         "key": "inconnu",
-        "wins": 2,
-        "losses": 2,
-        "total": 4,
-        "winrate": 50,
-        "roi": 142.8
+        "wins": 4,
+        "losses": 3,
+        "total": 7,
+        "winrate": 57.1,
+        "roi": 106.6
       }
     ],
     "by_has_elo": [
       {
         "key": "inconnu",
-        "wins": 2,
-        "losses": 2,
-        "total": 4,
-        "winrate": 50,
-        "roi": 142.8
+        "wins": 4,
+        "losses": 3,
+        "total": 7,
+        "winrate": 57.1,
+        "roi": 106.6
       }
     ],
     "updated": "2026-06-17"

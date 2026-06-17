@@ -2040,8 +2040,8 @@ jobs:
                 var status=fix.fixture&&fix.fixture.status&&fix.fixture.status.short||'';
                 if(status!=='FT'&&status!=='AET'&&status!=='PEN')continue;
                 if(gh===null||ga===null)continue;
-                var found=histo.predictions.find(function(p){return p.result==='scheduled'&&p.fixture_id===fid;});
-                if(!found)found=histo.predictions.find(function(p){return p.result==='scheduled'&&p.type==='single'&&p.sport!=='tennis'&&p.date&&resolveDates.indexOf(p.date.substring(0,10))!==-1&&levenshtein((p.home||'').toLowerCase(),homeN.toLowerCase())<=3&&levenshtein((p.away||'').toLowerCase(),awayN.toLowerCase())<=3;});
+                var found=histo.predictions.find(function(p){return (p.result==='scheduled'||p.result==='pending')&&p.fixture_id===fid;});
+                if(!found)found=histo.predictions.find(function(p){return (p.result==='scheduled'||p.result==='pending')&&p.type==='single'&&p.sport!=='tennis'&&p.date&&resolveDates.indexOf(p.date.substring(0,10))!==-1&&levenshtein((p.home||'').toLowerCase(),homeN.toLowerCase())<=3&&levenshtein((p.away||'').toLowerCase(),awayN.toLowerCase())<=3;});
                 if(!found)continue;
                 var pred=(found.prediction||'').toLowerCase();
                 var isWin=false;
@@ -2065,7 +2065,7 @@ jobs:
               if(TENNIS_KEY){
                 // Chercher les paris tennis pending d'hier
                 var pendingTennis=histo.predictions.filter(function(p){
-                  return p.result==='scheduled'&&p.sport==='tennis'&&p.date&&p.date.substring(0,10)===yDate;
+                  return (p.result==='scheduled'||p.result==='pending')&&p.sport==='tennis'&&p.date&&p.date.substring(0,10)===yDate;
                 });
                 console.log('  Paris tennis pending à résoudre: '+pendingTennis.length);
 
@@ -2296,8 +2296,8 @@ jobs:
                   var status=fix.fixture&&fix.fixture.status&&fix.fixture.status.short||'';
                   if(status!=='FT'&&status!=='AET'&&status!=='PEN')return;
                   if(gh===null||ga===null)return;
-                  var found=histoEarly.predictions.find(function(p){return p.result==='scheduled'&&p.fixture_id===fid;});
-                  if(!found)found=histoEarly.predictions.find(function(p){return p.result==='scheduled'&&p.type==='single'&&p.sport!=='tennis'&&p.date&&resolveDatesEarly.indexOf(p.date.substring(0,10))!==-1&&levenshtein((p.home||'').toLowerCase(),homeN.toLowerCase())<=3&&levenshtein((p.away||'').toLowerCase(),awayN.toLowerCase())<=3;});
+                  var found=histoEarly.predictions.find(function(p){return (p.result==='scheduled'||p.result==='pending')&&p.fixture_id===fid;});
+                  if(!found)found=histoEarly.predictions.find(function(p){return (p.result==='scheduled'||p.result==='pending')&&p.type==='single'&&p.sport!=='tennis'&&p.date&&resolveDatesEarly.indexOf(p.date.substring(0,10))!==-1&&levenshtein((p.home||'').toLowerCase(),homeN.toLowerCase())<=3&&levenshtein((p.away||'').toLowerCase(),awayN.toLowerCase())<=3;});
                   if(!found)return;
                   var pred=(found.prediction||'').toLowerCase();
                   var isWin=false;
@@ -2376,14 +2376,6 @@ jobs:
               var isWorldCupMatch=(lg.id===1);
 
               var cached=(oldData.matchs||[]).find(function(m){return m.id===f.id&&m.sport==='football'&&m.verdict_shark&&m.verdict_shark!=='';});
-              // PATCH TEMPORAIRE : on ignore le cache pour les matchs World Cup afin de
-              // forcer leur régénération avec le nouveau wc2026_model.js (sélection par
-              // probabilité, plus d'edge). À retirer une fois tous les matchs WC déjà
-              // analysés régénérés au moins une fois.
-              if(cached&&isWorldCupMatch){
-                console.log('-> '+home.name+' vs '+away.name+' : cache WC ignoré (régénération forcée)');
-                cached=null;
-              }
               if(cached){
                 console.log('-> '+home.name+' vs '+away.name+' : cache');
                 matchsData.push(cached);

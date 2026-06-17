@@ -52,8 +52,26 @@ body::before{content:'';position:fixed;top:-300px;left:50%;transform:translateX(
 .hero-title span{color:var(--cyan);}
 .hero-sub{font-size:13px;color:#64748b;line-height:1.6;margin-bottom:16px;max-width:380px;}
 
+/* HERO PREDATOR (World Cup) */
+.hero-predator{position:relative;padding:38px 20px 24px;max-width:720px;margin:0 auto;text-align:center;overflow:hidden;z-index:1;}
+.hero-predator::before{content:'';position:absolute;top:-100px;left:50%;transform:translateX(-50%);width:600px;height:400px;background:radial-gradient(ellipse,rgba(34,211,238,0.08) 0%,transparent 60%);pointer-events:none;}
+.hp-eyebrow{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:3px;color:var(--amber);margin-bottom:14px;display:flex;align-items:center;justify-content:center;gap:8px;position:relative;z-index:1;}
+.hp-eyebrow .line{width:24px;height:1px;background:var(--amber);opacity:0.4;}
+.hp-eyebrow .dot{width:5px;height:5px;background:var(--amber);border-radius:50%;animation:blink 1.2s infinite;}
+.hp-shark-big{position:relative;z-index:1;font-size:46px;margin-bottom:4px;display:inline-block;filter:drop-shadow(0 0 24px rgba(34,211,238,0.25));animation:float 3s ease-in-out infinite;}
+.hp-title{position:relative;z-index:1;font-family:'Bebas Neue',sans-serif;font-size:clamp(26px,6.5vw,40px);letter-spacing:1px;line-height:1.05;margin:6px auto 14px;max-width:480px;color:var(--text);}
+.hp-title b{color:var(--cyan);}
+.hp-sub{position:relative;z-index:1;font-size:13.5px;color:#94a3b8;line-height:1.6;margin:0 auto 20px;max-width:420px;}
+.hp-sub b{color:var(--text);font-weight:600;}
+.hp-cta-row{position:relative;z-index:1;display:flex;justify-content:center;gap:10px;margin-bottom:18px;flex-wrap:wrap;}
+.hp-cta-primary{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:1px;padding:11px 22px;border-radius:10px;border:1px solid var(--border-cyan);background:rgba(34,211,238,0.1);color:var(--cyan);cursor:pointer;}
+.hp-cta-secondary{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:1px;padding:11px 22px;border-radius:10px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:not-allowed;opacity:0.5;position:relative;}
+.hp-cta-secondary .soon{font-size:6px;letter-spacing:1px;position:absolute;top:-7px;right:6px;background:var(--card);padding:1px 5px;border-radius:6px;border:1px solid var(--border);color:var(--muted);}
+.hp-ticker{position:relative;z-index:1;display:flex;justify-content:center;gap:18px;font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:1px;flex-wrap:wrap;}
+.hp-ticker span{color:var(--cyan);}
+
 /* SPORT SELECTOR — la pièce centrale */
-.sport-selector{display:flex;gap:8px;margin-bottom:6px;}
+.sport-selector{display:flex;gap:8px;margin-bottom:6px;flex-wrap:wrap;justify-content:center;}
 .sport-btn{display:flex;align-items:center;gap:8px;padding:10px 20px;border-radius:12px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:.2s;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1px;}
 .sport-btn .sport-icon{font-size:18px;}
 .sport-btn.active-foot{background:rgba(34,211,238,0.08);border-color:var(--border-cyan);color:var(--cyan);}
@@ -249,23 +267,38 @@ body::before{content:'';position:fixed;top:-300px;left:50%;transform:translateX(
   </div>
 </header>
 
-<div class="hero">
-  <div class="hero-shark" id="heroEmoji">🦈</div>
-  <div class="hero-tag"><span class="dot"></span> <span id="heroTagText">ANALYSES IA EN DIRECT</span></div>
-  <h1 class="hero-title"><span>IA</span>SHARK</h1>
-  <p class="hero-sub" id="heroSub">L'IA qui attaque les cotes. Analyses statistiques quotidiennes alimentées par l'intelligence artificielle.</p>
+<div class="hero-predator">
+  <div class="hp-eyebrow"><span class="line"></span> <span class="dot"></span> COUPE DU MONDE 2026 — ANALYSES QUOTIDIENNES <span class="line"></span></div>
+  <div class="hp-shark-big" id="heroEmoji">🦈</div>
+  <h1 class="hp-title" id="heroTitle">Le seul <b>expert</b> qui ne ressent rien — il calcule.</h1>
+  <p class="hp-sub" id="heroSub">Chaque match du Mondial passé au crible : <b>xG dynamiques, forme, fatigue, H2H.</b> Pas d'intuition, que de la donnée.</p>
 
   <!-- SPORT SELECTOR -->
-  <div class="sport-selector">
+  <div class="sport-selector" style="position:relative;z-index:1;justify-content:center;">
     <button class="sport-btn active-foot" id="btnFoot" onclick="setSport('football')">
       <span class="sport-icon">⚽</span> FOOTBALL
     </button>
-    <button class="sport-btn" id="btnTennis" onclick="setSport('tennis')">
+    <button class="sport-btn hp-cta-secondary-inline" id="btnTennis" onclick="setSport('tennis')" style="opacity:0.5;cursor:not-allowed;position:relative;">
       <span class="sport-icon">🎾</span> TENNIS
+      <span style="font-size:6px;letter-spacing:1px;position:absolute;top:-7px;right:2px;background:var(--card);padding:1px 5px;border-radius:6px;border:1px solid var(--border);color:var(--muted);">BIENTÔT</span>
+    </button>
+    <button class="sport-btn hp-cta-secondary-inline" id="btnBasket" onclick="setSport('basket')" style="opacity:0.5;cursor:not-allowed;position:relative;">
+      <span class="sport-icon">🏀</span> BASKET
+      <span style="font-size:6px;letter-spacing:1px;position:absolute;top:-7px;right:2px;background:var(--card);padding:1px 5px;border-radius:6px;border:1px solid var(--border);color:var(--muted);">BIENTÔT</span>
+    </button>
+    <button class="sport-btn hp-cta-secondary-inline" id="btnHockey" onclick="setSport('hockey')" style="opacity:0.5;cursor:not-allowed;position:relative;">
+      <span class="sport-icon">🏒</span> HOCKEY
+      <span style="font-size:6px;letter-spacing:1px;position:absolute;top:-7px;right:2px;background:var(--card);padding:1px 5px;border-radius:6px;border:1px solid var(--border);color:var(--muted);">BIENTÔT</span>
     </button>
   </div>
 
-  <div class="stats-row">
+  <div class="hp-ticker" id="heroTicker">
+    <div><span id="tickerWinrate">—</span> winrate</div>
+    <div><span id="tickerRoi">—</span> ROI cumulé</div>
+    <div><span>104</span> matchs CDM couverts</div>
+  </div>
+
+  <div class="stats-row" style="margin-top:10px;">
     <div class="stat-pill" id="statMatchs"><span id="countSport">—</span> ANALYSES DU JOUR</div>
   </div>
 </div>
@@ -319,23 +352,17 @@ var currentSport = 'football';
 
 // ── SPORT SWITCH ────────────────────────────────────────
 function setSport(sport) {
+  if(sport === 'tennis' || sport === 'basket' || sport === 'hockey') return; // pas encore activés
   currentSport = sport;
-  var isTennis = sport === 'tennis';
+  var isTennis = false;
 
   // Boutons sport
-  document.getElementById('btnFoot').className = 'sport-btn' + (!isTennis ? ' active-foot' : '');
-  document.getElementById('btnTennis').className = 'sport-btn' + (isTennis ? ' active-tennis' : '');
-
-  // Hero
-  document.getElementById('heroEmoji').textContent = isTennis ? '🎾' : '🦈';
-  document.getElementById('heroTagText').textContent = isTennis ? 'TENNIS IA EN DIRECT' : 'ANALYSES IA EN DIRECT';
-  document.getElementById('heroSub').textContent = isTennis
-    ? 'L\'IA qui attaque les cotes tennis. Classement ATP/WTA, surface, H2H et Pinnacle analysés par l\'intelligence artificielle.'
-    : 'L\'IA qui attaque les cotes. Analyses statistiques quotidiennes alimentées par l\'intelligence artificielle.';
+  document.getElementById('btnFoot').className = 'sport-btn active-foot';
+  document.getElementById('btnTennis').className = 'sport-btn';
 
   // Mode CSS
-  document.getElementById('dayTabsWrap').className = 'day-tabs' + (isTennis ? ' tennis-mode' : '');
-  document.getElementById('filters').className = 'filters' + (isTennis ? ' tennis-mode' : '');
+  document.getElementById('dayTabsWrap').className = 'day-tabs';
+  document.getElementById('filters').className = 'filters';
 
   // Reset filtre
   currentFilter = 'all';
@@ -446,7 +473,11 @@ function buildLeagueBtns(matchs){
 }
 
 // ── CARD BUILDERS ─────────────────────────────────────────
-function confClass(c){ return c>=7.5?'high':c>=6.0?'med':'low'; }
+function normConf(c){
+  c = parseFloat(c)||0;
+  return c <= 1 ? c*10 : c;
+}
+function confClass(c){ c=normConf(c); return c>=7.5?'high':c>=6.0?'med':'low'; }
 
 function teamLogo(team){
   if(!team) return '';
@@ -469,7 +500,7 @@ function buildCard(m){
   var p1=m.p1||0, pn=m.pn||0, p2=m.p2||0;
   var cc = isTennis ? 'tennis-conf' : confClass(m.conf||0);
   var heure = (m.date||'').split(' ')[1]||'';
-  var isHot = m.hot||(m.conf||0)>=8.0;
+  var isHot = m.hot||normConf(m.conf)>=8.0;
   var isVal = m.val||m.vbet==='OUI';
 
   var badges = '';
@@ -522,7 +553,7 @@ function buildCard(m){
     +    '</div>'
     +  '</div>'
     +  '<div class="mc-right">'
-    +    '<div class="conf-circle '+cc+'"><div class="conf-num">'+(m.conf||0).toFixed(1)+'</div><div class="conf-sub">/10</div></div>'
+    +    '<div class="conf-circle '+cc+'"><div class="conf-num">'+normConf(m.conf).toFixed(1)+'</div><div class="conf-sub">/10</div></div>'
     +    '<button class="mc-cta">VOIR →</button>'
     +  '</div>'
     +'</div>'
@@ -542,7 +573,7 @@ var PREMIUM_LEAGUES = ['ldc','el','premier','laliga','seriea','bundesliga','ligu
 function getChoc(list){
   var premium = list.filter(function(m){ return PREMIUM_LEAGUES.indexOf(leagueKey(m)) !== -1; });
   if(!premium.length) premium = list;
-  return premium.reduce(function(best,m){ return (m.conf||0)>(best.conf||0)?m:best; }, premium[0]);
+  return premium.reduce(function(best,m){ return normConf(m.conf)>normConf(best.conf)?m:best; }, premium[0]);
 }
 
 function buildChocCard(m){
@@ -649,6 +680,24 @@ async function loadData(){
     renderMatchs();
   }catch(e){
     document.getElementById('cardsList').innerHTML='<div class="empty-state"><h3>ERREUR CHARGEMENT</h3><p>Impossible de charger les analyses. Réessaie dans un instant.</p></div>';
+  }
+  loadStats();
+}
+
+async function loadStats(){
+  try{
+    var resp = await fetch('historique.json?t='+Date.now());
+    var data = await resp.json();
+    var s = data.stats || {};
+    var wrEl = document.getElementById('tickerWinrate');
+    var roiEl = document.getElementById('tickerRoi');
+    if(wrEl) wrEl.textContent = (typeof s.winrate === 'number') ? s.winrate.toFixed(1)+'%' : '—';
+    if(roiEl) roiEl.textContent = (typeof s.roi === 'number') ? (s.roi>=0?'+':'')+s.roi.toFixed(1)+'%' : '—';
+  }catch(e){
+    var wrEl = document.getElementById('tickerWinrate');
+    var roiEl = document.getElementById('tickerRoi');
+    if(wrEl) wrEl.textContent = '—';
+    if(roiEl) roiEl.textContent = '—';
   }
 }
 

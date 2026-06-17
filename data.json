@@ -1,1001 +1,6 @@
 {
   "matchs": [
     {
-      "id": 1489379,
-      "sport": "football",
-      "home": {
-        "n": "Saudi Arabia",
-        "id": 23
-      },
-      "away": {
-        "n": "Uruguay",
-        "id": 7
-      },
-      "league": "World Cup",
-      "ligue_icon": "🏆",
-      "league_key": "other",
-      "date": "2026-06-16 00:00",
-      "cat": [
-        "all"
-      ],
-      "val": false,
-      "hot": false,
-      "conf": 0.65,
-      "p1": 29,
-      "pn": 60,
-      "p2": 53,
-      "po15": 0,
-      "po25": 35,
-      "btts": 41,
-      "c1": "8.20",
-      "cn": "4.34",
-      "c2": "1.45",
-      "co15": "1.33",
-      "co25": "2.09",
-      "cu25": "1.77",
-      "dc1x": "2.77",
-      "dc2x": "1.08",
-      "dc12": "1.22",
-      "cdc1x": "2.77",
-      "cdc2x": "1.08",
-      "cbtts": "2.28",
-      "cbtts_non": "1.59",
-      "btts_oui": "2.28",
-      "btts_non": "1.59",
-      "bookies": [
-        {
-          "n": "Betclic",
-          "o": "200€ offerts",
-          "l": "#LIEN_BETCLIC",
-          "c": "1.77",
-          "c1": "8.20",
-          "cn": "4.34",
-          "c2": "1.45"
-        },
-        {
-          "n": "Winamax",
-          "o": "100€ offerts",
-          "l": "#LIEN_WINAMAX",
-          "c": "1.74",
-          "c1": "8.17",
-          "cn": "4.31",
-          "c2": "1.42"
-        },
-        {
-          "n": "Unibet",
-          "o": "100€ remboursés",
-          "l": "#LIEN_UNIBET",
-          "c": "1.75",
-          "c1": "8.18",
-          "cn": "4.32",
-          "c2": "1.43"
-        },
-        {
-          "n": "PMU",
-          "o": "100€ offerts",
-          "l": "#LIEN_PMU",
-          "c": "1.72",
-          "c1": "8.15",
-          "cn": "4.29",
-          "c2": "1.40"
-        },
-        {
-          "n": "Bet365",
-          "o": "100€ bonus",
-          "l": "#LIEN_BET365",
-          "c": "1.80",
-          "c1": "8.23",
-          "cn": "4.37",
-          "c2": "1.48"
-        }
-      ],
-      "edge": "+10% (prob modèle 65% vs prob implicite cote 1.77 = 56.5%)",
-      "marche": "Under 2.5",
-      "risque": "FAIBLE",
-      "pari_rec": "Under 2.5 buts",
-      "cote_rec": "1.77",
-      "no_signal": false,
-      "no_signal_label": "",
-      "mise": "2-3% bankroll",
-      "verdict_shark": "Le modèle Poisson projette 2.10 buts attendus au total (λ 0.85 + 1.25), plaçant Under 2.5 à 65% de probabilité contre un seuil requis de 55%.",
-      "scenario": {
-        "phase1": "0-30min: Uruguay prend le contrôle du ballon, l'Arabie Saoudite se replie en bloc bas et limite les espaces. Peu de transitions dangereuses, score probable 0-0.",
-        "phase2": "30-70min: Uruguay crée les meilleures occasions via ses qualités individuelles (Top5: 38%), l'Arabie Saoudite défend en 4-4-2 bas. Un but uruguayen est l'issue la plus probable, score central 0-1.",
-        "phase3": "70-90min: Uruguay gère le résultat sans chercher à ouvrir le jeu, l'Arabie Saoudite manque de ressources offensives (xG 0.89) pour revenir. Le match se ferme, Under 2.5 se confirme."
-      },
-      "scenario_15min": [
-        {
-          "t": "0-15min",
-          "prob": 8,
-          "txt": "Entrée en matière prudente des deux équipes, Uruguay tente d'imposer son pressing haut, Arabie Saoudite cherche à s'organiser défensivement. Probabilité de but: 8%."
-        },
-        {
-          "t": "15-30min",
-          "prob": 12,
-          "txt": "Uruguay monte en puissance, premières occasions franches via les flancs. L'Arabie Saoudite reste compacte mais subit. Probabilité de but dans ce quart: 12%."
-        },
-        {
-          "t": "30-45min",
-          "prob": 10,
-          "txt": "Légère stabilisation tactique avant la mi-temps. L'Uruguay peut ouvrir le score sur phase arrêtée ou erreur défensive saoudienne. Probabilité de but: 10%."
-        },
-        {
-          "t": "45-60min",
-          "prob": 15,
-          "txt": "Reprise avec Uruguay plus agressif, l'Arabie Saoudite accuse les premières fatigues de concentration. C'est la fenêtre la plus probable pour le premier but uruguayen. Probabilité: 15%."
-        },
-        {
-          "t": "60-75min",
-          "prob": 18,
-          "txt": "Phase clé du match: Uruguay accentue la pression, rotations possibles côté saoudien. Le deuxième but reste peu probable (Under 2.5 toujours confortable). Probabilité de but: 18%."
-        },
-        {
-          "t": "75-90min",
-          "prob": 20,
-          "txt": "L'Arabie Saoudite doit pousser si elle est menée, ouvrant des espaces en contre pour l'Uruguay. Risque légèrement accru de second but mais le total 2+ reste improbable selon le modèle. Probabilité de but: 20%."
-        }
-      ],
-      "facteur_x": "Lambda Poisson combiné de 2.10 buts (SA 0.85 + URU 1.25) — 65% de probabilité mathématique que le total reste sous 2.5 buts selon le moteur.",
-      "analyse_card": "L'Arabie Saoudite présente un xG offensif de seulement 0.89 et une valeur d'attaque de 25M€, signalant une capacité de création très limitée face à une défense uruguayenne solide (xG concédé 0.81). L'Uruguay génère 1.34 xG mais devrait dominer sans urgence excessive en phase de groupes, ce qui limite les prises de risque offensives. Les deux équipes affichent une fatigue à 0/100 et aucune absence majeure, mais l'écart de force brut (29.1 vs 52.5) suggère un match contrôlé plutôt qu'ouvert.",
-      "conseil_public": "Jouer Under 2.5 buts — le profil défensif des deux équipes et les lambdas Poisson bas convergent vers un match fermé avec haute probabilité de rester sous la barre des 3 buts.",
-      "contexte": "Match de phase de groupes Coupe du Monde 2026 — premier match pour les deux sélections, enjeux maximaux, aucune des deux équipes n'a de marge pour gérer le score. L'Uruguay voudra s'imposer proprement sans prendre de risques défensifs inutiles.",
-      "vbet": "OUI",
-      "scores": [
-        "0-1"
-      ],
-      "paris_safe": {
-        "bet": "Under 2.5 buts",
-        "cote": 1.77,
-        "proba": "29%"
-      },
-      "paris_risque": {
-        "bet": "",
-        "cote": "",
-        "proba": ""
-      },
-      "kelly": "5.0",
-      "stade": {
-        "nom": "Hard Rock Stadium — Miami Gardens",
-        "cap": "",
-        "meteo": "☁️",
-        "temp": "32°C",
-        "desc": "nuageux"
-      },
-      "crit_home": {
-        "fd": 0,
-        "att": 0,
-        "def": 88,
-        "fr": 0,
-        "mot": 70,
-        "fat": 50
-      },
-      "crit_away": {
-        "fd": 0,
-        "att": 0,
-        "def": 88,
-        "fr": 0,
-        "mot": 70,
-        "fat": 50
-      },
-      "form_home": [
-        {
-          "d": "2025-12-15",
-          "opponent": "Jordan",
-          "score": "0-1",
-          "result": "L",
-          "home": true,
-          "match": "Jordan",
-          "lieu": "DOM",
-          "date_full": "2025-12-15T17:30:00+00:00"
-        },
-        {
-          "d": "2025-12-08",
-          "opponent": "Morocco",
-          "score": "0-1",
-          "result": "L",
-          "home": false,
-          "match": "Morocco",
-          "lieu": "EXT",
-          "date_full": "2025-12-08T17:00:00+00:00"
-        },
-        {
-          "d": "2025-12-05",
-          "opponent": "Comoros",
-          "score": "3-1",
-          "result": "W",
-          "home": false,
-          "match": "Comoros",
-          "lieu": "EXT",
-          "date_full": "2025-12-05T18:30:00+00:00"
-        },
-        {
-          "d": "2025-12-02",
-          "opponent": "Oman",
-          "score": "2-1",
-          "result": "W",
-          "home": true,
-          "match": "Oman",
-          "lieu": "DOM",
-          "date_full": "2025-12-02T17:00:00+00:00"
-        },
-        {
-          "d": "2025-11-18",
-          "opponent": "Algeria",
-          "score": "0-2",
-          "result": "L",
-          "home": true,
-          "match": "Algeria",
-          "lieu": "DOM",
-          "date_full": "2025-11-18T16:30:00+00:00"
-        }
-      ],
-      "form_away": [
-        {
-          "d": "2025-11-19",
-          "opponent": "USA",
-          "score": "1-5",
-          "result": "L",
-          "home": false,
-          "match": "USA",
-          "lieu": "EXT",
-          "date_full": "2025-11-19T00:00:00+00:00"
-        },
-        {
-          "d": "2025-11-16",
-          "opponent": "Mexico",
-          "score": "0-0",
-          "result": "D",
-          "home": false,
-          "match": "Mexico",
-          "lieu": "EXT",
-          "date_full": "2025-11-16T01:00:00+00:00"
-        },
-        {
-          "d": "2025-10-13",
-          "opponent": "Uzbekistan",
-          "score": "2-1",
-          "result": "W",
-          "home": false,
-          "match": "Uzbekistan",
-          "lieu": "EXT",
-          "date_full": "2025-10-13T12:45:00+00:00"
-        },
-        {
-          "d": "2025-10-10",
-          "opponent": "Dominican Republic",
-          "score": "1-0",
-          "result": "W",
-          "home": true,
-          "match": "Dominican Republic",
-          "lieu": "DOM",
-          "date_full": "2025-10-10T12:45:00+00:00"
-        }
-      ],
-      "forme_h": "",
-      "forme_a": "",
-      "h2h": [],
-      "injuries": [],
-      "fatigue": {
-        "home": {
-          "val": 15,
-          "info": "Repos 183 jours"
-        },
-        "away": {
-          "val": 15,
-          "info": "Repos 210 jours"
-        }
-      },
-      "fatigue_home": {
-        "val": 15,
-        "info": "Repos 183 jours"
-      },
-      "fatigue_away": {
-        "val": 15,
-        "info": "Repos 210 jours"
-      },
-      "tendances": {
-        "over25_home": 2,
-        "over25_away": 2,
-        "over25_home_n": 8,
-        "over25_away_n": 3,
-        "btts_home": 3,
-        "btts_away": 2,
-        "btts_home_n": 8,
-        "btts_away_n": 3
-      },
-      "classement": null,
-      "actu": [
-        {
-          "c": "Saudi Arabia",
-          "t": "Spain at World Cup 2026: Can Spain be crowned world champions under Luis de la Fuente if Lamine Yamal has limited involvement?",
-          "tx": "Time to talk Lamine’s importance",
-          "tm": "2026-06-07"
-        },
-        {
-          "c": "Saudi Arabia",
-          "t": "La FIFA accusée de refourguer ses places au marché noir",
-          "tx": "Les fourberies de Gianni continuent. Après la tourmente autour de leurs prix délirants, les billets pour les matchs…",
-          "tm": "2026-06-03"
-        },
-        {
-          "c": "Uruguay",
-          "t": "Coupe du monde 2026. Kanté remplace Mbappé en conférence de presse, la crise couve pour la Tunisie... suivez la cinquième journée du Mondial",
-          "tx": "La première journée de la phase de poules se poursuit sur le continent nord-américain. Principal favori à enter en lice, l'Espagne sera opposée au Cap Vert (18 heures), alors que la rencontre entre la Belgique et l'Egypte fera également partie des plus attend…",
-          "tm": "2026-06-15"
-        },
-        {
-          "c": "Uruguay",
-          "t": "Pronostic Argentine Algérie : analyse, cotes et prono World Cup 2026",
-          "tx": "Argentine – Algérie : les deux équipes s'affrontent en World Cup 2026. Découvrez notre pronostic avec l'Argentine favorite à la victoire.",
-          "tm": "2026-06-15"
-        }
-      ],
-      "arbitre": null,
-      "events_home": null,
-      "events_away": null,
-      "top_scorers_home": [],
-      "top_scorers_away": [],
-      "elo_home": null,
-      "elo_away": null,
-      "elo_diff": null,
-      "elo_signal": null,
-      "dropping_odds": null,
-      "pinnacle_snapshot": null
-    },
-    {
-      "id": 1489378,
-      "sport": "football",
-      "home": {
-        "n": "Iran",
-        "id": 22
-      },
-      "away": {
-        "n": "New Zealand",
-        "id": 4673
-      },
-      "league": "World Cup",
-      "ligue_icon": "🏆",
-      "league_key": "other",
-      "date": "2026-06-16 03:00",
-      "cat": [
-        "all"
-      ],
-      "val": false,
-      "hot": false,
-      "conf": 0.56,
-      "p1": 53,
-      "pn": 60,
-      "p2": 29,
-      "po15": 0,
-      "po25": 54,
-      "btts": 56,
-      "c1": "1.82",
-      "cn": "3.50",
-      "c2": "4.67",
-      "co15": "1.45",
-      "co25": "2.39",
-      "cu25": "1.58",
-      "dc1x": "1.18",
-      "dc2x": "2.01",
-      "dc12": "1.29",
-      "cdc1x": "1.18",
-      "cdc2x": "2.01",
-      "cbtts": "2.15",
-      "cbtts_non": "1.65",
-      "btts_oui": "2.15",
-      "btts_non": "1.65",
-      "bookies": [
-        {
-          "n": "Betclic",
-          "o": "200€ offerts",
-          "l": "#LIEN_BETCLIC",
-          "c": "2.15",
-          "c1": "1.82",
-          "cn": "3.50",
-          "c2": "4.67"
-        },
-        {
-          "n": "Winamax",
-          "o": "100€ offerts",
-          "l": "#LIEN_WINAMAX",
-          "c": "2.12",
-          "c1": "1.79",
-          "cn": "3.47",
-          "c2": "4.64"
-        },
-        {
-          "n": "Unibet",
-          "o": "100€ remboursés",
-          "l": "#LIEN_UNIBET",
-          "c": "2.13",
-          "c1": "1.80",
-          "cn": "3.48",
-          "c2": "4.65"
-        },
-        {
-          "n": "PMU",
-          "o": "100€ offerts",
-          "l": "#LIEN_PMU",
-          "c": "2.10",
-          "c1": "1.77",
-          "cn": "3.45",
-          "c2": "4.62"
-        },
-        {
-          "n": "Bet365",
-          "o": "100€ bonus",
-          "l": "#LIEN_BET365",
-          "c": "2.18",
-          "c1": "1.85",
-          "cn": "3.53",
-          "c2": "4.70"
-        }
-      ],
-      "edge": "+1% (prob modèle 56% vs seuil requis 55%)",
-      "marche": "BTTS Oui",
-      "risque": "MODERE",
-      "pari_rec": "BTTS Oui",
-      "cote_rec": "2.15",
-      "no_signal": false,
-      "no_signal_label": "",
-      "mise": "2-3% bankroll",
-      "verdict_shark": "BTTS Oui validé à 56% de probabilité modèle : Iran xG généré 1.71 vs New Zealand xG concédé 1.50, les deux équipes sont projetées à scorer selon les lambdas Poisson.",
-      "scenario": {
-        "phase1": "0-30min — L'Iran installe sa domination technique (FIFA 1594 pts, 15 exp CM) et presse haut. La NZ défend en bloc bas mais son manque d'expérience (3 joueurs CM) génère des espaces sur transitions. Premier but iranien probable avant la 30e.",
-        "phase2": "30-60min — La Nouvelle-Zélande, portée par ses joueurs évoluant dans le Top 5 (20%), tente de répondre et obtient des occasions sur contre-attaques. Le lambda NZ de 1.14 s'exprime : but néo-zélandais probable sur phase arrêtée ou contre rapide.",
-        "phase3": "60-90min — L'Iran, supérieur physiquement et techniquement, gère le score et peut ajouter un second but. Score central 2-1 validant BTTS. La NZ peut concéder un troisième but si elle s'ouvre trop."
-      },
-      "scenario_15min": [
-        {
-          "t": "0-15min",
-          "prob": 8,
-          "txt": "Entrée en matière prudente des deux équipes, prise de repères. L'Iran tente ses premières combinaisons, NZ défend organisée. Probabilité de but faible mais non nulle sur coup franc iranien."
-        },
-        {
-          "t": "15-30min",
-          "prob": 12,
-          "txt": "L'Iran monte en pression et force des erreurs défensives néo-zélandaises. Première occasion franche iranienne, lambda Iran 1.71 commence à s'exprimer. But iranien attendu dans cette fenêtre."
-        },
-        {
-          "t": "30-45min",
-          "prob": 10,
-          "txt": "La NZ tient le choc mais concède des corners. Possibilité d'une action directe NZ sur contre-attaque rapide — xG NZ concédé 1.50 par l'Iran révèle une défense imparfaite. Phase équilibrée avant la pause."
-        },
-        {
-          "t": "45-60min",
-          "prob": 15,
-          "txt": "Retour des vestiaires dynamique. L'Iran cherche à tuer le match, la NZ doit réagir si elle est menée. But de l'une ou l'autre équipe très probable dans les 15 premières minutes de la seconde période."
-        },
-        {
-          "t": "60-75min",
-          "prob": 18,
-          "txt": "Phase la plus dangereuse du match. La NZ s'ouvre pour chercher l'égalisation ou réduire l'écart, créant des espaces pour l'Iran. Lambda combiné Poisson 2.85 buts en 90min concentre ici une part importante des occasions."
-        },
-        {
-          "t": "75-90min",
-          "prob": 20,
-          "txt": "Fin de match à fort potentiel de buts : Iran en gestion offensive, NZ poussée par la nécessité. C'est la fenêtre la plus probable pour voir marquer la NZ si ce n'est pas encore fait, validant définitivement BTTS Oui."
-        }
-      ],
-      "facteur_x": "Lambda Poisson NZ 1.14 but estimé face à une défense iranienne concédant 1.04 xG/match : probabilité que la NZ marque au moins 1 but = ~68% selon distribution Poisson (1 - e^-1.14 ≈ 0.680), signal décisif pour valider BTTS.",
-      "analyse_card": "L'Iran présente un lambda offensif de 1.71 but avec une valeur d'attaque de 30M€, face à une défense néo-zélandaise évaluée à seulement 5M€ et qui concède en moyenne 1.50 xG. La Nouvelle-Zélande, bien que fragile défensivement (xG concédé 1.50), dispose d'un potentiel offensif non négligeable avec 1.24 xG générés face à une défense iranienne concédant 1.04 xG — lambda NZ estimé à 1.14. Le différentiel de force (36.7 vs 20.6) favorise l'Iran mais ne neutralise pas le risque de prise de but, soutenant le scénario BTTS.",
-      "conseil_public": "Jouer BTTS Oui à 2.15 avec mise limitée à 2-3% de bankroll — edge positif confirmé à +1% au-dessus du seuil, risque modéré justifié par la volatilité défensive néo-zélandaise.",
-      "contexte": "Phase de groupes Coupe du Monde 2026 — premier match pour les deux équipes (aucune donnée de récupération, 0km parcourus, 3j de repos). L'Iran est le favori du groupe avec 53% de chances de victoire ici, la Nouvelle-Zélande joue son ticket de qualification sur ce match crucial. Les deux équipes ont une motivation maximale, aucune rotation attendue.",
-      "vbet": "OUI",
-      "scores": [
-        "2-1"
-      ],
-      "paris_safe": {
-        "bet": "BTTS Oui",
-        "cote": 2.15,
-        "proba": "53%"
-      },
-      "paris_risque": {
-        "bet": "",
-        "cote": "",
-        "proba": ""
-      },
-      "kelly": "5.0",
-      "stade": {
-        "nom": "SoFi Stadium — Inglewood",
-        "cap": "",
-        "meteo": "☀️",
-        "temp": "18°C",
-        "desc": "ciel dégagé"
-      },
-      "crit_home": {
-        "fd": 0,
-        "att": 0,
-        "def": 88,
-        "fr": 0,
-        "mot": 70,
-        "fat": 50
-      },
-      "crit_away": {
-        "fd": 0,
-        "att": 0,
-        "def": 88,
-        "fr": 0,
-        "mot": 70,
-        "fat": 50
-      },
-      "form_home": [
-        {
-          "d": "2025-10-14",
-          "opponent": "Tanzania",
-          "score": "2-0",
-          "result": "W",
-          "home": true,
-          "match": "Tanzania",
-          "lieu": "DOM",
-          "date_full": "2025-10-14T15:00:00+00:00"
-        },
-        {
-          "d": "2025-10-10",
-          "opponent": "Russia",
-          "score": "1-2",
-          "result": "L",
-          "home": false,
-          "match": "Russia",
-          "lieu": "EXT",
-          "date_full": "2025-10-10T17:00:00+00:00"
-        },
-        {
-          "d": "2025-09-04",
-          "opponent": "Tajikistan",
-          "score": "2-2",
-          "result": "D",
-          "home": false,
-          "match": "Tajikistan",
-          "lieu": "EXT",
-          "date_full": "2025-09-04T15:30:00+00:00"
-        },
-        {
-          "d": "2025-09-01",
-          "opponent": "India",
-          "score": "3-0",
-          "result": "W",
-          "home": false,
-          "match": "India",
-          "lieu": "EXT",
-          "date_full": "2025-09-01T12:00:00+00:00"
-        },
-        {
-          "d": "2025-08-29",
-          "opponent": "Afghanistan",
-          "score": "3-1",
-          "result": "W",
-          "home": true,
-          "match": "Afghanistan",
-          "lieu": "DOM",
-          "date_full": "2025-08-29T12:00:00+00:00"
-        }
-      ],
-      "form_away": [
-        {
-          "d": "2025-11-19",
-          "opponent": "Ecuador",
-          "score": "0-2",
-          "result": "L",
-          "home": false,
-          "match": "Ecuador",
-          "lieu": "EXT",
-          "date_full": "2025-11-19T01:30:00+00:00"
-        },
-        {
-          "d": "2025-11-16",
-          "opponent": "Colombia",
-          "score": "1-2",
-          "result": "L",
-          "home": false,
-          "match": "Colombia",
-          "lieu": "EXT",
-          "date_full": "2025-11-16T00:30:00+00:00"
-        },
-        {
-          "d": "2025-10-14",
-          "opponent": "Norway",
-          "score": "1-1",
-          "result": "D",
-          "home": false,
-          "match": "Norway",
-          "lieu": "EXT",
-          "date_full": "2025-10-14T16:00:00+00:00"
-        },
-        {
-          "d": "2025-10-09",
-          "opponent": "Poland",
-          "score": "0-1",
-          "result": "L",
-          "home": false,
-          "match": "Poland",
-          "lieu": "EXT",
-          "date_full": "2025-10-09T18:45:00+00:00"
-        },
-        {
-          "d": "2025-09-09",
-          "opponent": "Australia",
-          "score": "1-3",
-          "result": "L",
-          "home": true,
-          "match": "Australia",
-          "lieu": "DOM",
-          "date_full": "2025-09-09T07:00:00+00:00"
-        }
-      ],
-      "forme_h": "",
-      "forme_a": "",
-      "h2h": [],
-      "injuries": [],
-      "fatigue": {
-        "home": {
-          "val": 15,
-          "info": "Repos 245 jours"
-        },
-        "away": {
-          "val": 15,
-          "info": "Repos 210 jours"
-        }
-      },
-      "fatigue_home": {
-        "val": 15,
-        "info": "Repos 245 jours"
-      },
-      "fatigue_away": {
-        "val": 15,
-        "info": "Repos 210 jours"
-      },
-      "tendances": {
-        "over25_home": 1,
-        "over25_away": 1,
-        "over25_home_n": 2,
-        "over25_away_n": 6,
-        "btts_home": 1,
-        "btts_away": 2,
-        "btts_home_n": 2,
-        "btts_away_n": 6
-      },
-      "classement": null,
-      "actu": [
-        {
-          "c": "Iran",
-          "t": "Guerre au Moyen-Orient : Pourquoi l’accord Iran-Etats-Unis est-il une « catastrophe vu d’Israël » ?",
-          "tx": "Pour Israël, l’accord annoncé entre les Etats-Unis et l’Iran a un goût amer, entre absence de garanties de sécurité et mise au ban des priorités diplomatiques américaines",
-          "tm": "2026-06-15"
-        },
-        {
-          "c": "Iran",
-          "t": "Accord Iran/USA : \"On comprend que la situation est pire désormais pour les Iraniens\", regrette la présidente de l'association Iran Justice",
-          "tx": "Après trois mois et demi de conflit, l'Iran et les États-Unis ont finalement signé un accord dimanche 14 juin pour mettre fin à la guerre au Moyen-Orient.",
-          "tm": "2026-06-15"
-        },
-        {
-          "c": "New Zealand",
-          "t": "The only thing hit harder than New Zealand? England's team rules [Dumbass]",
-          "tx": "<table> <tr><td> </td><td> [link] [0 comments] </td></tr></table>",
-          "tm": "2026-06-12"
-        },
-        {
-          "c": "New Zealand",
-          "t": "WikiLambda the Ultimate",
-          "tx": "Comments",
-          "tm": "2026-06-11"
-        }
-      ],
-      "arbitre": null,
-      "events_home": null,
-      "events_away": null,
-      "top_scorers_home": [],
-      "top_scorers_away": [],
-      "elo_home": null,
-      "elo_away": null,
-      "elo_diff": null,
-      "elo_signal": null,
-      "dropping_odds": null,
-      "pinnacle_snapshot": null
-    },
-    {
-      "id": 1489383,
-      "sport": "football",
-      "home": {
-        "n": "France",
-        "id": 2
-      },
-      "away": {
-        "n": "Senegal",
-        "id": 13
-      },
-      "league": "World Cup",
-      "ligue_icon": "🏆",
-      "league_key": "other",
-      "date": "2026-06-16 21:00",
-      "cat": [
-        "all"
-      ],
-      "val": false,
-      "hot": false,
-      "conf": 0.59,
-      "p1": 51,
-      "pn": 60,
-      "p2": 31,
-      "po15": 0,
-      "po25": 55,
-      "btts": 59,
-      "c1": "1.46",
-      "cn": "4.43",
-      "c2": "7.00",
-      "co15": "1.23",
-      "co25": "1.80",
-      "cu25": "2.02",
-      "dc1x": "1.10",
-      "dc2x": "2.70",
-      "dc12": "1.20",
-      "cdc1x": "1.10",
-      "cdc2x": "2.70",
-      "cbtts": "1.95",
-      "cbtts_non": "1.80",
-      "btts_oui": "1.95",
-      "btts_non": "1.80",
-      "bookies": [
-        {
-          "n": "Betclic",
-          "o": "200€ offerts",
-          "l": "#LIEN_BETCLIC",
-          "c": "1.95",
-          "c1": "1.46",
-          "cn": "4.43",
-          "c2": "7.00"
-        },
-        {
-          "n": "Winamax",
-          "o": "100€ offerts",
-          "l": "#LIEN_WINAMAX",
-          "c": "1.92",
-          "c1": "1.43",
-          "cn": "4.40",
-          "c2": "6.97"
-        },
-        {
-          "n": "Unibet",
-          "o": "100€ remboursés",
-          "l": "#LIEN_UNIBET",
-          "c": "1.93",
-          "c1": "1.44",
-          "cn": "4.41",
-          "c2": "6.98"
-        },
-        {
-          "n": "PMU",
-          "o": "100€ offerts",
-          "l": "#LIEN_PMU",
-          "c": "1.90",
-          "c1": "1.41",
-          "cn": "4.38",
-          "c2": "6.95"
-        },
-        {
-          "n": "Bet365",
-          "o": "100€ bonus",
-          "l": "#LIEN_BET365",
-          "c": "1.98",
-          "c1": "1.49",
-          "cn": "4.46",
-          "c2": "7.03"
-        }
-      ],
-      "edge": "+15.1% (prob modèle 59% vs prob implicite cote 1.95 = 51.3%)",
-      "marche": "BTTS Oui",
-      "risque": "MODERE",
-      "pari_rec": "BTTS Oui",
-      "cote_rec": "1.95",
-      "no_signal": false,
-      "no_signal_label": "",
-      "mise": "2-3% bankroll",
-      "verdict_shark": "Les deux équipes affichent des lambdas Poisson équilibrés (France 1.49 / Sénégal 1.42) avec un xG combiné de 4.84 en qualifications, soutenant une probabilité BTTS de 59% au-dessus du seuil requis de 55%.",
-      "scenario": {
-        "phase1": "0-30 min — France impose son pressing haut avec Mbappé et l'attaque à 480M€, cherchant à ouvrir rapidement le score ; le Sénégal défend en bloc compact (xG concédé 0.38) mais subit la pression.",
-        "phase2": "30-65 min — Après l'ouverture du score probable de la France, le Sénégal est forcé de sortir et expose ses lignes ; Sadio Mané et les transitions sénégalaises (2.25 xG offensifs) créent un danger réel en contre-attaque, favorisant le BTTS.",
-        "phase3": "65-90 min — Le match s'étire, les deux équipes ont des besoins de points ; la France gère sans rotation (match 1, 0% fatigue) et le Sénégal pousse pour égaliser ou réduire l'écart, consolidant le scénario BTTS dans le dernier tiers."
-      },
-      "scenario_15min": [
-        {
-          "t": "0-15min",
-          "prob": 8,
-          "txt": "Phase d'observation tactique, France tente d'imposer sa possession (FIFA 1851 pts), pression sur les côtés mais bloc sénégalais fermé — probabilité de but limitée mais réelle via coup de pied arrêté."
-        },
-        {
-          "t": "15-30min",
-          "prob": 12,
-          "txt": "La France commence à trouver des espaces entre les lignes ; Mbappé et les ailiers accélèrent, xG offensif France (2.59) se matérialise — premier but probable dans cette fenêtre."
-        },
-        {
-          "t": "30-45min",
-          "prob": 10,
-          "txt": "Le Sénégal résiste mais fatigue tactique en fin de première mi-temps ; transitions dangereuses des Lions (lambda 1.42), risque d'un contre sénégalais ou d'un penalty possible."
-        },
-        {
-          "t": "45-60min",
-          "prob": 15,
-          "txt": "Reprise avec ajustements tactiques des deux coachs ; la France accélère après la pause, période favorable aux buts selon les patterns de Phase de Groupes CM — fenêtre clé pour le 2e but."
-        },
-        {
-          "t": "60-75min",
-          "prob": 18,
-          "txt": "Le Sénégal, poussé par le score ou l'enjeu, monte davantage et expose son dos à la France ; les contre-attaques françaises (vitesse Mbappé) et les tentatives sénégalaises combinées maximisent le BTTS dans cette zone."
-        },
-        {
-          "t": "75-90min",
-          "prob": 20,
-          "txt": "Dernière ligne droite — si le score est 1-0 ou 2-0 France, le Sénégal prend des risques offensifs pour marquer (pression psychologique CM), augmentant mécaniquement la probabilité du but sénégalais nécessaire au BTTS."
-        }
-      ],
-      "facteur_x": "Lambda Poisson Sénégal à 1.42 : malgré l'écart de force (86.4 vs 52.7), le moteur attribue au Sénégal un potentiel offensif quasi-équivalent à la France sur ce match, rendant BTTS structurellement solide.",
-      "analyse_card": "La France génère 2.59 xG offensifs en qualifications avec une valeur attaque de 480M€ et 92% de joueurs issus du Top 5 européen, garantissant une pression offensive constante. Le Sénégal, malgré une valeur attaque plus modeste (50M€), produit 2.25 xG offensifs et concède seulement 0.38 xG en moyenne, mais face à la densité technique française, trouver le filet reste probable selon le modèle Poisson. Les lambdas estimés (1.49 / 1.42) indiquent un match ouvert des deux côtés, compatible avec un scénario où chaque équipe marque au moins une fois.",
-      "conseil_public": "Jouer BTTS Oui à 1.95 — la probabilité modèle de 59% dépasse le seuil de fiabilité et les lambdas Poisson symétriques confirment le potentiel offensif des deux équipes.",
-      "contexte": "Journée 1 de la phase de groupes de la Coupe du Monde 2026 — aucune équipe déjà qualifiée, les deux sélections jouent à plein régime avec un enjeu maximal sur ce premier match déterminant pour la tête de groupe.",
-      "vbet": "OUI",
-      "scores": [
-        "2-1"
-      ],
-      "paris_safe": {
-        "bet": "BTTS Oui",
-        "cote": 1.95,
-        "proba": "51%"
-      },
-      "paris_risque": {
-        "bet": "",
-        "cote": "",
-        "proba": ""
-      },
-      "kelly": "5.0",
-      "stade": {
-        "nom": "MetLife Stadium — New York New Jersey",
-        "cap": "",
-        "meteo": "🌤️",
-        "temp": "",
-        "desc": ""
-      },
-      "crit_home": {
-        "fd": 0,
-        "att": 0,
-        "def": 88,
-        "fr": 0,
-        "mot": 70,
-        "fat": 50
-      },
-      "crit_away": {
-        "fd": 0,
-        "att": 0,
-        "def": 88,
-        "fr": 0,
-        "mot": 70,
-        "fat": 50
-      },
-      "form_home": [],
-      "form_away": [
-        {
-          "d": "2026-01-14",
-          "opponent": "Egypt",
-          "score": "1-0",
-          "result": "W",
-          "home": true,
-          "match": "Egypt",
-          "lieu": "DOM",
-          "date_full": "2026-01-14T17:00:00+00:00"
-        },
-        {
-          "d": "2026-01-09",
-          "opponent": "Mali",
-          "score": "1-0",
-          "result": "W",
-          "home": false,
-          "match": "Mali",
-          "lieu": "EXT",
-          "date_full": "2026-01-09T16:00:00+00:00"
-        },
-        {
-          "d": "2026-01-03",
-          "opponent": "Sudan",
-          "score": "3-1",
-          "result": "W",
-          "home": true,
-          "match": "Sudan",
-          "lieu": "DOM",
-          "date_full": "2026-01-03T16:00:00+00:00"
-        },
-        {
-          "d": "2025-12-30",
-          "opponent": "Benin",
-          "score": "3-0",
-          "result": "W",
-          "home": false,
-          "match": "Benin",
-          "lieu": "EXT",
-          "date_full": "2025-12-30T19:00:00+00:00"
-        },
-        {
-          "d": "2025-12-27",
-          "opponent": "Congo DR",
-          "score": "1-1",
-          "result": "D",
-          "home": true,
-          "match": "Congo DR",
-          "lieu": "DOM",
-          "date_full": "2025-12-27T15:00:00+00:00"
-        }
-      ],
-      "forme_h": "",
-      "forme_a": "",
-      "h2h": [],
-      "injuries": [],
-      "fatigue": {
-        "home": {
-          "val": 40,
-          "info": "Calendrier inconnu"
-        },
-        "away": {
-          "val": 15,
-          "info": "Repos 153 jours"
-        }
-      },
-      "fatigue_home": {
-        "val": 40,
-        "info": "Calendrier inconnu"
-      },
-      "fatigue_away": {
-        "val": 15,
-        "info": "Repos 153 jours"
-      },
-      "tendances": {
-        "over25_home": 0,
-        "over25_away": 4,
-        "over25_home_n": 1,
-        "over25_away_n": 10,
-        "btts_home": 0,
-        "btts_away": 4,
-        "btts_home_n": 1,
-        "btts_away_n": 10
-      },
-      "classement": null,
-      "actu": [
-        {
-          "c": "France",
-          "t": "Promo : le MacBook Neo tombe à 611 €, le 512 Go se maintient à 715 €",
-          "tx": "Amazon semble décidé à vendre un maximum de Mac d’ici la fête des pères. Le géant du commerce en ligne a encore revu à la baisse le prix des MacBook Neo. Être un best-seller n’empêche pas les promotions, surtout avec le petit portable d'Apple de 2026. Le moin…",
-          "tm": "2026-06-15"
-        },
-        {
-          "c": "France",
-          "t": "Le Contre-pied de Jean-Marc Ghéraille : Curaçao, bleu de toi",
-          "tx": "Le petit Poucet est d’ores et déjà un des coups de cœur de la Coupe du Monde ...",
-          "tm": "2026-06-15"
-        },
-        {
-          "c": "Senegal",
-          "t": "World Cup Group I guide: Early tests for potential champions France and Norway",
-          "tx": "Iraq face a near-impossible task",
-          "tm": "2026-06-10"
-        },
-        {
-          "c": "Senegal",
-          "t": "Événement : soirée de projection So Foot pour France – Sénégal à la Coupe du Monde à partir de 18h30",
-          "tx": "Après la triple soirée du 30 mai PSG-Arsenal sur deux péniches et une discothèque, on récidive et on enchaîne direct…",
-          "tm": "2026-06-04"
-        }
-      ],
-      "arbitre": null,
-      "events_home": null,
-      "events_away": null,
-      "top_scorers_home": [],
-      "top_scorers_away": [],
-      "elo_home": null,
-      "elo_away": null,
-      "elo_diff": null,
-      "elo_signal": null,
-      "dropping_odds": null,
-      "pinnacle_snapshot": null
-    },
-    {
       "id": 1539016,
       "sport": "football",
       "home": {
@@ -1015,35 +20,35 @@
       ],
       "val": false,
       "hot": false,
-      "conf": 0.64,
-      "p1": 23,
+      "conf": 0.72,
+      "p1": 20,
       "pn": 60,
-      "p2": 59,
+      "p2": 62,
       "po15": 0,
       "po25": 64,
       "btts": 52,
-      "c1": "13.25",
+      "c1": "13.00",
       "cn": "6.50",
       "c2": "1.21",
       "co15": "1.18",
       "co25": "1.62",
       "cu25": "2.31",
-      "dc1x": "4.50",
+      "dc1x": "4.47",
       "dc2x": "1.03",
       "dc12": "1.10",
-      "cdc1x": "4.50",
+      "cdc1x": "4.47",
       "cdc2x": "1.03",
       "cbtts": "2.30",
-      "cbtts_non": "1.57",
+      "cbtts_non": "1.55",
       "btts_oui": "2.30",
-      "btts_non": "1.57",
+      "btts_non": "1.55",
       "bookies": [
         {
           "n": "Betclic",
           "o": "200€ offerts",
           "l": "#LIEN_BETCLIC",
           "c": "1.62",
-          "c1": "13.25",
+          "c1": "13.00",
           "cn": "6.50",
           "c2": "1.21"
         },
@@ -1052,7 +57,7 @@
           "o": "100€ offerts",
           "l": "#LIEN_WINAMAX",
           "c": "1.59",
-          "c1": "13.22",
+          "c1": "12.97",
           "cn": "6.47",
           "c2": "1.18"
         },
@@ -1061,7 +66,7 @@
           "o": "100€ remboursés",
           "l": "#LIEN_UNIBET",
           "c": "1.60",
-          "c1": "13.23",
+          "c1": "12.98",
           "cn": "6.48",
           "c2": "1.19"
         },
@@ -1070,7 +75,7 @@
           "o": "100€ offerts",
           "l": "#LIEN_PMU",
           "c": "1.57",
-          "c1": "13.20",
+          "c1": "12.95",
           "cn": "6.45",
           "c2": "1.16"
         },
@@ -1079,69 +84,69 @@
           "o": "100€ bonus",
           "l": "#LIEN_BET365",
           "c": "1.65",
-          "c1": "13.28",
+          "c1": "13.03",
           "cn": "6.53",
           "c2": "1.24"
         }
       ],
-      "edge": "+9% (prob modèle 64% vs probabilité implicite cote 61.7%)",
+      "edge": "+9pts (64% modèle vs 55% seuil requis | implied cote 61.7%)",
       "marche": "Over 2.5",
-      "risque": "MODERE",
+      "risque": "FAIBLE",
       "pari_rec": "Over 2.5 buts",
       "cote_rec": "1.62",
       "no_signal": false,
       "no_signal_label": "",
       "mise": "2-3% bankroll",
-      "verdict_shark": "La Norvège affiche un xG généré de 3.86 en qualifications face à une défense irakienne concédant 1.03 xG/match, projetant un lambda combiné de 3.30 buts selon le modèle Poisson.",
+      "verdict_shark": "Norway domine avec un xG de 3.32 contre 0.93 pour l'Iraq, et les lambdas Poisson combinés (0.84 + 2.47 = 3.31 buts attendus) placent Over 2.5 à 64% de probabilité avec un edge positif de +9pts sur le seuil requis.",
       "scenario": {
-        "phase1": "0-30min : La Norvège impose son rythme dès le coup d'envoi, pressing haut exploitant le faible taux d'expérience mondiale irakien (2 joueurs Top 5). Premier but norvégien probable avant la 30e minute selon le lambda élevé.",
-        "phase2": "30-60min : L'Iraq tente de résister mais les transitions rapides norvégiennes créent un flux constant d'occasions. Un second but norvégien consolide l'avantage ; possibilité d'un but irakien sur phase arrêtée ou contre (xG Iraq 0.86).",
-        "phase3": "60-90min : La Norvège gère son avance avec des rotations possibles en fin de match. Le total de buts franchit très probablement la barre des 2.5 grâce à l'accumulation des situations créées tout au long du match."
+        "phase1": "0-30min : Norway impose immédiatement son pressing haut et son intensité. L'Iraq, bien organisé défensivement en bloc bas, résiste en première intention mais concède des corners et frappes lointaines. Premier but norvégien attendu entre la 20e et la 30e minute sur phase de construction.",
+        "phase2": "30-65min : Norway développe son jeu en profitant des espaces laissés par l'Iraq lors de rares contre-attaques. Haaland ou équivalent profil pivot exploite les centres. L'Iraq tente une transition rapide et peut occasionner un but sur corner ou coup-franc défensivement mal géré par une défense norvégienne moins solide (xG concédé 0.74).",
+        "phase3": "65-90min : Norway, en contrôle à 2-0 ou 3-0, maintient la pression pour le goal average. L'Iraq, épuisé défensivement, concède un troisième but. Le Over 2.5 est validé avec très forte probabilité dans cette phase finale."
       },
       "scenario_15min": [
         {
           "t": "0-15min",
           "prob": 8,
-          "txt": "Entrée en matière prudente des deux équipes, prise de repères. La Norvège installe sa possession sans encore créer de situations franches. Probabilité d'un but dans ce laps de temps limitée mais réelle côté norvégien."
+          "txt": "Entrée en matière norvégienne avec pressing haut — faible probabilité de but immédiat mais domination territoriale nette, 3-4 occasions franches attendues."
         },
         {
           "t": "15-30min",
           "prob": 12,
-          "txt": "La Norvège hausse l'intensité et commence à exposer les lignes défensives irakiennes. Premier but attendu dans cette fenêtre selon la distribution Poisson ; l'Iraq reste compact mais recule."
+          "txt": "Norway construit méthodiquement, l'Iraq commence à reculer sur sa propre surface. Premier but norvégien probable sur combinaison ou coup de pied arrêté dans cette fenêtre."
         },
         {
           "t": "30-45min",
           "prob": 10,
-          "txt": "La Norvège cherche à doubler la mise avant la pause. L'Iraq peut espérer un coup sur phase arrêtée. Probabilité d'un but dans ce créneau modérée, les deux équipes gèrent le dernier quart d'heure avant la mi-temps."
+          "txt": "L'Iraq peut tenter un coup sur contre-attaque après un but encaissé. Norway contrôle mais peut être surpris défensivement (xG concédé 0.74 non nul). Probabilité d'un deuxième but avant la mi-temps."
         },
         {
           "t": "45-60min",
           "prob": 15,
-          "txt": "Reprise norvégienne avec une intensité accrue. Ce créneau post-mi-temps est historiquement productif en buts ; la Norvège capitalise sur sa supériorité physique et technique pour marquer un second ou troisième but."
+          "txt": "Reprise avec Norway dominant à 1-0 ou 2-0. Pression accrue après la mi-temps, l'Iraq perd son organisation défensive. But norvégien supplémentaire attendu dans cette fenêtre — Over 2.5 potentiellement validé ici."
         },
         {
           "t": "60-75min",
           "prob": 18,
-          "txt": "Phase la plus dense en buts attendus selon le modèle. La fatigue irakienne commence à se faire sentir malgré 0 fatigue initiale ; la Norvège accélère et crée ses meilleures occasions. But norvégien très probable dans ce créneau."
+          "txt": "Phase décisive : Norway exploite les espaces ouverts par un Iraq épuisé cherchant l'égalisation. Fenêtre la plus probable pour le troisième but combiné (total) et validation définitive du Over 2.5."
         },
         {
           "t": "75-90min",
           "prob": 20,
-          "txt": "Créneau le plus productif en probabilité de but. Si le score est déjà fixé à 2+ buts, la Norvège peut gérer mais des buts irakiens de consolation ou un but norvégien supplémentaire poussent le total bien au-dessus de 2.5. L'Over est attendu confirmé."
+          "txt": "Norway en gestion mais maintient son intensité pour le goal average. L'Iraq peut concéder un but supplémentaire sur une erreur défensive de fatigue. Phase la plus prolixe en buts selon la distribution Poisson en fin de match."
         }
       ],
-      "facteur_x": "Lambda Poisson Norvège = 2.44 buts attendus, soit le signal offensif dominant ; combiné à la fragilité défensive irakienne (xG concédé 1.03/match), la distribution de Poisson indique 64% de probabilité de voir plus de 2.5 buts.",
-      "analyse_card": "La Norvège dispose d'une attaque valorisée à 120M€ avec un xG offensif de 3.86 en qualifications, contre une défense irakienne à 10M€ et 1.03 xG concédé par match. L'Iraq n'est crédité que de 0.86 but attendu dans ce match, avec une valeur offensive de 15M€ et 70% de ses joueurs norvégiens évoluant dans le Top 5 européen. Le déséquilibre structurel entre les deux équipes (FIFA 1612 vs 1445) confirme la domination attendue de la Norvège dans la création d'occasions.",
-      "conseil_public": "Jouer Over 2.5 buts à 1.62 — probabilité modèle 64% pour un seuil requis de 55%, edge positif confirmé sur la base des lambdas Poisson (Iraq 0.86 + Norway 2.44 = 3.30 buts attendus).",
-      "contexte": "Phase de groupes de la Coupe du Monde 2026, match d'ouverture entre deux équipes sans fatigue accumulée (0km, 3j de récupération). La Norvège cherche à lancer sa campagne avec un résultat probant face à une sélection irakienne à forte infériorité sur le papier.",
+      "facteur_x": "Lambda Poisson Norway = 2.47 buts attendus — seul, il génère ~72% de probabilité d'atteindre au moins 2 buts norvégiens, rendant le troisième but très probable avec la participation même marginale de l'Iraq (lambda 0.84).",
+      "analyse_card": "Norway affiche une supériorité offensive écrasante avec 120M€ de valeur attaque et un xG généré de 3.32, face à une défense irakienne extrêmement vulnérable (xG concédé 1.63, valeur défense 10M€). L'Iraq, avec seulement 2 joueurs expérimentés en Coupe du Monde et 12% de présence dans le Top 5 européen contre 70% pour la Norvège, ne dispose pas des ressources pour limiter les occasions adverses. Le différentiel FIFA de 167 points (1612 vs 1445) confirme un déséquilibre structurel majeur qui se traduit directement dans les lambdas Poisson calculés.",
+      "conseil_public": "Jouer Over 2.5 buts — le flux offensif norvégien seul (lambda 2.47) suffit à valider le marché même en cas de clean sheet irakienne.",
+      "contexte": "Phase de groupes de la Coupe du Monde 2026, journée initiale : chaque point est capital pour la qualification. Norway, avec 62% de probabilité de victoire, est fortement incité à presser d'entrée sans rotation tactique conservatrice. L'Iraq, outsider à 20%, sera contraint de subir et de défendre profondément, limitant ses transitions offensives mais exposant davantage son bloc défensif.",
       "vbet": "OUI",
       "scores": [
-        "1-2"
+        "1-3"
       ],
       "paris_safe": {
         "bet": "Over 2.5 buts",
         "cote": 1.62,
-        "proba": "23%"
+        "proba": "20%"
       },
       "paris_risque": {
         "bet": "",
@@ -1152,9 +157,9 @@
       "stade": {
         "nom": "Gillette Stadium — Boston",
         "cap": "",
-        "meteo": "☀️",
-        "temp": "21°C",
-        "desc": "ciel dégagé"
+        "meteo": "☁️",
+        "temp": "14°C",
+        "desc": "couvert"
       },
       "crit_home": {
         "fd": 0,
@@ -1253,20 +258,20 @@
       "fatigue": {
         "home": {
           "val": 15,
-          "info": "Repos 186 jours"
+          "info": "Repos 187 jours"
         },
         "away": {
           "val": 15,
-          "info": "Repos 245 jours"
+          "info": "Repos 246 jours"
         }
       },
       "fatigue_home": {
         "val": 15,
-        "info": "Repos 186 jours"
+        "info": "Repos 187 jours"
       },
       "fatigue_away": {
         "val": 15,
-        "info": "Repos 245 jours"
+        "info": "Repos 246 jours"
       },
       "tendances": {
         "over25_home": 2,
@@ -1282,14 +287,14 @@
       "actu": [
         {
           "c": "Iraq",
-          "t": "Coupe du monde 2026: France, groupes, calendrier, chaînes TV, favoris... Tout savoir sur le Mondial",
-          "tx": "La Coupe du monde 2026 débute ce jeudi 11 juin pour cinq semaines d'intense compétition. Nouveau format, équipes engagées, favoris... RMC Sport fait le point sur tout ce qu'il y a à savoir sur ce mondial 2026.",
-          "tm": "2026-06-10"
+          "t": "Coupe du monde : c’est quoi le WBGT, et pourquoi il peut changer le destin des Bleus ?",
+          "tx": "Ce mardi 16 juin 2026, la rencontre France-Sénégal de la Coupe du Monde 2026 ne sera pas seulement un rendez-vous sportif attendu. Les climatologues s’inquiètent de l'effet du réchauffement sur la météo : il y a quelques jours, les prévisions encourageaient à…",
+          "tm": "2026-06-16"
         },
         {
           "c": "Iraq",
-          "t": "World Cup Group I guide: Early tests for potential champions France and Norway",
-          "tx": "Iraq face a near-impossible task",
+          "t": "Coupe du monde 2026: France, groupes, calendrier, chaînes TV, favoris... Tout savoir sur le Mondial",
+          "tx": "La Coupe du monde 2026 débute ce jeudi 11 juin pour cinq semaines d'intense compétition. Nouveau format, équipes engagées, favoris... RMC Sport fait le point sur tout ce qu'il y a à savoir sur ce mondial 2026.",
           "tm": "2026-06-10"
         },
         {
@@ -1337,133 +342,133 @@
       ],
       "val": false,
       "hot": false,
-      "conf": 0,
-      "p1": 53,
+      "conf": 0.62,
+      "p1": 56,
       "pn": 60,
-      "p2": 29,
+      "p2": 26,
       "po15": 0,
-      "po25": 50,
-      "btts": 53,
-      "c1": "1.42",
-      "cn": "4.47",
-      "c2": "8.00",
-      "co15": "1.29",
-      "co25": "1.94",
-      "cu25": "1.88",
-      "dc1x": "1.09",
-      "dc2x": "2.80",
-      "dc12": "1.20",
-      "cdc1x": "1.09",
-      "cdc2x": "2.80",
-      "cbtts": "2.17",
-      "cbtts_non": "1.67",
-      "btts_oui": "2.17",
-      "btts_non": "1.67",
+      "po25": 38,
+      "btts": 45,
+      "c1": "1.50",
+      "cn": "4.20",
+      "c2": "7.22",
+      "co15": "1.30",
+      "co25": "1.96",
+      "cu25": "1.85",
+      "dc1x": "1.11",
+      "dc2x": "2.69",
+      "dc12": "1.21",
+      "cdc1x": "1.11",
+      "cdc2x": "2.69",
+      "cbtts": "2.05",
+      "cbtts_non": "1.70",
+      "btts_oui": "2.05",
+      "btts_non": "1.70",
       "bookies": [
         {
           "n": "Betclic",
           "o": "200€ offerts",
           "l": "#LIEN_BETCLIC",
-          "c": "1.42",
-          "c1": "1.42",
-          "cn": "4.47",
-          "c2": "8.00"
+          "c": "1.85",
+          "c1": "1.50",
+          "cn": "4.20",
+          "c2": "7.22"
         },
         {
           "n": "Winamax",
           "o": "100€ offerts",
           "l": "#LIEN_WINAMAX",
-          "c": "1.39",
-          "c1": "1.39",
-          "cn": "4.44",
-          "c2": "7.97"
+          "c": "1.82",
+          "c1": "1.47",
+          "cn": "4.17",
+          "c2": "7.19"
         },
         {
           "n": "Unibet",
           "o": "100€ remboursés",
           "l": "#LIEN_UNIBET",
-          "c": "1.40",
-          "c1": "1.40",
-          "cn": "4.45",
-          "c2": "7.98"
+          "c": "1.83",
+          "c1": "1.48",
+          "cn": "4.18",
+          "c2": "7.20"
         },
         {
           "n": "PMU",
           "o": "100€ offerts",
           "l": "#LIEN_PMU",
-          "c": "1.37",
-          "c1": "1.37",
-          "cn": "4.42",
-          "c2": "7.95"
+          "c": "1.80",
+          "c1": "1.45",
+          "cn": "4.15",
+          "c2": "7.17"
         },
         {
           "n": "Bet365",
           "o": "100€ bonus",
           "l": "#LIEN_BET365",
-          "c": "1.45",
-          "c1": "1.45",
-          "cn": "4.50",
-          "c2": "8.03"
+          "c": "1.88",
+          "c1": "1.53",
+          "cn": "4.23",
+          "c2": "7.25"
         }
       ],
-      "edge": "",
-      "marche": "RESULTAT",
-      "risque": "ELEVE",
-      "pari_rec": "",
-      "cote_rec": "",
-      "no_signal": true,
-      "no_signal_label": "Aucun signal clair sur ce match",
+      "edge": "+7% (prob modèle 62% vs seuil requis 55%)",
+      "marche": "Under 2.5",
+      "risque": "MODERE",
+      "pari_rec": "Under 2.5 buts",
+      "cote_rec": "1.85",
+      "no_signal": false,
+      "no_signal_label": "",
       "mise": "2-3% bankroll",
-      "verdict_shark": "",
+      "verdict_shark": "Le modèle attribue 62% de probabilité à Under 2.5 avec des lambdas Poisson modestes (ARG 1.18 / ALG 1.03), générant un edge positif de +7% sur le seuil requis.",
       "scenario": {
-        "phase1": "0-30min : L'Argentine impose son pressing haut et cherche à contrôler le tempo via Messi et De Paul. L'Algérie s'organise en bloc bas 4-4-2 compact, limitant les espaces dans l'axe. Peu d'occasions franches attendues, équilibre tactique.",
-        "phase2": "30-70min : L'Argentine commence à trouver des brèches sur les côtés grâce à sa supériorité technique. L'Algérie tente des contres rapides sur perte de balle argentine — Mahrez ou Bennacer déclencheurs. Période la plus productive en termes de buts probables.",
-        "phase3": "70-90min : Si l'Argentine mène, gestion et possession. Si match nul, les deux équipes poussent — l'Algérie prend des risques défensifs ouvrant des espaces. Dernières 20 minutes les plus dangereuses en buts."
+        "phase1": "0-30min — L'Argentine prend le contrôle du jeu, pression haute sur la défense algérienne sans prise de risque excessive. L'Algérie défend en bloc bas avec 1-2 contre-attaques sporadiques. Faible densité de tirs cadrés des deux côtés.",
+        "phase2": "30-75min — Si l'Argentine ouvre le score (scénario central), elle gère le résultat sans forcer. L'Algérie est contrainte d'allonger le jeu mais manque d'expérience CdM (6 joueurs vs 19) pour déstabiliser structurellement la défense sud-américaine. Total buts probable : 1.",
+        "phase3": "75-90min — Fin de match gérée par l'Argentine, l'Algérie tente mais sans efficacité suffisante. Probabilité faible d'un 3e but. Le score de 1-0 ou 2-0 reste le plus compatible avec les lambdas modèle. Under 2.5 se confirme dans 62% des simulations."
       },
       "scenario_15min": [
         {
           "t": "0-15min",
           "prob": 8,
-          "txt": "Entame prudente des deux équipes, Argentine en possession, Algérie organisée défensivement — probabilité de but faible, les blocs sont en place."
+          "txt": "Entrée en matière tactique, l'Argentine pose le jeu sans se précipiter. Faible probabilité de but immédiat, les deux équipes s'observent."
         },
         {
           "t": "15-30min",
           "prob": 12,
-          "txt": "L'Argentine monte en pression, les premières occasions sur corners et frappes lointaines apparaissent — l'Algérie menace en contre via les ailes."
+          "txt": "Montée en pression argentine, premières occasions dangereuses. L'Algérie se replie mais reste organisée. Un but argentin possible mais pas dominant."
         },
         {
           "t": "30-45min",
           "prob": 10,
-          "txt": "Période de flottement avant la mi-temps, rythme ralenti, les équipes cherchent à préserver leur énergie — buts moins probables dans cette fenêtre."
+          "txt": "Phase de transition — si 0-0, l'Argentine accélère avant la pause. Risque de but avant la mi-temps contenu par la structure défensive algérienne."
         },
         {
           "t": "45-60min",
           "prob": 15,
-          "txt": "Reprise de mi-temps dynamique, ajustements tactiques des deux coachs — l'Argentine pousse fort, l'Algérie vulnérable sur les 10 premières minutes de la 2ème période."
+          "txt": "Début de seconde mi-temps, période la plus propice à un but argentin sur sortie de vestiaires. L'Algérie ajuste tactiquement mais reste vulnérable sur les phases statiques."
         },
         {
           "t": "60-75min",
           "prob": 18,
-          "txt": "Phase décisive : fatigue des défenseurs algériens, l'Argentine accélère le jeu — fenêtre la plus probable pour un but argentin ou une réaction algérienne sur contre."
+          "txt": "Pic offensif argentin si le score est toujours serré. Rotations possibles mais pas de décote significative (J1). L'Algérie tente de profiter des espaces laissés."
         },
         {
           "t": "75-90min",
           "prob": 20,
-          "txt": "Dernière ligne droite : si score serré, les deux équipes prennent des risques — espaces en fin de match, probabilité de but la plus haute, interventions directes des remplaçants."
+          "txt": "Phase finale — si 1-0 ou 2-0, l'Argentine gère. Probabilité maximale sur cette tranche reflète les buts tardifs habituels, mais le total reste contenu sous 2.5 dans le scénario central."
         }
       ],
-      "facteur_x": "Lambda Algérie 1.51 > Lambda Argentine 1.15 : paradoxe statistique généré par des xG qualifications CAF surévalués — signal d'instabilité du modèle, edge impossible à certifier.",
-      "analyse_card": "L'Argentine affiche un xG généré de 1.41 et un xG concédé de 0.64 sur ses qualifications, reflétant une solidité défensive réelle mais une efficacité offensive mesurée. L'Algérie surprend avec un xG généré de 2.38, supérieur à l'Argentine, mais ce chiffre provient exclusivement de qualifications africaines (CAF), dont le niveau défensif est structurellement plus faible. Les lambdas Poisson résultants (ARG 1.15 / ALG 1.51) illustrent cette incertitude : les deux équipes ont des profils offensifs actifs mais les niveaux de compétition sont incomparables, rendant la projection buts très volatile.",
-      "conseil_public": "Ne pas miser sur ce match : aucun marché n'offre un edge statistique suffisant, et les xG algériens gonflés par un contexte de qualification faible rendent le modèle Poisson peu fiable pour ce choc de niveaux.",
-      "contexte": "Phase de groupes Coupe du Monde 2026, journée 1 — les deux équipes jouent pour un départ idéal dans leur groupe. L'Argentine, championne du monde en titre, est fortement favorite mais un faux pas reste possible. L'Algérie, outsider, n'a aucun point à perdre et pourrait jouer très défensivement ou au contraire en bloc offensif par surprise. Enjeu maximal pour les deux sélections.",
-      "vbet": "NON",
+      "facteur_x": "Lambda Poisson total de 2.21 buts attendus — inférieur au seuil Over 2.5 — avec xG concédé argentin à 0.51, le plus bas du calcul, signal défensif dominant.",
+      "analyse_card": "L'Argentine affiche un xG concédé très bas (0.51) et un lambda offensif contenu à 1.18, reflétant une approche disciplinée en phase de groupes. L'Algérie, malgré un xG généré de 1.55 en qualification, fait face à une défense argentine structurée évaluée à 160M€, ce qui tempère son potentiel offensif réel. La combinaison des deux lambdas (total 2.21 buts attendus) positionne le match statistiquement sous le seuil des 2.5 buts.",
+      "conseil_public": "Miser sur Under 2.5 à 1.85 : le modèle donne 62% de probabilité, l'edge est net et les lambdas Poisson combinés (2.21 buts attendus) soutiennent structurellement ce marché.",
+      "contexte": "Match de phase de groupes CdM 2026 — première journée pour les deux équipes, enjeu maximal des deux côtés, ce qui réduit le risque de rotation et favorise une approche prudente tactiquement, surtout pour l'Algérie face à un adversaire de rang supérieur (FIFA 1885 vs 1521).",
+      "vbet": "OUI",
       "scores": [
-        "1-1"
+        "1-0"
       ],
       "paris_safe": {
-        "bet": "",
-        "cote": "1.42",
-        "proba": "53%"
+        "bet": "Under 2.5 buts",
+        "cote": 1.85,
+        "proba": "56%"
       },
       "paris_risque": {
         "bet": "",
@@ -1474,9 +479,9 @@
       "stade": {
         "nom": "Arrowhead Stadium — Kansas City",
         "cap": "",
-        "meteo": "🌧️",
-        "temp": "19°C",
-        "desc": "légère pluie"
+        "meteo": "☀️",
+        "temp": "23°C",
+        "desc": "ciel dégagé"
       },
       "crit_home": {
         "fd": 0,
@@ -1585,20 +590,20 @@
       "fatigue": {
         "home": {
           "val": 15,
-          "info": "Repos 214 jours"
+          "info": "Repos 215 jours"
         },
         "away": {
           "val": 15,
-          "info": "Repos 157 jours"
+          "info": "Repos 158 jours"
         }
       },
       "fatigue_home": {
         "val": 15,
-        "info": "Repos 214 jours"
+        "info": "Repos 215 jours"
       },
       "fatigue_away": {
         "val": 15,
-        "info": "Repos 157 jours"
+        "info": "Repos 158 jours"
       },
       "tendances": {
         "over25_home": 0,
@@ -1657,133 +662,133 @@
       ],
       "val": false,
       "hot": false,
-      "conf": 0,
-      "p1": 56,
+      "conf": 0.55,
+      "p1": 58,
       "pn": 60,
-      "p2": 26,
+      "p2": 24,
       "po15": 0,
-      "po25": 50,
-      "btts": 51,
-      "c1": "1.37",
-      "cn": "5.00",
-      "c2": "8.80",
-      "co15": "1.24",
-      "co25": "1.80",
-      "cu25": "2.02",
+      "po25": 45,
+      "btts": 45,
+      "c1": "1.38",
+      "cn": "4.75",
+      "c2": "8.43",
+      "co15": "1.26",
+      "co25": "1.85",
+      "cu25": "1.98",
       "dc1x": "1.08",
-      "dc2x": "3.08",
+      "dc2x": "3.00",
       "dc12": "1.17",
       "cdc1x": "1.08",
-      "cdc2x": "3.08",
+      "cdc2x": "3.00",
       "cbtts": "2.10",
-      "cbtts_non": "1.70",
+      "cbtts_non": "1.67",
       "btts_oui": "2.10",
-      "btts_non": "1.70",
+      "btts_non": "1.67",
       "bookies": [
         {
           "n": "Betclic",
           "o": "200€ offerts",
           "l": "#LIEN_BETCLIC",
-          "c": "1.37",
-          "c1": "1.37",
-          "cn": "5.00",
-          "c2": "8.80"
+          "c": "1.98",
+          "c1": "1.38",
+          "cn": "4.75",
+          "c2": "8.43"
         },
         {
           "n": "Winamax",
           "o": "100€ offerts",
           "l": "#LIEN_WINAMAX",
-          "c": "1.34",
-          "c1": "1.34",
-          "cn": "4.97",
-          "c2": "8.77"
+          "c": "1.95",
+          "c1": "1.35",
+          "cn": "4.72",
+          "c2": "8.40"
         },
         {
           "n": "Unibet",
           "o": "100€ remboursés",
           "l": "#LIEN_UNIBET",
-          "c": "1.35",
-          "c1": "1.35",
-          "cn": "4.98",
-          "c2": "8.78"
+          "c": "1.96",
+          "c1": "1.36",
+          "cn": "4.73",
+          "c2": "8.41"
         },
         {
           "n": "PMU",
           "o": "100€ offerts",
           "l": "#LIEN_PMU",
-          "c": "1.32",
-          "c1": "1.32",
-          "cn": "4.95",
-          "c2": "8.75"
+          "c": "1.93",
+          "c1": "1.33",
+          "cn": "4.70",
+          "c2": "8.38"
         },
         {
           "n": "Bet365",
           "o": "100€ bonus",
           "l": "#LIEN_BET365",
-          "c": "1.40",
-          "c1": "1.40",
-          "cn": "5.03",
-          "c2": "8.83"
+          "c": "2.01",
+          "c1": "1.41",
+          "cn": "4.78",
+          "c2": "8.46"
         }
       ],
-      "edge": "",
-      "marche": "RESULTAT",
-      "risque": "ELEVE",
-      "pari_rec": "",
-      "cote_rec": "",
-      "no_signal": true,
-      "no_signal_label": "Aucun signal clair sur ce match",
+      "edge": "Edge Under 2.5 : prob modèle 55% vs prob implicite cote 50.5% → edge brut +4.5%",
+      "marche": "Under 2.5",
+      "risque": "MODERE",
+      "pari_rec": "Under 2.5 buts",
+      "cote_rec": "1.98",
+      "no_signal": false,
+      "no_signal_label": "",
       "mise": "2-3% bankroll",
-      "verdict_shark": "",
+      "verdict_shark": "Avec un lambda Jordan à 0.8 but et un xG concédé autrichien de seulement 0.55, le modèle Poisson attribue 55% de probabilité à un match à moins de 3 buts.",
       "scenario": {
-        "phase1": "0-30min : L'Autriche impose un pressing haut et monopolise la possession. La Jordanie défend en bloc bas avec un 5-4-1 compact. Pression autrichienne sans brèche immédiate, xG cumulé faible malgré le contrôle.",
-        "phase2": "30-65min : Après la demi-heure, l'Autriche trouve des espaces dans les transitions. Risque de but autrichien sur phase arrêtée ou combinaison centrale. La Jordanie tente quelques contres rapides, son lambda 0.98 laisse envisager une opportunité isolée.",
-        "phase3": "65-90min : Si l'Autriche mène, gestion du score et rotations possibles. Si le score est serré, les deux équipes s'ouvrent davantage, augmentant légèrement la probabilité de but jordanien en fin de match. Score final probable 2-0 ou 1-0."
+        "phase1": "0-30 min : L'Autriche impose son rythme avec possession et pressing organisé. Jordan défend en bloc bas, limitant les espaces. Peu de situations franches des deux côtés, score probable 0-0 ou 1-0 sur coup de pied arrêté.",
+        "phase2": "30-60 min : L'Autriche accélère après la pause, exploitant les transitions. Jordan peine à construire offensivement (xG limité). Le score devrait rester contenu — une seule réalisation autrichienne suffit à la dynamique de match.",
+        "phase3": "60-90 min : L'Autriche gère son avantage sans prendre de risques excessifs. Jordan tente quelques incursions mais sans réel danger. Score final attendu 2-0 ou 1-0, confirmant l'Under 2.5."
       },
       "scenario_15min": [
         {
           "t": "0-15min",
           "prob": 8,
-          "txt": "Autriche prend le jeu en main mais Jordan bien organisé défensivement. Faible probabilité de but dans ce laps de temps malgré la pression autrichienne initiale."
+          "txt": "Entrée en matière prudente. L'Autriche teste la défense jordanienne via les couloirs. Jordan défend compact. Probabilité but : 8%."
         },
         {
           "t": "15-30min",
           "prob": 12,
-          "txt": "Montée en puissance autrichienne, premières occasions franches. Un but autrichien sur phase arrêtée ou frappe de loin devient plausible à partir de la 20e minute."
+          "txt": "L'Autriche monte en puissance, combinaisons offensives plus fluides. Premier but autrichien possible sur phase construite. Probabilité but : 12%."
         },
         {
           "t": "30-45min",
           "prob": 10,
-          "txt": "La Jordanie résiste et tente de tenir jusqu'à la mi-temps. Légère baisse d'intensité autrichienne, risque de contre jordanien. Probabilité de but autrichien reste dominante mais pas certaine."
+          "txt": "Jordan tente de résister jusqu'à la pause. Peu d'occasions franches créées par les deux équipes. Fin de première mi-temps fermée. Probabilité but : 10%."
         },
         {
           "t": "45-60min",
           "prob": 15,
-          "txt": "Reprise avec ajustements tactiques. L'Autriche pousse pour ouvrir le score ou doubler la mise. Fenêtre de but élevée après la pause, Jordan exposé sur les transitions."
+          "txt": "Retour des vestiaires favorable à l'Autriche. Ajustements tactiques autrichiens attendus, pression accrue sur la défense jordanienne. Probabilité but : 15%."
         },
         {
           "t": "60-75min",
           "prob": 18,
-          "txt": "Phase la plus dangereuse : l'Autriche en supériorité tactique, le bloc jordanien fatigue. Entrées de remplaçants autrichiens frais. Moment le plus probable pour un but décisif."
+          "txt": "Phase la plus dangereuse. L'Autriche cherche le but du break, Jordan exposée aux contres. Pic d'intensité offensive autrichienne. Probabilité but : 18%."
         },
         {
           "t": "75-90min",
           "prob": 20,
-          "txt": "Dernière demi-heure décisive : si l'Autriche n'a pas encore marqué, pression maximale et jeu ouvert. Scénario de but tardif très probable, potentiellement des deux côtés selon le score au 75e."
+          "txt": "Fin de match avec Jordan poussant par orgueil. L'Autriche g��re mais peut concéder un but de prestige. Dernières minutes à risque modéré pour l'Under. Probabilité but : 20%."
         }
       ],
-      "facteur_x": "Écart FIFA de 243 points (1641 vs 1398) et différentiel xG offensif de +1.14 en faveur de l'Autriche, mais lambda Jordan à 0.98 maintient une réelle incertitude sur l'Over/Under 2.5 et le BTTS — aucun marché buts ne dépasse 51% de probabilité.",
-      "analyse_card": "L'Autriche affiche un xG généré de 2.54 en qualifications contre 1.40 pour la Jordanie, mais les lambdas Poisson corrigés donnent respectivement 1.69 et 0.98 buts attendus, signe d'une domination autrichienne sans écrasement. La Jordanie concède en moyenne 0.84 xG/match mais génère très peu de danger réel (valeur attaque 12M€ vs 65M€ pour l'Autriche), rendant le scénario buts des deux équipes peu probable malgré une cote attractive.",
-      "conseil_public": "Ne joue aucun marché sur ce match : le seul signal solide (DC 1X à 74%) est bloqué par une cote 1.08 sous le seuil publiable, et tous les marchés restants sont sous leur seuil de probabilité requis.",
-      "contexte": "Phase de groupes Coupe du Monde 2026 — premier match pour les deux nations, enjeu maximal en termes de points, aucune rotation attendue. L'Autriche, 52.4/100 de force, affronte la Jordanie (24.2/100), soit un écart de 28 points qui justifie une domination mais pas une certitude sur les marchés buts.",
-      "vbet": "NON",
+      "facteur_x": "Lambda Jordan estimé à 0.8 but — probabilité Poisson d'un but jordanien inférieure à 55% — signal clé limitant les chances d'un score élevé.",
+      "analyse_card": "L'Autriche génère un xG de 2.19 mais concède seulement 0.55 — une défense solide limitant les occasions adverses. Jordan affiche un xG généré de 1.05 mais encaisse 1.17, signalant une attaque modeste face à une défense poreuse. Le différentiel de valeur marché est éloquent : 105M€ combinés côté autrichien contre 23M€ côté jordanien, reflétant un écart qualitatif structurel qui plafonne le potentiel offensif global du match.",
+      "conseil_public": "Jouer Under 2.5 à 1.98 — la faiblesse offensive jordanienne (lambda 0.8) combinée à la solidité défensive autrichienne (xG concédé 0.55) justifie ce choix à probabilité seuil atteint.",
+      "contexte": "Phase de groupes Coupe du Monde 2026, match d'ouverture pour les deux équipes. L'Autriche, favorite nette (FIFA 1641 pts vs 1398), cherche à démarrer fort. Jordan, outsider avec seulement 10% de joueurs issus du Top 5 européen, misera sur la discipline défensive pour limiter les dégâts. Enjeu direct sur la qualification : chaque point compte en phase de groupes.",
+      "vbet": "OUI",
       "scores": [
         "2-0"
       ],
       "paris_safe": {
-        "bet": "",
-        "cote": "1.37",
-        "proba": "56%"
+        "bet": "Under 2.5 buts",
+        "cote": 1.98,
+        "proba": "58%"
       },
       "paris_risque": {
         "bet": "",
@@ -1792,11 +797,11 @@
       },
       "kelly": "5.0",
       "stade": {
-        "nom": "Levi's Stadium — San Francisco Bay Area",
+        "nom": "Levi's Stadium — Santa Clara",
         "cap": "",
-        "meteo": "🌤️",
-        "temp": "",
-        "desc": ""
+        "meteo": "☁️",
+        "temp": "24°C",
+        "desc": "peu nuageux"
       },
       "crit_home": {
         "fd": 0,
@@ -1878,7 +883,7 @@
         },
         "away": {
           "val": 15,
-          "info": "Repos 183 jours"
+          "info": "Repos 184 jours"
         }
       },
       "fatigue_home": {
@@ -1887,7 +892,7 @@
       },
       "fatigue_away": {
         "val": 15,
-        "info": "Repos 183 jours"
+        "info": "Repos 184 jours"
       },
       "tendances": {
         "over25_home": 0,
@@ -1903,27 +908,27 @@
       "actu": [
         {
           "c": "Austria",
+          "t": "De la paillasse au pilote industriel : ce que les investisseurs ne comprennent pas de la deep tech",
+          "tx": "Monter une deeptech environnementale en Europe, c'est naviguer entre une excellence scientifique reconnue et un écosystème de financement structurellement inadapté à ses cycles.",
+          "tm": "2026-06-16"
+        },
+        {
+          "c": "Austria",
           "t": "GP de Barcelone de F1 : changement de pilotes chez Williams et Cadillac vendredi",
           "tx": "À l'approche du GP de Barcelone de F1 2026, les écuries s'activent pour remplir leurs obligations réglementaires concernant les jeunes pilotes. Williams et Cadillac ont officiellement confirmé que Luke Browning et Colton Herta prendront la piste vendredi lors…",
           "tm": "2026-06-10"
         },
         {
-          "c": "Austria",
-          "t": "Coupe du monde 2026: que vaut la Corée du Sud de Son Heung-min et Lee Kang-in ?",
-          "tx": "AFTER COUPE DU MONDE. Demi-finaliste de la dernière Coupe d'Asie, la Corée du Sud s'est qualifiée pour la Coupe du monde 2026. Pour leur douzième participation, les coéquipiers de Kang-in Lee vont devoir défier le Mexique, l'Afrique du Sud et la Tchéquie pour…",
-          "tm": "2026-06-09"
+          "c": "Jordan",
+          "t": "Retraites : le mirage de la suppression de l'âge légal",
+          "tx": "Deux responsables politiques de premier plan ont récemment remis sur la table la suppression de l’âge légal de départ, une idée qui revient régulièrement dans le débat sur les retraites. Gabriel Attal l’a explicitement intégrée à son programme, tandis que le …",
+          "tm": "2026-06-16"
         },
         {
           "c": "Jordan",
-          "t": "Coupe du monde 2026 : “Sirius” d’Alan Parsons Project, la musique qui accompagne l’entrée des joueurs à chaque match",
-          "tx": "À chaque match de la Coupe du monde 2026, c’est “Sirius, morceau instrumental d’Alan Parsons Project sorti en 1982 qui ouvre les hostilités. On vous explique l’histoire de ce titre. ...",
-          "tm": "2026-06-15"
-        },
-        {
-          "c": "Jordan",
-          "t": "IA : l'illusion du prototype",
-          "tx": "1/10 - Future licorne du logiciel B2B. Tout a basculé quand son fondateur a cru qu'un prototype IA réalisé en 2 jours pouvait devenir un produit industriel. L'histoire d'une illusion fatale.",
-          "tm": "2026-06-15"
+          "t": "Retraites : le mariage de la suppression de l'âge légal",
+          "tx": "Deux responsables politiques de premier plan ont récemment remis sur la table la suppression de l’âge légal de départ, une idée qui revient régulièrement dans le débat sur les retraites. Gabriel Attal l’a explicitement intégrée à son programme, tandis que le …",
+          "tm": "2026-06-16"
         }
       ],
       "arbitre": null,
@@ -1966,124 +971,124 @@
       "po25": 63,
       "btts": 60,
       "c1": "1.29",
-      "cn": "5.50",
+      "cn": "5.38",
       "c2": "11.00",
-      "co15": "1.21",
-      "co25": "1.71",
-      "cu25": "2.13",
+      "co15": "1.23",
+      "co25": "1.80",
+      "cu25": "2.01",
       "dc1x": "1.05",
-      "dc2x": "3.60",
-      "dc12": "1.14",
+      "dc2x": "3.48",
+      "dc12": "1.15",
       "cdc1x": "1.05",
-      "cdc2x": "3.60",
-      "cbtts": "2.20",
-      "cbtts_non": "1.62",
-      "btts_oui": "2.20",
-      "btts_non": "1.62",
+      "cdc2x": "3.48",
+      "cbtts": "2.27",
+      "cbtts_non": "1.59",
+      "btts_oui": "2.27",
+      "btts_non": "1.59",
       "bookies": [
         {
           "n": "Betclic",
           "o": "200€ offerts",
           "l": "#LIEN_BETCLIC",
-          "c": "1.71",
+          "c": "1.80",
           "c1": "1.29",
-          "cn": "5.50",
+          "cn": "5.38",
           "c2": "11.00"
         },
         {
           "n": "Winamax",
           "o": "100€ offerts",
           "l": "#LIEN_WINAMAX",
-          "c": "1.68",
+          "c": "1.77",
           "c1": "1.26",
-          "cn": "5.47",
+          "cn": "5.35",
           "c2": "10.97"
         },
         {
           "n": "Unibet",
           "o": "100€ remboursés",
           "l": "#LIEN_UNIBET",
-          "c": "1.69",
+          "c": "1.78",
           "c1": "1.27",
-          "cn": "5.48",
+          "cn": "5.36",
           "c2": "10.98"
         },
         {
           "n": "PMU",
           "o": "100€ offerts",
           "l": "#LIEN_PMU",
-          "c": "1.66",
+          "c": "1.75",
           "c1": "1.24",
-          "cn": "5.45",
+          "cn": "5.33",
           "c2": "10.95"
         },
         {
           "n": "Bet365",
           "o": "100€ bonus",
           "l": "#LIEN_BET365",
-          "c": "1.74",
+          "c": "1.83",
           "c1": "1.32",
-          "cn": "5.53",
+          "cn": "5.41",
           "c2": "11.03"
         }
       ],
-      "edge": "+4.5pts (prob modèle 63% vs prob implicite cote 58.5%)",
+      "edge": "+13.4%",
       "marche": "Over 2.5",
       "risque": "MODERE",
       "pari_rec": "Over 2.5 buts",
-      "cote_rec": "1.71",
+      "cote_rec": "1.80",
       "no_signal": false,
       "no_signal_label": "",
       "mise": "2-3% bankroll",
-      "verdict_shark": "Le modèle Poisson projette 3.24 buts totaux (lambda Portugal 2.1 + Congo DR 1.14), donnant 63% de probabilité pour Over 2.5 contre une cote impliquant 58.5% — edge positif de +4.5pts.",
+      "verdict_shark": "Portugal (xG 2.1) face à Congo DR (xG 1.14) génère un lambda combiné Poisson de 3.24 buts attendus, la probabilité Over 2.5 atteint 63% pour une cote de 1.80 soit un edge positif de +13.4%.",
       "scenario": {
-        "phase1": "0-30min : Portugal impose son pressing haut et son jeu de possession — le Congo DR défend en bloc bas mais subit les premières occasions ; ouverture du score probable entre la 20e et 30e minute via Ronaldo ou Bruno Fernandes sur phase combinée.",
-        "phase2": "30-60min : Portugal enfonce le verrou avec un 2e but avant la mi-temps ou en début de seconde période ; Congo DR tente quelques transitions rapides et peut surprendre sur un coup de pied arrêté — BTTS reste plausible (60%).",
-        "phase3": "60-90min : Portugal gère mais continue de créer — possible 3e but dans le dernier quart d'heure grâce aux remplaçants offensifs ; Over 2.5 sécurisé statistiquement avant la 75e minute dans 58% des scénarios Poisson."
+        "phase1": "0-30min : Portugal impose son tempo avec pression haute, Congo DR défend bas en bloc compact, première occasion sérieuse attendue dès la 12e via Ronaldo ou Bruno Fernandes sur jeu à vitesse.",
+        "phase2": "30-65min : Portugal ouvre le score avant la mi-temps probable, Congo DR tenté de sortir en contre au retour des vestiaires — Mbemba et la charnière centrale testés sur coups de pied arrêtés portugais, deuxième but attendu dans cette phase.",
+        "phase3": "65-90min : Portugal gère mais maintient l'intensité pour la différence de buts — Congo DR peut arracher un but de consolation en fin de match sur corner ou coup franc, ce qui valide Over 2.5 et potentiellement BTTS."
       },
       "scenario_15min": [
         {
           "t": "0-15min",
           "prob": 8,
-          "txt": "Phase d'installation — Portugal prend le ballon, Congo DR défend en 4-4-2 compact ; pression croissante mais peu de vraies occasions finalisées dans ce laps de temps."
+          "txt": "Entrée prudente, Portugal sonde le bloc bas congolais, pression haute sans but mais 2-3 frappes cadrées attendues."
         },
         {
           "t": "15-30min",
           "prob": 14,
-          "txt": "Portugal trouve les espaces via les couloirs — Bruno Fernandes et Leao créent des décalages ; probabilité de premier but Portugal dans cette fenêtre la plus haute de la première mi-temps."
+          "txt": "Montée en puissance portugaise, Bruno Fernandes ou Leao dans l'axe, probabilité élevée du premier but sur action construite ou coup franc."
         },
         {
           "t": "30-45min",
           "prob": 11,
-          "txt": "Congo DR résiste mais fatigue légèrement — risque de 2e but Portugal avant la mi-temps ; corner ou coup franc dans une zone dangereuse probable."
+          "txt": "Portugal proche du 2-0 avant la pause, Congo DR tente un contre rapide via ses attaquants dynamiques, équilibre fragile."
         },
         {
           "t": "45-60min",
-          "prob": 15,
-          "txt": "Début de seconde mi-temps — Portugal repart fort, Congo DR exposé en transition ; fenêtre à haut risque de but supplémentaire, potentiellement le but qui scelle Over 2.5."
+          "prob": 16,
+          "txt": "Retour des vestiaires explosif, Portugal cherche le break définitif, Congo DR expose ses flancs en tentant de revenir."
         },
         {
           "t": "60-75min",
-          "prob": 18,
-          "txt": "Phase décisive — Portugal introduit des remplaçants frais, Congo DR épuisé défensivement ; c'est la fenêtre statistiquement la plus productive pour le 3e but selon distribution Poisson."
+          "prob": 19,
+          "txt": "Phase décisive pour l'Over 2.5 — Portugal en gestion offensive, troisième but très probable dans cette fenêtre temporelle selon la distribution Poisson."
         },
         {
           "t": "75-90min",
-          "prob": 20,
-          "txt": "Congo DR pousse si le score le justifie, ouvrant des espaces en contre pour Portugal — scénario idéal pour but additionnel et consolidation Over 2.5 ; probabilité cumulée de but dans ce segment la plus haute du match."
+          "prob": 21,
+          "txt": "Fin de match avec gestion portugaise mais Congo DR peut arracher un but de prestige — validation quasi-certaine de l'Over 2.5 ici si non encore acquis."
         }
       ],
-      "facteur_x": "Lambda Portugal 2.1 buts (le plus élevé du groupe estimé) combiné à une défense congolaise valorisée à seulement 50M€ — l'écart de valeur de 330M€ sur la ligne offensive est le signal décisif.",
-      "analyse_card": "Portugal affiche un xG généré de 3.1 par match en qualifications avec une valeur d'attaque de 380M€ et 88% de joueurs évoluant dans le Top 5 européen, ce qui positionne leur ligne offensive parmi les plus létales du tournoi. Congo DR concède en moyenne 1.1 xG par match mais fait face à une opposition d'un tout autre calibre, avec un écart de force de 54.4 points sur 100 selon le modèle. Le différentiel xG offensif combiné de 4.3 soutient structurellement un match à buts multiples, même si le Congo DR peut produire sporadiquement en contre.",
-      "conseil_public": "Jouer Over 2.5 à 1.71 — l'edge modèle est positif (+4.5pts) et les lambdas Poisson confirment une projection à 3.24 buts ; mise recommandée selon fraction Kelly.",
-      "contexte": "Match de phase de groupes Coupe du Monde 2026 (Groupe A/B) — journée 1 pour les deux équipes, enjeux maximaux, aucune rotation attendue, les deux sélections jouent à enjeux plein ce qui maximise l'intensité offensive de Portugal.",
+      "facteur_x": "Lambda Poisson combiné 3.24 buts avec xG offensif Portugal à 3.1/match en qualifications — probabilité Poisson P(buts≥3) cohérente avec 63% Over 2.5.",
+      "analyse_card": "Portugal affiche une attaque élite valorisée à 380M€ avec 3.1 xG générés en qualifications et seulement 1.08 xG concédés, signe d'un bloc solide mais offensivement dominant. Congo DR présente des lignes attaque-défense symétriques à 50M€ chacune et 1.2 xG offensif, ce qui indique une équipe capable de créer quelques occasions malgré un écart technique abyssal de 54.4 points de force avec le Portugal. L'écart FIFA de 364 points combiné aux lambdas Poisson (Portugal 2.1 / Congo 1.14) confirme un match à haute production de buts attendue.",
+      "conseil_public": "Jouer Over 2.5 buts à cote 1.80 — l'edge modèle de +13.4% est au-dessus du seuil requis et les lambdas Poisson valident structurellement ce marché comme le plus solide disponible.",
+      "contexte": "Phase de groupes Coupe du Monde 2026 — premier match confirmé pour les deux sélections, enjeux maximaux pour les deux équipes, aucune rotation stratégique à anticiper à ce stade, ce qui préserve l'intensité offensive du Portugal.",
       "vbet": "OUI",
       "scores": [
         "3-1"
       ],
       "paris_safe": {
         "bet": "Over 2.5 buts",
-        "cote": 1.71,
+        "cote": 1.8,
         "proba": "62%"
       },
       "paris_risque": {
@@ -2096,7 +1101,7 @@
         "nom": "NRG Stadium — Houston",
         "cap": "",
         "meteo": "🌧️",
-        "temp": "26°C",
+        "temp": "25°C",
         "desc": "légère pluie"
       },
       "crit_home": {
@@ -2179,7 +1184,7 @@
         },
         "away": {
           "val": 15,
-          "info": "Repos 168 jours"
+          "info": "Repos 169 jours"
         }
       },
       "fatigue_home": {
@@ -2188,7 +1193,7 @@
       },
       "fatigue_away": {
         "val": 15,
-        "info": "Repos 168 jours"
+        "info": "Repos 169 jours"
       },
       "tendances": {
         "over25_home": 0,
@@ -2204,15 +1209,15 @@
       "actu": [
         {
           "c": "Portugal",
-          "t": "Coupe du monde 2026. Kanté remplace Mbappé en conférence de presse, la crise couve pour la Tunisie... suivez la cinquième journée du Mondial",
-          "tx": "La première journée de la phase de poules se poursuit sur le continent nord-américain. Principal favori à enter en lice, l'Espagne sera opposée au Cap Vert (18 heures), alors que la rencontre entre la Belgique et l'Egypte fera également partie des plus attend…",
-          "tm": "2026-06-15"
+          "t": "La chanteuse Bonnie Tyler est sortie du coma mais son état demeure préoccupant",
+          "tx": "La chanteuse britannique Bonnie Tyler, star des années 1980, se trouve toujours en soins intensifs dans un hôpital au Portugal, selon son agent.",
+          "tm": "2026-06-16"
         },
         {
           "c": "Portugal",
-          "t": "Double féminicide au Portugal : les parents d'Angela Legobien réclament un jugement en France pour Cédric Prizzon",
-          "tx": "Cédric Prizzon, accusé du double féminicide d'Angela et Audrey, ne sera pas extradé vers la France. Le Portugal refuse de remettre le suspect de 42 ans à la justice française malgré un mandat d'arrêt européen, provoquant l'écœurement des familles qui dénoncen…",
-          "tm": "2026-06-15"
+          "t": "Nicolas Retailleau arrive chez Beneteau en tant que nouveau directeur général des finances",
+          "tx": "Fort de plus de vingt ans d’expérience dans la finance internationale, Nicolas Retailleau accède au directoire du groupe Beneteau. Une nomination stratégique pour le constructeur nautique vendéen, qui veut renforcer ses fondamentaux et poursuivre ses investis…",
+          "tm": "2026-06-16"
         },
         {
           "c": "Congo DR",
@@ -2267,20 +1272,20 @@
       "po25": 62,
       "btts": 64,
       "c1": "1.73",
-      "cn": "3.71",
-      "c2": "4.96",
-      "co15": "1.36",
-      "co25": "2.13",
-      "cu25": "1.71",
+      "cn": "3.70",
+      "c2": "4.95",
+      "co15": "1.33",
+      "co25": "2.11",
+      "cu25": "1.73",
       "dc1x": "1.17",
-      "dc2x": "2.10",
-      "dc12": "1.28",
+      "dc2x": "2.08",
+      "dc12": "1.27",
       "cdc1x": "1.17",
-      "cdc2x": "2.10",
+      "cdc2x": "2.08",
       "cbtts": "2.00",
-      "cbtts_non": "1.73",
+      "cbtts_non": "1.75",
       "btts_oui": "2.00",
-      "btts_non": "1.73",
+      "btts_non": "1.75",
       "bookies": [
         {
           "n": "Betclic",
@@ -2288,8 +1293,8 @@
           "l": "#LIEN_BETCLIC",
           "c": "2.00",
           "c1": "1.73",
-          "cn": "3.71",
-          "c2": "4.96"
+          "cn": "3.70",
+          "c2": "4.95"
         },
         {
           "n": "Winamax",
@@ -2297,8 +1302,8 @@
           "l": "#LIEN_WINAMAX",
           "c": "1.97",
           "c1": "1.70",
-          "cn": "3.68",
-          "c2": "4.93"
+          "cn": "3.67",
+          "c2": "4.92"
         },
         {
           "n": "Unibet",
@@ -2306,8 +1311,8 @@
           "l": "#LIEN_UNIBET",
           "c": "1.98",
           "c1": "1.71",
-          "cn": "3.69",
-          "c2": "4.94"
+          "cn": "3.68",
+          "c2": "4.93"
         },
         {
           "n": "PMU",
@@ -2315,8 +1320,8 @@
           "l": "#LIEN_PMU",
           "c": "1.95",
           "c1": "1.68",
-          "cn": "3.66",
-          "c2": "4.91"
+          "cn": "3.65",
+          "c2": "4.90"
         },
         {
           "n": "Bet365",
@@ -2324,11 +1329,11 @@
           "l": "#LIEN_BET365",
           "c": "2.03",
           "c1": "1.76",
-          "cn": "3.74",
-          "c2": "4.99"
+          "cn": "3.73",
+          "c2": "4.98"
         }
       ],
-      "edge": "+9pp (prob modèle 64% vs cote implicite 50%)",
+      "edge": "+14% (prob modèle 64% vs cote implicite 50%)",
       "marche": "BTTS Oui",
       "risque": "MODERE",
       "pari_rec": "BTTS Oui",
@@ -2336,48 +1341,48 @@
       "no_signal": false,
       "no_signal_label": "",
       "mise": "2-3% bankroll",
-      "verdict_shark": "Les deux lambdas Poisson (England 1.64 / Croatia 1.57) génèrent une probabilité BTTS de 64%, au-dessus du seuil de fiabilité de 55%, avec un edge positif de +9pp.",
+      "verdict_shark": "BTTS Oui retenu à 64% de probabilité modèle : lambdas Poisson England 1.64 / Croatia 1.57 génèrent une forte probabilité de buts des deux côtés, avec un edge positif face à la cote impliquée (50%).",
       "scenario": {
-        "phase1": "0-30min : England impose son pressing haut (force 79.5), but anglais probable sur transition rapide via Saka ou Bellingham — la Croatie subit mais reste organisée en bloc médian.",
-        "phase2": "30-60min : La Croatie tente de s'équilibrer, Modric/Kovacic gèrent le tempo — un set-piece ou une erreur défensive anglaise peut permettre l'égalisation croate, validant la première partie du BTTS.",
-        "phase3": "60-90min : England reprend l'initiative avec ses entrants ou sur corner — score final probable 2-1 ou 1-1, les deux équipes ayant marqué, confirmant le BTTS Oui."
+        "phase1": "0-30 min — England impose son rythme avec possession haute et pression dans les 30m croates ; Kane ou Saka trouvent l'espace sur les côtés, un premier but anglais est probable avant la demi-heure.",
+        "phase2": "30-65 min — La Croatie, habituée aux grands tournois (17 exp CM), répond tactiquement avec des transitions rapides via Modric et les milieux créatifs ; un but croate en deuxième partie de première mi-temps ou en début de seconde valide le BTTS.",
+        "phase3": "65-90 min — Match ouvert avec les deux équipes cherchant la décision ; England tente de sceller via ses remplaçants offensifs, la Croatie exploite les espaces laissés — probabilité élevée d'un 3e but, consolidant l'Over 2.5 également."
       },
       "scenario_15min": [
         {
           "t": "0-15min",
           "prob": 8,
-          "txt": "Pression anglaise immédiate, England contrôle le ballon — faible probabilité de but mais pressing intense crée les premières occasions via les couloirs."
+          "txt": "Pression anglaise immédiate, possession dominante ; chances de pré-ouverture du score mais défense croate bien organisée en bloc bas."
         },
         {
           "t": "15-30min",
           "prob": 12,
-          "txt": "Montée en puissance d'England, première occasion franche probable — la Croatie contre-attaque avec Kramaric et Perisic en transition rapide."
+          "txt": "England crée les situations les plus nettes, probabilité croissante d'un premier but ; Kane dans la surface ou Saka en dribble constituent les menaces principales."
         },
         {
           "t": "30-45min",
           "prob": 10,
-          "txt": "Phase de jeu équilibrée avant la mi-temps — les deux équipes ont posé leur bloc, un coup de pied arrêté peut débloquer le score avant la pause."
+          "txt": "La Croatie commence à trouver ses automatismes en transition ; risque de but avant la pause des deux côtés, Modric dicte le tempo au milieu."
         },
         {
           "t": "45-60min",
           "prob": 15,
-          "txt": "Reprise offensive d'England dès la 45e+1 — les remplaçants croates apportent de la fraîcheur, phase la plus dense en buts attendus de la première heure."
+          "txt": "Deuxième mi-temps démarrant sur un rythme élevé ; ajustements tactiques des deux bancs, la Croatie cherche l'égalisation ou la réduction si elle est menée."
         },
         {
           "t": "60-75min",
           "prob": 18,
-          "txt": "Pic offensif du match — England pousse pour faire le break, la Croatie répond par ses joueurs expérimentés, probabilité maximale de voir les deux équipes marquer dans cette fenêtre."
+          "txt": "Pic d'intensité offensive — entrées de remplaçants des deux côtés, espaces plus grands en milieu de terrain ; fenêtre favorable aux buts pour valider BTTS et Over 2.5."
         },
         {
           "t": "75-90min",
           "prob": 20,
-          "txt": "Fin de match ouverte — si le score est serré, England accélère avec ses entrants (Foden, Palmer), la Croatie tente le tout pour le tout, phase la plus propice aux buts décisifs."
+          "txt": "Phase finale la plus productive en buts : l'équipe qui mène sécurise, l'autre prend des risques — forte probabilité d'un but supplémentaire consolidant le scénario 2-1 ou 2-2."
         }
       ],
-      "facteur_x": "Lambda Croatia 1.57 : malgré 65/100 de force modèle, la Croatie génère un xG de 3.06 en qualifs avec 17 joueurs expérimentés CM — leur efficacité offensive en grand tournoi est le signal décisif pour valider le BTTS.",
-      "analyse_card": "L'Angleterre affiche un xG offensif de 2.67 en qualifications mais ne concède quasi rien (0.08 xGA), signalant une défense hermétique. La Croatie, malgré une valeur marchande bien inférieure (100M€ attaque), produit un xG de 3.06 avec 17 joueurs expérimentés en Coupe du Monde — leur maturité compétitive compense l'écart de valeur. Les lambdas combinés (3.21 buts attendus) soutiennent un scénario où les deux équipes trouvent le chemin des filets.",
-      "conseil_public": "Jouer BTTS Oui à 2.00 — la probabilité modèle de 64% génère un edge de +9pp sur la cote implicite de 50%, ce qui est le signal le plus robuste du tableau.",
-      "contexte": "Phase de groupes (J1 présumée) — les deux équipes jouent à fond leurs chances de qualification, aucune rotation stratégique anticipée. England vise la tête de groupe, la Croatie cherche à confirmer son statut de finaliste 2018. Aucune équipe n'a d'intérêt à gérer le résultat.",
+      "facteur_x": "Divergence xG concédé : England 0.08 (qualifs_seul, non représentatif) vs lambda Poisson corrigé à 1.57 buts accordés — le modèle anticipe un effet de régression vers la moyenne décisif pour valider BTTS.",
+      "analyse_card": "England affiche un xG concédé anormalement bas (0.08 en qualifs) qui sera naturellement régulé face à une Croatia affichant 3.06 xG générés — le modèle lisse ces extrêmes via les lambdas Poisson. La Croatie (65/100 de force) conserve une capacité offensive réelle (100M€ valeur attaque, 17 joueurs avec expérience CM) suffisante pour percer une défense anglaise à 250M€ de valeur mais exposée en transition. Les deux lambdas quasi-symétriques (1.64 vs 1.57) confirment un match ouvert des deux côtés.",
+      "conseil_public": "Jouer BTTS Oui à 2.00 — la probabilité modèle de 64% face à une cote implicite de 50% représente un edge de +14% clairement exploitable ; limiter la mise à 3-5% de bankroll en raison de la source qualifs_seul pour les xG.",
+      "contexte": "Phase de groupes Coupe du Monde 2026 — journée initiale pour les deux sélections, enjeux maximaux, aucune rotation attendue. England (Force 79.5) visera les 3 points mais la Croatie (65/100, 17 exp CM) est rodée aux grands tournois et ne subira pas sans réagir. Le résultat de ce match oriente directement la qualification pour les deux équipes.",
       "vbet": "OUI",
       "scores": [
         "2-1"
@@ -2396,9 +1401,9 @@
       "stade": {
         "nom": "AT&T Stadium — Dallas",
         "cap": "",
-        "meteo": "☁️",
-        "temp": "26°C",
-        "desc": "couvert"
+        "meteo": "☀️",
+        "temp": "24°C",
+        "desc": "ciel dégagé"
       },
       "crit_home": {
         "fd": 0,
@@ -2446,7 +1451,7 @@
       "fatigue": {
         "home": {
           "val": 15,
-          "info": "Repos 250 jours"
+          "info": "Repos 251 jours"
         },
         "away": {
           "val": 40,
@@ -2455,7 +1460,7 @@
       },
       "fatigue_home": {
         "val": 15,
-        "info": "Repos 250 jours"
+        "info": "Repos 251 jours"
       },
       "fatigue_away": {
         "val": 40,
@@ -2475,27 +1480,27 @@
       "actu": [
         {
           "c": "England",
-          "t": "Your Premier League club's summer transfer plans",
-          "tx": "",
-          "tm": "2026-06-15"
+          "t": "Le jeu 007 First Light profite d'une nouvelle mise à jour",
+          "tx": "Le jeu 007 First Light profite d'une nouvelle mise à jour, qui se nomme 1.0.5, alors quelles améliorations pour l'agent plus si secret ?\n\nCORRECTIONS\n\nProblème lié au mode hors ligne\nCorrection d'un problème introduit par la mise à jour 1.0.4 du jeu (désormai…",
+          "tm": "2026-06-16"
         },
         {
           "c": "England",
-          "t": "Comment Levi's se joue des règles de la FIFA sur le nom des stades de la Coupe du Monde 2026",
-          "tx": "Pour RMC Sport, Matthieu Lamoureux, spécialiste du marketing, de la publicité et des tendances de consommation analyse la Coupe du monde 2026 côté pub. Et il y a de sacrés clients.",
+          "t": "Wimbledon 2026 : le prize money atteint un record à 64,2 millions de livres, une hausse historique de 20 %",
+          "tx": "Le All England Club a annoncé que les champions 2026 repartiront avec 3,6 millions de livres (environ 4 165 000 €). ...",
           "tm": "2026-06-15"
+        },
+        {
+          "c": "Croatia",
+          "t": "Football – “Je ne sais pas comment le club va tourner” : Jack Raia ne rejoindra pas le Croatia Wandre et a déjà trouvé une porte de sortie en P2B",
+          "tx": "Nouveau retournement de situation concernant l’ancien joueur du Wallonia Hannut en ce mardi 16 juin 2026. ...",
+          "tm": "2026-06-16"
         },
         {
           "c": "Croatia",
           "t": "Voici les séries définitives pour la saison de football en province de Liège de la P1 à la P4 en 2026-2027",
           "tx": "Le Bureau provincial de Liège a communiqué ce lundi 15 juin 2026 la version définitive des séries pour la saison de football 2026-2027. ...",
           "tm": "2026-06-15"
-        },
-        {
-          "c": "Croatia",
-          "t": "La star de télé-réalité, Nikola Lozina, n’est plus président du Croatia Wandre : “Ma santé mentale en prend un coup”",
-          "tx": "Après sept années à la tête du Croatia Wandre, un club de football en P1 liégeoise, Nikola Lozina a décidé de claquer la porte. ...",
-          "tm": "2026-06-14"
         }
       ],
       "arbitre": null,
@@ -2537,125 +1542,125 @@
       "po15": 0,
       "po25": 55,
       "btts": 57,
-      "c1": "2.25",
-      "cn": "3.26",
-      "c2": "3.40",
-      "co15": "1.40",
-      "co25": "2.27",
-      "cu25": "1.63",
-      "dc1x": "1.30",
-      "dc2x": "1.67",
-      "dc12": "1.31",
-      "cdc1x": "1.30",
-      "cdc2x": "1.67",
-      "cbtts": "1.93",
-      "cbtts_non": "1.80",
-      "btts_oui": "1.93",
-      "btts_non": "1.80",
+      "c1": "2.30",
+      "cn": "3.22",
+      "c2": "3.25",
+      "co15": "1.43",
+      "co25": "2.34",
+      "cu25": "1.60",
+      "dc1x": "1.33",
+      "dc2x": "1.61",
+      "dc12": "1.33",
+      "cdc1x": "1.33",
+      "cdc2x": "1.61",
+      "cbtts": "1.95",
+      "cbtts_non": "1.78",
+      "btts_oui": "1.95",
+      "btts_non": "1.78",
       "bookies": [
         {
           "n": "Betclic",
           "o": "200€ offerts",
           "l": "#LIEN_BETCLIC",
-          "c": "1.93",
-          "c1": "2.25",
-          "cn": "3.26",
-          "c2": "3.40"
+          "c": "1.95",
+          "c1": "2.30",
+          "cn": "3.22",
+          "c2": "3.25"
         },
         {
           "n": "Winamax",
           "o": "100€ offerts",
           "l": "#LIEN_WINAMAX",
-          "c": "1.90",
-          "c1": "2.22",
-          "cn": "3.23",
-          "c2": "3.37"
+          "c": "1.92",
+          "c1": "2.27",
+          "cn": "3.19",
+          "c2": "3.22"
         },
         {
           "n": "Unibet",
           "o": "100€ remboursés",
           "l": "#LIEN_UNIBET",
-          "c": "1.91",
-          "c1": "2.23",
-          "cn": "3.24",
-          "c2": "3.38"
+          "c": "1.93",
+          "c1": "2.28",
+          "cn": "3.20",
+          "c2": "3.23"
         },
         {
           "n": "PMU",
           "o": "100€ offerts",
           "l": "#LIEN_PMU",
-          "c": "1.88",
-          "c1": "2.20",
-          "cn": "3.21",
-          "c2": "3.35"
+          "c": "1.90",
+          "c1": "2.25",
+          "cn": "3.17",
+          "c2": "3.20"
         },
         {
           "n": "Bet365",
           "o": "100€ bonus",
           "l": "#LIEN_BET365",
-          "c": "1.96",
-          "c1": "2.28",
-          "cn": "3.29",
-          "c2": "3.43"
+          "c": "1.98",
+          "c1": "2.33",
+          "cn": "3.25",
+          "c2": "3.28"
         }
       ],
-      "edge": "+3.5% (prob modèle 57% vs prob implicite cote 51.8%)",
+      "edge": "+11.15% (prob implicite cote 1.95 = 51.3% vs modèle 57%)",
       "marche": "BTTS Oui",
       "risque": "MODERE",
       "pari_rec": "BTTS Oui",
-      "cote_rec": "1.93",
+      "cote_rec": "1.95",
       "no_signal": false,
       "no_signal_label": "",
       "mise": "2-3% bankroll",
-      "verdict_shark": "Les deux équipes affichent des xG offensifs combinés de 4.53 et des lambdas Poisson de 1.68 (Ghana) et 1.21 (Panama), générant une probabilité BTTS de 57% — edge positif confirmé au seuil requis.",
+      "verdict_shark": "BTTS Oui validé à 57% de probabilité modèle avec des lambdas Poisson de 1.68 (Ghana) et 1.21 (Panama), deux équipes offensivement actives en qualifications.",
       "scenario": {
-        "phase1": "0-30 min : Ghana impose son rythme avec sa supériorité technique (Force 43.6 vs 28), pression haute et premières occasions sur xG 1.68 — Panama défend en bloc compact, tentant de limiter les espaces dans l'axe.",
-        "phase2": "30-65 min : Ghana ouvre logiquement le score, Panama réagit en exploitant les transitions rapides — leur lambda 1.21 se concrétise par une situation dangereuse ou un but sur corner/phase arrêtée, BTTS en cours de validation.",
-        "phase3": "65-90 min : Ghana gère l'avantage mais Panama, dos au mur pour ses points de groupe, pousse offensivement — les espaces augmentent et favorisent la concrétisation du BTTS si ce n'est pas déjà fait."
+        "phase1": "0-30min: Ghana impose un tempo offensif grâce à sa supériorité technique (FIFA 1445, Top5 50%), Panama bloque bas et cherche la transition rapide — pression ghanéenne sans ouverture immédiate.",
+        "phase2": "30-60min: Ghana ouvre le score sur une action construite (xG élevé soutient la probabilité), Panama réagit et pousse pour égaliser — le BTTS prend forme dans cette phase centrale.",
+        "phase3": "60-90min: Ghana gère et marque potentiellement un 2e but en contre, Panama tente de rester dans le match — le score final 2-1 ou 1-1 consolide le BTTS."
       },
       "scenario_15min": [
         {
           "t": "0-15min",
           "prob": 8,
-          "txt": "Entrée prudente des deux équipes en phase de groupes CM, Ghana établit la possession mais Panama défend organisé — probabilité de but faible, jeu de placement."
+          "txt": "Phase d'observation, Ghana prend le contrôle du ballon, Panama défend en bloc compact — faible probabilité de but dans ce laps de temps."
         },
         {
           "t": "15-30min",
           "prob": 12,
-          "txt": "Ghana monte en pression avec ses joueurs Top5 (50% d'expérience), premières situations franches — Panama tente une transition rapide sur l'espace laissé par la défense ghanéenne cotée 20M€."
+          "txt": "Ghana commence à créer des occasions via ses ailiers offensifs, pression croissante — premier but possible mais pas encore probable."
         },
         {
           "t": "30-45min",
-          "prob": 10,
-          "txt": "Phase de stabilisation avant la mi-temps, les deux équipes consolidant leurs positions — occasion probable pour Ghana sur coup de pied arrêté, lambda 1.68 commence à peser."
+          "prob": 14,
+          "txt": "Montée en puissance ghanéenne avant la mi-temps, Panama exposé sur les transitions — ouverture du score la plus probable dans cet intervalle."
         },
         {
           "t": "45-60min",
           "prob": 15,
-          "txt": "Réajustements tactiques post mi-temps — Ghana accentue la pression, Panama sort davantage pour chercher le but avec ses 1.21 buts attendus, phase décisive pour le BTTS."
+          "txt": "Retour des vestiaires avec Panama obligé de sortir davantage — espace pour les deux équipes, phase clé pour le BTTS."
         },
         {
           "t": "60-75min",
           "prob": 18,
-          "txt": "Pic d'intensité offensive : Ghana cherche le KO, Panama ouvre les espaces — c'est la fenêtre la plus favorable à la concrétisation du second but et validation du BTTS Oui."
+          "txt": "Pic d'intensité: Ghana cherche le 2e but, Panama répond offensivement — intervalle le plus dense en buts attendus selon la distribution Poisson."
         },
         {
           "t": "75-90min",
           "prob": 20,
-          "txt": "Fin de match sous pression maximale — Panama doit marquer pour ses points de groupe, prise de risque accrue, transitions dangereuses dans les deux sens favorisant les buts tardifs."
+          "txt": "Dernière demi-heure décisive: Panama pousse tout ou rien si encore en vie, Ghana peut frapper en contre — forte probabilité de but(s) en fin de match."
         }
       ],
-      "facteur_x": "Lambda Panama 1.21 buts attendus — signal clé indiquant que malgré l'infériorité structurelle (Force 28/100), Panama possède un potentiel offensif suffisant pour marquer face à une défense ghanéenne cotée 20M€ seulement.",
-      "analyse_card": "Ghana domine offensivement avec un xG généré de 2.75 en qualifications contre seulement 1.78 pour Panama, mais les deux défenses concèdent peu (0.63 et 0.61 xG). Les lambdas Poisson (Ghana 1.68 / Panama 1.21) indiquent que les deux équipes ont une capacité réelle à marquer, rendant le BTTS structurellement plausible malgré des défenses solides. L'écart de valeur marchande attaque (40M€ vs 12M€) confirme la supériorité ghanéenne, mais Panama conserve un potentiel offensif non nul avec 1.21 buts attendus.",
-      "conseil_public": "Jouer BTTS Oui à 1.93 — la probabilité modèle de 57% dépasse le seuil requis de 55% avec un edge net positif; mise Kelly modérée recommandée.",
-      "contexte": "Phase de groupes Coupe du Monde 2026, journée non pr��cisée — les deux équipes jouent pour des points cruciaux, aucune rotation motivée par une qualification déjà acquise n'est applicable à ce stade, ce qui maintient l'intensité offensive des deux côtés.",
+      "facteur_x": "Lambda Panama à 1.21 but attendu — supérieur à 1.0, ce qui signifie que statistiquement Panama marque dans la majorité des simulations Poisson, rendant le BTTS structurellement solide.",
+      "analyse_card": "Ghana génère 2.75 xG par match en qualifications contre seulement 0.63 concédé, mais face à Panama (1.78 xG offensif), les deux équipes ont des profils offensifs réels. Les lambdas Poisson combinés (1.68 + 1.21 = 2.89 buts attendus) soutiennent un scénario BTTS avec Panama ayant les ressources pour trouver le cadre. La valeur attaque de Ghana (40M€ vs 12M€) confirme un différentiel de qualité, mais pas une imperméabilité défensive totale côté ghanéen.",
+      "conseil_public": "Jouer BTTS Oui à 1.95 — la probabilité modèle de 57% dépasse le seuil requis de 55% et les lambdas des deux équipes confirment que chaque camp peut marquer au moins une fois.",
+      "contexte": "Phase de groupes Coupe du Monde 2026, journée non précisée — les deux équipes sont en compétition directe pour se qualifier, aucune rotation motivée par une qualification acquise attendue. Ghana favori (50% victoire) mais Panama (32%) reste une menace crédible, renforçant l'intérêt du BTTS.",
       "vbet": "OUI",
       "scores": [
         "2-1"
       ],
       "paris_safe": {
         "bet": "BTTS Oui",
-        "cote": 1.93,
+        "cote": 1.95,
         "proba": "50%"
       },
       "paris_risque": {
@@ -2667,9 +1672,9 @@
       "stade": {
         "nom": "BMO Field — Toronto",
         "cap": "",
-        "meteo": "☁️",
-        "temp": "20°C",
-        "desc": "couvert"
+        "meteo": "🌧️",
+        "temp": "14°C",
+        "desc": "légère pluie"
       },
       "crit_home": {
         "fd": 0,
@@ -2788,7 +1793,7 @@
       "fatigue": {
         "home": {
           "val": 15,
-          "info": "Repos 210 jours"
+          "info": "Repos 211 jours"
         },
         "away": {
           "val": 15,
@@ -2797,7 +1802,7 @@
       },
       "fatigue_home": {
         "val": 15,
-        "info": "Repos 210 jours"
+        "info": "Repos 211 jours"
       },
       "fatigue_away": {
         "val": 15,
@@ -2817,27 +1822,27 @@
       "actu": [
         {
           "c": "Ghana",
+          "t": "Coupe du monde 2026: \"Il n'y a pas à réfléchir\", le nouveau défi d'Hervé Renard, remplaçant surprise de Sabri Lamouchi avec la Tunisie",
+          "tx": "Remplaçant surprise de Sabri Lamouchi sur le banc de la Tunisie, Hervé Renard est attendu au Mexique ce mardi pour prendre en main une sélection malade en pleine Coupe du monde 2026. Un nouveau défi de taille que le technicien français ne pouvait pas refuser.",
+          "tm": "2026-06-16"
+        },
+        {
+          "c": "Ghana",
           "t": "Coupe du monde 2026: ce qu’a vraiment dit Ceferin avant d’être recadré par 13 pays mondialistes",
           "tx": "Le président de l’UEFA, Alexander Ceferin, s’est attiré les foudres de nombreux pays en lice au Mondial 2026 en qualifiant de \"totalement inintéressants\" beaucoup de matchs de la Coupe du monde. Mais le Slovène n’avait pas dit que ça…",
           "tm": "2026-06-15"
         },
         {
-          "c": "Ghana",
-          "t": "Coupe du monde 2026 - Cap-Vert, Curaçao, Ouzbékistan, ... : les nations débutantes en Coupe du monde critiquent le président de l'UEFA",
-          "tx": "Les nations africaines, asiatiques et caribéennes participant pour la première fois à la Coupe du monde de football, grâce au format qui accueille désormais 48 nations et non plus 32, ont exprimé leur \"profonde déception\" à la suite des propos du président de…",
-          "tm": "2026-06-15"
+          "c": "Panama",
+          "t": "Les Diables rouges font recette sur la RTBF et en tête des audiences en France",
+          "tx": "Sans surprise, le premier match des Diables rouges a cartonné lundi soir sur La Une. C’est même un record d’audience pour cette Coupe du monde, qui ne fait que débuter. ...",
+          "tm": "2026-06-16"
         },
         {
           "c": "Panama",
-          "t": "À 29 ans, Youri Tielemans est déjà le guide des Diables Rouges au Mondial: “J’ose parler aux anciens”",
-          "tx": "Youri Tielemans s'impose comme le cinquième plus jeune capitaine de l'histoire des Diables Rouges en Coupe du Monde. ...",
-          "tm": "2026-06-15"
-        },
-        {
-          "c": "Panama",
-          "t": "\"Il était une foi\" : pourquoi faut-il croire (fort) en nos Diables rouges à cette Coupe du monde?",
-          "tx": "La Belgique va entamer sa quinzième Coupe du monde lundi à Seattle contre l’Égypte de Mo Salah. Avec un statut moins doré mais pas avec beaucoup moins d’ambitions qu’avant. Les Diables au charme plus discret ont de bien jolis arguments à présenter à la planèt…",
-          "tm": "2026-06-15"
+          "t": "Les Diables rouges démarrent le Mondial devant un million de téléspectateurs sur La Une",
+          "tx": "Sans surprise, le premier match des Diables rouges a cartonné lundi soir sur La Une. C’est même un record d’audience pour cette Coupe du monde, qui ne fait que débuter. ...",
+          "tm": "2026-06-16"
         }
       ],
       "arbitre": null,
@@ -2879,16 +1884,16 @@
       "po15": 0,
       "po25": 51,
       "btts": 55,
-      "c1": "8.88",
-      "cn": "4.65",
-      "c2": "1.38",
+      "c1": "9.50",
+      "cn": "4.67",
+      "c2": "1.37",
       "co15": "1.29",
-      "co25": "1.94",
-      "cu25": "1.88",
-      "dc1x": "3.07",
+      "co25": "1.92",
+      "cu25": "1.89",
+      "dc1x": "3.06",
       "dc2x": "1.06",
       "dc12": "1.19",
-      "cdc1x": "3.07",
+      "cdc1x": "3.06",
       "cdc2x": "1.06",
       "cbtts": "2.25",
       "cbtts_non": "1.60",
@@ -2900,48 +1905,48 @@
           "o": "200€ offerts",
           "l": "#LIEN_BETCLIC",
           "c": "2.25",
-          "c1": "8.88",
-          "cn": "4.65",
-          "c2": "1.38"
+          "c1": "9.50",
+          "cn": "4.67",
+          "c2": "1.37"
         },
         {
           "n": "Winamax",
           "o": "100€ offerts",
           "l": "#LIEN_WINAMAX",
           "c": "2.22",
-          "c1": "8.85",
-          "cn": "4.62",
-          "c2": "1.35"
+          "c1": "9.47",
+          "cn": "4.64",
+          "c2": "1.34"
         },
         {
           "n": "Unibet",
           "o": "100€ remboursés",
           "l": "#LIEN_UNIBET",
           "c": "2.23",
-          "c1": "8.86",
-          "cn": "4.63",
-          "c2": "1.36"
+          "c1": "9.48",
+          "cn": "4.65",
+          "c2": "1.35"
         },
         {
           "n": "PMU",
           "o": "100€ offerts",
           "l": "#LIEN_PMU",
           "c": "2.20",
-          "c1": "8.83",
-          "cn": "4.60",
-          "c2": "1.33"
+          "c1": "9.45",
+          "cn": "4.62",
+          "c2": "1.32"
         },
         {
           "n": "Bet365",
           "o": "100€ bonus",
           "l": "#LIEN_BET365",
           "c": "2.28",
-          "c1": "8.91",
-          "cn": "4.68",
-          "c2": "1.41"
+          "c1": "9.53",
+          "cn": "4.70",
+          "c2": "1.40"
         }
       ],
-      "edge": "+0% (seuil exact atteint : prob modèle 55% = seuil requis 55%, pas d'edge excédentaire)",
+      "edge": "0.0% (prob modèle 55% = seuil exact, edge neutre — valeur de cote 2.25 compense)",
       "marche": "BTTS Oui",
       "risque": "MODERE",
       "pari_rec": "BTTS Oui",
@@ -2949,51 +1954,51 @@
       "no_signal": false,
       "no_signal_label": "",
       "mise": "2-3% bankroll",
-      "verdict_shark": "BTTS Oui atteint exactement le seuil de fiabilité à 55% avec des lambdas Poisson de 1.39 (UZB) et 1.33 (COL), deux équipes capables de scorer mais sans dominance défensive marquée.",
+      "verdict_shark": "Avec des lambdas Poisson de 1.39 (UZB) et 1.33 (COL) et un xG offensif combiné de 3.11, le modèle estime à 55% la probabilité que les deux équipes marquent — seuil minimum atteint exactement.",
       "scenario": {
-        "phase1": "0-30min — La Colombie impose son rythme avec une pression haute grâce à sa supériorité technique (FIFA 1703 vs 1478). L'Ouzbékistan défend en bloc bas mais tente quelques transitions rapides en exploitant les espaces dans le dos de la défense colombienne.",
-        "phase2": "30-60min — La Colombie ouvre probablement le score sur une phase de possession prolongée. L'Ouzbékistan, qui ne peut pas se permettre de perdre sans réagir, pousse et crée des situations sur contre-attaque, augmentant la probabilité d'un but ouzbek.",
-        "phase3": "60-90min — Avec le match ouvert, les deux équipes échangent des occasions. La Colombie gère sans fermer totalement le jeu, et l'Ouzbékistan profite d'un moment de relâchement défensif pour inscrire son but, validant le BTTS."
+        "phase1": "0-30 min : La Colombie impose son jeu dès l'entame grâce à sa supériorité technique (FIFA 1703, 40% Top5). L'Ouzbékistan défend en bloc bas avec le malus altitude déjà actif. Premier quart d'heure tendu, premier but colombien attendu avant la 30e.",
+        "phase2": "30-65 min : L'Ouzbékistan, poussé par l'enjeu de la Coupe du Monde et un xG de 1.32, tente de répondre sur transition rapide. La défense colombienne (1.45 xG concédé) laisse un espace sur une contre-attaque. But uzbek plausible dans cette phase, BTTS potentiellement validé.",
+        "phase3": "65-90 min : La Colombie gère son avantage mais continue d'attaquer (xG 1.79). L'Ouzbékistan, fatigué physiologiquement en fin de match malgré 0% fatigue initiale, s'expose à un deuxième but adverse. Score final 1-2 ou 1-3 le plus probable."
       },
       "scenario_15min": [
         {
           "t": "0-15min",
           "prob": 8,
-          "txt": "Phase d'observation. La Colombie tâte le pressing ouzbek, peu de situations franches. Probabilité de but faible dans ce laps de temps."
+          "txt": "Entrée en matière prudente des deux équipes. La Colombie tente d'imposer le tempo avec ses 40% de joueurs Top5, mais l'Ouzbékistan défend en organisation. Probabilité de but faible dans ce premier quart."
         },
         {
           "t": "15-30min",
           "prob": 12,
-          "txt": "La Colombie commence à trouver des espaces entre les lignes ouzbèkes. Premier danger sérieux attendu, possibilité d'ouverture du score colombien."
+          "txt": "La Colombie commence à trouver des espaces. Un but colombien est le scénario le plus probable sur cette tranche — Cuadrado ou Díaz sur le côté. L'Ouzbékistan reste compact mais recule."
         },
         {
           "t": "30-45min",
           "prob": 10,
-          "txt": "L'Ouzbékistan s'organise mieux défensivement après l'adaptation initiale. Moins de transitions, jeu plus fermé avant la mi-temps. Risque de but légèrement réduit."
+          "txt": "Période de gestion pour la Colombie après un éventuel but. L'Ouzbékistan tente quelques transitions rapides (xG 1.32) mais sans concrétiser avant la mi-temps. Risque de 2-0 à la pause."
         },
         {
           "t": "45-60min",
           "prob": 15,
-          "txt": "Retour des vestiaires dynamique. Si la Colombie n'a pas scoré, elle accélère. Si elle mène, l'Ouzbékistan doit s'ouvrir — c'est la fenêtre clé pour le premier but ouzbek."
+          "txt": "Retour des vestiaires avec l'Ouzbékistan plus offensif pour réduire le score. La défense colombienne (1.45 xG concédé) montre ses fragilités. C'est la tranche la plus probable pour un but uzbek et la validation du BTTS."
         },
         {
           "t": "60-75min",
           "prob": 18,
-          "txt": "Phase la plus favorable au BTTS : les deux équipes sont ouvertes, la fatigue réduit la rigueur défensive. C'est ici que le deuxième but (quel que soit le camp) est le plus probable."
+          "txt": "Pic d'intensité du match. Si l'Ouzbékistan a réduit le score, la Colombie accélère pour tuer le match. Double probabilité de but dans cette fenêtre — score 1-2 ou 2-1 potentiel. BTTS largement en voie de validation."
         },
         {
           "t": "75-90min",
           "prob": 20,
-          "txt": "Fin de match : l'Ouzbékistan pousse pour égaliser ou la Colombie contre-attaque sur équipe ouzbèke avancée. Derniers buts les plus probables de la rencontre, validant ou invalidant le BTTS."
+          "txt": "Gestion finale pour la Colombie, mais les espaces créés favorisent les derniers buts. L'Ouzbékistan, épuisé physiologiquement, concède en contre. La Colombie confirme sa victoire 1-2 ou 1-3. BTTS validé si le but uzbek est tombé."
         }
       ],
-      "facteur_x": "Lambda Poisson Ouzbékistan à 1.39 — supérieur à celui de la Colombie (1.33) malgré un malus altitude de -8% déjà intégré, signalant une opportunité offensive réelle pour l'équipe perçue comme largement inférieure.",
-      "analyse_card": "L'Ouzbékistan affiche un xG concédé de seulement 0.87 en qualifications mais face à une attaque colombienne valorisée à 130M€ avec 1.79 xG généré, le lambda Poisson de 1.33 pour la Colombie reste solide. En retour, l'Ouzbékistan génère 1.32 xG offensif et le lambda de 1.39 suggère une capacité réelle à scorer, soutenue par une défense colombienne perméable (xG concédé 1.45). L'écart de valeur marchande (34M€ vs 200M€) est significatif mais les deux équipes présentent des profils offensifs suffisants pour alimenter un BTTS.",
-      "conseil_public": "Jouer BTTS Oui à 2.25 uniquement si la mise est calibrée avec prudence : le seuil est atteint mais non dépassé, la cote attractive compense le risque marginal.",
-      "contexte": "Phase de groupes Coupe du Monde 2026 : l'Ouzbékistan participe probablement à sa première édition avec un statut de outsider total, tandis que la Colombie vise une qualification directe. Les deux équipes jouent donc avec des enjeux réels, limitant le risque de gestion conservatrice des débats.",
+      "facteur_x": "xG concédé par la Colombie en qualifications : 1.45/match — signal chiffré clé indiquant une défense perméable malgré sa supériorité générale, ce qui ouvre la porte à un but uzbek.",
+      "analyse_card": "L'Ouzbékistan affiche un xG généré de 1.32 en qualifications, un chiffre modeste mais suffisant pour menacer une défense colombienne qui a concédé 1.45 xG par match. La Colombie, forte de 130M€ de valeur offensive et d'un xG de 1.79, devrait trouver le chemin des filets, mais sa défense (70M€, 1.45 xG concédé) laisse des espaces exploitables même pour une attaque uzbeke à 20M€. Le malus altitude -8% sur l'Ouzbékistan est déjà intégré dans les lambdas, confirmant que leur potentiel offensif reste limité mais non nul.",
+      "conseil_public": "Jouer BTTS Oui à 2.25 avec une mise raisonnée (Kelly fractionnaire recommandé) — la cote est attractive mais la probabilité de 55% est au seuil plancher, limitez l'exposition.",
+      "contexte": "Phase de groupes Coupe du Monde 2026, journée non précisée — les deux équipes n'ont aucune absence majeure confirmée et sont à 0% de fatigue, ce qui maximise le niveau de jeu affiché. L'Ouzbékistan, outsider face à un favori colombien classé 1703 pts FIFA, aura à cœur de montrer sa valeur sur la scène mondiale, réduisant le risque d'une équipe qui se ferme.",
       "vbet": "OUI",
       "scores": [
-        "1-1"
+        "1-2"
       ],
       "paris_safe": {
         "bet": "BTTS Oui",
@@ -3010,8 +2015,8 @@
         "nom": "Estadio Azteca — Mexico City",
         "cap": "",
         "meteo": "☁️",
-        "temp": "22°C",
-        "desc": "nuageux"
+        "temp": "16°C",
+        "desc": "couvert"
       },
       "crit_home": {
         "fd": 0,
@@ -3130,7 +2135,7 @@
       "fatigue": {
         "home": {
           "val": 15,
-          "info": "Repos 214 jours"
+          "info": "Repos 215 jours"
         },
         "away": {
           "val": 15,
@@ -3139,7 +2144,7 @@
       },
       "fatigue_home": {
         "val": 15,
-        "info": "Repos 214 jours"
+        "info": "Repos 215 jours"
       },
       "fatigue_away": {
         "val": 15,
@@ -3218,17 +2223,17 @@
       "c1": "1.78",
       "cn": "3.70",
       "c2": "4.56",
-      "co15": "1.34",
+      "co15": "1.33",
       "co25": "2.10",
       "cu25": "1.75",
-      "dc1x": "1.18",
+      "dc1x": "1.20",
       "dc2x": "2.04",
-      "dc12": "1.25",
-      "cdc1x": "1.18",
+      "dc12": "1.26",
+      "cdc1x": "1.20",
       "cdc2x": "2.04",
-      "cbtts": "1.94",
+      "cbtts": "1.96",
       "cbtts_non": "1.80",
-      "btts_oui": "1.94",
+      "btts_oui": "1.96",
       "btts_non": "1.80",
       "bookies": [
         {
@@ -3287,46 +2292,46 @@
       "mise": "2-3% bankroll",
       "verdict_shark": "",
       "scenario": {
-        "phase1": "0-30min : les deux équipes s'observent, enjeu de la J1 pousse à la prudence. La Tchéquie tente d'imposer son jeu positionnel via son avantage technique (58% joueurs Top 5 vs 20%), l'Afrique du Sud défend bas en 4-4-2 compact.",
-        "phase2": "30-60min : la Tchéquie augmente la pression après avoir sécurisé le bloc adverse — xG tchèque commence à se matérialiser. Risque de but sur transition rapide sud-africaine, leur force étant le contre (lambda 1.32 légèrement supérieur).",
-        "phase3": "60-90min : si le score est nul ou serré, les deux équipes ouvrent le jeu — probabilité de buts en fin de match augmente. Le xG concédé élevé de la Tchéquie (1.70) devient critique en cas de pressing haut adverse dans les 20 dernières minutes."
+        "phase1": "0-30min — La Tchéquie impose son pressing et son organisation supérieure (FIFA +47pts), cherchant à contrôler la possession. L'Afrique du Sud s'appuie sur son bloc bas et tente de limiter les espaces dans l'axe.",
+        "phase2": "30-65min — La pression tchèque s'intensifie avec le potentiel offensif de ses 8 joueurs expérimentés en CM. L'Afrique du Sud, physiquement en forme (fatigue 0%), peut créer des transitions dangereuses sur les récupérations hautes.",
+        "phase3": "65-90min — La gestion des dernières 25 minutes sera décisive : une Tchéquie qui mène cherchera à sécuriser, une Afrique du Sud qui peut égaliser grâce à son engagement physique intact. Les remplaçants et l'intensité de fin de match accentuent l'incertitude sur les marchés buts."
       },
       "scenario_15min": [
         {
           "t": "0-15min",
           "prob": 8,
-          "txt": "Entrée prudente des deux équipes, faible densité de tirs cadrés. Les blocs sont en place, peu d'espaces — probabilité de but faible malgré l'enjeu."
+          "txt": "Phase d'observation mutuelle — les deux équipes testent les blocs adverses. Probabilité de but faible, la Tchéquie installe sa possession sans prendre de risque défensif."
         },
         {
           "t": "15-30min",
           "prob": 12,
-          "txt": "La Tchéquie commence à trouver des espaces entre les lignes sud-africaines. Premiers xG tchèques se dessinent, mais la défense de l'Afrique du Sud (0.98 xG concédé en qualif) tient."
+          "txt": "Montée en pression tchèque, premières occasions sur phases arrêtées (xG offensif 1.42). L'Afrique du Sud peut surprendre en contre avec ses attaquants rapides."
         },
         {
           "t": "30-45min",
           "prob": 10,
-          "txt": "Équilibre tactique maintenu. Un coup de pied arrêté ou une erreur défensive tchèque (xG concédé 1.70) pourrait débloquer le match avant la pause — fenêtre de but sur phase arrêtée."
+          "txt": "Légère baisse d'intensité avant la mi-temps — le match pourrait rester ouvert. Moment propice pour un but tchèque sur une action construite depuis le milieu."
         },
         {
           "t": "45-60min",
           "prob": 15,
-          "txt": "Reprise avec intentions offensives des deux côtés. La Tchéquie cherche le break, l'Afrique du Sud profite de sa forme physique fraîche (fatigue 0%) pour presser plus haut — probabilité de but en hausse."
+          "txt": "Reprise dynamique après ajustements tactiques. L'Afrique du Sud, qui concède 0.98 xG en moyenne, peut être déstabilisée par les entrées de remplaçants tchèques dès la mi-temps."
         },
         {
           "t": "60-75min",
           "prob": 18,
-          "txt": "Pic de buts statistiquement probable. Si la Tchéquie mène, l'Afrique du Sud s'ouvre — leur lambda offensif de 1.32 se lib��re. Si score nul, tension maximale des deux côtés avec prise de risques croissante."
+          "txt": "Zone de risque maximale pour les buts — fatigue nulle des deux équipes (0/100) maintient l'intensité physique. Les espaces s'ouvrent en fin de bloc défensif africain."
         },
         {
           "t": "75-90min",
           "prob": 20,
-          "txt": "Dernière phase : fatigue cognitive et physique maximale pour les joueurs peu habitués à la Coupe du Monde (5 joueurs expérimentés côté sud-africain). Buts tardifs probables, confirme le lambda Poisson combiné de 2.52 buts attendus sur l'ensemble du match."
+          "txt": "Fenêtre finale la plus prolifique — les enjeux de qualification (1ère journée = points cruciaux) poussent les deux équipes à l'offensive. Le lambda Poisson Sud-Africain élevé (1.32) peut se matérialiser ici sur corner ou coup franc."
         }
       ],
-      "facteur_x": "Le xG concédé de la Tchéquie (1.70) est le signal le plus alarmant : combiné au lambda offensif de l'Afrique du Sud (1.32), il ouvre une vraie fenêtre BTTS à 51% — insuffisante pour un pari, mais à surveiller si l'Afrique du Sud s'avère agressive en début de match.",
-      "analyse_card": "La Tchéquie affiche un xG concédé élevé de 1.7 malgré une force supérieure (36.7/100 vs 25.6/100), signalant une défense poreuse. L'Afrique du Sud présente un profil défensif compact avec seulement 0.98 xG concédé, mais une attaque limitée à 0.94 xG généré. Les lambdas Poisson équilibrés (1.2 vs 1.32) traduisent un match serré où l'Afrique du Sud pourrait surprendre en contre-attaque.",
-      "conseil_public": "Abstention totale sur ce match : aucun marché ne génère d'edge statistique suffisant, et la volatilité d'un premier match de Coupe du Monde entre deux équipes peu connues l'une de l'autre accentue l'incertitude.",
-      "contexte": "Phase de groupes, Journée 1 pour les deux équipes — enjeu maximal, rotation improbable, les deux sélections jouent leur qualification. L'Afrique du Sud, outsider, aura à cœur de créer la surprise devant un adversaire tchèque plus côté mais défensivement fragile.",
+      "facteur_x": "Le lambda Poisson de l'Afrique du Sud (1.32) dépasse celui de la Tchéquie (1.20) malgré une force modèle inférieure (25.6 vs 36.7) — signal contradictoire issu du xG concédé élevé des Tchèques (1.70), rendant l'issue des marchés buts particulièrement instable.",
+      "analyse_card": "La Tchéquie génère 1.42 xG offensif contre 1.7 xG concédés, révélant une défense perméable qui compense partiellement son avantage offensif (38M€ vs 18M€). L'Afrique du Sud présente des lambdas Poisson inhabituellement équilibrés (1.32 vs 1.2 Czech), portés par un xG concédé bas à 0.98 qui traduit un bloc défensif compact mais une attaque limitée à 0.94 xG. L'écart de valeur marché (Force 36.7 vs 25.6) est réel mais les probabilités de buts restent dispersées, générant une incertitude structurelle sur tous les marchés.",
+      "conseil_public": "Abstiens-toi sur ce match : aucun marché ne présente un edge statistique suffisant, et le profil des deux équipes (lambdas proches, xG concédés moyens des deux côtés) rend toute conviction prématurée.",
+      "contexte": "Match de phase de groupes Coupe du Monde 2026 à Atlanta — les deux équipes sont en début de compétition avec un enjeu maximal pour les points. La Tchéquie (FIFA 1534) part favorite logique mais l'Afrique du Sud (FIFA 1487) a l'avantage d'un jeu défensif organisé qui peut neutraliser les probabilités. Chaque point compte pour la qualification, les deux sélections joueront sans rotation à ce stade.",
       "vbet": "NON",
       "scores": [
         "1-1"
@@ -3346,7 +2351,7 @@
         "nom": "Mercedes-Benz Stadium — Atlanta",
         "cap": "",
         "meteo": "🌧️",
-        "temp": "20°C",
+        "temp": "21°C",
         "desc": "légère pluie"
       },
       "crit_home": {
@@ -3446,20 +2451,20 @@
       "fatigue": {
         "home": {
           "val": 15,
-          "info": "Repos 215 jours"
+          "info": "Repos 216 jours"
         },
         "away": {
           "val": 15,
-          "info": "Repos 163 jours"
+          "info": "Repos 164 jours"
         }
       },
       "fatigue_home": {
         "val": 15,
-        "info": "Repos 215 jours"
+        "info": "Repos 216 jours"
       },
       "fatigue_away": {
         "val": 15,
-        "info": "Repos 163 jours"
+        "info": "Repos 164 jours"
       },
       "tendances": {
         "over25_home": 0,
@@ -3530,18 +2535,18 @@
       "p2": 29,
       "po15": 0,
       "po25": 53,
-      "btts": 47,
-      "c1": "1.57",
+      "btts": 53,
+      "c1": "1.55",
       "cn": "4.10",
-      "c2": "6.20",
-      "co15": "1.34",
-      "co25": "2.10",
-      "cu25": "1.74",
-      "dc1x": "1.13",
-      "dc2x": "2.40",
+      "c2": "6.17",
+      "co15": "1.33",
+      "co25": "2.05",
+      "cu25": "1.78",
+      "dc1x": "1.12",
+      "dc2x": "2.45",
       "dc12": "1.22",
-      "cdc1x": "1.13",
-      "cdc2x": "2.40",
+      "cdc1x": "1.12",
+      "cdc2x": "2.45",
       "cbtts": "2.10",
       "cbtts_non": "1.67",
       "btts_oui": "2.10",
@@ -3551,46 +2556,46 @@
           "n": "Betclic",
           "o": "200€ offerts",
           "l": "#LIEN_BETCLIC",
-          "c": "1.57",
-          "c1": "1.57",
+          "c": "1.55",
+          "c1": "1.55",
           "cn": "4.10",
-          "c2": "6.20"
+          "c2": "6.17"
         },
         {
           "n": "Winamax",
           "o": "100€ offerts",
           "l": "#LIEN_WINAMAX",
-          "c": "1.54",
-          "c1": "1.54",
+          "c": "1.52",
+          "c1": "1.52",
           "cn": "4.07",
-          "c2": "6.17"
+          "c2": "6.14"
         },
         {
           "n": "Unibet",
           "o": "100€ remboursés",
           "l": "#LIEN_UNIBET",
-          "c": "1.55",
-          "c1": "1.55",
+          "c": "1.53",
+          "c1": "1.53",
           "cn": "4.08",
-          "c2": "6.18"
+          "c2": "6.15"
         },
         {
           "n": "PMU",
           "o": "100€ offerts",
           "l": "#LIEN_PMU",
-          "c": "1.52",
-          "c1": "1.52",
+          "c": "1.50",
+          "c1": "1.50",
           "cn": "4.05",
-          "c2": "6.15"
+          "c2": "6.12"
         },
         {
           "n": "Bet365",
           "o": "100€ bonus",
           "l": "#LIEN_BET365",
-          "c": "1.60",
-          "c1": "1.60",
+          "c": "1.58",
+          "c1": "1.58",
           "cn": "4.13",
-          "c2": "6.23"
+          "c2": "6.20"
         }
       ],
       "edge": "",
@@ -3603,53 +2608,53 @@
       "mise": "2-3% bankroll",
       "verdict_shark": "",
       "scenario": {
-        "phase1": "0-30 min : La Suisse impose son pressing et monopolise la possession, cherchant à ouvrir rapidement le score via ses ailiers. La Bosnie, défensive et compacte, tente de résister et de repartir en contre.",
-        "phase2": "30-65 min : Après une éventuelle ouverture du score suisse, la Bosnie doit s'ouvrir davantage, ce qui crée des espaces pour les transitions rapides suisses mais aussi quelques occasions bosniaques en contre-attaque.",
-        "phase3": "65-90 min : La Suisse gère le match si elle est en tête, avec des rotations possibles. La Bosnie pousse mais manque de créativité offensive (xG généré 1.55) pour renverser la situation."
+        "phase1": "0-30min : La Suisse installe une domination territoriale progressive avec ses joueurs expérimentés (12 joueurs au CM), le bloc bosnien se positionne bas pour limiter les espaces, pression suisse sans brèche immédiate.",
+        "phase2": "30-70min : La Suisse force le jeu sur les côtés (attaque 90M€), la Bosnie tente de piquer en contre avec son xG offensif de 1.55 — période la plus ouverte avec risque de but rapide des deux côtés.",
+        "phase3": "70-90min : Si la Suisse mène, gestion du résultat et entrées de rotation légères ; si match nul, montée en puissance et prise de risques accrue côté suisse avec espaces bosniens en contre."
       },
       "scenario_15min": [
         {
           "t": "0-15min",
           "prob": 8,
-          "txt": "Entrée en matière prudente des deux équipes. La Suisse prend le contrôle du ballon, la Bosnie s'organise en 4-4-2 défensif. Peu d'occasions franches, probabilité de but faible dans ce quart d'heure."
+          "txt": "Phase d'observation — la Suisse tente d'imposer son pressing haut, la Bosnie subit mais reste organisée défensivement, probabilité de but faible dans cette fenêtre d'adaptation mutuelle."
         },
         {
           "t": "15-30min",
           "prob": 12,
-          "txt": "La Suisse commence à trouver des espaces sur les côtés. Premières situations dangereuses via les couloirs. La Bosnie reste disciplinée mais montre des signes de fragilité sur les transitions rapides."
+          "txt": "La Suisse commence à trouver des combinaisons dans les couloirs, xG suisse monte progressivement ; premier danger réel attendu sur coup de pied arrêté ou transition rapide."
         },
         {
           "t": "30-45min",
           "prob": 10,
-          "txt": "Phase de jeu plus ouverte avec des duels au milieu. Risque de coup de pied arrêté des deux côtés. La Suisse (FIFA 1654) maintient la pression sans pour autant créer en masse."
+          "txt": "Phase de consolidation avant la mi-temps — la Bosnie cherche à tenir le score et repartir dans le vestiaire sans encaisser, intensité légèrement réduite, risque de but en baisse."
         },
         {
           "t": "45-60min",
           "prob": 15,
-          "txt": "Le second acte s'ouvre avec des ajustements tactiques. Si la Bosnie encaisse, elle devra attaquer et exposer sa défense (xG concédé 1.06). C'est la période la plus propice aux buts selon le modèle."
+          "txt": "Reprise souvent favorable à l'équipe plus forte physiquement — la Suisse (Force 59.9) repart avec une intensité accrue, la fatigue bosnienne commence à créer des espaces derrière leur bloc."
         },
         {
           "t": "60-75min",
           "prob": 18,
-          "txt": "Phase décisive : la Suisse capitalise sur son avantage physique et technique en fin de match. Les remplaçants suisses apportent de la fraîcheur, tandis que la fatigue commence à affecter les Bosniaques."
+          "txt": "Fenêtre de décision du match — les changements tactiques suisses ouvrent des espaces, le lambda bosnien (1.01) peut se concrétiser en contre si la Suisse s'expose en cherchant un but supplémentaire."
         },
         {
           "t": "75-90min",
           "prob": 20,
-          "txt": "Dernière ligne droite : si le score est serré, la Bosnie tente de tout donner. La Suisse, avec ses 12 joueurs expérimentés en Coupe du Monde, sait gérer ce type de pression. Probabilité de but la plus élevée de la rencontre sur cette période."
+          "txt": "Phase finale la plus productive statistiquement — fatigue bosnienne maximale (moins de 38% de joueurs Top5), la Suisse avec ses remplaçants frais accentue la pression ; buts tardifs très probables dans cette fenêtre."
         }
       ],
-      "facteur_x": "L'écart de force brute est significatif (+27.5 pts de force modèle), mais les probabilités résultat restent dispersées (53/18/29), signe que le moteur intègre une variabilité élevée liée à l'expérience internationale limitée des deux équipes dans ce format.",
-      "analyse_card": "La Suisse domine nettement sur le plan offensif avec un xG généré de 2.55 contre seulement 1.55 pour la Bosnie, et une valeur d'attaque presque trois fois supérieure (90M€ vs 35M€). Cependant, le lambda Suisse (1.81) combiné au lambda Bosnie (1.01) place l'espérance totale de buts à 2.82, juste au-dessus du seuil 2.5, ce qui génère une incertitude sur le marché Over. La défense suisse, avec un xG concédé de seulement 0.47, suggère que la Bosnie aura des difficultés à concrétiser ses occasions, rendant le BTTS Oui également fragile.",
-      "conseil_public": "Ne pas parier sur ce match : aucun marché n'offre un edge suffisant, et la zone probabiliste 47-53% sur tous les marchés clés indique un match trop équilibré statistiquement pour prendre une position fiable.",
-      "contexte": "Phase de groupes de la Coupe du Monde 2026 : la Suisse, nettement supérieure en force (59.9 vs 32.4), part favorite pour engranger les 3 points et se positionner en tête de groupe, tandis que la Bosnie dispute sa survie dans la compétition avec seulement 2 joueurs expérimentés en Coupe du Monde.",
+      "facteur_x": "Lambda défensif combiné de 0.77 xG concédé en moyenne : la Bosnie peut contenir partiellement la Suisse sur un bloc bas, ce qui maintient la probabilité Under 2.5 à 47% — insuffisant mais signal de prudence sur les marchés offensifs.",
+      "analyse_card": "La Suisse génère un xG de 2.55 contre seulement 1.81 lambda Poisson estimé, reflétant une attaque solide (valeur 90M€) face à une défense bosnienne perméable (xG concédé 1.06). La Bosnie, avec un xG offensif de 1.55 et une défense évaluée à 20M€, présente un différentiel de force significatif (59.9 vs 32.4/100), mais les lambdas Poisson (1.81 / 1.01) génèrent une distribution de buts trop dispersée pour valider un marché avec confiance suffisante.",
+      "conseil_public": "Ne pas jouer ce match : aucun signal ne dépasse le seuil de 55% requis, le risque de perte est supérieur à l'espérance de gain sur tous les marchés disponibles.",
+      "contexte": "Phase de groupes Coupe du Monde 2026 — match d'ouverture pour les deux équipes (J1), les enjeux de qualification restent entiers des deux côtés, aucune rotation anticipée justifiée à ce stade, ce qui maintient une incertitude tactique élevée.",
       "vbet": "NON",
       "scores": [
-        "2-0"
+        "2-1"
       ],
       "paris_safe": {
         "bet": "",
-        "cote": "1.57",
+        "cote": "1.55",
         "proba": "53%"
       },
       "paris_risque": {
@@ -3662,7 +2667,7 @@
         "nom": "SoFi Stadium — Los Angeles",
         "cap": "",
         "meteo": "☀️",
-        "temp": "18°C",
+        "temp": "16°C",
         "desc": "ciel dégagé"
       },
       "crit_home": {
@@ -3756,7 +2761,7 @@
         },
         "away": {
           "val": 15,
-          "info": "Repos 247 jours"
+          "info": "Repos 248 jours"
         }
       },
       "fatigue_home": {
@@ -3765,7 +2770,7 @@
       },
       "fatigue_away": {
         "val": 15,
-        "info": "Repos 247 jours"
+        "info": "Repos 248 jours"
       },
       "tendances": {
         "over25_home": 1,
@@ -3796,6 +2801,1062 @@
           "t": "Pronostic Canada Bosnia-Herzegovina : analyse, cotes et prono Coupe du Monde",
           "tx": "Canada – Bosnia-Herzegovina : analyse complète, cotes, et notre pronostic Coupe du Monde. Pariez sur la victoire du Canada ou moins de 2,5 buts dans ce match.",
           "tm": "2026-06-12"
+        }
+      ],
+      "arbitre": null,
+      "events_home": null,
+      "events_away": null,
+      "top_scorers_home": [],
+      "top_scorers_away": [],
+      "elo_home": null,
+      "elo_away": null,
+      "elo_diff": null,
+      "elo_signal": null,
+      "dropping_odds": null,
+      "pinnacle_snapshot": null
+    },
+    {
+      "id": 1489387,
+      "sport": "football",
+      "home": {
+        "n": "Canada",
+        "id": 5529
+      },
+      "away": {
+        "n": "Qatar",
+        "id": 1569
+      },
+      "league": "World Cup",
+      "ligue_icon": "🏆",
+      "league_key": "other",
+      "date": "2026-06-19 00:00",
+      "cat": [
+        "all"
+      ],
+      "val": false,
+      "hot": false,
+      "conf": 0,
+      "p1": 59,
+      "pn": 60,
+      "p2": 23,
+      "po15": 0,
+      "po25": 53,
+      "btts": 53,
+      "c1": "1.29",
+      "cn": "5.50",
+      "c2": "10.75",
+      "co15": "1.22",
+      "co25": "1.77",
+      "cu25": "2.10",
+      "dc1x": "1.04",
+      "dc2x": "3.60",
+      "dc12": "1.14",
+      "cdc1x": "1.04",
+      "cdc2x": "3.60",
+      "cbtts": "2.27",
+      "cbtts_non": "1.58",
+      "btts_oui": "2.27",
+      "btts_non": "1.58",
+      "bookies": [
+        {
+          "n": "Betclic",
+          "o": "200€ offerts",
+          "l": "#LIEN_BETCLIC",
+          "c": "1.29",
+          "c1": "1.29",
+          "cn": "5.50",
+          "c2": "10.75"
+        },
+        {
+          "n": "Winamax",
+          "o": "100€ offerts",
+          "l": "#LIEN_WINAMAX",
+          "c": "1.26",
+          "c1": "1.26",
+          "cn": "5.47",
+          "c2": "10.72"
+        },
+        {
+          "n": "Unibet",
+          "o": "100€ remboursés",
+          "l": "#LIEN_UNIBET",
+          "c": "1.27",
+          "c1": "1.27",
+          "cn": "5.48",
+          "c2": "10.73"
+        },
+        {
+          "n": "PMU",
+          "o": "100€ offerts",
+          "l": "#LIEN_PMU",
+          "c": "1.24",
+          "c1": "1.24",
+          "cn": "5.45",
+          "c2": "10.70"
+        },
+        {
+          "n": "Bet365",
+          "o": "100€ bonus",
+          "l": "#LIEN_BET365",
+          "c": "1.32",
+          "c1": "1.32",
+          "cn": "5.53",
+          "c2": "10.78"
+        }
+      ],
+      "edge": "",
+      "marche": "RESULTAT",
+      "risque": "ELEVE",
+      "pari_rec": "",
+      "cote_rec": "",
+      "no_signal": true,
+      "no_signal_label": "Aucun signal clair sur ce match",
+      "mise": "2-3% bankroll",
+      "verdict_shark": "",
+      "scenario": {
+        "phase1": "0-30 min — Le Canada impose sa supériorité physique et tente d'exploiter les espaces défensifs qataris (xG concédé 2.35). Pression canadienne avec tentatives sur coups de pied arrêtés, Qatar défensif et compact en bloc bas.",
+        "phase2": "30-65 min — Phase d'équilibre relatif : le Qatar peut piquer en transition (xG généré 1.06), le Canada cherche à ouvrir le score par la profondeur. La faiblesse défensive qatarie (5M€) expose leurs latéraux face aux ailiers canadiens.",
+        "phase3": "65-90 min — Si le Canada mène, gestion du score probable avec maintien du bloc. Si score nul, intensité maximale canadienne portée par le public de BC Place. Le Qatar peut viser un point surprise en résistant, mais le différentiel de force (34.9 vs 13.8) pèse lourdement en fin de match."
+      },
+      "scenario_15min": [
+        {
+          "t": "0-15min",
+          "prob": 8,
+          "txt": "Mise en place des équipes, Canada prend l'initiative avec possession haute, Qatar défensif. Faible probabilité de but mais pression canadienne croissante sur les couloirs."
+        },
+        {
+          "t": "15-30min",
+          "prob": 12,
+          "txt": "Le Canada commence à créer de la profondeur, les défenseurs qataris (5M€ valeur) peinent face aux mouvements combinatoires. Probabilité de premier but en hausse, potentiellement sur action offensive canadienne."
+        },
+        {
+          "t": "30-45min",
+          "prob": 10,
+          "txt": "Légère stabilisation tactique avant la mi-temps. Les deux équipes cherchent à conserver leur situation. Risque de but sur coup de pied arrêté ou contre qatari rapide."
+        },
+        {
+          "t": "45-60min",
+          "prob": 15,
+          "txt": "Reprise avec intensité accrue. Le Canada pousse fort sur l'entame de seconde période, profitant de l'élan du vestiaire. Le xG concédé qatari de 2.35 se matérialise potentiellement ici."
+        },
+        {
+          "t": "60-75min",
+          "prob": 18,
+          "txt": "Phase la plus dangereuse du match. Fatigue défensive qatarie, espaces qui s'ouvrent. Le Canada (lambda 1.79) est statistiquement dans sa fenêtre de rendement maximum. Buts probables dans cette tranche."
+        },
+        {
+          "t": "75-90min",
+          "prob": 20,
+          "txt": "Fin de match avec enjeu maximal. Si Canada mène, le Qatar doit prendre des risques et s'expose à un but supplémentaire en contre. Probabilité la plus haute de but sur l'ensemble de la rencontre — mais reste insuffisante pour valider un pari Over."
+        }
+      ],
+      "facteur_x": "Le Qatar concède 2.35 xG par match (source hybride qualif/tournoi), signal le plus défavorable du match — mais le lambda Canada 1.79 reste en deçà du seuil Over 2.5 fiable, ce qui bloque toute recommandation.",
+      "analyse_card": "Le Canada affiche un xG généré de 1.23 et concède 0.96 sur tournoi seul, ce qui traduit une attaque modeste (30M€) mais une défense relative cohérente (17M€). Le Qatar présente un profil défensivement très fragile avec un xG concédé de 2.35 (source hybride), mais son attaque à 1.06 xG généré reste crédible pour marquer au moins une fois. Le différentiel de valeur de marché (30M€ vs 10M€ attaque, 17M€ vs 5M€ défense) confirme la supériorité structurelle canadienne sans garantir un score fleuve.",
+      "conseil_public": "Ne pas jouer ce match : aucun marché n'atteint son seuil de fiabilité, les probabilités Over 2.5 et BTTS Oui restent à 53% — insuffisant pour engager des fonds selon les règles IASHARK.",
+      "contexte": "Phase de groupes Coupe du Monde 2026, match à enjeux bilatéraux : le Canada joue sur home soil (BC Place, Vancouver) avec une pression publique maximale, tandis que le Qatar, nation hôte en 2022, doit éviter une nouvelle sortie précoce. Les deux équipes sont en phase d'ouverture, ce qui maintient des motivations intactes et exclut tout scenario de rotation.",
+      "vbet": "NON",
+      "scores": [
+        "2-1"
+      ],
+      "paris_safe": {
+        "bet": "",
+        "cote": "1.29",
+        "proba": "59%"
+      },
+      "paris_risque": {
+        "bet": "",
+        "cote": "",
+        "proba": ""
+      },
+      "kelly": "5.0",
+      "stade": {
+        "nom": "BC Place — Vancouver",
+        "cap": "",
+        "meteo": "☀️",
+        "temp": "15°C",
+        "desc": "ciel dégagé"
+      },
+      "crit_home": {
+        "fd": 0,
+        "att": 0,
+        "def": 88,
+        "fr": 0,
+        "mot": 70,
+        "fat": 50
+      },
+      "crit_away": {
+        "fd": 0,
+        "att": 0,
+        "def": 88,
+        "fr": 0,
+        "mot": 70,
+        "fat": 50
+      },
+      "form_home": [
+        {
+          "d": "2025-11-19",
+          "opponent": "Venezuela",
+          "score": "2-0",
+          "result": "W",
+          "home": true,
+          "match": "Venezuela",
+          "lieu": "DOM",
+          "date_full": "2025-11-19T01:30:00+00:00"
+        },
+        {
+          "d": "2025-11-14",
+          "opponent": "Ecuador",
+          "score": "0-0",
+          "result": "D",
+          "home": true,
+          "match": "Ecuador",
+          "lieu": "DOM",
+          "date_full": "2025-11-14T00:30:00+00:00"
+        },
+        {
+          "d": "2025-10-15",
+          "opponent": "Colombia",
+          "score": "0-0",
+          "result": "D",
+          "home": true,
+          "match": "Colombia",
+          "lieu": "DOM",
+          "date_full": "2025-10-15T00:30:00+00:00"
+        },
+        {
+          "d": "2025-10-10",
+          "opponent": "Australia",
+          "score": "0-1",
+          "result": "L",
+          "home": true,
+          "match": "Australia",
+          "lieu": "DOM",
+          "date_full": "2025-10-10T23:30:00+00:00"
+        },
+        {
+          "d": "2025-09-09",
+          "opponent": "Wales",
+          "score": "1-0",
+          "result": "W",
+          "home": false,
+          "match": "Wales",
+          "lieu": "EXT",
+          "date_full": "2025-09-09T18:45:00+00:00"
+        }
+      ],
+      "form_away": [
+        {
+          "d": "2025-12-07",
+          "opponent": "Tunisia",
+          "score": "0-3",
+          "result": "L",
+          "home": true,
+          "match": "Tunisia",
+          "lieu": "DOM",
+          "date_full": "2025-12-07T17:00:00+00:00"
+        },
+        {
+          "d": "2025-12-04",
+          "opponent": "Syria",
+          "score": "1-1",
+          "result": "D",
+          "home": false,
+          "match": "Syria",
+          "lieu": "EXT",
+          "date_full": "2025-12-04T17:00:00+00:00"
+        },
+        {
+          "d": "2025-12-01",
+          "opponent": "Palestine",
+          "score": "0-1",
+          "result": "L",
+          "home": true,
+          "match": "Palestine",
+          "lieu": "DOM",
+          "date_full": "2025-12-01T15:45:00+00:00"
+        },
+        {
+          "d": "2025-11-17",
+          "opponent": "Zimbabwe",
+          "score": "1-2",
+          "result": "L",
+          "home": true,
+          "match": "Zimbabwe",
+          "lieu": "DOM",
+          "date_full": "2025-11-17T16:30:00+00:00"
+        },
+        {
+          "d": "2025-09-07",
+          "opponent": "Russia",
+          "score": "1-4",
+          "result": "L",
+          "home": true,
+          "match": "Russia",
+          "lieu": "DOM",
+          "date_full": "2025-09-07T15:15:00+00:00"
+        }
+      ],
+      "forme_h": "",
+      "forme_a": "",
+      "h2h": [],
+      "injuries": [],
+      "fatigue": {
+        "home": {
+          "val": 15,
+          "info": "Repos 210 jours"
+        },
+        "away": {
+          "val": 15,
+          "info": "Repos 192 jours"
+        }
+      },
+      "fatigue_home": {
+        "val": 15,
+        "info": "Repos 210 jours"
+      },
+      "fatigue_away": {
+        "val": 15,
+        "info": "Repos 192 jours"
+      },
+      "tendances": {
+        "over25_home": 2,
+        "over25_away": 0,
+        "over25_home_n": 7,
+        "over25_away_n": 1,
+        "btts_home": 1,
+        "btts_away": 1,
+        "btts_home_n": 7,
+        "btts_away_n": 1
+      },
+      "classement": null,
+      "actu": [
+        {
+          "c": "Canada",
+          "t": "Fortes chaleurs et grossesse : ce que révèle une étude sur 36 millions de naissances inquiète",
+          "tx": "Pour des millions de femmes enceintes, l’été n’est pas seulement une épreuve, c’est aussi un danger méconnu. Une étude inédite, portant sur 36,6 millions de naissances dans 13 pays, révèle que les vagues de chaleur extrêmes augmentent le risque d'accouchement…",
+          "tm": "2026-06-16"
+        },
+        {
+          "c": "Canada",
+          "t": "Céline Dion, “Felicità”, James Bond… Macron illustre l’arrivée des dirigeants au G7 avec un choix musical très particulier",
+          "tx": "Sur ses réseaux sociaux, le président français a publié des vidéos de l’arrivée des dirigeants avec une bande sonore saluant, à sa manière, la culture du pays invité. ...",
+          "tm": "2026-06-16"
+        },
+        {
+          "c": "Qatar",
+          "t": "Les Diables rouges font recette sur la RTBF et en tête des audiences en France",
+          "tx": "Sans surprise, le premier match des Diables rouges a cartonné lundi soir sur La Une. C’est même un record d’audience pour cette Coupe du monde, qui ne fait que débuter. ...",
+          "tm": "2026-06-16"
+        },
+        {
+          "c": "Qatar",
+          "t": "Équipe de France : Après 14 ans de service, Didier Deschamps jugé par ses pairs (partie 2 – Zlatko Dalić)",
+          "tx": "Hommage du meilleur des rivaux.",
+          "tm": "2026-06-16"
+        }
+      ],
+      "arbitre": null,
+      "events_home": null,
+      "events_away": null,
+      "top_scorers_home": [],
+      "top_scorers_away": [],
+      "elo_home": 1461,
+      "elo_away": null,
+      "elo_diff": null,
+      "elo_signal": null,
+      "dropping_odds": null,
+      "pinnacle_snapshot": null
+    },
+    {
+      "id": 1489388,
+      "sport": "football",
+      "home": {
+        "n": "Mexico",
+        "id": 16
+      },
+      "away": {
+        "n": "South Korea",
+        "id": 17
+      },
+      "league": "World Cup",
+      "ligue_icon": "🏆",
+      "league_key": "other",
+      "date": "2026-06-19 03:00",
+      "cat": [
+        "all"
+      ],
+      "val": false,
+      "hot": false,
+      "conf": 0.63,
+      "p1": 39,
+      "pn": 60,
+      "p2": 34,
+      "po15": 0,
+      "po25": 37,
+      "btts": 44,
+      "c1": "2.02",
+      "cn": "3.30",
+      "c2": "4.00",
+      "co15": "1.44",
+      "co25": "2.38",
+      "cu25": "1.59",
+      "dc1x": "1.23",
+      "dc2x": "1.80",
+      "dc12": "1.33",
+      "cdc1x": "1.23",
+      "cdc2x": "1.80",
+      "cbtts": "2.04",
+      "cbtts_non": "1.71",
+      "btts_oui": "2.04",
+      "btts_non": "1.71",
+      "bookies": [
+        {
+          "n": "Betclic",
+          "o": "200€ offerts",
+          "l": "#LIEN_BETCLIC",
+          "c": "1.59",
+          "c1": "2.02",
+          "cn": "3.30",
+          "c2": "4.00"
+        },
+        {
+          "n": "Winamax",
+          "o": "100€ offerts",
+          "l": "#LIEN_WINAMAX",
+          "c": "1.56",
+          "c1": "1.99",
+          "cn": "3.27",
+          "c2": "3.97"
+        },
+        {
+          "n": "Unibet",
+          "o": "100€ remboursés",
+          "l": "#LIEN_UNIBET",
+          "c": "1.57",
+          "c1": "2.00",
+          "cn": "3.28",
+          "c2": "3.98"
+        },
+        {
+          "n": "PMU",
+          "o": "100€ offerts",
+          "l": "#LIEN_PMU",
+          "c": "1.54",
+          "c1": "1.97",
+          "cn": "3.25",
+          "c2": "3.95"
+        },
+        {
+          "n": "Bet365",
+          "o": "100€ bonus",
+          "l": "#LIEN_BET365",
+          "c": "1.62",
+          "c1": "2.05",
+          "cn": "3.33",
+          "c2": "4.03"
+        }
+      ],
+      "edge": "+21%",
+      "marche": "Under 2.5",
+      "risque": "FAIBLE",
+      "pari_rec": "Under 2.5 buts",
+      "cote_rec": "1.59",
+      "no_signal": false,
+      "no_signal_label": "",
+      "mise": "2-3% bankroll",
+      "verdict_shark": "Avec des lambdas Poisson à 1.1 et 1.08 buts respectivement, le modèle calcule 63% de probabilité Under 2.5 contre une cote impliquant 42% — edge positif net de +21%.",
+      "scenario": {
+        "phase1": "0-30min : Mexique en contrôle territorial grâce au soutien du public et à l'avantage d'acclimatation à l'altitude. Corée du Sud en phase d'adaptation physique, bloc bas et transitions prudentes. Peu de chances nettes créées, score probable 0-0.",
+        "phase2": "30-60min : La Corée du Sud tente de s'imposer via ses profils Top5 (42%) avec des combinaisons techniques. Le Mexique exploite les transitions. Un but probable dans ce segment menant à un score 1-0 ou 0-1, mais le deuxième but reste peu probable.",
+        "phase3": "60-90min : Gestion du résultat par l'équipe qui mène. L'équipe qui est menée pousse sans pour autant créer suffisamment face à des défenses organisées. Score final 1-0 ou 1-1 comme scénarios centraux, consolidant l'Under 2.5."
+      },
+      "scenario_15min": [
+        {
+          "t": "0-15min",
+          "prob": 8,
+          "txt": "Entrée en matière prudente des deux équipes. Le Mexique établit sa possession, la Corée du Sud cherche ses repères à 1728m d'altitude. Probabilité de but faible, les blocs défensifs sont en place."
+        },
+        {
+          "t": "15-30min",
+          "prob": 12,
+          "txt": "Première montée en intensité. La Corée du Sud commence à construire via ses milieux techniques. Le Mexique menace sur transitions rapides. Légère augmentation du danger mais défenses solides."
+        },
+        {
+          "t": "30-45min",
+          "prob": 10,
+          "txt": "Période de stabilisation avant la pause. Les deux équipes gèrent l'énergie face à l'altitude. Peu de situations franches, le 0-0 ou 1-0 reste le scénario dominant à la mi-temps."
+        },
+        {
+          "t": "45-60min",
+          "prob": 15,
+          "txt": "Reprise avec intentions offensives accrues, notamment de la Corée du Sud. Le but le plus probable du match est attendu dans ce segment. Le Mexique peut frapper sur contre-attaque après les premières 10 minutes de la seconde période."
+        },
+        {
+          "t": "60-75min",
+          "prob": 18,
+          "txt": "Phase décisive : l'équipe qui mène gère, l'autre cherche l'égalisation. La fatigue liée à l'altitude commence à peser sur la Corée du Sud (-8% malus). Chances créées mais peu concrétisées, le deuxième but reste improbable."
+        },
+        {
+          "t": "75-90min",
+          "prob": 20,
+          "txt": "Dernière ligne droite — poussée finale de l'équipe qui cherche le résultat. Espaces en contre pour l'adversaire. Mais les deux défenses, fatiguées, restent organisées. Le score final Under 2.5 se confirme dans 63% des simulations."
+        }
+      ],
+      "facteur_x": "Malus altitude -8% Corée du Sud + xG concédé Mexique 0.07 en tournoi = pression offensive réduite des deux côtés, lambdas combinés 2.18 buts, probabilité Under 2.5 à 63%.",
+      "analyse_card": "Le Mexique affiche un xG concédé extrêmement bas (0.07) en tournoi, reflétant un bloc défensif compact en phase de groupes. La Corée du Sud génère 2.08 xG offensifs mais subit un malus altitude de -8% à l'Estadio Akron (1728m), réduisant mécaniquement son rendement offensif. Les deux lambdas combinés (2.18 buts attendus) orientent structurellement la distribution Poisson vers des scores serrés 1-0, 0-1 ou 1-1.",
+      "conseil_public": "Miser sur Under 2.5 buts — c'est le seul marché doublement validé (probabilité 63% > seuil 55%, cote ≥ 1.30) avec un edge calculé de +21 points.",
+      "contexte": "Phase de groupes J1 pour les deux nations — chaque point est crucial, ce qui incite les deux équipes à une approche pragmatique et défensive pour éviter une défaite inaugurale. Le Mexique évolue à domicile (contexte Coupe du Monde 2026 aux USA/Canada/Mexique) avec le soutien populaire, renforçant la stabilité défensive attendue.",
+      "vbet": "OUI",
+      "scores": [
+        "1-1"
+      ],
+      "paris_safe": {
+        "bet": "Under 2.5 buts",
+        "cote": 1.59,
+        "proba": "39%"
+      },
+      "paris_risque": {
+        "bet": "",
+        "cote": "",
+        "proba": ""
+      },
+      "kelly": "5.0",
+      "stade": {
+        "nom": "Estadio Akron — Guadalajara",
+        "cap": "",
+        "meteo": "🌧️",
+        "temp": "19°C",
+        "desc": "légère pluie"
+      },
+      "crit_home": {
+        "fd": 0,
+        "att": 0,
+        "def": 88,
+        "fr": 0,
+        "mot": 70,
+        "fat": 50
+      },
+      "crit_away": {
+        "fd": 0,
+        "att": 0,
+        "def": 88,
+        "fr": 0,
+        "mot": 70,
+        "fat": 50
+      },
+      "form_home": [
+        {
+          "d": "2025-11-19",
+          "opponent": "Paraguay",
+          "score": "1-2",
+          "result": "L",
+          "home": true,
+          "match": "Paraguay",
+          "lieu": "DOM",
+          "date_full": "2025-11-19T01:30:00+00:00"
+        },
+        {
+          "d": "2025-11-16",
+          "opponent": "Uruguay",
+          "score": "0-0",
+          "result": "D",
+          "home": true,
+          "match": "Uruguay",
+          "lieu": "DOM",
+          "date_full": "2025-11-16T01:00:00+00:00"
+        },
+        {
+          "d": "2025-10-15",
+          "opponent": "Ecuador",
+          "score": "1-1",
+          "result": "D",
+          "home": true,
+          "match": "Ecuador",
+          "lieu": "DOM",
+          "date_full": "2025-10-15T02:30:00+00:00"
+        },
+        {
+          "d": "2025-10-12",
+          "opponent": "Colombia",
+          "score": "0-4",
+          "result": "L",
+          "home": true,
+          "match": "Colombia",
+          "lieu": "DOM",
+          "date_full": "2025-10-12T01:00:00+00:00"
+        },
+        {
+          "d": "2025-09-10",
+          "opponent": "South Korea",
+          "score": "2-2",
+          "result": "D",
+          "home": true,
+          "match": "South Korea",
+          "lieu": "DOM",
+          "date_full": "2025-09-10T01:30:00+00:00"
+        }
+      ],
+      "form_away": [
+        {
+          "d": "2025-11-18",
+          "opponent": "Ghana",
+          "score": "1-0",
+          "result": "W",
+          "home": true,
+          "match": "Ghana",
+          "lieu": "DOM",
+          "date_full": "2025-11-18T11:00:00+00:00"
+        },
+        {
+          "d": "2025-11-14",
+          "opponent": "Bolivia",
+          "score": "2-0",
+          "result": "W",
+          "home": true,
+          "match": "Bolivia",
+          "lieu": "DOM",
+          "date_full": "2025-11-14T11:00:00+00:00"
+        },
+        {
+          "d": "2025-10-14",
+          "opponent": "Paraguay",
+          "score": "2-0",
+          "result": "W",
+          "home": true,
+          "match": "Paraguay",
+          "lieu": "DOM",
+          "date_full": "2025-10-14T11:00:00+00:00"
+        },
+        {
+          "d": "2025-10-10",
+          "opponent": "Brazil",
+          "score": "0-5",
+          "result": "L",
+          "home": true,
+          "match": "Brazil",
+          "lieu": "DOM",
+          "date_full": "2025-10-10T11:00:00+00:00"
+        },
+        {
+          "d": "2025-09-10",
+          "opponent": "Mexico",
+          "score": "2-2",
+          "result": "D",
+          "home": false,
+          "match": "Mexico",
+          "lieu": "EXT",
+          "date_full": "2025-09-10T01:30:00+00:00"
+        }
+      ],
+      "forme_h": "",
+      "forme_a": "",
+      "h2h": [],
+      "injuries": [],
+      "fatigue": {
+        "home": {
+          "val": 15,
+          "info": "Repos 210 jours"
+        },
+        "away": {
+          "val": 15,
+          "info": "Repos 211 jours"
+        }
+      },
+      "fatigue_home": {
+        "val": 15,
+        "info": "Repos 210 jours"
+      },
+      "fatigue_away": {
+        "val": 15,
+        "info": "Repos 211 jours"
+      },
+      "tendances": {
+        "over25_home": 5,
+        "over25_away": 1,
+        "over25_home_n": 12,
+        "over25_away_n": 3,
+        "btts_home": 5,
+        "btts_away": 1,
+        "btts_home_n": 12,
+        "btts_away_n": 3
+      },
+      "classement": null,
+      "actu": [
+        {
+          "c": "Mexico",
+          "t": "Les États-Unis affirment avoir remis 313 criminels au Mexique",
+          "tx": "Selon l'ambassadeur des États-Unis au Mexique, Ronald Johnson, les États-Unis ont transféré \"313 criminels recherchés\" au Mexique.",
+          "tm": "2026-06-16"
+        },
+        {
+          "c": "Mexico",
+          "t": "Fujikina Arles 2026 : Alex Webb, Tendance Floue et plus de 80 rendez-vous photo au cœur des Rencontres",
+          "tx": "Du 6 au 11 juillet 2026, la Fujikina revient à Arles pour une 3e édition : expositions Alex Webb et Tendance Floue, workshops, conférences, sorties photo et prêts de matériel Fujifilm.\n\n© 2026 Phototrend - Fujikina Arles 2026 : Alex Webb, Tendance Floue et pl…",
+          "tm": "2026-06-16"
+        },
+        {
+          "c": "South Korea",
+          "t": "Pour la direction de l'Église de l'Unification, liée au pouvoir japonais, « le système impérial du Japon doit naturellement être aboli » (Anglais)",
+          "tx": "-\nPolitique\n\n/ \nCorée du Sud, \nAnglais, \nPolitique, \nReligions",
+          "tm": "2026-06-01"
+        },
+        {
+          "c": "South Korea",
+          "t": "Tesla FSD en Chine : le coup de poker d'Elon Musk pour reconquérir le marché",
+          "tx": "Après une attente interminable qui a mis les nerfs des investisseurs et des clients à rude épreuve, le constructeur américain a enfin lâché les chevaux. Le FSD, son système de conduite assistée le plus avancé, est désormais disponible en Chine. Un lancement q…",
+          "tm": "2026-05-22"
+        }
+      ],
+      "arbitre": null,
+      "events_home": null,
+      "events_away": null,
+      "top_scorers_home": [],
+      "top_scorers_away": [],
+      "elo_home": null,
+      "elo_away": null,
+      "elo_diff": null,
+      "elo_signal": null,
+      "dropping_odds": null,
+      "pinnacle_snapshot": null
+    },
+    {
+      "id": 1489391,
+      "sport": "football",
+      "home": {
+        "n": "USA",
+        "id": 2384
+      },
+      "away": {
+        "n": "Australia",
+        "id": 20
+      },
+      "league": "World Cup",
+      "ligue_icon": "🏆",
+      "league_key": "other",
+      "date": "2026-06-19 21:00",
+      "cat": [
+        "all"
+      ],
+      "val": false,
+      "hot": false,
+      "conf": 0.62,
+      "p1": 45,
+      "pn": 60,
+      "p2": 33,
+      "po15": 0,
+      "po25": 38,
+      "btts": 44,
+      "c1": "1.60",
+      "cn": "4.10",
+      "c2": "5.40",
+      "co15": "1.29",
+      "co25": "1.96",
+      "cu25": "1.85",
+      "dc1x": "1.14",
+      "dc2x": "2.30",
+      "dc12": "1.22",
+      "cdc1x": "1.14",
+      "cdc2x": "2.30",
+      "cbtts": "1.98",
+      "cbtts_non": "1.77",
+      "btts_oui": "1.98",
+      "btts_non": "1.77",
+      "bookies": [
+        {
+          "n": "Betclic",
+          "o": "200€ offerts",
+          "l": "#LIEN_BETCLIC",
+          "c": "1.85",
+          "c1": "1.60",
+          "cn": "4.10",
+          "c2": "5.40"
+        },
+        {
+          "n": "Winamax",
+          "o": "100€ offerts",
+          "l": "#LIEN_WINAMAX",
+          "c": "1.82",
+          "c1": "1.57",
+          "cn": "4.07",
+          "c2": "5.37"
+        },
+        {
+          "n": "Unibet",
+          "o": "100€ remboursés",
+          "l": "#LIEN_UNIBET",
+          "c": "1.83",
+          "c1": "1.58",
+          "cn": "4.08",
+          "c2": "5.38"
+        },
+        {
+          "n": "PMU",
+          "o": "100€ offerts",
+          "l": "#LIEN_PMU",
+          "c": "1.80",
+          "c1": "1.55",
+          "cn": "4.05",
+          "c2": "5.35"
+        },
+        {
+          "n": "Bet365",
+          "o": "100€ bonus",
+          "l": "#LIEN_BET365",
+          "c": "1.88",
+          "c1": "1.63",
+          "cn": "4.13",
+          "c2": "5.43"
+        }
+      ],
+      "edge": "+8% (62% modèle vs 54% implicite cote 1.85)",
+      "marche": "Under 2.5",
+      "risque": "MODERE",
+      "pari_rec": "Under 2.5 buts",
+      "cote_rec": "1.85",
+      "no_signal": false,
+      "no_signal_label": "",
+      "mise": "2-3% bankroll",
+      "verdict_shark": "Le modèle Poisson estime seulement 2.21 buts attendus (λ USA 1.21 + λ AUS 1.00), plaçant l'Under 2.5 à 62% de probabilité contre une cote impliquant 54%.",
+      "scenario": {
+        "phase1": "0-30 min : Les USA imposent leur rythme à domicile, pression haute sur la relance australienne, possession américaine dominante autour de 55-60%. L'Australie joue bas en 4-4-2 défensif, limitant les espaces — peu de vraies occasions attendues.",
+        "phase2": "30-70 min : Le match se joue dans les transitions. Les USA cherchent à débloquer le score via Pulisic ou Weah sur les côtés. L'Australie tente quelques contres rapides avec Leckie mais le bloc défensif américain tient. Score probable 1-0 ou 0-0 à l'heure de jeu.",
+        "phase3": "70-90 min : Si les USA mènent 1-0, l'Australie s'ouvre davantage mais prend le risque du contre. La probabilité d'un 2ème but reste limitée (Under 2.5 toujours confortable). Si match nul, les deux équipes restent prudentes en phase de groupes — score final 1-0 ou 0-0 le plus attendu."
+      },
+      "scenario_15min": [
+        {
+          "t": "0-15min",
+          "prob": 8,
+          "txt": "Démarrage prudent des deux équipes, prise de marques. USA installe sa possession, Australie en bloc bas. Faible probabilité de but dans cette fenêtre malgré l'enthousiasme du public de Seattle."
+        },
+        {
+          "t": "15-30min",
+          "prob": 12,
+          "txt": "Les USA commencent à trouver les espaces dans le dos de la défense australienne. Pulisic et Turner créent les premières occasions franches. Probabilité croissante d'ouverture du score américaine."
+        },
+        {
+          "t": "30-45min",
+          "prob": 10,
+          "txt": "Le jeu se stabilise, l'Australie a mieux analysé le pressing US. Quelques coups francs dangereux dans cette zone. Risque de but australien sur coup de pied arrêté via un défenseur central."
+        },
+        {
+          "t": "45-60min",
+          "prob": 15,
+          "txt": "Reprise avec probable ajustement tactique américain. Les changements de mi-temps peuvent ouvrir des espaces. C'est la fenêtre la plus probable pour un 2ème but si le score est déjà 1-0 — mais toujours Under 2.5 dominant."
+        },
+        {
+          "t": "60-75min",
+          "prob": 18,
+          "txt": "Phase décisive du match — si l'Australie est menée, elle pousse et s'expose aux contres américains. Pulisic en pointe avancée sur les transitions rapides. Moment le plus intense de la seconde période."
+        },
+        {
+          "t": "75-90min",
+          "prob": 20,
+          "txt": "Fin de match : les derniers 15 minutes voient toujours les probabilités de but augmenter mécaniquement (fatigue, remplaçants, désespoir). Mais avec un score probable 1-0, les USA géreront le résultat — Under 2.5 reste à 62% de réalisation globale."
+        }
+      ],
+      "facteur_x": "xG concédé USA = 0.54 (meilleure donnée défensive disponible sur tournoi) — signal le plus fort pour l'Under 2.5.",
+      "analyse_card": "Les USA affichent une défense solide avec un xG concédé de seulement 0.54 sur le tournoi, tandis que l'Australie génère certes 1.46 xG offensif mais concède 1.01 xG — indice d'une équipe moins imperméable. Le différentiel de valeur marché est écrasant (USA 310M€ vs AUS 65M€), et les lambdas Poisson combinés de 2.21 buts favorisent nettement un match fermé. La phase de groupes en début de compétition induit généralement une prudence tactique accrue des deux côtés.",
+      "conseil_public": "Jouer Under 2.5 buts à 1.85 — l'edge de +8 points (62% modèle vs 54% implicite cote) valide le pari avec une mise Kelly modérée.",
+      "contexte": "Phase de groupes Coupe du Monde 2026, journée 1 pour les deux équipes — enjeu maximum, chaque point compte. Les USA jouent à domicile à Seattle (Lumen Field), ce qui renforce leur bloc défensif organisé. L'Australie, outsider du groupe, devra gérer le pressing américain et préservera probablement ses forces défensivement.",
+      "vbet": "OUI",
+      "scores": [
+        "1-0"
+      ],
+      "paris_safe": {
+        "bet": "Under 2.5 buts",
+        "cote": 1.85,
+        "proba": "45%"
+      },
+      "paris_risque": {
+        "bet": "",
+        "cote": "",
+        "proba": ""
+      },
+      "kelly": "5.0",
+      "stade": {
+        "nom": "Lumen Field — Seattle",
+        "cap": "",
+        "meteo": "☀️",
+        "temp": "12°C",
+        "desc": "ciel dégagé"
+      },
+      "crit_home": {
+        "fd": 0,
+        "att": 0,
+        "def": 88,
+        "fr": 0,
+        "mot": 70,
+        "fat": 50
+      },
+      "crit_away": {
+        "fd": 0,
+        "att": 0,
+        "def": 88,
+        "fr": 0,
+        "mot": 70,
+        "fat": 50
+      },
+      "form_home": [
+        {
+          "d": "2025-11-19",
+          "opponent": "Uruguay",
+          "score": "5-1",
+          "result": "W",
+          "home": true,
+          "match": "Uruguay",
+          "lieu": "DOM",
+          "date_full": "2025-11-19T00:00:00+00:00"
+        },
+        {
+          "d": "2025-11-15",
+          "opponent": "Paraguay",
+          "score": "2-1",
+          "result": "W",
+          "home": true,
+          "match": "Paraguay",
+          "lieu": "DOM",
+          "date_full": "2025-11-15T22:00:00+00:00"
+        },
+        {
+          "d": "2025-10-15",
+          "opponent": "Australia",
+          "score": "2-1",
+          "result": "W",
+          "home": true,
+          "match": "Australia",
+          "lieu": "DOM",
+          "date_full": "2025-10-15T01:00:00+00:00"
+        },
+        {
+          "d": "2025-10-11",
+          "opponent": "Ecuador",
+          "score": "1-1",
+          "result": "D",
+          "home": true,
+          "match": "Ecuador",
+          "lieu": "DOM",
+          "date_full": "2025-10-11T00:30:00+00:00"
+        },
+        {
+          "d": "2025-09-09",
+          "opponent": "Japan",
+          "score": "2-0",
+          "result": "W",
+          "home": true,
+          "match": "Japan",
+          "lieu": "DOM",
+          "date_full": "2025-09-09T23:30:00+00:00"
+        }
+      ],
+      "form_away": [
+        {
+          "d": "2025-11-19",
+          "opponent": "Colombia",
+          "score": "0-3",
+          "result": "L",
+          "home": false,
+          "match": "Colombia",
+          "lieu": "EXT",
+          "date_full": "2025-11-19T01:30:00+00:00"
+        },
+        {
+          "d": "2025-11-15",
+          "opponent": "Venezuela",
+          "score": "0-1",
+          "result": "L",
+          "home": false,
+          "match": "Venezuela",
+          "lieu": "EXT",
+          "date_full": "2025-11-15T02:30:00+00:00"
+        },
+        {
+          "d": "2025-10-15",
+          "opponent": "USA",
+          "score": "1-2",
+          "result": "L",
+          "home": false,
+          "match": "USA",
+          "lieu": "EXT",
+          "date_full": "2025-10-15T01:00:00+00:00"
+        },
+        {
+          "d": "2025-10-10",
+          "opponent": "Canada",
+          "score": "1-0",
+          "result": "W",
+          "home": false,
+          "match": "Canada",
+          "lieu": "EXT",
+          "date_full": "2025-10-10T23:30:00+00:00"
+        },
+        {
+          "d": "2025-09-09",
+          "opponent": "New Zealand",
+          "score": "3-1",
+          "result": "W",
+          "home": false,
+          "match": "New Zealand",
+          "lieu": "EXT",
+          "date_full": "2025-09-09T07:00:00+00:00"
+        }
+      ],
+      "forme_h": "",
+      "forme_a": "",
+      "h2h": [],
+      "injuries": [],
+      "fatigue": {
+        "home": {
+          "val": 15,
+          "info": "Repos 210 jours"
+        },
+        "away": {
+          "val": 15,
+          "info": "Repos 210 jours"
+        }
+      },
+      "fatigue_home": {
+        "val": 15,
+        "info": "Repos 210 jours"
+      },
+      "fatigue_away": {
+        "val": 15,
+        "info": "Repos 210 jours"
+      },
+      "tendances": {
+        "over25_home": 11,
+        "over25_away": 3,
+        "over25_home_n": 14,
+        "over25_away_n": 5,
+        "btts_home": 9,
+        "btts_away": 2,
+        "btts_home_n": 14,
+        "btts_away_n": 5
+      },
+      "classement": null,
+      "actu": [
+        {
+          "c": "USA",
+          "t": "Donald Trump va-t-il rompre avec le protocole de la FIFA lors de cette Coupe du monde ?",
+          "tx": "Le président américain aurait reçu l’autorisation de donner le trophée au capitaine de l’équipe victorieuse après la finale de la Coupe du monde. ...",
+          "tm": "2026-06-16"
+        },
+        {
+          "c": "USA",
+          "t": "Interview Jean-Marc Caimi et Valentina Piccinni, lauréats du prix Portrait des Sony World Photography Awards 2026",
+          "tx": "Lauréats du prix Sony World Photography Awards 2026 (catégorie Portraits) Jean-Marc Caimi et Valentina Piccinni reviennent sur leur série The Faithful, capturée en mai 2025. Place à l'interview.\n\n© 2026 Phototrend - Interview Jean-Marc Caimi et Valentina Picc…",
+          "tm": "2026-06-16"
+        },
+        {
+          "c": "Australia",
+          "t": "L'IA vous fait peur ? Pourtant vous allez acheter des actions",
+          "tx": "L'IA, c'est le Bitcoin de 2010. Tout le monde s'en souvient. Ils vous ont fait peur avec l'IA pour vous vendre des abonnements. Ils rétropédalent pour vous vendre des actions.",
+          "tm": "2026-06-15"
+        },
+        {
+          "c": "Australia",
+          "t": "Abu Fanous",
+          "tx": "Comments",
+          "tm": "2026-06-14"
         }
       ],
       "arbitre": null,

@@ -251,7 +251,7 @@
       "home": "France",
       "away": "Senegal",
       "prediction": "BTTS Oui",
-      "cote": 2.0,
+      "cote": 2,
       "conf": 7.4,
       "conf_bucket": "7-8",
       "market": "btts_oui",
@@ -421,9 +421,9 @@
   ],
   "stats": {
     "winrate": 71.4,
-    "roi": 165.7,
+    "roi": 135.1,
     "total": 7,
-    "streak": 1,
+    "streak": 3,
     "wins": 5,
     "losses": 2
   },
@@ -434,19 +434,11 @@
       "wins": 5,
       "losses": 2,
       "total": 7,
-      "roi": 0
+      "roi": 25
     }
   ],
   "backtesting": {
     "by_market": [
-      {
-        "key": "dc_x2",
-        "wins": 1,
-        "losses": 0,
-        "total": 1,
-        "winrate": 100,
-        "roi": 650
-      },
       {
         "key": "over25",
         "wins": 1,
@@ -456,12 +448,12 @@
         "roi": -26.3
       },
       {
-        "key": "dc1x",
-        "wins": 1,
+        "key": "dc_x2",
+        "wins": 2,
         "losses": 0,
-        "total": 1,
+        "total": 2,
         "winrate": 100,
-        "roi": 180
+        "roi": 372.5
       },
       {
         "key": "btts_oui",
@@ -470,6 +462,14 @@
         "total": 1,
         "winrate": 100,
         "roi": 100
+      },
+      {
+        "key": "dc1x",
+        "wins": 1,
+        "losses": 0,
+        "total": 1,
+        "winrate": 100,
+        "roi": 180
       }
     ],
     "by_league": [
@@ -479,7 +479,7 @@
         "losses": 2,
         "total": 7,
         "winrate": 71.4,
-        "roi": 165.7
+        "roi": 135.1
       }
     ],
     "by_conf": [
@@ -489,7 +489,7 @@
         "losses": 2,
         "total": 7,
         "winrate": 71.4,
-        "roi": 165.7
+        "roi": 135.1
       }
     ],
     "by_sport": [
@@ -499,7 +499,7 @@
         "losses": 2,
         "total": 7,
         "winrate": 71.4,
-        "roi": 165.7
+        "roi": 135.1
       }
     ],
     "by_has_pinnacle": [
@@ -509,7 +509,7 @@
         "losses": 2,
         "total": 7,
         "winrate": 71.4,
-        "roi": 165.7
+        "roi": 135.1
       }
     ],
     "by_has_elo": [
@@ -519,7 +519,7 @@
         "losses": 2,
         "total": 7,
         "winrate": 71.4,
-        "roi": 165.7
+        "roi": 135.1
       }
     ],
     "updated": "2026-06-17"

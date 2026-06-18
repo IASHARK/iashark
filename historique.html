@@ -270,14 +270,45 @@ function getSportFilteredPredictions(){
   return allPredictions.filter(function(p){ return (p.sport||'football')===currentStatSport; });
 }
 
-function renderStats(){
-  var s;
-  if(currentStatSport==='all'){
-    s = historiqueData.stats || {};
-  } else {
-    var bySport = historiqueData.stats_by_sport || {};
-    s = bySport[currentStatSport] || {winrate:0,roi:0,total:0,streak:0,wins:0,losses:0};
+function calcStatsFromPredictions(preds){
+  var resolved = preds.filter(function(p){ return p.type==='single' && (p.result==='win'||p.result==='loss'); });
+  var wins = resolved.filter(function(p){ return p.result==='win'; });
+  var total = resolved.length;
+  if(!total) return {winrate:0,roi:0,total:0,streak:0,wins:0,losses:0};
+  var roiSum = 0;
+  resolved.forEach(function(p){
+    var c = parseFloat(p.cote)||1.75;
+    roiSum += p.result==='win' ? (c-1) : -1;
+  });
+  var sorted = resolved.slice().sort(function(a,b){
+    return (a.resolved_date||a.date||'').localeCompare(b.resolved_date||b.date||'');
+  });
+  var streak = 0;
+  for(var i=sorted.length-1;i>=0;i--){
+    var isW = sorted[i].result==='win';
+    if(i===sorted.length-1){ streak = isW?1:-1; }
+    else if(isW&&streak>0){ streak++; }
+    else if(!isW&&streak<0){ streak--; }
+    else break;
   }
+  return {
+    winrate: Math.round((wins.length/total*100)*10)/10,
+    roi: Math.round((roiSum/total*100)*10)/10,
+    total: total,
+    streak: streak,
+    wins: wins.length,
+    losses: total-wins.length
+  };
+}
+
+function renderStats(){
+  // Source unique de vérité : on calcule toujours depuis allPredictions,
+  // filtrées par sport si besoin. Ça garantit que "Tous" et "Football" donnent
+  // exactement le même résultat tant qu'il n'y a que du foot dans les données —
+  // contrairement à une dépendance sur un champ stats_by_sport précalculé côté
+  // pipeline qui pourrait ne pas être à jour ou désynchronisé du tableau réel.
+  var filtered = currentStatSport==='all' ? allPredictions : getSportFilteredPredictions();
+  var s = calcStatsFromPredictions(filtered);
   var wr = s.winrate||0;
   var roi = s.roi||0;
   document.getElementById('statWinrate').textContent = wr+'%';

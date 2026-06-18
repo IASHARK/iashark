@@ -16,7 +16,7 @@
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23080c12'/%3E%3Ctext x='50%25' y='54%25' dominant-baseline='middle' text-anchor='middle' font-size='40' fill='%2322d3ee'%3E🦈%3C/text%3E%3C/svg%3E">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#080c12;--card:#0d1520;--card2:#0f1a28;--cyan:#22d3ee;--cyan2:#06b6d4;--amber:#f59e0b;--green:#10b981;--red:#ef4444;--text:#e2e8f0;--muted:#4a6580;--border:rgba(255,255,255,0.06);--border-cyan:rgba(34,211,238,0.18);}
+:root{--bg:#080c12;--card:#0d1520;--card2:#0f1a28;--cyan:#22d3ee;--cyan2:#06b6d4;--amber:#f59e0b;--green:#10b981;--red:#ef4444;--text:#e2e8f0;--muted:#4a6580;--border:rgba(255,255,255,0.06);--border-cyan:rgba(34,211,238,0.18);--tennis:#a3e635;}
 *{margin:0;padding:0;box-sizing:border-box;}
 body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;padding-bottom:90px;}
 
@@ -24,6 +24,12 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 .hdr{position:sticky;top:0;z-index:99;background:rgba(8,12,18,0.96);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);padding:0 20px;height:56px;display:flex;align-items:center;justify-content:space-between;}
 .logo{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:3px;color:var(--text);text-decoration:none;}
 .logo span{color:var(--cyan);}
+
+/* SPORT TOGGLE (pour les stats) */
+.sport-toggle{display:flex;gap:8px;margin-bottom:14px;}
+.sp-btn{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1px;padding:7px 16px;border-radius:10px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:.2s;display:flex;align-items:center;gap:6px;}
+.sp-btn.active{background:rgba(34,211,238,0.1);border-color:var(--border-cyan);color:var(--cyan);}
+.sp-btn.active.tennis-active{background:rgba(163,230,53,0.08);border-color:rgba(163,230,53,0.2);color:var(--tennis);}
 
 /* HERO STATS */
 .hero{padding:28px 20px 20px;max-width:720px;margin:0 auto;}
@@ -62,6 +68,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 .pred-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px 16px;display:grid;grid-template-columns:1fr auto;align-items:center;gap:12px;}
 .pred-card.win{border-left:3px solid var(--green);}
 .pred-card.loss{border-left:3px solid var(--red);}
+.pred-card.neutral{border-left:3px solid var(--muted);opacity:0.75;}
 .pred-match{font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:1px;margin-bottom:4px;}
 .pred-meta{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
 .pred-tag{font-family:'Space Mono',monospace;font-size:7px;letter-spacing:1px;padding:2px 8px;border-radius:10px;}
@@ -72,8 +79,10 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 .pred-result{font-family:'Bebas Neue',sans-serif;font-size:20px;}
 .pred-result.win{color:var(--green);}
 .pred-result.loss{color:var(--red);}
+.pred-result.neutral{color:var(--muted);font-size:14px;letter-spacing:0.5px;}
 .pred-score{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);margin-top:2px;}
 .pred-cote{font-family:'Bebas Neue',sans-serif;font-size:14px;color:var(--amber);}
+.pred-neutral-txt{font-size:12px;color:var(--muted);font-style:italic;margin-top:2px;max-width:340px;}
 
 /* EMPTY */
 .empty{text-align:center;padding:48px 20px;}
@@ -121,6 +130,13 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
   <div class="hero">
     <div class="hero-title"><span>HISTO</span>RIQUE</div>
     <div class="hero-sub">Performance des pronostics IA — singles uniquement, matchs terminés</div>
+
+    <!-- SPORT TOGGLE : change quelles stats sont affichées -->
+    <div class="sport-toggle" id="sportToggle">
+      <button class="sp-btn active" id="spAll" onclick="setStatSport('all')">🌐 TOUS</button>
+      <button class="sp-btn" id="spFootball" onclick="setStatSport('football')">⚽ FOOTBALL</button>
+      <button class="sp-btn" id="spTennis" onclick="setStatSport('tennis')">🎾 TENNIS</button>
+    </div>
 
     <div class="stats-grid">
       <div class="stat-card green">
@@ -199,8 +215,10 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 
 <script>
 var allPredictions = [];
+var historiqueData = {};
 var currentFilter = 'all';
 var currentTab = 'paris';
+var currentStatSport = 'all';
 
 var MARKET_LABELS = {
   'over25':'Over 2.5','over15':'Over 1.5','btts_non':'BTTS Non',
@@ -211,8 +229,12 @@ var MARKET_LABELS = {
 // 'scheduled' (match pas encore joué) et l'ancien 'pending' (compat avec
 // les entrées déjà existantes générées avant ce correctif) ne sont JAMAIS
 // affichés ici : l'historique ne montre que des paris dont on connaît déjà
-// le résultat réel.
+// le résultat réel. 'neutral' est un cas particulier : le match a eu lieu,
+// mais aucun marché n'était assez fiable pour être recommandé (no signal) —
+// affiché dans la liste pour la transparence, mais exclu de tout calcul
+// winrate/ROI (ni gagné ni perdu, ça n'a jamais été un vrai pari).
 var RESOLVED_STATUSES = ['win','loss'];
+var DISPLAYABLE_STATUSES = ['win','loss','neutral'];
 
 function setTab(tab) {
   currentTab = tab;
@@ -230,20 +252,74 @@ function setFilter(f, btn) {
   renderPredictions();
 }
 
+// ── SPORT TOGGLE (stats + liste) ──────────────────────────
+function setStatSport(sport){
+  currentStatSport = sport;
+  document.getElementById('spAll').classList.toggle('active', sport==='all');
+  document.getElementById('spFootball').classList.toggle('active', sport==='football');
+  document.getElementById('spFootball').classList.toggle('tennis-active', false);
+  document.getElementById('spTennis').classList.toggle('active', sport==='tennis');
+  document.getElementById('spTennis').classList.toggle('tennis-active', sport==='tennis');
+  renderStats();
+  renderPredictions();
+  renderBacktesting(historiqueData.backtesting);
+}
+
+function getSportFilteredPredictions(){
+  if(currentStatSport==='all') return allPredictions;
+  return allPredictions.filter(function(p){ return (p.sport||'football')===currentStatSport; });
+}
+
+function renderStats(){
+  var s;
+  if(currentStatSport==='all'){
+    s = historiqueData.stats || {};
+  } else {
+    var bySport = historiqueData.stats_by_sport || {};
+    s = bySport[currentStatSport] || {winrate:0,roi:0,total:0,streak:0,wins:0,losses:0};
+  }
+  var wr = s.winrate||0;
+  var roi = s.roi||0;
+  document.getElementById('statWinrate').textContent = wr+'%';
+  document.getElementById('statWinrate').style.color = wr>=55?'var(--green)':wr>=45?'var(--amber)':'var(--red)';
+  document.getElementById('statRoi').textContent = (roi>=0?'+':'')+roi+'%';
+  document.getElementById('statRoi').style.color = roi>=0?'var(--green)':'var(--red)';
+  document.getElementById('statTotal').textContent = s.total||0;
+  document.getElementById('statWins').textContent = s.wins||0;
+  document.getElementById('statLosses').textContent = s.losses||0;
+
+  var streak = s.streak||0;
+  var streakEl = document.getElementById('statStreak');
+  if (streak > 0) {
+    streakEl.textContent = streak+' victoires 🔥';
+    streakEl.style.color = 'var(--green)';
+  } else if (streak < 0) {
+    streakEl.textContent = Math.abs(streak)+' défaites';
+    streakEl.style.color = 'var(--red)';
+  } else {
+    streakEl.textContent = '—';
+    streakEl.style.color = 'var(--muted)';
+  }
+}
+
 function renderPredictions() {
-  // On ne garde que les singles déjà résolus (win/loss) — jamais les
-  // matchs pas encore joués (scheduled/pending), peu importe le filtre actif.
-  var list = allPredictions.filter(function(p){
-    return p.type==='single' && RESOLVED_STATUSES.indexOf(p.result)!==-1;
+  // On garde les singles affichables (win/loss/neutral) du sport sélectionné —
+  // jamais les matchs pas encore joués (scheduled/pending), peu importe le filtre actif.
+  var sportList = getSportFilteredPredictions();
+  var list = sportList.filter(function(p){
+    return p.type==='single' && DISPLAYABLE_STATUSES.indexOf(p.result)!==-1;
   });
+  // Le filtre "Gagnés"/"Perdus" ne s'applique qu'aux résultats win/loss ;
+  // les entrées neutral restent visibles uniquement sous "Tous".
   if (currentFilter !== 'all') list = list.filter(function(p){ return p.result === currentFilter; });
+  else list = list; // neutral incluses sous "Tous"
 
   // Tri du plus récent au plus ancien pour une lecture cohérente
   list = list.slice().sort(function(a,b){
     return (b.resolved_date||b.date||'').localeCompare(a.resolved_date||a.date||'');
   });
 
-  var resolvedTotal = allPredictions.filter(function(p){return p.type==='single'&&RESOLVED_STATUSES.indexOf(p.result)!==-1;}).length;
+  var resolvedTotal = sportList.filter(function(p){return p.type==='single'&&RESOLVED_STATUSES.indexOf(p.result)!==-1;}).length;
   document.getElementById('countLbl').textContent = list.length + ' PARIS';
   document.getElementById('totalBadge').textContent = resolvedTotal + ' PARIS';
 
@@ -253,10 +329,12 @@ function renderPredictions() {
   }
 
   document.getElementById('predList').innerHTML = list.map(function(p) {
-    var resultLabel = p.result==='win'?'WIN':'LOSS';
+    var isNeutral = p.result==='neutral';
+    var resultLabel = isNeutral ? 'NEUTRE' : (p.result==='win'?'WIN':'LOSS');
     var scoreStr = p.score ? p.score : '—';
-    var marketLabel = MARKET_LABELS[p.market] || p.prediction || '';
-    var coteStr = p.cote ? parseFloat(p.cote).toFixed(2) : '';
+    var marketLabel = isNeutral ? '' : (MARKET_LABELS[p.market] || p.prediction || '');
+    var coteStr = (!isNeutral && p.cote) ? parseFloat(p.cote).toFixed(2) : '';
+    var neutralTxt = isNeutral ? '<div class="pred-neutral-txt">'+(p.no_signal_label||"Rien d'exploitable ici — on attend mieux.")+'</div>' : '';
     return '<div class="pred-card '+p.result+'">'
       +'<div>'
       +'<div class="pred-match">'+p.match+'</div>'
@@ -266,6 +344,7 @@ function renderPredictions() {
       +(p.league?'<span class="pred-tag tag-league">'+p.league+'</span>':'')
       +'<span class="tag-date">'+(p.resolved_date||p.date)+'</span>'
       +'</div>'
+      +neutralTxt
       +'</div>'
       +'<div class="pred-right">'
       +'<div class="pred-result '+p.result+'">'+resultLabel+'</div>'
@@ -313,33 +392,10 @@ async function loadData() {
   try {
     var resp = await fetch('historique.json?t='+Date.now());
     var data = await resp.json();
+    historiqueData = data;
     allPredictions = data.predictions || [];
-    var stats = data.stats || {};
 
-    // Stats
-    var wr = stats.winrate||0;
-    var roi = stats.roi||0;
-    document.getElementById('statWinrate').textContent = wr+'%';
-    document.getElementById('statWinrate').style.color = wr>=55?'var(--green)':wr>=45?'var(--amber)':'var(--red)';
-    document.getElementById('statRoi').textContent = (roi>=0?'+':'')+roi+'%';
-    document.getElementById('statRoi').style.color = roi>=0?'var(--green)':'var(--red)';
-    document.getElementById('statTotal').textContent = stats.total||0;
-    document.getElementById('statWins').textContent = stats.wins||0;
-    document.getElementById('statLosses').textContent = stats.losses||0;
-
-    var streak = stats.streak||0;
-    var streakEl = document.getElementById('statStreak');
-    if (streak > 0) {
-      streakEl.textContent = streak+' victoires 🔥';
-      streakEl.style.color = 'var(--green)';
-    } else if (streak < 0) {
-      streakEl.textContent = Math.abs(streak)+' défaites';
-      streakEl.style.color = 'var(--red)';
-    } else {
-      streakEl.textContent = '—';
-      streakEl.style.color = 'var(--muted)';
-    }
-
+    renderStats();
     renderPredictions();
     renderBacktesting(data.backtesting);
 

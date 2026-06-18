@@ -83,6 +83,10 @@ body::before{content:'';position:fixed;top:-300px;left:50%;transform:translateX(
 .stat-pill{font-family:'Space Mono',monospace;font-size:8px;color:var(--muted);letter-spacing:1px;}
 .stat-pill span{color:var(--cyan);}
 .stat-pill.tennis-stat span{color:var(--tennis);}
+.cote-rule-card{max-width:720px;margin:18px auto 0;padding:16px 20px;background:rgba(34,211,238,0.04);border:1px solid var(--bc);border-radius:14px;}
+.cote-rule-title{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--cyan);margin-bottom:8px;display:flex;align-items:center;gap:8px;}
+.cote-rule-txt{font-size:13px;color:#94a3b8;line-height:1.65;}
+.cote-rule-txt b{color:var(--text);}
 
 /* FILTERS */
 .filters{max-width:720px;margin:0 auto 12px;padding:0 20px;display:flex;gap:7px;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;position:relative;z-index:1;}
@@ -280,15 +284,15 @@ body::before{content:'';position:fixed;top:-300px;left:50%;transform:translateX(
     </button>
     <button class="sport-btn hp-cta-secondary-inline" id="btnTennis" onclick="setSport('tennis')" style="opacity:0.5;cursor:not-allowed;position:relative;">
       <span class="sport-icon">🎾</span> TENNIS
-      <span style="font-size:6px;letter-spacing:1px;position:absolute;top:-7px;right:2px;background:var(--card);padding:1px 5px;border-radius:6px;border:1px solid var(--border);color:var(--muted);">BIENTÔT</span>
+      <span style="font-size:6px;letter-spacing:1px;position:absolute;top:-7px;right:2px;background:var(--card);padding:1px 5px;border-radius:6px;border:1px solid rgba(245,158,11,0.4);color:var(--amber);">BIENTÔT</span>
     </button>
     <button class="sport-btn hp-cta-secondary-inline" id="btnBasket" onclick="setSport('basket')" style="opacity:0.5;cursor:not-allowed;position:relative;">
       <span class="sport-icon">🏀</span> BASKET
-      <span style="font-size:6px;letter-spacing:1px;position:absolute;top:-7px;right:2px;background:var(--card);padding:1px 5px;border-radius:6px;border:1px solid var(--border);color:var(--muted);">BIENTÔT</span>
+      <span style="font-size:6px;letter-spacing:1px;position:absolute;top:-7px;right:2px;background:var(--card);padding:1px 5px;border-radius:6px;border:1px solid rgba(245,158,11,0.4);color:var(--amber);">BIENTÔT</span>
     </button>
     <button class="sport-btn hp-cta-secondary-inline" id="btnHockey" onclick="setSport('hockey')" style="opacity:0.5;cursor:not-allowed;position:relative;">
       <span class="sport-icon">🏒</span> HOCKEY
-      <span style="font-size:6px;letter-spacing:1px;position:absolute;top:-7px;right:2px;background:var(--card);padding:1px 5px;border-radius:6px;border:1px solid var(--border);color:var(--muted);">BIENTÔT</span>
+      <span style="font-size:6px;letter-spacing:1px;position:absolute;top:-7px;right:2px;background:var(--card);padding:1px 5px;border-radius:6px;border:1px solid rgba(245,158,11,0.4);color:var(--amber);">BIENTÔT</span>
     </button>
   </div>
 
@@ -301,6 +305,11 @@ body::before{content:'';position:fixed;top:-300px;left:50%;transform:translateX(
   <div class="stats-row" style="margin-top:10px;">
     <div class="stat-pill" id="statMatchs"><span id="countSport">—</span> ANALYSES DU JOUR</div>
   </div>
+</div>
+
+<div class="cote-rule-card">
+  <div class="cote-rule-title">📐 NOTRE RÈGLE DE COTE MINIMUM</div>
+  <div class="cote-rule-txt">Pas de pari sous cote <b>1.60</b>, sauf exception. Être confiant à 90% ne change rien si le gain est trop faible — dans ce cas, on préfère ne rien recommander. L'objectif est la rentabilité sur la durée, pas un coup ponctuel : c'est pourquoi chaque recommandation porte sur un match unique, jamais un combiné.</div>
 </div>
 
 <!-- FILTERS -->
@@ -509,7 +518,10 @@ function buildCard(m){
   else if(isTennis) badges += '<span class="badge badge-tennis">🎾 TENNIS</span>';
   else badges += '<span class="badge badge-free">✓ GRATUIT</span>';
 
-  var coteStr = m.cote_rec && m.cote_rec !== '--' ? m.cote_rec : (m.c1 && m.c1 !== '--' ? m.c1 : '');
+  var coteStr = '';
+  if(!m.no_signal){
+    coteStr = m.cote_rec && m.cote_rec !== '--' ? m.cote_rec : (m.c1 && m.c1 !== '--' ? m.c1 : '');
+  }
   if(m.pari_rec && !isTennis){
     var pr = (m.pari_rec||'').toLowerCase();
     if(pr.includes('btts non')&&m.btts_non&&m.btts_non!=='--') coteStr=m.btts_non;
@@ -523,7 +535,7 @@ function buildCard(m){
   var cssClass = 'mc'+(isTennis?' tennis':'')+(isHot&&!isTennis?' hot':'')+(isVal?' value':'');
   var navTarget = isTennis ? 'tennis-match.html?id='+m.id : 'match.html?id='+m.id;
 
-  var pariLabel = m.pari_rec || (m.no_signal_label||'Aucun signal clair sur ce match');
+  var pariLabel = m.pari_rec || (m.no_signal_label||"Rien d'exploitable ici — on attend mieux.");
 
   // Pour le tennis : afficher classement ATP/WTA
   var tennisInfo = '';
@@ -580,14 +592,17 @@ function buildChocCard(m){
   var isTennis = (m.sport||'football') === 'tennis';
   var heure = (m.date||'').split(' ')[1]||'';
   var hn = m.home&&m.home.n||'', an = m.away&&m.away.n||'';
-  var pariCote = m.cote_rec||'';
-  if(!pariCote||pariCote==='--'){
-    var pr=(m.pari_rec||'').toLowerCase();
-    if(pr.includes('btts non')&&m.btts_non&&m.btts_non!=='--') pariCote=m.btts_non;
-    else if(pr.includes('x2')&&m.dc2x&&m.dc2x!=='--') pariCote=m.dc2x;
-    else if(pr.includes('1x')&&m.dc1x&&m.dc1x!=='--') pariCote=m.dc1x;
-    else if(pr.includes('over 2.5')&&m.co25&&m.co25!=='--') pariCote=m.co25;
-    else if(m.c1&&m.c1!=='--') pariCote=m.c1;
+  var pariCote = '';
+  if(!m.no_signal){
+    pariCote = m.cote_rec||'';
+    if(!pariCote||pariCote==='--'){
+      var pr=(m.pari_rec||'').toLowerCase();
+      if(pr.includes('btts non')&&m.btts_non&&m.btts_non!=='--') pariCote=m.btts_non;
+      else if(pr.includes('x2')&&m.dc2x&&m.dc2x!=='--') pariCote=m.dc2x;
+      else if(pr.includes('1x')&&m.dc1x&&m.dc1x!=='--') pariCote=m.dc1x;
+      else if(pr.includes('over 2.5')&&m.co25&&m.co25!=='--') pariCote=m.co25;
+      else if(m.c1&&m.c1!=='--') pariCote=m.c1;
+    }
   }
   function logoH(team,ini){
     if(!team) return '';
@@ -609,7 +624,7 @@ function buildChocCard(m){
     +'<div><span class="choc-vs">VS</span><div class="choc-hr">'+heure+'</div></div>'
     +'<div class="choc-team">'+logoH(m.away,an.slice(0,2).toUpperCase())+'<div class="choc-name" style="color:rgba(226,232,240,0.65)">'+an.toUpperCase()+'</div>'+(m.away&&m.away.rank?'<div class="choc-sub-lbl">ATP #'+m.away.rank+'</div>':'<div class="choc-sub-lbl">'+(isTennis?'JOUEUR':'EXTÉRIEUR')+'</div>')+'</div>'
     +'</div></div>'
-    +'<div class="choc-pari-strip"><div><div class="choc-pari-lbl">'+chocTitle+'</div><div class="choc-pari-bet">'+(m.pari_rec||m.no_signal_label||'Analyse IA')+'</div></div>'
+    +'<div class="choc-pari-strip"><div><div class="choc-pari-lbl">'+chocTitle+'</div><div class="choc-pari-bet">'+(m.pari_rec||m.no_signal_label||"Rien d'exploitable ici — on attend mieux.")+'</div></div>'
     +(pariCote?'<div class="choc-cote">'+pariCote+'</div>':'')
     +'</div></div></div>';
 }

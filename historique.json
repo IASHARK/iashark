@@ -262,11 +262,11 @@
       "match": "Argentina vs Algeria",
       "home": "Argentina",
       "away": "Algeria",
-      "prediction": "Under 2.5",
-      "cote": 1.85,
-      "conf": 7.5,
-      "conf_bucket": "7-8",
-      "market": "autre",
+      "prediction": null,
+      "cote": null,
+      "conf": null,
+      "conf_bucket": null,
+      "market": null,
       "league": "World Cup",
       "league_key": "other",
       "sport": "football",
@@ -274,7 +274,8 @@
       "has_pinnacle": false,
       "has_elo": false,
       "date": "2026-06-15",
-      "result": "loss",
+      "result": "neutral",
+      "no_signal_label": "Rien d'exploitable ici — on attend mieux.",
       "fixture_id": 1489381,
       "type": "single",
       "score": "3-0",
@@ -476,20 +477,38 @@
     }
   ],
   "stats": {
-    "winrate": 66.7,
-    "roi": 85.1,
-    "total": 12,
-    "streak": 5,
+    "winrate": 72.7,
+    "roi": 101.9,
+    "total": 11,
+    "streak": 2,
     "wins": 8,
-    "losses": 4
+    "losses": 3
+  },
+  "stats_by_sport": {
+    "football": {
+      "winrate": 72.7,
+      "roi": 101.9,
+      "total": 11,
+      "streak": 2,
+      "wins": 8,
+      "losses": 3
+    },
+    "tennis": {
+      "winrate": 0,
+      "roi": 0,
+      "total": 0,
+      "streak": 0,
+      "wins": 0,
+      "losses": 0
+    }
   },
   "monthly": [
     {
       "month": "2026-06",
       "label": "Jun 2026",
       "wins": 8,
-      "losses": 4,
-      "total": 12,
+      "losses": 3,
+      "total": 11,
       "roi": 0
     }
   ],
@@ -526,64 +545,56 @@
         "total": 1,
         "winrate": 100,
         "roi": 100
-      },
-      {
-        "key": "autre",
-        "wins": 0,
-        "losses": 1,
-        "total": 1,
-        "winrate": 0,
-        "roi": -100
       }
     ],
     "by_league": [
       {
         "key": "other",
         "wins": 8,
-        "losses": 4,
-        "total": 12,
-        "winrate": 66.7,
-        "roi": 85.1
+        "losses": 3,
+        "total": 11,
+        "winrate": 72.7,
+        "roi": 101.9
       }
     ],
     "by_conf": [
       {
         "key": "7-8",
         "wins": 8,
-        "losses": 4,
-        "total": 12,
-        "winrate": 66.7,
-        "roi": 85.1
+        "losses": 3,
+        "total": 11,
+        "winrate": 72.7,
+        "roi": 101.9
       }
     ],
     "by_sport": [
       {
         "key": "football",
         "wins": 8,
-        "losses": 4,
-        "total": 12,
-        "winrate": 66.7,
-        "roi": 85.1
+        "losses": 3,
+        "total": 11,
+        "winrate": 72.7,
+        "roi": 101.9
       }
     ],
     "by_has_pinnacle": [
       {
         "key": "inconnu",
         "wins": 8,
-        "losses": 4,
-        "total": 12,
-        "winrate": 66.7,
-        "roi": 85.1
+        "losses": 3,
+        "total": 11,
+        "winrate": 72.7,
+        "roi": 101.9
       }
     ],
     "by_has_elo": [
       {
         "key": "inconnu",
         "wins": 8,
-        "losses": 4,
-        "total": 12,
-        "winrate": 66.7,
-        "roi": 85.1
+        "losses": 3,
+        "total": 11,
+        "winrate": 72.7,
+        "roi": 101.9
       }
     ],
     "updated": "2026-06-18"

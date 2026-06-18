@@ -218,14 +218,11 @@
       "match": "Portugal vs Congo DR",
       "home": "Portugal",
       "away": "Congo DR",
-      "prediction": "DC X2",
-      "cote": 3.58,
+      "prediction": "Over 2.5",
+      "cote": 1.8,
       "conf": 7.5,
       "conf_bucket": "7-8",
-      "edge": "+11.1%",
-      "edge_num": 11.1,
-      "edge_bucket": "10%+",
-      "market": "dc_x2",
+      "market": "over25",
       "league": "World Cup",
       "league_key": "other",
       "sport": "football",
@@ -233,7 +230,7 @@
       "has_pinnacle": false,
       "has_elo": false,
       "date": "2026-06-15",
-      "result": "win",
+      "result": "loss",
       "fixture_id": 1539003,
       "type": "single",
       "score": "1-1",
@@ -243,14 +240,11 @@
       "match": "Austria vs Jordan",
       "home": "Austria",
       "away": "Jordan",
-      "prediction": "DC X2",
-      "cote": 3.3,
+      "prediction": "Over 2.5",
+      "cote": 1.98,
       "conf": 7.4,
       "conf_bucket": "7-8",
-      "edge": "44% - 30.3% = +13.7%",
-      "edge_num": 4430.313,
-      "edge_bucket": "10%+",
-      "market": "dc_x2",
+      "market": "over25",
       "league": "World Cup",
       "league_key": "other",
       "sport": "football",
@@ -258,7 +252,7 @@
       "has_pinnacle": false,
       "has_elo": false,
       "date": "2026-06-15",
-      "result": "loss",
+      "result": "win",
       "fixture_id": 1489382,
       "type": "single",
       "score": "3-1",
@@ -268,14 +262,11 @@
       "match": "Argentina vs Algeria",
       "home": "Argentina",
       "away": "Algeria",
-      "prediction": "DC X2",
-      "cote": 3,
+      "prediction": "Under 2.5",
+      "cote": 1.85,
       "conf": 7.5,
       "conf_bucket": "7-8",
-      "edge": "+10.7%",
-      "edge_num": 10.7,
-      "edge_bucket": "10%+",
-      "market": "dc_x2",
+      "market": "autre",
       "league": "World Cup",
       "league_key": "other",
       "sport": "football",
@@ -293,14 +284,11 @@
       "match": "Iraq vs Norway",
       "home": "Iraq",
       "away": "Norway",
-      "prediction": "DC 1X",
-      "cote": 4.65,
+      "prediction": "Over 2.5",
+      "cote": 1.62,
       "conf": 7.5,
       "conf_bucket": "7-8",
-      "edge": "+21.5% (43% modèle - 21.5% implicite cote 4.65)",
-      "edge_num": 21.54321,
-      "edge_bucket": "10%+",
-      "market": "dc1x",
+      "market": "over25",
       "league": "World Cup",
       "league_key": "other",
       "sport": "football",
@@ -308,7 +296,7 @@
       "has_pinnacle": false,
       "has_elo": false,
       "date": "2026-06-15",
-      "result": "loss",
+      "result": "win",
       "fixture_id": 1539016,
       "type": "single",
       "score": "1-4",
@@ -488,48 +476,48 @@
     }
   ],
   "stats": {
-    "winrate": 58.3,
-    "roi": 84.9,
+    "winrate": 66.7,
+    "roi": 85.1,
     "total": 12,
-    "streak": 2,
-    "wins": 7,
-    "losses": 5
+    "streak": 5,
+    "wins": 8,
+    "losses": 4
   },
   "monthly": [
     {
       "month": "2026-06",
       "label": "Jun 2026",
-      "wins": 7,
-      "losses": 5,
+      "wins": 8,
+      "losses": 4,
       "total": 12,
-      "roi": 2.1
+      "roi": 0
     }
   ],
   "backtesting": {
     "by_market": [
       {
-        "key": "dc_x2",
-        "wins": 3,
-        "losses": 2,
-        "total": 5,
-        "winrate": 60,
-        "roi": 160.6
+        "key": "over25",
+        "wins": 4,
+        "losses": 3,
+        "total": 7,
+        "winrate": 57.1,
+        "roi": 13.7
       },
       {
-        "key": "over25",
+        "key": "dc_x2",
         "wins": 2,
-        "losses": 2,
-        "total": 4,
-        "winrate": 50,
-        "roi": 9
+        "losses": 0,
+        "total": 2,
+        "winrate": 100,
+        "roi": 372.5
       },
       {
         "key": "dc1x",
         "wins": 1,
-        "losses": 1,
-        "total": 2,
-        "winrate": 50,
-        "roi": 40
+        "losses": 0,
+        "total": 1,
+        "winrate": 100,
+        "roi": 180
       },
       {
         "key": "btts_oui",
@@ -538,56 +526,64 @@
         "total": 1,
         "winrate": 100,
         "roi": 100
+      },
+      {
+        "key": "autre",
+        "wins": 0,
+        "losses": 1,
+        "total": 1,
+        "winrate": 0,
+        "roi": -100
       }
     ],
     "by_league": [
       {
         "key": "other",
-        "wins": 7,
-        "losses": 5,
+        "wins": 8,
+        "losses": 4,
         "total": 12,
-        "winrate": 58.3,
-        "roi": 84.9
+        "winrate": 66.7,
+        "roi": 85.1
       }
     ],
     "by_conf": [
       {
         "key": "7-8",
-        "wins": 7,
-        "losses": 5,
+        "wins": 8,
+        "losses": 4,
         "total": 12,
-        "winrate": 58.3,
-        "roi": 84.9
+        "winrate": 66.7,
+        "roi": 85.1
       }
     ],
     "by_sport": [
       {
         "key": "football",
-        "wins": 7,
-        "losses": 5,
+        "wins": 8,
+        "losses": 4,
         "total": 12,
-        "winrate": 58.3,
-        "roi": 84.9
+        "winrate": 66.7,
+        "roi": 85.1
       }
     ],
     "by_has_pinnacle": [
       {
         "key": "inconnu",
-        "wins": 7,
-        "losses": 5,
+        "wins": 8,
+        "losses": 4,
         "total": 12,
-        "winrate": 58.3,
-        "roi": 84.9
+        "winrate": 66.7,
+        "roi": 85.1
       }
     ],
     "by_has_elo": [
       {
         "key": "inconnu",
-        "wins": 7,
-        "losses": 5,
+        "wins": 8,
+        "losses": 4,
         "total": 12,
-        "winrate": 58.3,
-        "roi": 84.9
+        "winrate": 66.7,
+        "roi": 85.1
       }
     ],
     "updated": "2026-06-18"

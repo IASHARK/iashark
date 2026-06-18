@@ -381,6 +381,7 @@ function setSport(sport) {
   updateCounts();
   buildLeagueBtns(getSportMatchs());
   renderMatchs();
+  loadStats();
 }
 
 function getSportMatchs() {
@@ -703,7 +704,8 @@ async function loadStats(){
   try{
     var resp = await fetch('historique.json?t='+Date.now());
     var data = await resp.json();
-    var s = data.stats || {};
+    var bySport = data.stats_by_sport || {};
+    var s = bySport[currentSport] || data.stats || {};
     var wrEl = document.getElementById('tickerWinrate');
     var roiEl = document.getElementById('tickerRoi');
     if(wrEl) wrEl.textContent = (typeof s.winrate === 'number') ? s.winrate.toFixed(1)+'%' : '—';

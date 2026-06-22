@@ -633,6 +633,10 @@ function buildMarketsList(m){
 
 // ── NOUVEAU PRO : DONUT 1X2 (vraies données p1/pn/p2) ────────────────
 function buildDonut(hn,an,p1,pn,p2){
+  // FIX : normaliser si la somme dépasse 100 (peut arriver sur les matchs WC
+  // dont le modèle retourne des probas non normalisées)
+  var rawTotal=p1+pn+p2;
+  if(rawTotal>105){var scale=100/rawTotal;p1=Math.round(p1*scale);pn=Math.round(pn*scale);p2=100-p1-pn;}
   var total=p1+pn+p2||1;
   var r=42,cx=55,cy=55,circ=2*Math.PI*r;
   var segs=[
@@ -882,9 +886,19 @@ function buildCompTable(hn,an,ch,ca){
   var rows=def.map(function(c){
     var vh=Math.min(Math.max(dh[c.key]||0,0),100);
     var va=Math.min(Math.max(da[c.key]||0,0),100);
+    var maxV=Math.max(vh,va,1);
+    // Largeur de chaque barre = proportion relative au max de la ligne (50% max)
+    var wH=Math.round((vh/maxV)*50);
+    var wA=Math.round((va/maxV)*50);
+    // Barre home depuis gauche, barre away depuis droite — structure flex séparée
+    var barHtml='<div style="display:flex;height:4px;border-radius:3px;overflow:hidden;background:rgba(255,255,255,0.04);">'
+      +'<div style="width:'+wH+'%;background:linear-gradient(90deg,var(--cyan2),var(--cyan));height:100%;border-radius:3px;"></div>'
+      +'<div style="flex:1"></div>'
+      +'<div style="width:'+wA+'%;background:rgba(226,232,240,0.18);height:100%;border-radius:3px;"></div>'
+      +'</div>';
     return '<tr>'
       +'<td class="comp-val h">'+vh+'</td>'
-      +'<td class="comp-bar-cell"><div class="comp-bar-track"><div class="comp-bar-h" style="width:'+(vh/2)+'%"></div><div class="comp-bar-a" style="width:'+(va/2)+'%"></div></div><div class="comp-lbl-mid">'+c.label+'</div></td>'
+      +'<td class="comp-bar-cell">'+barHtml+'<div class="comp-lbl-mid">'+c.label+'</div></td>'
       +'<td class="comp-val a">'+va+'</td>'
       +'</tr>';
   }).join('');
@@ -1212,6 +1226,14 @@ function render(m){
   var isWC=m.league_key==='wc'||m.sport==='football'&&m.wc_probs;
   var isTennis=m.sport==='tennis';
   var pariRec=m.pari_rec||'', paricote=m.cote_rec||'—';
+
+  // FIX : normaliser les probabilités si leur somme dépasse 100
+  // (arrive sur les matchs WC dont le modèle peut retourner p1+pn+p2 > 100)
+  var rp1=m.p1||0, rpn=m.pn||0, rp2=m.p2||0;
+  var rawSum=rp1+rpn+rp2;
+  if(rawSum>105){var sc=100/rawSum;rp1=Math.round(rp1*sc);rpn=Math.round(rpn*sc);rp2=100-rp1-rpn;}
+  // Réassigner sur m (shallow) pour que tous les blocs en aval lisent les valeurs normalisées
+  m=Object.assign({},m,{p1:rp1,pn:rpn,p2:rp2});
 
   document.title=hn+' vs '+an+' — IASHARK';
 

@@ -90,17 +90,82 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 .stade-name{font-family:'Space Mono',monospace;font-size:8px;color:var(--muted);}
 .stade-meta{margin-left:auto;font-family:'Space Mono',monospace;font-size:7px;color:var(--muted2);}
 
-/* PARIS RECOMMANDÉ */
+/* ── NOUVEAU : PARIS RECOMMANDÉ + JAUGE CIRCULAIRE + MEILLEUR MARCHÉ ── */
 .pari-main{background:linear-gradient(135deg,rgba(34,211,238,0.06),rgba(6,182,212,0.01));border:1px solid var(--bc);border-radius:13px;padding:16px;position:relative;overflow:hidden;}
 .pari-main::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,var(--cyan),transparent);}
-.pm-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px;}
-.pm-left{}
+.pm-headline{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:10px;}
 .pm-lbl{font-family:'Space Mono',monospace;font-size:7px;color:var(--cyan);letter-spacing:2px;margin-bottom:3px;}
-.pm-bet{font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--text);line-height:1;margin-bottom:3px;}
-.pm-right{text-align:right;flex-shrink:0;}
-.pm-cote{font-family:'Bebas Neue',sans-serif;font-size:46px;color:var(--cyan);line-height:1;}
+.pm-bet{font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--text);line-height:1;}
+.pm-cote-big{font-family:'Bebas Neue',sans-serif;font-size:38px;color:var(--cyan);line-height:1;text-align:right;flex-shrink:0;}
 
-/* JAUGE CONFIANCE */
+.gauge-row{display:flex;gap:12px;align-items:stretch;margin-bottom:10px;}
+.gauge-wrap{flex-shrink:0;width:100px;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(255,255,255,0.02);border-radius:11px;padding:10px 6px;}
+.gauge-svg{width:78px;height:78px;}
+.gauge-num{font-family:'Bebas Neue',sans-serif;font-size:22px;fill:var(--cyan);}
+.gauge-den{font-family:'Space Mono',monospace;font-size:7px;fill:var(--muted);}
+.gauge-lbl{font-family:'Space Mono',monospace;font-size:6px;color:var(--muted);letter-spacing:1.5px;margin-top:4px;text-align:center;}
+.gauge-badge{font-family:'Space Mono',monospace;font-size:6.5px;letter-spacing:1px;padding:2px 7px;border-radius:10px;margin-top:5px;background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);color:var(--amber);white-space:nowrap;}
+
+.mkt-best-box{flex:1;display:flex;flex-direction:column;gap:6px;background:rgba(255,255,255,0.015);border:1px solid var(--border);border-radius:11px;padding:10px 12px;justify-content:center;}
+.mbb-lbl{font-family:'Space Mono',monospace;font-size:6.5px;color:var(--muted);letter-spacing:1.5px;}
+.mbb-row{display:flex;justify-content:space-between;align-items:baseline;}
+.mbb-name{font-size:9px;color:#94a3b8;}
+.mbb-val{font-family:'Space Mono',monospace;font-size:11px;color:var(--text);font-weight:700;}
+.mbb-val.cyan{color:var(--cyan);}
+.mbb-val.green{color:var(--green);}
+.mbb-divider{height:1px;background:var(--border);margin:1px 0;}
+
+.pm-warn{margin-top:8px;font-family:'Space Mono',monospace;font-size:7px;color:var(--amber);}
+
+/* ── NOUVEAU : TABLEAU TOUS LES MARCHÉS ── */
+.mkt-table{width:100%;border-collapse:collapse;margin-top:4px;}
+.mkt-table th{font-family:'Space Mono',monospace;font-size:6px;color:var(--muted);letter-spacing:1px;text-align:left;padding:0 8px 6px;font-weight:400;}
+.mkt-table th.r{text-align:right;}
+.mkt-table td{padding:7px 8px;font-size:10px;border-top:1px solid var(--border);}
+.mkt-table tr.best td{background:rgba(34,211,238,0.04);}
+.mkt-table tr:first-child td{border-top:none;}
+.mkt-table .mname{font-family:'Space Mono',monospace;font-size:9px;color:var(--text);}
+.mkt-table .mcote{font-family:'Bebas Neue',sans-serif;font-size:15px;color:var(--cyan);text-align:right;}
+.mkt-table .mprob{font-family:'Space Mono',monospace;font-size:8px;color:var(--muted);text-align:right;}
+.mkt-table .medge{text-align:right;}
+.medge-pos{font-family:'Space Mono',monospace;font-size:7px;color:var(--green);}
+.medge-zero{font-family:'Space Mono',monospace;font-size:7px;color:var(--muted2);}
+.mstar{color:var(--amber);margin-right:3px;}
+
+/* ── NOUVEAU : SCORES LES PLUS PROBABLES ── */
+.scores-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;}
+.score-cell{background:var(--card2);border:1px solid var(--border);border-radius:9px;padding:10px 4px;text-align:center;}
+.score-cell.top{border-color:var(--bc);background:rgba(34,211,238,0.05);}
+.score-cell-val{font-family:'Bebas Neue',sans-serif;font-size:18px;color:var(--text);line-height:1;}
+.score-cell.top .score-cell-val{color:var(--cyan);}
+.score-cell-pct{font-family:'Space Mono',monospace;font-size:7px;color:var(--muted);margin-top:3px;}
+
+/* ── NOUVEAU : RADAR DE FORCES (SVG) ── */
+.radar-wrap{display:flex;align-items:center;gap:14px;}
+.radar-svg{flex-shrink:0;width:160px;height:160px;}
+.radar-legend{flex:1;display:flex;flex-direction:column;gap:7px;}
+.radar-leg-item{display:flex;align-items:center;gap:7px;}
+.radar-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.radar-leg-name{font-family:'Space Mono',monospace;font-size:8px;color:var(--text);}
+
+/* ── NOUVEAU : ANALYSE COMPARATIVE — tableau dense ── */
+.comp-table{width:100%;border-collapse:collapse;}
+.comp-table th{font-family:'Space Mono',monospace;font-size:7px;letter-spacing:1px;padding:0 4px 8px;font-weight:400;}
+.comp-table th.h{color:var(--cyan);text-align:left;}
+.comp-table th.mid{color:var(--muted);text-align:center;}
+.comp-table th.a{color:var(--text);text-align:right;}
+.comp-table td{padding:7px 4px;border-top:1px solid var(--border);}
+.comp-table tr:first-child td{border-top:none;}
+.comp-val{font-family:'Space Mono',monospace;font-size:10px;width:34px;}
+.comp-val.h{color:var(--cyan);text-align:left;}
+.comp-val.a{color:var(--text);text-align:right;}
+.comp-bar-cell{padding:7px 6px;}
+.comp-bar-track{height:4px;border-radius:3px;background:rgba(255,255,255,0.04);overflow:hidden;display:flex;}
+.comp-bar-h{background:linear-gradient(90deg,var(--cyan2),var(--cyan));height:100%;}
+.comp-bar-a{background:rgba(226,232,240,0.18);height:100%;margin-left:auto;}
+.comp-lbl-mid{font-family:'Space Mono',monospace;font-size:6px;color:var(--muted);text-align:center;letter-spacing:0.5px;}
+
+/* JAUGE CONFIANCE (ancienne, conservée pour fallback) */
 .conf-block{background:rgba(255,255,255,0.02);border-radius:9px;padding:10px 12px;margin:10px 0;}
 .conf-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
 .conf-score{font-family:'Bebas Neue',sans-serif;font-size:40px;line-height:1;color:var(--cyan);}
@@ -111,7 +176,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 .conf-scale{display:flex;justify-content:space-between;margin-top:4px;}
 .conf-scale span{font-family:'Space Mono',monospace;font-size:6px;color:var(--muted2);letter-spacing:1px;}
 
-/* MARCHÉS — tableau edge */
+/* MARCHÉS — ancien (conservé pour tennis qui garde l'ancien format) */
 .markets-table{display:flex;flex-direction:column;gap:5px;margin-top:10px;}
 .mkt-row{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;background:rgba(255,255,255,0.02);border:1px solid var(--border);}
 .mkt-row.best{background:rgba(34,211,238,0.04);border-color:var(--bc);}
@@ -121,14 +186,31 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 .mkt-edge{font-family:'Space Mono',monospace;font-size:7px;padding:2px 6px;border-radius:4px;white-space:nowrap;}
 .mkt-edge.pos{background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.2);color:var(--green);}
 .mkt-edge.zero{background:rgba(255,255,255,0.02);border:1px solid var(--border);color:var(--muted);}
-.mkt-best-tag{font-family:'Space Mono',monospace;font-size:6px;color:var(--cyan);letter-spacing:1px;}
-.pm-warn{margin-top:8px;font-family:'Space Mono',monospace;font-size:7px;color:var(--amber);}
 
 /* FACTEUR IA */
 .facteur{background:rgba(245,158,11,0.03);border:1px solid rgba(245,158,11,0.12);border-radius:10px;padding:11px 14px;display:flex;gap:10px;align-items:flex-start;}
 .fact-icon{font-size:18px;flex-shrink:0;}
 .fact-lbl{font-family:'Space Mono',monospace;font-size:7px;color:var(--amber);letter-spacing:2px;margin-bottom:3px;}
 .fact-txt{font-size:12px;color:var(--text);line-height:1.5;}
+
+/* ── NOUVEAU : CONTEXTE DU MATCH ── */
+.ctx-text{font-size:12px;color:#94a3b8;line-height:1.7;margin-bottom:10px;}
+.ctx-fiche{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.ctx-fiche-col{background:var(--card2);border:1px solid var(--border);border-radius:9px;padding:10px 12px;}
+.ctx-fiche-team{font-family:'Space Mono',monospace;font-size:7px;letter-spacing:1px;color:var(--muted);margin-bottom:7px;padding-bottom:6px;border-bottom:1px solid var(--border);}
+.ctx-fiche-row{display:flex;justify-content:space-between;align-items:center;padding:2px 0;font-size:10px;color:var(--muted);}
+.ctx-fiche-val{font-family:'Bebas Neue',sans-serif;font-size:14px;color:var(--text);}
+
+/* ── NOUVEAU : POURQUOI CE PARI ── */
+.why-list{display:flex;flex-direction:column;gap:0;}
+.why-block{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);}
+.why-block:last-child{border-bottom:none;padding-bottom:0;}
+.why-block:first-child{padding-top:0;}
+.why-num{flex-shrink:0;width:24px;height:24px;border-radius:50%;background:rgba(34,211,238,0.08);border:1px solid var(--bc);color:var(--cyan);font-family:'Space Mono',monospace;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;}
+.why-body{flex:1;padding-top:2px;}
+.why-titre{font-family:'Space Mono',monospace;font-size:9px;color:var(--text);letter-spacing:0.5px;font-weight:700;margin-bottom:4px;}
+.why-txt{font-size:12px;color:#94a3b8;line-height:1.65;}
+.why-txt strong{color:var(--text);font-weight:600;}
 
 /* VERDICT */
 .verdict-block{background:rgba(255,255,255,0.015);border:1px solid var(--border);border-radius:10px;padding:12px 14px;}
@@ -192,6 +274,20 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 .arb-n{font-family:'Bebas Neue',sans-serif;font-size:26px;line-height:1;color:var(--amber);}
 .arb-l{font-family:'Space Mono',monospace;font-size:6px;color:var(--muted);margin-top:2px;}
 
+/* ── NOUVEAU : ABSENTS & RETOURS — mini-tableau ── */
+.abs-table{width:100%;border-collapse:collapse;}
+.abs-table th{font-family:'Space Mono',monospace;font-size:6px;color:var(--muted);letter-spacing:1px;text-align:left;padding:0 6px 7px;font-weight:400;}
+.abs-table td{padding:7px 6px;border-top:1px solid var(--border);font-size:10px;}
+.abs-table tr:first-child td{border-top:none;}
+.abs-team-tag{display:inline-block;width:6px;height:6px;border-radius:50%;margin-right:6px;}
+.abs-team-tag.h{background:var(--cyan);}
+.abs-team-tag.a{background:rgba(226,232,240,0.5);}
+.abs-name{font-size:10px;color:var(--text);}
+.abs-reason{font-family:'Space Mono',monospace;font-size:7px;color:var(--muted);}
+.abs-status{font-family:'Space Mono',monospace;font-size:6.5px;letter-spacing:0.5px;padding:2px 6px;border-radius:4px;white-space:nowrap;}
+.abs-status.out{color:var(--red);background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.18);}
+.abs-status.susp{color:var(--amber);background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.18);}
+
 /* SURFACE TENNIS */
 .surf-block{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
 .surf-col{background:var(--card2);border:1px solid var(--border);border-radius:9px;padding:11px 13px;}
@@ -214,22 +310,6 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 .tourec-l{font-family:'Space Mono',monospace;font-size:7px;color:var(--muted2);}
 .tourec-v{font-family:'Bebas Neue',sans-serif;font-size:14px;color:var(--text);}
 .tourec-best{font-family:'Space Mono',monospace;font-size:7px;color:var(--cyan);margin-top:4px;}
-
-/* COMP */
-.comp{display:grid;grid-template-columns:1fr 1fr;background:var(--border);border-radius:10px;overflow:hidden;border:1px solid var(--border);}
-.comp-c{background:var(--card2);padding:12px;}
-.comp-c:first-child{border-right:1px solid var(--border);}
-.comp-lbl{font-family:'Space Mono',monospace;font-size:7px;letter-spacing:1px;margin-bottom:10px;padding-bottom:7px;border-bottom:1px solid var(--border);}
-.crit{display:flex;flex-direction:column;gap:8px;}
-.cr{display:flex;flex-direction:column;gap:3px;}
-.cr-top{display:flex;justify-content:space-between;}
-.cr-lbl{font-family:'Space Mono',monospace;font-size:6px;color:var(--muted);letter-spacing:1px;}
-.cr-val{font-family:'Space Mono',monospace;font-size:8px;}
-.cr-bar{height:2px;background:rgba(255,255,255,0.04);border-radius:2px;overflow:hidden;}
-.cr-fill{height:100%;border-radius:2px;transition:width 1.2s ease;}
-.cr-fill.hi{background:linear-gradient(90deg,var(--cyan2),var(--cyan));}
-.cr-fill.mid{background:linear-gradient(90deg,#d97706,var(--amber));}
-.cr-fill.lo{background:linear-gradient(90deg,#dc2626,var(--red));}
 
 /* PATTERNS — graphique buts */
 .pat-double-wrap{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
@@ -338,12 +418,57 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 .ni:hover .ni-icon{transform:translateY(-2px);}
 .ni-lbl{font-family:'Space Mono',monospace;font-size:6px;letter-spacing:1px;color:var(--muted);}
 
+/* ── NOUVEAU : TAB NAVIGATION ── */
+.tabbar{display:flex;gap:0;border-bottom:1px solid var(--border);background:var(--card);position:sticky;top:50px;z-index:40;}
+.tab-btn{flex:1;font-family:'Space Mono',monospace;font-size:8px;letter-spacing:1.5px;color:var(--muted);background:none;border:none;padding:13px 6px;cursor:pointer;position:relative;transition:.15s;}
+.tab-btn:hover{color:#94a3b8;}
+.tab-btn.active{color:var(--cyan);}
+.tab-btn.active::after{content:'';position:absolute;bottom:-1px;left:0;right:0;height:2px;background:var(--cyan);}
+.tab-panel{display:none;}
+.tab-panel.active{display:block;animation:tabfade .25s ease;}
+@keyframes tabfade{from{opacity:0}to{opacity:1}}
+
 @media(max-width:480px){
   .pat-double-wrap{grid-template-columns:1fr;}
   .wc-grid{grid-template-columns:1fr;}
   .surf-block{grid-template-columns:1fr;}
   .tourec-grid{grid-template-columns:1fr;}
-}
+  .gauge-row{flex-direction:column;}
+  .gauge-wrap{width:100%;flex-direction:row;justify-content:center;gap:10px;}
+  .radar-wrap{flex-direction:column;}
+  .radar-svg{width:140px;height:140px;}
+  .scores-grid{grid-template-columns:repeat(3,1fr);}
+}/* ── NOUVEAU PRO : DONUT 1X2 ── */
+.donut-row{display:flex;align-items:center;gap:16px;}
+.donut-svg{flex-shrink:0;width:110px;height:110px;}
+.donut-legend{flex:1;display:flex;flex-direction:column;gap:8px;}
+.donut-leg-item{display:flex;align-items:center;gap:8px;}
+.donut-dot{width:9px;height:9px;border-radius:2px;flex-shrink:0;}
+.donut-leg-name{font-family:'Space Mono',monospace;font-size:9px;color:var(--text);flex:1;}
+.donut-leg-val{font-family:'Bebas Neue',sans-serif;font-size:16px;}
+
+/* ── NOUVEAU PRO : MINI COURBE xG (SVG polyline) ── */
+.curve-wrap{background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;}
+.curve-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+.curve-title{font-family:'Space Mono',monospace;font-size:7px;color:var(--muted);letter-spacing:1px;}
+.curve-legend{display:flex;gap:10px;}
+.curve-leg{display:flex;align-items:center;gap:4px;font-family:'Space Mono',monospace;font-size:6.5px;}
+.curve-leg-line{width:10px;height:2px;border-radius:1px;}
+.curve-svg{width:100%;height:90px;display:block;}
+
+.demo-tag{font-family:'Space Mono',monospace;font-size:6px;letter-spacing:1px;color:var(--amber);background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);padding:2px 6px;border-radius:4px;margin-left:6px;white-space:nowrap;}
+
+/* ── NOUVEAU PRO : SECTION VALUE BETS (variante) ── */
+.vb-row{display:flex;align-items:center;gap:8px;padding:9px 11px;background:var(--card2);border:1px solid var(--border);border-radius:9px;}
+.vb-row.starred{border-color:rgba(245,158,11,0.3);background:rgba(245,158,11,0.04);}
+.vb-star{color:var(--amber);font-size:11px;flex-shrink:0;}
+.vb-name{font-family:'Space Mono',monospace;font-size:9px;color:var(--text);flex:1;}
+.vb-cote{font-family:'Bebas Neue',sans-serif;font-size:16px;color:var(--cyan);width:38px;text-align:right;}
+.vb-value{font-family:'Space Mono',monospace;font-size:8px;color:var(--green);width:42px;text-align:right;}
+
+.demo-section-lbl{font-family:'Space Mono',monospace;font-size:7px;color:var(--amber);letter-spacing:2px;margin:18px 18px 4px;display:flex;align-items:center;gap:6px;}
+.demo-section-lbl::after{content:'';flex:1;height:1px;background:rgba(245,158,11,0.15);}
+
 </style>
 </head>
 <body>
@@ -382,14 +507,108 @@ function lgImg(team,ini){
   return '<img class="team-logo" src="'+url+'" onerror="this.outerHTML=\'<div class=team-logo-ph>'+ini+'</div>\'">';
 }
 function fmtEdge(e){
-  if(e===null||e===undefined)return '<span class="mkt-edge zero">—</span>';
+  if(e===null||e===undefined)return '<span class="medge-zero">—</span>';
   var n=parseFloat(e);
-  if(n>0)return '<span class="mkt-edge pos">+'+n.toFixed(1)+'%</span>';
-  return '<span class="mkt-edge zero">'+n.toFixed(1)+'%</span>';
+  if(n>0)return '<span class="medge-pos">+'+n.toFixed(1)+'%</span>';
+  return '<span class="medge-zero">'+n.toFixed(1)+'%</span>';
+}
+// Extrait le premier pourcentage signé trouvé dans le texte "edge" généré
+// par Claude (ex: "+11.15% (...)" -> 11.15). Retourne null si non trouvé —
+// on n'invente jamais un chiffre absent.
+function parseEdgeText(edgeStr){
+  if(!edgeStr)return null;
+  var m=String(edgeStr).match(/([+-]?\d+(\.\d+)?)\s*%/);
+  return m?parseFloat(m[1]):null;
 }
 
-// ── MARCHÉS avec edge ────────────────────────────────────
-function buildMarkets(m,isPariRec){
+// Traduit un nom de marché technique (tel que produit par le pipeline/
+// Claude, ex: "Over 2.5", "BTTS Non", "DC 1X") en libellé français clair
+// pour l'affichage. Recherche par inclusion (insensible à la casse) pour
+// couvrir les variantes ("Over 2.5 buts", "Under 2.5"...). Si aucune
+// correspondance, retourne le texte d'origine plutôt que de l'effacer.
+function translateMarket(raw){
+  if(!raw)return raw;
+  var s=String(raw).toLowerCase();
+  if(s.includes('over 2.5'))return 'Plus de 2,5 buts';
+  if(s.includes('under 2.5'))return 'Moins de 2,5 buts';
+  if(s.includes('over 1.5'))return 'Plus de 1,5 but';
+  if(s.includes('under 1.5'))return 'Moins de 1,5 but';
+  if(s.includes('over 3.5'))return 'Plus de 3,5 buts';
+  if(s.includes('btts oui')||s.includes('btts yes'))return 'Les deux équipes marquent';
+  if(s.includes('btts non')||s.includes('btts no'))return 'Une équipe ne marque pas';
+  if(s.includes('dc 1x')||s==='1x')return 'Victoire ou nul (domicile)';
+  if(s.includes('dc x2')||s==='x2')return 'Victoire ou nul (extérieur)';
+  if(s.includes('match winner')||s==='1')return 'Victoire à domicile';
+  return raw;
+}
+
+// Nettoie le jargon technique à l'intérieur d'un TEXTE LIBRE (phrases
+// générées par Claude côté pipeline : verdict_shark, facteur_x, contexte,
+// analyse_card...). Contrairement à translateMarket() qui traduit un nom
+// de marché isolé, cette fonction fait des remplacements ciblés mot à mot
+// dans une phrase complète, en respectant la casse d'origine autant que
+// possible. C'est un correctif d'affichage : la vraie solution long terme
+// est de faire produire ces textes directement en français clair par le
+// prompt Claude côté pipeline.js, pour éviter ce genre de remplacement.
+function cleanJargon(text){
+  if(!text)return text;
+  var s=String(text);
+  var replacements=[
+    // Formes avec article déjà présent dans le texte source : on neutralise
+    // l'article cassé en le remplaçant par une formulation sans article
+    // défini, plus sûre grammaticalement même si moins naturelle.
+    [/\ble xGA\b/gi,'le nombre de buts encaissés attendu'],
+    [/\bla xGA\b/gi,'le nombre de buts encaissés attendu'],
+    [/\bxGA\b/gi,'buts encaissés attendus'],
+    [/\ble xG\b/gi,'le nombre de buts attendu'],
+    [/\bla xG\b/gi,'le nombre de buts attendu'],
+    [/\bxG\b/gi,'buts attendus'],
+    [/\bBTTS Oui\b/gi,'les deux équipes marquent'],
+    [/\bBTTS Non\b/gi,'une équipe ne marque pas'],
+    [/\bBTTS\b/gi,'les deux équipes marquent'],
+    [/\bOver 2\.5 buts\b/gi,'plus de 2,5 buts'],
+    [/\bOver 2\.5\b/gi,'plus de 2,5 buts'],
+    [/\bUnder 2\.5 buts\b/gi,'moins de 2,5 buts'],
+    [/\bUnder 2\.5\b/gi,'moins de 2,5 buts'],
+    [/\bOver 1\.5\b/gi,'plus de 1,5 but'],
+    [/\bUnder 1\.5\b/gi,'moins de 1,5 but'],
+    [/\bDC 1X\b/gi,'victoire ou nul (domicile)'],
+    [/\bDC X2\b/gi,'victoire ou nul (extérieur)'],
+    [/\bles lambdas? Poisson\b/gi,'les estimations de buts du modèle'],
+    [/\blambdas? Poisson\b/gi,'estimations de buts du modèle'],
+    [/\ble lambda\b/gi,'l\'estimation de buts'],
+    [/\bla lambda\b/gi,'l\'estimation de buts'],
+    [/\blambda[s]?\b/gi,'estimation de buts'],
+    [/\ble Poisson\b/g,'le modèle statistique'],
+    [/\bPoisson\b/g,'modèle statistique'],
+  ];
+  replacements.forEach(function(r){ s=s.replace(r[0],r[1]); });
+  if(s.length) s=s.charAt(0).toUpperCase()+s.slice(1);
+  return s;
+}
+
+// ── POISSON (même formule que le pipeline, recalculée côté front pour
+// produire la matrice de scores — nécessite lambda_h/lambda_a réels) ──
+function poissonProb(lambda,k){
+  if(lambda<=0)return k===0?1:0;
+  var logFact=0;for(var i=2;i<=k;i++)logFact+=Math.log(i);
+  return Math.exp(-lambda+k*Math.log(lambda)-logFact);
+}
+function topScoresFromLambdas(lambdaH,lambdaA,n){
+  n=n||5;
+  var rows=[];
+  for(var h=0;h<=6;h++){
+    for(var a=0;a<=6;a++){
+      var p=poissonProb(lambdaH,h)*poissonProb(lambdaA,a);
+      rows.push({h:h,a:a,p:p});
+    }
+  }
+  rows.sort(function(x,y){return y.p-x.p;});
+  return rows.slice(0,n);
+}
+
+// ── MARCHÉS avec edge (logique identique à l'existant) ───────────────
+function buildMarketsList(m){
   var mkts=[];
   function edge(prob,cote){
     if(!prob||!cote||cote==='--')return null;
@@ -399,116 +618,294 @@ function buildMarkets(m,isPariRec){
   }
   var p1=m.p1||0,pn=m.pn||0,p2=m.p2||0;
   var p1x=p1+pn, px2=p2+pn;
-
-  // Probabilités Over/Under depuis Poisson si disponible
   var po25=m.po25||0, pbtts=m.btts||0, pu25=100-po25;
 
-  if(m.co25&&m.co25!=='--') mkts.push({name:'Over 2.5',cote:m.co25,edge:edge(po25||55,m.co25)});
-  if(m.cu25&&m.cu25!=='--') mkts.push({name:'Under 2.5',cote:m.cu25,edge:edge(pu25||45,m.cu25)});
-  if(m.btts_oui&&m.btts_oui!=='--') mkts.push({name:'BTTS Oui',cote:m.btts_oui,edge:edge(pbtts||45,m.btts_oui)});
-  if(m.btts_non&&m.btts_non!=='--') mkts.push({name:'BTTS Non',cote:m.btts_non,edge:edge(100-pbtts||55,m.btts_non)});
-  if(m.dc1x&&m.dc1x!=='--') mkts.push({name:'DC 1X',cote:m.dc1x,edge:edge(p1x,m.dc1x)});
-  if(m.dc2x&&m.dc2x!=='--') mkts.push({name:'DC X2',cote:m.dc2x,edge:edge(px2,m.dc2x)});
+  if(m.co25&&m.co25!=='--') mkts.push({key:'over 2.5',name:'Plus de 2,5 buts',cote:m.co25,prob:po25||null,edge:edge(po25||55,m.co25)});
+  if(m.cu25&&m.cu25!=='--') mkts.push({key:'under 2.5',name:'Moins de 2,5 buts',cote:m.cu25,prob:pu25||null,edge:edge(pu25||45,m.cu25)});
+  if(m.btts_oui&&m.btts_oui!=='--') mkts.push({key:'btts oui',name:'Les deux équipes marquent',cote:m.btts_oui,prob:pbtts||null,edge:edge(pbtts||45,m.btts_oui)});
+  if(m.btts_non&&m.btts_non!=='--') mkts.push({key:'btts non',name:'Une équipe ne marque pas',cote:m.btts_non,prob:(100-pbtts)||null,edge:edge(100-pbtts||55,m.btts_non)});
+  if(m.dc1x&&m.dc1x!=='--') mkts.push({key:'dc 1x',name:'Victoire ou nul (domicile)',cote:m.dc1x,prob:p1x||null,edge:edge(p1x,m.dc1x)});
+  if(m.dc2x&&m.dc2x!=='--') mkts.push({key:'dc x2',name:'Victoire ou nul (extérieur)',cote:m.dc2x,prob:px2||null,edge:edge(px2,m.dc2x)});
 
+  mkts.sort(function(a,b){return (b.edge||-99)-(a.edge||-99);});
+  return mkts;
+}
+
+// ── NOUVEAU PRO : DONUT 1X2 (vraies données p1/pn/p2) ────────────────
+function buildDonut(hn,an,p1,pn,p2){
+  var total=p1+pn+p2||1;
+  var r=42,cx=55,cy=55,circ=2*Math.PI*r;
+  var segs=[
+    {val:p1,color:'var(--cyan)'},
+    {val:pn,color:'var(--muted2)'},
+    {val:p2,color:'rgba(226,232,240,0.35)'}
+  ];
+  var offset=0,paths='';
+  segs.forEach(function(s){
+    var frac=s.val/total;
+    var len=circ*frac;
+    paths+='<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="none" stroke="'+s.color+'" stroke-width="16" '
+      +'stroke-dasharray="'+len+' '+(circ-len)+'" stroke-dashoffset="'+(-offset)+'" transform="rotate(-90 '+cx+' '+cy+')"/>';
+    offset+=len;
+  });
+  var svg='<svg class="donut-svg" viewBox="0 0 110 110">'+paths+'</svg>';
+  var legend='<div class="donut-legend">'
+    +'<div class="donut-leg-item"><div class="donut-dot" style="background:var(--cyan)"></div><div class="donut-leg-name">'+hn.slice(0,12)+'</div><div class="donut-leg-val" style="color:var(--cyan)">'+p1+'%</div></div>'
+    +(pn?'<div class="donut-leg-item"><div class="donut-dot" style="background:var(--muted2)"></div><div class="donut-leg-name">Nul</div><div class="donut-leg-val" style="color:var(--muted)">'+pn+'%</div></div>':'')
+    +'<div class="donut-leg-item"><div class="donut-dot" style="background:rgba(226,232,240,0.35)"></div><div class="donut-leg-name">'+an.slice(0,12)+'</div><div class="donut-leg-val">'+p2+'%</div></div>'
+    +'</div>';
+  return '<div class="s"><div class="stitle">PROBABILITÉS 1X2</div><div class="donut-row">'+svg+legend+'</div></div><div class="sep"></div>';
+}
+
+// ── NOUVEAU PRO (DEMO) : COURBE xG 10 DERNIERS MATCHS ────────────────
+// DONNÉE SIMULÉE — le pipeline ne produit pas de série temporelle de xG
+// match par match aujourd'hui (seulement des moyennes et tranches de jeu
+// agrégées sur 20 matchs). Génération déterministe à partir des moyennes
+// réelles disponibles (events_home/away.goals_avg) pour rester cohérent
+// avec le match affiché, mais les points individuels sont reconstruits,
+// pas mesurés. À ne jamais déployer en l'état sans calcul réel pipeline.
+function buildXgCurve(hn,an,avgH,avgA){
+  if(!avgH&&!avgA)return '';
+  var n=10,w=300,h=70,pad=6;
+  function seededSeries(avg,seed){
+    var pts=[];
+    var v=parseFloat(avg)||1.2;
+    for(var i=0;i<n;i++){
+      var wobble=Math.sin((i*1.7+seed)*1.3)*0.45+Math.cos((i*0.9+seed))*0.25;
+      pts.push(Math.max(0.2,v+wobble));
+    }
+    return pts;
+  }
+  var sH=seededSeries(avgH,1), sA=seededSeries(avgA,7);
+  var maxV=Math.max.apply(null,sH.concat(sA).concat([1]));
+  function toPoints(arr){
+    return arr.map(function(v,i){
+      var x=pad+(i/(n-1))*(w-pad*2);
+      var y=h-pad-((v/maxV)*(h-pad*2));
+      return x+','+y;
+    }).join(' ');
+  }
+  return '<div class="curve-wrap"><div class="curve-hdr"><span class="curve-title">BUTS ATTENDUS — 10 DERNIERS MATCHS<span class="demo-tag">DEMO</span></span>'
+    +'<div class="curve-legend"><span class="curve-leg"><span class="curve-leg-line" style="background:var(--cyan)"></span>'+hn.slice(0,10)+'</span><span class="curve-leg"><span class="curve-leg-line" style="background:rgba(226,232,240,0.5)"></span>'+an.slice(0,10)+'</span></div></div>'
+    +'<svg class="curve-svg" viewBox="0 0 '+w+' '+h+'" preserveAspectRatio="none">'
+    +'<polyline points="'+toPoints(sH)+'" fill="none" stroke="var(--cyan)" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/>'
+    +'<polyline points="'+toPoints(sA)+'" fill="none" stroke="rgba(226,232,240,0.5)" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/>'
+    +'</svg></div>';
+}
+
+
+function buildGauge(conf){
+  var pct=Math.min(100,Math.max(0,(conf||0)*10));
+  var r=33, circ=2*Math.PI*r;
+  var offset=circ*(1-pct/100);
+  var col=pct>=75?'var(--cyan)':pct>=60?'var(--amber)':'#94a3b8';
+  var lvl=pct>=75?'SHARK LOCK':pct>=60?'FIABLE':pct>=40?'MODÉRÉ':'PRUDENT';
+  return '<div class="gauge-wrap">'
+    +'<svg class="gauge-svg" viewBox="0 0 80 80">'
+    +'<circle cx="40" cy="40" r="'+r+'" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="7"/>'
+    +'<circle cx="40" cy="40" r="'+r+'" fill="none" stroke="'+col+'" stroke-width="7" stroke-linecap="round" '
+    +'stroke-dasharray="'+circ+'" stroke-dashoffset="'+offset+'" transform="rotate(-90 40 40)" style="transition:stroke-dashoffset 1s ease"/>'
+    +'<text x="40" y="38" text-anchor="middle" class="gauge-num">'+(conf||0).toFixed(0)+'</text>'
+    +'<text x="40" y="52" text-anchor="middle" class="gauge-den">/10</text>'
+    +'</svg>'
+    +'<div class="gauge-lbl">INDICE SHARK</div>'
+    +'<div class="gauge-badge">'+lvl+'</div>'
+    +'</div>';
+}
+
+// ── NOUVEAU : BLOC MEILLEUR MARCHÉ (proba IA vs implicite vs value) ──
+function buildBestMarketBox(pariRec,coteRec,edgeText,probIA){
+  var edgeNum=parseEdgeText(edgeText);
+  var coteF=parseFloat(coteRec);
+  var probImplicite=coteF&&coteF>1?Math.round((1/coteF)*100):null;
+  return '<div class="mkt-best-box">'
+    +'<div class="mbb-lbl">MEILLEUR MARCHÉ</div>'
+    +'<div class="mbb-row"><span class="mbb-name">'+esc(translateMarket(pariRec))+'</span></div>'
+    +'<div class="mbb-divider"></div>'
+    +(probIA?'<div class="mbb-row"><span class="mbb-name">Probabilité estimée par l\'IA</span><span class="mbb-val cyan">'+Math.round(probIA)+'%</span></div>':'')
+    +(probImplicite?'<div class="mbb-row"><span class="mbb-name">Probabilité du marché</span><span class="mbb-val">'+probImplicite+'%</span></div>':'')
+    +(edgeNum!==null?'<div class="mbb-row"><span class="mbb-name">Avantage statistique</span><span class="mbb-val '+(edgeNum>0?'green':'')+'">'+(edgeNum>0?'+':'')+edgeNum.toFixed(1)+'%</span></div>':'')
+    +'</div>';
+}
+
+// ── NOUVEAU : TABLEAU TOUS LES MARCHÉS (consensus) ───────────────────
+function buildMarketsTable(m,pariRec){
+  var mkts=buildMarketsList(m);
   if(!mkts.length)return '';
-  mkts.sort(function(a,b){return (b.edge||0)-(a.edge||0);});
+  var rows=mkts.map(function(mk){
+    var isRec=pariRec&&mk.key===pariRec.toLowerCase().trim();
+    return '<tr class="'+(isRec?'best':'')+'">'
+      +'<td class="mname">'+(isRec?'<span class="mstar">★</span>':'')+mk.name+'</td>'
+      +'<td class="mprob">'+(mk.prob!==null?Math.round(mk.prob)+'%':'—')+'</td>'
+      +'<td class="mcote">'+mk.cote+'</td>'
+      +'<td class="medge">'+fmtEdge(mk.edge!==null?mk.edge*100:null)+'</td>'
+      +'</tr>';
+  }).join('');
+  return '<div class="s"><div class="stitle">CONSENSUS DES MARCHÉS</div>'
+    +'<table class="mkt-table"><thead><tr><th>MARCHÉ</th><th class="r">PROBA IA</th><th class="r">COTE</th><th class="r">VALUE</th></tr></thead><tbody>'
+    +rows+'</tbody></table>'
+    +'</div><div class="sep"></div>';
+}
 
-  var rows=mkts.map(function(mk,i){
-    var cls=i===0&&mk.edge>0?'best':i===1&&mk.edge>0?'best2':'';
-    var isRec=isPariRec&&mk.name.toLowerCase()===isPariRec.toLowerCase();
-    return '<div class="mkt-row '+cls+'">'
-      +'<span class="mkt-name">'+(isRec?'★ ':'')+mk.name+'</span>'
-      +'<span class="mkt-cote">'+mk.cote+'</span>'
-      +fmtEdge(mk.edge!==null?mk.edge*100:null)
-      +'</div>';
+// ── NOUVEAU : SCORES LES PLUS PROBABLES ──────────────────────────────
+function buildScoresProbables(lambdaH,lambdaA,fallbackScores){
+  // Cas 1: on a les vrais lambdas (nouveaux matchs traités après l'ajout
+  // de lambda_h/lambda_a au pipeline) -> matrice Poisson réelle.
+  if(lambdaH&&lambdaA&&lambdaH>0&&lambdaA>0){
+    var top=topScoresFromLambdas(lambdaH,lambdaA,5);
+    var cells=top.map(function(s,i){
+      return '<div class="score-cell'+(i===0?' top':'')+'"><div class="score-cell-val">'+s.h+'-'+s.a+'</div><div class="score-cell-pct">'+Math.round(s.p*100)+'%</div></div>';
+    }).join('');
+    return '<div class="s"><div class="stitle">SCORES LES PLUS PROBABLES</div><div class="scores-grid">'+cells+'</div></div><div class="sep"></div>';
+  }
+  // Cas 2 (fallback, matchs en cache sans lambda): on affiche uniquement
+  // le score central fourni par Claude, sans inventer de distribution de
+  // probabilités qu'on ne peut pas calculer honnêtement.
+  if(fallbackScores&&fallbackScores.length){
+    return '<div class="s"><div class="stitle">SCORE LE PLUS PROBABLE</div>'
+      +'<div class="scores-grid" style="grid-template-columns:repeat(1,140px)"><div class="score-cell top"><div class="score-cell-val">'+esc(fallbackScores[0])+'</div><div class="score-cell-pct">SELON LE MODÈLE</div></div></div>'
+      +'</div><div class="sep"></div>';
+  }
+  return '';
+}
+
+// ── NOUVEAU : RADAR DE FORCES (SVG, 4 axes réels) ────────────────────
+function buildRadar(hn,an,ch,ca){
+  if(!ch&&!ca)return '';
+  // Axes honnêtes basés sur les champs réellement fournis par crit_home/away :
+  // att (attaque), def (défense), fr (forme récente), mot (motivation/enjeu).
+  // Pas de "pressing" inventé — ce champ n'existe pas dans la donnée.
+  var axes=[
+    {key:'att',label:'ATTAQUE'},
+    {key:'def',label:'DÉFENSE'},
+    {key:'fr',label:'FORME'},
+    {key:'mot',label:'ENJEU'}
+  ];
+  var dh=ch||{}, da=ca||{};
+  var hasSignal=axes.some(function(ax){return (dh[ax.key]||0)>0||(da[ax.key]||0)>0;});
+  if(!hasSignal)return '';
+
+  var cx=80,cy=80,maxR=58;
+  function pt(idx,val){
+    var angle=(Math.PI*2*idx/axes.length)-Math.PI/2;
+    var r=maxR*(Math.min(100,Math.max(0,val))/100);
+    return [cx+r*Math.cos(angle),cy+r*Math.sin(angle)];
+  }
+  function polyPoints(crit){
+    return axes.map(function(ax,i){var p=pt(i,crit[ax.key]||0);return p[0]+','+p[1];}).join(' ');
+  }
+  // Grille de fond (cercles concentriques à 33/66/100%)
+  var gridCircles=[33,66,100].map(function(pct){
+    return '<polygon points="'+axes.map(function(ax,i){var p=pt(i,pct);return p[0]+','+p[1];}).join(' ')+'" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>';
+  }).join('');
+  var axisLines=axes.map(function(ax,i){var p=pt(i,100);return '<line x1="'+cx+'" y1="'+cy+'" x2="'+p[0]+'" y2="'+p[1]+'" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>';}).join('');
+  var axisLabels=axes.map(function(ax,i){
+    var p=pt(i,118);
+    var anchor=Math.abs(p[0]-cx)<3?'middle':(p[0]>cx?'start':'end');
+    return '<text x="'+p[0]+'" y="'+p[1]+'" text-anchor="'+anchor+'" font-family="Space Mono,monospace" font-size="7" fill="var(--muted)" dominant-baseline="middle">'+ax.label+'</text>';
   }).join('');
 
-  return '<div class="markets-table">'+rows+'</div>';
+  var svg='<svg class="radar-svg" viewBox="0 0 160 160">'
+    +gridCircles+axisLines
+    +'<polygon points="'+polyPoints(dh)+'" fill="rgba(34,211,238,0.12)" stroke="var(--cyan)" stroke-width="1.5"/>'
+    +'<polygon points="'+polyPoints(da)+'" fill="rgba(226,232,240,0.06)" stroke="rgba(226,232,240,0.4)" stroke-width="1.5"/>'
+    +axisLabels
+    +'</svg>';
+
+  var legend='<div class="radar-legend">'
+    +'<div class="radar-leg-item"><div class="radar-dot" style="background:var(--cyan)"></div><div class="radar-leg-name">'+hn.toUpperCase().slice(0,14)+'</div></div>'
+    +'<div class="radar-leg-item"><div class="radar-dot" style="background:rgba(226,232,240,0.5)"></div><div class="radar-leg-name">'+an.toUpperCase().slice(0,14)+'</div></div>'
+    +axes.map(function(ax){
+      return '<div style="margin-top:4px"><div style="display:flex;justify-content:space-between"><span style="font-family:Space Mono,monospace;font-size:6.5px;color:var(--muted)">'+ax.label+'</span></div>'
+        +'<div style="display:flex;gap:4px;align-items:center;margin-top:2px"><span style="font-family:Space Mono,monospace;font-size:8px;color:var(--cyan);width:22px">'+(dh[ax.key]||0)+'</span><span style="font-family:Space Mono,monospace;font-size:8px;color:var(--muted2)">/</span><span style="font-family:Space Mono,monospace;font-size:8px;color:var(--text);width:22px">'+(da[ax.key]||0)+'</span></div></div>';
+    }).join('')
+    +'</div>';
+
+  return '<div class="s"><div class="stitle">RADAR DE FORCES</div><div class="radar-wrap">'+svg+legend+'</div></div><div class="sep"></div>';
 }
 
-// ── COMP ─────────────────────────────────────────────────
-function buildComp(hn,an,ch,ca){
-  var def=[{label:'ATTAQUE',val:55},{label:'DÉFENSE',val:50},{label:'FORME',val:60},{label:'PRESSING',val:55}];
-  var dh=ch&&ch.length?ch:def;
-  var da=ca&&ca.length?ca:def;
-  function rows(crits){
-    return crits.map(function(c){
-      var w=Math.min(Math.max(c.val||0,0),100);
-      var cls=w>=65?'hi':w>=40?'mid':'lo';
-      var col=w>=65?'var(--green)':w>=40?'var(--amber)':'var(--red)';
-      return '<div class="cr"><div class="cr-top"><span class="cr-lbl">'+(c.label||'')+'</span><span class="cr-val" style="color:'+col+'">'+w+'</span></div><div class="cr-bar"><div class="cr-fill '+cls+'" data-w="'+w+'" style="width:0%"></div></div></div>';
-    }).join('');
-  }
-  return '<div class="comp">'
-    +'<div class="comp-c"><div class="comp-lbl" style="color:var(--cyan)">'+hn.toUpperCase().slice(0,13)+'</div><div class="crit">'+rows(dh)+'</div></div>'
-    +'<div class="comp-c"><div class="comp-lbl" style="color:var(--text)">'+an.toUpperCase().slice(0,13)+'</div><div class="crit">'+rows(da)+'</div></div>'
-    +'</div>';
+
+// ── NOUVEAU : STATS DU MATCH (possession, corners, tirs détaillés, passes,
+// arrêts gardien) — DÉMO. Ces champs (Ball Possession, Corner Kicks, Total
+// Shots, Shots off Goal, Shots insidebox/outsidebox, Blocked Shots,
+// Goalkeeper Saves, Total passes, Passes accurate, Passes %) existent bien
+// dans la réponse /fixtures/statistics d'API-Sports mais ne sont
+// actuellement PAS extraits par le pipeline (seuls Shots on Goal et
+// expected_goals le sont). Valeurs ci-dessous simulées à partir de plages
+// réalistes pour la démo — à remplacer par les vraies données une fois
+// le pipeline étendu pour les lire.
+// Lit les vraies stats du match depuis match_stats_home/away (branchés
+// au pipeline via getWeightedXGStats — moyennes sur les 10 derniers matchs).
+// Ne s'affiche que si au moins une stat est disponible. Pas de fallback
+// simulé : si les données sont absentes (match CM ou API sans stats),
+// le bloc ne s'affiche pas du tout plutôt que d'afficher du faux.
+function buildMatchStats(hn,an,stH,stA){
+  if(!stH&&!stA)return '';
+  var sH=stH||{}, sA=stA||{};
+  var stats=[
+    {label:'POSSESSION',h:sH.possession,a:sA.possession,unit:'%'},
+    {label:'TIRS TOTAUX',h:sH.shots_total,a:sA.shots_total},
+    {label:'TIRS CADRÉS',h:sH.shots_on,a:sA.shots_on},
+    {label:'TIRS HORS CADRE',h:sH.shots_off,a:sA.shots_off},
+    {label:'TIRS BLOQUÉS',h:sH.shots_blocked,a:sA.shots_blocked},
+    {label:'CORNERS',h:sH.corners,a:sA.corners},
+    {label:'FAUTES',h:sH.fouls,a:sA.fouls},
+    {label:'HORS-JEU',h:sH.offsides,a:sA.offsides},
+    {label:'ARRÊTS GARDIEN',h:sH.saves,a:sA.saves},
+    {label:'PASSES RÉUSSIES',h:sH.passes_pct,a:sA.passes_pct,unit:'%'},
+    {label:'BUTS ATTENDUS',h:sH.xg,a:sA.xg},
+    {label:'BUTS ENCAISSÉS ATTENDUS',h:sH.xga,a:sA.xga},
+  ];
+  // Ne garder que les lignes où au moins une valeur est non nulle
+  var visible=stats.filter(function(s){return s.h!=null||s.a!=null;});
+  if(!visible.length)return '';
+  var rows=visible.map(function(s){
+    var vH=s.h!=null?s.h:0, vA=s.a!=null?s.a:0;
+    var maxV=Math.max(vH,vA,0.01);
+    var wH=Math.round((vH/maxV)*100), wA=Math.round((vA/maxV)*100);
+    var dispH=s.h!=null?(s.h+(s.unit||'')):'—';
+    var dispA=s.a!=null?(s.a+(s.unit||'')):'—';
+    return '<tr>'
+      +'<td class="comp-val h">'+dispH+'</td>'
+      +'<td class="comp-bar-cell"><div class="comp-bar-track"><div class="comp-bar-h" style="width:'+(wH/2)+'%"></div><div class="comp-bar-a" style="width:'+(wA/2)+'%"></div></div><div class="comp-lbl-mid">'+s.label+'</div></td>'
+      +'<td class="comp-val a">'+dispA+'</td>'
+      +'</tr>';
+  }).join('');
+  return '<div class="s"><div class="stitle">STATS (MOYENNES 10 DERNIERS MATCHS)</div>'
+    +'<table class="comp-table"><thead><tr><th class="h">'+hn.toUpperCase().slice(0,12)+'</th><th class="mid"></th><th class="a">'+an.toUpperCase().slice(0,12)+'</th></tr></thead><tbody>'+rows+'</tbody></table></div><div class="sep"></div>';
 }
 
-// ── PATTERNS graphique buts (20 matchs) ──────────────────
-function buildPatterns(hn,an,evH,evA,m){
-  if(!evH&&!evA&&!m)return '';
-  var hn3=hn.slice(0,3).toUpperCase(),an3=an.slice(0,3).toUpperCase();
-  var gamesH=(evH&&evH.games)||20, gamesA=(evA&&evA.games)||20;
+// ── NOUVEAU : ANALYSE COMPARATIVE — tableau dense avec barres inline ─
+function buildCompTable(hn,an,ch,ca){
+  var def=[{label:'ATTAQUE',key:'att'},{label:'DÉFENSE',key:'def'},{label:'FORME',key:'fr'},{label:'MOTIVATION',key:'mot'}];
+  var dh=ch||{}, da=ca||{};
+  var rows=def.map(function(c){
+    var vh=Math.min(Math.max(dh[c.key]||0,0),100);
+    var va=Math.min(Math.max(da[c.key]||0,0),100);
+    return '<tr>'
+      +'<td class="comp-val h">'+vh+'</td>'
+      +'<td class="comp-bar-cell"><div class="comp-bar-track"><div class="comp-bar-h" style="width:'+(vh/2)+'%"></div><div class="comp-bar-a" style="width:'+(va/2)+'%"></div></div><div class="comp-lbl-mid">'+c.label+'</div></td>'
+      +'<td class="comp-val a">'+va+'</td>'
+      +'</tr>';
+  }).join('');
+  return '<table class="comp-table"><thead><tr><th class="h">'+hn.toUpperCase().slice(0,12)+'</th><th class="mid"></th><th class="a">'+an.toUpperCase().slice(0,12)+'</th></tr></thead><tbody>'+rows+'</tbody></table>';
+}
 
-  // Stats xG
-  function statRow(lbl,nh,na){
-    if(!nh&&!na)return '';
-    return '<div class="pat-stat-row"><span class="pat-stat-lbl">'+lbl+'</span>'
-      +'<div class="pat-stat-vals">'
-      +'<div class="psv"><div class="psv-n h">'+(nh||'—')+'</div><div class="psv-t">'+hn3+'</div></div>'
-      +'<span class="pat-sep">/</span>'
-      +'<div class="psv"><div class="psv-n a">'+(na||'—')+'</div><div class="psv-t">'+an3+'</div></div>'
-      +'</div></div>';
-  }
-  var statsHtml='<div class="pat-stats-grid">'
-    +statRow('xG moy/match',m&&m.xgH_avg,m&&m.xgA_avg)
-    +statRow('Tirs cadrés/match',m&&m.xgH_shots,m&&m.xgA_shots)
-    +statRow('Tirs totaux/match',m&&m.xgH_shots_total,m&&m.xgA_shots_total)
-    +statRow('Fautes/match',m&&m.xgH_fouls,m&&m.xgA_fouls)
-    +'</div>';
-
-  var slotsH=evH&&evH.slots||[];
-  var slotsA=evA&&evA.slots||[];
-  if(!slotsH.length&&!slotsA.length)return '<div class="s"><div class="stitle">PATTERNS — 20 DERNIERS MATCHS</div>'+statsHtml+'</div><div class="sep"></div>';
-
-  var allNs=slotsH.concat(slotsA).map(function(s){return parseInt(s.n)||0;});
-  var maxN=Math.max.apply(null,allNs.concat([1]));
-
-  function doubleRow(slotM,slotC,games){
-    var nm=parseInt(slotM&&slotM.n)||0;
-    var nc=parseInt(slotC&&slotC.n)||0;
-    var pctM=Math.round((nm/maxN)*100);
-    var pctC=Math.round((nc/maxN)*100);
-    return '<div class="pat-double-row">'
-      +'<div class="pat-slot-lbl">'+(slotM?slotM.t:'—')+'</div>'
-      +'<div class="pat-bars">'
-      +'<div class="pat-bar-row"><div class="pat-bar-track"><div class="pat-bar-fill pf-blue" style="width:'+pctM+'%"></div></div><div class="pat-bar-val">'+nm+'<span class="pat-bar-unit">/'+games+'</span></div></div>'
-      +'<div class="pat-bar-row"><div class="pat-bar-track"><div class="pat-bar-fill pf-red" style="width:'+pctC+'%"></div></div><div class="pat-bar-val">'+nc+'<span class="pat-bar-unit">/'+games+'</span></div></div>'
-      +'</div></div>';
-  }
-
-  var s6=[{t:'0-15',n:0},{t:'15-30',n:0},{t:'30-45',n:0},{t:'45-60',n:0},{t:'60-75',n:0},{t:'75-90',n:0}];
-  function fillSlots(arr){return s6.map(function(d,i){return arr[i]||d;});}
-  var sh=fillSlots(slotsH),sa=fillSlots(slotsA);
-  var sch=evH&&evH.slots_conceded?fillSlots(evH.slots_conceded):s6;
-  var sca=evA&&evA.slots_conceded?fillSlots(evA.slots_conceded):s6;
-
-  function topSlot(slots){var b=null,bv=-1;(slots||[]).forEach(function(s){var n=parseInt(s.n)||0;if(n>bv){bv=n;b=s;}});return b;}
-  var tH=topSlot(slotsH),tA=topSlot(slotsA);
-  var lines=[];
-  if(tH&&parseInt(tH.n)>0) lines.push('<strong>'+hn+'</strong> marque surtout <strong>'+tH.t+'</strong> ('+tH.n+'/'+gamesH+' matchs).');
-  if(tA&&parseInt(tA.n)>0) lines.push('<strong>'+an+'</strong> le plus dangereux <strong>'+tA.t+'</strong> ('+tA.n+'/'+gamesA+' matchs).');
-
-  var chartHtml='<div class="pat-double-wrap">'
-    +'<div class="pat-double-col"><div class="pat-col-hdr"><span style="color:var(--cyan)">'+hn.slice(0,12).toUpperCase()+'</span><div class="pat-legend"><span class="pat-leg pat-leg-blue">⚽ Marqués</span><span class="pat-leg pat-leg-red">🛡 Encaissés</span></div></div>'+sh.map(function(s,i){return doubleRow(s,sch[i],gamesH);}).join('')+'</div>'
-    +'<div class="pat-double-col"><div class="pat-col-hdr"><span>'+an.slice(0,12).toUpperCase()+'</span><div class="pat-legend"><span class="pat-leg pat-leg-blue">⚽ Marqués</span><span class="pat-leg pat-leg-red">🛡 Encaissés</span></div></div>'+sa.map(function(s,i){return doubleRow(s,sca[i],gamesA);}).join('')+'</div>'
-    +'</div>';
-
-  return '<div class="s"><div class="stitle">PATTERNS — 20 DERNIERS MATCHS</div>'
-    +statsHtml
-    +(lines.length?'<div class="pat-comment">'+lines.join(' ')+'</div>':'')
-    +chartHtml
+// ── NOUVEAU : ABSENTS & RETOURS — tableau ────────────────────────────
+function buildAbsentsTable(injuries,homeId,homeN,awayN){
+  if(!injuries||!injuries.length)return '';
+  var rows=injuries.map(function(inj){
+    var isHome=inj.team===homeId;
+    var statusCls=inj.status==='suspended'?'susp':'out';
+    var statusLbl=inj.status==='suspended'?'SUSPENDU':'ABSENT';
+    return '<tr>'
+      +'<td><span class="abs-team-tag '+(isHome?'h':'a')+'"></span><span class="abs-name">'+esc(inj.name)+'</span></td>'
+      +'<td class="abs-reason">'+esc(inj.reason||'')+'</td>'
+      +'<td style="text-align:right"><span class="abs-status '+statusCls+'">'+statusLbl+'</span></td>'
+      +'</tr>';
+  }).join('');
+  return '<div class="s"><div class="stitle">ABSENTS &amp; RETOURS</div>'
+    +'<table class="abs-table"><tbody>'+rows+'</tbody></table>'
     +'</div><div class="sep"></div>';
 }
 
@@ -521,8 +918,6 @@ function buildH2H(hn,an,h2h,homeId){
     if(r==='1')w1++;else if(r==='2')w2++;else wN++;
   });
   var rows=h2h.slice(0,5).map(function(g){
-    var isHome=g.home&&g.home.toLowerCase().includes(hn.toLowerCase().slice(0,4));
-    var hw=g.w==='1'?'win':'',aw=g.w==='2'?'win':'';
     return '<div class="h2h-row">'
       +'<span class="h2h-team '+(g.w==='1'?'win':'')+'">'+esc(g.home||'')+'</span>'
       +'<span class="h2h-score">'+esc(g.s||'?-?')+'</span>'
@@ -544,16 +939,15 @@ function buildElo(hn,an,eloH,eloA,eloSignal){
   if(!eloH&&!eloA)return '';
   var maxElo=Math.max(eloH||0,eloA||0);
   var wH=eloH?Math.round((eloH/maxElo)*100):0;
-  var wA=eloA?Math.round((eloA/maxElo)*100):0;
   var sigColor=eloSignal==='FORT'?'var(--red)':eloSignal==='MODÉRÉ'?'var(--amber)':'var(--muted)';
-  return '<div class="s"><div class="stitle">ELO RATING</div>'
+  return '<div class="s"><div class="stitle">INDICE DE FORCE</div>'
     +'<div class="elo-block">'
     +'<div class="elo-row">'
     +'<div class="elo-team"><div class="elo-name">'+hn.toUpperCase().slice(0,12)+'</div><div class="elo-val" style="color:var(--cyan)">'+(eloH?Math.round(eloH):'—')+'</div></div>'
     +'<div class="elo-bar-wrap"><div class="elo-bar"><div class="elo-fill-h" style="width:'+wH+'%"></div><div class="elo-fill-a" style="width:'+(100-wH)+'%"></div></div></div>'
     +'<div class="elo-team" style="text-align:right"><div class="elo-name">'+an.toUpperCase().slice(0,12)+'</div><div class="elo-val">'+(eloA?Math.round(eloA):'—')+'</div></div>'
     +'</div>'
-    +(eloSignal?'<div class="elo-signal" style="color:'+sigColor+'">SIGNAL '+eloSignal+'</div>':'')
+    +(eloSignal?'<div class="elo-signal" style="color:'+sigColor+'">ÉCART '+eloSignal+'</div>':'')
     +'</div></div><div class="sep"></div>';
 }
 
@@ -589,13 +983,10 @@ function buildWCModel(m){
   if(m.sport!=='football'||!m.wc_probs)return '';
   var wcp=m.wc_probs, wcm=m.wc_markets;
   if(!wcp)return '';
-
   var fatH=wcp.fatigueH||0, fatA=wcp.fatigueA||0;
   var fatColH=fatH>60?'#ef4444':fatH>40?'var(--amber)':'var(--green)';
   var fatColA=fatA>60?'#ef4444':fatA>40?'var(--amber)':'var(--green)';
-
   var altH=wcp.altMalusH||0, altA=wcp.altMalusA||0;
-
   return '<div class="s"><div class="stitle">MODÈLE IA SHARK — CM 2026</div>'
     +'<div class="wc-model">'
     +'<div class="wc-model-title">SIGNAUX COUPE DU MONDE</div>'
@@ -615,7 +1006,6 @@ function buildWCModel(m){
     +(wcp.scoreA?'<div class="wc-stat"><span class="wc-stat-lbl">xG qualifs</span><span class="wc-stat-val">+'+wcp.scoreA.details.xg_for+' / -'+wcp.scoreA.details.xg_against+'</span></div>':'')
     +'</div>'
     +'</div>'
-    // Fatigue
     +'<div class="wc-fatigue-row">'
     +'<span class="wc-fat-lbl">✈ '+esc(m.home.n||'').slice(0,10)+' fatigue</span>'
     +'<div class="wc-fat-bar"><div class="wc-fat-fill" style="width:'+fatH+'%;background:'+fatColH+'"></div></div>'
@@ -647,7 +1037,7 @@ function buildScen(m){
     var last=i===phases.length-1;
     return '<div class="scen-phase">'
       +'<div class="scen-l"><div class="scen-badge">'+(p.t||'')+'</div>'+(!last?'<div class="scen-line"></div>':'')+'</div>'
-      +'<div class="scen-body"><div class="scen-bar-row"><div class="scen-bar"><div class="scen-bar-fill" style="width:'+w+'%"></div></div><span class="scen-pct">'+(p.prob||0)+'%</span></div><div class="scen-txt">'+(p.txt||'')+'</div></div>'
+      +'<div class="scen-body"><div class="scen-bar-row"><div class="scen-bar"><div class="scen-bar-fill" style="width:'+w+'%"></div></div><span class="scen-pct">'+(p.prob||0)+'%</span></div><div class="scen-txt">'+esc(cleanJargon(p.txt||''))+'</div></div>'
       +'</div>';
   }).join('');
   return '<div class="s"><div class="stitle">SCÉNARIO ATTENDU</div><div class="scen-list">'+list+'</div></div><div class="sep"></div>';
@@ -718,6 +1108,85 @@ function buildTourRecord(hn,an,tr1,tr2){
     +'</div><div class="sep"></div>';
 }
 
+// ── NOUVEAU : CONTEXTE DU MATCH + FICHE D'IDENTITÉ (Vue d'ensemble) ──
+// Utilise uniquement des champs réels de data.json : classement,
+// forme récente, indice de force, valeur attaque/défense côté Coupe du
+// Monde (mkt.val_att_h/a si dispo). Aucune donnée inventée — chaque
+// ligne n'apparaît que si la donnée source existe.
+function buildContexteMatch(m,hn,an,isWC,isTennis){
+  var lignes=[];
+  if(m.contexte) lignes.push(esc(cleanJargon(m.contexte)));
+  if(!lignes.length) return '';
+  var fiche='';
+  // Fiche d'identité : classement championnat (foot classique) ou points
+  // FIFA/valeur d'effectif (Coupe du Monde, via wc_probs si présent)
+  if(!isTennis && m.classement && m.classement.home && m.classement.away){
+    fiche='<div class="ctx-fiche">'
+      +'<div class="ctx-fiche-col"><div class="ctx-fiche-team">'+hn.toUpperCase().slice(0,14)+'</div>'
+      +'<div class="ctx-fiche-row"><span>Classement</span><span class="ctx-fiche-val">'+m.classement.home.rank+'e</span></div>'
+      +'<div class="ctx-fiche-row"><span>Points</span><span class="ctx-fiche-val">'+m.classement.home.pts+'</span></div>'
+      +'<div class="ctx-fiche-row"><span>Forme</span><span class="ctx-fiche-val">'+(m.classement.home.form||'—')+'</span></div></div>'
+      +'<div class="ctx-fiche-col"><div class="ctx-fiche-team">'+an.toUpperCase().slice(0,14)+'</div>'
+      +'<div class="ctx-fiche-row"><span>Classement</span><span class="ctx-fiche-val">'+m.classement.away.rank+'e</span></div>'
+      +'<div class="ctx-fiche-row"><span>Points</span><span class="ctx-fiche-val">'+m.classement.away.pts+'</span></div>'
+      +'<div class="ctx-fiche-row"><span>Forme</span><span class="ctx-fiche-val">'+(m.classement.away.form||'—')+'</span></div></div>'
+      +'</div>';
+  } else if(isWC && m.wc_probs && m.wc_probs.scoreH && m.wc_probs.scoreA){
+    var dH=m.wc_probs.scoreH.details||{}, dA=m.wc_probs.scoreA.details||{};
+    fiche='<div class="ctx-fiche">'
+      +'<div class="ctx-fiche-col"><div class="ctx-fiche-team">'+hn.toUpperCase().slice(0,14)+'</div>'
+      +(dH.fifa_pts?'<div class="ctx-fiche-row"><span>Points FIFA</span><span class="ctx-fiche-val">'+dH.fifa_pts+'</span></div>':'')
+      +(dH.wc_exp?'<div class="ctx-fiche-row"><span>Joueurs expérimentés CM</span><span class="ctx-fiche-val">'+dH.wc_exp+'</span></div>':'')
+      +'</div>'
+      +'<div class="ctx-fiche-col"><div class="ctx-fiche-team">'+an.toUpperCase().slice(0,14)+'</div>'
+      +(dA.fifa_pts?'<div class="ctx-fiche-row"><span>Points FIFA</span><span class="ctx-fiche-val">'+dA.fifa_pts+'</span></div>':'')
+      +(dA.wc_exp?'<div class="ctx-fiche-row"><span>Joueurs expérimentés CM</span><span class="ctx-fiche-val">'+dA.wc_exp+'</span></div>':'')
+      +'</div>'
+      +'</div>';
+  }
+  return '<div class="s"><div class="stitle">CONTEXTE DU MATCH</div>'
+    +'<div class="ctx-text">'+lignes.join(' ')+'</div>'
+    +fiche
+    +'</div><div class="sep"></div>';
+}
+
+// ── NOUVEAU : "POURQUOI CE PARI" — explication structurée en tête de
+// l'onglet Décision. Synthétise verdict_shark, facteur_x, edge et
+// contexte déjà fournis par le pipeline, dans une mise en forme
+// pédagogique plutôt que comme des chiffres bruts isolés. Tous les
+// champs utilisés existent déjà dans data.json — aucune donnée inventée.
+function buildPourquoiCePari(m,pariRec,paricote){
+  if(!pariRec)return '';
+  var edgeNum=parseEdgeText(m.edge);
+  var marketFr=translateMarket(pariRec);
+  var blocs=[];
+
+  blocs.push({
+    num:'1', titre:'Le pari recommandé',
+    txt:'L\'IA recommande <strong>'+esc(marketFr)+'</strong> à la cote de <strong>'+esc(paricote)+'</strong>, avec un niveau de confiance de <strong>'+(m.conf||0).toFixed(1)+'/10</strong>.'
+  });
+  if(m.verdict_shark){
+    blocs.push({num:'2', titre:'Le raisonnement', txt:esc(cleanJargon(m.verdict_shark))});
+  }
+  if(m.facteur_x){
+    blocs.push({num:'3', titre:'Le facteur décisif', txt:esc(cleanJargon(m.facteur_x))});
+  }
+  if(edgeNum!==null){
+    blocs.push({num:'4', titre:'Pourquoi cette cote est intéressante',
+      txt:'La probabilité estimée par le modèle est supérieure à celle impliquée par la cote du bookmaker, ce qui représente un avantage statistique d\'environ <strong>'+(edgeNum>0?'+':'')+edgeNum.toFixed(1)+'%</strong> en faveur du parieur sur le long terme.'});
+  }
+  if(m.kelly){
+    blocs.push({num:String(blocs.length+1), titre:'Mise conseillée',
+      txt:'Sur la base de cet avantage statistique, la mise recommandée est d\'environ <strong>'+esc(m.kelly)+'% de la bankroll</strong> (méthode de Kelly fractionnée, pour limiter le risque de ruine en cas d\'erreur du modèle).'});
+  }
+
+  var html=blocs.map(function(b){
+    return '<div class="why-block"><div class="why-num">'+b.num+'</div><div class="why-body"><div class="why-titre">'+b.titre+'</div><div class="why-txt">'+b.txt+'</div></div></div>';
+  }).join('');
+
+  return '<div class="s"><div class="stitle">POURQUOI CE PARI ?</div><div class="why-list">'+html+'</div></div><div class="sep"></div>';
+}
+
 // ── PRO WALL ─────────────────────────────────────────────
 function buildProWall(){
   var inner='<div style="height:120px;background:var(--card2);border-radius:10px;"></div>';
@@ -726,9 +1195,9 @@ function buildProWall(){
     +'<div class="pw-top"><span class="pw-top-lbl">CONTENU PRO</span></div>'
     +'<div class="pw-body">'
     +'<div class="pw-title">Accès <span>complet</span></div>'
-    +'<div class="pw-sub">Analyses avancées, edge calculé, Kelly, alertes temps réel.</div>'
+    +'<div class="pw-sub">Analyses avancées, avantage statistique calculé, mise conseillée, alertes en temps réel.</div>'
     +'<div class="pw-feats">'
-    +'<div class="pw-feat"><div class="pw-feat-l"><div><div class="pw-feat-name">EDGE + KELLY</div><div class="pw-feat-desc">Avantage statistique par marché</div></div></div><span class="pw-badge c1">PRO</span></div>'
+    +'<div class="pw-feat"><div class="pw-feat-l"><div><div class="pw-feat-name">AVANTAGE + MISE CONSEILLÉE</div><div class="pw-feat-desc">Avantage statistique par marché</div></div></div><span class="pw-badge c1">PRO</span></div>'
     +'<div class="pw-feat"><div class="pw-feat-l"><div><div class="pw-feat-name">ALERTES DROPPING ODDS</div><div class="pw-feat-desc">Mouvements de cotes en temps réel</div></div></div><span class="pw-badge c1">PRO</span></div>'
     +'</div></div>'
     +'<div class="pw-cta-wrap"><a class="pw-cta" href="/compte.html">PASSER PRO — 19.95€/MOIS</a></div>'
@@ -742,8 +1211,6 @@ function render(m){
   var isHot=m.hot||(m.conf||0)>=8, isVal=m.val||m.vbet==='OUI';
   var isWC=m.league_key==='wc'||m.sport==='football'&&m.wc_probs;
   var isTennis=m.sport==='tennis';
-  var confPct=Math.round(((m.conf||0)/10)*100);
-  var confLvl=(m.conf||0)>=7.5?'SHARK LOCK':(m.conf||0)>=6.5?'ELEVE':'MODERE';
   var pariRec=m.pari_rec||'', paricote=m.cote_rec||'—';
 
   document.title=hn+' vs '+an+' — IASHARK';
@@ -775,16 +1242,23 @@ function render(m){
     +stadeHtml
     +'</div>';
 
-  // ─ PARIS RECOMMANDÉ
+  // ─ PARIS RECOMMANDÉ (jauge circulaire + bloc meilleur marché + tableau marchés)
   var parisHtml='';
   if(pariRec){
     var coteMin=paricote!=='—'?((parseFloat(paricote)-0.20).toFixed(2)):'';
-    var marketsHtml=!isTennis?buildMarkets(m,pariRec):'';
+    var probIA=null;
+    var pl=pariRec.toLowerCase();
+    if(pl.includes('over 2.5'))probIA=m.po25;
+    else if(pl.includes('under 2.5'))probIA=100-(m.po25||0);
+    else if(pl.includes('btts oui'))probIA=m.btts;
+    else if(pl.includes('btts non'))probIA=100-(m.btts||0);
+    else if(pl.includes('1x'))probIA=(m.p1||0)+(m.pn||0);
+    else if(pl.includes('x2'))probIA=(m.p2||0)+(m.pn||0);
+
     parisHtml='<div class="s"><div class="stitle">PARIS RECOMMANDÉ</div>'
       +'<div class="pari-main">'
-      +'<div class="pm-top"><div class="pm-left"><div class="pm-lbl">SÉLECTION IA DU SOIR</div><div class="pm-bet">'+pariRec.toUpperCase()+'</div></div><div class="pm-right"><div class="pm-cote">'+paricote+'</div></div></div>'
-      +'<div class="conf-block"><div class="conf-top"><div class="conf-score">'+(m.conf||0).toFixed(1)+'<sup>/10</sup></div><div class="conf-badge">'+confLvl+'</div></div><div class="conf-track"><div class="conf-fill" style="width:'+confPct+'%"></div></div><div class="conf-scale"><span>PRUDENT</span><span>CONFIANT</span><span>ÉLEVÉ</span><span>LOCK</span></div></div>'
-      +(marketsHtml?marketsHtml:'')
+      +'<div class="pm-headline"><div><div class="pm-lbl">SÉLECTION IA DU JOUR</div><div class="pm-bet">'+translateMarket(pariRec).toUpperCase()+'</div></div><div class="pm-cote-big">'+paricote+'</div></div>'
+      +'<div class="gauge-row">'+buildGauge(m.conf)+buildBestMarketBox(pariRec,paricote,m.edge,probIA)+'</div>'
       +(coteMin?'<div class="pm-warn">⚠ Si la cote passe sous '+coteMin+' — ne pas jouer</div>':'')
       +'</div></div><div class="sep"></div>';
   }
@@ -795,14 +1269,59 @@ function render(m){
     :'<div class="s"><div class="skip ok"><div class="skip-icon">✅</div><div><div class="skip-lbl">FEU VERT</div><div class="skip-txt">Configuration favorable. <strong>Voir la sélection ci-dessus.</strong></div></div></div></div><div class="sep"></div>';
 
   // ─ FACTEUR IA
-  var facteur=m.facteur_x?'<div class="s"><div class="facteur"><div class="fact-icon">⚡</div><div><div class="fact-lbl">FACTEUR DÉCISIF</div><div class="fact-txt">'+esc(m.facteur_x)+'</div></div></div></div><div class="sep"></div>':'';
+  var facteur=m.facteur_x?'<div class="s"><div class="facteur"><div class="fact-icon">⚡</div><div><div class="fact-lbl">FACTEUR DÉCISIF</div><div class="fact-txt">'+esc(cleanJargon(m.facteur_x))+'</div></div></div></div><div class="sep"></div>':'';
 
   // ─ VERDICT
   var verdict=(m.verdict_shark||m.contexte)?
     '<div class="s"><div class="verdict-block"><div class="verdict-badge">🦈 VERDICT DU SHARK</div>'
-    +(m.verdict_shark?'<div class="verdict-title">'+esc(m.verdict_shark)+'</div>':'')
-    +(m.contexte?'<div class="verdict-body">'+esc(m.contexte)+'</div>':'')
+    +(m.verdict_shark?'<div class="verdict-title">'+esc(cleanJargon(m.verdict_shark))+'</div>':'')
+    +(m.contexte?'<div class="verdict-body">'+esc(cleanJargon(m.contexte))+'</div>':'')
     +'</div></div><div class="sep"></div>':'';
+
+  // ─ PRO WALL (si pas pro)
+  var proWall=!isPro&&!isTennis?buildProWall():'';
+
+  // ─ ONGLET 1 : VUE D'ENSEMBLE
+  var tabApercu=parisHtml+buildContexteMatch(m,hn,an,isWC,isTennis)+skipHtml+facteur+verdict;
+
+  // ─ ONGLET 2 : ANALYSE
+  var tabAnalyse=
+    (!isTennis?buildDonut(hn,an,m.p1||0,m.pn||0,m.p2||0):'')
+    +(!isTennis?buildMarketsTable(m,pariRec):'')
+    +(!isTennis?buildScoresProbables(m.lambda_h,m.lambda_a,m.scores):'')
+    +buildWCModel(m)
+    +(!isTennis?buildRadar(hn,an,m.crit_home,m.crit_away):'')
+    +(!isTennis?'<div class="s"><div class="stitle">ANALYSE COMPARATIVE</div>'+buildCompTable(hn,an,m.crit_home,m.crit_away)+'<div style="margin-top:10px">'+buildXgCurve(hn,an,(m.match_stats_home&&m.match_stats_home.xg)||(m.events_home&&m.events_home.goals_avg),(m.match_stats_away&&m.match_stats_away.xg)||(m.events_away&&m.events_away.goals_avg))+'</div></div><div class="sep"></div>':'')
+    +(!isTennis?buildMatchStats(hn,an,m.match_stats_home,m.match_stats_away):'')
+    +(isTennis?buildSurface(hn,an,m.surf_stats_p1,m.surf_stats_p2,m.surface):'')
+    +buildScen(m);
+
+  // ─ ONGLET 3 : DÉCISION
+  var tabCriteres=
+    buildPourquoiCePari(m,pariRec,paricote)
+    +(isTennis?buildTennisH2H(hn,an,m.h2h_tennis):buildH2H(hn,an,m.h2h,m.home&&m.home.id))
+    +(!isTennis&&!isWC?buildElo(hn,an,m.elo_home,m.elo_away,m.elo_signal):'')
+    +(!isTennis?buildDropping(m.dropping_odds):'')
+    +(isTennis?buildTourRecord(hn,an,m.tour_record_p1,m.tour_record_p2):'')
+    +(!isTennis?buildAbsentsTable(m.injuries,m.home&&m.home.id,hn,an):'')
+    +buildPlayers(hn,an,m.top_scorers_home,m.top_scorers_away)
+    +(!isTennis?buildArbitre(m.arbitre):'');
+
+  // Retirer le dernier .sep traînant de chaque onglet pour un rendu propre
+  function trimSep(html){return html.replace(/<div class="sep"><\/div>\s*$/,'');}
+  tabApercu=trimSep(tabApercu);
+  tabAnalyse=trimSep(tabAnalyse);
+  tabCriteres=trimSep(tabCriteres);
+
+  var tabsNav='<div class="tabbar">'
+    +'<button class="tab-btn active" data-tab="apercu" onclick="switchTab(this,\'apercu\')">VUE D\'ENSEMBLE</button>'
+    +'<button class="tab-btn" data-tab="analyse" onclick="switchTab(this,\'analyse\')">ANALYSE</button>'
+    +'<button class="tab-btn" data-tab="criteres" onclick="switchTab(this,\'criteres\')">DÉCISION</button>'
+    +'</div>';
+
+  var tabsContent='<div id="tab-apercu" class="tab-panel active">'+tabApercu+'</div>'
+    +'<div id="tab-analyse" class="tab-panel">'+tabAnalyse+'</div>'
+    +'<div id="tab-criteres" class="tab-panel">'+tabCriteres+'</div>';
 
   // ─ PRO WALL (si pas pro)
   var proWall=!isPro&&!isTennis?buildProWall():'';
@@ -811,36 +1330,17 @@ function render(m){
     +topbar
     +wcBanner
     +teamsHtml
-    +'<div class="sep"></div>'
-    +parisHtml
-    +skipHtml
-    +facteur
-    // WC model
-    +buildWCModel(m)
-    // H2H
-    +(isTennis?buildTennisH2H(hn,an,m.h2h_tennis):buildH2H(hn,an,m.h2h,m.home&&m.home.id))
-    // ELO (foot seulement)
-    +(!isTennis&&!isWC?buildElo(hn,an,m.elo_home,m.elo_away,m.elo_signal):'')
-    // Dropping odds
-    +(!isTennis?buildDropping(m.dropping_odds):'')
-    // Analyse comparative
-    +'<div class="s"><div class="stitle">ANALYSE COMPARATIVE</div>'+buildComp(hn,an,m.crit_home,m.crit_away)+'</div><div class="sep"></div>'
-    // Surface tennis
-    +(isTennis?buildSurface(hn,an,m.surf_stats_p1,m.surf_stats_p2,m.surface):'')
-    // Palmarès tournoi tennis
-    +(isTennis?buildTourRecord(hn,an,m.tour_record_p1,m.tour_record_p2):'')
-    // Patterns buts (foot)
-    +(!isTennis?buildPatterns(hn,an,m.events_home,m.events_away,m):'')
-    // Scénario
-    +buildScen(m)
-    // Buteurs
-    +buildPlayers(hn,an,m.top_scorers_home,m.top_scorers_away)
-    // Arbitre
-    +(!isTennis?buildArbitre(m.arbitre):'')
-    // Verdict
-    +verdict
+    +tabsNav
+    +tabsContent
     +proWall
     +'<div class="card-footer"></div></div></div>';
+}
+
+function switchTab(btn,tabName){
+  document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.remove('active');});
+  document.querySelectorAll('.tab-panel').forEach(function(p){p.classList.remove('active');});
+  btn.classList.add('active');
+  document.getElementById('tab-'+tabName).classList.add('active');
 }
 
 // ── INIT ──────────────────────────────────────────────────
@@ -862,14 +1362,6 @@ async function init(){
       return;
     }
     el.innerHTML=render(m);
-    // Animer les barres
-    setTimeout(function(){
-      document.querySelectorAll('.cr-fill[data-w]').forEach(function(b){
-        var w=b.getAttribute('data-w');
-        b.style.width='0%';
-        requestAnimationFrame(function(){setTimeout(function(){b.style.width=w+'%';},60);});
-      });
-    },100);
   }catch(e){
     console.error(e);
     el.innerHTML='<div style="text-align:center;padding:60px 20px;color:var(--muted)">Erreur de chargement</div>';

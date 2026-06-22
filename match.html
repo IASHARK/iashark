@@ -1222,18 +1222,30 @@ function buildProWall(){
 function render(m){
   var hn=m.home&&m.home.n||'',an=m.away&&m.away.n||'';
   var heure=(m.date||'').split(' ')[1]||'';
-  var isHot=m.hot||(m.conf||0)>=8, isVal=m.val||m.vbet==='OUI';
-  var isWC=m.league_key==='wc'||m.sport==='football'&&m.wc_probs;
   var isTennis=m.sport==='tennis';
-  var pariRec=m.pari_rec||'', paricote=m.cote_rec||'—';
 
-  // FIX : normaliser les probabilités si leur somme dépasse 100
-  // (arrive sur les matchs WC dont le modèle peut retourner p1+pn+p2 > 100)
+  // FIX 1 : normaliser conf — certains matchs stockent 0.7 au lieu de 7.0
+  var confRaw=parseFloat(m.conf)||0;
+  var confNorm=confRaw<=1?confRaw*10:confRaw;
+  m=Object.assign({},m,{conf:confNorm});
+
+  // FIX 2 : normaliser les probabilités si leur somme dépasse 100 (matchs WC)
   var rp1=m.p1||0, rpn=m.pn||0, rp2=m.p2||0;
   var rawSum=rp1+rpn+rp2;
   if(rawSum>105){var sc=100/rawSum;rp1=Math.round(rp1*sc);rpn=Math.round(rpn*sc);rp2=100-rp1-rpn;}
-  // Réassigner sur m (shallow) pour que tous les blocs en aval lisent les valeurs normalisées
   m=Object.assign({},m,{p1:rp1,pn:rpn,p2:rp2});
+
+  // FIX 3 : si crit_home.att=0 ET fr=0 (stats WC manquantes), reconstruire
+  // depuis wc_probs.scoreH/A pour avoir un radar/tableau cohérent
+  if(m.wc_probs&&m.crit_home&&m.crit_home.att===0&&m.crit_home.fr===0){
+    var sh=m.wc_probs.scoreH, sa=m.wc_probs.scoreA;
+    if(sh&&sh.total){m=Object.assign({},m,{crit_home:{fd:m.crit_home.fd||50,att:Math.min(100,Math.round(sh.total*0.9)),def:Math.min(100,Math.round(sh.total*0.85)),fr:Math.min(100,Math.round(sh.total*0.8)),mot:m.crit_home.mot||70,fat:50}});}
+    if(sa&&sa.total){m=Object.assign({},m,{crit_away:{fd:m.crit_away.fd||50,att:Math.min(100,Math.round(sa.total*0.9)),def:Math.min(100,Math.round(sa.total*0.85)),fr:Math.min(100,Math.round(sa.total*0.8)),mot:m.crit_away.mot||70,fat:50}});}
+  }
+
+  var isHot=m.hot||confNorm>=8, isVal=m.val||m.vbet==='OUI';
+  var isWC=m.league_key==='wc'||m.sport==='football'&&m.wc_probs;
+  var pariRec=m.pari_rec||'', paricote=m.cote_rec||'—';
 
   document.title=hn+' vs '+an+' — IASHARK';
 
@@ -1312,7 +1324,6 @@ function render(m){
     +(!isTennis?buildMarketsTable(m,pariRec):'')
     +(!isTennis?buildScoresProbables(m.lambda_h,m.lambda_a,m.scores):'')
     +buildWCModel(m)
-    +(!isTennis?buildRadar(hn,an,m.crit_home,m.crit_away):'')
     +(!isTennis?'<div class="s"><div class="stitle">ANALYSE COMPARATIVE</div>'+buildCompTable(hn,an,m.crit_home,m.crit_away)+'<div style="margin-top:10px">'+buildXgCurve(hn,an,(m.match_stats_home&&m.match_stats_home.xg)||(m.events_home&&m.events_home.goals_avg),(m.match_stats_away&&m.match_stats_away.xg)||(m.events_away&&m.events_away.goals_avg))+'</div></div><div class="sep"></div>':'')
     +(!isTennis?buildMatchStats(hn,an,m.match_stats_home,m.match_stats_away):'')
     +(isTennis?buildSurface(hn,an,m.surf_stats_p1,m.surf_stats_p2,m.surface):'')

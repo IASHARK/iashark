@@ -845,46 +845,46 @@
       "mise": "2-3% bankroll",
       "verdict_shark": "",
       "scenario": {
-        "phase1": "0-30min : L'Argentine cherche à imposer son pressing haut et sa possession (68% exp Top5) pour neutraliser la transition autrichienne ; Austria tente de sortir vite par les couloirs pour exploiter un ratio xG offensif favorable.",
-        "phase2": "30-60min : Si le score reste vierge, l'Autriche gagne en confiance et peut ouvrir le jeu — son xG généré de 2.37 suggère un potentiel offensif réel en phase intermédiaire ; l'Argentine risque de concéder sur phase arr��tée (faiblesse relative défense 160M€).",
-        "phase3": "60-90min : La supériorité individuelle argentine (FIFA 1885, 19 exp CM) devrait s'exprimer en fin de match — un but de l'Argentine entre 65 et 85min est le scénario central, mais un résultat nul ou une victoire autrichienne reste statistiquement plausible à 52%."
+        "phase1": "0-30 min : L'Argentine installe sa possession (FIFA 1885 pts) et cherche à contrôler le tempo ; l'Autriche défend en bloc bas avec ses 5 joueurs expérimentés en CM, limitant les espaces dans les 20 premières minutes.",
+        "phase2": "30-65 min : Phase de transitions physiques — l'Autriche tente d'exploiter les contre-attaques rapides (xG généré 2.37 en qualifs) face à une défense argentine à 160M€ ; risque de but autrichien sur phase arrêtée ou transition.",
+        "phase3": "65-90 min : Gestion finale — si l'Argentine mène, probable repli défensif et ralentissement du jeu ; si score nul, les deux équipes prennent des risques calculés, augmentant la probabilité d'un but tardif dans les 20 dernières minutes."
       },
       "scenario_15min": [
         {
           "t": "0-15min",
           "prob": 8,
-          "txt": "Début prudent, les deux équipes se jaugent — pressing argentin haut mais Austria bien organisée en bloc médian, probabilité de but faible."
+          "txt": "Prise de contact prudente, les deux équipes sondent les blocs défensifs adverses ; probabilité de but faible, Argentine en possession dominante."
         },
         {
           "t": "15-30min",
           "prob": 12,
-          "txt": "Montée en pression autrichienne sur les transitions, leur xG généré 2.37 commence à se matérialiser — première occasion franche possible pour l'Autriche."
+          "txt": "Montée en intensité progressive, premières occasions sur phases arrêtées ; l'Autriche tente de surprendre sur transition rapide, Argentine xG 1.42 commence à se matérialiser."
         },
         {
           "t": "30-45min",
           "prob": 10,
-          "txt": "L'Argentine reprend le contrôle via la possession, Messi et les créateurs centraux cherchent à exploiter les espaces — risque de but argentin en fin de 1ère période."
+          "txt": "Période de stabilisation avant la mi-temps, les équipes gèrent l'énergie ; probabilité de but légèrement réduite, focus défensif des deux côtés avant le vestiaire."
         },
         {
           "t": "45-60min",
           "prob": 15,
-          "txt": "Reprise avec ajustements tactiques — la période 45-60min est historiquement productive dans les matchs de groupe WC ; lambda combiné 2.52 buts prédit un but probable dans cette fenêtre."
+          "txt": "Reprise avec ajustements tactiques post-mi-temps ; l'équipe qui encaisse en premier modifie radicalement son plan de jeu — phase la plus ouverte du match."
         },
         {
           "t": "60-75min",
           "prob": 18,
-          "txt": "Pic de probabilité de but — l'Autriche, si elle mène ou est à égalité, pousse davantage et expose ses lignes ; l'Argentine avec ses entrants potentiels accélère le tempo offensif."
+          "txt": "Pic d'intensité physique et tactique, fatigue musculaire nulle (0km récup) permettant un rythme élevé soutenu ; entrées de remplaçants des deux côtés, espaces qui s'ouvrent."
         },
         {
           "t": "75-90min",
           "prob": 20,
-          "txt": "Dernière phase décisive — la supériorité physique et technique argentine (Force 74.3 vs 50.9) se manifeste pleinement ; scénario d'un but argentin tardif ou maintien du score le plus probable selon le modèle Poisson cumulé."
+          "txt": "Dernière phase décisive : l'équipe qui cherche le résultat prend des risques défensifs, augmentant la probabilité de but tardif ; c'est la fenêtre temporelle la plus productive statistiquement pour ce type de match de groupe."
         }
       ],
-      "facteur_x": "Lambda Poisson inversé : Austria 1.47 buts estimés vs Argentina 1.05 — signal atypique pour un favori FIFA à 1885pts face à une équipe à 1641pts, indiquant une incertitude modèle maximale.",
-      "analyse_card": "L'Argentine affiche un xG concédé de seulement 0.57 mais un lambda offensif de 1.05, paradoxe expliqué par une défense autrichienne solide (xG concédé 0.68) couplée à un système autrichien offensivement actif (xG généré 2.37). L'Autriche, malgré une valeur attaque de 65M€ contre 310M€ pour l'Argentine, génère statistiquement plus de danger selon le modèle hybride qualif/tournoi. Ce déséquilibre entre valeur marchande et performance xG crée une forte incertitude sur l'issue scoreboard.",
-      "conseil_public": "Ne pas parier sur ce match — aucun signal ne dépasse le seuil de fiabilité requis, et les lambdas Poisson inhabituellement inversés (favori qui score moins) signalent un modèle sous tension.",
-      "contexte": "Phase de groupes Coupe du Monde 2026 ��� les deux équipes jouent un match de classement avec des enjeux potentiellement asymétriques selon leurs résultats respectifs lors des journées 1 et 2 ; une rotation partielle de l'Argentine si déjà qualifiée décoterait l'attaque de -30% et confirmerait le passage.",
+      "facteur_x": "Lambda Austria (1.47) > Lambda Argentina (1.05) malgré un écart de force 74.3 vs 50.9 : signal contradictoire issu du xG qualificatif de l'Autriche (2.37) qui gonfle artificiellement les projections offensives autrichiennes.",
+      "analyse_card": "L'Argentine affiche un xG concédé très bas (0.57) et un lambda offensif de seulement 1.05, indiquant une approche prudente en phase de groupes. L'Autriche génère un xG surprenant de 2.37 en qualification mais son lambda Poisson de 1.47 s'explique par un différentiel de force défensive adverse — à nuancer fortement. Avec des valeurs d'attaque (310M€ vs 65M€) et de défense (160M€ vs 40M€) très déséquilibrées, le match présente paradoxalement une incertitude élevée due aux lambdas croisés atypiques.",
+      "conseil_public": "Ne pas jouer ce match : aucun marché ne présente un edge statistique suffisant, et les lambdas Poisson inhabituels (Austria 1.47 > Argentina 1.05) signalent une instabilité du modèle sur ce fixture — attendre confirmation d'absences ou de côtes de marché avant tout engagement.",
+      "contexte": "Phase de groupes Coupe du Monde 2026 — premier match des deux sélections (J1 estimée), les enjeux de qualification sont maximaux pour les deux équipes, aucune rotation prévisible à ce stade, ce qui renforce l'imprévisibilité tactique.",
       "vbet": "NON",
       "scores": [
         "1-1"
@@ -904,7 +904,7 @@
         "nom": "AT&T Stadium — Dallas",
         "cap": "",
         "meteo": "☁️",
-        "temp": "25°C",
+        "temp": "28°C",
         "desc": "couvert"
       },
       "crit_home": {
@@ -1253,46 +1253,46 @@
       "mise": "2-3% bankroll",
       "verdict_shark": "",
       "scenario": {
-        "phase1": "0-30 min — La France prend le contrôle du ballon dès l'entame, pression haute sur la sortie de balle irakienne (FIFA gap +406 pts). L'Iraq défend en bloc bas, limitant les espaces. Probabilité d'un but France avant la 30e : ~28%.",
-        "phase2": "31-65 min — La France ouvre vraisemblablement le score et administre le match. L'Iraq peut tenter quelques transitions rapides (0.97 xG/match), mais la défense française (xG concédé 0.57) reste imperméable. Score probable à la 65e : 1-0 ou 2-0.",
-        "phase3": "66-90 min — Avec l'avance acquise, rotations possibles côté France (gestion de l'effectif en phase de groupes). L'Iraq profite potentiellement d'un relâchement défensif pour créer une occasion, mais le score final 2-0 reste le scénario central (lambda Iraq 0.77 = but concédé dans ~54% des matchs)."
+        "phase1": "0-30min : La France prend le contrôle du ballon dès l'entame, pression haute sur la défense irakienne positionnée bas, premier xG French autour de 0.35 sur cette fenêtre — Iraq résiste en bloc compact, peu de transitions dangereuses.",
+        "phase2": "30-65min : Ouverture du score probable de la France sur phase construite ou coup de pied arrêté, l'Iraq tente quelques contres rapides mais son manque d'expérience mondiale (2 joueurs CM) bride la conversion — deuxième but français envisageable mais non certain selon Poisson.",
+        "phase3": "65-90min : Gestion française du résultat, possibles rotations en fin de match, l'Iraq peut espérer un but de prestige si la France se relâche — scénario 2-0 ou 2-1 comme dénouement central."
       },
       "scenario_15min": [
         {
           "t": "0-15min",
           "prob": 8,
-          "txt": "Phase de mise en place : France monopolise la possession, Iraq en 4-4-2 compact. Faible probabilité de but en ouverture malgré la pression française — défense irakienne organisée en début de match."
+          "txt": "France installe sa domination territoriale, touches de balle longues, Iraq replié — probabilité de but faible mais premiers xG français s'accumulent dès la 10e minute."
         },
         {
           "t": "15-30min",
           "prob": 12,
-          "txt": "La France monte en puissance, combinaisons dans les 30 derniers mètres. Premières situations franches attendues côté France, l'Iraq se contente de contres rapides. Probabilité d'un but cumulée monte à 20%."
+          "txt": "Pression française s'intensifie, premières occasions franches sur les côtés, Iraq défend à 9-10 derrière le ballon — premier but attendu dans cette fenêtre selon le lambda 1.88."
         },
         {
           "t": "30-45min",
           "prob": 10,
-          "txt": "Période de domination confirmée France, pression sur les transitions défensives irakiennes. Un but français avant la mi-temps consoliderait le scénario 2-0. Risque Iraq faible mais non nul (xG concédé France 0.57/match)."
+          "txt": "Phase de jeu plus ouverte avant la mi-temps, risque de but français sur phase arrêtée ou contre rapide — Iraq peut sporadiquement menacer sur une perte de balle française."
         },
         {
           "t": "45-60min",
           "prob": 15,
-          "txt": "Reprise avec ajustements tactiques probables de l'Iraq pour limiter les dégâts. La France peut accentuer le score en phase de domination post-mi-temps — tranche temporelle historiquement productive pour les équipes dominantes."
+          "txt": "Reprise favorable à la France, Iraq physiquement moins en mesure de soutenir l'intensité — fenêtre à haut risque pour l'Iraq, deuxième but français le plus probable ici."
         },
         {
           "t": "60-75min",
           "prob": 18,
-          "txt": "Tranche à fort potentiel offensif France : fatigue physique de l'Iraq (profondeur de banc limitée, valeur défense 10M€) commence à se faire sentir. Rotations françaises possibles mais continuité de la pression offensive attendue."
+          "txt": "France en gestion ou en quête du break définitif, entrées de remplaçants des deux côtés — Iraq tente de presser plus haut pour un but d'honneur, créant des espaces derrière."
         },
         {
           "t": "75-90min",
           "prob": 20,
-          "txt": "Dernière ligne droite : la France gère ou cherche à aggraver le score selon le contexte groupe. L'Iraq peut tenter une sortie offensive pour l'honneur sur phase arrêtée. Tranche la plus probable pour un but supplémentaire dans les deux sens — lambda Iraq 0.77 signifie que ~37% de ses buts tombent en fin de match."
+          "txt": "Dernière tranche la plus prolifique selon les stats générales de phase de groupes CM, France peut scorer un 3e but ou l'Iraq inscrire un but tardif sur corner ou coup franc — variance maximale sur ce segment."
         }
       ],
-      "facteur_x": "Écart FIFA de 406 points (1851 vs 1445) et ratio xG offensif/défensif France de 4.26 contre 0.73 pour l'Iraq — signal de domination structurelle mais lambdas Poisson insuffisants pour sécuriser l'Over 2.5 à 49%.",
-      "analyse_card": "La France affiche un xG généré de 2.43 et une valeur offensive de 480M€ face à une défense irakienne à 10M€, ce qui crée un déséquilibre structurel majeur (lambda France 1.88 vs Iraq 0.77). Cependant, l'Iraq génère tout de même 0.97 xG par match et concède en moyenne 1.33 xG, ce qui maintient une probabilité BTTS non négligeable à 45%. Le modèle Poisson situe l'Over 2.5 à seulement 49%, traduisant une incertitude réelle sur le volume de buts malgré la domination française attendue.",
-      "conseil_public": "Passer ce match : aucun marché ne dépasse son seuil de probabilité minimum, et la règle de neutralité absolue interdit de forcer un pari sous-optimal — préserver le taux de réussite prime sur tout.",
-      "contexte": "Phase de groupes Coupe du Monde 2026 : la France (force 85.7/100, FIFA 1851 pts) affronte l'Iraq (force 19.7/100, FIFA 1445 pts) dans un match où l'enjeu de qualification conditionnera potentiellement la gestion du temps de jeu et les rotations côté français, ce qui pèse sur la lisibilité des marchés offensifs.",
+      "facteur_x": "Lambda France 1.88 vs lambda Iraq 0.77 : l'écart prédit une domination nette, mais la probabilité Over 2.5 stagne à 49%, signe que le modèle anticipe une France efficace sans nécessairement être prolifique — edge trop faible sur tous les marchés.",
+      "analyse_card": "La France affiche un xG généré de 2.43 et une valeur offensive de 480M€ face à une défense irakienne à seulement 10M€, avec un lambda Poisson de 1.88 buts attendus. L'Iraq génère 0.97 xG offensif contre une défense française à 0.57 xG concédé, ce qui plafonne les espoirs offensifs irakiens à un lambda de 0.77. Malgré l'écart de niveau (85.7 vs 19.7 en force), la distribution de Poisson laisse une probabilité de 51% pour Under 2.5 et 54% pour BTTS Non, insuffisantes pour atteindre les seuils de fiabilité du modèle.",
+      "conseil_public": "Ne pas parier sur ce match : aucun marché disponible ne présente un edge statistique suffisant, et la cote la plus accessible (Over 2.5 à 1.32) ne couvre pas la probabilité modèle de 49% — attendre un match avec signal clair.",
+      "contexte": "Phase de groupes Coupe du Monde 2026 — premier affrontement officiel France-Iraq, l'enjeu de qualification reste ouvert pour les deux équipes à ce stade, ce qui limite les risques de rotation majeure mais n'apporte pas de signal différenciateur exploitable.",
       "vbet": "NON",
       "scores": [
         "2-0"
@@ -1311,9 +1311,9 @@
       "stade": {
         "nom": "Lincoln Financial Field — Philadelphia",
         "cap": "",
-        "meteo": "☁️",
-        "temp": "26°C",
-        "desc": "couvert"
+        "meteo": "🌧️",
+        "temp": "28°C",
+        "desc": "légère pluie"
       },
       "crit_home": {
         "fd": 100,
@@ -1471,14 +1471,14 @@
       "actu": [
         {
           "c": "France",
-          "t": "Étirez-vous quand vous baillez",
-          "tx": "Julien Ménielle nous explique pourquoi il est excellent pour la santé de s'étirer comme les chats quand on baille.",
+          "t": "Actualité : Canicules dès juin pendant un mois, nuits sans sommeil : ce que la France subira bientôt si rien n'est fait",
+          "tx": "Depuis le mercredi 17 juin 2026, la France subit une canicule. Météo-France qualifie cet épisode de précoce. Il s'agit de la 52e vague de chaleur recensée dans l'Hexagone depuis 1947. L'épisode durera plusieurs jours, avec un plateau attendu entre lundi 22 et…",
           "tm": "2026-06-21"
         },
         {
           "c": "France",
-          "t": "\"La baleine et le musicien\"",
-          "tx": "franceinfo junior fête la musique au cinéma avec le film documentaire de Valentin Paoli, \"La baleine et le musicien\".",
+          "t": "Plusieurs départements en alerte rouge à la pollution de l'air lundi en raison de la canicule",
+          "tx": "Les préfectures des Bouches-du-Rhône et du Var ont abaissé les limitations de vitesse ainsi qu'interdit l'utilisation de certains appareils ou produits à base de solvants organiques.",
           "tm": "2026-06-21"
         },
         {
@@ -1993,46 +1993,46 @@
       "mise": "2-3% bankroll",
       "verdict_shark": "",
       "scenario": {
-        "phase1": "0-30min : Algeria installe sa supériorité technique (FIFA 1521 vs 1398), pression offensive progressive avec un xG attendu ~0.50 sur ce premier tiers. Jordan défend en bloc compact, cherchant à limiter les espaces dans l'axe.",
-        "phase2": "30-60min : Le match atteint son point d'équilibre. Algeria tente de forcer le verrou jordanien avec ses joueurs du Top5 européen (42%), tandis que Jordan exploite les transitions rapides avec son xG offensif modeste de 1.35. Probabilité d'un premier but sur cette phase la plus élevée.",
-        "phase3": "60-90min : Si Algeria mène, gestion du score et rotation probable. Si score nul, intensité croissante des deux côtés avec risque de buts tardifs — les lambdas Poisson restants favorisent un second but Algeria mais sans certitude suffisante pour parier."
+        "phase1": "0-30min — L'Algérie impose son pressing et tente d'exploiter son avantage technique dès l'entame. La Jordanie défend en bloc bas avec un bloc médian compact, limitant les espaces dans l'axe. Peu de situations franches attendues dans ce premier quart d'heure.",
+        "phase2": "30-65min — Phase de déséquilibre progressif : si l'Algérie ouvre le score, la Jordanie est contrainte de sortir, ouvrant des couloirs en contre. Les lambdas Poisson suggèrent que la majorité des buts (2.67 attendus cumulés) se concentrent en seconde mi-temps après une première période fermée.",
+        "phase3": "65-90min — Fin de match sous tension selon le score : l'Algérie gérerait un avantage ou accélérerait en cas d'égalité. La Jordanie pourrait bénéficier d'un temps fort tardif si le match est serré. Le scénario nul (18%) reste possible si les deux équipes se neutralisent défensivement."
       },
       "scenario_15min": [
         {
           "t": "0-15min",
           "prob": 8,
-          "txt": "Démarrage prudent des deux équipes en phase de tournoi, blocs défensifs en place. Algeria tente les premières combinaisons via ses joueurs du Top5 européen, Jordan surveille les transitions."
+          "txt": "Phase d'observation — les deux équipes tâtent le terrain. L'Algérie tente les premières combinaisons courtes, la Jordanie repousse en zone basse. Probabilité de but dans ce créneau faible (8%), aucun des deux n'a encore trouvé le bon timing offensif."
         },
         {
           "t": "15-30min",
           "prob": 12,
-          "txt": "Montée en pression Algeria conforme à son lambda offensif 1.49. Premier vrai danger probable sur coup de pied arrêté ou débordement axe droit. Jordan répond par une contre-attaque rapide, xG modeste."
+          "txt": "L'Algérie commence à imposer son rythme avec des transitions rapides via ses joueurs évoluant en Top 5 européen (42% du groupe). Première vraie occasion algérienne attendue ici. La Jordanie tente quelques contres sporadiques mais reste défensive."
         },
         {
           "t": "30-45min",
           "prob": 10,
-          "txt": "Phase de possession Algeria dominante. Jordan défend avec discipline (xG concédé 1.01 seulement). Probabilité d'un but avant la mi-temps limitée mais réelle — scénario 0-1 Algeria ou 0-0 à la pause les plus probables."
+          "txt": "Légère baisse de rythme avant la pause — les deux équipes préservent leurs forces. Possibilité d'un but sur coup de pied arrêté (les deux équipes ont des profils physiques homogènes). Probabilité de but modérée à 10%."
         },
         {
           "t": "45-60min",
           "prob": 15,
-          "txt": "Reprise post-mi-temps favorable aux équipes offensives : Algeria pousse pour débloquer. Jordan peut profiter d'un espace dans le dos de la défense algérienne sur une transition rapide — lambda Jordan 1.18 encore largement actif."
+          "txt": "Reprise avec une Algérie plus directe — l'entraîneur algérien peut avoir ajusté le dispositif à la mi-temps. La Jordanie subit une pression accrue. C'est la fenêtre la plus probable pour un premier but algérien si le match est encore vierge."
         },
         {
           "t": "60-75min",
           "prob": 18,
-          "txt": "Phase la plus productive statistiquement. Si match nul, les deux entraîneurs injectent de la fraîcheur. Algeria avec plus de ressources offensives (25M€ attaque) accroît la pression — probabilité de but Algeria la plus haute ici."
+          "txt": "Pic d'intensité : si le score est nul ou serré, les deux équipes prennent des risques. Les entrées en jeu modifient les équilibres. Avec un lambda Algérie à 1.49, ce créneau concentre statistiquement le plus de buts attendus côté algérien."
         },
         {
           "t": "75-90min",
           "prob": 20,
-          "txt": "Pic de probabilité de but final : fatigue défensive et lignes qui s'ouvrent. Le scénario 1-1 (score central modèle) reste le plus fréquent sur des matchs à lambdas équilibrés. Risque penalty ou coup franc décisif dans les 10 dernières minutes."
+          "txt": "Dernière phase décisive — la plus haute probabilité de but par tranche (20%). Une équipe qui perd pousse, l'autre gère ou contre-attaque. Le modèle xG indique que les deux équipes concèdent des buts en fin de match (xG concédé ~1.0 chacune), rendant ce créneau le plus fertile pour les inscriptions finales."
         }
       ],
-      "facteur_x": "Lambda Poisson Jordan 1.18 vs Algeria 1.49 — différentiel de 0.31 but, trop faible pour trancher un marché Over/Under à 50% exact ou un BTTS à 53% sans edge net.",
-      "analyse_card": "Algeria domine structurellement avec un xG offensif de 1.96 contre 1.35 pour Jordan, et une valeur d'attaque double (25M€ vs 12M€). Cependant, les deux défenses sont solides avec un xG concédé presque identique (1.00 vs 1.01), ce qui rend le scénario BTTS incertain malgré les lambdas Poisson de 1.18 (Jordan) et 1.49 (Algeria). Le total combiné xG de 3.31 génère un Over/Under 2.5 à pile 50%, sans avantage statistique exploitable.",
-      "conseil_public": "Abstention totale sur ce match — aucun marché ne dépasse son seuil de probabilité minimum, et le match présente une incertitude symétrique sur tous les axes (résultat, buts, BTTS).",
-      "contexte": "Phase de groupes Coupe du Monde 2026 — journée 1 ou 2, les deux équipes ont un enjeu de qualification intact. Algeria (Force 37.1) part favorite logique face à Jordan (Force 23.1), mais l'absence de données H2H officielles et l'incertitude tactique en phase de poule limitent la fiabilité du modèle.",
+      "facteur_x": "Écart de force FIFA de 123 points (1521 vs 1398) en faveur de l'Algérie, mais cet écart ne suffit pas à faire franchir à aucun marché son seuil de probabilité — le signal est réel mais trop diffus pour être actionnable.",
+      "analyse_card": "L'Algérie domine structurellement avec un xG généré de 1.96 contre 1.35 pour la Jordanie, et une valeur d'attaque plus du double (25M€ vs 12M€). Cependant, les deux défenses affichent un xG concédé quasi identique autour de 1.00, ce qui comprime les probabilités de buts et empêche tout marché Over/Under d'atteindre le seuil de fiabilité. Les lambdas Poisson (Jordan 1.18 / Algeria 1.49) traduisent un match de niveau modeste où ni l'intensité offensive ni la solidité défensive ne génèrent d'avantage statistique net suffisant.",
+      "conseil_public": "Abstiens-toi totalement sur ce match : aucun signal chiffré ne dépasse les seuils de confiance définis par le modèle, et le contexte de phase de groupes avec des équipes de force déséquilibrée mais non extrême crée une incertitude diffuse sur tous les marchés.",
+      "contexte": "Phase de groupes Coupe du Monde 2026 — résultat avec enjeu direct sur la qualification. L'Algérie (force 37.1/100) est favorite à 51% mais la Jordanie reste capable de perturber (31%). Le format élargi à 48 équipes rend la 3e place qualificative possible, ce qui peut influencer les motivations des deux équipes selon leur situation dans le groupe au moment du coup d'envoi.",
       "vbet": "NON",
       "scores": [
         "1-1"
@@ -2211,14 +2211,14 @@
       "actu": [
         {
           "c": "Jordan",
-          "t": "Procès en appel de Marine Le Pen : si elle ne peut pas se présenter, \"on n'appellera pas à l'insurrection, on n'est pas LFI\", déclare Thomas Ménagé",
-          "tx": "La justice doit se prononcer en appel le 7 juillet pour confirmer ou non la peine d'inéligibilité de cinq ans de Marine Le Pen dans l'affaire des assistants parlementaires du FN.",
+          "t": "Qu’attend la France pour prendre la menace de l’extrême droite au sérieux ?",
+          "tx": "Dans cet édito, la rédaction du “Guardian” déplore que les Français ne prennent pas la mesure de la gravité que représente le succès grandissant de l’extrême droite à l’approche de la présidentielle de 2027. Pour le quotidien britannique, les partis tradition…",
           "tm": "2026-06-21"
         },
         {
           "c": "Jordan",
-          "t": "Voici le classement final du Jogging de Verviers 2026 (vidéo)",
-          "tx": "Le jogging de Verviers 2026 (14 km) a livré ses verdicts. Derrière Arnaud Collard, vainqueur de cette 43e édition, découvrez le classement complet de la course verviétoise. ...",
+          "t": "Procès en appel de Marine Le Pen : si elle ne peut pas se présenter, \"on n'appellera pas à l'insurrection, on n'est pas LFI\", déclare Thomas Ménagé",
+          "tx": "La justice doit se prononcer en appel le 7 juillet pour confirmer ou non la peine d'inéligibilité de cinq ans de Marine Le Pen dans l'affaire des assistants parlementaires du FN.",
           "tm": "2026-06-21"
         },
         {
@@ -2236,7 +2236,7 @@
       "top_scorers_home": [],
       "top_scorers_away": [],
       "elo_home": null,
-      "elo_away": 1556,
+      "elo_away": null,
       "elo_diff": null,
       "elo_signal": null,
       "dropping_odds": null,

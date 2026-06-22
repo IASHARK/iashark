@@ -7,7 +7,7 @@
       "prediction": "Over 2.5 buts",
       "prediction_fr": "Plus de 2,5 buts",
       "cote": 1.65,
-      "conf": 6.0,
+      "conf": 6,
       "market": "over25",
       "league": "World Cup",
       "league_key": "wc",
@@ -76,7 +76,7 @@
       "prediction": "BTTS Oui",
       "prediction_fr": "Les deux équipes marquent",
       "cote": 1.97,
-      "conf": 6.0,
+      "conf": 6,
       "market": "btts_oui",
       "league": "World Cup",
       "league_key": "wc",
@@ -168,7 +168,7 @@
       "prediction": "BTTS Oui",
       "prediction_fr": "Les deux équipes marquent",
       "cote": 2.39,
-      "conf": 6.0,
+      "conf": 6,
       "market": "btts_oui",
       "league": "World Cup",
       "league_key": "other",
@@ -811,7 +811,7 @@
       "away": "Senegal",
       "prediction": "BTTS Oui",
       "prediction_fr": "Les deux équipes marquent",
-      "cote": 2.0,
+      "cote": 2,
       "conf": 7.4,
       "market": "btts_oui",
       "league": "World Cup",
@@ -836,7 +836,7 @@
       "prediction": "DC X2",
       "prediction_fr": "Victoire ou nul (ext.)",
       "cote": 1.95,
-      "conf": 7.0,
+      "conf": 7,
       "market": "dc_x2",
       "league": "World Cup",
       "league_key": "other",
@@ -975,21 +975,21 @@
     }
   ],
   "stats": {
-    "winrate": 64.3,
-    "roi": 40.0,
-    "total": 28,
+    "winrate": 62.1,
+    "roi": 35.1,
+    "total": 29,
     "streak": -2,
     "wins": 18,
-    "losses": 10
+    "losses": 11
   },
   "monthly": [
     {
       "month": "2026-06",
       "label": "Jun 2026",
       "wins": 18,
-      "losses": 10,
-      "total": 28,
-      "roi": 40.0
+      "losses": 11,
+      "total": 29,
+      "roi": 8.6
     }
   ],
   "backtesting": {
@@ -1023,7 +1023,7 @@
         "wins": 2,
         "losses": 0,
         "total": 2,
-        "winrate": 100.0,
+        "winrate": 100,
         "roi": 372.5
       },
       {
@@ -1031,34 +1031,42 @@
         "wins": 1,
         "losses": 0,
         "total": 1,
-        "winrate": 100.0,
-        "roi": 38.0
+        "winrate": 100,
+        "roi": 38
       },
       {
         "key": "dc1x",
         "wins": 1,
         "losses": 0,
         "total": 1,
-        "winrate": 100.0,
-        "roi": 180.0
+        "winrate": 100,
+        "roi": 180
+      },
+      {
+        "key": "inconnu",
+        "wins": 0,
+        "losses": 1,
+        "total": 1,
+        "winrate": 0,
+        "roi": -100
       }
     ],
     "by_league": [
       {
         "key": "other",
         "wins": 17,
-        "losses": 10,
-        "total": 27,
-        "winrate": 63.0,
-        "roi": 38.5
+        "losses": 11,
+        "total": 28,
+        "winrate": 60.7,
+        "roi": 33.5
       },
       {
         "key": "laliga2",
         "wins": 1,
         "losses": 0,
         "total": 1,
-        "winrate": 100.0,
-        "roi": 80.0
+        "winrate": 100,
+        "roi": 80
       }
     ],
     "by_conf": [
@@ -1075,54 +1083,54 @@
         "wins": 6,
         "losses": 2,
         "total": 8,
-        "winrate": 75.0,
+        "winrate": 75,
         "roi": 28.4
       },
       {
         "key": "<6",
         "wins": 3,
-        "losses": 3,
-        "total": 6,
-        "winrate": 50.0,
-        "roi": -18.2
+        "losses": 4,
+        "total": 7,
+        "winrate": 42.9,
+        "roi": -29.9
       }
     ],
     "by_sport": [
       {
         "key": "football",
         "wins": 18,
-        "losses": 10,
-        "total": 28,
-        "winrate": 64.3,
-        "roi": 40.0
+        "losses": 11,
+        "total": 29,
+        "winrate": 62.1,
+        "roi": 35.1
       }
     ],
     "by_has_pinnacle": [
       {
         "key": "inconnu",
         "wins": 18,
-        "losses": 10,
-        "total": 28,
-        "winrate": 64.3,
-        "roi": 40.0
+        "losses": 11,
+        "total": 29,
+        "winrate": 62.1,
+        "roi": 35.1
       }
     ],
     "by_has_elo": [
       {
         "key": "inconnu",
         "wins": 17,
-        "losses": 10,
-        "total": 27,
-        "winrate": 63.0,
-        "roi": 38.5
+        "losses": 11,
+        "total": 28,
+        "winrate": 60.7,
+        "roi": 33.5
       },
       {
-        "key": true,
+        "key": "true",
         "wins": 1,
         "losses": 0,
         "total": 1,
-        "winrate": 100.0,
-        "roi": 80.0
+        "winrate": 100,
+        "roi": 80
       }
     ],
     "updated": "2026-06-22"

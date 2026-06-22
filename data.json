@@ -704,10 +704,10 @@
       "hot": false,
       "conf": 0,
       "p1": 48,
-      "pn": 60,
+      "pn": 35,
       "p2": 33,
-      "lambda_h": 0.3,
-      "lambda_a": 0.3,
+      "lambda_h": 0.768,
+      "lambda_a": 0.856,
       "wc_probs": {
         "p1": 48,
         "pN": 19,
@@ -845,46 +845,46 @@
       "mise": "2-3% bankroll",
       "verdict_shark": "",
       "scenario": {
-        "phase1": "0-30 min : L'Argentine impose sa possession et sa force FIFA (1885 pts vs 1641), cherche à contrôler le tempo sans prendre de risque — faible densité de tirs attendue, les deux équipes en phase d'observation tactique.",
-        "phase2": "31-65 min : Montée en puissance progressive, l'Autriche tente de valoriser ses transitions rapides (xG généré 2.37 en qualif) face à une défense Argentine expérimentée (19 joueurs CM) ��� phase la plus incertaine avec probabilité d'ouverture du score maximale.",
-        "phase3": "66-90 min : Si score nul, l'Argentine pousse avec ses remplaçants offensifs (valeur attaque 310M€) — l'Autriche (5 joueurs CM exp) risque de subir physiquement en fin de match, mais le score 1-1 reste le scénario central le plus probable selon les lambdas."
+        "phase1": "0-30 min : L'Argentine tentera d'imposer sa possession et de presser haut pour neutraliser la transition rapide autrichienne. L'Autriche, bien organisée défensivement, cherchera à résister et à exploiter les espaces en contre via ses ailiers rapides.",
+        "phase2": "30-65 min : Période de gestion et d'ajustements — si l'Argentine mène, elle ralentira le jeu ; si score nul ou Autriche devant, la physionomie change radicalement avec l'Argentine forcée d'ouvrir. Le lambda autrichien élevé suggère des occasions réelles dans cette tranche.",
+        "phase3": "65-90 min : Dernier quart décisif — avec un xG combiné de 3.79, les buts tardifs sont probables. L'Argentine dispose d'un banc de qualité supérieure pour les entrants, mais la fatigue mentale liée à l'enjeu peut favoriser des erreurs individuelles des deux côtés."
       },
       "scenario_15min": [
         {
           "t": "0-15min",
           "prob": 8,
-          "txt": "Phase de mise en place : faible probabilité de but, les deux équipes tâtent le terrain — Argentine en possession, Autriche en bloc médian compact."
+          "txt": "Entrée prudente des deux équipes, Argentine en possession, Autriche compacte en 4-4-2 bas. Probabilité de but faible — les équipes sondent mutuellement leurs lignes défensives."
         },
         {
           "t": "15-30min",
           "prob": 12,
-          "txt": "Première accélération Argentine sur les côtés, quelques occasions construites — risque de but sur set-piece ou transition autrichienne contre-intuitive."
+          "txt": "L'Argentine commence à accélérer, pression sur les couloirs autrichiens. Premier danger attendu sur coup de pied arrêté ou transition rapide. Lambda Argentine (1.05) suggère des opportunités limitées mais réelles."
         },
         {
           "t": "30-45min",
           "prob": 10,
-          "txt": "Légère baisse de rythme avant la mi-temps, les équipes gèrent l'énergie — probabilité de but en baisse, match équilibré et fermé."
+          "txt": "Fin de première mi-temps souvent prudente en phase de groupes CM — les entraîneurs préfèrent ne pas prendre de risques avant la mi-temps. Légère baisse de l'intensité offensive attendue."
         },
         {
           "t": "45-60min",
           "prob": 15,
-          "txt": "Reprise avec intensité accrue, les équipes cherchent à prendre l'avantage — c'est la fenêtre la plus probable pour le premier but du match."
+          "txt": "La deuxième mi-temps s'ouvre avec plus d'espaces — l'Autriche, si elle est à égalité ou menante, attaquera avec plus de hardiesse. Lambda autrichien (1.47) se concrétise davantage dans cette phase."
         },
         {
           "t": "60-75min",
           "prob": 18,
-          "txt": "Entrée des remplaçants, le match s'ouvre — l'Argentine exploite sa profondeur de banc (valeur attaque 310M€), phase dangereuse pour l'Autriche défensivement."
+          "txt": "Phase la plus propice aux buts selon les données Poisson combinées. Substitutions des deux côtés, organisation défensive fragilisée. L'Autriche peut exploiter ses entrants frais sur les espaces laissés par l'Argentine offensive."
         },
         {
           "t": "75-90min",
           "prob": 20,
-          "txt": "Dernière ligne droite décisive : si match nul, les deux équipes prennent des risques — probabilité de but maximale sur la durée du match, scénario 1-1 ou 1-0 le plus central."
+          "txt": "Tronçon le plus fertile statistiquement. Si le match est serré, l'Argentine poussera avec Di María/Dybala-type options et s'exposera en contre. Le xG combiné de 3.79 laisse anticiper au moins un but dans ce dernier quart avec probabilité maximale."
         }
       ],
-      "facteur_x": "Lambda Poisson Argentina 1.05 vs Austria 1.47 : l'Autriche est modélisée comme plus dangereuse offensivement — signal contre-intuitif issu d'un xG qualifications gonflé (80% du poids) qui fragilise la fiabilité du modèle sur ce match.",
-      "analyse_card": "L'Argentine génère un xG offensif modeste de 1.42 avec un lambda Poisson de seulement 1.05 but attendu, reflet d'une équipe solide défensivement (xG concédé 0.57) mais peu prolifique dans ce contexte. L'Autriche affiche paradoxalement un xG généré de 2.37 mais ses lambdas Poisson (1.47) restent gonflés par des qualifications face à des adversaires inférieurs (source hybride 80% qualifications). Le rapport de force de 310M€ attaque Argentine vs 65M€ attaque Autrichienne suggère une domination Argentine, mais les probabilités résultat (48/19/33) révèlent une incertitude anormalement élevée.",
-      "conseil_public": "Abstiens-toi sur ce match : l'écart de force réel est significatif mais les lambdas Poisson déséquilibrés et l'absence de données H2H officielles rendent tout pari structurellement risqué.",
-      "contexte": "Phase de groupes Coupe du Monde 2026 — match à enjeux directs pour les deux équipes au classement du groupe, aucune des deux n'étant encore qualifiée à cette date (22 juin, journée 2 ou 3 selon le calendrier), ce qui maintient une motivation maximale des deux côtés et réduit le risque de rotation.",
+      "facteur_x": "Lambda Autriche (1.47) supérieur au lambda Argentine (1.05) : paradoxe statistique où l'outsider est projeté comme plus probable buteur, alimenté par un xG généré Autriche de 2.37 — signal de volatilité extrême rendant tout marché trop risqué.",
+      "analyse_card": "L'Argentine affiche un xG concédé très bas (0.57) mais un xG généré modeste (1.42), ce qui traduit une solidité défensive mais une attaque en deçà de son potentiel — lambda Poisson à seulement 1.05 but. L'Autriche surprend avec un xG généré à 2.37, supérieur à l'Argentine, et un lambda de 1.47, ce qui reflète un profil offensif actif mais une défense fragile (xG concédé 0.68). Le différentiel de valeur de marché est massif (375M€ Argentine vs 105M€ Autriche) mais ne se traduit pas en domination nette dans les probabilités de résultat (48% / 19% / 33%), signalant une incertitude structurelle élevée.",
+      "conseil_public": "Abstiens-toi sur ce match : aucun marché ne dépasse son seuil de fiabilité minimum, et la répartition des probabilités (notamment 33% Autriche) indique une configuration trop ouverte pour engager des unités.",
+      "contexte": "Phase de groupes Coupe du Monde 2026 — les deux équipes cherchent des points précieux pour la qualification en huitièmes de finale. L'Argentine, tenante du titre (CdM 2022), est favorite mais une défaite la mettrait sous pression. L'Autriche, nation émergente du football européen, joue sans pression maximale et peut exploiter les transitions.",
       "vbet": "NON",
       "scores": [
         "1-1"
@@ -908,84 +908,145 @@
         "desc": "nuageux"
       },
       "crit_home": {
-        "fd": 0,
-        "att": 0,
+        "fd": 100,
+        "att": 100,
         "def": 88,
-        "fr": 0,
+        "fr": 100,
         "mot": 70,
         "fat": 50
       },
       "crit_away": {
         "fd": 0,
-        "att": 0,
-        "def": 88,
-        "fr": 0,
+        "att": 100,
+        "def": 53,
+        "fr": 100,
         "mot": 70,
         "fat": 50
       },
       "form_home": [
         {
-          "d": "2025-11-14",
-          "opponent": "Angola",
+          "d": "2026-06-17",
+          "opponent": "Algeria",
+          "score": "3-0",
+          "result": "W",
+          "home": true,
+          "match": "Algeria",
+          "lieu": "DOM",
+          "date_full": "2026-06-17T01:00:00+00:00"
+        },
+        {
+          "d": "2026-06-10",
+          "opponent": "Iceland",
+          "score": "3-0",
+          "result": "W",
+          "home": true,
+          "match": "Iceland",
+          "lieu": "DOM",
+          "date_full": "2026-06-10T01:00:00+00:00"
+        },
+        {
+          "d": "2026-06-07",
+          "opponent": "Honduras",
           "score": "2-0",
           "result": "W",
-          "home": false,
-          "match": "Angola",
-          "lieu": "EXT",
-          "date_full": "2025-11-14T16:00:00+00:00"
+          "home": true,
+          "match": "Honduras",
+          "lieu": "DOM",
+          "date_full": "2026-06-07T00:00:00+00:00"
         },
         {
-          "d": "2025-10-15",
-          "opponent": "Puerto Rico",
-          "score": "6-0",
+          "d": "2026-03-31",
+          "opponent": "Zambia",
+          "score": "5-0",
           "result": "W",
-          "home": false,
-          "match": "Puerto Rico",
-          "lieu": "EXT",
-          "date_full": "2025-10-15T00:00:00+00:00"
+          "home": true,
+          "match": "Zambia",
+          "lieu": "DOM",
+          "date_full": "2026-03-31T23:30:00+00:00"
         },
         {
-          "d": "2025-10-11",
-          "opponent": "Venezuela",
+          "d": "2026-03-27",
+          "opponent": "Mauritania",
+          "score": "2-1",
+          "result": "W",
+          "home": true,
+          "match": "Mauritania",
+          "lieu": "DOM",
+          "date_full": "2026-03-27T23:15:00+00:00"
+        }
+      ],
+      "form_away": [
+        {
+          "d": "2026-06-17",
+          "opponent": "Jordan",
+          "score": "3-1",
+          "result": "W",
+          "home": true,
+          "match": "Jordan",
+          "lieu": "DOM",
+          "date_full": "2026-06-17T04:00:00+00:00"
+        },
+        {
+          "d": "2026-06-01",
+          "opponent": "Tunisia",
           "score": "1-0",
           "result": "W",
           "home": true,
-          "match": "Venezuela",
+          "match": "Tunisia",
           "lieu": "DOM",
-          "date_full": "2025-10-11T00:00:00+00:00"
+          "date_full": "2026-06-01T18:45:00+00:00"
+        },
+        {
+          "d": "2026-03-31",
+          "opponent": "South Korea",
+          "score": "1-0",
+          "result": "W",
+          "home": true,
+          "match": "South Korea",
+          "lieu": "DOM",
+          "date_full": "2026-03-31T18:45:00+00:00"
+        },
+        {
+          "d": "2026-03-27",
+          "opponent": "Ghana",
+          "score": "5-1",
+          "result": "W",
+          "home": true,
+          "match": "Ghana",
+          "lieu": "DOM",
+          "date_full": "2026-03-27T17:00:00+00:00"
         }
       ],
-      "form_away": [],
-      "forme_h": "",
-      "forme_a": "",
+      "forme_h": "W",
+      "forme_a": "W",
       "h2h": [],
       "injuries": [],
       "fatigue": {
         "home": {
-          "val": 15,
-          "info": "Repos 220 jours"
+          "val": 50,
+          "info": "Dernier match il y a 5j — 2 match(s) en 14j"
         },
         "away": {
-          "val": 40,
-          "info": "Calendrier inconnu"
+          "val": 50,
+          "info": "Dernier match il y a 5j — 1 match(s) en 14j"
         }
       },
       "fatigue_home": {
-        "val": 15,
-        "info": "Repos 220 jours"
+        "val": 50,
+        "info": "Dernier match il y a 5j — 2 match(s) en 14j"
       },
       "fatigue_away": {
-        "val": 40,
-        "info": "Calendrier inconnu"
+        "val": 50,
+        "info": "Dernier match il y a 5j — 1 match(s) en 14j"
       },
       "tendances": {
-        "over25_home": 0,
+        "over25_home": 8,
         "over25_away": 0,
-        "over25_home_n": 1,
+        "over25_home_n": 12,
         "over25_away_n": 1,
-        "btts_home": 0,
+        "btts_home": 3,
         "btts_away": 0,
-        "btts_home_n": 1,
+        "btts_home_n": 12,
         "btts_away_n": 1
       },
       "classement": null,
@@ -1051,10 +1112,10 @@
       "hot": false,
       "conf": 0,
       "p1": 67,
-      "pn": 60,
+      "pn": 37,
       "p2": 15,
-      "lambda_h": 0.3,
-      "lambda_a": 0.3,
+      "lambda_h": 0.896,
+      "lambda_a": 0.5,
       "wc_probs": {
         "p1": 67,
         "pN": 18,
@@ -1192,46 +1253,46 @@
       "mise": "2-3% bankroll",
       "verdict_shark": "",
       "scenario": {
-        "phase1": "0-30min : La France installe sa domination territoriale avec un pressing haut, l'Irak se réfugie dans un bloc bas compact à 5-4-1. Les 15 premières minutes voient peu de danger réel mais la France accumule les corners et les tirs lointains. Probabilité d'ouverture du score avant la 30e : ~30%.",
-        "phase2": "30-65min : La France trouve l'espace dans les couloirs grâce à sa supériorité technique écrasante (FIFA 1851 vs 1445). Un à deux buts français probables dans cette tranche horaire — le bloc irakien s'étire et les transitions rapides deviennent dangereuses. L'Irak tente une rare contre-attaque mais manque de finisseurs de niveau international (xG concédé 1.33 confirme une défense friable sous pression constante).",
-        "phase3": "65-90min : Possible gestion du résultat par la France avec des rotations tactiques. Si la qualification est acquise, entrées de joueurs moins titulaires — effet décote -30% attaque. Scénario 3e but possible mais non probable (lambda 1.88 déjà atteint). L'Irak peut espérer un but de consolation sur coup de pied arrêté dans les 10 dernières minutes (prob ~25%)."
+        "phase1": "0-30min : La France s'installe dans le camp irakien avec une possession dominante (attendu >65%). L'Iraq cherche à défendre bas en bloc compact, limitant les espaces dans l'axe. Pression française via les couloirs avec Mbappé ou son successeur désigné côté gauche.",
+        "phase2": "30-65min : Ouverture du score française probable sur corner ou phase arrêtée — l'Iraq concède 1.33 xG/match sur ce type de séquence. Risque de contre-attaque irakienne isolée sur transition rapide, le Iraq ayant un xG offensif de 0.97 à ne pas ignorer totalement.",
+        "phase3": "65-90min : La France gère son avantage. Possible rotation de joueurs si le score est confortable (2-0 ou plus). L'Iraq peut saisir une opportunité en fin de match sur défense française moins concentrée, mais la solidité défensive française (xG concédé 0.57) limite fortement ce scénario."
       },
       "scenario_15min": [
         {
           "t": "0-15min",
           "prob": 8,
-          "txt": "France en rodage, bloc défensif irakien serré. Tirs de loin, corners, mais peu de danger réel. Probabilité but : 8% — l'Irak résiste grâce à son organisation initiale."
+          "txt": "Prise en main progressive de la France — pression haute, Iraq en bloc défensif. Faible probabilité de but immédiat, les équipes trouvent leurs repères tactiques."
         },
         {
           "t": "15-30min",
           "prob": 12,
-          "txt": "La France monte en pression, création de combinaisons sur les côtés. Premier grand danger attendu dans cette fenêtre — probabilité but France 12%, l'Irak reste passif en phase offensive."
+          "txt": "Montée en puissance française avec premières occasions franches. L'Iraq commence à subir physiquement le pressing — premier but possible sur phase construite ou coup de pied arrêté."
         },
         {
           "t": "30-45min",
           "prob": 10,
-          "txt": "Milieu de première mi-temps — la France cherche l'ouverture du score avant la pause. Le bloc irakien tient mais s'expose à une erreur défensive. But France plausible (10%), but Irak très improbable (<2%)."
+          "txt": "Équilibre relatif avant la mi-temps. La France contrôle sans forcer, conserve l'énergie. Risque réduit d'ouverture du score dans ce quart d'heure précis."
         },
         {
           "t": "45-60min",
           "prob": 15,
-          "txt": "Reprise de mi-temps : la France repart fort, l'Irak fatigué par l'effort défensif. C'est la fenêtre la plus favorable pour un second but français. Probabilité but dans cette tranche : 15%."
+          "txt": "Retour des vestiaires favorable à la France : ajustements tactiques, rythme imposé. Tranche historiquement productive pour les grandes équipes contre des adversaires inférieurs — but attendu."
         },
         {
           "t": "60-75min",
           "prob": 18,
-          "txt": "France en pleine maîtrise, possibles changements offensifs pour maintenir l'intensité. L'Irak accuse le différentiel physique et technique — c'est le pic de probabilité d'un but supplémentaire (18%), y compris un possible but irakien sur contre."
+          "txt": "Pic d'intensité française — l'Iraq fatigue physiquement, les espaces s'ouvrent. Deuxième but probable dans cette fenêtre si le premier a déjà été marqu��. Rotation française possible en fin de tranche."
         },
         {
           "t": "75-90min",
           "prob": 20,
-          "txt": "Derniers 15 minutes : match ouvert avec la France gérant et l'Irak poussant pour l'honneur. Maximum de buts attendus sur cette tranche (20%) — coup franc ou corner irakien possible, et France peut encore frapper en contre. Tranche la plus prolifique statistiquement."
+          "txt": "Fin de match : la France gère ou cherche à alourdir le score. Entrées de remplaçants frais côté France. L'Iraq peut profiter d'un relâchement défensif pour créer une occasion, mais la probabilité de but irakien reste structurellement faible (lambda 0.77)."
         }
       ],
-      "facteur_x": "Lambda France 1.88 vs Iraq 0.77 = total attendu 2.65 buts, Over 2.5 à seulement 49% de probabilité modèle — un seuil trop bas pour justifier un engagement avec une cote à 1.30.",
-      "analyse_card": "La France affiche un xG généré de 2.43 pour 0.57 concédé, avec un différentiel de valeur attaque/défense de 760M€ contre 25M€ pour l'Irak. Les lambdas Poisson estiment 1.88 buts pour la France contre 0.77 pour l'Irak, soit un total attendu de 2.65 buts — juste au-dessus du seuil 2.5 mais sans conviction statistique. L'Irak concède en moyenne 1.33 xG par match et ne dispose que de 12% de joueurs évoluant dans le Top 5 européen, ce qui confirme une défense perméable face à une attaque de classe mondiale.",
-      "conseil_public": "Passer ce match : aucun marché n'atteint son seuil de probabilité minimum, et le contexte de phase de groupes avec possible rotation française rend les scénarios trop incertains pour engager des fonds.",
-      "contexte": "Phase de groupes de la Coupe du Monde 2026, journée non précisée — si la France est déjà qualifiée à ce stade, une rotation -30% en attaque est envisageable, ce qui ferait baisser encore la probabilité Over 2.5 et renforcerait l'incertitude globale sur tous les marchés offensifs.",
+      "facteur_x": "BTTS Non à 54% de probabilité modèle pour un seuil requis de 55% : manque de 1 point de probabilité pour valider — c'est le marché le plus proche du seuil mais l'edge reste négatif ou nul.",
+      "analyse_card": "La France affiche un xG généré de 2.43 contre 0.57 concédé, soutenu par une valeur attaque de 480M€ et un lambda Poisson de 1.88 but. L'Iraq, avec un xG offensif de 0.97 et défensif concédé de 1.33, présente un écart structurel colossal (force 85.7 vs 19.7). Néanmoins, le modèle Poisson produit des distributions trop dispersées (Over 2.5 à 49%, Under 2.5 à 51%) pour isoler un signal exploitable.",
+      "conseil_public": "Ne pas parier sur ce match : aucun marché ne dépasse son seuil de probabilité minimum, et la règle absolue impose de passer son tour — discipline avant rendement.",
+      "contexte": "Phase de groupes Coupe du Monde 2026 — match du 22 juin. L'écart de niveau est historique (FIFA 1851 vs 1445 pts), mais la structure des probabilités reste trop équilibrée sur les marchés disponibles pour générer un edge certifié. Le risque de score atypique ou de gestion défensive française reste non négligeable.",
       "vbet": "NON",
       "scores": [
         "2-0"
@@ -1255,118 +1316,169 @@
         "desc": "couvert"
       },
       "crit_home": {
-        "fd": 0,
-        "att": 0,
-        "def": 88,
-        "fr": 0,
+        "fd": 100,
+        "att": 100,
+        "def": 53,
+        "fr": 100,
         "mot": 70,
         "fat": 50
       },
       "crit_away": {
         "fd": 0,
-        "att": 0,
-        "def": 88,
+        "att": 40,
+        "def": 0,
         "fr": 0,
         "mot": 70,
         "fat": 50
       },
-      "form_home": [],
-      "form_away": [
+      "form_home": [
         {
-          "d": "2025-12-12",
-          "opponent": "Jordan",
-          "score": "0-1",
-          "result": "L",
-          "home": false,
-          "match": "Jordan",
-          "lieu": "EXT",
-          "date_full": "2025-12-12T14:30:00+00:00"
+          "d": "2026-06-16",
+          "opponent": "Senegal",
+          "score": "3-1",
+          "result": "W",
+          "home": true,
+          "match": "Senegal",
+          "lieu": "DOM",
+          "date_full": "2026-06-16T19:00:00+00:00"
         },
         {
-          "d": "2025-12-09",
-          "opponent": "Algeria",
-          "score": "0-2",
-          "result": "L",
-          "home": false,
-          "match": "Algeria",
-          "lieu": "EXT",
-          "date_full": "2025-12-09T17:00:00+00:00"
+          "d": "2026-06-08",
+          "opponent": "Northern Ireland",
+          "score": "3-1",
+          "result": "W",
+          "home": true,
+          "match": "Northern Ireland",
+          "lieu": "DOM",
+          "date_full": "2026-06-08T19:10:00+00:00"
         },
         {
-          "d": "2025-12-06",
-          "opponent": "Sudan",
-          "score": "2-0",
+          "d": "2026-06-04",
+          "opponent": "Ivory Coast",
+          "score": "1-2",
+          "result": "L",
+          "home": true,
+          "match": "Ivory Coast",
+          "lieu": "DOM",
+          "date_full": "2026-06-04T19:10:00+00:00"
+        },
+        {
+          "d": "2026-03-29",
+          "opponent": "Colombia",
+          "score": "3-1",
           "result": "W",
           "home": false,
-          "match": "Sudan",
+          "match": "Colombia",
           "lieu": "EXT",
-          "date_full": "2025-12-06T16:00:00+00:00"
+          "date_full": "2026-03-29T19:00:00+00:00"
         },
         {
-          "d": "2025-12-03",
-          "opponent": "Bahrain",
+          "d": "2026-03-26",
+          "opponent": "Brazil",
+          "score": "2-1",
+          "result": "W",
+          "home": false,
+          "match": "Brazil",
+          "lieu": "EXT",
+          "date_full": "2026-03-26T20:00:00+00:00"
+        }
+      ],
+      "form_away": [
+        {
+          "d": "2026-06-16",
+          "opponent": "Norway",
+          "score": "1-4",
+          "result": "L",
+          "home": true,
+          "match": "Norway",
+          "lieu": "DOM",
+          "date_full": "2026-06-16T22:00:00+00:00"
+        },
+        {
+          "d": "2026-06-10",
+          "opponent": "Venezuela",
+          "score": "0-2",
+          "result": "L",
+          "home": true,
+          "match": "Venezuela",
+          "lieu": "DOM",
+          "date_full": "2026-06-10T01:00:00+00:00"
+        },
+        {
+          "d": "2026-06-04",
+          "opponent": "Spain",
+          "score": "1-1",
+          "result": "D",
+          "home": false,
+          "match": "Spain",
+          "lieu": "EXT",
+          "date_full": "2026-06-04T19:00:00+00:00"
+        },
+        {
+          "d": "2026-05-29",
+          "opponent": "Andorra",
+          "score": "1-0",
+          "result": "W",
+          "home": true,
+          "match": "Andorra",
+          "lieu": "DOM",
+          "date_full": "2026-05-29T16:00:00+00:00"
+        },
+        {
+          "d": "2026-04-01",
+          "opponent": "Bolivia",
           "score": "2-1",
           "result": "W",
           "home": true,
-          "match": "Bahrain",
+          "match": "Bolivia",
           "lieu": "DOM",
-          "date_full": "2025-12-03T14:30:00+00:00"
-        },
-        {
-          "d": "2025-09-07",
-          "opponent": "Thailand",
-          "score": "1-0",
-          "result": "W",
-          "home": false,
-          "match": "Thailand",
-          "lieu": "EXT",
-          "date_full": "2025-09-07T13:00:00+00:00"
+          "date_full": "2026-04-01T03:00:00+00:00"
         }
       ],
-      "forme_h": "",
-      "forme_a": "",
+      "forme_h": "W",
+      "forme_a": "L",
       "h2h": [],
       "injuries": [],
       "fatigue": {
         "home": {
-          "val": 40,
-          "info": "Calendrier inconnu"
+          "val": 50,
+          "info": "Dernier match il y a 6j — 2 match(s) en 14j"
         },
         "away": {
-          "val": 15,
-          "info": "Repos 192 jours"
+          "val": 50,
+          "info": "Dernier match il y a 6j — 2 match(s) en 14j"
         }
       },
       "fatigue_home": {
-        "val": 40,
-        "info": "Calendrier inconnu"
+        "val": 50,
+        "info": "Dernier match il y a 6j — 2 match(s) en 14j"
       },
       "fatigue_away": {
-        "val": 15,
-        "info": "Repos 192 jours"
+        "val": 50,
+        "info": "Dernier match il y a 6j — 2 match(s) en 14j"
       },
       "tendances": {
-        "over25_home": 0,
-        "over25_away": 0,
-        "over25_home_n": 1,
-        "over25_away_n": 4,
-        "btts_home": 0,
-        "btts_away": 0,
-        "btts_home_n": 1,
-        "btts_away_n": 4
+        "over25_home": 3,
+        "over25_away": 2,
+        "over25_home_n": 3,
+        "over25_away_n": 8,
+        "btts_home": 3,
+        "btts_away": 4,
+        "btts_home_n": 3,
+        "btts_away_n": 8
       },
       "classement": null,
       "actu": [
         {
           "c": "France",
-          "t": "L’occitan, cette “langue des troubadours” bien vivante dans le sud de la France",
-          "tx": "Corse, basque, catalan, picard, alsacien, breton… Les langues minoritaires abondent en France. L’occitan et ses variétés régionales sont toujours parlés dans le sud du pays, mais le nombre de locuteurs a singulièrement baissé, constate un chroniqueur du magaz…",
+          "t": "Concerts annulés, 35 départements en vigilance rouge, noyades… Le point sur la canicule",
+          "tx": "Quelque 53 millions de Français souffrent de la chaleur ce dimanche dans les 35 départements placés en vigilance rouge et les 45 autres en vigilance orange.",
           "tm": "2026-06-21"
         },
         {
           "c": "France",
-          "t": "Derrière « Jim Queen » et ses blagues délirantes, un film d’animation plus concernant qu’il n’y paraît",
-          "tx": "Danger de l’extrême droite, homophobie… Cette histoire déjantée d’un virus transformant les hommes gays en hétéros va bien au-delà de l’humour.",
+          "t": "Équipe de France : Lucas Digne sous le charme de Michael Olise",
+          "tx": "Le tiktokeur Digne entre dans la trend Olise. Présent en conférence de presse samedi avant France-Irak, Lucas Digne,…",
           "tm": "2026-06-21"
         },
         {
@@ -1740,9 +1852,9 @@
       "hot": false,
       "conf": 0,
       "p1": 31,
-      "pn": 60,
+      "pn": 47,
       "p2": 51,
-      "lambda_h": 0.3,
+      "lambda_h": 0.64,
       "lambda_a": 0.3,
       "wc_probs": {
         "p1": 31,
@@ -1881,46 +1993,46 @@
       "mise": "2-3% bankroll",
       "verdict_shark": "",
       "scenario": {
-        "phase1": "0-30min : l'Algérie impose un pressing haut, cherche à exploiter son avantage FIFA (123 pts d'écart) et sa puissance offensive via ses 42% de joueurs évoluant dans le Top 5 européen. La Jordanie tente de tenir en bloc bas.",
-        "phase2": "30-60min : le match devient plus ouvert, les deux équipes cherchent à concrétiser leurs occasions. La Jordanie peut se montrer dangereuse en contre (xG généré 1.35), tandis que l'Algérie insiste sur les côtés avec sa valeur d'attaque à 25M€.",
-        "phase3": "60-90min : si le score est serré, les deux équipes poussent pour obtenir un résultat qualificatif. Le lambda Poisson combiné (2.67) suggère que la majorité des buts tombe après la 60e minute, avec un dénouement probable en fin de match."
+        "phase1": "0-30min : L'Algérie impose son pressing et sa supériorité technique (FIFA 1521 vs 1398), cherchant à ouvrir le score rapidement. La Jordanie s'organise en bloc défensif pour freiner les offensives adverses.",
+        "phase2": "30-60min : Le match entre dans une phase plus équilibrée — la Jordanie exploite les transitions avec son xG de 1.35, tandis que l'Algérie peine à trouver des espaces face à un bloc bas compact. Score serré probable.",
+        "phase3": "60-90min : L'Algérie accélère en fin de match (42% de joueurs Top 5 vs 10%), créant plus d'occasions. La Jordanie défend avec intensité, le match peut basculer sur un coup de pied arrêté ou une erreur individuelle."
       },
       "scenario_15min": [
         {
           "t": "0-15min",
           "prob": 8,
-          "txt": "Phase d'observation : l'Algérie tente de fixer le jeu haut, Jordanie bien organisée défensivement, peu d'occasions franches des deux côtés."
+          "txt": "Démarrage prudent des deux équipes, l'Algérie teste la défense jordanienne avec ses ailiers — faible probabilité de but dans ce premier quart d'heure d'observation mutuelle."
         },
         {
           "t": "15-30min",
           "prob": 12,
-          "txt": "L'Algérie commence à créer via ses combinaisons offensives (xG 1.96 sur 90min) ; la Jordanie tente quelques contre-attaques rapides, premier but possible."
+          "txt": "L'Algérie monte en puissance, son xG généré de 1.96 commence à se matérialiser en occasions concrètes — période la plus dangereuse pour la Jordanie avant la mi-temps."
         },
         {
           "t": "30-45min",
           "prob": 10,
-          "txt": "Période de gestion avant la mi-temps : rythme légèrement réduit, les deux équipes conservent leur énergie, occasions de mi-distance peu concrètes."
+          "txt": "La Jordanie résiste et peut créer la surprise en contre-attaque, son xG de 1.35 reflétant une capacité réelle à finaliser malgré son statut d'outsider."
         },
         {
           "t": "45-60min",
           "prob": 15,
-          "txt": "Reprise dynamique : l'Algérie repart fort après la pause, pression accrue sur la défense jordanienne (valeur défense 11M€ vs attaque algérienne 25M€)."
+          "txt": "Les ajustements tactiques de la mi-temps ouvrent le jeu — période classique de buts dans les matchs de groupes où les enjeux poussent les équipes à prendre des risques croissants."
         },
         {
           "t": "60-75min",
           "prob": 18,
-          "txt": "Pic d'intensité : changements tactiques des deux côtés, la Jordanie cherche à égaliser ou à ouvrir le score si le match est nul, l'Algérie exploite les espaces laissés."
+          "txt": "Les remplaçants algériens entrent en jeu, leur supériorité en valeur d'attaque (25M€) se fait sentir — probabilité croissante d'un but algérien dans cette fenêtre."
         },
         {
           "t": "75-90min",
           "prob": 20,
-          "txt": "Fin de match sous tension qualificative : les deux équipes poussent, risque élevé de buts dans les dernières minutes compte tenu des enjeux et du lambda combiné à 2.67."
+          "txt": "Dernière phase la plus fertile en buts : pression maximale si le score est nul ou serré, les deux équipes jouant leur qualification — fenêtre statistiquement la plus productive du match."
         }
       ],
-      "facteur_x": "Lambda Poisson combiné de 2.67 buts attendus (Jordan 1.18 + Algeria 1.49) place la probabilité Over 2.5 et Under 2.5 exactement à parité (50/50), aucune direction n'offre d'edge exploitable.",
-      "analyse_card": "L'Algérie affiche un xG offensif supérieur (1.96) face à une défense jordanienne concédant 1.01 xG, ce qui reflète un léger avantage des Fennecs sur le plan offensif. La Jordanie, avec seulement 12M€ de valeur d'attaque et 1.18 buts attendus (lambda Poisson), ne présente pas de garantie de scorer régulièrement. Les deux équipes affichent des défenses proches (xG concédé ~1.0 chacune), rendant le marché des buts et le BTTS particulièrement incertain et non exploitable.",
-      "conseil_public": "Passe ce match : aucun signal ne justifie un engagement financier, attends un marché avec edge réel ≥ seuil requis avant de jouer.",
-      "contexte": "Phase de groupes Coupe du Monde 2026 : les deux sélections jouent leur qualification en jeu, ce qui maintient une motivation élevée des deux côtés et limite les rotations. La pression compétitive équilibre les deux équipes et contribue à l'incertitude générale du match.",
+      "facteur_x": "Lambda Poisson combiné de 2.67 buts attendus place le match exactement sur la frontière Over/Under 2.5, rendant les deux côtés du marché statistiquement équivalents à ~50% — aucun edge exploitable.",
+      "analyse_card": "L'Algérie domine structurellement avec un xG généré de 1.96 contre 1.35 pour la Jordanie, et une valeur d'attaque plus que double (25M€ vs 12M€). Cependant, les deux défenses concèdent peu (xG concédé ~1.0 chacune), ce qui compresse les probabilités de buts et crée une incertitude symétrique sur les marchés Over/Under et BTTS. Avec des lambdas Poisson de 1.18 (Jordanie) et 1.49 (Algérie), le match se situe dans une zone grise statistique qui ne favorise aucun marché de façon décisive.",
+      "conseil_public": "Ne pas jouer ce match : aucun edge fiable n'est identifiable, les marchés les plus proches du seuil (BTTS Oui à 53%, Over 2.5 à 50%) restent en dessous des seuils de validation — attendre un match avec au moins un marché ✅ FIABLE.",
+      "contexte": "Phase de groupes Coupe du Monde 2026 — les deux équipes jouent probablement leur qualification dans ce match, ce qui maintient une intensité compétitive élevée mais ne suffit pas à créer un signal statistique exploitable. La Jordanie (31% victoire) est outsider face à une Algérie plus expérimentée (51%), mais le nul reste plausible à 18%.",
       "vbet": "NON",
       "scores": [
         "1-1"
@@ -1945,155 +2057,155 @@
       },
       "crit_home": {
         "fd": 0,
-        "att": 0,
-        "def": 88,
+        "att": 40,
+        "def": 0,
         "fr": 0,
         "mot": 70,
         "fat": 50
       },
       "crit_away": {
-        "fd": 0,
-        "att": 0,
-        "def": 88,
-        "fr": 0,
+        "fd": 50,
+        "att": 33,
+        "def": 32,
+        "fr": 30,
         "mot": 70,
         "fat": 50
       },
       "form_home": [
         {
-          "d": "2025-12-15",
-          "opponent": "Saudi Arabia",
-          "score": "1-0",
-          "result": "W",
+          "d": "2026-06-17",
+          "opponent": "Austria",
+          "score": "1-3",
+          "result": "L",
           "home": false,
-          "match": "Saudi Arabia",
+          "match": "Austria",
           "lieu": "EXT",
-          "date_full": "2025-12-15T17:30:00+00:00"
+          "date_full": "2026-06-17T04:00:00+00:00"
         },
         {
-          "d": "2025-12-12",
-          "opponent": "Iraq",
-          "score": "1-0",
-          "result": "W",
+          "d": "2026-06-07",
+          "opponent": "Colombia",
+          "score": "0-2",
+          "result": "L",
+          "home": false,
+          "match": "Colombia",
+          "lieu": "EXT",
+          "date_full": "2026-06-07T23:00:00+00:00"
+        },
+        {
+          "d": "2026-05-31",
+          "opponent": "Switzerland",
+          "score": "1-4",
+          "result": "L",
+          "home": false,
+          "match": "Switzerland",
+          "lieu": "EXT",
+          "date_full": "2026-05-31T13:00:00+00:00"
+        },
+        {
+          "d": "2026-03-31",
+          "opponent": "Nigeria",
+          "score": "2-2",
+          "result": "D",
           "home": true,
-          "match": "Iraq",
+          "match": "Nigeria",
           "lieu": "DOM",
-          "date_full": "2025-12-12T14:30:00+00:00"
+          "date_full": "2026-03-31T17:30:00+00:00"
         },
         {
-          "d": "2025-12-09",
-          "opponent": "Egypt",
-          "score": "3-0",
-          "result": "W",
-          "home": false,
-          "match": "Egypt",
-          "lieu": "EXT",
-          "date_full": "2025-12-09T14:30:00+00:00"
-        },
-        {
-          "d": "2025-12-06",
-          "opponent": "Kuwait",
-          "score": "3-1",
-          "result": "W",
-          "home": false,
-          "match": "Kuwait",
-          "lieu": "EXT",
-          "date_full": "2025-12-06T11:00:00+00:00"
-        },
-        {
-          "d": "2025-12-03",
-          "opponent": "United Arab Emirates",
-          "score": "2-1",
-          "result": "W",
+          "d": "2026-03-27",
+          "opponent": "Costa Rica",
+          "score": "2-2",
+          "result": "D",
           "home": true,
-          "match": "United Arab Emirates",
+          "match": "Costa Rica",
           "lieu": "DOM",
-          "date_full": "2025-12-03T17:00:00+00:00"
+          "date_full": "2026-03-27T17:30:00+00:00"
         }
       ],
       "form_away": [
         {
-          "d": "2026-01-10",
-          "opponent": "Nigeria",
-          "score": "0-2",
+          "d": "2026-06-17",
+          "opponent": "Argentina",
+          "score": "0-3",
           "result": "L",
-          "home": true,
-          "match": "Nigeria",
-          "lieu": "DOM",
-          "date_full": "2026-01-10T16:00:00+00:00"
+          "home": false,
+          "match": "Argentina",
+          "lieu": "EXT",
+          "date_full": "2026-06-17T01:00:00+00:00"
         },
         {
-          "d": "2025-12-31",
-          "opponent": "Equatorial Guinea",
-          "score": "3-1",
+          "d": "2026-06-11",
+          "opponent": "Bolivia",
+          "score": "4-0",
           "result": "W",
           "home": false,
-          "match": "Equatorial Guinea",
+          "match": "Bolivia",
           "lieu": "EXT",
-          "date_full": "2025-12-31T16:00:00+00:00"
+          "date_full": "2026-06-11T00:00:00+00:00"
         },
         {
-          "d": "2025-12-28",
-          "opponent": "Burkina Faso",
+          "d": "2026-06-03",
+          "opponent": "Netherlands",
           "score": "1-0",
           "result": "W",
-          "home": true,
-          "match": "Burkina Faso",
-          "lieu": "DOM",
-          "date_full": "2025-12-28T17:30:00+00:00"
+          "home": false,
+          "match": "Netherlands",
+          "lieu": "EXT",
+          "date_full": "2026-06-03T18:45:00+00:00"
         },
         {
-          "d": "2025-12-24",
-          "opponent": "Sudan",
-          "score": "3-0",
-          "result": "W",
+          "d": "2026-03-31",
+          "opponent": "Uruguay",
+          "score": "0-0",
+          "result": "D",
           "home": true,
-          "match": "Sudan",
+          "match": "Uruguay",
           "lieu": "DOM",
-          "date_full": "2025-12-24T15:00:00+00:00"
+          "date_full": "2026-03-31T18:30:00+00:00"
         },
         {
-          "d": "2025-12-09",
-          "opponent": "Iraq",
-          "score": "2-0",
+          "d": "2026-03-27",
+          "opponent": "Guatemala",
+          "score": "7-0",
           "result": "W",
           "home": true,
-          "match": "Iraq",
+          "match": "Guatemala",
           "lieu": "DOM",
-          "date_full": "2025-12-09T17:00:00+00:00"
+          "date_full": "2026-03-27T19:30:00+00:00"
         }
       ],
-      "forme_h": "",
-      "forme_a": "",
+      "forme_h": "L",
+      "forme_a": "L",
       "h2h": [],
       "injuries": [],
       "fatigue": {
         "home": {
-          "val": 15,
-          "info": "Repos 189 jours"
+          "val": 50,
+          "info": "Dernier match il y a 5j — 1 match(s) en 14j"
         },
         "away": {
-          "val": 15,
-          "info": "Repos 163 jours"
+          "val": 50,
+          "info": "Dernier match il y a 5j — 2 match(s) en 14j"
         }
       },
       "fatigue_home": {
-        "val": 15,
-        "info": "Repos 189 jours"
+        "val": 50,
+        "info": "Dernier match il y a 5j — 1 match(s) en 14j"
       },
       "fatigue_away": {
-        "val": 15,
-        "info": "Repos 163 jours"
+        "val": 50,
+        "info": "Dernier match il y a 5j — 2 match(s) en 14j"
       },
       "tendances": {
-        "over25_home": 2,
-        "over25_away": 4,
-        "over25_home_n": 5,
-        "over25_away_n": 7,
-        "btts_home": 2,
-        "btts_away": 3,
-        "btts_home_n": 5,
-        "btts_away_n": 7
+        "over25_home": 6,
+        "over25_away": 2,
+        "over25_home_n": 10,
+        "over25_away_n": 3,
+        "btts_home": 4,
+        "btts_away": 0,
+        "btts_home_n": 10,
+        "btts_away_n": 3
       },
       "classement": null,
       "actu": [

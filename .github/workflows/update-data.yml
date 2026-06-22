@@ -1230,12 +1230,14 @@ jobs:
             });
           }
 
-          async function getTeamStats(teamId, leagueId) {
-            var r = await get('https://v3.football.api-sports.io/teams/statistics?team='+teamId+'&league='+leagueId+'&season='+SEASON, APS);
+          async function getTeamStats(teamId, leagueId, season) {
+            var s = season || SEASON;
+            var r = await get('https://v3.football.api-sports.io/teams/statistics?team='+teamId+'&league='+leagueId+'&season='+s, APS);
             return r.response||null;
           }
-          async function getLast10(teamId) {
-            var r = await get('https://v3.football.api-sports.io/fixtures?team='+teamId+'&last=20&status=FT&season='+SEASON, APS);
+          async function getLast10(teamId, season) {
+            var s = season || SEASON;
+            var r = await get('https://v3.football.api-sports.io/fixtures?team='+teamId+'&last=20&status=FT&season='+s, APS);
             return r.response||[];
           }
           async function getFullStanding(leagueId) {
@@ -2326,7 +2328,9 @@ jobs:
               var rkH=entryH?entryH.rank:null;
               var rkA=entryA?entryA.rank:null;
 
-              var batch1=await Promise.all([getTeamStats(home.id,lg.id),getTeamStats(away.id,lg.id),getLast10(home.id),getLast10(away.id)]);
+              var wcSeason = isWorldCupMatch ? 2026 : SEASON;
+              var wcLeagueId = isWorldCupMatch ? 1 : lg.id;
+              var batch1=await Promise.all([getTeamStats(home.id,wcLeagueId,wcSeason),getTeamStats(away.id,wcLeagueId,wcSeason),getLast10(home.id,wcSeason),getLast10(away.id,wcSeason)]);
               await sleep(400);
               var batch2=await Promise.all([getOdds(f.id),getInjuries(f.id),getH2H(home.id,away.id),getWeather(f.venue&&f.venue.city?f.venue.city:''),getNews(home.name),getNews(away.name),getPredictions(f.id),getLineups(f.id),getRefereeStats(f.referee||null),getTopScorers(home.id,lg.id),getTopScorers(away.id,lg.id),getPinnacleOdds(home.name,away.name,lgKey(lg.id))]);
               await sleep(400);
@@ -2371,6 +2375,7 @@ jobs:
               var odds=parseOdds(oddsRaw);
               var critH=calcCriteres(sH,true,rkH);
               var critA=calcCriteres(sA,false,rkA);
+
               var fatigueH=calcFatigue(last10H);
               var fatigueA=calcFatigue(last10A);
               var tendances=calcTendances(last10H,last10A);
@@ -2570,7 +2575,24 @@ jobs:
                 paris_safe:{bet:an?(an.pari_rec||''):'',cote:an?(parseFloat(an.cote_rec)||odds.c1):odds.c1,proba:an?(an.p1||0)+'%':''},
                 paris_risque:{bet:'',cote:'',proba:''},kelly:kellyVal,
                 stade:{nom:f.venue&&f.venue.name?(f.venue.name+(f.venue.city?' \u2014 '+f.venue.city:'')):home.name+' (domicile)',cap:'',meteo:wx?wx.emoji:'\ud83c\udf24\ufe0f',temp:wx?wx.temp:'',desc:wx?wx.desc:''},
-                crit_home:critH,crit_away:critA,
+                crit_home:(function(){
+                  // FIX WC : si att=0 et fr=0 (stats nationale absente), reconstruire
+                  // les critères depuis le score modèle WC (scoreH.total sur 100).
+                  if(isWorldCupMatch && critH.att===0 && critH.fr===0 && an&&an._wcProbs&&an._wcProbs.scoreH){
+                    var sc=an._wcProbs.scoreH;
+                    var total=sc.total||50;
+                    return {fd:critH.fd||50,att:Math.min(100,Math.round(total*0.9)),def:Math.min(100,Math.round(total*0.85)),fr:Math.min(100,Math.round(total*0.8)),mot:critH.mot||70,fat:an._wcProbs.fatigueH||50};
+                  }
+                  return critH;
+                })(),
+                crit_away:(function(){
+                  if(isWorldCupMatch && critA.att===0 && critA.fr===0 && an&&an._wcProbs&&an._wcProbs.scoreA){
+                    var sc=an._wcProbs.scoreA;
+                    var total=sc.total||50;
+                    return {fd:critA.fd||50,att:Math.min(100,Math.round(total*0.9)),def:Math.min(100,Math.round(total*0.85)),fr:Math.min(100,Math.round(total*0.8)),mot:critA.mot||70,fat:an._wcProbs.fatigueA||50};
+                  }
+                  return critA;
+                })(),
                 form_home:last10H.slice(0,5),form_away:last10A.slice(0,5),
                 forme_h:(sH&&sH.form)||'',forme_a:(sA&&sA.form)||'',
                 h2h:h2hFormatted,injuries,

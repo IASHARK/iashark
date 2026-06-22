@@ -2161,7 +2161,7 @@ jobs:
             console.log('=== IASHARK',TODAY,'===');
 
             // ── 1. FETCH TENNIS + RANKINGS EN PARALLÈLE avec le football ──
-            var tennisFixturesPromise = getTennisFixtures();
+            var tennisFixturesPromise = Promise.resolve([]); // TENNIS EN PAUSE
             var footballFixturesPromise = getFixtures();
             if(ODDS_IO_KEY) await loadOddsIOIndex();
             var rankingsPromise = Promise.all([

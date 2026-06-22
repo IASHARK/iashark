@@ -484,6 +484,7 @@ jobs:
           const TODAY    = new Date().toISOString().split('T')[0];
 
           var LG_KEY = {
+            1:'wc',
             39:'premier', 40:'champ', 61:'ligue1', 62:'ligue2',
             140:'laliga', 141:'laliga2', 135:'seriea', 78:'bundesliga',
             2:'ldc', 3:'el', 88:'eredivisie', 94:'primeira', 203:'superlig',
@@ -1383,23 +1384,40 @@ jobs:
                 var xgAgainst=parseFloat(sOpp['expected_goals'])||null;
                 var shots_on=parseInt(s['shots_on_goal'])||0;
                 var shots_total=parseInt(s['total_shots'])||0;
+                var shots_off=parseInt(s['shots_off_goal'])||0;
+                var shots_blocked=parseInt(s['blocked_shots'])||0;
                 var fouls=parseInt(s['fouls'])||0;
+                var corners=parseInt(s['corner_kicks'])||0;
+                var offsides=parseInt(s['offsides'])||0;
+                var saves=parseInt(s['goalkeeper_saves'])||0;
+                var saves_opp=parseInt(sOpp['goalkeeper_saves'])||0;
+                var possession=s['ball_possession']?parseInt(String(s['ball_possession']).replace('%',''))||null:null;
+                var passes_pct=s['passes_%']?parseInt(String(s['passes_%']).replace('%',''))||null:null;
+                var passes_acc=parseInt(s['passes_accurate'])||0;
                 var fx=rawFixtures.find(function(f){return f.fixture.id===fixtureIds[i];});
                 var oppId=fx?(fx.teams.home.id===teamId?fx.teams.away.id:fx.teams.home.id):null;
                 var xgWeighted=null;
                 if(xgTeam!==null&&oppId&&xgConcededCache[oppId]) xgWeighted=parseFloat((xgTeam/xgConcededCache[oppId]).toFixed(3));
-                results.push({xg:xgTeam,xga:xgAgainst,xg_weighted:xgWeighted,shots_on,shots_total,fouls});
+                results.push({xg:xgTeam,xga:xgAgainst,xg_weighted:xgWeighted,shots_on,shots_total,shots_off,shots_blocked,fouls,corners,offsides,saves,saves_opp,possession,passes_pct,passes_acc});
                 await sleep(150);
               }catch(e){}
             }
-            if(!results.length) return {xg_avg:null,xga_avg:null,xg_weighted:null,shots_on_avg:null,shots_total_avg:null,fouls_avg:null};
+            if(!results.length) return {xg_avg:null,xga_avg:null,xg_weighted:null,shots_on_avg:null,shots_total_avg:null,fouls_avg:null,shots_off_avg:null,shots_blocked_avg:null,corners_avg:null,offsides_avg:null,saves_avg:null,saves_opp_avg:null,possession_avg:null,passes_pct_avg:null};
             function avg(arr){return arr.length?arr.reduce(function(a,b){return a+b;},0)/arr.length:null;}
             var xgs=results.filter(function(r){return r.xg!==null;}).map(function(r){return r.xg;});
             var xgas=results.filter(function(r){return r.xga!==null;}).map(function(r){return r.xga;});
             var xgsW=results.filter(function(r){return r.xg_weighted!==null;}).map(function(r){return r.xg_weighted;});
             var shots=results.map(function(r){return r.shots_on;}).filter(Boolean);
             var shotsT=results.map(function(r){return r.shots_total;}).filter(Boolean);
+            var shotsOff=results.map(function(r){return r.shots_off;}).filter(Boolean);
+            var shotsBlk=results.map(function(r){return r.shots_blocked;}).filter(Boolean);
             var foulsArr=results.map(function(r){return r.fouls;}).filter(Boolean);
+            var cornersArr=results.map(function(r){return r.corners;}).filter(Boolean);
+            var offsidesArr=results.map(function(r){return r.offsides;}).filter(Boolean);
+            var savesArr=results.map(function(r){return r.saves;}).filter(Boolean);
+            var savesOppArr=results.map(function(r){return r.saves_opp;}).filter(Boolean);
+            var posArr=results.filter(function(r){return r.possession!==null;}).map(function(r){return r.possession;});
+            var passPctArr=results.filter(function(r){return r.passes_pct!==null;}).map(function(r){return r.passes_pct;});
             var avgXGA=avg(xgas);
             var surchauffe=false;
             if(avgXGA&&avgXGA>=1.5){var recentBE=results.slice(0,5).filter(function(r){return r.xga!==null&&r.xga>=1.5;}).length;if(recentBE>=3)surchauffe=true;}
@@ -1407,9 +1425,17 @@ jobs:
               xg_avg:avg(xgs)?parseFloat(avg(xgs).toFixed(2)):null,
               xga_avg:avgXGA?parseFloat(avgXGA.toFixed(2)):null,
               xg_weighted:avg(xgsW)?parseFloat(avg(xgsW).toFixed(3)):null,
-              shots_on_avg:avg(shots)?avg(shots).toFixed(1):null,
-              shots_total_avg:avg(shotsT)?avg(shotsT).toFixed(1):null,
-              fouls_avg:avg(foulsArr)?avg(foulsArr).toFixed(1):null,
+              shots_on_avg:avg(shots)?parseFloat(avg(shots).toFixed(1)):null,
+              shots_total_avg:avg(shotsT)?parseFloat(avg(shotsT).toFixed(1)):null,
+              shots_off_avg:avg(shotsOff)?parseFloat(avg(shotsOff).toFixed(1)):null,
+              shots_blocked_avg:avg(shotsBlk)?parseFloat(avg(shotsBlk).toFixed(1)):null,
+              fouls_avg:avg(foulsArr)?parseFloat(avg(foulsArr).toFixed(1)):null,
+              corners_avg:avg(cornersArr)?parseFloat(avg(cornersArr).toFixed(1)):null,
+              offsides_avg:avg(offsidesArr)?parseFloat(avg(offsidesArr).toFixed(1)):null,
+              saves_avg:avg(savesArr)?parseFloat(avg(savesArr).toFixed(1)):null,
+              saves_opp_avg:avg(savesOppArr)?parseFloat(avg(savesOppArr).toFixed(1)):null,
+              possession_avg:avg(posArr)?Math.round(avg(posArr)):null,
+              passes_pct_avg:avg(passPctArr)?Math.round(avg(passPctArr)):null,
               defense_surchauffe:surchauffe,n:results.length
             };
           }
@@ -1803,7 +1829,19 @@ jobs:
             }, {'x-api-key':ANT_KEY, 'anthropic-version':'2023-06-01'});
 
             var txt=((r.content||[]).find(function(b){return b.type==='text';})||{}).text||'{}';
-            try{return JSON.parse(txt.replace(/```json|```/g,'').trim());}
+            try{
+              var parsedResult=JSON.parse(txt.replace(/```json|```/g,'').trim());
+              // FIX: wcProbs/wcMarkets sont calculés plus haut dans cette
+              // fonction (uniquement utilisés jusqu'ici pour construire le
+              // prompt texte envoyé à Claude) — on les attache au résultat
+              // pour qu'ils remontent jusqu'à matchObj et donc jusqu'au
+              // site, au lieu d'être perdus à la fin de cette fonction.
+              if(isWorldCup && typeof wcProbs!=='undefined' && wcProbs){
+                parsedResult._wcProbs=wcProbs;
+                parsedResult._wcMarkets=wcMarkets||null;
+              }
+              return parsedResult;
+            }
             catch(e){console.log('Parse error genAnalyse:',txt.slice(0,200));return null;}
           }
 
@@ -2002,33 +2040,64 @@ jobs:
 
             for(var mi=0;mi<matchsData.length;mi++){
               var m=matchsData[mi];
-              var alreadyExists=histo.predictions.find(function(p){return p.fixture_id===m.id||(p.home===m.home.n&&p.away===m.away.n&&p.date&&p.date.substring(0,10)===TODAY);});
-              if(!alreadyExists&&m.pari_rec){
-                var betLabel=m.pari_rec;
-                var betCote=parseFloat(m.cote_rec)||null;
-                var marketType='autre';
-                if(betLabel){
-                  var bl=betLabel.toLowerCase();
-                  if(bl.includes('over 2.5'))marketType='over25';
-                  else if(bl.includes('over 1.5'))marketType='over15';
-                  else if(bl.includes('btts non'))marketType='btts_non';
-                  else if(bl.includes('btts'))marketType='btts_oui';
-                  else if(bl.includes('1x'))marketType='dc1x';
-                  else if(bl.includes('x2'))marketType='dc_x2';
-                  else if(m.sport==='tennis')marketType='match_winner';
+              // FIX 1 : on check uniquement par fixture_id pour éviter qu'un match
+              // no_signal du jour J apparaisse avec un pari le jour J+1 si le pipeline
+              // retourne dessus. On n'ajoute que si le fixture_id n'existe PAS déjà,
+              // quelle que soit la date. Et on n'ajoute jamais un no_signal.
+              var alreadyExists=histo.predictions.find(function(p){return p.fixture_id===m.id;});
+              if(alreadyExists){
+                // Si le match existe déjà en no_signal et qu'aujourd'hui il a un vrai
+                // pari (rare mais peut arriver si le pipeline est rerunné), on met à
+                // jour le pari mais on ne touche pas au statut résolution.
+                if((alreadyExists.no_signal||!alreadyExists.prediction)&&m.pari_rec&&m.result==='scheduled'){
+                  alreadyExists.prediction=m.pari_rec;
+                  alreadyExists.prediction_fr=m.pari_rec; // FIX 2 : label français stocké
+                  alreadyExists.cote=parseFloat(m.cote_rec)||alreadyExists.cote;
+                  alreadyExists.no_signal=false;
                 }
-                var confBucket=m.conf>=8?'8+':m.conf>=7?'7-8':m.conf>=6?'6-7':'<6';
-                histo.predictions.unshift({
-                  match:m.home.n+' vs '+m.away.n,
-                  home:m.home.n,away:m.away.n,
-                  prediction:betLabel,cote:betCote,conf:m.conf,
-                  conf_bucket:confBucket,
-                  market:marketType,league:m.league||'',league_key:m.league_key||'',
-                  sport:m.sport||'football',
-                  elo_diff:m.elo_diff||null,has_pinnacle:!!(m.pinnacle_snapshot),has_elo:!!(m.elo_home),
-                  date:TODAY,result:'scheduled',fixture_id:m.id,type:'single',score:null
-                });
+                continue;
               }
+              // FIX 2 : on stocke aussi le label français traduit pour l'affichage
+              var betLabel=m.pari_rec||null;
+              var betLabelFr=betLabel?
+                betLabel.replace(/\bOver 2\.5\b/i,'Plus de 2,5 buts')
+                  .replace(/\bUnder 2\.5\b/i,'Moins de 2,5 buts')
+                  .replace(/\bOver 1\.5\b/i,'Plus de 1,5 but')
+                  .replace(/\bBTTS Oui\b/i,'Les deux équipes marquent')
+                  .replace(/\bBTTS Non\b/i,'Une équipe ne marque pas')
+                  .replace(/\bDC 1X\b/i,'Victoire ou nul (dom.)')
+                  .replace(/\bDC X2\b/i,'Victoire ou nul (ext.)')
+                :null;
+              var betCote=parseFloat(m.cote_rec)||null;
+              var marketType='autre';
+              if(betLabel){
+                var bl=betLabel.toLowerCase();
+                if(bl.includes('over 2.5'))marketType='over25';
+                else if(bl.includes('over 1.5'))marketType='over15';
+                else if(bl.includes('btts non'))marketType='btts_non';
+                else if(bl.includes('btts'))marketType='btts_oui';
+                else if(bl.includes('1x'))marketType='dc1x';
+                else if(bl.includes('x2'))marketType='dc_x2';
+                else if(m.sport==='tennis')marketType='match_winner';
+              }
+              var confBucket=m.conf>=8?'8+':m.conf>=7?'7-8':m.conf>=6?'6-7':'<6';
+              var isNoSignal=!!(m.no_signal)||!betLabel;
+              histo.predictions.unshift({
+                match:m.home.n+' vs '+m.away.n,
+                home:m.home.n,away:m.away.n,
+                prediction:betLabel,
+                prediction_fr:betLabelFr, // FIX 2 : label français pour affichage
+                cote:betCote,conf:m.conf,
+                conf_bucket:confBucket,
+                market:marketType,league:m.league||'',league_key:m.league_key||'',
+                sport:m.sport||'football',
+                elo_diff:m.elo_diff||null,has_pinnacle:!!(m.pinnacle_snapshot),has_elo:!!(m.elo_home),
+                date:TODAY,
+                // FIX 1 : no_signal stocké explicitement, résultat différencié
+                no_signal:isNoSignal,
+                result:isNoSignal?'no_signal':'scheduled',
+                fixture_id:m.id,type:'single',score:null
+              });
             }
 
             histo.predictions=histo.predictions.slice(0,300);
@@ -2037,7 +2106,7 @@ jobs:
             var cleaned=beforeClean-histo.predictions.length;
             if(cleaned>0)console.log('  Nettoyage: '+cleaned+' combinés supprimés');
 
-            var singles=histo.predictions.filter(function(p){return p.type==='single'&&p.result!=='pending'&&p.result!=='scheduled';});
+            var singles=histo.predictions.filter(function(p){return p.type==='single'&&p.result!=='pending'&&p.result!=='scheduled'&&p.result!=='no_signal';});
             var wins=singles.filter(function(p){return p.result==='win';});
             var total=singles.length;
             var winrate=total>0?(wins.length/total*100):0;
@@ -2175,7 +2244,7 @@ jobs:
               histoEarly.predictions=histoEarly.predictions.filter(function(p){return p.type!=='combi';});
               var cleanedE=beforeCleanE-histoEarly.predictions.length;
               if(cleanedE>0)console.log('  Nettoyage: '+cleanedE+' combinés supprimés');
-              var singlesE=histoEarly.predictions.filter(function(p){return p.type==='single'&&p.result!=='pending'&&p.result!=='scheduled';});
+              var singlesE=histoEarly.predictions.filter(function(p){return p.type==='single'&&p.result!=='pending'&&p.result!=='scheduled'&&p.result!=='no_signal';});
               var winsE=singlesE.filter(function(p){return p.result==='win';});
               var totalE=singlesE.length;
               var winrateE=totalE>0?(winsE.length/totalE*100):0;
@@ -2477,6 +2546,9 @@ jobs:
                 p1:an&&(an.p1||0)>0?(an.p1||0):(shinProbs?shinProbs.p1:poissonProbs.p1)||0,
                 pn:an&&(an.pn||0)>0?(an.pn||0):(shinProbs?shinProbs.pN:poissonProbs.pN)||0,
                 p2:an&&(an.p2||0)>0?(an.p2||0):(shinProbs?shinProbs.p2:poissonProbs.p2)||0,
+                lambda_h:lambdas.lambdaH||null,lambda_a:lambdas.lambdaA||null,
+                wc_probs:an&&an._wcProbs?an._wcProbs:null,
+                wc_markets:an&&an._wcMarkets?an._wcMarkets:null,
                 po15:0,po25:an?(an.po25||0):0,btts:an?(an.btts||0):0,
                 c1:odds.c1,cn:odds.cn,c2:odds.c2,co15:odds.co15,co25:odds.co25,cu25:odds.cu25,
                 dc1x:odds.dc1x,dc2x:odds.dc2x,dc12:odds.dc12,cdc1x:odds.dc1x,cdc2x:odds.dc2x,
@@ -2507,6 +2579,36 @@ jobs:
                 tendances,classement:classementObj,actu:(nH||[]).concat(nA||[]),
                 arbitre:refStats?{nom:refStats.name,cartons:refStats.cards_per_game,penaltys:refStats.pens_per_game,matchs:refStats.games}:null,
                 events_home:isWorldCupMatch?null:(evPatH||null),events_away:isWorldCupMatch?null:(evPatA||null),
+                match_stats_home:isWorldCupMatch?null:{
+                  possession:xgH.possession_avg,
+                  corners:xgH.corners_avg,
+                  shots_total:xgH.shots_total_avg,
+                  shots_on:xgH.shots_on_avg,
+                  shots_off:xgH.shots_off_avg,
+                  shots_blocked:xgH.shots_blocked_avg,
+                  fouls:xgH.fouls_avg,
+                  offsides:xgH.offsides_avg,
+                  saves:xgH.saves_avg,
+                  saves_opp:xgH.saves_opp_avg,
+                  passes_pct:xgH.passes_pct_avg,
+                  xg:xgH.xg_avg,
+                  xga:xgH.xga_avg
+                },
+                match_stats_away:isWorldCupMatch?null:{
+                  possession:xgA.possession_avg,
+                  corners:xgA.corners_avg,
+                  shots_total:xgA.shots_total_avg,
+                  shots_on:xgA.shots_on_avg,
+                  shots_off:xgA.shots_off_avg,
+                  shots_blocked:xgA.shots_blocked_avg,
+                  fouls:xgA.fouls_avg,
+                  offsides:xgA.offsides_avg,
+                  saves:xgA.saves_avg,
+                  saves_opp:xgA.saves_opp_avg,
+                  passes_pct:xgA.passes_pct_avg,
+                  xg:xgA.xg_avg,
+                  xga:xgA.xga_avg
+                },
                 top_scorers_home:topScorersH||[],top_scorers_away:topScorersA||[],
                 elo_home:eloH?Math.round(eloH):null,elo_away:eloA?Math.round(eloA):null,
                 elo_diff:eloStats?eloStats.diff:null,elo_signal:eloStats?eloStats.signal:null,
@@ -2559,6 +2661,20 @@ jobs:
             console.log('\n=== DONE: '+allMatchsData.length+' matchs total ('+matchsData.length+' football + '+tennisMatchs.length+' tennis) | '+combisData.length+' combis ===');
 
             await updateHistorique(allMatchsData);
+
+            // FIX 3 : injecter les stats globales (ROI, winrate, streak) dans
+            // data.json APRÈS updateHistorique pour que l'index puisse les lire.
+            // updateHistorique écrit historique.json puis sort — on relit juste
+            // les stats calculées et on met à jour data.json.
+            try{
+              var histoForStats=JSON.parse(fs.readFileSync('historique.json','utf8'));
+              if(histoForStats.stats){
+                var dataForStats=JSON.parse(fs.readFileSync('data.json','utf8'));
+                dataForStats.global_stats=histoForStats.stats;
+                fs.writeFileSync('data.json',JSON.stringify(dataForStats,null,2));
+                console.log('  global_stats injectés dans data.json: winrate='+histoForStats.stats.winrate+'% ROI='+histoForStats.stats.roi+'%');
+              }
+            }catch(e){console.log('  Avertissement: impossible de relire historique.json pour global_stats:',e.message);}
 
             generateWorldCupPages();
             generateSitemaps(allMatchsData);

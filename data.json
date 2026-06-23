@@ -1,1514 +1,6 @@
 {
   "matchs": [
     {
-      "id": 1489398,
-      "sport": "football",
-      "home": {
-        "n": "Uruguay",
-        "id": 7
-      },
-      "away": {
-        "n": "Cape Verde Islands",
-        "id": 1533
-      },
-      "league": "World Cup",
-      "ligue_icon": "🏆",
-      "league_key": "other",
-      "date": "2026-06-22 00:00",
-      "cat": [
-        "all"
-      ],
-      "val": false,
-      "hot": false,
-      "conf": 0.67,
-      "p1": 62,
-      "pn": 60,
-      "p2": 20,
-      "po15": 0,
-      "po25": 37,
-      "btts": 33,
-      "c1": "1.44",
-      "cn": "4.18",
-      "c2": "7.85",
-      "co15": "1.40",
-      "co25": "2.25",
-      "cu25": "1.65",
-      "dc1x": "1.08",
-      "dc2x": "2.70",
-      "dc12": "1.22",
-      "cdc1x": "1.08",
-      "cdc2x": "2.70",
-      "cbtts": "2.45",
-      "cbtts_non": "1.52",
-      "btts_oui": "2.45",
-      "btts_non": "1.52",
-      "bookies": [
-        {
-          "n": "Betclic",
-          "o": "200€ offerts",
-          "l": "#LIEN_BETCLIC",
-          "c": "1.52",
-          "c1": "1.44",
-          "cn": "4.18",
-          "c2": "7.85"
-        },
-        {
-          "n": "Winamax",
-          "o": "100€ offerts",
-          "l": "#LIEN_WINAMAX",
-          "c": "1.49",
-          "c1": "1.41",
-          "cn": "4.15",
-          "c2": "7.82"
-        },
-        {
-          "n": "Unibet",
-          "o": "100€ remboursés",
-          "l": "#LIEN_UNIBET",
-          "c": "1.50",
-          "c1": "1.42",
-          "cn": "4.16",
-          "c2": "7.83"
-        },
-        {
-          "n": "PMU",
-          "o": "100€ offerts",
-          "l": "#LIEN_PMU",
-          "c": "1.47",
-          "c1": "1.39",
-          "cn": "4.13",
-          "c2": "7.80"
-        },
-        {
-          "n": "Bet365",
-          "o": "100€ bonus",
-          "l": "#LIEN_BET365",
-          "c": "1.55",
-          "c1": "1.47",
-          "cn": "4.21",
-          "c2": "7.88"
-        }
-      ],
-      "edge": "+6.8% (prob modèle 67% vs prob implicite cote 65.8%)",
-      "marche": "BTTS Non",
-      "risque": "FAIBLE",
-      "pari_rec": "BTTS Non",
-      "cote_rec": "1.52",
-      "no_signal": false,
-      "no_signal_label": "",
-      "mise": "2-3% bankroll",
-      "verdict_shark": "Le modèle Poisson attribue un lambda de 0.53 but à Cape Verde, générant 67% de probabilité que les deux équipes ne marquent pas toutes les deux.",
-      "scenario": {
-        "phase1": "0-30 min : Uruguay impose un bloc offensif structuré, pressions hautes sur la défense du Cap-Vert qui tente de s'organiser en bloc bas. Faible production offensive insulaire attendue, Uruguay monopolise la possession.",
-        "phase2": "30-60 min : Uruguay ouvre probablement le score et gère. Le Cap-Vert, en infériorité tactique, ne trouve pas les ressources offensives pour menacer la défense uruguayenne — le lambda 0.53 reste cohérent avec un bloc défensif subi.",
-        "phase3": "60-90 min : Uruguay peut gérer le score ou en ajouter un second. Cap-Vert en quête d'un but de l'espoir mais sans xG suffisant pour le matérialiser. BTTS Non tient statistiquement dans ce scénario dominant."
-      },
-      "scenario_15min": [
-        {
-          "t": "0-15min",
-          "prob": 8,
-          "txt": "Mise en place tactique : Uruguay tente de fixer le bloc cap-verdien, pas de but attendu dans cette fenêtre malgré la pression initiale."
-        },
-        {
-          "t": "15-30min",
-          "prob": 12,
-          "txt": "Uruguay accentue la pression, premières occasions nettes possibles sur corners ou combinaisons latérales. Cap-Vert défend en bloc sans contre réel."
-        },
-        {
-          "t": "30-45min",
-          "prob": 10,
-          "txt": "Fenêtre de but uruguayen probable sur phase d'accumulation offensive. Cap-Vert toujours muet offensivement, xG sur cette tranche < 0.05."
-        },
-        {
-          "t": "45-60min",
-          "prob": 15,
-          "txt": "Reprise avec une éventuelle intensification uruguayenne. But possible sur les 10 premières minutes de la seconde période. Cap-Vert sans solution."
-        },
-        {
-          "t": "60-75min",
-          "prob": 18,
-          "txt": "Phase de gestion pour l'Uruguay si déjà devant. Cap-Vert peut tenter quelques projections mais sans profondeur réelle — lambda cumulé reste sous 0.40 sur cette tranche."
-        },
-        {
-          "t": "75-90min",
-          "prob": 20,
-          "txt": "Uruguay peut scorer un second but ou gérer. Cap-Vert épuisé tactiquement, probabilité de but insulaire quasi nulle — BTTS Non se solidifie dans cette fenêtre finale."
-        }
-      ],
-      "facteur_x": "xG offensif Cap-Vert = 0.20 — valeur la plus basse du modèle, lambda Poisson 0.53 → P(Cap-Vert marque 0 but) ≈ 59% selon Poisson, edge BTTS Non confirmé.",
-      "analyse_card": "Uruguay génère 1.66 buts attendus par match (lambda Poisson) contre un Cap-Vert limité à 0.53, reflet d'un xG concédé de 2.1 buts pour les insulaires sur leurs dernières sorties. Le Cap-Vert affiche un xG offensif de seulement 0.2, valeur la plus basse du calcul, signalant une attaque quasi inexistante face à une défense uruguayenne valorisée à 70M€. La probabilité que le Cap-Vert ne marque pas sur ce match dépasse 59% selon la loi de Poisson (e^-0.53), ce qui ancre solidement le marché BTTS Non.",
-      "conseil_public": "Jouer BTTS Non à 1.52 : la probabilité modèle de 67% génère un edge positif net et le lambda offensif du Cap-Vert (0.53) est statistiquement insuffisant pour garantir un but.",
-      "contexte": "Phase de groupes Coupe du Monde 2026 — Uruguay, tête de série du groupe, cherche à asseoir sa position qualificative dès la journée 2 ; le Cap-Vert dispute sa première apparition sur la scène mondiale et affronte un écart de force de 34.9 points (51.6 vs 16.7). Un résultat négatif pour le Cap-Vert les mettrait en grande difficulté pour la qualification.",
-      "vbet": "OUI",
-      "scores": [
-        "2-0"
-      ],
-      "paris_safe": {
-        "bet": "BTTS Non",
-        "cote": 1.52,
-        "proba": "62%"
-      },
-      "paris_risque": {
-        "bet": "",
-        "cote": "",
-        "proba": ""
-      },
-      "kelly": "5.0",
-      "stade": {
-        "nom": "Hard Rock Stadium — Miami",
-        "cap": "",
-        "meteo": "☁️",
-        "temp": "26°C",
-        "desc": "couvert"
-      },
-      "crit_home": {
-        "fd": 0,
-        "att": 0,
-        "def": 88,
-        "fr": 0,
-        "mot": 70,
-        "fat": 50
-      },
-      "crit_away": {
-        "fd": 0,
-        "att": 0,
-        "def": 88,
-        "fr": 0,
-        "mot": 70,
-        "fat": 50
-      },
-      "form_home": [
-        {
-          "d": "2025-11-19",
-          "opponent": "USA",
-          "score": "1-5",
-          "result": "L",
-          "home": false,
-          "match": "USA",
-          "lieu": "EXT",
-          "date_full": "2025-11-19T00:00:00+00:00"
-        },
-        {
-          "d": "2025-11-16",
-          "opponent": "Mexico",
-          "score": "0-0",
-          "result": "D",
-          "home": false,
-          "match": "Mexico",
-          "lieu": "EXT",
-          "date_full": "2025-11-16T01:00:00+00:00"
-        },
-        {
-          "d": "2025-10-13",
-          "opponent": "Uzbekistan",
-          "score": "2-1",
-          "result": "W",
-          "home": false,
-          "match": "Uzbekistan",
-          "lieu": "EXT",
-          "date_full": "2025-10-13T12:45:00+00:00"
-        },
-        {
-          "d": "2025-10-10",
-          "opponent": "Dominican Republic",
-          "score": "1-0",
-          "result": "W",
-          "home": true,
-          "match": "Dominican Republic",
-          "lieu": "DOM",
-          "date_full": "2025-10-10T12:45:00+00:00"
-        }
-      ],
-      "form_away": [
-        {
-          "d": "2025-06-08",
-          "opponent": "Georgia",
-          "score": "1-1",
-          "result": "D",
-          "home": false,
-          "match": "Georgia",
-          "lieu": "EXT",
-          "date_full": "2025-06-08T16:00:00+00:00"
-        },
-        {
-          "d": "2025-06-03",
-          "opponent": "Malaysia",
-          "score": "3-0",
-          "result": "W",
-          "home": false,
-          "match": "Malaysia",
-          "lieu": "EXT",
-          "date_full": "2025-06-03T12:00:00+00:00"
-        },
-        {
-          "d": "2025-05-29",
-          "opponent": "Malaysia",
-          "score": "1-1",
-          "result": "D",
-          "home": false,
-          "match": "Malaysia",
-          "lieu": "EXT",
-          "date_full": "2025-05-29T13:00:00+00:00"
-        },
-        {
-          "d": "2024-11-19",
-          "opponent": "Mauritania",
-          "score": "0-1",
-          "result": "L",
-          "home": false,
-          "match": "Mauritania",
-          "lieu": "EXT",
-          "date_full": "2024-11-19T15:00:00+00:00"
-        },
-        {
-          "d": "2024-11-15",
-          "opponent": "Egypt",
-          "score": "1-1",
-          "result": "D",
-          "home": true,
-          "match": "Egypt",
-          "lieu": "DOM",
-          "date_full": "2024-11-15T16:00:00+00:00"
-        }
-      ],
-      "forme_h": "",
-      "forme_a": "",
-      "h2h": [],
-      "injuries": [],
-      "fatigue": {
-        "home": {
-          "val": 15,
-          "info": "Repos 213 jours"
-        },
-        "away": {
-          "val": 15,
-          "info": "Repos 377 jours"
-        }
-      },
-      "fatigue_home": {
-        "val": 15,
-        "info": "Repos 213 jours"
-      },
-      "fatigue_away": {
-        "val": 15,
-        "info": "Repos 377 jours"
-      },
-      "tendances": {
-        "over25_home": 0,
-        "over25_away": 2,
-        "over25_home_n": 1,
-        "over25_away_n": 6,
-        "btts_home": 0,
-        "btts_away": 2,
-        "btts_home_n": 1,
-        "btts_away_n": 6
-      },
-      "classement": null,
-      "actu": [
-        {
-          "c": "Uruguay",
-          "t": "« Infantino a une fascination naturelle pour le pouvoir » : ces zones d’ombre qui entourent le règne du maître du football mondial",
-          "tx": "Pendant plus de deux ans, le journaliste Simon Bolle a enquêté sur le président de la Fifa et publié Fifa Connection, enquête sur le système Infantino. Pour Challenges, il revient sur la personnalité de celui qui règne sur la « planète foot » depuis 2016. Et …",
-          "tm": "2026-06-19"
-        },
-        {
-          "c": "Uruguay",
-          "t": "Quiz 2026: qui l'a emporté? Le Stockali Tom Jurdan ou le Nandrinois Kevin Firquet?",
-          "tx": "Le Stockali a sué pour prendre la mesure du gardien de Templiers-Nandrin. Il a utilisé la question subsidiaire. ...",
-          "tm": "2026-06-17"
-        }
-      ],
-      "arbitre": null,
-      "events_home": null,
-      "events_away": null,
-      "top_scorers_home": [],
-      "top_scorers_away": [],
-      "elo_home": null,
-      "elo_away": null,
-      "elo_diff": null,
-      "elo_signal": null,
-      "dropping_odds": null,
-      "pinnacle_snapshot": null
-    },
-    {
-      "id": 1489396,
-      "sport": "football",
-      "home": {
-        "n": "New Zealand",
-        "id": 4673
-      },
-      "away": {
-        "n": "Egypt",
-        "id": 32
-      },
-      "league": "World Cup",
-      "ligue_icon": "🏆",
-      "league_key": "other",
-      "date": "2026-06-22 03:00",
-      "cat": [
-        "all"
-      ],
-      "val": false,
-      "hot": false,
-      "conf": 0.59,
-      "p1": 32,
-      "pn": 60,
-      "p2": 50,
-      "po15": 0,
-      "po25": 41,
-      "btts": 44,
-      "c1": "5.53",
-      "cn": "3.95",
-      "c2": "1.60",
-      "co15": "1.33",
-      "co25": "2.08",
-      "cu25": "1.75",
-      "dc1x": "2.30",
-      "dc2x": "1.15",
-      "dc12": "1.24",
-      "cdc1x": "2.30",
-      "cdc2x": "1.15",
-      "cbtts": "2.05",
-      "cbtts_non": "1.70",
-      "btts_oui": "2.05",
-      "btts_non": "1.70",
-      "bookies": [
-        {
-          "n": "Betclic",
-          "o": "200€ offerts",
-          "l": "#LIEN_BETCLIC",
-          "c": "1.75",
-          "c1": "5.53",
-          "cn": "3.95",
-          "c2": "1.60"
-        },
-        {
-          "n": "Winamax",
-          "o": "100€ offerts",
-          "l": "#LIEN_WINAMAX",
-          "c": "1.72",
-          "c1": "5.50",
-          "cn": "3.92",
-          "c2": "1.57"
-        },
-        {
-          "n": "Unibet",
-          "o": "100€ remboursés",
-          "l": "#LIEN_UNIBET",
-          "c": "1.73",
-          "c1": "5.51",
-          "cn": "3.93",
-          "c2": "1.58"
-        },
-        {
-          "n": "PMU",
-          "o": "100€ offerts",
-          "l": "#LIEN_PMU",
-          "c": "1.70",
-          "c1": "5.48",
-          "cn": "3.90",
-          "c2": "1.55"
-        },
-        {
-          "n": "Bet365",
-          "o": "100€ bonus",
-          "l": "#LIEN_BET365",
-          "c": "1.78",
-          "c1": "5.56",
-          "cn": "3.98",
-          "c2": "1.63"
-        }
-      ],
-      "edge": "+7.25% (prob modèle 59% vs prob implicite cote 57.1%)",
-      "marche": "Under 2.5",
-      "risque": "MODERE",
-      "pari_rec": "Under 2.5 buts",
-      "cote_rec": "1.75",
-      "no_signal": false,
-      "no_signal_label": "",
-      "mise": "2-3% bankroll",
-      "verdict_shark": "Le modèle Poisson (λ NZ: 0.86 / λ EGY: 1.46) génère 59% de probabilité Under 2.5, au-dessus du seuil requis de 55%, avec une défense égyptienne solide (xG concédé 0.47 en qualifications).",
-      "scenario": {
-        "phase1": "0-30min — Egypt impose son rythme, contrôle la possession et tente d'ouvrir par les flancs. New Zealand subit mais reste organisé défensivement, limitant les occasions franches à distance.",
-        "phase2": "30-60min — Egypt trouve probablement l'ouverture du score (score central 0-1). New Zealand contraint de sortir, crée quelques transitions mais sans aboutissement face à une défense égyptienne solide (xG concédé 0.47).",
-        "phase3": "60-90min — Egypt gère son avantage sans prendre de risques inutiles, ne forçant pas vers un second but. New Zealand manque de qualité offensive (7M€ valeur attaque) pour revenir. Fin de match 0-1 ou 1-1 au maximum, restant bien Under 2.5."
-      },
-      "scenario_15min": [
-        {
-          "t": "0-15min",
-          "prob": 8,
-          "txt": "Phase d'installation — faible probabilité de but. Egypt cherche ses repères offensifs, New Zealand défend en bloc. Aucune occasion franche attendue dans ce laps de temps."
-        },
-        {
-          "t": "15-30min",
-          "prob": 12,
-          "txt": "Egypt monte en pression, exploitation des espaces sur les côtés. Probability croissante d'une occasion sérieuse égyptienne mais peu de concrétisation immédiate."
-        },
-        {
-          "t": "30-45min",
-          "prob": 10,
-          "txt": "Période de transition avant la mi-temps — les équipes cherchent à ne pas prendre de but avant le repos. Egypt pourrait forcer sur corner ou coup de pied arrêté."
-        },
-        {
-          "t": "45-60min",
-          "prob": 15,
-          "txt": "Reprise de seconde période — Egypt repart avec plus d'intention offensive après le vestiaire. Fenêtre probable pour le but égyptien, potentiellement sur une combinaison rapide."
-        },
-        {
-          "t": "60-75min",
-          "prob": 18,
-          "txt": "Pic d'intensité égyptienne — Egypt en tête exploite la fatigue adverse. New Zealand contraint d'ouvrir davantage, mais son faible xG offensif (1.24) limite le danger en contre."
-        },
-        {
-          "t": "75-90min",
-          "prob": 20,
-          "txt": "Phase finale — Egypt peut gérer ou chercher le second but. New Zealand pousse désespérément sans ressources offensives suffisantes. Scénario majoritaire : fin de match à 1 ou 2 buts maximum, Under 2.5 confirmé."
-        }
-      ],
-      "facteur_x": "λ combiné Poisson = 2.32 buts (NZ 0.86 + EGY 1.46) — inférieur au seuil 2.5, soit une probabilité calculée Under 2.5 de 59%.",
-      "analyse_card": "New Zealand affiche une attaque très limitée (xG généré 1.24, valeur attaque 7M€) face à une défense égyptienne disciplinée (xG concédé 0.47). Egypt dispose d'un potentiel offensif supérieur (xG 1.42, valeur attaque 28M€), mais le lambda combiné de 2.32 buts reste sous le seuil des 2.5. La probabilité BTTS Non à 56% confirme que l'une des deux équipes devrait rester muette, renforçant le scénario d'un match sobre en buts.",
-      "conseil_public": "Jouer Under 2.5 buts à cote 1.75 avec mise réduite (Kelly conservateur), en phase de groupes où Egypt peut gérer son résultat une fois l'avantage obtenu.",
-      "contexte": "Première journée de la phase de groupes — les deux équipes cherchent leurs repères au tournoi. Egypt est favoris (50%) et tentera de verrouiller rapidement le match. New Zealand, outsider (32%), risque de défendre en bloc, limitant le volume offensif global et favorisant un score serré.",
-      "vbet": "OUI",
-      "scores": [
-        "0-1"
-      ],
-      "paris_safe": {
-        "bet": "Under 2.5 buts",
-        "cote": 1.75,
-        "proba": "32%"
-      },
-      "paris_risque": {
-        "bet": "",
-        "cote": "",
-        "proba": ""
-      },
-      "kelly": "5.0",
-      "stade": {
-        "nom": "BC Place — Vancouver",
-        "cap": "",
-        "meteo": "☀️",
-        "temp": "15°C",
-        "desc": "ciel dégagé"
-      },
-      "crit_home": {
-        "fd": 0,
-        "att": 0,
-        "def": 88,
-        "fr": 0,
-        "mot": 70,
-        "fat": 50
-      },
-      "crit_away": {
-        "fd": 0,
-        "att": 0,
-        "def": 88,
-        "fr": 0,
-        "mot": 70,
-        "fat": 50
-      },
-      "form_home": [
-        {
-          "d": "2025-11-19",
-          "opponent": "Ecuador",
-          "score": "0-2",
-          "result": "L",
-          "home": false,
-          "match": "Ecuador",
-          "lieu": "EXT",
-          "date_full": "2025-11-19T01:30:00+00:00"
-        },
-        {
-          "d": "2025-11-16",
-          "opponent": "Colombia",
-          "score": "1-2",
-          "result": "L",
-          "home": false,
-          "match": "Colombia",
-          "lieu": "EXT",
-          "date_full": "2025-11-16T00:30:00+00:00"
-        },
-        {
-          "d": "2025-10-14",
-          "opponent": "Norway",
-          "score": "1-1",
-          "result": "D",
-          "home": false,
-          "match": "Norway",
-          "lieu": "EXT",
-          "date_full": "2025-10-14T16:00:00+00:00"
-        },
-        {
-          "d": "2025-10-09",
-          "opponent": "Poland",
-          "score": "0-1",
-          "result": "L",
-          "home": false,
-          "match": "Poland",
-          "lieu": "EXT",
-          "date_full": "2025-10-09T18:45:00+00:00"
-        },
-        {
-          "d": "2025-09-09",
-          "opponent": "Australia",
-          "score": "1-3",
-          "result": "L",
-          "home": true,
-          "match": "Australia",
-          "lieu": "DOM",
-          "date_full": "2025-09-09T07:00:00+00:00"
-        }
-      ],
-      "form_away": [
-        {
-          "d": "2026-01-14",
-          "opponent": "Senegal",
-          "score": "0-1",
-          "result": "L",
-          "home": false,
-          "match": "Senegal",
-          "lieu": "EXT",
-          "date_full": "2026-01-14T17:00:00+00:00"
-        },
-        {
-          "d": "2026-01-10",
-          "opponent": "Ivory Coast",
-          "score": "3-2",
-          "result": "W",
-          "home": true,
-          "match": "Ivory Coast",
-          "lieu": "DOM",
-          "date_full": "2026-01-10T19:00:00+00:00"
-        },
-        {
-          "d": "2025-12-29",
-          "opponent": "Angola",
-          "score": "0-0",
-          "result": "D",
-          "home": false,
-          "match": "Angola",
-          "lieu": "EXT",
-          "date_full": "2025-12-29T16:00:00+00:00"
-        },
-        {
-          "d": "2025-12-26",
-          "opponent": "South Africa",
-          "score": "1-0",
-          "result": "W",
-          "home": true,
-          "match": "South Africa",
-          "lieu": "DOM",
-          "date_full": "2025-12-26T15:00:00+00:00"
-        },
-        {
-          "d": "2025-12-22",
-          "opponent": "Zimbabwe",
-          "score": "2-1",
-          "result": "W",
-          "home": true,
-          "match": "Zimbabwe",
-          "lieu": "DOM",
-          "date_full": "2025-12-22T20:00:00+00:00"
-        }
-      ],
-      "forme_h": "",
-      "forme_a": "",
-      "h2h": [],
-      "injuries": [],
-      "fatigue": {
-        "home": {
-          "val": 15,
-          "info": "Repos 213 jours"
-        },
-        "away": {
-          "val": 15,
-          "info": "Repos 157 jours"
-        }
-      },
-      "fatigue_home": {
-        "val": 15,
-        "info": "Repos 213 jours"
-      },
-      "fatigue_away": {
-        "val": 15,
-        "info": "Repos 157 jours"
-      },
-      "tendances": {
-        "over25_home": 2,
-        "over25_away": 1,
-        "over25_home_n": 2,
-        "over25_away_n": 7,
-        "btts_home": 2,
-        "btts_away": 2,
-        "btts_home_n": 2,
-        "btts_away_n": 7
-      },
-      "classement": null,
-      "actu": [
-        {
-          "c": "New Zealand",
-          "t": "The only thing hit harder than New Zealand? England's team rules [Dumbass]",
-          "tx": "<table> <tr><td> </td><td> [link] [0 comments] </td></tr></table>",
-          "tm": "2026-06-12"
-        },
-        {
-          "c": "New Zealand",
-          "t": "WikiLambda the Ultimate",
-          "tx": "Comments",
-          "tm": "2026-06-11"
-        },
-        {
-          "c": "Egypt",
-          "t": "En Égypte, les Soudanais paient au prix fort le durcissement de la politique migratoire européenne",
-          "tx": "Entré en vigueur ce vendredi 12 juin, le Pacte européen sur la migration et l’asile renforce la coopération avec les pays chargés de retenir les migrants avant leur arrivée en Europe. En Égypte, où les rafles et expulsions de réfugiés soudanais se multiplient…",
-          "tm": "2026-06-12"
-        },
-        {
-          "c": "Egypt",
-          "t": "Des mercenaires russes assurent la protection de pétroliers – et nous expliquent comment ils s'y prennent (Anglais)",
-          "tx": "-\nÉcologie\n\n/ \nRussie, \nMonde, \nAnglais, \nExtractivisme, \nGuerre en Ukraine, \nDéfense",
-          "tm": "2026-06-10"
-        }
-      ],
-      "arbitre": null,
-      "events_home": null,
-      "events_away": null,
-      "top_scorers_home": [],
-      "top_scorers_away": [],
-      "elo_home": null,
-      "elo_away": null,
-      "elo_diff": null,
-      "elo_signal": null,
-      "dropping_odds": null,
-      "pinnacle_snapshot": null
-    },
-    {
-      "id": 1489399,
-      "sport": "football",
-      "home": {
-        "n": "Argentina",
-        "id": 26
-      },
-      "away": {
-        "n": "Austria",
-        "id": 775
-      },
-      "league": "World Cup",
-      "ligue_icon": "🏆",
-      "league_key": "wc",
-      "date": "2026-06-22 19:00",
-      "cat": [
-        "all"
-      ],
-      "val": false,
-      "hot": false,
-      "conf": 0,
-      "p1": 48,
-      "pn": 35,
-      "p2": 33,
-      "lambda_h": 0.768,
-      "lambda_a": 0.856,
-      "wc_probs": {
-        "p1": 48,
-        "pN": 19,
-        "p2": 33,
-        "scoreH": {
-          "total": 74.3,
-          "details": {
-            "fifa_pts": 1885,
-            "fifa_norm": 98,
-            "valeur_m": 720,
-            "valeur_norm": 89,
-            "top5_pct": 68,
-            "xg_for": 1.42,
-            "xg_against": 0.57,
-            "xg_diff": 0.85,
-            "xg_norm": 71,
-            "wc_exp": 19,
-            "exp_norm": 95
-          }
-        },
-        "scoreA": {
-          "total": 50.9,
-          "details": {
-            "fifa_pts": 1641,
-            "fifa_norm": 63,
-            "valeur_m": 170,
-            "valeur_norm": 32,
-            "top5_pct": 62,
-            "xg_for": 2.37,
-            "xg_against": 0.68,
-            "xg_diff": 1.69,
-            "xg_norm": 92,
-            "wc_exp": 5,
-            "exp_norm": 25
-          }
-        },
-        "fatigueH": 0,
-        "fatigueA": 0,
-        "altMalusH": 0,
-        "altMalusA": 0
-      },
-      "wc_markets": {
-        "off_combined": 3.79,
-        "def_avg": 0.63,
-        "lambda_h": 1.05,
-        "lambda_a": 1.47,
-        "val_att_h": 310,
-        "val_def_h": 160,
-        "val_att_a": 65,
-        "val_def_a": 40,
-        "xg_source_h": "hybride_qualif80_tournoi20",
-        "xg_source_a": "hybride_qualif80_tournoi20",
-        "prob_over25": 46,
-        "prob_under25": 54,
-        "prob_btts_oui": 50,
-        "prob_btts_non": 50,
-        "prob_dc1x": 67,
-        "prob_dcx2": 52,
-        "score_central": "1-1",
-        "po25": 46,
-        "btts": 50
-      },
-      "po15": 0,
-      "po25": 46,
-      "btts": 50,
-      "c1": "1.46",
-      "cn": "4.30",
-      "c2": "7.50",
-      "co15": "1.28",
-      "co25": "1.90",
-      "cu25": "1.90",
-      "dc1x": "1.10",
-      "dc2x": "2.70",
-      "dc12": "1.21",
-      "cdc1x": "1.10",
-      "cdc2x": "2.70",
-      "cbtts": "2.05",
-      "cbtts_non": "1.74",
-      "btts_oui": "2.05",
-      "btts_non": "1.74",
-      "bookies": [
-        {
-          "n": "Betclic",
-          "o": "200€ offerts",
-          "l": "#LIEN_BETCLIC",
-          "c": "1.46",
-          "c1": "1.46",
-          "cn": "4.30",
-          "c2": "7.50"
-        },
-        {
-          "n": "Winamax",
-          "o": "100€ offerts",
-          "l": "#LIEN_WINAMAX",
-          "c": "1.43",
-          "c1": "1.43",
-          "cn": "4.27",
-          "c2": "7.47"
-        },
-        {
-          "n": "Unibet",
-          "o": "100€ remboursés",
-          "l": "#LIEN_UNIBET",
-          "c": "1.44",
-          "c1": "1.44",
-          "cn": "4.28",
-          "c2": "7.48"
-        },
-        {
-          "n": "PMU",
-          "o": "100€ offerts",
-          "l": "#LIEN_PMU",
-          "c": "1.41",
-          "c1": "1.41",
-          "cn": "4.25",
-          "c2": "7.45"
-        },
-        {
-          "n": "Bet365",
-          "o": "100€ bonus",
-          "l": "#LIEN_BET365",
-          "c": "1.49",
-          "c1": "1.49",
-          "cn": "4.33",
-          "c2": "7.53"
-        }
-      ],
-      "edge": "",
-      "marche": "RESULTAT",
-      "risque": "ELEVE",
-      "pari_rec": "",
-      "cote_rec": "",
-      "no_signal": true,
-      "no_signal_label": "Rien d'exploitable ici — on attend mieux.",
-      "mise": "2-3% bankroll",
-      "verdict_shark": "",
-      "scenario": {
-        "phase1": "0-30 min : L'Argentine installe sa possession (FIFA 1885 pts) et cherche à contrôler le tempo ; l'Autriche défend en bloc bas avec ses 5 joueurs expérimentés en CM, limitant les espaces dans les 20 premières minutes.",
-        "phase2": "30-65 min : Phase de transitions physiques — l'Autriche tente d'exploiter les contre-attaques rapides (xG généré 2.37 en qualifs) face à une défense argentine à 160M€ ; risque de but autrichien sur phase arrêtée ou transition.",
-        "phase3": "65-90 min : Gestion finale — si l'Argentine mène, probable repli défensif et ralentissement du jeu ; si score nul, les deux équipes prennent des risques calculés, augmentant la probabilité d'un but tardif dans les 20 dernières minutes."
-      },
-      "scenario_15min": [
-        {
-          "t": "0-15min",
-          "prob": 8,
-          "txt": "Prise de contact prudente, les deux équipes sondent les blocs défensifs adverses ; probabilité de but faible, Argentine en possession dominante."
-        },
-        {
-          "t": "15-30min",
-          "prob": 12,
-          "txt": "Montée en intensité progressive, premières occasions sur phases arrêtées ; l'Autriche tente de surprendre sur transition rapide, Argentine xG 1.42 commence à se matérialiser."
-        },
-        {
-          "t": "30-45min",
-          "prob": 10,
-          "txt": "Période de stabilisation avant la mi-temps, les équipes gèrent l'énergie ; probabilité de but légèrement réduite, focus défensif des deux côtés avant le vestiaire."
-        },
-        {
-          "t": "45-60min",
-          "prob": 15,
-          "txt": "Reprise avec ajustements tactiques post-mi-temps ; l'équipe qui encaisse en premier modifie radicalement son plan de jeu — phase la plus ouverte du match."
-        },
-        {
-          "t": "60-75min",
-          "prob": 18,
-          "txt": "Pic d'intensité physique et tactique, fatigue musculaire nulle (0km récup) permettant un rythme élevé soutenu ; entrées de remplaçants des deux côtés, espaces qui s'ouvrent."
-        },
-        {
-          "t": "75-90min",
-          "prob": 20,
-          "txt": "Dernière phase décisive : l'équipe qui cherche le résultat prend des risques défensifs, augmentant la probabilité de but tardif ; c'est la fenêtre temporelle la plus productive statistiquement pour ce type de match de groupe."
-        }
-      ],
-      "facteur_x": "Lambda Austria (1.47) > Lambda Argentina (1.05) malgré un écart de force 74.3 vs 50.9 : signal contradictoire issu du xG qualificatif de l'Autriche (2.37) qui gonfle artificiellement les projections offensives autrichiennes.",
-      "analyse_card": "L'Argentine affiche un xG concédé très bas (0.57) et un lambda offensif de seulement 1.05, indiquant une approche prudente en phase de groupes. L'Autriche génère un xG surprenant de 2.37 en qualification mais son lambda Poisson de 1.47 s'explique par un différentiel de force défensive adverse — à nuancer fortement. Avec des valeurs d'attaque (310M€ vs 65M€) et de défense (160M€ vs 40M€) très déséquilibrées, le match présente paradoxalement une incertitude élevée due aux lambdas croisés atypiques.",
-      "conseil_public": "Ne pas jouer ce match : aucun marché ne présente un edge statistique suffisant, et les lambdas Poisson inhabituels (Austria 1.47 > Argentina 1.05) signalent une instabilité du modèle sur ce fixture — attendre confirmation d'absences ou de côtes de marché avant tout engagement.",
-      "contexte": "Phase de groupes Coupe du Monde 2026 — premier match des deux sélections (J1 estimée), les enjeux de qualification sont maximaux pour les deux équipes, aucune rotation prévisible à ce stade, ce qui renforce l'imprévisibilité tactique.",
-      "vbet": "NON",
-      "scores": [
-        "1-1"
-      ],
-      "paris_safe": {
-        "bet": "",
-        "cote": "1.46",
-        "proba": "48%"
-      },
-      "paris_risque": {
-        "bet": "",
-        "cote": "",
-        "proba": ""
-      },
-      "kelly": "5.0",
-      "stade": {
-        "nom": "AT&T Stadium — Dallas",
-        "cap": "",
-        "meteo": "☁️",
-        "temp": "28°C",
-        "desc": "couvert"
-      },
-      "crit_home": {
-        "fd": 100,
-        "att": 100,
-        "def": 88,
-        "fr": 100,
-        "mot": 70,
-        "fat": 50
-      },
-      "crit_away": {
-        "fd": 0,
-        "att": 100,
-        "def": 53,
-        "fr": 100,
-        "mot": 70,
-        "fat": 50
-      },
-      "form_home": [
-        {
-          "d": "2026-06-17",
-          "opponent": "Algeria",
-          "score": "3-0",
-          "result": "W",
-          "home": true,
-          "match": "Algeria",
-          "lieu": "DOM",
-          "date_full": "2026-06-17T01:00:00+00:00"
-        },
-        {
-          "d": "2026-06-10",
-          "opponent": "Iceland",
-          "score": "3-0",
-          "result": "W",
-          "home": true,
-          "match": "Iceland",
-          "lieu": "DOM",
-          "date_full": "2026-06-10T01:00:00+00:00"
-        },
-        {
-          "d": "2026-06-07",
-          "opponent": "Honduras",
-          "score": "2-0",
-          "result": "W",
-          "home": true,
-          "match": "Honduras",
-          "lieu": "DOM",
-          "date_full": "2026-06-07T00:00:00+00:00"
-        },
-        {
-          "d": "2026-03-31",
-          "opponent": "Zambia",
-          "score": "5-0",
-          "result": "W",
-          "home": true,
-          "match": "Zambia",
-          "lieu": "DOM",
-          "date_full": "2026-03-31T23:30:00+00:00"
-        },
-        {
-          "d": "2026-03-27",
-          "opponent": "Mauritania",
-          "score": "2-1",
-          "result": "W",
-          "home": true,
-          "match": "Mauritania",
-          "lieu": "DOM",
-          "date_full": "2026-03-27T23:15:00+00:00"
-        }
-      ],
-      "form_away": [
-        {
-          "d": "2026-06-17",
-          "opponent": "Jordan",
-          "score": "3-1",
-          "result": "W",
-          "home": true,
-          "match": "Jordan",
-          "lieu": "DOM",
-          "date_full": "2026-06-17T04:00:00+00:00"
-        },
-        {
-          "d": "2026-06-01",
-          "opponent": "Tunisia",
-          "score": "1-0",
-          "result": "W",
-          "home": true,
-          "match": "Tunisia",
-          "lieu": "DOM",
-          "date_full": "2026-06-01T18:45:00+00:00"
-        },
-        {
-          "d": "2026-03-31",
-          "opponent": "South Korea",
-          "score": "1-0",
-          "result": "W",
-          "home": true,
-          "match": "South Korea",
-          "lieu": "DOM",
-          "date_full": "2026-03-31T18:45:00+00:00"
-        },
-        {
-          "d": "2026-03-27",
-          "opponent": "Ghana",
-          "score": "5-1",
-          "result": "W",
-          "home": true,
-          "match": "Ghana",
-          "lieu": "DOM",
-          "date_full": "2026-03-27T17:00:00+00:00"
-        }
-      ],
-      "forme_h": "W",
-      "forme_a": "W",
-      "h2h": [],
-      "injuries": [],
-      "fatigue": {
-        "home": {
-          "val": 50,
-          "info": "Dernier match il y a 6j — 2 match(s) en 14j"
-        },
-        "away": {
-          "val": 50,
-          "info": "Dernier match il y a 5j — 1 match(s) en 14j"
-        }
-      },
-      "fatigue_home": {
-        "val": 50,
-        "info": "Dernier match il y a 6j — 2 match(s) en 14j"
-      },
-      "fatigue_away": {
-        "val": 50,
-        "info": "Dernier match il y a 5j — 1 match(s) en 14j"
-      },
-      "tendances": {
-        "over25_home": 8,
-        "over25_away": 0,
-        "over25_home_n": 12,
-        "over25_away_n": 1,
-        "btts_home": 3,
-        "btts_away": 0,
-        "btts_home_n": 12,
-        "btts_away_n": 1
-      },
-      "classement": null,
-      "actu": [
-        {
-          "c": "Argentina",
-          "t": "Cannes Lions 2026 : le palmarès français complet",
-          "tx": "Le plus grand des festivals de créativité publicitaire. Les Cannes Lions, LE rendez-vous international dédié à la créativité publicitaire, investissent une nouvelle fois la Croisette à l’occasion de leur 73ème édition. Chaque année, le festival récompense les…",
-          "tm": "2026-06-19"
-        },
-        {
-          "c": "Argentina",
-          "t": "En Russie, clubs de lecture et bibliothèques se transforment en lieux de résistance",
-          "tx": "Depuis l’invasion de l’Ukraine en 2022, le secteur russe de l’édition a été frappé par une série d’interdits, avec des retraits d’ouvrages et la mise à l’index d’auteurs non conformes à l’esprit du temps. Le site russe indépendant “Veter” raconte comment cert…",
-          "tm": "2026-06-19"
-        },
-        {
-          "c": "Austria",
-          "t": "De la paillasse au pilote industriel : ce que les investisseurs ne comprennent pas de la deep tech",
-          "tx": "Monter une deeptech environnementale en Europe, c'est naviguer entre une excellence scientifique reconnue et un écosystème de financement structurellement inadapté à ses cycles.",
-          "tm": "2026-06-16"
-        },
-        {
-          "c": "Austria",
-          "t": "GP de Barcelone de F1 : changement de pilotes chez Williams et Cadillac vendredi",
-          "tx": "À l'approche du GP de Barcelone de F1 2026, les écuries s'activent pour remplir leurs obligations réglementaires concernant les jeunes pilotes. Williams et Cadillac ont officiellement confirmé que Luke Browning et Colton Herta prendront la piste vendredi lors…",
-          "tm": "2026-06-10"
-        }
-      ],
-      "arbitre": null,
-      "events_home": null,
-      "events_away": null,
-      "match_stats_home": null,
-      "match_stats_away": null,
-      "top_scorers_home": [],
-      "top_scorers_away": [],
-      "elo_home": null,
-      "elo_away": null,
-      "elo_diff": null,
-      "elo_signal": null,
-      "dropping_odds": null,
-      "pinnacle_snapshot": null
-    },
-    {
-      "id": 1539017,
-      "sport": "football",
-      "home": {
-        "n": "France",
-        "id": 2
-      },
-      "away": {
-        "n": "Iraq",
-        "id": 1567
-      },
-      "league": "World Cup",
-      "ligue_icon": "🏆",
-      "league_key": "wc",
-      "date": "2026-06-22 23:00",
-      "cat": [
-        "all"
-      ],
-      "val": false,
-      "hot": false,
-      "conf": 0,
-      "p1": 67,
-      "pn": 37,
-      "p2": 15,
-      "lambda_h": 0.896,
-      "lambda_a": 0.5,
-      "wc_probs": {
-        "p1": 67,
-        "pN": 18,
-        "p2": 15,
-        "scoreH": {
-          "total": 85.7,
-          "details": {
-            "fifa_pts": 1851,
-            "fifa_norm": 93,
-            "valeur_m": 1180,
-            "valeur_norm": 100,
-            "top5_pct": 92,
-            "xg_for": 2.43,
-            "xg_against": 0.57,
-            "xg_diff": 1.86,
-            "xg_norm": 97,
-            "wc_exp": 18,
-            "exp_norm": 90
-          }
-        },
-        "scoreA": {
-          "total": 19.7,
-          "details": {
-            "fifa_pts": 1445,
-            "fifa_norm": 35,
-            "valeur_m": 38,
-            "valeur_norm": 11,
-            "top5_pct": 12,
-            "xg_for": 0.97,
-            "xg_against": 1.33,
-            "xg_diff": -0.36,
-            "xg_norm": 41,
-            "wc_exp": 2,
-            "exp_norm": 10
-          }
-        },
-        "fatigueH": 0,
-        "fatigueA": 0,
-        "altMalusH": 0,
-        "altMalusA": 0
-      },
-      "wc_markets": {
-        "off_combined": 3.4,
-        "def_avg": 0.95,
-        "lambda_h": 1.88,
-        "lambda_a": 0.77,
-        "val_att_h": 480,
-        "val_def_h": 280,
-        "val_att_a": 15,
-        "val_def_a": 10,
-        "xg_source_h": "hybride_qualif80_tournoi20",
-        "xg_source_a": "hybride_qualif80_tournoi20",
-        "prob_over25": 49,
-        "prob_under25": 51,
-        "prob_btts_oui": 45,
-        "prob_btts_non": 54,
-        "prob_dc1x": 85,
-        "prob_dcx2": 33,
-        "score_central": "1-0",
-        "po25": 49,
-        "btts": 45
-      },
-      "po15": 0,
-      "po25": 49,
-      "btts": 45,
-      "c1": "1.09",
-      "cn": "10.75",
-      "c2": "--",
-      "co15": "1.08",
-      "co25": "1.32",
-      "cu25": "3.35",
-      "dc1x": "1.01",
-      "dc2x": "7.50",
-      "dc12": "1.05",
-      "cdc1x": "1.01",
-      "cdc2x": "7.50",
-      "cbtts": "2.62",
-      "cbtts_non": "1.44",
-      "btts_oui": "2.62",
-      "btts_non": "1.44",
-      "bookies": [
-        {
-          "n": "Betclic",
-          "o": "200€ offerts",
-          "l": "#LIEN_BETCLIC",
-          "c": "1.09",
-          "c1": "1.09",
-          "cn": "10.75",
-          "c2": "--"
-        },
-        {
-          "n": "Winamax",
-          "o": "100€ offerts",
-          "l": "#LIEN_WINAMAX",
-          "c": "1.06",
-          "c1": "1.06",
-          "cn": "10.72",
-          "c2": "--"
-        },
-        {
-          "n": "Unibet",
-          "o": "100€ remboursés",
-          "l": "#LIEN_UNIBET",
-          "c": "1.07",
-          "c1": "1.07",
-          "cn": "10.73",
-          "c2": "--"
-        },
-        {
-          "n": "PMU",
-          "o": "100€ offerts",
-          "l": "#LIEN_PMU",
-          "c": "1.04",
-          "c1": "1.04",
-          "cn": "10.70",
-          "c2": "--"
-        },
-        {
-          "n": "Bet365",
-          "o": "100€ bonus",
-          "l": "#LIEN_BET365",
-          "c": "1.12",
-          "c1": "1.12",
-          "cn": "10.78",
-          "c2": "--"
-        }
-      ],
-      "edge": "",
-      "marche": "RESULTAT",
-      "risque": "ELEVE",
-      "pari_rec": "",
-      "cote_rec": "",
-      "no_signal": true,
-      "no_signal_label": "Rien d'exploitable ici — on attend mieux.",
-      "mise": "2-3% bankroll",
-      "verdict_shark": "",
-      "scenario": {
-        "phase1": "0-30min : La France prend le contrôle du ballon dès l'entame, pression haute sur la défense irakienne positionnée bas, premier xG French autour de 0.35 sur cette fenêtre — Iraq résiste en bloc compact, peu de transitions dangereuses.",
-        "phase2": "30-65min : Ouverture du score probable de la France sur phase construite ou coup de pied arrêté, l'Iraq tente quelques contres rapides mais son manque d'expérience mondiale (2 joueurs CM) bride la conversion — deuxième but français envisageable mais non certain selon Poisson.",
-        "phase3": "65-90min : Gestion française du résultat, possibles rotations en fin de match, l'Iraq peut espérer un but de prestige si la France se relâche — scénario 2-0 ou 2-1 comme dénouement central."
-      },
-      "scenario_15min": [
-        {
-          "t": "0-15min",
-          "prob": 8,
-          "txt": "France installe sa domination territoriale, touches de balle longues, Iraq replié — probabilité de but faible mais premiers xG français s'accumulent dès la 10e minute."
-        },
-        {
-          "t": "15-30min",
-          "prob": 12,
-          "txt": "Pression française s'intensifie, premières occasions franches sur les côtés, Iraq défend à 9-10 derrière le ballon — premier but attendu dans cette fenêtre selon le lambda 1.88."
-        },
-        {
-          "t": "30-45min",
-          "prob": 10,
-          "txt": "Phase de jeu plus ouverte avant la mi-temps, risque de but français sur phase arrêtée ou contre rapide — Iraq peut sporadiquement menacer sur une perte de balle française."
-        },
-        {
-          "t": "45-60min",
-          "prob": 15,
-          "txt": "Reprise favorable à la France, Iraq physiquement moins en mesure de soutenir l'intensité — fenêtre à haut risque pour l'Iraq, deuxième but français le plus probable ici."
-        },
-        {
-          "t": "60-75min",
-          "prob": 18,
-          "txt": "France en gestion ou en quête du break définitif, entrées de remplaçants des deux côtés — Iraq tente de presser plus haut pour un but d'honneur, créant des espaces derrière."
-        },
-        {
-          "t": "75-90min",
-          "prob": 20,
-          "txt": "Dernière tranche la plus prolifique selon les stats générales de phase de groupes CM, France peut scorer un 3e but ou l'Iraq inscrire un but tardif sur corner ou coup franc — variance maximale sur ce segment."
-        }
-      ],
-      "facteur_x": "Lambda France 1.88 vs lambda Iraq 0.77 : l'écart prédit une domination nette, mais la probabilité Over 2.5 stagne à 49%, signe que le modèle anticipe une France efficace sans nécessairement être prolifique — edge trop faible sur tous les marchés.",
-      "analyse_card": "La France affiche un xG généré de 2.43 et une valeur offensive de 480M€ face à une défense irakienne à seulement 10M€, avec un lambda Poisson de 1.88 buts attendus. L'Iraq génère 0.97 xG offensif contre une défense française à 0.57 xG concédé, ce qui plafonne les espoirs offensifs irakiens à un lambda de 0.77. Malgré l'écart de niveau (85.7 vs 19.7 en force), la distribution de Poisson laisse une probabilité de 51% pour Under 2.5 et 54% pour BTTS Non, insuffisantes pour atteindre les seuils de fiabilité du modèle.",
-      "conseil_public": "Ne pas parier sur ce match : aucun marché disponible ne présente un edge statistique suffisant, et la cote la plus accessible (Over 2.5 à 1.32) ne couvre pas la probabilité modèle de 49% — attendre un match avec signal clair.",
-      "contexte": "Phase de groupes Coupe du Monde 2026 — premier affrontement officiel France-Iraq, l'enjeu de qualification reste ouvert pour les deux équipes à ce stade, ce qui limite les risques de rotation majeure mais n'apporte pas de signal différenciateur exploitable.",
-      "vbet": "NON",
-      "scores": [
-        "2-0"
-      ],
-      "paris_safe": {
-        "bet": "",
-        "cote": "1.09",
-        "proba": "67%"
-      },
-      "paris_risque": {
-        "bet": "",
-        "cote": "",
-        "proba": ""
-      },
-      "kelly": null,
-      "stade": {
-        "nom": "Lincoln Financial Field — Philadelphia",
-        "cap": "",
-        "meteo": "🌧️",
-        "temp": "28°C",
-        "desc": "légère pluie"
-      },
-      "crit_home": {
-        "fd": 100,
-        "att": 100,
-        "def": 53,
-        "fr": 100,
-        "mot": 70,
-        "fat": 50
-      },
-      "crit_away": {
-        "fd": 0,
-        "att": 40,
-        "def": 0,
-        "fr": 0,
-        "mot": 70,
-        "fat": 50
-      },
-      "form_home": [
-        {
-          "d": "2026-06-16",
-          "opponent": "Senegal",
-          "score": "3-1",
-          "result": "W",
-          "home": true,
-          "match": "Senegal",
-          "lieu": "DOM",
-          "date_full": "2026-06-16T19:00:00+00:00"
-        },
-        {
-          "d": "2026-06-08",
-          "opponent": "Northern Ireland",
-          "score": "3-1",
-          "result": "W",
-          "home": true,
-          "match": "Northern Ireland",
-          "lieu": "DOM",
-          "date_full": "2026-06-08T19:10:00+00:00"
-        },
-        {
-          "d": "2026-06-04",
-          "opponent": "Ivory Coast",
-          "score": "1-2",
-          "result": "L",
-          "home": true,
-          "match": "Ivory Coast",
-          "lieu": "DOM",
-          "date_full": "2026-06-04T19:10:00+00:00"
-        },
-        {
-          "d": "2026-03-29",
-          "opponent": "Colombia",
-          "score": "3-1",
-          "result": "W",
-          "home": false,
-          "match": "Colombia",
-          "lieu": "EXT",
-          "date_full": "2026-03-29T19:00:00+00:00"
-        },
-        {
-          "d": "2026-03-26",
-          "opponent": "Brazil",
-          "score": "2-1",
-          "result": "W",
-          "home": false,
-          "match": "Brazil",
-          "lieu": "EXT",
-          "date_full": "2026-03-26T20:00:00+00:00"
-        }
-      ],
-      "form_away": [
-        {
-          "d": "2026-06-16",
-          "opponent": "Norway",
-          "score": "1-4",
-          "result": "L",
-          "home": true,
-          "match": "Norway",
-          "lieu": "DOM",
-          "date_full": "2026-06-16T22:00:00+00:00"
-        },
-        {
-          "d": "2026-06-10",
-          "opponent": "Venezuela",
-          "score": "0-2",
-          "result": "L",
-          "home": true,
-          "match": "Venezuela",
-          "lieu": "DOM",
-          "date_full": "2026-06-10T01:00:00+00:00"
-        },
-        {
-          "d": "2026-06-04",
-          "opponent": "Spain",
-          "score": "1-1",
-          "result": "D",
-          "home": false,
-          "match": "Spain",
-          "lieu": "EXT",
-          "date_full": "2026-06-04T19:00:00+00:00"
-        },
-        {
-          "d": "2026-05-29",
-          "opponent": "Andorra",
-          "score": "1-0",
-          "result": "W",
-          "home": true,
-          "match": "Andorra",
-          "lieu": "DOM",
-          "date_full": "2026-05-29T16:00:00+00:00"
-        },
-        {
-          "d": "2026-04-01",
-          "opponent": "Bolivia",
-          "score": "2-1",
-          "result": "W",
-          "home": true,
-          "match": "Bolivia",
-          "lieu": "DOM",
-          "date_full": "2026-04-01T03:00:00+00:00"
-        }
-      ],
-      "forme_h": "W",
-      "forme_a": "L",
-      "h2h": [],
-      "injuries": [],
-      "fatigue": {
-        "home": {
-          "val": 50,
-          "info": "Dernier match il y a 6j — 2 match(s) en 14j"
-        },
-        "away": {
-          "val": 50,
-          "info": "Dernier match il y a 6j — 2 match(s) en 14j"
-        }
-      },
-      "fatigue_home": {
-        "val": 50,
-        "info": "Dernier match il y a 6j — 2 match(s) en 14j"
-      },
-      "fatigue_away": {
-        "val": 50,
-        "info": "Dernier match il y a 6j — 2 match(s) en 14j"
-      },
-      "tendances": {
-        "over25_home": 3,
-        "over25_away": 2,
-        "over25_home_n": 3,
-        "over25_away_n": 8,
-        "btts_home": 3,
-        "btts_away": 4,
-        "btts_home_n": 3,
-        "btts_away_n": 8
-      },
-      "classement": null,
-      "actu": [
-        {
-          "c": "France",
-          "t": "Actualité : Canicules dès juin pendant un mois, nuits sans sommeil : ce que la France subira bientôt si rien n'est fait",
-          "tx": "Depuis le mercredi 17 juin 2026, la France subit une canicule. Météo-France qualifie cet épisode de précoce. Il s'agit de la 52e vague de chaleur recensée dans l'Hexagone depuis 1947. L'épisode durera plusieurs jours, avec un plateau attendu entre lundi 22 et…",
-          "tm": "2026-06-21"
-        },
-        {
-          "c": "France",
-          "t": "Plusieurs départements en alerte rouge à la pollution de l'air lundi en raison de la canicule",
-          "tx": "Les préfectures des Bouches-du-Rhône et du Var ont abaissé les limitations de vitesse ainsi qu'interdit l'utilisation de certains appareils ou produits à base de solvants organiques.",
-          "tm": "2026-06-21"
-        },
-        {
-          "c": "Iraq",
-          "t": "57% of Americans: Thanks, Obama [Spiffy]",
-          "tx": "<table> <tr><td> </td><td> [link] [6 comments] </td></tr></table>",
-          "tm": "2026-06-19"
-        },
-        {
-          "c": "Iraq",
-          "t": "Irak-Norvège: \"Vous allez vous croire à Bagdad\", la diaspora irakienne promet une ambiance bouillante",
-          "tx": "Après 40 ans d’attente, la sélection irakienne est enfin de retour en Coupe du monde. Un bonheur exceptionnel pour ce pays de 46 millions d’habitants, mais dont les supporters ont vite déchanté face aux refus systématiques des autorités américaines de délivre…",
-          "tm": "2026-06-16"
-        }
-      ],
-      "arbitre": null,
-      "events_home": null,
-      "events_away": null,
-      "match_stats_home": null,
-      "match_stats_away": null,
-      "top_scorers_home": [],
-      "top_scorers_away": [],
-      "elo_home": null,
-      "elo_away": null,
-      "elo_diff": null,
-      "elo_signal": null,
-      "dropping_odds": null,
-      "pinnacle_snapshot": null
-    },
-    {
       "id": 1489401,
       "sport": "football",
       "home": {
@@ -1851,43 +343,43 @@
       "val": false,
       "hot": false,
       "conf": 0,
-      "p1": 31,
-      "pn": 47,
-      "p2": 51,
-      "lambda_h": 0.64,
-      "lambda_a": 0.3,
+      "p1": 30,
+      "pn": 25,
+      "p2": 52,
+      "lambda_h": 1.249,
+      "lambda_a": 1.511,
       "wc_probs": {
-        "p1": 31,
+        "p1": 30,
         "pN": 18,
-        "p2": 51,
+        "p2": 52,
         "scoreH": {
-          "total": 23.1,
+          "total": 21.4,
           "details": {
             "fifa_pts": 1398,
             "fifa_norm": 28,
             "valeur_m": 35,
             "valeur_norm": 11,
             "top5_pct": 10,
-            "xg_for": 1.35,
-            "xg_against": 1.01,
-            "xg_diff": 0.34,
-            "xg_norm": 59,
+            "xg_for": 1.2,
+            "xg_against": 1.2,
+            "xg_diff": 0,
+            "xg_norm": 50,
             "wc_exp": 5,
             "exp_norm": 25
           }
         },
         "scoreA": {
-          "total": 37.1,
+          "total": 36.8,
           "details": {
             "fifa_pts": 1521,
             "fifa_norm": 46,
             "valeur_m": 62,
             "valeur_norm": 16,
             "top5_pct": 42,
-            "xg_for": 1.96,
-            "xg_against": 1,
-            "xg_diff": 0.96,
-            "xg_norm": 74,
+            "xg_for": 1.85,
+            "xg_against": 0.95,
+            "xg_diff": 0.9,
+            "xg_norm": 73,
             "wc_exp": 6,
             "exp_norm": 30
           }
@@ -1898,89 +390,89 @@
         "altMalusA": 0
       },
       "wc_markets": {
-        "off_combined": 3.31,
-        "def_avg": 1,
-        "lambda_h": 1.18,
-        "lambda_a": 1.49,
+        "off_combined": 3.05,
+        "def_avg": 1.08,
+        "lambda_h": 1.08,
+        "lambda_a": 1.53,
         "val_att_h": 12,
         "val_def_h": 11,
         "val_att_a": 25,
         "val_def_a": 15,
-        "xg_source_h": "hybride_qualif80_tournoi20",
-        "xg_source_a": "hybride_qualif80_tournoi20",
-        "prob_over25": 50,
-        "prob_under25": 50,
-        "prob_btts_oui": 53,
-        "prob_btts_non": 47,
-        "prob_dc1x": 49,
-        "prob_dcx2": 69,
+        "xg_source_h": "hybride_qualif60_tournoi40",
+        "xg_source_a": "hybride_qualif60_tournoi40",
+        "prob_over25": 48,
+        "prob_under25": 52,
+        "prob_btts_oui": 52,
+        "prob_btts_non": 48,
+        "prob_dc1x": 48,
+        "prob_dcx2": 70,
         "score_central": "1-1",
-        "po25": 50,
-        "btts": 53
+        "po25": 48,
+        "btts": 52
       },
       "po15": 0,
-      "po25": 50,
-      "btts": 53,
-      "c1": "6.10",
-      "cn": "4.25",
-      "c2": "1.53",
-      "co15": "1.28",
-      "co25": "1.90",
-      "cu25": "1.91",
-      "dc1x": "2.50",
-      "dc2x": "1.13",
+      "po25": 48,
+      "btts": 52,
+      "c1": "6.50",
+      "cn": "4.22",
+      "c2": "1.50",
+      "co15": "1.30",
+      "co25": "1.92",
+      "cu25": "1.89",
+      "dc1x": "2.55",
+      "dc2x": "1.10",
       "dc12": "1.21",
-      "cdc1x": "2.50",
-      "cdc2x": "1.13",
-      "cbtts": "1.95",
-      "cbtts_non": "1.78",
-      "btts_oui": "1.95",
-      "btts_non": "1.78",
+      "cdc1x": "2.55",
+      "cdc2x": "1.10",
+      "cbtts": "2.05",
+      "cbtts_non": "1.75",
+      "btts_oui": "2.05",
+      "btts_non": "1.75",
       "bookies": [
         {
           "n": "Betclic",
           "o": "200€ offerts",
           "l": "#LIEN_BETCLIC",
-          "c": "6.10",
-          "c1": "6.10",
-          "cn": "4.25",
-          "c2": "1.53"
+          "c": "6.50",
+          "c1": "6.50",
+          "cn": "4.22",
+          "c2": "1.50"
         },
         {
           "n": "Winamax",
           "o": "100€ offerts",
           "l": "#LIEN_WINAMAX",
-          "c": "6.07",
-          "c1": "6.07",
-          "cn": "4.22",
-          "c2": "1.50"
+          "c": "6.47",
+          "c1": "6.47",
+          "cn": "4.19",
+          "c2": "1.47"
         },
         {
           "n": "Unibet",
           "o": "100€ remboursés",
           "l": "#LIEN_UNIBET",
-          "c": "6.08",
-          "c1": "6.08",
-          "cn": "4.23",
-          "c2": "1.51"
+          "c": "6.48",
+          "c1": "6.48",
+          "cn": "4.20",
+          "c2": "1.48"
         },
         {
           "n": "PMU",
           "o": "100€ offerts",
           "l": "#LIEN_PMU",
-          "c": "6.05",
-          "c1": "6.05",
-          "cn": "4.20",
-          "c2": "1.48"
+          "c": "6.45",
+          "c1": "6.45",
+          "cn": "4.17",
+          "c2": "1.45"
         },
         {
           "n": "Bet365",
           "o": "100€ bonus",
           "l": "#LIEN_BET365",
-          "c": "6.13",
-          "c1": "6.13",
-          "cn": "4.28",
-          "c2": "1.56"
+          "c": "6.53",
+          "c1": "6.53",
+          "cn": "4.25",
+          "c2": "1.53"
         }
       ],
       "edge": "",
@@ -1993,54 +485,54 @@
       "mise": "2-3% bankroll",
       "verdict_shark": "",
       "scenario": {
-        "phase1": "0-30min — L'Algérie impose son pressing et tente d'exploiter son avantage technique dès l'entame. La Jordanie défend en bloc bas avec un bloc médian compact, limitant les espaces dans l'axe. Peu de situations franches attendues dans ce premier quart d'heure.",
-        "phase2": "30-65min — Phase de déséquilibre progressif : si l'Algérie ouvre le score, la Jordanie est contrainte de sortir, ouvrant des couloirs en contre. Les lambdas Poisson suggèrent que la majorité des buts (2.67 attendus cumulés) se concentrent en seconde mi-temps après une première période fermée.",
-        "phase3": "65-90min — Fin de match sous tension selon le score : l'Algérie gérerait un avantage ou accélérerait en cas d'égalité. La Jordanie pourrait bénéficier d'un temps fort tardif si le match est serré. Le scénario nul (18%) reste possible si les deux équipes se neutralisent défensivement."
+        "phase1": "0-30min : Algeria installe sa supériorité technique (FIFA 1521 pts) en contrôlant le ballon, Jordan se replie en bloc bas 4-4-2 pour limiter les espaces. Peu de situations nettes, tension tactique dominante.",
+        "phase2": "30-60min : Algeria crée les premières occasions réelles via ses ailiers de Top 5 (42%) — un ou deux tirs cadrés probables. Jordan tente des contre-attaques rapides exploitant le xG offensif résiduel (1.2). Probabilité d'un premier but dans cette fenêtre : ~38%.",
+        "phase3": "60-90min : Si Algeria mène, elle gère et Jordan s'ouvre — scénario favorable aux buts tardifs. Si match nul, les deux équipes poussent, augmentant la volatilité offensive en fin de match. La tranche 75-90min concentre le plus haut risque de but décisif."
       },
       "scenario_15min": [
         {
           "t": "0-15min",
           "prob": 8,
-          "txt": "Phase d'observation — les deux équipes tâtent le terrain. L'Algérie tente les premières combinaisons courtes, la Jordanie repousse en zone basse. Probabilité de but dans ce créneau faible (8%), aucun des deux n'a encore trouvé le bon timing offensif."
+          "txt": "Démarrage prudent des deux équipes en phase de groupes CM — Algeria prend possession, Jordan teste son bloc défensif. Probabilité de but très faible, match en phase de lecture tactique."
         },
         {
           "t": "15-30min",
           "prob": 12,
-          "txt": "L'Algérie commence à imposer son rythme avec des transitions rapides via ses joueurs évoluant en Top 5 européen (42% du groupe). Première vraie occasion algérienne attendue ici. La Jordanie tente quelques contres sporadiques mais reste défensive."
+          "txt": "Algeria commence à accélérer via ses relayeurs Top 5 — premières frappes lointaines probables. Jordan compacte son bloc et tente un contre. Pression algérienne montante mais sans efficacité clinique encore."
         },
         {
           "t": "30-45min",
           "prob": 10,
-          "txt": "Légère baisse de rythme avant la pause — les deux équipes préservent leurs forces. Possibilité d'un but sur coup de pied arrêté (les deux équipes ont des profils physiques homogènes). Probabilité de but modérée à 10%."
+          "txt": "Fin de première période potentiellement tendue avec un but probable sur corner ou transition. Jordan peut surprendre sur phase arrêtée (xG défensif Algeria 0.95 peut être testé). Score 0-0 ou 1-0 Algeria le plus probable."
         },
         {
           "t": "45-60min",
           "prob": 15,
-          "txt": "Reprise avec une Algérie plus directe — l'entraîneur algérien peut avoir ajusté le dispositif à la mi-temps. La Jordanie subit une pression accrue. C'est la fenêtre la plus probable pour un premier but algérien si le match est encore vierge."
+          "txt": "Retour des vestiaires souvent décisif en match de CM — Algeria revient avec intentions offensives claires. Si 0-0 à la mi-temps, cette tranche concentre la plus haute probabilité de premier but du match."
         },
         {
           "t": "60-75min",
           "prob": 18,
-          "txt": "Pic d'intensité : si le score est nul ou serré, les deux équipes prennent des risques. Les entrées en jeu modifient les équilibres. Avec un lambda Algérie à 1.49, ce créneau concentre statistiquement le plus de buts attendus côté algérien."
+          "txt": "Pic d'intensité offensive algérienne avec joueurs frais potentiels en entrée. Jordan commence à accuser physiquement la pression (malgré 0km fatigue, l'intensité tactique pèse). Scénario de but algérien dominant dans cette fenêtre."
         },
         {
           "t": "75-90min",
           "prob": 20,
-          "txt": "Dernière phase décisive — la plus haute probabilité de but par tranche (20%). Une équipe qui perd pousse, l'autre gère ou contre-attaque. Le modèle xG indique que les deux équipes concèdent des buts en fin de match (xG concédé ~1.0 chacune), rendant ce créneau le plus fertile pour les inscriptions finales."
+          "txt": "Dernière ligne droite décisive — si Algeria mène, elle consolide ; si égalité, les deux équipes ouvrent le jeu pour une victoire aux enjeux de qualification. Plus haute probabilité de buts dans cette tranche, y compris un possible but jordanien sur dernier recours."
         }
       ],
-      "facteur_x": "Écart de force FIFA de 123 points (1521 vs 1398) en faveur de l'Algérie, mais cet écart ne suffit pas à faire franchir à aucun marché son seuil de probabilité — le signal est réel mais trop diffus pour être actionnable.",
-      "analyse_card": "L'Algérie domine structurellement avec un xG généré de 1.96 contre 1.35 pour la Jordanie, et une valeur d'attaque plus du double (25M€ vs 12M€). Cependant, les deux défenses affichent un xG concédé quasi identique autour de 1.00, ce qui comprime les probabilités de buts et empêche tout marché Over/Under d'atteindre le seuil de fiabilité. Les lambdas Poisson (Jordan 1.18 / Algeria 1.49) traduisent un match de niveau modeste où ni l'intensité offensive ni la solidité défensive ne génèrent d'avantage statistique net suffisant.",
-      "conseil_public": "Abstiens-toi totalement sur ce match : aucun signal chiffré ne dépasse les seuils de confiance définis par le modèle, et le contexte de phase de groupes avec des équipes de force déséquilibrée mais non extrême crée une incertitude diffuse sur tous les marchés.",
-      "contexte": "Phase de groupes Coupe du Monde 2026 — résultat avec enjeu direct sur la qualification. L'Algérie (force 37.1/100) est favorite à 51% mais la Jordanie reste capable de perturber (31%). Le format élargi à 48 équipes rend la 3e place qualificative possible, ce qui peut influencer les motivations des deux équipes selon leur situation dans le groupe au moment du coup d'envoi.",
+      "facteur_x": "Le lambda Jordan (1.08 buts estimés) repose sur un xG concédé algérien de 0.95 — si Algeria joue compact en défense et presse haut, Jordan pourrait rester sous 0.8 xG réel, faisant basculer le match vers Under 2.5 ; mais la moindre ouverture algérienne (xG offensif 1.85) peut faire exploser ce compteur.",
+      "analyse_card": "Algeria domine structurellement avec un xG offensif de 1.85 contre 0.95 encaissé, adossé à 42% de joueurs évoluant dans le Top 5 européen et 123 points FIFA de supériorité. Jordan affiche un bloc défensif symétrique (xG généré 1.2 = xG concédé 1.2) suggérant un profil compact mais sans réel danger offensif. La combinaison des lambdas Poisson (Jordan 1.08 / Algeria 1.53) place l'expected total à 2.61 buts, soit une zone frontière directement sur le seuil Over/Under 2.5, rendant toute décision volumétrique à haut risque d'erreur.",
+      "conseil_public": "Abstiens-toi sur ce match : aucun marché ne dépasse son seuil de probabilité minimum, et le score attendu de 2.61 buts se situe exactement sur la ligne de partage Over/Under 2.5 — investir ici serait statistiquement équivalent à un pile ou face.",
+      "contexte": "Phase de groupes Coupe du Monde 2026 — Levi's Stadium. Jordan et Algeria jouent leur qualification en phase à élimination directe. Algeria (Force 36.8) est favorite mais une surprise jordanienne reste dans les probabilités à 30%. Les enjeux sont maximaux pour les deux sélections, ce qui suggère un engagement tactique élevé et potentiellement un match fermé en première période.",
       "vbet": "NON",
       "scores": [
         "1-1"
       ],
       "paris_safe": {
         "bet": "",
-        "cote": "6.10",
-        "proba": "31%"
+        "cote": "6.50",
+        "proba": "30%"
       },
       "paris_risque": {
         "bet": "",
@@ -2049,11 +541,11 @@
       },
       "kelly": "5.0",
       "stade": {
-        "nom": "Levi's Stadium — San Francisco Bay Area",
+        "nom": "Levi's Stadium — Santa Clara",
         "cap": "",
-        "meteo": "🌤️",
-        "temp": "",
-        "desc": ""
+        "meteo": "☁️",
+        "temp": "23°C",
+        "desc": "couvert"
       },
       "crit_home": {
         "fd": 0,
@@ -2065,13 +557,23 @@
       },
       "crit_away": {
         "fd": 50,
-        "att": 33,
-        "def": 32,
-        "fr": 30,
+        "att": 40,
+        "def": 18,
+        "fr": 50,
         "mot": 70,
         "fat": 50
       },
       "form_home": [
+        {
+          "d": "2026-06-23",
+          "opponent": "Algeria",
+          "score": "1-2",
+          "result": "L",
+          "home": true,
+          "match": "Algeria",
+          "lieu": "DOM",
+          "date_full": "2026-06-23T03:00:00+00:00"
+        },
         {
           "d": "2026-06-17",
           "opponent": "Austria",
@@ -2111,19 +613,19 @@
           "match": "Nigeria",
           "lieu": "DOM",
           "date_full": "2026-03-31T17:30:00+00:00"
-        },
-        {
-          "d": "2026-03-27",
-          "opponent": "Costa Rica",
-          "score": "2-2",
-          "result": "D",
-          "home": true,
-          "match": "Costa Rica",
-          "lieu": "DOM",
-          "date_full": "2026-03-27T17:30:00+00:00"
         }
       ],
       "form_away": [
+        {
+          "d": "2026-06-23",
+          "opponent": "Jordan",
+          "score": "2-1",
+          "result": "W",
+          "home": false,
+          "match": "Jordan",
+          "lieu": "EXT",
+          "date_full": "2026-06-23T03:00:00+00:00"
+        },
         {
           "d": "2026-06-17",
           "opponent": "Argentina",
@@ -2163,49 +665,39 @@
           "match": "Uruguay",
           "lieu": "DOM",
           "date_full": "2026-03-31T18:30:00+00:00"
-        },
-        {
-          "d": "2026-03-27",
-          "opponent": "Guatemala",
-          "score": "7-0",
-          "result": "W",
-          "home": true,
-          "match": "Guatemala",
-          "lieu": "DOM",
-          "date_full": "2026-03-27T19:30:00+00:00"
         }
       ],
-      "forme_h": "L",
-      "forme_a": "L",
+      "forme_h": "LL",
+      "forme_a": "LW",
       "h2h": [],
       "injuries": [],
       "fatigue": {
         "home": {
-          "val": 50,
-          "info": "Dernier match il y a 5j — 1 match(s) en 14j"
+          "val": 90,
+          "info": "Dernier match il y a 0j — 2 match(s) en 14j"
         },
         "away": {
-          "val": 50,
-          "info": "Dernier match il y a 6j — 2 match(s) en 14j"
+          "val": 100,
+          "info": "Dernier match il y a 0j — 3 match(s) en 14j"
         }
       },
       "fatigue_home": {
-        "val": 50,
-        "info": "Dernier match il y a 5j — 1 match(s) en 14j"
+        "val": 90,
+        "info": "Dernier match il y a 0j — 2 match(s) en 14j"
       },
       "fatigue_away": {
-        "val": 50,
-        "info": "Dernier match il y a 6j — 2 match(s) en 14j"
+        "val": 100,
+        "info": "Dernier match il y a 0j — 3 match(s) en 14j"
       },
       "tendances": {
-        "over25_home": 6,
-        "over25_away": 2,
+        "over25_home": 7,
+        "over25_away": 3,
         "over25_home_n": 10,
-        "over25_away_n": 3,
-        "btts_home": 4,
-        "btts_away": 0,
+        "over25_away_n": 4,
+        "btts_home": 5,
+        "btts_away": 1,
         "btts_home_n": 10,
-        "btts_away_n": 3
+        "btts_away_n": 4
       },
       "classement": null,
       "actu": [
@@ -4419,15 +2911,2501 @@
       "elo_signal": null,
       "dropping_odds": null,
       "pinnacle_snapshot": null
+    },
+    {
+      "id": 1489405,
+      "sport": "football",
+      "home": {
+        "n": "Morocco",
+        "id": 31
+      },
+      "away": {
+        "n": "Haiti",
+        "id": 2386
+      },
+      "league": "World Cup",
+      "ligue_icon": "🏆",
+      "league_key": "wc",
+      "date": "2026-06-25 00:00",
+      "cat": [
+        "all"
+      ],
+      "val": false,
+      "hot": false,
+      "conf": 0,
+      "p1": 65,
+      "pn": 44,
+      "p2": 17,
+      "lambda_h": 0.652,
+      "lambda_a": 0.436,
+      "wc_probs": {
+        "p1": 65,
+        "pN": 18,
+        "p2": 17,
+        "scoreH": {
+          "total": 57.2,
+          "details": {
+            "fifa_pts": 1714,
+            "fifa_norm": 73,
+            "valeur_m": 260,
+            "valeur_norm": 44,
+            "top5_pct": 62,
+            "xg_for": 1.94,
+            "xg_against": 0.57,
+            "xg_diff": 1.37,
+            "xg_norm": 84,
+            "wc_exp": 12,
+            "exp_norm": 60
+          }
+        },
+        "scoreA": {
+          "total": 14.8,
+          "details": {
+            "fifa_pts": 1276,
+            "fifa_norm": 11,
+            "valeur_m": 10,
+            "valeur_norm": 4,
+            "top5_pct": 8,
+            "xg_for": 1.31,
+            "xg_against": 1.42,
+            "xg_diff": -0.11,
+            "xg_norm": 47,
+            "wc_exp": 2,
+            "exp_norm": 10
+          }
+        },
+        "fatigueH": 0,
+        "fatigueA": 0,
+        "altMalusH": 0,
+        "altMalusA": 0
+      },
+      "wc_markets": {
+        "off_combined": 3.25,
+        "def_avg": 0.99,
+        "lambda_h": 1.68,
+        "lambda_a": 0.94,
+        "val_att_h": 90,
+        "val_def_h": 70,
+        "val_att_a": 4,
+        "val_def_a": 3,
+        "xg_source_h": "hybride_qualif60_tournoi40",
+        "xg_source_a": "hybride_qualif60_tournoi40",
+        "prob_over25": 49,
+        "prob_under25": 51,
+        "prob_btts_oui": 50,
+        "prob_btts_non": 50,
+        "prob_dc1x": 83,
+        "prob_dcx2": 35,
+        "score_central": "1-0",
+        "po25": 49,
+        "btts": 50
+      },
+      "po15": 0,
+      "po25": 49,
+      "btts": 50,
+      "c1": "1.18",
+      "cn": "7.05",
+      "c2": "15.00",
+      "co15": "1.15",
+      "co25": "1.54",
+      "cu25": "2.42",
+      "dc1x": "1.02",
+      "dc2x": "4.83",
+      "dc12": "1.10",
+      "cdc1x": "1.02",
+      "cdc2x": "4.83",
+      "cbtts": "2.36",
+      "cbtts_non": "1.53",
+      "btts_oui": "2.36",
+      "btts_non": "1.53",
+      "bookies": [
+        {
+          "n": "Betclic",
+          "o": "200€ offerts",
+          "l": "#LIEN_BETCLIC",
+          "c": "1.18",
+          "c1": "1.18",
+          "cn": "7.05",
+          "c2": "15.00"
+        },
+        {
+          "n": "Winamax",
+          "o": "100€ offerts",
+          "l": "#LIEN_WINAMAX",
+          "c": "1.15",
+          "c1": "1.15",
+          "cn": "7.02",
+          "c2": "14.97"
+        },
+        {
+          "n": "Unibet",
+          "o": "100€ remboursés",
+          "l": "#LIEN_UNIBET",
+          "c": "1.16",
+          "c1": "1.16",
+          "cn": "7.03",
+          "c2": "14.98"
+        },
+        {
+          "n": "PMU",
+          "o": "100€ offerts",
+          "l": "#LIEN_PMU",
+          "c": "1.13",
+          "c1": "1.13",
+          "cn": "7.00",
+          "c2": "14.95"
+        },
+        {
+          "n": "Bet365",
+          "o": "100€ bonus",
+          "l": "#LIEN_BET365",
+          "c": "1.21",
+          "c1": "1.21",
+          "cn": "7.08",
+          "c2": "15.03"
+        }
+      ],
+      "edge": "",
+      "marche": "RESULTAT",
+      "risque": "ELEVE",
+      "pari_rec": "",
+      "cote_rec": "",
+      "no_signal": true,
+      "no_signal_label": "Rien d'exploitable ici — on attend mieux.",
+      "mise": "2-3% bankroll",
+      "verdict_shark": "",
+      "scenario": {
+        "phase1": "0-30min : Le Maroc impose son pressing haut et cherche à ouvrir le score rapidement grâce à sa supériorité technique ; Haïti tente de résister en bloc défensif bas, limitant les espaces dans l'axe.",
+        "phase2": "30-65min : Le Maroc exploite les ailes et les situations de transition ; un but marocain entre la 25e et la 55e minute est le scénario central (lambda 1.68). Haïti peut piquer en contre sur un espace laissé après pression.",
+        "phase3": "65-90min : Maroc gérant son avantage avec possibilité de second but sur phase arrêtée ou contre rapide ; Haïti épuisée physiquement (gap athlétique élite vs semi-pro) mais toujours capable d'un but isolé sur erreur défensive."
+      },
+      "scenario_15min": [
+        {
+          "t": "0-15min",
+          "prob": 8,
+          "txt": "Maroc en contrôle dès le coup d'envoi, pression haute, Haïti recule — premier but marocain possible mais probabilité modérée sur cette fenêtre."
+        },
+        {
+          "t": "15-30min",
+          "prob": 12,
+          "txt": "Montée en puissance marocaine, combinaisons sur les côtés, xG s'accumule — fenêtre la plus probable pour le premier but du match."
+        },
+        {
+          "t": "30-45min",
+          "prob": 10,
+          "txt": "Haïti résiste encore en bloc, risque de but marocain sur phase arrêtée ou corner — probabilité de but Haïti quasi nulle sur cette période."
+        },
+        {
+          "t": "45-60min",
+          "prob": 15,
+          "txt": "Retour des vestiaires souvent favorable à l'équipe dominante — le Maroc peut enfoncer le clou avec un second but, Haïti exposée aux transitions rapides."
+        },
+        {
+          "t": "60-75min",
+          "prob": 18,
+          "txt": "Pic de probabilité de buts : fatigue haïtienne maximale, le Maroc exploite les espaces — scénario 2-0 ou 2-1 central sur cette fenêtre."
+        },
+        {
+          "t": "75-90min",
+          "prob": 20,
+          "txt": "Fin de match : le Maroc gère ou relâche selon l'enjeu classement ; Haïti peut marquer un but de consolation sur pressing désespéré — période la plus productive statistiquement."
+        }
+      ],
+      "facteur_x": "Lambda Haïti à 0.94 but — anormalement élevé pour une équipe à 14.8/100 de force, ce qui génère une incertitude résiduelle sur BTTS et Under 2.5, bloquant tout edge net.",
+      "analyse_card": "Le Maroc présente un xG généré de 1.94 contre seulement 0.57 concédé, signalant une équipe dominatrice dans les deux surfaces. Haïti concède structurellement plus qu'elle ne produit (xG concédé 1.42 vs généré 1.31), mais le lambda Poisson modélisé pour Haïti à 0.94 but reste non négligeable, ce qui plafonne la certitude sur le résultat net. L'écart de valeur marchande (94M€ vs 7M€) et d'expérience (12 vs 2 joueurs de haut niveau) confirme la supériorité marocaine, mais pas avec l'intensité attendue dans les marchés buts.",
+      "conseil_public": "Passer ce match — aucun marché ne présente un edge exploitable, et la proximité des probabilités Over/Under (49/51) et BTTS (50/50) interdit tout pari à taux de réussite élevé.",
+      "contexte": "Phase de groupes Coupe du Monde 2026 : le Maroc vise la qualification avec ambition, mais une rotation partielle est possible si l'enjeu classement est déjà en partie fixé. Haïti joue sa survie dans le groupe mais dispose de ressources humaines limitées à ce niveau. L'incertitude tactique et l'absence de H2H officiel dégradent la fiabilité du signal.",
+      "vbet": "NON",
+      "scores": [
+        "2-0"
+      ],
+      "paris_safe": {
+        "bet": "",
+        "cote": "1.18",
+        "proba": "65%"
+      },
+      "paris_risque": {
+        "bet": "",
+        "cote": "",
+        "proba": ""
+      },
+      "kelly": "5.0",
+      "stade": {
+        "nom": "Mercedes-Benz Stadium — Atlanta",
+        "cap": "",
+        "meteo": "☁️",
+        "temp": "22°C",
+        "desc": "couvert"
+      },
+      "crit_home": {
+        "fd": 0,
+        "att": 40,
+        "def": 70,
+        "fr": 67,
+        "mot": 70,
+        "fat": 50
+      },
+      "crit_away": {
+        "fd": 50,
+        "att": 13,
+        "def": 13,
+        "fr": 12,
+        "mot": 70,
+        "fat": 50
+      },
+      "form_home": [
+        {
+          "d": "2026-06-19",
+          "opponent": "Scotland",
+          "score": "1-0",
+          "result": "W",
+          "home": false,
+          "match": "Scotland",
+          "lieu": "EXT",
+          "date_full": "2026-06-19T22:00:00+00:00"
+        },
+        {
+          "d": "2026-06-13",
+          "opponent": "Brazil",
+          "score": "1-1",
+          "result": "D",
+          "home": false,
+          "match": "Brazil",
+          "lieu": "EXT",
+          "date_full": "2026-06-13T22:00:00+00:00"
+        },
+        {
+          "d": "2026-06-07",
+          "opponent": "Norway",
+          "score": "1-1",
+          "result": "D",
+          "home": true,
+          "match": "Norway",
+          "lieu": "DOM",
+          "date_full": "2026-06-07T19:00:00+00:00"
+        },
+        {
+          "d": "2026-06-02",
+          "opponent": "Madagascar",
+          "score": "4-0",
+          "result": "W",
+          "home": true,
+          "match": "Madagascar",
+          "lieu": "DOM",
+          "date_full": "2026-06-02T17:00:00+00:00"
+        },
+        {
+          "d": "2026-05-26",
+          "opponent": "Burundi",
+          "score": "5-0",
+          "result": "W",
+          "home": true,
+          "match": "Burundi",
+          "lieu": "DOM",
+          "date_full": "2026-05-26T11:00:00+00:00"
+        }
+      ],
+      "form_away": [
+        {
+          "d": "2026-06-20",
+          "opponent": "Brazil",
+          "score": "0-3",
+          "result": "L",
+          "home": false,
+          "match": "Brazil",
+          "lieu": "EXT",
+          "date_full": "2026-06-20T00:30:00+00:00"
+        },
+        {
+          "d": "2026-06-14",
+          "opponent": "Scotland",
+          "score": "0-1",
+          "result": "L",
+          "home": true,
+          "match": "Scotland",
+          "lieu": "DOM",
+          "date_full": "2026-06-14T01:00:00+00:00"
+        },
+        {
+          "d": "2026-06-06",
+          "opponent": "Peru",
+          "score": "1-2",
+          "result": "L",
+          "home": true,
+          "match": "Peru",
+          "lieu": "DOM",
+          "date_full": "2026-06-06T00:00:00+00:00"
+        },
+        {
+          "d": "2026-06-03",
+          "opponent": "New Zealand",
+          "score": "4-0",
+          "result": "W",
+          "home": true,
+          "match": "New Zealand",
+          "lieu": "DOM",
+          "date_full": "2026-06-03T00:00:00+00:00"
+        },
+        {
+          "d": "2026-03-31",
+          "opponent": "Iceland",
+          "score": "1-1",
+          "result": "D",
+          "home": true,
+          "match": "Iceland",
+          "lieu": "DOM",
+          "date_full": "2026-03-31T17:30:00+00:00"
+        }
+      ],
+      "forme_h": "DW",
+      "forme_a": "LL",
+      "h2h": [],
+      "injuries": [],
+      "fatigue": {
+        "home": {
+          "val": 70,
+          "info": "Dernier match il y a 3j — 2 match(s) en 14j"
+        },
+        "away": {
+          "val": 70,
+          "info": "Dernier match il y a 3j — 2 match(s) en 14j"
+        }
+      },
+      "fatigue_home": {
+        "val": 70,
+        "info": "Dernier match il y a 3j — 2 match(s) en 14j"
+      },
+      "fatigue_away": {
+        "val": 70,
+        "info": "Dernier match il y a 3j — 2 match(s) en 14j"
+      },
+      "tendances": {
+        "over25_home": 3,
+        "over25_away": 6,
+        "over25_home_n": 5,
+        "over25_away_n": 6,
+        "btts_home": 3,
+        "btts_away": 2,
+        "btts_home_n": 5,
+        "btts_away_n": 6
+      },
+      "classement": null,
+      "actu": [
+        {
+          "c": "Morocco",
+          "t": "Externalisation informatique au Maroc : le « build-operate-transfer » qui vous laisse propriétaire de votre équipe",
+          "tx": "L’externalisation informatique au Maroc ne se résume plus à la régie ou à la filiale créée seul. Une troisième voie s’impose – un modèle de build-operate-transfer où vous détenez pleinement votre équipe nearshore, sans en porter la charge juridique, fiscale e…",
+          "tm": "2026-06-04"
+        },
+        {
+          "c": "Haiti",
+          "t": "DIRECT. Écosse-Maroc: suivez le match du groupe C de la Coupe du monde 2026 en live",
+          "tx": "L'Écosse défie le Maroc dans la nuit de vendredi à samedi (00h00) dans le groupe C du Mondial 2026. Un duel disputé au Gillette Stadium de Boston qui pourrait compter dans la course aux seizièmes de finale. Le duel entre la Tartan Army et les Lions de l'Atlas…",
+          "tm": "2026-06-19"
+        },
+        {
+          "c": "Haiti",
+          "t": "Coupe du monde : « Si ça se trouve, dans quatre ans, j’aurai un enfant », ces fous qui regardent tous les matchs la nuit",
+          "tx": "Simon, Luis et Reda font partie de ces passionnés prêts à tout pour ne louper aucune miette de la Coupe du monde 2026 en dépit du décalage horaire avec l’Amérique du Nord. Ils racontent leur quotidien",
+          "tm": "2026-06-18"
+        }
+      ],
+      "arbitre": null,
+      "events_home": null,
+      "events_away": null,
+      "match_stats_home": null,
+      "match_stats_away": null,
+      "top_scorers_home": [],
+      "top_scorers_away": [],
+      "elo_home": null,
+      "elo_away": null,
+      "elo_diff": null,
+      "elo_signal": null,
+      "dropping_odds": null,
+      "pinnacle_snapshot": null
+    },
+    {
+      "id": 1489406,
+      "sport": "football",
+      "home": {
+        "n": "Scotland",
+        "id": 1108
+      },
+      "away": {
+        "n": "Brazil",
+        "id": 6
+      },
+      "league": "World Cup",
+      "ligue_icon": "🏆",
+      "league_key": "wc",
+      "date": "2026-06-25 00:00",
+      "cat": [
+        "all"
+      ],
+      "val": false,
+      "hot": false,
+      "conf": 0.56,
+      "p1": 29,
+      "pn": 40,
+      "p2": 53,
+      "lambda_h": 0.492,
+      "lambda_a": 0.78,
+      "wc_probs": {
+        "p1": 29,
+        "pN": 18,
+        "p2": 53,
+        "scoreH": {
+          "total": 40,
+          "details": {
+            "fifa_pts": 1401,
+            "fifa_norm": 29,
+            "valeur_m": 180,
+            "valeur_norm": 34,
+            "top5_pct": 65,
+            "xg_for": 1.48,
+            "xg_against": 1.13,
+            "xg_diff": 0.35,
+            "xg_norm": 59,
+            "wc_exp": 5,
+            "exp_norm": 25
+          }
+        },
+        "scoreA": {
+          "total": 73.7,
+          "details": {
+            "fifa_pts": 1791,
+            "fifa_norm": 84,
+            "valeur_m": 980,
+            "valeur_norm": 100,
+            "top5_pct": 72,
+            "xg_for": 1.29,
+            "xg_against": 0.97,
+            "xg_diff": 0.32,
+            "xg_norm": 58,
+            "wc_exp": 20,
+            "exp_norm": 100
+          }
+        },
+        "fatigueH": 0,
+        "fatigueA": 0,
+        "altMalusH": 0,
+        "altMalusA": 0
+      },
+      "wc_markets": {
+        "off_combined": 2.77,
+        "def_avg": 1.05,
+        "lambda_h": 1.23,
+        "lambda_a": 1.21,
+        "val_att_h": 65,
+        "val_def_h": 40,
+        "val_att_a": 380,
+        "val_def_a": 260,
+        "xg_source_h": "hybride_qualif60_tournoi40",
+        "xg_source_a": "hybride_qualif60_tournoi40",
+        "prob_over25": 44,
+        "prob_under25": 56,
+        "prob_btts_oui": 50,
+        "prob_btts_non": 50,
+        "prob_dc1x": 47,
+        "prob_dcx2": 71,
+        "score_central": "1-1",
+        "po25": 44,
+        "btts": 50
+      },
+      "po15": 0,
+      "po25": 44,
+      "btts": 50,
+      "c1": "8.20",
+      "cn": "4.92",
+      "c2": "1.38",
+      "co15": "1.25",
+      "co25": "1.86",
+      "cu25": "1.96",
+      "dc1x": "3.05",
+      "dc2x": "1.08",
+      "dc12": "1.17",
+      "cdc1x": "3.05",
+      "cdc2x": "1.08",
+      "cbtts": "2.15",
+      "cbtts_non": "1.65",
+      "btts_oui": "2.15",
+      "btts_non": "1.65",
+      "bookies": [
+        {
+          "n": "Betclic",
+          "o": "200€ offerts",
+          "l": "#LIEN_BETCLIC",
+          "c": "1.96",
+          "c1": "8.20",
+          "cn": "4.92",
+          "c2": "1.38"
+        },
+        {
+          "n": "Winamax",
+          "o": "100€ offerts",
+          "l": "#LIEN_WINAMAX",
+          "c": "1.93",
+          "c1": "8.17",
+          "cn": "4.89",
+          "c2": "1.35"
+        },
+        {
+          "n": "Unibet",
+          "o": "100€ remboursés",
+          "l": "#LIEN_UNIBET",
+          "c": "1.94",
+          "c1": "8.18",
+          "cn": "4.90",
+          "c2": "1.36"
+        },
+        {
+          "n": "PMU",
+          "o": "100€ offerts",
+          "l": "#LIEN_PMU",
+          "c": "1.91",
+          "c1": "8.15",
+          "cn": "4.87",
+          "c2": "1.33"
+        },
+        {
+          "n": "Bet365",
+          "o": "100€ bonus",
+          "l": "#LIEN_BET365",
+          "c": "1.99",
+          "c1": "8.23",
+          "cn": "4.95",
+          "c2": "1.41"
+        }
+      ],
+      "edge": "+1% (prob modèle 56% vs seuil 55%)",
+      "marche": "Under 2.5",
+      "risque": "MODERE",
+      "pari_rec": "Under 2.5 buts",
+      "cote_rec": "1.96",
+      "no_signal": false,
+      "no_signal_label": "",
+      "mise": "2-3% bankroll",
+      "verdict_shark": "Le modèle Poisson (λ Scotland 1.23 + λ Brazil 1.21) projette 56% de probabilité Under 2.5, edge positif de +1% sur le seuil requis à 55% avec une cote publiable de 1.96.",
+      "scenario": {
+        "phase1": "0-30min : Brazil installe sa domination possession (72% top-5 league exp), Scotland en bloc bas 4-4-2 compact, rythme lent, peu d'occasions franches — confirme la trajectoire Under.",
+        "phase2": "31-60min : Pression brésilienne augmente après la mi-temps, Scotland subit mais défense organisée (xG concédé 1.13 en qualif). Un but brésilien probable, Scotland contre-attaque sporadiquement via ses 1.48 xG offensifs.",
+        "phase3": "61-90min : Match géré par Brazil avec un avantage d'un but, Scotland pousse sans excès, volume de buts total contenu — scénario 1-0 ou 1-1 dominant, Under 2.5 validé dans ~56% des simulations."
+      },
+      "scenario_15min": [
+        {
+          "t": "0-15min",
+          "prob": 8,
+          "txt": "Entrée prudente des deux équipes, blocs défensifs en place, Brazil teste avec des frappes lointaines, aucun but attendu — probabilité de but dans ce slot 8%."
+        },
+        {
+          "t": "15-30min",
+          "prob": 12,
+          "txt": "Brazil monte en pression, combinaisons dans le tiers offensif, Scotland défend en nombre mais risque une percée sur corner ou frappe — probabilité de but 12%."
+        },
+        {
+          "t": "30-45min",
+          "prob": 10,
+          "txt": "Scotland tente quelques transitions rapides sur ses 1.48 xG offensifs, Brazil contrôle le tempo, fin de première période fermée — probabilité de but 10%."
+        },
+        {
+          "t": "45-60min",
+          "prob": 15,
+          "txt": "Retour des vestiaires dynamique, Brazil accélère avec ses 20 joueurs expérimentés CM, risque maximal d'ouverture du score dans ce slot — probabilité de but 15%."
+        },
+        {
+          "t": "60-75min",
+          "prob": 18,
+          "txt": "Si le score est 0-0 ou 1-0, les deux équipes poussent davantage, Scotland sort du bloc pour chercher l'égalité ou le hold — moment le plus chargé offensivement — probabilité de but 18%."
+        },
+        {
+          "t": "75-90min",
+          "prob": 20,
+          "txt": "Gestion finale, fatigue nulle au départ mais jambes lourdes en fin de match, possibilité d'un second but brésilien ou égaliseur écossais sur phase arrêtée — probabilité de but 20%, total buts restant sous 2.5 dans la majorité des simulations."
+        }
+      ],
+      "facteur_x": "Le xG défensif moyen concédé de 1.05 combiné aux lambdas Poisson symétriques (1.23 / 1.21) génère une probabilité cumulée Under 2.5 de 56% — signal clé qui dépasse le seuil requis de 55%.",
+      "analyse_card": "Scotland affiche un xG concédé de 1.13 et une valeur défensive de seulement 40M€ face à une attaque brésilienne à 380M€, mais les lambdas Poisson résultants restent modérés (1.23 vs 1.21), reflétant deux blocs défensivement solides en phase de poules. Brazil concède en moyenne 0.97 xG par match et Scotland ne génère que 1.48 xG offensifs, ce qui contient naturellement le volume de buts attendu sous la barre des 2.5. Le xG offensif combiné de 2.77 est neutralisé par le xG défensif moyen concédé de 1.05, ancrant la projection autour de 2.44 buts totaux.",
+      "conseil_public": "Jouer Under 2.5 à 1.96 uniquement si la cote est confirmée au kick-off — la marge est étroite (1% au-dessus du seuil), donc éviter toute cote inférieure à 1.90 en dernière minute.",
+      "contexte": "Phase de groupes Coupe du Monde 2026 : Brazil favori à 53% pour la victoire, Scotland en position d'outsider à 29%. Les deux équipes ont 3 jours de récupération complets et zéro fatigue enregistrée, ce qui maximise l'intensité défensive attendue. L'enjeu de qualification rend chaque équipe prudente tactiquement en début de compétition.",
+      "vbet": "OUI",
+      "scores": [
+        "1-1"
+      ],
+      "paris_safe": {
+        "bet": "Under 2.5 buts",
+        "cote": 1.96,
+        "proba": "29%"
+      },
+      "paris_risque": {
+        "bet": "",
+        "cote": "",
+        "proba": ""
+      },
+      "kelly": "5.0",
+      "stade": {
+        "nom": "Hard Rock Stadium — Miami",
+        "cap": "",
+        "meteo": "☁️",
+        "temp": "27°C",
+        "desc": "nuageux"
+      },
+      "crit_home": {
+        "fd": 0,
+        "att": 20,
+        "def": 70,
+        "fr": 50,
+        "mot": 70,
+        "fat": 50
+      },
+      "crit_away": {
+        "fd": 0,
+        "att": 80,
+        "def": 70,
+        "fr": 67,
+        "mot": 70,
+        "fat": 50
+      },
+      "form_home": [
+        {
+          "d": "2026-06-19",
+          "opponent": "Morocco",
+          "score": "0-1",
+          "result": "L",
+          "home": true,
+          "match": "Morocco",
+          "lieu": "DOM",
+          "date_full": "2026-06-19T22:00:00+00:00"
+        },
+        {
+          "d": "2026-06-14",
+          "opponent": "Haiti",
+          "score": "1-0",
+          "result": "W",
+          "home": false,
+          "match": "Haiti",
+          "lieu": "EXT",
+          "date_full": "2026-06-14T01:00:00+00:00"
+        },
+        {
+          "d": "2026-06-06",
+          "opponent": "Bolivia",
+          "score": "4-0",
+          "result": "W",
+          "home": false,
+          "match": "Bolivia",
+          "lieu": "EXT",
+          "date_full": "2026-06-06T20:00:00+00:00"
+        },
+        {
+          "d": "2026-05-30",
+          "opponent": "Curaçao",
+          "score": "4-1",
+          "result": "W",
+          "home": true,
+          "match": "Curaçao",
+          "lieu": "DOM",
+          "date_full": "2026-05-30T12:00:00+00:00"
+        },
+        {
+          "d": "2026-03-31",
+          "opponent": "Ivory Coast",
+          "score": "0-1",
+          "result": "L",
+          "home": true,
+          "match": "Ivory Coast",
+          "lieu": "DOM",
+          "date_full": "2026-03-31T18:30:00+00:00"
+        }
+      ],
+      "form_away": [
+        {
+          "d": "2026-06-20",
+          "opponent": "Haiti",
+          "score": "3-0",
+          "result": "W",
+          "home": true,
+          "match": "Haiti",
+          "lieu": "DOM",
+          "date_full": "2026-06-20T00:30:00+00:00"
+        },
+        {
+          "d": "2026-06-13",
+          "opponent": "Morocco",
+          "score": "1-1",
+          "result": "D",
+          "home": true,
+          "match": "Morocco",
+          "lieu": "DOM",
+          "date_full": "2026-06-13T22:00:00+00:00"
+        },
+        {
+          "d": "2026-06-06",
+          "opponent": "Egypt",
+          "score": "2-1",
+          "result": "W",
+          "home": true,
+          "match": "Egypt",
+          "lieu": "DOM",
+          "date_full": "2026-06-06T22:00:00+00:00"
+        },
+        {
+          "d": "2026-05-31",
+          "opponent": "Panama",
+          "score": "6-2",
+          "result": "W",
+          "home": true,
+          "match": "Panama",
+          "lieu": "DOM",
+          "date_full": "2026-05-31T21:30:00+00:00"
+        },
+        {
+          "d": "2026-04-01",
+          "opponent": "Croatia",
+          "score": "3-1",
+          "result": "W",
+          "home": true,
+          "match": "Croatia",
+          "lieu": "DOM",
+          "date_full": "2026-04-01T00:00:00+00:00"
+        }
+      ],
+      "forme_h": "WL",
+      "forme_a": "DW",
+      "h2h": [],
+      "injuries": [],
+      "fatigue": {
+        "home": {
+          "val": 70,
+          "info": "Dernier match il y a 3j — 2 match(s) en 14j"
+        },
+        "away": {
+          "val": 70,
+          "info": "Dernier match il y a 3j — 2 match(s) en 14j"
+        }
+      },
+      "fatigue_home": {
+        "val": 70,
+        "info": "Dernier match il y a 3j — 2 match(s) en 14j"
+      },
+      "fatigue_away": {
+        "val": 70,
+        "info": "Dernier match il y a 3j — 2 match(s) en 14j"
+      },
+      "tendances": {
+        "over25_home": 1,
+        "over25_away": 3,
+        "over25_home_n": 4,
+        "over25_away_n": 7,
+        "btts_home": 1,
+        "btts_away": 4,
+        "btts_home_n": 4,
+        "btts_away_n": 7
+      },
+      "classement": null,
+      "actu": [
+        {
+          "c": "Scotland",
+          "t": "\"Le Fils de l'oligarque\", par Patrick Radden Keefe : enquête dans un Londres ténébreux",
+          "tx": "Avec \"Le Fils de l’oligarque\", le journaliste  Patrick Radden Keefe s'est attaqué au mystérieux suicide d'un jeune Anglais affabulateur se faisant passer pour l'enfant d'un Russe richissime.",
+          "tm": "2026-06-22"
+        },
+        {
+          "c": "Scotland",
+          "t": "Coupe du monde : le joueur de l’Écosse Ryan Christie se plaint de l’arbitrage face au Maroc",
+          "tx": "Les Pictes pignent. Battu par le Maroc sur la plus petite des marges, l’Écosse est sorti frustré de…",
+          "tm": "2026-06-20"
+        },
+        {
+          "c": "Brazil",
+          "t": "Your Premier League club's summer transfer plans",
+          "tx": "",
+          "tm": "2026-06-15"
+        },
+        {
+          "c": "Brazil",
+          "t": "Top 10 des bons films où c'est le méchant qui gagne à la fin, HAHAHAHAHAHAHAHAHAHA",
+          "tx": "Il est bien rare au cinéma que les bons sentiments l'emportent sur les rires sardoniques. En contre-pied de ce qu'il se passe dans la vie, le cinéma aime à…",
+          "tm": "2026-06-12"
+        }
+      ],
+      "arbitre": null,
+      "events_home": null,
+      "events_away": null,
+      "match_stats_home": null,
+      "match_stats_away": null,
+      "top_scorers_home": [],
+      "top_scorers_away": [],
+      "elo_home": null,
+      "elo_away": null,
+      "elo_diff": null,
+      "elo_signal": null,
+      "dropping_odds": null,
+      "pinnacle_snapshot": null
+    },
+    {
+      "id": 1539010,
+      "sport": "football",
+      "home": {
+        "n": "Czechia",
+        "id": 770
+      },
+      "away": {
+        "n": "Mexico",
+        "id": 16
+      },
+      "league": "World Cup",
+      "ligue_icon": "🏆",
+      "league_key": "wc",
+      "date": "2026-06-25 03:00",
+      "cat": [
+        "all"
+      ],
+      "val": false,
+      "hot": false,
+      "conf": 0.61,
+      "p1": 33,
+      "pn": 43,
+      "p2": 46,
+      "lambda_h": 0.552,
+      "lambda_a": 0.584,
+      "wc_probs": {
+        "p1": 33,
+        "pN": 20,
+        "p2": 46,
+        "scoreH": {
+          "total": 37.8,
+          "details": {
+            "fifa_pts": 1534,
+            "fifa_norm": 48,
+            "valeur_m": 95,
+            "valeur_norm": 22,
+            "top5_pct": 58,
+            "xg_for": 1.46,
+            "xg_against": 1.52,
+            "xg_diff": -0.06,
+            "xg_norm": 49,
+            "wc_exp": 8,
+            "exp_norm": 40
+          }
+        },
+        "scoreA": {
+          "total": 48.6,
+          "details": {
+            "fifa_pts": 1682,
+            "fifa_norm": 69,
+            "valeur_m": 160,
+            "valeur_norm": 31,
+            "top5_pct": 22,
+            "xg_for": 1,
+            "xg_against": 0.49,
+            "xg_diff": 0.51,
+            "xg_norm": 63,
+            "wc_exp": 20,
+            "exp_norm": 100
+          }
+        },
+        "fatigueH": 0,
+        "fatigueA": 0,
+        "altMalusH": 8,
+        "altMalusA": 0
+      },
+      "wc_markets": {
+        "off_combined": 2.46,
+        "def_avg": 1,
+        "lambda_h": 0.98,
+        "lambda_a": 1.26,
+        "val_att_h": 38,
+        "val_def_h": 22,
+        "val_att_a": 60,
+        "val_def_a": 40,
+        "xg_source_h": "hybride_qualif60_tournoi40",
+        "xg_source_a": "tournoi_seul",
+        "prob_over25": 39,
+        "prob_under25": 61,
+        "prob_btts_oui": 45,
+        "prob_btts_non": 55,
+        "prob_dc1x": 53,
+        "prob_dcx2": 66,
+        "score_central": "0-1",
+        "po25": 39,
+        "btts": 45
+      },
+      "po15": 0,
+      "po25": 39,
+      "btts": 45,
+      "c1": "3.74",
+      "cn": "3.73",
+      "c2": "1.92",
+      "co15": "1.33",
+      "co25": "2.08",
+      "cu25": "1.77",
+      "dc1x": "1.84",
+      "dc2x": "1.28",
+      "dc12": "1.25",
+      "cdc1x": "1.84",
+      "cdc2x": "1.28",
+      "cbtts": "1.89",
+      "cbtts_non": "1.85",
+      "btts_oui": "1.89",
+      "btts_non": "1.85",
+      "bookies": [
+        {
+          "n": "Betclic",
+          "o": "200€ offerts",
+          "l": "#LIEN_BETCLIC",
+          "c": "1.77",
+          "c1": "3.74",
+          "cn": "3.73",
+          "c2": "1.92"
+        },
+        {
+          "n": "Winamax",
+          "o": "100€ offerts",
+          "l": "#LIEN_WINAMAX",
+          "c": "1.74",
+          "c1": "3.71",
+          "cn": "3.70",
+          "c2": "1.89"
+        },
+        {
+          "n": "Unibet",
+          "o": "100€ remboursés",
+          "l": "#LIEN_UNIBET",
+          "c": "1.75",
+          "c1": "3.72",
+          "cn": "3.71",
+          "c2": "1.90"
+        },
+        {
+          "n": "PMU",
+          "o": "100€ offerts",
+          "l": "#LIEN_PMU",
+          "c": "1.72",
+          "c1": "3.69",
+          "cn": "3.68",
+          "c2": "1.87"
+        },
+        {
+          "n": "Bet365",
+          "o": "100€ bonus",
+          "l": "#LIEN_BET365",
+          "c": "1.80",
+          "c1": "3.77",
+          "cn": "3.76",
+          "c2": "1.95"
+        }
+      ],
+      "edge": "+6pts (prob modèle 61% vs seuil 55%)",
+      "marche": "Under 2.5",
+      "risque": "MODERE",
+      "pari_rec": "Under 2.5 buts",
+      "cote_rec": "1.77",
+      "no_signal": false,
+      "no_signal_label": "",
+      "mise": "2-3% bankroll",
+      "verdict_shark": "Le modèle projette seulement 2.24 buts cumulés (lambda 0.98 + 1.26) avec 61% de probabilité Under 2.5, soit un edge net de +6pts au-dessus du seuil requis.",
+      "scenario": {
+        "phase1": "0-30min — Le Mexique installe sa domination territoriale à l'Azteca avec pression haute, la Tchéquie bloc bas 4-4-2 et concède le ballon. Peu de situations franches, match fermé et tactique.",
+        "phase2": "30-60min — Le Mexique intensifie sans débloquer, la Tchéquie cherche la transition rapide. Un but mexicain sur phase arrêtée ou contre est le scénario le plus probable. Score attendu 0-1 ou 1-1 à la mi-temps.",
+        "phase3": "60-90min — Avec l'enjeu maintenu, les deux équipes gèrent le résultat. La Tchéquie ne dispose pas du potentiel offensif pour renverser la tendance. Match qui se clôture à 1-1 ou 0-1, restant sous la barre des 2.5 buts."
+      },
+      "scenario_15min": [
+        {
+          "t": "0-15min",
+          "prob": 8,
+          "txt": "Prise de contact, Mexique en possession, Tchéquie compacte. Faible probabilité de but, les deux équipes cherchent leurs repères défensifs dans l'atmosphère Azteca."
+        },
+        {
+          "t": "15-30min",
+          "prob": 12,
+          "txt": "Mexique accélère le jeu, premières occasions sur phases arrêtées. La Tchéquie résiste mais subit, risque d'un but mexicain sur coup franc ou corner."
+        },
+        {
+          "t": "30-45min",
+          "prob": 10,
+          "txt": "La Tchéquie tient structurellement, le Mexique manque de percussion dans la surface. Possible contre tchèque sur erreur mexicaine en fin de première période."
+        },
+        {
+          "t": "45-60min",
+          "prob": 15,
+          "txt": "Retour des vestiaires avec intensité rehaussée, Mexique sort avec ambition. Période la plus dangereuse pour encaisser un but, Lambda Mexico concentré sur cette phase."
+        },
+        {
+          "t": "60-75min",
+          "prob": 18,
+          "txt": "Si le score est vierge ou 0-1, le Mexique pousse massivement. La Tchéquie fatigue légèrement, risque de but mais aussi de contre. Phase clé pour l'Under 2.5."
+        },
+        {
+          "t": "75-90min",
+          "prob": 20,
+          "txt": "Phase finale, gestion du score probable si Mexico mène. Si match nul, les deux équipes jouent prudemment pour ne pas prendre le but perdant. Under 2.5 se consolide dans ce scénario de gestion."
+        }
+      ],
+      "facteur_x": "xG offensif Mexique à 1.00 uniquement (source tournoi seul) — lambda 1.26 calculé mais attaque mexicaine historiquement frugale sur ces données, combiné au malus altitude -8% déjà intégré pour la Tchéquie.",
+      "analyse_card": "La Tchéquie affiche un xG concédé de 1.52 mais son attaque est limitée à 1.46 xG générés avec une valeur offensive de 38M€ seulement. Le Mexique, bien que favori (Force 48.6), présente un xG offensif très modeste de 1.00 généré sur données tournoi seul, ce qui fragilise la probabilité d'un match ouvert. Le lambda Poisson combiné de 2.24 buts indique structurellement un match fermé, renforcé par le profil défensif mexicain (xG concédé 0.49).",
+      "conseil_public": "Jouer Under 2.5 à 1.77 — la projection Poisson à 2.24 buts et la solidité défensive mexicaine (xG concédé 0.49) soutiennent ce marché au-dessus du seuil de fiabilité.",
+      "contexte": "Phase de groupes Coupe du Monde 2026 — Journée non précisée mais aucune qualification confirmée pour les deux équipes, ce qui maintient l'enjeu compétitif pour les deux côtés. Mexique à domicile symbolique (Azteca) avec soutien populaire massif, ce qui favorise un jeu prudent et contrôlé de la Tchéquie.",
+      "vbet": "OUI",
+      "scores": [
+        "1-1"
+      ],
+      "paris_safe": {
+        "bet": "Under 2.5 buts",
+        "cote": 1.77,
+        "proba": "33%"
+      },
+      "paris_risque": {
+        "bet": "",
+        "cote": "",
+        "proba": ""
+      },
+      "kelly": "5.0",
+      "stade": {
+        "nom": "Estadio Azteca — Mexico City",
+        "cap": "",
+        "meteo": "🌧️",
+        "temp": "15°C",
+        "desc": "légère pluie"
+      },
+      "crit_home": {
+        "fd": 0,
+        "att": 40,
+        "def": 35,
+        "fr": 17,
+        "mot": 70,
+        "fat": 50
+      },
+      "crit_away": {
+        "fd": 0,
+        "att": 60,
+        "def": 88,
+        "fr": 100,
+        "mot": 70,
+        "fat": 50
+      },
+      "form_home": [
+        {
+          "d": "2026-06-18",
+          "opponent": "South Africa",
+          "score": "1-1",
+          "result": "D",
+          "home": true,
+          "match": "South Africa",
+          "lieu": "DOM",
+          "date_full": "2026-06-18T16:00:00+00:00"
+        },
+        {
+          "d": "2026-06-12",
+          "opponent": "South Korea",
+          "score": "1-2",
+          "result": "L",
+          "home": false,
+          "match": "South Korea",
+          "lieu": "EXT",
+          "date_full": "2026-06-12T02:00:00+00:00"
+        },
+        {
+          "d": "2026-06-05",
+          "opponent": "Guatemala",
+          "score": "3-1",
+          "result": "W",
+          "home": true,
+          "match": "Guatemala",
+          "lieu": "DOM",
+          "date_full": "2026-06-05T00:00:00+00:00"
+        },
+        {
+          "d": "2026-05-31",
+          "opponent": "Kosovo",
+          "score": "2-1",
+          "result": "W",
+          "home": true,
+          "match": "Kosovo",
+          "lieu": "DOM",
+          "date_full": "2026-05-31T14:00:00+00:00"
+        }
+      ],
+      "form_away": [
+        {
+          "d": "2026-06-19",
+          "opponent": "South Korea",
+          "score": "1-0",
+          "result": "W",
+          "home": true,
+          "match": "South Korea",
+          "lieu": "DOM",
+          "date_full": "2026-06-19T01:00:00+00:00"
+        },
+        {
+          "d": "2026-06-11",
+          "opponent": "South Africa",
+          "score": "2-0",
+          "result": "W",
+          "home": true,
+          "match": "South Africa",
+          "lieu": "DOM",
+          "date_full": "2026-06-11T19:00:00+00:00"
+        },
+        {
+          "d": "2026-06-05",
+          "opponent": "Serbia",
+          "score": "5-1",
+          "result": "W",
+          "home": true,
+          "match": "Serbia",
+          "lieu": "DOM",
+          "date_full": "2026-06-05T02:00:00+00:00"
+        },
+        {
+          "d": "2026-05-31",
+          "opponent": "Australia",
+          "score": "1-0",
+          "result": "W",
+          "home": true,
+          "match": "Australia",
+          "lieu": "DOM",
+          "date_full": "2026-05-31T02:00:00+00:00"
+        },
+        {
+          "d": "2026-05-23",
+          "opponent": "Ghana",
+          "score": "2-0",
+          "result": "W",
+          "home": true,
+          "match": "Ghana",
+          "lieu": "DOM",
+          "date_full": "2026-05-23T02:00:00+00:00"
+        }
+      ],
+      "forme_h": "LD",
+      "forme_a": "WW",
+      "h2h": [],
+      "injuries": [],
+      "fatigue": {
+        "home": {
+          "val": 50,
+          "info": "Dernier match il y a 5j — 2 match(s) en 14j"
+        },
+        "away": {
+          "val": 70,
+          "info": "Dernier match il y a 4j — 2 match(s) en 14j"
+        }
+      },
+      "fatigue_home": {
+        "val": 50,
+        "info": "Dernier match il y a 5j — 2 match(s) en 14j"
+      },
+      "fatigue_away": {
+        "val": 70,
+        "info": "Dernier match il y a 4j — 2 match(s) en 14j"
+      },
+      "tendances": {
+        "over25_home": 2,
+        "over25_away": 0,
+        "over25_home_n": 3,
+        "over25_away_n": 2,
+        "btts_home": 3,
+        "btts_away": 0,
+        "btts_home_n": 3,
+        "btts_away_n": 2
+      },
+      "classement": null,
+      "actu": [
+        {
+          "c": "Czechia",
+          "t": "Making a vintage LLM from scratch",
+          "tx": "Comments",
+          "tm": "2026-06-11"
+        },
+        {
+          "c": "Mexico",
+          "t": "Les Diables rouges et la guerre des hymnes : \"Les Belges m'ont surpris. Normalement, vous ne faites pas les conneries à la française\"",
+          "tx": "Positifs, colorés et parfois comiques, on compte plus de 13 hymnes non officiels, dont deux sons réalisés par nos Diables en personne. Mais un seul – décrié – est reconnu officiellement par l’Union belge de football. ...",
+          "tm": "2026-06-21"
+        },
+        {
+          "c": "Mexico",
+          "t": "Coupe du monde 2026 – Cielito Lindo, l’autre hymne du Mondial",
+          "tx": "La chanson préférée des mariachis est reprise en boucle par les supporters mexicains.",
+          "tm": "2026-06-21"
+        }
+      ],
+      "arbitre": null,
+      "events_home": null,
+      "events_away": null,
+      "match_stats_home": null,
+      "match_stats_away": null,
+      "top_scorers_home": [],
+      "top_scorers_away": [],
+      "elo_home": null,
+      "elo_away": null,
+      "elo_diff": null,
+      "elo_signal": null,
+      "dropping_odds": null,
+      "pinnacle_snapshot": null
+    },
+    {
+      "id": 1489407,
+      "sport": "football",
+      "home": {
+        "n": "South Africa",
+        "id": 1531
+      },
+      "away": {
+        "n": "South Korea",
+        "id": 17
+      },
+      "league": "World Cup",
+      "ligue_icon": "🏆",
+      "league_key": "wc",
+      "date": "2026-06-25 03:00",
+      "cat": [
+        "all"
+      ],
+      "val": false,
+      "hot": false,
+      "conf": 0.62,
+      "p1": 29,
+      "pn": 39,
+      "p2": 53,
+      "lambda_h": 0.468,
+      "lambda_a": 0.82,
+      "wc_probs": {
+        "p1": 29,
+        "pN": 18,
+        "p2": 53,
+        "scoreH": {
+          "total": 27.4,
+          "details": {
+            "fifa_pts": 1487,
+            "fifa_norm": 41,
+            "valeur_m": 45,
+            "valeur_norm": 13,
+            "top5_pct": 20,
+            "xg_for": 1.2,
+            "xg_against": 0.89,
+            "xg_diff": 0.31,
+            "xg_norm": 58,
+            "wc_exp": 5,
+            "exp_norm": 25
+          }
+        },
+        "scoreA": {
+          "total": 48.9,
+          "details": {
+            "fifa_pts": 1619,
+            "fifa_norm": 60,
+            "valeur_m": 210,
+            "valeur_norm": 38,
+            "top5_pct": 42,
+            "xg_for": 1.8,
+            "xg_against": 0.68,
+            "xg_diff": 1.12,
+            "xg_norm": 78,
+            "wc_exp": 13,
+            "exp_norm": 65
+          }
+        },
+        "fatigueH": 0,
+        "fatigueA": 0,
+        "altMalusH": 8,
+        "altMalusA": 8
+      },
+      "wc_markets": {
+        "off_combined": 3,
+        "def_avg": 0.79,
+        "lambda_h": 0.94,
+        "lambda_a": 1.35,
+        "val_att_h": 18,
+        "val_def_h": 12,
+        "val_att_a": 80,
+        "val_def_a": 50,
+        "xg_source_h": "hybride_qualif60_tournoi40",
+        "xg_source_a": "hybride_qualif60_tournoi40",
+        "prob_over25": 40,
+        "prob_under25": 60,
+        "prob_btts_oui": 45,
+        "prob_btts_non": 55,
+        "prob_dc1x": 47,
+        "prob_dcx2": 71,
+        "score_central": "0-1",
+        "po25": 40,
+        "btts": 45
+      },
+      "po15": 0,
+      "po25": 40,
+      "btts": 45,
+      "c1": "5.32",
+      "cn": "3.79",
+      "c2": "1.65",
+      "co15": "1.33",
+      "co25": "2.06",
+      "cu25": "1.77",
+      "dc1x": "2.25",
+      "dc2x": "1.15",
+      "dc12": "1.25",
+      "cdc1x": "2.25",
+      "cdc2x": "1.15",
+      "cbtts": "2.00",
+      "cbtts_non": "1.75",
+      "btts_oui": "2.00",
+      "btts_non": "1.75",
+      "bookies": [
+        {
+          "n": "Betclic",
+          "o": "200€ offerts",
+          "l": "#LIEN_BETCLIC",
+          "c": "1.77",
+          "c1": "5.32",
+          "cn": "3.79",
+          "c2": "1.65"
+        },
+        {
+          "n": "Winamax",
+          "o": "100€ offerts",
+          "l": "#LIEN_WINAMAX",
+          "c": "1.74",
+          "c1": "5.29",
+          "cn": "3.76",
+          "c2": "1.62"
+        },
+        {
+          "n": "Unibet",
+          "o": "100€ remboursés",
+          "l": "#LIEN_UNIBET",
+          "c": "1.75",
+          "c1": "5.30",
+          "cn": "3.77",
+          "c2": "1.63"
+        },
+        {
+          "n": "PMU",
+          "o": "100€ offerts",
+          "l": "#LIEN_PMU",
+          "c": "1.72",
+          "c1": "5.27",
+          "cn": "3.74",
+          "c2": "1.60"
+        },
+        {
+          "n": "Bet365",
+          "o": "100€ bonus",
+          "l": "#LIEN_BET365",
+          "c": "1.80",
+          "c1": "5.35",
+          "cn": "3.82",
+          "c2": "1.68"
+        }
+      ],
+      "edge": "+6.2% (prob modèle 60% vs prob implicite cote 56.5%)",
+      "marche": "Under 2.5",
+      "risque": "FAIBLE",
+      "pari_rec": "Under 2.5 buts",
+      "cote_rec": "1.77",
+      "no_signal": false,
+      "no_signal_label": "",
+      "mise": "2-3% bankroll",
+      "verdict_shark": "Le modèle attribue 60% de probabilité à l'Under 2.5, les lambdas Poisson combinés (0.94 + 1.35 = 2.29 buts attendus) soutenant structurellement un match sous la barre des 3 buts.",
+      "scenario": {
+        "phase1": "0-30 min : La Corée du Sud impose sa supériorité technique (FIFA 1619 vs 1487) et contrôle le rythme du jeu en phase de construction. L'Afrique du Sud cherche à verrouiller l'espace défensivement, le score reste probablement vierge ou 0-1 à la demi-heure.",
+        "phase2": "30-65 min : La Corée du Sud concrétise son avantage avec un ou deux occasions franches via son xG offensif de 1.8. L'Afrique du Sud, limitée offensivement (xG 1.2), peine à créer du danger structurel. Le score oscille entre 0-1 et 1-1 avec peu d'échanges ouverts.",
+        "phase3": "65-90 min : Les équipes gèrent le résultat — la Corée du Sud défend son avantage, l'Afrique du Sud tente de réagir mais sans moyens suffisants. Le match se ferme en fin de partie, le total de buts reste sous 2.5 dans 60% des scénarios modélisés."
+      },
+      "scenario_15min": [
+        {
+          "t": "0-15min",
+          "prob": 8,
+          "txt": "Phase d'observation tactique — les deux équipes sans fatigue (0km, 3j récup) entrent prudemment. Très faible probabilité de but dans cette fenêtre, les blocs défensifs sont en place dès le coup d'envoi."
+        },
+        {
+          "t": "15-30min",
+          "prob": 12,
+          "txt": "La Corée du Sud commence à fixer son emprise via la possession (42% joueurs Top5). Premières occasions coréennes possibles sur transition rapide. L'Afrique du Sud tente de contenir sans s'exposer."
+        },
+        {
+          "t": "30-45min",
+          "prob": 10,
+          "txt": "Fin de première mi-temps — les équipes stabilisent leur système. Le match reste compact défensivement. Probabilité d'un but sud-africain quasi nulle dans cette fenêtre, léger risque coréen sur coup de pied arrêté."
+        },
+        {
+          "t": "45-60min",
+          "prob": 15,
+          "txt": "Reprise — la Corée du Sud pousse pour marquer ou consolider. C'est la fenêtre la plus probable pour le premier but du match si le score est encore vierge. L'Afrique du Sud est plus exposée en début de deuxième mi-temps."
+        },
+        {
+          "t": "60-75min",
+          "prob": 18,
+          "txt": "Phase de gestion ou de réaction — si la Corée mène 1-0, elle gère ; si le score est nul, c'est la fenêtre de pression maximale coréenne. L'Afrique du Sud peut trouver un but sur contre-attaque isolée, mais sans fiabilité offensive (xG 1.2)."
+        },
+        {
+          "t": "75-90min",
+          "prob": 20,
+          "txt": "Fin de match — pic probabiliste lié aux derniers assauts offensifs ou aux erreurs défensives en fin de rencontre. Cependant, le total de buts reste contenu : la probabilité cumulée d'atteindre 3 buts demeure inférieure à 40% selon le modèle Poisson."
+        }
+      ],
+      "facteur_x": "Lambda Poisson combiné de 2.29 buts attendus, soit un écart de -0.21 sous le seuil Under 2.5 — signal quantitatif central validant la probabilité modèle à 60%.",
+      "analyse_card": "La Corée du Sud présente un xG défensif de seulement 0.68 but concédé en moyenne, ce qui compresse mécaniquement le potentiel offensif sud-africain (xG généré 1.2, valeur attaque 18M€). L'Afrique du Sud, avec un lambda Poisson à 0.94 but attendu, dispose d'un arsenal offensif limité face à une arrière-garde coréenne solide (valeur défense 50M€, Top5 42%). Le total de buts attendus à 2.29 reste clairement sous le seuil de 2.5, validant la lecture défensive du match.",
+      "conseil_public": "Jouer l'Under 2.5 à 1.77 avec une mise Kelly réduite de 3% du bankroll compte tenu de l'edge modéré et de l'absence de validation Pinnacle.",
+      "contexte": "Match de phase de groupes Coupe du Monde 2026 — les deux équipes n'ont pas encore de statut qualifié confirmé à ce stade, maintenant une intensité compétitive standard. L'enjeu de qualification préserve la motivation des deux sélections, ce qui réduit le risque de match plié ou sans intensité défensive.",
+      "vbet": "OUI",
+      "scores": [
+        "1-1"
+      ],
+      "paris_safe": {
+        "bet": "Under 2.5 buts",
+        "cote": 1.77,
+        "proba": "29%"
+      },
+      "paris_risque": {
+        "bet": "",
+        "cote": "",
+        "proba": ""
+      },
+      "kelly": "5.0",
+      "stade": {
+        "nom": "Estadio BBVA — Monterrey",
+        "cap": "",
+        "meteo": "☀️",
+        "temp": "25°C",
+        "desc": "ciel dégagé"
+      },
+      "crit_home": {
+        "fd": 0,
+        "att": 20,
+        "def": 35,
+        "fr": 17,
+        "mot": 70,
+        "fat": 50
+      },
+      "crit_away": {
+        "fd": 0,
+        "att": 40,
+        "def": 53,
+        "fr": 50,
+        "mot": 70,
+        "fat": 50
+      },
+      "form_home": [
+        {
+          "d": "2026-06-18",
+          "opponent": "Czechia",
+          "score": "1-1",
+          "result": "D",
+          "home": false,
+          "match": "Czechia",
+          "lieu": "EXT",
+          "date_full": "2026-06-18T16:00:00+00:00"
+        },
+        {
+          "d": "2026-06-11",
+          "opponent": "Mexico",
+          "score": "0-2",
+          "result": "L",
+          "home": false,
+          "match": "Mexico",
+          "lieu": "EXT",
+          "date_full": "2026-06-11T19:00:00+00:00"
+        },
+        {
+          "d": "2026-06-06",
+          "opponent": "Jamaica",
+          "score": "1-1",
+          "result": "D",
+          "home": false,
+          "match": "Jamaica",
+          "lieu": "EXT",
+          "date_full": "2026-06-06T21:00:00+00:00"
+        },
+        {
+          "d": "2026-05-29",
+          "opponent": "Nicaragua",
+          "score": "0-0",
+          "result": "D",
+          "home": true,
+          "match": "Nicaragua",
+          "lieu": "DOM",
+          "date_full": "2026-05-29T16:00:00+00:00"
+        },
+        {
+          "d": "2026-03-31",
+          "opponent": "Panama",
+          "score": "1-2",
+          "result": "L",
+          "home": true,
+          "match": "Panama",
+          "lieu": "DOM",
+          "date_full": "2026-03-31T17:30:00+00:00"
+        }
+      ],
+      "form_away": [
+        {
+          "d": "2026-06-19",
+          "opponent": "Mexico",
+          "score": "0-1",
+          "result": "L",
+          "home": false,
+          "match": "Mexico",
+          "lieu": "EXT",
+          "date_full": "2026-06-19T01:00:00+00:00"
+        },
+        {
+          "d": "2026-06-12",
+          "opponent": "Czechia",
+          "score": "2-1",
+          "result": "W",
+          "home": true,
+          "match": "Czechia",
+          "lieu": "DOM",
+          "date_full": "2026-06-12T02:00:00+00:00"
+        },
+        {
+          "d": "2026-06-04",
+          "opponent": "El Salvador",
+          "score": "1-0",
+          "result": "W",
+          "home": true,
+          "match": "El Salvador",
+          "lieu": "DOM",
+          "date_full": "2026-06-04T01:00:00+00:00"
+        },
+        {
+          "d": "2026-05-31",
+          "opponent": "Trinidad and Tobago",
+          "score": "5-0",
+          "result": "W",
+          "home": true,
+          "match": "Trinidad and Tobago",
+          "lieu": "DOM",
+          "date_full": "2026-05-31T01:00:00+00:00"
+        },
+        {
+          "d": "2026-03-31",
+          "opponent": "Austria",
+          "score": "0-1",
+          "result": "L",
+          "home": false,
+          "match": "Austria",
+          "lieu": "EXT",
+          "date_full": "2026-03-31T18:45:00+00:00"
+        }
+      ],
+      "forme_h": "LD",
+      "forme_a": "WL",
+      "h2h": [],
+      "injuries": [],
+      "fatigue": {
+        "home": {
+          "val": 50,
+          "info": "Dernier match il y a 5j — 2 match(s) en 14j"
+        },
+        "away": {
+          "val": 70,
+          "info": "Dernier match il y a 4j — 2 match(s) en 14j"
+        }
+      },
+      "fatigue_home": {
+        "val": 50,
+        "info": "Dernier match il y a 5j — 2 match(s) en 14j"
+      },
+      "fatigue_away": {
+        "val": 70,
+        "info": "Dernier match il y a 4j — 2 match(s) en 14j"
+      },
+      "tendances": {
+        "over25_home": 1,
+        "over25_away": 4,
+        "over25_home_n": 3,
+        "over25_away_n": 9,
+        "btts_home": 2,
+        "btts_away": 3,
+        "btts_home_n": 3,
+        "btts_away_n": 9
+      },
+      "classement": null,
+      "actu": [
+        {
+          "c": "South Africa",
+          "t": ":: « Aucun Africain n'est illégal en Afrique » : le coup de gueule de Thuthukile Zuma",
+          "tx": "Le 12 juin 2026, Thuthukile Zuma, fille de l&#039;ancien président\nsud-africain Jacob Zuma, a déclenché un tollé en affirmant qu&#039;«\naucun Africain n&#039;est illégal en Af...",
+          "tm": "2026-06-18"
+        },
+        {
+          "c": "South Africa",
+          "t": "This isn't just a race against Elon. It's a war. A race war [Obvious]",
+          "tx": "<table> <tr><td> </td><td> [link] [4 comments] </td></tr></table>",
+          "tm": "2026-06-17"
+        },
+        {
+          "c": "South Korea",
+          "t": "South Korea is the new weapons dealer for the world [Followup]",
+          "tx": "<table> <tr><td> </td><td> [link] [2 comments] </td></tr></table>",
+          "tm": "2026-06-20"
+        },
+        {
+          "c": "South Korea",
+          "t": "Pour la direction de l'Église de l'Unification, liée au pouvoir japonais, « le système impérial du Japon doit naturellement être aboli » (Anglais)",
+          "tx": "-\nPolitique\n\n/ \nCorée du Sud, \nAnglais, \nPolitique, \nReligions",
+          "tm": "2026-06-01"
+        }
+      ],
+      "arbitre": null,
+      "events_home": null,
+      "events_away": null,
+      "match_stats_home": null,
+      "match_stats_away": null,
+      "top_scorers_home": [],
+      "top_scorers_away": [],
+      "elo_home": null,
+      "elo_away": null,
+      "elo_diff": null,
+      "elo_signal": null,
+      "dropping_odds": null,
+      "pinnacle_snapshot": null
+    },
+    {
+      "id": 1489410,
+      "sport": "football",
+      "home": {
+        "n": "Ecuador",
+        "id": 2382
+      },
+      "away": {
+        "n": "Germany",
+        "id": 25
+      },
+      "league": "World Cup",
+      "ligue_icon": "🏆",
+      "league_key": "wc",
+      "date": "2026-06-25 22:00",
+      "cat": [
+        "all"
+      ],
+      "val": false,
+      "hot": false,
+      "conf": 0,
+      "p1": 26,
+      "pn": 27,
+      "p2": 56,
+      "lambda_h": 0.948,
+      "lambda_a": 1.4,
+      "wc_probs": {
+        "p1": 26,
+        "pN": 18,
+        "p2": 56,
+        "scoreH": {
+          "total": 37.8,
+          "details": {
+            "fifa_pts": 1601,
+            "fifa_norm": 57,
+            "valeur_m": 120,
+            "valeur_norm": 25,
+            "top5_pct": 25,
+            "xg_for": 1.45,
+            "xg_against": 0.67,
+            "xg_diff": 0.78,
+            "xg_norm": 70,
+            "wc_exp": 8,
+            "exp_norm": 40
+          }
+        },
+        "scoreA": {
+          "total": 80.7,
+          "details": {
+            "fifa_pts": 1729,
+            "fifa_norm": 76,
+            "valeur_m": 870,
+            "valeur_norm": 100,
+            "top5_pct": 82,
+            "xg_for": 2.68,
+            "xg_against": 0.67,
+            "xg_diff": 2.01,
+            "xg_norm": 100,
+            "wc_exp": 16,
+            "exp_norm": 80
+          }
+        },
+        "fatigueH": 0,
+        "fatigueA": 0,
+        "altMalusH": 0,
+        "altMalusA": 0
+      },
+      "wc_markets": {
+        "off_combined": 4.13,
+        "def_avg": 0.67,
+        "lambda_h": 1.06,
+        "lambda_a": 1.68,
+        "val_att_h": 50,
+        "val_def_h": 25,
+        "val_att_a": 320,
+        "val_def_a": 200,
+        "xg_source_h": "hybride_qualif60_tournoi40",
+        "xg_source_a": "hybride_qualif60_tournoi40",
+        "prob_over25": 51,
+        "prob_under25": 49,
+        "prob_btts_oui": 53,
+        "prob_btts_non": 47,
+        "prob_dc1x": 44,
+        "prob_dcx2": 74,
+        "score_central": "1-1",
+        "po25": 51,
+        "btts": 53
+      },
+      "po15": 0,
+      "po25": 51,
+      "btts": 53,
+      "c1": "3.63",
+      "cn": "3.88",
+      "c2": "1.92",
+      "co15": "1.25",
+      "co25": "1.80",
+      "cu25": "2.02",
+      "dc1x": "1.85",
+      "dc2x": "1.28",
+      "dc12": "1.24",
+      "cdc1x": "1.85",
+      "cdc2x": "1.28",
+      "cbtts": "1.67",
+      "cbtts_non": "2.10",
+      "btts_oui": "1.67",
+      "btts_non": "2.10",
+      "bookies": [
+        {
+          "n": "Betclic",
+          "o": "200€ offerts",
+          "l": "#LIEN_BETCLIC",
+          "c": "3.63",
+          "c1": "3.63",
+          "cn": "3.88",
+          "c2": "1.92"
+        },
+        {
+          "n": "Winamax",
+          "o": "100€ offerts",
+          "l": "#LIEN_WINAMAX",
+          "c": "3.60",
+          "c1": "3.60",
+          "cn": "3.85",
+          "c2": "1.89"
+        },
+        {
+          "n": "Unibet",
+          "o": "100€ remboursés",
+          "l": "#LIEN_UNIBET",
+          "c": "3.61",
+          "c1": "3.61",
+          "cn": "3.86",
+          "c2": "1.90"
+        },
+        {
+          "n": "PMU",
+          "o": "100€ offerts",
+          "l": "#LIEN_PMU",
+          "c": "3.58",
+          "c1": "3.58",
+          "cn": "3.83",
+          "c2": "1.87"
+        },
+        {
+          "n": "Bet365",
+          "o": "100€ bonus",
+          "l": "#LIEN_BET365",
+          "c": "3.66",
+          "c1": "3.66",
+          "cn": "3.91",
+          "c2": "1.95"
+        }
+      ],
+      "edge": "",
+      "marche": "RESULTAT",
+      "risque": "ELEVE",
+      "pari_rec": "",
+      "cote_rec": "",
+      "no_signal": true,
+      "no_signal_label": "Rien d'exploitable ici — on attend mieux.",
+      "mise": "2-3% bankroll",
+      "verdict_shark": "",
+      "scenario": {
+        "phase1": "0-30 min : L'Allemagne installe sa domination territoriale avec un pressing haut, l'Équateur défend en bloc bas à 5-4-1. Peu d'occasions franches, possession allemande >65%, lambda faible sur ce segment.",
+        "phase2": "30-70 min : L'Allemagne accélère et crée les premières situations nettes (xG cumulé ~1.2). L'Équateur menace sur transition rapide via son ailier rapide — le but allemand le plus probable tombe dans cette fenêtre.",
+        "phase3": "70-90 min : Gestion du résultat si l'Allemagne mène, ou poussée finale. L'Équateur tente de sauver l'honneur sur coup de pied arrêté. Second but allemand possible, BTTS très incertain."
+      },
+      "scenario_15min": [
+        {
+          "t": "0-15min",
+          "prob": 8,
+          "txt": "Domination allemande d'entrée, pressing intense, mais l'Équateur ferme les espaces — faible probabilité de but sur cette fenêtre malgré l'initiative allemande."
+        },
+        {
+          "t": "15-30min",
+          "prob": 12,
+          "txt": "L'Allemagne commence à trouver des brèches sur le côté gauche équatorien, premières frappes cadrées. L'Équateur contre via Enner Valencia ou équivalent — tension montante."
+        },
+        {
+          "t": "30-45min",
+          "prob": 10,
+          "txt": "Phase de stabilisation, les deux équipes rentrent dans un schéma plus positionnel. Risque de coup de pied arrêté décisif. Premier but allemand plausible avant la mi-temps."
+        },
+        {
+          "t": "45-60min",
+          "prob": 15,
+          "txt": "Retour des vestiaires avec ajustement tactique allemand probable. Accélération du rythme, l'Allemagne pousse pour le second but — fenêtre la plus dangereuse pour l'Équateur défensivement."
+        },
+        {
+          "t": "60-75min",
+          "prob": 18,
+          "txt": "Phase de domination maximale allemande, entrants offensifs possibles. L'Équateur perd en intensité physique, les espaces s'ouvrent — probabilité de but cumulé la plus haute sur ce segment."
+        },
+        {
+          "t": "75-90min",
+          "prob": 20,
+          "txt": "Fin de match : si l'Allemagne mène de 2 buts elle gère, sinon elle pousse encore. L'Équateur tente un but de prestige sur coup franc ou corner — segment avec le plus de buts en fin de match sur ce profil de rencontre."
+        }
+      ],
+      "facteur_x": "Le xG défensif concédé identique des deux équipes (0.67) crée une anomalie statistique qui comprime tous les marchés de buts sous leurs seuils de fiabilité respectifs.",
+      "analyse_card": "L'Allemagne domine massivement sur le plan offensif avec un xG généré de 2.68 contre 1.45 pour l'Équateur, et une valeur d'attaque de 320M€ contre 50M€. Cependant, les deux défenses affichent le même xG concédé (0.67), ce qui comprime les probabilités de buts et génère une forte incertitude sur les marchés Over/BTTS. Lambda Poisson Équateur 1.06 / Allemagne 1.68 : profil de match à buts limités malgré le différentiel de force.",
+      "conseil_public": "Ne pas jouer ce match : le seul marché à edge positif (DC X2, 74%) est à cote 1.28, sous le seuil de 1.30 — le rapport risque/rendement ne justifie aucune mise.",
+      "contexte": "Phase de groupes Coupe du Monde 2026, journée à préciser — l'Allemagne (force 80.7/100) est largement favorite face à une Équateur (37.8/100) avec peu d'expérience internationale top-niveau (8 joueurs CM vs 16). Si l'Allemagne est déjà qualifiée à ce stade, des rotations pourraient réduire son niveau offensif de ~30%, rendant le marché encore plus incertain.",
+      "vbet": "NON",
+      "scores": [
+        "0-2"
+      ],
+      "paris_safe": {
+        "bet": "",
+        "cote": "3.63",
+        "proba": "26%"
+      },
+      "paris_risque": {
+        "bet": "",
+        "cote": "",
+        "proba": ""
+      },
+      "kelly": "3.0",
+      "stade": {
+        "nom": "MetLife Stadium — New York New Jersey",
+        "cap": "",
+        "meteo": "🌤️",
+        "temp": "",
+        "desc": ""
+      },
+      "crit_home": {
+        "fd": 0,
+        "att": 0,
+        "def": 70,
+        "fr": 17,
+        "mot": 70,
+        "fat": 50
+      },
+      "crit_away": {
+        "fd": 0,
+        "att": 100,
+        "def": 53,
+        "fr": 100,
+        "mot": 70,
+        "fat": 50
+      },
+      "form_home": [
+        {
+          "d": "2026-06-21",
+          "opponent": "Curaçao",
+          "score": "0-0",
+          "result": "D",
+          "home": true,
+          "match": "Curaçao",
+          "lieu": "DOM",
+          "date_full": "2026-06-21T00:00:00+00:00"
+        },
+        {
+          "d": "2026-06-14",
+          "opponent": "Ivory Coast",
+          "score": "0-1",
+          "result": "L",
+          "home": false,
+          "match": "Ivory Coast",
+          "lieu": "EXT",
+          "date_full": "2026-06-14T23:00:00+00:00"
+        },
+        {
+          "d": "2026-06-07",
+          "opponent": "Guatemala",
+          "score": "3-0",
+          "result": "W",
+          "home": true,
+          "match": "Guatemala",
+          "lieu": "DOM",
+          "date_full": "2026-06-07T20:00:00+00:00"
+        },
+        {
+          "d": "2026-05-31",
+          "opponent": "Saudi Arabia",
+          "score": "2-1",
+          "result": "W",
+          "home": true,
+          "match": "Saudi Arabia",
+          "lieu": "DOM",
+          "date_full": "2026-05-31T00:00:00+00:00"
+        },
+        {
+          "d": "2026-03-31",
+          "opponent": "Netherlands",
+          "score": "1-1",
+          "result": "D",
+          "home": false,
+          "match": "Netherlands",
+          "lieu": "EXT",
+          "date_full": "2026-03-31T18:45:00+00:00"
+        }
+      ],
+      "form_away": [
+        {
+          "d": "2026-06-20",
+          "opponent": "Ivory Coast",
+          "score": "2-1",
+          "result": "W",
+          "home": true,
+          "match": "Ivory Coast",
+          "lieu": "DOM",
+          "date_full": "2026-06-20T20:00:00+00:00"
+        },
+        {
+          "d": "2026-06-14",
+          "opponent": "Curaçao",
+          "score": "7-1",
+          "result": "W",
+          "home": true,
+          "match": "Curaçao",
+          "lieu": "DOM",
+          "date_full": "2026-06-14T17:00:00+00:00"
+        },
+        {
+          "d": "2026-06-06",
+          "opponent": "USA",
+          "score": "2-1",
+          "result": "W",
+          "home": false,
+          "match": "USA",
+          "lieu": "EXT",
+          "date_full": "2026-06-06T18:30:00+00:00"
+        },
+        {
+          "d": "2026-05-31",
+          "opponent": "Finland",
+          "score": "4-0",
+          "result": "W",
+          "home": true,
+          "match": "Finland",
+          "lieu": "DOM",
+          "date_full": "2026-05-31T18:45:00+00:00"
+        },
+        {
+          "d": "2026-03-30",
+          "opponent": "Ghana",
+          "score": "2-1",
+          "result": "W",
+          "home": true,
+          "match": "Ghana",
+          "lieu": "DOM",
+          "date_full": "2026-03-30T18:45:00+00:00"
+        }
+      ],
+      "forme_h": "LD",
+      "forme_a": "WW",
+      "h2h": [],
+      "injuries": [],
+      "fatigue": {
+        "home": {
+          "val": 90,
+          "info": "Dernier match il y a 2j — 2 match(s) en 14j"
+        },
+        "away": {
+          "val": 70,
+          "info": "Dernier match il y a 3j — 2 match(s) en 14j"
+        }
+      },
+      "fatigue_home": {
+        "val": 90,
+        "info": "Dernier match il y a 2j — 2 match(s) en 14j"
+      },
+      "fatigue_away": {
+        "val": 70,
+        "info": "Dernier match il y a 3j — 2 match(s) en 14j"
+      },
+      "tendances": {
+        "over25_home": 4,
+        "over25_away": 2,
+        "over25_home_n": 10,
+        "over25_away_n": 2,
+        "btts_home": 2,
+        "btts_away": 2,
+        "btts_home_n": 10,
+        "btts_away_n": 2
+      },
+      "classement": null,
+      "actu": [
+        {
+          "c": "Ecuador",
+          "t": "Coupe du monde 2026 : Comment le roi du poulet et l’Independiente del Valle ont transformé l’Équateur",
+          "tx": "Willian Pacho et ses copains pourraient bien surprendre durant cette Coupe du monde.",
+          "tm": "2026-06-14"
+        },
+        {
+          "c": "Ecuador",
+          "t": "Les stars du football qui ne participeront pas à la Coupe cet été reçoivent une invitation de l'Équateur",
+          "tx": "GUAYAQUIL, Équateur, 14 juin 2026 /PRNewswire/ -- Le secrétaire au Tourisme de l'Équateur a lancé Ecuador 2026, une campagne touristique internationale qui utilise le football comme tremplin pour promouvoir le pays auprès d'un public international lors de l'u…",
+          "tm": "2026-06-14"
+        },
+        {
+          "c": "Germany",
+          "t": "Xiaomi lance une bataille juridique contre un importateur allemand",
+          "tx": "Alors que la marque chinoise prévoit son arrivée sur le marché européen en 2027, un importateur allemand pourrait lui couper l’herbe sous le pied avec des volumes qui agacent le constructeur. Xiaomi a décidé de réagir. L’importateur allemand Autohelden pense …",
+          "tm": "2026-06-19"
+        },
+        {
+          "c": "Germany",
+          "t": "Aurélien Bompard: From June 08 to June 14",
+          "tx": "",
+          "tm": "2026-06-18"
+        }
+      ],
+      "arbitre": null,
+      "events_home": null,
+      "events_away": null,
+      "match_stats_home": null,
+      "match_stats_away": null,
+      "top_scorers_home": [],
+      "top_scorers_away": [],
+      "elo_home": null,
+      "elo_away": null,
+      "elo_diff": null,
+      "elo_signal": null,
+      "dropping_odds": null,
+      "pinnacle_snapshot": null
+    },
+    {
+      "id": 1489409,
+      "sport": "football",
+      "home": {
+        "n": "Curaçao",
+        "id": 5530
+      },
+      "away": {
+        "n": "Ivory Coast",
+        "id": 1501
+      },
+      "league": "World Cup",
+      "ligue_icon": "🏆",
+      "league_key": "wc",
+      "date": "2026-06-25 22:00",
+      "cat": [
+        "all"
+      ],
+      "val": false,
+      "hot": false,
+      "conf": 0.63,
+      "p1": 16,
+      "pn": 43,
+      "p2": 66,
+      "lambda_h": 0.36,
+      "lambda_a": 0.728,
+      "wc_probs": {
+        "p1": 16,
+        "pN": 18,
+        "p2": 66,
+        "scoreH": {
+          "total": 10.8,
+          "details": {
+            "fifa_pts": 1400,
+            "fifa_norm": 29,
+            "valeur_m": 50,
+            "valeur_norm": 14,
+            "top5_pct": 30,
+            "xg_for": 0.45,
+            "xg_against": 3.53,
+            "xg_diff": -3.08,
+            "xg_norm": -27,
+            "wc_exp": 5,
+            "exp_norm": 25
+          }
+        },
+        "scoreA": {
+          "total": 45.9,
+          "details": {
+            "fifa_pts": 1408,
+            "fifa_norm": 30,
+            "valeur_m": 290,
+            "valeur_norm": 47,
+            "top5_pct": 48,
+            "xg_for": 1.6,
+            "xg_against": 0.58,
+            "xg_diff": 1.02,
+            "xg_norm": 76,
+            "wc_exp": 10,
+            "exp_norm": 50
+          }
+        },
+        "fatigueH": 0,
+        "fatigueA": 0,
+        "altMalusH": 0,
+        "altMalusA": 0
+      },
+      "wc_markets": {
+        "off_combined": 2.05,
+        "def_avg": 2.05,
+        "lambda_h": 0.52,
+        "lambda_a": 2.57,
+        "val_att_h": 50,
+        "val_def_h": 50,
+        "val_att_a": 120,
+        "val_def_a": 70,
+        "xg_source_h": "tournoi_seul",
+        "xg_source_a": "hybride_qualif60_tournoi40",
+        "prob_over25": 59,
+        "prob_under25": 41,
+        "prob_btts_oui": 37,
+        "prob_btts_non": 63,
+        "prob_dc1x": 34,
+        "prob_dcx2": 84,
+        "score_central": "0-2",
+        "po25": 59,
+        "btts": 37
+      },
+      "po15": 0,
+      "po25": 59,
+      "btts": 37,
+      "c1": "15.00",
+      "cn": "7.95",
+      "c2": "1.15",
+      "co15": "1.14",
+      "co25": "1.50",
+      "cu25": "2.50",
+      "dc1x": "5.50",
+      "dc2x": "1.02",
+      "dc12": "1.08",
+      "cdc1x": "5.50",
+      "cdc2x": "1.02",
+      "cbtts": "2.44",
+      "cbtts_non": "1.50",
+      "btts_oui": "2.44",
+      "btts_non": "1.50",
+      "bookies": [
+        {
+          "n": "Betclic",
+          "o": "200€ offerts",
+          "l": "#LIEN_BETCLIC",
+          "c": "1.50",
+          "c1": "15.00",
+          "cn": "7.95",
+          "c2": "1.15"
+        },
+        {
+          "n": "Winamax",
+          "o": "100€ offerts",
+          "l": "#LIEN_WINAMAX",
+          "c": "1.47",
+          "c1": "14.97",
+          "cn": "7.92",
+          "c2": "1.12"
+        },
+        {
+          "n": "Unibet",
+          "o": "100€ remboursés",
+          "l": "#LIEN_UNIBET",
+          "c": "1.48",
+          "c1": "14.98",
+          "cn": "7.93",
+          "c2": "1.13"
+        },
+        {
+          "n": "PMU",
+          "o": "100€ offerts",
+          "l": "#LIEN_PMU",
+          "c": "1.45",
+          "c1": "14.95",
+          "cn": "7.90",
+          "c2": "1.10"
+        },
+        {
+          "n": "Bet365",
+          "o": "100€ bonus",
+          "l": "#LIEN_BET365",
+          "c": "1.53",
+          "c1": "15.03",
+          "cn": "7.98",
+          "c2": "1.18"
+        }
+      ],
+      "edge": "63% prob modèle vs ~67% implicite cote 1.50 — edge légèrement négatif en valeur pure mais seuil fiabilité atteint (63% > 55%)",
+      "marche": "BTTS Non",
+      "risque": "FAIBLE",
+      "pari_rec": "BTTS Non",
+      "cote_rec": "1.50",
+      "no_signal": false,
+      "no_signal_label": "",
+      "mise": "2-3% bankroll",
+      "verdict_shark": "Avec un xG Curaçao de seulement 0.52 but attendu et une probabilité modèle de 63% que les deux équipes ne marquent pas, BTTS Non s'impose comme le marché le plus fiable de ce choc.",
+      "scenario": {
+        "phase1": "0-30 min : Ivory Coast domine la possession et la pression territoriale. Curaçao est compact en bloc bas et tente de limiter les espaces. Faible danger offensif côté Curaçao, les ivoiriens créent les premières occasions (2-3 xG sur la période).",
+        "phase2": "30-60 min : Ivory Coast ouvre le score et gère son avantage. Curaçao, dos au mur, tente de réagir mais son manque de qualité offensive (Lambda 0.52) rend toute égalisation très improbable. BTTS Non reste confortablement en bonne voie.",
+        "phase3": "60-90 min : Ivory Coast peut se permettre de contrôler le match avec son avance. Le risque BTTS survient uniquement sur un contre-attaque isolée, mais la probabilité reste à 63% que Curaçao termine sans marquer. Score final attendu 0-2 ou 0-1."
+      },
+      "scenario_15min": [
+        {
+          "t": "0-15min",
+          "prob": 8,
+          "txt": "Ivory Coast installe une pression immédiate. Curaçao défend en bloc compact. Faible probabilité de but dans cette phase d'observation, mais un corner ou une occasion franche côté ivoirien est attendu dès la 10e minute."
+        },
+        {
+          "t": "15-30min",
+          "prob": 12,
+          "txt": "Ivory Coast commence à trouver des espaces dans la défense de Curaçao. Première occasion franche probable vers la 22e-25e minute. Curaçao toujours sans danger réel en attaque — BTTS Non confortable."
+        },
+        {
+          "t": "30-45min",
+          "prob": 10,
+          "txt": "Phase de consolidation avant la mi-temps. Ivory Coast est proche d'ouvrir le score si ce n'est pas déjà fait. Curaçao reste sur son bloc défensif, sans construire d'attaque cohérente (xG généré < 0.15 sur la période)."
+        },
+        {
+          "t": "45-60min",
+          "prob": 15,
+          "txt": "Retour des vestiaires avec Ivory Coast en confiance. Première ou deuxième réalisation attendue dans cette fenêtre. Curaçao commence à s'ouvrir par nécessité, créant des espaces en contre pour les ivoiriens."
+        },
+        {
+          "t": "60-75min",
+          "prob": 18,
+          "txt": "Phase de gestion pour Ivory Coast. Curaçao tente désespérément de réduire l'écart mais son Lambda offensif (0.52) ne lui donne que ~15% de chance de marquer sur cette fenêtre. Le BTTS Non reste très probable."
+        },
+        {
+          "t": "75-90min",
+          "prob": 20,
+          "txt": "Fin de match — Ivory Coast gère son avantage. Curaçao épuisé, à court d'idées. Probabilité d'un but de Curaçao dans ces 15 dernières minutes estimée à ~12%. BTTS Non se confirme avec une grande probabilité sur le coup de sifflet final."
+        }
+      ],
+      "facteur_x": "Lambda offensif Curaçao = 0.52 but attendu : probabilité de marquer au moins 1 but selon Poisson = 40%, soit une probabilité de ne PAS marquer de 60% — signal central qui valide BTTS Non.",
+      "analyse_card": "Ivory Coast affiche un lambda offensif de 2.57 buts attendus contre un Curaçao très limité (xG généré 0.45 en tournoi), ce qui favorise une victoire côte ivoirienne sans réponse adverse. Curaçao concède en moyenne 3.53 xG par match mais son attaque est trop faible (0.52 lambda Poisson) pour inquiéter la défense ivoirienne. La force défensive d'Ivory Coast (xG concédé 0.58) combinée à la faiblesse offensive de Curaçao rend très probable que l'équipe NKOUDOU-GRADEL ne prenne pas de but.",
+      "conseil_public": "Jouer BTTS Non à 1.50 — la probabilité modèle de 63% dépasse le seuil requis de 55%, et le profil offensif de Curaçao est structurellement insuffisant pour marquer face à la défense ivoirienne.",
+      "contexte": "Phase de groupes Coupe du Monde 2026 ��� Ivory Coast (FIFA 1408pts, 66% de chances de victoire) a tout intérêt à s'imposer pour sécuriser sa qualification. Curaçao, en grande difficulté (Force 10.8/100), joue sa survie mais dispose d'un potentiel offensif quasi nul à ce niveau. Aucune rotation majeure signalée, les deux équipes sont fraîches (Fatigue 0/100).",
+      "vbet": "OUI",
+      "scores": [
+        "0-2"
+      ],
+      "paris_safe": {
+        "bet": "BTTS Non",
+        "cote": 1.5,
+        "proba": "16%"
+      },
+      "paris_risque": {
+        "bet": "",
+        "cote": "",
+        "proba": ""
+      },
+      "kelly": "5.0",
+      "stade": {
+        "nom": "Lincoln Financial Field — Philadelphia",
+        "cap": "",
+        "meteo": "☁️",
+        "temp": "22°C",
+        "desc": "couvert"
+      },
+      "crit_home": {
+        "fd": 0,
+        "att": 20,
+        "def": 0,
+        "fr": 17,
+        "mot": 70,
+        "fat": 50
+      },
+      "crit_away": {
+        "fd": 0,
+        "att": 40,
+        "def": 53,
+        "fr": 50,
+        "mot": 70,
+        "fat": 50
+      },
+      "form_home": [
+        {
+          "d": "2026-06-21",
+          "opponent": "Ecuador",
+          "score": "0-0",
+          "result": "D",
+          "home": false,
+          "match": "Ecuador",
+          "lieu": "EXT",
+          "date_full": "2026-06-21T00:00:00+00:00"
+        },
+        {
+          "d": "2026-06-14",
+          "opponent": "Germany",
+          "score": "1-7",
+          "result": "L",
+          "home": false,
+          "match": "Germany",
+          "lieu": "EXT",
+          "date_full": "2026-06-14T17:00:00+00:00"
+        },
+        {
+          "d": "2026-06-07",
+          "opponent": "Aruba",
+          "score": "4-0",
+          "result": "W",
+          "home": true,
+          "match": "Aruba",
+          "lieu": "DOM",
+          "date_full": "2026-06-07T00:00:00+00:00"
+        },
+        {
+          "d": "2026-05-30",
+          "opponent": "Scotland",
+          "score": "1-4",
+          "result": "L",
+          "home": false,
+          "match": "Scotland",
+          "lieu": "EXT",
+          "date_full": "2026-05-30T12:00:00+00:00"
+        },
+        {
+          "d": "2026-03-31",
+          "opponent": "Australia",
+          "score": "1-5",
+          "result": "L",
+          "home": false,
+          "match": "Australia",
+          "lieu": "EXT",
+          "date_full": "2026-03-31T09:10:00+00:00"
+        }
+      ],
+      "form_away": [
+        {
+          "d": "2026-06-20",
+          "opponent": "Germany",
+          "score": "1-2",
+          "result": "L",
+          "home": false,
+          "match": "Germany",
+          "lieu": "EXT",
+          "date_full": "2026-06-20T20:00:00+00:00"
+        },
+        {
+          "d": "2026-06-14",
+          "opponent": "Ecuador",
+          "score": "1-0",
+          "result": "W",
+          "home": true,
+          "match": "Ecuador",
+          "lieu": "DOM",
+          "date_full": "2026-06-14T23:00:00+00:00"
+        },
+        {
+          "d": "2026-06-08",
+          "opponent": "Philadelphia Union II",
+          "score": "2-0",
+          "result": "W",
+          "home": false,
+          "match": "Philadelphia Union II",
+          "lieu": "EXT",
+          "date_full": "2026-06-08T23:00:00+00:00"
+        },
+        {
+          "d": "2026-06-04",
+          "opponent": "France",
+          "score": "2-1",
+          "result": "W",
+          "home": false,
+          "match": "France",
+          "lieu": "EXT",
+          "date_full": "2026-06-04T19:10:00+00:00"
+        },
+        {
+          "d": "2026-03-31",
+          "opponent": "Scotland",
+          "score": "1-0",
+          "result": "W",
+          "home": false,
+          "match": "Scotland",
+          "lieu": "EXT",
+          "date_full": "2026-03-31T18:30:00+00:00"
+        }
+      ],
+      "forme_h": "LD",
+      "forme_a": "WL",
+      "h2h": [],
+      "injuries": [],
+      "fatigue": {
+        "home": {
+          "val": 90,
+          "info": "Dernier match il y a 2j — 2 match(s) en 14j"
+        },
+        "away": {
+          "val": 70,
+          "info": "Dernier match il y a 3j — 2 match(s) en 14j"
+        }
+      },
+      "fatigue_home": {
+        "val": 90,
+        "info": "Dernier match il y a 2j — 2 match(s) en 14j"
+      },
+      "fatigue_away": {
+        "val": 70,
+        "info": "Dernier match il y a 3j — 2 match(s) en 14j"
+      },
+      "tendances": {
+        "over25_home": 4,
+        "over25_away": 3,
+        "over25_home_n": 6,
+        "over25_away_n": 5,
+        "btts_home": 3,
+        "btts_away": 2,
+        "btts_home_n": 6,
+        "btts_away_n": 5
+      },
+      "classement": null,
+      "actu": [
+        {
+          "c": "Curaçao",
+          "t": "Coupe du monde 2026: la France qualifiée pour les 16es de finale si...",
+          "tx": "L'équipe de France peut valider son billet pour les 16es de finale de la Coupe du monde 2026 dès ce lundi (23h) contre l'Irak.",
+          "tm": "2026-06-22"
+        },
+        {
+          "c": "Curaçao",
+          "t": "Coupe du monde 2026 : Première historique pour les Pharaons de Salah, nouvel exploit du Cap-Vert… Le récap de la nuit",
+          "tx": "Comme le football ne s’arrête pas la nuit durant ce Mondial, « 20 Minutes » fait le point ce lundi matin sur tout ce que vous avez manqué. Avec notamment la première victoire de l’Egypte dans un mondial et un gardien iranien en feu",
+          "tm": "2026-06-22"
+        },
+        {
+          "c": "Ivory Coast",
+          "t": "Your Premier League club's summer transfer plans",
+          "tx": "",
+          "tm": "2026-06-15"
+        },
+        {
+          "c": "Ivory Coast",
+          "t": "PREVIEW | France vs Ivory Coast: team news, lineups, predictions (National Friendlies 04/06)",
+          "tx": "UnavailableFrançaCosta do MarfimLast starting XIsFrance ( vs Colombia 2026-03-29): Brice Samba, Pierre Kalulu, Maxence Lacroix, Lucas Hernández, Lucas Digne, N’Golo Kanté, Warren Zaïre-Emery, Ma...",
+          "tm": "2026-06-02"
+        }
+      ],
+      "arbitre": null,
+      "events_home": null,
+      "events_away": null,
+      "match_stats_home": null,
+      "match_stats_away": null,
+      "top_scorers_home": [],
+      "top_scorers_away": [],
+      "elo_home": null,
+      "elo_away": null,
+      "elo_diff": null,
+      "elo_signal": null,
+      "dropping_odds": null,
+      "pinnacle_snapshot": null
     }
   ],
   "combis": [],
   "global_stats": {
-    "winrate": 62.1,
-    "roi": 35.1,
-    "total": 29,
-    "streak": -2,
+    "winrate": 58.1,
+    "roi": 26.4,
+    "total": 31,
+    "streak": -4,
     "wins": 18,
-    "losses": 11
+    "losses": 13
   }
 }

@@ -1,6 +1,121 @@
 {
   "predictions": [
     {
+      "match": "South Africa vs Canada",
+      "home": "South Africa",
+      "away": "Canada",
+      "prediction": null,
+      "prediction_fr": null,
+      "cote": null,
+      "conf": 0,
+      "conf_bucket": "<6",
+      "market": "autre",
+      "league": "World Cup",
+      "league_key": "wc",
+      "sport": "football",
+      "elo_diff": null,
+      "has_pinnacle": false,
+      "has_elo": false,
+      "date": "2026-06-26",
+      "no_signal": true,
+      "result": "no_signal",
+      "fixture_id": 1561329,
+      "type": "single",
+      "score": null
+    },
+    {
+      "match": "Jordan vs Argentina",
+      "home": "Jordan",
+      "away": "Argentina",
+      "prediction": "Under 2.5 buts",
+      "prediction_fr": "Moins de 2,5 buts buts",
+      "cote": 2.37,
+      "conf": 0.57,
+      "conf_bucket": "<6",
+      "market": "autre",
+      "league": "World Cup",
+      "league_key": "wc",
+      "sport": "football",
+      "elo_diff": null,
+      "has_pinnacle": false,
+      "has_elo": false,
+      "date": "2026-06-26",
+      "no_signal": false,
+      "result": "scheduled",
+      "fixture_id": 1489421,
+      "type": "single",
+      "score": null
+    },
+    {
+      "match": "Algeria vs Austria",
+      "home": "Algeria",
+      "away": "Austria",
+      "prediction": "BTTS Oui",
+      "prediction_fr": "Les deux équipes marquent",
+      "cote": 2.05,
+      "conf": 0.59,
+      "conf_bucket": "<6",
+      "market": "btts_oui",
+      "league": "World Cup",
+      "league_key": "wc",
+      "sport": "football",
+      "elo_diff": null,
+      "has_pinnacle": false,
+      "has_elo": true,
+      "date": "2026-06-26",
+      "no_signal": false,
+      "result": "scheduled",
+      "fixture_id": 1489418,
+      "type": "single",
+      "score": null
+    },
+    {
+      "match": "Congo DR vs Uzbekistan",
+      "home": "Congo DR",
+      "away": "Uzbekistan",
+      "prediction": "Under 2.5 buts",
+      "prediction_fr": "Moins de 2,5 buts buts",
+      "cote": 1.92,
+      "conf": 0.69,
+      "conf_bucket": "<6",
+      "market": "autre",
+      "league": "World Cup",
+      "league_key": "wc",
+      "sport": "football",
+      "elo_diff": null,
+      "has_pinnacle": false,
+      "has_elo": false,
+      "date": "2026-06-26",
+      "no_signal": false,
+      "result": "scheduled",
+      "fixture_id": 1539013,
+      "type": "single",
+      "score": null
+    },
+    {
+      "match": "Colombia vs Portugal",
+      "home": "Colombia",
+      "away": "Portugal",
+      "prediction": "BTTS Oui",
+      "prediction_fr": "Les deux équipes marquent",
+      "cote": 1.84,
+      "conf": 0.6,
+      "conf_bucket": "<6",
+      "market": "btts_oui",
+      "league": "World Cup",
+      "league_key": "wc",
+      "sport": "football",
+      "elo_diff": null,
+      "has_pinnacle": false,
+      "has_elo": false,
+      "date": "2026-06-26",
+      "no_signal": false,
+      "result": "scheduled",
+      "fixture_id": 1489419,
+      "type": "single",
+      "score": null
+    },
+    {
       "match": "Panama vs England",
       "home": "Panama",
       "away": "England",
@@ -294,10 +409,11 @@
       "has_elo": false,
       "date": "2026-06-23",
       "no_signal": false,
-      "result": "scheduled",
+      "result": "win",
       "fixture_id": 1489409,
       "type": "single",
-      "score": null
+      "score": "0-2",
+      "resolved_date": "2026-06-26"
     },
     {
       "match": "Ecuador vs Germany",
@@ -340,10 +456,11 @@
       "has_elo": false,
       "date": "2026-06-23",
       "no_signal": false,
-      "result": "scheduled",
+      "result": "win",
       "fixture_id": 1489407,
       "type": "single",
-      "score": null
+      "score": "1-0",
+      "resolved_date": "2026-06-26"
     },
     {
       "match": "Czechia vs Mexico",
@@ -363,10 +480,11 @@
       "has_elo": false,
       "date": "2026-06-23",
       "no_signal": false,
-      "result": "scheduled",
+      "result": "loss",
       "fixture_id": 1539010,
       "type": "single",
-      "score": null
+      "score": "0-3",
+      "resolved_date": "2026-06-26"
     },
     {
       "match": "Scotland vs Brazil",
@@ -386,10 +504,11 @@
       "has_elo": false,
       "date": "2026-06-23",
       "no_signal": false,
-      "result": "scheduled",
+      "result": "loss",
       "fixture_id": 1489406,
       "type": "single",
-      "score": null
+      "score": "0-3",
+      "resolved_date": "2026-06-26"
     },
     {
       "match": "Morocco vs Haiti",
@@ -1398,21 +1517,21 @@
     }
   ],
   "stats": {
-    "winrate": 57.9,
-    "roi": 21.6,
-    "total": 38,
-    "streak": 3,
-    "wins": 22,
-    "losses": 16
+    "winrate": 57.1,
+    "roi": 17.8,
+    "total": 42,
+    "streak": 2,
+    "wins": 24,
+    "losses": 18
   },
   "monthly": [
     {
       "month": "2026-06",
       "label": "Jun 2026",
-      "wins": 22,
-      "losses": 16,
-      "total": 38,
-      "roi": 1.3
+      "wins": 24,
+      "losses": 18,
+      "total": 42,
+      "roi": 0
     }
   ],
   "backtesting": {
@@ -1442,12 +1561,20 @@
         "roi": -21
       },
       {
-        "key": "btts_non",
+        "key": "autre",
         "wins": 1,
+        "losses": 2,
+        "total": 3,
+        "winrate": 33.3,
+        "roi": -41
+      },
+      {
+        "key": "btts_non",
+        "wins": 2,
         "losses": 1,
-        "total": 2,
-        "winrate": 50,
-        "roi": -31
+        "total": 3,
+        "winrate": 66.7,
+        "roi": -4
       },
       {
         "key": "dc_x2",
@@ -1485,11 +1612,11 @@
       },
       {
         "key": "wc",
-        "wins": 3,
-        "losses": 1,
-        "total": 4,
-        "winrate": 75,
-        "roi": 27.7
+        "wins": 5,
+        "losses": 3,
+        "total": 8,
+        "winrate": 62.5,
+        "roi": 4.7
       },
       {
         "key": "laliga2",
@@ -1519,41 +1646,41 @@
       },
       {
         "key": "<6",
-        "wins": 3,
-        "losses": 6,
-        "total": 9,
-        "winrate": 33.3,
-        "roi": -45.4
+        "wins": 5,
+        "losses": 8,
+        "total": 13,
+        "winrate": 38.5,
+        "roi": -37.1
       }
     ],
     "by_sport": [
       {
         "key": "football",
-        "wins": 22,
-        "losses": 16,
-        "total": 38,
-        "winrate": 57.9,
-        "roi": 21.6
+        "wins": 24,
+        "losses": 18,
+        "total": 42,
+        "winrate": 57.1,
+        "roi": 17.8
       }
     ],
     "by_has_pinnacle": [
       {
         "key": "inconnu",
-        "wins": 22,
-        "losses": 16,
-        "total": 38,
-        "winrate": 57.9,
-        "roi": 21.6
+        "wins": 24,
+        "losses": 18,
+        "total": 42,
+        "winrate": 57.1,
+        "roi": 17.8
       }
     ],
     "by_has_elo": [
       {
         "key": "inconnu",
-        "wins": 21,
-        "losses": 16,
-        "total": 37,
-        "winrate": 56.8,
-        "roi": 20.1
+        "wins": 23,
+        "losses": 18,
+        "total": 41,
+        "winrate": 56.1,
+        "roi": 16.3
       },
       {
         "key": "true",
@@ -1564,6 +1691,6 @@
         "roi": 80
       }
     ],
-    "updated": "2026-06-25"
+    "updated": "2026-06-26"
   }
 }

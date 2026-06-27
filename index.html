@@ -343,10 +343,14 @@ function updateCounts() {
   var sportList = getSportMatchs();
   var cToday = sportList.filter(isToday).length;
   var cTomorrow = sportList.filter(isTomorrow).length;
-  document.getElementById('countToday').textContent = cToday;
-  document.getElementById('countTomorrow').textContent = cTomorrow;
-  document.getElementById('countSport').textContent = cToday;
-  document.getElementById('matchCount').innerHTML = '<span>'+(cToday+cTomorrow)+'</span> MATCHS';
+  var elToday = document.getElementById('countToday');
+  var elTomorrow = document.getElementById('countTomorrow');
+  var elSport = document.getElementById('countSport');
+  var elCount = document.getElementById('matchCount');
+  if(elToday) elToday.textContent = cToday;
+  if(elTomorrow) elTomorrow.textContent = cTomorrow;
+  if(elSport) elSport.textContent = cToday;
+  if(elCount) elCount.innerHTML = '<span>'+(cToday+cTomorrow)+'</span> MATCHS';
   if(cToday===0&&cTomorrow>0) setDayTab('tomorrow');
 }
 
@@ -563,15 +567,17 @@ function renderMatchs() {
 async function loadData(){
   try{
     var resp = await fetch('data.json?t='+Date.now());
+    if(!resp.ok) throw new Error('HTTP '+resp.status);
     var data = await resp.json();
     allMatchs = data.matchs||[];
-    // Stats chargées depuis historique.json via loadStats()
     updateCounts();
     buildLeagueBtns(getSportMatchs());
     setupFilters();
     renderMatchs();
   }catch(e){
-    document.getElementById('cardsList').innerHTML='<div class="empty-state"><h3>ERREUR CHARGEMENT</h3><p>Impossible de charger les analyses. Réessaie dans un instant.</p></div>';
+    console.error('loadData error:',e);
+    var el=document.getElementById('cardsList');
+    if(el) el.innerHTML='<div class="empty-state"><h3>ERREUR CHARGEMENT</h3><p>Impossible de charger les analyses. Réessaie dans un instant.</p></div>';
   }
   loadStats();
 }

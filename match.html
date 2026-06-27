@@ -32,9 +32,9 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 .card.hot{border-color:rgba(245,158,11,0.2);}
 .card.wc{border-color:rgba(245,158,11,0.25);}
 @keyframes up{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
-.s{padding:0 18px 13px;}
-.s.pt{padding-top:14px;}
-.sep{height:1px;background:var(--border);margin:0 18px 13px;}
+.s{padding:0 18px 18px;}
+.s.pt{padding-top:18px;}
+.sep{height:1px;background:var(--border);margin:0 18px 18px;}
 .stitle{font-family:'Space Mono',monospace;font-size:8px;color:var(--muted);letter-spacing:2px;margin-bottom:9px;display:flex;align-items:center;gap:5px;}
 .stitle::after{content:'';flex:1;height:1px;background:var(--border);}
 
@@ -188,10 +188,10 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 .mkt-edge.zero{background:rgba(255,255,255,0.02);border:1px solid var(--border);color:var(--muted);}
 
 /* FACTEUR IA */
-.facteur{background:rgba(245,158,11,0.03);border:1px solid rgba(245,158,11,0.12);border-radius:10px;padding:11px 14px;display:flex;gap:10px;align-items:flex-start;}
-.fact-icon{font-size:18px;flex-shrink:0;}
-.fact-lbl{font-family:'Space Mono',monospace;font-size:7px;color:var(--amber);letter-spacing:2px;margin-bottom:3px;}
-.fact-txt{font-size:12px;color:var(--text);line-height:1.5;}
+.facteur{background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:10px;padding:14px 16px;display:flex;gap:10px;align-items:flex-start;}
+.fact-icon{font-size:16px;flex-shrink:0;opacity:0.7;}
+.fact-lbl{font-family:'Space Mono',monospace;font-size:7px;color:var(--muted);letter-spacing:2px;margin-bottom:4px;}
+.fact-txt{font-size:12px;color:#94a3b8;line-height:1.6;}
 
 /* ── NOUVEAU : CONTEXTE DU MATCH ── */
 .ctx-text{font-size:12px;color:#94a3b8;line-height:1.7;margin-bottom:10px;}
@@ -213,9 +213,9 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 .why-txt strong{color:var(--text);font-weight:600;}
 
 /* VERDICT */
-.verdict-block{background:rgba(255,255,255,0.015);border:1px solid var(--border);border-radius:10px;padding:12px 14px;}
-.verdict-badge{font-family:'Space Mono',monospace;font-size:7px;color:var(--cyan);letter-spacing:2px;margin-bottom:6px;}
-.verdict-title{font-family:'Bebas Neue',sans-serif;font-size:16px;color:var(--text);margin-bottom:5px;line-height:1.3;}
+.verdict-block{background:rgba(255,255,255,0.015);border:1px solid var(--border);border-radius:10px;padding:14px 16px;}
+.verdict-badge{font-family:'Space Mono',monospace;font-size:7px;color:var(--muted);letter-spacing:2px;margin-bottom:6px;}
+.verdict-title{font-size:13px;color:var(--text);margin-bottom:6px;line-height:1.5;font-weight:500;}
 .verdict-body{font-size:12px;color:#94a3b8;line-height:1.65;}
 
 /* WC MODEL */
@@ -475,13 +475,13 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 <header class="hdr">
   <button class="hdr-back" onclick="history.back()">← RETOUR</button>
   <a class="logo" href="/">IA<span>SHARK</span></a>
-  <span class="hdr-pill">ANALYSE IA</span>
+  <a href="/compte.html" style="margin-left:auto;font-family:'Space Mono',monospace;font-size:8px;letter-spacing:1px;padding:5px 12px;border-radius:7px;border:1px solid rgba(34,211,238,0.25);background:rgba(34,211,238,0.06);color:var(--cyan);text-decoration:none;">CONNEXION</a>
 </header>
 <div id="root"><div class="loading"><div class="spinner"></div><div class="loading-lbl">CHARGEMENT...</div></div></div>
 <nav class="nav">
-  <div class="ni" onclick="location='/'"><div class="ni-icon">⚡</div><div class="ni-lbl">ANALYSES</div></div>
+  <div class="ni" onclick="location='/'"><div class="ni-icon">🦈</div><div class="ni-lbl">ACCUEIL</div></div>
   <div class="ni" onclick="location='/historique.html'"><div class="ni-icon">📊</div><div class="ni-lbl">HISTORIQUE</div></div>
-  <div class="ni" onclick="location='/combis.html'"><div class="ni-icon">🎰</div><div class="ni-lbl">COMBINÉS</div></div>
+  <div class="ni" onclick="location='/pro.html'"><div class="ni-icon">⭐</div><div class="ni-lbl">PRO</div></div>
   <div class="ni" onclick="location='/blog/'"><div class="ni-icon">📖</div><div class="ni-lbl">GUIDES</div></div>
   <div class="ni" onclick="location='/compte.html'"><div class="ni-icon">👤</div><div class="ni-lbl">COMPTE</div></div>
 </nav>
@@ -752,9 +752,8 @@ function buildMarketsTable(m,pariRec){
 }
 
 // ── NOUVEAU : SCORES LES PLUS PROBABLES ──────────────────────────────
-function buildScoresProbables(lambdaH,lambdaA,fallbackScores){
-  // Cas 1: on a les vrais lambdas (nouveaux matchs traités après l'ajout
-  // de lambda_h/lambda_a au pipeline) -> matrice Poisson réelle.
+function buildScoresProbables(lambdaH,lambdaA,fallbackScores,m){
+  // Cas 1 : vrais lambdas → matrice Poisson
   if(lambdaH&&lambdaA&&lambdaH>0&&lambdaA>0){
     var top=topScoresFromLambdas(lambdaH,lambdaA,5);
     var cells=top.map(function(s,i){
@@ -762,12 +761,12 @@ function buildScoresProbables(lambdaH,lambdaA,fallbackScores){
     }).join('');
     return '<div class="s"><div class="stitle">SCORES LES PLUS PROBABLES</div><div class="scores-grid">'+cells+'</div></div><div class="sep"></div>';
   }
-  // Cas 2 (fallback, matchs en cache sans lambda): on affiche uniquement
-  // le score central fourni par Claude, sans inventer de distribution de
-  // probabilités qu'on ne peut pas calculer honnêtement.
-  if(fallbackScores&&fallbackScores.length){
+  // Cas 2 : score central prédit par Claude (wc_markets ou paris_safe) — PAS le score réel du match
+  var scoreCentral = (m&&m.wc_markets&&m.wc_markets.score_central) ? m.wc_markets.score_central
+    : (m&&m.paris_safe&&m.paris_safe.bet&&/^\d-\d/.test(m.paris_safe.bet)) ? m.paris_safe.bet : null;
+  if(scoreCentral){
     return '<div class="s"><div class="stitle">SCORE LE PLUS PROBABLE</div>'
-      +'<div class="scores-grid" style="grid-template-columns:repeat(1,140px)"><div class="score-cell top"><div class="score-cell-val">'+esc(fallbackScores[0])+'</div><div class="score-cell-pct">SELON LE MODÈLE</div></div></div>'
+      +'<div class="scores-grid" style="grid-template-columns:repeat(1,140px)"><div class="score-cell top"><div class="score-cell-val">'+esc(scoreCentral)+'</div><div class="score-cell-pct">SELON LE MODÈLE</div></div></div>'
       +'</div><div class="sep"></div>';
   }
   return '';
@@ -1322,7 +1321,7 @@ function render(m){
   var tabAnalyse=
     (!isTennis?buildDonut(hn,an,m.p1||0,m.pn||0,m.p2||0):'')
     +(!isTennis?buildMarketsTable(m,pariRec):'')
-    +(!isTennis?buildScoresProbables(m.lambda_h,m.lambda_a,m.scores):'')
+    +(!isTennis?buildScoresProbables(m.lambda_h,m.lambda_a,m.scores,m):'')
     +buildWCModel(m)
     +(!isTennis?'<div class="s"><div class="stitle">ANALYSE COMPARATIVE</div>'+buildCompTable(hn,an,m.crit_home,m.crit_away)+'<div style="margin-top:10px">'+buildXgCurve(hn,an,(m.match_stats_home&&m.match_stats_home.xg)||(m.events_home&&m.events_home.goals_avg),(m.match_stats_away&&m.match_stats_away.xg)||(m.events_away&&m.events_away.goals_avg))+'</div></div><div class="sep"></div>':'')
     +(!isTennis?buildMatchStats(hn,an,m.match_stats_home,m.match_stats_away):'')

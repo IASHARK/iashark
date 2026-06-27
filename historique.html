@@ -190,7 +190,7 @@ var RESOLVED=['win','loss'];
 var DISPLAYABLE=['win','loss','neutral','no_signal'];
 
 // Un pari est PRO si conf >= 7.0 et qu'il a un vrai pari (pas no_signal)
-function isPro(p){ return !p.no_signal && parseFloat(p.conf||0)>=7.0 && p.prediction; }
+function isPro(p){ return !p.no_signal && parseFloat(p.conf||0)>=7.0 && p.prediction && (p.date||'')>='2026-06-27'; }
 
 function setTab(tab,btn){
   document.getElementById('tabParis').style.display=tab==='paris'?'block':'none';

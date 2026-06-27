@@ -153,11 +153,6 @@ body::before{content:'';position:fixed;top:-300px;left:50%;transform:translateX(
   <div class="hp-shark-big">🦈</div>
   <h1 class="hp-title">Le seul <b>expert</b> qui ne ressent rien — il calcule.</h1>
   <p class="hp-sub">Chaque match du Mondial passé au crible : <b>xG dynamiques, forme, fatigue, H2H.</b> Pas d'intuition, que de la donnée.</p>
-  <div style="position:relative;z-index:1;display:flex;justify-content:center;gap:24px;margin-bottom:18px;font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:1px;flex-wrap:wrap;">
-    <div><span id="tickerWinrate" style="color:var(--green)">—</span> winrate</div>
-    <div><span id="tickerRoi" style="color:var(--green)">—</span> ROI cumulé</div>
-  </div>
-
   <div class="sport-selector">
     <button class="sport-btn active-foot" id="btnFoot" onclick="setSport('football')">
       <span class="sport-icon">⚽</span> FOOTBALL
@@ -252,11 +247,9 @@ function renderMatchs(){var sl=getSportMatchs(),list=applyDayFilter(filterMatchs
 
 async function loadData(){try{var r=await fetch('data.json?t='+Date.now());if(!r.ok)throw new Error('HTTP '+r.status);var d=await r.json();allMatchs=d.matchs||[];updateCounts();buildLeagueBtns(getSportMatchs());setupFilters();renderMatchs();}catch(e){console.error(e);var el=document.getElementById('cardsList');if(el)el.innerHTML='<div class="empty-state"><h3>ERREUR CHARGEMENT</h3><p>Réessaie dans un instant.</p></div>';}}
 
-async function loadStats(){try{var r=await fetch('historique.json?t='+Date.now());var d=await r.json();var s=d.stats||{};var wr=document.getElementById('tickerWinrate'),roi=document.getElementById('tickerRoi');if(wr)wr.textContent=(typeof s.winrate==='number')?s.winrate.toFixed(1)+'%':'—';if(roi)roi.textContent=(typeof s.roi==='number')?(s.roi>=0?'+':'')+s.roi.toFixed(1)+'%':'—';if(roi&&typeof s.roi==='number')roi.style.color=s.roi>=0?'var(--green)':'var(--red)';if(wr&&typeof s.winrate==='number')wr.style.color=s.winrate>=55?'var(--green)':s.winrate>=45?'var(--amber)':'var(--red)';}catch(e){}}
 
 setupFilters();
 loadData();
-loadStats();
 </script>
 </body>
 </html>

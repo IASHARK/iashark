@@ -39,66 +39,93 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 .stitle{font-family:'Space Mono',monospace;font-size:8px;color:var(--muted);letter-spacing:2px;margin-bottom:9px;display:flex;align-items:center;gap:5px;}
 .stitle::after{content:'';flex:1;height:1px;background:var(--border);}
 
-/* TOPBAR */
-.topbar{background:linear-gradient(135deg,#090f1c,#0c1828);padding:12px 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);gap:8px;flex-wrap:wrap;}
-.topbar.wc-bar{background:linear-gradient(135deg,#0f0c00,#1a1200);}
-.lg-row{display:flex;align-items:center;gap:7px;}
-.lg-name{font-family:'Space Mono',monospace;font-size:8px;color:var(--muted);letter-spacing:1px;}
-.badges{display:flex;gap:5px;align-items:center;}
-.badge{font-family:'Space Mono',monospace;font-size:7px;letter-spacing:1.5px;padding:3px 9px;border-radius:20px;}
-.badge.hot{background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);color:var(--amber);}
-.badge.val{background:rgba(34,211,238,0.06);border:1px solid var(--bc);color:var(--cyan);}
-.badge.wc{background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.3);color:var(--amber);}
-.badge.time{font-size:10px;letter-spacing:0;color:var(--text);padding:0;}
-
-/* WC BANNER */
-.wc-banner{background:linear-gradient(90deg,rgba(245,158,11,0.08),rgba(245,158,11,0.03));border-bottom:1px solid rgba(245,158,11,0.15);padding:8px 18px;display:flex;align-items:center;gap:10px;}
-.wc-flag{font-size:18px;}
-.wc-info{flex:1;}
-.wc-title{font-family:'Bebas Neue',sans-serif;font-size:14px;color:var(--amber);letter-spacing:2px;}
-.wc-sub{font-family:'Space Mono',monospace;font-size:7px;color:rgba(245,158,11,0.5);margin-top:1px;}
-.wc-group{font-family:'Space Mono',monospace;font-size:9px;color:var(--amber);border:1px solid rgba(245,158,11,0.2);padding:3px 8px;border-radius:4px;}
-
-/* TEAMS */
-.teams{padding:22px 18px 16px;background:linear-gradient(180deg,#090f1c,var(--card));}
-.teams-row{display:grid;grid-template-columns:1fr 56px 1fr;align-items:center;gap:8px;margin-bottom:14px;}
+/* HERO */
+.hero{background:linear-gradient(160deg,#080f1e 0%,#060a10 70%);padding:18px 18px 0;border-bottom:1px solid var(--border);}
+.league-pill{display:inline-flex;align-items:center;gap:6px;font-family:'Space Mono',monospace;font-size:7px;letter-spacing:1px;color:var(--amber);background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);padding:4px 10px;border-radius:20px;margin-bottom:16px;}
+.teams{display:grid;grid-template-columns:1fr 52px 1fr;align-items:center;gap:8px;margin-bottom:14px;}
 .team{text-align:center;}
 .team-logo{width:48px;height:48px;border-radius:50%;object-fit:contain;background:rgba(255,255,255,0.03);margin:0 auto 7px;display:block;}
-.team-logo-ph{width:48px;height:48px;border-radius:50%;background:rgba(255,255,255,0.04);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:14px;color:var(--muted);margin:0 auto 7px;}
+.team-logo-ph{font-size:34px;margin-bottom:8px;display:block;text-align:center;}
 .team-name{font-family:'Bebas Neue',sans-serif;font-size:clamp(16px,4.5vw,26px);letter-spacing:1px;line-height:1;margin-bottom:3px;}
-.team-sub{font-family:'Space Mono',monospace;font-size:7px;color:var(--muted);letter-spacing:1px;}
+.team-sub{font-family:'Space Mono',monospace;font-size:7px;color:var(--muted);letter-spacing:1px;margin-top:3px;}
 .team-form{display:flex;justify-content:center;gap:2px;margin-top:5px;}
 .fd{width:14px;height:14px;border-radius:2px;font-size:6px;font-weight:700;display:flex;align-items:center;justify-content:center;font-family:'Space Mono',monospace;}
 .fw{background:rgba(16,185,129,0.18);color:var(--green);}
 .fn{background:rgba(245,158,11,0.1);color:var(--amber);}
 .fl{background:rgba(239,68,68,0.13);color:var(--red);}
-.team.away .team-name{color:rgba(226,232,240,0.65);}
+.team.away .team-name{color:rgba(226,232,240,0.55);}
 .vs-col{text-align:center;}
-.vs{font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--muted2);display:block;}
-.vs-hr{font-family:'Space Mono',monospace;font-size:10px;color:var(--cyan);margin-top:2px;}
-.pbar{display:flex;height:3px;border-radius:3px;overflow:hidden;margin-bottom:7px;}
+.vs{font-family:'Bebas Neue',sans-serif;font-size:16px;color:rgba(255,255,255,0.12);display:block;}
+.vs-hr{font-family:'Space Mono',monospace;font-size:12px;color:var(--cyan);margin-top:3px;}
+
+/* TOPBAR — conservé pour les badges hot/val */
+.topbar{display:none;}
+.badges{display:flex;gap:5px;align-items:center;}
+.badge{font-family:'Space Mono',monospace;font-size:7px;letter-spacing:1.5px;padding:3px 9px;border-radius:20px;}
+.badge.hot{background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);color:var(--amber);}
+.badge.val{background:rgba(34,211,238,0.06);border:1px solid var(--bc);color:var(--cyan);}
+.badge.wc{background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.3);color:var(--amber);}
+
+/* WC BANNER — masqué car intégré dans hero */
+.wc-banner{display:none;}
+
+/* PROBA */
+.proba{padding:14px 18px;border-bottom:1px solid var(--border);}
+.pbar{display:flex;height:4px;border-radius:4px;overflow:hidden;margin-bottom:10px;}
 .pb1{background:linear-gradient(90deg,var(--cyan2),var(--cyan));}
-.pbn{background:rgba(255,255,255,0.07);}
+.pbn{background:rgba(255,255,255,0.08);}
 .pb2{background:rgba(226,232,240,0.15);}
 .plabels{display:flex;justify-content:space-between;}
 .pi{text-align:center;}
-.pi-pct{font-family:'Bebas Neue',sans-serif;font-size:18px;line-height:1;}
-.pi-lbl{font-family:'Space Mono',monospace;font-size:6px;color:var(--muted);letter-spacing:1px;}
+.pi-pct{font-family:'Bebas Neue',sans-serif;font-size:22px;line-height:1;}
+.pi-lbl{font-family:'Space Mono',monospace;font-size:6px;color:var(--muted);letter-spacing:1px;margin-top:2px;}
 
 /* STADE */
-.stade-row{display:flex;align-items:center;gap:8px;margin-top:10px;padding:7px 10px;background:rgba(255,255,255,0.02);border-radius:7px;border:1px solid var(--border);}
+.stade-row{display:flex;align-items:center;gap:8px;margin:12px 18px 0;padding:7px 10px;background:rgba(255,255,255,0.02);border-radius:7px;border:1px solid var(--border);}
 .stade-icon{font-size:13px;}
 .stade-name{font-family:'Space Mono',monospace;font-size:8px;color:var(--muted);}
 .stade-meta{margin-left:auto;font-family:'Space Mono',monospace;font-size:7px;color:var(--muted2);}
 
-/* ── NOUVEAU : PARIS RECOMMANDÉ + JAUGE CIRCULAIRE + MEILLEUR MARCHÉ ── */
-.pari-main{background:linear-gradient(135deg,rgba(34,211,238,0.06),rgba(6,182,212,0.01));border:1px solid var(--bc);border-radius:13px;padding:16px;position:relative;overflow:hidden;}
+/* PARIS RECOMMANDÉ — nouveau design */
+.pari-main{background:linear-gradient(135deg,rgba(34,211,238,0.08),rgba(34,211,238,0.02));border:1px solid rgba(34,211,238,0.2);border-radius:16px;padding:18px;position:relative;overflow:hidden;margin:16px 18px;}
 .pari-main::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,var(--cyan),transparent);}
-.pm-headline{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:10px;}
-.pm-lbl{font-family:'Space Mono',monospace;font-size:7px;color:var(--cyan);letter-spacing:2px;margin-bottom:3px;}
-.pm-bet{font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--text);line-height:1;}
-.pm-cote-big{font-family:'Bebas Neue',sans-serif;font-size:38px;color:var(--cyan);line-height:1;text-align:right;flex-shrink:0;}
+.pm-headline{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;}
+.pm-lbl{font-family:'Space Mono',monospace;font-size:7px;color:var(--cyan);letter-spacing:2px;margin-bottom:5px;}
+.pm-bet{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--text);line-height:1;max-width:180px;}
+.pm-cote-big{font-family:'Bebas Neue',sans-serif;font-size:52px;color:var(--cyan);line-height:1;flex-shrink:0;}
+.pm-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:12px;}
+.pmm{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.05);border-radius:8px;padding:8px 6px;text-align:center;}
+.pmm-val{font-family:'Space Mono',monospace;font-size:13px;font-weight:700;}
+.pmm-val.cy{color:var(--cyan);}
+.pmm-val.gr{color:var(--green);}
+.pmm-lbl{font-family:'Space Mono',monospace;font-size:6px;color:var(--muted);margin-top:3px;letter-spacing:0.5px;}
+.pm-conf{display:flex;align-items:center;gap:8px;}
+.pm-conf-lbl{font-family:'Space Mono',monospace;font-size:7px;color:var(--muted);white-space:nowrap;}
+.pm-conf-bar{flex:1;height:3px;background:rgba(255,255,255,0.06);border-radius:3px;overflow:hidden;}
+.pm-conf-fill{height:100%;background:var(--amber);border-radius:3px;}
+.pm-conf-val{font-family:'Space Mono',monospace;font-size:7px;color:var(--amber);white-space:nowrap;}
+.pm-warn{margin-top:8px;font-family:'Space Mono',monospace;font-size:7px;color:rgba(245,158,11,0.6);}
 
+/* STRIP infos compact */
+.info-strip{display:flex;margin:0 18px 16px;border:1px solid var(--border);border-radius:10px;overflow:hidden;}
+.is-item{flex:1;padding:10px 8px;text-align:center;border-right:1px solid var(--border);}
+.is-item:last-child{border-right:none;}
+.is-val{font-family:'Bebas Neue',sans-serif;font-size:18px;line-height:1;}
+.is-lbl{font-family:'Space Mono',monospace;font-size:6px;color:var(--muted);margin-top:3px;letter-spacing:0.5px;}
+
+/* INSIGHT — signal+verdict fusionnés */
+.insight{margin:0 18px 16px;border-radius:12px;border:1px solid var(--border);overflow:hidden;background:var(--card);}
+.insight-row{display:flex;gap:12px;padding:14px;}
+.insight-row+.insight-row{border-top:1px solid var(--border);}
+.ir-icon{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+.ir-icon.sig{background:rgba(34,211,238,0.1);}
+.ir-icon.ok{background:rgba(16,185,129,0.1);}
+.ir-lbl{font-family:'Space Mono',monospace;font-size:7px;letter-spacing:2px;margin-bottom:4px;}
+.ir-lbl.sig{color:var(--cyan);}
+.ir-lbl.ok{color:var(--green);}
+.ir-txt{font-size:12px;color:#94a3b8;line-height:1.65;}
+
+/* gauge — conservé pour onglet Analyse */
 .gauge-row{display:flex;gap:12px;align-items:stretch;margin-bottom:10px;}
 .gauge-wrap{flex-shrink:0;width:100px;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(255,255,255,0.02);border-radius:11px;padding:10px 6px;}
 .gauge-svg{width:78px;height:78px;}
@@ -106,7 +133,6 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 .gauge-den{font-family:'Space Mono',monospace;font-size:7px;fill:var(--muted);}
 .gauge-lbl{font-family:'Space Mono',monospace;font-size:6px;color:var(--muted);letter-spacing:1.5px;margin-top:4px;text-align:center;}
 .gauge-badge{font-family:'Space Mono',monospace;font-size:6.5px;letter-spacing:1px;padding:2px 7px;border-radius:10px;margin-top:5px;background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);color:var(--amber);white-space:nowrap;}
-
 .mkt-best-box{flex:1;display:flex;flex-direction:column;gap:6px;background:rgba(255,255,255,0.015);border:1px solid var(--border);border-radius:11px;padding:10px 12px;justify-content:center;}
 .mbb-lbl{font-family:'Space Mono',monospace;font-size:6.5px;color:var(--muted);letter-spacing:1.5px;}
 .mbb-row{display:flex;justify-content:space-between;align-items:baseline;}
@@ -115,8 +141,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 .mbb-val.cyan{color:var(--cyan);}
 .mbb-val.green{color:var(--green);}
 .mbb-divider{height:1px;background:var(--border);margin:1px 0;}
-
-.pm-warn{margin-top:8px;font-family:'Space Mono',monospace;font-size:7px;color:var(--amber);}
+.pm-warn-old{margin-top:8px;font-family:'Space Mono',monospace;font-size:7px;color:var(--amber);}
 
 /* ── NOUVEAU : TABLEAU TOUS LES MARCHÉS ── */
 .mkt-table{width:100%;border-collapse:collapse;margin-top:4px;}
@@ -1249,34 +1274,29 @@ function render(m){
 
   document.title=hn+' vs '+an+' — IASHARK';
 
-  // ─ TOPBAR
-  var topbar='<div class="topbar'+(isWC?' wc-bar':'')+'"><div class="lg-row"><span style="font-size:14px">'+(m.ligue_icon||'🏆')+'</span><span class="lg-name">'+(m.league||'').toUpperCase()+'</span></div>'
-    +'<div class="badges">'+(heure?'<span class="badge time">'+heure+'</span>':'')
-    +(isWC?'<span class="badge wc">🌍 CM 2026</span>':isHot?'<span class="badge hot">SHARK LOCK</span>':isVal?'<span class="badge val">VALUE BET</span>':'')
-    +'</div></div>';
-
-  // ─ WC BANNER
-  var wcBanner=isWC?'<div class="wc-banner"><div class="wc-flag">🏆</div><div class="wc-info"><div class="wc-title">FIFA WORLD CUP 2026</div><div class="wc-sub">USA · Canada · Mexique</div></div>'+(m.league?'<div class="wc-group">'+esc(m.league).split(' ').pop()+'</div>':'')+'</div>':'';
-
-  // ─ TEAMS
+  // ─ HERO (remplace topbar + wc-banner + teams)
+  var leaguePill='<div class="league-pill">'+(m.ligue_icon||'🏆')+' '+(isWC?'FIFA WORLD CUP 2026 · '+(m.league||'').split(' ').pop():(m.league||'').toUpperCase())+(isHot?' · <span style="color:var(--amber)">SHARK LOCK</span>':isVal?' · <span style="color:var(--cyan)">VALUE BET</span>':'')+'</div>';
   var stadeHtml='';
   if(m.stade&&m.stade.nom){
-    stadeHtml='<div class="stade-row"><span class="stade-icon">🏟</span><span class="stade-name">'+esc(m.stade.nom)+'</span>'
-      +(m.stade.temp?'<span class="stade-meta">'+esc(m.stade.temp)+'</span>':'')
-      +'</div>';
+    stadeHtml='<div class="stade-row"><span class="stade-icon">🏟</span><span class="stade-name">'+esc(m.stade.nom)+'</span>'+(m.stade.temp?'<span class="stade-meta">'+esc(m.stade.temp)+'</span>':'')+'</div>';
   }
-  var teamsHtml='<div class="teams">'
-    +'<div class="teams-row">'
-    +'<div class="team home">'+lgImg(m.home,hn.slice(0,2).toUpperCase())+'<div class="team-name">'+hn.toUpperCase()+'</div><div class="team-sub">'+(isTennis?'JOUEUR 1':'DOMICILE')+'</div>'+(forme(m.forme_h||m.form_p1)?'<div class="team-form">'+forme(m.forme_h||m.form_p1)+'</div>':'')+'</div>'
+  function teamDisplay(team,name,side,forme_str,isTennis){
+    var logo=team&&team.logo?'<img class="team-logo" src="'+team.logo+'" onerror="this.style.display=\'none\'">':(team&&team.flag?'<span class="team-logo-ph">'+team.flag+'</span>':'');
+    return '<div class="team '+side+'">'+logo+'<div class="team-name">'+name.toUpperCase()+'</div><div class="team-sub">'+(isTennis?(side==='home'?'JOUEUR 1':'JOUEUR 2'):(side==='home'?'DOMICILE':'EXTÉRIEUR'))+'</div>'+(forme(forme_str)?'<div class="team-form">'+forme(forme_str)+'</div>':'')+'</div>';
+  }
+  var teamsHtml='<div class="hero">'+leaguePill
+    +'<div class="teams">'
+    +teamDisplay(m.home,hn,'home',m.forme_h||m.form_p1,isTennis)
     +'<div class="vs-col"><span class="vs">VS</span>'+(heure?'<div class="vs-hr">'+heure+'</div>':'')+'</div>'
-    +'<div class="team away">'+lgImg(m.away,an.slice(0,2).toUpperCase())+'<div class="team-name">'+an.toUpperCase()+'</div><div class="team-sub">'+(isTennis?'JOUEUR 2':'EXTÉRIEUR')+'</div>'+(forme(m.forme_a||m.form_p2)?'<div class="team-form">'+forme(m.forme_a||m.form_p2)+'</div>':'')+'</div>'
+    +teamDisplay(m.away,an,'away',m.forme_a||m.form_p2,isTennis)
     +'</div>'
-    +'<div class="pbar"><div class="pb1" style="width:'+(m.p1||0)+'%"></div><div class="pbn" style="width:'+(m.pn||0)+'%"></div><div class="pb2" style="width:'+(m.p2||0)+'%"></div></div>'
-    +'<div class="plabels"><div class="pi"><div class="pi-pct" style="color:var(--cyan)">'+(m.p1||0)+'%</div><div class="pi-lbl">'+hn.slice(0,8).toUpperCase()+'</div></div>'+(m.pn?'<div class="pi"><div class="pi-pct" style="color:var(--muted)">'+(m.pn||0)+'%</div><div class="pi-lbl">NUL</div></div>':'')+'<div class="pi"><div class="pi-pct" style="color:rgba(226,232,240,0.45)">'+(m.p2||0)+'%</div><div class="pi-lbl">'+an.slice(0,8).toUpperCase()+'</div></div></div>'
     +stadeHtml
+    +'</div>'
+    +'<div class="proba"><div class="pbar"><div class="pb1" style="width:'+(m.p1||0)+'%"></div><div class="pbn" style="width:'+(m.pn||0)+'%"></div><div class="pb2" style="width:'+(m.p2||0)+'%"></div></div>'
+    +'<div class="plabels"><div class="pi"><div class="pi-pct" style="color:var(--cyan)">'+(m.p1||0)+'%</div><div class="pi-lbl">'+hn.slice(0,8).toUpperCase()+'</div></div>'+(m.pn?'<div class="pi"><div class="pi-pct" style="color:rgba(255,255,255,0.25)">'+(m.pn||0)+'%</div><div class="pi-lbl">NUL</div></div>':'')+'<div class="pi"><div class="pi-pct" style="color:rgba(255,255,255,0.35)">'+(m.p2||0)+'%</div><div class="pi-lbl">'+an.slice(0,8).toUpperCase()+'</div></div></div>'
     +'</div>';
 
-  // ─ PARIS RECOMMANDÉ (jauge circulaire + bloc meilleur marché + tableau marchés)
+  // ─ PARIS RECOMMANDÉ — nouveau design
   var parisHtml='';
   if(pariRec){
     var coteMin=paricote!=='—'?((parseFloat(paricote)-0.20).toFixed(2)):'';
@@ -1288,35 +1308,77 @@ function render(m){
     else if(pl.includes('btts non'))probIA=100-(m.btts||0);
     else if(pl.includes('1x'))probIA=(m.p1||0)+(m.pn||0);
     else if(pl.includes('x2'))probIA=(m.p2||0)+(m.pn||0);
+    var edgeNum=parseEdgeText(m.edge);
+    var coteF=parseFloat(paricote);
+    var probImpl=coteF&&coteF>1?Math.round((1/coteF)*100):null;
+    var confPct=Math.min(100,Math.max(0,(m.conf||0)*10));
+    var confLvl=confPct>=75?'SHARK LOCK':confPct>=60?'FIABLE':confPct>=40?'MODÉRÉ':'PRUDENT';
 
-    parisHtml='<div class="s"><div class="stitle">PARIS RECOMMANDÉ</div>'
-      +'<div class="pari-main">'
+    parisHtml='<div class="pari-main">'
       +'<div class="pm-headline"><div><div class="pm-lbl">SÉLECTION IA DU JOUR</div><div class="pm-bet">'+translateMarket(pariRec).toUpperCase()+'</div></div><div class="pm-cote-big">'+paricote+'</div></div>'
-      +'<div class="gauge-row">'+buildGauge(m.conf)+buildBestMarketBox(pariRec,paricote,m.edge,probIA)+'</div>'
-      +(coteMin?'<div class="pm-warn">⚠ Si la cote passe sous '+coteMin+' — ne pas jouer</div>':'')
-      +'</div></div><div class="sep"></div>';
+      +'<div class="pm-metrics">'
+      +(probIA?'<div class="pmm"><div class="pmm-val cy">'+Math.round(probIA)+'%</div><div class="pmm-lbl">PROBA IA</div></div>':'')
+      +(probImpl?'<div class="pmm"><div class="pmm-val">'+probImpl+'%</div><div class="pmm-lbl">COTE IMPL.</div></div>':'')
+      +(edgeNum!==null?'<div class="pmm"><div class="pmm-val gr">'+(edgeNum>0?'+':'')+edgeNum.toFixed(0)+'%</div><div class="pmm-lbl">AVANTAGE</div></div>':'')
+      +'</div>'
+      +'<div class="pm-conf"><span class="pm-conf-lbl">CONFIANCE</span><div class="pm-conf-bar"><div class="pm-conf-fill" style="width:'+confPct+'%"></div></div><span class="pm-conf-val">'+(m.conf||0).toFixed(0)+'/10 · '+confLvl+'</span></div>'
+      +(coteMin?'<div class="pm-warn">⚠ Si cote passe sous '+coteMin+' — ne pas jouer</div>':'')
+      +'</div>';
   }
+
+  // ─ STRIP infos (WC : FIFA pts + exp CM, sinon classement)
+  var stripHtml='';
+  if(!isTennis){
+    var d1='',d2='',d3='',d4='';
+    if(isWC&&m.wc_probs&&m.wc_probs.scoreH&&m.wc_probs.scoreA){
+      var dH=m.wc_probs.scoreH.details||{},dA=m.wc_probs.scoreA.details||{};
+      d1=dH.fifa_pts||'—'; d2=dA.fifa_pts||'—'; d3=dH.wc_exp||'—'; d4=dA.wc_exp||'—';
+      stripHtml='<div class="info-strip">'
+        +'<div class="is-item"><div class="is-val" style="color:var(--cyan)">'+d1+'</div><div class="is-lbl">FIFA '+hn.slice(0,4).toUpperCase()+'</div></div>'
+        +'<div class="is-item"><div class="is-val">'+d2+'</div><div class="is-lbl">FIFA '+an.slice(0,4).toUpperCase()+'</div></div>'
+        +'<div class="is-item"><div class="is-val" style="color:var(--cyan)">'+d3+'</div><div class="is-lbl">EXP CM '+hn.slice(0,4).toUpperCase()+'</div></div>'
+        +'<div class="is-item"><div class="is-val">'+d4+'</div><div class="is-lbl">EXP CM '+an.slice(0,4).toUpperCase()+'</div></div>'
+        +'</div>';
+    } else if(m.classement&&m.classement.home&&m.classement.away){
+      stripHtml='<div class="info-strip">'
+        +'<div class="is-item"><div class="is-val" style="color:var(--cyan)">'+m.classement.home.rank+'e</div><div class="is-lbl">RANK '+hn.slice(0,6).toUpperCase()+'</div></div>'
+        +'<div class="is-item"><div class="is-val">'+m.classement.away.rank+'e</div><div class="is-lbl">RANK '+an.slice(0,6).toUpperCase()+'</div></div>'
+        +'<div class="is-item"><div class="is-val" style="color:var(--cyan)">'+m.classement.home.pts+'</div><div class="is-lbl">PTS '+hn.slice(0,6).toUpperCase()+'</div></div>'
+        +'<div class="is-item"><div class="is-val">'+m.classement.away.pts+'</div><div class="is-lbl">PTS '+an.slice(0,6).toUpperCase()+'</div></div>'
+        +'</div>';
+    }
+  }
+
+  // ─ CONTEXTE texte seul
+  var ctxHtml=m.contexte?'<div style="padding:0 18px 16px"><div style="font-size:13px;color:#94a3b8;line-height:1.75;">'+esc(cleanJargon(m.contexte))+'</div></div>':'';
 
   // ─ SKIP
   var skipHtml=m.no_signal
-    ?'<div class="s"><div class="skip danger"><div class="skip-icon">🚨</div><div><div class="skip-lbl">PASSE TON TOUR</div><div class="skip-txt">'+(m.no_signal_label||'Signaux contradictoires. <strong>Ne pas jouer.</strong>')+'</div></div></div></div><div class="sep"></div>'
-    :'<div class="s"><div class="skip ok"><div class="skip-icon">✅</div><div><div class="skip-lbl">FEU VERT</div><div class="skip-txt">Configuration favorable. <strong>Voir la sélection ci-dessus.</strong></div></div></div></div><div class="sep"></div>';
+    ?'<div style="padding:0 18px 16px"><div class="skip danger"><div class="skip-icon">🚨</div><div><div class="skip-lbl">PASSE TON TOUR</div><div class="skip-txt">'+(m.no_signal_label||'Signaux contradictoires. <strong>Ne pas jouer.</strong>')+'</div></div></div></div>'
+    :'';
 
-  // ─ FACTEUR IA
-  var facteur=m.facteur_x?'<div class="s"><div class="facteur"><div class="fact-icon">⚡</div><div><div class="fact-lbl">SIGNAL DÉCISIF</div><div class="fact-txt">'+esc(cleanJargon(m.facteur_x))+'</div></div></div></div><div class="sep"></div>':'';
-
-  // ─ VERDICT
-  var verdict=(m.verdict_shark||m.contexte)?
-    '<div class="s"><div class="verdict-block"><div class="verdict-badge">VERDICT</div>'
-    +(m.verdict_shark?'<div class="verdict-title">'+esc(cleanJargon(m.verdict_shark))+'</div>':'')
-    +(m.contexte?'<div class="verdict-body">'+esc(cleanJargon(m.contexte))+'</div>':'')
-    +'</div></div><div class="sep"></div>':'';
+  // ─ INSIGHT — signal + verdict fusionnés dans un seul bloc
+  var insightHtml='';
+  var hasSignal=m.facteur_x||m.verdict_shark||m.no_signal;
+  if(hasSignal){
+    insightHtml='<div class="insight">';
+    if(m.facteur_x){
+      insightHtml+='<div class="insight-row"><div class="ir-icon sig">⚡</div><div><div class="ir-lbl sig">SIGNAL DÉCISIF</div><div class="ir-txt">'+esc(cleanJargon(m.facteur_x))+'</div></div></div>';
+    }
+    if(m.verdict_shark){
+      insightHtml+='<div class="insight-row"><div class="ir-icon ok">✅</div><div><div class="ir-lbl ok">VERDICT</div><div class="ir-txt">'+esc(cleanJargon(m.verdict_shark))+'</div></div></div>';
+    }
+    if(!m.facteur_x&&!m.verdict_shark&&m.no_signal){
+      insightHtml+='<div class="insight-row"><div class="ir-icon" style="background:rgba(239,68,68,0.1)">🚨</div><div><div class="ir-lbl" style="color:var(--red)">PASSE TON TOUR</div><div class="ir-txt">'+(m.no_signal_label||'Signaux contradictoires. Ne pas jouer.')+'</div></div></div>';
+    }
+    insightHtml+='</div>';
+  }
 
   // ─ PRO WALL (si pas pro)
   var proWall=!isPro&&!isTennis?buildProWall():'';
 
   // ─ ONGLET 1 : VUE D'ENSEMBLE
-  var tabApercu=parisHtml+buildContexteMatch(m,hn,an,isWC,isTennis)+skipHtml+facteur+verdict;
+  var tabApercu=parisHtml+stripHtml+ctxHtml+skipHtml+insightHtml;
 
   // ─ ONGLET 2 : ANALYSE
   var tabAnalyse=
@@ -1360,8 +1422,6 @@ function render(m){
   var proWall=!isPro&&!isTennis?buildProWall():'';
 
   return '<div class="wrap"><div class="card'+(isHot?' hot':'')+(isWC?' wc':'')+'">'
-    +topbar
-    +wcBanner
     +teamsHtml
     +tabsNav
     +tabsContent

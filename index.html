@@ -36,23 +36,19 @@ body::before{content:'';position:fixed;top:-300px;left:50%;transform:translateX(
 .hdr-right{display:flex;gap:8px;align-items:center;}
 .hdr-count{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:1px;color:var(--muted);padding:5px 12px;border:1px solid var(--border);border-radius:20px;}
 .hdr-count span{color:var(--cyan);}
-.btn-login{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1px;padding:6px 14px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:.2s;}
-.btn-login:hover{border-color:var(--cyan);color:var(--cyan);}
-.btn-pro{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1px;padding:6px 14px;border-radius:8px;border:1px solid rgba(34,211,238,0.3);background:rgba(34,211,238,0.08);color:var(--cyan);cursor:pointer;transition:.2s;}
-.btn-pro:hover{background:rgba(34,211,238,0.15);}
+.btn-login{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1px;padding:6px 14px;border-radius:8px;border:1px solid rgba(34,211,238,0.3);background:rgba(34,211,238,0.06);color:var(--cyan);cursor:pointer;transition:.2s;text-decoration:none;display:inline-flex;align-items:center;}
+.btn-login:hover{background:rgba(34,211,238,0.12);}
+
+/* LANG */
+.lang-wrap{position:relative;}
+.lang-btn{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:1px;padding:6px 10px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:.2s;}
+.lang-btn:hover{border-color:var(--cyan);color:var(--cyan);}
+.lang-menu{display:none;position:absolute;top:calc(100% + 6px);right:0;background:#0d1520;border:1px solid var(--border);border-radius:10px;overflow:hidden;z-index:200;min-width:140px;box-shadow:0 8px 24px rgba(0,0,0,0.4);}
+.lang-menu.open{display:block;}
+.lang-opt{padding:9px 14px;font-family:'DM Sans',sans-serif;font-size:12px;color:var(--muted);cursor:pointer;transition:.15s;}
+.lang-opt:hover{background:rgba(34,211,238,0.06);color:var(--cyan);}
 
 /* HERO */
-.hero{padding:28px 20px 20px;max-width:720px;margin:0 auto;position:relative;z-index:1;text-align:center;display:flex;flex-direction:column;align-items:center;}
-.hero-shark{font-size:44px;margin-bottom:8px;display:inline-block;animation:float 3s ease-in-out infinite;}
-@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
-.hero-tag{display:inline-flex;align-items:center;gap:6px;font-family:'Space Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--cyan);background:rgba(34,211,238,0.06);border:1px solid var(--border-cyan);padding:4px 12px;border-radius:20px;margin-bottom:12px;}
-.hero-tag .dot{width:5px;height:5px;background:var(--cyan);border-radius:50%;animation:blink 1.2s infinite;}
-.hero-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(34px,8vw,52px);letter-spacing:3px;line-height:1.0;margin-bottom:6px;}
-.hero-title span{color:var(--cyan);}
-.hero-sub{font-size:13px;color:#64748b;line-height:1.6;margin-bottom:16px;max-width:380px;}
-
-/* HERO PREDATOR (World Cup) */
 .hero-predator{position:relative;padding:38px 20px 24px;max-width:720px;margin:0 auto;text-align:center;overflow:hidden;z-index:1;}
 .hero-predator::before{content:'';position:absolute;top:-100px;left:50%;transform:translateX(-50%);width:600px;height:400px;background:radial-gradient(ellipse,rgba(34,211,238,0.08) 0%,transparent 60%);pointer-events:none;}
 .hp-eyebrow{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:3px;color:var(--amber);margin-bottom:14px;display:flex;align-items:center;justify-content:center;gap:8px;position:relative;z-index:1;}
@@ -63,27 +59,28 @@ body::before{content:'';position:fixed;top:-300px;left:50%;transform:translateX(
 .hp-title b{color:var(--cyan);}
 .hp-sub{position:relative;z-index:1;font-size:13.5px;color:#94a3b8;line-height:1.6;margin:0 auto 20px;max-width:420px;}
 .hp-sub b{color:var(--text);font-weight:600;}
-.hp-cta-row{position:relative;z-index:1;display:flex;justify-content:center;gap:10px;margin-bottom:18px;flex-wrap:wrap;}
-.hp-cta-primary{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:1px;padding:11px 22px;border-radius:10px;border:1px solid var(--border-cyan);background:rgba(34,211,238,0.1);color:var(--cyan);cursor:pointer;}
-.hp-cta-secondary{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:1px;padding:11px 22px;border-radius:10px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:not-allowed;opacity:0.5;position:relative;}
-.hp-cta-secondary .soon{font-size:6px;letter-spacing:1px;position:absolute;top:-7px;right:6px;background:var(--card);padding:1px 5px;border-radius:6px;border:1px solid var(--border);color:var(--muted);}
 .hp-ticker{position:relative;z-index:1;display:flex;justify-content:center;gap:18px;font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:1px;flex-wrap:wrap;}
 .hp-ticker span{color:var(--cyan);}
 
-/* SPORT SELECTOR — la pièce centrale */
-.sport-selector{display:flex;gap:8px;margin-bottom:6px;flex-wrap:wrap;justify-content:center;}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+
+/* SPORT SELECTOR */
+.sport-selector{display:flex;gap:8px;margin-bottom:6px;flex-wrap:wrap;justify-content:center;position:relative;z-index:1;}
 .sport-btn{display:flex;align-items:center;gap:8px;padding:10px 20px;border-radius:12px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:.2s;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1px;}
 .sport-btn .sport-icon{font-size:18px;}
 .sport-btn.active-foot{background:rgba(34,211,238,0.08);border-color:var(--border-cyan);color:var(--cyan);}
-.sport-btn.active-tennis{background:rgba(163,230,53,0.08);border-color:var(--border-tennis);color:var(--tennis);}
 .sport-btn:hover{opacity:0.85;}
+.sport-btn.disabled{opacity:0.4;cursor:not-allowed;position:relative;}
+.sport-btn.disabled .soon-tag{font-size:6px;letter-spacing:1px;position:absolute;top:-7px;right:2px;background:var(--card);padding:1px 5px;border-radius:6px;border:1px solid rgba(245,158,11,0.4);color:var(--amber);}
 
 /* STATS ROW */
-.stats-row{display:flex;gap:16px;margin-bottom:4px;}
+.stats-row{display:flex;gap:16px;margin-bottom:4px;position:relative;z-index:1;}
 .stat-pill{font-family:'Space Mono',monospace;font-size:8px;color:var(--muted);letter-spacing:1px;}
 .stat-pill span{color:var(--cyan);}
-.stat-pill.tennis-stat span{color:var(--tennis);}
-.cote-rule-card{max-width:720px;margin:18px auto 0;padding:16px 20px;background:rgba(34,211,238,0.04);border:1px solid var(--bc);border-radius:14px;}
+
+/* RÈGLE COTE */
+.cote-rule-card{max-width:720px;margin:18px auto 0;padding:16px 20px;background:rgba(34,211,238,0.04);border:1px solid var(--border-cyan);border-radius:14px;}
 .cote-rule-title{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--cyan);margin-bottom:8px;display:flex;align-items:center;gap:8px;}
 .cote-rule-txt{font-size:13px;color:#94a3b8;line-height:1.65;}
 .cote-rule-txt b{color:var(--text);}
@@ -93,31 +90,24 @@ body::before{content:'';position:fixed;top:-300px;left:50%;transform:translateX(
 .filters::-webkit-scrollbar{display:none;}
 .filter-btn{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:1px;padding:6px 14px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:.2s;white-space:nowrap;flex-shrink:0;}
 .filter-btn:hover,.filter-btn.active{background:rgba(34,211,238,0.1);border-color:var(--border-cyan);color:var(--cyan);}
-.tennis-mode .filter-btn:hover,
-.tennis-mode .filter-btn.active{background:rgba(163,230,53,0.08);border-color:var(--border-tennis);color:var(--tennis);}
 
 /* DAY TABS */
 .day-tabs{max-width:720px;margin:0 auto 14px;padding:0 20px;display:flex;gap:8px;position:relative;z-index:1;}
 .day-tab{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:2px;padding:8px 20px;border-radius:10px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:.2s;}
 .day-tab.active{background:rgba(34,211,238,0.1);border-color:var(--border-cyan);color:var(--cyan);}
-.tennis-mode .day-tab.active{background:rgba(163,230,53,0.08);border-color:var(--border-tennis);color:var(--tennis);}
 .day-tab .tab-count{font-size:7px;background:rgba(34,211,238,0.15);border-radius:10px;padding:1px 6px;margin-left:6px;}
-.tennis-mode .day-tab .tab-count{background:rgba(163,230,53,0.15);}
 
 /* SECTION HEADERS */
 .sec-hdr{max-width:720px;margin:0 auto 10px;padding:0 20px;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:3px;color:var(--muted);display:flex;align-items:center;gap:10px;position:relative;z-index:1;}
 .sec-hdr::after{content:'';flex:1;height:1px;background:var(--border);}
 .sec-hdr.s-choc{color:var(--amber);}
-.sec-hdr.s-tennis{color:var(--tennis);}
 
 /* CARDS */
 .cards-list{max-width:720px;margin:0 auto;padding:0 20px;display:flex;flex-direction:column;gap:10px;position:relative;z-index:1;}
 .mc{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;cursor:pointer;transition:border-color .2s,transform .2s,box-shadow .2s;animation:fadeup .4s ease forwards;opacity:0;}
-.mc:nth-child(1){animation-delay:.05s}.mc:nth-child(2){animation-delay:.10s}.mc:nth-child(3){animation-delay:.15s}.mc:nth-child(4){animation-delay:.20s}.mc:nth-child(n+5){animation-delay:.25s}
+.mc:nth-child(1){animation-delay:.05s}.mc:nth-child(2){animation-delay:.10s}.mc:nth-child(3){animation-delay:.15s}.mc:nth-child(n+4){animation-delay:.20s}
 @keyframes fadeup{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
 .mc:hover{border-color:rgba(34,211,238,0.25);transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,0.3);}
-.mc.tennis{border-left:2px solid rgba(163,230,53,0.3);}
-.mc.tennis:hover{border-color:rgba(163,230,53,0.3);}
 .mc.value{border-color:rgba(34,211,238,0.18);}
 .mc.hot{border-color:rgba(245,158,11,0.25);}
 .mc.hot:hover{border-color:rgba(245,158,11,0.45);}
@@ -130,7 +120,6 @@ body::before{content:'';position:fixed;top:-300px;left:50%;transform:translateX(
 .badge-value{background:rgba(34,211,238,0.08);border:1px solid var(--border-cyan);color:var(--cyan);}
 .badge-hot{background:linear-gradient(135deg,rgba(245,158,11,0.15),rgba(239,68,68,0.08));border:1px solid rgba(245,158,11,0.3);color:var(--amber);}
 .badge-free{background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.2);color:var(--green);}
-.badge-tennis{background:rgba(163,230,53,0.08);border:1px solid var(--border-tennis);color:var(--tennis);}
 
 /* CARD BODY */
 .mc-body{padding:14px 14px 10px;display:flex;align-items:center;gap:12px;}
@@ -144,32 +133,22 @@ body::before{content:'';position:fixed;top:-300px;left:50%;transform:translateX(
 .mc-teams-sep{display:flex;flex-direction:column;align-items:center;gap:2px;flex-shrink:0;}
 .mc-vs{font-family:'Bebas Neue',sans-serif;font-size:13px;color:var(--muted);}
 .mc-time{font-family:'Space Mono',monospace;font-size:9px;color:var(--cyan);}
-.mc.tennis .mc-time{color:var(--tennis);}
 .mc-pari{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
 .mc-pari-label{font-family:'Space Mono',monospace;font-size:7px;color:var(--amber);letter-spacing:1px;}
 .mc-pari-bet{font-size:13px;font-weight:600;color:var(--text);}
 .mc-pari-cote{font-family:'Bebas Neue',sans-serif;font-size:17px;color:var(--amber);}
 .mc-pari-edge{font-family:'Space Mono',monospace;font-size:8px;color:var(--green);background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.18);padding:2px 7px;border-radius:10px;}
 
-/* TENNIS SURFACE BADGE */
-.surface-badge{font-family:'Space Mono',monospace;font-size:7px;letter-spacing:1px;padding:2px 7px;border-radius:10px;font-weight:500;}
-.surface-clay{background:rgba(234,88,12,0.12);border:1px solid rgba(234,88,12,0.25);color:#f97316;}
-.surface-grass{background:rgba(163,230,53,0.08);border:1px solid rgba(163,230,53,0.2);color:var(--tennis);}
-.surface-hard{background:rgba(59,130,246,0.08);border:1px solid rgba(59,130,246,0.2);color:#60a5fa;}
-
 /* CONF CIRCLE */
 .mc-right{display:flex;flex-direction:column;align-items:center;gap:8px;flex-shrink:0;}
 .conf-circle{width:52px;height:52px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;border:2px solid rgba(255,255,255,0.08);}
 .conf-circle.high{border-color:rgba(245,158,11,0.4);background:rgba(245,158,11,0.06);}
 .conf-circle.med{border-color:rgba(34,211,238,0.35);background:rgba(34,211,238,0.05);}
-.conf-circle.tennis-conf{border-color:rgba(163,230,53,0.35);background:rgba(163,230,53,0.05);}
 .conf-num{font-family:'Bebas Neue',sans-serif;font-size:18px;line-height:1;color:var(--amber);}
 .conf-circle.med .conf-num{color:var(--cyan);}
-.conf-circle.tennis-conf .conf-num{color:var(--tennis);}
 .conf-circle.low .conf-num{color:var(--muted);}
 .conf-sub{font-family:'Space Mono',monospace;font-size:7px;color:var(--muted);margin-top:-2px;}
 .mc-cta{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:1px;padding:5px 10px;border-radius:8px;border:1px solid var(--border-cyan);background:rgba(34,211,238,0.08);color:var(--cyan);cursor:pointer;transition:.2s;white-space:nowrap;}
-.mc.tennis .mc-cta{border-color:var(--border-tennis);background:rgba(163,230,53,0.06);color:var(--tennis);}
 
 /* PROBA BAR */
 .mc-probas{padding:8px 14px 12px;border-top:1px solid var(--border);}
@@ -177,7 +156,6 @@ body::before{content:'';position:fixed;top:-300px;left:50%;transform:translateX(
 .pb-1{background:linear-gradient(90deg,var(--cyan2),var(--cyan));height:100%;}
 .pb-n{background:rgba(255,255,255,0.1);height:100%;}
 .pb-2{background:rgba(226,232,240,0.2);height:100%;}
-.mc.tennis .pb-1{background:linear-gradient(90deg,var(--tennis2),var(--tennis));}
 .prob-labels{display:flex;justify-content:space-between;}
 .prob-lbl-item{display:flex;flex-direction:column;align-items:center;gap:1px;}
 .prob-lbl-pct{font-family:'Bebas Neue',sans-serif;font-size:14px;line-height:1;}
@@ -187,15 +165,10 @@ body::before{content:'';position:fixed;top:-300px;left:50%;transform:translateX(
 .choc-card-wrap{max-width:720px;margin:0 auto 10px;padding:0 20px;}
 .choc-card{background:linear-gradient(135deg,var(--card2),var(--card));border:1px solid rgba(245,158,11,0.2);border-radius:16px;overflow:hidden;cursor:pointer;transition:.2s;position:relative;}
 .choc-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(245,158,11,0.4),transparent);}
-.choc-card.tennis-choc{border-color:rgba(163,230,53,0.2);}
-.choc-card.tennis-choc::before{background:linear-gradient(90deg,transparent,rgba(163,230,53,0.4),transparent);}
 .choc-card:hover{border-color:rgba(245,158,11,0.4);transform:translateY(-2px);}
-.choc-card.tennis-choc:hover{border-color:rgba(163,230,53,0.4);}
 .choc-inner{padding:18px 18px 14px;}
 .choc-league{font-family:'Space Mono',monospace;font-size:8px;color:var(--amber);letter-spacing:2px;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
-.choc-league.tennis-league{color:var(--tennis);}
 .choc-dot{width:5px;height:5px;background:var(--amber);border-radius:50%;animation:blink 1.2s infinite;}
-.choc-dot.tennis-dot{background:var(--tennis);}
 .choc-teams-row{display:grid;grid-template-columns:1fr 50px 1fr;align-items:center;gap:8px;margin-bottom:14px;}
 .choc-team{text-align:center;}
 .choc-logo{width:42px;height:42px;border-radius:50%;object-fit:contain;background:rgba(255,255,255,0.03);margin:0 auto 6px;display:block;}
@@ -204,14 +177,10 @@ body::before{content:'';position:fixed;top:-300px;left:50%;transform:translateX(
 .choc-sub-lbl{font-family:'Space Mono',monospace;font-size:7px;color:var(--muted);margin-top:3px;}
 .choc-vs{font-family:'Bebas Neue',sans-serif;font-size:14px;color:var(--muted);text-align:center;display:block;}
 .choc-hr{font-family:'Space Mono',monospace;font-size:10px;color:var(--cyan);text-align:center;margin-top:2px;}
-.choc-card.tennis-choc .choc-hr{color:var(--tennis);}
 .choc-pari-strip{background:rgba(245,158,11,0.04);border-top:1px solid rgba(245,158,11,0.1);padding:12px 18px;display:flex;align-items:center;justify-content:space-between;}
-.choc-card.tennis-choc .choc-pari-strip{background:rgba(163,230,53,0.04);border-top-color:rgba(163,230,53,0.1);}
 .choc-pari-lbl{font-family:'Space Mono',monospace;font-size:7px;color:rgba(245,158,11,0.6);letter-spacing:1px;margin-bottom:3px;}
-.choc-card.tennis-choc .choc-pari-lbl{color:rgba(163,230,53,0.6);}
 .choc-pari-bet{font-size:15px;font-weight:500;color:var(--text);}
 .choc-cote{font-family:'Bebas Neue',sans-serif;font-size:36px;color:var(--amber);line-height:1;}
-.choc-card.tennis-choc .choc-cote{color:var(--tennis);}
 
 /* LOADING / EMPTY */
 .loading-state{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 20px;gap:16px;}
@@ -224,22 +193,11 @@ body::before{content:'';position:fixed;top:-300px;left:50%;transform:translateX(
 
 /* BOTTOM NAV */
 .nav-bottom{position:fixed;bottom:0;left:0;right:0;background:rgba(8,12,18,0.97);backdrop-filter:blur(14px);border-top:1px solid var(--border);display:flex;z-index:100;}
-.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px 4px 8px;gap:3px;cursor:pointer;transition:.2s;-webkit-tap-highlight-color:transparent;}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px 4px 8px;gap:3px;cursor:pointer;transition:.2s;-webkit-tap-highlight-color:transparent;text-decoration:none;}
 .nav-icon{font-size:18px;transition:.2s;}
 .nav-lbl{font-family:'Space Mono',monospace;font-size:7px;color:var(--muted);letter-spacing:1px;}
 .nav-item.active .nav-lbl{color:var(--cyan);}
 .nav-item.active .nav-icon{filter:drop-shadow(0 0 6px rgba(34,211,238,0.5));}
-
-/* LANG */
-.lang-wrap{position:relative;}
-.lang-btn{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:1px;padding:6px 10px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:.2s;}
-.lang-btn:hover{border-color:var(--cyan);color:var(--cyan);}
-.lang-menu{display:none;position:absolute;top:calc(100% + 6px);right:0;background:#0d1520;border:1px solid var(--border);border-radius:10px;overflow:hidden;z-index:200;min-width:140px;}
-.lang-menu.open{display:block;}
-.lang-opt{padding:9px 14px;font-family:'DM Sans',sans-serif;font-size:12px;color:var(--muted);cursor:pointer;transition:.15s;}
-.lang-opt:hover{background:rgba(34,211,238,0.06);color:var(--cyan);}
-
-.badge-demain{font-family:'Space Mono',monospace;font-size:6px;letter-spacing:1px;padding:2px 6px;border-radius:4px;background:rgba(139,92,246,0.12);border:1px solid rgba(139,92,246,0.25);color:#a78bfa;margin-left:4px;vertical-align:middle;}
 
 @media(max-width:480px){
   .mc-team-name{font-size:12px;max-width:70px;}
@@ -253,57 +211,42 @@ body::before{content:'';position:fixed;top:-300px;left:50%;transform:translateX(
 <header class="hdr">
   <a href="/" class="logo"><span>IA</span>SHARK</a>
   <div class="hdr-right">
-    <div class="hdr-count" id="matchCount">⟳</div>
-    <div class="lang-wrap" id="langWrap">
-      <button class="lang-btn" onclick="toggleLang(event)">🌐 FR</button>
-      <div class="lang-menu" id="langMenu">
-        <div class="lang-opt" onclick="setLang('fr')">🇫🇷 Français</div>
-        <div class="lang-opt" onclick="setLang('en')">🇬🇧 English</div>
-        <div class="lang-opt" onclick="setLang('es')">🇪🇸 Español</div>
-        <div class="lang-opt" onclick="setLang('pt')">🇧🇷 Português</div>
-        <div class="lang-opt" onclick="setLang('de')">🇩🇪 Deutsch</div>
-        <div class="lang-opt" onclick="setLang('it')">🇮🇹 Italiano</div>
-        <div class="lang-opt" onclick="setLang('ar')">🇸🇦 عربي</div>
-      </div>
-    </div>
-    <button class="btn-login" onclick="location.href='/compte.html'">CONNEXION</button>
-    <button class="btn-pro" onclick="location.href='/compte.html'">PRO ▸</button>
+    <a href="/compte.html" class="btn-login">CONNEXION</a>
   </div>
 </header>
 
 <div class="hero-predator">
-  <div class="hp-eyebrow"><span class="line"></span> <span class="dot"></span> COUPE DU MONDE 2026 — ANALYSES QUOTIDIENNES <span class="line"></span></div>
-  <div class="hp-shark-big" id="heroEmoji">🦈</div>
-  <h1 class="hp-title" id="heroTitle">Le seul <b>expert</b> qui ne ressent rien — il calcule.</h1>
-  <p class="hp-sub" id="heroSub">Chaque match du Mondial passé au crible : <b>xG dynamiques, forme, fatigue, H2H.</b> Pas d'intuition, que de la donnée.</p>
+  <div class="hp-eyebrow"><span class="line"></span><span class="dot"></span> COUPE DU MONDE 2026 — ANALYSES QUOTIDIENNES <span class="line"></span></div>
+  <div class="hp-shark-big">🦈</div>
+  <h1 class="hp-title">Le seul <b>expert</b> qui ne ressent rien — il calcule.</h1>
+  <p class="hp-sub">Chaque match du Mondial passé au crible : <b>xG dynamiques, forme, fatigue, H2H.</b> Pas d'intuition, que de la donnée.</p>
 
-  <!-- SPORT SELECTOR -->
-  <div class="sport-selector" style="position:relative;z-index:1;justify-content:center;">
+  <div class="sport-selector">
     <button class="sport-btn active-foot" id="btnFoot" onclick="setSport('football')">
       <span class="sport-icon">⚽</span> FOOTBALL
     </button>
-    <button class="sport-btn hp-cta-secondary-inline" id="btnTennis" onclick="setSport('tennis')" style="opacity:0.5;cursor:not-allowed;position:relative;">
+    <button class="sport-btn disabled" onclick="return false">
       <span class="sport-icon">🎾</span> TENNIS
-      <span style="font-size:6px;letter-spacing:1px;position:absolute;top:-7px;right:2px;background:var(--card);padding:1px 5px;border-radius:6px;border:1px solid rgba(245,158,11,0.4);color:var(--amber);">BIENTÔT</span>
+      <span class="soon-tag">BIENTÔT</span>
     </button>
-    <button class="sport-btn hp-cta-secondary-inline" id="btnBasket" onclick="setSport('basket')" style="opacity:0.5;cursor:not-allowed;position:relative;">
+    <button class="sport-btn disabled" onclick="return false">
       <span class="sport-icon">🏀</span> BASKET
-      <span style="font-size:6px;letter-spacing:1px;position:absolute;top:-7px;right:2px;background:var(--card);padding:1px 5px;border-radius:6px;border:1px solid rgba(245,158,11,0.4);color:var(--amber);">BIENTÔT</span>
+      <span class="soon-tag">BIENTÔT</span>
     </button>
-    <button class="sport-btn hp-cta-secondary-inline" id="btnHockey" onclick="setSport('hockey')" style="opacity:0.5;cursor:not-allowed;position:relative;">
+    <button class="sport-btn disabled" onclick="return false">
       <span class="sport-icon">🏒</span> HOCKEY
-      <span style="font-size:6px;letter-spacing:1px;position:absolute;top:-7px;right:2px;background:var(--card);padding:1px 5px;border-radius:6px;border:1px solid rgba(245,158,11,0.4);color:var(--amber);">BIENTÔT</span>
+      <span class="soon-tag">BIENTÔT</span>
     </button>
   </div>
 
-  <div class="hp-ticker" id="heroTicker">
+  <div class="hp-ticker">
     <div><span id="tickerWinrate">—</span> winrate</div>
     <div><span id="tickerRoi">—</span> ROI cumulé</div>
     <div><span>104</span> matchs CDM couverts</div>
   </div>
 
-  <div class="stats-row" style="margin-top:10px;">
-    <div class="stat-pill" id="statMatchs"><span id="countSport">—</span> ANALYSES DU JOUR</div>
+  <div class="stats-row" style="margin-top:10px;justify-content:center;">
+    <div class="stat-pill"><span id="countSport">—</span> ANALYSES DU JOUR</div>
   </div>
 </div>
 
@@ -312,20 +255,17 @@ body::before{content:'';position:fixed;top:-300px;left:50%;transform:translateX(
   <div class="cote-rule-txt">Pas de pari sous cote <b>1.60</b>, sauf exception. Être confiant à 90% ne change rien si le gain est trop faible — dans ce cas, on préfère ne rien recommander. L'objectif est la rentabilité sur la durée, pas un coup ponctuel : c'est pourquoi chaque recommandation porte sur un match unique, jamais un combiné.</div>
 </div>
 
-<!-- FILTERS -->
 <div class="filters" id="filters">
   <button class="filter-btn active" data-filter="all">🌐 TOUS</button>
   <button class="filter-btn" data-filter="value">⚡ VALUE</button>
   <div id="leagueBtns" style="display:contents"></div>
 </div>
 
-<!-- DAY TABS -->
 <div class="day-tabs" id="dayTabsWrap">
   <button class="day-tab active" id="tabToday" onclick="setDayTab('today')">AUJOURD'HUI <span class="tab-count" id="countToday">—</span></button>
   <button class="day-tab" id="tabTomorrow" onclick="setDayTab('tomorrow')">DEMAIN <span class="tab-count" id="countTomorrow">—</span></button>
 </div>
 
-<div id="mainContent"></div>
 <div id="cardsList">
   <div class="loading-state">
     <div class="loading-spinner"></div>
@@ -345,12 +285,13 @@ body::before{content:'';position:fixed;top:-300px;left:50%;transform:translateX(
   </div>
 </div>
 
+<!-- NAV BOTTOM — combinés remplacé par PRO -->
 <nav class="nav-bottom">
-  <div class="nav-item active"><div class="nav-icon">🦈</div><div class="nav-lbl">ACCUEIL</div></div>
-  <div class="nav-item" onclick="window.location='/historique.html'"><div class="nav-icon">📊</div><div class="nav-lbl">HISTORIQUE</div></div>
-  <div class="nav-item" onclick="window.location='/combis.html'"><div class="nav-icon">🎰</div><div class="nav-lbl">COMBINÉS</div></div>
-  <div class="nav-item" onclick="window.location='/blog/'"><div class="nav-icon">📖</div><div class="nav-lbl">GUIDES</div></div>
-  <div class="nav-item" onclick="window.location='/compte.html'"><div class="nav-icon">👤</div><div class="nav-lbl">COMPTE</div></div>
+  <a href="/" class="nav-item active"><div class="nav-icon">🦈</div><div class="nav-lbl">ACCUEIL</div></a>
+  <a href="/historique.html" class="nav-item"><div class="nav-icon">📊</div><div class="nav-lbl">HISTORIQUE</div></a>
+  <a href="/pro.html" class="nav-item"><div class="nav-icon">⭐</div><div class="nav-lbl">PRO</div></a>
+  <a href="/blog/" class="nav-item"><div class="nav-icon">📖</div><div class="nav-lbl">GUIDES</div></div></a>
+  <a href="/compte.html" class="nav-item"><div class="nav-icon">👤</div><div class="nav-lbl">COMPTE</div></a>
 </nav>
 
 <script>
@@ -359,36 +300,23 @@ var currentFilter = 'all';
 var currentDayFilter = 'today';
 var currentSport = 'football';
 
-// ── SPORT SWITCH ────────────────────────────────────────
+// ── SPORT ────────────────────────────────────────────────
 function setSport(sport) {
-  if(sport === 'tennis' || sport === 'basket' || sport === 'hockey') return; // pas encore activés
   currentSport = sport;
-  var isTennis = false;
-
-  // Boutons sport
   document.getElementById('btnFoot').className = 'sport-btn active-foot';
-  document.getElementById('btnTennis').className = 'sport-btn';
-
-  // Mode CSS
-  document.getElementById('dayTabsWrap').className = 'day-tabs';
-  document.getElementById('filters').className = 'filters';
-
-  // Reset filtre
   currentFilter = 'all';
   document.querySelectorAll('.filter-btn').forEach(function(b){b.classList.remove('active');});
   document.querySelector('.filter-btn[data-filter="all"]').classList.add('active');
-
   updateCounts();
   buildLeagueBtns(getSportMatchs());
   renderMatchs();
   loadStats();
 }
-
 function getSportMatchs() {
   return allMatchs.filter(function(m){ return (m.sport||'football') === currentSport; });
 }
 
-// ── DATE HELPERS ─────────────────────────────────────────
+// ── DATES ─────────────────────────────────────────────────
 function getTodayStr() {
   var parts = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Paris', year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(new Date());
   return parts.map(function(p){return p.value;}).join('');
@@ -400,20 +328,17 @@ function getTomorrowStr() {
 }
 function isToday(m){ return (m.date||'').startsWith(getTodayStr()); }
 function isTomorrow(m){ return (m.date||'').startsWith(getTomorrowStr()); }
-
 function setDayTab(day){
   currentDayFilter = day;
   document.getElementById('tabToday').classList.toggle('active', day==='today');
   document.getElementById('tabTomorrow').classList.toggle('active', day==='tomorrow');
   renderMatchs();
 }
-
 function applyDayFilter(list){
   if(currentDayFilter==='today') return list.filter(isToday);
   if(currentDayFilter==='tomorrow') return list.filter(isTomorrow);
   return list;
 }
-
 function updateCounts() {
   var sportList = getSportMatchs();
   var cToday = sportList.filter(isToday).length;
@@ -421,19 +346,17 @@ function updateCounts() {
   document.getElementById('countToday').textContent = cToday;
   document.getElementById('countTomorrow').textContent = cTomorrow;
   document.getElementById('countSport').textContent = cToday;
-  document.getElementById('matchCount').innerHTML = '<span>'+(cToday+cTomorrow)+'</span> ' + (currentSport==='tennis'?'MATCHS':'MATCHS');
+  document.getElementById('matchCount').innerHTML = '<span>'+(cToday+cTomorrow)+'</span> MATCHS';
   if(cToday===0&&cTomorrow>0) setDayTab('tomorrow');
 }
 
 // ── FILTERS ───────────────────────────────────────────────
 function leagueKey(m){ return (m.league_key||'').toLowerCase(); }
-
 function filterMatchs(matchs, f) {
   if(f==='all') return matchs;
   if(f==='value') return matchs.filter(function(m){return m.val||m.vbet==='OUI';});
   return matchs.filter(function(m){return leagueKey(m)===f;});
 }
-
 function setupFilters(){
   document.querySelectorAll('.filter-btn').forEach(function(btn){
     btn.addEventListener('click',function(){
@@ -444,21 +367,15 @@ function setupFilters(){
     });
   });
 }
-
 var LEAGUE_LABELS = {
   'premier':{flag:'🏴󠁧󠁢󠁥󠁮󠁧󠁿',name:'Premier League'},'champ':{flag:'🏴󠁧󠁢󠁥󠁮󠁧󠁿',name:'Championship'},
   'ligue1':{flag:'🇫🇷',name:'Ligue 1'},'ligue2':{flag:'🇫🇷',name:'Ligue 2'},
   'laliga':{flag:'🇪🇸',name:'La Liga'},'laliga2':{flag:'🇪🇸',name:'La Liga 2'},
   'seriea':{flag:'🇮🇹',name:'Serie A'},'bundesliga':{flag:'🇩🇪',name:'Bundesliga'},
   'ldc':{flag:'🏆',name:'Ligue des Champions'},'el':{flag:'🏆',name:'Europa League'},
-  'eredivisie':{flag:'🇳🇱',name:'Eredivisie'},'primeira':{flag:'🇵🇹',name:'Primeira Liga'},
-  'superlig':{flag:'🇹🇷',name:'Süper Lig'},'brasileirao':{flag:'🇧🇷',name:'Brasileirão'},
-  'kleague':{flag:'🇰🇷',name:'K-League'},'superliga-dk':{flag:'🇩🇰',name:'Superliga'},
-  'saudi':{flag:'🇸🇦',name:'Saudi Pro League'},'worldcup':{flag:'🌍',name:'Coupe du Monde'},
+  'wc':{flag:'🌍',name:'World Cup'},'other':{flag:'🏆',name:'International'},
   'atp':{flag:'🎾',name:'ATP'},'wta':{flag:'🎾',name:'WTA'},
-  'atp-gs':{flag:'🏆',name:'Grand Slam'},'wimbledon':{flag:'🏴󠁧󠁢󠁥󠁮󠁧󠁿',name:'Wimbledon'},
 };
-
 function buildLeagueBtns(matchs){
   var seen = {};
   matchs.forEach(function(m){
@@ -483,10 +400,7 @@ function buildLeagueBtns(matchs){
 }
 
 // ── CARD BUILDERS ─────────────────────────────────────────
-function normConf(c){
-  c = parseFloat(c)||0;
-  return c <= 1 ? c*10 : c;
-}
+function normConf(c){ c=parseFloat(c)||0; return c<=1?c*10:c; }
 function confClass(c){ c=normConf(c); return c>=7.5?'high':c>=6.0?'med':'low'; }
 
 function teamLogo(team){
@@ -497,60 +411,48 @@ function teamLogo(team){
   return '<div class="mc-team-logo-placeholder">'+(team.n||'?').slice(0,2).toUpperCase()+'</div>';
 }
 
-function surfaceBadge(surface){
-  if(!surface) return '';
-  var s = (surface||'').toLowerCase();
-  var cls = s.includes('clay')||s.includes('terre')?'surface-clay':s.includes('grass')||s.includes('gazon')?'surface-grass':'surface-hard';
-  var label = s.includes('clay')||s.includes('terre')?'🟤 TERRE':s.includes('grass')||s.includes('gazon')?'🟢 GAZON':'🔵 DUR';
-  return '<span class="surface-badge '+cls+'">'+label+'</span>';
+function translateMarket(raw){
+  if(!raw) return raw;
+  var s = String(raw).toLowerCase();
+  if(s.includes('over 2.5')) return 'Plus de 2,5 buts';
+  if(s.includes('under 2.5')) return 'Moins de 2,5 buts';
+  if(s.includes('over 1.5')) return 'Plus de 1,5 but';
+  if(s.includes('btts non')||s.includes('une équipe ne marque')) return 'Une équipe ne marque pas';
+  if(s.includes('btts')||s.includes('les deux équipes')) return 'Les deux équipes marquent';
+  if(s.includes('dc 1x')||s==='1x') return 'DC 1X';
+  if(s.includes('dc x2')||s==='x2') return 'DC X2';
+  return raw;
 }
 
 function buildCard(m){
-  var isTennis = (m.sport||'football') === 'tennis';
   var p1=m.p1||0, pn=m.pn||0, p2=m.p2||0;
-  var cc = isTennis ? 'tennis-conf' : confClass(m.conf||0);
+  var cc = confClass(m.conf||0);
   var heure = (m.date||'').split(' ')[1]||'';
   var isHot = m.hot||normConf(m.conf)>=8.0;
   var isVal = m.val||m.vbet==='OUI';
-
   var badges = '';
   if(isVal) badges += '<span class="badge badge-value">⚡ VALUE BET</span>';
   else if(isHot) badges += '<span class="badge badge-hot">🔥 SHARK LOCK</span>';
-  else if(isTennis) badges += '<span class="badge badge-tennis">🎾 TENNIS</span>';
   else badges += '<span class="badge badge-free">✓ GRATUIT</span>';
 
   var coteStr = '';
   if(!m.no_signal){
-    coteStr = m.cote_rec && m.cote_rec !== '--' ? m.cote_rec : (m.c1 && m.c1 !== '--' ? m.c1 : '');
+    coteStr = m.cote_rec && m.cote_rec !== '--' ? m.cote_rec : '';
+    if(m.pari_rec){
+      var pr = (m.pari_rec||'').toLowerCase();
+      if(pr.includes('btts non')&&m.btts_non&&m.btts_non!=='--') coteStr=m.btts_non;
+      else if(pr.includes('x2')&&m.dc2x&&m.dc2x!=='--') coteStr=m.dc2x;
+      else if(pr.includes('1x')&&m.dc1x&&m.dc1x!=='--') coteStr=m.dc1x;
+      else if(pr.includes('over 2.5')&&m.co25&&m.co25!=='--') coteStr=m.co25;
+      else if(pr.includes('under 2.5')&&m.cu25&&m.cu25!=='--') coteStr=m.cu25;
+    }
   }
-  if(m.pari_rec && !isTennis){
-    var pr = (m.pari_rec||'').toLowerCase();
-    if(pr.includes('btts non')&&m.btts_non&&m.btts_non!=='--') coteStr=m.btts_non;
-    else if(pr.includes('x2')&&m.dc2x&&m.dc2x!=='--') coteStr=m.dc2x;
-    else if(pr.includes('1x')&&m.dc1x&&m.dc1x!=='--') coteStr=m.dc1x;
-    else if(pr.includes('over 2.5')&&m.co25&&m.co25!=='--') coteStr=m.co25;
-    else if(pr.includes('under 2.5')&&m.cu25&&m.cu25!=='--') coteStr=m.cu25;
-  }
-
   var edgeStr = m.edge ? '<span class="mc-pari-edge">EDGE '+m.edge+'</span>' : '';
-  var cssClass = 'mc'+(isTennis?' tennis':'')+(isHot&&!isTennis?' hot':'')+(isVal?' value':'');
-  var navTarget = isTennis ? 'tennis-match.html?id='+m.id : 'match.html?id='+m.id;
+  var cssClass = 'mc'+(isHot?' hot':'')+(isVal?' value':'');
+  var pariLabel = m.pari_rec ? translateMarket(m.pari_rec) : (m.no_signal_label||"Rien d'exploitable ici — on attend mieux.");
 
-  var pariLabel = m.pari_rec || (m.no_signal_label||"Rien d'exploitable ici — on attend mieux.");
-
-  // Pour le tennis : afficher classement ATP/WTA
-  var tennisInfo = '';
-  if(isTennis){
-    var rankH = m.home&&m.home.rank ? '#'+m.home.rank : '';
-    var rankA = m.away&&m.away.rank ? '#'+m.away.rank : '';
-    tennisInfo = surfaceBadge(m.surface) + (rankH?' <span style="font-size:10px;color:var(--muted)">'+rankH+'</span>':'');
-  }
-
-  return '<div class="'+cssClass+'" onclick="window.location=\''+navTarget+'\'">'
-    +'<div class="mc-top">'
-    +  '<div class="mc-league">'+(m.ligue_icon||'🏆')+' '+(m.league||'').toUpperCase()+'</div>'
-    +  '<div class="mc-badges">'+badges+(isTennis&&m.surface?surfaceBadge(m.surface):'')+'</div>'
-    +'</div>'
+  return '<div class="'+cssClass+'" onclick="window.location=\'match.html?id='+m.id+'\'">'
+    +'<div class="mc-top"><div class="mc-league">'+(m.ligue_icon||'🏆')+' '+(m.league||'').toUpperCase()+'</div><div class="mc-badges">'+badges+'</div></div>'
     +'<div class="mc-body">'
     +  '<div class="mc-left">'
     +    '<div class="mc-teams">'
@@ -558,39 +460,23 @@ function buildCard(m){
     +      '<div class="mc-teams-sep"><div class="mc-vs">VS</div><div class="mc-time">'+heure+'</div></div>'
     +      '<div class="mc-team away">'+teamLogo(m.away)+'<div class="mc-team-name">'+(m.away&&m.away.n||'').toUpperCase()+'</div></div>'
     +    '</div>'
-    +    '<div class="mc-pari">'
-    +      '<span class="mc-pari-label">🦈 IASHARK</span>'
-    +      '<span class="mc-pari-bet">'+pariLabel+'</span>'
-    +      (coteStr?'<span class="mc-pari-cote">'+coteStr+'</span>':'')
-    +      edgeStr
-    +    '</div>'
+    +    '<div class="mc-pari"><span class="mc-pari-label">🦈 IASHARK</span><span class="mc-pari-bet">'+pariLabel+'</span>'+(coteStr?'<span class="mc-pari-cote">'+coteStr+'</span>':'')+edgeStr+'</div>'
     +  '</div>'
-    +  '<div class="mc-right">'
-    +    '<div class="conf-circle '+cc+'"><div class="conf-num">'+normConf(m.conf).toFixed(1)+'</div><div class="conf-sub">/10</div></div>'
-    +    '<button class="mc-cta">VOIR →</button>'
-    +  '</div>'
+    +  '<div class="mc-right"><div class="conf-circle '+cc+'"><div class="conf-num">'+normConf(m.conf).toFixed(1)+'</div><div class="conf-sub">/10</div></div><button class="mc-cta">VOIR →</button></div>'
     +'</div>'
     +'<div class="mc-probas">'
     +  '<div class="prob-bar-wrap"><div class="pb-1" style="width:'+p1+'%"></div><div class="pb-n" style="width:'+pn+'%"></div><div class="pb-2" style="width:'+p2+'%"></div></div>'
-    +  '<div class="prob-labels">'
-    +    '<div class="prob-lbl-item"><div class="prob-lbl-pct" style="color:'+(isTennis?'var(--tennis)':'var(--cyan)')+'">'+p1+'%</div><div class="prob-lbl-txt">'+(m.home&&m.home.n||'').toUpperCase().slice(0,8)+'</div></div>'
-    +    (isTennis?'':'<div class="prob-lbl-item"><div class="prob-lbl-pct" style="color:var(--muted)">'+pn+'%</div><div class="prob-lbl-txt">NUL</div></div>')
-    +    '<div class="prob-lbl-item"><div class="prob-lbl-pct" style="color:rgba(226,232,240,0.45)">'+p2+'%</div><div class="prob-lbl-txt">'+(m.away&&m.away.n||'').toUpperCase().slice(0,8)+'</div></div>'
-    +  '</div>'
-    +'</div>'
-    +'</div>';
+    +  '<div class="prob-labels"><div class="prob-lbl-item"><div class="prob-lbl-pct" style="color:var(--cyan)">'+p1+'%</div><div class="prob-lbl-txt">'+(m.home&&m.home.n||'').toUpperCase().slice(0,8)+'</div></div><div class="prob-lbl-item"><div class="prob-lbl-pct" style="color:var(--muted)">'+pn+'%</div><div class="prob-lbl-txt">NUL</div></div><div class="prob-lbl-item"><div class="prob-lbl-pct" style="color:rgba(226,232,240,0.45)">'+p2+'%</div><div class="prob-lbl-txt">'+(m.away&&m.away.n||'').toUpperCase().slice(0,8)+'</div></div></div>'
+    +'</div></div>';
 }
 
-var PREMIUM_LEAGUES = ['ldc','el','premier','laliga','seriea','bundesliga','ligue1','atp-gs','wimbledon'];
-
+var PREMIUM_LEAGUES = ['ldc','el','premier','laliga','seriea','bundesliga','ligue1'];
 function getChoc(list){
   var premium = list.filter(function(m){ return PREMIUM_LEAGUES.indexOf(leagueKey(m)) !== -1; });
   if(!premium.length) premium = list;
   return premium.reduce(function(best,m){ return normConf(m.conf)>normConf(best.conf)?m:best; }, premium[0]);
 }
-
 function buildChocCard(m){
-  var isTennis = (m.sport||'football') === 'tennis';
   var heure = (m.date||'').split(' ')[1]||'';
   var hn = m.home&&m.home.n||'', an = m.away&&m.away.n||'';
   var pariCote = '';
@@ -611,21 +497,15 @@ function buildChocCard(m){
     if(!url) return '<div class="choc-logo-ph">'+ini+'</div>';
     return '<img class="choc-logo" src="'+url+'" onerror="this.outerHTML=\'<div class=choc-logo-ph>'+ini+'</div>\'">';
   }
-  var navTarget = isTennis ? 'tennis-match.html?id='+m.id : 'match.html?id='+m.id;
-  var cardClass = 'choc-card'+(isTennis?' tennis-choc':'');
-  var leagueClass = 'choc-league'+(isTennis?' tennis-league':'');
-  var dotClass = 'choc-dot'+(isTennis?' tennis-dot':'');
-  var chocTitle = isTennis ? 'MATCH DU JOUR 🎾' : 'CHOC DU SOIR';
-
-  return '<div class="choc-card-wrap"><div class="'+cardClass+'" onclick="window.location=\''+navTarget+'\'">'
-    +'<div class="choc-inner">'
-    +'<div class="'+leagueClass+'"><span class="'+dotClass+'"></span>'+(m.ligue_icon||'')+(m.league||'').toUpperCase()+(isTennis&&m.surface?' · '+m.surface.toUpperCase():'')+'</div>'
+  var pariLbl = m.pari_rec ? translateMarket(m.pari_rec) : (m.no_signal_label||"Rien d'exploitable ici — on attend mieux.");
+  return '<div class="choc-card-wrap"><div class="choc-card" onclick="window.location=\'match.html?id='+m.id+'\'">'
+    +'<div class="choc-inner"><div class="choc-league"><span class="choc-dot"></span>'+(m.ligue_icon||'')+(m.league||'').toUpperCase()+'</div>'
     +'<div class="choc-teams-row">'
-    +'<div class="choc-team">'+logoH(m.home,hn.slice(0,2).toUpperCase())+'<div class="choc-name">'+hn.toUpperCase()+'</div>'+(m.home&&m.home.rank?'<div class="choc-sub-lbl">ATP #'+m.home.rank+'</div>':'<div class="choc-sub-lbl">'+(isTennis?'JOUEUR':'DOMICILE')+'</div>')+'</div>'
+    +'<div class="choc-team">'+logoH(m.home,hn.slice(0,2).toUpperCase())+'<div class="choc-name">'+hn.toUpperCase()+'</div><div class="choc-sub-lbl">DOMICILE</div></div>'
     +'<div><span class="choc-vs">VS</span><div class="choc-hr">'+heure+'</div></div>'
-    +'<div class="choc-team">'+logoH(m.away,an.slice(0,2).toUpperCase())+'<div class="choc-name" style="color:rgba(226,232,240,0.65)">'+an.toUpperCase()+'</div>'+(m.away&&m.away.rank?'<div class="choc-sub-lbl">ATP #'+m.away.rank+'</div>':'<div class="choc-sub-lbl">'+(isTennis?'JOUEUR':'EXTÉRIEUR')+'</div>')+'</div>'
+    +'<div class="choc-team">'+logoH(m.away,an.slice(0,2).toUpperCase())+'<div class="choc-name" style="color:rgba(226,232,240,0.65)">'+an.toUpperCase()+'</div><div class="choc-sub-lbl">EXTÉRIEUR</div></div>'
     +'</div></div>'
-    +'<div class="choc-pari-strip"><div><div class="choc-pari-lbl">'+chocTitle+'</div><div class="choc-pari-bet">'+(m.pari_rec||m.no_signal_label||"Rien d'exploitable ici — on attend mieux.")+'</div></div>'
+    +'<div class="choc-pari-strip"><div><div class="choc-pari-lbl">CHOC DU SOIR</div><div class="choc-pari-bet">'+pariLbl+'</div></div>'
     +(pariCote?'<div class="choc-cote">'+pariCote+'</div>':'')
     +'</div></div></div>';
 }
@@ -636,19 +516,16 @@ function renderMatchs() {
   var list = applyDayFilter(filterMatchs(sportList, currentFilter));
   var isDemain = currentDayFilter === 'tomorrow';
   var el = document.getElementById('cardsList');
-
   if(!list.length){
     el.innerHTML = '<div class="cards-list"><div class="empty-state"><h3>'+(isDemain?'AUCUN MATCH DEMAIN':'AUCUN MATCH TROUVÉ')+'</h3><p>'+(isDemain?'Reviens ce soir pour les analyses de demain.':'Essaie un autre filtre ou reviens demain.')+'</p></div></div>';
     return;
   }
-
   var nowStr = (function(){
     var d=new Date();
     var f=new Intl.DateTimeFormat('fr-FR',{timeZone:'Europe/Paris',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false}).formatToParts(d);
     var r={};f.forEach(function(x){r[x.type]=x.value;});
     return r.year+'-'+r.month+'-'+r.day+' '+r.hour+':'+r.minute;
   })();
-
   var listAvenir=[], listPasses=[];
   list.forEach(function(m){ if((m.date||'')<nowStr) listPasses.push(m); else listAvenir.push(m); });
   listAvenir.sort(function(a,b){return (a.date||'')<(b.date||'')?-1:1;});
@@ -659,9 +536,7 @@ function renderMatchs() {
     var activeList = listAvenir.length>0?listAvenir:listPasses;
     var choc = getChoc(activeList);
     var rest = activeList.filter(function(m){return m.id!==choc.id;});
-    var chocLabel = listAvenir.length===0?'TERMINÉ':'DU SOIR';
-    var isTennisSport = currentSport==='tennis';
-    html += '<div class="sec-hdr'+(isTennisSport?' s-tennis':' s-choc')+'">'+(isTennisSport?'MATCH ':'CHOC ')+chocLabel+'</div>';
+    html += '<div class="sec-hdr s-choc">CHOC DU SOIR</div>';
     html += buildChocCard(choc);
     if(rest.length){
       html += '<div class="sec-hdr" style="margin-top:16px;">PROCHAINS MATCHS — '+rest.length+' MATCH'+(rest.length>1?'S':'')+'</div>';
@@ -684,12 +559,13 @@ function renderMatchs() {
   el.innerHTML = html;
 }
 
-// ── LOAD DATA ────────────────────────────────────────────
+// ── LOAD ──────────────────────────────────────────────────
 async function loadData(){
   try{
     var resp = await fetch('data.json?t='+Date.now());
     var data = await resp.json();
     allMatchs = data.matchs||[];
+    // Stats chargées depuis historique.json via loadStats()
     updateCounts();
     buildLeagueBtns(getSportMatchs());
     setupFilters();
@@ -704,24 +580,71 @@ async function loadStats(){
   try{
     var resp = await fetch('historique.json?t='+Date.now());
     var data = await resp.json();
-    var bySport = data.stats_by_sport || {};
-    var s = bySport[currentSport] || data.stats || {};
+    var s = data.stats || {};
     var wrEl = document.getElementById('tickerWinrate');
     var roiEl = document.getElementById('tickerRoi');
-    if(wrEl) wrEl.textContent = (typeof s.winrate === 'number') ? s.winrate.toFixed(1)+'%' : '—';
-    if(roiEl) roiEl.textContent = (typeof s.roi === 'number') ? (s.roi>=0?'+':'')+s.roi.toFixed(1)+'%' : '—';
-  }catch(e){
-    var wrEl = document.getElementById('tickerWinrate');
-    var roiEl = document.getElementById('tickerRoi');
-    if(wrEl) wrEl.textContent = '—';
-    if(roiEl) roiEl.textContent = '—';
-  }
+    if(wrEl) wrEl.textContent = (typeof s.winrate==='number') ? s.winrate.toFixed(1)+'%' : '—';
+    if(roiEl) roiEl.textContent = (typeof s.roi==='number') ? (s.roi>=0?'+':'')+s.roi.toFixed(1)+'%' : '—';
+  }catch(e){}
 }
 
-// ── LANG ─────────────────────────────────────────────────
-function toggleLang(e){e.stopPropagation();document.getElementById('langMenu').classList.toggle('open');}
-function setLang(lg){localStorage.setItem('lg',lg);document.getElementById('langMenu').classList.remove('open');document.querySelector('.lang-btn').textContent='🌐 '+lg.toUpperCase();if(lg!=='fr') window.location='/'+lg+'/';}
-document.addEventListener('click',function(){document.getElementById('langMenu').classList.remove('open');});
+// ── LANGUE — FIX : traduit vraiment la page ───────────────
+var TRANSLATIONS = {
+  fr:{accueil:'ACCUEIL',historique:'HISTORIQUE',pro:'PRO',guides:'GUIDES',compte:'COMPTE',connexion:'CONNEXION',analyses:'ANALYSES DU JOUR',titre:'Le seul expert qui ne ressent rien — il calcule.'},
+  en:{accueil:'HOME',historique:'HISTORY',pro:'PRO',guides:'GUIDES',compte:'ACCOUNT',connexion:'LOGIN',analyses:'TODAY\'S ANALYSES',titre:'The only expert who feels nothing — it calculates.'},
+  es:{accueil:'INICIO',historique:'HISTORIAL',pro:'PRO',guides:'GUÍAS',compte:'CUENTA',connexion:'CONEXIÓN',analyses:'ANÁLISIS DE HOY',titre:'El único experto que no siente nada — calcula.'},
+  pt:{accueil:'INÍCIO',historique:'HISTÓRICO',pro:'PRO',guides:'GUIAS',compte:'CONTA',connexion:'LOGIN',analyses:'ANÁLISES DO DIA',titre:'O único especialista que não sente nada — ele calcula.'},
+  de:{accueil:'START',historique:'VERLAUF',pro:'PRO',guides:'GUIDES',compte:'KONTO',connexion:'LOGIN',analyses:'ANALYSEN DES TAGES',titre:'Der einzige Experte, der nichts fühlt — er berechnet.'},
+  it:{accueil:'HOME',historique:'STORICO',pro:'PRO',guides:'GUIDE',compte:'ACCOUNT',connexion:'ACCESSO',analyses:'ANALISI DEL GIORNO',titre:'L\'unico esperto che non sente nulla — calcola.'},
+  ar:{accueil:'الرئيسية',historique:'السجل',pro:'برو',guides:'أدلة',compte:'الحساب',connexion:'تسجيل الدخول',analyses:'تحليلات اليوم',titre:'الخبير الوحيد الذي لا يشعر بشيء — يحسب فقط.'},
+};
+var currentLang = 'fr';
+
+function applyTranslation(lg){
+  var t = TRANSLATIONS[lg] || TRANSLATIONS['fr'];
+  // Labels nav bottom
+  var navLabels = document.querySelectorAll('.nav-lbl');
+  var navMap = ['accueil','historique','pro','guides','compte'];
+  navLabels.forEach(function(el, i){ if(navMap[i] && t[navMap[i]]) el.textContent = t[navMap[i]]; });
+  // Bouton connexion
+  var btnLogin = document.querySelector('.btn-login');
+  if(btnLogin) btnLogin.textContent = t.connexion || 'CONNEXION';
+  // Titre hero
+  var heroTitle = document.querySelector('.hp-title');
+  if(heroTitle && t.titre) heroTitle.innerHTML = t.titre.replace(/(expert|Experte|expert|especialista|especialista|Experte|esperto|خبير)/i,'<b>$1</b>');
+  // Stat pill
+  var statPill = document.getElementById('countSport');
+  if(statPill && t.analyses){
+    statPill.parentElement.innerHTML = '<span id="countSport">'+statPill.textContent+'</span> '+t.analyses;
+  }
+  // Direction RTL pour arabe
+  document.documentElement.dir = lg==='ar'?'rtl':'ltr';
+  // Bouton lang
+  var flags = {fr:'🇫🇷',en:'🇬🇧',es:'🇪🇸',pt:'🇧🇷',de:'🇩🇪',it:'🇮🇹',ar:'🇸🇦'};
+  document.getElementById('langBtnTxt').textContent = (flags[lg]||'🌐')+' '+lg.toUpperCase();
+}
+
+function toggleLang(e){
+  e.stopPropagation();
+  document.getElementById('langMenu').classList.toggle('open');
+}
+function setLang(lg){
+  currentLang = lg;
+  localStorage.setItem('lg', lg);
+  document.getElementById('langMenu').classList.remove('open');
+  applyTranslation(lg);
+}
+document.addEventListener('click',function(e){
+  if(!document.getElementById('langWrap').contains(e.target)){
+    document.getElementById('langMenu').classList.remove('open');
+  }
+});
+
+// Init lang depuis localStorage
+(function(){
+  var saved = localStorage.getItem('lg');
+  if(saved && saved!=='fr') applyTranslation(saved);
+})();
 
 setupFilters();
 loadData();

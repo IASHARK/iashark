@@ -904,6 +904,79 @@ function buildMatchStats(hn,an,stH,stA){
     +'<table class="comp-table"><thead><tr><th class="h">'+hn.toUpperCase().slice(0,12)+'</th><th class="mid"></th><th class="a">'+an.toUpperCase().slice(0,12)+'</th></tr></thead><tbody>'+rows+'</tbody></table></div><div class="sep"></div>';
 }
 
+
+// ── PATTERNS DE JEU — buts marqués/encaissés par tranche 15min ───────
+// Source : events_home/away.slots (vraies données pipeline via getFixtureEvents)
+// Ne s'affiche que si les slots sont disponibles — jamais de données inventées.
+// Pour la CDM, events_home/away est null → bloc masqué automatiquement.
+function buildPatterns(hn, an, evH, evA) {
+  if(!evH && !evA) return '';
+  var sH = (evH && evH.slots) || [];
+  var sA = (evA && evA.slots) || [];
+  if(!sH.length && !sA.length) return '';
+
+  var slots = ["0-15'", "15-30'", "30-45'", "45-60'", "60-75'", "75-90'"];
+
+  // Calcul du max pour normaliser les barres
+  var allVals = [];
+  sH.forEach(function(s){ allVals.push(s.n||0); });
+  sA.forEach(function(s){ allVals.push(s.n||0); });
+  var concH = evH ? (evH.slots_against||[]) : [];
+  var concA = evA ? (evA.slots_against||[]) : [];
+  concH.forEach(function(s){ allVals.push(s.n||0); });
+  concA.forEach(function(s){ allVals.push(s.n||0); });
+  var maxVal = Math.max.apply(null, allVals.concat([1]));
+
+  function col(teamSlots, concSlots, teamName, isCyan) {
+    var nameColor = isCyan ? 'var(--cyan)' : 'rgba(226,232,240,0.6)';
+    var rows = slots.map(function(lbl, i) {
+      var scored = (teamSlots[i] && teamSlots[i].n) || 0;
+      var conced = (concSlots[i] && concSlots[i].n) || 0;
+      var wS = Math.round((scored / maxVal) * 100);
+      var wC = Math.round((conced / maxVal) * 100);
+      return '<div style="display:flex;align-items:center;gap:6px;padding:3px 0;">'
+        + '<div style="font-family:Space Mono,monospace;font-size:7px;color:var(--muted);width:30px;flex-shrink:0">' + lbl + '</div>'
+        + '<div style="flex:1;display:flex;flex-direction:column;gap:2px;">'
+        +   '<div style="display:flex;align-items:center;gap:4px;">'
+        +     '<div style="flex:1;height:4px;background:rgba(255,255,255,0.04);border-radius:2px;overflow:hidden;">'
+        +       '<div style="width:' + wS + '%;height:100%;background:rgba(34,211,238,0.7);border-radius:2px;"></div>'
+        +     '</div>'
+        +     '<div style="font-family:Bebas Neue,sans-serif;font-size:11px;color:var(--text);width:14px;text-align:right">' + scored + '</div>'
+        +   '</div>'
+        +   '<div style="display:flex;align-items:center;gap:4px;">'
+        +     '<div style="flex:1;height:4px;background:rgba(255,255,255,0.04);border-radius:2px;overflow:hidden;">'
+        +       '<div style="width:' + wC + '%;height:100%;background:rgba(239,68,68,0.6);border-radius:2px;"></div>'
+        +     '</div>'
+        +     '<div style="font-family:Bebas Neue,sans-serif;font-size:11px;color:var(--muted);width:14px;text-align:right">' + conced + '</div>'
+        +   '</div>'
+        + '</div>'
+        + '</div>';
+    }).join('');
+    return '<div>'
+      + '<div style="font-family:Space Mono,monospace;font-size:8px;color:' + nameColor + ';margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--border)">' + teamName.toUpperCase().slice(0,14) + '</div>'
+      + rows
+      + '</div>';
+  }
+
+  // Légende
+  var legend = '<div style="display:flex;gap:14px;margin-bottom:10px;">'
+    + '<span style="display:flex;align-items:center;gap:5px;font-family:Space Mono,monospace;font-size:7px;color:var(--muted)">'
+    +   '<div style="width:8px;height:4px;border-radius:1px;background:rgba(34,211,238,0.7)"></div>Marqués'
+    + '</span>'
+    + '<span style="display:flex;align-items:center;gap:5px;font-family:Space Mono,monospace;font-size:7px;color:var(--muted)">'
+    +   '<div style="width:8px;height:4px;border-radius:1px;background:rgba(239,68,68,0.6)"></div>Encaissés'
+    + '</span>'
+    + '</div>';
+
+  return '<div class="s"><div class="stitle">PATTERNS DE JEU — 15 MIN</div>'
+    + legend
+    + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">'
+    + col(sH, concH, hn, true)
+    + col(sA, concA, an, false)
+    + '</div>'
+    + '</div><div class="sep"></div>';
+}
+
 // ── NOUVEAU : ANALYSE COMPARATIVE — tableau dense avec barres inline ─
 function buildCompTable(hn,an,ch,ca){
   var def=[{label:'ATTAQUE',key:'att'},{label:'DÉFENSE',key:'def'},{label:'FORME',key:'fr'},{label:'MOTIVATION',key:'mot'}];
@@ -1410,8 +1483,9 @@ function render(m){
     +(!isTennis?buildMarketsTable(m,pariRec):'')
     +(!isTennis?buildScoresProbables(m.lambda_h,m.lambda_a,m.scores,m):'')
     +buildWCModel(m)
-    +(!isTennis?'<div class="s"><div class="stitle">ANALYSE COMPARATIVE</div>'+buildCompTable(hn,an,m.crit_home,m.crit_away)+'<div style="margin-top:10px">'+buildXgCurve(hn,an,(m.match_stats_home&&m.match_stats_home.xg)||(m.events_home&&m.events_home.goals_avg),(m.match_stats_away&&m.match_stats_away.xg)||(m.events_away&&m.events_away.goals_avg))+'</div></div><div class="sep"></div>':'')
+    +(!isTennis?'<div class="s"><div class="stitle">ANALYSE COMPARATIVE</div>'+buildCompTable(hn,an,m.crit_home,m.crit_away)+'</div><div class="sep"></div>':'')
     +(!isTennis?buildMatchStats(hn,an,m.match_stats_home,m.match_stats_away):'')
+    +(!isTennis?buildPatterns(hn,an,m.events_home,m.events_away):'')
     +(isTennis?buildSurface(hn,an,m.surf_stats_p1,m.surf_stats_p2,m.surface):'')
     +buildScen(m);
 

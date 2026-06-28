@@ -2937,46 +2937,46 @@
       "mise": "2-3% bankroll",
       "verdict_shark": "",
       "scenario": {
-        "phase1": "0-30 min — Le Canada impose son tempo avec une possession dominante et des transitions rapides via ses ailiers de MLS/Europe. L'Afrique du Sud défend en bloc bas et tente de résister aux combinaisons offensives canadiennes en évitant les espaces dans le dos.",
-        "phase2": "30-65 min — Le Canada crée les meilleures occasions (xG supérieur attendu) et marque probablement en première mi-temps ou juste après la pause. L'Afrique du Sud cherche à exploiter les transitions rapides sur les rares pertes de balle canadiennes, son unique voie vers le but.",
-        "phase3": "65-90 min — Si le Canada mène, il gère le match et peut creuser l'écart. Si le score est serré, l'Afrique du Sud pousse mais son manque de puissance offensive (Force 26/100) limite ses chances de retourner la rencontre. Fin logique sur un score de type 0-2 ou 1-2."
+        "phase1": "0-30 min : Canada prend l'initiative avec une possession haute et des transitions rapides via ses joueurs de top5 (40%). L'Afrique du Sud défend en bloc bas, limitant les espaces dans l'axe. Le rythme est élevé mais les occasions franches restent rares.",
+        "phase2": "30-65 min : Canada intensifie la pression après la pause, exploitant la fatigue physique croissante de l'Afrique du Sud. Un but canadien dans cette fenêtre est le scénario central (lambda 1.76). L'Afrique du Sud tente des contres sur transition, avec un potentiel xG de 0.91 maintenu.",
+        "phase3": "65-90 min : Si Canada mène, gestion du résultat avec possible rotation tardive. Si le score est serré, l'Afrique du Sud pousse et s'expose en contre — le scénario 1-2 ou 0-2 devient dominant dans les 20 dernières minutes."
       },
       "scenario_15min": [
         {
           "t": "0-15min",
           "prob": 8,
-          "txt": "Phase d'observation — le Canada met en place sa pression haute, l'Afrique du Sud s'organise défensivement. Peu d'occasions franches, probabilité de but faible dans ce laps de temps."
+          "txt": "Phase d'installation : Canada impose son pressing haut, Afrique du Sud cherche à sortir proprement. Faible probabilité de but immédiat, les deux équipes tâtent le terrain dans un stade SoFi à atmosphère électrique."
         },
         {
           "t": "15-30min",
           "prob": 12,
-          "txt": "Le Canada commence à trouver des espaces entre les lignes sud-africaines. Premiers tirs cadrés attendus, risque de but canadien croissant via les débordements sur les côtés."
+          "txt": "Canada commence à trouver des espaces dans le dos de la défense sud-africaine via ses ailiers. Première occasion franche attendue autour de la 22e-27e minute. Probabilité d'ouverture du score canadienne en hausse."
         },
         {
           "t": "30-45min",
           "prob": 10,
-          "txt": "Phase de pression maximale canadienne avant la pause. L'Afrique du Sud peut tenter un contre dangereux sur repli rapide. Probabilité d'un but dans ces 15 minutes modérée."
+          "txt": "L'Afrique du Sud stabilise son bloc défensif et tente de récupérer des ballons hauts. Un coup de pied arrêté ou une erreur individuelle reste le principal vecteur de but dans cette fenêtre. Match équilibré malgré le différentiel de force."
         },
         {
           "t": "45-60min",
           "prob": 15,
-          "txt": "La période post-pause est souvent favorable aux équipes dominantes — le Canada repart avec le même plan et peut concrétiser rapidement une occasion créée en fin de première mi-temps. Risque de but ouverture de score élevé ici."
+          "txt": "Reprise avec un Canada plus direct — la seconde mi-temps voit historiquement plus de buts en phase de groupes CM. Si le score est 0-0, la pression canadienne s'accélère nettement dès la 48e-55e minute."
         },
         {
           "t": "60-75min",
           "prob": 18,
-          "txt": "Pic de dangerosité offensive canadienne. Avec Larin et les ailiers MLS en confiance, les situations de 1v1 augmentent. L'Afrique du Sud, physiquement intacte (0 km, 3j récup) mais techniquement inférieure, commence à subir davantage."
+          "txt": "Pic d'intensité offensive canadienne : entrées de remplaçants frais, Afrique du Sud en difficulté physique croissante. Fenêtre la plus probable pour le but décisif du match selon le modèle Poisson (lambda cumulé Canada ~1.18 buts à ce stade)."
         },
         {
           "t": "75-90min",
           "prob": 20,
-          "txt": "Phase finale — si le Canada mène, il gère et peut aggraver le score sur corner ou contre. Si l'Afrique du Sud est dos au mur, elle prend des risques défensifs et expose ses espaces. Période la plus propice aux buts des deux côtés selon le contexte scoreboard."
+          "txt": "Phase finale : si Canada mène, l'Afrique du Sud ouvre les espaces en cherchant l'égalisation, créant des contres. Le deuxième but (Canada ou Afrique du Sud) est le plus probable dans cette fenêtre — 20% de probabilité de but sur les 15 dernières minutes selon la distribution Poisson."
         }
       ],
-      "facteur_x": "Lambda Canada 1.76 vs Lambda Afrique du Sud 0.91 : total attendu 2.67 buts place Over/Under 2.5 exactement à la frontière du 50/50, rendant tout pari aléatoire sans edge réel.",
-      "analyse_card": "Le Canada affiche un xG généré de 2.5 en phase de groupes et un xG concédé de seulement 0.76, ce qui reflète une supériorité nette dans les deux surfaces. L'Afrique du Sud présente un xG généré limité à 1.05 et une valeur d'attaque de 18M€ contre 30M€ pour le Canada, signalant un déséquilibre offensif réel. Malgré cet écart, les lambdas Poisson (0.91 vs 1.76) placent le total attendu à 2.67 buts, ce qui rend le Over/Under 2.5 parfaitement incertain autour de 50/50.",
-      "conseil_public": "Ne pas jouer ce match : l'incertitude est symétrique sur tous les marchés disponibles et aucun edge exploitable n'existe au-delà du seuil de fiabilité requis.",
-      "contexte": "Match de phase de groupes à la Coupe du Monde 2026 — les deux équipes ont potentiellement des enjeux de qualification selon leur position dans le groupe, mais aucune information de qualification anticipée n'est disponible. L'absence d'Ibrahim Koné côté canadien est notable mais n'affecte pas suffisamment les probabilités pour débloquer un marché fiable.",
+      "facteur_x": "Le delta lambda Poisson Canada/Afrique du Sud de +0.85 but (1.76 vs 0.91) est insuffisant pour trancher : avec xG_combiné de 3.55 et un modèle à 50/50 sur Over 2.5, le signal est trop bruité par la source hybride qualif/tournoi de l'Afrique du Sud (30% qualif + 70% tournoi) pour être exploitable.",
+      "analyse_card": "Canada affiche un lambda offensif de 1.76 buts contre 0.91 pour l'Afrique du Sud, reflétant un écart de valeur significatif (attaque 30M€ vs 18M€) et un xG concédé très faible de 0.76. Cependant, l'Afrique du Sud génère un xG de 1.05 en phase défensive solide (xG concédé 1.01), rendant les scénarios de clean-sheet ou de nul défensif peu exclus. L'incertitude symétrique entre Over/Under et BTTS Oui/Non (50%/49%) traduit un match structurellement équilibré malgré la supériorité canadienne sur le papier.",
+      "conseil_public": "Ne misez sur aucun marché de ce match : l'incertitude statistique est maximale et aucun signal ne génère d'edge exploitable selon les règles du modèle IASHARK.",
+      "contexte": "Phase de groupes Coupe du Monde 2026, match de la 3e journée — les deux équipes n'ont pas encore leur statut de qualification confirmé à ce stade, mais la position du Canada (force 41.2) en fait le favori logique pour valider ou sécuriser sa place. L'Afrique du Sud (force 26) joue sa survie dans le tournoi. Aucune rotation massive signalée, ce qui maintient la compétitivité apparente du match.",
       "vbet": "NON",
       "scores": [
         "0-2"
@@ -5483,46 +5483,46 @@
       "mise": "2-3% bankroll",
       "verdict_shark": "",
       "scenario": {
-        "phase1": "0-30min : La France impose le tempo avec possession haute et pressing offensif — la Suède défend en bloc bas, limitant les espaces en contre. Peu de buts attendus dans ce segment malgré la domination française (lambda partiel ~0.54 buts France).",
-        "phase2": "30-75min : La pression française s'intensifie, Mbappé et les ailiers exploitent les couloirs face à une défense suédoise exposée (xG concédé 1.50). Probabilité d'ouverture du score élevée sur cette phase, avec risque de but suédois en contre si la France s'étire.",
-        "phase3": "75-90min : Si France mène 1-0 ou 2-0, gestion du résultat probable avec rotation défensive. La Suède peut tenter le tout pour le tout si le contexte de groupe l'exige, augmentant légèrement le risque BTTS en fin de match."
+        "phase1": "0-30 min : La France impose sa possession et son pressing haut (92% des joueurs évoluant dans le Top 5 européen). La Suède s'organise en bloc médian bas pour limiter les espaces, avec des transitions rapides cherchant Isak ou l'avant-centre désigné. Pression française constante mais peu de finition nette attendue en tout début de match.",
+        "phase2": "30-65 min : Après l'ouverture du score probable pour la France (lambda 1.81), la Suède est forcée de s'ouvrir. Le milieu français (Tchouaméni, Camavinga ou équivalent) contrôle le tempo. La Suède tente quelques transitions, son xG concédé de 1.50 expose ses lacunes défensives. Second but français possible, but suédois peu probable mais non exclu.",
+        "phase3": "65-90 min : Si la France mène 2-0, les rotations s'accélèrent. Gestion du résultat côté français avec relâchement possible. La Suède bénéficie d'espaces et peut créer 1 à 2 occasions de qualité — le score final 2-0 ou 2-1 reste le scénario central, sans edge exploitable sur aucun marché disponible."
       },
       "scenario_15min": [
         {
           "t": "0-15min",
           "prob": 8,
-          "txt": "Phase d'observation — la France teste la défense suédoise en bloc, peu d'espaces, probabilité de but faible. Suède disciplinée défensivement."
+          "txt": "Prise de contrôle progressive de la France. La Suède défend en bloc compact à 4-4-2. Peu de buts attendus : la prudence suédoise en début de match réduit les espaces. Probabilité but dans ce créneau : 8%."
         },
         {
           "t": "15-30min",
           "prob": 12,
-          "txt": "La France accélère le rythme, les combinaisons entre milieux et attaquants créent des situations dangereuses. Premier xG significatif attendu sur cette fenêtre."
+          "txt": "La France commence à trouver les espaces entre les lignes suédoises. Premières situations franches côté français (Mbappé ou profil similaire). Probabilité but cumulatif dans ce créneau : 12%, ouverture du score française la plus probable."
         },
         {
           "t": "30-45min",
           "prob": 10,
-          "txt": "Consolidation française avant la mi-temps — la Suède tente quelques sorties rapides en contre, exposant brièvement la défense des Bleus. Probabilité de but modérée des deux côtés."
+          "txt": "Fin de première mi-temps : si la France mène, la Suède tente une réaction avant la pause. Quelques corners et coups de pied arrêtés. Probabilité d'un but supplémentaire dans ce créneau : 10%, risque de réduction du score suédois sur coup de pied arrêté."
         },
         {
           "t": "45-60min",
           "prob": 15,
-          "txt": "Retour des vestiaires souvent décisif — la France repart avec intensité, la fatigue mentale suédoise commence à se faire sentir. Fenêtre favorable pour un but français."
+          "txt": "Retour des vestiaires : la France peut ajuster tactiquement et accélérer. C'est souvent la période où les équipes supérieures doublent la mise. Probabilité but dans ce créneau : 15%, second but français attendu si la France n'a marqué qu'une fois."
         },
         {
           "t": "60-75min",
           "prob": 18,
-          "txt": "Phase de rupture : la France accélère avec les entrants potentiels, la défense suédoise montre des signes de fatigue. Probabilité de but la plus élevée sur ce segment hors fin de match."
+          "txt": "La Suède, obligée de pousser si elle est menée de 2 buts, s'expose aux contre-attaques françaises. C'est la période la plus fertile en buts : 18% de probabilité de but, potentiellement côté des deux équipes avec les espaces qui s'ouvrent."
         },
         {
           "t": "75-90min",
           "prob": 20,
-          "txt": "Fin de match décisive — si la France mène, elle gère ; si le score est serré ou si l'enjeu groupe impose, les deux équipes ouvrent le jeu. Plus forte probabilité de but sur n'importe quelle fenêtre, notamment suédoise en cas de nécessité."
+          "txt": "Phase finale : avec un résultat consolidé, les remplaçants français entrent et peuvent marquer. La Suède tente le tout pour le tout si son destin qualificatif l'y oblige. Période la plus probable pour un but (20%), incluant arrêts de jeu, coup franc ou pénalty — but français ou réduction suédoise sur corner."
         }
       ],
-      "facteur_x": "Lambda Poisson France 1.81 vs Suède 0.94 — écart offensif significatif mais insuffisant pour franchir le seuil Over 2.5 à 55% (modèle à 52%), laissant une marge d'erreur trop étroite pour valider un pari.",
-      "analyse_card": "La France affiche un xG généré de 2.12 contre seulement 0.84 concédé, pour un lambda Poisson offensif de 1.81 buts — nette supériorité structurelle. La Suède génère 1.04 xG offensif mais concède 1.50 en moyenne, exposant une défense fragile face à l'attaque française valorisée à 480M€. Malgré cet écart de force (82.8 vs 40.7), les probabilités restent trop dispersées pour identifier un marché fiable au-delà des seuils requis.",
-      "conseil_public": "Ne joue aucun marché sur ce match — l'absence de signal au-dessus du seuil de probabilité et la cote DC 1X à 1.06 (sous 1.30) rendent toute mise statistiquement non justifiable selon les règles IASHARK.",
-      "contexte": "Phase de groupes Coupe du Monde 2026, match pouvant décider de la qualification ou du classement dans le groupe — les enjeux peuvent induire des rotations ou une gestion conservatrice du score, ce qui augmente l'incertitude sur les marchés de buts et BTTS.",
+      "facteur_x": "Le lambda Suède à 0.94 buts donne une probabilité BTTS Oui de seulement 51% — insuffisante — et la règle de rotation en J3 pour la France (si qualifiée) peut déprimer encore le lambda offensif français en dessous de 1.81, fragilisant le marché Over 2.5 déjà à 52%.",
+      "analyse_card": "La France affiche un xG généré de 2.12 contre un xG concédé de seulement 0.84, reflétant une domination offensive et défensive nette (lambda Poisson 1.81 buts). La Suède, avec un xG généré de 1.04 et un xG concédé de 1.50, présente un profil offensif limité et défensivement perméable (lambda Poisson 0.94 buts). Le différentiel de valeur marché est éloquent : 480M€ vs 75M€ en attaque, mais la probabilité d'un résultat Suède à 27% indique une incertitude réelle qui empêche de valider un marché avec une confiance suffisante.",
+      "conseil_public": "Ne pas parier sur ce match : aucun marché disponible n'atteint le seuil de probabilité minimum de 55% ; attendre un match avec un edge clairement identifié.",
+      "contexte": "Phase de groupes Coupe du Monde 2026, journée 3 potentiellement décisive pour les qualifications. Si la France est déjà qualifiée, des rotations sont probables (décote attaque -30% à appliquer mentalement), ce qui réduit encore la confiance dans les marchés offensifs. La Suède, outsider du groupe (FIFA 1598 vs 1851), joue potentiellement sa survie en compétition, ce qui peut générer un bloc défensif inattendu.",
       "vbet": "NON",
       "scores": [
         "2-0"
@@ -5691,14 +5691,20 @@
       "actu": [
         {
           "c": "France",
-          "t": "« Il est Ballon d’or ? Je ne le connaissais pas ! » : quand des Texans s’improvisent supporters des Bleus devant Norvège-France à la Coupe du monde",
-          "tx": "Alors, football ou soccer pour les cow-boys ? La victoire prolifique de l’équipe de France face à la…",
+          "t": "Le show de Dembélé, une qualification suprise du Cap Vert, les Iraniens en colère : le bulletin de la Coupe du Monde de Trump",
+          "tx": "La 23ᵉ édition du Mondial est ouverte depuis plus de deux semaines au Mexique, au Canada et aux Etats-Unis de Donald Trump, sur fond de politique répressive et de tensions avec l’Iran. Chaque jour jusqu’à la finale, le 19 juillet, « le Nouvel Obs » vous racon…",
           "tm": "2026-06-27"
         },
         {
           "c": "France",
-          "t": "Dans le podcast « Un divorce alpin », une histoire de violence conjugale",
-          "tx": "Le témoignage de Rachel éclaire les mécanismes d’une relation sous emprise.",
+          "t": "Voici la box idéale pour un foyer qui veut tout sans payer le prix fort",
+          "tx": "Fibre jusqu'à 5 Gbit/s, Wi-Fi 7, plus de 300 chaînes TV et téléphonie illimitée pour 29,99 euros par mois la première année. La Freebox Pop coche presque toutes les cases d'un abonnement complet, sans grimper dans les tarifs premium.",
+          "tm": "2026-06-27"
+        },
+        {
+          "c": "Sweden",
+          "t": "Le show de Dembélé, une qualification suprise du Cap Vert, les Iraniens en colère : le bulletin de la Coupe du Monde de Trump",
+          "tx": "La 23ᵉ édition du Mondial est ouverte depuis plus de deux semaines au Mexique, au Canada et aux Etats-Unis de Donald Trump, sur fond de politique répressive et de tensions avec l’Iran. Chaque jour jusqu’à la finale, le 19 juillet, « le Nouvel Obs » vous racon…",
           "tm": "2026-06-27"
         },
         {
@@ -5706,12 +5712,6 @@
           "t": "\"Y a-t-il seulement une chance?\": la presse suédoise effrayée par l'équipe de France et son attaque digne \"du Brésil de 2002\"",
           "tx": "La presse suédoise a bien du mal à imaginer sa sélection faire tomber les Bleus, mardi, en 16es de finale de la Coupe du monde 2026. Seul l'ancien attaquant John Guidetti imagine la France pouvoir se faire piéger en prenant \"la grosse tête\".",
           "tm": "2026-06-27"
-        },
-        {
-          "c": "Sweden",
-          "t": "La souveraineté européenne passera-t-elle par le hardware open source ?",
-          "tx": "Le fait de dépendre de technologies propriétaires américaines pour le hardware, comme celui qui est utilisé pour fondre des puces ou faire tourner des centres de données, est problématique.",
-          "tm": "2026-06-25"
         }
       ],
       "arbitre": null,

@@ -2010,6 +2010,7 @@ jobs:
                 var wcProbs = WC_MODEL.calcMatchProbs(homeKey, awayKey, wcPhase, null, null, stadeKey, dynStatsH, dynStatsA);
                 var wcMarkets = WC_MODEL.calcWCMarkets(homeKey, awayKey, wcProbs, dynStatsH, dynStatsA);
 
+
                 prompt = WC_MODEL.buildWCPrompt({
                   home: d.home, away: d.away,
                   league: d.league, date: d.date, stade: d.stade,
@@ -2789,7 +2790,6 @@ jobs:
                 poisson_over25:poissonProbs.over25,poisson_under25:poissonProbs.under25,
                 poisson_bttsY:poissonProbs.bttsY,poisson_bttsN:poissonProbs.bttsN,
                 dixon_p1:poissonProbs.dixon?poissonProbs.dixon.p1:poissonProbs.p1,
-              mc_scores:poissonProbs.montecarlo?poissonProbs.montecarlo.top_scores:[],
                 dixon_pN:poissonProbs.dixon?poissonProbs.dixon.pN:poissonProbs.pN,
                 dixon_p2:poissonProbs.dixon?poissonProbs.dixon.p2:poissonProbs.p2,
                 mc_p1:poissonProbs.montecarlo?poissonProbs.montecarlo.p1:poissonProbs.p1,
@@ -2883,6 +2883,7 @@ jobs:
                 contexte:an?(an.contexte||''):'',
                 vbet:an?(an.vbet||'NON'):'NON',
                 scores:an&&an.score_central?[an.score_central]:[],
+                mc_scores:poissonProbs.montecarlo?poissonProbs.montecarlo.top_scores:[],
                 paris_safe:{bet:an?(an.pari_rec||''):'',cote:an?(parseFloat(an.cote_rec)||odds.c1):odds.c1,proba:an?(an.p1||0)+'%':''},
                 paris_risque:{bet:'',cote:'',proba:''},kelly:kellyVal,
                 stade:{nom:f.venue&&f.venue.name?(f.venue.name+(f.venue.city?' \u2014 '+f.venue.city:'')):home.name+' (domicile)',cap:'',meteo:wx?wx.emoji:'\ud83c\udf24\ufe0f',temp:wx?wx.temp:'',desc:wx?wx.desc:''},

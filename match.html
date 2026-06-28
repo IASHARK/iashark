@@ -1326,30 +1326,54 @@ function render(m){
       +'</div>';
   }
 
-  // ─ STRIP infos (WC : FIFA pts + exp CM, sinon classement)
+  // ─ STRIP classement sobre
   var stripHtml='';
   if(!isTennis){
-    var d1='',d2='',d3='',d4='';
     if(isWC&&m.wc_probs&&m.wc_probs.scoreH&&m.wc_probs.scoreA){
       var dH=m.wc_probs.scoreH.details||{},dA=m.wc_probs.scoreA.details||{};
-      d1=dH.fifa_pts||'—'; d2=dA.fifa_pts||'—'; d3=dH.wc_exp||'—'; d4=dA.wc_exp||'—';
       stripHtml='<div class="info-strip">'
-        +'<div class="is-item"><div class="is-val" style="color:var(--cyan)">'+d1+'</div><div class="is-lbl">FIFA '+hn.slice(0,4).toUpperCase()+'</div></div>'
-        +'<div class="is-item"><div class="is-val">'+d2+'</div><div class="is-lbl">FIFA '+an.slice(0,4).toUpperCase()+'</div></div>'
-        +'<div class="is-item"><div class="is-val" style="color:var(--cyan)">'+d3+'</div><div class="is-lbl">EXP CM '+hn.slice(0,4).toUpperCase()+'</div></div>'
-        +'<div class="is-item"><div class="is-val">'+d4+'</div><div class="is-lbl">EXP CM '+an.slice(0,4).toUpperCase()+'</div></div>'
+        +'<div class="is-item"><div class="is-val" style="color:var(--cyan)">'+(dH.fifa_pts||'—')+'</div><div class="is-lbl">FIFA '+hn.slice(0,4).toUpperCase()+'</div></div>'
+        +'<div class="is-item"><div class="is-val">'+(dA.fifa_pts||'—')+'</div><div class="is-lbl">FIFA '+an.slice(0,4).toUpperCase()+'</div></div>'
+        +'<div class="is-item"><div class="is-val" style="color:var(--cyan)">'+(dH.wc_exp||'—')+'</div><div class="is-lbl">EXP CM '+hn.slice(0,4).toUpperCase()+'</div></div>'
+        +'<div class="is-item"><div class="is-val">'+(dA.wc_exp||'—')+'</div><div class="is-lbl">EXP CM '+an.slice(0,4).toUpperCase()+'</div></div>'
         +'</div>';
-    } else if(m.classement&&m.classement.home&&m.classement.away){
-      stripHtml='<div class="info-strip">'
-        +'<div class="is-item"><div class="is-val" style="color:var(--cyan)">'+m.classement.home.rank+'e</div><div class="is-lbl">RANK '+hn.slice(0,6).toUpperCase()+'</div></div>'
-        +'<div class="is-item"><div class="is-val">'+m.classement.away.rank+'e</div><div class="is-lbl">RANK '+an.slice(0,6).toUpperCase()+'</div></div>'
-        +'<div class="is-item"><div class="is-val" style="color:var(--cyan)">'+m.classement.home.pts+'</div><div class="is-lbl">PTS '+hn.slice(0,6).toUpperCase()+'</div></div>'
-        +'<div class="is-item"><div class="is-val">'+m.classement.away.pts+'</div><div class="is-lbl">PTS '+an.slice(0,6).toUpperCase()+'</div></div>'
+    } else if(m.classement&&m.classement.home&&m.classement.away&&m.classement.standings&&m.classement.standings.length){
+      // Tableau sobre : rang + nom + forme dots + V/N/D + pts
+      function formDots(str){
+        return (str||'').split('').slice(0,5).map(function(c){
+          var col=c==='W'||c==='V'?'rgba(255,255,255,0.55)':c==='D'||c==='N'?'rgba(255,255,255,0.2)':'rgba(255,255,255,0.08)';
+          return '<div style="width:5px;height:5px;border-radius:50%;background:'+col+'"></div>';
+        }).join('');
+      }
+      var rows='';
+      m.classement.standings.forEach(function(t,i){
+        var isH=t.team_id===m.home.id||t.name===m.home.n;
+        var isA=t.team_id===m.away.id||t.name===m.away.n;
+        var border=i<m.classement.standings.length-1?'border-bottom:1px solid rgba(255,255,255,0.04);':'';
+        var nameCol=isH?'#e2e8f0':isA?'rgba(226,232,240,0.6)':'#4a6580';
+        var ptsCol=isH?'#22d3ee':isA?'#e2e8f0':'#4a6580';
+        var rankCol=isH||isA?'#e2e8f0':'#2a3f55';
+        var dot=isH?'<div style="width:3px;height:3px;border-radius:50%;background:#22d3ee;margin-right:8px;flex-shrink:0"></div>'
+               :isA?'<div style="width:3px;height:3px;border-radius:50%;background:rgba(255,255,255,0.3);margin-right:8px;flex-shrink:0"></div>'
+               :'<div style="width:3px;margin-right:8px;flex-shrink:0"></div>';
+        rows+='<div style="display:flex;align-items:center;padding:9px 0;'+border+'">'
+          +'<div style="font-family:Space Mono,monospace;font-size:9px;color:'+rankCol+';width:22px;flex-shrink:0">'+t.rank+'</div>'
+          +dot
+          +'<div style="flex:1;min-width:0;font-family:Space Mono,monospace;font-size:10px;color:'+nameCol+';white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(t.name)+'</div>'
+          +'<div style="display:flex;gap:3px;align-items:center;margin:0 12px">'+formDots(t.form)+'</div>'
+          +'<div style="font-family:Space Mono,monospace;font-size:9px;color:#2a3f55;width:20px;text-align:center">'+(t.won||0)+'</div>'
+          +'<div style="font-family:Space Mono,monospace;font-size:9px;color:#2a3f55;width:20px;text-align:center">'+(t.drawn||0)+'</div>'
+          +'<div style="font-family:Space Mono,monospace;font-size:9px;color:#2a3f55;width:20px;text-align:center">'+(t.lost||0)+'</div>'
+          +'<div style="font-family:Bebas Neue,sans-serif;font-size:20px;color:'+ptsCol+';width:36px;text-align:right">'+t.pts+'</div>'
+          +'</div>';
+      });
+      stripHtml='<div style="margin:0 18px 16px">'
+        +'<div style="font-family:Space Mono,monospace;font-size:7px;letter-spacing:2px;color:#4a6580;margin-bottom:10px;display:flex;align-items:center;gap:8px">CLASSEMENT<div style="flex:1;height:1px;background:rgba(255,255,255,0.05)"></div></div>'
+        +rows
         +'</div>';
     }
   }
-
-  // ─ CONTEXTE texte seul
+// ─ CONTEXTE texte seul
   var ctxHtml=m.contexte?'<div style="padding:0 18px 16px"><div style="font-size:13px;color:#94a3b8;line-height:1.75;">'+esc(cleanJargon(m.contexte))+'</div></div>':'';
 
   // ─ SKIP

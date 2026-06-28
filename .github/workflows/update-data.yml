@@ -306,11 +306,40 @@ jobs:
               // on retombe sur les buts réels du tournoi en cours plutôt que rien.
               var xgForAvg = avg(xgFor);
               var xgAgainstAvg = avg(xgAgainst);
+              // Slots 15min depuis les events des matchs joués en CDM
+              var slotsFor=[{t:'0-15',n:0},{t:'15-30',n:0},{t:'30-45',n:0},{t:'45-60',n:0},{t:'60-75',n:0},{t:'75-90',n:0}];
+              var slotsAgainst=[{t:'0-15',n:0},{t:'15-30',n:0},{t:'30-45',n:0},{t:'45-60',n:0},{t:'60-75',n:0},{t:'75-90',n:0}];
+              var slotRanges=[[0,15],[15,30],[30,45],[45,60],[60,75],[75,91]];
+              var hasSlotsData=false;
+              for(var si2=0;si2<played.length;si2++){
+                try{
+                  var evR=await get('https://v3.football.api-sports.io/fixtures/events?fixture='+played[si2].fixture.id,APS);
+                  var evts=evR.response||[];
+                  var isHome2=played[si2].teams.home.id===teamId;
+                  evts.forEach(function(e){
+                    if(e.type!=='Goal'||e.detail==='Missed Penalty') return;
+                    var min=e.time&&e.time.elapsed||0;
+                    var isByTeam=e.team&&e.team.id===teamId;
+                    for(var ri=0;ri<slotRanges.length;ri++){
+                      if(min>=slotRanges[ri][0]&&min<slotRanges[ri][1]){
+                        if(isByTeam) slotsFor[ri].n++;
+                        else slotsAgainst[ri].n++;
+                        hasSlotsData=true;
+                        break;
+                      }
+                    }
+                  });
+                }catch(e2){}
+                await sleep(100);
+              }
+
               var result = {
                 xg_for: xgForAvg!=null ? Math.round(xgForAvg*100)/100 : avg(goalsFor),
                 xg_against: xgAgainstAvg!=null ? Math.round(xgAgainstAvg*100)/100 : avg(goalsAgainst),
                 games: played.length,
                 source: xgForAvg!=null ? 'tournoi_xg_reel' : 'tournoi_buts_reels',
+                slots: hasSlotsData ? slotsFor : null,
+                slots_against: hasSlotsData ? slotsAgainst : null,
               };
               console.log('  [WC tournoi] '+teamName+': xg_for='+result.xg_for+' xg_against='+result.xg_against+' ('+played.length+' matchs joués, source='+result.source+')');
               WC_TEAM_STATS_CACHE[cacheKey] = result;
@@ -1570,10 +1599,11 @@ jobs:
             return bestScore<0.35?eloData[best]:null;
           }
 
-          function eloWinProb(eloH,eloA,vdH,mdHdom){
+          function eloWinProb(eloH,eloA,vdH,mdHdom,forceNeutral){
             if(!eloH||!eloA) return null;
             var homeBonus=70;
-            if(vdH!=null&&mdHdom&&mdHdom>0){
+            if(forceNeutral){homeBonus=0;}
+            else if(vdH!=null&&mdHdom&&mdHdom>0){
               var hwr=vdH/mdHdom;
               if(hwr>=0.65)homeBonus=100;else if(hwr>=0.50)homeBonus=70;else if(hwr>=0.35)homeBonus=40;else homeBonus=20;
             }
@@ -1825,13 +1855,14 @@ jobs:
                 var dynStatsH = await getTeamWCStats(d.homeId, homeKey);
                 var dynStatsA = await getTeamWCStats(d.awayId, awayKey);
 
-                var wcProbs = WC_MODEL.calcMatchProbs(homeKey, awayKey, 'group', null, null, stadeKey, dynStatsH, dynStatsA);
+                var wcPhase = isKnockout ? 'knockout' : 'group';
+                var wcProbs = WC_MODEL.calcMatchProbs(homeKey, awayKey, wcPhase, null, null, stadeKey, dynStatsH, dynStatsA);
                 var wcMarkets = WC_MODEL.calcWCMarkets(homeKey, awayKey, wcProbs, dynStatsH, dynStatsA);
 
                 prompt = WC_MODEL.buildWCPrompt({
                   home: d.home, away: d.away,
                   league: d.league, date: d.date, stade: d.stade,
-                  phase: 'group',
+                  phase: wcPhase,
                   probs: wcProbs, markets: wcMarkets,
                   fatigueH: null, fatigueA: null,
                   h2h: h2hStr, absences: injStr,
@@ -2385,6 +2416,10 @@ jobs:
               var home=fix.teams.home;
               var away=fix.teams.away;
               var isWorldCupMatch=(lg.id===1);
+              // Phase éliminatoire CDM : round contient "Round of", "Quarter", "Semi", "Final", etc.
+              var wcRound=(f.fixture&&f.fixture.round||'').toLowerCase();
+              var isKnockout=isWorldCupMatch&&(wcRound.includes('round of')||wcRound.includes('quarter')||wcRound.includes('semi')||wcRound.includes('final'));
+              if(isKnockout) console.log('  [WC KNOCKOUT] '+home.name+' vs '+away.name+' — '+f.fixture.round);
 
               var cached=(oldData.matchs||[]).find(function(m){return m.id===f.id&&m.sport==='football'&&m.verdict_shark&&m.verdict_shark!=='';});
               if(cached){
@@ -2472,7 +2507,7 @@ jobs:
               var vdH_elo=(sH&&sH.fixtures&&sH.fixtures.wins&&sH.fixtures.wins.home)||0;
               var eloH=getElo(eloData,home.name);
               var eloA=getElo(eloData,away.name);
-              var eloStats=eloWinProb(eloH,eloA,vdH_elo,mdHdom_elo);
+              var eloStats=eloWinProb(eloH,eloA,isKnockout?0:vdH_elo,isKnockout?1:mdHdom_elo,isKnockout);
               if(eloH&&eloA)console.log('ELO: '+home.name+' '+Math.round(eloH)+' vs '+away.name+' '+Math.round(eloA));
 
               var droppingOdds=null;
@@ -2666,7 +2701,17 @@ jobs:
                 fatigue_home:{val:fatigueH.val,info:fatigueH.info},fatigue_away:{val:fatigueA.val,info:fatigueA.info},
                 tendances,classement:classementObj,actu:(nH||[]).concat(nA||[]),
                 arbitre:refStats?{nom:refStats.name,cartons:refStats.cards_per_game,penaltys:refStats.pens_per_game,matchs:refStats.games}:null,
-                events_home:isWorldCupMatch?null:(evPatH||null),events_away:isWorldCupMatch?null:(evPatA||null),
+                events_home:isWorldCupMatch?(function(){
+                  // Pour CDM, utiliser les slots calculés depuis getTeamTournamentStats si dispo
+                  var ts=WC_TEAM_STATS_CACHE['tournoi_'+home.id];
+                  if(ts&&ts.slots) return {slots:ts.slots,slots_against:ts.slots_against||null,goals_avg:ts.xg_for||null,conceded_avg:ts.xg_against||null,games:ts.games||0};
+                  return null;
+                })():(evPatH||null),
+                events_away:isWorldCupMatch?(function(){
+                  var ts=WC_TEAM_STATS_CACHE['tournoi_'+away.id];
+                  if(ts&&ts.slots) return {slots:ts.slots,slots_against:ts.slots_against||null,goals_avg:ts.xg_for||null,conceded_avg:ts.xg_against||null,games:ts.games||0};
+                  return null;
+                })():(evPatA||null),
                 top_scorers_home:topScorersH||[],top_scorers_away:topScorersA||[],
                 elo_home:eloH?Math.round(eloH):null,elo_away:eloA?Math.round(eloA):null,
                 elo_diff:eloStats?eloStats.diff:null,elo_signal:eloStats?eloStats.signal:null,

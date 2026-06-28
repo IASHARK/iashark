@@ -2476,6 +2476,7 @@ jobs:
                 function avg(n){return (n/games).toFixed(2);}
                 return{goals_avg:avg(allGoals.length),conceded_avg:avg(concGoals.length),
                   slots:[{t:'0-15',n:goalsIn(0,15,allGoals)},{t:'15-30',n:goalsIn(15,30,allGoals)},{t:'30-45',n:goalsIn(30,45,allGoals)},{t:'45-60',n:goalsIn(45,60,allGoals)},{t:'60-75',n:goalsIn(60,75,allGoals)},{t:'75-90',n:goalsIn(75,91,allGoals)}],
+                  slots_against:[{t:'0-15',n:goalsIn(0,15,concGoals)},{t:'15-30',n:goalsIn(15,30,concGoals)},{t:'30-45',n:goalsIn(30,45,concGoals)},{t:'45-60',n:goalsIn(45,60,concGoals)},{t:'60-75',n:goalsIn(60,75,concGoals)},{t:'75-90',n:goalsIn(75,91,concGoals)}],
                   red_cards:redCards,yellow_per_game:(yellowCards/games).toFixed(1),games};
               }
 

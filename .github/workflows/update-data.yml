@@ -631,7 +631,7 @@ jobs:
               bttsY:blendMarket('bttsY'), bttsN:blendMarket('bttsN'),
               poisson:{p1:po.p1,pN:po.pN,p2:po.p2,over25:po.over25,bttsN:po.bttsN},
               dixon:{p1:dc.p1,pN:dc.pN,p2:dc.p2,over25:dc.over25,bttsN:dc.bttsN},
-              montecarlo:{p1:mc.p1,pN:mc.pN,p2:mc.p2,over25:mc.over25,bttsN:mc.bttsN},
+              montecarlo:{p1:mc.p1,pN:mc.pN,p2:mc.p2,over25:mc.over25,bttsN:mc.bttsN,top_scores:mc.top_scores||[]},
               elo_used:hasElo,
             };
           }
@@ -2021,7 +2021,7 @@ jobs:
                   tournoi_xg_h: null, tournoi_xg_a: null,
                   pinnacle_p1: d.pinnacle_p1, pinnacle_pN: d.pinnacle_pN, pinnacle_p2: d.pinnacle_p2,
                   dc1x: d.dc1x, dcx2: d.dc2x,
-                  over25: d.co25, under25: d.cu25,
+                  over15: d.co15, over25: d.co25, over35: d.co35, under25: d.cu25,
                   btts_oui: d.btts_oui, btts_non: d.btts_non,
                 });
               }
@@ -2564,7 +2564,11 @@ jobs:
             try{if(fs.existsSync('data.json')){var prevData=JSON.parse(fs.readFileSync('data.json','utf8'));(prevData.matchs||[]).forEach(function(m){if(m.pinnacle_snapshot){prevPinnacleOdds[m.home.n+'|'+m.away.n]=m.pinnacle_snapshot;}});}}catch(e){}
 
             var oldData={matchs:[]};
-            try{if(fs.existsSync('data.json'))oldData=JSON.parse(fs.readFileSync('data.json','utf8'));}catch(e){}
+            if(process.env.FORCE_REFRESH!=='true'){
+              try{if(fs.existsSync('data.json'))oldData=JSON.parse(fs.readFileSync('data.json','utf8'));}catch(e){}
+            } else {
+              console.log('FORCE_REFRESH=true — cache ignoré, tous les matchs seront recalculés');
+            }
 
             var matchsData=[];
             var forCombis=[];
@@ -2582,18 +2586,8 @@ jobs:
               var isKnockout=isWorldCupMatch&&(wcRound.includes('round of')||wcRound.includes('quarter')||wcRound.includes('semi')||wcRound.includes('final'));
               if(isKnockout) console.log('  [WC KNOCKOUT] '+home.name+' vs '+away.name+' — '+f.fixture.round);
 
-              var cached=(oldData.matchs||[]).find(function(m){return m.id===f.id&&m.sport==='football'&&m.verdict_shark&&m.verdict_shark!=='';});
-              if(cached){
-                console.log('-> '+home.name+' vs '+away.name+' : cache');
-                matchsData.push(cached);
-                var cachedEdgeNum=parseFloat((cached.edge||'').replace(/[^0-9.]/g,''))||0;
-                var cachedCote=parseFloat(cached.cote_rec)||0;
-                var cachedPariLow=(cached.pari_rec||'').toLowerCase();
-                var cachedMarcheOk=cachedPariLow.includes('dc 1x')||cachedPariLow.includes('dc x2')||cachedPariLow.includes('over 2.5')||cachedPariLow.includes('btts non');
-                var cachedEloOk=isWorldCupMatch?true:!!(cached.elo_home&&cached.elo_away);
-                if(cached.conf>=7.0&&cachedEdgeNum>=5&&cachedEdgeNum<=15&&cachedCote>=1.55&&cachedCote<=2.40&&cachedEloOk&&cachedMarcheOk)forCombis.push({home:cached.home.n,away:cached.away.n,pari:cached.pari_rec,conf:cached.conf,edge:cached.edge||'',cote:parseFloat(cached.cote_rec)||1.5});
-                continue;
-              }
+              // CACHE DÉSACTIVÉ — tous les matchs sont recalculés à chaque run
+              // var cached = null;
 
               console.log('\n-> '+home.name+' vs '+away.name+' ('+lg.name+')'+(isWorldCupMatch?' 🌍':''));
               if(!standingsCache[lg.id]){
@@ -2974,6 +2968,7 @@ jobs:
 
       - name: Run pipeline
         env:
+          FORCE_REFRESH:      ${{ github.event.inputs.force_refresh }}
           APISPORTS_KEY:      ${{ secrets.APISPORTS_KEY }}
           OPENWEATHER_KEY:    ${{ secrets.OPENWEATHER_KEY }}
           NEWSAPI_KEY:        ${{ secrets.NEWSAPI_KEY }}

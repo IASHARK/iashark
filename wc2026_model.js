@@ -1,8 +1,6 @@
 // ═══════════════════════════════════════════════════════
 // MODÈLE COUPE DU MONDE 2026 — IASHARK
-// Corrections : fuseau horaire, fatigue, normalisation log
-// + Marchés neutres basés sur Poisson (over/under/btts/1X/X2)
-// + Edge calculé en JS, fourchette de cote 1.40-2.90
+// v2 : Over 1.5 + Over 3.5 ajoutés, seuils WC_PROB_MIN abaissés
 // ═══════════════════════════════════════════════════════
 const https = require('https');
 const {
@@ -10,26 +8,17 @@ const {
   TOP5_DENSITY, QUALS_XG, WC_EXPERIENCE, HOME_BONUS, ALTITUDE_ADAPTED
 } = require('./wc2026_data.js');
 
-// ── Bornes de cote acceptées pour un pari CM ──────────
-// Objectif : maximiser le taux de réussite, pas l'edge théorique.
-// On garde une cote minimum pour que le pari reste "publiable",
-// mais aucune borne maximum n'est imposée ici (un favori net
-// avec une cote à 1.15 peut très bien être le pari le plus fiable).
 const WC_COTE_MIN = 1.30;
 
-// ── Seuils de probabilité minimum par marché ──────────
-// DC 1X/DC X2 couvrent structurellement 2 résultats sur 3 et ont donc
-// mécaniquement une proba modèle plus haute que Over/Under ou BTTS.
-// Pour rester neutre sans laisser DC dominer systématiquement, chaque
-// famille de marché a son propre seuil minimum de proba pour être
-// considérée comme un pari "fiable".
+// CORRECTION v2 : seuils abaissés — DC 70->60, Over/BTTS 55->48
+// Over 1.5 seuil 65% (quasi toujours vrai en WC), Over 3.5 seuil 40%
 const WC_PROB_MIN = {
-  'DC 1X': 70, 'DC X2': 70,
-  'Over 2.5': 55, 'Under 2.5': 55,
-  'BTTS Oui': 55, 'BTTS Non': 55,
+  'DC 1X': 60, 'DC X2': 60,
+  'Over 1.5': 65, 'Over 2.5': 48, 'Over 3.5': 40,
+  'Under 2.5': 48,
+  'BTTS Oui': 48, 'BTTS Non': 48,
 };
 
-// ── Haversine distance en km ──────────────────────────
 function haversine(lat1, lng1, lat2, lng2) {
   const R = 6371;
   const dLat = (lat2-lat1)*Math.PI/180;
@@ -40,101 +29,67 @@ function haversine(lat1, lng1, lat2, lng2) {
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
 }
 
-// ── Fatigue logistique ────────────────────────────────
-// Correction Gemini : fuseau horaire réel (tz) et non longitude/15
 function calcFatigueLogistique(stade1, stade2, joursRecup) {
   if(!stade1||!stade2) return { score: 0, km: 0, jours: joursRecup||3 };
   const s1 = WC2026_STADIUMS[stade1];
   const s2 = WC2026_STADIUMS[stade2];
   if(!s1||!s2) return { score: 0, km: 0, jours: joursRecup||3 };
-
   const km = haversine(s1.lat, s1.lng, s2.lat, s2.lng);
-
-  // Distance
   let scoreKm = 0;
-  if(km > 4000)      scoreKm = 100;
+  if(km > 4000) scoreKm = 100;
   else if(km > 3000) scoreKm = 80;
   else if(km > 2000) scoreKm = 60;
   else if(km > 1000) scoreKm = 40;
-  else if(km > 500)  scoreKm = 20;
-  else               scoreKm = 5;
-
-  // Fuseau horaire RÉEL (correction Gemini — pas longitude/15)
+  else if(km > 500) scoreKm = 20;
+  else scoreKm = 5;
   const fuseauDiff = Math.abs((s1.tz||0) - (s2.tz||0));
   const scoreJetlag = Math.min(40, fuseauDiff * 10);
-
-  // Jours de récupération
   let scoreRecup = 0;
-  if(joursRecup <= 3)      scoreRecup = 40;
+  if(joursRecup <= 3) scoreRecup = 40;
   else if(joursRecup <= 4) scoreRecup = 25;
   else if(joursRecup <= 5) scoreRecup = 10;
-  else                     scoreRecup = 0;
-
+  else scoreRecup = 0;
   const total = Math.min(100, Math.round(scoreKm*0.5 + scoreJetlag*0.2 + scoreRecup*0.3));
   return { score: total, km: Math.round(km), jours: joursRecup||3, stade1, stade2 };
 }
 
-// ── Malus altitude ────────────────────────────────────
-// Correction Gemini : Azteca 2240m, Guadalajara 1566m
 function calcAltitudeMalus(stadeName, teamName) {
   const s = WC2026_STADIUMS[stadeName];
   if(!s) return 0;
-  if(s.alt <= 800) return 0;  // Altitude normale
-  if(ALTITUDE_ADAPTED.includes(teamName)) return 0; // Équipe acclimatée
-  // Malus progressif selon altitude
-  if(s.alt > 2000) return 15; // Azteca → -15% force
-  if(s.alt > 1500) return 8;  // Guadalajara → -8%
-  if(s.alt > 800)  return 3;  // Monterrey → -3%
+  if(s.alt <= 800) return 0;
+  if(ALTITUDE_ADAPTED.includes(teamName)) return 0;
+  if(s.alt > 2000) return 15;
+  if(s.alt > 1500) return 8;
+  if(s.alt > 800) return 3;
   return 0;
 }
 
-// ── Score modèle par équipe ───────────────────────────
-// Correction Gemini : normalisation logarithmique valeur marchande
 function calcTeamScore(teamName, phase, stadeName, dynXg) {
   const isElim = phase === 'elimination';
-
   const fifa   = FIFA_POINTS[teamName]  || 1400;
   const valeur = SQUAD_VALUE[teamName]  || 50;
   const top5   = TOP5_DENSITY[teamName] || 30;
   const xg     = (dynXg && dynXg.xg_for!=null && dynXg.xg_against!=null)
     ? dynXg : (QUALS_XG[teamName] || { xg_for: 1.2, xg_against: 1.1 });
   const wcExp  = WC_EXPERIENCE[teamName]|| 5;
-
-  // Normalisation
   const normFifa   = Math.min(100, (fifa - 1200) / 7);
-  // Correction Gemini : loi de puissance, plafond 850M€
   const normValeur = Math.min(100, Math.pow(valeur / 850, 0.7) * 100);
   const normXG     = Math.min(100, (xg.xg_for - xg.xg_against + 2) * 25);
   const normExp    = Math.min(100, wcExp * 5);
-
-  // Poids selon la phase
   let score;
   if(!isElim) {
-    score = normFifa   * 0.15 +
-            normValeur * 0.25 +
-            normXG     * 0.20 +
-            top5       * 0.20 +
-            normExp    * 0.10;
+    score = normFifa*0.15 + normValeur*0.25 + normXG*0.20 + top5*0.20 + normExp*0.10;
   } else {
-    score = normFifa   * 0.05 +
-            normValeur * 0.30 +
-            normXG     * 0.15 +
-            top5       * 0.20 +
-            normExp    * 0.20;
+    score = normFifa*0.05 + normValeur*0.30 + normXG*0.15 + top5*0.20 + normExp*0.20;
   }
-
-  // Bonus pays hôte (correction Gemini)
   if(stadeName) {
     const stade = WC2026_STADIUMS[stadeName];
     if(stade && HOME_BONUS[teamName] && stade.country === (
-      teamName === 'USA' ? 'USA' :
-      teamName === 'Mexico' ? 'Mexico' :
-      teamName === 'Canada' ? 'Canada' : null
+      teamName === 'USA' ? 'USA' : teamName === 'Mexico' ? 'Mexico' : teamName === 'Canada' ? 'Canada' : null
     )) {
       score = score * (1 + HOME_BONUS[teamName]/100);
     }
   }
-
   return {
     total: Math.round(Math.min(100, score) * 10) / 10,
     details: {
@@ -149,36 +104,26 @@ function calcTeamScore(teamName, phase, stadeName, dynXg) {
   };
 }
 
-// ── Probabilités match ────────────────────────────────
-// Correction Gemini : fatigue augmente probN au lieu de s'annuler
 function calcMatchProbs(homeTeam, awayTeam, phase, fatigueHome, fatigueAway, stadeName, dynXgH, dynXgA) {
   const scoreH = calcTeamScore(homeTeam, phase, stadeName, dynXgH);
   const scoreA = calcTeamScore(awayTeam, phase, stadeName, dynXgA);
-
-  // Malus altitude
   const altMalusH = calcAltitudeMalus(stadeName, homeTeam);
   const altMalusA = calcAltitudeMalus(stadeName, awayTeam);
-
-  // Appliquer fatigue + altitude
   const fH = fatigueHome ? fatigueHome.score : 0;
   const fA = fatigueAway ? fatigueAway.score : 0;
   const adjH = scoreH.total * (1 - fH/500) * (1 - altMalusH/100);
   const adjA = scoreA.total * (1 - fA/500) * (1 - altMalusA/100);
-
   const total = adjH + adjA;
   let probH = adjH / total;
   let probA = adjA / total;
-
   let probN = 0;
   if(phase !== 'elimination') {
     const ecart = Math.abs(probH - probA);
-    // Correction Gemini : fatigue cumulée augmente la probabilité de nul
     const fatigueCumulee = (fH + fA) / 200;
     probN = Math.max(0.18, 0.32 - ecart * 0.7 + fatigueCumulee * 0.1);
     probH = probH * (1 - probN);
     probA = probA * (1 - probN);
   }
-
   return {
     p1: Math.round(probH * 100),
     pN: Math.round(probN * 100),
@@ -189,7 +134,6 @@ function calcMatchProbs(homeTeam, awayTeam, phase, fatigueHome, fatigueAway, sta
   };
 }
 
-// ── Dépendance au buteur ──────────────────────────────
 function calcDependanceStar(goals_star, goals_total) {
   if(!goals_total) return null;
   const ratio = goals_star / goals_total;
@@ -200,33 +144,34 @@ function calcDependanceStar(goals_star, goals_total) {
   };
 }
 
-// ── Poisson helpers (mêmes formules que le pipeline foot) ─────────
 function poissonProb(lambda, k) {
   if(lambda<=0) return k===0?1:0;
   let logFact = 0;
   for(let i=2;i<=k;i++) logFact += Math.log(i);
-  const logP = -lambda + k*Math.log(lambda) - logFact;
-  return Math.exp(logP);
+  return Math.exp(-lambda + k*Math.log(lambda) - logFact);
 }
 
-// Calcule les probas Over/Under 2.5 et BTTS depuis 2 lambdas (xG attendus)
-// + le score le plus probable (mode de la matrice Poisson) pour score_central
+// CORRECTION v2 : over15 et over35 ajoutés
 function calcPoissonMarketProbs(lambdaH, lambdaA) {
   const mat = [];
   for(let h=0;h<=8;h++){
     mat[h]=[];
     for(let a=0;a<=8;a++) mat[h][a]=poissonProb(lambdaH,h)*poissonProb(lambdaA,a);
   }
-  let over25=0, under25=0, bttsY=0, bttsN=0;
+  let over15=0, over25=0, over35=0, under25=0, bttsY=0, bttsN=0;
   let bestP=-1, bestH=0, bestA=0;
   for(let h=0;h<=8;h++) for(let a=0;a<=8;a++){
     const p=mat[h][a];
+    if(h+a>1.5) over15+=p;
     if(h+a>2.5) over25+=p; else under25+=p;
+    if(h+a>3.5) over35+=p;
     if(h>0&&a>0) bttsY+=p; else bttsN+=p;
     if(p>bestP){bestP=p;bestH=h;bestA=a;}
   }
   return {
+    over15: Math.round(over15*100),
     over25: Math.round(over25*100),
+    over35: Math.round(over35*100),
     under25: Math.round(under25*100),
     bttsY: Math.round(bttsY*100),
     bttsN: Math.round(bttsN*100),
@@ -234,15 +179,7 @@ function calcPoissonMarketProbs(lambdaH, lambdaA) {
   };
 }
 
-// ── Logique marchés WC — version neutre ───────────────────────────
-// produit pour chaque marché une probabilité continue (via Poisson + 1X/X2 du moteur),
-// utilisée ensuite par calcWCBestBet pour sélectionner le marché le plus probable.
-// Aucun marché n'est favorisé a priori : même formule pour les 6 marchés.
-//
-// dynXgH / dynXgA (optionnels) : xG calculés dynamiquement par le pipeline
-// (qualifs réelles via API + tournoi en cours, cf getTeamWCStats côté
-// pipeline.js). Si fournis, ils remplacent QUALS_XG statique. Sinon on
-// retombe sur QUALS_XG (fallback Océanie / équipe non mappée / erreur API).
+// CORRECTION v2 : prob_over15 et prob_over35 dans le return
 function calcWCMarkets(homeTeam, awayTeam, probs, dynXgH, dynXgA) {
   const xgH = (dynXgH && dynXgH.xg_for!=null && dynXgH.xg_against!=null)
     ? dynXgH : (QUALS_XG[homeTeam] || { xg_for: 1.2, xg_against: 1.1 });
@@ -250,17 +187,11 @@ function calcWCMarkets(homeTeam, awayTeam, probs, dynXgH, dynXgA) {
     ? dynXgA : (QUALS_XG[awayTeam] || { xg_for: 1.2, xg_against: 1.1 });
   const vH  = SQUAD_VALUE_BY_LINE[homeTeam] || { att: 50, mid: 50, def: 50 };
   const vA  = SQUAD_VALUE_BY_LINE[awayTeam] || { att: 50, mid: 50, def: 50 };
-
   const offCombined = xgH.xg_for + xgA.xg_for;
   const defAvg = (xgH.xg_against + xgA.xg_against) / 2;
-
-  // Lambdas attendus pour le match = moyenne entre "ce que l'équipe marque"
-  // et "ce que l'adversaire concède", borné à un minimum réaliste.
   const lambdaH = Math.max(0.4, (xgH.xg_for + xgA.xg_against) / 2);
   const lambdaA = Math.max(0.4, (xgA.xg_for + xgH.xg_against) / 2);
-
   const poissonMkt = calcPoissonMarketProbs(lambdaH, lambdaA);
-
   return {
     off_combined: Math.round(offCombined*100)/100,
     def_avg: Math.round(defAvg*100)/100,
@@ -270,43 +201,36 @@ function calcWCMarkets(homeTeam, awayTeam, probs, dynXgH, dynXgA) {
     val_att_a: vA.att, val_def_a: vA.def,
     xg_source_h: (dynXgH && dynXgH.xg_for!=null) ? (dynXgH.source||'dynamique') : 'statique_qualifs',
     xg_source_a: (dynXgA && dynXgA.xg_for!=null) ? (dynXgA.source||'dynamique') : 'statique_qualifs',
-    // Probabilités continues par marché — base neutre, aucun favoritisme
+    prob_over15: poissonMkt.over15,
     prob_over25: poissonMkt.over25,
+    prob_over35: poissonMkt.over35,
     prob_under25: poissonMkt.under25,
     prob_btts_oui: poissonMkt.bttsY,
     prob_btts_non: poissonMkt.bttsN,
     prob_dc1x: probs.p1 + probs.pN,
     prob_dcx2: probs.p2 + probs.pN,
-    // Champs utilitaires pour compléter matchObj (alignés avec le pipeline foot)
     score_central: poissonMkt.score_central,
     po25: poissonMkt.over25,
     btts: poissonMkt.bttsY,
   };
 }
 
-// ── Sélection neutre par probabilité — version "winrate max" ──────
-// Au lieu de chercher un edge (écart proba vs cote bookmaker), on
-// cherche directement le marché le plus PROBABLE selon le modèle,
-// parmi les 6 marchés traités à parfaite égalité. Un marché n'est
-// retenu que si :
-//   - sa cote est >= WC_COTE_MIN (reste publiable)
-//   - sa proba modèle dépasse le seuil minimum de sa famille (WC_PROB_MIN)
-// Parmi les marchés qui passent ces deux filtres, on prend celui
-// avec la proba la plus haute, tout court.
+// CORRECTION v2 : Over 1.5 et Over 3.5 dans les candidats
 function calcWCBestBet(markets, cotes) {
   const candidats = [
-    { marche: 'Over 2.5',  prob: markets.prob_over25,  cote: cotes.over25 },
-    { marche: 'Under 2.5', prob: markets.prob_under25, cote: cotes.under25 },
+    { marche: 'Over 1.5',  prob: markets.prob_over15,   cote: cotes.over15 },
+    { marche: 'Over 2.5',  prob: markets.prob_over25,   cote: cotes.over25 },
+    { marche: 'Over 3.5',  prob: markets.prob_over35,   cote: cotes.over35 },
+    { marche: 'Under 2.5', prob: markets.prob_under25,  cote: cotes.under25 },
     { marche: 'BTTS Oui',  prob: markets.prob_btts_oui, cote: cotes.btts_oui },
     { marche: 'BTTS Non',  prob: markets.prob_btts_non, cote: cotes.btts_non },
     { marche: 'DC 1X',     prob: markets.prob_dc1x,     cote: cotes.dc1x },
     { marche: 'DC X2',     prob: markets.prob_dcx2,     cote: cotes.dcx2 },
   ];
-
   const tous = candidats.map(function(c){
     const cote = parseFloat(c.cote);
     const coteValide = c.cote && c.cote!=='--' && !isNaN(cote) && cote >= WC_COTE_MIN;
-    const seuil = WC_PROB_MIN[c.marche] || 50;
+    const seuil = WC_PROB_MIN[c.marche] || 48;
     const fiable = coteValide && c.prob >= seuil;
     return {
       marche: c.marche,
@@ -316,39 +240,28 @@ function calcWCBestBet(markets, cotes) {
       fiable: fiable,
     };
   });
-
-  // Tri neutre : proba modèle décroissante, peu importe le marché.
   const fiables = tous.filter(function(c){ return c.fiable; });
   fiables.sort(function(a,b){ return b.prob_modele - a.prob_modele; });
-
   return { tous: tous, fiables: fiables, meilleur: fiables[0] || null };
 }
 
-// ── Prompt Claude WC ──────────────────────────────────
-// Version "winrate max" : aucun marché n'est priorisé par défaut, le choix
-// se fait sur la probabilité modèle la plus haute (calcWCBestBet), filtrée
-// par cote minimum (WC_COTE_MIN) et par seuil de probabilité par famille
-// (WC_PROB_MIN) — pas de notion d'edge / value bet.
+// CORRECTION v2 : over15/over35 dans destructuration et cotes
 function buildWCPrompt(data) {
   const {
     home, away, league, date, stade, phase, probs, markets,
     fatigueH, fatigueA, h2h, absences,
     tournoi_xg_h, tournoi_xg_a,
     pinnacle_p1, pinnacle_pN, pinnacle_p2,
-    dc1x, dcx2, over25, under25, btts_oui, btts_non,
+    dc1x, dcx2, over15, over25, over35, under25, btts_oui, btts_non,
   } = data;
-
   const isElim = phase === 'elimination';
   const phaseLabel = isElim ? 'PHASE ÉLIMINATOIRE' : 'PHASE DE GROUPES';
   const mkt = markets || {};
-
-  const cotes = { dc1x, dcx2, over25, under25, btts_oui, btts_non };
+  const cotes = { dc1x, dcx2, over15, over25, over35, under25, btts_oui, btts_non };
   const sel = calcWCBestBet(mkt, cotes);
-
   const marchesLines = sel.tous.map(function(c){
     return c.marche+': cote '+c.cote+' | prob modèle '+c.prob_modele+'% (seuil requis '+c.seuil+'%)'+(c.fiable?' ✅ FIABLE':'');
   }).join('\n');
-
   const meilleur = sel.meilleur;
 
   return `Tu es l'ingénieur IA principal de iashark.com. Analyse les données du modèle et génère un verdict JSON strict.
@@ -361,7 +274,7 @@ Stade: ${stade} | Date: ${date}
 ${home}: Force ${probs.scoreH.total}/100 | Fatigue ${probs.fatigueH}/100 (${fatigueH?fatigueH.km:0}km, ${fatigueH?fatigueH.jours:3}j récup)${probs.altMalusH>0?' | ⚠️ Malus altitude -'+probs.altMalusH+'%':''}
 ${away}: Force ${probs.scoreA.total}/100 | Fatigue ${probs.fatigueA}/100 (${fatigueA?fatigueA.km:0}km, ${fatigueA?fatigueA.jours:3}j récup)${probs.altMalusA>0?' | ⚠️ Malus altitude -'+probs.altMalusA+'%':''}
 
-=== PROBABILITÉS MOTEUR (résultat) ===
+=== PROBABILITÉS MOTEUR ===
 ${home}: ${probs.p1}%${!isElim?' | Nul: '+probs.pN+'%':''} | ${away}: ${probs.p2}%
 
 === ANALYSE ATTAQUE / DÉFENSE ===
@@ -377,35 +290,32 @@ ${away}:
 ${tournoi_xg_h?`
 xG dans ce tournoi — ${home}: +${tournoi_xg_h.for}/-${tournoi_xg_h.against} | ${away}: +${tournoi_xg_a.for}/-${tournoi_xg_a.against}`:''}
 
-=== MODÈLE OFFENSIF/DÉFENSIF (base du calcul Poisson) ===
-xG offensif combiné: ${mkt.off_combined} | xG défensif moyen concédé: ${mkt.def_avg}
-Lambdas Poisson estimés pour ce match: ${home} ${mkt.lambda_h} buts | ${away} ${mkt.lambda_a} buts
+=== LAMBDAS POISSON ===
+${home}: ${mkt.lambda_h} buts attendus | ${away}: ${mkt.lambda_a} buts attendus
 
-=== TOUS LES MARCHÉS (cote >= ${WC_COTE_MIN.toFixed(2)}) — PROBABILITÉ MODÈLE ===
+=== TOUS LES MARCHÉS (cote >= ${WC_COTE_MIN.toFixed(2)}) ===
 ${marchesLines}
 ${meilleur?`
-Marché le plus probable et fiable: ${meilleur.marche} (cote ${meilleur.cote}, prob modèle ${meilleur.prob_modele}%, seuil requis ${meilleur.seuil}%)`:`
-Aucun marché n'atteint son seuil de probabilité minimum — ce match est trop incertain pour un pari fiable.`}
+Marché recommandé: ${meilleur.marche} (cote ${meilleur.cote}, prob ${meilleur.prob_modele}%)`:`
+Aucun marché fiable — passe ton tour.`}
 
 === H2H & ABSENCES ===
-H2H officiel: ${h2h||'Pas d historique recent en competition officielle'}
-Absences confirmées: ${absences||'Aucune absence majeure confirmée'}
+H2H: ${h2h||'Pas d historique recent'}
+Absences: ${absences||'Aucune absence majeure confirmée'}
 
-=== VALIDATION PINNACLE ===
+=== PINNACLE ===
 ${pinnacle_p1?`${home}: ${pinnacle_p1}% | Nul: ${pinnacle_pN||'N/A'}% | ${away}: ${pinnacle_p2}%
-Alignement: ${Math.abs(probs.p1-pinnacle_p1)<=10?'✅ Cohérent':'⚠️ DIVERGENCE >10% → passe ton tour sauf explication logistique'}`:'Pinnacle non disponible — baser la décision sur le modèle seul'}
+${Math.abs(probs.p1-pinnacle_p1)<=10?'✅ Cohérent':'⚠️ DIVERGENCE >10% → passe ton tour sauf explication logistique'}`:'Pinnacle non disponible'}
 
-=== RÈGLES ABSOLUES (NEUTRALITÉ — OBJECTIF: TAUX DE RÉUSSITE MAXIMUM) ===
-1. L'OBJECTIF EST LE TAUX DE RÉUSSITE, PAS LE GAIN POTENTIEL. Ignore complètement la cote pour juger de la qualité du pari — la cote ne sert qu'à vérifier qu'elle est >= ${WC_COTE_MIN.toFixed(2)} (publiable). Le seul critère de choix est la probabilité que l'événement se produise réellement.
-2. NEUTRALITÉ TOTALE ENTRE MARCHÉS : Over 2.5, Under 2.5, BTTS Oui, BTTS Non, DC 1X, DC X2 sont à traiter exactement à égalité. Tu ne dois JAMAIS préférer un type de marché par défaut.
-3. CHOIX DU MARCHÉ : prends le marché marqué ✅ FIABLE avec la probabilité modèle la plus haute (indiqué ci-dessus comme "le plus probable et fiable"). Si aucun marché n'est ✅ FIABLE → passe_ton_tour = true.
-4. Fatigue >60 → l'équipe fatiguée marque moins → cela doit déjà être reflété dans les lambdas/probabilités ci-dessus, ne pas appliquer de correction supplémentaire.
-5. Altitude >1500m + équipe non acclimatée → idem, déjà reflété dans les probabilités, ne pas dupliquer la correction.
-6. Pinnacle diverge >10% du modèle → passe_ton_tour = true SAUF si fatigue ou altitude l'explique clairement.
-
-7. ${isElim?'ÉLIMINATION: qualifier_h + qualifier_a obligatoires. Expérience CM décisive aux TAB':'3ème journée: équipe déjà qualifiée → rotation → décote attaque -30% (ajuste ta confiance en conséquence)'}
-Tu peux ajuster les probabilités de ±5% max si absences majeures le justifient — recalcule alors mentalement l'edge avant de répondre.
-RÈGLE ABSOLUE: analyse_card, conseil, contexte, facteur_x, scenario, scenario_15min TOUJOURS remplis même si passe_ton_tour=true.
+=== RÈGLES ===
+1. Objectif : taux de réussite maximum. La cote sert seulement à vérifier >= ${WC_COTE_MIN.toFixed(2)}.
+2. Neutralité totale entre tous les marchés.
+3. Prends le marché ✅ FIABLE avec la proba la plus haute. Sinon passe_ton_tour=true.
+4. Fatigue et altitude déjà dans les lambdas — ne pas corriger en double.
+5. Pinnacle diverge >10% → passe_ton_tour=true sauf fatigue/altitude.
+6. ${isElim?'ÉLIMINATION: expérience CM décisive':'3ème journée déjà qualifiée → rotation → baisse confiance de 1 point'}
+7. Ajustement probas ±5% max si absences majeures.
+RÈGLE ABSOLUE: analyse_card, conseil, contexte, facteur_x, scenario, scenario_15min TOUJOURS remplis.
 
 Réponds UNIQUEMENT en JSON valide sans markdown:
 {
@@ -413,13 +323,13 @@ Réponds UNIQUEMENT en JSON valide sans markdown:
   "confiance": 0.0,
   "pari_rec": "",
   "cote_rec": "",
-  "marche": "Over 2.5|Under 2.5|BTTS Oui|BTTS Non|DC 1X|DC X2",
+  "marche": "Over 1.5|Over 2.5|Over 3.5|Under 2.5|BTTS Oui|BTTS Non|DC 1X|DC X2",
   "risque": "FAIBLE|MODERE|ELEVE",
   "verdict_shark": "1 phrase avec stat clé chiffrée",
-  "analyse_card": "[TOUJOURS REMPLI] 2-3 phrases attaque/défense basées sur les données",
-  "conseil": "[TOUJOURS REMPLI] 1 directive directe",
-  "contexte": "[TOUJOURS REMPLI] enjeux groupe ou bracket",
-  "facteur_x": "[TOUJOURS REMPLI] le signal chiffré décisif",
+  "analyse_card": "[TOUJOURS REMPLI]",
+  "conseil": "[TOUJOURS REMPLI]",
+  "contexte": "[TOUJOURS REMPLI]",
+  "facteur_x": "[TOUJOURS REMPLI]",
   "score_central": "${mkt.score_central||'?-?'}",
   "p1": ${probs.p1}, "pN": ${probs.pN}, "p2": ${probs.p2},
   "po25": ${mkt.po25||0}, "btts": ${mkt.btts||0},
@@ -439,7 +349,6 @@ Réponds UNIQUEMENT en JSON valide sans markdown:
   ]
 }`;
 }
-
 
 module.exports = {
   calcFatigueLogistique, calcTeamScore, calcMatchProbs,

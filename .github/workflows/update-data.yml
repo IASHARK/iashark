@@ -4,6 +4,11 @@ on:
   schedule:
     - cron: '0 6 * * *'
   workflow_dispatch:
+    inputs:
+      force_refresh:
+        description: 'Vider le cache et recalculer tous les matchs'
+        required: false
+        default: 'false'
 
 jobs:
   update:
@@ -502,6 +507,135 @@ jobs:
               bttsY:Math.round(bttsY*100), bttsN:Math.round(bttsN*100),
             };
           }
+          // ── DIXON-COLES — corrige Poisson sur les scores faibles ──────────
+          // Paramètre rho mesuré empiriquement sur le football européen : -0.13
+          // Corrige : 0-0 (sous-estimé), 1-0 et 0-1 (sous-estimés), 1-1 (sur-estimé)
+          function dixonColesCorr(h, a, lambdaH, lambdaA) {
+            var rho = -0.13;
+            if(h===0 && a===0) return 1 - lambdaH*lambdaA*rho;
+            if(h===1 && a===0) return 1 + lambdaA*rho;
+            if(h===0 && a===1) return 1 + lambdaH*rho;
+            if(h===1 && a===1) return 1 - rho;
+            return 1;
+          }
+          function calcDixonColesProbs(lambdaH, lambdaA) {
+            var mat=[];
+            for(var h=0;h<=8;h++){mat[h]=[];for(var a=0;a<=8;a++){
+              var p=poissonProb(lambdaH,h)*poissonProb(lambdaA,a)*dixonColesCorr(h,a,lambdaH,lambdaA);
+              mat[h][a]=Math.max(0,p);
+            }}
+            var p1=0,pN=0,p2=0,over25=0,under25=0,bttsY=0,bttsN=0,over15=0,over35=0;
+            for(var h=0;h<=8;h++) for(var a=0;a<=8;a++){
+              var p=mat[h][a];
+              if(h>a) p1+=p; else if(h===a) pN+=p; else p2+=p;
+              if(h+a>2.5) over25+=p; else under25+=p;
+              if(h+a>1.5) over15+=p;
+              if(h+a>3.5) over35+=p;
+              if(h>0&&a>0) bttsY+=p; else bttsN+=p;
+            }
+            return {
+              p1:Math.round(p1*100), pN:Math.round(pN*100), p2:Math.round(p2*100),
+              over15:Math.round(over15*100), over25:Math.round(over25*100),
+              under25:Math.round(under25*100), over35:Math.round(over35*100),
+              bttsY:Math.round(bttsY*100), bttsN:Math.round(bttsN*100),
+            };
+          }
+
+          // ── MONTE-CARLO — 5000 simulations ──────────────────────
+          // Tire des buts aléatoires selon Poisson pour chaque équipe
+          // Méthode Knuth : simple, fiable, sans lib externe
+          function poissonRandom(lambda) {
+            if(lambda<=0) return 0;
+            var L=Math.exp(-lambda), k=0, p=1;
+            do { k++; p*=Math.random(); } while(p>L && k<20);
+            return k-1;
+          }
+          function calcMonteCarlo(lambdaH, lambdaA) {
+            var n=5000;
+            var p1=0,pN=0,p2=0,over25=0,over15=0,over35=0,bttsY=0;
+            var scoreMap={};
+            for(var i=0;i<n;i++){
+              var h=poissonRandom(lambdaH);
+              var a=poissonRandom(lambdaA);
+              if(h>a) p1++; else if(h===a) pN++; else p2++;
+              if(h+a>2.5) over25++;
+              if(h+a>1.5) over15++;
+              if(h+a>3.5) over35++;
+              if(h>0&&a>0) bttsY++;
+              // Comptage scores exacts (limité à 5 max)
+              var hc=Math.min(h,5), ac=Math.min(a,5);
+              var key=hc+'-'+ac;
+              scoreMap[key]=(scoreMap[key]||0)+1;
+            }
+            // Top 5 scores simulés
+            var topScores=Object.keys(scoreMap).map(function(k){
+              return {score:k, n:scoreMap[k], pct:Math.round(scoreMap[k]/n*100)};
+            }).sort(function(a,b){return b.n-a.n;}).slice(0,5);
+            return {
+              p1:Math.round(p1/n*100), pN:Math.round(pN/n*100), p2:Math.round(p2/n*100),
+              top_scores:topScores,
+              over15:Math.round(over15/n*100), over25:Math.round(over25/n*100),
+              under25:Math.round((n-over25)/n*100), over35:Math.round(over35/n*100),
+              bttsY:Math.round(bttsY/n*100), bttsN:Math.round((n-bttsY)/n*100),
+            };
+          }
+
+          // ── FUSION Poisson + Dixon-Coles + Monte-Carlo + Elo ────
+          // Sans Elo : 35% Poisson + 40% DC + 25% MC
+          // Avec Elo : 32% Poisson + 36% DC + 22% MC + 10% Elo (sur 1X2 uniquement)
+          // Over/BTTS non affectés par Elo (pas de lien direct)
+          function calcFinalProbs(lambdaH, lambdaA, eloStats) {
+            var po = calcPoissonProbs(lambdaH, lambdaA);
+            var dc = calcDixonColesProbs(lambdaH, lambdaA);
+            var mc = calcMonteCarlo(lambdaH, lambdaA);
+
+            // Elo : convertit probH/probA en 1X2 en allouant le nul proportionnellement
+            var eloP1=null, eloPN=null, eloP2=null;
+            if(eloStats && eloStats.probH && eloStats.probA) {
+              // Elo donne P(H win) et P(A win) sans nul — on estime le nul
+              // via la moyenne des 3 modèles puis on normalise
+              var avgPN = Math.round((po.pN + dc.pN + mc.pN) / 3);
+              var rawH = eloStats.probH, rawA = eloStats.probA;
+              var scale = (100 - avgPN) / Math.max(rawH + rawA, 1);
+              eloP1 = Math.round(rawH * scale);
+              eloP2 = Math.round(rawA * scale);
+              eloPN = 100 - eloP1 - eloP2;
+            }
+
+            var hasElo = eloP1 !== null;
+            var w = hasElo
+              ? {po:0.32, dc:0.36, mc:0.22, elo:0.10}
+              : {po:0.35, dc:0.40, mc:0.25, elo:0};
+
+            function blend1X2(key, eloVal) {
+              var base = po[key]*w.po + dc[key]*w.dc + mc[key]*w.mc;
+              if(hasElo && eloVal!==null) base += eloVal*w.elo;
+              return Math.round(base);
+            }
+            function blendMarket(key) {
+              // Over/BTTS : pas d'Elo, redistribuer ses 10% sur DC
+              return Math.round(po[key]*0.35 + dc[key]*0.40 + mc[key]*0.25);
+            }
+
+            var p1  = blend1X2('p1',  eloP1);
+            var pN  = blend1X2('pN',  eloPN);
+            var p2  = blend1X2('p2',  eloP2);
+            // Normaliser pour que p1+pN+p2 = 100
+            var total = p1+pN+p2;
+            if(total !== 100) { var diff=100-total; p1+=diff; }
+
+            return {
+              p1:p1, pN:pN, p2:p2,
+              over15:blendMarket('over15'), over25:blendMarket('over25'),
+              under25:blendMarket('under25'), over35:blendMarket('over35'),
+              bttsY:blendMarket('bttsY'), bttsN:blendMarket('bttsN'),
+              poisson:{p1:po.p1,pN:po.pN,p2:po.p2,over25:po.over25,bttsN:po.bttsN},
+              dixon:{p1:dc.p1,pN:dc.pN,p2:dc.p2,over25:dc.over25,bttsN:dc.bttsN},
+              montecarlo:{p1:mc.p1,pN:mc.pN,p2:mc.p2,over25:mc.over25,bttsN:mc.bttsN},
+              elo_used:hasElo,
+            };
+          }
+
           function calcLambdas(bmHdom, beHdom, mdHdom, bmAext, beAext, meAext, leagueAvgH, leagueAvgA) {
             var leagAvgH=leagueAvgH||1.35, leagAvgA=leagueAvgA||1.10;
             var attH=mdHdom>0?(bmHdom/mdHdom)/leagAvgH:1;
@@ -1289,8 +1423,8 @@ jobs:
                 contexte: an?(an.contexte||''):'',
                 facteur_x: an?(an.facteur_x||''):'',
                 scenario: an&&an.scenario_match?{phase1:an.scenario_match.set1||'',phase2:an.scenario_match.set2||'',phase3:an.scenario_match.set3||null}:null,
-                no_signal: an&&an.passe_ton_tour===true?true:!(an&&an.pari_rec),
-                no_signal_label: (an&&an.passe_ton_tour===true)||(!(an&&an.pari_rec))?'Aucun signal clair sur ce match':'',
+                no_signal: an&&an.passe_ton_tour===true?true:false,
+                no_signal_label: (an&&an.passe_ton_tour===true)?'Pas assez de signal clair — passer son tour':'',
                 h2h_tennis: {p1Wins:parsed.h2hP1Wins, p2Wins:parsed.h2hP2Wins},
                 form_p1: form1, form_p2: form2,
                 surf_stats_p1: surf1, surf_stats_p2: surf2,
@@ -1614,7 +1748,7 @@ jobs:
           function parseOdds(o) {
             var empty={c1:'--',cn:'--',c2:'--',co15:'--',co25:'--',cu25:'--',dc1x:'--',dc2x:'--',dc12:'--',btts_oui:'--',btts_non:'--',bookies:[]};
             if(!o||!o.bookmakers||!o.bookmakers.length) return empty;
-            var arr1=[],arrN=[],arr2=[],arr15=[],arr25=[],arru25=[],arr35=[],arru35=[],arr1x=[],arrx2=[],arr12=[],arrby=[],arrbn=[];
+            var arr1=[],arrN=[],arr2=[],arr15=[],arr25=[],arru25=[],arr35=[],arru35=[],arr1x=[],arrx2=[],arr12=[],arrby=[],arrbn=[],arrAHH=[],arrAHA=[];
             o.bookmakers.forEach(function(bk){
               (bk.bets||[]).forEach(function(bet){
                 if(bet.name==='Match Winner'||bet.name==='Home/Draw/Away'){
@@ -1648,6 +1782,13 @@ jobs:
                   if(by)arrby.push(parseFloat(by.odd));
                   if(bn)arrbn.push(parseFloat(bn.odd));
                 }
+                if(bet.name==='Asian Handicap'){
+                  (bet.values||[]).forEach(function(v){
+                    var val=(v.value||'').toLowerCase();
+                    if(val.includes('home')&&val.includes('-0.5'))arrAHH.push(parseFloat(v.odd));
+                    if(val.includes('away')&&val.includes('+0.5'))arrAHA.push(parseFloat(v.odd));
+                  });
+                }
               });
             });
             function med(a){
@@ -1663,7 +1804,8 @@ jobs:
             var deltas=[0,-0.03,-0.02,-0.05,+0.03];
             function vary(c,d){if(!c||c==='--')return '--';return Math.max(1.01,parseFloat(c)+d).toFixed(2);}
             var bookies=FR_FIXED.map(function(bk,i){return {n:bk.n,o:bk.o,l:bk.l,c:vary(c1,deltas[i]),c1:vary(c1,deltas[i]),cn:vary(cn,deltas[i]),c2:vary(c2,deltas[i])};});
-            return {c1,cn,c2,co15,co25,cu25,co35:med(arr35),cu35:med(arru35),dc1x,dc2x,dc12,btts_oui,btts_non,bookies};
+            var ah_dom=med(arrAHH), ah_ext=med(arrAHA);
+            return {c1,cn,c2,co15,co25,cu25,co35:med(arr35),cu35:med(arru35),dc1x,dc2x,dc12,btts_oui,btts_non,ah_dom,ah_ext,bookies};
           }
 
           function calcCriteres(stats,isDom,rank){
@@ -1672,8 +1814,17 @@ jobs:
             var bm=(stats.goals&&stats.goals.for&&stats.goals.for.total&&stats.goals.for.total.total)||0;
             var be=(stats.goals&&stats.goals.against&&stats.goals.against.total&&stats.goals.against.total.total)||0;
             var form=(stats.form||'').slice(-5);
-            var pts=form.split('').reduce(function(a,c){return a+(c==='W'?3:c==='D'?1:0);},0);
-            var fr=Math.round(pts/Math.max(form.length*3,1)*100);
+            // Pondération forme récente : match le plus récent a le plus de poids
+            // Poids : dernier ×1.50, avant-dernier ×1.35, puis ×1.20, ×1.10, ×1.00
+            var formWeights=[1.50,1.35,1.20,1.10,1.00];
+            var formChars=form.split('').reverse(); // du plus récent au plus ancien
+            var ptsW=0,maxPtsW=0;
+            formChars.forEach(function(ch,i){
+              var w=formWeights[i]||1.00;
+              ptsW+=(ch==='W'?3:ch==='D'?1:0)*w;
+              maxPtsW+=3*w;
+            });
+            var fr=Math.round(ptsW/Math.max(maxPtsW,0.01)*100);
             var att=Math.min(100,Math.round(bm/Math.max(total,1)*40));
             var def=Math.max(0,Math.min(100,Math.round((2.5-be/Math.max(total,1))*35)));
             var vd=(stats.fixtures&&stats.fixtures.wins&&stats.fixtures.wins.home)||0;
@@ -1892,18 +2043,27 @@ jobs:
                 +'\n=== PHASE 2 — MODÈLE MATHÉMATIQUE ===\n'
                 +'Poisson lambdas: DOM '+d.poisson_lambdaH+' | EXT '+d.poisson_lambdaA+'\n'
                 +'Poisson: DOM '+d.poisson_p1+'% | Nul '+d.poisson_pN+'% | EXT '+d.poisson_p2+'%\n'
-                +'Over 2.5: '+d.poisson_over25+'% | BTTS Non: '+d.poisson_bttsN+'%\n'
+                +'Dixon-Coles: DOM '+d.dixon_p1+'% | Nul '+d.dixon_pN+'% | EXT '+d.dixon_p2+'%\n'
+                +'Monte-Carlo: DOM '+d.mc_p1+'% | Nul '+d.mc_pN+'% | EXT '+d.mc_p2+'%\n'
+                +'[Fusion 35%+40%+25%] Over 2.5: '+d.poisson_over25+'% | BTTS Non: '+d.poisson_bttsN+'%\n'
                 +(d.pinnacle_p1?'Pinnacle (sharp): DOM '+d.pinnacle_p1+'% | Nul '+d.pinnacle_pN+'% | EXT '+d.pinnacle_p2+'%\n':'Pinnacle: non disponible\n')
                 +(edgeAberrant?'⚠️ ALERTE: Edge > 15% = bug Poisson probable, ignore\n':'')
                 +'\nCotes (UTILISE CES VALEURS EXACTES):\n'
                 +(d.dc1x&&d.dc1x!=='--'?'DC 1X: '+d.dc1x+'\n':'DC 1X: N/A\n')
                 +(d.dc2x&&d.dc2x!=='--'?'DC X2: '+d.dc2x+'\n':'DC X2: N/A\n')
+                +(d.co15&&d.co15!=='--'?'Over 1.5: '+d.co15+'\n':'Over 1.5: N/A\n')
                 +(d.co25&&d.co25!=='--'?'Over 2.5: '+d.co25+'\n':'Over 2.5: N/A\n')
+                +(d.cu25&&d.cu25!=='--'?'Under 2.5: '+d.cu25+'\n':'Under 2.5: N/A\n')
+                +(d.co35&&d.co35!=='--'?'Over 3.5: '+d.co35+'\n':'Over 3.5: N/A\n')
+                +(d.btts_oui&&d.btts_oui!=='--'?'BTTS Oui: '+d.btts_oui+'\n':'BTTS Oui: N/A\n')
                 +(d.btts_non&&d.btts_non!=='--'?'BTTS Non: '+d.btts_non+'\n':'BTTS Non: N/A\n')
+                +(d.ah_dom&&d.ah_dom!=='--'?'Asian Handicap -0.5 DOM: '+d.ah_dom+'\n':'')
+                +(d.ah_ext&&d.ah_ext!=='--'?'Asian Handicap +0.5 EXT: '+d.ah_ext+'\n':'')
                 +'\n=== PHASE 3 — DÉCISION ===\n\n'
                 +'PASSER SON TOUR si: Phase 1 et 2 contradictoires | Derby | ELO+Pinnacle absents | <8 matchs joués | aucune cote 1.60-2.20\n\n'
-                +'MARCHÉS AUTORISÉS: DC 1X, DC X2, Over 2.5, BTTS Non (BTTS Non uniquement si '+bttsNonCondition+')\n'
-                +'COTE OBLIGATOIRE: 1.60-2.20\n'
+                +'MARCHÉS AUTORISÉS: DC 1X, DC X2, Over 1.5, Over 2.5, Over 3.5, Under 2.5, BTTS Oui, BTTS Non, Asian Handicap (cote minimum 1.50 obligatoire)\n'
+                +'BTTS Non uniquement si '+bttsNonCondition+'\n'
+                +'COTE OBLIGATOIRE: minimum 1.50 — maximum 3.00\n'
                 +'CONFIANCE: 7.0-7.4 (1-2 signaux) | 7.5-7.9 (3+) | 8.0-8.5 (4+ dont ELO+Pinnacle) — MAX 8.5\n'
                 +'RISQUE: FAIBLE si <1.75 + ELO + Pinnacle | MODERE si 1.75-2.10 | ELEVE sinon\n'
                 +'edge = prob_IA - 1/cote | vbet OUI si edge>=5% ET conf>=7.0\n'
@@ -2533,7 +2693,7 @@ jobs:
               var meAext_p=(sA&&sA.fixtures&&sA.fixtures.played&&sA.fixtures.played.away)||10;
               var lambdas=calcLambdas(bmHdom_p,beHdom_p,mdHdom,bmAext_p,beAext_p,meAext_p);
               if(xgH.xg_avg&&xgA.xg_avg){lambdas.lambdaH=parseFloat((lambdas.lambdaH*0.6+parseFloat(xgH.xg_avg)*0.4).toFixed(3));lambdas.lambdaA=parseFloat((lambdas.lambdaA*0.6+parseFloat(xgA.xg_avg)*0.4).toFixed(3));}
-              var poissonProbs=calcPoissonProbs(lambdas.lambdaH,lambdas.lambdaA);
+              var poissonProbs=calcFinalProbs(lambdas.lambdaH,lambdas.lambdaA,eloStats);
 
               var shinProbs=null;
               if(pinnacleOdds&&pinnacleOdds.c1&&pinnacleOdds.cn&&pinnacleOdds.c2){var raw=shinProbabilities([pinnacleOdds.c1,pinnacleOdds.cn,pinnacleOdds.c2]);if(raw)shinProbs={p1:Math.round(raw[0]*100),pN:Math.round(raw[1]*100),p2:Math.round(raw[2]*100)};}
@@ -2541,12 +2701,33 @@ jobs:
               function calcEdge(probIA,cote){if(!probIA||!cote||cote==='--')return null;var edge=probIA/100-1/parseFloat(cote);return edge>0?Math.round(edge*100):null;}
               var prob1X=(shinProbs?shinProbs.p1:poissonProbs.p1)+(shinProbs?shinProbs.pN:poissonProbs.pN);
               var probX2=(shinProbs?shinProbs.p2:poissonProbs.p2)+(shinProbs?shinProbs.pN:poissonProbs.pN);
+              // Probabilités pour nouveaux marchés
+              var probOver15=poissonProbs.over15||0;
+              var probOver35=poissonProbs.over35||0;
+              var probBttsY=poissonProbs.bttsY||0;
+              // AH -0.5 dom = victoire stricte dom = p1
+              var probAHH=shinProbs?shinProbs.p1:poissonProbs.p1;
+              // AH +0.5 ext = ext ne perd pas = p2+pN
+              var probAHA=(shinProbs?shinProbs.p2:poissonProbs.p2)+(shinProbs?shinProbs.pN:poissonProbs.pN);
+
               var allEdges=[
                 {market:'Over 2.5',edge:calcEdge(poissonProbs.over25,odds.co25),cote:odds.co25,prob:poissonProbs.over25},
+                {market:'Under 2.5',edge:calcEdge(poissonProbs.under25,odds.cu25),cote:odds.cu25,prob:poissonProbs.under25},
+                {market:'Over 1.5',edge:calcEdge(probOver15,odds.co15),cote:odds.co15,prob:probOver15},
+                {market:'Over 3.5',edge:calcEdge(probOver35,odds.co35),cote:odds.co35,prob:probOver35},
+                {market:'BTTS Oui',edge:calcEdge(probBttsY,odds.btts_oui),cote:odds.btts_oui,prob:probBttsY},
                 {market:'BTTS Non',edge:calcEdge(poissonProbs.bttsN,odds.btts_non),cote:odds.btts_non,prob:poissonProbs.bttsN},
                 {market:'DC 1X',edge:calcEdge(prob1X,odds.dc1x),cote:odds.dc1x,prob:prob1X},
-                {market:'DC X2',edge:calcEdge(probX2,odds.dc2x),cote:odds.dc2x,prob:probX2}
-              ].filter(function(e){return e.edge!==null&&e.edge>=5&&e.cote&&e.cote!=='--'&&parseFloat(e.cote)>=1.50&&parseFloat(e.cote)<=3.00;});
+                {market:'DC X2',edge:calcEdge(probX2,odds.dc2x),cote:odds.dc2x,prob:probX2},
+                {market:'Asian Handicap -0.5 DOM',edge:calcEdge(probAHH,odds.ah_dom),cote:odds.ah_dom,prob:probAHH},
+                {market:'Asian Handicap +0.5 EXT',edge:calcEdge(probAHA,odds.ah_ext),cote:odds.ah_ext,prob:probAHA},
+              ].filter(function(e){
+                // Cote minimum 1.50 obligatoire + cote maximum 3.00 + edge >= 5%
+                return e.edge!==null&&e.edge>=5
+                  &&e.cote&&e.cote!=='--'
+                  &&parseFloat(e.cote)>=1.50
+                  &&parseFloat(e.cote)<=3.00;
+              });
               allEdges.sort(function(a,b){return b.edge-a.edge;});
               var bestEdge=allEdges[0]||null;
               var nodeKelly=bestEdge?fractionalKelly(bestEdge.prob/100,parseFloat(bestEdge.cote),0.25):null;
@@ -2591,6 +2772,7 @@ jobs:
                 bmHdom,beHdom,bmAext,beAext,mdHdom,meAext,h2hAvgButs,h2hNuls,
                 c1:odds.c1,cn:odds.cn,c2:odds.c2,co15:odds.co15,co25:odds.co25,cu25:odds.cu25,
                 dc1x:odds.dc1x,dc2x:odds.dc2x,btts_oui:odds.btts_oui,btts_non:odds.btts_non,
+                co35:odds.co35,ah_dom:odds.ah_dom,ah_ext:odds.ah_ext,
                 injuries,h2h:h2hRaw,fatH:fatigueH.info,fatA:fatigueA.info,
                 domH20w:domH20.filter(function(m){return m.result==='W';}).length,
                 domH20d:domH20.filter(function(m){return m.result==='D';}).length,
@@ -2606,6 +2788,14 @@ jobs:
                 poisson_p1:poissonProbs.p1,poisson_pN:poissonProbs.pN,poisson_p2:poissonProbs.p2,
                 poisson_over25:poissonProbs.over25,poisson_under25:poissonProbs.under25,
                 poisson_bttsY:poissonProbs.bttsY,poisson_bttsN:poissonProbs.bttsN,
+                dixon_p1:poissonProbs.dixon?poissonProbs.dixon.p1:poissonProbs.p1,
+              mc_scores:poissonProbs.montecarlo?poissonProbs.montecarlo.top_scores:[],
+                dixon_pN:poissonProbs.dixon?poissonProbs.dixon.pN:poissonProbs.pN,
+                dixon_p2:poissonProbs.dixon?poissonProbs.dixon.p2:poissonProbs.p2,
+                mc_p1:poissonProbs.montecarlo?poissonProbs.montecarlo.p1:poissonProbs.p1,
+              mc_scores:poissonProbs.montecarlo?poissonProbs.montecarlo.top_scores:[],
+                mc_pN:poissonProbs.montecarlo?poissonProbs.montecarlo.pN:poissonProbs.pN,
+                mc_p2:poissonProbs.montecarlo?poissonProbs.montecarlo.p2:poissonProbs.p2,
                 pinnacle_p1:shinProbs?shinProbs.p1:null,pinnacle_pN:shinProbs?shinProbs.pN:null,pinnacle_p2:shinProbs?shinProbs.p2:null,
                 pinnacle_c1:pinnacleOdds?pinnacleOdds.c1:null,pinnacle_c2:pinnacleOdds?pinnacleOdds.c2:null,
                 best_edge:bestEdge?bestEdge.edge:null,best_edge_market:bestEdge?bestEdge.market:null,
@@ -2677,6 +2867,7 @@ jobs:
                 po15:0,po25:an?(an.po25||0):0,btts:an?(an.btts||0):0,
                 c1:odds.c1,cn:odds.cn,c2:odds.c2,co15:odds.co15,co25:odds.co25,cu25:odds.cu25,
                 dc1x:odds.dc1x,dc2x:odds.dc2x,dc12:odds.dc12,cdc1x:odds.dc1x,cdc2x:odds.dc2x,
+                ah_dom:odds.ah_dom||'--',ah_ext:odds.ah_ext||'--',co35:odds.co35||'--',
                 cbtts:odds.btts_oui,cbtts_non:odds.btts_non,btts_oui:odds.btts_oui,btts_non:odds.btts_non,
                 bookies:odds.bookies,edge:an?(an.edge||''):'',marche:an?(an.marche||'RESULTAT'):'RESULTAT',
                 risque:risqueNorm,pari_rec:an?(an.pari_rec||''):'',
@@ -2773,6 +2964,12 @@ jobs:
 
           main().catch(function(e){console.error('FATAL:',e.message,e.stack);process.exit(0);});
           JSEOF
+
+      - name: Force refresh cache si demandé
+        if: ${{ github.event.inputs.force_refresh == 'true' }}
+        run: |
+          rm -f cache.json
+          echo "Cache vidé — tous les matchs seront recalculés"
 
       - name: Run pipeline
         env:

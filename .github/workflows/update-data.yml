@@ -1855,7 +1855,7 @@ jobs:
                 var dynStatsH = await getTeamWCStats(d.homeId, homeKey);
                 var dynStatsA = await getTeamWCStats(d.awayId, awayKey);
 
-                var wcPhase = isKnockout ? 'knockout' : 'group';
+                var wcPhase = d.isKnockout ? 'knockout' : 'group';
                 var wcProbs = WC_MODEL.calcMatchProbs(homeKey, awayKey, wcPhase, null, null, stadeKey, dynStatsH, dynStatsA);
                 var wcMarkets = WC_MODEL.calcWCMarkets(homeKey, awayKey, wcProbs, dynStatsH, dynStatsA);
 
@@ -2616,6 +2616,7 @@ jobs:
                 eloH,eloA,eloStats,droppingOdds,
                 xgH_xga:xgH.xga_avg,xgA_xga:xgA.xga_avg,
                 xgH_defense_surchauffe:xgH.defense_surchauffe,xgA_defense_surchauffe:xgA.defense_surchauffe,
+                isKnockout:isKnockout,
               });
               await sleep(500);
 

@@ -2968,8 +2968,8 @@ jobs:
       - name: Force refresh cache si demandé
         if: ${{ github.event.inputs.force_refresh == 'true' }}
         run: |
-          rm -f cache.json
-          echo "Cache vidé — tous les matchs seront recalculés"
+          echo '{"matchs":[]}' > data.json
+          echo "data.json vidé — tous les matchs seront recalculés"
 
       - name: Run pipeline
         env:

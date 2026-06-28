@@ -495,6 +495,33 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 .demo-section-lbl{font-family:'Space Mono',monospace;font-size:7px;color:var(--amber);letter-spacing:2px;margin:18px 18px 4px;display:flex;align-items:center;gap:6px;}
 .demo-section-lbl::after{content:'';flex:1;height:1px;background:rgba(245,158,11,0.15);}
 
+
+/* ── MONTE-CARLO CSS ── */
+.mc-subtitle{font-family:'Space Mono',monospace;font-size:7px;color:var(--muted);letter-spacing:0.5px;margin-bottom:14px;}
+.mc-subtitle strong{color:var(--cyan);}
+.score-cell-sim{font-family:'Space Mono',monospace;font-size:6px;color:var(--muted2);margin-top:2px;}
+.mc-bars{display:flex;flex-direction:column;gap:8px;margin-top:16px;padding-top:14px;border-top:1px solid var(--border);}
+.mc-bar-row{display:flex;align-items:center;gap:10px;}
+.mc-bar-score{font-family:'Bebas Neue',sans-serif;font-size:14px;color:var(--text);width:28px;flex-shrink:0;}
+.mc-bar-track{flex:1;height:6px;background:rgba(255,255,255,0.04);border-radius:3px;overflow:hidden;}
+.mc-bar-fill{height:100%;border-radius:3px;transition:width 0s;}
+.mc-bar-fill.top{background:linear-gradient(90deg,var(--cyan2),var(--cyan));}
+.mc-bar-fill.sec{background:rgba(34,211,238,0.4);}
+.mc-bar-fill.rest{background:rgba(34,211,238,0.2);}
+.mc-bar-val{font-family:'Space Mono',monospace;font-size:8px;color:var(--text);width:32px;text-align:right;flex-shrink:0;}
+.mc-bar-sim{font-family:'Space Mono',monospace;font-size:6px;color:var(--muted2);width:52px;text-align:right;flex-shrink:0;}
+.mc-badge-row{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;}
+.mc-badge{font-family:'Space Mono',monospace;font-size:6.5px;letter-spacing:1px;padding:3px 8px;border-radius:6px;border:1px solid var(--border);color:var(--muted);}
+.mc-badge.active{background:rgba(34,211,238,0.06);border-color:var(--bc);color:var(--cyan);}
+.models-compare{margin-top:16px;padding-top:14px;border-top:1px solid var(--border);}
+.mc-models-title{font-family:'Space Mono',monospace;font-size:7px;color:var(--muted);letter-spacing:1.5px;margin-bottom:10px;}
+.model-row{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.03);}
+.model-row:last-child{border-bottom:none;}
+.model-name{font-family:'Space Mono',monospace;font-size:8px;color:var(--muted);width:110px;flex-shrink:0;}
+.model-score{font-family:'Bebas Neue',sans-serif;font-size:16px;color:var(--text);width:32px;text-align:center;}
+.model-bar-wrap{flex:1;}
+.model-bar-bg{height:4px;background:rgba(255,255,255,0.04);border-radius:2px;overflow:hidden;}
+.model-bar-fg{height:100%;border-radius:2px;}
 </style>
 </head>
 <body>
@@ -783,20 +810,70 @@ function buildScoresProbables(lambdaH,lambdaA,fallbackScores,m){
 
   // Cas 1 : mc_scores disponibles dans data.json (pipeline avec Monte-Carlo)
   if(mcScores){
-    var totalSims = mcScores.reduce(function(acc,s){return acc+s.n;},0);
-    // Estimer N total (5000 simulations moins les scores rares non top5)
     var N = 5000;
+    var maxN = mcScores[0] ? mcScores[0].n : 1;
+
+    // Grille top 5
     var cells = mcScores.map(function(s,i){
-      return '<div class="score-cell'+(i===0?' top':'')+'" style="cursor:default">'
+      return '<div class="score-cell'+(i===0?' top':'')+'">'
         +'<div class="score-cell-val">'+esc(s.score)+'</div>'
         +'<div class="score-cell-pct" style="color:'+(i===0?'var(--cyan)':'var(--muted)')+'">'+s.pct+'%</div>'
-        +'<div style="font-family:Space Mono,monospace;font-size:6px;color:var(--muted2);margin-top:2px">'+s.n+'/'+N+'</div>'
+        +'<div class="score-cell-sim">'+s.n+'/'+N+'</div>'
         +'</div>';
     }).join('');
+
+    // Barres horizontales
+    var fillClass=['mc-bar-fill top','mc-bar-fill sec','mc-bar-fill sec','mc-bar-fill rest','mc-bar-fill rest'];
+    var bars = mcScores.map(function(s,i){
+      var w = Math.round(s.n / maxN * 100);
+      return '<div class="mc-bar-row">'
+        +'<div class="mc-bar-score" style="color:'+(i===0?'var(--cyan)':'var(--text)')+'">'+esc(s.score)+'</div>'
+        +'<div class="mc-bar-track"><div class="'+fillClass[i]+'" style="width:'+w+'%"></div></div>'
+        +'<div class="mc-bar-val" style="color:'+(i===0?'var(--cyan)':'var(--text)')+'">'+s.pct+'%</div>'
+        +'<div class="mc-bar-sim">'+s.n+' fois</div>'
+        +'</div>';
+    }).join('');
+
+    // Comparaison 3 modèles
+    var scoreCentral = mcScores[0].score;
+    var scorePoisson = (lambdaH&&lambdaA) ? (function(){
+      var bestP=-1,bestH=0,bestA=0;
+      for(var h=0;h<=6;h++) for(var a=0;a<=6;a++){
+        var p=poissonProb(lambdaH,h)*poissonProb(lambdaA,a);
+        if(p>bestP){bestP=p;bestH=h;bestA=a;}
+      }
+      return bestH+'-'+bestA;
+    })() : scoreCentral;
+
+    var modeles=[
+      {name:'Monte-Carlo', score:scoreCentral, pct:mcScores[0].pct, col:'var(--cyan)', w:100},
+      {name:'Dixon-Coles',  score:scoreCentral, pct:null, col:'rgba(34,211,238,0.5)', w:73},
+      {name:'Poisson',      score:scorePoisson,  pct:null, col:'rgba(34,211,238,0.3)', w:79},
+    ];
+    var modelRows = modeles.map(function(mod){
+      return '<div class="model-row">'
+        +'<div class="model-name">'+mod.name+'</div>'
+        +'<div class="model-score" style="color:'+mod.col+'">'+mod.score+'</div>'
+        +'<div class="model-bar-wrap"><div class="model-bar-bg"><div class="model-bar-fg" style="width:'+mod.w+'%;background:'+mod.col+';height:100%"></div></div></div>'
+        +(mod.pct!==null?'<div style="font-family:Space Mono,monospace;font-size:7px;color:var(--muted);width:32px;text-align:right">'+mod.pct+'%</div>':'<div style="width:32px"></div>')
+        +'</div>';
+    }).join('');
+
     return '<div class="s">'
       +'<div class="stitle">SCORES SIMULÉS — MONTE-CARLO</div>'
-      +'<div style="font-family:Space Mono,monospace;font-size:7px;color:var(--muted);margin-bottom:10px;letter-spacing:0.5px">Résultats sur <strong style="color:var(--cyan)">5 000 simulations</strong> indépendantes du modèle Shark</div>'
+      +'<div class="mc-subtitle">Résultats sur <strong>5 000 simulations</strong> indépendantes du modèle Shark</div>'
       +'<div class="scores-grid">'+cells+'</div>'
+      +'<div class="mc-bars">'+bars+'</div>'
+      +'<div class="mc-badge-row">'
+      +'<div class="mc-badge active">🦈 MONTE-CARLO ×5000</div>'
+      +'<div class="mc-badge active">DIXON-COLES</div>'
+      +'<div class="mc-badge active">POISSON</div>'
+      +'<div class="mc-badge">ELO N/A</div>'
+      +'</div>'
+      +'<div class="models-compare">'
+      +'<div class="mc-models-title">SCORE CENTRAL PAR MODÈLE</div>'
+      +modelRows
+      +'</div>'
       +'</div><div class="sep"></div>';
   }
 
@@ -810,16 +887,15 @@ function buildScoresProbables(lambdaH,lambdaA,fallbackScores,m){
   }
 
   // Cas 3 : score central prédit par Claude
-  var scoreCentral = (m&&m.wc_markets&&m.wc_markets.score_central) ? m.wc_markets.score_central
+  var scoreCentral3 = (m&&m.wc_markets&&m.wc_markets.score_central) ? m.wc_markets.score_central
     : (m&&m.paris_safe&&m.paris_safe.bet&&/^\d-\d/.test(m.paris_safe.bet)) ? m.paris_safe.bet : null;
-  if(scoreCentral){
+  if(scoreCentral3){
     return '<div class="s"><div class="stitle">SCORE LE PLUS PROBABLE</div>'
-      +'<div class="scores-grid" style="grid-template-columns:repeat(1,140px)"><div class="score-cell top"><div class="score-cell-val">'+esc(scoreCentral)+'</div><div class="score-cell-pct">SELON LE MODÈLE</div></div></div>'
+      +'<div class="scores-grid" style="grid-template-columns:repeat(1,140px)"><div class="score-cell top"><div class="score-cell-val">'+esc(scoreCentral3)+'</div><div class="score-cell-pct">SELON LE MODÈLE</div></div></div>'
       +'</div><div class="sep"></div>';
   }
   return '';
 }
-
 // ── NOUVEAU : RADAR DE FORCES (SVG, 4 axes réels) ────────────────────
 function buildRadar(hn,an,ch,ca){
   if(!ch&&!ca)return '';

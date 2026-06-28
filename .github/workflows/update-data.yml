@@ -562,9 +562,8 @@ jobs:
               if(h+a>1.5) over15++;
               if(h+a>3.5) over35++;
               if(h>0&&a>0) bttsY++;
-              // Comptage scores exacts (limité à 5 max)
-              var hc=Math.min(h,5), ac=Math.min(a,5);
-              var key=hc+'-'+ac;
+              // Scores réels sans bridage — 3-1, 4-0, 5-2 etc. possibles
+              var key=h+'-'+a;
               scoreMap[key]=(scoreMap[key]||0)+1;
             }
             // Top 5 scores simulés
@@ -643,8 +642,8 @@ jobs:
             var attA=meAext>0?(bmAext/meAext)/leagAvgA:1;
             var defA=meAext>0?(beAext/meAext)/leagAvgH:1;
             return {
-              lambdaH:parseFloat(Math.max(0.3,attH*defA*leagAvgH).toFixed(3)),
-              lambdaA:parseFloat(Math.max(0.3,attA*defH*leagAvgA).toFixed(3))
+              lambdaH:parseFloat(Math.max(0.8,attH*defA*leagAvgH).toFixed(3)),
+              lambdaA:parseFloat(Math.max(0.7,attA*defH*leagAvgA).toFixed(3))
             };
           }
           function shinProbabilities(odds) {
@@ -2687,7 +2686,14 @@ jobs:
               var beAext_p=(sA&&sA.goals&&sA.goals.against&&sA.goals.against.total&&sA.goals.against.total.away)||0;
               var meAext_p=(sA&&sA.fixtures&&sA.fixtures.played&&sA.fixtures.played.away)||10;
               var lambdas=calcLambdas(bmHdom_p,beHdom_p,mdHdom,bmAext_p,beAext_p,meAext_p);
-              if(xgH.xg_avg&&xgA.xg_avg){lambdas.lambdaH=parseFloat((lambdas.lambdaH*0.6+parseFloat(xgH.xg_avg)*0.4).toFixed(3));lambdas.lambdaA=parseFloat((lambdas.lambdaA*0.6+parseFloat(xgA.xg_avg)*0.4).toFixed(3));}
+              if(xgH.xg_avg&&xgA.xg_avg){
+                lambdas.lambdaH=parseFloat((lambdas.lambdaH*0.6+parseFloat(xgH.xg_avg)*0.4).toFixed(3));
+                lambdas.lambdaA=parseFloat((lambdas.lambdaA*0.6+parseFloat(xgA.xg_avg)*0.4).toFixed(3));
+              }
+              // FIX cohérence : garantir lambdas >= 0.8 pour avoir des scores réalistes
+              // (ligues exotiques sans xG donnaient lambdas 0.3-0.5 → que des 0-0)
+              lambdas.lambdaH=parseFloat(Math.max(0.8,lambdas.lambdaH).toFixed(3));
+              lambdas.lambdaA=parseFloat(Math.max(0.7,lambdas.lambdaA).toFixed(3));
               var poissonProbs=calcFinalProbs(lambdas.lambdaH,lambdas.lambdaA,eloStats);
 
               var shinProbs=null;
@@ -2808,6 +2814,11 @@ jobs:
               if(an&&an.passe_ton_tour===true){
                 console.log('  \u23ed PASS: '+home.name+' vs '+away.name);
                 an.pari_rec='';an.cote_rec='';an.confiance=0;an.vbet='NON';an.verdict_shark='';an.edge='';an.kelly='0';an.marche='';an.risque='ELEVE';
+              }
+              // FIX : forcer passe_ton_tour si cote < 1.50 (règle absolue)
+              if(an&&an.cote_rec&&an.cote_rec!==''&&parseFloat(an.cote_rec)<1.50){
+                console.log('  \u26d4 Cote '+an.cote_rec+' < 1.50 — passe_ton_tour forcé');
+                an.pari_rec='';an.cote_rec='';an.confiance=0;an.vbet='NON';an.verdict_shark='';an.edge='';an.kelly='0';an.passe_ton_tour=true;
               }
 
               (function(){

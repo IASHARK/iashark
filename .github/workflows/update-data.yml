@@ -38,13 +38,10 @@ jobs:
           };
           const TENNIS_BASE = 'https://tennis-api-atp-wta-itf.p.rapidapi.com';
 
-          // ── MODÈLE COUPE DU MONDE 2026 ──────────────────────────
+          // ── PATCH 8 : wc2026_data.js et wc2026_model.js désactivés ──────────
+          // Les matchs CDM utilisent désormais le même pipeline que les championnats classiques
+          // Données via API-Sports uniquement : stats, xG, H2H, ELO
           var WC_DATA = null, WC_MODEL = null;
-          try {
-            WC_DATA  = require('./wc2026_data.js');
-            WC_MODEL = require('./wc2026_model.js');
-            console.log('WC2026 model loaded OK');
-          } catch(e) { console.log('WC2026 model not found:', e.message); }
 
           // ── HELPERS ──────────────────────────────────────────────
           function sleep(ms) { return new Promise(function(r){ setTimeout(r,ms); }); }
@@ -89,14 +86,10 @@ jobs:
           }
 
           // ═══════════════════════════════════════════════════════
-          // ── DONNÉES DYNAMIQUES WC2026 — qualifs réelles + tournoi en cours ──
+          // ── DONNÉES DYNAMIQUES WC2026 ────────────────────────────
           // ═══════════════════════════════════════════════════════
 
-          // Mapping équipe → ligue de qualifs API-Sports (par confédération).
-          // Océanie (id 33) n'a pas statistics_fixtures actif → pas de fallback API,
-          // on reste sur wc2026_data.js (QUALS_XG statique) pour ces équipes.
           var WC_QUALIF_LEAGUE = {
-            // Europe (id 32)
             'France':32,'Germany':32,'Spain':32,'England':32,'Portugal':32,'Italy':32,
             'Netherlands':32,'Belgium':32,'Croatia':32,'Switzerland':32,'Austria':32,
             'Denmark':32,'Norway':32,'Sweden':32,'Poland':32,'Ukraine':32,'Czech Republic':32,
@@ -107,40 +100,23 @@ jobs:
             'Cyprus':32,'Faroe Islands':32,'Gibraltar':32,'San Marino':32,'Andorra':32,
             'Malta':32,'Moldova':32,'Belarus':32,'Armenia':32,'Azerbaijan':32,'Kazakhstan':32,
             'Estonia':32,'Latvia':32,'Lithuania':32,'Bulgaria':32,'Liechtenstein':32,
-
-            // CONCACAF (id 31)
             'USA':31,'Mexico':31,'Canada':31,'Costa Rica':31,'Jamaica':31,'Panama':31,
             'Honduras':31,'El Salvador':31,'Curacao':31,'Haiti':31,'Trinidad and Tobago':31,
             'Guatemala':31,'Nicaragua':31,'Suriname':31,
-
-            // Asie (id 30)
             'Iran':30,'South Korea':30,'Korea Republic':30,'Japan':30,'Australia':30,
             'Saudi Arabia':30,'Qatar':30,'Iraq':30,'UAE':30,'United Arab Emirates':30,
             'Uzbekistan':30,'Jordan':30,'Oman':30,'Bahrain':30,'Kyrgyzstan':30,
             'North Korea':30,'China':30,'Indonesia':30,'Palestine':30,
-
-            // Afrique (id 29)
             'Morocco':29,'Senegal':29,'Tunisia':29,'Egypt':29,'Algeria':29,'Nigeria':29,
             'Ghana':29,'Cameroon':29,'Ivory Coast':29,'South Africa':29,'DR Congo':29,
             'Mali':29,'Cape Verde':29,'Gabon':29,'Mozambique':29,'Benin':29,'Uganda':29,
             'Burkina Faso':29,'Guinea':29,
-
-            // Amérique du Sud (id 34)
             'Brazil':34,'Argentina':34,'Uruguay':34,'Colombia':34,'Ecuador':34,
             'Paraguay':34,'Bolivia':34,'Venezuela':34,'Chile':34,'Peru':34,
-
-            // Océanie (id 33) — pas de stats fixtures, volontairement absent du mapping
-            // 'New Zealand', 'Fiji', etc. tomberont sur le fallback statique.
           };
 
-          // Cache mémoire pour éviter de refetch la même équipe plusieurs fois dans le run
           var WC_TEAM_STATS_CACHE = {};
 
-          // Calcule un xG approximatif à partir des buts réels + tirs cadrés.
-          // Pondération : 65% buts réels (résultat brut, ce qui compte au final),
-          // 35% tirs cadrés convertis en "buts attendus" via un taux de conversion
-          // moyen de 32% (taux observé en moyenne dans le football international —
-          // un tir cadré sur trois finit globalement au fond des filets).
           function calcApproxXG(goalsAvg, shotsOnTargetAvg) {
             if(goalsAvg==null) return null;
             if(shotsOnTargetAvg==null) return Math.round(goalsAvg*100)/100;
@@ -149,25 +125,12 @@ jobs:
             return Math.round(blended*100)/100;
           }
 
-          // Récupère les 8 derniers matchs de qualifs d'une équipe + leurs stats
-          // (buts réels + tirs cadrés, expected_goals étant systématiquement null
-          // pour les qualifs d'après vérification manuelle sur 3 matchs Asie 2026).
           async function getTeamQualifStats(teamId, teamName) {
             var cacheKey = 'qualif_'+teamId;
             if(WC_TEAM_STATS_CACHE[cacheKey]) return WC_TEAM_STATS_CACHE[cacheKey];
-
             var leagueId = WC_QUALIF_LEAGUE[teamName];
-            if(!leagueId) {
-              console.log('  [WC qualif] '+teamName+': clé absente de WC_QUALIF_LEAGUE (vérifier orthographe exacte / Océanie) — fallback statique');
-              WC_TEAM_STATS_CACHE[cacheKey] = null;
-              return null;
-            }
-
+            if(!leagueId) { WC_TEAM_STATS_CACHE[cacheKey] = null; return null; }
             try {
-              // On tente la saison "current" pour ce cycle de qualifs (2024/2023/2026
-              // selon confédération — cf ids constatés). On essaie season 2026 puis
-              // 2024 puis 2023 en fallback, car l'API-Sports a des conventions de
-              // numérotation de saison différentes par confédération pour ce cycle.
               var seasonsToTry = [2026, 2024, 2023];
               var fixturesRaw = null;
               for(var si=0; si<seasonsToTry.length; si++){
@@ -175,26 +138,13 @@ jobs:
                 if(r.response && r.response.length){ fixturesRaw = r.response; break; }
                 await sleep(150);
               }
-              if(!fixturesRaw || !fixturesRaw.length) {
-                console.log('  [WC qualif] '+teamName+': aucun match de qualifs trouvé — fallback statique');
-                WC_TEAM_STATS_CACHE[cacheKey] = null;
-                return null;
-              }
-
-              // Garder seulement les matchs terminés, triés du plus récent au plus ancien
+              if(!fixturesRaw || !fixturesRaw.length) { WC_TEAM_STATS_CACHE[cacheKey] = null; return null; }
               var played = fixturesRaw.filter(function(f){
                 var st=(f.fixture.status&&f.fixture.status.short)||'';
                 return st==='FT'||st==='AET'||st==='PEN';
               }).sort(function(a,b){ return (b.fixture.timestamp||0)-(a.fixture.timestamp||0); });
-
               var last8 = played.slice(0, 8);
-              if(!last8.length) {
-                console.log('  [WC qualif] '+teamName+': 0 match terminé trouvé — fallback statique');
-                WC_TEAM_STATS_CACHE[cacheKey] = null;
-                return null;
-              }
-
-              // Buts réels (toujours disponibles, jamais null)
+              if(!last8.length) { WC_TEAM_STATS_CACHE[cacheKey] = null; return null; }
               var goalsFor=[], goalsAgainst=[];
               last8.forEach(function(f){
                 var isHome = f.teams.home.id===teamId;
@@ -203,8 +153,6 @@ jobs:
                 if(gf!=null) goalsFor.push(gf);
                 if(ga!=null) goalsAgainst.push(ga);
               });
-
-              // Tirs cadrés via fixtures/statistics (peut être null par match, on ignore les null)
               var shotsOnFor=[], shotsOnAgainst=[];
               for(var mi=0; mi<last8.length; mi++){
                 try {
@@ -223,51 +171,29 @@ jobs:
                 } catch(e){}
                 await sleep(120);
               }
-
               function avg(arr){ return arr.length ? arr.reduce(function(a,b){return a+b;},0)/arr.length : null; }
-              var goalsForAvg = avg(goalsFor);
-              var goalsAgainstAvg = avg(goalsAgainst);
-              var shotsOnForAvg = avg(shotsOnFor);
-              var shotsOnAgainstAvg = avg(shotsOnAgainst);
-
-              // Forme récente V/N/D sur ces 8 matchs (signal complémentaire, pas utilisé
-              // dans le calcul de lambdas mais utile à afficher dans le prompt pour Claude)
-              var form = last8.map(function(f){
-                var isHome = f.teams.home.id===teamId;
-                var gf = isHome ? f.goals.home : f.goals.away;
-                var ga = isHome ? f.goals.away : f.goals.home;
-                if(gf==null||ga==null) return '?';
-                return gf>ga?'V':gf<ga?'D':'N';
-              }).join('');
-
               var result = {
-                xg_for: calcApproxXG(goalsForAvg, shotsOnForAvg),
-                xg_against: calcApproxXG(goalsAgainstAvg, shotsOnAgainstAvg),
-                goals_for_avg: goalsForAvg!=null?Math.round(goalsForAvg*100)/100:null,
-                goals_against_avg: goalsAgainstAvg!=null?Math.round(goalsAgainstAvg*100)/100:null,
-                shots_on_for_avg: shotsOnForAvg!=null?Math.round(shotsOnForAvg*100)/100:null,
-                shots_on_against_avg: shotsOnAgainstAvg!=null?Math.round(shotsOnAgainstAvg*100)/100:null,
-                form: form,
-                n_matches: last8.length,
-                source: 'qualifs_api',
+                xg_for: calcApproxXG(avg(goalsFor), avg(shotsOnFor)),
+                xg_against: calcApproxXG(avg(goalsAgainst), avg(shotsOnAgainst)),
+                goals_for_avg: avg(goalsFor)!=null?Math.round(avg(goalsFor)*100)/100:null,
+                goals_against_avg: avg(goalsAgainst)!=null?Math.round(avg(goalsAgainst)*100)/100:null,
+                form: last8.map(function(f){
+                  var isHome = f.teams.home.id===teamId;
+                  var gf = isHome ? f.goals.home : f.goals.away;
+                  var ga = isHome ? f.goals.away : f.goals.home;
+                  if(gf==null||ga==null) return '?';
+                  return gf>ga?'V':gf<ga?'D':'N';
+                }).join(''),
+                n_matches: last8.length, source: 'qualifs_api',
               };
-              console.log('  [WC qualif] '+teamName+': xg_for≈'+result.xg_for+' xg_against≈'+result.xg_against+' ('+last8.length+' matchs, forme '+form+')');
               WC_TEAM_STATS_CACHE[cacheKey] = result;
               return result;
-            } catch(e) {
-              console.log('  [WC qualif] '+teamName+' erreur:', e.message);
-              WC_TEAM_STATS_CACHE[cacheKey] = null;
-              return null;
-            }
+            } catch(e) { WC_TEAM_STATS_CACHE[cacheKey] = null; return null; }
           }
 
-          // Récupère les matchs déjà joués par l'équipe dans le tournoi WC2026 en cours,
-          // avec leur expected_goals réel (disponible et fiable pour les matchs WC,
-          // contrairement aux qualifs — vérifié manuellement).
           async function getTeamTournamentStats(teamId, teamName) {
             var cacheKey = 'tournoi_'+teamId;
             if(WC_TEAM_STATS_CACHE[cacheKey]!==undefined) return WC_TEAM_STATS_CACHE[cacheKey];
-
             try {
               var r = await get('https://v3.football.api-sports.io/fixtures?league=1&season=2026&team='+teamId, APS);
               var fixturesRaw = r.response||[];
@@ -275,19 +201,13 @@ jobs:
                 var st=(f.fixture.status&&f.fixture.status.short)||'';
                 return st==='FT'||st==='AET'||st==='PEN';
               });
-
-              if(!played.length) {
-                WC_TEAM_STATS_CACHE[cacheKey] = null;
-                return null;
-              }
-
+              if(!played.length) { WC_TEAM_STATS_CACHE[cacheKey] = null; return null; }
               var xgFor=[], xgAgainst=[], goalsFor=[], goalsAgainst=[];
               for(var mi=0; mi<played.length; mi++){
                 var f = played[mi];
                 var isHome = f.teams.home.id===teamId;
                 if(f.goals.home!=null) goalsFor.push(isHome?f.goals.home:f.goals.away);
                 if(f.goals.away!=null) goalsAgainst.push(isHome?f.goals.away:f.goals.home);
-
                 try {
                   var statR = await get('https://v3.football.api-sports.io/fixtures/statistics?fixture='+f.fixture.id, APS);
                   var blocks = statR.response||[];
@@ -304,14 +224,7 @@ jobs:
                 } catch(e){}
                 await sleep(120);
               }
-
               function avg(arr){ return arr.length ? arr.reduce(function(a,b){return a+b;},0)/arr.length : null; }
-
-              // Si expected_goals n'a jamais été dispo malgré le match joué (cas rare),
-              // on retombe sur les buts réels du tournoi en cours plutôt que rien.
-              var xgForAvg = avg(xgFor);
-              var xgAgainstAvg = avg(xgAgainst);
-              // Slots 15min depuis les events des matchs joués en CDM
               var slotsFor=[{t:'0-15',n:0},{t:'15-30',n:0},{t:'30-45',n:0},{t:'45-60',n:0},{t:'60-75',n:0},{t:'75-90',n:0}];
               var slotsAgainst=[{t:'0-15',n:0},{t:'15-30',n:0},{t:'30-45',n:0},{t:'45-60',n:0},{t:'60-75',n:0},{t:'75-90',n:0}];
               var slotRanges=[[0,15],[15,30],[30,45],[45,60],[60,75],[75,91]];
@@ -320,7 +233,6 @@ jobs:
                 try{
                   var evR=await get('https://v3.football.api-sports.io/fixtures/events?fixture='+played[si2].fixture.id,APS);
                   var evts=evR.response||[];
-                  var isHome2=played[si2].teams.home.id===teamId;
                   evts.forEach(function(e){
                     if(e.type!=='Goal'||e.detail==='Missed Penalty') return;
                     var min=e.time&&e.time.elapsed||0;
@@ -337,7 +249,7 @@ jobs:
                 }catch(e2){}
                 await sleep(100);
               }
-
+              var xgForAvg = avg(xgFor), xgAgainstAvg = avg(xgAgainst);
               var result = {
                 xg_for: xgForAvg!=null ? Math.round(xgForAvg*100)/100 : avg(goalsFor),
                 xg_against: xgAgainstAvg!=null ? Math.round(xgAgainstAvg*100)/100 : avg(goalsAgainst),
@@ -346,53 +258,27 @@ jobs:
                 slots: hasSlotsData ? slotsFor : null,
                 slots_against: hasSlotsData ? slotsAgainst : null,
               };
-              console.log('  [WC tournoi] '+teamName+': xg_for='+result.xg_for+' xg_against='+result.xg_against+' ('+played.length+' matchs joués, source='+result.source+')');
               WC_TEAM_STATS_CACHE[cacheKey] = result;
               return result;
-            } catch(e) {
-              console.log('  [WC tournoi] '+teamName+' erreur:', e.message);
-              WC_TEAM_STATS_CACHE[cacheKey] = null;
-              return null;
-            }
+            } catch(e) { WC_TEAM_STATS_CACHE[cacheKey] = null; return null; }
           }
 
-          // Point d'entrée unique : combine qualifs + tournoi en cours pour une équipe,
-          // avec pondération qui évolue selon le nombre de matchs déjà joués dans le
-          // tournoi (plus le tournoi avance, plus son poids augmente face aux qualifs).
           async function getTeamWCStats(teamId, teamName) {
             var qualif = await getTeamQualifStats(teamId, teamName);
             var tournoi = await getTeamTournamentStats(teamId, teamName);
-
-            // Aucune donnée dynamique disponible (Océanie, équipe non mappée, API vide) :
-            // signal clair au code appelant pour utiliser le fallback statique QUALS_XG.
             if(!qualif && !tournoi) return null;
-
-            // Seulement des données qualifs (cas le plus fréquent : match 1 de poule)
-            if(qualif && !tournoi) {
-              return { xg_for: qualif.xg_for, xg_against: qualif.xg_against, source: 'qualifs_seul', detail: qualif };
-            }
-
-            // Seulement le tournoi (cas rare : pas de mapping qualifs mais déjà joué en CM)
-            if(!qualif && tournoi) {
-              return { xg_for: tournoi.xg_for, xg_against: tournoi.xg_against, source: 'tournoi_seul', detail: tournoi };
-            }
-
-            // Hybridation qualifs + tournoi, poids croissant pour le tournoi au fil des matchs
+            if(qualif && !tournoi) return { xg_for: qualif.xg_for, xg_against: qualif.xg_against, source: 'qualifs_seul', detail: qualif };
+            if(!qualif && tournoi) return { xg_for: tournoi.xg_for, xg_against: tournoi.xg_against, source: 'tournoi_seul', detail: tournoi };
             var nGames = tournoi.games||0;
-            var poidsTournoi = nGames>=2 ? 0.70 : 0.40; // 1 match joué → 40%, 2-3 matchs → 70%
+            var poidsTournoi = nGames>=2 ? 0.70 : 0.40;
             var poidsQualif = 1 - poidsTournoi;
-
-            var xgFor = (qualif.xg_for*poidsQualif) + (tournoi.xg_for*poidsTournoi);
-            var xgAgainst = (qualif.xg_against*poidsQualif) + (tournoi.xg_against*poidsTournoi);
-
             return {
-              xg_for: Math.round(xgFor*100)/100,
-              xg_against: Math.round(xgAgainst*100)/100,
+              xg_for: Math.round(((qualif.xg_for||0)*poidsQualif + (tournoi.xg_for||0)*poidsTournoi)*100)/100,
+              xg_against: Math.round(((qualif.xg_against||0)*poidsQualif + (tournoi.xg_against||0)*poidsTournoi)*100)/100,
               source: 'hybride_qualif'+Math.round(poidsQualif*100)+'_tournoi'+Math.round(poidsTournoi*100),
               detail: { qualif: qualif, tournoi: tournoi },
             };
           }
-
 
           function postJSON(host, path, body, headers) {
             return new Promise(function(resolve) {
@@ -507,9 +393,6 @@ jobs:
               bttsY:Math.round(bttsY*100), bttsN:Math.round(bttsN*100),
             };
           }
-          // ── DIXON-COLES — corrige Poisson sur les scores faibles ──────────
-          // Paramètre rho mesuré empiriquement sur le football européen : -0.13
-          // Corrige : 0-0 (sous-estimé), 1-0 et 0-1 (sous-estimés), 1-1 (sur-estimé)
           function dixonColesCorr(h, a, lambdaH, lambdaA) {
             var rho = -0.13;
             if(h===0 && a===0) return 1 - lambdaH*lambdaA*rho;
@@ -541,32 +424,37 @@ jobs:
             };
           }
 
-          // ── MONTE-CARLO — 5000 simulations ──────────────────────
-          // Tire des buts aléatoires selon Poisson pour chaque équipe
-          // Méthode Knuth : simple, fiable, sans lib externe
-          function poissonRandom(lambda) {
+          // ── PATCH 1 : poissonKnuth — algorithme de Knuth sans cap artificiel ──
+          // Avec lambda 2.5, des scores 4-1, 5-2 apparaissent naturellement
+          function poissonKnuth(lambda) {
             if(lambda<=0) return 0;
             var L=Math.exp(-lambda), k=0, p=1;
-            do { k++; p*=Math.random(); } while(p>L && k<20);
+            do { k++; p*=Math.random(); } while(p>L);
             return k-1;
           }
+          // Alias de compatibilité
+          var poissonRandom = poissonKnuth;
+
+          // ── PATCH 2+3 : calcMonteCarlo corrigé ──────────────────
+          // Utilise poissonKnuth, scores triés par fréquence réelle, pas bridés
           function calcMonteCarlo(lambdaH, lambdaA) {
             var n=5000;
             var p1=0,pN=0,p2=0,over25=0,over15=0,over35=0,bttsY=0;
             var scoreMap={};
             for(var i=0;i<n;i++){
-              var h=poissonRandom(lambdaH);
-              var a=poissonRandom(lambdaA);
+              // poissonKnuth sans cap — les scores 3-1, 4-2 apparaissent si lambdas élevés
+              var h=poissonKnuth(lambdaH);
+              var a=poissonKnuth(lambdaA);
               if(h>a) p1++; else if(h===a) pN++; else p2++;
               if(h+a>2.5) over25++;
               if(h+a>1.5) over15++;
               if(h+a>3.5) over35++;
               if(h>0&&a>0) bttsY++;
-              // Scores réels sans bridage — 3-1, 4-0, 5-2 etc. possibles
               var key=h+'-'+a;
               scoreMap[key]=(scoreMap[key]||0)+1;
             }
-            // Top 5 scores simulés
+            // Scores triés par fréquence réelle — pas bridés, pas de score forcé
+            // Si lambdaH=2.5 et lambdaA=1.4, des 3-1, 4-1, 4-2 apparaissent naturellement
             var topScores=Object.keys(scoreMap).map(function(k){
               return {score:k, n:scoreMap[k], pct:Math.round(scoreMap[k]/n*100)};
             }).sort(function(a,b){return b.n-a.n;}).slice(0,5);
@@ -579,20 +467,12 @@ jobs:
             };
           }
 
-          // ── FUSION Poisson + Dixon-Coles + Monte-Carlo + Elo ────
-          // Sans Elo : 35% Poisson + 40% DC + 25% MC
-          // Avec Elo : 32% Poisson + 36% DC + 22% MC + 10% Elo (sur 1X2 uniquement)
-          // Over/BTTS non affectés par Elo (pas de lien direct)
           function calcFinalProbs(lambdaH, lambdaA, eloStats) {
             var po = calcPoissonProbs(lambdaH, lambdaA);
             var dc = calcDixonColesProbs(lambdaH, lambdaA);
             var mc = calcMonteCarlo(lambdaH, lambdaA);
-
-            // Elo : convertit probH/probA en 1X2 en allouant le nul proportionnellement
             var eloP1=null, eloPN=null, eloP2=null;
             if(eloStats && eloStats.probH && eloStats.probA) {
-              // Elo donne P(H win) et P(A win) sans nul — on estime le nul
-              // via la moyenne des 3 modèles puis on normalise
               var avgPN = Math.round((po.pN + dc.pN + mc.pN) / 3);
               var rawH = eloStats.probH, rawA = eloStats.probA;
               var scale = (100 - avgPN) / Math.max(rawH + rawA, 1);
@@ -600,29 +480,23 @@ jobs:
               eloP2 = Math.round(rawA * scale);
               eloPN = 100 - eloP1 - eloP2;
             }
-
             var hasElo = eloP1 !== null;
             var w = hasElo
               ? {po:0.32, dc:0.36, mc:0.22, elo:0.10}
               : {po:0.35, dc:0.40, mc:0.25, elo:0};
-
             function blend1X2(key, eloVal) {
               var base = po[key]*w.po + dc[key]*w.dc + mc[key]*w.mc;
               if(hasElo && eloVal!==null) base += eloVal*w.elo;
               return Math.round(base);
             }
             function blendMarket(key) {
-              // Over/BTTS : pas d'Elo, redistribuer ses 10% sur DC
               return Math.round(po[key]*0.35 + dc[key]*0.40 + mc[key]*0.25);
             }
-
             var p1  = blend1X2('p1',  eloP1);
             var pN  = blend1X2('pN',  eloPN);
             var p2  = blend1X2('p2',  eloP2);
-            // Normaliser pour que p1+pN+p2 = 100
             var total = p1+pN+p2;
             if(total !== 100) { var diff=100-total; p1+=diff; }
-
             return {
               p1:p1, pN:pN, p2:p2,
               over15:blendMarket('over15'), over25:blendMarket('over25'),
@@ -635,17 +509,29 @@ jobs:
             };
           }
 
-          function calcLambdas(bmHdom, beHdom, mdHdom, bmAext, beAext, meAext, leagueAvgH, leagueAvgA) {
+          // ── PATCH 4 : calcLambdas avec leagueId + planchers réalistes ──────
+          // Plancher par niveau de compétition — pas de cap vers le haut
+          // Top 5 EU + LDC/EL : min 1.05/0.90
+          // CDM phase de groupes : min 0.90/0.80 (plus défensif)
+          // Autres ligues : min 0.95/0.80
+          function calcLambdas(bmHdom, beHdom, mdHdom, bmAext, beAext, meAext, leagueAvgH, leagueAvgA, leagueId) {
             var leagAvgH=leagueAvgH||1.35, leagAvgA=leagueAvgA||1.10;
+            var TOP=[39,61,140,135,78,2,3];
+            var isTop=leagueId&&TOP.indexOf(leagueId)!==-1;
+            var isWC=leagueId===1;
+            var minLH=isWC?0.90:isTop?1.05:0.95;
+            var minLA=isWC?0.80:isTop?0.90:0.80;
             var attH=mdHdom>0?(bmHdom/mdHdom)/leagAvgH:1;
             var defH=mdHdom>0?(beHdom/mdHdom)/leagAvgA:1;
             var attA=meAext>0?(bmAext/meAext)/leagAvgA:1;
             var defA=meAext>0?(beAext/meAext)/leagAvgH:1;
+            // Pas de cap vers le haut — si une équipe marque 3/match, lambda 2.5+ est correct
             return {
-              lambdaH:parseFloat(Math.max(0.8,attH*defA*leagAvgH).toFixed(3)),
-              lambdaA:parseFloat(Math.max(0.7,attA*defH*leagAvgA).toFixed(3))
+              lambdaH:parseFloat(Math.max(minLH,attH*defA*leagAvgH).toFixed(3)),
+              lambdaA:parseFloat(Math.max(minLA,attA*defH*leagAvgA).toFixed(3))
             };
           }
+
           function shinProbabilities(odds) {
             var prices=odds.filter(function(o){return o&&o>1;});
             if(!prices.length) return null;
@@ -722,7 +608,6 @@ jobs:
           // ── TENNIS PIPELINE ─────────────────────────────────────
           // ═══════════════════════════════════════════════════════
 
-          // Tournois à couvrir (ATP + WTA, pas ITF/Challenger pour éviter le bruit)
           var TENNIS_TOUR_RANKS = {
             atp: ['grand_slam','atp1000','atp500','atp250'],
             wta: ['grand_slam','wta1000','wta500','wta250']
@@ -735,14 +620,10 @@ jobs:
             var TOMORROW = tomorrow.toISOString().split('T')[0];
             var tours = ['atp','wta'];
             var dates = [TODAY, TOMORROW];
-
             for(var t=0; t<tours.length; t++){
               var tour = tours[t];
               for(var d=0; d<dates.length; d++){
                 try {
-                  // Fetch avec tout inclus en un seul appel + filtre singles uniquement
-                  // include=tournament.court,tournament.rank,h2h donne surface + rang tournoi + H2H
-                  // Les cotes odd1/odd2 sont déjà dans la réponse de base
                   var pageNo = 1;
                   var hasMore = true;
                   while(hasMore){
@@ -752,22 +633,20 @@ jobs:
                       +'&pageSize=50&pageNo='+pageNo;
                     console.log('Tennis fetch: '+tour.toUpperCase()+' '+dates[d]+' page'+pageNo);
                     var resp = await getArr(url, TENNIS_HEADERS);
-                    // Réponse peut être array direct ou {data:[], hasNextPage}
                     var items = Array.isArray(resp) ? resp : (resp.data||[]);
                     hasMore = !Array.isArray(resp) && resp.hasNextPage === true;
                     console.log('  -> '+items.length+' fixtures');
                     items.forEach(function(f){ f._tour = tour; });
                     all = all.concat(items);
                     pageNo++;
-                    if(pageNo > 5) break; // sécurité max 250 fixtures
-                    if(items.length < 50) break; // pas de page suivante
+                    if(pageNo > 5) break;
+                    if(items.length < 50) break;
                     await sleep(300);
                   }
                 } catch(e) { console.log('Tennis fixtures error '+tour+' '+dates[d]+':', e.message); }
                 await sleep(400);
               }
             }
-            // Dédoublonner par id
             var seen={};
             return all.filter(function(f){
               var k=String(f.id||JSON.stringify(f));
@@ -775,21 +654,15 @@ jobs:
             });
           }
 
-          // Cotes tennis depuis Odds-API.io
-          // Fetch tous les events tennis une seule fois et construit un index par nom
           var ODDS_IO_INDEX = null;
           async function loadOddsIOIndex() {
             if(!ODDS_IO_KEY) return;
             if(ODDS_IO_INDEX!==null) return;
             ODDS_IO_INDEX = {};
             try {
-              // 1. Fetch la liste des sports actifs et filtrer tennis
               var sportsR = await get('https://api.the-odds-api.com/v4/sports/?apiKey='+ODDS_KEY, {});
               var sports = Array.isArray(sportsR)?sportsR:[];
               var tennisSports = sports.filter(function(s){ return s.key&&s.key.toLowerCase().includes('tennis'); });
-              console.log('OddsIO tennis sports: '+tennisSports.map(function(s){return s.key;}).join(', '));
-
-              // 2. Fetch les cotes pour chaque tournoi tennis actif
               var allEvents = [];
               for(var i=0;i<tennisSports.length;i++){
                 try {
@@ -797,12 +670,9 @@ jobs:
                   var r = await get('https://api.the-odds-api.com/v4/sports/'+sport+'/odds/?apiKey='+ODDS_KEY+'&regions=eu&markets=h2h&bookmakers=pinnacle,bet365&oddsFormat=decimal', {});
                   var evts = Array.isArray(r)?r:[];
                   allEvents = allEvents.concat(evts);
-                  console.log('OddsIO '+sport+': '+evts.length+' events');
                 } catch(e2){}
                 await sleep(300);
               }
-
-              // 3. Indexer par nom joueur
               allEvents.forEach(function(e){
                 if(!e.home_team||!e.away_team) return;
                 function ck(n){ return (n||'').toLowerCase().replace(/[^a-z]/g,''); }
@@ -830,7 +700,6 @@ jobs:
             });
             if(!found) return null;
             try {
-              // Les cotes sont déjà dans l'event The Odds API
               var bks = found.bookmakers||[];
               var bk = bks.find(function(b){return b.key==='pinnacle';}) ||
                        bks.find(function(b){return b.key==='bet365';}) ||
@@ -838,22 +707,18 @@ jobs:
               if(!bk) return null;
               var ml = (bk.markets||[]).find(function(m){return m.key==='h2h';});
               if(!ml||!ml.outcomes||!ml.outcomes[0]) return null;
-              // Tennis h2h = 2 outcomes : home et away
-              var o1 = ml.outcomes.find(function(o){return ck(o.name).slice(0,6)===c1.slice(0,6);});
-              var o2 = ml.outcomes.find(function(o){return ck(o.name).slice(0,6)===c2.slice(0,6);});
+              function ck2(n){ return (n||'').toLowerCase().replace(/[^a-z]/g,''); }
+              var o1 = ml.outcomes.find(function(o){return ck2(o.name).slice(0,6)===c1.slice(0,6);});
+              var o2 = ml.outcomes.find(function(o){return ck2(o.name).slice(0,6)===c2.slice(0,6);});
               var c1val = o1?parseFloat(o1.price):0;
               var c2val = o2?parseFloat(o2.price):0;
               if(c1val>1&&c2val>1) {
-                // Si les noms sont inversés dans l'index, inverser les cotes
-                var eh=clean(found.home);
-                var needSwap = eh.slice(0,6)===c2.slice(0,6);
-                return needSwap?{c1:c2val.toFixed(2),c2:c1val.toFixed(2)}:{c1:c1val.toFixed(2),c2:c2val.toFixed(2)};
+                return {c1:c1val.toFixed(2),c2:c2val.toFixed(2)};
               }
               return null;
             } catch(e){ return null; }
           }
 
-          // Cotes tennis — endpoint séparé Best Odds
           async function getTennisOddsBest(fixtureId) {
             if(!TENNIS_KEY||!fixtureId) return null;
             try {
@@ -862,36 +727,26 @@ jobs:
                 TENNIS_HEADERS
               );
               if(!r||!r.result) return null;
-              // Uniquement Match Winner — jamais de fallback sur un autre marché
               var ftr = r.result['Full Time Result']||r.result['Match Winner']||null;
               if(!ftr) return null;
               var o1=parseFloat(ftr.od1||0);
               var o2=parseFloat(ftr.od2||0);
-              // Cotes valides : entre 1.01 et 50, et pas aberrantes (ratio max 20x)
               if(o1<1.01||o2<1.01||o1>50||o2>50) return null;
-              if(Math.max(o1,o2)/Math.min(o1,o2)>15) return null; // ratio trop extrême = mauvais marché
+              if(Math.max(o1,o2)/Math.min(o1,o2)>15) return null;
               return {c1:o1.toFixed(2), c2:o2.toFixed(2)};
             } catch(e){ return null; }
           }
 
-          // Ranking ATP/WTA — pour enrichir le prompt avec le classement actuel
-          // Infos joueur : classement + stats surface (getPlayerInfo)
-          // ── TENNIS API FUNCTIONS ─────────────────────────────────
-
-          // /player/profile/{id} → classement, points, surface points
           async function getTennisPlayerInfo(playerId, tour) {
             if(!TENNIS_KEY||!playerId) return null;
             try {
               var r = await get(TENNIS_BASE+'/tennis/v2/'+tour+'/player/profile/'+playerId, TENNIS_HEADERS);
-              // L'API peut retourner le profil directement ou dans un champ data
               var profile = (r&&r.data)?r.data:r;
               if(profile&&profile.currentRank) return profile;
-              // Fallback: chercher dans la liste des joueurs
               return profile||null;
             } catch(e){ return null; }
           }
 
-          // /player/match-stats/{id} → stats service/retour carrière
           async function getTennisMatchStats(playerId, tour) {
             if(!TENNIS_KEY||!playerId) return null;
             try {
@@ -900,7 +755,6 @@ jobs:
             } catch(e){ return null; }
           }
 
-          // /player/past-matches/{id} → derniers matchs joués (player1 = winner)
           async function getTennisRecentForm(playerId, tour) {
             if(!TENNIS_KEY||!playerId) return [];
             try {
@@ -913,7 +767,6 @@ jobs:
             } catch(e){ return []; }
           }
 
-          // /player/surface-summary/{id} → wins/losses par surface par année
           async function getTennisSurfaceSummary(playerId, tour) {
             if(!TENNIS_KEY||!playerId) return null;
             try {
@@ -922,7 +775,6 @@ jobs:
             } catch(e){ return null; }
           }
 
-          // Titres du joueur par niveau de tournoi
           async function getTennisTitles(playerId, tour) {
             if(!TENNIS_KEY||!playerId) return null;
             try {
@@ -937,12 +789,10 @@ jobs:
                 else if(rank.includes('1000')||rank.includes('masters')) masters+=won;
                 else other+=won;
               });
-              return {grandSlams:grandSlams, masters:masters, other:other,
-                      total:grandSlams+masters+other};
+              return {grandSlams:grandSlams, masters:masters, other:other, total:grandSlams+masters+other};
             } catch(e){ return null; }
           }
 
-          // Palmarès du joueur dans CE tournoi spécifiquement
           async function getTennisTournamentRecord(playerId, tournamentId, tour) {
             if(!TENNIS_KEY||!playerId||!tournamentId) return null;
             try {
@@ -952,20 +802,16 @@ jobs:
               );
               var data = (r&&r.data)||[];
               if(!data.length) return null;
-              // Agréger victoires/défaites toutes années
               var totalWins=0, totalLosses=0, bestRound='', appearances=data.length;
               data.forEach(function(yr){
                 totalWins += parseInt(yr.wins)||0;
                 totalLosses += parseInt(yr.losses)||0;
-                // Garder le meilleur round atteint
                 if(!bestRound||(yr.bestRoundId&&parseInt(yr.bestRoundId)>parseInt(bestRound.id||0))){
                   bestRound = yr.bestRound||'';
                 }
               });
               return {
-                wins: totalWins,
-                losses: totalLosses,
-                appearances: appearances,
+                wins: totalWins, losses: totalLosses, appearances: appearances,
                 bestRound: bestRound,
                 winrate: totalWins+totalLosses>0?Math.round(totalWins/(totalWins+totalLosses)*100):null
               };
@@ -991,7 +837,6 @@ jobs:
             };
           }
 
-          // Forme depuis past matches — match_winner = id du gagnant
           function calcTennisForm(matches, playerId) {
             var res=[];
             (matches||[]).forEach(function(m){
@@ -1001,15 +846,12 @@ jobs:
             return res.slice(0,5).join('');
           }
 
-          // Forme sur CETTE surface spécifiquement depuis les matchs récents
-          // On déduit la surface depuis le tournoi si disponible
           function calcTennisFormOnSurface(matches, playerId, surface) {
             var surfLow=(surface||'').toLowerCase();
             var courtMatch=surfLow.includes('clay')?'clay':surfLow.includes('grass')?'grass':'hard';
             var res=[];
             (matches||[]).forEach(function(m){
               if(!m.match_winner||m.result_type==='upcoming') return;
-              // Filtre surface si disponible dans le match
               var mSurf=((m.tournament&&m.tournament.court&&m.tournament.court.name)||'').toLowerCase();
               if(mSurf&&!mSurf.includes(courtMatch)&&!(courtMatch==='hard'&&mSurf.includes('hard'))) return;
               res.push(String(m.match_winner)===String(playerId)?'W':'L');
@@ -1017,11 +859,6 @@ jobs:
             return res.slice(0,5).join('');
           }
 
-          // Stats surface depuis surface-summary → data[].surfaces[]
-          // surface-summary retourne les valeurs en string, profile retourne en int
-          // Calcule winrate surface depuis past-matches — marche pour TOUS les joueurs
-          // past-matches retourne chaque match avec tournament.court.name
-          // Stats surface depuis past-matches — marche pour TOUS les joueurs
           function calcSurfaceStatsForPlayer(matches, playerId, surface) {
             if(!matches||!matches.length||!surface||!playerId) return null;
             var surfLow=(surface||'').toLowerCase();
@@ -1041,16 +878,13 @@ jobs:
             return {wins:wins,losses:losses,total:wins+losses,winrate:Math.round(wins/(wins+losses)*100)};
           }
 
-          // Stats surface depuis surface-summary — années adaptées par surface
-          // Gazon : 3 ans (saison courte de 3 semaines)
-          // Terre/Dur : 2 ans (saison plus longue)
           function calcSurfaceStats(surfData, surface) {
             if(!surfData||!surface) return null;
             var surfLow=(surface||'').toLowerCase();
             var isGrass=surfLow.includes('grass');
             var isClay=surfLow.includes('clay');
             var target=isClay?'Clay':isGrass?'Grass':'Hard';
-            var yearsBack=isGrass?3:2; // gazon 3 ans, reste 2 ans
+            var yearsBack=isGrass?3:2;
             var wins=0,losses=0;
             var years=Array.isArray(surfData)?surfData:[];
             var currentYear=new Date().getFullYear();
@@ -1059,7 +893,6 @@ jobs:
             filtered.forEach(function(yr){
               (yr.surfaces||[]).forEach(function(s){
                 var cn=(s.court||'').toLowerCase();
-                // Matcher Hard et I.hard ensemble
                 var match=target==='Hard'?(cn==='hard'||cn==='i.hard'):cn===target.toLowerCase();
                 if(match){
                   wins+=parseInt(s.courtWins)||0;
@@ -1068,32 +901,27 @@ jobs:
               });
             });
             if(wins+losses===0) return null;
-            var label=isGrass?'3 ans':isClay?'2 ans':'2 ans';
             return {wins:wins,losses:losses,total:wins+losses,
                     winrate:Math.round(wins/(wins+losses)*100),
-                    label:label};
+                    label:isGrass?'3 ans':'2 ans'};
           }
 
-          // Calcul des stats service depuis getPlayerMatchStats
           function calcServiceStats(stats) {
             if(!stats||!stats.serviceStats) return null;
             var sv=stats.serviceStats, rt=stats.rtnStats;
             var bpSv=stats.breakPointsServeStats, bpRt=stats.breakPointsRtnStats;
             function pct(a,b){return b&&b>0?Math.round(a/b*100):null;}
             return {
-              // Service
               firstServePct: pct(sv.firstServeGm, sv.firstServeOfGm),
               winsOn1st: pct(sv.winningOnFirstServeGm, sv.firstServeGm),
               winsOn2nd: pct(sv.winningOnSecondServeGm, sv.winningOnSecondServeOfGm),
               bpSavedPct: pct(bpSv.breakPointSavedGm, bpSv.breakPointFacedGm),
-              // Retour
               winsRtnOn1st: pct(rt.winningOnFirstServeGm, rt.firstServeOfGm),
               winsRtnOn2nd: pct(rt.winningOnSecondServeGm, rt.winningOnSecondServeOfGm),
               bpConvertedPct: pct(bpRt.breakPointWonGm, bpRt.breakPointChanceGm),
             };
           }
 
-          // Filtre tournois Main tour uniquement (250+)
           function isMainTourMatch(parsed) {
             var tr=(parsed.tourRank||'').toLowerCase();
             return tr.includes('main tour')||tr.includes('grand slam')||
@@ -1101,12 +929,9 @@ jobs:
                    tr.includes('finals')||tr.includes('wta')||tr.includes('atp');
           }
 
-          // ── PROMPT TENNIS ────────────────────────────────────────
           async function genAnalyseTennis(d) {
             var surfaceLabel = (d.surface||'').toLowerCase().includes('clay')?'Terre battue':
                                (d.surface||'').toLowerCase().includes('grass')?'Gazon':'Dur';
-
-            // Shin depuis cotes
             var shinProbs = d.shinProbs||null;
             if(!shinProbs&&d.c1&&d.c1!=='--'&&d.c2&&d.c2!=='--'){
               var raw=shinProbabilities([parseFloat(d.c1),parseFloat(d.c2)]);
@@ -1114,7 +939,6 @@ jobs:
             }
             var probIAP1 = shinProbs?shinProbs.p1:(d.c1&&d.c1!=='--'?Math.round(100/parseFloat(d.c1)):50);
             var probIAP2 = 100-probIAP1;
-
             function calcEdge(probIA,cote){
               if(!probIA||!cote||cote==='--') return null;
               var e=probIA/100-1/parseFloat(cote);
@@ -1123,8 +947,6 @@ jobs:
             var edgeP1=calcEdge(probIAP1,d.c1), edgeP2=calcEdge(probIAP2,d.c2);
             var kellyP1=edgeP1&&d.c1&&d.c1!=='--'?fractionalKelly(probIAP1/100,parseFloat(d.c1),0.25):null;
             var kellyP2=edgeP2&&d.c2&&d.c2!=='--'?fractionalKelly(probIAP2/100,parseFloat(d.c2),0.25):null;
-
-            // Formatage stats service
             function fmtSv(sv,name){
               if(!sv) return name+': stats non disponibles';
               return name+':\n'
@@ -1135,129 +957,66 @@ jobs:
                 +'  Break points convertis en retour: '+(sv.bpConvertedPct||'?')+'%\n'
                 +'  Points gagnés en retour 2ème balle adverse: '+(sv.winsRtnOn2nd||'?')+'%';
             }
-
-            // Stats surface
             var surf1Str=d.surf1?d.surf1.wins+'V/'+d.surf1.losses+'D sur '+surfaceLabel+' cette saison ('+d.surf1.winrate+'% winrate)':'Non disponible';
             var surf2Str=d.surf2?d.surf2.wins+'V/'+d.surf2.losses+'D sur '+surfaceLabel+' cette saison ('+d.surf2.winrate+'% winrate)':'Non disponible';
-
-            // H2H
             var h2hTotal=(d.h2hP1Wins||0)+(d.h2hP2Wins||0);
             var h2hStr=h2hTotal>0?d.p1+' mène '+(d.h2hP1Wins||0)+'-'+(d.h2hP2Wins||0)+' sur '+h2hTotal+' confrontations':'Aucun H2H disponible';
-
-            // Surface-specific context
             var surfContext=surfaceLabel==='Gazon'
-              ?'GAZON : Service dominant, rebond bas. Les grands serveurs et volleyeurs sont avantagés. Les échanges sont courts. Le % 1ère balle et aces sont cruciaux. Les matchs se jouent souvent au service.'
+              ?'GAZON : Service dominant, rebond bas. Les grands serveurs et volleyeurs sont avantagés.'
               :surfaceLabel==='Terre battue'
-              ?'TERRE BATTUE : Échanges longs, rebond haut. Les joueurs de fond de court défensifs sont avantagés. Le % 2ème balle et les breaks sont déterminants. La fatigue physique joue un rôle majeur.'
-              :'DUR : Surface équilibrée. Le service compte mais le retour est efficace. Les stats de 2ème balle et de breaks sont les meilleurs prédicteurs.';
-
+              ?'TERRE BATTUE : Échanges longs, rebond haut. Les joueurs de fond de court défensifs sont avantagés.'
+              :'DUR : Surface équilibrée. Le service compte mais le retour est efficace.';
             var prompt =
               '=== ANALYSE TENNIS — '+surfaceLabel.toUpperCase()+' ===\n'
               +d.p1+(d.seed1?' [Seed #'+d.seed1+']':'')+' vs '+d.p2+(d.seed2?' [Seed #'+d.seed2+']':'')+' — '+(d.tournament||'')+(d.round?' ('+d.round+')':'')+'\n'
               +'Date: '+d.date+' | Surface: '+surfaceLabel+' | '+d.tourRank+'\n\n'
-
-
-              +'=== CONTEXTE SURFACE ===\n'
-              +surfContext+'\n\n'
-
+              +'=== CONTEXTE SURFACE ===\n'+surfContext+'\n\n'
               +'=== CLASSEMENT & PROFIL ===\n'
-              +'⚠ IMPORTANT : Le classement ATP/WTA est calculé sur TOUTES surfaces. Un joueur bien classé peut être mauvais sur cette surface spécifique. Ne pas utiliser le classement seul comme signal fort.\n\n'
               +d.p1+' : ATP/WTA #'+(d.rank1||'N/C')+'\n'
-              +(d.seed1?'  Statut : Tête de série #'+d.seed1+'\n':'')
-              +(d.seed1==='LL'||d.seed1==='ll'?'  → Lucky Loser : a perdu en qualifications mais rentré suite désistement. Peut être en reprise de rythme.\n':'')
-              +(d.seed1==='WC'||d.seed1==='wc'?'  → Wild Card : invitation du tournoi. Souvent joueur local ou revenant de blessure — ne pas sous-estimer.\n':'')
-              +(d.seed1==='Q'||d.seed1==='q'?'  → Qualifier : a dû passer les qualifs. Classement bas mais peut être en très grande forme.\n':'')
-              +(d.seed1==='PR'||d.seed1==='pr'?'  → Protected Ranking : revient de blessure avec ancien classement protégé. Niveau réel peut être bien supérieur au classement actuel.\n':'')
               +(d.titles1&&d.titles1.total>0?'  Palmarès : '+d.titles1.grandSlams+' Grand Chelem, '+d.titles1.masters+' Masters 1000, '+d.titles1.other+' autres titres\n':'  Palmarès : Aucun titre majeur\n')
-              +'\n'
               +d.p2+' : ATP/WTA #'+(d.rank2||'N/C')+'\n'
-              +(d.seed2?'  Statut : Tête de série #'+d.seed2+'\n':'')
-              +(d.seed2==='LL'||d.seed2==='ll'?'  → Lucky Loser : a perdu en qualifications mais rentré suite désistement. Peut être en reprise de rythme.\n':'')
-              +(d.seed2==='WC'||d.seed2==='wc'?'  → Wild Card : invitation du tournoi. Souvent joueur local ou revenant de blessure — ne pas sous-estimer.\n':'')
-              +(d.seed2==='Q'||d.seed2==='q'?'  → Qualifier : a dû passer les qualifs. Classement bas mais peut être en très grande forme.\n':'')
-              +(d.seed2==='PR'||d.seed2==='pr'?'  → Protected Ranking : revient de blessure avec ancien classement protégé. Niveau réel peut être bien supérieur au classement actuel.\n':'')
               +(d.titles2&&d.titles2.total>0?'  Palmarès : '+d.titles2.grandSlams+' Grand Chelem, '+d.titles2.masters+' Masters 1000, '+d.titles2.other+' autres titres\n':'  Palmarès : Aucun titre majeur\n')
-              +'\n'
-              +(d.rank1&&d.rank2?'Ecart classement brut: '+Math.abs(d.rank1-d.rank2)+' places (signal FAIBLE sur surface spécifique)\n':'')+'\n'
-
-
-              +'=== STATS SURFACE 1 AN ===\n'
-              +d.p1+': '+surf1Str+'\n'
-              +d.p2+': '+surf2Str+'\n\n'
-
-              +'=== STATS SERVICE & RETOUR ===\n'
-              +fmtSv(d.svStats1,d.p1)+'\n'
-              +fmtSv(d.svStats2,d.p2)+'\n\n'
-
-              +'=== HEAD TO HEAD ===\n'
-              +h2hStr+'\n\n'
-              +h2hStr+'\n\n'
-
+              +'\n=== STATS SURFACE ===\n'
+              +d.p1+': '+surf1Str+'\n'+d.p2+': '+surf2Str+'\n\n'
+              +'=== STATS SERVICE & RETOUR ===\n'+fmtSv(d.svStats1,d.p1)+'\n'+fmtSv(d.svStats2,d.p2)+'\n\n'
+              +'=== HEAD TO HEAD ===\n'+h2hStr+'\n\n'
               +'=== PALMARES DANS CE TOURNOI ===\n'
               +(d.tourRec1?d.p1+' : '+d.tourRec1.wins+'V/'+d.tourRec1.losses+'D en '+d.tourRec1.appearances+' participations | Meilleur tour: '+d.tourRec1.bestRound:(d.p1+' : Aucun historique'))+'\n'
               +(d.tourRec2?d.p2+' : '+d.tourRec2.wins+'V/'+d.tourRec2.losses+'D en '+d.tourRec2.appearances+' participations | Meilleur tour: '+d.tourRec2.bestRound:(d.p2+' : Aucun historique'))+'\n\n'
-
               +'=== COTES ===\n'
               +(d.c1&&d.c1!=='--'?d.p1+': '+d.c1:d.p1+': non disponible')+'\n'
               +(d.c2&&d.c2!=='--'?d.p2+': '+d.c2:d.p2+': non disponible')+'\n'
               +(shinProbs?'Shin: '+d.p1+' '+shinProbs.p1+'% | '+d.p2+' '+shinProbs.p2+'%\n':'')
               +'Edge: '+d.p1+' '+(edgeP1!==null?'+'+edgeP1+'%':'0%')+' | '+d.p2+' '+(edgeP2!==null?'+'+edgeP2+'%':'0%')+'\n\n'
-
-              +'=== COMMENT RAISONNER SUR '+surfaceLabel.toUpperCase()+' ===\n'
-              +(surfaceLabel==='Gazon'?
-                'GAZON : le service est roi. Checke dans cet ordre :\n1. Qui a le meilleur % 1ere balle ? > 65% = service imbrisable\n2. Qui a le meilleur winrate gazon cette saison ?\n3. Les breaks sont rares — le set se joue souvent au tie-break\n4. Un gaucher ou un grand serveur est structurellement avantagé\n5. Les points ATP gazon confirment qui est specialiste gazon\n':
-              surfaceLabel==='Terre battue'?
-                'TERRE : le retour est roi. Checke dans cet ordre :\n1. Qui convertit le plus de BP ? > 45% = retourneur dangereux\n2. Qui gagne le plus de pts sur 2eme balle adverse ?\n3. Winrate terre cette saison — la forme physique prime\n4. Les echanges longs favorisent les defenseurs de fond de court\n':
-                'DUR : surface neutre. Checke dans cet ordre :\n1. Ecart classement > 20 places = signal fort\n2. Forme recente 10 derniers matchs\n3. % 1ere balle + BP sauves\n4. H2H si disponible\n'
-              )+'\n'
-              +'MARCHE : Match Winner uniquement. Cote minimum 1.45, pas de maximum.\n'
+              +'MARCHE : Match Winner uniquement. Cote minimum 1.45.\n'
               +'CONFIANCE : 6.0 minimum. Max 9.0.\n\n'
-              +'DECISION SANS COTES : Ne pas avoir de cote nest PAS une raison de passer son tour.\n'
-              +'Si 2 signaux ou plus pointent vers le meme joueur, tu DOIS le jouer.\n'
-              +'Sans cote, estime-la dans cote_rec (ex: ~1.65) et mets vbet=OUI si conf >= 6.5.\n\n'
-              +'SIGNAUX — chacun vaut 1 point pour un joueur :\n'
-              +'H2H dominant >= 3-1 = 1 signal fort\n'
-              +'Meilleur winrate surface cette saison = 1 signal\n'
-              +'Forme recente superieure (WWW vs LLL) = 1 signal\n'
-              +'Ecart classement > 20 places = 1 signal\n'
-              +'Points ATP sur cette surface > 2x adversaire = 1 signal\n\n'
-              +'REGLE ABSOLUE : 2 signaux ou plus vers le meme joueur = JOUER. Pas de passe ton tour.\n'
-              +'1 signal ou moins, signaux contradictoires = passe ton tour.\n\n'
-              +'EXEMPLE CONCRET : Bonzi H2H 3-1 (signal 1) + winrate gazon 60%>56% (signal 2) + forme WWW (signal 3) = 3 signaux = JOUER BONZI sans hesiter.\n\n'
-              +'STYLE : UNE decision tranchante. UNE stat qui justifie. Jamais de peut-etre.\n\n'
               +'{\n'
               +'"passe_ton_tour": false,\n'
               +'"confiance": 0.0,\n'
               +'"pari_rec": "'+d.p1+' | '+d.p2+' | ou vide si passe_ton_tour",\n'
               +'"cote_rec": "cote exacte copiée depuis les données",\n'
               +'"risque": "FAIBLE|MODERE|ELEVE",\n'
-              +'"verdict_shark": "1 phrase tranchante : joueur + cote + 1 stat clé qui justifie",\n'
-              +'"analyse_card": "2-3 phrases précises sur les forces/faiblesses sur '+surfaceLabel+' — cite les stats disponibles",\n'
-              +'"conseil": "1 phrase directe — joue ou joue pas et pourquoi en 1 mot",\n'
+              +'"verdict_shark": "1 phrase tranchante : joueur + cote + 1 stat clé",\n'
+              +'"analyse_card": "2-3 phrases précises sur les forces/faiblesses",\n'
+              +'"conseil": "1 phrase directe",\n'
               +'"contexte": "tournoi + round + enjeux",\n'
-              +'"facteur_x": "LE seul facteur décisif sur '+surfaceLabel+' pour CE match — stat précise",\n'
+              +'"facteur_x": "LE seul facteur décisif",\n'
               +'"p1": '+probIAP1+',\n'
               +'"p2": '+probIAP2+',\n'
               +'"edge": "'+(edgeP1!==null?'+'+edgeP1:edgeP2!==null?'+'+edgeP2:'0')+'%",\n'
-              +'"vbet": "OUI si edge>=4% ET conf>=6.0 ET passe_ton_tour=false, sinon NON",\n'
+              +'"vbet": "OUI si edge>=4% ET conf>=6.0, sinon NON",\n'
               +'"kelly": "'+(kellyP1||kellyP2||0)+'%",\n'
-              +'"scenario_match": {\n'
-              +'  "set1": "1er set : qui prend l\'ascendant, breaks attendus, dynamique de service",\n'
-              +'  "set2": "2ème set : momentum, ajustements, qui réagit mieux",\n'
-              +'  "set3": "3ème set si serré (null sinon) : facteur mental et physique"\n'
-              +'}\n'
+              +'"scenario_match": {"set1":"","set2":"","set3":null}\n'
               +'}';
-
             var r = await postJSONWithRetry('api.anthropic.com', '/v1/messages', {
               model: 'claude-sonnet-4-6',
               max_tokens: 1500,
-              system: 'Tu es un analyste tennis professionnel. Tu réponds EXCLUSIVEMENT en JSON valide. Zéro backtick. RÈGLES : (1) Sois ultra direct — une phrase = un fait chiffré. (2) verdict_shark = "JOUE [joueur] à [cote] — [1 stat clé]". (3) analyse_card = forces concrètes sur CETTE surface. (4) facteur_x = LA stat qui fait gagner sur cette surface. (5) conseil = une seule phrase actionnable. JAMAIS de "il est difficile de dire", JAMAIS de "peut-être". Si tu hésites → passe_ton_tour=true.',
+              system: 'Tu es un analyste tennis professionnel. Tu réponds EXCLUSIVEMENT en JSON valide. Zéro backtick.',
               messages: [{role:'user', content:prompt}]
             }, {'x-api-key':ANT_KEY, 'anthropic-version':'2023-06-01'});
-
             var txt = ((r.content||[]).find(function(b){return b.type==='text';})||{}).text||'{}';
             try { return JSON.parse(txt.replace(/```json|```/g,'').trim()); }
-            catch(e) { console.log('Parse error genAnalyseTennis:', txt.slice(0,200)); return null; }
+            catch(e) { return null; }
           }
 
           async function processTennisFixtures(fixtures, RANK_MAP, PHOTOS) {
@@ -1265,29 +1024,15 @@ jobs:
             PHOTOS = PHOTOS||{};
             var tennisMatchs = [];
             console.log('\n=== TENNIS PIPELINE: '+fixtures.length+' matchs à analyser ===');
-
             for(var i=0; i<fixtures.length; i++){
               var f = fixtures[i];
               var tour = f._tour||'atp';
               var parsed = parseTennisFixture(f);
               var p1Name = parsed.p1Name;
               var p2Name = parsed.p2Name;
-
-              // Skip doubles
-              if(p1Name.includes('/')&&p2Name.includes('/')){
-                console.log('[TENNIS] Skip doubles: '+p1Name);
-                continue;
-              }
-
-              // Skip tournois inférieurs à 250 (Challenger, ITF, Futures)
-              if(!isMainTourMatch(parsed)){
-                console.log('[TENNIS] Skip (non Main tour): '+p1Name+' vs '+p2Name+' — '+parsed.tourRank);
-                continue;
-              }
-
+              if(p1Name.includes('/')&&p2Name.includes('/')){ continue; }
+              if(!isMainTourMatch(parsed)){ continue; }
               console.log('\n[TENNIS] -> '+p1Name+' vs '+p2Name+' ('+tour.toUpperCase()+' | '+parsed.tourRank+' | '+parsed.surface+')');
-
-              // Fetch : surface-summary + matchs récents + match-stats + cotes + palmarès tournoi
               var batch = await Promise.all([
                 getTennisSurfaceSummary(parsed.p1Id, tour),
                 getTennisSurfaceSummary(parsed.p2Id, tour),
@@ -1303,107 +1048,59 @@ jobs:
                 getTennisTitles(parsed.p2Id, tour),
               ]);
               await sleep(600);
-
-              var surfData1 = batch[0];
-              var surfData2 = batch[1];
-              var matches1  = batch[2]||[];
-              var matches2  = batch[3]||[];
-              var mstats1   = batch[4];
-              var mstats2   = batch[5];
-              var bestOdds  = batch[6];
-              var oddsIO    = batch[7];
-              var tourRec1  = batch[8];
-              var tourRec2  = batch[9];
-              var titles1   = batch[10];
-              var titles2   = batch[11];
-
-              // Classement depuis RANK_MAP global (fiable pour tous les joueurs)
+              var surfData1=batch[0], surfData2=batch[1], matches1=batch[2]||[], matches2=batch[3]||[];
+              var mstats1=batch[4], mstats2=batch[5], bestOdds=batch[6], oddsIO=batch[7];
+              var tourRec1=batch[8], tourRec2=batch[9], titles1=batch[10], titles2=batch[11];
               var rank1 = RANK_MAP[String(parsed.p1Id)]||null;
               var rank2 = RANK_MAP[String(parsed.p2Id)]||null;
-              var profile1 = null; // plus utilisé
-              var profile2 = null;
-
-              // Forme globale
               var form1 = calcTennisForm(matches1, parsed.p1Id);
               var form2 = calcTennisForm(matches2, parsed.p2Id);
               var formSurf1 = calcTennisFormOnSurface(matches1, parsed.p1Id, parsed.surface);
               var formSurf2 = calcTennisFormOnSurface(matches2, parsed.p2Id, parsed.surface);
-
-              // Stats surface depuis past-matches (marche pour TOUS les joueurs)
-              // Fallback sur surface-summary si past-matches insuffisant
               var surf1 = calcSurfaceStatsForPlayer(matches1, parsed.p1Id, parsed.surface);
               var surf2 = calcSurfaceStatsForPlayer(matches2, parsed.p2Id, parsed.surface);
               if(!surf1&&surfData1) surf1=calcSurfaceStats(surfData1, parsed.surface);
               if(!surf2&&surfData2) surf2=calcSurfaceStats(surfData2, parsed.surface);
-
-              // Stats service/retour/breaks depuis match-stats
               var svStats1 = calcServiceStats(mstats1);
               var svStats2 = calcServiceStats(mstats2);
-
-              // Cotes : OddsIO (Pinnacle/Bet365) prioritaire, sinon best odds API tennis
               var c1 = (oddsIO&&oddsIO.c1)||(bestOdds&&bestOdds.c1)||parsed.c1;
               var c2 = (oddsIO&&oddsIO.c2)||(bestOdds&&bestOdds.c2)||parsed.c2;
-              if(oddsIO) console.log('  OddsIO cotes: '+c1+'/'+c2);
-              console.log('  #'+rank1+' vs #'+rank2+' | Cotes: '+c1+'/'+c2+' | Forme: '+form1+'/'+form2+' | Surface: '+(surf1?surf1.winrate+'%':'?')+'/'+(surf2?surf2.winrate+'%':'?'));
-
-              // Skip seulement si VRAIMENT rien — ni cotes ni classement ni forme
               var hasData = (c1!=='--'&&c2!=='--')||(rank1||rank2)||(form1.length>0)||(form2.length>0);
-              if(!hasData){
-                console.log('  Skip (aucune donnée): '+p1Name+' vs '+p2Name);
-                continue;
-              }
-
-              // Shin sur les cotes
+              if(!hasData){ continue; }
               var shinProbs = null;
               if(c1!=='--'&&c2!=='--'){
                 var raw=shinProbabilities([parseFloat(c1),parseFloat(c2)]);
                 if(raw&&raw.length===2)shinProbs={p1:Math.round(raw[0]*100),p2:Math.round(raw[1]*100)};
               }
-
               var an = await genAnalyseTennis({
                 p1:p1Name, p2:p2Name, p1Id:parsed.p1Id, p2Id:parsed.p2Id,
-                rank1:rank1, rank2:rank2,
-                seed1:parsed.seed1, seed2:parsed.seed2,
+                rank1:rank1, rank2:rank2, seed1:parsed.seed1, seed2:parsed.seed2,
                 tournament:parsed.tournament, tourRank:parsed.tourRank,
                 surface:parsed.surface, round:parsed.round,
                 date:(parsed.date||'').split('T')[0]+' '+toParisHeure(parsed.date||''),
-                form1:form1, form2:form2,
-                formSurf1:formSurf1, formSurf2:formSurf2,
-                surf1:surf1, surf2:surf2,
-                svStats1:svStats1, svStats2:svStats2,
+                form1:form1, form2:form2, formSurf1:formSurf1, formSurf2:formSurf2,
+                surf1:surf1, surf2:surf2, svStats1:svStats1, svStats2:svStats2,
                 h2hP1Wins:parsed.h2hP1Wins, h2hP2Wins:parsed.h2hP2Wins,
                 c1:c1, c2:c2, shinProbs:shinProbs,
-                tourRec1:tourRec1, tourRec2:tourRec2,
-                titles1:titles1, titles2:titles2,
+                tourRec1:tourRec1, tourRec2:tourRec2, titles1:titles1, titles2:titles2,
               });
               await sleep(300);
-
               if(an&&an.passe_ton_tour===true){
-                console.log('  ⏭ PASS tennis: '+p1Name+' vs '+p2Name);
-                an.pari_rec='';an.cote_rec='';an.confiance=0;
-                an.vbet='NON';an.verdict_shark='';an.edge='';an.kelly='0';
+                an.pari_rec='';an.cote_rec='';an.confiance=0;an.vbet='NON';an.verdict_shark='';an.edge='';an.kelly='0';
               }
-
               var lkKey = tour==='wta'?'wta':'atp';
               var surfLabel = (parsed.surface||'').toLowerCase().includes('clay')?'clay':
                               (parsed.surface||'').toLowerCase().includes('grass')?'grass':'hard';
               var fDate = (parsed.date||'').split('T')[0];
               var heure = toParisHeure(parsed.date||'');
-
               var matchObj = {
-                id: 't_'+parsed.id,
-                sport: 'tennis',
+                id: 't_'+parsed.id, sport: 'tennis',
                 home: {n:p1Name, id:parsed.p1Id, seed:parsed.seed1, country:parsed.p1Country, rank:rank1, photo:PHOTOS[String(parsed.p1Id)]||null},
                 away: {n:p2Name, id:parsed.p2Id, seed:parsed.seed2, country:parsed.p2Country, rank:rank2, photo:PHOTOS[String(parsed.p2Id)]||null},
                 league: parsed.tournament+(parsed.round?' — '+parsed.round:''),
-                ligue_icon: '\uD83C\uDFBE',
-                league_key: lkKey,
-                surface: surfLabel,
-                tour_rank: parsed.tourRank,
-                date: (fDate+' '+heure).trim(),
-                raw_date: parsed.date||'',
-                tour_record_p1: tourRec1||null,
-                tour_record_p2: tourRec2||null,
+                ligue_icon: '\uD83C\uDFBE', league_key: lkKey, surface: surfLabel,
+                tour_rank: parsed.tourRank, date: (fDate+' '+heure).trim(), raw_date: parsed.date||'',
+                tour_record_p1: tourRec1||null, tour_record_p2: tourRec2||null,
                 cat: ['all'],
                 val: an?(an.vbet==='OUI'&&(an.confiance||0)>=7.0):false,
                 hot: an?((an.confiance||0)>=8.0):false,
@@ -1412,35 +1109,28 @@ jobs:
                 pn: 0,
                 p2: shinProbs?shinProbs.p2:(an?(an.p2||50):50),
                 c1: c1, c2: c2,
-                cote_rec: an?(an.cote_rec||''):'',
-                pari_rec: an?(an.pari_rec||''):'',
-                edge: an?(an.edge||''):'',
-                kelly: an?(an.kelly||'0'):'0',
-                vbet: an?(an.vbet||'NON'):'NON',
-                risque: an?(an.risque||'ELEVE'):'ELEVE',
+                cote_rec: an?(an.cote_rec||''):'', pari_rec: an?(an.pari_rec||''):'',
+                edge: an?(an.edge||''):'', kelly: an?(an.kelly||'0'):'0',
+                vbet: an?(an.vbet||'NON'):'NON', risque: an?(an.risque||'ELEVE'):'ELEVE',
                 verdict_shark: an?(an.verdict_shark||''):'',
                 analyse_card: an?(an.analyse_card||an.conseil||''):'',
                 conseil_public: an?(an.conseil||an.analyse_card||''):'',
-                contexte: an?(an.contexte||''):'',
-                facteur_x: an?(an.facteur_x||''):'',
+                contexte: an?(an.contexte||''):'', facteur_x: an?(an.facteur_x||''):'',
                 scenario: an&&an.scenario_match?{phase1:an.scenario_match.set1||'',phase2:an.scenario_match.set2||'',phase3:an.scenario_match.set3||null}:null,
                 no_signal: an&&an.passe_ton_tour===true?true:false,
                 no_signal_label: (an&&an.passe_ton_tour===true)?'Pas assez de signal clair — passer son tour':'',
                 h2h_tennis: {p1Wins:parsed.h2hP1Wins, p2Wins:parsed.h2hP2Wins},
-                form_p1: form1, form_p2: form2,
-                surf_stats_p1: surf1, surf_stats_p2: surf2,
+                form_p1: form1, form_p2: form2, surf_stats_p1: surf1, surf_stats_p2: surf2,
                 mise: '1-2% bankroll',
               };
-
               tennisMatchs.push(matchObj);
-              console.log('  OK conf='+matchObj.conf+' pari='+matchObj.pari_rec+' cotes='+c1+'/'+c2);
+              console.log('  OK conf='+matchObj.conf+' pari='+matchObj.pari_rec);
             }
             return tennisMatchs;
           }
 
-
           // ═══════════════════════════════════════════════════════
-          // ── FOOTBALL PIPELINE (inchangé) ────────────────────────
+          // ── FOOTBALL PIPELINE ───────────────────────────────────
           // ═══════════════════════════════════════════════════════
 
           function lgKey(lgId) { return LG_KEY[lgId]||'other'; }
@@ -1456,10 +1146,6 @@ jobs:
             if(s.includes('champions')) return '\uD83C\uDFC6';
             if(s.includes('scottish')) return '\uD83C\uDFF4\uDB40\uDC67\uDB40\uDC62\uDB40\uDC73\uDB40\uDC63\uDB40\uDC74\uDB40\uDC7F';
             if(s.includes('belgi')) return '\uD83C\uDDE7\uD83C\uDDEA';
-            if(s.includes('super league')) return '\uD83C\uDDE8\uD83C\uDDF3';
-            if(s.includes('veikkausliiga')) return '\uD83C\uDDEB\uD83C\uDDEE';
-            if(s.includes('botola')) return '\uD83C\uDDF2\uD83C\uDDE6';
-            if(s.includes('canadian premier')) return '\uD83C\uDDE8\uD83C\uDDE6';
             return '\uD83C\uDFC6';
           }
 
@@ -1470,26 +1156,15 @@ jobs:
             var dayAfter = new Date(); dayAfter.setDate(dayAfter.getDate()+2);
             var DAYAFTER = dayAfter.toISOString().split('T')[0];
             var dates = [TODAY, TOMORROW, DAYAFTER];
-
-            // Coupe du Monde — fetch par date directement
             try {
               for(var wd=0; wd<dates.length; wd++){
                 var wcResp = await get('https://v3.football.api-sports.io/fixtures?league=1&season=2026&date='+dates[wd]+'&timezone=Europe%2FParis', APS);
-                console.log('WC raw response keys:', Object.keys(wcResp||{}));
-                console.log('WC errors:', JSON.stringify(wcResp.errors||{}));
-                console.log('WC results:', wcResp.results||0);
-                if(wcResp.response&&wcResp.response.length){
-                  console.log('World Cup '+dates[wd]+':', wcResp.response.length+' matchs');
-                  all = all.concat(wcResp.response);
-                } else {
-                  console.log('World Cup '+dates[wd]+': 0 matchs (response='+JSON.stringify(wcResp.response)+')');
-                }
+                console.log('WC '+dates[wd]+':', (wcResp.response||[]).length+' matchs');
+                if(wcResp.response&&wcResp.response.length) all = all.concat(wcResp.response);
                 await sleep(300);
               }
             } catch(e) { console.log('WC fetch error:', e.message); }
             await sleep(300);
-
-            // Autres ligues
             for(var d=0; d<dates.length; d++){
               for(var i=0; i<LEAGUES.length; i++){
                 var lgId = LEAGUES[i];
@@ -1521,11 +1196,6 @@ jobs:
               return r2.response||[];
             }
             return r.response||[];
-          }
-          async function getFullStanding(leagueId) {
-            var r = await get('https://v3.football.api-sports.io/standings?league='+leagueId+'&season='+SEASON, APS);
-            var grp=(r.response&&r.response[0]&&r.response[0].league&&r.response[0].league.standings&&r.response[0].league.standings[0])||[];
-            return grp;
           }
           async function getOdds(fixtureId) {
             var r = await get('https://v3.football.api-sports.io/odds?fixture='+fixtureId, APS);
@@ -1649,7 +1319,7 @@ jobs:
               });
               if(Object.keys(result).length>0) console.log('Pinnacle matched:',homeTeam,'\u2192',matchedHome);
               return Object.keys(result).length>0?result:null;
-            } catch(e){console.log('Pinnacle fetch error:',e.message);return null;}
+            } catch(e){return null;}
           }
 
           async function getWeightedXGStats(teamId, fixtureIds, rawFixtures, xgConcededCache) {
@@ -1815,10 +1485,8 @@ jobs:
             var bm=(stats.goals&&stats.goals.for&&stats.goals.for.total&&stats.goals.for.total.total)||0;
             var be=(stats.goals&&stats.goals.against&&stats.goals.against.total&&stats.goals.against.total.total)||0;
             var form=(stats.form||'').slice(-5);
-            // Pondération forme récente : match le plus récent a le plus de poids
-            // Poids : dernier ×1.50, avant-dernier ×1.35, puis ×1.20, ×1.10, ×1.00
             var formWeights=[1.50,1.35,1.20,1.10,1.00];
-            var formChars=form.split('').reverse(); // du plus récent au plus ancien
+            var formChars=form.split('').reverse();
             var ptsW=0,maxPtsW=0;
             formChars.forEach(function(ch,i){
               var w=formWeights[i]||1.00;
@@ -1829,10 +1497,9 @@ jobs:
             var att=Math.min(100,Math.round(bm/Math.max(total,1)*40));
             var def=Math.max(0,Math.min(100,Math.round((2.5-be/Math.max(total,1))*35)));
             var vd=(stats.fixtures&&stats.fixtures.wins&&stats.fixtures.wins.home)||0;
-            var ve=(stats.fixtures&&stats.fixtures.wins&&stats.fixtures.wins.away)||0;
             var md=(stats.fixtures&&stats.fixtures.played&&stats.fixtures.played.home)||Math.round(total/2);
             var me=(stats.fixtures&&stats.fixtures.played&&stats.fixtures.played.away)||Math.round(total/2);
-            var fd=isDom?Math.min(100,Math.round(vd/Math.max(md,1)*100)):Math.min(100,Math.round(ve/Math.max(me,1)*100));
+            var fd=isDom?Math.min(100,Math.round(vd/Math.max(md,1)*100)):Math.min(100,Math.round((stats.fixtures&&stats.fixtures.wins&&stats.fixtures.wins.away||0)/Math.max(me,1)*100));
             var mot=70;
             if(rank){if(rank<=3)mot=95;else if(rank<=6)mot=85;else if(rank<=10)mot=70;else if(rank>=17)mot=90;else mot=60;}
             return{fd:Math.max(0,Math.min(100,fd)),att:Math.max(0,Math.min(100,att)),def:Math.max(0,Math.min(100,def)),fr:Math.max(0,Math.min(100,fr)),mot:Math.max(0,Math.min(100,mot)),fat:50};
@@ -1944,7 +1611,7 @@ jobs:
             return{score:Math.min(riskScore,100),alerts};
           }
 
-          // ── PROMPT FOOTBALL ──────────────────────────────────────
+          // ── PATCH 9+10 : genAnalyse — CDM traité comme foot classique ────────
           async function genAnalyse(d) {
             var isWorldCup=(d.leagueId===1);
             var moyBmHdom=d.bmHdom&&d.mdHdom?(d.bmHdom/d.mdHdom).toFixed(2):'?';
@@ -1954,7 +1621,6 @@ jobs:
             var edgeAberrant=d.best_edge&&d.best_edge>15;
             var failHpct=d.mdHdom>0?Math.round((d.failHdom/d.mdHdom)*100):0;
             var failApct=d.meAext>0?Math.round((d.failAext/d.meAext)*100):0;
-            var bttsNonCondition=failHpct>=35||failApct>=35;
             var poissonScoreH=Math.round(d.poisson_lambdaH||1.2);
             var poissonScoreA=Math.round(d.poisson_lambdaA||1.0);
             var scoreCentral=poissonScoreH+'-'+poissonScoreA;
@@ -1975,111 +1641,68 @@ jobs:
               h2hStr=d.home+' '+w1+'V / '+wN+'N / '+w2+'D | Moy buts: '+d.h2hAvgButs;
             }
 
-            var prompt;
-            var wcPromptIsComplete = false;
+            // PATCH 9 : CDM utilise le même prompt que foot classique
+            // Ajout d'un en-tête contextuel CDM si isWorldCup
+            var wcHeader = '';
             if(isWorldCup){
-              wcPromptIsComplete = true;
-              prompt = '⚠️ Modèle WC non disponible — analyse basique\n';
-
-              if(WC_MODEL && WC_DATA){
-                var stadeName = d.stade || '';
-                var stadeKey = null;
-                if(WC_DATA.WC2026_STADIUMS){
-                  Object.keys(WC_DATA.WC2026_STADIUMS).forEach(function(k){
-                    if(stadeName.toLowerCase().includes(k.toLowerCase().slice(0,6))||k.toLowerCase().includes(stadeName.toLowerCase().slice(0,6))) stadeKey = k;
-                  });
-                }
-
-                var homeKey = d.home, awayKey = d.away;
-                var nameMap = {
-                  'United States':'USA','Korea Republic':'South Korea','Czechia':'Czech Republic',
-                  'Czech Republic':'Czech Republic','Ivory Coast':'Ivory Coast','DR Congo':'DR Congo',
-                  'Bosnia and Herzegovina':'Bosnia','Bosnia & Herzegovina':'Bosnia','Bosnia-Herzegovina':'Bosnia',
-                };
-                homeKey = nameMap[homeKey] || homeKey;
-                awayKey = nameMap[awayKey] || awayKey;
-
-                // xG dynamiques : qualifs réelles (buts + tirs cadrés via API,
-                // expected_goals étant systématiquement null pour les qualifs)
-                // hybridées avec le xG réel du tournoi en cours dès qu'il est
-                // disponible. Fallback automatique sur QUALS_XG statique si
-                // aucune donnée dynamique n'est trouvée (ex: Océanie).
-                var dynStatsH = await getTeamWCStats(d.homeId, homeKey);
-                var dynStatsA = await getTeamWCStats(d.awayId, awayKey);
-
-                var wcPhase = d.isKnockout ? 'knockout' : 'group';
-                var wcProbs = WC_MODEL.calcMatchProbs(homeKey, awayKey, wcPhase, null, null, stadeKey, dynStatsH, dynStatsA);
-                var wcMarkets = WC_MODEL.calcWCMarkets(homeKey, awayKey, wcProbs, dynStatsH, dynStatsA);
-
-
-                prompt = WC_MODEL.buildWCPrompt({
-                  home: d.home, away: d.away,
-                  league: d.league, date: d.date, stade: d.stade,
-                  phase: wcPhase,
-                  probs: wcProbs, markets: wcMarkets,
-                  fatigueH: null, fatigueA: null,
-                  h2h: h2hStr, absences: injStr,
-                  tournoi_xg_h: null, tournoi_xg_a: null,
-                  pinnacle_p1: d.pinnacle_p1, pinnacle_pN: d.pinnacle_pN, pinnacle_p2: d.pinnacle_p2,
-                  dc1x: d.dc1x, dcx2: d.dc2x,
-                  over15: d.co15, over25: d.co25, over35: d.co35, under25: d.cu25,
-                  btts_oui: d.btts_oui, btts_non: d.btts_non,
-                });
-              }
-            } else {
-              prompt='=== MATCH ===\n'+d.home+' (DOM, #'+(d.rkH||'?')+') vs '+d.away+' (EXT, #'+(d.rkA||'?')+')\n'+d.league+' | '+d.date+' | '+d.stade+'\n\n'
-                +'=== PHASE 1 — ANALYSE INDÉPENDANTE ===\n'
-                +'DOM — Bilan domicile: '+d.vdH+'V / '+d.mdHdom+' matchs | Marqués: '+moyBmHdom+'/match | Encaissés: '+moyBeHdom+'/match\n'
-                +'DOM — Sans marquer: '+d.failHdom+'/'+d.mdHdom+' ('+failHpct+'%) | CS: '+d.csHdom+'/'+d.mdHdom+'\n'
-                +'DOM — Forme 5 derniers: '+d.forme5H+(d.streakH?' | '+d.streakH:'')+'\n'
-                +(d.xgH_avg?'DOM — xG: '+d.xgH_avg+' | xGA: '+(d.xgH_xga||'N/A')+(d.xgH_defense_surchauffe?' ⚠️ DÉFENSE SURCHAUFFE':'')+'\n':'')
-                +'\nEXT — Bilan extérieur: '+d.veA+'V / '+d.meAext+' matchs | Marqués: '+moyBmAext+'/match | Encaissés: '+moyBeAext+'/match\n'
-                +'EXT — Sans marquer: '+d.failAext+'/'+d.meAext+' ('+failApct+'%) | CS: '+d.csAext+'/'+d.meAext+'\n'
-                +'EXT — Forme 5 derniers: '+d.forme5A+(d.streakA?' | '+d.streakA:'')+'\n'
-                +(d.xgA_avg?'EXT — xG: '+d.xgA_avg+' | xGA: '+(d.xgA_xga||'N/A')+(d.xgA_defense_surchauffe?' ⚠️ DÉFENSE SURCHAUFFE':'')+'\n':'')
-                +'\nH2H: '+h2hStr+'\nAbsences: '+injStr+'\n'
-                +(d.eloH&&d.eloA?'ELO: '+d.home+' '+Math.round(d.eloH)+' vs '+d.away+' '+Math.round(d.eloA)+' | Écart: '+(d.eloStats?d.eloStats.diff:0)+' ('+( d.eloStats?d.eloStats.signal:'?')+')\n':'ELO: non disponible\n')
-                +(d.motivH&&d.motivH.alerts&&d.motivH.alerts.length?'Enjeu DOM: '+d.motivH.alerts.join(' | ')+'\n':'')
-                +(d.motivA&&d.motivA.alerts&&d.motivA.alerts.length?'Enjeu EXT: '+d.motivA.alerts.join(' | ')+'\n':'')
-                +(d.matchup&&d.matchup.insights&&d.matchup.insights.length?'Tactique: '+d.matchup.insights.join(' | ')+'\n':'')
-                +'\n=== PHASE 2 — MODÈLE MATHÉMATIQUE ===\n'
-                +'Poisson lambdas: DOM '+d.poisson_lambdaH+' | EXT '+d.poisson_lambdaA+'\n'
-                +'Poisson: DOM '+d.poisson_p1+'% | Nul '+d.poisson_pN+'% | EXT '+d.poisson_p2+'%\n'
-                +'Dixon-Coles: DOM '+d.dixon_p1+'% | Nul '+d.dixon_pN+'% | EXT '+d.dixon_p2+'%\n'
-                +'Monte-Carlo: DOM '+d.mc_p1+'% | Nul '+d.mc_pN+'% | EXT '+d.mc_p2+'%\n'
-                +'[Fusion 35%+40%+25%] Over 2.5: '+d.poisson_over25+'% | BTTS Non: '+d.poisson_bttsN+'%\n'
-                +(d.pinnacle_p1?'Pinnacle (sharp): DOM '+d.pinnacle_p1+'% | Nul '+d.pinnacle_pN+'% | EXT '+d.pinnacle_p2+'%\n':'Pinnacle: non disponible\n')
-                +(edgeAberrant?'⚠️ ALERTE: Edge > 15% = bug Poisson probable, ignore\n':'')
-                +'\nCotes (UTILISE CES VALEURS EXACTES):\n'
-                +(d.dc1x&&d.dc1x!=='--'?'DC 1X: '+d.dc1x+'\n':'DC 1X: N/A\n')
-                +(d.dc2x&&d.dc2x!=='--'?'DC X2: '+d.dc2x+'\n':'DC X2: N/A\n')
-                +(d.co15&&d.co15!=='--'?'Over 1.5: '+d.co15+'\n':'Over 1.5: N/A\n')
-                +(d.co25&&d.co25!=='--'?'Over 2.5: '+d.co25+'\n':'Over 2.5: N/A\n')
-                +(d.cu25&&d.cu25!=='--'?'Under 2.5: '+d.cu25+'\n':'Under 2.5: N/A\n')
-                +(d.co35&&d.co35!=='--'?'Over 3.5: '+d.co35+'\n':'Over 3.5: N/A\n')
-                +(d.btts_oui&&d.btts_oui!=='--'?'BTTS Oui: '+d.btts_oui+'\n':'BTTS Oui: N/A\n')
-                +(d.btts_non&&d.btts_non!=='--'?'BTTS Non: '+d.btts_non+'\n':'BTTS Non: N/A\n')
-                +(d.ah_dom&&d.ah_dom!=='--'?'Asian Handicap -0.5 DOM: '+d.ah_dom+'\n':'')
-                +(d.ah_ext&&d.ah_ext!=='--'?'Asian Handicap +0.5 EXT: '+d.ah_ext+'\n':'')
-                +'\n=== PHASE 3 — DÉCISION ===\n\n'
-                +'PASSER SON TOUR si: Phase 1 et 2 contradictoires | Derby | ELO+Pinnacle absents | <8 matchs joués | aucune cote 1.60-2.20\n\n'
-                +'MARCHÉS AUTORISÉS: DC 1X, DC X2, Over 1.5, Over 2.5, Over 3.5, Under 2.5, BTTS Oui, BTTS Non, Asian Handicap (cote minimum 1.50 obligatoire)\n'
-                +'BTTS Non uniquement si '+bttsNonCondition+'\n'
-                +'COTE OBLIGATOIRE: minimum 1.50 — maximum 3.00\n'
-                +'CONFIANCE: 7.0-7.4 (1-2 signaux) | 7.5-7.9 (3+) | 8.0-8.5 (4+ dont ELO+Pinnacle) — MAX 8.5\n'
-                +'RISQUE: FAIBLE si <1.75 + ELO + Pinnacle | MODERE si 1.75-2.10 | ELEVE sinon\n'
-                +'edge = prob_IA - 1/cote | vbet OUI si edge>=5% ET conf>=7.0\n'
-                +'kelly = edge_decimal*(cote-1)-(1-edge_decimal))/(cote-1)*0.25*100, max 5%\n\n';
+              wcHeader = '=== COUPE DU MONDE 2026 ===\n'
+                +'Phase: '+(d.isKnockout?'ÉLIMINATION DIRECTE — match à enjeu maximal, chaque erreur élimine':'PHASE DE GROUPES')+'\n'
+                +'Note CDM: Les équipes jouent plus défensivement qu\'en championnat. Lambdas ajustés en conséquence.\n\n';
             }
 
-            // JSON commun foot
+            var prompt = wcHeader
+              +'=== MATCH ===\n'+d.home+' (DOM, #'+(d.rkH||'?')+') vs '+d.away+' (EXT, #'+(d.rkA||'?')+')\n'+d.league+' | '+d.date+' | '+d.stade+'\n\n'
+              +'=== PHASE 1 — ANALYSE INDÉPENDANTE ===\n'
+              +'DOM — Bilan domicile: '+d.vdH+'V / '+d.mdHdom+' matchs | Marqués: '+moyBmHdom+'/match | Encaissés: '+moyBeHdom+'/match\n'
+              +'DOM — Sans marquer: '+d.failHdom+'/'+d.mdHdom+' ('+failHpct+'%) | CS: '+d.csHdom+'/'+d.mdHdom+'\n'
+              +'DOM — Forme 5 derniers: '+d.forme5H+(d.streakH?' | '+d.streakH:'')+'\n'
+              +(d.xgH_avg?'DOM — xG: '+d.xgH_avg+' | xGA: '+(d.xgH_xga||'N/A')+(d.xgH_defense_surchauffe?' \u26a0\ufe0f D\u00c9FENSE SURCHAUFFE':'')+'\n':'')
+              +'\nEXT — Bilan extérieur: '+d.veA+'V / '+d.meAext+' matchs | Marqués: '+moyBmAext+'/match | Encaissés: '+moyBeAext+'/match\n'
+              +'EXT — Sans marquer: '+d.failAext+'/'+d.meAext+' ('+failApct+'%) | CS: '+d.csAext+'/'+d.meAext+'\n'
+              +'EXT — Forme 5 derniers: '+d.forme5A+(d.streakA?' | '+d.streakA:'')+'\n'
+              +(d.xgA_avg?'EXT — xG: '+d.xgA_avg+' | xGA: '+(d.xgA_xga||'N/A')+(d.xgA_defense_surchauffe?' \u26a0\ufe0f D\u00c9FENSE SURCHAUFFE':'')+'\n':'')
+              +'\nH2H: '+h2hStr+'\nAbsences: '+injStr+'\n'
+              +(d.eloH&&d.eloA?'ELO: '+d.home+' '+Math.round(d.eloH)+' vs '+d.away+' '+Math.round(d.eloA)+' | \u00c9cart: '+(d.eloStats?d.eloStats.diff:0)+' ('+(d.eloStats?d.eloStats.signal:'?')+')\n':'ELO: non disponible\n')
+              +(d.motivH&&d.motivH.alerts&&d.motivH.alerts.length?'Enjeu DOM: '+d.motivH.alerts.join(' | ')+'\n':'')
+              +(d.motivA&&d.motivA.alerts&&d.motivA.alerts.length?'Enjeu EXT: '+d.motivA.alerts.join(' | ')+'\n':'')
+              +(d.matchup&&d.matchup.insights&&d.matchup.insights.length?'Tactique: '+d.matchup.insights.join(' | ')+'\n':'')
+              +'\n=== PHASE 2 — MODÈLE MATHÉMATIQUE ===\n'
+              +'Poisson lambdas: DOM '+d.poisson_lambdaH+' | EXT '+d.poisson_lambdaA+'\n'
+              +'Poisson: DOM '+d.poisson_p1+'% | Nul '+d.poisson_pN+'% | EXT '+d.poisson_p2+'%\n'
+              +'Dixon-Coles: DOM '+d.dixon_p1+'% | Nul '+d.dixon_pN+'% | EXT '+d.dixon_p2+'%\n'
+              +'Monte-Carlo: DOM '+d.mc_p1+'% | Nul '+d.mc_pN+'% | EXT '+d.mc_p2+'%\n'
+              +(d.mc_scores&&d.mc_scores.length?'Top scores MC: '+d.mc_scores.map(function(s){return s.score+'('+s.pct+'%)';}).join(', ')+'\n':'')
+              +'[Fusion 35%+40%+25%] Over 2.5: '+d.poisson_over25+'% | BTTS Non: '+d.poisson_bttsN+'%\n'
+              +(d.pinnacle_p1?'Pinnacle (sharp): DOM '+d.pinnacle_p1+'% | Nul '+d.pinnacle_pN+'% | EXT '+d.pinnacle_p2+'%\n':'Pinnacle: non disponible\n')
+              +(edgeAberrant?'\u26a0\ufe0f ALERTE: Edge > 15% = bug Poisson probable, ignore\n':'')
+              +'\nCotes (UTILISE CES VALEURS EXACTES):\n'
+              // PATCH 10 : 4 marchés seulement dans le prompt
+              +(d.co25&&d.co25!=='--'?'Over 2.5: '+d.co25+'\n':'Over 2.5: N/A\n')
+              +(d.btts_non&&d.btts_non!=='--'?'BTTS Non: '+d.btts_non+'\n':'BTTS Non: N/A\n')
+              +(d.dc1x&&d.dc1x!=='--'?'DC 1X: '+d.dc1x+'\n':'DC 1X: N/A\n')
+              +(d.dc2x&&d.dc2x!=='--'?'DC X2: '+d.dc2x+'\n':'DC X2: N/A\n')
+              +'\n=== PHASE 3 — DÉCISION ===\n\n'
+              +'PASSER SON TOUR si: Phase 1 et 2 contradictoires | Derby | ELO+Pinnacle absents | <8 matchs joués\n\n'
+              // PATCH 10 : 4 marchés seulement + cote 1.50 minimum absolue
+              +'MARCHÉS AUTORISÉS (4 seulement — aucun autre accepté):\n'
+              +'  - Over 2.5 (cote disponible: '+(d.co25&&d.co25!=='--'?d.co25:'N/A')+')\n'
+              +'  - BTTS Non (cote disponible: '+(d.btts_non&&d.btts_non!=='--'?d.btts_non:'N/A')+')\n'
+              +'  - DC 1X (cote disponible: '+(d.dc1x&&d.dc1x!=='--'?d.dc1x:'N/A')+')\n'
+              +'  - DC X2 (cote disponible: '+(d.dc2x&&d.dc2x!=='--'?d.dc2x:'N/A')+')\n'
+              +'RÈGLE ABSOLUE: cote_rec DOIT être >= 1.50. Si la cote du marché choisi est < 1.50 → passe_ton_tour=true.\n'
+              +'COTE OBLIGATOIRE: minimum 1.50 — maximum 3.00\n'
+              +'CONFIANCE: 7.0-7.4 (1-2 signaux) | 7.5-7.9 (3+) | 8.0-8.5 (4+ dont ELO+Pinnacle) — MAX 8.5\n'
+              +'RISQUE: FAIBLE si <1.75 + ELO + Pinnacle | MODERE si 1.75-2.10 | ELEVE sinon\n'
+              +'edge = prob_IA - 1/cote | vbet OUI si edge>=5% ET conf>=7.0\n'
+              +'kelly = edge_decimal*(cote-1)-(1-edge_decimal))/(cote-1)*0.25*100, max 5%\n\n';
+
             var jsonTpl = 'Réponds UNIQUEMENT avec ce JSON valide. Aucun texte avant ou après. Aucun backtick.\n'
               +'RÈGLE ABSOLUE: analyse_card, conseil, contexte, facteur_x, scenario, scenario_15min TOUJOURS remplis même si passe_ton_tour=true.\n\n'
               +'{\n'
               +'"passe_ton_tour": false,\n'
               +'"confiance": [7.0 à 8.5 ou 0],\n'
-              +'"pari_rec": "[DC 1X|DC X2|Over 2.5|BTTS Non] ou vide",\n'
-              +'"cote_rec": "[COPIE EXACTE de la cote ci-dessus]",\n'
+              +'"pari_rec": "[Over 2.5|BTTS Non|DC 1X|DC X2] ou vide",\n'
+              +'"cote_rec": "[COPIE EXACTE de la cote ci-dessus — DOIT être >= 1.50]",\n'
               +'"marche": "[DOUBLE_CHANCE|TOTAL_BUTS|BTTS] ou vide",\n'
               +'"risque": "[FAIBLE|MODERE|ELEVE]",\n'
               +'"verdict_shark": "[pari] à [cote] — [1 phrase] ou vide",\n'
@@ -2104,16 +1727,11 @@ jobs:
               +']\n'
               +'}';
 
-            var finalContent = wcPromptIsComplete ? prompt : (prompt + jsonTpl);
-            var systemMsg = isWorldCup
-              ? 'Tu es IASHARK, un système d\'analyse statistique de football. Tu réponds EXCLUSIVEMENT en JSON valide. Aucun backtick, aucun texte avant ou après le JSON. Tu n\'inventes jamais de statistiques. Tu es factuel, NEUTRE entre tous les marchés (Over/Under, BTTS, DC), et tu choisis uniquement sur la base de l\'edge calculé fourni. Quand aucun marché n\'a d\'edge suffisant dans la fourchette de cote donnée, tu passes ton tour.'
-              : 'Tu es IASHARK, un système d\'analyse statistique de football. Tu réponds EXCLUSIVEMENT en JSON valide. Aucun backtick, aucun texte avant ou après le JSON. Tu n\'inventes jamais de statistiques. Tu es factuel, neutre, calibré. Quand les données sont insuffisantes, tu passes ton tour.';
-
             var r = await postJSONWithRetry('api.anthropic.com', '/v1/messages', {
               model: 'claude-sonnet-4-6',
               max_tokens: 2500,
-              system: systemMsg,
-              messages: [{role:'user', content:finalContent}]
+              system: 'Tu es IASHARK, un système d\'analyse statistique de football. Tu réponds EXCLUSIVEMENT en JSON valide. Aucun backtick, aucun texte avant ou après le JSON. Tu n\'inventes jamais de statistiques. Tu es factuel, neutre, calibré. Marchés autorisés : Over 2.5, BTTS Non, DC 1X, DC X2 uniquement. Cote minimum absolue : 1.50. Si cote < 1.50 → passe_ton_tour=true. Quand les données sont insuffisantes, tu passes ton tour.',
+              messages: [{role:'user', content:prompt+jsonTpl}]
             }, {'x-api-key':ANT_KEY, 'anthropic-version':'2023-06-01'});
 
             var txt=((r.content||[]).find(function(b){return b.type==='text';})||{}).text||'{}';
@@ -2141,7 +1759,7 @@ jobs:
             var typeFou=isSamedi?'samedi_fou':'dimanche_fou';
             var pool=[];
             (allMatchs||[]).forEach(function(m){
-              if(m.sport==='tennis') return; // pas de combinés tennis
+              if(m.sport==='tennis') return;
               var edgeNum=parseFloat((m.edge||'').replace(/[^0-9.]/g,''))||0;
               var candidates=[];
               if(m.dc1x&&m.dc1x!=='--'&&parseFloat(m.dc1x)>=1.20&&parseFloat(m.dc1x)<=2.00)candidates.push({match:m.home.n+' vs '+m.away.n,sel:'DC 1X',cote:parseFloat(m.dc1x),edge:edgeNum});
@@ -2205,25 +1823,13 @@ jobs:
             var histoPath='historique.json';
             var histo={predictions:[],stats:{winrate:0,roi:0,total:0,streak:0,wins:0,losses:0},monthly:[],backtesting:{}};
             try{histo=JSON.parse(fs.readFileSync(histoPath,'utf8'));}catch(e){}
-
             var yesterday=new Date(TODAY+'T12:00:00Z');yesterday.setDate(yesterday.getDate()-1);
             var yDate=yesterday.toISOString().split('T')[0];
-
-            // Fenêtre de résolution élargie à 4 jours en arrière (pas seulement
-            // "hier") : un match bloqué en pending à cause d'un bug ponctuel
-            // (ex: WC absent de l'endpoint générique) doit pouvoir être rattrapé
-            // au run suivant, au lieu de rester pending indéfiniment.
             var resolveDates=[];
             for(var dback=1; dback<=4; dback++){
               var dd=new Date(TODAY+'T12:00:00Z'); dd.setDate(dd.getDate()-dback);
               resolveDates.push(dd.toISOString().split('T')[0]);
             }
-
-            // Résolution football — championnats classiques + Coupe du Monde
-            // 2026 explicitement (l'endpoint générique par date ne renvoie pas
-            // systématiquement les matchs WC, il faut les fetch à part avec
-            // league=1&season=2026 comme dans getFixtures()). On couvre les
-            // 4 derniers jours pour rattraper les éventuels pending bloqués.
             try{
               var yResults=[];
               for(var rdi=0; rdi<resolveDates.length; rdi++){
@@ -2231,7 +1837,7 @@ jobs:
                 var fClassic=await get('https://v3.football.api-sports.io/fixtures?date='+rDate+'&timezone=Europe/Paris',APS);
                 var fWC=await get('https://v3.football.api-sports.io/fixtures?league=1&season=2026&date='+rDate+'&timezone=Europe/Paris',APS);
                 yResults=yResults.concat(fClassic.response||[], fWC.response||[]);
-                console.log('  Résultats '+rDate+': '+(fClassic.response||[]).length+' classique + '+(fWC.response||[]).length+' World Cup');
+                console.log('  R\u00e9sultats '+rDate+': '+(fClassic.response||[]).length+' classique + '+(fWC.response||[]).length+' World Cup');
                 await sleep(150);
               }
               for(var yr=0;yr<yResults.length;yr++){
@@ -2259,32 +1865,21 @@ jobs:
                 else if(pred.includes('x2')||pred.includes('dc x2'))isWin=(ga>=gh);
                 else if(pred.includes('nul')||pred.includes('draw'))isWin=(gh===ga);
                 found.result=isWin?'win':'loss';found.score=gh+'-'+ga;found.fixture_id=fid;found.resolved_date=TODAY;
-                console.log('  Résolu foot: '+found.match+' \u2192 '+found.result+' ('+gh+'-'+ga+')');
+                console.log('  R\u00e9solu foot: '+found.match+' \u2192 '+found.result+' ('+gh+'-'+ga+')');
               }
-            }catch(e){console.log('  Résultats hier erreur:',e.message);}
-
-            // Résolution tennis — utilise past-matches car fixtures ne contient pas le winner
-            // past-matches retourne match_winner = id du gagnant
+            }catch(e){console.log('  R\u00e9sultats hier erreur:',e.message);}
             try{
               if(TENNIS_KEY){
-                // Chercher les paris tennis pending d'hier
                 var pendingTennis=histo.predictions.filter(function(p){
                   return (p.result==='scheduled'||p.result==='pending')&&p.sport==='tennis'&&p.date&&p.date.substring(0,10)===yDate;
                 });
-                console.log('  Paris tennis pending à résoudre: '+pendingTennis.length);
-
+                console.log('  Paris tennis pending \u00e0 r\u00e9soudre: '+pendingTennis.length);
                 if(pendingTennis.length>0){
-                  // Pour chaque pari pending, chercher le résultat via past-matches d'un des joueurs
                   var resolvedIds={};
                   for(var pt=0;pt<pendingTennis.length;pt++){
                     var pending=pendingTennis[pt];
                     if(resolvedIds[pending.fixture_id]) continue;
-
-                    // Extraire l'ID joueur depuis fixture_id (format t_12345)
-                    var fxId=String(pending.fixture_id||'').replace('t_','');
                     var tour=(pending.league_key||'atp').toLowerCase().includes('wta')?'wta':'atp';
-
-                    // Chercher via l'endpoint fixtures d'hier avec result
                     try {
                       var dayFixtures=await getArr(
                         TENNIS_BASE+'/tennis/v2/'+tour+'/fixtures/'+yDate+'?filter=PlayerGroup:singles&pageSize=50',
@@ -2295,16 +1890,12 @@ jobs:
                         var fxMatchId='t_'+fx.id;
                         var p1n=fx.player1&&fx.player1.name||'';
                         var p2n=fx.player2&&fx.player2.name||'';
-                        // Match par fixture_id ou par noms
                         var isMatch=fxMatchId===pending.fixture_id||
                           (p1n&&p2n&&pending.home&&pending.away&&
                            p1n.toLowerCase().includes(pending.home.split(' ').pop().toLowerCase().slice(0,4))&&
                            p2n.toLowerCase().includes(pending.away.split(' ').pop().toLowerCase().slice(0,4)));
                         if(!isMatch) continue;
-                        // Vérifier si le match est terminé (result non vide)
                         if(!fx.result||fx.result==='') continue;
-                        // Déterminer le gagnant depuis le score (sets)
-                        // Format: "6-3 6-4" = player1 gagne, "3-6 4-6" = player2 gagne
                         var sets=fx.result.split(' ');
                         var p1sets=0,p2sets=0;
                         sets.forEach(function(s){
@@ -2317,29 +1908,21 @@ jobs:
                         var winnerName=p1sets>p2sets?p1n:p2n;
                         var predLow=(pending.prediction||'').toLowerCase();
                         var winnerLow=winnerName.toLowerCase();
-                        // Match si le nom du gagnant est dans la prédiction (4 premiers chars)
                         var isWinT=predLow.includes(winnerLow.slice(0,4))||
                                    predLow.includes(winnerLow.split(' ').pop().slice(0,4));
                         pending.result=isWinT?'win':'loss';
                         pending.score=winnerName+' W '+fx.result;
                         pending.resolved_date=yDate;
                         resolvedIds[pending.fixture_id]=true;
-                        console.log('  Résolu tennis: '+pending.match+' → '+pending.result+' ('+winnerName+')');
+                        console.log('  R\u00e9solu tennis: '+pending.match+' \u2192 '+pending.result+' ('+winnerName+')');
                         break;
                       }
-                    } catch(e2){ console.log('  Erreur résolution tennis match:', e2.message); }
+                    } catch(e2){ console.log('  Erreur r\u00e9solution tennis match:', e2.message); }
                     await sleep(200);
                   }
                 }
               }
-            }catch(e){console.log('  Résultats tennis erreur:',e.message);}
-
-            // Ajouter les nouveaux paris d'aujourd'hui avec le statut "scheduled"
-            // (= match pas encore joué). Ce statut n'est JAMAIS affiché sur le
-            // site (filtré côté génération de historique.html) — il sert
-            // uniquement de mémoire interne pour pouvoir résoudre le pari une
-            // fois le match terminé. Dès la résolution, le statut devient
-            // 'win' ou 'loss' et l'entrée apparaît alors dans l'historique.
+            }catch(e){console.log('  R\u00e9sultats tennis erreur:',e.message);}
             for(var mi=0;mi<matchsData.length;mi++){
               var m=matchsData[mi];
               var alreadyExists=histo.predictions.find(function(p){return p.fixture_id===m.id||(p.home===m.home.n&&p.away===m.away.n&&p.date&&p.date.substring(0,10)===TODAY);});
@@ -2359,10 +1942,8 @@ jobs:
                 }
                 var confBucket=m.conf>=8?'8+':m.conf>=7?'7-8':m.conf>=6?'6-7':'<6';
                 histo.predictions.unshift({
-                  match:m.home.n+' vs '+m.away.n,
-                  home:m.home.n,away:m.away.n,
-                  prediction:betLabel,cote:betCote,conf:m.conf,
-                  conf_bucket:confBucket,
+                  match:m.home.n+' vs '+m.away.n,home:m.home.n,away:m.away.n,
+                  prediction:betLabel,cote:betCote,conf:m.conf,conf_bucket:confBucket,
                   market:marketType,league:m.league||'',league_key:m.league_key||'',
                   sport:m.sport||'football',
                   elo_diff:m.elo_diff||null,has_pinnacle:!!(m.pinnacle_snapshot),has_elo:!!(m.elo_home),
@@ -2370,13 +1951,11 @@ jobs:
                 });
               }
             }
-
             histo.predictions=histo.predictions.slice(0,300);
             var beforeClean=histo.predictions.length;
             histo.predictions=histo.predictions.filter(function(p){return p.type!=='combi';});
             var cleaned=beforeClean-histo.predictions.length;
-            if(cleaned>0)console.log('  Nettoyage: '+cleaned+' combinés supprimés');
-
+            if(cleaned>0)console.log('  Nettoyage: '+cleaned+' combin\u00e9s supprim\u00e9s');
             var singles=histo.predictions.filter(function(p){return p.type==='single'&&p.result!=='pending'&&p.result!=='scheduled';});
             var wins=singles.filter(function(p){return p.result==='win';});
             var total=singles.length;
@@ -2393,7 +1972,6 @@ jobs:
               else break;
             }
             histo.stats={winrate:Math.round(winrate*10)/10,roi:Math.round(roi*10)/10,total,streak,wins:wins.length,losses:total-wins.length};
-
             function breakdown(field){
               var groups={};
               singles.forEach(function(p){
@@ -2408,11 +1986,9 @@ jobs:
               }).sort(function(a,b){return b.total-a.total;});
             }
             histo.backtesting={by_market:breakdown('market'),by_league:breakdown('league_key'),by_conf:breakdown('conf_bucket'),by_sport:breakdown('sport'),by_has_pinnacle:breakdown('has_pinnacle'),by_has_elo:breakdown('has_elo'),updated:TODAY};
-
             var mktStats=histo.backtesting.by_market;
             console.log('  === BACKTESTING INSIGHTS ===');
             mktStats.forEach(function(m){if(m.total>=5)console.log('  '+m.key+': '+m.winrate+'% winrate | ROI '+m.roi+'% | '+m.total+' paris');});
-
             var months={};
             singles.forEach(function(p){var key=(p.date||'').substring(0,7);if(!months[key])months[key]={wins:0,losses:0};if(p.result==='win')months[key].wins++;else months[key].losses++;});
             histo.monthly=Object.keys(months).sort().reverse().slice(0,6).map(function(k){
@@ -2420,7 +1996,6 @@ jobs:
               var parts=k.split('-');var mn=['Jan','F\u00e9v','Mar','Avr','Mai','Jun','Jul','Ao\u00fb','Sep','Oct','Nov','D\u00e9c'];
               return{month:k,label:(mn[parseInt(parts[1])-1]||parts[1])+' '+parts[0],wins:mo.wins,losses:mo.losses,total:tot,roi:Math.round(r*10)/10};
             });
-
             fs.writeFileSync(histoPath,JSON.stringify(histo,null,2));
             console.log('  Historique: '+total+' paris | Winrate: '+winrate.toFixed(0)+'% | ROI: '+roi.toFixed(1)+'%');
           }
@@ -2431,10 +2006,8 @@ jobs:
           async function main(){
             console.log('=== IASHARK',TODAY,'===');
 
-            // ── 1. FETCH TENNIS + RANKINGS EN PARALLÈLE avec le football ──
-            var tennisFixturesPromise = Promise.resolve([]); // Tennis bloqué temporairement
+            var tennisFixturesPromise = Promise.resolve([]);
             var footballFixturesPromise = getFixtures();
-            // Fetch rankings ATP+WTA + OddsIO index en parallèle
             if(ODDS_IO_KEY) await loadOddsIOIndex();
             var rankingsPromise = Promise.all([
               get(TENNIS_BASE+'/tennis/v2/atp/ranking/singles/?pageSize=300', TENNIS_HEADERS).catch(function(){return null;}),
@@ -2445,16 +2018,14 @@ jobs:
             var fixtures = await footballFixturesPromise;
             var rankingsRaw = await rankingsPromise;
 
-            // Construire un dictionnaire {playerId: position} pour ATP et WTA
             var RANK_MAP = {};
-            // Charger le mapping photos
             var PHOTOS = {};
             try {
               var photosRaw = require('fs').readFileSync('photos.json','utf8');
               var photosData = JSON.parse(photosRaw);
               PHOTOS = Object.assign({}, photosData.atp||{}, photosData.wta||{});
               console.log('Photos loaded: '+Object.keys(PHOTOS).length+' joueurs');
-            } catch(e) { console.log('Photos file not found — using initials'); }
+            } catch(e) { console.log('Photos file not found'); }
             [rankingsRaw[0], rankingsRaw[1]].forEach(function(r){
               var items = (r&&r.data)||[];
               items.forEach(function(item){
@@ -2464,15 +2035,13 @@ jobs:
               });
             });
             console.log('Rankings loaded: '+Object.keys(RANK_MAP).length+' joueurs');
-
             console.log('Football fixtures:', fixtures.length);
             console.log('Tennis fixtures:', tennisFixtures.length);
 
             if(!fixtures.length&&!tennisFixtures.length){
               fs.writeFileSync('data.json',JSON.stringify({matchs:[],combis:[]},null,2));
               generateWorldCupPages();generateSitemaps([]);
-
-              console.log('\n=== JOUR SANS MATCHS — Résolution historique d\'hier ===');
+              console.log('\n=== JOUR SANS MATCHS — R\u00e9solution historique ===');
               var histoPathEarly='historique.json';
               var histoEarly={predictions:[],stats:{winrate:0,roi:0,total:0,streak:0,wins:0,losses:0},monthly:[],backtesting:{}};
               try{histoEarly=JSON.parse(fs.readFileSync(histoPathEarly,'utf8'));}catch(e){}
@@ -2488,7 +2057,6 @@ jobs:
                   var fClassicE=await get('https://v3.football.api-sports.io/fixtures?date='+rDateE+'&timezone=Europe/Paris',APS);
                   var fWCE=await get('https://v3.football.api-sports.io/fixtures?league=1&season=2026&date='+rDateE+'&timezone=Europe/Paris',APS);
                   yResEarly=yResEarly.concat(fClassicE.response||[], fWCE.response||[]);
-                  console.log('  Résultats '+rDateE+': '+(fClassicE.response||[]).length+' classique + '+(fWCE.response||[]).length+' World Cup');
                   await sleep(150);
                 }
                 yResEarly.forEach(function(fix){
@@ -2506,18 +2074,14 @@ jobs:
                   var pred=(found.prediction||'').toLowerCase();
                   var isWin=false;
                   if(pred.includes('over 2.5'))isWin=(gh+ga)>2;
-                  else if(pred.includes('over 1.5'))isWin=(gh+ga)>1;
                   else if(pred.includes('btts non'))isWin=(gh===0||ga===0);
                   else if(pred.includes('1x')||pred.includes('dc 1x'))isWin=(gh>=ga);
                   else if(pred.includes('x2')||pred.includes('dc x2'))isWin=(ga>=gh);
                   found.result=isWin?'win':'loss';found.score=gh+'-'+ga;found.fixture_id=fid;found.resolved_date=TODAY;
-                  console.log('  \u2192 '+found.match+' : '+found.result.toUpperCase()+' ('+gh+'-'+ga+')');
                 });
-              }catch(e){console.log('  Erreur résolution hier:',e.message);}
+              }catch(e){console.log('  Erreur r\u00e9solution:',e.message);}
               var beforeCleanE=histoEarly.predictions.length;
               histoEarly.predictions=histoEarly.predictions.filter(function(p){return p.type!=='combi';});
-              var cleanedE=beforeCleanE-histoEarly.predictions.length;
-              if(cleanedE>0)console.log('  Nettoyage: '+cleanedE+' combinés supprimés');
               var singlesE=histoEarly.predictions.filter(function(p){return p.type==='single'&&p.result!=='pending'&&p.result!=='scheduled';});
               var winsE=singlesE.filter(function(p){return p.result==='win';});
               var totalE=singlesE.length;
@@ -2531,11 +2095,10 @@ jobs:
               singlesE.forEach(function(p){var key=(p.date||'').substring(0,7);if(!monthsE[key])monthsE[key]={wins:0,losses:0};if(p.result==='win')monthsE[key].wins++;else monthsE[key].losses++;});
               histoEarly.monthly=Object.keys(monthsE).sort().reverse().slice(0,6).map(function(k){var mo=monthsE[k];var tot=mo.wins+mo.losses;var r=tot>0?((mo.wins*0.75-mo.losses)/tot*100):0;var parts=k.split('-');var mn=['Jan','F\u00e9v','Mar','Avr','Mai','Jun','Jul','Ao\u00fb','Sep','Oct','Nov','D\u00e9c'];return{month:k,label:(mn[parseInt(parts[1])-1]||parts[1])+' '+parts[0],wins:mo.wins,losses:mo.losses,total:tot,roi:Math.round(r*10)/10};});
               fs.writeFileSync(histoPathEarly,JSON.stringify(histoEarly,null,2));
-              console.log('  Historique mis à jour: '+totalE+' singles | Winrate: '+winrateE.toFixed(0)+'% | ROI: '+roiE.toFixed(1)+'%');
               return;
             }
 
-            // ── 2. FOOTBALL PROCESSING ──
+            // ── FOOTBALL PROCESSING ──
             var xgConcededCache={};
             if(fixtures.length){
               var allTeamIds=[];
@@ -2543,7 +2106,7 @@ jobs:
                 if(fix.teams.home.id&&allTeamIds.indexOf(fix.teams.home.id)===-1)allTeamIds.push(fix.teams.home.id);
                 if(fix.teams.away.id&&allTeamIds.indexOf(fix.teams.away.id)===-1)allTeamIds.push(fix.teams.away.id);
               });
-              console.log('Pré-chargement xG cache pour',allTeamIds.length,'équipes...');
+              console.log('Pr\u00e9-chargement xG cache pour',allTeamIds.length,'\u00e9quipes...');
               for(var ti=0;ti<allTeamIds.length;ti++){
                 try{
                   var tid=allTeamIds[ti];
@@ -2560,16 +2123,13 @@ jobs:
             }
 
             var eloData=await loadClubElo();
-
             var prevPinnacleOdds={};
             try{if(fs.existsSync('data.json')){var prevData=JSON.parse(fs.readFileSync('data.json','utf8'));(prevData.matchs||[]).forEach(function(m){if(m.pinnacle_snapshot){prevPinnacleOdds[m.home.n+'|'+m.away.n]=m.pinnacle_snapshot;}});}}catch(e){}
 
-            var oldData={matchs:[]};
-            if(process.env.FORCE_REFRESH!=='true'){
-              try{if(fs.existsSync('data.json'))oldData=JSON.parse(fs.readFileSync('data.json','utf8'));}catch(e){}
-            } else {
-              console.log('FORCE_REFRESH=true — cache ignoré, tous les matchs seront recalculés');
-            }
+            // ── PATCH FORCE REFRESH : toujours recalculer à chaque run ──────────
+            // Le cache est désactivé par défaut — chaque run recalcule tous les matchs
+            // pour garantir des données fraîches. Plus besoin du paramètre force_refresh.
+            console.log('Cache d\u00e9sactiv\u00e9 — tous les matchs recalcul\u00e9s \u00e0 chaque run');
 
             var matchsData=[];
             var forCombis=[];
@@ -2582,15 +2142,11 @@ jobs:
               var home=fix.teams.home;
               var away=fix.teams.away;
               var isWorldCupMatch=(lg.id===1);
-              // Phase éliminatoire CDM : round contient "Round of", "Quarter", "Semi", "Final", etc.
               var wcRound=(f.fixture&&f.fixture.round||'').toLowerCase();
               var isKnockout=isWorldCupMatch&&(wcRound.includes('round of')||wcRound.includes('quarter')||wcRound.includes('semi')||wcRound.includes('final'));
               if(isKnockout) console.log('  [WC KNOCKOUT] '+home.name+' vs '+away.name+' — '+f.fixture.round);
 
-              // CACHE DÉSACTIVÉ — tous les matchs sont recalculés à chaque run
-              // var cached = null;
-
-              console.log('\n-> '+home.name+' vs '+away.name+' ('+lg.name+')'+(isWorldCupMatch?' 🌍':''));
+              console.log('\n-> '+home.name+' vs '+away.name+' ('+lg.name+')'+(isWorldCupMatch?' \uD83C\uDF0D':''));
               if(!standingsCache[lg.id]){
                 var stSeason=SEASON_2026.indexOf(lg.id)!==-1?2026:SEASON;
                 var stResp=await get('https://v3.football.api-sports.io/standings?league='+lg.id+'&season='+stSeason,APS);
@@ -2687,7 +2243,9 @@ jobs:
               var bmAext_p=(sA&&sA.goals&&sA.goals.for&&sA.goals.for.total&&sA.goals.for.total.away)||0;
               var beAext_p=(sA&&sA.goals&&sA.goals.against&&sA.goals.against.total&&sA.goals.against.total.away)||0;
               var meAext_p=(sA&&sA.fixtures&&sA.fixtures.played&&sA.fixtures.played.away)||10;
-              var lambdas=calcLambdas(bmHdom_p,beHdom_p,mdHdom,bmAext_p,beAext_p,meAext_p);
+
+              // ── PATCH 5 : passer lg.id à calcLambdas ────────────────────────
+              var lambdas=calcLambdas(bmHdom_p,beHdom_p,mdHdom,bmAext_p,beAext_p,meAext_p,null,null,lg.id);
               if(xgH.xg_avg&&xgA.xg_avg){
                 lambdas.lambdaH=parseFloat((lambdas.lambdaH*0.6+parseFloat(xgH.xg_avg)*0.4).toFixed(3));
                 lambdas.lambdaA=parseFloat((lambdas.lambdaA*0.6+parseFloat(xgA.xg_avg)*0.4).toFixed(3));
@@ -2701,28 +2259,14 @@ jobs:
               function calcEdge(probIA,cote){if(!probIA||!cote||cote==='--')return null;var edge=probIA/100-1/parseFloat(cote);return edge>0?Math.round(edge*100):null;}
               var prob1X=(shinProbs?shinProbs.p1:poissonProbs.p1)+(shinProbs?shinProbs.pN:poissonProbs.pN);
               var probX2=(shinProbs?shinProbs.p2:poissonProbs.p2)+(shinProbs?shinProbs.pN:poissonProbs.pN);
-              // Probabilités pour nouveaux marchés
-              var probOver15=poissonProbs.over15||0;
-              var probOver35=poissonProbs.over35||0;
-              var probBttsY=poissonProbs.bttsY||0;
-              // AH -0.5 dom = victoire stricte dom = p1
-              var probAHH=shinProbs?shinProbs.p1:poissonProbs.p1;
-              // AH +0.5 ext = ext ne perd pas = p2+pN
-              var probAHA=(shinProbs?shinProbs.p2:poissonProbs.p2)+(shinProbs?shinProbs.pN:poissonProbs.pN);
 
+              // ── PATCH 6 : 4 marchés seulement + cote min 1.50 stricte ───────
               var allEdges=[
                 {market:'Over 2.5',edge:calcEdge(poissonProbs.over25,odds.co25),cote:odds.co25,prob:poissonProbs.over25},
-                {market:'Under 2.5',edge:calcEdge(poissonProbs.under25,odds.cu25),cote:odds.cu25,prob:poissonProbs.under25},
-                {market:'Over 1.5',edge:calcEdge(probOver15,odds.co15),cote:odds.co15,prob:probOver15},
-                {market:'Over 3.5',edge:calcEdge(probOver35,odds.co35),cote:odds.co35,prob:probOver35},
-                {market:'BTTS Oui',edge:calcEdge(probBttsY,odds.btts_oui),cote:odds.btts_oui,prob:probBttsY},
                 {market:'BTTS Non',edge:calcEdge(poissonProbs.bttsN,odds.btts_non),cote:odds.btts_non,prob:poissonProbs.bttsN},
                 {market:'DC 1X',edge:calcEdge(prob1X,odds.dc1x),cote:odds.dc1x,prob:prob1X},
                 {market:'DC X2',edge:calcEdge(probX2,odds.dc2x),cote:odds.dc2x,prob:probX2},
-                {market:'Asian Handicap -0.5 DOM',edge:calcEdge(probAHH,odds.ah_dom),cote:odds.ah_dom,prob:probAHH},
-                {market:'Asian Handicap +0.5 EXT',edge:calcEdge(probAHA,odds.ah_ext),cote:odds.ah_ext,prob:probAHA},
               ].filter(function(e){
-                // Cote minimum 1.50 obligatoire + cote maximum 3.00 + edge >= 5%
                 return e.edge!==null&&e.edge>=5
                   &&e.cote&&e.cote!=='--'
                   &&parseFloat(e.cote)>=1.50
@@ -2743,7 +2287,7 @@ jobs:
               var d10Astr=last10A.slice(0,5).map(function(m){return m.result+' '+m.score+' vs '+m.match+' ('+m.lieu+')';}).join(' | ')||'N/A';
               var domH20=last10H.slice(0,20).filter(function(m){return m.home===true;});
               var extA20=last10A.slice(0,20).filter(function(m){return m.home===false;});
-              function calcCurrentStreak(matches){if(!matches||!matches.length)return '';var last=matches[0].result,count=0;for(var i=0;i<matches.length;i++){if(matches[i].result===last)count++;else break;}var label=last==='W'?'victoires consécutives':last==='L'?'défaites consécutives':'nuls consécutifs';return count>1?'En ce moment: '+count+' '+label:'';}
+              function calcCurrentStreak(matches){if(!matches||!matches.length)return '';var last=matches[0].result,count=0;for(var i=0;i<matches.length;i++){if(matches[i].result===last)count++;else break;}var label=last==='W'?'victoires cons\u00e9cutives':last==='L'?'d\u00e9faites cons\u00e9cutives':'nuls cons\u00e9cutifs';return count>1?'En ce moment: '+count+' '+label:'';}
               var streakH=calcCurrentStreak(last10H);
               var streakA=calcCurrentStreak(last10A);
               var forme5H=last10H.slice(0,5).map(function(m){return m.result;}).join('');
@@ -2792,7 +2336,7 @@ jobs:
                 dixon_pN:poissonProbs.dixon?poissonProbs.dixon.pN:poissonProbs.pN,
                 dixon_p2:poissonProbs.dixon?poissonProbs.dixon.p2:poissonProbs.p2,
                 mc_p1:poissonProbs.montecarlo?poissonProbs.montecarlo.p1:poissonProbs.p1,
-              mc_scores:poissonProbs.montecarlo?poissonProbs.montecarlo.top_scores:[],
+                mc_scores:poissonProbs.montecarlo?poissonProbs.montecarlo.top_scores:[],
                 mc_pN:poissonProbs.montecarlo?poissonProbs.montecarlo.pN:poissonProbs.pN,
                 mc_p2:poissonProbs.montecarlo?poissonProbs.montecarlo.p2:poissonProbs.p2,
                 pinnacle_p1:shinProbs?shinProbs.p1:null,pinnacle_pN:shinProbs?shinProbs.pN:null,pinnacle_p2:shinProbs?shinProbs.p2:null,
@@ -2814,7 +2358,16 @@ jobs:
                 console.log('  \u23ed PASS: '+home.name+' vs '+away.name);
                 an.pari_rec='';an.cote_rec='';an.confiance=0;an.vbet='NON';an.verdict_shark='';an.edge='';an.kelly='0';an.marche='';an.risque='ELEVE';
               }
-
+              // ── PATCH 7 : vérification post-Claude cote < 1.50 ──────────────
+              if(an&&!an.passe_ton_tour){
+                var coteRet=parseFloat(an.cote_rec)||0;
+                if(coteRet>0&&coteRet<1.50){
+                  console.log('  \u26d4 Cote '+coteRet+' < 1.50 renvoy\u00e9e par Claude \u2014 PASS forc\u00e9');
+                  an.passe_ton_tour=true;an.pari_rec='';an.cote_rec='';
+                  an.confiance=0;an.vbet='NON';an.verdict_shark='';an.edge='';an.kelly='0';
+                  an.marche='';an.risque='ELEVE';
+                }
+              }
 
               (function(){
                 var p=(an&&an.pari_rec||'').toLowerCase();
@@ -2896,7 +2449,6 @@ jobs:
                 tendances,classement:classementObj,actu:(nH||[]).concat(nA||[]),
                 arbitre:refStats?{nom:refStats.name,cartons:refStats.cards_per_game,penaltys:refStats.pens_per_game,matchs:refStats.games}:null,
                 events_home:isWorldCupMatch?(function(){
-                  // Pour CDM, utiliser les slots calculés depuis getTeamTournamentStats si dispo
                   var ts=WC_TEAM_STATS_CACHE['tournoi_'+home.id];
                   if(ts&&ts.slots) return {slots:ts.slots,slots_against:ts.slots_against||null,goals_avg:ts.xg_for||null,conceded_avg:ts.xg_against||null,games:ts.games||0};
                   return null;
@@ -2935,17 +2487,14 @@ jobs:
               console.log('  OK conf='+matchObj.conf+' edge='+matchObj.edge+' pari='+matchObj.pari_rec);
             }
 
-            // ── 3. TENNIS PROCESSING ──
             var tennisMatchs = [];
             if(tennisFixtures.length){
               tennisMatchs = await processTennisFixtures(tennisFixtures, RANK_MAP, PHOTOS);
             }
 
-            // ── 4. MERGE football + tennis dans matchsData ──
             var allMatchsData = matchsData.concat(tennisMatchs);
             allMatchsData.sort(function(a,b){return (a.date||'').localeCompare(b.date||'');});
 
-            // ── 5. COMBINÉS (football uniquement) ──
             matchsData.sort(function(a,b){var tA=(a.date||'').split(' ')[1]||'99:99';var tB=(b.date||'').split(' ')[1]||'99:99';return tA<tB?-1:tA>tB?1:0;});
             var todayDate=new Date(TODAY+'T12:00:00Z');
             var dayOfWeek=todayDate.getUTCDay();
@@ -2958,7 +2507,6 @@ jobs:
             console.log('\n=== DONE: '+allMatchsData.length+' matchs total ('+matchsData.length+' football + '+tennisMatchs.length+' tennis) | '+combisData.length+' combis ===');
 
             await updateHistorique(allMatchsData);
-
             generateWorldCupPages();
             generateSitemaps(allMatchsData);
           }
@@ -2966,15 +2514,13 @@ jobs:
           main().catch(function(e){console.error('FATAL:',e.message,e.stack);process.exit(0);});
           JSEOF
 
-      - name: Force refresh cache si demandé
-        if: ${{ github.event.inputs.force_refresh == 'true' }}
+      - name: Vider le cache — recalcul complet à chaque run
         run: |
-          echo '{"matchs":[]}' > data.json
-          echo "data.json vidé — tous les matchs seront recalculés"
+          echo '{"matchs":[],"combis":[]}' > data.json
+          echo "Cache vidé — tous les matchs seront recalculés (comportement par défaut)"
 
       - name: Run pipeline
         env:
-          FORCE_REFRESH:      ${{ github.event.inputs.force_refresh }}
           APISPORTS_KEY:      ${{ secrets.APISPORTS_KEY }}
           OPENWEATHER_KEY:    ${{ secrets.OPENWEATHER_KEY }}
           NEWSAPI_KEY:        ${{ secrets.NEWSAPI_KEY }}

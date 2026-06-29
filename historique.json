@@ -1,6 +1,69 @@
 {
   "predictions": [
     {
+      "match": "Belgium vs Senegal",
+      "home": "Belgium",
+      "away": "Senegal",
+      "prediction": "Over 2.5",
+      "cote": 2.21,
+      "conf": 6.5,
+      "conf_bucket": "6-7",
+      "market": "over25",
+      "league": "World Cup",
+      "league_key": "other",
+      "sport": "football",
+      "elo_diff": null,
+      "has_pinnacle": false,
+      "has_elo": false,
+      "date": "2026-06-29",
+      "result": "scheduled",
+      "fixture_id": 1567308,
+      "type": "single",
+      "score": null
+    },
+    {
+      "match": "England vs Congo DR",
+      "home": "England",
+      "away": "Congo DR",
+      "prediction": "Under 2.5",
+      "cote": 1.93,
+      "conf": 6,
+      "conf_bucket": "6-7",
+      "market": "autre",
+      "league": "World Cup",
+      "league_key": "other",
+      "sport": "football",
+      "elo_diff": null,
+      "has_pinnacle": false,
+      "has_elo": false,
+      "date": "2026-06-29",
+      "result": "scheduled",
+      "fixture_id": 1567307,
+      "type": "single",
+      "score": null
+    },
+    {
+      "match": "Mexico vs Ecuador",
+      "home": "Mexico",
+      "away": "Ecuador",
+      "prediction": "Under 2.5",
+      "cote": 1.41,
+      "conf": 6,
+      "conf_bucket": "6-7",
+      "market": "autre",
+      "league": "World Cup",
+      "league_key": "other",
+      "sport": "football",
+      "elo_diff": null,
+      "has_pinnacle": false,
+      "has_elo": false,
+      "date": "2026-06-29",
+      "result": "scheduled",
+      "fixture_id": 1567306,
+      "type": "single",
+      "score": null
+    },
+    {
       "match": "France vs Sweden",
       "home": "France",
       "away": "Sweden",
@@ -100,10 +163,11 @@
       "has_pinnacle": false,
       "has_elo": false,
       "date": "2026-06-27",
-      "result": "scheduled",
+      "result": "win",
       "fixture_id": 1523186,
       "type": "single",
-      "score": null
+      "score": "1-4",
+      "resolved_date": "2026-06-29"
     },
     {
       "match": "Qingdao Youth Island vs Hangzhou Greentown",
@@ -121,10 +185,11 @@
       "has_pinnacle": false,
       "has_elo": false,
       "date": "2026-06-27",
-      "result": "scheduled",
+      "result": "win",
       "fixture_id": 1523185,
       "type": "single",
-      "score": null
+      "score": "3-1",
+      "resolved_date": "2026-06-29"
     },
     {
       "match": "AC Oulu vs Lahti",
@@ -433,10 +498,11 @@
       "has_elo": false,
       "date": "2026-06-26",
       "no_signal": false,
-      "result": "scheduled",
+      "result": "loss",
       "fixture_id": 1489421,
       "type": "single",
-      "score": null
+      "score": "1-3",
+      "resolved_date": "2026-06-29"
     },
     {
       "match": "Algeria vs Austria",
@@ -456,10 +522,11 @@
       "has_elo": true,
       "date": "2026-06-26",
       "no_signal": false,
-      "result": "scheduled",
+      "result": "win",
       "fixture_id": 1489418,
       "type": "single",
-      "score": null
+      "score": "3-3",
+      "resolved_date": "2026-06-29"
     },
     {
       "match": "Congo DR vs Uzbekistan",
@@ -479,10 +546,11 @@
       "has_elo": false,
       "date": "2026-06-26",
       "no_signal": false,
-      "result": "scheduled",
+      "result": "loss",
       "fixture_id": 1539013,
       "type": "single",
-      "score": null
+      "score": "3-1",
+      "resolved_date": "2026-06-29"
     },
     {
       "match": "Colombia vs Portugal",
@@ -502,10 +570,11 @@
       "has_elo": false,
       "date": "2026-06-26",
       "no_signal": false,
-      "result": "scheduled",
+      "result": "loss",
       "fixture_id": 1489419,
       "type": "single",
-      "score": null
+      "score": "0-0",
+      "resolved_date": "2026-06-29"
     },
     {
       "match": "Panama vs England",
@@ -1917,40 +1986,40 @@
     }
   ],
   "stats": {
-    "winrate": 54.3,
-    "roi": 4.2,
-    "total": 70,
-    "streak": 1,
-    "wins": 38,
-    "losses": 32
+    "winrate": 53.9,
+    "roi": 2.7,
+    "total": 76,
+    "streak": 3,
+    "wins": 41,
+    "losses": 35
   },
   "monthly": [
     {
       "month": "2026-06",
       "label": "Jun 2026",
-      "wins": 38,
-      "losses": 32,
-      "total": 70,
-      "roi": -5
+      "wins": 41,
+      "losses": 35,
+      "total": 76,
+      "roi": -5.6
     }
   ],
   "backtesting": {
     "by_market": [
       {
         "key": "over25",
-        "wins": 15,
+        "wins": 16,
         "losses": 8,
-        "total": 23,
-        "winrate": 65.2,
-        "roi": 16.1
+        "total": 24,
+        "winrate": 66.7,
+        "roi": 18
       },
       {
         "key": "autre",
         "wins": 4,
-        "losses": 13,
-        "total": 17,
-        "winrate": 23.5,
-        "roi": -58.8
+        "losses": 15,
+        "total": 19,
+        "winrate": 21.1,
+        "roi": -63.1
       },
       {
         "key": "under25",
@@ -1962,11 +2031,11 @@
       },
       {
         "key": "btts_oui",
-        "wins": 4,
-        "losses": 4,
-        "total": 8,
+        "wins": 5,
+        "losses": 5,
+        "total": 10,
         "winrate": 50,
-        "roi": -5.4
+        "roi": -3.8
       },
       {
         "key": "btts_non",
@@ -1978,11 +2047,11 @@
       },
       {
         "key": "dc_x2",
-        "wins": 4,
+        "wins": 5,
         "losses": 0,
-        "total": 4,
+        "total": 5,
         "winrate": 100,
-        "roi": 209.3
+        "roi": 177.4
       },
       {
         "key": "dc1x",
@@ -2012,11 +2081,19 @@
       },
       {
         "key": "wc",
-        "wins": 12,
-        "losses": 14,
-        "total": 26,
-        "winrate": 46.2,
-        "roi": -21.5
+        "wins": 13,
+        "losses": 17,
+        "total": 30,
+        "winrate": 43.3,
+        "roi": -25.1
+      },
+      {
+        "key": "chine",
+        "wins": 5,
+        "losses": 1,
+        "total": 6,
+        "winrate": 83.3,
+        "roi": 29.3
       },
       {
         "key": "finlande",
@@ -2025,14 +2102,6 @@
         "total": 6,
         "winrate": 66.7,
         "roi": 12.5
-      },
-      {
-        "key": "chine",
-        "wins": 3,
-        "losses": 1,
-        "total": 4,
-        "winrate": 75,
-        "roi": 16
       },
       {
         "key": "laliga2",
@@ -2046,19 +2115,19 @@
     "by_conf": [
       {
         "key": "<6",
-        "wins": 12,
-        "losses": 19,
-        "total": 31,
-        "winrate": 38.7,
-        "roi": -34.8
+        "wins": 13,
+        "losses": 22,
+        "total": 35,
+        "winrate": 37.1,
+        "roi": -36.4
       },
       {
         "key": "7-8",
-        "wins": 16,
+        "wins": 18,
         "losses": 8,
-        "total": 24,
-        "winrate": 66.7,
-        "roi": 47.5
+        "total": 26,
+        "winrate": 69.2,
+        "roi": 48.2
       },
       {
         "key": "6-7",
@@ -2072,41 +2141,41 @@
     "by_sport": [
       {
         "key": "football",
-        "wins": 38,
-        "losses": 32,
-        "total": 70,
-        "winrate": 54.3,
-        "roi": 4.2
+        "wins": 41,
+        "losses": 35,
+        "total": 76,
+        "winrate": 53.9,
+        "roi": 2.7
       }
     ],
     "by_has_pinnacle": [
       {
         "key": "inconnu",
-        "wins": 38,
-        "losses": 32,
-        "total": 70,
-        "winrate": 54.3,
-        "roi": 4.2
+        "wins": 41,
+        "losses": 35,
+        "total": 76,
+        "winrate": 53.9,
+        "roi": 2.7
       }
     ],
     "by_has_elo": [
       {
         "key": "inconnu",
-        "wins": 34,
-        "losses": 32,
-        "total": 66,
-        "winrate": 51.5,
-        "roi": 0.5
+        "wins": 36,
+        "losses": 35,
+        "total": 71,
+        "winrate": 50.7,
+        "roi": -2.2
       },
       {
         "key": "true",
-        "wins": 4,
+        "wins": 5,
         "losses": 0,
-        "total": 4,
+        "total": 5,
         "winrate": 100,
-        "roi": 65.3
+        "roi": 73.2
       }
     ],
-    "updated": "2026-06-28"
+    "updated": "2026-06-29"
   }
 }

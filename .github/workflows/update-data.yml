@@ -1611,6 +1611,48 @@ jobs:
             return{score:Math.min(riskScore,100),alerts};
           }
 
+          // ── Calcul des vrais pourcentages de buts par tranche depuis evPat ──────
+          // Utilisé pour le scénario 15min — remplace les valeurs codées en dur
+          function calcSlotSummary(evPatH, evPatA) {
+            var slots = ['0-15','15-30','30-45','45-60','60-75','75-90'];
+            var result = [];
+            var totalH = 0, totalA = 0, totalHconc = 0, totalAconc = 0;
+
+            // Calculer les totaux
+            if(evPatH&&evPatH.slots) evPatH.slots.forEach(function(s){ totalH+=s.n; });
+            if(evPatA&&evPatA.slots) evPatA.slots.forEach(function(s){ totalA+=s.n; });
+            if(evPatH&&evPatH.slots_against) evPatH.slots_against.forEach(function(s){ totalHconc+=s.n; });
+            if(evPatA&&evPatA.slots_against) evPatA.slots_against.forEach(function(s){ totalAconc+=s.n; });
+
+            for(var i=0; i<slots.length; i++){
+              var nHmark = evPatH&&evPatH.slots&&evPatH.slots[i]?evPatH.slots[i].n:0;
+              var nAmark = evPatA&&evPatA.slots&&evPatA.slots[i]?evPatA.slots[i].n:0;
+              var nHconc = evPatH&&evPatH.slots_against&&evPatH.slots_against[i]?evPatH.slots_against[i].n:0;
+              var nAconc = evPatA&&evPatA.slots_against&&evPatA.slots_against[i]?evPatA.slots_against[i].n:0;
+
+              // Pourcentage de buts par tranche pour chaque équipe
+              var pctHmark = totalH>0?Math.round(nHmark/totalH*100):0;
+              var pctAmark = totalA>0?Math.round(nAmark/totalA*100):0;
+              var pctHconc = totalHconc>0?Math.round(nHconc/totalHconc*100):0;
+              var pctAconc = totalAconc>0?Math.round(nAconc/totalAconc*100):0;
+
+              // Probabilité combinée de but dans cette tranche (moyenne des 4 signaux)
+              var probCombined = Math.round((pctHmark + pctAmark + pctHconc + pctAconc) / 4);
+              // Fallback si pas de données : distribution uniforme
+              if(probCombined===0) probCombined = Math.round(100/6);
+
+              result.push({
+                t: slots[i]+'min',
+                prob: probCombined,
+                pct_home_mark: pctHmark,
+                pct_away_mark: pctAmark,
+                pct_home_conc: pctHconc,
+                pct_away_conc: pctAconc,
+              });
+            }
+            return result;
+          }
+
           // ── PATCH 9+10 : genAnalyse — CDM traité comme foot classique ────────
           async function genAnalyse(d) {
             var isWorldCup=(d.leagueId===1);
@@ -1618,7 +1660,6 @@ jobs:
             var moyBeHdom=d.beHdom&&d.mdHdom?(d.beHdom/d.mdHdom).toFixed(2):'?';
             var moyBmAext=d.bmAext&&d.meAext?(d.bmAext/d.meAext).toFixed(2):'?';
             var moyBeAext=d.beAext&&d.meAext?(d.beAext/d.meAext).toFixed(2):'?';
-            var edgeAberrant=d.best_edge&&d.best_edge>15;
             var failHpct=d.mdHdom>0?Math.round((d.failHdom/d.mdHdom)*100):0;
             var failApct=d.meAext>0?Math.round((d.failAext/d.meAext)*100):0;
             var poissonScoreH=Math.round(d.poisson_lambdaH||1.2);
@@ -1672,65 +1713,73 @@ jobs:
               +'Dixon-Coles: DOM '+d.dixon_p1+'% | Nul '+d.dixon_pN+'% | EXT '+d.dixon_p2+'%\n'
               +'Monte-Carlo: DOM '+d.mc_p1+'% | Nul '+d.mc_pN+'% | EXT '+d.mc_p2+'%\n'
               +(d.mc_scores&&d.mc_scores.length?'Top scores MC: '+d.mc_scores.map(function(s){return s.score+'('+s.pct+'%)';}).join(', ')+'\n':'')
-              +'[Fusion 35%+40%+25%] Over 2.5: '+d.poisson_over25+'% | BTTS Non: '+d.poisson_bttsN+'%\n'
               +(d.pinnacle_p1?'Pinnacle (sharp): DOM '+d.pinnacle_p1+'% | Nul '+d.pinnacle_pN+'% | EXT '+d.pinnacle_p2+'%\n':'Pinnacle: non disponible\n')
-              +(edgeAberrant?'\u26a0\ufe0f ALERTE: Edge > 15% = bug Poisson probable, ignore\n':'')
-              +'\nCotes (UTILISE CES VALEURS EXACTES):\n'
-              // PATCH 10 : 4 marchés seulement dans le prompt
-              +(d.co25&&d.co25!=='--'?'Over 2.5: '+d.co25+'\n':'Over 2.5: N/A\n')
-              +(d.btts_non&&d.btts_non!=='--'?'BTTS Non: '+d.btts_non+'\n':'BTTS Non: N/A\n')
-              +(d.dc1x&&d.dc1x!=='--'?'DC 1X: '+d.dc1x+'\n':'DC 1X: N/A\n')
-              +(d.dc2x&&d.dc2x!=='--'?'DC X2: '+d.dc2x+'\n':'DC X2: N/A\n')
-              +'\n=== PHASE 3 — DÉCISION ===\n\n'
-              +'PASSER SON TOUR si: Phase 1 et 2 contradictoires | Derby | ELO+Pinnacle absents | <8 matchs joués\n\n'
-              // PATCH 10 : 4 marchés seulement + cote 1.50 minimum absolue
-              +'MARCHÉS AUTORISÉS (4 seulement — aucun autre accepté):\n'
-              +'  - Over 2.5 (cote disponible: '+(d.co25&&d.co25!=='--'?d.co25:'N/A')+')\n'
-              +'  - BTTS Non (cote disponible: '+(d.btts_non&&d.btts_non!=='--'?d.btts_non:'N/A')+')\n'
-              +'  - DC 1X (cote disponible: '+(d.dc1x&&d.dc1x!=='--'?d.dc1x:'N/A')+')\n'
-              +'  - DC X2 (cote disponible: '+(d.dc2x&&d.dc2x!=='--'?d.dc2x:'N/A')+')\n'
-              +'RÈGLE ABSOLUE: cote_rec DOIT être >= 1.50. Si la cote du marché choisi est < 1.50 → passe_ton_tour=true.\n'
-              +'COTE OBLIGATOIRE: minimum 1.50 — maximum 3.00\n'
-              +'CONFIANCE: 7.0-7.4 (1-2 signaux) | 7.5-7.9 (3+) | 8.0-8.5 (4+ dont ELO+Pinnacle) — MAX 8.5\n'
-              +'RISQUE: FAIBLE si <1.75 + ELO + Pinnacle | MODERE si 1.75-2.10 | ELEVE sinon\n'
-              +'edge = prob_IA - 1/cote | vbet OUI si edge>=5% ET conf>=7.0\n'
-              +'kelly = edge_decimal*(cote-1)-(1-edge_decimal))/(cote-1)*0.25*100, max 5%\n\n';
+              +'\nCotes disponibles (filtre >= 1.50 déjà appliqué par le système):\n'
+              +(d.co25&&d.co25!=='--'?'Over 2.5: '+d.co25+'\n':'')
+              +(d.btts_non&&d.btts_non!=='--'?'BTTS Non: '+d.btts_non+'\n':'')
+              +(d.dc1x&&d.dc1x!=='--'?'DC 1X: '+d.dc1x+'\n':'')
+              +(d.dc2x&&d.dc2x!=='--'?'DC X2: '+d.dc2x+'\n':'')
+              +'\n=== DÉCISION DU MODÈLE MATHÉMATIQUE ===\n'
+              +(d.best_market
+                ?'Marché sélectionné par le système : '+d.best_market+' | Probabilité modèle : '+d.best_market_prob+'% | Cote : '+d.best_market_cote+'\n'
+                 +'(Sélection automatique par proba la plus haute parmi les marchés jouables >= 1.50)\n'
+                :'Aucun marché jouable — toutes les cotes sont < 1.50 ou absentes.\n')
+              // Données réelles par tranche pour le scénario
+              +(d.slotSummary&&d.slotSummary.length
+                ?'\n=== BUTS PAR TRANCHE (données réelles) ===\n'
+                 +d.slotSummary.map(function(s){
+                   return s.t+' : '
+                     +d.home+' marque '+s.pct_home_mark+'% de ses buts ici, encaisse '+s.pct_away_conc+'% des buts de '+d.away
+                     +' | '+d.away+' marque '+s.pct_away_mark+'%, encaisse '+s.pct_home_conc+'% — Probabilité but: '+s.prob+'%';
+                 }).join('\n')+'\n'
+                :'')
+              +'\n=== TON RÔLE ===\n'
+              +'Tu es un rédacteur d\'analyse. Le marché est déjà sélectionné par le modèle ci-dessus.\n'
+              +'Tu NE CHANGES PAS le marché. Tu NE PROPOSES PAS un autre marché.\n'
+              +'Tu dois UNIQUEMENT :\n'
+              +'1. Décider si ce match est jouable (passe_ton_tour=true) dans ces cas SEULEMENT : derby détecté | données insuffisantes < 8 matchs | Phase 1 contredit radicalement Phase 2\n'
+              +'2. Si jouable : rédiger une analyse factuelle qui explique pourquoi les données supportent ce marché\n'
+              +'3. Pour scenario_15min : écrire un texte narratif par tranche EN CITANT les vrais pourcentages fournis ci-dessus. Ne jamais inventer un chiffre qui ne figure pas dans les données.\n'
+              +'4. Attribuer un niveau de confiance (7.0-8.5) selon la solidité des signaux\n'
+              +'CONFIANCE: 7.0-7.4 (signaux modérés) | 7.5-7.9 (signaux forts) | 8.0-8.5 (ELO+Pinnacle+MC convergents) — MAX 8.5\n'
+              +'RISQUE: FAIBLE si cote <1.75 + signaux convergents | MODERE si cote 1.75-2.20 | ELEVE sinon\n\n';
 
+            // pari_rec et cote_rec sont déjà définis par le code — Claude les reçoit, ne les choisit pas
+            var preselected_pari = d.best_market || '';
+            var preselected_cote = d.best_market_cote || '';
             var jsonTpl = 'Réponds UNIQUEMENT avec ce JSON valide. Aucun texte avant ou après. Aucun backtick.\n'
+              +'RAPPEL: le marché est déjà sélectionné par le modèle — pari_rec et cote_rec sont imposés ci-dessous.\n'
               +'RÈGLE ABSOLUE: analyse_card, conseil, contexte, facteur_x, scenario, scenario_15min TOUJOURS remplis même si passe_ton_tour=true.\n\n'
               +'{\n'
               +'"passe_ton_tour": false,\n'
-              +'"confiance": [7.0 à 8.5 ou 0],\n'
-              +'"pari_rec": "[Over 2.5|BTTS Non|DC 1X|DC X2] ou vide",\n'
-              +'"cote_rec": "[COPIE EXACTE de la cote ci-dessus — DOIT être >= 1.50]",\n'
-              +'"marche": "[DOUBLE_CHANCE|TOTAL_BUTS|BTTS] ou vide",\n'
+              +'"confiance": [7.0 à 8.5 ou 0 si passe_ton_tour=true],\n'
+              +'"pari_rec": "'+preselected_pari+'",\n'
+              +'"cote_rec": "'+preselected_cote+'",\n'
+              +'"marche": "[DOUBLE_CHANCE|TOTAL_BUTS|BTTS selon pari_rec]",\n'
               +'"risque": "[FAIBLE|MODERE|ELEVE]",\n'
-              +'"verdict_shark": "[pari] à [cote] — [1 phrase] ou vide",\n'
-              +'"analyse_card": "[TOUJOURS REMPLI]",\n'
-              +'"conseil": "[TOUJOURS REMPLI]",\n'
+              +'"verdict_shark": "'+preselected_pari+' à '+preselected_cote+' — [1 phrase factuelle sur les données] ou vide si passe_ton_tour",\n'
+              +'"analyse_card": "[TOUJOURS REMPLI — analyse factuelle 2-3 phrases]",\n'
+              +'"conseil": "[TOUJOURS REMPLI — 1 phrase directe]",\n'
               +'"contexte": "[TOUJOURS REMPLI]",\n'
-              +'"facteur_x": "[TOUJOURS REMPLI]",\n'
+              +'"facteur_x": "[TOUJOURS REMPLI — le signal le plus fort qui justifie ce marché]",\n'
               +'"score_central": "'+scoreCentral+'",\n'
               +'"p1": '+d.poisson_p1+', "pn": '+d.poisson_pN+', "p2": '+d.poisson_p2+',\n'
               +'"po25": '+d.poisson_over25+', "btts": '+d.poisson_bttsY+',\n'
-              +'"edge": "[prob_estimée - 1/cote en %]",\n'
-              +'"vbet": "[OUI|NON]",\n'
-              +'"kelly": "[1/4 Kelly max 5%]",\n'
+              +'"vbet": "[OUI si confiance >= 7.0 et passe_ton_tour=false, sinon NON]",\n'
               +'"scenario": {"phase1":"[TOUJOURS REMPLI]","phase2":"[TOUJOURS REMPLI]","phase3":"[TOUJOURS REMPLI]"},\n'
-              +'"scenario_15min": [\n'
-              +'  {"t":"0-15min","prob":8,"txt":"[TOUJOURS REMPLI]"},\n'
-              +'  {"t":"15-30min","prob":12,"txt":"[TOUJOURS REMPLI]"},\n'
-              +'  {"t":"30-45min","prob":10,"txt":"[TOUJOURS REMPLI]"},\n'
-              +'  {"t":"45-60min","prob":15,"txt":"[TOUJOURS REMPLI]"},\n'
-              +'  {"t":"60-75min","prob":18,"txt":"[TOUJOURS REMPLI]"},\n'
-              +'  {"t":"75-90min","prob":20,"txt":"[TOUJOURS REMPLI]"}\n'
-              +']\n'
+              // scenario_15min — prob est la vraie proba calculée depuis les données API
+              +(d.slotSummary&&d.slotSummary.length
+                ?'"scenario_15min": [\n'
+                 +d.slotSummary.map(function(s,i){
+                   return '  {"t":"'+s.t+'","prob":'+s.prob+',"txt":"[narrative factuelle basée sur les données ci-dessus — cite les vrais chiffres]"}';
+                 }).join(',\n')+'\n]\n'
+                :'"scenario_15min": null\n')
               +'}';
 
             var r = await postJSONWithRetry('api.anthropic.com', '/v1/messages', {
               model: 'claude-sonnet-4-6',
               max_tokens: 2500,
-              system: 'Tu es IASHARK, un système d\'analyse statistique de football. Tu réponds EXCLUSIVEMENT en JSON valide. Aucun backtick, aucun texte avant ou après le JSON. Tu n\'inventes jamais de statistiques. Tu es factuel, neutre, calibré. Marchés autorisés : Over 2.5, BTTS Non, DC 1X, DC X2 uniquement. Cote minimum absolue : 1.50. Si cote < 1.50 → passe_ton_tour=true. Quand les données sont insuffisantes, tu passes ton tour.',
+              system: 'Tu es IASHARK, un rédacteur d\'analyse sportive. Tu réponds EXCLUSIVEMENT en JSON valide. Aucun backtick. Tu n\'inventes jamais de statistiques. Le marché et la cote sont déjà sélectionnés par le système mathématique — tu ne les changes JAMAIS. Ton seul pouvoir de décision : passe_ton_tour=true si derby, données insuffisantes (<8 matchs), ou Phase 1 contredit radicalement Phase 2. Dans tous les autres cas, tu analyses et tu rédiges en restant factuel et neutre.',
               messages: [{role:'user', content:prompt+jsonTpl}]
             }, {'x-api-key':ANT_KEY, 'anthropic-version':'2023-06-01'});
 
@@ -2256,25 +2305,28 @@ jobs:
               var shinProbs=null;
               if(pinnacleOdds&&pinnacleOdds.c1&&pinnacleOdds.cn&&pinnacleOdds.c2){var raw=shinProbabilities([pinnacleOdds.c1,pinnacleOdds.cn,pinnacleOdds.c2]);if(raw)shinProbs={p1:Math.round(raw[0]*100),pN:Math.round(raw[1]*100),p2:Math.round(raw[2]*100)};}
 
-              function calcEdge(probIA,cote){if(!probIA||!cote||cote==='--')return null;var edge=probIA/100-1/parseFloat(cote);return edge>0?Math.round(edge*100):null;}
+              // ── DÉCISION MÉCANIQUE — le code choisit le marché, Claude ne décide plus ──
+              // Principe : proba la plus haute parmi les 4 marchés selon le modèle mathématique
+              // Les cotes servent UNIQUEMENT à filtrer >= 1.50 — aucun calcul d'edge
               var prob1X=(shinProbs?shinProbs.p1:poissonProbs.p1)+(shinProbs?shinProbs.pN:poissonProbs.pN);
               var probX2=(shinProbs?shinProbs.p2:poissonProbs.p2)+(shinProbs?shinProbs.pN:poissonProbs.pN);
 
-              // ── PATCH 6 : 4 marchés seulement + cote min 1.50 stricte ───────
-              var allEdges=[
-                {market:'Over 2.5',edge:calcEdge(poissonProbs.over25,odds.co25),cote:odds.co25,prob:poissonProbs.over25},
-                {market:'BTTS Non',edge:calcEdge(poissonProbs.bttsN,odds.btts_non),cote:odds.btts_non,prob:poissonProbs.bttsN},
-                {market:'DC 1X',edge:calcEdge(prob1X,odds.dc1x),cote:odds.dc1x,prob:prob1X},
-                {market:'DC X2',edge:calcEdge(probX2,odds.dc2x),cote:odds.dc2x,prob:probX2},
-              ].filter(function(e){
-                return e.edge!==null&&e.edge>=5
-                  &&e.cote&&e.cote!=='--'
-                  &&parseFloat(e.cote)>=1.50
-                  &&parseFloat(e.cote)<=3.00;
+              // Les 4 marchés avec leur probabilité pure du modèle
+              // Filtre unique : cote disponible >= 1.50 (jouable)
+              var allMarkets=[
+                {market:'Over 2.5', cote:odds.co25,   prob:poissonProbs.over25, label:'Over 2.5'},
+                {market:'BTTS Non', cote:odds.btts_non,prob:poissonProbs.bttsN,  label:'BTTS Non'},
+                {market:'DC 1X',    cote:odds.dc1x,   prob:prob1X,              label:'DC 1X'},
+                {market:'DC X2',    cote:odds.dc2x,   prob:probX2,              label:'DC X2'},
+              ].filter(function(m){
+                // Filtre UNIQUEMENT sur la jouabilité — pas d'edge, pas de seuil de proba
+                return m.cote&&m.cote!=='--'&&parseFloat(m.cote)>=1.50;
               });
-              allEdges.sort(function(a,b){return b.edge-a.edge;});
-              var bestEdge=allEdges[0]||null;
-              var nodeKelly=bestEdge?fractionalKelly(bestEdge.prob/100,parseFloat(bestEdge.cote),0.25):null;
+
+              // Trier par probabilité pure décroissante — le marché le plus probable gagne
+              allMarkets.sort(function(a,b){return b.prob-a.prob;});
+              var bestMarket=allMarkets[0]||null;
+              var nodeKelly=null; // Kelly supprimé — basé sur les cotes du matin = non pertinent
 
               var injuries=(injRaw||[]).map(function(inj){return{name:inj.name,team:inj.team===home.id?home.id:away.id,reason:inj.reason||'Blessure',status:(inj.status||'out').toLowerCase().includes('suspend')?'suspended':'out',impact:'medium'};});
               var matchup=calcMatchup(xgH,xgA,sH,sA);
@@ -2341,12 +2393,15 @@ jobs:
                 mc_p2:poissonProbs.montecarlo?poissonProbs.montecarlo.p2:poissonProbs.p2,
                 pinnacle_p1:shinProbs?shinProbs.p1:null,pinnacle_pN:shinProbs?shinProbs.pN:null,pinnacle_p2:shinProbs?shinProbs.p2:null,
                 pinnacle_c1:pinnacleOdds?pinnacleOdds.c1:null,pinnacle_c2:pinnacleOdds?pinnacleOdds.c2:null,
-                best_edge:bestEdge?bestEdge.edge:null,best_edge_market:bestEdge?bestEdge.market:null,
-                all_edges:allEdges.slice(0,3),node_kelly:nodeKelly,
+                best_market:bestMarket?bestMarket.market:null,
+                best_market_prob:bestMarket?bestMarket.prob:null,
+                best_market_cote:bestMarket?bestMarket.cote:null,
+                all_markets:allMarkets,node_kelly:nodeKelly,
                 lineup_home_formation:lineups&&lineups.home?lineups.home.formation:null,
                 lineup_away_formation:lineups&&lineups.away?lineups.away.formation:null,
                 streakH,streakA,forme5H,forme5A,
                 evPatH,evPatA,motivH,motivA,matchup,keyAbsenceAlerts,disciplineRisk,topScorersH,topScorersA,
+                slotSummary:calcSlotSummary(evPatH,evPatA),
                 eloH,eloA,eloStats,droppingOdds,
                 xgH_xga:xgH.xga_avg,xgA_xga:xgA.xga_avg,
                 xgH_defense_surchauffe:xgH.defense_surchauffe,xgA_defense_surchauffe:xgA.defense_surchauffe,
@@ -2356,17 +2411,12 @@ jobs:
 
               if(an&&an.passe_ton_tour===true){
                 console.log('  \u23ed PASS: '+home.name+' vs '+away.name);
-                an.pari_rec='';an.cote_rec='';an.confiance=0;an.vbet='NON';an.verdict_shark='';an.edge='';an.kelly='0';an.marche='';an.risque='ELEVE';
+                an.pari_rec='';an.cote_rec='';an.confiance=0;an.vbet='NON';an.verdict_shark='';an.kelly='0';an.marche='';an.risque='ELEVE';
               }
-              // ── PATCH 7 : vérification post-Claude cote < 1.50 ──────────────
-              if(an&&!an.passe_ton_tour){
-                var coteRet=parseFloat(an.cote_rec)||0;
-                if(coteRet>0&&coteRet<1.50){
-                  console.log('  \u26d4 Cote '+coteRet+' < 1.50 renvoy\u00e9e par Claude \u2014 PASS forc\u00e9');
-                  an.passe_ton_tour=true;an.pari_rec='';an.cote_rec='';
-                  an.confiance=0;an.vbet='NON';an.verdict_shark='';an.edge='';an.kelly='0';
-                  an.marche='';an.risque='ELEVE';
-                }
+              // Sécurité : si Claude a vidé pari_rec/cote_rec alors qu'il n'aurait pas dû, on les réinjecte depuis bestMarket
+              if(an&&!an.passe_ton_tour&&bestMarket){
+                if(!an.pari_rec) an.pari_rec=bestMarket.market;
+                if(!an.cote_rec) an.cote_rec=String(bestMarket.cote);
               }
 
               (function(){
@@ -2381,8 +2431,8 @@ jobs:
                 if(odds.bookies&&odds.bookies.length&&coteRec&&coteRec!=='--'){odds.bookies.forEach(function(bk,i){bk.c=Math.max(1.01,parseFloat(coteRec)+(deltas[i]||0)).toFixed(2);});}
               })();
 
-              var kellyVal=nodeKelly||null;
-              if(!kellyVal&&an){var edgeRaw=(an.edge||'').replace(/[^0-9.]/g,'');var edgeNum=parseFloat(edgeRaw)||0;var coteRaw=parseFloat(an.cote_rec)||parseFloat(odds.c1)||0;if(edgeNum>0&&coteRaw>1)kellyVal=Math.min((edgeNum/(coteRaw-1))*0.25,5).toFixed(1);}
+              // Kelly supprimé — basé sur les cotes du matin = non pertinent
+              var kellyVal='2'; // Mise fixe recommandée : 2% bankroll
 
               var classementObj=null;
               if(entryH||entryA){
@@ -2422,7 +2472,7 @@ jobs:
                 dc1x:odds.dc1x,dc2x:odds.dc2x,dc12:odds.dc12,cdc1x:odds.dc1x,cdc2x:odds.dc2x,
                 ah_dom:odds.ah_dom||'--',ah_ext:odds.ah_ext||'--',co35:odds.co35||'--',
                 cbtts:odds.btts_oui,cbtts_non:odds.btts_non,btts_oui:odds.btts_oui,btts_non:odds.btts_non,
-                bookies:odds.bookies,edge:an?(an.edge||''):'',marche:an?(an.marche||'RESULTAT'):'RESULTAT',
+                bookies:odds.bookies,edge:bestMarket?'+'+bestMarket.prob+'% (proba modèle)':'',marche:an?(an.marche||'RESULTAT'):'RESULTAT',
                 risque:risqueNorm,pari_rec:an?(an.pari_rec||''):'',
                 cote_rec:an?(an.cote_rec||''):'',
                 no_signal:an&&an.passe_ton_tour===true?true:!(an&&an.pari_rec),
@@ -2466,23 +2516,18 @@ jobs:
               };
               matchsData.push(matchObj);
 
-              if(an&&(an.confiance||0)>=7.0){
-                var edgeNumCheck=parseFloat((an.edge||'').replace(/[^0-9.]/g,''))||0;
-                var coteRecCheck=parseFloat(an.cote_rec)||0;
-                var edgeOk=edgeNumCheck>=5&&edgeNumCheck<=15;
-                var coteOk=coteRecCheck>=1.55&&coteRecCheck<=2.40;
+              // Qualification pour combinés — basée sur proba du modèle + confiance, plus d'edge
+              if(an&&!an.passe_ton_tour&&(an.confiance||0)>=7.0&&bestMarket){
+                var coteRecCheck=parseFloat(an.cote_rec||bestMarket.cote)||0;
+                var probCheck=bestMarket.prob||0;
+                // Critères : cote jouable 1.50-2.50 + proba modèle >= 55% + confiance >= 7.0
+                var coteOk=coteRecCheck>=1.50&&coteRecCheck<=2.50;
+                var probaOk=probCheck>=55;
                 var eloOk=isWorldCupMatch?true:!!(matchObj.elo_home&&matchObj.elo_away);
-                var pariLow=(an.pari_rec||'').toLowerCase();
-                var marcheOk=pariLow.includes('dc 1x')||pariLow.includes('dc x2')||pariLow.includes('over 2.5')||pariLow.includes('btts non');
-                if(edgeOk&&coteOk&&eloOk&&marcheOk){
-                  var coteRec2=odds.c1;
-                  if(pariLow.includes('btts non'))coteRec2=odds.btts_non;
-                  else if(pariLow.includes('x2'))coteRec2=odds.dc2x;
-                  else if(pariLow.includes('1x'))coteRec2=odds.dc1x;
-                  else if(pariLow.includes('over 2.5'))coteRec2=odds.co25;
-                  forCombis.push({home:home.name,away:away.name,pari:an.pari_rec,conf:an.confiance,edge:an.edge||'',cote:coteRec2&&coteRec2!=='--'?parseFloat(coteRec2):1.5});
-                  console.log('  \u2705 QUALIFI\u00c9: conf='+an.confiance+' edge='+edgeNumCheck+'% cote='+coteRecCheck);
-                }else{console.log('  \u26d4 Filtr\u00e9: conf='+an.confiance+' edge='+edgeNumCheck+'% cote='+coteRecCheck);}
+                if(coteOk&&probaOk&&eloOk){
+                  forCombis.push({home:home.name,away:away.name,pari:an.pari_rec||bestMarket.market,conf:an.confiance,prob:probCheck,cote:coteRecCheck});
+                  console.log('  \u2705 QUALIFI\u00c9: conf='+an.confiance+' prob='+probCheck+'% cote='+coteRecCheck);
+                }else{console.log('  \u26d4 Filtr\u00e9: conf='+an.confiance+' prob='+probCheck+'% cote='+coteRecCheck);}
               }
               console.log('  OK conf='+matchObj.conf+' edge='+matchObj.edge+' pari='+matchObj.pari_rec);
             }

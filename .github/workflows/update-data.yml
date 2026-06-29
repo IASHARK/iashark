@@ -1714,16 +1714,21 @@ jobs:
               +'Monte-Carlo: DOM '+d.mc_p1+'% | Nul '+d.mc_pN+'% | EXT '+d.mc_p2+'%\n'
               +(d.mc_scores&&d.mc_scores.length?'Top scores MC: '+d.mc_scores.map(function(s){return s.score+'('+s.pct+'%)';}).join(', ')+'\n':'')
               +(d.pinnacle_p1?'Pinnacle (sharp): DOM '+d.pinnacle_p1+'% | Nul '+d.pinnacle_pN+'% | EXT '+d.pinnacle_p2+'%\n':'Pinnacle: non disponible\n')
-              +'\nCotes disponibles (filtre >= 1.50 déjà appliqué par le système):\n'
-              +(d.co25&&d.co25!=='--'?'Over 2.5: '+d.co25+'\n':'')
-              +(d.btts_non&&d.btts_non!=='--'?'BTTS Non: '+d.btts_non+'\n':'')
-              +(d.dc1x&&d.dc1x!=='--'?'DC 1X: '+d.dc1x+'\n':'')
-              +(d.dc2x&&d.dc2x!=='--'?'DC X2: '+d.dc2x+'\n':'')
-              +'\n=== DÉCISION DU MODÈLE MATHÉMATIQUE ===\n'
-              +(d.best_market
-                ?'Marché sélectionné par le système : '+d.best_market+' | Probabilité modèle : '+d.best_market_prob+'% | Cote : '+d.best_market_cote+'\n'
-                 +'(Sélection automatique par proba la plus haute parmi les marchés jouables >= 1.50)\n'
+              // Marchés disponibles — probas calculées par le modèle
+              +(d.all_markets&&d.all_markets.length
+                ?'\n=== MARCHÉS DISPONIBLES (cote >= 1.50) ===\n'
+                 +'(probas calculées indépendamment par le modèle Poisson + Dixon-Coles + Monte-Carlo)\n'
+                 +d.all_markets.map(function(m){
+                   return m.market+' | Proba modèle: '+m.prob+'% | Cote: '+m.cote;
+                 }).join('\n')+'\n'
                 :'Aucun marché jouable — toutes les cotes sont < 1.50 ou absentes.\n')
+              // Scores Monte-Carlo pour cohérence avec le marché choisi
+              +(d.mc_scores&&d.mc_scores.length
+                ?'\n=== SCORES MONTE-CARLO (5000 simulations) ===\n'
+                 +'Top scores: '+d.mc_scores.map(function(s){return s.score+'('+s.pct+'%)';}).join(', ')+'\n'
+                 +'→ Utilise ces scores pour vérifier la cohérence du marché que tu choisis.\n'
+                 +'→ Ex: si Over 2.5 mais top scores = 0-0, 1-0, 0-1 → incohérent → choisis autre marché\n'
+                :'')
               // Données réelles par tranche pour le scénario
               +(d.slotSummary&&d.slotSummary.length
                 ?'\n=== BUTS PAR TRANCHE (données réelles) ===\n'
@@ -1733,45 +1738,40 @@ jobs:
                      +' | '+d.away+' marque '+s.pct_away_mark+'%, encaisse '+s.pct_home_conc+'% — Probabilité but: '+s.prob+'%';
                  }).join('\n')+'\n'
                 :'')
-              +'\n=== TON RÔLE ===\n'
-              +'Tu es un rédacteur d\'analyse. Le marché est déjà sélectionné par le modèle ci-dessus.\n'
-              +'Tu NE CHANGES PAS le marché. Tu NE PROPOSES PAS un autre marché.\n'
-              +'Tu dois UNIQUEMENT :\n'
-              +'1. Décider si ce match est jouable (passe_ton_tour=true) dans ces cas SEULEMENT : derby détecté | données insuffisantes < 8 matchs | Phase 1 contredit radicalement Phase 2\n'
-              +'2. Si jouable : rédiger une analyse factuelle qui explique pourquoi les données supportent ce marché\n'
-              +'3. Pour scenario_15min : écrire un texte narratif par tranche EN CITANT les vrais pourcentages fournis ci-dessus. Ne jamais inventer un chiffre qui ne figure pas dans les données.\n'
-              +'4. Attribuer un niveau de confiance (7.0-8.5) selon la solidité des signaux\n'
-              +'CONFIANCE: 7.0-7.4 (signaux modérés) | 7.5-7.9 (signaux forts) | 8.0-8.5 (ELO+Pinnacle+MC convergents) — MAX 8.5\n'
+              +'\n=== TON ANALYSE ===\n'
+              +'Tu es un analyste sportif professionnel. Tu reçois les données ci-dessus et tu choisis librement le meilleur marché.\n'
+              +'\nRÈGLES DE SÉLECTION DU MARCHÉ :\n'
+              +'1. Choisis le marché dont les signaux sont les plus convergents (Phase 1 + Phase 2 + Monte-Carlo pointent dans la même direction)\n'
+              +'2. Vérifie la cohérence avec les scores Monte-Carlo — si Over 2.5 mais top scores sont 0-0/1-0, ne choisis pas Over 2.5\n'
+              +'3. Aucun marché n\'est favorisé a priori — BTTS Non, Over 2.5, DC 1X/X2, Under 2.5, BTTS Oui sont tous équivalents\n'
+              +'4. Si les signaux sont contradictoires ou insuffisants → passe_ton_tour=true\n'
+              +'5. Si aucun marché n\'a de cote disponible >= 1.50 → passe_ton_tour=true\n'
+              +'\nCONFIANCE: 7.0-7.4 (signaux modérés) | 7.5-7.9 (signaux forts) | 8.0-8.5 (ELO+Pinnacle+MC convergents) — MAX 8.5\n'
               +'RISQUE: FAIBLE si cote <1.75 + signaux convergents | MODERE si cote 1.75-2.20 | ELEVE sinon\n\n';
 
-            // pari_rec et cote_rec sont déjà définis par le code — Claude les reçoit, ne les choisit pas
-            var preselected_pari = d.best_market || '';
-            var preselected_cote = d.best_market_cote || '';
             var jsonTpl = 'Réponds UNIQUEMENT avec ce JSON valide. Aucun texte avant ou après. Aucun backtick.\n'
-              +'RAPPEL: le marché est déjà sélectionné par le modèle — pari_rec et cote_rec sont imposés ci-dessous.\n'
               +'RÈGLE ABSOLUE: analyse_card, conseil, contexte, facteur_x, scenario, scenario_15min TOUJOURS remplis même si passe_ton_tour=true.\n\n'
               +'{\n'
               +'"passe_ton_tour": false,\n'
-              +'"confiance": [7.0 à 8.5 ou 0 si passe_ton_tour=true],\n'
-              +'"pari_rec": "'+preselected_pari+'",\n'
-              +'"cote_rec": "'+preselected_cote+'",\n'
-              +'"marche": "[DOUBLE_CHANCE|TOTAL_BUTS|BTTS selon pari_rec]",\n'
-              +'"risque": "[FAIBLE|MODERE|ELEVE]",\n'
-              +'"verdict_shark": "'+preselected_pari+' à '+preselected_cote+' — [1 phrase factuelle sur les données] ou vide si passe_ton_tour",\n'
-              +'"analyse_card": "[TOUJOURS REMPLI — analyse factuelle 2-3 phrases]",\n'
-              +'"conseil": "[TOUJOURS REMPLI — 1 phrase directe]",\n'
-              +'"contexte": "[TOUJOURS REMPLI]",\n'
-              +'"facteur_x": "[TOUJOURS REMPLI — le signal le plus fort qui justifie ce marché]",\n'
+              +'"confiance": 0.0,\n'
+              +'"pari_rec": "[marché choisi parmi : Over 2.5 | Under 2.5 | BTTS Oui | BTTS Non | DC 1X | DC X2] ou vide si passe_ton_tour",\n'
+              +'"cote_rec": "[cote exacte du marché choisi — copie depuis les données ci-dessus]",\n'
+              +'"marche": "[DOUBLE_CHANCE | TOTAL_BUTS | BTTS]",\n'
+              +'"risque": "[FAIBLE | MODERE | ELEVE]",\n'
+              +'"verdict_shark": "[marché] à [cote] — [1 phrase factuelle sur le signal le plus fort]",\n'
+              +'"analyse_card": "[2-3 phrases factuelles — cite les stats qui justifient ce marché]",\n'
+              +'"conseil": "[1 phrase directe et actionnable]",\n'
+              +'"contexte": "[contexte du match — enjeu, classement, phase]",\n'
+              +'"facteur_x": "[LE signal statistique le plus fort qui justifie ce marché]",\n'
               +'"score_central": "'+scoreCentral+'",\n'
               +'"p1": '+d.poisson_p1+', "pn": '+d.poisson_pN+', "p2": '+d.poisson_p2+',\n'
               +'"po25": '+d.poisson_over25+', "btts": '+d.poisson_bttsY+',\n'
               +'"vbet": "[OUI si confiance >= 7.0 et passe_ton_tour=false, sinon NON]",\n'
               +'"scenario": {"phase1":"[TOUJOURS REMPLI]","phase2":"[TOUJOURS REMPLI]","phase3":"[TOUJOURS REMPLI]"},\n'
-              // scenario_15min — prob est la vraie proba calculée depuis les données API
               +(d.slotSummary&&d.slotSummary.length
                 ?'"scenario_15min": [\n'
                  +d.slotSummary.map(function(s,i){
-                   return '  {"t":"'+s.t+'","prob":'+s.prob+',"txt":"[narrative factuelle basée sur les données ci-dessus — cite les vrais chiffres]"}';
+                   return '  {"t":"'+s.t+'","prob":'+s.prob+',"txt":"[narrative factuelle — cite les vrais chiffres des données]"}';
                  }).join(',\n')+'\n]\n'
                 :'"scenario_15min": null\n')
               +'}';
@@ -1779,7 +1779,7 @@ jobs:
             var r = await postJSONWithRetry('api.anthropic.com', '/v1/messages', {
               model: 'claude-sonnet-4-6',
               max_tokens: 2500,
-              system: 'Tu es IASHARK, un rédacteur d\'analyse sportive. Tu réponds EXCLUSIVEMENT en JSON valide. Aucun backtick. Tu n\'inventes jamais de statistiques. Le marché et la cote sont déjà sélectionnés par le système mathématique — tu ne les changes JAMAIS. Ton seul pouvoir de décision : passe_ton_tour=true si derby, données insuffisantes (<8 matchs), ou Phase 1 contredit radicalement Phase 2. Dans tous les autres cas, tu analyses et tu rédiges en restant factuel et neutre.',
+              system: 'Tu es IASHARK, un analyste sportif professionnel. Tu réponds EXCLUSIVEMENT en JSON valide. Aucun backtick. Tu n\'inventes jamais de statistiques. Tu choisis librement le meilleur marché parmi ceux proposés en te basant uniquement sur les données statistiques fournies. Tu es totalement neutre — aucun marché n\'est favorisé a priori. Tu vérifies toujours la cohérence entre le marché choisi et les scores Monte-Carlo. Si les signaux sont insuffisants ou contradictoires, tu passes ton tour.',
               messages: [{role:'user', content:prompt+jsonTpl}]
             }, {'x-api-key':ANT_KEY, 'anthropic-version':'2023-06-01'});
 
@@ -2305,28 +2305,25 @@ jobs:
               var shinProbs=null;
               if(pinnacleOdds&&pinnacleOdds.c1&&pinnacleOdds.cn&&pinnacleOdds.c2){var raw=shinProbabilities([pinnacleOdds.c1,pinnacleOdds.cn,pinnacleOdds.c2]);if(raw)shinProbs={p1:Math.round(raw[0]*100),pN:Math.round(raw[1]*100),p2:Math.round(raw[2]*100)};}
 
-              // ── DÉCISION MÉCANIQUE — le code choisit le marché, Claude ne décide plus ──
-              // Principe : proba la plus haute parmi les 4 marchés selon le modèle mathématique
-              // Les cotes servent UNIQUEMENT à filtrer >= 1.50 — aucun calcul d'edge
+              // ── 6 MARCHÉS — le code calcule les probas, Claude choisit librement ──
+              // Le code ne sélectionne AUCUN marché — il passe tout à Claude
+              // Filtre unique : cote >= 1.50 pour ne pas proposer des marchés non jouables
               var prob1X=(shinProbs?shinProbs.p1:poissonProbs.p1)+(shinProbs?shinProbs.pN:poissonProbs.pN);
               var probX2=(shinProbs?shinProbs.p2:poissonProbs.p2)+(shinProbs?shinProbs.pN:poissonProbs.pN);
 
-              // Les 4 marchés avec leur probabilité pure du modèle
-              // Filtre unique : cote disponible >= 1.50 (jouable)
+              // Les 6 marchés avec leur probabilité calculée indépendamment par le modèle
+              // Aucun tri, aucune sélection — Claude reçoit tous les marchés jouables
               var allMarkets=[
-                {market:'Over 2.5', cote:odds.co25,   prob:poissonProbs.over25, label:'Over 2.5'},
-                {market:'BTTS Non', cote:odds.btts_non,prob:poissonProbs.bttsN,  label:'BTTS Non'},
-                {market:'DC 1X',    cote:odds.dc1x,   prob:prob1X,              label:'DC 1X'},
-                {market:'DC X2',    cote:odds.dc2x,   prob:probX2,              label:'DC X2'},
+                {market:'Over 2.5',  cote:odds.co25,      prob:poissonProbs.over25, label:'Plus de 2.5 buts'},
+                {market:'Under 2.5', cote:odds.cu25,      prob:poissonProbs.under25,label:'Moins de 2.5 buts'},
+                {market:'BTTS Oui',  cote:odds.btts_oui,  prob:poissonProbs.bttsY,  label:'Les deux équipes marquent'},
+                {market:'BTTS Non',  cote:odds.btts_non,  prob:poissonProbs.bttsN,  label:'Une équipe ne marque pas'},
+                {market:'DC 1X',     cote:odds.dc1x,      prob:prob1X,              label:'Victoire ou nul domicile'},
+                {market:'DC X2',     cote:odds.dc2x,      prob:probX2,              label:'Victoire ou nul extérieur'},
               ].filter(function(m){
-                // Filtre UNIQUEMENT sur la jouabilité — pas d'edge, pas de seuil de proba
                 return m.cote&&m.cote!=='--'&&parseFloat(m.cote)>=1.50;
               });
-
-              // Trier par probabilité pure décroissante — le marché le plus probable gagne
-              allMarkets.sort(function(a,b){return b.prob-a.prob;});
-              var bestMarket=allMarkets[0]||null;
-              var nodeKelly=null; // Kelly supprimé — basé sur les cotes du matin = non pertinent
+              var nodeKelly=null;
 
               var injuries=(injRaw||[]).map(function(inj){return{name:inj.name,team:inj.team===home.id?home.id:away.id,reason:inj.reason||'Blessure',status:(inj.status||'out').toLowerCase().includes('suspend')?'suspended':'out',impact:'medium'};});
               var matchup=calcMatchup(xgH,xgA,sH,sA);
@@ -2354,6 +2351,7 @@ jobs:
               var heure=toParisHeure(f.date||'')||heureUTC;
               var meteoStr=wx?wx.desc+' '+wx.emoji+' '+wx.temp+' | Vent: '+wx.wind:'N/A';
 
+              var bestMarket=null; // Plus de sélection mécanique — Claude décide
               var an=await genAnalyse({
                 leagueId:lg.id,home:home.name,away:away.name,homeId:home.id,awayId:away.id,
                 league:lg.name,date:TODAY+' '+heure,stade:(f.venue&&f.venue.name)||'',meteo:meteoStr,
@@ -2393,9 +2391,6 @@ jobs:
                 mc_p2:poissonProbs.montecarlo?poissonProbs.montecarlo.p2:poissonProbs.p2,
                 pinnacle_p1:shinProbs?shinProbs.p1:null,pinnacle_pN:shinProbs?shinProbs.pN:null,pinnacle_p2:shinProbs?shinProbs.p2:null,
                 pinnacle_c1:pinnacleOdds?pinnacleOdds.c1:null,pinnacle_c2:pinnacleOdds?pinnacleOdds.c2:null,
-                best_market:bestMarket?bestMarket.market:null,
-                best_market_prob:bestMarket?bestMarket.prob:null,
-                best_market_cote:bestMarket?bestMarket.cote:null,
                 all_markets:allMarkets,node_kelly:nodeKelly,
                 lineup_home_formation:lineups&&lineups.home?lineups.home.formation:null,
                 lineup_away_formation:lineups&&lineups.away?lineups.away.formation:null,
@@ -2413,10 +2408,10 @@ jobs:
                 console.log('  \u23ed PASS: '+home.name+' vs '+away.name);
                 an.pari_rec='';an.cote_rec='';an.confiance=0;an.vbet='NON';an.verdict_shark='';an.kelly='0';an.marche='';an.risque='ELEVE';
               }
-              // Sécurité : si Claude a vidé pari_rec/cote_rec alors qu'il n'aurait pas dû, on les réinjecte depuis bestMarket
-              if(an&&!an.passe_ton_tour&&bestMarket){
-                if(!an.pari_rec) an.pari_rec=bestMarket.market;
-                if(!an.cote_rec) an.cote_rec=String(bestMarket.cote);
+              // Sécurité : si Claude a retourné un pari_rec sans cote_rec, on cherche la cote dans allMarkets
+              if(an&&!an.passe_ton_tour&&an.pari_rec&&!an.cote_rec){
+                var found=(d.all_markets||[]).find(function(m){return m.market.toLowerCase()===an.pari_rec.toLowerCase();});
+                if(found) an.cote_rec=String(found.cote);
               }
 
               (function(){
@@ -2472,7 +2467,7 @@ jobs:
                 dc1x:odds.dc1x,dc2x:odds.dc2x,dc12:odds.dc12,cdc1x:odds.dc1x,cdc2x:odds.dc2x,
                 ah_dom:odds.ah_dom||'--',ah_ext:odds.ah_ext||'--',co35:odds.co35||'--',
                 cbtts:odds.btts_oui,cbtts_non:odds.btts_non,btts_oui:odds.btts_oui,btts_non:odds.btts_non,
-                bookies:odds.bookies,edge:bestMarket?'+'+bestMarket.prob+'% (proba modèle)':'',marche:an?(an.marche||'RESULTAT'):'RESULTAT',
+                bookies:odds.bookies,edge:an&&an.pari_rec?(function(){ var m=(d.all_markets||[]).find(function(x){return x.market.toLowerCase()===an.pari_rec.toLowerCase();}); return m?m.prob+'% (modèle)':''; })():'',marche:an?(an.marche||'RESULTAT'):'RESULTAT',
                 risque:risqueNorm,pari_rec:an?(an.pari_rec||''):'',
                 cote_rec:an?(an.cote_rec||''):'',
                 no_signal:an&&an.passe_ton_tour===true?true:!(an&&an.pari_rec),
@@ -2516,17 +2511,17 @@ jobs:
               };
               matchsData.push(matchObj);
 
-              // Qualification pour combinés — basée sur proba du modèle + confiance, plus d'edge
-              if(an&&!an.passe_ton_tour&&(an.confiance||0)>=7.0&&bestMarket){
-                var coteRecCheck=parseFloat(an.cote_rec||bestMarket.cote)||0;
-                var probCheck=bestMarket.prob||0;
-                // Critères : cote jouable 1.50-2.50 + proba modèle >= 55% + confiance >= 7.0
+              // Qualification pour combinés — basée sur le choix libre de Claude
+              if(an&&!an.passe_ton_tour&&an.pari_rec&&(an.confiance||0)>=7.0){
+                var coteRecCheck=parseFloat(an.cote_rec)||0;
+                // Trouver la proba du marché choisi par Claude dans allMarkets
+                var chosenMarket=(d.all_markets||[]).find(function(m){return m.market.toLowerCase()===an.pari_rec.toLowerCase();});
+                var probCheck=chosenMarket?chosenMarket.prob:0;
                 var coteOk=coteRecCheck>=1.50&&coteRecCheck<=2.50;
-                var probaOk=probCheck>=55;
-                var eloOk=isWorldCupMatch?true:!!(matchObj.elo_home&&matchObj.elo_away);
-                if(coteOk&&probaOk&&eloOk){
-                  forCombis.push({home:home.name,away:away.name,pari:an.pari_rec||bestMarket.market,conf:an.confiance,prob:probCheck,cote:coteRecCheck});
-                  console.log('  \u2705 QUALIFI\u00c9: conf='+an.confiance+' prob='+probCheck+'% cote='+coteRecCheck);
+                var probaOk=probCheck>=52; // seuil légèrement plus bas pour plus de diversité
+                if(coteOk&&probaOk){
+                  forCombis.push({home:home.name,away:away.name,pari:an.pari_rec,conf:an.confiance,prob:probCheck,cote:coteRecCheck});
+                  console.log('  \u2705 QUALIFI\u00c9: conf='+an.confiance+' prob='+probCheck+'% cote='+coteRecCheck+' marché='+an.pari_rec);
                 }else{console.log('  \u26d4 Filtr\u00e9: conf='+an.confiance+' prob='+probCheck+'% cote='+coteRecCheck);}
               }
               console.log('  OK conf='+matchObj.conf+' edge='+matchObj.edge+' pari='+matchObj.pari_rec);

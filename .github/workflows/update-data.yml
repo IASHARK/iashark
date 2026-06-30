@@ -1725,7 +1725,12 @@ jobs:
             if(isWorldCup){
               wcHeader = '=== COUPE DU MONDE 2026 ===\n'
                 +'Phase: '+(d.isKnockout?'ÉLIMINATION DIRECTE — match à enjeu maximal, chaque erreur élimine':'PHASE DE GROUPES')+'\n'
-                +'Note CDM: Les équipes jouent plus défensivement qu\'en championnat. Lambdas ajustés en conséquence.\n\n';
+                +'Note CDM: Les équipes jouent plus défensivement qu\'en championnat. Lambdas ajustés en conséquence.\n'
+                +'IMPORTANT — TERRAIN NEUTRE : ce match se joue sur terrain neutre (pas de domicile réel).\n'
+                +'Les statistiques "DOM"/"EXT" ci-dessous sont des libellés techniques internes du pipeline\n'
+                +'(elles servent à calculer les lambdas) — ne les reproduis JAMAIS tel quel dans ton texte.\n'
+                +'N\'utilise JAMAIS "à domicile", "à l\'extérieur", "reste à 0 victoire en extérieur" ou\n'
+                +'formulation équivalente dans ton analyse — désigne toujours les équipes par leur nom.\n\n';
             }
 
             var prompt = wcHeader
@@ -2265,7 +2270,17 @@ jobs:
               var away=fix.teams.away;
               var isWorldCupMatch=(lg.id===1);
               var wcRound=(f.fixture&&f.fixture.round||'').toLowerCase();
-              var isKnockout=isWorldCupMatch&&(wcRound.includes('round of')||wcRound.includes('quarter')||wcRound.includes('semi')||wcRound.includes('final'));
+              // Détection élargie pour couvrir le nouveau format CDM 2026 à 48 équipes,
+              // qui introduit un tour de 32e de finale inédit par rapport aux éditions
+              // précédentes — l'API peut nommer ce tour différemment selon la source.
+              // Pur texte : ne touche à aucun calcul de lambda, de proba ou de marché.
+              var isKnockout=isWorldCupMatch&&(
+                wcRound.includes('round of')||wcRound.includes('quarter')||wcRound.includes('semi')||
+                wcRound.includes('final')||wcRound.includes('knockout')||wcRound.includes('1/8')||
+                wcRound.includes('1/4')||wcRound.includes('1/2')||wcRound.includes('last 32')||
+                wcRound.includes('last 16')||wcRound.includes('playoff')||wcRound.includes('play-off')||
+                wcRound.includes('third place')||wcRound.includes('3rd place')
+              );
               if(isKnockout) console.log('  [WC KNOCKOUT] '+home.name+' vs '+away.name+' — '+f.fixture.round);
 
               // Si ce match a déjà une prédiction verrouillée (vu lors d'un run précédent,

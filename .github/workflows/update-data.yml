@@ -1332,23 +1332,38 @@ jobs:
                 var teamBlock=r.response.find(function(b){return b.team&&b.team.id===teamId;});
                 var oppBlock=r.response.find(function(b){return b.team&&b.team.id!==teamId;});
                 if(!teamBlock){await sleep(150);continue;}
-                var s={};(teamBlock.statistics||[]).forEach(function(x){s[(x.type||'').toLowerCase().replace(/ /g,'_')]=x.value;});
-                var sOpp={};if(oppBlock)(oppBlock.statistics||[]).forEach(function(x){sOpp[(x.type||'').toLowerCase().replace(/ /g,'_')]=x.value;});
+                // Normalisation : "Ball Possession" → "ball_possession", "Passes %" → "passes_%"
+                var s={};(teamBlock.statistics||[]).forEach(function(x){s[(x.type||'').toLowerCase().replace(/[\s%]+/g,'_').replace(/_+$/,'')]=x.value;});
+                var sOpp={};if(oppBlock)(oppBlock.statistics||[]).forEach(function(x){sOpp[(x.type||'').toLowerCase().replace(/[\s%]+/g,'_').replace(/_+$/,'')]=x.value;});
+                // Helper pour parser les valeurs en % (ex: "55%" → 55) ou numériques classiques
+                function numOrPct(v){if(v==null)return null;var str=String(v).replace('%','').trim();var n=parseFloat(str);return isNaN(n)?null:n;}
                 var xgTeam=parseFloat(s['expected_goals'])||null;
                 var xgAgainst=parseFloat(sOpp['expected_goals'])||null;
                 var shots_on=parseInt(s['shots_on_goal'])||0;
                 var shots_total=parseInt(s['total_shots'])||0;
                 var fouls=parseInt(s['fouls'])||0;
+                // Nouvelles stats déjà fournies par l'API mais jamais extraites jusqu'ici
+                var shots_off=parseInt(s['shots_off_goal'])||null;
+                var shots_blocked=parseInt(s['blocked_shots'])||null;
+                var corners=parseInt(s['corner_kicks'])||null;
+                var offsides=parseInt(s['offsides'])||null;
+                var possession=numOrPct(s['ball_possession']);
+                var saves=parseInt(s['goalkeeper_saves'])||null;
+                var passes_total=parseInt(s['total_passes'])||null;
+                var passes_pct=numOrPct(s['passes']);
                 var fx=rawFixtures.find(function(f){return f.fixture.id===fixtureIds[i];});
                 var oppId=fx?(fx.teams.home.id===teamId?fx.teams.away.id:fx.teams.home.id):null;
                 var xgWeighted=null;
                 if(xgTeam!==null&&oppId&&xgConcededCache[oppId]) xgWeighted=parseFloat((xgTeam/xgConcededCache[oppId]).toFixed(3));
-                results.push({xg:xgTeam,xga:xgAgainst,xg_weighted:xgWeighted,shots_on,shots_total,fouls});
+                results.push({xg:xgTeam,xga:xgAgainst,xg_weighted:xgWeighted,shots_on,shots_total,fouls,
+                  shots_off,shots_blocked,corners,offsides,possession,saves,passes_total,passes_pct});
                 await sleep(150);
               }catch(e){}
             }
-            if(!results.length) return {xg_avg:null,xga_avg:null,xg_weighted:null,shots_on_avg:null,shots_total_avg:null,fouls_avg:null};
+            if(!results.length) return {xg_avg:null,xga_avg:null,xg_weighted:null,shots_on_avg:null,shots_total_avg:null,fouls_avg:null,
+              possession_avg:null,corners_avg:null,offsides_avg:null,saves_avg:null,passes_pct_avg:null,shots_off_avg:null,shots_blocked_avg:null};
             function avg(arr){return arr.length?arr.reduce(function(a,b){return a+b;},0)/arr.length:null;}
+            function avgField(key){var vals=results.map(function(r){return r[key];}).filter(function(v){return v!=null;});return avg(vals);}
             var xgs=results.filter(function(r){return r.xg!==null;}).map(function(r){return r.xg;});
             var xgas=results.filter(function(r){return r.xga!==null;}).map(function(r){return r.xga;});
             var xgsW=results.filter(function(r){return r.xg_weighted!==null;}).map(function(r){return r.xg_weighted;});
@@ -1365,6 +1380,14 @@ jobs:
               shots_on_avg:avg(shots)?avg(shots).toFixed(1):null,
               shots_total_avg:avg(shotsT)?avg(shotsT).toFixed(1):null,
               fouls_avg:avg(foulsArr)?avg(foulsArr).toFixed(1):null,
+              // Nouvelles moyennes — possession et qualité offensive réelle (cadrage, pas juste volume)
+              possession_avg:avgField('possession')?Math.round(avgField('possession')):null,
+              corners_avg:avgField('corners')?parseFloat(avgField('corners').toFixed(1)):null,
+              offsides_avg:avgField('offsides')?parseFloat(avgField('offsides').toFixed(1)):null,
+              saves_avg:avgField('saves')?parseFloat(avgField('saves').toFixed(1)):null,
+              passes_pct_avg:avgField('passes_pct')?Math.round(avgField('passes_pct')):null,
+              shots_off_avg:avgField('shots_off')?parseFloat(avgField('shots_off').toFixed(1)):null,
+              shots_blocked_avg:avgField('shots_blocked')?parseFloat(avgField('shots_blocked').toFixed(1)):null,
               defense_surchauffe:surchauffe,n:results.length
             };
           }
@@ -1743,7 +1766,7 @@ jobs:
               +'\nRÈGLES DE SÉLECTION DU MARCHÉ :\n'
               +'1. Choisis le marché dont les signaux sont les plus convergents (Phase 1 + Phase 2 + Monte-Carlo pointent dans la même direction)\n'
               +'2. Vérifie la cohérence avec les scores Monte-Carlo — si Over 2.5 mais top scores sont 0-0/1-0, ne choisis pas Over 2.5\n'
-              +'3. Aucun marché n\'est favorisé a priori — BTTS Non, Over 2.5, DC 1X/X2, Under 2.5, BTTS Oui sont tous équivalents\n'
+              +'3. Aucun marché n\'est favorisé a priori — les 10 marchés (Over/Under 2.5, BTTS Oui/Non, DC 1X/X2, Victoire sèche, Handicaps) sont tous équivalents au départ\n'
               +'4. Si les signaux sont contradictoires ou insuffisants → passe_ton_tour=true\n'
               +'5. Si aucun marché n\'a de cote disponible >= 1.50 → passe_ton_tour=true\n'
               +'\nCONFIANCE: 7.0-7.4 (signaux modérés) | 7.5-7.9 (signaux forts) | 8.0-8.5 (ELO+Pinnacle+MC convergents) — MAX 8.5\n'
@@ -1754,7 +1777,7 @@ jobs:
               +'{\n'
               +'"passe_ton_tour": false,\n'
               +'"confiance": 0.0,\n'
-              +'"pari_rec": "[marché choisi parmi : Over 2.5 | Under 2.5 | BTTS Oui | BTTS Non | DC 1X | DC X2] ou vide si passe_ton_tour",\n'
+              +'"pari_rec": "[marché choisi EXACTEMENT comme nommé dans MARCHÉS DISPONIBLES ci-dessus] ou vide si passe_ton_tour",\n'
               +'"cote_rec": "[cote exacte du marché choisi — copie depuis les données ci-dessus]",\n'
               +'"marche": "[DOUBLE_CHANCE | TOTAL_BUTS | BTTS]",\n'
               +'"risque": "[FAIBLE | MODERE | ELEVE]",\n'
@@ -2299,6 +2322,21 @@ jobs:
                 lambdas.lambdaH=parseFloat((lambdas.lambdaH*0.6+parseFloat(xgH.xg_avg)*0.4).toFixed(3));
                 lambdas.lambdaA=parseFloat((lambdas.lambdaA*0.6+parseFloat(xgA.xg_avg)*0.4).toFixed(3));
               }
+              // Qualité offensive réelle via le ratio tirs cadrés/tirs totaux — pas juste le volume brut.
+              // Une équipe qui tire beaucoup mais cadre peu a une attaque moins fiable, à xG égal.
+              // Ratio moyen de référence en football pro ≈ 35% (tirs cadrés / tirs tentés).
+              // Ajustement volontairement borné à ±15% pour ne jamais déstabiliser le modèle —
+              // c'est un correctif fin, pas un second moteur de calcul.
+              function calcShotQualityFactor(shotsOnAvg, shotsTotalAvg){
+                var on=parseFloat(shotsOnAvg), tot=parseFloat(shotsTotalAvg);
+                if(!on||!tot||tot<=0) return 1;
+                var ratio=on/tot, baseline=0.35;
+                return Math.max(0.85, Math.min(1.15, ratio/baseline));
+              }
+              var shotQualH=calcShotQualityFactor(xgH.shots_on_avg, xgH.shots_total_avg);
+              var shotQualA=calcShotQualityFactor(xgA.shots_on_avg, xgA.shots_total_avg);
+              lambdas.lambdaH=parseFloat((lambdas.lambdaH*shotQualH).toFixed(3));
+              lambdas.lambdaA=parseFloat((lambdas.lambdaA*shotQualA).toFixed(3));
 
               var poissonProbs=calcFinalProbs(lambdas.lambdaH,lambdas.lambdaA,eloStats);
 
@@ -2310,9 +2348,13 @@ jobs:
               // Filtre unique : cote >= 1.50 pour ne pas proposer des marchés non jouables
               var prob1X=(shinProbs?shinProbs.p1:poissonProbs.p1)+(shinProbs?shinProbs.pN:poissonProbs.pN);
               var probX2=(shinProbs?shinProbs.p2:poissonProbs.p2)+(shinProbs?shinProbs.pN:poissonProbs.pN);
+              // AH -0.5 dom = victoire sèche dom (gagne même par 1 but) | AH +0.5 ext = ext ne perd pas
+              var probAHdom=shinProbs?shinProbs.p1:poissonProbs.p1;
+              var probAHext=(shinProbs?shinProbs.p2:poissonProbs.p2)+(shinProbs?shinProbs.pN:poissonProbs.pN);
 
-              // Les 6 marchés avec leur probabilité calculée indépendamment par le modèle
-              // Aucun tri, aucune sélection — Claude reçoit tous les marchés jouables
+              // 10 marchés possibles — Aucun tri, aucune sélection : Claude reçoit tous les marchés jouables
+              // Le filtre cote >= 1.50 écarte naturellement la victoire sèche d'un ultra-favori (ex: 1.20)
+              // tout en gardant son handicap -0.5 qui offre souvent une cote jouable (ex: 1.75)
               var allMarkets=[
                 {market:'Over 2.5',  cote:odds.co25,      prob:poissonProbs.over25, label:'Plus de 2.5 buts'},
                 {market:'Under 2.5', cote:odds.cu25,      prob:poissonProbs.under25,label:'Moins de 2.5 buts'},
@@ -2320,6 +2362,10 @@ jobs:
                 {market:'BTTS Non',  cote:odds.btts_non,  prob:poissonProbs.bttsN,  label:'Une équipe ne marque pas'},
                 {market:'DC 1X',     cote:odds.dc1x,      prob:prob1X,              label:'Victoire ou nul domicile'},
                 {market:'DC X2',     cote:odds.dc2x,      prob:probX2,              label:'Victoire ou nul extérieur'},
+                {market:'Victoire Domicile', cote:odds.c1, prob:shinProbs?shinProbs.p1:poissonProbs.p1, label:'Victoire sèche domicile'},
+                {market:'Victoire Extérieur',cote:odds.c2, prob:shinProbs?shinProbs.p2:poissonProbs.p2, label:'Victoire sèche extérieur'},
+                {market:'Handicap -0.5 Domicile', cote:odds.ah_dom, prob:probAHdom, label:'Domicile gagne (handicap -0.5)'},
+                {market:'Handicap +0.5 Extérieur',cote:odds.ah_ext, prob:probAHext, label:'Extérieur ne perd pas (handicap +0.5)'},
               ].filter(function(m){
                 return m.cote&&m.cote!=='--'&&parseFloat(m.cote)>=1.50;
               });
@@ -2410,7 +2456,7 @@ jobs:
               }
               // Sécurité : si Claude a retourné un pari_rec sans cote_rec, on cherche la cote dans allMarkets
               if(an&&!an.passe_ton_tour&&an.pari_rec&&!an.cote_rec){
-                var found=(d.all_markets||[]).find(function(m){return m.market.toLowerCase()===an.pari_rec.toLowerCase();});
+                var found=(allMarkets||[]).find(function(m){return m.market.toLowerCase()===an.pari_rec.toLowerCase();});
                 if(found) an.cote_rec=String(found.cote);
               }
 
@@ -2467,7 +2513,7 @@ jobs:
                 dc1x:odds.dc1x,dc2x:odds.dc2x,dc12:odds.dc12,cdc1x:odds.dc1x,cdc2x:odds.dc2x,
                 ah_dom:odds.ah_dom||'--',ah_ext:odds.ah_ext||'--',co35:odds.co35||'--',
                 cbtts:odds.btts_oui,cbtts_non:odds.btts_non,btts_oui:odds.btts_oui,btts_non:odds.btts_non,
-                bookies:odds.bookies,edge:an&&an.pari_rec?(function(){ var m=(d.all_markets||[]).find(function(x){return x.market.toLowerCase()===an.pari_rec.toLowerCase();}); return m?m.prob+'% (modèle)':''; })():'',marche:an?(an.marche||'RESULTAT'):'RESULTAT',
+                bookies:odds.bookies,edge:an&&an.pari_rec?(function(){ function nm(s){return (s||'').toLowerCase().replace(/[^a-z0-9]/g,'');} var pn=nm(an.pari_rec); var mk=(allMarkets||[]).find(function(x){var xn=nm(x.market);return xn===pn||pn.includes(xn)||xn.includes(pn);}); return mk?mk.prob+'% (modèle)':''; })():'',marche:an?(an.marche||'RESULTAT'):'RESULTAT',
                 risque:risqueNorm,pari_rec:an?(an.pari_rec||''):'',
                 cote_rec:an?(an.cote_rec||''):'',
                 no_signal:an&&an.passe_ton_tour===true?true:!(an&&an.pari_rec),
@@ -2504,6 +2550,22 @@ jobs:
                   return null;
                 })():(evPatA||null),
                 top_scorers_home:topScorersH||[],top_scorers_away:topScorersA||[],
+                // Stats détaillées moyennées sur 10 derniers matchs — alimente buildMatchStats() côté front
+                // Données déjà fournies par API-Sports mais jamais exploitées avant ce patch
+                match_stats_home:{
+                  possession:xgH.possession_avg, shots_total:xgH.shots_total_avg?parseFloat(xgH.shots_total_avg):null,
+                  shots_on:xgH.shots_on_avg?parseFloat(xgH.shots_on_avg):null, shots_off:xgH.shots_off_avg,
+                  shots_blocked:xgH.shots_blocked_avg, corners:xgH.corners_avg, fouls:xgH.fouls_avg?parseFloat(xgH.fouls_avg):null,
+                  offsides:xgH.offsides_avg, saves:xgH.saves_avg, passes_pct:xgH.passes_pct_avg,
+                  xg:xgH.xg_avg, xga:xgH.xga_avg,
+                },
+                match_stats_away:{
+                  possession:xgA.possession_avg, shots_total:xgA.shots_total_avg?parseFloat(xgA.shots_total_avg):null,
+                  shots_on:xgA.shots_on_avg?parseFloat(xgA.shots_on_avg):null, shots_off:xgA.shots_off_avg,
+                  shots_blocked:xgA.shots_blocked_avg, corners:xgA.corners_avg, fouls:xgA.fouls_avg?parseFloat(xgA.fouls_avg):null,
+                  offsides:xgA.offsides_avg, saves:xgA.saves_avg, passes_pct:xgA.passes_pct_avg,
+                  xg:xgA.xg_avg, xga:xgA.xga_avg,
+                },
                 elo_home:eloH?Math.round(eloH):null,elo_away:eloA?Math.round(eloA):null,
                 elo_diff:eloStats?eloStats.diff:null,elo_signal:eloStats?eloStats.signal:null,
                 dropping_odds:droppingOdds||null,
@@ -2514,15 +2576,23 @@ jobs:
               // Qualification pour combinés — basée sur le choix libre de Claude
               if(an&&!an.passe_ton_tour&&an.pari_rec&&(an.confiance||0)>=7.0){
                 var coteRecCheck=parseFloat(an.cote_rec)||0;
-                // Trouver la proba du marché choisi par Claude dans allMarkets
-                var chosenMarket=(d.all_markets||[]).find(function(m){return m.market.toLowerCase()===an.pari_rec.toLowerCase();});
-                var probCheck=chosenMarket?chosenMarket.prob:0;
+                // Matching tolérant : normaliser espaces/casse/accents avant comparaison
+                function normMarket(s){return (s||'').toLowerCase().replace(/[^a-z0-9]/g,'');}
+                var pariNorm=normMarket(an.pari_rec);
+                var chosenMarket=(allMarkets||[]).find(function(m){
+                  var mNorm=normMarket(m.market);
+                  return mNorm===pariNorm||pariNorm.includes(mNorm)||mNorm.includes(pariNorm);
+                });
+                // Fallback : si aucun marché trouvé mais cote valide, on qualifie quand même
+                // sur la seule base de la confiance (évite de perdre tous les combinés
+                // à cause d'une formulation différente de Claude)
+                var probCheck=chosenMarket?chosenMarket.prob:null;
                 var coteOk=coteRecCheck>=1.50&&coteRecCheck<=2.50;
-                var probaOk=probCheck>=52; // seuil légèrement plus bas pour plus de diversité
+                var probaOk=probCheck===null?true:probCheck>=52;
                 if(coteOk&&probaOk){
-                  forCombis.push({home:home.name,away:away.name,pari:an.pari_rec,conf:an.confiance,prob:probCheck,cote:coteRecCheck});
-                  console.log('  \u2705 QUALIFI\u00c9: conf='+an.confiance+' prob='+probCheck+'% cote='+coteRecCheck+' marché='+an.pari_rec);
-                }else{console.log('  \u26d4 Filtr\u00e9: conf='+an.confiance+' prob='+probCheck+'% cote='+coteRecCheck);}
+                  forCombis.push({home:home.name,away:away.name,pari:an.pari_rec,conf:an.confiance,prob:probCheck||0,cote:coteRecCheck});
+                  console.log('  \u2705 QUALIFI\u00c9: conf='+an.confiance+' prob='+(probCheck!==null?probCheck+'%':'n/a')+' cote='+coteRecCheck+' marché='+an.pari_rec);
+                }else{console.log('  \u26d4 Filtr\u00e9: conf='+an.confiance+' prob='+(probCheck!==null?probCheck+'%':'n/a')+' cote='+coteRecCheck);}
               }
               console.log('  OK conf='+matchObj.conf+' edge='+matchObj.edge+' pari='+matchObj.pari_rec);
             }

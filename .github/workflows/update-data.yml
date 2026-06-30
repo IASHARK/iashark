@@ -2234,6 +2234,25 @@ jobs:
             // pour garantir des données fraîches. Plus besoin du paramètre force_refresh.
             console.log('Cache d\u00e9sactiv\u00e9 — tous les matchs recalcul\u00e9s \u00e0 chaque run');
 
+            // ── CACHE PERSISTANT PAR MATCH : verrouille la prédiction dès la 1ère fois ──
+            // Le pipeline récupère les matchs sur 3 jours (aujourd'hui/demain/après-demain).
+            // Sans ce verrou, un match vu "demain" pourrait être recalculé différemment
+            // une fois qu'il devient "aujourd'hui" le jour suivant — donnant l'impression
+            // que le pari change tout seul d'un jour à l'autre. Avec ce verrou : la toute
+            // première fois qu'un match (identifié par son fixture_id, stable côté API)
+            // est calculé, sa prédiction reste figée pour tous les runs suivants, qu'il
+            // soit encore "après-demain", devienne "demain", puis "aujourd'hui".
+            var matchCache = {};
+            try {
+              if (fs.existsSync('data.json')) {
+                var prevDataForCache = JSON.parse(fs.readFileSync('data.json', 'utf8'));
+                (prevDataForCache.matchs || []).forEach(function(m) {
+                  matchCache[String(m.id)] = m;
+                });
+              }
+            } catch (e) {}
+            console.log('Cache persistant : ' + Object.keys(matchCache).length + ' match(s) d\u00e9j\u00e0 verrouill\u00e9(s) depuis un run pr\u00e9c\u00e9dent \u2014 pr\u00e9diction conserv\u00e9e \u00e0 l\'identique');
+
             var matchsData=[];
             var forCombis=[];
             var standingsCache={};
@@ -2248,6 +2267,16 @@ jobs:
               var wcRound=(f.fixture&&f.fixture.round||'').toLowerCase();
               var isKnockout=isWorldCupMatch&&(wcRound.includes('round of')||wcRound.includes('quarter')||wcRound.includes('semi')||wcRound.includes('final'));
               if(isKnockout) console.log('  [WC KNOCKOUT] '+home.name+' vs '+away.name+' — '+f.fixture.round);
+
+              // Si ce match a déjà une prédiction verrouillée (vu lors d'un run précédent,
+              // qu'il soit déjà passé "aujourd'hui" ou encore "demain"), on la garde telle
+              // quelle — pas de recalcul, pas de nouveaux appels API, jamais.
+              var cacheKeyMatch = String(f.id);
+              if (matchCache[cacheKeyMatch]) {
+                console.log('  \u26a1 D\u00e9j\u00e0 verrouill\u00e9: '+home.name+' vs '+away.name+' \u2014 pr\u00e9diction conserv\u00e9e');
+                matchsData.push(matchCache[cacheKeyMatch]);
+                continue;
+              }
 
               console.log('\n-> '+home.name+' vs '+away.name+' ('+lg.name+')'+(isWorldCupMatch?' \uD83C\uDF0D':''));
               if(!standingsCache[lg.id]){

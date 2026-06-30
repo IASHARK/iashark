@@ -573,7 +573,7 @@ jobs:
             365, 362, 242, 164
           ];
           const SEASON   = 2025;
-          var SEASON_2026 = [292, 169, 244, 200, 479, 365, 362, 242, 164];
+          var SEASON_2026 = [1, 292, 169, 244, 200, 479, 365, 362, 242, 164];
           const TODAY    = new Date().toISOString().split('T')[0];
 
           var LG_KEY = {
@@ -1184,9 +1184,23 @@ jobs:
             });
           }
 
-          async function getTeamStats(teamId, leagueId) {
-            var r = await get('https://v3.football.api-sports.io/teams/statistics?team='+teamId+'&league='+leagueId+'&season='+SEASON, APS);
-            return r.response||null;
+          async function getTeamStats(teamId, leagueId, season) {
+            // BUG CORRIGÉ : cette fonction utilisait toujours SEASON (2025) peu importe la ligue.
+            // Pour la Coupe du Monde 2026 (league=1) et les ligues de SEASON_2026, l'API renvoie
+            // un objet vide pour la saison 2025 → toutes les stats tombaient à 0 → les lambdas
+            // retombaient systématiquement sur leur valeur plancher (0.90/0.80 pour la CDM),
+            // ce qui biaisait TOUS ces matchs vers Under 2.5 / BTTS Non sans rapport avec les
+            // vraies équipes en présence.
+            var s = season || (SEASON_2026.indexOf(leagueId)!==-1 ? 2026 : SEASON);
+            var r = await get('https://v3.football.api-sports.io/teams/statistics?team='+teamId+'&league='+leagueId+'&season='+s, APS);
+            var isEmpty = !r.response || (typeof r.response==='object' && !Array.isArray(r.response) && Object.keys(r.response).length===0);
+            if(isEmpty && s!==2026){
+              // Fallback automatique vers 2026 — couvre la CDM et toute ligue mal classée
+              var r2 = await get('https://v3.football.api-sports.io/teams/statistics?team='+teamId+'&league='+leagueId+'&season=2026', APS);
+              var isEmpty2 = !r2.response || (typeof r2.response==='object' && !Array.isArray(r2.response) && Object.keys(r2.response).length===0);
+              return isEmpty2 ? null : r2.response;
+            }
+            return isEmpty ? null : r.response;
           }
           async function getLast10(teamId, season) {
             var s = season || SEASON;
@@ -1769,7 +1783,10 @@ jobs:
               +'3. Aucun marché n\'est favorisé a priori — les 10 marchés (Over/Under 2.5, BTTS Oui/Non, DC 1X/X2, Victoire sèche, Handicaps) sont tous équivalents au départ\n'
               +'4. Si les signaux sont contradictoires ou insuffisants → passe_ton_tour=true\n'
               +'5. Si aucun marché n\'a de cote disponible >= 1.50 → passe_ton_tour=true\n'
-              +'\nCONFIANCE: 7.0-7.4 (signaux modérés) | 7.5-7.9 (signaux forts) | 8.0-8.5 (ELO+Pinnacle+MC convergents) — MAX 8.5\n'
+              +'\nCONFIANCE : note continue de 5.5 à 9.0 reflétant fidèlement la force réelle du signal — JAMAIS de valeur "ronde" par défaut (évite de toujours tomber sur 7.0, 7.5 ou 8.0).\n'
+              +'Base-toi précisément sur : nombre de signaux convergents entre Phase 1 et Phase 2, écart entre les modèles (Poisson/Dixon-Coles/Monte-Carlo — s\'ils divergent, baisse la note), confirmation ELO+Pinnacle, taille de l\'échantillon de matchs disponibles.\n'
+              +'Repères : 5.5-6.4 = signal correct mais pas exceptionnel | 6.5-7.4 = signal solide | 7.5-8.4 = signal très solide multi-convergent | 8.5-9.0 = cas rarissime où absolument tout converge.\n'
+              +'Si le signal est trop faible pour mériter une note, ne force rien : passe_ton_tour=true plutôt que de gonfler artificiellement une confiance basse.\n'
               +'RISQUE: FAIBLE si cote <1.75 + signaux convergents | MODERE si cote 1.75-2.20 | ELEVE sinon\n\n';
 
             var jsonTpl = 'Réponds UNIQUEMENT avec ce JSON valide. Aucun texte avant ou après. Aucun backtick.\n'
@@ -2337,6 +2354,30 @@ jobs:
               var shotQualA=calcShotQualityFactor(xgA.shots_on_avg, xgA.shots_total_avg);
               lambdas.lambdaH=parseFloat((lambdas.lambdaH*shotQualH).toFixed(3));
               lambdas.lambdaA=parseFloat((lambdas.lambdaA*shotQualA).toFixed(3));
+
+              // ── FIX CDM : utiliser les vraies stats de qualifications, pas seulement le tournoi en cours ──
+              // En tout début de Coupe du Monde, chaque équipe n'a joué que 0 à 3 matchs dans le tournoi —
+              // un échantillon trop faible pour calculer des lambdas fiables. getTeamWCStats() combine les
+              // 8 derniers matchs de qualifications (échantillon réel et fiable) avec les matchs du tournoi
+              // déjà joués, pondérés progressivement. Sans ce correctif, le modèle reste aveugle sur les
+              // vraies équipes en présence pendant toute la phase de groupes.
+              if(isWorldCupMatch){
+                var wcStatsH=await getTeamWCStats(home.id, home.name);
+                var wcStatsA=await getTeamWCStats(away.id, away.name);
+                if(wcStatsH&&wcStatsA&&wcStatsH.xg_for!=null&&wcStatsA.xg_for!=null){
+                  // Lambda dom = attaque dom pondérée par la défense ext (et inversement) — moyenne simple
+                  // car l'échantillon qualifs ne permet pas un calcul attaque×défense croisé plus fin.
+                  var lambdaH_wc=(wcStatsH.xg_for+(wcStatsA.xg_against||wcStatsA.xg_for))/2;
+                  var lambdaA_wc=(wcStatsA.xg_for+(wcStatsH.xg_against||wcStatsH.xg_for))/2;
+                  // Blend avec le résultat déjà calculé (tournoi+floor) à 30%, qualifs à 70% —
+                  // les qualifs restent la source la plus fiable tant que le tournoi est jeune.
+                  lambdas.lambdaH=parseFloat(Math.max(0.90,(lambdas.lambdaH*0.3+lambdaH_wc*0.7)).toFixed(3));
+                  lambdas.lambdaA=parseFloat(Math.max(0.80,(lambdas.lambdaA*0.3+lambdaA_wc*0.7)).toFixed(3));
+                  console.log('  [WC lambdas qualifs] '+home.name+': '+lambdas.lambdaH+' | '+away.name+': '+lambdas.lambdaA+' (source: '+wcStatsH.source+'/'+wcStatsA.source+')');
+                } else {
+                  console.log('  [WC lambdas] Pas de stats qualifs disponibles pour '+home.name+' ou '+away.name+' — repli sur stats tournoi/floor');
+                }
+              }
 
               var poissonProbs=calcFinalProbs(lambdas.lambdaH,lambdas.lambdaA,eloStats);
 

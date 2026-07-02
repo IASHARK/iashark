@@ -9,6 +9,10 @@ on:
         description: 'Vider le cache et recalculer tous les matchs'
         required: false
         default: 'false'
+      test_wc_only:
+        description: 'Mode test : Coupe du Monde uniquement (rapide)'
+        required: false
+        default: 'false'
 
 jobs:
   update:
@@ -575,6 +579,8 @@ jobs:
           const SEASON   = 2025;
           var SEASON_2026 = [1, 292, 169, 244, 200, 479, 365, 362, 242, 164];
           const TODAY    = new Date().toISOString().split('T')[0];
+          var TEST_WC_ONLY = process.env.TEST_WC_ONLY === 'true';
+          if(TEST_WC_ONLY) console.log('=== MODE TEST : COUPE DU MONDE UNIQUEMENT ===');
 
           var LG_KEY = {
             39:'premier', 40:'champ', 61:'ligue1', 62:'ligue2',
@@ -1165,6 +1171,7 @@ jobs:
               }
             } catch(e) { console.log('WC fetch error:', e.message); }
             await sleep(300);
+            if(!TEST_WC_ONLY){
             for(var d=0; d<dates.length; d++){
               for(var i=0; i<LEAGUES.length; i++){
                 var lgId = LEAGUES[i];
@@ -1176,6 +1183,7 @@ jobs:
                 if(r.response) all = all.concat(r.response);
                 await sleep(200);
               }
+            }
             }
             var seen={};
             return all.filter(function(f){
@@ -2593,6 +2601,8 @@ jobs:
 
               var matchObj={
                 id:f.id,sport:'football',
+                league_id:lg.id,
+                season:SEASON_2026.indexOf(lg.id)!==-1?2026:SEASON,
                 home:{n:home.name,id:home.id},away:{n:away.name,id:away.id},
                 league:lg.name,ligue_icon:lgIcon(lg.name),league_key:lgKey(lg.id),
                 date:(dateVraieParis+' '+heure).trim(),cat:['all'],
@@ -2738,6 +2748,7 @@ jobs:
           ODDS_API_IO_KEY:    ${{ secrets.ODDS_API_IO_KEY }}
           RAPIDAPI_TENNIS_KEY: ${{ secrets.RAPIDAPI_TENNIS_KEY }}
           CREATOMATE_KEY:     ${{ secrets.CREATOMATE_KEY }}
+          TEST_WC_ONLY:       ${{ github.event.inputs.test_wc_only }}
         run: node pipeline.js
 
       - name: Commit and push

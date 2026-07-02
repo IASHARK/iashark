@@ -1171,7 +1171,12 @@ jobs:
               }
             } catch(e) { console.log('WC fetch error:', e.message); }
             await sleep(300);
-            if(!TEST_WC_ONLY){
+            // ── MODE TEST TEMPORAIRE : autres ligues désactivées en dur ──────
+            // Le pipeline ne traite QUE la Coupe du Monde pour l'instant, le temps
+            // de vérifier le widget classement/H2H sur match.html. Pour réactiver
+            // toutes les ligues, il suffit de supprimer le "if(false)" ci-dessous
+            // et remettre "if(!TEST_WC_ONLY){" à la place (ou juste enlever le if).
+            if(false){
             for(var d=0; d<dates.length; d++){
               for(var i=0; i<LEAGUES.length; i++){
                 var lgId = LEAGUES[i];

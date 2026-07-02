@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>IASHARK PRO</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#080c12;--card:#0d1520;--card2:#0f1a28;
+  --cyan:#22d3ee;--cyan2:#06b6d4;
+  --amber:#f59e0b;--green:#10b981;--red:#ef4444;
+  --text:#e2e8f0;--muted:#4a6580;
+  --border:rgba(255,255,255,0.06);
+  --bc:rgba(34,211,238,0.18);--ba:rgba(245,158,11,0.2);
+  --bg:rgba(16,185,129,0.2);--br:rgba(239,68,68,0.2);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:#080c12;color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;padding-bottom:70px;}
+.hdr{position:sticky;top:0;z-index:99;background:rgba(8,12,18,0.96);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);padding:0 20px;height:56px;display:flex;align-items:center;justify-content:space-between;}
+.logo{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:3px;color:var(--text);text-decoration:none;}
+.logo span{color:var(--cyan);}
+.pro-pill{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:2px;padding:4px 12px;border-radius:20px;background:rgba(245,158,11,0.1);border:1px solid var(--ba);color:var(--amber);}
+.login-gate{max-width:400px;margin:80px auto;padding:0 20px;}
+.login-card{background:var(--card);border:1px solid var(--ba);border-radius:16px;padding:32px;}
+.login-shark{font-size:52px;text-align:center;margin-bottom:16px;}
+.login-title{font-family:'Bebas Neue',sans-serif;font-size:30px;letter-spacing:2px;text-align:center;margin-bottom:6px;}
+.login-title span{color:var(--amber);}
+.login-sub{font-size:13px;color:var(--muted);text-align:center;margin-bottom:24px;line-height:1.6;}
+.login-input{width:100%;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:10px;padding:12px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;margin-bottom:10px;outline:none;transition:.2s;}
+.login-input:focus{border-color:var(--amber);}
+.login-btn{width:100%;padding:13px;border-radius:10px;border:1px solid var(--ba);background:rgba(245,158,11,0.1);color:var(--amber);font-family:'Space Mono',monospace;font-size:10px;letter-spacing:2px;cursor:pointer;transition:.2s;}
+.login-btn:hover{background:rgba(245,158,11,0.2);}
+.login-hint{font-size:11px;color:var(--muted);text-align:center;margin-top:12px;}
+.main{max-width:920px;margin:0 auto;padding:24px 20px;}
+.pro-hero{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;padding:20px 24px;background:rgba(245,158,11,0.04);border:1px solid var(--ba);border-radius:16px;}
+.pro-hero h1{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:2px;margin-bottom:4px;}
+.pro-hero h1 span{color:var(--amber);}
+.pro-hero p{font-size:13px;color:var(--muted);}
+.hero-stats{display:flex;gap:28px;}
+.hstat{text-align:center;}
+.hstat-val{font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--cyan);}
+.hstat-lbl{font-family:'Space Mono',monospace;font-size:7px;color:var(--muted);letter-spacing:1px;margin-top:1px;}
+.tabs{display:flex;gap:4px;margin-bottom:24px;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:12px;padding:4px;}
+.tab-btn{flex:1;padding:9px 8px;border-radius:9px;border:none;background:transparent;color:var(--muted);font-family:'Space Mono',monospace;font-size:8px;letter-spacing:1px;cursor:pointer;transition:.2s;white-space:nowrap;}
+.tab-btn.active{background:var(--card2);color:var(--text);border:1px solid var(--bc);}
+.tab-section{display:none;}
+.tab-section.active{display:block;}
+.sel-top{display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap;}
+.lock-badge{font-family:'Space Mono',monospace;font-size:7px;letter-spacing:1px;padding:3px 9px;border-radius:20px;background:rgba(245,158,11,0.08);border:1px solid var(--ba);color:var(--amber);}
+.fsel{background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Space Mono',monospace;font-size:9px;padding:7px 10px;cursor:pointer;outline:none;}
+.tbl-wrap{overflow-x:auto;border-radius:12px;border:1px solid var(--border);}
+table{width:100%;border-collapse:collapse;}
+th{padding:10px 14px;font-family:'Space Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--muted);text-align:left;border-bottom:1px solid var(--border);background:rgba(0,0,0,0.2);white-space:nowrap;}
+td{padding:12px 14px;border-bottom:1px solid var(--border);font-size:13px;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:rgba(255,255,255,0.015);}
+.mname{font-weight:500;}
+.mleague{font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);margin-top:2px;}
+.mchip{display:inline-block;padding:2px 8px;border-radius:6px;font-family:'Space Mono',monospace;font-size:8px;background:rgba(34,211,238,0.08);border:1px solid var(--bc);color:var(--cyan);}
+.cbadge{display:inline-block;padding:3px 9px;border-radius:20px;font-family:'Bebas Neue',sans-serif;font-size:14px;}
+.c8{color:var(--amber);background:rgba(245,158,11,0.08);border:1px solid var(--ba);}
+.c7{color:var(--cyan);background:rgba(34,211,238,0.06);border:1px solid var(--bc);}
+.edge-v{font-family:'Space Mono',monospace;font-size:10px;color:var(--green);}
+.cote-v{font-family:'Bebas Neue',sans-serif;font-size:18px;color:var(--amber);}
+.tstats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px;}
+.tstat{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 16px;}
+.tstat-lbl{font-family:'Space Mono',monospace;font-size:7px;letter-spacing:2px;color:var(--muted);margin-bottom:6px;}
+.tstat-val{font-family:'Bebas Neue',sans-serif;font-size:28px;line-height:1;}
+.green{color:var(--green)!important;}
+.red{color:var(--red)!important;}
+.amber{color:var(--amber)!important;}
+.cyan{color:var(--cyan)!important;}
+.addform{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px;}
+.ftitle{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--muted);margin-bottom:12px;}
+.fgrid{display:grid;grid-template-columns:2fr 1.2fr 0.8fr 0.8fr 1fr auto;gap:8px;align-items:end;}
+.fg label{display:block;font-family:'Space Mono',monospace;font-size:8px;letter-spacing:1px;color:var(--muted);margin-bottom:5px;}
+.finput{width:100%;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:8px;padding:9px 10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;transition:.2s;}
+.finput:focus{border-color:var(--cyan);}
+.fselect{width:100%;background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:9px 10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;cursor:pointer;}
+.btnadd{padding:9px 16px;border-radius:8px;border:1px solid rgba(16,185,129,0.3);background:rgba(16,185,129,0.1);color:var(--green);font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1px;cursor:pointer;transition:.2s;white-space:nowrap;}
+.btnadd:hover{background:rgba(16,185,129,0.18);}
+.pcols{display:grid;grid-template-columns:2fr 1.2fr 0.8fr 0.8fr 1fr 90px 28px;gap:8px;padding:4px 14px;font-family:'Space Mono',monospace;font-size:7px;letter-spacing:1px;color:var(--muted);}
+.prow{display:grid;grid-template-columns:2fr 1.2fr 0.8fr 0.8fr 1fr 90px 28px;gap:8px;align-items:center;padding:11px 14px;background:var(--card);border:1px solid var(--border);border-radius:10px;font-size:13px;margin-bottom:6px;}
+.prow.win{border-left:2px solid var(--green);}
+.prow.loss{border-left:2px solid var(--red);}
+.prow.pending{border-left:2px solid var(--muted);}
+.rchip{display:inline-block;padding:3px 9px;border-radius:20px;font-family:'Space Mono',monospace;font-size:8px;letter-spacing:1px;}
+.rwin{background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.3);color:var(--green);}
+.rloss{background:rgba(239,68,68,0.1);border:1px solid var(--br);color:var(--red);}
+.rpending{background:rgba(255,255,255,0.04);border:1px solid var(--border);color:var(--muted);}
+.btndel{background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;padding:0;transition:.2s;}
+.btndel:hover{color:var(--red);}
+.nform{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px;}
+.nfgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;}
+.ntextarea{width:100%;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:8px;padding:10px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;resize:vertical;min-height:90px;outline:none;margin-bottom:8px;line-height:1.6;transition:.2s;}
+.ntextarea:focus{border-color:var(--cyan);}
+.nfrow{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+.btnsave{padding:9px 18px;border-radius:8px;border:1px solid var(--bc);background:rgba(34,211,238,0.08);color:var(--cyan);font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1px;cursor:pointer;transition:.2s;}
+.btnsave:hover{background:rgba(34,211,238,0.15);}
+.ncard{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:10px;}
+.ncard.erreur{border-left:2px solid var(--red);}
+.ncard.bonne{border-left:2px solid var(--green);}
+.ncard.value{border-left:2px solid var(--amber);}
+.ncard.discipline{border-left:2px solid var(--cyan);}
+.ncard-hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;}
+.nmatch{font-weight:500;font-size:14px;}
+.ndate{font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);}
+.nbody{font-size:13px;color:rgba(226,232,240,0.7);line-height:1.65;margin-bottom:10px;}
+.ntags{display:flex;gap:6px;flex-wrap:wrap;}
+.ntag{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:1px;padding:3px 8px;border-radius:20px;}
+.tag-erreur{background:rgba(239,68,68,0.08);border:1px solid var(--br);color:var(--red);}
+.tag-bonne{background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.3);color:var(--green);}
+.tag-value{background:rgba(245,158,11,0.08);border:1px solid var(--ba);color:var(--amber);}
+.tag-discipline{background:rgba(34,211,238,0.08);border:1px solid var(--bc);color:var(--cyan);}
+.sim-intro{font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:20px;padding:14px 16px;background:rgba(34,211,238,0.04);border:1px solid var(--bc);border-radius:10px;}
+.match-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:20px;}
+.mcard{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;cursor:pointer;transition:.2s;}
+.mcard:hover{border-color:rgba(255,255,255,0.12);}
+.mcard.sel{border-color:var(--amber);background:rgba(245,158,11,0.04);}
+.mcard-name{font-weight:500;font-size:13px;margin-bottom:4px;}
+.mcard-meta{font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);}
+.mcard-conf{font-family:'Bebas Neue',sans-serif;font-size:16px;color:var(--amber);margin-top:6px;}
+.sim-panel{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px;}
+.sim-inputs{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px;}
+.sim-input-block label{display:block;font-family:'Space Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--muted);margin-bottom:8px;}
+.sim-cote-display{width:100%;font-family:'Bebas Neue',sans-serif;font-size:28px;padding:12px;border-radius:10px;border:1px solid var(--border);background:rgba(245,158,11,0.06);color:var(--amber);text-align:center;}
+.sim-cote-input{width:100%;font-family:'Bebas Neue',sans-serif;font-size:28px;padding:12px;border-radius:10px;border:1px solid var(--border);background:rgba(255,255,255,0.04);color:var(--text);text-align:center;outline:none;transition:.2s;}
+.sim-cote-input:focus{border-color:var(--cyan);}
+.mise-row{display:flex;align-items:center;gap:12px;margin-bottom:20px;}
+.mise-row label{font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:1px;white-space:nowrap;}
+.mise-row input[type=range]{flex:1;}
+.mise-val{font-family:'Bebas Neue',sans-serif;font-size:18px;color:var(--text);min-width:50px;}
+.result-box{border-radius:12px;padding:18px;margin-bottom:14px;transition:.3s;}
+.result-box.neutral{background:rgba(255,255,255,0.03);border:1px solid var(--border);}
+.result-box.positive{background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.25);}
+.result-box.warning{background:rgba(245,158,11,0.06);border:1px solid var(--ba);}
+.result-box.negative{background:rgba(239,68,68,0.06);border:1px solid var(--br);}
+.result-verdict{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:1px;margin-bottom:8px;}
+.result-verdict.positive{color:var(--green);}
+.result-verdict.warning{color:var(--amber);}
+.result-verdict.negative{color:var(--red);}
+.result-verdict.neutral{color:var(--muted);}
+.result-detail{font-size:13px;color:rgba(226,232,240,0.7);line-height:1.65;margin-bottom:14px;}
+.sim-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px;}
+.sm{background:rgba(0,0,0,0.2);border-radius:8px;padding:10px 12px;text-align:center;}
+.sm-val{font-family:'Bebas Neue',sans-serif;font-size:22px;line-height:1;}
+.sm-lbl{font-family:'Space Mono',monospace;font-size:7px;letter-spacing:1px;color:var(--muted);margin-top:3px;}
+.edge-bar-wrap{height:6px;background:rgba(255,255,255,0.06);border-radius:3px;overflow:hidden;margin-bottom:10px;}
+.edge-bar{height:100%;border-radius:3px;transition:.4s;}
+.kelly-row{display:flex;align-items:center;gap:10px;padding:10px 12px;background:rgba(0,0,0,0.2);border-radius:8px;}
+.kelly-lbl{font-family:'Space Mono',monospace;font-size:8px;color:var(--muted);flex:1;letter-spacing:1px;}
+.kelly-val{font-size:13px;font-weight:500;color:var(--green);}
+.histo-title{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--muted);margin-bottom:10px;}
+.hitem{display:grid;grid-template-columns:1fr auto auto auto;gap:12px;align-items:center;padding:10px 14px;background:var(--card);border:1px solid var(--border);border-radius:8px;font-size:13px;margin-bottom:6px;}
+.hedge{font-family:'Space Mono',monospace;font-size:10px;}
+.hchip{font-family:'Space Mono',monospace;font-size:7px;letter-spacing:1px;padding:3px 8px;border-radius:20px;}
+.hgo{background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.3);color:var(--green);}
+.hwait{background:rgba(245,158,11,0.1);border:1px solid var(--ba);color:var(--amber);}
+.hpass{background:rgba(239,68,68,0.1);border:1px solid var(--br);color:var(--red);}
+.empty-hint{text-align:center;padding:32px;color:var(--muted);font-size:13px;}
+.nav-bottom{position:fixed;bottom:0;left:0;right:0;background:rgba(8,12,18,0.97);backdrop-filter:blur(14px);border-top:1px solid var(--border);display:flex;z-index:100;}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px 4px 8px;gap:3px;cursor:pointer;text-decoration:none;}
+.nav-icon{font-size:18px;}
+.nav-lbl{font-family:'Space Mono',monospace;font-size:7px;color:var(--muted);letter-spacing:1px;}
+.nav-item.active .nav-lbl{color:var(--amber);}
+.loading{text-align:center;padding:32px;color:var(--muted);font-family:'Space Mono',monospace;font-size:9px;letter-spacing:2px;}
+@media(max-width:600px){
+  .tstats{grid-template-columns:repeat(2,1fr);}
+  .fgrid{grid-template-columns:1fr 1fr;}.fgrid>:nth-child(5),.fgrid>:nth-child(6){grid-column:1/-1;}
+  .pcols,.prow{grid-template-columns:1fr 1fr 1fr 1fr;}
+  .pcols>:nth-child(n+5),.prow>:nth-child(n+5){display:none;}
+  .pro-hero{flex-direction:column;gap:14px;}
+  .hero-stats{justify-content:center;}
+  .match-grid{grid-template-columns:1fr;}
+  .sim-inputs{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+
+<header class="hdr">
+  <a href="/" class="logo"><span>IA</span>SHARK</a>
+  <div class="pro-pill">⭐ PRO</div>
+</header>
+
+<div id="loginGate">
+  <div class="login-gate">
+    <div class="login-card">
+      <div class="login-shark">🦈</div>
+      <div class="login-title">Espace <span>PRO</span></div>
+      <div class="login-sub">Accès réservé aux membres Pro. Connecte-toi avec ton compte IASHARK.</div>
+      <input type="email" class="login-input" id="loginEmail" placeholder="Email">
+      <input type="password" class="login-input" id="loginPwd" placeholder="Mot de passe">
+      <button class="login-btn" onclick="doLogin()">ACCÉDER À L'ESPACE PRO →</button>
+      <div class="login-hint">Démo — entre n'importe quel email + mot de passe</div>
+    </div>
+  </div>
+</div>
+
+<div id="proContent" style="display:none">
+<div class="main">
+
+  <div class="pro-hero">
+    <div>
+      <h1>Espace <span>PRO</span></h1>
+      <p>Sélections conf ≥ 7.0 · Tracker · Carnet · Simulateur d'edge</p>
+    </div>
+    <div class="hero-stats">
+      <div class="hstat"><div class="hstat-val" id="heroWR">—</div><div class="hstat-lbl">WINRATE</div></div>
+      <div class="hstat"><div class="hstat-val" id="heroROI">—</div><div class="hstat-lbl">ROI</div></div>
+      <div class="hstat"><div class="hstat-val" id="heroTotal">—</div><div class="hstat-lbl">PARIS</div></div>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('selections',this)">⭐ SÉLECTIONS PRO</button>
+    <button class="tab-btn" onclick="switchTab('tracker',this)">📊 TRACKER</button>
+    <button class="tab-btn" onclick="switchTab('carnet',this)">📓 CARNET</button>
+    <button class="tab-btn" onclick="switchTab('simulateur',this)">🎯 SIMULATEUR</button>
+  </div>
+
+  <!-- SÉLECTIONS -->
+  <div id="tab-selections" class="tab-section active">
+    <div class="sel-top">
+      <span class="lock-badge">🔒 CONF ≥ 7.0</span>
+      <select class="fsel" id="filterMkt" onchange="renderSel()">
+        <option value="">Tous les marchés</option>
+        <option value="over25">Plus de 2,5 buts</option>
+        <option value="under25">Moins de 2,5 buts</option>
+        <option value="btts_oui">Les deux équipes marquent</option>
+        <option value="btts_non">Une équipe ne marque pas</option>
+        <option value="dc1x">DC 1X</option>
+        <option value="dc_x2">DC X2</option>
+      </select>
+      <select class="fsel" id="filterSort" onchange="renderSel()">
+        <option value="date">Trier : date ↑</option>
+        <option value="conf">Trier : confiance</option>
+        <option value="cote">Trier : cote</option>
+      </select>
+      <span style="font-family:'Space Mono',monospace;font-size:9px;color:var(--muted)" id="selCount"></span>
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>MATCH</th><th>MARCHÉ</th><th>COTE</th><th>SCORE PROBABLE 1</th><th>SCORE PROBABLE 2</th><th>CONF</th><th>DATE</th></tr></thead>
+        <tbody id="selBody"><tr><td colspan="6" class="loading">CHARGEMENT...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- TRACKER -->
+  <div id="tab-tracker" class="tab-section">
+    <div class="tstats" id="tstats"></div>
+    <div class="addform">
+      <div class="ftitle">AJOUTER UN PARI</div>
+      <div class="fgrid">
+        <div class="fg"><label>MATCH</label><input type="text" class="finput" id="tMatch" placeholder="Ex: France vs Brésil"></div>
+        <div class="fg"><label>MARCHÉ</label>
+          <select class="fselect" id="tMarket">
+            <option>Plus de 2,5 buts</option><option>Moins de 2,5 buts</option>
+            <option>Les deux équipes marquent</option><option>Une équipe ne marque pas</option>
+            <option>DC 1X</option><option>DC X2</option>
+          </select>
+        </div>
+        <div class="fg"><label>COTE</label><input type="number" class="finput" id="tCote" step="0.01" min="1.01" placeholder="1.85"></div>
+        <div class="fg"><label>MISE (€)</label><input type="number" class="finput" id="tMise" step="1" min="1" placeholder="10"></div>
+        <div class="fg"><label>RÉSULTAT</label>
+          <select class="fselect" id="tResult">
+            <option value="pending">En attente</option>
+            <option value="win">Gagné ✅</option>
+            <option value="loss">Perdu ❌</option>
+          </select>
+        </div>
+        <div class="fg"><label>&nbsp;</label><button class="btnadd" onclick="addPari()">+ AJOUTER</button></div>
+      </div>
+    </div>
+    <div class="pcols"><span>MATCH</span><span>MARCHÉ</span><span>COTE</span><span>MISE</span><span>P&L</span><span>RÉSULTAT</span><span></span></div>
+    <div id="parisList"></div>
+  </div>
+
+  <!-- CARNET -->
+  <div id="tab-carnet" class="tab-section">
+    <div class="nform">
+      <div class="ftitle">NOUVELLE NOTE</div>
+      <div class="nfgrid">
+        <div class="fg"><label>MATCH</label><input type="text" class="finput" id="nMatch" placeholder="Ex: Espagne vs Allemagne"></div>
+        <div class="fg"><label>CATÉGORIE</label>
+          <select class="fselect" id="nTag">
+            <option value="">Catégorie</option>
+            <option value="erreur">Erreur d'analyse</option>
+            <option value="bonne">Bonne analyse</option>
+            <option value="value">Value manquée</option>
+            <option value="discipline">Discipline bankroll</option>
+          </select>
+        </div>
+      </div>
+      <textarea class="ntextarea" id="nContent" placeholder="Pourquoi j'ai joué ce pari, ce que j'ai bien ou mal analysé, erreurs à ne pas reproduire..."></textarea>
+      <div class="nfrow">
+        <select class="fselect" id="nResult" style="width:auto;min-width:140px;">
+          <option value="">Résultat</option>
+          <option value="win">Gagné ✅</option>
+          <option value="loss">Perdu ❌</option>
+        </select>
+        <button class="btnsave" onclick="addNote()">SAUVEGARDER →</button>
+        <span style="font-family:'Space Mono',monospace;font-size:8px;color:var(--muted)" id="noteCount"></span>
+      </div>
+    </div>
+    <div id="notesList"></div>
+  </div>
+
+  <!-- SIMULATEUR -->
+  <div id="tab-simulateur" class="tab-section">
+    <div class="sim-intro">
+      🎯 Tu vois une cote chez ton bookmaker différente de celle du modèle ? Entre-la ici. Le simulateur calcule l'edge réel, l'espérance mathématique et te dit si c'est intéressant à jouer.
+    </div>
+    <div style="font-family:'Space Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--muted);margin-bottom:10px">1 — CHOISIS UN MATCH</div>
+    <div class="match-grid" id="matchGrid"><div class="loading">CHARGEMENT DES MATCHS...</div></div>
+
+    <div id="simPanel" style="display:none">
+      <div class="sim-panel">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px">
+          <div>
+            <div style="font-weight:500;font-size:15px;margin-bottom:4px" id="simTitle"></div>
+            <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--muted)" id="simSub"></div>
+          </div>
+          <button onclick="resetSim()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1px">✕ CHANGER</button>
+        </div>
+        <div class="sim-inputs">
+          <div class="sim-input-block">
+            <label>COTE MODÈLE IASHARK</label>
+            <div class="sim-cote-display" id="modelCote">—</div>
+          </div>
+          <div class="sim-input-block">
+            <label>COTE QUE TU VOIS (bookmaker)</label>
+            <input type="number" class="sim-cote-input" id="bookCote" step="0.01" min="1.01" placeholder="ex: 1.95" oninput="calcEdge()">
+          </div>
+        </div>
+        <div class="mise-row">
+          <label>MISE SIMULÉE</label>
+          <input type="range" min="5" max="200" step="5" value="10" id="miseSlider" oninput="updateMise();calcEdge()">
+          <span class="mise-val" id="miseVal">10€</span>
+        </div>
+      </div>
+      <div class="result-box neutral" id="resultBox">
+        <div class="result-verdict neutral" id="resultVerdict">Entre la cote bookmaker pour voir l'analyse</div>
+        <div class="result-detail" id="resultDetail"></div>
+        <div class="sim-metrics" id="simMetrics" style="display:none"></div>
+        <div class="edge-bar-wrap" id="edgeBarWrap" style="display:none"><div class="edge-bar" id="edgeBar"></div></div>
+        <div class="kelly-row" id="kellyRow" style="display:none">
+          <span class="kelly-lbl">MISE KELLY RECOMMANDÉE (1/4 FRACTION)</span>
+          <span class="kelly-val" id="kellyVal">—</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="histo-title" style="margin-top:24px">HISTORIQUE DES SIMULATIONS</div>
+    <div id="simHisto"><div class="empty-hint">Aucune simulation. Choisis un match et entre une cote.</div></div>
+  </div>
+
+</div>
+</div>
+
+<nav class="nav-bottom">
+  <a href="/" class="nav-item"><div class="nav-icon">🦈</div><div class="nav-lbl">ACCUEIL</div></a>
+  <a href="/historique.html" class="nav-item"><div class="nav-icon">📊</div><div class="nav-lbl">HISTORIQUE</div></a>
+  <a href="/pro.html" class="nav-item active"><div class="nav-icon">⭐</div><div class="nav-lbl">PRO</div></a>
+  <a href="/blog/" class="nav-item"><div class="nav-icon">📖</div><div class="nav-lbl">GUIDES</div></a>
+  <a href="/compte.html" class="nav-item"><div class="nav-icon">👤</div><div class="nav-lbl">COMPTE</div></a>
+</nav>
+
+<script>
+// ── HELPERS ───────────────────────────────────────────
+var STORAGE_KEY_PARIS='iashark_pro_paris';
+var STORAGE_KEY_NOTES='iashark_pro_notes';
+var nextPId=1,nextNId=1;
+var PARIS=[],NOTES=[];
+var allMatchs=[],simSelected=null,simHistory=[],simMise=10;
+
+function translateMarket(raw){
+  if(!raw)return raw;
+  var s=String(raw).toLowerCase();
+  if(s.includes('over 2.5'))return 'Plus de 2,5 buts';
+  if(s.includes('under 2.5'))return 'Moins de 2,5 buts';
+  if(s.includes('over 1.5'))return 'Plus de 1,5 but';
+  if(s.includes('btts non')||s.includes('une équipe ne marque'))return 'Une équipe ne marque pas';
+  if(s.includes('btts')||s.includes('les deux équipes'))return 'Les deux équipes marquent';
+  if(s.includes('dc 1x')||s.includes('1x'))return 'DC 1X';
+  if(s.includes('dc x2')||s.includes('x2'))return 'DC X2';
+  return raw;
+}
+
+function getMarketKey(raw){
+  if(!raw)return 'autre';
+  var s=String(raw).toLowerCase();
+  if(s.includes('over 2.5'))return 'over25';
+  if(s.includes('under 2.5'))return 'under25';
+  if(s.includes('btts non')||s.includes('une équipe ne marque'))return 'btts_non';
+  if(s.includes('btts')||s.includes('les deux équipes'))return 'btts_oui';
+  if(s.includes('1x'))return 'dc1x';
+  if(s.includes('x2'))return 'dc_x2';
+  return 'autre';
+}
+
+// ── LOGIN ──────────────────────────────────────────────
+function doLogin(){
+  var e=document.getElementById('loginEmail').value.trim();
+  var p=document.getElementById('loginPwd').value.trim();
+  if(!e||!p){alert('Remplis les deux champs.');return;}
+  document.getElementById('loginGate').style.display='none';
+  document.getElementById('proContent').style.display='block';
+  loadAll();
+}
+
+// ── CHARGEMENT DATA ────────────────────────────────────
+async function loadAll(){
+  loadLocalData();
+  try{
+    // Charger data.json
+    var resp=await fetch('data.json?t='+Date.now());
+    var data=await resp.json();
+    allMatchs=(data.matchs||[]).filter(function(m){
+      var conf=parseFloat(m.conf)||0;
+      var confNorm=conf<=1?conf*10:conf;
+      return confNorm>=7.0&&!m.no_signal&&m.pari_rec;
+    });
+    // Stats depuis historique global
+    if(data.global_stats){
+      var s=data.global_stats;
+      document.getElementById('heroWR').textContent=(s.winrate||0).toFixed(1)+'%';
+      document.getElementById('heroROI').textContent=(s.roi>=0?'+':'')+( s.roi||0).toFixed(1)+'%';
+      document.getElementById('heroTotal').textContent=s.total||0;
+    }
+  }catch(e){
+    // Fallback démo si pas de data.json disponible
+    allMatchs=getDemoMatchs();
+    document.getElementById('heroWR').textContent='64.3%';
+    document.getElementById('heroROI').textContent='+40%';
+    document.getElementById('heroTotal').textContent='28';
+  }
+  renderSel();
+  renderMatchGrid();
+  renderTracker();
+  renderNotes();
+}
+
+function getDemoMatchs(){
+  return [
+    {id:1551272,home:{n:'Almeria'},away:{n:'Malaga'},league:'LaLiga 2',league_key:'laliga2',ligue_icon:'🇪🇸',date:'2026-06-22 21:00',conf:7.5,pari_rec:'Over 2.5',cote_rec:'1.80',edge:'+13.5%',co25:'1.80',cu25:'2.10',dc1x:'1.45',dc2x:'2.30',btts_oui:'1.75',btts_non:'2.00'},
+    {id:1489384,home:{n:'England'},away:{n:'Croatia'},league:'World Cup',league_key:'wc',ligue_icon:'🌍',date:'2026-06-22 18:00',conf:7.5,pari_rec:'Over 2.5',cote_rec:'2.15',edge:'+12.1%',co25:'2.15',dc1x:'1.20',dc2x:'4.50',btts_oui:'1.90',btts_non:'1.80'},
+    {id:1489379,home:{n:'Saudi Arabia'},away:{n:'Uruguay'},league:'World Cup',league_key:'wc',ligue_icon:'🌍',date:'2026-06-22 20:00',conf:7.5,pari_rec:'DC 1X',cote_rec:'2.80',edge:'+12.3%',co25:'1.95',dc1x:'2.80',dc2x:'1.55',btts_oui:'2.10',btts_non:'1.65'},
+    {id:1489380,home:{n:'Spain'},away:{n:'Cape Verde'},league:'World Cup',league_key:'wc',ligue_icon:'🌍',date:'2026-06-22 20:00',conf:7.5,pari_rec:'DC X2',cote_rec:'7.50',edge:'+24.7%',co25:'1.70',dc1x:'1.05',dc2x:'7.50',btts_oui:'2.90',btts_non:'1.35'},
+    {id:1489383,home:{n:'France'},away:{n:'Sénégal'},league:'World Cup',league_key:'wc',ligue_icon:'🌍',date:'2026-06-22 21:00',conf:7.4,pari_rec:'BTTS Oui',cote_rec:'2.00',edge:'+9.8%',co25:'1.80',dc1x:'1.12',dc2x:'5.50',btts_oui:'2.00',btts_non:'1.72'},
+  ];
+}
+
+// ── SÉLECTIONS PRO ─────────────────────────────────────
+function renderSel(){
+  var mkt=document.getElementById('filterMkt').value;
+  var srt=document.getElementById('filterSort').value;
+  var list=allMatchs.filter(function(m){
+    if(!mkt)return true;
+    var mk=getMarketKey(m.pari_rec||'');
+    return mk===mkt;
+  });
+  list.sort(function(a,b){
+    var ca=parseFloat(a.conf)||0,cb=parseFloat(b.conf)||0;
+    var cna=ca<=1?ca*10:ca,cnb=cb<=1?cb*10:cb;
+    if(srt==='date')return (a.date||'')<(b.date||'')?-1:1;
+    if(srt==='conf')return cnb-cna;
+    if(srt==='edge'){
+      var ea=parseFloat((a.edge||'').replace(/[^0-9.]/g,''))||0;
+      var eb=parseFloat((b.edge||'').replace(/[^0-9.]/g,''))||0;
+      return eb-ea;
+    }
+    if(srt==='cote')return (parseFloat(b.cote_rec)||0)-(parseFloat(a.cote_rec)||0);
+    return 0;
+  });
+  document.getElementById('selCount').textContent=list.length+' sélection'+(list.length>1?'s':'')+' conf ≥ 7.0';
+  if(!list.length){
+    document.getElementById('selBody').innerHTML='<tr><td colspan="6" class="empty-hint">Aucune sélection pour ce filtre aujourd\'hui.</td></tr>';
+    return;
+  }
+  document.getElementById('selBody').innerHTML=list.map(function(m){
+    var conf=parseFloat(m.conf)||0;
+    var confN=conf<=1?conf*10:conf;
+    var cc=confN>=8?'c8':'c7';
+    var heure=(m.date||'').split(' ')[1]||'';
+    var edgeStr=m.edge?String(m.edge).replace(/[^0-9.+\-]/g,'')+'%':'—';
+    var label=translateMarket(m.pari_rec)||m.pari_rec||'—';
+    return '<tr>'
+      +'<td><div class="mname">'+(m.home&&m.home.n?m.home.n:'?')+' vs '+(m.away&&m.away.n?m.away.n:'?')+'</div><div class="mleague">'+(m.ligue_icon||'🏆')+' '+m.league+'</div></td>'
+      +'<td><span class="mchip">'+label+'</span></td>'
+      +'<td><span class="cote-v">'+(m.cote_rec||'—')+'</span></td>'
+      +'<td style="font-family:\'Space Mono\',monospace;font-size:10px;color:var(--text)">'+(m.mc_scores&&m.mc_scores[0]?'<b>'+m.mc_scores[0].score+'</b> <span style=\"color:var(--muted)\">'+m.mc_scores[0].pct+'%</span>':'—')+'</td>'
+      +'<td style="font-family:\'Space Mono\',monospace;font-size:10px;color:var(--text)">'+(m.mc_scores&&m.mc_scores[1]?'<b>'+m.mc_scores[1].score+'</b> <span style=\"color:var(--muted)\">'+m.mc_scores[1].pct+'%</span>':'—')+'</td>'
+      +'<td><span class="cbadge '+cc+'">'+confN.toFixed(1)+'/10</span></td>'
+      +'<td style="font-family:\'Space Mono\',monospace;font-size:10px;color:var(--cyan)">'+(m.date||'').slice(0,10)+'<br>'+heure+'</td>'
+      +'</tr>';
+  }).join('');
+}
+
+// ── SIMULATEUR ────────────────────────────────────────
+function buildSimMatchs(){
+  return allMatchs.map(function(m,i){
+    var conf=parseFloat(m.conf)||0;
+    var confN=conf<=1?conf*10:conf;
+    var cote=parseFloat(m.cote_rec)||0;
+    if(!cote)return null;
+    // Proba IA depuis Poisson ou fallback
+    var probIA=m.po25?parseInt(m.po25):0;
+    if(!probIA){
+      var mkt=getMarketKey(m.pari_rec||'');
+      if(mkt==='btts_non')probIA=100-parseInt(m.btts||50);
+      else if(mkt==='btts_oui')probIA=parseInt(m.btts||50);
+      else if(mkt==='dc1x')probIA=parseInt(m.p1||0)+parseInt(m.pn||0);
+      else if(mkt==='dc_x2')probIA=parseInt(m.p2||0)+parseInt(m.pn||0);
+      else probIA=Math.round(100/cote);
+    }
+    if(!probIA)probIA=Math.round(100/cote);
+    var coteModele=probIA>0?Math.round(10000/probIA)/100:cote;
+    return {
+      id:m.id,
+      match:(m.home&&m.home.n?m.home.n:'?')+' vs '+(m.away&&m.away.n?m.away.n:'?'),
+      league:m.league,
+      market:translateMarket(m.pari_rec)||m.pari_rec,
+      probIA:probIA,
+      coteModele:coteModele,
+      conf:confN.toFixed(1),
+      heure:(m.date||'').split(' ')[1]||''
+    };
+  }).filter(Boolean);
+}
+
+function renderMatchGrid(){
+  var matchsSim=buildSimMatchs();
+  if(!matchsSim.length){
+    document.getElementById('matchGrid').innerHTML='<div class="loading">Aucun match avec une cote disponible.</div>';
+    return;
+  }
+  document.getElementById('matchGrid').innerHTML=matchsSim.map(function(m){
+    var sel=simSelected&&simSelected.id===m.id;
+    return '<div class="mcard'+(sel?' sel':'')+'" onclick="selectSim('+m.id+')">'
+      +'<div class="mcard-name">'+m.match+'</div>'
+      +'<div class="mcard-meta">'+m.league+' · '+m.heure+'</div>'
+      +'<div class="mcard-meta" style="margin-top:3px">'+m.market+'</div>'
+      +'<div class="mcard-conf">'+m.conf+'/10</div>'
+      +'</div>';
+  }).join('');
+}
+
+function selectSim(id){
+  var matchsSim=buildSimMatchs();
+  simSelected=matchsSim.find(function(m){return m.id===id;});
+  if(!simSelected)return;
+  renderMatchGrid();
+  document.getElementById('simPanel').style.display='block';
+  document.getElementById('simTitle').textContent=simSelected.match;
+  document.getElementById('simSub').textContent=simSelected.market+' — conf '+simSelected.conf+'/10';
+  document.getElementById('modelCote').textContent=simSelected.coteModele.toFixed(2);
+  document.getElementById('bookCote').value='';
+  resetResult();
+}
+
+function resetSim(){simSelected=null;document.getElementById('simPanel').style.display='none';renderMatchGrid();}
+function updateMise(){simMise=parseInt(document.getElementById('miseSlider').value);document.getElementById('miseVal').textContent=simMise+'€';}
+
+function resetResult(){
+  document.getElementById('resultBox').className='result-box neutral';
+  document.getElementById('resultVerdict').textContent='Entre la cote bookmaker pour voir l\'analyse';
+  document.getElementById('resultVerdict').className='result-verdict neutral';
+  document.getElementById('resultDetail').textContent='';
+  document.getElementById('simMetrics').style.display='none';
+  document.getElementById('edgeBarWrap').style.display='none';
+  document.getElementById('kellyRow').style.display='none';
+}
+
+function calcEdge(){
+  if(!simSelected)return;
+  var bv=parseFloat(document.getElementById('bookCote').value);
+  if(!bv||bv<=1.01){resetResult();return;}
+  var probIA=simSelected.probIA/100;
+  var probImpl=1/bv;
+  var edge=Math.round((probIA-probImpl)*1000)/10;
+  var gain=Math.round(simMise*(bv-1)*100)/100;
+  var esp=Math.round((probIA*gain-(1-probIA)*simMise)*100)/100;
+  var kelly=Math.max(0,(probIA-(1-probIA)/(bv-1))*0.25);
+  var kellyMise=Math.round(Math.min(kelly*simMise*100,simMise*200))/100;
+
+  var status,vtext,dtext;
+  if(edge>=8){status='positive';vtext='JOUE — EDGE FORT, COTE INTÉRESSANTE';dtext='La cote '+bv.toFixed(2)+' est bien au-dessus de la valeur modèle ('+simSelected.coteModele.toFixed(2)+'). Edge de +'+edge.toFixed(1)+'% — c\'est une opportunité claire. Sur 100 paris identiques tu gagnes en moyenne '+Math.round(edge*100)/100+'€ par tranche de 100€ misée.';}
+  else if(edge>=3){status='positive';vtext='ENVISAGEABLE — EDGE POSITIF MODÉRÉ';dtext='La cote '+bv.toFixed(2)+' dépasse légèrement la valeur modèle ('+simSelected.coteModele.toFixed(2)+'). Edge de +'+edge.toFixed(1)+'% — positif mais modeste. Mise réduite conseillée.';}
+  else if(edge>=-2){status='warning';vtext='NEUTRE — PAS D\'AVANTAGE CLAIR';dtext='La cote '+bv.toFixed(2)+' est proche de la valeur juste du modèle ('+simSelected.coteModele.toFixed(2)+'). Edge de '+edge.toFixed(1)+'% — la marge bookmaker efface l\'avantage. Attends une meilleure cote.';}
+  else{status='negative';vtext='NE PAS JOUER — COTE INFÉRIEURE AU MODÈLE';dtext='La cote '+bv.toFixed(2)+' est en dessous de la valeur juste du modèle ('+simSelected.coteModele.toFixed(2)+'). Edge de '+edge.toFixed(1)+'% — tu joues structurellement à perte sur ce marché.';}
+
+  var box=document.getElementById('resultBox');
+  box.className='result-box '+status;
+  var v=document.getElementById('resultVerdict');
+  v.className='result-verdict '+(status==='warning'?'warning':status);
+  v.textContent=vtext;
+  document.getElementById('resultDetail').textContent=dtext;
+
+  var met=document.getElementById('simMetrics');
+  met.style.display='grid';
+  var ec=edge>=3?'green':edge<-2?'red':'amber';
+  var esc=esp>=0?'green':'red';
+  met.innerHTML='<div class="sm"><div class="sm-val '+ec+'">'+(edge>=0?'+':'')+edge.toFixed(1)+'%</div><div class="sm-lbl">EDGE</div></div>'
+    +'<div class="sm"><div class="sm-val '+esc+'">'+(esp>=0?'+':'')+esp.toFixed(2)+'€</div><div class="sm-lbl">ESPÉRANCE/PARI</div></div>'
+    +'<div class="sm"><div class="sm-val amber">'+Math.round(probIA*100)+'%</div><div class="sm-lbl">PROBA MODÈLE</div></div>';
+
+  document.getElementById('edgeBarWrap').style.display='block';
+  var bar=document.getElementById('edgeBar');
+  var pct=Math.min(Math.max((edge+5)/30*100,2),100).toFixed(0);
+  bar.style.width=pct+'%';
+  bar.style.background=edge>=8?'var(--green)':edge>=3?'#a3e635':edge>=-2?'var(--amber)':'var(--red)';
+
+  if(edge>=3){
+    document.getElementById('kellyRow').style.display='flex';
+    document.getElementById('kellyVal').textContent=Math.round(kelly*1000)/10+'% bankroll (≈'+kellyMise+'€ sur '+simMise+'€ de base)';
+  } else {
+    document.getElementById('kellyRow').style.display='none';
+  }
+
+  var chipCls=edge>=3?'hchip hgo':edge>=-2?'hchip hwait':'hchip hpass';
+  var chipLbl=edge>=3?'JOUER':edge>=-2?'ATTENDRE':'PASSER';
+  simHistory.unshift({match:simSelected.match,book:bv,model:simSelected.coteModele,edge:edge,chip:chipCls,chipLbl:chipLbl});
+  if(simHistory.length>6)simHistory.pop();
+  renderSimHisto();
+}
+
+function renderSimHisto(){
+  var el=document.getElementById('simHisto');
+  if(!simHistory.length){el.innerHTML='<div class="empty-hint">Aucune simulation. Choisis un match et entre une cote.</div>';return;}
+  el.innerHTML=simHistory.map(function(h){
+    var ec=h.edge>=3?'green':h.edge<-2?'red':'amber';
+    return '<div class="hitem"><span style="font-weight:500">'+h.match+'</span>'
+      +'<span style="font-family:\'Space Mono\',monospace;font-size:9px;color:var(--muted)">'+h.book.toFixed(2)+' vs '+h.model.toFixed(2)+'</span>'
+      +'<span class="hedge '+ec+'">'+(h.edge>=0?'+':'')+h.edge.toFixed(1)+'%</span>'
+      +'<span class="'+h.chip+'">'+h.chipLbl+'</span>'
+      +'</div>';
+  }).join('');
+}
+
+// ── TRACKER — PERSISTANT localStorage ─────────────────
+function loadLocalData(){
+  try{
+    var p=localStorage.getItem(STORAGE_KEY_PARIS);
+    if(p){PARIS=JSON.parse(p);nextPId=PARIS.length?Math.max.apply(null,PARIS.map(function(x){return x.id;}))+1:1;}
+    var n=localStorage.getItem(STORAGE_KEY_NOTES);
+    if(n){NOTES=JSON.parse(n);nextNId=NOTES.length?Math.max.apply(null,NOTES.map(function(x){return x.id;}))+1:1;}
+  }catch(e){}
+}
+
+function saveParis(){try{localStorage.setItem(STORAGE_KEY_PARIS,JSON.stringify(PARIS));}catch(e){}}
+function saveNotes(){try{localStorage.setItem(STORAGE_KEY_NOTES,JSON.stringify(NOTES));}catch(e){}}
+
+function calcStats(){
+  var res=PARIS.filter(function(p){return p.result!=='pending';});
+  var wins=res.filter(function(p){return p.result==='win';});
+  var gain=res.reduce(function(s,p){return s+(p.result==='win'?p.mise*(p.cote-1):-p.mise);},0);
+  var mise=PARIS.reduce(function(s,p){return s+p.mise;},0);
+  return{wins:wins.length,losses:res.length-wins.length,wr:res.length?Math.round(wins.length/res.length*1000)/10:0,roi:mise?Math.round(gain/mise*1000)/10:0,gain:Math.round(gain*100)/100};
+}
+
+function renderTracker(){
+  var s=calcStats();
+  document.getElementById('tstats').innerHTML=
+    '<div class="tstat"><div class="tstat-lbl">WINRATE</div><div class="tstat-val '+(s.wr>=55?'green':'red')+'">'+s.wr+'%</div></div>'
+    +'<div class="tstat"><div class="tstat-lbl">ROI</div><div class="tstat-val '+(s.roi>=0?'green':'red')+'">'+(s.roi>=0?'+':'')+s.roi+'%</div></div>'
+    +'<div class="tstat"><div class="tstat-lbl">BILAN</div><div class="tstat-val amber">'+s.wins+'V / '+s.losses+'D</div></div>'
+    +'<div class="tstat"><div class="tstat-lbl">P&L TOTAL</div><div class="tstat-val '+(s.gain>=0?'green':'red')+'">'+(s.gain>=0?'+':'')+s.gain+'€</div></div>';
+  document.getElementById('parisList').innerHTML=PARIS.length
+    ?PARIS.slice().reverse().map(function(p){
+      var pl=p.result==='win'?'+'+Math.round(p.mise*(p.cote-1)*100)/100+'€':p.result==='loss'?'-'+p.mise+'€':'—';
+      var plc=p.result==='win'?'green':p.result==='loss'?'red':'';
+      var rm={win:'GAGNÉ ✅',loss:'PERDU ❌',pending:'EN ATTENTE'};
+      return '<div class="prow '+p.result+'">'
+        +'<span style="font-weight:500">'+p.match+'</span>'
+        +'<span style="font-size:12px;color:var(--muted)">'+p.market+'</span>'
+        +'<span style="font-family:\'Bebas Neue\',sans-serif;font-size:17px;color:var(--amber)">'+p.cote.toFixed(2)+'</span>'
+        +'<span>'+p.mise+'€</span>'
+        +'<span class="'+plc+'">'+pl+'</span>'
+        +'<span class="rchip r'+p.result+'">'+rm[p.result]+'</span>'
+        +'<button class="btndel" onclick="delPari('+p.id+')">✕</button>'
+        +'</div>';
+    }).join('')
+    :'<div class="empty-hint">Aucun pari. Saisis ton premier pari ci-dessus — il sera sauvegardé automatiquement.</div>';
+}
+
+function addPari(){
+  var m=document.getElementById('tMatch').value.trim();
+  var c=parseFloat(document.getElementById('tCote').value);
+  var ms=parseFloat(document.getElementById('tMise').value);
+  if(!m||!c||!ms)return;
+  PARIS.push({id:nextPId++,match:m,market:document.getElementById('tMarket').value,cote:c,mise:ms,result:document.getElementById('tResult').value});
+  saveParis();
+  document.getElementById('tMatch').value='';document.getElementById('tCote').value='';document.getElementById('tMise').value='';
+  renderTracker();
+}
+
+function delPari(id){
+  if(!confirm('Supprimer ce pari ?'))return;
+  PARIS=PARIS.filter(function(p){return p.id!==id;});
+  saveParis();renderTracker();
+}
+
+// ── CARNET — PERSISTANT localStorage ──────────────────
+function renderNotes(){
+  var tl={erreur:'Erreur d\'analyse',bonne:'Bonne analyse',value:'Value manquée',discipline:'Discipline bankroll'};
+  document.getElementById('noteCount').textContent=NOTES.length+' note'+(NOTES.length>1?'s':'');
+  document.getElementById('notesList').innerHTML=NOTES.length
+    ?NOTES.slice().reverse().map(function(n){
+      var tc=n.tag?'ntag tag-'+n.tag:'ntag';
+      var tl2=tl[n.tag]||n.tag||'';
+      var rc=n.result?'<span class="rchip r'+n.result+'">'+(n.result==='win'?'GAGNÉ ✅':'PERDU ❌')+'</span>':'';
+      return '<div class="ncard '+(n.tag||'')+'">'
+        +'<div class="ncard-hdr"><span class="nmatch">'+n.match+'</span><span class="ndate">'+n.date+'</span></div>'
+        +'<div class="nbody">'+n.content+'</div>'
+        +'<div class="ntags">'+(tl2?'<span class="'+tc+'">'+tl2+'</span>':'')+rc+'</div>'
+        +'</div>';
+    }).join('')
+    :'<div class="empty-hint">Aucune note. Commence à analyser tes paris pour progresser sur la durée.</div>';
+}
+
+function addNote(){
+  var m=document.getElementById('nMatch').value.trim();
+  var c=document.getElementById('nContent').value.trim();
+  if(!m||!c)return;
+  var today=new Date().toISOString().split('T')[0];
+  NOTES.push({id:nextNId++,match:m,content:c,tag:document.getElementById('nTag').value,result:document.getElementById('nResult').value,date:today});
+  saveNotes();
+  document.getElementById('nMatch').value='';document.getElementById('nContent').value='';
+  renderNotes();
+}
+
+// ── TABS ──────────────────────────────────────────────
+function switchTab(name,btn){
+  document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.remove('active');});
+  document.querySelectorAll('.tab-section').forEach(function(s){s.classList.remove('active');});
+  btn.classList.add('active');
+  document.getElementById('tab-'+name).classList.add('active');
+}
+</script>
+</body>
+</html>

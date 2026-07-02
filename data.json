@@ -22,10 +22,10 @@
       ],
       "val": true,
       "hot": false,
-      "conf": 7.6,
-      "p1": 74,
+      "conf": 7.2,
+      "p1": 75,
       "pn": 16,
-      "p2": 10,
+      "p2": 9,
       "po15": 0,
       "po25": 64,
       "btts": 51,
@@ -102,48 +102,48 @@
       "no_signal": false,
       "no_signal_label": "",
       "mise": "2-3% bankroll",
-      "verdict_shark": "Over 2.5 à 1.67 — les trois modèles convergent à 64% et les top scores Monte-Carlo montrent 2-0 (11%), 3-0 (10%), 2-1 (10%), 3-1 (8%), soit plus de 39% des simulations produisant au moins 3 buts.",
+      "verdict_shark": "Over 2.5 à 1.67 — les trois modèles convergent à 64% avec un lambda USA de 2.514 et des scores Monte-Carlo dominés par 2-0, 3-0 et 3-1",
       "scenario": {
-        "phase1": "USA dominent largement les 30 premières minutes grâce à leur dynamisme offensif (27% de leurs buts marqués entre la 30e et la 45e minute) et la fragilité bosniaque dans la tranche 15-30 (47% de leurs buts encaissés ici). Score probable à la mi-temps : 2-0.",
-        "phase2": "La Bosnie tente de réagir en seconde période, profitant d'une légère baisse d'intensité américaine entre la 45e et la 60e minute (seulement 3% des buts USA dans cette tranche). Elle peut réduire l'écart, mais les USA restent dominants avec 20% de leurs buts entre la 60e et la 75e minute.",
-        "phase3": "La tranche 75-90 minutes est la plus productive du match (31% de probabilité de but), avec la Bosnie qui marque 60% de ses buts dans cet intervalle. Les USA scellent le score avec leur régularité offensive. Score final le plus probable : 3-1."
+        "phase1": "USA domine la première période grâce à sa pression offensive dès la 15e-30e minute (21% de probabilité but), Bosnia & Herzegovina encaisse tôt et peine à répondre offensivement.",
+        "phase2": "USA creuse l'écart en deuxième période, notamment entre la 60e et la 75e minute où la probabilité de but monte à 23% — Bosnia & Herzegovina tente de revenir mais l'écart est difficile à combler.",
+        "phase3": "Dernière tranche 75-90min la plus chargée (31%), USA gère avec un troisième but ou Bosnia & Herzegovina réduit le score en fin de match, consolidant l'Over 2.5."
       },
       "scenario_15min": [
         {
           "t": "0-15min",
           "prob": 7,
-          "txt": "Démarrage prudent des deux équipes : USA marquent 17% de leurs buts dans cet intervalle mais la Bosnie n'encaisse que 12% de ses buts ici. Probabilité de but faible à 7%, les équipes s'observent."
+          "txt": "Démarrage prudent des deux équipes. USA marque 17% de ses buts dans cette tranche mais Bosnia & Herzegovina n'encaisse que 12% ici, probabilité de but limitée à 7%."
         },
         {
           "t": "15-30min",
           "prob": 21,
-          "txt": "Tranche la plus dangereuse de la première période : USA marquent 17% de leurs buts ici et la Bosnie encaisse 47% de ses buts dans cet intervalle. La probabilité monte à 21%, premier but attendu."
+          "txt": "Tranche à risque élevé pour Bosnia & Herzegovina : elle encaisse 47% de ses buts ici tandis que USA marque 17% de ses buts dans cet intervalle. Probabilité but à 21%, ouverture du score probable."
         },
         {
           "t": "30-45min",
           "prob": 11,
-          "txt": "USA à leur pic offensif avec 27% de leurs buts marqués ici, mais la Bosnie semble se ressaisir défensivement (0% de ses buts encaissés dans cette tranche selon les données). Probabilité modérée à 11%."
+          "txt": "USA maintient la pression avec 27% de ses buts marqués dans cet intervalle, mais Bosnia & Herzegovina marque 0% ici et n'encaisse que 18%. Probabilité but modérée à 11%."
         },
         {
           "t": "45-60min",
           "prob": 7,
-          "txt": "Intervalle creux pour les USA (seulement 3% de leurs buts) et la Bosnie marque 20% de ses buts ici. Probabilité basse à 7%, risque de réduction du score bosnien après la mi-temps."
+          "txt": "Tranche calme en début de deuxième période — USA ne marque que 3% de ses buts ici. Bosnia & Herzegovina marque 20% des siens dans cet intervalle mais n'a pas les ressources offensives suffisantes. Probabilité but à 7%."
         },
         {
           "t": "60-75min",
           "prob": 23,
-          "txt": "Regain d'intensité : USA marquent 20% de leurs buts dans cette tranche et encaissent 67% des buts bosniaques ici. Probabilité élevée à 23%, moment clé pour l'issue du match."
+          "txt": "Montée en pression : USA marque 20% de ses buts ici et Bosnia & Herzegovina encaisse 6% dans cette tranche. Probabilité but à 23% — USA potentiellement en position de tuer le match."
         },
         {
           "t": "75-90min",
           "prob": 31,
-          "txt": "Tranche la plus fertile du match avec 31% de probabilité de but. La Bosnie marque 60% de ses buts entre la 75e et la 90e minute, les USA 17%. C'est ici que le score final se dessine, confirmant l'Over 2.5."
+          "txt": "Tranche la plus fertile du match avec 31% de probabilité but. Bosnia & Herzegovina marque 60% de ses buts dans cet intervalle, suggérant une réduction possible du score qui contribue à l'Over 2.5 si le score est déjà 2-0 ou plus."
         }
       ],
-      "facteur_x": "39% des 5000 simulations Monte-Carlo produisent l'un des quatre scores les plus probables (2-0, 3-0, 2-1, 3-1), tous situés au-dessus du seuil de 2.5 buts, ce qui valide directement la cohérence du marché Over 2.5.",
-      "analyse_card": "Le modèle Poisson donne un lambda de 2.514 pour les USA, reflétant une attaque prolifique confirmée par un bilan parfait de 3 victoires en 3 matchs sans jamais rester sans marquer. La Bosnie-Herzégovine n'a pas gardé sa cage inviolée lors de ses 3 derniers matchs et encaisse 47% de ses buts entre la 15e et la 30e minute, tranche où les USA marquent également 17% de leurs buts. Les scores Monte-Carlo les plus fréquents (2-0, 3-0, 2-1, 3-1) représentent collectivement 39% des simulations, tous au-dessus de 2.5 buts.",
-      "conseil_public": "Jouer Over 2.5 à 1.67 : les trois modèles s'alignent à 64% et les scores simulés les plus probables dépassent tous ce seuil.",
-      "contexte": "Phase de groupes de la Coupe du Monde 2026 au Levi's Stadium, le 2 juillet 2026. Les USA sont en forme avec 3 victoires consécutives tandis que la Bosnie-Herzégovine n'a pas gagné lors de ses 3 derniers matchs et reste vulnérable défensivement. Le contexte de Coupe du Monde incite certes à plus de prudence tactique, mais les lambdas ont déjà été ajustés en conséquence.",
+      "facteur_x": "Lambda offensif USA à 2.514 combiné à des scores Monte-Carlo majoritairement au-dessus de 2.5 buts (2-0, 3-0, 2-1, 3-1 totalisent 39% des simulations).",
+      "analyse_card": "Le modèle Poisson, Dixon-Coles et Monte-Carlo s'accordent tous à 64% sur l'Over 2.5, avec un lambda offensif USA de 2.514 qui reflète une attaque prolifique. Les scores Monte-Carlo les plus probables (2-0 à 12%, 3-0 à 10%, 3-1 à 8%) sont majoritairement au-dessus de 2.5 buts, ce qui valide la cohérence du marché. Bosnia & Herzegovina n'a conservé aucune feuille blanche en trois matchs et encaisse 47% de ses buts entre la 15e et la 30e minute, signe d'une défense vulnérable en milieu de première période.",
+      "conseil_public": "Jouer Over 2.5 buts à 1.67 — signal multi-modèle cohérent et confirmé par la distribution Monte-Carlo.",
+      "contexte": "Phase de groupes de la Coupe du Monde 2026, disputée au Levi's Stadium sur terrain neutre. USA présente un bilan parfait sur ses 3 derniers matchs avec 3 victoires consécutives. Bosnia & Herzegovina reste sur une forme contrastée (WL sur les 5 derniers) et n'a remporté aucun de ses 3 derniers matchs récents.",
       "vbet": "OUI",
       "scores": [
         "3-1"
@@ -151,34 +151,34 @@
       "mc_scores": [
         {
           "score": "2-0",
-          "n": 567,
-          "pct": 11
+          "n": 606,
+          "pct": 12
         },
         {
           "score": "3-0",
-          "n": 524,
+          "n": 510,
           "pct": 10
         },
         {
           "score": "2-1",
-          "n": 476,
-          "pct": 10
+          "n": 457,
+          "pct": 9
         },
         {
           "score": "1-0",
-          "n": 424,
-          "pct": 8
+          "n": 432,
+          "pct": 9
         },
         {
           "score": "3-1",
-          "n": 394,
+          "n": 377,
           "pct": 8
         }
       ],
       "paris_safe": {
         "bet": "Over 2.5",
         "cote": 1.67,
-        "proba": "74%"
+        "proba": "75%"
       },
       "paris_risque": {
         "bet": "",
@@ -334,14 +334,14 @@
       "actu": [
         {
           "c": "USA",
-          "t": "DIRECT. États-Unis-Bosnie Herzégovine: suivez le match de la Team USA en seizièmes de finale du Mondial 2026 en live",
-          "tx": "Principal hôte du Mondial 2026, les États-Unis affronte la Bosnie-Herzégovine lors d’un seizième de finale disputé à San Francisco dans la nuit de mercredi à jeudi (02h). Devant leur public et après une phase de poule gérée tranquillement, les Américains rêve…",
+          "t": "France-Paraguay: grosses chaleurs, risque d'orages... à quelle météo s'attendre pour le 8e de finale de Coupe du monde 2026?",
+          "tx": "Après sa large victoire contre la Suède (3-0) en 16e de finale de la Coupe du monde 2026, l'équipe de France affrontera samedi (23h) le Paraguay à Philadelphie pour une place en quart. La température devrait monter d'un cran pour les Bleus, avec un risque d'o…",
           "tm": "2026-07-01"
         },
         {
           "c": "USA",
-          "t": "Négociations de paix : l’Iran annonce la fin des discussions au Qatar sur le protocole d’accord avec les USA",
-          "tx": "Le vice-ministre des Affaires étrangères, Kazem Gharibabadi, qui s’est rendu à Doha pour suivre la mise en œuvre des dispositions du mémorandum d’entente, a annoncé la fin des pourparlers au Qatar ...",
+          "t": "Tout ce que Netflix débarque en juillet 2026 pour rester au frais cet été",
+          "tx": "Juillet 2026 s’annonce comme un mois généreux pour les abonnés à la plateforme de streaming au N rouge, avec un...\nL’article Tout ce que Netflix débarque en juillet 2026 pour rester au frais cet été est apparu en premier sur Tuxboard.",
           "tm": "2026-07-01"
         },
         {
@@ -531,25 +531,25 @@
       ],
       "val": true,
       "hot": false,
-      "conf": 7.2,
-      "p1": 61,
-      "pn": 22,
-      "p2": 17,
+      "conf": 7.8,
+      "p1": 70,
+      "pn": 18,
+      "p2": 12,
       "po15": 0,
-      "po25": 58,
-      "btts": 54,
+      "po25": 65,
+      "btts": 55,
       "c1": "1.29",
       "cn": "5.50",
-      "c2": "11.65",
-      "co15": "1.19",
-      "co25": "1.67",
-      "cu25": "2.20",
+      "c2": "11.25",
+      "co15": "1.20",
+      "co25": "1.68",
+      "cu25": "2.22",
       "dc1x": "1.05",
-      "dc2x": "3.65",
-      "dc12": "1.15",
+      "dc2x": "3.66",
+      "dc12": "1.14",
       "cdc1x": "1.05",
-      "cdc2x": "3.65",
-      "ah_dom": "1.29",
+      "cdc2x": "3.66",
+      "ah_dom": "1.27",
       "ah_ext": "8.00",
       "co35": "2.63",
       "cbtts": "2.10",
@@ -561,98 +561,98 @@
           "n": "Betclic",
           "o": "200€ offerts",
           "l": "#LIEN_BETCLIC",
-          "c": "1.67",
+          "c": "1.68",
           "c1": "1.29",
           "cn": "5.50",
-          "c2": "11.65"
+          "c2": "11.25"
         },
         {
           "n": "Winamax",
           "o": "100€ offerts",
           "l": "#LIEN_WINAMAX",
-          "c": "1.64",
+          "c": "1.65",
           "c1": "1.26",
           "cn": "5.47",
-          "c2": "11.62"
+          "c2": "11.22"
         },
         {
           "n": "Unibet",
           "o": "100€ remboursés",
           "l": "#LIEN_UNIBET",
-          "c": "1.65",
+          "c": "1.66",
           "c1": "1.27",
           "cn": "5.48",
-          "c2": "11.63"
+          "c2": "11.23"
         },
         {
           "n": "PMU",
           "o": "100€ offerts",
           "l": "#LIEN_PMU",
-          "c": "1.62",
+          "c": "1.63",
           "c1": "1.24",
           "cn": "5.45",
-          "c2": "11.60"
+          "c2": "11.20"
         },
         {
           "n": "Bet365",
           "o": "100€ bonus",
           "l": "#LIEN_BET365",
-          "c": "1.70",
+          "c": "1.71",
           "c1": "1.32",
           "cn": "5.53",
-          "c2": "11.68"
+          "c2": "11.28"
         }
       ],
-      "edge": "58% (modèle)",
+      "edge": "65% (modèle)",
       "marche": "TOTAL_BUTS",
       "risque": "FAIBLE",
       "pari_rec": "Over 2.5",
-      "cote_rec": "1.67",
+      "cote_rec": "1.68",
       "no_signal": false,
       "no_signal_label": "",
       "mise": "2-3% bankroll",
-      "verdict_shark": "Over 2.5 à 1.67 — les lambdas Poisson (2.058 / 0.973) combinés aux scores Monte-Carlo (2-0, 2-1, 3-0 représentent 27% des simulations) pointent solidement vers un match à 3 buts ou plus.",
+      "verdict_shark": "Over 2.5 à 1.68 — les trois modèles convergent à 65% et les scores Monte-Carlo placent 2-0, 2-1 et 3-0 en tête, ce qui valide structurellement le passage de la barre des 2.5 buts.",
       "scenario": {
-        "phase1": "L'Espagne présente des indicateurs offensifs dominants (xG 1.75, xGA 0.18) et une forme récente en hausse avec deux victoires consécutives. L'Autriche montre une vulnérabilité défensive marquée (xGA 1.71) malgré une forme globale correcte sur les 5 derniers matchs.",
-        "phase2": "Les trois modèles (Poisson 58%, Dixon-Coles aligné, Monte-Carlo cohérent) convergent sur l'Over 2.5. Les lambdas (2.058 / 0.973) génèrent naturellement des scénarios à 3+ buts dans une proportion significative des simulations.",
-        "phase3": "Les tranches temporelles montrent une activité but répartie sur l'ensemble du match (15-30min à 25%, 45-60min à 19%, 60-75min à 20%, 75-90min à 20%), ce qui augmente la probabilité d'atteindre le seuil de 3 buts sans dépendre d'une seule période."
+        "phase1": "Spain domine statistiquement avec un xG de 2.02 contre 0.99 pour Austria, et un xGA autrichien alarmant à 1.99. Spain n'a pas encaissé de but dans 3 matchs sur 3, mais les modèles anticipent une pression offensive espagnole suffisante pour générer plusieurs buts.",
+        "phase2": "Les trois modèles (Poisson, Dixon-Coles, Monte-Carlo) convergent à 65% en faveur de l'Over 2.5, avec un lambda espagnol à 2.43 et autrichien à 0.91. L'écart inter-modèles est inférieur à 2 points de pourcentage, ce qui signale une haute fiabilité du signal.",
+        "phase3": "La distribution des tranches horaires montre une activité offensive concentrée entre 15-30min (23%), 60-75min (23%) et 75-90min (21%), suggérant un match à buts répartis sur l'ensemble de la rencontre — ce qui favorise l'accumulation nécessaire pour franchir le seuil de 2.5 buts."
       },
       "scenario_15min": [
         {
           "t": "0-15min",
-          "prob": 6,
-          "txt": "Démarrage prudent des deux équipes : l'Espagne ne génère que 17% de ses buts dans cette tranche, l'Autriche seulement 8%. Probabilité but à 6% — phase d'observation tactique."
+          "prob": 5,
+          "txt": "Démarrage prudent des deux équipes — Spain marque seulement 13% de ses buts dans cette tranche et Austria 8%, pour une probabilité combinée de but de seulement 5%. Le match s'installe sans urgence offensive immédiate."
         },
         {
           "t": "15-30min",
-          "prob": 25,
-          "txt": "Tranche la plus chaude du match : l'Espagne concentre 33% de ses buts ici, l'Autriche encaisse 50% de ses buts concédés dans cette période. Probabilité but à 25% — fenêtre offensive clé."
+          "prob": 23,
+          "txt": "Pic d'activité offensive : Spain génère 27% de ses buts ici, et Austria encaisse 50% des buts qu'elle concède dans cette fenêtre. La probabilité de but monte à 23% — c'est la tranche la plus dangereuse du premier acte, favorable à Spain."
         },
         {
           "t": "30-45min",
-          "prob": 10,
-          "txt": "L'Espagne marque 25% de ses buts sur cette tranche mais l'Autriche ne marque que 0% ici. Probabilité but à 10% — activité modérée, Espagne davantage menaçante."
+          "prob": 12,
+          "txt": "Spain reste actif avec 27% de ses buts dans cette tranche, mais Austria encaisse moins (20% de ses buts concédés ici). La probabilité globale descend à 12%, phase de transition avant la mi-temps."
         },
         {
           "t": "45-60min",
-          "prob": 19,
-          "txt": "Reprise animée : l'Autriche marque 31% de ses buts dans cette période, l'Espagne encaisse 29% des buts de l'adversaire ici. Probabilité but à 19% — tranche favorable à un but autrichien."
+          "prob": 16,
+          "txt": "Redémarrage équilibré : Spain inscrit 13% de ses buts ici, Austria en marque 31% — c'est la fenêtre où Austria est statistiquement la plus dangereuse. Probabilité de but à 16%, avec un risque de réduction d'écart autrichien."
         },
         {
           "t": "60-75min",
-          "prob": 20,
-          "txt": "L'Autriche encaisse 50% des buts de l'Espagne dans cette période (données réelles), probabilité but à 20% — pression espagnole susceptible de s'intensifier en fin de première heure."
+          "prob": 23,
+          "txt": "Deuxième pic d'intensité — Austria encaisse 50% de ses buts concédés dans cette tranche, son point de faiblesse défensive le plus marqué en deuxième mi-temps. Spain marque 13% ici. Probabilité de but à 23%, propice à un but espagnol décisif."
         },
         {
           "t": "75-90min",
-          "prob": 20,
-          "txt": "Tranche décisive : l'Autriche marque 38% de ses buts ici, l'Espagne encaisse 43% des buts adverses dans cette période. Probabilité but à 20% — risque de buts tardifs des deux côtés, renforce le scénario Over 2.5."
+          "prob": 21,
+          "txt": "Fin de match sous tension : Austria inscrit 38% de ses buts dans cette tranche (sa plus haute proportion offensive), Spain 7%. Probabilité de but à 21% — moment où Austria tente de revenir, ce qui ouvre des espaces et peut générer un ou plusieurs buts supplémentaires."
         }
       ],
-      "facteur_x": "Les scores Monte-Carlo (2-0, 2-1, 3-0 = 27% cumulés) combinés au lambda offensif espagnol de 2.058 et au xGA autrichien de 1.71 constituent le signal le plus solide en faveur de l'Over 2.5.",
-      "analyse_card": "L'Espagne affiche un xG de 1.75 pour seulement 0.18 xGA sur cette phase de groupes, traduisant une domination offensive claire. Le modèle Poisson donne 58% de probabilité à l'Over 2.5, confirmé par Dixon-Coles et Monte-Carlo de façon cohérente. Les scores les plus probables en simulation (2-0 à 10%, 2-1 à 10%, 3-0 à 7%) totalisent 27% sur des scénarios dépassant 2 buts, et la tactique offense-versus-défense poreuse de l'Autriche (xGA 1.71) renforce ce signal.",
-      "conseil_public": "Joue l'Over 2.5 à 1.67 — la convergence des trois modèles et la structure des scores Monte-Carlo valident ce marché avec un risque contenu.",
-      "contexte": "Phase de groupes de la Coupe du Monde 2026, match au SoFi Stadium sur terrain neutre. L'Espagne est en position favorable avec deux victoires consécutives, l'Autriche cherche à rebondir après un bilan de 0 victoire en 2 matchs dans cette phase.",
+      "facteur_x": "Les scores Monte-Carlo dominants (2-0, 2-1, 3-0, 1-0, 1-1) représentent 45% de toutes les simulations — parmi eux, 2-0, 2-1 et 3-0 totalisent 30% à eux seuls et franchissent tous la barre Over 2.5, confirmant la robustesse du marché.",
+      "analyse_card": "Spain affiche un xG de 2.02 et un lambda Poisson de 2.43, signalant une attaque prolifique face à une défense autrichienne sous pression (xGA 1.99). Les scores Monte-Carlo dominants sont 2-0 (11%), 2-1 (10%) et 3-0 (9%) : six des dix scénarios les plus probables dépassent 2.5 buts au total. Les trois modèles indépendants (Poisson 65%, Dixon-Coles non détaillé mais cohérent, Monte-Carlo 65%) pointent tous dans la même direction sans divergence notable.",
+      "conseil_public": "Jouer Over 2.5 buts à 1.68 — le signal est multi-convergent et les scores les plus probables supportent clairement ce seuil.",
+      "contexte": "Phase de groupes de la Coupe du Monde 2026, au SoFi Stadium sur terrain neutre. Spain présente une dynamique offensive très solide avec 3 victoires consécutives, tandis qu'Austria n'a pas encore gagné en trois matchs de groupe avec une défense régulièrement mise en difficulté.",
       "vbet": "OUI",
       "scores": [
         "2-1"
@@ -660,34 +660,34 @@
       "mc_scores": [
         {
           "score": "2-0",
-          "n": 516,
-          "pct": 10
+          "n": 558,
+          "pct": 11
         },
         {
           "score": "2-1",
-          "n": 510,
+          "n": 505,
           "pct": 10
-        },
-        {
-          "score": "1-0",
-          "n": 501,
-          "pct": 10
-        },
-        {
-          "score": "1-1",
-          "n": 469,
-          "pct": 9
         },
         {
           "score": "3-0",
-          "n": 343,
+          "n": 442,
+          "pct": 9
+        },
+        {
+          "score": "1-0",
+          "n": 405,
+          "pct": 8
+        },
+        {
+          "score": "1-1",
+          "n": 359,
           "pct": 7
         }
       ],
       "paris_safe": {
         "bet": "Over 2.5",
-        "cote": 1.67,
-        "proba": "61%"
+        "cote": 1.68,
+        "proba": "70%"
       },
       "paris_risque": {
         "bet": "",
@@ -699,26 +699,36 @@
         "nom": "SoFi Stadium — Inglewood",
         "cap": "",
         "meteo": "☀️",
-        "temp": "22°C",
+        "temp": "23°C",
         "desc": "ciel dégagé"
       },
       "crit_home": {
-        "fd": 50,
-        "att": 67,
+        "fd": 67,
+        "att": 80,
         "def": 88,
-        "fr": 80,
+        "fr": 86,
         "mot": 70,
         "fat": 50
       },
       "crit_away": {
         "fd": 0,
-        "att": 80,
-        "def": 18,
-        "fr": 42,
+        "att": 60,
+        "def": 9,
+        "fr": 30,
         "mot": 70,
         "fat": 50
       },
       "form_home": [
+        {
+          "d": "2026-07-02",
+          "opponent": "Austria",
+          "score": "3-0",
+          "result": "W",
+          "home": true,
+          "match": "Austria",
+          "lieu": "DOM",
+          "date_full": "2026-07-02T19:00:00+00:00"
+        },
         {
           "d": "2026-06-27",
           "opponent": "Uruguay",
@@ -758,19 +768,19 @@
           "match": "Peru",
           "lieu": "EXT",
           "date_full": "2026-06-09T02:00:00+00:00"
-        },
-        {
-          "d": "2026-06-04",
-          "opponent": "Iraq",
-          "score": "1-1",
-          "result": "D",
-          "home": true,
-          "match": "Iraq",
-          "lieu": "DOM",
-          "date_full": "2026-06-04T19:00:00+00:00"
         }
       ],
       "form_away": [
+        {
+          "d": "2026-07-02",
+          "opponent": "Spain",
+          "score": "0-3",
+          "result": "L",
+          "home": false,
+          "match": "Spain",
+          "lieu": "EXT",
+          "date_full": "2026-07-02T19:00:00+00:00"
+        },
         {
           "d": "2026-06-28",
           "opponent": "Algeria",
@@ -810,49 +820,39 @@
           "match": "Tunisia",
           "lieu": "DOM",
           "date_full": "2026-06-01T18:45:00+00:00"
-        },
-        {
-          "d": "2026-03-31",
-          "opponent": "South Korea",
-          "score": "1-0",
-          "result": "W",
-          "home": true,
-          "match": "South Korea",
-          "lieu": "DOM",
-          "date_full": "2026-03-31T18:45:00+00:00"
         }
       ],
-      "forme_h": "DWW",
-      "forme_a": "WLD",
+      "forme_h": "DWWW",
+      "forme_a": "WLDL",
       "h2h": [],
       "injuries": [],
       "fatigue": {
         "home": {
-          "val": 50,
-          "info": "Dernier match il y a 6j — 2 match(s) en 14j"
+          "val": 100,
+          "info": "Dernier match il y a 0j — 3 match(s) en 14j"
         },
         "away": {
-          "val": 50,
-          "info": "Dernier match il y a 5j — 2 match(s) en 14j"
+          "val": 100,
+          "info": "Dernier match il y a 0j — 3 match(s) en 14j"
         }
       },
       "fatigue_home": {
-        "val": 50,
-        "info": "Dernier match il y a 6j — 2 match(s) en 14j"
+        "val": 100,
+        "info": "Dernier match il y a 0j — 3 match(s) en 14j"
       },
       "fatigue_away": {
-        "val": 50,
-        "info": "Dernier match il y a 5j — 2 match(s) en 14j"
+        "val": 100,
+        "info": "Dernier match il y a 0j — 3 match(s) en 14j"
       },
       "tendances": {
-        "over25_home": 2,
-        "over25_away": 1,
-        "over25_home_n": 5,
-        "over25_away_n": 2,
+        "over25_home": 3,
+        "over25_away": 2,
+        "over25_home_n": 6,
+        "over25_away_n": 3,
         "btts_home": 1,
         "btts_away": 1,
-        "btts_home_n": 5,
-        "btts_away_n": 2
+        "btts_home_n": 6,
+        "btts_away_n": 3
       },
       "classement": null,
       "actu": [
@@ -894,7 +894,7 @@
           },
           {
             "t": "30-45",
-            "n": 1
+            "n": 2
           },
           {
             "t": "45-60",
@@ -902,11 +902,11 @@
           },
           {
             "t": "60-75",
-            "n": 0
+            "n": 1
           },
           {
             "t": "75-90",
-            "n": 0
+            "n": 1
           }
         ],
         "slots_against": [
@@ -935,9 +935,9 @@
             "n": 0
           }
         ],
-        "goals_avg": 1.75,
-        "conceded_avg": 0.18,
-        "games": 3
+        "goals_avg": 2.03,
+        "conceded_avg": 0.22,
+        "games": 4
       },
       "events_away": {
         "slots": [
@@ -977,7 +977,7 @@
           },
           {
             "t": "30-45",
-            "n": 1
+            "n": 2
           },
           {
             "t": "45-60",
@@ -985,46 +985,46 @@
           },
           {
             "t": "60-75",
-            "n": 1
+            "n": 2
           },
           {
             "t": "75-90",
-            "n": 2
+            "n": 3
           }
         ],
-        "goals_avg": 1.22,
-        "conceded_avg": 1.71,
-        "games": 3
+        "goals_avg": 0.99,
+        "conceded_avg": 1.99,
+        "games": 4
       },
       "top_scorers_home": [],
       "top_scorers_away": [],
       "match_stats_home": {
-        "possession": 68,
-        "shots_total": 17.8,
-        "shots_on": 5.7,
-        "shots_off": 7.7,
-        "shots_blocked": 4.5,
-        "corners": 7.3,
-        "fouls": 11.2,
+        "possession": 67,
+        "shots_total": 18.6,
+        "shots_on": 6.3,
+        "shots_off": 7.4,
+        "shots_blocked": 4.9,
+        "corners": 7.6,
+        "fouls": 10.7,
         "offsides": 2.3,
         "saves": 1.3,
         "passes_pct": 91,
-        "xg": 1.75,
-        "xga": 0.18
+        "xg": 2.02,
+        "xga": 0.22
       },
       "match_stats_away": {
-        "possession": 53,
-        "shots_total": 8.7,
+        "possession": 50,
+        "shots_total": 8.1,
         "shots_on": 3.3,
-        "shots_off": 4.7,
+        "shots_off": 4.6,
         "shots_blocked": 1,
         "corners": 3.5,
-        "fouls": 11,
-        "offsides": 2.5,
-        "saves": 2.2,
+        "fouls": 11.6,
+        "offsides": 3,
+        "saves": 2.8,
         "passes_pct": 86,
-        "xg": 1.22,
-        "xga": 1.71
+        "xg": 0.99,
+        "xga": 1.99
       },
       "elo_home": null,
       "elo_away": null,
@@ -1053,9 +1053,9 @@
       "cat": [
         "all"
       ],
-      "val": false,
+      "val": true,
       "hot": false,
-      "conf": 6.8,
+      "conf": 7.2,
       "p1": 60,
       "pn": 21,
       "p2": 19,
@@ -1085,7 +1085,7 @@
           "n": "Betclic",
           "o": "200€ offerts",
           "l": "#LIEN_BETCLIC",
-          "c": "1.70",
+          "c": "1.73",
           "c1": "1.69",
           "cn": "3.73",
           "c2": "5.35"
@@ -1094,7 +1094,7 @@
           "n": "Winamax",
           "o": "100€ offerts",
           "l": "#LIEN_WINAMAX",
-          "c": "1.67",
+          "c": "1.70",
           "c1": "1.66",
           "cn": "3.70",
           "c2": "5.32"
@@ -1103,7 +1103,7 @@
           "n": "Unibet",
           "o": "100€ remboursés",
           "l": "#LIEN_UNIBET",
-          "c": "1.68",
+          "c": "1.71",
           "c1": "1.67",
           "cn": "3.71",
           "c2": "5.33"
@@ -1112,7 +1112,7 @@
           "n": "PMU",
           "o": "100€ offerts",
           "l": "#LIEN_PMU",
-          "c": "1.65",
+          "c": "1.68",
           "c1": "1.64",
           "cn": "3.68",
           "c2": "5.30"
@@ -1121,96 +1121,96 @@
           "n": "Bet365",
           "o": "100€ bonus",
           "l": "#LIEN_BET365",
-          "c": "1.73",
+          "c": "1.76",
           "c1": "1.72",
           "cn": "3.76",
           "c2": "5.38"
         }
       ],
-      "edge": "60% (modèle)",
-      "marche": "BTTS",
+      "edge": "63% (modèle)",
+      "marche": "TOTAL_BUTS",
       "risque": "FAIBLE",
-      "pari_rec": "BTTS Oui",
-      "cote_rec": "1.70",
+      "pari_rec": "Over 2.5",
+      "cote_rec": "1.73",
       "no_signal": false,
       "no_signal_label": "",
       "mise": "2-3% bankroll",
-      "verdict_shark": "BTTS Oui à 1.70 — les trois modèles convergent à 60% et les scores Monte-Carlo confirment que les deux équipes trouvent le chemin des filets dans 3 des 5 scénarios les plus probables (1-1, 2-1, 3-1).",
+      "verdict_shark": "Over 2.5 à 1.73 — les trois modèles convergent à 63% et les scores Monte-Carlo les plus fréquents (2-1, 2-0, 3-1) totalisent 26% sur des scénarios à 3+ buts.",
       "scenario": {
-        "phase1": "Portugal présente un profil offensif solide (xG 1.40) et une forme correcte (DWDWW), avec une clean sheet sur 2 matchs mais aucun match sans marquer. Croatia, malgré un xG plus modeste (0.80), reste dangereux offensivement et n'a pas non plus affiché de match sans but marqué.",
-        "phase2": "Les trois modèles (Poisson, Dixon-Coles, Monte-Carlo) s'alignent à 60% sur BTTS Oui. Les lambdas (Portugal 2.117, Croatia 1.125) indiquent une production offensive des deux côtés. L'écart inter-modèles est minimal, ce qui renforce la fiabilité du signal.",
-        "phase3": "Les scores Monte-Carlo valident pleinement le marché BTTS : 1-1 (10%), 2-1 (9%), 3-1 (7%) représentent trois des cinq scénarios dominants avec les deux équipes au score. La tranche 75-90min concentre 33% de la probabilité de but, suggérant des buts tardifs potentiels des deux côtés."
+        "phase1": "Le Portugal affiche une forme solide (DWDWW) avec 0 match sans marquer sur ses 2 derniers et un xG offensif de 1.4. La Croatie (WWLWL, 2 victoires consécutives) présente un xGA de 1.31, indiquant une défense exposée.",
+        "phase2": "Poisson, Dixon-Coles et Monte-Carlo s'accordent à 59-60% de victoire Portugal, avec un Over 2.5 à 63%. L'écart minimal entre les trois modèles (≤2 points) renforce la robustesse du signal.",
+        "phase3": "Les scores MC confirment la cohérence : 2-1 (11%), 2-0 (9%), 3-1 (6%) représentent les scénarios les plus simulés. Les scores à 2+ buts pour le Portugal seul suffisent souvent à dépasser 2.5 total avec la contribution croate (xG 0.8)."
       },
       "scenario_15min": [
         {
           "t": "0-15min",
           "prob": 11,
-          "txt": "Entame active attendue. Portugal marque 17% de ses buts dans cette tranche, Croatia en encaisse 0% mais marque 10% des siens ici. Probabilité de but à 11%, tranche ouverte mais sans profil de rush décisif."
+          "txt": "Ouverture de match prudente mais pas stérile : le Portugal génère 17% de ses buts dans ce créneau, la Croatie en encaisse également 0% ici. Probabilité but de 11% — un but précoce est possible mais non dominant."
         },
         {
           "t": "15-30min",
           "prob": 4,
-          "txt": "Tranche la plus calme du match selon les données. Portugal y marque 17% de ses buts mais Croatia n'y marque aucun but (0%) et n'en encaisse aucun non plus (0%). Probabilité de but réduite à 4%, jeu de placement tactique probable."
+          "txt": "Tranche la plus calme du match : le Portugal marque 17% de ses buts ici mais la Croatie n'en inscrit aucun (0%) et n'en encaisse aucun (0%). Probabilité but à 4% — période de gestion tactique attendue."
         },
         {
           "t": "30-45min",
           "prob": 24,
-          "txt": "Montée en puissance avant la mi-temps. Portugal marque 17% de ses buts dans cette tranche, Croatia y inscrit 30% de ses buts et en encaisse 33%. Probabilité de but à 24%, période propice à l'ouverture du score."
+          "txt": "Premier pic d'intensité : le Portugal marque 17% de ses buts ici et la Croatie 30% des siens. La Croatie encaisse 33% de ses buts dans ce créneau. Probabilité but à 24% — montée en pression avant la mi-temps."
         },
         {
           "t": "45-60min",
           "prob": 24,
-          "txt": "Reprise à haute intensité. Profils identiques à la tranche 30-45 : Portugal marque 17% de ses buts ici, Croatia 30%, et Croatia en encaisse 33%. Probabilité de but à 24%, les ajustements tactiques à la mi-temps peuvent accélérer le rythme."
+          "txt": "Deuxième tranche la plus active du match : même profil que la 30-45 avec Portugal à 17% offensif et Croatie à 30%. La Croatie encaisse 33% de ses buts ici. Probabilité but à 24% — les buts de reprise sont fréquents pour ces deux équipes."
         },
         {
           "t": "60-75min",
           "prob": 4,
-          "txt": "Creux statistique notable. Portugal ne marque que 8% de ses buts dans cette tranche, Croatia 0%, et Croatia n'en encaisse aucun ici. Probabilité de but à 4%, période de gestion et de fatigue avec peu d'occasions tranchantes."
+          "txt": "Creux d'activité en milieu de seconde période : Portugal à 8% offensif, Croatie à 0%. Aucun but encaissé par l'un ou l'autre dans ce créneau selon les données. Probabilité but à 4% — phase de gestion des ressources."
         },
         {
           "t": "75-90min",
           "prob": 33,
-          "txt": "Tranche la plus décisive du match. Portugal inscrit 25% de ses buts ici mais surtout encaisse 42% des buts de Croatia dans cette fenêtre. Croatia marque 30% de ses buts dans ce final et en encaisse 33%. Probabilité de but maximale à 33%, période idéale pour les buts qui valident le BTTS."
+          "txt": "Tranche finale la plus prolifique du match : le Portugal marque 25% de ses buts ici et encaisse 42% des buts croates dans ce créneau. La Croatie marque 30% de ses buts en fin de match. Probabilité but à 33% — forte pression finale attendue, buts décisifs probables."
         }
       ],
-      "facteur_x": "Aucune des deux équipes n'a terminé un match sans marquer sur leurs 2 derniers matchs respectifs (0% de blancs), et les scores Monte-Carlo les plus fréquents intègrent majoritairement les deux équipes au score (1-1, 2-1, 3-1).",
-      "analyse_card": "Portugal affiche un xG de 1.40 et Croatia un xG de 0.80, avec aucune des deux équipes ayant échoué à marquer sur leurs 2 derniers matchs (0% sans marquer chacune). Les simulations Monte-Carlo placent 1-1 (10%), 2-1 (9%) et 3-1 (7%) comme trois des cinq scores les plus fréquents, soit des scénarios BTTS qui cumulent 26% des simulations à eux seuls. Les feuilles de match de Croatia montrent une capacité à marquer même en difficulté (xG 0.80 mais aucun blanc), ce qui renforce la cohérence du signal.",
-      "conseil_public": "Miser sur BTTS Oui à 1.70, soutenu par une convergence solide Poisson/Dixon-Coles/Monte-Carlo à 60% et des profils offensifs des deux équipes sans blanc sur les matchs récents.",
-      "contexte": "Phase de groupes de la Coupe du Monde 2026, match disputé sur terrain neutre au BMO Field le 2 juillet 2026. Portugal et Croatia se situent dans la phase cruciale de la compétition où chaque résultat détermine la qualification. Les deux sélections ont chacune remporté 1 match sur 2 disputés dans ce groupe.",
+      "facteur_x": "Lambda offensif Portugal à 2.117 combiné aux scores MC (2-1 à 11%, 3-1 à 6%) : les simulations placent massivement les scénarios à 3+ buts parmi les plus probables.",
+      "analyse_card": "Le modèle Poisson donne des lambdas de 2.117 pour le Portugal et 1.125 pour la Croatie, générant une probabilité Over 2.5 de 63% — confirmée à l'identique par Dixon-Coles et Monte-Carlo. Les scores MC dominants sont 2-1 (11%), 2-0 (9%) et 3-1 (6%), soit 26% cumulés sur des scores dépassant 2.5 buts, ce qui valide la cohérence interne du signal. Les xG des deux équipes (1.4 + 0.8 = 2.2 attendus) restent légèrement en dessous du seuil, ce qui tempère légèrement la confiance, mais le lambda offensif du Portugal (2.117) est significativement élevé.",
+      "conseil_public": "Jouer Over 2.5 à 1.73 — le signal est multi-convergent sur trois modèles distincts avec des scores MC cohérents pour ce marché.",
+      "contexte": "Phase de groupes de la Coupe du Monde 2026, match sur terrain neutre (BMO Field, Toronto). Portugal et Croatie affichent chacun 1 victoire en 2 matchs de groupe. Les deux équipes ont encore des enjeux de qualification directe selon leur position dans le groupe.",
       "vbet": "OUI",
       "scores": [
         "2-1"
       ],
       "mc_scores": [
         {
-          "score": "1-1",
-          "n": 484,
-          "pct": 10
+          "score": "2-1",
+          "n": 528,
+          "pct": 11
         },
         {
-          "score": "2-1",
-          "n": 448,
+          "score": "1-1",
+          "n": 470,
           "pct": 9
         },
         {
           "score": "2-0",
-          "n": 440,
+          "n": 453,
           "pct": 9
         },
         {
           "score": "1-0",
-          "n": 426,
+          "n": 428,
           "pct": 9
         },
         {
           "score": "3-1",
-          "n": 337,
-          "pct": 7
+          "n": 302,
+          "pct": 6
         }
       ],
       "paris_safe": {
-        "bet": "BTTS Oui",
-        "cote": 1.7,
+        "bet": "Over 2.5",
+        "cote": 1.73,
         "proba": "60%"
       },
       "paris_risque": {
@@ -1222,9 +1222,9 @@
       "stade": {
         "nom": "BMO Field — Toronto",
         "cap": "",
-        "meteo": "☀️",
-        "temp": "34°C",
-        "desc": "ciel dégagé"
+        "meteo": "☁️",
+        "temp": "35°C",
+        "desc": "partiellement nuageux"
       },
       "crit_home": {
         "fd": 50,
@@ -1382,14 +1382,14 @@
       "actu": [
         {
           "c": "Portugal",
-          "t": "Ligue 1: comment les présidents accueillent le vote du projet de loi sur la réforme du sport professionnel?",
-          "tx": "Ce lundi, l’Assemblée nationale a voté une loi visant à réformer le sport professionnel français. Multipropriété, diffusion gratuite, plafonnement des salaires de dirigeants. Des mesures qui partagent les présidents de clubs de Ligue 1, entre bonne chose et h…",
+          "t": "Budget fédéral : les charges d’intérêt de la dette ont dépassé les 10 milliards d’euros",
+          "tx": "Pour le ministre des Finances, Jan Jambon, ces chiffres démontrent une nouvelle fois la nécessité d’assainir les finances publiques. ...",
           "tm": "2026-07-01"
         },
         {
           "c": "Portugal",
-          "t": "Météo-France prévoit \"sans doute un nouvel épisode de fortes chaleurs à partir de ce week-end\" avec entre 30°C et 38°C dans l'Ouest et le Sud",
-          "tx": "\"Cela ne sera pas au niveau de ce que l'on a connu ces deux dernières semaines mais on n'en sera quand même pas loin et il faut ajouter que la nuit les températures vont de nouveau rester assez hautes\", a déclaré à France Télévisions Pierre Huat, prévisionnis…",
+          "t": "Ligue 1: comment les présidents accueillent le vote du projet de loi sur la réforme du sport professionnel?",
+          "tx": "Ce lundi, l’Assemblée nationale a voté une loi visant à réformer le sport professionnel français. Multipropriété, diffusion gratuite, plafonnement des salaires de dirigeants. Des mesures qui partagent les présidents de clubs de Ligue 1, entre bonne chose et h…",
           "tm": "2026-07-01"
         },
         {
@@ -1585,24 +1585,24 @@
       "p2": 13,
       "po15": 0,
       "po25": 73,
-      "btts": 62,
-      "c1": "1.92",
-      "cn": "3.35",
-      "c2": "4.45",
+      "btts": 63,
+      "c1": "1.95",
+      "cn": "3.30",
+      "c2": "4.37",
       "co15": "1.38",
       "co25": "2.21",
-      "cu25": "1.67",
-      "dc1x": "1.21",
-      "dc2x": "1.86",
+      "cu25": "1.69",
+      "dc1x": "1.22",
+      "dc2x": "1.85",
       "dc12": "1.33",
-      "cdc1x": "1.21",
-      "cdc2x": "1.86",
-      "ah_dom": "1.90",
-      "ah_ext": "4.15",
-      "co35": "3.95",
-      "cbtts": "1.95",
+      "cdc1x": "1.22",
+      "cdc2x": "1.85",
+      "ah_dom": "1.93",
+      "ah_ext": "3.95",
+      "co35": "3.88",
+      "cbtts": "1.93",
       "cbtts_non": "1.80",
-      "btts_oui": "1.95",
+      "btts_oui": "1.93",
       "btts_non": "1.80",
       "bookies": [
         {
@@ -1610,45 +1610,45 @@
           "o": "200€ offerts",
           "l": "#LIEN_BETCLIC",
           "c": "2.21",
-          "c1": "1.92",
-          "cn": "3.35",
-          "c2": "4.45"
+          "c1": "1.95",
+          "cn": "3.30",
+          "c2": "4.37"
         },
         {
           "n": "Winamax",
           "o": "100€ offerts",
           "l": "#LIEN_WINAMAX",
           "c": "2.18",
-          "c1": "1.89",
-          "cn": "3.32",
-          "c2": "4.42"
+          "c1": "1.92",
+          "cn": "3.27",
+          "c2": "4.34"
         },
         {
           "n": "Unibet",
           "o": "100€ remboursés",
           "l": "#LIEN_UNIBET",
           "c": "2.19",
-          "c1": "1.90",
-          "cn": "3.33",
-          "c2": "4.43"
+          "c1": "1.93",
+          "cn": "3.28",
+          "c2": "4.35"
         },
         {
           "n": "PMU",
           "o": "100€ offerts",
           "l": "#LIEN_PMU",
           "c": "2.16",
-          "c1": "1.87",
-          "cn": "3.30",
-          "c2": "4.40"
+          "c1": "1.90",
+          "cn": "3.25",
+          "c2": "4.32"
         },
         {
           "n": "Bet365",
           "o": "100€ bonus",
           "l": "#LIEN_BET365",
           "c": "2.24",
-          "c1": "1.95",
-          "cn": "3.38",
-          "c2": "4.48"
+          "c1": "1.98",
+          "cn": "3.33",
+          "c2": "4.40"
         }
       ],
       "edge": "73% (modèle)",
@@ -1659,48 +1659,48 @@
       "no_signal": false,
       "no_signal_label": "",
       "mise": "2-3% bankroll",
-      "verdict_shark": "Over 2.5 à 2.21 — les trois modèles convergent à 73% et les scores Monte-Carlo les plus fréquents (2-1, 3-1, 3-0, 2-0) génèrent majoritairement 3 buts ou plus.",
+      "verdict_shark": "Over 2.5 à 2.21 — les trois modèles convergent à 73% et les scores Monte-Carlo dominants (2-1, 3-1, 3-0) confirment un match à 3 buts ou plus.",
       "scenario": {
-        "phase1": "La Suisse affiche une forme dominante avec 3 victoires consécutives et un bilan de 2V/2 sur ses matchs référencés. L'Algérie, 1V/2, a marqué dans un seul de ses deux derniers matchs en déplacement (50% sans marquer), ce qui nuance sa capacité offensive.",
-        "phase2": "Poisson (73%), Dixon-Coles et Monte-Carlo convergent tous à 73% sur l'Over 2.5. Le score attendu central est 3-1, et les 5 premiers scores MC couvrent des scénarios à 3+ buts pour 4 d'entre eux. La valeur est présente à 2.21 face à une probabilité modélisée de 73%.",
-        "phase3": "Les tranches horaires montrent une activité offensive répartie sur l'ensemble du match : 24% de probabilité de but entre 15-30min, 22% entre 45-60min et 23% entre 75-90min. Le match devrait rester ouvert et productif jusqu'en fin de rencontre."
+        "phase1": "Switzerland domine nettement la première heure avec un lambda offensif élevé (2.657). On attend un ou deux buts tôt, portés par les tranches 15-30min (24% de probabilité but) et 0-15min (14%). Algeria, malgré un lambda plus contenu, dispose d'une attaque capable de punir sur transition.",
+        "phase2": "Autour de la mi-temps et en début de seconde mi-temps (45-60min, 22%), les automatismes offensifs de Switzerland se confirment. Algeria peut réduire l'écart grâce à sa distribution de buts en seconde période (18% de ses buts entre 45-60min et 25% entre 75-90min).",
+        "phase3": "La tranche 75-90min est statistiquement active (23% de probabilité but globale) : Algeria marque 25% de ses buts dans ce créneau et encaisse 50%. Si le score est déjà élevé, des buts supplémentaires sont probables dans le money-time, confortant l'Over 2.5."
       },
       "scenario_15min": [
         {
           "t": "0-15min",
           "prob": 14,
-          "txt": "Ouverture prudente : la Suisse génère 25% de ses buts dans cette tranche, l'Algérie seulement 5%. Probabilité de but modérée à 14%, le rythme est encore en installation."
+          "txt": "Ouverture prudente mais déjà dangereuse : Switzerland génère 25% de ses buts dans cette tranche tandis qu'Algeria encaisse 0% ici. La probabilité reste modérée à 14%, signalant un début de match où Switzerland cherche à prendre l'initiative sans que les portes s'ouvrent totalement."
         },
         {
           "t": "15-30min",
           "prob": 24,
-          "txt": "Tranche la plus active du premier acte : la Suisse y concentre 33% de ses buts et l'Algérie 28%. Probabilité de but à 24% — moment clé pour le premier score."
+          "txt": "Tranche la plus fertile du match : Switzerland y inscrit 33% de ses buts et Algeria 28% des siens. Avec 24% de probabilité de but, c'est le créneau clé de la première mi-temps pour voir le tableau d'affichage bouger dans les deux sens."
         },
         {
           "t": "30-45min",
           "prob": 9,
-          "txt": "Tranche calme avec seulement 9% de probabilité de but. La Suisse n'y réalise que 17% de ses buts et l'Algérie 8% — repli tactique attendu avant la mi-temps."
+          "txt": "Creux statistique en fin de première mi-temps : Switzerland ne marque que 17% de ses buts ici et Algeria seulement 8%. La probabilité retombe à 9%, suggérant un match qui se stabilise avant la pause, même si une frappe surprise reste possible."
         },
         {
           "t": "45-60min",
           "prob": 22,
-          "txt": "Reprise explosive : l'Algérie concentre 45% de ses buts encaissés ici et 18% de ses buts marqués. Probabilité de but à 22%, tranche à surveiller pour une réaction ou un break décisif."
+          "txt": "Rebond immédiat après la mi-temps : Switzerland encaisse 45% des buts d'Algeria dans cette tranche, et Algeria en marque 18%. La probabilité remonte à 22%, signe que les ajustements tactiques à la pause peuvent laisser des espaces exploitables dès la reprise."
         },
         {
           "t": "60-75min",
           "prob": 9,
-          "txt": "Tranche creuse en seconde période : 9% de probabilité de but seulement. La Suisse (17%) et l'Algérie (18%) y sont peu prolifiques — gestion du score probable."
+          "txt": "Second creux du match : Switzerland ne marque que 17% de ses buts dans cette période et Algeria 18%, mais les deux équipes encaissent 0% ici. La probabilité de 9% refl��te une phase de gestion où les équipes cherchent à consolider leur position avant le sprint final."
         },
         {
           "t": "75-90min",
           "prob": 23,
-          "txt": "Final très actif : l'Algérie marque 25% de ses buts ici et encaisse 50% des buts suisses. Probabilité de but à 23% — tranche décisive pour confirmer ou creuser l'écart."
+          "txt": "Money-time explosif : Algeria inscrit 25% de ses buts dans ce créneau et en encaisse 50%, tandis que Switzerland marque 8% des siens ici. La probabilité de 23% traduit une fin de match ouverte où les résultats ne sont pas encore scellés, favorisant l'atteinte ou le dépassement du seuil des 3 buts."
         }
       ],
-      "facteur_x": "Lambda offensif suisse à 2.657 couplé aux scores Monte-Carlo dominants (2-1, 3-1, 3-0) : la grande majorité des simulations produisent au moins 3 buts.",
-      "analyse_card": "Le modèle Poisson (73%), Dixon-Coles et Monte-Carlo s'alignent sur un Over 2.5. Les top scores MC sont 2-1 (10%), 3-1 (8%), 3-0 (8%) et 2-0 (8%) : 26% des simulations produisent déjà 4 buts ou plus (2-1 et 3-1 seuls = 18%). Le lambda offensif de la Suisse (2.657) est nettement supérieur à celui de l'Algérie (1.118), signalant un volume de buts attendu élevé malgré le contexte défensif de la phase de groupes.",
-      "conseil_public": "Miser sur Over 2.5 buts à 2.21 avec une mise modérée, en cohérence avec la convergence des trois modèles et la distribution MC.",
-      "contexte": "Phase de groupes de la Coupe du Monde 2026, match joué sur terrain neutre à Vancouver (BC Place). La Suisse présente un bilan de 2 victoires en 2 matchs et 3 succès consécutifs toutes compétitions confondues. L'Algérie affiche 1 victoire en 2 matchs mais reste sur 4 victoires lors de ses 5 dernières sorties.",
+      "facteur_x": "Lambda Switzerland de 2.657 combiné à 73% Over 2.5 sur les trois modèles, avec 4 des 5 top scores MC dépassant 2 buts au total.",
+      "analyse_card": "Les lambdas Poisson (Switzerland 2.657 / Algeria 1.118) génèrent une probabilité Over 2.5 identique à 73% dans les trois modèles (Poisson, Dixon-Coles, Monte-Carlo). Les cinq scores Monte-Carlo les plus fréquents totalisent tous au moins 3 buts dans quatre cas sur cinq (2-1, 3-1, 3-0, 3-0), validant la cohérence directe avec ce marché. Switzerland affiche 3 victoires consécutives et n'a été blanchie dans aucun de ses matchs (0 match sans marquer sur 2), signe d'une attaque active qui s'inscrit dans ce contexte offensif.",
+      "conseil_public": "Jouer Over 2.5 à 2.21 : la convergence totale des trois modèles à 73% et la confirmation des top scores MC offrent un signal clair malgré la cote modérée.",
+      "contexte": "Phase de groupes de la Coupe du Monde 2026 à BC Place (terrain neutre). Switzerland aborde ce match en pleine forme avec 3 victoires consécutives ; Algeria a enchaîné 4 succès sur ses 5 derniers matchs. Les deux équipes ont un besoin de points important en phase de groupes, mais l'ajustement défensif typique des Coupes du Monde a déjà été intégré dans les lambdas.",
       "vbet": "OUI",
       "scores": [
         "3-1"
@@ -1708,27 +1708,27 @@
       "mc_scores": [
         {
           "score": "2-1",
-          "n": 499,
+          "n": 493,
           "pct": 10
         },
         {
-          "score": "3-1",
-          "n": 394,
+          "score": "2-0",
+          "n": 417,
           "pct": 8
         },
         {
-          "score": "2-0",
-          "n": 384,
+          "score": "3-1",
+          "n": 385,
           "pct": 8
+        },
+        {
+          "score": "1-1",
+          "n": 366,
+          "pct": 7
         },
         {
           "score": "3-0",
-          "n": 383,
-          "pct": 8
-        },
-        {
-          "score": "1-0",
-          "n": 329,
+          "n": 339,
           "pct": 7
         }
       ],
@@ -2096,21 +2096,21 @@
       "btts": 46,
       "c1": "3.33",
       "cn": "2.90",
-      "c2": "2.47",
-      "co15": "1.57",
-      "co25": "2.80",
-      "cu25": "1.44",
+      "c2": "2.49",
+      "co15": "1.60",
+      "co25": "2.86",
+      "cu25": "1.41",
       "dc1x": "1.55",
       "dc2x": "1.33",
       "dc12": "1.40",
       "cdc1x": "1.55",
       "cdc2x": "1.33",
-      "ah_dom": "3.22",
+      "ah_dom": "3.30",
       "ah_ext": "2.38",
-      "co35": "5.55",
-      "cbtts": "2.15",
+      "co35": "5.78",
+      "cbtts": "2.21",
       "cbtts_non": "1.62",
-      "btts_oui": "2.15",
+      "btts_oui": "2.21",
       "btts_non": "1.62",
       "bookies": [
         {
@@ -2120,7 +2120,7 @@
           "c": "1.62",
           "c1": "3.33",
           "cn": "2.90",
-          "c2": "2.47"
+          "c2": "2.49"
         },
         {
           "n": "Winamax",
@@ -2129,7 +2129,7 @@
           "c": "1.59",
           "c1": "3.30",
           "cn": "2.87",
-          "c2": "2.44"
+          "c2": "2.46"
         },
         {
           "n": "Unibet",
@@ -2138,7 +2138,7 @@
           "c": "1.60",
           "c1": "3.31",
           "cn": "2.88",
-          "c2": "2.45"
+          "c2": "2.47"
         },
         {
           "n": "PMU",
@@ -2147,7 +2147,7 @@
           "c": "1.57",
           "c1": "3.28",
           "cn": "2.85",
-          "c2": "2.42"
+          "c2": "2.44"
         },
         {
           "n": "Bet365",
@@ -2156,7 +2156,7 @@
           "c": "1.65",
           "c1": "3.36",
           "cn": "2.93",
-          "c2": "2.50"
+          "c2": "2.52"
         }
       ],
       "edge": "54% (modèle)",
@@ -2167,77 +2167,77 @@
       "no_signal": false,
       "no_signal_label": "",
       "mise": "2-3% bankroll",
-      "verdict_shark": "BTTS Non à 1.62 — les modèles convergent à 54% pour qu'au moins une équipe reste muette, cohérent avec les top scores Monte-Carlo (1-0, 0-1, 0-0 cumulant 34%)",
+      "verdict_shark": "BTTS Non à 1.62 — le modèle attribue 54% de probabilité à ce scénario, cohérent avec les top scores Monte-Carlo dominés par des résultats à score unique (1-0 14%, 0-1 11%, 0-0 10%).",
       "scenario": {
-        "phase1": "Australia présente une solidité défensive notable avec 1 clean sheet sur 1 match dans ce cadre, et une forme récente instable (3 défaites consécutives avant un rebond). Egypt marque dans ses matchs mais n'a pas réussi à maintenir son but à zéro, avec l'absence de Hamdi Fathy qui fragilise davantage son dispositif offensif.",
-        "phase2": "Les lambdas Poisson (1.253 pour Australia, 1.012 pour Egypt) indiquent des attaques modérées, cohérentes avec une phase de groupes CDM défensive. La probabilité modèle de BTTS Non atteint 54%, soit la valeur la plus élevée parmi les marchés disponibles, avec une cote à 1.62 présentant une légère value.",
-        "phase3": "Les simulations Monte-Carlo valident le signal : les scores sans BTTS (1-0, 0-1, 0-0) cumulent 34% des simulations contre 13% pour le seul score 1-1. La convergence entre les trois modèles (Poisson 54%, tactique défensive, MC) est solide, même si l'échantillon de matchs reste limité."
+        "phase1": "Australia affiche une solidité défensive marquée sur son match référencé (0 but encaissé, clean sheet), tandis qu'Egypt, malgré 2 matchs sans concéder un clean sheet, a toujours marqué. Les formes récentes divergent : Australia sort de 3 défaites consécutives avant deux victoires, Egypt présente une forme plus régulière (LWDWW).",
+        "phase2": "Les lambdas Poisson (Australia 1.253 / Egypt 1.012) indiquent une légère supériorité australienne en termes d'espérance de buts. La proba BTTS Non de 54% est cohérente entre Poisson, Dixon-Coles et Monte-Carlo. Les trois modèles s'accordent sur une domination australienne modérée (41-43%).",
+        "phase3": "Les scores Monte-Carlo concentrent les résultats sur des scores à un but d'écart ou nuls : 1-0 (14%), 1-1 (13%), 0-1 (11%), 0-0 (10%), 2-0 (9%). Quatre des cinq top scores ne voient pas les deux équipes marquer, validant structurellement le BTTS Non."
       },
       "scenario_15min": [
         {
           "t": "0-15min",
           "prob": 7,
-          "txt": "Démarrage prudent attendu : Australia ne concentre que 0% de ses buts marqués dans cette tranche, tandis qu'Egypt en inscrit 12%. La probabilité de but reste très basse à 7%, les deux équipes installant leur dispositif défensif."
+          "txt": "Ouverture prudente : Australia ne marque que 0% de ses buts dans cette tranche, Egypt 12%. Probabilité de but très faible (7%) — les deux équipes s'observent et organisent leur bloc défensif."
         },
         {
           "t": "15-30min",
           "prob": 13,
-          "txt": "Le rythme monte légèrement : Australia génère 17% de ses buts dans cette tranche, Egypt 19%. La probabilité de but atteint 13%, traduisant une phase de jeu plus équilibrée sans domination claire."
+          "txt": "Légère montée en pression : Australia génère 17% de ses buts ici, Egypt 19%. La probabilité de but grimpe à 13%, avec Egypt qui commence à peser offensivement."
         },
         {
           "t": "30-45min",
           "prob": 20,
-          "txt": "Tranche la plus productive de la première mi-temps : Australia marque 17% de ses buts ici, Egypt 12%, mais Egypt encaisse 29% de ses buts dans ce créneau. La pression australienne pourrait s'intensifier avant la pause, avec une probabilité de but à 20%."
+          "txt": "Tranche la plus active de la première période : Australia concentre 17% de ses buts et encaisse 21% des buts d'Egypt ici. Egypt réalise 12% de ses réalisations dans ce créneau. Probabilité de but à 20% — pic avant la pause."
         },
         {
           "t": "45-60min",
           "prob": 18,
-          "txt": "Début de seconde mi-temps avec une probabilité stable à 18%. Australia concentre 17% de ses buts dans cette tranche, Egypt 19%, mais Australia n'encaisse que 7% de ses buts ici — sa défense est particulièrement solide en ce début de seconde période."
+          "txt": "Reprise avec un léger recul d'intensité : Australia marque 17% et encaisse 7% des buts d'Egypt dans cette tranche. Egypt marque 19% mais encaisse 29% de ses buts concédés ici. Probabilité stable à 18%."
         },
         {
           "t": "60-75min",
           "prob": 19,
-          "txt": "Tranche à surveiller pour Australia : 33% de ses buts sont inscrits dans ce créneau, soit la part la plus élevée de leur production offensive. Egypt en revanche n'encaisse aucun but (0%) dans cette tranche sur ses statistiques récentes, ce qui crée une tension tactique intéressante."
+          "txt": "Tranche offensive pour Australia : 33% de ses buts sont inscrits dans ce créneau, contre seulement 15% pour Egypt. Egypt encaisse 0% dans cette tranche mais Australia est nettement plus dangereux offensivement (probabilité but 19%)."
         },
         {
           "t": "75-90min",
           "prob": 24,
-          "txt": "Tranche la plus à risque du match avec 24% de probabilité de but. Egypt marque 23% de ses buts ici et Australia encaisse 43% de ses buts dans ce créneau — les fins de match sont le moment de vulnérabilité le plus marqué pour Australia, à surveiller en cas de score serré."
+          "txt": "Fin de match la plus fertile : Australia marque 17% de ses buts ici, Egypt 23%. Surtout, Egypt encaisse 43% de ses buts dans ce créneau final — la probabilité de but culmine à 24%, avec un risque réel de but australien en fin de rencontre."
         }
       ],
-      "facteur_x": "Le cumul 1-0 + 0-1 + 0-0 dans les top scores Monte-Carlo atteint 34% contre seulement 13% pour le score 1-1, ce qui signale structurellement une probabilité plus forte de BTTS Non que Oui malgré les lambdas proches (1.253 / 1.012).",
-      "analyse_card": "Les scores Monte-Carlo les plus probables incluent 1-0 (13%), 0-1 (11%) et 0-0 (10%), soit 34% de simulations sans BTTS Oui. La note tactique souligne deux défenses solides en phase de groupes de Coupe du Monde, contexte historiquement favorable aux matchs à faible scoring. L'absence de Hamdi Fathy affaiblit le potentiel offensif égyptien, renforçant la probabilité qu'une des deux équipes ne marque pas.",
-      "conseil_public": "Jouer BTTS Non à 1.62 — la convergence défensive, les absences égyptiennes et les simulations Monte-Carlo pointent vers un match où l'une des deux équipes ne trouve pas le chemin des filets.",
-      "contexte": "Phase de groupes de la Coupe du Monde 2026, Australia contre Egypt à l'AT&T Stadium sur terrain neutre. Les deux équipes sont dans une logique de qualification, le jeu défensif est typiquement privilégié à ce stade de la compétition. Australia affiche une clean sheet sur son seul match disputé dans ce format, Egypt n'en a aucune sur ses deux derniers matches.",
-      "vbet": "NON",
+      "facteur_x": "Top scores Monte-Carlo sur 5000 simulations : 1-0 (14%), 0-1 (11%) et 0-0 (10%) cumulent 35% des scénarios sans que les deux équipes marquent simultanément — signal le plus fort en faveur du BTTS Non.",
+      "analyse_card": "Les simulations Monte-Carlo placent 1-0, 0-1 et 0-0 parmi les 4 scores les plus probables (35% cumulé), ce qui converge fortement vers un BTTS Non. Le signal tactique indique deux défenses solides, renforçant explicitement ce marché. Australia n'a encaissé aucun but sur son seul match suivi (CS 1/1), et la proba modèle de 54% génère une value positive face à la cote 1.62 (valeur implicite bookmaker ~62%).",
+      "conseil_public": "Miser sur BTTS Non à 1.62 — la convergence entre les scores MC, la solidité défensive d'Australia et la note tactique justifie ce choix sans sur-exposition.",
+      "contexte": "Phase de groupes de la Coupe du Monde 2026, sur terrain neutre à l'AT&T Stadium. Les deux équipes sont en quête de points décisifs pour la qualification, ce qui favorise un jeu prudent et organisé défensivement.",
+      "vbet": "OUI",
       "scores": [
         "1-0"
       ],
       "mc_scores": [
         {
-          "score": "1-1",
-          "n": 658,
-          "pct": 13
+          "score": "1-0",
+          "n": 710,
+          "pct": 14
         },
         {
-          "score": "1-0",
-          "n": 656,
+          "score": "1-1",
+          "n": 642,
           "pct": 13
         },
         {
           "score": "0-1",
-          "n": 561,
+          "n": 540,
           "pct": 11
         },
         {
           "score": "0-0",
-          "n": 479,
+          "n": 505,
           "pct": 10
         },
         {
           "score": "2-0",
-          "n": 385,
-          "pct": 8
+          "n": 428,
+          "pct": 9
         }
       ],
       "paris_safe": {
@@ -2255,7 +2255,7 @@
         "nom": "AT&T Stadium — Dallas",
         "cap": "",
         "meteo": "☁️",
-        "temp": "35°C",
+        "temp": "36°C",
         "desc": "nuageux"
       },
       "crit_home": {
@@ -2626,68 +2626,68 @@
       "po15": 0,
       "po25": 49,
       "btts": 47,
-      "c1": "1.16",
-      "cn": "7.50",
+      "c1": "1.15",
+      "cn": "7.70",
       "c2": "--",
-      "co15": "1.18",
-      "co25": "1.67",
-      "cu25": "2.25",
+      "co15": "1.17",
+      "co25": "1.65",
+      "cu25": "2.26",
       "dc1x": "1.02",
-      "dc2x": "5.40",
-      "dc12": "1.10",
+      "dc2x": "5.45",
+      "dc12": "1.09",
       "cdc1x": "1.02",
-      "cdc2x": "5.40",
-      "ah_dom": "1.14",
+      "cdc2x": "5.45",
+      "ah_dom": "1.13",
       "ah_ext": "--",
-      "co35": "2.62",
-      "cbtts": "2.72",
+      "co35": "2.55",
+      "cbtts": "2.75",
       "cbtts_non": "1.40",
-      "btts_oui": "2.72",
+      "btts_oui": "2.75",
       "btts_non": "1.40",
       "bookies": [
         {
           "n": "Betclic",
           "o": "200€ offerts",
           "l": "#LIEN_BETCLIC",
-          "c": "2.25",
-          "c1": "1.16",
-          "cn": "7.50",
+          "c": "2.26",
+          "c1": "1.15",
+          "cn": "7.70",
           "c2": "--"
         },
         {
           "n": "Winamax",
           "o": "100€ offerts",
           "l": "#LIEN_WINAMAX",
-          "c": "2.22",
-          "c1": "1.13",
-          "cn": "7.47",
+          "c": "2.23",
+          "c1": "1.12",
+          "cn": "7.67",
           "c2": "--"
         },
         {
           "n": "Unibet",
           "o": "100€ remboursés",
           "l": "#LIEN_UNIBET",
-          "c": "2.23",
-          "c1": "1.14",
-          "cn": "7.48",
+          "c": "2.24",
+          "c1": "1.13",
+          "cn": "7.68",
           "c2": "--"
         },
         {
           "n": "PMU",
           "o": "100€ offerts",
           "l": "#LIEN_PMU",
-          "c": "2.20",
-          "c1": "1.11",
-          "cn": "7.45",
+          "c": "2.21",
+          "c1": "1.10",
+          "cn": "7.65",
           "c2": "--"
         },
         {
           "n": "Bet365",
           "o": "100€ bonus",
           "l": "#LIEN_BET365",
-          "c": "2.28",
-          "c1": "1.19",
-          "cn": "7.53",
+          "c": "2.29",
+          "c1": "1.18",
+          "cn": "7.73",
           "c2": "--"
         }
       ],
@@ -2695,86 +2695,86 @@
       "marche": "TOTAL_BUTS",
       "risque": "MODERE",
       "pari_rec": "Under 2.5",
-      "cote_rec": "2.25",
+      "cote_rec": "2.26",
       "no_signal": false,
       "no_signal_label": "",
       "mise": "2-3% bankroll",
-      "verdict_shark": "Under 2.5 à 2.25 — les scores Monte-Carlo les plus probables (1-0 et 2-0 à 25% combinés) et la solidité défensive des deux équipes convergent vers un match à moins de 3 buts.",
+      "verdict_shark": "Under 2.5 à 2.26 — les scores Monte-Carlo les plus fréquents (1-0, 2-0, 1-1) cumulent 47% des simulations et restent majoritairement sous le seuil de 2.5 buts.",
       "scenario": {
-        "phase1": "L'Argentine présente un bilan défensif impeccable avec 2 clean sheets sur 2 matchs, tandis que le Cap-Vert n'a pas marqué dans la moitié de ses sorties récentes — profil défensif dominant des deux côtés.",
-        "phase2": "Les trois modèles (Poisson 62%, Dixon-Coles 61%, Monte-Carlo 62%) s'accordent sur la victoire argentine, et les top scores simulés (1-0, 2-0, 2-1) indiquent que la majorité des simulations terminent à 2 buts ou moins — Under 2.5 cohérent.",
-        "phase3": "Avec un lambda offensif combiné de 2.636 (1.836 + 0.8), le nombre moyen de buts attendus est proche de 2.6, ce qui place mécaniquement Under et Over 2.5 à quasi-égalité, mais la prudence défensive propre à la phase de groupes CDM penche vers l'Under."
+        "phase1": "L'Argentine affiche une solidité défensive remarquable avec 2 clean sheets en 2 matchs et 3 victoires consécutives. Cap-Vert reste sans marquer dans 50% de ses matchs récents et n'a pas gagné en 2 rencontres, ce qui indique un potentiel offensif limité.",
+        "phase2": "Les lambdas Poisson (1.836 vs 0.8) et les trois modèles concordent sur une domination argentine sans explosion offensive. La proba Under 2.5 à 51% dépasse légèrement l'Over, et les scores MC les plus fréquents pointent vers des matchs peu prolifiques.",
+        "phase3": "Les tranches horaires montrent une activité de buts modérée : 9% de probabilité dans les quatre premières tranches de 15 min, avec des pics à 14% (30-45 min) et 17% (45-60 min et 75-90 min). Aucune tranche ne suggère une avalanche de buts, cohérent avec l'Under 2.5."
       },
       "scenario_15min": [
         {
           "t": "0-15min",
           "prob": 9,
-          "txt": "Phase d'observation classique en début de match de Coupe du Monde : l'Argentine génère 11% de ses buts sur cette tranche, le Cap-Vert également 13%, mais la probabilité de but reste basse à 9% — les deux équipes se jaugent."
+          "txt": "Ouverture prudente : l'Argentine ne réalise que 11% de ses buts sur cette tranche, Cap-Vert 13%. Faible activité offensive des deux côtés, probabilité but à 9%."
         },
         {
           "t": "15-30min",
           "prob": 9,
-          "txt": "Rythme similaire au premier quart d'heure : l'Argentine (11% de ses buts) et le Cap-Vert (13%) restent prudents — probabilité de but maintenue à 9%, le match reste fermé."
+          "txt": "La même tendance se confirme : 11% des buts argentins et 13% des buts cap-verdiens concentrés ici. Le match reste fermé, probabilité but stable à 9%."
         },
         {
           "t": "30-45min",
           "prob": 14,
-          "txt": "Montée en pression en fin de première mi-temps : l'Argentine concentre 33% de ses buts sur cette tranche, portant la probabilité de but à 14% — c'est la fenêtre la plus dangereuse de la première période."
+          "txt": "L'Argentine monte en régime avec 33% de ses buts marqués sur cette tranche, contre seulement 13% pour Cap-Vert. Probabilité but à 14%, pic relatif de la première mi-temps."
         },
         {
           "t": "45-60min",
           "prob": 17,
-          "txt": "Tranche la plus active du match : le Cap-Vert encaisse 44% de ses buts adverses sur cette période, et marque lui-même 25% de ses buts ici — probabilité maximale de 17%, risque de but à l'ouverture de la seconde mi-temps."
+          "txt": "Cap-Vert encaisse 44% de ses buts sur cette tranche en tant qu'équipe qui subit, et marque 25% de ses buts ici. Tranche la plus active du match avec 17% de probabilité but."
         },
         {
           "t": "60-75min",
           "prob": 9,
-          "txt": "Ralentissement en milieu de seconde mi-temps : l'Argentine ne marque que 11% de ses buts ici, et le Cap-Vert 13% — les équipes gèrent leur avantage ou leur déficit, probabilité de but retombe à 9%."
+          "txt": "Retour à la prudence : l'Argentine ne produit que 11% de ses buts sur cette période, Cap-Vert 13%. Gestion du résultat probable, probabilité but retombe à 9%."
         },
         {
           "t": "75-90min",
           "prob": 17,
-          "txt": "Dernière montée en puissance : l'Argentine inscrit 33% de ses buts sur ce segment final, et le Cap-Vert 25% des siens — probabilité remonte à 17%, pouvant influencer le total final mais pas suffisamment pour dépasser 2.5 buts dans la majorité des scénarios."
+          "txt": "Dernière poussée offensive : l'Argentine génère 33% de ses buts sur ce créneau, Cap-Vert 25%. Probabilité but à 17%, mais les scénarios MC indiquent que la majorité des matchs restent sous 3 buts à ce stade."
         }
       ],
-      "facteur_x": "Cape Verde Islands affiche un lambda offensif de seulement 0.8 et n'a pas marqué dans 50% de ses matchs récents — signal le plus fort en faveur d'un match à bas total de buts.",
-      "analyse_card": "Le modèle place l'Under 2.5 à 51% contre 49% pour l'Over, mais les scores Monte-Carlo les plus fréquents sont 1-0 (13%) et 2-0 (12%), soit 25% cumulés sur des scores ≤ 2 buts. Cape Verde Islands n'a marqué aucun but dans 50% de ses matchs récents, et la note tactique du pipeline confirme deux défenses solides. Le lambda offensif de Cape Verde (0.8) est particulièrement bas, ce qui limite mécaniquement les chances d'atteindre 3 buts au total.",
-      "conseil_public": "Miser sur Under 2.5 buts : les top scores Monte-Carlo et le profil défensif de Cape Verde Islands rendent un match fermé nettement plus probable qu'un match prolifique.",
-      "contexte": "Phase de groupes de la Coupe du Monde 2026 au Hard Rock Stadium — match sur terrain neutre entre l'Argentine, solide favorite avec 3 victoires consécutives, et le Cap-Vert, équipe organisée défensivement mais peu prolifique offensivement.",
-      "vbet": "NON",
+      "facteur_x": "37% des simulations Monte-Carlo produisent un score final à exactement 1 ou 2 buts (1-0 14%, 2-0 12%, 1-1 11%), soit la majorité des scénarios les plus probables, tous compatibles avec l'Under 2.5.",
+      "analyse_card": "Les trois modèles (Poisson, Dixon-Coles, Monte-Carlo) convergent vers une proba Under 2.5 de 51%, supérieure à celle de l'Over. Les top scores MC sont 1-0 (14%), 2-0 (12%) et 1-1 (11%), ce qui représente 37% des simulations à exactement 1 ou 2 buts au total — cohérent avec l'Under 2.5. Cap-Vert n'a pas marqué dans 50% de ses matchs récents et le contexte tactique signale deux défenses solides, renforçant la tendance basse en termes de volume de buts.",
+      "conseil_public": "Jouer Under 2.5 à 2.26 en s'appuyant sur la concentration des scénarios MC autour de 1 à 2 buts et sur le profil défensif des deux équipes en phase de groupes.",
+      "contexte": "Phase de groupes de la Coupe du Monde 2026 au Hard Rock Stadium, terrain neutre. L'Argentine est largement favorite avec 62% de probabilité de victoire selon les trois modèles ; Cap-Vert cherche à exister dans le tournoi avec un bilan de 0 victoire en 2 matchs. L'enjeu de qualification pousse les deux équipes à ne pas s'exposer défensivement.",
+      "vbet": "OUI",
       "scores": [
-        "2-0"
+        "1-0"
       ],
       "mc_scores": [
         {
           "score": "1-0",
-          "n": 664,
-          "pct": 13
+          "n": 683,
+          "pct": 14
         },
         {
           "score": "2-0",
-          "n": 623,
+          "n": 600,
           "pct": 12
         },
         {
           "score": "1-1",
-          "n": 515,
-          "pct": 10
+          "n": 546,
+          "pct": 11
         },
         {
           "score": "2-1",
-          "n": 505,
+          "n": 506,
           "pct": 10
         },
         {
           "score": "3-0",
-          "n": 367,
+          "n": 337,
           "pct": 7
         }
       ],
       "paris_safe": {
         "bet": "Under 2.5",
-        "cote": 2.25,
+        "cote": 2.26,
         "proba": "62%"
       },
       "paris_risque": {
@@ -3203,76 +3203,76 @@
       "no_signal": false,
       "no_signal_label": "",
       "mise": "2-3% bankroll",
-      "verdict_shark": "Under 2.5 à 1.66 — les scores Monte-Carlo concentrent 50% des simulations sur 0-0, 1-0 et 0-1, confirmant une dynamique peu prolifique.",
+      "verdict_shark": "Under 2.5 à 1.66 — les scores Monte-Carlo les plus fréquents (1-0, 1-1, 0-1, 0-0) représentent 50% des simulations et confirment un match à faible volume de buts.",
       "scenario": {
-        "phase1": "Match équilibré sur terrain neutre : Colombia en forme mais Ghana solide défensivement (1 clean sheet sur 2). Les deux équipes ont failli marquer dans 50% de leurs matchs, signalant une prudence offensive en phase de groupes CDM.",
-        "phase2": "Les trois modèles (Poisson, Dixon-Coles, Monte-Carlo) s'accordent : moins de 37% de probabilité pour l'Over 2.5, lambdas contenus sous 1.15. La distribution des scores MC favorise les issues à faible scoring.",
-        "phase3": "La tranche 75-90min concentre 45% de probabilité de but selon les données réelles — un éventuel but tardif reste le scénario le plus probable, mais insuffisant pour dépasser 2.5 buts au total sur 90 minutes."
+        "phase1": "Colombia domine la forme récente avec 2 victoires consécutives et une solidité défensive confirmée (2 clean sheets sur 2). Ghana accumule 2 défaites consécutives et peine à marquer régulièrement.",
+        "phase2": "Les trois modèles (Poisson 64%, Dixon-Coles implicite, Monte-Carlo via top scores) convergent vers un match peu prolifique. Les lambdas (1.123 / 1.020) restent modérés, cohérents avec un contexte de phase de groupes de Coupe du Monde.",
+        "phase3": "La tranche 75-90min concentre 45% de probabilité de but, suggérant une fin de match plus ouverte si le score reste serré. Mais même en intégrant cette accélération, les simulations placent le score final le plus probable à 1-0, en dessous de 2.5 buts."
       },
       "scenario_15min": [
         {
           "t": "0-15min",
           "prob": 11,
-          "txt": "Démarrage prudent : Colombia génère 11% de ses buts dans cette tranche, Ghana 25%. Malgré l'activité offensive de Ghana en début de match, la probabilité de but est limitée à 11% — les défenses prennent leurs marques."
+          "txt": "Démarrage prudent : Colombia génère 11% de ses buts sur cette tranche, Ghana 25% des siens. La probabilité globale de but est de 11%, reflétant une entrée en matière fermée typique d'un match de phase de groupes à fort enjeu."
         },
         {
           "t": "15-30min",
           "prob": 12,
-          "txt": "Légère montée en pression : Colombia maintient 11% de ses buts ici, Ghana 13%. Ghana a encaissé 25% de ses buts dans cette tranche, laissant Colombia potentiellement dangereux en transition. Probabilité but : 12%."
+          "txt": "Légère montée en pression : Colombia marque 11% de ses buts ici, Ghana 13%. Ghana encaisse 25% de ses buts sur cette tranche, ce qui expose légèrement sa défense. Probabilité de but à 12%, phase toujours équilibrée."
         },
         {
           "t": "30-45min",
           "prob": 6,
-          "txt": "Tranche la plus stérile du match : Colombia ne marque aucun but dans ce créneau (0%) et n'en encaisse aucun de Ghana (0%). Ghana marque 25% de ses buts ici mais encaisse 0%. Probabilité but très basse à 6%."
+          "txt": "Tranche la plus fermée du match : Colombia ne marque aucun but ici (0%) et Ghana n'encaisse rien non plus (0%). La probabilité tombe à 6%, signalant un jeu de bloc et d'organisation tactique avant la mi-temps."
         },
         {
           "t": "45-60min",
           "prob": 6,
-          "txt": "Le début de seconde période reste fermé : Colombia à 11% de ses buts dans cette tranche, Ghana à 13%. Aucun but encaissé par Colombia de la part de Ghana ici (0%). Probabilité but identique à 6% — les équipes se repositionnent tactiquement."
+          "txt": "Reprise sans explosion offensive : Colombia marque 11% de ses buts sur cette tranche, Ghana 13%, mais les défenses tiennent (0% d'encaissés pour chaque équipe sur cette période). Probabilité de but à 6%, le match reste serré."
         },
         {
           "t": "60-75min",
           "prob": 20,
-          "txt": "Montée en intensité : c'est la tranche la plus risquée de l'heure de jeu avec 20% de probabilité de but. Colombia encaisse 42% des buts de Ghana dans ce créneau, et Ghana marque 25% de ses buts ici. Les remplacements peuvent ouvrir des espaces."
+          "txt": "Pic intermédiaire significatif : Ghana génère 25% de ses buts ici, et Colombia encaisse 42% des buts de Ghana sur cette tranche. La probabilité monte à 20%, c'est la fenêtre la plus dangereuse de la première heure de jeu."
         },
         {
           "t": "75-90min",
           "prob": 45,
-          "txt": "Pic d'activité offensive en fin de match : Colombia marque 56% de ses buts dans cette tranche finale et encaisse 25% des buts de Ghana. La probabilité de but grimpe à 45% — c'est ici que le score central 1-1 ou 1-0 se dessine, confirmant que les buts arrivent tard mais restent en nombre limité."
+          "txt": "Finale explosive : Colombia marque 56% de ses buts totaux sur cette tranche et encaisse 25% des buts de Ghana. Ghana n'inscrit rien ici (0%) mais concède 100% de ses buts de la rencontre dans ce segment. Probabilité de but à 45%, ce qui explique le score central 1-0 avec un but tardif de Colombia."
         }
       ],
-      "facteur_x": "50% des simulations Monte-Carlo aboutissent à des scores de 2 buts ou moins (1-0, 0-0, 0-1, 1-1), validant directement l'Under 2.5 avec une proba modèle de 64%.",
-      "analyse_card": "Le modèle attribue 64% de probabilité à l'Under 2.5, cohérent avec les top scores MC (1-1 13%, 1-0 13%, 0-0 12%, 0-1 12%) qui totalisent 50% des simulations pour 2 buts ou moins. Les deux équipes affichent 50% de matchs sans marquer et la note tactique signale deux défenses solides en contexte Coupe du Monde, où les lambdas sont délibérément réduits (Colombia 1.123, Ghana 1.02). Poisson, Dixon-Coles et Monte-Carlo convergent tous vers un match fermé.",
-      "conseil_public": "Miser sur Under 2.5 à 1.66 — la convergence modèles + scores MC + profil défensif des deux équipes justifie ce choix dans une phase de groupes CDM.",
-      "contexte": "Phase de groupes de la Coupe du Monde 2026, le 2 juillet à l'Arrowhead Stadium sur terrain neutre. Colombia est en forme (2 victoires consécutives) tandis que Ghana traverse une série négative (2 défaites consécutives). L'enjeu de qualification renforce la prudence tactique des deux sélections.",
+      "facteur_x": "50% des simulations Monte-Carlo aboutissent à un score de 2 buts ou moins (1-0 : 14%, 1-1 : 13%, 0-1 : 12%, 0-0 : 11%), combiné à un lambda Ghana de seulement 1.020 sur terrain neutre en phase de groupes.",
+      "analyse_card": "Le modèle attribue 64% de probabilité à l'Under 2.5, soutenu par des lambdas modérés (Colombia 1.123 / Ghana 1.020) reflétant le contexte défensif de la Coupe du Monde. Les quatre scores Monte-Carlo les plus probables totalisent 2 buts ou moins dans 3 cas sur 4 (1-0, 0-1, 0-0). La note tactique signale deux défenses solides, et Ghana présente deux défaites consécutives avec une attaque limitée sur les 15 premiers matchs de sa forme récente.",
+      "conseil_public": "Miser sur Under 2.5 à 1.66 : la convergence des modèles et les scores Monte-Carlo valident cette sélection comme la plus solide de la carte.",
+      "contexte": "Phase de groupes de la Coupe du Monde 2026, sur terrain neutre à l'Arrowhead Stadium. Colombia présente une forme récente positive (2 victoires consécutives) face à Ghana en difficulté (2 défaites consécutives). L'enjeu de qualification accroît la prudence tactique des deux équipes.",
       "vbet": "OUI",
       "scores": [
-        "1-1"
+        "1-0"
       ],
       "mc_scores": [
         {
-          "score": "1-1",
-          "n": 646,
-          "pct": 13
-        },
-        {
           "score": "1-0",
-          "n": 633,
-          "pct": 13
+          "n": 677,
+          "pct": 14
         },
         {
-          "score": "0-0",
-          "n": 623,
-          "pct": 12
+          "score": "1-1",
+          "n": 643,
+          "pct": 13
         },
         {
           "score": "0-1",
-          "n": 596,
+          "n": 585,
           "pct": 12
         },
         {
-          "score": "2-0",
-          "n": 396,
+          "score": "0-0",
+          "n": 569,
+          "pct": 11
+        },
+        {
+          "score": "2-1",
+          "n": 397,
           "pct": 8
         }
       ],
@@ -3446,9 +3446,9 @@
         },
         {
           "c": "Colombia",
-          "t": "Coupe du monde 2026 : Julian Quiñones et le Mexique, à la vie à l’amor",
-          "tx": "Le premier buteur de cette Coupe du monde ne pouvait choisir que le Mexique.",
-          "tm": "2026-06-24"
+          "t": "Reality has a surprising amount of detail",
+          "tx": "Comments",
+          "tm": "2026-06-27"
         },
         {
           "c": "Ghana",
@@ -3631,10 +3631,10 @@
       ],
       "val": false,
       "hot": false,
-      "conf": 6.6,
-      "p1": 45,
+      "conf": 6.8,
+      "p1": 46,
       "pn": 26,
-      "p2": 29,
+      "p2": 28,
       "po15": 0,
       "po25": 52,
       "btts": 56,
@@ -3703,7 +3703,7 @@
           "c2": "1.83"
         }
       ],
-      "edge": "71% (modèle)",
+      "edge": "72% (modèle)",
       "marche": "DOUBLE_CHANCE",
       "risque": "MODERE",
       "pari_rec": "DC 1X",
@@ -3711,48 +3711,48 @@
       "no_signal": false,
       "no_signal_label": "",
       "mise": "2-3% bankroll",
-      "verdict_shark": "DC 1X à 2.00 — trois modèles convergent à 71% de probabilité pour Canada ou match nul, offrant une valeur réelle face à la cote proposée.",
+      "verdict_shark": "DC 1X à 2.00 — les trois modèles (Poisson 72%, Dixon-Coles, Monte-Carlo) convergent vers une victoire Canada ou nul, avec 45% victoire Canada + 26% nul selon Monte-Carlo.",
       "scenario": {
-        "phase1": "Canada en bonne forme relative (WDDLW) avec une défense qui n'a pas été blanchie sur ses 2 derniers matchs. Le Maroc est en pleine confiance (WWWDW, 3 victoires consécutives) mais les deux équipes jouent défensivement en phase de groupes CDM.",
-        "phase2": "Lambdas Poisson (Canada 1.56 / Maroc 1.19) reflètent un léger avantage canadien. Les trois modèles convergent à 70-72% pour DC 1X. Les scores Monte-Carlo dominants (1-1, 1-0, 2-1, 2-0) valident ce marché — seul le 0-1 (8%) serait défavorable parmi le top 5.",
-        "phase3": "La tranche 75-90min concentre 31% de probabilité de but, dont 75% des buts encaissés par le Maroc dans cette fenêtre. Si le score est serré en fin de match, le Canada peut exploiter cette tendance en phase finale pour confirmer le résultat DC 1X."
+        "phase1": "Canada déroule une forme correcte (WDDLW) avec 1 clean sheet sur 2 matchs. Maroc est en grande forme (WWWDW, 3 victoires consécutives) mais les deux défenses semblent solides. L'absence de Koné fragilise légèrement le milieu canadien.",
+        "phase2": "Les lambdas Poisson (Canada 1.56, Maroc 1.192) favorisent Canada offensivement, mais la DC 1X à 72% de proba modèle est le signal le plus clair et le mieux confirmé par les trois modèles. Les top scores MC (1-1, 1-0, 2-1, 2-0) excluent quasi tous une victoire nette Maroc.",
+        "phase3": "Les tranches de buts montrent une intensification en fin de match (75-90min à 31%), ce qui peut favoriser un but tardif canadien ou un hold du score. La DC 1X couvre les deux scénarios les plus probables du MC (1-1 et 1-0) représentant 23% à eux seuls."
       },
       "scenario_15min": [
         {
           "t": "0-15min",
           "prob": 16,
-          "txt": "Ouverture à 16% de probabilité de but. Le Canada marque 16% de ses buts dans cette tranche, tandis que le Maroc encaisse 0% de ses buts concédés ici — pression canadienne possible mais le Maroc défend bien en début de match."
+          "txt": "Entame active : Canada marque 16% de ses buts et encaisse 33% des buts de Maroc sur cette tranche. Probabilité de but à 16% — phase d'exposition précoce, ouverture possible des deux côtés."
         },
         {
           "t": "15-30min",
           "prob": 10,
-          "txt": "Tranche plus calme à 10%. Le Canada marque 21% de ses buts sur cette période mais le Maroc n'encaisse rien ici non plus. Les deux équipes se jaugent, le jeu se compacte au milieu."
+          "txt": "Tranche intermédiaire plus fermée : Canada marque 21% de ses buts ici mais Maroc n'encaisse rien sur cette période. Probabilité de but réduite à 10% — les deux blocs se mettent en place."
         },
         {
           "t": "30-45min",
           "prob": 6,
-          "txt": "Phase la plus fermée du match à seulement 6% de probabilité de but. Le Canada ne marque que 11% de ses buts ici, le Maroc 13% — les deux blocs défensifs tiennent avant la pause."
+          "txt": "Phase la plus stérile du match : probabilité de but à seulement 6%. Canada ne marque que 11% de ses buts et Maroc 13% sur cette tranche — attente de la mi-temps des deux équipes."
         },
         {
           "t": "45-60min",
           "prob": 18,
-          "txt": "Retour des vestiaires dynamique à 18%. Le Canada inscrit 21% de ses buts sur ce segment et le Maroc encaisse 33% de ses buts concédés ici — fenêtre favorable à un but canadien en début de seconde période."
+          "txt": "Reprise énergique : Canada marque 21% de ses buts ici et encaisse 33% des buts de Maroc. Probabilité de but remonte à 18% — ajustements tactiques de mi-temps pourraient libérer des espaces."
         },
         {
           "t": "60-75min",
           "prob": 20,
-          "txt": "Montée en pression à 20%. Le Maroc marque 15% de ses buts sur cette tranche et le Canada encaisse 33% de ses buts ici — risque d'égalisation ou de but marocain si le Canada mène, ce qui reste compatible avec DC 1X."
+          "txt": "Montée en pression : probabilité de but à 20%. Canada ne marque que 5% de ses buts sur cette tranche mais encaisse 33% des buts de Maroc — période de vulnérabilité défensive canadienne à surveiller."
         },
         {
           "t": "75-90min",
           "prob": 31,
-          "txt": "Tranche décisive à 31% de probabilité de but — la plus haute du match. Le Canada inscrit 26% de ses buts ici et le Maroc encaisse 75% de ses buts concédés sur cette fenêtre, suggérant une fin de match ouverte et favorable à un but canadien consolidant le DC 1X."
+          "txt": "Tranche la plus décisive du match : probabilité de but à 31%, la plus haute. Canada marque 26% de ses buts ici et Maroc encaisse 75% de ses buts concédés sur cette période — scénario de but tardif très probable, favorable à la DC 1X."
         }
       ],
-      "facteur_x": "Convergence remarquable des trois modèles indépendants (Poisson, Dixon-Coles, Monte-Carlo) tous à 70-72% pour DC 1X, avec les 5 scores Monte-Carlo les plus fréquents incluant 4 résultats favorables à ce marché sur 5 (1-1, 1-0, 2-1, 2-0).",
-      "analyse_card": "Les trois modèles (Poisson 45%+26%=71%, Dixon-Coles 44%+28%=72%, Monte-Carlo 45%+25%=70%) convergent tous vers une probabilité de 70-72% pour Canada ou nul, contre une cote impliquant 50%. Le Maroc affiche une forme excellente avec 3 victoires consécutives, mais les scores Monte-Carlo les plus probables (1-1, 1-0, 2-1, 2-0) favorisent largement les scénarios où le Canada ne perd pas. L'absence d'I. Koné est à surveiller, mais la solidité défensive du Canada (0 match sans marquer sur ses 2 derniers) soutient ce choix.",
-      "conseil_public": "Miser sur DC 1X (Canada ou nul) à 2.00, soutenu par une convergence multi-modèles à ~71% contre une cote impliquant 50%.",
-      "contexte": "Phase de groupes de la Coupe du Monde 2026, Canada contre Maroc au NRG Stadium sur terrain neutre. Les deux équipes sont en forme — le Maroc enchaîne 3 victoires consécutives, le Canada cherche à confirmer après un bilan de 1 victoire sur 2 en phase de poules. L'enjeu de qualification rend les deux équipes prudentes tactiquement.",
+      "facteur_x": "Convergence à 71-72% sur DC 1X entre les trois modèles (Poisson, Dixon-Coles, Monte-Carlo), supérieure à la probabilité implicite de la cote (50%) — edge positif significatif.",
+      "analyse_card": "Les simulations Monte-Carlo attribuent 45% de chances à Canada et 26% au nul, soit 71% combinés pour la DC 1X — en parfait alignement avec la probabilité modèle de 72%. Les top scores MC (1-1 à 13%, 1-0 à 10%, 2-1 à 9%, 2-0 à 7%) illustrent la domination de scénarios favorables ou nuls pour Canada. Malgré l'absence de Koné, Canada conserve un lambda offensif supérieur (1.56 vs 1.192).",
+      "conseil_public": "Joue DC 1X à 2.00 — la convergence des trois modèles à 71-72% sur ce marché offre une valeur exploitable à cette cote.",
+      "contexte": "Phase de groupes de la Coupe du Monde 2026, Canada vs Maroc au NRG Stadium le 2 juillet. Match à enjeu direct pour la qualification, les deux équipes évoluent dans un contexte de compétition majeure avec un style plus défensif qu'en championnat. Terrain neutre, Maroc en grande forme avec 3 victoires consécutives.",
       "vbet": "OUI",
       "scores": [
         "1-1"
@@ -3760,34 +3760,34 @@
       "mc_scores": [
         {
           "score": "1-1",
-          "n": 606,
-          "pct": 12
+          "n": 635,
+          "pct": 13
         },
         {
           "score": "1-0",
-          "n": 473,
-          "pct": 9
+          "n": 520,
+          "pct": 10
         },
         {
           "score": "2-1",
-          "n": 447,
+          "n": 460,
           "pct": 9
         },
         {
           "score": "2-0",
-          "n": 393,
-          "pct": 8
+          "n": 368,
+          "pct": 7
         },
         {
           "score": "0-1",
-          "n": 384,
-          "pct": 8
+          "n": 358,
+          "pct": 7
         }
       ],
       "paris_safe": {
         "bet": "DC 1X",
         "cote": 2,
-        "proba": "45%"
+        "proba": "46%"
       },
       "paris_risque": {
         "bet": "",
@@ -3799,7 +3799,7 @@
         "nom": "NRG Stadium — Houston",
         "cap": "",
         "meteo": "☁️",
-        "temp": "32°C",
+        "temp": "33°C",
         "desc": "couvert"
       },
       "crit_home": {
@@ -4173,20 +4173,20 @@
       "c1": "13.50",
       "cn": "7.00",
       "c2": "1.19",
-      "co15": "1.17",
+      "co15": "1.18",
       "co25": "1.62",
       "cu25": "2.30",
-      "dc1x": "4.72",
+      "dc1x": "4.75",
       "dc2x": "1.02",
       "dc12": "1.10",
-      "cdc1x": "4.72",
+      "cdc1x": "4.75",
       "cdc2x": "1.02",
       "ah_dom": "--",
-      "ah_ext": "1.15",
+      "ah_ext": "1.16",
       "co35": "2.57",
-      "cbtts": "2.49",
+      "cbtts": "2.47",
       "cbtts_non": "1.48",
-      "btts_oui": "2.49",
+      "btts_oui": "2.47",
       "btts_non": "1.48",
       "bookies": [
         {
@@ -4239,81 +4239,81 @@
       "marche": "DOUBLE_CHANCE",
       "risque": "MODERE",
       "pari_rec": "Victoire France (EXT)",
-      "cote_rec": "non disponible dans les marchés listés",
+      "cote_rec": "non disponible",
       "no_signal": false,
       "no_signal_label": "",
       "mise": "2-3% bankroll",
-      "verdict_shark": "DC X2 à 4.72 — les trois modèles (Poisson 50%, Dixon-Coles 50%, Monte-Carlo 53%) convergent tous vers une victoire ou nul France, avec un lambda offensif France (1.526) nettement supérieur à celui du Paraguay (0.9).",
+      "verdict_shark": "Victoire France à confirmer — les trois modèles convergent à 50-52% en faveur de la France, soutenu par un xG de 2.28 et 5 victoires consécutives.",
       "scenario": {
-        "phase1": "France en grande forme avec 5 victoires consécutives ; Paraguay sans victoire et sans marquer sur son seul match de phase de groupes. Forme et solidité défensive nettement favorables à la France.",
-        "phase2": "Modèles Poisson (50%), Dixon-Coles (50%) et Monte-Carlo (53%) convergent unanimement vers une victoire France. DC X2 cumule ~76-79% de probabilité selon les modèles.",
-        "phase3": "Les scores Monte-Carlo les plus probables (0-1 : 13%, 1-1 : 12%, 0-2 : 11%, 1-2 : 10%) confirment tous une France qui ne perd pas, validant la cohérence du marché DC X2."
+        "phase1": "Paraguay sans marquer dans 100% de ses matchs (1/1) avec une forme irrégulière (WLLD). La France affiche 5 victoires consécutives, aucun match sans marquer, et des statistiques offensives nettement supérieures.",
+        "phase2": "Les trois modèles mathématiques convergent à 50-52% pour une victoire de la France. Le lambda Poisson de la France (1.526) est 70% supérieur à celui du Paraguay (0.9). Les scores Monte-Carlo les plus probables (0-1, 0-2, 1-2) matérialisent tous une victoire française.",
+        "phase3": "Les tranches 45-60min (24%) et 75-90min (25%) concentrent les probabilités de buts les plus élevées. La France marque 57% de ses buts sur les 15 dernières minutes selon la répartition par tranche, ce qui favorise un dénouement tardif en sa faveur."
       },
       "scenario_15min": [
         {
           "t": "0-15min",
           "prob": 11,
-          "txt": "Début de match prudent : Paraguay marque 20% de ses buts dans cette tranche mais France n'encaisse que 14% de ses buts ici. La probabilité d'un but est de seulement 11% — phase d'observation tactique attendue."
+          "txt": "Probabilité de but faible à 11%. Le Paraguay marque 20% de ses buts dans cette tranche mais la France n'encaisse que 0% de ses buts ici. Démarrage attendu fermé des deux côtés, typique d'un match de Coupe du Monde."
         },
         {
           "t": "15-30min",
           "prob": 18,
-          "txt": "La pression monte : Paraguay inscrit 20% de ses buts ici, France encaisse 29% de ses buts sur cette tranche. Probabilité but à 18% — première fenêtre de risque défensif pour la France."
+          "txt": "La France encaisse 14% de ses buts dans cette tranche, tandis que le Paraguay marque 20% des siens ici. C'est la première zone de risque défensif pour la France — probabilité montante à 18%."
         },
         {
           "t": "30-45min",
           "prob": 5,
-          "txt": "Tranche la plus calme du match : Paraguay n'a marqué aucun but ici (0%) et France n'a encaissé aucun but sur cette période (0%). Probabilité but à seulement 5% — fin de première mi-temps fermée attendue."
+          "txt": "Tranche la plus calme du match : le Paraguay marque 0% et la France encaisse 0% dans ce segment. Probabilité de but au plus bas (5%), phase d'organisation tactique attendue."
         },
         {
           "t": "45-60min",
           "prob": 24,
-          "txt": "Tranche la plus productive offensivement pour le Paraguay (40% de ses buts) et active pour la France (27% de ses buts). Probabilité but la plus haute de la première heure à 24% — ouverture du score la plus probable ici."
+          "txt": "Pic d'activité offensive : le Paraguay marque 40% de ses buts dans cette tranche et la France 27% des siens. Les deux équipes semblent plus tranchantes en début de seconde période — probabilité de but la plus haute de la première heure à 24%."
         },
         {
           "t": "60-75min",
           "prob": 18,
-          "txt": "Phase intermédiaire : Paraguay inscrit 20% de ses buts ici, France 23% de ses buts. Probabilité but à 18% — rythme soutenu mais sans pic particulier."
+          "txt": "La France marque 23% de ses buts dans cette tranche et le Paraguay 20% des siens. Activité symétrique et soutenue — probabilité stable à 18%, phase de pression mutuelle."
         },
         {
           "t": "75-90min",
           "prob": 25,
-          "txt": "Tranche finale la plus dangereuse : France inscrit 14% de ses buts ici mais surtout encaisse 57% des buts de France selon les données de Paraguay. Probabilité but à 25% — dernier quart d'heure sous haute tension, risque de but décisif ou de scellage du score."
+          "txt": "Tranche décisive : la France marque 14% de ses buts ici mais le Paraguay encaisse 57% des buts de la France dans ces 15 dernières minutes. C'est la zone de conclusion la plus probable pour la France, avec une probabilité de but de 25%."
         }
       ],
-      "facteur_x": "Lambda offensif France (1.526) vs Paraguay (0.9) : écart de 0.626 point combiné à un xG France de 2.28 et un xGA de 0.88 — le différentiel offensif/défensif le plus fort du dossier.",
-      "analyse_card": "France affiche 5 victoires consécutives et un xG de 2.28 contre un xGA de 0.88, signe d'une domination offensive et défensive réelle. Les modèles Poisson, Dixon-Coles et Monte-Carlo s'accordent tous entre 50% et 53% pour une victoire France, et 26-29% pour le nul, soit une probabilité combinée DC X2 de ~76-79%. Le top des scores Monte-Carlo (0-1, 1-1, 0-2, 1-2) est entièrement cohérent avec un résultat favorable à la France ou nul.",
-      "conseil_public": "Jouer la Double Chance X2 (France ne perd pas) à 4.72 en vous appuyant sur la convergence des trois modèles et la supériorité offensive/défensive confirmée de la France.",
-      "contexte": "Phase de groupes Coupe du Monde 2026, match sur terrain neutre au Lincoln Financial Field. La France, nation de premier rang mondial, affronte le Paraguay dans un match à enjeu qualificatif ; la France est favorite logique selon tous les modèles disponibles.",
+      "facteur_x": "xG France de 2.28 combiné à 5 victoires consécutives et un lambda Poisson de 1.526 contre 0.9 pour le Paraguay — écart de création offensive significatif.",
+      "analyse_card": "Le modèle Poisson (51%), Dixon-Coles (50%) et Monte-Carlo (52%) sont parfaitement alignés en faveur de la France. Les xG offensifs de la France s'élèvent à 2.28 contre seulement 0.88 encaissés, traduisant une supériorité technique nette. Les scores Monte-Carlo les plus fréquents (0-1: 14%, 1-1: 12%, 0-2: 10%, 1-2: 10%) confirment que la France domine le scénario le plus probable, avec un score central retenu à 1-2.",
+      "conseil_public": "Miser sur la victoire de la France via le marché DC X2 (cote 1.50 non listée) ou directement sur la victoire France si disponible chez votre opérateur — la convergence des trois modèles à 50-52% le justifie.",
+      "contexte": "Phase de groupes de la Coupe du Monde 2026, joué sur terrain neutre à Philadelphie (Lincoln Financial Field). La France est en forme (5 victoires consécutives) tandis que le Paraguay reste sur un bilan limité en phase de poules avec une seule rencontre jouée sans marquer.",
       "vbet": "NON",
       "scores": [
-        "0-1"
+        "1-2"
       ],
       "mc_scores": [
         {
           "score": "0-1",
-          "n": 647,
-          "pct": 13
+          "n": 701,
+          "pct": 14
         },
         {
           "score": "1-1",
-          "n": 614,
+          "n": 608,
           "pct": 12
         },
         {
           "score": "0-2",
-          "n": 528,
-          "pct": 11
+          "n": 518,
+          "pct": 10
         },
         {
           "score": "1-2",
-          "n": 491,
+          "n": 486,
           "pct": 10
         },
         {
           "score": "0-0",
-          "n": 438,
-          "pct": 9
+          "n": 480,
+          "pct": 10
         }
       ],
       "paris_safe": {
@@ -4331,7 +4331,7 @@
         "nom": "Lincoln Financial Field — Philadelphia",
         "cap": "",
         "meteo": "☀️",
-        "temp": "39°C",
+        "temp": "38°C",
         "desc": "ciel dégagé"
       },
       "crit_home": {
@@ -4480,26 +4480,26 @@
       "actu": [
         {
           "c": "Paraguay",
-          "t": "Météo, protocole… On ne voit pas comment le 8e de finale des Bleus pourrait se dérouler normalement",
-          "tx": "Les pauses fraîcheur devraient s’avérer utiles, samedi 4 juillet, pour le 8e de finale de l’équipe de France. À moins que les orages ne prennent le dessus.",
+          "t": "DIRECT. Coupe du monde 2026, les Bleus: toutes les infos sur l'équipe de France avant le 8e de finale face au Paraguay en live",
+          "tx": "Après leur large victoire face à la Suède (3-0) mardi soir, les Bleus se tournent vers la préparation de leur huitième de finale de la Coupe du monde 2026 face au Paraguay. Avant le match samedi prochain, retrouvez les principales informations à retenir dans …",
           "tm": "2026-07-01"
         },
         {
           "c": "Paraguay",
-          "t": "Angleterre-RD Congo: Kane en sauveur, Mpasi en feu... le résumé vidéo de la grosse frayeur anglaise",
-          "tx": "Menée 1-0 dès la 7e minute, l'Angleterre a renversé la République démocratique du Congo dans le dernier quart d'heure grâce à un doublé de Harry Kane, ce mercredi en 16es de finale de la Coupe du monde 2026 (2-1). Retrouvez tous les moments forts de ce match …",
+          "t": "La fédé allemande a discuté avec Julian Nagelsmann",
+          "tx": "Plus déprimant que Goethe. Alors que l’Allemagne s’est fait sortir en seizièmes de finale de Coupe du monde",
           "tm": "2026-07-01"
         },
         {
           "c": "France",
-          "t": "\"Messi favorisé par les arbitres\" : les raisons de la folle rumeur",
-          "tx": " \"Messi favorisé par les arbitres\", cette rumeur persistante a refait surface lors du match contre l’Algérie. Rien pourtant n’a jamais prouvé un quelconque favoritisme envers le joueur argentin qui cristallise toutes les attentions et suscite les théories…",
+          "t": "Violences conjugales : comment fonctionne le modèle espagnol, qui a permis de réduire les féminicides de 30% en 20 ans",
+          "tx": "Si l'économie espagnole va très bien, le pays est aussi en pointe sur les questions sociétales. Ici en France, avec l'affaire Lyhanna, les associations réclament à corps et a cris une loi intégrale contre les violences faites aux femmes, prenant pour modèle l…",
           "tm": "2026-07-01"
         },
         {
           "c": "France",
-          "t": "Canicule : la Province de Namur débloque 350.000€ pour créer des “îlots de fraîcheur” qui protègent des fortes chaleurs",
-          "tx": "La Province l’a annoncé ce mercredi 1er juillet 2026 : un module-type d’îlot de fraîcheur” va être conçu et décliné dans les zones les plus vulnérables des différentes communes namuroises. ...",
+          "t": "DIRECT. Coupe du monde 2026, les Bleus: toutes les infos sur l'équipe de France avant le 8e de finale face au Paraguay en live",
+          "tx": "Après leur large victoire face à la Suède (3-0) mardi soir, les Bleus se tournent vers la préparation de leur huitième de finale de la Coupe du monde 2026 face au Paraguay. Avant le match samedi prochain, retrouvez les principales informations à retenir dans …",
           "tm": "2026-07-01"
         }
       ],
@@ -4661,25 +4661,25 @@
       "label": "SHARK SAFE",
       "type": "safe",
       "selections": "Over 2.5 + Over 2.5",
-      "matchs": "USA vs Bosnia & Herzegovina, Spain vs Austria",
-      "cote_totale": "1.67 x 1.67 = 2.79 → ajusté 1.85 avec marge bookmaker",
-      "conseil": "Combiné 2 matchs sur les affiches les plus fiables du jour. USA et Espagne évoluent dans des contextes offensifs favorables. Idéal pour miser prudemment avec un bon rapport risque/rendement."
+      "matchs": "Spain vs Austria (Over 2.5 @1.68), Portugal vs Croatia (Over 2.5 @1.73)",
+      "cote_totale": "1.91",
+      "conseil": "Combiné 2 matchs solides avec les cotes les plus attractives sur Over 2.5. Spain vs Austria affiche une confiance maximale de 7.8/10. Mise recommandée: 5-8% bankroll."
     },
     {
       "label": "SHARK VALUE",
       "type": "value",
-      "selections": "Over 2.5 + Over 2.5 + DC X2",
-      "matchs": "USA vs Bosnia & Herzegovina, Spain vs Austria, Switzerland vs Algeria",
-      "cote_totale": "3.20",
-      "conseil": "Trois matchs sélectionnés avec une couverture intelligente. Over 2.5 confirmé sur USA et Espagne (confiance élevée), DC X2 sur Suisse vs Algérie pour sécuriser le ticket tout en maximisant la cote. Bon équilibre valeur/sécurité."
+      "selections": "Over 2.5 + Over 2.5 + Over 2.5",
+      "matchs": "Spain vs Austria (Over 2.5 @1.68), USA vs Bosnia & Herzegovina (Over 2.5 @1.67), Portugal vs Croatia (Over 2.5 @1.73)",
+      "cote_totale": "4.85",
+      "conseil": "Triple Over 2.5 sur les 3 matchs à confiance égale ou supérieure à 7.2/10. Profil offensif confirmé pour ces affiches. Mise recommandée: 3-5% bankroll."
     },
     {
       "label": "SHARK EXPERT",
       "type": "audace",
-      "selections": "Over 2.5 + Over 2.5 + Over 2.5 + DC 1X",
-      "matchs": "USA vs Bosnia & Herzegovina, Spain vs Austria, Switzerland vs Algeria, Spain vs Austria (DC 1X bonus)",
-      "cote_totale": "5.10",
-      "conseil": "Combiné audacieux pour les sharks confirmés. Les trois Over 2.5 sont alignés avec les analyses du jour. L'ajout d'un DC 1X renforce la structure du ticket. Réservé aux parieurs expérimentés avec une mise maîtrisée. Potentiel de gain élevé sur mise réduite."
+      "selections": "Over 2.5 + Over 2.5 + Over 2.5 + Over 2.5",
+      "matchs": "Spain vs Austria (Over 2.5 @1.68), USA vs Bosnia & Herzegovina (Over 2.5 @1.67), Portugal vs Croatia (Over 2.5 @1.73), Switzerland vs Algeria (Over 2.5 @2.21)",
+      "cote_totale": "10.21",
+      "conseil": "Combiné audacieux sur les 4 signaux du jour. Switzerland vs Algeria booste significativement la cote globale avec sa cote @2.21. Réservé aux profils risque élevé. Mise recommandée: 1-2% bankroll uniquement."
     }
   ]
 }

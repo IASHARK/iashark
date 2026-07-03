@@ -2287,7 +2287,7 @@ jobs:
               var home=fix.teams.home;
               var away=fix.teams.away;
               var isWorldCupMatch=(lg.id===1);
-              var wcRound=(f.fixture&&f.fixture.round||'').toLowerCase();
+              var wcRound=(lg.round||'').toLowerCase();
               // Détection élargie pour couvrir le nouveau format CDM 2026 à 48 équipes,
               // qui introduit un tour de 32e de finale inédit par rapport aux éditions
               // précédentes — l'API peut nommer ce tour différemment selon la source.

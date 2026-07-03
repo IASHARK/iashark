@@ -1,6 +1,27 @@
 {
   "predictions": [
     {
+      "match": "Brazil vs Norway",
+      "home": "Brazil",
+      "away": "Norway",
+      "prediction": "BTTS Oui",
+      "cote": 1.65,
+      "conf": 7.2,
+      "conf_bucket": "7-8",
+      "market": "btts_oui",
+      "league": "World Cup",
+      "league_key": "other",
+      "sport": "football",
+      "elo_diff": null,
+      "has_pinnacle": false,
+      "has_elo": false,
+      "date": "2026-07-03",
+      "result": "scheduled",
+      "fixture_id": 1568100,
+      "type": "single",
+      "score": null
+    },
+    {
       "match": "Libertad vs Leones del Norte",
       "home": "Libertad",
       "away": "Leones del Norte",
@@ -689,10 +710,11 @@
       "has_pinnacle": false,
       "has_elo": false,
       "date": "2026-06-30",
-      "result": "scheduled",
+      "result": "win",
       "fixture_id": 1508796,
       "type": "single",
-      "score": null
+      "score": "3-2",
+      "resolved_date": "2026-07-03"
     },
     {
       "match": "Spain vs Austria",
@@ -710,10 +732,11 @@
       "has_pinnacle": false,
       "has_elo": false,
       "date": "2026-06-30",
-      "result": "scheduled",
+      "result": "loss",
       "fixture_id": 1567311,
       "type": "single",
-      "score": null
+      "score": "3-0",
+      "resolved_date": "2026-07-03"
     },
     {
       "match": "Thor Akureyri vs KR Reykjavik",
@@ -731,10 +754,11 @@
       "has_pinnacle": false,
       "has_elo": false,
       "date": "2026-06-30",
-      "result": "scheduled",
+      "result": "loss",
       "fixture_id": 1508799,
       "type": "single",
-      "score": null
+      "score": "3-3",
+      "resolved_date": "2026-07-03"
     },
     {
       "match": "USA vs Bosnia & Herzegovina",
@@ -752,10 +776,11 @@
       "has_pinnacle": false,
       "has_elo": false,
       "date": "2026-06-30",
-      "result": "scheduled",
+      "result": "win",
       "fixture_id": 1562586,
       "type": "single",
-      "score": null
+      "score": "2-0",
+      "resolved_date": "2026-07-03"
     },
     {
       "match": "LDU de Quito vs Orense SC",
@@ -773,10 +798,11 @@
       "has_pinnacle": false,
       "has_elo": false,
       "date": "2026-06-30",
-      "result": "scheduled",
+      "result": "win",
       "fixture_id": 1519379,
       "type": "single",
-      "score": null
+      "score": "3-0",
+      "resolved_date": "2026-07-03"
     },
     {
       "match": "Forge vs Vancouver FC",
@@ -2882,56 +2908,56 @@
     }
   ],
   "stats": {
-    "winrate": 68.3,
-    "roi": 25,
-    "total": 82,
-    "streak": 10,
-    "wins": 56,
-    "losses": 26
+    "winrate": 67.8,
+    "roi": 23.9,
+    "total": 87,
+    "streak": 2,
+    "wins": 59,
+    "losses": 28
   },
   "monthly": [
     {
       "month": "2026-06",
       "label": "Jun 2026",
-      "wins": 56,
-      "losses": 26,
-      "total": 82,
-      "roi": 19.5
+      "wins": 59,
+      "losses": 28,
+      "total": 87,
+      "roi": 18.7
     }
   ],
   "backtesting": {
     "by_market": [
       {
         "key": "over25",
-        "wins": 22,
+        "wins": 23,
         "losses": 8,
-        "total": 30,
-        "winrate": 73.3,
-        "roi": 30.4
+        "total": 31,
+        "winrate": 74.2,
+        "roi": 32.5
       },
       {
         "key": "under25",
         "wins": 12,
-        "losses": 11,
-        "total": 23,
-        "winrate": 52.2,
-        "roi": -13.3
+        "losses": 12,
+        "total": 24,
+        "winrate": 50,
+        "roi": -17
       },
       {
         "key": "btts_oui",
-        "wins": 8,
+        "wins": 9,
         "losses": 5,
-        "total": 13,
-        "winrate": 61.5,
-        "roi": 15.7
+        "total": 14,
+        "winrate": 64.3,
+        "roi": 19.6
       },
       {
         "key": "btts_non",
-        "wins": 5,
-        "losses": 2,
-        "total": 7,
-        "winrate": 71.4,
-        "roi": 18.1
+        "wins": 6,
+        "losses": 3,
+        "total": 9,
+        "winrate": 66.7,
+        "roi": 10.4
       },
       {
         "key": "dc_x2",
@@ -2953,11 +2979,11 @@
     "by_league": [
       {
         "key": "other",
-        "wins": 23,
-        "losses": 15,
-        "total": 38,
-        "winrate": 60.5,
-        "roi": 26.4
+        "wins": 24,
+        "losses": 16,
+        "total": 40,
+        "winrate": 60,
+        "roi": 24.3
       },
       {
         "key": "wc",
@@ -2992,6 +3018,14 @@
         "roi": 53.8
       },
       {
+        "key": "islande",
+        "wins": 2,
+        "losses": 1,
+        "total": 3,
+        "winrate": 66.7,
+        "roi": -0.3
+      },
+      {
         "key": "canada",
         "wins": 2,
         "losses": 0,
@@ -3000,12 +3034,12 @@
         "roi": 87
       },
       {
-        "key": "islande",
+        "key": "equateur",
         "wins": 1,
         "losses": 0,
         "total": 1,
         "winrate": 100,
-        "roi": 29
+        "roi": 95
       },
       {
         "key": "laliga2",
@@ -3027,11 +3061,11 @@
     "by_conf": [
       {
         "key": "7-8",
-        "wins": 28,
-        "losses": 8,
-        "total": 36,
-        "winrate": 77.8,
-        "roi": 50.2
+        "wins": 31,
+        "losses": 10,
+        "total": 41,
+        "winrate": 75.6,
+        "roi": 44.9
       },
       {
         "key": "6-7",
@@ -3053,31 +3087,31 @@
     "by_sport": [
       {
         "key": "football",
-        "wins": 56,
-        "losses": 26,
-        "total": 82,
-        "winrate": 68.3,
-        "roi": 25
+        "wins": 59,
+        "losses": 28,
+        "total": 87,
+        "winrate": 67.8,
+        "roi": 23.9
       }
     ],
     "by_has_pinnacle": [
       {
         "key": "inconnu",
-        "wins": 56,
-        "losses": 26,
-        "total": 82,
-        "winrate": 68.3,
-        "roi": 25
+        "wins": 59,
+        "losses": 28,
+        "total": 87,
+        "winrate": 67.8,
+        "roi": 23.9
       }
     ],
     "by_has_elo": [
       {
         "key": "inconnu",
-        "wins": 50,
-        "losses": 26,
-        "total": 76,
-        "winrate": 65.8,
-        "roi": 22.1
+        "wins": 53,
+        "losses": 28,
+        "total": 81,
+        "winrate": 65.4,
+        "roi": 21.1
       },
       {
         "key": "true",
@@ -3088,6 +3122,6 @@
         "roi": 62.2
       }
     ],
-    "updated": "2026-07-02"
+    "updated": "2026-07-03"
   }
 }

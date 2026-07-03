@@ -1284,7 +1284,8 @@ jobs:
             return {name:refName,games:games.length,cards_per_game:(totalCards/games.length).toFixed(1),pens_per_game:(totalPens/games.length).toFixed(1)};
           }
           async function getTopScorers(teamId, leagueId) {
-            var r = await get('https://v3.football.api-sports.io/players?team='+teamId+'&season='+SEASON+'&league='+leagueId, APS);
+            var s = SEASON_2026.indexOf(leagueId)!==-1 ? 2026 : SEASON;
+            var r = await get('https://v3.football.api-sports.io/players?team='+teamId+'&season='+s+'&league='+leagueId, APS);
             var players=(r&&r.response)||[];
             if(!players.length) return [];
             var scored=players.filter(function(p){return p.statistics&&p.statistics[0]&&p.statistics[0].goals&&(p.statistics[0].goals.total>0||p.statistics[0].goals.assists>0);});

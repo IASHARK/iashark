@@ -2299,7 +2299,7 @@ jobs:
                 wcRound.includes('last 16')||wcRound.includes('playoff')||wcRound.includes('play-off')||
                 wcRound.includes('third place')||wcRound.includes('3rd place')
               );
-              if(isKnockout) console.log('  [WC KNOCKOUT] '+home.name+' vs '+away.name+' — '+f.fixture.round);
+              if(isKnockout) console.log('  [WC KNOCKOUT] '+home.name+' vs '+away.name+' — '+lg.round);
 
               // Si ce match a déjà une prédiction verrouillée (vu lors d'un run précédent,
               // qu'il soit déjà passé "aujourd'hui" ou encore "demain"), on la garde telle

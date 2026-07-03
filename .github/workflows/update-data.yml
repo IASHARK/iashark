@@ -574,10 +574,11 @@ jobs:
             88, 94, 203, 119, 179, 144, 292,
             66, 307, 143, 137, 81,
             169, 244, 200, 479,
-            365, 362, 242, 164
+            365, 362, 242, 164,
+            357, 113
           ];
           const SEASON   = 2025;
-          var SEASON_2026 = [1, 292, 169, 244, 200, 479, 365, 362, 242, 164];
+          var SEASON_2026 = [1, 292, 169, 244, 200, 479, 365, 362, 242, 164, 357, 113];
           const TODAY    = new Date().toISOString().split('T')[0];
           var TEST_WC_ONLY = process.env.TEST_WC_ONLY === 'true';
           if(TEST_WC_ONLY) console.log('=== MODE TEST : COUPE DU MONDE UNIQUEMENT ===');
@@ -589,7 +590,8 @@ jobs:
             119:'superliga-dk', 179:'scottish', 144:'belgique', 292:'kleague',
             66:'coupe-france', 307:'saudi', 143:'copa-rey', 137:'coppa-italia', 81:'dfb-pokal',
             169:'chine', 244:'finlande', 200:'maroc', 479:'canada',
-            365:'lettonie', 362:'lituanie', 242:'equateur', 164:'islande'
+            365:'lettonie', 362:'lituanie', 242:'equateur', 164:'islande',
+            357:'irlande', 113:'suede'
           };
 
           var BOOKIE_MAP = {
@@ -1184,10 +1186,19 @@ jobs:
               }
             }
             var seen={};
-            return all.filter(function(f){
+            var uniqueFixtures=all.filter(function(f){
               if(seen[f.fixture.id]) return false;
               seen[f.fixture.id]=true; return true;
             });
+            // ── MODE TEST : ne garder qu'UN SEUL match de la Coupe du Monde
+            // pour tester rapidement. Passe TEST_ONE_MATCH à false pour
+            // repasser sur tous les matchs de toutes les ligues.
+            var TEST_ONE_MATCH = true;
+            if(TEST_ONE_MATCH){
+              var wcOnly = uniqueFixtures.filter(function(f){ return f.league.id===1; });
+              uniqueFixtures = wcOnly.length ? wcOnly.slice(0,1) : uniqueFixtures.slice(0,1);
+            }
+            return uniqueFixtures;
           }
 
           async function getTeamStats(teamId, leagueId, season) {
@@ -1283,7 +1294,7 @@ jobs:
             if(!players.length) return [];
             var scored=players.filter(function(p){return p.statistics&&p.statistics[0]&&p.statistics[0].goals&&(p.statistics[0].goals.total>0||p.statistics[0].goals.assists>0);});
             scored.sort(function(a,b){return ((b.statistics[0].goals.total||0)+(b.statistics[0].goals.assists||0))-((a.statistics[0].goals.total||0)+(a.statistics[0].goals.assists||0));});
-            return scored.slice(0,3).map(function(p){var s=p.statistics[0];return {id:p.player.id,name:p.player.name,photo:p.player.photo||('https://media.api-sports.io/football/players/'+p.player.id+'.png'),goals:s.goals.total||0,assists:s.goals.assists||0,games:s.games.appearences||0};});
+            return scored.slice(0,3).map(function(p){var s=p.statistics[0];return {id:p.player.id,name:p.player.name,photo:p.player.photo||('https://media.api-sports.io/football/players/'+p.player.id+'.png'),goals:s.goals.total||0,assists:s.goals.assists||0,games:s.games.appearences||0,shots_total:(s.shots&&s.shots.total)||0,shots_on:(s.shots&&s.shots.on)||0};});
           }
           async function getFixtureEvents(fixtureId) {
             var r = await get('https://v3.football.api-sports.io/fixtures/events?fixture='+fixtureId, APS);
@@ -2658,6 +2669,7 @@ jobs:
                   return null;
                 })():(evPatA||null),
                 top_scorers_home:topScorersH||[],top_scorers_away:topScorersA||[],
+                key_absences:keyAbsenceAlerts||[],
                 // Stats détaillées moyennées sur 10 derniers matchs — alimente buildMatchStats() côté front
                 // Données déjà fournies par API-Sports mais jamais exploitées avant ce patch
                 match_stats_home:{

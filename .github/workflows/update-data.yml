@@ -1193,7 +1193,7 @@ jobs:
             // ── MODE TEST : ne garder qu'UN SEUL match de la Coupe du Monde
             // pour tester rapidement. Passe TEST_ONE_MATCH à false pour
             // repasser sur tous les matchs de toutes les ligues.
-            var TEST_ONE_MATCH = true;
+            var TEST_ONE_MATCH = false;
             if(TEST_ONE_MATCH){
               var wcOnly = uniqueFixtures.filter(function(f){ return f.league.id===1; });
               uniqueFixtures = wcOnly.length ? wcOnly.slice(0,1) : uniqueFixtures.slice(0,1);

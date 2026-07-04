@@ -1193,7 +1193,7 @@ jobs:
             // ── MODE TEST : ne garder qu'UN SEUL match de la Coupe du Monde
             // pour tester rapidement. Passe TEST_ONE_MATCH à false pour
             // repasser sur tous les matchs de toutes les ligues.
-            var TEST_ONE_MATCH = false;
+            var TEST_ONE_MATCH = true;
             if(TEST_ONE_MATCH){
               var wcOnly = uniqueFixtures.filter(function(f){ return f.league.id===1; });
               uniqueFixtures = wcOnly.length ? wcOnly.slice(0,1) : uniqueFixtures.slice(0,1);
@@ -1934,7 +1934,16 @@ jobs:
             console.log('\n=== HISTORIQUE UPDATE ===');
             var histoPath='historique.json';
             var histo={predictions:[],stats:{winrate:0,roi:0,total:0,streak:0,wins:0,losses:0},monthly:[],backtesting:{}};
-            try{histo=JSON.parse(fs.readFileSync(histoPath,'utf8'));}catch(e){}
+            var histoLuAvecSucces=false;
+            var nbPredictionsAvant=0;
+            try{
+              histo=JSON.parse(fs.readFileSync(histoPath,'utf8'));
+              histoLuAvecSucces=true;
+              nbPredictionsAvant=(histo.predictions||[]).length;
+            }catch(e){
+              console.log('  ⚠ ERREUR lecture/parsing historique.json:', e.message);
+              console.log('  ⚠ Le fichier existant est peut-être corrompu ou absent — voir garde-fou plus bas.');
+            }
             var yesterday=new Date(TODAY+'T12:00:00Z');yesterday.setDate(yesterday.getDate()-1);
             var yDate=yesterday.toISOString().split('T')[0];
             var resolveDates=[TODAY];
@@ -2122,6 +2131,20 @@ jobs:
               var parts=k.split('-');var mn=['Jan','F\u00e9v','Mar','Avr','Mai','Jun','Jul','Ao\u00fb','Sep','Oct','Nov','D\u00e9c'];
               return{month:k,label:(mn[parseInt(parts[1])-1]||parts[1])+' '+parts[0],wins:mo.wins,losses:mo.losses,total:tot,roi:Math.round(r*10)/10};
             });
+            // ── GARDE-FOU ANTI-PERTE DE DONNÉES ─────────────────────────
+            // Si la lecture du fichier existant a échoué (JSON corrompu, etc.)
+            // OU si le nouveau total de prédictions est anormalement plus bas
+            // que l'ancien (perte de plus de 20%), on REFUSE d'écraser le
+            // fichier. Mieux vaut un run qui échoue bruyamment qu'un
+            // historique de plusieurs mois effacé silencieusement.
+            var nbPredictionsApres=(histo.predictions||[]).length;
+            var perteImportante = histoLuAvecSucces && nbPredictionsAvant>10 && nbPredictionsApres < nbPredictionsAvant*0.8;
+            if(!histoLuAvecSucces || perteImportante){
+              console.log('  🚨 GARDE-FOU DÉCLENCHÉ — écriture de historique.json ANNULÉE pour éviter une perte de données.');
+              console.log('  🚨 Avant: '+nbPredictionsAvant+' prédictions | Après (calculé): '+nbPredictionsApres+' prédictions.');
+              console.log('  🚨 Vérifie manuellement historique.json avant de relancer un run.');
+              return;
+            }
             fs.writeFileSync(histoPath,JSON.stringify(histo,null,2));
             console.log('  Historique: '+total+' paris | Winrate: '+winrate.toFixed(0)+'% | ROI: '+roi.toFixed(1)+'%');
           }
@@ -2170,7 +2193,15 @@ jobs:
               console.log('\n=== JOUR SANS MATCHS — R\u00e9solution historique ===');
               var histoPathEarly='historique.json';
               var histoEarly={predictions:[],stats:{winrate:0,roi:0,total:0,streak:0,wins:0,losses:0},monthly:[],backtesting:{}};
-              try{histoEarly=JSON.parse(fs.readFileSync(histoPathEarly,'utf8'));}catch(e){}
+              var histoEarlyLuAvecSucces=false;
+              var nbPredictionsAvantEarly=0;
+              try{
+                histoEarly=JSON.parse(fs.readFileSync(histoPathEarly,'utf8'));
+                histoEarlyLuAvecSucces=true;
+                nbPredictionsAvantEarly=(histoEarly.predictions||[]).length;
+              }catch(e){
+                console.log('  ⚠ ERREUR lecture/parsing historique.json:', e.message);
+              }
               var resolveDatesEarly=[TODAY];
               for(var dbackE=1; dbackE<=4; dbackE++){
                 var ddE=new Date(TODAY+'T12:00:00Z'); ddE.setDate(ddE.getDate()-dbackE);
@@ -2220,6 +2251,13 @@ jobs:
               var monthsE={};
               singlesE.forEach(function(p){var key=(p.date||'').substring(0,7);if(!monthsE[key])monthsE[key]={wins:0,losses:0};if(p.result==='win')monthsE[key].wins++;else monthsE[key].losses++;});
               histoEarly.monthly=Object.keys(monthsE).sort().reverse().slice(0,6).map(function(k){var mo=monthsE[k];var tot=mo.wins+mo.losses;var r=tot>0?((mo.wins*0.75-mo.losses)/tot*100):0;var parts=k.split('-');var mn=['Jan','F\u00e9v','Mar','Avr','Mai','Jun','Jul','Ao\u00fb','Sep','Oct','Nov','D\u00e9c'];return{month:k,label:(mn[parseInt(parts[1])-1]||parts[1])+' '+parts[0],wins:mo.wins,losses:mo.losses,total:tot,roi:Math.round(r*10)/10};});
+              var nbPredictionsApresEarly=(histoEarly.predictions||[]).length;
+              var perteImportanteEarly = histoEarlyLuAvecSucces && nbPredictionsAvantEarly>10 && nbPredictionsApresEarly < nbPredictionsAvantEarly*0.8;
+              if(!histoEarlyLuAvecSucces || perteImportanteEarly){
+                console.log('  🚨 GARDE-FOU DÉCLENCHÉ — écriture de historique.json ANNULÉE pour éviter une perte de données.');
+                console.log('  🚨 Avant: '+nbPredictionsAvantEarly+' | Après (calculé): '+nbPredictionsApresEarly+'.');
+                return;
+              }
               fs.writeFileSync(histoPathEarly,JSON.stringify(histoEarly,null,2));
               return;
             }

@@ -1937,7 +1937,7 @@ jobs:
             try{histo=JSON.parse(fs.readFileSync(histoPath,'utf8'));}catch(e){}
             var yesterday=new Date(TODAY+'T12:00:00Z');yesterday.setDate(yesterday.getDate()-1);
             var yDate=yesterday.toISOString().split('T')[0];
-            var resolveDates=[];
+            var resolveDates=[TODAY];
             for(var dback=1; dback<=4; dback++){
               var dd=new Date(TODAY+'T12:00:00Z'); dd.setDate(dd.getDate()-dback);
               resolveDates.push(dd.toISOString().split('T')[0]);
@@ -2171,7 +2171,7 @@ jobs:
               var histoPathEarly='historique.json';
               var histoEarly={predictions:[],stats:{winrate:0,roi:0,total:0,streak:0,wins:0,losses:0},monthly:[],backtesting:{}};
               try{histoEarly=JSON.parse(fs.readFileSync(histoPathEarly,'utf8'));}catch(e){}
-              var resolveDatesEarly=[];
+              var resolveDatesEarly=[TODAY];
               for(var dbackE=1; dbackE<=4; dbackE++){
                 var ddE=new Date(TODAY+'T12:00:00Z'); ddE.setDate(ddE.getDate()-dbackE);
                 resolveDatesEarly.push(ddE.toISOString().split('T')[0]);

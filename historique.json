@@ -1,6 +1,90 @@
 {
   "predictions": [
     {
+      "match": "Switzerland vs Colombia",
+      "home": "Switzerland",
+      "away": "Colombia",
+      "prediction": "BTTS Oui",
+      "cote": 1.95,
+      "conf": 6.8,
+      "conf_bucket": "6-7",
+      "market": "btts_oui",
+      "league": "World Cup",
+      "league_key": "other",
+      "sport": "football",
+      "elo_diff": null,
+      "has_pinnacle": false,
+      "has_elo": false,
+      "date": "2026-07-05",
+      "result": "scheduled",
+      "fixture_id": 1576805,
+      "type": "single",
+      "score": null
+    },
+    {
+      "match": "Argentina vs Egypt",
+      "home": "Argentina",
+      "away": "Egypt",
+      "prediction": "BTTS Oui",
+      "cote": 2.33,
+      "conf": 6.8,
+      "conf_bucket": "6-7",
+      "market": "btts_oui",
+      "league": "World Cup",
+      "league_key": "other",
+      "sport": "football",
+      "elo_diff": null,
+      "has_pinnacle": false,
+      "has_elo": false,
+      "date": "2026-07-05",
+      "result": "scheduled",
+      "fixture_id": 1576804,
+      "type": "single",
+      "score": null
+    },
+    {
+      "match": "Orense SC vs Tecnico Universitario",
+      "home": "Orense SC",
+      "away": "Tecnico Universitario",
+      "prediction": "Under 2.5",
+      "cote": 1.75,
+      "conf": 6.8,
+      "conf_bucket": "6-7",
+      "market": "under25",
+      "league": "Liga Pro",
+      "league_key": "equateur",
+      "sport": "football",
+      "elo_diff": null,
+      "has_pinnacle": false,
+      "has_elo": false,
+      "date": "2026-07-05",
+      "result": "scheduled",
+      "fixture_id": 1519390,
+      "type": "single",
+      "score": null
+    },
+    {
+      "match": "USA vs Belgium",
+      "home": "USA",
+      "away": "Belgium",
+      "prediction": "Over 2.5",
+      "cote": 1.74,
+      "conf": 6.8,
+      "conf_bucket": "6-7",
+      "market": "over25",
+      "league": "World Cup",
+      "league_key": "other",
+      "sport": "football",
+      "elo_diff": null,
+      "has_pinnacle": false,
+      "has_elo": false,
+      "date": "2026-07-05",
+      "result": "scheduled",
+      "fixture_id": 1570715,
+      "type": "single",
+      "score": null
+    },
+    {
       "match": "Pacific FC vs HFX Wanderers FC",
       "home": "Pacific FC",
       "away": "HFX Wanderers FC",
@@ -654,10 +738,11 @@
       "has_pinnacle": false,
       "has_elo": false,
       "date": "2026-07-03",
-      "result": "scheduled",
+      "result": "loss",
       "fixture_id": 1517305,
       "type": "single",
-      "score": null
+      "score": "0-3",
+      "resolved_date": "2026-07-05"
     },
     {
       "match": "Brazil vs Norway",
@@ -696,10 +781,11 @@
       "has_pinnacle": false,
       "has_elo": false,
       "date": "2026-07-02",
-      "result": "scheduled",
+      "result": "loss",
       "fixture_id": 1519388,
       "type": "single",
-      "score": null
+      "score": "1-3",
+      "resolved_date": "2026-07-05"
     },
     {
       "match": "IBV Vestmannaeyjar vs Valur Reykjavik",
@@ -849,10 +935,11 @@
       "has_pinnacle": false,
       "has_elo": false,
       "date": "2026-07-02",
-      "result": "scheduled",
+      "result": "win",
       "fixture_id": 1569870,
       "type": "single",
-      "score": null
+      "score": "0-1",
+      "resolved_date": "2026-07-05"
     },
     {
       "match": "Canada vs Morocco",
@@ -3595,21 +3682,21 @@
     }
   ],
   "stats": {
-    "winrate": 65.9,
-    "roi": 18.3,
-    "total": 123,
+    "winrate": 65.1,
+    "roi": 17.3,
+    "total": 126,
     "streak": 6,
-    "wins": 81,
-    "losses": 42
+    "wins": 82,
+    "losses": 44
   },
   "monthly": [
     {
       "month": "2026-07",
       "label": "Jul 2026",
-      "wins": 22,
-      "losses": 14,
-      "total": 36,
-      "roi": 6.9
+      "wins": 23,
+      "losses": 16,
+      "total": 39,
+      "roi": 3.2
     },
     {
       "month": "2026-06",
@@ -3632,11 +3719,11 @@
       },
       {
         "key": "under25",
-        "wins": 15,
-        "losses": 14,
-        "total": 29,
-        "winrate": 51.7,
-        "roi": -12.5
+        "wins": 16,
+        "losses": 15,
+        "total": 31,
+        "winrate": 51.6,
+        "roi": -10.7
       },
       {
         "key": "btts_oui",
@@ -3687,6 +3774,14 @@
         "roi": -100
       },
       {
+        "key": "handicap_ext",
+        "wins": 0,
+        "losses": 1,
+        "total": 1,
+        "winrate": 0,
+        "roi": -100
+      },
+      {
         "key": "victoire_ext",
         "wins": 0,
         "losses": 1,
@@ -3698,11 +3793,11 @@
     "by_league": [
       {
         "key": "other",
-        "wins": 26,
+        "wins": 27,
         "losses": 20,
-        "total": 46,
-        "winrate": 56.5,
-        "roi": 15.8
+        "total": 47,
+        "winrate": 57.4,
+        "roi": 18.3
       },
       {
         "key": "wc",
@@ -3753,6 +3848,22 @@
         "roi": 39.4
       },
       {
+        "key": "canada",
+        "wins": 2,
+        "losses": 1,
+        "total": 3,
+        "winrate": 66.7,
+        "roi": 24.7
+      },
+      {
+        "key": "equateur",
+        "wins": 1,
+        "losses": 2,
+        "total": 3,
+        "winrate": 33.3,
+        "roi": -35
+      },
+      {
         "key": "kleague",
         "wins": 2,
         "losses": 1,
@@ -3777,22 +3888,6 @@
         "roi": 68.3
       },
       {
-        "key": "canada",
-        "wins": 2,
-        "losses": 0,
-        "total": 2,
-        "winrate": 100,
-        "roi": 87
-      },
-      {
-        "key": "equateur",
-        "wins": 1,
-        "losses": 1,
-        "total": 2,
-        "winrate": 50,
-        "roi": -2.5
-      },
-      {
         "key": "laliga2",
         "wins": 1,
         "losses": 0,
@@ -3812,11 +3907,11 @@
       },
       {
         "key": "6-7",
-        "wins": 27,
-        "losses": 18,
-        "total": 45,
-        "winrate": 60,
-        "roi": 3.4
+        "wins": 28,
+        "losses": 20,
+        "total": 48,
+        "winrate": 58.3,
+        "roi": 1.7
       },
       {
         "key": "<6",
@@ -3838,31 +3933,31 @@
     "by_sport": [
       {
         "key": "football",
-        "wins": 81,
-        "losses": 42,
-        "total": 123,
-        "winrate": 65.9,
-        "roi": 18.3
+        "wins": 82,
+        "losses": 44,
+        "total": 126,
+        "winrate": 65.1,
+        "roi": 17.3
       }
     ],
     "by_has_pinnacle": [
       {
         "key": "inconnu",
-        "wins": 81,
-        "losses": 42,
-        "total": 123,
-        "winrate": 65.9,
-        "roi": 18.3
+        "wins": 82,
+        "losses": 44,
+        "total": 126,
+        "winrate": 65.1,
+        "roi": 17.3
       }
     ],
     "by_has_elo": [
       {
         "key": "inconnu",
-        "wins": 75,
-        "losses": 41,
-        "total": 116,
-        "winrate": 64.7,
-        "roi": 17
+        "wins": 76,
+        "losses": 43,
+        "total": 119,
+        "winrate": 63.9,
+        "roi": 16
       },
       {
         "key": "true",
@@ -3873,6 +3968,6 @@
         "roi": 39
       }
     ],
-    "updated": "2026-07-04"
+    "updated": "2026-07-05"
   }
 }

@@ -84,6 +84,26 @@ jobs:
               }).on('error',function(){ clearTimeout(timer); resolve([]); });
             });
           }
+          // ── FIX RÉSOLUTION MARCHÉS : fonction unique partagée ────────────
+          // Avant ce fix, la logique de résolution win/loss était dupliquée à 2 endroits
+          // (updateHistorique + bloc "jour sans matchs") et aucune des deux ne couvrait
+          // les marchés Victoire Domicile/Extérieur ni la variante "DC X1" — ces paris
+          // étaient donc systématiquement classés en défaite, peu importe le score réel.
+          function resolveMarketWin(predRaw, gh, ga) {
+            var pred = (predRaw||'').toLowerCase();
+            if(pred.includes('over 2.5')) return (gh+ga)>2;
+            if(pred.includes('over 1.5')) return (gh+ga)>1;
+            if(pred.includes('over 3.5')) return (gh+ga)>3;
+            if(pred.includes('under 2.5')) return (gh+ga)<3;
+            if(pred.includes('btts non')) return (gh===0||ga===0);
+            if(pred.includes('btts')) return (gh>0&&ga>0);
+            if(pred.includes('victoire')&&(pred.includes('domicile')||pred.includes('dom'))) return gh>ga;
+            if(pred.includes('victoire')&&(pred.includes('extérieur')||pred.includes('ext'))) return ga>gh;
+            if(pred.includes('1x')||pred.includes('x1')||pred.includes('dc 1x')) return gh>=ga;
+            if(pred.includes('x2')||pred.includes('dc x2')) return ga>=gh;
+            if(pred.includes('nul')||pred.includes('draw')) return gh===ga;
+            return null;
+          }
           // ═══════════════════════════════════════════════════════
           // ── DONNÉES DYNAMIQUES WC2026 ────────────────────────────
           // ═══════════════════════════════════════════════════════
@@ -1722,7 +1742,7 @@ jobs:
               +'\nRÈGLES DE SÉLECTION DU MARCHÉ :\n'
               +'1. Choisis le marché dont les signaux sont les plus convergents (Phase 1 + Phase 2 + Monte-Carlo pointent dans la même direction)\n'
               +'2. Vérifie la cohérence avec les scores Monte-Carlo — si Over 2.5 mais top scores sont 0-0/1-0, ne choisis pas Over 2.5\n'
-              +'3. Aucun marché n\'est favorisé a priori — les 10 marchés (Over/Under 2.5, BTTS Oui/Non, DC 1X/X2, Victoire sèche, Handicaps) sont tous équivalents au départ\n'
+              +'3. Aucun marché n\'est favorisé a priori — les 8 marchés (Over/Under 2.5, BTTS Oui/Non, DC 1X/X2, Victoire sèche) sont tous équivalents au départ\n'
               +'4. Si les signaux sont contradictoires ou insuffisants → passe_ton_tour=true\n'
               +'5. Si aucun marché n\'a de cote disponible >= 1.50 → passe_ton_tour=true\n'
               +'\nCONFIANCE : note continue de 5.5 à 9.0 reflétant fidèlement la force réelle du signal — JAMAIS de valeur "ronde" par défaut (évite de toujours tomber sur 7.0, 7.5 ou 8.0).\n'
@@ -1877,17 +1897,8 @@ jobs:
                 var found=histo.predictions.find(function(p){return (p.result==='scheduled'||p.result==='pending')&&p.fixture_id===fid;});
                 if(!found)found=histo.predictions.find(function(p){return (p.result==='scheduled'||p.result==='pending')&&p.type==='single'&&p.sport!=='tennis'&&p.date&&resolveDates.indexOf(p.date.substring(0,10))!==-1&&levenshtein((p.home||'').toLowerCase(),homeN.toLowerCase())<=3&&levenshtein((p.away||'').toLowerCase(),awayN.toLowerCase())<=3;});
                 if(!found)continue;
-                var pred=(found.prediction||'').toLowerCase();
-                var isWin=false;
-                if(pred.includes('over 2.5'))isWin=(gh+ga)>2;
-                else if(pred.includes('over 1.5'))isWin=(gh+ga)>1;
-                else if(pred.includes('over 3.5'))isWin=(gh+ga)>3;
-                else if(pred.includes('under 2.5'))isWin=(gh+ga)<3;
-                else if(pred.includes('btts non'))isWin=(gh===0||ga===0);
-                else if(pred.includes('btts'))isWin=(gh>0&&ga>0);
-                else if(pred.includes('1x')||pred.includes('dc 1x'))isWin=(gh>=ga);
-                else if(pred.includes('x2')||pred.includes('dc x2'))isWin=(ga>=gh);
-                else if(pred.includes('nul')||pred.includes('draw'))isWin=(gh===ga);
+                var isWin=resolveMarketWin(found.prediction, gh, ga);
+                if(isWin===null){ continue; }
                 found.result=isWin?'win':'loss';found.score=gh+'-'+ga;found.fixture_id=fid;found.resolved_date=TODAY;
                 console.log('  R\u00e9solu foot: '+found.match+' \u2192 '+found.result+' ('+gh+'-'+ga+')');
               }
@@ -1965,8 +1976,9 @@ jobs:
                   else if(bl.includes('over 1.5'))marketType='over15';
                   else if(bl.includes('btts non'))marketType='btts_non';
                   else if(bl.includes('btts'))marketType='btts_oui';
-                  // Classification des 4 marchés ajoutés (victoire sèche + handicap) — sans cette
-                  // couverture ils tombaient eux aussi tous dans 'autre' dès leur introduction.
+                  // Classification des marchés victoire sèche — le marché Handicap a été retiré
+                  // des choix proposés à Claude (cf. allMarkets), ces 2 branches ne servent donc
+                  // plus qu'à classer d'éventuelles anciennes entrées déjà présentes dans l'historique.
                   else if(bl.includes('handicap')&&(bl.includes('domicile')||bl.includes('dom')))marketType='handicap_dom';
                   else if(bl.includes('handicap')&&(bl.includes('extérieur')||bl.includes('ext')))marketType='handicap_ext';
                   else if(bl.includes('victoire')&&(bl.includes('domicile')||bl.includes('dom')))marketType='victoire_dom';
@@ -2104,12 +2116,8 @@ jobs:
                   var found=histoEarly.predictions.find(function(p){return (p.result==='scheduled'||p.result==='pending')&&p.fixture_id===fid;});
                   if(!found)found=histoEarly.predictions.find(function(p){return (p.result==='scheduled'||p.result==='pending')&&p.type==='single'&&p.sport!=='tennis'&&p.date&&resolveDatesEarly.indexOf(p.date.substring(0,10))!==-1&&levenshtein((p.home||'').toLowerCase(),homeN.toLowerCase())<=3&&levenshtein((p.away||'').toLowerCase(),awayN.toLowerCase())<=3;});
                   if(!found)return;
-                  var pred=(found.prediction||'').toLowerCase();
-                  var isWin=false;
-                  if(pred.includes('over 2.5'))isWin=(gh+ga)>2;
-                  else if(pred.includes('btts non'))isWin=(gh===0||ga===0);
-                  else if(pred.includes('1x')||pred.includes('dc 1x'))isWin=(gh>=ga);
-                  else if(pred.includes('x2')||pred.includes('dc x2'))isWin=(ga>=gh);
+                  var isWin=resolveMarketWin(found.prediction, gh, ga);
+                  if(isWin===null){ return; }
                   found.result=isWin?'win':'loss';found.score=gh+'-'+ga;found.fixture_id=fid;found.resolved_date=TODAY;
                 });
               }catch(e){console.log('  Erreur r\u00e9solution:',e.message);}
@@ -2345,17 +2353,19 @@ jobs:
               var poissonProbs=calcFinalProbs(lambdas.lambdaH,lambdas.lambdaA,eloStats);
               var shinProbs=null;
               if(pinnacleOdds&&pinnacleOdds.c1&&pinnacleOdds.cn&&pinnacleOdds.c2){var raw=shinProbabilities([pinnacleOdds.c1,pinnacleOdds.cn,pinnacleOdds.c2]);if(raw)shinProbs={p1:Math.round(raw[0]*100),pN:Math.round(raw[1]*100),p2:Math.round(raw[2]*100)};}
-              // ── 6 MARCHÉS — le code calcule les probas, Claude choisit librement ──
+              // ── MARCHÉS — le code calcule les probas, Claude choisit librement ──
               // Le code ne sélectionne AUCUN marché — il passe tout à Claude
               // Filtre unique : cote >= 1.50 pour ne pas proposer des marchés non jouables
+              // FIX: le marché Handicap a été retiré des choix proposés (cf. allMarkets plus bas) —
+              // ces 2 variables restent calculées mais ne sont plus utilisées dans allMarkets,
+              // elles ne cassent donc rien si on veut les réintroduire plus tard.
               var prob1X=(shinProbs?shinProbs.p1:poissonProbs.p1)+(shinProbs?shinProbs.pN:poissonProbs.pN);
               var probX2=(shinProbs?shinProbs.p2:poissonProbs.p2)+(shinProbs?shinProbs.pN:poissonProbs.pN);
-              // AH -0.5 dom = victoire sèche dom (gagne même par 1 but) | AH +0.5 ext = ext ne perd pas
               var probAHdom=shinProbs?shinProbs.p1:poissonProbs.p1;
               var probAHext=(shinProbs?shinProbs.p2:poissonProbs.p2)+(shinProbs?shinProbs.pN:poissonProbs.pN);
-              // 10 marchés possibles — Aucun tri, aucune sélection : Claude reçoit tous les marchés jouables
-              // Le filtre cote >= 1.50 écarte naturellement la victoire sèche d'un ultra-favori (ex: 1.20)
-              // tout en gardant son handicap -0.5 qui offre souvent une cote jouable (ex: 1.75)
+              // 8 marchés possibles — Aucun tri, aucune sélection : Claude reçoit tous les marchés jouables.
+              // FIX: Handicap -0.5 Domicile / +0.5 Extérieur retirés de la liste sur demande — Claude ne
+              // peut plus jamais les recommander.
               var allMarkets=[
                 {market:'Over 2.5',  cote:odds.co25,      prob:poissonProbs.over25, label:'Plus de 2.5 buts'},
                 {market:'Under 2.5', cote:odds.cu25,      prob:poissonProbs.under25,label:'Moins de 2.5 buts'},
@@ -2365,8 +2375,6 @@ jobs:
                 {market:'DC X2',     cote:odds.dc2x,      prob:probX2,              label:'Victoire ou nul extérieur'},
                 {market:'Victoire Domicile', cote:odds.c1, prob:shinProbs?shinProbs.p1:poissonProbs.p1, label:'Victoire sèche domicile'},
                 {market:'Victoire Extérieur',cote:odds.c2, prob:shinProbs?shinProbs.p2:poissonProbs.p2, label:'Victoire sèche extérieur'},
-                {market:'Handicap -0.5 Domicile', cote:odds.ah_dom, prob:probAHdom, label:'Domicile gagne (handicap -0.5)'},
-                {market:'Handicap +0.5 Extérieur',cote:odds.ah_ext, prob:probAHext, label:'Extérieur ne perd pas (handicap +0.5)'},
               ].filter(function(m){
                 return m.cote&&m.cote!=='--'&&parseFloat(m.cote)>=1.50;
               });
@@ -2545,8 +2553,6 @@ jobs:
                 })():(evPatA||null),
                 top_scorers_home:topScorersH||[],top_scorers_away:topScorersA||[],
                 key_absences:keyAbsenceAlerts||[],
-                // Stats détaillées moyennées sur 10 derniers matchs — alimente buildMatchStats() côté front
-                // Données déjà fournies par API-Sports mais jamais exploitées avant ce patch
                 match_stats_home:{
                   possession:xgH.possession_avg, shots_total:xgH.shots_total_avg?parseFloat(xgH.shots_total_avg):null,
                   shots_on:xgH.shots_on_avg?parseFloat(xgH.shots_on_avg):null, shots_off:xgH.shots_off_avg,

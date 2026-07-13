@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-R30ZBHG8J0"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-R30ZBHG8J0');</script>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>IASHARK — Historique & Performance</title>
+<meta name="description" content="Historique des pronostics IASHARK. Winrate, ROI et résultats détaillés de toutes nos prédictions football IA.">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23080c12'/%3E%3Ctext x='50%25' y='54%25' dominant-baseline='middle' text-anchor='middle' font-size='40' fill='%2322d3ee'%3E🦈%3C/text%3E%3C/svg%3E">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#080c12;--card:#0d1520;--card2:#0f1a28;--cyan:#22d3ee;--cyan2:#06b6d4;--amber:#f59e0b;--green:#10b981;--red:#ef4444;--text:#e2e8f0;--muted:#4a6580;--border:rgba(255,255,255,0.06);--border-cyan:rgba(34,211,238,0.18);}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;padding-bottom:90px;}
+.hdr{position:sticky;top:0;z-index:99;background:rgba(8,12,18,0.96);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);padding:0 20px;height:56px;display:flex;align-items:center;justify-content:space-between;}
+.logo{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:3px;color:var(--text);text-decoration:none;}
+.logo span{color:var(--cyan);}
+.hdr-right{display:flex;gap:8px;align-items:center;}
+.btn-login{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1px;padding:6px 14px;border-radius:8px;border:1px solid rgba(34,211,238,0.3);background:rgba(34,211,238,0.06);color:var(--cyan);cursor:pointer;transition:.2s;text-decoration:none;display:inline-flex;align-items:center;}
+.btn-login:hover{background:rgba(34,211,238,0.12);}
+.hdr-badge{font-family:'Space Mono',monospace;font-size:8px;color:var(--muted);letter-spacing:1px;}
+.hero{padding:28px 20px 20px;max-width:720px;margin:0 auto;}
+.hero-title{font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:2px;margin-bottom:16px;}
+.hero-title span{color:var(--cyan);}
+
+.sport-toggle{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
+.sp-btn{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1px;padding:7px 16px;border-radius:10px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:.2s;display:flex;align-items:center;gap:6px;}
+.sp-btn.active{background:rgba(34,211,238,0.1);border-color:var(--border-cyan);color:var(--cyan);}
+.sp-btn.pro-btn.active{background:rgba(245,158,11,0.1);border-color:rgba(245,158,11,0.35);color:var(--amber);}
+
+/* ── STATS FUSIONNÉES ── */
+.stats-merged{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:18px 20px;margin-bottom:20px;}
+.sm-top{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;margin-bottom:14px;}
+.sm-lbl{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--muted);margin-bottom:6px;}
+.sm-val{font-family:'Bebas Neue',sans-serif;font-size:30px;line-height:1;}
+.sm-trend{display:flex;gap:3px;margin-top:8px;}
+.sm-dot{width:14px;height:14px;border-radius:3px;font-size:8px;display:flex;align-items:center;justify-content:center;font-weight:700;}
+.sm-dot.w{background:rgba(16,185,129,0.18);color:var(--green);}
+.sm-dot.l{background:rgba(239,68,68,0.15);color:var(--red);}
+.sm-trend-lbl{font-family:'Space Mono',monospace;font-size:6.5px;letter-spacing:1px;color:var(--muted);margin-top:4px;}
+.sm-bilan{display:flex;gap:10px;align-items:center;padding-top:14px;border-top:1px solid var(--border);font-family:'Space Mono',monospace;font-size:12px;flex-wrap:wrap;}
+.sm-bilan b{font-family:'Bebas Neue',sans-serif;font-size:20px;}
+
+.section-lbl{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:3px;color:var(--muted);display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.section-lbl::after{content:'';flex:1;height:1px;background:var(--border);}
+.tabs{display:flex;gap:8px;margin-bottom:16px;}
+.tab{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:2px;padding:8px 16px;border-radius:10px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:.2s;}
+.tab.active{background:rgba(34,211,238,0.1);border-color:var(--border-cyan);color:var(--cyan);}
+
+/* ── RECHERCHE + FILTRES ── */
+.search-wrap{position:relative;margin-bottom:10px;}
+.search-input{width:100%;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:11px 14px 11px 36px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;transition:.2s;}
+.search-input:focus{border-color:var(--border-cyan);}
+.search-icon{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:13px;}
+.search-clear{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;display:none;}
+.search-clear.show{display:block;}
+.filter-row{display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap;}
+.fsel{background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Space Mono',monospace;font-size:9px;padding:8px 10px;cursor:pointer;outline:none;}
+.filter-btn{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:1px;padding:6px 14px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:.2s;}
+.filter-btn.active,.filter-btn:hover{background:rgba(34,211,238,0.1);border-color:var(--border-cyan);color:var(--cyan);}
+.filter-count{font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);margin-left:auto;}
+
+.pred-list{display:flex;flex-direction:column;gap:8px;}
+.pred-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px 16px;display:grid;grid-template-columns:1fr auto;align-items:center;gap:12px;}
+.pred-card.win{border-left:3px solid var(--green);}
+.pred-card.loss{border-left:3px solid var(--red);}
+.pred-card.neutral{border-left:3px solid var(--muted);opacity:0.75;}
+.pred-match{font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:1px;margin-bottom:4px;}
+.pred-meta{display:flex;gap:6px;align-items:center;flex-wrap:wrap;}
+.pred-tag{font-family:'Space Mono',monospace;font-size:7px;letter-spacing:1px;padding:2px 8px;border-radius:10px;cursor:pointer;transition:.2s;}
+.tag-market{background:rgba(34,211,238,0.08);border:1px solid var(--border-cyan);color:var(--cyan);}
+.tag-market:hover{background:rgba(34,211,238,0.16);}
+.tag-league{background:rgba(255,255,255,0.04);border:1px solid var(--border);color:var(--muted);}
+.tag-league:hover{border-color:var(--border-cyan);color:var(--cyan);}
+.tag-date{color:var(--muted);font-family:'Space Mono',monospace;font-size:7px;}
+.tag-pro{background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.3);color:var(--amber);cursor:default;}
+.pred-right{text-align:right;}
+.pred-result{font-family:'Bebas Neue',sans-serif;font-size:20px;}
+.pred-result.win{color:var(--green);}
+.pred-result.loss{color:var(--red);}
+.pred-result.neutral{color:var(--muted);font-size:14px;}
+.pred-score{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);margin-top:2px;}
+.pred-cote{font-family:'Bebas Neue',sans-serif;font-size:14px;color:var(--amber);}
+
+.bt-sort-note{font-size:11px;color:var(--muted);margin-bottom:10px;}
+.bt-grid{display:flex;flex-direction:column;gap:6px;margin-bottom:20px;}
+.bt-row{display:grid;grid-template-columns:120px 1fr 60px 60px;gap:8px;align-items:center;padding:8px 12px;background:var(--card);border-radius:10px;border:1px solid var(--border);}
+.bt-row.low-sample{opacity:0.6;}
+.bt-key{font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:5px;}
+.bt-n-badge{font-family:'Space Mono',monospace;font-size:7px;color:var(--muted);}
+.low-badge{font-family:'Space Mono',monospace;font-size:6.5px;letter-spacing:0.5px;color:var(--amber);background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);padding:1px 5px;border-radius:8px;}
+.bt-bar-wrap{height:5px;background:rgba(255,255,255,0.06);border-radius:3px;overflow:hidden;}
+.bt-bar{height:100%;border-radius:3px;}
+.bt-wr{font-family:'Space Mono',monospace;font-size:10px;text-align:right;}
+.bt-roi{font-family:'Space Mono',monospace;font-size:10px;text-align:right;}
+.empty{text-align:center;padding:48px 20px;}
+.empty h3{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:1px;color:var(--muted);margin-bottom:6px;}
+.empty p{font-size:13px;color:var(--muted);}
+.nav-bottom{position:fixed;bottom:0;left:0;right:0;background:rgba(8,12,18,0.97);backdrop-filter:blur(14px);border-top:1px solid var(--border);display:flex;z-index:100;}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px 4px 8px;gap:5px;cursor:pointer;transition:.2s;-webkit-tap-highlight-color:transparent;text-decoration:none;}
+.nav-icon{width:20px;height:20px;display:flex;align-items:center;justify-content:center;}
+.nav-icon svg{width:20px;height:20px;stroke:var(--muted);transition:.2s;}
+.nav-lbl{font-family:'Space Mono',monospace;font-size:7px;color:var(--muted);letter-spacing:1px;}
+.nav-item.active .nav-lbl{color:var(--cyan);}
+.nav-item.active .nav-icon svg{stroke:var(--cyan);filter:drop-shadow(0 0 6px rgba(34,211,238,0.5));}
+@media(max-width:480px){.bt-row{grid-template-columns:90px 1fr 50px 50px;}}
+</style>
+</head>
+<body>
+
+<header class="hdr">
+  <a href="/" class="logo"><span>IA</span>SHARK</a>
+  <div class="hdr-right">
+    <span class="hdr-badge" id="totalBadge">— PARIS</span>
+    <a href="/compte.html" class="btn-login">CONNEXION</a>
+  </div>
+</header>
+
+<div style="max-width:720px;margin:0 auto;padding:0 20px;">
+  <div class="hero">
+    <div class="hero-title"><span>HISTO</span>RIQUE</div>
+
+    <div class="sport-toggle" id="sportToggle">
+      <button class="sp-btn active" id="spAll" onclick="setStatSport('all')">🌐 TOUS</button>
+      <button class="sp-btn" id="spFootball" onclick="setStatSport('football')">⚽ FOOTBALL</button>
+      <button class="sp-btn pro-btn" id="spPro" onclick="setStatSport('pro')">⭐ PRO</button>
+    </div>
+
+    <div class="stats-merged">
+      <div class="sm-top">
+        <div>
+          <div class="sm-lbl">WINRATE</div>
+          <div class="sm-val" id="statWinrate">—</div>
+        </div>
+        <div>
+          <div class="sm-lbl">ROI</div>
+          <div class="sm-val" id="statRoi">—</div>
+        </div>
+        <div>
+          <div class="sm-lbl">FORME RÉCENTE</div>
+          <div class="sm-trend" id="statTrend"></div>
+          <div class="sm-trend-lbl" id="statTrendLbl"></div>
+        </div>
+      </div>
+      <div class="sm-bilan">
+        <span><b class="green" id="statWins">—</b> V</span>
+        <span style="color:var(--muted)">/</span>
+        <span><b class="red" id="statLosses">—</b> D</span>
+        <span style="color:var(--muted);margin-left:auto;" id="statTotal">— paris au total</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="setTab('paris',this)">PARIS</button>
+    <button class="tab" onclick="setTab('backtesting',this)">BACKTESTING</button>
+  </div>
+
+  <div id="tabParis">
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input type="text" class="search-input" id="searchInput" placeholder="Rechercher une équipe, un championnat..." oninput="onSearch()">
+      <button class="search-clear" id="searchClear" onclick="clearSearch()">✕</button>
+    </div>
+    <div class="filter-row">
+      <select class="fsel" id="mktSel" onchange="renderPredictions()"><option value="">TOUS LES MARCHÉS</option></select>
+      <select class="fsel" id="leagueSel" onchange="renderPredictions()"><option value="">TOUS CHAMPIONNATS</option></select>
+      <button class="filter-btn active" onclick="setFilter('all',this)">TOUS</button>
+      <button class="filter-btn" onclick="setFilter('win',this)">✅</button>
+      <button class="filter-btn" onclick="setFilter('loss',this)">❌</button>
+      <span class="filter-count" id="countLbl"></span>
+    </div>
+    <div class="pred-list" id="predList">
+      <div class="empty"><h3>CHARGEMENT...</h3></div>
+    </div>
+  </div>
+
+  <div id="tabBacktesting" style="display:none;">
+    <div class="bt-sort-note">Trié par nombre de paris — les marchés testés sur peu de paris sont estompés et marqués, pour éviter de sur-interpréter un petit échantillon.</div>
+    <div id="btContent"><div class="empty"><h3>CHARGEMENT...</h3></div></div>
+  </div>
+</div>
+
+<div style="max-width:720px;margin:24px auto 0;padding:0 20px 20px;text-align:center;">
+  <div style="font-family:'Space Mono',monospace;font-size:8px;color:rgba(74,101,128,0.5);line-height:2;letter-spacing:1px;">
+    <div>⚠️ LE JEU PEUT ÊTRE DANGEREUX — JOUEZ RESPONSABLE · INTERDIT AUX MOINS DE 18 ANS</div>
+    <div>Aide : <a href="https://www.joueurs-info-service.fr" style="color:rgba(34,211,238,0.4);text-decoration:none;">joueurs-info-service.fr</a> · 09 74 75 13 13</div>
+  </div>
+</div>
+
+<nav class="nav-bottom">
+  <a href="/" class="nav-item">
+    <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5L12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg></div>
+    <div class="nav-lbl">ACCUEIL</div>
+  </a>
+  <a href="/historique.html" class="nav-item active">
+    <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20v-4"/></svg></div>
+    <div class="nav-lbl">HISTORIQUE</div>
+  </a>
+  <a href="/pro.html" class="nav-item">
+    <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.9 6.6L22 9.3l-5 4.9L18.2 22 12 18.3 5.8 22 7 14.2 2 9.3l7.1-.7z"/></svg></div>
+    <div class="nav-lbl">PRO</div>
+  </a>
+  <a href="/blog/" class="nav-item">
+    <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg></div>
+    <div class="nav-lbl">GUIDES</div>
+  </a>
+  <a href="/compte.html" class="nav-item">
+    <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg></div>
+    <div class="nav-lbl">COMPTE</div>
+  </a>
+</nav>
+<script>
+var allPredictions=[], historiqueData={}, currentFilter='all', currentStatSport='all';
+
+var MARKET_LABELS={'over25':'Plus de 2,5 buts','over15':'Plus de 1,5 but','under25':'Moins de 2,5 buts','btts_non':'Une équipe ne marque pas','btts_oui':'Les deux équipes marquent','dc1x':'DC 1X','dc_x2':'DC X2','victoire_dom':'Victoire domicile','victoire_ext':'Victoire extérieur','handicap_dom':'Handicap -0.5 dom','handicap_ext':'Handicap +0.5 ext','match_winner':'Vainqueur','autre':'Autre'};
+var RESOLVED=['win','loss'];
+var DISPLAYABLE=['win','loss','neutral','no_signal'];
+
+function isPro(p){ return !p.no_signal && parseFloat(p.conf||0)>=7.0 && p.prediction && (p.date||'')>='2026-06-27'; }
+
+function setTab(tab,btn){
+  document.getElementById('tabParis').style.display=tab==='paris'?'block':'none';
+  document.getElementById('tabBacktesting').style.display=tab==='backtesting'?'block':'none';
+  document.querySelectorAll('.tab').forEach(function(b){b.classList.remove('active');});
+  btn.classList.add('active');
+}
+function setFilter(f,btn){
+  currentFilter=f;
+  document.querySelectorAll('.filter-btn').forEach(function(b){b.classList.remove('active');});
+  btn.classList.add('active');
+  renderPredictions();
+}
+function setStatSport(sport){
+  currentStatSport=sport;
+  ['spAll','spFootball','spPro'].forEach(function(id){document.getElementById(id).classList.remove('active');});
+  document.getElementById(sport==='all'?'spAll':sport==='pro'?'spPro':'spFootball').classList.add('active');
+  renderStats();
+  renderPredictions();
+  renderBacktesting(historiqueData.backtesting);
+}
+function getSportFilteredPredictions(){
+  if(currentStatSport==='pro') return allPredictions.filter(isPro);
+  if(currentStatSport==='football') return allPredictions.filter(function(p){return(p.sport||'football')==='football';});
+  return allPredictions;
+}
+function calcStats(preds){
+  var resolved=preds.filter(function(p){return p.type==='single'&&(p.result==='win'||p.result==='loss');});
+  var wins=resolved.filter(function(p){return p.result==='win';});
+  var total=resolved.length;
+  if(!total)return{winrate:0,roi:0,total:0,wins:0,losses:0};
+  var roiSum=0;
+  resolved.forEach(function(p){var c=parseFloat(p.cote)||1.75;roiSum+=p.result==='win'?(c-1):-1;});
+  return{winrate:Math.round((wins.length/total*100)*10)/10,roi:Math.round((roiSum/total*100)*10)/10,total:total,wins:wins.length,losses:total-wins.length};
+}
+function renderStats(){
+  var filtered=getSportFilteredPredictions();
+  var s=calcStats(filtered);
+  var wr=s.winrate||0,roi=s.roi||0;
+  document.getElementById('statWinrate').textContent=wr+'%';
+  document.getElementById('statWinrate').style.color=wr>=55?'var(--green)':wr>=45?'var(--amber)':'var(--red)';
+  document.getElementById('statRoi').textContent=(roi>=0?'+':'')+roi+'%';
+  document.getElementById('statRoi').style.color=roi>=0?'var(--green)':'var(--red)';
+  document.getElementById('statWins').textContent=s.wins||0;
+  document.getElementById('statLosses').textContent=s.losses||0;
+  document.getElementById('statTotal').textContent=(s.total||0)+' paris au total';
+
+  var resolved=filtered.filter(function(p){return p.type==='single'&&(p.result==='win'||p.result==='loss');})
+    .slice().sort(function(a,b){return(b.resolved_date||b.date||'').localeCompare(a.resolved_date||a.date||'');})
+    .slice(0,5).reverse();
+  document.getElementById('statTrend').innerHTML=resolved.map(function(p){
+    return '<div class="sm-dot '+(p.result==='win'?'w':'l')+'">'+(p.result==='win'?'V':'D')+'</div>';
+  }).join('');
+  document.getElementById('statTrendLbl').textContent=resolved.length?resolved.length+' DERNIERS PARIS':'AUCUN PARI RÉCENT';
+}
+function buildFilterOptions(){
+  var filtered=getSportFilteredPredictions().filter(function(p){return p.type==='single'&&DISPLAYABLE.indexOf(p.result)!==-1;});
+  var markets={}, leagues={};
+  filtered.forEach(function(p){
+    if(p.market) markets[p.market]=true;
+    if(p.league) leagues[p.league]=true;
+  });
+  var mktSel=document.getElementById('mktSel');
+  var curMkt=mktSel.value;
+  mktSel.innerHTML='<option value="">TOUS LES MARCHÉS</option>'+Object.keys(markets).sort().map(function(k){
+    return '<option value="'+k+'">'+(MARKET_LABELS[k]||k).toUpperCase()+'</option>';
+  }).join('');
+  mktSel.value=curMkt;
+  var leagueSel=document.getElementById('leagueSel');
+  var curLeague=leagueSel.value;
+  leagueSel.innerHTML='<option value="">TOUS CHAMPIONNATS</option>'+Object.keys(leagues).sort().map(function(l){
+    return '<option value="'+l+'">'+l.toUpperCase()+'</option>';
+  }).join('');
+  leagueSel.value=curLeague;
+}
+function onSearch(){
+  document.getElementById('searchClear').classList.toggle('show', document.getElementById('searchInput').value.length>0);
+  renderPredictions();
+}
+function clearSearch(){
+  document.getElementById('searchInput').value='';
+  document.getElementById('searchClear').classList.remove('show');
+  renderPredictions();
+}
+function filterByTag(type,val){
+  if(type==='market') document.getElementById('mktSel').value=val;
+  if(type==='league') document.getElementById('leagueSel').value=val;
+  renderPredictions();
+  window.scrollTo({top:document.querySelector('.filter-row').offsetTop-70,behavior:'smooth'});
+}
+function renderPredictions(){
+  var sportList=getSportFilteredPredictions();
+  var mkt=document.getElementById('mktSel').value;
+  var league=document.getElementById('leagueSel').value;
+  var q=(document.getElementById('searchInput').value||'').trim().toLowerCase();
+  var list=sportList.filter(function(p){return p.type==='single'&&DISPLAYABLE.indexOf(p.result)!==-1;});
+  if(currentFilter!=='all')list=list.filter(function(p){return p.result===currentFilter;});
+  if(mkt)list=list.filter(function(p){return p.market===mkt;});
+  if(league)list=list.filter(function(p){return p.league===league;});
+  if(q)list=list.filter(function(p){return (p.match||'').toLowerCase().indexOf(q)!==-1||(p.league||'').toLowerCase().indexOf(q)!==-1;});
+  list=list.slice().sort(function(a,b){return(b.resolved_date||b.date||'').localeCompare(a.resolved_date||a.date||'');});
+  var resolvedTotal=sportList.filter(function(p){return p.type==='single'&&RESOLVED.indexOf(p.result)!==-1;}).length;
+  document.getElementById('countLbl').textContent=list.length+' pari'+(list.length>1?'s':'');
+  document.getElementById('totalBadge').textContent=resolvedTotal+' PARIS';
+  if(!list.length){document.getElementById('predList').innerHTML='<div class="empty"><h3>AUCUN PARIS</h3><p>Aucun résultat pour cette combinaison de filtres.</p></div>';return;}
+  document.getElementById('predList').innerHTML=list.map(function(p){
+    if(p.result==='no_signal')return'';
+    var ml=MARKET_LABELS[p.market]||p.prediction_fr||p.prediction||'';
+    var coteStr=p.cote&&p.result!=='neutral'?parseFloat(p.cote).toFixed(2):'';
+    var proTag=isPro(p)?'<span class="pred-tag tag-pro">⭐ PRO</span>':'';
+    return'<div class="pred-card '+p.result+'">'
+      +'<div>'
+      +'<div class="pred-match">'+p.match+'</div>'
+      +'<div class="pred-meta">'
+      +(ml&&p.market?'<span class="pred-tag tag-market" onclick="filterByTag(\'market\',\''+p.market+'\')">'+ml+'</span>':'')
+      +(coteStr?'<span class="pred-cote">'+coteStr+'</span>':'')
+      +proTag
+      +(p.league?'<span class="pred-tag tag-league" onclick="filterByTag(\'league\',\''+p.league+'\')">'+p.league+'</span>':'')
+      +'<span class="tag-date">'+(p.resolved_date||p.date)+'</span>'
+      +'</div>'
+      +'</div>'
+      +'<div class="pred-right">'
+      +'<div class="pred-result '+p.result+'">'+(p.result==='win'?'WIN':'LOSS')+'</div>'
+      +'<div class="pred-score">'+(p.score||'—')+'</div>'
+      +'</div>'
+      +'</div>';
+  }).filter(Boolean).join('');
+}
+function renderBacktesting(bt){
+  if(!bt||!bt.by_market||!bt.by_market.length){document.getElementById('btContent').innerHTML='<div class="empty"><h3>PAS ENCORE DE DONNÉES</h3><p>Les stats apparaîtront après les premiers paris résolus.</p></div>';return;}
+  function section(title,rows,useMarketLabels){
+    if(!rows||!rows.length)return'';
+    var sorted=rows.slice().sort(function(a,b){return b.total-a.total;});
+    return'<div class="section-lbl" style="margin-bottom:10px;">'+title+'</div><div class="bt-grid">'+sorted.map(function(r){
+      var wr=r.winrate||0,roi=r.roi||0;
+      var lowSample=r.total<10;
+      var color=wr>=65?'#10b981':wr>=55?'#22d3ee':wr>=45?'#f59e0b':'#ef4444';
+      var roiColor=roi>=0?'#10b981':'#ef4444';
+      var label=useMarketLabels?(MARKET_LABELS[r.key]||r.key):r.key;
+      return '<div class="bt-row'+(lowSample?' low-sample':'')+'">'
+        +'<div class="bt-key" title="'+r.key+'">'+label+'<span class="bt-n-badge">('+r.total+')</span></div>'
+        +'<div class="bt-bar-wrap"><div class="bt-bar" style="width:'+Math.min(wr,100)+'%;background:'+color+'"></div></div>'
+        +'<div class="bt-wr" style="color:'+color+'">'+wr+'%</div>'
+        +'<div class="bt-roi" style="color:'+roiColor+'">'+(roi>=0?'+':'')+roi+'%</div>'
+        +(lowSample?'<div style="grid-column:1/-1;margin-top:2px"><span class="low-badge">ÉCHANTILLON FAIBLE</span></div>':'')
+        +'</div>';
+    }).join('')+'</div>';
+  }
+  document.getElementById('btContent').innerHTML=''
+    +section('PAR MARCHÉ',bt.by_market,true)
+    +section('PAR LIGUE',bt.by_league,false)
+    +section('PAR CONFIANCE',bt.by_conf,false);
+}
+async function loadData(){
+  try{
+    var r=await fetch('historique.json?t='+Date.now());
+    var d=await r.json();
+    historiqueData=d;
+    allPredictions=d.predictions||[];
+    renderStats();
+    buildFilterOptions();
+    renderPredictions();
+    renderBacktesting(d.backtesting);
+  }catch(e){document.getElementById('predList').innerHTML='<div class="empty"><h3>ERREUR</h3><p>Impossible de charger l\'historique.</p></div>';}
+}
+loadData();
+</script>
+</body>
+</html>

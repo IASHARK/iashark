@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="fr" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Blog IASHARK — Analyses Football IA & Coupe du Monde 2026</title>
+<meta name="description" content="Analyses et prédictions football IA quotidiennes. Suivi de la Coupe du Monde 2026 équipe par équipe. Guides experts paris sportifs.">
+<link rel="canonical" href="https://iashark.com/blog/">
+<link rel="alternate" hreflang="fr" href="https://iashark.com/blog/">
+<link rel="alternate" hreflang="en" href="https://iashark.com/en/blog/">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Blog","name":"IASHARK Blog","url":"https://iashark.com/blog/","description":"Analyses et prédictions football IA quotidiennes. Suivi de la Coupe du Monde 2026 équipe par équipe.","inLanguage":"fr","publisher":{"@type":"Organization","name":"IASHARK","url":"https://iashark.com"}}</script>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#080c12;--card:#0d1520;--card2:#0f1a28;
+  --cyan:#22d3ee;--cyan2:#06b6d4;--amber:#f59e0b;--green:#10b981;--red:#ef4444;
+  --text:#e2e8f0;--muted:#4a6580;
+  --border:rgba(255,255,255,0.06);--border-cyan:rgba(34,211,238,0.18);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;padding-bottom:90px;position:relative;}
+body::before{content:'';position:fixed;top:-300px;left:50%;transform:translateX(-50%);width:900px;height:600px;background:radial-gradient(ellipse,rgba(34,211,238,0.05) 0%,transparent 65%);pointer-events:none;z-index:0;}
+a{color:inherit;text-decoration:none;}
+
+.hdr{position:sticky;top:0;z-index:99;background:rgba(8,12,18,0.96);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);padding:0 20px;height:56px;display:flex;align-items:center;justify-content:space-between;}
+.logo{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:3px;color:var(--text);}
+.logo span{color:var(--cyan);}
+.hdr-right{display:flex;gap:8px;align-items:center;}
+.btn-ghost{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:1px;color:var(--muted);border:1px solid var(--border);padding:6px 12px;border-radius:8px;transition:.2s;}
+.btn-ghost:hover{color:var(--cyan);border-color:var(--border-cyan);}
+.btn-login{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1px;padding:6px 14px;border-radius:8px;border:1px solid rgba(34,211,238,0.3);background:rgba(34,211,238,0.06);color:var(--cyan);transition:.2s;}
+.btn-login:hover{background:rgba(34,211,238,0.12);}
+
+.hero{position:relative;padding:44px 20px 0;max-width:900px;margin:0 auto;overflow:hidden;z-index:1;}
+.hero-eyebrow{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:3px;color:var(--amber);display:flex;align-items:center;gap:8px;margin-bottom:16px;}
+.hero-eyebrow .dot{width:5px;height:5px;background:var(--amber);border-radius:50%;animation:blink 1.2s infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+.hero h1{font-family:'Bebas Neue',sans-serif;font-size:clamp(30px,6vw,46px);line-height:1.05;letter-spacing:0.5px;margin-bottom:12px;max-width:560px;}
+.hero h1 b{color:var(--cyan);}
+.hero p{font-size:14px;color:#94a3b8;max-width:480px;line-height:1.7;margin-bottom:28px;}
+
+.wc-strip{position:relative;background:linear-gradient(120deg,rgba(245,158,11,0.07),rgba(34,211,238,0.05));border:1px solid rgba(245,158,11,0.22);border-radius:18px;padding:22px 22px 18px;margin-bottom:36px;overflow:hidden;}
+.wc-strip::before{content:'';position:absolute;top:-60px;right:-60px;width:220px;height:220px;background:radial-gradient(circle,rgba(245,158,11,0.12),transparent 70%);}
+.wc-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;position:relative;z-index:1;flex-wrap:wrap;gap:8px;}
+.wc-label{display:flex;align-items:center;gap:8px;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--amber);}
+.wc-label .dot{width:5px;height:5px;background:var(--amber);border-radius:50%;animation:blink 1.2s infinite;}
+.wc-count{font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:1px;}
+.wc-note{position:relative;z-index:1;font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:0.5px;}
+
+.filters{max-width:900px;margin:0 auto 6px;padding:0 20px;display:flex;gap:7px;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;position:relative;z-index:1;}
+.filters::-webkit-scrollbar{display:none;}
+.filter-btn{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:1px;padding:7px 15px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:.2s;white-space:nowrap;flex-shrink:0;}
+.filter-btn:hover,.filter-btn.active{background:rgba(34,211,238,0.1);border-color:var(--border-cyan);color:var(--cyan);}
+
+.sec-hdr{max-width:900px;margin:34px auto 14px;padding:0 20px;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:3px;color:var(--muted);display:flex;align-items:center;gap:10px;}
+.sec-hdr::after{content:'';flex:1;height:1px;background:var(--border);}
+
+.grid{max-width:900px;margin:0 auto;padding:0 20px;display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;}
+.article-card{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;display:flex;flex-direction:column;transition:border-color .2s,transform .2s;cursor:pointer;animation:fadeup .4s ease forwards;opacity:0;}
+.article-card:nth-child(1){animation-delay:.03s}.article-card:nth-child(2){animation-delay:.06s}.article-card:nth-child(3){animation-delay:.09s}.article-card:nth-child(4){animation-delay:.12s}
+@keyframes fadeup{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.article-card:hover{border-color:rgba(34,211,238,0.28);transform:translateY(-3px);}
+.art-top{padding:16px 18px 0;}
+.art-tag{display:inline-flex;align-items:center;gap:5px;font-family:'Space Mono',monospace;font-size:7px;letter-spacing:1px;padding:4px 9px;border-radius:20px;margin-bottom:12px;}
+.art-tag.tag-guide{background:rgba(34,211,238,0.08);border:1px solid var(--border-cyan);color:var(--cyan);}
+.art-icon{font-size:26px;margin-bottom:10px;display:block;padding:0 18px;}
+.art-title{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:0.5px;line-height:1.15;margin-bottom:8px;padding:0 18px;}
+.art-desc{font-size:12.5px;color:var(--muted);line-height:1.6;margin-bottom:16px;flex:1;padding:0 18px;}
+.art-foot{display:flex;align-items:center;justify-content:space-between;padding:12px 18px;border-top:1px solid var(--border);background:rgba(0,0,0,0.15);}
+.art-read{font-family:'Space Mono',monospace;font-size:8px;color:var(--cyan);letter-spacing:1px;}
+.art-meta{font-family:'Space Mono',monospace;font-size:8px;color:var(--muted);letter-spacing:1px;}
+
+.soon-card{opacity:0.5;cursor:default;}
+.soon-card:hover{transform:none;border-color:var(--border);}
+
+.cta{max-width:900px;margin:44px auto 0;padding:0 20px;}
+.cta-inner{background:linear-gradient(135deg,rgba(34,211,238,0.08),rgba(6,182,212,0.03));border:1px solid var(--border-cyan);border-radius:18px;padding:38px 28px;text-align:center;}
+.cta-inner h2{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:1px;margin-bottom:8px;}
+.cta-inner p{font-size:13px;color:#94a3b8;max-width:380px;margin:0 auto 20px;}
+.cta-btn{display:inline-block;background:var(--cyan);color:#03121a;font-family:'Space Mono',monospace;font-size:10px;font-weight:700;letter-spacing:2px;padding:13px 32px;border-radius:10px;}
+
+footer{max-width:900px;margin:40px auto 0;padding:24px 20px;text-align:center;}
+footer p{font-family:'Space Mono',monospace;font-size:8px;color:rgba(74,101,128,0.6);letter-spacing:1px;line-height:2;}
+
+.nav-bottom{position:fixed;bottom:0;left:0;right:0;background:rgba(8,12,18,0.97);backdrop-filter:blur(14px);border-top:1px solid var(--border);display:flex;z-index:100;}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px 4px 8px;gap:5px;cursor:pointer;transition:.2s;-webkit-tap-highlight-color:transparent;text-decoration:none;}
+.nav-icon{width:20px;height:20px;display:flex;align-items:center;justify-content:center;}
+.nav-icon svg{width:20px;height:20px;stroke:var(--muted);transition:.2s;}
+.nav-lbl{font-family:'Space Mono',monospace;font-size:7px;color:var(--muted);letter-spacing:1px;}
+.nav-item.active .nav-lbl{color:var(--cyan);}
+.nav-item.active .nav-icon svg{stroke:var(--cyan);filter:drop-shadow(0 0 6px rgba(34,211,238,0.5));}
+
+@media(max-width:480px){.grid{grid-template-columns:1fr 1fr;gap:10px;}.art-title{font-size:15px;}}
+</style>
+</head>
+<body>
+
+<header class="hdr">
+  <a href="https://iashark.com" class="logo"><span>IA</span>SHARK</a>
+  <div class="hdr-right">
+    <a href="https://iashark.com/" class="btn-ghost">← ACCUEIL</a>
+    <a href="https://iashark.com/compte.html" class="btn-login">CONNEXION</a>
+  </div>
+</header>
+
+<div class="hero">
+  <div class="hero-eyebrow"><span class="dot"></span> COUPE DU MONDE 2026 — HUITIÈMES DE FINALE EN COURS</div>
+  <h1>Le blog qui suit le Mondial <b>match par match</b>, avec l'IA.</h1>
+  <p>Analyses par équipe, value bets, guides stratégie. Mis à jour chaque jour tant que le tournoi avance.</p>
+
+  <div class="wc-strip">
+    <div class="wc-top">
+      <div class="wc-label"><span class="dot"></span> ANALYSES PAR ÉQUIPE</div>
+      <div class="wc-count">BIENTÔT DISPONIBLE</div>
+    </div>
+    <div class="wc-note">Chaque équipe encore en course aura sa propre page, mise à jour après chaque match du tournoi.</div>
+  </div>
+</div>
+
+<div class="filters">
+  <button class="filter-btn active">🌐 TOUS</button>
+  <button class="filter-btn">📖 GUIDES</button>
+  <button class="filter-btn">💎 VALUE BET</button>
+  <button class="filter-btn">🤖 IA & MÉTHODE</button>
+</div>
+
+<div class="sec-hdr">📖 GUIDES PERMANENTS</div>
+<div class="grid">
+  <a href="/blog/guides/coupe-du-monde-2026-guide-complet.html" class="article-card">
+    <div class="art-top"><span class="art-tag tag-guide">MONDIAL</span></div>
+    <span class="art-icon">🌍</span>
+    <div class="art-title">Coupe du Monde 2026 — Guide Complet</div>
+    <div class="art-desc">48 équipes, 3 pays hôtes, favoris IA, value bets long terme.</div>
+    <div class="art-foot"><span class="art-read">LIRE →</span><span class="art-meta">GUIDE</span></div>
+  </a>
+  <a href="/blog/guides/value-bet-guide-complet-2026.html" class="article-card">
+    <div class="art-top"><span class="art-tag tag-guide">STRATÉGIE</span></div>
+    <span class="art-icon">💎</span>
+    <div class="art-title">Value Bet — Guide Complet 2026</div>
+    <div class="art-desc">La méthode des professionnels pour repérer une cote sous-évaluée.</div>
+    <div class="art-foot"><span class="art-read">LIRE →</span><span class="art-meta">GUIDE</span></div>
+  </a>
+  <a href="/blog/guides/prediction-ia-football-guide-2026.html" class="article-card">
+    <div class="art-top"><span class="art-tag tag-guide">IA</span></div>
+    <span class="art-icon">🤖</span>
+    <div class="art-title">Prédiction IA Football 2026</div>
+    <div class="art-desc">Comment IASHARK combine Poisson, Elo et xG pour analyser un match.</div>
+    <div class="art-foot"><span class="art-read">LIRE →</span><span class="art-meta">GUIDE</span></div>
+  </a>
+  <a href="/blog/guides/meilleurs-bookmakers-monde-2026.html" class="article-card">
+    <div class="art-top"><span class="art-tag tag-guide">BOOKMAKERS</span></div>
+    <span class="art-icon">🏦</span>
+    <div class="art-title">Top Bookmakers Monde 2026</div>
+    <div class="art-desc">Comparatif cotes, bonus et fiabilité pour parier dans de bonnes conditions.</div>
+    <div class="art-foot"><span class="art-read">LIRE →</span><span class="art-meta">GUIDE</span></div>
+  </a>
+  <a href="/blog/guides/guide-paris-sportifs-debutant-complet.html" class="article-card">
+    <div class="art-top"><span class="art-tag tag-guide">DÉBUTANT</span></div>
+    <span class="art-icon">📚</span>
+    <div class="art-title">Paris Sportifs — Guide Débutant</div>
+    <div class="art-desc">Vocabulaire, gestion de bankroll et les erreurs à éviter en premier.</div>
+    <div class="art-foot"><span class="art-read">LIRE →</span><span class="art-meta">GUIDE</span></div>
+  </a>
+  <div class="article-card soon-card">
+    <div class="art-top"><span class="art-tag tag-guide">MONDIAL</span></div>
+    <span class="art-icon">🇲🇦</span>
+    <div class="art-title">Analyses par équipe</div>
+    <div class="art-desc">Maroc, France, Brésil... chaque équipe encore en course, bientôt.</div>
+    <div class="art-foot"><span class="art-read" style="color:var(--muted)">À VENIR</span><span class="art-meta">EN PRÉPARATION</span></div>
+  </div>
+</div>
+
+<div class="cta">
+  <div class="cta-inner">
+    <h2>🦈 Analyses IA en direct</h2>
+    <p>Toutes les prédictions football du jour, mises à jour chaque matin. 100% gratuit.</p>
+    <a href="https://iashark.com" class="cta-btn">VOIR LES ANALYSES DU JOUR →</a>
+  </div>
+</div>
+
+<footer>
+  <p>⚠️ LE JEU PEUT ÊTRE DANGEREUX — JOUEZ RESPONSABLE · INTERDIT AUX MOINS DE 18 ANS<br>
+  IASHARK — Intelligence Artificielle & Paris Sportifs · Les analyses publiées sont à titre indicatif uniquement</p>
+</footer>
+
+<nav class="nav-bottom">
+  <a href="https://iashark.com/" class="nav-item">
+    <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5L12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg></div>
+    <div class="nav-lbl">ACCUEIL</div>
+  </a>
+  <a href="https://iashark.com/historique.html" class="nav-item">
+    <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20v-4"/></svg></div>
+    <div class="nav-lbl">HISTORIQUE</div>
+  </a>
+  <a href="https://iashark.com/pro.html" class="nav-item">
+    <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.9 6.6L22 9.3l-5 4.9L18.2 22 12 18.3 5.8 22 7 14.2 2 9.3l7.1-.7z"/></svg></div>
+    <div class="nav-lbl">PRO</div>
+  </a>
+  <a href="https://iashark.com/blog/" class="nav-item active">
+    <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg></div>
+    <div class="nav-lbl">GUIDES</div>
+  </a>
+  <a href="https://iashark.com/compte.html" class="nav-item">
+    <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg></div>
+    <div class="nav-lbl">COMPTE</div>
+  </a>
+</nav>
+
+</body>
+</html>

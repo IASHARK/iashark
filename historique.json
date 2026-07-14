@@ -1,6 +1,111 @@
 {
   "predictions": [
     {
+      "match": "Aucas vs Independiente del Valle",
+      "home": "Aucas",
+      "away": "Independiente del Valle",
+      "prediction": "Over 2.5",
+      "cote": 1.96,
+      "conf": 7.6,
+      "conf_bucket": "7-8",
+      "market": "over25",
+      "league": "Liga Pro",
+      "league_key": "equateur",
+      "sport": "football",
+      "elo_diff": null,
+      "has_pinnacle": false,
+      "has_elo": false,
+      "date": "2026-07-14",
+      "result": "scheduled",
+      "fixture_id": 1519400,
+      "type": "single",
+      "score": null
+    },
+    {
+      "match": "Barcelona SC vs Guayaquil City FC",
+      "home": "Barcelona SC",
+      "away": "Guayaquil City FC",
+      "prediction": "Victoire Domicile",
+      "cote": 1.55,
+      "conf": 6.8,
+      "conf_bucket": "6-7",
+      "market": "victoire_dom",
+      "league": "Liga Pro",
+      "league_key": "equateur",
+      "sport": "football",
+      "elo_diff": null,
+      "has_pinnacle": false,
+      "has_elo": true,
+      "date": "2026-07-14",
+      "result": "scheduled",
+      "fixture_id": 1519401,
+      "type": "single",
+      "score": null
+    },
+    {
+      "match": "Leones del Norte vs Deportivo Cuenca",
+      "home": "Leones del Norte",
+      "away": "Deportivo Cuenca",
+      "prediction": "BTTS Non",
+      "cote": 1.67,
+      "conf": 7.2,
+      "conf_bucket": "7-8",
+      "market": "btts_non",
+      "league": "Liga Pro",
+      "league_key": "equateur",
+      "sport": "football",
+      "elo_diff": null,
+      "has_pinnacle": false,
+      "has_elo": false,
+      "date": "2026-07-14",
+      "result": "scheduled",
+      "fixture_id": 1519402,
+      "type": "single",
+      "score": null
+    },
+    {
+      "match": "Universidad Catolica vs LDU de Quito",
+      "home": "Universidad Catolica",
+      "away": "LDU de Quito",
+      "prediction": "BTTS Oui",
+      "cote": 1.71,
+      "conf": 6.8,
+      "conf_bucket": "6-7",
+      "market": "btts_oui",
+      "league": "Liga Pro",
+      "league_key": "equateur",
+      "sport": "football",
+      "elo_diff": null,
+      "has_pinnacle": false,
+      "has_elo": false,
+      "date": "2026-07-14",
+      "result": "scheduled",
+      "fixture_id": 1519407,
+      "type": "single",
+      "score": null
+    },
+    {
+      "match": "France vs Spain",
+      "home": "France",
+      "away": "Spain",
+      "prediction": "BTTS Oui",
+      "cote": 1.65,
+      "conf": 6.8,
+      "conf_bucket": "6-7",
+      "market": "btts_oui",
+      "league": "World Cup",
+      "league_key": "other",
+      "sport": "football",
+      "elo_diff": null,
+      "has_pinnacle": false,
+      "has_elo": false,
+      "date": "2026-07-14",
+      "result": "scheduled",
+      "fixture_id": 1585131,
+      "type": "single",
+      "score": null
+    },
+    {
       "match": "England vs Argentina",
       "home": "England",
       "away": "Argentina",
@@ -79,10 +184,11 @@
       "has_pinnacle": false,
       "has_elo": false,
       "date": "2026-07-13",
-      "result": "scheduled",
-      "fixture_id": 1585131,
+      "result": "win",
+      "fixture_id": 1494693,
       "type": "single",
-      "score": null
+      "score": "2-1",
+      "resolved_date": "2026-07-14"
     },
     {
       "match": "Macara vs Mushuc Runa SC",
@@ -162,10 +268,11 @@
       "league_key": "islande",
       "sport": "football",
       "date": "2026-07-11",
-      "result": "scheduled",
+      "result": "win",
       "fixture_id": 1508807,
       "type": "single",
-      "score": null
+      "score": "2-1",
+      "resolved_date": "2026-07-14"
     },
     {
       "match": "Djurgardens IF vs Halmstad",
@@ -180,10 +287,11 @@
       "league_key": "suede",
       "sport": "football",
       "date": "2026-07-11",
-      "result": "scheduled",
+      "result": "loss",
       "fixture_id": 1494202,
       "type": "single",
-      "score": null
+      "score": "3-0",
+      "resolved_date": "2026-07-14"
     },
     {
       "match": "Emelec vs Barcelona SC",
@@ -198,10 +306,11 @@
       "league_key": "equateur",
       "sport": "football",
       "date": "2026-07-11",
-      "result": "scheduled",
+      "result": "win",
       "fixture_id": 1519393,
       "type": "single",
-      "score": null
+      "score": "0-0",
+      "resolved_date": "2026-07-14"
     },
     {
       "match": "FH hafnarfjordur vs Valur Reykjavik",
@@ -4282,12 +4391,12 @@
     }
   ],
   "stats": {
-    "winrate": 66.7,
-    "roi": 19,
-    "total": 195,
-    "streak": 1,
-    "wins": 130,
-    "losses": 65
+    "winrate": 66.8,
+    "roi": 19.1,
+    "total": 199,
+    "streak": 2,
+    "wins": 133,
+    "losses": 66
   },
   "backtesting": {
     "by_market": [
@@ -4301,19 +4410,19 @@
       },
       {
         "key": "under25",
-        "wins": 24,
+        "wins": 25,
         "losses": 20,
-        "total": 44,
-        "winrate": 54.5,
-        "roi": -5.1
+        "total": 45,
+        "winrate": 55.6,
+        "roi": -3.8
       },
       {
         "key": "btts_oui",
-        "wins": 21,
-        "losses": 15,
-        "total": 36,
-        "winrate": 58.3,
-        "roi": 6
+        "wins": 22,
+        "losses": 16,
+        "total": 38,
+        "winrate": 57.9,
+        "roi": 4.8
       },
       {
         "key": "btts_non",
@@ -4341,11 +4450,11 @@
       },
       {
         "key": "victoire_dom",
-        "wins": 4,
+        "wins": 5,
         "losses": 1,
-        "total": 5,
-        "winrate": 80,
-        "roi": 37.8
+        "total": 6,
+        "winrate": 83.3,
+        "roi": 43.2
       },
       {
         "key": "dc1x",
@@ -4375,11 +4484,11 @@
     "by_league": [
       {
         "key": "other",
-        "wins": 35,
+        "wins": 36,
         "losses": 23,
-        "total": 58,
-        "winrate": 60.3,
-        "roi": 21.6
+        "total": 59,
+        "winrate": 61,
+        "roi": 22.3
       },
       {
         "key": "wc",
@@ -4398,6 +4507,22 @@
         "roi": 38.2
       },
       {
+        "key": "suede",
+        "wins": 13,
+        "losses": 3,
+        "total": 16,
+        "winrate": 81.3,
+        "roi": 35
+      },
+      {
+        "key": "equateur",
+        "wins": 8,
+        "losses": 7,
+        "total": 15,
+        "winrate": 53.3,
+        "roi": -8.8
+      },
+      {
         "key": "finlande",
         "wins": 9,
         "losses": 6,
@@ -4406,20 +4531,12 @@
         "roi": 2.2
       },
       {
-        "key": "suede",
-        "wins": 13,
-        "losses": 2,
-        "total": 15,
-        "winrate": 86.7,
-        "roi": 44
-      },
-      {
-        "key": "equateur",
-        "wins": 7,
+        "key": "islande",
+        "wins": 5,
         "losses": 7,
-        "total": 14,
-        "winrate": 50,
-        "roi": -13.1
+        "total": 12,
+        "winrate": 41.7,
+        "roi": -35.6
       },
       {
         "key": "kleague",
@@ -4428,14 +4545,6 @@
         "total": 12,
         "winrate": 83.3,
         "roi": 47.5
-      },
-      {
-        "key": "islande",
-        "wins": 4,
-        "losses": 7,
-        "total": 11,
-        "winrate": 36.4,
-        "roi": -45.2
       },
       {
         "key": "lettonie",
@@ -4481,19 +4590,19 @@
     "by_conf": [
       {
         "key": "7-8",
-        "wins": 70,
-        "losses": 24,
-        "total": 94,
-        "winrate": 74.5,
-        "roi": 34.3
+        "wins": 71,
+        "losses": 25,
+        "total": 96,
+        "winrate": 74,
+        "roi": 33.3
       },
       {
         "key": "6-7",
-        "wins": 47,
+        "wins": 49,
         "losses": 30,
-        "total": 77,
-        "winrate": 61,
-        "roi": 7.7
+        "total": 79,
+        "winrate": 62,
+        "roi": 9
       },
       {
         "key": "<6",
@@ -4515,43 +4624,43 @@
     "by_sport": [
       {
         "key": "football",
-        "wins": 130,
-        "losses": 65,
-        "total": 195,
-        "winrate": 66.7,
-        "roi": 19
+        "wins": 133,
+        "losses": 66,
+        "total": 199,
+        "winrate": 66.8,
+        "roi": 19.1
       }
     ],
     "by_has_pinnacle": [
       {
         "key": "inconnu",
-        "wins": 130,
-        "losses": 65,
-        "total": 195,
-        "winrate": 66.7,
-        "roi": 19
+        "wins": 133,
+        "losses": 66,
+        "total": 199,
+        "winrate": 66.8,
+        "roi": 19.1
       }
     ],
     "by_has_elo": [
       {
         "key": "inconnu",
-        "wins": 130,
-        "losses": 65,
-        "total": 195,
-        "winrate": 66.7,
-        "roi": 19
+        "wins": 133,
+        "losses": 66,
+        "total": 199,
+        "winrate": 66.8,
+        "roi": 19.1
       }
     ],
-    "updated": "2026-07-13"
+    "updated": "2026-07-14"
   },
   "monthly": [
     {
       "month": "2026-07",
       "label": "Jul 2026",
-      "wins": 71,
-      "losses": 36,
-      "total": 107,
-      "roi": 16.1
+      "wins": 74,
+      "losses": 37,
+      "total": 111,
+      "roi": 16.7
     },
     {
       "month": "2026-06",

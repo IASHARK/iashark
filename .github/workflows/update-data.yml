@@ -41,11 +41,7 @@ jobs:
             'x-rapidapi-host': 'tennis-api-atp-wta-itf.p.rapidapi.com'
           };
           const TENNIS_BASE = 'https://tennis-api-atp-wta-itf.p.rapidapi.com';
-          // ── PATCH 8 : wc2026_data.js et wc2026_model.js désactivés ──────────
-          // Les matchs CDM utilisent désormais le même pipeline que les championnats classiques
-          // Données via API-Sports uniquement : stats, xG, H2H, ELO
           var WC_DATA = null, WC_MODEL = null;
-          // ── HELPERS ──────────────────────────────────────────────
           function sleep(ms) { return new Promise(function(r){ setTimeout(r,ms); }); }
           function get(url, headers) {
             return new Promise(function(resolve) {
@@ -84,11 +80,46 @@ jobs:
               }).on('error',function(){ clearTimeout(timer); resolve([]); });
             });
           }
-          // ── FIX RÉSOLUTION MARCHÉS : fonction unique partagée ────────────
-          // Avant ce fix, la logique de résolution win/loss était dupliquée à 2 endroits
-          // (updateHistorique + bloc "jour sans matchs") et aucune des deux ne couvrait
-          // les marchés Victoire Domicile/Extérieur ni la variante "DC X1" — ces paris
-          // étaient donc systématiquement classés en défaite, peu importe le score réel.
+          function getText(url, headers) {
+            return new Promise(function(resolve) {
+              var u = new URL(url);
+              var timer = setTimeout(function(){ resolve(''); }, 10000);
+              https.get({
+                hostname: u.hostname, path: u.pathname+u.search,
+                headers: Object.assign({'User-Agent':'IASHARK/1.0'}, headers||{})
+              }, function(res) {
+                var d='';
+                res.on('data',function(c){d+=c;});
+                res.on('end',function(){ clearTimeout(timer); resolve(d); });
+              }).on('error',function(){ clearTimeout(timer); resolve(''); });
+            });
+          }
+          function stripCdata(s){ return (s||'').replace(/<!\[CDATA\[/g,'').replace(/\]\]>/g,'').trim(); }
+          function stripTags(s){ return (s||'').replace(/<[^>]+>/g,'').trim(); }
+          function decodeEntities(s){
+            return (s||'').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>')
+              .replace(/&#39;/g,"'").replace(/&quot;/g,'"').replace(/&apos;/g,"'");
+          }
+          function parseRSSItems(xml, maxItems) {
+            maxItems = maxItems || 15;
+            var items = [];
+            var blocks = xml.match(/<item[\s\S]*?<\/item>/g) || [];
+            blocks.slice(0, maxItems).forEach(function(block){
+              function field(tag){
+                var re = new RegExp('<'+tag+'[^>]*>([\\s\\S]*?)<\\/'+tag+'>');
+                var m = block.match(re);
+                return m ? decodeEntities(stripTags(stripCdata(m[1]))) : '';
+              }
+              var link = field('link');
+              if(!link){ var lm = block.match(/<link[^>]*href=["']([^"']+)["']/); if(lm) link = lm[1]; }
+              items.push({ title: field('title'), link: link, pubDate: field('pubDate')||field('published')||field('updated'), description: field('description')||field('summary') });
+            });
+            return items;
+          }
+          var RSS_SOURCES = [
+            { nom: "L'Equipe", url: "https://dwh.lequipe.fr/api/edito/rss?path=/Football/Transferts-football/", type: 'mercato', fiabilite: 'high' },
+            { nom: "Foot01", url: "https://www.foot01.com/news.rss", type: 'general', fiabilite: 'mid' },
+          ];
           function resolveMarketWin(predRaw, gh, ga) {
             var pred = (predRaw||'').toLowerCase();
             if(pred.includes('over 2.5')) return (gh+ga)>2;
@@ -98,15 +129,12 @@ jobs:
             if(pred.includes('btts non')) return (gh===0||ga===0);
             if(pred.includes('btts')) return (gh>0&&ga>0);
             if(pred.includes('victoire')&&(pred.includes('domicile')||pred.includes('dom'))) return gh>ga;
-            if(pred.includes('victoire')&&(pred.includes('extérieur')||pred.includes('ext'))) return ga>gh;
+            if(pred.includes('victoire')&&(pred.includes('exterieur')||pred.includes('ext'))) return ga>gh;
             if(pred.includes('1x')||pred.includes('x1')||pred.includes('dc 1x')) return gh>=ga;
             if(pred.includes('x2')||pred.includes('dc x2')) return ga>=gh;
             if(pred.includes('nul')||pred.includes('draw')) return gh===ga;
             return null;
           }
-          // ═══════════════════════════════════════════════════════
-          // ── DONNÉES DYNAMIQUES WC2026 ────────────────────────────
-          // ═══════════════════════════════════════════════════════
           var WC_QUALIF_LEAGUE = {
             'France':32,'Germany':32,'Spain':32,'England':32,'Portugal':32,'Italy':32,
             'Netherlands':32,'Belgium':32,'Croatia':32,'Switzerland':32,'Austria':32,
@@ -323,7 +351,7 @@ jobs:
               var r = await postJSON(host, path, body, headers);
               if(r.error && (r.error.type==='overloaded_error'||r.error.type==='rate_limit_error')){
                 var wait=attempt*30000;
-                console.log('  Rate limit — attente '+(wait/1000)+'s tentative '+attempt+'/4');
+                console.log('  Rate limit - attente '+(wait/1000)+'s tentative '+attempt+'/4');
                 await sleep(wait);
                 continue;
               }
@@ -370,7 +398,6 @@ jobs:
             var mm = String(paris.getUTCMinutes()).padStart(2,'0');
             return hh+':'+mm;
           }
-          // ── MATHS FOOTBALL ───────────────────────────────────────
           function poissonProb(lambda, k) {
             if(lambda<=0) return k===0?1:0;
             var logP = -lambda + k*Math.log(lambda) - logFactorial(k);
@@ -429,24 +456,18 @@ jobs:
               bttsY:Math.round(bttsY*100), bttsN:Math.round(bttsN*100),
             };
           }
-          // ── PATCH 1 : poissonKnuth — algorithme de Knuth sans cap artificiel ──
-          // Avec lambda 2.5, des scores 4-1, 5-2 apparaissent naturellement
           function poissonKnuth(lambda) {
             if(lambda<=0) return 0;
             var L=Math.exp(-lambda), k=0, p=1;
             do { k++; p*=Math.random(); } while(p>L);
             return k-1;
           }
-          // Alias de compatibilité
           var poissonRandom = poissonKnuth;
-          // ── PATCH 2+3 : calcMonteCarlo corrigé ──────────────────
-          // Utilise poissonKnuth, scores triés par fréquence réelle, pas bridés
           function calcMonteCarlo(lambdaH, lambdaA) {
             var n=5000;
             var p1=0,pN=0,p2=0,over25=0,over15=0,over35=0,bttsY=0;
             var scoreMap={};
             for(var i=0;i<n;i++){
-              // poissonKnuth sans cap — les scores 3-1, 4-2 apparaissent si lambdas élevés
               var h=poissonKnuth(lambdaH);
               var a=poissonKnuth(lambdaA);
               if(h>a) p1++; else if(h===a) pN++; else p2++;
@@ -457,8 +478,6 @@ jobs:
               var key=h+'-'+a;
               scoreMap[key]=(scoreMap[key]||0)+1;
             }
-            // Scores triés par fréquence réelle — pas bridés, pas de score forcé
-            // Si lambdaH=2.5 et lambdaA=1.4, des 3-1, 4-1, 4-2 apparaissent naturellement
             var topScores=Object.keys(scoreMap).map(function(k){
               return {score:k, n:scoreMap[k], pct:Math.round(scoreMap[k]/n*100)};
             }).sort(function(a,b){return b.n-a.n;}).slice(0,5);
@@ -511,11 +530,6 @@ jobs:
               elo_used:hasElo,
             };
           }
-          // ── PATCH 4 : calcLambdas avec leagueId + planchers réalistes ──────
-          // Plancher par niveau de compétition — pas de cap vers le haut
-          // Top 5 EU + LDC/EL : min 1.05/0.90
-          // CDM phase de groupes : min 0.90/0.80 (plus défensif)
-          // Autres ligues : min 0.95/0.80
           function calcLambdas(bmHdom, beHdom, mdHdom, bmAext, beAext, meAext, leagueAvgH, leagueAvgA, leagueId) {
             var leagAvgH=leagueAvgH||1.35, leagAvgA=leagueAvgA||1.10;
             var TOP=[39,61,140,135,78,2,3];
@@ -527,7 +541,6 @@ jobs:
             var defH=mdHdom>0?(beHdom/mdHdom)/leagAvgA:1;
             var attA=meAext>0?(bmAext/meAext)/leagAvgA:1;
             var defA=meAext>0?(beAext/meAext)/leagAvgH:1;
-            // Pas de cap vers le haut — si une équipe marque 3/match, lambda 2.5+ est correct
             return {
               lambdaH:parseFloat(Math.max(minLH,attH*defA*leagAvgH).toFixed(3)),
               lambdaA:parseFloat(Math.max(minLA,attA*defH*leagAvgA).toFixed(3))
@@ -564,7 +577,6 @@ jobs:
             if(kelly<=0) return null;
             return Math.min(kelly*fraction*100,5).toFixed(1);
           }
-          // ── CONFIG FOOTBALL ──────────────────────────────────────
           const LEAGUES = [
             39, 40, 61, 62, 140, 141, 135, 78, 2, 3,
             88, 94, 203, 119, 179, 144, 292,
@@ -589,29 +601,26 @@ jobs:
             357:'irlande', 113:'suede'
           };
           var BOOKIE_MAP = {
-            'betclic':{domain:'betclic.fr',promo:'200\u20ac offerts',l:'#'},
-            'winamax':{domain:'winamax.fr',promo:'100\u20ac offerts',l:'#'},
-            'unibet':{domain:'unibet.fr',promo:'100\u20ac rembours\u00e9s',l:'#'},
-            'pmu':{domain:'pmu.fr',promo:'100\u20ac offerts',l:'#'},
-            'bet365':{domain:'bet365.com',promo:'100\u20ac bonus',l:'#'},
+            'betclic':{domain:'betclic.fr',promo:'200 offerts',l:'#'},
+            'winamax':{domain:'winamax.fr',promo:'100 offerts',l:'#'},
+            'unibet':{domain:'unibet.fr',promo:'100 rembourses',l:'#'},
+            'pmu':{domain:'pmu.fr',promo:'100 offerts',l:'#'},
+            'bet365':{domain:'bet365.com',promo:'100 bonus',l:'#'},
           };
           var FR_FIXED = [
-            {n:'Betclic',o:'200\u20ac offerts',l:'#LIEN_BETCLIC'},
-            {n:'Winamax',o:'100\u20ac offerts',l:'#LIEN_WINAMAX'},
-            {n:'Unibet',o:'100\u20ac rembours\u00e9s',l:'#LIEN_UNIBET'},
-            {n:'PMU',o:'100\u20ac offerts',l:'#LIEN_PMU'},
-            {n:'Bet365',o:'100\u20ac bonus',l:'#LIEN_BET365'},
+            {n:'Betclic',o:'200 offerts',l:'#LIEN_BETCLIC'},
+            {n:'Winamax',o:'100 offerts',l:'#LIEN_WINAMAX'},
+            {n:'Unibet',o:'100 rembourses',l:'#LIEN_UNIBET'},
+            {n:'PMU',o:'100 offerts',l:'#LIEN_PMU'},
+            {n:'Bet365',o:'100 bonus',l:'#LIEN_BET365'},
           ];
           var LANGS = {'en':'English'};
-          // ═══════════════════════════════════════════════════════
-          // ── TENNIS PIPELINE ─────────────────────────────────────
-          // ═══════════════════════════════════════════════════════
           var TENNIS_TOUR_RANKS = {
             atp: ['grand_slam','atp1000','atp500','atp250'],
             wta: ['grand_slam','wta1000','wta500','wta250']
           };
           async function getTennisFixtures() {
-            if(!TENNIS_KEY) { console.log('Tennis API key manquante — skip tennis'); return []; }
+            if(!TENNIS_KEY) { console.log('Tennis API key manquante - skip tennis'); return []; }
             var all = [];
             var tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate()+1);
             var TOMORROW = tomorrow.toISOString().split('T')[0];
@@ -930,32 +939,32 @@ jobs:
             function fmtSv(sv,name){
               if(!sv) return name+': stats non disponibles';
               return name+':\n'
-                +'  1ère balle rentrée: '+(sv.firstServePct||'?')+'%\n'
-                +'  Points gagnés sur 1ère balle: '+(sv.winsOn1st||'?')+'%\n'
-                +'  Points gagnés sur 2ème balle: '+(sv.winsOn2nd||'?')+'%\n'
-                +'  Break points sauvés: '+(sv.bpSavedPct||'?')+'%\n'
+                +'  1ere balle rentree: '+(sv.firstServePct||'?')+'%\n'
+                +'  Points gagnes sur 1ere balle: '+(sv.winsOn1st||'?')+'%\n'
+                +'  Points gagnes sur 2eme balle: '+(sv.winsOn2nd||'?')+'%\n'
+                +'  Break points sauves: '+(sv.bpSavedPct||'?')+'%\n'
                 +'  Break points convertis en retour: '+(sv.bpConvertedPct||'?')+'%\n'
-                +'  Points gagnés en retour 2ème balle adverse: '+(sv.winsRtnOn2nd||'?')+'%';
+                +'  Points gagnes en retour 2eme balle adverse: '+(sv.winsRtnOn2nd||'?')+'%';
             }
             var surf1Str=d.surf1?d.surf1.wins+'V/'+d.surf1.losses+'D sur '+surfaceLabel+' cette saison ('+d.surf1.winrate+'% winrate)':'Non disponible';
             var surf2Str=d.surf2?d.surf2.wins+'V/'+d.surf2.losses+'D sur '+surfaceLabel+' cette saison ('+d.surf2.winrate+'% winrate)':'Non disponible';
             var h2hTotal=(d.h2hP1Wins||0)+(d.h2hP2Wins||0);
-            var h2hStr=h2hTotal>0?d.p1+' mène '+(d.h2hP1Wins||0)+'-'+(d.h2hP2Wins||0)+' sur '+h2hTotal+' confrontations':'Aucun H2H disponible';
+            var h2hStr=h2hTotal>0?d.p1+' mene '+(d.h2hP1Wins||0)+'-'+(d.h2hP2Wins||0)+' sur '+h2hTotal+' confrontations':'Aucun H2H disponible';
             var surfContext=surfaceLabel==='Gazon'
-              ?'GAZON : Service dominant, rebond bas. Les grands serveurs et volleyeurs sont avantagés.'
+              ?'GAZON : Service dominant, rebond bas. Les grands serveurs et volleyeurs sont avantages.'
               :surfaceLabel==='Terre battue'
-              ?'TERRE BATTUE : Échanges longs, rebond haut. Les joueurs de fond de court défensifs sont avantagés.'
-              :'DUR : Surface équilibrée. Le service compte mais le retour est efficace.';
+              ?'TERRE BATTUE : Echanges longs, rebond haut. Les joueurs de fond de court defensifs sont avantages.'
+              :'DUR : Surface equilibree. Le service compte mais le retour est efficace.';
             var prompt =
-              '=== ANALYSE TENNIS — '+surfaceLabel.toUpperCase()+' ===\n'
-              +d.p1+(d.seed1?' [Seed #'+d.seed1+']':'')+' vs '+d.p2+(d.seed2?' [Seed #'+d.seed2+']':'')+' — '+(d.tournament||'')+(d.round?' ('+d.round+')':'')+'\n'
+              '=== ANALYSE TENNIS - '+surfaceLabel.toUpperCase()+' ===\n'
+              +d.p1+(d.seed1?' [Seed #'+d.seed1+']':'')+' vs '+d.p2+(d.seed2?' [Seed #'+d.seed2+']':'')+' - '+(d.tournament||'')+(d.round?' ('+d.round+')':'')+'\n'
               +'Date: '+d.date+' | Surface: '+surfaceLabel+' | '+d.tourRank+'\n\n'
               +'=== CONTEXTE SURFACE ===\n'+surfContext+'\n\n'
               +'=== CLASSEMENT & PROFIL ===\n'
               +d.p1+' : ATP/WTA #'+(d.rank1||'N/C')+'\n'
-              +(d.titles1&&d.titles1.total>0?'  Palmarès : '+d.titles1.grandSlams+' Grand Chelem, '+d.titles1.masters+' Masters 1000, '+d.titles1.other+' autres titres\n':'  Palmarès : Aucun titre majeur\n')
+              +(d.titles1&&d.titles1.total>0?'  Palmares : '+d.titles1.grandSlams+' Grand Chelem, '+d.titles1.masters+' Masters 1000, '+d.titles1.other+' autres titres\n':'  Palmares : Aucun titre majeur\n')
               +d.p2+' : ATP/WTA #'+(d.rank2||'N/C')+'\n'
-              +(d.titles2&&d.titles2.total>0?'  Palmarès : '+d.titles2.grandSlams+' Grand Chelem, '+d.titles2.masters+' Masters 1000, '+d.titles2.other+' autres titres\n':'  Palmarès : Aucun titre majeur\n')
+              +(d.titles2&&d.titles2.total>0?'  Palmares : '+d.titles2.grandSlams+' Grand Chelem, '+d.titles2.masters+' Masters 1000, '+d.titles2.other+' autres titres\n':'  Palmares : Aucun titre majeur\n')
               +'\n=== STATS SURFACE ===\n'
               +d.p1+': '+surf1Str+'\n'+d.p2+': '+surf2Str+'\n\n'
               +'=== STATS SERVICE & RETOUR ===\n'+fmtSv(d.svStats1,d.p1)+'\n'+fmtSv(d.svStats2,d.p2)+'\n\n'
@@ -974,13 +983,13 @@ jobs:
               +'"passe_ton_tour": false,\n'
               +'"confiance": 0.0,\n'
               +'"pari_rec": "'+d.p1+' | '+d.p2+' | ou vide si passe_ton_tour",\n'
-              +'"cote_rec": "cote exacte copiée depuis les données",\n'
+              +'"cote_rec": "cote exacte copiee depuis les donnees",\n'
               +'"risque": "FAIBLE|MODERE|ELEVE",\n'
-              +'"verdict_shark": "1 phrase tranchante : joueur + cote + 1 stat clé",\n'
-              +'"analyse_card": "2-3 phrases précises sur les forces/faiblesses",\n'
+              +'"verdict_shark": "1 phrase tranchante : joueur + cote + 1 stat cle",\n'
+              +'"analyse_card": "2-3 phrases precises sur les forces/faiblesses",\n'
               +'"conseil": "1 phrase directe",\n'
               +'"contexte": "tournoi + round + enjeux",\n'
-              +'"facteur_x": "LE seul facteur décisif",\n'
+              +'"facteur_x": "LE seul facteur decisif",\n'
               +'"p1": '+probIAP1+',\n'
               +'"p2": '+probIAP2+',\n'
               +'"edge": "'+(edgeP1!==null?'+'+edgeP1:edgeP2!==null?'+'+edgeP2:'0')+'%",\n'
@@ -991,7 +1000,7 @@ jobs:
             var r = await postJSONWithRetry('api.anthropic.com', '/v1/messages', {
               model: 'claude-sonnet-4-6',
               max_tokens: 1500,
-              system: 'Tu es un analyste tennis professionnel. Tu réponds EXCLUSIVEMENT en JSON valide. Zéro backtick.',
+              system: 'Tu es un analyste tennis professionnel. Tu reponds EXCLUSIVEMENT en JSON valide. Zero backtick.',
               messages: [{role:'user', content:prompt}]
             }, {'x-api-key':ANT_KEY, 'anthropic-version':'2023-06-01'});
             var txt = ((r.content||[]).find(function(b){return b.type==='text';})||{}).text||'{}';
@@ -1002,7 +1011,7 @@ jobs:
             RANK_MAP = RANK_MAP||{};
             PHOTOS = PHOTOS||{};
             var tennisMatchs = [];
-            console.log('\n=== TENNIS PIPELINE: '+fixtures.length+' matchs à analyser ===');
+            console.log('\n=== TENNIS PIPELINE: '+fixtures.length+' matchs a analyser ===');
             for(var i=0; i<fixtures.length; i++){
               var f = fixtures[i];
               var tour = f._tour||'atp';
@@ -1076,8 +1085,8 @@ jobs:
                 id: 't_'+parsed.id, sport: 'tennis',
                 home: {n:p1Name, id:parsed.p1Id, seed:parsed.seed1, country:parsed.p1Country, rank:rank1, photo:PHOTOS[String(parsed.p1Id)]||null},
                 away: {n:p2Name, id:parsed.p2Id, seed:parsed.seed2, country:parsed.p2Country, rank:rank2, photo:PHOTOS[String(parsed.p2Id)]||null},
-                league: parsed.tournament+(parsed.round?' — '+parsed.round:''),
-                ligue_icon: '\uD83C\uDFBE', league_key: lkKey, surface: surfLabel,
+                league: parsed.tournament+(parsed.round?' - '+parsed.round:''),
+                ligue_icon: 'T', league_key: lkKey, surface: surfLabel,
                 tour_rank: parsed.tourRank, date: (fDate+' '+heure).trim(), raw_date: parsed.date||'',
                 tour_record_p1: tourRec1||null, tour_record_p2: tourRec2||null,
                 cat: ['all'],
@@ -1097,7 +1106,7 @@ jobs:
                 contexte: an?(an.contexte||''):'', facteur_x: an?(an.facteur_x||''):'',
                 scenario: an&&an.scenario_match?{phase1:an.scenario_match.set1||'',phase2:an.scenario_match.set2||'',phase3:an.scenario_match.set3||null}:null,
                 no_signal: an&&an.passe_ton_tour===true?true:false,
-                no_signal_label: (an&&an.passe_ton_tour===true)?'Pas assez de signal clair — passer son tour':'',
+                no_signal_label: (an&&an.passe_ton_tour===true)?'Pas assez de signal clair - passer son tour':'',
                 h2h_tennis: {p1Wins:parsed.h2hP1Wins, p2Wins:parsed.h2hP2Wins},
                 form_p1: form1, form_p2: form2, surf_stats_p1: surf1, surf_stats_p2: surf2,
                 mise: '1-2% bankroll',
@@ -1107,22 +1116,10 @@ jobs:
             }
             return tennisMatchs;
           }
-          // ═══════════════════════════════════════════════════════
-          // ── FOOTBALL PIPELINE ───────────────────────────────────
-          // ═══════════════════════════════════════════════════════
           function lgKey(lgId) { return LG_KEY[lgId]||'other'; }
           function lgIcon(l) {
             var s=(l||'').toLowerCase();
-            if(s.includes('ligue 1')) return '\uD83C\uDDEB\uD83C\uDDF7';
-            if(s.includes('la liga')) return '\uD83C\uDDEA\uD83C\uDDF8';
-            if(s.includes('serie a')) return '\uD83C\uDDEE\uD83C\uDDF9';
-            if(s.includes('bundesliga')) return '\uD83C\uDDE9\uD83C\uDDEA';
-            if(s.includes('premier league')) return '\uD83C\uDFF4\uDB40\uDC67\uDB40\uDC62\uDB40\uDC65\uDB40\uDC6E\uDB40\uDC67\uDB40\uDC7F';
-            if(s.includes('championship')) return '\uD83C\uDFF4\uDB40\uDC67\uDB40\uDC62\uDB40\uDC65\uDB40\uDC6E\uDB40\uDC67\uDB40\uDC7F';
-            if(s.includes('champions')) return '\uD83C\uDFC6';
-            if(s.includes('scottish')) return '\uD83C\uDFF4\uDB40\uDC67\uDB40\uDC62\uDB40\uDC73\uDB40\uDC63\uDB40\uDC74\uDB40\uDC7F';
-            if(s.includes('belgi')) return '\uD83C\uDDE7\uD83C\uDDEA';
-            return '\uD83C\uDFC6';
+            return 'FB';
           }
           async function getFixtures() {
             var all = [];
@@ -1157,9 +1154,6 @@ jobs:
               if(seen[f.fixture.id]) return false;
               seen[f.fixture.id]=true; return true;
             });
-            // ── MODE TEST : ne garder qu'UN SEUL match de la Coupe du Monde
-            // pour tester rapidement. Passe TEST_ONE_MATCH à false pour
-            // repasser sur tous les matchs de toutes les ligues.
             var TEST_ONE_MATCH = false;
             if(TEST_ONE_MATCH){
               var wcOnly = uniqueFixtures.filter(function(f){ return f.league.id===1; });
@@ -1168,17 +1162,10 @@ jobs:
             return uniqueFixtures;
           }
           async function getTeamStats(teamId, leagueId, season) {
-            // BUG CORRIGÉ : cette fonction utilisait toujours SEASON (2025) peu importe la ligue.
-            // Pour la Coupe du Monde 2026 (league=1) et les ligues de SEASON_2026, l'API renvoie
-            // un objet vide pour la saison 2025 → toutes les stats tombaient à 0 → les lambdas
-            // retombaient systématiquement sur leur valeur plancher (0.90/0.80 pour la CDM),
-            // ce qui biaisait TOUS ces matchs vers Under 2.5 / BTTS Non sans rapport avec les
-            // vraies équipes en présence.
             var s = season || (SEASON_2026.indexOf(leagueId)!==-1 ? 2026 : SEASON);
             var r = await get('https://v3.football.api-sports.io/teams/statistics?team='+teamId+'&league='+leagueId+'&season='+s, APS);
             var isEmpty = !r.response || (typeof r.response==='object' && !Array.isArray(r.response) && Object.keys(r.response).length===0);
             if(isEmpty && s!==2026){
-              // Fallback automatique vers 2026 — couvre la CDM et toute ligue mal classée
               var r2 = await get('https://v3.football.api-sports.io/teams/statistics?team='+teamId+'&league='+leagueId+'&season=2026', APS);
               var isEmpty2 = !r2.response || (typeof r2.response==='object' && !Array.isArray(r2.response) && Object.keys(r2.response).length===0);
               return isEmpty2 ? null : r2.response;
@@ -1215,13 +1202,8 @@ jobs:
             var r = await get('https://api.openweathermap.org/data/2.5/weather?q='+encodeURIComponent(city)+'&appid='+OWM_KEY+'&units=metric&lang=fr',{});
             if(!r||!r.main) return null;
             var icon=(r.weather&&r.weather[0]&&r.weather[0].main)||'';
-            var emoji='\ud83c\udf24\ufe0f';
-            if(icon==='Thunderstorm') emoji='\u26c8\ufe0f';
-            else if(icon==='Rain'||icon==='Drizzle') emoji='\ud83c\udf27\ufe0f';
-            else if(icon==='Snow') emoji='\u2744\ufe0f';
-            else if(icon==='Clear') emoji='\u2600\ufe0f';
-            else if(icon==='Clouds') emoji='\u2601\ufe0f';
-            return {emoji,temp:Math.round(r.main.temp)+'\u00b0C',desc:(r.weather&&r.weather[0]&&r.weather[0].description)||'',wind:Math.round((r.wind&&r.wind.speed)||0)+' km/h'};
+            var emoji='';
+            return {emoji,temp:Math.round(r.main.temp)+'C',desc:(r.weather&&r.weather[0]&&r.weather[0].description)||'',wind:Math.round((r.wind&&r.wind.speed)||0)+' km/h'};
           }
           async function getNews(team) {
             if(!NEWS_KEY) return [];
@@ -1312,7 +1294,6 @@ jobs:
                 if(mkt.key==='totals'){(mkt.outcomes||[]).forEach(function(o){if(o.point===2.5&&o.name==='Over')result.over25=o.price;if(o.point===2.5&&o.name==='Under')result.under25=o.price;});}
                 if(mkt.key==='btts'){(mkt.outcomes||[]).forEach(function(o){if(o.name==='Yes')result.bttsY=o.price;if(o.name==='No')result.bttsN=o.price;});}
               });
-              if(Object.keys(result).length>0) console.log('Pinnacle matched:',homeTeam,'\u2192',matchedHome);
               return Object.keys(result).length>0?result:null;
             } catch(e){return null;}
           }
@@ -1326,17 +1307,14 @@ jobs:
                 var teamBlock=r.response.find(function(b){return b.team&&b.team.id===teamId;});
                 var oppBlock=r.response.find(function(b){return b.team&&b.team.id!==teamId;});
                 if(!teamBlock){await sleep(150);continue;}
-                // Normalisation : "Ball Possession" → "ball_possession", "Passes %" → "passes_%"
                 var s={};(teamBlock.statistics||[]).forEach(function(x){s[(x.type||'').toLowerCase().replace(/[\s%]+/g,'_').replace(/_+$/,'')]=x.value;});
                 var sOpp={};if(oppBlock)(oppBlock.statistics||[]).forEach(function(x){sOpp[(x.type||'').toLowerCase().replace(/[\s%]+/g,'_').replace(/_+$/,'')]=x.value;});
-                // Helper pour parser les valeurs en % (ex: "55%" → 55) ou numériques classiques
                 function numOrPct(v){if(v==null)return null;var str=String(v).replace('%','').trim();var n=parseFloat(str);return isNaN(n)?null:n;}
                 var xgTeam=parseFloat(s['expected_goals'])||null;
                 var xgAgainst=parseFloat(sOpp['expected_goals'])||null;
                 var shots_on=parseInt(s['shots_on_goal'])||0;
                 var shots_total=parseInt(s['total_shots'])||0;
                 var fouls=parseInt(s['fouls'])||0;
-                // Nouvelles stats déjà fournies par l'API mais jamais extraites jusqu'ici
                 var shots_off=parseInt(s['shots_off_goal'])||null;
                 var shots_blocked=parseInt(s['blocked_shots'])||null;
                 var corners=parseInt(s['corner_kicks'])||null;
@@ -1374,7 +1352,6 @@ jobs:
               shots_on_avg:avg(shots)?avg(shots).toFixed(1):null,
               shots_total_avg:avg(shotsT)?avg(shotsT).toFixed(1):null,
               fouls_avg:avg(foulsArr)?avg(foulsArr).toFixed(1):null,
-              // Nouvelles moyennes — possession et qualité offensive réelle (cadrage, pas juste volume)
               possession_avg:avgField('possession')?Math.round(avgField('possession')):null,
               corners_avg:avgField('corners')?parseFloat(avgField('corners').toFixed(1)):null,
               offsides_avg:avgField('offsides')?parseFloat(avgField('offsides').toFixed(1)):null,
@@ -1403,7 +1380,7 @@ jobs:
                 var parts=line.split(',');
                 if(parts.length>=5){var name=(parts[1]||'').trim();var elo=parseFloat(parts[4]);if(name&&!isNaN(elo))clubEloCache[name.toLowerCase()]=elo;}
               });
-              console.log('ClubElo charg\u00e9:',Object.keys(clubEloCache).length,'\u00e9quipes');
+              console.log('ClubElo charge:',Object.keys(clubEloCache).length,'equipes');
               return clubEloCache;
             } catch(e){console.log('ClubElo indisponible:',e.message);clubEloCache={};return clubEloCache;}
           }
@@ -1427,7 +1404,7 @@ jobs:
               if(hwr>=0.65)homeBonus=100;else if(hwr>=0.50)homeBonus=70;else if(hwr>=0.35)homeBonus=40;else homeBonus=20;
             }
             var probHadj=1/(1+Math.pow(10,(eloA-(eloH+homeBonus))/400));
-            return {probH:Math.round(probHadj*100),probA:Math.round((1-probHadj)*100),diff:Math.round(eloH-eloA),homeBonus,signal:Math.abs(eloH-eloA)>=100?'FORT':Math.abs(eloH-eloA)>=50?'MOD\u00c9R\u00c9':'FAIBLE'};
+            return {probH:Math.round(probHadj*100),probA:Math.round((1-probHadj)*100),diff:Math.round(eloH-eloA),homeBonus,signal:Math.abs(eloH-eloA)>=100?'FORT':Math.abs(eloH-eloA)>=50?'MODERE':'FAIBLE'};
           }
           function parseOdds(o) {
             var empty={c1:'--',cn:'--',c2:'--',co15:'--',co25:'--',cu25:'--',dc1x:'--',dc2x:'--',dc12:'--',btts_oui:'--',btts_non:'--',bookies:[]};
@@ -1525,7 +1502,7 @@ jobs:
             var score=0;
             if(daysSince<=2)score=90;else if(daysSince<=4)score=70;else if(daysSince<=6)score=50;else if(daysSince<=8)score=30;else score=15;
             if(matchesIn14>=3)score=Math.min(100,score+20);
-            return{val:Math.round(score),info:daysSince<=7?'Dernier match il y a '+daysSince+'j \u2014 '+matchesIn14+' match(s) en 14j':'Repos '+daysSince+' jours'};
+            return{val:Math.round(score),info:daysSince<=7?'Dernier match il y a '+daysSince+'j - '+matchesIn14+' match(s) en 14j':'Repos '+daysSince+' jours'};
           }
           function calcTendances(last10Home,last10Away){
             function countOver25(games){return games.filter(function(g){var p=(g.score||'').split('-');return parseInt(p[0]||0)+parseInt(p[1]||0)>2;}).length;}
@@ -1539,15 +1516,15 @@ jobs:
             totalTeams=totalTeams||20;matchsLeft=matchsLeft||5;
             var alerts=[],score=50;
             if(!rank)return{score:50,alerts:[],label:'Enjeu standard'};
-            if(rank>=totalTeams-3){score+=30;alerts.push('\u26a0\ufe0f EN ZONE DE REL\u00c9GATION (#'+rank+'/'+totalTeams+')');}
-            else if(rank<=3&&ptsLeader){var gap=(ptsLeader-pts)||0;if(gap<=6){score+=20;alerts.push('\uD83C\uDFC6 \u00c0 '+gap+' pts du titre');}}
-            if(rank<=5&&rank>1){score+=10;alerts.push('\uD83C\uDF0D En course pour l\'Europe (#'+rank+')');}
+            if(rank>=totalTeams-3){score+=30;alerts.push('EN ZONE DE RELEGATION (#'+rank+'/'+totalTeams+')');}
+            else if(rank<=3&&ptsLeader){var gap=(ptsLeader-pts)||0;if(gap<=6){score+=20;alerts.push('A '+gap+' pts du titre');}}
+            if(rank<=5&&rank>1){score+=10;alerts.push('En course pour Europe (#'+rank+')');}
             var hLow=(homeName||'').toLowerCase(),aLow=(awayName||'').toLowerCase();
             var isDerby=['manchester','london','milan','madrid','rome','glasgow','paris'].some(function(c){return hLow.includes(c)&&aLow.includes(c);})||
               (hLow.includes('city')&&aLow.includes('united'))||(hLow.includes('celtic')&&aLow.includes('rangers'))||(hLow.includes('inter')&&aLow.includes('milan'));
-            if(isDerby){score+=25;alerts.push('\uD83D\uDD25 DERBY — imprévisibilité maximale');}
+            if(isDerby){score+=25;alerts.push('DERBY - imprevisibilite maximale');}
             score=Math.max(0,Math.min(100,score));
-            return{score,alerts,label:score>=80?'ENJEU CRITIQUE':score>=60?'ENJEU \u00c9LEV\u00c9':score>=40?'Enjeu mod\u00e9r\u00e9':'Enjeu faible',isDerby};
+            return{score,alerts,label:score>=80?'ENJEU CRITIQUE':score>=60?'ENJEU ELEVE':score>=40?'Enjeu modere':'Enjeu faible',isDerby};
           }
           function calcMatchup(xgH,xgA,sH,sA){
             var xgHavg=xgH&&xgH.xg_avg?parseFloat(xgH.xg_avg):1.2;
@@ -1557,8 +1534,8 @@ jobs:
             var defH=sH&&sH.goals&&sH.goals.against&&sH.goals.against.total?(sH.goals.against.total.total/totalH).toFixed(2):1.2;
             var defA=sA&&sA.goals&&sA.goals.against&&sA.goals.against.total?(sA.goals.against.total.total/totalA).toFixed(2):1.2;
             var insights=[];
-            if(xgHavg>=1.4&&xgAavg>=1.2)insights.push('\u26bd Deux équipes offensives — renforce Over 2.5');
-            if(parseFloat(defH)<=1.0&&parseFloat(defA)<=1.0)insights.push('\uD83D\uDD12 Deux défenses solides — renforce BTTS Non');
+            if(xgHavg>=1.4&&xgAavg>=1.2)insights.push('Deux equipes offensives - renforce Over 2.5');
+            if(parseFloat(defH)<=1.0&&parseFloat(defA)<=1.0)insights.push('Deux defenses solides - renforce BTTS Non');
             return{insights,defH,defA};
           }
           function calcKeyAbsences(injuries,topScorersH,topScorersA,homeId,awayId,bmHdom,mdHdom,bmAext,meAext){
@@ -1576,7 +1553,7 @@ jobs:
                 if(isAbsent){
                   var totalContrib=(player.goals||0)+(player.assists||0);
                   var pct=Math.round((totalContrib/Math.max((teamGoals||1)*1.5,1))*100);
-                  var severity=pct>=30?'\uD83D\uDEA8 ALERTE ROUGE':pct>=20?'\uD83D\uDD34 ABSENCE MAJEURE':'\uD83D\uDFE1 Absence notable';
+                  var severity=pct>=30?'ALERTE ROUGE':pct>=20?'ABSENCE MAJEURE':'Absence notable';
                   alerts.push(severity+': '+player.name+' ('+teamLabel+') ABSENT');
                 }
               });
@@ -1607,20 +1584,17 @@ jobs:
             var foutesH=xgH&&xgH.fouls_avg?parseFloat(xgH.fouls_avg):0;
             var foutesA=xgA&&xgA.fouls_avg?parseFloat(xgA.fouls_avg):0;
             var alerts=[],riskScore=0;
-            if(cartons>=5.0){riskScore+=30;alerts.push('\uD83D\uDFE8 Arbitre tr\u00e8s s\u00e9v\u00e8re ('+cartons+' cartons/match)');}
-            else if(cartons>=4.0){riskScore+=15;alerts.push('\uD83D\uDFE8 Arbitre s\u00e9v\u00e8re ('+cartons+' cartons/match)');}
-            if(foutesH>=14&&cartons>=4.0){riskScore+=25;alerts.push('\u26a0\ufe0f '+homeName+' tr\u00e8s agressif + arbitre s\u00e9v\u00e8re');}
-            if(foutesA>=14&&cartons>=4.0){riskScore+=25;alerts.push('\u26a0\ufe0f '+awayName+' tr\u00e8s agressif + arbitre s\u00e9v\u00e8re');}
+            if(cartons>=5.0){riskScore+=30;alerts.push('Arbitre tres severe ('+cartons+' cartons/match)');}
+            else if(cartons>=4.0){riskScore+=15;alerts.push('Arbitre severe ('+cartons+' cartons/match)');}
+            if(foutesH>=14&&cartons>=4.0){riskScore+=25;alerts.push(homeName+' tres agressif + arbitre severe');}
+            if(foutesA>=14&&cartons>=4.0){riskScore+=25;alerts.push(awayName+' tres agressif + arbitre severe');}
             if(!alerts.length)return null;
             return{score:Math.min(riskScore,100),alerts};
           }
-          // ── Calcul des vrais pourcentages de buts par tranche depuis evPat ──────
-          // Utilisé pour le scénario 15min — remplace les valeurs codées en dur
           function calcSlotSummary(evPatH, evPatA) {
             var slots = ['0-15','15-30','30-45','45-60','60-75','75-90'];
             var result = [];
             var totalH = 0, totalA = 0, totalHconc = 0, totalAconc = 0;
-            // Calculer les totaux
             if(evPatH&&evPatH.slots) evPatH.slots.forEach(function(s){ totalH+=s.n; });
             if(evPatA&&evPatA.slots) evPatA.slots.forEach(function(s){ totalA+=s.n; });
             if(evPatH&&evPatH.slots_against) evPatH.slots_against.forEach(function(s){ totalHconc+=s.n; });
@@ -1630,14 +1604,11 @@ jobs:
               var nAmark = evPatA&&evPatA.slots&&evPatA.slots[i]?evPatA.slots[i].n:0;
               var nHconc = evPatH&&evPatH.slots_against&&evPatH.slots_against[i]?evPatH.slots_against[i].n:0;
               var nAconc = evPatA&&evPatA.slots_against&&evPatA.slots_against[i]?evPatA.slots_against[i].n:0;
-              // Pourcentage de buts par tranche pour chaque équipe
               var pctHmark = totalH>0?Math.round(nHmark/totalH*100):0;
               var pctAmark = totalA>0?Math.round(nAmark/totalA*100):0;
               var pctHconc = totalHconc>0?Math.round(nHconc/totalHconc*100):0;
               var pctAconc = totalAconc>0?Math.round(nAconc/totalAconc*100):0;
-              // Probabilité combinée de but dans cette tranche (moyenne des 4 signaux)
               var probCombined = Math.round((pctHmark + pctAmark + pctHconc + pctAconc) / 4);
-              // Fallback si pas de données : distribution uniforme
               if(probCombined===0) probCombined = Math.round(100/6);
               result.push({
                 t: slots[i]+'min',
@@ -1650,7 +1621,6 @@ jobs:
             }
             return result;
           }
-          // ── PATCH 9+10 : genAnalyse — CDM traité comme foot classique ────────
           async function genAnalyse(d) {
             var isWorldCup=(d.leagueId===1);
             var moyBmHdom=d.bmHdom&&d.mdHdom?(d.bmHdom/d.mdHdom).toFixed(2):'?';
@@ -1662,7 +1632,7 @@ jobs:
             var poissonScoreH=Math.round(d.poisson_lambdaH||1.2);
             var poissonScoreA=Math.round(d.poisson_lambdaA||1.0);
             var scoreCentral=poissonScoreH+'-'+poissonScoreA;
-            var injStr='Aucune absence majeure confirmée.';
+            var injStr='Aucune absence majeure confirmee.';
             if(d.injuries&&d.injuries.length){
               var injH=d.injuries.filter(function(x){return x.team===d.homeId;});
               var injA=d.injuries.filter(function(x){return x.team===d.awayId;});
@@ -1677,93 +1647,88 @@ jobs:
               d.h2h.forEach(function(g){var gfH=g.goals.home||0,gfA=g.goals.away||0;var isH=g.teams.home.id===d.homeId;if(gfH>gfA)isH?w1++:w2++;else if(gfH<gfA)isH?w2++:w1++;else wN++;});
               h2hStr=d.home+' '+w1+'V / '+wN+'N / '+w2+'D | Moy buts: '+d.h2hAvgButs;
             }
-            // PATCH 9 : CDM utilise le même prompt que foot classique
-            // Ajout d'un en-tête contextuel CDM si isWorldCup
             var wcHeader = '';
             if(isWorldCup){
               wcHeader = '=== COUPE DU MONDE 2026 ===\n'
-                +'Phase: '+(d.isKnockout?'ÉLIMINATION DIRECTE — match à enjeu maximal, chaque erreur élimine':'PHASE DE GROUPES')+'\n'
-                +'Note CDM: Les équipes jouent plus défensivement qu\'en championnat. Lambdas ajustés en conséquence.\n'
-                +'IMPORTANT — TERRAIN NEUTRE : ce match se joue sur terrain neutre (pas de domicile réel).\n'
-                +'Les statistiques "DOM"/"EXT" ci-dessous sont des libellés techniques internes du pipeline\n'
-                +'(elles servent à calculer les lambdas) — ne les reproduis JAMAIS tel quel dans ton texte.\n'
-                +'N\'utilise JAMAIS "à domicile", "à l\'extérieur", "reste à 0 victoire en extérieur" ou\n'
-                +'formulation équivalente dans ton analyse — désigne toujours les équipes par leur nom.\n\n';
+                +'Phase: '+(d.isKnockout?'ELIMINATION DIRECTE - match a enjeu maximal, chaque erreur elimine':'PHASE DE GROUPES')+'\n'
+                +'Note CDM: Les equipes jouent plus defensivement qu\'en championnat. Lambdas ajustes en consequence.\n'
+                +'IMPORTANT - TERRAIN NEUTRE : ce match se joue sur terrain neutre (pas de domicile reel).\n'
+                +'Les statistiques "DOM"/"EXT" ci-dessous sont des libelles techniques internes du pipeline\n'
+                +'(elles servent a calculer les lambdas) - ne les reproduis JAMAIS tel quel dans ton texte.\n'
+                +'N\'utilise JAMAIS "a domicile", "a l\'exterieur", "reste a 0 victoire en exterieur" ou\n'
+                +'formulation equivalente dans ton analyse - designe toujours les equipes par leur nom.\n\n';
             }
             var prompt = wcHeader
               +'=== MATCH ===\n'+d.home+' (DOM, #'+(d.rkH||'?')+') vs '+d.away+' (EXT, #'+(d.rkA||'?')+')\n'+d.league+' | '+d.date+' | '+d.stade+'\n\n'
-              +'=== PHASE 1 — ANALYSE INDÉPENDANTE ===\n'
-              +'DOM — Bilan domicile: '+d.vdH+'V / '+d.mdHdom+' matchs | Marqués: '+moyBmHdom+'/match | Encaissés: '+moyBeHdom+'/match\n'
-              +'DOM — Sans marquer: '+d.failHdom+'/'+d.mdHdom+' ('+failHpct+'%) | CS: '+d.csHdom+'/'+d.mdHdom+'\n'
-              +'DOM — Forme 5 derniers: '+d.forme5H+(d.streakH?' | '+d.streakH:'')+'\n'
-              +(d.xgH_avg?'DOM — xG: '+d.xgH_avg+' | xGA: '+(d.xgH_xga||'N/A')+(d.xgH_defense_surchauffe?' \u26a0\ufe0f D\u00c9FENSE SURCHAUFFE':'')+'\n':'')
-              +'\nEXT — Bilan extérieur: '+d.veA+'V / '+d.meAext+' matchs | Marqués: '+moyBmAext+'/match | Encaissés: '+moyBeAext+'/match\n'
-              +'EXT — Sans marquer: '+d.failAext+'/'+d.meAext+' ('+failApct+'%) | CS: '+d.csAext+'/'+d.meAext+'\n'
-              +'EXT — Forme 5 derniers: '+d.forme5A+(d.streakA?' | '+d.streakA:'')+'\n'
-              +(d.xgA_avg?'EXT — xG: '+d.xgA_avg+' | xGA: '+(d.xgA_xga||'N/A')+(d.xgA_defense_surchauffe?' \u26a0\ufe0f D\u00c9FENSE SURCHAUFFE':'')+'\n':'')
+              +'=== PHASE 1 - ANALYSE INDEPENDANTE ===\n'
+              +'DOM - Bilan domicile: '+d.vdH+'V / '+d.mdHdom+' matchs | Marques: '+moyBmHdom+'/match | Encaisses: '+moyBeHdom+'/match\n'
+              +'DOM - Sans marquer: '+d.failHdom+'/'+d.mdHdom+' ('+failHpct+'%) | CS: '+d.csHdom+'/'+d.mdHdom+'\n'
+              +'DOM - Forme 5 derniers: '+d.forme5H+(d.streakH?' | '+d.streakH:'')+'\n'
+              +(d.xgH_avg?'DOM - xG: '+d.xgH_avg+' | xGA: '+(d.xgH_xga||'N/A')+(d.xgH_defense_surchauffe?' DEFENSE SURCHAUFFE':'')+'\n':'')
+              +'\nEXT - Bilan exterieur: '+d.veA+'V / '+d.meAext+' matchs | Marques: '+moyBmAext+'/match | Encaisses: '+moyBeAext+'/match\n'
+              +'EXT - Sans marquer: '+d.failAext+'/'+d.meAext+' ('+failApct+'%) | CS: '+d.csAext+'/'+d.meAext+'\n'
+              +'EXT - Forme 5 derniers: '+d.forme5A+(d.streakA?' | '+d.streakA:'')+'\n'
+              +(d.xgA_avg?'EXT - xG: '+d.xgA_avg+' | xGA: '+(d.xgA_xga||'N/A')+(d.xgA_defense_surchauffe?' DEFENSE SURCHAUFFE':'')+'\n':'')
               +'\nH2H: '+h2hStr+'\nAbsences: '+injStr+'\n'
-              +(d.eloH&&d.eloA?'ELO: '+d.home+' '+Math.round(d.eloH)+' vs '+d.away+' '+Math.round(d.eloA)+' | \u00c9cart: '+(d.eloStats?d.eloStats.diff:0)+' ('+(d.eloStats?d.eloStats.signal:'?')+')\n':'ELO: non disponible\n')
+              +(d.eloH&&d.eloA?'ELO: '+d.home+' '+Math.round(d.eloH)+' vs '+d.away+' '+Math.round(d.eloA)+' | Ecart: '+(d.eloStats?d.eloStats.diff:0)+' ('+(d.eloStats?d.eloStats.signal:'?')+')\n':'ELO: non disponible\n')
               +(d.motivH&&d.motivH.alerts&&d.motivH.alerts.length?'Enjeu DOM: '+d.motivH.alerts.join(' | ')+'\n':'')
               +(d.motivA&&d.motivA.alerts&&d.motivA.alerts.length?'Enjeu EXT: '+d.motivA.alerts.join(' | ')+'\n':'')
               +(d.matchup&&d.matchup.insights&&d.matchup.insights.length?'Tactique: '+d.matchup.insights.join(' | ')+'\n':'')
-              +'\n=== PHASE 2 — MODÈLE MATHÉMATIQUE ===\n'
+              +'\n=== PHASE 2 - MODELE MATHEMATIQUE ===\n'
               +'Poisson lambdas: DOM '+d.poisson_lambdaH+' | EXT '+d.poisson_lambdaA+'\n'
               +'Poisson: DOM '+d.poisson_p1+'% | Nul '+d.poisson_pN+'% | EXT '+d.poisson_p2+'%\n'
               +'Dixon-Coles: DOM '+d.dixon_p1+'% | Nul '+d.dixon_pN+'% | EXT '+d.dixon_p2+'%\n'
               +'Monte-Carlo: DOM '+d.mc_p1+'% | Nul '+d.mc_pN+'% | EXT '+d.mc_p2+'%\n'
               +(d.mc_scores&&d.mc_scores.length?'Top scores MC: '+d.mc_scores.map(function(s){return s.score+'('+s.pct+'%)';}).join(', ')+'\n':'')
               +(d.pinnacle_p1?'Pinnacle (sharp): DOM '+d.pinnacle_p1+'% | Nul '+d.pinnacle_pN+'% | EXT '+d.pinnacle_p2+'%\n':'Pinnacle: non disponible\n')
-              // Marchés disponibles — probas calculées par le modèle
               +(d.all_markets&&d.all_markets.length
-                ?'\n=== MARCHÉS DISPONIBLES (cote >= 1.50) ===\n'
-                 +'(probas calculées indépendamment par le modèle Poisson + Dixon-Coles + Monte-Carlo)\n'
+                ?'\n=== MARCHES DISPONIBLES (cote >= 1.50) ===\n'
+                 +'(probas calculees independamment par le modele Poisson + Dixon-Coles + Monte-Carlo)\n'
                  +d.all_markets.map(function(m){
-                   return m.market+' | Proba modèle: '+m.prob+'% | Cote: '+m.cote;
+                   return m.market+' | Proba modele: '+m.prob+'% | Cote: '+m.cote;
                  }).join('\n')+'\n'
-                :'Aucun marché jouable — toutes les cotes sont < 1.50 ou absentes.\n')
-              // Scores Monte-Carlo pour cohérence avec le marché choisi
+                :'Aucun marche jouable - toutes les cotes sont < 1.50 ou absentes.\n')
               +(d.mc_scores&&d.mc_scores.length
                 ?'\n=== SCORES MONTE-CARLO (5000 simulations) ===\n'
                  +'Top scores: '+d.mc_scores.map(function(s){return s.score+'('+s.pct+'%)';}).join(', ')+'\n'
-                 +'→ Utilise ces scores pour vérifier la cohérence du marché que tu choisis.\n'
-                 +'→ Ex: si Over 2.5 mais top scores = 0-0, 1-0, 0-1 → incohérent → choisis autre marché\n'
+                 +'-> Utilise ces scores pour verifier la coherence du marche que tu choisis.\n'
+                 +'-> Ex: si Over 2.5 mais top scores = 0-0, 1-0, 0-1 -> incoherent -> choisis autre marche\n'
                 :'')
-              // Données réelles par tranche pour le scénario
               +(d.slotSummary&&d.slotSummary.length
-                ?'\n=== BUTS PAR TRANCHE (données réelles) ===\n'
+                ?'\n=== BUTS PAR TRANCHE (donnees reelles) ===\n'
                  +d.slotSummary.map(function(s){
                    return s.t+' : '
                      +d.home+' marque '+s.pct_home_mark+'% de ses buts ici, encaisse '+s.pct_away_conc+'% des buts de '+d.away
-                     +' | '+d.away+' marque '+s.pct_away_mark+'%, encaisse '+s.pct_home_conc+'% — Probabilité but: '+s.prob+'%';
+                     +' | '+d.away+' marque '+s.pct_away_mark+'%, encaisse '+s.pct_home_conc+'% - Probabilite but: '+s.prob+'%';
                  }).join('\n')+'\n'
                 :'')
               +'\n=== TON ANALYSE ===\n'
-              +'Tu es un analyste sportif professionnel. Tu reçois les données ci-dessus et tu choisis librement le meilleur marché.\n'
-              +'\nRÈGLES DE SÉLECTION DU MARCHÉ :\n'
-              +'1. Choisis le marché dont les signaux sont les plus convergents (Phase 1 + Phase 2 + Monte-Carlo pointent dans la même direction)\n'
-              +'2. Vérifie la cohérence avec les scores Monte-Carlo — si Over 2.5 mais top scores sont 0-0/1-0, ne choisis pas Over 2.5\n'
-              +'3. Aucun marché n\'est favorisé a priori — les 8 marchés (Over/Under 2.5, BTTS Oui/Non, DC 1X/X2, Victoire sèche) sont tous équivalents au départ\n'
-              +'4. Si les signaux sont contradictoires ou insuffisants → passe_ton_tour=true\n'
-              +'5. Si aucun marché n\'a de cote disponible >= 1.50 → passe_ton_tour=true\n'
-              +'\nCONFIANCE : note continue de 5.5 à 9.0 reflétant fidèlement la force réelle du signal — JAMAIS de valeur "ronde" par défaut (évite de toujours tomber sur 7.0, 7.5 ou 8.0).\n'
-              +'Base-toi précisément sur : nombre de signaux convergents entre Phase 1 et Phase 2, écart entre les modèles (Poisson/Dixon-Coles/Monte-Carlo — s\'ils divergent, baisse la note), confirmation ELO+Pinnacle, taille de l\'échantillon de matchs disponibles.\n'
-              +'Repères : 5.5-6.4 = signal correct mais pas exceptionnel | 6.5-7.4 = signal solide | 7.5-8.4 = signal très solide multi-convergent | 8.5-9.0 = cas rarissime où absolument tout converge.\n'
-              +'Si le signal est trop faible pour mériter une note, ne force rien : passe_ton_tour=true plutôt que de gonfler artificiellement une confiance basse.\n'
+              +'Tu es un analyste sportif professionnel. Tu recois les donnees ci-dessus et tu choisis librement le meilleur marche.\n'
+              +'\nREGLES DE SELECTION DU MARCHE :\n'
+              +'1. Choisis le marche dont les signaux sont les plus convergents (Phase 1 + Phase 2 + Monte-Carlo pointent dans la meme direction)\n'
+              +'2. Verifie la coherence avec les scores Monte-Carlo - si Over 2.5 mais top scores sont 0-0/1-0, ne choisis pas Over 2.5\n'
+              +'3. Aucun marche n\'est favorise a priori - les 8 marches (Over/Under 2.5, BTTS Oui/Non, DC 1X/X2, Victoire seche) sont tous equivalents au depart\n'
+              +'4. Si les signaux sont contradictoires ou insuffisants -> passe_ton_tour=true\n'
+              +'5. Si aucun marche n\'a de cote disponible >= 1.50 -> passe_ton_tour=true\n'
+              +'\nCONFIANCE : note continue de 5.5 a 9.0 refletant fidelement la force reelle du signal - JAMAIS de valeur "ronde" par defaut (evite de toujours tomber sur 7.0, 7.5 ou 8.0).\n'
+              +'Base-toi precisement sur : nombre de signaux convergents entre Phase 1 et Phase 2, ecart entre les modeles (Poisson/Dixon-Coles/Monte-Carlo - s\'ils divergent, baisse la note), confirmation ELO+Pinnacle, taille de l\'echantillon de matchs disponibles.\n'
+              +'Reperes : 5.5-6.4 = signal correct mais pas exceptionnel | 6.5-7.4 = signal solide | 7.5-8.4 = signal tres solide multi-convergent | 8.5-9.0 = cas rarissime ou absolument tout converge.\n'
+              +'Si le signal est trop faible pour meriter une note, ne force rien : passe_ton_tour=true plutot que de gonfler artificiellement une confiance basse.\n'
               +'RISQUE: FAIBLE si cote <1.75 + signaux convergents | MODERE si cote 1.75-2.20 | ELEVE sinon\n\n';
-            var jsonTpl = 'Réponds UNIQUEMENT avec ce JSON valide. Aucun texte avant ou après. Aucun backtick.\n'
-              +'RÈGLE ABSOLUE: analyse_card, conseil, contexte, facteur_x, scenario, scenario_15min TOUJOURS remplis même si passe_ton_tour=true.\n\n'
+            var jsonTpl = 'Reponds UNIQUEMENT avec ce JSON valide. Aucun texte avant ou apres. Aucun backtick.\n'
+              +'REGLE ABSOLUE: analyse_card, conseil, contexte, facteur_x, scenario, scenario_15min TOUJOURS remplis meme si passe_ton_tour=true.\n\n'
               +'{\n'
               +'"passe_ton_tour": false,\n'
               +'"confiance": 0.0,\n'
-              +'"pari_rec": "[marché choisi EXACTEMENT comme nommé dans MARCHÉS DISPONIBLES ci-dessus] ou vide si passe_ton_tour",\n'
-              +'"cote_rec": "[cote exacte du marché choisi — copie depuis les données ci-dessus]",\n'
+              +'"pari_rec": "[marche choisi EXACTEMENT comme nomme dans MARCHES DISPONIBLES ci-dessus] ou vide si passe_ton_tour",\n'
+              +'"cote_rec": "[cote exacte du marche choisi - copie depuis les donnees ci-dessus]",\n'
               +'"marche": "[DOUBLE_CHANCE | TOTAL_BUTS | BTTS]",\n'
               +'"risque": "[FAIBLE | MODERE | ELEVE]",\n'
-              +'"verdict_shark": "[marché] à [cote] — [1 phrase factuelle sur le signal le plus fort]",\n'
-              +'"analyse_card": "[2-3 phrases factuelles — cite les stats qui justifient ce marché]",\n'
+              +'"verdict_shark": "[marche] a [cote] - [1 phrase factuelle sur le signal le plus fort]",\n'
+              +'"analyse_card": "[2-3 phrases factuelles - cite les stats qui justifient ce marche]",\n'
               +'"conseil": "[1 phrase directe et actionnable]",\n'
-              +'"contexte": "[contexte du match — enjeu, classement, phase]",\n'
-              +'"facteur_x": "[LE signal statistique le plus fort qui justifie ce marché]",\n'
+              +'"contexte": "[contexte du match - enjeu, classement, phase]",\n'
+              +'"facteur_x": "[LE signal statistique le plus fort qui justifie ce marche]",\n'
               +'"score_central": "'+scoreCentral+'",\n'
               +'"p1": '+d.poisson_p1+', "pn": '+d.poisson_pN+', "p2": '+d.poisson_p2+',\n'
               +'"po25": '+d.poisson_over25+', "btts": '+d.poisson_bttsY+',\n'
@@ -1772,14 +1737,14 @@ jobs:
               +(d.slotSummary&&d.slotSummary.length
                 ?'"scenario_15min": [\n'
                  +d.slotSummary.map(function(s,i){
-                   return '  {"t":"'+s.t+'","prob":'+s.prob+',"txt":"[narrative factuelle — cite les vrais chiffres des données]"}';
+                   return '  {"t":"'+s.t+'","prob":'+s.prob+',"txt":"[narrative factuelle - cite les vrais chiffres des donnees]"}';
                  }).join(',\n')+'\n]\n'
                 :'"scenario_15min": null\n')
               +'}';
             var r = await postJSONWithRetry('api.anthropic.com', '/v1/messages', {
               model: 'claude-sonnet-4-6',
               max_tokens: 2500,
-              system: 'Tu es IASHARK, un analyste sportif professionnel. Tu réponds EXCLUSIVEMENT en JSON valide. Aucun backtick. Tu n\'inventes jamais de statistiques. Tu choisis librement le meilleur marché parmi ceux proposés en te basant uniquement sur les données statistiques fournies. Tu es totalement neutre — aucun marché n\'est favorisé a priori. Tu vérifies toujours la cohérence entre le marché choisi et les scores Monte-Carlo. Si les signaux sont insuffisants ou contradictoires, tu passes ton tour.',
+              system: 'Tu es IASHARK, un analyste sportif professionnel. Tu reponds EXCLUSIVEMENT en JSON valide. Aucun backtick. Tu n\'inventes jamais de statistiques. Tu choisis librement le meilleur marche parmi ceux proposes en te basant uniquement sur les donnees statistiques fournies. Tu es totalement neutre - aucun marche n\'est favorise a priori. Tu verifies toujours la coherence entre le marche choisi et les scores Monte-Carlo. Si les signaux sont insuffisants ou contradictoires, tu passes ton tour.',
               messages: [{role:'user', content:prompt+jsonTpl}]
             }, {'x-api-key':ANT_KEY, 'anthropic-version':'2023-06-01'});
             var txt=((r.content||[]).find(function(b){return b.type==='text';})||{}).text||'{}';
@@ -1791,9 +1756,9 @@ jobs:
             var sortedForCombis=list.slice().sort(function(a,b){return b.conf-a.conf;});
             var lines=sortedForCombis.slice(0,10).map(function(a){return '- '+a.home+' vs '+a.away+': '+a.pari+' cote '+a.cote+' (confiance '+a.conf+'/10)';}).join('\n');
             var promptClassic='Expert paris sportifs IASHARK. Meilleurs signaux du jour:\n'+lines+'\n\n'
-              +'Génère 3 combinés optimisés. Marchés autorisés: Over 2.5, BTTS Non, DC 1X, DC X2.\n'
+              +'Genere 3 combines optimises. Marches autorises: Over 2.5, BTTS Non, DC 1X, DC X2.\n'
               +'c1 "SHARK SAFE": 2 matchs, cote 1.50-2.00. c2 "SHARK VALUE": 3 matchs, 2.50-4.00. c3 "SHARK EXPERT": 3-4 matchs, 4.00-6.00.\n'
-              +'Réponds UNIQUEMENT JSON sans backticks:\n'
+              +'Reponds UNIQUEMENT JSON sans backticks:\n'
               +'{"c1":{"label":"SHARK SAFE","type":"safe","selections":"DC X2 + Over 2.5","matchs":"m1, m2","cote_totale":"1.85","conseil":"..."},'
               +'"c2":{"label":"SHARK VALUE","type":"value","selections":"DC 1X + Over 2.5 + BTTS Non","matchs":"m1, m2, m3","cote_totale":"3.20","conseil":"..."},'
               +'"c3":{"label":"SHARK EXPERT","type":"audace","selections":"Over 2.5 + DC X2 + DC 1X","matchs":"m1, m2, m3","cote_totale":"5.50","conseil":"..."}}';
@@ -1825,8 +1790,8 @@ jobs:
               selected.push(pool[si]);coteTotale*=pool[si].cote;
               if(coteTotale>=5)break;
             }
-            if(selected.length<2){classics.push({label:labelFou,type:typeFou,selections:'Marchés serrés',matchs:'',cote_totale:'--',conseil:'Pas de combiné fou aujourd\'hui.'});return classics;}
-            classics.push({label:labelFou,type:typeFou,selections:selected.map(function(s){return s.sel;}).join(', '),matchs:selected.map(function(s){return s.match;}).join(', '),cote_totale:coteTotale.toFixed(2),conseil:selected.length+' sélections triées par edge'});
+            if(selected.length<2){classics.push({label:labelFou,type:typeFou,selections:'Marches serres',matchs:'',cote_totale:'--',conseil:'Pas de combine fou aujourd\'hui.'});return classics;}
+            classics.push({label:labelFou,type:typeFou,selections:selected.map(function(s){return s.sel;}).join(', '),matchs:selected.map(function(s){return s.match;}).join(', '),cote_totale:coteTotale.toFixed(2),conseil:selected.length+' selections triees par edge'});
             return classics;
           }
           function generateWorldCupPages(){
@@ -1861,7 +1826,6 @@ jobs:
             fs.writeFileSync('sitemap.xml','<?xml version="1.0" encoding="UTF-8"?>\n<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'+entries+'\n</sitemapindex>');
             console.log('  Sitemaps done: '+sitemapFiles.length+' files');
           }
-          // ── HISTORIQUE ───────────────────────────────────────────
           async function updateHistorique(matchsData){
             console.log('\n=== HISTORIQUE UPDATE ===');
             var histoPath='historique.json';
@@ -1881,7 +1845,7 @@ jobs:
                 var fClassic=await get('https://v3.football.api-sports.io/fixtures?date='+rDate+'&timezone=Europe/Paris',APS);
                 var fWC=await get('https://v3.football.api-sports.io/fixtures?league=1&season=2026&date='+rDate+'&timezone=Europe/Paris',APS);
                 yResults=yResults.concat(fClassic.response||[], fWC.response||[]);
-                console.log('  R\u00e9sultats '+rDate+': '+(fClassic.response||[]).length+' classique + '+(fWC.response||[]).length+' World Cup');
+                console.log('  Resultats '+rDate+': '+(fClassic.response||[]).length+' classique + '+(fWC.response||[]).length+' World Cup');
                 await sleep(150);
               }
               for(var yr=0;yr<yResults.length;yr++){
@@ -1900,15 +1864,15 @@ jobs:
                 var isWin=resolveMarketWin(found.prediction, gh, ga);
                 if(isWin===null){ continue; }
                 found.result=isWin?'win':'loss';found.score=gh+'-'+ga;found.fixture_id=fid;found.resolved_date=TODAY;
-                console.log('  R\u00e9solu foot: '+found.match+' \u2192 '+found.result+' ('+gh+'-'+ga+')');
+                console.log('  Resolu foot: '+found.match+' -> '+found.result+' ('+gh+'-'+ga+')');
               }
-            }catch(e){console.log('  R\u00e9sultats hier erreur:',e.message);}
+            }catch(e){console.log('  Resultats hier erreur:',e.message);}
             try{
               if(TENNIS_KEY){
                 var pendingTennis=histo.predictions.filter(function(p){
                   return (p.result==='scheduled'||p.result==='pending')&&p.sport==='tennis'&&p.date&&p.date.substring(0,10)===yDate;
                 });
-                console.log('  Paris tennis pending \u00e0 r\u00e9soudre: '+pendingTennis.length);
+                console.log('  Paris tennis pending a resoudre: '+pendingTennis.length);
                 if(pendingTennis.length>0){
                   var resolvedIds={};
                   for(var pt=0;pt<pendingTennis.length;pt++){
@@ -1949,15 +1913,15 @@ jobs:
                         pending.score=winnerName+' W '+fx.result;
                         pending.resolved_date=yDate;
                         resolvedIds[pending.fixture_id]=true;
-                        console.log('  R\u00e9solu tennis: '+pending.match+' \u2192 '+pending.result+' ('+winnerName+')');
+                        console.log('  Resolu tennis: '+pending.match+' -> '+pending.result+' ('+winnerName+')');
                         break;
                       }
-                    } catch(e2){ console.log('  Erreur r\u00e9solution tennis match:', e2.message); }
+                    } catch(e2){ console.log('  Erreur resolution tennis match:', e2.message); }
                     await sleep(200);
                   }
                 }
               }
-            }catch(e){console.log('  R\u00e9sultats tennis erreur:',e.message);}
+            }catch(e){console.log('  Resultats tennis erreur:',e.message);}
             for(var mi=0;mi<matchsData.length;mi++){
               var m=matchsData[mi];
               var alreadyExists=histo.predictions.find(function(p){return p.fixture_id===m.id||(p.home===m.home.n&&p.away===m.away.n&&p.date&&p.date.substring(0,10)===TODAY);});
@@ -1967,22 +1931,15 @@ jobs:
                 var marketType='autre';
                 if(betLabel){
                   var bl=betLabel.toLowerCase();
-                  // FIX CRITIQUE : 'under 2.5' n'était jamais vérifié — tous les paris Under 2.5
-                  // récents tombaient silencieusement dans 'autre', masquant leur vraie performance
-                  // dans le backtesting (confirmé sur données réelles : 20% winrate caché sous 'autre'
-                  // alors que les anciens paris correctement étiquetés 'under25' tournent à 54.5%).
                   if(bl.includes('under 2.5'))marketType='under25';
                   else if(bl.includes('over 2.5'))marketType='over25';
                   else if(bl.includes('over 1.5'))marketType='over15';
                   else if(bl.includes('btts non'))marketType='btts_non';
                   else if(bl.includes('btts'))marketType='btts_oui';
-                  // Classification des marchés victoire sèche — le marché Handicap a été retiré
-                  // des choix proposés à Claude (cf. allMarkets), ces 2 branches ne servent donc
-                  // plus qu'à classer d'éventuelles anciennes entrées déjà présentes dans l'historique.
                   else if(bl.includes('handicap')&&(bl.includes('domicile')||bl.includes('dom')))marketType='handicap_dom';
-                  else if(bl.includes('handicap')&&(bl.includes('extérieur')||bl.includes('ext')))marketType='handicap_ext';
+                  else if(bl.includes('handicap')&&(bl.includes('exterieur')||bl.includes('ext')))marketType='handicap_ext';
                   else if(bl.includes('victoire')&&(bl.includes('domicile')||bl.includes('dom')))marketType='victoire_dom';
-                  else if(bl.includes('victoire')&&(bl.includes('extérieur')||bl.includes('ext')))marketType='victoire_ext';
+                  else if(bl.includes('victoire')&&(bl.includes('exterieur')||bl.includes('ext')))marketType='victoire_ext';
                   else if(bl.includes('1x'))marketType='dc1x';
                   else if(bl.includes('x2'))marketType='dc_x2';
                   else if(m.sport==='tennis')marketType='match_winner';
@@ -2002,10 +1959,7 @@ jobs:
             var beforeClean=histo.predictions.length;
             histo.predictions=histo.predictions.filter(function(p){return p.type!=='combi';});
             var cleaned=beforeClean-histo.predictions.length;
-            if(cleaned>0)console.log('  Nettoyage: '+cleaned+' combin\u00e9s supprim\u00e9s');
-            // FIX : un match "no_signal"/"neutral" (passe ton tour) n'est PAS une défaite —
-            // aucun pari n'a été placé. Les compter comme perte faussait winrate et ROI vers
-            // le bas artificiellement (confirmé : 56.1%/+3.2% avec le bug vs 64.8%/+19.2% corrigé).
+            if(cleaned>0)console.log('  Nettoyage: '+cleaned+' combines supprimes');
             var singles=histo.predictions.filter(function(p){return p.type==='single'&&(p.result==='win'||p.result==='loss');});
             var wins=singles.filter(function(p){return p.result==='win';});
             var total=singles.length;
@@ -2043,15 +1997,106 @@ jobs:
             singles.forEach(function(p){var key=(p.date||'').substring(0,7);if(!months[key])months[key]={wins:0,losses:0};if(p.result==='win')months[key].wins++;else months[key].losses++;});
             histo.monthly=Object.keys(months).sort().reverse().slice(0,6).map(function(k){
               var mo=months[k];var tot=mo.wins+mo.losses;var r=tot>0?((mo.wins*0.75-mo.losses)/tot*100):0;
-              var parts=k.split('-');var mn=['Jan','F\u00e9v','Mar','Avr','Mai','Jun','Jul','Ao\u00fb','Sep','Oct','Nov','D\u00e9c'];
+              var parts=k.split('-');var mn=['Jan','Fev','Mar','Avr','Mai','Jun','Jul','Aou','Sep','Oct','Nov','Dec'];
               return{month:k,label:(mn[parseInt(parts[1])-1]||parts[1])+' '+parts[0],wins:mo.wins,losses:mo.losses,total:tot,roi:Math.round(r*10)/10};
             });
             fs.writeFileSync(histoPath,JSON.stringify(histo,null,2));
             console.log('  Historique: '+total+' paris | Winrate: '+winrate.toFixed(0)+'% | ROI: '+roi.toFixed(1)+'%');
           }
-          // ═══════════════════════════════════════════════════════
-          // ── MAIN ────────────────────────────────────────────────
-          // ═══════════════════════════════════════════════════════
+          var TRANSFER_CACHE_DAYS = 5;
+          async function updateTransferts(fixtures) {
+            console.log('\n=== TRANSFERTS OFFICIELS ===');
+            var transfPath = 'transferts.json';
+            var store = { teams_checked: {}, items: [] };
+            try { store = JSON.parse(fs.readFileSync(transfPath, 'utf8')); } catch(e) {}
+            var seenPlayers = {};
+            store.items.forEach(function(it){ seenPlayers[it.player_id+'_'+it.date] = true; });
+            var teamIds = [], teamLeagueMap = {};
+            fixtures.forEach(function(fx){
+              var hId=fx.teams.home.id, aId=fx.teams.away.id, lgId=fx.league.id;
+              if(hId && teamIds.indexOf(hId)===-1){ teamIds.push(hId); teamLeagueMap[hId]=lgId; }
+              if(aId && teamIds.indexOf(aId)===-1){ teamIds.push(aId); teamLeagueMap[aId]=lgId; }
+            });
+            console.log('  '+teamIds.length+' clubs concernes par les matchs a venir');
+            var now = Date.now(), newCount = 0;
+            for(var ti=0; ti<teamIds.length; ti++){
+              var teamId = teamIds[ti];
+              var lastChecked = store.teams_checked[teamId];
+              if(lastChecked && (now-lastChecked) < TRANSFER_CACHE_DAYS*86400000) continue;
+              try{
+                var r = await get('https://v3.football.api-sports.io/transfers?team='+teamId, APS);
+                var records = r.response || [];
+                for(var pi=0; pi<records.length; pi++){
+                  var rec = records[pi];
+                  var player = rec.player || {};
+                  var latest = (rec.transfers||[])[0];
+                  if(!latest || !latest.date) continue;
+                  var daysAgo = (now - new Date(latest.date).getTime())/86400000;
+                  if(daysAgo>21 || daysAgo<0) continue;
+                  var uid = player.id+'_'+latest.date;
+                  if(seenPlayers[uid]) continue;
+                  seenPlayers[uid]=true;
+                  var season = SEASON_2026.indexOf(teamLeagueMap[teamId])!==-1 ? 2026 : SEASON;
+                  var pInfo = await get('https://v3.football.api-sports.io/players?id='+player.id+'&season='+season, APS);
+                  var pData = (pInfo.response && pInfo.response[0]) || null;
+                  var bio = pData ? pData.player : null;
+                  var stats = pData && pData.statistics && pData.statistics[0] ? pData.statistics[0] : null;
+                  store.items.unshift({
+                    player_id: player.id, name: player.name||(bio&&bio.name)||'',
+                    photo: (bio&&bio.photo)||('https://media.api-sports.io/football/players/'+player.id+'.png'),
+                    age: bio?bio.age:null, nationality: bio?bio.nationality:null,
+                    poste: stats&&stats.games?stats.games.position:null,
+                    from: (latest.teams&&latest.teams.out&&latest.teams.out.name)||'',
+                    to: (latest.teams&&latest.teams.in&&latest.teams.in.name)||'',
+                    fee: latest.type || 'N/A',
+                    date: latest.date,
+                    buts_saison_prec: stats&&stats.goals?stats.goals.total:null,
+                    passes_saison_prec: stats&&stats.goals?stats.goals.assists:null,
+                    matchs_saison_prec: stats&&stats.games?stats.games.appearences:null,
+                  });
+                  newCount++;
+                  await sleep(200);
+                }
+                store.teams_checked[teamId]=now;
+              }catch(e){ console.log('  Erreur transferts team '+teamId+': '+e.message); }
+              await sleep(200);
+            }
+            store.items.sort(function(a,b){ return new Date(b.date)-new Date(a.date); });
+            store.items = store.items.slice(0,60);
+            store.updated = TODAY;
+            fs.writeFileSync(transfPath, JSON.stringify(store,null,2));
+            console.log('  Transferts: '+store.items.length+' au total ('+newCount+' nouveaux)');
+          }
+          async function updateRumeurs() {
+            console.log('\n=== ACTUS & RUMEURS RSS ===');
+            var actusPath = 'actus.json';
+            var actus = { items: [] };
+            try { actus = JSON.parse(fs.readFileSync(actusPath,'utf8')); } catch(e) {}
+            var seenLinks = {};
+            actus.items.forEach(function(it){ seenLinks[it.link]=true; });
+            var newCount = 0;
+            for(var si=0; si<RSS_SOURCES.length; si++){
+              var src = RSS_SOURCES[si];
+              try{
+                var xml = await getText(src.url);
+                if(!xml || xml.indexOf('<item')===-1){ console.log('  '+src.nom+': pas de flux RSS valide'); continue; }
+                var items = parseRSSItems(xml, 20);
+                items.forEach(function(it){
+                  if(!it.link || seenLinks[it.link]) return;
+                  seenLinks[it.link]=true;
+                  actus.items.unshift({ source:src.nom, fiabilite:src.fiabilite, type:src.type, title:it.title, snippet:(it.description||'').slice(0,220), link:it.link, date:it.pubDate||new Date().toISOString() });
+                  newCount++;
+                });
+                console.log('  '+src.nom+': '+items.length+' articles lus');
+              }catch(e){ console.log('  '+src.nom+' erreur: '+e.message); }
+              await sleep(300);
+            }
+            actus.items.sort(function(a,b){ return new Date(b.date)-new Date(a.date); });
+            actus.items = actus.items.slice(0,150);
+            actus.updated = TODAY;
+            fs.writeFileSync(actusPath, JSON.stringify(actus,null,2));
+            console.log('  Actus: '+actus.items.length+' au total ('+newCount+' nouveaux)');
+          }
           async function main(){
             console.log('=== IASHARK',TODAY,'===');
             var tennisFixturesPromise = Promise.resolve([]);
@@ -2086,7 +2131,7 @@ jobs:
             if(!fixtures.length&&!tennisFixtures.length){
               fs.writeFileSync('data.json',JSON.stringify({matchs:[],combis:[]},null,2));
               generateWorldCupPages();generateSitemaps([]);
-              console.log('\n=== JOUR SANS MATCHS — R\u00e9solution historique ===');
+              console.log('\n=== JOUR SANS MATCHS - Resolution historique ===');
               var histoPathEarly='historique.json';
               var histoEarly={predictions:[],stats:{winrate:0,roi:0,total:0,streak:0,wins:0,losses:0},monthly:[],backtesting:{}};
               try{histoEarly=JSON.parse(fs.readFileSync(histoPathEarly,'utf8'));}catch(e){}
@@ -2120,7 +2165,7 @@ jobs:
                   if(isWin===null){ return; }
                   found.result=isWin?'win':'loss';found.score=gh+'-'+ga;found.fixture_id=fid;found.resolved_date=TODAY;
                 });
-              }catch(e){console.log('  Erreur r\u00e9solution:',e.message);}
+              }catch(e){console.log('  Erreur resolution:',e.message);}
               var beforeCleanE=histoEarly.predictions.length;
               histoEarly.predictions=histoEarly.predictions.filter(function(p){return p.type!=='combi';});
               var singlesE=histoEarly.predictions.filter(function(p){return p.type==='single'&&(p.result==='win'||p.result==='loss');});
@@ -2134,11 +2179,10 @@ jobs:
               histoEarly.stats={winrate:Math.round(winrateE*10)/10,roi:Math.round(roiE*10)/10,total:totalE,streak:streakE,wins:winsE.length,losses:totalE-winsE.length};
               var monthsE={};
               singlesE.forEach(function(p){var key=(p.date||'').substring(0,7);if(!monthsE[key])monthsE[key]={wins:0,losses:0};if(p.result==='win')monthsE[key].wins++;else monthsE[key].losses++;});
-              histoEarly.monthly=Object.keys(monthsE).sort().reverse().slice(0,6).map(function(k){var mo=monthsE[k];var tot=mo.wins+mo.losses;var r=tot>0?((mo.wins*0.75-mo.losses)/tot*100):0;var parts=k.split('-');var mn=['Jan','F\u00e9v','Mar','Avr','Mai','Jun','Jul','Ao\u00fb','Sep','Oct','Nov','D\u00e9c'];return{month:k,label:(mn[parseInt(parts[1])-1]||parts[1])+' '+parts[0],wins:mo.wins,losses:mo.losses,total:tot,roi:Math.round(r*10)/10};});
+              histoEarly.monthly=Object.keys(monthsE).sort().reverse().slice(0,6).map(function(k){var mo=monthsE[k];var tot=mo.wins+mo.losses;var r=tot>0?((mo.wins*0.75-mo.losses)/tot*100):0;var parts=k.split('-');var mn=['Jan','Fev','Mar','Avr','Mai','Jun','Jul','Aou','Sep','Oct','Nov','Dec'];return{month:k,label:(mn[parseInt(parts[1])-1]||parts[1])+' '+parts[0],wins:mo.wins,losses:mo.losses,total:tot,roi:Math.round(r*10)/10};});
               fs.writeFileSync(histoPathEarly,JSON.stringify(histoEarly,null,2));
               return;
             }
-            // ── FOOTBALL PROCESSING ──
             var xgConcededCache={};
             if(fixtures.length){
               var allTeamIds=[];
@@ -2146,7 +2190,7 @@ jobs:
                 if(fix.teams.home.id&&allTeamIds.indexOf(fix.teams.home.id)===-1)allTeamIds.push(fix.teams.home.id);
                 if(fix.teams.away.id&&allTeamIds.indexOf(fix.teams.away.id)===-1)allTeamIds.push(fix.teams.away.id);
               });
-              console.log('Pr\u00e9-chargement xG cache pour',allTeamIds.length,'\u00e9quipes...');
+              console.log('Pre-chargement xG cache pour',allTeamIds.length,'equipes...');
               for(var ti=0;ti<allTeamIds.length;ti++){
                 try{
                   var tid=allTeamIds[ti];
@@ -2164,18 +2208,7 @@ jobs:
             var eloData=await loadClubElo();
             var prevPinnacleOdds={};
             try{if(fs.existsSync('data.json')){var prevData=JSON.parse(fs.readFileSync('data.json','utf8'));(prevData.matchs||[]).forEach(function(m){if(m.pinnacle_snapshot){prevPinnacleOdds[m.home.n+'|'+m.away.n]=m.pinnacle_snapshot;}});}}catch(e){}
-            // ── PATCH FORCE REFRESH : toujours recalculer à chaque run ──────────
-            // Le cache est désactivé par défaut — chaque run recalcule tous les matchs
-            // pour garantir des données fraîches. Plus besoin du paramètre force_refresh.
-            console.log('Cache d\u00e9sactiv\u00e9 — tous les matchs recalcul\u00e9s \u00e0 chaque run');
-            // ── CACHE PERSISTANT PAR MATCH : verrouille la prédiction dès la 1ère fois ──
-            // Le pipeline récupère les matchs sur 3 jours (aujourd'hui/demain/après-demain).
-            // Sans ce verrou, un match vu "demain" pourrait être recalculé différemment
-            // une fois qu'il devient "aujourd'hui" le jour suivant — donnant l'impression
-            // que le pari change tout seul d'un jour à l'autre. Avec ce verrou : la toute
-            // première fois qu'un match (identifié par son fixture_id, stable côté API)
-            // est calculé, sa prédiction reste figée pour tous les runs suivants, qu'il
-            // soit encore "après-demain", devienne "demain", puis "aujourd'hui".
+            console.log('Cache desactive - tous les matchs recalcules a chaque run');
             var matchCache = {};
             try {
               if (fs.existsSync('data.json')) {
@@ -2185,7 +2218,7 @@ jobs:
                 });
               }
             } catch (e) {}
-            console.log('Cache persistant : ' + Object.keys(matchCache).length + ' match(s) d\u00e9j\u00e0 verrouill\u00e9(s) depuis un run pr\u00e9c\u00e9dent \u2014 pr\u00e9diction conserv\u00e9e \u00e0 l\'identique');
+            console.log('Cache persistant : ' + Object.keys(matchCache).length + ' match(s) deja verrouille(s) depuis un run precedent - prediction conservee a l\'identique');
             var matchsData=[];
             var forCombis=[];
             var standingsCache={};
@@ -2197,10 +2230,6 @@ jobs:
               var away=fix.teams.away;
               var isWorldCupMatch=(lg.id===1);
               var wcRound=(lg.round||'').toLowerCase();
-              // Détection élargie pour couvrir le nouveau format CDM 2026 à 48 équipes,
-              // qui introduit un tour de 32e de finale inédit par rapport aux éditions
-              // précédentes — l'API peut nommer ce tour différemment selon la source.
-              // Pur texte : ne touche à aucun calcul de lambda, de proba ou de marché.
               var isKnockout=isWorldCupMatch&&(
                 wcRound.includes('round of')||wcRound.includes('quarter')||wcRound.includes('semi')||
                 wcRound.includes('final')||wcRound.includes('knockout')||wcRound.includes('1/8')||
@@ -2208,17 +2237,14 @@ jobs:
                 wcRound.includes('last 16')||wcRound.includes('playoff')||wcRound.includes('play-off')||
                 wcRound.includes('third place')||wcRound.includes('3rd place')
               );
-              if(isKnockout) console.log('  [WC KNOCKOUT] '+home.name+' vs '+away.name+' — '+lg.round);
-              // Si ce match a déjà une prédiction verrouillée (vu lors d'un run précédent,
-              // qu'il soit déjà passé "aujourd'hui" ou encore "demain"), on la garde telle
-              // quelle — pas de recalcul, pas de nouveaux appels API, jamais.
+              if(isKnockout) console.log('  [WC KNOCKOUT] '+home.name+' vs '+away.name+' - '+lg.round);
               var cacheKeyMatch = String(f.id);
               if (matchCache[cacheKeyMatch]) {
-                console.log('  \u26a1 D\u00e9j\u00e0 verrouill\u00e9: '+home.name+' vs '+away.name+' \u2014 pr\u00e9diction conserv\u00e9e');
+                console.log('  Deja verrouille: '+home.name+' vs '+away.name+' - prediction conservee');
                 matchsData.push(matchCache[cacheKeyMatch]);
                 continue;
               }
-              console.log('\n-> '+home.name+' vs '+away.name+' ('+lg.name+')'+(isWorldCupMatch?' \uD83C\uDF0D':''));
+              console.log('\n-> '+home.name+' vs '+away.name+' ('+lg.name+')'+(isWorldCupMatch?' [WC]':''));
               if(!standingsCache[lg.id]){
                 var stSeason=SEASON_2026.indexOf(lg.id)!==-1?2026:SEASON;
                 var stResp=await get('https://v3.football.api-sports.io/standings?league='+lg.id+'&season='+stSeason,APS);
@@ -2306,17 +2332,11 @@ jobs:
               var bmAext_p=(sA&&sA.goals&&sA.goals.for&&sA.goals.for.total&&sA.goals.for.total.away)||0;
               var beAext_p=(sA&&sA.goals&&sA.goals.against&&sA.goals.against.total&&sA.goals.against.total.away)||0;
               var meAext_p=(sA&&sA.fixtures&&sA.fixtures.played&&sA.fixtures.played.away)||10;
-              // ── PATCH 5 : passer lg.id à calcLambdas ────────────────────────
               var lambdas=calcLambdas(bmHdom_p,beHdom_p,mdHdom,bmAext_p,beAext_p,meAext_p,null,null,lg.id);
               if(xgH.xg_avg&&xgA.xg_avg){
                 lambdas.lambdaH=parseFloat((lambdas.lambdaH*0.6+parseFloat(xgH.xg_avg)*0.4).toFixed(3));
                 lambdas.lambdaA=parseFloat((lambdas.lambdaA*0.6+parseFloat(xgA.xg_avg)*0.4).toFixed(3));
               }
-              // Qualité offensive réelle via le ratio tirs cadrés/tirs totaux — pas juste le volume brut.
-              // Une équipe qui tire beaucoup mais cadre peu a une attaque moins fiable, à xG égal.
-              // Ratio moyen de référence en football pro ≈ 35% (tirs cadrés / tirs tentés).
-              // Ajustement volontairement borné à ±15% pour ne jamais déstabiliser le modèle —
-              // c'est un correctif fin, pas un second moteur de calcul.
               function calcShotQualityFactor(shotsOnAvg, shotsTotalAvg){
                 var on=parseFloat(shotsOnAvg), tot=parseFloat(shotsTotalAvg);
                 if(!on||!tot||tot<=0) return 1;
@@ -2327,54 +2347,35 @@ jobs:
               var shotQualA=calcShotQualityFactor(xgA.shots_on_avg, xgA.shots_total_avg);
               lambdas.lambdaH=parseFloat((lambdas.lambdaH*shotQualH).toFixed(3));
               lambdas.lambdaA=parseFloat((lambdas.lambdaA*shotQualA).toFixed(3));
-              // ── FIX CDM : utiliser les vraies stats de qualifications, pas seulement le tournoi en cours ──
-              // En tout début de Coupe du Monde, chaque équipe n'a joué que 0 à 3 matchs dans le tournoi —
-              // un échantillon trop faible pour calculer des lambdas fiables. getTeamWCStats() combine les
-              // 8 derniers matchs de qualifications (échantillon réel et fiable) avec les matchs du tournoi
-              // déjà joués, pondérés progressivement. Sans ce correctif, le modèle reste aveugle sur les
-              // vraies équipes en présence pendant toute la phase de groupes.
               if(isWorldCupMatch){
                 var wcStatsH=await getTeamWCStats(home.id, home.name);
                 var wcStatsA=await getTeamWCStats(away.id, away.name);
                 if(wcStatsH&&wcStatsA&&wcStatsH.xg_for!=null&&wcStatsA.xg_for!=null){
-                  // Lambda dom = attaque dom pondérée par la défense ext (et inversement) — moyenne simple
-                  // car l'échantillon qualifs ne permet pas un calcul attaque×défense croisé plus fin.
                   var lambdaH_wc=(wcStatsH.xg_for+(wcStatsA.xg_against||wcStatsA.xg_for))/2;
                   var lambdaA_wc=(wcStatsA.xg_for+(wcStatsH.xg_against||wcStatsH.xg_for))/2;
-                  // Blend avec le résultat déjà calculé (tournoi+floor) à 30%, qualifs à 70% —
-                  // les qualifs restent la source la plus fiable tant que le tournoi est jeune.
                   lambdas.lambdaH=parseFloat(Math.max(0.90,(lambdas.lambdaH*0.3+lambdaH_wc*0.7)).toFixed(3));
                   lambdas.lambdaA=parseFloat(Math.max(0.80,(lambdas.lambdaA*0.3+lambdaA_wc*0.7)).toFixed(3));
                   console.log('  [WC lambdas qualifs] '+home.name+': '+lambdas.lambdaH+' | '+away.name+': '+lambdas.lambdaA+' (source: '+wcStatsH.source+'/'+wcStatsA.source+')');
                 } else {
-                  console.log('  [WC lambdas] Pas de stats qualifs disponibles pour '+home.name+' ou '+away.name+' — repli sur stats tournoi/floor');
+                  console.log('  [WC lambdas] Pas de stats qualifs disponibles pour '+home.name+' ou '+away.name+' - repli sur stats tournoi/floor');
                 }
               }
               var poissonProbs=calcFinalProbs(lambdas.lambdaH,lambdas.lambdaA,eloStats);
               var shinProbs=null;
               if(pinnacleOdds&&pinnacleOdds.c1&&pinnacleOdds.cn&&pinnacleOdds.c2){var raw=shinProbabilities([pinnacleOdds.c1,pinnacleOdds.cn,pinnacleOdds.c2]);if(raw)shinProbs={p1:Math.round(raw[0]*100),pN:Math.round(raw[1]*100),p2:Math.round(raw[2]*100)};}
-              // ── MARCHÉS — le code calcule les probas, Claude choisit librement ──
-              // Le code ne sélectionne AUCUN marché — il passe tout à Claude
-              // Filtre unique : cote >= 1.50 pour ne pas proposer des marchés non jouables
-              // FIX: le marché Handicap a été retiré des choix proposés (cf. allMarkets plus bas) —
-              // ces 2 variables restent calculées mais ne sont plus utilisées dans allMarkets,
-              // elles ne cassent donc rien si on veut les réintroduire plus tard.
               var prob1X=(shinProbs?shinProbs.p1:poissonProbs.p1)+(shinProbs?shinProbs.pN:poissonProbs.pN);
               var probX2=(shinProbs?shinProbs.p2:poissonProbs.p2)+(shinProbs?shinProbs.pN:poissonProbs.pN);
               var probAHdom=shinProbs?shinProbs.p1:poissonProbs.p1;
               var probAHext=(shinProbs?shinProbs.p2:poissonProbs.p2)+(shinProbs?shinProbs.pN:poissonProbs.pN);
-              // 8 marchés possibles — Aucun tri, aucune sélection : Claude reçoit tous les marchés jouables.
-              // FIX: Handicap -0.5 Domicile / +0.5 Extérieur retirés de la liste sur demande — Claude ne
-              // peut plus jamais les recommander.
               var allMarkets=[
                 {market:'Over 2.5',  cote:odds.co25,      prob:poissonProbs.over25, label:'Plus de 2.5 buts'},
                 {market:'Under 2.5', cote:odds.cu25,      prob:poissonProbs.under25,label:'Moins de 2.5 buts'},
-                {market:'BTTS Oui',  cote:odds.btts_oui,  prob:poissonProbs.bttsY,  label:'Les deux équipes marquent'},
-                {market:'BTTS Non',  cote:odds.btts_non,  prob:poissonProbs.bttsN,  label:'Une équipe ne marque pas'},
+                {market:'BTTS Oui',  cote:odds.btts_oui,  prob:poissonProbs.bttsY,  label:'Les deux equipes marquent'},
+                {market:'BTTS Non',  cote:odds.btts_non,  prob:poissonProbs.bttsN,  label:'Une equipe ne marque pas'},
                 {market:'DC 1X',     cote:odds.dc1x,      prob:prob1X,              label:'Victoire ou nul domicile'},
-                {market:'DC X2',     cote:odds.dc2x,      prob:probX2,              label:'Victoire ou nul extérieur'},
-                {market:'Victoire Domicile', cote:odds.c1, prob:shinProbs?shinProbs.p1:poissonProbs.p1, label:'Victoire sèche domicile'},
-                {market:'Victoire Extérieur',cote:odds.c2, prob:shinProbs?shinProbs.p2:poissonProbs.p2, label:'Victoire sèche extérieur'},
+                {market:'DC X2',     cote:odds.dc2x,      prob:probX2,              label:'Victoire ou nul exterieur'},
+                {market:'Victoire Domicile', cote:odds.c1, prob:shinProbs?shinProbs.p1:poissonProbs.p1, label:'Victoire seche domicile'},
+                {market:'Victoire Exterieur',cote:odds.c2, prob:shinProbs?shinProbs.p2:poissonProbs.p2, label:'Victoire seche exterieur'},
               ].filter(function(m){
                 return m.cote&&m.cote!=='--'&&parseFloat(m.cote)>=1.50;
               });
@@ -2390,7 +2391,7 @@ jobs:
               var d10Astr=last10A.slice(0,5).map(function(m){return m.result+' '+m.score+' vs '+m.match+' ('+m.lieu+')';}).join(' | ')||'N/A';
               var domH20=last10H.slice(0,20).filter(function(m){return m.home===true;});
               var extA20=last10A.slice(0,20).filter(function(m){return m.home===false;});
-              function calcCurrentStreak(matches){if(!matches||!matches.length)return '';var last=matches[0].result,count=0;for(var i=0;i<matches.length;i++){if(matches[i].result===last)count++;else break;}var label=last==='W'?'victoires cons\u00e9cutives':last==='L'?'d\u00e9faites cons\u00e9cutives':'nuls cons\u00e9cutifs';return count>1?'En ce moment: '+count+' '+label:'';}
+              function calcCurrentStreak(matches){if(!matches||!matches.length)return '';var last=matches[0].result,count=0;for(var i=0;i<matches.length;i++){if(matches[i].result===last)count++;else break;}var label=last==='W'?'victoires consecutives':last==='L'?'defaites consecutives':'nuls consecutifs';return count>1?'En ce moment: '+count+' '+label:'';}
               var streakH=calcCurrentStreak(last10H);
               var streakA=calcCurrentStreak(last10A);
               var forme5H=last10H.slice(0,5).map(function(m){return m.result;}).join('');
@@ -2404,7 +2405,7 @@ jobs:
               var heureUTC=(f.date||'').split('T')[1]?(f.date||'').split('T')[1].slice(0,5):'';
               var heure=toParisHeure(f.date||'')||heureUTC;
               var meteoStr=wx?wx.desc+' '+wx.emoji+' '+wx.temp+' | Vent: '+wx.wind:'N/A';
-              var bestMarket=null; // Plus de sélection mécanique — Claude décide
+              var bestMarket=null;
               var an=await genAnalyse({
                 leagueId:lg.id,home:home.name,away:away.name,homeId:home.id,awayId:away.id,
                 league:lg.name,date:TODAY+' '+heure,stade:(f.venue&&f.venue.name)||'',meteo:meteoStr,
@@ -2457,10 +2458,9 @@ jobs:
               });
               await sleep(500);
               if(an&&an.passe_ton_tour===true){
-                console.log('  \u23ed PASS: '+home.name+' vs '+away.name);
+                console.log('  PASS: '+home.name+' vs '+away.name);
                 an.pari_rec='';an.cote_rec='';an.confiance=0;an.vbet='NON';an.verdict_shark='';an.kelly='0';an.marche='';an.risque='ELEVE';
               }
-              // Sécurité : si Claude a retourné un pari_rec sans cote_rec, on cherche la cote dans allMarkets
               if(an&&!an.passe_ton_tour&&an.pari_rec&&!an.cote_rec){
                 var found=(allMarkets||[]).find(function(m){return m.market.toLowerCase()===an.pari_rec.toLowerCase();});
                 if(found) an.cote_rec=String(found.cote);
@@ -2476,8 +2476,7 @@ jobs:
                 var deltas=[0,-0.03,-0.02,-0.05,+0.03];
                 if(odds.bookies&&odds.bookies.length&&coteRec&&coteRec!=='--'){odds.bookies.forEach(function(bk,i){bk.c=Math.max(1.01,parseFloat(coteRec)+(deltas[i]||0)).toFixed(2);});}
               })();
-              // Kelly supprimé — basé sur les cotes du matin = non pertinent
-              var kellyVal='2'; // Mise fixe recommandée : 2% bankroll
+              var kellyVal='2';
               var classementObj=null;
               if(entryH||entryA){
                 var rankH=rkH||99,rankA=rkA||99;
@@ -2515,7 +2514,7 @@ jobs:
                 dc1x:odds.dc1x,dc2x:odds.dc2x,dc12:odds.dc12,cdc1x:odds.dc1x,cdc2x:odds.dc2x,
                 ah_dom:odds.ah_dom||'--',ah_ext:odds.ah_ext||'--',co35:odds.co35||'--',
                 cbtts:odds.btts_oui,cbtts_non:odds.btts_non,btts_oui:odds.btts_oui,btts_non:odds.btts_non,
-                bookies:odds.bookies,edge:an&&an.pari_rec?(function(){ function nm(s){return (s||'').toLowerCase().replace(/[^a-z0-9]/g,'');} var pn=nm(an.pari_rec); var mk=(allMarkets||[]).find(function(x){var xn=nm(x.market);return xn===pn||pn.includes(xn)||xn.includes(pn);}); return mk?mk.prob+'% (modèle)':''; })():'',marche:an?(an.marche||'RESULTAT'):'RESULTAT',
+                bookies:odds.bookies,edge:an&&an.pari_rec?(function(){ function nm(s){return (s||'').toLowerCase().replace(/[^a-z0-9]/g,'');} var pn=nm(an.pari_rec); var mk=(allMarkets||[]).find(function(x){var xn=nm(x.market);return xn===pn||pn.includes(xn)||xn.includes(pn);}); return mk?mk.prob+'% (modele)':''; })():'',marche:an?(an.marche||'RESULTAT'):'RESULTAT',
                 risque:risqueNorm,pari_rec:an?(an.pari_rec||''):'',
                 cote_rec:an?(an.cote_rec||''):'',
                 no_signal:an&&an.passe_ton_tour===true?true:!(an&&an.pari_rec),
@@ -2532,7 +2531,7 @@ jobs:
                 mc_scores:poissonProbs.montecarlo?poissonProbs.montecarlo.top_scores:[],
                 paris_safe:{bet:an?(an.pari_rec||''):'',cote:an?(parseFloat(an.cote_rec)||odds.c1):odds.c1,proba:an?(an.p1||0)+'%':''},
                 paris_risque:{bet:'',cote:'',proba:''},kelly:kellyVal,
-                stade:{nom:f.venue&&f.venue.name?(f.venue.name+(f.venue.city?' \u2014 '+f.venue.city:'')):home.name+' (domicile)',cap:'',meteo:wx?wx.emoji:'\ud83c\udf24\ufe0f',temp:wx?wx.temp:'',desc:wx?wx.desc:''},
+                stade:{nom:f.venue&&f.venue.name?(f.venue.name+(f.venue.city?' - '+f.venue.city:'')):home.name+' (domicile)',cap:'',meteo:wx?wx.emoji:'',temp:wx?wx.temp:'',desc:wx?wx.desc:''},
                 crit_home:critH,crit_away:critA,
                 form_home:last10H.slice(0,5),form_away:last10A.slice(0,5),
                 forme_h:(sH&&sH.form)||'',forme_a:(sA&&sA.form)||'',
@@ -2573,26 +2572,21 @@ jobs:
                 pinnacle_snapshot:pinnacleOdds?{c1:pinnacleOdds.c1,cn:pinnacleOdds.cn,c2:pinnacleOdds.c2,date:TODAY}:null,
               };
               matchsData.push(matchObj);
-              // Qualification pour combinés — basée sur le choix libre de Claude
               if(an&&!an.passe_ton_tour&&an.pari_rec&&(an.confiance||0)>=7.0){
                 var coteRecCheck=parseFloat(an.cote_rec)||0;
-                // Matching tolérant : normaliser espaces/casse/accents avant comparaison
                 function normMarket(s){return (s||'').toLowerCase().replace(/[^a-z0-9]/g,'');}
                 var pariNorm=normMarket(an.pari_rec);
                 var chosenMarket=(allMarkets||[]).find(function(m){
                   var mNorm=normMarket(m.market);
                   return mNorm===pariNorm||pariNorm.includes(mNorm)||mNorm.includes(pariNorm);
                 });
-                // Fallback : si aucun marché trouvé mais cote valide, on qualifie quand même
-                // sur la seule base de la confiance (évite de perdre tous les combinés
-                // à cause d'une formulation différente de Claude)
                 var probCheck=chosenMarket?chosenMarket.prob:null;
                 var coteOk=coteRecCheck>=1.50&&coteRecCheck<=2.50;
                 var probaOk=probCheck===null?true:probCheck>=52;
                 if(coteOk&&probaOk){
                   forCombis.push({home:home.name,away:away.name,pari:an.pari_rec,conf:an.confiance,prob:probCheck||0,cote:coteRecCheck});
-                  console.log('  \u2705 QUALIFI\u00c9: conf='+an.confiance+' prob='+(probCheck!==null?probCheck+'%':'n/a')+' cote='+coteRecCheck+' marché='+an.pari_rec);
-                }else{console.log('  \u26d4 Filtr\u00e9: conf='+an.confiance+' prob='+(probCheck!==null?probCheck+'%':'n/a')+' cote='+coteRecCheck);}
+                  console.log('  QUALIFIE: conf='+an.confiance+' prob='+(probCheck!==null?probCheck+'%':'n/a')+' cote='+coteRecCheck+' marche='+an.pari_rec);
+                }else{console.log('  Filtre: conf='+an.confiance+' prob='+(probCheck!==null?probCheck+'%':'n/a')+' cote='+coteRecCheck);}
               }
               console.log('  OK conf='+matchObj.conf+' edge='+matchObj.edge+' pari='+matchObj.pari_rec);
             }
@@ -2612,15 +2606,17 @@ jobs:
             fs.writeFileSync('data.json',JSON.stringify({matchs:allMatchsData,combis:combisData},null,2));
             console.log('\n=== DONE: '+allMatchsData.length+' matchs total ('+matchsData.length+' football + '+tennisMatchs.length+' tennis) | '+combisData.length+' combis ===');
             await updateHistorique(allMatchsData);
+            await updateTransferts(fixtures);
+            await updateRumeurs();
             generateWorldCupPages();
             generateSitemaps(allMatchsData);
           }
           main().catch(function(e){console.error('FATAL:',e.message,e.stack);process.exit(0);});
           JSEOF
-      - name: Vider le cache — recalcul complet à chaque run
+      - name: Vider le cache - recalcul complet a chaque run
         run: |
           echo '{"matchs":[],"combis":[]}' > data.json
-          echo "Cache vidé — tous les matchs seront recalculés (comportement par défaut)"
+          echo "Cache vide - tous les matchs seront recalcules (comportement par defaut)"
       - name: Run pipeline
         env:
           APISPORTS_KEY:      ${{ secrets.APISPORTS_KEY }}
@@ -2638,6 +2634,6 @@ jobs:
         run: |
           git config user.name "IASHARK"
           git config user.email "yaramode81@gmail.com"
-          git add data.json historique.json sitemap.xml sitemap-*.xml
+          git add data.json historique.json transferts.json actus.json sitemap.xml sitemap-*.xml
           git diff --staged --quiet || git commit -m "Daily update - $(date +%Y-%m-%d)"
           git push

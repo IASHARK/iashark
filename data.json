@@ -14,7 +14,7 @@
         "id": 1149
       },
       "league": "Liga Pro",
-      "ligue_icon": "🏆",
+      "ligue_icon": "FB",
       "league_key": "equateur",
       "date": "2026-07-15 02:00",
       "cat": [
@@ -22,117 +22,163 @@
       ],
       "val": false,
       "hot": false,
-      "conf": 0,
-      "p1": 48,
+      "conf": 6.8,
+      "p1": 49,
       "pn": 34,
-      "p2": 18,
+      "p2": 17,
       "po15": 0,
       "po25": 23,
       "btts": 29,
-      "c1": "--",
-      "cn": "--",
-      "c2": "--",
-      "co15": "--",
-      "co25": "--",
-      "cu25": "--",
-      "dc1x": "--",
-      "dc2x": "--",
-      "dc12": "--",
-      "cdc1x": "--",
-      "cdc2x": "--",
-      "ah_dom": "--",
-      "ah_ext": "--",
-      "co35": "--",
-      "cbtts": "--",
-      "cbtts_non": "--",
-      "btts_oui": "--",
-      "btts_non": "--",
-      "bookies": [],
-      "edge": "",
-      "marche": "RESULTAT",
-      "risque": "ELEVE",
-      "pari_rec": "",
-      "cote_rec": "",
-      "no_signal": true,
-      "no_signal_label": "Aucun signal clair sur ce match",
+      "c1": "2.68",
+      "cn": "2.67",
+      "c2": "2.90",
+      "co15": "1.62",
+      "co25": "2.88",
+      "cu25": "1.38",
+      "dc1x": "1.36",
+      "dc2x": "1.40",
+      "dc12": "1.40",
+      "cdc1x": "1.36",
+      "cdc2x": "1.40",
+      "ah_dom": "2.60",
+      "ah_ext": "2.85",
+      "co35": "5.90",
+      "cbtts": "2.26",
+      "cbtts_non": "1.54",
+      "btts_oui": "2.26",
+      "btts_non": "1.54",
+      "bookies": [
+        {
+          "n": "Betclic",
+          "o": "200 offerts",
+          "l": "#LIEN_BETCLIC",
+          "c": "1.54",
+          "c1": "2.68",
+          "cn": "2.67",
+          "c2": "2.90"
+        },
+        {
+          "n": "Winamax",
+          "o": "100 offerts",
+          "l": "#LIEN_WINAMAX",
+          "c": "1.51",
+          "c1": "2.65",
+          "cn": "2.64",
+          "c2": "2.87"
+        },
+        {
+          "n": "Unibet",
+          "o": "100 rembourses",
+          "l": "#LIEN_UNIBET",
+          "c": "1.52",
+          "c1": "2.66",
+          "cn": "2.65",
+          "c2": "2.88"
+        },
+        {
+          "n": "PMU",
+          "o": "100 offerts",
+          "l": "#LIEN_PMU",
+          "c": "1.49",
+          "c1": "2.63",
+          "cn": "2.62",
+          "c2": "2.85"
+        },
+        {
+          "n": "Bet365",
+          "o": "100 bonus",
+          "l": "#LIEN_BET365",
+          "c": "1.57",
+          "c1": "2.71",
+          "cn": "2.70",
+          "c2": "2.93"
+        }
+      ],
+      "edge": "71% (modele)",
+      "marche": "BTTS",
+      "risque": "FAIBLE",
+      "pari_rec": "BTTS Non",
+      "cote_rec": "1.54",
+      "no_signal": false,
+      "no_signal_label": "",
       "mise": "2-3% bankroll",
-      "verdict_shark": "",
+      "verdict_shark": "BTTS Non à 1.54 - les modèles convergent à 71% sur l'absence de buts des deux équipes, cohérent avec les top scores Monte-Carlo (1-0 à 21%, 0-0 à 19%, 2-0 à 12%)",
       "scenario": {
-        "phase1": "Manta FC dispose d'un avantage domicile relatif avec 3 victoires consécutives en forme, mais son bilan global à domicile reste très faible (2V/10). Delfin SC est en chute libre (WLDLL) avec un seul succès en 10 déplacements. Les deux équipes en zone de relégation devraient livrer un match fermé et prudent.",
-        "phase2": "Les trois modèles convergent unanimement : DOM 48%, Nul 33-36%, EXT 17-19%. Les lambdas Poisson (Manta 1.104 / Delfin 0.549) traduisent une attaque timide des deux côtés. Le score le plus probable Monte-Carlo est 1-0 (22%), suivi de 0-0 (19%), ce qui confirme un match à faible scoring.",
-        "phase3": "Sans cotes disponibles au-dessus de 1.50, aucun marché ne peut être recommandé. Même les marchés cohérents avec les données (Under 2.5, victoire Manta, Double Chance 1X) ne génèrent pas de value exploitable. Tour passé conformément aux règles de sélection."
+        "phase1": "Manta FC présente un bilan domicile très limité (2V/10) mais est en forme récente avec 3 victoires consécutives. Delfin SC ne gagne quasiment jamais à l'extérieur (1V/10) et son attaque est exsangue en déplacement.",
+        "phase2": "Les lambdas Poisson (DOM 1.104 / EXT 0.549) donnent une domination nette à Manta. Les trois modèles (Poisson 71%, Dixon-Coles implicite, MC 71%) convergent sur BTTS Non. Les top scores MC excluent massivement un scénario où les deux équipes marquent.",
+        "phase3": "Le scénario le plus probable est une victoire courte de Manta FC sur un score de 1-0 ou 2-0, ou un 0-0 défensif. Dans les trois cas, BTTS Non est validé. La tranche 75-90min concentre 32% des buts, ce qui peut amplifier un but de Manta en fin de match sans réponse de Delfin."
       },
       "scenario_15min": [
         {
           "t": "0-15min",
           "prob": 9,
-          "txt": "Démarrage prudent attendu : Manta FC ne réalise que 4% de ses buts dans ce créneau à domicile, et Delfin SC en marque 8% de ses buts en déplacement. La probabilité de but reste la plus basse du match (9%). Match d'observation prévisible entre deux équipes aux enjeux élevés."
+          "txt": "Début prudent attendu : Manta ne marque que 4% de ses buts dans cette tranche à domicile, Delfin 8% en déplacement. Probabilité but globale de 9%, phase de prise en mains tactique dans un match à fort enjeu de relégation."
         },
         {
           "t": "15-30min",
           "prob": 10,
-          "txt": "Légère montée en pression : Manta FC génère 9% de ses buts sur cette tranche, mais encaisse aussi 18% des buts de Delfin SC ici. Probabilité but à 10%, toujours contenue. Les deux équipes cherchent à s'installer sans prendre de risques défensifs."
+          "txt": "Légère montée en pression : Manta marque 9% de ses buts ici, Delfin encaisse seulement 6% dans cette tranche en déplacement. Probabilité but de 10%, le jeu reste fermé avec peu d'espaces."
         },
         {
           "t": "30-45min",
           "prob": 16,
-          "txt": "Tranche la plus productive pour Manta FC en première période : 26% de ses buts marqués ici à domicile. Delfin SC en revanche n'a marqué aucun but (0%) dans ce créneau en déplacement. Probabilité but en hausse à 16%, portée quasi-exclusivement par une éventuelle réalisation de Manta FC."
+          "txt": "Tranche plus active : Manta marque 26% de ses buts à domicile dans ce créneau, mais Delfin ne marque jamais (0%) en déplacement sur ce segment. Probabilité but de 16%, favorable à un but de Manta sans riposte adverse."
         },
         {
           "t": "45-60min",
           "prob": 23,
-          "txt": "Tranche la plus dangereuse du match : probabilité but au plus haut (23%). Delfin SC réalise 33% de ses buts en déplacement sur cette tranche, mais Manta FC encaisse aussi 24% des buts de Delfin SC ici. Période clé pour l'ouverture du score ou l'égalisation."
+          "txt": "Pic d'activité en début de seconde période : Delfin marque 33% de ses buts en déplacement ici, mais Manta encaisse seulement 24% dans ce créneau. Probabilité but la plus haute à 23%, tranche à surveiller pour l'ouverture du score ou une égalisation."
         },
         {
           "t": "60-75min",
           "prob": 11,
-          "txt": "Accalmie notable en milieu de seconde période : probabilité but retombe à 11%. Manta FC ne marque que 13% de ses buts ici, et Delfin SC n'encaisse que 6% sur cette tranche en déplacement. Phase de gestion probable si l'un des deux équipes mène au score."
+          "txt": "Creux d'activité : Manta marque 13% de ses buts ici à domicile, Delfin 17% en déplacement. Probabilité but faible à 11%, les deux équipes gèrent le résultat plutôt qu'elles ne prennent des risques en zone de relégation."
         },
         {
           "t": "75-90min",
           "prob": 32,
-          "txt": "Finale explosive attendue : probabilité but la plus élevée du match (32%). Manta FC inscrit 30% de ses buts à domicile sur ce créneau et encaisse 26% des buts de Delfin SC ici. Delfin SC réalise également 33% de ses buts en déplacement sur les 15 dernières minutes. La pression liée à l'enjeu relégation devrait amplifier ce phénomène."
+          "txt": "Tranche la plus dangereuse du match : Manta marque 30% de ses buts à domicile ici et Delfin encaisse 39% de ses buts concédés en déplacement dans ce créneau. Probabilité but maximale à 32%, scénario classique d'un but de Manta qui sécurise la victoire et confirme BTTS Non."
         }
       ],
-      "facteur_x": "Manta FC est sans marquer dans 80% de ses matchs à domicile (8/10) et Delfin SC dans 60% de ses déplacements (6/10) — les top scores MC confirment un match fermé (1-0 à 22%, 0-0 à 19%), mais aucune cote exploitable n'est disponible pour capitaliser sur ce signal.",
-      "analyse_card": "Les modèles Poisson, Dixon-Coles et Monte-Carlo convergent vers une domination de Manta FC à domicile (48% victoire), mais les cotes associées sont inférieures à 1.50. Manta FC marque dans seulement 20% de ses matchs à domicile (8/10 sans marquer) et Delfin SC ne score qu'en 40% de ses déplacements, ce qui rendrait l'Under 2.5 cohérent avec les top scores MC (1-0 à 22%, 0-0 à 19%) — mais là encore aucune cote exploitable n'est disponible. Sans cote >= 1.50 sur aucun marché, la Value bet est inexistante.",
-      "conseil_public": "Ne pas miser sur ce match : l'absence totale de cotes >= 1.50 annule tout potentiel de value quelle que soit la solidité du signal.",
-      "contexte": "Choc de bas de tableau entre Manta FC (16e, zone de relégation) et Delfin SC (15e, zone de relégation) en Liga Pro. Les deux équipes jouent leur maintien, ce qui renforce la prudence tactique et explique les lambdas offensifs très faibles (DOM: 1.104 / EXT: 0.549). Manta FC reste sur 3 victoires consécutives malgré un bilan domicile catastrophique (2V/10).",
-      "vbet": "NON",
+      "facteur_x": "Delfin SC affiche un xG extérieur de seulement 0.35 sur ses 10 matchs à l'extérieur, ce qui en fait l'une des attaques les plus stériles en déplacement du championnat.",
+      "analyse_card": "Manta FC n'a pas marqué dans 80% de ses matchs à domicile (8/10) et Delfin SC n'a pas marqué dans 60% de ses déplacements (6/10). Les xG extérieurs de Delfin sont extrêmement faibles à 0.35, avec un lambda Poisson de seulement 0.549. Le modèle Poisson, Dixon-Coles et Monte-Carlo convergent tous autour de 71% pour BTTS Non, et les 3 scores les plus fréquents MC (1-0, 0-0, 2-0) représentent 52% des simulations sans que les deux équipes marquent ensemble.",
+      "conseil_public": "Miser sur BTTS Non à 1.54 : la convergence des trois modèles et les statistiques de buts marqués des deux équipes valident clairement ce marché.",
+      "contexte": "Derby de relégation entre Manta FC (16e) et Delfin SC (15e) en Liga Pro - les deux équipes sont en zone dangereuse, ce qui tend à générer des matchs fermés et prudents.",
+      "vbet": "OUI",
       "scores": [
         "1-0"
       ],
       "mc_scores": [
         {
           "score": "1-0",
-          "n": 1075,
-          "pct": 22
+          "n": 1052,
+          "pct": 21
         },
         {
           "score": "0-0",
-          "n": 949,
+          "n": 942,
           "pct": 19
         },
         {
           "score": "1-1",
-          "n": 611,
+          "n": 609,
           "pct": 12
         },
         {
           "score": "2-0",
-          "n": 581,
+          "n": 607,
           "pct": 12
         },
         {
           "score": "0-1",
-          "n": 545,
-          "pct": 11
+          "n": 504,
+          "pct": 10
         }
       ],
       "paris_safe": {
-        "bet": "",
-        "cote": "--",
-        "proba": "48%"
+        "bet": "BTTS Non",
+        "cote": 1.54,
+        "proba": "49%"
       },
       "paris_risque": {
         "bet": "",
@@ -141,10 +187,10 @@
       },
       "kelly": "2",
       "stade": {
-        "nom": "Estadio Jocay — Manta",
+        "nom": "Estadio Jocay - Manta",
         "cap": "",
-        "meteo": "☁️",
-        "temp": "26°C",
+        "meteo": "",
+        "temp": "26C",
         "desc": "peu nuageux"
       },
       "crit_home": {
@@ -542,7 +588,7 @@
         "id": 1151
       },
       "league": "Liga Pro",
-      "ligue_icon": "🏆",
+      "ligue_icon": "FB",
       "league_key": "equateur",
       "date": "2026-07-15 19:00",
       "cat": [
@@ -550,116 +596,162 @@
       ],
       "val": false,
       "hot": false,
-      "conf": 0,
+      "conf": 6.8,
       "p1": 39,
       "pn": 33,
       "p2": 28,
       "po15": 0,
       "po25": 29,
       "btts": 37,
-      "c1": "--",
-      "cn": "--",
-      "c2": "--",
-      "co15": "--",
-      "co25": "--",
-      "cu25": "--",
-      "dc1x": "--",
-      "dc2x": "--",
-      "dc12": "--",
-      "cdc1x": "--",
-      "cdc2x": "--",
-      "ah_dom": "--",
-      "ah_ext": "--",
-      "co35": "--",
-      "cbtts": "--",
-      "cbtts_non": "--",
-      "btts_oui": "--",
-      "btts_non": "--",
-      "bookies": [],
-      "edge": "",
-      "marche": "RESULTAT",
-      "risque": "ELEVE",
-      "pari_rec": "",
-      "cote_rec": "",
-      "no_signal": true,
-      "no_signal_label": "Aucun signal clair sur ce match",
+      "c1": "3.02",
+      "cn": "3.05",
+      "c2": "2.34",
+      "co15": "1.36",
+      "co25": "2.12",
+      "cu25": "1.66",
+      "dc1x": "1.51",
+      "dc2x": "1.33",
+      "dc12": "1.30",
+      "cdc1x": "1.51",
+      "cdc2x": "1.33",
+      "ah_dom": "2.94",
+      "ah_ext": "2.33",
+      "co35": "3.75",
+      "cbtts": "1.83",
+      "cbtts_non": "1.85",
+      "btts_oui": "1.83",
+      "btts_non": "1.85",
+      "bookies": [
+        {
+          "n": "Betclic",
+          "o": "200 offerts",
+          "l": "#LIEN_BETCLIC",
+          "c": "1.66",
+          "c1": "3.02",
+          "cn": "3.05",
+          "c2": "2.34"
+        },
+        {
+          "n": "Winamax",
+          "o": "100 offerts",
+          "l": "#LIEN_WINAMAX",
+          "c": "1.63",
+          "c1": "2.99",
+          "cn": "3.02",
+          "c2": "2.31"
+        },
+        {
+          "n": "Unibet",
+          "o": "100 rembourses",
+          "l": "#LIEN_UNIBET",
+          "c": "1.64",
+          "c1": "3.00",
+          "cn": "3.03",
+          "c2": "2.32"
+        },
+        {
+          "n": "PMU",
+          "o": "100 offerts",
+          "l": "#LIEN_PMU",
+          "c": "1.61",
+          "c1": "2.97",
+          "cn": "3.00",
+          "c2": "2.29"
+        },
+        {
+          "n": "Bet365",
+          "o": "100 bonus",
+          "l": "#LIEN_BET365",
+          "c": "1.69",
+          "c1": "3.05",
+          "cn": "3.08",
+          "c2": "2.37"
+        }
+      ],
+      "edge": "71% (modele)",
+      "marche": "TOTAL_BUTS",
+      "risque": "FAIBLE",
+      "pari_rec": "Under 2.5",
+      "cote_rec": "1.66",
+      "no_signal": false,
+      "no_signal_label": "",
       "mise": "2-3% bankroll",
-      "verdict_shark": "",
+      "verdict_shark": "Under 2.5 a 1.66 - le modele Poisson (71%), Dixon-Coles (71%) et Monte-Carlo convergent sur des scores faibles, les top MC etant 1-0(16%), 0-0(15%), 1-1(13%), 0-1(13%).",
       "scenario": {
-        "phase1": "Libertad, sous pression de relégation, joue à domicile mais affiche un bilan fragile (3V/8) et un xGA alarmant de 2.61. Tecnico Universitario arrive avec 3 défaites de suite en extérieur mais un xG modeste (0.96), signe d'une attaque peu efficace loin de ses bases.",
-        "phase2": "Les trois modèles (Poisson, Dixon-Coles, Monte-Carlo) s'accordent sur une légère domination de Libertad (~37-39%) avec un nul très probable (~33-35%). Les lambdas faibles (1.032 et 0.842) anticipent un match à moins de 2 buts.",
-        "phase3": "Les scores MC confirment un scénario serré et peu prolifique. La probabilité Over 2.5 n'atteint que 29% et le BTTS 37%, rendant ces marchés peu pertinents. Sans cote exploitable au-dessus de 1.50, aucun pari ne peut être validé."
+        "phase1": "Libertad en zone de relegation pousse a gagner mais reste limité offensivement (xG 1.61 a domicile, 3/8 matchs sans marquer). Tecnico Universitario vient avec 3 defaites consecutives et un xG extérieur de seulement 0.96.",
+        "phase2": "Les trois modeles convergent : Under 2.5 a 71%, lambdas faibles (1.032 / 0.842), top scores MC dominés par 1-0, 0-0, 1-1, 0-1. Cohérence maximale entre Poisson, Dixon-Coles et Monte-Carlo.",
+        "phase3": "Le scenario probable est un match serré et peu fertile en buts, Libertad cherchant à arracher une victoire courte (1-0 score central MC a 16%), avec peu d'espace pour des échanges ouverts compte tenu de la prudence des deux équipes en mauvaise forme."
       },
       "scenario_15min": [
         {
           "t": "0-15min",
           "prob": 11,
-          "txt": "Entame prudente attendue : Libertad ne marque que 8% de ses buts sur cette tranche, Tecnico Universitario 13%. La probabilité d'un but reste faible à 11%, les deux équipes s'observant en début de match."
+          "txt": "Ouverture prudente : Libertad ne marque que 8% de ses buts dans ce créneau tandis que Tecnico Universitario en marque 13%. Probabilité de but à 11%, match d'observation probable."
         },
         {
           "t": "15-30min",
           "prob": 12,
-          "txt": "Libertad monte légèrement en régime avec 17% de ses buts inscrits sur cette tranche, mais Tecnico Universitario ne marque que 7% des siens ici. La probabilité reste contenue à 12%, match encore fermé."
+          "txt": "Légère montée en puissance de Libertad qui concentre 17% de ses buts domicile ici. Tecnico Universitario ne marque que 7% de ses buts en déplacement dans ce créneau. Pression locale sans concrétisation attendue."
         },
         {
           "t": "30-45min",
           "prob": 17,
-          "txt": "Tranche plus animée : Tecnico Universitario marque 27% de ses buts sur ce segment, Libertad 17%. La probabilité d'un but grimpe à 17%, la période la plus active de la première mi-temps."
+          "txt": "Créneau le plus actif de la première mi-temps : Tecnico Universitario marque 27% de ses buts extérieurs ici, Libertad 17%. La probabilité de but monte à 17%, moment où les visiteurs peuvent exprimer leur meilleur potentiel offensif."
         },
         {
           "t": "45-60min",
           "prob": 29,
-          "txt": "Pic d'activité du match : Libertad marque 33% de ses buts ici et encaisse 42% des buts de Tecnico Universitario sur ce créneau. Probabilité maximale à 29%, tranche décisive autour de la mi-temps."
+          "txt": "Tranche la plus dangereuse du match : Libertad marque 33% de ses buts domicile ici et encaisse 42% des buts de Tecnico Universitario. Probabilité de but à 29%, phase où les deux équipes sont les plus efficaces offensivement."
         },
         {
           "t": "60-75min",
           "prob": 10,
-          "txt": "Creux d'activité notable : Libertad ne marque que 4% de ses buts sur ce segment, Tecnico Universitario 20% mais avec peu de volume global. Probabilité basse à 10%, match potentiellement bloqué."
+          "txt": "Nette baisse d'intensité : Libertad ne marque que 4% de ses buts dans ce créneau, Tecnico Universitario 20%. Probabilité globale à 10%, probable gestion du résultat en cours."
         },
         {
           "t": "75-90min",
           "prob": 21,
-          "txt": "Regain en fin de match avec 21% de probabilité : Libertad marque 21% de ses buts et encaisse 23% des buts adverses ici. L'enjeu de relégation pourrait pousser Libertad à forcer si le score est nul ou défavorable."
+          "txt": "Regain final : Libertad marque 21% de ses buts ici, Tecnico Universitario 20%. Probabilité de but à 21%, les deux équipes cherchent à conclure ou égaliser, but tardif possible mais pas de multiplication des occasions."
         }
       ],
-      "facteur_x": "Top scores Monte-Carlo dominés par 0-0 (17%) et 1-0 (15%) — le match pointe vers un faible nombre de buts, rendant Over 2.5 et BTTS Oui incohérents, et aucun autre marché n'a de cote disponible ≥ 1.50.",
-      "analyse_card": "Les modèles Poisson, Dixon-Coles et Monte-Carlo convergent sur un scénario à faible production de buts : les top scores MC sont 0-0 (17%), 1-0 (15%), 1-1 (13%), 0-1 (13%), excluant Over 2.5 et BTTS Oui comme marchés viables. Les lambdas Poisson sont faibles (DOM 1.032 / EXT 0.842), confirmant un match équilibré et serré. Aucune cote disponible n'atteint le seuil minimum de 1.50 pour justifier une mise.",
-      "conseil_public": "Passer ce match — sans cote exploitable au-dessus de 1.50, aucun pari ne présente de valeur suffisante, même si les signaux statistiques sont cohérents entre eux.",
-      "contexte": "Libertad est en zone de relégation (#14/16) et reçoit Tecnico Universitario (#9), actuellement sur une série de 3 défaites consécutives en déplacement. Libertad n'a remporté que 3 de ses 8 matchs à domicile, avec un xG défensif préoccupant (xGA 2.61). L'enjeu est fort pour Libertad qui joue sa survie en Liga Pro.",
-      "vbet": "NON",
+      "facteur_x": "Les lambdas Poisson (1.032 et 0.842) combinés aux top scores MC (1-0, 0-0, 1-1, 0-1 representant 57% des simulations) signalent une rencontre a faible volume de buts.",
+      "analyse_card": "Les lambdas Poisson sont faibles (DOM 1.032, EXT 0.842), ce qui implique peu de buts attendus. Les trois modeles s'accordent a 71% sur Under 2.5, et les quatre premiers scores MC cumulent 57% des simulations avec un total <= 2 buts. Le xGA de Tecnico Universitario en deplacement est faible (1.16), renforçant le signal basse-scoring.",
+      "conseil_public": "Jouer Under 2.5 a 1.66 : la convergence des trois modeles sur ce marche et la faiblesse des lambdas offrent une valeur attendue positive.",
+      "contexte": "Libertad est en zone de relegation (#14/16), sous pression a domicile avec un bilan de 3V/8. Tecnico Universitario (#9) arrive sur une serie de 3 defaites consecutives et n'a remporte que 3 matchs en 9 deplacements. Enjeu fort pour Libertad, mais la mauvaise forme des deux equipes suggere un match tendu et fermé.",
+      "vbet": "OUI",
       "scores": [
         "1-0"
       ],
       "mc_scores": [
         {
-          "score": "0-0",
-          "n": 826,
-          "pct": 17
+          "score": "1-0",
+          "n": 795,
+          "pct": 16
         },
         {
-          "score": "1-0",
-          "n": 750,
+          "score": "0-0",
+          "n": 727,
           "pct": 15
         },
         {
           "score": "1-1",
-          "n": 650,
+          "n": 637,
           "pct": 13
         },
         {
           "score": "0-1",
-          "n": 626,
+          "n": 635,
           "pct": 13
         },
         {
           "score": "2-0",
-          "n": 406,
-          "pct": 8
+          "n": 454,
+          "pct": 9
         }
       ],
       "paris_safe": {
-        "bet": "",
-        "cote": "--",
+        "bet": "Under 2.5",
+        "cote": 1.66,
         "proba": "39%"
       },
       "paris_risque": {
@@ -669,10 +761,10 @@
       },
       "kelly": "2",
       "stade": {
-        "nom": "Estadio Federativo Reina del Cisne — Loja",
+        "nom": "Estadio Federativo Reina del Cisne - Loja",
         "cap": "",
-        "meteo": "☁️",
-        "temp": "20°C",
+        "meteo": "",
+        "temp": "20C",
         "desc": "peu nuageux"
       },
       "crit_home": {
@@ -1104,38 +1196,7 @@
         "games": 20
       },
       "top_scorers_home": [],
-      "top_scorers_away": [
-        {
-          "id": 13612,
-          "name": "C. Castaño",
-          "photo": "https://media.api-sports.io/football/players/13612.png",
-          "goals": 3,
-          "assists": 2,
-          "games": 15,
-          "shots_total": 21,
-          "shots_on": 13
-        },
-        {
-          "id": 59404,
-          "name": "J. Bocanegra",
-          "photo": "https://media.api-sports.io/football/players/59404.png",
-          "goals": 2,
-          "assists": 2,
-          "games": 16,
-          "shots_total": 21,
-          "shots_on": 10
-        },
-        {
-          "id": 59800,
-          "name": "J. Anaya",
-          "photo": "https://media.api-sports.io/football/players/59800.png",
-          "goals": 3,
-          "assists": 0,
-          "games": 16,
-          "shots_total": 7,
-          "shots_on": 4
-        }
-      ],
+      "top_scorers_away": [],
       "key_absences": [],
       "match_stats_home": {
         "possession": 45,
@@ -1186,7 +1247,7 @@
         "id": 26
       },
       "league": "World Cup",
-      "ligue_icon": "🏆",
+      "ligue_icon": "FB",
       "league_key": "other",
       "date": "2026-07-15 21:00",
       "cat": [
@@ -1195,9 +1256,9 @@
       "val": false,
       "hot": false,
       "conf": 6.8,
-      "p1": 26,
+      "p1": 27,
       "pn": 24,
-      "p2": 50,
+      "p2": 49,
       "po15": 0,
       "po25": 61,
       "btts": 62,
@@ -1222,135 +1283,135 @@
       "bookies": [
         {
           "n": "Betclic",
-          "o": "200€ offerts",
+          "o": "200 offerts",
           "l": "#LIEN_BETCLIC",
-          "c": "1.89",
+          "c": "3.02",
           "c1": "2.68",
           "cn": "2.88",
           "c2": "3.02"
         },
         {
           "n": "Winamax",
-          "o": "100€ offerts",
+          "o": "100 offerts",
           "l": "#LIEN_WINAMAX",
-          "c": "1.86",
+          "c": "2.99",
           "c1": "2.65",
           "cn": "2.85",
           "c2": "2.99"
         },
         {
           "n": "Unibet",
-          "o": "100€ remboursés",
+          "o": "100 rembourses",
           "l": "#LIEN_UNIBET",
-          "c": "1.87",
+          "c": "3.00",
           "c1": "2.66",
           "cn": "2.86",
           "c2": "3.00"
         },
         {
           "n": "PMU",
-          "o": "100€ offerts",
+          "o": "100 offerts",
           "l": "#LIEN_PMU",
-          "c": "1.84",
+          "c": "2.97",
           "c1": "2.63",
           "cn": "2.83",
           "c2": "2.97"
         },
         {
           "n": "Bet365",
-          "o": "100€ bonus",
+          "o": "100 bonus",
           "l": "#LIEN_BET365",
-          "c": "1.92",
+          "c": "3.05",
           "c1": "2.71",
           "cn": "2.91",
           "c2": "3.05"
         }
       ],
-      "edge": "62% (modèle)",
-      "marche": "BTTS",
-      "risque": "MODERE",
-      "pari_rec": "BTTS Oui",
-      "cote_rec": "1.89",
+      "edge": "49% (modele)",
+      "marche": "DOUBLE_CHANCE",
+      "risque": "ELEVE",
+      "pari_rec": "Victoire Exterieur",
+      "cote_rec": "3.02",
       "no_signal": false,
       "no_signal_label": "",
       "mise": "2-3% bankroll",
-      "verdict_shark": "BTTS Oui à 1.89 — les trois modèles convergent à 62% de probabilité et les top scores Monte-Carlo (1-1 à 10%, 1-2 à 9%, 2-1 à 7%) confirment que les deux équipes marquent dans les scénarios les plus probables.",
+      "verdict_shark": "Victoire Exterieur a 3.02 - Les trois modeles convergent a 49% en faveur de l'Argentine, soutenu par une dynamique de 3 victoires consecutives.",
       "scenario": {
-        "phase1": "England présente un bilan limité sur les données disponibles (2 victoires sur 3 matchs, 1 match sans marquer sur 3), tandis qu'Argentina affiche un momentum fort avec 3 victoires consécutives et aucun match sans marquer sur son dernier résultat — signal BTTS Oui modérément favorable.",
-        "phase2": "Les trois modèles mathématiques convergent à 62% pour BTTS Oui, avec une edge positive de ~9 points de pourcentage sur la cote proposée à 1.89 (implied prob. 53%). Les lambdas confirment la menace offensive des deux équipes.",
-        "phase3": "Les scores Monte-Carlo les plus fréquents (1-1 à 10%, 1-2 à 9%, 2-1 à 7%) totalisent 26% des simulations et impliquent tous BTTS Oui — cohérence forte entre modèle et scores simulés."
+        "phase1": "L'Angleterre presente un bilan correct (2V/3) mais marque 75% de ses buts en tout debut de match, signalant une dependance aux entames. L'Argentine est invaincu sur son seul match de reference et arrive en pleine confiance avec 3 victoires de suite.",
+        "phase2": "Les trois modeles (Poisson, Dixon-Coles, Monte-Carlo) convergent a 49% pour l'Argentine. Le lambda argentin de 1.851 est nettement superieur au lambda anglais de 1.318, traduisant un avantage offensif structurel. Le score central Monte-Carlo 1-2 est le plus representatif.",
+        "phase3": "Les scores MC (1-1 10%, 1-2 10%, 0-1 8%, 0-2 7%) montrent que l'Argentine marque dans la majorite des scenarios et l'emporte dans environ 49% des simulations. La cote de 3.02 offre une valeur potentielle si le modele est fiable, mais l'echantillon reduit et le contexte elimination directe limitent la confiance a 6.8."
       },
       "scenario_15min": [
         {
           "t": "0-15min",
           "prob": 22,
-          "txt": "Tranche à haute activité offensive pour England qui inscrit 75% de ses buts dans ce couloir temporel — risque de but rapide, mais Argentina n'a encaissé aucun but sur cette tranche dans ses données disponibles."
+          "txt": "Tranche a fort potentiel offensif : l'Angleterre inscrit 75% de ses buts dans ce segment, tandis que l'Argentine y marque 11% de ses buts. Probabilite de but globale de 22% - la premiere occasion anglaise pourrait intervenir tres tot."
         },
         {
           "t": "15-30min",
           "prob": 9,
-          "txt": "Activité réduite : England marque 25% de ses buts ici, Argentina seulement 11% — la probabilité de but tombe à 9%, tranche la plus calme du match selon les données."
+          "txt": "Periode la plus calme du match : l'Angleterre y marque 25% de ses buts restants mais l'Argentine n'y marque que 11%. Probabilite de but a seulement 9% - les deux blocs defensifs tendent a se stabiliser apres l'entame."
         },
         {
           "t": "30-45min",
           "prob": 17,
-          "txt": "Argentina monte en puissance : 33% de ses buts sont inscrits sur cette tranche, et 33% de ses encaissés également — England n'a marqué aucun but ici dans ses données, mais reste vulnérable."
+          "txt": "Retour en force de l'Argentine : 33% de ses buts sont inscrits dans cette tranche, et l'Angleterre en encaisse egalement 33% ici. Probabilite de but a 17% - moment critique avant la pause ou l'Argentine peut faire la difference."
         },
         {
           "t": "45-60min",
           "prob": 17,
-          "txt": "Tranche paradoxale : aucune des deux équipes n'a marqué ni encaissé sur cette période selon les données disponibles, pourtant la probabilité modélisée reste à 17% — à surveiller en début de seconde période."
+          "txt": "Tranche neutre statistiquement : ni l'Angleterre ni l'Argentine n'ont de donnees de buts marques ou encaisses dans ce segment (0%/0%). Probabilite de but a 17% portee par la dynamique generale du modele plutot que par des stats specifiques."
         },
         {
           "t": "60-75min",
           "prob": 11,
-          "txt": "Faible activité offensive globale : Argentina marque 11% de ses buts ici, mais England encaisse 33% de ses buts sur cette tranche — risque défensif pour England en cas de montée en pression argentinie."
+          "txt": "Periode de gestion : l'Argentine y marque 11% de ses buts et l'Angleterre en encaisse 33% dans ce segment. Probabilite de but a 11% - les changements tactiques peuvent modifier l'equilibre, avec un risque anglais de contre argentin."
         },
         {
           "t": "75-90min",
           "prob": 17,
-          "txt": "Fin de match sous tension : Argentina marque 33% de ses buts et encaisse 33% sur cette dernière tranche — les deux équipes restent menaçantes, renforçant le scénario BTTS Oui si le score est encore ouvert."
+          "txt": "Fin de match potentiellement decisive : l'Argentine inscrit 33% de ses buts dans ce segment final et l'Angleterre en encaisse 33%. Probabilite de but a 17% - scenario typique d'un but argentin tardif pour sceller la qualification conforme aux tops MC."
         }
       ],
-      "facteur_x": "Le lambda offensif d'Argentina (1.851) est significativement supérieur à celui d'England (1.318), et les scores Monte-Carlo les plus fréquents (1-1, 1-2, 2-1) impliquent tous que les deux équipes marquent — BTTS Oui est le marché le plus cohérent avec ces projections.",
-      "analyse_card": "Le modèle Poisson, Dixon-Coles et Monte-Carlo s'accordent sur 62% de probabilité BTTS Oui, avec une valeur positive face à une cote de 1.89 (probabilité implicite ~53%). Les top scores MC (1-1, 1-2, 2-1 représentent 26% des simulations) montrent que les deux équipes trouvent le chemin des filets dans les scénarios les plus fréquents. Argentina affiche un lambda offensif de 1.851, nettement supérieur à England (1.318), et n'est pas resté sans marquer sur ses derniers matchs (0% sans marquer sur 1 match).",
-      "conseil_public": "Miser sur BTTS Oui à 1.89 : la convergence des trois modèles à 62% offre une valeur claire face à l'implied probability du bookmaker à 53%.",
-      "contexte": "Quart ou demi-finale de la Coupe du Monde 2026 au Mercedes-Benz Stadium — match à élimination directe sur terrain neutre. England et Argentina sont deux équipes de premier rang mondial sans absences majeures signalées, ce qui maximise le potentiel offensif des deux côtés.",
-      "vbet": "OUI",
+      "facteur_x": "Convergence parfaite des trois modeles independants (Poisson, Dixon-Coles, Monte-Carlo) a exactement 49% pour l'Argentine, avec les scores Monte-Carlo les plus frequents validant directement une victoire argentine (1-2, 0-1, 0-2 representent 25% des simulations).",
+      "analyse_card": "Les modeles Poisson (49%), Dixon-Coles (49%) et Monte-Carlo (49%) sont parfaitement alignes sur une victoire argentine, une convergence rare et solide. Les scores Monte-Carlo les plus probables (1-2 a 10%, 0-1 a 8%, 0-2 a 7%) confirment directement ce scenario : la majorite des simulations implique l'Argentine vainqueur. L'Argentine affiche un lambda offensif superieur (1.851 vs 1.318) et une forme impeccable avec 3 victoires consecutives, contre seulement 2 victoires sur 3 pour l'Angleterre.",
+      "conseil_public": "Jouer la victoire argentine a 3.02, mais en limitant la mise en raison du contexte elimination directe et de l'echantillon reduit (1 match de reference pour l'Argentine).",
+      "contexte": "Quart ou demi-finale de la Coupe du Monde 2026 au Mercedes-Benz Stadium d'Atlanta - match a elimination directe sur terrain neutre. L'enjeu maximal incite les deux equipes a la prudence tactique, mais l'Argentine entre dans ce match avec une dynamique offensive superieure. L'Angleterre doit composer sans J. Quansah en defense.",
+      "vbet": "NON",
       "scores": [
         "1-2"
       ],
       "mc_scores": [
         {
           "score": "1-1",
-          "n": 510,
+          "n": 514,
           "pct": 10
         },
         {
           "score": "1-2",
-          "n": 455,
-          "pct": 9
+          "n": 477,
+          "pct": 10
         },
         {
           "score": "0-1",
-          "n": 407,
-          "pct": 8
-        },
-        {
-          "score": "0-2",
           "n": 396,
           "pct": 8
         },
         {
-          "score": "2-1",
-          "n": 329,
+          "score": "0-2",
+          "n": 364,
+          "pct": 7
+        },
+        {
+          "score": "2-2",
+          "n": 338,
           "pct": 7
         }
       ],
       "paris_safe": {
-        "bet": "BTTS Oui",
-        "cote": 1.89,
-        "proba": "26%"
+        "bet": "Victoire Exterieur",
+        "cote": 3.02,
+        "proba": "27%"
       },
       "paris_risque": {
         "bet": "",
@@ -1359,10 +1420,10 @@
       },
       "kelly": "2",
       "stade": {
-        "nom": "Mercedes-Benz Stadium — Atlanta",
+        "nom": "Mercedes-Benz Stadium - Atlanta",
         "cap": "",
-        "meteo": "☁️",
-        "temp": "30°C",
+        "meteo": "",
+        "temp": "30C",
         "desc": "nuageux"
       },
       "crit_home": {
@@ -1438,7 +1499,15 @@
       "forme_h": "WDWWWW",
       "forme_a": "WWWWWW",
       "h2h": [],
-      "injuries": [],
+      "injuries": [
+        {
+          "name": "J. Quansah",
+          "team": 10,
+          "reason": "Suspension Through Sports Court",
+          "status": "out",
+          "impact": "medium"
+        }
+      ],
       "fatigue": {
         "home": {
           "val": 15,
@@ -1661,7 +1730,7 @@
         "id": 1158
       },
       "league": "Liga Pro",
-      "ligue_icon": "🏆",
+      "ligue_icon": "FB",
       "league_key": "equateur",
       "date": "2026-07-16 00:00",
       "cat": [
@@ -1705,46 +1774,46 @@
       "mise": "2-3% bankroll",
       "verdict_shark": "",
       "scenario": {
-        "phase1": "Universidad Católica présente un avantage domicile solide (5V/9, xG 1.73 vs xGA 1.42) et n'a jamais été blanchie à domicile (0/9). LDU souffre en déplacement avec 3 matchs sans marquer sur 9 (33%) et seulement 2 clean sheets.",
-        "phase2": "Les trois modèles convergent : DOM ~41-42%, Nul ~24-26%, EXT ~33-35%. Lambdas Poisson à 1.687 pour le DOM et 1.495 pour l'EXT indiquent un match ouvert et relativement équilibré, légèrement favorable à Católica.",
-        "phase3": "Les scores Monte-Carlo dominants (1-1, 2-1, 1-2, 2-2, 2-0) soutiennent un match avec 2 à 3 buts et une probabilité BTTS de 64%. Sans cotes exploitables, aucun pari ne peut être validé malgré des signaux cohérents."
+        "phase1": "Universidad Católica affiche 5V/9 à domicile avec un xG de 1.73 et 4 clean sheets, mais une forme mitigée sur les 5 derniers matchs (WLLDD). LDU de Quito marque 33% de ses matchs extérieurs sans marquer et affiche un xG de 1.44 en déplacement.",
+        "phase2": "Les trois modèles (Poisson 42%/24%/34%, Dixon-Coles 41%/26%/33%, Monte-Carlo 42%/24%/34%) convergent parfaitement vers une légère domination de l'hôte. L'écart inter-modèles est minimal, ce qui renforce la fiabilité de la distribution de probabilités.",
+        "phase3": "Les top scores MC (1-1: 11%, 2-1: 9%, 1-2: 7%, 2-2: 7%) indiquent un match à buts avec BTTS dominant, cohérent avec les xG des deux équipes. Malgré la convergence des signaux, l'absence de cotes jouables >= 1.50 impose le passage de tour."
       },
       "scenario_15min": [
         {
           "t": "0-15min",
           "prob": 6,
-          "txt": "Démarrage prudent attendu : Católica ne marque que 0% de ses buts dans ce créneau, LDU 17% des siens. Probabilité but globale très faible à 6%."
+          "txt": "Démarrage prudent attendu : Universidad Católica ne marque que 0% de ses buts sur cette tranche à domicile et n'encaisse que 0% des buts de LDU ici. LDU marque 17% de ses buts extérieurs sur cette période, mais l'activité globale reste très faible (probabilité but: 6%)."
         },
         {
           "t": "15-30min",
           "prob": 15,
-          "txt": "Légère montée en pression : LDU marque 20% de ses buts ici et Católica 7%. Probabilité but à 15%, avec LDU légèrement plus dangereux offensivement sur cette tranche."
+          "txt": "Montée en puissance progressive : LDU de Quito génère 20% de ses buts extérieurs sur cette tranche et encaisse 17%. Universidad Católica marque 7% de ses buts ici et en encaisse 14%. La probabilité de but monte à 15%, phase de transition tactique."
         },
         {
           "t": "30-45min",
           "prob": 21,
-          "txt": "Tranche la plus productive pour Católica à domicile : 36% de ses buts marqués ici. LDU n'encaisse que 21% mais Católica est nettement plus tranchant. Probabilité but maximale de la 1re mi-temps à 21%."
+          "txt": "Tranche la plus productive en première période : Universidad Católica marque 36% de ses buts à domicile sur ce segment, son pic offensif absolu. LDU n'encaisse que 21% de ses buts sur ce laps. Probabilité but maximale de première mi-temps à 21%."
         },
         {
           "t": "45-60min",
           "prob": 16,
-          "txt": "Entame de 2e mi-temps stable : Católica marque 11% de ses buts ici, LDU 20%. Probabilité but à 16%, légèrement favorable à LDU sur cette tranche."
+          "txt": "Début de seconde mi-temps stable : Universidad Católica marque 11% de ses buts ici et en encaisse 14% des buts de LDU. LDU génère 20% de ses buts extérieurs sur cette tranche. Retour à une intensité modérée (probabilité but: 16%)."
         },
         {
           "t": "60-75min",
           "prob": 18,
-          "txt": "Phase intermédiaire animée : Católica marque 18% ici, LDU 20%. Católica encaisse 24% sur cette tranche, ce qui peut inviter LDU à presser davantage. Probabilité but à 18%."
+          "txt": "Phase d'accélération intermédiaire : Universidad Católica encaisse 24% des buts de LDU sur cette tranche, son pic défensif le plus exposé. LDU marque 20% de ses buts extérieurs ici. Probabilité but à 18%, pression croissante des visiteurs en quête d'Europe."
         },
         {
           "t": "75-90min",
           "prob": 25,
-          "txt": "Tranche finale la plus prolifique du match : Católica marque 29% de ses buts ici et encaisse 29% des buts de LDU. LDU marque 14% mais encaisse 29%. Probabilité but maximale à 25%, logique de fin de match ouverte."
+          "txt": "Dernière ligne droite la plus dangereuse : probabilité but maximale à 25%. Universidad Católica marque 29% de ses buts à domicile et en encaisse 29% des buts de LDU sur cette tranche. LDU encaisse aussi 29% de ses buts extérieurs ici. Fin de match ouverte des deux côtés."
         }
       ],
-      "facteur_x": "Convergence des trois modèles (Poisson, Dixon-Coles, Monte-Carlo) sur 41-42% de victoire domicile, et top scores MC incluant 2-1, 1-2 et 2-2, signalant un match ouvert avec buts probables des deux côtés.",
-      "analyse_card": "Les modèles Poisson (DOM 42%), Dixon-Coles (DOM 41%) et Monte-Carlo (DOM 41%) convergent fortement sur une victoire à domicile de l'Universidad Católica. Le top score MC est 1-1 (11%), suivi de 2-1 (8%) et 1-2 (8%), ce qui place l'Over 2.5 à environ 62% de probabilité — signal cohérent. Cependant, les données Pinnacle et les cotes réelles sont toutes absentes ou inférieures à 1.50, rendant tout marché inexploitable selon nos règles.",
-      "conseil_public": "Attendre la publication des cotes réelles avant d'envisager ce match — aucune value identifiable sans cotes disponibles.",
-      "contexte": "Match de Liga Pro entre Universidad Católica (7e, à domicile, bilan 5V/9) et LDU de Quito (5e, en déplacement, en course pour l'Europe). LDU a un enjeu classement notable. Phase régulière, mi-saison.",
+      "facteur_x": "Les top scores Monte-Carlo (1-1: 11%, 2-1: 9%, 2-2: 7%) suggèrent un BTTS probable à 64%, mais l'absence de cotes >= 1.50 rend toute exploitation impossible.",
+      "analyse_card": "Les modèles Poisson, Dixon-Coles et Monte-Carlo convergent sur une victoire de l'Universidad Católica à domicile (~42%), avec un Nul à 24% et LDU à 34%. Les top scores MC (1-1 à 11%, 2-1 à 9%, 1-2 à 7%) indiquent une probabilité Over 2.5 de 62% et BTTS de 64%, signaux cohérents mais aucune cote disponible >= 1.50 ne permet d'exploiter ces marchés avec valeur.",
+      "conseil_public": "Passer ce match : sans cotes disponibles exploitables au-dessus de 1.50, aucun marché ne présente une valeur suffisante pour justifier un engagement.",
+      "contexte": "Liga Pro 2026 - LDU de Quito (#5 extérieur) est en course pour l'Europe, ce qui renforce sa motivation. Universidad Católica (#7 domicile) défend sur 5V/9 à domicile avec un xG solide de 1.73. Match à enjeu asymétrique côté visiteur.",
       "vbet": "NON",
       "scores": [
         "2-1"
@@ -1752,28 +1821,28 @@
       "mc_scores": [
         {
           "score": "1-1",
-          "n": 533,
+          "n": 540,
           "pct": 11
         },
         {
           "score": "2-1",
-          "n": 419,
-          "pct": 8
+          "n": 425,
+          "pct": 9
         },
         {
           "score": "1-2",
-          "n": 411,
-          "pct": 8
-        },
-        {
-          "score": "2-2",
-          "n": 339,
+          "n": 367,
           "pct": 7
         },
         {
-          "score": "2-0",
-          "n": 305,
-          "pct": 6
+          "score": "2-2",
+          "n": 342,
+          "pct": 7
+        },
+        {
+          "score": "1-0",
+          "n": 328,
+          "pct": 7
         }
       ],
       "paris_safe": {
@@ -1790,8 +1859,8 @@
       "stade": {
         "nom": "Universidad Catolica (domicile)",
         "cap": "",
-        "meteo": "🌧️",
-        "temp": "17°C",
+        "meteo": "",
+        "temp": "17C",
         "desc": "légère pluie"
       },
       "crit_home": {
@@ -2238,125 +2307,171 @@
         "id": 1154
       },
       "league": "Liga Pro",
-      "ligue_icon": "🏆",
+      "ligue_icon": "FB",
       "league_key": "equateur",
       "date": "2026-07-16 00:00",
       "cat": [
         "all"
       ],
-      "val": false,
+      "val": true,
       "hot": false,
-      "conf": 0,
-      "p1": 39,
-      "pn": 36,
+      "conf": 7.2,
+      "p1": 40,
+      "pn": 35,
       "p2": 25,
       "po15": 0,
       "po25": 22,
       "btts": 31,
-      "c1": "--",
-      "cn": "--",
-      "c2": "--",
-      "co15": "--",
-      "co25": "--",
-      "cu25": "--",
-      "dc1x": "--",
-      "dc2x": "--",
-      "dc12": "--",
-      "cdc1x": "--",
-      "cdc2x": "--",
-      "ah_dom": "--",
-      "ah_ext": "--",
-      "co35": "--",
-      "cbtts": "--",
-      "cbtts_non": "--",
-      "btts_oui": "--",
-      "btts_non": "--",
-      "bookies": [],
-      "edge": "",
-      "marche": "RESULTAT",
-      "risque": "ELEVE",
-      "pari_rec": "",
-      "cote_rec": "",
-      "no_signal": true,
-      "no_signal_label": "Aucun signal clair sur ce match",
+      "c1": "2.20",
+      "cn": "2.77",
+      "c2": "3.60",
+      "co15": "1.54",
+      "co25": "2.70",
+      "cu25": "1.44",
+      "dc1x": "1.25",
+      "dc2x": "1.59",
+      "dc12": "1.37",
+      "cdc1x": "1.25",
+      "cdc2x": "1.59",
+      "ah_dom": "2.16",
+      "ah_ext": "3.35",
+      "co35": "5.24",
+      "cbtts": "2.15",
+      "cbtts_non": "1.59",
+      "btts_oui": "2.15",
+      "btts_non": "1.59",
+      "bookies": [
+        {
+          "n": "Betclic",
+          "o": "200 offerts",
+          "l": "#LIEN_BETCLIC",
+          "c": "1.59",
+          "c1": "2.20",
+          "cn": "2.77",
+          "c2": "3.60"
+        },
+        {
+          "n": "Winamax",
+          "o": "100 offerts",
+          "l": "#LIEN_WINAMAX",
+          "c": "1.56",
+          "c1": "2.17",
+          "cn": "2.74",
+          "c2": "3.57"
+        },
+        {
+          "n": "Unibet",
+          "o": "100 rembourses",
+          "l": "#LIEN_UNIBET",
+          "c": "1.57",
+          "c1": "2.18",
+          "cn": "2.75",
+          "c2": "3.58"
+        },
+        {
+          "n": "PMU",
+          "o": "100 offerts",
+          "l": "#LIEN_PMU",
+          "c": "1.54",
+          "c1": "2.15",
+          "cn": "2.72",
+          "c2": "3.55"
+        },
+        {
+          "n": "Bet365",
+          "o": "100 bonus",
+          "l": "#LIEN_BET365",
+          "c": "1.62",
+          "c1": "2.23",
+          "cn": "2.80",
+          "c2": "3.63"
+        }
+      ],
+      "edge": "69% (modele)",
+      "marche": "BTTS",
+      "risque": "FAIBLE",
+      "pari_rec": "BTTS Non",
+      "cote_rec": "1.59",
+      "no_signal": false,
+      "no_signal_label": "",
       "mise": "2-3% bankroll",
-      "verdict_shark": "",
+      "verdict_shark": "BTTS Non a 1.59 - les modeles convergent a 69% de probabilite qu'au moins une equipe ne marque pas, confirme par les top scores MC (0-0 et 1-0 representent 38% des simulations).",
       "scenario": {
-        "phase1": "Leones del Norte domine à domicile (5V/9, CS 4/9) mais peine parfois à marquer (2 matchs sans but). Deportivo Cuenca est solide à l'extérieur avec 5 victoires sur 9, 5 clean sheets et seulement 33% de matchs sans marquer.",
-        "phase2": "Les trois modèles convergent : DOM ~39-40%, Nul ~35-38%, EXT ~24-25%. Les lambdas de Poisson (0.95 DOM vs 0.68 EXT) indiquent un match à faible production offensive. Les top scores MC (0-0, 1-0, 0-1, 1-1) confirment une rencontre fermée.",
-        "phase3": "Avec un xGA de 0.54 pour Cuenca à l'extérieur et 20% de probabilité sur 0-0, le scénario le plus probable est un match serré décidé par un seul but ou terminant nul. L'intensité offensive augmente nettement en fin de match (75-90min : 29% de probabilité de but)."
+        "phase1": "Leones du Norte domine a domicile (5V/9) mais reste muet 22% du temps, et Cuenca tient proprement sa cage 5 fois sur 9 en exterieur avec un xGA exceptionnel de 0.54 : les signaux de Phase 1 pointent vers un match peu prolifique ou l'une des equipes ne marque pas.",
+        "phase2": "Les trois modeles (Poisson, Dixon-Coles, Monte-Carlo) se stabilisent tous autour de 69% pour BTTS Non, avec des lambdas faibles (0.95 et 0.681). Les top scores MC (0-0 19%, 1-0 19%) confirment cette tendance : un seul but ou aucun est le scenario le plus probable.",
+        "phase3": "La cohérence entre Phase 1 et Phase 2 est forte. BTTS Non a 1.59 offre une value reelle par rapport au 69% du modele. Le risque est contenu par la cote basse et la convergence des signaux, sans donnees ELO ni Pinnacle pour contredire les conclusions."
       },
       "scenario_15min": [
         {
           "t": "0-15min",
           "prob": 10,
-          "txt": "Ouverture prudente : Leones marque 8% de ses buts domicile dans cette tranche, Cuenca seulement 4% de ses buts extérieurs. Cuenca encaisse 19% de ses buts ext. ici, mais la probabilité globale reste faible à 10%."
+          "txt": "Demarrage prudent prevu. Leones marque seulement 8% de ses buts domicile dans cette tranche, Cuenca 4% en exterieur. La probabilite de but est de 10%, la plus basse de la rencontre : les deux equipes s'observent."
         },
         {
           "t": "15-30min",
           "prob": 9,
-          "txt": "Tranche la moins active du match : Leones marque 13% de ses buts ici mais Cuenca ne génère que 4% de ses buts ext. dans cette période. Cuenca encaisse seulement 6% de ses buts ext. ici — probabilité but à 9%."
+          "txt": "Tranche la moins active du match avec 9% de probabilite de but. Leones marque 13% de ses buts ici mais Cuenca ne marque que 4% en exterieur dans cet intervalle, signalant un milieu de premiere mi-temps tres ferme."
         },
         {
           "t": "30-45min",
           "prob": 19,
-          "txt": "Premier pic offensif : Leones marque 29% de ses buts domicile dans cette tranche. Cuenca marque 19% et encaisse 19% ici. La probabilité de but monte à 19%, faisant de cette période la plus active de la première mi-temps."
+          "txt": "Pic de la premiere mi-temps avec 19% de probabilite de but. Leones genere 29% de ses buts domicile dans cette fenetre. Si un but doit tomber avant la pause, c'est ici que les chances sont maximales cote Leones."
         },
         {
           "t": "45-60min",
           "prob": 13,
-          "txt": "Début de seconde mi-temps modéré : Leones marque seulement 8% ici mais Cuenca marque 30% de ses buts ext. dans cette tranche — le plus fort ratio de Cuenca sur le match. Probabilité but à 13%."
+          "txt": "Reprise avec 13% de probabilite de but. Cuenca est actif dans cette tranche (30% de ses buts exterieurs), mais Leones n'encaisse que 9% des buts de Cuenca ici, ce qui nuance le danger reel."
         },
         {
           "t": "60-75min",
           "prob": 20,
-          "txt": "Montée en puissance : Leones marque 21% de ses buts et encaisse 26% des buts de Cuenca dans cette tranche. Cuenca marque 15% ici. Probabilité but à 20%, deuxième pic de la rencontre."
+          "txt": "Phase mediane de la seconde mi-temps avec 20% de probabilite de but. Leones marque 21% de ses buts domicile ici et Cuenca encaisse 19% dans cet intervalle : periode de pression accrue, potentiellement decisive."
         },
         {
           "t": "75-90min",
           "prob": 29,
-          "txt": "Tranche finale la plus dangereuse : Leones marque 21% et encaisse 35% des buts de Cuenca ici. Cuenca marque 30% de ses buts ext. dans ces 15 minutes. Probabilité but maximale à 29% — dénouement probable dans ce final."
+          "txt": "Tranche la plus dangereuse du match avec 29% de probabilite de but. Leones encaisse 35% des buts de Cuenca dans ces 15 dernieres minutes, et Cuenca marque 30% de ses buts exterieurs ici : fin de match ouverte, attention au contre de Cuenca."
         }
       ],
-      "facteur_x": "Le xGA de 0.54 de Deportivo Cuenca à l'extérieur combiné à 5 clean sheets sur 9 matchs ext. est le signal défensif le plus fort, aligné avec les 20% de probabilité Monte-Carlo sur le score 0-0.",
-      "analyse_card": "Les modèles Poisson, Dixon-Coles et Monte-Carlo convergent vers un match défensif avec 20% de probabilité sur le score 0-0 et 19% sur 1-0. Les top scores MC sont dominés par des scores faibles (0-0, 1-0, 0-1, 1-1), ce qui confirme un Under 2.5 logique mais sans cote exploitable. Deportivo Cuenca affiche un xGA exceptionnel de 0.54 en déplacement et 5 clean sheets sur 9 matchs à l'extérieur, renforçant la tendance défensive globale.",
-      "conseil_public": "Attends une offre de cote exploitable (>= 1.50) avant d'engager — les signaux sont cohérents mais aucun marché ne présente de valeur actionnable dans les conditions actuelles.",
-      "contexte": "Leones del Norte (#8) reçoit Deportivo Cuenca (#6) en Liga Pro ecuatoriana. Les deux équipes affichent un bilan extérieur/domicile similaire (5V/9 matchs chacune), mais Cuenca arrive en meilleure forme récente avec 2 victoires consécutives et des statistiques défensives remarquables à l'extérieur.",
-      "vbet": "NON",
+      "facteur_x": "Le xGA de 0.54 de Deportivo Cuenca en deplacement est le signal statistique le plus fort : Cuenca encaisse tres peu en exterieur, rendant un but de Leones incertain, ce qui alimente directement BTTS Non a 69% selon les modeles.",
+      "analyse_card": "Deportivo Cuenca affiche un xGA de seulement 0.54 et 5 clean sheets sur 9 matchs exterieurs, signalant une defense tres solide. Leones del Norte reste sans marquer dans 22% de ses matchs domicile. Les lambdas Poisson (DOM 0.95, EXT 0.681) et les top scores Monte-Carlo (0-0 a 19%, 1-0 a 19%, 0-1 a 14%) montrent une forte concentration de resultats ou l'une des deux equipes ne marque pas, ce qui converge directement avec BTTS Non.",
+      "conseil_public": "Miser sur BTTS Non a 1.59 : trois modeles independants sur quatre s'accordent autour de 69% de probabilite, la defense de Cuenca (xGA 0.54) et le taux de clean sheet des deux equipes soutiennent fortement ce marche.",
+      "contexte": "Liga Pro ecuadorienne, journee du 15 juillet 2026. Leones del Norte recoit Deportivo Cuenca au Estadio Olimpico de Ibarra. Cuenca (#6) vient de remporter 2 matchs consecutifs et reste sur une forme WWDLW, tandis que Leones (#8) affiche WDWDW a domicile. Aucune absence majeure signalee des deux cotes.",
+      "vbet": "OUI",
       "scores": [
         "1-0"
       ],
       "mc_scores": [
         {
           "score": "0-0",
-          "n": 1004,
-          "pct": 20
+          "n": 962,
+          "pct": 19
         },
         {
           "score": "1-0",
-          "n": 943,
+          "n": 926,
           "pct": 19
         },
         {
           "score": "0-1",
-          "n": 668,
-          "pct": 13
+          "n": 689,
+          "pct": 14
         },
         {
           "score": "1-1",
-          "n": 618,
+          "n": 576,
           "pct": 12
         },
         {
           "score": "2-0",
-          "n": 423,
-          "pct": 8
+          "n": 457,
+          "pct": 9
         }
       ],
       "paris_safe": {
-        "bet": "",
-        "cote": "--",
-        "proba": "39%"
+        "bet": "BTTS Non",
+        "cote": 1.59,
+        "proba": "40%"
       },
       "paris_risque": {
         "bet": "",
@@ -2365,10 +2480,10 @@
       },
       "kelly": "2",
       "stade": {
-        "nom": "Estadio Olimpico de Ibarra — Ibarra",
+        "nom": "Estadio Olimpico de Ibarra - Ibarra",
         "cap": "",
-        "meteo": "☁️",
-        "temp": "20°C",
+        "meteo": "",
+        "temp": "20C",
         "desc": "partiellement nuageux"
       },
       "crit_home": {
@@ -2802,7 +2917,7 @@
         "id": 1159
       },
       "league": "Liga Pro",
-      "ligue_icon": "🏆",
+      "ligue_icon": "FB",
       "league_key": "equateur",
       "date": "2026-07-16 02:30",
       "cat": [
@@ -2838,7 +2953,7 @@
       "bookies": [
         {
           "n": "Betclic",
-          "o": "200€ offerts",
+          "o": "200 offerts",
           "l": "#LIEN_BETCLIC",
           "c": "1.50",
           "c1": "1.50",
@@ -2847,7 +2962,7 @@
         },
         {
           "n": "Winamax",
-          "o": "100€ offerts",
+          "o": "100 offerts",
           "l": "#LIEN_WINAMAX",
           "c": "1.47",
           "c1": "1.47",
@@ -2856,7 +2971,7 @@
         },
         {
           "n": "Unibet",
-          "o": "100€ remboursés",
+          "o": "100 rembourses",
           "l": "#LIEN_UNIBET",
           "c": "1.48",
           "c1": "1.48",
@@ -2865,7 +2980,7 @@
         },
         {
           "n": "PMU",
-          "o": "100€ offerts",
+          "o": "100 offerts",
           "l": "#LIEN_PMU",
           "c": "1.45",
           "c1": "1.45",
@@ -2874,7 +2989,7 @@
         },
         {
           "n": "Bet365",
-          "o": "100€ bonus",
+          "o": "100 bonus",
           "l": "#LIEN_BET365",
           "c": "1.53",
           "c1": "1.53",
@@ -2882,7 +2997,7 @@
           "c2": "6.03"
         }
       ],
-      "edge": "61% (modèle)",
+      "edge": "61% (modele)",
       "marche": "DOUBLE_CHANCE",
       "risque": "FAIBLE",
       "pari_rec": "Victoire Domicile",
@@ -2890,48 +3005,48 @@
       "no_signal": false,
       "no_signal_label": "",
       "mise": "2-3% bankroll",
-      "verdict_shark": "Victoire Domicile à 1.50 — les trois modèles convergent à 60-62% pour Barcelona SC, avec un xGA élevé de Guayaquil City FC en déplacement (44% de matchs sans marquer à l'extérieur).",
+      "verdict_shark": "Victoire Domicile a 1.50 - les trois modeles convergent a 60-61% pour Barcelona SC, soutenu par un bilan domicile de 6V/8 matchs et une proba modele identique.",
       "scenario": {
-        "phase1": "Barcelona SC domine à domicile (6V/8) avec une forme récente correcte (WLWDD) et un avantage structurel clair. Guayaquil City FC est vulnérable à l'extérieur (3V/9, 44% sans marquer).",
-        "phase2": "Les trois modèles mathématiques convergent entre 60% et 62% pour une victoire de Barcelona SC. Les lambdas Poisson (DOM 1.827 vs EXT 0.8) illustrent un écart offensif significatif.",
-        "phase3": "Les scores Monte-Carlo renforcent la cohérence : les 4 résultats les plus probables (1-0, 2-0, 2-1, 1-1) totalisant 46% incluent trois victoires nettes du domicile, validant le marché Victoire Domicile."
+        "phase1": "Barcelona SC domine structurellement a domicile (6V/8, 4 CS) face a Guayaquil City qui echoue a marquer dans 44% de ses deplacements. L'enjeu europeen pour les locaux renforce la motivation.",
+        "phase2": "Les trois modeles (Poisson, Dixon-Coles, Monte-Carlo) convergent a 60-61% pour la victoire domicile. Lambda offensif de 1.827 vs 0.8 traduit une nette superiorite de creation de buts cote Barcelona.",
+        "phase3": "Les scores MC favoris (1-0 14%, 2-0 12%, 2-1 9%) dessinent un profil de victoire controllee de Barcelona. La tranche 75-90min est la plus productive (22% des buts marques par Barcelona) et peut sceller le resultat."
       },
       "scenario_15min": [
         {
           "t": "0-15min",
           "prob": 8,
-          "txt": "Démarrage prudent attendu : Barcelona SC génère 19% de ses buts dans cette tranche mais Guayaquil City FC n'en marque que 3% en déplacement. Probabilité de but globale faible à 8%."
+          "txt": "Phase d'observation prudente : Barcelona SC marque 19% de ses buts dans ce creneau a domicile, mais Guayaquil City n'en inscrit que 3%. Probabilite de but limitee a 8%, ouverture du score peu probable mais possible cote local."
         },
         {
           "t": "15-30min",
           "prob": 20,
-          "txt": "La tranche la plus active de la première période : Barcelona SC concentre 26% de ses buts ici et Guayaquil City FC encaisse 21% des buts adverses sur cette fenêtre. Probabilité de but à 20%, pic offensif attendu."
+          "txt": "Tranche la plus productive de la premiere periode : Barcelona genere 26% de ses buts ici, Guayaquil City encaisse 21% de ses buts adverses dans cet intervalle. Probabilite de but montant a 20%, moment clef pour l'ouverture du score."
         },
         {
           "t": "30-45min",
           "prob": 19,
-          "txt": "Activité maintenue : Barcelona SC marque 15% de ses buts ici mais encaisse 27% des buts de Guayaquil City FC sur cette période. Moment où l'équipe visiteuse tente de réagir. Probabilité de but à 19%."
+          "txt": "Activite soutenue des deux cotes : Guayaquil City encaisse 27% de ses buts dans cette tranche, Barcelona en marque 15%. Risque egalement present cote local avec 27% des buts adverses encaisses ici. Probabilite de but a 19%."
         },
         {
           "t": "45-60min",
           "prob": 14,
-          "txt": "Légère baisse d'intensité au retour des vestiaires. Barcelona SC ne marque que 7% de ses buts ici, bien que Guayaquil City FC frappe 17% des siens sur cette tranche. Probabilité de but à 14%."
+          "txt": "Ralentissement habituel post-pause : Barcelona ne marque que 7% de ses buts dans ce creneau. Guayaquil City reste actif (17% de ses buts marques ici). Probabilite de but moderee a 14%."
         },
         {
           "t": "60-75min",
           "prob": 9,
-          "txt": "Creux tactique en milieu de seconde période : Barcelona SC marque 11% de ses buts ici et Guayaquil City FC seulement 10% en déplacement sur cette tranche. Probabilité de but à 9%, la plus faible de la seconde période."
+          "txt": "Phase la plus calme du match : Barcelona marque 11% de ses buts ici, Guayaquil City seulement 10%. Les deux defenses tiennent mieux dans cet intervalle, probabilite de but la plus basse a 9%."
         },
         {
           "t": "75-90min",
           "prob": 31,
-          "txt": "Pic d'activité en fin de match : Guayaquil City FC marque 40% de ses buts en déplacement sur cette tranche et Barcelona SC 22% des siens. Probabilité de but maximale à 31% — la tranche la plus fertile du match, propice aux buts de closing ou de réduction du score."
+          "txt": "Pic d'activite finale : Guayaquil City inscrit 40% de ses buts exterieurs dans cette tranche, et Barcelona marque egalement 22% de ses buts ici. Probabilite de but maximale a 31%, denouement probable du match dans ces 15 dernieres minutes."
         }
       ],
-      "facteur_x": "Guayaquil City FC est resté muet 44% de ses déplacements et n'a remporté que 3 matches à l'extérieur sur 9, tandis que Barcelona SC n'a jamais été blanchi à domicile en 8 rencontres.",
-      "analyse_card": "Barcelona SC affiche 6 victoires sur 8 à domicile (75%) et n'a jamais terminé sans marquer en 8 matches joués chez lui. Guayaquil City FC n'a remporté que 3 de ses 9 déplacements (33%) et est resté muet 4 fois sur 9 à l'extérieur (44%). Les modèles Poisson, Dixon-Coles et Monte-Carlo s'accordent tous entre 60% et 62% en faveur du domicile, confirmant une domination statistique nette. Les scores Monte-Carlo les plus probables (1-0 à 14%, 2-0 à 12%, 2-1 à 9%) sont tous des victoires de Barcelona SC, renforçant la cohérence du marché choisi.",
-      "conseil_public": "Miser sur la Victoire Domicile à 1.50 — le signal multi-modèle est clair et cohérent avec les scores Monte-Carlo.",
-      "contexte": "Barcelona SC occupe la 3e place en Liga Pro et est en course pour l'Europe, ce qui implique un enjeu compétitif fort à domicile. Guayaquil City FC est 11e et peine à performer en déplacement cette saison.",
+      "facteur_x": "Convergence parfaite des trois modeles independants (Poisson 61%, Dixon-Coles 60%, Monte-Carlo 61%) sur la victoire domicile, avec un lambda offensif de 1.827 vs 0.8 pour l'exterieur.",
+      "analyse_card": "Barcelona SC affiche 6 victoires sur 8 matchs a domicile avec 4 clean sheets (50%), soit une base solide de solidite defensive. Le modele Poisson (61%), Dixon-Coles (60%) et Monte-Carlo (61%) sont parfaitement alignes sur la victoire domicile. Les top scores MC (1-0 14%, 2-0 12%, 2-1 9%) illustrent un profil de victoires courtes mais nettes de Barcelona, coherent avec un xG de 1.827 contre 0.8 pour l'adversaire.",
+      "conseil_public": "Miser sur la Victoire Domicile a 1.50, signal multi-modele convergent avec bilan domicile robuste et adversaire exterieur fragile (3V/9, 44% sans marquer).",
+      "contexte": "Barcelona SC (#3) reçoit Guayaquil City FC (#11) dans un match de Liga Pro ou l'enjeu europeen pousse les locaux a s'imposer. Guayaquil City ne gagne qu'un tiers de ses matchs hors de ses bases.",
       "vbet": "OUI",
       "scores": [
         "2-1"
@@ -2939,27 +3054,27 @@
       "mc_scores": [
         {
           "score": "1-0",
-          "n": 677,
+          "n": 685,
           "pct": 14
         },
         {
           "score": "2-0",
-          "n": 582,
+          "n": 597,
           "pct": 12
         },
         {
           "score": "1-1",
-          "n": 529,
+          "n": 534,
           "pct": 11
         },
         {
           "score": "2-1",
-          "n": 461,
+          "n": 433,
           "pct": 9
         },
         {
-          "score": "0-0",
-          "n": 374,
+          "score": "3-0",
+          "n": 369,
           "pct": 7
         }
       ],
@@ -2975,10 +3090,10 @@
       },
       "kelly": "2",
       "stade": {
-        "nom": "Estadio Monumental Banco Pichincha — Guayaquil",
+        "nom": "Estadio Monumental Banco Pichincha - Guayaquil",
         "cap": "",
-        "meteo": "☁️",
-        "temp": "32°C",
+        "meteo": "",
+        "temp": "31C",
         "desc": "partiellement nuageux"
       },
       "crit_home": {
@@ -3484,170 +3599,124 @@
         "id": 1153
       },
       "league": "Liga Pro",
-      "ligue_icon": "🏆",
+      "ligue_icon": "FB",
       "league_key": "equateur",
       "date": "2026-07-16 23:30",
       "cat": [
         "all"
       ],
-      "val": true,
+      "val": false,
       "hot": false,
-      "conf": 7.2,
+      "conf": 0,
       "p1": 38,
       "pn": 24,
       "p2": 38,
       "po15": 0,
       "po25": 64,
       "btts": 65,
-      "c1": "2.95",
-      "cn": "3.20",
-      "c2": "2.26",
-      "co15": "1.31",
-      "co25": "2.00",
-      "cu25": "1.77",
-      "dc1x": "1.54",
-      "dc2x": "1.33",
-      "dc12": "1.29",
-      "cdc1x": "1.54",
-      "cdc2x": "1.33",
-      "ah_dom": "2.85",
-      "ah_ext": "2.29",
-      "co35": "3.48",
-      "cbtts": "1.75",
-      "cbtts_non": "1.94",
-      "btts_oui": "1.75",
-      "btts_non": "1.94",
-      "bookies": [
-        {
-          "n": "Betclic",
-          "o": "200€ offerts",
-          "l": "#LIEN_BETCLIC",
-          "c": "1.75",
-          "c1": "2.95",
-          "cn": "3.20",
-          "c2": "2.26"
-        },
-        {
-          "n": "Winamax",
-          "o": "100€ offerts",
-          "l": "#LIEN_WINAMAX",
-          "c": "1.72",
-          "c1": "2.92",
-          "cn": "3.17",
-          "c2": "2.23"
-        },
-        {
-          "n": "Unibet",
-          "o": "100€ remboursés",
-          "l": "#LIEN_UNIBET",
-          "c": "1.73",
-          "c1": "2.93",
-          "cn": "3.18",
-          "c2": "2.24"
-        },
-        {
-          "n": "PMU",
-          "o": "100€ offerts",
-          "l": "#LIEN_PMU",
-          "c": "1.70",
-          "c1": "2.90",
-          "cn": "3.15",
-          "c2": "2.21"
-        },
-        {
-          "n": "Bet365",
-          "o": "100€ bonus",
-          "l": "#LIEN_BET365",
-          "c": "1.78",
-          "c1": "2.98",
-          "cn": "3.23",
-          "c2": "2.29"
-        }
-      ],
-      "edge": "65% (modèle)",
-      "marche": "BTTS",
-      "risque": "MODERE",
-      "pari_rec": "BTTS Oui",
-      "cote_rec": "1.75",
-      "no_signal": false,
-      "no_signal_label": "",
+      "c1": "--",
+      "cn": "--",
+      "c2": "--",
+      "co15": "--",
+      "co25": "--",
+      "cu25": "--",
+      "dc1x": "--",
+      "dc2x": "--",
+      "dc12": "--",
+      "cdc1x": "--",
+      "cdc2x": "--",
+      "ah_dom": "--",
+      "ah_ext": "--",
+      "co35": "--",
+      "cbtts": "--",
+      "cbtts_non": "--",
+      "btts_oui": "--",
+      "btts_non": "--",
+      "bookies": [],
+      "edge": "",
+      "marche": "RESULTAT",
+      "risque": "ELEVE",
+      "pari_rec": "",
+      "cote_rec": "",
+      "no_signal": true,
+      "no_signal_label": "Aucun signal clair sur ce match",
       "mise": "2-3% bankroll",
-      "verdict_shark": "BTTS Oui à 1.75 — les deux équipes affichent des xG offensifs élevés (1.81 et 2.20) et les scores Monte-Carlo confirment une forte présence des deux équipes au score.",
+      "verdict_shark": "",
       "scenario": {
-        "phase1": "Aucas à domicile (6V/9) face au leader Independiente del Valle (8V/9 en déplacement) : deux équipes offensives avec des xG supérieurs à 1.80, peu de clean sheets des deux côtés — les conditions réunies pour voir les deux équipes marquer.",
-        "phase2": "Le modèle Poisson donne 65% de probabilité BTTS Oui. Les lambdas équilibrés (1.653 / 1.636) indiquent un match ouvert sans équipe clairement défensive. La convergence Poisson / Dixon-Coles / Monte-Carlo est forte sur ce marché.",
-        "phase3": "Les scores Monte-Carlo confirment : 1-1 (10%), 2-1 (8%), 1-2 (8%), 2-2 (7%) — les quatre scénarios les plus probables impliquent tous un but de chaque équipe, validant directement le BTTS Oui."
+        "phase1": "Aucas solide à domicile (6V/9) avec xG 1.81, mais Independiente del Valle impressionnant en déplacement (8V/9, xG 2.20) et en forme (3 victoires consécutives). Signal offensif fort des deux côtés.",
+        "phase2": "Les trois modèles (Poisson, Dixon-Coles, Monte-Carlo) s'accordent sur une parfaite équité entre les deux équipes (38% chacune) et un profil Over/BTTS élevé. Les lambdas quasi-identiques (1.653 vs 1.636) confirment l'équilibre.",
+        "phase3": "Les scores Monte-Carlo dominants (1-1, 1-2, 2-1, 2-2) sont cohérents avec un Over 2.5 à 64% et un BTTS à 65%. Aucun marché jouable malgré ces signaux convergents : passage obligatoire."
       },
       "scenario_15min": [
         {
           "t": "0-15min",
           "prob": 7,
-          "txt": "Tranche calme : Aucas ne marque que 18% de ses buts ici mais Independiente del Valle n'en inscrit que 4% — probabilité but globale à 7%, peu d'action attendue en ouverture."
+          "txt": "Démarrage prudent attendu : Aucas ne marque que 18% de ses buts sur cette tranche mais n'a encaissé aucun but d'IdV ici (0%). IdV marque seulement 4% de ses buts en 0-15min. Probabilité de but globale estimée à 7%, la plus faible de la rencontre."
         },
         {
           "t": "15-30min",
           "prob": 12,
-          "txt": "Montée en régime : Independiente del Valle monte à 18% de ses buts sur cette tranche, Aucas encaisse 12% des buts adverses ici — probabilité but à 12%, premier danger extérieur possible."
+          "txt": "Montée en pression progressive : IdV commence à peser davantage (18% de ses buts sur cette tranche) tandis qu'Aucas encaisse 12% des buts adverses ici. Probabilité de but à 12%, le match prend de la vitesse."
         },
         {
           "t": "30-45min",
           "prob": 22,
-          "txt": "Tranche clé avant la mi-temps : Aucas encaisse 41% des buts d'Independiente del Valle dans ce segment, IDV marque 18% de ses buts ici — probabilité but à 22%, moment de pression extérieure maximale en première période."
+          "txt": "Tranche la plus dangereuse de la première mi-temps : Aucas encaisse 41% des buts d'IdV sur cette période, signalant une vulnérabilité défensive marquée en fin de première période. IdV marque 18% de ses buts ici. Probabilité à 22%."
         },
         {
           "t": "45-60min",
           "prob": 21,
-          "txt": "Début de seconde période actif : Aucas marque 29% de ses buts sur cette tranche et IDV 21% des siens — probabilité but à 21%, les deux équipes peuvent réagir après la pause."
+          "txt": "Début de seconde mi-temps animé : Aucas marque 29% de ses buts sur 45-60min (son pic offensif côté domicile), et IdV encaisse 29% de ses buts dans cette tranche également. Probabilité à 21%, les deux équipes cherchent à prendre l'avantage rapidement après la pause."
         },
         {
           "t": "60-75min",
           "prob": 13,
-          "txt": "Tranche plus discrète : Aucas ne marque aucun but (0%) sur ce segment dans ses données, IDV inscrit 14% de ses buts ici — probabilité but à 13%, ralentissement offensif attendu."
+          "txt": "Légère baisse d'intensité : Aucas ne marque aucun but (0%) sur 60-75min selon les données historiques, bien qu'IdV encaisse 18% de ses buts ici. IdV marque 14% de ses buts sur cette tranche. Probabilité à 13%, phase de gestion tactique probable."
         },
         {
           "t": "75-90min",
           "prob": 26,
-          "txt": "Finish explosif : Aucas marque 29% de ses buts et IDV 25% des siens sur cette tranche finale — probabilité but la plus haute du match à 26%, les deux équipes poussent pour un résultat décisif avec un enjeu majeur pour les deux clubs."
+          "txt": "Fin de match explosive : Aucas marque 29% de ses buts sur 75-90min, IdV marque 25% des siens, et les deux équipes encaissent respectivement 24% et 25% de leurs buts concédés sur cette tranche. Probabilité à 26%, la plus élevée du match - les enjeux (titre vs Europe) renforcent l'intensité finale."
         }
       ],
-      "facteur_x": "Independiente del Valle ne reste muet qu'à 11% de ses matchs extérieurs (xG 2.20), tandis qu'Aucas ne garde sa cage inviolée qu'à 33% à domicile — la probabilité BTTS du modèle atteint 65%.",
-      "analyse_card": "Independiente del Valle présente un xG extérieur de 2.20 et ne reste muet qu'à 11% de ses déplacements, ce qui signifie qu'ils marquent dans 89% de leurs matchs à l'extérieur. Aucas, de son côté, encaisse dans 67% de ses matchs à domicile (6 fois sur 9) tout en marquant dans 78% des cas (CS seulement 3/9). Les top scores Monte-Carlo — 1-1(10%), 2-1(8%), 1-2(8%), 2-2(7%) — montrent que les scénarios avec buts des deux équipes dominent largement, représentant ensemble plus de 33% des simulations sur les 4 premiers scores.",
-      "conseil_public": "Jouer BTTS Oui à 1.75 en exploitant la convergence entre xG élevés des deux équipes, le faible taux de clean sheet (33% chacun) et la confirmation Monte-Carlo.",
-      "contexte": "Choc de Liga Pro entre le 2e (Aucas, en course pour l'Europe) et le leader (Independiente del Valle, à 0 point du titre) — les deux équipes ont un fort enjeu et aucune absence majeure confirmée.",
-      "vbet": "OUI",
+      "facteur_x": "Independiente del Valle présente un xG extérieur de 2.20 avec 8 victoires en 9 matchs à l'extérieur, le signal offensif visiteur est le plus fort du dossier, mais sans cote exploitable.",
+      "analyse_card": "Les modèles Poisson, Dixon-Coles et Monte-Carlo convergent vers un match très équilibré (DOM 38-39% / EXT 37-38%) avec une probabilité Over 2.5 de 64% et BTTS de 65%. Les top scores Monte-Carlo (1-1, 1-2, 2-1, 2-2) confirment un profil offensif cohérent. Cependant, la condition sine qua non de cote >= 1.50 n'est pas remplie sur aucun marché disponible, ce qui annule toute opportunité de valeur.",
+      "conseil_public": "Ne pas miser sur ce match : aucune cote disponible n'atteint le seuil minimal de 1.50 requis pour justifier une prise de risque, indépendamment de la qualité du signal offensif.",
+      "contexte": "Match de haute intensité en Liga Pro Équateur entre Aucas (2e, en course pour l'Europe) et Independiente del Valle (1er, à 0 point du titre). Les deux équipes sont offensives et défendent leur position en fin de saison, ce qui renforce l'enjeu des deux côtés.",
+      "vbet": "NON",
       "scores": [
-        "2-1"
+        "1-2"
       ],
       "mc_scores": [
         {
           "score": "1-1",
-          "n": 512,
+          "n": 500,
           "pct": 10
         },
         {
-          "score": "2-1",
-          "n": 402,
-          "pct": 8
+          "score": "1-2",
+          "n": 430,
+          "pct": 9
         },
         {
-          "score": "1-2",
-          "n": 387,
+          "score": "2-1",
+          "n": 415,
           "pct": 8
         },
         {
           "score": "2-2",
-          "n": 329,
+          "n": 354,
           "pct": 7
         },
         {
           "score": "1-0",
-          "n": 317,
+          "n": 303,
           "pct": 6
         }
       ],
       "paris_safe": {
-        "bet": "BTTS Oui",
-        "cote": 1.75,
+        "bet": "",
+        "cote": "--",
         "proba": "38%"
       },
       "paris_risque": {
@@ -3657,10 +3726,10 @@
       },
       "kelly": "2",
       "stade": {
-        "nom": "Estadio Gonzalo Pozo Ripalda — Quito",
+        "nom": "Estadio Gonzalo Pozo Ripalda - Quito",
         "cap": "",
-        "meteo": "🌧️",
-        "temp": "17°C",
+        "meteo": "",
+        "temp": "17C",
         "desc": "légère pluie"
       },
       "crit_home": {
@@ -3794,7 +3863,7 @@
         },
         "away": {
           "val": 30,
-          "info": "Dernier match il y a 7j — 1 match(s) en 14j"
+          "info": "Dernier match il y a 7j - 1 match(s) en 14j"
         }
       },
       "fatigue_home": {
@@ -3803,7 +3872,7 @@
       },
       "fatigue_away": {
         "val": 30,
-        "info": "Dernier match il y a 7j — 1 match(s) en 14j"
+        "info": "Dernier match il y a 7j - 1 match(s) en 14j"
       },
       "tendances": {
         "over25_home": 5,
@@ -4071,7 +4140,7 @@
         "id": 2622
       },
       "league": "Canadian Premier League",
-      "ligue_icon": "🏴󠁧󠁢󠁥󠁮󠁧󠁿",
+      "ligue_icon": "FB",
       "league_key": "canada",
       "date": "2026-07-17 01:00",
       "cat": [
@@ -4079,13 +4148,13 @@
       ],
       "val": true,
       "hot": false,
-      "conf": 7.6,
-      "p1": 73,
+      "conf": 7.8,
+      "p1": 74,
       "pn": 16,
-      "p2": 11,
+      "p2": 10,
       "po15": 0,
       "po25": 68,
-      "btts": 55,
+      "btts": 56,
       "c1": "1.26",
       "cn": "5.20",
       "c2": "8.94",
@@ -4107,7 +4176,7 @@
       "bookies": [
         {
           "n": "Betclic",
-          "o": "200€ offerts",
+          "o": "200 offerts",
           "l": "#LIEN_BETCLIC",
           "c": "1.50",
           "c1": "1.26",
@@ -4116,7 +4185,7 @@
         },
         {
           "n": "Winamax",
-          "o": "100€ offerts",
+          "o": "100 offerts",
           "l": "#LIEN_WINAMAX",
           "c": "1.47",
           "c1": "1.23",
@@ -4125,7 +4194,7 @@
         },
         {
           "n": "Unibet",
-          "o": "100€ remboursés",
+          "o": "100 rembourses",
           "l": "#LIEN_UNIBET",
           "c": "1.48",
           "c1": "1.24",
@@ -4134,7 +4203,7 @@
         },
         {
           "n": "PMU",
-          "o": "100€ offerts",
+          "o": "100 offerts",
           "l": "#LIEN_PMU",
           "c": "1.45",
           "c1": "1.21",
@@ -4143,7 +4212,7 @@
         },
         {
           "n": "Bet365",
-          "o": "100€ bonus",
+          "o": "100 bonus",
           "l": "#LIEN_BET365",
           "c": "1.53",
           "c1": "1.29",
@@ -4151,7 +4220,7 @@
           "c2": "8.97"
         }
       ],
-      "edge": "68% (modèle)",
+      "edge": "68% (modele)",
       "marche": "TOTAL_BUTS",
       "risque": "FAIBLE",
       "pari_rec": "Over 2.5",
@@ -4159,48 +4228,48 @@
       "no_signal": false,
       "no_signal_label": "",
       "mise": "2-3% bankroll",
-      "verdict_shark": "Over 2.5 à 1.50 — les trois modèles convergent à 68% et les top scores Monte-Carlo (2-0, 2-1, 3-1, 3-0) valident massivement un scénario de plus de 2.5 buts.",
+      "verdict_shark": "Over 2.5 à 1.50 - Les modèles Poisson, Dixon-Coles et Monte-Carlo convergent à 68% avec des lambdas DOM 2.62 / EXT 0.914 et 5 des 6 top scores MC dépassent 2.5 buts.",
       "scenario": {
-        "phase1": "Forge domine structurellement à domicile (5V/6, 5 CS/6) face à une équipe extérieure sans victoire (0V/5). L'enjeu de titre pour Forge contre une équipe en relégation amplifie le déséquilibre.",
-        "phase2": "Les trois modèles (Poisson 73%, Dixon-Coles 73%, MC 73%) convergent parfaitement sur la victoire Forge, avec un Over 2.5 à 68% soutenu par un lambda DOM de 2.62 vs 0.914 pour Pacific.",
-        "phase3": "Les top scores MC (2-0, 2-1, 3-1, 3-0, 1-0) montrent que 4 des 5 scénarios les plus probables franchissent le seuil des 2.5 buts, validant pleinement le marché Over 2.5 sans contradiction."
+        "phase1": "Forge domine à domicile (5V/6) malgré 2 défaites consécutives récentes. Pacific FC est sans victoire en déplacement (0V/5) et en zone de relégation, ce qui indique une équipe sous pression défensive et mentalement fragile.",
+        "phase2": "Les trois modèles convergent à 68% pour Over 2.5. Les lambdas (2.62 vs 0.914) prévoient une nette domination de Forge. Le score central 3-1 et la distribution MC confirment un match à haute densité offensive côté Forge.",
+        "phase3": "Les tranches 45-60min (23%) et 75-90min (21%) sont les plus actives statistiquement, avec un Forge historiquement très prolifique en fin de match (27% de ses buts entre 75-90min). Un scénario 2-0 ou 3-1 réalisé progressivement est le plus probable."
       },
       "scenario_15min": [
         {
           "t": "0-15min",
           "prob": 10,
-          "txt": "Activité offensive modérée en ouverture — Forge génère 18% de ses buts dans cette tranche mais Pacific FC n'en encaisse que 9% de leur total ici. Probabilité but à 10%, pression Forge attendue sans explosion immédiate."
+          "txt": "Forge marque 18% de ses buts dans cette tranche contre seulement 4% pour Pacific FC. Probabilité de but modérée à 10% - ouverture du score possible mais pas inévitable dès l'entame."
         },
         {
           "t": "15-30min",
           "prob": 19,
-          "txt": "Tranche la plus dangereuse du premier acte — Forge marque 15% de ses buts ici et Pacific FC encaisse 26% de ses buts dans ce créneau. Probabilité but à 19%, moment propice à l'ouverture du score."
+          "txt": "Tranche la plus active en première mi-temps avec 19% de probabilité de but. Pacific FC marque 17% de ses buts ici mais encaisse 26% - fenêtre favorable à un but de Forge qui domine progressivement."
         },
         {
           "t": "30-45min",
           "prob": 12,
-          "txt": "Légère baisse d'intensité — Forge ne produit que 9% de ses buts dans cette fenêtre et Pacific en encaisse 9%. Probabilité but à 12%, gestion de fin de première mi-temps."
+          "txt": "Probabilité réduite à 12%. Forge ne marque que 9% de ses buts ici. Tranche habituellement plus calme avant la pause, malgré Pacific FC qui concentre 17% de ses buts dans ce créneau."
         },
         {
           "t": "45-60min",
           "prob": 23,
-          "txt": "Tranche la plus prolifique du match — Forge marque 21% de ses buts ici et Pacific en encaisse 30%. Probabilité but à 23%, retour des vestiaires souvent décisif dans ce profil de rencontre."
+          "txt": "Tranche la plus dangereuse du match avec 23% de probabilité. Forge marque 21% de ses buts ici et Pacific FC en encaisse 30% - reprise explosive attendue, potentiel deuxième but de Forge."
         },
         {
           "t": "60-75min",
           "prob": 15,
-          "txt": "Tranche intermédiaire — Forge ne produit que 9% de ses buts ici mais Pacific encaisse 13%. Probabilité but à 15%, Forge peut gérer le score acquis ou forcer l'écart."
+          "txt": "Légère baisse à 15% malgré Pacific FC encaissant 20% de ses buts dans ce créneau. Forge moins prolifique ici (9%) mais peut s'appuyer sur des entrées de banc pour maintenir la pression."
         },
         {
           "t": "75-90min",
           "prob": 21,
-          "txt": "Forte activité finale — Forge marque 27% de ses buts en fin de match et Pacific en encaisse 13%. Probabilité but à 21%, Forge historiquement très efficace en fin de rencontre à domicile."
+          "txt": "Forge marque 27% de ses buts dans cette tranche finale - sa fenêtre de scoring la plus fertile. Pacific FC encaisse également 27% de ses buts ici, confirmant un scénario de but(s) tardif(s) très probable pour atteindre l'Over 2.5."
         }
       ],
-      "facteur_x": "Lambda offensif de Forge à 2.62 couplé à 45% des simulations MC affichant un score final >= 3 buts au total (2-1, 3-1, 3-0 seuls représentent 27%).",
-      "analyse_card": "Poisson, Dixon-Coles et Monte-Carlo sont unanimes à 68% pour l'Over 2.5, avec un lambda DOM de 2.62 particulièrement élevé. Les top 5 scores MC cumulent 45% des simulations et tous impliquent au moins 3 buts au total, confirmant la cohérence du marché. Forge affiche 5 clean sheets sur 6 à domicile et Pacific FC n'a remporté aucun de ses 5 matchs à l'extérieur, signalant un déséquilibre structurel propice à une victoire nette et prolifique de l'équipe locale.",
-      "conseil_public": "Jouer Over 2.5 buts à 1.50 — le signal multi-modèle est cohérent et les scores MC le confirment sans ambiguïté.",
-      "contexte": "Forge (#1) reçoit Pacific FC (#8) à Tim Hortons Field. Forge est à 0 pts du titre et Pacific FC est en zone de relégation, créant un écart de motivation et de niveau très marqué. Malgré 2 défaites consécutives pour Forge, leur bilan domicile reste solide (5V/6).",
+      "facteur_x": "Lambda offensif DOM 2.62 couplé à 5/6 top scores MC > 2.5 buts - la puissance offensive de Forge à domicile face à une équipe lanterne rouge sans victoire en déplacement génère un contexte structurellement favorable aux buts.",
+      "analyse_card": "Le lambda offensif de Forge à domicile (2.62) est nettement supérieur à la moyenne et les top scores Monte-Carlo (2-0: 11%, 3-0: 9%, 2-1: 9%, 3-1: 8%) représentent 37% des simulations, tous au-dessus de 2.5 buts. Forge affiche 5 clean sheets sur 6 matchs à domicile mais encaisse peu, tandis que Pacific FC (0V/5 extérieur, dernier) offre peu de résistance défensive avec une probabilité de but 45-60min à 23% et 75-90min à 21%.",
+      "conseil_public": "Miser sur Over 2.5 à 1.50 : la convergence totale des trois modèles à 68% et la distribution des scores MC valident clairement ce marché.",
+      "contexte": "Forge (#1, en lutte pour le titre) reçoit Pacific FC (#8/8, en zone de relégation) à Tim Hortons Field. L'écart de niveau est maximal dans ce championnat avec des enjeux diamétralement opposés.",
       "vbet": "OUI",
       "scores": [
         "3-1"
@@ -4208,34 +4277,34 @@
       "mc_scores": [
         {
           "score": "2-0",
-          "n": 504,
-          "pct": 10
+          "n": 532,
+          "pct": 11
+        },
+        {
+          "score": "3-0",
+          "n": 457,
+          "pct": 9
         },
         {
           "score": "2-1",
-          "n": 467,
+          "n": 449,
           "pct": 9
         },
         {
           "score": "3-1",
-          "n": 427,
-          "pct": 9
-        },
-        {
-          "score": "3-0",
-          "n": 425,
-          "pct": 9
+          "n": 414,
+          "pct": 8
         },
         {
           "score": "1-0",
-          "n": 383,
-          "pct": 8
+          "n": 358,
+          "pct": 7
         }
       ],
       "paris_safe": {
         "bet": "Over 2.5",
         "cote": 1.5,
-        "proba": "73%"
+        "proba": "74%"
       },
       "paris_risque": {
         "bet": "",
@@ -4246,7 +4315,7 @@
       "stade": {
         "nom": "Tim Hortons Field",
         "cap": "",
-        "meteo": "🌤️",
+        "meteo": "",
         "temp": "",
         "desc": ""
       },
@@ -4712,7 +4781,7 @@
         "id": 1148
       },
       "league": "Liga Pro",
-      "ligue_icon": "🏆",
+      "ligue_icon": "FB",
       "league_key": "equateur",
       "date": "2026-07-17 02:00",
       "cat": [
@@ -4720,116 +4789,162 @@
       ],
       "val": false,
       "hot": false,
-      "conf": 0,
+      "conf": 6.8,
       "p1": 49,
       "pn": 29,
       "p2": 22,
       "po15": 0,
       "po25": 37,
       "btts": 42,
-      "c1": "--",
-      "cn": "--",
-      "c2": "--",
-      "co15": "--",
-      "co25": "--",
-      "cu25": "--",
-      "dc1x": "--",
-      "dc2x": "--",
-      "dc12": "--",
-      "cdc1x": "--",
-      "cdc2x": "--",
-      "ah_dom": "--",
-      "ah_ext": "--",
-      "co35": "--",
-      "cbtts": "--",
-      "cbtts_non": "--",
-      "btts_oui": "--",
-      "btts_non": "--",
-      "bookies": [],
-      "edge": "",
-      "marche": "RESULTAT",
-      "risque": "ELEVE",
-      "pari_rec": "",
-      "cote_rec": "",
-      "no_signal": true,
-      "no_signal_label": "Aucun signal clair sur ce match",
+      "c1": "2.05",
+      "cn": "2.95",
+      "c2": "3.60",
+      "co15": "1.37",
+      "co25": "2.19",
+      "cu25": "1.63",
+      "dc1x": "1.25",
+      "dc2x": "1.67",
+      "dc12": "1.33",
+      "cdc1x": "1.25",
+      "cdc2x": "1.67",
+      "ah_dom": "2.06",
+      "ah_ext": "3.45",
+      "co35": "3.92",
+      "cbtts": "1.87",
+      "cbtts_non": "1.80",
+      "btts_oui": "1.87",
+      "btts_non": "1.80",
+      "bookies": [
+        {
+          "n": "Betclic",
+          "o": "200 offerts",
+          "l": "#LIEN_BETCLIC",
+          "c": "1.63",
+          "c1": "2.05",
+          "cn": "2.95",
+          "c2": "3.60"
+        },
+        {
+          "n": "Winamax",
+          "o": "100 offerts",
+          "l": "#LIEN_WINAMAX",
+          "c": "1.60",
+          "c1": "2.02",
+          "cn": "2.92",
+          "c2": "3.57"
+        },
+        {
+          "n": "Unibet",
+          "o": "100 rembourses",
+          "l": "#LIEN_UNIBET",
+          "c": "1.61",
+          "c1": "2.03",
+          "cn": "2.93",
+          "c2": "3.58"
+        },
+        {
+          "n": "PMU",
+          "o": "100 offerts",
+          "l": "#LIEN_PMU",
+          "c": "1.58",
+          "c1": "2.00",
+          "cn": "2.90",
+          "c2": "3.55"
+        },
+        {
+          "n": "Bet365",
+          "o": "100 bonus",
+          "l": "#LIEN_BET365",
+          "c": "1.66",
+          "c1": "2.08",
+          "cn": "2.98",
+          "c2": "3.63"
+        }
+      ],
+      "edge": "63% (modele)",
+      "marche": "TOTAL_BUTS",
+      "risque": "FAIBLE",
+      "pari_rec": "Under 2.5",
+      "cote_rec": "1.63",
+      "no_signal": false,
+      "no_signal_label": "",
       "mise": "2-3% bankroll",
-      "verdict_shark": "",
+      "verdict_shark": "Under 2.5 a 1.63 - le modele Poisson (63%), Dixon-Coles et Monte-Carlo convergent vers un match a faible scoring avec 1-0, 0-0 et 1-1 comme scenarios dominants",
       "scenario": {
-        "phase1": "Orense SC domine à domicile avec 49% de probabilité de victoire selon Poisson/Dixon-Coles/MC convergents. Emelec souffre structurellement en déplacement avec une attaque quasi-muette (63% de matchs sans marquer).",
-        "phase2": "Les trois modèles (Poisson 49%, Dixon-Coles 48%, Monte-Carlo 51%) convergent fortement sur la victoire Orense. Le nul est secondairement probable à 27-31%. Emelec ne dépasse pas 22% de chances de victoire.",
-        "phase3": "Les scores MC top sont 1-0 (16%), 1-1 (12%), 0-0 (11%) et 2-0 (11%) — cohérents avec un match fermé, peu de buts, et une domination partielle d'Orense sans explosion offensive. Le marché Under 2.5 serait logique mais aucune cote exploitable n'est confirmée."
+        "phase1": "Orense SC domine a domicile sur le papier (49% de victoire) mais reste limité offensivement. Emelec est en grande souffrance en deplacement avec une defense surchauffee (xGA 1.97) mais une attaque quasi inexistante (63% de matchs sans marquer en ext).",
+        "phase2": "Les lambdas Poisson (DOM 1.346 / EXT 0.809) confirment un match serré et peu prolifique. La probabilite Under 2.5 ressort a 63% de facon consistante sur les trois modeles. Le score le plus probable est 1-0 (16%).",
+        "phase3": "La tranche 75-90min concentre 28% des buts (la plus haute), ce qui suggere que les buts arrivent tard dans le match, souvent en fin de partie - cela n'impacte pas l'Under 2.5 si le match reste a 0-1 ou 1-0 jusqu'a la 75e minute."
       },
       "scenario_15min": [
         {
           "t": "0-15min",
           "prob": 9,
-          "txt": "Démarrage prudent attendu. Orense ne génère que 5% de ses buts dans cette tranche et Emelec 19%, mais ces pourcentages reflètent des volumes absolus faibles — la probabilité réelle de but sur 15 minutes reste à 9%. Les deux équipes s'observent."
+          "txt": "Debut prudent. Orense marque seulement 5% de ses buts dans cette tranche, Emelec 19% des siens mais encaisse peu (4% des buts d'Orense viennent ici). Probabilite de but faible a 9%."
         },
         {
           "t": "15-30min",
           "prob": 8,
-          "txt": "Tranche la plus calme du match : Orense marque seulement 5% de ses buts ici, Emelec 7%. Emelec encaisse 0% de ses buts dans cette fenêtre en déplacement — probabilité de but globale à 8%, la plus basse de la rencontre."
+          "txt": "Tranche la plus calme du match. Orense ne marque que 5% de ses buts ici et Emelec 7% des siens. Emelec encaisse 0% de ses buts dans cette periode en deplacement. Probabilite but tres basse a 8%."
         },
         {
           "t": "30-45min",
           "prob": 21,
-          "txt": "Pic de première mi-temps : Orense concentre 24% de ses buts offensifs ici et encaisse 20% de la production d'Emelec. Emelec contribue 15% de ses buts offensifs. Probabilité de but à 21% — moment clé avant la pause."
+          "txt": "Acceleration avant la mi-temps. Orense monte a 24% de ses buts marques dans cette tranche, Emelec encaisse 23% des buts adverses ici. C'est la periode la plus active de la premiere mi-temps avec 21% de probabilite de but."
         },
         {
           "t": "45-60min",
           "prob": 19,
-          "txt": "La deuxième mi-temps s'ouvre sur une intensité maintenue : Orense marque 19% de ses buts dans cette tranche et en encaisse 24% d'Emelec. Probabilité de but à 19% — tranche équilibrée tactiquement."
+          "txt": "Reprise active. Orense encaisse 24% des buts d'Emelec dans cette tranche et marque 19% des siens. Emelec marque 15% de ses buts ici. Probabilite de but stable a 19%."
         },
         {
           "t": "60-75min",
           "prob": 16,
-          "txt": "Légère baisse d'intensité : Orense produit 19% de ses buts ici mais Emelec n'en génère que 19% également à l'extérieur, avec seulement 12% encaissés par Orense dans ce créneau. Probabilité de but à 16%."
+          "txt": "Legere baisse d'intensite. Orense marque 19% de ses buts et en encaisse 12% venant d'Emelec. Emelec marque 19% de ses buts ici. Probabilite a 16%, sous la moyenne."
         },
         {
           "t": "75-90min",
           "prob": 28,
-          "txt": "Tranche la plus explosive du match : Orense marque 29% de ses buts en fin de match et encaisse 36% des buts d'Emelec ici — Emelec génère 26% de sa production offensive dans ce créneau. Probabilité de but maximale à 28%, confirmant une fin de match ouverte."
+          "txt": "Pic d'activite finale. Orense marque 29% de ses buts dans ce final et encaisse 36% des buts d'Emelec. Emelec marque 26% de ses buts en fin de match. La tranche la plus dangereuse du match avec 28% de probabilite de but - periode critique pour l'Under 2.5."
         }
       ],
-      "facteur_x": "Emelec marque dans seulement 37% de ses déplacements (63% sans marquer à l'extérieur) — signal le plus fort du match, mais inexploitable sans cote disponible.",
-      "analyse_card": "Orense SC affiche un bilan domicile de 3V/9 avec un xG de 1.92 et un xGA de 1.65, indiquant une équipe produisant de l'attaque mais poreuse. Emelec à l'extérieur est très limité : 1V/8, 63% de matchs sans marquer, xG extérieur à 1.18 contre xGA 1.97 — signaux de faiblesse offensive confirmés. Les modèles Monte-Carlo désignent 1-0 (16%), 1-1 (12%) et 0-0 (11%) comme scores dominants, suggérant une tendance Under et BTTS non, mais aucune cote exploitable n'est disponible.",
-      "conseil_public": "Ne pas jouer ce match — l'absence de cotes >= 1.50 rend toute mise sans valeur attendue positive. Passer son tour est la décision rationnelle.",
-      "contexte": "Liga Pro équatorienne, journée de milieu de saison. Orense SC (#10 au général) reçoit Emelec (#12), un duel de bas de tableau où les deux équipes cherchent à éviter la relégation. L'enjeu défensif domine tactiquement.",
-      "vbet": "NON",
+      "facteur_x": "Emelec ne marque pas dans 63% de ses matchs en exterieur (5/8), et ses lambdas Poisson en deplacement donnent un xG de seulement 1.18, ce qui rend les scenarios a 3+ buts tres improbables.",
+      "analyse_card": "Les trois modeles (Poisson 63%, Dixon-Coles, Monte-Carlo) s'accordent sur une probabilite Under 2.5 a 63%. Les top scores Monte-Carlo sont 1-0 (16%), 1-1 (13%), 0-0 (11%), 2-0 (10%) et 0-1 (10%), ce qui est parfaitement coherent avec l'Under 2.5 - aucun score a 3 buts ou plus ne figure parmi les scenarios dominants. Emelec ne marque pas en deplacement dans 63% des cas (5/8 matchs sans marquer), ce qui tire naturellement le total vers le bas.",
+      "conseil_public": "Miser sur Under 2.5 a 1.63 : la convergence des trois modeles et la faible capacite offensive d'Emelec en exterieur (xG 1.18, 63% de matchs sans marquer) soutiennent clairement ce marche.",
+      "contexte": "Liga Pro 2026, phase de championnat ecuatorien. Orense SC recoit a l'Estadio 9 de Mayo avec un bilan domicile modeste (3V/9) face a un Emelec en grande difficulte en deplacement (1V/8). Les deux equipes alternent victoires et defaites sur leurs 5 derniers matchs.",
+      "vbet": "OUI",
       "scores": [
         "1-0"
       ],
       "mc_scores": [
         {
           "score": "1-0",
-          "n": 807,
+          "n": 784,
           "pct": 16
         },
         {
           "score": "1-1",
-          "n": 621,
-          "pct": 12
+          "n": 627,
+          "pct": 13
         },
         {
           "score": "0-0",
-          "n": 554,
+          "n": 543,
           "pct": 11
         },
         {
           "score": "2-0",
-          "n": 536,
-          "pct": 11
+          "n": 523,
+          "pct": 10
         },
         {
           "score": "0-1",
-          "n": 466,
-          "pct": 9
+          "n": 475,
+          "pct": 10
         }
       ],
       "paris_safe": {
-        "bet": "",
-        "cote": "--",
+        "bet": "Under 2.5",
+        "cote": 1.63,
         "proba": "49%"
       },
       "paris_risque": {
@@ -4839,10 +4954,10 @@
       },
       "kelly": "2",
       "stade": {
-        "nom": "Estadio 9 de Mayo — Machala",
+        "nom": "Estadio 9 de Mayo - Machala",
         "cap": "",
-        "meteo": "☀️",
-        "temp": "28°C",
+        "meteo": "",
+        "temp": "28C",
         "desc": "ciel dégagé"
       },
       "crit_home": {
@@ -5225,7 +5340,38 @@
         "games": 20
       },
       "top_scorers_home": [],
-      "top_scorers_away": [],
+      "top_scorers_away": [
+        {
+          "id": 446972,
+          "name": "L. Klimowicz",
+          "photo": "https://media.api-sports.io/football/players/446972.png",
+          "goals": 4,
+          "assists": 2,
+          "games": 18,
+          "shots_total": 28,
+          "shots_on": 17
+        },
+        {
+          "id": 119812,
+          "name": "A. Mina",
+          "photo": "https://media.api-sports.io/football/players/119812.png",
+          "goals": 1,
+          "assists": 2,
+          "games": 17,
+          "shots_total": 10,
+          "shots_on": 6
+        },
+        {
+          "id": 16557,
+          "name": "R. Caicedo",
+          "photo": "https://media.api-sports.io/football/players/16557.png",
+          "goals": 2,
+          "assists": 0,
+          "games": 18,
+          "shots_total": 12,
+          "shots_on": 3
+        }
+      ],
       "key_absences": [],
       "match_stats_home": {
         "possession": 41,
@@ -5276,7 +5422,7 @@
         "id": 5648
       },
       "league": "Super League",
-      "ligue_icon": "🏆",
+      "ligue_icon": "FB",
       "league_key": "chine",
       "date": "2026-07-17 13:00",
       "cat": [
@@ -5284,116 +5430,162 @@
       ],
       "val": false,
       "hot": false,
-      "conf": 0,
+      "conf": 6.8,
       "p1": 27,
       "pn": 25,
       "p2": 48,
       "po15": 0,
       "po25": 53,
       "btts": 56,
-      "c1": "--",
-      "cn": "--",
-      "c2": "--",
-      "co15": "--",
-      "co25": "--",
-      "cu25": "--",
-      "dc1x": "--",
-      "dc2x": "--",
-      "dc12": "--",
-      "cdc1x": "--",
-      "cdc2x": "--",
-      "ah_dom": "--",
-      "ah_ext": "--",
-      "co35": "--",
-      "cbtts": "--",
-      "cbtts_non": "--",
-      "btts_oui": "--",
-      "btts_non": "--",
-      "bookies": [],
-      "edge": "",
-      "marche": "RESULTAT",
-      "risque": "ELEVE",
-      "pari_rec": "",
-      "cote_rec": "",
-      "no_signal": true,
-      "no_signal_label": "Aucun signal clair sur ce match",
+      "c1": "4.00",
+      "cn": "3.82",
+      "c2": "1.75",
+      "co15": "1.18",
+      "co25": "1.62",
+      "cu25": "2.21",
+      "dc1x": "2.00",
+      "dc2x": "1.22",
+      "dc12": "1.22",
+      "cdc1x": "2.00",
+      "cdc2x": "1.22",
+      "ah_dom": "3.90",
+      "ah_ext": "1.73",
+      "co35": "2.50",
+      "cbtts": "1.60",
+      "cbtts_non": "2.20",
+      "btts_oui": "1.60",
+      "btts_non": "2.20",
+      "bookies": [
+        {
+          "n": "Betclic",
+          "o": "200 offerts",
+          "l": "#LIEN_BETCLIC",
+          "c": "1.60",
+          "c1": "4.00",
+          "cn": "3.82",
+          "c2": "1.75"
+        },
+        {
+          "n": "Winamax",
+          "o": "100 offerts",
+          "l": "#LIEN_WINAMAX",
+          "c": "1.57",
+          "c1": "3.97",
+          "cn": "3.79",
+          "c2": "1.72"
+        },
+        {
+          "n": "Unibet",
+          "o": "100 rembourses",
+          "l": "#LIEN_UNIBET",
+          "c": "1.58",
+          "c1": "3.98",
+          "cn": "3.80",
+          "c2": "1.73"
+        },
+        {
+          "n": "PMU",
+          "o": "100 offerts",
+          "l": "#LIEN_PMU",
+          "c": "1.55",
+          "c1": "3.95",
+          "cn": "3.77",
+          "c2": "1.70"
+        },
+        {
+          "n": "Bet365",
+          "o": "100 bonus",
+          "l": "#LIEN_BET365",
+          "c": "1.63",
+          "c1": "4.03",
+          "cn": "3.85",
+          "c2": "1.78"
+        }
+      ],
+      "edge": "56% (modele)",
+      "marche": "BTTS",
+      "risque": "FAIBLE",
+      "pari_rec": "BTTS Oui",
+      "cote_rec": "1.60",
+      "no_signal": false,
+      "no_signal_label": "",
       "mise": "2-3% bankroll",
-      "verdict_shark": "",
+      "verdict_shark": "BTTS Oui à 1.60 - les deux équipes ont marqué dans 89% de leurs matchs respectifs et les xG convergent vers un match ouvert des deux côtés",
       "scenario": {
-        "phase1": "Chengdu domine structurellement à l'extérieur (6V/9, xG 1.48, xGA 1.20) mais sa forme récente LLDDD avec 2 défaites consécutives tempère l'enthousiasme. Qingdao est capable de marquer (xG 1.43) mais encaisse facilement (xGA 1.48).",
-        "phase2": "Les trois modèles convergent : EXT favori à 47-49%, DOM à 25-27%, nul à 24-27%. Le score central 1-2 est cohérent avec les tops Monte-Carlo (1-2 à 9%, 0-1 à 10%, 0-2 à 8%). Over 2.5 à 53% et BTTS à 56% sont plausibles mais sans cote exploitable.",
-        "phase3": "Aucun marché n'est jouable car toutes les cotes sont inférieures à 1.50 ou absentes. Même si les signaux pointent vers une victoire de Chengdu et un match avec buts des deux côtés, la règle absolue de valeur minimale (cote >= 1.50) impose de passer ce match."
+        "phase1": "Qingdao (#6, DOM) présente des xG équilibrés (1.43/1.48) et une forme WLDLW, indiquant une capacité à marquer à domicile mais aussi une perméabilité défensive. Chengdu (#1, EXT) domine en extérieur (6V/9) avec un xG de 1.48 et un xGA de 1.20, mais traverse une série LLDDD avec 2 défaites consécutives - signal de vulnérabilité temporaire.",
+        "phase2": "Les modèles Poisson, Dixon-Coles et Monte-Carlo convergent tous vers une victoire Chengdu (~47-49%) mais avec des lambdas qui indiquent que Qingdao marque suffisamment (1.161) pour que le BTTS soit probable à 56%. Les top scores MC incluent 1-1 (12%), 1-2 (9%), 1-0 (7%), dont la majorité implique un but de Qingdao.",
+        "phase3": "Les buts se concentrent en fin de match (75-90min à 26% de probabilité) et en deuxième mi-temps (45-60min à 20%). Chengdu, poussé par l'enjeu titre, devrait dominer mais laisser des espaces à Qingdao qui marque 26% de ses buts en fin de match. Le BTTS Oui reste cohérent avec l'ensemble des données disponibles."
       },
       "scenario_15min": [
         {
           "t": "0-15min",
           "prob": 14,
-          "txt": "Démarrage équilibré : Qingdao marque 13% de ses buts ici et encaisse 13% de ceux de Chengdu. Chengdu ne marque que 9% de ses buts dans ce créneau mais encaisse 19% de ceux de Qingdao. Probabilité de but globale de 14%, ouverture prudente attendue."
+          "txt": "Phase d'observation - Qingdao marque 13% de ses buts et en encaisse 13% sur cette tranche. Chengdu, sous pression du titre, pourrait chercher à s'imposer rapidement mais ne marque que 9% de ses buts ici. Probabilité de but modérée à 14%."
         },
         {
           "t": "15-30min",
           "prob": 12,
-          "txt": "Tranche la plus calme du match : Qingdao ne marque que 4% de ses buts ici, Chengdu 15%. La probabilité de but tombe à 12%, les deux équipes cherchent à s'installer tactiquement."
+          "txt": "Tranche la plus calme du match - Qingdao ne marque que 4% de ses buts ici, tandis que Chengdu est plus actif (15%). La probabilité de but chute à 12%, période peu propice aux ouvertures du score."
         },
         {
           "t": "30-45min",
           "prob": 16,
-          "txt": "Montée en puissance avant la mi-temps : Qingdao génère 22% de ses buts dans ce créneau, Chengdu 18%. Probabilité de but à 16%, la fin de première période concentre les occasions offensives des deux équipes."
+          "txt": "Montée en puissance en fin de première mi-temps - Qingdao marque 22% de ses buts sur cette tranche et Chengdu 18%. Probabilité de but à 16%, avec un scénario probable d'ouverture du score avant la pause."
         },
         {
           "t": "45-60min",
           "prob": 20,
-          "txt": "Tranche la plus productive du match : Qingdao marque 22% de ses buts ici et encaisse 26% de ceux de Chengdu. Probabilité de but maximale à 20%, le retour des vestiaires historiquement décisif pour les deux équipes."
+          "txt": "Tranche la plus productive de la première heure - Qingdao marque 22% de ses buts ici et encaisse 26% des buts de Chengdu. Avec une probabilité de but à 20%, la période post-pause est cruciale pour le développement du score."
         },
         {
           "t": "60-75min",
           "prob": 14,
-          "txt": "Creux de milieu de seconde période : Qingdao marque 13% de ses buts ici, Chengdu 15%. Probabilité de but redescend à 14%, phase de gestion tactique ou ajustements si le score est serré."
+          "txt": "Légère baisse d'intensité - Qingdao marque 13% de ses buts et Chengdu 15% sur cette tranche. Probabilité de but à 14%, phase de gestion tactique avant le sprint final."
         },
         {
           "t": "75-90min",
           "prob": 26,
-          "txt": "Tranche la plus prolifique de la rencontre : Qingdao marque 26% de ses buts ici et encaisse 22% de ceux de Chengdu ; Chengdu marque 30% de ses buts en fin de match. Probabilité de but à 26%, les dernières minutes seront décisives notamment si Chengdu cherche à valider ou forcer le résultat pour le titre."
+          "txt": "Tranche la plus fertile du match - Qingdao marque 26% de ses buts ici et Chengdu 30%, avec des probabilités d'encaissement élevées (22% et 24% respectivement). La probabilité de but atteint 26%, confirmant que la fin de match est déterminante pour le BTTS."
         }
       ],
-      "facteur_x": "Chengdu Better City est à 0 pt du titre avec 6V/9 à l'extérieur (xG 1.48/xGA 1.20), mais la forme récente (LLDDD, 2 défaites consécutives) introduit une incertitude significative qui, combinée à l'absence de cotes exploitables, impose de passer son tour.",
-      "analyse_card": "Chengdu Better City affiche 6 victoires en 9 matchs à l'extérieur avec un xG de 1.48, mais arrive sur une série de 2 défaites consécutives et 3 nuls lors des 5 derniers matchs. Les modèles Poisson, Dixon-Coles et Monte-Carlo convergent tous vers une victoire EXT (47-49%), avec un score central 1-2 cohérent avec les tops MC (1-2 à 9%, 0-1 à 10%). Malgré la cohérence des signaux directionnels, aucune cote exploitable n'est disponible (toutes < 1.50 ou absentes), ce qui invalide tout pari selon les règles de sélection.",
-      "conseil_public": "Passer ce match : sans cote disponible supérieure à 1.50, aucun marché n'offre de valeur exploitable, même avec des signaux convergents.",
-      "contexte": "Qingdao Youth Island (#6 à domicile, 3V/9) reçoit Chengdu Better City (#1, à 0 pts du titre) dans un match à fort enjeu pour le visiteur. Chengdu est leader mais en perte de vitesse récente (LLDDD sur 5 matchs). L'enjeu titre pousse Chengdu à jouer le résultat, mais la forme immédiate est préoccupante.",
-      "vbet": "NON",
+      "facteur_x": "Seulement 2 clean sheets sur 9 matchs pour chaque équipe (22%), et 89% de matchs avec un but marqué de chaque côté - le signal BTTS est le plus robuste et cohérent avec les top scores Monte-Carlo dominés par des scores avec buts des deux équipes (1-1, 1-2, 1-0).",
+      "analyse_card": "Qingdao affiche un xG de 1.43 et Chengdu un xGA de 1.20, avec seulement 11% de matchs sans marquer pour chaque équipe, ce qui indique une probabilité élevée que les deux équipes trouvent le chemin des filets. Le modèle Poisson estime le BTTS Oui à 56%, soutenu par les lambdas 1.161 (DOM) et 1.648 (EXT). Les top scores Monte-Carlo 1-1 (12%), 1-2 (9%) et 1-0 (7%) confirment que Qingdao marque régulièrement même face à une équipe supérieure.",
+      "conseil_public": "Jouer BTTS Oui à 1.60 en s'appuyant sur la forte probabilité que les deux équipes marquent, confirmée par les modèles et les données de clean sheet limitées (2/9 pour chaque équipe).",
+      "contexte": "Chengdu Better City (EXT, #1) est à 0 point du titre et joue avec l'enjeu maximal, face à Qingdao (#6) à domicile qui reste sur une forme WLDLW. Chengdu vient de deux défaites consécutives (forme LLDDD), ce qui peut générer un match ouvert avec des prises de risque des deux côtés.",
+      "vbet": "OUI",
       "scores": [
         "1-2"
       ],
       "mc_scores": [
         {
           "score": "1-1",
-          "n": 582,
+          "n": 584,
           "pct": 12
         },
         {
           "score": "0-1",
-          "n": 501,
+          "n": 494,
           "pct": 10
         },
         {
           "score": "1-2",
-          "n": 453,
+          "n": 452,
           "pct": 9
         },
         {
           "score": "0-2",
-          "n": 399,
+          "n": 406,
           "pct": 8
         },
         {
           "score": "1-0",
-          "n": 381,
-          "pct": 8
+          "n": 365,
+          "pct": 7
         }
       ],
       "paris_safe": {
-        "bet": "",
-        "cote": "--",
+        "bet": "BTTS Oui",
+        "cote": 1.6,
         "proba": "27%"
       },
       "paris_risque": {
@@ -5403,10 +5595,10 @@
       },
       "kelly": "2",
       "stade": {
-        "nom": "Qingdao Guzhenkou University City Sports Center — Qingdao",
+        "nom": "Qingdao Guzhenkou University City Sports Center - Qingdao",
         "cap": "",
-        "meteo": "☁️",
-        "temp": "24°C",
+        "meteo": "",
+        "temp": "24C",
         "desc": "nuageux"
       },
       "crit_home": {
@@ -5540,7 +5732,7 @@
         },
         "away": {
           "val": 15,
-          "info": "Repos 148 jours"
+          "info": "Repos 149 jours"
         }
       },
       "fatigue_home": {
@@ -5549,7 +5741,7 @@
       },
       "fatigue_away": {
         "val": 15,
-        "info": "Repos 148 jours"
+        "info": "Repos 149 jours"
       },
       "tendances": {
         "over25_home": 4,
@@ -5800,38 +5992,7 @@
         "yellow_per_game": "2.6",
         "games": 20
       },
-      "top_scorers_home": [
-        {
-          "id": 42020,
-          "name": "A. Yakubu",
-          "photo": "https://media.api-sports.io/football/players/42020.png",
-          "goals": 4,
-          "assists": 6,
-          "games": 18,
-          "shots_total": 26,
-          "shots_on": 12
-        },
-        {
-          "id": 41161,
-          "name": "Davidson",
-          "photo": "https://media.api-sports.io/football/players/41161.png",
-          "goals": 5,
-          "assists": 3,
-          "games": 18,
-          "shots_total": 34,
-          "shots_on": 17
-        },
-        {
-          "id": 38116,
-          "name": "S. Memišević",
-          "photo": "https://media.api-sports.io/football/players/38116.png",
-          "goals": 2,
-          "assists": 0,
-          "games": 16,
-          "shots_total": 9,
-          "shots_on": 3
-        }
-      ],
+      "top_scorers_home": [],
       "top_scorers_away": [],
       "key_absences": [],
       "match_stats_home": {
@@ -5883,124 +6044,170 @@
         "id": 5684
       },
       "league": "Super League",
-      "ligue_icon": "🏆",
+      "ligue_icon": "FB",
       "league_key": "chine",
       "date": "2026-07-17 13:35",
       "cat": [
         "all"
       ],
-      "val": false,
+      "val": true,
       "hot": false,
-      "conf": 0,
+      "conf": 7.2,
       "p1": 66,
       "pn": 17,
       "p2": 17,
       "po15": 0,
       "po25": 81,
       "btts": 73,
-      "c1": "--",
-      "cn": "--",
-      "c2": "--",
-      "co15": "--",
-      "co25": "--",
-      "cu25": "--",
-      "dc1x": "--",
-      "dc2x": "--",
-      "dc12": "--",
-      "cdc1x": "--",
-      "cdc2x": "--",
-      "ah_dom": "--",
-      "ah_ext": "--",
-      "co35": "--",
-      "cbtts": "--",
-      "cbtts_non": "--",
-      "btts_oui": "--",
-      "btts_non": "--",
-      "bookies": [],
-      "edge": "",
-      "marche": "RESULTAT",
-      "risque": "ELEVE",
-      "pari_rec": "",
-      "cote_rec": "",
-      "no_signal": true,
-      "no_signal_label": "Aucun signal clair sur ce match",
+      "c1": "1.37",
+      "cn": "4.95",
+      "c2": "6.50",
+      "co15": "1.10",
+      "co25": "1.40",
+      "cu25": "2.77",
+      "dc1x": "1.08",
+      "dc2x": "2.90",
+      "dc12": "1.14",
+      "cdc1x": "1.08",
+      "cdc2x": "2.90",
+      "ah_dom": "1.36",
+      "ah_ext": "5.90",
+      "co35": "2.01",
+      "cbtts": "1.58",
+      "cbtts_non": "2.21",
+      "btts_oui": "1.58",
+      "btts_non": "2.21",
+      "bookies": [
+        {
+          "n": "Betclic",
+          "o": "200 offerts",
+          "l": "#LIEN_BETCLIC",
+          "c": "1.58",
+          "c1": "1.37",
+          "cn": "4.95",
+          "c2": "6.50"
+        },
+        {
+          "n": "Winamax",
+          "o": "100 offerts",
+          "l": "#LIEN_WINAMAX",
+          "c": "1.55",
+          "c1": "1.34",
+          "cn": "4.92",
+          "c2": "6.47"
+        },
+        {
+          "n": "Unibet",
+          "o": "100 rembourses",
+          "l": "#LIEN_UNIBET",
+          "c": "1.56",
+          "c1": "1.35",
+          "cn": "4.93",
+          "c2": "6.48"
+        },
+        {
+          "n": "PMU",
+          "o": "100 offerts",
+          "l": "#LIEN_PMU",
+          "c": "1.53",
+          "c1": "1.32",
+          "cn": "4.90",
+          "c2": "6.45"
+        },
+        {
+          "n": "Bet365",
+          "o": "100 bonus",
+          "l": "#LIEN_BET365",
+          "c": "1.61",
+          "c1": "1.40",
+          "cn": "4.98",
+          "c2": "6.53"
+        }
+      ],
+      "edge": "73% (modele)",
+      "marche": "BTTS",
+      "risque": "FAIBLE",
+      "pari_rec": "BTTS Oui",
+      "cote_rec": "1.58",
+      "no_signal": false,
+      "no_signal_label": "",
       "mise": "2-3% bankroll",
-      "verdict_shark": "",
+      "verdict_shark": "BTTS Oui à 1.58 - Le modèle Poisson/Dixon-Coles/Monte-Carlo converge à 73% pour que les deux équipes marquent, soutenu par un xG de 2.31 pour Beijing et des top scores MC majoritairement avec buts des deux côtés.",
       "scenario": {
-        "phase1": "Beijing Guoan domine structurellement : 4V/9 à domicile, xG de 2.31, aucun match sans marquer à domicile (0/9). Shenyang est fragile en déplacement avec 50% de matchs sans marquer en 8 déplacements.",
-        "phase2": "Les trois modèles (Poisson, Dixon-Coles, Monte-Carlo) convergent à 65-66% pour une victoire Beijing. Les lambdas (2.871 vs 1.477) projettent un match à forte production offensive côté domicile. L'Over 2.5 ressort à 81% de probabilité.",
-        "phase3": "Les top scores MC (3-1 à 7%, 2-1 à 7%, 3-2 à 6%) confirment la cohérence avec un Over 2.5 et un BTTS élevé. Mais en l'absence de cotes >= 1.50, aucun marché ne peut être recommandé avec une valeur réelle."
+        "phase1": "Beijing domine nettement à domicile (4V/9) avec un xG offensif de 2.31 contre 1.2 concédé. Shenyang marque dans 50% de ses déplacements malgré 1 seule victoire sur 8 matchs extérieurs.",
+        "phase2": "Les trois modèles (Poisson 73%, Dixon-Coles 73%, Monte-Carlo implicite via top scores) convergent sur une probabilité BTTS élevée. Les lambdas de 2.871 et 1.477 confirment une production de buts des deux côtés.",
+        "phase3": "Cohérence Monte-Carlo validée : sur les 5 scores les plus fréquents, 3 impliquent Shenyang qui marque (2-1, 3-1, 2-2). Le score 2-0 et 4-1 représentent les scénarios BTTS Non mais ne représentent que 12% combinés contre 21% pour les scores BTTS Oui."
       },
       "scenario_15min": [
         {
           "t": "0-15min",
           "prob": 7,
-          "txt": "Démarrage prudent attendu : Beijing ne marque que 2% de ses buts dans cette tranche à domicile, Shenyang 11% à l'extérieur. Probabilité combinée de but estimée à 7% — début de match fermé."
+          "txt": "Démarrage prudent attendu. Beijing ne génère que 2% de ses buts dans ce créneau, tandis que Shenyang en marque 11%. Probabilité de but faible à 7%, phase d'observation tactique probable."
         },
         {
           "t": "15-30min",
           "prob": 19,
-          "txt": "Montée en puissance : Beijing génère 14% de ses buts ici, mais encaisse surtout 31% des buts de Shenyang dans cette fenêtre. Tranche à risque défensif pour les locaux, probabilité de but à 19%."
+          "txt": "Tranche la plus active du premier acte : Beijing marque 14% de ses buts ici mais encaisse 31% des buts de Shenyang, signal d'un possible danger extérieur. Probabilité de but élevée à 19%."
         },
         {
           "t": "30-45min",
           "prob": 11,
-          "txt": "Phase intermédiaire stable : Beijing marque 12% et Shenyang 11% de leurs buts respectifs ici. Probabilité de but à 11%, tranche relativement calme avant la mi-temps."
+          "txt": "Légère accalmie avant la mi-temps. Beijing marque 12% de ses buts dans cette tranche, Shenyang 11%. Probabilité modérée à 11%, phase de consolidation des deux équipes."
         },
         {
           "t": "45-60min",
           "prob": 23,
-          "txt": "Tranche la plus productive du match : Beijing marque 29% de ses buts ici, Shenyang également 29%. Probabilité de but à 23% — explosivité post-mi-temps des deux côtés."
+          "txt": "Tranche clé du second acte : Beijing marque 29% de ses buts ici et Shenyang également 29%. Probabilité de but maximale à 23%, typique d'une réaction post-mi-temps des deux équipes."
         },
         {
           "t": "60-75min",
           "prob": 18,
-          "txt": "Phase de gestion : Beijing marque 16% de ses buts ici, Shenyang 16% également. Beijing encaisse 25% des buts adverses dans cette tranche — vigilance défensive à 18% de probabilité de but."
+          "txt": "Beijing marque 16% de ses buts dans ce créneau et encaisse 25% des buts de Shenyang. Probabilité à 18%, phase où Shenyang peut se montrer dangereux en contre."
         },
         {
           "t": "75-90min",
           "prob": 24,
-          "txt": "Fin de match la plus active : Beijing marque 27% de ses buts ici, Shenyang 24%. Probabilité de but maximale à 24% — les dernières minutes sont historiquement décisives pour les deux équipes."
+          "txt": "Fin de match explosive : Beijing marque 27% de ses buts ici, Shenyang 24%. C'est la tranche la plus prolifique pour les deux équipes avec une probabilité de 24%, renforçant le signal BTTS."
         }
       ],
-      "facteur_x": "Le lambda offensif de Beijing Guoan (2.871) combiné au bilan extérieur catastrophique de Shenyang (1V/8, 50% sans marquer) constitue le signal le plus fort, mais il est entièrement absorbé par des cotes trop basses pour générer de la valeur.",
-      "analyse_card": "Le modèle Poisson donne DOM 66% / Nul 17% / EXT 17%, confirmé par Dixon-Coles et Monte-Carlo. Les lambdas (2.871 vs 1.477) indiquent un fort déséquilibre en faveur de Beijing Guoan, et les top scores MC (3-1, 2-1, 3-2) suggèrent une volumétrie Over 2.5 élevée (81%). Cependant, l'absence totale de cotes >= 1.50 rend toute recommandation de pari sans valeur mathématique.",
-      "conseil_public": "Passer ce match : aucun marché ne présente de cote suffisante pour offrir une valeur réelle compte tenu des probabilités modélisées.",
-      "contexte": "Super League chinoise, journée du 15 juillet 2026. Beijing Guoan (#7) reçoit Shenyang Urban (#9) dans un match de milieu de tableau. Beijing est solide à domicile (4V/9) avec un xG offensif de 2.31, tandis que Shenyang est vulnérable à l'extérieur (1V/8, 50% sans marquer).",
-      "vbet": "NON",
+      "facteur_x": "Beijing Guoan n'a pas concédé 0 but en attaque sur 9 matchs à domicile (0% de matchs sans marquer) et possède un xG de 2.31, garantissant une production offensive solide.",
+      "analyse_card": "Beijing Guoan affiche un xG offensif de 2.31 et n'est jamais resté sans marquer à domicile sur 9 matchs (0%). Shenyang Urban marque dans 50% de ses déplacements (4/8 matchs sans marquer, soit 50% de matchs où ils scorent). Les top scores Monte-Carlo (2-1, 3-1, 4-1, 2-2, 2-0) montrent que 3 des 5 scores les plus probables impliquent les deux équipes qui marquent, dont le 2-1 et 2-2 qui représentent 14% combinés.",
+      "conseil_public": "Jouer BTTS Oui à 1.58 : Beijing ne blanchit jamais à domicile, Shenyang marque dans la moitié de ses déplacements et les trois modèles indépendants convergent à 73% de probabilité.",
+      "contexte": "Super League chinoise, journée du 15 juillet 2026. Beijing Guoan (7e) reçoit Shenyang Urban (9e), deux équipes de milieu de tableau avec des enjeux de classement modérés mais un besoin de points pour se distancer de la zone rouge.",
+      "vbet": "OUI",
       "scores": [
         "3-1"
       ],
       "mc_scores": [
         {
-          "score": "3-1",
-          "n": 370,
-          "pct": 7
+          "score": "2-1",
+          "n": 405,
+          "pct": 8
         },
         {
-          "score": "2-1",
+          "score": "3-1",
           "n": 352,
           "pct": 7
         },
         {
-          "score": "1-1",
-          "n": 322,
-          "pct": 6
-        },
-        {
-          "score": "3-2",
-          "n": 291,
+          "score": "4-1",
+          "n": 284,
           "pct": 6
         },
         {
           "score": "2-2",
-          "n": 289,
+          "n": 283,
+          "pct": 6
+        },
+        {
+          "score": "2-0",
+          "n": 279,
           "pct": 6
         }
       ],
       "paris_safe": {
-        "bet": "",
-        "cote": "--",
+        "bet": "BTTS Oui",
+        "cote": 1.58,
         "proba": "66%"
       },
       "paris_risque": {
@@ -6012,8 +6219,8 @@
       "stade": {
         "nom": "Beijing Guoan (domicile)",
         "cap": "",
-        "meteo": "☁️",
-        "temp": "28°C",
+        "meteo": "",
+        "temp": "28C",
         "desc": "couvert"
       },
       "crit_home": {
@@ -6408,38 +6615,7 @@
         "yellow_per_game": "1.9",
         "games": 20
       },
-      "top_scorers_home": [
-        {
-          "id": 12674,
-          "name": "Zhang Yuning",
-          "photo": "https://media.api-sports.io/football/players/12674.png",
-          "goals": 7,
-          "assists": 4,
-          "games": 16,
-          "shots_total": 38,
-          "shots_on": 19
-        },
-        {
-          "id": 33083,
-          "name": "Serginho",
-          "photo": "https://media.api-sports.io/football/players/33083.png",
-          "goals": 3,
-          "assists": 5,
-          "games": 16,
-          "shots_total": 25,
-          "shots_on": 12
-        },
-        {
-          "id": 41683,
-          "name": "Fábio Abreu",
-          "photo": "https://media.api-sports.io/football/players/41683.png",
-          "goals": 5,
-          "assists": 1,
-          "games": 13,
-          "shots_total": 34,
-          "shots_on": 22
-        }
-      ],
+      "top_scorers_home": [],
       "top_scorers_away": [],
       "key_absences": [],
       "match_stats_home": {
@@ -6491,170 +6667,124 @@
         "id": 1431
       },
       "league": "Super League",
-      "ligue_icon": "🏆",
+      "ligue_icon": "FB",
       "league_key": "chine",
       "date": "2026-07-17 13:35",
       "cat": [
         "all"
       ],
-      "val": true,
+      "val": false,
       "hot": false,
-      "conf": 7.6,
+      "conf": 0,
       "p1": 50,
       "pn": 22,
       "p2": 28,
       "po15": 0,
       "po25": 72,
       "btts": 70,
-      "c1": "1.53",
-      "cn": "4.10",
-      "c2": "5.50",
-      "co15": "1.19",
-      "co25": "1.65",
-      "cu25": "2.16",
-      "dc1x": "1.13",
-      "dc2x": "2.40",
-      "dc12": "1.19",
-      "cdc1x": "1.13",
-      "cdc2x": "2.40",
-      "ah_dom": "1.52",
-      "ah_ext": "4.80",
-      "co35": "2.61",
-      "cbtts": "1.70",
-      "cbtts_non": "2.01",
-      "btts_oui": "1.70",
-      "btts_non": "2.01",
-      "bookies": [
-        {
-          "n": "Betclic",
-          "o": "200€ offerts",
-          "l": "#LIEN_BETCLIC",
-          "c": "1.65",
-          "c1": "1.53",
-          "cn": "4.10",
-          "c2": "5.50"
-        },
-        {
-          "n": "Winamax",
-          "o": "100€ offerts",
-          "l": "#LIEN_WINAMAX",
-          "c": "1.62",
-          "c1": "1.50",
-          "cn": "4.07",
-          "c2": "5.47"
-        },
-        {
-          "n": "Unibet",
-          "o": "100€ remboursés",
-          "l": "#LIEN_UNIBET",
-          "c": "1.63",
-          "c1": "1.51",
-          "cn": "4.08",
-          "c2": "5.48"
-        },
-        {
-          "n": "PMU",
-          "o": "100€ offerts",
-          "l": "#LIEN_PMU",
-          "c": "1.60",
-          "c1": "1.48",
-          "cn": "4.05",
-          "c2": "5.45"
-        },
-        {
-          "n": "Bet365",
-          "o": "100€ bonus",
-          "l": "#LIEN_BET365",
-          "c": "1.68",
-          "c1": "1.56",
-          "cn": "4.13",
-          "c2": "5.53"
-        }
-      ],
-      "edge": "72% (modèle)",
-      "marche": "TOTAL_BUTS",
-      "risque": "FAIBLE",
-      "pari_rec": "Over 2.5",
-      "cote_rec": "1.65",
-      "no_signal": false,
-      "no_signal_label": "",
+      "c1": "--",
+      "cn": "--",
+      "c2": "--",
+      "co15": "--",
+      "co25": "--",
+      "cu25": "--",
+      "dc1x": "--",
+      "dc2x": "--",
+      "dc12": "--",
+      "cdc1x": "--",
+      "cdc2x": "--",
+      "ah_dom": "--",
+      "ah_ext": "--",
+      "co35": "--",
+      "cbtts": "--",
+      "cbtts_non": "--",
+      "btts_oui": "--",
+      "btts_non": "--",
+      "bookies": [],
+      "edge": "",
+      "marche": "RESULTAT",
+      "risque": "ELEVE",
+      "pari_rec": "",
+      "cote_rec": "",
+      "no_signal": true,
+      "no_signal_label": "Aucun signal clair sur ce match",
       "mise": "2-3% bankroll",
-      "verdict_shark": "Over 2.5 à 1.65 — trois modèles indépendants convergent à 72% et les top scores MC (2-1, 2-2, 3-1) confirment pleinement la tendance haute.",
+      "verdict_shark": "",
       "scenario": {
-        "phase1": "Henan contrôle à domicile avec un bilan 3V/8 et des xG offensifs solides à 2.17 ; Qingdao, muet en CS extérieur (0/9), expose régulièrement sa défense avec des xGA de 1.79.",
-        "phase2": "Les trois modèles (Poisson 72%, Dixon-Coles confirmé, MC 72%) s'accordent sur une probabilité Over 2.5 nettement supérieure à la probabilité implicite de la cote (60.6%), dégageant une value edge de ~11 points.",
-        "phase3": "Les scores Monte-Carlo les plus probables (2-1 à 10%, 2-2 à 7%, 3-1 à 6%) représentent 23% des simulations et sont tous Over 2.5, consolidant la cohérence du marché retenu."
+        "phase1": "Henan affiche un xG de 2.17 à domicile contre un xGA de 1.49, Qingdao marque peu en déplacement (1V/9) mais n'a jamais gardé leur cage inviolée sur les 9 derniers matchs extérieurs (0 CS). Les deux clubs sont en zone de relégation, enjeu maximal.",
+        "phase2": "Poisson (DOM 50%/Nul 22%/EXT 28%), Dixon-Coles (50/23/27) et Monte-Carlo (51/20/29) sont parfaitement alignés. Les lambdas 2.156 vs 1.575 favorisent Henan. Over 2.5 à 72% et BTTS à 70% sont les marchés les plus solides mathématiquement.",
+        "phase3": "Les top scores MC (2-1 à 9%, 1-1 à 8%, 2-2 à 7%, 1-2 à 7%, 3-1 à 6%) confirment un match ouvert avec buts des deux côtés. Les tranches 45-60min (20%) et 75-90min (26%) concentrent le risque offensif maximal. Signal clair, mais aucune cote exploitable >= 1.50 disponible."
       },
       "scenario_15min": [
         {
           "t": "0-15min",
           "prob": 12,
-          "txt": "Qingdao marque 19% de ses buts en déplacement dans cette tranche, Henan n'en marque que 5% ici — activité offensive asymétrique mais probabilité globale de but modérée à 12%."
+          "txt": "Démarrage prudent malgré l'enjeu. Henan ne marque que 5% de ses buts dans cette tranche à domicile, Qingdao en marque 19% mais encaisse 12%. Probabilité de but limitée à 12%, les deux équipes cherchent à s'installer tactiquement."
         },
         {
           "t": "15-30min",
           "prob": 11,
-          "txt": "Tranche calme : Henan monte à 16% de ses réalisations mais Qingdao ne contribue qu'à 8% des siennes dans ce créneau — probabilité but la plus basse du match à 11%."
+          "txt": "Tranche calme statistiquement : Henan génère 16% de ses buts ici mais Qingdao n'en produit que 8% en extérieur sur ce créneau. Probabilité but de 11%, phase de prise en main du match."
         },
         {
           "t": "30-45min",
           "prob": 17,
-          "txt": "Henan encaisse 24% des buts de Qingdao dans cette fenêtre, Qingdao encaisse 18% des buts d'Henan — montée en pression avant la mi-temps avec probabilité à 17%."
+          "txt": "Montée en pression en fin de première mi-temps. Henan encaisse 24% des buts de Qingdao dans cette tranche, et les visiteurs marquent 12% de leurs buts ici. Probabilité but de 17%, le match commence à s'ouvrir."
         },
         {
           "t": "45-60min",
           "prob": 20,
-          "txt": "Tranche la plus productive en première heure : Henan marque 21% de ses buts ici et encaisse 21% de ceux de Qingdao — Qingdao encaisse 30% de ses buts dans ce créneau, probabilité but pic à 20%."
+          "txt": "Tranche la plus productive de la première heure de jeu. Henan marque 21% de ses buts et encaisse 21% sur ce créneau, Qingdao encaisse 30% ici. Probabilité but de 20%, les remplaçants et ajustements tactiques créent des espaces."
         },
         {
           "t": "60-75min",
           "prob": 14,
-          "txt": "Légère baisse d'intensité : Henan marque 26% mais Qingdao ne contribue qu'à 12% de ses réalisations extérieures — probabilité but en retrait à 14%."
+          "txt": "Légère baisse d'intensité relative. Henan est le plus actif avec 26% de ses buts marqués dans cette tranche, Qingdao ne marque que 12% ici en extérieur. Probabilité but de 14%, Henan pousse pour la victoire."
         },
         {
           "t": "75-90min",
           "prob": 26,
-          "txt": "Finale explosive : Qingdao marque 42% de ses buts extérieurs dans cette tranche et Henan encaisse 24% de ses buts ici — probabilité but la plus haute du match à 26%, cohérente avec un Over 2.5 encore en jeu en fin de partie."
+          "txt": "Tranche la plus dangereuse du match. Qingdao marque 42% de ses buts extérieurs dans les 15 dernières minutes, et Henan encaisse 24% des buts adverses ici. Probabilité but de 26%, la pression du score et de la relégation génère le maximum d'occasions."
         }
       ],
-      "facteur_x": "Lambdas Poisson combinés à 3.73 buts attendus + 72% de probabilité Over 2.5 confirmée par trois modèles indépendants, avec 4 des 5 top scores MC dépassant 2.5 buts.",
-      "analyse_card": "Le modèle Poisson donne des lambdas de 2.156 (DOM) et 1.575 (EXT), soit un total attendu de 3.73 buts, bien au-dessus du seuil 2.5. Les xG combinés atteignent 4.11 (2.17 + 1.94) et les 5 scores les plus fréquents en Monte-Carlo (2-1, 1-1, 2-2, 3-1, 2-0) couvrent 37% des simulations avec 4 sur 5 terminant Over 2.5. La tactique offensive des deux équipes en situation de relégation renforce la pression à scorer, et Qingdao n'a gardé aucun clean-sheet en 9 déplacements.",
-      "conseil_public": "Jouer Over 2.5 à 1.65 : le signal est cohérent entre xG, Poisson, Dixon-Coles, Monte-Carlo et les scores top simulés.",
-      "contexte": "Duel de bas de tableau entre le 13e (Henan, domicile) et le 14e (Qingdao, extérieur) de Super League — les deux clubs sont en zone de relégation, ce qui génère une pression offensive accrue et réduit la tendance aux matchs fermés.",
-      "vbet": "OUI",
+      "facteur_x": "xG combinés de 4.11 (DOM 2.17 + EXT 1.94) + top scores MC dominés par 2-1, 2-2, 1-2, 3-1 = signal Over 2.5 très fort, mais aucune cote disponible >= 1.50 pour en profiter.",
+      "analyse_card": "Les modèles Poisson, Dixon-Coles et Monte-Carlo convergent vers un profil offensif (Over 2.5 à ~72%, BTTS ~70%) et les top scores MC (2-1, 2-2, 1-2, 3-1) valident cette tendance. Cependant, aucune cote >= 1.50 n'est disponible selon les données fournies, rendant tout marché inexploitable selon les règles de sélection. Les xG combinés (2.17 + 1.94) et le signal tactique offensif sont réels mais sans valeur marchande exploitable.",
+      "conseil_public": "Passer son tour - attendre la disponibilité de cotes suffisantes (>= 1.50) avant d'engager sur ce match.",
+      "contexte": "Duel direct entre deux équipes en zone de relégation (13e vs 14e sur 16) en Super League chinoise le 15 juillet 2026 à Zhengzhou. L'enjeu est maximal pour les deux clubs, ce qui intensifie l'engagement offensif attendu. Henan domine à domicile avec 3V/8, Qingdao n'a qu'1V en 9 déplacements.",
+      "vbet": "NON",
       "scores": [
         "2-1"
       ],
       "mc_scores": [
         {
           "score": "2-1",
-          "n": 488,
-          "pct": 10
+          "n": 453,
+          "pct": 9
         },
         {
           "score": "1-1",
-          "n": 401,
+          "n": 385,
           "pct": 8
         },
         {
           "score": "2-2",
-          "n": 334,
+          "n": 354,
+          "pct": 7
+        },
+        {
+          "score": "1-2",
+          "n": 329,
           "pct": 7
         },
         {
           "score": "3-1",
-          "n": 320,
-          "pct": 6
-        },
-        {
-          "score": "2-0",
-          "n": 305,
+          "n": 290,
           "pct": 6
         }
       ],
       "paris_safe": {
-        "bet": "Over 2.5",
-        "cote": 1.65,
+        "bet": "",
+        "cote": "--",
         "proba": "50%"
       },
       "paris_risque": {
@@ -6664,10 +6794,10 @@
       },
       "kelly": "2",
       "stade": {
-        "nom": "Zhengzhou Hanghai Stadium — Zhengzhou",
+        "nom": "Zhengzhou Hanghai Stadium - Zhengzhou",
         "cap": "",
-        "meteo": "☀️",
-        "temp": "28°C",
+        "meteo": "",
+        "temp": "28C",
         "desc": "ciel dégagé"
       },
       "crit_home": {
@@ -7089,7 +7219,7 @@
         "id": 836
       },
       "league": "Super League",
-      "ligue_icon": "🏆",
+      "ligue_icon": "FB",
       "league_key": "chine",
       "date": "2026-07-17 14:00",
       "cat": [
@@ -7125,7 +7255,7 @@
       "bookies": [
         {
           "n": "Betclic",
-          "o": "200€ offerts",
+          "o": "200 offerts",
           "l": "#LIEN_BETCLIC",
           "c": "1.53",
           "c1": "2.54",
@@ -7134,7 +7264,7 @@
         },
         {
           "n": "Winamax",
-          "o": "100€ offerts",
+          "o": "100 offerts",
           "l": "#LIEN_WINAMAX",
           "c": "1.50",
           "c1": "2.51",
@@ -7143,7 +7273,7 @@
         },
         {
           "n": "Unibet",
-          "o": "100€ remboursés",
+          "o": "100 rembourses",
           "l": "#LIEN_UNIBET",
           "c": "1.51",
           "c1": "2.52",
@@ -7152,7 +7282,7 @@
         },
         {
           "n": "PMU",
-          "o": "100€ offerts",
+          "o": "100 offerts",
           "l": "#LIEN_PMU",
           "c": "1.48",
           "c1": "2.49",
@@ -7161,7 +7291,7 @@
         },
         {
           "n": "Bet365",
-          "o": "100€ bonus",
+          "o": "100 bonus",
           "l": "#LIEN_BET365",
           "c": "1.56",
           "c1": "2.57",
@@ -7169,7 +7299,7 @@
           "c2": "2.43"
         }
       ],
-      "edge": "74% (modèle)",
+      "edge": "74% (modele)",
       "marche": "DOUBLE_CHANCE",
       "risque": "FAIBLE",
       "pari_rec": "DC 1X",
@@ -7177,48 +7307,48 @@
       "no_signal": false,
       "no_signal_label": "",
       "mise": "2-3% bankroll",
-      "verdict_shark": "DC 1X à 1.53 — Yunnan Yukun cumule 51% de victoire domicile avec 23% de nul, soit 74% de probabilité modèle contre une cote impliquant ~65%.",
+      "verdict_shark": "DC 1X à 1.53 - trois modèles indépendants convergent à 74% pour Yunnan Yukun 1X, cohérent avec les top scores MC (1-1, 2-1, 1-0, 2-0).",
       "scenario": {
-        "phase1": "Yunnan Yukun domine à domicile (4V/8) avec une forme récente positive (DWWWD) et un xG offensif de 1.43 supérieur à celui de Shanghai SIPG (0.87). L'enjeu européen renforce la motivation des locaux.",
-        "phase2": "Les lambdas Poisson (DOM 1.967 vs EXT 1.354) traduisent une supériorité locale claire. Les trois modèles placent la DC 1X entre 73% et 74%, soit un edge positif vs la cote du bookmaker (~65%).",
-        "phase3": "Les top scores Monte-Carlo (1-1 10%, 2-1 10%, 2-0 7%) montrent que Shanghai SIPG ne s'impose dans aucun des scénarios les plus probables. Un score nul ou une victoire locale couvre 10+10+7+6 = 33% des simulations pour les seuls 4 premiers scores, cohérent avec la DC 1X."
+        "phase1": "Yunnan Yukun domine à domicile (4V/8, forme DWWWD) face à un Shanghai SIPG en difficulté à l'extérieur (2V/9, 3 nuls consécutifs). Les xG favorisent nettement les locaux (1.43 vs 0.87).",
+        "phase2": "Les trois modèles mathématiques (Poisson, Dixon-Coles, Monte-Carlo) convergent à 51% pour la victoire domicile et 23% pour le nul, soit 74% cumulés pour la DC 1X. Les lambdas Poisson (1.967 vs 1.354) confirment la supériorité attendue de Yunnan.",
+        "phase3": "Les top scores Monte-Carlo (1-1 10%, 2-1 9%, 1-0 7%, 2-0 7%) sont tous cohérents avec la DC 1X : aucun scénario parmi les tops ne montre une victoire nette de Shanghai. Signal multi-convergent validé."
       },
       "scenario_15min": [
         {
           "t": "0-15min",
           "prob": 12,
-          "txt": "Ouverture prudente — Yunnan Yukun marque 12% de ses buts dans cette tranche, Shanghai SIPG 18% des siens. Probabilité but globale de 12%, phase de prise de contrôle attendue."
+          "txt": "Ouverture prudente : Yunnan marque 12% de ses buts dans cette tranche, Shanghai seulement 18% mais n'encaisse que 8% ici. Probabilité but globale de 12%, phase d'observation attendue."
         },
         {
           "t": "15-30min",
           "prob": 14,
-          "txt": "Montée en puissance progressive — Yunnan Yukun ne marque que 9% de ses buts ici, mais Shanghai SIPG produit 18% de ses buts offensifs. Les locaux encaissent 16% des buts adverses dans cette tranche, risque limité mais présent."
+          "txt": "Légère montée en pression : Shanghai marque 18% de ses buts dans ce créneau et Yunnan encaisse 16% ici. Probabilité but de 14%, les deux équipes commencent à se chercher davantage."
         },
         {
           "t": "30-45min",
           "prob": 20,
-          "txt": "Tranche la plus fertile en première période — Yunnan Yukun marque 33% de ses buts domicile ici (pic de la mi-temps). Probabilité but estimée à 20%, tranche à surveiller pour l'ouverture du score ou le 2e but local."
+          "txt": "Tranche clé de la première mi-temps : Yunnan marque 33% de ses buts ici, son pic de production offensive. Probabilité but de 20%, moment le plus favorable pour voir les locaux ouvrir le score avant la pause."
         },
         {
           "t": "45-60min",
           "prob": 20,
-          "txt": "Reprise active — Shanghai SIPG marque 27% de ses buts extérieurs dans cette fenêtre (point culminant de leur activité offensive). Yunnan Yukun encaisse 16% de ses buts ici. Phase à double sens, probabilité but à 20%."
+          "txt": "Reprise animée : Shanghai marque 27% de ses buts dans ce créneau et Yunnan en encaisse 16%. Probabilité but de 20%, risque de réaction adverse ou de double sur la lancée de la mi-temps."
         },
         {
           "t": "60-75min",
           "prob": 15,
-          "txt": "Passage creux pour Shanghai SIPG — ils ne marquent que 3% de leurs buts extérieurs ici (creux absolu). Yunnan Yukun marque 15% dans cette tranche. Probabilité but réduite à 15%."
+          "txt": "Légère baisse d'intensité : Shanghai ne marque que 3% de ses buts ici, son plus bas. Yunnan marque 15%. Probabilité but de 15%, phase de gestion probable si les locaux mènent."
         },
         {
           "t": "75-90min",
           "prob": 20,
-          "txt": "Fin de match animée — Yunnan Yukun marque 18% de ses buts domicile ici et encaisse 19% des buts de Shanghai SIPG. Ce dernier marque 15% de ses buts extérieurs en fin de match. Probabilité but à 20%, phase propice aux buts de clôture."
+          "txt": "Fin de match animée : Yunnan marque 18% de ses buts ici et encaisse 19% des buts de Shanghai. Shanghai encaisse 28% de ses buts concédés dans ce créneau. Probabilité but de 20%, phase ouverte avec possible but de clôture ou de réduction du score."
         }
       ],
-      "facteur_x": "Shanghai SIPG n'a gagné que 2 fois en 9 déplacements (22%) et enchaîne 3 nuls consécutifs — probabilité de victoire ext��rieure limitée à 26% selon tous les modèles.",
-      "analyse_card": "Les trois modèles (Poisson 74%, Dixon-Coles 74%, Monte-Carlo 73%) convergent unanimement sur la DC 1X. Yunnan Yukun affiche 4 victoires en 8 matchs à domicile avec une forme récente solide (DWWWD) et un xG offensif supérieur (1.43 vs 0.87) à celui de Shanghai SIPG. Shanghai SIPG ne gagne qu'en 2 déplacements sur 9 et traverse une série de 3 nuls consécutifs, réduisant fortement la probabilité d'un succès extérieur.",
-      "conseil_public": "Jouer DC 1X à 1.53 sur la base d'une convergence modèle à 74% face à une cote impliquant ~65%, avec une value edge estimée à +9 points de probabilité.",
-      "contexte": "Yunnan Yukun (#5) reçoit Shanghai SIPG (#12) en Super League le 15/07/2026. L'hôte est en course pour l'Europe, ce qui renforce la motivation à domicile. Shanghai SIPG est en manque de dynamisme avec 3 nuls consécutifs et un bilan extérieur très faible (2V/9).",
+      "facteur_x": "Shanghai SIPG : seulement 2 victoires en 9 déplacements et 3 nuls consécutifs, xG extérieur de seulement 0.87 contre 1.43 pour Yunnan à domicile.",
+      "analyse_card": "Yunnan Yukun affiche 4V/8 à domicile avec une forme DWWWD sur les 5 derniers matchs, tandis que Shanghai SIPG n'enregistre que 2V/9 à l'extérieur avec 3 nuls consécutifs en cours. Le modèle Poisson (74%), Dixon-Coles (74%) et Monte-Carlo (74%) convergent parfaitement sur la DC 1X. Les xG de Yunnan (1.43) dépassent ceux de Shanghai en déplacement (0.87), confirmant la domination locale attendue.",
+      "conseil_public": "Jouer DC 1X à 1.53 : la convergence des trois modèles à 74% sur ce marché en fait l'option la plus fiable du match.",
+      "contexte": "Yunnan Yukun (#5) reçoit Shanghai SIPG (#12) en Super League le 15/07/2026. L'enjeu est réel pour les locaux en course pour l'Europe, tandis que Shanghai traverse une série de 3 nuls consécutifs à l'extérieur et ne convainc pas hors de ses bases.",
       "vbet": "OUI",
       "scores": [
         "2-1"
@@ -7226,28 +7356,28 @@
       "mc_scores": [
         {
           "score": "1-1",
-          "n": 496,
+          "n": 504,
           "pct": 10
         },
         {
           "score": "2-1",
-          "n": 489,
-          "pct": 10
+          "n": 436,
+          "pct": 9
         },
         {
-          "score": "2-0",
-          "n": 343,
+          "score": "1-0",
+          "n": 371,
           "pct": 7
         },
         {
-          "score": "2-2",
-          "n": 319,
-          "pct": 6
+          "score": "2-0",
+          "n": 357,
+          "pct": 7
         },
         {
           "score": "1-2",
-          "n": 315,
-          "pct": 6
+          "n": 325,
+          "pct": 7
         }
       ],
       "paris_safe": {
@@ -7262,10 +7392,10 @@
       },
       "kelly": "2",
       "stade": {
-        "nom": "Yuxi Plateau Sports Center Stadium — Yuxi",
+        "nom": "Yuxi Plateau Sports Center Stadium - Yuxi",
         "cap": "",
-        "meteo": "☁️",
-        "temp": "19°C",
+        "meteo": "",
+        "temp": "19C",
         "desc": "couvert"
       },
       "crit_home": {
@@ -7399,7 +7529,7 @@
         },
         "away": {
           "val": 15,
-          "info": "Repos 147 jours"
+          "info": "Repos 148 jours"
         }
       },
       "fatigue_home": {
@@ -7408,7 +7538,7 @@
       },
       "fatigue_away": {
         "val": 15,
-        "info": "Repos 147 jours"
+        "info": "Repos 148 jours"
       },
       "tendances": {
         "over25_home": 6,
@@ -7790,7 +7920,7 @@
         "id": 638
       },
       "league": "A Lyga",
-      "ligue_icon": "🏆",
+      "ligue_icon": "FB",
       "league_key": "lituanie",
       "date": "2026-07-17 18:00",
       "cat": [
@@ -7834,46 +7964,46 @@
       "mise": "2-3% bankroll",
       "verdict_shark": "",
       "scenario": {
-        "phase1": "Panevėžys domine à domicile (4V/11) face à une équipe extérieure en crise totale (0V/9). La pression de la relégation est partagée, mais le bilan factuel penche nettement pour le domicile.",
-        "phase2": "Les trois modèles (Poisson 73%, Dixon-Coles 72%, Monte-Carlo 73%) sont exceptionnellement alignés sur une victoire Panevėžys. Les top scores MC (2-0, 2-1, 3-0, 1-0) confirment une domination probable avec plusieurs buts.",
-        "phase3": "Malgré la convergence des signaux, aucune cote >= 1.50 n'est disponible. Le marché est déjà trop efficient sur ce match pour offrir une valeur exploitable. Tour passé conformément aux règles."
+        "phase1": "Panevėžys domine structurellement à domicile (4V/11) face à une équipe extérieure sans victoire (0/9). L'enjeu relégation pousse les deux équipes à jouer avec intensité, mais les données brutes favorisent nettement les locaux.",
+        "phase2": "Les trois modèles convergent à 72-73% pour Panevėžys. Le lambda DOM à 2.432 contre 0.8 pour Trakai illustre un déséquilibre offensif marqué. Les top scores MC (2-0, 1-0, 2-1, 3-0) confirment une domination attendue des locaux.",
+        "phase3": "La dernière tranche 75-90min concentre 25% de probabilité de but, la plus haute de tout le match. Panevėžys marque 22% de ses buts dans ce créneau et Trakai encaisse 32% des siens ici, suggérant un potentiel de buts tardifs si le match reste ouvert."
       },
       "scenario_15min": [
         {
           "t": "0-15min",
           "prob": 13,
-          "txt": "Activité offensive limitée en ouverture : Panevėžys ne marque que 8% de ses buts dans cette tranche à domicile, et FK Trakai marque 19% de ses buts ici mais encaisse 18%. Probabilité de but globale à 13% — phase de placement tactique attendue."
+          "txt": "Démarrage prudent : Panevėžys ne marque que 8% de ses buts dans cette tranche, Trakai seulement 19% des siens. La probabilité globale de but à 13% reflète une entame généralement fermée pour les deux équipes."
         },
         {
           "t": "15-30min",
           "prob": 18,
-          "txt": "Tranche la plus productive en première mi-temps : Panevėžys y marque 27% de ses buts et FK Trakai en encaisse 14%. Probabilité de but montant à 18% — phase où le domicile tend à prendre l'ascendant."
+          "txt": "Tranche active pour Panevėžys qui génère 27% de ses buts ici, la plus haute proportion de sa première mi-temps. Trakai n'inscrit que 6% de ses buts extérieurs dans ce créneau, rendant une ouverture du score locale probable."
         },
         {
           "t": "30-45min",
           "prob": 12,
-          "txt": "Ralentissement du rythme attendu : Panevėžys marque seulement 16% de ses buts entre 30 et 45 min, FK Trakai également 6% seulement. Probabilité à 12% — fin de première période moins prolifique."
+          "txt": "Légère baisse d'intensité : Panevėžys tombe à 16% de ses buts marqués ici, Trakai à 6% seulement. La probabilité globale de 12% indique un créneau moins propice aux buts en fin de première période."
         },
         {
           "t": "45-60min",
           "prob": 18,
-          "txt": "Rebond en début de seconde période : FK Trakai marque 25% de ses buts dans cette tranche, tandis que Panevėžys en encaisse 18%. Probabilité remontant à 18% — risque de réduction de l'écart si Trakai entre bien."
+          "txt": "Trakai marque 25% de ses buts extérieurs dans cette tranche, son pic offensif sur l'ensemble du match. Panevėžys encaisse 18% de ses buts ici, ce qui en fait une fenêtre à surveiller pour une réaction trakaïenne."
         },
         {
           "t": "60-75min",
           "prob": 15,
-          "txt": "Phase intermédiaire relativement neutre : Panevėžys marque 14% de ses buts ici, FK Trakai 19%. Probabilité à 15% — zone de gestion du match si Panevėžys mène, avec quelques transitions dangereuses."
+          "txt": "Phase intermédiaire avec 15% de probabilité de but. Panevėžys marque 14% et Trakai 19% dans ce créneau. Les deux équipes maintiennent une activité offensive modérée sans pic marqué."
         },
         {
           "t": "75-90min",
           "prob": 25,
-          "txt": "Tranche la plus prolifique du match : Panevėžys marque 22% de ses buts ici, FK Trakai 25% et encaisse 32%. Probabilité de but maximale à 25% — fin de match à fort potentiel offensif, surtout en cas d'urgence pour Trakai en zone de relégation."
+          "txt": "Tranche la plus fertile du match : Panevėžys marque 22% de ses buts ici, Trakai encaisse 32% de ses buts extérieurs dans ce créneau. La pression de relégation combinée à la fatigue devrait générer le maximum d'actions en fin de match."
         }
       ],
-      "facteur_x": "FK Trakai ne marque qu'à l'extérieur dans 2 matchs sur 9 (22%) et n'a remporté aucun match en déplacement cette saison — signal le plus fort disponible dans les données.",
-      "analyse_card": "Les modèles Poisson, Dixon-Coles et Monte-Carlo convergent fortement vers une victoire de Panevėžys (72-73%), avec des top scores MC dominés par 2-0 (11%), 2-1 (10%), 3-0 (10%) — cohérent avec un Over 2.5 ou une victoire domicile. FK Trakai ne marque qu'à l'extérieur dans 22% des matchs joués (78% sans marquer en déplacement), ce qui renforce le signal pour BTTS Non ou Victoire sèche Panevėžys. Cependant, toutes les cotes exploitables sont inférieures à 1.50, seuil minimum requis pour valider un marché jouable.",
-      "conseil_public": "Ne pas jouer ce match : malgré des signaux statistiques convergents en faveur de Panevėžys, l'absence de cote >= 1.50 annule toute valeur potentielle selon les critères de sélection.",
-      "contexte": "Panevėžys (#8) reçoit FK Trakai (#10) dans un duel de bas de tableau en A Lyga, les deux équipes étant en zone de relégation. L'enjeu est maximum pour les deux clubs, mais le bilan extérieur désastreux de Trakai (0V/9 matchs, 78% sans marquer) donne un net avantage au domicile.",
+      "facteur_x": "FK Trakai sans marquer dans 78% de ses déplacements (7/9) : le lambda offensif extérieur à 0.8 est le signal le plus fort, mais il ne génère que des cotes sous 1.50 pour les marchés associés.",
+      "analyse_card": "Les trois modèles (Poisson 73%, Dixon-Coles 72%, Monte-Carlo 73%) convergent massivement sur la victoire de Panevėžys à domicile, mais cette probabilité est trop élevée pour générer des cotes exploitables au-dessus de 1.50. FK Trakai n'a remporté aucun de ses 9 matchs à l'extérieur et n'a pas marqué dans 78% de ces déplacements (7/9). Malgré des signaux statistiques solides, l'absence de cotes disponibles >= 1.50 rend tout marché injouable selon les règles définies.",
+      "conseil_public": "Passer ce match : les probabilités sont trop déséquilibrées pour offrir de la valeur à des cotes acceptables, aucun marché ne présente un ratio risque/rendement suffisant.",
+      "contexte": "Duel de bas de tableau en A Lyga entre Panevėžys (#8) et FK Trakai (#10), les deux équipes en zone de relégation. La pression est maximale des deux côtés, mais Panevėžys joue à domicile avec un bilan de 4V/11 contre une équipe trakaïenne qui n'a pas gagné une seule fois en 9 déplacements cette saison.",
       "vbet": "NON",
       "scores": [
         "2-1"
@@ -7881,27 +8011,27 @@
       "mc_scores": [
         {
           "score": "2-0",
-          "n": 552,
+          "n": 537,
           "pct": 11
         },
         {
-          "score": "2-1",
-          "n": 486,
-          "pct": 10
-        },
-        {
-          "score": "3-0",
-          "n": 484,
-          "pct": 10
-        },
-        {
           "score": "1-0",
-          "n": 448,
+          "n": 508,
+          "pct": 10
+        },
+        {
+          "score": "2-1",
+          "n": 466,
           "pct": 9
         },
         {
-          "score": "3-1",
-          "n": 380,
+          "score": "3-0",
+          "n": 437,
+          "pct": 9
+        },
+        {
+          "score": "1-1",
+          "n": 392,
           "pct": 8
         }
       ],
@@ -7919,7 +8049,7 @@
       "stade": {
         "nom": "Aukstaitijos Stadium",
         "cap": "",
-        "meteo": "🌤️",
+        "meteo": "",
         "temp": "",
         "desc": ""
       },
@@ -8330,7 +8460,7 @@
         "id": 371
       },
       "league": "Allsvenskan",
-      "ligue_icon": "🏆",
+      "ligue_icon": "FB",
       "league_key": "suede",
       "date": "2026-07-17 19:00",
       "cat": [
@@ -8374,46 +8504,46 @@
       "mise": "2-3% bankroll",
       "verdict_shark": "",
       "scenario": {
-        "phase1": "Goteborg en zone de relégation sans victoire à domicile (0/5) fait face à Brommapojkarna qui voyage bien (3V/7). Les xG favorisent Goteborg en création (1.97) mais leur xGA domicile (1.48) et le xGA extérieur de Brommapojkarna (1.63) annoncent un match ouvert.",
-        "phase2": "Les trois modèles convergent : victoire Brommapojkarna à 44-46%, nul 25-28%, Goteborg 28-29%. Lambda Poisson : DOM 1.188 vs EXT 1.54, confirmant l'avantage visiteur. Over 2.5 à 51% reste incertain, BTTS à 55% légèrement en faveur des buts des deux côtés.",
-        "phase3": "Top scores MC : 1-1 (12%), 0-1 (11%), 1-2 (10%), 1-0 (8%), 0-2 (8%). Les scores les plus probables incluent des buts des deux équipes dans 5 des 5 premiers résultats, cohérent avec BTTS 55%. Score central retenu : 1-2 en faveur de Brommapojkarna."
+        "phase1": "Göteborg sans victoire à domicile (0V/5), 40% de matchs sans marquer, aucun clean sheet. Brommapojkarna 3V/7 en extérieur avec défense surchauffée. Les absences côté Göteborg (5 joueurs) accentuent le déséquilibre.",
+        "phase2": "Poisson, Dixon-Coles et Monte-Carlo convergent tous vers une probabilité extérieure de 44-45%. Le lambda DOM (1.188) est nettement inférieur au lambda EXT (1.54), confirmant la supériorité offensive attendue de Brommapojkarna. BTTS à 55% et Over 2.5 à 51% sont des signaux modérés.",
+        "phase3": "Top scores MC : 1-1(12%), 0-1(10%), 1-2(9%), 1-0(7%), 0-2(7%). Score central retenu 1-2, cohérent avec la dynamique EXT favorable. Aucune cote >= 1.50 disponible - aucun marché jouable."
       },
       "scenario_15min": [
         {
           "t": "0-15min",
           "prob": 15,
-          "txt": "Phase d'observation attendue. Goteborg marque 19% de ses buts dans cette tranche à domicile, Brommapojkarna seulement 15% de ses buts en déplacement. Probabilité de but globale de 15%, tranche relativement calme malgré l'enjeu pour le DOM."
+          "txt": "Göteborg marque 19% de ses buts dans cette tranche à domicile, Brommapojkarna seulement 15% de ses buts en extérieur ici. Probabilité but globale 15% - ouverture de match prudente attendue."
         },
         {
           "t": "15-30min",
           "prob": 11,
-          "txt": "Tranche la plus calme du match : Goteborg ne marque que 6% de ses buts ici, mais encaisse 9% des buts de Brommapojkarna. Brommapojkarna marque seulement 3% de ses buts extérieurs sur cette période. Probabilité de but à 11%, moment de transition tactique."
+          "txt": "Tranche la plus calme : Göteborg marque seulement 6% de ses buts ici, mais Brommapojkarna encaisse 25% de ses buts concédés en extérieur dans cette fenêtre. Probabilité but 11%."
         },
         {
           "t": "30-45min",
           "prob": 13,
-          "txt": "Légère relance en fin de première période. Goteborg marque 19% de ses buts domicile ici mais Brommapojkarna n'en marque que 3% en déplacement. En revanche Goteborg encaisse 23% des buts adverses sur cette tranche — risque d'ouverture du score pour les visiteurs avant la mi-temps."
+          "txt": "Göteborg marque 19% de ses buts dans cette tranche, Brommapojkarna encaisse 8% - défense visitée résistante. Probabilité but 13%, légère montée en pression avant la pause."
         },
         {
           "t": "45-60min",
           "prob": 19,
-          "txt": "Tranche la plus active de la première heure. Goteborg marque 25% de ses buts domicile ici, Brommapojkarna 24% de ses buts extérieurs. Les deux équipes hausser leur niveau après la pause. Probabilité de but à 19%, moment clé pour le scénario du match."
+          "txt": "Tranche clé : Göteborg marque 25% de ses buts ici (plus haute proportion), Brommapojkarna marque 24% de ses buts ext dans cette fenêtre. Probabilité but 19% - pic d'activité en début de seconde période."
         },
         {
           "t": "60-75min",
           "prob": 19,
-          "txt": "Deuxième tranche à 19% de probabilité de but. Brommapojkarna marque 24% de ses buts extérieurs ici et encaisse 25% des buts adverses. Goteborg, sous pression de l'enjeu relégation, peut pousser davantage, ouvrant des espaces pour les contres visiteurs."
+          "txt": "Göteborg marque 13% ici mais encaisse 14% des buts de Brommapojkarna dans cette tranche. Brommapojkarna monte en puissance (24% de ses buts ext, encaisse 25%). Probabilité but 19%."
         },
         {
           "t": "75-90min",
           "prob": 24,
-          "txt": "Tranche la plus dangereuse : Brommapojkarna marque 30% de ses buts extérieurs dans les 15 dernières minutes et Goteborg en marque 19%. Les deux équipes encaissent respectivement 20% et 25% de leurs buts ici. Probabilité de but maximale à 24%, les fins de match sont historiquement prolifiques pour ces deux équipes."
+          "txt": "Tranche la plus chaude : Brommapojkarna marque 30% de ses buts ext dans ce créneau, Göteborg encaisse 20%. Göteborg sous pression en zone de relégation pourrait s'ouvrir. Probabilité but maximale à 24%."
         }
       ],
-      "facteur_x": "0 victoire à domicile en 5 matchs pour IFK Goteborg (xG 1.97 / xGA 1.48 dom), combiné à l'avantage extérieur de Brommapojkarna validé par les trois modèles (MC 46%), mais aucune cote >= 1.50 disponible pour l'exploiter.",
-      "analyse_card": "Les modèles Poisson, Dixon-Coles et Monte-Carlo convergent vers une victoire extérieure de Brommapojkarna (44-46%), mais aucune cote exploitable n'est disponible (toutes < 1.50). Les top scores MC (1-1 12%, 0-1 11%, 1-2 10%) suggèrent un match avec buts des deux côtés (BTTS ~55%), mais sans cote viable ce signal ne peut être joué. IFK Goteborg est en zone de relégation (#14/16) avec 0 victoire à domicile en 5 matchs, ce qui renforce la tendance extérieure sans créer d'opportunité de valeur.",
-      "conseil_public": "Ne pas miser sur ce match : l'absence de cotes supérieures à 1.50 rend toute prise de risque non justifiée, même si les signaux sont cohérents entre eux.",
-      "contexte": "IFK Goteborg, 14e et en zone de relégation, reçoit Brommapojkarna (11e) à Gamla Ullevi en Allsvenskan. Goteborg n'a remporté aucun match à domicile en 5 tentatives. Brommapojkarna affiche 3 victoires sur 7 à l'extérieur avec une défense sous pression (xGA 1.63). Enjeu élevé pour le DOM qui lutte pour sa survie.",
+      "facteur_x": "Göteborg : 0 victoire en 5 matchs à domicile, 5 absents clés, en zone de relégation - signal fort de fragilité mais aucune cote exploitable disponible.",
+      "analyse_card": "Les modèles Poisson, Dixon-Coles et Monte-Carlo convergent vers une victoire extérieure de Brommapojkarna (44-45%), avec un xG extérieur faible (1.1) mais une défense de Göteborg poreuse à domicile (0 clean sheet en 5 matchs). Les top scores MC (1-1 12%, 0-1 10%, 1-2 9%) suggèrent un match avec buts des deux côtés et un total modéré. Göteborg est en zone de relégation (#14) avec 5 absents majeurs, ce qui fragilise davantage leur potentiel offensif (0V en 5 matchs à domicile).",
+      "conseil_public": "Ne pas jouer ce match : aucune cote disponible ne dépasse 1.50, la valeur est inexistante quelle que soit la sélection.",
+      "contexte": "Göteborg (#14, zone de relégation) reçoit Brommapojkarna (#11) à Gamla Ullevi en Allsvenskan. Göteborg n'a pas gagné un seul de ses 5 matchs à domicile et compte 5 absents notables. Brommapojkarna est en forme (3V/7 ext) mais affiche une défense surchauffée (xGA 1.63 ext).",
       "vbet": "NON",
       "scores": [
         "1-2"
@@ -8421,28 +8551,28 @@
       "mc_scores": [
         {
           "score": "1-1",
-          "n": 606,
+          "n": 593,
           "pct": 12
         },
         {
           "score": "0-1",
-          "n": 525,
-          "pct": 11
-        },
-        {
-          "score": "1-2",
-          "n": 486,
+          "n": 517,
           "pct": 10
         },
         {
+          "score": "1-2",
+          "n": 460,
+          "pct": 9
+        },
+        {
           "score": "1-0",
-          "n": 403,
-          "pct": 8
+          "n": 374,
+          "pct": 7
         },
         {
           "score": "0-2",
-          "n": 399,
-          "pct": 8
+          "n": 365,
+          "pct": 7
         }
       ],
       "paris_safe": {
@@ -8459,7 +8589,7 @@
       "stade": {
         "nom": "Gamla Ullevi",
         "cap": "",
-        "meteo": "🌤️",
+        "meteo": "",
         "temp": "",
         "desc": ""
       },
@@ -8586,7 +8716,106 @@
       "forme_h": "LLDDDLLWDWLL",
       "forme_a": "DDLWLWLWWDDL",
       "h2h": [],
-      "injuries": [],
+      "injuries": [
+        {
+          "name": "G. Ersoy",
+          "team": 366,
+          "reason": "Muscle Injury",
+          "status": "out",
+          "impact": "medium"
+        },
+        {
+          "name": "A. Mucolli",
+          "team": 366,
+          "reason": "Knee Injury",
+          "status": "out",
+          "impact": "medium"
+        },
+        {
+          "name": "J. Rasheed",
+          "team": 366,
+          "reason": "Ankle Injury",
+          "status": "out",
+          "impact": "medium"
+        },
+        {
+          "name": "I. Seidu",
+          "team": 366,
+          "reason": "Inactive",
+          "status": "out",
+          "impact": "medium"
+        },
+        {
+          "name": "R. Yeboah",
+          "team": 366,
+          "reason": "Inactive",
+          "status": "out",
+          "impact": "medium"
+        },
+        {
+          "name": "K. Ackermann",
+          "team": 371,
+          "reason": "Convalescence",
+          "status": "out",
+          "impact": "medium"
+        },
+        {
+          "name": "D. Isso",
+          "team": 371,
+          "reason": "Inactive",
+          "status": "out",
+          "impact": "medium"
+        },
+        {
+          "name": "G. Ersoy",
+          "team": 366,
+          "reason": "Muscle Injury",
+          "status": "out",
+          "impact": "medium"
+        },
+        {
+          "name": "A. Mucolli",
+          "team": 366,
+          "reason": "Knee Injury",
+          "status": "out",
+          "impact": "medium"
+        },
+        {
+          "name": "J. Rasheed",
+          "team": 366,
+          "reason": "Ankle Injury",
+          "status": "out",
+          "impact": "medium"
+        },
+        {
+          "name": "I. Seidu",
+          "team": 366,
+          "reason": "Inactive",
+          "status": "out",
+          "impact": "medium"
+        },
+        {
+          "name": "R. Yeboah",
+          "team": 366,
+          "reason": "Inactive",
+          "status": "out",
+          "impact": "medium"
+        },
+        {
+          "name": "K. Ackermann",
+          "team": 371,
+          "reason": "Convalescence",
+          "status": "out",
+          "impact": "medium"
+        },
+        {
+          "name": "D. Isso",
+          "team": 371,
+          "reason": "Inactive",
+          "status": "out",
+          "impact": "medium"
+        }
+      ],
       "fatigue": {
         "home": {
           "val": 15,
@@ -8906,7 +9135,7 @@
         "id": 2241
       },
       "league": "Allsvenskan",
-      "ligue_icon": "🏆",
+      "ligue_icon": "FB",
       "league_key": "suede",
       "date": "2026-07-17 19:00",
       "cat": [
@@ -8914,10 +9143,10 @@
       ],
       "val": true,
       "hot": true,
-      "conf": 8.2,
+      "conf": 8.1,
       "p1": 30,
-      "pn": 18,
-      "p2": 52,
+      "pn": 17,
+      "p2": 53,
       "po15": 0,
       "po25": 90,
       "btts": 86,
@@ -8942,7 +9171,7 @@
       "bookies": [
         {
           "n": "Betclic",
-          "o": "200€ offerts",
+          "o": "200 offerts",
           "l": "#LIEN_BETCLIC",
           "c": "1.65",
           "c1": "1.81",
@@ -8951,7 +9180,7 @@
         },
         {
           "n": "Winamax",
-          "o": "100€ offerts",
+          "o": "100 offerts",
           "l": "#LIEN_WINAMAX",
           "c": "1.62",
           "c1": "1.78",
@@ -8960,7 +9189,7 @@
         },
         {
           "n": "Unibet",
-          "o": "100€ remboursés",
+          "o": "100 rembourses",
           "l": "#LIEN_UNIBET",
           "c": "1.63",
           "c1": "1.79",
@@ -8969,7 +9198,7 @@
         },
         {
           "n": "PMU",
-          "o": "100€ offerts",
+          "o": "100 offerts",
           "l": "#LIEN_PMU",
           "c": "1.60",
           "c1": "1.76",
@@ -8978,7 +9207,7 @@
         },
         {
           "n": "Bet365",
-          "o": "100€ bonus",
+          "o": "100 bonus",
           "l": "#LIEN_BET365",
           "c": "1.68",
           "c1": "1.84",
@@ -8986,7 +9215,7 @@
           "c2": "3.93"
         }
       ],
-      "edge": "90% (modèle)",
+      "edge": "90% (modele)",
       "marche": "TOTAL_BUTS",
       "risque": "FAIBLE",
       "pari_rec": "Over 2.5",
@@ -8994,76 +9223,76 @@
       "no_signal": false,
       "no_signal_label": "",
       "mise": "2-3% bankroll",
-      "verdict_shark": "Over 2.5 à 1.65 — trois modèles indépendants (Poisson, Dixon-Coles, Monte-Carlo) convergent à 90% de probabilité, confirmé par des top scores MC entièrement composés de rencontres à 3+ buts.",
+      "verdict_shark": "Over 2.5 a 1.65 - signal multi-convergent exceptionnel avec 90% de probabilite modele et top scores Monte-Carlo validant massivement le depassement de 2.5 buts.",
       "scenario": {
-        "phase1": "Mjallby en forme monstrueuse (12 victoires consécutives) mais Vasteras plus fort offensivement à l'extérieur (xG 4.32 vs 2.63 pour DOM). Le contexte pousse à un match ouvert avec les deux équipes cherchant à marquer.",
-        "phase2": "Les trois modèles (Poisson, Dixon-Coles, Monte-Carlo) alignés à 90% sur Over 2.5 et 86% sur BTTS Oui. Les lambdas élevés (2.334 + 3.033 = 5.37 buts attendus) sont cohérents avec les xG fournis. Aucune divergence entre les modèles.",
-        "phase3": "Score central projeté 2-3 confirmé par les top scores MC. Les tranches 60-75min (24%) et 75-90min (22%) concentrent la plus forte activité de buts, suggérant un match qui s'emballe en seconde période pour franchir la barre des 2.5."
+        "phase1": "Mjallby AIF presente un xG offensif de 2.63 et une forme exceptionnelle (12 victoires consecutives), tandis que Vasteras SK FK affiche un xG exterieur de 4.32 avec 4V en 6 matchs loin de chez eux. Les deux equipes sont offensivement dominantes selon les donnees de Phase 1.",
+        "phase2": "Les lambdas Poisson (DOM 2.334 / EXT 3.033) produisent une probabilite Over 2.5 de 90% confirmee identiquement par Dixon-Coles et Monte-Carlo. Les trois modeles sont parfaitement alignes, ce qui est rare et constitue un signal de haute qualite.",
+        "phase3": "Les scores Monte-Carlo valident totalement le marche : 2-3 (6%), 2-2 (6%), 1-3 (5%), 1-2 (5%), 3-3 (5%) - tous les top scores depassent 2.5 buts. La coherence entre modele et simulation est complete. Le BTTS a 86% renforce egalement la nature offensive de la rencontre."
       },
       "scenario_15min": [
         {
           "t": "0-15min",
           "prob": 9,
-          "txt": "Démarrage prudent attendu : Mjallby ne marque que 5% de ses buts ici, Vasteras 7%. La probabilité de but dans cette tranche est la plus faible du match (9%). Le score initial devrait rester 0-0."
+          "txt": "Phase d'observation attendue : Mjallby AIF ne marque que 5% de ses buts ici a domicile, Vasteras SK FK 7% en deplacement. Probabilite de but limitee a 9%, le match se construit tacticalement."
         },
         {
           "t": "15-30min",
           "prob": 17,
-          "txt": "Montée en pression : Mjallby marque 19% de ses buts dans cette fenêtre, encaissant aussi 9% des buts adverses. Probabilité but à 17%, la seconde plus haute de la première mi-temps. Premier but du match probable ici."
+          "txt": "La pression monte : Mjallby AIF genere 19% de ses buts dans cette tranche, tandis que Vasteras SK FK encaisse 29% de ses buts exterieurs ici. Premier but probable, probabilite 17%."
         },
         {
           "t": "30-45min",
           "prob": 15,
-          "txt": "Mjallby ne marque que 7% de ses buts ici mais encaisse 23% des buts de Vasteras dans cette tranche. Vasteras marque 16% — pression extérieure croissante avant la mi-temps, probabilité but 15%."
+          "txt": "Mjallby AIF marque 7% ici mais encaisse 23% des buts de Vasteras en exterieur dans cette tranche. Vasteras marque 16% de ses buts exterieurs ici. Match potentiellement ouvert avant la pause, probabilite 15%."
         },
         {
           "t": "45-60min",
           "prob": 15,
-          "txt": "Mjallby est historiquement très actif juste après la mi-temps (29% de ses buts ici), mais Vasteras n'encaisse aucun but dans cette fenêtre (0%). Tranche paradoxale à 15% — but de DOM potentiel mais EXT solide défensivement."
+          "txt": "Tranche favorable a Mjallby AIF qui marque 29% de ses buts a domicile ici - leur pic offensif principal. Vasteras encaisse 0% de ses buts dans cette tranche en deplacement, mais Vasteras marque 24%. Probabilite globale 15%."
         },
         {
           "t": "60-75min",
           "prob": 24,
-          "txt": "Tranche la plus explosive du match : Mjallby marque 21% et encaisse 27% ici, Vasteras marque 18% et encaisse 29%. La probabilité but maximale (24%) suggère 1 à 2 buts dans cette fenêtre, cruciale pour franchir Over 2.5."
+          "txt": "Pic d'activite du match : Mjallby AIF encaisse 27% des buts de Vasteras ici, Vasteras marque 18% et encaisse 29% dans cette tranche. C'est la fenetre la plus productive du match avec 24% de probabilite de but."
         },
         {
           "t": "75-90min",
           "prob": 22,
-          "txt": "Fin de match intense : Vasteras marque 27% de ses buts et Mjallby en encaisse 27% dans cette tranche. Probabilité but à 22% — les buts tardifs sont fréquents pour les deux équipes, le score final devrait largement dépasser 2.5."
+          "txt": "Fin de match intense : Vasteras SK FK marque 27% de ses buts exterieurs dans ce crepuscule, Mjallby AIF encaisse 27% et marque 19% ici. Les buts de fin de match sont statistiquement frequents pour les deux equipes, probabilite 22%."
         }
       ],
-      "facteur_x": "xG combin�� de 6.95 (2.63 + 4.32) et 90% de probabilité Over 2.5 calculée de manière identique par Poisson, Dixon-Coles et Monte-Carlo, avec tous les top scores MC au-dessus de 2.5 buts.",
-      "analyse_card": "Les lambdas Poisson (DOM 2.334 / EXT 3.033) projettent une moyenne de 5.37 buts sur le match, et les 5 scores MC les plus fréquents (2-2, 1-3, 2-3, 1-2, 3-2) dépassent tous 2.5 buts, soit une cohérence totale avec le marché. Côté contexte, Mjallby affiche un xG de 2.63 et Vasteras un xG de 4.32, deux des valeurs offensives les plus élevées de la base. La tactique identifiée ('deux équipes offensives') renforce encore la convergence des signaux.",
-      "conseil_public": "Jouer Over 2.5 à 1.65 : le signal est massif et multi-convergent, la valeur est présente avec 90% de probabilité modèle contre une cote impliquant ~61%.",
-      "contexte": "Allsvenskan, journée de mi-juillet 2026. Mjallby (#10, domicile) est en série de 12 victoires consécutives malgré un bilan domicile modeste (2V/5). Vasteras (#8, extérieur) est sur 2 défaites de suite mais affiche 4V/6 à l'extérieur cette saison. Match à enjeu de maintien/milieu de tableau.",
+      "facteur_x": "xG combines de 6.95 (DOM 2.63 + EXT 4.32) avec 90% de probabilite Over 2.5 confirme par les trois modeles independants ET les top scores Monte-Carlo tous superieurs a 2.5 buts.",
+      "analyse_card": "Les trois modeles (Poisson, Dixon-Coles, Monte-Carlo) convergent a 90% de probabilite pour Over 2.5. Les xG cumulatifs sont massifs : DOM 2.63 xG / EXT 4.32 xG, soit 6.95 xG combinés. Les top scores Monte-Carlo (2-3, 2-2, 1-3, 1-2, 3-3) sont tous a 3 buts ou plus, ce qui valide totalement la coherence du marche choisi. La tactique offensive des deux equipes est confirmee statistiquement.",
+      "conseil_public": "Jouer Over 2.5 a 1.65 - la convergence des trois modeles a 90% avec validation complete par les scores Monte-Carlo en fait le pari le plus solide de la carte.",
+      "contexte": "Allsvenskan, journee de mi-saison (15 juillet 2026). Mjallby AIF est en forme absolue avec 12 victoires consecutives et accueille a domicile (Strandvallen). Vasteras SK FK, bien qu'en forme exterieure (4V/6), traverse deux defaites consecutives recentes. L'enjeu est fort pour les deux equipes dans la course au classement.",
       "vbet": "OUI",
       "scores": [
         "2-3"
       ],
       "mc_scores": [
         {
-          "score": "2-2",
-          "n": 325,
-          "pct": 7
-        },
-        {
-          "score": "1-3",
-          "n": 293,
+          "score": "2-3",
+          "n": 299,
           "pct": 6
         },
         {
-          "score": "2-3",
-          "n": 263,
+          "score": "2-2",
+          "n": 282,
+          "pct": 6
+        },
+        {
+          "score": "1-3",
+          "n": 262,
           "pct": 5
         },
         {
           "score": "1-2",
-          "n": 243,
+          "n": 256,
           "pct": 5
         },
         {
-          "score": "3-2",
-          "n": 229,
+          "score": "3-3",
+          "n": 243,
           "pct": 5
         }
       ],
@@ -9081,7 +9310,7 @@
       "stade": {
         "nom": "Strandvallen",
         "cap": "",
-        "meteo": "🌤️",
+        "meteo": "",
         "temp": "",
         "desc": ""
       },
@@ -9465,7 +9694,38 @@
         "games": 20
       },
       "top_scorers_home": [],
-      "top_scorers_away": [],
+      "top_scorers_away": [
+        {
+          "id": 374997,
+          "name": "M. Ladefoged",
+          "photo": "https://media.api-sports.io/football/players/374997.png",
+          "goals": 9,
+          "assists": 2,
+          "games": 12,
+          "shots_total": 28,
+          "shots_on": 14
+        },
+        {
+          "id": 406564,
+          "name": "M. Baggesen",
+          "photo": "https://media.api-sports.io/football/players/406564.png",
+          "goals": 2,
+          "assists": 3,
+          "games": 10,
+          "shots_total": 7,
+          "shots_on": 3
+        },
+        {
+          "id": 63943,
+          "name": "I. Lushaku",
+          "photo": "https://media.api-sports.io/football/players/63943.png",
+          "goals": 0,
+          "assists": 5,
+          "games": 8,
+          "shots_total": 2,
+          "shots_on": 1
+        }
+      ],
       "key_absences": [],
       "match_stats_home": {
         "possession": 58,
@@ -9509,24 +9769,24 @@
       "type": "safe",
       "selections": "Over 2.5 + Over 2.5",
       "matchs": "Mjallby AIF vs Vasteras SK FK, Forge vs Pacific FC",
-      "cote_totale": "1.65 x 1.50 = 2.48 → ajustée à 1.85 (mise réduite recommandée)",
-      "conseil": "Combiné sécurisé basé sur les 2 matchs avec le meilleur ratio confiance/cote. Mjallby et Vasteras affichent des profils offensifs solides en Allsvenskan. Forge vs Pacific FC est un classique CPL à buts. Mise recommandée : 3-5% bankroll."
+      "cote_totale": "1.65 x 1.50 = 2.48 → ajusté à 1.98",
+      "conseil": "Combiné sécurisé sur les deux matchs les plus confiants du jour. Mjallby et Vasteras évoluent dans un championnat suédois très offensif, tandis que Forge vs Pacific FC est une affiche CPL historiquement prolifique. Idéal pour miser avec sérénité."
     },
     {
       "label": "SHARK VALUE",
       "type": "value",
-      "selections": "Over 2.5 + Over 2.5 + Over 2.5",
-      "matchs": "Mjallby AIF vs Vasteras SK FK, Henan Jianye vs Qingdao Jonoon, Forge vs Pacific FC",
-      "cote_totale": "1.65 x 1.65 x 1.50 = 4.08 → ajustée à 3.20",
-      "conseil": "Triple Over 2.5 sur 3 championnats à tendance offensive marquée. La Super League chinoise et la CPL canadienne sont deux des ligues les plus prolifiques. Mjallby confirme la dynamique scandinave. Bon rapport risque/rendement. Mise recommandée : 2-3% bankroll."
+      "selections": "Over 2.5 + Over 2.5 + BTTS Non",
+      "matchs": "Mjallby AIF vs Vasteras SK FK, Forge vs Pacific FC, Leones del Norte vs Deportivo Cuenca",
+      "cote_totale": "1.65 x 1.50 x 1.59 = 3.93",
+      "conseil": "Excellent rapport risque/rendement. On conserve les deux Over 2.5 solides et on y ajoute le BTTS Non sur Leones vs Cuenca, une rencontre où une équipe devrait dominer sans concéder. Confiance globale correcte pour un retour significatif."
     },
     {
       "label": "SHARK EXPERT",
       "type": "audace",
-      "selections": "Over 2.5 + Over 2.5 + Over 2.5 + BTTS Oui",
-      "matchs": "Mjallby AIF vs Vasteras SK FK, Henan Jianye vs Qingdao Jonoon, Forge vs Pacific FC, Aucas vs Independiente del Valle",
-      "cote_totale": "1.65 x 1.65 x 1.50 x 1.75 = 7.14 → ajustée à 5.50",
-      "conseil": "Combiné audacieux réunissant les 4 meilleurs signaux du jour. Aucas vs Independiente del Valle en Liga Pro Ecuador promet des buts des deux côtés vu le pressing offensif d'IDV. Réservé aux joueurs expérimentés. Mise recommandée : 1-2% bankroll maximum."
+      "selections": "Over 2.5 + Over 2.5 + BTTS Non + BTTS Oui",
+      "matchs": "Mjallby AIF vs Vasteras SK FK, Forge vs Pacific FC, Leones del Norte vs Deportivo Cuenca, Beijing Guoan vs Shenyang Urban",
+      "cote_totale": "1.65 x 1.50 x 1.59 x 1.58 = 6.21",
+      "conseil": "Combiné 4 matchs pour les joueurs audacieux. On intègre Beijing Guoan vs Shenyang Urban en BTTS Oui, un duel de championnat chinois souvent animé. La cote dépasse les 6.00 pour une mise modérée. Réservé aux bankrolls stables avec gestion stricte des mises."
     }
   ]
 }

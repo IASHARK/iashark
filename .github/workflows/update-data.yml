@@ -97,8 +97,27 @@ jobs:
           function stripCdata(s){ return (s||'').replace(/<!\[CDATA\[/g,'').replace(/\]\]>/g,'').trim(); }
           function stripTags(s){ return (s||'').replace(/<[^>]+>/g,'').trim(); }
           function decodeEntities(s){
-            return (s||'').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>')
-              .replace(/&#39;/g,"'").replace(/&quot;/g,'"').replace(/&apos;/g,"'");
+            var out = (s||'').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>')
+              .replace(/&quot;/g,'"').replace(/&apos;/g,"'")
+              .replace(/&rsquo;/g,"'").replace(/&lsquo;/g,"'")
+              .replace(/&rdquo;/g,'"').replace(/&ldquo;/g,'"')
+              .replace(/&nbsp;/g,' ');
+            // Entites numeriques (couvre &#39; ET &#039; ET &#8217; etc., quel que soit le nombre de zeros)
+            out = out.replace(/&#x([0-9a-f]+);/gi, function(m, hex){ return String.fromCharCode(parseInt(hex,16)); });
+            out = out.replace(/&#0*(\d+);/g, function(m, dec){ return String.fromCharCode(parseInt(dec,10)); });
+            return out;
+          }
+          function smartSnippet(desc, maxLen){
+            maxLen = maxLen || 220;
+            var text = (desc||'').replace(/\s+/g,' ').trim();
+            if(text.length <= maxLen) return text;
+            var cut = text.slice(0, maxLen);
+            var lastEnd = Math.max(cut.lastIndexOf('. '), cut.lastIndexOf('! '), cut.lastIndexOf('? '));
+            if(lastEnd > maxLen*0.4){
+              return cut.slice(0, lastEnd+1).trim();
+            }
+            var lastSpace = cut.lastIndexOf(' ');
+            return (lastSpace>0?cut.slice(0,lastSpace):cut).trim() + '…';
           }
           function parseRSSItems(xml, maxItems) {
             maxItems = maxItems || 15;
@@ -119,6 +138,8 @@ jobs:
           var RSS_SOURCES = [
             { nom: "L'Equipe", url: "https://dwh.lequipe.fr/api/edito/rss?path=/Football/Transferts-football/", type: 'mercato', fiabilite: 'high' },
             { nom: "Foot01", url: "https://www.foot01.com/news.rss", type: 'general', fiabilite: 'mid' },
+            { nom: "RMC Sport", url: "https://rmcsport.bfmtv.com/rss/football/", type: 'general', fiabilite: 'high' },
+            { nom: "Foot Mercato", url: "https://www.footmercato.net/flux-rss", type: 'mercato', fiabilite: 'high' },
           ];
           function resolveMarketWin(predRaw, gh, ga) {
             var pred = (predRaw||'').toLowerCase();
@@ -2084,7 +2105,7 @@ jobs:
                 items.forEach(function(it){
                   if(!it.link || seenLinks[it.link]) return;
                   seenLinks[it.link]=true;
-                  actus.items.unshift({ source:src.nom, fiabilite:src.fiabilite, type:src.type, title:it.title, snippet:(it.description||'').slice(0,220), link:it.link, date:it.pubDate||new Date().toISOString() });
+                  actus.items.unshift({ source:src.nom, fiabilite:src.fiabilite, type:src.type, title:it.title, snippet:smartSnippet(it.description,220), link:it.link, date:it.pubDate||new Date().toISOString() });
                   newCount++;
                 });
                 console.log('  '+src.nom+': '+items.length+' articles lus');

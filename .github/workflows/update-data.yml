@@ -604,10 +604,11 @@ jobs:
             66, 307, 143, 137, 81,
             169, 244, 200, 479,
             365, 362, 242, 164,
-            357, 113
+            357, 113,
+            71, 253, 262
           ];
           const SEASON   = 2025;
-          var SEASON_2026 = [1, 292, 169, 244, 200, 479, 365, 362, 242, 164, 357, 113];
+          var SEASON_2026 = [1, 292, 169, 244, 200, 479, 365, 362, 242, 164, 357, 113, 71, 253];
           const TODAY    = new Date().toISOString().split('T')[0];
           var TEST_WC_ONLY = process.env.TEST_WC_ONLY === 'true';
           if(TEST_WC_ONLY) console.log('=== MODE TEST : COUPE DU MONDE UNIQUEMENT ===');
@@ -619,7 +620,8 @@ jobs:
             66:'coupe-france', 307:'saudi', 143:'copa-rey', 137:'coppa-italia', 81:'dfb-pokal',
             169:'chine', 244:'finlande', 200:'maroc', 479:'canada',
             365:'lettonie', 362:'lituanie', 242:'equateur', 164:'islande',
-            357:'irlande', 113:'suede'
+            357:'irlande', 113:'suede',
+            71:'bresil', 253:'mls', 262:'ligamx'
           };
           var BOOKIE_MAP = {
             'betclic':{domain:'betclic.fr',promo:'200 offerts',l:'#'},

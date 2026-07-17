@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="fr" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>À propos — IASHARK</title>
+<meta name="description" content="Comment IASHARK analyse le football : sources de données, modèles statistiques, méthodologie, résultats vérifiables et mentions légales.">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#080c12;--card:#0d1520;--card2:#0f1a28;
+  --cyan:#22d3ee;--cyan2:#06b6d4;--amber:#f59e0b;--green:#10b981;--red:#ef4444;
+  --text:#e2e8f0;--muted:#4a6580;
+  --border:rgba(255,255,255,0.06);--border-cyan:rgba(34,211,238,0.18);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;padding-bottom:90px;}
+a{color:inherit;text-decoration:none;}
+
+.hdr{position:sticky;top:0;z-index:99;background:rgba(8,12,18,0.96);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);padding:0 20px;height:56px;display:flex;align-items:center;justify-content:space-between;}
+.logo{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:3px;color:var(--text);}
+.logo span{color:var(--cyan);}
+.btn-ghost{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:1px;color:var(--muted);border:1px solid var(--border);padding:6px 12px;border-radius:8px;}
+
+.wrap{max-width:720px;margin:0 auto;padding:0 20px;}
+
+.hero{padding:44px 0 8px;}
+.hero-eyebrow{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:3px;color:var(--cyan);margin-bottom:16px;}
+.hero h1{font-family:'Bebas Neue',sans-serif;font-size:clamp(28px,6vw,42px);line-height:1.1;letter-spacing:0.5px;margin-bottom:16px;}
+.hero h1 b{color:var(--cyan);}
+.hero p{font-size:14.5px;color:#94a3b8;line-height:1.75;max-width:560px;}
+
+.sec{padding:36px 0;border-top:1px solid var(--border);}
+.sec-lbl{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:2.5px;color:var(--muted);margin-bottom:14px;}
+.sec h2{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:0.5px;margin-bottom:14px;}
+.sec p{font-size:14px;line-height:1.75;color:#cbd5e1;margin-bottom:14px;}
+.sec p:last-child{margin-bottom:0;}
+.sec b{color:var(--text);font-weight:600;}
+
+.model-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:18px 0;}
+.model-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 16px;}
+.model-card .mtitle{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1px;color:var(--cyan);margin-bottom:6px;}
+.model-card .mdesc{font-size:12px;color:var(--muted);line-height:1.6;}
+
+.callout{background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.25);border-radius:14px;padding:18px 20px;margin:18px 0;}
+.callout .ctitle{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1.5px;color:var(--amber);margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+.callout p{color:#e2c88a;font-size:13px;margin-bottom:0;}
+
+.example-box{background:var(--card);border:1px solid var(--border-cyan);border-radius:14px;padding:20px 22px;margin:18px 0;}
+.example-box .ex-row{display:flex;justify-content:space-between;align-items:baseline;padding:9px 0;border-bottom:1px solid var(--border);font-size:13px;}
+.example-box .ex-row:last-child{border-bottom:none;}
+.example-box .ex-label{color:var(--muted);}
+.example-box .ex-value{font-family:'Space Mono',monospace;color:var(--text);font-weight:700;}
+.example-box .ex-value.hl{color:var(--cyan);}
+.example-divider{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1.5px;color:var(--muted);text-align:center;margin:16px 0 8px;position:relative;}
+.simple-list{list-style:none;margin:16px 0;}
+.simple-list li{font-size:13.5px;color:#cbd5e1;padding:7px 0 7px 18px;position:relative;}
+.simple-list li::before{content:'•';position:absolute;left:0;color:var(--cyan);}
+.simple-list b{color:var(--text);font-family:'Space Mono',monospace;}
+
+.stat-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:18px 0;}
+.stat-chip{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 10px;text-align:center;}
+.stat-num{font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--cyan);line-height:1;margin-bottom:4px;}
+.stat-num.neg{color:var(--red);}
+.stat-lbl{font-family:'Space Mono',monospace;font-size:7px;color:var(--muted);letter-spacing:0.5px;}
+
+.market-table{width:100%;border-collapse:collapse;margin:18px 0;font-size:12.5px;}
+.market-table th{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:1px;color:var(--muted);text-align:left;padding:8px 10px;border-bottom:1px solid var(--border);}
+.market-table td{padding:9px 10px;border-bottom:1px solid var(--border);color:#cbd5e1;}
+.market-table td.num{font-family:'Space Mono',monospace;text-align:right;}
+.market-table td.pos{color:var(--green);}
+.market-table td.negv{color:var(--red);}
+
+.legal-list{list-style:none;}
+.legal-list li{font-size:13px;color:#b8c4d4;line-height:1.7;padding:10px 0 10px 22px;border-bottom:1px solid var(--border);position:relative;}
+.legal-list li:last-child{border-bottom:none;}
+.legal-list li::before{content:'—';position:absolute;left:0;color:var(--muted);}
+.legal-list b{color:var(--text);}
+
+.help-box{background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.25);border-radius:14px;padding:20px;margin-top:18px;text-align:center;}
+.help-box .htitle{font-family:'Bebas Neue',sans-serif;font-size:18px;color:var(--green);margin-bottom:8px;}
+.help-box p{font-size:13px;color:#a7d9c4;margin-bottom:10px;}
+.help-box .phone{font-family:'Space Mono',monospace;font-size:20px;font-weight:700;color:var(--green);letter-spacing:1px;}
+.help-box .sub{font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);margin-top:6px;}
+
+footer{padding:30px 20px;text-align:center;}
+footer p{font-family:'Space Mono',monospace;font-size:8px;color:rgba(74,101,128,0.6);letter-spacing:1px;line-height:2;}
+
+.nav-bottom{position:fixed;bottom:0;left:0;right:0;background:rgba(8,12,18,0.97);backdrop-filter:blur(14px);border-top:1px solid var(--border);display:flex;z-index:100;}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px 4px 8px;gap:5px;text-decoration:none;}
+.nav-icon svg{width:20px;height:20px;stroke:var(--muted);}
+.nav-lbl{font-family:'Space Mono',monospace;font-size:7px;color:var(--muted);letter-spacing:1px;}
+.nav-item.active .nav-lbl{color:var(--cyan);}
+.nav-item.active .nav-icon svg{stroke:var(--cyan);}
+
+@media(max-width:480px){.model-grid{grid-template-columns:1fr;}.stat-strip{grid-template-columns:1fr 1fr;}}
+</style>
+</head>
+<body>
+
+<header class="hdr">
+  <a href="https://iashark.com" class="logo"><span>IA</span>SHARK</a>
+  <a href="https://iashark.com/" class="btn-ghost">← ACCUEIL</a>
+</header>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="hero-eyebrow">À PROPOS</div>
+    <h1>Pas de flair.<br>Des <b>données</b>, un modèle,<br>un résultat vérifiable.</h1>
+    <p>IASHARK analyse chaque match à partir de données statistiques publiques et de modèles mathématiques établis. Pas de martingale, pas de martingale magique, pas de martingale — juste des probabilités calculées et documentées.</p>
+  </div>
+
+  <!-- ═══ METHODOLOGIE ═══ -->
+  <div class="sec">
+    <div class="sec-lbl">MÉTHODOLOGIE</div>
+    <h2>Comment le modèle fonctionne</h2>
+    <p>Pour chaque match, le système croise plusieurs sources de données : calendriers, statistiques d'équipe et de joueurs, expected goals (xG) quand la donnée est disponible, cotes de marché de référence, et classement Elo. Ces données alimentent quatre modèles statistiques distincts, combinés ensemble :</p>
+
+    <div class="model-grid">
+      <div class="model-card">
+        <div class="mtitle">POISSON</div>
+        <div class="mdesc">Distribution statistique classique utilisée pour modéliser le nombre de buts probable de chaque équipe.</div>
+      </div>
+      <div class="model-card">
+        <div class="mtitle">DIXON-COLES</div>
+        <div class="mdesc">Correction du modèle de Poisson pour les scores faibles (0-0, 1-0, 0-1, 1-1), statistiquement sous/sur-représentés par Poisson seul.</div>
+      </div>
+      <div class="model-card">
+        <div class="mtitle">MONTE-CARLO</div>
+        <div class="mdesc">5000 simulations du match par rencontre, pour vérifier la cohérence des scores probables avec le marché choisi.</div>
+      </div>
+      <div class="model-card">
+        <div class="mtitle">ELO</div>
+        <div class="mdesc">Classement de force relative des équipes (méthode ClubElo), utilisé comme signal de confirmation supplémentaire.</div>
+      </div>
+    </div>
+
+    <p>Un modèle de langage synthétise ensuite l'ensemble de ces signaux statistiques pour choisir, match par match, le marché dont la convergence des indicateurs est la plus forte — et lui attribue un score de confiance reflétant le degré d'accord entre les modèles.</p>
+    <p><b>La notion d'edge</b> : le modèle compare sa probabilité calculée à la cote proposée par les bookmakers. Quand la probabilité du modèle est supérieure à celle qu'implique la cote, on parle de "value bet" — une cote potentiellement sur-évaluée par le marché.</p>
+  </div>
+
+  <!-- ═══ SIMPLE VS COMBINE ═══ -->
+  <div class="sec">
+    <div class="sec-lbl">À LIRE AVANT TOUT</div>
+    <h2>Un modèle par match, pas de combinés</h2>
+    <p>Le cœur du système analyse <b>chaque match indépendamment</b> — un pari simple à la fois. Toutes les statistiques de performance présentées sur ce site (winrate, ROI, détail par marché) portent exclusivement sur ces <b>paris simples</b>, jamais sur des combinaisons de plusieurs paris.</p>
+  </div>
+
+  <!-- ═══ EXEMPLE ROI ═══ -->
+  <div class="sec">
+    <div class="sec-lbl">COMPRENDRE LES CHIFFRES</div>
+    <h2>Ce qu'un ROI de 20% veut vraiment dire</h2>
+    <p>Quand vous voyez un ROI (retour sur investissement) de 20% sur ce site, ça ne veut pas dire que votre capital augmente "seulement" de 20%. Dans les faits, votre gain réel en euros est souvent bien plus élevé que ce chiffre seul ne le laisse penser. Exemple concret :</p>
+
+    <ul class="simple-list">
+      <li>Capital de départ : <b>3 000 €</b></li>
+      <li>Mise par pari (fixe) : <b>100 €</b></li>
+      <li>Nombre de paris joués : <b>200</b></li>
+    </ul>
+
+    <p><b>1. Pourquoi vous n'avez pas besoin de 20 000€ pour jouer ?</b></p>
+    <p>Si vous faites 200 paris à 100€, vous déplacez un total de 20 000€ sur toute la période — c'est ce qu'on appelle le volume de jeu (le "turnover"). Pourtant, vous n'avez besoin que de 3 000€ sur votre compte. Pourquoi ? Parce que l'argent circule : vous misez 100€, le match se termine, vous récupérez votre mise avec vos gains éventuels, et vous réutilisez ce même argent pour le pari suivant. Vos 3 000€ de départ sont ainsi recyclés un peu plus de 6 fois sur la période.</p>
+
+    <p><b>2. Le ROI vs votre bénéfice réel</b></p>
+    <div class="example-box">
+      <div class="ex-row"><span class="ex-label">ROI de 20% (mesure de l'efficacité, sur les 20 000€ de mises cumulées)</span><span class="ex-value hl">4 000 € de gains</span></div>
+      <div class="ex-row"><span class="ex-label">Rendement sur votre capital de départ (3 000€ → 3 000€ + 4 000€)</span><span class="ex-value hl">+133%</span></div>
+      <div class="ex-row"><span class="ex-label">Votre cagnotte totale</span><span class="ex-value hl">7 000 €</span></div>
+    </div>
+    <p style="font-size:12px;color:var(--muted);">Cet exemple est basé sur nos performances passées ; elles ne garantissent pas les résultats futurs.</p>
+
+    <div class="callout">
+      <div class="ctitle">⚠ LA RÈGLE DE SÉCURITÉ POUR PROTÉGER VOTRE ARGENT</div>
+      <p>Miser 100€ avec un capital de 3 000€ signifie que vous jouez 3,3% de votre capital sur chaque pari. Même avec les meilleurs pronostics du monde, les séries de défaites consécutives arrivent. Si vous enchaînez 5 ou 6 pertes d'affilée avec des mises trop grosses, vous risquez de mettre votre capital en danger.<br><br>Notre conseil : ne misez pas une somme fixe au hasard. Misez plutôt un pourcentage fixe de votre capital actuel, idéalement entre 2% et 3% (soit 60€ à 90€ par pari pour un capital de 3 000€). Cela suffit largement pour encaisser les mauvaises séries et faire grimper votre cagnotte de façon sereine.</p>
+    </div>
+  </div>
+
+  <!-- ═══ RESULTATS ═══ -->
+  <div class="sec">
+    <div class="sec-lbl">HISTORIQUE VÉRIFIABLE</div>
+    <h2>Nos résultats, paris simples uniquement</h2>
+    <p>Chiffres calculés automatiquement à partir de l'historique réel des prédictions, mis à jour en continu.</p>
+
+    <div class="stat-strip">
+      <div class="stat-chip"><div class="stat-num">203</div><div class="stat-lbl">PARIS RÉSOLUS</div></div>
+      <div class="stat-chip"><div class="stat-num">68%</div><div class="stat-lbl">WINRATE GLOBAL</div></div>
+      <div class="stat-chip"><div class="stat-num">+22%</div><div class="stat-lbl">ROI GLOBAL</div></div>
+    </div>
+
+    <table class="market-table">
+      <tr><th>Marché</th><th style="text-align:right">Winrate</th><th style="text-align:right">ROI</th><th style="text-align:right">Paris</th></tr>
+      <tr><td>Double Chance X2</td><td class="num">85.7%</td><td class="num pos">+71.6%</td><td class="num">14</td></tr>
+      <tr><td>Victoire Domicile</td><td class="num">83.3%</td><td class="num pos">+43.2%</td><td class="num">6</td></tr>
+      <tr><td>Over 2.5 buts</td><td class="num">75.4%</td><td class="num pos">+30.2%</td><td class="num">61</td></tr>
+      <tr><td>BTTS Non</td><td class="num">70%</td><td class="num pos">+22.9%</td><td class="num">20</td></tr>
+      <tr><td>BTTS Oui</td><td class="num">62.5%</td><td class="num pos">+12.9%</td><td class="num">40</td></tr>
+      <tr><td>Under 2.5 buts</td><td class="num">56.5%</td><td class="num negv">-2.2%</td><td class="num">46</td></tr>
+      <tr><td>Victoire Extérieur</td><td class="num">55.6%</td><td class="num pos">+3.4%</td><td class="num">9</td></tr>
+    </table>
+
+    <p style="font-size:12px;color:var(--muted);">Seuls les marchés avec un échantillon suffisant (5 paris ou plus) sont affichés, résultats positifs et négatifs inclus. Les performances passées ne garantissent pas les performances futures.</p>
+  </div>
+
+  <!-- ═══ LEGAL ═══ -->
+  <div class="sec">
+    <div class="sec-lbl">MENTIONS IMPORTANTES</div>
+    <h2>Ce que vous devez savoir</h2>
+    <ul class="legal-list">
+      <li><b>IASHARK n'est pas un opérateur de paris sportifs.</b> Nous ne prenons aucune mise, ne gérons aucun compte joueur et ne procédons à aucun encaissement de gains. Pour parier réellement, vous devez passer par un opérateur agréé par l'ANJ (Autorité Nationale des Jeux).</li>
+      <li><b>Nous ne sommes ni conseillers financiers, ni traders professionnels agréés, ni professionnels du pari sportif.</b> IASHARK est un outil d'analyse statistique à but informatif et éducatif — en aucun cas un service de conseil en investissement, en trading ou en paris.</li>
+      <li><b>Contenu informatif uniquement.</b> Les analyses, statistiques et scores de confiance publiés ici sont fournis à titre purement informatif et éducatif. Ils ne constituent ni un conseil financier, ni une garantie de résultat.</li>
+      <li><b>Aucune responsabilité ne pourra être engagée</b> en cas de perte financière résultant de décisions prises sur la base des contenus de ce site. Vous êtes seul responsable de vos décisions de jeu et de leurs conséquences.</li>
+      <li><b>Le sport est imprévisible.</b> Aucun modèle statistique, aussi rigoureux soit-il, ne peut prédire un résultat sportif avec certitude.</li>
+      <li><b>Performances passées ≠ performances futures.</b> Un edge statistique positif à long terme n'empêche pas des séries de pertes à court terme. Le modèle et la méthodologie décrits sur cette page peuvent évoluer sans préavis.</li>
+      <li><b>Propriété du contenu.</b> Les analyses, textes et méthodologie présentés sur ce site sont la propriété d'IASHARK et ne peuvent être reproduits sans autorisation préalable.</li>
+      <li><b>Réservé aux personnes majeures</b> (18 ans et plus).</li>
+    </ul>
+
+    <div class="help-box">
+      <div class="htitle">🦈 Jouer doit rester un plaisir</div>
+      <p>Si vous ou un proche rencontrez des difficultés avec le jeu, une aide gratuite et anonyme existe.</p>
+      <div class="phone">09 74 75 13 13</div>
+      <div class="sub">JOUEURS-INFO-SERVICE.FR · 7J/7 DE 8H À 2H · APPEL NON SURTAXÉ</div>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  <p>⚠️ LE JEU PEUT ÊTRE DANGEREUX — JOUEZ RESPONSABLE · INTERDIT AUX MOINS DE 18 ANS<br>
+  IASHARK — Les analyses publiées sont à titre indicatif uniquement</p>
+</footer>
+
+<nav class="nav-bottom">
+  <a href="https://iashark.com/" class="nav-item"><div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5L12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg></div><div class="nav-lbl">ACCUEIL</div></a>
+  <a href="https://iashark.com/historique.html" class="nav-item"><div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20v-4"/></svg></div><div class="nav-lbl">HISTORIQUE</div></a>
+  <a href="https://iashark.com/pro.html" class="nav-item"><div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.9 6.6L22 9.3l-5 4.9L18.2 22 12 18.3 5.8 22 7 14.2 2 9.3l7.1-.7z"/></svg></div><div class="nav-lbl">PRO</div></a>
+  <a href="https://iashark.com/blog/" class="nav-item"><div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg></div><div class="nav-lbl">GUIDES</div></a>
+  <a href="https://iashark.com/compte.html" class="nav-item"><div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg></div><div class="nav-lbl">COMPTE</div></a>
+</nav>
+
+</body>
+</html>

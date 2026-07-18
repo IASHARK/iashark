@@ -1,0 +1,64 @@
+name: Patch Form Dots + Contexte (correctif ponctuel)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Patch data.json
+        run: |
+          cat > patch.js << 'EOF'
+          const fs = require('fs');
+          const path = 'data.json';
+          const data = JSON.parse(fs.readFileSync(path, 'utf8'));
+          let patchedForm = 0;
+          let patchedText = 0;
+
+          function hasTeams(m, a, b) {
+            var h = (m.home && m.home.n || '').toLowerCase();
+            var aw = (m.away && m.away.n || '').toLowerCase();
+            a = a.toLowerCase(); b = b.toLowerCase();
+            return (h.includes(a) && aw.includes(b)) || (h.includes(b) && aw.includes(a));
+          }
+
+          (data.matchs || []).forEach(function(m) {
+            // Fix 1 : pastilles "5 derniers resultats" (classement.form non fiable en phase finale CDM)
+            if (m.classement) {
+              if (m.classement.home && m.form_home) { m.classement.home.form = m.form_home; patchedForm++; }
+              if (m.classement.away && m.form_away) { m.classement.away.form = m.form_away; patchedForm++; }
+            }
+
+            // Fix 2 : contexte errone - France vs Angleterre = match pour la 3e place, pas quart/demi
+            if (hasTeams(m, 'france', 'england')) {
+              m.contexte = "Match pour la 3e place de la Coupe du Monde 2026, a Miami. Les deux equipes viennent de perdre en demi-finale (France battue par l'Espagne 2-0, Angleterre battue par l'Argentine 2-1) et jouent sans enjeu sportif majeur pour la victoire finale - attention aux rotations d'effectif possibles, l'intensite est generalement plus faible que lors des matchs a elimination directe.";
+              patchedText++;
+            }
+
+            // Fix 3 : contexte errone - Espagne vs Argentine = LA finale, pas "quart ou stade avance"
+            if (hasTeams(m, 'spain', 'argentina')) {
+              m.contexte = "LA FINALE de la Coupe du Monde 2026, au MetLife Stadium (New York/New Jersey), dimanche 19 juillet. L'Argentine, championne du monde en titre, affronte l'Espagne, championne d'Europe en titre, pour le trophee mondial. Enjeu maximal : c'est le dernier match du tournoi, decisif pour l'histoire des deux nations.";
+              patchedText++;
+            }
+          });
+
+          fs.writeFileSync(path, JSON.stringify(data, null, 2));
+          console.log('Pastilles corrigees : ' + patchedForm);
+          console.log('Textes contexte corriges : ' + patchedText);
+          EOF
+          node patch.js
+          rm patch.js
+
+      - name: Commit and push
+        run: |
+          git config user.name "IASHARK"
+          git config user.email "yaramode81@gmail.com"
+          git add data.json
+          git diff --staged --quiet || git commit -m "Correctif ponctuel : pastilles forme + contexte finale/3e place CDM"
+          git push

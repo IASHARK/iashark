@@ -1257,61 +1257,210 @@ jobs:
             games.forEach(function(g){(g.events||[]).forEach(function(e){if(e.type==='Card')totalCards++;if(e.detail&&e.detail.toLowerCase().includes('penalty'))totalPens++;});});
             return {name:refName,games:games.length,cards_per_game:(totalCards/games.length).toFixed(1),pens_per_game:(totalPens/games.length).toFixed(1)};
           }
-          async function getTopScorersFromFixtures(teamId, fixtureIds) {
-            var statsMap = {};
-            for(var i=0;i<fixtureIds.length;i++){
-              try{
-                var r = await get('https://v3.football.api-sports.io/fixtures/players?fixture='+fixtureIds[i], APS);
-                var teamBlock=(r.response||[]).find(function(b){return b.team&&b.team.id===teamId;});
-                if(teamBlock){
-                  (teamBlock.players||[]).forEach(function(p){
-                    var st=p.statistics&&p.statistics[0];
-                    if(!st)return;
-                    var pid=p.player.id;
-                    if(!statsMap[pid])statsMap[pid]={
-                      id:pid,name:p.player.name,photo:p.player.photo,
-                      goals:0,assists:0,shots_total:0,shots_on:0,games:0,
-                      fouls_committed:0,fouls_drawn:0,
-                      yellow:0,red:0,
-                      duels_total:0,duels_won:0,
-                      dribbles_success:0,dribbles_attempts:0,
-                      key_passes:0
-                    };
-                    var mins=st.games&&st.games.minutes;
-                    if(mins&&mins>0)statsMap[pid].games++;
-                    statsMap[pid].goals+=(st.goals&&st.goals.total)||0;
-                    statsMap[pid].assists+=(st.goals&&st.goals.assists)||0;
-                    statsMap[pid].shots_total+=(st.shots&&st.shots.total)||0;
-                    statsMap[pid].shots_on+=(st.shots&&st.shots.on)||0;
-                    statsMap[pid].fouls_committed+=(st.fouls&&st.fouls.committed)||0;
-                    statsMap[pid].fouls_drawn+=(st.fouls&&st.fouls.drawn)||0;
-                    statsMap[pid].yellow+=(st.cards&&st.cards.yellow)||0;
-                    statsMap[pid].red+=(st.cards&&st.cards.red)||0;
-                    statsMap[pid].duels_total+=(st.duels&&st.duels.total)||0;
-                    statsMap[pid].duels_won+=(st.duels&&st.duels.won)||0;
-                    statsMap[pid].dribbles_success+=(st.dribbles&&st.dribbles.success)||0;
-                    statsMap[pid].dribbles_attempts+=(st.dribbles&&st.dribbles.attempts)||0;
-                    statsMap[pid].key_passes+=(st.passes&&st.passes.key)||0;
-                  });
-                }
-              }catch(e){}
-              await sleep(150);
-            }
-            var arr=Object.keys(statsMap).map(function(k){return statsMap[k];}).filter(function(p){return p.goals>0||p.assists>0;});
-            arr.sort(function(a,b){return (b.goals+b.assists)-(a.goals+a.assists);});
-            return arr.slice(0,3).map(function(p){
-              return {
-                id:p.id,name:p.name,photo:p.photo||('https://media.api-sports.io/football/players/'+p.id+'.png'),
-                goals:p.goals,assists:p.assists,games:p.games,
-                shots_total:p.shots_total,shots_on:p.shots_on,
-                fouls_committed:p.fouls_committed,fouls_drawn:p.fouls_drawn,
-                yellow:p.yellow,red:p.red,
-                duels_total:p.duels_total,duels_won:p.duels_won,
-                dribbles_success:p.dribbles_success,dribbles_attempts:p.dribbles_attempts,
-                key_passes:p.key_passes,
-                sample_size:fixtureIds.length
-              };
+          var SPORTMONKS_KEY = process.env.SPORTMONKS_KEY;
+          var SM_LEAGUE_CACHE = {};
+          var SM_TOPSCORERS_CACHE = {};
+          function getSM(url) {
+            var sep = url.indexOf('?') > -1 ? '&' : '?';
+            return get(url + sep + 'api_token=' + SPORTMONKS_KEY, {});
+          }
+          var CLUB_STOPWORDS = ['fc','sc','cf','ac','if','bk','sk','ik','fk','ff','cd','ca','sd','ud','fk','united','city','club','athletic','atletico','calcio','de','do','da','le','la','los'];
+          function smNormalize(s) {
+            s = (s||'').toLowerCase();
+            try { s = s.normalize('NFD').replace(/[\u0300-\u036f]/g,''); } catch(e){}
+            s = s.replace(/[^a-z0-9]+/g,' ').trim();
+            var words = s.split(' ').filter(function(w){ return w && CLUB_STOPWORDS.indexOf(w)===-1; });
+            return words.join(' ');
+          }
+          function smAcronym(s) {
+            var norm = smNormalize(s);
+            var words = norm.split(' ').filter(Boolean);
+            if(words.length < 2) return null;
+            return words.map(function(w){ return w.length <= 3 ? w : w[0]; }).join('');
+          }
+          function smBestMatch(name, candidates) {
+            var nameLow = (name||'').toLowerCase().trim();
+            var nameNorm = smNormalize(name);
+            var nameAcronym = smAcronym(name);
+            candidates = (candidates||[]).filter(Boolean);
+
+            var exact = candidates.find(function(c){ return (c||'').toLowerCase().trim() === nameLow; });
+            if(exact) return exact;
+
+            var byAcronym = candidates.find(function(c){
+              var cLow = (c||'').toLowerCase().trim();
+              var cAcronym = smAcronym(c);
+              return (nameAcronym && cLow === nameAcronym) || (cAcronym && nameLow === cAcronym);
             });
+            if(byAcronym) return byAcronym;
+
+            var bySubstring = candidates.find(function(c){
+              var cNorm = smNormalize(c);
+              if(cNorm.length < 3 || nameNorm.length < 3) return false;
+              return cNorm.indexOf(nameNorm) !== -1 || nameNorm.indexOf(cNorm) !== -1;
+            });
+            if(bySubstring) return bySubstring;
+
+            var best = null, bestScore = Infinity;
+            candidates.forEach(function(c){
+              var cNorm = smNormalize(c);
+              var score = levenshtein(nameNorm, cNorm) / Math.max(nameNorm.length, cNorm.length, 1);
+              if(score < bestScore){ bestScore = score; best = c; }
+            });
+            return bestScore < 0.45 ? best : null;
+          }
+          async function smFindLeagueSeasonByCountry(countryName) {
+            try {
+              var rc = await getSM('https://api.sportmonks.com/v3/core/countries/search/' + encodeURIComponent(countryName));
+              var countries = rc.data || [];
+              if(!countries.length) return null;
+              var country = countries[0];
+              var rl = await getSM('https://api.sportmonks.com/v3/football/leagues/countries/' + country.id + '?include=currentSeason');
+              var leagues = (rl.data || []).filter(function(l){ return l.sub_type==='domestic' && l.currentseason; });
+              console.log('  [SPORTMONKS] Fallback pays "'+countryName+'" (id:'+country.id+') -> '+leagues.length+' ligue(s) domestique(s): '+leagues.map(function(l){return l.name+'(id:'+l.id+',cat:'+l.category+')';}).join(', '));
+              if(!leagues.length) return null;
+              var current = leagues.filter(function(l){ return l.currentseason.is_current===true; });
+              if(!current.length) return null;
+              current.sort(function(a,b){ return (a.category||99)-(b.category||99); });
+              var best = current[0];
+              console.log('  [SPORTMONKS] Fallback retenu: "'+best.name+'" (categorie '+best.category+', probablement le plus haut niveau du pays)');
+              return { leagueId: best.id, seasonId: best.currentseason.id, leagueName: best.name };
+            } catch(e) { return null; }
+          }
+          async function smFindLeagueSeason(leagueName, countryName) {
+            var key = (leagueName||'').toLowerCase()+'|'+(countryName||'').toLowerCase();
+            if(SM_LEAGUE_CACHE[key] !== undefined) return SM_LEAGUE_CACHE[key];
+            if(!SPORTMONKS_KEY){ SM_LEAGUE_CACHE[key] = null; return null; }
+            try {
+              var r = await getSM('https://api.sportmonks.com/v3/football/leagues/search/' + encodeURIComponent(leagueName) + '?include=currentSeason;country');
+              var leagues = r.data || [];
+              var candidates = [];
+              if(leagues.length){
+                console.log('  [SPORTMONKS] Recherche "'+leagueName+'" (pays attendu: '+(countryName||'?')+') -> '+leagues.length+' resultat(s): '+leagues.map(function(l){return l.name+'/'+((l.country&&l.country.name)||'?')+'(id:'+l.id+')';}).join(', '));
+                if(countryName){
+                  var countryLow = countryName.toLowerCase();
+                  candidates = leagues.filter(function(l){
+                    var lc = (l.country && l.country.name || '').toLowerCase();
+                    return lc === countryLow || lc.includes(countryLow) || countryLow.includes(lc);
+                  });
+                } else {
+                  candidates = leagues;
+                }
+              } else {
+                console.log('  [SPORTMONKS] Aucune ligue trouvee pour "'+leagueName+'"');
+              }
+              var best;
+              if(candidates.length){
+                var exact = candidates.find(function(l){ return (l.name||'').toLowerCase() === leagueName.toLowerCase(); });
+                best = exact || candidates[0];
+              } else if(countryName){
+                console.log('  [SPORTMONKS] Nom "'+leagueName+'" ne matche pas le pays "'+countryName+'" -> on cherche directement les ligues du pays');
+                var byCountryResult = await smFindLeagueSeasonByCountry(countryName);
+                SM_LEAGUE_CACHE[key] = byCountryResult;
+                return byCountryResult;
+              } else {
+                SM_LEAGUE_CACHE[key] = null; return null;
+              }
+              if(!best || !best.currentseason){
+                console.log('  [SPORTMONKS] Ligue "'+leagueName+'" -> match "'+(best&&best.name)+'" mais PAS de currentSeason -> abandon');
+                SM_LEAGUE_CACHE[key] = null; return null;
+              }
+              var cs = best.currentseason;
+              console.log('  [SPORTMONKS] Ligue retenue: "'+best.name+'" / pays "'+((best.country&&best.country.name)||'?')+'" (id:'+best.id+') | Saison: "'+cs.name+'" (id:'+cs.id+') | is_current:'+cs.is_current+' | periode:'+cs.starting_at+' -> '+cs.ending_at);
+              if(cs.is_current !== true){
+                console.log('  [SPORTMONKS] REJET: "'+best.name+'" saison "'+cs.name+'" n\'est pas is_current -> pas de stats affichees pour ce match (mieux vaut rien que des stats perimees)');
+                SM_LEAGUE_CACHE[key] = null; return null;
+              }
+              var result = { leagueId: best.id, seasonId: cs.id, leagueName: best.name };
+              SM_LEAGUE_CACHE[key] = result;
+              return result;
+            } catch(e) { SM_LEAGUE_CACHE[key] = null; return null; }
+          }
+          async function smGetTopscorers(seasonId) {
+            if(SM_TOPSCORERS_CACHE[seasonId]) return SM_TOPSCORERS_CACHE[seasonId];
+            try {
+              var allEntries = [];
+              var page = 1;
+              var maxPages = 4;
+              while(page <= maxPages){
+                var r = await getSM('https://api.sportmonks.com/v3/football/topscorers/seasons/' + seasonId + '?filters=seasontopscorerTypes:208&include=type;player:name,image_path;participant:name&page=' + page);
+                var list = r.data || [];
+                allEntries = allEntries.concat(list);
+                var hasMore = r.pagination && r.pagination.has_more;
+                if(!hasMore) break;
+                page++;
+                await sleep(150);
+              }
+              SM_TOPSCORERS_CACHE[seasonId] = allEntries;
+              return allEntries;
+            } catch(e) { SM_TOPSCORERS_CACHE[seasonId] = []; return []; }
+          }
+          async function smGetPlayerStats(playerId, seasonId) {
+            try {
+              var r = await getSM('https://api.sportmonks.com/v3/football/players/' + playerId + '?include=statistics.details.type&filters=playerStatisticSeasons:' + seasonId);
+              var data = r.data;
+              if(!data || !data.statistics || !data.statistics.length) return null;
+              var details = data.statistics[0].details || [];
+              var map = {};
+              details.forEach(function(d){ map[d.type_id] = d.value; });
+              function num(v){ return (v && v.total != null) ? v.total : 0; }
+              return {
+                goals: num(map[52]), assists: num(map[79]),
+                shots_total: num(map[42]), shots_on: num(map[86]),
+                fouls_committed: num(map[56]), fouls_drawn: num(map[96]),
+                yellow: num(map[84]), red: num(map[83]),
+                duels_total: num(map[105]), duels_won: num(map[106]),
+                dribbles_success: num(map[109]), dribbles_attempts: num(map[108]),
+                key_passes: num(map[117]),
+                minutes: num(map[119]), games: num(map[321]),
+              };
+            } catch(e) { return null; }
+          }
+          async function getTopScorersSportmonks(teamName, leagueName, countryName) {
+            var leagueSeason = await smFindLeagueSeason(leagueName, countryName);
+            if(!leagueSeason) return [];
+            var topscorers = await smGetTopscorers(leagueSeason.seasonId);
+            if(!topscorers.length) return [];
+            var teamNames = topscorers.map(function(t){ return t.participant ? t.participant.name : ''; }).filter(Boolean);
+            var uniqueTeamNames = teamNames.filter(function(v,i,a){ return a.indexOf(v)===i; });
+            var matchedTeam = smBestMatch(teamName, uniqueTeamNames);
+            if(!matchedTeam){
+              console.log('  [SPORTMONKS] Equipe "'+teamName+'" NON TROUVEE parmi: '+uniqueTeamNames.join(', '));
+              return [];
+            }
+            console.log('  [SPORTMONKS] Equipe "'+teamName+'" -> matchee avec "'+matchedTeam+'"');
+            var teamScorers = topscorers.filter(function(t){ return t.participant && t.participant.name === matchedTeam; });
+            teamScorers.sort(function(a,b){ return (b.total||0)-(a.total||0); });
+            var top3 = teamScorers.slice(0,3);
+            var results = [];
+            for(var i=0; i<top3.length; i++){
+              var entry = top3[i];
+              var stats = await smGetPlayerStats(entry.player_id, leagueSeason.seasonId);
+              await sleep(150);
+              results.push({
+                id: entry.player_id,
+                name: entry.player ? entry.player.name : '',
+                photo: entry.player ? entry.player.image_path : null,
+                goals: stats ? stats.goals : (entry.total||0),
+                assists: stats ? stats.assists : 0,
+                games: stats ? stats.games : 0,
+                shots_total: stats ? stats.shots_total : 0,
+                shots_on: stats ? stats.shots_on : 0,
+                fouls_committed: stats ? stats.fouls_committed : 0,
+                fouls_drawn: stats ? stats.fouls_drawn : 0,
+                yellow: stats ? stats.yellow : 0,
+                red: stats ? stats.red : 0,
+                duels_total: stats ? stats.duels_total : 0,
+                duels_won: stats ? stats.duels_won : 0,
+                dribbles_success: stats ? stats.dribbles_success : 0,
+                dribbles_attempts: stats ? stats.dribbles_attempts : 0,
+                key_passes: stats ? stats.key_passes : 0,
+                sample_size: stats ? stats.games : null,
+                sample_type: 'saison',
+                source: 'sportmonks'
+              });
+            }
+            return results;
           }
           async function getFixtureEvents(fixtureId) {
             var r = await get('https://v3.football.api-sports.io/fixtures/events?fixture='+fixtureId, APS);
@@ -2335,8 +2484,8 @@ jobs:
               var pinnacleOdds=batch2[9]||null;
               var last20IdsH=(raw10H||[]).slice(0,20).map(function(fx){return fx.fixture.id;});
               var last20IdsA=(raw10A||[]).slice(0,20).map(function(fx){return fx.fixture.id;});
-              var topScorersH=await getTopScorersFromFixtures(home.id, last20IdsH.slice(0,10));
-              var topScorersA=await getTopScorersFromFixtures(away.id, last20IdsA.slice(0,10));
+              var topScorersH=await getTopScorersSportmonks(home.name, lg.name, lg.country);
+              var topScorersA=await getTopScorersSportmonks(away.name, lg.name, lg.country);
               var eventsH_raw=[],eventsA_raw=[];
               for(var evi=0;evi<last20IdsH.length;evi++){eventsH_raw.push(await getFixtureEvents(last20IdsH[evi]));await sleep(150);}
               for(var evi=0;evi<last20IdsA.length;evi++){eventsA_raw.push(await getFixtureEvents(last20IdsA[evi]));await sleep(150);}
@@ -2734,6 +2883,7 @@ jobs:
       - name: Run pipeline
         env:
           APISPORTS_KEY:      ${{ secrets.APISPORTS_KEY }}
+          SPORTMONKS_KEY:     ${{ secrets.SPORTMONKS_KEY }}
           OPENWEATHER_KEY:    ${{ secrets.OPENWEATHER_KEY }}
           NEWSAPI_KEY:        ${{ secrets.NEWSAPI_KEY }}
           ANTHROPIC_KEY:      ${{ secrets.ANTHROPIC_KEY }}

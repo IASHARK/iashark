@@ -2855,6 +2855,9 @@ jobs:
           }
           main().catch(function(e){console.error('FATAL:',e.message,e.stack);process.exit(0);});
           JSEOF
+      - name: Vider le cache (force recalcul complet pour ce test)
+        run: echo '{"matchs":[],"combis":[]}' > data.json
+
       - name: Run pipeline
         env:
           APISPORTS_KEY:      ${{ secrets.APISPORTS_KEY }}

@@ -13,6 +13,10 @@ on:
         description: 'Mode test : Coupe du Monde uniquement (rapide)'
         required: false
         default: 'false'
+      test_match_filter:
+        description: 'Mode test : ne traiter QUE le match contenant ces 2 noms, separes par une virgule (ex: Guayaquil,Mantra). Laisser vide en usage normal.'
+        required: false
+        default: ''
 
 jobs:
   update:
@@ -102,7 +106,6 @@ jobs:
               .replace(/&rsquo;/g,"'").replace(/&lsquo;/g,"'")
               .replace(/&rdquo;/g,'"').replace(/&ldquo;/g,'"')
               .replace(/&nbsp;/g,' ');
-            // Entites numeriques (couvre &#39; ET &#039; ET &#8217; etc., quel que soit le nombre de zeros)
             out = out.replace(/&#x([0-9a-f]+);/gi, function(m, hex){ return String.fromCharCode(parseInt(hex,16)); });
             out = out.replace(/&#0*(\d+);/g, function(m, dec){ return String.fromCharCode(parseInt(dec,10)); });
             return out;
@@ -612,6 +615,8 @@ jobs:
           const TODAY    = new Date().toISOString().split('T')[0];
           var TEST_WC_ONLY = process.env.TEST_WC_ONLY === 'true';
           if(TEST_WC_ONLY) console.log('=== MODE TEST : COUPE DU MONDE UNIQUEMENT ===');
+          var TEST_MATCH_FILTER = (process.env.TEST_MATCH_FILTER || '').trim();
+          if(TEST_MATCH_FILTER) console.log('=== MODE TEST : FILTRE MATCH UNIQUE — "'+TEST_MATCH_FILTER+'" ===');
           var LG_KEY = {
             39:'premier', 40:'champ', 61:'ligue1', 62:'ligue2',
             140:'laliga', 141:'laliga2', 135:'seriea', 78:'bundesliga',
@@ -1177,6 +1182,21 @@ jobs:
               if(seen[f.fixture.id]) return false;
               seen[f.fixture.id]=true; return true;
             });
+            if(TEST_MATCH_FILTER){
+              var filterNames=TEST_MATCH_FILTER.split(',').map(function(s){return s.trim().toLowerCase();}).filter(Boolean);
+              if(filterNames.length>=2){
+                var n1=filterNames[0], n2=filterNames[1];
+                var filtered=uniqueFixtures.filter(function(f){
+                  var h=(f.teams.home.name||'').toLowerCase();
+                  var a=(f.teams.away.name||'').toLowerCase();
+                  return (h.includes(n1)&&a.includes(n2))||(h.includes(n2)&&a.includes(n1));
+                });
+                console.log('  [TEST_MATCH_FILTER] '+filtered.length+' match(s) trouve(s) pour "'+TEST_MATCH_FILTER+'"');
+                filtered.forEach(function(f){console.log('    -> '+f.teams.home.name+' vs '+f.teams.away.name+' ('+f.league.name+', '+f.fixture.date+')');});
+                return filtered;
+              }
+              console.log('  [TEST_MATCH_FILTER] format invalide, attendu "Equipe1,Equipe2" - filtre ignore');
+            }
             var TEST_ONE_MATCH = false;
             if(TEST_ONE_MATCH){
               var wcOnly = uniqueFixtures.filter(function(f){ return f.league.id===1; });
@@ -1269,13 +1289,30 @@ jobs:
                     var st=p.statistics&&p.statistics[0];
                     if(!st)return;
                     var pid=p.player.id;
-                    if(!statsMap[pid])statsMap[pid]={id:pid,name:p.player.name,photo:p.player.photo,goals:0,assists:0,shots_total:0,shots_on:0,games:0};
+                    if(!statsMap[pid])statsMap[pid]={
+                      id:pid,name:p.player.name,photo:p.player.photo,
+                      goals:0,assists:0,shots_total:0,shots_on:0,games:0,
+                      fouls_committed:0,fouls_drawn:0,
+                      yellow:0,red:0,
+                      duels_total:0,duels_won:0,
+                      dribbles_success:0,dribbles_attempts:0,
+                      key_passes:0
+                    };
                     var mins=st.games&&st.games.minutes;
                     if(mins&&mins>0)statsMap[pid].games++;
                     statsMap[pid].goals+=(st.goals&&st.goals.total)||0;
                     statsMap[pid].assists+=(st.goals&&st.goals.assists)||0;
                     statsMap[pid].shots_total+=(st.shots&&st.shots.total)||0;
                     statsMap[pid].shots_on+=(st.shots&&st.shots.on)||0;
+                    statsMap[pid].fouls_committed+=(st.fouls&&st.fouls.committed)||0;
+                    statsMap[pid].fouls_drawn+=(st.fouls&&st.fouls.drawn)||0;
+                    statsMap[pid].yellow+=(st.cards&&st.cards.yellow)||0;
+                    statsMap[pid].red+=(st.cards&&st.cards.red)||0;
+                    statsMap[pid].duels_total+=(st.duels&&st.duels.total)||0;
+                    statsMap[pid].duels_won+=(st.duels&&st.duels.won)||0;
+                    statsMap[pid].dribbles_success+=(st.dribbles&&st.dribbles.success)||0;
+                    statsMap[pid].dribbles_attempts+=(st.dribbles&&st.dribbles.attempts)||0;
+                    statsMap[pid].key_passes+=(st.passes&&st.passes.key)||0;
                   });
                 }
               }catch(e){}
@@ -1284,7 +1321,17 @@ jobs:
             var arr=Object.keys(statsMap).map(function(k){return statsMap[k];}).filter(function(p){return p.goals>0||p.assists>0;});
             arr.sort(function(a,b){return (b.goals+b.assists)-(a.goals+a.assists);});
             return arr.slice(0,3).map(function(p){
-              return {id:p.id,name:p.name,photo:p.photo||('https://media.api-sports.io/football/players/'+p.id+'.png'),goals:p.goals,assists:p.assists,games:p.games,shots_total:p.shots_total,shots_on:p.shots_on};
+              return {
+                id:p.id,name:p.name,photo:p.photo||('https://media.api-sports.io/football/players/'+p.id+'.png'),
+                goals:p.goals,assists:p.assists,games:p.games,
+                shots_total:p.shots_total,shots_on:p.shots_on,
+                fouls_committed:p.fouls_committed,fouls_drawn:p.fouls_drawn,
+                yellow:p.yellow,red:p.red,
+                duels_total:p.duels_total,duels_won:p.duels_won,
+                dribbles_success:p.dribbles_success,dribbles_attempts:p.dribbles_attempts,
+                key_passes:p.key_passes,
+                sample_size:fixtureIds.length
+              };
             });
           }
           async function getFixtureEvents(fixtureId) {
@@ -2716,6 +2763,7 @@ jobs:
           RAPIDAPI_TENNIS_KEY: ${{ secrets.RAPIDAPI_TENNIS_KEY }}
           CREATOMATE_KEY:     ${{ secrets.CREATOMATE_KEY }}
           TEST_WC_ONLY:       ${{ github.event.inputs.test_wc_only }}
+          TEST_MATCH_FILTER:  ${{ github.event.inputs.test_match_filter }}
         run: node pipeline.js
 
       - name: Commit and push

@@ -1,22 +1,7 @@
-name: Update IASHARK Daily
+name: TEST Equateur uniquement
 
 on:
-  schedule:
-    - cron: '0 6 * * *'
   workflow_dispatch:
-    inputs:
-      force_refresh:
-        description: 'Vider le cache et recalculer tous les matchs'
-        required: false
-        default: 'false'
-      test_wc_only:
-        description: 'Mode test : Coupe du Monde uniquement (rapide)'
-        required: false
-        default: 'false'
-      test_match_filter:
-        description: 'Mode test : ne traiter QUE le match contenant ces 2 noms, separes par une virgule (ex: Guayaquil,Mantra). Laisser vide en usage normal.'
-        required: false
-        default: ''
 
 jobs:
   update:
@@ -602,13 +587,7 @@ jobs:
             return Math.min(kelly*fraction*100,5).toFixed(1);
           }
           const LEAGUES = [
-            39, 40, 61, 62, 140, 141, 135, 78, 2, 3,
-            88, 94, 203, 119, 179, 144, 292,
-            66, 307, 143, 137, 81,
-            169, 244, 200, 479,
-            365, 362, 242, 164,
-            357, 113,
-            71, 253, 262
+            242
           ];
           const SEASON   = 2025;
           var SEASON_2026 = [1, 292, 169, 244, 200, 479, 365, 362, 242, 164, 357, 113, 71, 253];
@@ -2744,14 +2723,6 @@ jobs:
           }
           main().catch(function(e){console.error('FATAL:',e.message,e.stack);process.exit(0);});
           JSEOF
-      - name: Vider le cache uniquement si force_refresh demande
-        run: |
-          if [ "${{ github.event.inputs.force_refresh }}" = "true" ]; then
-            echo '{"matchs":[],"combis":[]}' > data.json
-            echo "force_refresh=true : cache vide, tous les matchs seront recalcules"
-          else
-            echo "Cache conserve : les matchs deja verrouilles gardent leur prediction (matchCache actif)"
-          fi
       - name: Run pipeline
         env:
           APISPORTS_KEY:      ${{ secrets.APISPORTS_KEY }}
@@ -2762,14 +2733,7 @@ jobs:
           ODDS_API_IO_KEY:    ${{ secrets.ODDS_API_IO_KEY }}
           RAPIDAPI_TENNIS_KEY: ${{ secrets.RAPIDAPI_TENNIS_KEY }}
           CREATOMATE_KEY:     ${{ secrets.CREATOMATE_KEY }}
-          TEST_WC_ONLY:       ${{ github.event.inputs.test_wc_only }}
-          TEST_MATCH_FILTER:  ${{ github.event.inputs.test_match_filter }}
         run: node pipeline.js
 
-      - name: Commit and push
-        run: |
-          git config user.name "IASHARK"
-          git config user.email "yaramode81@gmail.com"
-          git add data.json historique.json transferts.json actus.json sitemap.xml sitemap-*.xml
-          git diff --staged --quiet || git commit -m "Daily update - $(date +%Y-%m-%d)"
-          git push
+      - name: Afficher le resultat (data.json) dans les logs
+        run: cat data.json

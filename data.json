@@ -52,7 +52,7 @@
           "n": "Betclic",
           "o": "200 offerts",
           "l": "#LIEN_BETCLIC",
-          "c": "1.64",
+          "c": "2.08",
           "c1": "1.33",
           "cn": "4.42",
           "c2": "8.80"
@@ -61,7 +61,7 @@
           "n": "Winamax",
           "o": "100 offerts",
           "l": "#LIEN_WINAMAX",
-          "c": "1.61",
+          "c": "2.05",
           "c1": "1.30",
           "cn": "4.39",
           "c2": "8.77"
@@ -70,7 +70,7 @@
           "n": "Unibet",
           "o": "100 rembourses",
           "l": "#LIEN_UNIBET",
-          "c": "1.62",
+          "c": "2.06",
           "c1": "1.31",
           "cn": "4.40",
           "c2": "8.78"
@@ -79,7 +79,7 @@
           "n": "PMU",
           "o": "100 offerts",
           "l": "#LIEN_PMU",
-          "c": "1.59",
+          "c": "2.03",
           "c1": "1.28",
           "cn": "4.37",
           "c2": "8.75"
@@ -88,7 +88,7 @@
           "n": "Bet365",
           "o": "100 bonus",
           "l": "#LIEN_BET365",
-          "c": "1.67",
+          "c": "2.11",
           "c1": "1.36",
           "cn": "4.45",
           "c2": "8.83"
@@ -96,88 +96,88 @@
       ],
       "edge": "50% (modele)",
       "marche": "BTTS",
-      "risque": "FAIBLE",
-      "pari_rec": "BTTS Non",
-      "cote_rec": "1.64",
+      "risque": "MODERE",
+      "pari_rec": "BTTS Oui",
+      "cote_rec": "2.08",
       "no_signal": false,
       "no_signal_label": "",
       "mise": "2-3% bankroll",
-      "verdict_shark": "BTTS Non a 1.64 - Libertad reste muet dans 45% de ses matchs exterieurs et les top scores MC montrent 1-0, 2-0 et 0-1 comme scenarios dominants sans double inscription.",
+      "verdict_shark": "BTTS Oui a 2.08 - le modele attribue 50% de probabilite aux deux equipes qui marquent, soutenu par un xGA de 1.52 pour Barcelona et 2.61 pour Libertad en deplacement.",
       "scenario": {
-        "phase1": "Barcelona SC domine a domicile (7V/10) avec 5 clean sheets et une defense qui a contenu les adversaires regulierement. Libertad souffre enormement en deplacement (1V/11) et reste muet presque une fois sur deux.",
-        "phase2": "Les modeles Poisson, Dixon-Coles et Monte-Carlo convergent tous vers une victoire de Barcelona a 51-53%. Les lambdas (1.623 vs 0.955) indiquent un net avantage offensif pour le domicile. La proba BTTS est estimee a 50% mais les top scores MC penchent vers des scores sans double inscription.",
-        "phase3": "Le score central retenu est 2-1 mais les scenarios 1-0 (13%) et 2-0 (10%) totalisent 23% des simulations vs seulement 11% pour 1-1. La majorite des simulations produit un score sans but de Libertad, coherent avec BTTS Non."
+        "phase1": "Barcelona SC domine avec 7V/10 a domicile et 0% de matchs sans marquer, mais encaisse relativement (xGA 1.52). Libertad en difficulte extreme en exterieur (1V/11) mais conserve un xG de 1.61.",
+        "phase2": "Les modeles Poisson, Dixon-Coles et Monte-Carlo convergent a 51-53% pour Barcelona, avec des lambdas de 1.623 vs 0.955. La probabilite BTTS ressort a 50% selon le modele, soit une valeur attendue positive a 2.08.",
+        "phase3": "Les scores les plus probables en Monte-Carlo sont 1-1 (12%) et 2-1 (11%), directement BTTS. Le score 0-0 ne represente que 7%, limitant le risque Non-BTTS. La cote 2.08 offre une value reelle si la probabilite reelle depasse 48%."
       },
       "scenario_15min": [
         {
           "t": "0-15min",
           "prob": 11,
-          "txt": "Tranche moderement active : Barcelona SC concentre 19% de ses buts ici, Libertad seulement 8%. Probabilite globale de but de 11%, phase d'entrée dans le match."
+          "txt": "Entame moderee : Barcelona SC realise 19% de ses buts sur domicile dans ce creneau, mais Libertad n'en produit que 8% de ses buts ici. Probabilite globale de but a 11%, pression barceloniste en debut de match."
         },
         {
           "t": "15-30min",
           "prob": 19,
-          "txt": "Tranche plus dangereuse : Barcelona SC marque 26% de ses buts dans cet intervalle, Libertad 17%. Probabilite de but montant a 19%, phase propice a l'ouverture du score."
+          "txt": "Montee en puissance : tranche la plus productive pour Barcelona (26% de ses buts domicile). Libertad marque aussi 17% ici. Probabilite de but a 19%, creneau BTTS favorable."
         },
         {
           "t": "30-45min",
           "prob": 16,
-          "txt": "Activite equilibree : Barcelona SC marque 15% de ses buts ici, Libertad 17%. Les deux equipes encaissent 16-17% dans cette tranche, probabilite de but a 16%."
+          "txt": "Phase equilibree : Barcelona SC marque 15% et Libertad 17% de leurs buts respectifs dans cette tranche. Probabilite de but stable a 16%, duels tactiques avant la mi-temps."
         },
         {
           "t": "45-60min",
           "prob": 21,
-          "txt": "Tranche critique en debut de seconde periode : Libertad concentre 33% de ses buts exterieurs ici, Barcelona encaisse 28% de ses buts dans cet intervalle. Probabilite de but culminant a 21%, periode dangereuse pour la defense barceloniste."
+          "txt": "Creneau cle : Libertad realise 33% de ses buts exterieurs entre 45 et 60 min, et Barcelona encaisse 28% dans cette tranche. Probabilite de but a 21%, risque accru pour Barcelona juste apres la reprise."
         },
         {
           "t": "60-75min",
           "prob": 9,
-          "txt": "Tranche la plus calme du match : Barcelona SC ne marque que 11% de ses buts ici, Libertad seulement 4%. Probabilite de but tombant a 9%, phase de gestion."
+          "txt": "Creux d'activite : Barcelona SC ne marque que 11% de ses buts domicile ici et Libertad seulement 4% en exterieur. Probabilite de but la plus basse a 9%, phase de gestion probable."
         },
         {
           "t": "75-90min",
           "prob": 24,
-          "txt": "Tranche la plus productive : Barcelona SC marque 22% de ses buts en fin de match, Libertad 21%. Les deux equipes encaissent aussi fortement (33% pour Barcelona, 20% pour Libertad). Probabilite de but maximale a 24%, phase decisive pour le resultat final."
+          "txt": "Phase finale decisive : Barcelona SC realise 22% de ses buts domicile et Libertad 21% des leurs dans ce creneau. Libertad encaisse 33% de ses buts ici, Barcelona 20%. Probabilite la plus elevee a 24%, derniers assauts des deux cotes."
         }
       ],
-      "facteur_x": "Libertad ne marque pas dans 45% de ses matchs exterieurs (5/11) et les modeles donnent Barcelona gagnant dans 52-53% des simulations, rendant le score 1-0 ou 2-0 le plus plausible.",
-      "analyse_card": "Libertad ne marque pas dans 45% de ses deplacements (5/11), ce qui est un signal fort en faveur de BTTS Non. Les scores les plus probables selon Monte-Carlo sont 1-0 (13%), 2-0 (10%) et 0-1 (8%), soit 3 des 5 top scores excluant un but des deux equipes. Barcelona SC affiche en revanche 5 clean sheets sur 10 matchs a domicile (50%), renforçant la probabilite que Libertad reste muet.",
-      "conseil_public": "Jouer BTTS Non a 1.64 en s'appuyant sur l'incapacite reguliere de Libertad a marquer en deplacement et les clean sheets frequents de Barcelona a domicile.",
-      "contexte": "Barcelona SC (#3) joue a domicile pour maintenir sa place en course pour l'Europe face a Libertad (#15) qui lutte pour sa survie en Liga Pro. L'ecart de classement et d'enjeu est significatif.",
+      "facteur_x": "Barcelona SC n'a pas termine un seul match a domicile sans marquer sur ses 10 derniers (0%), et les top scores MC placent 1-1 et 2-1 comme les scenarios les plus probables, convergent avec BTTS Oui.",
+      "analyse_card": "Barcelona SC n'est pas resté muet lors d'aucun de ses 10 matchs a domicile (0% de matchs sans marquer), ce qui garantit statistiquement une contribution offensive. Libertad, malgre 45% de matchs sans marquer en exterieur, affiche un xG de 1.61 et encaisse 2.61 xGA, indiquant des matchs ouverts quand ils se deplacent. Les top scores Monte-Carlo incluent 1-1 (12%) et 2-1 (11%), soit 23% de simulations BTTS directement compatibles parmi les 5 premiers scores, et 0-0 ne represente que 7%.",
+      "conseil_public": "Jouer BTTS Oui a 2.08 en misant sur l'incapacite historique de Barcelona a garder son clean sheet (5/10 seulement) et la dynamique offensive de Libertad en xG malgre leur bilan exterieur.",
+      "contexte": "Barcelona SC (#3, en course pour l'Europe) recoit Libertad (#15/16, en zone de relegation) dans un match a fort enjeu bilateral. La pression de la relegation pousse Libertad a jouer offensivement, tandis que Barcelona doit s'imposer pour consolider sa place europeenne.",
       "vbet": "NON",
       "scores": [
         "2-1"
       ],
       "mc_scores": [
         {
-          "score": "1-0",
-          "n": 629,
-          "pct": 13
+          "score": "1-1",
+          "n": 602,
+          "pct": 12
         },
         {
-          "score": "1-1",
-          "n": 566,
+          "score": "1-0",
+          "n": 585,
+          "pct": 12
+        },
+        {
+          "score": "2-1",
+          "n": 532,
           "pct": 11
         },
         {
           "score": "2-0",
-          "n": 517,
+          "n": 524,
           "pct": 10
         },
         {
-          "score": "2-1",
-          "n": 441,
-          "pct": 9
-        },
-        {
-          "score": "0-1",
-          "n": 393,
-          "pct": 8
+          "score": "0-0",
+          "n": 373,
+          "pct": 7
         }
       ],
       "paris_safe": {
-        "bet": "BTTS Non",
-        "cote": 1.64,
+        "bet": "BTTS Oui",
+        "cote": 2.08,
         "proba": "52%"
       },
       "paris_risque": {
@@ -925,7 +925,7 @@
       "p2": 52,
       "po15": 0,
       "po25": 40,
-      "btts": 44,
+      "btts": 43,
       "c1": "3.22",
       "cn": "2.88",
       "c2": "2.28",
@@ -949,7 +949,7 @@
           "n": "Betclic",
           "o": "200 offerts",
           "l": "#LIEN_BETCLIC",
-          "c": "2.28",
+          "c": "1.57",
           "c1": "3.22",
           "cn": "2.88",
           "c2": "2.28"
@@ -958,7 +958,7 @@
           "n": "Winamax",
           "o": "100 offerts",
           "l": "#LIEN_WINAMAX",
-          "c": "2.25",
+          "c": "1.54",
           "c1": "3.19",
           "cn": "2.85",
           "c2": "2.25"
@@ -967,7 +967,7 @@
           "n": "Unibet",
           "o": "100 rembourses",
           "l": "#LIEN_UNIBET",
-          "c": "2.26",
+          "c": "1.55",
           "c1": "3.20",
           "cn": "2.86",
           "c2": "2.26"
@@ -976,7 +976,7 @@
           "n": "PMU",
           "o": "100 offerts",
           "l": "#LIEN_PMU",
-          "c": "2.23",
+          "c": "1.52",
           "c1": "3.17",
           "cn": "2.83",
           "c2": "2.23"
@@ -985,96 +985,96 @@
           "n": "Bet365",
           "o": "100 bonus",
           "l": "#LIEN_BET365",
-          "c": "2.31",
+          "c": "1.60",
           "c1": "3.25",
           "cn": "2.91",
           "c2": "2.31"
         }
       ],
-      "edge": "52% (modele)",
-      "marche": "DOUBLE_CHANCE",
-      "risque": "MODERE",
-      "pari_rec": "Victoire Exterieur",
-      "cote_rec": "2.28",
+      "edge": "61% (modele)",
+      "marche": "TOTAL_BUTS",
+      "risque": "FAIBLE",
+      "pari_rec": "Under 2.5",
+      "cote_rec": "1.57",
       "no_signal": false,
       "no_signal_label": "",
       "mise": "2-3% bankroll",
-      "verdict_shark": "Victoire Exterieur a 2.28 - Aucas domine par les xG (1.81 vs 0.96) et les trois modeles convergent a 51-52% en faveur de l'exterieur.",
+      "verdict_shark": "Under 2.5 à 1.57 - les top scores Monte-Carlo (0-1, 1-1, 0-2, 0-0, 1-0 = 58% cumulés) pointent massivement vers des matchs à 1-2 buts",
       "scenario": {
-        "phase1": "Tecnico en forme catastrophique (LLLDD, 3 defaites consecutives) face a Aucas motivee par l'enjeu europeen et solide en exterieur (4V/10, 6 CS/10).",
-        "phase2": "Les trois modeles convergent entre 51% et 52% pour Aucas, lambda exterieur a 1.459 vs 0.811 pour Tecnico. Le score 0-1 est le plus frequent en Monte-Carlo (15%).",
-        "phase3": "Le profil de match pointe vers un match serré mais maitrisé par Aucas : under 2.5 probable (60%), BTTS faible (44%), victoire exterieure sur score minimum comme 0-1 ou 0-2."
+        "phase1": "Tecnico en grande difficulté (3 défaites consécutives, xG dom 0.96, 33% de matchs sans marquer à domicile) face à Aucas qui défend très bien à l'extérieur (60% de clean sheets, xGA 0.68).",
+        "phase2": "Les trois modèles convergent à 52% pour la victoire Aucas, lambda total 2.27 buts, probabilité Under 2.5 à 61% — signal mathématique clair en faveur d'un match peu prolifique.",
+        "phase3": "Les scores Monte-Carlo les plus fréquents (0-1, 0-2, 0-0) confirment que le match se terminera très probablement sous 2.5 buts ; aucun score dominant ne dépasse 2 buts au total sauf 0-2 et 1-1 qui restent exactement à la limite ou en dessous."
       },
       "scenario_15min": [
         {
           "t": "0-15min",
           "prob": 13,
-          "txt": "Faible intensite offensive en debut de match : Tecnico marque seulement 13% de ses buts dans ce creneau, Aucas 18%. La probabilite globale d'un but est de 13%, indiquant un depart prudent des deux equipes."
+          "txt": "Ouverture prudente attendue : Tecnico marque 13% de ses buts dans ce créneau, Aucas 18% — activité offensive légère, probabilité but à 13%."
         },
         {
           "t": "15-30min",
           "prob": 9,
-          "txt": "Tranche la plus calme du match : Tecnico ne marque que 7% de ses buts ici et Aucas seulement 9%. Probabilite but de 9%, phase de positionnement tactique attendue."
+          "txt": "Tranche la plus calme du match : Tecnico ne génère que 7% de ses buts ici, Aucas 9% — probabilité but la plus faible à 9%, match en phase de placement tactique."
         },
         {
           "t": "30-45min",
           "prob": 16,
-          "txt": "Tecnico monte en puissance en fin de premiere periode avec 27% de ses buts dans ce creneau, mais Aucas n'encaisse que 8% ici. Probabilite but de 16%, plutot en faveur de Tecnico offensivement."
+          "txt": "Tecnico est plus dangereux en fin de première mi-temps avec 27% de ses buts dans ce créneau, mais Aucas n'y marque que 15% — probabilité but à 16%, légère poussée domicile."
         },
         {
           "t": "45-60min",
           "prob": 28,
-          "txt": "Tranche la plus dangereuse du match : Aucas marque 29% de ses buts ici et Tecnico en encaisse 29%. Probabilite but de 28%, moment cle ou Aucas peut faire la difference en debut de seconde periode."
+          "txt": "Créneau le plus chaud du match : Aucas marque 29% de ses buts ici et Tecnico encaisse 29% des buts d'Aucas dans cette tranche — probabilité but maximale à 28%, ouverture du score la plus probable."
         },
         {
           "t": "60-75min",
           "prob": 11,
-          "txt": "Creux statistique notable pour Aucas qui marque 0% de ses buts dans cette tranche. Tecnico encaisse seulement 18% ici. Probabilite but de 11%, phase de gestion de match probable si Aucas mene."
+          "txt": "Forte chute d'intensité offensive : Aucas ne marque que 0% de ses buts dans cette fenêtre, Tecnico 20% — probabilité but retombe à 11%, match susceptible de se fermer après l'heure de jeu."
         },
         {
           "t": "75-90min",
           "prob": 24,
-          "txt": "Forte activite en fin de match : Aucas marque 29% de ses buts dans ce creneau et Tecnico 20%. Probabilite but de 24%, buts de consolidation ou de reaction en toute fin de rencontre."
+          "txt": "Reprise d'activité en fin de match : Aucas marque 29% de ses buts et encaisse 23% dans ce créneau, Tecnico marque 20% — probabilité but à 24%, risque de but décisif ou égalisateur dans les dernières minutes."
         }
       ],
-      "facteur_x": "Aucas : 6 clean sheets sur 10 matchs exterieurs (60%) + xG exterieur de 1.81, signaux offensifs et defensifs tous deux dominants.",
-      "analyse_card": "Aucas affiche un xG offensif de 1.81 contre seulement 0.96 pour Tecnico, et maintient 6 clean sheets sur 10 matchs exterieurs (60%). Tecnico traverse 3 defaites consecutives avec un xGA de 1.16, confirmant une defense permeabe a domicile. Les trois modeles (Poisson 52%, Dixon-Coles 51%, Monte-Carlo 52%) sont parfaitement alignes sur la victoire d'Aucas, et le score Monte-Carlo le plus probable est 0-1 (15%), coherent avec ce choix.",
-      "conseil_public": "Jouer la victoire d'Aucas a 2.28, soutenue par une convergence forte des trois modeles et une superiorite claire en xG.",
-      "contexte": "Aucas est 2e au classement et en course pour une place europeenne, ce qui renforce sa motivation en deplacement. Tecnico est 10e a domicile avec une forme alarmante (LLLDD) et 3 defaites consecutives.",
-      "vbet": "OUI",
+      "facteur_x": "Aucas n'encaisse que 0.68 xG par match à l'extérieur et réalise 6 clean sheets sur 10 déplacements, ce qui bride structurellement le total de buts.",
+      "analyse_card": "Le modèle accorde 61% de probabilité à l'Under 2.5, confirmé par les simulations Monte-Carlo dont les 5 scores les plus fréquents totalisent 58% et restent tous sous ou à la limite de 2 buts (0-1, 1-1, 0-2, 0-0, 1-0). Aucas affiche un xGA de seulement 0.68 en extérieur avec 6 clean sheets sur 10 matchs (60%), limitant fortement la production offensive de Tecnico (xG dom 0.96). Les lambdas Poisson (0.811 et 1.459) donnent une espérance totale de 2.27 buts, structurellement en dessous du seuil 2.5.",
+      "conseil_public": "Miser sur Under 2.5 à 1.57 en profitant d'une valeur modeste mais d'un signal multi-modèles cohérent vers un match fermé.",
+      "contexte": "Tecnico Universitario reçoit Aucas en Liga Pro équatorienne, en difficulté avec 3 défaites consécutives et un bilan domicile de 4V/9. Aucas, 2e au classement, est en course pour l'Europe avec une forme alternée (WLWLW) et une défense très solide à l'extérieur.",
+      "vbet": "NON",
       "scores": [
         "0-1"
       ],
       "mc_scores": [
         {
           "score": "0-1",
-          "n": 731,
+          "n": 761,
           "pct": 15
         },
         {
           "score": "1-1",
-          "n": 627,
+          "n": 645,
           "pct": 13
         },
         {
           "score": "0-2",
-          "n": 561,
+          "n": 532,
           "pct": 11
         },
         {
           "score": "0-0",
-          "n": 505,
+          "n": 511,
           "pct": 10
         },
         {
           "score": "1-0",
-          "n": 425,
+          "n": 459,
           "pct": 9
         }
       ],
       "paris_safe": {
-        "bet": "Victoire Exterieur",
-        "cote": 2.28,
+        "bet": "Under 2.5",
+        "cote": 1.57,
         "proba": "20%"
       },
       "paris_risque": {
@@ -1087,7 +1087,7 @@
         "nom": "Estadio Bellavista - Ambato",
         "cap": "",
         "meteo": "",
-        "temp": "15C",
+        "temp": "16C",
         "desc": "couvert"
       },
       "crit_home": {
@@ -1756,11 +1756,11 @@
       "val": false,
       "hot": false,
       "conf": 6.8,
-      "p1": 47,
-      "pn": 27,
-      "p2": 26,
+      "p1": 45,
+      "pn": 28,
+      "p2": 27,
       "po15": 0,
-      "po25": 47,
+      "po25": 46,
       "btts": 51,
       "c1": "2.33",
       "cn": "3.00",
@@ -1827,7 +1827,7 @@
           "c2": "3.53"
         }
       ],
-      "edge": "53% (modele)",
+      "edge": "54% (modele)",
       "marche": "TOTAL_BUTS",
       "risque": "FAIBLE",
       "pari_rec": "Under 2.5",
@@ -1835,83 +1835,83 @@
       "no_signal": false,
       "no_signal_label": "",
       "mise": "2-3% bankroll",
-      "verdict_shark": "Under 2.5 à 1.62 - les scores Monte-Carlo les plus fréquents (1-1, 1-0, 0-0) totalisent 33% et pointent massivement vers un match à moins de 3 buts.",
+      "verdict_shark": "Under 2.5 à 1.62 - les modèles Poisson, Dixon-Coles et Monte-Carlo convergent vers un match fermé avec 54% de probabilité de moins de 3 buts.",
       "scenario": {
-        "phase1": "L'Espagne affiche une forme impeccable (6 victoires consécutives) avec un xG de 1.93 et un xGA remarquable de 0.31, signe d'une solidité défensive exceptionnelle. L'Argentine n'a concédé aucun but lors de ses 2 derniers matchs mais son attaque reste moins prolifique (lambda 1.063).",
-        "phase2": "Les trois modèles convergent : Poisson 53%, Dixon-Coles confirmé, Monte-Carlo avec une majorité de scores à 2 buts ou moins. La proba modèle de 53% pour Under 2.5 face à une cote impliquant ~38% crée une value nette de +15 points.",
-        "phase3": "En phase à élimination directe, les équipes adoptent une posture plus conservatrice. La tactique signalée (deux défenses solides) et le contexte Coupe du Monde renforcent la tendance au match serré et contrôlé, consolidant le scénario Under 2.5."
+        "phase1": "Spain affiche 6 victoires consécutives avec un xGA de 0.31, l'un des plus bas de la compétition, et Argentina totalise 3 victoires consécutives. Les deux équipes arrivent en forme mais avec un profil défensif marqué.",
+        "phase2": "Les modèles Poisson (54% Under 2.5), Dixon-Coles (confirmé par les probas) et Monte-Carlo (top scores majoritairement ≤2 buts) convergent unanimement vers un match peu prolifique. Les lambdas restent modérés : 1.447 pour Spain et 1.063 pour Argentina.",
+        "phase3": "En phase éliminatoire de Coupe du Monde, les équipes adoptent systématiquement un bloc plus bas et ralentissent le jeu. La combinaison d'un enjeu maximal et de deux défenses solides rend l'Under 2.5 le scénario structurellement le plus probable."
       },
       "scenario_15min": [
         {
           "t": "0-15min",
           "prob": 5,
-          "txt": "Probabilité de but très faible à 5% : l'Espagne ne génère que 10% de ses buts sur cette tranche, l'Argentine 11%. Les deux équipes gèrent leurs efforts en début de match à élimination directe. Phase d'observation attendue."
+          "txt": "Probabilité but très faible à 5%. Spain ne marque que 10% de ses buts dans ce créneau et Argentina seulement 11%, avec aucun but encaissé par Spain dans cette tranche sur ses matchs récents. Les deux équipes tâtent le terrain tactiquement."
         },
         {
           "t": "15-30min",
           "prob": 17,
-          "txt": "Montée en pression significative à 17% : l'Espagne concentre 25% de ses buts sur cette tranche. L'Argentine encaisse 33% des buts qui lui sont concédés ici, ce qui en fait la fenêtre la plus dangereuse pour les Albicelestes en première période."
+          "txt": "Probabilité but en hausse à 17%. Spain concentre 25% de ses buts dans cette tranche. Argentina encaisse 33% de ses buts ici, ce qui en fait la première fenêtre réellement dangereuse pour un débloquage du score."
         },
         {
           "t": "30-45min",
           "prob": 23,
-          "txt": "Tranche la plus productive du match à 23% de probabilité de but : l'Espagne marque 25% de ses buts ici, l'Argentine 33%. Les deux équipes semblent trouver leur rythme en fin de première mi-temps, ce qui peut provoquer un échange de buts."
+          "txt": "Tranche la plus prolifique du match à 23%. Spain marque 25% de ses buts ici et Argentina 33% des siens. Argentina encaisse également 33% de ses buts dans cette période - moment clé avant la mi-temps."
         },
         {
           "t": "45-60min",
           "prob": 4,
-          "txt": "Probabilité minimale à 4% en tout début de seconde période : l'Espagne ne marque que 15% de ses buts ici et l'Argentine 0%. La pause et les ajustements tactiques créent généralement une phase de transition calme en début de second acte."
+          "txt": "Probabilité but quasi nulle à 4%, la plus basse du match. Spain n'a encaissé aucun but dans ce créneau et Argentina ne marque que 0% ici. Début de seconde mi-temps très fermé attendu."
         },
         {
           "t": "60-75min",
           "prob": 14,
-          "txt": "Regain d'activité à 14% : l'Argentine génère 11% de ses buts sur cette tranche et encaisse 33% des buts adverses. L'Espagne, avec 10% de ses réalisations ici, peut exploiter la fatigue ou des espaces laissés par une équipe cherchant à renverser le score."
+          "txt": "Regain d'activité à 14%. Spain marque 10% de ses buts ici, Argentina 11% des siens et encaisse 33% dans cette tranche. Les entraîneurs commencent à réajuster tactiquement avec les changements."
         },
         {
           "t": "75-90min",
           "prob": 12,
-          "txt": "Tranche finale à 12% de probabilité de but : l'Argentine est plus active offensivement (33% de ses buts ici) tandis que l'Espagne reste solide défensivement (0% de buts encaissés sur cette tranche). Un but tardif espagnol de contre-attaque reste le scénario le plus cohérent."
+          "txt": "Probabilité à 12% en fin de match. Spain marque 15% de ses buts dans ce créneau et Argentina 33% des siens. Si le score est serré, les deux équipes restent prudentes pour ne pas concéder en phase éliminatoire."
         }
       ],
-      "facteur_x": "Les 5 scores Monte-Carlo les plus probables (1-1, 1-0, 2-1, 2-0, 0-0) représentent 51% des simulations et 4 d'entre eux sur 5 se concluent à 2 buts ou moins, validant fortement l'Under 2.5.",
-      "analyse_card": "Le modèle Poisson attribue un lambda de 1.50 à l'Espagne et 1.063 à l'Argentine, des valeurs modestes pour une phase à élimination directe. Les scores Monte-Carlo les plus probables sont 1-1 (13%), 1-0 (12%), 0-0 (8%), 2-1 (9%) et 2-0 (9%) : seuls les scores 2-1 et 2-2 dépassent 2.5, soit une minorité. La note tactique confirme deux défenses solides et l'enjeu éliminatoire incite à la prudence offensive, soutenant l'Under 2.5 à 53% selon le modèle contre une cote impliquant 38% de probabilité implicite.",
-      "conseil_public": "Miser sur Under 2.5 à 1.62 : la convergence des modèles (53%) et la distribution Monte-Carlo (majorité de scores à 2 buts ou moins) offrent une value claire face à la cote proposée.",
-      "contexte": "Quart ou demi-finale de la Coupe du Monde 2026 au MetLife Stadium le 19 juillet. Terrain neutre, enjeu maximal - une défaite élimine définitivement. Les deux nations comptent parmi les favoris du tournoi, avec un effectif complet des deux côtés.",
-      "vbet": "OUI",
+      "facteur_x": "Les top scores Monte-Carlo (1-0, 1-1, 0-1, 2-0, 2-1) couvrent 51% des simulations avec seulement le score 2-1 dépassant 2.5 buts, et le xGA de Spain à 0.31 signale une défense hermétique qui limite structurellement le total de buts.",
+      "analyse_card": "Les trois modèles s'accordent à 54% sur l'Under 2.5, cohérent avec les top scores Monte-Carlo : 1-0 (13%), 1-1 (12%), 0-1 (9%) et 2-0 (8%) représentent ensemble 42% des simulations et tous restent sous ou à 2.5 buts. Le contexte d'élimination directe en Coupe du Monde 2026 renforce le profil défensif des deux équipes, avec un xGA Spain de seulement 0.31 et Argentina sans clean sheet sur ses derniers matchs mais avec des lambdas modérés (Spain 1.447, Argentina 1.063). La tactique identifiée de deux défenses solides valide structurellement ce scénario bas scoring.",
+      "conseil_public": "Miser sur Under 2.5 à 1.62 avec une mise calibrée, en cohérence avec les top scores Monte-Carlo majoritairement inférieurs ou égaux à 2 buts totaux.",
+      "contexte": "Huitième de finale ou phase éliminatoire Coupe du Monde 2026 au MetLife Stadium le 19 juillet, terrain neutre, enjeu maximal - une défaite élimine. Les deux sélections évoluent avec une prudence tactique accrue caractéristique des phases à élimination directe.",
+      "vbet": "NON",
       "scores": [
         "1-0"
       ],
       "mc_scores": [
         {
-          "score": "1-1",
-          "n": 656,
+          "score": "1-0",
+          "n": 635,
           "pct": 13
         },
         {
-          "score": "1-0",
-          "n": 586,
+          "score": "1-1",
+          "n": 612,
           "pct": 12
         },
         {
           "score": "2-1",
-          "n": 468,
+          "n": 446,
+          "pct": 9
+        },
+        {
+          "score": "0-1",
+          "n": 444,
           "pct": 9
         },
         {
           "score": "2-0",
-          "n": 445,
-          "pct": 9
-        },
-        {
-          "score": "0-0",
-          "n": 391,
+          "n": 418,
           "pct": 8
         }
       ],
       "paris_safe": {
         "bet": "Under 2.5",
         "cote": 1.62,
-        "proba": "47%"
+        "proba": "45%"
       },
       "paris_risque": {
         "bet": "",
@@ -1927,18 +1927,18 @@
         "desc": "ciel dégagé"
       },
       "crit_home": {
-        "fd": 75,
-        "att": 74,
+        "fd": 80,
+        "att": 70,
         "def": 83,
         "fr": 100,
         "mot": 70,
         "fat": 50
       },
       "crit_away": {
-        "fd": 100,
-        "att": 100,
+        "fd": 67,
+        "att": 95,
         "def": 53,
-        "fr": 100,
+        "fr": 76,
         "mot": 70,
         "fat": 50
       },
@@ -2026,8 +2026,8 @@
           "date_full": "2025-10-11T00:00:00+00:00"
         }
       ],
-      "forme_h": "DWWWWWW",
-      "forme_a": "WWWWWWW",
+      "forme_h": "DWWWWWWW",
+      "forme_a": "WWWWWWWL",
       "h2h": [],
       "injuries": [],
       "fatigue": {
@@ -2298,7 +2298,7 @@
       "p2": 25,
       "po15": 0,
       "po25": 29,
-      "btts": 36,
+      "btts": 37,
       "c1": "2.05",
       "cn": "3.05",
       "c2": "3.75",
@@ -2364,7 +2364,7 @@
           "c2": "3.78"
         }
       ],
-      "edge": "64% (modele)",
+      "edge": "63% (modele)",
       "marche": "BTTS",
       "risque": "FAIBLE",
       "pari_rec": "BTTS Non",
@@ -2372,48 +2372,48 @@
       "no_signal": false,
       "no_signal_label": "",
       "mise": "2-3% bankroll",
-      "verdict_shark": "BTTS Non a 1.62 - les top scores Monte-Carlo concentrent 46% des simulations sur des scores ou une equipe ne marque pas (1-0: 17%, 0-0: 16%, 0-1: 13%)",
+      "verdict_shark": "BTTS Non à 1.62 - les deux équipes affichent des taux élevés de matchs sans marquer (DOM 44%, EXT 56%) et les top scores Monte-Carlo (1-0, 0-0, 2-0) valident un scénario à une seule équipe buteuse",
       "scenario": {
-        "phase1": "Guayaquil City FC domine statistiquement a domicile (42% de victoires modélisées) mais reste friable offensivement avec 44% de matchs sans marquer. Manta FC en zone rouge affronte ce deplacemenet avec une dynamique de 3 wins consecutifs mais un historique exterieur alarmant (1V/9, 56% sans marquer).",
-        "phase2": "Les trois modeles sont cohérents : Poisson (64% BTTS Non), Dixon-Coles (coherent) et MC (1-0: 17%, 0-0: 16%, 0-1: 13% = 46% des scenarios impliquent qu'une equipe reste muette). Lambda EXT de 0.779 confirme la faiblesse offensive de Manta en deplacement.",
-        "phase3": "Le scenario le plus probable selon MC est 1-0 pour Guayaquil City (17%), suivi de 0-0 (16%) puis 0-1 (13%). Dans les deux scenarios dominants, au moins une equipe ne marque pas - ce qui confirme BTTS Non comme marche le plus coherent avec les donnees."
+        "phase1": "Guayaquil City domine à domicile (3V/9) mais reste une équipe moyennement productive. Manta FC, malgré 3 victoires consécutives, reste historiquement stérile en déplacement (56% sans marquer). Le bilan suggère un match fermé où une seule équipe marque.",
+        "phase2": "Les trois modèles convergent à 63% pour BTTS Non. Les lambdas (1.097 / 0.779) indiquent un faible volume de buts attendus, confirmant la probabilité d'un match à un seul buteur. L'Under 2.5 à 71% renforce la cohérence du signal.",
+        "phase3": "Les scores Monte-Carlo les plus fréquents (1-0, 0-0, 2-0) représentent 41% des simulations et correspondent tous à des scénarios BTTS Non. Seul 1-1 (13%) et 0-1 (13%) contredisent ce signal, mais restent minoritaires."
       },
       "scenario_15min": [
         {
           "t": "0-15min",
           "prob": 7,
-          "txt": "Ouverture prudente : Guayaquil ne marque que 3% de ses buts dans cette tranche, Manta 4%. Probabilite de but globale de seulement 7% - les deux equipes se jaugent sans prise de risque excessive."
+          "txt": "Tranche très calme : Guayaquil City ne marque que 3% de ses buts ici, Manta 4%. L'activité offensive est quasi nulle en début de match pour les deux équipes. Probabilité de but globale à seulement 7%."
         },
         {
           "t": "15-30min",
           "prob": 12,
-          "txt": "Legerement plus actif : Guayaquil marque 13% de ses buts ici, Manta 9%. Manta encaisse 20% de ses buts dans cette fenetre, ce qui represente une zone de vulnerabilite defensive pour les visiteurs."
+          "txt": "Légère montée en puissance : Guayaquil génère 13% de ses buts dans cet intervalle, Manta 9%. Manta encaisse 20% des buts adverses ici, ce qui expose leur défense en milieu de première mi-temps. Probabilité but à 12%."
         },
         {
           "t": "30-45min",
           "prob": 22,
-          "txt": "Tranche la plus active de la premiere periode : Guayaquil marque 17% de ses buts ici, Manta 26%. Manta encaisse 27% de ses buts dans ce créneau - une pression accrue en fin de premiere mi-temps est attendue."
+          "txt": "Tranche la plus active de la première mi-temps : Guayaquil City marque 17% de ses buts ici et encaisse 19% des buts de Manta. Manta marque 26% et encaisse 27% sur cette fenêtre. Pic d'activité offensive des deux côtés, probabilité but à 22%."
         },
         {
           "t": "45-60min",
           "prob": 16,
-          "txt": "Debut de seconde periode stable : Guayaquil marque 17% de ses buts ici, Manta 17%. Les deux equipes encaissent respectivement 16% et 13% dans cette tranche - equilibre relatif apres la pause."
+          "txt": "Reprise de jeu classique : Guayaquil marque 17% et Manta 17% de leurs buts respectifs ici. Equilibre offensif modéré après la mi-temps. Probabilité but à 16%, légère baisse par rapport à la fin de première période."
         },
         {
           "t": "60-75min",
           "prob": 9,
-          "txt": "Creux d'activite : Guayaquil ne marque que 10% de ses buts ici, Manta 13%. Manta n'encaisse que 7% dans cette fenetre - le jeu se resserre, les entraineurs font leurs changements."
+          "txt": "Creux de milieu de seconde mi-temps : Guayaquil ne marque que 10% de ses buts ici, Manta 13%. Les deux défenses tiennent mieux dans cette fenêtre. Probabilité but à seulement 9%, tranche la plus sèche après le début de match."
         },
         {
           "t": "75-90min",
           "prob": 34,
-          "txt": "Tranche decisionnelle majeure avec 34% de probabilite de but : Guayaquil marque 40% de ses buts ici et encaisse 39% des buts de Manta dans ce créneau. Manta marque 30% et encaisse 27% - c'est la fenetre ou les evenements du match se concretisent, notamment si Guayaquil cherche a forcer le resultat."
+          "txt": "Tranche décisive : Guayaquil marque 40% de ses buts dans les 15 dernières minutes, Manta 30%. Manta encaisse 27% des buts adverses ici. Le pic tardif est massif pour les deux équipes, avec 34% de probabilité de but, notamment en faveur d'un but de Guayaquil pour sceller le résultat."
         }
       ],
-      "facteur_x": "Manta FC ne marque pas lors de 56% de ses deplacements (5/9), combiné a un xG exterieur de seulement 0.779 (lambda Poisson EXT) - la probabilite qu'ils restent muets est le signal le plus fiable.",
-      "analyse_card": "Guayaquil City FC ne marque pas dans 44% de ses matchs a domicile (4/9) et Manta FC ne marque pas dans 56% de ses matchs a l'exterieur (5/9). Le modele Poisson donne une probabilite BTTS Non a 64%, soutenu par les lambdas faibles (DOM 1.097 / EXT 0.779). Les trois modeles (Poisson, Dixon-Coles, Monte-Carlo) convergent vers des scores buts faibles : 1-0, 0-0 et 0-1 representent 46% des simulations MC.",
-      "conseil_public": "Jouer BTTS Non a 1.62 en s'appuyant sur la faible productivite offensive des deux equipes et la forte proportion de clean sheets cumulees.",
-      "contexte": "Guayaquil City FC recoit a domicile avec un bilan mediocre (3V/9) et une forme recente LDDDW. Manta FC, en zone de relegation (#16/16), presente une forme surprenante (3 victoires consecutives) mais ne marque pas en exterieur dans 56% des cas - la pression du maintien peut aussi generer un jeu plus ferme et defensif.",
+      "facteur_x": "Manta FC ne marque pas dans 56% de ses matchs à l'extérieur (5/9), et les scores Monte-Carlo les plus probables (1-0, 0-0, 2-0) excluent massivement un scénario où les deux équipes trouvent le filet.",
+      "analyse_card": "Guayaquil City FC ne marque pas dans 44% de ses matchs à domicile (4/9) et Manta FC reste muet dans 56% de ses déplacements (5/9). Le modèle attribue 63% de probabilité à BTTS Non, confirmé par les top scores Monte-Carlo dominés par 1-0 (17%), 0-0 (15%) et 2-0 (9%), soit des scénarios sans double buteur. Les lambdas Poisson (DOM 1.097 / EXT 0.779) indiquent une attaque extérieure structurellement faible malgré la récente série de victoires de Manta.",
+      "conseil_public": "Jouer BTTS Non à 1.62 en misant sur la faiblesse chronique des deux équipes à marquer simultanément, validée par trois modèles indépendants.",
+      "contexte": "Liga Pro, journée 2026-07-19. Guayaquil City (#12) reçoit Manta FC (#16), dernier et en zone de relégation. Manta enchaîne 3 victoires consécutives mais reste très vulnérable à l'extérieur (1V/9). Match à fort enjeu pour Manta qui lutte pour sa survie.",
       "vbet": "OUI",
       "scores": [
         "1-0"
@@ -2421,28 +2421,28 @@
       "mc_scores": [
         {
           "score": "1-0",
-          "n": 835,
+          "n": 834,
           "pct": 17
         },
         {
           "score": "0-0",
-          "n": 778,
-          "pct": 16
+          "n": 759,
+          "pct": 15
         },
         {
           "score": "1-1",
-          "n": 658,
+          "n": 652,
           "pct": 13
         },
         {
           "score": "0-1",
-          "n": 635,
+          "n": 636,
           "pct": 13
         },
         {
           "score": "2-0",
-          "n": 509,
-          "pct": 10
+          "n": 457,
+          "pct": 9
         }
       ],
       "paris_safe": {
@@ -3047,7 +3047,7 @@
           "n": "Betclic",
           "o": "200 offerts",
           "l": "#LIEN_BETCLIC",
-          "c": "1.67",
+          "c": "1.97",
           "c1": "1.36",
           "cn": "4.45",
           "c2": "7.50"
@@ -3056,7 +3056,7 @@
           "n": "Winamax",
           "o": "100 offerts",
           "l": "#LIEN_WINAMAX",
-          "c": "1.64",
+          "c": "1.94",
           "c1": "1.33",
           "cn": "4.42",
           "c2": "7.47"
@@ -3065,7 +3065,7 @@
           "n": "Unibet",
           "o": "100 rembourses",
           "l": "#LIEN_UNIBET",
-          "c": "1.65",
+          "c": "1.95",
           "c1": "1.34",
           "cn": "4.43",
           "c2": "7.48"
@@ -3074,7 +3074,7 @@
           "n": "PMU",
           "o": "100 offerts",
           "l": "#LIEN_PMU",
-          "c": "1.62",
+          "c": "1.92",
           "c1": "1.31",
           "cn": "4.40",
           "c2": "7.45"
@@ -3083,96 +3083,96 @@
           "n": "Bet365",
           "o": "100 bonus",
           "l": "#LIEN_BET365",
-          "c": "1.70",
+          "c": "2.00",
           "c1": "1.39",
           "cn": "4.48",
           "c2": "7.53"
         }
       ],
-      "edge": "56% (modele)",
-      "marche": "BTTS",
-      "risque": "FAIBLE",
-      "pari_rec": "BTTS Non",
-      "cote_rec": "1.67",
+      "edge": "60% (modele)",
+      "marche": "TOTAL_BUTS",
+      "risque": "MODERE",
+      "pari_rec": "Under 2.5",
+      "cote_rec": "1.97",
       "no_signal": false,
       "no_signal_label": "",
       "mise": "2-3% bankroll",
-      "verdict_shark": "BTTS Non a 1.67 - Emelec reste muet sur 56% de ses deplacements et affiche un xG exterieur de seulement 1.18 face a une defense IDV solide (xGA 1.15).",
+      "verdict_shark": "Under 2.5 a 1.97 - les trois modeles convergent a 60% sur moins de 3 buts, confirme par les top scores Monte-Carlo dominés par 1-0, 1-1, 2-0 et 0-0.",
       "scenario": {
-        "phase1": "IDV domine a domicile (6V/9), solide defensivement (xGA 1.15, 4 CS), en pleine forme (3 victoires de suite). Emelec tres fragile en deplacement, muet dans plus d'un match sur deux.",
-        "phase2": "Poisson, Dixon-Coles et Monte-Carlo convergent tous vers une victoire IDV a ~53-55%. Les lambdas (DOM 1.51 / EXT 0.81) indiquent un match a faible scoring pour Emelec. BTTS Non ressort a 56% de probabilite modele.",
-        "phase3": "Top scores MC : 1-0 (16%), 0-0 (9%), 2-0 (11%) - trois des cinq scenarios les plus probables ne voient pas Emelec marquer, ce qui est pleinement coherent avec le pari BTTS Non."
+        "phase1": "Independiente del Valle domine a domicile (6V/9, xG 2.2, xGA 1.15, 3 victoires consecutives) face a un Emelec exterieur tres limité offensivement (56% de matchs sans marquer, xG 1.18 en deplacement).",
+        "phase2": "Les trois modeles s'accordent: Under 2.5 a 60% (Poisson, Dixon-Coles, Monte-Carlo). Le lambda total de 2.32 buts esperés place le match naturellement sous le seuil de 2.5, avec une distribution MC dominee par des scores bas.",
+        "phase3": "Les scores Monte-Carlo les plus frequents (1-0, 2-0, 0-0, 1-1) representent collectivement 49% des simulations et restent tous compatibles avec Under 2.5, validant la coherence du marche choisi."
       },
       "scenario_15min": [
         {
           "t": "0-15min",
           "prob": 8,
-          "txt": "Entame prudente : IDV ne genere que 4% de ses buts sur cette tranche a domicile, Emelec 19% de ses buts en exterieur mais encaisse 0% de ses buts concedes ici. Probabilite but globale seulement 8%, match en observation."
+          "txt": "Tranche calme: Independiente del Valle ne marque que 4% de ses buts domicile dans cette periode et Emelec encaisse 0% de ses buts exterieurs ici. Faible probabilite d'ouverture du score (8%)."
         },
         {
           "t": "15-30min",
           "prob": 9,
-          "txt": "La pression IDV monte progressivement : 18% de leurs buts domicile se produisent ici. Emelec encaisse 12% de ses buts concedes en exterieur sur cette tranche. Probabilite but reste faible a 9%."
+          "txt": "Legere montee en pression: IdV marque 18% de ses buts domicile dans ce creneau, mais Emelec n'encaisse que 12% de ses buts exterieurs ici. Probabilite but modeste a 9%."
         },
         {
           "t": "30-45min",
           "prob": 24,
-          "txt": "Tranche la plus dangereuse de la premiere periode : IDV marque 18% de ses buts domicile ici et Emelec encaisse 41% de ses buts concedes en exterieur sur cette fenetre. Probabilite but explose a 24%, moment cle pour IDV."
+          "txt": "Tranche la plus dangereuse de la premiere mi-temps: IdV marque 18% de ses buts et Emelec encaisse 41% des buts qu'il prend en deplacement dans ce creneau. Pic offensif attendu (24%)."
         },
         {
           "t": "45-60min",
           "prob": 17,
-          "txt": "Debut de seconde periode actif : IDV realise 21% de ses buts domicile ici, Emelec encaisse 6% mais marque 15% de ses buts exterieurs. Probabilite but de 17%, avec risque de reaction d'Emelec limité."
+          "txt": "Retour des vestiaires avec une intensite correcte: IdV marque 21% de ses buts domicile dans cette tranche mais Emelec n'encaisse que 6% de ses buts exterieurs ici - asymetrie defensive notable (17%)."
         },
         {
           "t": "60-75min",
           "prob": 16,
-          "txt": "Phase milieu de seconde periode : IDV marque 14% de ses buts domicile, Emelec 19% de ses buts exterieurs. Les deux defenses restent en place, probabilite but stable a 16%."
+          "txt": "Phase intermediaire equilibree: IdV marque 14% de ses buts domicile, Emelec marque 19% de ses buts en deplacement. Les deux equipes peuvent s'exprimer mais le volume reste contenu (16%)."
         },
         {
           "t": "75-90min",
           "prob": 28,
-          "txt": "Tranche la plus prolifique du match : IDV marque 25% de ses buts domicile ici, Emelec 26% de ses buts exterieurs et encaisse 24%. Probabilite but maximale a 28%, risque de but d'Emelec en fin de match, point de vigilance pour le BTTS Non."
+          "txt": "Tranche la plus fertile du match: IdV marque 25% de ses buts domicile en fin de match et Emelec encaisse 24% de ses buts exterieurs ici. Probabilite but maximale de 28%, coherente avec un denouement tardif."
         }
       ],
-      "facteur_x": "Emelec ne marque pas dans 56% de ses deplacements (5/9) avec un xG exterieur de seulement 1.18, signal le plus convergent de l'analyse.",
-      "analyse_card": "Emelec ne marque pas lors de 5 de ses 9 matchs exterieurs (56%), ce qui est le signal le plus fort de cette analyse. Independiente del Valle encaisse peu a domicile (xGA 1.15, 4 clean sheets sur 9) et la note tactique confirme deux defenses solides. Le Monte-Carlo place 0-0 (9%) et 1-0 (16%) comme scenarios frequents sans but d'Emelec, ce qui renforce la coherence du BTTS Non.",
-      "conseil_public": "Jouer BTTS Non a 1.67 en s'appuyant sur l'incapacite chronique d'Emelec a marquer en deplacement et la solidite defensive d'IDV a domicile.",
-      "contexte": "Independiente del Valle est leader (a 0 pt du titre) et recoit Emelec, 9e, dans un match de Liga Pro. IDV est en forme avec 3 victoires consecutives ; Emelec alterne W/L et traverse une serie instable (LWLWL).",
+      "facteur_x": "Emelec sans marquer dans 56% de ses deplacements et xG exterieur de 1.18 - le volume offensif adverse est structurellement insuffisant pour pousser le total au-dessus de 2.5 buts.",
+      "analyse_card": "Les lambdas Poisson (DOM 1.51 / EXT 0.809) generent une moyenne attendue de 2.32 buts, favorable a l'Under 2.5. Les top scores Monte-Carlo (1-0: 15%, 1-1: 12%, 2-0: 12%, 0-0: 10%) representent 49% des simulations et tous restent sous ou egaux a 2.5 buts. Emelec est muet dans 56% de ses deplacements (xG exterieur 1.18) et la tactique identifie deux defenses solides renforçant le scenario BTTS Non / faible scoring.",
+      "conseil_public": "Jouer Under 2.5 a 1.97 - le modele a 60% offre une value nette face a la cote impliquant 51% de probabilite implicite.",
+      "contexte": "Independiente del Valle (#1) reçoit Emelec (#9) dans un match de Liga Pro avec un enjeu titre direct pour le DOM; Emelec en deplacement est en forme alternee (LWLWL) et n'a gagne que 2 fois en 9 matchs a l'exterieur.",
       "vbet": "OUI",
       "scores": [
-        "1-0"
+        "2-0"
       ],
       "mc_scores": [
         {
           "score": "1-0",
-          "n": 780,
-          "pct": 16
+          "n": 740,
+          "pct": 15
         },
         {
           "score": "1-1",
-          "n": 567,
-          "pct": 11
+          "n": 618,
+          "pct": 12
         },
         {
           "score": "2-0",
-          "n": 545,
-          "pct": 11
+          "n": 586,
+          "pct": 12
         },
         {
           "score": "0-0",
-          "n": 463,
-          "pct": 9
+          "n": 505,
+          "pct": 10
         },
         {
           "score": "2-1",
-          "n": 460,
+          "n": 458,
           "pct": 9
         }
       ],
       "paris_safe": {
-        "bet": "BTTS Non",
-        "cote": 1.67,
+        "bet": "Under 2.5",
+        "cote": 1.97,
         "proba": "53%"
       },
       "paris_risque": {
@@ -3928,48 +3928,48 @@
       "no_signal": false,
       "no_signal_label": "",
       "mise": "2-3% bankroll",
-      "verdict_shark": "BTTS Oui à 1.77 - le xG d'Orense (1.92) combiné aux clean sheets limitées de Mushuc Runa à domicile (40% seulement) soutient la probabilité que les deux équipes marquent.",
+      "verdict_shark": "BTTS Oui a 1.77 - le modele donne 54% de probabilite que les deux equipes marquent, soutenu par les xG offensifs des deux equipes et les top scores MC incluant 1-1(13%), 2-1(8%), 1-2(8%)",
       "scenario": {
-        "phase1": "Mushuc Runa en zone de relégation joue avec urgence à domicile mais défend prudemment (xGA 0.7). Orense, équipe extérieure sans pression de classement, dispose d'un xG offensif solide de 1.92, laissant anticiper qu'elle trouvera le chemin des filets.",
-        "phase2": "Les trois modèles (Poisson 54%, Dixon-Coles cohérent, Monte-Carlo 54%) convergent sur BTTS Oui. Les lambdas Poisson (DOM 1.356 / EXT 1.289) indiquent une production offensive équilibrée des deux côtés, favorable à un match avec buts aux deux extrémités.",
-        "phase3": "Les top scores Monte-Carlo (1-1, 2-1, 1-2) représentent les scénarios les plus fréquents avec buts des deux équipes. Orense n'a concédé un clean sheet qu'à 2/9 reprises à l'extérieur, réduisant la probabilité que Mushuc Runa reste muet à domicile face à une équipe qui attaque."
+        "phase1": "Mushuc Runa en zone de relégation cherche absolument les 3 points à domicile, mais sa forme récente (LDWLD) et son bilan de 4V/10 à domicile limitent les certitudes offensives. Orense démontre une capacité à marquer en dehors de ses bases (xG 1.92 ext).",
+        "phase2": "Le modèle Poisson (lambdas 1.356 vs 1.289) et Monte-Carlo convergent vers un match serré. La probabilité BTTS à 54% est cohérente avec les top scores MC où 1-1, 2-1 et 1-2 représentent environ 29% des simulations, tous favorables au BTTS.",
+        "phase3": "La cote de 1.77 implique une probabilité implicite de 56.5%, très proche de la probabilité modèle de 54%. La value est marginale mais le signal est cohérent entre les trois méthodes de calcul."
       },
       "scenario_15min": [
         {
           "t": "0-15min",
           "prob": 9,
-          "txt": "Démarrage prudent attendu. Mushuc Runa ne marque que 10% de ses buts dans cette tranche à domicile, et Orense seulement 5% en extérieur. Probabilité de but réduite à 9%, phase de prise de contact tactique."
+          "txt": "Ouverture prudente : Mushuc Runa marque seulement 10% de ses buts ici à domicile, et Orense 5% de ses buts en déplacement. La probabilité de but dans ce créneau est faible à 9%."
         },
         {
           "t": "15-30min",
           "prob": 13,
-          "txt": "Montée en puissance progressive. Mushuc Runa encaisse 19% des buts d'Orense dans cette fenêtre, et Orense encaisse 18% des buts de Mushuc Runa ici. Probabilité de but à 13%, le match commence à s'ouvrir."
+          "txt": "Légère montée en pression : Mushuc Runa encaisse 19% des buts d'Orense sur cette tranche. La probabilité de but monte à 13%, avec un risque accru sur la défense de Mushuc Runa."
         },
         {
           "t": "30-45min",
           "prob": 23,
-          "txt": "Tranche la plus active de la première période. Mushuc Runa marque 20% de ses buts et Orense 24% des siens dans ce segment. Les deux équipes encaissent aussi 23% dans cette fenêtre. Probabilité de but à 23%, pic offensif attendu avant la mi-temps."
+          "txt": "Tranche la plus active de la première mi-temps : Mushuc Runa marque 20% de ses buts ici et Orense 24% de ses buts extérieurs. La probabilité de but atteint 23%, créneau clé pour le scénario BTTS."
         },
         {
           "t": "45-60min",
           "prob": 22,
-          "txt": "La pression de relégation de Mushuc Runa se ressent en début de seconde période : 30% de leurs buts tombent ici. Orense encaisse 18% dans cette tranche mais marque aussi 19%. Probabilité de but élevée à 22%."
+          "txt": "Début de seconde mi-temps intense : Mushuc Runa marque 30% de ses buts sur cette période (sa tranche la plus prolifique). Orense encaisse 18% de ses buts ici. Probabilité de but à 22%."
         },
         {
           "t": "60-75min",
           "prob": 12,
-          "txt": "Légère baisse d'intensité. Mushuc Runa ne marque que 15% de ses buts ici, Orense 19%, mais Orense n'a encaissé aucun but dans cette tranche en extérieur (0%). Probabilité de but retombe à 12%."
+          "txt": "Légère accalmie : Mushuc Runa marque 15% de ses buts et Orense 19% de ses buts extérieurs ici, mais Orense n'encaisse aucun but sur cette tranche dans les données. Probabilité de but à 12%."
         },
         {
           "t": "75-90min",
           "prob": 22,
-          "txt": "Regain offensif en fin de match. Orense marque 29% de ses buts extérieurs dans cette fenêtre et Mushuc Runa 15% des siens. Les deux équipes encaissent 19-23% ici. Probabilité de but à 22%, scénario de but tardif très plausible."
+          "txt": "Fin de match décisive : Orense marque 29% de ses buts extérieurs sur cette tranche, et Mushuc Runa 15% de ses buts domicile. Créneau potentiellement décisif pour le BTTS si un des deux n'a pas encore scoré."
         }
       ],
-      "facteur_x": "Les scores Monte-Carlo dominants (1-1 à 12%, 2-1 à 9%, 1-2 à 8%) totalisent 29% pour des résultats BTTS=Oui parmi les 5 premiers scores, confirmant la cohérence du marché avec le modèle.",
-      "analyse_card": "Mushuc Runa affiche un xGA de 0.7 à domicile mais n'a gardé sa cage inviolée que 6/10 fois, et Orense a scoré dans 67% de ses matchs extérieurs (6/9 rencontres). Orense présente un xG offensif de 1.92, le plus élevé des deux équipes, indiquant une réelle capacité à trouver le chemin des filets. Le modèle Poisson/Dixon-Coles/Monte-Carlo convergent à 54% pour BTTS Oui, confirmé par les top scores MC : 1-1 (12%), 2-1 (9%), 1-2 (8%) représentant 29% des simulations avec buts des deux côtés.",
-      "conseil_public": "Jouer BTTS Oui à 1.77 avec mise modérée, les scores Monte-Carlo les plus probables (1-1, 2-1, 1-2) impliquent tous que les deux équipes marquent.",
-      "contexte": "Mushuc Runa (#14/16) est en zone de relégation et joue à domicile avec une pression maximale pour prendre des points. Orense (#11) est en position confortable et affiche une meilleure forme récente (LWLWD). Matchs sans historique H2H disponible en Liga Pro.",
+      "facteur_x": "Orense SC possède un xG offensif de 1.92 en déplacement, le signal le plus fort indiquant que l'équipe visiteuse est capable de marquer même face à une défense organisée.",
+      "analyse_card": "Orense SC affiche un xG offensif de 1.92 en deplacement et ne reste sans marquer que 33% du temps, ce qui indique une equipe capable de trouver le filet. Mushuc Runa SC, malgre une solidite defensive relative (xGA 0.7 a domicile), encaisse dans 40% de ses matchs a domicile (CS 6/10 donc 4/10 avec but encaisse). Les scores Monte-Carlo les plus frequents incluent 1-1(13%), 2-1(8%) et 1-2(8%), soit environ 29% des simulations aboutissant a un BTTS direct dans les 3 premiers scores.",
+      "conseil_public": "Jouer BTTS Oui a 1.77 en misant sur la capacite offensive d'Orense (xG 1.92 ext) face a une defense de Mushuc Runa qui concede dans 4 matchs sur 10 a domicile.",
+      "contexte": "Mushuc Runa (#14/16) est en zone de relégation et joue avec une pression maximale, ce qui peut ouvrir des espaces. Orense (#11) n'a pas d'enjeu direct mais montre une forme extérieure correcte (3V/9). Pas de données H2H disponibles.",
       "vbet": "NON",
       "scores": [
         "1-1"
@@ -3977,27 +3977,27 @@
       "mc_scores": [
         {
           "score": "1-1",
-          "n": 613,
-          "pct": 12
+          "n": 642,
+          "pct": 13
         },
         {
           "score": "1-0",
-          "n": 470,
+          "n": 476,
+          "pct": 10
+        },
+        {
+          "score": "0-1",
+          "n": 458,
           "pct": 9
         },
         {
           "score": "2-1",
-          "n": 442,
-          "pct": 9
-        },
-        {
-          "score": "0-1",
-          "n": 427,
-          "pct": 9
+          "n": 403,
+          "pct": 8
         },
         {
           "score": "1-2",
-          "n": 410,
+          "n": 385,
           "pct": 8
         }
       ],
@@ -4016,7 +4016,7 @@
         "nom": "Estadio Bellavista - Ambato",
         "cap": "",
         "meteo": "",
-        "temp": "15C",
+        "temp": "16C",
         "desc": "couvert"
       },
       "crit_home": {
@@ -4716,76 +4716,76 @@
       "no_signal": false,
       "no_signal_label": "",
       "mise": "2-3% bankroll",
-      "verdict_shark": "Under 2.5 à 1.53 - le modèle à 77% converge avec des top scores MC dominés par 1-0 (21%) et 0-0 (20%), confirmant un match peu prolifique.",
+      "verdict_shark": "Under 2.5 à 1.53 - Le modèle attribue 77% de probabilité à moins de 2.5 buts, parfaitement cohérent avec les scores Monte-Carlo dominants (0-0: 21%, 1-0: 20%, 1-1: 12%, 2-0: 12%).",
       "scenario": {
-        "phase1": "Libertad domine légèrement à domicile (4V/9) mais sa forme récente est médiocre (LWDDD) et son xGA de 2.61 révèle une défense fragile. Delfin SC est en grande difficulté à l'extérieur (1V/10) avec un attaque quasi inexistante (xG 0.35).",
-        "phase2": "Les trois modèles convergent : DOM 47-48%, Nul 33-36%, EXT 17-19%. Le lambda de Delfin SC (0.549) est très faible, confirmant une attaque inefficace. La probabilité Under 2.5 atteint 77% selon l'ensemble des modèles.",
-        "phase3": "Les scores Monte-Carlo valident la cohérence : 1-0 (21%), 0-0 (20%), 2-0 (11%), 0-1 (11%) représentent ensemble 63% des simulations, tous compatibles avec l'Under 2.5. Aucun score prolifique ne domine les simulations."
+        "phase1": "Libertad à domicile reste limité (4V/9) avec une forme récente médiocre (LWDDD) et 33% de matchs sans marquer. Delfin SC est encore plus faible à l'extérieur (1V/10, 60% sans marquer), rendant un match à faible scoring très probable.",
+        "phase2": "Les lambdas Poisson (1.093 vs 0.549) génèrent une espérance de 1.64 buts au total. Under 2.5 ressort à 77% sur les trois modèles (Poisson, Dixon-Coles, Monte-Carlo) avec une convergence totale et sans divergence notable entre les méthodes.",
+        "phase3": "Les scores Monte-Carlo confirment la cohérence : 0-0 (21%), 1-0 (20%), 2-0 (12%), 1-1 (12%), 0-1 (11%) - les quatre scénarios les plus probables restent tous sous le seuil de 2.5 buts. Aucun signal ne pointe vers un match prolifique."
       },
       "scenario_15min": [
         {
           "t": "0-15min",
           "prob": 9,
-          "txt": "Démarrage prudent attendu : Libertad ne marque que 8% de ses buts dans cette tranche à domicile, Delfin SC également 8% à l'extérieur. Probabilité de but à 9%, tranche la plus calme du match."
+          "txt": "Démarrage prudent attendu : Libertad ne marque que 8% de ses buts dans cette tranche à domicile, Delfin SC également 8% de ses buts en déplacement. Probabilité d'un but avant la 15e minute estimée à seulement 9%."
         },
         {
           "t": "15-30min",
           "prob": 14,
-          "txt": "Légère montée en puissance : Libertad marque 17% de ses buts dans cette fenêtre et encaisse 18% des buts de Delfin SC. Delfin SC ne marque que 8% ici à l'extérieur. Probabilité de but à 14%."
+          "txt": "Montée progressive en intensité : Libertad génère 17% de ses buts sur cette tranche, mais Delfin SC reste à 8% de ses réalisations extérieures. Probabilité de but légèrement supérieure à 14%, sans danger réel."
         },
         {
           "t": "30-45min",
           "prob": 13,
-          "txt": "Tranche similaire : Libertad marque 17% de ses buts ici, mais Delfin SC n'a marqué 0% de ses buts extérieurs dans cette fenêtre. La probabilité de but reste modérée à 13%."
+          "txt": "Tranche similaire à la précédente : Libertad marque 17% de ses buts ici, mais Delfin SC n'a inscrit aucun but dans cette tranche en déplacement (0%). La probabilité de but retombe à 13%, confirmant la stérilité offensive des visiteurs."
         },
         {
           "t": "45-60min",
           "prob": 30,
-          "txt": "Pic d'activité : Libertad marque 33% de ses buts à domicile dans cette tranche et encaisse 24% des buts de Delfin SC. Delfin SC marque 33% de ses buts extérieurs ici également. Tranche la plus dangereuse avec 30% de probabilité."
+          "txt": "Tranche à risque maximale : Libertad concentre 33% de ses buts et Delfin SC 33% de ses réalisations extérieures dans ce créneau. La probabilité grimpe à 30%, c'est la fenêtre la plus dangereuse pour le pari Under 2.5."
         },
         {
           "t": "60-75min",
           "prob": 10,
-          "txt": "Creux d'activité : Libertad ne marque que 4% de ses buts dans cette fenêtre et n'encaisse que 6% des buts de Delfin SC. Probabilité de but retombée à 10%, match potentiellement déjà plié."
+          "txt": "Chute nette d'activité offensive : Libertad ne marque que 4% de ses buts à domicile dans cette tranche. Delfin SC monte à 17% mais cela reste marginal. Probabilité de but retombée à 10%, la plus basse de la seconde période."
         },
         {
           "t": "75-90min",
           "prob": 25,
-          "txt": "Regain final significatif : Libertad marque 21% de ses buts à domicile en fin de match et encaisse 26% des buts de Delfin SC ici. Delfin SC marque 33% de ses buts extérieurs dans cette tranche. Probabilité de but à 25%, attention aux fins de match."
+          "txt": "Dernier rush en fin de match : Libertad marque 21% de ses buts et encaisse 26% dans cette fenêtre, Delfin SC marque 33% de ses buts extérieurs ici. Probabilité de but à 25%, tranche à surveiller pour ne pas compromettre l'Under 2.5 si le score est encore à 0 ou 1 but total."
         }
       ],
-      "facteur_x": "Delfin SC génère un xG extérieur de seulement 0.35 par match et n'a pas marqué dans 60% de ses déplacements - la probabilité d'un match à buts rares est structurellement élevée.",
-      "analyse_card": "Le modèle Poisson/Dixon-Coles/Monte-Carlo s'accordent tous sur 77% de probabilité Under 2.5. Les scores MC les plus fréquents sont 1-0 (21%), 0-0 (20%), 2-0 (11%) et 0-1 (11%), soit 63% des simulations produisant 0 ou 1 but total. Delfin SC affiche un xG extérieur de seulement 0.35 et n'a pas marqué dans 60% de ses matchs à l'extérieur, tandis que Libertad présente un xG de 1.61 mais un bilan 4V/9 à domicile avec une forme récente LWDDD.",
-      "conseil_public": "Miser Under 2.5 buts à 1.53 avec une value modeste mais des signaux très convergents entre les trois modèles mathématiques et les scores Monte-Carlo.",
-      "contexte": "Match de bas de tableau en Liga Pro entre deux équipes en zone de relégation (#15 et #13/16), ce qui accentue la pression défensive et le pragmatisme tactique des deux équipes avec peu à perdre offensivement.",
+      "facteur_x": "Delfin SC sans marquer dans 60% de ses déplacements avec un xG extérieur de seulement 0.35 - l'attaque visiteur est la plus faible du contexte analysé.",
+      "analyse_card": "Delfin SC affiche un xG extérieur catastrophique de 0.35 et reste muet dans 60% de ses déplacements, signalant une attaque quasi-inexistante loin de ses bases. Libertad génère un xG de 1.61 à domicile mais encaisse peu (xGA 2.61 sur l'ensemble), et les Poisson lambdas (DOM 1.093, EXT 0.549) produisent une espérance de buts totale de 1.64. Les trois modèles convergent unanimement vers Under 2.5 à 77%, et les quatre scores les plus fréquents en Monte-Carlo ne dépassent pas 2 buts cumulés.",
+      "conseil_public": "Miser sur Under 2.5 à 1.53 : la convergence totale des modèles et la faiblesse offensive de Delfin à l'extérieur en font le signal le plus solide de ce match.",
+      "contexte": "Match de survie entre deux équipes en zone de relégation (Libertad #15, Delfin SC #13 sur 16) en Liga Pro équatorienne. La pression du classement favorise la prudence défensive des deux équipes, ce qui renforce le scénario de faible scoring.",
       "vbet": "OUI",
       "scores": [
         "1-0"
       ],
       "mc_scores": [
         {
-          "score": "1-0",
-          "n": 1065,
+          "score": "0-0",
+          "n": 1027,
           "pct": 21
         },
         {
-          "score": "0-0",
-          "n": 985,
+          "score": "1-0",
+          "n": 1018,
           "pct": 20
         },
         {
           "score": "1-1",
-          "n": 578,
+          "n": 576,
           "pct": 12
         },
         {
           "score": "2-0",
-          "n": 567,
-          "pct": 11
+          "n": 575,
+          "pct": 12
         },
         {
           "score": "0-1",
-          "n": 548,
+          "n": 550,
           "pct": 11
         }
       ],
@@ -4804,7 +4804,7 @@
         "nom": "Estadio Federativo Reina del Cisne - Loja",
         "cap": "",
         "meteo": "",
-        "temp": "17C",
+        "temp": "14C",
         "desc": "légère pluie"
       },
       "crit_home": {
@@ -5396,33 +5396,33 @@
     {
       "label": "SHARK SAFE",
       "type": "safe",
-      "selections": "BTTS Non + Under 2.5",
+      "selections": "Under 2.5 + Under 2.5",
       "matchs": "Independiente del Valle vs Emelec, Libertad vs Delfin SC",
-      "cote_totale": "1.87",
-      "conseil": "Combiné sécurisé sur 2 matchs solides. Les deux sélections montrent une faible tendance offensive. Mise recommandée : 5-10% bankroll."
+      "cote_totale": "1.97 x 1.53 = 3.01 → sélection partielle: Libertad vs Delfin SC Under 2.5 + DC 1X Independiente del Valle vs Emelec",
+      "conseil": "Combiné prudent basé sur les deux signaux Under 2.5 du jour. Libertad vs Delfin SC offre la meilleure sécurité avec une cote attractive. Mise recommandée: 3-5% bankroll."
     },
     {
       "label": "SHARK VALUE",
       "type": "value",
-      "selections": "BTTS Non + Under 2.5 + DC X2",
-      "matchs": "Independiente del Valle vs Emelec, Libertad vs Delfin SC, Libertad vs Delfin SC (DC X2)",
-      "cote_totale": "2.86",
-      "conseil": "Ajout d'une double chance X2 pour booster la cote tout en maintenant une sécurité raisonnable. Libertad joue à domicile avec une défense solide. Mise recommandée : 3-5% bankroll."
+      "selections": "Under 2.5 Independiente del Valle vs Emelec + Under 2.5 Libertad vs Delfin SC + BTTS Non Libertad vs Delfin SC",
+      "matchs": "Independiente del Valle vs Emelec, Libertad vs Delfin SC, Libertad vs Delfin SC (BTTS Non)",
+      "cote_totale": "1.97 x 1.53 x 1.10 ≈ 3.31",
+      "conseil": "Combiné valeur exploitant les deux signaux IASHARK du jour. Les équipes équatoriennes et paraguayennes évoluent dans des championnats défensifs. BTTS Non sur Libertad renforce la cohérence de la sélection Under. Mise recommandée: 2-3% bankroll."
     },
     {
       "label": "SHARK EXPERT",
       "type": "audace",
-      "selections": "BTTS Non + Under 2.5 + DC X2 + DC 1X",
-      "matchs": "Independiente del Valle vs Emelec, Libertad vs Delfin SC, Libertad vs Delfin SC (DC X2), Independiente del Valle vs Emelec (DC 1X)",
-      "cote_totale": "4.78",
-      "conseil": "Combiné expert maximisant le potentiel de gain. Independiente del Valle favoris à domicile, Libertad difficile à battre sur son terrain. Réservé aux joueurs expérimentés. Mise recommandée : 1-2% bankroll."
+      "selections": "Under 2.5 Independiente del Valle vs Emelec + Under 2.5 Libertad vs Delfin SC + DC X2 Emelec + BTTS Non Delfin SC",
+      "matchs": "Independiente del Valle vs Emelec, Libertad vs Delfin SC, Independiente del Valle vs Emelec (DC X2), Libertad vs Delfin SC (BTTS Non)",
+      "cote_totale": "1.97 x 1.53 x 1.45 x 1.15 ≈ 5.17",
+      "conseil": "Combiné expert maximisant les deux signaux IASHARK avec des marchés complémentaires DC X2 et BTTS Non. Profil audacieux pour chasseurs de valeur. Emelec et Delfin SC en déplacement restent compétitifs défensivement. Mise recommandée: 1-2% bankroll uniquement."
     },
     {
       "label": "DIMANCHE FOU",
       "type": "dimanche_fou",
-      "selections": "DC 1X, DC 1X, BTTS Non, DC 1X, DC 1X",
-      "matchs": "Libertad vs Delfin SC, Guayaquil City FC vs Manta FC, Independiente del Valle vs Emelec, Mushuc Runa SC vs Orense SC, Spain vs Argentina",
-      "cote_totale": "4.44",
+      "selections": "DC 1X, DC 1X, DC X2, BTTS Non, DC 1X",
+      "matchs": "Libertad vs Delfin SC, Guayaquil City FC vs Manta FC, Tecnico Universitario vs Aucas, Independiente del Valle vs Emelec, Spain vs Argentina",
+      "cote_totale": "4.58",
       "conseil": "5 selections triees par edge"
     }
   ]

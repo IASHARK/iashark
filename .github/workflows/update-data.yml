@@ -1177,7 +1177,7 @@ jobs:
               if(seen[f.fixture.id]) return false;
               seen[f.fixture.id]=true; return true;
             });
-            var TEST_ONE_MATCH = false;
+            var TEST_ONE_MATCH = true;
             if(TEST_ONE_MATCH){
               var wcOnly = uniqueFixtures.filter(function(f){ return f.league.id===1; });
               uniqueFixtures = wcOnly.length ? wcOnly.slice(0,1) : uniqueFixtures.slice(0,1);

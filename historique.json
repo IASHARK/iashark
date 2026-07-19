@@ -340,11 +340,11 @@
       "match": "SJK vs KuPS",
       "home": "SJK",
       "away": "KuPS",
-      "prediction": "Over 2.5",
-      "cote": 1.6,
+      "prediction": "Under 2.5",
+      "cote": 1.72,
       "conf": 6.8,
       "conf_bucket": "6-7",
-      "market": "over25",
+      "market": "under25",
       "league": "Veikkausliiga",
       "league_key": "finlande",
       "sport": "football",
@@ -352,7 +352,7 @@
       "has_pinnacle": false,
       "has_elo": false,
       "date": "2026-07-18",
-      "result": "loss",
+      "result": "win",
       "fixture_id": 1504264,
       "type": "single",
       "score": "0-1",
@@ -985,11 +985,11 @@
       "match": "AIK Stockholm vs Gais",
       "home": "AIK Stockholm",
       "away": "Gais",
-      "prediction": "BTTS Oui",
-      "cote": 1.65,
+      "prediction": "Under 2.5",
+      "cote": 1.76,
       "conf": 6.8,
       "conf_bucket": "6-7",
-      "market": "btts_oui",
+      "market": "under25",
       "league": "Allsvenskan",
       "league_key": "suede",
       "sport": "football",
@@ -997,7 +997,7 @@
       "has_pinnacle": false,
       "has_elo": false,
       "date": "2026-07-16",
-      "result": "loss",
+      "result": "win",
       "fixture_id": 1494209,
       "type": "single",
       "score": "2-0",
@@ -1051,11 +1051,11 @@
       "match": "Daejeon Citizen vs Ulsan Hyundai FC",
       "home": "Daejeon Citizen",
       "away": "Ulsan Hyundai FC",
-      "prediction": "Under 2.5",
-      "cote": 1.85,
+      "prediction": "DC X2",
+      "cote": 1.57,
       "conf": 6.8,
       "conf_bucket": "6-7",
-      "market": "under25",
+      "market": "dc_x2",
       "league": "K League 1",
       "league_key": "kleague",
       "sport": "football",
@@ -1063,7 +1063,7 @@
       "has_pinnacle": false,
       "has_elo": false,
       "date": "2026-07-16",
-      "result": "loss",
+      "result": "win",
       "fixture_id": 1506998,
       "type": "single",
       "score": "2-2",
@@ -1337,11 +1337,11 @@
       "match": "Atlético Ottawa vs York United",
       "home": "Atlético Ottawa",
       "away": "York United",
-      "prediction": "Over 2.5",
-      "cote": 1.69,
+      "prediction": "BTTS Oui",
+      "cote": 1.8,
       "conf": 7.6,
       "conf_bucket": "7-8",
-      "market": "over25",
+      "market": "btts_oui",
       "league": "Canadian Premier League",
       "league_key": "canada",
       "sport": "football",
@@ -1349,7 +1349,7 @@
       "has_pinnacle": false,
       "has_elo": false,
       "date": "2026-07-16",
-      "result": "loss",
+      "result": "win",
       "fixture_id": 1517310,
       "type": "single",
       "score": "1-1",
@@ -6698,38 +6698,38 @@
     }
   ],
   "stats": {
-    "winrate": 65.9,
-    "roi": 17,
+    "winrate": 67.5,
+    "roi": 19.8,
     "total": 246,
     "streak": -2,
-    "wins": 162,
-    "losses": 84
+    "wins": 166,
+    "losses": 80
   },
   "backtesting": {
     "by_market": [
       {
         "key": "over25",
         "wins": 51,
-        "losses": 21,
-        "total": 72,
-        "winrate": 70.8,
-        "roi": 22.3
+        "losses": 19,
+        "total": 70,
+        "winrate": 72.9,
+        "roi": 25.8
       },
       {
         "key": "under25",
-        "wins": 32,
-        "losses": 23,
-        "total": 55,
-        "winrate": 58.2,
-        "roi": 1.2
+        "wins": 34,
+        "losses": 22,
+        "total": 56,
+        "winrate": 60.7,
+        "roi": 5.6
       },
       {
         "key": "btts_oui",
-        "wins": 32,
-        "losses": 18,
+        "wins": 33,
+        "losses": 17,
         "total": 50,
-        "winrate": 64,
-        "roi": 13.4
+        "winrate": 66.0,
+        "roi": 17.0
       },
       {
         "key": "btts_non",
@@ -6741,11 +6741,11 @@
       },
       {
         "key": "dc_x2",
-        "wins": 13,
+        "wins": 14,
         "losses": 4,
-        "total": 17,
-        "winrate": 76.5,
-        "roi": 52.5
+        "total": 18,
+        "winrate": 77.8,
+        "roi": 52.7
       },
       {
         "key": "victoire_ext",
@@ -6768,7 +6768,7 @@
         "wins": 4,
         "losses": 1,
         "total": 5,
-        "winrate": 80,
+        "winrate": 80.0,
         "roi": 57.2
       },
       {
@@ -6776,16 +6776,16 @@
         "wins": 2,
         "losses": 0,
         "total": 2,
-        "winrate": 100,
-        "roi": 81
+        "winrate": 100.0,
+        "roi": 81.0
       },
       {
         "key": "dc_x1",
         "wins": 1,
         "losses": 0,
         "total": 1,
-        "winrate": 100,
-        "roi": 53
+        "winrate": 100.0,
+        "roi": 53.0
       }
     ],
     "by_league": [
@@ -6815,27 +6815,27 @@
       },
       {
         "key": "finlande",
-        "wins": 11,
-        "losses": 8,
+        "wins": 12,
+        "losses": 7,
         "total": 19,
-        "winrate": 57.9,
-        "roi": -0.6
+        "winrate": 63.2,
+        "roi": 8.4
       },
       {
         "key": "suede",
-        "wins": 13,
-        "losses": 6,
+        "wins": 14,
+        "losses": 5,
         "total": 19,
-        "winrate": 68.4,
-        "roi": 13.7
+        "winrate": 73.7,
+        "roi": 22.9
       },
       {
         "key": "kleague",
-        "wins": 12,
-        "losses": 4,
+        "wins": 13,
+        "losses": 3,
         "total": 16,
-        "winrate": 75,
-        "roi": 32.3
+        "winrate": 81.2,
+        "roi": 42.1
       },
       {
         "key": "islande",
@@ -6855,18 +6855,18 @@
       },
       {
         "key": "canada",
-        "wins": 5,
-        "losses": 4,
+        "wins": 6,
+        "losses": 3,
         "total": 9,
-        "winrate": 55.6,
-        "roi": 3.4
+        "winrate": 66.7,
+        "roi": 23.4
       },
       {
         "key": "irlande",
         "wins": 8,
         "losses": 0,
         "total": 8,
-        "winrate": 100,
+        "winrate": 100.0,
         "roi": 74.1
       },
       {
@@ -6874,7 +6874,7 @@
         "wins": 3,
         "losses": 3,
         "total": 6,
-        "winrate": 50,
+        "winrate": 50.0,
         "roi": -23.3
       },
       {
@@ -6882,7 +6882,7 @@
         "wins": 3,
         "losses": 2,
         "total": 5,
-        "winrate": 60,
+        "winrate": 60.0,
         "roi": -9.2
       },
       {
@@ -6890,7 +6890,7 @@
         "wins": 3,
         "losses": 1,
         "total": 4,
-        "winrate": 75,
+        "winrate": 75.0,
         "roi": 43.8
       },
       {
@@ -6898,26 +6898,26 @@
         "wins": 1,
         "losses": 0,
         "total": 1,
-        "winrate": 100,
-        "roi": 80
+        "winrate": 100.0,
+        "roi": 80.0
       }
     ],
     "by_conf": [
       {
         "key": "7-8",
-        "wins": 81,
-        "losses": 32,
+        "wins": 82,
+        "losses": 31,
         "total": 113,
-        "winrate": 71.7,
-        "roi": 28.1
+        "winrate": 72.6,
+        "roi": 29.7
       },
       {
         "key": "6-7",
-        "wins": 66,
-        "losses": 40,
+        "wins": 69,
+        "losses": 37,
         "total": 106,
-        "winrate": 62.3,
-        "roi": 10.1
+        "winrate": 65.1,
+        "roi": 14.9
       },
       {
         "key": "<6",
@@ -6932,38 +6932,38 @@
         "wins": 6,
         "losses": 4,
         "total": 10,
-        "winrate": 60,
+        "winrate": 60.0,
         "roi": 1.1
       }
     ],
     "by_sport": [
       {
         "key": "football",
-        "wins": 162,
-        "losses": 84,
+        "wins": 166,
+        "losses": 80,
         "total": 246,
-        "winrate": 65.9,
-        "roi": 17
+        "winrate": 67.5,
+        "roi": 19.8
       }
     ],
     "by_has_pinnacle": [
       {
         "key": "inconnu",
-        "wins": 162,
-        "losses": 84,
+        "wins": 164,
+        "losses": 82,
         "total": 246,
-        "winrate": 65.9,
-        "roi": 17
+        "winrate": 66.7,
+        "roi": 17.6
       }
     ],
     "by_has_elo": [
       {
         "key": "inconnu",
-        "wins": 160,
-        "losses": 83,
+        "wins": 162,
+        "losses": 81,
         "total": 243,
-        "winrate": 65.8,
-        "roi": 16.9
+        "winrate": 66.7,
+        "roi": 17.5
       },
       {
         "key": "true",
@@ -6980,10 +6980,10 @@
     {
       "month": "2026-07",
       "label": "Jul 2026",
-      "wins": 103,
-      "losses": 55,
+      "wins": 107,
+      "losses": 51,
       "total": 158,
-      "roi": 14.1
+      "roi": 18.3
     },
     {
       "month": "2026-06",

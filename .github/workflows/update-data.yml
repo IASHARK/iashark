@@ -1263,9 +1263,21 @@ jobs:
             var r = await get('https://v3.football.api-sports.io/players?team='+teamId+'&season='+s+'&league='+leagueId, APS);
             var players=(r&&r.response)||[];
             if(!players.length) return [];
-            var scored=players.filter(function(p){return p.statistics&&p.statistics[0]&&p.statistics[0].goals&&(p.statistics[0].goals.total>0||p.statistics[0].goals.assists>0);});
-            scored.sort(function(a,b){return ((b.statistics[0].goals.total||0)+(b.statistics[0].goals.assists||0))-((a.statistics[0].goals.total||0)+(a.statistics[0].goals.assists||0));});
-            return scored.slice(0,3).map(function(p){var s=p.statistics[0];return {id:p.player.id,name:p.player.name,photo:p.player.photo||('https://media.api-sports.io/football/players/'+p.player.id+'.png'),goals:s.goals.total||0,assists:s.goals.assists||0,games:s.games.appearences||0,shots_total:(s.shots&&s.shots.total)||0,shots_on:(s.shots&&s.shots.on)||0};});
+            function statsForLeague(p){
+              return (p.statistics||[]).find(function(st){return st.league && st.league.id===leagueId;}) || (p.statistics&&p.statistics[0]);
+            }
+            var scored=players.filter(function(p){
+              var st=statsForLeague(p);
+              return st && st.goals && (st.goals.total>0||st.goals.assists>0);
+            });
+            scored.sort(function(a,b){
+              var sa=statsForLeague(a), sb=statsForLeague(b);
+              return ((sb.goals.total||0)+(sb.goals.assists||0))-((sa.goals.total||0)+(sa.goals.assists||0));
+            });
+            return scored.slice(0,3).map(function(p){
+              var s=statsForLeague(p);
+              return {id:p.player.id,name:p.player.name,photo:p.player.photo||('https://media.api-sports.io/football/players/'+p.player.id+'.png'),goals:s.goals.total||0,assists:s.goals.assists||0,games:s.games.appearences||0,shots_total:(s.shots&&s.shots.total)||0,shots_on:(s.shots&&s.shots.on)||0};
+            });
           }
           async function getFixtureEvents(fixtureId) {
             var r = await get('https://v3.football.api-sports.io/fixtures/events?fixture='+fixtureId, APS);
@@ -2231,7 +2243,7 @@ jobs:
             var eloData=await loadClubElo();
             var prevPinnacleOdds={};
             try{if(fs.existsSync('data.json')){var prevData=JSON.parse(fs.readFileSync('data.json','utf8'));(prevData.matchs||[]).forEach(function(m){if(m.pinnacle_snapshot){prevPinnacleOdds[m.home.n+'|'+m.away.n]=m.pinnacle_snapshot;}});}}catch(e){}
-            console.log('Cache desactive - tous les matchs recalcules a chaque run');
+            console.log('Cache actif - matchs deja verrouilles reutilises, seuls les nouveaux sont calcules');
             var matchCache = {};
             try {
               if (fs.existsSync('data.json')) {
@@ -2310,6 +2322,43 @@ jobs:
               }
               var evPatH=calcEventsPattern(eventsH_raw,home.id);
               var evPatA=calcEventsPattern(eventsA_raw,away.id);
+              function calcHotPlayers(eventsArr,teamId,seasonTop){
+                var last10Events=eventsArr.slice(0,10);
+                var allEvts=[].concat.apply([],last10Events);
+                var teamGoals=allEvts.filter(function(e){return e.team&&e.team.id===teamId&&e.type==='Goal'&&e.detail!=='Missed Penalty'&&e.detail!=='Own Goal';});
+                var goalsByPlayer={},assistsByPlayer={};
+                teamGoals.forEach(function(e){
+                  if(e.player&&e.player.id){
+                    var pid=e.player.id;
+                    if(!goalsByPlayer[pid])goalsByPlayer[pid]={id:pid,name:e.player.name,count:0};
+                    goalsByPlayer[pid].count++;
+                  }
+                  if(e.assist&&e.assist.id){
+                    var aid=e.assist.id;
+                    if(!assistsByPlayer[aid])assistsByPlayer[aid]={id:aid,name:e.assist.name,count:0};
+                    assistsByPlayer[aid].count++;
+                  }
+                });
+                function topOf(dict){
+                  var arr=Object.keys(dict).map(function(k){return dict[k];});
+                  arr.sort(function(a,b){return b.count-a.count;});
+                  return arr.length?arr[0]:null;
+                }
+                function decorate(entry){
+                  if(!entry||entry.count<=0)return null;
+                  var found=(seasonTop||[]).find(function(p){return p.id===entry.id;});
+                  return{
+                    id:entry.id,name:entry.name,
+                    photo:found?found.photo:('https://media.api-sports.io/football/players/'+entry.id+'.png'),
+                    count:entry.count,
+                    shots_total:found?found.shots_total:null,
+                    shots_on:found?found.shots_on:null,
+                  };
+                }
+                return{scorer:decorate(topOf(goalsByPlayer)),assist:decorate(topOf(assistsByPlayer))};
+              }
+              var hotH=calcHotPlayers(eventsH_raw,home.id,topScorersH);
+              var hotA=calcHotPlayers(eventsA_raw,away.id,topScorersA);
               var last10H=formatLast10(raw10H,home.id);
               var last10A=formatLast10(raw10A,away.id);
               var last10IdsH_xg=raw10H.slice(0,10).map(function(fx){return fx.fixture.id;});
@@ -2522,7 +2571,7 @@ jobs:
                 league:lg.name,ligue_icon:lgIcon(lg.name),league_key:lgKey(lg.id),
                 date:(dateVraieParis+' '+heure).trim(),cat:['all'],
                 val:an?(an.vbet==='OUI'&&(an.confiance||0)>=7.0):false,
-                hot:an?((an.confiance||0)>=8.0||((an.confiance||0)>=7.5&&['ldc','premier','laliga','seriea','bundesliga','ligue1'].includes(lgKey(lg.id)))):false,
+                hot:an?((an.confiance||0)>=7.5):false,
                 conf:(function(){
                   var raw=an?(an.confiance||an.confidence||0):0;
                   var val=parseFloat(String(raw).replace(',','.'))||0;
@@ -2574,6 +2623,8 @@ jobs:
                   return null;
                 })():(evPatA||null),
                 top_scorers_home:topScorersH||[],top_scorers_away:topScorersA||[],
+                hot_scorer_home:hotH.scorer,hot_assist_home:hotH.assist,
+                hot_scorer_away:hotA.scorer,hot_assist_away:hotA.assist,
                 key_absences:keyAbsenceAlerts||[],
                 match_stats_home:{
                   possession:xgH.possession_avg, shots_total:xgH.shots_total_avg?parseFloat(xgH.shots_total_avg):null,
@@ -2636,10 +2687,14 @@ jobs:
           }
           main().catch(function(e){console.error('FATAL:',e.message,e.stack);process.exit(0);});
           JSEOF
-      - name: Vider le cache - recalcul complet a chaque run
+      - name: Vider le cache uniquement si force_refresh demande
         run: |
-          echo '{"matchs":[],"combis":[]}' > data.json
-          echo "Cache vide - tous les matchs seront recalcules (comportement par defaut)"
+          if [ "${{ github.event.inputs.force_refresh }}" = "true" ]; then
+            echo '{"matchs":[],"combis":[]}' > data.json
+            echo "force_refresh=true : cache vide, tous les matchs seront recalcules"
+          else
+            echo "Cache conserve : les matchs deja verrouilles gardent leur prediction (matchCache actif)"
+          fi
       - name: Run pipeline
         env:
           APISPORTS_KEY:      ${{ secrets.APISPORTS_KEY }}

@@ -1177,19 +1177,10 @@ jobs:
               if(seen[f.fixture.id]) return false;
               seen[f.fixture.id]=true; return true;
             });
-            var TEST_ONE_MATCH = true;
+            var TEST_ONE_MATCH = false;
             if(TEST_ONE_MATCH){
-              var targeted = uniqueFixtures.filter(function(f){
-                var hn=(f.teams.home.name||'').toLowerCase();
-                var an=(f.teams.away.name||'').toLowerCase();
-                return (hn.includes('anyang')&&an.includes('gwangju'))||(hn.includes('gwangju')&&an.includes('anyang'));
-              });
-              if(targeted.length){
-                uniqueFixtures = targeted.slice(0,1);
-              } else {
-                var wcOnly = uniqueFixtures.filter(function(f){ return f.league.id===1; });
-                uniqueFixtures = wcOnly.length ? wcOnly.slice(0,1) : uniqueFixtures.slice(0,1);
-              }
+              var wcOnly = uniqueFixtures.filter(function(f){ return f.league.id===1; });
+              uniqueFixtures = wcOnly.length ? wcOnly.slice(0,1) : uniqueFixtures.slice(0,1);
             }
             return uniqueFixtures;
           }
@@ -1267,25 +1258,33 @@ jobs:
             games.forEach(function(g){(g.events||[]).forEach(function(e){if(e.type==='Card')totalCards++;if(e.detail&&e.detail.toLowerCase().includes('penalty'))totalPens++;});});
             return {name:refName,games:games.length,cards_per_game:(totalCards/games.length).toFixed(1),pens_per_game:(totalPens/games.length).toFixed(1)};
           }
-          async function getTopScorers(teamId, leagueId) {
-            var s = SEASON_2026.indexOf(leagueId)!==-1 ? 2026 : SEASON;
-            var r = await get('https://v3.football.api-sports.io/players?team='+teamId+'&season='+s+'&league='+leagueId, APS);
-            var players=(r&&r.response)||[];
-            if(!players.length) return [];
-            function statsForLeague(p){
-              return (p.statistics||[]).find(function(st){return st.league && st.league.id===leagueId;}) || (p.statistics&&p.statistics[0]);
+          async function getTopScorersFromFixtures(teamId, fixtureIds) {
+            var statsMap = {};
+            for(var i=0;i<fixtureIds.length;i++){
+              try{
+                var r = await get('https://v3.football.api-sports.io/fixtures/players?fixture='+fixtureIds[i], APS);
+                var teamBlock=(r.response||[]).find(function(b){return b.team&&b.team.id===teamId;});
+                if(teamBlock){
+                  (teamBlock.players||[]).forEach(function(p){
+                    var st=p.statistics&&p.statistics[0];
+                    if(!st)return;
+                    var pid=p.player.id;
+                    if(!statsMap[pid])statsMap[pid]={id:pid,name:p.player.name,photo:p.player.photo,goals:0,assists:0,shots_total:0,shots_on:0,games:0};
+                    var mins=st.games&&st.games.minutes;
+                    if(mins&&mins>0)statsMap[pid].games++;
+                    statsMap[pid].goals+=(st.goals&&st.goals.total)||0;
+                    statsMap[pid].assists+=(st.goals&&st.goals.assists)||0;
+                    statsMap[pid].shots_total+=(st.shots&&st.shots.total)||0;
+                    statsMap[pid].shots_on+=(st.shots&&st.shots.on)||0;
+                  });
+                }
+              }catch(e){}
+              await sleep(150);
             }
-            var scored=players.filter(function(p){
-              var st=statsForLeague(p);
-              return st && st.goals && (st.goals.total>0||st.goals.assists>0);
-            });
-            scored.sort(function(a,b){
-              var sa=statsForLeague(a), sb=statsForLeague(b);
-              return ((sb.goals.total||0)+(sb.goals.assists||0))-((sa.goals.total||0)+(sa.goals.assists||0));
-            });
-            return scored.slice(0,3).map(function(p){
-              var s=statsForLeague(p);
-              return {id:p.player.id,name:p.player.name,photo:p.player.photo||('https://media.api-sports.io/football/players/'+p.player.id+'.png'),goals:s.goals.total||0,assists:s.goals.assists||0,games:s.games.appearences||0,shots_total:(s.shots&&s.shots.total)||0,shots_on:(s.shots&&s.shots.on)||0};
+            var arr=Object.keys(statsMap).map(function(k){return statsMap[k];}).filter(function(p){return p.goals>0||p.assists>0;});
+            arr.sort(function(a,b){return (b.goals+b.assists)-(a.goals+a.assists);});
+            return arr.slice(0,3).map(function(p){
+              return {id:p.id,name:p.name,photo:p.photo||('https://media.api-sports.io/football/players/'+p.id+'.png'),goals:p.goals,assists:p.assists,games:p.games,shots_total:p.shots_total,shots_on:p.shots_on};
             });
           }
           async function getFixtureEvents(fixtureId) {
@@ -2302,14 +2301,16 @@ jobs:
               var rkA=entryA?entryA.rank:null;
               var batch1=await Promise.all([getTeamStats(home.id,lg.id),getTeamStats(away.id,lg.id),getLast10(home.id),getLast10(away.id)]);
               await sleep(400);
-              var batch2=await Promise.all([getOdds(f.id),getInjuries(f.id),getH2H(home.id,away.id),getWeather(f.venue&&f.venue.city?f.venue.city:''),getNews(home.name),getNews(away.name),getPredictions(f.id),getLineups(f.id),getRefereeStats(f.referee||null),getTopScorers(home.id,lg.id),getTopScorers(away.id,lg.id),getPinnacleOdds(home.name,away.name,lgKey(lg.id))]);
+              var batch2=await Promise.all([getOdds(f.id),getInjuries(f.id),getH2H(home.id,away.id),getWeather(f.venue&&f.venue.city?f.venue.city:''),getNews(home.name),getNews(away.name),getPredictions(f.id),getLineups(f.id),getRefereeStats(f.referee||null),getPinnacleOdds(home.name,away.name,lgKey(lg.id))]);
               await sleep(400);
               var sH=batch1[0],sA=batch1[1],raw10H=batch1[2],raw10A=batch1[3];
               var oddsRaw=batch2[0],injRaw=batch2[1],h2hRaw=batch2[2],wx=batch2[3],nH=batch2[4],nA=batch2[5];
               var predictions=batch2[6]||null,lineups=batch2[7]||null,refStats=batch2[8]||null;
-              var topScorersH=batch2[9]||[],topScorersA=batch2[10]||[],pinnacleOdds=batch2[11]||null;
+              var pinnacleOdds=batch2[9]||null;
               var last20IdsH=(raw10H||[]).slice(0,20).map(function(fx){return fx.fixture.id;});
               var last20IdsA=(raw10A||[]).slice(0,20).map(function(fx){return fx.fixture.id;});
+              var topScorersH=await getTopScorersFromFixtures(home.id, last20IdsH.slice(0,10));
+              var topScorersA=await getTopScorersFromFixtures(away.id, last20IdsA.slice(0,10));
               var eventsH_raw=[],eventsA_raw=[];
               for(var evi=0;evi<last20IdsH.length;evi++){eventsH_raw.push(await getFixtureEvents(last20IdsH[evi]));await sleep(150);}
               for(var evi=0;evi<last20IdsA.length;evi++){eventsA_raw.push(await getFixtureEvents(last20IdsA[evi]));await sleep(150);}

@@ -1179,8 +1179,17 @@ jobs:
             });
             var TEST_ONE_MATCH = true;
             if(TEST_ONE_MATCH){
-              var wcOnly = uniqueFixtures.filter(function(f){ return f.league.id===1; });
-              uniqueFixtures = wcOnly.length ? wcOnly.slice(0,1) : uniqueFixtures.slice(0,1);
+              var targeted = uniqueFixtures.filter(function(f){
+                var hn=(f.teams.home.name||'').toLowerCase();
+                var an=(f.teams.away.name||'').toLowerCase();
+                return (hn.includes('anyang')&&an.includes('gwangju'))||(hn.includes('gwangju')&&an.includes('anyang'));
+              });
+              if(targeted.length){
+                uniqueFixtures = targeted.slice(0,1);
+              } else {
+                var wcOnly = uniqueFixtures.filter(function(f){ return f.league.id===1; });
+                uniqueFixtures = wcOnly.length ? wcOnly.slice(0,1) : uniqueFixtures.slice(0,1);
+              }
             }
             return uniqueFixtures;
           }

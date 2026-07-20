@@ -1311,7 +1311,8 @@ jobs:
           }
           async function smFindLeagueSeasonByCountry(countryName) {
             try {
-              var rc = await getSM('https://api.sportmonks.com/v3/core/countries/search/' + encodeURIComponent(countryName));
+              var countryNameNorm = (countryName||'').replace(/-/g,' ').trim();
+              var rc = await getSM('https://api.sportmonks.com/v3/core/countries/search/' + encodeURIComponent(countryNameNorm));
               var countries = rc.data || [];
               if(!countries.length) return null;
               var country = countries[0];
@@ -1338,9 +1339,9 @@ jobs:
               if(leagues.length){
                 console.log('  [SPORTMONKS] Recherche "'+leagueName+'" (pays attendu: '+(countryName||'?')+') -> '+leagues.length+' resultat(s): '+leagues.map(function(l){return l.name+'/'+((l.country&&l.country.name)||'?')+'(id:'+l.id+')';}).join(', '));
                 if(countryName){
-                  var countryLow = countryName.toLowerCase();
+                  var countryLow = countryName.toLowerCase().replace(/-/g,' ').trim();
                   candidates = leagues.filter(function(l){
-                    var lc = (l.country && l.country.name || '').toLowerCase();
+                    var lc = (l.country && l.country.name || '').toLowerCase().replace(/-/g,' ').trim();
                     return lc === countryLow || lc.includes(countryLow) || countryLow.includes(lc);
                   });
                 } else {

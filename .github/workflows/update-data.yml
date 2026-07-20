@@ -2453,6 +2453,7 @@ jobs:
             var matchsData=[];
             var forCombis=[];
             var standingsCache={};
+            var SM_SEASON_GOALS_CACHE={};
             for(var fi=0;fi<fixtures.length;fi++){
               var fix=fixtures[fi];
               var f=fix.fixture;
@@ -2547,20 +2548,13 @@ jobs:
               var evPatH=calcEventsPattern(eventsH_raw,home.id);
               var evPatA=calcEventsPattern(eventsA_raw,away.id);
 
-              var SM_SEASON_GOALS_CACHE={};
               async function smGetSeasonGoalEvents(seasonId){
                 if(SM_SEASON_GOALS_CACHE[seasonId]) return SM_SEASON_GOALS_CACHE[seasonId];
                 var allFixtures=[];
-                var page=1, maxPages=6;
                 try{
-                  while(page<=maxPages){
-                    var r=await getSM('https://api.sportmonks.com/v3/football/seasons/'+seasonId+'/fixtures?include=events.type;statistics.type;participants&filters=eventTypes:14&page='+page);
-                    var list=r.data||[];
-                    allFixtures=allFixtures.concat(list);
-                    if(!(r.pagination&&r.pagination.has_more)) break;
-                    page++;
-                    await sleep(150);
-                  }
+                  var r=await getSM('https://api.sportmonks.com/v3/football/seasons/'+seasonId+'?include=fixtures.participants;fixtures.events.type;fixtures.statistics.type&filters=eventTypes:14');
+                  allFixtures=(r.data&&r.data.fixtures)||[];
+                  if(!allFixtures.length) console.log('  [SPORTMONKS] Cache saison: 0 fixtures renvoyees pour season_id='+seasonId+' (reponse: '+JSON.stringify(r).slice(0,200)+')');
                 }catch(e){ console.log('  [SPORTMONKS] ERREUR Cache saison Sportmonks: '+e.message); }
                 SM_SEASON_GOALS_CACHE[seasonId]=allFixtures;
                 return allFixtures;

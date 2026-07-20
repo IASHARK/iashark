@@ -1,18 +1,7 @@
-name: Update IASHARK Daily
+name: TEST Islande - Moteur Sportmonks
 
 on:
-  schedule:
-    - cron: '0 6 * * *'
   workflow_dispatch:
-    inputs:
-      force_refresh:
-        description: 'Vider le cache et recalculer tous les matchs'
-        required: false
-        default: 'false'
-      test_wc_only:
-        description: 'Mode test : Coupe du Monde uniquement (rapide)'
-        required: false
-        default: 'false'
 
 jobs:
   update:
@@ -598,13 +587,7 @@ jobs:
             return Math.min(kelly*fraction*100,5).toFixed(1);
           }
           const LEAGUES = [
-            39, 40, 61, 62, 140, 141, 135, 78, 2, 3,
-            88, 94, 203, 119, 179, 144, 292,
-            66, 307, 143, 137, 81,
-            169, 244, 200, 479,
-            365, 362, 242, 164,
-            357, 113,
-            71, 253, 262
+            164
           ];
           const SEASON   = 2025;
           var SEASON_2026 = [1, 292, 169, 244, 200, 479, 365, 362, 242, 164, 357, 113, 71, 253];
@@ -622,6 +605,7 @@ jobs:
             357:'irlande', 113:'suede',
             71:'bresil', 253:'mls', 262:'ligamx'
           };
+          var SMALL_LEAGUE_KEYS_SPORTMONKS = {'kleague':1,'lettonie':1,'lituanie':1,'equateur':1,'islande':1,'suede':1,'finlande':1,'chine':1,'bresil':1,'ligamx':1};
           var BOOKIE_MAP = {
             'betclic':{domain:'betclic.fr',promo:'200 offerts',l:'#'},
             'winamax':{domain:'winamax.fr',promo:'100 offerts',l:'#'},
@@ -2487,6 +2471,28 @@ jobs:
               var batch2=await Promise.all([getOdds(f.id),getInjuries(f.id),getH2H(home.id,away.id),getWeather(f.venue&&f.venue.city?f.venue.city:''),getNews(home.name),getNews(away.name),getPredictions(f.id),getLineups(f.id),getRefereeStats(f.referee||null),getPinnacleOdds(home.name,away.name,lgKey(lg.id))]);
               await sleep(400);
               var sH=batch1[0],sA=batch1[1],raw10H=batch1[2],raw10A=batch1[3];
+              var isSmallLeagueEngine=!!SMALL_LEAGUE_KEYS_SPORTMONKS[lgKey(lg.id)];
+              function isEmptySH(s){
+                return !s || !(s.fixtures && s.fixtures.played && ((s.fixtures.played.home||0)>0 || (s.fixtures.played.away||0)>0));
+              }
+              if(isSmallLeagueEngine && (isEmptySH(sH) || isEmptySH(sA))){
+                try{
+                  var lsForEngine=await smFindLeagueSeason(lg.name, lg.country);
+                  if(lsForEngine){
+                    var seasonFixturesForEngine=await smGetSeasonGoalEvents(lsForEngine.seasonId);
+                    if(isEmptySH(sH)){
+                      var homeIdEngine=await smResolveTeamId(seasonFixturesForEngine,home.name);
+                      var shFallback=smTeamStatsAPIShape(seasonFixturesForEngine,homeIdEngine);
+                      if(shFallback){ sH=shFallback; console.log('  [SPORTMONKS] Moteur lambdas (petite ligue) utilise pour '+home.name); }
+                    }
+                    if(isEmptySH(sA)){
+                      var awayIdEngine=await smResolveTeamId(seasonFixturesForEngine,away.name);
+                      var saFallback=smTeamStatsAPIShape(seasonFixturesForEngine,awayIdEngine);
+                      if(saFallback){ sA=saFallback; console.log('  [SPORTMONKS] Moteur lambdas (petite ligue) utilise pour '+away.name); }
+                    }
+                  }
+                }catch(e){}
+              }
               var oddsRaw=batch2[0],injRaw=batch2[1],h2hRaw=batch2[2],wx=batch2[3],nH=batch2[4],nA=batch2[5];
               var predictions=batch2[6]||null,lineups=batch2[7]||null,refStats=batch2[8]||null;
               var pinnacleOdds=batch2[9]||null;
@@ -2515,6 +2521,176 @@ jobs:
               }
               var evPatH=calcEventsPattern(eventsH_raw,home.id);
               var evPatA=calcEventsPattern(eventsA_raw,away.id);
+
+              var SM_SEASON_GOALS_CACHE={};
+              async function smGetSeasonGoalEvents(seasonId){
+                if(SM_SEASON_GOALS_CACHE[seasonId]) return SM_SEASON_GOALS_CACHE[seasonId];
+                var allFixtures=[];
+                var page=1, maxPages=6;
+                try{
+                  while(page<=maxPages){
+                    var r=await getSM('https://api.sportmonks.com/v3/football/seasons/'+seasonId+'/fixtures?include=events.type;statistics.type;participants&filters=eventTypes:14&page='+page);
+                    var list=r.data||[];
+                    allFixtures=allFixtures.concat(list);
+                    if(!(r.pagination&&r.pagination.has_more)) break;
+                    page++;
+                    await sleep(150);
+                  }
+                }catch(e){}
+                SM_SEASON_GOALS_CACHE[seasonId]=allFixtures;
+                return allFixtures;
+              }
+              function smTeamStatsFromFixtures(fixtures,teamName,limit){
+                limit=limit||10;
+                var teamNames=[];
+                fixtures.forEach(function(fx){ (fx.participants||[]).forEach(function(p){ teamNames.push(p.name); }); });
+                var uniqueNames=teamNames.filter(function(v,i,a){return a.indexOf(v)===i;});
+                var matched=smBestMatch(teamName,uniqueNames);
+                if(!matched) return null;
+                var teamFixtures=fixtures.filter(function(fx){
+                  return (fx.participants||[]).some(function(p){return p.name===matched;});
+                });
+                teamFixtures.sort(function(a,b){ return new Date(b.starting_at)-new Date(a.starting_at); });
+                teamFixtures=teamFixtures.slice(0,limit);
+                if(!teamFixtures.length) return null;
+                var teamId=null;
+                teamFixtures.forEach(function(fx){
+                  (fx.participants||[]).forEach(function(p){ if(p.name===matched) teamId=p.id; });
+                });
+                var STAT_MAP={possession:45,shots_total:42,shots_on:86,shots_off:41,shots_blocked:58,corners:34,fouls:56,offsides:51,saves:57,passes_pct:82};
+                var sums={possession:0,shots_total:0,shots_on:0,shots_off:0,shots_blocked:0,corners:0,fouls:0,offsides:0,saves:0,passes_pct:0};
+                var counts={possession:0,shots_total:0,shots_on:0,shots_off:0,shots_blocked:0,corners:0,fouls:0,offsides:0,saves:0,passes_pct:0};
+                teamFixtures.forEach(function(fx){
+                  (fx.statistics||[]).forEach(function(st){
+                    if(st.participant_id!==teamId) return;
+                    Object.keys(STAT_MAP).forEach(function(key){
+                      if(st.type_id===STAT_MAP[key] && st.data && st.data.value!=null){
+                        sums[key]+=st.data.value; counts[key]++;
+                      }
+                    });
+                  });
+                });
+                var out={source:'sportmonks'};
+                Object.keys(STAT_MAP).forEach(function(key){
+                  out[key]=counts[key]>0?Math.round((sums[key]/counts[key])*10)/10:null;
+                });
+                out.xg=null; out.xga=null;
+                return out;
+              }
+              async function smResolveTeamId(seasonFixtures,teamName){
+                var names=[];
+                seasonFixtures.forEach(function(fx){ (fx.participants||[]).forEach(function(p){ names.push(p.name); }); });
+                var uniqueNames=names.filter(function(v,i,a){return a.indexOf(v)===i;});
+                var matched=smBestMatch(teamName,uniqueNames);
+                if(!matched) return null;
+                var found=null;
+                seasonFixtures.forEach(function(fx){ (fx.participants||[]).forEach(function(p){ if(p.name===matched) found=p.id; }); });
+                return found;
+              }
+              function smTeamStatsAPIShape(seasonFixtures,teamId){
+                if(!teamId) return null;
+                var teamFixtures=seasonFixtures.filter(function(fx){
+                  return (fx.participants||[]).some(function(p){return p.id===teamId;});
+                });
+                if(!teamFixtures.length) return null;
+                teamFixtures.sort(function(a,b){ return new Date(b.starting_at)-new Date(a.starting_at); });
+                var pH_home=0,pH_away=0,wH_home=0,wH_away=0;
+                var gfH_home=0,gfH_away=0,gaH_home=0,gaH_away=0;
+                var csH_home=0,csH_away=0,ftsH_home=0,ftsH_away=0;
+                var formArr=[];
+                teamFixtures.forEach(function(fx){
+                  var me=(fx.participants||[]).find(function(p){return p.id===teamId;});
+                  var opp=(fx.participants||[]).find(function(p){return p.id!==teamId;});
+                  if(!me||!opp) return;
+                  var isHome=me.meta&&me.meta.location==='home';
+                  var goals=(fx.events||[]).filter(function(e){return e.type_id===14;});
+                  var myGoals=goals.filter(function(e){return e.participant_id===teamId;}).length;
+                  var oppGoals=goals.filter(function(e){return e.participant_id===opp.id;}).length;
+                  if(isHome){
+                    pH_home++; gfH_home+=myGoals; gaH_home+=oppGoals;
+                    if(oppGoals===0) csH_home++;
+                    if(myGoals===0) ftsH_home++;
+                    if(myGoals>oppGoals) wH_home++;
+                  } else {
+                    pH_away++; gfH_away+=myGoals; gaH_away+=oppGoals;
+                    if(oppGoals===0) csH_away++;
+                    if(myGoals===0) ftsH_away++;
+                    if(myGoals>oppGoals) wH_away++;
+                  }
+                  if(formArr.length<5){
+                    formArr.push(myGoals>oppGoals?'W':(myGoals<oppGoals?'L':'D'));
+                  }
+                });
+                return {
+                  fixtures:{played:{home:pH_home,away:pH_away,total:pH_home+pH_away},wins:{home:wH_home,away:wH_away}},
+                  goals:{
+                    for:{home:{},away:{},total:{home:gfH_home,away:gfH_away,total:gfH_home+gfH_away}},
+                    against:{home:{},away:{},total:{home:gaH_home,away:gaH_away,total:gaH_home+gaH_away}}
+                  },
+                  clean_sheet:{home:csH_home,away:csH_away},
+                  failed_to_score:{home:ftsH_home,away:ftsH_away},
+                  form:formArr.reverse().join(''),
+                  source:'sportmonks'
+                };
+              }
+              function smTeamPatternFromFixtures(fixtures,teamName,limit){
+                limit=limit||10;
+                var teamNames=[];
+                fixtures.forEach(function(fx){ (fx.participants||[]).forEach(function(p){ teamNames.push(p.name); }); });
+                var uniqueNames=teamNames.filter(function(v,i,a){return a.indexOf(v)===i;});
+                var matched=smBestMatch(teamName,uniqueNames);
+                if(!matched) return null;
+                var teamFixtures=fixtures.filter(function(fx){
+                  return (fx.participants||[]).some(function(p){return p.name===matched;});
+                });
+                teamFixtures.sort(function(a,b){ return new Date(b.starting_at)-new Date(a.starting_at); });
+                teamFixtures=teamFixtures.slice(0,limit);
+                if(!teamFixtures.length) return null;
+                var teamId=null;
+                teamFixtures.forEach(function(fx){
+                  (fx.participants||[]).forEach(function(p){ if(p.name===matched) teamId=p.id; });
+                });
+                var scored=[],conceded=[];
+                teamFixtures.forEach(function(fx){
+                  (fx.events||[]).forEach(function(ev){
+                    if(ev.type_id!==14) return;
+                    var m=(ev.minute||0)+(ev.extra_minute||0);
+                    (ev.participant_id===teamId?scored:conceded).push(m);
+                  });
+                });
+                function bucket(arr,lo,hi){ return arr.filter(function(m){ return hi===null?m>=lo:(m>=lo&&m<hi); }).length; }
+                var games=teamFixtures.length;
+                function avg(n){ return (n/games).toFixed(2); }
+                return {
+                  goals_avg:avg(scored.length), conceded_avg:avg(conceded.length),
+                  slots:[{t:'0-15',n:bucket(scored,0,15)},{t:'15-30',n:bucket(scored,15,30)},{t:'30-45',n:bucket(scored,30,45)},{t:'45-60',n:bucket(scored,45,60)},{t:'60-75',n:bucket(scored,60,75)},{t:'75-90',n:bucket(scored,75,null)}],
+                  slots_against:[{t:'0-15',n:bucket(conceded,0,15)},{t:'15-30',n:bucket(conceded,15,30)},{t:'30-45',n:bucket(conceded,30,45)},{t:'45-60',n:bucket(conceded,45,60)},{t:'60-75',n:bucket(conceded,60,75)},{t:'75-90',n:bucket(conceded,75,null)}],
+                  red_cards:0, yellow_per_game:'0.0', games:games, source:'sportmonks'
+                };
+              }
+              function isEmptyPattern(p){
+                if(!p||!p.games) return true;
+                var totalScored=(p.slots||[]).reduce(function(s,x){return s+x.n;},0);
+                var totalConceded=(p.slots_against||[]).reduce(function(s,x){return s+x.n;},0);
+                return totalScored===0 && totalConceded===0;
+              }
+              var isSmallLeague=!!SMALL_LEAGUE_KEYS_SPORTMONKS[lgKey(lg.id)];
+              if(isSmallLeague || isEmptyPattern(evPatH) || isEmptyPattern(evPatA)){
+                try{
+                  var lsForPatterns=await smFindLeagueSeason(lg.name, lg.country);
+                  if(lsForPatterns){
+                    var seasonFixtures=await smGetSeasonGoalEvents(lsForPatterns.seasonId);
+                    if(isSmallLeague || isEmptyPattern(evPatH)){
+                      var fallbackH=smTeamPatternFromFixtures(seasonFixtures,home.name);
+                      if(fallbackH){ evPatH=fallbackH; console.log('  [SPORTMONKS] Patterns 15min (petite ligue) utilise pour '+home.name); }
+                    }
+                    if(isSmallLeague || isEmptyPattern(evPatA)){
+                      var fallbackA=smTeamPatternFromFixtures(seasonFixtures,away.name);
+                      if(fallbackA){ evPatA=fallbackA; console.log('  [SPORTMONKS] Fallback patterns 15min utilise pour '+away.name); }
+                    }
+                  }
+                }catch(e){}
+              }
               function calcHotPlayers(eventsArr,teamId,seasonTop){
                 var last10Events=eventsArr.slice(0,10);
                 var allEvts=[].concat.apply([],last10Events);
@@ -2558,6 +2734,41 @@ jobs:
               var last10IdsA_xg=raw10A.slice(0,10).map(function(fx){return fx.fixture.id;});
               var xgH=await getWeightedXGStats(home.id,last10IdsH_xg,raw10H,xgConcededCache);
               var xgA=await getWeightedXGStats(away.id,last10IdsA_xg,raw10A,xgConcededCache);
+
+              var matchStatsH={
+                possession:xgH.possession_avg, shots_total:xgH.shots_total_avg?parseFloat(xgH.shots_total_avg):null,
+                shots_on:xgH.shots_on_avg?parseFloat(xgH.shots_on_avg):null, shots_off:xgH.shots_off_avg,
+                shots_blocked:xgH.shots_blocked_avg, corners:xgH.corners_avg, fouls:xgH.fouls_avg?parseFloat(xgH.fouls_avg):null,
+                offsides:xgH.offsides_avg, saves:xgH.saves_avg, passes_pct:xgH.passes_pct_avg,
+                xg:xgH.xg_avg, xga:xgH.xga_avg,
+              };
+              var matchStatsA={
+                possession:xgA.possession_avg, shots_total:xgA.shots_total_avg?parseFloat(xgA.shots_total_avg):null,
+                shots_on:xgA.shots_on_avg?parseFloat(xgA.shots_on_avg):null, shots_off:xgA.shots_off_avg,
+                shots_blocked:xgA.shots_blocked_avg, corners:xgA.corners_avg, fouls:xgA.fouls_avg?parseFloat(xgA.fouls_avg):null,
+                offsides:xgA.offsides_avg, saves:xgA.saves_avg, passes_pct:xgA.passes_pct_avg,
+                xg:xgA.xg_avg, xga:xgA.xga_avg,
+              };
+              function isEmptyTeamStats(s){
+                if(!s) return true;
+                return s.possession==null && s.shots_total==null && s.corners==null && s.fouls==null;
+              }
+              if(isSmallLeague || isEmptyTeamStats(matchStatsH) || isEmptyTeamStats(matchStatsA)){
+                try{
+                  var lsForStats=await smFindLeagueSeason(lg.name, lg.country);
+                  if(lsForStats){
+                    var seasonFixturesForStats=await smGetSeasonGoalEvents(lsForStats.seasonId);
+                    if(isSmallLeague || isEmptyTeamStats(matchStatsH)){
+                      var statsFallbackH=smTeamStatsFromFixtures(seasonFixturesForStats,home.name);
+                      if(statsFallbackH){ matchStatsH=statsFallbackH; console.log('  [SPORTMONKS] Stats equipe (petite ligue) utilise pour '+home.name); }
+                    }
+                    if(isSmallLeague || isEmptyTeamStats(matchStatsA)){
+                      var statsFallbackA=smTeamStatsFromFixtures(seasonFixturesForStats,away.name);
+                      if(statsFallbackA){ matchStatsA=statsFallbackA; console.log('  [SPORTMONKS] Fallback stats equipe utilise pour '+away.name); }
+                    }
+                  }
+                }catch(e){}
+              }
               await sleep(300);
               var odds=parseOdds(oddsRaw);
               var critH=calcCriteres(sH,true,rkH);
@@ -2646,10 +2857,70 @@ jobs:
               });
               var nodeKelly=null;
               var injuries=(injRaw||[]).map(function(inj){return{name:inj.name,team:inj.team===home.id?home.id:away.id,reason:inj.reason||'Blessure',status:(inj.status||'out').toLowerCase().includes('suspend')?'suspended':'out',impact:'medium'};});
+              if(isSmallLeague && (!injuries||!injuries.length)){
+                try{
+                  async function smGetSidelined(teamId){
+                    if(!teamId) return [];
+                    var r=await getSM('https://api.sportmonks.com/v3/football/teams/'+teamId+'?include=sidelined.type;sidelined.player');
+                    var list=(r.data&&r.data.sidelined)||[];
+                    return list.filter(function(s){ return s.completed===false; }).map(function(s){
+                      return {
+                        name:(s.player&&s.player.name)||'Joueur inconnu',
+                        team:teamId,
+                        reason:(s.type&&s.type.name)||'Indisponible',
+                        status:(s.category==='suspended')?'suspended':'out',
+                        impact:'medium'
+                      };
+                    });
+                  }
+                  var lsForInj=await smFindLeagueSeason(lg.name, lg.country);
+                  if(lsForInj){
+                    var seasonFixturesForInj=await smGetSeasonGoalEvents(lsForInj.seasonId);
+                    var homeIdInj=await smResolveTeamId(seasonFixturesForInj,home.name);
+                    var awayIdInj=await smResolveTeamId(seasonFixturesForInj,away.name);
+                    var sidelinedH=await smGetSidelined(homeIdInj);
+                    var sidelinedA=await smGetSidelined(awayIdInj);
+                    var sidelinedAll=sidelinedH.map(function(s){return Object.assign({},s,{team:home.id});})
+                      .concat(sidelinedA.map(function(s){return Object.assign({},s,{team:away.id});}));
+                    if(sidelinedAll.length){ injuries=sidelinedAll; console.log('  [SPORTMONKS] Blessures/suspensions (petite ligue) utilise pour '+home.name+'/'+away.name); }
+                  }
+                }catch(e){}
+              }
               var matchup=calcMatchup(xgH,xgA,sH,sA);
               var keyAbsenceAlerts=calcKeyAbsences(injuries,topScorersH,topScorersA,home.id,away.id,bmHdom,mdHdom,bmAext,meAext);
               var disciplineRisk=calcDisciplineRisk(refStats,xgH,xgA,home.name,away.name);
               var h2hFormatted=formatH2H(h2hRaw,home.id);
+              if(isSmallLeague && (!h2hFormatted||!h2hFormatted.length)){
+                try{
+                  var lsForH2H=await smFindLeagueSeason(lg.name, lg.country);
+                  if(lsForH2H){
+                    var seasonFixturesForH2H=await smGetSeasonGoalEvents(lsForH2H.seasonId);
+                    var teamNamesH2H=[];
+                    seasonFixturesForH2H.forEach(function(fx){ (fx.participants||[]).forEach(function(p){ teamNamesH2H.push(p.name); }); });
+                    var uniqueNamesH2H=teamNamesH2H.filter(function(v,i,a){return a.indexOf(v)===i;});
+                    var matchedHomeH2H=smBestMatch(home.name,uniqueNamesH2H);
+                    var matchedAwayH2H=smBestMatch(away.name,uniqueNamesH2H);
+                    if(matchedHomeH2H && matchedAwayH2H){
+                      var h2hFixtures=seasonFixturesForH2H.filter(function(fx){
+                        var names=(fx.participants||[]).map(function(p){return p.name;});
+                        return names.indexOf(matchedHomeH2H)!==-1 && names.indexOf(matchedAwayH2H)!==-1;
+                      });
+                      h2hFixtures.sort(function(a,b){ return new Date(b.starting_at)-new Date(a.starting_at); });
+                      h2hFormatted=h2hFixtures.slice(0,5).map(function(fx){
+                        var goalsScored=(fx.events||[]).filter(function(e){return e.type_id===14;});
+                        var homeP=(fx.participants||[]).find(function(p){return p.meta&&p.meta.location==='home';})||(fx.participants||[])[0];
+                        var awayP=(fx.participants||[]).find(function(p){return p.meta&&p.meta.location==='away';})||(fx.participants||[])[1];
+                        var gH=goalsScored.filter(function(e){return homeP&&e.participant_id===homeP.id;}).length;
+                        var gA=goalsScored.filter(function(e){return awayP&&e.participant_id===awayP.id;}).length;
+                        var isH=homeP&&homeP.name===matchedHomeH2H;
+                        var w; if(gH>gA)w=isH?'1':'2'; else if(gH<gA)w=isH?'2':'1'; else w='N';
+                        return {d:(fx.starting_at||'').split(' ')[0], home:homeP?homeP.name:matchedHomeH2H, away:awayP?awayP.name:matchedAwayH2H, s:gH+'-'+gA, w:w};
+                      });
+                      if(h2hFormatted.length) console.log('  [SPORTMONKS] H2H (petite ligue) utilise pour '+home.name+' vs '+away.name);
+                    }
+                  }
+                }catch(e){}
+              }
               var mdH=(sH&&sH.fixtures&&sH.fixtures.played&&sH.fixtures.played.home)||Math.round(totalH/2);
               var meA=(sA&&sA.fixtures&&sA.fixtures.played&&sA.fixtures.played.away)||Math.round(totalA/2);
               var d10Hstr=last10H.slice(0,5).map(function(m){return m.result+' '+m.score+' vs '+m.match+' ('+m.lieu+')';}).join(' | ')||'N/A';
@@ -2819,20 +3090,8 @@ jobs:
                 hot_scorer_home:hotH.scorer,hot_assist_home:hotH.assist,
                 hot_scorer_away:hotA.scorer,hot_assist_away:hotA.assist,
                 key_absences:keyAbsenceAlerts||[],
-                match_stats_home:{
-                  possession:xgH.possession_avg, shots_total:xgH.shots_total_avg?parseFloat(xgH.shots_total_avg):null,
-                  shots_on:xgH.shots_on_avg?parseFloat(xgH.shots_on_avg):null, shots_off:xgH.shots_off_avg,
-                  shots_blocked:xgH.shots_blocked_avg, corners:xgH.corners_avg, fouls:xgH.fouls_avg?parseFloat(xgH.fouls_avg):null,
-                  offsides:xgH.offsides_avg, saves:xgH.saves_avg, passes_pct:xgH.passes_pct_avg,
-                  xg:xgH.xg_avg, xga:xgH.xga_avg,
-                },
-                match_stats_away:{
-                  possession:xgA.possession_avg, shots_total:xgA.shots_total_avg?parseFloat(xgA.shots_total_avg):null,
-                  shots_on:xgA.shots_on_avg?parseFloat(xgA.shots_on_avg):null, shots_off:xgA.shots_off_avg,
-                  shots_blocked:xgA.shots_blocked_avg, corners:xgA.corners_avg, fouls:xgA.fouls_avg?parseFloat(xgA.fouls_avg):null,
-                  offsides:xgA.offsides_avg, saves:xgA.saves_avg, passes_pct:xgA.passes_pct_avg,
-                  xg:xgA.xg_avg, xga:xgA.xga_avg,
-                },
+                match_stats_home:matchStatsH,
+                match_stats_away:matchStatsA,
                 elo_home:eloH?Math.round(eloH):null,elo_away:eloA?Math.round(eloA):null,
                 elo_diff:eloStats?eloStats.diff:null,elo_signal:eloStats?eloStats.signal:null,
                 dropping_odds:droppingOdds||null,
@@ -2880,14 +3139,8 @@ jobs:
           }
           main().catch(function(e){console.error('FATAL:',e.message,e.stack);process.exit(0);});
           JSEOF
-      - name: Vider le cache uniquement si force_refresh demande
-        run: |
-          if [ "${{ github.event.inputs.force_refresh }}" = "true" ]; then
-            echo '{"matchs":[],"combis":[]}' > data.json
-            echo "force_refresh=true : cache vide, tous les matchs seront recalcules"
-          else
-            echo "Cache conserve : les matchs deja verrouilles gardent leur prediction (matchCache actif)"
-          fi
+      - name: Vider le cache (force recalcul complet pour ce test)
+        run: echo '{"matchs":[],"combis":[]}' > data.json
       - name: Run pipeline
         env:
           APISPORTS_KEY:      ${{ secrets.APISPORTS_KEY }}
@@ -2899,13 +3152,37 @@ jobs:
           ODDS_API_IO_KEY:    ${{ secrets.ODDS_API_IO_KEY }}
           RAPIDAPI_TENNIS_KEY: ${{ secrets.RAPIDAPI_TENNIS_KEY }}
           CREATOMATE_KEY:     ${{ secrets.CREATOMATE_KEY }}
-          TEST_WC_ONLY:       ${{ github.event.inputs.test_wc_only }}
         run: node pipeline.js
+
+      - name: Afficher le resultat complet (moteur + joueurs + stats)
+        run: |
+          echo "=== VERIFICATION MOTEUR + STATS - ISLANDE ==="
+          node -e "
+            const d = require('./data.json');
+            d.matchs.forEach(m => {
+              console.log('');
+              console.log('=========================================');
+              console.log(m.home.n, 'vs', m.away.n, '-', m.league);
+              console.log('=========================================');
+              console.log('pari_rec:', m.pari_rec, '| cote_rec:', m.cote_rec, '| edge:', m.edge, '| conf:', m.conf);
+              console.log('no_signal:', m.no_signal, '| no_signal_label:', m.no_signal_label);
+              console.log('p1/pn/p2:', m.p1, m.pn, m.p2);
+              console.log('crit_home:', JSON.stringify(m.crit_home));
+              console.log('crit_away:', JSON.stringify(m.crit_away));
+              console.log('match_stats_home.source:', m.match_stats_home && m.match_stats_home.source);
+              console.log('match_stats_away.source:', m.match_stats_away && m.match_stats_away.source);
+              console.log('events_home.source:', m.events_home && m.events_home.source);
+              console.log('top_scorers_home count:', (m.top_scorers_home||[]).length);
+              console.log('h2h count:', (m.h2h||[]).length);
+              console.log('injuries count:', (m.injuries||[]).length);
+              console.log('verdict_shark:', m.verdict_shark);
+            });
+          "
 
       - name: Commit and push
         run: |
           git config user.name "IASHARK"
           git config user.email "yaramode81@gmail.com"
           git add data.json historique.json transferts.json actus.json sitemap.xml sitemap-*.xml
-          git diff --staged --quiet || git commit -m "Daily update - $(date +%Y-%m-%d)"
+          git diff --staged --quiet || git commit -m "TEST Islande moteur Sportmonks - $(date +%Y-%m-%d)"
           git push

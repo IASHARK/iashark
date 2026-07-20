@@ -1,7 +1,18 @@
-name: TEST Islande - Moteur Sportmonks
+name: Update IASHARK Daily
 
 on:
+  schedule:
+    - cron: '0 6 * * *'
   workflow_dispatch:
+    inputs:
+      force_refresh:
+        description: 'Vider le cache et recalculer tous les matchs'
+        required: false
+        default: 'false'
+      test_wc_only:
+        description: 'Mode test : Coupe du Monde uniquement (rapide)'
+        required: false
+        default: 'false'
 
 jobs:
   update:
@@ -587,7 +598,13 @@ jobs:
             return Math.min(kelly*fraction*100,5).toFixed(1);
           }
           const LEAGUES = [
-            164
+            39, 40, 61, 62, 140, 141, 135, 78, 2, 3,
+            88, 94, 203, 119, 179, 144, 292,
+            66, 307, 143, 137, 81,
+            169, 244, 200, 479,
+            365, 362, 242, 164,
+            357, 113,
+            71, 253, 262
           ];
           const SEASON   = 2025;
           var SEASON_2026 = [1, 292, 169, 244, 200, 479, 365, 362, 242, 164, 357, 113, 71, 253];
@@ -1280,8 +1297,12 @@ jobs:
 
             var bySubstring = candidates.find(function(c){
               var cNorm = smNormalize(c);
-              if(cNorm.length < 3 || nameNorm.length < 3) return false;
-              return cNorm.indexOf(nameNorm) !== -1 || nameNorm.indexOf(cNorm) !== -1;
+              var nameWords = nameNorm.split(' ').filter(Boolean);
+              var cWords = cNorm.split(' ').filter(Boolean);
+              if(!nameWords.length || !cWords.length) return false;
+              var shorter = nameWords.length<=cWords.length ? nameWords : cWords;
+              var longer = nameWords.length<=cWords.length ? cWords : nameWords;
+              return shorter.every(function(w){ return w.length>=2 && longer.indexOf(w)!==-1; });
             });
             if(bySubstring) return bySubstring;
 
@@ -2491,7 +2512,7 @@ jobs:
                       if(saFallback){ sA=saFallback; console.log('  [SPORTMONKS] Moteur lambdas (petite ligue) utilise pour '+away.name); }
                     }
                   }
-                }catch(e){}
+                }catch(e){ console.log('  [SPORTMONKS] ERREUR Moteur lambdas: '+e.message); }
               }
               var oddsRaw=batch2[0],injRaw=batch2[1],h2hRaw=batch2[2],wx=batch2[3],nH=batch2[4],nA=batch2[5];
               var predictions=batch2[6]||null,lineups=batch2[7]||null,refStats=batch2[8]||null;
@@ -2536,7 +2557,7 @@ jobs:
                     page++;
                     await sleep(150);
                   }
-                }catch(e){}
+                }catch(e){ console.log('  [SPORTMONKS] ERREUR Cache saison Sportmonks: '+e.message); }
                 SM_SEASON_GOALS_CACHE[seasonId]=allFixtures;
                 return allFixtures;
               }
@@ -2689,7 +2710,7 @@ jobs:
                       if(fallbackA){ evPatA=fallbackA; console.log('  [SPORTMONKS] Fallback patterns 15min utilise pour '+away.name); }
                     }
                   }
-                }catch(e){}
+                }catch(e){ console.log('  [SPORTMONKS] ERREUR Patterns 15min: '+e.message); }
               }
               function calcHotPlayers(eventsArr,teamId,seasonTop){
                 var last10Events=eventsArr.slice(0,10);
@@ -2767,7 +2788,7 @@ jobs:
                       if(statsFallbackA){ matchStatsA=statsFallbackA; console.log('  [SPORTMONKS] Fallback stats equipe utilise pour '+away.name); }
                     }
                   }
-                }catch(e){}
+                }catch(e){ console.log('  [SPORTMONKS] ERREUR Stats equipe: '+e.message); }
               }
               await sleep(300);
               var odds=parseOdds(oddsRaw);
@@ -2884,7 +2905,7 @@ jobs:
                       .concat(sidelinedA.map(function(s){return Object.assign({},s,{team:away.id});}));
                     if(sidelinedAll.length){ injuries=sidelinedAll; console.log('  [SPORTMONKS] Blessures/suspensions (petite ligue) utilise pour '+home.name+'/'+away.name); }
                   }
-                }catch(e){}
+                }catch(e){ console.log('  [SPORTMONKS] ERREUR Blessures/suspensions: '+e.message); }
               }
               var matchup=calcMatchup(xgH,xgA,sH,sA);
               var keyAbsenceAlerts=calcKeyAbsences(injuries,topScorersH,topScorersA,home.id,away.id,bmHdom,mdHdom,bmAext,meAext);
@@ -2919,7 +2940,7 @@ jobs:
                       if(h2hFormatted.length) console.log('  [SPORTMONKS] H2H (petite ligue) utilise pour '+home.name+' vs '+away.name);
                     }
                   }
-                }catch(e){}
+                }catch(e){ console.log('  [SPORTMONKS] ERREUR H2H: '+e.message); }
               }
               var mdH=(sH&&sH.fixtures&&sH.fixtures.played&&sH.fixtures.played.home)||Math.round(totalH/2);
               var meA=(sA&&sA.fixtures&&sA.fixtures.played&&sA.fixtures.played.away)||Math.round(totalA/2);
@@ -3139,8 +3160,14 @@ jobs:
           }
           main().catch(function(e){console.error('FATAL:',e.message,e.stack);process.exit(0);});
           JSEOF
-      - name: Vider le cache (force recalcul complet pour ce test)
-        run: echo '{"matchs":[],"combis":[]}' > data.json
+      - name: Vider le cache uniquement si force_refresh demande
+        run: |
+          if [ "${{ github.event.inputs.force_refresh }}" = "true" ]; then
+            echo '{"matchs":[],"combis":[]}' > data.json
+            echo "force_refresh=true : cache vide, tous les matchs seront recalcules"
+          else
+            echo "Cache conserve : les matchs deja verrouilles gardent leur prediction (matchCache actif)"
+          fi
       - name: Run pipeline
         env:
           APISPORTS_KEY:      ${{ secrets.APISPORTS_KEY }}
@@ -3152,37 +3179,13 @@ jobs:
           ODDS_API_IO_KEY:    ${{ secrets.ODDS_API_IO_KEY }}
           RAPIDAPI_TENNIS_KEY: ${{ secrets.RAPIDAPI_TENNIS_KEY }}
           CREATOMATE_KEY:     ${{ secrets.CREATOMATE_KEY }}
+          TEST_WC_ONLY:       ${{ github.event.inputs.test_wc_only }}
         run: node pipeline.js
-
-      - name: Afficher le resultat complet (moteur + joueurs + stats)
-        run: |
-          echo "=== VERIFICATION MOTEUR + STATS - ISLANDE ==="
-          node -e "
-            const d = require('./data.json');
-            d.matchs.forEach(m => {
-              console.log('');
-              console.log('=========================================');
-              console.log(m.home.n, 'vs', m.away.n, '-', m.league);
-              console.log('=========================================');
-              console.log('pari_rec:', m.pari_rec, '| cote_rec:', m.cote_rec, '| edge:', m.edge, '| conf:', m.conf);
-              console.log('no_signal:', m.no_signal, '| no_signal_label:', m.no_signal_label);
-              console.log('p1/pn/p2:', m.p1, m.pn, m.p2);
-              console.log('crit_home:', JSON.stringify(m.crit_home));
-              console.log('crit_away:', JSON.stringify(m.crit_away));
-              console.log('match_stats_home.source:', m.match_stats_home && m.match_stats_home.source);
-              console.log('match_stats_away.source:', m.match_stats_away && m.match_stats_away.source);
-              console.log('events_home.source:', m.events_home && m.events_home.source);
-              console.log('top_scorers_home count:', (m.top_scorers_home||[]).length);
-              console.log('h2h count:', (m.h2h||[]).length);
-              console.log('injuries count:', (m.injuries||[]).length);
-              console.log('verdict_shark:', m.verdict_shark);
-            });
-          "
 
       - name: Commit and push
         run: |
           git config user.name "IASHARK"
           git config user.email "yaramode81@gmail.com"
           git add data.json historique.json transferts.json actus.json sitemap.xml sitemap-*.xml
-          git diff --staged --quiet || git commit -m "TEST Islande moteur Sportmonks - $(date +%Y-%m-%d)"
+          git diff --staged --quiet || git commit -m "Daily update - $(date +%Y-%m-%d)"
           git push

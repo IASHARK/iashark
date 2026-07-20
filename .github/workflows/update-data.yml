@@ -1,7 +1,18 @@
-name: TEST Toutes Petites Ligues - Sportmonks
+name: Update IASHARK Daily
 
 on:
+  schedule:
+    - cron: '0 6 * * *'
   workflow_dispatch:
+    inputs:
+      force_refresh:
+        description: 'Vider le cache et recalculer tous les matchs'
+        required: false
+        default: 'false'
+      test_wc_only:
+        description: 'Mode test : Coupe du Monde uniquement (rapide)'
+        required: false
+        default: 'false'
 
 jobs:
   update:
@@ -587,7 +598,13 @@ jobs:
             return Math.min(kelly*fraction*100,5).toFixed(1);
           }
           const LEAGUES = [
-            292, 365, 362, 242, 164, 113, 244, 169, 71, 262
+            39, 40, 61, 62, 140, 141, 135, 78, 2, 3,
+            88, 94, 203, 119, 179, 144, 292,
+            66, 307, 143, 137, 81,
+            169, 244, 200, 479,
+            365, 362, 242, 164,
+            357, 113,
+            71, 253, 262
           ];
           const SEASON   = 2025;
           var SEASON_2026 = [1, 292, 169, 244, 200, 479, 365, 362, 242, 164, 357, 113, 71, 253];
@@ -2479,21 +2496,25 @@ jobs:
               function isEmptySH(s){
                 return !s || !(s.fixtures && s.fixtures.played && ((s.fixtures.played.home||0)>0 || (s.fixtures.played.away||0)>0));
               }
-              if(isSmallLeagueEngine && (isEmptySH(sH) || isEmptySH(sA))){
+              if(isSmallLeagueEngine || isEmptySH(sH) || isEmptySH(sA)){
                 try{
                   var lsForEngine=await smFindLeagueSeason(lg.name, lg.country);
                   if(lsForEngine){
                     var seasonFixturesForEngine=await smGetSeasonGoalEvents(lsForEngine.seasonId);
-                    if(isEmptySH(sH)){
+                    if(isSmallLeagueEngine || isEmptySH(sH)){
                       var homeIdEngine=await smResolveTeamId(seasonFixturesForEngine,home.name);
                       var shFallback=smTeamStatsAPIShape(seasonFixturesForEngine,homeIdEngine);
                       if(shFallback){ sH=shFallback; console.log('  [SPORTMONKS] Moteur lambdas (petite ligue) utilise pour '+home.name); }
+                      else console.log('  [SPORTMONKS] Moteur lambdas: aucune correspondance equipe pour '+home.name+' dans le cache saison');
                     }
-                    if(isEmptySH(sA)){
+                    if(isSmallLeagueEngine || isEmptySH(sA)){
                       var awayIdEngine=await smResolveTeamId(seasonFixturesForEngine,away.name);
                       var saFallback=smTeamStatsAPIShape(seasonFixturesForEngine,awayIdEngine);
                       if(saFallback){ sA=saFallback; console.log('  [SPORTMONKS] Moteur lambdas (petite ligue) utilise pour '+away.name); }
+                      else console.log('  [SPORTMONKS] Moteur lambdas: aucune correspondance equipe pour '+away.name+' dans le cache saison');
                     }
+                  } else {
+                    console.log('  [SPORTMONKS] Moteur lambdas: smFindLeagueSeason a renvoye null pour '+lg.name);
                   }
                 }catch(e){ console.log('  [SPORTMONKS] ERREUR Moteur lambdas: '+e.message); }
               }
@@ -2687,11 +2708,15 @@ jobs:
                     if(isSmallLeague || isEmptyPattern(evPatH)){
                       var fallbackH=smTeamPatternFromFixtures(seasonFixtures,home.name);
                       if(fallbackH){ evPatH=fallbackH; console.log('  [SPORTMONKS] Patterns 15min (petite ligue) utilise pour '+home.name); }
+                      else console.log('  [SPORTMONKS] Patterns 15min: aucune correspondance equipe pour '+home.name+' dans le cache saison');
                     }
                     if(isSmallLeague || isEmptyPattern(evPatA)){
                       var fallbackA=smTeamPatternFromFixtures(seasonFixtures,away.name);
                       if(fallbackA){ evPatA=fallbackA; console.log('  [SPORTMONKS] Fallback patterns 15min utilise pour '+away.name); }
+                      else console.log('  [SPORTMONKS] Patterns 15min: aucune correspondance equipe pour '+away.name+' dans le cache saison');
                     }
+                  } else {
+                    console.log('  [SPORTMONKS] Patterns 15min: smFindLeagueSeason a renvoye null pour '+lg.name);
                   }
                 }catch(e){ console.log('  [SPORTMONKS] ERREUR Patterns 15min: '+e.message); }
               }
@@ -2765,11 +2790,15 @@ jobs:
                     if(isSmallLeague || isEmptyTeamStats(matchStatsH)){
                       var statsFallbackH=smTeamStatsFromFixtures(seasonFixturesForStats,home.name);
                       if(statsFallbackH){ matchStatsH=statsFallbackH; console.log('  [SPORTMONKS] Stats equipe (petite ligue) utilise pour '+home.name); }
+                      else console.log('  [SPORTMONKS] Stats equipe: aucune correspondance equipe pour '+home.name+' dans le cache saison');
                     }
                     if(isSmallLeague || isEmptyTeamStats(matchStatsA)){
                       var statsFallbackA=smTeamStatsFromFixtures(seasonFixturesForStats,away.name);
                       if(statsFallbackA){ matchStatsA=statsFallbackA; console.log('  [SPORTMONKS] Fallback stats equipe utilise pour '+away.name); }
+                      else console.log('  [SPORTMONKS] Stats equipe: aucune correspondance equipe pour '+away.name+' dans le cache saison');
                     }
+                  } else {
+                    console.log('  [SPORTMONKS] Stats equipe: smFindLeagueSeason a renvoye null pour '+lg.name);
                   }
                 }catch(e){ console.log('  [SPORTMONKS] ERREUR Stats equipe: '+e.message); }
               }
@@ -3143,8 +3172,14 @@ jobs:
           }
           main().catch(function(e){console.error('FATAL:',e.message,e.stack);process.exit(0);});
           JSEOF
-      - name: Vider le cache (force recalcul complet pour ce test)
-        run: echo '{"matchs":[],"combis":[]}' > data.json
+      - name: Vider le cache uniquement si force_refresh demande
+        run: |
+          if [ "${{ github.event.inputs.force_refresh }}" = "true" ]; then
+            echo '{"matchs":[],"combis":[]}' > data.json
+            echo "force_refresh=true : cache vide, tous les matchs seront recalcules"
+          else
+            echo "Cache conserve : les matchs deja verrouilles gardent leur prediction (matchCache actif)"
+          fi
       - name: Run pipeline
         env:
           APISPORTS_KEY:      ${{ secrets.APISPORTS_KEY }}
@@ -3156,45 +3191,13 @@ jobs:
           ODDS_API_IO_KEY:    ${{ secrets.ODDS_API_IO_KEY }}
           RAPIDAPI_TENNIS_KEY: ${{ secrets.RAPIDAPI_TENNIS_KEY }}
           CREATOMATE_KEY:     ${{ secrets.CREATOMATE_KEY }}
+          TEST_WC_ONLY:       ${{ github.event.inputs.test_wc_only }}
         run: node pipeline.js
-
-      - name: Rapport complet - toutes les petites ligues
-        run: |
-          echo "=== RAPPORT COMPLET - 10 PETITES LIGUES SPORTMONKS ==="
-          node -e "
-            const d = require('./data.json');
-            var byLeague = {};
-            d.matchs.forEach(m => {
-              var key = m.league_key || m.league || 'inconnu';
-              if(!byLeague[key]) byLeague[key] = [];
-              byLeague[key].push(m);
-            });
-            Object.keys(byLeague).forEach(key => {
-              console.log('');
-              console.log('#####################################');
-              console.log('LIGUE:', key, '(' + byLeague[key].length + ' matchs)');
-              console.log('#####################################');
-              byLeague[key].forEach(m => {
-                console.log('');
-                console.log('--- ' + m.home.n + ' vs ' + m.away.n + ' ---');
-                console.log('  pari_rec:', m.pari_rec, '| edge:', m.edge, '| conf:', m.conf, '| no_signal:', m.no_signal);
-                console.log('  match_stats_home.source:', (m.match_stats_home && m.match_stats_home.source) || 'API-SPORTS');
-                console.log('  match_stats_away.source:', (m.match_stats_away && m.match_stats_away.source) || 'API-SPORTS');
-                console.log('  events_home.source:', (m.events_home && m.events_home.source) || 'API-SPORTS');
-                console.log('  events_away.source:', (m.events_away && m.events_away.source) || 'API-SPORTS');
-                console.log('  top_scorers_home/away:', (m.top_scorers_home||[]).length, '/', (m.top_scorers_away||[]).length);
-                console.log('  h2h count:', (m.h2h||[]).length);
-                console.log('  injuries count:', (m.injuries||[]).length);
-              });
-            });
-            console.log('');
-            console.log('=== TOTAL:', d.matchs.length, 'matchs traites ===');
-          "
 
       - name: Commit and push
         run: |
           git config user.name "IASHARK"
           git config user.email "yaramode81@gmail.com"
           git add data.json historique.json transferts.json actus.json sitemap.xml sitemap-*.xml
-          git diff --staged --quiet || git commit -m "TEST toutes petites ligues Sportmonks - $(date +%Y-%m-%d)"
+          git diff --staged --quiet || git commit -m "Daily update - $(date +%Y-%m-%d)"
           git push

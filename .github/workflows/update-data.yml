@@ -1405,13 +1405,14 @@ jobs:
               details.forEach(function(d){ map[d.type_id] = d.value; });
               function num(v){ return (v && v.total != null) ? v.total : 0; }
               return {
-                goals: num(map[52]), assists: num(map[79]),
-                shots_total: num(map[42]), shots_on: num(map[86]),
+                goals: num(map[52]), penalties: (map[52] && map[52].penalties) || 0, assists: num(map[79]),
+                shots_total: num(map[42]), shots_on: num(map[86]), woodwork: num(map[64]),
                 fouls_committed: num(map[56]), fouls_drawn: num(map[96]),
                 yellow: num(map[84]), red: num(map[83]),
-                duels_total: num(map[105]), duels_won: num(map[106]),
+                duels_total: num(map[105]), duels_won: num(map[106]), aerials_won: num(map[107]),
                 dribbles_success: num(map[109]), dribbles_attempts: num(map[108]),
-                key_passes: num(map[117]),
+                key_passes: num(map[117]), passes_pct: num(map[1584]),
+                big_chances_created: num(map[580]), big_chances_missed: num(map[581]),
                 minutes: num(map[119]), games: num(map[321]),
               };
             } catch(e) { return null; }
@@ -1452,9 +1453,15 @@ jobs:
                 red: stats ? stats.red : 0,
                 duels_total: stats ? stats.duels_total : 0,
                 duels_won: stats ? stats.duels_won : 0,
+                aerials_won: stats ? stats.aerials_won : 0,
                 dribbles_success: stats ? stats.dribbles_success : 0,
                 dribbles_attempts: stats ? stats.dribbles_attempts : 0,
                 key_passes: stats ? stats.key_passes : 0,
+                passes_pct: stats ? stats.passes_pct : 0,
+                penalties: stats ? stats.penalties : 0,
+                woodwork: stats ? stats.woodwork : 0,
+                big_chances_created: stats ? stats.big_chances_created : 0,
+                big_chances_missed: stats ? stats.big_chances_missed : 0,
                 sample_size: stats ? stats.games : null,
                 sample_type: 'saison',
                 source: 'sportmonks'

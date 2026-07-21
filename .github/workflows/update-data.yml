@@ -1279,6 +1279,9 @@ jobs:
             if(words.length < 2) return null;
             return words.map(function(w){ return w.length <= 3 ? w : w[0]; }).join('');
           }
+          function smIsPlayed(fx){
+            return fx && fx.result_info !== null && fx.result_info !== undefined;
+          }
           function smBestMatch(name, candidates) {
             var nameLow = (name||'').toLowerCase().trim();
             var nameNorm = smNormalize(name);
@@ -2567,7 +2570,7 @@ jobs:
                 var matched=smBestMatch(teamName,uniqueNames);
                 if(!matched) return null;
                 var teamFixtures=fixtures.filter(function(fx){
-                  return (fx.participants||[]).some(function(p){return p.name===matched;});
+                  return smIsPlayed(fx) && (fx.participants||[]).some(function(p){return p.name===matched;});
                 });
                 teamFixtures.sort(function(a,b){ return new Date(b.starting_at)-new Date(a.starting_at); });
                 teamFixtures=teamFixtures.slice(0,limit);
@@ -2609,7 +2612,7 @@ jobs:
               function smTeamStatsAPIShape(seasonFixtures,teamId){
                 if(!teamId) return null;
                 var teamFixtures=seasonFixtures.filter(function(fx){
-                  return (fx.participants||[]).some(function(p){return p.id===teamId;});
+                  return smIsPlayed(fx) && (fx.participants||[]).some(function(p){return p.id===teamId;});
                 });
                 if(!teamFixtures.length) return null;
                 teamFixtures.sort(function(a,b){ return new Date(b.starting_at)-new Date(a.starting_at); });
@@ -2660,7 +2663,7 @@ jobs:
                 var matched=smBestMatch(teamName,uniqueNames);
                 if(!matched) return null;
                 var teamFixtures=fixtures.filter(function(fx){
-                  return (fx.participants||[]).some(function(p){return p.name===matched;});
+                  return smIsPlayed(fx) && (fx.participants||[]).some(function(p){return p.name===matched;});
                 });
                 teamFixtures.sort(function(a,b){ return new Date(b.starting_at)-new Date(a.starting_at); });
                 teamFixtures=teamFixtures.slice(0,limit);
@@ -2930,7 +2933,7 @@ jobs:
                     if(matchedHomeH2H && matchedAwayH2H){
                       var h2hFixtures=seasonFixturesForH2H.filter(function(fx){
                         var names=(fx.participants||[]).map(function(p){return p.name;});
-                        return names.indexOf(matchedHomeH2H)!==-1 && names.indexOf(matchedAwayH2H)!==-1;
+                        return smIsPlayed(fx) && names.indexOf(matchedHomeH2H)!==-1 && names.indexOf(matchedAwayH2H)!==-1;
                       });
                       h2hFixtures.sort(function(a,b){ return new Date(b.starting_at)-new Date(a.starting_at); });
                       h2hFormatted=h2hFixtures.slice(0,5).map(function(fx){

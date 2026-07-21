@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>IASHARK PRO</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <style>
 :root{
   --bg:#080c12;--card:#0d1520;--card2:#0f1a28;
@@ -21,18 +22,27 @@ body{background:#080c12;color:var(--text);font-family:'DM Sans',sans-serif;min-h
 .logo{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:3px;color:var(--text);text-decoration:none;}
 .logo span{color:var(--cyan);}
 .pro-pill{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:2px;padding:4px 12px;border-radius:20px;background:rgba(245,158,11,0.1);border:1px solid var(--ba);color:var(--amber);}
-.login-gate{max-width:400px;margin:80px auto;padding:0 20px;}
-.login-card{background:var(--card);border:1px solid var(--ba);border-radius:16px;padding:32px;}
-.login-shark{font-size:52px;text-align:center;margin-bottom:16px;}
-.login-title{font-family:'Bebas Neue',sans-serif;font-size:30px;letter-spacing:2px;text-align:center;margin-bottom:6px;}
-.login-title span{color:var(--amber);}
-.login-sub{font-size:13px;color:var(--muted);text-align:center;margin-bottom:24px;line-height:1.6;}
-.login-input{width:100%;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:10px;padding:12px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;margin-bottom:10px;outline:none;transition:.2s;}
-.login-input:focus{border-color:var(--amber);}
-.login-btn{width:100%;padding:13px;border-radius:10px;border:1px solid var(--ba);background:rgba(245,158,11,0.1);color:var(--amber);font-family:'Space Mono',monospace;font-size:10px;letter-spacing:2px;cursor:pointer;transition:.2s;}
-.login-btn:hover{background:rgba(245,158,11,0.2);}
-.login-hint{font-size:11px;color:var(--muted);text-align:center;margin-top:12px;}
 .main{max-width:920px;margin:0 auto;padding:24px 20px;}
+.pro-wall{position:relative;border-radius:14px;}
+.pro-wall.locked{max-height:460px;overflow:hidden;}
+.pro-wall.locked .pro-wall-inner{filter:blur(5px);pointer-events:none;user-select:none;opacity:.22;}
+.pro-wall-overlay{position:absolute;inset:0;display:none;flex-direction:column;z-index:10;background:linear-gradient(180deg,rgba(8,12,18,0.05) 0%,rgba(8,12,18,0.92) 28%,rgba(8,12,18,0.99) 50%);}
+.pro-wall.locked .pro-wall-overlay{display:flex;}
+.pw-top{background:rgba(255,255,255,0.015);border-bottom:1px solid rgba(255,255,255,0.04);padding:12px 18px;display:flex;align-items:center;justify-content:space-between;}
+.pw-top-lbl{font-family:'Space Mono',monospace;font-size:8px;color:var(--amber);letter-spacing:3px;}
+.pw-body{padding:18px 18px 0;}
+.pw-title{font-family:'Bebas Neue',sans-serif;font-size:26px;color:#f1f5f9;letter-spacing:2px;margin-bottom:4px;}
+.pw-title span{color:var(--amber);}
+.pw-sub{font-size:11px;color:rgba(148,163,184,0.55);line-height:1.5;margin-bottom:14px;}
+.pw-feats{display:flex;flex-direction:column;}
+.pw-feat{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.03);gap:10px;}
+.pw-feat:last-child{border-bottom:none;}
+.pw-feat-l{display:flex;align-items:flex-start;gap:8px;flex:1;}
+.pw-feat-name{font-family:'Space Mono',monospace;font-size:9px;color:var(--amber);letter-spacing:1px;margin-bottom:2px;font-weight:700;}
+.pw-feat-desc{font-size:10px;color:rgba(148,163,184,0.45);line-height:1.4;}
+.pw-badge{font-family:'Space Mono',monospace;font-size:6px;letter-spacing:1px;padding:2px 6px;border-radius:3px;white-space:nowrap;flex-shrink:0;background:rgba(245,158,11,0.06);color:rgba(245,158,11,0.5);border:1px solid rgba(245,158,11,0.12);}
+.pw-cta-wrap{padding:14px 18px 18px;}
+.pw-cta{width:100%;background:var(--amber);color:#1a1200;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:2px;font-weight:700;padding:13px;border:none;border-radius:9px;cursor:pointer;text-align:center;display:block;text-decoration:none;}
 .pro-hero{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;padding:20px 24px;background:rgba(245,158,11,0.04);border:1px solid var(--ba);border-radius:16px;flex-wrap:wrap;gap:14px;}
 .pro-hero h1{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:2px;margin-bottom:4px;}
 .pro-hero h1 span{color:var(--amber);}
@@ -168,21 +178,7 @@ body{background:#080c12;color:var(--text);font-family:'DM Sans',sans-serif;min-h
   <div class="pro-pill">⭐ PRO</div>
 </header>
 
-<div id="loginGate">
-  <div class="login-gate">
-    <div class="login-card">
-      <div class="login-shark">🦈</div>
-      <div class="login-title">Espace <span>PRO</span></div>
-      <div class="login-sub">Accès réservé aux membres Pro. Connecte-toi avec ton compte IASHARK.</div>
-      <input type="email" class="login-input" id="loginEmail" placeholder="Email">
-      <input type="password" class="login-input" id="loginPwd" placeholder="Mot de passe">
-      <button class="login-btn" onclick="doLogin()">ACCÉDER À L'ESPACE PRO →</button>
-      <div class="login-hint">Démo — entre n'importe quel email + mot de passe</div>
-    </div>
-  </div>
-</div>
-
-<div id="proContent" style="display:none">
+<div id="proContent">
 <div class="main">
 
   <div class="pro-hero">
@@ -204,37 +200,55 @@ body{background:#080c12;color:var(--text);font-family:'DM Sans',sans-serif;min-h
     <button class="tab-btn" onclick="switchTab('suivi',this)">📊 MON SUIVI</button>
   </div>
 
-  <!-- SÉLECTIONS -->
-  <div id="tab-selections" class="tab-section active">
-    <div class="sel-toolbar">
-      <span class="lock-badge">🔒 CONF ≥ 7.0</span>
-      <select class="fsel" id="filterMkt" onchange="renderSelections()">
-        <option value="">Tous les marchés</option>
-        <option value="over25">Plus de 2,5 buts</option>
-        <option value="under25">Moins de 2,5 buts</option>
-        <option value="btts_oui">Les deux équipes marquent</option>
-        <option value="btts_non">Une équipe ne marque pas</option>
-        <option value="dc1x">DC 1X</option>
-        <option value="dc_x2">DC X2</option>
-      </select>
-      <select class="fsel" id="sortSel" onchange="renderSelections()">
-        <option value="conf">Trier : confiance</option>
-        <option value="cote">Trier : cote</option>
-        <option value="date">Trier : date</option>
-      </select>
-      <span class="sel-count" id="selCount"></span>
-    </div>
-    <div id="selList"><div class="loading">CHARGEMENT...</div></div>
-  </div>
+  <div class="pro-wall locked" id="proWall">
+    <div class="pro-wall-inner" id="proWallInner">
 
-  <!-- MON SUIVI (fusion Tracker + Carnet) -->
-  <div id="tab-suivi" class="tab-section">
-    <div class="tstats" id="tstats"></div>
-    <div class="sync-bar">
-      <button class="sync-btn" id="syncBtn" onclick="runSync()">🔄 SYNCHRONISER</button>
-      <div class="sync-status" id="syncStatus">Les paris suivis depuis Sélections se résolvent automatiquement.</div>
+      <!-- SÉLECTIONS -->
+      <div id="tab-selections" class="tab-section active">
+        <div class="sel-toolbar">
+          <span class="lock-badge">🔒 CONF ≥ 7.0</span>
+          <select class="fsel" id="filterMkt" onchange="renderSelections()">
+            <option value="">Tous les marchés</option>
+            <option value="over25">Plus de 2,5 buts</option>
+            <option value="under25">Moins de 2,5 buts</option>
+            <option value="btts_oui">Les deux équipes marquent</option>
+            <option value="btts_non">Une équipe ne marque pas</option>
+            <option value="dc1x">DC 1X</option>
+            <option value="dc_x2">DC X2</option>
+          </select>
+          <select class="fsel" id="sortSel" onchange="renderSelections()">
+            <option value="conf">Trier : confiance</option>
+            <option value="cote">Trier : cote</option>
+            <option value="date">Trier : date</option>
+          </select>
+          <span class="sel-count" id="selCount"></span>
+        </div>
+        <div id="selList"><div class="loading">CHARGEMENT...</div></div>
+      </div>
+
+      <!-- MON SUIVI (fusion Tracker + Carnet) -->
+      <div id="tab-suivi" class="tab-section">
+        <div class="tstats" id="tstats"></div>
+        <div class="sync-bar">
+          <button class="sync-btn" id="syncBtn" onclick="runSync()">🔄 SYNCHRONISER</button>
+          <div class="sync-status" id="syncStatus">Les paris suivis depuis Sélections se résolvent automatiquement.</div>
+        </div>
+        <div id="betsList"></div>
+      </div>
+
     </div>
-    <div id="betsList"></div>
+    <div class="pro-wall-overlay">
+      <div class="pw-top"><span class="pw-top-lbl">CONTENU PRO</span></div>
+      <div class="pw-body">
+        <div class="pw-title">Accès <span>complet</span></div>
+        <div class="pw-sub">Sélections à forte confiance, suivi automatique de tes paris, vérification de cote en un clic.</div>
+        <div class="pw-feats">
+          <div class="pw-feat"><div class="pw-feat-l"><div><div class="pw-feat-name">SÉLECTIONS CONF ≥ 7.0</div><div class="pw-feat-desc">Les pronostics à plus forte confiance de l'IA</div></div></div><span class="pw-badge">PRO</span></div>
+          <div class="pw-feat"><div class="pw-feat-l"><div><div class="pw-feat-name">SUIVI AUTOMATIQUE</div><div class="pw-feat-desc">Tracker de paris et résolution automatique</div></div></div><span class="pw-badge">PRO</span></div>
+        </div>
+      </div>
+      <div class="pw-cta-wrap"><a class="pw-cta" href="/compte.html">PASSER PRO →</a></div>
+    </div>
   </div>
 
 </div>
@@ -326,15 +340,28 @@ function getProbIA(m){
   return probIA;
 }
 
-function doLogin(){
-  var e=document.getElementById('loginEmail').value.trim();
-  var p=document.getElementById('loginPwd').value.trim();
-  if(!e||!p){alert('Remplis les deux champs.');return;}
-  document.getElementById('loginGate').style.display='none';
-  document.getElementById('proContent').style.display='block';
+var SUPA_URL = 'https://ksvjraqitxouwiabecai.supabase.co';
+var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtzdmpyYXFpdHhvdXdpYWJlY2FpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3ODcwMjMsImV4cCI6MjA4ODM2MzAyM30.Eh3qk4tATM40hoYxdErAllLEo1y8KNt4BSCET_fAgT8';
+var sb = supabase.createClient(SUPA_URL, SUPA_KEY);
+var currentUser = null;
+
+function unlockProWall(){
+  document.getElementById('proWall').classList.remove('locked');
   document.getElementById('fabBtn').style.display='flex';
-  loadAll();
 }
+
+async function checkProAccess(){
+  try{
+    var res = await sb.auth.getSession();
+    if(!res.data || !res.data.session) return;
+    currentUser = res.data.session.user;
+    var ures = await sb.from('users').select('plan').eq('id', currentUser.id).maybeSingle();
+    var plan = ures.data && ures.data.plan ? ures.data.plan : 'free';
+    if(plan === 'pro') unlockProWall();
+  }catch(e){}
+}
+loadAll();
+checkProAccess();
 
 async function loadAll(){
   loadLocalData();

@@ -124,7 +124,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
     <div class="sport-toggle" id="sportToggle">
       <button class="sp-btn active" id="spAll" onclick="setStatSport('all')">🌐 TOUS</button>
       <button class="sp-btn" id="spFootball" onclick="setStatSport('football')">⚽ FOOTBALL</button>
-      <button class="sp-btn pro-btn" id="spPro" onclick="setStatSport('pro')">⭐ PRO</button>
+      <button class="sp-btn pro-btn" id="spPro" onclick="setStatSport('pro')">⭐ OUTILS</button>
     </div>
 
     <div class="stats-merged">
@@ -200,7 +200,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
   </a>
   <a href="/pro.html" class="nav-item">
     <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.9 6.6L22 9.3l-5 4.9L18.2 22 12 18.3 5.8 22 7 14.2 2 9.3l7.1-.7z"/></svg></div>
-    <div class="nav-lbl">PRO</div>
+    <div class="nav-lbl">OUTILS</div>
   </a>
   <a href="/blog/" class="nav-item">
     <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg></div>
@@ -328,7 +328,7 @@ function renderPredictions(){
     if(p.result==='no_signal')return'';
     var ml=MARKET_LABELS[p.market]||p.prediction_fr||p.prediction||'';
     var coteStr=p.cote&&p.result!=='neutral'?parseFloat(p.cote).toFixed(2):'';
-    var proTag=isPro(p)?'<span class="pred-tag tag-pro">⭐ PRO</span>':'';
+    var proTag=isPro(p)?'<span class="pred-tag tag-pro">⭐ OUTILS</span>':'';
     return'<div class="pred-card '+p.result+'">'
       +'<div>'
       +'<div class="pred-match">'+p.match+'</div>'

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>IASHARK PRO</title>
+<title>IASHARK OUTILS</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <style>
@@ -22,6 +22,8 @@ body{background:#080c12;color:var(--text);font-family:'DM Sans',sans-serif;min-h
 .logo{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:3px;color:var(--text);text-decoration:none;}
 .logo span{color:var(--cyan);}
 .pro-pill{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:2px;padding:4px 12px;border-radius:20px;background:rgba(245,158,11,0.1);border:1px solid var(--ba);color:var(--amber);}
+.btn-login{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1px;padding:6px 14px;border-radius:8px;border:1px solid rgba(34,211,238,0.3);background:rgba(34,211,238,0.06);color:var(--cyan);cursor:pointer;transition:.2s;text-decoration:none;display:inline-flex;align-items:center;}
+.btn-login:hover{background:rgba(34,211,238,0.12);}
 .main{max-width:920px;margin:0 auto;padding:24px 20px;}
 .pro-wall{position:relative;border-radius:14px;}
 .pro-wall.locked{max-height:460px;overflow:hidden;}
@@ -175,7 +177,7 @@ body{background:#080c12;color:var(--text);font-family:'DM Sans',sans-serif;min-h
 
 <header class="hdr">
   <a href="/" class="logo"><span>IA</span>SHARK</a>
-  <div class="pro-pill">⭐ PRO</div>
+  <a href="/compte.html" class="btn-login">CONNEXION</a>
 </header>
 
 <div id="proContent">
@@ -183,7 +185,7 @@ body{background:#080c12;color:var(--text);font-family:'DM Sans',sans-serif;min-h
 
   <div class="pro-hero">
     <div>
-      <h1>Espace <span>PRO</span></h1>
+      <h1>Espace <span>OUTILS</span></h1>
       <p>Sélections conf ≥ 7.0 · Suivi automatique · Vérification de cote</p>
     </div>
     <div class="hero-stats">
@@ -238,13 +240,13 @@ body{background:#080c12;color:var(--text);font-family:'DM Sans',sans-serif;min-h
 
     </div>
     <div class="pro-wall-overlay">
-      <div class="pw-top"><span class="pw-top-lbl">CONTENU PRO</span></div>
+      <div class="pw-top"><span class="pw-top-lbl">CONTENU OUTILS</span></div>
       <div class="pw-body">
         <div class="pw-title">Accès <span>complet</span></div>
         <div class="pw-sub">Sélections à forte confiance, suivi automatique de tes paris, vérification de cote en un clic.</div>
         <div class="pw-feats">
-          <div class="pw-feat"><div class="pw-feat-l"><div><div class="pw-feat-name">SÉLECTIONS CONF ≥ 7.0</div><div class="pw-feat-desc">Les pronostics à plus forte confiance de l'IA</div></div></div><span class="pw-badge">PRO</span></div>
-          <div class="pw-feat"><div class="pw-feat-l"><div><div class="pw-feat-name">SUIVI AUTOMATIQUE</div><div class="pw-feat-desc">Tracker de paris et résolution automatique</div></div></div><span class="pw-badge">PRO</span></div>
+          <div class="pw-feat"><div class="pw-feat-l"><div><div class="pw-feat-name">SÉLECTIONS CONF ≥ 7.0</div><div class="pw-feat-desc">Les pronostics à plus forte confiance de l'IA</div></div></div><span class="pw-badge">OUTILS</span></div>
+          <div class="pw-feat"><div class="pw-feat-l"><div><div class="pw-feat-name">SUIVI AUTOMATIQUE</div><div class="pw-feat-desc">Tracker de paris et résolution automatique</div></div></div><span class="pw-badge">OUTILS</span></div>
         </div>
       </div>
       <div class="pw-cta-wrap"><a class="pw-cta" href="/compte.html">PASSER PRO →</a></div>
@@ -282,7 +284,7 @@ body{background:#080c12;color:var(--text);font-family:'DM Sans',sans-serif;min-h
   </a>
   <a href="/pro.html" class="nav-item active">
     <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.9 6.6L22 9.3l-5 4.9L18.2 22 12 18.3 5.8 22 7 14.2 2 9.3l7.1-.7z"/></svg></div>
-    <div class="nav-lbl">PRO</div>
+    <div class="nav-lbl">OUTILS</div>
   </a>
   <a href="/blog/" class="nav-item">
     <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg></div>

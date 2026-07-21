@@ -137,7 +137,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
     <div class="auth-card">
       <div class="auth-shark">🦈</div>
       <div class="auth-title">Mon <span>Compte</span></div>
-      <div class="auth-sub">Accède à tes sélections Pro, ton tracker et tes statistiques personnalisées.</div>
+      <div class="auth-sub">Accède à tes sélections Outils, ton tracker et tes statistiques personnalisées.</div>
 
       <div class="auth-tabs">
         <button class="auth-tab active" id="tabLoginBtn" onclick="switchAuthTab('login')">CONNEXION</button>
@@ -195,7 +195,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
         <div class="dash-card-val"><a href="/historique.html" style="color:var(--cyan);">VOIR →</a></div>
       </div>
       <div class="dash-card">
-        <div class="dash-card-title">ESPACE PRO</div>
+        <div class="dash-card-title">ESPACE OUTILS</div>
         <div class="dash-card-val"><a href="/pro.html" style="color:var(--amber);">ACCÈS →</a></div>
       </div>
     </div>
@@ -212,7 +212,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
         <div class="pro-feature"><span class="ck">＋</span> Historique complet et détaillé</div>
         <div class="pro-feature"><span class="ck">＋</span> Analyses approfondies par match</div>
       </div>
-      <a href="/pro.html" class="btn-amber" id="planCta">DÉCOUVRIR PRO →</a>
+      <a href="/pro.html" class="btn-amber" id="planCta">DÉCOUVRIR OUTILS →</a>
     </div>
 
     <!-- CAPITAL DE PARIS -->
@@ -289,7 +289,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
   </a>
   <a href="/pro.html" class="nav-item">
     <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.9 6.6L22 9.3l-5 4.9L18.2 22 12 18.3 5.8 22 7 14.2 2 9.3l7.1-.7z"/></svg></div>
-    <div class="nav-lbl">PRO</div>
+    <div class="nav-lbl">OUTILS</div>
   </a>
   <a href="/blog/" class="nav-item">
     <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg></div>
@@ -500,17 +500,17 @@ function showDashboard(user) {
     var plan = res.data&&res.data.plan ? res.data.plan : 'free';
     var isPro = plan==='pro';
 
-    document.getElementById('planBadge').textContent = isPro?'PRO':'GRATUIT';
+    document.getElementById('planBadge').textContent = isPro?'OUTILS':'GRATUIT';
     document.getElementById('planBadge').className = 'ubadge '+(isPro?'pro':'free');
 
-    document.getElementById('planStatusTxt').textContent = isPro?'Plan Pro':'Plan Gratuit';
+    document.getElementById('planStatusTxt').textContent = isPro?'Plan Outils':'Plan Gratuit';
     document.getElementById('planStatusTxt').className = 'plan-status '+(isPro?'pro':'free');
 
     if(isPro){
-      document.getElementById('planDescTxt').textContent = 'Ton abonnement Pro est actif — tu as accès à toutes les sélections à forte confiance.';
+      document.getElementById('planDescTxt').textContent = 'Ton abonnement Outils est actif — tu as accès à toutes les sélections à forte confiance.';
       document.getElementById('planFeaturesBlock').style.display = 'none';
       var cta = document.getElementById('planCta');
-      cta.textContent = 'VOIR MON ESPACE PRO →';
+      cta.textContent = 'VOIR MON ESPACE OUTILS →';
       cta.href = '/pro.html';
     }
 

@@ -1643,7 +1643,8 @@ function render(m){
   function getFlag(name){return FLAG_MAP[name]||'';}
   var stadeHtml='';
   if(m.stade&&m.stade.nom){
-    stadeHtml='<div class="stade-row"><span class="stade-icon">🏟</span><span class="stade-name">'+esc(m.stade.nom)+'</span>'+(m.stade.temp?'<span class="stade-meta">'+esc(m.stade.temp)+'</span>':'')+'</div>';
+    var meteoMeta=[m.stade.meteo,m.stade.temp].filter(Boolean).map(esc).join(' ');
+    stadeHtml='<div class="stade-row"><span class="stade-icon">🏟</span><span class="stade-name">'+esc(m.stade.nom)+'</span>'+(meteoMeta?'<span class="stade-meta">'+meteoMeta+'</span>':'')+'</div>';
   }
   function teamRank(team,name){
     if(!m.classement||!m.classement.standings||!m.classement.standings.length)return null;
@@ -1702,13 +1703,6 @@ function render(m){
     ?'<div style="padding:0 18px 16px"><div class="skip danger"><div class="skip-icon">🚨</div><div><div class="skip-lbl">PASSE TON TOUR</div><div class="skip-txt">'+(m.no_signal_label||'Signaux contradictoires. <strong>Ne pas jouer.</strong>')+'</div></div></div></div>'
     :'';
 
-  var meteoHtml=(m.stade&&(m.stade.desc||m.stade.temp))
-    ?'<div style="padding:0 18px 16px;color:#94a3b8;font-size:12px;">'+(m.stade.meteo||'')+' Conditions à la rencontre : '+esc(m.stade.desc||'')+(m.stade.temp?', '+esc(m.stade.temp):'')+'.</div>'
-    :'';
-  var absentsHtml=!isTennis?buildAbsentsTable(m.injuries,m.home&&m.home.id,hn,an):'';
-  var arbitreHtml=!isTennis?buildArbitre(m.arbitre):'';
-  var tabApercu=skipHtml+absentsHtml+meteoHtml+arbitreHtml;
-
   var tabAnalyseEquipe=
     (!isTennis?buildDonut(hn,an,m.p1||0,m.pn||0,m.p2||0):'')
     +(!isTennis?buildMarketsTable(m,pariRec):'')
@@ -1737,7 +1731,8 @@ function render(m){
     +'<div id="analyse-sub-joueur" class="analyse-sub-panel" style="display:none;">'+(tabAnalyseJoueur||'<div style="padding:40px 20px;text-align:center;color:var(--muted);font-family:Space Mono,monospace;font-size:9px;">PAS DE DONNÉES JOUEUR POUR CE MATCH</div>')+'</div>';
 
   var tabCriteres=
-    buildPourquoiCePari(m,pariRec,paricote)
+    skipHtml
+    +buildPourquoiCePari(m,pariRec,paricote)
     +(isTennis?buildTennisH2H(hn,an,m.h2h_tennis):'')
     +(!isTennis&&!isWC?buildElo(hn,an,m.elo_home,m.elo_away,m.elo_signal):'')
     +(!isTennis?buildDropping(m.dropping_odds):'')
@@ -1746,20 +1741,17 @@ function render(m){
   var tabFAQ=buildFAQ(m,hn,an,pariRec,paricote);
 
   function trimSep(html){return html.replace(/<div class="sep"><\/div>\s*$/,'');}
-  tabApercu=trimSep(tabApercu);
   tabAnalyse=trimSep(tabAnalyse);
   tabCriteres=trimSep(tabCriteres);
   tabFAQ=trimSep(tabFAQ);
 
   var tabsNav='<div class="tabbar">'
-    +'<button class="tab-btn active" data-tab="apercu" onclick="switchTab(this,\'apercu\')">VUE D\'ENSEMBLE</button>'
-    +'<button class="tab-btn" data-tab="analyse" onclick="switchTab(this,\'analyse\')">ANALYSE</button>'
+    +'<button class="tab-btn active" data-tab="analyse" onclick="switchTab(this,\'analyse\')">ANALYSE</button>'
     +'<button class="tab-btn" data-tab="criteres" onclick="switchTab(this,\'criteres\')">DÉCISION</button>'
     +'<button class="tab-btn" data-tab="savoir" onclick="switchTab(this,\'savoir\')">EN SAVOIR +</button>'
     +'</div>';
 
-  var tabsContent='<div id="tab-apercu" class="tab-panel active">'+tabApercu+'</div>'
-    +'<div id="tab-analyse" class="tab-panel">'+tabAnalyse+'</div>'
+  var tabsContent='<div id="tab-analyse" class="tab-panel active">'+tabAnalyse+'</div>'
     +'<div id="tab-criteres" class="tab-panel">'+tabCriteres+'</div>'
     +'<div id="tab-savoir" class="tab-panel">'+tabFAQ+'</div>';
 

@@ -711,13 +711,23 @@ jobs:
             var r = await get('https://v3.football.api-sports.io/fixtures?h2h='+homeId+'-'+awayId+'&last=8', APS);
             return r.response||[];
           }
-          async function getWeather(city) {
+          async function getWeather(city, matchDateISO) {
             if(!city||!city.trim()||!OWM_KEY) return null;
-            var r = await get('https://api.openweathermap.org/data/2.5/weather?q='+encodeURIComponent(city)+'&appid='+OWM_KEY+'&units=metric&lang=fr',{});
-            if(!r||!r.main) return null;
-            var icon=(r.weather&&r.weather[0]&&r.weather[0].main)||'';
+            var targetTs = matchDateISO ? (new Date(matchDateISO).getTime()/1000) : null;
+            var r = await get('https://api.openweathermap.org/data/2.5/forecast?q='+encodeURIComponent(city)+'&appid='+OWM_KEY+'&units=metric&lang=fr',{});
+            if(!r||!r.list||!r.list.length) return null;
+            var slot = r.list[0];
+            if(targetTs){
+              var bestDiff=Infinity;
+              r.list.forEach(function(item){
+                var diff=Math.abs(item.dt-targetTs);
+                if(diff<bestDiff){bestDiff=diff;slot=item;}
+              });
+            }
+            if(!slot||!slot.main) return null;
+            var icon=(slot.weather&&slot.weather[0]&&slot.weather[0].main)||'';
             var emoji='';
-            return {emoji,temp:Math.round(r.main.temp)+'C',desc:(r.weather&&r.weather[0]&&r.weather[0].description)||'',wind:Math.round((r.wind&&r.wind.speed)||0)+' km/h'};
+            return {emoji,temp:Math.round(slot.main.temp)+'C',desc:(slot.weather&&slot.weather[0]&&slot.weather[0].description)||'',wind:Math.round((slot.wind&&slot.wind.speed)||0)+' km/h'};
           }
           async function getNews(team) {
             if(!NEWS_KEY) return [];
@@ -1903,7 +1913,7 @@ jobs:
               var rkA=entryA?entryA.rank:null;
               var batch1=await Promise.all([getTeamStats(home.id,lg.id),getTeamStats(away.id,lg.id),getLast10(home.id),getLast10(away.id)]);
               await sleep(400);
-              var batch2=await Promise.all([getOdds(f.id),getInjuries(f.id),getH2H(home.id,away.id),getWeather(f.venue&&f.venue.city?f.venue.city:''),getNews(home.name),getNews(away.name),getPredictions(f.id),getLineups(f.id),getRefereeStats(f.referee||null),getPinnacleOdds(home.name,away.name,lgKey(lg.id))]);
+              var batch2=await Promise.all([getOdds(f.id),getInjuries(f.id),getH2H(home.id,away.id),getWeather(f.venue&&f.venue.city?f.venue.city:'',f.date),getNews(home.name),getNews(away.name),getPredictions(f.id),getLineups(f.id),getRefereeStats(f.referee||null),getPinnacleOdds(home.name,away.name,lgKey(lg.id))]);
               await sleep(400);
               var sH=batch1[0],sA=batch1[1],raw10H=batch1[2],raw10A=batch1[3];
               var isSmallLeagueEngine=!!SMALL_LEAGUE_KEYS_SPORTMONKS[lgKey(lg.id)];

@@ -34,6 +34,10 @@ body::before{content:'';position:fixed;top:-300px;left:50%;transform:translateX(
 .hp-title b{color:var(--cyan);}
 .hp-sub{position:relative;z-index:1;font-size:13.5px;color:#94a3b8;line-height:1.6;margin:0 auto 20px;max-width:420px;}
 .hp-sub b{color:var(--text);font-weight:600;}
+.hp-stats{position:relative;z-index:1;display:flex;justify-content:center;gap:26px;margin-bottom:22px;flex-wrap:wrap;}
+.hp-stat{text-align:center;}
+.hp-stat-val{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--cyan);}
+.hp-stat-lbl{font-family:'Space Mono',monospace;font-size:7px;color:var(--muted);letter-spacing:1px;margin-top:2px;}
 @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
 .sport-selector{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;justify-content:center;position:relative;z-index:1;}
@@ -203,6 +207,11 @@ body::before{content:'';position:fixed;top:-300px;left:50%;transform:translateX(
   <div class="hp-shark-big">🦈</div>
   <h1 class="hp-title">Aucune émotion.<br><b>Que des probabilités.</b></h1>
   <p class="hp-sub">Chaque match est passé au crible à partir de vraies données : <b>buts attendus (xG), forme récente, fatigue du calendrier, face-à-face.</b> Pas de feeling, que du calcul.</p>
+  <div class="hp-stats" id="hpStats" style="display:none;">
+    <div class="hp-stat"><div class="hp-stat-val" id="hpWinrate">—</div><div class="hp-stat-lbl">RÉUSSITE</div></div>
+    <div class="hp-stat"><div class="hp-stat-val" id="hpRoi">—</div><div class="hp-stat-lbl">ROI</div></div>
+    <div class="hp-stat"><div class="hp-stat-val" id="hpTotal">—</div><div class="hp-stat-lbl">PARIS SUIVIS</div></div>
+  </div>
   <div class="sport-selector">
     <button class="sport-btn active-foot" id="btnFoot" onclick="setSport('football')">
       <span class="sport-icon">⚽</span> FOOTBALL
@@ -578,8 +587,25 @@ async function loadData(){
   }
 }
 
+async function loadRealStats(){
+  try{
+    var r=await fetch('historique.json?t='+Date.now());
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    var d=await r.json();
+    var s=d.stats;
+    if(!s||!s.total)return;
+    document.getElementById('hpWinrate').textContent=s.winrate+'%';
+    document.getElementById('hpRoi').textContent=(s.roi>=0?'+':'')+s.roi+'%';
+    document.getElementById('hpTotal').textContent=s.total;
+    document.getElementById('hpStats').style.display='flex';
+  }catch(e){
+    console.error(e);
+  }
+}
+
 setupFilters();
 loadData();
+loadRealStats();
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="/auth-header.js"></script>

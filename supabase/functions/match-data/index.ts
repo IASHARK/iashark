@@ -32,10 +32,10 @@ Deno.serve(async (req: Request) => {
       if (userData?.user) {
         const { data: row } = await supabase
           .from("users")
-          .select("plan")
+          .select("plan,role")
           .eq("id", userData.user.id)
           .maybeSingle();
-        isPro = row?.plan === "pro";
+        isPro = row?.plan === "pro" || row?.role === "admin";
       }
     } catch (_e) {
       isPro = false;

@@ -17,16 +17,17 @@
     return local.length > 14 ? local.slice(0,14)+'…' : local;
   }
 
-  function chipLabel(email, plan){
-    return truncateEmail(email)+' · '+(plan==='pro'?'OUTILS':'GRATUIT');
+  function chipLabel(email, plan, role){
+    var tag = role==='admin' ? 'ADMIN' : (plan==='pro' ? 'OUTILS' : 'GRATUIT');
+    return truncateEmail(email)+' · '+tag;
   }
 
   function loggedOutHtml(){
     return '<button type="button" class="btn-login" id="quickLoginBtn" onclick="IasharkAuthHeader.togglePopover()">CONNEXION</button>';
   }
 
-  function loggedInHtml(email, plan){
-    return '<a href="/compte.html" class="btn-login">'+chipLabel(email, plan)+'</a>';
+  function loggedInHtml(email, plan, role){
+    return '<a href="/compte.html" class="btn-login">'+chipLabel(email, plan, role)+'</a>';
   }
 
   var POPOVER_CSS = '.iashark-login-pop{position:fixed;top:60px;right:16px;z-index:300;background:#0d1520;'
@@ -130,9 +131,10 @@
       var sessRes = await sb.auth.getSession();
       var session = sessRes.data && sessRes.data.session;
       if(!session){ el.innerHTML = loggedOutHtml(); return; }
-      var ures = await sb.from('users').select('plan').eq('id', session.user.id).maybeSingle();
+      var ures = await sb.from('users').select('plan,role').eq('id', session.user.id).maybeSingle();
       var plan = ures.data && ures.data.plan ? ures.data.plan : 'free';
-      el.innerHTML = loggedInHtml(session.user.email, plan);
+      var role = ures.data && ures.data.role;
+      el.innerHTML = loggedInHtml(session.user.email, plan, role);
       sb.auth.onAuthStateChange(function(event, newSession){
         if(!newSession){ el.innerHTML = loggedOutHtml(); }
       });

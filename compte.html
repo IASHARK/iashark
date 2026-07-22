@@ -4,10 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>IASHARK — Mon Compte</title>
+<meta name="robots" content="noindex, nofollow">
 <meta name="description" content="Gère ton compte, ton abonnement Outils et tes préférences IASHARK.">
 <meta property="og:title" content="IASHARK — Mon Compte">
 <meta property="og:description" content="Gère ton compte, ton abonnement Outils et tes préférences IASHARK.">
 <meta property="og:type" content="website">
+<link rel="canonical" href="https://iashark.com/compte.html">
 <meta property="og:url" content="https://iashark.com/compte.html">
 <meta property="og:image" content="https://iashark.com/icon-512.png">
 <meta name="twitter:card" content="summary_large_image">
@@ -462,17 +464,18 @@ function showDashboard(user) {
     document.getElementById('sinceBadge').textContent = 'MEMBRE DEPUIS '+mois[d.getMonth()]+' '+d.getFullYear();
   }
 
-  sb.from('users').select('plan').eq('id',user.id).maybeSingle().then(function(res){
+  sb.from('users').select('plan,role').eq('id',user.id).maybeSingle().then(function(res){
     var plan = res.data&&res.data.plan ? res.data.plan : 'free';
-    var isPro = plan==='pro';
+    var role = res.data&&res.data.role;
+    var isPro = plan==='pro' || role==='admin';
 
-    document.getElementById('planBadge').textContent = isPro?'OUTILS':'GRATUIT';
+    document.getElementById('planBadge').textContent = role==='admin'?'ADMIN':(isPro?'OUTILS':'GRATUIT');
     document.getElementById('planBadge').className = 'ubadge '+(isPro?'pro':'free');
 
-    document.getElementById('planStatusTxt').textContent = isPro?'Plan Outils':'Plan Gratuit';
+    document.getElementById('planStatusTxt').textContent = role==='admin'?'Administrateur':(isPro?'Plan Outils':'Plan Gratuit');
     document.getElementById('planStatusTxt').className = 'plan-status '+(isPro?'pro':'free');
 
-    document.getElementById('hdrPill').textContent = IasharkAuthHeader.chipLabel(user.email, plan);
+    document.getElementById('hdrPill').textContent = IasharkAuthHeader.chipLabel(user.email, plan, role);
 
     if(isPro){
       document.getElementById('planDescTxt').textContent = 'Ton abonnement Outils est actif — tu as accès à toutes les sélections à forte confiance.';

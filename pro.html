@@ -8,6 +8,7 @@
 <meta property="og:title" content="IASHARK OUTILS">
 <meta property="og:description" content="Sélections à forte confiance, suivi automatique des paris et vérification de cote en un clic — l'espace Outils d'IASHARK.">
 <meta property="og:type" content="website">
+<link rel="canonical" href="https://iashark.com/pro.html">
 <meta property="og:url" content="https://iashark.com/pro.html">
 <meta property="og:image" content="https://iashark.com/icon-512.png">
 <meta name="twitter:card" content="summary_large_image">
@@ -403,9 +404,10 @@ async function checkProAccess(){
     var res = await sb.auth.getSession();
     if(!res.data || !res.data.session) return;
     currentUser = res.data.session.user;
-    var ures = await sb.from('users').select('plan,capital').eq('id', currentUser.id).maybeSingle();
+    var ures = await sb.from('users').select('plan,role,capital').eq('id', currentUser.id).maybeSingle();
     var plan = ures.data && ures.data.plan ? ures.data.plan : 'free';
-    if(plan === 'pro') unlockProWall();
+    var role = ures.data && ures.data.role;
+    if(plan === 'pro' || role === 'admin') unlockProWall();
     showCapital(ures.data && ures.data.capital);
   }catch(e){}
 }

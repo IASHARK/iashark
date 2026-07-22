@@ -24,6 +24,7 @@
   --wc:#f59e0b;
 }
 *{margin:0;padding:0;box-sizing:border-box;}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;}
 body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;padding-bottom:80px;}
 .hdr{position:sticky;top:0;z-index:99;background:rgba(6,10,16,0.96);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);height:50px;display:flex;align-items:center;padding:0 16px;gap:12px;}
 .hdr-back{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:1px;color:var(--muted);border:1px solid var(--border);padding:5px 10px;border-radius:6px;background:none;cursor:pointer;transition:.15s;text-decoration:none;}
@@ -553,7 +554,7 @@ function lgImg(team,ini){
   if(!team)return '';
   var url=team.logo||(team.id?'https://media.api-sports.io/football/teams/'+team.id+'.png':'');
   if(!url)return '<div class="team-logo-ph">'+ini+'</div>';
-  return '<img class="team-logo" src="'+url+'" onerror="this.outerHTML=\'<div class=team-logo-ph>'+ini+'</div>\'">';
+  return '<img class="team-logo" src="'+url+'" alt="" onerror="this.outerHTML=\'<div class=team-logo-ph>'+ini+'</div>\'">';
 }
 function fmtEdge(e){
   if(e===null||e===undefined)return '<span class="medge-zero">—</span>';
@@ -1269,7 +1270,7 @@ function buildPlayerStatCards(hn,an,scH,scA){
 
     var row='<div onclick="togglePlayerCard(\''+id+'\')" style="display:grid;grid-template-columns:24px 42px 1fr 68px;align-items:center;gap:10px;padding:11px 10px;cursor:pointer;border-radius:8px;transition:background .15s ease;'+(isTop?'background:linear-gradient(90deg,rgba(34,211,238,0.07),transparent 70%);box-shadow:inset 3px 0 0 var(--cyan);':'')+'" onmouseover="this.style.background=\'rgba(255,255,255,0.02)\'" onmouseout="this.style.background=\''+(isTop?'linear-gradient(90deg,rgba(34,211,238,0.07),transparent 70%)':'transparent')+'\'">'
       +'<div style="font-family:Space Mono,monospace;text-align:center;font-size:14px;'+(isTop?'color:var(--cyan);font-weight:700;':'color:var(--muted);')+'">'+(idx+1)+'</div>'
-      +(p.photo?'<img src="'+p.photo+'" style="width:42px;height:42px;border-radius:50%;object-fit:cover;flex-shrink:0;border:1px solid '+(isTop?'var(--cyan)':'var(--border)')+';" onerror="this.outerHTML=\'<div style=width:42px;height:42px;border-radius:50%;background:var(--card2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-family:Space Mono,monospace;font-size:11px;color:var(--muted);>'+initiales+'</div>\'">':'<div style="width:42px;height:42px;border-radius:50%;background:var(--card2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-family:Space Mono,monospace;font-size:11px;color:var(--muted);">'+initiales+'</div>')
+      +(p.photo?'<img src="'+p.photo+'" alt="" style="width:42px;height:42px;border-radius:50%;object-fit:cover;flex-shrink:0;border:1px solid '+(isTop?'var(--cyan)':'var(--border)')+';" onerror="this.outerHTML=\'<div style=width:42px;height:42px;border-radius:50%;background:var(--card2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-family:Space Mono,monospace;font-size:11px;color:var(--muted);>'+initiales+'</div>\'">':'<div style="width:42px;height:42px;border-radius:50%;background:var(--card2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-family:Space Mono,monospace;font-size:11px;color:var(--muted);">'+initiales+'</div>')
       +'<div style="min-width:0;"><div style="font-weight:600;font-size:13.5px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+esc(p.name||'')+'</div>'
       +'<div style="font-family:Space Mono,monospace;font-size:10px;color:var(--muted);margin-top:2px;display:flex;align-items:center;gap:5px;"><span style="width:5px;height:5px;border-radius:50%;background:'+(p.teamSide==='h'?'var(--cyan)':'rgba(226,232,240,0.4)')+';display:inline-block;flex-shrink:0;"></span>'+esc(p.teamName)+'</div></div>'
       +'<div style="text-align:right;"><div style="font-family:Space Mono,monospace;font-size:17px;font-weight:700;color:var(--cyan);">'+probApprox+'%</div><div style="font-family:Space Mono,monospace;font-size:8px;color:var(--muted);margin-top:1px;">proba de marquer</div></div>'
@@ -1633,6 +1634,27 @@ function buildWidgetGame(m){
     +'<api-sports-widget data-type="game" data-game-id="'+fxId+'" data-theme="iashark"></api-sports-widget>'
     +'</div></div>';
 }
+// ── SEO : canonical + OG dynamiques par match (chaque ?id= est une page distincte pour Google) ──
+function setMeta(selector,attr,value){
+  var el=document.querySelector(selector);
+  if(el) el.setAttribute(attr,value);
+}
+function updateSeoTags(hn,an,pariRec,matchId){
+  var title=hn+' vs '+an+' — Pronostic IA | IASHARK';
+  var desc='Analyse '+hn+' vs '+an+' par l\'IA IASHARK : probabilités, '+(pariRec?'pronostic '+translateMarket(pariRec)+', ':'')+'avantage statistique et confiance du modèle.';
+  var url='https://iashark.com/match.html?id='+matchId;
+  var canonical=document.querySelector('link[rel="canonical"]');
+  if(!canonical){
+    canonical=document.createElement('link');
+    canonical.rel='canonical';
+    document.head.appendChild(canonical);
+  }
+  canonical.href=url;
+  setMeta('meta[name="description"]','content',desc);
+  setMeta('meta[property="og:title"]','content',title);
+  setMeta('meta[property="og:description"]','content',desc);
+  setMeta('meta[property="og:url"]','content',url);
+}
 // ── RENDER PRINCIPAL ──────────────────────────────────────
 function render(m){
   var hn=m.home&&m.home.n||'',an=m.away&&m.away.n||'';
@@ -1659,6 +1681,7 @@ function render(m){
   var pariRec=m.pari_rec||'', paricote=m.cote_rec||'—';
 
   document.title=hn+' vs '+an+' — IASHARK';
+  updateSeoTags(hn,an,pariRec,fId);
 
   var FLAG_MAP={'France':'🇫🇷','Germany':'🇩🇪','Spain':'🇪🇸','England':'🏴󠁧󠁢󠁥󠁮󠁧󠁿','Portugal':'🇵🇹','Italy':'🇮🇹','Netherlands':'🇳🇱','Belgium':'🇧🇪','Croatia':'🇭🇷','Switzerland':'🇨🇭','Austria':'🇦🇹','Denmark':'🇩🇰','Norway':'🇳🇴','Sweden':'🇸🇪','Poland':'🇵🇱','Ukraine':'🇺🇦','Czech Republic':'🇨🇿','Scotland':'🏴󠁧󠁢󠁳󠁣󠁴󠁿','Wales':'🏴󠁧󠁢󠁷󠁬󠁳󠁿','Serbia':'🇷🇸','Slovakia':'🇸🇰','Slovenia':'🇸🇮','Romania':'🇷🇴','Hungary':'🇭🇺','Bosnia':'🇧🇦','Bosnia & Herzegovina':'🇧🇦','Albania':'🇦🇱','Greece':'🇬🇷','Turkey':'🇹🇷','Iceland':'🇮🇸','Finland':'🇫🇮','Ireland':'🇮🇪','Northern Ireland':'🇬🇧','Georgia':'🇬🇪','USA':'🇺🇸','United States':'🇺🇸','Mexico':'🇲🇽','Canada':'🇨🇦','Costa Rica':'🇨🇷','Jamaica':'🇯🇲','Panama':'🇵🇦','Honduras':'🇭🇳','Iran':'🇮🇷','South Korea':'🇰🇷','Korea Republic':'🇰🇷','Japan':'🇯🇵','Australia':'🇦🇺','Saudi Arabia':'🇸🇦','Qatar':'🇶🇦','Iraq':'🇮🇶','Uzbekistan':'🇺🇿','Jordan':'🇯🇴','Morocco':'🇲🇦','Senegal':'🇸🇳','Tunisia':'🇹🇳','Egypt':'🇪🇬','Algeria':'🇩🇿','Nigeria':'🇳🇬','Ghana':'🇬🇭','Cameroon':'🇨🇲','Ivory Coast':'🇨🇮','South Africa':'🇿🇦','Cape Verde':'🇨🇻','Brazil':'🇧🇷','Argentina':'🇦🇷','Uruguay':'🇺🇾','Colombia':'🇨🇴','Ecuador':'🇪🇨','Paraguay':'🇵🇾','Bolivia':'🇧🇴','Venezuela':'🇻🇪','Chile':'🇨🇱','Peru':'🇵🇪','New Zealand':'🇳🇿'};
   function getFlag(name){return FLAG_MAP[name]||'';}
@@ -1671,6 +1694,7 @@ function render(m){
     return '<div class="team '+side+'">'+logo+'<div class="team-name">'+name.toUpperCase()+'</div><div class="team-sub">'+(isTennis?(side==='home'?'JOUEUR 1':'JOUEUR 2'):(side==='home'?'DOMICILE':'EXTÉRIEUR'))+'</div></div>';
   }
   var teamsHtml='<div class="hero">'
+    +'<h1 class="sr-only">'+esc(hn)+' vs '+esc(an)+' — Pronostic IA IASHARK</h1>'
     +'<div class="teams">'
     +teamDisplay(m.home,hn,'home',m.forme_h||m.form_p1,isTennis)
     +'<div class="vs-col"><span class="vs">VS</span>'+(heure?'<div class="vs-hr">'+heure+'</div>':'')+'</div>'

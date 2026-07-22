@@ -630,7 +630,6 @@ jobs:
             {n:'PMU',o:'100 offerts',l:'#LIEN_PMU'},
             {n:'Bet365',o:'100 bonus',l:'#LIEN_BET365'},
           ];
-          var LANGS = {'en':'English'};
           function lgKey(lgId) { return LG_KEY[lgId]||'other'; }
           function lgIcon(l) {
             var s=(l||'').toLowerCase();
@@ -1526,37 +1525,32 @@ jobs:
             classics.push({label:labelFou,type:typeFou,selections:selected.map(function(s){return s.sel;}).join(', '),matchs:selected.map(function(s){return s.match;}).join(', '),cote_totale:coteTotale.toFixed(2),conseil:selected.length+' selections triees par edge'});
             return classics;
           }
-          function generateWorldCupPages(){
-            console.log('  Generating World Cup 2026 pages...');
-            Object.keys(LANGS).forEach(function(lang){
-              mkdirSafe(lang+'/world-cup-2026');
-              fs.writeFileSync(lang+'/world-cup-2026/index.html','<!DOCTYPE html><html lang="'+lang+'"><head><meta charset="UTF-8"><title>World Cup 2026 AI | IASHARK</title></head><body style="background:#060a0c;color:white;font-family:Arial,sans-serif;padding:40px;"><h1>2026 FIFA World Cup AI Predictions</h1><p><a href="https://iashark.com" style="color:cyan;">IASHARK</a></p></body></html>');
-            });
-            console.log('  WC pages done');
-          }
+          // Pages statiques a forte valeur SEO, en plus des matchs du jour.
+          var STATIC_SITEMAP_PAGES=[
+            {loc:'https://iashark.com/',priority:'1.0'},
+            {loc:'https://iashark.com/historique.html',priority:'0.8'},
+            {loc:'https://iashark.com/pro.html',priority:'0.8'},
+            {loc:'https://iashark.com/a-propos.html',priority:'0.6'},
+            {loc:'https://iashark.com/blog/',priority:'0.6'},
+            {loc:'https://iashark.com/blog/guides/',priority:'0.6'},
+            {loc:'https://iashark.com/blog/guides/coupe-du-monde-2026-guide-complet.html',priority:'0.6'},
+            {loc:'https://iashark.com/blog/guides/guide-paris-sportifs-debutant-complet.html',priority:'0.6'},
+            {loc:'https://iashark.com/blog/guides/meilleurs-bookmakers-monde-2026.html',priority:'0.6'},
+            {loc:'https://iashark.com/blog/guides/prediction-ia-football-guide-2026.html',priority:'0.6'},
+            {loc:'https://iashark.com/blog/guides/value-bet-guide-complet-2026.html',priority:'0.6'}
+          ];
           function generateSitemaps(matchsData){
             console.log('  Generating sitemaps...');
-            var sitemapFiles=[];
-            Object.keys(LANGS).forEach(function(lang){
-              var urls=['<url><loc>https://iashark.com/'+lang+'/</loc><lastmod>'+TODAY+'</lastmod><changefreq>daily</changefreq><priority>0.8</priority></url>'];
-              matchsData.forEach(function(m){
-                var slug=slugify(m.home.n+'-vs-'+m.away.n+'-'+m.date.split(' ')[0]);
-                urls.push('<url><loc>https://iashark.com/'+lang+'/match/'+slug+'.html</loc><lastmod>'+TODAY+'</lastmod><changefreq>daily</changefreq><priority>1.0</priority></url>');
-              });
-              var fname='sitemap-'+lang+'.xml';
-              fs.writeFileSync(fname,'<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'+urls.join('\n')+'\n</urlset>');
-              sitemapFiles.push(fname);
+            var urls=STATIC_SITEMAP_PAGES.map(function(p){
+              return '<url><loc>'+p.loc+'</loc><lastmod>'+TODAY+'</lastmod><changefreq>daily</changefreq><priority>'+p.priority+'</priority></url>';
             });
-            var urlsFr=['<url><loc>https://iashark.com/</loc><lastmod>'+TODAY+'</lastmod><changefreq>daily</changefreq><priority>1.0</priority></url>'];
-            matchsData.forEach(function(m){
-              var slug=slugify(m.home.n+'-vs-'+m.away.n+'-'+m.date.split(' ')[0]);
-              urlsFr.push('<url><loc>https://iashark.com/match/'+slug+'.html</loc><lastmod>'+TODAY+'</lastmod><changefreq>daily</changefreq><priority>0.9</priority></url>');
+            (matchsData||[]).forEach(function(m){
+              if(!m.id)return;
+              urls.push('<url><loc>https://iashark.com/match.html?id='+m.id+'</loc><lastmod>'+TODAY+'</lastmod><changefreq>daily</changefreq><priority>0.9</priority></url>');
             });
-            fs.writeFileSync('sitemap-fr.xml','<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'+urlsFr.join('\n')+'\n</urlset>');
-            sitemapFiles.push('sitemap-fr.xml');
-            var entries=sitemapFiles.map(function(f){return '<sitemap><loc>https://iashark.com/'+f+'</loc><lastmod>'+TODAY+'</lastmod></sitemap>';}).join('\n');
-            fs.writeFileSync('sitemap.xml','<?xml version="1.0" encoding="UTF-8"?>\n<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'+entries+'\n</sitemapindex>');
-            console.log('  Sitemaps done: '+sitemapFiles.length+' files');
+            fs.writeFileSync('sitemap-fr.xml','<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'+urls.join('\n')+'\n</urlset>');
+            fs.writeFileSync('sitemap.xml','<?xml version="1.0" encoding="UTF-8"?>\n<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n<sitemap><loc>https://iashark.com/sitemap-fr.xml</loc><lastmod>'+TODAY+'</lastmod></sitemap>\n</sitemapindex>');
+            console.log('  Sitemap done: '+urls.length+' urls');
           }
           async function updateHistorique(matchsData){
             console.log('\n=== HISTORIQUE UPDATE ===');
@@ -1779,7 +1773,7 @@ jobs:
             console.log('Football fixtures:', fixtures.length);
             if(!fixtures.length){
               fs.writeFileSync('data.json',JSON.stringify({matchs:[],combis:[]},null,2));
-              generateWorldCupPages();generateSitemaps([]);
+              generateSitemaps([]);
               console.log('\n=== JOUR SANS MATCHS - Resolution historique ===');
               var histoPathEarly='historique.json';
               var histoEarly={predictions:[],stats:{winrate:0,roi:0,total:0,streak:0,wins:0,losses:0},monthly:[],backtesting:{}};
@@ -2616,7 +2610,6 @@ jobs:
             await updateHistorique(allMatchsData);
             await updateTransferts(fixtures);
             await updateRumeurs();
-            generateWorldCupPages();
             generateSitemaps(allMatchsData);
           }
           main().catch(function(e){console.error('FATAL:',e.message,e.stack);process.exit(0);});

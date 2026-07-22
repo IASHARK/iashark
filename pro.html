@@ -65,9 +65,12 @@ body{background:#080c12;color:var(--text);font-family:'DM Sans',sans-serif;min-h
 .day-summary b{color:var(--amber);}
 .day-summary .cy{color:var(--cyan);}
 
-.capital-bar{display:none;align-items:center;gap:12px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px 16px;margin-bottom:14px;flex-wrap:wrap;}
+.capital-bar{display:none;flex-direction:column;gap:8px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px 16px;margin-bottom:14px;}
+.capital-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
 .capital-lbl{font-family:'Space Mono',monospace;font-size:8px;color:var(--muted);letter-spacing:1px;}
-.capital-val{font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--cyan);}
+.capital-val{font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--text);}
+.capital-val.cyan{color:var(--cyan);}
+.capital-hint{font-family:'Space Mono',monospace;font-size:8.5px;color:var(--muted);}
 .capital-edit-btn{margin-left:auto;padding:8px 12px;border-radius:8px;border:1px solid var(--bc);background:rgba(34,211,238,0.08);color:var(--cyan);font-family:'Space Mono',monospace;font-size:8.5px;letter-spacing:1px;cursor:pointer;}
 .capital-edit-form{display:none;gap:8px;width:100%;margin-top:10px;}
 .capital-edit-form.open{display:flex;}
@@ -106,6 +109,8 @@ body{background:#080c12;color:var(--text);font-family:'DM Sans',sans-serif;min-h
 .subpanel{display:none;}
 .subpanel.open{display:block;}
 .row-flex{display:flex;align-items:end;gap:8px;flex-wrap:wrap;}
+.mise-sugg-hint{font-size:11.5px;color:var(--muted);margin-bottom:8px;}
+.mise-sugg-hint b{color:var(--cyan);}
 .fg label{display:block;font-family:'Space Mono',monospace;font-size:8px;letter-spacing:1px;color:var(--muted);margin-bottom:5px;}
 .finput{background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;width:100px;}
 .finput:focus{border-color:var(--cyan);}
@@ -212,9 +217,16 @@ body{background:#080c12;color:var(--text);font-family:'DM Sans',sans-serif;min-h
   </div>
 
   <div class="capital-bar" id="capitalBar">
-    <span class="capital-lbl">MON CAPITAL</span>
-    <span class="capital-val" id="capitalVal">— €</span>
-    <button class="capital-edit-btn" id="capitalEditBtn" onclick="toggleCapitalEdit()">MODIFIER</button>
+    <div class="capital-row">
+      <span class="capital-lbl">CAPITAL DE DÉPART</span>
+      <span class="capital-val" id="capitalVal">— €</span>
+      <button class="capital-edit-btn" id="capitalEditBtn" onclick="toggleCapitalEdit()">MODIFIER</button>
+    </div>
+    <div class="capital-row" id="capitalActuelRow" style="display:none;">
+      <span class="capital-lbl">CAPITAL ACTUEL</span>
+      <span class="capital-val cyan" id="capitalActuelVal">— €</span>
+      <span class="capital-hint" id="capitalHint"></span>
+    </div>
     <div class="capital-edit-form" id="capitalEditForm">
       <input type="number" id="capitalInput" placeholder="Ex: 1000">
       <button class="sync-btn" onclick="saveCapital()">ENREGISTRER</button>
@@ -374,12 +386,19 @@ var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJ
 var sb = supabase.createClient(SUPA_URL, SUPA_KEY);
 var currentUser = null;
 
+/* TEMPORAIRE (phase de test) : Outils ouvert a tous, meme plan gratuit / non connecte.
+   Repasser a false pour retablir le paywall normal une fois les paliers d'abonnement decides. */
+var OUTILS_OPEN_FOR_ALL = true;
+
 function unlockProWall(){
   document.getElementById('proWall').classList.remove('locked');
   document.getElementById('fabBtn').style.display='flex';
 }
 
+var currentCapital = 0;
+
 async function checkProAccess(){
+  if(OUTILS_OPEN_FOR_ALL) unlockProWall();
   try{
     var res = await sb.auth.getSession();
     if(!res.data || !res.data.session) return;
@@ -393,14 +412,27 @@ async function checkProAccess(){
 loadAll();
 checkProAccess();
 
+function getParisPnL(){
+  return PARIS.filter(function(p){return p.result!=='pending';})
+    .reduce(function(s,p){return s+(p.result==='win'?p.mise*(p.cote-1):-p.mise);},0);
+}
+
 function showCapital(capital){
   document.getElementById('capitalBar').style.display = 'flex';
+  currentCapital = capital ? Number(capital) : 0;
   if(capital){
     document.getElementById('capitalVal').textContent = Number(capital).toLocaleString('fr-FR')+' €';
     document.getElementById('capitalInput').placeholder = 'Modifier ('+capital+'€ actuellement)';
+    var pnl = getParisPnL();
+    var actuel = currentCapital + pnl;
+    document.getElementById('capitalActuelRow').style.display = 'flex';
+    document.getElementById('capitalActuelVal').textContent = Math.round(actuel).toLocaleString('fr-FR')+' €';
+    document.getElementById('capitalHint').textContent = pnl===0 ? '(aucun pari résolu encore)' : '('+(pnl>0?'+':'')+Math.round(pnl)+'€ sur tes paris suivis)';
   } else {
     document.getElementById('capitalVal').textContent = 'Non renseigné';
+    document.getElementById('capitalActuelRow').style.display = 'none';
   }
+  renderSelections();
 }
 
 function toggleCapitalEdit(){
@@ -509,6 +541,12 @@ function renderSelections(){
     var alreadyFollowed=PARIS.some(function(p){return p.fixtureId===m.id;});
     var note=selNotes[m.id];
     var isFollowed=alreadyFollowed;
+    var suggMise=null;
+    if(currentCapital>0 && m.kelly){
+      var actuelBk=currentCapital+getParisPnL();
+      suggMise=Math.max(1,Math.round(actuelBk*(parseFloat(m.kelly)/100)));
+    }
+    var miseDefault=suggMise||10;
     return '<div class="card-item">'
       +'<div class="card-top">'
       +'<div class="card-info"><div class="mname">'+hn+' vs '+an+'</div><div class="mleague">'+(m.ligue_icon||'🏆')+' '+m.league+' · '+label+' · '+heure+'</div>'
@@ -525,11 +563,13 @@ function renderSelections(){
       +'<button class="chip" data-chip="note" onclick="setChip('+m.id+',\'note\',this)">AJOUTER UNE NOTE</button>'
       +'</div>'
       +'<div class="subpanel open" id="sub-suivre-'+m.id+'">'
+      +(suggMise?'<div class="mise-sugg-hint">🎯 Mise conseillée sur ta bankroll actuelle : <b>'+suggMise+'€</b></div>':'')
       +'<div class="row-flex">'
-      +'<div class="fg"><label>MISE (€)</label><input type="number" class="finput" id="mise-'+m.id+'" value="10" style="width:80px"></div>'
+      +'<div class="fg"><label>MISE (€)</label><input type="number" class="finput" id="mise-'+m.id+'" value="'+miseDefault+'" style="width:80px"></div>'
       +'<button class="qm-btn" onclick="setAccMise('+m.id+',5,this)">5€</button>'
-      +'<button class="qm-btn active" onclick="setAccMise('+m.id+',10,this)">10€</button>'
+      +'<button class="qm-btn'+(!suggMise?' active':'')+'" onclick="setAccMise('+m.id+',10,this)">10€</button>'
       +'<button class="qm-btn" onclick="setAccMise('+m.id+',20,this)">20€</button>'
+      +(suggMise?'<button class="qm-btn active" onclick="setAccMise('+m.id+','+suggMise+',this)">'+suggMise+'€ 🎯</button>':'')
       +'<button class="btnvalid" onclick="confirmFollow('+m.id+')">✓ AJOUTER À MON SUIVI</button>'
       +'</div></div>'
       +'<div class="subpanel" id="sub-cote-'+m.id+'">'
@@ -670,6 +710,7 @@ function setManualResult(id,result){
   renderBets();
   renderHeroStats();
   renderDaySummary();
+  if(currentCapital>0) showCapital(currentCapital);
 }
 function delPari(id){
   if(!confirm('Supprimer ce pari de ton suivi ?'))return;
@@ -678,6 +719,7 @@ function delPari(id){
   renderBets();
   renderSelections();
   renderHeroStats();
+  if(currentCapital>0) showCapital(currentCapital);
   renderDaySummary();
 }
 
@@ -702,6 +744,7 @@ async function runSync(){
     renderBets();
     renderHeroStats();
     renderDaySummary();
+    if(currentCapital>0) showCapital(currentCapital);
     status.innerHTML=n>0?'<b>'+n+' pari(s)</b> résolu(s) automatiquement — 0 clic nécessaire.':'Rien de nouveau à résoudre pour l\'instant.';
     showToast(n>0?n+' résultat(s) synchronisés':'Aucun nouveau résultat');
   }catch(e){

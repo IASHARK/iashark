@@ -7,6 +7,10 @@ const DATA_URL = "https://iashark.com/data.json";
 // Champs exclusifs Outils : jamais envoyes au client si le plan n'est pas verifie 'pro' cote serveur.
 const PREMIUM_FIELDS = ["kelly", "edge", "verdict_shark", "facteur_x", "dropping_odds"];
 
+// TEMPORAIRE (phase de test) : Outils ouvert a tous, meme plan gratuit / non connecte.
+// Repasser a false pour retablir le paywall normal une fois les paliers d'abonnement decides.
+const OPEN_FOR_ALL = true;
+
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
@@ -37,6 +41,8 @@ Deno.serve(async (req: Request) => {
       isPro = false;
     }
   }
+
+  isPro = isPro || OPEN_FOR_ALL;
 
   const resp = await fetch(DATA_URL + "?t=" + Date.now());
   const data = await resp.json();

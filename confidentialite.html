@@ -27,10 +27,12 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 .txt a:hover{text-decoration:underline;}
 .highlight{background:rgba(34,211,238,0.04);border:1px solid var(--border-cyan);border-radius:10px;padding:12px 16px;margin-top:10px;font-size:13px;color:#94a3b8;line-height:1.7;}
 .nav-bottom{position:fixed;bottom:0;left:0;right:0;background:rgba(8,12,18,0.97);backdrop-filter:blur(14px);border-top:1px solid var(--border);display:flex;height:64px;z-index:100;}
-.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px 4px 8px;gap:3px;cursor:pointer;transition:.2s;}
-.nav-icon{font-size:18px;}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px 4px 8px;gap:3px;cursor:pointer;transition:.2s;text-decoration:none;-webkit-tap-highlight-color:transparent;}
+.nav-icon{width:20px;height:20px;display:flex;align-items:center;justify-content:center;}
+.nav-icon svg{width:20px;height:20px;stroke:var(--muted);transition:.2s;}
 .nav-lbl{font-family:'Space Mono',monospace;font-size:7px;color:var(--muted);letter-spacing:1px;}
 .nav-item.active .nav-lbl{color:var(--cyan);}
+.nav-item.active .nav-icon svg{stroke:var(--cyan);filter:drop-shadow(0 0 6px rgba(34,211,238,0.5));}
 </style>
 </head>
 <body>
@@ -41,7 +43,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 
 <div class="wrap">
   <div class="page-title">CONFIDENTIALITÉ</div>
-  <div class="page-date">DERNIÈRE MISE À JOUR : MARS 2026</div>
+  <div class="page-date">DERNIÈRE MISE À JOUR : JUILLET 2026</div>
 
   <div class="section">
     <div class="section-title">01 · RESPONSABLE DU TRAITEMENT</div>
@@ -57,7 +59,8 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
       Nous collectons uniquement les données nécessaires au fonctionnement du service :
       <ul>
         <li><strong>Adresse email</strong> — pour la création de compte et l'authentification</li>
-        <li><strong>Données de navigation</strong> — pages visitées, durée de session (via Google Analytics)</li>
+        <li><strong>Capital de départ (optionnel)</strong> — renseigné volontairement dans l'espace Outils pour calculer des mises adaptées ; reste strictement privé et n'est jamais partagé</li>
+        <li><strong>Données de navigation</strong> — pages visitées, durée de session (via Google Analytics, uniquement si vous acceptez les cookies analytiques)</li>
         <li><strong>Données de paiement</strong> — traitées exclusivement par Stripe, non stockées par IASHARK</li>
       </ul>
       <div class="highlight">Nous ne collectons aucune donnée sensible. Nous ne vendons aucune donnée à des tiers.</div>
@@ -92,13 +95,12 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
   <div class="section">
     <div class="section-title">05 · COOKIES</div>
     <div class="txt">
-      IASHARK utilise des cookies pour :
+      IASHARK utilise deux types de cookies :
       <ul>
-        <li>Maintenir votre session de connexion</li>
-        <li>Mémoriser votre langue préférée</li>
-        <li>Mesurer l'audience via Google Analytics (données anonymisées)</li>
+        <li><strong>Cookies essentiels</strong> (toujours actifs, sans consentement requis) — maintenir votre session de connexion</li>
+        <li><strong>Cookies analytiques</strong> (Google Analytics, données anonymisées) — uniquement si vous cliquez sur "Accepter" dans la bannière affichée lors de votre première visite</li>
       </ul>
-      Vous pouvez désactiver les cookies dans les paramètres de votre navigateur. Certaines fonctionnalités du site peuvent alors être limitées.
+      Vous pouvez changer d'avis à tout moment en effaçant les données de navigation de votre navigateur, ce qui réaffichera la bannière de consentement.
     </div>
   </div>
 
@@ -151,11 +153,26 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 </div>
 
 <nav class="nav-bottom">
-  <div class="nav-item" onclick="window.location='/'"><div class="nav-icon">🦈</div><div class="nav-lbl">ACCUEIL</div></div>
-  <div class="nav-item" onclick="window.location='/historique.html'"><div class="nav-icon">📊</div><div class="nav-lbl">HISTORIQUE</div></div>
-  <div class="nav-item" onclick="window.location='/combis.html'"><div class="nav-icon">🎰</div><div class="nav-lbl">COMBINÉS</div></div>
-  <div class="nav-item" onclick="window.location='/blog/'"><div class="nav-icon">📖</div><div class="nav-lbl">GUIDES</div></div>
-  <div class="nav-item" onclick="window.location='/compte.html'"><div class="nav-icon">👤</div><div class="nav-lbl">COMPTE</div></div>
+  <a href="/" class="nav-item">
+    <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5L12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg></div>
+    <div class="nav-lbl">ACCUEIL</div>
+  </a>
+  <a href="/historique.html" class="nav-item">
+    <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20v-4"/></svg></div>
+    <div class="nav-lbl">HISTORIQUE</div>
+  </a>
+  <a href="/pro.html" class="nav-item">
+    <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.9 6.6L22 9.3l-5 4.9L18.2 22 12 18.3 5.8 22 7 14.2 2 9.3l7.1-.7z"/></svg></div>
+    <div class="nav-lbl">OUTILS</div>
+  </a>
+  <a href="/blog/" class="nav-item">
+    <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg></div>
+    <div class="nav-lbl">GUIDES</div>
+  </a>
+  <a href="/compte.html" class="nav-item">
+    <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg></div>
+    <div class="nav-lbl">COMPTE</div>
+  </a>
 </nav>
 <script src="/site-prefs.js"></script>
 </body>

@@ -113,7 +113,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
   <a href="/" class="logo"><span>IA</span>SHARK</a>
   <div class="hdr-right">
     <span class="hdr-badge" id="totalBadge">— PARIS</span>
-    <a href="/compte.html" class="btn-login">CONNEXION</a>
+    <span id="authHeaderSlot"><a href="/compte.html" class="btn-login">CONNEXION</a></span>
   </div>
 </header>
 
@@ -386,5 +386,8 @@ async function loadData(){
 }
 loadData();
 </script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="/auth-header.js"></script>
+<script>IasharkAuthHeader.mount('#authHeaderSlot');</script>
 </body>
 </html>

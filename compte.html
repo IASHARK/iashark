@@ -7,6 +7,7 @@
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23080c12'/%3E%3Ctext x='50%25' y='54%25' dominant-baseline='middle' text-anchor='middle' font-size='40' fill='%2322d3ee'%3E🦈%3C/text%3E%3C/svg%3E">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="/auth-header.js"></script>
 <style>
 :root{--bg:#080c12;--card:#0d1520;--card2:#0f1a28;--cyan:#22d3ee;--amber:#f59e0b;--green:#10b981;--red:#ef4444;--text:#e2e8f0;--muted:#4a6580;--border:rgba(255,255,255,0.06);--bc:rgba(34,211,238,0.18);--ba:rgba(245,158,11,0.2);}
 *{margin:0;padding:0;box-sizing:border-box;}
@@ -505,6 +506,8 @@ function showDashboard(user) {
 
     document.getElementById('planStatusTxt').textContent = isPro?'Plan Outils':'Plan Gratuit';
     document.getElementById('planStatusTxt').className = 'plan-status '+(isPro?'pro':'free');
+
+    document.getElementById('hdrPill').textContent = IasharkAuthHeader.chipLabel(user.email, plan);
 
     if(isPro){
       document.getElementById('planDescTxt').textContent = 'Ton abonnement Outils est actif — tu as accès à toutes les sélections à forte confiance.';

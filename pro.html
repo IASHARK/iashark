@@ -177,7 +177,7 @@ body{background:#080c12;color:var(--text);font-family:'DM Sans',sans-serif;min-h
 
 <header class="hdr">
   <a href="/" class="logo"><span>IA</span>SHARK</a>
-  <a href="/compte.html" class="btn-login">CONNEXION</a>
+  <span id="authHeaderSlot"><a href="/compte.html" class="btn-login">CONNEXION</a></span>
 </header>
 
 <div id="proContent">
@@ -693,5 +693,7 @@ function switchTab(name,btn){
   document.getElementById('tab-'+name).classList.add('active');
 }
 </script>
+<script src="/auth-header.js"></script>
+<script>IasharkAuthHeader.mount('#authHeaderSlot');</script>
 </body>
 </html>

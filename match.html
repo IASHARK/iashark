@@ -1873,16 +1873,25 @@ function togglePlayerCard(id){
 
 var SUPA_URL='https://ksvjraqitxouwiabecai.supabase.co';
 var SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtzdmpyYXFpdHhvdXdpYWJlY2FpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3ODcwMjMsImV4cCI6MjA4ODM2MzAyM30.Eh3qk4tATM40hoYxdErAllLEo1y8KNt4BSCET_fAgT8';
-async function checkSession(){
-  try{var sb=supabase.createClient(SUPA_URL,SUPA_KEY);var res=await sb.auth.getSession();var s=res.data&&res.data.session;if(!s)return false;var u=await sb.from('users').select('plan').eq('id',s.user.id).maybeSingle();return u.data&&u.data.plan==='pro';}catch(e){return false;}
+var MATCH_DATA_URL='https://ksvjraqitxouwiabecai.supabase.co/functions/v1/match-data';
+
+/* Le plan est verifie cote serveur (Edge Function match-data) : les champs Outils
+   (kelly, edge, verdict_shark, facteur_x, dropping_odds) ne sont meme pas envoyes
+   au client si le compte n'est pas 'pro' -- pas seulement masques par du CSS. */
+async function fetchMatchData(){
+  var sb=supabase.createClient(SUPA_URL,SUPA_KEY);
+  var sess=await sb.auth.getSession();
+  var token=(sess.data&&sess.data.session&&sess.data.session.access_token)||SUPA_KEY;
+  var resp=await fetch(MATCH_DATA_URL+'?t='+Date.now(),{headers:{Authorization:'Bearer '+token}});
+  return resp.json();
 }
 
 async function init(){
   var el=document.getElementById('root');
   if(!fId){el.innerHTML='<div style="text-align:center;padding:60px 20px;font-family:Space Mono,monospace;font-size:10px;color:var(--muted)">ID MANQUANT<br><br><a href="/" style="color:var(--cyan)">← RETOUR</a></div>';return;}
   try{
-    var res=await Promise.all([fetch('data.json?t='+Date.now()).then(function(r){return r.json();}),checkSession()]);
-    var data=res[0]; isPro=res[1]||true;
+    var data=await fetchMatchData();
+    isPro=!!data.isPro;
     var m=(data.matchs||[]).find(function(x){return String(x.id)===String(fId);});
     if(!m){
       el.innerHTML='<div style="text-align:center;padding:60px 20px"><div style="font-family:Space Mono,monospace;font-size:10px;color:var(--muted)">MATCH INTROUVABLE · ID: '+fId+'</div><br><a href="/" style="color:var(--cyan);font-family:Space Mono,monospace;font-size:9px">← RETOUR</a></div>';

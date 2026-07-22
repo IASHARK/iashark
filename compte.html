@@ -216,22 +216,6 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
       <a href="/pro.html" class="btn-amber" id="planCta">DÉCOUVRIR OUTILS →</a>
     </div>
 
-    <!-- CAPITAL DE PARIS -->
-    <div class="section">
-      <div class="section-title">TON CAPITAL</div>
-      <div class="plan-desc">Sert à te proposer des mises adaptées et réalistes ailleurs sur le site — ça reste privé, visible seulement par toi.</div>
-      <div id="capitalDisplay" style="display:none;margin-bottom:12px;">
-        <span style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--cyan);" id="capitalVal">—</span>
-        <span style="font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);margin-left:8px;">CAPITAL ACTUEL</span>
-      </div>
-      <div class="form-group">
-        <label>CAPITAL DE DÉPART (€)</label>
-        <input type="number" class="form-input" id="capitalInput" placeholder="Ex: 1000">
-      </div>
-      <button class="btn-primary" id="btnSaveCapital" onclick="saveCapital()">ENREGISTRER →</button>
-      <div class="sec-msg" id="capitalMsg"></div>
-    </div>
-
     <!-- SECURITE -->
     <div class="section">
       <div class="section-title">SÉCURITÉ</div>
@@ -390,32 +374,6 @@ async function doLogout() {
   hideMsg();
 }
 
-/* ═══ CAPITAL DE PARIS : reel via Supabase (table users, colonne capital) ═══ */
-async function saveCapital(){
-  var val = parseFloat(document.getElementById('capitalInput').value);
-  var msgEl = document.getElementById('capitalMsg');
-  var btn = document.getElementById('btnSaveCapital');
-  if(!val || val<=0){
-    msgEl.textContent = 'Entre un montant valide.';
-    msgEl.className = 'sec-msg error'; msgEl.style.display='block';
-    return;
-  }
-  btn.disabled = true; btn.textContent = 'ENREGISTREMENT...';
-  try{
-    var res = await sb.from('users').update({capital: val}).eq('id', currentUser.id);
-    if(res.error) throw res.error;
-    msgEl.textContent = 'Capital enregistré.';
-    msgEl.className = 'sec-msg success'; msgEl.style.display='block';
-    document.getElementById('capitalVal').textContent = val.toLocaleString('fr-FR')+'€';
-    document.getElementById('capitalDisplay').style.display = 'block';
-    document.getElementById('capitalInput').value = '';
-  }catch(e){
-    msgEl.textContent = 'Erreur : '+(e.message||'réessaie');
-    msgEl.className = 'sec-msg error'; msgEl.style.display='block';
-  }
-  btn.disabled = false; btn.textContent = 'ENREGISTRER →';
-}
-
 /* ═══ SECURITE : changement mot de passe / email — REELS via Supabase Auth ═══ */
 function toggleSecPanel(which){
   var pwdP = document.getElementById('secPanelPwd');
@@ -497,7 +455,7 @@ function showDashboard(user) {
     document.getElementById('sinceBadge').textContent = 'MEMBRE DEPUIS '+mois[d.getMonth()]+' '+d.getFullYear();
   }
 
-  sb.from('users').select('plan,capital').eq('id',user.id).maybeSingle().then(function(res){
+  sb.from('users').select('plan').eq('id',user.id).maybeSingle().then(function(res){
     var plan = res.data&&res.data.plan ? res.data.plan : 'free';
     var isPro = plan==='pro';
 
@@ -515,12 +473,6 @@ function showDashboard(user) {
       var cta = document.getElementById('planCta');
       cta.textContent = 'VOIR MON ESPACE OUTILS →';
       cta.href = '/pro.html';
-    }
-
-    if(res.data&&res.data.capital){
-      document.getElementById('capitalVal').textContent = Number(res.data.capital).toLocaleString('fr-FR')+'€';
-      document.getElementById('capitalDisplay').style.display = 'block';
-      document.getElementById('capitalInput').placeholder = 'Modifier ('+res.data.capital+'€ actuellement)';
     }
   });
 }

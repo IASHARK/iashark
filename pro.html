@@ -58,6 +58,15 @@ body{background:#080c12;color:var(--text);font-family:'DM Sans',sans-serif;min-h
 .day-summary b{color:var(--amber);}
 .day-summary .cy{color:var(--cyan);}
 
+.capital-bar{display:none;align-items:center;gap:12px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px 16px;margin-bottom:14px;flex-wrap:wrap;}
+.capital-lbl{font-family:'Space Mono',monospace;font-size:8px;color:var(--muted);letter-spacing:1px;}
+.capital-val{font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--cyan);}
+.capital-edit-btn{margin-left:auto;padding:8px 12px;border-radius:8px;border:1px solid var(--bc);background:rgba(34,211,238,0.08);color:var(--cyan);font-family:'Space Mono',monospace;font-size:8.5px;letter-spacing:1px;cursor:pointer;}
+.capital-edit-form{display:none;gap:8px;width:100%;margin-top:10px;}
+.capital-edit-form.open{display:flex;}
+.capital-edit-form input{flex:1;background:var(--card2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;padding:8px 10px;outline:none;}
+.capital-msg{font-size:11.5px;color:var(--muted);width:100%;margin-top:6px;}
+
 .tabs{display:flex;gap:4px;margin-bottom:20px;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:12px;padding:4px;}
 .tab-btn{flex:1;padding:10px 8px;border-radius:9px;border:none;background:transparent;color:var(--muted);font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1px;cursor:pointer;transition:.2s;white-space:nowrap;}
 .tab-btn.active{background:var(--card2);color:var(--text);border:1px solid var(--bc);}
@@ -192,6 +201,17 @@ body{background:#080c12;color:var(--text);font-family:'DM Sans',sans-serif;min-h
       <div class="hstat"><div class="hstat-val" id="heroWR">—</div><div class="hstat-lbl">WINRATE</div></div>
       <div class="hstat"><div class="hstat-val" id="heroROI">—</div><div class="hstat-lbl">ROI</div></div>
       <div class="hstat"><div class="hstat-val" id="heroTotal">—</div><div class="hstat-lbl">PARIS</div></div>
+    </div>
+  </div>
+
+  <div class="capital-bar" id="capitalBar">
+    <span class="capital-lbl">MON CAPITAL</span>
+    <span class="capital-val" id="capitalVal">— €</span>
+    <button class="capital-edit-btn" id="capitalEditBtn" onclick="toggleCapitalEdit()">MODIFIER</button>
+    <div class="capital-edit-form" id="capitalEditForm">
+      <input type="number" id="capitalInput" placeholder="Ex: 1000">
+      <button class="sync-btn" onclick="saveCapital()">ENREGISTRER</button>
+      <div class="capital-msg" id="capitalMsg"></div>
     </div>
   </div>
 
@@ -357,13 +377,52 @@ async function checkProAccess(){
     var res = await sb.auth.getSession();
     if(!res.data || !res.data.session) return;
     currentUser = res.data.session.user;
-    var ures = await sb.from('users').select('plan').eq('id', currentUser.id).maybeSingle();
+    var ures = await sb.from('users').select('plan,capital').eq('id', currentUser.id).maybeSingle();
     var plan = ures.data && ures.data.plan ? ures.data.plan : 'free';
     if(plan === 'pro') unlockProWall();
+    showCapital(ures.data && ures.data.capital);
   }catch(e){}
 }
 loadAll();
 checkProAccess();
+
+function showCapital(capital){
+  document.getElementById('capitalBar').style.display = 'flex';
+  if(capital){
+    document.getElementById('capitalVal').textContent = Number(capital).toLocaleString('fr-FR')+' €';
+    document.getElementById('capitalInput').placeholder = 'Modifier ('+capital+'€ actuellement)';
+  } else {
+    document.getElementById('capitalVal').textContent = 'Non renseigné';
+  }
+}
+
+function toggleCapitalEdit(){
+  document.getElementById('capitalEditForm').classList.toggle('open');
+}
+
+async function saveCapital(){
+  var val = parseFloat(document.getElementById('capitalInput').value);
+  var msgEl = document.getElementById('capitalMsg');
+  if(!val || val<=0){
+    msgEl.textContent = 'Entre un montant valide.';
+    return;
+  }
+  if(!currentUser){
+    msgEl.textContent = 'Connecte-toi pour enregistrer ton capital.';
+    return;
+  }
+  msgEl.textContent = 'Enregistrement...';
+  try{
+    var res = await sb.from('users').update({capital: val}).eq('id', currentUser.id);
+    if(res.error) throw res.error;
+    msgEl.textContent = 'Capital enregistré.';
+    document.getElementById('capitalInput').value = '';
+    showCapital(val);
+    setTimeout(function(){ document.getElementById('capitalEditForm').classList.remove('open'); msgEl.textContent=''; }, 1200);
+  }catch(e){
+    msgEl.textContent = 'Erreur : '+(e.message||'réessaie');
+  }
+}
 
 async function loadAll(){
   loadLocalData();

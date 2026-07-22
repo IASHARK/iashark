@@ -75,7 +75,6 @@ body::before{content:'';position:fixed;top:-300px;left:50%;transform:translateX(
 .day-tab .tab-count{font-size:7px;background:rgba(34,211,238,0.15);border-radius:10px;padding:1px 6px;margin-left:6px;}
 .sec-hdr{max-width:720px;margin:0 auto 10px;padding:0 20px;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:3px;color:var(--muted);display:flex;align-items:center;gap:10px;position:relative;z-index:1;}
 .sec-hdr::after{content:'';flex:1;height:1px;background:var(--border);}
-.sec-hdr.s-choc{color:var(--amber);}
 .cards-list{max-width:720px;margin:0 auto;padding:0 20px;display:flex;flex-direction:column;gap:10px;position:relative;z-index:1;}
 .mc{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;cursor:pointer;transition:border-color .2s,transform .2s,box-shadow .2s;animation:fadeup .4s ease forwards;opacity:0;}
 .mc:nth-child(1){animation-delay:.05s}.mc:nth-child(2){animation-delay:.10s}.mc:nth-child(3){animation-delay:.15s}.mc:nth-child(n+4){animation-delay:.20s}
@@ -504,8 +503,7 @@ function buildCard(m){
     +'</div></div>';
 }
 
-var PREMIUM=['ldc','el','premier','laliga','seriea','bundesliga','ligue1','wc'];
-function getChoc(list){var p=list.filter(function(m){return PREMIUM.indexOf(leagueKey(m))!==-1;});if(!p.length)p=list;return p.reduce(function(best,m){return ovrConf(m)>ovrConf(best)?m:best;},p[0]);}
+function getChoc(list){return list.reduce(function(best,m){return ovrConf(m)>ovrConf(best)?m:best;},list[0]);}
 
 function buildChocCard(m){
   var heure=(m.date||'').split(' ')[1]||'',hn=m.home&&m.home.n||'',an=m.away&&m.away.n||'';
@@ -532,7 +530,7 @@ function buildChocCard(m){
     +'<div><span class="choc-vs">VS</span><div class="choc-hr">'+heure+'</div></div>'
     +'<div class="choc-team">'+logoH(m.away,an.slice(0,2).toUpperCase())+'<div class="choc-name" style="color:rgba(226,232,240,0.65)">'+an.toUpperCase()+'</div><div class="choc-sub-lbl">EXTÉRIEUR</div></div>'
     +'</div></div>'
-    +'<div class="choc-pari-strip"><div><div class="choc-pari-lbl">CHOC DU SOIR</div><div class="choc-pari-bet">'+pl+'</div></div>'+(pc?'<div class="choc-cote">'+pc+'</div>':'')+'</div>'
+    +'<div class="choc-pari-strip"><div><div class="choc-pari-lbl">🦈 IASHARK</div><div class="choc-pari-bet">'+pl+'</div></div>'+(pc?'<div class="choc-cote">'+pc+'</div>':'')+'</div>'
     +'</div></div>';
 }
 
@@ -550,7 +548,6 @@ function renderMatchs(){
   var html='';
   if(currentFilter==='all'&&!currentSearch){
     var al=la.length>0?la:lp,choc=getChoc(al),rest=al.filter(function(m){return m.id!==choc.id;});
-    html+='<div class="sec-hdr s-choc">CHOC DU SOIR</div>';
     html+=buildChocCard(choc);
     if(rest.length){
       html+='<div class="sec-hdr" style="margin-top:16px;">PROCHAINS MATCHS — '+rest.length+' MATCH'+(rest.length>1?'S':'')+'</div>';

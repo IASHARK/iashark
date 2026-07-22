@@ -1109,30 +1109,6 @@ function buildAbsentsTable(injuries,homeId,homeN,awayN){
     +'</div><div class="sep"></div>';
 }
 
-function buildH2H(hn,an,h2h,homeId){
-  if(!h2h||!h2h.length)return '';
-  var w1=0,wN=0,w2=0;
-  h2h.forEach(function(g){
-    var r=g.w||'N';
-    if(r==='1')w1++;else if(r==='2')w2++;else wN++;
-  });
-  var rows=h2h.slice(0,5).map(function(g){
-    return '<div class="h2h-row">'
-      +'<span class="h2h-team '+(g.w==='1'?'win':'')+'">'+esc(g.home||'')+'</span>'
-      +'<span class="h2h-score">'+esc(g.s||'?-?')+'</span>'
-      +'<span class="h2h-team '+(g.w==='2'?'win':'')+'">'+esc(g.away||'')+'</span>'
-      +'</div>';
-  }).join('');
-  return '<div class="s"><div class="stitle">HEAD TO HEAD</div>'
-    +'<div class="h2h-summary">'
-    +'<div class="h2h-sum-item"><div class="h2h-sum-n" style="color:var(--cyan)">'+w1+'</div><div class="h2h-sum-l">'+hn.slice(0,8).toUpperCase()+'</div></div>'
-    +'<div class="h2h-sum-item"><div class="h2h-sum-n" style="color:var(--muted)">'+wN+'</div><div class="h2h-sum-l">NULS</div></div>'
-    +'<div class="h2h-sum-item"><div class="h2h-sum-n" style="color:rgba(226,232,240,0.4)">'+w2+'</div><div class="h2h-sum-l">'+an.slice(0,8).toUpperCase()+'</div></div>'
-    +'</div>'
-    +'<div class="h2h-list">'+rows+'</div>'
-    +'</div><div class="sep"></div>';
-}
-
 function buildElo(hn,an,eloH,eloA,eloSignal){
   if(!eloH&&!eloA)return '';
   var maxElo=Math.max(eloH||0,eloA||0);
@@ -1316,26 +1292,6 @@ function buildPlayerStatCards(hn,an,scH,scA){
     +'<div style="background:var(--card2);border:1px solid var(--border);border-radius:12px;padding:4px;">'+cardsHtml+'</div>'
     +'<div style="font-family:Space Mono,monospace;font-size:9px;color:var(--muted);margin-top:10px;">⚠ Stats cumulées sur la saison en cours. Vérifie la composition officielle ~1h avant le coup d\'envoi.</div>'
     +'</div><div class="sep"></div>';
-}
-
-function buildResumeRencontre(m,hn,an){
-  if(!m.contexte)return '';
-
-  var base=esc(cleanJargon(m.contexte));
-
-  function sumSlots(ev,range){
-    if(!ev||!ev.slots)return 0;
-    return ev.slots.slice(range[0],range[1]).reduce(function(a,s){return a+(s.n||0);},0);
-  }
-  var premiereMt=sumSlots(m.events_home,[0,3])+sumSlots(m.events_away,[0,3]);
-  var secondeMt=sumSlots(m.events_home,[3,6])+sumSlots(m.events_away,[3,6]);
-  var phraseMiTemps='';
-  if(premiereMt+secondeMt>=4){
-    if(secondeMt>premiereMt*1.3)phraseMiTemps=' Les deux équipes marquent majoritairement en 2e mi-temps, laissant présager un scénario tendu en fin de rencontre.';
-    else if(premiereMt>secondeMt*1.3)phraseMiTemps=' Les deux équipes marquent surtout en 1re période, avec un rythme qui tend à retomber après la pause.';
-  }
-
-  return '<div style="padding:0 18px 16px"><div style="font-size:13px;color:#94a3b8;line-height:1.75;">'+base+phraseMiTemps+'</div></div>';
 }
 
 function buildAbsencesCle(m){
@@ -1689,9 +1645,16 @@ function render(m){
   if(m.stade&&m.stade.nom){
     stadeHtml='<div class="stade-row"><span class="stade-icon">🏟</span><span class="stade-name">'+esc(m.stade.nom)+'</span>'+(m.stade.temp?'<span class="stade-meta">'+esc(m.stade.temp)+'</span>':'')+'</div>';
   }
+  function teamRank(team,name){
+    if(!m.classement||!m.classement.standings||!m.classement.standings.length)return null;
+    var row=m.classement.standings.find(function(t){return (team&&t.team_id===team.id)||t.name===name;});
+    return row?row.rank:null;
+  }
   function teamDisplay(team,name,side,forme_str,isTennis){
     var logo=lgImg(team,(name||'?').slice(0,2).toUpperCase());
-    return '<div class="team '+side+'">'+logo+'<div class="team-name">'+name.toUpperCase()+'</div><div class="team-sub">'+(isTennis?(side==='home'?'JOUEUR 1':'JOUEUR 2'):(side==='home'?'DOMICILE':'EXTÉRIEUR'))+'</div></div>';
+    var rank=!isTennis?teamRank(team,name):null;
+    var subLbl=isTennis?(side==='home'?'JOUEUR 1':'JOUEUR 2'):(rank?'#'+rank+' AU CLASSEMENT':(side==='home'?'DOMICILE':'EXTÉRIEUR'));
+    return '<div class="team '+side+'">'+logo+'<div class="team-name">'+name.toUpperCase()+'</div><div class="team-sub">'+subLbl+'</div></div>';
   }
   var teamsHtml='<div class="hero">'
     +'<h1 class="sr-only">'+esc(hn)+' vs '+esc(an)+' — Pronostic IA IASHARK</h1>'
@@ -1735,80 +1698,16 @@ function render(m){
       +'</div>';
   }
 
-  var stripHtml='';
-  if(!isTennis){
-    if(isWC&&m.wc_probs&&m.wc_probs.scoreH&&m.wc_probs.scoreA){
-      var dH=m.wc_probs.scoreH.details||{},dA=m.wc_probs.scoreA.details||{};
-      stripHtml='<div class="info-strip">'
-        +'<div class="is-item"><div class="is-val" style="color:var(--cyan)">'+(dH.fifa_pts||'—')+'</div><div class="is-lbl">FIFA '+hn.slice(0,4).toUpperCase()+'</div></div>'
-        +'<div class="is-item"><div class="is-val">'+(dA.fifa_pts||'—')+'</div><div class="is-lbl">FIFA '+an.slice(0,4).toUpperCase()+'</div></div>'
-        +'<div class="is-item"><div class="is-val" style="color:var(--cyan)">'+(dH.wc_exp||'—')+'</div><div class="is-lbl">EXP CM '+hn.slice(0,4).toUpperCase()+'</div></div>'
-        +'<div class="is-item"><div class="is-val">'+(dA.wc_exp||'—')+'</div><div class="is-lbl">EXP CM '+an.slice(0,4).toUpperCase()+'</div></div>'
-        +'</div>';
-    } else if(m.classement&&m.classement.home&&m.classement.away&&m.classement.standings&&m.classement.standings.length){
-      function formDots(str){
-        return (str||'').split('').slice(0,5).map(function(c){
-          var col=c==='W'||c==='V'?'rgba(255,255,255,0.55)':c==='D'||c==='N'?'rgba(255,255,255,0.2)':'rgba(255,255,255,0.08)';
-          return '<div style="width:5px;height:5px;border-radius:50%;background:'+col+'"></div>';
-        }).join('');
-      }
-      var rows='';
-      m.classement.standings.forEach(function(t,i){
-        var isH=t.team_id===m.home.id||t.name===m.home.n;
-        var isA=t.team_id===m.away.id||t.name===m.away.n;
-        var border=i<m.classement.standings.length-1?'border-bottom:1px solid rgba(255,255,255,0.04);':'';
-        var nameCol=isH?'#e2e8f0':isA?'rgba(226,232,240,0.6)':'#4a6580';
-        var ptsCol=isH?'#22d3ee':isA?'#e2e8f0':'#4a6580';
-        var rankCol=isH||isA?'#e2e8f0':'#2a3f55';
-        var dot=isH?'<div style="width:3px;height:3px;border-radius:50%;background:#22d3ee;margin-right:8px;flex-shrink:0"></div>'
-               :isA?'<div style="width:3px;height:3px;border-radius:50%;background:rgba(255,255,255,0.3);margin-right:8px;flex-shrink:0"></div>'
-               :'<div style="width:3px;margin-right:8px;flex-shrink:0"></div>';
-        rows+='<div style="display:flex;align-items:center;padding:9px 0;'+border+'">'
-          +'<div style="font-family:Space Mono,monospace;font-size:9px;color:'+rankCol+';width:22px;flex-shrink:0">'+t.rank+'</div>'
-          +dot
-          +'<div style="flex:1;min-width:0;font-family:Space Mono,monospace;font-size:10px;color:'+nameCol+';white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(t.name)+'</div>'
-          +'<div style="display:flex;gap:3px;align-items:center;margin:0 12px">'+formDots(t.form)+'</div>'
-          +'<div style="font-family:Space Mono,monospace;font-size:9px;color:#2a3f55;width:20px;text-align:center">'+(t.won||0)+'</div>'
-          +'<div style="font-family:Space Mono,monospace;font-size:9px;color:#2a3f55;width:20px;text-align:center">'+(t.drawn||0)+'</div>'
-          +'<div style="font-family:Space Mono,monospace;font-size:9px;color:#2a3f55;width:20px;text-align:center">'+(t.lost||0)+'</div>'
-          +'<div style="font-family:Bebas Neue,sans-serif;font-size:20px;color:'+ptsCol+';width:36px;text-align:right">'+t.pts+'</div>'
-          +'</div>';
-      });
-      stripHtml='<div style="margin:0 18px 16px">'
-        +'<div style="font-family:Space Mono,monospace;font-size:7px;letter-spacing:2px;color:#4a6580;margin-bottom:10px;display:flex;align-items:center;gap:8px">CLASSEMENT<div style="flex:1;height:1px;background:rgba(255,255,255,0.05)"></div></div>'
-        +rows
-        +'</div>';
-    }
-  }
-  var ctxHtml=!isTennis?buildResumeRencontre(m,hn,an):(m.contexte?'<div style="padding:0 18px 16px"><div style="font-size:13px;color:#94a3b8;line-height:1.75;">'+esc(cleanJargon(m.contexte))+'</div></div>':'');
-
   var skipHtml=m.no_signal
     ?'<div style="padding:0 18px 16px"><div class="skip danger"><div class="skip-icon">🚨</div><div><div class="skip-lbl">PASSE TON TOUR</div><div class="skip-txt">'+(m.no_signal_label||'Signaux contradictoires. <strong>Ne pas jouer.</strong>')+'</div></div></div></div>'
     :'';
 
-  var insightHtml='';
-  var hasSignal=m.facteur_x||m.verdict_shark||m.no_signal;
-  if(hasSignal){
-    insightHtml='<div class="insight">';
-    if(m.facteur_x){
-      insightHtml+='<div class="insight-row"><div class="ir-icon sig">⚡</div><div><div class="ir-lbl sig">SIGNAL DÉCISIF</div><div class="ir-txt">'+esc(cleanJargon(m.facteur_x))+'</div></div></div>';
-    }
-    if(m.verdict_shark){
-    }
-    if(!m.facteur_x&&!m.verdict_shark&&m.no_signal){
-      insightHtml+='<div class="insight-row"><div class="ir-icon" style="background:rgba(239,68,68,0.1)">🚨</div><div><div class="ir-lbl" style="color:var(--red)">PASSE TON TOUR</div><div class="ir-txt">'+(m.no_signal_label||'Signaux contradictoires. Ne pas jouer.')+'</div></div></div>';
-    }
-    insightHtml+='</div>';
-  }
-
-  var classementHtml=!isTennis?stripHtml:'';
-  var h2hCustomHtml=!isTennis?buildH2H(hn,an,m.h2h,m.home&&m.home.id):'';
   var meteoHtml=(m.stade&&(m.stade.desc||m.stade.temp))
     ?'<div style="padding:0 18px 16px;color:#94a3b8;font-size:12px;">'+(m.stade.meteo||'')+' Conditions à la rencontre : '+esc(m.stade.desc||'')+(m.stade.temp?', '+esc(m.stade.temp):'')+'.</div>'
     :'';
   var absentsHtml=!isTennis?buildAbsentsTable(m.injuries,m.home&&m.home.id,hn,an):'';
   var arbitreHtml=!isTennis?buildArbitre(m.arbitre):'';
-  var tabApercu=parisHtml+classementHtml+h2hCustomHtml+ctxHtml+meteoHtml+skipHtml+insightHtml+absentsHtml+arbitreHtml;
+  var tabApercu=skipHtml+absentsHtml+meteoHtml+arbitreHtml;
 
   var tabAnalyseEquipe=
     (!isTennis?buildDonut(hn,an,m.p1||0,m.pn||0,m.p2||0):'')
@@ -1833,7 +1732,7 @@ function render(m){
     +'<button class="analyse-sub-btn" data-sub="joueur" onclick="switchAnalyseSub(this,\'joueur\')" style="flex:1;font-family:Space Mono,monospace;font-size:8px;letter-spacing:1.5px;color:var(--muted);background:none;border:none;border-bottom:2px solid transparent;padding:11px 6px;cursor:pointer;">JOUEUR</button>'
     +'</div>';
 
-  var tabAnalyse=analyseSubNav
+  var tabAnalyse=parisHtml+analyseSubNav
     +'<div id="analyse-sub-equipe" class="analyse-sub-panel">'+tabAnalyseEquipe+'</div>'
     +'<div id="analyse-sub-joueur" class="analyse-sub-panel" style="display:none;">'+(tabAnalyseJoueur||'<div style="padding:40px 20px;text-align:center;color:var(--muted);font-family:Space Mono,monospace;font-size:9px;">PAS DE DONNÉES JOUEUR POUR CE MATCH</div>')+'</div>';
 

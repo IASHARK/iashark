@@ -556,7 +556,7 @@ function renderSelections(){
       +'</div>'
       +'<div class="cote-v">'+(m.cote_rec||'—')+'</div>'
       +'<div class="cbadge '+cc+'">'+confN.toFixed(1)+'</div>'
-      +'<button class="btn-follow'+(isFollowed?' done':'')+'" onclick="togglePanel('+m.id+')">'+(isFollowed?'✓ SUIVI':'GÉRER ▾')+'</button>'
+      +'<button class="btn-follow'+(isFollowed?' done':'')+'" id="followbtn-'+m.id+'" onclick="togglePanel('+m.id+')">'+(isFollowed?'✓ SUIVI':'GÉRER ▾')+'</button>'
       +'</div>'
       +'<div class="panel" id="panel-'+m.id+'">'
       +'<div class="chip-row">'
@@ -643,7 +643,10 @@ function confirmFollow(id){
     source:'auto', fixtureId:id, note:selNotes[id]||''
   });
   saveParis();
-  renderSelections();
+  var followBtn=document.getElementById('followbtn-'+id);
+  if(followBtn){followBtn.textContent='✓ SUIVI';followBtn.classList.add('done');}
+  var panelEl=document.getElementById('panel-'+id);
+  if(panelEl)panelEl.classList.remove('open');
   renderBets();
   renderHeroStats();
   renderDaySummary();

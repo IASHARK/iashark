@@ -44,8 +44,17 @@ Deno.serve(async (req: Request) => {
 
   isPro = isPro || OPEN_FOR_ALL;
 
-  const resp = await fetch(DATA_URL + "?t=" + Date.now());
-  const data = await resp.json();
+  let data: Record<string, unknown>;
+  try {
+    const resp = await fetch(DATA_URL + "?t=" + Date.now());
+    if (!resp.ok) throw new Error("data.json fetch failed: " + resp.status);
+    data = await resp.json();
+  } catch (e) {
+    return new Response(
+      JSON.stringify({ error: "Impossible de charger les donnees", details: String(e) }),
+      { status: 502, headers: { ...CORS_HEADERS, "Content-Type": "application/json" } },
+    );
+  }
 
   if (!isPro && Array.isArray(data.matchs)) {
     data.matchs = data.matchs.map((m: Record<string, unknown>) => {

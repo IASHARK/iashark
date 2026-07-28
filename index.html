@@ -243,6 +243,7 @@ body::before{content:'';position:fixed;top:-300px;left:50%;transform:translateX(
 </div>
 
 <div id="cardsList">
+  <!--SEO_MATCHES_SUMMARY--><div style="padding:4px 0 12px"><h2 style="font-family:'Bebas Neue',sans-serif;font-size:20px;color:#e2e8f0;margin-bottom:10px">Analyses IA du jour — 2026-07-28</h2><ul style="list-style:none;padding:0;margin:0;color:#94a3b8;font-size:12.5px;line-height:1.8"><li>02:00 — <strong>Deportivo Cuenca vs Emelec</strong> (Liga Pro) — Pronostic IA : Under 2.5 (confiance 6.8/10)</li></ul></div><!--/SEO_MATCHES_SUMMARY-->
   <div class="loading-state">
     <div class="loading-spinner"></div>
     <div class="loading-text">CHARGEMENT DES ANALYSES...</div>
@@ -452,7 +453,7 @@ function ovrConf(m){
 }
 function confClass(m){var c=ovrConf(m);return c>=75?'high':c>=60?'med':'low';}
 function confTier(m){var v=ovrConf(m)/10;return v>=8?'tier-red':v>=7?'tier-orange':'tier-blue';}
-function teamLogo(t){if(!t)return'';if(t.photo)return'<img class="mc-team-logo" src="'+t.photo+'" onerror="this.style.display=\'none\'" alt="">';if(t.logo)return'<img class="mc-team-logo" src="'+t.logo+'" onerror="this.style.display=\'none\'" alt="">';if(t.id)return'<img class="mc-team-logo" src="https://media.api-sports.io/football/teams/'+t.id+'.png" onerror="this.outerHTML=\'<div class=mc-team-logo-placeholder>\'+(this.getAttribute(\'data-ini\')||\'?\')+\'</div>\'" data-ini="'+(t.n||'').slice(0,2).toUpperCase()+'" alt="">';return'<div class="mc-team-logo-placeholder">'+(t.n||'?').slice(0,2).toUpperCase()+'</div>';}
+function teamLogo(t){if(!t)return'';var altN=('Logo '+(t.n||'')).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');if(t.photo)return'<img class="mc-team-logo" src="'+t.photo+'" onerror="this.style.display=\'none\'" alt="'+altN+'">';if(t.logo)return'<img class="mc-team-logo" src="'+t.logo+'" onerror="this.style.display=\'none\'" alt="'+altN+'">';if(t.id)return'<img class="mc-team-logo" src="https://media.api-sports.io/football/teams/'+t.id+'.png" onerror="this.outerHTML=\'<div class=mc-team-logo-placeholder>\'+(this.getAttribute(\'data-ini\')||\'?\')+\'</div>\'" data-ini="'+(t.n||'').slice(0,2).toUpperCase()+'" alt="'+altN+'">';return'<div class="mc-team-logo-placeholder">'+(t.n||'?').slice(0,2).toUpperCase()+'</div>';}
 function translateMarket(r){if(!r)return r;var s=String(r).toLowerCase();if(s.includes('over 2.5'))return'Plus de 2,5 buts';if(s.includes('under 2.5'))return'Moins de 2,5 buts';if(s.includes('over 1.5'))return'Plus de 1,5 but';if(s.includes('btts non')||s.includes('une équipe ne marque'))return'Une équipe ne marque pas';if(s.includes('btts')||s.includes('les deux équipes'))return'Les deux équipes marquent';if(s.includes('dc 1x')||s==='1x')return'DC 1X';if(s.includes('dc x2')||s==='x2')return'DC X2';return r;}
 
 function leagueHeader(m){
@@ -492,7 +493,7 @@ function buildCard(m){
   }
   var css='mc'+(isHot&&!isWC?' hot':'')+(isVal&&!isWC?' value':'')+(isWC?' worldcup':'');
   var pariLabel=m.pari_rec?translateMarket(m.pari_rec):(m.no_signal_label||"Rien d'exploitable ici — on attend mieux.");
-  return'<div class="'+css+'" onclick="window.location=\'match.html?id='+m.id+'\'">'
+  return'<div class="'+css+'" onclick="window.location=\'/match/'+m.id+'.html\'">'
     +'<div class="mc-top"><div class="mc-league">'+leagueHeader(m)+'</div><div class="mc-badges">'+badges+'</div></div>'
     +'<div class="mc-body"><div class="mc-left"><div class="mc-teams">'
     +'<div class="mc-team home">'+teamLogo(m.home)+'<div class="mc-team-name">'+(m.home&&m.home.n||'').toUpperCase()+'</div></div>'
@@ -526,14 +527,14 @@ function buildChocCard(m){
       else if(m.c1&&m.c1!=='--')pc=m.c1;
     }
   }
-  function logoH(t,ini){if(!t)return'';var u=t.photo||t.logo||(t.id?'https://media.api-sports.io/football/teams/'+t.id+'.png':'');if(!u)return'<div class="choc-logo-ph">'+ini+'</div>';return'<img class="choc-logo" src="'+u+'" alt="" onerror="this.outerHTML=\'<div class=choc-logo-ph>'+ini+'</div>\'">';}
+  function logoH(t,ini,name){if(!t)return'';var u=t.photo||t.logo||(t.id?'https://media.api-sports.io/football/teams/'+t.id+'.png':'');if(!u)return'<div class="choc-logo-ph">'+ini+'</div>';var altN=('Logo '+(name||ini)).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');return'<img class="choc-logo" src="'+u+'" alt="'+altN+'" onerror="this.outerHTML=\'<div class=choc-logo-ph>'+ini+'</div>\'">';}
   var pl=m.pari_rec?translateMarket(m.pari_rec):(m.no_signal_label||"Rien d'exploitable ici — on attend mieux.");
-  return'<div class="choc-card-wrap"><div class="choc-card" onclick="window.location=\'match.html?id='+m.id+'\'">'
+  return'<div class="choc-card-wrap"><div class="choc-card" onclick="window.location=\'/match/'+m.id+'.html\'">'
     +'<div class="choc-inner"><div class="choc-league"><span class="choc-dot"></span>'+leagueHeader(m)+'</div>'
     +'<div class="choc-teams-row">'
-    +'<div class="choc-team">'+logoH(m.home,hn.slice(0,2).toUpperCase())+'<div class="choc-name">'+hn.toUpperCase()+'</div><div class="choc-sub-lbl">DOMICILE</div></div>'
+    +'<div class="choc-team">'+logoH(m.home,hn.slice(0,2).toUpperCase(),hn)+'<div class="choc-name">'+hn.toUpperCase()+'</div><div class="choc-sub-lbl">DOMICILE</div></div>'
     +'<div><span class="choc-vs">VS</span><div class="choc-hr">'+heure+'</div></div>'
-    +'<div class="choc-team">'+logoH(m.away,an.slice(0,2).toUpperCase())+'<div class="choc-name" style="color:rgba(226,232,240,0.65)">'+an.toUpperCase()+'</div><div class="choc-sub-lbl">EXTÉRIEUR</div></div>'
+    +'<div class="choc-team">'+logoH(m.away,an.slice(0,2).toUpperCase(),an)+'<div class="choc-name" style="color:rgba(226,232,240,0.65)">'+an.toUpperCase()+'</div><div class="choc-sub-lbl">EXTÉRIEUR</div></div>'
     +'</div></div>'
     +'<div class="choc-pari-strip"><div><div class="choc-pari-lbl">🦈 IASHARK</div><div class="choc-pari-bet">'+pl+'</div></div>'+(pc?'<div class="choc-cote">'+pc+'</div>':'')+'</div>'
     +'</div></div>';

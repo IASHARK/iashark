@@ -554,9 +554,10 @@ jobs:
             var defH=mdHdom>0?(beHdom/mdHdom)/leagAvgA:1;
             var attA=meAext>0?(bmAext/meAext)/leagAvgA:1;
             var defA=meAext>0?(beAext/meAext)/leagAvgH:1;
+            var maxLH=3.4, maxLA=3.0;
             return {
-              lambdaH:parseFloat(Math.max(minLH,attH*defA*leagAvgH).toFixed(3)),
-              lambdaA:parseFloat(Math.max(minLA,attA*defH*leagAvgA).toFixed(3))
+              lambdaH:parseFloat(Math.min(maxLH,Math.max(minLH,attH*defA*leagAvgH)).toFixed(3)),
+              lambdaA:parseFloat(Math.min(maxLA,Math.max(minLA,attA*defH*leagAvgA)).toFixed(3))
             };
           }
           function shinProbabilities(odds) {
@@ -616,20 +617,6 @@ jobs:
             71:'bresil', 253:'mls', 262:'ligamx'
           };
           var SMALL_LEAGUE_KEYS_SPORTMONKS = {'kleague':1,'lettonie':1,'lituanie':1,'equateur':1,'islande':1,'suede':1,'finlande':1,'chine':1,'bresil':1,'ligamx':1};
-          var BOOKIE_MAP = {
-            'betclic':{domain:'betclic.fr',promo:'200 offerts',l:'#'},
-            'winamax':{domain:'winamax.fr',promo:'100 offerts',l:'#'},
-            'unibet':{domain:'unibet.fr',promo:'100 rembourses',l:'#'},
-            'pmu':{domain:'pmu.fr',promo:'100 offerts',l:'#'},
-            'bet365':{domain:'bet365.com',promo:'100 bonus',l:'#'},
-          };
-          var FR_FIXED = [
-            {n:'Betclic',o:'200 offerts',l:'#LIEN_BETCLIC'},
-            {n:'Winamax',o:'100 offerts',l:'#LIEN_WINAMAX'},
-            {n:'Unibet',o:'100 rembourses',l:'#LIEN_UNIBET'},
-            {n:'PMU',o:'100 offerts',l:'#LIEN_PMU'},
-            {n:'Bet365',o:'100 bonus',l:'#LIEN_BET365'},
-          ];
           function lgKey(lgId) { return LG_KEY[lgId]||'other'; }
           function lgIcon(l) {
             var s=(l||'').toLowerCase();
@@ -1142,7 +1129,7 @@ jobs:
             return {probH:Math.round(probHadj*100),probA:Math.round((1-probHadj)*100),diff:Math.round(eloH-eloA),homeBonus,signal:Math.abs(eloH-eloA)>=100?'FORT':Math.abs(eloH-eloA)>=50?'MODERE':'FAIBLE'};
           }
           function parseOdds(o) {
-            var empty={c1:'--',cn:'--',c2:'--',co15:'--',co25:'--',cu25:'--',dc1x:'--',dc2x:'--',dc12:'--',btts_oui:'--',btts_non:'--',bookies:[]};
+            var empty={c1:'--',cn:'--',c2:'--',co15:'--',co25:'--',cu25:'--',dc1x:'--',dc2x:'--',dc12:'--',btts_oui:'--',btts_non:'--'};
             if(!o||!o.bookmakers||!o.bookmakers.length) return empty;
             var arr1=[],arrN=[],arr2=[],arr15=[],arr25=[],arru25=[],arr35=[],arru35=[],arr1x=[],arrx2=[],arr12=[],arrby=[],arrbn=[],arrAHH=[],arrAHA=[];
             o.bookmakers.forEach(function(bk){
@@ -1197,11 +1184,8 @@ jobs:
             var co15=med(arr15),co25=med(arr25),cu25=med(arru25);
             var dc1x=med(arr1x),dc2x=med(arrx2),dc12=med(arr12);
             var btts_oui=med(arrby),btts_non=med(arrbn);
-            var deltas=[0,-0.03,-0.02,-0.05,+0.03];
-            function vary(c,d){if(!c||c==='--')return '--';return Math.max(1.01,parseFloat(c)+d).toFixed(2);}
-            var bookies=FR_FIXED.map(function(bk,i){return {n:bk.n,o:bk.o,l:bk.l,c:vary(c1,deltas[i]),c1:vary(c1,deltas[i]),cn:vary(cn,deltas[i]),c2:vary(c2,deltas[i])};});
             var ah_dom=med(arrAHH), ah_ext=med(arrAHA);
-            return {c1,cn,c2,co15,co25,cu25,co35:med(arr35),cu35:med(arru35),dc1x,dc2x,dc12,btts_oui,btts_non,ah_dom,ah_ext,bookies};
+            return {c1,cn,c2,co15,co25,cu25,co35:med(arr35),cu35:med(arru35),dc1x,dc2x,dc12,btts_oui,btts_non,ah_dom,ah_ext};
           }
           function calcCriteres(stats,isDom,rank){
             if(!stats)return{fd:50,att:50,def:50,fr:50,mot:70,fat:50};
@@ -1420,7 +1404,9 @@ jobs:
               +'Dixon-Coles: DOM '+d.dixon_p1+'% | Nul '+d.dixon_pN+'% | EXT '+d.dixon_p2+'%\n'
               +'Monte-Carlo: DOM '+d.mc_p1+'% | Nul '+d.mc_pN+'% | EXT '+d.mc_p2+'%\n'
               +(d.mc_scores&&d.mc_scores.length?'Top scores MC: '+d.mc_scores.map(function(s){return s.score+'('+s.pct+'%)';}).join(', ')+'\n':'')
-              +(d.pinnacle_p1?'Pinnacle (sharp): DOM '+d.pinnacle_p1+'% | Nul '+d.pinnacle_pN+'% | EXT '+d.pinnacle_p2+'%\n':'Pinnacle: non disponible\n')
+              +(d.pinnacle_p1?(d.market_source||'Marche')+': DOM '+d.pinnacle_p1+'% | Nul '+d.pinnacle_pN+'% | EXT '+d.pinnacle_p2+'%\n':'Marche: non disponible\n')
+              +'Probabilite finale ancree au marche ('+(d.market_source||'aucune cote fiable')+'): DOM '+d.final_p1+'% | Nul '+d.final_pN+'% | EXT '+d.final_p2+'%\n'
+              +'-> Utilise EXCLUSIVEMENT cette probabilite ancree (pas le Poisson brut ci-dessus) pour choisir le marche et remplir p1/pn/p2 dans le JSON : le Poisson brut peut diverger fortement du marche sur petit echantillon (ligues mineures) et n\'est affiche que pour contexte.\n'
               +(d.all_markets&&d.all_markets.length
                 ?'\n=== MARCHES DISPONIBLES (cote >= 1.50) ===\n'
                  +'(probas calculees independamment par le modele Poisson + Dixon-Coles + Monte-Carlo)\n'
@@ -1473,7 +1459,7 @@ jobs:
               +'"contexte": "[classement/forme du match, avec les chiffres exacts fournis ci-dessus - enjeu UNIQUEMENT si une ligne Enjeu DOM/EXT existe dans les donnees]",\n'
               +'"facteur_x": "[LE signal statistique le plus fort qui justifie ce marche, avec le chiffre exact cite]",\n'
               +'"score_central": "'+scoreCentral+'",\n'
-              +'"p1": '+d.poisson_p1+', "pn": '+d.poisson_pN+', "p2": '+d.poisson_p2+',\n'
+              +'"p1": '+d.final_p1+', "pn": '+d.final_pN+', "p2": '+d.final_p2+',\n'
               +'"po25": '+d.poisson_over25+', "btts": '+d.poisson_bttsY+',\n'
               +'"vbet": "[OUI si confiance >= 7.0 et passe_ton_tour=false, sinon NON]",\n'
               +'"scenario": {"phase1":"[TOUJOURS REMPLI]","phase2":"[TOUJOURS REMPLI]","phase3":"[TOUJOURS REMPLI]"},\n'
@@ -1494,49 +1480,105 @@ jobs:
             try{return JSON.parse(txt.replace(/```json|```/g,'').trim());}
             catch(e){console.log('Parse error genAnalyse:',txt.slice(0,200));return null;}
           }
-          async function genCombis(list,isSamedi,isDimanche,allMatchs){
-            if(!list.length) return [];
-            var sortedForCombis=list.slice().sort(function(a,b){return b.conf-a.conf;});
-            var lines=sortedForCombis.slice(0,10).map(function(a){return '- '+a.home+' vs '+a.away+': '+a.pari+' cote '+a.cote+' (confiance '+a.conf+'/10)';}).join('\n');
-            var promptClassic='Expert paris sportifs IASHARK. Meilleurs signaux du jour:\n'+lines+'\n\n'
-              +'Genere 3 combines optimises. Marches autorises: Over 2.5, BTTS Non, DC 1X, DC X2.\n'
-              +'c1 "SHARK SAFE": 2 matchs, cote 1.50-2.00. c2 "SHARK VALUE": 3 matchs, 2.50-4.00. c3 "SHARK EXPERT": 3-4 matchs, 4.00-6.00.\n'
-              +'Reponds UNIQUEMENT JSON sans backticks:\n'
-              +'{"c1":{"label":"SHARK SAFE","type":"safe","selections":"DC X2 + Over 2.5","matchs":"m1, m2","cote_totale":"1.85","conseil":"..."},'
-              +'"c2":{"label":"SHARK VALUE","type":"value","selections":"DC 1X + Over 2.5 + BTTS Non","matchs":"m1, m2, m3","cote_totale":"3.20","conseil":"..."},'
-              +'"c3":{"label":"SHARK EXPERT","type":"audace","selections":"Over 2.5 + DC X2 + DC 1X","matchs":"m1, m2, m3","cote_totale":"5.50","conseil":"..."}}';
-            var r=await postJSONWithRetry('api.anthropic.com','/v1/messages',{model:'claude-sonnet-4-6',max_tokens:800,messages:[{role:'user',content:promptClassic}]},{'x-api-key':ANT_KEY,'anthropic-version':'2023-06-01'});
-            var txt=(r.content&&r.content[0]&&r.content[0].text)||'{}';
-            var classics=[];
-            try{var obj=JSON.parse(txt.replace(/```json|```/g,'').trim());classics=Object.values(obj).filter(Boolean).map(function(c){return{label:c.label||'COMBINE',type:c.type||'safe',selections:c.selections||'',matchs:c.matchs||'',cote_totale:c.cote_totale||'',conseil:c.conseil||''};});}catch(e){classics=[];}
-            if(!isSamedi&&!isDimanche) return classics;
-            var labelFou=isSamedi?'SAMEDI FOU':'DIMANCHE FOU';
-            var typeFou=isSamedi?'samedi_fou':'dimanche_fou';
-            var pool=[];
-            (allMatchs||[]).forEach(function(m){
-              var edgeNum=parseFloat((m.edge||'').replace(/[^0-9.]/g,''))||0;
-              var candidates=[];
-              if(m.dc1x&&m.dc1x!=='--'&&parseFloat(m.dc1x)>=1.20&&parseFloat(m.dc1x)<=2.00)candidates.push({match:m.home.n+' vs '+m.away.n,sel:'DC 1X',cote:parseFloat(m.dc1x),edge:edgeNum});
-              if(m.dc2x&&m.dc2x!=='--'&&parseFloat(m.dc2x)>=1.20&&parseFloat(m.dc2x)<=2.00)candidates.push({match:m.home.n+' vs '+m.away.n,sel:'DC X2',cote:parseFloat(m.dc2x),edge:edgeNum});
-              if(m.btts_non&&m.btts_non!=='--'&&parseFloat(m.btts_non)>=1.20&&parseFloat(m.btts_non)<=2.00)candidates.push({match:m.home.n+' vs '+m.away.n,sel:'BTTS Non',cote:parseFloat(m.btts_non),edge:edgeNum});
-              if(m.co25&&m.co25!=='--'&&parseFloat(m.co25)>=1.20&&parseFloat(m.co25)<=2.50)candidates.push({match:m.home.n+' vs '+m.away.n,sel:'Over 2.5',cote:parseFloat(m.co25),edge:edgeNum});
-              if(!candidates.length)return;
-              candidates.sort(function(a,b){return b.edge-a.edge||a.cote-b.cote;});
-              pool.push(candidates[0]);
-            });
-            if(pool.length<2){classics.push({label:labelFou,type:typeFou,selections:'Pas assez de matchs',matchs:'',cote_totale:'--',conseil:'Reviens demain!'});return classics;}
-            pool.sort(function(a,b){return b.edge-a.edge;});
-            var selected=[],coteTotale=1.0;
-            for(var si=0;si<pool.length;si++){
-              if(selected.length>=5||coteTotale*pool[si].cote>10)break;
-              selected.push(pool[si]);coteTotale*=pool[si].cote;
-              if(coteTotale>=5)break;
-            }
-            if(selected.length<2){classics.push({label:labelFou,type:typeFou,selections:'Marches serres',matchs:'',cote_totale:'--',conseil:'Pas de combine fou aujourd\'hui.'});return classics;}
-            classics.push({label:labelFou,type:typeFou,selections:selected.map(function(s){return s.sel;}).join(', '),matchs:selected.map(function(s){return s.match;}).join(', '),cote_totale:coteTotale.toFixed(2),conseil:selected.length+' selections triees par edge'});
-            return classics;
-          }
           // Pages statiques a forte valeur SEO, en plus des matchs du jour.
+          function escHtml(s){
+            return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+          }
+          function seoTitleFor(m){
+            return m.home.n+' vs '+m.away.n+' — Pronostic & Analyse IA | IASHARK';
+          }
+          function seoDescriptionFor(m){
+            var d=(m.date||'').split(' ')[0];
+            var comp=m.league||'';
+            var pari=(m.pari_rec&&!m.no_signal)?(' Notre modele recommande : '+m.pari_rec+'.'):'';
+            return 'Analyse IA du match '+m.home.n+' vs '+m.away.n+(comp?' ('+comp+')':'')+(d?' le '+d:'')+'.'+pari+' Probabilites, statistiques et niveau de confiance sur IASHARK.';
+          }
+          function seoJsonLdFor(m){
+            var iso=null;
+            try{ iso=new Date((m.date||'').replace(' ','T')+':00Z').toISOString(); }catch(e){}
+            var ld={
+              '@context':'https://schema.org',
+              '@type':'SportsEvent',
+              name:m.home.n+' vs '+m.away.n,
+              sport:'Football',
+              homeTeam:{'@type':'SportsTeam',name:m.home.n},
+              awayTeam:{'@type':'SportsTeam',name:m.away.n},
+              url:'https://iashark.com/match/'+m.id+'.html'
+            };
+            if(iso) ld.startDate=iso;
+            if(m.league) ld.superEvent={'@type':'SportsEvent',name:m.league};
+            return JSON.stringify(ld);
+          }
+          function seoSummaryHtmlFor(m){
+            var d=(m.date||'').split(' ')[0];
+            var pariTxt=(m.pari_rec&&!m.no_signal)?('<p>Marché recommandé par le modèle : <strong>'+escHtml(m.pari_rec)+'</strong> (confiance '+escHtml(String(m.conf||''))+'/10).</p>'):'';
+            return '<div style="padding:24px 16px;font-family:\'DM Sans\',sans-serif;color:#94a3b8;font-size:13px;line-height:1.6">'
+              +'<h1 style="font-family:\'Bebas Neue\',sans-serif;font-size:22px;letter-spacing:.5px;color:#e2e8f0;margin-bottom:8px">'+escHtml(m.home.n)+' vs '+escHtml(m.away.n)+'</h1>'
+              +'<p>'+(m.league?escHtml(m.league)+' — ':'')+escHtml(d)+'</p>'
+              +pariTxt
+              +'<p>Analyse complète générée par le modèle statistique IASHARK (Poisson, Dixon-Coles, Monte Carlo, Elo).</p>'
+              +'</div>';
+          }
+          function generateMatchPages(matchsData){
+            console.log('  Generating match pages (SEO)...');
+            var tpl=fs.readFileSync('match.html','utf8');
+            if(!fs.existsSync('match')) fs.mkdirSync('match');
+            var keepFiles={};
+            (matchsData||[]).forEach(function(m){
+              if(!m.id||!m.home||!m.away) return;
+              var title=seoTitleFor(m);
+              var desc=seoDescriptionFor(m);
+              var canonical='https://iashark.com/match/'+m.id+'.html';
+              var metaBlock='<meta name="description" content="'+escHtml(desc)+'">'
+                +'<link rel="canonical" href="'+canonical+'">'
+                +'<meta property="og:type" content="website">'
+                +'<meta property="og:title" content="'+escHtml(title)+'">'
+                +'<meta property="og:description" content="'+escHtml(desc)+'">'
+                +'<meta property="og:url" content="'+canonical+'">'
+                +'<meta name="twitter:card" content="summary">'
+                +'<meta name="twitter:title" content="'+escHtml(title)+'">'
+                +'<meta name="twitter:description" content="'+escHtml(desc)+'">'
+                +'<script type="application/ld+json">'+seoJsonLdFor(m)+'</script>';
+              var page=tpl
+                .replace('<title>Analyse Match — IASHARK</title>','<title>'+escHtml(title)+'</title>')
+                .replace('<!--SEO_META--><!--/SEO_META-->', metaBlock)
+                .replace('<!--SEO_SUMMARY--><!--/SEO_SUMMARY-->', seoSummaryHtmlFor(m))
+                .replace('<!--FIXED_ID_SCRIPT--><!--/FIXED_ID_SCRIPT-->', '<script>var FIXED_MATCH_ID='+JSON.stringify(String(m.id))+';</script>')
+                .replace('<!--PRELOADED_MATCH_SCRIPT--><!--/PRELOADED_MATCH_SCRIPT-->', '<script>var PRELOADED_MATCH='+JSON.stringify(m).replace(/</g,'\\u003c')+';</script>');
+              fs.writeFileSync('match/'+m.id+'.html', page);
+              keepFiles[String(m.id)+'.html']=true;
+            });
+            try{
+              var existing=fs.readdirSync('match');
+              existing.forEach(function(f){
+                if(!keepFiles[f]) fs.unlinkSync('match/'+f);
+              });
+            }catch(e){}
+            console.log('  Match pages: '+Object.keys(keepFiles).length+' generees, '+((fs.readdirSync('match')||[]).length)+' au total dans /match');
+          }
+          function seoHomeSummaryHtml(matchsData){
+            var todays=(matchsData||[]).filter(function(m){return (m.date||'').split(' ')[0]===TODAY;});
+            if(!todays.length) return '';
+            var items=todays.map(function(m){
+              var heure=(m.date||'').split(' ')[1]||'';
+              var pari=(m.pari_rec&&!m.no_signal)?(' — Pronostic IA : '+escHtml(m.pari_rec)+' (confiance '+escHtml(String(m.conf||''))+'/10)'):'';
+              return '<li>'+escHtml(heure)+' — <strong>'+escHtml(m.home.n)+' vs '+escHtml(m.away.n)+'</strong>'+(m.league?' ('+escHtml(m.league)+')':'')+pari+'</li>';
+            }).join('');
+            return '<div style="padding:4px 0 12px"><h2 style="font-family:\'Bebas Neue\',sans-serif;font-size:20px;color:#e2e8f0;margin-bottom:10px">Analyses IA du jour — '+escHtml(TODAY)+'</h2><ul style="list-style:none;padding:0;margin:0;color:#94a3b8;font-size:12.5px;line-height:1.8">'+items+'</ul></div>';
+          }
+          function injectHomeSeoSummary(matchsData){
+            try{
+              var idxPath='index.html';
+              var tpl=fs.readFileSync(idxPath,'utf8');
+              var summary=seoHomeSummaryHtml(matchsData);
+              var replaced=tpl.replace(/<!--SEO_MATCHES_SUMMARY-->[\s\S]*?<!--\/SEO_MATCHES_SUMMARY-->/, '<!--SEO_MATCHES_SUMMARY-->'+summary+'<!--/SEO_MATCHES_SUMMARY-->');
+              fs.writeFileSync(idxPath, replaced);
+              console.log('  Home SEO summary injectee ('+(todaysCountSafe(matchsData))+' matchs du jour)');
+            }catch(e){console.log('  Erreur injection home SEO:',e.message);}
+          }
+          function todaysCountSafe(matchsData){
+            return (matchsData||[]).filter(function(m){return (m.date||'').split(' ')[0]===TODAY;}).length;
+          }
           var STATIC_SITEMAP_PAGES=[
             {loc:'https://iashark.com/',priority:'1.0'},
             {loc:'https://iashark.com/historique.html',priority:'0.8'},
@@ -1557,7 +1599,7 @@ jobs:
             });
             (matchsData||[]).forEach(function(m){
               if(!m.id)return;
-              urls.push('<url><loc>https://iashark.com/match.html?id='+m.id+'</loc><lastmod>'+TODAY+'</lastmod><changefreq>daily</changefreq><priority>0.9</priority></url>');
+              urls.push('<url><loc>https://iashark.com/match/'+m.id+'.html</loc><lastmod>'+TODAY+'</lastmod><changefreq>daily</changefreq><priority>0.9</priority></url>');
             });
             fs.writeFileSync('sitemap-fr.xml','<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'+urls.join('\n')+'\n</urlset>');
             fs.writeFileSync('sitemap.xml','<?xml version="1.0" encoding="UTF-8"?>\n<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n<sitemap><loc>https://iashark.com/sitemap-fr.xml</loc><lastmod>'+TODAY+'</lastmod></sitemap>\n</sitemapindex>');
@@ -1575,6 +1617,13 @@ jobs:
               var dd=new Date(TODAY+'T12:00:00Z'); dd.setDate(dd.getDate()-dback);
               resolveDates.push(dd.toISOString().split('T')[0]);
             }
+            // Rattrapage: les predictions encore scheduled/pending plus vieilles que 4 jours
+            // (match non retrouve la premiere fois) ne sont sinon plus jamais retentees.
+            var staleDates=(histo.predictions||[])
+              .filter(function(p){return (p.result==='scheduled'||p.result==='pending')&&p.date;})
+              .map(function(p){return p.date.substring(0,10);})
+              .filter(function(d,i,arr){return d<yDate&&resolveDates.indexOf(d)===-1&&arr.indexOf(d)===i;});
+            resolveDates=resolveDates.concat(staleDates);
             try{
               var yResults=[];
               for(var rdi=0; rdi<resolveDates.length; rdi++){
@@ -1783,8 +1832,10 @@ jobs:
             var fixtures = await getFixtures();
             console.log('Football fixtures:', fixtures.length);
             if(!fixtures.length){
-              fs.writeFileSync('data.json',JSON.stringify({matchs:[],combis:[]},null,2));
+              fs.writeFileSync('data.json',JSON.stringify({matchs:[]},null,2));
+              generateMatchPages([]);
               generateSitemaps([]);
+              injectHomeSeoSummary([]);
               console.log('\n=== JOUR SANS MATCHS - Resolution historique ===');
               var histoPathEarly='historique.json';
               var histoEarly={predictions:[],stats:{winrate:0,roi:0,total:0,streak:0,wins:0,losses:0},monthly:[],backtesting:{}};
@@ -1794,6 +1845,11 @@ jobs:
                 var ddE=new Date(TODAY+'T12:00:00Z'); ddE.setDate(ddE.getDate()-dbackE);
                 resolveDatesEarly.push(ddE.toISOString().split('T')[0]);
               }
+              var staleDatesEarly=(histoEarly.predictions||[])
+                .filter(function(p){return (p.result==='scheduled'||p.result==='pending')&&p.date;})
+                .map(function(p){return p.date.substring(0,10);})
+                .filter(function(d,i,arr){return d<resolveDatesEarly[resolveDatesEarly.length-1]&&resolveDatesEarly.indexOf(d)===-1&&arr.indexOf(d)===i;});
+              resolveDatesEarly=resolveDatesEarly.concat(staleDatesEarly);
               try{
                 var yResEarly=[];
                 for(var rdiE=0; rdiE<resolveDatesEarly.length; rdiE++){
@@ -1874,7 +1930,6 @@ jobs:
             } catch (e) {}
             console.log('Cache persistant : ' + Object.keys(matchCache).length + ' match(s) deja verrouille(s) depuis un run precedent - prediction conservee a l\'identique');
             var matchsData=[];
-            var forCombis=[];
             var standingsCache={};
             var SM_SEASON_GOALS_CACHE={};
             for(var fi=0;fi<fixtures.length;fi++){
@@ -2328,12 +2383,24 @@ jobs:
                 }
               }
               var poissonProbs=calcFinalProbs(lambdas.lambdaH,lambdas.lambdaA,eloStats);
+              var usingPinnacle=!!(pinnacleOdds&&pinnacleOdds.c1&&pinnacleOdds.cn&&pinnacleOdds.c2);
+              var marketOdds=usingPinnacle?pinnacleOdds:((odds.c1&&odds.c1!=='--'&&odds.cn&&odds.cn!=='--'&&odds.c2&&odds.c2!=='--')?{c1:parseFloat(odds.c1),cn:parseFloat(odds.cn),c2:parseFloat(odds.c2)}:null);
               var shinProbs=null;
-              if(pinnacleOdds&&pinnacleOdds.c1&&pinnacleOdds.cn&&pinnacleOdds.c2){var raw=shinProbabilities([pinnacleOdds.c1,pinnacleOdds.cn,pinnacleOdds.c2]);if(raw)shinProbs={p1:Math.round(raw[0]*100),pN:Math.round(raw[1]*100),p2:Math.round(raw[2]*100)};}
-              var prob1X=(shinProbs?shinProbs.p1:poissonProbs.p1)+(shinProbs?shinProbs.pN:poissonProbs.pN);
-              var probX2=(shinProbs?shinProbs.p2:poissonProbs.p2)+(shinProbs?shinProbs.pN:poissonProbs.pN);
-              var probAHdom=shinProbs?shinProbs.p1:poissonProbs.p1;
-              var probAHext=(shinProbs?shinProbs.p2:poissonProbs.p2)+(shinProbs?shinProbs.pN:poissonProbs.pN);
+              if(marketOdds){var raw=shinProbabilities([marketOdds.c1,marketOdds.cn,marketOdds.c2]);if(raw)shinProbs={p1:Math.round(raw[0]*100),pN:Math.round(raw[1]*100),p2:Math.round(raw[2]*100)};}
+              // Ancrage marche: le marche (cotes reelles, Pinnacle si dispo sinon mediane multi-bookmakers) recoit un poids dominant
+              // pour eviter qu'un lambda Poisson extreme sur petit echantillon (ligues mineures) ne produise une confiance illusoire.
+              var anchored=poissonProbs;
+              if(shinProbs){
+                var mw=usingPinnacle?0.65:0.55;
+                var ap1=Math.round(poissonProbs.p1*(1-mw)+shinProbs.p1*mw);
+                var ap2=Math.round(poissonProbs.p2*(1-mw)+shinProbs.p2*mw);
+                var apN=100-ap1-ap2;
+                anchored={p1:ap1,pN:apN,p2:ap2};
+              }
+              var prob1X=anchored.p1+anchored.pN;
+              var probX2=anchored.p2+anchored.pN;
+              var probAHdom=anchored.p1;
+              var probAHext=anchored.p2+anchored.pN;
               var allMarkets=[
                 {market:'Over 2.5',  cote:odds.co25,      prob:poissonProbs.over25, label:'Plus de 2.5 buts'},
                 {market:'Under 2.5', cote:odds.cu25,      prob:poissonProbs.under25,label:'Moins de 2.5 buts'},
@@ -2341,8 +2408,8 @@ jobs:
                 {market:'BTTS Non',  cote:odds.btts_non,  prob:poissonProbs.bttsN,  label:'Une equipe ne marque pas'},
                 {market:'DC 1X',     cote:odds.dc1x,      prob:prob1X,              label:'Victoire ou nul domicile'},
                 {market:'DC X2',     cote:odds.dc2x,      prob:probX2,              label:'Victoire ou nul exterieur'},
-                {market:'Victoire Domicile', cote:odds.c1, prob:shinProbs?shinProbs.p1:poissonProbs.p1, label:'Victoire seche domicile'},
-                {market:'Victoire Exterieur',cote:odds.c2, prob:shinProbs?shinProbs.p2:poissonProbs.p2, label:'Victoire seche exterieur'},
+                {market:'Victoire Domicile', cote:odds.c1, prob:anchored.p1, label:'Victoire seche domicile'},
+                {market:'Victoire Exterieur',cote:odds.c2, prob:anchored.p2, label:'Victoire seche exterieur'},
               ].filter(function(m){
                 return m.cote&&m.cote!=='--'&&parseFloat(m.cote)>=1.50;
               });
@@ -2471,7 +2538,9 @@ jobs:
                 mc_pN:poissonProbs.montecarlo?poissonProbs.montecarlo.pN:poissonProbs.pN,
                 mc_p2:poissonProbs.montecarlo?poissonProbs.montecarlo.p2:poissonProbs.p2,
                 pinnacle_p1:shinProbs?shinProbs.p1:null,pinnacle_pN:shinProbs?shinProbs.pN:null,pinnacle_p2:shinProbs?shinProbs.p2:null,
-                pinnacle_c1:pinnacleOdds?pinnacleOdds.c1:null,pinnacle_c2:pinnacleOdds?pinnacleOdds.c2:null,
+                pinnacle_c1:marketOdds?marketOdds.c1:null,pinnacle_c2:marketOdds?marketOdds.c2:null,
+                market_source:usingPinnacle?'Pinnacle (sharp)':(marketOdds?'Cotes moyennes multi-bookmakers':null),
+                final_p1:anchored.p1,final_pN:anchored.pN,final_p2:anchored.p2,
                 all_markets:allMarkets,node_kelly:nodeKelly,
                 lineup_home_formation:lineups&&lineups.home?lineups.home.formation:null,
                 lineup_away_formation:lineups&&lineups.away?lineups.away.formation:null,
@@ -2492,17 +2561,6 @@ jobs:
                 var found=(allMarkets||[]).find(function(m){return m.market.toLowerCase()===an.pari_rec.toLowerCase();});
                 if(found) an.cote_rec=String(found.cote);
               }
-              (function(){
-                var p=(an&&an.pari_rec||'').toLowerCase();
-                var coteRec;
-                if(p.includes('btts non'))coteRec=odds.btts_non;
-                else if(p.includes('x2'))coteRec=odds.dc2x;
-                else if(p.includes('1x'))coteRec=odds.dc1x;
-                else if(p.includes('over 2.5'))coteRec=odds.co25;
-                else coteRec=an&&an.cote_rec||odds.c1;
-                var deltas=[0,-0.03,-0.02,-0.05,+0.03];
-                if(odds.bookies&&odds.bookies.length&&coteRec&&coteRec!=='--'){odds.bookies.forEach(function(bk,i){bk.c=Math.max(1.01,parseFloat(coteRec)+(deltas[i]||0)).toFixed(2);});}
-              })();
               var kellyVal='2';
               var classementObj=null;
               if(entryH||entryA){
@@ -2533,15 +2591,15 @@ jobs:
                   if(val>0&&val<=1.0) val=val*10;
                   return Math.round(val*10)/10;
                 })(),
-                p1:an&&(an.p1||0)>0?(an.p1||0):(shinProbs?shinProbs.p1:poissonProbs.p1)||0,
-                pn:an&&(an.pn||0)>0?(an.pn||0):(shinProbs?shinProbs.pN:poissonProbs.pN)||0,
-                p2:an&&(an.p2||0)>0?(an.p2||0):(shinProbs?shinProbs.p2:poissonProbs.p2)||0,
+                p1:an&&(an.p1||0)>0?(an.p1||0):(anchored.p1||0),
+                pn:an&&(an.pn||0)>0?(an.pn||0):(anchored.pN||0),
+                p2:an&&(an.p2||0)>0?(an.p2||0):(anchored.p2||0),
                 po15:0,po25:an?(an.po25||0):0,btts:an?(an.btts||0):0,
                 c1:odds.c1,cn:odds.cn,c2:odds.c2,co15:odds.co15,co25:odds.co25,cu25:odds.cu25,
                 dc1x:odds.dc1x,dc2x:odds.dc2x,dc12:odds.dc12,cdc1x:odds.dc1x,cdc2x:odds.dc2x,
                 ah_dom:odds.ah_dom||'--',ah_ext:odds.ah_ext||'--',co35:odds.co35||'--',
                 cbtts:odds.btts_oui,cbtts_non:odds.btts_non,btts_oui:odds.btts_oui,btts_non:odds.btts_non,
-                bookies:odds.bookies,edge:an&&an.pari_rec?(function(){ function nm(s){return (s||'').toLowerCase().replace(/[^a-z0-9]/g,'');} var pn=nm(an.pari_rec); var mk=(allMarkets||[]).find(function(x){var xn=nm(x.market);return xn===pn||pn.includes(xn)||xn.includes(pn);}); return mk?mk.prob+'% (modele)':''; })():'',marche:an?(an.marche||'RESULTAT'):'RESULTAT',
+                edge:an&&an.pari_rec?(function(){ function nm(s){return (s||'').toLowerCase().replace(/[^a-z0-9]/g,'');} var pn=nm(an.pari_rec); var mk=(allMarkets||[]).find(function(x){var xn=nm(x.market);return xn===pn||pn.includes(xn)||xn.includes(pn);}); return mk?mk.prob+'% (modele)':''; })():'',marche:an?(an.marche||'RESULTAT'):'RESULTAT',
                 risque:risqueNorm,pari_rec:an?(an.pari_rec||''):'',
                 cote_rec:an?(an.cote_rec||''):'',
                 no_signal:an&&an.passe_ton_tour===true?true:!(an&&an.pari_rec),
@@ -2589,46 +2647,26 @@ jobs:
                 pinnacle_snapshot:pinnacleOdds?{c1:pinnacleOdds.c1,cn:pinnacleOdds.cn,c2:pinnacleOdds.c2,date:TODAY}:null,
               };
               matchsData.push(matchObj);
-              if(an&&!an.passe_ton_tour&&an.pari_rec&&(an.confiance||0)>=7.0){
-                var coteRecCheck=parseFloat(an.cote_rec)||0;
-                function normMarket(s){return (s||'').toLowerCase().replace(/[^a-z0-9]/g,'');}
-                var pariNorm=normMarket(an.pari_rec);
-                var chosenMarket=(allMarkets||[]).find(function(m){
-                  var mNorm=normMarket(m.market);
-                  return mNorm===pariNorm||pariNorm.includes(mNorm)||mNorm.includes(pariNorm);
-                });
-                var probCheck=chosenMarket?chosenMarket.prob:null;
-                var coteOk=coteRecCheck>=1.50&&coteRecCheck<=2.50;
-                var probaOk=probCheck===null?true:probCheck>=52;
-                if(coteOk&&probaOk){
-                  forCombis.push({home:home.name,away:away.name,pari:an.pari_rec,conf:an.confiance,prob:probCheck||0,cote:coteRecCheck});
-                  console.log('  QUALIFIE: conf='+an.confiance+' prob='+(probCheck!==null?probCheck+'%':'n/a')+' cote='+coteRecCheck+' marche='+an.pari_rec);
-                }else{console.log('  Filtre: conf='+an.confiance+' prob='+(probCheck!==null?probCheck+'%':'n/a')+' cote='+coteRecCheck);}
-              }
               console.log('  OK conf='+matchObj.conf+' edge='+matchObj.edge+' pari='+matchObj.pari_rec);
             }
             var allMatchsData = matchsData.slice();
             allMatchsData.sort(function(a,b){return (a.date||'').localeCompare(b.date||'');});
             matchsData.sort(function(a,b){var tA=(a.date||'').split(' ')[1]||'99:99';var tB=(b.date||'').split(' ')[1]||'99:99';return tA<tB?-1:tA>tB?1:0;});
-            var todayDate=new Date(TODAY+'T12:00:00Z');
-            var dayOfWeek=todayDate.getUTCDay();
-            var isSamedi=(dayOfWeek===6);
-            var isDimanche=(dayOfWeek===0);
-            var combisRaw=await genCombis(forCombis,isSamedi,isDimanche,matchsData);
-            var combisData=combisRaw.map(function(c){return{label:c.label,type:c.type,selections:c.selections,matchs:c.matchs,cote_totale:c.cote_totale,conseil:c.conseil};});
-            fs.writeFileSync('data.json',JSON.stringify({matchs:allMatchsData,combis:combisData},null,2));
-            console.log('\n=== DONE: '+allMatchsData.length+' matchs total | '+combisData.length+' combis ===');
+            fs.writeFileSync('data.json',JSON.stringify({matchs:allMatchsData},null,2));
+            console.log('\n=== DONE: '+allMatchsData.length+' matchs total ===');
             await updateHistorique(allMatchsData);
             await updateTransferts(fixtures);
             await updateRumeurs();
+            generateMatchPages(allMatchsData);
             generateSitemaps(allMatchsData);
+            injectHomeSeoSummary(allMatchsData);
           }
           main().catch(function(e){console.error('FATAL:',e.message,e.stack);process.exit(0);});
           JSEOF
       - name: Vider le cache uniquement si force_refresh demande
         run: |
           if [ "${{ github.event.inputs.force_refresh }}" = "true" ]; then
-            echo '{"matchs":[],"combis":[]}' > data.json
+            echo '{"matchs":[]}' > data.json
             echo "force_refresh=true : cache vide, tous les matchs seront recalcules"
           else
             echo "Cache conserve : les matchs deja verrouilles gardent leur prediction (matchCache actif)"
@@ -2650,6 +2688,6 @@ jobs:
         run: |
           git config user.name "IASHARK"
           git config user.email "yaramode81@gmail.com"
-          git add data.json historique.json transferts.json actus.json sitemap.xml sitemap-*.xml
+          git add data.json historique.json transferts.json actus.json sitemap.xml sitemap-*.xml match/ index.html
           git diff --staged --quiet || git commit -m "Daily update - $(date +%Y-%m-%d)"
           git push

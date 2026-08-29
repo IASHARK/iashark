@@ -1,0 +1,7 @@
+{
+  "_comment": "Couche future (MASTER i18n) pour restreindre/autoriser des fonctionnalites ou la commercialisation par pays sans refaire l'architecture. NON APPLIQUEE pour l'instant : aucune page ne lit ce fichier, c'est une structure de donnees preparee a l'avance, pas une fonctionnalite active. Langue != juridiction : ce fichier ne doit jamais etre rempli avec du faux contenu juridique local (voir DATA_LEAKAGE_POLICY.md pour le meme principe applique aux donnees de modele).",
+  "default": {"available": true, "features_restricted": []},
+  "countries": {
+    "FR": {"available": true, "features_restricted": [], "note": "Juridiction reelle d'IASHARK - seule juridiction validee juridiquement a ce jour."}
+  }
+}

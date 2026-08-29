@@ -1,1 +1,21 @@
 /*  /maintenance.html  200!
+
+# --- i18n (MASTER V2.1 SS19) ------------------------------------------
+# Ces regles restent INERTES tant que la ligne catch-all ci-dessus est
+# active : Netlify evalue les regles dans l'ordre et s'arrete a la
+# premiere qui matche, donc /*  ->  /maintenance.html  intercepte tout
+# avant que ces regles ne soient jamais atteintes. Elles ne prendront
+# effet que si/quand la pause du site est levee (decision de
+# l'utilisateur, jamais automatique).
+#
+# IMPORTANT - regle de securite pour ce fichier : n'ajouter une ligne
+# ci-dessous QUE pour une page dont /fr/<page> (et les 5 autres locales)
+# ont ete reellement generes par `npm run build:i18n` et commit. Ajouter
+# une redirection vers une page qui n'existe pas encore produirait un
+# 404 en cascade des que la pause serait levee. Etat actuel (2026-08-29) :
+# seul marches.html a ete genere pour les 6 locales - voir
+# IASHARK_V2_EXECUTION_STATE.md pour la liste a jour. PAS de redirection
+# de suggestion de langue sur "/" tant que les 6 pages d'accueil
+# localisees n'existent pas (sinon "/" redirigerait vers une page qui
+# n'existe pas).
+/marches.html            /fr/marches.html            301

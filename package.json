@@ -5,7 +5,8 @@
   "description": "IASHARK - moteur de pronostics IA football",
   "scripts": {
     "test": "node --test",
-    "backtest": "node scripts/backtest_historique.js"
+    "backtest": "node scripts/backtest_historique.js",
+    "build:i18n": "node scripts/build-locales.js"
   },
   "engines": {
     "node": ">=20"

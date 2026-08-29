@@ -1,11 +1,18 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="pt">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Marchés — IASHARK</title>
-<meta name="description" content="Analyse des marchés disponibles : probabilité modèle, probabilité de marché (retrait de marge), écart, qualité des données — par match et par catalogue de marchés.">
-<link rel="canonical" href="https://iashark.com/marches.html">
+<title>Mercados — IASHARK</title>
+<meta name="description" content="Análise dos mercados disponíveis: probabilidade do modelo, probabilidade de mercado (margem removida), diferença, qualidade dos dados — por jogo e catálogo completo de mercados.">
+<link rel="canonical" href="https://iashark.com/pt/marches.html">
+<link rel="alternate" hreflang="fr" href="https://iashark.com/fr/marches.html">
+<link rel="alternate" hreflang="en" href="https://iashark.com/en/marches.html">
+<link rel="alternate" hreflang="es" href="https://iashark.com/es/marches.html">
+<link rel="alternate" hreflang="de" href="https://iashark.com/de/marches.html">
+<link rel="alternate" hreflang="it" href="https://iashark.com/it/marches.html">
+<link rel="alternate" hreflang="pt" href="https://iashark.com/pt/marches.html">
+<link rel="alternate" hreflang="x-default" href="https://iashark.com/fr/marches.html">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#080c12;--card:#0d1520;--card2:#0f1a28;--cyan:#22d3ee;--cyan2:#06b6d4;--amber:#f59e0b;--green:#10b981;--red:#ef4444;--text:#e2e8f0;--muted:#4a6580;--border:rgba(255,255,255,0.06);--border-cyan:rgba(34,211,238,0.18);}
@@ -48,74 +55,74 @@ h1 span{color:var(--cyan);}
 <body>
 
 <header class="hdr">
-  <a href="/" class="logo"><span>IA</span>SHARK</a>
-  <span id="authHeaderSlot"><a href="/compte.html" class="btn-login">CONNEXION</a></span>
+  <a href="/pt/" class="logo"><span>IA</span>SHARK</a>
+  <span id="authHeaderSlot"><a href="/pt/compte.html" class="btn-login">ENTRAR</a></span>
 </header>
 
 <div class="wrap">
-  <h1>Analyse des <span>marchés</span></h1>
-  <p class="sub">Probabilité du modèle, probabilité de marché (marge retirée) et écart entre les deux — par match, et catalogue complet des marchés supportés par le moteur.</p>
+  <h1>Análise de <span>mercados</span></h1>
+  <p class="sub">Probabilidade do modelo, probabilidade de mercado (margem removida) e a diferença entre as duas — por jogo, e catálogo completo dos mercados suportados pelo motor.</p>
 
-  <div class="sec-title">MARCHÉS DU JOUR</div>
+  <div class="sec-title">MERCADOS DE HOJE</div>
   <div class="filters">
     <select class="fsel" id="filterMarket" onchange="renderMatchMarkets()">
-      <option value="">Tous les marchés</option>
-      <option value="over25">Plus de 2,5 buts</option>
-      <option value="under25">Moins de 2,5 buts</option>
-      <option value="btts_oui">BTTS Oui</option>
-      <option value="btts_non">BTTS Non</option>
+      <option value="">Todos os mercados</option>
+      <option value="over25">Mais de 2,5 golos</option>
+      <option value="under25">Menos de 2,5 golos</option>
+      <option value="btts_oui">Ambas marcam Sim</option>
+      <option value="btts_non">Ambas marcam Não</option>
       <option value="dc1x">DC 1X</option>
       <option value="dc_x2">DC X2</option>
-      <option value="victoire_dom">Victoire domicile</option>
-      <option value="victoire_ext">Victoire extérieur</option>
+      <option value="victoire_dom">Vitória casa</option>
+      <option value="victoire_ext">Vitória fora</option>
     </select>
     <select class="fsel" id="sortMarket" onchange="renderMatchMarkets()">
-      <option value="date">Trier : heure</option>
-      <option value="ecart">Trier : écart modèle/marché</option>
-      <option value="qualite">Trier : qualité des données</option>
+      <option value="date">Ordenar: hora</option>
+      <option value="ecart">Ordenar: diferença modelo/mercado</option>
+      <option value="qualite">Ordenar: qualidade dos dados</option>
     </select>
   </div>
-  <div id="matchMarketsWrap"><div class="empty-state">CHARGEMENT…</div></div>
+  <div id="matchMarketsWrap"><div class="empty-state">A CARREGAR...</div></div>
 
-  <div class="sec-title">CATALOGUE DES MARCHÉS</div>
+  <div class="sec-title">CATÁLOGO DE MERCADOS</div>
   <table class="mtable">
-    <thead><tr><th>Marché</th><th>Catégorie</th><th>Statut</th></tr></thead>
+    <thead><tr><th>Mercado</th><th>Categoria</th><th>Estado</th></tr></thead>
     <tbody id="registryBody"></tbody>
   </table>
   <p style="font-family:'Space Mono',monospace;font-size:8px;color:var(--muted);margin-top:10px;line-height:1.8;">
-    <b style="color:var(--green);">MODÉLISÉ ET VALIDÉ</b> : modèle + résolution automatique + tests — probabilité affichée sur les fiches match.<br>
-    <b style="color:var(--amber);">EXPÉRIMENTAL</b> : modèle testé mathématiquement, résolution automatique pas encore implémentée.<br>
-    <b style="color:var(--muted);">NON SUPPORTÉ</b> : nécessite une donnée ou un modèle qui n'existe pas encore.
+    <b style="color:var(--green);">MODELADO E VALIDADO</b> : modelo + resolução automática + testes — probabilidade apresentada nas fichas de jogo.<br>
+    <b style="color:var(--amber);">EXPERIMENTAL</b> : modelo testado matematicamente, resolução automática ainda não implementada.<br>
+    <b style="color:var(--muted);">NÃO SUPORTADO</b> : requer um dado ou um modelo que ainda não existe.
   </p>
 </div>
 
 <nav class="nav-bottom">
-  <a href="/" class="nav-item">
+  <a href="/pt/" class="nav-item">
     <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5L12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg></div>
-    <div class="nav-lbl">ACCUEIL</div>
+    <div class="nav-lbl">INÍCIO</div>
   </a>
-  <a href="/marches.html" class="nav-item active">
+  <a href="/pt/marches.html" class="nav-item active">
     <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 17V9M13 17V5M8 17v-4"/></svg></div>
-    <div class="nav-lbl">MARCHÉS</div>
+    <div class="nav-lbl">MERCADOS</div>
   </a>
-  <a href="/pro.html" class="nav-item">
+  <a href="/pt/pro.html" class="nav-item">
     <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.9 6.6L22 9.3l-5 4.9L18.2 22 12 18.3 5.8 22 7 14.2 2 9.3l7.1-.7z"/></svg></div>
-    <div class="nav-lbl">OUTILS</div>
+    <div class="nav-lbl">FERRAMENTAS</div>
   </a>
   <a href="/blog/" class="nav-item">
     <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg></div>
-    <div class="nav-lbl">GUIDES</div>
+    <div class="nav-lbl">GUIAS</div>
   </a>
-  <a href="/compte.html" class="nav-item">
+  <a href="/pt/compte.html" class="nav-item">
     <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg></div>
-    <div class="nav-lbl">COMPTE</div>
+    <div class="nav-lbl">CONTA</div>
   </a>
 </nav>
 
 <div style="max-width:720px;margin:24px auto 0;padding:0 20px 20px;text-align:center;">
   <div style="font-family:'Space Mono',monospace;font-size:8px;color:rgba(74,101,128,0.5);line-height:2;letter-spacing:1px;">
-    <div>⚠️ LE JEU PEUT ÊTRE DANGEREUX — JOUEZ RESPONSABLE · INTERDIT AUX MOINS DE 18 ANS</div>
-    <div>Aide : <a href="https://www.joueurs-info-service.fr" style="color:rgba(34,211,238,0.4);text-decoration:none;">joueurs-info-service.fr</a> · 09 74 75 13 13</div>
+    <div>⚠️ APOSTAR PODE SER PERIGOSO — JOGUE COM RESPONSABILIDADE · PROIBIDO A MENORES DE 18 ANOS</div>
+    <div>Ajuda (França): <a href="https://www.joueurs-info-service.fr" style="color:rgba(34,211,238,0.4);text-decoration:none;">joueurs-info-service.fr</a> · 09 74 75 13 13</div>
   </div>
 </div>
 
@@ -125,32 +132,32 @@ h1 span{color:var(--cyan);}
 // Duplique volontairement les donnees plutot qu'un import (site statique
 // sans bundler, meme pattern que MARKET_LABELS ailleurs sur le site).
 var MARKET_REGISTRY=[
-  {label:'Résultat du match (1X2)',category:'1X2',status:'validated'},
-  {label:'Double Chance (1X / X2 / 12)',category:'1X2',status:'validated'},
-  {label:'Draw No Bet',category:'1X2',status:'validated'},
-  {label:'Total de buts (O/U 0.5 à 6.5)',category:'BUTS',status:'validated'},
-  {label:'Totaux par équipe',category:'BUTS',status:'experimental'},
-  {label:'BTTS',category:'BUTS',status:'validated'},
-  {label:'Clean sheet',category:'BUTS',status:'experimental'},
-  {label:'Gagne sans encaisser',category:'BUTS',status:'experimental'},
-  {label:'Score exact',category:'BUTS',status:'experimental'},
-  {label:'Bandes de buts',category:'BUTS',status:'experimental'},
-  {label:'Handicap (lignes entières/demi)',category:'HANDICAP',status:'validated'},
-  {label:'Handicap asiatique (quart .25/.75)',category:'HANDICAP',status:'unsupported'},
-  {label:'Marchés mi-temps',category:'TEMPS',status:'unsupported'},
-  {label:'Corners',category:'CORNERS',status:'unsupported'},
-  {label:'Cartons',category:'CARTONS',status:'unsupported'},
-  {label:'Player props',category:'JOUEURS',status:'unsupported'},
+  {label:'Resultado do jogo (1X2)',category:'1X2',status:'validated'},
+  {label:'Dupla Hipótese (1X / X2 / 12)',category:'1X2',status:'validated'},
+  {label:'Empate Anula Aposta',category:'1X2',status:'validated'},
+  {label:'Total de golos (O/U 0.5 a 6.5)',category:'BUTS',status:'validated'},
+  {label:'Totais por equipa',category:'BUTS',status:'experimental'},
+  {label:'Ambas marcam',category:'BUTS',status:'validated'},
+  {label:'Sem sofrer golos',category:'BUTS',status:'experimental'},
+  {label:'Vence sem sofrer',category:'BUTS',status:'experimental'},
+  {label:'Resultado exato',category:'BUTS',status:'experimental'},
+  {label:'Bandas de golos',category:'BUTS',status:'experimental'},
+  {label:'Handicap (linhas inteiras/meias)',category:'HANDICAP',status:'validated'},
+  {label:'Handicap asiático (quarto .25/.75)',category:'HANDICAP',status:'unsupported'},
+  {label:'Mercados de 1ª parte',category:'TEMPS',status:'unsupported'},
+  {label:'Cantos',category:'CORNERS',status:'unsupported'},
+  {label:'Cartões',category:'CARTONS',status:'unsupported'},
+  {label:'Props de jogadores',category:'JOUEURS',status:'unsupported'},
 ];
-var STATUS_LABEL={validated:'MODÉLISÉ ET VALIDÉ',experimental:'EXPÉRIMENTAL',unsupported:'NON SUPPORTÉ'};
-var CATEGORY_LABEL={'1X2':'1X2','BUTS':'BUTS','HANDICAP':'HANDICAP','TEMPS':'TEMPS','CORNERS':'CORNERS','CARTONS':'CARTONS','JOUEURS':'JOUEURS'};
+var STATUS_LABEL={validated:'MODELADO E VALIDADO',experimental:'EXPERIMENTAL',unsupported:'NÃO SUPORTADO'};
+var CATEGORY_LABEL={'1X2':'1X2','BUTS':'GOLOS','HANDICAP':'HANDICAP','TEMPS':'1ª PARTE','CORNERS':'CANTOS','CARTONS':'CARTÕES','JOUEURS':'JOGADORES'};
 document.getElementById('registryBody').innerHTML=MARKET_REGISTRY.map(function(m){
   return '<tr><td>'+m.label+'</td><td style="color:var(--muted);font-family:Space Mono,monospace;font-size:9px;">'+(CATEGORY_LABEL[m.category]||m.category)+'</td>'
     +'<td><span class="status-badge status-'+m.status+'">'+STATUS_LABEL[m.status]+'</span></td></tr>';
 }).join('');
 
-var DATA_QUALITY_LABELS={'Élevée':'ÉLEVÉE','Moyenne':'MOYENNE','Faible':'FAIBLE'};
-var MARKET_KEY_LABELS={over25:'Plus de 2,5 buts',under25:'Moins de 2,5 buts',btts_oui:'BTTS Oui',btts_non:'BTTS Non',dc1x:'DC 1X',dc_x2:'DC X2',victoire_dom:'Victoire domicile',victoire_ext:'Victoire extérieur'};
+var DATA_QUALITY_LABELS={'Élevée':'ALTA','Moyenne':'MÉDIA','Faible':'BAIXA'};
+var MARKET_KEY_LABELS={over25:'Mais de 2,5 golos',under25:'Menos de 2,5 golos',btts_oui:'Ambas marcam Sim',btts_non:'Ambas marcam Não',dc1x:'DC 1X',dc_x2:'DC X2',victoire_dom:'Vitória casa',victoire_ext:'Vitória fora'};
 function getMarketKey(pariRec){
   var s=(pariRec||'').toLowerCase();
   if(s.includes('under 2.5'))return 'under25';
@@ -188,10 +195,10 @@ function renderMatchMarkets(){
   });
   var wrap=document.getElementById('matchMarketsWrap');
   if(!list.length){
-    wrap.innerHTML='<div class="empty-state">AUCUN MARCHÉ EXPLOITABLE AUJOURD\'HUI<br><span style="color:rgba(74,101,128,0.6)">Revenez plus tard, ou consultez le catalogue des marchés ci-dessous.</span></div>';
+    wrap.innerHTML='<div class="empty-state">NENHUM MERCADO EXPLORÁVEL HOJE<br><span style="color:rgba(74,101,128,0.6)">Volta mais tarde, ou consulta o catálogo de mercados abaixo.</span></div>';
     return;
   }
-  wrap.innerHTML='<table class="mtable"><thead><tr><th>Match</th><th>Heure</th><th>Marché</th><th>Proba modèle</th><th>Cote</th><th>Écart</th><th>Qualité</th></tr></thead><tbody>'
+  wrap.innerHTML='<table class="mtable"><thead><tr><th>Jogo</th><th>Hora</th><th>Mercado</th><th>Prob. modelo</th><th>Odd</th><th>Diferença</th><th>Qualidade</th></tr></thead><tbody>'
     +list.map(function(m){
       var hn=(m.home&&m.home.n)||'?', an=(m.away&&m.away.n)||'?';
       var heure=(m.date||'').split(' ')[1]||'';

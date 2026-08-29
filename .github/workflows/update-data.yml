@@ -37,6 +37,8 @@ jobs:
           const { resolveMarketWin } = require('./lib/resolvers.js');
           const { parseOdds } = require('./lib/odds.js');
           const { pickMarketDeterministic, computeRiskLabel, computeModelAgreement, computeDataQualityScore, computeReliability } = require('./lib/decision.js');
+          const I18N_LOCALES = require('./i18n/locales.json');
+          const I18N_PAGES = require('./scripts/i18n-manifest.js');
           // Identifiant du generateur de predictions actif. A incrementer/renommer
           // quand le moteur change reellement (ex: introduction du moteur V2.1
           // multi-modeles §10 du MASTER) pour pouvoir comparer les performances
@@ -1188,8 +1190,37 @@ jobs:
               urls.push('<url><loc>https://iashark.com/match/'+m.id+'.html</loc><lastmod>'+TODAY+'</lastmod><changefreq>daily</changefreq><priority>0.9</priority></url>');
             });
             fs.writeFileSync('sitemap-fr.xml','<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'+urls.join('\n')+'\n</urlset>');
-            fs.writeFileSync('sitemap.xml','<?xml version="1.0" encoding="UTF-8"?>\n<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n<sitemap><loc>https://iashark.com/sitemap-fr.xml</loc><lastmod>'+TODAY+'</lastmod></sitemap>\n</sitemapindex>');
+            var sitemapFiles = generateLocalizedSitemaps();
+            var indexEntries = ['<sitemap><loc>https://iashark.com/sitemap-fr.xml</loc><lastmod>'+TODAY+'</lastmod></sitemap>']
+              .concat(sitemapFiles.map(function(f){ return '<sitemap><loc>https://iashark.com/'+f+'</loc><lastmod>'+TODAY+'</lastmod></sitemap>'; }));
+            fs.writeFileSync('sitemap.xml','<?xml version="1.0" encoding="UTF-8"?>\n<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'+indexEntries.join('\n')+'\n</sitemapindex>');
             console.log('  Sitemap done: '+urls.length+' urls');
+          }
+          // Sitemaps par locale (MASTER SS19 - "sitemap international") : ne
+          // liste QUE les pages reellement generees par scripts/build-locales.js
+          // (I18N_PAGES, meme source que le build lui-meme - jamais de page
+          // vide/non traduite indexee). hreflang complet via xhtml:link sur
+          // chaque <url>, y compris x-default vers la version FR par defaut.
+          function generateLocalizedSitemaps(){
+            var SITE='https://iashark.com';
+            var files=[];
+            I18N_LOCALES.supported.forEach(function(locale){
+              var urls = I18N_PAGES.map(function(page){
+                var slug = page.file === 'index.html' ? '' : page.file;
+                var loc = SITE+'/'+locale+'/'+slug;
+                var alternates = I18N_LOCALES.supported.map(function(l2){
+                  var altSlug = page.file === 'index.html' ? '' : page.file;
+                  return '<xhtml:link rel="alternate" hreflang="'+l2+'" href="'+SITE+'/'+l2+'/'+altSlug+'"/>';
+                }).join('');
+                alternates += '<xhtml:link rel="alternate" hreflang="x-default" href="'+SITE+'/'+I18N_LOCALES.default+'/'+slug+'"/>';
+                return '<url><loc>'+loc+'</loc><lastmod>'+TODAY+'</lastmod><changefreq>weekly</changefreq><priority>0.5</priority>'+alternates+'</url>';
+              });
+              var fname = 'sitemap-'+locale+'-i18n.xml';
+              fs.writeFileSync(fname, '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n'+urls.join('\n')+'\n</urlset>');
+              files.push(fname);
+            });
+            console.log('  Localized sitemaps: '+files.length+' file(s), '+I18N_PAGES.length+' page(s) each');
+            return files;
           }
           async function updateHistorique(matchsData){
             console.log('\n=== HISTORIQUE UPDATE ===');

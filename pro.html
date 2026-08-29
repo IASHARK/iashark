@@ -313,6 +313,13 @@ body{background:#080c12;color:var(--text);font-family:'DM Sans',sans-serif;min-h
 
 <div class="toast" id="toast"><span style="color:var(--green)">✓</span>&nbsp;<span id="toastTxt"></span></div>
 
+<div style="max-width:1100px;margin:24px auto 80px;padding:0 20px;text-align:center;">
+  <div style="font-family:'Space Mono',monospace;font-size:8px;color:rgba(74,101,128,0.5);line-height:2;letter-spacing:1px;">
+    <div>⚠️ LE JEU PEUT ÊTRE DANGEREUX — JOUEZ RESPONSABLE · INTERDIT AUX MOINS DE 18 ANS</div>
+    <div>Aide : <a href="https://www.joueurs-info-service.fr" style="color:rgba(34,211,238,0.4);text-decoration:none;">joueurs-info-service.fr</a> · 09 74 75 13 13</div>
+  </div>
+</div>
+
 <nav class="nav-bottom">
   <a href="/" class="nav-item">
     <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5L12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg></div>
@@ -484,6 +491,7 @@ async function fetchMatchData(){
     return await resp2.json();
   }
 }
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
 async function loadAll(){
   loadLocalData();
   try{
@@ -570,7 +578,7 @@ function renderSelections(){
     return '<div class="card-item">'
       +'<div class="card-top">'
       +'<div class="card-info"><div class="mname">'+hn+' vs '+an+'</div><div class="mleague">'+(m.ligue_icon||'🏆')+' '+m.league+' · '+label+' · '+heure+'</div>'
-      +(note?'<div class="saved-note">📝 '+note+'</div>':'')
+      +(note?'<div class="saved-note">📝 '+esc(note)+'</div>':'')
       +'</div>'
       +'<div class="cote-v">'+(m.cote_rec||'—')+'</div>'
       +'<div class="cbadge '+cc+'">'+confN.toFixed(1)+'</div>'

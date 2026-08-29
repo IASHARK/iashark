@@ -608,6 +608,152 @@ var PAGES = [
         return "if(s.includes('over 2.5'))return '" + esc(n.over25) + "';\n  if(s.includes('under 2.5'))return '" + esc(n.under25) + "';\n  if(s.includes('over 1.5'))return '" + esc(n.over15) + "';\n  if(s.includes('btts non')||s.includes('une équipe ne marque'))return '" + esc(nat.btts_non_natural) + "';\n  if(s.includes('btts')||s.includes('les deux équipes'))return '" + esc(nat.btts_oui_natural) + "';\n  if(s.includes('dc 1x')||s.includes('1x'))return '" + esc(n.dc1x) + "';\n  if(s.includes('dc x2')||s.includes('x2'))return '" + esc(n.dc_x2) + "';";
       }}
     ]
+  },
+  {
+    file: "compte.html",
+    metas: {
+      fr: {title: "IASHARK — Mon Compte", description: "Gère ton compte, ton abonnement Outils et tes préférences IASHARK."},
+      en: {title: "IASHARK — My Account", description: "Manage your account, your Tools subscription and your IASHARK preferences."},
+      es: {title: "IASHARK — Mi Cuenta", description: "Gestiona tu cuenta, tu suscripción Herramientas y tus preferencias IASHARK."},
+      de: {title: "IASHARK — Mein Konto", description: "Verwalte dein Konto, dein Tools-Abonnement und deine IASHARK-Einstellungen."},
+      it: {title: "IASHARK — Il Mio Account", description: "Gestisci il tuo account, il tuo abbonamento Strumenti e le tue preferenze IASHARK."},
+      pt: {title: "IASHARK — A Minha Conta", description: "Gere a tua conta, a tua subscrição Ferramentas e as tuas preferências IASHARK."}
+    },
+    replacements: [
+      {find: '<span class="hdr-pill" id="hdrPill">MON COMPTE</span>', build: function(d){ return '<span class="hdr-pill" id="hdrPill">' + d.compte_page.hdr_pill_default + '</span>'; }},
+      {find: '<div class="loading-lbl">VÉRIFICATION...</div>', build: function(d){ return '<div class="loading-lbl">' + d.compte_page.loading_verification + '</div>'; }},
+      {find: '<div class="auth-title">Mon <span>Compte</span></div>', build: function(d, l, esc){
+        var parts = d.auth.title.split(" ");
+        var last = parts.pop();
+        return '<div class="auth-title">' + (parts.join(" ") + " ") + '<span>' + last + '</span></div>';
+      }},
+      {find: '<div class="auth-sub">Accède à tes sélections Outils, ton tracker et tes statistiques personnalisées.</div>', build: function(d){ return '<div class="auth-sub">' + d.auth.subtitle + '</div>'; }},
+      {find: '<button class="auth-tab active" id="tabLoginBtn" onclick="switchAuthTab(\'login\')">CONNEXION</button>', build: function(d){ return '<button class="auth-tab active" id="tabLoginBtn" onclick="switchAuthTab(\'login\')">' + d.auth.tab_login + '</button>'; }},
+      {find: '<button class="auth-tab" id="tabSignupBtn" onclick="switchAuthTab(\'signup\')">INSCRIPTION</button>', build: function(d){ return '<button class="auth-tab" id="tabSignupBtn" onclick="switchAuthTab(\'signup\')">' + d.auth.tab_signup + '</button>'; }},
+      {find: '<label>EMAIL</label>\n          <input type="email" class="form-input" id="loginEmail" placeholder="ton@email.com" autocomplete="email">',
+       build: function(d){ return '<label>' + d.auth.email + '</label>\n          <input type="email" class="form-input" id="loginEmail" placeholder="' + d.compte_page.email_placeholder + '" autocomplete="email">'; }},
+      {find: '<label>MOT DE PASSE</label>', build: function(d){ return '<label>' + d.auth.password + '</label>'; }},
+      {find: '<button class="btn-primary" id="btnLogin" onclick="doLogin()">SE CONNECTER →</button>', build: function(d){ return '<button class="btn-primary" id="btnLogin" onclick="doLogin()">' + d.auth.login_btn + '</button>'; }},
+      {find: '<div class="forgot-link" onclick="forgotPassword()">Mot de passe oublié ?</div>', build: function(d){ return '<div class="forgot-link" onclick="forgotPassword()">' + d.auth.forgot_password + '</div>'; }},
+      {find: '<label>EMAIL</label>\n          <input type="email" class="form-input" id="signupEmail" placeholder="ton@email.com" autocomplete="email">',
+       build: function(d){ return '<label>' + d.auth.email + '</label>\n          <input type="email" class="form-input" id="signupEmail" placeholder="' + d.compte_page.email_placeholder + '" autocomplete="email">'; }},
+      {find: '<label>MOT DE PASSE (min. 8 caractères)</label>\n          <input type="password" class="form-input" id="signupPwd" placeholder="••••••••" autocomplete="new-password">',
+       build: function(d){ return '<label>' + d.auth.password + ' (' + d.auth.min_chars + ')</label>\n          <input type="password" class="form-input" id="signupPwd" placeholder="••••••••" autocomplete="new-password">'; }},
+      {find: '<label>CONFIRMER LE MOT DE PASSE</label>', build: function(d){ return '<label>' + d.auth.confirm_password + '</label>'; }},
+      {find: '<button class="btn-primary" id="btnSignup" onclick="doSignup()">CRÉER MON COMPTE →</button>', build: function(d){ return '<button class="btn-primary" id="btnSignup" onclick="doSignup()">' + d.auth.signup_btn + '</button>'; }},
+      {find: '<span class="ubadge free" id="planBadge">GRATUIT</span>', build: function(d){ return '<span class="ubadge free" id="planBadge">' + d.account.plan_free_badge + '</span>'; }},
+      {find: "<span class=\"ubadge since\" id=\"sinceBadge\">MEMBRE DEPUIS —</span>", build: function(d){ return '<span class="ubadge since" id="sinceBadge">' + d.account.member_since + ' —</span>'; }},
+      {find: '<div class="dash-card-title">HISTORIQUE</div>', build: function(d){ return '<div class="dash-card-title">' + d.account.dashboard_history + '</div>'; }},
+      {find: '<div class="dash-card-val"><a href="/historique.html" style="color:var(--cyan);">VOIR →</a></div>', build: function(d){ return '<div class="dash-card-val"><a href="/historique.html" style="color:var(--cyan);">' + d.compte_page.dash_view + '</a></div>'; }},
+      {find: '<div class="dash-card-title">ESPACE OUTILS</div>', build: function(d){ return '<div class="dash-card-title">' + d.account.dashboard_tools + '</div>'; }},
+      {find: '<div class="dash-card-val"><a href="/pro.html" style="color:var(--amber);">ACCÈS →</a></div>', build: function(d){ return '<div class="dash-card-val"><a href="/pro.html" style="color:var(--amber);">' + d.compte_page.dash_access + '</a></div>'; }},
+      {find: '<div class="section-title">ABONNEMENT</div>', build: function(d){ return '<div class="section-title">' + d.account.plan_section_title + '</div>'; }},
+      {find: '<span class="plan-status free" id="planStatusTxt">Plan Gratuit</span>', build: function(d){ return '<span class="plan-status free" id="planStatusTxt">' + d.account.plan_free_status + '</span>'; }},
+      {find: "<div class=\"plan-desc\" id=\"planDescTxt\">Tu utilises la version gratuite d'IASHARK — le match à la plus forte probabilité modèle du jour est accessible gratuitement.</div>",
+       build: function(d){ return '<div class="plan-desc" id="planDescTxt">' + d.account.plan_free_desc + '</div>'; }},
+      {find: '<div class="pro-feature"><span class="ck">＋</span> Toutes les sélections à forte probabilité modèle</div>', build: function(d){ return '<div class="pro-feature"><span class="ck">＋</span> ' + d.tools_page.pw_feat1_desc.replace("Les pronostics à plus forte", "Toutes les sélections à forte") + '</div>'; }},
+      {find: '<div class="pro-feature"><span class="ck">＋</span> Historique complet et détaillé</div>', build: function(d, l, esc){
+        var m = {en:"Full, detailed history",es:"Historial completo y detallado",de:"Vollständiger, detaillierter Verlauf",it:"Cronologia completa e dettagliata",pt:"Histórico completo e detalhado",fr:"Historique complet et détaillé"};
+        return '<div class="pro-feature"><span class="ck">＋</span> ' + m[l] + '</div>';
+      }},
+      {find: '<div class="pro-feature"><span class="ck">＋</span> Analyses approfondies par match</div>', build: function(d, l, esc){
+        var m = {en:"In-depth analysis per match",es:"Análisis en profundidad por partido",de:"Ausführliche Analysen pro Spiel",it:"Analisi approfondite per partita",pt:"Análises aprofundadas por jogo",fr:"Analyses approfondies par match"};
+        return '<div class="pro-feature"><span class="ck">＋</span> ' + m[l] + '</div>';
+      }},
+      {find: '<a href="/pro.html" class="btn-amber" id="planCta">DÉCOUVRIR OUTILS →</a>', build: function(d){ return '<a href="/pro.html" class="btn-amber" id="planCta">' + d.cta.discover_tools + '</a>'; }},
+      {find: '<div class="section-title">SÉCURITÉ</div>', build: function(d){ return '<div class="section-title">' + d.account.security_title + '</div>'; }},
+      {find: "<button class=\"sec-form-toggle\" onclick=\"toggleSecPanel('pwd')\">Changer mon mot de passe <span>+</span></button>", build: function(d){ return "<button class=\"sec-form-toggle\" onclick=\"toggleSecPanel('pwd')\">" + d.account.change_password + " <span>+</span></button>"; }},
+      {find: '<label>NOUVEAU MOT DE PASSE (min. 8 caractères)</label>', build: function(d){ return '<label>' + d.compte_page.new_password_label + ' (' + d.auth.min_chars + ')</label>'; }},
+      {find: '<button class="btn-primary" id="btnChangePwd" onclick="changePassword()">METTRE À JOUR →</button>', build: function(d){ return '<button class="btn-primary" id="btnChangePwd" onclick="changePassword()">' + d.compte_page.update_btn + '</button>'; }},
+      {find: "<button class=\"sec-form-toggle\" onclick=\"toggleSecPanel('email')\">Changer mon email <span>+</span></button>", build: function(d){ return "<button class=\"sec-form-toggle\" onclick=\"toggleSecPanel('email')\">" + d.account.change_email + " <span>+</span></button>"; }},
+      {find: '<label>NOUVELLE ADRESSE EMAIL</label>\n          <input type="email" class="form-input" id="newEmail" placeholder="nouveau@email.com">',
+       build: function(d){ return '<label>' + d.compte_page.new_email_label + '</label>\n          <input type="email" class="form-input" id="newEmail" placeholder="' + d.compte_page.new_email_placeholder + '">'; }},
+      {find: '<button class="btn-primary" id="btnChangeEmail" onclick="changeEmail()">METTRE À JOUR →</button>', build: function(d){ return '<button class="btn-primary" id="btnChangeEmail" onclick="changeEmail()">' + d.compte_page.update_btn + '</button>'; }},
+      {find: '<div class="section-title">AIDE &amp; SUPPORT</div>', build: function(d){ return '<div class="section-title">' + d.account.help_title + '</div>'; }},
+      {find: '<a href="mailto:contact@iashark.com" class="help-row">Nous contacter <span class="arrow">→</span></a>', build: function(d){ return '<a href="mailto:contact@iashark.com" class="help-row">' + d.account.contact_us + ' <span class="arrow">→</span></a>'; }},
+      {find: '<a href="/a-propos.html" class="help-row">Notre méthode <span class="arrow">→</span></a>', build: function(d){ return '<a href="/a-propos.html" class="help-row">' + d.account.our_method + ' <span class="arrow">→</span></a>'; }},
+      {find: '<div class="section-title">MES DONNÉES</div>', build: function(d){ return '<div class="section-title">' + d.account.data_title + '</div>'; }},
+      {find: '<div class="danger-txt">Télécharge une copie de tes données IASHARK (compte + historique de suivi local) au format JSON</div>',
+       build: function(d){ return '<div class="danger-txt">' + d.account.export_desc + '</div>'; }},
+      {find: '<button class="danger-btn" id="btnExport" onclick="exportMyData()" style="color:var(--cyan);border-color:var(--bc);">EXPORTER</button>',
+       build: function(d){ return '<button class="danger-btn" id="btnExport" onclick="exportMyData()" style="color:var(--cyan);border-color:var(--bc);">' + d.account.export_btn + '</button>'; }},
+      {find: '<div class="danger-txt">Demander la suppression de mon compte (traité manuellement sous 48h)</div>', build: function(d){ return '<div class="danger-txt">' + d.account.danger_delete_desc + '</div>'; }},
+      {find: '<button class="danger-btn" onclick="requestDeletion()">DEMANDER</button>', build: function(d){ return '<button class="danger-btn" onclick="requestDeletion()">' + d.account.danger_delete_btn + '</button>'; }},
+      {find: '<button class="btn-logout" onclick="doLogout()">SE DÉCONNECTER</button>', build: function(d){ return '<button class="btn-logout" onclick="doLogout()">' + d.cta.logout + '</button>'; }},
+      {find:
+        '    <div>⚠️ LE JEU PEUT ÊTRE DANGEREUX — JOUEZ RESPONSABLE · INTERDIT AUX MOINS DE 18 ANS</div>\n' +
+        '    <div>Aide : <a href="https://www.joueurs-info-service.fr" style="color:rgba(34,211,238,0.4);text-decoration:none;">joueurs-info-service.fr</a> · 09 74 75 13 13</div>',
+       build: function(d){
+        var f = d.footer;
+        return '    <div>⚠️ ' + f.disclaimer_warning + '</div>\n' +
+          '    <div>' + f.disclaimer_help_label + ' <a href="https://www.joueurs-info-service.fr" style="color:rgba(34,211,238,0.4);text-decoration:none;">' + f.disclaimer_help_site + '</a> · ' + f.disclaimer_help_phone + '</div>';
+      }},
+      {find: '<div class="nav-lbl">ACCUEIL</div>', build: function(d){ return '<div class="nav-lbl">' + d.nav.home + '</div>'; }},
+      {find: '<div class="nav-lbl">MARCHÉS</div>', build: function(d){ return '<div class="nav-lbl">' + d.nav.markets + '</div>'; }},
+      {find: '<div class="nav-lbl">HISTORIQUE</div>', build: function(d){ return '<div class="nav-lbl">' + d.nav.history + '</div>'; }},
+      {find: '<div class="nav-lbl">OUTILS</div>', build: function(d){ return '<div class="nav-lbl">' + d.nav.tools + '</div>'; }},
+      {find: '<div class="nav-lbl">GUIDES</div>', build: function(d){ return '<div class="nav-lbl">' + d.nav.guides + '</div>'; }},
+      {find: '<div class="nav-lbl">COMPTE</div>', build: function(d){ return '<div class="nav-lbl">' + d.nav.account + '</div>'; }},
+      {find: "btn.disabled = true; btn.textContent = 'CONNEXION...';", build: function(d, l, esc){ return "btn.disabled = true; btn.textContent = '" + esc(d.compte_page.msg_connecting) + "';"; }},
+      {find: "if(r.status===429){ showMsg(j.message||'Trop de tentatives.','error'); btn.disabled=false; btn.textContent='SE CONNECTER →'; return; }",
+       build: function(d, l, esc){ return "if(r.status===429){ showMsg(j.message||'" + esc(d.auth_header.too_many_attempts) + "','error'); btn.disabled=false; btn.textContent='" + esc(d.auth.login_btn) + "'; return; }"; }},
+      {find: "if(!r.ok) throw {message: j.msg||j.error_description||j.error||'Erreur de connexion'};", build: function(d, l, esc){ return "if(!r.ok) throw {message: j.msg||j.error_description||j.error||'" + esc(d.auth_header.generic_login_error) + "'};"; }},
+      {find: "showMsg('Connexion réussie !','success');", build: function(d, l, esc){ return "showMsg('" + esc(d.compte_page.msg_login_success) + "','success');"; }},
+      {find: "var msg = e.message||'Erreur de connexion';\n    if(msg.includes('Invalid login')) msg = 'Email ou mot de passe incorrect.';\n    if(msg.includes('Email not confirmed')) msg = 'Confirme ton email avant de te connecter.';",
+       build: function(d, l, esc){
+        var ah = d.auth_header;
+        return "var msg = e.message||'" + esc(ah.generic_login_error) + "';\n    if(msg.includes('Invalid login')) msg = '" + esc(ah.invalid_login) + "';\n    if(msg.includes('Email not confirmed')) msg = '" + esc(ah.confirm_email) + "';";
+      }},
+      {find: "btn.disabled = false; btn.textContent = 'SE CONNECTER →';", build: function(d, l, esc){ return "btn.disabled = false; btn.textContent = '" + esc(d.auth.login_btn) + "';"; }},
+      {find: "if(!email||!pwd){ showMsg('Remplis tous les champs.','error'); return; }\n  if(pwd.length<8){ showMsg('Le mot de passe doit contenir au moins 8 caractères.','error'); return; }\n  if(pwd!==pwd2){ showMsg('Les mots de passe ne correspondent pas.','error'); return; }",
+       build: function(d, l, esc){
+        var c = d.compte_page;
+        return "if(!email||!pwd){ showMsg('" + esc(c.msg_fill_all_fields) + "','error'); return; }\n  if(pwd.length<8){ showMsg('" + esc(c.msg_password_min) + "','error'); return; }\n  if(pwd!==pwd2){ showMsg('" + esc(c.msg_passwords_mismatch) + "','error'); return; }";
+      }},
+      {find: "if(!email||!pwd){ showMsg('Remplis tous les champs.','error'); return; }\n  var btn = document.getElementById('btnLogin');",
+       build: function(d, l, esc){ return "if(!email||!pwd){ showMsg('" + esc(d.compte_page.msg_fill_all_fields) + "','error'); return; }\n  var btn = document.getElementById('btnLogin');"; }},
+      {find: "btn.disabled = true; btn.textContent = 'CRÉATION...';", build: function(d, l, esc){ return "btn.disabled = true; btn.textContent = '" + esc(d.compte_page.msg_creating) + "';"; }},
+      {find: "showMsg('Compte créé ! Vérifie ton email pour confirmer ton inscription.','info');", build: function(d, l, esc){ return "showMsg('" + esc(d.compte_page.msg_account_created_check_email) + "','info');"; }},
+      {find: "showMsg('Compte créé avec succès !','success');", build: function(d, l, esc){ return "showMsg('" + esc(d.compte_page.msg_account_created_success) + "','success');"; }},
+      {find: "var msg = e.message||'Erreur lors de la création';\n    if(msg.includes('already registered')) msg = 'Cet email est déjà utilisé. Connecte-toi.';",
+       build: function(d, l, esc){ var c = d.compte_page; return "var msg = e.message||'" + esc(c.msg_creation_error) + "';\n    if(msg.includes('already registered')) msg = '" + esc(c.msg_already_registered) + "';"; }},
+      {find: "btn.disabled = false; btn.textContent = 'CRÉER MON COMPTE →';", build: function(d, l, esc){ return "btn.disabled = false; btn.textContent = '" + esc(d.auth.signup_btn) + "';"; }},
+      {find: "if(!email){ showMsg('Entre ton email ci-dessus pour réinitialiser ton mot de passe.','info'); return; }", build: function(d, l, esc){ return "if(!email){ showMsg('" + esc(d.compte_page.msg_enter_email_reset) + "','info'); return; }"; }},
+      {find: "showMsg('Email de réinitialisation envoyé à '+email,'success');", build: function(d, l, esc){ return "showMsg('" + esc(d.compte_page.msg_reset_sent_prefix) + "'+email,'success');"; }},
+      {find: "showMsg('Erreur : '+(e.message||'réessaie'),'error');", count: 1, build: function(d, l, esc){ return "showMsg('" + esc(d.tools_page.capital_msg_error_prefix) + "'+(e.message||'réessaie'),'error');"; }},
+      {find: "document.getElementById('hdrPill').textContent = 'MON COMPTE';", build: function(d, l, esc){ return "document.getElementById('hdrPill').textContent = '" + esc(d.compte_page.hdr_pill_default) + "';"; }},
+      {find: "msgEl.textContent = 'Le mot de passe doit contenir au moins 8 caractères.';", build: function(d, l, esc){ return "msgEl.textContent = '" + esc(d.compte_page.msg_password_min) + "';"; }},
+      {find: "btn.disabled = true; btn.textContent = 'MISE À JOUR...';", count: 2, build: function(d, l, esc){ return "btn.disabled = true; btn.textContent = '" + esc(d.compte_page.update_btn_loading) + "';"; }},
+      {find: "msgEl.textContent = 'Mot de passe mis à jour avec succès.';", build: function(d, l, esc){ return "msgEl.textContent = '" + esc(d.compte_page.msg_password_updated) + "';"; }},
+      {find: "msgEl.textContent = 'Erreur : '+(e.message||'réessaie');", count: 3, build: function(d, l, esc){ return "msgEl.textContent = '" + esc(d.tools_page.capital_msg_error_prefix) + "'+(e.message||'réessaie');"; }},
+      {find: "btn.disabled = false; btn.textContent = 'METTRE À JOUR →';", count: 2, build: function(d, l, esc){ return "btn.disabled = false; btn.textContent = '" + esc(d.compte_page.update_btn) + "';"; }},
+      {find: "msgEl.textContent = 'Entre une adresse email valide.';", build: function(d, l, esc){ return "msgEl.textContent = '" + esc(d.compte_page.msg_invalid_email) + "';"; }},
+      {find: "msgEl.textContent = 'Un email de confirmation a été envoyé à '+email+'. Clique sur le lien pour valider le changement.';",
+       build: function(d, l, esc){ var c = d.compte_page; return "msgEl.textContent = '" + esc(c.msg_email_confirmation_sent_prefix) + "'+email+'" + esc(c.msg_email_confirmation_sent_suffix) + "';"; }},
+      {find: "btn.disabled = true; btn.textContent = 'EXPORT...';", build: function(d, l, esc){ return "btn.disabled = true; btn.textContent = '" + esc(d.compte_page.export_loading) + "';"; }},
+      {find: "note: 'tracked_bets_local provient du suivi de paris stocke localement dans ton navigateur (jamais envoye a IASHARK) - il ne sera present que si tu exportes depuis le meme navigateur/appareil que celui utilise pour le suivi.'",
+       build: function(d, l, esc){ return "note: '" + esc(d.compte_page.export_note) + "'"; }},
+      {find: "msgEl.textContent = 'Export téléchargé.';", build: function(d, l, esc){ return "msgEl.textContent = '" + esc(d.compte_page.export_success) + "';"; }},
+      {find: "btn.disabled = false; btn.textContent = 'EXPORTER';", build: function(d, l, esc){ return "btn.disabled = false; btn.textContent = '" + esc(d.account.export_btn) + "';"; }},
+      {find: "var subject = encodeURIComponent('Demande de suppression de compte IASHARK');\n  var body = encodeURIComponent('Bonjour,\\n\\nJe souhaite supprimer mon compte IASHARK associe a l\\'adresse : '+currentUser.email+'\\n\\nMerci de confirmer la suppression.');",
+       build: function(d, l, esc){
+        var c = d.compte_page;
+        return "var subject = encodeURIComponent('" + esc(c.deletion_subject) + "');\n  var body = encodeURIComponent('" + esc(c.deletion_body_greeting) + "'+currentUser.email+'" + esc(c.deletion_body_closing) + "');";
+      }},
+      {find: "document.getElementById('hdrPill').textContent = 'CONNECTÉ';", build: function(d, l, esc){ return "document.getElementById('hdrPill').textContent = '" + esc(d.compte_page.hdr_pill_connected) + "';"; }},
+      {find: "var mois = ['JANV.','FÉVR.','MARS','AVR.','MAI','JUIN','JUIL.','AOÛT','SEPT.','OCT.','NOV.','DÉC.'];\n    document.getElementById('sinceBadge').textContent = 'MEMBRE DEPUIS '+mois[d.getMonth()]+' '+d.getFullYear();",
+       build: function(d, l, esc){
+        var months = d.compte_page.months.map(function(mo){ return "'" + esc(mo) + "'"; }).join(",");
+        return "var mois = [" + months + "];\n    document.getElementById('sinceBadge').textContent = '" + esc(d.account.member_since) + " '+mois[d.getMonth()]+' '+d.getFullYear();";
+      }},
+      {find: "document.getElementById('planBadge').textContent = role==='admin'?'ADMIN':(isPro?'OUTILS':'GRATUIT');",
+       build: function(d, l, esc){ return "document.getElementById('planBadge').textContent = role==='admin'?'" + esc(d.compte_page.role_admin) + "':(isPro?'" + esc(d.nav.tools) + "':'" + esc(d.account.plan_free_badge) + "');"; }},
+      {find: "document.getElementById('planStatusTxt').textContent = role==='admin'?'Administrateur':(isPro?'Plan Outils':'Plan Gratuit');",
+       build: function(d, l, esc){ var a = d.account, c = d.compte_page; return "document.getElementById('planStatusTxt').textContent = role==='admin'?'" + esc(c.role_admin_full) + "':(isPro?'" + esc(a.plan_pro_status) + "':'" + esc(a.plan_free_status) + "');"; }},
+      {find: "document.getElementById('planDescTxt').textContent = 'Ton abonnement Outils est actif — tu as accès à toutes les sélections à forte probabilité modèle.';",
+       build: function(d, l, esc){ return "document.getElementById('planDescTxt').textContent = '" + esc(d.account.plan_pro_desc) + "';"; }},
+      {find: "cta.textContent = 'VOIR MON ESPACE OUTILS →';", build: function(d, l, esc){ return "cta.textContent = '" + esc(d.cta.view_full_tools) + "';"; }}
+    ]
   }
 ];
 

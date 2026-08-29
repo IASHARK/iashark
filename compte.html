@@ -331,8 +331,30 @@ async function doLogin() {
   var btn = document.getElementById('btnLogin');
   btn.disabled = true; btn.textContent = 'CONNEXION...';
   try {
-    var res = await sb.auth.signInWithPassword({email:email, password:pwd});
-    if(res.error) throw res.error;
+    // Passe par login-guard (rate limit reel par IP+email, backe Postgres)
+    // plutot que sb.auth.signInWithPassword() en direct - voir
+    // supabase/functions/login-guard/index.ts. Repli sur l'appel direct si
+    // la fonction est indisponible, pour ne jamais bloquer la connexion a
+    // cause d'un probleme cote fonction plutot que cote identifiants.
+    var loginResp;
+    try{
+      var r = await fetch(SUPA_URL+'/functions/v1/login-guard', {
+        method:'POST',
+        headers:{'Content-Type':'application/json','apikey':SUPA_KEY},
+        body:JSON.stringify({email:email, password:pwd})
+      });
+      var j = await r.json();
+      if(r.status===429){ showMsg(j.message||'Trop de tentatives.','error'); btn.disabled=false; btn.textContent='SE CONNECTER →'; return; }
+      if(!r.ok) throw {message: j.msg||j.error_description||j.error||'Erreur de connexion'};
+      var setRes = await sb.auth.setSession({access_token:j.access_token, refresh_token:j.refresh_token});
+      if(setRes.error) throw setRes.error;
+      loginResp = {data:{user:setRes.data.user}, error:null};
+    }catch(guardErr){
+      if(guardErr && guardErr.message && guardErr.message!=='Failed to fetch'){ throw guardErr; }
+      loginResp = await sb.auth.signInWithPassword({email:email, password:pwd});
+      if(loginResp.error) throw loginResp.error;
+    }
+    var res = loginResp;
     showMsg('Connexion réussie !','success');
     setTimeout(function(){ showDashboard(res.data.user); }, 600);
   } catch(e) {

@@ -108,8 +108,29 @@
     msgEl.textContent = ''; msgEl.className = 'qmsg';
     try{
       var sb = getSb();
-      var res = await sb.auth.signInWithPassword({email: email, password: pwd});
-      if(res.error) throw res.error;
+      var res;
+      try{
+        var r = await fetch(SUPA_URL+'/functions/v1/login-guard', {
+          method:'POST',
+          headers:{'Content-Type':'application/json','apikey':SUPA_KEY},
+          body:JSON.stringify({email:email, password:pwd})
+        });
+        var j = await r.json();
+        if(r.status===429){
+          msgEl.textContent = j.message || 'Trop de tentatives.';
+          msgEl.className = 'qmsg error';
+          btn.disabled = false; btn.textContent = 'SE CONNECTER →';
+          return;
+        }
+        if(!r.ok) throw {message: j.msg||j.error_description||j.error||'Erreur de connexion'};
+        var setRes = await sb.auth.setSession({access_token:j.access_token, refresh_token:j.refresh_token});
+        if(setRes.error) throw setRes.error;
+        res = {error:null};
+      }catch(guardErr){
+        if(guardErr && guardErr.message && guardErr.message!=='Failed to fetch'){ throw guardErr; }
+        res = await sb.auth.signInWithPassword({email: email, password: pwd});
+        if(res.error) throw res.error;
+      }
       msgEl.textContent = 'Connecté ! Rechargement...';
       msgEl.className = 'qmsg success';
       setTimeout(function(){ window.location.reload(); }, 500);

@@ -39,9 +39,7 @@ function get(obj, keyPath) {
 // "Calci d'angolo") qui casserait sinon la chaine JS generee. A utiliser
 // pour TOUT texte traduit injecte dans du JS - jamais pour du texte HTML
 // brut (qui n'a pas besoin de cet echappement et l'afficherait a tort).
-function jsStr(s) {
-  return String(s).replace(/\\/g, "\\\\").replace(/'/g, "\\'");
-}
+var jsStr = require("./js-escape.js").jsStr;
 
 function rewriteInternalLinks(html, locale) {
   return html.replace(/(href|src)="(\/[a-zA-Z0-9_\-./]*)"/g, function (m, attr, p) {

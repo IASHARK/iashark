@@ -1,19 +1,26 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="it">
 <head>
 <meta name="google-site-verification" content="DluMMCMDwqkPA0QjmbkJ02L1" />
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>IASHARK — Pronostics IA · Football</title>
-<meta name="description" content="Pronostics football alimentés par l'intelligence artificielle. Analyses statistiques, edge IA et value bets quotidiens.">
-<meta property="og:title" content="IASHARK — Pronostics IA · Football">
-<meta property="og:description" content="Pronostics football alimentés par l'intelligence artificielle. Analyses statistiques, edge IA et value bets quotidiens.">
+<title>IASHARK — Pronostici Calcio con IA</title>
+<meta name="description" content="Pronostici calcistici basati sull'intelligenza artificiale. Analisi statistiche, edge IA e value bet quotidiane.">
+<meta property="og:title" content="IASHARK — Pronostici Calcio con IA">
+<meta property="og:description" content="Pronostici calcistici basati sull'intelligenza artificiale. Analisi statistiche, edge IA e value bet quotidiane.">
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://iashark.com/">
+<meta property="og:url" content="https://iashark.com/it/">
 <meta property="og:image" content="https://iashark.com/icon-512.png">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="canonical" href="https://iashark.com/">
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","name":"IASHARK","url":"https://iashark.com","logo":"https://iashark.com/icon-512.png","description":"Pronostics football alimentés par l'intelligence artificielle."}</script>
+<link rel="canonical" href="https://iashark.com/it/">
+<link rel="alternate" hreflang="fr" href="https://iashark.com/fr/">
+<link rel="alternate" hreflang="en" href="https://iashark.com/en/">
+<link rel="alternate" hreflang="es" href="https://iashark.com/es/">
+<link rel="alternate" hreflang="de" href="https://iashark.com/de/">
+<link rel="alternate" hreflang="it" href="https://iashark.com/it/">
+<link rel="alternate" hreflang="pt" href="https://iashark.com/pt/">
+<link rel="alternate" hreflang="x-default" href="https://iashark.com/fr/">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","name":"IASHARK","url":"https://iashark.com","logo":"https://iashark.com/icon-512.png","description":"Pronostici calcistici basati sull\'intelligenza artificiale."}</script>
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"IASHARK","url":"https://iashark.com"}</script>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23080c12'/%3E%3Ctext x='50%25' y='54%25' dominant-baseline='middle' text-anchor='middle' font-size='40' fill='%2322d3ee'%3E🦈%3C/text%3E%3C/svg%3E">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
@@ -195,97 +202,97 @@ body::before{content:'';position:fixed;top:-300px;left:50%;transform:translateX(
 <body>
 
 <header class="hdr">
-  <a href="/" class="logo"><span>IA</span>SHARK</a>
+  <a href="/it/" class="logo"><span>IA</span>SHARK</a>
   <div>
-    <span id="authHeaderSlot"><a href="/compte.html" class="btn-login">CONNEXION</a></span>
+    <span id="authHeaderSlot"><a href="/it/compte.html" class="btn-login">ACCEDI</a></span>
   </div>
 </header>
 
 <div class="hero-predator">
   <div class="hp-shark-big">🦈</div>
-  <h1 class="hp-title">Aucune émotion.<br><b>Que des probabilités.</b></h1>
-  <p class="hp-sub">Chaque match est passé au crible à partir de vraies données : <b>buts attendus (xG), forme récente, fatigue du calendrier, face-à-face.</b> Pas de feeling, que du calcul.</p>
+  <h1 class="hp-title">Zero emozioni.<br><b>Solo probabilità.</b></h1>
+  <p class="hp-sub">Ogni partita viene analizzata con dati reali: <b>gol attesi (xG), forma recente, affaticamento da calendario, precedenti.</b> Niente istinto, solo calcolo.</p>
   <div class="sport-selector">
     <button class="sport-btn active-foot" id="btnFoot" onclick="setSport('football')">
-      <span class="sport-icon">⚽</span> FOOTBALL
+      <span class="sport-icon">⚽</span> CALCIO
     </button>
     <button class="sport-btn disabled" onclick="return false">
       <span class="sport-icon">🏀</span> BASKET
-      <span class="soon-tag">BIENTÔT</span>
+      <span class="soon-tag">PRESTO</span>
     </button>
     <button class="sport-btn disabled" onclick="return false">
       <span class="sport-icon">🏒</span> HOCKEY
-      <span class="soon-tag">BIENTÔT</span>
+      <span class="soon-tag">PRESTO</span>
     </button>
   </div>
 </div>
 
 <div style="text-align:center;margin:0 auto 20px;position:relative;z-index:1;">
-  <a href="/a-propos.html" class="hp-method-pill">Notre méthode →</a>
+  <a href="/it/a-propos.html" class="hp-method-pill">Il nostro metodo →</a>
 </div>
 
 <div class="filters" id="filters">
   <div class="search-wrap">
     <span class="prompt">&gt;</span>
-    <input type="text" class="search-input" id="teamSearch" placeholder="Rechercher une équipe, un championnat..." oninput="onSearchInput(this.value)">
+    <input type="text" class="search-input" id="teamSearch" placeholder="Cerca una squadra, un campionato..." oninput="onSearchInput(this.value)">
   </div>
   <div class="champ-dropdown">
     <div class="champ-dropdown-btn" id="champDropdownBtn" onclick="toggleChampDropdown()">
-      <span id="champDropdownLabel">TOUS LES CHAMPIONNATS</span><span>▾</span>
+      <span id="champDropdownLabel">TUTTI I CAMPIONATI</span><span>▾</span>
     </div>
     <div class="champ-dropdown-panel" id="champDropdownPanel"></div>
   </div>
 </div>
 
 <div class="day-tabs">
-  <button class="day-tab active" id="tabToday" onclick="setDayTab('today')">AUJOURD'HUI <span class="tab-count" id="countToday">—</span></button>
-  <button class="day-tab" id="tabTomorrow" onclick="setDayTab('tomorrow')">DEMAIN <span class="tab-count" id="countTomorrow">—</span></button>
+  <button class="day-tab active" id="tabToday" onclick="setDayTab('today')">OGGI <span class="tab-count" id="countToday">—</span></button>
+  <button class="day-tab" id="tabTomorrow" onclick="setDayTab('tomorrow')">DOMANI <span class="tab-count" id="countTomorrow">—</span></button>
 </div>
 
 <div id="cardsList">
   <!--SEO_MATCHES_SUMMARY--><!--/SEO_MATCHES_SUMMARY-->
   <div class="loading-state">
     <div class="loading-spinner"></div>
-    <div class="loading-text">CHARGEMENT DES ANALYSES...</div>
+    <div class="loading-text">CARICAMENTO ANALISI...</div>
   </div>
 </div>
 
 <div style="max-width:1100px;margin:24px auto 0;padding:0 20px 20px;text-align:center;">
   <div style="font-family:'Space Mono',monospace;font-size:8px;color:rgba(74,101,128,0.5);line-height:2;letter-spacing:1px;">
-    <div>⚠️ LE JEU PEUT ÊTRE DANGEREUX — JOUEZ RESPONSABLE · INTERDIT AUX MOINS DE 18 ANS</div>
-    <div>Aide : <a href="https://www.joueurs-info-service.fr" style="color:rgba(34,211,238,0.4);text-decoration:none;">joueurs-info-service.fr</a> · 09 74 75 13 13</div>
+    <div>⚠️ IL GIOCO PUÒ ESSERE PERICOLOSO — GIOCA IN MODO RESPONSABILE · VIETATO AI MINORI DI 18 ANNI</div>
+    <div>Aiuto (Francia): <a href="https://www.joueurs-info-service.fr" style="color:rgba(34,211,238,0.4);text-decoration:none;">joueurs-info-service.fr</a> · 09 74 75 13 13</div>
     <div style="margin-top:8px;">
-      <a href="/mentions-legales.html" style="color:rgba(74,101,128,0.6);text-decoration:none;margin:0 8px;">Mentions légales</a>
-      <a href="/cgv.html" style="color:rgba(74,101,128,0.6);text-decoration:none;margin:0 8px;">CGV</a>
-      <a href="/confidentialite.html" style="color:rgba(74,101,128,0.6);text-decoration:none;margin:0 8px;">Confidentialité</a>
+      <a href="/it/mentions-legales.html" style="color:rgba(74,101,128,0.6);text-decoration:none;margin:0 8px;">Note Legali</a>
+      <a href="/it/cgv.html" style="color:rgba(74,101,128,0.6);text-decoration:none;margin:0 8px;">Termini</a>
+      <a href="/it/confidentialite.html" style="color:rgba(74,101,128,0.6);text-decoration:none;margin:0 8px;">Privacy</a>
     </div>
   </div>
 </div>
 
 <nav class="nav-bottom">
-  <a href="/" class="nav-item active">
+  <a href="/it/" class="nav-item active">
     <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5L12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg></div>
-    <div class="nav-lbl">ACCUEIL</div>
+    <div class="nav-lbl">HOME</div>
   </a>
-  <a href="/marches.html" class="nav-item">
+  <a href="/it/marches.html" class="nav-item">
     <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 17V9M13 17V5M8 17v-4"/></svg></div>
-    <div class="nav-lbl">MARCHÉS</div>
+    <div class="nav-lbl">MERCATI</div>
   </a>
-  <a href="/historique.html" class="nav-item">
+  <a href="/it/historique.html" class="nav-item">
     <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20v-4"/></svg></div>
-    <div class="nav-lbl">HISTORIQUE</div>
+    <div class="nav-lbl">STORICO</div>
   </a>
-  <a href="/pro.html" class="nav-item">
+  <a href="/it/pro.html" class="nav-item">
     <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.9 6.6L22 9.3l-5 4.9L18.2 22 12 18.3 5.8 22 7 14.2 2 9.3l7.1-.7z"/></svg></div>
-    <div class="nav-lbl">OUTILS</div>
+    <div class="nav-lbl">STRUMENTI</div>
   </a>
   <a href="/blog/" class="nav-item">
     <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg></div>
-    <div class="nav-lbl">GUIDES</div>
+    <div class="nav-lbl">GUIDE</div>
   </a>
-  <a href="/compte.html" class="nav-item">
+  <a href="/it/compte.html" class="nav-item">
     <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg></div>
-    <div class="nav-lbl">COMPTE</div>
+    <div class="nav-lbl">ACCOUNT</div>
   </a>
 </nav>
 
@@ -301,7 +308,7 @@ function setSport(s){
   currentFilter='all';
   currentSearch='';
   document.getElementById('teamSearch').value='';
-  document.getElementById('champDropdownLabel').textContent='TOUS LES CHAMPIONNATS';
+  document.getElementById('champDropdownLabel').textContent='TUTTI I CAMPIONATI';
   updateCounts();
   buildLeagueBtns(getSportMatchs());
   renderMatchs();
@@ -339,45 +346,45 @@ function applySearchFilter(list){
 function setupFilters(){document.querySelectorAll('.filter-btn').forEach(function(btn){btn.addEventListener('click',function(){document.querySelectorAll('.filter-btn').forEach(function(b){b.classList.remove('active');});btn.classList.add('active');currentFilter=btn.dataset.filter;renderMatchs();});});}
 
 var LEAGUE_LABELS={
-  'premier':{flag:'🏴󠁧󠁢󠁥󠁮󠁧󠁿',name:'Premier League',country:'Angleterre'},
-  'champ':{flag:'🏴󠁧󠁢󠁥󠁮󠁧󠁿',name:'Championship',country:'Angleterre'},
-  'ligue1':{flag:'🇫🇷',name:'Ligue 1',country:'France'},
-  'ligue2':{flag:'🇫🇷',name:'Ligue 2',country:'France'},
-  'laliga':{flag:'🇪🇸',name:'La Liga',country:'Espagne'},
-  'laliga2':{flag:'🇪🇸',name:'La Liga 2',country:'Espagne'},
-  'seriea':{flag:'🇮🇹',name:'Serie A',country:'Italie'},
-  'bundesliga':{flag:'🇩🇪',name:'Bundesliga',country:'Allemagne'},
-  'ldc':{flag:'🏆',name:'Ligue des Champions',country:null},
+  'premier':{flag:'🏴󠁧󠁢󠁥󠁮󠁧󠁿',name:'Premier League',country:'Inghilterra'},
+  'champ':{flag:'🏴󠁧󠁢󠁥󠁮󠁧󠁿',name:'Championship',country:'Inghilterra'},
+  'ligue1':{flag:'🇫🇷',name:'Ligue 1',country:'Francia'},
+  'ligue2':{flag:'🇫🇷',name:'Ligue 2',country:'Francia'},
+  'laliga':{flag:'🇪🇸',name:'La Liga',country:'Spagna'},
+  'laliga2':{flag:'🇪🇸',name:'La Liga 2',country:'Spagna'},
+  'seriea':{flag:'🇮🇹',name:'Serie A',country:'Italia'},
+  'bundesliga':{flag:'🇩🇪',name:'Bundesliga',country:'Germania'},
+  'ldc':{flag:'🏆',name:'Champions League',country:null},
   'el':{flag:'🏆',name:'Europa League',country:null},
   'wc':{flag:'🌍',name:'World Cup',country:null},
-  'other':{flag:'🏆',name:'Coupe du Monde',country:null},
+  'other':{flag:'🏆',name:'Coppa del Mondo',country:null},
   'atp':{flag:'🎾',name:'ATP',country:null},
   'wta':{flag:'🎾',name:'WTA',country:null},
-  'chine':{flag:'🇨🇳',name:'Super League',country:'Chine'},
-  'finlande':{flag:'🇫🇮',name:'Veikkausliiga',country:'Finlande'},
-  'maroc':{flag:'🇲🇦',name:'Botola Pro',country:'Maroc'},
+  'chine':{flag:'🇨🇳',name:'Super League',country:'Cina'},
+  'finlande':{flag:'🇫🇮',name:'Veikkausliiga',country:'Finlandia'},
+  'maroc':{flag:'🇲🇦',name:'Botola Pro',country:'Marocco'},
   'canada':{flag:'🇨🇦',name:'Canadian Premier',country:'Canada'},
-  'lettonie':{flag:'🇱🇻',name:'Virsliga',country:'Lettonie'},
-  'islande':{flag:'🇮🇸',name:'Úrvalsdeild',country:'Islande'},
-  'equateur':{flag:'🇪🇨',name:'Liga Pro',country:'Équateur'},
-  'lituanie':{flag:'🇱🇹',name:'A Lyga',country:'Lituanie'},
-  'eredivisie':{flag:'🇳🇱',name:'Eredivisie',country:'Pays-Bas'},
-  'primeira':{flag:'🇵🇹',name:'Primeira Liga',country:'Portugal'},
-  'superlig':{flag:'🇹🇷',name:'Süper Lig',country:'Turquie'},
-  'superliga-dk':{flag:'🇩🇰',name:'Superliga',country:'Danemark'},
-  'scottish':{flag:'🏴󠁧󠁢󠁳󠁣󠁴󠁿',name:'Premiership',country:'Écosse'},
-  'belgique':{flag:'🇧🇪',name:'Jupiler Pro League',country:'Belgique'},
-  'kleague':{flag:'🇰🇷',name:'K League 1',country:'Corée du Sud'},
-  'coupe-france':{flag:'🇫🇷',name:'Coupe de France',country:'France'},
-  'saudi':{flag:'🇸🇦',name:'Saudi Pro League',country:'Arabie Saoudite'},
-  'copa-rey':{flag:'🇪🇸',name:'Copa del Rey',country:'Espagne'},
-  'coppa-italia':{flag:'🇮🇹',name:'Coppa Italia',country:'Italie'},
-  'dfb-pokal':{flag:'🇩🇪',name:'DFB-Pokal',country:'Allemagne'},
-  'irlande':{flag:'🇮🇪',name:'Premier Division',country:'Irlande'},
-  'suede':{flag:'🇸🇪',name:'Allsvenskan',country:'Suède'},
-  'bresil':{flag:'🇧🇷',name:'Brasileirão Série A',country:'Brésil'},
+  'lettonie':{flag:'🇱🇻',name:'Virsliga',country:'Lettonia'},
+  'islande':{flag:'🇮🇸',name:'Úrvalsdeild',country:'Islanda'},
+  'equateur':{flag:'🇪🇨',name:'Liga Pro',country:'Ecuador'},
+  'lituanie':{flag:'🇱🇹',name:'A Lyga',country:'Lituania'},
+  'eredivisie':{flag:'🇳🇱',name:'Eredivisie',country:'Paesi Bassi'},
+  'primeira':{flag:'🇵🇹',name:'Primeira Liga',country:'Portogallo'},
+  'superlig':{flag:'🇹🇷',name:'Süper Lig',country:'Turchia'},
+  'superliga-dk':{flag:'🇩🇰',name:'Superliga',country:'Danimarca'},
+  'scottish':{flag:'🏴󠁧󠁢󠁳󠁣󠁴󠁿',name:'Premiership',country:'Scozia'},
+  'belgique':{flag:'🇧🇪',name:'Jupiler Pro League',country:'Belgio'},
+  'kleague':{flag:'🇰🇷',name:'K League 1',country:'Corea del Sud'},
+  'coupe-france':{flag:'🇫🇷',name:'Coupe de France',country:'Francia'},
+  'saudi':{flag:'🇸🇦',name:'Saudi Pro League',country:'Arabia Saudita'},
+  'copa-rey':{flag:'🇪🇸',name:'Copa del Rey',country:'Spagna'},
+  'coppa-italia':{flag:'🇮🇹',name:'Coppa Italia',country:'Italia'},
+  'dfb-pokal':{flag:'🇩🇪',name:'DFB-Pokal',country:'Germania'},
+  'irlande':{flag:'🇮🇪',name:'Premier Division',country:'Irlanda'},
+  'suede':{flag:'🇸🇪',name:'Allsvenskan',country:'Svezia'},
+  'bresil':{flag:'🇧🇷',name:'Brasileirão Série A',country:'Brasile'},
   'mls':{flag:'🇺🇸',name:'MLS',country:'USA'},
-  'ligamx':{flag:'🇲🇽',name:'Liga MX',country:'Mexique'},
+  'ligamx':{flag:'🇲🇽',name:'Liga MX',country:'Messico'},
 };
 
 function buildLeagueBtns(matchs){
@@ -392,7 +399,7 @@ function renderChampDropdown(q){
   if(!panel) return;
   var query=(q||'').toLowerCase();
   var filtered=leagueList.filter(function(i){return i.name.toLowerCase().includes(query);});
-  var html='<div class="champ-item'+(currentFilter==='all'?' active':'')+'" onclick="selectChampionnat(\'all\')">🌐 Tous les championnats</div>';
+  var html='<div class="champ-item'+(currentFilter==='all'?' active':'')+'" onclick="selectChampionnat(\'all\')">🌐 Tutti i campionati</div>';
   filtered.forEach(function(i){
     var icon=i.isWC?WC_TROPHY_EMOJI:i.flag;
     html+='<div class="champ-item'+(currentFilter===i.key?' active':'')+'" onclick="selectChampionnat(\''+i.key+'\')">'+icon+' '+i.name+'</div>';
@@ -403,7 +410,7 @@ function renderChampDropdown(q){
 function selectChampionnat(key){
   currentFilter=key;
   if(key==='all'){
-    document.getElementById('champDropdownLabel').textContent='TOUS LES CHAMPIONNATS';
+    document.getElementById('champDropdownLabel').textContent='TUTTI I CAMPIONATI';
   }else{
     var item=leagueList.filter(function(i){return i.key===key;})[0];
     if(item){
@@ -458,7 +465,7 @@ function ovrConf(m){
 function confClass(m){var c=ovrConf(m);return c>=75?'high':c>=60?'med':'low';}
 function confTier(m){var v=ovrConf(m)/10;return v>=8?'tier-red':v>=7?'tier-orange':'tier-blue';}
 function teamLogo(t){if(!t)return'';var altN=('Logo '+(t.n||'')).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');if(t.photo)return'<img class="mc-team-logo" src="'+t.photo+'" onerror="this.style.display=\'none\'" alt="'+altN+'">';if(t.logo)return'<img class="mc-team-logo" src="'+t.logo+'" onerror="this.style.display=\'none\'" alt="'+altN+'">';if(t.id)return'<img class="mc-team-logo" src="https://media.api-sports.io/football/teams/'+t.id+'.png" onerror="this.outerHTML=\'<div class=mc-team-logo-placeholder>\'+(this.getAttribute(\'data-ini\')||\'?\')+\'</div>\'" data-ini="'+(t.n||'').slice(0,2).toUpperCase()+'" alt="'+altN+'">';return'<div class="mc-team-logo-placeholder">'+(t.n||'?').slice(0,2).toUpperCase()+'</div>';}
-function translateMarket(r){if(!r)return r;var s=String(r).toLowerCase();if(s.includes('over 2.5'))return'Plus de 2,5 buts';if(s.includes('under 2.5'))return'Moins de 2,5 buts';if(s.includes('over 1.5'))return'Plus de 1,5 but';if(s.includes('btts non')||s.includes('une équipe ne marque'))return'Une équipe ne marque pas';if(s.includes('btts')||s.includes('les deux équipes'))return'Les deux équipes marquent';if(s.includes('dc 1x')||s==='1x')return'DC 1X';if(s.includes('dc x2')||s==='x2')return'DC X2';return r;}
+function translateMarket(r){if(!r)return r;var s=String(r).toLowerCase();if(s.includes('over 2.5'))return'Over 2,5 gol';if(s.includes('under 2.5'))return'Under 2,5 gol';if(s.includes('over 1.5'))return'Over 1,5 gol';if(s.includes('btts non')||s.includes('une équipe ne marque'))return'Una squadra non segna';if(s.includes('btts')||s.includes('les deux équipes'))return'Entrambe le squadre segnano';if(s.includes('dc 1x')||s==='1x')return'DC 1X';if(s.includes('dc x2')||s==='x2')return'DC X2';return r;}
 
 function leagueHeader(m){
   var lk=leagueKey(m);
@@ -496,7 +503,7 @@ function buildCard(m){
     }
   }
   var css='mc'+(isHot&&!isWC?' hot':'')+(isVal&&!isWC?' value':'')+(isWC?' worldcup':'');
-  var pariLabel=m.pari_rec?translateMarket(m.pari_rec):(m.no_signal_label||'Rien d\'exploitable ici — on attend mieux.');
+  var pariLabel=m.pari_rec?translateMarket(m.pari_rec):(m.no_signal_label||'Niente di sfruttabile qui — aspettiamo un\'occasione migliore.');
   return'<div class="'+css+'" onclick="window.location=\'/match/'+m.id+'.html\'">'
     +'<div class="mc-top"><div class="mc-league">'+leagueHeader(m)+'</div><div class="mc-badges">'+badges+'</div></div>'
     +'<div class="mc-body"><div class="mc-left"><div class="mc-teams">'
@@ -506,10 +513,10 @@ function buildCard(m){
     +'</div>'
     +'<div class="mc-pari"><span class="mc-pari-label">🦈 IASHARK</span><span class="mc-pari-bet">'+pariLabel+'</span>'+(coteStr?'<span class="mc-pari-cote">'+coteStr+'</span>':'')+'</div>'
     +'</div>'
-    +'<div class="mc-right"><div class="conf-ring '+confTier(m)+'"><div class="conf-ring-val">'+(ovrConf(m)/10).toFixed(1)+'</div><div class="conf-ring-sub">/10</div></div><button class="mc-cta">VOIR →</button></div>'
+    +'<div class="mc-right"><div class="conf-ring '+confTier(m)+'"><div class="conf-ring-val">'+(ovrConf(m)/10).toFixed(1)+'</div><div class="conf-ring-sub">/10</div></div><button class="mc-cta">VEDI →</button></div>'
     +'</div>'
     +'<div class="mc-probas"><div class="prob-bar-wrap"><div class="pb-1" style="width:'+p1+'%"></div><div class="pb-n" style="width:'+pn+'%"></div><div class="pb-2" style="width:'+p2+'%"></div></div>'
-    +'<div class="prob-labels"><div class="prob-lbl-item"><div class="prob-lbl-pct" style="color:var(--cyan)">'+p1+'%</div><div class="prob-lbl-txt">'+(m.home&&m.home.n||'').toUpperCase().slice(0,8)+'</div></div><div class="prob-lbl-item"><div class="prob-lbl-pct" style="color:var(--muted)">'+pn+'%</div><div class="prob-lbl-txt">NUL</div></div><div class="prob-lbl-item"><div class="prob-lbl-pct" style="color:rgba(226,232,240,0.45)">'+p2+'%</div><div class="prob-lbl-txt">'+(m.away&&m.away.n||'').toUpperCase().slice(0,8)+'</div></div></div>'
+    +'<div class="prob-labels"><div class="prob-lbl-item"><div class="prob-lbl-pct" style="color:var(--cyan)">'+p1+'%</div><div class="prob-lbl-txt">'+(m.home&&m.home.n||'').toUpperCase().slice(0,8)+'</div></div><div class="prob-lbl-item"><div class="prob-lbl-pct" style="color:var(--muted)">'+pn+'%</div><div class="prob-lbl-txt">PAREGGIO</div></div><div class="prob-lbl-item"><div class="prob-lbl-pct" style="color:rgba(226,232,240,0.45)">'+p2+'%</div><div class="prob-lbl-txt">'+(m.away&&m.away.n||'').toUpperCase().slice(0,8)+'</div></div></div>'
     +'</div></div>';
 }
 
@@ -532,13 +539,13 @@ function buildChocCard(m){
     }
   }
   function logoH(t,ini,name){if(!t)return'';var u=t.photo||t.logo||(t.id?'https://media.api-sports.io/football/teams/'+t.id+'.png':'');if(!u)return'<div class="choc-logo-ph">'+ini+'</div>';var altN=('Logo '+(name||ini)).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');return'<img class="choc-logo" src="'+u+'" alt="'+altN+'" onerror="this.outerHTML=\'<div class=choc-logo-ph>'+ini+'</div>\'">';}
-  var pl=m.pari_rec?translateMarket(m.pari_rec):(m.no_signal_label||'Rien d\'exploitable ici — on attend mieux.');
+  var pl=m.pari_rec?translateMarket(m.pari_rec):(m.no_signal_label||'Niente di sfruttabile qui — aspettiamo un\'occasione migliore.');
   return'<div class="choc-card-wrap"><div class="choc-card" onclick="window.location=\'/match/'+m.id+'.html\'">'
     +'<div class="choc-inner"><div class="choc-league"><span class="choc-dot"></span>'+leagueHeader(m)+'</div>'
     +'<div class="choc-teams-row">'
-    +'<div class="choc-team">'+logoH(m.home,hn.slice(0,2).toUpperCase(),hn)+'<div class="choc-name">'+hn.toUpperCase()+'</div><div class="choc-sub-lbl">DOMICILE</div></div>'
+    +'<div class="choc-team">'+logoH(m.home,hn.slice(0,2).toUpperCase(),hn)+'<div class="choc-name">'+hn.toUpperCase()+'</div><div class="choc-sub-lbl">CASA</div></div>'
     +'<div><span class="choc-vs">VS</span><div class="choc-hr">'+heure+'</div></div>'
-    +'<div class="choc-team">'+logoH(m.away,an.slice(0,2).toUpperCase(),an)+'<div class="choc-name" style="color:rgba(226,232,240,0.65)">'+an.toUpperCase()+'</div><div class="choc-sub-lbl">EXTÉRIEUR</div></div>'
+    +'<div class="choc-team">'+logoH(m.away,an.slice(0,2).toUpperCase(),an)+'<div class="choc-name" style="color:rgba(226,232,240,0.65)">'+an.toUpperCase()+'</div><div class="choc-sub-lbl">TRASFERTA</div></div>'
     +'</div></div>'
     +'<div class="choc-pari-strip"><div><div class="choc-pari-lbl">🦈 IASHARK</div><div class="choc-pari-bet">'+pl+'</div></div>'+(pc?'<div class="choc-cote">'+pc+'</div>':'')+'</div>'
     +'</div></div>';
@@ -547,7 +554,7 @@ function buildChocCard(m){
 function renderMatchs(){
   var sl=getSportMatchs(),list=applySearchFilter(applyDayFilter(filterMatchs(sl,currentFilter))),isDemain=currentDayFilter==='tomorrow',el=document.getElementById('cardsList');
   if(!list.length){
-    el.innerHTML='<div class="cards-list"><div class="empty-state"><h3>'+(isDemain?'AUCUN MATCH DEMAIN':'AUCUN MATCH TROUVÉ')+'</h3><p>'+(isDemain?'Reviens ce soir pour les analyses de demain.':'Essaie un autre filtre ou reviens demain.')+'</p></div></div>';
+    el.innerHTML='<div class="cards-list"><div class="empty-state"><h3>'+(isDemain?'NESSUNA PARTITA DOMANI':'NESSUNA PARTITA TROVATA')+'</h3><p>'+(isDemain?'Torna stasera per le analisi di domani.':'Prova un altro filtro o torna domani.')+'</p></div></div>';
     return;
   }
   var nowStr=(function(){var d=new Date(),f=new Intl.DateTimeFormat('fr-FR',{timeZone:'Europe/Paris',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false}).formatToParts(d),r={};f.forEach(function(x){r[x.type]=x.value;});return r.year+'-'+r.month+'-'+r.day+' '+r.hour+':'+r.minute;})();
@@ -560,20 +567,20 @@ function renderMatchs(){
     var al=la.length>0?la:lp,choc=getChoc(al),rest=al.filter(function(m){return m.id!==choc.id;});
     html+=buildChocCard(choc);
     if(rest.length){
-      html+='<div class="sec-hdr" style="margin-top:16px;">PROCHAINS MATCHS — '+rest.length+' MATCH'+(rest.length>1?'S':'')+'</div>';
+      html+='<div class="sec-hdr" style="margin-top:16px;">PROSSIME PARTITE — '+rest.length+' '+(rest.length>1?'PARTITE':'PARTITA')+'</div>';
       html+='<div class="cards-list">'+rest.map(buildCard).join('')+'</div>';
     }
     if(la.length>0&&lp.length>0){
-      html+='<div class="sec-hdr" style="margin-top:32px;opacity:0.5;">PASSÉS / EN COURS</div>';
+      html+='<div class="sec-hdr" style="margin-top:32px;opacity:0.5;">PASSATE / IN CORSO</div>';
       html+='<div class="cards-list" style="opacity:0.6;filter:grayscale(0.4);">'+lp.map(buildCard).join('')+'</div>';
     }
   }else{
     if(la.length>0){
-      html+='<div class="sec-hdr">'+la.length+' MATCH'+(la.length>1?'S':'')+' À VENIR</div>';
+      html+='<div class="sec-hdr">'+la.length+' '+(la.length>1?'PARTITE':'PARTITA')+' IN ARRIVO</div>';
       html+='<div class="cards-list">'+la.map(buildCard).join('')+'</div>';
     }
     if(lp.length>0){
-      html+='<div class="sec-hdr" style="margin-top:24px;opacity:0.5;">'+lp.length+' PASSÉS</div>';
+      html+='<div class="sec-hdr" style="margin-top:24px;opacity:0.5;">'+lp.length+' PASSATE</div>';
       html+='<div class="cards-list" style="opacity:0.6;filter:grayscale(0.4);">'+lp.map(buildCard).join('')+'</div>';
     }
   }
@@ -593,7 +600,7 @@ async function loadData(){
   }catch(e){
     console.error(e);
     var el=document.getElementById('cardsList');
-    if(el)el.innerHTML='<div class="empty-state"><h3>ERREUR CHARGEMENT</h3><p>Réessaie dans un instant.</p></div>';
+    if(el)el.innerHTML='<div class="empty-state"><h3>ERRORE DI CARICAMENTO</h3><p>Riprova tra un momento.</p></div>';
   }
 }
 

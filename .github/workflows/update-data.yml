@@ -14,6 +14,10 @@ on:
         required: false
         default: 'false'
 
+concurrency:
+  group: update-data
+  cancel-in-progress: false
+
 jobs:
   update:
     runs-on: ubuntu-latest
@@ -654,17 +658,21 @@ jobs:
               }
             } catch(e) { console.log('WC fetch error:', e.message); }
             await sleep(300);
-            for(var d=0; d<dates.length; d++){
-              for(var i=0; i<LEAGUES.length; i++){
-                var lgId = LEAGUES[i];
-                var season = SEASON_2026.indexOf(lgId)!==-1?2026:SEASON;
-                var r = await get(
-                  'https://v3.football.api-sports.io/fixtures?date='+dates[d]+'&league='+lgId+'&season='+season+'&timezone=Europe%2FParis',
-                  APS
-                );
-                if(r.response) all = all.concat(r.response);
-                await sleep(200);
+            if(!TEST_WC_ONLY){
+              for(var d=0; d<dates.length; d++){
+                for(var i=0; i<LEAGUES.length; i++){
+                  var lgId = LEAGUES[i];
+                  var season = SEASON_2026.indexOf(lgId)!==-1?2026:SEASON;
+                  var r = await get(
+                    'https://v3.football.api-sports.io/fixtures?date='+dates[d]+'&league='+lgId+'&season='+season+'&timezone=Europe%2FParis',
+                    APS
+                  );
+                  if(r.response) all = all.concat(r.response);
+                  await sleep(200);
+                }
               }
+            } else {
+              console.log('MODE TEST WC uniquement : les '+LEAGUES.length+' autres championnats sont ignores.');
             }
             var seen={};
             var uniqueFixtures=all.filter(function(f){
@@ -2802,7 +2810,7 @@ jobs:
             generateSitemaps(allMatchsData);
             injectHomeSeoSummary(allMatchsData);
           }
-          main().catch(function(e){console.error('FATAL:',e.message,e.stack);process.exit(0);});
+          main().catch(function(e){console.error('FATAL:',e.message,e.stack);process.exit(1);});
           JSEOF
       - name: Vider le cache uniquement si force_refresh demande
         run: |

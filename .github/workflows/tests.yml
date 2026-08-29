@@ -1,0 +1,22 @@
+name: tests
+
+on:
+  push:
+    branches: [main, iashark-v2]
+  pull_request:
+    branches: [main, iashark-v2]
+
+jobs:
+  unit-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Run unit tests (lib/ - moteur mathematique du pipeline)
+        run: node --test
+      - name: Verify pipeline script syntax (extracted from update-data.yml)
+        run: |
+          awk '/cat > pipeline.js << .JSEOF./{flag=1;next}/^          JSEOF/{flag=0}flag' .github/workflows/update-data.yml | sed 's/^          //' > /tmp/pipeline_check.js
+          node --check /tmp/pipeline_check.js

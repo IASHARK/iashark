@@ -32,6 +32,9 @@ jobs:
           cat > pipeline.js << 'JSEOF'
           const https = require('https');
           const fs    = require('fs');
+          const { poissonProb, calcPoissonProbs, dixonColesCorr, calcDixonColesProbs, calcMonteCarlo, shinProbabilities } = require('./lib/models.js');
+          const { fractionalKelly } = require('./lib/betting.js');
+          const { resolveMarketWin } = require('./lib/resolvers.js');
           const APS_KEY    = process.env.APISPORTS_KEY;
           const OWM_KEY    = process.env.OPENWEATHER_KEY;
           const NEWS_KEY   = process.env.NEWSAPI_KEY;
@@ -139,35 +142,6 @@ jobs:
             { nom: "RMC Sport", url: "https://rmcsport.bfmtv.com/rss/football/", type: 'general', fiabilite: 'high' },
             { nom: "Foot Mercato", url: "https://www.footmercato.net/flux-rss", type: 'mercato', fiabilite: 'high' },
           ];
-          function resolveMarketWin(predRaw, gh, ga) {
-            // Retourne true/false (gagne/perdu), 'void' (push handicap, aucun gagnant
-            // ni perdant - mise remboursee) ou null (marche non reconnu, non resolvable).
-            var pred = (predRaw||'').toLowerCase();
-            if(pred.includes('handicap')){
-              var hMatch=pred.match(/handicap\s*([+-]?\d+(?:[.,]\d+)?)/);
-              if(!hMatch) return null;
-              var line=parseFloat(hMatch[1].replace(',','.'));
-              var isDom=pred.includes('domicile')||pred.includes('dom');
-              var isExt=pred.includes('exterieur')||pred.includes('ext');
-              if(!isDom&&!isExt) return null;
-              var adjH=isDom?gh+line:gh;
-              var adjA=isExt?ga+line:ga;
-              if(adjH===adjA) return 'void';
-              return isDom?(adjH>adjA):(adjA>adjH);
-            }
-            if(pred.includes('over 2.5')) return (gh+ga)>2;
-            if(pred.includes('over 1.5')) return (gh+ga)>1;
-            if(pred.includes('over 3.5')) return (gh+ga)>3;
-            if(pred.includes('under 2.5')) return (gh+ga)<3;
-            if(pred.includes('btts non')) return (gh===0||ga===0);
-            if(pred.includes('btts')) return (gh>0&&ga>0);
-            if(pred.includes('victoire')&&(pred.includes('domicile')||pred.includes('dom'))) return gh>ga;
-            if(pred.includes('victoire')&&(pred.includes('exterieur')||pred.includes('ext'))) return ga>gh;
-            if(pred.includes('1x')||pred.includes('x1')||pred.includes('dc 1x')) return gh>=ga;
-            if(pred.includes('x2')||pred.includes('dc x2')) return ga>=gh;
-            if(pred.includes('nul')||pred.includes('draw')) return gh===ga;
-            return null;
-          }
           var WC_QUALIF_LEAGUE = {
             'France':32,'Germany':32,'Spain':32,'England':32,'Portugal':32,'Italy':32,
             'Netherlands':32,'Belgium':32,'Croatia':32,'Switzerland':32,'Austria':32,
@@ -431,97 +405,6 @@ jobs:
             var mm = String(paris.getUTCMinutes()).padStart(2,'0');
             return hh+':'+mm;
           }
-          function poissonProb(lambda, k) {
-            if(lambda<=0) return k===0?1:0;
-            var logP = -lambda + k*Math.log(lambda) - logFactorial(k);
-            return Math.exp(logP);
-          }
-          function logFactorial(n) {
-            if(n<=1) return 0;
-            var r=0;for(var i=2;i<=n;i++) r+=Math.log(i);return r;
-          }
-          function calcPoissonProbs(lambdaH, lambdaA) {
-            var mat=[];
-            for(var h=0;h<=8;h++){mat[h]=[];for(var a=0;a<=8;a++) mat[h][a]=poissonProb(lambdaH,h)*poissonProb(lambdaA,a);}
-            var p1=0,pN=0,p2=0,over25=0,under25=0,bttsY=0,bttsN=0,over15=0,over35=0;
-            for(var h=0;h<=8;h++) for(var a=0;a<=8;a++){
-              var p=mat[h][a];
-              if(h>a) p1+=p; else if(h===a) pN+=p; else p2+=p;
-              if(h+a>2.5) over25+=p; else under25+=p;
-              if(h+a>1.5) over15+=p;
-              if(h+a>3.5) over35+=p;
-              if(h>0&&a>0) bttsY+=p; else bttsN+=p;
-            }
-            return {
-              p1:Math.round(p1*100), pN:Math.round(pN*100), p2:Math.round(p2*100),
-              over15:Math.round(over15*100), over25:Math.round(over25*100),
-              under25:Math.round(under25*100), over35:Math.round(over35*100),
-              bttsY:Math.round(bttsY*100), bttsN:Math.round(bttsN*100),
-            };
-          }
-          function dixonColesCorr(h, a, lambdaH, lambdaA) {
-            var rho = -0.13;
-            if(h===0 && a===0) return 1 - lambdaH*lambdaA*rho;
-            if(h===1 && a===0) return 1 + lambdaA*rho;
-            if(h===0 && a===1) return 1 + lambdaH*rho;
-            if(h===1 && a===1) return 1 - rho;
-            return 1;
-          }
-          function calcDixonColesProbs(lambdaH, lambdaA) {
-            var mat=[];
-            for(var h=0;h<=8;h++){mat[h]=[];for(var a=0;a<=8;a++){
-              var p=poissonProb(lambdaH,h)*poissonProb(lambdaA,a)*dixonColesCorr(h,a,lambdaH,lambdaA);
-              mat[h][a]=Math.max(0,p);
-            }}
-            var p1=0,pN=0,p2=0,over25=0,under25=0,bttsY=0,bttsN=0,over15=0,over35=0;
-            for(var h=0;h<=8;h++) for(var a=0;a<=8;a++){
-              var p=mat[h][a];
-              if(h>a) p1+=p; else if(h===a) pN+=p; else p2+=p;
-              if(h+a>2.5) over25+=p; else under25+=p;
-              if(h+a>1.5) over15+=p;
-              if(h+a>3.5) over35+=p;
-              if(h>0&&a>0) bttsY+=p; else bttsN+=p;
-            }
-            return {
-              p1:Math.round(p1*100), pN:Math.round(pN*100), p2:Math.round(p2*100),
-              over15:Math.round(over15*100), over25:Math.round(over25*100),
-              under25:Math.round(under25*100), over35:Math.round(over35*100),
-              bttsY:Math.round(bttsY*100), bttsN:Math.round(bttsN*100),
-            };
-          }
-          function poissonKnuth(lambda) {
-            if(lambda<=0) return 0;
-            var L=Math.exp(-lambda), k=0, p=1;
-            do { k++; p*=Math.random(); } while(p>L);
-            return k-1;
-          }
-          var poissonRandom = poissonKnuth;
-          function calcMonteCarlo(lambdaH, lambdaA) {
-            var n=5000;
-            var p1=0,pN=0,p2=0,over25=0,over15=0,over35=0,bttsY=0;
-            var scoreMap={};
-            for(var i=0;i<n;i++){
-              var h=poissonKnuth(lambdaH);
-              var a=poissonKnuth(lambdaA);
-              if(h>a) p1++; else if(h===a) pN++; else p2++;
-              if(h+a>2.5) over25++;
-              if(h+a>1.5) over15++;
-              if(h+a>3.5) over35++;
-              if(h>0&&a>0) bttsY++;
-              var key=h+'-'+a;
-              scoreMap[key]=(scoreMap[key]||0)+1;
-            }
-            var topScores=Object.keys(scoreMap).map(function(k){
-              return {score:k, n:scoreMap[k], pct:Math.round(scoreMap[k]/n*100)};
-            }).sort(function(a,b){return b.n-a.n;}).slice(0,5);
-            return {
-              p1:Math.round(p1/n*100), pN:Math.round(pN/n*100), p2:Math.round(p2/n*100),
-              top_scores:topScores,
-              over15:Math.round(over15/n*100), over25:Math.round(over25/n*100),
-              under25:Math.round((n-over25)/n*100), over35:Math.round(over35/n*100),
-              bttsY:Math.round(bttsY/n*100), bttsN:Math.round((n-bttsY)/n*100),
-            };
-          }
           function calcFinalProbs(lambdaH, lambdaA, eloStats) {
             var po = calcPoissonProbs(lambdaH, lambdaA);
             var dc = calcDixonColesProbs(lambdaH, lambdaA);
@@ -579,37 +462,6 @@ jobs:
               lambdaH:parseFloat(Math.min(maxLH,Math.max(minLH,attH*defA*leagAvgH)).toFixed(3)),
               lambdaA:parseFloat(Math.min(maxLA,Math.max(minLA,attA*defH*leagAvgA)).toFixed(3))
             };
-          }
-          function shinProbabilities(odds) {
-            var prices=odds.filter(function(o){return o&&o>1;});
-            if(!prices.length) return null;
-            var rawProbs=prices.map(function(o){return 1/o;});
-            var sumRaw=rawProbs.reduce(function(a,b){return a+b;},0);
-            if(sumRaw<=1) return rawProbs;
-            var z=0.02;
-            for(var iter=0;iter<50;iter++){
-              var f=0,df=0;
-              for(var i=0;i<rawProbs.length;i++){
-                var qi=rawProbs[i];
-                var denom=Math.sqrt(z*z+4*(1-z)*qi*qi/sumRaw);
-                f+=(z+denom)/(2*(1-z));
-                df+=(1+(2*z/sumRaw-2*qi*qi*(1-2*z)/(sumRaw*sumRaw))/denom)/(2*(1-z))+(z+denom)/(2*(1-z)*(1-z));
-              }
-              f-=1;
-              var zNew=z-f/df;
-              if(Math.abs(zNew-z)<1e-8) break;
-              z=Math.max(0,Math.min(0.15,zNew));
-            }
-            var trueProbs=rawProbs.map(function(qi){return (z+Math.sqrt(z*z+4*(1-z)*qi*qi/sumRaw))/(2*(1-z));});
-            var sumTrue=trueProbs.reduce(function(a,b){return a+b;},0);
-            return trueProbs.map(function(p){return p/sumTrue;});
-          }
-          function fractionalKelly(probIA, cote, fraction) {
-            fraction=fraction||0.25;
-            var b=cote-1, q=1-probIA;
-            var kelly=(probIA*b-q)/b;
-            if(kelly<=0) return null;
-            return Math.min(kelly*fraction*100,5).toFixed(1);
           }
           const LEAGUES = [
             39, 40, 61, 62, 140, 141, 135, 78, 2, 3,

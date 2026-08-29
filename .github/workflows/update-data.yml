@@ -1275,6 +1275,8 @@ jobs:
                 histo.predictions.unshift({
                   match:m.home.n+' vs '+m.away.n,home:m.home.n,away:m.away.n,
                   prediction:betLabel,cote:betCote,conf:m.conf,conf_bucket:confBucket,
+                  model_probability:m.model_probability!=null?m.model_probability:null,
+                  reliability:m.reliability||null,
                   market:marketType,league:m.league||'',league_key:m.league_key||'',
                   sport:m.sport||'football',
                   elo_diff:m.elo_diff||null,has_pinnacle:!!(m.pinnacle_snapshot),has_elo:!!(m.elo_home),
@@ -1283,7 +1285,17 @@ jobs:
                 });
               }
             }
-            histo.predictions=histo.predictions.slice(0,300);
+            // Archive complete, non plafonnee, dans Supabase (predictions_archive,
+            // migration 0005) AVANT toute troncature du cache JSON local - plus
+            // aucune prediction n'est perdue definitivement (MASTER §15.3, corrige
+            // ce jalon : l'ancien slice(0,300) supprimait silencieusement tout au-dela
+            // des 300 plus recentes, a chaque run, sans aucune archive).
+            await writePredictionsArchive(histo.predictions);
+            // Cache JSON local : fenetre recente bornee pour la taille de page
+            // (§33), plus genereuse que l'ancien plafond (500 au lieu de 300) - ce
+            // n'est plus destructif puisque l'historique complet vit desormais dans
+            // Supabase.
+            histo.predictions=histo.predictions.slice(0,500);
             var beforeClean=histo.predictions.length;
             histo.predictions=histo.predictions.filter(function(p){return p.type!=='combi';});
             var cleaned=beforeClean-histo.predictions.length;
@@ -1518,6 +1530,49 @@ jobs:
             }
             console.log('  [snapshots] '+rows.length+' snapshots ecrits dans Supabase (match_snapshots).');
           }
+          // Archive complete des predictions dans Supabase (predictions_archive,
+          // migration 0005) - corrige le bug MASTER §15.3 : l'ancien
+          // histo.predictions.slice(0,300) supprimait definitivement toute
+          // prediction au-dela des 300 plus recentes, a chaque run, sans jamais
+          // les archiver nulle part. Upsert idempotent sur fixture_id : rejouer ce
+          // run n'ecrase que la meme ligne, ne duplique jamais.
+          async function writePredictionsArchive(predictions) {
+            var rows=(predictions||[]).filter(function(p){return p.fixture_id!=null&&p.type==='single';}).map(function(p){
+              return {
+                fixture_id:p.fixture_id,
+                match_label:p.match||null,home:p.home||null,away:p.away||null,
+                prediction:p.prediction||null,cote:p.cote!=null?String(p.cote):null,
+                model_probability:p.model_probability!=null?p.model_probability:null,
+                reliability:p.reliability||null,
+                conf:p.conf!=null?p.conf:null,conf_bucket:p.conf_bucket||null,
+                market:p.market||null,league:p.league||null,league_key:p.league_key||null,
+                sport:p.sport||'football',
+                elo_diff:p.elo_diff!=null?p.elo_diff:null,
+                has_pinnacle:!!p.has_pinnacle,has_elo:!!p.has_elo,
+                date:p.date||null,result:p.result||'scheduled',type:p.type||'single',
+                score:p.score||null,resolved_date:p.resolved_date||null,
+                pipeline_sha:p.pipeline_sha||null,
+              };
+            });
+            if(!rows.length) return;
+            if(!SUPA_URL_PIPELINE||!SUPA_SERVICE_KEY){
+              console.log('  [archive] SUPABASE_SERVICE_ROLE_KEY non configure - '+rows.length+' predictions NON archivees (risque de perte definitive au prochain troncage du cache JSON local).');
+              return;
+            }
+            var u = new URL(SUPA_URL_PIPELINE);
+            var batchSize = 200;
+            for(var i=0;i<rows.length;i+=batchSize){
+              var batch = rows.slice(i,i+batchSize);
+              var r = await upsertJSON(u.hostname, '/rest/v1/predictions_archive?on_conflict=fixture_id', batch, {
+                'apikey': SUPA_SERVICE_KEY,
+                'Authorization': 'Bearer '+SUPA_SERVICE_KEY,
+                'Prefer': 'resolution=merge-duplicates,return=minimal',
+              });
+              if(!r.ok) console.log('  [archive] echec upsert batch '+i+': status='+r.status+' '+(r.error||r.body||'').toString().slice(0,200));
+              await sleep(100);
+            }
+            console.log('  [archive] '+rows.length+' predictions archivees dans Supabase (predictions_archive, sans plafond).');
+          }
           async function main(){
             console.log('=== IASHARK',TODAY,'===');
             var fixtures = await getFixtures();
@@ -1599,6 +1654,11 @@ jobs:
                 monthsE[key].roi+=p.result==='win'?(c-1):-1;
               });
               histoEarly.monthly=Object.keys(monthsE).sort().reverse().slice(0,6).map(function(k){var mo=monthsE[k];var tot=mo.wins+mo.losses;var r=mo.roiCount>0?(mo.roi/mo.roiCount*100):0;var parts=k.split('-');var mn=['Jan','Fev','Mar','Avr','Mai','Jun','Jul','Aou','Sep','Oct','Nov','Dec'];return{month:k,label:(mn[parseInt(parts[1])-1]||parts[1])+' '+parts[0],wins:mo.wins,losses:mo.losses,total:tot,roi:Math.round(r*10)/10};});
+              // Meme archive Supabase que la branche principale (voir
+              // writePredictionsArchive plus haut) - les resolutions win/loss/void
+              // faites ci-dessus (jour sans nouveau match) doivent aussi se
+              // propager, pas seulement rester dans le cache JSON local.
+              await writePredictionsArchive(histoEarly.predictions);
               fs.writeFileSync(histoPathEarly,JSON.stringify(histoEarly,null,2));
               return;
             }

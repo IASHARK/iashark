@@ -1,0 +1,37 @@
+{
+  "generated_at": "2026-08-29T16:07:31.814Z",
+  "source": "historique.json",
+  "n_total_predictions": 300,
+  "n_resolved_singles_used": 291,
+  "n_excluded": 9,
+  "metrics": {
+    "brier_score": 0.2814,
+    "log_loss": 0.7671,
+    "expected_calibration_error": 0.1635
+  },
+  "calibration_table": [
+    {
+      "bucket": "6-7",
+      "n": 138,
+      "avg_predicted_prob_pct": 66.3,
+      "actual_win_rate_pct": 56.5,
+      "gap_pct": -9.8
+    },
+    {
+      "bucket": "7-8",
+      "n": 142,
+      "avg_predicted_prob_pct": 74,
+      "actual_win_rate_pct": 53.5,
+      "gap_pct": -20.5
+    },
+    {
+      "bucket": "8+",
+      "n": 11,
+      "avg_predicted_prob_pct": 81.5,
+      "actual_win_rate_pct": 36.4,
+      "gap_pct": -45.2
+    }
+  ],
+  "interpretation": "SURCONFIANCE DETECTEE : au moins un bucket de confiance a un taux de reussite reel significativement inferieur a la probabilite annoncee. Le score de confiance actuel (conf/10) n'est PAS une probabilite calibree.",
+  "limitation": "Echantillon reel mais limite (ancien pipeline, avant moteur V2.1). Ne valide PAS un futur moteur - sert de photographie de reference (baseline) pour mesurer un progres reel plus tard."
+}

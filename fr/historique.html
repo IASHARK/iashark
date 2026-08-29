@@ -8,8 +8,15 @@
 <meta property="og:title" content="IASHARK — Historique & Performance">
 <meta property="og:description" content="Historique des pronostics IASHARK. Winrate, ROI et résultats détaillés de toutes nos prédictions football IA.">
 <meta property="og:type" content="website">
-<link rel="canonical" href="https://iashark.com/historique.html">
-<meta property="og:url" content="https://iashark.com/historique.html">
+<link rel="canonical" href="https://iashark.com/fr/historique.html">
+<link rel="alternate" hreflang="fr" href="https://iashark.com/fr/historique.html">
+<link rel="alternate" hreflang="en" href="https://iashark.com/en/historique.html">
+<link rel="alternate" hreflang="es" href="https://iashark.com/es/historique.html">
+<link rel="alternate" hreflang="de" href="https://iashark.com/de/historique.html">
+<link rel="alternate" hreflang="it" href="https://iashark.com/it/historique.html">
+<link rel="alternate" hreflang="pt" href="https://iashark.com/pt/historique.html">
+<link rel="alternate" hreflang="x-default" href="https://iashark.com/fr/historique.html">
+<meta property="og:url" content="https://iashark.com/fr/historique.html">
 <meta property="og:image" content="https://iashark.com/icon-512.png">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23080c12'/%3E%3Ctext x='50%25' y='54%25' dominant-baseline='middle' text-anchor='middle' font-size='40' fill='%2322d3ee'%3E🦈%3C/text%3E%3C/svg%3E">
@@ -115,10 +122,10 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 <body>
 
 <header class="hdr">
-  <a href="/" class="logo"><span>IA</span>SHARK</a>
+  <a href="/fr/" class="logo"><span>IA</span>SHARK</a>
   <div class="hdr-right">
     <span class="hdr-badge" id="totalBadge">— PARIS</span>
-    <span id="authHeaderSlot"><a href="/compte.html" class="btn-login">CONNEXION</a></span>
+    <span id="authHeaderSlot"><a href="/fr/compte.html" class="btn-login">CONNEXION</a></span>
   </div>
 </header>
 
@@ -199,19 +206,19 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 </div>
 
 <nav class="nav-bottom">
-  <a href="/" class="nav-item">
+  <a href="/fr/" class="nav-item">
     <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5L12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg></div>
     <div class="nav-lbl">ACCUEIL</div>
   </a>
-  <a href="/marches.html" class="nav-item">
+  <a href="/fr/marches.html" class="nav-item">
     <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 17V9M13 17V5M8 17v-4"/></svg></div>
     <div class="nav-lbl">MARCHÉS</div>
   </a>
-  <a href="/historique.html" class="nav-item active">
+  <a href="/fr/historique.html" class="nav-item active">
     <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20v-4"/></svg></div>
     <div class="nav-lbl">HISTORIQUE</div>
   </a>
-  <a href="/pro.html" class="nav-item">
+  <a href="/fr/pro.html" class="nav-item">
     <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.9 6.6L22 9.3l-5 4.9L18.2 22 12 18.3 5.8 22 7 14.2 2 9.3l7.1-.7z"/></svg></div>
     <div class="nav-lbl">OUTILS</div>
   </a>
@@ -219,7 +226,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
     <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg></div>
     <div class="nav-lbl">GUIDES</div>
   </a>
-  <a href="/compte.html" class="nav-item">
+  <a href="/fr/compte.html" class="nav-item">
     <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg></div>
     <div class="nav-lbl">COMPTE</div>
   </a>
@@ -340,7 +347,7 @@ function renderPredictions(){
   if(q)list=list.filter(function(p){return (p.match||'').toLowerCase().indexOf(q)!==-1||(p.league||'').toLowerCase().indexOf(q)!==-1;});
   list=list.slice().sort(function(a,b){return(b.resolved_date||b.date||'').localeCompare(a.resolved_date||a.date||'');});
   var resolvedTotal=sportList.filter(function(p){return p.type==='single'&&RESOLVED.indexOf(p.result)!==-1;}).length;
-  document.getElementById('countLbl').textContent=list.length+' pari'+(list.length>1?'s':'');
+  document.getElementById('countLbl').textContent=list.length+' '+(list.length>1?'paris':'pari');
   document.getElementById('totalBadge').textContent=resolvedTotal+' PARIS';
   if(!list.length){document.getElementById('predList').innerHTML='<div class="empty"><h3>AUCUN PARIS</h3><p>Aucun résultat pour cette combinaison de filtres.</p></div>';return;}
   document.getElementById('predList').innerHTML=list.map(function(p){
@@ -454,7 +461,7 @@ async function loadFullArchive(){
     document.getElementById('btnLoadArchive').style.display='none';
   }catch(e){
     status.textContent='Erreur de chargement de l\'archive complète — réessaie plus tard.';
-    btn.disabled=false; btn.textContent="CHARGER L'HISTORIQUE COMPLET (AU-DELÀ DES 500 DERNIERS)";
+    btn.disabled=false; btn.textContent="CHARGER L\'HISTORIQUE COMPLET (AU-DELÀ DES 500 DERNIERS)";
   }
 }
 </script>

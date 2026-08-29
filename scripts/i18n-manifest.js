@@ -754,6 +754,96 @@ var PAGES = [
        build: function(d, l, esc){ return "document.getElementById('planDescTxt').textContent = '" + esc(d.account.plan_pro_desc) + "';"; }},
       {find: "cta.textContent = 'VOIR MON ESPACE OUTILS →';", build: function(d, l, esc){ return "cta.textContent = '" + esc(d.cta.view_full_tools) + "';"; }}
     ]
+  },
+  {
+    file: "historique.html",
+    metas: {
+      fr: {title: "IASHARK — Historique & Performance", description: "Historique des pronostics IASHARK. Winrate, ROI et résultats détaillés de toutes nos prédictions football IA."},
+      en: {title: "IASHARK — History & Performance", description: "History of IASHARK predictions. Winrate, ROI and detailed results of all our AI football predictions."},
+      es: {title: "IASHARK — Historial y Rendimiento", description: "Historial de los pronósticos IASHARK. Winrate, ROI y resultados detallados de todas nuestras predicciones de fútbol con IA."},
+      de: {title: "IASHARK — Historie & Performance", description: "Verlauf der IASHARK-Vorhersagen. Trefferquote, ROI und detaillierte Ergebnisse aller unserer KI-Fußballvorhersagen."},
+      it: {title: "IASHARK — Storico e Performance", description: "Storico dei pronostici IASHARK. Winrate, ROI e risultati dettagliati di tutti i nostri pronostici calcio IA."},
+      pt: {title: "IASHARK — Histórico e Desempenho", description: "Histórico das previsões IASHARK. Winrate, ROI e resultados detalhados de todas as nossas previsões de futebol com IA."}
+    },
+    replacements: [
+      {find: '<span class="hdr-badge" id="totalBadge">— PARIS</span>', build: function(d){ return '<span class="hdr-badge" id="totalBadge">— ' + d.history_page.default_badge_suffix + '</span>'; }},
+      {find: '<span id="authHeaderSlot"><a href="/compte.html" class="btn-login">CONNEXION</a></span>', build: function(d){ return '<span id="authHeaderSlot"><a href="/compte.html" class="btn-login">' + d.cta.login + '</a></span>'; }},
+      {find: '<h1 class="hero-title"><span>HISTO</span>RIQUE</h1>', build: function(d, l){
+        if (l === "fr") return '<h1 class="hero-title"><span>HISTO</span>RIQUE</h1>';
+        return '<h1 class="hero-title"><span>' + d.history_page.title_span + '</span>' + d.history_page.title_rest + '</h1>';
+      }},
+      {find: "<button class=\"sp-btn active\" id=\"spAll\" onclick=\"setStatSport('all')\">🌐 TOUS</button>", build: function(d){ return "<button class=\"sp-btn active\" id=\"spAll\" onclick=\"setStatSport('all')\">🌐 " + d.history_page.toggle_all + "</button>"; }},
+      {find: "<button class=\"sp-btn\" id=\"spFootball\" onclick=\"setStatSport('football')\">⚽ FOOTBALL</button>", build: function(d){ return "<button class=\"sp-btn\" id=\"spFootball\" onclick=\"setStatSport('football')\">⚽ " + d.history_page.toggle_football + "</button>"; }},
+      {find: "<button class=\"sp-btn pro-btn\" id=\"spPro\" onclick=\"setStatSport('pro')\">⭐ OUTILS</button>", build: function(d){ return "<button class=\"sp-btn pro-btn\" id=\"spPro\" onclick=\"setStatSport('pro')\">⭐ " + d.history_page.toggle_tools + "</button>"; }},
+      {find: '<div class="sm-lbl">WINRATE</div>', build: function(d){ return '<div class="sm-lbl">' + d.history_page.lbl_winrate + '</div>'; }},
+      {find: '<div class="sm-lbl">ROI</div>', build: function(d){ return '<div class="sm-lbl">' + d.history_page.lbl_roi + '</div>'; }},
+      {find: '<div class="sm-lbl">FORME RÉCENTE</div>', build: function(d){ return '<div class="sm-lbl">' + d.history_page.lbl_recent_form + '</div>'; }},
+      {find: '<span><b class="green" id="statWins">—</b> V</span>', build: function(d){ return '<span><b class="green" id="statWins">—</b> ' + d.history_page.letter_win + '</span>'; }},
+      {find: '<span><b class="red" id="statLosses">—</b> D</span>', build: function(d){ return '<span><b class="red" id="statLosses">—</b> ' + d.history_page.letter_loss + '</span>'; }},
+      {find: '<span style="color:var(--muted);margin-left:auto;" id="statTotal">— paris au total</span>', build: function(d){ return '<span style="color:var(--muted);margin-left:auto;" id="statTotal">—' + d.history_page.total_bets_suffix + '</span>'; }},
+      {find: "<button class=\"tab active\" onclick=\"setTab('paris',this)\">PARIS</button>", build: function(d){ return "<button class=\"tab active\" onclick=\"setTab('paris',this)\">" + d.history_page.tab_bets + "</button>"; }},
+      {find: "<button class=\"tab\" onclick=\"setTab('backtesting',this)\">BACKTESTING</button>", build: function(d){ return "<button class=\"tab\" onclick=\"setTab('backtesting',this)\">" + d.history_page.tab_backtesting + "</button>"; }},
+      {find: 'placeholder="Rechercher une équipe, un championnat..."', build: function(d){ return 'placeholder="' + d.history_page.search_placeholder + '"'; }},
+      {find: '<select class="fsel" id="mktSel" onchange="renderPredictions()"><option value="">TOUS LES MARCHÉS</option></select>', build: function(d){ return '<select class="fsel" id="mktSel" onchange="renderPredictions()"><option value="">' + d.history_page.filter_all_markets + '</option></select>'; }},
+      {find: '<select class="fsel" id="leagueSel" onchange="renderPredictions()"><option value="">TOUS CHAMPIONNATS</option></select>', build: function(d){ return '<select class="fsel" id="leagueSel" onchange="renderPredictions()"><option value="">' + d.history_page.filter_all_leagues + '</option></select>'; }},
+      {find: "<button class=\"filter-btn active\" onclick=\"setFilter('all',this)\">TOUS</button>", build: function(d){ return "<button class=\"filter-btn active\" onclick=\"setFilter('all',this)\">" + d.history_page.filter_all + "</button>"; }},
+      {find: '<div class="empty"><h3>CHARGEMENT...</h3></div>', count: 2, build: function(d){ return '<div class="empty"><h3>' + d.common.loading + '</h3></div>'; }},
+      {find: "<button class=\"tab\" id=\"btnLoadArchive\" onclick=\"loadFullArchive()\" style=\"cursor:pointer;\">CHARGER L'HISTORIQUE COMPLET (AU-DELÀ DES 500 DERNIERS)</button>",
+       build: function(d){ return "<button class=\"tab\" id=\"btnLoadArchive\" onclick=\"loadFullArchive()\" style=\"cursor:pointer;\">" + d.history_page.archive_btn + "</button>"; }},
+      {find: '<div class="bt-sort-note">Trié par nombre de paris — les marchés testés sur peu de paris sont estompés et marqués, pour éviter de sur-interpréter un petit échantillon.</div>',
+       build: function(d){ return '<div class="bt-sort-note">' + d.history_page.bt_sort_note + '</div>'; }},
+      {find:
+        '    <div>⚠️ LE JEU PEUT ÊTRE DANGEREUX — JOUEZ RESPONSABLE · INTERDIT AUX MOINS DE 18 ANS</div>\n' +
+        '    <div>Aide : <a href="https://www.joueurs-info-service.fr" style="color:rgba(34,211,238,0.4);text-decoration:none;">joueurs-info-service.fr</a> · 09 74 75 13 13</div>',
+       build: function(d){
+        var f = d.footer;
+        return '    <div>⚠️ ' + f.disclaimer_warning + '</div>\n' +
+          '    <div>' + f.disclaimer_help_label + ' <a href="https://www.joueurs-info-service.fr" style="color:rgba(34,211,238,0.4);text-decoration:none;">' + f.disclaimer_help_site + '</a> · ' + f.disclaimer_help_phone + '</div>';
+      }},
+      {find: '<div class="nav-lbl">ACCUEIL</div>', build: function(d){ return '<div class="nav-lbl">' + d.nav.home + '</div>'; }},
+      {find: '<div class="nav-lbl">MARCHÉS</div>', build: function(d){ return '<div class="nav-lbl">' + d.nav.markets + '</div>'; }},
+      {find: '<div class="nav-lbl">HISTORIQUE</div>', build: function(d){ return '<div class="nav-lbl">' + d.nav.history + '</div>'; }},
+      {find: '<div class="nav-lbl">OUTILS</div>', build: function(d){ return '<div class="nav-lbl">' + d.nav.tools + '</div>'; }},
+      {find: '<div class="nav-lbl">GUIDES</div>', build: function(d){ return '<div class="nav-lbl">' + d.nav.guides + '</div>'; }},
+      {find: '<div class="nav-lbl">COMPTE</div>', build: function(d){ return '<div class="nav-lbl">' + d.nav.account + '</div>'; }},
+      {find: "var MARKET_LABELS={'over25':'Plus de 2,5 buts','over15':'Plus de 1,5 but','under25':'Moins de 2,5 buts','btts_non':'Une équipe ne marque pas','btts_oui':'Les deux équipes marquent','dc1x':'DC 1X','dc_x1':'DC 1X','dc_x2':'DC X2','victoire_dom':'Victoire domicile','victoire_ext':'Victoire extérieur','handicap_dom':'Handicap -0.5 dom','handicap_ext':'Handicap +0.5 ext','match_winner':'Vainqueur','autre':'Autre'};",
+       build: function(d, l, esc){
+        var n = d.market_names, nat = d.market_names_natural;
+        return "var MARKET_LABELS={'over25':'" + esc(n.over25) + "','over15':'" + esc(n.over15) + "','under25':'" + esc(n.under25) + "','btts_non':'" + esc(nat.btts_non_natural) + "','btts_oui':'" + esc(nat.btts_oui_natural) + "','dc1x':'" + esc(n.dc1x) + "','dc_x1':'" + esc(n.dc1x) + "','dc_x2':'" + esc(n.dc_x2) + "','victoire_dom':'" + esc(n.victoire_dom) + "','victoire_ext':'" + esc(n.victoire_ext) + "','handicap_dom':'" + esc(n.handicap_dom) + "','handicap_ext':'" + esc(n.handicap_ext) + "','match_winner':'" + esc(n.match_winner) + "','autre':'" + esc(n.autre) + "'};";
+      }},
+      {find: "document.getElementById('statTotal').textContent=(s.total||0)+' paris au total';", build: function(d, l, esc){ return "document.getElementById('statTotal').textContent=(s.total||0)+'" + esc(d.history_page.total_bets_suffix) + "';"; }},
+      {find: "document.getElementById('statTrendLbl').textContent=resolved.length?resolved.length+' DERNIERS PARIS':'AUCUN PARI RÉCENT';",
+       build: function(d, l, esc){ return "document.getElementById('statTrendLbl').textContent=resolved.length?resolved.length+'" + esc(d.history_page.trend_last_bets_suffix) + "':'" + esc(d.history_page.trend_none) + "';"; }},
+      {find: "mktSel.innerHTML='<option value=\"\">TOUS LES MARCHÉS</option>'+Object.keys(markets).sort().map(function(k){", build: function(d, l, esc){ return "mktSel.innerHTML='<option value=\"\">" + esc(d.history_page.filter_all_markets) + "</option>'+Object.keys(markets).sort().map(function(k){"; }},
+      {find: "leagueSel.innerHTML='<option value=\"\">TOUS CHAMPIONNATS</option>'+Object.keys(leagues).sort().map(function(l){", build: function(d, l2, esc){ return "leagueSel.innerHTML='<option value=\"\">" + esc(d.history_page.filter_all_leagues) + "</option>'+Object.keys(leagues).sort().map(function(l){"; }},
+      {find: "document.getElementById('countLbl').textContent=list.length+' pari'+(list.length>1?'s':'');",
+       build: function(d, l, esc){ var h = d.history_page; return "document.getElementById('countLbl').textContent=list.length+' '+(list.length>1?'" + esc(h.bet_many) + "':'" + esc(h.bet_one) + "');"; }},
+      {find: "document.getElementById('totalBadge').textContent=resolvedTotal+' PARIS';", build: function(d, l, esc){ return "document.getElementById('totalBadge').textContent=resolvedTotal+' " + esc(d.history_page.default_badge_suffix) + "';"; }},
+      {find: "if(!list.length){document.getElementById('predList').innerHTML='<div class=\"empty\"><h3>AUCUN PARIS</h3><p>Aucun résultat pour cette combinaison de filtres.</p></div>';return;}",
+       build: function(d, l, esc){ var h = d.history_page; return "if(!list.length){document.getElementById('predList').innerHTML='<div class=\"empty\"><h3>" + esc(h.empty_no_bets_title) + "</h3><p>" + esc(h.empty_no_bets_sub) + "</p></div>';return;}"; }},
+      {find: "+'<span class=\"tag-date\">'+(p.date||p.resolved_date||'')+(p.resolved_date&&p.date&&p.resolved_date!==p.date?' · résolu '+p.resolved_date:'')+'</span>'",
+       build: function(d, l, esc){ return "+'<span class=\"tag-date\">'+(p.date||p.resolved_date||'')+(p.resolved_date&&p.date&&p.resolved_date!==p.date?'" + esc(d.history_page.resolved_prefix) + "'+p.resolved_date:'')+'</span>'"; }},
+      {find: "+'<div class=\"pred-result '+p.result+'\">'+(p.result==='win'?'WIN':p.result==='void'?'ANNULÉ':'LOSS')+'</div>'",
+       build: function(d, l, esc){ return "+'<div class=\"pred-result '+p.result+'\">'+(p.result==='win'?'WIN':p.result==='void'?'" + esc(d.history_page.result_void) + "':'LOSS')+'</div>'"; }},
+      {find: "var proTag=isPro(p)?'<span class=\"pred-tag tag-pro\">⭐ OUTILS</span>':'';",
+       build: function(d, l, esc){ return "var proTag=isPro(p)?'<span class=\"pred-tag tag-pro\">⭐ " + esc(d.nav.tools) + "</span>':'';"; }},
+      {find: "if(!bt||!bt.by_market||!bt.by_market.length){document.getElementById('btContent').innerHTML='<div class=\"empty\"><h3>PAS ENCORE DE DONNÉES</h3><p>Les stats apparaîtront après les premiers paris résolus.</p></div>';return;}",
+       build: function(d, l, esc){ var h = d.history_page; return "if(!bt||!bt.by_market||!bt.by_market.length){document.getElementById('btContent').innerHTML='<div class=\"empty\"><h3>" + esc(h.empty_no_data_title) + "</h3><p>" + esc(h.empty_no_data_sub) + "</p></div>';return;}"; }},
+      {find: "+(lowSample?'<div style=\"grid-column:1/-1;margin-top:2px\"><span class=\"low-badge\">ÉCHANTILLON FAIBLE</span></div>':'')",
+       build: function(d, l, esc){ return "+(lowSample?'<div style=\"grid-column:1/-1;margin-top:2px\"><span class=\"low-badge\">" + esc(d.history_page.low_sample_badge) + "</span></div>':'')"; }},
+      {find: "+section('PAR MARCHÉ',bt.by_market,true)\n    +section('PAR LIGUE',bt.by_league,false)\n    +section('PAR PROBABILITÉ',bt.by_conf,false);",
+       build: function(d, l, esc){ var h = d.history_page; return "+section('" + esc(h.section_by_market) + "',bt.by_market,true)\n    +section('" + esc(h.section_by_league) + "',bt.by_league,false)\n    +section('" + esc(h.section_by_prob) + "',bt.by_conf,false);"; }},
+      {find: "}catch(e){document.getElementById('predList').innerHTML='<div class=\"empty\"><h3>ERREUR</h3><p>Impossible de charger l\\'historique.</p></div>';}",
+       build: function(d, l, esc){ var h = d.history_page; return "}catch(e){document.getElementById('predList').innerHTML='<div class=\"empty\"><h3>" + esc(h.empty_error_title) + "</h3><p>" + esc(h.empty_error_sub) + "</p></div>';}"; }},
+      {find: "btn.disabled=true; btn.textContent='CHARGEMENT...';", build: function(d, l, esc){ return "btn.disabled=true; btn.textContent='" + esc(d.history_page.archive_loading) + "';"; }},
+      {find: "status.textContent = added>0\n      ? (added+' prédiction(s) supplémentaire(s) chargée(s) depuis l\\'archive complète ('+totalFetched+' au total dans l\\'archive Supabase).')\n      : 'Aucune prédiction supplémentaire au-delà de ce qui est déjà affiché.';",
+       build: function(d, l, esc){
+        var h = d.history_page;
+        return "status.textContent = added>0\n      ? (added+'" + esc(h.archive_added_mid) + "'+totalFetched+'" + esc(h.archive_added_suffix) + "')\n      : '" + esc(h.archive_none_more) + "';";
+      }},
+      {find: "status.textContent='Erreur de chargement de l\\'archive complète — réessaie plus tard.';\n    btn.disabled=false; btn.textContent=\"CHARGER L'HISTORIQUE COMPLET (AU-DELÀ DES 500 DERNIERS)\";",
+       build: function(d, l, esc){ var h = d.history_page; return "status.textContent='" + esc(h.archive_error) + "';\n    btn.disabled=false; btn.textContent=\"" + esc(h.archive_btn).replace(/"/g, '\\"') + "\";"; }}
+    ]
   }
 ];
 

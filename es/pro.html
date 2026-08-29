@@ -571,7 +571,7 @@ async function fetchMatchData(){
     if(!resp.ok) throw new Error('edge function status '+resp.status);
     return await resp.json();
   }catch(e){
-    var resp2=await fetch('data.json?t='+Date.now());
+    var resp2=await fetch('/data.json?t='+Date.now());
     return await resp2.json();
   }
 }
@@ -905,7 +905,7 @@ async function runSync(){
   btn.innerHTML='<span class="spin"></span>SINCRONIZANDO...';
   status.innerHTML='Leyendo historique.json...';
   try{
-    var r=await fetch('historique.json?t='+Date.now());
+    var r=await fetch('/historique.json?t='+Date.now());
     var d=await r.json();
     var preds=d.predictions||[];
     var n=0;

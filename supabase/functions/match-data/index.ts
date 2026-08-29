@@ -6,7 +6,7 @@ const DATA_URL = "https://iashark.com/data.json";
 
 // data.json (public) ne contient plus jamais ces champs depuis que le pipeline
 // les ecrit a la place dans la table match_premium_data (voir
-// supabase/migrations/0001_match_premium_data.sql). Cette liste sert
+// supabase/migrations/0002_match_premium_data.sql). Cette liste sert
 // uniquement de garde-fou si un ancien commit de data.json les contenait
 // encore par erreur - on les retire quand meme explicitement pour un
 // visiteur non-pro, en plus de ne jamais les rapporter depuis la table.

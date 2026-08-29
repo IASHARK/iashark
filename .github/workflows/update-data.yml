@@ -1835,7 +1835,7 @@ jobs:
           // avertissement plutot que d'echouer tout le run, mais n'ecrit ces champs
           // NULLE PART en clair - c'est le comportement de repli volontaire tant que
           // SUPABASE_SERVICE_ROLE_KEY n'est pas ajoute comme secret GitHub Actions
-          // (voir supabase/migrations/0001_match_premium_data.sql pour la migration
+          // (voir supabase/migrations/0002_match_premium_data.sql pour la migration
           // a appliquer sur le projet Supabase avant d'ajouter ce secret).
           function upsertJSON(host, path, body, headers) {
             return new Promise(function(resolve) {
@@ -2700,7 +2700,7 @@ jobs:
               // Champs premium (Outils) : jamais ecrits dans data.json (public, non
               // authentifie). Collectes a part et pousses vers Supabase apres la boucle -
               // seule l'Edge Function match-data, avec verification de session/plan cote
-              // serveur, doit pouvoir les lire. Voir supabase/migrations/0001_match_premium_data.sql.
+              // serveur, doit pouvoir les lire. Voir supabase/migrations/0002_match_premium_data.sql.
               var edgeVal=an&&an.pari_rec?(function(){ function nm(s){return (s||'').toLowerCase().replace(/[^a-z0-9]/g,'');} var pn=nm(an.pari_rec); var mk=(allMarkets||[]).find(function(x){var xn=nm(x.market);return xn===pn||pn.includes(xn)||xn.includes(pn);}); return mk?mk.prob+'% (modele)':''; })():'';
               premiumRows.push({
                 fixture_id:f.id,kelly:kellyVal,edge:edgeVal,

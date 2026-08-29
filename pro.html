@@ -237,6 +237,38 @@ body{background:#080c12;color:var(--text);font-family:'DM Sans',sans-serif;min-h
 
   <div class="day-summary" id="daySummary">🦈 <div>Chargement du résumé du jour...</div></div>
 
+  <!-- Calculateurs de base (MASTER V2.1 §3.1/§13.1) : gratuits, toujours
+       visibles - hors du pro-wall, contrairement aux sélections/suivi qui
+       restent PRO. -->
+  <div class="capital-bar" style="display:flex;">
+    <div class="capital-row"><span class="capital-lbl">🧮 CALCULATEURS GRATUITS</span></div>
+    <div class="capital-row" style="gap:16px;align-items:flex-end;">
+      <div style="flex:1;min-width:120px;">
+        <div class="capital-lbl" style="margin-bottom:4px;">COTE DÉCIMALE</div>
+        <input type="number" step="0.01" min="1.01" id="calcCote" placeholder="Ex: 2.10" oninput="calcFromCote()" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--text);font-family:'Space Mono',monospace;">
+      </div>
+      <div style="text-align:center;color:var(--muted);font-family:'Space Mono',monospace;font-size:10px;padding-bottom:10px;">⇄</div>
+      <div style="flex:1;min-width:120px;">
+        <div class="capital-lbl" style="margin-bottom:4px;">PROBABILITÉ IMPLICITE (%)</div>
+        <input type="number" step="0.1" min="0.01" max="99.99" id="calcProb" placeholder="Ex: 47.6" oninput="calcFromProb()" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--text);font-family:'Space Mono',monospace;">
+      </div>
+    </div>
+    <div class="capital-hint" style="color:var(--muted);font-size:9px;">Probabilité implicite = 100 / cote décimale — inclut la marge du bookmaker, ce n'est pas une probabilité "juste" (fair).</div>
+  </div>
+
+  <div class="capital-bar" style="display:flex;">
+    <div class="capital-row"><span class="capital-lbl">📐 MARGE BOOKMAKER (1X2)</span></div>
+    <div class="capital-row" style="gap:10px;">
+      <input type="number" step="0.01" min="1.01" id="margeC1" placeholder="Cote 1" oninput="calcMarge()" style="flex:1;min-width:70px;background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--text);font-family:'Space Mono',monospace;">
+      <input type="number" step="0.01" min="1.01" id="margeCN" placeholder="Cote N" oninput="calcMarge()" style="flex:1;min-width:70px;background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--text);font-family:'Space Mono',monospace;">
+      <input type="number" step="0.01" min="1.01" id="margeC2" placeholder="Cote 2" oninput="calcMarge()" style="flex:1;min-width:70px;background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--text);font-family:'Space Mono',monospace;">
+    </div>
+    <div class="capital-row" id="margeResult" style="display:none;">
+      <span class="capital-lbl">MARGE</span><span class="capital-val cyan" id="margeVal">—</span>
+      <span class="capital-hint" id="margeHint"></span>
+    </div>
+  </div>
+
   <div class="tabs">
     <button class="tab-btn active" onclick="switchTab('selections',this)">⭐ SÉLECTIONS</button>
     <button class="tab-btn" onclick="switchTab('suivi',this)">📊 MON SUIVI</button>
@@ -394,9 +426,11 @@ var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJ
 var sb = supabase.createClient(SUPA_URL, SUPA_KEY);
 var currentUser = null;
 
-/* TEMPORAIRE (phase de test) : Outils ouvert a tous, meme plan gratuit / non connecte.
-   Repasser a false pour retablir le paywall normal une fois les paliers d'abonnement decides. */
-var OUTILS_OPEN_FOR_ALL = true;
+// Paywall reel : les paliers FREE/PRO sont decides (MASTER V2.1 §3.1) - le
+// flag de bypass permanent (OUTILS_OPEN_FOR_ALL=true) explicitement banni
+// par le MASTER (§24 : "Supprimer : OUTILS_OPEN_FOR_ALL=true") est retire.
+// Le deverrouillage ne depend plus que du plan reel verifie cote serveur
+// (table users, RLS restreint chaque utilisateur a sa propre ligne).
 
 function unlockProWall(){
   document.getElementById('proWall').classList.remove('locked');
@@ -406,7 +440,6 @@ function unlockProWall(){
 var currentCapital = 0;
 
 async function checkProAccess(){
-  if(OUTILS_OPEN_FOR_ALL) unlockProWall();
   try{
     var res = await sb.auth.getSession();
     if(!res.data || !res.data.session) return;
@@ -492,6 +525,35 @@ async function fetchMatchData(){
   }
 }
 function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+
+// Calculateurs gratuits (S3.1/S13.1) - memes formules que lib/betting.js/
+// lib/models.js (deja testees, tests/betting.test.js et tests/models.test.js),
+// reimplementees en JS navigateur pur car cette page n'a pas de bundler.
+var calcSyncing=false;
+function calcFromCote(){
+  if(calcSyncing)return; calcSyncing=true;
+  var c=parseFloat(document.getElementById('calcCote').value);
+  document.getElementById('calcProb').value=(c&&c>1)?(100/c).toFixed(2):'';
+  calcSyncing=false;
+}
+function calcFromProb(){
+  if(calcSyncing)return; calcSyncing=true;
+  var p=parseFloat(document.getElementById('calcProb').value);
+  document.getElementById('calcCote').value=(p&&p>0&&p<100)?(100/p).toFixed(2):'';
+  calcSyncing=false;
+}
+function calcMarge(){
+  var c1=parseFloat(document.getElementById('margeC1').value);
+  var cn=parseFloat(document.getElementById('margeCN').value);
+  var c2=parseFloat(document.getElementById('margeC2').value);
+  var box=document.getElementById('margeResult');
+  if(!c1||!cn||!c2||c1<=1||cn<=1||c2<=1){box.style.display='none';return;}
+  var sumImplied=(1/c1)+(1/cn)+(1/c2);
+  var margePct=(sumImplied-1)*100;
+  document.getElementById('margeVal').textContent=margePct.toFixed(2)+'%';
+  document.getElementById('margeHint').textContent=margePct>=0?'(marge normale du bookmaker)':'(anomalie : somme des probabilités < 100%, vérifie les cotes saisies)';
+  box.style.display='flex';
+}
 async function loadAll(){
   loadLocalData();
   try{

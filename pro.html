@@ -14,6 +14,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="/funnel-track.js"></script>
 <style>
 :root{
   --bg:#080c12;--card:#0d1520;--card2:#0f1a28;
@@ -53,6 +54,9 @@ body{background:#080c12;color:var(--text);font-family:'DM Sans',sans-serif;min-h
 .pw-badge{font-family:'Space Mono',monospace;font-size:6px;letter-spacing:1px;padding:2px 6px;border-radius:3px;white-space:nowrap;flex-shrink:0;background:rgba(245,158,11,0.06);color:rgba(245,158,11,0.5);border:1px solid rgba(245,158,11,0.12);}
 .pw-cta-wrap{padding:14px 18px 18px;}
 .pw-cta{width:100%;background:var(--amber);color:#1a1200;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:2px;font-weight:700;padding:13px;border:none;border-radius:9px;cursor:pointer;text-align:center;display:block;text-decoration:none;}
+.pw-cta:disabled{opacity:.6;cursor:not-allowed;}
+.pw-note{font-size:10.5px;color:var(--muted);text-align:center;margin-top:10px;line-height:1.5;display:none;}
+.pw-note.show{display:block;}
 .pro-hero{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;padding:20px 24px;background:rgba(245,158,11,0.04);border:1px solid var(--ba);border-radius:16px;flex-wrap:wrap;gap:14px;}
 .pro-hero h1{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:2px;margin-bottom:4px;}
 .pro-hero h1 span{color:var(--amber);}
@@ -361,7 +365,10 @@ body{background:#080c12;color:var(--text);font-family:'DM Sans',sans-serif;min-h
           <div class="pw-feat"><div class="pw-feat-l"><div><div class="pw-feat-name">SUIVI AUTOMATIQUE</div><div class="pw-feat-desc">Tracker de paris et résolution automatique</div></div></div><span class="pw-badge">OUTILS</span></div>
         </div>
       </div>
-      <div class="pw-cta-wrap"><a class="pw-cta" href="/compte.html">PASSER OUTILS →</a></div>
+      <div class="pw-cta-wrap">
+        <button class="pw-cta" id="pwCtaBtn" onclick="handleProCta()">PASSER OUTILS — 19,95€/MOIS →</button>
+        <div class="pw-note" id="pwNote"></div>
+      </div>
     </div>
   </div>
 
@@ -484,17 +491,81 @@ function unlockProWall(){
 var currentCapital = 0;
 
 async function checkProAccess(){
+  if(window.iasharkTrack) iasharkTrack('tool_page_view');
   try{
     var res = await sb.auth.getSession();
-    if(!res.data || !res.data.session) return;
+    if(!res.data || !res.data.session){
+      if(window.iasharkTrack) iasharkTrack('paywall_view', {reason:'anonymous'});
+      return;
+    }
     currentUser = res.data.session.user;
     var ures = await sb.from('users').select('plan,role,capital').eq('id', currentUser.id).maybeSingle();
     var plan = ures.data && ures.data.plan ? ures.data.plan : 'free';
     var role = ures.data && ures.data.role;
-    if(plan === 'pro' || role === 'admin') unlockProWall();
+    if(plan === 'pro' || role === 'admin'){
+      unlockProWall();
+    } else if(window.iasharkTrack){
+      iasharkTrack('paywall_view', {reason:'free_plan'}, currentUser.id);
+    }
     showCapital(ures.data && ures.data.capital);
   }catch(e){}
 }
+
+/* ═══ Tunnel de conversion (MASTER §21) : bouton "PASSER OUTILS" du paywall.
+   PAYMENT_PROVIDER reste "disabled" (choix reel du prestataire = decision
+   utilisateur separee, jamais fait a sa place ici) - voir
+   supabase/functions/create-checkout-session/. Ce bouton est deja cable
+   bout-en-bout ("checkout pret") : quand un vrai prestataire sera active,
+   aucun changement frontend ne sera necessaire, seule la reponse cote
+   fonction Edge changera (url reelle au lieu de processed:false). ═══ */
+function currentLocalePrefix(){
+  // Vide sur la racine (page FR non prefixee, encore la version en
+  // production actuelle) - jamais 'fr' par defaut, qui pointerait vers
+  // /fr/compte.html alors que la navigation courante est en /compte.html
+  // non prefixe (meme piege que le bug des liens legaux corrige plus tot
+  // ce chantier : ne jamais lier vers une URL prefixee en supposant qu'elle
+  // existe).
+  var m = window.location.pathname.match(/^\/([a-z]{2})\//);
+  return m ? '/'+m[1] : '';
+}
+
+async function handleProCta(){
+  var res = await sb.auth.getSession();
+  if(!res.data || !res.data.session){
+    if(window.iasharkTrack) iasharkTrack('signup_started', {from:'pro_paywall'});
+    window.location.href = currentLocalePrefix()+'/compte.html?redirect=pro';
+    return;
+  }
+  startCheckoutSession(res.data.session);
+}
+
+async function startCheckoutSession(session){
+  var btn = document.getElementById('pwCtaBtn');
+  var note = document.getElementById('pwNote');
+  btn.disabled = true; btn.textContent = 'PATIENTE...';
+  note.classList.remove('show');
+  if(window.iasharkTrack) iasharkTrack('checkout_started', null, session.user.id);
+  try{
+    var r = await fetch(SUPA_URL+'/functions/v1/create-checkout-session', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':'Bearer '+session.access_token},
+      body: '{}'
+    });
+    var j = await r.json();
+    if(j.processed && j.url){
+      window.location.href = j.url;
+      return;
+    }
+    if(window.iasharkTrack) iasharkTrack('checkout_unavailable', null, session.user.id);
+    note.textContent = 'Le paiement en ligne n\'est pas encore activé — reviens très bientôt. Écris-nous sur contact@iashark.com si tu veux être prévenu(e) dès l\'ouverture.';
+    note.classList.add('show');
+  }catch(e){
+    note.textContent = 'Une erreur est survenue. Réessaie dans un instant.';
+    note.classList.add('show');
+  }
+  btn.disabled = false; btn.textContent = 'PASSER OUTILS — 19,95€/MOIS →';
+}
+
 loadAll();
 checkProAccess();
 

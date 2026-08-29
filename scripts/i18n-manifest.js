@@ -461,7 +461,12 @@ var PAGES = [
        build: function(d, l, esc){ var t = d.tools_page; return '<div class="pw-feat-name">' + esc(t.pw_feat1_name) + '</div><div class="pw-feat-desc">' + esc(t.pw_feat1_desc) + '</div></div></div><span class="pw-badge">' + esc(d.nav.tools) + '</span></div>'; }},
       {find: '<div class="pw-feat-name">SUIVI AUTOMATIQUE</div><div class="pw-feat-desc">Tracker de paris et résolution automatique</div></div></div><span class="pw-badge">OUTILS</span></div>',
        build: function(d, l, esc){ var t = d.tools_page; return '<div class="pw-feat-name">' + esc(t.pw_feat2_name) + '</div><div class="pw-feat-desc">' + esc(t.pw_feat2_desc) + '</div></div></div><span class="pw-badge">' + esc(d.nav.tools) + '</span></div>'; }},
-      {find: '<a class="pw-cta" href="/compte.html">PASSER OUTILS →</a>', build: function(d, l, esc){ return '<a class="pw-cta" href="/compte.html">' + esc(d.tools_page.pw_cta) + '</a>'; }},
+      {find: '<button class="pw-cta" id="pwCtaBtn" onclick="handleProCta()">PASSER OUTILS — 19,95€/MOIS →</button>', build: function(d, l, esc){ return '<button class="pw-cta" id="pwCtaBtn" onclick="handleProCta()">' + esc(d.tools_page.pw_cta) + '</button>'; }},
+      {find: "btn.disabled = true; btn.textContent = 'PATIENTE...';", build: function(d, l, esc){ return "btn.disabled = true; btn.textContent = '" + esc(d.tools_page.pw_cta_loading) + "';"; }},
+      {find: "note.textContent = 'Le paiement en ligne n\\'est pas encore activé — reviens très bientôt. Écris-nous sur contact@iashark.com si tu veux être prévenu(e) dès l\\'ouverture.';",
+       build: function(d, l, esc){ return "note.textContent = '" + esc(d.tools_page.pw_unavailable_msg) + "';"; }},
+      {find: "note.textContent = 'Une erreur est survenue. Réessaie dans un instant.';", build: function(d, l, esc){ return "note.textContent = '" + esc(d.tools_page.pw_error_msg) + "';"; }},
+      {find: "btn.disabled = false; btn.textContent = 'PASSER OUTILS — 19,95€/MOIS →';", build: function(d, l, esc){ return "btn.disabled = false; btn.textContent = '" + esc(d.tools_page.pw_cta) + "';"; }},
       {find: '<div class="modal-title">Ajout rapide</div>', build: function(d){ return '<div class="modal-title">' + d.tools_page.modal_title + '</div>'; }},
       {find: '<div class="modal-sub">Pour un pari pris sur le vif, sans passer par Sélections.</div>', build: function(d, l, esc){ return '<div class="modal-sub">' + esc(d.tools_page.modal_sub) + '</div>'; }},
       {find: '<label>MATCH</label><input type="text" class="finput" id="mMatch" style="width:100%" placeholder="Ex: PSG vs OM">',
@@ -620,6 +625,13 @@ var PAGES = [
       pt: {title: "IASHARK — A Minha Conta", description: "Gere a tua conta, a tua subscrição Ferramentas e as tuas preferências IASHARK."}
     },
     replacements: [
+      {find: '<div class="onboard-title">Bienvenue sur <span style="color:var(--cyan)">IASHARK</span> 🦈</div>',
+       build: function(d, l, esc){ return '<div class="onboard-title">' + d.compte_page.onboarding_title_pre + ' <span style="color:var(--cyan)">IASHARK</span> 🦈</div>'; }},
+      {find: "<div class=\"onboard-body\">Ton compte est prêt. Commence par le match du jour en accès gratuit, puis découvre l'espace Outils quand tu veux aller plus loin.</div>",
+       build: function(d){ return '<div class="onboard-body">' + d.compte_page.onboarding_body + '</div>'; }},
+      {find: '<a href="/" class="onboard-cta primary">VOIR LE MATCH DU JOUR →</a>', build: function(d){ return '<a href="/" class="onboard-cta primary">' + d.compte_page.onboarding_cta_home + '</a>'; }},
+      {find: '<a href="/pro.html" class="onboard-cta">DÉCOUVRIR OUTILS →</a>', build: function(d){ return '<a href="/pro.html" class="onboard-cta">' + d.cta.discover_tools + '</a>'; }},
+      {find: '<button class="onboard-dismiss" onclick="dismissOnboarding()">Masquer ce message</button>', build: function(d){ return '<button class="onboard-dismiss" onclick="dismissOnboarding()">' + d.compte_page.onboarding_dismiss + '</button>'; }},
       {find: '<span class="hdr-pill" id="hdrPill">MON COMPTE</span>', build: function(d){ return '<span class="hdr-pill" id="hdrPill">' + d.compte_page.hdr_pill_default + '</span>'; }},
       {find: '<div class="loading-lbl">VÉRIFICATION...</div>', build: function(d){ return '<div class="loading-lbl">' + d.compte_page.loading_verification + '</div>'; }},
       {find: '<div class="auth-title">Mon <span>Compte</span></div>', build: function(d, l, esc){

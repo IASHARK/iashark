@@ -23,6 +23,7 @@
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23080c12'/%3E%3Ctext x='50%25' y='54%25' dominant-baseline='middle' text-anchor='middle' font-size='40' fill='%2322d3ee'%3E🦈%3C/text%3E%3C/svg%3E">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="/funnel-track.js"></script>
 <script src="/auth-header.js"></script>
 <style>
 :root{--bg:#080c12;--card:#0d1520;--card2:#0f1a28;--cyan:#22d3ee;--amber:#f59e0b;--green:#10b981;--red:#ef4444;--text:#e2e8f0;--muted:#4a6580;--border:rgba(255,255,255,0.06);--bc:rgba(34,211,238,0.18);--ba:rgba(245,158,11,0.2);}
@@ -68,6 +69,14 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 /* DASHBOARD */
 .dashboard{display:none;}
 
+.onboard-banner{display:none;background:linear-gradient(135deg,rgba(16,185,129,0.08),rgba(16,185,129,0.02));border:1px solid rgba(16,185,129,0.25);border-radius:16px;padding:20px;margin-bottom:16px;}
+.onboard-banner.show{display:block;}
+.onboard-title{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:0.5px;color:var(--green);margin-bottom:8px;}
+.onboard-body{font-size:12.5px;color:var(--muted);line-height:1.6;margin-bottom:14px;}
+.onboard-ctas{display:flex;gap:8px;margin-bottom:10px;}
+.onboard-cta{flex:1;text-align:center;padding:10px;border-radius:9px;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1px;text-decoration:none;border:1px solid var(--border);color:var(--text);}
+.onboard-cta.primary{border-color:rgba(16,185,129,0.3);color:var(--green);background:rgba(16,185,129,0.06);}
+.onboard-dismiss{width:100%;background:none;border:none;color:var(--muted);font-family:'Space Mono',monospace;font-size:8px;letter-spacing:1px;cursor:pointer;text-decoration:underline;padding:4px;}
 .user-hero{background:linear-gradient(135deg,rgba(34,211,238,0.06),rgba(6,182,212,0.02));border:1px solid var(--bc);border-radius:16px;padding:24px;margin-bottom:16px;text-align:center;}
 .user-avatar{width:56px;height:56px;border-radius:50%;background:rgba(34,211,238,0.1);border:2px solid var(--bc);display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--cyan);margin:0 auto 12px;}
 .user-email{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);margin-bottom:8px;}
@@ -196,6 +205,17 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 
   <!-- DASHBOARD -->
   <div class="dashboard" id="dashboardCard">
+
+    <!-- ONBOARDING (affiche une seule fois, juste apres inscription) -->
+    <div class="onboard-banner" id="onboardBanner">
+      <div class="onboard-title">Benvenuto su <span style="color:var(--cyan)">IASHARK</span> 🦈</div>
+      <div class="onboard-body">Il tuo account è pronto. Inizia dalla partita gratuita del giorno, poi scopri lo spazio Strumenti quando vuoi andare oltre.</div>
+      <div class="onboard-ctas">
+        <a href="/it/" class="onboard-cta primary">VEDI LA PARTITA DI OGGI →</a>
+        <a href="/it/pro.html" class="onboard-cta">SCOPRI STRUMENTI →</a>
+      </div>
+      <button class="onboard-dismiss" onclick="dismissOnboarding()">Nascondi questo messaggio</button>
+    </div>
 
     <div class="user-hero">
       <div class="user-avatar" id="userAvatar">?</div>
@@ -377,6 +397,7 @@ async function doLogin() {
     }
     var res = loginResp;
     showMsg('Accesso riuscito!','success');
+    if(window.iasharkTrack) iasharkTrack('login_completed', null, res.data.user.id);
     setTimeout(function(){ showDashboard(res.data.user); }, 600);
   } catch(e) {
     var msg = e.message||'Errore di accesso';
@@ -396,14 +417,23 @@ async function doSignup() {
   if(pwd!==pwd2){ showMsg('Le password non corrispondono.','error'); return; }
   var btn = document.getElementById('btnSignup');
   btn.disabled = true; btn.textContent = 'CREAZIONE...';
+  if(window.iasharkTrack) iasharkTrack('signup_started');
   try {
     var res = await sb.auth.signUp({email:email, password:pwd, options:{emailRedirectTo:window.location.origin+'/compte.html'}});
     if(res.error) throw res.error;
+    // Marque l'onboarding comme du en attente meme si la session n'est pas
+    // immediate (confirmation email requise) - showDashboard() le lira au
+    // tout premier vrai retour sur le tableau de bord (SIGNED_IN via
+    // onAuthStateChange apres clic sur le lien de confirmation), pas
+    // seulement dans le cas rare de session immediate.
+    try{ localStorage.setItem('iashark_pending_onboarding','1'); }catch(e){}
     if(res.data.user && !res.data.session) {
       showMsg('Account creato! Controlla la tua email per confermare la registrazione.','info');
+      if(window.iasharkTrack) iasharkTrack('signup_completed', {email_confirmation_pending:true}, res.data.user.id);
     } else if(res.data.session) {
       showMsg('Account creato con successo!','success');
-      setTimeout(function(){ showDashboard(res.data.user); }, 600);
+      if(window.iasharkTrack) iasharkTrack('signup_completed', {email_confirmation_pending:false}, res.data.user.id);
+      setTimeout(function(){ showDashboard(res.data.user, {justSignedUp:true}); }, 600);
     }
   } catch(e) {
     var msg = e.message||'Errore durante la creazione';
@@ -545,7 +575,17 @@ function requestDeletion(){
   window.location.href = 'mailto:contact@iashark.com?subject='+subject+'&body='+body;
 }
 
-function showDashboard(user) {
+function currentLocalePrefix(){
+  var m = window.location.pathname.match(/^\/([a-z]{2})\//);
+  return m ? '/'+m[1] : '';
+}
+
+function dismissOnboarding(){
+  document.getElementById('onboardBanner').classList.remove('show');
+  if(window.iasharkTrack) iasharkTrack('onboarding_dismissed', null, currentUser?currentUser.id:null);
+}
+
+function showDashboard(user, opts) {
   currentUser = user;
   document.getElementById('loadingScreen').style.display = 'none';
   document.getElementById('authCard').style.display = 'none';
@@ -553,6 +593,30 @@ function showDashboard(user) {
   document.getElementById('userEmail').textContent = user.email||'';
   document.getElementById('hdrPill').textContent = 'CONNESSO';
   document.getElementById('userAvatar').textContent = (user.email||'?').slice(0,1).toUpperCase();
+
+  // Onboarding : affiche une seule fois, au tout premier vrai retour sur le
+  // dashboard apres inscription (session immediate OU confirmation email -
+  // voir localStorage 'iashark_pending_onboarding' pose dans doSignup()).
+  var pendingOnboarding = false;
+  try{ pendingOnboarding = localStorage.getItem('iashark_pending_onboarding')==='1'; }catch(e){}
+  if((opts && opts.justSignedUp) || pendingOnboarding){
+    document.getElementById('onboardBanner').classList.add('show');
+    try{ localStorage.removeItem('iashark_pending_onboarding'); }catch(e){}
+  }
+
+  // Retour de parcours "decouverte PRO -> compte -> Outils" (MASTER §21) :
+  // un visiteur qui a clique "PASSER OUTILS" sans etre connecte est envoye
+  // ici avec ?redirect=pro - une fois authentifie, on le ramene directement
+  // sur Outils au lieu de le laisser sur le dashboard (continuite du
+  // parcours, pas une redirection agressive : ne se declenche que si le
+  // parametre est explicitement present).
+  try{
+    var params = new URLSearchParams(window.location.search);
+    if(params.get('redirect')==='pro'){
+      window.location.replace(currentLocalePrefix()+'/pro.html');
+      return;
+    }
+  }catch(e){}
 
   if(user.created_at){
     var d = new Date(user.created_at);

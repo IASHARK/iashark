@@ -1,22 +1,30 @@
 import { createClient } from "jsr:@supabase/supabase-js@2";
 import Stripe from "npm:stripe@17";
 
-// Webhook Stripe — MASTER V2.1 §3.2/§23. DÉSACTIVÉ PAR DÉFAUT via BILLING_MODE.
+// Webhook de paiement — MASTER V2.1 §3.2/§23. DÉSACTIVÉ PAR DÉFAUT via
+// PAYMENT_PROVIDER (architecture agnostique du prestataire final - le choix
+// réel du prestataire est une décision séparée de l'utilisateur, ne doit
+// jamais bloquer la V2 : voir IASHARK_V2_EXECUTION_STATE.md, décision "ne
+// pas choisir de prestataire maintenant"). Cette implémentation concrète
+// est Stripe (le candidat déjà documenté par le MASTER §3.2), prête à
+// s'activer si `PAYMENT_PROVIDER=stripe` — mais rien n'empêche de brancher
+// un autre prestataire plus tard en gardant `entitlements`/`subscriptions`
+// tels quels et en ajoutant une fonction équivalente pour ce prestataire.
 //
-// Tant que BILLING_MODE !== "stripe" (secret non configuré ou vaut
-// "disabled"/"test"), cette fonction accuse reception (200) et NE FAIT
-// RIEN d'autre : aucun appel Stripe, aucune ecriture DB, aucun changement
-// de plan utilisateur. C'est le mecanisme qui garantit "aucun vrai
-// paiement ne doit etre execute sans cles reelles" - pas une simple
-// convention documentaire.
+// Tant que PAYMENT_PROVIDER !== "stripe" (secret non configuré ou vaut
+// "disabled"), cette fonction accuse reception (200) et NE FAIT RIEN
+// d'autre : aucun appel Stripe, aucune ecriture DB, aucun changement de
+// plan utilisateur. C'est le mecanisme qui garantit "aucun vrai paiement
+// ne doit etre execute sans cles reelles" - pas une simple convention
+// documentaire.
 //
 // STATUT HONNETE : ce code n'a jamais pu etre teste contre un vrai webhook
 // Stripe (aucun compte Stripe/cle de test disponible depuis cette session).
 // Verifie uniquement : structure, coherence avec le schema
 // supabase/migrations/0006_billing_scaffold.sql, et absence d'appel reseau
-// tant que BILLING_MODE!=='stripe'. A tester en conditions reelles (Stripe
-// CLI `stripe listen --forward-to`, ou le tableau de bord Stripe en mode
-// test) avant toute activation - voir IASHARK_V2_STRIPE_GO_LIVE.md.
+// tant que PAYMENT_PROVIDER!=='stripe'. A tester en conditions reelles
+// (Stripe CLI `stripe listen --forward-to`, ou le tableau de bord Stripe en
+// mode test) avant toute activation - voir IASHARK_V2_STRIPE_GO_LIVE.md.
 //
 // Association user <-> customer <-> subscription : le checkout Stripe doit
 // etre cree avec `client_reference_id` = user.id (Supabase auth uid), pour
@@ -25,7 +33,7 @@ import Stripe from "npm:stripe@17";
 
 const SUPA_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-const BILLING_MODE = Deno.env.get("BILLING_MODE") || "disabled";
+const PAYMENT_PROVIDER = Deno.env.get("PAYMENT_PROVIDER") || "disabled";
 const STRIPE_SECRET_KEY = Deno.env.get("STRIPE_SECRET_KEY");
 const STRIPE_WEBHOOK_SECRET = Deno.env.get("STRIPE_WEBHOOK_SECRET");
 
@@ -44,21 +52,21 @@ Deno.serve(async (req: Request) => {
     return new Response("ok", { headers: CORS_HEADERS });
   }
 
-  if (BILLING_MODE !== "stripe") {
+  if (PAYMENT_PROVIDER !== "stripe") {
     // Comportement par defaut et actuel du produit : accuse reception sans
     // rien traiter. Renvoie 200 (pas une erreur) pour que Stripe, si ce
     // secret etait un jour configure par erreur cote Stripe avant d'etre
     // pret cote IASHARK, ne re-tente pas indefiniment un webhook qui ne
     // sera jamais traite.
-    console.log("[stripe-webhook] BILLING_MODE=" + BILLING_MODE + " - evenement recu mais NON traite (facturation desactivee).");
-    return new Response(JSON.stringify({ ok: true, billing_mode: BILLING_MODE, processed: false }), {
+    console.log("[stripe-webhook] PAYMENT_PROVIDER=" + PAYMENT_PROVIDER + " - evenement recu mais NON traite (paiement desactive).");
+    return new Response(JSON.stringify({ ok: true, payment_provider: PAYMENT_PROVIDER, processed: false }), {
       status: 200,
       headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
     });
   }
 
   if (!STRIPE_SECRET_KEY || !STRIPE_WEBHOOK_SECRET) {
-    console.error("[stripe-webhook] BILLING_MODE=stripe mais STRIPE_SECRET_KEY/STRIPE_WEBHOOK_SECRET manquants - configuration incoherente, refus de traiter.");
+    console.error("[stripe-webhook] PAYMENT_PROVIDER=stripe mais STRIPE_SECRET_KEY/STRIPE_WEBHOOK_SECRET manquants - configuration incoherente, refus de traiter.");
     return new Response(JSON.stringify({ error: "billing_misconfigured" }), {
       status: 500,
       headers: { ...CORS_HEADERS, "Content-Type": "application/json" },

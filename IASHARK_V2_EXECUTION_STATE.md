@@ -13,7 +13,7 @@ Mis à jour à chaque jalon, comme demandé. Statuts honnêtes uniquement — ri
 - Archives : la perte de données réelle (`slice(0,300)`) est corrigée, plus aucune prédiction n'est supprimée définitivement.
 - Mobile (spot-check) : index/pro/compte/match ne montrent aucun overflow horizontal à 375px, alt text et labels boutons présents sur match.html.
 - Business : FREE permanent cohérent, prix PRO 19,95€/mois cohérent partout, aucun essai "1€" contradictoire, guides sans fausse statistique de performance.
-- Billing : scaffold Stripe désactivé déployé et vérifié inerte en conditions réelles (aucun paiement possible tant que `BILLING_MODE!=='stripe'`).
+- Billing : scaffold de paiement désactivé (`PAYMENT_PROVIDER=disabled`, architecture agnostique du prestataire — Stripe est l'implémentation câblée, le choix définitif du prestataire est une décision séparée et différée de l'utilisateur, ne bloque pas la V2) déployé et vérifié inerte en conditions réelles.
 
 ### REMAINING_NON_BLOCKING (améliore le produit, ne bloque pas un lancement honnête)
 
@@ -91,7 +91,7 @@ Si tu reprends ce projet dans une session fraîche avec seulement le MASTER V2.1
 - **Séparation stricte PURE/MARKET_CONSENSUS/MARKET_AWARE (§10.2)** : PURE ne voit jamais une cote, pour aucun marché. **Fait et vérifié** (preuve mathématique + garde-fou anti-régression sur le code source réel) — voir Journal, fix critique post-Phase-5.
 - **Aucun `slice(0,300)` destructif (§15.3)** : **Fait** — `predictions_archive` Supabase non plafonnée.
 - **FREE permanent, PRO 19,95€/mois, pas d'essai "1€"** (§3.1) : déjà cohérent sur le site (vérifié/corrigé avant ce document, `landing.html`).
-- **Stripe : aucun vrai paiement sans clés réelles (§3.2)** : `BILLING_MODE` doit valoir exactement `"stripe"` pour que quoi que ce soit se passe. L'utilisateur configure lui-même les clés réelles (voir `IASHARK_V2_STRIPE_GO_LIVE.md`) — **ne jamais le faire à sa place, ne jamais committer de clé**.
+- **Paiement : aucun vrai paiement sans clés réelles (§3.2)** : `PAYMENT_PROVIDER` doit valoir exactement `"stripe"` pour que quoi que ce soit se passe (architecture agnostique du prestataire — le choix définitif est une décision séparée et différée de l'utilisateur, explicitement pas à faire par Claude). L'utilisateur configure lui-même les clés réelles (voir `IASHARK_V2_STRIPE_GO_LIVE.md`) — **ne jamais le faire à sa place, ne jamais committer de clé**.
 - **Vocabulaire (§2.2/§2.3)** : "probabilité"/"modèle"/"marché"/"écart modèle/marché" oui ; "pari sûr"/"meilleur pari"/"nos picks"/"gagnez" non.
 
 ### Contrainte technique permanente de cette session

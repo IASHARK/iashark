@@ -10,7 +10,11 @@ create table if not exists rate_limit_buckets (
 );
 alter table rate_limit_buckets enable row level security;
 -- Aucune policy anon/authenticated : uniquement accessible via service role
--- (l'Edge Function), jamais directement depuis le navigateur.
+-- (l'Edge Function), jamais directement depuis le navigateur. REVOKE en plus
+-- du GRANT SELECT que Postgres accorde par defaut a anon/authenticated sur
+-- toute nouvelle table (RLS bloquait deja les lignes, meme principe que
+-- match_premium_data).
+revoke all on rate_limit_buckets from anon, authenticated;
 
 create or replace function check_rate_limit(p_key text, p_limit int, p_window_seconds int)
 returns boolean

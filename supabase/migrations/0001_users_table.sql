@@ -6,6 +6,15 @@
 --
 -- Cette table est interrogee directement par le frontend (auth-header.js,
 -- compte.html, pro.html, match.html) via sb.from('users').select('plan,role,capital').
+--
+-- NOTE HISTORIQUE : `supabase list_migrations` montre 2 migrations
+-- anterieures a ce depot (2026-07-22, "lock_down_users_table_client_grants"
+-- et "add_capital_column_with_scoped_grant") deja appliquees sur le projet
+-- avant que ce fichier n'existe - leur contenu SQL exact n'est pas
+-- recuperable a posteriori (aucun outil ne l'expose). C'est justement pour
+-- ca que ce fichier est ecrit pour etre idempotent et reconciliant plutot
+-- que de supposer une table vide au depart : il produit le meme etat final
+-- correct qu'il soit rejoue sur une base neuve ou sur celle-ci.
 -- Ne pas renommer sans mettre a jour ces 4 fichiers en meme temps.
 
 create table if not exists public.users (

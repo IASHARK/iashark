@@ -1716,7 +1716,8 @@ jobs:
                   market:marketType,league:m.league||'',league_key:m.league_key||'',
                   sport:m.sport||'football',
                   elo_diff:m.elo_diff||null,has_pinnacle:!!(m.pinnacle_snapshot),has_elo:!!(m.elo_home),
-                  date:TODAY,result:'scheduled',fixture_id:m.id,type:'single',score:null
+                  date:TODAY,result:'scheduled',fixture_id:m.id,type:'single',score:null,
+                  pipeline_sha:process.env.GITHUB_SHA||null
                 });
               }
             }
@@ -2782,6 +2783,8 @@ jobs:
                 elo_home:eloH?Math.round(eloH):null,elo_away:eloA?Math.round(eloA):null,
                 elo_diff:eloStats?eloStats.diff:null,elo_signal:eloStats?eloStats.signal:null,
                 pinnacle_snapshot:pinnacleOdds?{c1:pinnacleOdds.c1,cn:pinnacleOdds.cn,c2:pinnacleOdds.c2,date:TODAY}:null,
+                pipeline_sha:process.env.GITHUB_SHA||null,
+                market_source:usingPinnacle?'Pinnacle (sharp)':(marketOdds?'Cotes moyennes multi-bookmakers':'Aucune cote fiable'),
               };
               // Champs premium (Outils) : jamais ecrits dans data.json (public, non
               // authentifie). Collectes a part et pousses vers Supabase apres la boucle -
@@ -2793,6 +2796,8 @@ jobs:
                 verdict_shark:an?(an.verdict_shark||''):'',
                 facteur_x:an?(an.facteur_x||''):'',
                 dropping_odds:droppingOdds||null,
+                raw_response:an||null,
+                pipeline_sha:process.env.GITHUB_SHA||null,
               });
               matchsData.push(matchObj);
               console.log('  OK conf='+matchObj.conf+' edge='+edgeVal+' pari='+matchObj.pari_rec);

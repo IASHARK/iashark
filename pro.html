@@ -4,9 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>IASHARK OUTILS</title>
-<meta name="description" content="Sélections à forte confiance, suivi automatique des paris et vérification de cote en un clic — l'espace Outils d'IASHARK.">
+<meta name="description" content="Sélections à forte probabilité modèle, suivi automatique des paris et vérification de cote en un clic — l'espace Outils d'IASHARK.">
 <meta property="og:title" content="IASHARK OUTILS">
-<meta property="og:description" content="Sélections à forte confiance, suivi automatique des paris et vérification de cote en un clic — l'espace Outils d'IASHARK.">
+<meta property="og:description" content="Sélections à forte probabilité modèle, suivi automatique des paris et vérification de cote en un clic — l'espace Outils d'IASHARK.">
 <meta property="og:type" content="website">
 <link rel="canonical" href="https://iashark.com/pro.html">
 <meta property="og:url" content="https://iashark.com/pro.html">
@@ -208,7 +208,7 @@ body{background:#080c12;color:var(--text);font-family:'DM Sans',sans-serif;min-h
   <div class="pro-hero">
     <div>
       <h1>Espace <span>OUTILS</span></h1>
-      <p>Sélections conf ≥ 7.0 · Suivi automatique · Vérification de cote</p>
+      <p>Sélections probabilité ≥ 70% · Suivi automatique · Vérification de cote</p>
     </div>
     <div class="hero-stats">
       <div class="hstat"><div class="hstat-val" id="heroWR">—</div><div class="hstat-lbl">WINRATE</div></div>
@@ -248,7 +248,7 @@ body{background:#080c12;color:var(--text);font-family:'DM Sans',sans-serif;min-h
       <!-- SÉLECTIONS -->
       <div id="tab-selections" class="tab-section active">
         <div class="sel-toolbar">
-          <span class="lock-badge">🔒 CONF ≥ 7.0</span>
+          <span class="lock-badge">🔒 PROBA ≥ 70%</span>
           <select class="fsel" id="filterMkt" onchange="renderSelections()">
             <option value="">Tous les marchés</option>
             <option value="over25">Plus de 2,5 buts</option>
@@ -259,7 +259,7 @@ body{background:#080c12;color:var(--text);font-family:'DM Sans',sans-serif;min-h
             <option value="dc_x2">DC X2</option>
           </select>
           <select class="fsel" id="sortSel" onchange="renderSelections()">
-            <option value="conf">Trier : confiance</option>
+            <option value="conf">Trier : probabilité modèle</option>
             <option value="cote">Trier : cote</option>
             <option value="date">Trier : date</option>
           </select>
@@ -283,9 +283,9 @@ body{background:#080c12;color:var(--text);font-family:'DM Sans',sans-serif;min-h
       <div class="pw-top"><span class="pw-top-lbl">CONTENU OUTILS</span></div>
       <div class="pw-body">
         <div class="pw-title">Accès <span>complet</span></div>
-        <div class="pw-sub">Sélections à forte confiance, suivi automatique de tes paris, vérification de cote en un clic.</div>
+        <div class="pw-sub">Sélections à forte probabilité modèle, suivi automatique de tes paris, vérification de cote en un clic.</div>
         <div class="pw-feats">
-          <div class="pw-feat"><div class="pw-feat-l"><div><div class="pw-feat-name">SÉLECTIONS CONF ≥ 7.0</div><div class="pw-feat-desc">Les pronostics à plus forte confiance de l'IA</div></div></div><span class="pw-badge">OUTILS</span></div>
+          <div class="pw-feat"><div class="pw-feat-l"><div><div class="pw-feat-name">SÉLECTIONS PROBABILITÉ ≥ 70%</div><div class="pw-feat-desc">Les pronostics à plus forte probabilité modèle</div></div></div><span class="pw-badge">OUTILS</span></div>
           <div class="pw-feat"><div class="pw-feat-l"><div><div class="pw-feat-name">SUIVI AUTOMATIQUE</div><div class="pw-feat-desc">Tracker de paris et résolution automatique</div></div></div><span class="pw-badge">OUTILS</span></div>
         </div>
       </div>
@@ -497,9 +497,8 @@ async function loadAll(){
   try{
     var data=await fetchMatchData();
     allMatchs=(data.matchs||[]).filter(function(m){
-      var conf=parseFloat(m.conf)||0;
-      var confNorm=conf<=1?conf*10:conf;
-      return confNorm>=7.0&&!m.no_signal&&m.pari_rec;
+      var prob=m.model_probability!=null?m.model_probability:((parseFloat(m.conf)||0)<=1?(parseFloat(m.conf)||0)*10*10:(parseFloat(m.conf)||0)*10);
+      return prob>=70&&!m.no_signal&&m.pari_rec;
     });
   }catch(e){
     allMatchs=getDemoMatchs();
@@ -534,7 +533,7 @@ function renderDaySummary(){
   var todayStr=new Date().toISOString().split('T')[0];
   var todayCount=allMatchs.filter(function(m){return (m.date||'').indexOf(todayStr)===0;}).length;
   var pendingCount=PARIS.filter(function(p){return p.result==='pending';}).length;
-  document.getElementById('daySummary').innerHTML='🦈 <div>Aujourd\'hui : <b>'+(todayCount||allMatchs.length)+' sélection'+((todayCount||allMatchs.length)>1?'s':'')+'</b> conf ≥7.0'
+  document.getElementById('daySummary').innerHTML='🦈 <div>Aujourd\'hui : <b>'+(todayCount||allMatchs.length)+' sélection'+((todayCount||allMatchs.length)>1?'s':'')+'</b> probabilité ≥70%'
     +(pendingCount?' · <span class="cy">'+pendingCount+' pari'+(pendingCount>1?'s':'')+'</span> en attente de résultat dans ton suivi.':' · aucun pari en attente.')
     +'</div>';
 }
@@ -547,9 +546,9 @@ function renderSelections(){
     return getMarketKey(m.pari_rec||'')===mkt;
   });
   list=list.slice().sort(function(a,b){
-    var ca=parseFloat(a.conf)||0,cb=parseFloat(b.conf)||0;
-    var cna=ca<=1?ca*10:ca,cnb=cb<=1?cb*10:cb;
-    if(sortBy==='conf')return cnb-cna;
+    var pa=a.model_probability!=null?a.model_probability:((parseFloat(a.conf)||0)<=1?(parseFloat(a.conf)||0)*100:(parseFloat(a.conf)||0)*10);
+    var pb=b.model_probability!=null?b.model_probability:((parseFloat(b.conf)||0)<=1?(parseFloat(b.conf)||0)*100:(parseFloat(b.conf)||0)*10);
+    if(sortBy==='conf')return pb-pa;
     if(sortBy==='cote')return (parseFloat(b.cote_rec)||0)-(parseFloat(a.cote_rec)||0);
     if(sortBy==='date')return (a.date||'')<(b.date||'')?-1:1;
     return 0;
@@ -560,8 +559,11 @@ function renderSelections(){
     return;
   }
   document.getElementById('selList').innerHTML=list.map(function(m){
+    // model_probability : probabilite reelle du marche (0-100). Repli sur
+    // l'ancien champ conf (deprecie) pour compatibilite descendante.
     var conf=parseFloat(m.conf)||0;
     var confN=conf<=1?conf*10:conf;
+    var modelProbPct=m.model_probability!=null?Math.round(m.model_probability):Math.round(confN*10);
     var cc=confN>=8?'c8':'c7';
     var heure=(m.date||'').split(' ')[1]||'';
     var hn=(m.home&&m.home.n)||'?', an=(m.away&&m.away.n)||'?';
@@ -581,7 +583,7 @@ function renderSelections(){
       +(note?'<div class="saved-note">📝 '+esc(note)+'</div>':'')
       +'</div>'
       +'<div class="cote-v">'+(m.cote_rec||'—')+'</div>'
-      +'<div class="cbadge '+cc+'">'+confN.toFixed(1)+'</div>'
+      +'<div class="cbadge '+cc+'" title="Probabilité modèle">'+modelProbPct+'%</div>'
       +'<button class="btn-follow'+(isFollowed?' done':'')+'" id="followbtn-'+m.id+'" onclick="togglePanel('+m.id+')">'+(isFollowed?'✓ SUIVI':'GÉRER ▾')+'</button>'
       +'</div>'
       +'<div class="panel" id="panel-'+m.id+'">'

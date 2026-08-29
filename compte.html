@@ -216,9 +216,9 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
       <div class="plan-row">
         <span class="plan-status free" id="planStatusTxt">Plan Gratuit</span>
       </div>
-      <div class="plan-desc" id="planDescTxt">Tu utilises la version gratuite d'IASHARK — le match à la plus forte confiance du jour est accessible gratuitement.</div>
+      <div class="plan-desc" id="planDescTxt">Tu utilises la version gratuite d'IASHARK — le match à la plus forte probabilité modèle du jour est accessible gratuitement.</div>
       <div class="pro-features" id="planFeaturesBlock">
-        <div class="pro-feature"><span class="ck">＋</span> Toutes les sélections à forte confiance</div>
+        <div class="pro-feature"><span class="ck">＋</span> Toutes les sélections à forte probabilité modèle</div>
         <div class="pro-feature"><span class="ck">＋</span> Historique complet et détaillé</div>
         <div class="pro-feature"><span class="ck">＋</span> Analyses approfondies par match</div>
       </div>
@@ -507,7 +507,7 @@ function showDashboard(user) {
     document.getElementById('hdrPill').textContent = IasharkAuthHeader.chipLabel(user.email, plan, role);
 
     if(isPro){
-      document.getElementById('planDescTxt').textContent = 'Ton abonnement Outils est actif — tu as accès à toutes les sélections à forte confiance.';
+      document.getElementById('planDescTxt').textContent = 'Ton abonnement Outils est actif — tu as accès à toutes les sélections à forte probabilité modèle.';
       document.getElementById('planFeaturesBlock').style.display = 'none';
       var cta = document.getElementById('planCta');
       cta.textContent = 'VOIR MON ESPACE OUTILS →';

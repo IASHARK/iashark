@@ -471,7 +471,7 @@ function leagueHeader(m){
 function buildCard(m){
   var p1=m.p1||0,pn=m.pn||0,p2=m.p2||0,cc=confClass(m),heure=(m.date||'').split(' ')[1]||'';
   var isWC=isWorldCup(m);
-  var isHot=m.hot||ovrConf(m)>=80,isVal=m.val||m.vbet==='OUI';
+  var isHot=!!m.hot,isVal=m.val||m.vbet==='OUI';
   var badges='';
   if(!isWC){
     if(isVal)badges+='<span class="badge badge-value">⚡ VALUE BET</span>';

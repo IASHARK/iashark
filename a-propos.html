@@ -143,7 +143,7 @@ footer p{font-family:'Space Mono',monospace;font-size:8px;color:rgba(74,101,128,
       </div>
     </div>
 
-    <p>Un modèle de langage synthétise ensuite l'ensemble de ces signaux statistiques pour choisir, match par match, le marché dont la convergence des indicateurs est la plus forte — et lui attribue un score de confiance reflétant le degré d'accord entre les modèles.</p>
+    <p>Le marché mis en avant pour chaque match est choisi automatiquement : c'est celui dont la probabilité calculée par les modèles est la plus élevée parmi les marchés disponibles. La <b>probabilité affichée</b> est directement celle du modèle, jamais modifiée. La <b>fiabilité</b> affichée à côté est un indicateur séparé — reflet de l'accord entre les modèles, de la qualité des données disponibles pour ce match et de la taille de l'échantillon statistique — jamais une réécriture de la probabilité elle-même. Un modèle de langage rédige ensuite le texte d'explication qui accompagne ce choix, mais ne calcule, ne choisit ni ne modifie aucun chiffre : les probabilités, cotes, marché retenu et niveau de fiabilité sont entièrement déterminés par du code, pas par le modèle de langage.</p>
     <p><b>La notion d'edge</b> : le modèle compare sa probabilité calculée à la cote proposée par les bookmakers. Quand la probabilité du modèle est supérieure à celle qu'implique la cote, on parle de "value bet" — une cote potentiellement sur-évaluée par le marché.</p>
   </div>
 
@@ -238,7 +238,7 @@ footer p{font-family:'Space Mono',monospace;font-size:8px;color:rgba(74,101,128,
     <ul class="legal-list">
       <li><b>IASHARK n'est pas un opérateur de paris sportifs.</b> Nous ne prenons aucune mise, ne gérons aucun compte joueur et ne procédons à aucun encaissement de gains. Pour parier réellement, vous devez passer par un opérateur agréé par l'ANJ (Autorité Nationale des Jeux).</li>
       <li><b>Nous ne sommes ni conseillers financiers, ni traders professionnels agréés, ni professionnels du pari sportif.</b> IASHARK est un outil d'analyse statistique à but informatif et éducatif — en aucun cas un service de conseil en investissement, en trading ou en paris.</li>
-      <li><b>Contenu informatif uniquement.</b> Les analyses, statistiques et scores de confiance publiés ici sont fournis à titre purement informatif et éducatif. Ils ne constituent ni un conseil financier, ni une garantie de résultat.</li>
+      <li><b>Contenu informatif uniquement.</b> Les analyses, statistiques, probabilités et indicateurs de fiabilité publiés ici sont fournis à titre purement informatif et éducatif. Ils ne constituent ni un conseil financier, ni une garantie de résultat.</li>
       <li><b>Aucune responsabilité ne pourra être engagée</b> en cas de perte financière résultant de décisions prises sur la base des contenus de ce site. Vous êtes seul responsable de vos décisions de jeu et de leurs conséquences.</li>
       <li><b>Le sport est imprévisible.</b> Aucun modèle statistique, aussi rigoureux soit-il, ne peut prédire un résultat sportif avec certitude.</li>
       <li><b>Performances passées ≠ performances futures.</b> Un edge statistique positif à long terme n'empêche pas des séries de pertes à court terme. Le modèle et la méthodologie décrits sur cette page peuvent évoluer sans préavis.</li>

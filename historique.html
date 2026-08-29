@@ -223,7 +223,13 @@ var MARKET_LABELS={'over25':'Plus de 2,5 buts','over15':'Plus de 1,5 but','under
 var RESOLVED=['win','loss'];
 var DISPLAYABLE=['win','loss','neutral','no_signal','void'];
 
-function isPro(p){ return !p.no_signal && parseFloat(p.conf||0)>=7.0 && p.prediction && (p.date||'')>='2026-06-27'; }
+// model_probability (0-100) est le champ moderne ; conf (0-10, deprecie)
+// reste la seule donnee disponible pour les entrees archivees avant ce
+// changement - repli necessaire, pas une preference.
+function isPro(p){
+  var prob=p.model_probability!=null?p.model_probability:(parseFloat(p.conf||0)*10);
+  return !p.no_signal && prob>=70 && p.prediction && (p.date||'')>='2026-06-27';
+}
 
 function setTab(tab,btn){
   document.getElementById('tabParis').style.display=tab==='paris'?'block':'none';
@@ -375,7 +381,7 @@ function renderBacktesting(bt){
   document.getElementById('btContent').innerHTML=''
     +section('PAR MARCHÉ',bt.by_market,true)
     +section('PAR LIGUE',bt.by_league,false)
-    +section('PAR CONFIANCE',bt.by_conf,false);
+    +section('PAR PROBABILITÉ',bt.by_conf,false);
 }
 async function loadData(){
   try{

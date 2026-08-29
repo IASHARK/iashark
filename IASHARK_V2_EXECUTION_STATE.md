@@ -2,6 +2,60 @@
 
 Mis à jour à chaque jalon, comme demandé. Statuts honnêtes uniquement — rien n'est marqué `PASS`/`EXECUTED` sans preuve vérifiée dans ce document ou dans un commit référencé.
 
+## REPRISE RAPIDE — lire ceci en premier si nouvelle session
+
+Si tu reprends ce projet dans une session fraîche avec seulement le MASTER V2.1 + ce document : tout ce qu'il te faut est ici. Ne refais pas d'audit théorique, ne re-découvre pas les bugs déjà listés — vérifie juste que l'état décrit ci-dessous correspond toujours au dépôt (`git log`, `npm test`) et continue.
+
+**Dépôt** : `IASHARK/iashark` sur GitHub. **Branche de travail** : `iashark-v2` (PAS `main` — rien n'est mergé sur `main`, c'est intentionnel, l'utilisateur décidera quand). **Commande de vérification de base** : `cd` dans le repo, `npm test` (doit afficher `159 pass / 0 fail` au moment de cette rédaction — si un chiffre différent apparaît dans le journal plus bas, c'est le chiffre le plus récent qui fait foi).
+
+### Discipline à respecter dès la reprise (déjà validée par l'utilisateur toute la session)
+
+1. Avant tout commit : `npm test` doit passer, ET `node --check` sur le pipeline extrait de `.github/workflows/update-data.yml` (voir la commande exacte dans le Journal, jalon P1-15) doit réussir.
+2. Ne jamais faire confiance à `{"success":true}` d'un outil MCP Supabase seul — toujours vérifier indépendamment via `execute_sql` (`information_schema`, `has_table_privilege`, ou un insert/delete de test réel).
+3. Toute donnée de test injectée dans `data.json` pour vérifier visuellement le frontend doit être `git checkout -- data.json` juste après (jamais committer une donnée de test).
+4. Commit + push après CHAQUE jalon logique, avec mise à jour de ce document dans le même commit ou juste après.
+5. Ne jamais marquer quelque chose `PASS`/`FIXED`/`TERMINÉ` sans preuve vérifiée réellement (exécution, pas juste lecture de code).
+6. Le MASTER complet représente plusieurs semaines de travail — prioriser le **chemin critique vers une V2 réellement lançable**, pas la complétion à 100% de chaque section idéale du MASTER. Documenter honnêtement ce qui est différé, jamais prétendre que c'est fait.
+
+### Liste de priorité en cours (donnée explicitement par l'utilisateur, dans cet ordre, à ne pas réordonner sans raison)
+
+| # | Item | Statut au dernier jalon |
+|---|---|---|
+| — | Fermeture moteur (4 points : model_probability/reliability séparés, comparaison honnête, vérification finale, séparation PURE/CONSENSUS/AWARE) | **FAIT** (voir Journal) |
+| 1 | Page Match complète (§7) | PARTIEL — probabilité/fiabilité séparées et vérifiées visuellement ; onglets enrichis (Joueurs/Stats/Compos/Modèles/Cotes séparés du MASTER) PAS FAITS, la page garde sa structure 4-onglets existante (Vue d'ensemble/Analyse/Décision/En savoir+) qui couvre déjà le contenu mais pas la présentation détaillée du §7.2 |
+| 2 | Page Marchés (§12) | NON DÉMARRÉ — page dédiée n'existe pas |
+| 3 | Suite Outils complète (§13, calculateurs) | NON DÉMARRÉ — `pro.html` fait déjà "Mon suivi"/sélections/Kelly par sélection mais pas de calculateurs autonomes (cote↔probabilité, marge, EV, bankroll simulator) |
+| 4 | Archives V2 (§15) | PARTIEL — **le plus important est fait** : bug de perte de données réelle (`slice(0,300)` destructif) corrigé, `predictions_archive` Supabase non plafonnée en place et vérifiée. Pagination UI dans `historique.html` NON FAITE (lit encore le cache JSON, pas l'API Supabase complète) |
+| 5 | Compte complet (§18) | PARTIEL (déjà avant ce chantier) — auth/reset/rate-limit faits ; dashboard/favoris/bankroll UI/export/suppression NON FAITS |
+| 6 | Admin (§29) | NON DÉMARRÉ |
+| 7 | Mobile/accessibilité (§32/§34) | NON DÉMARRÉ dans ce chantier (spot-check ancien dans FINAL_360_AUDIT.md seulement) |
+| 8 | i18n (§19) | NON DÉMARRÉ |
+| 9 | SEO (§20) | NON DÉMARRÉ au-delà de l'existant (meta/JSON-LD/canonical déjà présents avant ce chantier) |
+| 10 | Conversion FREE→PRO (§21) | PARTIEL — entitlements serveur existent (`getEntitlements`-like dans `match-data` Edge Function : `plan==='pro'\|\|role==='admin'`) ; tunnel de conversion/CTA dédié NON FAIT |
+| 11 | Stripe scaffold désactivé (§3.2/§23) | **FAIT et vérifié en direct** — migration `0006_billing_scaffold.sql` + Edge Function `stripe-webhook` déployée, testée par requête HTTP réelle (répond `{"ok":true,"billing_mode":"disabled","processed":false}`, 0 ligne écrite en base). Checkout frontend réel et portail client NON FAITS (voir `IASHARK_V2_STRIPE_GO_LIVE.md`) |
+| 12 | QA finale | NON DÉMARRÉE |
+
+**PROCHAINE ACTION EXACTE** : reprendre à l'item 7 (mobile/accessibilité) — un spot-check réel (resize_window mobile + tablet sur index.html/match.html/pro.html/compte.html, capture des erreurs console, vérification qu'aucun overflow horizontal n'apparaît) est faisable rapidement et n'a jamais été fait dans ce chantier. Puis continuer dans l'ordre 8→12, sauf si l'utilisateur redirige. Les items 1-3 et 5-6 (grosses refontes de page/nouvelles pages) sont volontairement reportés après la QA/sécurité/mobile car ce sont des chantiers de reconstruction UI plus longs et moins bloquants pour un lancement honnête (le contenu existe déjà, juste pas dans la présentation idéale du MASTER).
+
+### Décisions MASTER V2.1 à ne jamais oublier (condensé, voir le document complet pour le détail)
+
+- **Gel visuel strict (§1.1)** : ne JAMAIS changer les couleurs/polices/logo/identité visuelle d'IASHARK. Tout ajout doit "avoir l'air d'avoir toujours appartenu à IASHARK".
+- **Aucun faux chiffre (§1.2)** : toute valeur affichée doit être `SOURCE_API`/`CALCULATED_DETERMINISTIC`/`USER_INPUT`/`HISTORICAL_ARCHIVE`/`EXPERIMENTAL_MODEL` explicitement identifié. Jamais de stat commerciale inventée (déjà trouvé et corrigé un cas réel : `prediction-ia-football-guide-2026.html`).
+- **LLM = explication uniquement (§1.3/§7.8/§10.AJ)** : Claude ne calcule/choisit/modifie JAMAIS une probabilité, cote, marché, edge, EV, Kelly, score de confiance. **Fait et vérifié** — voir Journal, fix Phase 4.
+- **API sportive unique (§1.4)** : SportMonks supprimé, api-football/API-Sports seul. **Fait.**
+- **Supabase = source de vérité (§1.5)** : les JSON publics ne sont que des caches de lecture. Appliqué pour `match_premium_data`, `match_snapshots`, `predictions_archive`.
+- **Séparation stricte PURE/MARKET_CONSENSUS/MARKET_AWARE (§10.2)** : PURE ne voit jamais une cote, pour aucun marché. **Fait et vérifié** (preuve mathématique + garde-fou anti-régression sur le code source réel) — voir Journal, fix critique post-Phase-5.
+- **Aucun `slice(0,300)` destructif (§15.3)** : **Fait** — `predictions_archive` Supabase non plafonnée.
+- **FREE permanent, PRO 19,95€/mois, pas d'essai "1€"** (§3.1) : déjà cohérent sur le site (vérifié/corrigé avant ce document, `landing.html`).
+- **Stripe : aucun vrai paiement sans clés réelles (§3.2)** : `BILLING_MODE` doit valoir exactement `"stripe"` pour que quoi que ce soit se passe. L'utilisateur configure lui-même les clés réelles (voir `IASHARK_V2_STRIPE_GO_LIVE.md`) — **ne jamais le faire à sa place, ne jamais committer de clé**.
+- **Vocabulaire (§2.2/§2.3)** : "probabilité"/"modèle"/"marché"/"écart modèle/marché" oui ; "pari sûr"/"meilleur pari"/"nos picks"/"gagnez" non.
+
+### Contrainte technique permanente de cette session
+
+**Aucun accès à `APISPORTS_KEY`** ni aux autres secrets GitHub Actions (secrets de dépôt, jamais exposés à une session Claude Code). Impossible d'exécuter le pipeline en conditions réelles, d'appeler api-football directement, ou de mesurer un vrai walk-forward. Ce qui EST possible et déjà fait : écrire/tester le code (`node --check` sur le script extrait), écrire de vrais tests unitaires, backtester sur les prédictions déjà résolues dans `historique.json`, appliquer et vérifier indépendamment des migrations Supabase (accès MCP Supabase disponible), déployer et tester en direct des Edge Functions (curl a un vrai accès réseau, contrairement au navigateur sandboxé qui n'en a aucun).
+
+---
+
 ## MASTER V2.1 — source de vérité (mise à jour 2026-08-29)
 
 Le document `IASHARK_MASTER_V2_1_TRANSFORMATION_FINAL_ENGINE_PRO.md` (4317 lignes) a été **lu intégralement** ce jalon et devient la source de vérité absolue pour toute la suite, remplaçant le résumé de contexte partiel utilisé pour les jalons précédents (P1-15, P1-12, collecte forward, backtest). Ces jalons précédents restent valides : après relecture complète, ils sont alignés avec les exigences réelles du MASTER (§1.4 suppression SportMonks, §9.6/9.7 Kelly réel testé, §16 VOID, §10.AH seed Monte-Carlo, §22.6/22.7 exit code/concurrency).

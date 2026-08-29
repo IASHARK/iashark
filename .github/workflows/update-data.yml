@@ -1730,9 +1730,12 @@ jobs:
             var wins=singles.filter(function(p){return p.result==='win';});
             var total=singles.length;
             var winrate=total>0?(wins.length/total*100):0;
-            var roiTotal=0;
-            singles.forEach(function(p){var c=parseFloat(p.cote)||1.75;roiTotal+=p.result==='win'?(c-1):-1;});
-            var roi=total>0?(roiTotal/total*100):0;
+            // ROI : cote manquante/invalide -> le pari est exclu du ROI (jamais remplace
+            // par une valeur fictive) mais reste compte dans le winrate ci-dessus, qui
+            // n'a pas besoin de la cote.
+            var roiTotal=0, roiCount=0;
+            singles.forEach(function(p){var c=parseFloat(p.cote);if(!c||c<=1)return;roiCount++;roiTotal+=p.result==='win'?(c-1):-1;});
+            var roi=roiCount>0?(roiTotal/roiCount*100):0;
             var streak=0;
             for(var si=0;si<singles.length;si++){
               var isW=singles[si].result==='win';
@@ -1746,23 +1749,38 @@ jobs:
               var groups={};
               singles.forEach(function(p){
                 var k=p[field]||'inconnu';
-                if(!groups[k])groups[k]={wins:0,losses:0,roi:0};
-                if(p.result==='win'){groups[k].wins++;groups[k].roi+=(parseFloat(p.cote)||1.75)-1;}
-                else{groups[k].losses++;groups[k].roi-=1;}
+                if(!groups[k])groups[k]={wins:0,losses:0,roi:0,roiCount:0};
+                if(p.result==='win')groups[k].wins++; else groups[k].losses++;
+                var c=parseFloat(p.cote);
+                if(!c||c<=1)return; // cote manquante : exclue du ROI du groupe, comptee dans wins/losses
+                groups[k].roiCount++;
+                groups[k].roi+=p.result==='win'?(c-1):-1;
               });
               return Object.keys(groups).sort().map(function(k){
                 var g=groups[k];var tot=g.wins+g.losses;
-                return{key:k,wins:g.wins,losses:g.losses,total:tot,winrate:tot>0?Math.round(g.wins/tot*1000)/10:0,roi:tot>0?Math.round(g.roi/tot*1000)/10:0};
+                return{key:k,wins:g.wins,losses:g.losses,total:tot,winrate:tot>0?Math.round(g.wins/tot*1000)/10:0,roi:g.roiCount>0?Math.round(g.roi/g.roiCount*1000)/10:0};
               }).sort(function(a,b){return b.total-a.total;});
             }
             histo.backtesting={by_market:breakdown('market'),by_league:breakdown('league_key'),by_conf:breakdown('conf_bucket'),by_sport:breakdown('sport'),by_has_pinnacle:breakdown('has_pinnacle'),by_has_elo:breakdown('has_elo'),updated:TODAY};
             var mktStats=histo.backtesting.by_market;
             console.log('  === BACKTESTING INSIGHTS ===');
             mktStats.forEach(function(m){if(m.total>=5)console.log('  '+m.key+': '+m.winrate+'% winrate | ROI '+m.roi+'% | '+m.total+' paris');});
+            // Meme formule que le ROI global (vraie cote, pas de paiement fixe suppose) -
+            // avant ce correctif, le ROI mensuel utilisait un paiement fictif de 0.75 par
+            // victoire, une 3e formule independante qui divergeait du ROI global affiche
+            // juste au-dessus.
             var months={};
-            singles.forEach(function(p){var key=(p.date||'').substring(0,7);if(!months[key])months[key]={wins:0,losses:0};if(p.result==='win')months[key].wins++;else months[key].losses++;});
+            singles.forEach(function(p){
+              var key=(p.date||'').substring(0,7);
+              if(!months[key])months[key]={wins:0,losses:0,roi:0,roiCount:0};
+              if(p.result==='win')months[key].wins++; else months[key].losses++;
+              var c=parseFloat(p.cote);
+              if(!c||c<=1)return;
+              months[key].roiCount++;
+              months[key].roi+=p.result==='win'?(c-1):-1;
+            });
             histo.monthly=Object.keys(months).sort().reverse().slice(0,6).map(function(k){
-              var mo=months[k];var tot=mo.wins+mo.losses;var r=tot>0?((mo.wins*0.75-mo.losses)/tot*100):0;
+              var mo=months[k];var tot=mo.wins+mo.losses;var r=mo.roiCount>0?(mo.roi/mo.roiCount*100):0;
               var parts=k.split('-');var mn=['Jan','Fev','Mar','Avr','Mai','Jun','Jul','Aou','Sep','Oct','Nov','Dec'];
               return{month:k,label:(mn[parseInt(parts[1])-1]||parts[1])+' '+parts[0],wins:mo.wins,losses:mo.losses,total:tot,roi:Math.round(r*10)/10};
             });
@@ -1977,14 +1995,23 @@ jobs:
               var winsE=singlesE.filter(function(p){return p.result==='win';});
               var totalE=singlesE.length;
               var winrateE=totalE>0?(winsE.length/totalE*100):0;
-              var roiTotalE=0;singlesE.forEach(function(p){var c=parseFloat(p.cote)||1.75;roiTotalE+=p.result==='win'?(c-1):-1;});
-              var roiE=totalE>0?(roiTotalE/totalE*100):0;
+              var roiTotalE=0, roiCountE=0;
+              singlesE.forEach(function(p){var c=parseFloat(p.cote);if(!c||c<=1)return;roiCountE++;roiTotalE+=p.result==='win'?(c-1):-1;});
+              var roiE=roiCountE>0?(roiTotalE/roiCountE*100):0;
               var streakE=0;
               for(var si=0;si<singlesE.length;si++){var isW=singlesE[si].result==='win';if(si===0)streakE=isW?1:-1;else if(isW&&streakE>0)streakE++;else if(!isW&&streakE<0)streakE--;else break;}
               histoEarly.stats={winrate:Math.round(winrateE*10)/10,roi:Math.round(roiE*10)/10,total:totalE,streak:streakE,wins:winsE.length,losses:totalE-winsE.length};
               var monthsE={};
-              singlesE.forEach(function(p){var key=(p.date||'').substring(0,7);if(!monthsE[key])monthsE[key]={wins:0,losses:0};if(p.result==='win')monthsE[key].wins++;else monthsE[key].losses++;});
-              histoEarly.monthly=Object.keys(monthsE).sort().reverse().slice(0,6).map(function(k){var mo=monthsE[k];var tot=mo.wins+mo.losses;var r=tot>0?((mo.wins*0.75-mo.losses)/tot*100):0;var parts=k.split('-');var mn=['Jan','Fev','Mar','Avr','Mai','Jun','Jul','Aou','Sep','Oct','Nov','Dec'];return{month:k,label:(mn[parseInt(parts[1])-1]||parts[1])+' '+parts[0],wins:mo.wins,losses:mo.losses,total:tot,roi:Math.round(r*10)/10};});
+              singlesE.forEach(function(p){
+                var key=(p.date||'').substring(0,7);
+                if(!monthsE[key])monthsE[key]={wins:0,losses:0,roi:0,roiCount:0};
+                if(p.result==='win')monthsE[key].wins++; else monthsE[key].losses++;
+                var c=parseFloat(p.cote);
+                if(!c||c<=1)return;
+                monthsE[key].roiCount++;
+                monthsE[key].roi+=p.result==='win'?(c-1):-1;
+              });
+              histoEarly.monthly=Object.keys(monthsE).sort().reverse().slice(0,6).map(function(k){var mo=monthsE[k];var tot=mo.wins+mo.losses;var r=mo.roiCount>0?(mo.roi/mo.roiCount*100):0;var parts=k.split('-');var mn=['Jan','Fev','Mar','Avr','Mai','Jun','Jul','Aou','Sep','Oct','Nov','Dec'];return{month:k,label:(mn[parseInt(parts[1])-1]||parts[1])+' '+parts[0],wins:mo.wins,losses:mo.losses,total:tot,roi:Math.round(r*10)/10};});
               fs.writeFileSync(histoPathEarly,JSON.stringify(histoEarly,null,2));
               return;
             }

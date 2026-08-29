@@ -263,6 +263,122 @@ var PAGES = [
         return "if(el)el.innerHTML='<div class=\"empty-state\"><h3>" + esc(h.error_loading_title) + "</h3><p>" + esc(h.error_loading_retry) + "</p></div>';";
       }}
     ]
+  },
+  {
+    /* match.html : la structure/chrome (nav, sections, libelles, paywall,
+       parties templatees de "POURQUOI CE PARI") est traduite. Le contenu
+       narratif genere par le pipeline/LLM par match (m.verdict_shark,
+       m.facteur_x, m.key_absences, etc.) reste volontairement en francais -
+       c'est un texte dynamique, jamais connu au moment du build i18n, et
+       le traduire necessiterait une generation LLM multilingue au niveau
+       du pipeline (decision separee, hors scope ici). Ce template est
+       aussi celui que generateMatchPages() (update-data.yml) utilise pour
+       produire /match/{id}.html (FR uniquement pour l'instant) - cette
+       regeneration n'est pas affectee par ce fichier puisqu'elle lit
+       toujours la racine match.html, jamais /fr/match.html. Etendre
+       /match/{id}.html a /{locale}/match/{id}.html est la suite logique
+       de ce chantier, pas faite dans cette passe (voir IASHARK_V2_EXECUTION_STATE.md). */
+    file: "match.html",
+    metas: {
+      fr: {title: "Analyse Match — IASHARK"},
+      en: {title: "Match Analysis — IASHARK"},
+      es: {title: "Análisis del Partido — IASHARK"},
+      de: {title: "Spielanalyse — IASHARK"},
+      it: {title: "Analisi Partita — IASHARK"},
+      pt: {title: "Análise do Jogo — IASHARK"}
+    },
+    replacements: [
+      {find: '<a class="hdr-back" href="javascript:history.back()">← RETOUR</a>', build: function(d){ return '<a class="hdr-back" href="javascript:history.back()">' + d.match_page.back + '</a>'; }},
+      {find: '<span id="authHeaderSlot"><a class="btn-conn" href="/compte.html">CONNEXION</a></span>', build: function(d){ return '<span id="authHeaderSlot"><a class="btn-conn" href="/compte.html">' + d.cta.login + '</a></span>'; }},
+      {find: '<div class="loading-lbl">CHARGEMENT...</div>', build: function(d){ return '<div class="loading-lbl">' + d.common.loading + '</div>'; }},
+      {find:
+        '    <div>⚠️ LE JEU PEUT ÊTRE DANGEREUX — JOUEZ RESPONSABLE · INTERDIT AUX MOINS DE 18 ANS</div>\n' +
+        '    <div>Aide : <a href="https://www.joueurs-info-service.fr" style="color:rgba(34,211,238,0.4);text-decoration:none;">joueurs-info-service.fr</a> · 09 74 75 13 13</div>',
+       build: function(d){
+        var f = d.footer;
+        return '    <div>⚠️ ' + f.disclaimer_warning + '</div>\n' +
+          '    <div>' + f.disclaimer_help_label + ' <a href="https://www.joueurs-info-service.fr" style="color:rgba(34,211,238,0.4);text-decoration:none;">' + f.disclaimer_help_site + '</a> · ' + f.disclaimer_help_phone + '</div>';
+      }},
+      {find: '<div class="nav-lbl">ACCUEIL</div>', build: function(d){ return '<div class="nav-lbl">' + d.nav.home + '</div>'; }},
+      {find: '<div class="nav-lbl">MARCHÉS</div>', build: function(d){ return '<div class="nav-lbl">' + d.nav.markets + '</div>'; }},
+      {find: '<div class="nav-lbl">HISTORIQUE</div>', build: function(d){ return '<div class="nav-lbl">' + d.nav.history + '</div>'; }},
+      {find: '<div class="nav-lbl">PRO</div>', build: function(d){ return '<div class="nav-lbl">' + d.nav.tools + '</div>'; }},
+      {find: '<div class="nav-lbl">GUIDES</div>', build: function(d){ return '<div class="nav-lbl">' + d.nav.guides + '</div>'; }},
+      {find: '<div class="nav-lbl">COMPTE</div>', build: function(d){ return '<div class="nav-lbl">' + d.nav.account + '</div>'; }},
+      {find: "el.innerHTML='<div style=\"text-align:center;padding:60px 20px;font-family:Space Mono,monospace;font-size:10px;color:var(--muted)\">ID MANQUANT<br><br><a href=\"/\" style=\"color:var(--cyan)\">← RETOUR</a></div>';",
+       build: function(d, l, esc){ return "el.innerHTML='<div style=\"text-align:center;padding:60px 20px;font-family:Space Mono,monospace;font-size:10px;color:var(--muted)\">" + esc(d.match_page.id_missing) + "<br><br><a href=\"/\" style=\"color:var(--cyan)\">" + esc(d.match_page.back) + "</a></div>';"; }},
+      {find: "el.innerHTML='<div style=\"text-align:center;padding:60px 20px\"><div style=\"font-family:Space Mono,monospace;font-size:10px;color:var(--muted)\">MATCH INTROUVABLE · ID: '+fId+'</div><br><a href=\"/\" style=\"color:var(--cyan);font-family:Space Mono,monospace;font-size:9px\">← RETOUR</a></div>';",
+       build: function(d, l, esc){ return "el.innerHTML='<div style=\"text-align:center;padding:60px 20px\"><div style=\"font-family:Space Mono,monospace;font-size:10px;color:var(--muted)\">" + esc(d.match_page.match_not_found_prefix) + "'+fId+'</div><br><a href=\"/\" style=\"color:var(--cyan);font-family:Space Mono,monospace;font-size:9px\">" + esc(d.match_page.back) + "</a></div>';"; }},
+      {find: "el.innerHTML='<div style=\"text-align:center;padding:60px 20px;color:var(--muted)\">Erreur de chargement</div>';",
+       build: function(d, l, esc){ return "el.innerHTML='<div style=\"text-align:center;padding:60px 20px;color:var(--muted)\">" + esc(d.common.error_loading) + "</div>';"; }},
+      {find: "+'<button class=\"tab-btn active\" data-tab=\"apercu\" onclick=\"switchTab(this,\\'apercu\\')\">VUE D\\'ENSEMBLE</button>'\n    +'<button class=\"tab-btn\" data-tab=\"analyse\" onclick=\"switchTab(this,\\'analyse\\')\">ANALYSE</button>'\n    +'<button class=\"tab-btn\" data-tab=\"criteres\" onclick=\"switchTab(this,\\'criteres\\')\">DÉCISION</button>'\n    +'<button class=\"tab-btn\" data-tab=\"savoir\" onclick=\"switchTab(this,\\'savoir\\')\">EN SAVOIR +</button>'",
+       build: function(d, l, esc){
+        var t = d.match_page;
+        return "+'<button class=\"tab-btn active\" data-tab=\"apercu\" onclick=\"switchTab(this,\\'apercu\\')\">" + esc(t.tab_overview) + "</button>'\n    +'<button class=\"tab-btn\" data-tab=\"analyse\" onclick=\"switchTab(this,\\'analyse\\')\">" + esc(t.tab_analysis) + "</button>'\n    +'<button class=\"tab-btn\" data-tab=\"criteres\" onclick=\"switchTab(this,\\'criteres\\')\">" + esc(t.tab_decision) + "</button>'\n    +'<button class=\"tab-btn\" data-tab=\"savoir\" onclick=\"switchTab(this,\\'savoir\\')\">" + esc(t.tab_more) + "</button>'";
+      }},
+      {find: '<div class="stitle">PROBABILITÉS 1X2</div>', build: function(d, l, esc){ return '<div class="stitle">' + esc(d.match_page.section_1x2) + '</div>'; }},
+      {find: '<div class="stitle">CONSENSUS DES MARCHÉS</div>', build: function(d, l, esc){ return '<div class="stitle">' + esc(d.match_page.section_consensus) + '</div>'; }},
+      {find: '<div class="stitle">SCORES SIMULÉS — MONTE-CARLO</div>', build: function(d, l, esc){ return '<div class="stitle">' + esc(d.match_page.section_montecarlo) + '</div>'; }},
+      {find: '<div class="stitle">SCORES LES PLUS PROBABLES</div>', build: function(d, l, esc){ return '<div class="stitle">' + esc(d.match_page.section_top_scores) + '</div>'; }},
+      {find: '<div class="stitle">SCORE LE PLUS PROBABLE</div>', build: function(d, l, esc){ return '<div class="stitle">' + esc(d.match_page.section_top_score) + '</div>'; }},
+      {find: '<div class="stitle">RADAR DE FORCES</div>', build: function(d, l, esc){ return '<div class="stitle">' + esc(d.match_page.section_radar) + '</div>'; }},
+      {find: '<div class="stitle">STATS (MOYENNES 10 DERNIERS MATCHS)</div>', build: function(d, l, esc){ return '<div class="stitle">' + esc(d.match_page.section_stats) + '</div>'; }},
+      {find: '<div class="stitle">PATTERNS DE JEU — 15 MIN</div>', build: function(d, l, esc){ return '<div class="stitle">' + esc(d.match_page.section_patterns) + '</div>'; }},
+      {find: '<div class="stitle">ABSENTS &amp; RETOURS</div>', build: function(d, l, esc){ return '<div class="stitle">' + esc(d.match_page.section_absences) + '</div>'; }},
+      {find: '<div class="stitle">HEAD TO HEAD</div>', count: 3, build: function(d, l, esc){ return '<div class="stitle">' + esc(d.match_page.section_h2h) + '</div>'; }},
+      {find: '<div class="stitle">INDICE DE FORCE</div>', build: function(d, l, esc){ return '<div class="stitle">' + esc(d.match_page.section_force_index) + '</div>'; }},
+      {find: '<div class="stitle">ARBITRE — \'+esc(arb.nom)+\'</div>', build: function(d, l, esc){ return '<div class="stitle">' + esc(d.match_page.section_referee_prefix) + '\'+esc(arb.nom)+\'</div>'; }},
+      {find: '<div class="stitle">MODÈLE IA SHARK — CM 2026</div>', build: function(d, l, esc){ return '<div class="stitle">' + esc(d.match_page.section_wc_model) + '</div>'; }},
+      {find: '<div class="stitle">SCÉNARIO ATTENDU</div>', build: function(d, l, esc){ return '<div class="stitle">' + esc(d.match_page.section_scenario) + '</div>'; }},
+      {find: '<div class="stitle">JOUEURS À SUIVRE — CLASSEMENT</div>', build: function(d, l, esc){ return '<div class="stitle">' + esc(d.match_page.section_players) + '</div>'; }},
+      {find: '<div class="stitle">CLASSEMENT</div>', build: function(d, l, esc){ return '<div class="stitle">' + esc(d.match_page.section_ranking) + '</div>'; }},
+      {find: '<div class="stitle">SURFACE — \'+surfLabel.toUpperCase()+\'</div>', build: function(d, l, esc){ return '<div class="stitle">' + esc(d.match_page.section_surface_prefix) + '\'+surfLabel.toUpperCase()+\'</div>'; }},
+      {find: '<div class="stitle">PALMARÈS CE TOURNOI</div>', build: function(d, l, esc){ return '<div class="stitle">' + esc(d.match_page.section_palmares) + '</div>'; }},
+      {find: '<div class="stitle">CONTEXTE</div>', build: function(d, l, esc){ return '<div class="stitle">' + esc(d.match_page.section_context) + '</div>'; }},
+      {find: '<div class="stitle">POURQUOI CE PARI ?</div>', build: function(d, l, esc){ return '<div class="stitle">' + esc(d.match_page.section_why) + '</div>'; }},
+      {find: '<div class="stitle">ANALYSE COMPARATIVE</div>', build: function(d, l, esc){ return '<div class="stitle">' + esc(d.match_page.section_comparative) + '</div>'; }},
+      {find: "<div class=\"pm-lbl\">SÉLECTION IA DU JOUR</div>", build: function(d, l, esc){ return "<div class=\"pm-lbl\">" + esc(d.match_page.label_ia_pick) + "</div>"; }},
+      {find: "<div class=\"pmm-lbl\">PROBABILITÉ MODÈLE</div>", build: function(d, l, esc){ return "<div class=\"pmm-lbl\">" + esc(d.match_page.label_model_prob) + "</div>"; }},
+      {find: "<div class=\"pmm-lbl\">COTE IMPL.</div>", build: function(d, l, esc){ return "<div class=\"pmm-lbl\">" + esc(d.match_page.label_implied_odds) + "</div>"; }},
+      {find: "<div class=\"pmm-lbl\">AVANTAGE</div>", build: function(d, l, esc){ return "<div class=\"pmm-lbl\">" + esc(d.match_page.label_edge) + "</div>"; }},
+      {find: "<span class=\"pm-conf-lbl\">FIABILITÉ</span>", build: function(d, l, esc){ return "<span class=\"pm-conf-lbl\">" + esc(d.match_page.label_reliability) + "</span>"; }},
+      {find: "'<div class=\"pm-warn\">⚠ Si cote passe sous '+coteMin+' — ne pas jouer</div>'",
+       build: function(d, l, esc){ return "'<div class=\"pm-warn\">" + esc(d.match_page.warn_cote_below_prefix) + "'+coteMin+'" + esc(d.match_page.warn_cote_below_suffix) + "</div>'"; }},
+      {find: "<div class=\"ir-lbl sig\">SIGNAL DÉCISIF</div>", build: function(d, l, esc){ return "<div class=\"ir-lbl sig\">" + esc(d.match_page.signal_decisif) + "</div>"; }},
+      {find: "<div class=\"ir-lbl\" style=\"color:var(--red)\">PASSE TON TOUR</div><div class=\"ir-txt\">'+(m.no_signal_label||'Signaux contradictoires. Ne pas jouer.')+'</div>",
+       build: function(d, l, esc){ return "<div class=\"ir-lbl\" style=\"color:var(--red)\">" + esc(d.match_page.passe_ton_tour) + "</div><div class=\"ir-txt\">'+(m.no_signal_label||'" + esc(d.match_page.no_signal_fallback) + "')+'</div>"; }},
+      {find: '<span class="pw-top-lbl">CONTENU PRO</span>', build: function(d, l, esc){ return '<span class="pw-top-lbl">' + esc(d.match_page.content_pro_badge) + '</span>'; }},
+      {find: "<div class=\"pw-title\">Accès <span>complet</span></div>", build: function(d, l, esc){ return "<div class=\"pw-title\">" + esc(d.match_page.paywall_title_pre) + "<span>" + esc(d.match_page.paywall_title_hl) + "</span></div>"; }},
+      {find: "<div class=\"pw-sub\">Analyses avancées, avantage statistique calculé, mise conseillée, alertes en temps réel.</div>", build: function(d, l, esc){ return "<div class=\"pw-sub\">" + esc(d.match_page.paywall_sub) + "</div>"; }},
+      {find: '<div class="pw-feat-name">AVANTAGE + MISE CONSEILLÉE</div><div class="pw-feat-desc">Avantage statistique par marché</div></div></div><span class="pw-badge c1">PRO</span></div>',
+       build: function(d, l, esc){ var m = d.match_page; return '<div class="pw-feat-name">' + esc(m.paywall_feat1_name) + '</div><div class="pw-feat-desc">' + esc(m.paywall_feat1_desc) + '</div></div></div><span class="pw-badge c1">' + esc(m.paywall_pro_badge) + '</span></div>'; }},
+      {find: '<div class="pw-feat-name">ALERTES DROPPING ODDS</div><div class="pw-feat-desc">Mouvements de cotes en temps réel</div></div></div><span class="pw-badge c1">PRO</span></div>',
+       build: function(d, l, esc){ var m = d.match_page; return '<div class="pw-feat-name">' + esc(m.paywall_feat2_name) + '</div><div class="pw-feat-desc">' + esc(m.paywall_feat2_desc) + '</div></div></div><span class="pw-badge c1">' + esc(m.paywall_pro_badge) + '</span></div>'; }},
+      {find: "<a class=\"pw-cta\" href=\"/compte.html\">PASSER PRO — 19.95€/MOIS</a>", build: function(d, l, esc){ return "<a class=\"pw-cta\" href=\"/compte.html\">" + esc(d.match_page.paywall_cta) + "</a>"; }},
+      {find: "<div class=\"arb-l\">CARTONS/MATCH</div>", build: function(d, l, esc){ return "<div class=\"arb-l\">" + esc(d.match_page.arb_cards_per_match) + "</div>"; }},
+      {find: "<div class=\"arb-l\">PÉNALTYS/MATCH</div>", build: function(d, l, esc){ return "<div class=\"arb-l\">" + esc(d.match_page.arb_penalties_per_match) + "</div>"; }},
+      {find: "num:String(blocs.length+1), titre:'Le pari recommandé',\n    txt:'Le modèle statistique estime <strong>'+esc(marketFr)+'</strong> à <strong>'+modelProbTxt+'%</strong> de probabilité, à la cote de <strong>'+esc(paricote)+'</strong>'+(reliabilityTxt?' (fiabilité : <strong>'+esc(reliabilityTxt.toUpperCase())+'</strong>, mesurée par l\\'accord des modèles et la qualité des données disponibles — pas par la probabilité elle-même)':'')+'.'",
+       build: function(d, l, esc){
+        var w = d.match_page;
+        return "num:String(blocs.length+1), titre:'" + esc(w.why1_title) + "',\n    txt:'" + esc(w.why1_a) + "<strong>'+esc(marketFr)+'</strong>" + esc(w.why1_b) + "<strong>'+modelProbTxt+'%</strong>" + esc(w.why1_c) + "<strong>'+esc(paricote)+'</strong>'+(reliabilityTxt?'" + esc(w.why1_d) + "<strong>'+esc(reliabilityTxt.toUpperCase())+'</strong>" + esc(w.why1_e) + "':'')+'.'";
+      }},
+      {find: "blocs.push({num:String(blocs.length+1), titre:'Impact des absences',\n      txt:absTxt+' Cet élément est pris en compte dans les données transmises au modèle — il ne remet pas en cause le pari en l\\'état, mais reste un facteur de risque à surveiller.'});",
+       build: function(d, l, esc){ var w = d.match_page; return "blocs.push({num:String(blocs.length+1), titre:'" + esc(w.why2_title) + "',\n      txt:absTxt+'" + esc(w.why2_suffix) + "'});"; }},
+      {find: "blocs.push({num:String(blocs.length+1), titre:'Le raisonnement', txt:esc(cleanJargon(m.verdict_shark))});",
+       build: function(d, l, esc){ return "blocs.push({num:String(blocs.length+1), titre:'" + esc(d.match_page.why3_title) + "', txt:esc(cleanJargon(m.verdict_shark))});"; }},
+      {find: "blocs.push({num:String(blocs.length+1), titre:'Le facteur décisif', txt:esc(cleanJargon(m.facteur_x))});",
+       build: function(d, l, esc){ return "blocs.push({num:String(blocs.length+1), titre:'" + esc(d.match_page.why4_title) + "', txt:esc(cleanJargon(m.facteur_x))});"; }},
+      {find: "blocs.push({num:String(blocs.length+1), titre:'Pourquoi cette cote est intéressante',\n      txt:'La probabilité estimée par le modèle est supérieure à celle impliquée par la cote du bookmaker, ce qui représente un avantage statistique d\\'environ <strong>+'+edgeNum.toFixed(1)+'%</strong> en faveur du parieur sur le long terme.'});",
+       build: function(d, l, esc){
+        var w = d.match_page;
+        return "blocs.push({num:String(blocs.length+1), titre:'" + esc(w.why5_title) + "',\n      txt:'" + esc(w.why5_a) + "<strong>+'+edgeNum.toFixed(1)+'%</strong>" + esc(w.why5_b) + "'});";
+      }},
+      {find: "blocs.push({num:String(blocs.length+1), titre:'Mise conseillée',\n      txt:'Sur la base de cet avantage statistique, la mise recommandée est d\\'environ <strong>'+esc(m.kelly)+'% de la bankroll</strong> (méthode de Kelly fractionnée, pour limiter le risque de ruine en cas d\\'erreur du modèle).'});",
+       build: function(d, l, esc){
+        var w = d.match_page;
+        return "blocs.push({num:String(blocs.length+1), titre:'" + esc(w.why6_title) + "',\n      txt:'" + esc(w.why6_a) + "<strong>'+esc(m.kelly)+'" + esc(w.why6_b) + "</strong>" + esc(w.why6_c) + "'});";
+      }}
+    ]
   }
 ];
 

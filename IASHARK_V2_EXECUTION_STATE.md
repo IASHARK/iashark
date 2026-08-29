@@ -56,11 +56,15 @@ Table de calibration par tranche de confiance :
 
 Limite assumée : échantillon réel mais limité (291 paris, ancien pipeline pré-V2.1). Ceci sert de **baseline de référence** pour mesurer un progrès réel une fois le moteur V2.1 en place — pas une validation de ce moteur, qui n'existe pas encore.
 
+## Documents §10.AP / §39 requis par le MASTER
+
+6 des 12 documents moteur requis créés ce jalon avec du contenu réel (pas des stubs) : `MODEL_ARCHITECTURE.md`, `FEATURE_DICTIONARY.md`, `DATA_LEAKAGE_POLICY.md`, `ODDS_SNAPSHOT_POLICY.md`, `CALIBRATION_REPORT.md`, `MODEL_CHANGELOG.md`. `IASHARK_MARKET_REGISTRY.md` déjà fait au jalon précédent. Restent : `MODEL_RESEARCH_PLAN.md`, `API_SPORTS_COVERAGE_REPORT.md`, `API_QUOTA_BUDGET.md`, `OPTIONAL_DATA_SOURCES.md`, `BACKTEST_REPORT.md` (existe en `.json`, pas de version narrative `.md` séparée) — les trois premiers nécessitent un inventaire réel de la couverture/quota API-Sports, impossible sans accès `APISPORTS_KEY` depuis cette session (voir BLOCKED_EXTERNAL).
+
 ## BLOCKED_EXTERNAL
 
 - Paiement Stripe réel (clés, webhook) — l'utilisateur s'en charge à la fin.
 - `SUPABASE_SERVICE_ROLE_KEY` / `SUPABASE_URL` comme secrets GitHub Actions — toujours pas ajoutés (pas d'accès `gh` CLI dans cette session).
-- Accès direct à `APISPORTS_KEY` — je ne peux pas constituer un dataset historique massif moi-même depuis cette session.
+- Accès direct à `APISPORTS_KEY` — je ne peux pas constituer un dataset historique massif moi-même depuis cette session, ni produire `MODEL_RESEARCH_PLAN.md`/`API_SPORTS_COVERAGE_REPORT.md`/`API_QUOTA_BUDGET.md` avec des chiffres réels (coverage/quota) plutôt que des estimations.
 - `auth_leaked_password_protection` désactivé côté Supabase Auth — réglage dashboard, aucun outil MCP disponible pour le configurer.
 - Vraie exécution CI sur l'infrastructure GitHub (le workflow `.github/workflows/tests.yml` est créé et son étape d'extraction a été testée localement à l'identique — mais je ne peux pas observer un run GitHub Actions réel depuis cette session, seulement l'exécution locale équivalente).
 - `closing-odds.yml` n'a pas pu être exécuté en direct depuis cette session (pas d'accès `APISPORTS_KEY`/`SUPABASE_SERVICE_ROLE_KEY`) : `node --check` confirme la syntaxe et un run local avec les secrets absents confirme que le garde-fou "pas de clé -> sortie propre, pas de crash" fonctionne, mais l'appel réel à `/fixtures?id=` puis `/odds?fixture=` n'a jamais touché l'API en vrai. À vérifier au premier run GitHub Actions réel (regarder les logs de l'Action après ajout des secrets).

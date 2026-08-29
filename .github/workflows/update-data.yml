@@ -33,6 +33,8 @@ jobs:
           const NEWS_KEY   = process.env.NEWSAPI_KEY;
           const ANT_KEY    = process.env.ANTHROPIC_KEY;
           const ODDS_KEY   = process.env.ODDS_API_KEY;
+          const SUPA_URL_PIPELINE = process.env.SUPABASE_URL;
+          const SUPA_SERVICE_KEY  = process.env.SUPABASE_SERVICE_ROLE_KEY;
           const APS        = {'x-apisports-key': APS_KEY};
           var WC_DATA = null, WC_MODEL = null;
           function sleep(ms) { return new Promise(function(r){ setTimeout(r,ms); }); }
@@ -1827,6 +1829,56 @@ jobs:
             fs.writeFileSync(actusPath, JSON.stringify(actus,null,2));
             console.log('  Actus: '+actus.items.length+' au total ('+newCount+' nouveaux)');
           }
+          // Ecrit les champs premium (kelly/edge/verdict_shark/facteur_x/dropping_odds)
+          // dans Supabase (table match_premium_data), jamais dans un fichier public.
+          // Degrade proprement si le secret n'est pas encore configure : log un
+          // avertissement plutot que d'echouer tout le run, mais n'ecrit ces champs
+          // NULLE PART en clair - c'est le comportement de repli volontaire tant que
+          // SUPABASE_SERVICE_ROLE_KEY n'est pas ajoute comme secret GitHub Actions
+          // (voir supabase/migrations/0001_match_premium_data.sql pour la migration
+          // a appliquer sur le projet Supabase avant d'ajouter ce secret).
+          function upsertJSON(host, path, body, headers) {
+            return new Promise(function(resolve) {
+              var data = JSON.stringify(body);
+              var timer = setTimeout(function(){ resolve({ok:false,status:0,error:'timeout'}); }, 15000);
+              var req = https.request({
+                hostname:host, path:path, method:'POST',
+                headers:Object.assign({
+                  'Content-Type':'application/json',
+                  'Content-Length':Buffer.byteLength(data)
+                }, headers||{})
+              }, function(res) {
+                var d='';
+                res.on('data',function(c){d+=c;});
+                res.on('end',function(){
+                  clearTimeout(timer);
+                  resolve({ok:res.statusCode>=200&&res.statusCode<300,status:res.statusCode,body:d});
+                });
+              });
+              req.on('error',function(e){ clearTimeout(timer); resolve({ok:false,status:0,error:e.message}); });
+              req.write(data); req.end();
+            });
+          }
+          async function writePremiumData(rows) {
+            if(!rows||!rows.length) return;
+            if(!SUPA_URL_PIPELINE||!SUPA_SERVICE_KEY){
+              console.log('  [premium] SUPABASE_SERVICE_ROLE_KEY non configure - '+rows.length+' lignes premium NON persistees (ni publiques ni privees). A corriger avant mise en prod du plan Pro.');
+              return;
+            }
+            var u = new URL(SUPA_URL_PIPELINE);
+            var batchSize = 200;
+            for(var i=0;i<rows.length;i+=batchSize){
+              var batch = rows.slice(i,i+batchSize);
+              var r = await upsertJSON(u.hostname, '/rest/v1/match_premium_data?on_conflict=fixture_id', batch, {
+                'apikey': SUPA_SERVICE_KEY,
+                'Authorization': 'Bearer '+SUPA_SERVICE_KEY,
+                'Prefer': 'resolution=merge-duplicates,return=minimal',
+              });
+              if(!r.ok) console.log('  [premium] echec upsert batch '+i+': status='+r.status+' '+(r.error||r.body||'').toString().slice(0,200));
+              await sleep(100);
+            }
+            console.log('  [premium] '+rows.length+' lignes premium ecrites dans Supabase (match_premium_data).');
+          }
           async function main(){
             console.log('=== IASHARK',TODAY,'===');
             var fixtures = await getFixtures();
@@ -1930,6 +1982,7 @@ jobs:
             } catch (e) {}
             console.log('Cache persistant : ' + Object.keys(matchCache).length + ' match(s) deja verrouille(s) depuis un run precedent - prediction conservee a l\'identique');
             var matchsData=[];
+            var premiumRows=[];
             var standingsCache={};
             var SM_SEASON_GOALS_CACHE={};
             for(var fi=0;fi<fixtures.length;fi++){
@@ -2599,15 +2652,14 @@ jobs:
                 dc1x:odds.dc1x,dc2x:odds.dc2x,dc12:odds.dc12,cdc1x:odds.dc1x,cdc2x:odds.dc2x,
                 ah_dom:odds.ah_dom||'--',ah_ext:odds.ah_ext||'--',co35:odds.co35||'--',
                 cbtts:odds.btts_oui,cbtts_non:odds.btts_non,btts_oui:odds.btts_oui,btts_non:odds.btts_non,
-                edge:an&&an.pari_rec?(function(){ function nm(s){return (s||'').toLowerCase().replace(/[^a-z0-9]/g,'');} var pn=nm(an.pari_rec); var mk=(allMarkets||[]).find(function(x){var xn=nm(x.market);return xn===pn||pn.includes(xn)||xn.includes(pn);}); return mk?mk.prob+'% (modele)':''; })():'',marche:an?(an.marche||'RESULTAT'):'RESULTAT',
+                marche:an?(an.marche||'RESULTAT'):'RESULTAT',
                 risque:risqueNorm,pari_rec:an?(an.pari_rec||''):'',
                 cote_rec:an?(an.cote_rec||''):'',
                 no_signal:an&&an.passe_ton_tour===true?true:!(an&&an.pari_rec),
                 no_signal_label:(an&&an.passe_ton_tour===true)||(!(an&&an.pari_rec))?'Aucun signal clair sur ce match':'',
-                mise:'2-3% bankroll',verdict_shark:an?(an.verdict_shark||''):'',
+                mise:'2-3% bankroll',
                 scenario:an?(an.scenario||{phase1:'',phase2:'',phase3:''}):null,
                 scenario_15min:an?(an.scenario_15min||null):null,
-                facteur_x:an?(an.facteur_x||''):'',
                 analyse_card:an?(an.analyse_card||an.conseil||''):'',
                 conseil_public:an?(an.conseil||an.analyse_card||''):'',
                 contexte:an?(an.contexte||''):'',
@@ -2615,7 +2667,7 @@ jobs:
                 scores:an&&an.score_central?[an.score_central]:[],
                 mc_scores:poissonProbs.montecarlo?poissonProbs.montecarlo.top_scores:[],
                 paris_safe:{bet:an?(an.pari_rec||''):'',cote:an?(parseFloat(an.cote_rec)||odds.c1):odds.c1,proba:an?(an.p1||0)+'%':''},
-                paris_risque:{bet:'',cote:'',proba:''},kelly:kellyVal,
+                paris_risque:{bet:'',cote:'',proba:''},
                 stade:{nom:f.venue&&f.venue.name?(f.venue.name+(f.venue.city?' - '+f.venue.city:'')):home.name+' (domicile)',cap:'',meteo:wx?wx.emoji:'',temp:wx?wx.temp:'',desc:wx?wx.desc:''},
                 crit_home:critH,crit_away:critA,
                 form_home:last10H.slice(0,5),form_away:last10A.slice(0,5),
@@ -2643,17 +2695,28 @@ jobs:
                 match_stats_away:matchStatsA,
                 elo_home:eloH?Math.round(eloH):null,elo_away:eloA?Math.round(eloA):null,
                 elo_diff:eloStats?eloStats.diff:null,elo_signal:eloStats?eloStats.signal:null,
-                dropping_odds:droppingOdds||null,
                 pinnacle_snapshot:pinnacleOdds?{c1:pinnacleOdds.c1,cn:pinnacleOdds.cn,c2:pinnacleOdds.c2,date:TODAY}:null,
               };
+              // Champs premium (Outils) : jamais ecrits dans data.json (public, non
+              // authentifie). Collectes a part et pousses vers Supabase apres la boucle -
+              // seule l'Edge Function match-data, avec verification de session/plan cote
+              // serveur, doit pouvoir les lire. Voir supabase/migrations/0001_match_premium_data.sql.
+              var edgeVal=an&&an.pari_rec?(function(){ function nm(s){return (s||'').toLowerCase().replace(/[^a-z0-9]/g,'');} var pn=nm(an.pari_rec); var mk=(allMarkets||[]).find(function(x){var xn=nm(x.market);return xn===pn||pn.includes(xn)||xn.includes(pn);}); return mk?mk.prob+'% (modele)':''; })():'';
+              premiumRows.push({
+                fixture_id:f.id,kelly:kellyVal,edge:edgeVal,
+                verdict_shark:an?(an.verdict_shark||''):'',
+                facteur_x:an?(an.facteur_x||''):'',
+                dropping_odds:droppingOdds||null,
+              });
               matchsData.push(matchObj);
-              console.log('  OK conf='+matchObj.conf+' edge='+matchObj.edge+' pari='+matchObj.pari_rec);
+              console.log('  OK conf='+matchObj.conf+' edge='+edgeVal+' pari='+matchObj.pari_rec);
             }
             var allMatchsData = matchsData.slice();
             allMatchsData.sort(function(a,b){return (a.date||'').localeCompare(b.date||'');});
             matchsData.sort(function(a,b){var tA=(a.date||'').split(' ')[1]||'99:99';var tB=(b.date||'').split(' ')[1]||'99:99';return tA<tB?-1:tA>tB?1:0;});
             fs.writeFileSync('data.json',JSON.stringify({matchs:allMatchsData},null,2));
             console.log('\n=== DONE: '+allMatchsData.length+' matchs total ===');
+            await writePremiumData(premiumRows);
             await updateHistorique(allMatchsData);
             await updateTransferts(fixtures);
             await updateRumeurs();
@@ -2681,6 +2744,8 @@ jobs:
           ODDS_API_KEY:       ${{ secrets.ODDS_API_KEY }}
           ODDS_API_IO_KEY:    ${{ secrets.ODDS_API_IO_KEY }}
           CREATOMATE_KEY:     ${{ secrets.CREATOMATE_KEY }}
+          SUPABASE_URL:              ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           TEST_WC_ONLY:       ${{ github.event.inputs.test_wc_only }}
         run: node pipeline.js
 

@@ -1886,6 +1886,28 @@ var SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZ
 async function checkSession(){
   try{var sb=supabase.createClient(SUPA_URL,SUPA_KEY);var res=await sb.auth.getSession();var s=res.data&&res.data.session;if(!s)return false;var u=await sb.from('users').select('plan').eq('id',s.user.id).maybeSingle();return u.data&&u.data.plan==='pro';}catch(e){return false;}
 }
+async function fetchMatchDataWithAuth(){
+  // Les champs premium (kelly/edge/verdict_shark/facteur_x) ne sont plus dans
+  // data.json - seule l'Edge Function match-data (verification serveur du
+  // plan) peut les renvoyer. Repli sur data.json (gratuit uniquement) si
+  // l'appel echoue. Retourne {data, isPro} pour eviter un second aller-retour
+  // reseau juste pour le statut de session.
+  try{
+    var sb=supabase.createClient(SUPA_URL,SUPA_KEY);
+    var sess=await sb.auth.getSession();
+    var s=sess.data&&sess.data.session;
+    var token=s?s.access_token:SUPA_KEY;
+    var resp=await fetch(SUPA_URL+'/functions/v1/match-data',{headers:{'Authorization':'Bearer '+token,'apikey':SUPA_KEY}});
+    if(!resp.ok) throw new Error('edge function status '+resp.status);
+    var json=await resp.json();
+    return {data:json, isPro:!!json.isPro};
+  }catch(e){
+    var resp2=await fetch('/data.json?t='+Date.now());
+    var json2=await resp2.json();
+    var pro=await checkSession();
+    return {data:json2, isPro:pro};
+  }
+}
 
 async function init(){
   var el=document.getElementById('root');
@@ -1893,12 +1915,18 @@ async function init(){
   try{
     var m;
     if(typeof PRELOADED_MATCH!=='undefined'&&PRELOADED_MATCH&&String(PRELOADED_MATCH.id)===String(fId)){
-      m=PRELOADED_MATCH;
       isPro=await checkSession();
+      if(isPro){
+        var fetched=await fetchMatchDataWithAuth();
+        var enriched=(fetched.data.matchs||[]).find(function(x){return String(x.id)===String(fId);});
+        m=enriched||PRELOADED_MATCH;
+      }else{
+        m=PRELOADED_MATCH;
+      }
     }else{
-      var res=await Promise.all([fetch('/data.json?t='+Date.now()).then(function(r){return r.json();}),checkSession()]);
-      var data=res[0]; isPro=res[1];
-      m=(data.matchs||[]).find(function(x){return String(x.id)===String(fId);});
+      var fetched2=await fetchMatchDataWithAuth();
+      isPro=fetched2.isPro;
+      m=(fetched2.data.matchs||[]).find(function(x){return String(x.id)===String(fId);});
     }
     if(!m){
       el.innerHTML='<div style="text-align:center;padding:60px 20px"><div style="font-family:Space Mono,monospace;font-size:10px;color:var(--muted)">MATCH INTROUVABLE · ID: '+fId+'</div><br><a href="/" style="color:var(--cyan);font-family:Space Mono,monospace;font-size:9px">← RETOUR</a></div>';

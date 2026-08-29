@@ -465,11 +465,29 @@ async function saveCapital(){
   }
 }
 
+async function fetchMatchData(){
+  // Les champs premium (kelly/edge/verdict_shark/facteur_x) ne sont plus dans
+  // data.json - ils ne peuvent venir que de l'Edge Function match-data, qui
+  // verifie le vrai statut d'abonnement cote serveur avant de les inclure.
+  // Repli sur data.json (donnees gratuites uniquement) si l'appel echoue -
+  // ex. fonction pas encore deployee, hors ligne, etc.
+  try{
+    var sess=await sb.auth.getSession();
+    var token=sess.data&&sess.data.session?sess.data.session.access_token:SUPA_KEY;
+    var resp=await fetch(SUPA_URL+'/functions/v1/match-data', {
+      headers:{'Authorization':'Bearer '+token, 'apikey':SUPA_KEY}
+    });
+    if(!resp.ok) throw new Error('edge function status '+resp.status);
+    return await resp.json();
+  }catch(e){
+    var resp2=await fetch('data.json?t='+Date.now());
+    return await resp2.json();
+  }
+}
 async function loadAll(){
   loadLocalData();
   try{
-    var resp=await fetch('data.json?t='+Date.now());
-    var data=await resp.json();
+    var data=await fetchMatchData();
     allMatchs=(data.matchs||[]).filter(function(m){
       var conf=parseFloat(m.conf)||0;
       var confNorm=conf<=1?conf*10:conf;

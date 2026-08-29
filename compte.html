@@ -259,6 +259,16 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
       <a href="/a-propos.html" class="help-row">Notre méthode <span class="arrow">→</span></a>
     </div>
 
+    <!-- MES DONNEES (RGPD art. 20 - portabilite) -->
+    <div class="section">
+      <div class="section-title">MES DONNÉES</div>
+      <div class="danger-row">
+        <div class="danger-txt">Télécharge une copie de tes données IASHARK (compte + historique de suivi local) au format JSON</div>
+        <button class="danger-btn" id="btnExport" onclick="exportMyData()" style="color:var(--cyan);border-color:var(--bc);">EXPORTER</button>
+      </div>
+      <div class="sec-msg" id="exportMsg"></div>
+    </div>
+
     <!-- DANGER ZONE -->
     <div class="section">
       <div class="danger-row">
@@ -472,6 +482,52 @@ async function changeEmail(){
     msgEl.className = 'sec-msg error'; msgEl.style.display='block';
   }
   btn.disabled = false; btn.textContent = 'METTRE À JOUR →';
+}
+
+/* ═══ Export RGPD (art. 20, droit a la portabilite) : compte (table users,
+   propre ligne, deja lisible via RLS "select own") + suivi de paris local
+   (localStorage cote navigateur, jamais synchronise cote serveur - voir
+   pro.html STORAGE_KEY_PARIS) - genere un fichier telecharge cote client,
+   aucun appel serveur autre que la lecture de la propre ligne users ═══ */
+async function exportMyData(){
+  var msgEl = document.getElementById('exportMsg');
+  var btn = document.getElementById('btnExport');
+  if(!currentUser) return;
+  btn.disabled = true; btn.textContent = 'EXPORT...';
+  try{
+    var res = await sb.from('users').select('email,plan,role,capital,created_at,updated_at').eq('id',currentUser.id).maybeSingle();
+    if(res.error) throw res.error;
+    var trackedBets = [];
+    try{ var raw = localStorage.getItem('iashark_pro_paris'); if(raw) trackedBets = JSON.parse(raw); }catch(e){}
+    var payload = {
+      exported_at: new Date().toISOString(),
+      account: {
+        user_id: currentUser.id,
+        email: currentUser.email,
+        auth_created_at: currentUser.created_at,
+        plan: res.data ? res.data.plan : null,
+        role: res.data ? res.data.role : null,
+        capital: res.data ? res.data.capital : null
+      },
+      tracked_bets_local: trackedBets,
+      note: 'tracked_bets_local provient du suivi de paris stocke localement dans ton navigateur (jamais envoye a IASHARK) - il ne sera present que si tu exportes depuis le meme navigateur/appareil que celui utilise pour le suivi.'
+    };
+    var blob = new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'iashark-export-'+new Date().toISOString().slice(0,10)+'.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    msgEl.textContent = 'Export téléchargé.';
+    msgEl.className = 'sec-msg success'; msgEl.style.display='block';
+  }catch(e){
+    msgEl.textContent = 'Erreur : '+(e.message||'réessaie');
+    msgEl.className = 'sec-msg error'; msgEl.style.display='block';
+  }
+  btn.disabled = false; btn.textContent = 'EXPORTER';
 }
 
 /* ═══ Suppression de compte : demande par email (pas de suppression directe cote client, par securite) ═══ */

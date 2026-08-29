@@ -272,6 +272,7 @@ body{background:#080c12;color:var(--text);font-family:'DM Sans',sans-serif;min-h
   <div class="tabs">
     <button class="tab-btn active" onclick="switchTab('selections',this)">⭐ SÉLECTIONS</button>
     <button class="tab-btn" onclick="switchTab('suivi',this)">📊 MON SUIVI</button>
+    <button class="tab-btn" onclick="switchTab('calc',this)">🧮 CALCULATEURS</button>
   </div>
 
   <div class="pro-wall locked" id="proWall">
@@ -308,6 +309,45 @@ body{background:#080c12;color:var(--text);font-family:'DM Sans',sans-serif;min-h
           <div class="sync-status" id="syncStatus">Les paris suivis depuis Sélections se résolvent automatiquement.</div>
         </div>
         <div id="betsList"></div>
+      </div>
+
+      <!-- CALCULATEURS AVANCES (Kelly fractionnaire + EV) - memes formules
+           que le pipeline (lib/betting.js : fractionalKelly/expectedValue),
+           dupliquees ici volontairement (site statique sans bundler, meme
+           patron que le reste du fichier) - jamais un chiffre invente. -->
+      <div id="tab-calc" class="tab-section">
+        <div class="capital-bar" style="display:flex;">
+          <div class="capital-row"><span class="capital-lbl">🧮 MISE DE KELLY (FRACTIONNAIRE)</span></div>
+          <div class="capital-row" style="gap:10px;flex-wrap:wrap;">
+            <div style="flex:1;min-width:100px;">
+              <div class="capital-lbl" style="margin-bottom:4px;">BANKROLL (€)</div>
+              <input type="number" step="1" min="0" id="kellyBk" placeholder="Ex: 500" oninput="calcKelly()" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--text);font-family:'Space Mono',monospace;">
+            </div>
+            <div style="flex:1;min-width:100px;">
+              <div class="capital-lbl" style="margin-bottom:4px;">COTE DÉCIMALE</div>
+              <input type="number" step="0.01" min="1.01" id="kellyCote" placeholder="Ex: 2.10" oninput="calcKelly()" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--text);font-family:'Space Mono',monospace;">
+            </div>
+            <div style="flex:1;min-width:100px;">
+              <div class="capital-lbl" style="margin-bottom:4px;">PROBABILITÉ ESTIMÉE (%)</div>
+              <input type="number" step="0.1" min="0.1" max="99.9" id="kellyProb" placeholder="Ex: 55" oninput="calcKelly()" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--text);font-family:'Space Mono',monospace;">
+            </div>
+            <div style="flex:1;min-width:100px;">
+              <div class="capital-lbl" style="margin-bottom:4px;">FRACTION KELLY</div>
+              <select id="kellyFrac" onchange="calcKelly()" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--text);font-family:'Space Mono',monospace;">
+                <option value="0.25" selected>1/4 (prudent, standard)</option>
+                <option value="0.5">1/2</option>
+                <option value="1">Plein (agressif)</option>
+              </select>
+            </div>
+          </div>
+          <div id="kellyResult" style="display:none;">
+            <div class="capital-row"><span class="capital-lbl">MISE RECOMMANDÉE</span><span class="capital-val cyan" id="kellyMiseVal">—</span></div>
+            <div class="capital-row"><span class="capital-lbl">% DU BANKROLL</span><span class="capital-val" id="kellyPctVal">—</span></div>
+            <div class="capital-row"><span class="capital-lbl">EV (valeur espérée)</span><span class="capital-val" id="kellyEvVal">—</span></div>
+            <div class="capital-hint" id="kellyHint" style="color:var(--muted);font-size:9px;"></div>
+          </div>
+          <div class="capital-hint" style="color:var(--muted);font-size:9px;">La probabilité que tu entres ici doit venir de ton propre jugement ou d'une probabilité modèle IASHARK réelle (visible dans Sélections/Match) — ce calculateur ne fournit aucune probabilité, il applique seulement la formule de Kelly à ce que tu lui donnes. Mise plafonnée à 5% du bankroll par pari (même règle que le moteur), quel que soit l'edge.</div>
+        </div>
       </div>
 
     </div>
@@ -557,6 +597,35 @@ function calcMarge(){
   document.getElementById('margeVal').textContent=margePct.toFixed(2)+'%';
   document.getElementById('margeHint').textContent=margePct>=0?'(marge normale du bookmaker)':'(anomalie : somme des probabilités < 100%, vérifie les cotes saisies)';
   box.style.display='flex';
+}
+function calcKelly(){
+  var bk=parseFloat(document.getElementById('kellyBk').value);
+  var cote=parseFloat(document.getElementById('kellyCote').value);
+  var probPct=parseFloat(document.getElementById('kellyProb').value);
+  var fraction=parseFloat(document.getElementById('kellyFrac').value)||0.25;
+  var box=document.getElementById('kellyResult');
+  if(!bk||bk<=0||!cote||cote<=1||!probPct||probPct<=0||probPct>=100){box.style.display='none';return;}
+  var probIA=probPct/100;
+  // Memes formules que lib/betting.js (fractionalKelly/expectedValue),
+  // testees dans tests/betting.test.js - ne pas diverger de la logique
+  // pipeline.
+  var b=cote-1;
+  var q=1-probIA;
+  var kelly=(probIA*b-q)/b;
+  var ev=probIA*cote-1;
+  document.getElementById('kellyEvVal').textContent=(ev>=0?'+':'')+(ev*100).toFixed(1)+'% par unité misée';
+  if(kelly<=0){
+    document.getElementById('kellyMiseVal').textContent='0 € (aucun edge)';
+    document.getElementById('kellyPctVal').textContent='0%';
+    document.getElementById('kellyHint').textContent="À cette cote et cette probabilité, le calcul de Kelly ne recommande aucune mise (pas d'avantage mathématique) — parier ici reviendrait à un pari négatif en espérance.";
+  } else {
+    var pct=Math.min(kelly*fraction*100,5);
+    var mise=bk*(pct/100);
+    document.getElementById('kellyMiseVal').textContent=mise.toFixed(2)+' €';
+    document.getElementById('kellyPctVal').textContent=pct.toFixed(2)+'%';
+    document.getElementById('kellyHint').textContent=pct>=5?'Plafonné à 5% du bankroll par pari (même règle que le moteur), même si le Kelly plein calculé est supérieur.':'Kelly '+(fraction===1?'plein':fraction===0.5?'demi':'quart')+' appliqué sur un edge réel détecté par la formule.';
+  }
+  box.style.display='block';
 }
 async function loadAll(){
   loadLocalData();

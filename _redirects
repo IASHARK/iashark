@@ -12,10 +12,29 @@
 # ci-dessous QUE pour une page dont /fr/<page> (et les 5 autres locales)
 # ont ete reellement generes par `npm run build:i18n` et commit. Ajouter
 # une redirection vers une page qui n'existe pas encore produirait un
-# 404 en cascade des que la pause serait levee. Etat actuel (2026-08-29) :
-# seul marches.html a ete genere pour les 6 locales - voir
-# IASHARK_V2_EXECUTION_STATE.md pour la liste a jour. PAS de redirection
-# de suggestion de langue sur "/" tant que les 6 pages d'accueil
-# localisees n'existent pas (sinon "/" redirigerait vers une page qui
-# n'existe pas).
-/marches.html            /fr/marches.html            301
+# 404 en cascade des que la pause serait levee. Etat actuel (2026-08-30) :
+# les 7 pages coeur du produit sont generees pour les 6 locales
+# (marches/index/match/pro/compte/historique/landing) - voir
+# IASHARK_V2_EXECUTION_STATE.md pour la liste a jour et le detail par page
+# (ex. match.html n'est traduit que sur le chrome, pas le narratif LLM).
+
+# Suggestion de langue sur la racine "/", basee sur Accept-Language du
+# navigateur (parametre Language de Netlify) - JAMAIS un choix impose :
+# 302 (temporaire) pour rester une suggestion reversible, pas un
+# aiguillage permanent. Toute langue non listee retombe sur /fr/ (FR par
+# defaut, MASTER SS19). Netlify evalue ces regles dans l'ordre et prend
+# la premiere qui matche a la fois le chemin ET la condition Language.
+/  /en/  302  Language=en
+/  /es/  302  Language=es
+/  /de/  302  Language=de
+/  /it/  302  Language=it
+/  /pt/  302  Language=pt
+/  /fr/  302
+
+/marches.html             /fr/marches.html             301
+/index.html                /fr/                          301
+/match.html               /fr/match.html               301
+/pro.html                 /fr/pro.html                 301
+/compte.html              /fr/compte.html              301
+/historique.html          /fr/historique.html          301
+/landing.html             /fr/landing.html             301

@@ -18,6 +18,19 @@ test("resolveMarketWin: Over/Under 1.5 et 3.5 aussi geres", () => {
   assert.equal(resolveMarketWin("Over 3.5", 2, 2), true);
   assert.equal(resolveMarketWin("Over 3.5", 2, 1), false);
 });
+test("resolveMarketWin: lignes O/U generiques 0.5 a 6.5 (MASTER V2.1 §8.1, pas seulement 1.5/2.5/3.5)", () => {
+  assert.equal(resolveMarketWin("Over 0.5", 1, 0), true);
+  assert.equal(resolveMarketWin("Over 0.5", 0, 0), false);
+  assert.equal(resolveMarketWin("Over 4.5", 3, 2), true);
+  assert.equal(resolveMarketWin("Over 4.5", 2, 2), false);
+  assert.equal(resolveMarketWin("Over 5.5", 3, 3), true);
+  assert.equal(resolveMarketWin("Over 6.5", 4, 3), true);
+  assert.equal(resolveMarketWin("Over 6.5", 3, 3), false);
+  assert.equal(resolveMarketWin("Under 1.5", 1, 0), true);
+  assert.equal(resolveMarketWin("Under 1.5", 1, 1), false);
+  assert.equal(resolveMarketWin("Under 3.5", 2, 1), true);
+  assert.equal(resolveMarketWin("Under 3.5", 2, 2), false);
+});
 
 // --- BTTS ---
 test("resolveMarketWin: BTTS Oui gagne si les deux equipes marquent", () => {
@@ -74,6 +87,40 @@ test("resolveMarketWin: Handicap 0 equivaut a Draw No Bet (push sur match nul)",
 test("resolveMarketWin: Handicap sans ligne numerique ou sans cote reconnue -> null", () => {
   assert.equal(resolveMarketWin("Handicap Domicile", 1, 0), null); // pas de ligne chiffree
   assert.equal(resolveMarketWin("Handicap +0.5", 1, 0), null);     // pas de cote dom/ext
+});
+test("resolveMarketWin: Handicap quart de ligne (.25/.75) -> null explicite, jamais un WIN/LOSS complet errone", () => {
+  // Asian Handicap -0.25/-0.75 : le vrai settlement split la mise sur deux
+  // lignes (demi-gain/demi-perte possible), pas gere par ce resolver -
+  // refuser plutot que de mal compter un demi-perdant comme perte complete.
+  assert.equal(resolveMarketWin("Handicap -0.25 Domicile", 1, 1), null);
+  assert.equal(resolveMarketWin("Handicap +0.75 Exterieur", 1, 0), null);
+  assert.equal(resolveMarketWin("Handicap -1.25 Domicile", 2, 1), null);
+});
+test("resolveMarketWin: Handicap demi-ligne (.5) fonctionne normalement (pas confondu avec un quart)", () => {
+  assert.equal(resolveMarketWin("Handicap -0.5 Domicile", 1, 1), false);
+  assert.equal(resolveMarketWin("Handicap -0.5 Domicile", 2, 1), true);
+});
+
+// --- Draw No Bet ---
+test("resolveMarketWin: DNB Domicile - gagne, perd, void sur nul", () => {
+  assert.equal(resolveMarketWin("DNB Domicile", 2, 0), true);
+  assert.equal(resolveMarketWin("DNB Domicile", 0, 2), false);
+  assert.equal(resolveMarketWin("DNB Domicile", 1, 1), "void");
+});
+test("resolveMarketWin: DNB Exterieur - gagne, perd, void sur nul", () => {
+  assert.equal(resolveMarketWin("DNB Exterieur", 0, 2), true);
+  assert.equal(resolveMarketWin("DNB Exterieur", 2, 0), false);
+  assert.equal(resolveMarketWin("DNB Exterieur", 1, 1), "void");
+});
+test("resolveMarketWin: DNB sans cote reconnue -> null", () => {
+  assert.equal(resolveMarketWin("DNB", 2, 0), null);
+});
+
+// --- Nul (branche existante, non testee jusqu'ici) ---
+test("resolveMarketWin: Nul/Draw", () => {
+  assert.equal(resolveMarketWin("Nul", 1, 1), true);
+  assert.equal(resolveMarketWin("Nul", 1, 0), false);
+  assert.equal(resolveMarketWin("Draw", 2, 2), true);
 });
 
 // --- Marche non reconnu / inputs invalides ---

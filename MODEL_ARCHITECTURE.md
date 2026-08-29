@@ -2,18 +2,21 @@
 
 Document vivant, mis à jour à chaque changement réel du moteur. Décrit ce qui est **réellement construit et vérifié**, pas l'ambition finale du MASTER — pour l'ambition complète, voir `IASHARK_V2_EXECUTION_STATE.md` et le MASTER lui-même (§10.D à §10.AL).
 
-## `model_probability` : final vs intermédiaire, et asymétrie entre marchés
+## Séparation stricte PURE / MARKET_CONSENSUS / MARKET_AWARE (§10.2) — corrigée
 
-Vérification demandée explicitement : `matchObj.model_probability` est-il la dernière valeur calculée par le moteur pour le marché retenu, ou une valeur brute intermédiaire écrasée ensuite ?
+**Historique du problème** : une première vérification avait tracé que `model_probability` était toujours la dernière valeur calculée pour le marché retenu, mais avait révélé une asymétrie — 1X2/Double Chance utilisaient un blend ancré au marché (`anchored.p1/pN/p2`, proche de `MARKET_AWARE_PROBABILITY`) tandis qu'Over/Under et BTTS restaient purs. Signalé explicitement par l'utilisateur comme inacceptable : *"Aucun calcul PURE ne doit recevoir une probabilité issue d'un bookmaker, directement ou indirectement."*
 
-**Réponse tracée dans le code** : c'est toujours la dernière valeur calculée, jamais une valeur intermédiaire — mais "dernière valeur" ne veut pas dire la même chose selon le marché, et c'est une vraie asymétrie architecturale à connaître :
+**Corrigé** : les trois probabilités du §10.2 sont maintenant calculées et exposées séparément, pour tous les marchés, sans exception :
 
-- **1X2 et Double Chance** : `pickedMarket.prob` vient de `anchored.p1/pN/p2`, qui EST le résultat final d'un blend entre l'ensemble Poisson/Dixon-Coles/Monte-Carlo/Elo et la probabilité fair du marché (retrait de marge Shin sur les cotes réelles, poids 0.55-0.65 vers le marché). C'est donc proche de ce que le MASTER appelle `MARKET_AWARE_PROBABILITY` (§10.2), bien que ce soit un blend linéaire simple plutôt qu'un modèle entraîné avec le marché comme feature.
-- **Over/Under et BTTS** : `pickedMarket.prob` vient directement de `poissonProbs.over25`/`poissonProbs.bttsY` — l'ensemble Poisson/Dixon-Coles/Monte-Carlo/Elo SANS aucun ancrage au marché. C'est `PURE_IASHARK_PROBABILITY` (§10.2), pas mélangée aux cotes.
+- **`PURE_IASHARK_PROBABILITY`** (variable pipeline `pureProbs`, champ `model_probability`) : ensemble Poisson/Dixon-Coles/Monte-Carlo/Elo — **aucune cote n'entre dans ce calcul, pour aucun marché**. Double Chance pur (`purePropProb1X`/`purePropProbX2`) est dérivé des probabilités 1X2 pures elles-mêmes (`pureProbs.p1 + pureProbs.pN`), jamais d'un blend marché. C'est cette probabilité, et uniquement elle, qui alimente `allMarkets`, `pickMarketDeterministic`, et le calcul d'edge/Kelly.
+- **`MARKET_CONSENSUS_PROBABILITY`** (variable `shinProbs` pour 1X2, `fairOU`/`fairBTTS` pour Over/Under et BTTS, exposée dans `matchObj.market_consensus_p1/pN/p2`) : uniquement les cotes réelles, marge retirée (Shin). `null` si aucune cote fiable — jamais fabriquée.
+- **`MARKET_AWARE_PROBABILITY`** (variable `marketAware`, exposée dans `matchObj.market_aware_p1/pN/p2`) : modèle séparé et facultatif qui blend PURE avec le marché (poids 0.55-0.65 vers le marché selon la source). **N'alimente plus jamais** `allMarkets`/`pickMarketDeterministic`/edge/Kelly — exposé uniquement pour comparaison, jamais comme source de décision. Honnêtement documenté comme un blend linéaire simple, pas encore le modèle entraîné que le MASTER envisage à terme (§10.Q Model F).
 
-Aucune des deux n'est une **probabilité statistiquement calibrée** au sens du MASTER (§10.S, isotonic/Platt/temperature scaling contre l'historique réel des résultats) — ce moteur de calibration n'existe pas encore. "Final" ici veut dire "dernier nombre que le pipeline calcule avant de l'utiliser", pas "validé empiriquement contre des résultats réels". Voir `CALIBRATION_REPORT.md` pour ce qui est réellement mesuré (et ce qui ne l'est pas).
+**Preuve mathématique vérifiée** (pas juste tracée dans le code, exécutée réellement) : avec les mêmes lambdas, faire varier les cotes de marché de 1.30 (favori net) à 4.50 (outsider net) ne change PAS `PURE_IASHARK_PROBABILITY` (reste à 48% dans les deux cas) mais change `MARKET_AWARE_PROBABILITY` du tout au tout (61% → 33%). Voir `tests/pure-probability-separation.test.js`.
 
-**Écart avec le MASTER** (§10.2 exige une séparation nette et documentée entre PURE/MARKET_CONSENSUS/MARKET_AWARE, calculées et exposées séparément) : aujourd'hui, seul le résultat final d'un blend est exposé, jamais les trois couches distinctement. Prochaine étape concrète : exposer `pure_probability` (Poisson/DC/MC/Elo seul, pour tous les marchés, pas seulement O/U/BTTS), `market_consensus_probability` (Shin seul), et `model_probability` (le blend actuel, renommé `market_aware_probability` une fois la séparation faite) comme trois champs distincts plutôt qu'un seul nombre déjà mélangé.
+**Garde-fou anti-régression** : `tests/pipeline-source-guards.test.js` inspecte le texte source réel de `.github/workflows/update-data.yml` (pas une copie parallèle) et échoue si la variable `anchored` réapparaît, si un marché 1X2/DC cesse d'utiliser `pureProbs`, ou si `marketAware` est référencé dans le bloc de calcul edge/Kelly.
+
+Aucune des trois probabilités n'est une **probabilité statistiquement calibrée** au sens du MASTER (§10.S, isotonic/Platt/temperature scaling contre l'historique réel des résultats) — ce moteur de calibration n'existe pas encore. Voir `CALIBRATION_REPORT.md` pour ce qui est réellement mesuré (et ce qui ne l'est pas). Rappel explicite de l'utilisateur : `MARKET_IMPLIED_PROBABILITY_PROXY` (voir `CALIBRATION_REPORT.md`) est un benchmark/proxy, **pas** une validation du nouveau moteur déterministe.
 
 ## Vue d'ensemble
 

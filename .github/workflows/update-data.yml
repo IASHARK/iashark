@@ -1002,15 +1002,15 @@ jobs:
               +(d.motivH&&d.motivH.alerts&&d.motivH.alerts.length?'Enjeu DOM: '+d.motivH.alerts.join(' | ')+'\n':'')
               +(d.motivA&&d.motivA.alerts&&d.motivA.alerts.length?'Enjeu EXT: '+d.motivA.alerts.join(' | ')+'\n':'')
               +(d.matchup&&d.matchup.insights&&d.matchup.insights.length?'Tactique: '+d.matchup.insights.join(' | ')+'\n':'')
-              +'\n=== PHASE 2 - MODELE MATHEMATIQUE ===\n'
+              +'\n=== PHASE 2 - MODELE MATHEMATIQUE (contexte uniquement, deja calcule) ===\n'
               +'Poisson lambdas: DOM '+d.poisson_lambdaH+' | EXT '+d.poisson_lambdaA+'\n'
               +'Poisson: DOM '+d.poisson_p1+'% | Nul '+d.poisson_pN+'% | EXT '+d.poisson_p2+'%\n'
               +'Dixon-Coles: DOM '+d.dixon_p1+'% | Nul '+d.dixon_pN+'% | EXT '+d.dixon_p2+'%\n'
               +'Monte-Carlo: DOM '+d.mc_p1+'% | Nul '+d.mc_pN+'% | EXT '+d.mc_p2+'%\n'
               +(d.mc_scores&&d.mc_scores.length?'Top scores MC: '+d.mc_scores.map(function(s){return s.score+'('+s.pct+'%)';}).join(', ')+'\n':'')
-              +(d.pinnacle_p1?(d.market_source||'Marche')+': DOM '+d.pinnacle_p1+'% | Nul '+d.pinnacle_pN+'% | EXT '+d.pinnacle_p2+'%\n':'Marche: non disponible\n')
-              +'Probabilite finale ancree au marche ('+(d.market_source||'aucune cote fiable')+'): DOM '+d.final_p1+'% | Nul '+d.final_pN+'% | EXT '+d.final_p2+'%\n'
-              +'-> Utilise EXCLUSIVEMENT cette probabilite ancree (pas le Poisson brut ci-dessus) pour choisir le marche et remplir p1/pn/p2 dans le JSON : le Poisson brut peut diverger fortement du marche sur petit echantillon (ligues mineures) et n\'est affiche que pour contexte.\n'
+              +'Probabilite PURE IASHARK (ensemble Poisson+Dixon-Coles+Monte-Carlo+Elo, jamais influencee par une cote): DOM '+d.final_p1+'% | Nul '+d.final_pN+'% | EXT '+d.final_p2+'%\n'
+              +(d.pinnacle_p1?'Probabilite marche ('+(d.market_source||'Marche')+', retrait de marge): DOM '+d.pinnacle_p1+'% | Nul '+d.pinnacle_pN+'% | EXT '+d.pinnacle_p2+'%\n':'Marche: non disponible\n')
+              +'-> Ces deux probabilites sont deja calculees et NE DOIVENT PAS etre modifiees ni recalculees. Utilise-les uniquement pour REDIGER TON TEXTE (elles ne font pas partie du JSON que tu dois renvoyer).\n'
               +(d.all_markets&&d.all_markets.length
                 ?'\n=== MARCHES DISPONIBLES (cote >= 1.50) ===\n'
                  +'(probas calculees independamment par le modele Poisson + Dixon-Coles + Monte-Carlo)\n'
@@ -1841,31 +1841,27 @@ jobs:
                   console.log('  [WC lambdas] Pas de stats qualifs disponibles pour '+home.name+' ou '+away.name+' - repli sur stats tournoi/floor');
                 }
               }
-              var poissonProbs=calcFinalProbs(lambdas.lambdaH,lambdas.lambdaA,eloStats);
+              // === Separation stricte des 3 probabilites (MASTER V2.1 S10.2) ===
+              // PURE_IASHARK_PROBABILITY : uniquement donnees football + modeles
+              // IASHARK (Poisson/Dixon-Coles/Monte-Carlo/Elo). Ne recoit JAMAIS une
+              // cote, directement ou indirectement - c'est la seule probabilite
+              // utilisee pour choisir un marche (lib/decision.js#pickMarketDeterministic)
+              // et pour calculer edge/Kelly contre le marche (jamais l'inverse : le
+              // MASTER interdit explicitement de comparer une probabilite qui a deja
+              // vu le marche contre ce meme marche).
+              var pureProbs=calcFinalProbs(lambdas.lambdaH,lambdas.lambdaA,eloStats);
+              // Double Chance PURE : derivee des probas 1X2 PURE elles-memes (S10.V -
+              // "deriver sans modeles independants"), jamais d'un blend marche.
+              var purePropProb1X=pureProbs.p1+pureProbs.pN;
+              var purePropProbX2=pureProbs.p2+pureProbs.pN;
+
+              // MARKET_CONSENSUS_PROBABILITY : uniquement les cotes reelles, marge
+              // retiree (Shin). null si aucune cote fiable n'est disponible - jamais
+              // fabriquee.
               var usingPinnacle=!!(pinnacleOdds&&pinnacleOdds.c1&&pinnacleOdds.cn&&pinnacleOdds.c2);
               var marketOdds=usingPinnacle?pinnacleOdds:((odds.c1&&odds.c1!=='--'&&odds.cn&&odds.cn!=='--'&&odds.c2&&odds.c2!=='--')?{c1:parseFloat(odds.c1),cn:parseFloat(odds.cn),c2:parseFloat(odds.c2)}:null);
               var shinProbs=null;
               if(marketOdds){var raw=shinProbabilities([marketOdds.c1,marketOdds.cn,marketOdds.c2]);if(raw)shinProbs={p1:Math.round(raw[0]*100),pN:Math.round(raw[1]*100),p2:Math.round(raw[2]*100)};}
-              // Ancrage marche: le marche (cotes reelles, Pinnacle si dispo sinon mediane multi-bookmakers) recoit un poids dominant
-              // pour eviter qu'un lambda Poisson extreme sur petit echantillon (ligues mineures) ne produise une confiance illusoire.
-              var anchored=poissonProbs;
-              if(shinProbs){
-                var mw=usingPinnacle?0.65:0.55;
-                var ap1=Math.round(poissonProbs.p1*(1-mw)+shinProbs.p1*mw);
-                var ap2=Math.round(poissonProbs.p2*(1-mw)+shinProbs.p2*mw);
-                var apN=100-ap1-ap2;
-                anchored={p1:ap1,pN:apN,p2:ap2};
-              }
-              var prob1X=anchored.p1+anchored.pN;
-              var probX2=anchored.p2+anchored.pN;
-              var probAHdom=anchored.p1;
-              var probAHext=anchored.p2+anchored.pN;
-              // Probabilite "fair" du marche par paire de cotes complementaires (retrait
-              // de marge par la methode de Shin, deja utilisee pour le 1X2 plus haut) -
-              // necessaire pour calculer un edge et un Kelly reels: comparer la probabilite
-              // du modele a la probabilite du modele elle-meme (comme le faisait l'ancien
-              // champ "edge") n'a jamais ete un edge. Repli sur 1/cote (implicite brute,
-              // marge bookmaker incluse) quand la paire complementaire n'est pas disponible.
               function fairPairProbs(coteA,coteB){
                 var a=parseFloat(coteA),b=parseFloat(coteB);
                 if(!a||!b||a<=1||b<=1) return null;
@@ -1876,15 +1872,34 @@ jobs:
               function naiveImplied(cote){ var c=parseFloat(cote); return c>1?100/c:null; }
               var fairOU=fairPairProbs(odds.co25,odds.cu25);
               var fairBTTS=fairPairProbs(odds.btts_oui,odds.btts_non);
+
+              // MARKET_AWARE_PROBABILITY : modele SEPARE et FACULTATIF qui utilise le
+              // marche comme feature (S10.2 : "son but est la meilleure estimation
+              // probabiliste absolue possible, PAS la detection d'un ecart de
+              // marche"). Aujourd'hui un blend lineaire simple (pas encore le modele
+              // entraine que le MASTER envisage a terme) - honnetement documente comme
+              // tel. N'alimente JAMAIS allMarkets/pickMarketDeterministic/edge/Kelly :
+              // ceux-ci utilisent exclusivement PURE_IASHARK_PROBABILITY vs
+              // MARKET_CONSENSUS_PROBABILITY, jamais MARKET_AWARE contre le marche qui
+              // l'a nourri (interdiction explicite S10.2).
+              var marketAware=pureProbs;
+              if(shinProbs){
+                var mw=usingPinnacle?0.65:0.55;
+                var ap1=Math.round(pureProbs.p1*(1-mw)+shinProbs.p1*mw);
+                var ap2=Math.round(pureProbs.p2*(1-mw)+shinProbs.p2*mw);
+                var apN=100-ap1-ap2;
+                marketAware={p1:ap1,pN:apN,p2:ap2};
+              }
+
               var allMarkets=[
-                {market:'Over 2.5',  cote:odds.co25,      prob:poissonProbs.over25, marketProb:fairOU?fairOU.a:naiveImplied(odds.co25),      label:'Plus de 2.5 buts'},
-                {market:'Under 2.5', cote:odds.cu25,      prob:poissonProbs.under25,marketProb:fairOU?fairOU.b:naiveImplied(odds.cu25),      label:'Moins de 2.5 buts'},
-                {market:'BTTS Oui',  cote:odds.btts_oui,  prob:poissonProbs.bttsY,  marketProb:fairBTTS?fairBTTS.a:naiveImplied(odds.btts_oui), label:'Les deux equipes marquent'},
-                {market:'BTTS Non',  cote:odds.btts_non,  prob:poissonProbs.bttsN,  marketProb:fairBTTS?fairBTTS.b:naiveImplied(odds.btts_non), label:'Une equipe ne marque pas'},
-                {market:'DC 1X',     cote:odds.dc1x,      prob:prob1X,              marketProb:naiveImplied(odds.dc1x),                     label:'Victoire ou nul domicile'},
-                {market:'DC X2',     cote:odds.dc2x,      prob:probX2,              marketProb:naiveImplied(odds.dc2x),                     label:'Victoire ou nul exterieur'},
-                {market:'Victoire Domicile', cote:odds.c1, prob:anchored.p1, marketProb:shinProbs?shinProbs.p1:naiveImplied(odds.c1), label:'Victoire seche domicile'},
-                {market:'Victoire Exterieur',cote:odds.c2, prob:anchored.p2, marketProb:shinProbs?shinProbs.p2:naiveImplied(odds.c2), label:'Victoire seche exterieur'},
+                {market:'Over 2.5',  cote:odds.co25,      prob:pureProbs.over25, marketProb:fairOU?fairOU.a:naiveImplied(odds.co25),      label:'Plus de 2.5 buts'},
+                {market:'Under 2.5', cote:odds.cu25,      prob:pureProbs.under25,marketProb:fairOU?fairOU.b:naiveImplied(odds.cu25),      label:'Moins de 2.5 buts'},
+                {market:'BTTS Oui',  cote:odds.btts_oui,  prob:pureProbs.bttsY,  marketProb:fairBTTS?fairBTTS.a:naiveImplied(odds.btts_oui), label:'Les deux equipes marquent'},
+                {market:'BTTS Non',  cote:odds.btts_non,  prob:pureProbs.bttsN,  marketProb:fairBTTS?fairBTTS.b:naiveImplied(odds.btts_non), label:'Une equipe ne marque pas'},
+                {market:'DC 1X',     cote:odds.dc1x,      prob:purePropProb1X,   marketProb:naiveImplied(odds.dc1x),                     label:'Victoire ou nul domicile'},
+                {market:'DC X2',     cote:odds.dc2x,      prob:purePropProbX2,   marketProb:naiveImplied(odds.dc2x),                     label:'Victoire ou nul exterieur'},
+                {market:'Victoire Domicile', cote:odds.c1, prob:pureProbs.p1, marketProb:shinProbs?shinProbs.p1:naiveImplied(odds.c1), label:'Victoire seche domicile'},
+                {market:'Victoire Exterieur',cote:odds.c2, prob:pureProbs.p2, marketProb:shinProbs?shinProbs.p2:naiveImplied(odds.c2), label:'Victoire seche exterieur'},
               ].filter(function(m){
                 return m.cote&&m.cote!=='--'&&parseFloat(m.cote)>=1.50;
               });
@@ -1968,20 +1983,20 @@ jobs:
                 xgH_avg:xgH.xg_avg,xgH_weighted:xgH.xg_weighted,xgH_fouls:xgH.fouls_avg,
                 xgA_avg:xgA.xg_avg,xgA_weighted:xgA.xg_weighted,xgA_fouls:xgA.fouls_avg,
                 poisson_lambdaH:lambdas.lambdaH,poisson_lambdaA:lambdas.lambdaA,
-                poisson_p1:poissonProbs.p1,poisson_pN:poissonProbs.pN,poisson_p2:poissonProbs.p2,
-                poisson_over25:poissonProbs.over25,poisson_under25:poissonProbs.under25,
-                poisson_bttsY:poissonProbs.bttsY,poisson_bttsN:poissonProbs.bttsN,
-                dixon_p1:poissonProbs.dixon?poissonProbs.dixon.p1:poissonProbs.p1,
-                dixon_pN:poissonProbs.dixon?poissonProbs.dixon.pN:poissonProbs.pN,
-                dixon_p2:poissonProbs.dixon?poissonProbs.dixon.p2:poissonProbs.p2,
-                mc_p1:poissonProbs.montecarlo?poissonProbs.montecarlo.p1:poissonProbs.p1,
-                mc_scores:poissonProbs.montecarlo?poissonProbs.montecarlo.top_scores:[],
-                mc_pN:poissonProbs.montecarlo?poissonProbs.montecarlo.pN:poissonProbs.pN,
-                mc_p2:poissonProbs.montecarlo?poissonProbs.montecarlo.p2:poissonProbs.p2,
+                poisson_p1:pureProbs.p1,poisson_pN:pureProbs.pN,poisson_p2:pureProbs.p2,
+                poisson_over25:pureProbs.over25,poisson_under25:pureProbs.under25,
+                poisson_bttsY:pureProbs.bttsY,poisson_bttsN:pureProbs.bttsN,
+                dixon_p1:pureProbs.dixon?pureProbs.dixon.p1:pureProbs.p1,
+                dixon_pN:pureProbs.dixon?pureProbs.dixon.pN:pureProbs.pN,
+                dixon_p2:pureProbs.dixon?pureProbs.dixon.p2:pureProbs.p2,
+                mc_p1:pureProbs.montecarlo?pureProbs.montecarlo.p1:pureProbs.p1,
+                mc_scores:pureProbs.montecarlo?pureProbs.montecarlo.top_scores:[],
+                mc_pN:pureProbs.montecarlo?pureProbs.montecarlo.pN:pureProbs.pN,
+                mc_p2:pureProbs.montecarlo?pureProbs.montecarlo.p2:pureProbs.p2,
                 pinnacle_p1:shinProbs?shinProbs.p1:null,pinnacle_pN:shinProbs?shinProbs.pN:null,pinnacle_p2:shinProbs?shinProbs.p2:null,
                 pinnacle_c1:marketOdds?marketOdds.c1:null,pinnacle_c2:marketOdds?marketOdds.c2:null,
                 market_source:usingPinnacle?'Pinnacle (sharp)':(marketOdds?'Cotes moyennes multi-bookmakers':null),
-                final_p1:anchored.p1,final_pN:anchored.pN,final_p2:anchored.p2,
+                final_p1:pureProbs.p1,final_pN:pureProbs.pN,final_p2:pureProbs.p2,
                 all_markets:allMarkets,node_kelly:nodeKelly,
                 picked_market:pickedMarket,no_signal:noSignal,
                 lineup_home_formation:lineups&&lineups.home?lineups.home.formation:null,
@@ -2029,7 +2044,7 @@ jobs:
                 hasElo:!!(eloH&&eloA),
                 hasLineups:!!(lineups&&(lineups.home||lineups.away)),
               });
-              var modelAgreement=computeModelAgreement([poissonProbs.p1,poissonProbs.dixon?poissonProbs.dixon.p1:poissonProbs.p1,poissonProbs.montecarlo?poissonProbs.montecarlo.p1:poissonProbs.p1]);
+              var modelAgreement=computeModelAgreement([pureProbs.p1,pureProbs.dixon?pureProbs.dixon.p1:pureProbs.p1,pureProbs.montecarlo?pureProbs.montecarlo.p1:pureProbs.p1]);
               // Taille d'echantillon reelle (matchs joues cette saison par les deux
               // equipes) - jamais la valeur de repli ||20/||30 utilisee ailleurs pour
               // les calculs statistiques (qui doit rester un repli technique, pas une
@@ -2047,14 +2062,24 @@ jobs:
                 date:(dateVraieParis+' '+heure).trim(),cat:['all'],
                 val:!noSignal&&kellyVal!=='0',
                 hot:!noSignal&&modelAgreement.label==='Fort'&&kellyVal!=='0',
-                // model_probability : LA probabilite finale du moteur pour le marche
-                // retenu (0-100, deterministe). C'est le dernier nombre calcule par
-                // l'ensemble Poisson/Dixon-Coles/Monte-Carlo (+ancrage marche Shin pour
-                // le 1X2) avant selection - jamais une valeur intermediaire brute. Ce
-                // n'EST PAS une "probabilite calibree" au sens statistique (isotonic/
-                // Platt, §10.S) : aucune calibration post-hoc n'a encore ete mesuree
-                // pour ce moteur (voir CALIBRATION_REPORT.md).
+                // model_probability : PURE_IASHARK_PROBABILITY (§10.2) pour le marche
+                // retenu (0-100, deterministe) - ensemble Poisson/Dixon-Coles/Monte-Carlo
+                // (+Elo), et RIEN d'autre : aucune cote n'entre dans ce calcul, jamais,
+                // pour aucun marche (1X2/DC inclus - corrige ce jalon, ils etaient
+                // auparavant ancres au marche via un blend Shin, cf MODEL_ARCHITECTURE.md
+                // et tests/pure-probability.test.js). C'est le meme nombre utilise pour
+                // choisir le marche (lib/decision.js#pickMarketDeterministic) et pour
+                // calculer edge/Kelly contre market_consensus_* ci-dessous - jamais une
+                // valeur intermediaire brute, jamais MARKET_AWARE contre son propre
+                // marche source (interdit explicitement par le MASTER). Ce n'EST PAS une
+                // "probabilite calibree" au sens statistique (isotonic/Platt, §10.S) :
+                // aucune calibration post-hoc n'a encore ete mesuree pour ce moteur (voir
+                // CALIBRATION_REPORT.md).
                 model_probability:pickedMarket?Math.round(pickedMarket.prob*10)/10:null,
+                // Les 3 probabilites S10.2 exposees separement et explicitement pour le
+                // marche 1X2 (celui qui a les 3 versions calculees) - jamais fusionnees.
+                market_consensus_p1:shinProbs?shinProbs.p1:null,market_consensus_pN:shinProbs?shinProbs.pN:null,market_consensus_p2:shinProbs?shinProbs.p2:null,
+                market_aware_p1:marketAware.p1,market_aware_pN:marketAware.pN,market_aware_p2:marketAware.p2,
                 // reliability : fiabilite/confiance, EXPLICITEMENT separee de la
                 // probabilite (retour utilisateur direct : ne jamais confondre les
                 // deux). Composite de signaux mesurables (accord des modeles, qualite
@@ -2074,8 +2099,10 @@ jobs:
                 conf:pickedMarket?Math.round((pickedMarket.prob/10)*10)/10:Math.round((dataQuality.score/10)*10)/10,
                 data_quality_score:dataQuality.score,data_quality_label:dataQuality.label,
                 model_agreement:modelAgreement.label,
-                p1:anchored.p1||0,pn:anchored.pN||0,p2:anchored.p2||0,
-                po15:0,po25:poissonProbs.over25||0,btts:poissonProbs.bttsY||0,
+                // p1/pn/p2 : PURE_IASHARK_PROBABILITY (jamais market_aware -
+                // c'etait le bug corrige ce jalon pour 1X2/DC specifiquement).
+                p1:pureProbs.p1||0,pn:pureProbs.pN||0,p2:pureProbs.p2||0,
+                po15:0,po25:pureProbs.over25||0,btts:pureProbs.bttsY||0,
                 c1:odds.c1,cn:odds.cn,c2:odds.c2,co15:odds.co15,co25:odds.co25,cu25:odds.cu25,
                 dc1x:odds.dc1x,dc2x:odds.dc2x,dc12:odds.dc12,cdc1x:odds.dc1x,cdc2x:odds.dc2x,
                 ah_dom:odds.ah_dom||'--',ah_ext:odds.ah_ext||'--',co35:odds.co35||'--',
@@ -2093,7 +2120,7 @@ jobs:
                 contexte:an?(an.contexte||''):'',
                 vbet:(!noSignal&&kellyVal!=='0')?'OUI':'NON',
                 scores:an&&an.score_central?[an.score_central]:[],
-                mc_scores:poissonProbs.montecarlo?poissonProbs.montecarlo.top_scores:[],
+                mc_scores:pureProbs.montecarlo?pureProbs.montecarlo.top_scores:[],
                 paris_safe:{bet:pickedMarket?pickedMarket.market:'',cote:pickedMarket?parseFloat(pickedMarket.cote):odds.c1,proba:pickedMarket?Math.round(pickedMarket.prob)+'%':''},
                 paris_risque:{bet:'',cote:'',proba:''},
                 stade:{nom:f.venue&&f.venue.name?(f.venue.name+(f.venue.city?' - '+f.venue.city:'')):home.name+' (domicile)',cap:'',meteo:wx?wx.emoji:'',temp:wx?wx.temp:'',desc:wx?wx.desc:''},

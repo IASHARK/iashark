@@ -179,6 +179,10 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
     <div class="pred-list" id="predList">
       <div class="empty"><h3>CHARGEMENT...</h3></div>
     </div>
+    <div style="text-align:center;margin-top:14px;" id="archiveMoreWrap">
+      <button class="tab" id="btnLoadArchive" onclick="loadFullArchive()" style="cursor:pointer;">CHARGER L'HISTORIQUE COMPLET (AU-DELÀ DES 500 DERNIERS)</button>
+      <div style="font-family:'Space Mono',monospace;font-size:8px;color:var(--muted);margin-top:8px;" id="archiveMoreStatus"></div>
+    </div>
   </div>
 
   <div id="tabBacktesting" style="display:none;">
@@ -400,6 +404,59 @@ async function loadData(){
   }catch(e){document.getElementById('predList').innerHTML='<div class="empty"><h3>ERREUR</h3><p>Impossible de charger l\'historique.</p></div>';}
 }
 loadData();
+
+/* ═══ Archives V2 (MASTER §15.3) : historique.json est un cache borne aux
+   500 predictions les plus recentes ; predictions_archive (Supabase) est la
+   source de verite non plafonnee (lecture publique, deja anon-select
+   autorisee). Ce bouton charge le reste a la demande plutot que de tout
+   fetch au chargement de la page (couteux, inutile pour la majorite des
+   visiteurs qui ne vont jamais au-dela des 500 dernieres). ═══ */
+var SUPA_URL='https://ksvjraqitxouwiabecai.supabase.co';
+var SUPA_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtzdmpyYXFpdHhvdXdpYWJlY2FpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3ODcwMjMsImV4cCI6MjA4ODM2MzAyM30.Eh3qk4tATM40hoYxdErAllLEo1y8KNt4BSCET_fAgT8';
+var archiveLoaded=false;
+async function loadFullArchive(){
+  if(archiveLoaded)return;
+  var btn=document.getElementById('btnLoadArchive');
+  var status=document.getElementById('archiveMoreStatus');
+  btn.disabled=true; btn.textContent='CHARGEMENT...';
+  var existingIds={};
+  allPredictions.forEach(function(p){ if(p.fixture_id!=null) existingIds[p.fixture_id]=true; });
+  var added=0, offset=0, pageSize=1000, more=true, totalFetched=0;
+  try{
+    while(more){
+      var cols='fixture_id,match_label,market,cote,model_probability,reliability,conf,prediction,league,league_key,sport,date,result,type,score,resolved_date';
+      var url=SUPA_URL+'/rest/v1/predictions_archive?select='+cols+'&order=date.desc&limit='+pageSize+'&offset='+offset;
+      var resp=await fetch(url,{headers:{apikey:SUPA_ANON_KEY,Authorization:'Bearer '+SUPA_ANON_KEY}});
+      if(!resp.ok) throw new Error('HTTP '+resp.status);
+      var rows=await resp.json();
+      totalFetched+=rows.length;
+      rows.forEach(function(row){
+        if(existingIds[row.fixture_id])return;
+        existingIds[row.fixture_id]=true;
+        allPredictions.push({
+          fixture_id:row.fixture_id, match:row.match_label, market:row.market, cote:row.cote,
+          model_probability:row.model_probability, reliability:row.reliability, conf:row.conf,
+          prediction:row.prediction, league:row.league, league_key:row.league_key,
+          sport:row.sport||'football', date:row.date, result:row.result,
+          type:row.type||'single', score:row.score, resolved_date:row.resolved_date
+        });
+        added++;
+      });
+      more = rows.length===pageSize;
+      offset += pageSize;
+      if(offset>50000) break; // garde-fou anti-boucle infinie, pas une limite fonctionnelle
+    }
+    archiveLoaded=true;
+    renderStats(); buildFilterOptions(); renderPredictions();
+    status.textContent = added>0
+      ? (added+' prédiction(s) supplémentaire(s) chargée(s) depuis l\'archive complète ('+totalFetched+' au total dans l\'archive Supabase).')
+      : 'Aucune prédiction supplémentaire au-delà de ce qui est déjà affiché.';
+    document.getElementById('btnLoadArchive').style.display='none';
+  }catch(e){
+    status.textContent='Erreur de chargement de l\'archive complète — réessaie plus tard.';
+    btn.disabled=false; btn.textContent="CHARGER L'HISTORIQUE COMPLET (AU-DELÀ DES 500 DERNIERS)";
+  }
+}
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="/auth-header.js"></script>

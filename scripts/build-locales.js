@@ -19,14 +19,28 @@ LOCALES.supported.forEach(function (l) {
   DICTS[l] = JSON.parse(fs.readFileSync(path.join(ROOT, "i18n/dict/" + l + ".json"), "utf8"));
 });
 
-// Pages qui existent en version localisee (prefixees /xx/ par le build).
+// Pages qui existent REELLEMENT en version localisee (= qui ont une entree
+// dans scripts/i18n-manifest.js et sont donc vraiment generees sous /xx/).
 // Tout le reste (assets, /data.json, /i18n/*, scripts partages, mailto:,
 // liens externes, ancres) reste intact - c'est une ressource globale
 // partagee entre toutes les langues, pas du contenu editorial.
+//
+// IMPORTANT : a-propos.html, confidentialite.html, cgv.html et
+// mentions-legales.html ont ete retires de cette liste (bug reel trouve et
+// corrige) - ils n'ont jamais eu d'entree dans i18n-manifest.js, donc aucun
+// /xx/a-propos.html etc. n'existe sur disque ; les lister ici faisait que
+// TOUTE page generee (footer/nav) pointait vers ces URLs localisees
+// inexistantes (404 systematique sur les 4 liens legaux/methode, sur les 42
+// fichiers generes). Les pages legales (confidentialite/cgv/mentions-legales)
+// restent d'ailleurs volontairement non traduites tant qu'une validation
+// juridique n'a pas eu lieu (langue != juridiction - voir MASTER SS19) : le
+// comportement correct est que TOUTES les locales pointent vers la seule
+// version FR canonique, pas qu'elles pointent vers des copies localisees
+// qui n'existent pas. Ne remettre une page dans cette liste QUE quand une
+// entree correspondante existe reellement dans i18n-manifest.js.
 const LOCALIZABLE_PAGES = new Set([
   "/", "/index.html", "/match.html", "/pro.html", "/historique.html",
-  "/compte.html", "/marches.html", "/landing.html", "/a-propos.html",
-  "/confidentialite.html", "/cgv.html", "/mentions-legales.html"
+  "/compte.html", "/marches.html", "/landing.html"
 ]);
 
 function get(obj, keyPath) {

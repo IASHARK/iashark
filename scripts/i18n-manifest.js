@@ -184,7 +184,12 @@ var PAGES = [
       pt: {title: "IASHARK — Previsões de Futebol com IA", description: "Previsões de futebol baseadas em inteligência artificial. Análises estatísticas, edge de IA e value bets diários."}
     },
     replacements: [
-      {find: '"description":"Pronostics football alimentés par l\'intelligence artificielle."', build: function(d, l, esc){ return '"description":"' + esc(d.home_page.org_description) + '"'; }},
+      {find: '"description":"Pronostics football alimentés par l\'intelligence artificielle."', build: function(d){
+        // Contexte JSON (JSON-LD), pas JS : \' n'est pas un echappement JSON
+        // valide et casserait JSON.parse cote navigateur - seuls " et \
+        // doivent etre echappes ici, jamais l'apostrophe.
+        return '"description":"' + String(d.home_page.org_description).replace(/\\/g, "\\\\").replace(/"/g, '\\"') + '"';
+      }},
       {find: 'class="btn-login">CONNEXION<', build: function(d){ return 'class="btn-login">' + d.cta.login + '<'; }},
       {find: '<h1 class="hp-title">Aucune émotion.<br><b>Que des probabilités.</b></h1>', build: function(d){ var h=d.home_page; return '<h1 class="hp-title">' + h.hero_line1 + '<br><b>' + h.hero_line2 + '</b></h1>'; }},
       {find: '<p class="hp-sub">Chaque match est passé au crible à partir de vraies données : <b>buts attendus (xG), forme récente, fatigue du calendrier, face-à-face.</b> Pas de feeling, que du calcul.</p>', build: function(d){ var h=d.home_page; return '<p class="hp-sub">' + h.hero_sub_pre + '<b>' + h.hero_sub_bold + '</b>' + h.hero_sub_post + '</p>'; }},
@@ -377,6 +382,230 @@ var PAGES = [
        build: function(d, l, esc){
         var w = d.match_page;
         return "blocs.push({num:String(blocs.length+1), titre:'" + esc(w.why6_title) + "',\n      txt:'" + esc(w.why6_a) + "<strong>'+esc(m.kelly)+'" + esc(w.why6_b) + "</strong>" + esc(w.why6_c) + "'});";
+      }},
+      {find: "if(s.includes('over 2.5'))return 'Plus de 2,5 buts';\n  if(s.includes('under 2.5'))return 'Moins de 2,5 buts';\n  if(s.includes('over 1.5'))return 'Plus de 1,5 but';\n  if(s.includes('under 1.5'))return 'Moins de 1,5 but';\n  if(s.includes('over 3.5'))return 'Plus de 3,5 buts';\n  if(s.includes('btts oui')||s.includes('btts yes'))return 'Les deux équipes marquent';\n  if(s.includes('btts non')||s.includes('btts no'))return 'Une équipe ne marque pas';\n  if(s.includes('dc 1x')||s==='1x')return 'Victoire ou nul (domicile)';\n  if(s.includes('dc x2')||s==='x2')return 'Victoire ou nul (extérieur)';\n  if(s.includes('match winner')||s==='1')return 'Victoire à domicile';",
+       build: function(d, l, esc){
+        var n = d.market_names, nat = d.market_names_natural, m = d.match_page;
+        return "if(s.includes('over 2.5'))return '" + esc(n.over25) + "';\n  if(s.includes('under 2.5'))return '" + esc(n.under25) + "';\n  if(s.includes('over 1.5'))return '" + esc(n.over15) + "';\n  if(s.includes('under 1.5'))return '" + esc(m.under15) + "';\n  if(s.includes('over 3.5'))return '" + esc(m.over35) + "';\n  if(s.includes('btts oui')||s.includes('btts yes'))return '" + esc(nat.btts_oui_natural) + "';\n  if(s.includes('btts non')||s.includes('btts no'))return '" + esc(nat.btts_non_natural) + "';\n  if(s.includes('dc 1x')||s==='1x')return '" + esc(m.dc1x_long) + "';\n  if(s.includes('dc x2')||s==='x2')return '" + esc(m.dcx2_long) + "';\n  if(s.includes('match winner')||s==='1')return '" + esc(m.home_win_long) + "';";
+      }}
+    ]
+  },
+  {
+    file: "pro.html",
+    metas: {
+      fr: {title: "IASHARK OUTILS", description: "Sélections à forte probabilité modèle, suivi automatique des paris et vérification de cote en un clic — l'espace Outils d'IASHARK."},
+      en: {title: "IASHARK TOOLS", description: "High model-probability selections, automatic bet tracking and one-click odds check — the IASHARK Tools space."},
+      es: {title: "IASHARK HERRAMIENTAS", description: "Selecciones con alta probabilidad de modelo, seguimiento automático de apuestas y verificación de cuota en un clic — el espacio Herramientas de IASHARK."},
+      de: {title: "IASHARK TOOLS", description: "Tipps mit hoher Modellwahrscheinlichkeit, automatisches Wett-Tracking und Quotenprüfung mit einem Klick — der IASHARK-Tools-Bereich."},
+      it: {title: "IASHARK STRUMENTI", description: "Selezioni ad alta probabilità di modello, tracciamento automatico delle scommesse e verifica quota in un clic — l'area Strumenti di IASHARK."},
+      pt: {title: "IASHARK FERRAMENTAS", description: "Seleções com alta probabilidade de modelo, registo automático de apostas e verificação de odd num clique — o espaço Ferramentas do IASHARK."}
+    },
+    replacements: [
+      {find: '<span id="authHeaderSlot"><a href="/compte.html" class="btn-login">CONNEXION</a></span>', build: function(d){ return '<span id="authHeaderSlot"><a href="/compte.html" class="btn-login">' + d.cta.login + '</a></span>'; }},
+      {find: '<h1>Espace <span>OUTILS</span></h1>', build: function(d){ var t = d.tools_page; return '<h1>' + t.hero_title_pre + '<span>' + t.hero_title_hl + '</span></h1>'; }},
+      {find: '<p>Sélections probabilité ≥ 70% · Suivi automatique · Vérification de cote</p>', build: function(d, l, esc){ return '<p>' + esc(d.tools_page.hero_sub) + '</p>'; }},
+      {find: '<div class="hstat-lbl">WINRATE</div>', build: function(d){ return '<div class="hstat-lbl">' + d.tools_page.stat_winrate + '</div>'; }},
+      {find: '<div class="hstat-lbl">ROI</div>', build: function(d){ return '<div class="hstat-lbl">' + d.tools_page.stat_roi + '</div>'; }},
+      {find: '<div class="hstat-lbl">PARIS</div>', build: function(d){ return '<div class="hstat-lbl">' + d.tools_page.stat_total + '</div>'; }},
+      {find: '<span class="capital-lbl">CAPITAL DE DÉPART</span>', build: function(d){ return '<span class="capital-lbl">' + d.tools_page.capital_start + '</span>'; }},
+      {find: '<span class="capital-lbl">CAPITAL ACTUEL</span>', build: function(d){ return '<span class="capital-lbl">' + d.tools_page.capital_current + '</span>'; }},
+      {find: '<button class="capital-edit-btn" id="capitalEditBtn" onclick="toggleCapitalEdit()">MODIFIER</button>', build: function(d){ return '<button class="capital-edit-btn" id="capitalEditBtn" onclick="toggleCapitalEdit()">' + d.tools_page.capital_edit + '</button>'; }},
+      {find: '<input type="number" id="capitalInput" placeholder="Ex: 1000">', build: function(d){ return '<input type="number" id="capitalInput" placeholder="' + d.tools_page.capital_placeholder + '">'; }},
+      {find: '<button class="sync-btn" onclick="saveCapital()">ENREGISTRER</button>', build: function(d){ return '<button class="sync-btn" onclick="saveCapital()">' + d.tools_page.capital_save + '</button>'; }},
+      {find: '<div class="day-summary" id="daySummary">🦈 <div>Chargement du résumé du jour...</div></div>', build: function(d, l, esc){ return '<div class="day-summary" id="daySummary">🦈 <div>' + esc(d.common.loading) + '</div></div>'; }},
+      {find: '<span class="capital-lbl">🧮 CALCULATEURS GRATUITS</span>', build: function(d, l, esc){ return '<span class="capital-lbl">' + esc(d.tools_page.free_calc_title) + '</span>'; }},
+      {find: '<div class="capital-lbl" style="margin-bottom:4px;">COTE DÉCIMALE</div>', count: 2, build: function(d){ return '<div class="capital-lbl" style="margin-bottom:4px;">' + d.tools_page.calc_odds_label + '</div>'; }},
+      {find: '<div class="capital-lbl" style="margin-bottom:4px;">PROBABILITÉ IMPLICITE (%)</div>', build: function(d){ return '<div class="capital-lbl" style="margin-bottom:4px;">' + d.tools_page.calc_prob_label + '</div>'; }},
+      {find: '<div class="capital-hint" style="color:var(--muted);font-size:9px;">Probabilité implicite = 100 / cote décimale — inclut la marge du bookmaker, ce n\'est pas une probabilité "juste" (fair).</div>',
+       build: function(d){ return '<div class="capital-hint" style="color:var(--muted);font-size:9px;">' + d.tools_page.calc_prob_hint + '</div>'; }},
+      {find: '<span class="capital-lbl">📐 MARGE BOOKMAKER (1X2)</span>', build: function(d, l, esc){ return '<span class="capital-lbl">' + esc(d.tools_page.margin_title) + '</span>'; }},
+      {find: 'placeholder="Cote 1"', build: function(d){ return 'placeholder="' + d.tools_page.margin_odds1 + '"'; }},
+      {find: 'placeholder="Cote N"', build: function(d){ return 'placeholder="' + d.tools_page.margin_oddsn + '"'; }},
+      {find: 'placeholder="Cote 2"', build: function(d){ return 'placeholder="' + d.tools_page.margin_odds2 + '"'; }},
+      {find: '<span class="capital-lbl">MARGE</span>', build: function(d){ return '<span class="capital-lbl">' + d.tools_page.margin_label + '</span>'; }},
+      {find: "margePct>=0?'(marge normale du bookmaker)':'(anomalie : somme des probabilités < 100%, vérifie les cotes saisies)'",
+       build: function(d, l, esc){ return "margePct>=0?'" + esc(d.tools_page.margin_hint_normal) + "':'" + esc(d.tools_page.margin_hint_anomaly) + "'"; }},
+      {find: "<button class=\"tab-btn active\" onclick=\"switchTab('selections',this)\">⭐ SÉLECTIONS</button>", build: function(d, l, esc){ return "<button class=\"tab-btn active\" onclick=\"switchTab('selections',this)\">⭐ " + esc(d.tools_page.tab_selections) + "</button>"; }},
+      {find: "<button class=\"tab-btn\" onclick=\"switchTab('suivi',this)\">📊 MON SUIVI</button>", build: function(d, l, esc){ return "<button class=\"tab-btn\" onclick=\"switchTab('suivi',this)\">📊 " + esc(d.tools_page.tab_tracking) + "</button>"; }},
+      {find: "<button class=\"tab-btn\" onclick=\"switchTab('calc',this)\">🧮 CALCULATEURS</button>", build: function(d, l, esc){ return "<button class=\"tab-btn\" onclick=\"switchTab('calc',this)\">🧮 " + esc(d.tools_page.tab_calculators) + "</button>"; }},
+      {find: '<span class="lock-badge">🔒 PROBA ≥ 70%</span>', build: function(d, l, esc){ return '<span class="lock-badge">🔒 ' + esc(d.tools_page.lock_badge) + '</span>'; }},
+      {find: '<option value="">Tous les marchés</option>', build: function(d){ return '<option value="">' + d.markets_page.filter_all_markets + '</option>'; }},
+      {find: '<option value="over25">Plus de 2,5 buts</option>', build: function(d){ return '<option value="over25">' + d.market_names.over25 + '</option>'; }},
+      {find: '<option value="under25">Moins de 2,5 buts</option>', build: function(d){ return '<option value="under25">' + d.market_names.under25 + '</option>'; }},
+      {find: '<option value="btts_oui">Les deux équipes marquent</option>', build: function(d){ return '<option value="btts_oui">' + d.market_names_natural.btts_oui_natural + '</option>'; }},
+      {find: '<option value="btts_non">Une équipe ne marque pas</option>', build: function(d){ return '<option value="btts_non">' + d.market_names_natural.btts_non_natural + '</option>'; }},
+      {find: '<option value="dc1x">DC 1X</option>', build: function(d){ return '<option value="dc1x">' + d.market_names.dc1x + '</option>'; }},
+      {find: '<option value="dc_x2">DC X2</option>', build: function(d){ return '<option value="dc_x2">' + d.market_names.dc_x2 + '</option>'; }},
+      {find: '<option value="conf">Trier : probabilité modèle</option>', build: function(d){ return '<option value="conf">' + d.tools_page.sort_by_prob + '</option>'; }},
+      {find: '<option value="cote">Trier : cote</option>', build: function(d){ return '<option value="cote">' + d.tools_page.sort_by_odds + '</option>'; }},
+      {find: '<option value="date">Trier : date</option>', build: function(d){ return '<option value="date">' + d.tools_page.sort_by_date + '</option>'; }},
+      {find: '<div id="selList"><div class="loading">CHARGEMENT...</div></div>', build: function(d, l, esc){ return '<div id="selList"><div class="loading">' + esc(d.common.loading) + '</div></div>'; }},
+      {find: 'Les paris suivis depuis Sélections se résolvent automatiquement.', build: function(d, l, esc){ return esc(d.tools_page.sync_status_default); }},
+      {find: '<span class="capital-lbl">🧮 MISE DE KELLY (FRACTIONNAIRE)</span>', build: function(d, l, esc){ return '<span class="capital-lbl">' + esc(d.tools_page.kelly_title) + '</span>'; }},
+      {find: '<div class="capital-lbl" style="margin-bottom:4px;">BANKROLL (€)</div>', build: function(d){ return '<div class="capital-lbl" style="margin-bottom:4px;">' + d.tools_page.kelly_bankroll + '</div>'; }},
+      {find: '<div class="capital-lbl" style="margin-bottom:4px;">PROBABILITÉ ESTIMÉE (%)</div>', build: function(d){ return '<div class="capital-lbl" style="margin-bottom:4px;">' + d.tools_page.kelly_prob + '</div>'; }},
+      {find: '<div class="capital-lbl" style="margin-bottom:4px;">FRACTION KELLY</div>', build: function(d){ return '<div class="capital-lbl" style="margin-bottom:4px;">' + d.tools_page.kelly_fraction + '</div>'; }},
+      {find: '<option value="0.25" selected>1/4 (prudent, standard)</option>', build: function(d){ return '<option value="0.25" selected>' + d.tools_page.kelly_frac_quarter + '</option>'; }},
+      {find: '<option value="0.5">1/2</option>', build: function(d){ return '<option value="0.5">' + d.tools_page.kelly_frac_half + '</option>'; }},
+      {find: '<option value="1">Plein (agressif)</option>', build: function(d){ return '<option value="1">' + d.tools_page.kelly_frac_full + '</option>'; }},
+      {find: '<span class="capital-lbl">MISE RECOMMANDÉE</span>', build: function(d){ return '<span class="capital-lbl">' + d.tools_page.kelly_result_stake + '</span>'; }},
+      {find: '<span class="capital-lbl">% DU BANKROLL</span>', build: function(d){ return '<span class="capital-lbl">' + d.tools_page.kelly_result_pct + '</span>'; }},
+      {find: '<span class="capital-lbl">EV (valeur espérée)</span>', build: function(d){ return '<span class="capital-lbl">' + d.tools_page.kelly_result_ev + '</span>'; }},
+      {find: '<div class="capital-hint" style="color:var(--muted);font-size:9px;">La probabilité que tu entres ici doit venir de ton propre jugement ou d\'une probabilité modèle IASHARK réelle (visible dans Sélections/Match) — ce calculateur ne fournit aucune probabilité, il applique seulement la formule de Kelly à ce que tu lui donnes. Mise plafonnée à 5% du bankroll par pari (même règle que le moteur), quel que soit l\'edge.</div>',
+       build: function(d){ return '<div class="capital-hint" style="color:var(--muted);font-size:9px;">' + d.tools_page.kelly_hint_static + '</div>'; }},
+      {find: '<span class="pw-top-lbl">CONTENU OUTILS</span>', build: function(d){ return '<span class="pw-top-lbl">' + d.tools_page.pw_badge + '</span>'; }},
+      {find: '<div class="pw-title">Accès <span>complet</span></div>', build: function(d){ var t = d.tools_page; return '<div class="pw-title">' + t.pw_title_pre + '<span>' + t.pw_title_hl + '</span></div>'; }},
+      {find: '<div class="pw-sub">Sélections à forte probabilité modèle, suivi automatique de tes paris, vérification de cote en un clic.</div>',
+       build: function(d, l, esc){ return '<div class="pw-sub">' + esc(d.tools_page.pw_sub) + '</div>'; }},
+      {find: '<div class="pw-feat-name">SÉLECTIONS PROBABILITÉ ≥ 70%</div><div class="pw-feat-desc">Les pronostics à plus forte probabilité modèle</div></div></div><span class="pw-badge">OUTILS</span></div>',
+       build: function(d, l, esc){ var t = d.tools_page; return '<div class="pw-feat-name">' + esc(t.pw_feat1_name) + '</div><div class="pw-feat-desc">' + esc(t.pw_feat1_desc) + '</div></div></div><span class="pw-badge">' + esc(d.nav.tools) + '</span></div>'; }},
+      {find: '<div class="pw-feat-name">SUIVI AUTOMATIQUE</div><div class="pw-feat-desc">Tracker de paris et résolution automatique</div></div></div><span class="pw-badge">OUTILS</span></div>',
+       build: function(d, l, esc){ var t = d.tools_page; return '<div class="pw-feat-name">' + esc(t.pw_feat2_name) + '</div><div class="pw-feat-desc">' + esc(t.pw_feat2_desc) + '</div></div></div><span class="pw-badge">' + esc(d.nav.tools) + '</span></div>'; }},
+      {find: '<a class="pw-cta" href="/compte.html">PASSER OUTILS →</a>', build: function(d, l, esc){ return '<a class="pw-cta" href="/compte.html">' + esc(d.tools_page.pw_cta) + '</a>'; }},
+      {find: '<div class="modal-title">Ajout rapide</div>', build: function(d){ return '<div class="modal-title">' + d.tools_page.modal_title + '</div>'; }},
+      {find: '<div class="modal-sub">Pour un pari pris sur le vif, sans passer par Sélections.</div>', build: function(d, l, esc){ return '<div class="modal-sub">' + esc(d.tools_page.modal_sub) + '</div>'; }},
+      {find: '<label>MATCH</label><input type="text" class="finput" id="mMatch" style="width:100%" placeholder="Ex: PSG vs OM">',
+       build: function(d){ var t = d.tools_page; return '<label>' + t.modal_match_label + '</label><input type="text" class="finput" id="mMatch" style="width:100%" placeholder="' + t.modal_match_placeholder + '">'; }},
+      {find: '<label>MARCHÉ</label><input type="text" class="finput" id="mMarket" style="width:100%" placeholder="BTTS Oui">',
+       build: function(d){ var t = d.tools_page; return '<label>' + t.modal_market_label + '</label><input type="text" class="finput" id="mMarket" style="width:100%" placeholder="' + t.modal_market_placeholder + '">'; }},
+      {find: '<label>COTE</label><input type="number" class="finput" id="mCote" style="width:100%" step="0.01" placeholder="1.90">',
+       build: function(d){ var t = d.tools_page; return '<label>' + t.modal_odds_label + '</label><input type="number" class="finput" id="mCote" style="width:100%" step="0.01" placeholder="' + t.modal_odds_placeholder + '">'; }},
+      {find: '<label>MISE (€)</label><input type="number" class="finput" id="mMise" style="width:100%" value="10">',
+       build: function(d){ return '<label>' + d.tools_page.modal_stake_label + '</label><input type="number" class="finput" id="mMise" style="width:100%" value="10">'; }},
+      {find: '<button class="btnvalid" style="width:100%;text-align:center;" onclick="addFromModal()">+ AJOUTER À MON SUIVI</button>',
+       build: function(d, l, esc){ return '<button class="btnvalid" style="width:100%;text-align:center;" onclick="addFromModal()">' + esc(d.tools_page.modal_add_btn) + '</button>'; }},
+      {find:
+        '    <div>⚠️ LE JEU PEUT ÊTRE DANGEREUX — JOUEZ RESPONSABLE · INTERDIT AUX MOINS DE 18 ANS</div>\n' +
+        '    <div>Aide : <a href="https://www.joueurs-info-service.fr" style="color:rgba(34,211,238,0.4);text-decoration:none;">joueurs-info-service.fr</a> · 09 74 75 13 13</div>',
+       build: function(d){
+        var f = d.footer;
+        return '    <div>⚠️ ' + f.disclaimer_warning + '</div>\n' +
+          '    <div>' + f.disclaimer_help_label + ' <a href="https://www.joueurs-info-service.fr" style="color:rgba(34,211,238,0.4);text-decoration:none;">' + f.disclaimer_help_site + '</a> · ' + f.disclaimer_help_phone + '</div>';
+      }},
+      {find: '<div class="nav-lbl">ACCUEIL</div>', build: function(d){ return '<div class="nav-lbl">' + d.nav.home + '</div>'; }},
+      {find: '<div class="nav-lbl">MARCHÉS</div>', build: function(d){ return '<div class="nav-lbl">' + d.nav.markets + '</div>'; }},
+      {find: '<div class="nav-lbl">HISTORIQUE</div>', build: function(d){ return '<div class="nav-lbl">' + d.nav.history + '</div>'; }},
+      {find: '<div class="nav-lbl">OUTILS</div>', build: function(d){ return '<div class="nav-lbl">' + d.nav.tools + '</div>'; }},
+      {find: '<div class="nav-lbl">GUIDES</div>', build: function(d){ return '<div class="nav-lbl">' + d.nav.guides + '</div>'; }},
+      {find: '<div class="nav-lbl">COMPTE</div>', build: function(d){ return '<div class="nav-lbl">' + d.nav.account + '</div>'; }},
+      {find: "document.getElementById('daySummary').innerHTML='🦈 <div>Aujourd\\'hui : <b>'+(todayCount||allMatchs.length)+' sélection'+((todayCount||allMatchs.length)>1?'s':'')+'</b> probabilité ≥70%'\n    +(pendingCount?' · <span class=\"cy\">'+pendingCount+' pari'+(pendingCount>1?'s':'')+'</span> en attente de résultat dans ton suivi.':' · aucun pari en attente.')\n    +'</div>';",
+       build: function(d, l, esc){
+        var t = d.tools_page;
+        return "document.getElementById('daySummary').innerHTML='🦈 <div>" + esc(t.day_today_prefix) + "<b>'+(todayCount||allMatchs.length)+' '+((todayCount||allMatchs.length)>1?'" + esc(t.selection_many) + "':'" + esc(t.selection_one) + "')+'</b>" + esc(t.day_prob_suffix) + "'\n    +(pendingCount?' · <span class=\"cy\">'+pendingCount+' '+(pendingCount>1?'" + esc(t.bet_many) + "':'" + esc(t.bet_one) + "')+'</span>" + esc(t.day_pending_suffix) + "':'" + esc(t.day_none_pending) + "')\n    +'</div>';";
+      }},
+      {find: "msgEl.textContent = 'Entre un montant valide.';", build: function(d, l, esc){ return "msgEl.textContent = '" + esc(d.tools_page.capital_msg_invalid) + "';"; }},
+      {find: "msgEl.textContent = 'Connecte-toi pour enregistrer ton capital.';", build: function(d, l, esc){ return "msgEl.textContent = '" + esc(d.tools_page.capital_msg_login) + "';"; }},
+      {find: "msgEl.textContent = 'Enregistrement...';", build: function(d, l, esc){ return "msgEl.textContent = '" + esc(d.tools_page.capital_msg_saving) + "';"; }},
+      {find: "msgEl.textContent = 'Capital enregistré.';", build: function(d, l, esc){ return "msgEl.textContent = '" + esc(d.tools_page.capital_msg_saved) + "';"; }},
+      {find: "msgEl.textContent = 'Erreur : '+(e.message||'réessaie');", build: function(d, l, esc){ return "msgEl.textContent = '" + esc(d.tools_page.capital_msg_error_prefix) + "'+(e.message||'réessaie');"; }},
+      {find: "document.getElementById('capitalVal').textContent = Number(capital).toLocaleString('fr-FR')+' €';\n    document.getElementById('capitalInput').placeholder = 'Modifier ('+capital+'€ actuellement)';",
+       build: function(d, l, esc){
+        var t = d.tools_page;
+        return "document.getElementById('capitalVal').textContent = Number(capital).toLocaleString('fr-FR')+' €';\n    document.getElementById('capitalInput').placeholder = '" + esc(t.capital_edit_placeholder_prefix) + "'+capital+'" + esc(t.capital_edit_placeholder_suffix) + "';";
+      }},
+      {find: "document.getElementById('capitalHint').textContent = pnl===0 ? '(aucun pari résolu encore)' : '('+(pnl>0?'+':'')+Math.round(pnl)+'€ sur tes paris suivis)';",
+       build: function(d, l, esc){
+        var t = d.tools_page;
+        return "document.getElementById('capitalHint').textContent = pnl===0 ? '" + esc(t.capital_hint_none) + "' : '('+(pnl>0?'+':'')+Math.round(pnl)+'" + esc(t.capital_hint_pnl_suffix) + "';";
+      }},
+      {find: "document.getElementById('capitalVal').textContent = 'Non renseigné';", build: function(d, l, esc){ return "document.getElementById('capitalVal').textContent = '" + esc(d.tools_page.capital_not_set) + "';"; }},
+      {find: "document.getElementById('kellyEvVal').textContent=(ev>=0?'+':'')+(ev*100).toFixed(1)+'% par unité misée';",
+       build: function(d, l, esc){ return "document.getElementById('kellyEvVal').textContent=(ev>=0?'+':'')+(ev*100).toFixed(1)+'" + esc(d.tools_page.kelly_ev_suffix) + "';"; }},
+      {find: "document.getElementById('kellyMiseVal').textContent='0 € (aucun edge)';\n    document.getElementById('kellyPctVal').textContent='0%';\n    document.getElementById('kellyHint').textContent=\"À cette cote et cette probabilité, le calcul de Kelly ne recommande aucune mise (pas d'avantage mathématique) — parier ici reviendrait à un pari négatif en espérance.\";",
+       build: function(d, l, esc){
+        var t = d.tools_page;
+        return "document.getElementById('kellyMiseVal').textContent='" + esc(t.kelly_no_edge_stake) + "';\n    document.getElementById('kellyPctVal').textContent='0%';\n    document.getElementById('kellyHint').textContent=\"" + esc(t.kelly_no_edge_hint) + "\";";
+      }},
+      {find: "document.getElementById('kellyHint').textContent=pct>=5?'Plafonné à 5% du bankroll par pari (même règle que le moteur), même si le Kelly plein calculé est supérieur.':'Kelly '+(fraction===1?'plein':fraction===0.5?'demi':'quart')+' appliqué sur un edge réel détecté par la formule.';",
+       build: function(d, l, esc){
+        var t = d.tools_page;
+        return "document.getElementById('kellyHint').textContent=pct>=5?'" + esc(t.kelly_capped_hint) + "':'" + esc(t.kelly_applied_prefix) + "'+(fraction===1?'" + esc(t.kelly_frac_full_word) + "':fraction===0.5?'" + esc(t.kelly_frac_half_word) + "':'" + esc(t.kelly_frac_quarter_word) + "')+'" + esc(t.kelly_applied_suffix) + "';";
+      }},
+      {find: "document.getElementById('selCount').textContent=list.length+' sélection'+(list.length>1?'s':'');",
+       build: function(d, l, esc){
+        var t = d.tools_page;
+        return "document.getElementById('selCount').textContent=list.length+' '+(list.length>1?'" + esc(t.selection_many) + "':'" + esc(t.selection_one) + "');";
+      }},
+      {find: "document.getElementById('selList').innerHTML='<div class=\"empty-hint\">Aucune sélection pour ce filtre aujourd\\'hui.</div>';",
+       build: function(d, l, esc){ return "document.getElementById('selList').innerHTML='<div class=\"empty-hint\">" + esc(d.tools_page.empty_no_selection) + "</div>';"; }},
+      {find: "+'<div class=\"cbadge '+cc+'\" title=\"Probabilité modèle\">'+modelProbPct+'%</div>'\n      +'<button class=\"btn-follow'+(isFollowed?' done':'')+'\" id=\"followbtn-'+m.id+'\" onclick=\"togglePanel('+m.id+')\">'+(isFollowed?'✓ SUIVI':'GÉRER ▾')+'</button>'",
+       build: function(d, l, esc){
+        var t = d.tools_page;
+        return "+'<div class=\"cbadge '+cc+'\" title=\"" + esc(t.model_prob_title) + "\">'+modelProbPct+'%</div>'\n      +'<button class=\"btn-follow'+(isFollowed?' done':'')+'\" id=\"followbtn-'+m.id+'\" onclick=\"togglePanel('+m.id+')\">'+(isFollowed?'" + esc(t.btn_followed) + "':'" + esc(t.btn_manage) + "')+'</button>'";
+      }},
+      {find: "+'<button class=\"chip active\" data-chip=\"suivre\" onclick=\"setChip('+m.id+',\\'suivre\\',this)\">SUIVRE CE PARI</button>'\n      +'<button class=\"chip\" data-chip=\"cote\" onclick=\"setChip('+m.id+',\\'cote\\',this)\">VÉRIFIER UNE COTE</button>'\n      +'<button class=\"chip\" data-chip=\"note\" onclick=\"setChip('+m.id+',\\'note\\',this)\">AJOUTER UNE NOTE</button>'",
+       build: function(d, l, esc){
+        var t = d.tools_page;
+        return "+'<button class=\"chip active\" data-chip=\"suivre\" onclick=\"setChip('+m.id+',\\'suivre\\',this)\">" + esc(t.chip_follow) + "</button>'\n      +'<button class=\"chip\" data-chip=\"cote\" onclick=\"setChip('+m.id+',\\'cote\\',this)\">" + esc(t.chip_check_odds) + "</button>'\n      +'<button class=\"chip\" data-chip=\"note\" onclick=\"setChip('+m.id+',\\'note\\',this)\">" + esc(t.chip_add_note) + "</button>'";
+      }},
+      {find: "+(suggMise?'<div class=\"mise-sugg-hint\">🎯 Mise conseillée sur ta bankroll actuelle : <b>'+suggMise+'€</b></div>':'')",
+       build: function(d, l, esc){ return "+(suggMise?'<div class=\"mise-sugg-hint\">🎯 " + esc(d.tools_page.mise_sugg_prefix) + "<b>'+suggMise+'€</b></div>':'')"; }},
+      {find: "+'<div class=\"fg\"><label>MISE (€)</label><input type=\"number\" class=\"finput\" id=\"mise-'+m.id+'\" value=\"'+miseDefault+'\" style=\"width:80px\"></div>'",
+       build: function(d, l, esc){ return "+'<div class=\"fg\"><label>" + esc(d.tools_page.modal_stake_label) + "</label><input type=\"number\" class=\"finput\" id=\"mise-'+m.id+'\" value=\"'+miseDefault+'\" style=\"width:80px\"></div>'"; }},
+      {find: "+'<button class=\"btnvalid\" onclick=\"confirmFollow('+m.id+')\">✓ AJOUTER À MON SUIVI</button>'",
+       build: function(d, l, esc){ return "+'<button class=\"btnvalid\" onclick=\"confirmFollow('+m.id+')\">" + esc(d.tools_page.modal_add_btn) + "</button>'"; }},
+      {find: "+'<div class=\"fg\"><label>COTE VUE AILLEURS</label><input type=\"number\" step=\"0.01\" class=\"finput\" id=\"book-'+m.id+'\" placeholder=\"ex: 1.75\" oninput=\"calcEdge('+m.id+')\"></div>'",
+       build: function(d, l, esc){
+        var t = d.tools_page;
+        return "+'<div class=\"fg\"><label>" + esc(t.lbl_odds_seen_elsewhere) + "</label><input type=\"number\" step=\"0.01\" class=\"finput\" id=\"book-'+m.id+'\" placeholder=\"" + esc(t.placeholder_odds_example) + "\" oninput=\"calcEdge('+m.id+')\"></div>'";
+      }},
+      {find: "+'<textarea class=\"ntextarea\" id=\"note-'+m.id+'\" placeholder=\"Pourquoi ce pari t\\'intéresse, ce que tu observes...\">'+(note||'')+'</textarea>'\n      +'<button class=\"btnvalid\" onclick=\"saveSelNote('+m.id+')\">✓ ENREGISTRER LA NOTE</button>'",
+       build: function(d, l, esc){
+        var t = d.tools_page;
+        return "+'<textarea class=\"ntextarea\" id=\"note-'+m.id+'\" placeholder=\"" + esc(t.note_placeholder_sel) + "\">'+(note||'')+'</textarea>'\n      +'<button class=\"btnvalid\" onclick=\"saveSelNote('+m.id+')\">" + esc(t.btn_save_note) + "</button>'";
+      }},
+      {find: "el.innerHTML='Proba modèle <b>'+probIA+'%</b> vs proba cote <b>'+probImpl.toFixed(1)+'%</b> — avantage de <b style=\"color:'+(edge>0?'var(--green)':'var(--red)')+'\">'+(edge>0?'+':'')+edge+'%</b>. '+(edge>0?'Cote intéressante par rapport au modèle.':'Le modèle ne voit pas d\\'avantage à cette cote.');",
+       build: function(d, l, esc){
+        var t = d.tools_page;
+        return "el.innerHTML='" + esc(t.edge_prefix) + "<b>'+probIA+'" + esc(t.edge_mid) + "<b>'+probImpl.toFixed(1)+'" + esc(t.edge_suffix) + "<b style=\"color:'+(edge>0?'var(--green)':'var(--red)')+'\">'+(edge>0?'+':'')+edge+'" + esc(t.edge_close) + "'+(edge>0?'" + esc(t.edge_positive) + "':'" + esc(t.edge_negative) + "');";
+      }},
+      {find: "showToast('Note enregistrée sur ce match');", build: function(d, l, esc){ return "showToast('" + esc(d.tools_page.toast_note_saved_sel) + "');"; }},
+      {find: "if(PARIS.some(function(p){return p.fixtureId===id;})){showToast('Déjà suivi');return;}", build: function(d, l, esc){ return "if(PARIS.some(function(p){return p.fixtureId===id;})){showToast('" + esc(d.tools_page.toast_already_tracked) + "');return;}"; }},
+      {find: "showToast('Ajouté à Mon suivi — se résoudra automatiquement');", build: function(d, l, esc){ return "showToast('" + esc(d.tools_page.toast_added_tracking) + "');"; }},
+      {find: "'<div class=\"tstat\"><div class=\"tstat-lbl\">WINRATE</div><div class=\"tstat-val\" id=\"twr\">—</div></div>'\n    +'<div class=\"tstat\"><div class=\"tstat-lbl\">ROI</div><div class=\"tstat-val\" id=\"troi\">—</div></div>'\n    +'<div class=\"tstat\"><div class=\"tstat-lbl\">BILAN</div><div class=\"tstat-val cyan\" id=\"tbilan\">—</div></div>'\n    +'<div class=\"tstat\"><div class=\"tstat-lbl\">EN ATTENTE</div><div class=\"tstat-val\">'+pendingCount+'</div></div>';",
+       build: function(d, l, esc){
+        var t = d.tools_page;
+        return "'<div class=\"tstat\"><div class=\"tstat-lbl\">" + esc(t.tstat_winrate) + "</div><div class=\"tstat-val\" id=\"twr\">—</div></div>'\n    +'<div class=\"tstat\"><div class=\"tstat-lbl\">" + esc(t.tstat_roi) + "</div><div class=\"tstat-val\" id=\"troi\">—</div></div>'\n    +'<div class=\"tstat\"><div class=\"tstat-lbl\">" + esc(t.tstat_balance) + "</div><div class=\"tstat-val cyan\" id=\"tbilan\">—</div></div>'\n    +'<div class=\"tstat\"><div class=\"tstat-lbl\">" + esc(t.tstat_pending) + "</div><div class=\"tstat-val\">'+pendingCount+'</div></div>';";
+      }},
+      {find: "?'<span class=\"result-lbl\" style=\"color:var(--muted)\">EN ATTENTE</span>'", build: function(d, l, esc){ return "?'<span class=\"result-lbl\" style=\"color:var(--muted)\">" + esc(d.tools_page.result_pending) + "</span>'"; }},
+      {find: "resultHtml='<span class=\"result-lbl\" style=\"color:'+color+'\">'+(p.result==='win'?'GAGNÉ':'PERDU')+(p.score?' ('+p.score+')':'')+'</span>';",
+       build: function(d, l, esc){
+        var t = d.tools_page;
+        return "resultHtml='<span class=\"result-lbl\" style=\"color:'+color+'\">'+(p.result==='win'?'" + esc(t.result_won) + "':'" + esc(t.result_lost) + "')+(p.score?' ('+p.score+')':'')+'</span>';";
+      }},
+      {find: "var srcTag=p.source==='auto'?'<span class=\"src-tag src-auto\">🔄 AUTO</span>':'<span class=\"src-tag src-manual\">✎ MANUEL</span>';",
+       build: function(d, l, esc){
+        var t = d.tools_page;
+        return "var srcTag=p.source==='auto'?'<span class=\"src-tag src-auto\">" + esc(t.src_auto) + "</span>':'<span class=\"src-tag src-manual\">" + esc(t.src_manual) + "</span>';";
+      }},
+      {find: "+'<textarea class=\"ntextarea\" id=\"note-input-'+p.id+'\" placeholder=\"Ta note sur ce pari...\">'+p.note+'</textarea>'\n      +'<button class=\"btnvalid\" onclick=\"saveBetNote('+p.id+')\">✓ ENREGISTRER</button>'",
+       build: function(d, l, esc){
+        var t = d.tools_page;
+        return "+'<textarea class=\"ntextarea\" id=\"note-input-'+p.id+'\" placeholder=\"" + esc(t.note_placeholder_bet) + "\">'+p.note+'</textarea>'\n      +'<button class=\"btnvalid\" onclick=\"saveBetNote('+p.id+')\">" + esc(t.btn_save) + "</button>'";
+      }},
+      {find: "'<div class=\"empty-hint\">Aucun pari suivi. Va dans Sélections et clique \"GÉRER\" sur une ligne pour commencer.</div>'",
+       build: function(d, l, esc){ return "'<div class=\"empty-hint\">" + esc(d.tools_page.empty_no_bets) + "</div>'"; }},
+      {find: "showToast('Note enregistrée sur ce pari');", build: function(d, l, esc){ return "showToast('" + esc(d.tools_page.toast_note_saved_bet) + "');"; }},
+      {find: "if(!confirm('Supprimer ce pari de ton suivi ?'))return;", build: function(d, l, esc){ return "if(!confirm('" + esc(d.tools_page.confirm_delete_bet) + "'))return;"; }},
+      {find: "btn.innerHTML='<span class=\"spin\"></span>SYNCHRO...';\n  status.innerHTML='Lecture de historique.json...';",
+       build: function(d, l, esc){
+        var t = d.tools_page;
+        return "btn.innerHTML='<span class=\"spin\"></span>" + esc(t.sync_btn_syncing) + "';\n  status.innerHTML='" + esc(t.sync_reading) + "';";
+      }},
+      {find: "status.innerHTML=n>0?'<b>'+n+' pari(s)</b> résolu(s) automatiquement — 0 clic nécessaire.':'Rien de nouveau à résoudre pour l\\'instant.';\n    showToast(n>0?n+' résultat(s) synchronisés':'Aucun nouveau résultat');",
+       build: function(d, l, esc){
+        var t = d.tools_page;
+        return "status.innerHTML=n>0?'" + esc(t.sync_result_prefix) + "'+n+'" + esc(t.sync_result_mid) + "':'" + esc(t.sync_nothing_new) + "';\n    showToast(n>0?n+'" + esc(t.toast_sync_suffix) + "':'" + esc(t.toast_sync_none) + "');";
+      }},
+      {find: "status.innerHTML='Synchronisation indisponible pour le moment — réessaie plus tard.';", build: function(d, l, esc){ return "status.innerHTML='" + esc(d.tools_page.sync_unavailable) + "';"; }},
+      {find: "btn.innerHTML='🔄 SYNCHRONISER';", build: function(d, l, esc){ return "btn.innerHTML='" + esc(d.tools_page.sync_btn_default) + "';"; }},
+      {find: "showToast('Pari ajouté depuis l\\'ajout rapide');", build: function(d, l, esc){ return "showToast('" + esc(d.tools_page.toast_modal_added) + "');"; }},
+      {find: "+'<div class=\"bet-info\"><div class=\"mname\">'+p.match+srcTag+'</div><div class=\"mleague\">'+p.market+' · cote '+p.cote.toFixed(2)+' · '+p.mise+'€</div></div>'",
+       build: function(d, l, esc){ return "+'<div class=\"bet-info\"><div class=\"mname\">'+p.match+srcTag+'</div><div class=\"mleague\">'+p.market+' · " + esc(d.tools_page.bet_odds_label) + "'+p.cote.toFixed(2)+' · '+p.mise+'€</div></div>'"; }},
+      {find: "if(s.includes('over 2.5'))return 'Plus de 2,5 buts';\n  if(s.includes('under 2.5'))return 'Moins de 2,5 buts';\n  if(s.includes('over 1.5'))return 'Plus de 1,5 but';\n  if(s.includes('btts non')||s.includes('une équipe ne marque'))return 'Une équipe ne marque pas';\n  if(s.includes('btts')||s.includes('les deux équipes'))return 'Les deux équipes marquent';\n  if(s.includes('dc 1x')||s.includes('1x'))return 'DC 1X';\n  if(s.includes('dc x2')||s.includes('x2'))return 'DC X2';",
+       build: function(d, l, esc){
+        var n = d.market_names, nat = d.market_names_natural;
+        return "if(s.includes('over 2.5'))return '" + esc(n.over25) + "';\n  if(s.includes('under 2.5'))return '" + esc(n.under25) + "';\n  if(s.includes('over 1.5'))return '" + esc(n.over15) + "';\n  if(s.includes('btts non')||s.includes('une équipe ne marque'))return '" + esc(nat.btts_non_natural) + "';\n  if(s.includes('btts')||s.includes('les deux équipes'))return '" + esc(nat.btts_oui_natural) + "';\n  if(s.includes('dc 1x')||s.includes('1x'))return '" + esc(n.dc1x) + "';\n  if(s.includes('dc x2')||s.includes('x2'))return '" + esc(n.dc_x2) + "';";
       }}
     ]
   }

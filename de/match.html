@@ -591,16 +591,16 @@ function parseEdgeText(edgeStr){
 function translateMarket(raw){
   if(!raw)return raw;
   var s=String(raw).toLowerCase();
-  if(s.includes('over 2.5'))return 'Plus de 2,5 buts';
-  if(s.includes('under 2.5'))return 'Moins de 2,5 buts';
-  if(s.includes('over 1.5'))return 'Plus de 1,5 but';
-  if(s.includes('under 1.5'))return 'Moins de 1,5 but';
-  if(s.includes('over 3.5'))return 'Plus de 3,5 buts';
-  if(s.includes('btts oui')||s.includes('btts yes'))return 'Les deux équipes marquent';
-  if(s.includes('btts non')||s.includes('btts no'))return 'Une équipe ne marque pas';
-  if(s.includes('dc 1x')||s==='1x')return 'Victoire ou nul (domicile)';
-  if(s.includes('dc x2')||s==='x2')return 'Victoire ou nul (extérieur)';
-  if(s.includes('match winner')||s==='1')return 'Victoire à domicile';
+  if(s.includes('over 2.5'))return 'Über 2,5 Tore';
+  if(s.includes('under 2.5'))return 'Unter 2,5 Tore';
+  if(s.includes('over 1.5'))return 'Über 1,5 Tore';
+  if(s.includes('under 1.5'))return 'Unter 1,5 Tore';
+  if(s.includes('over 3.5'))return 'Über 3,5 Tore';
+  if(s.includes('btts oui')||s.includes('btts yes'))return 'Beide Teams treffen';
+  if(s.includes('btts non')||s.includes('btts no'))return 'Ein Team trifft nicht';
+  if(s.includes('dc 1x')||s==='1x')return 'Sieg oder Unentschieden (Heim)';
+  if(s.includes('dc x2')||s==='x2')return 'Sieg oder Unentschieden (Auswärts)';
+  if(s.includes('match winner')||s==='1')return 'Heimsieg';
   return raw;
 }
 

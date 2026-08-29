@@ -591,16 +591,16 @@ function parseEdgeText(edgeStr){
 function translateMarket(raw){
   if(!raw)return raw;
   var s=String(raw).toLowerCase();
-  if(s.includes('over 2.5'))return 'Plus de 2,5 buts';
-  if(s.includes('under 2.5'))return 'Moins de 2,5 buts';
-  if(s.includes('over 1.5'))return 'Plus de 1,5 but';
-  if(s.includes('under 1.5'))return 'Moins de 1,5 but';
-  if(s.includes('over 3.5'))return 'Plus de 3,5 buts';
-  if(s.includes('btts oui')||s.includes('btts yes'))return 'Les deux équipes marquent';
-  if(s.includes('btts non')||s.includes('btts no'))return 'Une équipe ne marque pas';
-  if(s.includes('dc 1x')||s==='1x')return 'Victoire ou nul (domicile)';
-  if(s.includes('dc x2')||s==='x2')return 'Victoire ou nul (extérieur)';
-  if(s.includes('match winner')||s==='1')return 'Victoire à domicile';
+  if(s.includes('over 2.5'))return 'Mais de 2,5 golos';
+  if(s.includes('under 2.5'))return 'Menos de 2,5 golos';
+  if(s.includes('over 1.5'))return 'Mais de 1,5 golo';
+  if(s.includes('under 1.5'))return 'Menos de 1,5 golo';
+  if(s.includes('over 3.5'))return 'Mais de 3,5 golos';
+  if(s.includes('btts oui')||s.includes('btts yes'))return 'Ambas as equipas marcam';
+  if(s.includes('btts non')||s.includes('btts no'))return 'Uma equipa não marca';
+  if(s.includes('dc 1x')||s==='1x')return 'Vence ou empata (casa)';
+  if(s.includes('dc x2')||s==='x2')return 'Vence ou empata (fora)';
+  if(s.includes('match winner')||s==='1')return 'Vitória casa';
   return raw;
 }
 

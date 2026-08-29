@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>IASHARK FERRAMENTAS</title>
+<meta name="description" content="Seleções com alta probabilidade de modelo, registo automático de apostas e verificação de odd num clique — o espaço Ferramentas do IASHARK.">
+<meta property="og:title" content="IASHARK FERRAMENTAS">
+<meta property="og:description" content="Seleções com alta probabilidade de modelo, registo automático de apostas e verificação de odd num clique — o espaço Ferramentas do IASHARK.">
+<meta property="og:type" content="website">
+<link rel="canonical" href="https://iashark.com/pt/pro.html">
+<link rel="alternate" hreflang="fr" href="https://iashark.com/fr/pro.html">
+<link rel="alternate" hreflang="en" href="https://iashark.com/en/pro.html">
+<link rel="alternate" hreflang="es" href="https://iashark.com/es/pro.html">
+<link rel="alternate" hreflang="de" href="https://iashark.com/de/pro.html">
+<link rel="alternate" hreflang="it" href="https://iashark.com/it/pro.html">
+<link rel="alternate" hreflang="pt" href="https://iashark.com/pt/pro.html">
+<link rel="alternate" hreflang="x-default" href="https://iashark.com/fr/pro.html">
+<meta property="og:url" content="https://iashark.com/pt/pro.html">
+<meta property="og:image" content="https://iashark.com/icon-512.png">
+<meta name="twitter:card" content="summary_large_image">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<style>
+:root{
+  --bg:#080c12;--card:#0d1520;--card2:#0f1a28;
+  --cyan:#22d3ee;--cyan2:#06b6d4;
+  --amber:#f59e0b;--green:#10b981;--red:#ef4444;
+  --text:#e2e8f0;--muted:#4a6580;
+  --border:rgba(255,255,255,0.06);
+  --bc:rgba(34,211,238,0.18);--ba:rgba(245,158,11,0.2);
+  --bg:rgba(16,185,129,0.2);--br:rgba(239,68,68,0.2);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:#080c12;color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;padding-bottom:70px;}
+.hdr{position:sticky;top:0;z-index:99;background:rgba(8,12,18,0.96);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);padding:0 20px;height:56px;display:flex;align-items:center;justify-content:space-between;}
+.logo{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:3px;color:var(--text);text-decoration:none;}
+.logo span{color:var(--cyan);}
+.pro-pill{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:2px;padding:4px 12px;border-radius:20px;background:rgba(245,158,11,0.1);border:1px solid var(--ba);color:var(--amber);}
+.btn-login{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1px;padding:6px 14px;border-radius:8px;border:1px solid rgba(34,211,238,0.3);background:rgba(34,211,238,0.06);color:var(--cyan);cursor:pointer;transition:.2s;text-decoration:none;display:inline-flex;align-items:center;}
+.btn-login:hover{background:rgba(34,211,238,0.12);}
+.main{max-width:920px;margin:0 auto;padding:24px 20px;}
+.pro-wall{position:relative;border-radius:14px;}
+.pro-wall.locked{max-height:460px;overflow:hidden;}
+.pro-wall.locked .pro-wall-inner{filter:blur(5px);pointer-events:none;user-select:none;opacity:.22;}
+.pro-wall-overlay{position:absolute;inset:0;display:none;flex-direction:column;z-index:10;background:linear-gradient(180deg,rgba(8,12,18,0.05) 0%,rgba(8,12,18,0.92) 28%,rgba(8,12,18,0.99) 50%);}
+.pro-wall.locked .pro-wall-overlay{display:flex;}
+.pw-top{background:rgba(255,255,255,0.015);border-bottom:1px solid rgba(255,255,255,0.04);padding:12px 18px;display:flex;align-items:center;justify-content:space-between;}
+.pw-top-lbl{font-family:'Space Mono',monospace;font-size:8px;color:var(--amber);letter-spacing:3px;}
+.pw-body{padding:18px 18px 0;}
+.pw-title{font-family:'Bebas Neue',sans-serif;font-size:26px;color:#f1f5f9;letter-spacing:2px;margin-bottom:4px;}
+.pw-title span{color:var(--amber);}
+.pw-sub{font-size:11px;color:rgba(148,163,184,0.55);line-height:1.5;margin-bottom:14px;}
+.pw-feats{display:flex;flex-direction:column;}
+.pw-feat{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.03);gap:10px;}
+.pw-feat:last-child{border-bottom:none;}
+.pw-feat-l{display:flex;align-items:flex-start;gap:8px;flex:1;}
+.pw-feat-name{font-family:'Space Mono',monospace;font-size:9px;color:var(--amber);letter-spacing:1px;margin-bottom:2px;font-weight:700;}
+.pw-feat-desc{font-size:10px;color:rgba(148,163,184,0.45);line-height:1.4;}
+.pw-badge{font-family:'Space Mono',monospace;font-size:6px;letter-spacing:1px;padding:2px 6px;border-radius:3px;white-space:nowrap;flex-shrink:0;background:rgba(245,158,11,0.06);color:rgba(245,158,11,0.5);border:1px solid rgba(245,158,11,0.12);}
+.pw-cta-wrap{padding:14px 18px 18px;}
+.pw-cta{width:100%;background:var(--amber);color:#1a1200;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:2px;font-weight:700;padding:13px;border:none;border-radius:9px;cursor:pointer;text-align:center;display:block;text-decoration:none;}
+.pro-hero{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;padding:20px 24px;background:rgba(245,158,11,0.04);border:1px solid var(--ba);border-radius:16px;flex-wrap:wrap;gap:14px;}
+.pro-hero h1{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:2px;margin-bottom:4px;}
+.pro-hero h1 span{color:var(--amber);}
+.pro-hero p{font-size:13px;color:var(--muted);}
+.hero-stats{display:flex;gap:28px;}
+.hstat{text-align:center;}
+.hstat-val{font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--cyan);}
+.hstat-lbl{font-family:'Space Mono',monospace;font-size:7px;color:var(--muted);letter-spacing:1px;margin-top:1px;}
+
+.day-summary{background:linear-gradient(135deg,rgba(245,158,11,0.06),rgba(245,158,11,0.01));border:1px solid var(--ba);border-radius:14px;padding:14px 18px;margin-bottom:18px;display:flex;align-items:center;gap:12px;font-size:13px;line-height:1.5;}
+.day-summary b{color:var(--amber);}
+.day-summary .cy{color:var(--cyan);}
+
+.capital-bar{display:none;flex-direction:column;gap:8px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px 16px;margin-bottom:14px;}
+.capital-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.capital-lbl{font-family:'Space Mono',monospace;font-size:8px;color:var(--muted);letter-spacing:1px;}
+.capital-val{font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--text);}
+.capital-val.cyan{color:var(--cyan);}
+.capital-hint{font-family:'Space Mono',monospace;font-size:8.5px;color:var(--muted);}
+.capital-edit-btn{margin-left:auto;padding:8px 12px;border-radius:8px;border:1px solid var(--bc);background:rgba(34,211,238,0.08);color:var(--cyan);font-family:'Space Mono',monospace;font-size:8.5px;letter-spacing:1px;cursor:pointer;}
+.capital-edit-form{display:none;gap:8px;width:100%;margin-top:10px;}
+.capital-edit-form.open{display:flex;}
+.capital-edit-form input{flex:1;background:var(--card2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;padding:8px 10px;outline:none;}
+.capital-msg{font-size:11.5px;color:var(--muted);width:100%;margin-top:6px;}
+
+.tabs{display:flex;gap:4px;margin-bottom:20px;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:12px;padding:4px;}
+.tab-btn{flex:1;padding:10px 8px;border-radius:9px;border:none;background:transparent;color:var(--muted);font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1px;cursor:pointer;transition:.2s;white-space:nowrap;}
+.tab-btn.active{background:var(--card2);color:var(--text);border:1px solid var(--bc);}
+.tab-section{display:none;}
+.tab-section.active{display:block;}
+
+.sel-toolbar{display:flex;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap;}
+.lock-badge{font-family:'Space Mono',monospace;font-size:7px;letter-spacing:1px;padding:3px 9px;border-radius:20px;background:rgba(245,158,11,0.08);border:1px solid var(--ba);color:var(--amber);}
+.fsel{background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Space Mono',monospace;font-size:9px;padding:8px 10px;cursor:pointer;outline:none;}
+.sel-count{font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);margin-left:auto;}
+
+.card-item{background:var(--card);border:1px solid var(--border);border-radius:14px;margin-bottom:10px;overflow:hidden;}
+.card-top{display:flex;align-items:center;gap:12px;padding:14px 16px;flex-wrap:wrap;}
+.card-info{flex:1;min-width:160px;}
+.mname{font-weight:500;font-size:14px;}
+.mleague{font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);margin-top:3px;}
+.cote-v{font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--amber);flex-shrink:0;}
+.cbadge{display:inline-block;padding:3px 9px;border-radius:20px;font-family:'Bebas Neue',sans-serif;font-size:14px;flex-shrink:0;}
+.c8{color:var(--amber);background:rgba(245,158,11,0.08);border:1px solid var(--ba);}
+.c7{color:var(--cyan);background:rgba(34,211,238,0.06);border:1px solid var(--bc);}
+.btn-follow{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:1px;padding:8px 12px;border-radius:8px;border:1px solid var(--bc);background:rgba(34,211,238,0.08);color:var(--cyan);cursor:pointer;transition:.2s;white-space:nowrap;flex-shrink:0;}
+.btn-follow:hover{background:rgba(34,211,238,0.18);}
+.btn-follow.done{border-color:rgba(16,185,129,0.3);background:rgba(16,185,129,0.08);color:var(--green);}
+
+.panel{display:none;border-top:1px solid var(--border);background:rgba(34,211,238,0.02);padding:14px 16px;}
+.panel.open{display:block;}
+.chip-row{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;}
+.chip{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:1px;padding:6px 12px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:.2s;}
+.chip.active{background:rgba(34,211,238,0.1);border-color:var(--bc);color:var(--cyan);}
+.subpanel{display:none;}
+.subpanel.open{display:block;}
+.row-flex{display:flex;align-items:end;gap:8px;flex-wrap:wrap;}
+.mise-sugg-hint{font-size:11.5px;color:var(--muted);margin-bottom:8px;}
+.mise-sugg-hint b{color:var(--cyan);}
+.fg label{display:block;font-family:'Space Mono',monospace;font-size:8px;letter-spacing:1px;color:var(--muted);margin-bottom:5px;}
+.finput{background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;width:100px;}
+.finput:focus{border-color:var(--cyan);}
+.qm-btn{font-family:'Space Mono',monospace;font-size:9px;padding:6px 10px;border-radius:6px;border:1px solid var(--border);background:rgba(255,255,255,0.03);color:var(--muted);cursor:pointer;}
+.qm-btn.active{border-color:var(--bc);color:var(--cyan);background:rgba(34,211,238,0.06);}
+.btnvalid{padding:8px 14px;border-radius:8px;border:1px solid rgba(16,185,129,0.3);background:rgba(16,185,129,0.1);color:var(--green);font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1px;cursor:pointer;}
+.edge-result{margin-top:10px;padding:10px 12px;border-radius:8px;font-size:12.5px;line-height:1.5;display:none;}
+.edge-result.show{display:block;}
+.edge-result.pos{background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.2);color:#94a3b8;}
+.edge-result.neg{background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.2);color:#94a3b8;}
+.edge-result b{color:var(--text);}
+.ntextarea{width:100%;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:8px;padding:9px 11px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;resize:vertical;min-height:70px;outline:none;margin-bottom:8px;line-height:1.6;}
+.ntextarea:focus{border-color:var(--cyan);}
+.saved-note{background:rgba(255,255,255,0.03);border-left:2px solid var(--cyan);border-radius:0 8px 8px 0;padding:8px 12px;font-size:12.5px;color:#94a3b8;line-height:1.5;margin-top:8px;}
+
+.tstats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;}
+.tstat{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 16px;}
+.tstat-lbl{font-family:'Space Mono',monospace;font-size:7px;letter-spacing:2px;color:var(--muted);margin-bottom:6px;}
+.tstat-val{font-family:'Bebas Neue',sans-serif;font-size:24px;line-height:1;}
+.green{color:var(--green)!important;}
+.red{color:var(--red)!important;}
+.amber{color:var(--amber)!important;}
+.cyan{color:var(--cyan)!important;}
+
+.sync-bar{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px 16px;margin-bottom:14px;flex-wrap:wrap;}
+.sync-btn{padding:9px 14px;border-radius:8px;border:1px solid var(--bc);background:rgba(34,211,238,0.08);color:var(--cyan);font-family:'Space Mono',monospace;font-size:8.5px;letter-spacing:1px;cursor:pointer;white-space:nowrap;}
+.sync-btn:disabled{opacity:0.6;cursor:default;}
+.sync-status{font-size:12px;color:var(--muted);flex:1;}
+.sync-status b{color:var(--cyan);}
+.spin{display:inline-block;width:11px;height:11px;border:2px solid rgba(34,211,238,0.2);border-top-color:var(--cyan);border-radius:50%;animation:spin .7s linear infinite;vertical-align:-2px;margin-right:5px;}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.bet-item{background:var(--card);border:1px solid var(--border);border-radius:12px;margin-bottom:8px;overflow:hidden;}
+.bet-item.win{border-left:3px solid var(--green);}
+.bet-item.loss{border-left:3px solid var(--red);}
+.bet-item.pending{border-left:3px solid var(--muted);}
+.bet-top{display:flex;align-items:center;gap:10px;padding:12px 14px;flex-wrap:wrap;}
+.bet-info{flex:1;min-width:160px;}
+.src-tag{font-family:'Space Mono',monospace;font-size:7px;padding:2px 7px;border-radius:10px;white-space:nowrap;margin-left:6px;}
+.src-auto{background:rgba(34,211,238,0.08);border:1px solid var(--bc);color:var(--cyan);}
+.src-manual{background:rgba(255,255,255,0.03);border:1px solid var(--border);color:var(--muted);}
+.quick-result{display:flex;gap:6px;}
+.qr-btn{width:28px;height:28px;border-radius:8px;border:1px solid var(--border);background:rgba(255,255,255,0.03);color:var(--muted);cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;}
+.qr-btn.win-btn.active{border-color:rgba(16,185,129,0.4);background:rgba(16,185,129,0.12);color:var(--green);}
+.qr-btn.loss-btn.active{border-color:rgba(239,68,68,0.4);background:rgba(239,68,68,0.12);color:var(--red);}
+.result-lbl{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1px;}
+.btn-note{background:none;border:none;color:var(--muted);cursor:pointer;font-size:13px;padding:4px;flex-shrink:0;}
+.btn-note:hover{color:var(--cyan);}
+.btndel{background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;padding:4px;transition:.2s;flex-shrink:0;}
+.btndel:hover{color:var(--red);}
+.note-panel{display:none;border-top:1px solid var(--border);padding:12px 14px;background:rgba(255,255,255,0.015);}
+.note-panel.open{display:block;}
+
+.fab{position:fixed;bottom:80px;right:20px;width:52px;height:52px;border-radius:50%;background:var(--cyan);color:#03121a;border:none;font-size:24px;cursor:pointer;box-shadow:0 4px 16px rgba(34,211,238,0.35);display:flex;align-items:center;justify-content:center;z-index:60;transition:.2s;}
+.fab:hover{transform:scale(1.06);}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.6);display:none;align-items:center;justify-content:center;z-index:250;padding:20px;}
+.modal-overlay.show{display:flex;}
+.modal-box{background:var(--card2);border:1px solid var(--bc);border-radius:16px;padding:22px;width:100%;max-width:340px;}
+.modal-title{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:1px;margin-bottom:4px;}
+.modal-sub{font-size:12px;color:var(--muted);margin-bottom:16px;}
+.modal-close{float:right;background:none;border:none;color:var(--muted);font-size:18px;cursor:pointer;}
+
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:#101d2a;border:1px solid var(--bc);border-radius:10px;padding:12px 18px;font-size:13px;color:var(--text);display:flex;align-items:center;gap:10px;opacity:0;pointer-events:none;transition:.25s;z-index:300;white-space:nowrap;max-width:90vw;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+.empty-hint{text-align:center;padding:32px;color:var(--muted);font-size:13px;}
+.loading{text-align:center;padding:32px;color:var(--muted);font-family:'Space Mono',monospace;font-size:9px;letter-spacing:2px;}
+
+.nav-bottom{position:fixed;bottom:0;left:0;right:0;background:rgba(8,12,18,0.97);backdrop-filter:blur(14px);border-top:1px solid var(--border);display:flex;z-index:100;}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px 4px 8px;gap:5px;cursor:pointer;transition:.2s;-webkit-tap-highlight-color:transparent;text-decoration:none;}
+.nav-icon{width:20px;height:20px;display:flex;align-items:center;justify-content:center;}
+.nav-icon svg{width:20px;height:20px;stroke:var(--muted);transition:.2s;}
+.nav-lbl{font-family:'Space Mono',monospace;font-size:7px;color:var(--muted);letter-spacing:1px;}
+.nav-item.active .nav-lbl{color:var(--cyan);}
+.nav-item.active .nav-icon svg{stroke:var(--cyan);filter:drop-shadow(0 0 6px rgba(34,211,238,0.5));}
+
+@media(max-width:600px){
+  .tstats{grid-template-columns:repeat(2,1fr);}
+  .pro-hero{flex-direction:column;gap:14px;}
+  .hero-stats{justify-content:center;}
+}
+</style>
+</head>
+<body>
+
+<header class="hdr">
+  <a href="/pt/" class="logo"><span>IA</span>SHARK</a>
+  <span id="authHeaderSlot"><a href="/pt/compte.html" class="btn-login">ENTRAR</a></span>
+</header>
+
+<div id="proContent">
+<div class="main">
+
+  <div class="pro-hero">
+    <div>
+      <h1>Espaço <span>FERRAMENTAS</span></h1>
+      <p>Probabilidade do modelo ≥ 70% · Registo automático · Verificação de odd</p>
+    </div>
+    <div class="hero-stats">
+      <div class="hstat"><div class="hstat-val" id="heroWR">—</div><div class="hstat-lbl">ACERTOS</div></div>
+      <div class="hstat"><div class="hstat-val" id="heroROI">—</div><div class="hstat-lbl">ROI</div></div>
+      <div class="hstat"><div class="hstat-val" id="heroTotal">—</div><div class="hstat-lbl">APOSTAS</div></div>
+    </div>
+  </div>
+
+  <div class="capital-bar" id="capitalBar">
+    <div class="capital-row">
+      <span class="capital-lbl">CAPITAL INICIAL</span>
+      <span class="capital-val" id="capitalVal">— €</span>
+      <button class="capital-edit-btn" id="capitalEditBtn" onclick="toggleCapitalEdit()">MODIFICAR</button>
+    </div>
+    <div class="capital-row" id="capitalActuelRow" style="display:none;">
+      <span class="capital-lbl">CAPITAL ATUAL</span>
+      <span class="capital-val cyan" id="capitalActuelVal">— €</span>
+      <span class="capital-hint" id="capitalHint"></span>
+    </div>
+    <div class="capital-edit-form" id="capitalEditForm">
+      <input type="number" id="capitalInput" placeholder="Ex: 1000">
+      <button class="sync-btn" onclick="saveCapital()">GUARDAR</button>
+      <div class="capital-msg" id="capitalMsg"></div>
+    </div>
+  </div>
+
+  <div class="day-summary" id="daySummary">🦈 <div>A CARREGAR...</div></div>
+
+  <!-- Calculateurs de base (MASTER V2.1 §3.1/§13.1) : gratuits, toujours
+       visibles - hors du pro-wall, contrairement aux sélections/suivi qui
+       restent PRO. -->
+  <div class="capital-bar" style="display:flex;">
+    <div class="capital-row"><span class="capital-lbl">🧮 CALCULADORAS GRATUITAS</span></div>
+    <div class="capital-row" style="gap:16px;align-items:flex-end;">
+      <div style="flex:1;min-width:120px;">
+        <div class="capital-lbl" style="margin-bottom:4px;">ODD DECIMAL</div>
+        <input type="number" step="0.01" min="1.01" id="calcCote" placeholder="Ex: 2.10" oninput="calcFromCote()" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--text);font-family:'Space Mono',monospace;">
+      </div>
+      <div style="text-align:center;color:var(--muted);font-family:'Space Mono',monospace;font-size:10px;padding-bottom:10px;">⇄</div>
+      <div style="flex:1;min-width:120px;">
+        <div class="capital-lbl" style="margin-bottom:4px;">PROBABILIDADE IMPLÍCITA (%)</div>
+        <input type="number" step="0.1" min="0.01" max="99.99" id="calcProb" placeholder="Ex: 47.6" oninput="calcFromProb()" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--text);font-family:'Space Mono',monospace;">
+      </div>
+    </div>
+    <div class="capital-hint" style="color:var(--muted);font-size:9px;">Probabilidade implícita = 100 / odd decimal — inclui a margem da casa de apostas, não é uma probabilidade "justa".</div>
+  </div>
+
+  <div class="capital-bar" style="display:flex;">
+    <div class="capital-row"><span class="capital-lbl">📐 MARGEM DA CASA (1X2)</span></div>
+    <div class="capital-row" style="gap:10px;">
+      <input type="number" step="0.01" min="1.01" id="margeC1" placeholder="Odd 1" oninput="calcMarge()" style="flex:1;min-width:70px;background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--text);font-family:'Space Mono',monospace;">
+      <input type="number" step="0.01" min="1.01" id="margeCN" placeholder="Odd N" oninput="calcMarge()" style="flex:1;min-width:70px;background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--text);font-family:'Space Mono',monospace;">
+      <input type="number" step="0.01" min="1.01" id="margeC2" placeholder="Odd 2" oninput="calcMarge()" style="flex:1;min-width:70px;background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--text);font-family:'Space Mono',monospace;">
+    </div>
+    <div class="capital-row" id="margeResult" style="display:none;">
+      <span class="capital-lbl">MARGEM</span><span class="capital-val cyan" id="margeVal">—</span>
+      <span class="capital-hint" id="margeHint"></span>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('selections',this)">⭐ SELEÇÕES</button>
+    <button class="tab-btn" onclick="switchTab('suivi',this)">📊 O MEU REGISTO</button>
+    <button class="tab-btn" onclick="switchTab('calc',this)">🧮 CALCULADORAS</button>
+  </div>
+
+  <div class="pro-wall locked" id="proWall">
+    <div class="pro-wall-inner" id="proWallInner">
+
+      <!-- SÉLECTIONS -->
+      <div id="tab-selections" class="tab-section active">
+        <div class="sel-toolbar">
+          <span class="lock-badge">🔒 PROB. ≥ 70%</span>
+          <select class="fsel" id="filterMkt" onchange="renderSelections()">
+            <option value="">Todos os mercados</option>
+            <option value="over25">Mais de 2,5 golos</option>
+            <option value="under25">Menos de 2,5 golos</option>
+            <option value="btts_oui">Ambas as equipas marcam</option>
+            <option value="btts_non">Uma equipa não marca</option>
+            <option value="dc1x">DC 1X</option>
+            <option value="dc_x2">DC X2</option>
+          </select>
+          <select class="fsel" id="sortSel" onchange="renderSelections()">
+            <option value="conf">Ordenar: probabilidade do modelo</option>
+            <option value="cote">Ordenar: odd</option>
+            <option value="date">Ordenar: data</option>
+          </select>
+          <span class="sel-count" id="selCount"></span>
+        </div>
+        <div id="selList"><div class="loading">A CARREGAR...</div></div>
+      </div>
+
+      <!-- MON SUIVI (fusion Tracker + Carnet) -->
+      <div id="tab-suivi" class="tab-section">
+        <div class="tstats" id="tstats"></div>
+        <div class="sync-bar">
+          <button class="sync-btn" id="syncBtn" onclick="runSync()">🔄 SYNCHRONISER</button>
+          <div class="sync-status" id="syncStatus">As apostas registadas a partir de Seleções resolvem-se automaticamente.</div>
+        </div>
+        <div id="betsList"></div>
+      </div>
+
+      <!-- CALCULATEURS AVANCES (Kelly fractionnaire + EV) - memes formules
+           que le pipeline (lib/betting.js : fractionalKelly/expectedValue),
+           dupliquees ici volontairement (site statique sans bundler, meme
+           patron que le reste du fichier) - jamais un chiffre invente. -->
+      <div id="tab-calc" class="tab-section">
+        <div class="capital-bar" style="display:flex;">
+          <div class="capital-row"><span class="capital-lbl">🧮 APOSTA DE KELLY (FRACIONADA)</span></div>
+          <div class="capital-row" style="gap:10px;flex-wrap:wrap;">
+            <div style="flex:1;min-width:100px;">
+              <div class="capital-lbl" style="margin-bottom:4px;">BANKROLL (€)</div>
+              <input type="number" step="1" min="0" id="kellyBk" placeholder="Ex: 500" oninput="calcKelly()" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--text);font-family:'Space Mono',monospace;">
+            </div>
+            <div style="flex:1;min-width:100px;">
+              <div class="capital-lbl" style="margin-bottom:4px;">ODD DECIMAL</div>
+              <input type="number" step="0.01" min="1.01" id="kellyCote" placeholder="Ex: 2.10" oninput="calcKelly()" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--text);font-family:'Space Mono',monospace;">
+            </div>
+            <div style="flex:1;min-width:100px;">
+              <div class="capital-lbl" style="margin-bottom:4px;">PROBABILIDADE ESTIMADA (%)</div>
+              <input type="number" step="0.1" min="0.1" max="99.9" id="kellyProb" placeholder="Ex: 55" oninput="calcKelly()" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--text);font-family:'Space Mono',monospace;">
+            </div>
+            <div style="flex:1;min-width:100px;">
+              <div class="capital-lbl" style="margin-bottom:4px;">FRAÇÃO DE KELLY</div>
+              <select id="kellyFrac" onchange="calcKelly()" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--text);font-family:'Space Mono',monospace;">
+                <option value="0.25" selected>1/4 (prudente, padrão)</option>
+                <option value="0.5">1/2</option>
+                <option value="1">Total (agressivo)</option>
+              </select>
+            </div>
+          </div>
+          <div id="kellyResult" style="display:none;">
+            <div class="capital-row"><span class="capital-lbl">APOSTA RECOMENDADA</span><span class="capital-val cyan" id="kellyMiseVal">—</span></div>
+            <div class="capital-row"><span class="capital-lbl">% DA BANKROLL</span><span class="capital-val" id="kellyPctVal">—</span></div>
+            <div class="capital-row"><span class="capital-lbl">EV (valor esperado)</span><span class="capital-val" id="kellyEvVal">—</span></div>
+            <div class="capital-hint" id="kellyHint" style="color:var(--muted);font-size:9px;"></div>
+          </div>
+          <div class="capital-hint" style="color:var(--muted);font-size:9px;">A probabilidade que introduzes aqui deve vir do teu próprio julgamento ou de uma probabilidade de modelo IASHARK real (visível em Seleções/Jogo) — esta calculadora não fornece qualquer probabilidade, aplica apenas a fórmula de Kelly ao que lhe dás. Aposta limitada a 5% da bankroll por aposta (mesma regra do motor), seja qual for a vantagem.</div>
+        </div>
+      </div>
+
+    </div>
+    <div class="pro-wall-overlay">
+      <div class="pw-top"><span class="pw-top-lbl">CONTEÚDO FERRAMENTAS</span></div>
+      <div class="pw-body">
+        <div class="pw-title">Acesso <span>completo</span></div>
+        <div class="pw-sub">Seleções com alta probabilidade de modelo, registo automático das tuas apostas, verificação de odd num clique.</div>
+        <div class="pw-feats">
+          <div class="pw-feat"><div class="pw-feat-l"><div><div class="pw-feat-name">SELEÇÕES PROBABILIDADE ≥ 70%</div><div class="pw-feat-desc">Os prognósticos com maior probabilidade de modelo</div></div></div><span class="pw-badge">FERRAMENTAS</span></div>
+          <div class="pw-feat"><div class="pw-feat-l"><div><div class="pw-feat-name">REGISTO AUTOMÁTICO</div><div class="pw-feat-desc">Tracker de apostas com resolução automática</div></div></div><span class="pw-badge">FERRAMENTAS</span></div>
+        </div>
+      </div>
+      <div class="pw-cta-wrap"><a class="pw-cta" href="/pt/compte.html">PASSAR A FERRAMENTAS →</a></div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<button class="fab" id="fabBtn" onclick="openModal()" title="Ajout rapide" style="display:none">+</button>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal-box">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-title">Adição rápida</div>
+    <div class="modal-sub">Para uma aposta feita na hora, sem passar por Seleções.</div>
+    <div class="fg" style="margin-bottom:10px;"><label>JOGO</label><input type="text" class="finput" id="mMatch" style="width:100%" placeholder="Ex: PSG vs OM"></div>
+    <div class="fg" style="margin-bottom:10px;"><label>MERCADO</label><input type="text" class="finput" id="mMarket" style="width:100%" placeholder="BTTS Sim"></div>
+    <div class="fg" style="margin-bottom:10px;"><label>ODD</label><input type="number" class="finput" id="mCote" style="width:100%" step="0.01" placeholder="1.90"></div>
+    <div class="fg" style="margin-bottom:14px;"><label>APOSTA (€)</label><input type="number" class="finput" id="mMise" style="width:100%" value="10"></div>
+    <button class="btnvalid" style="width:100%;text-align:center;" onclick="addFromModal()">+ ADICIONAR AO MEU REGISTO</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"><span style="color:var(--green)">✓</span>&nbsp;<span id="toastTxt"></span></div>
+
+<div style="max-width:1100px;margin:24px auto 80px;padding:0 20px;text-align:center;">
+  <div style="font-family:'Space Mono',monospace;font-size:8px;color:rgba(74,101,128,0.5);line-height:2;letter-spacing:1px;">
+    <div>⚠️ APOSTAR PODE SER PERIGOSO — JOGUE COM RESPONSABILIDADE · PROIBIDO A MENORES DE 18 ANOS</div>
+    <div>Ajuda (França): <a href="https://www.joueurs-info-service.fr" style="color:rgba(34,211,238,0.4);text-decoration:none;">joueurs-info-service.fr</a> · 09 74 75 13 13</div>
+  </div>
+</div>
+
+<nav class="nav-bottom">
+  <a href="/pt/" class="nav-item">
+    <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5L12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg></div>
+    <div class="nav-lbl">INÍCIO</div>
+  </a>
+  <a href="/pt/marches.html" class="nav-item">
+    <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 17V9M13 17V5M8 17v-4"/></svg></div>
+    <div class="nav-lbl">MERCADOS</div>
+  </a>
+  <a href="/pt/historique.html" class="nav-item">
+    <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20v-4"/></svg></div>
+    <div class="nav-lbl">HISTÓRICO</div>
+  </a>
+  <a href="/pt/pro.html" class="nav-item active">
+    <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.9 6.6L22 9.3l-5 4.9L18.2 22 12 18.3 5.8 22 7 14.2 2 9.3l7.1-.7z"/></svg></div>
+    <div class="nav-lbl">FERRAMENTAS</div>
+  </a>
+  <a href="/blog/" class="nav-item">
+    <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg></div>
+    <div class="nav-lbl">GUIAS</div>
+  </a>
+  <a href="/pt/compte.html" class="nav-item">
+    <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg></div>
+    <div class="nav-lbl">CONTA</div>
+  </a>
+</nav>
+<script>
+var STORAGE_KEY_PARIS='iashark_pro_paris';
+var STORAGE_KEY_SELNOTES='iashark_pro_selnotes';
+var nextPId=1;
+var PARIS=[];
+var selNotes={};
+var allMatchs=[];
+
+function translateMarket(raw){
+  if(!raw)return raw;
+  var s=String(raw).toLowerCase();
+  if(s.includes('over 2.5'))return 'Mais de 2,5 golos';
+  if(s.includes('under 2.5'))return 'Menos de 2,5 golos';
+  if(s.includes('over 1.5'))return 'Mais de 1,5 golo';
+  if(s.includes('btts non')||s.includes('une équipe ne marque'))return 'Uma equipa não marca';
+  if(s.includes('btts')||s.includes('les deux équipes'))return 'Ambas as equipas marcam';
+  if(s.includes('dc 1x')||s.includes('1x'))return 'DC 1X';
+  if(s.includes('dc x2')||s.includes('x2'))return 'DC X2';
+  return raw;
+}
+
+function getMarketKey(raw){
+  if(!raw)return 'autre';
+  var s=String(raw).toLowerCase();
+  if(s.includes('over 2.5'))return 'over25';
+  if(s.includes('under 2.5'))return 'under25';
+  if(s.includes('btts non')||s.includes('une équipe ne marque'))return 'btts_non';
+  if(s.includes('btts')||s.includes('les deux équipes'))return 'btts_oui';
+  if(s.includes('1x'))return 'dc1x';
+  if(s.includes('x2'))return 'dc_x2';
+  return 'autre';
+}
+
+function getProbIA(m){
+  var probIA = m.po25?parseInt(m.po25):0;
+  if(!probIA){
+    var mkt=getMarketKey(m.pari_rec||'');
+    if(mkt==='btts_non')probIA=100-parseInt(m.btts||50);
+    else if(mkt==='btts_oui')probIA=parseInt(m.btts||50);
+    else if(mkt==='dc1x')probIA=parseInt(m.p1||0)+parseInt(m.pn||0);
+    else if(mkt==='dc_x2')probIA=parseInt(m.p2||0)+parseInt(m.pn||0);
+    else probIA=Math.round(100/(parseFloat(m.cote_rec)||1.01));
+  }
+  if(!probIA)probIA=Math.round(100/(parseFloat(m.cote_rec)||1.01));
+  return probIA;
+}
+
+var SUPA_URL = 'https://ksvjraqitxouwiabecai.supabase.co';
+var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtzdmpyYXFpdHhvdXdpYWJlY2FpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3ODcwMjMsImV4cCI6MjA4ODM2MzAyM30.Eh3qk4tATM40hoYxdErAllLEo1y8KNt4BSCET_fAgT8';
+var sb = supabase.createClient(SUPA_URL, SUPA_KEY);
+var currentUser = null;
+
+// Paywall reel : les paliers FREE/PRO sont decides (MASTER V2.1 §3.1) - le
+// flag de bypass permanent (OUTILS_OPEN_FOR_ALL=true) explicitement banni
+// par le MASTER (§24 : "Supprimer : OUTILS_OPEN_FOR_ALL=true") est retire.
+// Le deverrouillage ne depend plus que du plan reel verifie cote serveur
+// (table users, RLS restreint chaque utilisateur a sa propre ligne).
+
+function unlockProWall(){
+  document.getElementById('proWall').classList.remove('locked');
+  document.getElementById('fabBtn').style.display='flex';
+}
+
+var currentCapital = 0;
+
+async function checkProAccess(){
+  try{
+    var res = await sb.auth.getSession();
+    if(!res.data || !res.data.session) return;
+    currentUser = res.data.session.user;
+    var ures = await sb.from('users').select('plan,role,capital').eq('id', currentUser.id).maybeSingle();
+    var plan = ures.data && ures.data.plan ? ures.data.plan : 'free';
+    var role = ures.data && ures.data.role;
+    if(plan === 'pro' || role === 'admin') unlockProWall();
+    showCapital(ures.data && ures.data.capital);
+  }catch(e){}
+}
+loadAll();
+checkProAccess();
+
+function getParisPnL(){
+  return PARIS.filter(function(p){return p.result!=='pending';})
+    .reduce(function(s,p){return s+(p.result==='win'?p.mise*(p.cote-1):-p.mise);},0);
+}
+
+function showCapital(capital){
+  document.getElementById('capitalBar').style.display = 'flex';
+  currentCapital = capital ? Number(capital) : 0;
+  if(capital){
+    document.getElementById('capitalVal').textContent = Number(capital).toLocaleString('fr-FR')+' €';
+    document.getElementById('capitalInput').placeholder = 'Modificar ('+capital+'€ atualmente)';
+    var pnl = getParisPnL();
+    var actuel = currentCapital + pnl;
+    document.getElementById('capitalActuelRow').style.display = 'flex';
+    document.getElementById('capitalActuelVal').textContent = Math.round(actuel).toLocaleString('fr-FR')+' €';
+    document.getElementById('capitalHint').textContent = pnl===0 ? '(nenhuma aposta resolvida ainda)' : '('+(pnl>0?'+':'')+Math.round(pnl)+'€ nas tuas apostas registadas)';
+  } else {
+    document.getElementById('capitalVal').textContent = 'Não indicado';
+    document.getElementById('capitalActuelRow').style.display = 'none';
+  }
+  renderSelections();
+}
+
+function toggleCapitalEdit(){
+  document.getElementById('capitalEditForm').classList.toggle('open');
+}
+
+async function saveCapital(){
+  var val = parseFloat(document.getElementById('capitalInput').value);
+  var msgEl = document.getElementById('capitalMsg');
+  if(!val || val<=0){
+    msgEl.textContent = 'Introduz um montante válido.';
+    return;
+  }
+  if(!currentUser){
+    msgEl.textContent = 'Inicia sessão para guardar o teu capital.';
+    return;
+  }
+  msgEl.textContent = 'A guardar...';
+  try{
+    var res = await sb.from('users').update({capital: val}).eq('id', currentUser.id);
+    if(res.error) throw res.error;
+    msgEl.textContent = 'Capital guardado.';
+    document.getElementById('capitalInput').value = '';
+    showCapital(val);
+    setTimeout(function(){ document.getElementById('capitalEditForm').classList.remove('open'); msgEl.textContent=''; }, 1200);
+  }catch(e){
+    msgEl.textContent = 'Erro: '+(e.message||'réessaie');
+  }
+}
+
+async function fetchMatchData(){
+  // Les champs premium (kelly/edge/verdict_shark/facteur_x) ne sont plus dans
+  // data.json - ils ne peuvent venir que de l'Edge Function match-data, qui
+  // verifie le vrai statut d'abonnement cote serveur avant de les inclure.
+  // Repli sur data.json (donnees gratuites uniquement) si l'appel echoue -
+  // ex. fonction pas encore deployee, hors ligne, etc.
+  try{
+    var sess=await sb.auth.getSession();
+    var token=sess.data&&sess.data.session?sess.data.session.access_token:SUPA_KEY;
+    var resp=await fetch(SUPA_URL+'/functions/v1/match-data', {
+      headers:{'Authorization':'Bearer '+token, 'apikey':SUPA_KEY}
+    });
+    if(!resp.ok) throw new Error('edge function status '+resp.status);
+    return await resp.json();
+  }catch(e){
+    var resp2=await fetch('data.json?t='+Date.now());
+    return await resp2.json();
+  }
+}
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+
+// Calculateurs gratuits (S3.1/S13.1) - memes formules que lib/betting.js/
+// lib/models.js (deja testees, tests/betting.test.js et tests/models.test.js),
+// reimplementees en JS navigateur pur car cette page n'a pas de bundler.
+var calcSyncing=false;
+function calcFromCote(){
+  if(calcSyncing)return; calcSyncing=true;
+  var c=parseFloat(document.getElementById('calcCote').value);
+  document.getElementById('calcProb').value=(c&&c>1)?(100/c).toFixed(2):'';
+  calcSyncing=false;
+}
+function calcFromProb(){
+  if(calcSyncing)return; calcSyncing=true;
+  var p=parseFloat(document.getElementById('calcProb').value);
+  document.getElementById('calcCote').value=(p&&p>0&&p<100)?(100/p).toFixed(2):'';
+  calcSyncing=false;
+}
+function calcMarge(){
+  var c1=parseFloat(document.getElementById('margeC1').value);
+  var cn=parseFloat(document.getElementById('margeCN').value);
+  var c2=parseFloat(document.getElementById('margeC2').value);
+  var box=document.getElementById('margeResult');
+  if(!c1||!cn||!c2||c1<=1||cn<=1||c2<=1){box.style.display='none';return;}
+  var sumImplied=(1/c1)+(1/cn)+(1/c2);
+  var margePct=(sumImplied-1)*100;
+  document.getElementById('margeVal').textContent=margePct.toFixed(2)+'%';
+  document.getElementById('margeHint').textContent=margePct>=0?'(margem normal da casa de apostas)':'(anomalia: soma das probabilidades < 100%, verifica as odds introduzidas)';
+  box.style.display='flex';
+}
+function calcKelly(){
+  var bk=parseFloat(document.getElementById('kellyBk').value);
+  var cote=parseFloat(document.getElementById('kellyCote').value);
+  var probPct=parseFloat(document.getElementById('kellyProb').value);
+  var fraction=parseFloat(document.getElementById('kellyFrac').value)||0.25;
+  var box=document.getElementById('kellyResult');
+  if(!bk||bk<=0||!cote||cote<=1||!probPct||probPct<=0||probPct>=100){box.style.display='none';return;}
+  var probIA=probPct/100;
+  // Memes formules que lib/betting.js (fractionalKelly/expectedValue),
+  // testees dans tests/betting.test.js - ne pas diverger de la logique
+  // pipeline.
+  var b=cote-1;
+  var q=1-probIA;
+  var kelly=(probIA*b-q)/b;
+  var ev=probIA*cote-1;
+  document.getElementById('kellyEvVal').textContent=(ev>=0?'+':'')+(ev*100).toFixed(1)+'% por unidade apostada';
+  if(kelly<=0){
+    document.getElementById('kellyMiseVal').textContent='0 € (sem vantagem)';
+    document.getElementById('kellyPctVal').textContent='0%';
+    document.getElementById('kellyHint').textContent="A esta odd e probabilidade, o cálculo de Kelly não recomenda nenhuma aposta (sem vantagem matemática) — apostar aqui seria uma aposta de valor esperado negativo.";
+  } else {
+    var pct=Math.min(kelly*fraction*100,5);
+    var mise=bk*(pct/100);
+    document.getElementById('kellyMiseVal').textContent=mise.toFixed(2)+' €';
+    document.getElementById('kellyPctVal').textContent=pct.toFixed(2)+'%';
+    document.getElementById('kellyHint').textContent=pct>=5?'Limitado a 5% da bankroll por aposta (mesma regra do motor), mesmo que o Kelly total calculado seja superior.':'Kelly '+(fraction===1?'total':fraction===0.5?'metade':'quarto')+' aplicado a uma vantagem real detetada pela fórmula.';
+  }
+  box.style.display='block';
+}
+async function loadAll(){
+  loadLocalData();
+  try{
+    var data=await fetchMatchData();
+    allMatchs=(data.matchs||[]).filter(function(m){
+      var prob=m.model_probability!=null?m.model_probability:((parseFloat(m.conf)||0)<=1?(parseFloat(m.conf)||0)*10*10:(parseFloat(m.conf)||0)*10);
+      return prob>=70&&!m.no_signal&&m.pari_rec;
+    });
+  }catch(e){
+    allMatchs=getDemoMatchs();
+  }
+  renderHeroStats();
+  renderDaySummary();
+  renderSelections();
+  renderBets();
+}
+
+function getDemoMatchs(){
+  return [
+    {id:1551272,home:{n:'Almeria'},away:{n:'Malaga'},league:'LaLiga 2',league_key:'laliga2',ligue_icon:'🇪🇸',date:'2026-06-22 21:00',conf:7.5,pari_rec:'Over 2.5',cote_rec:'1.80',po25:78},
+    {id:1489384,home:{n:'England'},away:{n:'Croatia'},league:'World Cup',league_key:'wc',ligue_icon:'🌍',date:'2026-06-22 18:00',conf:7.5,pari_rec:'Over 2.5',cote_rec:'2.15',po25:68},
+    {id:1489379,home:{n:'Saudi Arabia'},away:{n:'Uruguay'},league:'World Cup',league_key:'wc',ligue_icon:'🌍',date:'2026-06-22 20:00',conf:7.5,pari_rec:'DC 1X',cote_rec:'2.80',p1:60,pn:22},
+  ];
+}
+
+function renderHeroStats(){
+  var res=PARIS.filter(function(p){return p.result!=='pending';});
+  var wins=res.filter(function(p){return p.result==='win';});
+  var gain=res.reduce(function(s,p){return s+(p.result==='win'?p.mise*(p.cote-1):-p.mise);},0);
+  var mise=PARIS.reduce(function(s,p){return s+p.mise;},0);
+  var wr=res.length?Math.round(wins.length/res.length*1000)/10:0;
+  var roi=mise?Math.round(gain/mise*1000)/10:0;
+  document.getElementById('heroWR').textContent=wr+'%';
+  document.getElementById('heroROI').textContent=(roi>=0?'+':'')+roi+'%';
+  document.getElementById('heroTotal').textContent=res.length;
+}
+
+function renderDaySummary(){
+  var todayStr=new Date().toISOString().split('T')[0];
+  var todayCount=allMatchs.filter(function(m){return (m.date||'').indexOf(todayStr)===0;}).length;
+  var pendingCount=PARIS.filter(function(p){return p.result==='pending';}).length;
+  document.getElementById('daySummary').innerHTML='🦈 <div>Hoje: <b>'+(todayCount||allMatchs.length)+' '+((todayCount||allMatchs.length)>1?'seleções':'seleção')+'</b> probabilidade ≥70%'
+    +(pendingCount?' · <span class="cy">'+pendingCount+' '+(pendingCount>1?'apostas':'aposta')+'</span> à espera de resultado no teu registo.':' · nenhuma aposta pendente.')
+    +'</div>';
+}
+
+function renderSelections(){
+  var mkt=document.getElementById('filterMkt').value;
+  var sortBy=document.getElementById('sortSel').value;
+  var list=allMatchs.filter(function(m){
+    if(!mkt)return true;
+    return getMarketKey(m.pari_rec||'')===mkt;
+  });
+  list=list.slice().sort(function(a,b){
+    var pa=a.model_probability!=null?a.model_probability:((parseFloat(a.conf)||0)<=1?(parseFloat(a.conf)||0)*100:(parseFloat(a.conf)||0)*10);
+    var pb=b.model_probability!=null?b.model_probability:((parseFloat(b.conf)||0)<=1?(parseFloat(b.conf)||0)*100:(parseFloat(b.conf)||0)*10);
+    if(sortBy==='conf')return pb-pa;
+    if(sortBy==='cote')return (parseFloat(b.cote_rec)||0)-(parseFloat(a.cote_rec)||0);
+    if(sortBy==='date')return (a.date||'')<(b.date||'')?-1:1;
+    return 0;
+  });
+  document.getElementById('selCount').textContent=list.length+' '+(list.length>1?'seleções':'seleção');
+  if(!list.length){
+    document.getElementById('selList').innerHTML='<div class="empty-hint">Nenhuma seleção para este filtro hoje.</div>';
+    return;
+  }
+  document.getElementById('selList').innerHTML=list.map(function(m){
+    // model_probability : probabilite reelle du marche (0-100). Repli sur
+    // l'ancien champ conf (deprecie) pour compatibilite descendante.
+    var conf=parseFloat(m.conf)||0;
+    var confN=conf<=1?conf*10:conf;
+    var modelProbPct=m.model_probability!=null?Math.round(m.model_probability):Math.round(confN*10);
+    var cc=confN>=8?'c8':'c7';
+    var heure=(m.date||'').split(' ')[1]||'';
+    var hn=(m.home&&m.home.n)||'?', an=(m.away&&m.away.n)||'?';
+    var label=translateMarket(m.pari_rec)||m.pari_rec||'—';
+    var alreadyFollowed=PARIS.some(function(p){return p.fixtureId===m.id;});
+    var note=selNotes[m.id];
+    var isFollowed=alreadyFollowed;
+    var suggMise=null;
+    if(currentCapital>0 && m.kelly){
+      var actuelBk=currentCapital+getParisPnL();
+      suggMise=Math.max(1,Math.round(actuelBk*(parseFloat(m.kelly)/100)));
+    }
+    var miseDefault=suggMise||10;
+    return '<div class="card-item">'
+      +'<div class="card-top">'
+      +'<div class="card-info"><div class="mname">'+hn+' vs '+an+'</div><div class="mleague">'+(m.ligue_icon||'🏆')+' '+m.league+' · '+label+' · '+heure+'</div>'
+      +(note?'<div class="saved-note">📝 '+esc(note)+'</div>':'')
+      +'</div>'
+      +'<div class="cote-v">'+(m.cote_rec||'—')+'</div>'
+      +'<div class="cbadge '+cc+'" title="Probabilidade do modelo">'+modelProbPct+'%</div>'
+      +'<button class="btn-follow'+(isFollowed?' done':'')+'" id="followbtn-'+m.id+'" onclick="togglePanel('+m.id+')">'+(isFollowed?'✓ REGISTADA':'GERIR ▾')+'</button>'
+      +'</div>'
+      +'<div class="panel" id="panel-'+m.id+'">'
+      +'<div class="chip-row">'
+      +'<button class="chip active" data-chip="suivre" onclick="setChip('+m.id+',\'suivre\',this)">REGISTAR ESTA APOSTA</button>'
+      +'<button class="chip" data-chip="cote" onclick="setChip('+m.id+',\'cote\',this)">VERIFICAR UMA ODD</button>'
+      +'<button class="chip" data-chip="note" onclick="setChip('+m.id+',\'note\',this)">ADICIONAR UMA NOTA</button>'
+      +'</div>'
+      +'<div class="subpanel open" id="sub-suivre-'+m.id+'">'
+      +(suggMise?'<div class="mise-sugg-hint">🎯 🎯 Aposta recomendada com base na tua bankroll atual: <b>'+suggMise+'€</b></div>':'')
+      +'<div class="row-flex">'
+      +'<div class="fg"><label>APOSTA (€)</label><input type="number" class="finput" id="mise-'+m.id+'" value="'+miseDefault+'" style="width:80px"></div>'
+      +'<button class="qm-btn" onclick="setAccMise('+m.id+',5,this)">5€</button>'
+      +'<button class="qm-btn'+(!suggMise?' active':'')+'" onclick="setAccMise('+m.id+',10,this)">10€</button>'
+      +'<button class="qm-btn" onclick="setAccMise('+m.id+',20,this)">20€</button>'
+      +(suggMise?'<button class="qm-btn active" onclick="setAccMise('+m.id+','+suggMise+',this)">'+suggMise+'€ 🎯</button>':'')
+      +'<button class="btnvalid" onclick="confirmFollow('+m.id+')">+ ADICIONAR AO MEU REGISTO</button>'
+      +'</div></div>'
+      +'<div class="subpanel" id="sub-cote-'+m.id+'">'
+      +'<div class="row-flex">'
+      +'<div class="fg"><label>ODD VISTA NOUTRO SÍTIO</label><input type="number" step="0.01" class="finput" id="book-'+m.id+'" placeholder="ex: 1.75" oninput="calcEdge('+m.id+')"></div>'
+      +'</div>'
+      +'<div class="edge-result" id="edge-'+m.id+'"></div>'
+      +'</div>'
+      +'<div class="subpanel" id="sub-note-'+m.id+'">'
+      +'<textarea class="ntextarea" id="note-'+m.id+'" placeholder="Porque é que esta aposta te interessa, o que observas...">'+(note||'')+'</textarea>'
+      +'<button class="btnvalid" onclick="saveSelNote('+m.id+')">✓ GUARDAR NOTA</button>'
+      +'</div>'
+      +'</div>'
+      +'</div>';
+  }).join('');
+}
+
+function togglePanel(id){
+  var p=document.getElementById('panel-'+id);
+  var isOpen=p.classList.contains('open');
+  document.querySelectorAll('.panel').forEach(function(x){x.classList.remove('open');});
+  if(!isOpen)p.classList.add('open');
+}
+
+function setChip(id,chip,btn){
+  btn.parentElement.querySelectorAll('.chip').forEach(function(c){c.classList.remove('active');});
+  btn.classList.add('active');
+  ['suivre','cote','note'].forEach(function(c){
+    document.getElementById('sub-'+c+'-'+id).classList.toggle('open',c===chip);
+  });
+}
+
+function setAccMise(id,val,btn){
+  btn.parentElement.querySelectorAll('.qm-btn').forEach(function(b){b.classList.remove('active');});
+  btn.classList.add('active');
+  document.getElementById('mise-'+id).value=val;
+}
+
+function calcEdge(id){
+  var m=allMatchs.find(function(x){return x.id===id;});
+  if(!m)return;
+  var bookCote=parseFloat(document.getElementById('book-'+id).value);
+  var el=document.getElementById('edge-'+id);
+  if(!bookCote||bookCote<=1.01){el.className='edge-result';return;}
+  var probIA=getProbIA(m);
+  var probImpl=1/bookCote*100;
+  var edge=Math.round((probIA-probImpl)*10)/10;
+  el.className='edge-result show '+(edge>0?'pos':'neg');
+  el.innerHTML='Prob. modelo <b>'+probIA+'% vs prob. odd <b>'+probImpl.toFixed(1)+'% — vantagem de <b style="color:'+(edge>0?'var(--green)':'var(--red)')+'">'+(edge>0?'+':'')+edge+'%. '+(edge>0?'Odd interessante em relação ao modelo.':'O modelo não vê vantagem nesta odd.');
+}
+
+function saveSelNote(id){
+  var txt=document.getElementById('note-'+id).value.trim();
+  selNotes[id]=txt;
+  saveSelNotes();
+  renderSelections();
+  showToast('Nota guardada neste jogo');
+}
+
+function confirmFollow(id){
+  var m=allMatchs.find(function(x){return x.id===id;});
+  if(!m)return;
+  if(PARIS.some(function(p){return p.fixtureId===id;})){showToast('Já registada');return;}
+  var mise=parseFloat(document.getElementById('mise-'+id).value)||10;
+  var hn=(m.home&&m.home.n)||'?', an=(m.away&&m.away.n)||'?';
+  PARIS.unshift({
+    id:nextPId++, match:hn+' vs '+an, market:translateMarket(m.pari_rec)||m.pari_rec,
+    cote:parseFloat(m.cote_rec)||0, mise:mise, result:'pending',
+    source:'auto', fixtureId:id, note:selNotes[id]||''
+  });
+  saveParis();
+  var followBtn=document.getElementById('followbtn-'+id);
+  if(followBtn){followBtn.textContent='✓ SUIVI';followBtn.classList.add('done');}
+  var panelEl=document.getElementById('panel-'+id);
+  if(panelEl)panelEl.classList.remove('open');
+  renderBets();
+  renderHeroStats();
+  renderDaySummary();
+  showToast('Adicionada ao Meu Registo — resolve-se automaticamente');
+}
+
+function renderBets(){
+  var pendingCount=PARIS.filter(function(p){return p.result==='pending';}).length;
+  document.getElementById('tstats').innerHTML=
+    '<div class="tstat"><div class="tstat-lbl">ACERTOS</div><div class="tstat-val" id="twr">—</div></div>'
+    +'<div class="tstat"><div class="tstat-lbl">ROI</div><div class="tstat-val" id="troi">—</div></div>'
+    +'<div class="tstat"><div class="tstat-lbl">SALDO</div><div class="tstat-val cyan" id="tbilan">—</div></div>'
+    +'<div class="tstat"><div class="tstat-lbl">PENDENTE</div><div class="tstat-val">'+pendingCount+'</div></div>';
+  var res=PARIS.filter(function(p){return p.result!=='pending';});
+  var wins=res.filter(function(p){return p.result==='win';});
+  var gain=res.reduce(function(s,p){return s+(p.result==='win'?p.mise*(p.cote-1):-p.mise);},0);
+  var mise=PARIS.reduce(function(s,p){return s+p.mise;},0);
+  var wr=res.length?Math.round(wins.length/res.length*1000)/10:0;
+  var roi=mise?Math.round(gain/mise*1000)/10:0;
+  document.getElementById('twr').textContent=wr+'%';
+  document.getElementById('twr').className='tstat-val '+(wr>=55?'green':'red');
+  document.getElementById('troi').textContent=(roi>=0?'+':'')+roi+'%';
+  document.getElementById('troi').className='tstat-val '+(roi>=0?'green':'red');
+  document.getElementById('tbilan').textContent=wins.length+'V / '+(res.length-wins.length)+'D';
+
+  document.getElementById('betsList').innerHTML=PARIS.length ? PARIS.map(function(p){
+    var resultHtml;
+    if(p.result==='pending'){
+      resultHtml=p.source==='auto'
+        ?'<span class="result-lbl" style="color:var(--muted)">PENDENTE</span>'
+        :'<div class="quick-result">'
+          +'<button class="qr-btn win-btn" onclick="setManualResult('+p.id+',\'win\')">✅</button>'
+          +'<button class="qr-btn loss-btn" onclick="setManualResult('+p.id+',\'loss\')">❌</button>'
+          +'</div>';
+    } else {
+      var color=p.result==='win'?'var(--green)':'var(--red)';
+      resultHtml='<span class="result-lbl" style="color:'+color+'">'+(p.result==='win'?'GANHA':'PERDIDA')+(p.score?' ('+p.score+')':'')+'</span>';
+    }
+    var srcTag=p.source==='auto'?'<span class="src-tag src-auto">🔄 AUTO</span>':'<span class="src-tag src-manual">✎ MANUAL</span>';
+    return '<div class="bet-item '+p.result+'">'
+      +'<div class="bet-top">'
+      +'<div class="bet-info"><div class="mname">'+p.match+srcTag+'</div><div class="mleague">'+p.market+' · odd '+p.cote.toFixed(2)+' · '+p.mise+'€</div></div>'
+      +resultHtml
+      +'<button class="btn-note" onclick="toggleNote('+p.id+')" title="Note">✎</button>'
+      +'<button class="btndel" onclick="delPari('+p.id+')" title="Supprimer">✕</button>'
+      +'</div>'
+      +'<div class="note-panel" id="note-panel-'+p.id+'">'
+      +'<textarea class="ntextarea" id="note-input-'+p.id+'" placeholder="A tua nota sobre esta aposta...">'+p.note+'</textarea>'
+      +'<button class="btnvalid" onclick="saveBetNote('+p.id+')">✓ GUARDAR</button>'
+      +'</div>'
+      +'</div>';
+  }).join('') : '<div class="empty-hint">Nenhuma aposta registada. Vai a Seleções e clica em "GERIR" numa linha para começar.</div>';
+}
+
+function toggleNote(id){document.getElementById('note-panel-'+id).classList.toggle('open');}
+function saveBetNote(id){
+  var p=PARIS.find(function(x){return x.id===id;});
+  p.note=document.getElementById('note-input-'+id).value.trim();
+  saveParis();
+  showToast('Nota guardada nesta aposta');
+}
+function setManualResult(id,result){
+  var p=PARIS.find(function(x){return x.id===id;});
+  p.result=p.result===result?'pending':result;
+  saveParis();
+  renderBets();
+  renderHeroStats();
+  renderDaySummary();
+  if(currentCapital>0) showCapital(currentCapital);
+}
+function delPari(id){
+  if(!confirm('Remover esta aposta do teu registo?'))return;
+  PARIS=PARIS.filter(function(p){return p.id!==id;});
+  saveParis();
+  renderBets();
+  renderSelections();
+  renderHeroStats();
+  if(currentCapital>0) showCapital(currentCapital);
+  renderDaySummary();
+}
+
+async function runSync(){
+  var btn=document.getElementById('syncBtn');
+  var status=document.getElementById('syncStatus');
+  btn.disabled=true;
+  btn.innerHTML='<span class="spin"></span>A SINCRONIZAR...';
+  status.innerHTML='A ler historique.json...';
+  try{
+    var r=await fetch('historique.json?t='+Date.now());
+    var d=await r.json();
+    var preds=d.predictions||[];
+    var n=0;
+    PARIS.forEach(function(p){
+      if(p.source==='auto'&&p.result==='pending'&&p.fixtureId){
+        var match=preds.find(function(pr){return pr.fixture_id===p.fixtureId&&(pr.result==='win'||pr.result==='loss');});
+        if(match){p.result=match.result;p.score=match.score;n++;}
+      }
+    });
+    saveParis();
+    renderBets();
+    renderHeroStats();
+    renderDaySummary();
+    if(currentCapital>0) showCapital(currentCapital);
+    status.innerHTML=n>0?'<b>'+n+' aposta(s)</b> resolvida(s) automaticamente — 0 cliques necessários.':'Nada de novo para resolver por agora.';
+    showToast(n>0?n+' resultado(s) sincronizado(s)':'Nenhum resultado novo');
+  }catch(e){
+    status.innerHTML='Sincronização indisponível neste momento — tenta mais tarde.';
+  }
+  btn.disabled=false;
+  btn.innerHTML='🔄 SINCRONIZAR';
+}
+
+function openModal(){document.getElementById('modalOverlay').classList.add('show');}
+function closeModal(){document.getElementById('modalOverlay').classList.remove('show');}
+function addFromModal(){
+  var m=document.getElementById('mMatch').value.trim();
+  var mk=document.getElementById('mMarket').value.trim();
+  var c=parseFloat(document.getElementById('mCote').value);
+  var ms=parseFloat(document.getElementById('mMise').value)||10;
+  if(!m||!c)return;
+  PARIS.unshift({id:nextPId++,match:m,market:mk,cote:c,mise:ms,result:'pending',source:'manual',fixtureId:null,note:''});
+  saveParis();
+  document.getElementById('mMatch').value='';document.getElementById('mMarket').value='';document.getElementById('mCote').value='';
+  closeModal();
+  renderBets();
+  renderHeroStats();
+  renderDaySummary();
+  document.querySelectorAll('.tab-btn')[1].click();
+  showToast('Aposta adicionada pela adição rápida');
+}
+
+function loadLocalData(){
+  try{
+    var p=localStorage.getItem(STORAGE_KEY_PARIS);
+    if(p){PARIS=JSON.parse(p);nextPId=PARIS.length?Math.max.apply(null,PARIS.map(function(x){return x.id;}))+1:1;}
+  }catch(e){}
+  try{
+    var n=localStorage.getItem(STORAGE_KEY_SELNOTES);
+    if(n)selNotes=JSON.parse(n);
+  }catch(e){}
+}
+function saveParis(){try{localStorage.setItem(STORAGE_KEY_PARIS,JSON.stringify(PARIS));}catch(e){}}
+function saveSelNotes(){try{localStorage.setItem(STORAGE_KEY_SELNOTES,JSON.stringify(selNotes));}catch(e){}}
+
+var toastTimer=null;
+function showToast(txt){
+  var t=document.getElementById('toast');
+  document.getElementById('toastTxt').textContent=txt;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(function(){t.classList.remove('show');},2400);
+}
+
+function switchTab(name,btn){
+  document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.remove('active');});
+  document.querySelectorAll('.tab-section').forEach(function(s){s.classList.remove('active');});
+  btn.classList.add('active');
+  document.getElementById('tab-'+name).classList.add('active');
+}
+</script>
+<script src="/auth-header.js"></script>
+<script>IasharkAuthHeader.mount('#authHeaderSlot');</script>
+<script src="/site-prefs.js"></script>
+</body>
+</html>

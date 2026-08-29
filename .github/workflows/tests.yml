@@ -20,3 +20,7 @@ jobs:
         run: |
           awk '/cat > pipeline.js << .JSEOF./{flag=1;next}/^          JSEOF/{flag=0}flag' .github/workflows/update-data.yml | sed 's/^          //' > /tmp/pipeline_check.js
           node --check /tmp/pipeline_check.js
+      - name: Verify closing-odds script syntax (extracted from closing-odds.yml)
+        run: |
+          awk '/cat > closing-odds.js << .JSEOF./{flag=1;next}/^          JSEOF/{flag=0}flag' .github/workflows/closing-odds.yml | sed 's/^          //' > /tmp/closing_odds_check.js
+          node --check /tmp/closing_odds_check.js

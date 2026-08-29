@@ -35,6 +35,13 @@ jobs:
           const { poissonProb, calcPoissonProbs, dixonColesCorr, calcDixonColesProbs, calcMonteCarlo, shinProbabilities } = require('./lib/models.js');
           const { fractionalKelly } = require('./lib/betting.js');
           const { resolveMarketWin } = require('./lib/resolvers.js');
+          const { parseOdds } = require('./lib/odds.js');
+          // Identifiant du generateur de predictions actif. A incrementer/renommer
+          // quand le moteur change reellement (ex: introduction du moteur V2.1
+          // multi-modeles §10 du MASTER) pour pouvoir comparer les performances
+          // d'un modele a l'autre dans match_snapshots/match_premium_data plutot
+          // que de tout attribuer au meme "modele" indistinct.
+          const MODEL_VERSION = 'legacy-poisson-dc-mc-v1';
           const APS_KEY    = process.env.APISPORTS_KEY;
           const OWM_KEY    = process.env.OPENWEATHER_KEY;
           const NEWS_KEY   = process.env.NEWSAPI_KEY;
@@ -783,65 +790,6 @@ jobs:
             var probHadj=1/(1+Math.pow(10,(eloA-(eloH+homeBonus))/400));
             return {probH:Math.round(probHadj*100),probA:Math.round((1-probHadj)*100),diff:Math.round(eloH-eloA),homeBonus,signal:Math.abs(eloH-eloA)>=100?'FORT':Math.abs(eloH-eloA)>=50?'MODERE':'FAIBLE'};
           }
-          function parseOdds(o) {
-            var empty={c1:'--',cn:'--',c2:'--',co15:'--',co25:'--',cu25:'--',dc1x:'--',dc2x:'--',dc12:'--',btts_oui:'--',btts_non:'--'};
-            if(!o||!o.bookmakers||!o.bookmakers.length) return empty;
-            var arr1=[],arrN=[],arr2=[],arr15=[],arr25=[],arru25=[],arr35=[],arru35=[],arr1x=[],arrx2=[],arr12=[],arrby=[],arrbn=[],arrAHH=[],arrAHA=[];
-            o.bookmakers.forEach(function(bk){
-              (bk.bets||[]).forEach(function(bet){
-                if(bet.name==='Match Winner'||bet.name==='Home/Draw/Away'){
-                  var hm=(bet.values||[]).find(function(v){return v.value==='Home';});
-                  var dr=(bet.values||[]).find(function(v){return v.value==='Draw';});
-                  var aw=(bet.values||[]).find(function(v){return v.value==='Away';});
-                  if(hm&&parseFloat(hm.odd)>=1.05&&parseFloat(hm.odd)<=15)arr1.push(parseFloat(hm.odd));
-                  if(dr&&parseFloat(dr.odd)>=1.05&&parseFloat(dr.odd)<=15)arrN.push(parseFloat(dr.odd));
-                  if(aw&&parseFloat(aw.odd)>=1.05&&parseFloat(aw.odd)<=15)arr2.push(parseFloat(aw.odd));
-                }
-                if(bet.name==='Goals Over/Under'){
-                  (bet.values||[]).forEach(function(v){
-                    if(v.value==='Over 1.5')arr15.push(parseFloat(v.odd));
-                    if(v.value==='Over 2.5')arr25.push(parseFloat(v.odd));
-                    if(v.value==='Under 2.5')arru25.push(parseFloat(v.odd));
-                    if(v.value==='Over 3.5')arr35.push(parseFloat(v.odd));
-                    if(v.value==='Under 3.5')arru35.push(parseFloat(v.odd));
-                  });
-                }
-                if(bet.name==='Double Chance'){
-                  var d1x=(bet.values||[]).find(function(v){return v.value==='Home/Draw';});
-                  var dx2=(bet.values||[]).find(function(v){return v.value==='Draw/Away';});
-                  var d12=(bet.values||[]).find(function(v){return v.value==='Home/Away';});
-                  if(d1x)arr1x.push(parseFloat(d1x.odd));
-                  if(dx2)arrx2.push(parseFloat(dx2.odd));
-                  if(d12)arr12.push(parseFloat(d12.odd));
-                }
-                if(bet.name==='Both Teams Score'){
-                  var by=(bet.values||[]).find(function(v){return v.value==='Yes';});
-                  var bn=(bet.values||[]).find(function(v){return v.value==='No';});
-                  if(by)arrby.push(parseFloat(by.odd));
-                  if(bn)arrbn.push(parseFloat(bn.odd));
-                }
-                if(bet.name==='Asian Handicap'){
-                  (bet.values||[]).forEach(function(v){
-                    var val=(v.value||'').toLowerCase();
-                    if(val.includes('home')&&val.includes('-0.5'))arrAHH.push(parseFloat(v.odd));
-                    if(val.includes('away')&&val.includes('+0.5'))arrAHA.push(parseFloat(v.odd));
-                  });
-                }
-              });
-            });
-            function med(a){
-              if(!a.length)return '--';
-              var s=a.slice().sort(function(x,y){return x-y;});
-              var m=Math.floor(s.length/2);
-              return (s.length%2?s[m]:((s[m-1]+s[m])/2)).toFixed(2);
-            }
-            var c1=med(arr1),cn=med(arrN),c2=med(arr2);
-            var co15=med(arr15),co25=med(arr25),cu25=med(arru25);
-            var dc1x=med(arr1x),dc2x=med(arrx2),dc12=med(arr12);
-            var btts_oui=med(arrby),btts_non=med(arrbn);
-            var ah_dom=med(arrAHH), ah_ext=med(arrAHA);
-            return {c1,cn,c2,co15,co25,cu25,co35:med(arr35),cu35:med(arru35),dc1x,dc2x,dc12,btts_oui,btts_non,ah_dom,ah_ext};
-          }
           function calcCriteres(stats,isDom,rank){
             if(!stats)return{fd:50,att:50,def:50,fr:50,mot:70,fat:50};
             var total=(stats.fixtures&&stats.fixtures.played&&stats.fixtures.played.total)||30;
@@ -1562,6 +1510,31 @@ jobs:
             }
             console.log('  [premium] '+rows.length+' lignes premium ecrites dans Supabase (match_premium_data).');
           }
+          // Snapshot 'prediction' : capture les inputs bruts disponibles au moment de
+          // la generation, pour permettre plus tard (walk-forward reel, pas invente)
+          // de mesurer si une feature (lineups, blessures, forme, H2H...) a
+          // effectivement de la valeur predictive. Voir
+          // supabase/migrations/0004_forward_snapshots.sql.
+          async function writeSnapshots(rows) {
+            if(!rows||!rows.length) return;
+            if(!SUPA_URL_PIPELINE||!SUPA_SERVICE_KEY){
+              console.log('  [snapshots] SUPABASE_SERVICE_ROLE_KEY non configure - '+rows.length+' snapshots NON persistes.');
+              return;
+            }
+            var u = new URL(SUPA_URL_PIPELINE);
+            var batchSize = 200;
+            for(var i=0;i<rows.length;i+=batchSize){
+              var batch = rows.slice(i,i+batchSize);
+              var r = await upsertJSON(u.hostname, '/rest/v1/match_snapshots?on_conflict=fixture_id,snapshot_type', batch, {
+                'apikey': SUPA_SERVICE_KEY,
+                'Authorization': 'Bearer '+SUPA_SERVICE_KEY,
+                'Prefer': 'resolution=merge-duplicates,return=minimal',
+              });
+              if(!r.ok) console.log('  [snapshots] echec upsert batch '+i+': status='+r.status+' '+(r.error||r.body||'').toString().slice(0,200));
+              await sleep(100);
+            }
+            console.log('  [snapshots] '+rows.length+' snapshots ecrits dans Supabase (match_snapshots).');
+          }
           async function main(){
             console.log('=== IASHARK',TODAY,'===');
             var fixtures = await getFixtures();
@@ -1684,6 +1657,7 @@ jobs:
             console.log('Cache persistant : ' + Object.keys(matchCache).length + ' match(s) deja verrouille(s) depuis un run precedent - prediction conservee a l\'identique');
             var matchsData=[];
             var premiumRows=[];
+            var snapshotRows=[];
             var standingsCache={};
             for(var fi=0;fi<fixtures.length;fi++){
               var fix=fixtures[fi];
@@ -2145,6 +2119,25 @@ jobs:
                 raw_response:an||null,
                 pipeline_sha:process.env.GITHUB_SHA||null,
               });
+              snapshotRows.push({
+                fixture_id:f.id,
+                snapshot_type:'prediction',
+                model_version:MODEL_VERSION,
+                pipeline_sha:process.env.GITHUB_SHA||null,
+                raw_inputs:{
+                  odds:odds||null,
+                  pinnacle_odds:pinnacleOdds||null,
+                  injuries:injuries||[],
+                  lineups:lineups||null,
+                  team_stats_home:sH||null,team_stats_away:sA||null,
+                  match_stats_home:matchStatsH||null,match_stats_away:matchStatsA||null,
+                  h2h:h2hFormatted||[],
+                  weather:wx||null,
+                  referee:refStats||null,
+                  standing_home:entryH||null,standing_away:entryA||null,
+                  elo_home:eloH||null,elo_away:eloA||null,
+                },
+              });
               matchsData.push(matchObj);
               console.log('  OK conf='+matchObj.conf+' edge='+edgeVal+' pari='+matchObj.pari_rec);
             }
@@ -2154,6 +2147,7 @@ jobs:
             fs.writeFileSync('data.json',JSON.stringify({matchs:allMatchsData},null,2));
             console.log('\n=== DONE: '+allMatchsData.length+' matchs total ===');
             await writePremiumData(premiumRows);
+            await writeSnapshots(snapshotRows);
             await updateHistorique(allMatchsData);
             await updateTransferts(fixtures);
             await updateRumeurs();

@@ -1,0 +1,98 @@
+"use strict";
+const test = require("node:test");
+const assert = require("node:assert/strict");
+const { pickMarketDeterministic, computeRiskLabel, computeModelAgreement, computeDataQualityScore } = require("../lib/decision.js");
+
+test("pickMarketDeterministic: choisit le marche de plus haute probabilite modele", () => {
+  const markets = [
+    { market: "Over 2.5", prob: 55, cote: 1.9 },
+    { market: "BTTS Oui", prob: 68, cote: 1.7 },
+    { market: "DC 1X", prob: 60, cote: 1.3 },
+  ];
+  const picked = pickMarketDeterministic(markets);
+  assert.equal(picked.market, "BTTS Oui");
+});
+
+test("pickMarketDeterministic: liste vide -> null, jamais un marche invente", () => {
+  assert.equal(pickMarketDeterministic([]), null);
+  assert.equal(pickMarketDeterministic(null), null);
+});
+
+test("pickMarketDeterministic: un seul marche -> le retourne", () => {
+  const markets = [{ market: "Over 2.5", prob: 55, cote: 1.9 }];
+  assert.equal(pickMarketDeterministic(markets).market, "Over 2.5");
+});
+
+test("pickMarketDeterministic: egalite de probabilite -> deterministe (premier rencontre dans l'ordre du tableau)", () => {
+  const markets = [
+    { market: "A", prob: 60, cote: 1.9 },
+    { market: "B", prob: 60, cote: 1.8 },
+  ];
+  assert.equal(pickMarketDeterministic(markets).market, "A");
+});
+
+test("computeRiskLabel: cote basse -> FAIBLE, moyenne -> MODERE, haute -> ELEVE", () => {
+  assert.equal(computeRiskLabel(1.5), "FAIBLE");
+  assert.equal(computeRiskLabel(1.9), "MODERE");
+  assert.equal(computeRiskLabel(3.5), "ELEVE");
+});
+
+test("computeRiskLabel: bornes exactes", () => {
+  assert.equal(computeRiskLabel(1.75), "MODERE"); // pas strictement < 1.75
+  assert.equal(computeRiskLabel(2.2), "MODERE"); // <= 2.2
+  assert.equal(computeRiskLabel(2.21), "ELEVE");
+});
+
+test("computeRiskLabel: cote invalide -> repli MODERE, pas de crash", () => {
+  assert.equal(computeRiskLabel(null), "MODERE");
+  assert.equal(computeRiskLabel("abc"), "MODERE");
+  assert.equal(computeRiskLabel(0), "MODERE");
+});
+
+test("computeModelAgreement: modeles identiques -> Fort, stdDev=0", () => {
+  const r = computeModelAgreement([55, 55, 55]);
+  assert.equal(r.label, "Fort");
+  assert.equal(r.stdDev, 0);
+});
+
+test("computeModelAgreement: modeles tres divergents -> Faible", () => {
+  const r = computeModelAgreement([20, 50, 80]);
+  assert.equal(r.label, "Faible");
+});
+
+test("computeModelAgreement: divergence moderee -> Moyen", () => {
+  const r = computeModelAgreement([45, 55, 65]);
+  assert.equal(r.label, "Moyen", "stdDev=" + r.stdDev);
+});
+
+test("computeModelAgreement: moins de 2 valeurs valides -> Faible par defaut, pas de crash", () => {
+  const r = computeModelAgreement([55]);
+  assert.equal(r.label, "Faible");
+  assert.equal(r.stdDev, null);
+});
+
+test("computeDataQualityScore: toutes les sources presentes -> 100", () => {
+  const r = computeDataQualityScore({
+    hasTeamStatsHome: true, hasTeamStatsAway: true, hasOdds: true,
+    hasInjuries: true, hasH2H: true, hasElo: true, hasLineups: true,
+  });
+  assert.equal(r.score, 100);
+  assert.equal(r.label, "Élevée");
+});
+
+test("computeDataQualityScore: aucune source -> 0", () => {
+  const r = computeDataQualityScore({});
+  assert.equal(r.score, 0);
+  assert.equal(r.label, "Faible");
+});
+
+test("computeDataQualityScore: partiel -> label Moyenne dans la plage attendue", () => {
+  const r = computeDataQualityScore({ hasTeamStatsHome: true, hasTeamStatsAway: true, hasOdds: true });
+  assert.ok(r.score >= 40 && r.score < 70, "score=" + r.score);
+  assert.equal(r.label, "Moyenne");
+});
+
+test("computeDataQualityScore: flags null -> 0, pas de crash", () => {
+  const r = computeDataQualityScore(null);
+  assert.equal(r.score, 0);
+});

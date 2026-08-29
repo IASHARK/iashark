@@ -36,6 +36,7 @@ jobs:
           const { fractionalKelly } = require('./lib/betting.js');
           const { resolveMarketWin } = require('./lib/resolvers.js');
           const { parseOdds } = require('./lib/odds.js');
+          const { pickMarketDeterministic, computeRiskLabel, computeModelAgreement, computeDataQualityScore } = require('./lib/decision.js');
           // Identifiant du generateur de predictions actif. A incrementer/renommer
           // quand le moteur change reellement (ex: introduction du moteur V2.1
           // multi-modeles §10 du MASTER) pour pouvoir comparer les performances
@@ -1031,40 +1032,22 @@ jobs:
                      +' | '+d.away+' marque '+s.pct_away_mark+'%, encaisse '+s.pct_home_conc+'% - Probabilite but: '+s.prob+'%';
                  }).join('\n')+'\n'
                 :'')
-              +'\n=== TON ANALYSE ===\n'
-              +'Tu es un analyste sportif professionnel. Tu recois les donnees ci-dessus et tu choisis librement le meilleur marche.\n'
-              +'\nREGLES DE SELECTION DU MARCHE :\n'
-              +'0. PRIORITE ABSOLUE : le marche choisi DOIT correspondre a celui ayant la probabilite modele (Phase 2 - Poisson/Dixon-Coles/Monte-Carlo) la plus elevee parmi les marches disponibles. Les signaux qualitatifs (forme, motivation, absences) servent a AJUSTER la confiance, jamais a choisir un marche que le modele ne favorise pas.\n'
-              +'0bis. Exception rare : si tu ecartes le marche le mieux note par le modele pour un autre, tu dois justifier explicitement pourquoi dans verdict_shark (ex: titulaire cle absent non encore integre au modele) - ne fais jamais ce choix silencieusement.\n'
-              +'1. Choisis le marche dont les signaux sont les plus convergents (Phase 1 + Phase 2 + Monte-Carlo pointent dans la meme direction)\n'
-              +'2. Verifie la coherence avec les scores Monte-Carlo - si Over 2.5 mais top scores sont 0-0/1-0, ne choisis pas Over 2.5\n'
-              +'3. Aucun marche n\'est favorise a priori - les 8 marches (Over/Under 2.5, BTTS Oui/Non, DC 1X/X2, Victoire seche) sont tous equivalents au depart\n'
-              +'4. Si les signaux sont contradictoires ou insuffisants -> passe_ton_tour=true\n'
-              +'5. Si aucun marche n\'a de cote disponible >= 1.50 -> passe_ton_tour=true\n'
-              +'6. ANCRAGE OBLIGATOIRE DES TEXTES : contexte et facteur_x doivent citer un chiffre EXACT tire des donnees ci-dessus (classement #X, forme 5 derniers, xG, ecart ELO, % de buts par tranche, etc.). N\'invente jamais un enjeu ou un classement qui n\'apparait pas dans les donnees fournies - si aucune donnee d\'enjeu n\'est disponible (pas de ligne "Enjeu DOM/EXT"), ne mentionne pas d\'enjeu du tout plutot que d\'en inventer un vague. Une phrase sans chiffre precis est invalide.\n'
-              +'\nCONFIANCE : note continue de 5.5 a 9.0 refletant fidelement la force reelle du signal - JAMAIS de valeur "ronde" par defaut (evite de toujours tomber sur 7.0, 7.5 ou 8.0).\n'
-              +'Base-toi precisement sur : nombre de signaux convergents entre Phase 1 et Phase 2, ecart entre les modeles (Poisson/Dixon-Coles/Monte-Carlo - s\'ils divergent, baisse la note), confirmation ELO+Pinnacle, taille de l\'echantillon de matchs disponibles.\n'
-              +'Reperes : 5.5-6.4 = signal correct mais pas exceptionnel | 6.5-7.4 = signal solide | 7.5-8.4 = signal tres solide multi-convergent | 8.5-9.0 = cas rarissime ou absolument tout converge.\n'
-              +'Si le signal est trop faible pour meriter une note, ne force rien : passe_ton_tour=true plutot que de gonfler artificiellement une confiance basse.\n'
-              +'RISQUE: FAIBLE si cote <1.75 + signaux convergents | MODERE si cote 1.75-2.20 | ELEVE sinon\n\n';
-            var jsonTpl = 'Reponds UNIQUEMENT avec ce JSON valide. Aucun texte avant ou apres. Aucun backtick.\n'
-              +'REGLE ABSOLUE: analyse_card, conseil, contexte, facteur_x, scenario, scenario_15min TOUJOURS remplis meme si passe_ton_tour=true.\n\n'
+              +'\n=== DECISION DEJA PRISE PAR LE SYSTEME (ne pas la remettre en cause) ===\n'
+              +(d.no_signal
+                ?'Aucun marche exploitable (pas de cote fiable >= 1.50 disponible pour ce match). N\'invente ni marche ni cote : explique factuellement, en 1-2 phrases, pourquoi ce match manque de signal exploitable aujourd\'hui.\n'
+                :'Marche retenu : '+d.picked_market.market+' (cote '+d.picked_market.cote+', probabilite modele '+Math.round(d.picked_market.prob)+'%). C\'est mathematiquement le marche de plus haute probabilite modele parmi ceux disponibles avec une cote exploitable - deja calcule par le systeme. Ne le remets JAMAIS en cause, n\'en propose jamais un autre, ne cite jamais un autre marche comme "meilleur choix".\n')
+              +'\n=== TON ROLE (STRICT) ===\n'
+              +'Tu es un analyste sportif professionnel. Tu ne calcules RIEN : le marche, la cote, la probabilite, l\'edge et le niveau de risque sont deja decides ci-dessus par du code deterministe, pas par toi. Tu ne renvoies AUCUN nombre de probabilite, AUCUNE cote, AUCUN marche choisi, AUCUN score de confiance - uniquement du texte qui EXPLIQUE la decision deja prise, en citant les donnees reelles fournies plus haut.\n'
+              +'ANCRAGE OBLIGATOIRE DES TEXTES : contexte et facteur_x doivent citer un chiffre EXACT tire des donnees ci-dessus (classement #X, forme 5 derniers, xG, ecart ELO, % de buts par tranche, etc.). N\'invente jamais un enjeu ou un classement qui n\'apparait pas dans les donnees fournies - si aucune donnee d\'enjeu n\'est disponible (pas de ligne "Enjeu DOM/EXT"), ne mentionne pas d\'enjeu du tout plutot que d\'en inventer un vague. Une phrase sans chiffre precis est invalide.\n\n';
+            var jsonTpl = 'Reponds UNIQUEMENT avec ce JSON valide. Aucun texte avant ou apres. Aucun backtick. Ne renvoie AUCUN champ numerique de probabilite/cote/marche/confiance - uniquement les champs texte listes ci-dessous.\n'
+              +'REGLE ABSOLUE: tous les champs texte sont TOUJOURS remplis, meme si aucun marche exploitable n\'est disponible.\n\n'
               +'{\n'
-              +'"passe_ton_tour": false,\n'
-              +'"confiance": 0.0,\n'
-              +'"pari_rec": "[marche choisi EXACTEMENT comme nomme dans MARCHES DISPONIBLES ci-dessus] ou vide si passe_ton_tour",\n'
-              +'"cote_rec": "[cote exacte du marche choisi - copie depuis les donnees ci-dessus]",\n'
-              +'"marche": "[DOUBLE_CHANCE | TOTAL_BUTS | BTTS]",\n'
-              +'"risque": "[FAIBLE | MODERE | ELEVE]",\n'
-              +'"verdict_shark": "[marche] a [cote] - [1 phrase factuelle sur le signal le plus fort]",\n'
+              +'"verdict_shark": "[1 phrase factuelle sur le signal le plus fort pour le marche deja retenu ci-dessus]",\n'
               +'"analyse_card": "[2-3 phrases factuelles - cite les stats qui justifient ce marche]",\n'
-              +'"conseil": "[1 phrase directe et actionnable]",\n'
+              +'"conseil": "[1 phrase directe et factuelle]",\n'
               +'"contexte": "[classement/forme du match, avec les chiffres exacts fournis ci-dessus - enjeu UNIQUEMENT si une ligne Enjeu DOM/EXT existe dans les donnees]",\n'
               +'"facteur_x": "[LE signal statistique le plus fort qui justifie ce marche, avec le chiffre exact cite]",\n'
               +'"score_central": "'+scoreCentral+'",\n'
-              +'"p1": '+d.final_p1+', "pn": '+d.final_pN+', "p2": '+d.final_p2+',\n'
-              +'"po25": '+d.poisson_over25+', "btts": '+d.poisson_bttsY+',\n'
-              +'"vbet": "[OUI si confiance >= 7.0 et passe_ton_tour=false, sinon NON]",\n'
               +'"scenario": {"phase1":"[TOUJOURS REMPLI]","phase2":"[TOUJOURS REMPLI]","phase3":"[TOUJOURS REMPLI]"},\n'
               +(d.slotSummary&&d.slotSummary.length
                 ?'"scenario_15min": [\n'
@@ -1076,7 +1059,7 @@ jobs:
             var r = await postJSONWithRetry('api.anthropic.com', '/v1/messages', {
               model: 'claude-sonnet-4-6',
               max_tokens: 2500,
-              system: 'Tu es IASHARK, un analyste sportif professionnel. Tu reponds EXCLUSIVEMENT en JSON valide. Aucun backtick. Tu n\'inventes jamais de statistiques. Tu choisis librement le meilleur marche parmi ceux proposes en te basant uniquement sur les donnees statistiques fournies. Tu es totalement neutre - aucun marche n\'est favorise a priori. Tu verifies toujours la coherence entre le marche choisi et les scores Monte-Carlo. Si les signaux sont insuffisants ou contradictoires, tu passes ton tour.',
+              system: 'Tu es IASHARK, un analyste sportif professionnel. Tu reponds EXCLUSIVEMENT en JSON valide. Aucun backtick. Tu n\'inventes jamais de statistiques. Le marche, la cote, la probabilite et le niveau de risque sont deja decides par du code deterministe avant que tu n\'intervienne - tu ne les recalcules jamais, tu ne les modifies jamais, tu ne renvoies aucun champ numerique de probabilite/cote/confiance. Ton unique role est d\'ecrire un texte factuel qui explique la decision deja prise, en citant les donnees statistiques fournies.',
               messages: [{role:'user', content:prompt+jsonTpl}]
             }, {'x-api-key':ANT_KEY, 'anthropic-version':'2023-06-01'});
             var txt=((r.content||[]).find(function(b){return b.type==='text';})||{}).text||'{}';
@@ -1906,6 +1889,32 @@ jobs:
                 return m.cote&&m.cote!=='--'&&parseFloat(m.cote)>=1.50;
               });
               var nodeKelly=null;
+              // Selection du marche, edge, Kelly et niveau de risque : entierement
+              // deterministes, calcules AVANT l'appel au LLM (MASTER V2.1 §1.3/§7.8/
+              // §10.AJ : "Claude ne peut jamais [...] selectionner un marche via
+              // intuition [...] calculer edge/EV/Kelly"). Le LLM ne recoit plus que
+              // le resultat deja decide pour le commenter en texte - si Claude est
+              // indisponible, ce bloc produit exactement la meme decision (§10.AJ:
+              // "le moteur doit fonctionner a 100% sans lui").
+              var pickedMarket=pickMarketDeterministic(allMarkets);
+              var riskLabelCode=pickedMarket?computeRiskLabel(pickedMarket.cote):'MODERE';
+              var kellyVal='0';
+              var edgeVal='';
+              if(pickedMarket){
+                var choseCote=parseFloat(pickedMarket.cote);
+                var choseProb=pickedMarket.prob;
+                if(pickedMarket.marketProb!=null){
+                  edgeVal=(choseProb-pickedMarket.marketProb>=0?'+':'')+(choseProb-pickedMarket.marketProb).toFixed(1)+'%';
+                }
+                if(choseProb&&choseCote&&choseCote>1){
+                  var k=fractionalKelly(choseProb/100,choseCote,0.25);
+                  if(k!=null) kellyVal=k;
+                }
+              }
+              // Pas de marche exploitable (aucune cote >= 1.50) -> aucun signal a
+              // afficher, decide en code (reprend la regle 5 de l'ancien prompt,
+              // qui n'a plus besoin d'etre laissee a l'appreciation du LLM).
+              var noSignal=!pickedMarket;
               var injuries=(injRaw||[]).map(function(inj){return{name:inj.name,team:inj.team===home.id?home.id:away.id,reason:inj.reason||'Blessure',status:(inj.status||'out').toLowerCase().includes('suspend')?'suspended':'out',impact:'medium'};});
               var matchup=calcMatchup(xgH,xgA,sH,sA);
               var keyAbsenceAlerts=calcKeyAbsences(injuries,topScorersH,topScorersA,home.id,away.id,bmHdom,mdHdom,bmAext,meAext);
@@ -1974,6 +1983,7 @@ jobs:
                 market_source:usingPinnacle?'Pinnacle (sharp)':(marketOdds?'Cotes moyennes multi-bookmakers':null),
                 final_p1:anchored.p1,final_pN:anchored.pN,final_p2:anchored.p2,
                 all_markets:allMarkets,node_kelly:nodeKelly,
+                picked_market:pickedMarket,no_signal:noSignal,
                 lineup_home_formation:lineups&&lineups.home?lineups.home.formation:null,
                 lineup_away_formation:lineups&&lineups.away?lineups.away.formation:null,
                 streakH,streakA,forme5H,forme5A,
@@ -1985,43 +1995,9 @@ jobs:
                 isKnockout:isKnockout,
               });
               await sleep(500);
-              if(an&&an.passe_ton_tour===true){
-                console.log('  PASS: '+home.name+' vs '+away.name);
-                an.pari_rec='';an.cote_rec='';an.confiance=0;an.vbet='NON';an.verdict_shark='';an.kelly='0';an.marche='';an.risque='ELEVE';
-              }
-              if(an&&!an.passe_ton_tour&&an.pari_rec&&!an.cote_rec){
-                var found=(allMarkets||[]).find(function(m){return m.market.toLowerCase()===an.pari_rec.toLowerCase();});
-                if(found) an.cote_rec=String(found.cote);
-              }
-              // Kelly et edge reels, a partir du marche effectivement choisi par le
-              // modele (an.pari_rec) et de sa probabilite/cote dans allMarkets - plus
-              // aucune valeur codee en dur. Le "%" dans edgeVal est intentionnel :
-              // match.html.parseEdgeText() l'extrait par regex, kellyVal reste un
-              // nombre nu en pourcentage (match.html/pro.html l'utilisent directement
-              // comme un pourcentage de bankroll).
-              function nmMkt(s){return (s||'').toLowerCase().replace(/[^a-z0-9]/g,'');}
-              var chosenMarket=an&&an.pari_rec?(function(){
-                var pn=nmMkt(an.pari_rec);
-                return (allMarkets||[]).find(function(x){var xn=nmMkt(x.market);return xn===pn||pn.includes(xn)||xn.includes(pn);});
-              })():null;
-              var kellyVal='0';
-              var edgeVal='';
-              if(chosenMarket){
-                var choseCote=parseFloat(an.cote_rec)||parseFloat(chosenMarket.cote);
-                var choseProb=chosenMarket.prob;
-                if(chosenMarket.marketProb!=null){
-                  edgeVal=(choseProb-chosenMarket.marketProb>=0?'+':'')+(choseProb-chosenMarket.marketProb).toFixed(1)+'%';
-                }
-                if(choseProb&&choseCote&&choseCote>1){
-                  var k=fractionalKelly(choseProb/100,choseCote,0.25);
-                  if(k!=null) kellyVal=k;
-                }
-              }
-              // "val" (badge "value bet" affiche publiquement) reposait uniquement sur
-              // l'auto-evaluation du LLM (vbet='OUI' + confiance>=7.0) - desormais exige
-              // en plus un edge reellement positif (kellyVal!=='0'), pour ne plus jamais
-              // annoncer une "value bet" que le calcul mathematique dement.
-              matchObj.val = matchObj.val && kellyVal!=='0';
+              // pickedMarket/kellyVal/edgeVal/riskLabelCode/noSignal deja calcules
+              // AVANT l'appel LLM (voir plus haut) - an ne contient plus que du texte
+              // narratif, plus aucune re-selection de marche ni recalcul ici.
               var classementObj=null;
               if(entryH||entryA){
                 var rankH=rkH||99,rankA=rkA||99;
@@ -2029,13 +2005,31 @@ jobs:
                 var maxRank=Math.min(Math.max(rankH,rankA)+2,standings.length);
                 classementObj={league_name:lg.name,standings:standings.filter(function(s){return s.rank>=minRank&&s.rank<=maxRank;}).map(function(s){return{rank:s.rank,name:s.team.name,team_id:s.team.id,played:s.all.played,won:s.all.win,drawn:s.all.draw,lost:s.all.lose,gd:s.goalsDiff,pts:s.points,form:s.form||''};}),home:entryH?{rank:entryH.rank,pts:entryH.points,played:entryH.all.played,won:entryH.all.win,lost:entryH.all.lose,gd:entryH.goalsDiff,form:entryH.form||''}:null,away:entryA?{rank:entryA.rank,pts:entryA.points,played:entryA.all.played,won:entryA.all.win,lost:entryA.all.lose,gd:entryA.goalsDiff,form:entryA.form||''}:null};
               }
-              var risqueRaw=an?(an.risque||'MODERE'):'MODERE';
-              var risqueNorm=risqueRaw.toUpperCase();
-              if(risqueNorm.includes('FAIBLE'))risqueNorm='FAIBLE';
-              else if(risqueNorm.includes('ELEVE')||risqueNorm.includes('HIGH'))risqueNorm='ELEVE';
-              else risqueNorm='MODERE';
               var parisDateObj=new Date(new Date(f.date||TODAY).toLocaleString('en-US',{timeZone:'Europe/Paris'}));
               var dateVraieParis=parisDateObj.getFullYear()+'-'+String(parisDateObj.getMonth()+1).padStart(2,'0')+'-'+String(parisDateObj.getDate()).padStart(2,'0');
+              // Categorie de marche deterministe (etait an.marche, choisie par le LLM).
+              function categorizeMarket(marketName){
+                var n=(marketName||'').toLowerCase();
+                if(n.includes('over')||n.includes('under')) return 'TOTAL_BUTS';
+                if(n.includes('btts')) return 'BTTS';
+                if(n.includes('dc ')||n.includes('handicap')||n.includes('dnb')) return 'DOUBLE_CHANCE';
+                return 'RESULTAT';
+              }
+              // Data Quality Score (MASTER V2.1 §11.1) et Model Agreement (§10.AB/§11.2) :
+              // deterministes, remplacent l'ancien "Confiance /10" auto-rapporte par le LLM
+              // (dont le backtest de cette session a mesure qu'il etait activement
+              // desinformatif - voir BACKTEST_REPORT.json, Brier score 0.2814 > repere
+              // pile-ou-face 0.25).
+              var dataQuality=computeDataQualityScore({
+                hasTeamStatsHome:!!(sH&&sH.fixtures&&sH.fixtures.played&&((sH.fixtures.played.home||0)>0||(sH.fixtures.played.away||0)>0)),
+                hasTeamStatsAway:!!(sA&&sA.fixtures&&sA.fixtures.played&&((sA.fixtures.played.home||0)>0||(sA.fixtures.played.away||0)>0)),
+                hasOdds:!!(odds.c1&&odds.c1!=='--'),
+                hasInjuries:!!(injuries&&injuries.length),
+                hasH2H:!!(h2hRaw&&h2hRaw.length),
+                hasElo:!!(eloH&&eloA),
+                hasLineups:!!(lineups&&(lineups.home||lineups.away)),
+              });
+              var modelAgreement=computeModelAgreement([poissonProbs.p1,poissonProbs.dixon?poissonProbs.dixon.p1:poissonProbs.p1,poissonProbs.montecarlo?poissonProbs.montecarlo.p1:poissonProbs.p1]);
               var matchObj={
                 id:f.id,sport:'football',
                 league_id:lg.id,
@@ -2043,37 +2037,37 @@ jobs:
                 home:{n:home.name,id:home.id},away:{n:away.name,id:away.id},
                 league:lg.name,ligue_icon:lgIcon(lg.name),league_key:lgKey(lg.id),
                 date:(dateVraieParis+' '+heure).trim(),cat:['all'],
-                val:an?(an.vbet==='OUI'&&(an.confiance||0)>=7.0):false,
-                hot:an?((an.confiance||0)>=7.5):false,
-                conf:(function(){
-                  var raw=an?(an.confiance||an.confidence||0):0;
-                  var val=parseFloat(String(raw).replace(',','.'))||0;
-                  if(val>0&&val<=1.0) val=val*10;
-                  return Math.round(val*10)/10;
-                })(),
-                p1:an&&(an.p1||0)>0?(an.p1||0):(anchored.p1||0),
-                pn:an&&(an.pn||0)>0?(an.pn||0):(anchored.pN||0),
-                p2:an&&(an.p2||0)>0?(an.p2||0):(anchored.p2||0),
-                po15:0,po25:an?(an.po25||0):0,btts:an?(an.btts||0):0,
+                val:!noSignal&&kellyVal!=='0',
+                hot:!noSignal&&modelAgreement.label==='Fort'&&kellyVal!=='0',
+                // "conf" (echelle 0-10, conservee pour compatibilite avec le front et
+                // historique.json) est desormais la probabilite reelle du modele pour le
+                // marche retenu (pickedMarket.prob, deterministe) plutot que
+                // l'auto-evaluation subjective du LLM. Repli sur le Data Quality Score
+                // quand aucun marche n'est exploitable (rien a exprimer en probabilite).
+                conf:pickedMarket?Math.round((pickedMarket.prob/10)*10)/10:Math.round((dataQuality.score/10)*10)/10,
+                data_quality_score:dataQuality.score,data_quality_label:dataQuality.label,
+                model_agreement:modelAgreement.label,
+                p1:anchored.p1||0,pn:anchored.pN||0,p2:anchored.p2||0,
+                po15:0,po25:poissonProbs.over25||0,btts:poissonProbs.bttsY||0,
                 c1:odds.c1,cn:odds.cn,c2:odds.c2,co15:odds.co15,co25:odds.co25,cu25:odds.cu25,
                 dc1x:odds.dc1x,dc2x:odds.dc2x,dc12:odds.dc12,cdc1x:odds.dc1x,cdc2x:odds.dc2x,
                 ah_dom:odds.ah_dom||'--',ah_ext:odds.ah_ext||'--',co35:odds.co35||'--',
                 cbtts:odds.btts_oui,cbtts_non:odds.btts_non,btts_oui:odds.btts_oui,btts_non:odds.btts_non,
-                marche:an?(an.marche||'RESULTAT'):'RESULTAT',
-                risque:risqueNorm,pari_rec:an?(an.pari_rec||''):'',
-                cote_rec:an?(an.cote_rec||''):'',
-                no_signal:an&&an.passe_ton_tour===true?true:!(an&&an.pari_rec),
-                no_signal_label:(an&&an.passe_ton_tour===true)||(!(an&&an.pari_rec))?'Aucun signal clair sur ce match':'',
+                marche:pickedMarket?categorizeMarket(pickedMarket.market):'RESULTAT',
+                risque:riskLabelCode,pari_rec:pickedMarket?pickedMarket.market:'',
+                cote_rec:pickedMarket?String(pickedMarket.cote):'',
+                no_signal:noSignal,
+                no_signal_label:noSignal?'Aucun signal clair sur ce match':'',
                 mise:'2-3% bankroll',
                 scenario:an?(an.scenario||{phase1:'',phase2:'',phase3:''}):null,
                 scenario_15min:an?(an.scenario_15min||null):null,
                 analyse_card:an?(an.analyse_card||an.conseil||''):'',
                 conseil_public:an?(an.conseil||an.analyse_card||''):'',
                 contexte:an?(an.contexte||''):'',
-                vbet:an?(an.vbet||'NON'):'NON',
+                vbet:(!noSignal&&kellyVal!=='0')?'OUI':'NON',
                 scores:an&&an.score_central?[an.score_central]:[],
                 mc_scores:poissonProbs.montecarlo?poissonProbs.montecarlo.top_scores:[],
-                paris_safe:{bet:an?(an.pari_rec||''):'',cote:an?(parseFloat(an.cote_rec)||odds.c1):odds.c1,proba:an?(an.p1||0)+'%':''},
+                paris_safe:{bet:pickedMarket?pickedMarket.market:'',cote:pickedMarket?parseFloat(pickedMarket.cote):odds.c1,proba:pickedMarket?Math.round(pickedMarket.prob)+'%':''},
                 paris_risque:{bet:'',cote:'',proba:''},
                 stade:{nom:f.venue&&f.venue.name?(f.venue.name+(f.venue.city?' - '+f.venue.city:'')):home.name+' (domicile)',cap:'',meteo:wx?wx.emoji:'',temp:wx?wx.temp:'',desc:wx?wx.desc:''},
                 crit_home:critH,crit_away:critA,

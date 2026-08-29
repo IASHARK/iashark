@@ -1,37 +1,231 @@
 {
-  "generated_at": "2026-08-29T16:07:31.814Z",
+  "generated_at": "2026-08-29T18:05:40.932Z",
   "source": "historique.json",
   "n_total_predictions": 300,
-  "n_resolved_singles_used": 291,
-  "n_excluded": 9,
-  "metrics": {
-    "brier_score": 0.2814,
-    "log_loss": 0.7671,
-    "expected_calibration_error": 0.1635
+  "n_resolved_singles": 291,
+  "comparison": {
+    "OLD_PIPELINE_LLM_CONFIDENCE": {
+      "label": "OLD_PIPELINE_LLM_CONFIDENCE",
+      "n": 291,
+      "metrics": {
+        "brier_score": 0.2814,
+        "log_loss": 0.7671,
+        "expected_calibration_error": 0.1635
+      },
+      "calibration_table": [
+        {
+          "bucket": "6-7",
+          "n": 138,
+          "avg_predicted_prob_pct": 66.3,
+          "actual_win_rate_pct": 56.5,
+          "gap_pct": -9.8
+        },
+        {
+          "bucket": "7-8",
+          "n": 142,
+          "avg_predicted_prob_pct": 74,
+          "actual_win_rate_pct": 53.5,
+          "gap_pct": -20.5
+        },
+        {
+          "bucket": "8+",
+          "n": 11,
+          "avg_predicted_prob_pct": 81.5,
+          "actual_win_rate_pct": 36.4,
+          "gap_pct": -45.2
+        }
+      ],
+      "by_probability_band": [
+        {
+          "band": "60-70%",
+          "n": 138,
+          "avg_predicted_prob_pct": 66.3,
+          "actual_win_rate_pct": 56.5,
+          "gap_pct": -9.8
+        },
+        {
+          "band": "70-80%",
+          "n": 142,
+          "avg_predicted_prob_pct": 74,
+          "actual_win_rate_pct": 53.5,
+          "gap_pct": -20.5
+        },
+        {
+          "band": "80-90%",
+          "n": 11,
+          "avg_predicted_prob_pct": 81.5,
+          "actual_win_rate_pct": 36.4,
+          "gap_pct": -45.2
+        }
+      ],
+      "by_market": [
+        {
+          "market": "btts_non",
+          "n": 15,
+          "avg_predicted_prob_pct": 69.8,
+          "actual_win_rate_pct": 60,
+          "gap_pct": -9.8
+        },
+        {
+          "market": "btts_oui",
+          "n": 50,
+          "avg_predicted_prob_pct": 69.8,
+          "actual_win_rate_pct": 62,
+          "gap_pct": -7.8
+        },
+        {
+          "market": "dc_x2",
+          "n": 26,
+          "avg_predicted_prob_pct": 68.3,
+          "actual_win_rate_pct": 46.2,
+          "gap_pct": -22.1
+        },
+        {
+          "market": "over25",
+          "n": 89,
+          "avg_predicted_prob_pct": 74.7,
+          "actual_win_rate_pct": 47.2,
+          "gap_pct": -27.5
+        },
+        {
+          "market": "under25",
+          "n": 59,
+          "avg_predicted_prob_pct": 67.4,
+          "actual_win_rate_pct": 62.7,
+          "gap_pct": -4.6
+        },
+        {
+          "market": "victoire_dom",
+          "n": 28,
+          "avg_predicted_prob_pct": 69.3,
+          "actual_win_rate_pct": 57.1,
+          "gap_pct": -12.2
+        },
+        {
+          "market": "victoire_ext",
+          "n": 22,
+          "avg_predicted_prob_pct": 70.1,
+          "actual_win_rate_pct": 40.9,
+          "gap_pct": -29.2
+        }
+      ]
+    },
+    "MARKET_IMPLIED_PROBABILITY_PROXY": {
+      "label": "MARKET_IMPLIED_PROBABILITY_PROXY",
+      "n": 290,
+      "metrics": {
+        "brier_score": 0.2497,
+        "log_loss": 0.6929,
+        "expected_calibration_error": 0.085
+      },
+      "calibration_table": [
+        {
+          "bucket": "cote 1.5-1.75",
+          "n": 172,
+          "avg_predicted_prob_pct": 62.3,
+          "actual_win_rate_pct": 52.9,
+          "gap_pct": -9.3
+        },
+        {
+          "bucket": "cote 1.75-2.2",
+          "n": 102,
+          "avg_predicted_prob_pct": 53,
+          "actual_win_rate_pct": 59.8,
+          "gap_pct": 6.8
+        },
+        {
+          "bucket": "cote>=2.2",
+          "n": 16,
+          "avg_predicted_prob_pct": 41.4,
+          "actual_win_rate_pct": 31.3,
+          "gap_pct": -10.2
+        }
+      ],
+      "by_probability_band": [
+        {
+          "band": "30-40%",
+          "n": 5,
+          "avg_predicted_prob_pct": 38.1,
+          "actual_win_rate_pct": 40,
+          "gap_pct": 1.9
+        },
+        {
+          "band": "40-50%",
+          "n": 23,
+          "avg_predicted_prob_pct": 45.4,
+          "actual_win_rate_pct": 43.5,
+          "gap_pct": -1.9
+        },
+        {
+          "band": "50-60%",
+          "n": 119,
+          "avg_predicted_prob_pct": 54.8,
+          "actual_win_rate_pct": 56.3,
+          "gap_pct": 1.5
+        },
+        {
+          "band": "60-70%",
+          "n": 143,
+          "avg_predicted_prob_pct": 63,
+          "actual_win_rate_pct": 54.5,
+          "gap_pct": -8.5
+        }
+      ],
+      "by_market": [
+        {
+          "market": "btts_non",
+          "n": 15,
+          "avg_predicted_prob_pct": 57.3,
+          "actual_win_rate_pct": 60,
+          "gap_pct": 2.7
+        },
+        {
+          "market": "btts_oui",
+          "n": 50,
+          "avg_predicted_prob_pct": 58.4,
+          "actual_win_rate_pct": 62,
+          "gap_pct": 3.6
+        },
+        {
+          "market": "dc_x2",
+          "n": 26,
+          "avg_predicted_prob_pct": 57.5,
+          "actual_win_rate_pct": 46.2,
+          "gap_pct": -11.3
+        },
+        {
+          "market": "over25",
+          "n": 88,
+          "avg_predicted_prob_pct": 60.4,
+          "actual_win_rate_pct": 46.6,
+          "gap_pct": -13.8
+        },
+        {
+          "market": "under25",
+          "n": 59,
+          "avg_predicted_prob_pct": 57.5,
+          "actual_win_rate_pct": 62.7,
+          "gap_pct": 5.2
+        },
+        {
+          "market": "victoire_dom",
+          "n": 28,
+          "avg_predicted_prob_pct": 55.6,
+          "actual_win_rate_pct": 57.1,
+          "gap_pct": 1.5
+        },
+        {
+          "market": "victoire_ext",
+          "n": 22,
+          "avg_predicted_prob_pct": 50.6,
+          "actual_win_rate_pct": 40.9,
+          "gap_pct": -9.7
+        }
+      ]
+    },
+    "brier_delta": -0.0317,
+    "brier_delta_interpretation": "Le proxy marche (1/cote) a un Brier score PLUS BAS (meilleur) que la confiance LLM sur cet echantillon."
   },
-  "calibration_table": [
-    {
-      "bucket": "6-7",
-      "n": 138,
-      "avg_predicted_prob_pct": 66.3,
-      "actual_win_rate_pct": 56.5,
-      "gap_pct": -9.8
-    },
-    {
-      "bucket": "7-8",
-      "n": 142,
-      "avg_predicted_prob_pct": 74,
-      "actual_win_rate_pct": 53.5,
-      "gap_pct": -20.5
-    },
-    {
-      "bucket": "8+",
-      "n": 11,
-      "avg_predicted_prob_pct": 81.5,
-      "actual_win_rate_pct": 36.4,
-      "gap_pct": -45.2
-    }
-  ],
-  "interpretation": "SURCONFIANCE DETECTEE : au moins un bucket de confiance a un taux de reussite reel significativement inferieur a la probabilite annoncee. Le score de confiance actuel (conf/10) n'est PAS une probabilite calibree.",
-  "limitation": "Echantillon reel mais limite (ancien pipeline, avant moteur V2.1). Ne valide PAS un futur moteur - sert de photographie de reference (baseline) pour mesurer un progres reel plus tard."
+  "IMPORTANT_LIMITATION": "Ceci compare OLD_PIPELINE (confiance LLM) a MARKET_IMPLIED_PROBABILITY_PROXY (1/cote), PAS au pipeline deterministe reel (lib/decision.js + calcFinalProbs). historique.json ne stocke aucune probabilite modele brute par prediction (seulement conf et cote), et cette session n'a pas acces a APISPORTS_KEY pour refetcher les donnees historiques et recalculer ce qu'aurait produit le nouveau moteur. Une vraie comparaison OLD vs DETERMINISTIC_PIPELINE necessite d'attendre l'accumulation de nouvelles predictions generees et resolues par le pipeline corrige (voir match_snapshots, deja en place pour cette collecte forward).",
+  "interpretation": "SURCONFIANCE DETECTEE dans OLD_PIPELINE : au moins un bucket de confiance LLM a un taux de reussite reel significativement inferieur a la probabilite annoncee."
 }

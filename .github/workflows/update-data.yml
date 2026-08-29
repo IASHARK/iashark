@@ -36,7 +36,7 @@ jobs:
           const { fractionalKelly } = require('./lib/betting.js');
           const { resolveMarketWin } = require('./lib/resolvers.js');
           const { parseOdds } = require('./lib/odds.js');
-          const { pickMarketDeterministic, computeRiskLabel, computeModelAgreement, computeDataQualityScore } = require('./lib/decision.js');
+          const { pickMarketDeterministic, computeRiskLabel, computeModelAgreement, computeDataQualityScore, computeReliability } = require('./lib/decision.js');
           // Identifiant du generateur de predictions actif. A incrementer/renommer
           // quand le moteur change reellement (ex: introduction du moteur V2.1
           // multi-modeles §10 du MASTER) pour pouvoir comparer les performances
@@ -2030,6 +2030,14 @@ jobs:
                 hasLineups:!!(lineups&&(lineups.home||lineups.away)),
               });
               var modelAgreement=computeModelAgreement([poissonProbs.p1,poissonProbs.dixon?poissonProbs.dixon.p1:poissonProbs.p1,poissonProbs.montecarlo?poissonProbs.montecarlo.p1:poissonProbs.p1]);
+              // Taille d'echantillon reelle (matchs joues cette saison par les deux
+              // equipes) - jamais la valeur de repli ||20/||30 utilisee ailleurs pour
+              // les calculs statistiques (qui doit rester un repli technique, pas une
+              // donnee affichee comme reelle). null si vraiment inconnu.
+              var sampleSizeH=(sH&&sH.fixtures&&sH.fixtures.played&&sH.fixtures.played.total)||null;
+              var sampleSizeA=(sA&&sA.fixtures&&sA.fixtures.played&&sA.fixtures.played.total)||null;
+              var sampleSizeReal=(sampleSizeH!=null&&sampleSizeA!=null)?Math.min(sampleSizeH,sampleSizeA):null;
+              var reliability=computeReliability(modelAgreement,dataQuality,sampleSizeReal);
               var matchObj={
                 id:f.id,sport:'football',
                 league_id:lg.id,
@@ -2039,11 +2047,30 @@ jobs:
                 date:(dateVraieParis+' '+heure).trim(),cat:['all'],
                 val:!noSignal&&kellyVal!=='0',
                 hot:!noSignal&&modelAgreement.label==='Fort'&&kellyVal!=='0',
-                // "conf" (echelle 0-10, conservee pour compatibilite avec le front et
-                // historique.json) est desormais la probabilite reelle du modele pour le
-                // marche retenu (pickedMarket.prob, deterministe) plutot que
-                // l'auto-evaluation subjective du LLM. Repli sur le Data Quality Score
-                // quand aucun marche n'est exploitable (rien a exprimer en probabilite).
+                // model_probability : LA probabilite finale du moteur pour le marche
+                // retenu (0-100, deterministe). C'est le dernier nombre calcule par
+                // l'ensemble Poisson/Dixon-Coles/Monte-Carlo (+ancrage marche Shin pour
+                // le 1X2) avant selection - jamais une valeur intermediaire brute. Ce
+                // n'EST PAS une "probabilite calibree" au sens statistique (isotonic/
+                // Platt, §10.S) : aucune calibration post-hoc n'a encore ete mesuree
+                // pour ce moteur (voir CALIBRATION_REPORT.md).
+                model_probability:pickedMarket?Math.round(pickedMarket.prob*10)/10:null,
+                // reliability : fiabilite/confiance, EXPLICITEMENT separee de la
+                // probabilite (retour utilisateur direct : ne jamais confondre les
+                // deux). Composite de signaux mesurables (accord des modeles, qualite
+                // des donnees, taille d'echantillon) - jamais une probabilite recopiee
+                // sous un autre nom. Voir lib/decision.js#computeReliability.
+                reliability:reliability,
+                // "conf" (echelle 0-10) : ALIAS DEPRECIE conserve uniquement pour
+                // compatibilite descendante avec le frontend actuel (match.html/
+                // pro.html/historique.html lisent encore ce champ) et historique.json.
+                // Vaut model_probability/10 - PAS un score de confiance independant.
+                // A SUPPRIMER une fois le frontend migre vers model_probability +
+                // reliability (Phase 5) : chercher toutes les lectures de `.conf`/
+                // `conf_bucket` dans le frontend et les remplacer avant de retirer ce
+                // champ. Ne jamais lui donner une valeur differente de
+                // model_probability/10 entre-temps (sinon on recree la confusion
+                // probabilite/confiance qu'on est en train de corriger).
                 conf:pickedMarket?Math.round((pickedMarket.prob/10)*10)/10:Math.round((dataQuality.score/10)*10)/10,
                 data_quality_score:dataQuality.score,data_quality_label:dataQuality.label,
                 model_agreement:modelAgreement.label,

@@ -2,6 +2,19 @@
 
 Document vivant, mis à jour à chaque changement réel du moteur. Décrit ce qui est **réellement construit et vérifié**, pas l'ambition finale du MASTER — pour l'ambition complète, voir `IASHARK_V2_EXECUTION_STATE.md` et le MASTER lui-même (§10.D à §10.AL).
 
+## `model_probability` : final vs intermédiaire, et asymétrie entre marchés
+
+Vérification demandée explicitement : `matchObj.model_probability` est-il la dernière valeur calculée par le moteur pour le marché retenu, ou une valeur brute intermédiaire écrasée ensuite ?
+
+**Réponse tracée dans le code** : c'est toujours la dernière valeur calculée, jamais une valeur intermédiaire — mais "dernière valeur" ne veut pas dire la même chose selon le marché, et c'est une vraie asymétrie architecturale à connaître :
+
+- **1X2 et Double Chance** : `pickedMarket.prob` vient de `anchored.p1/pN/p2`, qui EST le résultat final d'un blend entre l'ensemble Poisson/Dixon-Coles/Monte-Carlo/Elo et la probabilité fair du marché (retrait de marge Shin sur les cotes réelles, poids 0.55-0.65 vers le marché). C'est donc proche de ce que le MASTER appelle `MARKET_AWARE_PROBABILITY` (§10.2), bien que ce soit un blend linéaire simple plutôt qu'un modèle entraîné avec le marché comme feature.
+- **Over/Under et BTTS** : `pickedMarket.prob` vient directement de `poissonProbs.over25`/`poissonProbs.bttsY` — l'ensemble Poisson/Dixon-Coles/Monte-Carlo/Elo SANS aucun ancrage au marché. C'est `PURE_IASHARK_PROBABILITY` (§10.2), pas mélangée aux cotes.
+
+Aucune des deux n'est une **probabilité statistiquement calibrée** au sens du MASTER (§10.S, isotonic/Platt/temperature scaling contre l'historique réel des résultats) — ce moteur de calibration n'existe pas encore. "Final" ici veut dire "dernier nombre que le pipeline calcule avant de l'utiliser", pas "validé empiriquement contre des résultats réels". Voir `CALIBRATION_REPORT.md` pour ce qui est réellement mesuré (et ce qui ne l'est pas).
+
+**Écart avec le MASTER** (§10.2 exige une séparation nette et documentée entre PURE/MARKET_CONSENSUS/MARKET_AWARE, calculées et exposées séparément) : aujourd'hui, seul le résultat final d'un blend est exposé, jamais les trois couches distinctement. Prochaine étape concrète : exposer `pure_probability` (Poisson/DC/MC/Elo seul, pour tous les marchés, pas seulement O/U/BTTS), `market_consensus_probability` (Shin seul), et `model_probability` (le blend actuel, renommé `market_aware_probability` une fois la séparation faite) comme trois champs distincts plutôt qu'un seul nombre déjà mélangé.
+
 ## Vue d'ensemble
 
 ```

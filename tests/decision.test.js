@@ -1,7 +1,7 @@
 "use strict";
 const test = require("node:test");
 const assert = require("node:assert/strict");
-const { pickMarketDeterministic, computeRiskLabel, computeModelAgreement, computeDataQualityScore } = require("../lib/decision.js");
+const { pickMarketDeterministic, computeRiskLabel, computeModelAgreement, computeDataQualityScore, computeReliability } = require("../lib/decision.js");
 
 test("pickMarketDeterministic: choisit le marche de plus haute probabilite modele", () => {
   const markets = [
@@ -95,4 +95,38 @@ test("computeDataQualityScore: partiel -> label Moyenne dans la plage attendue",
 test("computeDataQualityScore: flags null -> 0, pas de crash", () => {
   const r = computeDataQualityScore(null);
   assert.equal(r.score, 0);
+});
+
+test("computeReliability: n'est jamais une copie de la probabilite - jamais de champ 'prob'/'probability'", () => {
+  const r = computeReliability({ label: "Fort" }, { score: 80, label: "Élevée" }, 20);
+  assert.equal(r.prob, undefined);
+  assert.equal(r.probability, undefined);
+});
+
+test("computeReliability: tous les signaux forts -> Élevée", () => {
+  const r = computeReliability({ label: "Fort" }, { label: "Élevée" }, 20);
+  assert.equal(r.label, "Élevée");
+});
+
+test("computeReliability: tous les signaux faibles -> Faible", () => {
+  const r = computeReliability({ label: "Faible" }, { label: "Faible" }, 2);
+  assert.equal(r.label, "Faible");
+});
+
+test("computeReliability: sample_size null -> label 'Inconnue', jamais une valeur inventee", () => {
+  const r = computeReliability({ label: "Moyen" }, { label: "Moyenne" }, null);
+  assert.equal(r.sample_size, null);
+  assert.equal(r.sample_size_label, "Inconnue");
+});
+
+test("computeReliability: historical_calibration toujours NOT_AVAILABLE_YET (aucune prediction post-fix resolue)", () => {
+  const r = computeReliability({ label: "Fort" }, { label: "Élevée" }, 30);
+  assert.equal(r.historical_calibration, "NOT_AVAILABLE_YET");
+});
+
+test("computeReliability: expose les composants individuels, pas juste un label composite", () => {
+  const r = computeReliability({ label: "Moyen" }, { label: "Moyenne" }, 10);
+  assert.equal(r.model_agreement, "Moyen");
+  assert.equal(r.data_quality, "Moyenne");
+  assert.equal(r.sample_size, 10);
 });

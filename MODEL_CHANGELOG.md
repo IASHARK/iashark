@@ -2,6 +2,13 @@
 
 Changements qui affectent le calcul des probabilités, marchés, edge/Kelly ou la manière dont ils sont décidés. Journal complet et non-technique dans `IASHARK_V2_EXECUTION_STATE.md` ; ce fichier ne liste que ce qui touche le moteur lui-même.
 
+## 2026-08-29 (suite — fermeture du moteur avant Phase 5)
+
+- **`model_probability` (nouveau champ, 0-100)** devient LA probabilité du marché retenu — jamais appelée "confiance". C'est la dernière valeur calculée par l'ensemble (Poisson/Dixon-Coles/Monte-Carlo/Elo, +ancrage marché Shin pour 1X2/DC), tracée dans le code pour confirmer qu'aucune valeur intermédiaire ne fuite (voir `MODEL_ARCHITECTURE.md`, section "asymétrie entre marchés").
+- **`reliability` (nouveau champ, objet)** — fiabilité/confiance, explicitement séparée de la probabilité. Composite de 3 signaux mesurables (`lib/decision.js#computeReliability`, 7 tests) : accord des modèles, qualité des données, taille d'échantillon réelle (jamais une valeur de repli déguisée). `historical_calibration` vaut `NOT_AVAILABLE_YET` — honnête plutôt que fabriqué, aucune prédiction post-fix n'a encore été résolue pour mesurer ça.
+- **`conf` devient un ALIAS EXPLICITEMENT DÉPRÉCIÉ** (commenté comme tel dans le code) — conservé uniquement pour compatibilité frontend/`historique.json`, vaut toujours `model_probability/10`. À retirer en Phase 5 une fois le frontend migré vers `model_probability` + `reliability` (chercher toutes les lectures de `.conf`/`conf_bucket` dans `match.html`/`pro.html`/`historique.html`/`compte.html` avant suppression).
+- **Comparaison avant/après demandée explicitement** — voir `CALIBRATION_REPORT.md` pour le détail complet et sa limite honnête : impossible de reconstituer le pipeline déterministe réel sur les données historiques (probabilité modèle jamais stockée par prédiction). Fait à la place : `OLD_PIPELINE` (confiance LLM) vs `MARKET_IMPLIED_PROBABILITY_PROXY` (1/cote) — le proxy est meilleur (Brier 0.2497 vs 0.2814) mais ce n'est **pas une preuve** que le fix a amélioré la calibration du moteur réel, seulement un indice cohérent avec l'hypothèse.
+
 ## 2026-08-29
 
 - **[BREAKING pour la calibration]** `matchObj.conf` n'est plus l'auto-évaluation du LLM (`an.confiance`) mais la probabilité réelle du modèle pour le marché retenu (`pickedMarket.prob`), calculée en code déterministe. L'ancien champ a été mesuré comme activement désinformatif (Brier 0.2814 > repère pile-ou-face 0.25 — voir `CALIBRATION_REPORT.md`).

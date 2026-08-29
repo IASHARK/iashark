@@ -42,13 +42,28 @@ function get(obj, keyPath) {
 var jsStr = require("./js-escape.js").jsStr;
 
 function rewriteInternalLinks(html, locale) {
-  return html.replace(/(href|src)="(\/[a-zA-Z0-9_\-./]*)"/g, function (m, attr, p) {
+  // Liens racine-relatifs (href="/xxx") - la grande majorite des pages.
+  html = html.replace(/(href|src)="(\/[a-zA-Z0-9_\-./]*)"/g, function (m, attr, p) {
     var pathOnly = p.split("?")[0].split("#")[0];
     var rest = p.slice(pathOnly.length);
     if (!LOCALIZABLE_PAGES.has(pathOnly)) return m;
     var newPath = pathOnly === "/" ? "/" + locale + "/" : "/" + locale + pathOnly;
     return attr + '="' + newPath + rest + '"';
   });
+  // Liens en domaine absolu (href="https://iashark.com/xxx", ou bare
+  // "https://iashark.com" sans chemin = racine) - utilises par landing.html,
+  // pensee comme point d'entree isole (trafic publicitaire), pour que le
+  // clic reste dans la langue choisie plutot que de retomber sur le FR
+  // par defaut.
+  html = html.replace(/(href|src)="https:\/\/iashark\.com(\/[a-zA-Z0-9_\-./]*)?"/g, function (m, attr, p) {
+    p = p || "/";
+    var pathOnly = p.split("?")[0].split("#")[0];
+    var rest = p.slice(pathOnly.length);
+    if (!LOCALIZABLE_PAGES.has(pathOnly)) return m;
+    var newPath = pathOnly === "/" ? "/" + locale + "/" : "/" + locale + pathOnly;
+    return attr + '="' + SITE_URL + newPath + rest + '"';
+  });
+  return html;
 }
 
 function buildHead(html, locale, file, metas) {

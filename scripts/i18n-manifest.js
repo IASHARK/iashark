@@ -844,6 +844,92 @@ var PAGES = [
       {find: "status.textContent='Erreur de chargement de l\\'archive complète — réessaie plus tard.';\n    btn.disabled=false; btn.textContent=\"CHARGER L'HISTORIQUE COMPLET (AU-DELÀ DES 500 DERNIERS)\";",
        build: function(d, l, esc){ var h = d.history_page; return "status.textContent='" + esc(h.archive_error) + "';\n    btn.disabled=false; btn.textContent=\"" + esc(h.archive_btn).replace(/"/g, '\\"') + "\";"; }}
     ]
+  },
+  {
+    /* landing.html : page marketing autonome, pas de <script> du tout (pur
+       HTML/CSS) - aucune de ces regles n'a besoin de esc() JS, tout est du
+       texte HTML brut. Utilise des URLs absolues (https://iashark.com/...)
+       plutot que racine-relatives - voir rewriteInternalLinks() dans
+       build-locales.js, etendu pour gerer aussi ce format. */
+    file: "landing.html",
+    metas: {
+      fr: {title: "IASHARK — Le modèle qui lit le match avant qu'il commence", description: "Poisson, Dixon-Coles, Monte Carlo, Elo : IASHARK analyse chaque match avec des vrais modèles statistiques. Un match gratuit chaque jour."},
+      en: {title: "IASHARK — The model that reads the match before kickoff", description: "Poisson, Dixon-Coles, Monte Carlo, Elo: IASHARK analyzes every match with real statistical models. One free match every day."},
+      es: {title: "IASHARK — El modelo que lee el partido antes de que empiece", description: "Poisson, Dixon-Coles, Monte Carlo, Elo: IASHARK analiza cada partido con modelos estadísticos reales. Un partido gratis cada día."},
+      de: {title: "IASHARK — Das Modell, das das Spiel vor dem Anpfiff liest", description: "Poisson, Dixon-Coles, Monte Carlo, Elo: IASHARK analysiert jedes Spiel mit echten statistischen Modellen. Ein kostenloses Spiel jeden Tag."},
+      it: {title: "IASHARK — Il modello che legge la partita prima del fischio d'inizio", description: "Poisson, Dixon-Coles, Monte Carlo, Elo: IASHARK analizza ogni partita con veri modelli statistici. Una partita gratuita ogni giorno."},
+      pt: {title: "IASHARK — O modelo que lê o jogo antes do apito inicial", description: "Poisson, Dixon-Coles, Monte Carlo, Elo: o IASHARK analisa cada jogo com modelos estatísticos reais. Um jogo gratuito todos os dias."}
+    },
+    replacements: [
+      {find: '<a href="https://iashark.com" class="btn-nav">VOIR LE SITE →</a>', build: function(d){ return '<a href="https://iashark.com" class="btn-nav">' + d.landing_page.nav_cta + '</a>'; }},
+      {find: '<span class="dot"></span> MODÈLE STATISTIQUE · FOOTBALL', build: function(d){ return '<span class="dot"></span> ' + d.landing_page.eyebrow; }},
+      {find: '<h1 class="reveal" style="animation-delay:.1s">Aucune émotion.<br><b>Que des probabilités.</b></h1>', build: function(d){ var h = d.home_page; return '<h1 class="reveal" style="animation-delay:.1s">' + h.hero_line1 + '<br><b>' + h.hero_line2 + '</b></h1>'; }},
+      {find: "<p class=\"sub reveal\" style=\"animation-delay:.15s\">IASHARK croise <b>xG, forme récente, fatigue de calendrier et face-à-face</b> pour produire un signal de probabilité sur chaque match, avant le coup d'envoi.</p>",
+       build: function(d){ return '<p class="sub reveal" style="animation-delay:.15s">' + d.landing_page.hero_sub + '</p>'; }},
+      {find: '<a href="https://iashark.com" class="btn-primary">VOIR LE MATCH GRATUIT DU JOUR</a>', build: function(d){ return '<a href="https://iashark.com" class="btn-primary">' + d.landing_page.hero_cta + '</a>'; }},
+      {find: '<div class="cta-note">Sans carte bancaire · <b>1 analyse offerte chaque jour</b></div>', build: function(d){ var l = d.landing_page; return '<div class="cta-note">' + l.hero_cta_note_pre + '<b>' + l.hero_cta_note_b + '</b></div>'; }},
+      {find:
+        '      <span>MODÈLE <b>POISSON</b></span><span><b>DIXON-COLES</b> AJUSTEMENT BAS SCORES</span><span>SIMULATION <b>MONTE CARLO</b></span><span>CLASSEMENT <b>ELO</b> DYNAMIQUE</span><span>PROBABILITÉS <b>SHIN</b></span><span>KELLY <b>FRACTIONNÉ</b></span>\n' +
+        '      <span>MODÈLE <b>POISSON</b></span><span><b>DIXON-COLES</b> AJUSTEMENT BAS SCORES</span><span>SIMULATION <b>MONTE CARLO</b></span><span>CLASSEMENT <b>ELO</b> DYNAMIQUE</span><span>PROBABILITÉS <b>SHIN</b></span><span>KELLY <b>FRACTIONNÉ</b></span>',
+       build: function(d){
+        var l = d.landing_page;
+        var once = '<span>' + l.strip_poisson + '<b>' + l.strip_poisson_b + '</b></span>' +
+          '<span><b>' + l.strip_dc_b + '</b>' + l.strip_dc_rest + '</span>' +
+          '<span>' + l.strip_mc + '<b>' + l.strip_mc_b + '</b></span>' +
+          '<span>' + l.strip_elo + '<b>' + l.strip_elo_b + '</b>' + l.strip_elo_rest + '</span>' +
+          '<span>' + l.strip_shin + '<b>' + l.strip_shin_b + '</b></span>' +
+          '<span>' + l.strip_kelly + '<b>' + l.strip_kelly_b + '</b></span>';
+        return '      ' + once + '\n      ' + once;
+      }},
+      {find: '<div class="sec-lbl">LA MÉTHODE</div>', build: function(d){ return '<div class="sec-lbl">' + d.landing_page.lbl_method + '</div>'; }},
+      {find: '<h2 class="sec-title">Quatre modèles, <b>un seul signal</b> par match.</h2>', build: function(d){ var l = d.landing_page; return '<h2 class="sec-title">' + l.title_method_pre + '<b>' + l.title_method_b + '</b>' + l.title_method_post + '</h2>'; }},
+      {find: "<div class=\"model-card\"><div class=\"model-tag\">MODÈLE 1</div><div class=\"model-name\">Poisson</div><div class=\"model-desc\">Distribution du nombre de buts attendus pour chaque équipe, à domicile et à l'extérieur.</div></div>",
+       build: function(d){ var l = d.landing_page; return '<div class="model-card"><div class="model-tag">' + l.model1_tag + '</div><div class="model-name">' + l.model1_name + '</div><div class="model-desc">' + l.model1_desc + '</div></div>'; }},
+      {find: '<div class="model-card"><div class="model-tag">MODÈLE 2</div><div class="model-name">Dixon-Coles</div><div class="model-desc">Correction des scores faibles (0-0, 1-0, 1-1) que le Poisson pur sous-estime.</div></div>',
+       build: function(d){ var l = d.landing_page; return '<div class="model-card"><div class="model-tag">' + l.model2_tag + '</div><div class="model-name">' + l.model2_name + '</div><div class="model-desc">' + l.model2_desc + '</div></div>'; }},
+      {find: '<div class="model-card"><div class="model-tag">MODÈLE 3</div><div class="model-name">Monte Carlo</div><div class="model-desc">Des milliers de simulations du match pour obtenir une distribution de résultats robuste.</div></div>',
+       build: function(d){ var l = d.landing_page; return '<div class="model-card"><div class="model-tag">' + l.model3_tag + '</div><div class="model-name">' + l.model3_name + '</div><div class="model-desc">' + l.model3_desc + '</div></div>'; }},
+      {find: '<div class="model-card"><div class="model-tag">MODÈLE 4</div><div class="model-name">Elo & Shin</div><div class="model-desc">Force réelle des équipes dans le temps, et correction du biais des probabilités implicites.</div></div>',
+       build: function(d){ var l = d.landing_page; return '<div class="model-card"><div class="model-tag">' + l.model4_tag + '</div><div class="model-name">' + l.model4_name + '</div><div class="model-desc">' + l.model4_desc + '</div></div>'; }},
+      {find: '<h3>Rien à cacher. <b>Tout est tracé.</b></h3>', build: function(d){ var l = d.landing_page; return '<h3>' + l.proof_title_pre + '<b>' + l.proof_title_b + '</b></h3>'; }},
+      {find: "<p>Chaque analyse publiée reste visible dans notre historique : marché recommandé, probabilité annoncée, résultat réel. Tu vérifies, on ne réécrit rien après coup.</p>",
+       build: function(d){ return '<p>' + d.landing_page.proof_desc + '</p>'; }},
+      {find: '<a href="https://iashark.com/historique.html" class="btn-ghost">VOIR L\'HISTORIQUE COMPLET →</a>', build: function(d){ return '<a href="https://iashark.com/historique.html" class="btn-ghost">' + d.landing_page.proof_cta + '</a>'; }},
+      {find: '<div class="sec-lbl">EN PRATIQUE</div>', build: function(d){ return '<div class="sec-lbl">' + d.landing_page.lbl_practice + '</div>'; }},
+      {find: '<h2 class="sec-title">De la donnée brute au <b>signal exploitable.</b></h2>', build: function(d){ var l = d.landing_page; return '<h2 class="sec-title">' + l.title_practice_pre + '<b>' + l.title_practice_b + '</b></h2>'; }},
+      {find: '<div class="step-title">On ingère la donnée</div><div class="step-desc">Calendriers, compositions probables, historique des confrontations et statistiques xG remontés en continu, championnat par championnat.</div>',
+       build: function(d){ var l = d.landing_page; return '<div class="step-title">' + l.step1_title + '</div><div class="step-desc">' + l.step1_desc + '</div>'; }},
+      {find: '<div class="step-title">Le modèle calcule</div><div class="step-desc">Poisson, Dixon-Coles et Monte Carlo tournent en parallèle pour produire une distribution de probabilités sur chaque marché.</div>',
+       build: function(d){ var l = d.landing_page; return '<div class="step-title">' + l.step2_title + '</div><div class="step-desc">' + l.step2_desc + '</div>'; }},
+      {find: '<div class="step-title">Tu reçois le signal</div><div class="step-desc">Une fiche claire par match : probabilité, niveau de fiabilité, et le marché où le modèle détecte un écart avec le marché réel.</div>',
+       build: function(d){ var l = d.landing_page; return '<div class="step-title">' + l.step3_title + '</div><div class="step-desc">' + l.step3_desc + '</div>'; }},
+      {find: '<div class="sec-lbl">L\'ACCÈS</div>', build: function(d){ return '<div class="sec-lbl">' + d.landing_page.lbl_access + '</div>'; }},
+      {find: '<h2 class="sec-title">Commence gratuitement. <b>Passe à Pro</b> quand tu veux tout voir.</h2>', build: function(d){ var l = d.landing_page; return '<h2 class="sec-title">' + l.title_access_pre + '<b>' + l.title_access_b + '</b>' + l.title_access_post + '</h2>'; }},
+      {find: '<div class="plan-name">GRATUIT</div>', build: function(d){ return '<div class="plan-name">' + d.landing_page.plan_free_name + '</div>'; }},
+      {find: '<div class="plan-price">0€</div>', build: function(d){ return '<div class="plan-price">' + d.landing_page.plan_free_price + '</div>'; }},
+      {find: '<li>1 analyse complète offerte chaque jour</li>', build: function(d){ return '<li>' + d.landing_page.plan_free_feat1 + '</li>'; }},
+      {find: "<li>Accès à l'historique de performance</li>", build: function(d){ return '<li>' + d.landing_page.plan_free_feat2 + '</li>'; }},
+      {find: '<li>Notre méthode expliquée en détail</li>', build: function(d){ return '<li>' + d.landing_page.plan_free_feat3 + '</li>'; }},
+      {find: '<a href="https://iashark.com" class="plan-cta free">COMMENCER</a>', build: function(d){ return '<a href="https://iashark.com" class="plan-cta free">' + d.landing_page.plan_free_cta + '</a>'; }},
+      {find: "content:'RECOMMANDÉ';", build: function(d){ return "content:'" + d.landing_page.plan_pro_badge + "';"; }},
+      {find: '<div class="plan-name">PRO</div>', build: function(d){ return '<div class="plan-name">' + d.landing_page.plan_pro_name + '</div>'; }},
+      {find: '<div class="plan-price">Gratuit<span>les 3 premiers jours</span></div>', build: function(d){ var l = d.landing_page; return '<div class="plan-price">' + l.plan_pro_price_pre + '<span>' + l.plan_pro_price_span + '</span></div>'; }},
+      {find: '<div class="plan-trial">Puis 19,95€/mois — résiliable à tout moment</div>', build: function(d){ return '<div class="plan-trial">' + d.landing_page.plan_pro_trial + '</div>'; }},
+      {find: '<li>Toutes les analyses, tous les championnats</li>', build: function(d){ return '<li>' + d.landing_page.plan_pro_feat1 + '</li>'; }},
+      {find: '<li>Filtres avancés et niveau de fiabilité détaillé</li>', build: function(d){ return '<li>' + d.landing_page.plan_pro_feat2 + '</li>'; }},
+      {find: '<li>Suivi personnel de tes matchs suivis</li>', build: function(d){ return '<li>' + d.landing_page.plan_pro_feat3 + '</li>'; }},
+      {find: '<li>Résiliable à tout moment</li>', build: function(d){ return '<li>' + d.landing_page.plan_pro_feat4 + '</li>'; }},
+      {find: '<a href="https://iashark.com/pro.html" class="plan-cta pro">DÉBLOQUER PRO</a>', build: function(d){ return '<a href="https://iashark.com/pro.html" class="plan-cta pro">' + d.landing_page.plan_pro_cta + '</a>'; }},
+      {find: '<h2>Le prochain match a déjà <b>un signal.</b></h2>', build: function(d){ var l = d.landing_page; return '<h2>' + l.final_title_pre + '<b>' + l.final_title_b + '</b></h2>'; }},
+      {find: "<p>Va le voir, c'est gratuit.</p>", build: function(d){ return '<p>' + d.landing_page.final_sub + '</p>'; }},
+      {find: '<a href="https://iashark.com" class="btn-primary">VOIR LE MATCH DU JOUR</a>', build: function(d){ return '<a href="https://iashark.com" class="btn-primary">' + d.landing_page.final_cta + '</a>'; }},
+      {find: '<div>⚠️ INFORMATION À VISÉE STATISTIQUE — NE CONSTITUE PAS UN CONSEIL DE PARI · INTERDIT AUX MOINS DE 18 ANS</div>', build: function(d){ return '<div>⚠️ ' + d.landing_page.foot_disclaimer + '</div>'; }},
+      {find: '<div>Aide : <a href="https://www.joueurs-info-service.fr">joueurs-info-service.fr</a> · 09 74 75 13 13</div>',
+       build: function(d){ return '<div>' + d.landing_page.foot_help_label + ' <a href="https://www.joueurs-info-service.fr">' + d.footer.disclaimer_help_site + '</a> · ' + d.footer.disclaimer_help_phone + '</div>'; }},
+      {find: '<a href="https://iashark.com/mentions-legales.html">Mentions légales</a>', build: function(d){ return '<a href="https://iashark.com/mentions-legales.html">' + d.footer.mentions_legales + '</a>'; }},
+      {find: '<a href="https://iashark.com/cgv.html">CGV</a>', build: function(d){ return '<a href="https://iashark.com/cgv.html">' + d.footer.cgv + '</a>'; }},
+      {find: '<a href="https://iashark.com/confidentialite.html">Confidentialité</a>', build: function(d){ return '<a href="https://iashark.com/confidentialite.html">' + d.footer.confidentialite + '</a>'; }}
+    ]
   }
 ];
 

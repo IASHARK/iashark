@@ -33,13 +33,24 @@ test("i18n: tous les dictionnaires ont exactement les memes cles (aucune traduct
 // quart applique..." a le mot Kelly en prefixe, mais en anglais l'ordre
 // naturel est "Quarter Kelly applied..." (Kelly passe dans le suffixe),
 // donc le prefixe est legitimement vide pour cette langue.
-var ALLOWED_EMPTY = new Set(["tools_page.kelly_applied_prefix"]);
+// Cle = "locale.chemin.dans.le.dictionnaire" (precis par locale : un champ
+// peut etre legitimement vide dans une langue et pas dans une autre, quand
+// l'ordre des mots differe - ex. "Kelly quart applique" (FR, prefixe) vs
+// "Quarter Kelly applied" (EN, le mot Kelly passe dans le suffixe)).
+var ALLOWED_EMPTY = new Set([
+  "en.tools_page.kelly_applied_prefix", "de.tools_page.kelly_applied_prefix",
+  // landing_page.strip_* : le "signal strip" FR est "MODÈLE POISSON" (prefixe
+  // + mot en gras) mais EN/DE composent des mots-valises ("POISSON MODEL",
+  // "MONTE-CARLO-SIMULATION") sans prefixe separe.
+  "en.landing_page.strip_poisson", "en.landing_page.strip_mc", "en.landing_page.strip_elo", "en.landing_page.strip_shin", "en.landing_page.strip_kelly",
+  "de.landing_page.strip_poisson", "de.landing_page.strip_mc", "de.landing_page.strip_elo", "de.landing_page.strip_shin", "de.landing_page.strip_kelly"
+]);
 
 test("i18n: aucune valeur de dictionnaire n'est vide (pas de faux placeholder)", () => {
   LOCALES.supported.forEach(function (loc) {
     var dict = JSON.parse(fs.readFileSync(path.join(ROOT, "i18n/dict/" + loc + ".json"), "utf8"));
     flatten(dict).forEach(function (keyPath) {
-      if (ALLOWED_EMPTY.has(keyPath)) return;
+      if (ALLOWED_EMPTY.has(loc + "." + keyPath)) return;
       var v = keyPath.split(".").reduce(function (o, k) { return o[k]; }, dict);
       assert.ok(typeof v === "string" && v.trim().length > 0, loc + "." + keyPath + " est vide");
     });

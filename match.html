@@ -532,7 +532,8 @@ api-sports-widget[data-theme="iashark"]{
 <!--FIXED_ID_SCRIPT--><!--/FIXED_ID_SCRIPT-->
 <!--PRELOADED_MATCH_SCRIPT--><!--/PRELOADED_MATCH_SCRIPT-->
 <script>
-var fId=(typeof FIXED_MATCH_ID!=='undefined'&&FIXED_MATCH_ID)?FIXED_MATCH_ID:new URLSearchParams(location.search).get('id');
+var fIdRaw=(typeof FIXED_MATCH_ID!=='undefined'&&FIXED_MATCH_ID)?FIXED_MATCH_ID:new URLSearchParams(location.search).get('id');
+var fId=/^[0-9]+$/.test(String(fIdRaw||''))?fIdRaw:null;
 var isPro=true;
 
 function ph(n){return n?n.slice(0,2).toUpperCase():'??';}
@@ -1893,10 +1894,10 @@ async function init(){
     var m;
     if(typeof PRELOADED_MATCH!=='undefined'&&PRELOADED_MATCH&&String(PRELOADED_MATCH.id)===String(fId)){
       m=PRELOADED_MATCH;
-      isPro=(await checkSession())||true;
+      isPro=await checkSession();
     }else{
       var res=await Promise.all([fetch('/data.json?t='+Date.now()).then(function(r){return r.json();}),checkSession()]);
-      var data=res[0]; isPro=res[1]||true;
+      var data=res[0]; isPro=res[1];
       m=(data.matchs||[]).find(function(x){return String(x.id)===String(fId);});
     }
     if(!m){

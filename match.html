@@ -519,6 +519,10 @@ api-sports-widget[data-theme="iashark"]{
     <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5L12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg></div>
     <div class="nav-lbl">ACCUEIL</div>
   </a>
+  <a href="/marches.html" class="nav-item">
+    <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 17V9M13 17V5M8 17v-4"/></svg></div>
+    <div class="nav-lbl">MARCHÉS</div>
+  </a>
   <a href="/historique.html" class="nav-item">
     <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20v-4"/></svg></div>
     <div class="nav-lbl">HISTORIQUE</div>
@@ -541,7 +545,12 @@ api-sports-widget[data-theme="iashark"]{
 <script>
 var fIdRaw=(typeof FIXED_MATCH_ID!=='undefined'&&FIXED_MATCH_ID)?FIXED_MATCH_ID:new URLSearchParams(location.search).get('id');
 var fId=/^[0-9]+$/.test(String(fIdRaw||''))?fIdRaw:null;
-var isPro=true;
+// Par defaut FAUX (secure-by-default) : init() le reassigne toujours avant
+// render() sur les deux chemins possibles (voir plus bas), mais partir de
+// "true" ici serait fragile - un futur chemin qui oublierait de le
+// reassigner deviendrait silencieusement un bypass PRO, comme celui trouve
+// et corrige dans pro.html (OUTILS_OPEN_FOR_ALL).
+var isPro=false;
 
 function ph(n){return n?n.slice(0,2).toUpperCase():'??';}
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}

@@ -136,7 +136,21 @@ jobs:
             { nom: "Foot Mercato", url: "https://www.footmercato.net/flux-rss", type: 'mercato', fiabilite: 'high' },
           ];
           function resolveMarketWin(predRaw, gh, ga) {
+            // Retourne true/false (gagne/perdu), 'void' (push handicap, aucun gagnant
+            // ni perdant - mise remboursee) ou null (marche non reconnu, non resolvable).
             var pred = (predRaw||'').toLowerCase();
+            if(pred.includes('handicap')){
+              var hMatch=pred.match(/handicap\s*([+-]?\d+(?:[.,]\d+)?)/);
+              if(!hMatch) return null;
+              var line=parseFloat(hMatch[1].replace(',','.'));
+              var isDom=pred.includes('domicile')||pred.includes('dom');
+              var isExt=pred.includes('exterieur')||pred.includes('ext');
+              if(!isDom&&!isExt) return null;
+              var adjH=isDom?gh+line:gh;
+              var adjA=isExt?ga+line:ga;
+              if(adjH===adjA) return 'void';
+              return isDom?(adjH>adjA):(adjA>adjH);
+            }
             if(pred.includes('over 2.5')) return (gh+ga)>2;
             if(pred.includes('over 1.5')) return (gh+ga)>1;
             if(pred.includes('over 3.5')) return (gh+ga)>3;
@@ -1644,13 +1658,24 @@ jobs:
                 var gh=fix.goals&&fix.goals.home!=null?fix.goals.home:null;
                 var ga=fix.goals&&fix.goals.away!=null?fix.goals.away:null;
                 var status=fix.fixture&&fix.fixture.status&&fix.fixture.status.short||'';
-                if(status!=='FT'&&status!=='AET'&&status!=='PEN')continue;
-                if(gh===null||ga===null)continue;
+                var isVoidStatus=(status==='PST'||status==='CANC'||status==='ABD');
+                if(!isVoidStatus&&status!=='FT'&&status!=='AET'&&status!=='PEN')continue;
+                if(!isVoidStatus&&(gh===null||ga===null))continue;
                 var found=histo.predictions.find(function(p){return (p.result==='scheduled'||p.result==='pending')&&p.fixture_id===fid;});
                 if(!found)found=histo.predictions.find(function(p){return (p.result==='scheduled'||p.result==='pending')&&p.type==='single'&&p.date&&resolveDates.indexOf(p.date.substring(0,10))!==-1&&levenshtein((p.home||'').toLowerCase(),homeN.toLowerCase())<=3&&levenshtein((p.away||'').toLowerCase(),awayN.toLowerCase())<=3;});
                 if(!found)continue;
+                if(isVoidStatus){
+                  found.result='void';found.score=null;found.fixture_id=fid;found.resolved_date=TODAY;
+                  console.log('  VOID (match '+status+'): '+found.match);
+                  continue;
+                }
                 var isWin=resolveMarketWin(found.prediction, gh, ga);
                 if(isWin===null){ continue; }
+                if(isWin==='void'){
+                  found.result='void';found.score=gh+'-'+ga;found.fixture_id=fid;found.resolved_date=TODAY;
+                  console.log('  VOID (push handicap): '+found.match+' ('+gh+'-'+ga+')');
+                  continue;
+                }
                 found.result=isWin?'win':'loss';found.score=gh+'-'+ga;found.fixture_id=fid;found.resolved_date=TODAY;
                 console.log('  Resolu foot: '+found.match+' -> '+found.result+' ('+gh+'-'+ga+')');
               }
@@ -1918,13 +1943,22 @@ jobs:
                   var gh=fix.goals&&fix.goals.home!=null?fix.goals.home:null;
                   var ga=fix.goals&&fix.goals.away!=null?fix.goals.away:null;
                   var status=fix.fixture&&fix.fixture.status&&fix.fixture.status.short||'';
-                  if(status!=='FT'&&status!=='AET'&&status!=='PEN')return;
-                  if(gh===null||ga===null)return;
+                  var isVoidStatusE=(status==='PST'||status==='CANC'||status==='ABD');
+                  if(!isVoidStatusE&&status!=='FT'&&status!=='AET'&&status!=='PEN')return;
+                  if(!isVoidStatusE&&(gh===null||ga===null))return;
                   var found=histoEarly.predictions.find(function(p){return (p.result==='scheduled'||p.result==='pending')&&p.fixture_id===fid;});
                   if(!found)found=histoEarly.predictions.find(function(p){return (p.result==='scheduled'||p.result==='pending')&&p.type==='single'&&p.date&&resolveDatesEarly.indexOf(p.date.substring(0,10))!==-1&&levenshtein((p.home||'').toLowerCase(),homeN.toLowerCase())<=3&&levenshtein((p.away||'').toLowerCase(),awayN.toLowerCase())<=3;});
                   if(!found)return;
+                  if(isVoidStatusE){
+                    found.result='void';found.score=null;found.fixture_id=fid;found.resolved_date=TODAY;
+                    return;
+                  }
                   var isWin=resolveMarketWin(found.prediction, gh, ga);
                   if(isWin===null){ return; }
+                  if(isWin==='void'){
+                    found.result='void';found.score=gh+'-'+ga;found.fixture_id=fid;found.resolved_date=TODAY;
+                    return;
+                  }
                   found.result=isWin?'win':'loss';found.score=gh+'-'+ga;found.fixture_id=fid;found.resolved_date=TODAY;
                 });
               }catch(e){console.log('  Erreur resolution:',e.message);}
@@ -2454,15 +2488,31 @@ jobs:
               var probX2=anchored.p2+anchored.pN;
               var probAHdom=anchored.p1;
               var probAHext=anchored.p2+anchored.pN;
+              // Probabilite "fair" du marche par paire de cotes complementaires (retrait
+              // de marge par la methode de Shin, deja utilisee pour le 1X2 plus haut) -
+              // necessaire pour calculer un edge et un Kelly reels: comparer la probabilite
+              // du modele a la probabilite du modele elle-meme (comme le faisait l'ancien
+              // champ "edge") n'a jamais ete un edge. Repli sur 1/cote (implicite brute,
+              // marge bookmaker incluse) quand la paire complementaire n'est pas disponible.
+              function fairPairProbs(coteA,coteB){
+                var a=parseFloat(coteA),b=parseFloat(coteB);
+                if(!a||!b||a<=1||b<=1) return null;
+                var raw=shinProbabilities([a,b]);
+                if(!raw) return null;
+                return {a:raw[0]*100,b:raw[1]*100};
+              }
+              function naiveImplied(cote){ var c=parseFloat(cote); return c>1?100/c:null; }
+              var fairOU=fairPairProbs(odds.co25,odds.cu25);
+              var fairBTTS=fairPairProbs(odds.btts_oui,odds.btts_non);
               var allMarkets=[
-                {market:'Over 2.5',  cote:odds.co25,      prob:poissonProbs.over25, label:'Plus de 2.5 buts'},
-                {market:'Under 2.5', cote:odds.cu25,      prob:poissonProbs.under25,label:'Moins de 2.5 buts'},
-                {market:'BTTS Oui',  cote:odds.btts_oui,  prob:poissonProbs.bttsY,  label:'Les deux equipes marquent'},
-                {market:'BTTS Non',  cote:odds.btts_non,  prob:poissonProbs.bttsN,  label:'Une equipe ne marque pas'},
-                {market:'DC 1X',     cote:odds.dc1x,      prob:prob1X,              label:'Victoire ou nul domicile'},
-                {market:'DC X2',     cote:odds.dc2x,      prob:probX2,              label:'Victoire ou nul exterieur'},
-                {market:'Victoire Domicile', cote:odds.c1, prob:anchored.p1, label:'Victoire seche domicile'},
-                {market:'Victoire Exterieur',cote:odds.c2, prob:anchored.p2, label:'Victoire seche exterieur'},
+                {market:'Over 2.5',  cote:odds.co25,      prob:poissonProbs.over25, marketProb:fairOU?fairOU.a:naiveImplied(odds.co25),      label:'Plus de 2.5 buts'},
+                {market:'Under 2.5', cote:odds.cu25,      prob:poissonProbs.under25,marketProb:fairOU?fairOU.b:naiveImplied(odds.cu25),      label:'Moins de 2.5 buts'},
+                {market:'BTTS Oui',  cote:odds.btts_oui,  prob:poissonProbs.bttsY,  marketProb:fairBTTS?fairBTTS.a:naiveImplied(odds.btts_oui), label:'Les deux equipes marquent'},
+                {market:'BTTS Non',  cote:odds.btts_non,  prob:poissonProbs.bttsN,  marketProb:fairBTTS?fairBTTS.b:naiveImplied(odds.btts_non), label:'Une equipe ne marque pas'},
+                {market:'DC 1X',     cote:odds.dc1x,      prob:prob1X,              marketProb:naiveImplied(odds.dc1x),                     label:'Victoire ou nul domicile'},
+                {market:'DC X2',     cote:odds.dc2x,      prob:probX2,              marketProb:naiveImplied(odds.dc2x),                     label:'Victoire ou nul exterieur'},
+                {market:'Victoire Domicile', cote:odds.c1, prob:anchored.p1, marketProb:shinProbs?shinProbs.p1:naiveImplied(odds.c1), label:'Victoire seche domicile'},
+                {market:'Victoire Exterieur',cote:odds.c2, prob:anchored.p2, marketProb:shinProbs?shinProbs.p2:naiveImplied(odds.c2), label:'Victoire seche exterieur'},
               ].filter(function(m){
                 return m.cote&&m.cote!=='--'&&parseFloat(m.cote)>=1.50;
               });
@@ -2614,7 +2664,35 @@ jobs:
                 var found=(allMarkets||[]).find(function(m){return m.market.toLowerCase()===an.pari_rec.toLowerCase();});
                 if(found) an.cote_rec=String(found.cote);
               }
-              var kellyVal='2';
+              // Kelly et edge reels, a partir du marche effectivement choisi par le
+              // modele (an.pari_rec) et de sa probabilite/cote dans allMarkets - plus
+              // aucune valeur codee en dur. Le "%" dans edgeVal est intentionnel :
+              // match.html.parseEdgeText() l'extrait par regex, kellyVal reste un
+              // nombre nu en pourcentage (match.html/pro.html l'utilisent directement
+              // comme un pourcentage de bankroll).
+              function nmMkt(s){return (s||'').toLowerCase().replace(/[^a-z0-9]/g,'');}
+              var chosenMarket=an&&an.pari_rec?(function(){
+                var pn=nmMkt(an.pari_rec);
+                return (allMarkets||[]).find(function(x){var xn=nmMkt(x.market);return xn===pn||pn.includes(xn)||xn.includes(pn);});
+              })():null;
+              var kellyVal='0';
+              var edgeVal='';
+              if(chosenMarket){
+                var choseCote=parseFloat(an.cote_rec)||parseFloat(chosenMarket.cote);
+                var choseProb=chosenMarket.prob;
+                if(chosenMarket.marketProb!=null){
+                  edgeVal=(choseProb-chosenMarket.marketProb>=0?'+':'')+(choseProb-chosenMarket.marketProb).toFixed(1)+'%';
+                }
+                if(choseProb&&choseCote&&choseCote>1){
+                  var k=fractionalKelly(choseProb/100,choseCote,0.25);
+                  if(k!=null) kellyVal=k;
+                }
+              }
+              // "val" (badge "value bet" affiche publiquement) reposait uniquement sur
+              // l'auto-evaluation du LLM (vbet='OUI' + confiance>=7.0) - desormais exige
+              // en plus un edge reellement positif (kellyVal!=='0'), pour ne plus jamais
+              // annoncer une "value bet" que le calcul mathematique dement.
+              matchObj.val = matchObj.val && kellyVal!=='0';
               var classementObj=null;
               if(entryH||entryA){
                 var rankH=rkH||99,rankA=rkA||99;
@@ -2701,7 +2779,7 @@ jobs:
               // authentifie). Collectes a part et pousses vers Supabase apres la boucle -
               // seule l'Edge Function match-data, avec verification de session/plan cote
               // serveur, doit pouvoir les lire. Voir supabase/migrations/0002_match_premium_data.sql.
-              var edgeVal=an&&an.pari_rec?(function(){ function nm(s){return (s||'').toLowerCase().replace(/[^a-z0-9]/g,'');} var pn=nm(an.pari_rec); var mk=(allMarkets||[]).find(function(x){var xn=nm(x.market);return xn===pn||pn.includes(xn)||xn.includes(pn);}); return mk?mk.prob+'% (modele)':''; })():'';
+              // kellyVal/edgeVal deja calcules plus haut (reels, pas de valeur codee en dur).
               premiumRows.push({
                 fixture_id:f.id,kelly:kellyVal,edge:edgeVal,
                 verdict_shark:an?(an.verdict_shark||''):'',

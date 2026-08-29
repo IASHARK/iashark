@@ -1582,9 +1582,9 @@ function buildPourquoiCePari(m,pariRec,paricote){
   if(m.facteur_x){
     blocs.push({num:String(blocs.length+1), titre:'Le facteur décisif', txt:esc(cleanJargon(m.facteur_x))});
   }
-  if(edgeNum!==null){
+  if(edgeNum!==null&&edgeNum>0){
     blocs.push({num:String(blocs.length+1), titre:'Pourquoi cette cote est intéressante',
-      txt:'La probabilité estimée par le modèle est supérieure à celle impliquée par la cote du bookmaker, ce qui représente un avantage statistique d\'environ <strong>'+(edgeNum>0?'+':'')+edgeNum.toFixed(1)+'%</strong> en faveur du parieur sur le long terme.'});
+      txt:'La probabilité estimée par le modèle est supérieure à celle impliquée par la cote du bookmaker, ce qui représente un avantage statistique d\'environ <strong>+'+edgeNum.toFixed(1)+'%</strong> en faveur du parieur sur le long terme.'});
   }
   if(m.kelly){
     blocs.push({num:String(blocs.length+1), titre:'Mise conseillée',

@@ -1574,14 +1574,16 @@ function buildPourquoiCePari(m,pariRec,paricote){
   var marketFr=translateMarket(pariRec);
   var blocs=[];
 
+  var modelProbTxt=m.model_probability!=null?Math.round(m.model_probability):Math.round((m.conf||0)*10);
+  var reliabilityTxt=(m.reliability&&m.reliability.label)||null;
   blocs.push({
     num:String(blocs.length+1), titre:'Le pari recommandé',
-    txt:'L\'IA recommande <strong>'+esc(marketFr)+'</strong> à la cote de <strong>'+esc(paricote)+'</strong>, avec un niveau de confiance de <strong>'+(m.conf||0).toFixed(1)+'/10</strong>.'
+    txt:'Le modèle statistique estime <strong>'+esc(marketFr)+'</strong> à <strong>'+modelProbTxt+'%</strong> de probabilité, à la cote de <strong>'+esc(paricote)+'</strong>'+(reliabilityTxt?' (fiabilité : <strong>'+esc(reliabilityTxt.toUpperCase())+'</strong>, mesurée par l\'accord des modèles et la qualité des données disponibles — pas par la probabilité elle-même)':'')+'.'
   });
   if(m.key_absences&&m.key_absences.length){
     var absTxt=m.key_absences.map(function(a){return esc(a.replace(/[🚨🔴🟡]/g,'').trim());}).join(' ');
     blocs.push({num:String(blocs.length+1), titre:'Impact des absences',
-      txt:absTxt+' Cet élément a été pris en compte dans le calcul de confiance ci-dessus — il ne remet pas en cause le pari en l\'état, mais reste un facteur de risque à surveiller.'});
+      txt:absTxt+' Cet élément est pris en compte dans les données transmises au modèle — il ne remet pas en cause le pari en l\'état, mais reste un facteur de risque à surveiller.'});
   }
   if(m.verdict_shark){
     blocs.push({num:String(blocs.length+1), titre:'Le raisonnement', txt:esc(cleanJargon(m.verdict_shark))});
@@ -1658,7 +1660,7 @@ function render(m){
     if(sa&&sa.total){m=Object.assign({},m,{crit_away:{fd:m.crit_away.fd||50,att:Math.min(100,Math.round(sa.total*0.9)),def:Math.min(100,Math.round(sa.total*0.85)),fr:Math.min(100,Math.round(sa.total*0.8)),mot:m.crit_away.mot||70,fat:50}});}
   }
 
-  var isHot=m.hot||confNorm>=8, isVal=m.val||m.vbet==='OUI';
+  var isHot=!!m.hot, isVal=m.val||m.vbet==='OUI';
   var isWC=m.league_key==='wc'||m.sport==='football'&&m.wc_probs;
   var pariRec=m.pari_rec||'', paricote=m.cote_rec||'—';
 
@@ -1695,28 +1697,31 @@ function render(m){
   var parisHtml='';
   if(pariRec){
     var coteMin=paricote!=='—'?((parseFloat(paricote)-0.20).toFixed(2)):'';
-    var probIA=null;
-    var pl=pariRec.toLowerCase();
-    if(pl.includes('over 2.5'))probIA=m.po25;
-    else if(pl.includes('under 2.5'))probIA=100-(m.po25||0);
-    else if(pl.includes('btts oui'))probIA=m.btts;
-    else if(pl.includes('btts non'))probIA=100-(m.btts||0);
-    else if(pl.includes('1x'))probIA=(m.p1||0)+(m.pn||0);
-    else if(pl.includes('x2'))probIA=(m.p2||0)+(m.pn||0);
+    // model_probability : LA probabilite du marche retenu, calculee par le
+    // moteur (Poisson/Dixon-Coles/Monte-Carlo/Elo, ancree au marche pour
+    // 1X2/DC). Repli sur l'ancien champ conf (deprecie, egal a
+    // model_probability/10) uniquement pour des donnees mises en cache
+    // avant ce champ.
+    var probIA=m.model_probability!=null?m.model_probability:((m.conf||0)*10);
     var edgeNum=parseEdgeText(m.edge);
     var coteF=parseFloat(paricote);
     var probImpl=coteF&&coteF>1?Math.round((1/coteF)*100):null;
-    var confPct=Math.min(100,Math.max(0,(m.conf||0)*10));
-    var confLvl=confPct>=75?'SHARK LOCK':confPct>=60?'FIABLE':confPct>=40?'MODÉRÉ':'PRUDENT';
+    // Fiabilite : EXPLICITEMENT separee de la probabilite (m.reliability,
+    // voir lib/decision.js#computeReliability) - accord des modeles,
+    // qualite des donnees, taille d'echantillon. Jamais la probabilite
+    // elle-meme sous un autre nom.
+    var relLabel=(m.reliability&&m.reliability.label)||'Inconnue';
+    var relPct=relLabel==='Élevée'?85:relLabel==='Moyenne'?55:relLabel==='Faible'?25:0;
+    var relDetail=m.reliability?('Accord modèles: '+(m.reliability.model_agreement||'?')+' · Qualité données: '+(m.reliability.data_quality||'?')):'';
 
     parisHtml='<div class="pari-main">'
       +'<div class="pm-headline"><div><div class="pm-lbl">SÉLECTION IA DU JOUR</div><div class="pm-bet">'+translateMarket(pariRec).toUpperCase()+'</div></div><div class="pm-cote-big">'+paricote+'</div></div>'
       +'<div class="pm-metrics">'
-      +(probIA?'<div class="pmm"><div class="pmm-val cy">'+Math.round(probIA)+'%</div><div class="pmm-lbl">PROBA IA</div></div>':'')
+      +(probIA!=null?'<div class="pmm"><div class="pmm-val cy">'+Math.round(probIA)+'%</div><div class="pmm-lbl">PROBABILITÉ MODÈLE</div></div>':'')
       +(probImpl?'<div class="pmm"><div class="pmm-val">'+probImpl+'%</div><div class="pmm-lbl">COTE IMPL.</div></div>':'')
       +(edgeNum!==null?'<div class="pmm"><div class="pmm-val gr">'+(edgeNum>0?'+':'')+edgeNum.toFixed(0)+'%</div><div class="pmm-lbl">AVANTAGE</div></div>':'')
       +'</div>'
-      +'<div class="pm-conf"><span class="pm-conf-lbl">CONFIANCE</span><div class="pm-conf-bar"><div class="pm-conf-fill" style="width:'+confPct+'%"></div></div><span class="pm-conf-val">'+(m.conf||0).toFixed(0)+'/10 · '+confLvl+'</span></div>'
+      +'<div class="pm-conf" title="'+esc(relDetail)+'"><span class="pm-conf-lbl">FIABILITÉ</span><div class="pm-conf-bar"><div class="pm-conf-fill" style="width:'+relPct+'%"></div></div><span class="pm-conf-val">'+relLabel.toUpperCase()+'</span></div>'
       +(coteMin?'<div class="pm-warn">⚠ Si cote passe sous '+coteMin+' — ne pas jouer</div>':'')
       +'</div>';
   }

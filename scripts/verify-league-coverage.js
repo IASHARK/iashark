@@ -101,7 +101,11 @@ async function verifyLeague(league, apsKey) {
       };
     }
     var apiName = entry.league && entry.league.name;
-    var nameMismatch = apiName && league.displayName && !apiName.toLowerCase().includes(league.displayName.toLowerCase().split(" ")[0]);
+    // Compare au nom d'API attendu explicite (apiNameHint) quand le displayName
+    // interne est une abreviation (ex. MLS / Major League Soccer) qui ne
+    // matche jamais un nom complet par simple inclusion de sous-chaine.
+    var expectedName = league.apiNameHint || league.displayName;
+    var nameMismatch = apiName && expectedName && !apiName.toLowerCase().includes(expectedName.toLowerCase().split(" ")[0]);
     var season = resolveSeason(entry.seasons);
     if (!season) {
       return {

@@ -13,7 +13,13 @@
     "Les apiFootballId ci-dessous sont les identifiants publics et stables documentes par",
     "API-Football (inchanges depuis plusieurs saisons) ; ils sont re-confirmes automatiquement",
     "a chaque verification (le script compare le nom retourne par l'API au nom attendu et",
-    "log un avertissement si ca ne correspond pas, sans jamais fabriquer une correspondance)."
+    "log un avertissement si ca ne correspond pas, sans jamais fabriquer une correspondance).",
+    "Verification reelle du 2026-08-30 : les 13 ids ont ete confirmes contre l'API (noms API :",
+    "Premier League, La Liga, Serie A, Bundesliga, Ligue 1, UEFA Champions League, UEFA Europa",
+    "League, UEFA Europa Conference League, Eredivisie, Primeira Liga, Major League Soccer,",
+    "Allsvenskan, J1 League). apiNameHint (optionnel) : nom exact retourne par l'API quand il",
+    "differe visiblement du displayName interne (ex. MLS/Major League Soccer), pour eviter un",
+    "faux avertissement de correspondance sans changer l'id verifie."
   ],
   "leagues": [
     { "key": "premier",     "displayName": "Premier League",      "country": "Angleterre", "apiFootballId": 39,  "oddsSportKey": "soccer_epl",                              "europeanQualification": true  },
@@ -26,7 +32,7 @@
     { "key": "ecl",         "displayName": "Conference League",   "country": "UEFA",       "apiFootballId": 848, "oddsSportKey": "soccer_uefa_europa_conference_league",    "europeanQualification": false },
     { "key": "eredivisie",  "displayName": "Eredivisie",          "country": "Pays-Bas",   "apiFootballId": 88,  "oddsSportKey": "soccer_netherlands_eredivisie",           "europeanQualification": true  },
     { "key": "primeira",    "displayName": "Liga Portugal",       "country": "Portugal",   "apiFootballId": 94,  "oddsSportKey": "soccer_portugal_primeira_liga",           "europeanQualification": true  },
-    { "key": "mls",         "displayName": "MLS",                 "country": "USA/Canada", "apiFootballId": 253, "oddsSportKey": "soccer_usa_mls",                          "europeanQualification": false },
+    { "key": "mls",         "displayName": "MLS",                 "country": "USA/Canada", "apiFootballId": 253, "oddsSportKey": "soccer_usa_mls",                          "europeanQualification": false, "apiNameHint": "Major League Soccer" },
     { "key": "suede",       "displayName": "Allsvenskan",         "country": "Suede",      "apiFootballId": 113, "oddsSportKey": "soccer_sweden_allsvenskan",               "europeanQualification": true  },
     { "key": "jleague",     "displayName": "J1 League",           "country": "Japon",      "apiFootballId": 98,  "oddsSportKey": "soccer_japan_j_league",                   "europeanQualification": false }
   ]

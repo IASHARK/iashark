@@ -37,7 +37,7 @@ jobs:
           const { resolveMarketWin } = require('./lib/resolvers.js');
           const { parseOdds } = require('./lib/odds.js');
           const { pickMarketDeterministic, computeRiskLabel, computeModelAgreement, computeDataQualityScore, computeReliability } = require('./lib/decision.js');
-          const { buildPlayerMarketOutput } = require('./lib/markets/player-engine.js');
+          const { buildPlayerMarketOutput, MIN_APPEARANCES_FOR_RATE } = require('./lib/markets/player-engine.js');
           const I18N_LOCALES = require('./i18n/locales.json');
           const I18N_PAGES = require('./scripts/i18n-manifest.js');
           const { generateLocalizedSitemaps } = require('./scripts/i18n-sitemaps.js');
@@ -663,15 +663,42 @@ jobs:
             PLAYER_STATS_CACHE[cacheKey] = result;
             return result;
           }
+          // Effectif complet d'une equipe (pas la composition d'un match precis) -
+          // utilise en repli quand la composition officielle n'est pas encore
+          // publiee (cas tres majoritaire au run quotidien unique 6h UTC, les
+          // compositions ne sortant qu'~1h avant le coup d'envoi). Cache memoire
+          // pour la duree du run, un effectif change rarement d'une fixture a
+          // l'autre le meme jour.
+          var SQUAD_CACHE = {};
+          async function getTeamSquad(teamId) {
+            if(SQUAD_CACHE[teamId]!==undefined) return SQUAD_CACHE[teamId];
+            var r = await get('https://v3.football.api-sports.io/players/squads?team='+teamId, APS);
+            var squad = (r.response && r.response[0] && r.response[0].players) || [];
+            SQUAD_CACHE[teamId] = squad;
+            return squad;
+          }
           // Calcule les marches joueur reels (ANYTIME_GOALSCORER/PLAYER_SHOTS/
-          // PLAYER_SHOTS_ON_TARGET) pour les titulaires/remplacants d'une fixture,
-          // uniquement quand : (1) la composition officielle est confirmee (pas de
-          // lineup "attendue" fabriquee dans ce pipeline - la vraie prediction de
-          // composition pre-match est un chantier separe, non construit ici) et (2)
-          // l'analysis_tier de la ligue permet un traitement complet
-          // (FULL_ANALYSIS/STANDARD_ANALYSIS - jamais sur LIMITED_DATA/UNVERIFIED,
-          // demande explicite : "ne fais tourner les traitements Player lourds que
-          // lorsque le coverage de la competition/fixture le permet").
+          // PLAYER_SHOTS_ON_TARGET), uniquement quand l'analysis_tier de la ligue
+          // permet un traitement complet (FULL_ANALYSIS/STANDARD_ANALYSIS - jamais
+          // sur LIMITED_DATA/UNVERIFIED, demande explicite : "ne fais tourner les
+          // traitements Player lourds que lorsque le coverage de la
+          // competition/fixture le permet").
+          //
+          // Deux chemins, jamais melanges pour un meme joueur :
+          // - composition officielle confirmee (lineups fourni) -> lineupStatus
+          //   'confirmed_starter'/'confirmed_bench', mêmes minutes attendues que
+          //   toujours (moyenne historique reelle du joueur).
+          // - pas de composition publiee (cas majoritaire au run quotidien) ->
+          //   repli sur l'effectif complet (getTeamSquad), lineupStatus
+          //   'expected_starter'/'expected_bench' avec une starterProbability
+          //   REELLE (lineups joues / apparitions cette saison, jamais devinee) -
+          //   c'est la meme branche deja prevue et testee dans
+          //   lib/markets/player-engine.js (resolveExpectedMinutes,
+          //   'expected_starter'/'expected_bench'), simplement jamais appelee par
+          //   le pipeline jusqu'ici. assessDataQuality() plafonne deja cette
+          //   branche a 'medium' au mieux (jamais 'high', reserve aux compositions
+          //   confirmees) - la distinction confirme/attendu reste donc visible
+          //   cote produit (data_quality), jamais maquillee en certitude.
           // attackMultH/defenseMultA (et l'inverse) : derives de critH.att/critA.def
           // (calcCriteres, echelle 0-100 ou 50=neutre) divise par 50 - premiere
           // integration, approximation documentee plutot que fabriquee comme
@@ -680,13 +707,24 @@ jobs:
           // ces criteres 0-100 ; ce ratio est un pont raisonnable mais distinct.
           async function computePlayerMarketsForFixture(fixtureId, lineups, homeTeamId, awayTeamId, season, analysisTier, critHome, critAway) {
             if(analysisTier!=='FULL_ANALYSIS' && analysisTier!=='STANDARD_ANALYSIS') return [];
-            if(!lineups || (!lineups.home && !lineups.away)) return [];
             var attackMultHome = critHome ? Math.max(0.5, Math.min(1.5, critHome.att/50)) : 1;
             var attackMultAway = critAway ? Math.max(0.5, Math.min(1.5, critAway.att/50)) : 1;
             var defenseMultHome = critHome ? Math.max(0.5, Math.min(1.5, critHome.def/50)) : 1;
             var defenseMultAway = critAway ? Math.max(0.5, Math.min(1.5, critAway.def/50)) : 1;
             var results = [];
-            async function processTeamSide(teamLineup, teamId, teamAttackMult, opponentDefenseMult) {
+            function pushMarkets(playerId, playerName, stats, lineupStatus, starterProbability, teamAttackMult, opponentDefenseMult){
+              ['ANYTIME_GOALSCORER','PLAYER_SHOTS','PLAYER_SHOTS_ON_TARGET'].forEach(function(market){
+                var ratePer90 = stats.games.minutes>0 ? (market==='ANYTIME_GOALSCORER'?stats.goalsTotal:market==='PLAYER_SHOTS'?stats.shotsTotal:stats.shotsOnTarget)/(stats.games.minutes/90) : null;
+                var out = buildPlayerMarketOutput({
+                  fixtureId:fixtureId, playerId:playerId, market:market,
+                  lineupStatus:lineupStatus, historicalMinutes:stats.games, starterProbability:starterProbability,
+                  ratePer90:ratePer90, teamAttackMultiplier:teamAttackMult, opponentDefenseMultiplier:opponentDefenseMult,
+                  penaltyGoalsPer90: market==='ANYTIME_GOALSCORER' && stats.games.minutes>0 ? stats.penaltyScored/(stats.games.minutes/90) : undefined,
+                });
+                if(out){ out.player_name=playerName; results.push(out); }
+              });
+            }
+            async function processConfirmedSide(teamLineup, teamId, teamAttackMult, opponentDefenseMult) {
               if(!teamLineup) return;
               var starters = (teamLineup.startXI||[]).filter(function(p){return p.id;});
               var bench = (teamLineup.substitutes||[]).filter(function(p){return p.id;}).slice(0,5); // 5 premiers seulement (limite le volume d'appels, les remplacants tardifs sont peu pertinents pour ces marches)
@@ -696,16 +734,7 @@ jobs:
                 var stats = await getPlayerSeasonStats(p.id, teamId, season);
                 await sleep(150);
                 if(!stats) continue;
-                ['ANYTIME_GOALSCORER','PLAYER_SHOTS','PLAYER_SHOTS_ON_TARGET'].forEach(function(market){
-                  var ratePer90 = stats.games.minutes>0 ? (market==='ANYTIME_GOALSCORER'?stats.goalsTotal:market==='PLAYER_SHOTS'?stats.shotsTotal:stats.shotsOnTarget)/(stats.games.minutes/90) : null;
-                  var out = buildPlayerMarketOutput({
-                    fixtureId:fixtureId, playerId:p.id, market:market,
-                    lineupStatus:'confirmed_starter', historicalMinutes:stats.games,
-                    ratePer90:ratePer90, teamAttackMultiplier:teamAttackMult, opponentDefenseMultiplier:opponentDefenseMult,
-                    penaltyGoalsPer90: market==='ANYTIME_GOALSCORER' && stats.games.minutes>0 ? stats.penaltyScored/(stats.games.minutes/90) : undefined,
-                  });
-                  if(out){ out.player_name=p.name; results.push(out); }
-                });
+                pushMarkets(p.id, p.name, stats, 'confirmed_starter', undefined, teamAttackMult, opponentDefenseMult);
               }
               for(var bi=0; bi<bench.length; bi++){
                 var pb = bench[bi];
@@ -722,8 +751,44 @@ jobs:
                 if(outB){ outB.player_name=pb.name; results.push(outB); }
               }
             }
-            await processTeamSide(lineups.home, homeTeamId, attackMultHome, defenseMultAway);
-            await processTeamSide(lineups.away, awayTeamId, attackMultAway, defenseMultHome);
+            async function processExpectedSide(teamId, teamAttackMult, opponentDefenseMult) {
+              var squad = await getTeamSquad(teamId);
+              var candidates = squad.filter(function(p){ return p.id && p.position!=='Goalkeeper'; });
+              var withStats = [];
+              for(var i=0;i<candidates.length;i++){
+                var p = candidates[i];
+                var stats = await getPlayerSeasonStats(p.id, teamId, season);
+                await sleep(150);
+                // Meme seuil que le moteur (MIN_APPEARANCES_FOR_RATE) : sous ce
+                // nombre d'apparitions reelles cette saison, le taux par-90 est
+                // trop bruite pour meme envisager un joueur "attendu titulaire" -
+                // assessDataQuality() supprimerait le resultat de toute facon,
+                // mais filtrer ici evite des appels/traitement pour rien.
+                if(!stats || stats.games.appearences < MIN_APPEARANCES_FOR_RATE) continue;
+                withStats.push({player:p, stats:stats});
+              }
+              // Limite a 10 joueurs de champ par equipe (comme les 5 remplacants
+              // max cote confirme) - classes par minutes jouees cette saison,
+              // proxy reel de pertinence, jamais un choix arbitraire de noms.
+              withStats.sort(function(a,b){ return b.stats.games.minutes - a.stats.games.minutes; });
+              withStats = withStats.slice(0, 10);
+              withStats.forEach(function(entry){
+                var p = entry.player, stats = entry.stats;
+                // starterProbability reelle : proportion des apparitions ou ce
+                // joueur a ete titulaire cette saison (games.lineups/appearences,
+                // champs reels API-Football) - jamais devinee.
+                var starterProbability = stats.games.appearences>0 ? stats.games.lineups/stats.games.appearences : 0;
+                var lineupStatus = starterProbability>=0.5 ? 'expected_starter' : 'expected_bench';
+                pushMarkets(p.id, p.name, stats, lineupStatus, starterProbability, teamAttackMult, opponentDefenseMult);
+              });
+            }
+            if(lineups && (lineups.home || lineups.away)){
+              await processConfirmedSide(lineups.home, homeTeamId, attackMultHome, defenseMultAway);
+              await processConfirmedSide(lineups.away, awayTeamId, attackMultAway, defenseMultHome);
+            } else {
+              await processExpectedSide(homeTeamId, attackMultHome, defenseMultAway);
+              await processExpectedSide(awayTeamId, attackMultAway, defenseMultHome);
+            }
             return results;
           }
           async function getPredictions(fixtureId) {

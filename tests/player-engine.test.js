@@ -33,6 +33,44 @@ test("resolveExpectedMinutes: statut inconnu -> jamais de minutes inventees", ()
   assert.equal(r.expectedMinutes, null);
 });
 
+// Branche "expected_starter/expected_bench" avec une vraie starterProbability
+// (composition officielle pas encore publiee, repli sur l'effectif - voir
+// pipeline computePlayerMarketsForFixture/processExpectedSide) : les minutes
+// doivent etre une moyenne ponderee reelle entre le profil titulaire et le
+// profil remplacant de CE joueur, jamais une valeur fixe.
+test("resolveExpectedMinutes: 'expected_starter' avec starterProbability elevee -> minutes proches du profil titulaire", () => {
+  var hist = { appearences: 10, lineups: 8, minutes: 680 };
+  var starter = resolveExpectedMinutes("confirmed_starter", hist);
+  var expectedHigh = resolveExpectedMinutes("expected_starter", hist, 0.9);
+  assert.equal(expectedHigh.source, "blended_starter_probability");
+  assert.ok(Math.abs(expectedHigh.expectedMinutes - starter.expectedMinutes) <= 10);
+});
+
+test("resolveExpectedMinutes: 'expected_bench' avec starterProbability faible -> minutes proches du profil remplacant", () => {
+  var hist = { appearences: 10, lineups: 8, minutes: 680 };
+  var sub = resolveExpectedMinutes("confirmed_bench", hist);
+  var expectedLow = resolveExpectedMinutes("expected_bench", hist, 0.1);
+  assert.ok(Math.abs(expectedLow.expectedMinutes - sub.expectedMinutes) <= 10);
+});
+
+test("assessDataQuality: un statut 'expected_*' ne peut jamais atteindre 'high', meme avec beaucoup d'apparitions - reserve aux compositions confirmees", () => {
+  var q = assessDataQuality({ expectedMinutes: 75, historicalMinutes: { appearences: 30 }, opponentDefenseMultiplier: 1.1, lineupStatus: "expected_starter" });
+  assert.notEqual(q.quality, "high");
+});
+
+test("buildPlayerMarketOutput: joueur d'effectif (pas de composition confirmee) avec assez d'historique -> resultat reel produit, jamais supprime a tort", () => {
+  var out = buildPlayerMarketOutput({
+    fixtureId: 1, playerId: 42, market: "ANYTIME_GOALSCORER",
+    lineupStatus: "expected_starter", starterProbability: 0.8,
+    historicalMinutes: { appearences: 15, lineups: 13, minutes: 1100 },
+    ratePer90: 0.5, teamAttackMultiplier: 1, opponentDefenseMultiplier: 1,
+  });
+  assert.ok(out);
+  assert.equal(out.lineup_status, "expected_starter");
+  assert.equal(out.inputs_snapshot.starter_probability, 0.8);
+  assert.notEqual(out.data_quality, "insufficient");
+});
+
 test("computeGoalscorerProbability: 30 min attendues donne une probabilite strictement inferieure a 90 min (meme taux/contexte) - variable centrale", () => {
   var p30 = computeGoalscorerProbability({ expectedMinutes: 30, goalsPer90: 0.5, teamAttackMultiplier: 1, opponentDefenseMultiplier: 1 });
   var p90 = computeGoalscorerProbability({ expectedMinutes: 90, goalsPer90: 0.5, teamAttackMultiplier: 1, opponentDefenseMultiplier: 1 });

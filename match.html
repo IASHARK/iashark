@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Analyse Match — IASHARK</title>
 <!--SEO_META--><!--/SEO_META-->
-<script type="module" src="https://widgets.api-sports.io/3.1.0/widgets.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <style>
@@ -454,35 +453,6 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 .model-bar-bg{height:4px;background:rgba(255,255,255,0.04);border-radius:2px;overflow:hidden;}
 .model-bar-fg{height:100%;border-radius:2px;}
 
-/* Widget API-Sports — thème IASHARK (couleurs + tailles du design system) */
-api-sports-widget{--widget-height:auto;}
-api-sports-widget[data-theme="iashark"]{
-  --primary-color:#22d3ee;
-  --success-color:#10b981;
-  --warning-color:#f59e0b;
-  --danger-color:#ef4444;
-  --light-color:#4a6580;
-  --home-color:#22d3ee;
-  --away-color:rgba(226,232,240,0.6);
-  --text-color:#e2e8f0;
-  --text-color-info:#94a3b8;
-  --background-color:#0c1520;
-  --primary-font-size:0.72rem;
-  --secondary-font-size:0.68rem;
-  --button-font-size:0.7rem;
-  --title-font-size:0.75rem;
-  --header-text-transform:uppercase;
-  --button-text-transform:uppercase;
-  --title-text-transform:uppercase;
-  --border:1px solid rgba(255,255,255,0.06);
-  --game-height:2.3rem;
-  --league-height:2.35rem;
-  --score-size:1.6rem;
-  --flag-size:16px;
-  --teams-logo-size:18px;
-  --teams-logo-size-xl:4rem;
-  --hover:rgba(34,211,238,0.08);
-}
 .lang-switch{position:relative;}
 .lang-switch-btn{display:flex;align-items:center;gap:5px;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1px;color:var(--muted);background:transparent;border:1px solid var(--border);padding:6px 9px;border-radius:8px;cursor:pointer;transition:.2s;}
 .lang-switch-btn:hover{border-color:rgba(34,211,238,0.3);color:var(--cyan);}
@@ -499,26 +469,6 @@ api-sports-widget[data-theme="iashark"]{
 </style>
 </head>
 <body>
-
-<!-- ⚠️ CONFIG WIDGET API-SPORTS — DOIT ÊTRE EN PREMIER DANS LE BODY -->
-<!-- data-show-errors="true" activé temporairement pour debug (repasser en false une fois que ça marche) -->
-<api-sports-widget
-  data-type="config"
-  data-key="1b43d4467cbe0f0d7f81bca6057c0799"
-  data-sport="football"
-  data-lang="fr"
-  data-theme="iashark"
-  data-show-logos="true"
-  data-show-errors="true"
-  data-refresh="60"
-  data-player-statistics="true"
-  data-player-injuries="true"
-  data-team-squad="true"
-  data-team-statistics="true"
-  data-game-tab="statistics"
-  data-target-player="modal"
-  data-target-team="modal"
-></api-sports-widget>
 
 <header class="hdr">
   <a class="hdr-back" href="javascript:history.back()">← RETOUR</a>
@@ -1454,23 +1404,6 @@ function buildAbsencesCle(m){
     +'</div>';
 }
 
-function buildStandingsWidget(m){
-  if(!m.league_id)return null;
-  var season=m.season||(new Date(m.date).getFullYear());
-  return '<div class="s"><div class="stitle">CLASSEMENT</div>'
-    +'<div style="background:var(--card2);border:1px solid var(--border);border-radius:12px;overflow:hidden;">'
-    +'<api-sports-widget data-type="standings" data-league="'+m.league_id+'" data-season="'+season+'" data-theme="iashark"></api-sports-widget>'
-    +'</div></div><div class="sep"></div>';
-}
-
-function buildH2HWidget(homeId,awayId){
-  if(!homeId||!awayId)return '';
-  return '<div class="s"><div class="stitle">HEAD TO HEAD</div>'
-    +'<div style="background:var(--card2);border:1px solid var(--border);border-radius:12px;overflow:hidden;">'
-    +'<api-sports-widget data-type="h2h" data-h2h="'+homeId+'-'+awayId+'" data-theme="iashark"></api-sports-widget>'
-    +'</div></div><div class="sep"></div>';
-}
-
 function buildSurface(hn,an,s1,s2,surface){
   if(!s1&&!s2)return '';
   var surfLabel=surface==='clay'?'Terre battue':surface==='grass'?'Gazon':'Dur';
@@ -1725,22 +1658,6 @@ function buildProWall(){
     +'</div></div>';
 }
 
-function buildWidgetGame(m){
-  var fxId=m.fixture_id||m.id||'';
-  if(!fxId)return '';
-  var isLive=m.status&&(m.status==='1H'||m.status==='2H'||m.status==='HT'||m.status==='ET'||m.status==='LIVE');
-  var isUpcoming=!m.status||m.status==='NS'||m.status==='TBD';
-  if(!isLive&&!isUpcoming)return '';
-  var dot=isLive?'<div style="width:7px;height:7px;border-radius:50%;background:var(--green);animation:blink 1.2s infinite;flex-shrink:0;"></div>':'<div style="width:7px;height:7px;border-radius:50%;background:var(--muted);flex-shrink:0;"></div>';
-  var lbl=isLive?'LIVE — DONNÉES EN TEMPS RÉEL':'DONNÉES MATCH — MIS À JOUR AUTO';
-  return '<div style="margin:0 18px 16px;">'
-    +'<div style="font-family:Space Mono,monospace;font-size:7px;color:var(--muted);letter-spacing:2px;margin-bottom:8px;display:flex;align-items:center;gap:6px;">'
-    +dot+lbl
-    +'</div>'
-    +'<div style="background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;">'
-    +'<api-sports-widget data-type="game" data-game-id="'+fxId+'" data-theme="iashark"></api-sports-widget>'
-    +'</div></div>';
-}
 // ── RENDER PRINCIPAL ──────────────────────────────────────
 function render(m){
   var hn=m.home&&m.home.n||'',an=m.away&&m.away.n||'';

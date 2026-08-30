@@ -1,15 +1,11 @@
-# Maintenance REMISE le 2026-08-30 sur instruction explicite et urgente
-# de l'utilisateur : la V2 n'est PAS acceptee apres controle manuel reel
-# du site (ecarts constates avec le MASTER V2.1 - nav bottom, page
-# Outils, plusieurs pages ne reflete pas vraiment la V2). Recette
-# produit visuelle A-Z en cours sur la branche hotfix-v2-acceptance.
-# Ne pas retirer cette ligne sans feu vert explicite de l'utilisateur.
-/*  /maintenance.html  200!
+# Maintenance retiree le 2026-08-30 sur feu vert explicite de l'utilisateur,
+# apres la recette produit visuelle A-Z complete sur hotfix-v2-acceptance
+# (voir IASHARK_V2_RECETTE_VISUELLE.md) : correctifs V2 reels, verification
+# des 13 competitions de lancement, audit odds/marches, Player Engine,
+# revue securite dediee (2 problemes reels trouves et corriges), retrait
+# public d'Historique/Archives, i18n 6 langues verifie.
 
 # --- i18n (MASTER V2.1 SS19) ------------------------------------------
-# Ces regles restent INERTES tant que la ligne catch-all ci-dessus est
-# active.
-#
 # IMPORTANT - regle de securite pour ce fichier : n'ajouter une ligne
 # ci-dessous QUE pour une page dont /fr/<page> (et les 5 autres locales)
 # ont ete reellement generes par `npm run build:i18n` et commit. Ajouter

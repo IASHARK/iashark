@@ -15,10 +15,21 @@
 # ont ete reellement generes par `npm run build:i18n` et commit. Ajouter
 # une redirection vers une page qui n'existe pas encore produirait un
 # 404 en cascade. Etat actuel (2026-08-30) :
-# les 7 pages coeur du produit sont generees pour les 6 locales
-# (marches/index/match/pro/compte/historique/landing) - voir
+# les 6 pages coeur du produit sont generees pour les 6 locales
+# (index/match/pro/compte/historique/landing) - voir
 # IASHARK_V2_EXECUTION_STATE.md pour la liste a jour et le detail par page
 # (ex. match.html n'est traduit que sur le chrome, pas le narratif LLM).
+#
+# marches.html a ete retire du produit (page jugee sans valeur ajoutee par
+# rapport a ce qui est deja affiche par match, 2026-08-30) - anciennes URLs
+# redirigees vers l'accueil plutot que laissees en 404.
+/marches.html      /       301
+/fr/marches.html   /fr/    301
+/en/marches.html   /en/    301
+/es/marches.html   /es/    301
+/de/marches.html   /de/    301
+/it/marches.html   /it/    301
+/pt/marches.html   /pt/    301
 
 # Suggestion de langue sur la racine "/", basee sur Accept-Language du
 # navigateur (parametre Language de Netlify) - JAMAIS un choix impose :
@@ -33,7 +44,6 @@
 /  /pt/  302  Language=pt
 /  /fr/  302
 
-/marches.html             /fr/marches.html             301
 /index.html                /fr/                          301
 /match.html               /fr/match.html               301
 /pro.html                 /fr/pro.html                 301

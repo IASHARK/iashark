@@ -40,7 +40,7 @@ LOCALES.supported.forEach(function (l) {
 // entree correspondante existe reellement dans i18n-manifest.js.
 const LOCALIZABLE_PAGES = new Set([
   "/", "/index.html", "/match.html", "/pro.html", "/historique.html",
-  "/compte.html", "/marches.html", "/landing.html"
+  "/compte.html", "/landing.html"
 ]);
 
 function get(obj, keyPath) {

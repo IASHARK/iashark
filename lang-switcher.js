@@ -27,7 +27,7 @@
   }
 
   // Chemin "nu" de la page courante, sans prefixe de locale - ex.
-  // "/pro.html", "/", "/marches.html".
+  // "/pro.html", "/", "/compte.html".
   function currentSlug() {
     var p = location.pathname.replace(/^\/([a-z]{2})(\/|$)/, "/");
     return p;

@@ -498,7 +498,17 @@ var currentUser = null;
 // Le deverrouillage ne depend plus que du plan reel verifie cote serveur
 // (table users, RLS restreint chaque utilisateur a sa propre ligne).
 
+// Bug reel trouve en recette navigateur (utilisateur, 2026-08-30) : le
+// pro-wall ne cachait QUE visuellement le contenu (filter:blur + opacity),
+// mais renderSelections()/renderBets() peuplaient le DOM avec les vraies
+// donnees (equipes, cotes, probabilites) pour TOUT visiteur, PRO ou non -
+// verifiable via innerText meme flou. isProUnlocked est la vraie source de
+// verite cote client, alimentee uniquement par checkProAccess() (qui lit le
+// plan reel depuis Supabase, RLS-protege) - renderSelections()/renderBets()
+// refusent maintenant de peupler les vraies donnees tant qu'il est false.
+var isProUnlocked = false;
 function unlockProWall(){
+  isProUnlocked = true;
   document.getElementById('proWall').classList.remove('locked');
   document.getElementById('fabBtn').style.display='flex';
 }
@@ -762,6 +772,11 @@ function renderDaySummary(){
 function renderSelections(){
   var mkt=document.getElementById('filterMkt').value;
   var sortBy=document.getElementById('sortSel').value;
+  if(!isProUnlocked){
+    document.getElementById('selCount').textContent='';
+    document.getElementById('selList').innerHTML='<div class="empty-hint">Débloque OUTILS pour voir les sélections réelles (probabilité modèle, cote, marché).</div>';
+    return;
+  }
   var list=allMatchs.filter(function(m){
     if(!mkt)return true;
     return getMarketKey(m.pari_rec||'')===mkt;

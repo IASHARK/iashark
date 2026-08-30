@@ -309,7 +309,7 @@ var PAGES = [
     },
     replacements: [
       {find: '<a class="hdr-back" href="javascript:history.back()">← RETOUR</a>', build: function(d){ return '<a class="hdr-back" href="javascript:history.back()">' + d.match_page.back + '</a>'; }},
-      {find: '<span id="authHeaderSlot"><a class="btn-conn" href="/compte.html">CONNEXION</a></span>', build: function(d){ return '<span id="authHeaderSlot"><a class="btn-conn" href="/compte.html">' + d.cta.login + '</a></span>'; }},
+      {find: '<span id="authHeaderSlot"><a class="btn-login" href="/compte.html">CONNEXION</a></span>', build: function(d){ return '<span id="authHeaderSlot"><a class="btn-login" href="/compte.html">' + d.cta.login + '</a></span>'; }},
       {find: '<div class="loading-lbl">CHARGEMENT...</div>', build: function(d){ return '<div class="loading-lbl">' + d.common.loading + '</div>'; }},
       {find:
         '    <div>⚠️ LE JEU PEUT ÊTRE DANGEREUX — JOUEZ RESPONSABLE · INTERDIT AUX MOINS DE 18 ANS</div>\n' +

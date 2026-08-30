@@ -34,6 +34,12 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 .logo span{color:var(--cyan);}
 .btn-conn{margin-left:auto;font-family:'Space Mono',monospace;font-size:8px;letter-spacing:1px;color:var(--cyan);border:1px solid rgba(34,211,238,0.25);padding:5px 12px;border-radius:7px;background:rgba(34,211,238,0.06);text-decoration:none;transition:.15s;}
 .btn-conn:hover{background:rgba(34,211,238,0.12);}
+/* auth-header.js (partage, meme composant que index/marches/pro/compte/historique)
+   rend toujours class="btn-login" pour le chip connecte/deconnecte - cette regle
+   manquait ici, le chip perdait tout style une fois mont'e (bug reel trouve en
+   recette navigateur : "sur certaines pages mes initiales n'apparaissent pas"). */
+.btn-login{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:1px;color:var(--cyan);border:1px solid rgba(34,211,238,0.25);padding:5px 12px;border-radius:7px;background:rgba(34,211,238,0.06);text-decoration:none;transition:.15s;cursor:pointer;display:inline-flex;align-items:center;}
+.btn-login:hover{background:rgba(34,211,238,0.12);}
 .wrap{max-width:660px;margin:16px auto 0;padding:0 14px;}
 .card{border:1px solid var(--border);border-radius:18px;overflow:hidden;animation:up .4s ease forwards;}
 .card.hot{border-color:rgba(245,158,11,0.2);}
@@ -527,7 +533,7 @@ api-sports-widget[data-theme="iashark"]{
   <a class="logo" href="/pt/">IA<span>SHARK</span></a>
   <div style="display:flex;align-items:center;gap:8px;">
     <span id="langSwitchSlot"></span>
-    <span id="authHeaderSlot"><a class="btn-conn" href="/pt/compte.html">ENTRAR</a></span>
+    <span id="authHeaderSlot"><a class="btn-login" href="/pt/compte.html">ENTRAR</a></span>
   </div>
 </header>
 <div id="root"><!--SEO_SUMMARY--><!--/SEO_SUMMARY--><div class="loading"><div class="spinner"></div><div class="loading-lbl">A CARREGAR...</div></div></div>

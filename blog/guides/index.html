@@ -87,7 +87,7 @@ footer p{font-family:"Space Mono",monospace;font-size:9px;color:var(--muted);let
   <a href="/" class="logo"><span>IA</span>SHARK</a>
   <div class="hdr-right">
     <a href="/" class="btn-back">← ACCUEIL</a>
-    <a href="/compte.html" class="btn-login">CONNEXION</a>
+    <span id="authHeaderSlot"><a href="/compte.html" class="btn-login">CONNEXION</a></span>
   </div>
 </header>
 
@@ -189,5 +189,8 @@ footer p{font-family:"Space Mono",monospace;font-size:9px;color:var(--muted);let
 </nav>
 
 <script src="/site-prefs.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="/auth-header.js"></script>
+<script>IasharkAuthHeader.mount('#authHeaderSlot');</script>
 </body>
 </html>

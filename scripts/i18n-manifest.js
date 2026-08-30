@@ -164,9 +164,9 @@ var PAGES = [
         var n = d.market_names;
         return "var MARKET_KEY_LABELS={over25:'" + esc(n.over25) + "',under25:'" + esc(n.under25) + "',btts_oui:'" + esc(n.btts_oui) + "',btts_non:'" + esc(n.btts_non) + "',dc1x:'" + esc(n.dc1x) + "',dc_x2:'" + esc(n.dc_x2) + "',victoire_dom:'" + esc(n.victoire_dom) + "',victoire_ext:'" + esc(n.victoire_ext) + "'};";
       }},
-      {find: "wrap.innerHTML='<div class=\"empty-state\">AUCUN MARCHÉ EXPLOITABLE AUJOURD\\'HUI<br><span style=\"color:rgba(74,101,128,0.6)\">Revenez plus tard, ou consultez le catalogue des marchés ci-dessous.</span></div>';", build: function(d, l, esc){
+      {find: "wrap.innerHTML='<div class=\"empty-state\"><div class=\"empty-state-icon\"><svg viewBox=\"0 0 24 24\"><circle cx=\"11\" cy=\"11\" r=\"7\"/><path d=\"M21 21l-4.35-4.35\"/></svg></div>AUCUN MARCHÉ EXPLOITABLE AUJOURD\\'HUI<br><span style=\"color:rgba(74,101,128,0.6)\">Revenez plus tard, ou consultez le catalogue des marchés ci-dessous.</span></div>';", build: function(d, l, esc){
         var m = d.markets_page;
-        return "wrap.innerHTML='<div class=\"empty-state\">" + esc(m.empty_today) + "<br><span style=\"color:rgba(74,101,128,0.6)\">" + esc(m.empty_today_sub) + "</span></div>';";
+        return "wrap.innerHTML='<div class=\"empty-state\"><div class=\"empty-state-icon\"><svg viewBox=\"0 0 24 24\"><circle cx=\"11\" cy=\"11\" r=\"7\"/><path d=\"M21 21l-4.35-4.35\"/></svg></div>" + esc(m.empty_today) + "<br><span style=\"color:rgba(74,101,128,0.6)\">" + esc(m.empty_today_sub) + "</span></div>';";
       }},
       {find: "wrap.innerHTML='<table class=\"mtable\"><thead><tr><th>Match</th><th>Heure</th><th>Marché</th><th>Proba modèle</th><th>Cote</th><th>Écart</th><th>Qualité</th></tr></thead><tbody>'", build: function(d, l, esc){
         var m = d.markets_page;
@@ -834,8 +834,8 @@ var PAGES = [
       {find: "document.getElementById('countLbl').textContent=list.length+' pari'+(list.length>1?'s':'');",
        build: function(d, l, esc){ var h = d.history_page; return "document.getElementById('countLbl').textContent=list.length+' '+(list.length>1?'" + esc(h.bet_many) + "':'" + esc(h.bet_one) + "');"; }},
       {find: "document.getElementById('totalBadge').textContent=resolvedTotal+' PARIS';", build: function(d, l, esc){ return "document.getElementById('totalBadge').textContent=resolvedTotal+' " + esc(d.history_page.default_badge_suffix) + "';"; }},
-      {find: "if(!list.length){document.getElementById('predList').innerHTML='<div class=\"empty\"><h3>AUCUN PARIS</h3><p>Aucun résultat pour cette combinaison de filtres.</p></div>';return;}",
-       build: function(d, l, esc){ var h = d.history_page; return "if(!list.length){document.getElementById('predList').innerHTML='<div class=\"empty\"><h3>" + esc(h.empty_no_bets_title) + "</h3><p>" + esc(h.empty_no_bets_sub) + "</p></div>';return;}"; }},
+      {find: "if(!list.length){document.getElementById('predList').innerHTML='<div class=\"empty\"><div class=\"empty-icon\"><svg viewBox=\"0 0 24 24\"><circle cx=\"11\" cy=\"11\" r=\"7\"/><path d=\"M21 21l-4.35-4.35\"/></svg></div><h3>AUCUN PARIS</h3><p>Aucun résultat pour cette combinaison de filtres.</p></div>';return;}",
+       build: function(d, l, esc){ var h = d.history_page; return "if(!list.length){document.getElementById('predList').innerHTML='<div class=\"empty\"><div class=\"empty-icon\"><svg viewBox=\"0 0 24 24\"><circle cx=\"11\" cy=\"11\" r=\"7\"/><path d=\"M21 21l-4.35-4.35\"/></svg></div><h3>" + esc(h.empty_no_bets_title) + "</h3><p>" + esc(h.empty_no_bets_sub) + "</p></div>';return;}"; }},
       {find: "+'<span class=\"tag-date\">'+(p.date||p.resolved_date||'')+(p.resolved_date&&p.date&&p.resolved_date!==p.date?' · résolu '+p.resolved_date:'')+'</span>'",
        build: function(d, l, esc){ return "+'<span class=\"tag-date\">'+(p.date||p.resolved_date||'')+(p.resolved_date&&p.date&&p.resolved_date!==p.date?'" + esc(d.history_page.resolved_prefix) + "'+p.resolved_date:'')+'</span>'"; }},
       {find: "+'<div class=\"pred-result '+p.result+'\">'+(p.result==='win'?'WIN':p.result==='void'?'ANNULÉ':'LOSS')+'</div>'",

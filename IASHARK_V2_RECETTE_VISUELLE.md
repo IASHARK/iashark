@@ -6,6 +6,31 @@ Rédigé le 2026-08-30, suite au refus explicite de la V2 par l'utilisateur apr�
 
 **Méthode et limite honnête à connaître avant de lire la suite** : l'extension Claude in Chrome (navigateur réel) n'est pas connectée dans cet environnement — impossible d'obtenir une session authentifiée réelle dans un navigateur avec accès réseau complet. Pour vérifier les états FREE/PRO malgré cette contrainte : (1) deux vrais comptes de test ont été créés dans Supabase (production), un FREE et un PRO, avec connexion réelle via `curl` (mot de passe réel, token réel obtenu via l'API Auth réelle) ; (2) la réponse RÉELLE de l'API a été injectée dans le code RÉEL de la page (via `javascript_tool`, en remplaçant uniquement l'appel réseau bloqué par le sandbox) pour observer le rendu réel. C'est la vérification la plus rigoureuse possible dans cet environnement — mais ce n'est PAS une navigation authentifiée de bout en bout dans un vrai navigateur. Signalé explicitement à chaque ligne concernée. Les deux comptes de test ont été supprimés après usage (aucune trace résiduelle en base).
 
+## Mise à jour 2026-08-30 (suite) : sélecteur de langue + passe 21st.dev pragmatique
+
+### Sélecteur de langue — FAIT, visible et fonctionnel
+
+Ajouté sur les 7 pages coeur (`index`, `marches`, `match`, `pro`, `compte`, `historique`, `landing`) : script partagé `lang-switcher.js` (racine, non dupliqué par locale — même patron que `funnel-track.js`), monté dans le header de chaque page.
+
+- **Desktop** : pastille "XX ▾" à côté de CONNEXION (ou du pill de page pour `compte.html`) — clic ouvre un menu déroulant listant les 6 langues (code + nom natif + coche sur la langue active), même langage visuel que le reste du site (carte sombre, bordure cyan au survol).
+- **Mobile** : même composant, même position, testé à 375px — aucun débordement, dropdown fonctionnel (vérifié en appelant le toggle réel, pas juste visuellement).
+- **Redirection vers l'URL équivalente** : le clic navigue vers la même page dans la langue choisie (`/pro.html` → `/en/pro.html`), **vérifié réellement** (navigation confirmée, pas juste le HTML du lien).
+- **Mémorisation** : le choix est stocké (`localStorage`). Au prochain chargement d'une page non préfixée dans la même session, une redirection automatique **unique** vers la langue mémorisée se déclenche (jamais répétée dans la même session, pour ne pas combattre une navigation volontaire dans une autre langue) — **vérifié réellement** : après avoir choisi EN, visiter `/marches.html` redirige vers `/en/marches.html` une fois, puis `/historique.html` reste en FR (pas de seconde redirection forcée).
+- Vérifié en direct FR (desktop + mobile), EN (desktop + mobile), DE (desktop + mobile).
+
+163/163 tests toujours verts après ajout (aucune règle i18n cassée — le composant ne contient aucun texte à traduire, les noms de langue restent dans leur propre script).
+
+### Passe 21st.dev — pragmatique, sans React
+
+21st.dev interrogé (recherche de composants, gratuite) comme référence de patterns UI uniquement — aucun code installé (confirmé architecturalement incompatible avec le site statique sans bundler, voir rapport précédent). Améliorations réelles apportées, dans le langage visuel IASHARK existant :
+
+- **Dropdowns** (`marches.html`, `pro.html`, `historique.html`) : les `<select>` de filtres (marché, tri) passaient par le rendu brut du navigateur — ajout d'un chevron custom (SVG, `appearance:none`) et d'états hover/focus cyan cohérents avec le reste du site. Le `<select>` natif est conservé volontairement (pas de réimplémentation JS complète) : c'est déjà accessible, navigable au clavier, et déclenche le picker natif sur mobile — remplacer ça par un composant custom aurait été un risque réel pour un gain cosmétique marginal, exactement le genre de "churn" que la consigne "pragmatique" demande d'éviter.
+- **États vides** (`marches.html` "aucun marché exploitable", `historique.html` "aucun pari") : ajout d'une icône (loupe, cohérente avec le reste du vocabulaire d'icônes SVG du site) au-dessus du texte — remplace le bloc de texte brut par un vrai composant d'état vide.
+- **Modal "Ajout rapide"** (`pro.html`) et **paywall/pricing** (`match.html`/`pro.html`/`landing.html`) : inspectés en direct, déjà conformes au niveau attendu (carte sombre, hiérarchie claire, aucun effet proscrit) — non retouchés, changement jugé non nécessaire plutôt que fait par principe.
+- **Tabs Match, Compte** : inspectés, déjà cohérents (tabs segmentées existantes, cartes bien hiérarchisées) — non retouchés pour la même raison.
+
+163/163 tests toujours verts après ces changements. Vérifié en direct : chevrons de dropdown et icônes d'état vide visibles et correctement stylés en FR/EN, aucune régression.
+
 ## Bugs réels trouvés et corrigés pendant cette recette
 
 | # | Bug | Où | Gravité | Statut |
@@ -34,7 +59,8 @@ Légende : **PASS** = vérifié réellement (preuve indiquée) · **TO_VERIFY** 
 | `compte.html` (Compte) | Auth, onboarding, badge de plan correct FREE/PRO | **PASS** — écran de connexion capturé, badge "GRATUIT"/"Plan Gratuit" avec vraie donnée FREE, badge "OUTILS"/"Plan Outils" avec vraie donnée PRO | TO_VERIFY (pas re-testé à 375px cette recette) | **PASS** | **PASS** (voir ci-dessus) | **PASS** (voir ci-dessus) | Réelles requêtes Supabase authentifiées | **PASS** |
 | `admin.html` | Accès réservé réel, agrégats réels | TO_VERIFY (pas re-testé cette recette ; vérifié en base à un jalon précédent avec le vrai compte admin et un vrai compte non-admin) | TO_VERIFY | **PASS** (état refusé par défaut) | N/A | N/A | Vraies requêtes SQL contre la base de production | **TO_VERIFY** (re-confirmation visuelle pas refaite cette recette) |
 | Guides/Blog | Pas d'ancien positionnement dangereux/faux | **PASS** — recherche globale + lecture manuelle de tous les guides, 6 problèmes réels trouvés et corrigés (voir tableau ci-dessus) | N/A | **PASS** | N/A | N/A | Contenu éditorial statique | **PASS** (après corrections) |
-| i18n (6 langues) | Rendu réel dans le navigateur, pas seulement fichiers existants | **PASS partiel** — EN vérifié en direct sur `marches.html`/`historique.html`/`match.html` (nav, contenu, statuts registry tous traduits correctement) ; DE vérifié sur `match.html` (page introuvable correctement traduite) | TO_VERIFY (pas testé à 375px pour toutes les langues) | **PASS** (pour EN/DE testés) | N/A | N/A | — | **PASS partiel** (EN/DE spot-check réel) ; **TO_VERIFY** ES/IT/PT non re-testés cette recette |
+| Design (passe 21st.dev pragmatique) | Composants réellement améliorés, design IASHARK conservé strictement, pas de React installé | **PASS** — dropdowns (`marches`/`pro`/`historique`) et états vides (`marches`/`historique`) améliorés et vérifiés en direct ; modal/paywall/pricing/tabs inspectés et jugés déjà conformes (non retouchés, décision assumée) | **PASS** — vérifié à 375px sur `marches.html` (EN), aucune régression | **PASS** | N/A | N/A | — | **PASS** pour les composants listés dans la demande qui ont été jugés nécessitant une amélioration ; les autres (modal/paywall/tabs) sont `PASS` par inspection, pas par réécriture |
+| i18n (6 langues) + sélecteur de langue | Rendu réel dans le navigateur, sélecteur visible et fonctionnel sur desktop + mobile, redirige vers l'équivalent localisé et mémorise le choix | **PASS** — sélecteur vérifié en direct FR/EN/DE (dropdown ouvert, clic testé, redirection confirmée) sur `pro.html`/`marches.html`/`match.html`/`compte.html`. Contenu traduit vérifié EN (`marches.html`/`historique.html`/`match.html`) et DE (`match.html`/`compte.html`) | **PASS** — sélecteur + contenu vérifiés à 375px en FR (`historique.html`), EN (`marches.html`), DE (`compte.html`), aucun débordement | **PASS** | N/A | N/A | — | **PASS** pour FR/EN/DE (explicitement demandé) ; **TO_VERIFY** ES/IT/PT non re-testés cette recette (architecture identique, mêmes fichiers générés, risque jugé faible mais pas confirmé) |
 
 ## Ce qui reste `TO_VERIFY` (honnêtement, pas encore re-contrôlé dans cette recette)
 

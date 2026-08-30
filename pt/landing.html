@@ -132,6 +132,19 @@ footer{padding:30px 20px 100px;text-align:center;border-top:1px solid var(--bord
 .foot-legal{font-family:'Space Mono',monospace;font-size:8px;color:rgba(74,101,128,0.6);line-height:2;letter-spacing:.5px;}
 .foot-legal a{color:rgba(34,211,238,0.5);text-decoration:none;}
 .foot-links a{color:rgba(74,101,128,0.7);text-decoration:none;margin:0 8px;}
+.lang-switch{position:relative;}
+.lang-switch-btn{display:flex;align-items:center;gap:5px;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1px;color:var(--muted);background:transparent;border:1px solid var(--border);padding:6px 9px;border-radius:8px;cursor:pointer;transition:.2s;}
+.lang-switch-btn:hover{border-color:rgba(34,211,238,0.3);color:var(--cyan);}
+.lang-switch-menu{display:none;position:absolute;top:calc(100% + 6px);right:0;background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:6px;min-width:170px;z-index:200;box-shadow:0 10px 30px rgba(0,0,0,0.45);}
+.lang-switch-menu.open{display:block;}
+.lang-switch-item{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;color:var(--text);text-decoration:none;font-size:13px;transition:.15s;}
+.lang-switch-item:hover{background:rgba(34,211,238,0.08);}
+.lang-switch-item.active{color:var(--cyan);}
+.lang-switch-code{font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);width:22px;flex-shrink:0;}
+.lang-switch-item.active .lang-switch-code{color:var(--cyan);}
+.lang-switch-name{flex:1;}
+.lang-switch-check{color:var(--cyan);font-family:'Space Mono',monospace;font-size:10px;}
+@media(max-width:480px){.lang-switch-menu{right:-8px;}}
 </style>
 </head>
 <body>
@@ -139,7 +152,10 @@ footer{padding:30px 20px 100px;text-align:center;border-top:1px solid var(--bord
 <header class="hdr">
   <div class="hdr-in">
     <a href="https://iashark.com/pt/" class="logo"><span>IA</span>SHARK</a>
-    <a href="https://iashark.com/pt/" class="btn-nav">VER O SITE →</a>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <span id="langSwitchSlot"></span>
+      <a href="https://iashark.com/pt/" class="btn-nav">VER O SITE →</a>
+    </div>
   </div>
 </header>
 
@@ -254,5 +270,7 @@ footer{padding:30px 20px 100px;text-align:center;border-top:1px solid var(--bord
 
 <script src="/funnel-track.js"></script>
 <script>if(window.iasharkTrack) iasharkTrack('landing_view');</script>
+<script src="/lang-switcher.js"></script>
+<script>IasharkLangSwitcher.mount('#langSwitchSlot');IasharkLangSwitcher.applyRememberedChoiceOnce();</script>
 </body>
 </html>

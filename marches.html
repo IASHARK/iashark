@@ -23,6 +23,9 @@ h1 span{color:var(--cyan);}
 .sec-title::after{content:'';flex:1;height:1px;background:var(--border);}
 .filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
 .fsel{background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--text);font-family:'Space Mono',monospace;font-size:9px;}
+.fsel{appearance:none;-webkit-appearance:none;-moz-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234a6580' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;background-size:11px;padding-right:30px;transition:.15s;}
+.fsel:hover{border-color:rgba(34,211,238,0.3);}
+.fsel:focus{outline:none;border-color:var(--cyan);}
 .mtable{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;font-size:12px;}
 .mtable th{background:var(--card2);text-align:left;padding:9px 10px;font-family:'Space Mono',monospace;font-size:8px;letter-spacing:1px;color:var(--muted);}
 .mtable td{padding:9px 10px;border-top:1px solid var(--border);}
@@ -32,6 +35,8 @@ h1 span{color:var(--cyan);}
 .status-experimental{background:rgba(245,158,11,0.1);color:var(--amber);border:1px solid rgba(245,158,11,0.25);}
 .status-unsupported{background:rgba(74,101,128,0.1);color:var(--muted);border:1px solid var(--border);}
 .empty-state{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:40px 20px;text-align:center;color:var(--muted);font-family:'Space Mono',monospace;font-size:10px;line-height:1.8;}
+.empty-state-icon{margin:0 auto 14px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:50%;background:rgba(74,101,128,0.08);}
+.empty-state-icon svg{width:18px;height:18px;stroke:var(--muted);fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;}
 .gap-cell{font-family:'Space Mono',monospace;}
 .gap-pos{color:var(--green);}
 .gap-neg{color:var(--red);}
@@ -43,13 +48,29 @@ h1 span{color:var(--cyan);}
 .nav-item.active .nav-lbl{color:var(--cyan);}
 .nav-item.active .nav-icon svg{stroke:var(--cyan);filter:drop-shadow(0 0 6px rgba(34,211,238,0.5));}
 @media(max-width:600px){.mtable{display:block;overflow-x:auto;white-space:nowrap;}}
+.lang-switch{position:relative;}
+.lang-switch-btn{display:flex;align-items:center;gap:5px;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1px;color:var(--muted);background:transparent;border:1px solid var(--border);padding:6px 9px;border-radius:8px;cursor:pointer;transition:.2s;}
+.lang-switch-btn:hover{border-color:rgba(34,211,238,0.3);color:var(--cyan);}
+.lang-switch-menu{display:none;position:absolute;top:calc(100% + 6px);right:0;background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:6px;min-width:170px;z-index:200;box-shadow:0 10px 30px rgba(0,0,0,0.45);}
+.lang-switch-menu.open{display:block;}
+.lang-switch-item{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;color:var(--text);text-decoration:none;font-size:13px;transition:.15s;}
+.lang-switch-item:hover{background:rgba(34,211,238,0.08);}
+.lang-switch-item.active{color:var(--cyan);}
+.lang-switch-code{font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);width:22px;flex-shrink:0;}
+.lang-switch-item.active .lang-switch-code{color:var(--cyan);}
+.lang-switch-name{flex:1;}
+.lang-switch-check{color:var(--cyan);font-family:'Space Mono',monospace;font-size:10px;}
+@media(max-width:480px){.lang-switch-menu{right:-8px;}}
 </style>
 </head>
 <body>
 
 <header class="hdr">
   <a href="/" class="logo"><span>IA</span>SHARK</a>
-  <span id="authHeaderSlot"><a href="/compte.html" class="btn-login">CONNEXION</a></span>
+  <div style="display:flex;align-items:center;gap:8px;">
+    <span id="langSwitchSlot"></span>
+    <span id="authHeaderSlot"><a href="/compte.html" class="btn-login">CONNEXION</a></span>
+  </div>
 </header>
 
 <div class="wrap">
@@ -193,7 +214,7 @@ function renderMatchMarkets(){
   });
   var wrap=document.getElementById('matchMarketsWrap');
   if(!list.length){
-    wrap.innerHTML='<div class="empty-state">AUCUN MARCHÉ EXPLOITABLE AUJOURD\'HUI<br><span style="color:rgba(74,101,128,0.6)">Revenez plus tard, ou consultez le catalogue des marchés ci-dessous.</span></div>';
+    wrap.innerHTML='<div class="empty-state"><div class="empty-state-icon"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg></div>AUCUN MARCHÉ EXPLOITABLE AUJOURD\'HUI<br><span style="color:rgba(74,101,128,0.6)">Revenez plus tard, ou consultez le catalogue des marchés ci-dessous.</span></div>';
     return;
   }
   wrap.innerHTML='<table class="mtable"><thead><tr><th>Match</th><th>Heure</th><th>Marché</th><th>Proba modèle</th><th>Cote</th><th>Écart</th><th>Qualité</th></tr></thead><tbody>'
@@ -213,5 +234,7 @@ function renderMatchMarkets(){
 }
 loadMatches();
 </script>
+<script src="/lang-switcher.js"></script>
+<script>IasharkLangSwitcher.mount('#langSwitchSlot');IasharkLangSwitcher.applyRememberedChoiceOnce();</script>
 </body>
 </html>

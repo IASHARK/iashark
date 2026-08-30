@@ -141,13 +141,29 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 .nav-lbl{font-family:'Space Mono',monospace;font-size:7px;color:var(--muted);letter-spacing:1px;}
 .nav-item.active .nav-lbl{color:var(--cyan);}
 .nav-item.active .nav-icon svg{stroke:var(--cyan);filter:drop-shadow(0 0 6px rgba(34,211,238,0.5));}
+.lang-switch{position:relative;}
+.lang-switch-btn{display:flex;align-items:center;gap:5px;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1px;color:var(--muted);background:transparent;border:1px solid var(--border);padding:6px 9px;border-radius:8px;cursor:pointer;transition:.2s;}
+.lang-switch-btn:hover{border-color:rgba(34,211,238,0.3);color:var(--cyan);}
+.lang-switch-menu{display:none;position:absolute;top:calc(100% + 6px);right:0;background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:6px;min-width:170px;z-index:200;box-shadow:0 10px 30px rgba(0,0,0,0.45);}
+.lang-switch-menu.open{display:block;}
+.lang-switch-item{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;color:var(--text);text-decoration:none;font-size:13px;transition:.15s;}
+.lang-switch-item:hover{background:rgba(34,211,238,0.08);}
+.lang-switch-item.active{color:var(--cyan);}
+.lang-switch-code{font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);width:22px;flex-shrink:0;}
+.lang-switch-item.active .lang-switch-code{color:var(--cyan);}
+.lang-switch-name{flex:1;}
+.lang-switch-check{color:var(--cyan);font-family:'Space Mono',monospace;font-size:10px;}
+@media(max-width:480px){.lang-switch-menu{right:-8px;}}
 </style>
 </head>
 <body>
 
 <header class="hdr">
   <a href="/pt/" class="logo"><span>IA</span>SHARK</a>
-  <span class="hdr-pill" id="hdrPill">A MINHA CONTA</span>
+  <div style="display:flex;align-items:center;gap:8px;">
+    <span id="langSwitchSlot"></span>
+    <span class="hdr-pill" id="hdrPill">A MINHA CONTA</span>
+  </div>
 </header>
 
 <div class="wrap">
@@ -681,5 +697,7 @@ async function init() {
 init();
 </script>
 <script src="/site-prefs.js"></script>
+<script src="/lang-switcher.js"></script>
+<script>IasharkLangSwitcher.mount('#langSwitchSlot');IasharkLangSwitcher.applyRememberedChoiceOnce();</script>
 </body>
 </html>

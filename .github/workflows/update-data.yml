@@ -14,6 +14,10 @@ on:
         required: false
         default: 'false'
 
+concurrency:
+  group: update-data
+  cancel-in-progress: false
+
 jobs:
   update:
     runs-on: ubuntu-latest
@@ -28,11 +32,27 @@ jobs:
           cat > pipeline.js << 'JSEOF'
           const https = require('https');
           const fs    = require('fs');
+          const { poissonProb, calcPoissonProbs, dixonColesCorr, calcDixonColesProbs, calcMonteCarlo, shinProbabilities } = require('./lib/models.js');
+          const { fractionalKelly } = require('./lib/betting.js');
+          const { resolveMarketWin } = require('./lib/resolvers.js');
+          const { parseOdds } = require('./lib/odds.js');
+          const { pickMarketDeterministic, computeRiskLabel, computeModelAgreement, computeDataQualityScore, computeReliability } = require('./lib/decision.js');
+          const I18N_LOCALES = require('./i18n/locales.json');
+          const I18N_PAGES = require('./scripts/i18n-manifest.js');
+          const { generateLocalizedSitemaps } = require('./scripts/i18n-sitemaps.js');
+          // Identifiant du generateur de predictions actif. A incrementer/renommer
+          // quand le moteur change reellement (ex: introduction du moteur V2.1
+          // multi-modeles §10 du MASTER) pour pouvoir comparer les performances
+          // d'un modele a l'autre dans match_snapshots/match_premium_data plutot
+          // que de tout attribuer au meme "modele" indistinct.
+          const MODEL_VERSION = 'legacy-poisson-dc-mc-v1';
           const APS_KEY    = process.env.APISPORTS_KEY;
           const OWM_KEY    = process.env.OPENWEATHER_KEY;
           const NEWS_KEY   = process.env.NEWSAPI_KEY;
           const ANT_KEY    = process.env.ANTHROPIC_KEY;
           const ODDS_KEY   = process.env.ODDS_API_KEY;
+          const SUPA_URL_PIPELINE = process.env.SUPABASE_URL;
+          const SUPA_SERVICE_KEY  = process.env.SUPABASE_SERVICE_ROLE_KEY;
           const APS        = {'x-apisports-key': APS_KEY};
           var WC_DATA = null, WC_MODEL = null;
           function sleep(ms) { return new Promise(function(r){ setTimeout(r,ms); }); }
@@ -133,21 +153,6 @@ jobs:
             { nom: "RMC Sport", url: "https://rmcsport.bfmtv.com/rss/football/", type: 'general', fiabilite: 'high' },
             { nom: "Foot Mercato", url: "https://www.footmercato.net/flux-rss", type: 'mercato', fiabilite: 'high' },
           ];
-          function resolveMarketWin(predRaw, gh, ga) {
-            var pred = (predRaw||'').toLowerCase();
-            if(pred.includes('over 2.5')) return (gh+ga)>2;
-            if(pred.includes('over 1.5')) return (gh+ga)>1;
-            if(pred.includes('over 3.5')) return (gh+ga)>3;
-            if(pred.includes('under 2.5')) return (gh+ga)<3;
-            if(pred.includes('btts non')) return (gh===0||ga===0);
-            if(pred.includes('btts')) return (gh>0&&ga>0);
-            if(pred.includes('victoire')&&(pred.includes('domicile')||pred.includes('dom'))) return gh>ga;
-            if(pred.includes('victoire')&&(pred.includes('exterieur')||pred.includes('ext'))) return ga>gh;
-            if(pred.includes('1x')||pred.includes('x1')||pred.includes('dc 1x')) return gh>=ga;
-            if(pred.includes('x2')||pred.includes('dc x2')) return ga>=gh;
-            if(pred.includes('nul')||pred.includes('draw')) return gh===ga;
-            return null;
-          }
           var WC_QUALIF_LEAGUE = {
             'France':32,'Germany':32,'Spain':32,'England':32,'Portugal':32,'Italy':32,
             'Netherlands':32,'Belgium':32,'Croatia':32,'Switzerland':32,'Austria':32,
@@ -411,97 +416,6 @@ jobs:
             var mm = String(paris.getUTCMinutes()).padStart(2,'0');
             return hh+':'+mm;
           }
-          function poissonProb(lambda, k) {
-            if(lambda<=0) return k===0?1:0;
-            var logP = -lambda + k*Math.log(lambda) - logFactorial(k);
-            return Math.exp(logP);
-          }
-          function logFactorial(n) {
-            if(n<=1) return 0;
-            var r=0;for(var i=2;i<=n;i++) r+=Math.log(i);return r;
-          }
-          function calcPoissonProbs(lambdaH, lambdaA) {
-            var mat=[];
-            for(var h=0;h<=8;h++){mat[h]=[];for(var a=0;a<=8;a++) mat[h][a]=poissonProb(lambdaH,h)*poissonProb(lambdaA,a);}
-            var p1=0,pN=0,p2=0,over25=0,under25=0,bttsY=0,bttsN=0,over15=0,over35=0;
-            for(var h=0;h<=8;h++) for(var a=0;a<=8;a++){
-              var p=mat[h][a];
-              if(h>a) p1+=p; else if(h===a) pN+=p; else p2+=p;
-              if(h+a>2.5) over25+=p; else under25+=p;
-              if(h+a>1.5) over15+=p;
-              if(h+a>3.5) over35+=p;
-              if(h>0&&a>0) bttsY+=p; else bttsN+=p;
-            }
-            return {
-              p1:Math.round(p1*100), pN:Math.round(pN*100), p2:Math.round(p2*100),
-              over15:Math.round(over15*100), over25:Math.round(over25*100),
-              under25:Math.round(under25*100), over35:Math.round(over35*100),
-              bttsY:Math.round(bttsY*100), bttsN:Math.round(bttsN*100),
-            };
-          }
-          function dixonColesCorr(h, a, lambdaH, lambdaA) {
-            var rho = -0.13;
-            if(h===0 && a===0) return 1 - lambdaH*lambdaA*rho;
-            if(h===1 && a===0) return 1 + lambdaA*rho;
-            if(h===0 && a===1) return 1 + lambdaH*rho;
-            if(h===1 && a===1) return 1 - rho;
-            return 1;
-          }
-          function calcDixonColesProbs(lambdaH, lambdaA) {
-            var mat=[];
-            for(var h=0;h<=8;h++){mat[h]=[];for(var a=0;a<=8;a++){
-              var p=poissonProb(lambdaH,h)*poissonProb(lambdaA,a)*dixonColesCorr(h,a,lambdaH,lambdaA);
-              mat[h][a]=Math.max(0,p);
-            }}
-            var p1=0,pN=0,p2=0,over25=0,under25=0,bttsY=0,bttsN=0,over15=0,over35=0;
-            for(var h=0;h<=8;h++) for(var a=0;a<=8;a++){
-              var p=mat[h][a];
-              if(h>a) p1+=p; else if(h===a) pN+=p; else p2+=p;
-              if(h+a>2.5) over25+=p; else under25+=p;
-              if(h+a>1.5) over15+=p;
-              if(h+a>3.5) over35+=p;
-              if(h>0&&a>0) bttsY+=p; else bttsN+=p;
-            }
-            return {
-              p1:Math.round(p1*100), pN:Math.round(pN*100), p2:Math.round(p2*100),
-              over15:Math.round(over15*100), over25:Math.round(over25*100),
-              under25:Math.round(under25*100), over35:Math.round(over35*100),
-              bttsY:Math.round(bttsY*100), bttsN:Math.round(bttsN*100),
-            };
-          }
-          function poissonKnuth(lambda) {
-            if(lambda<=0) return 0;
-            var L=Math.exp(-lambda), k=0, p=1;
-            do { k++; p*=Math.random(); } while(p>L);
-            return k-1;
-          }
-          var poissonRandom = poissonKnuth;
-          function calcMonteCarlo(lambdaH, lambdaA) {
-            var n=5000;
-            var p1=0,pN=0,p2=0,over25=0,over15=0,over35=0,bttsY=0;
-            var scoreMap={};
-            for(var i=0;i<n;i++){
-              var h=poissonKnuth(lambdaH);
-              var a=poissonKnuth(lambdaA);
-              if(h>a) p1++; else if(h===a) pN++; else p2++;
-              if(h+a>2.5) over25++;
-              if(h+a>1.5) over15++;
-              if(h+a>3.5) over35++;
-              if(h>0&&a>0) bttsY++;
-              var key=h+'-'+a;
-              scoreMap[key]=(scoreMap[key]||0)+1;
-            }
-            var topScores=Object.keys(scoreMap).map(function(k){
-              return {score:k, n:scoreMap[k], pct:Math.round(scoreMap[k]/n*100)};
-            }).sort(function(a,b){return b.n-a.n;}).slice(0,5);
-            return {
-              p1:Math.round(p1/n*100), pN:Math.round(pN/n*100), p2:Math.round(p2/n*100),
-              top_scores:topScores,
-              over15:Math.round(over15/n*100), over25:Math.round(over25/n*100),
-              under25:Math.round((n-over25)/n*100), over35:Math.round(over35/n*100),
-              bttsY:Math.round(bttsY/n*100), bttsN:Math.round((n-bttsY)/n*100),
-            };
-          }
           function calcFinalProbs(lambdaH, lambdaA, eloStats) {
             var po = calcPoissonProbs(lambdaH, lambdaA);
             var dc = calcDixonColesProbs(lambdaH, lambdaA);
@@ -560,37 +474,6 @@ jobs:
               lambdaA:parseFloat(Math.min(maxLA,Math.max(minLA,attA*defH*leagAvgA)).toFixed(3))
             };
           }
-          function shinProbabilities(odds) {
-            var prices=odds.filter(function(o){return o&&o>1;});
-            if(!prices.length) return null;
-            var rawProbs=prices.map(function(o){return 1/o;});
-            var sumRaw=rawProbs.reduce(function(a,b){return a+b;},0);
-            if(sumRaw<=1) return rawProbs;
-            var z=0.02;
-            for(var iter=0;iter<50;iter++){
-              var f=0,df=0;
-              for(var i=0;i<rawProbs.length;i++){
-                var qi=rawProbs[i];
-                var denom=Math.sqrt(z*z+4*(1-z)*qi*qi/sumRaw);
-                f+=(z+denom)/(2*(1-z));
-                df+=(1+(2*z/sumRaw-2*qi*qi*(1-2*z)/(sumRaw*sumRaw))/denom)/(2*(1-z))+(z+denom)/(2*(1-z)*(1-z));
-              }
-              f-=1;
-              var zNew=z-f/df;
-              if(Math.abs(zNew-z)<1e-8) break;
-              z=Math.max(0,Math.min(0.15,zNew));
-            }
-            var trueProbs=rawProbs.map(function(qi){return (z+Math.sqrt(z*z+4*(1-z)*qi*qi/sumRaw))/(2*(1-z));});
-            var sumTrue=trueProbs.reduce(function(a,b){return a+b;},0);
-            return trueProbs.map(function(p){return p/sumTrue;});
-          }
-          function fractionalKelly(probIA, cote, fraction) {
-            fraction=fraction||0.25;
-            var b=cote-1, q=1-probIA;
-            var kelly=(probIA*b-q)/b;
-            if(kelly<=0) return null;
-            return Math.min(kelly*fraction*100,5).toFixed(1);
-          }
           const LEAGUES = [
             39, 40, 61, 62, 140, 141, 135, 78, 2, 3,
             88, 94, 203, 119, 179, 144, 292,
@@ -616,7 +499,6 @@ jobs:
             357:'irlande', 113:'suede',
             71:'bresil', 253:'mls', 262:'ligamx'
           };
-          var SMALL_LEAGUE_KEYS_SPORTMONKS = {'kleague':1,'lettonie':1,'lituanie':1,'equateur':1,'islande':1,'suede':1,'finlande':1,'chine':1,'bresil':1,'ligamx':1};
           function lgKey(lgId) { return LG_KEY[lgId]||'other'; }
           function lgIcon(l) {
             var s=(l||'').toLowerCase();
@@ -638,17 +520,21 @@ jobs:
               }
             } catch(e) { console.log('WC fetch error:', e.message); }
             await sleep(300);
-            for(var d=0; d<dates.length; d++){
-              for(var i=0; i<LEAGUES.length; i++){
-                var lgId = LEAGUES[i];
-                var season = SEASON_2026.indexOf(lgId)!==-1?2026:SEASON;
-                var r = await get(
-                  'https://v3.football.api-sports.io/fixtures?date='+dates[d]+'&league='+lgId+'&season='+season+'&timezone=Europe%2FParis',
-                  APS
-                );
-                if(r.response) all = all.concat(r.response);
-                await sleep(200);
+            if(!TEST_WC_ONLY){
+              for(var d=0; d<dates.length; d++){
+                for(var i=0; i<LEAGUES.length; i++){
+                  var lgId = LEAGUES[i];
+                  var season = SEASON_2026.indexOf(lgId)!==-1?2026:SEASON;
+                  var r = await get(
+                    'https://v3.football.api-sports.io/fixtures?date='+dates[d]+'&league='+lgId+'&season='+season+'&timezone=Europe%2FParis',
+                    APS
+                  );
+                  if(r.response) all = all.concat(r.response);
+                  await sleep(200);
+                }
               }
+            } else {
+              console.log('MODE TEST WC uniquement : les '+LEAGUES.length+' autres championnats sont ignores.');
             }
             var seen={};
             var uniqueFixtures=all.filter(function(f){
@@ -745,226 +631,6 @@ jobs:
             var totalCards=0,totalPens=0;
             games.forEach(function(g){(g.events||[]).forEach(function(e){if(e.type==='Card')totalCards++;if(e.detail&&e.detail.toLowerCase().includes('penalty'))totalPens++;});});
             return {name:refName,games:games.length,cards_per_game:(totalCards/games.length).toFixed(1),pens_per_game:(totalPens/games.length).toFixed(1)};
-          }
-          var SPORTMONKS_KEY = process.env.SPORTMONKS_KEY;
-          var SM_LEAGUE_CACHE = {};
-          var SM_TOPSCORERS_CACHE = {};
-          function getSM(url) {
-            var sep = url.indexOf('?') > -1 ? '&' : '?';
-            return get(url + sep + 'api_token=' + SPORTMONKS_KEY, {});
-          }
-          var CLUB_STOPWORDS = ['fc','sc','cf','ac','if','bk','sk','ik','fk','ff','cd','ca','sd','ud','club','de','do','da','le','la','los'];
-          function smNormalize(s) {
-            s = (s||'').toLowerCase();
-            try { s = s.normalize('NFD').replace(/[\u0300-\u036f]/g,''); } catch(e){}
-            s = s.replace(/[^a-z0-9]+/g,' ').trim();
-            var words = s.split(' ').filter(function(w){ return w && CLUB_STOPWORDS.indexOf(w)===-1; });
-            return words.join(' ');
-          }
-          function smAcronym(s) {
-            var norm = smNormalize(s);
-            var words = norm.split(' ').filter(Boolean);
-            if(words.length < 2) return null;
-            return words.map(function(w){ return w.length <= 3 ? w : w[0]; }).join('');
-          }
-          function smIsPlayed(fx){
-            return fx && fx.result_info !== null && fx.result_info !== undefined;
-          }
-          function smBestMatch(name, candidates) {
-            var nameLow = (name||'').toLowerCase().trim();
-            var nameNorm = smNormalize(name);
-            var nameAcronym = smAcronym(name);
-            candidates = (candidates||[]).filter(Boolean);
-          
-            var exact = candidates.find(function(c){ return (c||'').toLowerCase().trim() === nameLow; });
-            if(exact) return exact;
-          
-            var byAcronym = candidates.find(function(c){
-              var cLow = (c||'').toLowerCase().trim();
-              var cAcronym = smAcronym(c);
-              return (nameAcronym && cLow === nameAcronym) || (cAcronym && nameLow === cAcronym);
-            });
-            if(byAcronym) return byAcronym;
-          
-            var bySubstring = candidates.find(function(c){
-              var cNorm = smNormalize(c);
-              var nameWords = nameNorm.split(' ').filter(Boolean);
-              var cWords = cNorm.split(' ').filter(Boolean);
-              if(!nameWords.length || !cWords.length) return false;
-              var shorter = nameWords.length<=cWords.length ? nameWords : cWords;
-              var longer = nameWords.length<=cWords.length ? cWords : nameWords;
-              return shorter.every(function(w){ return w.length>=2 && longer.indexOf(w)!==-1; });
-            });
-            if(bySubstring) return bySubstring;
-          
-            var best = null, bestScore = Infinity;
-            candidates.forEach(function(c){
-              var cNorm = smNormalize(c);
-              var score = levenshtein(nameNorm, cNorm) / Math.max(nameNorm.length, cNorm.length, 1);
-              if(score < bestScore){ bestScore = score; best = c; }
-            });
-            return bestScore < 0.45 ? best : null;
-          }
-          async function smFindLeagueSeasonByCountry(countryName) {
-            try {
-              var countryNameNorm = (countryName||'').replace(/-/g,' ').trim();
-              var rc = await getSM('https://api.sportmonks.com/v3/core/countries/search/' + encodeURIComponent(countryNameNorm));
-              var countries = rc.data || [];
-              if(!countries.length) return null;
-              var country = countries[0];
-              var rl = await getSM('https://api.sportmonks.com/v3/football/leagues/countries/' + country.id + '?include=currentSeason');
-              var leagues = (rl.data || []).filter(function(l){ return l.sub_type==='domestic' && l.currentseason; });
-              console.log('  [SPORTMONKS] Fallback pays "'+countryName+'" (id:'+country.id+') -> '+leagues.length+' ligue(s) domestique(s): '+leagues.map(function(l){return l.name+'(id:'+l.id+',cat:'+l.category+')';}).join(', '));
-              if(!leagues.length) return null;
-              var current = leagues.filter(function(l){ return l.currentseason.is_current===true; });
-              if(!current.length) return null;
-              current.sort(function(a,b){ return (a.category||99)-(b.category||99); });
-              var best = current[0];
-              console.log('  [SPORTMONKS] Fallback retenu: "'+best.name+'" (categorie '+best.category+', probablement le plus haut niveau du pays)');
-              return { leagueId: best.id, seasonId: best.currentseason.id, leagueName: best.name };
-            } catch(e) { return null; }
-          }
-          async function smFindLeagueSeason(leagueName, countryName) {
-            var key = (leagueName||'').toLowerCase()+'|'+(countryName||'').toLowerCase();
-            if(SM_LEAGUE_CACHE[key] !== undefined) return SM_LEAGUE_CACHE[key];
-            if(!SPORTMONKS_KEY){ SM_LEAGUE_CACHE[key] = null; return null; }
-            try {
-              var r = await getSM('https://api.sportmonks.com/v3/football/leagues/search/' + encodeURIComponent(leagueName) + '?include=currentSeason;country');
-              var leagues = r.data || [];
-              var candidates = [];
-              if(leagues.length){
-                console.log('  [SPORTMONKS] Recherche "'+leagueName+'" (pays attendu: '+(countryName||'?')+') -> '+leagues.length+' resultat(s): '+leagues.map(function(l){return l.name+'/'+((l.country&&l.country.name)||'?')+'(id:'+l.id+')';}).join(', '));
-                if(countryName){
-                  var countryLow = countryName.toLowerCase().replace(/-/g,' ').trim();
-                  candidates = leagues.filter(function(l){
-                    var lc = (l.country && l.country.name || '').toLowerCase().replace(/-/g,' ').trim();
-                    return lc === countryLow || lc.includes(countryLow) || countryLow.includes(lc);
-                  });
-                } else {
-                  candidates = leagues;
-                }
-              } else {
-                console.log('  [SPORTMONKS] Aucune ligue trouvee pour "'+leagueName+'"');
-              }
-              var best;
-              if(candidates.length){
-                var exact = candidates.find(function(l){ return (l.name||'').toLowerCase() === leagueName.toLowerCase(); });
-                best = exact || candidates[0];
-              } else if(countryName){
-                console.log('  [SPORTMONKS] Nom "'+leagueName+'" ne matche pas le pays "'+countryName+'" -> on cherche directement les ligues du pays');
-                var byCountryResult = await smFindLeagueSeasonByCountry(countryName);
-                SM_LEAGUE_CACHE[key] = byCountryResult;
-                return byCountryResult;
-              } else {
-                SM_LEAGUE_CACHE[key] = null; return null;
-              }
-              if(!best || !best.currentseason){
-                console.log('  [SPORTMONKS] Ligue "'+leagueName+'" -> match "'+(best&&best.name)+'" mais PAS de currentSeason -> abandon');
-                SM_LEAGUE_CACHE[key] = null; return null;
-              }
-              var cs = best.currentseason;
-              console.log('  [SPORTMONKS] Ligue retenue: "'+best.name+'" / pays "'+((best.country&&best.country.name)||'?')+'" (id:'+best.id+') | Saison: "'+cs.name+'" (id:'+cs.id+') | is_current:'+cs.is_current+' | periode:'+cs.starting_at+' -> '+cs.ending_at);
-              if(cs.is_current !== true){
-                console.log('  [SPORTMONKS] REJET: "'+best.name+'" saison "'+cs.name+'" n\'est pas is_current -> pas de stats affichees pour ce match (mieux vaut rien que des stats perimees)');
-                SM_LEAGUE_CACHE[key] = null; return null;
-              }
-              var result = { leagueId: best.id, seasonId: cs.id, leagueName: best.name };
-              SM_LEAGUE_CACHE[key] = result;
-              return result;
-            } catch(e) { SM_LEAGUE_CACHE[key] = null; return null; }
-          }
-          async function smGetTopscorers(seasonId) {
-            if(SM_TOPSCORERS_CACHE[seasonId]) return SM_TOPSCORERS_CACHE[seasonId];
-            try {
-              var allEntries = [];
-              var page = 1;
-              var maxPages = 4;
-              while(page <= maxPages){
-                var r = await getSM('https://api.sportmonks.com/v3/football/topscorers/seasons/' + seasonId + '?filters=seasontopscorerTypes:208&include=type;player:name,image_path;participant:name&page=' + page);
-                var list = r.data || [];
-                allEntries = allEntries.concat(list);
-                var hasMore = r.pagination && r.pagination.has_more;
-                if(!hasMore) break;
-                page++;
-                await sleep(150);
-              }
-              SM_TOPSCORERS_CACHE[seasonId] = allEntries;
-              return allEntries;
-            } catch(e) { SM_TOPSCORERS_CACHE[seasonId] = []; return []; }
-          }
-          async function smGetPlayerStats(playerId, seasonId) {
-            try {
-              var r = await getSM('https://api.sportmonks.com/v3/football/players/' + playerId + '?include=statistics.details.type&filters=playerStatisticSeasons:' + seasonId);
-              var data = r.data;
-              if(!data || !data.statistics || !data.statistics.length) return null;
-              var details = data.statistics[0].details || [];
-              var map = {};
-              details.forEach(function(d){ map[d.type_id] = d.value; });
-              function num(v){ return (v && v.total != null) ? v.total : 0; }
-              return {
-                goals: num(map[52]), penalties: (map[52] && map[52].penalties) || 0, assists: num(map[79]),
-                shots_total: num(map[42]), shots_on: num(map[86]), woodwork: num(map[64]),
-                fouls_committed: num(map[56]), fouls_drawn: num(map[96]),
-                yellow: num(map[84]), red: num(map[83]),
-                duels_total: num(map[105]), duels_won: num(map[106]), aerials_won: num(map[107]),
-                dribbles_success: num(map[109]), dribbles_attempts: num(map[108]),
-                key_passes: num(map[117]), passes_pct: num(map[1584]),
-                big_chances_created: num(map[580]), big_chances_missed: num(map[581]),
-                minutes: num(map[119]), games: num(map[321]),
-              };
-            } catch(e) { return null; }
-          }
-          async function getTopScorersSportmonks(teamName, leagueName, countryName) {
-            var leagueSeason = await smFindLeagueSeason(leagueName, countryName);
-            if(!leagueSeason) return [];
-            var topscorers = await smGetTopscorers(leagueSeason.seasonId);
-            if(!topscorers.length) return [];
-            var teamNames = topscorers.map(function(t){ return t.participant ? t.participant.name : ''; }).filter(Boolean);
-            var uniqueTeamNames = teamNames.filter(function(v,i,a){ return a.indexOf(v)===i; });
-            var matchedTeam = smBestMatch(teamName, uniqueTeamNames);
-            if(!matchedTeam){
-              console.log('  [SPORTMONKS] Equipe "'+teamName+'" NON TROUVEE parmi: '+uniqueTeamNames.join(', '));
-              return [];
-            }
-            console.log('  [SPORTMONKS] Equipe "'+teamName+'" -> matchee avec "'+matchedTeam+'"');
-            var teamScorers = topscorers.filter(function(t){ return t.participant && t.participant.name === matchedTeam; });
-            teamScorers.sort(function(a,b){ return (b.total||0)-(a.total||0); });
-            var top3 = teamScorers.slice(0,3);
-            var results = [];
-            for(var i=0; i<top3.length; i++){
-              var entry = top3[i];
-              var stats = await smGetPlayerStats(entry.player_id, leagueSeason.seasonId);
-              await sleep(150);
-              results.push({
-                id: entry.player_id,
-                name: entry.player ? entry.player.name : '',
-                photo: entry.player ? entry.player.image_path : null,
-                goals: stats ? stats.goals : (entry.total||0),
-                assists: stats ? stats.assists : 0,
-                games: stats ? stats.games : 0,
-                shots_total: stats ? stats.shots_total : 0,
-                shots_on: stats ? stats.shots_on : 0,
-                fouls_committed: stats ? stats.fouls_committed : 0,
-                fouls_drawn: stats ? stats.fouls_drawn : 0,
-                yellow: stats ? stats.yellow : 0,
-                red: stats ? stats.red : 0,
-                duels_total: stats ? stats.duels_total : 0,
-                duels_won: stats ? stats.duels_won : 0,
-                aerials_won: stats ? stats.aerials_won : 0,
-                dribbles_success: stats ? stats.dribbles_success : 0,
-                dribbles_attempts: stats ? stats.dribbles_attempts : 0,
-                key_passes: stats ? stats.key_passes : 0,
-                passes_pct: stats ? stats.passes_pct : 0,
-                penalties: stats ? stats.penalties : 0,
-                woodwork: stats ? stats.woodwork : 0,
-                big_chances_created: stats ? stats.big_chances_created : 0,
-                big_chances_missed: stats ? stats.big_chances_missed : 0,
-                sample_size: stats ? stats.games : null,
-                sample_type: 'saison',
-                source: 'sportmonks'
-              });
-            }
-            return results;
           }
           async function getFixtureEvents(fixtureId) {
             var r = await get('https://v3.football.api-sports.io/fixtures/events?fixture='+fixtureId, APS);
@@ -1127,65 +793,6 @@ jobs:
             }
             var probHadj=1/(1+Math.pow(10,(eloA-(eloH+homeBonus))/400));
             return {probH:Math.round(probHadj*100),probA:Math.round((1-probHadj)*100),diff:Math.round(eloH-eloA),homeBonus,signal:Math.abs(eloH-eloA)>=100?'FORT':Math.abs(eloH-eloA)>=50?'MODERE':'FAIBLE'};
-          }
-          function parseOdds(o) {
-            var empty={c1:'--',cn:'--',c2:'--',co15:'--',co25:'--',cu25:'--',dc1x:'--',dc2x:'--',dc12:'--',btts_oui:'--',btts_non:'--'};
-            if(!o||!o.bookmakers||!o.bookmakers.length) return empty;
-            var arr1=[],arrN=[],arr2=[],arr15=[],arr25=[],arru25=[],arr35=[],arru35=[],arr1x=[],arrx2=[],arr12=[],arrby=[],arrbn=[],arrAHH=[],arrAHA=[];
-            o.bookmakers.forEach(function(bk){
-              (bk.bets||[]).forEach(function(bet){
-                if(bet.name==='Match Winner'||bet.name==='Home/Draw/Away'){
-                  var hm=(bet.values||[]).find(function(v){return v.value==='Home';});
-                  var dr=(bet.values||[]).find(function(v){return v.value==='Draw';});
-                  var aw=(bet.values||[]).find(function(v){return v.value==='Away';});
-                  if(hm&&parseFloat(hm.odd)>=1.05&&parseFloat(hm.odd)<=15)arr1.push(parseFloat(hm.odd));
-                  if(dr&&parseFloat(dr.odd)>=1.05&&parseFloat(dr.odd)<=15)arrN.push(parseFloat(dr.odd));
-                  if(aw&&parseFloat(aw.odd)>=1.05&&parseFloat(aw.odd)<=15)arr2.push(parseFloat(aw.odd));
-                }
-                if(bet.name==='Goals Over/Under'){
-                  (bet.values||[]).forEach(function(v){
-                    if(v.value==='Over 1.5')arr15.push(parseFloat(v.odd));
-                    if(v.value==='Over 2.5')arr25.push(parseFloat(v.odd));
-                    if(v.value==='Under 2.5')arru25.push(parseFloat(v.odd));
-                    if(v.value==='Over 3.5')arr35.push(parseFloat(v.odd));
-                    if(v.value==='Under 3.5')arru35.push(parseFloat(v.odd));
-                  });
-                }
-                if(bet.name==='Double Chance'){
-                  var d1x=(bet.values||[]).find(function(v){return v.value==='Home/Draw';});
-                  var dx2=(bet.values||[]).find(function(v){return v.value==='Draw/Away';});
-                  var d12=(bet.values||[]).find(function(v){return v.value==='Home/Away';});
-                  if(d1x)arr1x.push(parseFloat(d1x.odd));
-                  if(dx2)arrx2.push(parseFloat(dx2.odd));
-                  if(d12)arr12.push(parseFloat(d12.odd));
-                }
-                if(bet.name==='Both Teams Score'){
-                  var by=(bet.values||[]).find(function(v){return v.value==='Yes';});
-                  var bn=(bet.values||[]).find(function(v){return v.value==='No';});
-                  if(by)arrby.push(parseFloat(by.odd));
-                  if(bn)arrbn.push(parseFloat(bn.odd));
-                }
-                if(bet.name==='Asian Handicap'){
-                  (bet.values||[]).forEach(function(v){
-                    var val=(v.value||'').toLowerCase();
-                    if(val.includes('home')&&val.includes('-0.5'))arrAHH.push(parseFloat(v.odd));
-                    if(val.includes('away')&&val.includes('+0.5'))arrAHA.push(parseFloat(v.odd));
-                  });
-                }
-              });
-            });
-            function med(a){
-              if(!a.length)return '--';
-              var s=a.slice().sort(function(x,y){return x-y;});
-              var m=Math.floor(s.length/2);
-              return (s.length%2?s[m]:((s[m-1]+s[m])/2)).toFixed(2);
-            }
-            var c1=med(arr1),cn=med(arrN),c2=med(arr2);
-            var co15=med(arr15),co25=med(arr25),cu25=med(arru25);
-            var dc1x=med(arr1x),dc2x=med(arrx2),dc12=med(arr12);
-            var btts_oui=med(arrby),btts_non=med(arrbn);
-            var ah_dom=med(arrAHH), ah_ext=med(arrAHA);
-            return {c1,cn,c2,co15,co25,cu25,co35:med(arr35),cu35:med(arru35),dc1x,dc2x,dc12,btts_oui,btts_non,ah_dom,ah_ext};
           }
           function calcCriteres(stats,isDom,rank){
             if(!stats)return{fd:50,att:50,def:50,fr:50,mot:70,fat:50};
@@ -1398,15 +1005,15 @@ jobs:
               +(d.motivH&&d.motivH.alerts&&d.motivH.alerts.length?'Enjeu DOM: '+d.motivH.alerts.join(' | ')+'\n':'')
               +(d.motivA&&d.motivA.alerts&&d.motivA.alerts.length?'Enjeu EXT: '+d.motivA.alerts.join(' | ')+'\n':'')
               +(d.matchup&&d.matchup.insights&&d.matchup.insights.length?'Tactique: '+d.matchup.insights.join(' | ')+'\n':'')
-              +'\n=== PHASE 2 - MODELE MATHEMATIQUE ===\n'
+              +'\n=== PHASE 2 - MODELE MATHEMATIQUE (contexte uniquement, deja calcule) ===\n'
               +'Poisson lambdas: DOM '+d.poisson_lambdaH+' | EXT '+d.poisson_lambdaA+'\n'
               +'Poisson: DOM '+d.poisson_p1+'% | Nul '+d.poisson_pN+'% | EXT '+d.poisson_p2+'%\n'
               +'Dixon-Coles: DOM '+d.dixon_p1+'% | Nul '+d.dixon_pN+'% | EXT '+d.dixon_p2+'%\n'
               +'Monte-Carlo: DOM '+d.mc_p1+'% | Nul '+d.mc_pN+'% | EXT '+d.mc_p2+'%\n'
               +(d.mc_scores&&d.mc_scores.length?'Top scores MC: '+d.mc_scores.map(function(s){return s.score+'('+s.pct+'%)';}).join(', ')+'\n':'')
-              +(d.pinnacle_p1?(d.market_source||'Marche')+': DOM '+d.pinnacle_p1+'% | Nul '+d.pinnacle_pN+'% | EXT '+d.pinnacle_p2+'%\n':'Marche: non disponible\n')
-              +'Probabilite finale ancree au marche ('+(d.market_source||'aucune cote fiable')+'): DOM '+d.final_p1+'% | Nul '+d.final_pN+'% | EXT '+d.final_p2+'%\n'
-              +'-> Utilise EXCLUSIVEMENT cette probabilite ancree (pas le Poisson brut ci-dessus) pour choisir le marche et remplir p1/pn/p2 dans le JSON : le Poisson brut peut diverger fortement du marche sur petit echantillon (ligues mineures) et n\'est affiche que pour contexte.\n'
+              +'Probabilite PURE IASHARK (ensemble Poisson+Dixon-Coles+Monte-Carlo+Elo, jamais influencee par une cote): DOM '+d.final_p1+'% | Nul '+d.final_pN+'% | EXT '+d.final_p2+'%\n'
+              +(d.pinnacle_p1?'Probabilite marche ('+(d.market_source||'Marche')+', retrait de marge): DOM '+d.pinnacle_p1+'% | Nul '+d.pinnacle_pN+'% | EXT '+d.pinnacle_p2+'%\n':'Marche: non disponible\n')
+              +'-> Ces deux probabilites sont deja calculees et NE DOIVENT PAS etre modifiees ni recalculees. Utilise-les uniquement pour REDIGER TON TEXTE (elles ne font pas partie du JSON que tu dois renvoyer).\n'
               +(d.all_markets&&d.all_markets.length
                 ?'\n=== MARCHES DISPONIBLES (cote >= 1.50) ===\n'
                  +'(probas calculees independamment par le modele Poisson + Dixon-Coles + Monte-Carlo)\n'
@@ -1428,40 +1035,22 @@ jobs:
                      +' | '+d.away+' marque '+s.pct_away_mark+'%, encaisse '+s.pct_home_conc+'% - Probabilite but: '+s.prob+'%';
                  }).join('\n')+'\n'
                 :'')
-              +'\n=== TON ANALYSE ===\n'
-              +'Tu es un analyste sportif professionnel. Tu recois les donnees ci-dessus et tu choisis librement le meilleur marche.\n'
-              +'\nREGLES DE SELECTION DU MARCHE :\n'
-              +'0. PRIORITE ABSOLUE : le marche choisi DOIT correspondre a celui ayant la probabilite modele (Phase 2 - Poisson/Dixon-Coles/Monte-Carlo) la plus elevee parmi les marches disponibles. Les signaux qualitatifs (forme, motivation, absences) servent a AJUSTER la confiance, jamais a choisir un marche que le modele ne favorise pas.\n'
-              +'0bis. Exception rare : si tu ecartes le marche le mieux note par le modele pour un autre, tu dois justifier explicitement pourquoi dans verdict_shark (ex: titulaire cle absent non encore integre au modele) - ne fais jamais ce choix silencieusement.\n'
-              +'1. Choisis le marche dont les signaux sont les plus convergents (Phase 1 + Phase 2 + Monte-Carlo pointent dans la meme direction)\n'
-              +'2. Verifie la coherence avec les scores Monte-Carlo - si Over 2.5 mais top scores sont 0-0/1-0, ne choisis pas Over 2.5\n'
-              +'3. Aucun marche n\'est favorise a priori - les 8 marches (Over/Under 2.5, BTTS Oui/Non, DC 1X/X2, Victoire seche) sont tous equivalents au depart\n'
-              +'4. Si les signaux sont contradictoires ou insuffisants -> passe_ton_tour=true\n'
-              +'5. Si aucun marche n\'a de cote disponible >= 1.50 -> passe_ton_tour=true\n'
-              +'6. ANCRAGE OBLIGATOIRE DES TEXTES : contexte et facteur_x doivent citer un chiffre EXACT tire des donnees ci-dessus (classement #X, forme 5 derniers, xG, ecart ELO, % de buts par tranche, etc.). N\'invente jamais un enjeu ou un classement qui n\'apparait pas dans les donnees fournies - si aucune donnee d\'enjeu n\'est disponible (pas de ligne "Enjeu DOM/EXT"), ne mentionne pas d\'enjeu du tout plutot que d\'en inventer un vague. Une phrase sans chiffre precis est invalide.\n'
-              +'\nCONFIANCE : note continue de 5.5 a 9.0 refletant fidelement la force reelle du signal - JAMAIS de valeur "ronde" par defaut (evite de toujours tomber sur 7.0, 7.5 ou 8.0).\n'
-              +'Base-toi precisement sur : nombre de signaux convergents entre Phase 1 et Phase 2, ecart entre les modeles (Poisson/Dixon-Coles/Monte-Carlo - s\'ils divergent, baisse la note), confirmation ELO+Pinnacle, taille de l\'echantillon de matchs disponibles.\n'
-              +'Reperes : 5.5-6.4 = signal correct mais pas exceptionnel | 6.5-7.4 = signal solide | 7.5-8.4 = signal tres solide multi-convergent | 8.5-9.0 = cas rarissime ou absolument tout converge.\n'
-              +'Si le signal est trop faible pour meriter une note, ne force rien : passe_ton_tour=true plutot que de gonfler artificiellement une confiance basse.\n'
-              +'RISQUE: FAIBLE si cote <1.75 + signaux convergents | MODERE si cote 1.75-2.20 | ELEVE sinon\n\n';
-            var jsonTpl = 'Reponds UNIQUEMENT avec ce JSON valide. Aucun texte avant ou apres. Aucun backtick.\n'
-              +'REGLE ABSOLUE: analyse_card, conseil, contexte, facteur_x, scenario, scenario_15min TOUJOURS remplis meme si passe_ton_tour=true.\n\n'
+              +'\n=== DECISION DEJA PRISE PAR LE SYSTEME (ne pas la remettre en cause) ===\n'
+              +(d.no_signal
+                ?'Aucun marche exploitable (pas de cote fiable >= 1.50 disponible pour ce match). N\'invente ni marche ni cote : explique factuellement, en 1-2 phrases, pourquoi ce match manque de signal exploitable aujourd\'hui.\n'
+                :'Marche retenu : '+d.picked_market.market+' (cote '+d.picked_market.cote+', probabilite modele '+Math.round(d.picked_market.prob)+'%). C\'est mathematiquement le marche de plus haute probabilite modele parmi ceux disponibles avec une cote exploitable - deja calcule par le systeme. Ne le remets JAMAIS en cause, n\'en propose jamais un autre, ne cite jamais un autre marche comme "meilleur choix".\n')
+              +'\n=== TON ROLE (STRICT) ===\n'
+              +'Tu es un analyste sportif professionnel. Tu ne calcules RIEN : le marche, la cote, la probabilite, l\'edge et le niveau de risque sont deja decides ci-dessus par du code deterministe, pas par toi. Tu ne renvoies AUCUN nombre de probabilite, AUCUNE cote, AUCUN marche choisi, AUCUN score de confiance - uniquement du texte qui EXPLIQUE la decision deja prise, en citant les donnees reelles fournies plus haut.\n'
+              +'ANCRAGE OBLIGATOIRE DES TEXTES : contexte et facteur_x doivent citer un chiffre EXACT tire des donnees ci-dessus (classement #X, forme 5 derniers, xG, ecart ELO, % de buts par tranche, etc.). N\'invente jamais un enjeu ou un classement qui n\'apparait pas dans les donnees fournies - si aucune donnee d\'enjeu n\'est disponible (pas de ligne "Enjeu DOM/EXT"), ne mentionne pas d\'enjeu du tout plutot que d\'en inventer un vague. Une phrase sans chiffre precis est invalide.\n\n';
+            var jsonTpl = 'Reponds UNIQUEMENT avec ce JSON valide. Aucun texte avant ou apres. Aucun backtick. Ne renvoie AUCUN champ numerique de probabilite/cote/marche/confiance - uniquement les champs texte listes ci-dessous.\n'
+              +'REGLE ABSOLUE: tous les champs texte sont TOUJOURS remplis, meme si aucun marche exploitable n\'est disponible.\n\n'
               +'{\n'
-              +'"passe_ton_tour": false,\n'
-              +'"confiance": 0.0,\n'
-              +'"pari_rec": "[marche choisi EXACTEMENT comme nomme dans MARCHES DISPONIBLES ci-dessus] ou vide si passe_ton_tour",\n'
-              +'"cote_rec": "[cote exacte du marche choisi - copie depuis les donnees ci-dessus]",\n'
-              +'"marche": "[DOUBLE_CHANCE | TOTAL_BUTS | BTTS]",\n'
-              +'"risque": "[FAIBLE | MODERE | ELEVE]",\n'
-              +'"verdict_shark": "[marche] a [cote] - [1 phrase factuelle sur le signal le plus fort]",\n'
+              +'"verdict_shark": "[1 phrase factuelle sur le signal le plus fort pour le marche deja retenu ci-dessus]",\n'
               +'"analyse_card": "[2-3 phrases factuelles - cite les stats qui justifient ce marche]",\n'
-              +'"conseil": "[1 phrase directe et actionnable]",\n'
+              +'"conseil": "[1 phrase directe et factuelle]",\n'
               +'"contexte": "[classement/forme du match, avec les chiffres exacts fournis ci-dessus - enjeu UNIQUEMENT si une ligne Enjeu DOM/EXT existe dans les donnees]",\n'
               +'"facteur_x": "[LE signal statistique le plus fort qui justifie ce marche, avec le chiffre exact cite]",\n'
               +'"score_central": "'+scoreCentral+'",\n'
-              +'"p1": '+d.final_p1+', "pn": '+d.final_pN+', "p2": '+d.final_p2+',\n'
-              +'"po25": '+d.poisson_over25+', "btts": '+d.poisson_bttsY+',\n'
-              +'"vbet": "[OUI si confiance >= 7.0 et passe_ton_tour=false, sinon NON]",\n'
               +'"scenario": {"phase1":"[TOUJOURS REMPLI]","phase2":"[TOUJOURS REMPLI]","phase3":"[TOUJOURS REMPLI]"},\n'
               +(d.slotSummary&&d.slotSummary.length
                 ?'"scenario_15min": [\n'
@@ -1473,7 +1062,7 @@ jobs:
             var r = await postJSONWithRetry('api.anthropic.com', '/v1/messages', {
               model: 'claude-sonnet-4-6',
               max_tokens: 2500,
-              system: 'Tu es IASHARK, un analyste sportif professionnel. Tu reponds EXCLUSIVEMENT en JSON valide. Aucun backtick. Tu n\'inventes jamais de statistiques. Tu choisis librement le meilleur marche parmi ceux proposes en te basant uniquement sur les donnees statistiques fournies. Tu es totalement neutre - aucun marche n\'est favorise a priori. Tu verifies toujours la coherence entre le marche choisi et les scores Monte-Carlo. Si les signaux sont insuffisants ou contradictoires, tu passes ton tour.',
+              system: 'Tu es IASHARK, un analyste sportif professionnel. Tu reponds EXCLUSIVEMENT en JSON valide. Aucun backtick. Tu n\'inventes jamais de statistiques. Le marche, la cote, la probabilite et le niveau de risque sont deja decides par du code deterministe avant que tu n\'intervienne - tu ne les recalcules jamais, tu ne les modifies jamais, tu ne renvoies aucun champ numerique de probabilite/cote/confiance. Ton unique role est d\'ecrire un texte factuel qui explique la decision deja prise, en citant les donnees statistiques fournies.',
               messages: [{role:'user', content:prompt+jsonTpl}]
             }, {'x-api-key':ANT_KEY, 'anthropic-version':'2023-06-01'});
             var txt=((r.content||[]).find(function(b){return b.type==='text';})||{}).text||'{}';
@@ -1602,8 +1191,11 @@ jobs:
               urls.push('<url><loc>https://iashark.com/match/'+m.id+'.html</loc><lastmod>'+TODAY+'</lastmod><changefreq>daily</changefreq><priority>0.9</priority></url>');
             });
             fs.writeFileSync('sitemap-fr.xml','<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'+urls.join('\n')+'\n</urlset>');
-            fs.writeFileSync('sitemap.xml','<?xml version="1.0" encoding="UTF-8"?>\n<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n<sitemap><loc>https://iashark.com/sitemap-fr.xml</loc><lastmod>'+TODAY+'</lastmod></sitemap>\n</sitemapindex>');
-            console.log('  Sitemap done: '+urls.length+' urls');
+            var sitemapFiles = generateLocalizedSitemaps(I18N_LOCALES, I18N_PAGES, TODAY, '.');
+            var indexEntries = ['<sitemap><loc>https://iashark.com/sitemap-fr.xml</loc><lastmod>'+TODAY+'</lastmod></sitemap>']
+              .concat(sitemapFiles.map(function(f){ return '<sitemap><loc>https://iashark.com/'+f+'</loc><lastmod>'+TODAY+'</lastmod></sitemap>'; }));
+            fs.writeFileSync('sitemap.xml','<?xml version="1.0" encoding="UTF-8"?>\n<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'+indexEntries.join('\n')+'\n</sitemapindex>');
+            console.log('  Sitemap done: '+urls.length+' urls, '+sitemapFiles.length+' sitemap(s) i18n');
           }
           async function updateHistorique(matchsData){
             console.log('\n=== HISTORIQUE UPDATE ===');
@@ -1642,13 +1234,24 @@ jobs:
                 var gh=fix.goals&&fix.goals.home!=null?fix.goals.home:null;
                 var ga=fix.goals&&fix.goals.away!=null?fix.goals.away:null;
                 var status=fix.fixture&&fix.fixture.status&&fix.fixture.status.short||'';
-                if(status!=='FT'&&status!=='AET'&&status!=='PEN')continue;
-                if(gh===null||ga===null)continue;
+                var isVoidStatus=(status==='PST'||status==='CANC'||status==='ABD');
+                if(!isVoidStatus&&status!=='FT'&&status!=='AET'&&status!=='PEN')continue;
+                if(!isVoidStatus&&(gh===null||ga===null))continue;
                 var found=histo.predictions.find(function(p){return (p.result==='scheduled'||p.result==='pending')&&p.fixture_id===fid;});
                 if(!found)found=histo.predictions.find(function(p){return (p.result==='scheduled'||p.result==='pending')&&p.type==='single'&&p.date&&resolveDates.indexOf(p.date.substring(0,10))!==-1&&levenshtein((p.home||'').toLowerCase(),homeN.toLowerCase())<=3&&levenshtein((p.away||'').toLowerCase(),awayN.toLowerCase())<=3;});
                 if(!found)continue;
+                if(isVoidStatus){
+                  found.result='void';found.score=null;found.fixture_id=fid;found.resolved_date=TODAY;
+                  console.log('  VOID (match '+status+'): '+found.match);
+                  continue;
+                }
                 var isWin=resolveMarketWin(found.prediction, gh, ga);
                 if(isWin===null){ continue; }
+                if(isWin==='void'){
+                  found.result='void';found.score=gh+'-'+ga;found.fixture_id=fid;found.resolved_date=TODAY;
+                  console.log('  VOID (push handicap): '+found.match+' ('+gh+'-'+ga+')');
+                  continue;
+                }
                 found.result=isWin?'win':'loss';found.score=gh+'-'+ga;found.fixture_id=fid;found.resolved_date=TODAY;
                 console.log('  Resolu foot: '+found.match+' -> '+found.result+' ('+gh+'-'+ga+')');
               }
@@ -1678,14 +1281,27 @@ jobs:
                 histo.predictions.unshift({
                   match:m.home.n+' vs '+m.away.n,home:m.home.n,away:m.away.n,
                   prediction:betLabel,cote:betCote,conf:m.conf,conf_bucket:confBucket,
+                  model_probability:m.model_probability!=null?m.model_probability:null,
+                  reliability:m.reliability||null,
                   market:marketType,league:m.league||'',league_key:m.league_key||'',
                   sport:m.sport||'football',
                   elo_diff:m.elo_diff||null,has_pinnacle:!!(m.pinnacle_snapshot),has_elo:!!(m.elo_home),
-                  date:TODAY,result:'scheduled',fixture_id:m.id,type:'single',score:null
+                  date:TODAY,result:'scheduled',fixture_id:m.id,type:'single',score:null,
+                  pipeline_sha:process.env.GITHUB_SHA||null
                 });
               }
             }
-            histo.predictions=histo.predictions.slice(0,300);
+            // Archive complete, non plafonnee, dans Supabase (predictions_archive,
+            // migration 0005) AVANT toute troncature du cache JSON local - plus
+            // aucune prediction n'est perdue definitivement (MASTER §15.3, corrige
+            // ce jalon : l'ancien slice(0,300) supprimait silencieusement tout au-dela
+            // des 300 plus recentes, a chaque run, sans aucune archive).
+            await writePredictionsArchive(histo.predictions);
+            // Cache JSON local : fenetre recente bornee pour la taille de page
+            // (§33), plus genereuse que l'ancien plafond (500 au lieu de 300) - ce
+            // n'est plus destructif puisque l'historique complet vit desormais dans
+            // Supabase.
+            histo.predictions=histo.predictions.slice(0,500);
             var beforeClean=histo.predictions.length;
             histo.predictions=histo.predictions.filter(function(p){return p.type!=='combi';});
             var cleaned=beforeClean-histo.predictions.length;
@@ -1694,9 +1310,12 @@ jobs:
             var wins=singles.filter(function(p){return p.result==='win';});
             var total=singles.length;
             var winrate=total>0?(wins.length/total*100):0;
-            var roiTotal=0;
-            singles.forEach(function(p){var c=parseFloat(p.cote)||1.75;roiTotal+=p.result==='win'?(c-1):-1;});
-            var roi=total>0?(roiTotal/total*100):0;
+            // ROI : cote manquante/invalide -> le pari est exclu du ROI (jamais remplace
+            // par une valeur fictive) mais reste compte dans le winrate ci-dessus, qui
+            // n'a pas besoin de la cote.
+            var roiTotal=0, roiCount=0;
+            singles.forEach(function(p){var c=parseFloat(p.cote);if(!c||c<=1)return;roiCount++;roiTotal+=p.result==='win'?(c-1):-1;});
+            var roi=roiCount>0?(roiTotal/roiCount*100):0;
             var streak=0;
             for(var si=0;si<singles.length;si++){
               var isW=singles[si].result==='win';
@@ -1710,23 +1329,38 @@ jobs:
               var groups={};
               singles.forEach(function(p){
                 var k=p[field]||'inconnu';
-                if(!groups[k])groups[k]={wins:0,losses:0,roi:0};
-                if(p.result==='win'){groups[k].wins++;groups[k].roi+=(parseFloat(p.cote)||1.75)-1;}
-                else{groups[k].losses++;groups[k].roi-=1;}
+                if(!groups[k])groups[k]={wins:0,losses:0,roi:0,roiCount:0};
+                if(p.result==='win')groups[k].wins++; else groups[k].losses++;
+                var c=parseFloat(p.cote);
+                if(!c||c<=1)return; // cote manquante : exclue du ROI du groupe, comptee dans wins/losses
+                groups[k].roiCount++;
+                groups[k].roi+=p.result==='win'?(c-1):-1;
               });
               return Object.keys(groups).sort().map(function(k){
                 var g=groups[k];var tot=g.wins+g.losses;
-                return{key:k,wins:g.wins,losses:g.losses,total:tot,winrate:tot>0?Math.round(g.wins/tot*1000)/10:0,roi:tot>0?Math.round(g.roi/tot*1000)/10:0};
+                return{key:k,wins:g.wins,losses:g.losses,total:tot,winrate:tot>0?Math.round(g.wins/tot*1000)/10:0,roi:g.roiCount>0?Math.round(g.roi/g.roiCount*1000)/10:0};
               }).sort(function(a,b){return b.total-a.total;});
             }
             histo.backtesting={by_market:breakdown('market'),by_league:breakdown('league_key'),by_conf:breakdown('conf_bucket'),by_sport:breakdown('sport'),by_has_pinnacle:breakdown('has_pinnacle'),by_has_elo:breakdown('has_elo'),updated:TODAY};
             var mktStats=histo.backtesting.by_market;
             console.log('  === BACKTESTING INSIGHTS ===');
             mktStats.forEach(function(m){if(m.total>=5)console.log('  '+m.key+': '+m.winrate+'% winrate | ROI '+m.roi+'% | '+m.total+' paris');});
+            // Meme formule que le ROI global (vraie cote, pas de paiement fixe suppose) -
+            // avant ce correctif, le ROI mensuel utilisait un paiement fictif de 0.75 par
+            // victoire, une 3e formule independante qui divergeait du ROI global affiche
+            // juste au-dessus.
             var months={};
-            singles.forEach(function(p){var key=(p.date||'').substring(0,7);if(!months[key])months[key]={wins:0,losses:0};if(p.result==='win')months[key].wins++;else months[key].losses++;});
+            singles.forEach(function(p){
+              var key=(p.date||'').substring(0,7);
+              if(!months[key])months[key]={wins:0,losses:0,roi:0,roiCount:0};
+              if(p.result==='win')months[key].wins++; else months[key].losses++;
+              var c=parseFloat(p.cote);
+              if(!c||c<=1)return;
+              months[key].roiCount++;
+              months[key].roi+=p.result==='win'?(c-1):-1;
+            });
             histo.monthly=Object.keys(months).sort().reverse().slice(0,6).map(function(k){
-              var mo=months[k];var tot=mo.wins+mo.losses;var r=tot>0?((mo.wins*0.75-mo.losses)/tot*100):0;
+              var mo=months[k];var tot=mo.wins+mo.losses;var r=mo.roiCount>0?(mo.roi/mo.roiCount*100):0;
               var parts=k.split('-');var mn=['Jan','Fev','Mar','Avr','Mai','Jun','Jul','Aou','Sep','Oct','Nov','Dec'];
               return{month:k,label:(mn[parseInt(parts[1])-1]||parts[1])+' '+parts[0],wins:mo.wins,losses:mo.losses,total:tot,roi:Math.round(r*10)/10};
             });
@@ -1827,6 +1461,124 @@ jobs:
             fs.writeFileSync(actusPath, JSON.stringify(actus,null,2));
             console.log('  Actus: '+actus.items.length+' au total ('+newCount+' nouveaux)');
           }
+          // Ecrit les champs premium (kelly/edge/verdict_shark/facteur_x/dropping_odds)
+          // dans Supabase (table match_premium_data), jamais dans un fichier public.
+          // Degrade proprement si le secret n'est pas encore configure : log un
+          // avertissement plutot que d'echouer tout le run, mais n'ecrit ces champs
+          // NULLE PART en clair - c'est le comportement de repli volontaire tant que
+          // SUPABASE_SERVICE_ROLE_KEY n'est pas ajoute comme secret GitHub Actions
+          // (voir supabase/migrations/0002_match_premium_data.sql pour la migration
+          // a appliquer sur le projet Supabase avant d'ajouter ce secret).
+          function upsertJSON(host, path, body, headers) {
+            return new Promise(function(resolve) {
+              var data = JSON.stringify(body);
+              var timer = setTimeout(function(){ resolve({ok:false,status:0,error:'timeout'}); }, 15000);
+              var req = https.request({
+                hostname:host, path:path, method:'POST',
+                headers:Object.assign({
+                  'Content-Type':'application/json',
+                  'Content-Length':Buffer.byteLength(data)
+                }, headers||{})
+              }, function(res) {
+                var d='';
+                res.on('data',function(c){d+=c;});
+                res.on('end',function(){
+                  clearTimeout(timer);
+                  resolve({ok:res.statusCode>=200&&res.statusCode<300,status:res.statusCode,body:d});
+                });
+              });
+              req.on('error',function(e){ clearTimeout(timer); resolve({ok:false,status:0,error:e.message}); });
+              req.write(data); req.end();
+            });
+          }
+          async function writePremiumData(rows) {
+            if(!rows||!rows.length) return;
+            if(!SUPA_URL_PIPELINE||!SUPA_SERVICE_KEY){
+              console.log('  [premium] SUPABASE_SERVICE_ROLE_KEY non configure - '+rows.length+' lignes premium NON persistees (ni publiques ni privees). A corriger avant mise en prod du plan Pro.');
+              return;
+            }
+            var u = new URL(SUPA_URL_PIPELINE);
+            var batchSize = 200;
+            for(var i=0;i<rows.length;i+=batchSize){
+              var batch = rows.slice(i,i+batchSize);
+              var r = await upsertJSON(u.hostname, '/rest/v1/match_premium_data?on_conflict=fixture_id', batch, {
+                'apikey': SUPA_SERVICE_KEY,
+                'Authorization': 'Bearer '+SUPA_SERVICE_KEY,
+                'Prefer': 'resolution=merge-duplicates,return=minimal',
+              });
+              if(!r.ok) console.log('  [premium] echec upsert batch '+i+': status='+r.status+' '+(r.error||r.body||'').toString().slice(0,200));
+              await sleep(100);
+            }
+            console.log('  [premium] '+rows.length+' lignes premium ecrites dans Supabase (match_premium_data).');
+          }
+          // Snapshot 'prediction' : capture les inputs bruts disponibles au moment de
+          // la generation, pour permettre plus tard (walk-forward reel, pas invente)
+          // de mesurer si une feature (lineups, blessures, forme, H2H...) a
+          // effectivement de la valeur predictive. Voir
+          // supabase/migrations/0004_forward_snapshots.sql.
+          async function writeSnapshots(rows) {
+            if(!rows||!rows.length) return;
+            if(!SUPA_URL_PIPELINE||!SUPA_SERVICE_KEY){
+              console.log('  [snapshots] SUPABASE_SERVICE_ROLE_KEY non configure - '+rows.length+' snapshots NON persistes.');
+              return;
+            }
+            var u = new URL(SUPA_URL_PIPELINE);
+            var batchSize = 200;
+            for(var i=0;i<rows.length;i+=batchSize){
+              var batch = rows.slice(i,i+batchSize);
+              var r = await upsertJSON(u.hostname, '/rest/v1/match_snapshots?on_conflict=fixture_id,snapshot_type', batch, {
+                'apikey': SUPA_SERVICE_KEY,
+                'Authorization': 'Bearer '+SUPA_SERVICE_KEY,
+                'Prefer': 'resolution=merge-duplicates,return=minimal',
+              });
+              if(!r.ok) console.log('  [snapshots] echec upsert batch '+i+': status='+r.status+' '+(r.error||r.body||'').toString().slice(0,200));
+              await sleep(100);
+            }
+            console.log('  [snapshots] '+rows.length+' snapshots ecrits dans Supabase (match_snapshots).');
+          }
+          // Archive complete des predictions dans Supabase (predictions_archive,
+          // migration 0005) - corrige le bug MASTER §15.3 : l'ancien
+          // histo.predictions.slice(0,300) supprimait definitivement toute
+          // prediction au-dela des 300 plus recentes, a chaque run, sans jamais
+          // les archiver nulle part. Upsert idempotent sur fixture_id : rejouer ce
+          // run n'ecrase que la meme ligne, ne duplique jamais.
+          async function writePredictionsArchive(predictions) {
+            var rows=(predictions||[]).filter(function(p){return p.fixture_id!=null&&p.type==='single';}).map(function(p){
+              return {
+                fixture_id:p.fixture_id,
+                match_label:p.match||null,home:p.home||null,away:p.away||null,
+                prediction:p.prediction||null,cote:p.cote!=null?String(p.cote):null,
+                model_probability:p.model_probability!=null?p.model_probability:null,
+                reliability:p.reliability||null,
+                conf:p.conf!=null?p.conf:null,conf_bucket:p.conf_bucket||null,
+                market:p.market||null,league:p.league||null,league_key:p.league_key||null,
+                sport:p.sport||'football',
+                elo_diff:p.elo_diff!=null?p.elo_diff:null,
+                has_pinnacle:!!p.has_pinnacle,has_elo:!!p.has_elo,
+                date:p.date||null,result:p.result||'scheduled',type:p.type||'single',
+                score:p.score||null,resolved_date:p.resolved_date||null,
+                pipeline_sha:p.pipeline_sha||null,
+              };
+            });
+            if(!rows.length) return;
+            if(!SUPA_URL_PIPELINE||!SUPA_SERVICE_KEY){
+              console.log('  [archive] SUPABASE_SERVICE_ROLE_KEY non configure - '+rows.length+' predictions NON archivees (risque de perte definitive au prochain troncage du cache JSON local).');
+              return;
+            }
+            var u = new URL(SUPA_URL_PIPELINE);
+            var batchSize = 200;
+            for(var i=0;i<rows.length;i+=batchSize){
+              var batch = rows.slice(i,i+batchSize);
+              var r = await upsertJSON(u.hostname, '/rest/v1/predictions_archive?on_conflict=fixture_id', batch, {
+                'apikey': SUPA_SERVICE_KEY,
+                'Authorization': 'Bearer '+SUPA_SERVICE_KEY,
+                'Prefer': 'resolution=merge-duplicates,return=minimal',
+              });
+              if(!r.ok) console.log('  [archive] echec upsert batch '+i+': status='+r.status+' '+(r.error||r.body||'').toString().slice(0,200));
+              await sleep(100);
+            }
+            console.log('  [archive] '+rows.length+' predictions archivees dans Supabase (predictions_archive, sans plafond).');
+          }
           async function main(){
             console.log('=== IASHARK',TODAY,'===');
             var fixtures = await getFixtures();
@@ -1866,13 +1618,22 @@ jobs:
                   var gh=fix.goals&&fix.goals.home!=null?fix.goals.home:null;
                   var ga=fix.goals&&fix.goals.away!=null?fix.goals.away:null;
                   var status=fix.fixture&&fix.fixture.status&&fix.fixture.status.short||'';
-                  if(status!=='FT'&&status!=='AET'&&status!=='PEN')return;
-                  if(gh===null||ga===null)return;
+                  var isVoidStatusE=(status==='PST'||status==='CANC'||status==='ABD');
+                  if(!isVoidStatusE&&status!=='FT'&&status!=='AET'&&status!=='PEN')return;
+                  if(!isVoidStatusE&&(gh===null||ga===null))return;
                   var found=histoEarly.predictions.find(function(p){return (p.result==='scheduled'||p.result==='pending')&&p.fixture_id===fid;});
                   if(!found)found=histoEarly.predictions.find(function(p){return (p.result==='scheduled'||p.result==='pending')&&p.type==='single'&&p.date&&resolveDatesEarly.indexOf(p.date.substring(0,10))!==-1&&levenshtein((p.home||'').toLowerCase(),homeN.toLowerCase())<=3&&levenshtein((p.away||'').toLowerCase(),awayN.toLowerCase())<=3;});
                   if(!found)return;
+                  if(isVoidStatusE){
+                    found.result='void';found.score=null;found.fixture_id=fid;found.resolved_date=TODAY;
+                    return;
+                  }
                   var isWin=resolveMarketWin(found.prediction, gh, ga);
                   if(isWin===null){ return; }
+                  if(isWin==='void'){
+                    found.result='void';found.score=gh+'-'+ga;found.fixture_id=fid;found.resolved_date=TODAY;
+                    return;
+                  }
                   found.result=isWin?'win':'loss';found.score=gh+'-'+ga;found.fixture_id=fid;found.resolved_date=TODAY;
                 });
               }catch(e){console.log('  Erreur resolution:',e.message);}
@@ -1882,14 +1643,28 @@ jobs:
               var winsE=singlesE.filter(function(p){return p.result==='win';});
               var totalE=singlesE.length;
               var winrateE=totalE>0?(winsE.length/totalE*100):0;
-              var roiTotalE=0;singlesE.forEach(function(p){var c=parseFloat(p.cote)||1.75;roiTotalE+=p.result==='win'?(c-1):-1;});
-              var roiE=totalE>0?(roiTotalE/totalE*100):0;
+              var roiTotalE=0, roiCountE=0;
+              singlesE.forEach(function(p){var c=parseFloat(p.cote);if(!c||c<=1)return;roiCountE++;roiTotalE+=p.result==='win'?(c-1):-1;});
+              var roiE=roiCountE>0?(roiTotalE/roiCountE*100):0;
               var streakE=0;
               for(var si=0;si<singlesE.length;si++){var isW=singlesE[si].result==='win';if(si===0)streakE=isW?1:-1;else if(isW&&streakE>0)streakE++;else if(!isW&&streakE<0)streakE--;else break;}
               histoEarly.stats={winrate:Math.round(winrateE*10)/10,roi:Math.round(roiE*10)/10,total:totalE,streak:streakE,wins:winsE.length,losses:totalE-winsE.length};
               var monthsE={};
-              singlesE.forEach(function(p){var key=(p.date||'').substring(0,7);if(!monthsE[key])monthsE[key]={wins:0,losses:0};if(p.result==='win')monthsE[key].wins++;else monthsE[key].losses++;});
-              histoEarly.monthly=Object.keys(monthsE).sort().reverse().slice(0,6).map(function(k){var mo=monthsE[k];var tot=mo.wins+mo.losses;var r=tot>0?((mo.wins*0.75-mo.losses)/tot*100):0;var parts=k.split('-');var mn=['Jan','Fev','Mar','Avr','Mai','Jun','Jul','Aou','Sep','Oct','Nov','Dec'];return{month:k,label:(mn[parseInt(parts[1])-1]||parts[1])+' '+parts[0],wins:mo.wins,losses:mo.losses,total:tot,roi:Math.round(r*10)/10};});
+              singlesE.forEach(function(p){
+                var key=(p.date||'').substring(0,7);
+                if(!monthsE[key])monthsE[key]={wins:0,losses:0,roi:0,roiCount:0};
+                if(p.result==='win')monthsE[key].wins++; else monthsE[key].losses++;
+                var c=parseFloat(p.cote);
+                if(!c||c<=1)return;
+                monthsE[key].roiCount++;
+                monthsE[key].roi+=p.result==='win'?(c-1):-1;
+              });
+              histoEarly.monthly=Object.keys(monthsE).sort().reverse().slice(0,6).map(function(k){var mo=monthsE[k];var tot=mo.wins+mo.losses;var r=mo.roiCount>0?(mo.roi/mo.roiCount*100):0;var parts=k.split('-');var mn=['Jan','Fev','Mar','Avr','Mai','Jun','Jul','Aou','Sep','Oct','Nov','Dec'];return{month:k,label:(mn[parseInt(parts[1])-1]||parts[1])+' '+parts[0],wins:mo.wins,losses:mo.losses,total:tot,roi:Math.round(r*10)/10};});
+              // Meme archive Supabase que la branche principale (voir
+              // writePredictionsArchive plus haut) - les resolutions win/loss/void
+              // faites ci-dessus (jour sans nouveau match) doivent aussi se
+              // propager, pas seulement rester dans le cache JSON local.
+              await writePredictionsArchive(histoEarly.predictions);
               fs.writeFileSync(histoPathEarly,JSON.stringify(histoEarly,null,2));
               return;
             }
@@ -1930,8 +1705,9 @@ jobs:
             } catch (e) {}
             console.log('Cache persistant : ' + Object.keys(matchCache).length + ' match(s) deja verrouille(s) depuis un run precedent - prediction conservee a l\'identique');
             var matchsData=[];
+            var premiumRows=[];
+            var snapshotRows=[];
             var standingsCache={};
-            var SM_SEASON_GOALS_CACHE={};
             for(var fi=0;fi<fixtures.length;fi++){
               var fix=fixtures[fi];
               var f=fix.fixture;
@@ -1971,39 +1747,19 @@ jobs:
               var batch2=await Promise.all([getOdds(f.id),getInjuries(f.id),getH2H(home.id,away.id),getWeather(f.venue&&f.venue.city?f.venue.city:'',f.date),getNews(home.name),getNews(away.name),getPredictions(f.id),getLineups(f.id),getRefereeStats(f.referee||null),getPinnacleOdds(home.name,away.name,lgKey(lg.id))]);
               await sleep(400);
               var sH=batch1[0],sA=batch1[1],raw10H=batch1[2],raw10A=batch1[3];
-              var isSmallLeagueEngine=!!SMALL_LEAGUE_KEYS_SPORTMONKS[lgKey(lg.id)];
               function isEmptySH(s){
                 return !s || !(s.fixtures && s.fixtures.played && ((s.fixtures.played.home||0)>0 || (s.fixtures.played.away||0)>0));
               }
-              if(isSmallLeagueEngine || isEmptySH(sH) || isEmptySH(sA)){
-                try{
-                  var lsForEngine=await smFindLeagueSeason(lg.name, lg.country);
-                  if(lsForEngine){
-                    var seasonFixturesForEngine=await smGetSeasonGoalEvents(lsForEngine.seasonId);
-                    if(isSmallLeagueEngine || isEmptySH(sH)){
-                      var homeIdEngine=await smResolveTeamId(seasonFixturesForEngine,home.name);
-                      var shFallback=smTeamStatsAPIShape(seasonFixturesForEngine,homeIdEngine);
-                      if(shFallback){ sH=shFallback; console.log('  [SPORTMONKS] Moteur lambdas (petite ligue) utilise pour '+home.name); }
-                      else console.log('  [SPORTMONKS] Moteur lambdas: aucune correspondance equipe pour '+home.name+' dans le cache saison');
-                    }
-                    if(isSmallLeagueEngine || isEmptySH(sA)){
-                      var awayIdEngine=await smResolveTeamId(seasonFixturesForEngine,away.name);
-                      var saFallback=smTeamStatsAPIShape(seasonFixturesForEngine,awayIdEngine);
-                      if(saFallback){ sA=saFallback; console.log('  [SPORTMONKS] Moteur lambdas (petite ligue) utilise pour '+away.name); }
-                      else console.log('  [SPORTMONKS] Moteur lambdas: aucune correspondance equipe pour '+away.name+' dans le cache saison');
-                    }
-                  } else {
-                    console.log('  [SPORTMONKS] Moteur lambdas: smFindLeagueSeason a renvoye null pour '+lg.name);
-                  }
-                }catch(e){ console.log('  [SPORTMONKS] ERREUR Moteur lambdas: '+e.message); }
+              if(isEmptySH(sH) || isEmptySH(sA)){
+                console.log('  [DONNEES LIMITEES] '+lg.name+': stats equipe absentes de api-football pour '+(isEmptySH(sH)?home.name:'')+(isEmptySH(sH)&&isEmptySH(sA)?' et ':'')+(isEmptySH(sA)?away.name:'')+' - le moteur utilisera les valeurs par defaut de la ligue (aucune substitution via un autre fournisseur).');
               }
               var oddsRaw=batch2[0],injRaw=batch2[1],h2hRaw=batch2[2],wx=batch2[3],nH=batch2[4],nA=batch2[5];
               var predictions=batch2[6]||null,lineups=batch2[7]||null,refStats=batch2[8]||null;
               var pinnacleOdds=batch2[9]||null;
               var last20IdsH=(raw10H||[]).slice(0,20).map(function(fx){return fx.fixture.id;});
               var last20IdsA=(raw10A||[]).slice(0,20).map(function(fx){return fx.fixture.id;});
-              var topScorersH=await getTopScorersSportmonks(home.name, lg.name, lg.country);
-              var topScorersA=await getTopScorersSportmonks(away.name, lg.name, lg.country);
+              var topScorersH=null;
+              var topScorersA=null;
               var eventsH_raw=[],eventsA_raw=[];
               for(var evi=0;evi<last20IdsH.length;evi++){eventsH_raw.push(await getFixtureEvents(last20IdsH[evi]));await sleep(150);}
               for(var evi=0;evi<last20IdsA.length;evi++){eventsA_raw.push(await getFixtureEvents(last20IdsA[evi]));await sleep(150);}
@@ -2026,201 +1782,6 @@ jobs:
               var evPatH=calcEventsPattern(eventsH_raw,home.id);
               var evPatA=calcEventsPattern(eventsA_raw,away.id);
           
-              async function smGetSeasonGoalEvents(seasonId){
-                if(SM_SEASON_GOALS_CACHE[seasonId]) return SM_SEASON_GOALS_CACHE[seasonId];
-                var allFixtures=[];
-                try{
-                  var r=await getSM('https://api.sportmonks.com/v3/football/seasons/'+seasonId+'?include=fixtures.participants;fixtures.events.type;fixtures.statistics.type&filters=eventTypes:14,15,16');
-                  allFixtures=(r.data&&r.data.fixtures)||[];
-                  if(!allFixtures.length) console.log('  [SPORTMONKS] Cache saison: 0 fixtures renvoyees pour season_id='+seasonId+' (reponse: '+JSON.stringify(r).slice(0,200)+')');
-                }catch(e){ console.log('  [SPORTMONKS] ERREUR Cache saison Sportmonks: '+e.message); }
-                SM_SEASON_GOALS_CACHE[seasonId]=allFixtures;
-                return allFixtures;
-              }
-              function smTeamStatsFromFixtures(fixtures,teamName,limit){
-                limit=limit||10;
-                var teamNames=[];
-                fixtures.forEach(function(fx){ (fx.participants||[]).forEach(function(p){ teamNames.push(p.name); }); });
-                var uniqueNames=teamNames.filter(function(v,i,a){return a.indexOf(v)===i;});
-                var matched=smBestMatch(teamName,uniqueNames);
-                if(!matched) return null;
-                var teamFixtures=fixtures.filter(function(fx){
-                  return smIsPlayed(fx) && (fx.participants||[]).some(function(p){return p.name===matched;});
-                });
-                teamFixtures.sort(function(a,b){ return new Date(b.starting_at)-new Date(a.starting_at); });
-                teamFixtures=teamFixtures.slice(0,limit);
-                if(!teamFixtures.length) return null;
-                var teamId=null;
-                teamFixtures.forEach(function(fx){
-                  (fx.participants||[]).forEach(function(p){ if(p.name===matched) teamId=p.id; });
-                });
-                var STAT_MAP={possession:45,shots_total:42,shots_on:86,shots_off:41,shots_blocked:58,corners:34,fouls:56,offsides:51,saves:57,passes_pct:82};
-                var sums={possession:0,shots_total:0,shots_on:0,shots_off:0,shots_blocked:0,corners:0,fouls:0,offsides:0,saves:0,passes_pct:0};
-                var counts={possession:0,shots_total:0,shots_on:0,shots_off:0,shots_blocked:0,corners:0,fouls:0,offsides:0,saves:0,passes_pct:0};
-                teamFixtures.forEach(function(fx){
-                  (fx.statistics||[]).forEach(function(st){
-                    if(st.participant_id!==teamId) return;
-                    Object.keys(STAT_MAP).forEach(function(key){
-                      if(st.type_id===STAT_MAP[key] && st.data && st.data.value!=null){
-                        sums[key]+=st.data.value; counts[key]++;
-                      }
-                    });
-                  });
-                });
-                var out={source:'sportmonks'};
-                Object.keys(STAT_MAP).forEach(function(key){
-                  out[key]=counts[key]>0?Math.round((sums[key]/counts[key])*10)/10:null;
-                });
-                out.xg=null; out.xga=null;
-                return out;
-              }
-              async function smResolveTeamId(seasonFixtures,teamName){
-                var names=[];
-                seasonFixtures.forEach(function(fx){ (fx.participants||[]).forEach(function(p){ names.push(p.name); }); });
-                var uniqueNames=names.filter(function(v,i,a){return a.indexOf(v)===i;});
-                var matched=smBestMatch(teamName,uniqueNames);
-                if(!matched) return null;
-                var found=null;
-                seasonFixtures.forEach(function(fx){ (fx.participants||[]).forEach(function(p){ if(p.name===matched) found=p.id; }); });
-                return found;
-              }
-              function smGetLast10ShapedFixtures(seasonFixtures,teamName,limit){
-                limit=limit||20;
-                var names=[];
-                seasonFixtures.forEach(function(fx){ (fx.participants||[]).forEach(function(p){ names.push(p.name); }); });
-                var uniqueNames=names.filter(function(v,i,a){return a.indexOf(v)===i;});
-                var matched=smBestMatch(teamName,uniqueNames);
-                if(!matched) return null;
-                var resolvedTeamId=null;
-                seasonFixtures.forEach(function(fx){ (fx.participants||[]).forEach(function(p){ if(p.name===matched) resolvedTeamId=p.id; }); });
-                var teamFixtures=seasonFixtures.filter(function(fx){
-                  return smIsPlayed(fx) && (fx.participants||[]).some(function(p){return p.name===matched;});
-                });
-                teamFixtures.sort(function(a,b){ return new Date(b.starting_at)-new Date(a.starting_at); });
-                teamFixtures=teamFixtures.slice(0,limit);
-                if(!teamFixtures.length) return null;
-                var shapedFixtures=teamFixtures.map(function(fx){
-                  var homeP=(fx.participants||[]).find(function(p){return p.meta&&p.meta.location==='home';})||(fx.participants||[])[0];
-                  var awayP=(fx.participants||[]).find(function(p){return p.meta&&p.meta.location==='away';})||(fx.participants||[])[1];
-                  var goals=(fx.events||[]).filter(function(e){return e.type_id===14||e.type_id===15||e.type_id===16;});
-                  var gH=goals.filter(function(e){return homeP&&e.participant_id===homeP.id;}).length;
-                  var gA=goals.filter(function(e){return awayP&&e.participant_id===awayP.id;}).length;
-                  return {
-                    fixture:{id:fx.id,date:fx.starting_at},
-                    teams:{home:{id:homeP?homeP.id:null,name:homeP?homeP.name:''},away:{id:awayP?awayP.id:null,name:awayP?awayP.name:''}},
-                    goals:{home:gH,away:gA}
-                  };
-                });
-                return {teamId:resolvedTeamId,fixtures:shapedFixtures};
-              }
-              function smTeamStatsAPIShape(seasonFixtures,teamId){
-                if(!teamId) return null;
-                var teamFixtures=seasonFixtures.filter(function(fx){
-                  return smIsPlayed(fx) && (fx.participants||[]).some(function(p){return p.id===teamId;});
-                });
-                if(!teamFixtures.length) return null;
-                teamFixtures.sort(function(a,b){ return new Date(b.starting_at)-new Date(a.starting_at); });
-                var pH_home=0,pH_away=0,wH_home=0,wH_away=0;
-                var gfH_home=0,gfH_away=0,gaH_home=0,gaH_away=0;
-                var csH_home=0,csH_away=0,ftsH_home=0,ftsH_away=0;
-                var formArr=[];
-                teamFixtures.forEach(function(fx){
-                  var me=(fx.participants||[]).find(function(p){return p.id===teamId;});
-                  var opp=(fx.participants||[]).find(function(p){return p.id!==teamId;});
-                  if(!me||!opp) return;
-                  var isHome=me.meta&&me.meta.location==='home';
-                  var goals=(fx.events||[]).filter(function(e){return e.type_id===14||e.type_id===15||e.type_id===16;});
-                  var myGoals=goals.filter(function(e){return e.participant_id===teamId;}).length;
-                  var oppGoals=goals.filter(function(e){return e.participant_id===opp.id;}).length;
-                  if(isHome){
-                    pH_home++; gfH_home+=myGoals; gaH_home+=oppGoals;
-                    if(oppGoals===0) csH_home++;
-                    if(myGoals===0) ftsH_home++;
-                    if(myGoals>oppGoals) wH_home++;
-                  } else {
-                    pH_away++; gfH_away+=myGoals; gaH_away+=oppGoals;
-                    if(oppGoals===0) csH_away++;
-                    if(myGoals===0) ftsH_away++;
-                    if(myGoals>oppGoals) wH_away++;
-                  }
-                  if(formArr.length<5){
-                    formArr.push(myGoals>oppGoals?'W':(myGoals<oppGoals?'L':'D'));
-                  }
-                });
-                return {
-                  fixtures:{played:{home:pH_home,away:pH_away,total:pH_home+pH_away},wins:{home:wH_home,away:wH_away}},
-                  goals:{
-                    for:{home:{},away:{},total:{home:gfH_home,away:gfH_away,total:gfH_home+gfH_away}},
-                    against:{home:{},away:{},total:{home:gaH_home,away:gaH_away,total:gaH_home+gaH_away}}
-                  },
-                  clean_sheet:{home:csH_home,away:csH_away},
-                  failed_to_score:{home:ftsH_home,away:ftsH_away},
-                  form:formArr.reverse().join(''),
-                  source:'sportmonks'
-                };
-              }
-              function smTeamPatternFromFixtures(fixtures,teamName,limit){
-                limit=limit||10;
-                var teamNames=[];
-                fixtures.forEach(function(fx){ (fx.participants||[]).forEach(function(p){ teamNames.push(p.name); }); });
-                var uniqueNames=teamNames.filter(function(v,i,a){return a.indexOf(v)===i;});
-                var matched=smBestMatch(teamName,uniqueNames);
-                if(!matched) return null;
-                var teamFixtures=fixtures.filter(function(fx){
-                  return smIsPlayed(fx) && (fx.participants||[]).some(function(p){return p.name===matched;});
-                });
-                teamFixtures.sort(function(a,b){ return new Date(b.starting_at)-new Date(a.starting_at); });
-                teamFixtures=teamFixtures.slice(0,limit);
-                if(!teamFixtures.length) return null;
-                var teamId=null;
-                teamFixtures.forEach(function(fx){
-                  (fx.participants||[]).forEach(function(p){ if(p.name===matched) teamId=p.id; });
-                });
-                var scored=[],conceded=[];
-                teamFixtures.forEach(function(fx){
-                  (fx.events||[]).forEach(function(ev){
-                    if(ev.type_id!==14 && ev.type_id!==15 && ev.type_id!==16) return;
-                    var m=(ev.minute||0)+(ev.extra_minute||0);
-                    (ev.participant_id===teamId?scored:conceded).push(m);
-                  });
-                });
-                function bucket(arr,lo,hi){ return arr.filter(function(m){ return hi===null?m>=lo:(m>=lo&&m<hi); }).length; }
-                var games=teamFixtures.length;
-                function avg(n){ return (n/games).toFixed(2); }
-                return {
-                  goals_avg:avg(scored.length), conceded_avg:avg(conceded.length),
-                  slots:[{t:'0-15',n:bucket(scored,0,15)},{t:'15-30',n:bucket(scored,15,30)},{t:'30-45',n:bucket(scored,30,45)},{t:'45-60',n:bucket(scored,45,60)},{t:'60-75',n:bucket(scored,60,75)},{t:'75-90',n:bucket(scored,75,null)}],
-                  slots_against:[{t:'0-15',n:bucket(conceded,0,15)},{t:'15-30',n:bucket(conceded,15,30)},{t:'30-45',n:bucket(conceded,30,45)},{t:'45-60',n:bucket(conceded,45,60)},{t:'60-75',n:bucket(conceded,60,75)},{t:'75-90',n:bucket(conceded,75,null)}],
-                  red_cards:0, yellow_per_game:'0.0', games:games, source:'sportmonks'
-                };
-              }
-              function isEmptyPattern(p){
-                if(!p||!p.games) return true;
-                var totalScored=(p.slots||[]).reduce(function(s,x){return s+x.n;},0);
-                var totalConceded=(p.slots_against||[]).reduce(function(s,x){return s+x.n;},0);
-                return totalScored===0 && totalConceded===0;
-              }
-              var isSmallLeague=!!SMALL_LEAGUE_KEYS_SPORTMONKS[lgKey(lg.id)];
-              if(isSmallLeague || isEmptyPattern(evPatH) || isEmptyPattern(evPatA)){
-                try{
-                  var lsForPatterns=await smFindLeagueSeason(lg.name, lg.country);
-                  if(lsForPatterns){
-                    var seasonFixtures=await smGetSeasonGoalEvents(lsForPatterns.seasonId);
-                    if(isSmallLeague || isEmptyPattern(evPatH)){
-                      var fallbackH=smTeamPatternFromFixtures(seasonFixtures,home.name);
-                      if(fallbackH){ evPatH=fallbackH; console.log('  [SPORTMONKS] Patterns 15min (petite ligue) utilise pour '+home.name); }
-                      else console.log('  [SPORTMONKS] Patterns 15min: aucune correspondance equipe pour '+home.name+' dans le cache saison');
-                    }
-                    if(isSmallLeague || isEmptyPattern(evPatA)){
-                      var fallbackA=smTeamPatternFromFixtures(seasonFixtures,away.name);
-                      if(fallbackA){ evPatA=fallbackA; console.log('  [SPORTMONKS] Fallback patterns 15min utilise pour '+away.name); }
-                      else console.log('  [SPORTMONKS] Patterns 15min: aucune correspondance equipe pour '+away.name+' dans le cache saison');
-                    }
-                  } else {
-                    console.log('  [SPORTMONKS] Patterns 15min: smFindLeagueSeason a renvoye null pour '+lg.name);
-                  }
-                }catch(e){ console.log('  [SPORTMONKS] ERREUR Patterns 15min: '+e.message); }
-              }
               function calcHotPlayers(eventsArr,teamId,seasonTop){
                 var last10Events=eventsArr.slice(0,10);
                 var allEvts=[].concat.apply([],last10Events);
@@ -2260,18 +1821,6 @@ jobs:
               var hotA=calcHotPlayers(eventsA_raw,away.id,topScorersA);
               var last10H=formatLast10(raw10H,home.id);
               var last10A=formatLast10(raw10A,away.id);
-              if(isSmallLeague){
-                try{
-                  var lsForLast10=await smFindLeagueSeason(lg.name, lg.country);
-                  if(lsForLast10){
-                    var seasonFixturesForLast10=await smGetSeasonGoalEvents(lsForLast10.seasonId);
-                    var smLast10H=smGetLast10ShapedFixtures(seasonFixturesForLast10,home.name,20);
-                    var smLast10A=smGetLast10ShapedFixtures(seasonFixturesForLast10,away.name,20);
-                    if(smLast10H&&smLast10H.fixtures.length){ last10H=formatLast10(smLast10H.fixtures,smLast10H.teamId); console.log('  [SPORTMONKS] Last10/forme (petite ligue) utilise pour '+home.name); }
-                    if(smLast10A&&smLast10A.fixtures.length){ last10A=formatLast10(smLast10A.fixtures,smLast10A.teamId); console.log('  [SPORTMONKS] Last10/forme (petite ligue) utilise pour '+away.name); }
-                  }
-                }catch(e){ console.log('  [SPORTMONKS] ERREUR Last10/forme: '+e.message); }
-              }
               var last10IdsH_xg=raw10H.slice(0,10).map(function(fx){return fx.fixture.id;});
               var last10IdsA_xg=raw10A.slice(0,10).map(function(fx){return fx.fixture.id;});
               var xgH=await getWeightedXGStats(home.id,last10IdsH_xg,raw10H,xgConcededCache);
@@ -2291,30 +1840,6 @@ jobs:
                 offsides:xgA.offsides_avg, saves:xgA.saves_avg, passes_pct:xgA.passes_pct_avg,
                 xg:xgA.xg_avg, xga:xgA.xga_avg,
               };
-              function isEmptyTeamStats(s){
-                if(!s) return true;
-                return s.possession==null && s.shots_total==null && s.corners==null && s.fouls==null;
-              }
-              if(isSmallLeague || isEmptyTeamStats(matchStatsH) || isEmptyTeamStats(matchStatsA)){
-                try{
-                  var lsForStats=await smFindLeagueSeason(lg.name, lg.country);
-                  if(lsForStats){
-                    var seasonFixturesForStats=await smGetSeasonGoalEvents(lsForStats.seasonId);
-                    if(isSmallLeague || isEmptyTeamStats(matchStatsH)){
-                      var statsFallbackH=smTeamStatsFromFixtures(seasonFixturesForStats,home.name);
-                      if(statsFallbackH){ matchStatsH=statsFallbackH; console.log('  [SPORTMONKS] Stats equipe (petite ligue) utilise pour '+home.name); }
-                      else console.log('  [SPORTMONKS] Stats equipe: aucune correspondance equipe pour '+home.name+' dans le cache saison');
-                    }
-                    if(isSmallLeague || isEmptyTeamStats(matchStatsA)){
-                      var statsFallbackA=smTeamStatsFromFixtures(seasonFixturesForStats,away.name);
-                      if(statsFallbackA){ matchStatsA=statsFallbackA; console.log('  [SPORTMONKS] Fallback stats equipe utilise pour '+away.name); }
-                      else console.log('  [SPORTMONKS] Stats equipe: aucune correspondance equipe pour '+away.name+' dans le cache saison');
-                    }
-                  } else {
-                    console.log('  [SPORTMONKS] Stats equipe: smFindLeagueSeason a renvoye null pour '+lg.name);
-                  }
-                }catch(e){ console.log('  [SPORTMONKS] ERREUR Stats equipe: '+e.message); }
-              }
               await sleep(300);
               var odds=parseOdds(oddsRaw);
               var critH=calcCriteres(sH,true,rkH);
@@ -2382,103 +1907,100 @@ jobs:
                   console.log('  [WC lambdas] Pas de stats qualifs disponibles pour '+home.name+' ou '+away.name+' - repli sur stats tournoi/floor');
                 }
               }
-              var poissonProbs=calcFinalProbs(lambdas.lambdaH,lambdas.lambdaA,eloStats);
+              // === Separation stricte des 3 probabilites (MASTER V2.1 S10.2) ===
+              // PURE_IASHARK_PROBABILITY : uniquement donnees football + modeles
+              // IASHARK (Poisson/Dixon-Coles/Monte-Carlo/Elo). Ne recoit JAMAIS une
+              // cote, directement ou indirectement - c'est la seule probabilite
+              // utilisee pour choisir un marche (lib/decision.js#pickMarketDeterministic)
+              // et pour calculer edge/Kelly contre le marche (jamais l'inverse : le
+              // MASTER interdit explicitement de comparer une probabilite qui a deja
+              // vu le marche contre ce meme marche).
+              var pureProbs=calcFinalProbs(lambdas.lambdaH,lambdas.lambdaA,eloStats);
+              // Double Chance PURE : derivee des probas 1X2 PURE elles-memes (S10.V -
+              // "deriver sans modeles independants"), jamais d'un blend marche.
+              var purePropProb1X=pureProbs.p1+pureProbs.pN;
+              var purePropProbX2=pureProbs.p2+pureProbs.pN;
+
+              // MARKET_CONSENSUS_PROBABILITY : uniquement les cotes reelles, marge
+              // retiree (Shin). null si aucune cote fiable n'est disponible - jamais
+              // fabriquee.
               var usingPinnacle=!!(pinnacleOdds&&pinnacleOdds.c1&&pinnacleOdds.cn&&pinnacleOdds.c2);
               var marketOdds=usingPinnacle?pinnacleOdds:((odds.c1&&odds.c1!=='--'&&odds.cn&&odds.cn!=='--'&&odds.c2&&odds.c2!=='--')?{c1:parseFloat(odds.c1),cn:parseFloat(odds.cn),c2:parseFloat(odds.c2)}:null);
               var shinProbs=null;
               if(marketOdds){var raw=shinProbabilities([marketOdds.c1,marketOdds.cn,marketOdds.c2]);if(raw)shinProbs={p1:Math.round(raw[0]*100),pN:Math.round(raw[1]*100),p2:Math.round(raw[2]*100)};}
-              // Ancrage marche: le marche (cotes reelles, Pinnacle si dispo sinon mediane multi-bookmakers) recoit un poids dominant
-              // pour eviter qu'un lambda Poisson extreme sur petit echantillon (ligues mineures) ne produise une confiance illusoire.
-              var anchored=poissonProbs;
+              function fairPairProbs(coteA,coteB){
+                var a=parseFloat(coteA),b=parseFloat(coteB);
+                if(!a||!b||a<=1||b<=1) return null;
+                var raw=shinProbabilities([a,b]);
+                if(!raw) return null;
+                return {a:raw[0]*100,b:raw[1]*100};
+              }
+              function naiveImplied(cote){ var c=parseFloat(cote); return c>1?100/c:null; }
+              var fairOU=fairPairProbs(odds.co25,odds.cu25);
+              var fairBTTS=fairPairProbs(odds.btts_oui,odds.btts_non);
+
+              // MARKET_AWARE_PROBABILITY : modele SEPARE et FACULTATIF qui utilise le
+              // marche comme feature (S10.2 : "son but est la meilleure estimation
+              // probabiliste absolue possible, PAS la detection d'un ecart de
+              // marche"). Aujourd'hui un blend lineaire simple (pas encore le modele
+              // entraine que le MASTER envisage a terme) - honnetement documente comme
+              // tel. N'alimente JAMAIS allMarkets/pickMarketDeterministic/edge/Kelly :
+              // ceux-ci utilisent exclusivement PURE_IASHARK_PROBABILITY vs
+              // MARKET_CONSENSUS_PROBABILITY, jamais MARKET_AWARE contre le marche qui
+              // l'a nourri (interdiction explicite S10.2).
+              var marketAware=pureProbs;
               if(shinProbs){
                 var mw=usingPinnacle?0.65:0.55;
-                var ap1=Math.round(poissonProbs.p1*(1-mw)+shinProbs.p1*mw);
-                var ap2=Math.round(poissonProbs.p2*(1-mw)+shinProbs.p2*mw);
+                var ap1=Math.round(pureProbs.p1*(1-mw)+shinProbs.p1*mw);
+                var ap2=Math.round(pureProbs.p2*(1-mw)+shinProbs.p2*mw);
                 var apN=100-ap1-ap2;
-                anchored={p1:ap1,pN:apN,p2:ap2};
+                marketAware={p1:ap1,pN:apN,p2:ap2};
               }
-              var prob1X=anchored.p1+anchored.pN;
-              var probX2=anchored.p2+anchored.pN;
-              var probAHdom=anchored.p1;
-              var probAHext=anchored.p2+anchored.pN;
+
               var allMarkets=[
-                {market:'Over 2.5',  cote:odds.co25,      prob:poissonProbs.over25, label:'Plus de 2.5 buts'},
-                {market:'Under 2.5', cote:odds.cu25,      prob:poissonProbs.under25,label:'Moins de 2.5 buts'},
-                {market:'BTTS Oui',  cote:odds.btts_oui,  prob:poissonProbs.bttsY,  label:'Les deux equipes marquent'},
-                {market:'BTTS Non',  cote:odds.btts_non,  prob:poissonProbs.bttsN,  label:'Une equipe ne marque pas'},
-                {market:'DC 1X',     cote:odds.dc1x,      prob:prob1X,              label:'Victoire ou nul domicile'},
-                {market:'DC X2',     cote:odds.dc2x,      prob:probX2,              label:'Victoire ou nul exterieur'},
-                {market:'Victoire Domicile', cote:odds.c1, prob:anchored.p1, label:'Victoire seche domicile'},
-                {market:'Victoire Exterieur',cote:odds.c2, prob:anchored.p2, label:'Victoire seche exterieur'},
+                {market:'Over 2.5',  cote:odds.co25,      prob:pureProbs.over25, marketProb:fairOU?fairOU.a:naiveImplied(odds.co25),      label:'Plus de 2.5 buts'},
+                {market:'Under 2.5', cote:odds.cu25,      prob:pureProbs.under25,marketProb:fairOU?fairOU.b:naiveImplied(odds.cu25),      label:'Moins de 2.5 buts'},
+                {market:'BTTS Oui',  cote:odds.btts_oui,  prob:pureProbs.bttsY,  marketProb:fairBTTS?fairBTTS.a:naiveImplied(odds.btts_oui), label:'Les deux equipes marquent'},
+                {market:'BTTS Non',  cote:odds.btts_non,  prob:pureProbs.bttsN,  marketProb:fairBTTS?fairBTTS.b:naiveImplied(odds.btts_non), label:'Une equipe ne marque pas'},
+                {market:'DC 1X',     cote:odds.dc1x,      prob:purePropProb1X,   marketProb:naiveImplied(odds.dc1x),                     label:'Victoire ou nul domicile'},
+                {market:'DC X2',     cote:odds.dc2x,      prob:purePropProbX2,   marketProb:naiveImplied(odds.dc2x),                     label:'Victoire ou nul exterieur'},
+                {market:'Victoire Domicile', cote:odds.c1, prob:pureProbs.p1, marketProb:shinProbs?shinProbs.p1:naiveImplied(odds.c1), label:'Victoire seche domicile'},
+                {market:'Victoire Exterieur',cote:odds.c2, prob:pureProbs.p2, marketProb:shinProbs?shinProbs.p2:naiveImplied(odds.c2), label:'Victoire seche exterieur'},
               ].filter(function(m){
                 return m.cote&&m.cote!=='--'&&parseFloat(m.cote)>=1.50;
               });
               var nodeKelly=null;
-              var injuries=(injRaw||[]).map(function(inj){return{name:inj.name,team:inj.team===home.id?home.id:away.id,reason:inj.reason||'Blessure',status:(inj.status||'out').toLowerCase().includes('suspend')?'suspended':'out',impact:'medium'};});
-              if(isSmallLeague && (!injuries||!injuries.length)){
-                try{
-                  async function smGetSidelined(teamId){
-                    if(!teamId) return [];
-                    var r=await getSM('https://api.sportmonks.com/v3/football/teams/'+teamId+'?include=sidelined.type;sidelined.player');
-                    var list=(r.data&&r.data.sidelined)||[];
-                    return list.filter(function(s){ return s.completed===false; }).map(function(s){
-                      return {
-                        name:(s.player&&s.player.name)||'Joueur inconnu',
-                        team:teamId,
-                        reason:(s.type&&s.type.name)||'Indisponible',
-                        status:(s.category==='suspended')?'suspended':'out',
-                        impact:'medium'
-                      };
-                    });
-                  }
-                  var lsForInj=await smFindLeagueSeason(lg.name, lg.country);
-                  if(lsForInj){
-                    var seasonFixturesForInj=await smGetSeasonGoalEvents(lsForInj.seasonId);
-                    var homeIdInj=await smResolveTeamId(seasonFixturesForInj,home.name);
-                    var awayIdInj=await smResolveTeamId(seasonFixturesForInj,away.name);
-                    var sidelinedH=await smGetSidelined(homeIdInj);
-                    var sidelinedA=await smGetSidelined(awayIdInj);
-                    var sidelinedAll=sidelinedH.map(function(s){return Object.assign({},s,{team:home.id});})
-                      .concat(sidelinedA.map(function(s){return Object.assign({},s,{team:away.id});}));
-                    if(sidelinedAll.length){ injuries=sidelinedAll; console.log('  [SPORTMONKS] Blessures/suspensions (petite ligue) utilise pour '+home.name+'/'+away.name); }
-                  }
-                }catch(e){ console.log('  [SPORTMONKS] ERREUR Blessures/suspensions: '+e.message); }
+              // Selection du marche, edge, Kelly et niveau de risque : entierement
+              // deterministes, calcules AVANT l'appel au LLM (MASTER V2.1 §1.3/§7.8/
+              // §10.AJ : "Claude ne peut jamais [...] selectionner un marche via
+              // intuition [...] calculer edge/EV/Kelly"). Le LLM ne recoit plus que
+              // le resultat deja decide pour le commenter en texte - si Claude est
+              // indisponible, ce bloc produit exactement la meme decision (§10.AJ:
+              // "le moteur doit fonctionner a 100% sans lui").
+              var pickedMarket=pickMarketDeterministic(allMarkets);
+              var riskLabelCode=pickedMarket?computeRiskLabel(pickedMarket.cote):'MODERE';
+              var kellyVal='0';
+              var edgeVal='';
+              if(pickedMarket){
+                var choseCote=parseFloat(pickedMarket.cote);
+                var choseProb=pickedMarket.prob;
+                if(pickedMarket.marketProb!=null){
+                  edgeVal=(choseProb-pickedMarket.marketProb>=0?'+':'')+(choseProb-pickedMarket.marketProb).toFixed(1)+'%';
+                }
+                if(choseProb&&choseCote&&choseCote>1){
+                  var k=fractionalKelly(choseProb/100,choseCote,0.25);
+                  if(k!=null) kellyVal=k;
+                }
               }
+              // Pas de marche exploitable (aucune cote >= 1.50) -> aucun signal a
+              // afficher, decide en code (reprend la regle 5 de l'ancien prompt,
+              // qui n'a plus besoin d'etre laissee a l'appreciation du LLM).
+              var noSignal=!pickedMarket;
+              var injuries=(injRaw||[]).map(function(inj){return{name:inj.name,team:inj.team===home.id?home.id:away.id,reason:inj.reason||'Blessure',status:(inj.status||'out').toLowerCase().includes('suspend')?'suspended':'out',impact:'medium'};});
               var matchup=calcMatchup(xgH,xgA,sH,sA);
               var keyAbsenceAlerts=calcKeyAbsences(injuries,topScorersH,topScorersA,home.id,away.id,bmHdom,mdHdom,bmAext,meAext);
               var disciplineRisk=calcDisciplineRisk(refStats,xgH,xgA,home.name,away.name);
               var h2hFormatted=formatH2H(h2hRaw,home.id);
-              if(isSmallLeague && (!h2hFormatted||!h2hFormatted.length)){
-                try{
-                  var lsForH2H=await smFindLeagueSeason(lg.name, lg.country);
-                  if(lsForH2H){
-                    var seasonFixturesForH2H=await smGetSeasonGoalEvents(lsForH2H.seasonId);
-                    var teamNamesH2H=[];
-                    seasonFixturesForH2H.forEach(function(fx){ (fx.participants||[]).forEach(function(p){ teamNamesH2H.push(p.name); }); });
-                    var uniqueNamesH2H=teamNamesH2H.filter(function(v,i,a){return a.indexOf(v)===i;});
-                    var matchedHomeH2H=smBestMatch(home.name,uniqueNamesH2H);
-                    var matchedAwayH2H=smBestMatch(away.name,uniqueNamesH2H);
-                    if(matchedHomeH2H && matchedAwayH2H){
-                      var h2hFixtures=seasonFixturesForH2H.filter(function(fx){
-                        var names=(fx.participants||[]).map(function(p){return p.name;});
-                        return smIsPlayed(fx) && names.indexOf(matchedHomeH2H)!==-1 && names.indexOf(matchedAwayH2H)!==-1;
-                      });
-                      h2hFixtures.sort(function(a,b){ return new Date(b.starting_at)-new Date(a.starting_at); });
-                      h2hFormatted=h2hFixtures.slice(0,5).map(function(fx){
-                        var goalsScored=(fx.events||[]).filter(function(e){return e.type_id===14||e.type_id===15||e.type_id===16;});
-                        var homeP=(fx.participants||[]).find(function(p){return p.meta&&p.meta.location==='home';})||(fx.participants||[])[0];
-                        var awayP=(fx.participants||[]).find(function(p){return p.meta&&p.meta.location==='away';})||(fx.participants||[])[1];
-                        var gH=goalsScored.filter(function(e){return homeP&&e.participant_id===homeP.id;}).length;
-                        var gA=goalsScored.filter(function(e){return awayP&&e.participant_id===awayP.id;}).length;
-                        var isH=homeP&&homeP.name===matchedHomeH2H;
-                        var w; if(gH>gA)w=isH?'1':'2'; else if(gH<gA)w=isH?'2':'1'; else w='N';
-                        return {d:(fx.starting_at||'').split(' ')[0], home:homeP?homeP.name:matchedHomeH2H, away:awayP?awayP.name:matchedAwayH2H, s:gH+'-'+gA, w:w};
-                      });
-                      if(h2hFormatted.length) console.log('  [SPORTMONKS] H2H (petite ligue) utilise pour '+home.name+' vs '+away.name);
-                    }
-                  }
-                }catch(e){ console.log('  [SPORTMONKS] ERREUR H2H: '+e.message); }
-              }
               var mdH=(sH&&sH.fixtures&&sH.fixtures.played&&sH.fixtures.played.home)||Math.round(totalH/2);
               var meA=(sA&&sA.fixtures&&sA.fixtures.played&&sA.fixtures.played.away)||Math.round(totalA/2);
               var d10Hstr=last10H.slice(0,5).map(function(m){return m.result+' '+m.score+' vs '+m.match+' ('+m.lieu+')';}).join(' | ')||'N/A';
@@ -2527,21 +2049,22 @@ jobs:
                 xgH_avg:xgH.xg_avg,xgH_weighted:xgH.xg_weighted,xgH_fouls:xgH.fouls_avg,
                 xgA_avg:xgA.xg_avg,xgA_weighted:xgA.xg_weighted,xgA_fouls:xgA.fouls_avg,
                 poisson_lambdaH:lambdas.lambdaH,poisson_lambdaA:lambdas.lambdaA,
-                poisson_p1:poissonProbs.p1,poisson_pN:poissonProbs.pN,poisson_p2:poissonProbs.p2,
-                poisson_over25:poissonProbs.over25,poisson_under25:poissonProbs.under25,
-                poisson_bttsY:poissonProbs.bttsY,poisson_bttsN:poissonProbs.bttsN,
-                dixon_p1:poissonProbs.dixon?poissonProbs.dixon.p1:poissonProbs.p1,
-                dixon_pN:poissonProbs.dixon?poissonProbs.dixon.pN:poissonProbs.pN,
-                dixon_p2:poissonProbs.dixon?poissonProbs.dixon.p2:poissonProbs.p2,
-                mc_p1:poissonProbs.montecarlo?poissonProbs.montecarlo.p1:poissonProbs.p1,
-                mc_scores:poissonProbs.montecarlo?poissonProbs.montecarlo.top_scores:[],
-                mc_pN:poissonProbs.montecarlo?poissonProbs.montecarlo.pN:poissonProbs.pN,
-                mc_p2:poissonProbs.montecarlo?poissonProbs.montecarlo.p2:poissonProbs.p2,
+                poisson_p1:pureProbs.p1,poisson_pN:pureProbs.pN,poisson_p2:pureProbs.p2,
+                poisson_over25:pureProbs.over25,poisson_under25:pureProbs.under25,
+                poisson_bttsY:pureProbs.bttsY,poisson_bttsN:pureProbs.bttsN,
+                dixon_p1:pureProbs.dixon?pureProbs.dixon.p1:pureProbs.p1,
+                dixon_pN:pureProbs.dixon?pureProbs.dixon.pN:pureProbs.pN,
+                dixon_p2:pureProbs.dixon?pureProbs.dixon.p2:pureProbs.p2,
+                mc_p1:pureProbs.montecarlo?pureProbs.montecarlo.p1:pureProbs.p1,
+                mc_scores:pureProbs.montecarlo?pureProbs.montecarlo.top_scores:[],
+                mc_pN:pureProbs.montecarlo?pureProbs.montecarlo.pN:pureProbs.pN,
+                mc_p2:pureProbs.montecarlo?pureProbs.montecarlo.p2:pureProbs.p2,
                 pinnacle_p1:shinProbs?shinProbs.p1:null,pinnacle_pN:shinProbs?shinProbs.pN:null,pinnacle_p2:shinProbs?shinProbs.p2:null,
                 pinnacle_c1:marketOdds?marketOdds.c1:null,pinnacle_c2:marketOdds?marketOdds.c2:null,
                 market_source:usingPinnacle?'Pinnacle (sharp)':(marketOdds?'Cotes moyennes multi-bookmakers':null),
-                final_p1:anchored.p1,final_pN:anchored.pN,final_p2:anchored.p2,
+                final_p1:pureProbs.p1,final_pN:pureProbs.pN,final_p2:pureProbs.p2,
                 all_markets:allMarkets,node_kelly:nodeKelly,
+                picked_market:pickedMarket,no_signal:noSignal,
                 lineup_home_formation:lineups&&lineups.home?lineups.home.formation:null,
                 lineup_away_formation:lineups&&lineups.away?lineups.away.formation:null,
                 streakH,streakA,forme5H,forme5A,
@@ -2553,15 +2076,9 @@ jobs:
                 isKnockout:isKnockout,
               });
               await sleep(500);
-              if(an&&an.passe_ton_tour===true){
-                console.log('  PASS: '+home.name+' vs '+away.name);
-                an.pari_rec='';an.cote_rec='';an.confiance=0;an.vbet='NON';an.verdict_shark='';an.kelly='0';an.marche='';an.risque='ELEVE';
-              }
-              if(an&&!an.passe_ton_tour&&an.pari_rec&&!an.cote_rec){
-                var found=(allMarkets||[]).find(function(m){return m.market.toLowerCase()===an.pari_rec.toLowerCase();});
-                if(found) an.cote_rec=String(found.cote);
-              }
-              var kellyVal='2';
+              // pickedMarket/kellyVal/edgeVal/riskLabelCode/noSignal deja calcules
+              // AVANT l'appel LLM (voir plus haut) - an ne contient plus que du texte
+              // narratif, plus aucune re-selection de marche ni recalcul ici.
               var classementObj=null;
               if(entryH||entryA){
                 var rankH=rkH||99,rankA=rkA||99;
@@ -2569,13 +2086,39 @@ jobs:
                 var maxRank=Math.min(Math.max(rankH,rankA)+2,standings.length);
                 classementObj={league_name:lg.name,standings:standings.filter(function(s){return s.rank>=minRank&&s.rank<=maxRank;}).map(function(s){return{rank:s.rank,name:s.team.name,team_id:s.team.id,played:s.all.played,won:s.all.win,drawn:s.all.draw,lost:s.all.lose,gd:s.goalsDiff,pts:s.points,form:s.form||''};}),home:entryH?{rank:entryH.rank,pts:entryH.points,played:entryH.all.played,won:entryH.all.win,lost:entryH.all.lose,gd:entryH.goalsDiff,form:entryH.form||''}:null,away:entryA?{rank:entryA.rank,pts:entryA.points,played:entryA.all.played,won:entryA.all.win,lost:entryA.all.lose,gd:entryA.goalsDiff,form:entryA.form||''}:null};
               }
-              var risqueRaw=an?(an.risque||'MODERE'):'MODERE';
-              var risqueNorm=risqueRaw.toUpperCase();
-              if(risqueNorm.includes('FAIBLE'))risqueNorm='FAIBLE';
-              else if(risqueNorm.includes('ELEVE')||risqueNorm.includes('HIGH'))risqueNorm='ELEVE';
-              else risqueNorm='MODERE';
               var parisDateObj=new Date(new Date(f.date||TODAY).toLocaleString('en-US',{timeZone:'Europe/Paris'}));
               var dateVraieParis=parisDateObj.getFullYear()+'-'+String(parisDateObj.getMonth()+1).padStart(2,'0')+'-'+String(parisDateObj.getDate()).padStart(2,'0');
+              // Categorie de marche deterministe (etait an.marche, choisie par le LLM).
+              function categorizeMarket(marketName){
+                var n=(marketName||'').toLowerCase();
+                if(n.includes('over')||n.includes('under')) return 'TOTAL_BUTS';
+                if(n.includes('btts')) return 'BTTS';
+                if(n.includes('dc ')||n.includes('handicap')||n.includes('dnb')) return 'DOUBLE_CHANCE';
+                return 'RESULTAT';
+              }
+              // Data Quality Score (MASTER V2.1 §11.1) et Model Agreement (§10.AB/§11.2) :
+              // deterministes, remplacent l'ancien "Confiance /10" auto-rapporte par le LLM
+              // (dont le backtest de cette session a mesure qu'il etait activement
+              // desinformatif - voir BACKTEST_REPORT.json, Brier score 0.2814 > repere
+              // pile-ou-face 0.25).
+              var dataQuality=computeDataQualityScore({
+                hasTeamStatsHome:!!(sH&&sH.fixtures&&sH.fixtures.played&&((sH.fixtures.played.home||0)>0||(sH.fixtures.played.away||0)>0)),
+                hasTeamStatsAway:!!(sA&&sA.fixtures&&sA.fixtures.played&&((sA.fixtures.played.home||0)>0||(sA.fixtures.played.away||0)>0)),
+                hasOdds:!!(odds.c1&&odds.c1!=='--'),
+                hasInjuries:!!(injuries&&injuries.length),
+                hasH2H:!!(h2hRaw&&h2hRaw.length),
+                hasElo:!!(eloH&&eloA),
+                hasLineups:!!(lineups&&(lineups.home||lineups.away)),
+              });
+              var modelAgreement=computeModelAgreement([pureProbs.p1,pureProbs.dixon?pureProbs.dixon.p1:pureProbs.p1,pureProbs.montecarlo?pureProbs.montecarlo.p1:pureProbs.p1]);
+              // Taille d'echantillon reelle (matchs joues cette saison par les deux
+              // equipes) - jamais la valeur de repli ||20/||30 utilisee ailleurs pour
+              // les calculs statistiques (qui doit rester un repli technique, pas une
+              // donnee affichee comme reelle). null si vraiment inconnu.
+              var sampleSizeH=(sH&&sH.fixtures&&sH.fixtures.played&&sH.fixtures.played.total)||null;
+              var sampleSizeA=(sA&&sA.fixtures&&sA.fixtures.played&&sA.fixtures.played.total)||null;
+              var sampleSizeReal=(sampleSizeH!=null&&sampleSizeA!=null)?Math.min(sampleSizeH,sampleSizeA):null;
+              var reliability=computeReliability(modelAgreement,dataQuality,sampleSizeReal);
               var matchObj={
                 id:f.id,sport:'football',
                 league_id:lg.id,
@@ -2583,39 +2126,69 @@ jobs:
                 home:{n:home.name,id:home.id},away:{n:away.name,id:away.id},
                 league:lg.name,ligue_icon:lgIcon(lg.name),league_key:lgKey(lg.id),
                 date:(dateVraieParis+' '+heure).trim(),cat:['all'],
-                val:an?(an.vbet==='OUI'&&(an.confiance||0)>=7.0):false,
-                hot:an?((an.confiance||0)>=7.5):false,
-                conf:(function(){
-                  var raw=an?(an.confiance||an.confidence||0):0;
-                  var val=parseFloat(String(raw).replace(',','.'))||0;
-                  if(val>0&&val<=1.0) val=val*10;
-                  return Math.round(val*10)/10;
-                })(),
-                p1:an&&(an.p1||0)>0?(an.p1||0):(anchored.p1||0),
-                pn:an&&(an.pn||0)>0?(an.pn||0):(anchored.pN||0),
-                p2:an&&(an.p2||0)>0?(an.p2||0):(anchored.p2||0),
-                po15:0,po25:an?(an.po25||0):0,btts:an?(an.btts||0):0,
+                val:!noSignal&&kellyVal!=='0',
+                hot:!noSignal&&modelAgreement.label==='Fort'&&kellyVal!=='0',
+                // model_probability : PURE_IASHARK_PROBABILITY (§10.2) pour le marche
+                // retenu (0-100, deterministe) - ensemble Poisson/Dixon-Coles/Monte-Carlo
+                // (+Elo), et RIEN d'autre : aucune cote n'entre dans ce calcul, jamais,
+                // pour aucun marche (1X2/DC inclus - corrige ce jalon, ils etaient
+                // auparavant ancres au marche via un blend Shin, cf MODEL_ARCHITECTURE.md
+                // et tests/pure-probability.test.js). C'est le meme nombre utilise pour
+                // choisir le marche (lib/decision.js#pickMarketDeterministic) et pour
+                // calculer edge/Kelly contre market_consensus_* ci-dessous - jamais une
+                // valeur intermediaire brute, jamais MARKET_AWARE contre son propre
+                // marche source (interdit explicitement par le MASTER). Ce n'EST PAS une
+                // "probabilite calibree" au sens statistique (isotonic/Platt, §10.S) :
+                // aucune calibration post-hoc n'a encore ete mesuree pour ce moteur (voir
+                // CALIBRATION_REPORT.md).
+                model_probability:pickedMarket?Math.round(pickedMarket.prob*10)/10:null,
+                // Les 3 probabilites S10.2 exposees separement et explicitement pour le
+                // marche 1X2 (celui qui a les 3 versions calculees) - jamais fusionnees.
+                market_consensus_p1:shinProbs?shinProbs.p1:null,market_consensus_pN:shinProbs?shinProbs.pN:null,market_consensus_p2:shinProbs?shinProbs.p2:null,
+                market_aware_p1:marketAware.p1,market_aware_pN:marketAware.pN,market_aware_p2:marketAware.p2,
+                // reliability : fiabilite/confiance, EXPLICITEMENT separee de la
+                // probabilite (retour utilisateur direct : ne jamais confondre les
+                // deux). Composite de signaux mesurables (accord des modeles, qualite
+                // des donnees, taille d'echantillon) - jamais une probabilite recopiee
+                // sous un autre nom. Voir lib/decision.js#computeReliability.
+                reliability:reliability,
+                // "conf" (echelle 0-10) : ALIAS DEPRECIE conserve uniquement pour
+                // compatibilite descendante avec le frontend actuel (match.html/
+                // pro.html/historique.html lisent encore ce champ) et historique.json.
+                // Vaut model_probability/10 - PAS un score de confiance independant.
+                // A SUPPRIMER une fois le frontend migre vers model_probability +
+                // reliability (Phase 5) : chercher toutes les lectures de `.conf`/
+                // `conf_bucket` dans le frontend et les remplacer avant de retirer ce
+                // champ. Ne jamais lui donner une valeur differente de
+                // model_probability/10 entre-temps (sinon on recree la confusion
+                // probabilite/confiance qu'on est en train de corriger).
+                conf:pickedMarket?Math.round((pickedMarket.prob/10)*10)/10:Math.round((dataQuality.score/10)*10)/10,
+                data_quality_score:dataQuality.score,data_quality_label:dataQuality.label,
+                model_agreement:modelAgreement.label,
+                // p1/pn/p2 : PURE_IASHARK_PROBABILITY (jamais market_aware -
+                // c'etait le bug corrige ce jalon pour 1X2/DC specifiquement).
+                p1:pureProbs.p1||0,pn:pureProbs.pN||0,p2:pureProbs.p2||0,
+                po15:0,po25:pureProbs.over25||0,btts:pureProbs.bttsY||0,
                 c1:odds.c1,cn:odds.cn,c2:odds.c2,co15:odds.co15,co25:odds.co25,cu25:odds.cu25,
                 dc1x:odds.dc1x,dc2x:odds.dc2x,dc12:odds.dc12,cdc1x:odds.dc1x,cdc2x:odds.dc2x,
                 ah_dom:odds.ah_dom||'--',ah_ext:odds.ah_ext||'--',co35:odds.co35||'--',
                 cbtts:odds.btts_oui,cbtts_non:odds.btts_non,btts_oui:odds.btts_oui,btts_non:odds.btts_non,
-                edge:an&&an.pari_rec?(function(){ function nm(s){return (s||'').toLowerCase().replace(/[^a-z0-9]/g,'');} var pn=nm(an.pari_rec); var mk=(allMarkets||[]).find(function(x){var xn=nm(x.market);return xn===pn||pn.includes(xn)||xn.includes(pn);}); return mk?mk.prob+'% (modele)':''; })():'',marche:an?(an.marche||'RESULTAT'):'RESULTAT',
-                risque:risqueNorm,pari_rec:an?(an.pari_rec||''):'',
-                cote_rec:an?(an.cote_rec||''):'',
-                no_signal:an&&an.passe_ton_tour===true?true:!(an&&an.pari_rec),
-                no_signal_label:(an&&an.passe_ton_tour===true)||(!(an&&an.pari_rec))?'Aucun signal clair sur ce match':'',
-                mise:'2-3% bankroll',verdict_shark:an?(an.verdict_shark||''):'',
+                marche:pickedMarket?categorizeMarket(pickedMarket.market):'RESULTAT',
+                risque:riskLabelCode,pari_rec:pickedMarket?pickedMarket.market:'',
+                cote_rec:pickedMarket?String(pickedMarket.cote):'',
+                no_signal:noSignal,
+                no_signal_label:noSignal?'Aucun signal clair sur ce match':'',
+                mise:'2-3% bankroll',
                 scenario:an?(an.scenario||{phase1:'',phase2:'',phase3:''}):null,
                 scenario_15min:an?(an.scenario_15min||null):null,
-                facteur_x:an?(an.facteur_x||''):'',
                 analyse_card:an?(an.analyse_card||an.conseil||''):'',
                 conseil_public:an?(an.conseil||an.analyse_card||''):'',
                 contexte:an?(an.contexte||''):'',
-                vbet:an?(an.vbet||'NON'):'NON',
+                vbet:(!noSignal&&kellyVal!=='0')?'OUI':'NON',
                 scores:an&&an.score_central?[an.score_central]:[],
-                mc_scores:poissonProbs.montecarlo?poissonProbs.montecarlo.top_scores:[],
-                paris_safe:{bet:an?(an.pari_rec||''):'',cote:an?(parseFloat(an.cote_rec)||odds.c1):odds.c1,proba:an?(an.p1||0)+'%':''},
-                paris_risque:{bet:'',cote:'',proba:''},kelly:kellyVal,
+                mc_scores:pureProbs.montecarlo?pureProbs.montecarlo.top_scores:[],
+                paris_safe:{bet:pickedMarket?pickedMarket.market:'',cote:pickedMarket?parseFloat(pickedMarket.cote):odds.c1,proba:pickedMarket?Math.round(pickedMarket.prob)+'%':''},
+                paris_risque:{bet:'',cote:'',proba:''},
                 stade:{nom:f.venue&&f.venue.name?(f.venue.name+(f.venue.city?' - '+f.venue.city:'')):home.name+' (domicile)',cap:'',meteo:wx?wx.emoji:'',temp:wx?wx.temp:'',desc:wx?wx.desc:''},
                 crit_home:critH,crit_away:critA,
                 form_home:last10H.slice(0,5),form_away:last10A.slice(0,5),
@@ -2643,17 +2216,52 @@ jobs:
                 match_stats_away:matchStatsA,
                 elo_home:eloH?Math.round(eloH):null,elo_away:eloA?Math.round(eloA):null,
                 elo_diff:eloStats?eloStats.diff:null,elo_signal:eloStats?eloStats.signal:null,
-                dropping_odds:droppingOdds||null,
                 pinnacle_snapshot:pinnacleOdds?{c1:pinnacleOdds.c1,cn:pinnacleOdds.cn,c2:pinnacleOdds.c2,date:TODAY}:null,
+                pipeline_sha:process.env.GITHUB_SHA||null,
+                market_source:usingPinnacle?'Pinnacle (sharp)':(marketOdds?'Cotes moyennes multi-bookmakers':'Aucune cote fiable'),
               };
+              // Champs premium (Outils) : jamais ecrits dans data.json (public, non
+              // authentifie). Collectes a part et pousses vers Supabase apres la boucle -
+              // seule l'Edge Function match-data, avec verification de session/plan cote
+              // serveur, doit pouvoir les lire. Voir supabase/migrations/0002_match_premium_data.sql.
+              // kellyVal/edgeVal deja calcules plus haut (reels, pas de valeur codee en dur).
+              premiumRows.push({
+                fixture_id:f.id,kelly:kellyVal,edge:edgeVal,
+                verdict_shark:an?(an.verdict_shark||''):'',
+                facteur_x:an?(an.facteur_x||''):'',
+                dropping_odds:droppingOdds||null,
+                raw_response:an||null,
+                pipeline_sha:process.env.GITHUB_SHA||null,
+              });
+              snapshotRows.push({
+                fixture_id:f.id,
+                snapshot_type:'prediction',
+                model_version:MODEL_VERSION,
+                pipeline_sha:process.env.GITHUB_SHA||null,
+                raw_inputs:{
+                  odds:odds||null,
+                  pinnacle_odds:pinnacleOdds||null,
+                  injuries:injuries||[],
+                  lineups:lineups||null,
+                  team_stats_home:sH||null,team_stats_away:sA||null,
+                  match_stats_home:matchStatsH||null,match_stats_away:matchStatsA||null,
+                  h2h:h2hFormatted||[],
+                  weather:wx||null,
+                  referee:refStats||null,
+                  standing_home:entryH||null,standing_away:entryA||null,
+                  elo_home:eloH||null,elo_away:eloA||null,
+                },
+              });
               matchsData.push(matchObj);
-              console.log('  OK conf='+matchObj.conf+' edge='+matchObj.edge+' pari='+matchObj.pari_rec);
+              console.log('  OK conf='+matchObj.conf+' edge='+edgeVal+' pari='+matchObj.pari_rec);
             }
             var allMatchsData = matchsData.slice();
             allMatchsData.sort(function(a,b){return (a.date||'').localeCompare(b.date||'');});
             matchsData.sort(function(a,b){var tA=(a.date||'').split(' ')[1]||'99:99';var tB=(b.date||'').split(' ')[1]||'99:99';return tA<tB?-1:tA>tB?1:0;});
             fs.writeFileSync('data.json',JSON.stringify({matchs:allMatchsData},null,2));
             console.log('\n=== DONE: '+allMatchsData.length+' matchs total ===');
+            await writePremiumData(premiumRows);
+            await writeSnapshots(snapshotRows);
             await updateHistorique(allMatchsData);
             await updateTransferts(fixtures);
             await updateRumeurs();
@@ -2661,7 +2269,7 @@ jobs:
             generateSitemaps(allMatchsData);
             injectHomeSeoSummary(allMatchsData);
           }
-          main().catch(function(e){console.error('FATAL:',e.message,e.stack);process.exit(0);});
+          main().catch(function(e){console.error('FATAL:',e.message,e.stack);process.exit(1);});
           JSEOF
       - name: Vider le cache uniquement si force_refresh demande
         run: |
@@ -2674,13 +2282,14 @@ jobs:
       - name: Run pipeline
         env:
           APISPORTS_KEY:      ${{ secrets.APISPORTS_KEY }}
-          SPORTMONKS_KEY:     ${{ secrets.SPORTMONKS_KEY }}
           OPENWEATHER_KEY:    ${{ secrets.OPENWEATHER_KEY }}
           NEWSAPI_KEY:        ${{ secrets.NEWSAPI_KEY }}
           ANTHROPIC_KEY:      ${{ secrets.ANTHROPIC_KEY }}
           ODDS_API_KEY:       ${{ secrets.ODDS_API_KEY }}
           ODDS_API_IO_KEY:    ${{ secrets.ODDS_API_IO_KEY }}
           CREATOMATE_KEY:     ${{ secrets.CREATOMATE_KEY }}
+          SUPABASE_URL:              ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           TEST_WC_ONLY:       ${{ github.event.inputs.test_wc_only }}
         run: node pipeline.js
 

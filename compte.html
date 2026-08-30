@@ -16,6 +16,7 @@
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23080c12'/%3E%3Ctext x='50%25' y='54%25' dominant-baseline='middle' text-anchor='middle' font-size='40' fill='%2322d3ee'%3E🦈%3C/text%3E%3C/svg%3E">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="/funnel-track.js"></script>
 <script src="/auth-header.js"></script>
 <style>
 :root{--bg:#080c12;--card:#0d1520;--card2:#0f1a28;--cyan:#22d3ee;--amber:#f59e0b;--green:#10b981;--red:#ef4444;--text:#e2e8f0;--muted:#4a6580;--border:rgba(255,255,255,0.06);--bc:rgba(34,211,238,0.18);--ba:rgba(245,158,11,0.2);}
@@ -61,6 +62,14 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 /* DASHBOARD */
 .dashboard{display:none;}
 
+.onboard-banner{display:none;background:linear-gradient(135deg,rgba(16,185,129,0.08),rgba(16,185,129,0.02));border:1px solid rgba(16,185,129,0.25);border-radius:16px;padding:20px;margin-bottom:16px;}
+.onboard-banner.show{display:block;}
+.onboard-title{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:0.5px;color:var(--green);margin-bottom:8px;}
+.onboard-body{font-size:12.5px;color:var(--muted);line-height:1.6;margin-bottom:14px;}
+.onboard-ctas{display:flex;gap:8px;margin-bottom:10px;}
+.onboard-cta{flex:1;text-align:center;padding:10px;border-radius:9px;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1px;text-decoration:none;border:1px solid var(--border);color:var(--text);}
+.onboard-cta.primary{border-color:rgba(16,185,129,0.3);color:var(--green);background:rgba(16,185,129,0.06);}
+.onboard-dismiss{width:100%;background:none;border:none;color:var(--muted);font-family:'Space Mono',monospace;font-size:8px;letter-spacing:1px;cursor:pointer;text-decoration:underline;padding:4px;}
 .user-hero{background:linear-gradient(135deg,rgba(34,211,238,0.06),rgba(6,182,212,0.02));border:1px solid var(--bc);border-radius:16px;padding:24px;margin-bottom:16px;text-align:center;}
 .user-avatar{width:56px;height:56px;border-radius:50%;background:rgba(34,211,238,0.1);border:2px solid var(--bc);display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--cyan);margin:0 auto 12px;}
 .user-email{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);margin-bottom:8px;}
@@ -190,6 +199,17 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
   <!-- DASHBOARD -->
   <div class="dashboard" id="dashboardCard">
 
+    <!-- ONBOARDING (affiche une seule fois, juste apres inscription) -->
+    <div class="onboard-banner" id="onboardBanner">
+      <div class="onboard-title">Bienvenue sur <span style="color:var(--cyan)">IASHARK</span> 🦈</div>
+      <div class="onboard-body">Ton compte est prêt. Commence par le match du jour en accès gratuit, puis découvre l'espace Outils quand tu veux aller plus loin.</div>
+      <div class="onboard-ctas">
+        <a href="/" class="onboard-cta primary">VOIR LE MATCH DU JOUR →</a>
+        <a href="/pro.html" class="onboard-cta">DÉCOUVRIR OUTILS →</a>
+      </div>
+      <button class="onboard-dismiss" onclick="dismissOnboarding()">Masquer ce message</button>
+    </div>
+
     <div class="user-hero">
       <div class="user-avatar" id="userAvatar">?</div>
       <div class="user-email" id="userEmail">—</div>
@@ -216,9 +236,9 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
       <div class="plan-row">
         <span class="plan-status free" id="planStatusTxt">Plan Gratuit</span>
       </div>
-      <div class="plan-desc" id="planDescTxt">Tu utilises la version gratuite d'IASHARK — le match à la plus forte confiance du jour est accessible gratuitement.</div>
+      <div class="plan-desc" id="planDescTxt">Tu utilises la version gratuite d'IASHARK — le match à la plus forte probabilité modèle du jour est accessible gratuitement.</div>
       <div class="pro-features" id="planFeaturesBlock">
-        <div class="pro-feature"><span class="ck">＋</span> Toutes les sélections à forte confiance</div>
+        <div class="pro-feature"><span class="ck">＋</span> Toutes les sélections à forte probabilité modèle</div>
         <div class="pro-feature"><span class="ck">＋</span> Historique complet et détaillé</div>
         <div class="pro-feature"><span class="ck">＋</span> Analyses approfondies par match</div>
       </div>
@@ -259,6 +279,16 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
       <a href="/a-propos.html" class="help-row">Notre méthode <span class="arrow">→</span></a>
     </div>
 
+    <!-- MES DONNEES (RGPD art. 20 - portabilite) -->
+    <div class="section">
+      <div class="section-title">MES DONNÉES</div>
+      <div class="danger-row">
+        <div class="danger-txt">Télécharge une copie de tes données IASHARK (compte + historique de suivi local) au format JSON</div>
+        <button class="danger-btn" id="btnExport" onclick="exportMyData()" style="color:var(--cyan);border-color:var(--bc);">EXPORTER</button>
+      </div>
+      <div class="sec-msg" id="exportMsg"></div>
+    </div>
+
     <!-- DANGER ZONE -->
     <div class="section">
       <div class="danger-row">
@@ -272,10 +302,21 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 
 </div>
 
+<div style="max-width:1100px;margin:24px auto 0;padding:0 20px 20px;text-align:center;">
+  <div style="font-family:'Space Mono',monospace;font-size:8px;color:rgba(74,101,128,0.5);line-height:2;letter-spacing:1px;">
+    <div>⚠️ LE JEU PEUT ÊTRE DANGEREUX — JOUEZ RESPONSABLE · INTERDIT AUX MOINS DE 18 ANS</div>
+    <div>Aide : <a href="https://www.joueurs-info-service.fr" style="color:rgba(34,211,238,0.4);text-decoration:none;">joueurs-info-service.fr</a> · 09 74 75 13 13</div>
+  </div>
+</div>
+
 <nav class="nav-bottom">
   <a href="/" class="nav-item">
     <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5L12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg></div>
     <div class="nav-lbl">ACCUEIL</div>
+  </a>
+  <a href="/marches.html" class="nav-item">
+    <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 17V9M13 17V5M8 17v-4"/></svg></div>
+    <div class="nav-lbl">MARCHÉS</div>
   </a>
   <a href="/historique.html" class="nav-item">
     <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20v-4"/></svg></div>
@@ -324,9 +365,32 @@ async function doLogin() {
   var btn = document.getElementById('btnLogin');
   btn.disabled = true; btn.textContent = 'CONNEXION...';
   try {
-    var res = await sb.auth.signInWithPassword({email:email, password:pwd});
-    if(res.error) throw res.error;
+    // Passe par login-guard (rate limit reel par IP+email, backe Postgres)
+    // plutot que sb.auth.signInWithPassword() en direct - voir
+    // supabase/functions/login-guard/index.ts. Repli sur l'appel direct si
+    // la fonction est indisponible, pour ne jamais bloquer la connexion a
+    // cause d'un probleme cote fonction plutot que cote identifiants.
+    var loginResp;
+    try{
+      var r = await fetch(SUPA_URL+'/functions/v1/login-guard', {
+        method:'POST',
+        headers:{'Content-Type':'application/json','apikey':SUPA_KEY},
+        body:JSON.stringify({email:email, password:pwd})
+      });
+      var j = await r.json();
+      if(r.status===429){ showMsg(j.message||'Trop de tentatives.','error'); btn.disabled=false; btn.textContent='SE CONNECTER →'; return; }
+      if(!r.ok) throw {message: j.msg||j.error_description||j.error||'Erreur de connexion'};
+      var setRes = await sb.auth.setSession({access_token:j.access_token, refresh_token:j.refresh_token});
+      if(setRes.error) throw setRes.error;
+      loginResp = {data:{user:setRes.data.user}, error:null};
+    }catch(guardErr){
+      if(guardErr && guardErr.message && guardErr.message!=='Failed to fetch'){ throw guardErr; }
+      loginResp = await sb.auth.signInWithPassword({email:email, password:pwd});
+      if(loginResp.error) throw loginResp.error;
+    }
+    var res = loginResp;
     showMsg('Connexion réussie !','success');
+    if(window.iasharkTrack) iasharkTrack('login_completed', null, res.data.user.id);
     setTimeout(function(){ showDashboard(res.data.user); }, 600);
   } catch(e) {
     var msg = e.message||'Erreur de connexion';
@@ -346,14 +410,23 @@ async function doSignup() {
   if(pwd!==pwd2){ showMsg('Les mots de passe ne correspondent pas.','error'); return; }
   var btn = document.getElementById('btnSignup');
   btn.disabled = true; btn.textContent = 'CRÉATION...';
+  if(window.iasharkTrack) iasharkTrack('signup_started');
   try {
     var res = await sb.auth.signUp({email:email, password:pwd, options:{emailRedirectTo:window.location.origin+'/compte.html'}});
     if(res.error) throw res.error;
+    // Marque l'onboarding comme du en attente meme si la session n'est pas
+    // immediate (confirmation email requise) - showDashboard() le lira au
+    // tout premier vrai retour sur le tableau de bord (SIGNED_IN via
+    // onAuthStateChange apres clic sur le lien de confirmation), pas
+    // seulement dans le cas rare de session immediate.
+    try{ localStorage.setItem('iashark_pending_onboarding','1'); }catch(e){}
     if(res.data.user && !res.data.session) {
       showMsg('Compte créé ! Vérifie ton email pour confirmer ton inscription.','info');
+      if(window.iasharkTrack) iasharkTrack('signup_completed', {email_confirmation_pending:true}, res.data.user.id);
     } else if(res.data.session) {
       showMsg('Compte créé avec succès !','success');
-      setTimeout(function(){ showDashboard(res.data.user); }, 600);
+      if(window.iasharkTrack) iasharkTrack('signup_completed', {email_confirmation_pending:false}, res.data.user.id);
+      setTimeout(function(){ showDashboard(res.data.user, {justSignedUp:true}); }, 600);
     }
   } catch(e) {
     var msg = e.message||'Erreur lors de la création';
@@ -441,6 +514,52 @@ async function changeEmail(){
   btn.disabled = false; btn.textContent = 'METTRE À JOUR →';
 }
 
+/* ═══ Export RGPD (art. 20, droit a la portabilite) : compte (table users,
+   propre ligne, deja lisible via RLS "select own") + suivi de paris local
+   (localStorage cote navigateur, jamais synchronise cote serveur - voir
+   pro.html STORAGE_KEY_PARIS) - genere un fichier telecharge cote client,
+   aucun appel serveur autre que la lecture de la propre ligne users ═══ */
+async function exportMyData(){
+  var msgEl = document.getElementById('exportMsg');
+  var btn = document.getElementById('btnExport');
+  if(!currentUser) return;
+  btn.disabled = true; btn.textContent = 'EXPORT...';
+  try{
+    var res = await sb.from('users').select('email,plan,role,capital,created_at,updated_at').eq('id',currentUser.id).maybeSingle();
+    if(res.error) throw res.error;
+    var trackedBets = [];
+    try{ var raw = localStorage.getItem('iashark_pro_paris'); if(raw) trackedBets = JSON.parse(raw); }catch(e){}
+    var payload = {
+      exported_at: new Date().toISOString(),
+      account: {
+        user_id: currentUser.id,
+        email: currentUser.email,
+        auth_created_at: currentUser.created_at,
+        plan: res.data ? res.data.plan : null,
+        role: res.data ? res.data.role : null,
+        capital: res.data ? res.data.capital : null
+      },
+      tracked_bets_local: trackedBets,
+      note: 'tracked_bets_local provient du suivi de paris stocke localement dans ton navigateur (jamais envoye a IASHARK) - il ne sera present que si tu exportes depuis le meme navigateur/appareil que celui utilise pour le suivi.'
+    };
+    var blob = new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'iashark-export-'+new Date().toISOString().slice(0,10)+'.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    msgEl.textContent = 'Export téléchargé.';
+    msgEl.className = 'sec-msg success'; msgEl.style.display='block';
+  }catch(e){
+    msgEl.textContent = 'Erreur : '+(e.message||'réessaie');
+    msgEl.className = 'sec-msg error'; msgEl.style.display='block';
+  }
+  btn.disabled = false; btn.textContent = 'EXPORTER';
+}
+
 /* ═══ Suppression de compte : demande par email (pas de suppression directe cote client, par securite) ═══ */
 function requestDeletion(){
   if(!currentUser) return;
@@ -449,7 +568,17 @@ function requestDeletion(){
   window.location.href = 'mailto:contact@iashark.com?subject='+subject+'&body='+body;
 }
 
-function showDashboard(user) {
+function currentLocalePrefix(){
+  var m = window.location.pathname.match(/^\/([a-z]{2})\//);
+  return m ? '/'+m[1] : '';
+}
+
+function dismissOnboarding(){
+  document.getElementById('onboardBanner').classList.remove('show');
+  if(window.iasharkTrack) iasharkTrack('onboarding_dismissed', null, currentUser?currentUser.id:null);
+}
+
+function showDashboard(user, opts) {
   currentUser = user;
   document.getElementById('loadingScreen').style.display = 'none';
   document.getElementById('authCard').style.display = 'none';
@@ -457,6 +586,30 @@ function showDashboard(user) {
   document.getElementById('userEmail').textContent = user.email||'';
   document.getElementById('hdrPill').textContent = 'CONNECTÉ';
   document.getElementById('userAvatar').textContent = (user.email||'?').slice(0,1).toUpperCase();
+
+  // Onboarding : affiche une seule fois, au tout premier vrai retour sur le
+  // dashboard apres inscription (session immediate OU confirmation email -
+  // voir localStorage 'iashark_pending_onboarding' pose dans doSignup()).
+  var pendingOnboarding = false;
+  try{ pendingOnboarding = localStorage.getItem('iashark_pending_onboarding')==='1'; }catch(e){}
+  if((opts && opts.justSignedUp) || pendingOnboarding){
+    document.getElementById('onboardBanner').classList.add('show');
+    try{ localStorage.removeItem('iashark_pending_onboarding'); }catch(e){}
+  }
+
+  // Retour de parcours "decouverte PRO -> compte -> Outils" (MASTER §21) :
+  // un visiteur qui a clique "PASSER OUTILS" sans etre connecte est envoye
+  // ici avec ?redirect=pro - une fois authentifie, on le ramene directement
+  // sur Outils au lieu de le laisser sur le dashboard (continuite du
+  // parcours, pas une redirection agressive : ne se declenche que si le
+  // parametre est explicitement present).
+  try{
+    var params = new URLSearchParams(window.location.search);
+    if(params.get('redirect')==='pro'){
+      window.location.replace(currentLocalePrefix()+'/pro.html');
+      return;
+    }
+  }catch(e){}
 
   if(user.created_at){
     var d = new Date(user.created_at);
@@ -478,7 +631,7 @@ function showDashboard(user) {
     document.getElementById('hdrPill').textContent = IasharkAuthHeader.chipLabel(user.email, plan, role);
 
     if(isPro){
-      document.getElementById('planDescTxt').textContent = 'Ton abonnement Outils est actif — tu as accès à toutes les sélections à forte confiance.';
+      document.getElementById('planDescTxt').textContent = 'Ton abonnement Outils est actif — tu as accès à toutes les sélections à forte probabilité modèle.';
       document.getElementById('planFeaturesBlock').style.display = 'none';
       var cta = document.getElementById('planCta');
       cta.textContent = 'VOIR MON ESPACE OUTILS →';

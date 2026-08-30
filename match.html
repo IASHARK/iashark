@@ -507,10 +507,21 @@ api-sports-widget[data-theme="iashark"]{
   <span id="authHeaderSlot"><a class="btn-conn" href="/compte.html">CONNEXION</a></span>
 </header>
 <div id="root"><!--SEO_SUMMARY--><!--/SEO_SUMMARY--><div class="loading"><div class="spinner"></div><div class="loading-lbl">CHARGEMENT...</div></div></div>
+<div style="max-width:1100px;margin:24px auto 0;padding:0 20px 20px;text-align:center;">
+  <div style="font-family:'Space Mono',monospace;font-size:8px;color:rgba(74,101,128,0.5);line-height:2;letter-spacing:1px;">
+    <div>⚠️ LE JEU PEUT ÊTRE DANGEREUX — JOUEZ RESPONSABLE · INTERDIT AUX MOINS DE 18 ANS</div>
+    <div>Aide : <a href="https://www.joueurs-info-service.fr" style="color:rgba(34,211,238,0.4);text-decoration:none;">joueurs-info-service.fr</a> · 09 74 75 13 13</div>
+  </div>
+</div>
+
 <nav class="nav-bottom">
   <a href="/" class="nav-item">
     <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5L12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg></div>
     <div class="nav-lbl">ACCUEIL</div>
+  </a>
+  <a href="/marches.html" class="nav-item">
+    <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 17V9M13 17V5M8 17v-4"/></svg></div>
+    <div class="nav-lbl">MARCHÉS</div>
   </a>
   <a href="/historique.html" class="nav-item">
     <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20v-4"/></svg></div>
@@ -532,8 +543,14 @@ api-sports-widget[data-theme="iashark"]{
 <!--FIXED_ID_SCRIPT--><!--/FIXED_ID_SCRIPT-->
 <!--PRELOADED_MATCH_SCRIPT--><!--/PRELOADED_MATCH_SCRIPT-->
 <script>
-var fId=(typeof FIXED_MATCH_ID!=='undefined'&&FIXED_MATCH_ID)?FIXED_MATCH_ID:new URLSearchParams(location.search).get('id');
-var isPro=true;
+var fIdRaw=(typeof FIXED_MATCH_ID!=='undefined'&&FIXED_MATCH_ID)?FIXED_MATCH_ID:new URLSearchParams(location.search).get('id');
+var fId=/^[0-9]+$/.test(String(fIdRaw||''))?fIdRaw:null;
+// Par defaut FAUX (secure-by-default) : init() le reassigne toujours avant
+// render() sur les deux chemins possibles (voir plus bas), mais partir de
+// "true" ici serait fragile - un futur chemin qui oublierait de le
+// reassigner deviendrait silencieusement un bypass PRO, comme celui trouve
+// et corrige dans pro.html (OUTILS_OPEN_FOR_ALL).
+var isPro=false;
 
 function ph(n){return n?n.slice(0,2).toUpperCase():'??';}
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
@@ -1147,7 +1164,9 @@ function buildElo(hn,an,eloH,eloA,eloSignal){
 function buildDropping(drops){
   if(!drops||!drops.length)return '';
   var rows=drops.map(function(d){
-    var arrow=d.dir==='baisse'?'📉':'📈';
+    var arrow=d.dir==='baisse'
+      ?'<svg viewBox="0 0 24 24" width="13" height="13" style="vertical-align:-2px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg>'
+      :'<svg viewBox="0 0 24 24" width="13" height="13" style="vertical-align:-2px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>';
     return '<div class="drop-row">'
       +'<span class="drop-team">'+esc(d.team)+'</span>'
       +'<span class="drop-arrow">'+arrow+'</span>'
@@ -1197,17 +1216,17 @@ function buildWCModel(m){
     +'</div>'
     +'</div>'
     +'<div class="wc-fatigue-row">'
-    +'<span class="wc-fat-lbl">✈ '+esc(m.home.n||'').slice(0,10)+' fatigue</span>'
+    +'<span class="wc-fat-lbl"><svg viewBox="0 0 24 24" width="12" height="12" style="vertical-align:-2px;margin-right:2px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>'+esc(m.home.n||'').slice(0,10)+' fatigue</span>'
     +'<div class="wc-fat-bar"><div class="wc-fat-fill" style="width:'+fatH+'%;background:'+fatColH+'"></div></div>'
     +'<span class="wc-fat-val" style="color:'+fatColH+'">'+fatH+'</span>'
     +'</div>'
     +'<div class="wc-fatigue-row">'
-    +'<span class="wc-fat-lbl">✈ '+esc(m.away.n||'').slice(0,10)+' fatigue</span>'
+    +'<span class="wc-fat-lbl"><svg viewBox="0 0 24 24" width="12" height="12" style="vertical-align:-2px;margin-right:2px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>'+esc(m.away.n||'').slice(0,10)+' fatigue</span>'
     +'<div class="wc-fat-bar"><div class="wc-fat-fill" style="width:'+fatA+'%;background:'+fatColA+'"></div></div>'
     +'<span class="wc-fat-val" style="color:'+fatColA+'">'+fatA+'</span>'
     +'</div>'
-    +(altH>0?'<div class="wc-alert">⛰ Malus altitude '+esc(m.home.n||'')+': -'+altH+'% (stade >1500m)</div>':'')
-    +(altA>0?'<div class="wc-alert">⛰ Malus altitude '+esc(m.away.n||'')+': -'+altA+'% (stade >1500m)</div>':'')
+    +(altH>0?'<div class="wc-alert"><svg viewBox="0 0 24 24" width="12" height="12" style="vertical-align:-2px;margin-right:2px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><path d="M8 21l4-13 4 13"/><path d="M3 21l6-11 4 6.5"/><path d="M13 12l3-5 5 14"/></svg>Malus altitude '+esc(m.home.n||'')+': -'+altH+'% (stade >1500m)</div>':'')
+    +(altA>0?'<div class="wc-alert"><svg viewBox="0 0 24 24" width="12" height="12" style="vertical-align:-2px;margin-right:2px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><path d="M8 21l4-13 4 13"/><path d="M3 21l6-11 4 6.5"/><path d="M13 12l3-5 5 14"/></svg>Malus altitude '+esc(m.away.n||'')+': -'+altA+'% (stade >1500m)</div>':'')
     +'</div></div><div class="sep"></div>';
 }
 
@@ -1566,14 +1585,16 @@ function buildPourquoiCePari(m,pariRec,paricote){
   var marketFr=translateMarket(pariRec);
   var blocs=[];
 
+  var modelProbTxt=m.model_probability!=null?Math.round(m.model_probability):Math.round((m.conf||0)*10);
+  var reliabilityTxt=(m.reliability&&m.reliability.label)||null;
   blocs.push({
     num:String(blocs.length+1), titre:'Le pari recommandé',
-    txt:'L\'IA recommande <strong>'+esc(marketFr)+'</strong> à la cote de <strong>'+esc(paricote)+'</strong>, avec un niveau de confiance de <strong>'+(m.conf||0).toFixed(1)+'/10</strong>.'
+    txt:'Le modèle statistique estime <strong>'+esc(marketFr)+'</strong> à <strong>'+modelProbTxt+'%</strong> de probabilité, à la cote de <strong>'+esc(paricote)+'</strong>'+(reliabilityTxt?' (fiabilité : <strong>'+esc(reliabilityTxt.toUpperCase())+'</strong>, mesurée par l\'accord des modèles et la qualité des données disponibles — pas par la probabilité elle-même)':'')+'.'
   });
   if(m.key_absences&&m.key_absences.length){
     var absTxt=m.key_absences.map(function(a){return esc(a.replace(/[🚨🔴🟡]/g,'').trim());}).join(' ');
     blocs.push({num:String(blocs.length+1), titre:'Impact des absences',
-      txt:absTxt+' Cet élément a été pris en compte dans le calcul de confiance ci-dessus — il ne remet pas en cause le pari en l\'état, mais reste un facteur de risque à surveiller.'});
+      txt:absTxt+' Cet élément est pris en compte dans les données transmises au modèle — il ne remet pas en cause le pari en l\'état, mais reste un facteur de risque à surveiller.'});
   }
   if(m.verdict_shark){
     blocs.push({num:String(blocs.length+1), titre:'Le raisonnement', txt:esc(cleanJargon(m.verdict_shark))});
@@ -1581,9 +1602,9 @@ function buildPourquoiCePari(m,pariRec,paricote){
   if(m.facteur_x){
     blocs.push({num:String(blocs.length+1), titre:'Le facteur décisif', txt:esc(cleanJargon(m.facteur_x))});
   }
-  if(edgeNum!==null){
+  if(edgeNum!==null&&edgeNum>0){
     blocs.push({num:String(blocs.length+1), titre:'Pourquoi cette cote est intéressante',
-      txt:'La probabilité estimée par le modèle est supérieure à celle impliquée par la cote du bookmaker, ce qui représente un avantage statistique d\'environ <strong>'+(edgeNum>0?'+':'')+edgeNum.toFixed(1)+'%</strong> en faveur du parieur sur le long terme.'});
+      txt:'La probabilité estimée par le modèle est supérieure à celle impliquée par la cote du bookmaker, ce qui représente un avantage statistique d\'environ <strong>+'+edgeNum.toFixed(1)+'%</strong> en faveur du parieur sur le long terme.'});
   }
   if(m.kelly){
     blocs.push({num:String(blocs.length+1), titre:'Mise conseillée',
@@ -1650,7 +1671,7 @@ function render(m){
     if(sa&&sa.total){m=Object.assign({},m,{crit_away:{fd:m.crit_away.fd||50,att:Math.min(100,Math.round(sa.total*0.9)),def:Math.min(100,Math.round(sa.total*0.85)),fr:Math.min(100,Math.round(sa.total*0.8)),mot:m.crit_away.mot||70,fat:50}});}
   }
 
-  var isHot=m.hot||confNorm>=8, isVal=m.val||m.vbet==='OUI';
+  var isHot=!!m.hot, isVal=m.val||m.vbet==='OUI';
   var isWC=m.league_key==='wc'||m.sport==='football'&&m.wc_probs;
   var pariRec=m.pari_rec||'', paricote=m.cote_rec||'—';
 
@@ -1666,7 +1687,7 @@ function render(m){
   function getFlag(name){return FLAG_MAP[name]||'';}
   var stadeHtml='';
   if(m.stade&&m.stade.nom){
-    stadeHtml='<div class="stade-row"><span class="stade-icon">🏟</span><span class="stade-name">'+esc(m.stade.nom)+'</span>'+(m.stade.temp?'<span class="stade-meta">'+esc(m.stade.temp)+'</span>':'')+'</div>';
+    stadeHtml='<div class="stade-row"><span class="stade-icon"><svg viewBox="0 0 24 24" width="14" height="14" style="stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="9" ry="4"/></svg></span><span class="stade-name">'+esc(m.stade.nom)+'</span>'+(m.stade.temp?'<span class="stade-meta">'+esc(m.stade.temp)+'</span>':'')+'</div>';
   }
   function teamDisplay(team,name,side,forme_str,isTennis){
     var logo=lgImg(team,(name||'?').slice(0,2).toUpperCase(),name);
@@ -1687,28 +1708,31 @@ function render(m){
   var parisHtml='';
   if(pariRec){
     var coteMin=paricote!=='—'?((parseFloat(paricote)-0.20).toFixed(2)):'';
-    var probIA=null;
-    var pl=pariRec.toLowerCase();
-    if(pl.includes('over 2.5'))probIA=m.po25;
-    else if(pl.includes('under 2.5'))probIA=100-(m.po25||0);
-    else if(pl.includes('btts oui'))probIA=m.btts;
-    else if(pl.includes('btts non'))probIA=100-(m.btts||0);
-    else if(pl.includes('1x'))probIA=(m.p1||0)+(m.pn||0);
-    else if(pl.includes('x2'))probIA=(m.p2||0)+(m.pn||0);
+    // model_probability : LA probabilite du marche retenu, calculee par le
+    // moteur (Poisson/Dixon-Coles/Monte-Carlo/Elo, ancree au marche pour
+    // 1X2/DC). Repli sur l'ancien champ conf (deprecie, egal a
+    // model_probability/10) uniquement pour des donnees mises en cache
+    // avant ce champ.
+    var probIA=m.model_probability!=null?m.model_probability:((m.conf||0)*10);
     var edgeNum=parseEdgeText(m.edge);
     var coteF=parseFloat(paricote);
     var probImpl=coteF&&coteF>1?Math.round((1/coteF)*100):null;
-    var confPct=Math.min(100,Math.max(0,(m.conf||0)*10));
-    var confLvl=confPct>=75?'SHARK LOCK':confPct>=60?'FIABLE':confPct>=40?'MODÉRÉ':'PRUDENT';
+    // Fiabilite : EXPLICITEMENT separee de la probabilite (m.reliability,
+    // voir lib/decision.js#computeReliability) - accord des modeles,
+    // qualite des donnees, taille d'echantillon. Jamais la probabilite
+    // elle-meme sous un autre nom.
+    var relLabel=(m.reliability&&m.reliability.label)||'Inconnue';
+    var relPct=relLabel==='Élevée'?85:relLabel==='Moyenne'?55:relLabel==='Faible'?25:0;
+    var relDetail=m.reliability?('Accord modèles: '+(m.reliability.model_agreement||'?')+' · Qualité données: '+(m.reliability.data_quality||'?')):'';
 
     parisHtml='<div class="pari-main">'
       +'<div class="pm-headline"><div><div class="pm-lbl">SÉLECTION IA DU JOUR</div><div class="pm-bet">'+translateMarket(pariRec).toUpperCase()+'</div></div><div class="pm-cote-big">'+paricote+'</div></div>'
       +'<div class="pm-metrics">'
-      +(probIA?'<div class="pmm"><div class="pmm-val cy">'+Math.round(probIA)+'%</div><div class="pmm-lbl">PROBA IA</div></div>':'')
+      +(probIA!=null?'<div class="pmm"><div class="pmm-val cy">'+Math.round(probIA)+'%</div><div class="pmm-lbl">PROBABILITÉ MODÈLE</div></div>':'')
       +(probImpl?'<div class="pmm"><div class="pmm-val">'+probImpl+'%</div><div class="pmm-lbl">COTE IMPL.</div></div>':'')
       +(edgeNum!==null?'<div class="pmm"><div class="pmm-val gr">'+(edgeNum>0?'+':'')+edgeNum.toFixed(0)+'%</div><div class="pmm-lbl">AVANTAGE</div></div>':'')
       +'</div>'
-      +'<div class="pm-conf"><span class="pm-conf-lbl">CONFIANCE</span><div class="pm-conf-bar"><div class="pm-conf-fill" style="width:'+confPct+'%"></div></div><span class="pm-conf-val">'+(m.conf||0).toFixed(0)+'/10 · '+confLvl+'</span></div>'
+      +'<div class="pm-conf" title="'+esc(relDetail)+'"><span class="pm-conf-lbl">FIABILITÉ</span><div class="pm-conf-bar"><div class="pm-conf-fill" style="width:'+relPct+'%"></div></div><span class="pm-conf-val">'+relLabel.toUpperCase()+'</span></div>'
       +(coteMin?'<div class="pm-warn">⚠ Si cote passe sous '+coteMin+' — ne pas jouer</div>':'')
       +'</div>';
   }
@@ -1761,7 +1785,7 @@ function render(m){
   var ctxHtml=!isTennis?buildResumeRencontre(m,hn,an):(m.contexte?'<div style="padding:0 18px 16px"><div style="font-size:13px;color:#94a3b8;line-height:1.75;">'+esc(cleanJargon(m.contexte))+'</div></div>':'');
 
   var skipHtml=m.no_signal
-    ?'<div style="padding:0 18px 16px"><div class="skip danger"><div class="skip-icon">🚨</div><div><div class="skip-lbl">PASSE TON TOUR</div><div class="skip-txt">'+(m.no_signal_label||'Signaux contradictoires. <strong>Ne pas jouer.</strong>')+'</div></div></div></div>'
+    ?'<div style="padding:0 18px 16px"><div class="skip danger"><div class="skip-icon"><svg viewBox="0 0 24 24" width="14" height="14" style="stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div><div><div class="skip-lbl">PASSE TON TOUR</div><div class="skip-txt">'+(m.no_signal_label||'Signaux contradictoires. <strong>Ne pas jouer.</strong>')+'</div></div></div></div>'
     :'';
 
   var insightHtml='';
@@ -1769,12 +1793,12 @@ function render(m){
   if(hasSignal){
     insightHtml='<div class="insight">';
     if(m.facteur_x){
-      insightHtml+='<div class="insight-row"><div class="ir-icon sig">⚡</div><div><div class="ir-lbl sig">SIGNAL DÉCISIF</div><div class="ir-txt">'+esc(cleanJargon(m.facteur_x))+'</div></div></div>';
+      insightHtml+='<div class="insight-row"><div class="ir-icon sig"><svg viewBox="0 0 24 24" width="13" height="13" style="stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div><div><div class="ir-lbl sig">SIGNAL DÉCISIF</div><div class="ir-txt">'+esc(cleanJargon(m.facteur_x))+'</div></div></div>';
     }
     if(m.verdict_shark){
     }
     if(!m.facteur_x&&!m.verdict_shark&&m.no_signal){
-      insightHtml+='<div class="insight-row"><div class="ir-icon" style="background:rgba(239,68,68,0.1)">🚨</div><div><div class="ir-lbl" style="color:var(--red)">PASSE TON TOUR</div><div class="ir-txt">'+(m.no_signal_label||'Signaux contradictoires. Ne pas jouer.')+'</div></div></div>';
+      insightHtml+='<div class="insight-row"><div class="ir-icon" style="background:rgba(239,68,68,0.1)"><svg viewBox="0 0 24 24" width="14" height="14" style="stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div><div><div class="ir-lbl" style="color:var(--red)">PASSE TON TOUR</div><div class="ir-txt">'+(m.no_signal_label||'Signaux contradictoires. Ne pas jouer.')+'</div></div></div>';
     }
     insightHtml+='</div>';
   }
@@ -1885,6 +1909,28 @@ var SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZ
 async function checkSession(){
   try{var sb=supabase.createClient(SUPA_URL,SUPA_KEY);var res=await sb.auth.getSession();var s=res.data&&res.data.session;if(!s)return false;var u=await sb.from('users').select('plan').eq('id',s.user.id).maybeSingle();return u.data&&u.data.plan==='pro';}catch(e){return false;}
 }
+async function fetchMatchDataWithAuth(){
+  // Les champs premium (kelly/edge/verdict_shark/facteur_x) ne sont plus dans
+  // data.json - seule l'Edge Function match-data (verification serveur du
+  // plan) peut les renvoyer. Repli sur data.json (gratuit uniquement) si
+  // l'appel echoue. Retourne {data, isPro} pour eviter un second aller-retour
+  // reseau juste pour le statut de session.
+  try{
+    var sb=supabase.createClient(SUPA_URL,SUPA_KEY);
+    var sess=await sb.auth.getSession();
+    var s=sess.data&&sess.data.session;
+    var token=s?s.access_token:SUPA_KEY;
+    var resp=await fetch(SUPA_URL+'/functions/v1/match-data',{headers:{'Authorization':'Bearer '+token,'apikey':SUPA_KEY}});
+    if(!resp.ok) throw new Error('edge function status '+resp.status);
+    var json=await resp.json();
+    return {data:json, isPro:!!json.isPro};
+  }catch(e){
+    var resp2=await fetch('/data.json?t='+Date.now());
+    var json2=await resp2.json();
+    var pro=await checkSession();
+    return {data:json2, isPro:pro};
+  }
+}
 
 async function init(){
   var el=document.getElementById('root');
@@ -1892,12 +1938,18 @@ async function init(){
   try{
     var m;
     if(typeof PRELOADED_MATCH!=='undefined'&&PRELOADED_MATCH&&String(PRELOADED_MATCH.id)===String(fId)){
-      m=PRELOADED_MATCH;
-      isPro=(await checkSession())||true;
+      isPro=await checkSession();
+      if(isPro){
+        var fetched=await fetchMatchDataWithAuth();
+        var enriched=(fetched.data.matchs||[]).find(function(x){return String(x.id)===String(fId);});
+        m=enriched||PRELOADED_MATCH;
+      }else{
+        m=PRELOADED_MATCH;
+      }
     }else{
-      var res=await Promise.all([fetch('/data.json?t='+Date.now()).then(function(r){return r.json();}),checkSession()]);
-      var data=res[0]; isPro=res[1]||true;
-      m=(data.matchs||[]).find(function(x){return String(x.id)===String(fId);});
+      var fetched2=await fetchMatchDataWithAuth();
+      isPro=fetched2.isPro;
+      m=(fetched2.data.matchs||[]).find(function(x){return String(x.id)===String(fId);});
     }
     if(!m){
       el.innerHTML='<div style="text-align:center;padding:60px 20px"><div style="font-family:Space Mono,monospace;font-size:10px;color:var(--muted)">MATCH INTROUVABLE · ID: '+fId+'</div><br><a href="/" style="color:var(--cyan);font-family:Space Mono,monospace;font-size:9px">← RETOUR</a></div>';

@@ -4,9 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>IASHARK OUTILS</title>
-<meta name="description" content="Sélections à forte confiance, suivi automatique des paris et vérification de cote en un clic — l'espace Outils d'IASHARK.">
+<meta name="description" content="Sélections à forte probabilité modèle, suivi automatique des paris et vérification de cote en un clic — l'espace Outils d'IASHARK.">
 <meta property="og:title" content="IASHARK OUTILS">
-<meta property="og:description" content="Sélections à forte confiance, suivi automatique des paris et vérification de cote en un clic — l'espace Outils d'IASHARK.">
+<meta property="og:description" content="Sélections à forte probabilité modèle, suivi automatique des paris et vérification de cote en un clic — l'espace Outils d'IASHARK.">
 <meta property="og:type" content="website">
 <link rel="canonical" href="https://iashark.com/pro.html">
 <meta property="og:url" content="https://iashark.com/pro.html">
@@ -14,6 +14,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="/funnel-track.js"></script>
 <style>
 :root{
   --bg:#080c12;--card:#0d1520;--card2:#0f1a28;
@@ -53,6 +54,9 @@ body{background:#080c12;color:var(--text);font-family:'DM Sans',sans-serif;min-h
 .pw-badge{font-family:'Space Mono',monospace;font-size:6px;letter-spacing:1px;padding:2px 6px;border-radius:3px;white-space:nowrap;flex-shrink:0;background:rgba(245,158,11,0.06);color:rgba(245,158,11,0.5);border:1px solid rgba(245,158,11,0.12);}
 .pw-cta-wrap{padding:14px 18px 18px;}
 .pw-cta{width:100%;background:var(--amber);color:#1a1200;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:2px;font-weight:700;padding:13px;border:none;border-radius:9px;cursor:pointer;text-align:center;display:block;text-decoration:none;}
+.pw-cta:disabled{opacity:.6;cursor:not-allowed;}
+.pw-note{font-size:10.5px;color:var(--muted);text-align:center;margin-top:10px;line-height:1.5;display:none;}
+.pw-note.show{display:block;}
 .pro-hero{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;padding:20px 24px;background:rgba(245,158,11,0.04);border:1px solid var(--ba);border-radius:16px;flex-wrap:wrap;gap:14px;}
 .pro-hero h1{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:2px;margin-bottom:4px;}
 .pro-hero h1 span{color:var(--amber);}
@@ -208,7 +212,7 @@ body{background:#080c12;color:var(--text);font-family:'DM Sans',sans-serif;min-h
   <div class="pro-hero">
     <div>
       <h1>Espace <span>OUTILS</span></h1>
-      <p>Sélections conf ≥ 7.0 · Suivi automatique · Vérification de cote</p>
+      <p>Sélections probabilité ≥ 70% · Suivi automatique · Vérification de cote</p>
     </div>
     <div class="hero-stats">
       <div class="hstat"><div class="hstat-val" id="heroWR">—</div><div class="hstat-lbl">WINRATE</div></div>
@@ -237,9 +241,42 @@ body{background:#080c12;color:var(--text);font-family:'DM Sans',sans-serif;min-h
 
   <div class="day-summary" id="daySummary">🦈 <div>Chargement du résumé du jour...</div></div>
 
+  <!-- Calculateurs de base (MASTER V2.1 §3.1/§13.1) : gratuits, toujours
+       visibles - hors du pro-wall, contrairement aux sélections/suivi qui
+       restent PRO. -->
+  <div class="capital-bar" style="display:flex;">
+    <div class="capital-row"><span class="capital-lbl">CALCULATEURS GRATUITS</span></div>
+    <div class="capital-row" style="gap:16px;align-items:flex-end;">
+      <div style="flex:1;min-width:120px;">
+        <div class="capital-lbl" style="margin-bottom:4px;">COTE DÉCIMALE</div>
+        <input type="number" step="0.01" min="1.01" id="calcCote" placeholder="Ex: 2.10" oninput="calcFromCote()" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--text);font-family:'Space Mono',monospace;">
+      </div>
+      <div style="text-align:center;color:var(--muted);font-family:'Space Mono',monospace;font-size:10px;padding-bottom:10px;">⇄</div>
+      <div style="flex:1;min-width:120px;">
+        <div class="capital-lbl" style="margin-bottom:4px;">PROBABILITÉ IMPLICITE (%)</div>
+        <input type="number" step="0.1" min="0.01" max="99.99" id="calcProb" placeholder="Ex: 47.6" oninput="calcFromProb()" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--text);font-family:'Space Mono',monospace;">
+      </div>
+    </div>
+    <div class="capital-hint" style="color:var(--muted);font-size:9px;">Probabilité implicite = 100 / cote décimale — inclut la marge du bookmaker, ce n'est pas une probabilité "juste" (fair).</div>
+  </div>
+
+  <div class="capital-bar" style="display:flex;">
+    <div class="capital-row"><span class="capital-lbl">MARGE BOOKMAKER (1X2)</span></div>
+    <div class="capital-row" style="gap:10px;">
+      <input type="number" step="0.01" min="1.01" id="margeC1" placeholder="Cote 1" oninput="calcMarge()" style="flex:1;min-width:70px;background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--text);font-family:'Space Mono',monospace;">
+      <input type="number" step="0.01" min="1.01" id="margeCN" placeholder="Cote N" oninput="calcMarge()" style="flex:1;min-width:70px;background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--text);font-family:'Space Mono',monospace;">
+      <input type="number" step="0.01" min="1.01" id="margeC2" placeholder="Cote 2" oninput="calcMarge()" style="flex:1;min-width:70px;background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--text);font-family:'Space Mono',monospace;">
+    </div>
+    <div class="capital-row" id="margeResult" style="display:none;">
+      <span class="capital-lbl">MARGE</span><span class="capital-val cyan" id="margeVal">—</span>
+      <span class="capital-hint" id="margeHint"></span>
+    </div>
+  </div>
+
   <div class="tabs">
-    <button class="tab-btn active" onclick="switchTab('selections',this)">⭐ SÉLECTIONS</button>
-    <button class="tab-btn" onclick="switchTab('suivi',this)">📊 MON SUIVI</button>
+    <button class="tab-btn active" onclick="switchTab('selections',this)">SÉLECTIONS</button>
+    <button class="tab-btn" onclick="switchTab('suivi',this)">MON SUIVI</button>
+    <button class="tab-btn" onclick="switchTab('calc',this)">CALCULATEURS</button>
   </div>
 
   <div class="pro-wall locked" id="proWall">
@@ -248,7 +285,7 @@ body{background:#080c12;color:var(--text);font-family:'DM Sans',sans-serif;min-h
       <!-- SÉLECTIONS -->
       <div id="tab-selections" class="tab-section active">
         <div class="sel-toolbar">
-          <span class="lock-badge">🔒 CONF ≥ 7.0</span>
+          <span class="lock-badge"><svg viewBox="0 0 24 24" width="10" height="10" style="vertical-align:-1px;margin-right:3px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>PROBA ≥ 70%</span>
           <select class="fsel" id="filterMkt" onchange="renderSelections()">
             <option value="">Tous les marchés</option>
             <option value="over25">Plus de 2,5 buts</option>
@@ -259,7 +296,7 @@ body{background:#080c12;color:var(--text);font-family:'DM Sans',sans-serif;min-h
             <option value="dc_x2">DC X2</option>
           </select>
           <select class="fsel" id="sortSel" onchange="renderSelections()">
-            <option value="conf">Trier : confiance</option>
+            <option value="conf">Trier : probabilité modèle</option>
             <option value="cote">Trier : cote</option>
             <option value="date">Trier : date</option>
           </select>
@@ -272,10 +309,49 @@ body{background:#080c12;color:var(--text);font-family:'DM Sans',sans-serif;min-h
       <div id="tab-suivi" class="tab-section">
         <div class="tstats" id="tstats"></div>
         <div class="sync-bar">
-          <button class="sync-btn" id="syncBtn" onclick="runSync()">🔄 SYNCHRONISER</button>
+          <button class="sync-btn" id="syncBtn" onclick="runSync()"><svg viewBox="0 0 24 24" width="12" height="12" style="vertical-align:-2px;margin-right:4px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>SYNCHRONISER</button>
           <div class="sync-status" id="syncStatus">Les paris suivis depuis Sélections se résolvent automatiquement.</div>
         </div>
         <div id="betsList"></div>
+      </div>
+
+      <!-- CALCULATEURS AVANCES (Kelly fractionnaire + EV) - memes formules
+           que le pipeline (lib/betting.js : fractionalKelly/expectedValue),
+           dupliquees ici volontairement (site statique sans bundler, meme
+           patron que le reste du fichier) - jamais un chiffre invente. -->
+      <div id="tab-calc" class="tab-section">
+        <div class="capital-bar" style="display:flex;">
+          <div class="capital-row"><span class="capital-lbl">MISE DE KELLY (FRACTIONNAIRE)</span></div>
+          <div class="capital-row" style="gap:10px;flex-wrap:wrap;">
+            <div style="flex:1;min-width:100px;">
+              <div class="capital-lbl" style="margin-bottom:4px;">BANKROLL (€)</div>
+              <input type="number" step="1" min="0" id="kellyBk" placeholder="Ex: 500" oninput="calcKelly()" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--text);font-family:'Space Mono',monospace;">
+            </div>
+            <div style="flex:1;min-width:100px;">
+              <div class="capital-lbl" style="margin-bottom:4px;">COTE DÉCIMALE</div>
+              <input type="number" step="0.01" min="1.01" id="kellyCote" placeholder="Ex: 2.10" oninput="calcKelly()" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--text);font-family:'Space Mono',monospace;">
+            </div>
+            <div style="flex:1;min-width:100px;">
+              <div class="capital-lbl" style="margin-bottom:4px;">PROBABILITÉ ESTIMÉE (%)</div>
+              <input type="number" step="0.1" min="0.1" max="99.9" id="kellyProb" placeholder="Ex: 55" oninput="calcKelly()" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--text);font-family:'Space Mono',monospace;">
+            </div>
+            <div style="flex:1;min-width:100px;">
+              <div class="capital-lbl" style="margin-bottom:4px;">FRACTION KELLY</div>
+              <select id="kellyFrac" onchange="calcKelly()" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--text);font-family:'Space Mono',monospace;">
+                <option value="0.25" selected>1/4 (prudent, standard)</option>
+                <option value="0.5">1/2</option>
+                <option value="1">Plein (agressif)</option>
+              </select>
+            </div>
+          </div>
+          <div id="kellyResult" style="display:none;">
+            <div class="capital-row"><span class="capital-lbl">MISE RECOMMANDÉE</span><span class="capital-val cyan" id="kellyMiseVal">—</span></div>
+            <div class="capital-row"><span class="capital-lbl">% DU BANKROLL</span><span class="capital-val" id="kellyPctVal">—</span></div>
+            <div class="capital-row"><span class="capital-lbl">EV (valeur espérée)</span><span class="capital-val" id="kellyEvVal">—</span></div>
+            <div class="capital-hint" id="kellyHint" style="color:var(--muted);font-size:9px;"></div>
+          </div>
+          <div class="capital-hint" style="color:var(--muted);font-size:9px;">La probabilité que tu entres ici doit venir de ton propre jugement ou d'une probabilité modèle IASHARK réelle (visible dans Sélections/Match) — ce calculateur ne fournit aucune probabilité, il applique seulement la formule de Kelly à ce que tu lui donnes. Mise plafonnée à 5% du bankroll par pari (même règle que le moteur), quel que soit l'edge.</div>
+        </div>
       </div>
 
     </div>
@@ -283,13 +359,16 @@ body{background:#080c12;color:var(--text);font-family:'DM Sans',sans-serif;min-h
       <div class="pw-top"><span class="pw-top-lbl">CONTENU OUTILS</span></div>
       <div class="pw-body">
         <div class="pw-title">Accès <span>complet</span></div>
-        <div class="pw-sub">Sélections à forte confiance, suivi automatique de tes paris, vérification de cote en un clic.</div>
+        <div class="pw-sub">Sélections à forte probabilité modèle, suivi automatique de tes paris, vérification de cote en un clic.</div>
         <div class="pw-feats">
-          <div class="pw-feat"><div class="pw-feat-l"><div><div class="pw-feat-name">SÉLECTIONS CONF ≥ 7.0</div><div class="pw-feat-desc">Les pronostics à plus forte confiance de l'IA</div></div></div><span class="pw-badge">OUTILS</span></div>
+          <div class="pw-feat"><div class="pw-feat-l"><div><div class="pw-feat-name">SÉLECTIONS PROBABILITÉ ≥ 70%</div><div class="pw-feat-desc">Les pronostics à plus forte probabilité modèle</div></div></div><span class="pw-badge">OUTILS</span></div>
           <div class="pw-feat"><div class="pw-feat-l"><div><div class="pw-feat-name">SUIVI AUTOMATIQUE</div><div class="pw-feat-desc">Tracker de paris et résolution automatique</div></div></div><span class="pw-badge">OUTILS</span></div>
         </div>
       </div>
-      <div class="pw-cta-wrap"><a class="pw-cta" href="/compte.html">PASSER OUTILS →</a></div>
+      <div class="pw-cta-wrap">
+        <button class="pw-cta" id="pwCtaBtn" onclick="handleProCta()">PASSER OUTILS — 19,95€/MOIS →</button>
+        <div class="pw-note" id="pwNote"></div>
+      </div>
     </div>
   </div>
 
@@ -313,10 +392,21 @@ body{background:#080c12;color:var(--text);font-family:'DM Sans',sans-serif;min-h
 
 <div class="toast" id="toast"><span style="color:var(--green)">✓</span>&nbsp;<span id="toastTxt"></span></div>
 
+<div style="max-width:1100px;margin:24px auto 80px;padding:0 20px;text-align:center;">
+  <div style="font-family:'Space Mono',monospace;font-size:8px;color:rgba(74,101,128,0.5);line-height:2;letter-spacing:1px;">
+    <div>⚠️ LE JEU PEUT ÊTRE DANGEREUX — JOUEZ RESPONSABLE · INTERDIT AUX MOINS DE 18 ANS</div>
+    <div>Aide : <a href="https://www.joueurs-info-service.fr" style="color:rgba(34,211,238,0.4);text-decoration:none;">joueurs-info-service.fr</a> · 09 74 75 13 13</div>
+  </div>
+</div>
+
 <nav class="nav-bottom">
   <a href="/" class="nav-item">
     <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5L12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg></div>
     <div class="nav-lbl">ACCUEIL</div>
+  </a>
+  <a href="/marches.html" class="nav-item">
+    <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 17V9M13 17V5M8 17v-4"/></svg></div>
+    <div class="nav-lbl">MARCHÉS</div>
   </a>
   <a href="/historique.html" class="nav-item">
     <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20v-4"/></svg></div>
@@ -387,9 +477,11 @@ var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJ
 var sb = supabase.createClient(SUPA_URL, SUPA_KEY);
 var currentUser = null;
 
-/* TEMPORAIRE (phase de test) : Outils ouvert a tous, meme plan gratuit / non connecte.
-   Repasser a false pour retablir le paywall normal une fois les paliers d'abonnement decides. */
-var OUTILS_OPEN_FOR_ALL = true;
+// Paywall reel : les paliers FREE/PRO sont decides (MASTER V2.1 §3.1) - le
+// flag de bypass permanent (OUTILS_OPEN_FOR_ALL=true) explicitement banni
+// par le MASTER (§24 : "Supprimer : OUTILS_OPEN_FOR_ALL=true") est retire.
+// Le deverrouillage ne depend plus que du plan reel verifie cote serveur
+// (table users, RLS restreint chaque utilisateur a sa propre ligne).
 
 function unlockProWall(){
   document.getElementById('proWall').classList.remove('locked');
@@ -399,18 +491,81 @@ function unlockProWall(){
 var currentCapital = 0;
 
 async function checkProAccess(){
-  if(OUTILS_OPEN_FOR_ALL) unlockProWall();
+  if(window.iasharkTrack) iasharkTrack('tool_page_view');
   try{
     var res = await sb.auth.getSession();
-    if(!res.data || !res.data.session) return;
+    if(!res.data || !res.data.session){
+      if(window.iasharkTrack) iasharkTrack('paywall_view', {reason:'anonymous'});
+      return;
+    }
     currentUser = res.data.session.user;
     var ures = await sb.from('users').select('plan,role,capital').eq('id', currentUser.id).maybeSingle();
     var plan = ures.data && ures.data.plan ? ures.data.plan : 'free';
     var role = ures.data && ures.data.role;
-    if(plan === 'pro' || role === 'admin') unlockProWall();
+    if(plan === 'pro' || role === 'admin'){
+      unlockProWall();
+    } else if(window.iasharkTrack){
+      iasharkTrack('paywall_view', {reason:'free_plan'}, currentUser.id);
+    }
     showCapital(ures.data && ures.data.capital);
   }catch(e){}
 }
+
+/* ═══ Tunnel de conversion (MASTER §21) : bouton "PASSER OUTILS" du paywall.
+   PAYMENT_PROVIDER reste "disabled" (choix reel du prestataire = decision
+   utilisateur separee, jamais fait a sa place ici) - voir
+   supabase/functions/create-checkout-session/. Ce bouton est deja cable
+   bout-en-bout ("checkout pret") : quand un vrai prestataire sera active,
+   aucun changement frontend ne sera necessaire, seule la reponse cote
+   fonction Edge changera (url reelle au lieu de processed:false). ═══ */
+function currentLocalePrefix(){
+  // Vide sur la racine (page FR non prefixee, encore la version en
+  // production actuelle) - jamais 'fr' par defaut, qui pointerait vers
+  // /fr/compte.html alors que la navigation courante est en /compte.html
+  // non prefixe (meme piege que le bug des liens legaux corrige plus tot
+  // ce chantier : ne jamais lier vers une URL prefixee en supposant qu'elle
+  // existe).
+  var m = window.location.pathname.match(/^\/([a-z]{2})\//);
+  return m ? '/'+m[1] : '';
+}
+
+async function handleProCta(){
+  var res = await sb.auth.getSession();
+  if(!res.data || !res.data.session){
+    if(window.iasharkTrack) iasharkTrack('signup_started', {from:'pro_paywall'});
+    window.location.href = currentLocalePrefix()+'/compte.html?redirect=pro';
+    return;
+  }
+  startCheckoutSession(res.data.session);
+}
+
+async function startCheckoutSession(session){
+  var btn = document.getElementById('pwCtaBtn');
+  var note = document.getElementById('pwNote');
+  btn.disabled = true; btn.textContent = 'PATIENTE...';
+  note.classList.remove('show');
+  if(window.iasharkTrack) iasharkTrack('checkout_started', null, session.user.id);
+  try{
+    var r = await fetch(SUPA_URL+'/functions/v1/create-checkout-session', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':'Bearer '+session.access_token},
+      body: '{}'
+    });
+    var j = await r.json();
+    if(j.processed && j.url){
+      window.location.href = j.url;
+      return;
+    }
+    if(window.iasharkTrack) iasharkTrack('checkout_unavailable', null, session.user.id);
+    note.textContent = 'Le paiement en ligne n\'est pas encore activé — reviens très bientôt. Écris-nous sur contact@iashark.com si tu veux être prévenu(e) dès l\'ouverture.';
+    note.classList.add('show');
+  }catch(e){
+    note.textContent = 'Une erreur est survenue. Réessaie dans un instant.';
+    note.classList.add('show');
+  }
+  btn.disabled = false; btn.textContent = 'PASSER OUTILS — 19,95€/MOIS →';
+}
+
 loadAll();
 checkProAccess();
 
@@ -465,15 +620,91 @@ async function saveCapital(){
   }
 }
 
+async function fetchMatchData(){
+  // Les champs premium (kelly/edge/verdict_shark/facteur_x) ne sont plus dans
+  // data.json - ils ne peuvent venir que de l'Edge Function match-data, qui
+  // verifie le vrai statut d'abonnement cote serveur avant de les inclure.
+  // Repli sur data.json (donnees gratuites uniquement) si l'appel echoue -
+  // ex. fonction pas encore deployee, hors ligne, etc.
+  try{
+    var sess=await sb.auth.getSession();
+    var token=sess.data&&sess.data.session?sess.data.session.access_token:SUPA_KEY;
+    var resp=await fetch(SUPA_URL+'/functions/v1/match-data', {
+      headers:{'Authorization':'Bearer '+token, 'apikey':SUPA_KEY}
+    });
+    if(!resp.ok) throw new Error('edge function status '+resp.status);
+    return await resp.json();
+  }catch(e){
+    var resp2=await fetch('/data.json?t='+Date.now());
+    return await resp2.json();
+  }
+}
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+
+// Calculateurs gratuits (S3.1/S13.1) - memes formules que lib/betting.js/
+// lib/models.js (deja testees, tests/betting.test.js et tests/models.test.js),
+// reimplementees en JS navigateur pur car cette page n'a pas de bundler.
+var calcSyncing=false;
+function calcFromCote(){
+  if(calcSyncing)return; calcSyncing=true;
+  var c=parseFloat(document.getElementById('calcCote').value);
+  document.getElementById('calcProb').value=(c&&c>1)?(100/c).toFixed(2):'';
+  calcSyncing=false;
+}
+function calcFromProb(){
+  if(calcSyncing)return; calcSyncing=true;
+  var p=parseFloat(document.getElementById('calcProb').value);
+  document.getElementById('calcCote').value=(p&&p>0&&p<100)?(100/p).toFixed(2):'';
+  calcSyncing=false;
+}
+function calcMarge(){
+  var c1=parseFloat(document.getElementById('margeC1').value);
+  var cn=parseFloat(document.getElementById('margeCN').value);
+  var c2=parseFloat(document.getElementById('margeC2').value);
+  var box=document.getElementById('margeResult');
+  if(!c1||!cn||!c2||c1<=1||cn<=1||c2<=1){box.style.display='none';return;}
+  var sumImplied=(1/c1)+(1/cn)+(1/c2);
+  var margePct=(sumImplied-1)*100;
+  document.getElementById('margeVal').textContent=margePct.toFixed(2)+'%';
+  document.getElementById('margeHint').textContent=margePct>=0?'(marge normale du bookmaker)':'(anomalie : somme des probabilités < 100%, vérifie les cotes saisies)';
+  box.style.display='flex';
+}
+function calcKelly(){
+  var bk=parseFloat(document.getElementById('kellyBk').value);
+  var cote=parseFloat(document.getElementById('kellyCote').value);
+  var probPct=parseFloat(document.getElementById('kellyProb').value);
+  var fraction=parseFloat(document.getElementById('kellyFrac').value)||0.25;
+  var box=document.getElementById('kellyResult');
+  if(!bk||bk<=0||!cote||cote<=1||!probPct||probPct<=0||probPct>=100){box.style.display='none';return;}
+  var probIA=probPct/100;
+  // Memes formules que lib/betting.js (fractionalKelly/expectedValue),
+  // testees dans tests/betting.test.js - ne pas diverger de la logique
+  // pipeline.
+  var b=cote-1;
+  var q=1-probIA;
+  var kelly=(probIA*b-q)/b;
+  var ev=probIA*cote-1;
+  document.getElementById('kellyEvVal').textContent=(ev>=0?'+':'')+(ev*100).toFixed(1)+'% par unité misée';
+  if(kelly<=0){
+    document.getElementById('kellyMiseVal').textContent='0 € (aucun edge)';
+    document.getElementById('kellyPctVal').textContent='0%';
+    document.getElementById('kellyHint').textContent="À cette cote et cette probabilité, le calcul de Kelly ne recommande aucune mise (pas d'avantage mathématique) — parier ici reviendrait à un pari négatif en espérance.";
+  } else {
+    var pct=Math.min(kelly*fraction*100,5);
+    var mise=bk*(pct/100);
+    document.getElementById('kellyMiseVal').textContent=mise.toFixed(2)+' €';
+    document.getElementById('kellyPctVal').textContent=pct.toFixed(2)+'%';
+    document.getElementById('kellyHint').textContent=pct>=5?'Plafonné à 5% du bankroll par pari (même règle que le moteur), même si le Kelly plein calculé est supérieur.':'Kelly '+(fraction===1?'plein':fraction===0.5?'demi':'quart')+' appliqué sur un edge réel détecté par la formule.';
+  }
+  box.style.display='block';
+}
 async function loadAll(){
   loadLocalData();
   try{
-    var resp=await fetch('data.json?t='+Date.now());
-    var data=await resp.json();
+    var data=await fetchMatchData();
     allMatchs=(data.matchs||[]).filter(function(m){
-      var conf=parseFloat(m.conf)||0;
-      var confNorm=conf<=1?conf*10:conf;
-      return confNorm>=7.0&&!m.no_signal&&m.pari_rec;
+      var prob=m.model_probability!=null?m.model_probability:((parseFloat(m.conf)||0)<=1?(parseFloat(m.conf)||0)*10*10:(parseFloat(m.conf)||0)*10);
+      return prob>=70&&!m.no_signal&&m.pari_rec;
     });
   }catch(e){
     allMatchs=getDemoMatchs();
@@ -508,7 +739,7 @@ function renderDaySummary(){
   var todayStr=new Date().toISOString().split('T')[0];
   var todayCount=allMatchs.filter(function(m){return (m.date||'').indexOf(todayStr)===0;}).length;
   var pendingCount=PARIS.filter(function(p){return p.result==='pending';}).length;
-  document.getElementById('daySummary').innerHTML='🦈 <div>Aujourd\'hui : <b>'+(todayCount||allMatchs.length)+' sélection'+((todayCount||allMatchs.length)>1?'s':'')+'</b> conf ≥7.0'
+  document.getElementById('daySummary').innerHTML='🦈 <div>Aujourd\'hui : <b>'+(todayCount||allMatchs.length)+' sélection'+((todayCount||allMatchs.length)>1?'s':'')+'</b> probabilité ≥70%'
     +(pendingCount?' · <span class="cy">'+pendingCount+' pari'+(pendingCount>1?'s':'')+'</span> en attente de résultat dans ton suivi.':' · aucun pari en attente.')
     +'</div>';
 }
@@ -521,9 +752,9 @@ function renderSelections(){
     return getMarketKey(m.pari_rec||'')===mkt;
   });
   list=list.slice().sort(function(a,b){
-    var ca=parseFloat(a.conf)||0,cb=parseFloat(b.conf)||0;
-    var cna=ca<=1?ca*10:ca,cnb=cb<=1?cb*10:cb;
-    if(sortBy==='conf')return cnb-cna;
+    var pa=a.model_probability!=null?a.model_probability:((parseFloat(a.conf)||0)<=1?(parseFloat(a.conf)||0)*100:(parseFloat(a.conf)||0)*10);
+    var pb=b.model_probability!=null?b.model_probability:((parseFloat(b.conf)||0)<=1?(parseFloat(b.conf)||0)*100:(parseFloat(b.conf)||0)*10);
+    if(sortBy==='conf')return pb-pa;
     if(sortBy==='cote')return (parseFloat(b.cote_rec)||0)-(parseFloat(a.cote_rec)||0);
     if(sortBy==='date')return (a.date||'')<(b.date||'')?-1:1;
     return 0;
@@ -534,8 +765,11 @@ function renderSelections(){
     return;
   }
   document.getElementById('selList').innerHTML=list.map(function(m){
+    // model_probability : probabilite reelle du marche (0-100). Repli sur
+    // l'ancien champ conf (deprecie) pour compatibilite descendante.
     var conf=parseFloat(m.conf)||0;
     var confN=conf<=1?conf*10:conf;
+    var modelProbPct=m.model_probability!=null?Math.round(m.model_probability):Math.round(confN*10);
     var cc=confN>=8?'c8':'c7';
     var heure=(m.date||'').split(' ')[1]||'';
     var hn=(m.home&&m.home.n)||'?', an=(m.away&&m.away.n)||'?';
@@ -551,11 +785,11 @@ function renderSelections(){
     var miseDefault=suggMise||10;
     return '<div class="card-item">'
       +'<div class="card-top">'
-      +'<div class="card-info"><div class="mname">'+hn+' vs '+an+'</div><div class="mleague">'+(m.ligue_icon||'🏆')+' '+m.league+' · '+label+' · '+heure+'</div>'
-      +(note?'<div class="saved-note">📝 '+note+'</div>':'')
+      +'<div class="card-info"><div class="mname">'+esc(hn)+' vs '+esc(an)+'</div><div class="mleague">'+(m.ligue_icon||'🏆')+' '+esc(m.league)+' · '+esc(label)+' · '+esc(heure)+'</div>'
+      +(note?'<div class="saved-note">'+esc(note)+'</div>':'')
       +'</div>'
       +'<div class="cote-v">'+(m.cote_rec||'—')+'</div>'
-      +'<div class="cbadge '+cc+'">'+confN.toFixed(1)+'</div>'
+      +'<div class="cbadge '+cc+'" title="Probabilité modèle">'+modelProbPct+'%</div>'
       +'<button class="btn-follow'+(isFollowed?' done':'')+'" id="followbtn-'+m.id+'" onclick="togglePanel('+m.id+')">'+(isFollowed?'✓ SUIVI':'GÉRER ▾')+'</button>'
       +'</div>'
       +'<div class="panel" id="panel-'+m.id+'">'
@@ -565,13 +799,13 @@ function renderSelections(){
       +'<button class="chip" data-chip="note" onclick="setChip('+m.id+',\'note\',this)">AJOUTER UNE NOTE</button>'
       +'</div>'
       +'<div class="subpanel open" id="sub-suivre-'+m.id+'">'
-      +(suggMise?'<div class="mise-sugg-hint">🎯 Mise conseillée sur ta bankroll actuelle : <b>'+suggMise+'€</b></div>':'')
+      +(suggMise?'<div class="mise-sugg-hint">Mise conseillée sur ta bankroll actuelle : <b>'+suggMise+'€</b></div>':'')
       +'<div class="row-flex">'
       +'<div class="fg"><label>MISE (€)</label><input type="number" class="finput" id="mise-'+m.id+'" value="'+miseDefault+'" style="width:80px"></div>'
       +'<button class="qm-btn" onclick="setAccMise('+m.id+',5,this)">5€</button>'
       +'<button class="qm-btn'+(!suggMise?' active':'')+'" onclick="setAccMise('+m.id+',10,this)">10€</button>'
       +'<button class="qm-btn" onclick="setAccMise('+m.id+',20,this)">20€</button>'
-      +(suggMise?'<button class="qm-btn active" onclick="setAccMise('+m.id+','+suggMise+',this)">'+suggMise+'€ 🎯</button>':'')
+      +(suggMise?'<button class="qm-btn active" onclick="setAccMise('+m.id+','+suggMise+',this)">'+suggMise+'€</button>':'')
       +'<button class="btnvalid" onclick="confirmFollow('+m.id+')">✓ AJOUTER À MON SUIVI</button>'
       +'</div></div>'
       +'<div class="subpanel" id="sub-cote-'+m.id+'">'
@@ -678,17 +912,17 @@ function renderBets(){
       resultHtml=p.source==='auto'
         ?'<span class="result-lbl" style="color:var(--muted)">EN ATTENTE</span>'
         :'<div class="quick-result">'
-          +'<button class="qr-btn win-btn" onclick="setManualResult('+p.id+',\'win\')">✅</button>'
-          +'<button class="qr-btn loss-btn" onclick="setManualResult('+p.id+',\'loss\')">❌</button>'
+          +'<button class="qr-btn win-btn" onclick="setManualResult('+p.id+',\'win\')">✓</button>'
+          +'<button class="qr-btn loss-btn" onclick="setManualResult('+p.id+',\'loss\')">✕</button>'
           +'</div>';
     } else {
       var color=p.result==='win'?'var(--green)':'var(--red)';
       resultHtml='<span class="result-lbl" style="color:'+color+'">'+(p.result==='win'?'GAGNÉ':'PERDU')+(p.score?' ('+p.score+')':'')+'</span>';
     }
-    var srcTag=p.source==='auto'?'<span class="src-tag src-auto">🔄 AUTO</span>':'<span class="src-tag src-manual">✎ MANUEL</span>';
+    var srcTag=p.source==='auto'?'<span class="src-tag src-auto">AUTO</span>':'<span class="src-tag src-manual">✎ MANUEL</span>';
     return '<div class="bet-item '+p.result+'">'
       +'<div class="bet-top">'
-      +'<div class="bet-info"><div class="mname">'+p.match+srcTag+'</div><div class="mleague">'+p.market+' · cote '+p.cote.toFixed(2)+' · '+p.mise+'€</div></div>'
+      +'<div class="bet-info"><div class="mname">'+esc(p.match)+srcTag+'</div><div class="mleague">'+esc(p.market)+' · cote '+p.cote.toFixed(2)+' · '+p.mise+'€</div></div>'
       +resultHtml
       +'<button class="btn-note" onclick="toggleNote('+p.id+')" title="Note">✎</button>'
       +'<button class="btndel" onclick="delPari('+p.id+')" title="Supprimer">✕</button>'
@@ -735,7 +969,7 @@ async function runSync(){
   btn.innerHTML='<span class="spin"></span>SYNCHRO...';
   status.innerHTML='Lecture de historique.json...';
   try{
-    var r=await fetch('historique.json?t='+Date.now());
+    var r=await fetch('/historique.json?t='+Date.now());
     var d=await r.json();
     var preds=d.predictions||[];
     var n=0;
@@ -756,7 +990,7 @@ async function runSync(){
     status.innerHTML='Synchronisation indisponible pour le moment — réessaie plus tard.';
   }
   btn.disabled=false;
-  btn.innerHTML='🔄 SYNCHRONISER';
+  btn.innerHTML='<svg viewBox="0 0 24 24" width="12" height="12" style="vertical-align:-2px;margin-right:4px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>SYNCHRONISER';
 }
 
 function openModal(){document.getElementById('modalOverlay').classList.add('show');}

@@ -1,0 +1,137 @@
+name: closing-odds
+
+# Capture les cotes de cloture (juste avant le coup d'envoi) pour les matchs
+# deja predits par le pipeline principal (update-data.yml). C'est le
+# complement "closing" du snapshot "prediction" ecrit par ce dernier - voir
+# supabase/migrations/0004_forward_snapshots.sql et IASHARK_V2_EXECUTION_STATE.md
+# (section FORWARD_VALIDATION_ONLY). Le closing line value (CLV) - la
+# comparaison entre la cote au moment de la prediction et la cote de cloture -
+# est un des signaux de calibration les plus fiables en paris sportifs ; sans
+# ce job, il ne pourra jamais etre mesure.
+#
+# Tourne toutes les 30 minutes. A chaque execution, ne cible que les fixtures
+# de data.json dont le coup d'envoi (timestamp UTC reel renvoye par
+# api-football, PAS le texte "date" formate en heure de Paris de data.json qui
+# serait ambigu a reparser) tombe dans les 3 prochaines heures et qui ne sont
+# pas encore commences (status NS). Chaque execution reecrit le meme
+# fixture_id/'closing' (upsert) - la derniere ecriture avant le coup d'envoi
+# est donc la plus proche possible de la vraie cote de cloture.
+
+on:
+  schedule:
+    - cron: '*/30 * * * *'
+  workflow_dispatch: {}
+
+concurrency:
+  group: closing-odds
+  cancel-in-progress: false
+
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Capture cotes de cloture
+        env:
+          APISPORTS_KEY:      ${{ secrets.APISPORTS_KEY }}
+          SUPABASE_URL:              ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          cat > closing-odds.js << 'JSEOF'
+          const https = require('https');
+          const fs = require('fs');
+          const { parseOdds } = require('./lib/odds.js');
+
+          const APS_KEY = process.env.APISPORTS_KEY;
+          const APS = { 'x-apisports-key': APS_KEY };
+          const SUPA_URL = process.env.SUPABASE_URL;
+          const SUPA_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+          const MODEL_VERSION = 'legacy-poisson-dc-mc-v1';
+
+          function sleep(ms) { return new Promise((r) => setTimeout(r, ms)); }
+
+          function get(url, headers) {
+            return new Promise((resolve) => {
+              const u = new URL(url);
+              const timer = setTimeout(() => resolve({}), 10000);
+              https.get({ hostname: u.hostname, path: u.pathname + u.search, headers: Object.assign({ 'User-Agent': 'IASHARK/1.0' }, headers || {}) }, (res) => {
+                let d = '';
+                res.on('data', (c) => { d += c; });
+                res.on('end', () => {
+                  clearTimeout(timer);
+                  try { resolve(JSON.parse(d)); } catch (e) { resolve({}); }
+                });
+              }).on('error', () => { clearTimeout(timer); resolve({}); });
+            });
+          }
+
+          function upsertJSON(host, path, body, headers) {
+            return new Promise((resolve) => {
+              const data = JSON.stringify(body);
+              const timer = setTimeout(() => resolve({ ok: false, status: 0, error: 'timeout' }), 15000);
+              const req = https.request({ hostname: host, path, method: 'POST', headers: Object.assign({ 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(data) }, headers || {}) }, (res) => {
+                let d = '';
+                res.on('data', (c) => { d += c; });
+                res.on('end', () => { clearTimeout(timer); resolve({ ok: res.statusCode >= 200 && res.statusCode < 300, status: res.statusCode, body: d }); });
+              });
+              req.on('error', (e) => { clearTimeout(timer); resolve({ ok: false, status: 0, error: e.message }); });
+              req.write(data); req.end();
+            });
+          }
+
+          async function main() {
+            if (!APS_KEY) { console.log('APISPORTS_KEY absent - rien a faire.'); return; }
+            if (!SUPA_URL || !SUPA_KEY) { console.log('SUPABASE_URL/SUPABASE_SERVICE_ROLE_KEY absents - impossible de persister les cotes de cloture.'); return; }
+
+            let data;
+            try { data = JSON.parse(fs.readFileSync('data.json', 'utf8')); } catch (e) { console.log('data.json illisible:', e.message); return; }
+            const fixtureIds = (data.matchs || []).map((m) => m.id).filter(Boolean);
+            console.log('Fixtures a verifier:', fixtureIds.length);
+            if (!fixtureIds.length) return;
+
+            const rows = [];
+            for (const fid of fixtureIds) {
+              try {
+                const fr = await get('https://v3.football.api-sports.io/fixtures?id=' + fid, APS);
+                const fx = fr.response && fr.response[0];
+                if (!fx) { console.log('  fixture ' + fid + ': introuvable'); await sleep(150); continue; }
+                const status = (fx.fixture.status && fx.fixture.status.short) || '';
+                const ts = fx.fixture.timestamp;
+                if (status !== 'NS' || !ts) { await sleep(100); continue; }
+                const minutesToKickoff = (ts * 1000 - Date.now()) / 60000;
+                if (minutesToKickoff < 0 || minutesToKickoff > 180) { await sleep(100); continue; }
+                console.log('  fixture ' + fid + ': coup d\'envoi dans ' + Math.round(minutesToKickoff) + ' min -> capture cotes de cloture');
+                const or_ = await get('https://v3.football.api-sports.io/odds?fixture=' + fid, APS);
+                const oddsRaw = (or_.response && or_.response[0]) || null;
+                const odds = parseOdds(oddsRaw);
+                rows.push({
+                  fixture_id: fid,
+                  snapshot_type: 'closing',
+                  model_version: MODEL_VERSION,
+                  pipeline_sha: process.env.GITHUB_SHA || null,
+                  raw_inputs: { odds, minutes_to_kickoff: Math.round(minutesToKickoff) },
+                });
+                await sleep(250);
+              } catch (e) {
+                console.log('  fixture ' + fid + ': erreur ' + e.message);
+                await sleep(150);
+              }
+            }
+
+            if (!rows.length) { console.log('Aucun match dans la fenetre de cloture (0-180 min avant coup d\'envoi) a cette execution.'); return; }
+
+            const u = new URL(SUPA_URL);
+            const r = await upsertJSON(u.hostname, '/rest/v1/match_snapshots?on_conflict=fixture_id,snapshot_type', rows, {
+              apikey: SUPA_KEY,
+              Authorization: 'Bearer ' + SUPA_KEY,
+              Prefer: 'resolution=merge-duplicates,return=minimal',
+            });
+            if (!r.ok) console.log('Echec upsert closing snapshots: status=' + r.status + ' ' + (r.error || r.body || '').toString().slice(0, 200));
+            else console.log(rows.length + ' snapshots \'closing\' ecrits dans Supabase.');
+          }
+
+          main().catch((e) => { console.error('FATAL:', e.message, e.stack); process.exit(1); });
+          JSEOF
+          node closing-odds.js

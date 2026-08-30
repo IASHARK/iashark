@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>IASHARK — Il modello che legge la partita prima del fischio d'inizio</title>
+<link rel="canonical" href="https://iashark.com/it/landing.html">
+<link rel="alternate" hreflang="fr" href="https://iashark.com/fr/landing.html">
+<link rel="alternate" hreflang="en" href="https://iashark.com/en/landing.html">
+<link rel="alternate" hreflang="es" href="https://iashark.com/es/landing.html">
+<link rel="alternate" hreflang="de" href="https://iashark.com/de/landing.html">
+<link rel="alternate" hreflang="it" href="https://iashark.com/it/landing.html">
+<link rel="alternate" hreflang="pt" href="https://iashark.com/pt/landing.html">
+<link rel="alternate" hreflang="x-default" href="https://iashark.com/fr/landing.html">
+<meta name="description" content="Poisson, Dixon-Coles, Monte Carlo, Elo: IASHARK analizza ogni partita con veri modelli statistici. Una partita gratuita ogni giorno.">
+<meta name="robots" content="noindex, follow">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#080c12;--card:#0d1520;--card2:#0f1a28;
+  --cyan:#22d3ee;--cyan2:#06b6d4;--amber:#f59e0b;--green:#10b981;--red:#ef4444;
+  --text:#e2e8f0;--muted:#4a6580;--border:rgba(255,255,255,0.06);--border-cyan:rgba(34,211,238,0.18);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;overflow-x:hidden;}
+body::before{content:'';position:fixed;top:-300px;left:50%;transform:translateX(-50%);width:900px;height:600px;background:radial-gradient(ellipse,rgba(34,211,238,0.05) 0%,transparent 65%);pointer-events:none;z-index:0;}
+a{color:inherit;}
+.wrap{max-width:1100px;margin:0 auto;padding:0 20px;position:relative;z-index:1;}
+.eyebrow{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:3px;color:var(--amber);display:flex;align-items:center;justify-content:center;gap:8px;}
+.eyebrow .line{width:24px;height:1px;background:var(--amber);opacity:.4;}
+.eyebrow .dot{width:5px;height:5px;background:var(--amber);border-radius:50%;animation:blink 1.2s infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+@keyframes fadeup{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.reveal{animation:fadeup .5s ease forwards;opacity:0;}
+
+/* HEADER */
+.hdr{position:sticky;top:0;z-index:99;background:rgba(8,12,18,0.96);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);}
+.hdr-in{max-width:1100px;margin:0 auto;padding:0 20px;height:56px;display:flex;align-items:center;justify-content:space-between;}
+.logo{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:3px;text-decoration:none;}
+.logo span{color:var(--cyan);}
+.btn-nav{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1px;padding:8px 16px;border-radius:8px;border:1px solid rgba(34,211,238,0.3);background:rgba(34,211,238,0.08);color:var(--cyan);text-decoration:none;transition:.2s;}
+.btn-nav:hover{background:rgba(34,211,238,0.16);}
+
+/* HERO */
+.hero{position:relative;padding:56px 20px 40px;text-align:center;overflow:hidden;}
+.hero::before{content:'';position:absolute;top:-140px;left:50%;transform:translateX(-50%);width:700px;height:460px;background:radial-gradient(ellipse,rgba(34,211,238,0.09) 0%,transparent 60%);pointer-events:none;}
+.hero-shark{position:relative;z-index:1;font-size:52px;margin-bottom:6px;display:inline-block;filter:drop-shadow(0 0 24px rgba(34,211,238,0.28));animation:float 3s ease-in-out infinite;}
+.hero h1{position:relative;z-index:1;font-family:'Bebas Neue',sans-serif;font-size:clamp(30px,7vw,58px);letter-spacing:1px;line-height:1.05;margin:10px auto 18px;max-width:720px;}
+.hero h1 b{color:var(--cyan);}
+.hero p.sub{position:relative;z-index:1;font-size:15px;color:#94a3b8;line-height:1.7;margin:0 auto 28px;max-width:480px;}
+.hero p.sub b{color:var(--text);font-weight:600;}
+.cta-row{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:10px;}
+.btn-primary{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:1px;padding:15px 38px;border-radius:14px;background:linear-gradient(135deg,var(--cyan),var(--cyan2));color:#04141a;text-decoration:none;box-shadow:0 8px 30px rgba(34,211,238,0.25);transition:.2s;display:inline-block;}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 12px 34px rgba(34,211,238,0.35);}
+.cta-note{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1px;color:var(--muted);}
+.cta-note b{color:var(--green);}
+
+/* SIGNAL STRIP (signature element) */
+.signal-strip{position:relative;z-index:1;max-width:760px;margin:44px auto 0;padding:16px 22px;border:1px solid var(--border-cyan);border-radius:16px;background:rgba(34,211,238,0.04);font-family:'Space Mono',monospace;font-size:10.5px;color:var(--cyan);letter-spacing:.5px;overflow:hidden;white-space:nowrap;}
+.signal-strip .track{display:inline-block;animation:scroll-left 22s linear infinite;}
+.signal-strip span{margin-right:36px;color:var(--muted);}
+.signal-strip span b{color:var(--cyan);}
+@keyframes scroll-left{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+/* SECTION LABEL */
+.sec-lbl{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:3px;color:var(--muted);display:flex;align-items:center;gap:10px;margin-bottom:18px;}
+.sec-lbl::after{content:'';flex:1;height:1px;background:var(--border);}
+.sec-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(24px,4.5vw,36px);letter-spacing:.5px;margin-bottom:14px;max-width:560px;}
+.sec-title b{color:var(--cyan);}
+
+/* METHODE */
+.methode{padding:70px 0 20px;}
+.model-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:26px;}
+@media(min-width:820px){.model-grid{grid-template-columns:repeat(4,1fr);}}
+.model-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px 16px;transition:.2s;}
+.model-card:hover{border-color:rgba(34,211,238,0.25);transform:translateY(-3px);}
+.model-tag{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:1px;color:var(--amber);margin-bottom:10px;}
+.model-name{font-family:'Bebas Neue',sans-serif;font-size:19px;letter-spacing:.5px;margin-bottom:6px;}
+.model-desc{font-size:12px;color:#94a3b8;line-height:1.55;}
+
+/* PREUVE / TRANSPARENCE */
+.preuve{padding:60px 0;}
+.preuve-box{background:linear-gradient(135deg,var(--card2),var(--card));border:1px solid rgba(245,158,11,0.2);border-radius:20px;padding:32px 24px;display:flex;flex-direction:column;gap:18px;align-items:flex-start;}
+@media(min-width:820px){.preuve-box{flex-direction:row;align-items:center;justify-content:space-between;}}
+.preuve-txt h3{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:.5px;margin-bottom:8px;}
+.preuve-txt h3 b{color:var(--amber);}
+.preuve-txt p{font-size:13.5px;color:#94a3b8;line-height:1.6;max-width:440px;}
+.btn-ghost{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1px;padding:12px 22px;border-radius:10px;border:1px solid rgba(245,158,11,0.35);background:rgba(245,158,11,0.06);color:var(--amber);text-decoration:none;white-space:nowrap;transition:.2s;}
+.btn-ghost:hover{background:rgba(245,158,11,0.14);}
+
+/* COMMENT CA MARCHE */
+.steps{padding:60px 0;}
+.step-list{display:flex;flex-direction:column;gap:2px;margin-top:26px;border-radius:16px;overflow:hidden;border:1px solid var(--border);}
+.step{display:grid;grid-template-columns:56px 1fr;gap:16px;padding:22px 20px;background:var(--card);border-bottom:1px solid var(--border);}
+.step:last-child{border-bottom:none;}
+.step-num{font-family:'Bebas Neue',sans-serif;font-size:30px;color:var(--cyan);opacity:.5;line-height:1;}
+.step-title{font-family:'Bebas Neue',sans-serif;font-size:17px;letter-spacing:.5px;margin-bottom:4px;}
+.step-desc{font-size:12.5px;color:#94a3b8;line-height:1.55;}
+
+/* OFFRES */
+.offres{padding:60px 0 20px;}
+.plan-grid{display:grid;grid-template-columns:1fr;gap:14px;margin-top:26px;}
+@media(min-width:820px){.plan-grid{grid-template-columns:1fr 1fr;}}
+.plan{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:28px 24px;display:flex;flex-direction:column;gap:16px;}
+.plan.hi{border-color:rgba(34,211,238,0.3);background:linear-gradient(160deg,var(--card2),var(--card));position:relative;}
+.plan.hi::before{content:'CONSIGLIATO';position:absolute;top:-1px;right:20px;transform:translateY(-50%);font-family:'Space Mono',monospace;font-size:7px;letter-spacing:1.5px;background:var(--cyan);color:#04141a;padding:4px 10px;border-radius:20px;font-weight:700;}
+.plan-name{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--muted);}
+.plan.hi .plan-name{color:var(--cyan);}
+.plan-price{font-family:'Bebas Neue',sans-serif;font-size:42px;letter-spacing:.5px;line-height:1;}
+.plan-price span{font-family:'Space Mono',monospace;font-size:12px;color:var(--muted);letter-spacing:0;margin-left:6px;}
+.plan-trial{font-family:'Space Mono',monospace;font-size:9px;color:var(--green);letter-spacing:.5px;}
+.plan-feats{list-style:none;display:flex;flex-direction:column;gap:9px;}
+.plan-feats li{font-size:13px;color:#cbd5e1;display:flex;gap:9px;align-items:flex-start;line-height:1.4;}
+.plan-feats li::before{content:'✓';color:var(--cyan);font-weight:700;flex-shrink:0;}
+.plan.hi .plan-feats li::before{color:var(--cyan);}
+.plan-cta{margin-top:6px;text-align:center;padding:13px;border-radius:12px;font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:1px;text-decoration:none;transition:.2s;}
+.plan-cta.free{border:1px solid var(--border);color:var(--text);}
+.plan-cta.free:hover{border-color:rgba(255,255,255,0.2);}
+.plan-cta.pro{background:linear-gradient(135deg,var(--cyan),var(--cyan2));color:#04141a;}
+.plan-cta.pro:hover{transform:translateY(-2px);}
+
+/* CTA FINALE */
+.final-cta{padding:70px 0 40px;text-align:center;}
+.final-cta h2{font-family:'Bebas Neue',sans-serif;font-size:clamp(26px,5vw,42px);letter-spacing:.5px;max-width:600px;margin:0 auto 14px;}
+.final-cta h2 b{color:var(--cyan);}
+.final-cta p{font-size:13.5px;color:#94a3b8;margin-bottom:26px;}
+
+/* FOOTER */
+footer{padding:30px 20px 100px;text-align:center;border-top:1px solid var(--border);margin-top:20px;}
+.foot-legal{font-family:'Space Mono',monospace;font-size:8px;color:rgba(74,101,128,0.6);line-height:2;letter-spacing:.5px;}
+.foot-legal a{color:rgba(34,211,238,0.5);text-decoration:none;}
+.foot-links a{color:rgba(74,101,128,0.7);text-decoration:none;margin:0 8px;}
+</style>
+</head>
+<body>
+
+<header class="hdr">
+  <div class="hdr-in">
+    <a href="https://iashark.com/it/" class="logo"><span>IA</span>SHARK</a>
+    <a href="https://iashark.com/it/" class="btn-nav">VAI AL SITO →</a>
+  </div>
+</header>
+
+<div class="hero">
+  <div class="wrap">
+    <div class="hero-shark reveal">🦈</div>
+    <div class="eyebrow reveal" style="animation-delay:.05s"><span class="dot"></span> MODELLO STATISTICO · CALCIO</div>
+    <h1 class="reveal" style="animation-delay:.1s">Zero emozioni.<br><b>Solo probabilità.</b></h1>
+    <p class="sub reveal" style="animation-delay:.15s">IASHARK combina <b>xG, forma recente, affaticamento da calendario e precedenti</b> per produrre un segnale di probabilità su ogni partita, prima del fischio d'inizio.</p>
+    <div class="cta-row reveal" style="animation-delay:.2s">
+      <a href="https://iashark.com/it/" class="btn-primary">VEDI LA PARTITA GRATUITA DI OGGI</a>
+      <div class="cta-note">Senza carta di credito · <b>1 analisi gratuita ogni giorno</b></div>
+    </div>
+  </div>
+
+  <div class="signal-strip reveal" style="animation-delay:.3s">
+    <div class="track">
+      <span>MODELLO <b>POISSON</b></span><span><b>DIXON-COLES</b> CORREZIONE PUNTEGGI BASSI</span><span>SIMULAZIONE <b>MONTE CARLO</b></span><span>CLASSIFICA <b>ELO</b> DINAMICA</span><span>PROBABILITÀ <b>SHIN</b></span><span>KELLY <b>FRAZIONATO</b></span>
+      <span>MODELLO <b>POISSON</b></span><span><b>DIXON-COLES</b> CORREZIONE PUNTEGGI BASSI</span><span>SIMULAZIONE <b>MONTE CARLO</b></span><span>CLASSIFICA <b>ELO</b> DINAMICA</span><span>PROBABILITÀ <b>SHIN</b></span><span>KELLY <b>FRAZIONATO</b></span>
+    </div>
+  </div>
+</div>
+
+<section class="methode">
+  <div class="wrap">
+    <div class="sec-lbl">IL METODO</div>
+    <h2 class="sec-title">Quattro modelli, <b>un solo segnale</b> per partita.</h2>
+    <div class="model-grid">
+      <div class="model-card"><div class="model-tag">MODELLO 1</div><div class="model-name">Poisson</div><div class="model-desc">Distribuzione dei gol attesi per ciascuna squadra, in casa e in trasferta.</div></div>
+      <div class="model-card"><div class="model-tag">MODELLO 2</div><div class="model-name">Dixon-Coles</div><div class="model-desc">Correzione dei punteggi bassi (0-0, 1-0, 1-1) che il Poisson puro sottostima.</div></div>
+      <div class="model-card"><div class="model-tag">MODELLO 3</div><div class="model-name">Monte Carlo</div><div class="model-desc">Migliaia di simulazioni della partita per ottenere una distribuzione di risultati robusta.</div></div>
+      <div class="model-card"><div class="model-tag">MODELLO 4</div><div class="model-name">Elo e Shin</div><div class="model-desc">Forza reale delle squadre nel tempo, e correzione del bias delle probabilità implicite.</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="preuve">
+  <div class="wrap">
+    <div class="preuve-box">
+      <div class="preuve-txt">
+        <h3>Niente da nascondere. <b>Tutto è tracciato.</b></h3>
+        <p>Ogni analisi pubblicata resta visibile nel nostro storico: mercato consigliato, probabilità annunciata, risultato reale. Tu verifichi, noi non riscriviamo nulla in seguito.</p>
+      </div>
+      <a href="https://iashark.com/it/historique.html" class="btn-ghost">VEDI LO STORICO COMPLETO →</a>
+    </div>
+  </div>
+</section>
+
+<section class="steps">
+  <div class="wrap">
+    <div class="sec-lbl">IN PRATICA</div>
+    <h2 class="sec-title">Dal dato grezzo a un <b>segnale utilizzabile.</b></h2>
+    <div class="step-list">
+      <div class="step reveal"><div class="step-num">01</div><div><div class="step-title">Acquisiamo i dati</div><div class="step-desc">Calendari, probabili formazioni, storico degli scontri diretti e statistiche xG aggiornati in continuo, campionato per campionato.</div></div></div>
+      <div class="step reveal"><div class="step-num">02</div><div><div class="step-title">Il modello calcola</div><div class="step-desc">Poisson, Dixon-Coles e Monte Carlo girano in parallelo per produrre una distribuzione di probabilità per ogni mercato.</div></div></div>
+      <div class="step reveal"><div class="step-num">03</div><div><div class="step-title">Ricevi il segnale</div><div class="step-desc">Una scheda chiara per partita: probabilità, livello di affidabilità, e il mercato in cui il modello rileva uno scarto rispetto al mercato reale.</div></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="offres">
+  <div class="wrap">
+    <div class="sec-lbl">L'ACCESSO</div>
+    <h2 class="sec-title">Inizia gratis. <b>Passa a Pro</b> quando vuoi vedere tutto.</h2>
+    <div class="plan-grid">
+      <div class="plan">
+        <div class="plan-name">GRATUITO</div>
+        <div class="plan-price">0€</div>
+        <ul class="plan-feats">
+          <li>1 analisi completa gratuita ogni giorno</li>
+          <li>Accesso allo storico delle performance</li>
+          <li>Il nostro metodo spiegato in dettaglio</li>
+        </ul>
+        <a href="https://iashark.com/it/" class="plan-cta free">INIZIA</a>
+      </div>
+      <div class="plan hi">
+        <div class="plan-name">PRO</div>
+        <div class="plan-price">Gratuito<span>i primi 3 giorni</span></div>
+        <div class="plan-trial">Poi 19,95€/mese — annullabile in qualsiasi momento</div>
+        <ul class="plan-feats">
+          <li>Tutte le analisi, tutti i campionati</li>
+          <li>Filtri avanzati e livello di affidabilità dettagliato</li>
+          <li>Monitoraggio personale delle tue partite seguite</li>
+          <li>Annullabile in qualsiasi momento</li>
+        </ul>
+        <a href="https://iashark.com/it/pro.html" class="plan-cta pro">SBLOCCA PRO</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="final-cta">
+  <div class="wrap">
+    <div class="hero-shark" style="font-size:36px;margin-bottom:14px;">🦈</div>
+    <h2>La prossima partita ha già <b>un segnale.</b></h2>
+    <p>Vai a vederla, è gratis.</p>
+    <a href="https://iashark.com/it/" class="btn-primary">VEDI LA PARTITA DI OGGI</a>
+  </div>
+</section>
+
+<footer>
+  <div class="foot-legal">
+    <div>⚠️ INFORMAZIONI A SCOPO STATISTICO — NON COSTITUISCE UN CONSIGLIO DI SCOMMESSA · VIETATO AI MINORI DI 18 ANNI</div>
+    <div>Aiuto: <a href="https://www.joueurs-info-service.fr">joueurs-info-service.fr</a> · 09 74 75 13 13</div>
+    <div class="foot-links" style="margin-top:8px;">
+      <a href="https://iashark.com/mentions-legales.html">Note Legali</a>
+      <a href="https://iashark.com/cgv.html">Termini</a>
+      <a href="https://iashark.com/confidentialite.html">Privacy</a>
+    </div>
+  </div>
+</footer>
+
+<script src="/funnel-track.js"></script>
+<script>if(window.iasharkTrack) iasharkTrack('landing_view');</script>
+</body>
+</html>

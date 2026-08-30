@@ -1,8 +1,42 @@
 /* Header d'authentification partagé — utilisé par index.html, historique.html, pro.html.
-   compte.html gère sa propre session mais réutilise chipLabel() pour le même format. */
+   compte.html gère sa propre session mais réutilise chipLabel() pour le même format.
+   i18n : ce script est partagé (une seule copie, jamais dupliqué par page/langue comme
+   le reste du site généré par scripts/build-locales.js), donc localisé au runtime via
+   /i18n/dict/{locale}.json — détection de la locale identique à i18n/i18n.js (préfixe
+   d'URL /en/, /es/... ; racine ou /fr/ = défaut FR). Repli silencieux sur le FR figé
+   ci-dessous si le dictionnaire ne charge pas (jamais bloquer la connexion pour un
+   probleme de traduction). */
 (function(){
   var SUPA_URL = 'https://ksvjraqitxouwiabecai.supabase.co';
   var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtzdmpyYXFpdHhvdXdpYWJlY2FpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3ODcwMjMsImV4cCI6MjA4ODM2MzAyM30.Eh3qk4tATM40hoYxdErAllLEo1y8KNt4BSCET_fAgT8';
+
+  var FALLBACK_T = {
+    login_btn:'CONNEXION', quick_login_title:'CONNEXION RAPIDE', email_placeholder:'ton@email.com',
+    password_placeholder:'Mot de passe', submit_login:'SE CONNECTER →', submit_login_loading:'CONNEXION...',
+    no_account_label:'Pas de compte ?', signup_link:'Inscription', fill_both_fields:'Remplis les deux champs.',
+    too_many_attempts:'Trop de tentatives.', generic_login_error:'Erreur de connexion',
+    connected_reloading:'Connecté ! Rechargement...', invalid_login:'Email ou mot de passe incorrect.',
+    confirm_email:'Confirme ton email avant de te connecter.'
+  };
+  var T = FALLBACK_T;
+
+  function detectLocale(){
+    var m = location.pathname.match(/^\/([a-z]{2})(\/|$)/);
+    var supported = ['fr','en','es','de','it','pt'];
+    return (m && supported.indexOf(m[1]) !== -1) ? m[1] : 'fr';
+  }
+
+  var _dictPromise = null;
+  function loadT(){
+    if(_dictPromise) return _dictPromise;
+    var locale = detectLocale();
+    if(locale === 'fr'){ _dictPromise = Promise.resolve(FALLBACK_T); return _dictPromise; }
+    _dictPromise = fetch('/i18n/dict/'+locale+'.json')
+      .then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
+      .then(function(d){ T = (d && d.auth_header) ? d.auth_header : FALLBACK_T; return T; })
+      .catch(function(){ T = FALLBACK_T; return T; });
+    return _dictPromise;
+  }
 
   var _sbInstance = null;
   function getSb(){
@@ -23,7 +57,7 @@
   }
 
   function loggedOutHtml(){
-    return '<button type="button" class="btn-login" id="quickLoginBtn" onclick="IasharkAuthHeader.togglePopover()">CONNEXION</button>';
+    return '<button type="button" class="btn-login" id="quickLoginBtn" onclick="IasharkAuthHeader.togglePopover()">'+T.login_btn+'</button>';
   }
 
   function loggedInHtml(email, plan, role){
@@ -50,13 +84,15 @@
     +'.iashark-login-pop .foot a{color:#22d3ee;text-decoration:none;}'
     +'.iashark-login-pop .close{position:absolute;top:8px;right:10px;background:none;border:none;color:#4a6580;font-size:14px;cursor:pointer;line-height:1;}';
 
-  var POPOVER_HTML = '<button type="button" class="close" onclick="IasharkAuthHeader.closePopover()">✕</button>'
-    +'<div class="lbl">CONNEXION RAPIDE</div>'
-    +'<input type="email" id="quickLoginEmail" placeholder="ton@email.com" autocomplete="email">'
-    +'<input type="password" id="quickLoginPwd" placeholder="Mot de passe" autocomplete="current-password" onkeydown="if(event.key===\'Enter\')IasharkAuthHeader.quickLogin()">'
-    +'<button type="button" class="submit" id="quickLoginSubmit" onclick="IasharkAuthHeader.quickLogin()">SE CONNECTER →</button>'
-    +'<div class="qmsg" id="quickLoginMsg"></div>'
-    +'<div class="foot">Pas de compte ? <a href="/compte.html">Inscription</a></div>';
+  function popoverHtml(){
+    return '<button type="button" class="close" onclick="IasharkAuthHeader.closePopover()">✕</button>'
+      +'<div class="lbl">'+T.quick_login_title+'</div>'
+      +'<input type="email" id="quickLoginEmail" placeholder="'+T.email_placeholder+'" autocomplete="email">'
+      +'<input type="password" id="quickLoginPwd" placeholder="'+T.password_placeholder+'" autocomplete="current-password" onkeydown="if(event.key===\'Enter\')IasharkAuthHeader.quickLogin()">'
+      +'<button type="button" class="submit" id="quickLoginSubmit" onclick="IasharkAuthHeader.quickLogin()">'+T.submit_login+'</button>'
+      +'<div class="qmsg" id="quickLoginMsg"></div>'
+      +'<div class="foot">'+T.no_account_label+' <a href="/compte.html">'+T.signup_link+'</a></div>';
+  }
 
   function injectStyle(){
     if(document.getElementById('iashark-auth-style')) return;
@@ -73,7 +109,7 @@
     pop = document.createElement('div');
     pop.id = 'quickLoginPopover';
     pop.className = 'iashark-login-pop';
-    pop.innerHTML = POPOVER_HTML;
+    pop.innerHTML = popoverHtml();
     document.body.appendChild(pop);
     document.addEventListener('click', function(e){
       if(pop.classList.contains('open') && !pop.contains(e.target) && e.target.id!=='quickLoginBtn'){
@@ -100,32 +136,54 @@
     var msgEl = document.getElementById('quickLoginMsg');
     var btn = document.getElementById('quickLoginSubmit');
     if(!email || !pwd){
-      msgEl.textContent = 'Remplis les deux champs.';
+      msgEl.textContent = T.fill_both_fields;
       msgEl.className = 'qmsg error';
       return;
     }
-    btn.disabled = true; btn.textContent = 'CONNEXION...';
+    btn.disabled = true; btn.textContent = T.submit_login_loading;
     msgEl.textContent = ''; msgEl.className = 'qmsg';
     try{
       var sb = getSb();
-      var res = await sb.auth.signInWithPassword({email: email, password: pwd});
-      if(res.error) throw res.error;
-      msgEl.textContent = 'Connecté ! Rechargement...';
+      var res;
+      try{
+        var r = await fetch(SUPA_URL+'/functions/v1/login-guard', {
+          method:'POST',
+          headers:{'Content-Type':'application/json','apikey':SUPA_KEY},
+          body:JSON.stringify({email:email, password:pwd})
+        });
+        var j = await r.json();
+        if(r.status===429){
+          msgEl.textContent = j.message || T.too_many_attempts;
+          msgEl.className = 'qmsg error';
+          btn.disabled = false; btn.textContent = T.submit_login;
+          return;
+        }
+        if(!r.ok) throw {message: j.msg||j.error_description||j.error||T.generic_login_error};
+        var setRes = await sb.auth.setSession({access_token:j.access_token, refresh_token:j.refresh_token});
+        if(setRes.error) throw setRes.error;
+        res = {error:null};
+      }catch(guardErr){
+        if(guardErr && guardErr.message && guardErr.message!=='Failed to fetch'){ throw guardErr; }
+        res = await sb.auth.signInWithPassword({email: email, password: pwd});
+        if(res.error) throw res.error;
+      }
+      msgEl.textContent = T.connected_reloading;
       msgEl.className = 'qmsg success';
       setTimeout(function(){ window.location.reload(); }, 500);
     }catch(e){
-      var m = e.message || 'Erreur de connexion';
-      if(m.includes('Invalid login')) m = 'Email ou mot de passe incorrect.';
-      if(m.includes('Email not confirmed')) m = 'Confirme ton email avant de te connecter.';
+      var m = e.message || T.generic_login_error;
+      if(m.includes('Invalid login')) m = T.invalid_login;
+      if(m.includes('Email not confirmed')) m = T.confirm_email;
       msgEl.textContent = m;
       msgEl.className = 'qmsg error';
-      btn.disabled = false; btn.textContent = 'SE CONNECTER →';
+      btn.disabled = false; btn.textContent = T.submit_login;
     }
   }
 
   async function mount(selector){
     var el = document.querySelector(selector);
     if(!el) return;
+    await loadT();
     try{
       var sb = getSb();
       var sessRes = await sb.auth.getSession();

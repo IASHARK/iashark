@@ -267,6 +267,10 @@ body::before{content:'';position:fixed;top:-300px;left:50%;transform:translateX(
     <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5L12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg></div>
     <div class="nav-lbl">ACCUEIL</div>
   </a>
+  <a href="/marches.html" class="nav-item">
+    <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 17V9M13 17V5M8 17v-4"/></svg></div>
+    <div class="nav-lbl">MARCHÉS</div>
+  </a>
   <a href="/historique.html" class="nav-item">
     <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20v-4"/></svg></div>
     <div class="nav-lbl">HISTORIQUE</div>
@@ -287,6 +291,13 @@ body::before{content:'';position:fixed;top:-300px;left:50%;transform:translateX(
 
 <script>
 var allMatchs=[],currentFilter='all',currentDayFilter='today',currentSport='football',currentSearch='';
+
+// Echappement HTML pour tout texte semi-externe (noms d'equipe issus
+// d'api-football via le pipeline) avant insertion en innerHTML - defense
+// en profondeur, meme si la source n'est pas un input utilisateur direct
+// (voir match.html, meme fonction, deja appliquee la-bas depuis le fix XSS
+// reflechie plus tot dans ce chantier).
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
 
 var WC_TROPHY_EMOJI = '🏆';
 var leagueList = [];
@@ -391,7 +402,7 @@ function renderChampDropdown(q){
   var html='<div class="champ-item'+(currentFilter==='all'?' active':'')+'" onclick="selectChampionnat(\'all\')">🌐 Tous les championnats</div>';
   filtered.forEach(function(i){
     var icon=i.isWC?WC_TROPHY_EMOJI:i.flag;
-    html+='<div class="champ-item'+(currentFilter===i.key?' active':'')+'" onclick="selectChampionnat(\''+i.key+'\')">'+icon+' '+i.name+'</div>';
+    html+='<div class="champ-item'+(currentFilter===i.key?' active':'')+'" onclick="selectChampionnat(\''+esc(i.key)+'\')">'+icon+' '+esc(i.name)+'</div>';
   });
   panel.innerHTML=html;
 }
@@ -463,7 +474,7 @@ function leagueHeader(m){
     return WC_TROPHY_EMOJI+' FIFA WORLD CUP 2026';
   }
   var flag=l?l.flag:(m.ligue_icon||'🏆');
-  var name=(m.league||(l?l.name:lk)).toUpperCase();
+  var name=esc((m.league||(l?l.name:lk)).toUpperCase());
   var country=l&&l.country?' <span class="mc-league-country">— '+l.country.toUpperCase()+'</span>':'';
   return flag+' '+name+country;
 }
@@ -471,11 +482,11 @@ function leagueHeader(m){
 function buildCard(m){
   var p1=m.p1||0,pn=m.pn||0,p2=m.p2||0,cc=confClass(m),heure=(m.date||'').split(' ')[1]||'';
   var isWC=isWorldCup(m);
-  var isHot=m.hot||ovrConf(m)>=80,isVal=m.val||m.vbet==='OUI';
+  var isHot=!!m.hot,isVal=m.val||m.vbet==='OUI';
   var badges='';
   if(!isWC){
-    if(isVal)badges+='<span class="badge badge-value">⚡ VALUE BET</span>';
-    else if(isHot)badges+='<span class="badge badge-hot">🔥 SHARK LOCK</span>';
+    if(isVal)badges+='<span class="badge badge-value">VALUE BET</span>';
+    else if(isHot)badges+='<span class="badge badge-hot">SHARK LOCK</span>';
     else badges+='<span class="badge badge-free">✓ GRATUIT</span>';
   }
   var coteStr='';
@@ -492,20 +503,20 @@ function buildCard(m){
     }
   }
   var css='mc'+(isHot&&!isWC?' hot':'')+(isVal&&!isWC?' value':'')+(isWC?' worldcup':'');
-  var pariLabel=m.pari_rec?translateMarket(m.pari_rec):(m.no_signal_label||"Rien d'exploitable ici — on attend mieux.");
+  var pariLabel=m.pari_rec?translateMarket(m.pari_rec):(m.no_signal_label||'Rien d\'exploitable ici — on attend mieux.');
   return'<div class="'+css+'" onclick="window.location=\'/match/'+m.id+'.html\'">'
     +'<div class="mc-top"><div class="mc-league">'+leagueHeader(m)+'</div><div class="mc-badges">'+badges+'</div></div>'
     +'<div class="mc-body"><div class="mc-left"><div class="mc-teams">'
-    +'<div class="mc-team home">'+teamLogo(m.home)+'<div class="mc-team-name">'+(m.home&&m.home.n||'').toUpperCase()+'</div></div>'
+    +'<div class="mc-team home">'+teamLogo(m.home)+'<div class="mc-team-name">'+esc((m.home&&m.home.n||'').toUpperCase())+'</div></div>'
     +'<div class="mc-teams-sep"><div class="mc-vs">VS</div><div class="mc-time">'+heure+'</div></div>'
-    +'<div class="mc-team away">'+teamLogo(m.away)+'<div class="mc-team-name">'+(m.away&&m.away.n||'').toUpperCase()+'</div></div>'
+    +'<div class="mc-team away">'+teamLogo(m.away)+'<div class="mc-team-name">'+esc((m.away&&m.away.n||'').toUpperCase())+'</div></div>'
     +'</div>'
     +'<div class="mc-pari"><span class="mc-pari-label">🦈 IASHARK</span><span class="mc-pari-bet">'+pariLabel+'</span>'+(coteStr?'<span class="mc-pari-cote">'+coteStr+'</span>':'')+'</div>'
     +'</div>'
     +'<div class="mc-right"><div class="conf-ring '+confTier(m)+'"><div class="conf-ring-val">'+(ovrConf(m)/10).toFixed(1)+'</div><div class="conf-ring-sub">/10</div></div><button class="mc-cta">VOIR →</button></div>'
     +'</div>'
     +'<div class="mc-probas"><div class="prob-bar-wrap"><div class="pb-1" style="width:'+p1+'%"></div><div class="pb-n" style="width:'+pn+'%"></div><div class="pb-2" style="width:'+p2+'%"></div></div>'
-    +'<div class="prob-labels"><div class="prob-lbl-item"><div class="prob-lbl-pct" style="color:var(--cyan)">'+p1+'%</div><div class="prob-lbl-txt">'+(m.home&&m.home.n||'').toUpperCase().slice(0,8)+'</div></div><div class="prob-lbl-item"><div class="prob-lbl-pct" style="color:var(--muted)">'+pn+'%</div><div class="prob-lbl-txt">NUL</div></div><div class="prob-lbl-item"><div class="prob-lbl-pct" style="color:rgba(226,232,240,0.45)">'+p2+'%</div><div class="prob-lbl-txt">'+(m.away&&m.away.n||'').toUpperCase().slice(0,8)+'</div></div></div>'
+    +'<div class="prob-labels"><div class="prob-lbl-item"><div class="prob-lbl-pct" style="color:var(--cyan)">'+p1+'%</div><div class="prob-lbl-txt">'+esc((m.home&&m.home.n||'').toUpperCase().slice(0,8))+'</div></div><div class="prob-lbl-item"><div class="prob-lbl-pct" style="color:var(--muted)">'+pn+'%</div><div class="prob-lbl-txt">NUL</div></div><div class="prob-lbl-item"><div class="prob-lbl-pct" style="color:rgba(226,232,240,0.45)">'+p2+'%</div><div class="prob-lbl-txt">'+esc((m.away&&m.away.n||'').toUpperCase().slice(0,8))+'</div></div></div>'
     +'</div></div>';
 }
 
@@ -528,13 +539,13 @@ function buildChocCard(m){
     }
   }
   function logoH(t,ini,name){if(!t)return'';var u=t.photo||t.logo||(t.id?'https://media.api-sports.io/football/teams/'+t.id+'.png':'');if(!u)return'<div class="choc-logo-ph">'+ini+'</div>';var altN=('Logo '+(name||ini)).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');return'<img class="choc-logo" src="'+u+'" alt="'+altN+'" onerror="this.outerHTML=\'<div class=choc-logo-ph>'+ini+'</div>\'">';}
-  var pl=m.pari_rec?translateMarket(m.pari_rec):(m.no_signal_label||"Rien d'exploitable ici — on attend mieux.");
+  var pl=m.pari_rec?translateMarket(m.pari_rec):(m.no_signal_label||'Rien d\'exploitable ici — on attend mieux.');
   return'<div class="choc-card-wrap"><div class="choc-card" onclick="window.location=\'/match/'+m.id+'.html\'">'
     +'<div class="choc-inner"><div class="choc-league"><span class="choc-dot"></span>'+leagueHeader(m)+'</div>'
     +'<div class="choc-teams-row">'
-    +'<div class="choc-team">'+logoH(m.home,hn.slice(0,2).toUpperCase(),hn)+'<div class="choc-name">'+hn.toUpperCase()+'</div><div class="choc-sub-lbl">DOMICILE</div></div>'
+    +'<div class="choc-team">'+logoH(m.home,esc(hn.slice(0,2).toUpperCase()),hn)+'<div class="choc-name">'+esc(hn.toUpperCase())+'</div><div class="choc-sub-lbl">DOMICILE</div></div>'
     +'<div><span class="choc-vs">VS</span><div class="choc-hr">'+heure+'</div></div>'
-    +'<div class="choc-team">'+logoH(m.away,an.slice(0,2).toUpperCase(),an)+'<div class="choc-name" style="color:rgba(226,232,240,0.65)">'+an.toUpperCase()+'</div><div class="choc-sub-lbl">EXTÉRIEUR</div></div>'
+    +'<div class="choc-team">'+logoH(m.away,esc(an.slice(0,2).toUpperCase()),an)+'<div class="choc-name" style="color:rgba(226,232,240,0.65)">'+esc(an.toUpperCase())+'</div><div class="choc-sub-lbl">EXTÉRIEUR</div></div>'
     +'</div></div>'
     +'<div class="choc-pari-strip"><div><div class="choc-pari-lbl">🦈 IASHARK</div><div class="choc-pari-bet">'+pl+'</div></div>'+(pc?'<div class="choc-cote">'+pc+'</div>':'')+'</div>'
     +'</div></div>';
@@ -578,7 +589,7 @@ function renderMatchs(){
 
 async function loadData(){
   try{
-    var r=await fetch('data.json?t='+Date.now());
+    var r=await fetch('/data.json?t='+Date.now());
     if(!r.ok)throw new Error('HTTP '+r.status);
     var d=await r.json();
     allMatchs=d.matchs||[];

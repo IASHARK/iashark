@@ -30,7 +30,7 @@ test("les données avancées commencent par le contexte utile et se terminent pa
   const advancedSource = matchPage.slice(advancedStart, playersStart);
   const conditions = advancedSource.indexOf("buildMatchConditions(");
   const referee = advancedSource.indexOf("arbitreHtml");
-  const probabilities = advancedSource.indexOf("buildDonut(");
+  const probabilities = advancedSource.indexOf("buildCompactProbabilities(");
   const faq = advancedSource.lastIndexOf("buildFAQ(");
 
   assert.ok(conditions > -1, "les conditions du match doivent être affichées");
@@ -55,7 +55,7 @@ test("le résumé garde la décision, le contexte, les risques et les marchés c
   const summarySource = matchPage.slice(summaryStart, advancedStart);
   assert.match(summarySource, /parisHtml/);
   assert.match(summarySource, /ctxHtml/);
-  assert.match(summarySource, /insightHtml/);
+  assert.match(summarySource, /buildRiskStrip\(/);
   assert.match(summarySource, /buildMarketsTable\(/);
 });
 

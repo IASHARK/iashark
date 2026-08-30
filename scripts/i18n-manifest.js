@@ -337,10 +337,10 @@ var PAGES = [
         var t = d.match_page;
         return "+'<button class=\"tab-btn active\" id=\"tab-btn-resume\" role=\"tab\" aria-selected=\"true\" aria-controls=\"tab-resume\" data-tab=\"resume\" onclick=\"switchTab(this,\\'resume\\')\">" + esc(t.tab_summary) + "</button>'\n    +'<button class=\"tab-btn\" id=\"tab-btn-donnees\" role=\"tab\" aria-selected=\"false\" aria-controls=\"tab-donnees\" data-tab=\"donnees\" onclick=\"switchTab(this,\\'donnees\\')\">" + esc(t.tab_advanced_data) + "</button>'\n    +'<button class=\"tab-btn\" id=\"tab-btn-joueurs\" role=\"tab\" aria-selected=\"false\" aria-controls=\"tab-joueurs\" data-tab=\"joueurs\" onclick=\"switchTab(this,\\'joueurs\\')\">" + esc(t.tab_players) + "</button>'";
       }},
-      {find: '<div class="stitle">PROBABILITÉS 1X2</div>', build: function(d, l, esc){ return '<div class="stitle">' + esc(d.match_page.section_1x2) + '</div>'; }},
+      {find: '<div class="stitle">PROBABILITÉS 1X2</div>', count: 2, build: function(d, l, esc){ return '<div class="stitle">' + esc(d.match_page.section_1x2) + '</div>'; }},
       {find: '<div class="stitle">CONSENSUS DES MARCHÉS</div>', build: function(d, l, esc){ return '<div class="stitle">' + esc(d.match_page.section_consensus) + '</div>'; }},
       {find: '<div class="stitle">SCORES SIMULÉS — MONTE-CARLO</div>', build: function(d, l, esc){ return '<div class="stitle">' + esc(d.match_page.section_montecarlo) + '</div>'; }},
-      {find: '<div class="stitle">SCORES LES PLUS PROBABLES</div>', build: function(d, l, esc){ return '<div class="stitle">' + esc(d.match_page.section_top_scores) + '</div>'; }},
+      {find: '<div class="stitle">SCORES LES PLUS PROBABLES</div>', count: 3, build: function(d, l, esc){ return '<div class="stitle">' + esc(d.match_page.section_top_scores) + '</div>'; }},
       {find: '<div class="stitle">SCORE LE PLUS PROBABLE</div>', build: function(d, l, esc){ return '<div class="stitle">' + esc(d.match_page.section_top_score) + '</div>'; }},
       {find: '<div class="stitle">RADAR DE FORCES</div>', build: function(d, l, esc){ return '<div class="stitle">' + esc(d.match_page.section_radar) + '</div>'; }},
       {find: '<div class="stitle">STATS (MOYENNES 10 DERNIERS MATCHS)</div>', build: function(d, l, esc){ return '<div class="stitle">' + esc(d.match_page.section_stats) + '</div>'; }},

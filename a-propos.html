@@ -151,86 +151,8 @@ footer p{font-family:'Space Mono',monospace;font-size:8px;color:rgba(74,101,128,
   <div class="sec">
     <div class="sec-lbl">À LIRE AVANT TOUT</div>
     <h2>Un modèle par match, pas de combinés</h2>
-    <p>Le cœur du système analyse <b>chaque match indépendamment</b> — un pari simple à la fois. Toutes les statistiques de performance présentées sur ce site (winrate, ROI, détail par marché) portent exclusivement sur ces <b>paris simples</b>, jamais sur des combinaisons de plusieurs paris.</p>
+    <p>Le cœur du système analyse <b>chaque match indépendamment</b> — un pari simple à la fois, jamais des combinaisons de plusieurs paris.</p>
   </div>
-
-  <!-- ═══ EXEMPLE ROI ═══ -->
-  <div class="sec">
-    <div class="sec-lbl">COMPRENDRE LES CHIFFRES</div>
-    <h2>Ce qu'un ROI de 20% veut vraiment dire</h2>
-    <p>Quand vous voyez un ROI (retour sur investissement) de 20% sur ce site, ça ne veut pas dire que votre capital augmente "seulement" de 20%. Dans les faits, votre gain réel en euros est souvent bien plus élevé que ce chiffre seul ne le laisse penser. Exemple concret :</p>
-
-    <ul class="simple-list">
-      <li>Capital de départ : <b>3 000 €</b></li>
-      <li>Mise par pari (fixe) : <b>100 €</b></li>
-      <li>Nombre de paris joués : <b>200</b></li>
-    </ul>
-
-    <p><b>1. Pourquoi vous n'avez pas besoin de 20 000€ pour jouer ?</b></p>
-    <p>Si vous faites 200 paris à 100€, vous déplacez un total de 20 000€ sur toute la période — c'est ce qu'on appelle le volume de jeu (le "turnover"). Pourtant, vous n'avez besoin que de 3 000€ sur votre compte. Pourquoi ? Parce que l'argent circule : vous misez 100€, le match se termine, vous récupérez votre mise avec vos gains éventuels, et vous réutilisez ce même argent pour le pari suivant. Vos 3 000€ de départ sont ainsi recyclés un peu plus de 6 fois sur la période.</p>
-
-    <p><b>2. Le ROI vs votre bénéfice réel</b></p>
-    <div class="example-box">
-      <div class="ex-row"><span class="ex-label">ROI de 20% (mesure de l'efficacité, sur les 20 000€ de mises cumulées)</span><span class="ex-value hl">4 000 € de gains</span></div>
-      <div class="ex-row"><span class="ex-label">Rendement sur votre capital de départ (3 000€ → 3 000€ + 4 000€)</span><span class="ex-value hl">+133%</span></div>
-      <div class="ex-row"><span class="ex-label">Votre cagnotte totale</span><span class="ex-value hl">7 000 €</span></div>
-    </div>
-    <p style="font-size:12px;color:var(--muted);">Cet exemple est basé sur nos performances passées ; elles ne garantissent pas les résultats futurs.</p>
-
-    <div class="callout">
-      <div class="ctitle">⚠ LA RÈGLE DE SÉCURITÉ POUR PROTÉGER VOTRE ARGENT</div>
-      <p>Miser 100€ avec un capital de 3 000€ signifie que vous jouez 3,3% de votre capital sur chaque pari. Même avec les meilleurs pronostics du monde, les séries de défaites consécutives arrivent. Si vous enchaînez 5 ou 6 pertes d'affilée avec des mises trop grosses, vous risquez de mettre votre capital en danger.<br><br>Notre conseil : ne misez pas une somme fixe au hasard. Misez plutôt un pourcentage fixe de votre capital actuel, idéalement entre 2% et 3% (soit 60€ à 90€ par pari pour un capital de 3 000€). Cela suffit largement pour encaisser les mauvaises séries et faire grimper votre cagnotte de façon sereine.</p>
-    </div>
-  </div>
-
-  <!-- ═══ RESULTATS ═══ -->
-  <div class="sec">
-    <div class="sec-lbl">HISTORIQUE VÉRIFIABLE</div>
-    <h2>Nos résultats, paris simples uniquement</h2>
-    <p>Chiffres calculés en direct à partir de <a href="/historique.json" style="color:var(--cyan);text-decoration:underline;">l'historique réel des prédictions</a> — le même fichier que consulte <a href="/historique.html" style="color:var(--cyan);text-decoration:underline;">la page Historique</a>, jamais une valeur saisie à la main.</p>
-
-    <div class="stat-strip" id="statStrip">
-      <div class="stat-chip"><div class="stat-num" id="statTotal">—</div><div class="stat-lbl">PARIS RÉSOLUS</div></div>
-      <div class="stat-chip"><div class="stat-num" id="statWinrate">—</div><div class="stat-lbl">WINRATE GLOBAL</div></div>
-      <div class="stat-chip"><div class="stat-num" id="statRoi">—</div><div class="stat-lbl">ROI GLOBAL</div></div>
-    </div>
-
-    <table class="market-table">
-      <thead><tr><th>Marché</th><th style="text-align:right">Winrate</th><th style="text-align:right">ROI</th><th style="text-align:right">Paris</th></tr></thead>
-      <tbody id="marketTableBody"><tr><td colspan="4" style="color:var(--muted);padding:12px 0;">Chargement…</td></tr></tbody>
-    </table>
-
-    <p style="font-size:12px;color:var(--muted);">Seuls les marchés avec un échantillon suffisant (5 paris ou plus) sont affichés, résultats positifs et négatifs inclus. Les performances passées ne garantissent pas les performances futures.</p>
-  </div>
-
-  <script>
-  (function(){
-    function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
-    var MARKET_LABELS={'over25':'Plus de 2,5 buts','over15':'Plus de 1,5 but','under25':'Moins de 2,5 buts','btts_non':'Une équipe ne marque pas','btts_oui':'Les deux équipes marquent','dc1x':'DC 1X','dc_x1':'DC 1X','dc_x2':'DC X2','victoire_dom':'Victoire domicile','victoire_ext':'Victoire extérieur','handicap_dom':'Handicap dom.','handicap_ext':'Handicap ext.','match_winner':'Vainqueur','autre':'Autre'};
-    fetch('/historique.json?t='+Date.now()).then(function(r){return r.json();}).then(function(d){
-      var stats=d.stats||{};
-      document.getElementById('statTotal').textContent=(stats.total!=null?stats.total:'—');
-      document.getElementById('statWinrate').textContent=(stats.winrate!=null?stats.winrate+'%':'—');
-      var roi=stats.roi;
-      document.getElementById('statRoi').textContent=(roi!=null?(roi>0?'+':'')+roi+'%':'—');
-      var byMarket=(d.backtesting&&d.backtesting.by_market)||[];
-      var rows=byMarket.filter(function(m){return m.total>=5;}).sort(function(a,b){return b.total-a.total;});
-      var tbody=document.getElementById('marketTableBody');
-      if(!rows.length){tbody.innerHTML='<tr><td colspan="4" style="color:var(--muted);padding:12px 0;">Pas encore assez de données par marché (minimum 5 paris résolus).</td></tr>';return;}
-      tbody.innerHTML=rows.map(function(m){
-        var label=MARKET_LABELS[m.key]||m.key;
-        var roiCls=m.roi>0?'pos':m.roi<0?'negv':'';
-        var roiTxt=(m.roi>0?'+':'')+m.roi+'%';
-        return '<tr><td>'+esc(label)+'</td><td class="num">'+m.winrate+'%</td><td class="num '+roiCls+'">'+esc(roiTxt)+'</td><td class="num">'+m.total+'</td></tr>';
-      }).join('');
-    }).catch(function(){
-      document.getElementById('statTotal').textContent='—';
-      document.getElementById('statWinrate').textContent='—';
-      document.getElementById('statRoi').textContent='—';
-      document.getElementById('marketTableBody').innerHTML='<tr><td colspan="4" style="color:var(--muted);padding:12px 0;">Historique indisponible pour le moment. Voir <a href="/historique.html" style="color:var(--cyan);">la page Historique</a>.</td></tr>';
-    });
-  })();
-  </script>
 
   <!-- ═══ LEGAL ═══ -->
   <div class="sec">
@@ -265,7 +187,6 @@ footer p{font-family:'Space Mono',monospace;font-size:8px;color:rgba(74,101,128,
 <nav class="nav-bottom">
   <a href="https://iashark.com/" class="nav-item"><div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5L12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg></div><div class="nav-lbl">ACCUEIL</div></a>
   <a href="https://iashark.com/marches.html" class="nav-item"><div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 17V9M13 17V5M8 17v-4"/></svg></div><div class="nav-lbl">MARCHÉS</div></a>
-  <a href="https://iashark.com/historique.html" class="nav-item"><div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20v-4"/></svg></div><div class="nav-lbl">HISTORIQUE</div></a>
   <a href="https://iashark.com/pro.html" class="nav-item"><div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.9 6.6L22 9.3l-5 4.9L18.2 22 12 18.3 5.8 22 7 14.2 2 9.3l7.1-.7z"/></svg></div><div class="nav-lbl">OUTILS</div></a>
   <a href="https://iashark.com/blog/" class="nav-item"><div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg></div><div class="nav-lbl">GUIDES</div></a>
   <a href="https://iashark.com/compte.html" class="nav-item"><div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg></div><div class="nav-lbl">COMPTE</div></a>

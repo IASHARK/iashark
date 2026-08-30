@@ -1170,7 +1170,10 @@ jobs:
           }
           var STATIC_SITEMAP_PAGES=[
             {loc:'https://iashark.com/',priority:'1.0'},
-            {loc:'https://iashark.com/historique.html',priority:'0.8'},
+            // historique.html retiree du sitemap sur demande explicite (2026-08-30) :
+            // la page reste en ligne (donnees Supabase intactes) mais n'est plus
+            // promue publiquement tant que le moteur V2 n'a pas accumule assez de
+            // donnees reelles - voir IASHARK_V2_RECETTE_VISUELLE.md.
             {loc:'https://iashark.com/pro.html',priority:'0.8'},
             {loc:'https://iashark.com/a-propos.html',priority:'0.6'},
             {loc:'https://iashark.com/blog/',priority:'0.6'},

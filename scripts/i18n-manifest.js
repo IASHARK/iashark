@@ -120,7 +120,6 @@ var PAGES = [
       }},
       {find: '<div class="nav-lbl">ACCUEIL</div>', build: function(d){ return '<div class="nav-lbl">' + d.nav.home + "</div>"; }},
       {find: '<div class="nav-lbl">MARCHÉS</div>', build: function(d){ return '<div class="nav-lbl">' + d.nav.markets + "</div>"; }},
-      {find: '<div class="nav-lbl">HISTORIQUE</div>', build: function(d){ return '<div class="nav-lbl">' + d.nav.history + "</div>"; }},
       {find: '<div class="nav-lbl">OUTILS</div>', build: function(d){ return '<div class="nav-lbl">' + d.nav.tools + "</div>"; }},
       {find: '<div class="nav-lbl">GUIDES</div>', build: function(d){ return '<div class="nav-lbl">' + d.nav.guides + "</div>"; }},
       {find: '<div class="nav-lbl">COMPTE</div>', build: function(d){ return '<div class="nav-lbl">' + d.nav.account + "</div>"; }},
@@ -224,7 +223,6 @@ var PAGES = [
       }},
       {find: '<div class="nav-lbl">ACCUEIL</div>', build: function(d){ return '<div class="nav-lbl">' + d.nav.home + '</div>'; }},
       {find: '<div class="nav-lbl">MARCHÉS</div>', build: function(d){ return '<div class="nav-lbl">' + d.nav.markets + '</div>'; }},
-      {find: '<div class="nav-lbl">HISTORIQUE</div>', build: function(d){ return '<div class="nav-lbl">' + d.nav.history + '</div>'; }},
       {find: '<div class="nav-lbl">OUTILS</div>', build: function(d){ return '<div class="nav-lbl">' + d.nav.tools + '</div>'; }},
       {find: '<div class="nav-lbl">GUIDES</div>', build: function(d){ return '<div class="nav-lbl">' + d.nav.guides + '</div>'; }},
       {find: '<div class="nav-lbl">COMPTE</div>', build: function(d){ return '<div class="nav-lbl">' + d.nav.account + '</div>'; }},
@@ -307,7 +305,6 @@ var PAGES = [
       }},
       {find: '<div class="nav-lbl">ACCUEIL</div>', build: function(d){ return '<div class="nav-lbl">' + d.nav.home + '</div>'; }},
       {find: '<div class="nav-lbl">MARCHÉS</div>', build: function(d){ return '<div class="nav-lbl">' + d.nav.markets + '</div>'; }},
-      {find: '<div class="nav-lbl">HISTORIQUE</div>', build: function(d){ return '<div class="nav-lbl">' + d.nav.history + '</div>'; }},
       {find: '<div class="nav-lbl">OUTILS</div>', build: function(d){ return '<div class="nav-lbl">' + d.nav.tools + '</div>'; }},
       {find: '<div class="nav-lbl">GUIDES</div>', build: function(d){ return '<div class="nav-lbl">' + d.nav.guides + '</div>'; }},
       {find: '<div class="nav-lbl">COMPTE</div>', build: function(d){ return '<div class="nav-lbl">' + d.nav.account + '</div>'; }},
@@ -492,7 +489,6 @@ var PAGES = [
       }},
       {find: '<div class="nav-lbl">ACCUEIL</div>', build: function(d){ return '<div class="nav-lbl">' + d.nav.home + '</div>'; }},
       {find: '<div class="nav-lbl">MARCHÉS</div>', build: function(d){ return '<div class="nav-lbl">' + d.nav.markets + '</div>'; }},
-      {find: '<div class="nav-lbl">HISTORIQUE</div>', build: function(d){ return '<div class="nav-lbl">' + d.nav.history + '</div>'; }},
       {find: '<div class="nav-lbl">OUTILS</div>', build: function(d){ return '<div class="nav-lbl">' + d.nav.tools + '</div>'; }},
       {find: '<div class="nav-lbl">GUIDES</div>', build: function(d){ return '<div class="nav-lbl">' + d.nav.guides + '</div>'; }},
       {find: '<div class="nav-lbl">COMPTE</div>', build: function(d){ return '<div class="nav-lbl">' + d.nav.account + '</div>'; }},
@@ -658,8 +654,8 @@ var PAGES = [
       {find: '<button class="btn-primary" id="btnSignup" onclick="doSignup()">CRÉER MON COMPTE →</button>', build: function(d){ return '<button class="btn-primary" id="btnSignup" onclick="doSignup()">' + d.auth.signup_btn + '</button>'; }},
       {find: '<span class="ubadge free" id="planBadge">GRATUIT</span>', build: function(d){ return '<span class="ubadge free" id="planBadge">' + d.account.plan_free_badge + '</span>'; }},
       {find: "<span class=\"ubadge since\" id=\"sinceBadge\">MEMBRE DEPUIS —</span>", build: function(d){ return '<span class="ubadge since" id="sinceBadge">' + d.account.member_since + ' —</span>'; }},
-      {find: '<div class="dash-card-title">HISTORIQUE</div>', build: function(d){ return '<div class="dash-card-title">' + d.account.dashboard_history + '</div>'; }},
-      {find: '<div class="dash-card-val"><a href="/historique.html" style="color:var(--cyan);">VOIR →</a></div>', build: function(d){ return '<div class="dash-card-val"><a href="/historique.html" style="color:var(--cyan);">' + d.compte_page.dash_view + '</a></div>'; }},
+      {find: '<div class="dash-card-title">MARCHÉS</div>', build: function(d){ return '<div class="dash-card-title">' + d.nav.markets + '</div>'; }},
+      {find: '<div class="dash-card-val"><a href="/marches.html" style="color:var(--cyan);">VOIR →</a></div>', build: function(d){ return '<div class="dash-card-val"><a href="/marches.html" style="color:var(--cyan);">' + d.compte_page.dash_view + '</a></div>'; }},
       {find: '<div class="dash-card-title">ESPACE OUTILS</div>', build: function(d){ return '<div class="dash-card-title">' + d.account.dashboard_tools + '</div>'; }},
       {find: '<div class="dash-card-val"><a href="/pro.html" style="color:var(--amber);">ACCÈS →</a></div>', build: function(d){ return '<div class="dash-card-val"><a href="/pro.html" style="color:var(--amber);">' + d.compte_page.dash_access + '</a></div>'; }},
       {find: '<div class="section-title">ABONNEMENT</div>', build: function(d){ return '<div class="section-title">' + d.account.plan_section_title + '</div>'; }},
@@ -705,7 +701,6 @@ var PAGES = [
       }},
       {find: '<div class="nav-lbl">ACCUEIL</div>', build: function(d){ return '<div class="nav-lbl">' + d.nav.home + '</div>'; }},
       {find: '<div class="nav-lbl">MARCHÉS</div>', build: function(d){ return '<div class="nav-lbl">' + d.nav.markets + '</div>'; }},
-      {find: '<div class="nav-lbl">HISTORIQUE</div>', build: function(d){ return '<div class="nav-lbl">' + d.nav.history + '</div>'; }},
       {find: '<div class="nav-lbl">OUTILS</div>', build: function(d){ return '<div class="nav-lbl">' + d.nav.tools + '</div>'; }},
       {find: '<div class="nav-lbl">GUIDES</div>', build: function(d){ return '<div class="nav-lbl">' + d.nav.guides + '</div>'; }},
       {find: '<div class="nav-lbl">COMPTE</div>', build: function(d){ return '<div class="nav-lbl">' + d.nav.account + '</div>'; }},
@@ -772,6 +767,12 @@ var PAGES = [
   },
   {
     file: "historique.html",
+    // Retiree du produit public le 2026-08-30 (decision utilisateur) : la
+    // page reste generee/traduite (donnees Supabase intactes, usage
+    // interne possible) mais n'est plus liee depuis aucune navigation
+    // publique ni promue dans les sitemaps - voir noSitemap ci-dessous et
+    // IASHARK_V2_RECETTE_VISUELLE.md.
+    noSitemap: true,
     metas: {
       fr: {title: "IASHARK — Historique & Performance", description: "Historique des pronostics IASHARK. Winrate, ROI et résultats détaillés de toutes nos prédictions football IA."},
       en: {title: "IASHARK — History & Performance", description: "History of IASHARK predictions. Winrate, ROI and detailed results of all our AI football predictions."},
@@ -906,10 +907,6 @@ var PAGES = [
        build: function(d){ var l = d.landing_page; return '<div class="model-card"><div class="model-tag">' + l.model3_tag + '</div><div class="model-name">' + l.model3_name + '</div><div class="model-desc">' + l.model3_desc + '</div></div>'; }},
       {find: '<div class="model-card"><div class="model-tag">MODÈLE 4</div><div class="model-name">Elo & Shin</div><div class="model-desc">Force réelle des équipes dans le temps, et correction du biais des probabilités implicites.</div></div>',
        build: function(d){ var l = d.landing_page; return '<div class="model-card"><div class="model-tag">' + l.model4_tag + '</div><div class="model-name">' + l.model4_name + '</div><div class="model-desc">' + l.model4_desc + '</div></div>'; }},
-      {find: '<h3>Rien à cacher. <b>Tout est tracé.</b></h3>', build: function(d){ var l = d.landing_page; return '<h3>' + l.proof_title_pre + '<b>' + l.proof_title_b + '</b></h3>'; }},
-      {find: "<p>Chaque analyse publiée reste visible dans notre historique : marché recommandé, probabilité annoncée, résultat réel. Tu vérifies, on ne réécrit rien après coup.</p>",
-       build: function(d){ return '<p>' + d.landing_page.proof_desc + '</p>'; }},
-      {find: '<a href="https://iashark.com/historique.html" class="btn-ghost">VOIR L\'HISTORIQUE COMPLET →</a>', build: function(d){ return '<a href="https://iashark.com/historique.html" class="btn-ghost">' + d.landing_page.proof_cta + '</a>'; }},
       {find: '<div class="sec-lbl">EN PRATIQUE</div>', build: function(d){ return '<div class="sec-lbl">' + d.landing_page.lbl_practice + '</div>'; }},
       {find: '<h2 class="sec-title">De la donnée brute au <b>signal exploitable.</b></h2>', build: function(d){ var l = d.landing_page; return '<h2 class="sec-title">' + l.title_practice_pre + '<b>' + l.title_practice_b + '</b></h2>'; }},
       {find: '<div class="step-title">On ingère la donnée</div><div class="step-desc">Calendriers, compositions probables, historique des confrontations et statistiques xG remontés en continu, championnat par championnat.</div>',

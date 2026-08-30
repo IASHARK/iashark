@@ -19,9 +19,16 @@ const SITE_URL = "https://iashark.com";
 
 function generateLocalizedSitemaps(locales, pages, today, outDir) {
   outDir = outDir || ROOT;
+  // Une page avec noSitemap:true reste generee/traduite normalement (le
+  // fichier existe et fonctionne) mais n'est jamais promue dans les
+  // sitemaps - cas d'usage : une page gardee en ligne pour un usage
+  // interne/admin, jamais pour la decouverte publique/SEO (ex.
+  // historique.html, retiree du produit public le 2026-08-30 - voir
+  // IASHARK_V2_RECETTE_VISUELLE.md).
+  var sitemapPages = pages.filter(function (p) { return !p.noSitemap; });
   var files = [];
   locales.supported.forEach(function (locale) {
-    var urls = pages.map(function (page) {
+    var urls = sitemapPages.map(function (page) {
       var slug = page.file === "index.html" ? "" : page.file;
       var loc = SITE_URL + "/" + locale + "/" + slug;
       var alternates = locales.supported.map(function (l2) {

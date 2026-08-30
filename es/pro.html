@@ -792,7 +792,7 @@ function renderSelections(){
     var miseDefault=suggMise||10;
     return '<div class="card-item">'
       +'<div class="card-top">'
-      +'<div class="card-info"><div class="mname">'+hn+' vs '+an+'</div><div class="mleague">'+(m.ligue_icon||'🏆')+' '+m.league+' · '+label+' · '+heure+'</div>'
+      +'<div class="card-info"><div class="mname">'+esc(hn)+' vs '+esc(an)+'</div><div class="mleague">'+(m.ligue_icon||'🏆')+' '+esc(m.league)+' · '+esc(label)+' · '+esc(heure)+'</div>'
       +(note?'<div class="saved-note">'+esc(note)+'</div>':'')
       +'</div>'
       +'<div class="cote-v">'+(m.cote_rec||'—')+'</div>'
@@ -929,7 +929,7 @@ function renderBets(){
     var srcTag=p.source==='auto'?'<span class="src-tag src-auto">AUTO</span>':'<span class="src-tag src-manual">✎ MANUAL</span>';
     return '<div class="bet-item '+p.result+'">'
       +'<div class="bet-top">'
-      +'<div class="bet-info"><div class="mname">'+p.match+srcTag+'</div><div class="mleague">'+p.market+' · cuota '+p.cote.toFixed(2)+' · '+p.mise+'€</div></div>'
+      +'<div class="bet-info"><div class="mname">'+esc(p.match)+srcTag+'</div><div class="mleague">'+esc(p.market)+' · cuota '+p.cote.toFixed(2)+' · '+p.mise+'€</div></div>'
       +resultHtml
       +'<button class="btn-note" onclick="toggleNote('+p.id+')" title="Note">✎</button>'
       +'<button class="btndel" onclick="delPari('+p.id+')" title="Supprimer">✕</button>'

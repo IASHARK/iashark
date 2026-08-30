@@ -234,6 +234,8 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 <script>
 var allPredictions=[], historiqueData={}, currentFilter='all', currentStatSport='all';
 
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+
 var MARKET_LABELS={'over25':'Plus de 2,5 buts','over15':'Plus de 1,5 but','under25':'Moins de 2,5 buts','btts_non':'Une équipe ne marque pas','btts_oui':'Les deux équipes marquent','dc1x':'DC 1X','dc_x1':'DC 1X','dc_x2':'DC X2','victoire_dom':'Victoire domicile','victoire_ext':'Victoire extérieur','handicap_dom':'Handicap -0.5 dom','handicap_ext':'Handicap +0.5 ext','match_winner':'Vainqueur','autre':'Autre'};
 var RESOLVED=['win','loss'];
 var DISPLAYABLE=['win','loss','neutral','no_signal','void'];
@@ -310,13 +312,13 @@ function buildFilterOptions(){
   var mktSel=document.getElementById('mktSel');
   var curMkt=mktSel.value;
   mktSel.innerHTML='<option value="">TOUS LES MARCHÉS</option>'+Object.keys(markets).sort().map(function(k){
-    return '<option value="'+k+'">'+(MARKET_LABELS[k]||k).toUpperCase()+'</option>';
+    return '<option value="'+esc(k)+'">'+esc((MARKET_LABELS[k]||k).toUpperCase())+'</option>';
   }).join('');
   mktSel.value=curMkt;
   var leagueSel=document.getElementById('leagueSel');
   var curLeague=leagueSel.value;
   leagueSel.innerHTML='<option value="">TOUS CHAMPIONNATS</option>'+Object.keys(leagues).sort().map(function(l){
-    return '<option value="'+l+'">'+l.toUpperCase()+'</option>';
+    return '<option value="'+esc(l)+'">'+esc(l.toUpperCase())+'</option>';
   }).join('');
   leagueSel.value=curLeague;
 }
@@ -357,12 +359,12 @@ function renderPredictions(){
     var proTag=isPro(p)?'<span class="pred-tag tag-pro">OUTILS</span>':'';
     return'<div class="pred-card '+p.result+'">'
       +'<div>'
-      +'<div class="pred-match">'+p.match+'</div>'
+      +'<div class="pred-match">'+esc(p.match)+'</div>'
       +'<div class="pred-meta">'
-      +(ml&&p.market?'<span class="pred-tag tag-market" onclick="filterByTag(\'market\',\''+p.market+'\')">'+ml+'</span>':'')
+      +(ml&&p.market?'<span class="pred-tag tag-market" onclick="filterByTag(\'market\',\''+esc(p.market)+'\')">'+esc(ml)+'</span>':'')
       +(coteStr?'<span class="pred-cote">'+coteStr+'</span>':'')
       +proTag
-      +(p.league?'<span class="pred-tag tag-league" onclick="filterByTag(\'league\',\''+p.league+'\')">'+p.league+'</span>':'')
+      +(p.league?'<span class="pred-tag tag-league" onclick="filterByTag(\'league\',\''+esc(p.league)+'\')">'+esc(p.league)+'</span>':'')
       +'<span class="tag-date">'+(p.date||p.resolved_date||'')+(p.resolved_date&&p.date&&p.resolved_date!==p.date?' · résolu '+p.resolved_date:'')+'</span>'
       +'</div>'
       +'</div>'
@@ -385,7 +387,7 @@ function renderBacktesting(bt){
       var roiColor=roi>=0?'#10b981':'#ef4444';
       var label=useMarketLabels?(MARKET_LABELS[r.key]||r.key):r.key;
       return '<div class="bt-row'+(lowSample?' low-sample':'')+'">'
-        +'<div class="bt-key" title="'+r.key+'">'+label+'<span class="bt-n-badge">('+r.total+')</span></div>'
+        +'<div class="bt-key" title="'+esc(r.key)+'">'+esc(label)+'<span class="bt-n-badge">('+r.total+')</span></div>'
         +'<div class="bt-bar-wrap"><div class="bt-bar" style="width:'+Math.min(wr,100)+'%;background:'+color+'"></div></div>'
         +'<div class="bt-wr" style="color:'+color+'">'+wr+'%</div>'
         +'<div class="bt-roi" style="color:'+roiColor+'">'+(roi>=0?'+':'')+roi+'%</div>'

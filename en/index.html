@@ -299,6 +299,13 @@ body::before{content:'';position:fixed;top:-300px;left:50%;transform:translateX(
 <script>
 var allMatchs=[],currentFilter='all',currentDayFilter='today',currentSport='football',currentSearch='';
 
+// Echappement HTML pour tout texte semi-externe (noms d'equipe issus
+// d'api-football via le pipeline) avant insertion en innerHTML - defense
+// en profondeur, meme si la source n'est pas un input utilisateur direct
+// (voir match.html, meme fonction, deja appliquee la-bas depuis le fix XSS
+// reflechie plus tot dans ce chantier).
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+
 var WC_TROPHY_EMOJI = '🏆';
 var leagueList = [];
 
@@ -402,7 +409,7 @@ function renderChampDropdown(q){
   var html='<div class="champ-item'+(currentFilter==='all'?' active':'')+'" onclick="selectChampionnat(\'all\')">🌐 All leagues</div>';
   filtered.forEach(function(i){
     var icon=i.isWC?WC_TROPHY_EMOJI:i.flag;
-    html+='<div class="champ-item'+(currentFilter===i.key?' active':'')+'" onclick="selectChampionnat(\''+i.key+'\')">'+icon+' '+i.name+'</div>';
+    html+='<div class="champ-item'+(currentFilter===i.key?' active':'')+'" onclick="selectChampionnat(\''+esc(i.key)+'\')">'+icon+' '+esc(i.name)+'</div>';
   });
   panel.innerHTML=html;
 }
@@ -474,7 +481,7 @@ function leagueHeader(m){
     return WC_TROPHY_EMOJI+' FIFA WORLD CUP 2026';
   }
   var flag=l?l.flag:(m.ligue_icon||'🏆');
-  var name=(m.league||(l?l.name:lk)).toUpperCase();
+  var name=esc((m.league||(l?l.name:lk)).toUpperCase());
   var country=l&&l.country?' <span class="mc-league-country">— '+l.country.toUpperCase()+'</span>':'';
   return flag+' '+name+country;
 }
@@ -507,16 +514,16 @@ function buildCard(m){
   return'<div class="'+css+'" onclick="window.location=\'/match/'+m.id+'.html\'">'
     +'<div class="mc-top"><div class="mc-league">'+leagueHeader(m)+'</div><div class="mc-badges">'+badges+'</div></div>'
     +'<div class="mc-body"><div class="mc-left"><div class="mc-teams">'
-    +'<div class="mc-team home">'+teamLogo(m.home)+'<div class="mc-team-name">'+(m.home&&m.home.n||'').toUpperCase()+'</div></div>'
+    +'<div class="mc-team home">'+teamLogo(m.home)+'<div class="mc-team-name">'+esc((m.home&&m.home.n||'').toUpperCase())+'</div></div>'
     +'<div class="mc-teams-sep"><div class="mc-vs">VS</div><div class="mc-time">'+heure+'</div></div>'
-    +'<div class="mc-team away">'+teamLogo(m.away)+'<div class="mc-team-name">'+(m.away&&m.away.n||'').toUpperCase()+'</div></div>'
+    +'<div class="mc-team away">'+teamLogo(m.away)+'<div class="mc-team-name">'+esc((m.away&&m.away.n||'').toUpperCase())+'</div></div>'
     +'</div>'
     +'<div class="mc-pari"><span class="mc-pari-label">🦈 IASHARK</span><span class="mc-pari-bet">'+pariLabel+'</span>'+(coteStr?'<span class="mc-pari-cote">'+coteStr+'</span>':'')+'</div>'
     +'</div>'
     +'<div class="mc-right"><div class="conf-ring '+confTier(m)+'"><div class="conf-ring-val">'+(ovrConf(m)/10).toFixed(1)+'</div><div class="conf-ring-sub">/10</div></div><button class="mc-cta">VIEW →</button></div>'
     +'</div>'
     +'<div class="mc-probas"><div class="prob-bar-wrap"><div class="pb-1" style="width:'+p1+'%"></div><div class="pb-n" style="width:'+pn+'%"></div><div class="pb-2" style="width:'+p2+'%"></div></div>'
-    +'<div class="prob-labels"><div class="prob-lbl-item"><div class="prob-lbl-pct" style="color:var(--cyan)">'+p1+'%</div><div class="prob-lbl-txt">'+(m.home&&m.home.n||'').toUpperCase().slice(0,8)+'</div></div><div class="prob-lbl-item"><div class="prob-lbl-pct" style="color:var(--muted)">'+pn+'%</div><div class="prob-lbl-txt">DRAW</div></div><div class="prob-lbl-item"><div class="prob-lbl-pct" style="color:rgba(226,232,240,0.45)">'+p2+'%</div><div class="prob-lbl-txt">'+(m.away&&m.away.n||'').toUpperCase().slice(0,8)+'</div></div></div>'
+    +'<div class="prob-labels"><div class="prob-lbl-item"><div class="prob-lbl-pct" style="color:var(--cyan)">'+p1+'%</div><div class="prob-lbl-txt">'+esc((m.home&&m.home.n||'').toUpperCase().slice(0,8))+'</div></div><div class="prob-lbl-item"><div class="prob-lbl-pct" style="color:var(--muted)">'+pn+'%</div><div class="prob-lbl-txt">DRAW</div></div><div class="prob-lbl-item"><div class="prob-lbl-pct" style="color:rgba(226,232,240,0.45)">'+p2+'%</div><div class="prob-lbl-txt">'+esc((m.away&&m.away.n||'').toUpperCase().slice(0,8))+'</div></div></div>'
     +'</div></div>';
 }
 
@@ -543,9 +550,9 @@ function buildChocCard(m){
   return'<div class="choc-card-wrap"><div class="choc-card" onclick="window.location=\'/match/'+m.id+'.html\'">'
     +'<div class="choc-inner"><div class="choc-league"><span class="choc-dot"></span>'+leagueHeader(m)+'</div>'
     +'<div class="choc-teams-row">'
-    +'<div class="choc-team">'+logoH(m.home,hn.slice(0,2).toUpperCase(),hn)+'<div class="choc-name">'+hn.toUpperCase()+'</div><div class="choc-sub-lbl">HOME</div></div>'
+    +'<div class="choc-team">'+logoH(m.home,esc(hn.slice(0,2).toUpperCase()),hn)+'<div class="choc-name">'+esc(hn.toUpperCase())+'</div><div class="choc-sub-lbl">HOME</div></div>'
     +'<div><span class="choc-vs">VS</span><div class="choc-hr">'+heure+'</div></div>'
-    +'<div class="choc-team">'+logoH(m.away,an.slice(0,2).toUpperCase(),an)+'<div class="choc-name" style="color:rgba(226,232,240,0.65)">'+an.toUpperCase()+'</div><div class="choc-sub-lbl">AWAY</div></div>'
+    +'<div class="choc-team">'+logoH(m.away,esc(an.slice(0,2).toUpperCase()),an)+'<div class="choc-name" style="color:rgba(226,232,240,0.65)">'+esc(an.toUpperCase())+'</div><div class="choc-sub-lbl">AWAY</div></div>'
     +'</div></div>'
     +'<div class="choc-pari-strip"><div><div class="choc-pari-lbl">🦈 IASHARK</div><div class="choc-pari-bet">'+pl+'</div></div>'+(pc?'<div class="choc-cote">'+pc+'</div>':'')+'</div>'
     +'</div></div>';

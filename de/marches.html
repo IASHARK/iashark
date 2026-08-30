@@ -131,6 +131,7 @@ h1 span{color:var(--cyan);}
 // 2026-08-29, voir IASHARK_MARKET_REGISTRY.md pour le detail par marche).
 // Duplique volontairement les donnees plutot qu'un import (site statique
 // sans bundler, meme pattern que MARKET_LABELS ailleurs sur le site).
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
 var MARKET_REGISTRY=[
   {label:'Spielergebnis (1X2)',category:'1X2',status:'validated'},
   {label:'Doppelte Chance (1X / X2 / 12)',category:'1X2',status:'validated'},
@@ -205,11 +206,11 @@ function renderMatchMarkets(){
       var edgeNum=parseFloat((m.edge||'').replace('%',''));
       var edgeCls=isNaN(edgeNum)?'':(edgeNum>0?'gap-pos':'gap-neg');
       var prob=m.model_probability!=null?Math.round(m.model_probability):'—';
-      return '<tr><td>'+hn+' vs '+an+'</td><td style="font-family:Space Mono,monospace;">'+heure+'</td>'
-        +'<td>'+(MARKET_KEY_LABELS[getMarketKey(m.pari_rec)]||m.pari_rec)+'</td>'
-        +'<td class="gap-cell">'+prob+'%</td><td class="gap-cell">'+(m.cote_rec||'—')+'</td>'
-        +'<td class="gap-cell '+edgeCls+'">'+(m.edge||'—')+'</td>'
-        +'<td style="font-family:Space Mono,monospace;font-size:9px;color:var(--muted);">'+(m.data_quality_label?(DATA_QUALITY_LABELS[m.data_quality_label]||m.data_quality_label):'—')+'</td></tr>';
+      return '<tr><td>'+esc(hn)+' vs '+esc(an)+'</td><td style="font-family:Space Mono,monospace;">'+esc(heure)+'</td>'
+        +'<td>'+esc(MARKET_KEY_LABELS[getMarketKey(m.pari_rec)]||m.pari_rec)+'</td>'
+        +'<td class="gap-cell">'+prob+'%</td><td class="gap-cell">'+esc(m.cote_rec||'—')+'</td>'
+        +'<td class="gap-cell '+edgeCls+'">'+esc(m.edge||'—')+'</td>'
+        +'<td style="font-family:Space Mono,monospace;font-size:9px;color:var(--muted);">'+esc(m.data_quality_label?(DATA_QUALITY_LABELS[m.data_quality_label]||m.data_quality_label):'—')+'</td></tr>';
     }).join('')
     +'</tbody></table>';
 }

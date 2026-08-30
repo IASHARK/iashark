@@ -205,6 +205,7 @@ footer p{font-family:'Space Mono',monospace;font-size:8px;color:rgba(74,101,128,
 
   <script>
   (function(){
+    function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
     var MARKET_LABELS={'over25':'Plus de 2,5 buts','over15':'Plus de 1,5 but','under25':'Moins de 2,5 buts','btts_non':'Une équipe ne marque pas','btts_oui':'Les deux équipes marquent','dc1x':'DC 1X','dc_x1':'DC 1X','dc_x2':'DC X2','victoire_dom':'Victoire domicile','victoire_ext':'Victoire extérieur','handicap_dom':'Handicap dom.','handicap_ext':'Handicap ext.','match_winner':'Vainqueur','autre':'Autre'};
     fetch('/historique.json?t='+Date.now()).then(function(r){return r.json();}).then(function(d){
       var stats=d.stats||{};
@@ -220,7 +221,7 @@ footer p{font-family:'Space Mono',monospace;font-size:8px;color:rgba(74,101,128,
         var label=MARKET_LABELS[m.key]||m.key;
         var roiCls=m.roi>0?'pos':m.roi<0?'negv':'';
         var roiTxt=(m.roi>0?'+':'')+m.roi+'%';
-        return '<tr><td>'+label+'</td><td class="num">'+m.winrate+'%</td><td class="num '+roiCls+'">'+roiTxt+'</td><td class="num">'+m.total+'</td></tr>';
+        return '<tr><td>'+esc(label)+'</td><td class="num">'+m.winrate+'%</td><td class="num '+roiCls+'">'+esc(roiTxt)+'</td><td class="num">'+m.total+'</td></tr>';
       }).join('');
     }).catch(function(){
       document.getElementById('statTotal').textContent='—';

@@ -1,12 +1,14 @@
-# Pause maintenance levee le 2026-08-30 (feu vert explicite de
-# l'utilisateur, apres QA finale + rapport final - voir
-# IASHARK_V2_RAPPORT_FINAL.md). L'ancienne ligne catch-all
-# "/*  /maintenance.html  200!" est retiree : le site sert maintenant
-# son contenu reel au lieu de rediriger systematiquement vers
-# maintenance.html.
+# Maintenance REMISE le 2026-08-30 sur instruction explicite et urgente
+# de l'utilisateur : la V2 n'est PAS acceptee apres controle manuel reel
+# du site (ecarts constates avec le MASTER V2.1 - nav bottom, page
+# Outils, plusieurs pages ne reflete pas vraiment la V2). Recette
+# produit visuelle A-Z en cours sur la branche hotfix-v2-acceptance.
+# Ne pas retirer cette ligne sans feu vert explicite de l'utilisateur.
+/*  /maintenance.html  200!
 
 # --- i18n (MASTER V2.1 SS19) ------------------------------------------
-# Ces regles sont maintenant ACTIVES (plus de catch-all au-dessus).
+# Ces regles restent INERTES tant que la ligne catch-all ci-dessus est
+# active.
 #
 # IMPORTANT - regle de securite pour ce fichier : n'ajouter une ligne
 # ci-dessous QUE pour une page dont /fr/<page> (et les 5 autres locales)

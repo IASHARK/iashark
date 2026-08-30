@@ -180,6 +180,27 @@
     }
   }
 
+  // Cache sessionStorage (jamais localStorage - efface a la fermeture de
+  // l'onglet, jamais partage entre appareils/navigateurs) du dernier
+  // plan/role connu pour CET utilisateur precis. Ne sert jamais de source
+  // de verite : uniquement a afficher le bon chip immediatement le temps
+  // que la vraie requete RLS-protegee (reseau, 100-500ms) revienne, plutot
+  // que de laisser voir un "CONNEXION" trompeur pendant ce court instant a
+  // chaque navigation - bug reel remonte par l'utilisateur ("mon compte
+  // dois etre connecte quand je zigzag dans toute les pages... faut que ce
+  // soit fluide"). Le resultat reseau reel ecrase toujours l'affichage et
+  // le cache des qu'il arrive, meme s'il differe.
+  function chipCacheKey(uid){ return 'iashark_chip_' + uid; }
+  function readChipCache(uid){
+    try{
+      var raw = sessionStorage.getItem(chipCacheKey(uid));
+      return raw ? JSON.parse(raw) : null;
+    }catch(e){ return null; }
+  }
+  function writeChipCache(uid, plan, role){
+    try{ sessionStorage.setItem(chipCacheKey(uid), JSON.stringify({plan:plan, role:role})); }catch(e){}
+  }
+
   async function mount(selector){
     var el = document.querySelector(selector);
     if(!el) return;
@@ -189,9 +210,12 @@
       var sessRes = await sb.auth.getSession();
       var session = sessRes.data && sessRes.data.session;
       if(!session){ el.innerHTML = loggedOutHtml(); return; }
+      var cached = readChipCache(session.user.id);
+      if(cached){ el.innerHTML = loggedInHtml(session.user.email, cached.plan, cached.role); }
       var ures = await sb.from('users').select('plan,role').eq('id', session.user.id).maybeSingle();
       var plan = ures.data && ures.data.plan ? ures.data.plan : 'free';
       var role = ures.data && ures.data.role;
+      writeChipCache(session.user.id, plan, role);
       el.innerHTML = loggedInHtml(session.user.email, plan, role);
       sb.auth.onAuthStateChange(function(event, newSession){
         if(!newSession){ el.innerHTML = loggedOutHtml(); }

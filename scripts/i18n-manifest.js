@@ -344,7 +344,7 @@ var PAGES = [
       {find: '<div class="stitle">STATS (MOYENNES 10 DERNIERS MATCHS)</div>', build: function(d, l, esc){ return '<div class="stitle">' + esc(d.match_page.section_stats) + '</div>'; }},
       {find: '<div class="stitle">PATTERNS DE JEU — 15 MIN</div>', build: function(d, l, esc){ return '<div class="stitle">' + esc(d.match_page.section_patterns) + '</div>'; }},
       {find: '<div class="stitle">ABSENTS &amp; RETOURS</div>', build: function(d, l, esc){ return '<div class="stitle">' + esc(d.match_page.section_absences) + '</div>'; }},
-      {find: '<div class="stitle">HEAD TO HEAD</div>', count: 3, build: function(d, l, esc){ return '<div class="stitle">' + esc(d.match_page.section_h2h) + '</div>'; }},
+      {find: '<div class="stitle">HEAD TO HEAD</div>', count: 2, build: function(d, l, esc){ return '<div class="stitle">' + esc(d.match_page.section_h2h) + '</div>'; }},
       {find: '<div class="stitle">INDICE DE FORCE</div>', build: function(d, l, esc){ return '<div class="stitle">' + esc(d.match_page.section_force_index) + '</div>'; }},
       {find: '<div class="stitle">ARBITRE — \'+esc(arb.nom)+\'</div>', build: function(d, l, esc){ return '<div class="stitle">' + esc(d.match_page.section_referee_prefix) + '\'+esc(arb.nom)+\'</div>'; }},
       {find: '<div class="stitle">MODÈLE IA SHARK — CM 2026</div>', build: function(d, l, esc){ return '<div class="stitle">' + esc(d.match_page.section_wc_model) + '</div>'; }},
@@ -369,7 +369,6 @@ var PAGES = [
        build: function(d, l, esc){
         return '+\'<div style="text-align:right;"><div style="font-family:Space Mono,monospace;font-size:15px;font-weight:700;color:var(--text);">\'+ratioSaison+\'%</div><div style="font-family:Space Mono,monospace;font-size:8px;color:var(--muted);margin-top:1px;">' + esc(d.match_page.season_ratio_label) + '</div></div>\'';
       }},
-      {find: '<div class="stitle">CLASSEMENT</div>', build: function(d, l, esc){ return '<div class="stitle">' + esc(d.match_page.section_ranking) + '</div>'; }},
       {find: '<div class="stitle">SURFACE — \'+surfLabel.toUpperCase()+\'</div>', build: function(d, l, esc){ return '<div class="stitle">' + esc(d.match_page.section_surface_prefix) + '\'+surfLabel.toUpperCase()+\'</div>'; }},
       {find: '<div class="stitle">PALMARÈS CE TOURNOI</div>', build: function(d, l, esc){ return '<div class="stitle">' + esc(d.match_page.section_palmares) + '</div>'; }},
       {find: '<div class="stitle">CONTEXTE</div>', build: function(d, l, esc){ return '<div class="stitle">' + esc(d.match_page.section_context) + '</div>'; }},

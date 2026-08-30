@@ -510,7 +510,16 @@ var isProUnlocked = false;
 function unlockProWall(){
   isProUnlocked = true;
   document.getElementById('proWall').classList.remove('locked');
-  document.getElementById('fabBtn').style.display='flex';
+  updateFabVisibility();
+}
+
+// Le FAB "ajout rapide" ne sert qu'a l'onglet MON SUIVI (ajouter un pari
+// suivi manuellement) - l'afficher aussi sur SELECTIONS/CALCULATEURS le
+// faisait chevaucher visuellement le 3e bouton d'onglet en mobile (bug reel
+// trouve en recette navigateur, 2026-08-30).
+var currentTabName = 'selections';
+function updateFabVisibility(){
+  document.getElementById('fabBtn').style.display = (isProUnlocked && currentTabName === 'suivi') ? 'flex' : 'none';
 }
 
 var currentCapital = 0;
@@ -1069,6 +1078,8 @@ function switchTab(name,btn){
   document.querySelectorAll('.tab-section').forEach(function(s){s.classList.remove('active');});
   btn.classList.add('active');
   document.getElementById('tab-'+name).classList.add('active');
+  currentTabName = name;
+  updateFabVisibility();
 }
 </script>
 <script src="/auth-header.js"></script>

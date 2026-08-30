@@ -1,0 +1,33 @@
+{
+  "_readme": [
+    "Liste OFFICIELLE de lancement IASHARK (decision utilisateur du 2026-08-30).",
+    "Ce fichier ne fixe QUE l'identite des competitions (id API-Football, cle interne,",
+    "mapping odds best-effort). Il ne fixe PAS la saison active ni le niveau de couverture",
+    "(FULL_ANALYSIS / STANDARD_ANALYSIS / LIMITED_DATA) : ces deux informations sont",
+    "determinees en interrogeant reellement l'API (/leagues?id=X, qui renvoie season.current",
+    "et season.coverage) par scripts/verify-league-coverage.js, jamais devinees ici.",
+    "Voir league-coverage-report.json (genere par ce script) pour l'etat verifie le plus",
+    "recent, et IASHARK_V2_RECETTE_VISUELLE.md pour le contexte de decision.",
+    "Pour ajouter/retirer une competition du lancement : editer ce tableau puis relancer",
+    "scripts/verify-league-coverage.js (necessite APISPORTS_KEY) avant le prochain run pipeline.",
+    "Les apiFootballId ci-dessous sont les identifiants publics et stables documentes par",
+    "API-Football (inchanges depuis plusieurs saisons) ; ils sont re-confirmes automatiquement",
+    "a chaque verification (le script compare le nom retourne par l'API au nom attendu et",
+    "log un avertissement si ca ne correspond pas, sans jamais fabriquer une correspondance)."
+  ],
+  "leagues": [
+    { "key": "premier",     "displayName": "Premier League",      "country": "Angleterre", "apiFootballId": 39,  "oddsSportKey": "soccer_epl",                              "europeanQualification": true  },
+    { "key": "laliga",      "displayName": "La Liga",             "country": "Espagne",    "apiFootballId": 140, "oddsSportKey": "soccer_spain_la_liga",                    "europeanQualification": true  },
+    { "key": "seriea",      "displayName": "Serie A",             "country": "Italie",     "apiFootballId": 135, "oddsSportKey": "soccer_italy_serie_a",                    "europeanQualification": true  },
+    { "key": "bundesliga",  "displayName": "Bundesliga",          "country": "Allemagne",  "apiFootballId": 78,  "oddsSportKey": "soccer_germany_bundesliga",               "europeanQualification": true  },
+    { "key": "ligue1",      "displayName": "Ligue 1",             "country": "France",     "apiFootballId": 61,  "oddsSportKey": "soccer_france_ligue_1",                   "europeanQualification": true  },
+    { "key": "ldc",         "displayName": "Champions League",    "country": "UEFA",       "apiFootballId": 2,   "oddsSportKey": "soccer_uefa_champs_league",               "europeanQualification": false },
+    { "key": "el",          "displayName": "Europa League",       "country": "UEFA",       "apiFootballId": 3,   "oddsSportKey": "soccer_uefa_europa_league",               "europeanQualification": false },
+    { "key": "ecl",         "displayName": "Conference League",   "country": "UEFA",       "apiFootballId": 848, "oddsSportKey": "soccer_uefa_europa_conference_league",    "europeanQualification": false },
+    { "key": "eredivisie",  "displayName": "Eredivisie",          "country": "Pays-Bas",   "apiFootballId": 88,  "oddsSportKey": "soccer_netherlands_eredivisie",           "europeanQualification": true  },
+    { "key": "primeira",    "displayName": "Liga Portugal",       "country": "Portugal",   "apiFootballId": 94,  "oddsSportKey": "soccer_portugal_primeira_liga",           "europeanQualification": true  },
+    { "key": "mls",         "displayName": "MLS",                 "country": "USA/Canada", "apiFootballId": 253, "oddsSportKey": "soccer_usa_mls",                          "europeanQualification": false },
+    { "key": "suede",       "displayName": "Allsvenskan",         "country": "Suede",      "apiFootballId": 113, "oddsSportKey": "soccer_sweden_allsvenskan",               "europeanQualification": true  },
+    { "key": "jleague",     "displayName": "J1 League",           "country": "Japon",      "apiFootballId": 98,  "oddsSportKey": "soccer_japan_j_league",                   "europeanQualification": false }
+  ]
+}

@@ -40,6 +40,39 @@ jobs:
           const I18N_LOCALES = require('./i18n/locales.json');
           const I18N_PAGES = require('./scripts/i18n-manifest.js');
           const { generateLocalizedSitemaps } = require('./scripts/i18n-sitemaps.js');
+          const LEAGUES_CONFIG = require('./config/leagues.json');
+          var LEAGUE_COVERAGE_REPORT = null;
+          try { LEAGUE_COVERAGE_REPORT = JSON.parse(fs.readFileSync('./league-coverage-report.json', 'utf8')); }
+          catch (e) { console.log('league-coverage-report.json absent ou illisible : ' + e.message + ' (lancer scripts/verify-league-coverage.js). Saisons/tiers en repli.'); }
+          // Derive de config/leagues.json (liste de lancement officielle) : jamais
+          // de championnat hardcode en dehors de ce fichier de config.
+          const LEAGUE_IDS = LEAGUES_CONFIG.leagues.map(function(l){ return l.apiFootballId; });
+          var LG_KEY = {};
+          LEAGUES_CONFIG.leagues.forEach(function(l){ LG_KEY[l.apiFootballId] = l.key; });
+          var LEAGUE_COVERAGE_BY_ID = {};
+          if (LEAGUE_COVERAGE_REPORT && Array.isArray(LEAGUE_COVERAGE_REPORT.leagues)) {
+            LEAGUE_COVERAGE_REPORT.leagues.forEach(function(entry){ LEAGUE_COVERAGE_BY_ID[entry.apiFootballId] = entry; });
+          }
+          var SEASON_FALLBACK_WARNED = {};
+          // Saison reellement verifiee (season.current de l'API) si disponible,
+          // sinon repli sur defaultSeason avec avertissement explicite - jamais de
+          // saison devinee a partir du nom de la competition.
+          function seasonForLeague(leagueId, defaultSeason) {
+            var cov = LEAGUE_COVERAGE_BY_ID[leagueId];
+            if (cov && cov.status === 'VERIFIED' && cov.resolvedSeason) return cov.resolvedSeason;
+            if (!SEASON_FALLBACK_WARNED[leagueId]) {
+              SEASON_FALLBACK_WARNED[leagueId] = true;
+              console.log('Aucune saison verifiee pour la ligue '+leagueId+' (league-coverage-report.json absent/incomplet pour cet id) : repli sur '+defaultSeason+'. Lancer scripts/verify-league-coverage.js pour une valeur reelle.');
+            }
+            return defaultSeason;
+          }
+          // FULL_ANALYSIS / STANDARD_ANALYSIS / LIMITED_DATA reellement mesures par
+          // scripts/verify-league-coverage.js ; UNVERIFIED si aucun rapport recent
+          // n'existe pour cette ligue (jamais fabrique par defaut a FULL_ANALYSIS).
+          function analysisTierForLeague(leagueId) {
+            var cov = LEAGUE_COVERAGE_BY_ID[leagueId];
+            return (cov && cov.status === 'VERIFIED') ? cov.analysisTier : 'UNVERIFIED';
+          }
           // Identifiant du generateur de predictions actif. A incrementer/renommer
           // quand le moteur change reellement (ex: introduction du moteur V2.1
           // multi-modeles §10 du MASTER) pour pouvoir comparer les performances
@@ -459,8 +492,11 @@ jobs:
           }
           function calcLambdas(bmHdom, beHdom, mdHdom, bmAext, beAext, meAext, leagueAvgH, leagueAvgA, leagueId) {
             var leagAvgH=leagueAvgH||1.35, leagAvgA=leagueAvgA||1.10;
-            var TOP=[39,61,140,135,78,2,3];
-            var isTop=leagueId&&TOP.indexOf(leagueId)!==-1;
+            // La liste de lancement (config/leagues.json) est deja restreinte a 13
+            // competitions fortes et bien couvertes : toutes recoivent le seuil
+            // "isTop" (avant : sous-liste ad hoc [39,61,140,135,78,2,3] parmi ~35
+            // championnats melanges, dont plusieurs seconds/faibles).
+            var isTop=leagueId&&LEAGUE_IDS.indexOf(leagueId)!==-1;
             var isWC=leagueId===1;
             var minLH=isWC?0.90:isTop?1.05:0.95;
             var minLA=isWC?0.80:isTop?0.90:0.80;
@@ -474,31 +510,20 @@ jobs:
               lambdaA:parseFloat(Math.min(maxLA,Math.max(minLA,attA*defH*leagAvgA)).toFixed(3))
             };
           }
-          const LEAGUES = [
-            39, 40, 61, 62, 140, 141, 135, 78, 2, 3,
-            88, 94, 203, 119, 179, 144, 292,
-            66, 307, 143, 137, 81,
-            169, 244, 200, 479,
-            365, 362, 242, 164,
-            357, 113,
-            71, 253, 262
-          ];
-          const SEASON   = 2025;
-          var SEASON_2026 = [1, 292, 169, 244, 200, 479, 365, 362, 242, 164, 357, 113, 71, 253];
+          // Liste de lancement officielle (decision utilisateur du 2026-08-30) :
+          // 13 competitions fortes et bien couvertes, configurables dans
+          // config/leagues.json (id, cle interne, mapping odds) - plus aucun
+          // championnat/coupe hors de cette liste n'est hardcode ici. La saison
+          // active et le niveau de couverture (FULL_ANALYSIS/STANDARD_ANALYSIS/
+          // LIMITED_DATA) de chaque competition sont determines reellement par
+          // scripts/verify-league-coverage.js (appel /leagues?id=X, jamais devine)
+          // et lus depuis league-coverage-report.json via seasonForLeague()/
+          // analysisTierForLeague() plus haut dans ce fichier.
+          const LEAGUES = LEAGUE_IDS;
+          const SEASON  = 2025; // repli uniquement si aucun rapport de couverture verifie n'est disponible pour une ligue donnee
           const TODAY    = new Date().toISOString().split('T')[0];
           var TEST_WC_ONLY = process.env.TEST_WC_ONLY === 'true';
           if(TEST_WC_ONLY) console.log('=== MODE TEST : COUPE DU MONDE UNIQUEMENT ===');
-          var LG_KEY = {
-            39:'premier', 40:'champ', 61:'ligue1', 62:'ligue2',
-            140:'laliga', 141:'laliga2', 135:'seriea', 78:'bundesliga',
-            2:'ldc', 3:'el', 88:'eredivisie', 94:'primeira', 203:'superlig',
-            119:'superliga-dk', 179:'scottish', 144:'belgique', 292:'kleague',
-            66:'coupe-france', 307:'saudi', 143:'copa-rey', 137:'coppa-italia', 81:'dfb-pokal',
-            169:'chine', 244:'finlande', 200:'maroc', 479:'canada',
-            365:'lettonie', 362:'lituanie', 242:'equateur', 164:'islande',
-            357:'irlande', 113:'suede',
-            71:'bresil', 253:'mls', 262:'ligamx'
-          };
           function lgKey(lgId) { return LG_KEY[lgId]||'other'; }
           function lgIcon(l) {
             var s=(l||'').toLowerCase();
@@ -524,7 +549,7 @@ jobs:
               for(var d=0; d<dates.length; d++){
                 for(var i=0; i<LEAGUES.length; i++){
                   var lgId = LEAGUES[i];
-                  var season = SEASON_2026.indexOf(lgId)!==-1?2026:SEASON;
+                  var season = seasonForLeague(lgId, SEASON);
                   var r = await get(
                     'https://v3.football.api-sports.io/fixtures?date='+dates[d]+'&league='+lgId+'&season='+season+'&timezone=Europe%2FParis',
                     APS
@@ -549,7 +574,7 @@ jobs:
             return uniqueFixtures;
           }
           async function getTeamStats(teamId, leagueId, season) {
-            var s = season || (SEASON_2026.indexOf(leagueId)!==-1 ? 2026 : SEASON);
+            var s = season || seasonForLeague(leagueId, SEASON);
             var r = await get('https://v3.football.api-sports.io/teams/statistics?team='+teamId+'&league='+leagueId+'&season='+s, APS);
             var isEmpty = !r.response || (typeof r.response==='object' && !Array.isArray(r.response) && Object.keys(r.response).length===0);
             if(isEmpty && s!==2026){
@@ -656,13 +681,12 @@ jobs:
           }
           async function getPinnacleOdds(homeTeam, awayTeam, leagueKey) {
             if(!ODDS_KEY) return null;
-            var sportMap = {
-              'premier':'soccer_england_league1','champ':'soccer_england_championship',
-              'ligue1':'soccer_france_ligue_1','laliga':'soccer_spain_la_liga',
-              'seriea':'soccer_italy_serie_a','bundesliga':'soccer_germany_bundesliga',
-              'ldc':'soccer_uefa_champs_league','el':'soccer_uefa_europa_league',
-              'scottish':'soccer_scotland_premiership','belgique':'soccer_belgium_first_div_a',
-            };
+            // Derive de config/leagues.json (oddsSportKey) : les cotes restent
+            // toujours facultatives (l'analyse fonctionne sans), un mapping absent
+            // ou errone renvoie simplement null plus bas sans jamais bloquer le
+            // pipeline.
+            var sportMap = {};
+            LEAGUES_CONFIG.leagues.forEach(function(l){ if (l.oddsSportKey) sportMap[l.key] = l.oddsSportKey; });
             var sport=sportMap[leagueKey]||'soccer_uefa_champs_league';
             try {
               var url='https://api.the-odds-api.com/v4/sports/'+sport+'/odds/?apiKey='+ODDS_KEY+'&regions=eu&markets=h2h,totals,btts&bookmakers=pinnacle&oddsFormat=decimal';
@@ -838,7 +862,14 @@ jobs:
             var n1=Math.max(domGames.length,1),n2=Math.max(extGames.length,1);
             return{over25_home:countOver25(domGames),over25_away:countOver25(extGames),over25_home_n:n1,over25_away_n:n2,btts_home:countBTTS(domGames),btts_away:countBTTS(extGames),btts_home_n:n1,btts_away_n:n2};
           }
-          var EUROPEAN_LEAGUE_KEYS = {'premier':1,'champ':1,'ligue1':1,'ligue2':1,'laliga':1,'laliga2':1,'seriea':1,'bundesliga':1,'eredivisie':1,'primeira':1,'superlig':1,'superliga-dk':1,'scottish':1,'belgique':1,'irlande':1,'suede':1,'finlande':1,'islande':1,'lettonie':1,'lituanie':1};
+          // Derive de config/leagues.json (champ europeanQualification) : les
+          // championnats domestiques dont le classement peut mener a une
+          // qualification europeenne recoivent l'alerte "En course pour Europe" ;
+          // les competitions continentales elles-memes (ldc/el/ecl, deja "en
+          // Europe") et les championnats hors qualification europeenne (mls,
+          // jleague) en sont exclus.
+          var EUROPEAN_LEAGUE_KEYS = {};
+          LEAGUES_CONFIG.leagues.forEach(function(l){ if (l.europeanQualification) EUROPEAN_LEAGUE_KEYS[l.key] = 1; });
           function calcMotivation(rank,totalTeams,pts,ptsLeader,matchsLeft,isHome,leagueName,homeName,awayName,leagueKey){
             totalTeams=totalTeams||20;matchsLeft=matchsLeft||5;
             var alerts=[],score=50;
@@ -1403,7 +1434,7 @@ jobs:
                   var uid = player.id+'_'+latest.date;
                   if(seenPlayers[uid]) continue;
                   seenPlayers[uid]=true;
-                  var season = SEASON_2026.indexOf(teamLeagueMap[teamId])!==-1 ? 2026 : SEASON;
+                  var season = seasonForLeague(teamLeagueMap[teamId], SEASON);
                   var pInfo = await get('https://v3.football.api-sports.io/players?id='+player.id+'&season='+season, APS);
                   var pData = (pInfo.response && pInfo.response[0]) || null;
                   var bio = pData ? pData.player : null;
@@ -1735,7 +1766,7 @@ jobs:
               }
               console.log('\n-> '+home.name+' vs '+away.name+' ('+lg.name+')'+(isWorldCupMatch?' [WC]':''));
               if(!standingsCache[lg.id]){
-                var stSeason=SEASON_2026.indexOf(lg.id)!==-1?2026:SEASON;
+                var stSeason=seasonForLeague(lg.id, SEASON);
                 var stResp=await get('https://v3.football.api-sports.io/standings?league='+lg.id+'&season='+stSeason,APS);
                 standingsCache[lg.id]=(stResp.response&&stResp.response[0]&&stResp.response[0].league&&stResp.response[0].league.standings&&stResp.response[0].league.standings[0])||[];
                 await sleep(250);
@@ -2125,7 +2156,8 @@ jobs:
               var matchObj={
                 id:f.id,sport:'football',
                 league_id:lg.id,
-                season:SEASON_2026.indexOf(lg.id)!==-1?2026:SEASON,
+                season:seasonForLeague(lg.id, SEASON),
+                analysis_tier:analysisTierForLeague(lg.id),
                 home:{n:home.name,id:home.id},away:{n:away.name,id:away.id},
                 league:lg.name,ligue_icon:lgIcon(lg.name),league_key:lgKey(lg.id),
                 date:(dateVraieParis+' '+heure).trim(),cat:['all'],
@@ -2282,6 +2314,12 @@ jobs:
           else
             echo "Cache conserve : les matchs deja verrouilles gardent leur prediction (matchCache actif)"
           fi
+      - name: Verifier la couverture reelle des ligues de lancement (API-Football)
+        continue-on-error: true
+        env:
+          APISPORTS_KEY: ${{ secrets.APISPORTS_KEY }}
+        run: node scripts/verify-league-coverage.js
+
       - name: Run pipeline
         env:
           APISPORTS_KEY:      ${{ secrets.APISPORTS_KEY }}
@@ -2300,6 +2338,6 @@ jobs:
         run: |
           git config user.name "IASHARK"
           git config user.email "yaramode81@gmail.com"
-          git add data.json historique.json transferts.json actus.json sitemap.xml sitemap-*.xml match/ index.html
+          git add data.json historique.json transferts.json actus.json sitemap.xml sitemap-*.xml match/ index.html league-coverage-report.json
           git diff --staged --quiet || git commit -m "Daily update - $(date +%Y-%m-%d)"
           git push

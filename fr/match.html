@@ -1172,7 +1172,9 @@ function buildElo(hn,an,eloH,eloA,eloSignal){
 function buildDropping(drops){
   if(!drops||!drops.length)return '';
   var rows=drops.map(function(d){
-    var arrow=d.dir==='baisse'?'📉':'📈';
+    var arrow=d.dir==='baisse'
+      ?'<svg viewBox="0 0 24 24" width="13" height="13" style="vertical-align:-2px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg>'
+      :'<svg viewBox="0 0 24 24" width="13" height="13" style="vertical-align:-2px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>';
     return '<div class="drop-row">'
       +'<span class="drop-team">'+esc(d.team)+'</span>'
       +'<span class="drop-arrow">'+arrow+'</span>'
@@ -1222,17 +1224,17 @@ function buildWCModel(m){
     +'</div>'
     +'</div>'
     +'<div class="wc-fatigue-row">'
-    +'<span class="wc-fat-lbl">✈ '+esc(m.home.n||'').slice(0,10)+' fatigue</span>'
+    +'<span class="wc-fat-lbl"><svg viewBox="0 0 24 24" width="12" height="12" style="vertical-align:-2px;margin-right:2px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>'+esc(m.home.n||'').slice(0,10)+' fatigue</span>'
     +'<div class="wc-fat-bar"><div class="wc-fat-fill" style="width:'+fatH+'%;background:'+fatColH+'"></div></div>'
     +'<span class="wc-fat-val" style="color:'+fatColH+'">'+fatH+'</span>'
     +'</div>'
     +'<div class="wc-fatigue-row">'
-    +'<span class="wc-fat-lbl">✈ '+esc(m.away.n||'').slice(0,10)+' fatigue</span>'
+    +'<span class="wc-fat-lbl"><svg viewBox="0 0 24 24" width="12" height="12" style="vertical-align:-2px;margin-right:2px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>'+esc(m.away.n||'').slice(0,10)+' fatigue</span>'
     +'<div class="wc-fat-bar"><div class="wc-fat-fill" style="width:'+fatA+'%;background:'+fatColA+'"></div></div>'
     +'<span class="wc-fat-val" style="color:'+fatColA+'">'+fatA+'</span>'
     +'</div>'
-    +(altH>0?'<div class="wc-alert">⛰ Malus altitude '+esc(m.home.n||'')+': -'+altH+'% (stade >1500m)</div>':'')
-    +(altA>0?'<div class="wc-alert">⛰ Malus altitude '+esc(m.away.n||'')+': -'+altA+'% (stade >1500m)</div>':'')
+    +(altH>0?'<div class="wc-alert"><svg viewBox="0 0 24 24" width="12" height="12" style="vertical-align:-2px;margin-right:2px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><path d="M8 21l4-13 4 13"/><path d="M3 21l6-11 4 6.5"/><path d="M13 12l3-5 5 14"/></svg>Malus altitude '+esc(m.home.n||'')+': -'+altH+'% (stade >1500m)</div>':'')
+    +(altA>0?'<div class="wc-alert"><svg viewBox="0 0 24 24" width="12" height="12" style="vertical-align:-2px;margin-right:2px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><path d="M8 21l4-13 4 13"/><path d="M3 21l6-11 4 6.5"/><path d="M13 12l3-5 5 14"/></svg>Malus altitude '+esc(m.away.n||'')+': -'+altA+'% (stade >1500m)</div>':'')
     +'</div></div><div class="sep"></div>';
 }
 
@@ -1693,7 +1695,7 @@ function render(m){
   function getFlag(name){return FLAG_MAP[name]||'';}
   var stadeHtml='';
   if(m.stade&&m.stade.nom){
-    stadeHtml='<div class="stade-row"><span class="stade-icon">🏟</span><span class="stade-name">'+esc(m.stade.nom)+'</span>'+(m.stade.temp?'<span class="stade-meta">'+esc(m.stade.temp)+'</span>':'')+'</div>';
+    stadeHtml='<div class="stade-row"><span class="stade-icon"><svg viewBox="0 0 24 24" width="14" height="14" style="stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="9" ry="4"/></svg></span><span class="stade-name">'+esc(m.stade.nom)+'</span>'+(m.stade.temp?'<span class="stade-meta">'+esc(m.stade.temp)+'</span>':'')+'</div>';
   }
   function teamDisplay(team,name,side,forme_str,isTennis){
     var logo=lgImg(team,(name||'?').slice(0,2).toUpperCase(),name);
@@ -1791,7 +1793,7 @@ function render(m){
   var ctxHtml=!isTennis?buildResumeRencontre(m,hn,an):(m.contexte?'<div style="padding:0 18px 16px"><div style="font-size:13px;color:#94a3b8;line-height:1.75;">'+esc(cleanJargon(m.contexte))+'</div></div>':'');
 
   var skipHtml=m.no_signal
-    ?'<div style="padding:0 18px 16px"><div class="skip danger"><div class="skip-icon">🚨</div><div><div class="skip-lbl">PASSE TON TOUR</div><div class="skip-txt">'+(m.no_signal_label||'Signaux contradictoires. <strong>Ne pas jouer.</strong>')+'</div></div></div></div>'
+    ?'<div style="padding:0 18px 16px"><div class="skip danger"><div class="skip-icon"><svg viewBox="0 0 24 24" width="14" height="14" style="stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div><div><div class="skip-lbl">PASSE TON TOUR</div><div class="skip-txt">'+(m.no_signal_label||'Signaux contradictoires. <strong>Ne pas jouer.</strong>')+'</div></div></div></div>'
     :'';
 
   var insightHtml='';
@@ -1799,12 +1801,12 @@ function render(m){
   if(hasSignal){
     insightHtml='<div class="insight">';
     if(m.facteur_x){
-      insightHtml+='<div class="insight-row"><div class="ir-icon sig">⚡</div><div><div class="ir-lbl sig">SIGNAL DÉCISIF</div><div class="ir-txt">'+esc(cleanJargon(m.facteur_x))+'</div></div></div>';
+      insightHtml+='<div class="insight-row"><div class="ir-icon sig"><svg viewBox="0 0 24 24" width="13" height="13" style="stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div><div><div class="ir-lbl sig">SIGNAL DÉCISIF</div><div class="ir-txt">'+esc(cleanJargon(m.facteur_x))+'</div></div></div>';
     }
     if(m.verdict_shark){
     }
     if(!m.facteur_x&&!m.verdict_shark&&m.no_signal){
-      insightHtml+='<div class="insight-row"><div class="ir-icon" style="background:rgba(239,68,68,0.1)">🚨</div><div><div class="ir-lbl" style="color:var(--red)">PASSE TON TOUR</div><div class="ir-txt">'+(m.no_signal_label||'Signaux contradictoires. Ne pas jouer.')+'</div></div></div>';
+      insightHtml+='<div class="insight-row"><div class="ir-icon" style="background:rgba(239,68,68,0.1)"><svg viewBox="0 0 24 24" width="14" height="14" style="stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div><div><div class="ir-lbl" style="color:var(--red)">PASSE TON TOUR</div><div class="ir-txt">'+(m.no_signal_label||'Signaux contradictoires. Ne pas jouer.')+'</div></div></div>';
     }
     insightHtml+='</div>';
   }

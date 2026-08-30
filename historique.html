@@ -129,7 +129,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
     <div class="sport-toggle" id="sportToggle">
       <button class="sp-btn active" id="spAll" onclick="setStatSport('all')">🌐 TOUS</button>
       <button class="sp-btn" id="spFootball" onclick="setStatSport('football')">⚽ FOOTBALL</button>
-      <button class="sp-btn pro-btn" id="spPro" onclick="setStatSport('pro')">⭐ OUTILS</button>
+      <button class="sp-btn pro-btn" id="spPro" onclick="setStatSport('pro')">OUTILS</button>
     </div>
 
     <div class="stats-merged">
@@ -164,7 +164,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 
   <div id="tabParis">
     <div class="search-wrap">
-      <span class="search-icon">🔍</span>
+      <span class="search-icon"><svg viewBox="0 0 24 24" width="14" height="14" style="stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg></span>
       <input type="text" class="search-input" id="searchInput" placeholder="Rechercher une équipe, un championnat..." oninput="onSearch()">
       <button class="search-clear" id="searchClear" onclick="clearSearch()">✕</button>
     </div>
@@ -172,8 +172,8 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
       <select class="fsel" id="mktSel" onchange="renderPredictions()"><option value="">TOUS LES MARCHÉS</option></select>
       <select class="fsel" id="leagueSel" onchange="renderPredictions()"><option value="">TOUS CHAMPIONNATS</option></select>
       <button class="filter-btn active" onclick="setFilter('all',this)">TOUS</button>
-      <button class="filter-btn" onclick="setFilter('win',this)">✅</button>
-      <button class="filter-btn" onclick="setFilter('loss',this)">❌</button>
+      <button class="filter-btn" onclick="setFilter('win',this)">✓</button>
+      <button class="filter-btn" onclick="setFilter('loss',this)">✕</button>
       <span class="filter-count" id="countLbl"></span>
     </div>
     <div class="pred-list" id="predList">
@@ -347,7 +347,7 @@ function renderPredictions(){
     if(p.result==='no_signal')return'';
     var ml=MARKET_LABELS[p.market]||p.prediction_fr||p.prediction||'';
     var coteStr=p.cote&&p.result!=='neutral'?parseFloat(p.cote).toFixed(2):'';
-    var proTag=isPro(p)?'<span class="pred-tag tag-pro">⭐ OUTILS</span>':'';
+    var proTag=isPro(p)?'<span class="pred-tag tag-pro">OUTILS</span>':'';
     return'<div class="pred-card '+p.result+'">'
       +'<div>'
       +'<div class="pred-match">'+p.match+'</div>'

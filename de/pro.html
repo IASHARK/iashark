@@ -252,7 +252,7 @@ body{background:#080c12;color:var(--text);font-family:'DM Sans',sans-serif;min-h
        visibles - hors du pro-wall, contrairement aux sélections/suivi qui
        restent PRO. -->
   <div class="capital-bar" style="display:flex;">
-    <div class="capital-row"><span class="capital-lbl">🧮 KOSTENLOSE RECHNER</span></div>
+    <div class="capital-row"><span class="capital-lbl">KOSTENLOSE RECHNER</span></div>
     <div class="capital-row" style="gap:16px;align-items:flex-end;">
       <div style="flex:1;min-width:120px;">
         <div class="capital-lbl" style="margin-bottom:4px;">DEZIMALQUOTE</div>
@@ -268,7 +268,7 @@ body{background:#080c12;color:var(--text);font-family:'DM Sans',sans-serif;min-h
   </div>
 
   <div class="capital-bar" style="display:flex;">
-    <div class="capital-row"><span class="capital-lbl">📐 BUCHMACHERMARGE (1X2)</span></div>
+    <div class="capital-row"><span class="capital-lbl">BUCHMACHERMARGE (1X2)</span></div>
     <div class="capital-row" style="gap:10px;">
       <input type="number" step="0.01" min="1.01" id="margeC1" placeholder="Quote 1" oninput="calcMarge()" style="flex:1;min-width:70px;background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--text);font-family:'Space Mono',monospace;">
       <input type="number" step="0.01" min="1.01" id="margeCN" placeholder="Quote N" oninput="calcMarge()" style="flex:1;min-width:70px;background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--text);font-family:'Space Mono',monospace;">
@@ -281,9 +281,9 @@ body{background:#080c12;color:var(--text);font-family:'DM Sans',sans-serif;min-h
   </div>
 
   <div class="tabs">
-    <button class="tab-btn active" onclick="switchTab('selections',this)">⭐ TIPPS</button>
-    <button class="tab-btn" onclick="switchTab('suivi',this)">📊 MEIN TRACKING</button>
-    <button class="tab-btn" onclick="switchTab('calc',this)">🧮 RECHNER</button>
+    <button class="tab-btn active" onclick="switchTab('selections',this)">TIPPS</button>
+    <button class="tab-btn" onclick="switchTab('suivi',this)">MEIN TRACKING</button>
+    <button class="tab-btn" onclick="switchTab('calc',this)">RECHNER</button>
   </div>
 
   <div class="pro-wall locked" id="proWall">
@@ -292,7 +292,7 @@ body{background:#080c12;color:var(--text);font-family:'DM Sans',sans-serif;min-h
       <!-- SÉLECTIONS -->
       <div id="tab-selections" class="tab-section active">
         <div class="sel-toolbar">
-          <span class="lock-badge">🔒 WAHRSCH. ≥ 70%</span>
+          <span class="lock-badge"><svg viewBox="0 0 24 24" width="10" height="10" style="vertical-align:-1px;margin-right:3px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>WAHRSCH. ≥ 70%</span>
           <select class="fsel" id="filterMkt" onchange="renderSelections()">
             <option value="">Alle Märkte</option>
             <option value="over25">Über 2,5 Tore</option>
@@ -316,7 +316,7 @@ body{background:#080c12;color:var(--text);font-family:'DM Sans',sans-serif;min-h
       <div id="tab-suivi" class="tab-section">
         <div class="tstats" id="tstats"></div>
         <div class="sync-bar">
-          <button class="sync-btn" id="syncBtn" onclick="runSync()">🔄 SYNCHRONISER</button>
+          <button class="sync-btn" id="syncBtn" onclick="runSync()"><svg viewBox="0 0 24 24" width="12" height="12" style="vertical-align:-2px;margin-right:4px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>SYNCHRONISIEREN</button>
           <div class="sync-status" id="syncStatus">Aus Tipps verfolgte Wetten werden automatisch aufgelöst.</div>
         </div>
         <div id="betsList"></div>
@@ -328,7 +328,7 @@ body{background:#080c12;color:var(--text);font-family:'DM Sans',sans-serif;min-h
            patron que le reste du fichier) - jamais un chiffre invente. -->
       <div id="tab-calc" class="tab-section">
         <div class="capital-bar" style="display:flex;">
-          <div class="capital-row"><span class="capital-lbl">🧮 KELLY-EINSATZ (FRAKTIONIERT)</span></div>
+          <div class="capital-row"><span class="capital-lbl">KELLY-EINSATZ (FRAKTIONIERT)</span></div>
           <div class="capital-row" style="gap:10px;flex-wrap:wrap;">
             <div style="flex:1;min-width:100px;">
               <div class="capital-lbl" style="margin-bottom:4px;">BANKROLL (€)</div>
@@ -793,7 +793,7 @@ function renderSelections(){
     return '<div class="card-item">'
       +'<div class="card-top">'
       +'<div class="card-info"><div class="mname">'+hn+' vs '+an+'</div><div class="mleague">'+(m.ligue_icon||'🏆')+' '+m.league+' · '+label+' · '+heure+'</div>'
-      +(note?'<div class="saved-note">📝 '+esc(note)+'</div>':'')
+      +(note?'<div class="saved-note">'+esc(note)+'</div>':'')
       +'</div>'
       +'<div class="cote-v">'+(m.cote_rec||'—')+'</div>'
       +'<div class="cbadge '+cc+'" title="Modellwahrscheinlichkeit">'+modelProbPct+'%</div>'
@@ -806,13 +806,13 @@ function renderSelections(){
       +'<button class="chip" data-chip="note" onclick="setChip('+m.id+',\'note\',this)">NOTIZ HINZUFÜGEN</button>'
       +'</div>'
       +'<div class="subpanel open" id="sub-suivre-'+m.id+'">'
-      +(suggMise?'<div class="mise-sugg-hint">🎯 🎯 Empfohlener Einsatz auf deine aktuelle Bankroll: <b>'+suggMise+'€</b></div>':'')
+      +(suggMise?'<div class="mise-sugg-hint">Empfohlener Einsatz auf deine aktuelle Bankroll: <b>'+suggMise+'€</b></div>':'')
       +'<div class="row-flex">'
       +'<div class="fg"><label>EINSATZ (€)</label><input type="number" class="finput" id="mise-'+m.id+'" value="'+miseDefault+'" style="width:80px"></div>'
       +'<button class="qm-btn" onclick="setAccMise('+m.id+',5,this)">5€</button>'
       +'<button class="qm-btn'+(!suggMise?' active':'')+'" onclick="setAccMise('+m.id+',10,this)">10€</button>'
       +'<button class="qm-btn" onclick="setAccMise('+m.id+',20,this)">20€</button>'
-      +(suggMise?'<button class="qm-btn active" onclick="setAccMise('+m.id+','+suggMise+',this)">'+suggMise+'€ 🎯</button>':'')
+      +(suggMise?'<button class="qm-btn active" onclick="setAccMise('+m.id+','+suggMise+',this)">'+suggMise+'€</button>':'')
       +'<button class="btnvalid" onclick="confirmFollow('+m.id+')">+ ZU MEINEM TRACKING HINZUFÜGEN</button>'
       +'</div></div>'
       +'<div class="subpanel" id="sub-cote-'+m.id+'">'
@@ -919,14 +919,14 @@ function renderBets(){
       resultHtml=p.source==='auto'
         ?'<span class="result-lbl" style="color:var(--muted)">AUSSTEHEND</span>'
         :'<div class="quick-result">'
-          +'<button class="qr-btn win-btn" onclick="setManualResult('+p.id+',\'win\')">✅</button>'
-          +'<button class="qr-btn loss-btn" onclick="setManualResult('+p.id+',\'loss\')">❌</button>'
+          +'<button class="qr-btn win-btn" onclick="setManualResult('+p.id+',\'win\')">✓</button>'
+          +'<button class="qr-btn loss-btn" onclick="setManualResult('+p.id+',\'loss\')">✕</button>'
           +'</div>';
     } else {
       var color=p.result==='win'?'var(--green)':'var(--red)';
       resultHtml='<span class="result-lbl" style="color:'+color+'">'+(p.result==='win'?'GEWONNEN':'VERLOREN')+(p.score?' ('+p.score+')':'')+'</span>';
     }
-    var srcTag=p.source==='auto'?'<span class="src-tag src-auto">🔄 AUTO</span>':'<span class="src-tag src-manual">✎ MANUELL</span>';
+    var srcTag=p.source==='auto'?'<span class="src-tag src-auto">AUTO</span>':'<span class="src-tag src-manual">✎ MANUELL</span>';
     return '<div class="bet-item '+p.result+'">'
       +'<div class="bet-top">'
       +'<div class="bet-info"><div class="mname">'+p.match+srcTag+'</div><div class="mleague">'+p.market+' · Quote '+p.cote.toFixed(2)+' · '+p.mise+'€</div></div>'
@@ -997,7 +997,7 @@ async function runSync(){
     status.innerHTML='Synchronisierung derzeit nicht verfügbar — später erneut versuchen.';
   }
   btn.disabled=false;
-  btn.innerHTML='🔄 SYNCHRONISIEREN';
+  btn.innerHTML='<svg viewBox="0 0 24 24" width="12" height="12" style="vertical-align:-2px;margin-right:4px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>' + esc(d.tools_page.sync_btn_default) + '';
 }
 
 function openModal(){document.getElementById('modalOverlay').classList.add('show');}

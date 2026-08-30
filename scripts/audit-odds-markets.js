@@ -9,6 +9,7 @@
 // / NOT_AVAILABLE), documentee dans IASHARK_V2_RECETTE_VISUELLE.md.
 //
 // Usage : APISPORTS_KEY=xxx node scripts/audit-odds-markets.js [--fixtures-per-league=3]
+require("./load-env.js");
 const fs = require("fs");
 const https = require("https");
 const path = require("path");

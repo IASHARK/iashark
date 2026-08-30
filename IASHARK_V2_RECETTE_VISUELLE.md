@@ -6,6 +6,67 @@ Rédigé le 2026-08-30, suite au refus explicite de la V2 par l'utilisateur apr�
 
 **Méthode et limite honnête à connaître avant de lire la suite** : l'extension Claude in Chrome (navigateur réel) n'est pas connectée dans cet environnement — impossible d'obtenir une session authentifiée réelle dans un navigateur avec accès réseau complet. Pour vérifier les états FREE/PRO malgré cette contrainte : (1) deux vrais comptes de test ont été créés dans Supabase (production), un FREE et un PRO, avec connexion réelle via `curl` (mot de passe réel, token réel obtenu via l'API Auth réelle) ; (2) la réponse RÉELLE de l'API a été injectée dans le code RÉEL de la page (via `javascript_tool`, en remplaçant uniquement l'appel réseau bloqué par le sandbox) pour observer le rendu réel. C'est la vérification la plus rigoureuse possible dans cet environnement — mais ce n'est PAS une navigation authentifiée de bout en bout dans un vrai navigateur. Signalé explicitement à chaque ligne concernée. Les deux comptes de test ont été supprimés après usage (aucune trace résiduelle en base).
 
+## Mise à jour 2026-08-30 (suite 7) : fermeture des PARTIAL/TO_VERIFY corrigeables
+
+Demande : transformer les `PARTIAL`/`TO_VERIFY` de la suite 6 en `PASS` là où c'est réellement possible, sans nouvelle fonctionnalité.
+
+### 1. Secrets pipeline E2E — table précise
+
+| Variable | Utilisée où | Obligatoire | Locale (.env) | CI (secrets déclarés) | Bloque réellement |
+|---|---|---|---|---|---|
+| `APISPORTS_KEY` | Partout (fixtures/stats/lineups/joueurs/odds) | **Oui** | ✅ | ✅ | Oui — sans elle, aucune donnée réelle |
+| `SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY` | `writePremiumData`/`writeSnapshots`/`odds_snapshots` | Oui pour la persistance | ❌ | déclarées, non vérifiables par moi (pas de `gh`/token) | Seulement la **persistance** (dégrade proprement, log clair, ne crashe pas) |
+| `ANTHROPIC_KEY` | `genAnalyse` — texte narratif uniquement (`verdict_shark`, `analyse_card`...), jamais les probabilités/marchés déjà décidés en code déterministe avant l'appel | Oui pour le texte narratif | ❌ | déclarée | Seulement le **narratif** (échec rapide, pas de retry bloquant — `postJSONWithRetry` ne retente que sur `rate_limit`/`overloaded`, pas sur une auth invalide) |
+| `OPENWEATHER_KEY` | `getWeather`, gardé `if(!city\|\|!OWM_KEY) return null` | Non | ❌ | déclarée | Non — météo absente uniquement |
+| `NEWSAPI_KEY` | `getNews`, gardé `if(!NEWS_KEY) return []` | Non | ❌ | déclarée | Non |
+| `ODDS_API_KEY` | `getPinnacleOdds`, gardé `if(!ODDS_KEY) return null` | Non (le moteur analyse sans cote par design) | ❌ | déclarée | Non |
+| `CREATOMATE_KEY` / `ODDS_API_IO_KEY` | **Jamais consommées par `pipeline.js`** (grep `process.env` : aucune occurrence) | N/A | ❌ | déclarées mais mortes pour ce pipeline | Non applicable |
+| `GITHUB_SHA` | `pipeline_sha` | Non (auto-fourni par Actions) | ❌ (normal) | ✅ | Non |
+
+`.env` chargé proprement via `scripts/load-env.js` (nouveau, 0 dépendance npm, jamais de `console.log` de valeur) — `require("./load-env.js")` en tête de `verify-league-coverage.js`/`audit-odds-markets.js`/`save-odds-snapshot.js`, plus besoin de `source .env` manuel.
+
+**Exécution E2E réelle effectuée** (`scripts/e2e-pipeline-smoketest.js`, nouveau) : chaîne complète API-Football → team engine (réutilise `lib/models.js`/`lib/markets/score-matrix.js`, mêmes fonctions qu'en production) → Market Registry → data quality/reliability → Player Engine (gate `analysis_tier` + lineup confirmée) testée sur 4 fixtures réelles couvrant les 3 tiers (Premier League `FULL_ANALYSIS`, Liga Portugal `STANDARD_ANALYSIS`, Champions League `LIMITED_DATA`, MLS `FULL_ANALYSIS`) — résultat écrit dans `e2e-pipeline-smoketest-report.json`. Confirmé réel : lambdas calculés depuis les vraies stats saison, marchés dérivés (12/fixture), classification registry correcte, `data_quality`/`reliability` cohérents avec l'échantillon réel disponible (`sample_size:21` MLS → "Élevée" ; `sample_size:null` Champions League → "Inconnue"/"Faible", cohérent avec la phase de ligue pas encore démarrée déjà documentée en suite 4-5). Player Engine à 0 résultat sur cet échantillon car **aucune fixture n'avait de composition officiellement confirmée** au moment du run (normal, publiée ~1h avant coup d'envoi) — le chemin Player Engine lui-même a été vérifié séparément avec de vrais joueurs (suite 6, Jackson/Neto/Mudryk).
+
+**Ce que je ne peux toujours pas faire** : exécuter `node pipeline.js` complet (13 ligues × 3 jours + SEO + sitemaps + narratif LLM + météo/news, ~2400 lignes) en une fois — nécessiterait `SUPABASE_SERVICE_ROLE_KEY`/`ANTHROPIC_KEY` absents ici, et écrirait des dizaines de fichiers locaux (data.json, pages match/, sitemaps) qu'il faudrait ensuite `git checkout --` avant tout commit. Déclencher le workflow GitHub Actions moi-même (`workflow_dispatch` sur `hotfix-v2-acceptance`) — pas de `gh`/token dans cet environnement. → `BLOCKED_EXTERNAL`, nécessite une action de l'utilisateur (déclencher le workflow manuellement sur GitHub, ou confirmer que `SUPABASE_SERVICE_ROLE_KEY`/`ANTHROPIC_KEY` sont bien configurés).
+
+### 2. Marchés — filtres Buteurs/Tirs/Tirs cadrés
+
+Ajoutés sur `marches.html` (`renderPlayerMarketsTable`, branche séparée du scanner équipe existant, jamais mélangée à sa logique). Utilisent le Market Registry réel (`PLAYER_FILTER_MARKET`→bet_id réels de l'audit) ; les 3 marchés sont `MODELLED_EXPERIMENTAL` donc affichent une probabilité IASHARK — aucun des 3 n'est `ODDS_AVAILABLE_ONLY`, la règle "jamais de probabilité sur `ODDS_AVAILABLE_ONLY`" n'a donc rien à bloquer ici (déjà verrouillée par ailleurs, `tests/classify-market-audit.test.js`). Catalogue statique (`CATALOGUE DES MARCHÉS`) mis à jour en cohérence (Buteur/Tirs joueur/Tirs cadrés joueur en EXPÉRIMENTAL, Draw No Bet corrigé en EXPÉRIMENTAL pour matcher `lib/market-registry.js`). Vérifié réellement desktop + mobile (375px) : dropdown, empty-state, table, aucun débordement.
+
+### 3. Player Engine / page Match — 6 cas visuels
+
+Vérifiés via rendu réel de `buildPlayerEngineSection` (données synthétiques de forme réaliste, javascript_tool sur les pages construites) :
+- **Données complètes** (titulaire, buteur+tirs+tirs cadrés, qualité haute) : rendu propre, 3 lignes de marché par joueur.
+- **Joueur sans odds** : `oddsInfo` absent → seule la probabilité IASHARK affichée, aucune ligne "Cote/Probabilité marché" fabriquée.
+- **Joueur sans données suffisantes** (< 3 apparitions, ex. Mudryk réel) : `buildPlayerMarketOutput` retourne `null`, aucune carte générée pour ce joueur — vérifié en session précédente avec de vraies données API.
+- **Lineup non confirmée** : `computePlayerMarketsForFixture` retourne `[]` (gate réel, vérifié dans le smoke test E2E sur 4 vraies fixtures ce jour) → état vide honnête affiché ("PAS ENCORE DE DONNÉES PLAYER ENGINE POUR CE MATCH").
+- **Lineup confirmée** : chemin vérifié end-to-end avec de vrais joueurs Chelsea (suite 6).
+- **Aucun player prop disponible** : même état vide que "lineup non confirmée", testé réellement en DOM (capture d'écran mobile, aucun écran cassé).
+
+Aucun écran cassé dans les 6 cas — confirmé par rendu DOM réel, pas supposé.
+
+### 4. I18N — 6 langues, vérification réelle de rendu
+
+Toutes les nouvelles chaînes (section JOUEURS, filtres Marchés, catalogue) déplacées dans des constantes JS uniques (`PE_TXT`, `marketLabels`, `lineupLabels`, `PM_TXT`, `PLAYER_MARKET_LABELS`) traduites via `scripts/i18n-manifest.js` (même pattern que l'existant `DATA_QUALITY_LABELS`/`MARKET_KEY_LABELS`) + nouvelles clés dans les 6 `i18n/dict/*.json`. `npm run build:i18n` : 0 erreur (fail-fast `Replacement mismatch` n'a rien signalé, confirmant chaque règle a matché exactement 1 fois). **Rendu réel vérifié** (pas seulement génération de fichier) : EN et ES (marches.html, dropdown + empty-state réels), DE et PT (match.html, `buildPlayerEngineSection` exécuté en direct avec caractères spéciaux ü/ö/ß/ç/ã confirmés corrects), IT (marches.html, dropdown réel). Sélecteur de langue non re-testé dans cette passe spécifique (déjà vérifié fonctionnel sur les 6 locales en suite 1, aucun changement de son code cette session).
+
+### 5. Mobile — recette complète
+
+`marches.html` (nouveau filtre + empty-state) et `match.html` (nouvelle section JOUEURS, carte avec nom long) vérifiés réellement à 375px : aucun débordement horizontal (`scrollWidth` mesuré < largeur viewport), textes non coupés, cartes qui wrap correctement. `index.html`, `pro.html` (Outils), `compte.html` re-vérifiés à 375px (captures d'écran) : aucune régression, console propre (bruit 502/401 Supabase habituel uniquement). `admin.html`/`match.html` (état ID manquant) déjà vérifiés en suite 4. Non repris dans cette passe car non modifiés : détail fin des dropdowns/paywall déjà vérifié en suite 1/4.
+
+### 6. Sécurité — revue dédiée, 2 problèmes réels trouvés et corrigés
+
+- **XSS trouvé et corrigé** : `match.html`, l'affichage du statut lineup (`lineupLabels[pl.lineup_status]||pl.lineup_status`) n'était pas passé par `esc()` avant insertion HTML — corrigé. Pas exploitable aujourd'hui (la valeur vient exclusivement de notre propre pipeline, 4 valeurs fixes), mais corrigé par principe de défense en profondeur.
+- **Fuite de donnée premium trouvée et corrigée (plus sérieux)** : `player_markets` était écrit directement dans `data.json` (public, servi tel quel à `https://iashark.com/data.json` sans authentification), alors que les autres champs premium (`kelly`/`edge`/`verdict_shark`/`facteur_x`/`dropping_odds`) ne le sont jamais — ils vivent dans la table protégée `match_premium_data`, fusionnée uniquement pour les vrais utilisateurs PRO par l'Edge Function `match-data`. Corrigé : `player_markets` retiré de `matchObj` (pipeline), déplacé dans `premiumRows`/`match_premium_data` (nouvelle colonne `player_markets jsonb`, migration appliquée et vérifiée), `match-data/index.ts` mis à jour (`PREMIUM_FIELDS`, requête de sélection, fusion PRO) pour suivre exactement le même chemin que `kelly`/`edge`. **Aucune exposition réelle n'a eu lieu** : ce code n'a jamais tourné en production (uniquement sur `hotfix-v2-acceptance`, jamais mergé, jamais exécuté par la CI faute de secrets locaux) — trouvé et corrigé avant tout déploiement.
+- Confirmé (pas juste supposé) : RLS activé sur `odds_snapshots` avec **zéro policy** (deny-all pour `anon`/`authenticated`, accès `service_role` uniquement — requête `pg_policies` directe) ; `users.plan`/`users.role` n'ont **aucun GRANT UPDATE** pour `authenticated` (`information_schema.column_privileges` interrogé directement) — un utilisateur FREE ne peut pas s'auto-promouvoir PRO même via un appel client direct, la RLS `users_update_own` ne suffirait pas à elle seule sans ce verrou complémentaire au niveau colonne.
+- `.env` confirmé jamais commité (`git log --all --full-history -- .env` vide) et gitignoré. Aucune clé API/secret trouvée dans le code frontend ni dans l'historique de cette session (scan répété à chaque commit). `esc()` utilisé systématiquement pour toute donnée dynamique insérée en HTML dans le nouveau code (vérifié ligne par ligne). Paramètres fixture/player : toujours des identifiants numériques issus de l'API ou de notre propre pipeline, jamais interpolés depuis une entrée utilisateur non validée. Rate limiting : mêmes pauses 150-300ms entre appels API que le pipeline existant, cache en mémoire par run (`PLAYER_STATS_CACHE`) pour ne jamais refetcher un joueur déjà vu dans le même run.
+- **Non fait, à signaler** : l'Edge Function `match-data` corrigée n'a pas pu être redéployée (pas d'accès `supabase functions deploy` dans cet environnement) ni testée en conditions réelles avec un vrai compte PRO/FREE post-correctif — le code est réel et syntaxiquement cohérent (mêmes patterns que le code déjà en prod pour kelly/edge), mais son exécution réelle post-déploiement reste `BLOCKED_EXTERNAL`.
+
+### 7. FREE/PRO/Outils/Compte — régression fraîche
+
+Aucun fichier d'auth, `pro.html`, ni `compte.html` n'a été modifié dans cette session (seuls `match.html`/`marches.html`/pipeline/Edge Function ont changé). Le mécanisme FREE/PRO lui-même (`sb.from('users').select('plan,role,capital')`, vérifié inchangé) et le paywall `pro.html` restent exactement ceux vérifiés avec de vrais comptes Supabase en jalon précédent. Vérification fraîche faite cette passe : re-confirmation par lecture de code que `checkSession()`/`isPro` n'ont pas été touchés, re-capture d'écran mobile de `pro.html`/`compte.html` (aucune régression visuelle), et la correction de fuite `player_markets` ci-dessus qui, si elle n'avait pas été trouvée, aurait **créé** une régression FREE/PRO (accès à une donnée premium sans être PRO) — donc directement pertinente et couverte par cette régression.
+
+npm test : 203/203 après tous les correctifs de cette section.
+
 ## Mise à jour 2026-08-30 (suite 6) : Player Engine réel + recette de lancement (rapport final honnête)
 
 Demande : exploiter l'audit odds/marchés (suite 5) pour construire un vrai Player Engine (buteur, tirs, tirs cadrés), le brancher dans le pipeline, l'afficher sur `match.html`, mettre à jour le Market Registry, continuer les snapshots de cotes avec une vraie cadence, puis produire un rapport de lancement final avec 17 statuts.

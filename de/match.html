@@ -1281,9 +1281,10 @@ function buildScen(m){
 // playerId+'_'+market) - jamais mélangées dans le meme nombre.
 function buildPlayerEngineSection(m){
   var markets=m.player_markets||[];
+  var PE_TXT={title:'SPIELER-PROGNOSEN',empty:'NOCH KEINE PLAYER-ENGINE-DATEN FÜR DIESES SPIEL',empty_sub:'(offizielle Aufstellung noch nicht bestätigt, oder eingeschränkte Analyse für diesen Wettbewerb)',disclaimer:'Eigenes statistisches Modell (Poisson, erwartete Minuten + Mannschaftskontext) — niemals eine Quote, die in eine Wahrscheinlichkeit umgewandelt wird. Status: FORWARD_VALIDATION_ONLY, bis ein echter Out-of-Sample-Backtest durchgeführt wurde.',minutes:'Erwartete Minuten',quality:'Datenqualität',sample:'Stichprobe',matches_suffix:'Spiele',prob_iashark:'IASHARK-Wahrscheinlichkeit',odds:'Quote',market_prob:'Marktwahrscheinlichkeit'};
   if(!markets.length){
-    return '<div class="s"><div class="stitle">JOUEURS</div>'
-      +'<div style="padding:28px 16px;text-align:center;color:var(--muted);font-family:Space Mono,monospace;font-size:9px;">PAS ENCORE DE DONNÉES PLAYER ENGINE POUR CE MATCH<br><span style="font-size:8px;opacity:0.7;">(composition officielle pas encore confirmée, ou analyse limitée pour cette compétition)</span></div>'
+    return '<div class="s"><div class="stitle">'+PE_TXT.title+'</div>'
+      +'<div style="padding:28px 16px;text-align:center;color:var(--muted);font-family:Space Mono,monospace;font-size:9px;">'+PE_TXT.empty+'<br><span style="font-size:8px;opacity:0.7;">'+PE_TXT.empty_sub+'</span></div>'
       +'</div><div class="sep"></div>';
   }
   var byPlayer={};
@@ -1292,8 +1293,8 @@ function buildPlayerEngineSection(m){
     if(!byPlayer[key]) byPlayer[key]={name:pm.player_name,lineup_status:pm.lineup_status,expected_minutes:pm.expected_minutes,data_quality:pm.data_quality,sample_size:pm.sample_size,rows:[]};
     byPlayer[key].rows.push(pm);
   });
-  var marketLabels={ANYTIME_GOALSCORER:'Buteur',PLAYER_SHOTS:'Tirs',PLAYER_SHOTS_ON_TARGET:'Tirs cadrés'};
-  var lineupLabels={confirmed_starter:'Titulaire confirmé',confirmed_bench:'Remplaçant confirmé',expected_starter:'Titulaire attendu',expected_bench:'Remplaçant attendu'};
+  var marketLabels={ANYTIME_GOALSCORER:'Torschütze',PLAYER_SHOTS:'Schüsse',PLAYER_SHOTS_ON_TARGET:'Schüsse aufs Tor'};
+  var lineupLabels={confirmed_starter:'Bestätigter Starter',confirmed_bench:'Bestätigter Ersatzspieler',expected_starter:'Erwarteter Starter',expected_bench:'Erwarteter Ersatzspieler'};
   var qualityColor={high:'var(--green)',medium:'var(--cyan)',low:'var(--muted)'};
 
   var cards=Object.keys(byPlayer).map(function(key){
@@ -1313,9 +1314,9 @@ function buildPlayerEngineSection(m){
       if(oddsInfo&&oddsInfo.odd){
         var oddsImplied=Math.round((1/oddsInfo.odd)*100);
         separated='<div style="display:flex;gap:14px;font-family:Space Mono,monospace;font-size:9px;color:var(--muted);margin-top:3px;">'
-          +'<span>Probabilité IASHARK : <b style="color:var(--cyan)">'+Math.round((out.probability||0)*100)+'%</b></span>'
-          +'<span>Cote : <b style="color:var(--text)">'+oddsInfo.odd+'</b></span>'
-          +'<span>Probabilité marché : <b style="color:var(--text)">'+oddsImplied+'%</b></span>'
+          +'<span>'+PE_TXT.prob_iashark+' : <b style="color:var(--cyan)">'+Math.round((out.probability||0)*100)+'%</b></span>'
+          +'<span>'+PE_TXT.odds+' : <b style="color:var(--text)">'+oddsInfo.odd+'</b></span>'
+          +'<span>'+PE_TXT.market_prob+' : <b style="color:var(--text)">'+oddsImplied+'%</b></span>'
           +'</div>';
       }
       return '<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-top:1px solid var(--border);">'
@@ -1324,16 +1325,16 @@ function buildPlayerEngineSection(m){
     return '<div style="background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:10px;">'
       +'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px;">'
       +'<span style="font-weight:600;font-size:13.5px;color:var(--text);">'+esc(pl.name||'')+'</span>'
-      +'<span style="font-family:Space Mono,monospace;font-size:9px;color:var(--muted);">'+(lineupLabels[pl.lineup_status]||pl.lineup_status||'')+'</span></div>'
-      +'<div style="font-family:Space Mono,monospace;font-size:9px;color:var(--muted);margin-bottom:6px;">Minutes attendues : <b style="color:var(--text)">'+(pl.expected_minutes!=null?pl.expected_minutes:'—')+'</b>'
-      +' · Data quality : <b style="color:'+(qualityColor[pl.data_quality]||'var(--muted)')+'">'+esc(pl.data_quality||'')+'</b>'
-      +' · Échantillon : <b style="color:var(--text)">'+(pl.sample_size!=null?pl.sample_size+' matchs':'—')+'</b></div>'
+      +'<span style="font-family:Space Mono,monospace;font-size:9px;color:var(--muted);">'+esc(lineupLabels[pl.lineup_status]||pl.lineup_status||'')+'</span></div>'
+      +'<div style="font-family:Space Mono,monospace;font-size:9px;color:var(--muted);margin-bottom:6px;">'+PE_TXT.minutes+' : <b style="color:var(--text)">'+(pl.expected_minutes!=null?pl.expected_minutes:'—')+'</b>'
+      +' · '+PE_TXT.quality+' : <b style="color:'+(qualityColor[pl.data_quality]||'var(--muted)')+'">'+esc(pl.data_quality||'')+'</b>'
+      +' · '+PE_TXT.sample+' : <b style="color:var(--text)">'+(pl.sample_size!=null?pl.sample_size+' '+PE_TXT.matches_suffix:'—')+'</b></div>'
       +rowsHtml
       +'</div>';
   }).join('');
 
-  return '<div class="s"><div class="stitle">JOUEURS</div>'
-    +'<div style="font-family:Space Mono,monospace;font-size:8px;color:var(--muted);margin-bottom:10px;">Modèle statistique dédié (Poisson, minutes attendues + contexte d\'équipe) — jamais une cote transformée en probabilité. Statut : FORWARD_VALIDATION_ONLY tant qu\'aucun backtest hors échantillon réel n\'a été exécuté.</div>'
+  return '<div class="s"><div class="stitle">'+PE_TXT.title+'</div>'
+    +'<div style="font-family:Space Mono,monospace;font-size:8px;color:var(--muted);margin-bottom:10px;">'+PE_TXT.disclaimer+'</div>'
     +cards
     +'</div><div class="sep"></div>';
 }
@@ -1379,7 +1380,7 @@ function buildPlayerStatCards(hn,an,scH,scA){
       +(p.photo?'<img src="'+p.photo+'" style="width:42px;height:42px;border-radius:50%;object-fit:cover;flex-shrink:0;border:1px solid '+(isTop?'var(--cyan)':'var(--border)')+';" onerror="this.outerHTML=\'<div style=width:42px;height:42px;border-radius:50%;background:var(--card2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-family:Space Mono,monospace;font-size:11px;color:var(--muted);>'+initiales+'</div>\'">':'<div style="width:42px;height:42px;border-radius:50%;background:var(--card2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-family:Space Mono,monospace;font-size:11px;color:var(--muted);">'+initiales+'</div>')
       +'<div style="min-width:0;"><div style="font-weight:600;font-size:13.5px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+esc(p.name||'')+'</div>'
       +'<div style="font-family:Space Mono,monospace;font-size:10px;color:var(--muted);margin-top:2px;display:flex;align-items:center;gap:5px;"><span style="width:5px;height:5px;border-radius:50%;background:'+(p.teamSide==='h'?'var(--cyan)':'rgba(226,232,240,0.4)')+';display:inline-block;flex-shrink:0;"></span>'+esc(p.teamName)+'</div></div>'
-      +'<div style="text-align:right;"><div style="font-family:Space Mono,monospace;font-size:15px;font-weight:700;color:var(--text);">'+ratioSaison+'%</div><div style="font-family:Space Mono,monospace;font-size:8px;color:var(--muted);margin-top:1px;">ratio buts/match (saison)</div></div>'
+      +'<div style="text-align:right;"><div style="font-family:Space Mono,monospace;font-size:15px;font-weight:700;color:var(--text);">'+ratioSaison+'%</div><div style="font-family:Space Mono,monospace;font-size:8px;color:var(--muted);margin-top:1px;">Tore/Spiel-Verhältnis (Saison)</div></div>'
       +'</div>';
 
     var detail='<div id="'+id+'" style="display:'+(isTop?'block':'none')+';padding:6px 6px 16px;">'

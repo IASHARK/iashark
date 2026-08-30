@@ -96,6 +96,9 @@ h1 span{color:var(--cyan);}
       <option value="dc_x2">DO X2</option>
       <option value="victoire_dom">Victoria local</option>
       <option value="victoire_ext">Victoria visitante</option>
+      <option value="buteurs">Goleadores</option>
+      <option value="tirs">Tiros de jugador</option>
+      <option value="tirs_cadres">Tiros a puerta</option>
     </select>
     <select class="fsel" id="sortMarket" onchange="renderMatchMarkets()">
       <option value="date">Ordenar: hora</option>
@@ -148,15 +151,16 @@ h1 span{color:var(--cyan);}
 </div>
 
 <script>
-// Catalogue statique - reflete lib/market-registry.js (genere le
-// 2026-08-29, voir IASHARK_MARKET_REGISTRY.md pour le detail par marche).
-// Duplique volontairement les donnees plutot qu'un import (site statique
-// sans bundler, meme pattern que MARKET_LABELS ailleurs sur le site).
+// Catalogue statique - reflete lib/market-registry.js (mis a jour le
+// 2026-08-30 avec l'ajout du Player Engine, voir IASHARK_MARKET_REGISTRY.md
+// pour le detail par marche). Duplique volontairement les donnees plutot
+// qu'un import (site statique sans bundler, meme pattern que MARKET_LABELS
+// ailleurs sur le site).
 function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
 var MARKET_REGISTRY=[
   {label:'Resultado del partido (1X2)',category:'1X2',status:'validated'},
   {label:'Doble Oportunidad (1X / X2 / 12)',category:'1X2',status:'validated'},
-  {label:'Empate Sin Apuesta',category:'1X2',status:'validated'},
+  {label:'Empate Sin Apuesta',category:'1X2',status:'experimental'},
   {label:'Total de goles (O/U 0.5 a 6.5)',category:'BUTS',status:'validated'},
   {label:'Totales por equipo',category:'BUTS',status:'experimental'},
   {label:'Ambos marcan',category:'BUTS',status:'validated'},
@@ -169,7 +173,10 @@ var MARKET_REGISTRY=[
   {label:'Mercados de la primera parte',category:'TEMPS',status:'unsupported'},
   {label:'Córners',category:'CORNERS',status:'unsupported'},
   {label:'Tarjetas',category:'CARTONS',status:'unsupported'},
-  {label:'Props de jugadores',category:'JOUEURS',status:'unsupported'},
+  {label:'Goleador',category:'JOUEURS',status:'experimental'},
+  {label:'Tiros de jugador',category:'JOUEURS',status:'experimental'},
+  {label:'Tiros a puerta de jugador',category:'JOUEURS',status:'experimental'},
+  {label:'Otros player props (tarjetas, faltas, asistencias...)',category:'JOUEURS',status:'unsupported'},
 ];
 var STATUS_LABEL={validated:'MODELADO Y VALIDADO',experimental:'EXPERIMENTAL',unsupported:'NO SOPORTADO'};
 var CATEGORY_LABEL={'1X2':'1X2','BUTS':'GOLES','HANDICAP':'HÁNDICAP','TEMPS':'1ª PARTE','CORNERS':'CÓRNERS','CARTONS':'TARJETAS','JOUEURS':'JUGADORES'};
@@ -201,9 +208,51 @@ async function loadMatches(){
   }catch(e){ allMatchsData=[]; }
   renderMatchMarkets();
 }
+// Marches joueur (Player Engine, lib/markets/player-engine.js cote pipeline)
+// - branche separee du scanner equipe existant ci-dessous, jamais melangee
+// a sa logique de tri/filtre. N'affiche une probabilite IASHARK QUE pour
+// les marches reellement modelises (ANYTIME_GOALSCORER/PLAYER_SHOTS/
+// PLAYER_SHOTS_ON_TARGET, tous MODELLED_EXPERIMENTAL dans le Market
+// Registry a ce jour) - jamais pour un statut ODDS_AVAILABLE_ONLY (regle
+// explicite, aucun marche de ce type n'est actuellement branche ici).
+var PLAYER_FILTER_MARKET={buteurs:'ANYTIME_GOALSCORER',tirs:'PLAYER_SHOTS',tirs_cadres:'PLAYER_SHOTS_ON_TARGET'};
+var PLAYER_MARKET_LABELS={ANYTIME_GOALSCORER:'Goleador',PLAYER_SHOTS:'Tiros',PLAYER_SHOTS_ON_TARGET:'Tiros a puerta'};
+var PM_TXT={empty_prefix:'NINGÚN MERCADO',empty_suffix:'DISPONIBLE HOY',empty_sub:'Alineación oficial aún no confirmada para los partidos de hoy, o análisis limitado para esta competición.',th_player:'Jugador',th_match:'Partido',th_status:'Estado',th_minutes:'Min. esperados',th_prob:'Probabilidad IASHARK',th_quality:'Calidad de datos',th_sample:'Muestra'};
+function renderPlayerMarketsTable(marketId){
+  var rows=[];
+  allMatchsData.forEach(function(m){
+    (m.player_markets||[]).forEach(function(pm){
+      if(pm.market!==marketId) return;
+      rows.push({m:m,pm:pm});
+    });
+  });
+  var wrap=document.getElementById('matchMarketsWrap');
+  if(!rows.length){
+    wrap.innerHTML='<div class="empty-state"><div class="empty-state-icon"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg></div>'+PM_TXT.empty_prefix+' '+esc((PLAYER_MARKET_LABELS[marketId]||'').toUpperCase())+' '+PM_TXT.empty_suffix+'<br><span style="color:rgba(74,101,128,0.6)">'+PM_TXT.empty_sub+'</span></div>';
+    return;
+  }
+  wrap.innerHTML='<table class="mtable"><thead><tr><th>'+PM_TXT.th_player+'</th><th>'+PM_TXT.th_match+'</th><th>'+PM_TXT.th_status+'</th><th>'+PM_TXT.th_minutes+'</th><th>'+PM_TXT.th_prob+'</th><th>'+PM_TXT.th_quality+'</th><th>'+PM_TXT.th_sample+'</th></tr></thead><tbody>'
+    +rows.map(function(row){
+      var m=row.m,pm=row.pm;
+      var hn=(m.home&&m.home.n)||'?', an=(m.away&&m.away.n)||'?';
+      var out=pm.output||{};
+      var probTxt=marketId==='ANYTIME_GOALSCORER'
+        ?(out.probability!=null?Math.round(out.probability*100)+'%':'—')
+        :(out.over_lines&&out.over_lines['over_0.5']!=null?Math.round(out.over_lines['over_0.5']*100)+'% (over 0.5)':'—');
+      return '<tr><td>'+esc(pm.player_name||'')+'</td><td>'+esc(hn)+' vs '+esc(an)+'</td>'
+        +'<td style="font-family:Space Mono,monospace;font-size:9px;color:var(--muted);">'+esc(pm.lineup_status||'')+'</td>'
+        +'<td class="gap-cell">'+(pm.expected_minutes!=null?pm.expected_minutes:'—')+'</td>'
+        +'<td class="gap-cell">'+probTxt+'</td>'
+        +'<td style="font-family:Space Mono,monospace;font-size:9px;color:var(--muted);">'+esc(pm.data_quality||'—')+'</td>'
+        +'<td class="gap-cell">'+(pm.sample_size!=null?pm.sample_size:'—')+'</td></tr>';
+    }).join('')
+    +'</tbody></table>';
+}
+
 function renderMatchMarkets(){
   var mkt=document.getElementById('filterMarket').value;
   var sortBy=document.getElementById('sortMarket').value;
+  if(PLAYER_FILTER_MARKET[mkt]){ renderPlayerMarketsTable(PLAYER_FILTER_MARKET[mkt]); return; }
   var list=allMatchsData.filter(function(m){ return !mkt||getMarketKey(m.pari_rec)===mkt; });
   list=list.slice().sort(function(a,b){
     if(sortBy==='ecart'){

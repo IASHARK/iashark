@@ -14,6 +14,7 @@
 // Sans SUPABASE_URL/SUPABASE_SERVICE_ROLE_KEY, le script recupere quand meme
 // les cotes reelles mais les ecrit dans un fichier JSON local plutot que de
 // pretendre les avoir persistees en base (jamais de "success" fabrique).
+require("./load-env.js");
 const fs = require("fs");
 const https = require("https");
 const path = require("path");

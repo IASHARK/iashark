@@ -98,6 +98,19 @@ var PAGES = [
       {find: '<option value="dc_x2">DC X2</option>', build: function(d){ return '<option value="dc_x2">' + d.market_names.dc_x2 + "</option>"; }},
       {find: '<option value="victoire_dom">Victoire domicile</option>', build: function(d){ return '<option value="victoire_dom">' + d.market_names.victoire_dom + "</option>"; }},
       {find: '<option value="victoire_ext">Victoire extérieur</option>', build: function(d){ return '<option value="victoire_ext">' + d.market_names.victoire_ext + "</option>"; }},
+      {find: '<option value="buteurs">Buteurs</option>', build: function(d, l, esc){ return '<option value="buteurs">' + esc(d.markets_page.filter_buteurs) + "</option>"; }},
+      {find: '<option value="tirs">Tirs joueur</option>', build: function(d, l, esc){ return '<option value="tirs">' + esc(d.markets_page.filter_tirs) + "</option>"; }},
+      {find: '<option value="tirs_cadres">Tirs cadrés</option>', build: function(d, l, esc){ return '<option value="tirs_cadres">' + esc(d.markets_page.filter_tirs_cadres) + "</option>"; }},
+      {find: "var PLAYER_MARKET_LABELS={ANYTIME_GOALSCORER:'Buteur',PLAYER_SHOTS:'Tirs',PLAYER_SHOTS_ON_TARGET:'Tirs cadrés'};",
+       build: function(d, l, esc){
+        var p = d.match_page;
+        return "var PLAYER_MARKET_LABELS={ANYTIME_GOALSCORER:'" + esc(p.player_engine_market_goalscorer) + "',PLAYER_SHOTS:'" + esc(p.player_engine_market_shots) + "',PLAYER_SHOTS_ON_TARGET:'" + esc(p.player_engine_market_shots_target) + "'};";
+      }},
+      {find: "var PM_TXT={empty_prefix:'AUCUN MARCHÉ',empty_suffix:'DISPONIBLE AUJOURD\\'HUI',empty_sub:'Composition officielle pas encore confirmée pour les matchs du jour, ou analyse limitée pour cette compétition.',th_player:'Joueur',th_match:'Match',th_status:'Statut',th_minutes:'Min. attendues',th_prob:'Probabilité IASHARK',th_quality:'Qualité données',th_sample:'Échantillon'};",
+       build: function(d, l, esc){
+        var p = d.markets_page;
+        return "var PM_TXT={empty_prefix:'" + esc(p.pm_empty_prefix) + "',empty_suffix:'" + esc(p.pm_empty_suffix) + "',empty_sub:'" + esc(p.pm_empty_sub) + "',th_player:'" + esc(p.pm_th_player) + "',th_match:'" + esc(p.pm_th_match) + "',th_status:'" + esc(p.pm_th_status) + "',th_minutes:'" + esc(p.pm_th_minutes) + "',th_prob:'" + esc(p.pm_th_prob) + "',th_quality:'" + esc(p.pm_th_quality) + "',th_sample:'" + esc(p.pm_th_sample) + "'};";
+      }},
       {find: '<option value="date">Trier : heure</option>', build: function(d){ return '<option value="date">' + d.markets_page.sort_time + "</option>"; }},
       {find: '<option value="ecart">Trier : écart modèle/marché</option>', build: function(d){ return '<option value="ecart">' + d.markets_page.sort_gap + "</option>"; }},
       {find: '<option value="qualite">Trier : qualité des données</option>', build: function(d){ return '<option value="qualite">' + d.markets_page.sort_quality + "</option>"; }},
@@ -137,7 +150,7 @@ var PAGES = [
       }},
       {find: "{label:'Résultat du match (1X2)',category:'1X2',status:'validated'},", build: function(d, l, esc){ return "{label:'" + esc(d.market_catalog.c1) + "',category:'1X2',status:'validated'},"; }},
       {find: "{label:'Double Chance (1X / X2 / 12)',category:'1X2',status:'validated'},", build: function(d, l, esc){ return "{label:'" + esc(d.market_catalog.c2) + "',category:'1X2',status:'validated'},"; }},
-      {find: "{label:'Draw No Bet',category:'1X2',status:'validated'},", build: function(d, l, esc){ return "{label:'" + esc(d.market_catalog.c3) + "',category:'1X2',status:'validated'},"; }},
+      {find: "{label:'Draw No Bet',category:'1X2',status:'experimental'},", build: function(d, l, esc){ return "{label:'" + esc(d.market_catalog.c3) + "',category:'1X2',status:'experimental'},"; }},
       {find: "{label:'Total de buts (O/U 0.5 à 6.5)',category:'BUTS',status:'validated'},", build: function(d, l, esc){ return "{label:'" + esc(d.market_catalog.c4) + "',category:'BUTS',status:'validated'},"; }},
       {find: "{label:'Totaux par équipe',category:'BUTS',status:'experimental'},", build: function(d, l, esc){ return "{label:'" + esc(d.market_catalog.c5) + "',category:'BUTS',status:'experimental'},"; }},
       {find: "{label:'BTTS',category:'BUTS',status:'validated'},", build: function(d, l, esc){ return "{label:'" + esc(d.market_catalog.c6) + "',category:'BUTS',status:'validated'},"; }},
@@ -150,7 +163,10 @@ var PAGES = [
       {find: "{label:'Marchés mi-temps',category:'TEMPS',status:'unsupported'},", build: function(d, l, esc){ return "{label:'" + esc(d.market_catalog.c13) + "',category:'TEMPS',status:'unsupported'},"; }},
       {find: "{label:'Corners',category:'CORNERS',status:'unsupported'},", build: function(d, l, esc){ return "{label:'" + esc(d.market_catalog.c14) + "',category:'CORNERS',status:'unsupported'},"; }},
       {find: "{label:'Cartons',category:'CARTONS',status:'unsupported'},", build: function(d, l, esc){ return "{label:'" + esc(d.market_catalog.c15) + "',category:'CARTONS',status:'unsupported'},"; }},
-      {find: "{label:'Player props',category:'JOUEURS',status:'unsupported'},", build: function(d, l, esc){ return "{label:'" + esc(d.market_catalog.c16) + "',category:'JOUEURS',status:'unsupported'},"; }},
+      {find: "{label:'Buteur',category:'JOUEURS',status:'experimental'},", build: function(d, l, esc){ return "{label:'" + esc(d.market_catalog.c17) + "',category:'JOUEURS',status:'experimental'},"; }},
+      {find: "{label:'Tirs joueur',category:'JOUEURS',status:'experimental'},", build: function(d, l, esc){ return "{label:'" + esc(d.market_catalog.c18) + "',category:'JOUEURS',status:'experimental'},"; }},
+      {find: "{label:'Tirs cadrés joueur',category:'JOUEURS',status:'experimental'},", build: function(d, l, esc){ return "{label:'" + esc(d.market_catalog.c19) + "',category:'JOUEURS',status:'experimental'},"; }},
+      {find: "{label:'Autres player props (cartons, fautes, passes...)',category:'JOUEURS',status:'unsupported'},", build: function(d, l, esc){ return "{label:'" + esc(d.market_catalog.c20) + "',category:'JOUEURS',status:'unsupported'},"; }},
       {find: "var CATEGORY_LABEL={'1X2':'1X2','BUTS':'BUTS','HANDICAP':'HANDICAP','TEMPS':'TEMPS','CORNERS':'CORNERS','CARTONS':'CARTONS','JOUEURS':'JOUEURS'};", build: function(d, l, esc){
         var c = d.market_catalog_cat;
         return "var CATEGORY_LABEL={'1X2':'" + esc(c["1X2"]) + "','BUTS':'" + esc(c.BUTS) + "','HANDICAP':'" + esc(c.HANDICAP) + "','TEMPS':'" + esc(c.TEMPS) + "','CORNERS':'" + esc(c.CORNERS) + "','CARTONS':'" + esc(c.CARTONS) + "','JOUEURS':'" + esc(c.JOUEURS) + "'};";
@@ -334,6 +350,25 @@ var PAGES = [
       {find: '<div class="stitle">MODÈLE IA SHARK — CM 2026</div>', build: function(d, l, esc){ return '<div class="stitle">' + esc(d.match_page.section_wc_model) + '</div>'; }},
       {find: '<div class="stitle">SCÉNARIO ATTENDU</div>', build: function(d, l, esc){ return '<div class="stitle">' + esc(d.match_page.section_scenario) + '</div>'; }},
       {find: '<div class="stitle">JOUEURS À SUIVRE — CLASSEMENT</div>', build: function(d, l, esc){ return '<div class="stitle">' + esc(d.match_page.section_players) + '</div>'; }},
+      {find: "var PE_TXT={title:'PROJECTIONS JOUEURS',empty:'PAS ENCORE DE DONNÉES PLAYER ENGINE POUR CE MATCH',empty_sub:'(composition officielle pas encore confirmée, ou analyse limitée pour cette compétition)',disclaimer:'Modèle statistique dédié (Poisson, minutes attendues + contexte d\\'équipe) — jamais une cote transformée en probabilité. Statut : FORWARD_VALIDATION_ONLY tant qu\\'aucun backtest hors échantillon réel n\\'a été exécuté.',minutes:'Minutes attendues',quality:'Data quality',sample:'Échantillon',matches_suffix:'matchs',prob_iashark:'Probabilité IASHARK',odds:'Cote',market_prob:'Probabilité marché'};",
+       build: function(d, l, esc){
+        var p = d.match_page;
+        return "var PE_TXT={title:'" + esc(p.player_engine_title) + "',empty:'" + esc(p.player_engine_empty) + "',empty_sub:'" + esc(p.player_engine_empty_sub) + "',disclaimer:'" + esc(p.player_engine_disclaimer) + "',minutes:'" + esc(p.player_engine_minutes) + "',quality:'" + esc(p.player_engine_quality) + "',sample:'" + esc(p.player_engine_sample) + "',matches_suffix:'" + esc(p.player_engine_matches_suffix) + "',prob_iashark:'" + esc(p.player_engine_prob_iashark) + "',odds:'" + esc(p.player_engine_odds) + "',market_prob:'" + esc(p.player_engine_market_prob) + "'};";
+      }},
+      {find: "var marketLabels={ANYTIME_GOALSCORER:'Buteur',PLAYER_SHOTS:'Tirs',PLAYER_SHOTS_ON_TARGET:'Tirs cadrés'};",
+       build: function(d, l, esc){
+        var p = d.match_page;
+        return "var marketLabels={ANYTIME_GOALSCORER:'" + esc(p.player_engine_market_goalscorer) + "',PLAYER_SHOTS:'" + esc(p.player_engine_market_shots) + "',PLAYER_SHOTS_ON_TARGET:'" + esc(p.player_engine_market_shots_target) + "'};";
+      }},
+      {find: "var lineupLabels={confirmed_starter:'Titulaire confirmé',confirmed_bench:'Remplaçant confirmé',expected_starter:'Titulaire attendu',expected_bench:'Remplaçant attendu'};",
+       build: function(d, l, esc){
+        var p = d.match_page;
+        return "var lineupLabels={confirmed_starter:'" + esc(p.player_engine_status_confirmed_starter) + "',confirmed_bench:'" + esc(p.player_engine_status_confirmed_bench) + "',expected_starter:'" + esc(p.player_engine_status_expected_starter) + "',expected_bench:'" + esc(p.player_engine_status_expected_bench) + "'};";
+      }},
+      {find: '+\'<div style="text-align:right;"><div style="font-family:Space Mono,monospace;font-size:15px;font-weight:700;color:var(--text);">\'+ratioSaison+\'%</div><div style="font-family:Space Mono,monospace;font-size:8px;color:var(--muted);margin-top:1px;">ratio buts/match (saison)</div></div>\'',
+       build: function(d, l, esc){
+        return '+\'<div style="text-align:right;"><div style="font-family:Space Mono,monospace;font-size:15px;font-weight:700;color:var(--text);">\'+ratioSaison+\'%</div><div style="font-family:Space Mono,monospace;font-size:8px;color:var(--muted);margin-top:1px;">' + esc(d.match_page.season_ratio_label) + '</div></div>\'';
+      }},
       {find: '<div class="stitle">CLASSEMENT</div>', build: function(d, l, esc){ return '<div class="stitle">' + esc(d.match_page.section_ranking) + '</div>'; }},
       {find: '<div class="stitle">SURFACE — \'+surfLabel.toUpperCase()+\'</div>', build: function(d, l, esc){ return '<div class="stitle">' + esc(d.match_page.section_surface_prefix) + '\'+surfLabel.toUpperCase()+\'</div>'; }},
       {find: '<div class="stitle">PALMARÈS CE TOURNOI</div>', build: function(d, l, esc){ return '<div class="stitle">' + esc(d.match_page.section_palmares) + '</div>'; }},

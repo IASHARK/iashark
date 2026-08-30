@@ -14,6 +14,7 @@
 // que d'inventer une saison ou un niveau de couverture.
 //
 // Usage : APISPORTS_KEY=xxx node scripts/verify-league-coverage.js
+require("./load-env.js");
 const fs = require("fs");
 const https = require("https");
 const path = require("path");

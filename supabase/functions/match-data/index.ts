@@ -10,7 +10,7 @@ const DATA_URL = "https://iashark.com/data.json";
 // uniquement de garde-fou si un ancien commit de data.json les contenait
 // encore par erreur - on les retire quand meme explicitement pour un
 // visiteur non-pro, en plus de ne jamais les rapporter depuis la table.
-const PREMIUM_FIELDS = ["kelly", "edge", "verdict_shark", "facteur_x", "dropping_odds"];
+const PREMIUM_FIELDS = ["kelly", "edge", "verdict_shark", "facteur_x", "dropping_odds", "player_markets"];
 
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
@@ -82,7 +82,7 @@ Deno.serve(async (req: Request) => {
   if (fixtureIds.length) {
     const { data: premiumRows, error } = await supabase
       .from("match_premium_data")
-      .select("fixture_id,kelly,edge,verdict_shark,facteur_x,dropping_odds")
+      .select("fixture_id,kelly,edge,verdict_shark,facteur_x,dropping_odds,player_markets")
       .in("fixture_id", fixtureIds);
     if (error) {
       console.error("match_premium_data query failed:", error.message);
@@ -101,6 +101,7 @@ Deno.serve(async (req: Request) => {
           verdict_shark: premium.verdict_shark ?? null,
           facteur_x: premium.facteur_x ?? null,
           dropping_odds: premium.dropping_odds ?? null,
+          player_markets: premium.player_markets ?? null,
         }
       : m;
   });

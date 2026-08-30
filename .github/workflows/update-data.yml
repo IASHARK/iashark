@@ -2239,12 +2239,16 @@ jobs:
               var reliability=computeReliability(modelAgreement,dataQuality,sampleSizeReal);
               var fixtureAnalysisTier=analysisTierForLeague(lg.id);
               var playerMarkets=await computePlayerMarketsForFixture(f.id, lineups, home.id, away.id, seasonForLeague(lg.id, SEASON), fixtureAnalysisTier, critH, critA);
+              // player_markets N'EST PAS mis dans matchObj (public, data.json,
+              // accessible sans authentification) : c'est une analyse premium,
+              // poussee a part dans premiumRows plus bas (meme traitement que
+              // kelly/edge/verdict_shark) et fusionnee uniquement pour les
+              // utilisateurs PRO reels par l'Edge Function match-data.
               var matchObj={
                 id:f.id,sport:'football',
                 league_id:lg.id,
                 season:seasonForLeague(lg.id, SEASON),
                 analysis_tier:fixtureAnalysisTier,
-                player_markets:playerMarkets,
                 home:{n:home.name,id:home.id},away:{n:away.name,id:away.id},
                 league:lg.name,ligue_icon:lgIcon(lg.name),league_key:lgKey(lg.id),
                 date:(dateVraieParis+' '+heure).trim(),cat:['all'],
@@ -2352,6 +2356,14 @@ jobs:
                 verdict_shark:an?(an.verdict_shark||''):'',
                 facteur_x:an?(an.facteur_x||''):'',
                 dropping_odds:droppingOdds||null,
+                // player_markets (Player Engine) : meme traitement que
+                // kelly/edge/verdict_shark - analyse premium, jamais ecrite
+                // dans data.json public (voir plus bas, matchObj ne porte
+                // plus player_markets directement). Trouve/corrige lors de
+                // la revue securite du 2026-08-30 : ce champ etait
+                // initialement ecrit dans data.json en clair, accessible a
+                // tout visiteur non-pro via https://iashark.com/data.json.
+                player_markets:playerMarkets&&playerMarkets.length?playerMarkets:null,
                 raw_response:an||null,
                 pipeline_sha:process.env.GITHUB_SHA||null,
               });

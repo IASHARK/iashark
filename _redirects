@@ -1,18 +1,18 @@
-/*  /maintenance.html  200!
+# Pause maintenance levee le 2026-08-30 (feu vert explicite de
+# l'utilisateur, apres QA finale + rapport final - voir
+# IASHARK_V2_RAPPORT_FINAL.md). L'ancienne ligne catch-all
+# "/*  /maintenance.html  200!" est retiree : le site sert maintenant
+# son contenu reel au lieu de rediriger systematiquement vers
+# maintenance.html.
 
 # --- i18n (MASTER V2.1 SS19) ------------------------------------------
-# Ces regles restent INERTES tant que la ligne catch-all ci-dessus est
-# active : Netlify evalue les regles dans l'ordre et s'arrete a la
-# premiere qui matche, donc /*  ->  /maintenance.html  intercepte tout
-# avant que ces regles ne soient jamais atteintes. Elles ne prendront
-# effet que si/quand la pause du site est levee (decision de
-# l'utilisateur, jamais automatique).
+# Ces regles sont maintenant ACTIVES (plus de catch-all au-dessus).
 #
 # IMPORTANT - regle de securite pour ce fichier : n'ajouter une ligne
 # ci-dessous QUE pour une page dont /fr/<page> (et les 5 autres locales)
 # ont ete reellement generes par `npm run build:i18n` et commit. Ajouter
 # une redirection vers une page qui n'existe pas encore produirait un
-# 404 en cascade des que la pause serait levee. Etat actuel (2026-08-30) :
+# 404 en cascade. Etat actuel (2026-08-30) :
 # les 7 pages coeur du produit sont generees pour les 6 locales
 # (marches/index/match/pro/compte/historique/landing) - voir
 # IASHARK_V2_EXECUTION_STATE.md pour la liste a jour et le detail par page

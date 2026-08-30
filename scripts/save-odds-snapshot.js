@@ -41,6 +41,50 @@ function get(url, headers) {
     }).on("error", reject);
   });
 }
+
+// Cadence de collecte demandee explicitement : FIRST_SEEN / T72 / T24 / T6 /
+// T90MIN / LINEUP / CLOSE. Deduit du temps reel jusqu'au coup d'envoi
+// (jamais une phase fixee arbitrairement). LINEUP n'est jamais retournee ici
+// (elle depend de la confirmation de composition, pas du seul horaire) - a
+// declencher separement, au meme moment que computePlayerMarketsForFixture
+// dans le pipeline (meme fixture, meme evenement declencheur : composition
+// confirmee). CLOSE couvre a la fois juste avant le coup d'envoi et apres
+// (cote de cloture toujours utile a capturer si le run arrive un peu tard).
+function computeSnapshotPhase(kickoffISO, now) {
+  now = now || new Date();
+  var kickoff = new Date(kickoffISO);
+  var hoursToKickoff = (kickoff.getTime() - now.getTime()) / 3600000;
+  if (hoursToKickoff <= 1.5) return "CLOSE";
+  if (hoursToKickoff <= 6) return "T6";
+  if (hoursToKickoff <= 24) return "T24";
+  if (hoursToKickoff <= 72) return "T72";
+  return "FIRST_SEEN";
+}
+
+// Verifie les phases deja capturees pour une fixture (dedup reel, pas de
+// nouvel appel/insert si la phase courante a deja ete sauvegardee pour cette
+// fixture - "ne refais pas un appel... s'il peut etre partage", applique ici
+// a l'ecriture elle-meme plutot qu'a la lecture API, qui elle doit de toute
+// facon s'executer pour connaitre le fixture.date a jour).
+function getExistingPhases(supaUrl, supaKey, fixtureId) {
+  return new Promise(function (resolve) {
+    var u = new URL(supaUrl);
+    https.get({
+      hostname: u.hostname,
+      path: "/rest/v1/odds_snapshots?fixture_id=eq." + fixtureId + "&select=snapshot_phase",
+      headers: { apikey: supaKey, Authorization: "Bearer " + supaKey },
+    }, function (res) {
+      var body = "";
+      res.on("data", function (c) { body += c; });
+      res.on("end", function () {
+        try {
+          var rows = JSON.parse(body);
+          resolve(Array.isArray(rows) ? rows.map(function (r) { return r.snapshot_phase; }) : []);
+        } catch (e) { resolve([]); } // repli silencieux : au pire une phase est recapturee, jamais un crash
+      });
+    }).on("error", function () { resolve([]); });
+  });
+}
 // Meme pattern que upsertJSON dans .github/workflows/update-data.yml
 // (writeSnapshots/writePremiumData) - https brut, 0 dependance npm tierce.
 function postJSON(host, urlPath, body, headers) {
@@ -88,6 +132,14 @@ async function main() {
     var fixtures = (fxResp.response || []).slice(0, fixturesPerLeague);
     for (var fi = 0; fi < fixtures.length; fi++) {
       var fx = fixtures[fi];
+      var phase = computeSnapshotPhase(fx.fixture.date);
+      if (canWriteSupabase) {
+        var already = await getExistingPhases(supaUrl, supaKey, fx.fixture.id);
+        if (already.indexOf(phase) !== -1) {
+          console.log(league.key + " " + fx.teams.home.name + " vs " + fx.teams.away.name + " : phase " + phase + " deja capturee pour cette fixture, appel odds/insert evite (cache reel).");
+          continue;
+        }
+      }
       var oddsResp = await get("https://v3.football.api-sports.io/odds?fixture=" + fx.fixture.id, headers);
       await sleep(300);
       var oddsRows = oddsResp.response || [];
@@ -102,13 +154,14 @@ async function main() {
         fixture_id: fx.fixture.id,
         league_id: league.apiFootballId,
         league_key: league.key,
+        snapshot_phase: phase,
         bookmaker_count: bookmakerCount,
         market_count: Object.keys(marketIds).length,
         raw_odds: oddsRows[0],
         source: canWriteSupabase ? "pipeline" : "manual_audit",
         pipeline_sha: pipelineSha,
       });
-      console.log(league.key + " " + fx.teams.home.name + " vs " + fx.teams.away.name + " : snapshot capture (" + bookmakerCount + " bookmakers, " + Object.keys(marketIds).length + " marches).");
+      console.log(league.key + " " + fx.teams.home.name + " vs " + fx.teams.away.name + " : snapshot capture, phase " + phase + " (" + bookmakerCount + " bookmakers, " + Object.keys(marketIds).length + " marches).");
     }
   }
 
@@ -146,3 +199,5 @@ async function main() {
 if (require.main === module) {
   main().catch(function (e) { console.error("FATAL:", e.message); process.exitCode = 1; });
 }
+
+module.exports = { computeSnapshotPhase: computeSnapshotPhase };

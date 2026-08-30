@@ -1271,6 +1271,73 @@ function buildScen(m){
   return '<div class="s"><div class="stitle">CENÁRIO ESPERADO</div><div class="scen-list">'+list+'</div></div><div class="sep"></div>';
 }
 
+// Section JOUEURS reelle (Player Engine, lib/markets/player-engine.js cote
+// pipeline). Rendu uniquement a partir de m.player_markets - si le champ est
+// absent/vide (pipeline pas encore branche en production, composition pas
+// encore confirmee, ou analysis_tier ne permettant pas le calcul), affiche un
+// etat vide honnete plutot qu'une section vide silencieuse ou des donnees
+// inventees. Separe TOUJOURS Probabilite IASHARK / Cote / Probabilite marche
+// quand une cote existe pour ce joueur+marche (m.player_odds, cle
+// playerId+'_'+market) - jamais mélangées dans le meme nombre.
+function buildPlayerEngineSection(m){
+  var markets=m.player_markets||[];
+  if(!markets.length){
+    return '<div class="s"><div class="stitle">JOUEURS</div>'
+      +'<div style="padding:28px 16px;text-align:center;color:var(--muted);font-family:Space Mono,monospace;font-size:9px;">PAS ENCORE DE DONNÉES PLAYER ENGINE POUR CE MATCH<br><span style="font-size:8px;opacity:0.7;">(composition officielle pas encore confirmée, ou analyse limitée pour cette compétition)</span></div>'
+      +'</div><div class="sep"></div>';
+  }
+  var byPlayer={};
+  markets.forEach(function(pm){
+    var key=pm.player_id+'_'+(pm.player_name||'');
+    if(!byPlayer[key]) byPlayer[key]={name:pm.player_name,lineup_status:pm.lineup_status,expected_minutes:pm.expected_minutes,data_quality:pm.data_quality,sample_size:pm.sample_size,rows:[]};
+    byPlayer[key].rows.push(pm);
+  });
+  var marketLabels={ANYTIME_GOALSCORER:'Buteur',PLAYER_SHOTS:'Tirs',PLAYER_SHOTS_ON_TARGET:'Tirs cadrés'};
+  var lineupLabels={confirmed_starter:'Titulaire confirmé',confirmed_bench:'Remplaçant confirmé',expected_starter:'Titulaire attendu',expected_bench:'Remplaçant attendu'};
+  var qualityColor={high:'var(--green)',medium:'var(--cyan)',low:'var(--muted)'};
+
+  var cards=Object.keys(byPlayer).map(function(key){
+    var pl=byPlayer[key];
+    var rowsHtml=pl.rows.map(function(pm){
+      var out=pm.output||{};
+      var market=marketLabels[pm.market]||pm.market;
+      var oddsInfo=(m.player_odds&&m.player_odds[pm.player_id+'_'+pm.market])||null;
+      var probLine;
+      if(pm.market==='ANYTIME_GOALSCORER'){
+        probLine='<span style="color:var(--cyan);font-weight:700;">'+Math.round((out.probability||0)*100)+'%</span>';
+      } else {
+        var over05=out.over_lines?out.over_lines['over_0.5']:null;
+        probLine=over05!=null?('<span style="color:var(--cyan);font-weight:700;">'+Math.round(over05*100)+'%</span> over 0.5'):'—';
+      }
+      var separated='';
+      if(oddsInfo&&oddsInfo.odd){
+        var oddsImplied=Math.round((1/oddsInfo.odd)*100);
+        separated='<div style="display:flex;gap:14px;font-family:Space Mono,monospace;font-size:9px;color:var(--muted);margin-top:3px;">'
+          +'<span>Probabilité IASHARK : <b style="color:var(--cyan)">'+Math.round((out.probability||0)*100)+'%</b></span>'
+          +'<span>Cote : <b style="color:var(--text)">'+oddsInfo.odd+'</b></span>'
+          +'<span>Probabilité marché : <b style="color:var(--text)">'+oddsImplied+'%</b></span>'
+          +'</div>';
+      }
+      return '<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-top:1px solid var(--border);">'
+        +'<span style="font-size:12px;color:var(--muted);">'+esc(market)+'</span>'+probLine+'</div>'+separated;
+    }).join('');
+    return '<div style="background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:10px;">'
+      +'<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px;">'
+      +'<span style="font-weight:600;font-size:13.5px;color:var(--text);">'+esc(pl.name||'')+'</span>'
+      +'<span style="font-family:Space Mono,monospace;font-size:9px;color:var(--muted);">'+(lineupLabels[pl.lineup_status]||pl.lineup_status||'')+'</span></div>'
+      +'<div style="font-family:Space Mono,monospace;font-size:9px;color:var(--muted);margin-bottom:6px;">Minutes attendues : <b style="color:var(--text)">'+(pl.expected_minutes!=null?pl.expected_minutes:'—')+'</b>'
+      +' · Data quality : <b style="color:'+(qualityColor[pl.data_quality]||'var(--muted)')+'">'+esc(pl.data_quality||'')+'</b>'
+      +' · Échantillon : <b style="color:var(--text)">'+(pl.sample_size!=null?pl.sample_size+' matchs':'—')+'</b></div>'
+      +rowsHtml
+      +'</div>';
+  }).join('');
+
+  return '<div class="s"><div class="stitle">JOUEURS</div>'
+    +'<div style="font-family:Space Mono,monospace;font-size:8px;color:var(--muted);margin-bottom:10px;">Modèle statistique dédié (Poisson, minutes attendues + contexte d\'équipe) — jamais une cote transformée en probabilité. Statut : FORWARD_VALIDATION_ONLY tant qu\'aucun backtest hors échantillon réel n\'a été exécuté.</div>'
+    +cards
+    +'</div><div class="sep"></div>';
+}
+
 function buildPlayerStatCards(hn,an,scH,scA){
   var combined=[];
   (scH||[]).forEach(function(p){ combined.push(Object.assign({},p,{teamSide:'h',teamName:hn})); });
@@ -1290,8 +1357,13 @@ function buildPlayerStatCards(hn,an,scH,scA){
     var cadrage=p.shots_total?Math.round((p.shots_on/p.shots_total)*100):null;
     var duelsPct=p.duels_total?Math.round((p.duels_won/p.duels_total)*100):null;
     var dribblesPct=p.dribbles_attempts?Math.round((p.dribbles_success/p.dribbles_attempts)*100):null;
+    // Ratio saison simple (buts/matchs joues), PAS une probabilite calibree :
+    // aucun ajustement minutes attendues/contexte adversaire ici (c'est le role
+    // du Player Engine reel, lib/markets/player-engine.js, affiche separement
+    // ci-dessous via m.player_markets quand disponible). Ne jamais confondre ce
+    // ratio avec une PURE_IASHARK_PROBABILITY - libelle explicite plus bas.
     var lambdaMatch=(p.games||0)>0?(p.goals||0)/p.games:0;
-    var probApprox=Math.round((1-Math.exp(-lambdaMatch))*100);
+    var ratioSaison=Math.round((1-Math.exp(-lambdaMatch))*100);
     var isTop=idx===0;
     var id='pscard'+idx;
 
@@ -1307,7 +1379,7 @@ function buildPlayerStatCards(hn,an,scH,scA){
       +(p.photo?'<img src="'+p.photo+'" style="width:42px;height:42px;border-radius:50%;object-fit:cover;flex-shrink:0;border:1px solid '+(isTop?'var(--cyan)':'var(--border)')+';" onerror="this.outerHTML=\'<div style=width:42px;height:42px;border-radius:50%;background:var(--card2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-family:Space Mono,monospace;font-size:11px;color:var(--muted);>'+initiales+'</div>\'">':'<div style="width:42px;height:42px;border-radius:50%;background:var(--card2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-family:Space Mono,monospace;font-size:11px;color:var(--muted);">'+initiales+'</div>')
       +'<div style="min-width:0;"><div style="font-weight:600;font-size:13.5px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+esc(p.name||'')+'</div>'
       +'<div style="font-family:Space Mono,monospace;font-size:10px;color:var(--muted);margin-top:2px;display:flex;align-items:center;gap:5px;"><span style="width:5px;height:5px;border-radius:50%;background:'+(p.teamSide==='h'?'var(--cyan)':'rgba(226,232,240,0.4)')+';display:inline-block;flex-shrink:0;"></span>'+esc(p.teamName)+'</div></div>'
-      +'<div style="text-align:right;"><div style="font-family:Space Mono,monospace;font-size:17px;font-weight:700;color:var(--cyan);">'+probApprox+'%</div><div style="font-family:Space Mono,monospace;font-size:8px;color:var(--muted);margin-top:1px;">proba de marquer</div></div>'
+      +'<div style="text-align:right;"><div style="font-family:Space Mono,monospace;font-size:15px;font-weight:700;color:var(--text);">'+ratioSaison+'%</div><div style="font-family:Space Mono,monospace;font-size:8px;color:var(--muted);margin-top:1px;">ratio buts/match (saison)</div></div>'
       +'</div>';
 
     var detail='<div id="'+id+'" style="display:'+(isTop?'block':'none')+';padding:6px 6px 16px;">'
@@ -1844,7 +1916,8 @@ function render(m){
     +buildScen(m);
 
   var tabAnalyseJoueur=
-    (!isTennis?buildPlayerStatCards(hn,an,m.top_scorers_home,m.top_scorers_away):'');
+    (!isTennis?buildPlayerEngineSection(m):'')
+    +(!isTennis?buildPlayerStatCards(hn,an,m.top_scorers_home,m.top_scorers_away):'');
 
   function trimSepInline(html){return (html||'').replace(/<div class="sep"><\/div>\s*$/,'');}
   tabAnalyseEquipe=trimSepInline(tabAnalyseEquipe);

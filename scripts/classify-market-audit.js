@@ -55,7 +55,10 @@ const REGISTRY_TO_BET_IDS = {
   HALF_TIME_MARKETS: { betIds: [13, 6, 34, 7], note: "bet_id 13 'First Half Winner', 6 'Goals O/U First Half', 34 'BTTS First Half', 7 'HT/FT Double' = marches mi-temps reellement proposes par les bookmakers. Aucun modele temporel IASHARK dedie (MASTER §10.W) : jamais de probabilite IASHARK affichee dessus." },
   CORNERS: { betIds: [45, 55, 57, 58], note: "bet_id 45 'Corners Over Under', 55 'Corners 1x2', 57/58 Home/Away = marches corners reellement proposes et liquides (frequence maximale observee). Aucun modele corners cote nous." },
   CARDS: { betIds: [80, 81, 82, 83], note: "bet_id 80 'Cards Over/Under', 81 'Cards Asian Handicap', 82/83 Home/Away Total Cards = reellement proposes (frequence ~0.73). Aucun modele cartons cote nous." },
-  PLAYER_PROPS: { betIds: [212, 257, 275, 276, 240, 241, 242, 215], note: "Player Assists/Shots/Singles etc. reellement proposes (frequence variable, 0.13 a 1.0 selon le prop). Necessite le Player Impact Engine (§10.G) + Lineup Strength Engine (§10.J), aucun des deux construit - MASTER §8.6/§10.Z." },
+  ANYTIME_GOALSCORER: { betIds: [92, 218, 231], note: "bet_id 92 'Anytime Goal Scorer' (freq=0.867) + variantes Home/Away 218/231 = correspondance directe. Player Engine ajoute le 2026-08-30 (lib/markets/player-engine.js)." },
+  PLAYER_SHOTS: { betIds: [240, 241, 276], note: "bet_id 240/241 'Home/Away Player Shots' + 276 'Away Player Shots Total' = correspondance directe." },
+  PLAYER_SHOTS_ON_TARGET: { betIds: [242, 269, 275], note: "bet_id 242 'Player Shots On Target' + 269/275 'Home/Away Player Shots On Target Total' = correspondance directe." },
+  PLAYER_PROPS: { betIds: [212, 257, 215], note: "Player Assists/Score-or-Assist/Singles - hors perimetre du Player Engine actuel (buteur/tirs/tirs cadres uniquement). Necessite des extensions futures (passes decisives, etc.) - MASTER §8.6/§10.Z." },
 };
 
 function classifyMappedRegistryEntry(entry, betIdsInfo, observedByBetId) {

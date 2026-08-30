@@ -37,6 +37,7 @@ jobs:
           const { resolveMarketWin } = require('./lib/resolvers.js');
           const { parseOdds } = require('./lib/odds.js');
           const { pickMarketDeterministic, computeRiskLabel, computeModelAgreement, computeDataQualityScore, computeReliability } = require('./lib/decision.js');
+          const { buildPlayerMarketOutput } = require('./lib/markets/player-engine.js');
           const I18N_LOCALES = require('./i18n/locales.json');
           const I18N_PAGES = require('./scripts/i18n-manifest.js');
           const { generateLocalizedSitemaps } = require('./scripts/i18n-sitemaps.js');
@@ -637,10 +638,93 @@ jobs:
             if(!r.response||!r.response.length) return null;
             function extractLineup(team){
               return {formation:team.formation||null,coach:team.coach&&team.coach.name||null,
-                startXI:(team.startXI||[]).map(function(p){return {name:(p.player&&p.player.name)||'',pos:(p.player&&p.player.pos)||''};}),
-                substitutes:(team.substitutes||[]).map(function(p){return {name:(p.player&&p.player.name)||'',pos:(p.player&&p.player.pos)||''};})};
+                startXI:(team.startXI||[]).map(function(p){return {id:(p.player&&p.player.id)||null,name:(p.player&&p.player.name)||'',pos:(p.player&&p.player.pos)||''};}),
+                substitutes:(team.substitutes||[]).map(function(p){return {id:(p.player&&p.player.id)||null,name:(p.player&&p.player.name)||'',pos:(p.player&&p.player.pos)||''};})};
             }
             return {home:extractLineup(r.response[0]),away:extractLineup(r.response[1]||{})};
+          }
+          // Player Engine (lib/markets/player-engine.js) : cache en memoire pour la
+          // duree du run - un meme joueur peut apparaitre dans plusieurs marches
+          // (buteur/tirs/tirs cadres) sur la meme fixture, jamais refetch pour
+          // chacun ("mutualise/cache les appels API", demande explicite).
+          var PLAYER_STATS_CACHE = {};
+          async function getPlayerSeasonStats(playerId, teamId, season) {
+            var cacheKey = playerId+'_'+teamId+'_'+season;
+            if(PLAYER_STATS_CACHE[cacheKey]!==undefined) return PLAYER_STATS_CACHE[cacheKey];
+            var r = await get('https://v3.football.api-sports.io/players?id='+playerId+'&season='+season+'&team='+teamId, APS);
+            var p = (r.response&&r.response[0])||null;
+            var result = p ? {
+              games:{appearences:(p.statistics[0].games&&p.statistics[0].games.appearences)||0, lineups:(p.statistics[0].games&&p.statistics[0].games.lineups)||0, minutes:(p.statistics[0].games&&p.statistics[0].games.minutes)||0},
+              goalsTotal:(p.statistics[0].goals&&p.statistics[0].goals.total)||0,
+              shotsTotal:(p.statistics[0].shots&&p.statistics[0].shots.total)||0,
+              shotsOnTarget:(p.statistics[0].shots&&p.statistics[0].shots.on)||0,
+              penaltyScored:(p.statistics[0].penalty&&p.statistics[0].penalty.scored)||0,
+            } : null;
+            PLAYER_STATS_CACHE[cacheKey] = result;
+            return result;
+          }
+          // Calcule les marches joueur reels (ANYTIME_GOALSCORER/PLAYER_SHOTS/
+          // PLAYER_SHOTS_ON_TARGET) pour les titulaires/remplacants d'une fixture,
+          // uniquement quand : (1) la composition officielle est confirmee (pas de
+          // lineup "attendue" fabriquee dans ce pipeline - la vraie prediction de
+          // composition pre-match est un chantier separe, non construit ici) et (2)
+          // l'analysis_tier de la ligue permet un traitement complet
+          // (FULL_ANALYSIS/STANDARD_ANALYSIS - jamais sur LIMITED_DATA/UNVERIFIED,
+          // demande explicite : "ne fais tourner les traitements Player lourds que
+          // lorsque le coverage de la competition/fixture le permet").
+          // attackMultH/defenseMultA (et l'inverse) : derives de critH.att/critA.def
+          // (calcCriteres, echelle 0-100 ou 50=neutre) divise par 50 - premiere
+          // integration, approximation documentee plutot que fabriquee comme
+          // "identique au moteur principal" : le moteur principal buts (Poisson/
+          // Dixon-Coles/Monte-Carlo) utilise des lambdas d'equipe, pas directement
+          // ces criteres 0-100 ; ce ratio est un pont raisonnable mais distinct.
+          async function computePlayerMarketsForFixture(fixtureId, lineups, homeTeamId, awayTeamId, season, analysisTier, critHome, critAway) {
+            if(analysisTier!=='FULL_ANALYSIS' && analysisTier!=='STANDARD_ANALYSIS') return [];
+            if(!lineups || (!lineups.home && !lineups.away)) return [];
+            var attackMultHome = critHome ? Math.max(0.5, Math.min(1.5, critHome.att/50)) : 1;
+            var attackMultAway = critAway ? Math.max(0.5, Math.min(1.5, critAway.att/50)) : 1;
+            var defenseMultHome = critHome ? Math.max(0.5, Math.min(1.5, critHome.def/50)) : 1;
+            var defenseMultAway = critAway ? Math.max(0.5, Math.min(1.5, critAway.def/50)) : 1;
+            var results = [];
+            async function processTeamSide(teamLineup, teamId, teamAttackMult, opponentDefenseMult) {
+              if(!teamLineup) return;
+              var starters = (teamLineup.startXI||[]).filter(function(p){return p.id;});
+              var bench = (teamLineup.substitutes||[]).filter(function(p){return p.id;}).slice(0,5); // 5 premiers seulement (limite le volume d'appels, les remplacants tardifs sont peu pertinents pour ces marches)
+              for(var si=0; si<starters.length; si++){
+                var p = starters[si];
+                if((p.pos||'')==='G') continue; // gardiens exclus des marches buteur/tirs
+                var stats = await getPlayerSeasonStats(p.id, teamId, season);
+                await sleep(150);
+                if(!stats) continue;
+                ['ANYTIME_GOALSCORER','PLAYER_SHOTS','PLAYER_SHOTS_ON_TARGET'].forEach(function(market){
+                  var ratePer90 = stats.games.minutes>0 ? (market==='ANYTIME_GOALSCORER'?stats.goalsTotal:market==='PLAYER_SHOTS'?stats.shotsTotal:stats.shotsOnTarget)/(stats.games.minutes/90) : null;
+                  var out = buildPlayerMarketOutput({
+                    fixtureId:fixtureId, playerId:p.id, market:market,
+                    lineupStatus:'confirmed_starter', historicalMinutes:stats.games,
+                    ratePer90:ratePer90, teamAttackMultiplier:teamAttackMult, opponentDefenseMultiplier:opponentDefenseMult,
+                    penaltyGoalsPer90: market==='ANYTIME_GOALSCORER' && stats.games.minutes>0 ? stats.penaltyScored/(stats.games.minutes/90) : undefined,
+                  });
+                  if(out){ out.player_name=p.name; results.push(out); }
+                });
+              }
+              for(var bi=0; bi<bench.length; bi++){
+                var pb = bench[bi];
+                if((pb.pos||'')==='G') continue;
+                var statsB = await getPlayerSeasonStats(pb.id, teamId, season);
+                await sleep(150);
+                if(!statsB) continue;
+                var goalRateB = statsB.games.minutes>0 ? statsB.goalsTotal/(statsB.games.minutes/90) : null;
+                var outB = buildPlayerMarketOutput({
+                  fixtureId:fixtureId, playerId:pb.id, market:'ANYTIME_GOALSCORER',
+                  lineupStatus:'confirmed_bench', historicalMinutes:statsB.games,
+                  ratePer90:goalRateB, teamAttackMultiplier:teamAttackMult, opponentDefenseMultiplier:opponentDefenseMult,
+                });
+                if(outB){ outB.player_name=pb.name; results.push(outB); }
+              }
+            }
+            await processTeamSide(lineups.home, homeTeamId, attackMultHome, defenseMultAway);
+            await processTeamSide(lineups.away, awayTeamId, attackMultAway, defenseMultHome);
+            return results;
           }
           async function getPredictions(fixtureId) {
             var r = await get('https://v3.football.api-sports.io/predictions?fixture='+fixtureId, APS);
@@ -2153,11 +2237,14 @@ jobs:
               var sampleSizeA=(sA&&sA.fixtures&&sA.fixtures.played&&sA.fixtures.played.total)||null;
               var sampleSizeReal=(sampleSizeH!=null&&sampleSizeA!=null)?Math.min(sampleSizeH,sampleSizeA):null;
               var reliability=computeReliability(modelAgreement,dataQuality,sampleSizeReal);
+              var fixtureAnalysisTier=analysisTierForLeague(lg.id);
+              var playerMarkets=await computePlayerMarketsForFixture(f.id, lineups, home.id, away.id, seasonForLeague(lg.id, SEASON), fixtureAnalysisTier, critH, critA);
               var matchObj={
                 id:f.id,sport:'football',
                 league_id:lg.id,
                 season:seasonForLeague(lg.id, SEASON),
-                analysis_tier:analysisTierForLeague(lg.id),
+                analysis_tier:fixtureAnalysisTier,
+                player_markets:playerMarkets,
                 home:{n:home.name,id:home.id},away:{n:away.name,id:away.id},
                 league:lg.name,ligue_icon:lgIcon(lg.name),league_key:lgKey(lg.id),
                 date:(dateVraieParis+' '+heure).trim(),cat:['all'],

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-30T08:51:21.530Z",
+  "generatedAt": "2026-08-30T09:14:02.413Z",
   "source_audit": "2026-08-30T08:47:47.987Z",
   "rule_reminder": "Un marche n'est JAMAIS publie avec une probabilite IASHARK juste parce qu'un bookmaker le propose (MASTER V2.1 §8). MODEL_AND_ODDS/MODEL_SUPPORTED sont les deux seuls statuts ou une probabilite IASHARK peut etre affichee (avec etiquette 'experimental' si le registry le dit) ; ODDS_AVAILABLE_ONLY autorise au plus l'affichage de la cote brute, jamais une probabilite modele.",
   "registry_markets": [
@@ -232,32 +232,76 @@
       "mapping_note": "bet_id 80 'Cards Over/Under', 81 'Cards Asian Handicap', 82/83 Home/Away Total Cards = reellement proposes (frequence ~0.73). Aucun modele cartons cote nous."
     },
     {
+      "registry_id": "ANYTIME_GOALSCORER",
+      "registry_status": "MODELLED_EXPERIMENTAL",
+      "matched_bet_ids": [
+        92,
+        218,
+        231
+      ],
+      "matched_bet_names": [
+        "Anytime Goal Scorer",
+        "Away Anytime Goal Scorer",
+        "Home Anytime Goal Scorer"
+      ],
+      "real_frequency_max": 0.867,
+      "bookmaker_count_max": 2,
+      "classification": "MODEL_AND_ODDS",
+      "mapping_note": "bet_id 92 'Anytime Goal Scorer' (freq=0.867) + variantes Home/Away 218/231 = correspondance directe. Player Engine ajoute le 2026-08-30 (lib/markets/player-engine.js)."
+    },
+    {
+      "registry_id": "PLAYER_SHOTS",
+      "registry_status": "MODELLED_EXPERIMENTAL",
+      "matched_bet_ids": [
+        240,
+        241,
+        276
+      ],
+      "matched_bet_names": [
+        "Home Player Shots",
+        "Away Player Shots",
+        "Away Player Shots Total"
+      ],
+      "real_frequency_max": 0.767,
+      "bookmaker_count_max": 5,
+      "classification": "MODEL_AND_ODDS",
+      "mapping_note": "bet_id 240/241 'Home/Away Player Shots' + 276 'Away Player Shots Total' = correspondance directe."
+    },
+    {
+      "registry_id": "PLAYER_SHOTS_ON_TARGET",
+      "registry_status": "MODELLED_EXPERIMENTAL",
+      "matched_bet_ids": [
+        242,
+        269,
+        275
+      ],
+      "matched_bet_names": [
+        "Player Shots On Target",
+        "Home Player Shots On Target Total",
+        "Away Player Shots On Target Total"
+      ],
+      "real_frequency_max": 0.8,
+      "bookmaker_count_max": 3,
+      "classification": "MODEL_AND_ODDS",
+      "mapping_note": "bet_id 242 'Player Shots On Target' + 269/275 'Home/Away Player Shots On Target Total' = correspondance directe."
+    },
+    {
       "registry_id": "PLAYER_PROPS",
       "registry_status": "NOT_SUPPORTED",
       "matched_bet_ids": [
         212,
         257,
-        275,
-        276,
-        240,
-        241,
-        242,
         215
       ],
       "matched_bet_names": [
         "Player Assists",
         "Player to Score or Assist",
-        "Away Player Shots On Target Total",
-        "Away Player Shots Total",
-        "Home Player Shots",
-        "Away Player Shots",
-        "Player Shots On Target",
         "Player Singles"
       ],
       "real_frequency_max": 1,
-      "bookmaker_count_max": 5,
+      "bookmaker_count_max": 3,
       "classification": "ODDS_AVAILABLE_ONLY",
-      "mapping_note": "Player Assists/Shots/Singles etc. reellement proposes (frequence variable, 0.13 a 1.0 selon le prop). Necessite le Player Impact Engine (§10.G) + Lineup Strength Engine (§10.J), aucun des deux construit - MASTER §8.6/§10.Z."
+      "mapping_note": "Player Assists/Score-or-Assist/Singles - hors perimetre du Player Engine actuel (buteur/tirs/tirs cadres uniquement). Necessite des extensions futures (passes decisives, etc.) - MASTER §8.6/§10.Z."
     }
   ],
   "unmapped_observed_markets": [
@@ -910,14 +954,6 @@
       "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
     },
     {
-      "bet_id": 92,
-      "market_name_api": "Anytime Goal Scorer",
-      "real_frequency": 0.867,
-      "bookmaker_count": 1,
-      "classification": "ODDS_AVAILABLE_ONLY",
-      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
-    },
-    {
       "bet_id": 93,
       "market_name_api": "First Goal Scorer",
       "real_frequency": 0.867,
@@ -966,14 +1002,6 @@
       "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
     },
     {
-      "bet_id": 218,
-      "market_name_api": "Away Anytime Goal Scorer",
-      "real_frequency": 0.867,
-      "bookmaker_count": 2,
-      "classification": "ODDS_AVAILABLE_ONLY",
-      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
-    },
-    {
       "bet_id": 219,
       "market_name_api": "Away First Goal Scorer",
       "real_frequency": 0.867,
@@ -984,14 +1012,6 @@
     {
       "bet_id": 226,
       "market_name_api": "Away Last Goal Scorer",
-      "real_frequency": 0.867,
-      "bookmaker_count": 2,
-      "classification": "ODDS_AVAILABLE_ONLY",
-      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
-    },
-    {
-      "bet_id": 231,
-      "market_name_api": "Home Anytime Goal Scorer",
       "real_frequency": 0.867,
       "bookmaker_count": 2,
       "classification": "ODDS_AVAILABLE_ONLY",
@@ -1137,14 +1157,6 @@
       "bet_id": 339,
       "market_name_api": "Corners. Double Chance",
       "real_frequency": 0.767,
-      "bookmaker_count": 1,
-      "classification": "ODDS_AVAILABLE_ONLY",
-      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
-    },
-    {
-      "bet_id": 269,
-      "market_name_api": "Home Player Shots On Target Total",
-      "real_frequency": 0.733,
       "bookmaker_count": 1,
       "classification": "ODDS_AVAILABLE_ONLY",
       "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
@@ -1472,9 +1484,9 @@
   ],
   "catalog_markets_never_observed_count": 154,
   "summary": {
-    "MODEL_AND_ODDS": 9,
+    "MODEL_AND_ODDS": 12,
     "MODEL_SUPPORTED": 2,
-    "ODDS_AVAILABLE_ONLY": 148,
+    "ODDS_AVAILABLE_ONLY": 144,
     "INSUFFICIENT_DATA": 8,
     "NOT_AVAILABLE": 0,
     "catalog_markets_never_observed_in_this_audit": 154

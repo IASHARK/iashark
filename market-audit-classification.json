@@ -1,0 +1,1482 @@
+{
+  "generatedAt": "2026-08-30T08:51:21.530Z",
+  "source_audit": "2026-08-30T08:47:47.987Z",
+  "rule_reminder": "Un marche n'est JAMAIS publie avec une probabilite IASHARK juste parce qu'un bookmaker le propose (MASTER V2.1 §8). MODEL_AND_ODDS/MODEL_SUPPORTED sont les deux seuls statuts ou une probabilite IASHARK peut etre affichee (avec etiquette 'experimental' si le registry le dit) ; ODDS_AVAILABLE_ONLY autorise au plus l'affichage de la cote brute, jamais une probabilite modele.",
+  "registry_markets": [
+    {
+      "registry_id": "MATCH_WINNER",
+      "registry_status": "MODELLED_AND_VALIDATED",
+      "matched_bet_ids": [
+        1
+      ],
+      "matched_bet_names": [
+        "Match Winner"
+      ],
+      "real_frequency_max": 1,
+      "bookmaker_count_max": 14,
+      "classification": "MODEL_AND_ODDS",
+      "mapping_note": "bet_id 1 'Match Winner' = 1X2 plein match, correspondance directe."
+    },
+    {
+      "registry_id": "DOUBLE_CHANCE",
+      "registry_status": "MODELLED_AND_VALIDATED",
+      "matched_bet_ids": [
+        12
+      ],
+      "matched_bet_names": [
+        "Double Chance"
+      ],
+      "real_frequency_max": 1,
+      "bookmaker_count_max": 12,
+      "classification": "MODEL_AND_ODDS",
+      "mapping_note": "bet_id 12 'Double Chance' = correspondance directe."
+    },
+    {
+      "registry_id": "DRAW_NO_BET",
+      "registry_status": "MODELLED_EXPERIMENTAL",
+      "matched_bet_ids": [],
+      "matched_bet_names": [],
+      "real_frequency_max": 0,
+      "bookmaker_count_max": 0,
+      "classification": "MODEL_SUPPORTED",
+      "mapping_note": "AUCUN bet type plein-match 'Draw No Bet' dans le catalogue API-Football (338 entrees) - seuls 'Draw No Bet (1st Half)' [109] et '(2nd Half)' [182] existent. Un proxy indirect existe (Handicap Result [9] a la ligne 0.0) mais n'est pas un flux 'DNB' verifie ; pas retenu comme correspondance directe tant que non teste."
+    },
+    {
+      "registry_id": "TOTAL_GOALS",
+      "registry_status": "MODELLED_AND_VALIDATED",
+      "matched_bet_ids": [
+        5
+      ],
+      "matched_bet_names": [
+        "Goals Over/Under"
+      ],
+      "real_frequency_max": 1,
+      "bookmaker_count_max": 12,
+      "classification": "MODEL_AND_ODDS",
+      "mapping_note": "bet_id 5 'Goals Over/Under' plein match = correspondance directe (lignes 0.5-6.5)."
+    },
+    {
+      "registry_id": "TEAM_TOTALS",
+      "registry_status": "MODELLED_EXPERIMENTAL",
+      "matched_bet_ids": [
+        16,
+        17
+      ],
+      "matched_bet_names": [
+        "Total - Home",
+        "Total - Away"
+      ],
+      "real_frequency_max": 1,
+      "bookmaker_count_max": 11,
+      "classification": "MODEL_AND_ODDS",
+      "mapping_note": "bet_id 16/17 'Total - Home'/'Total - Away' = correspondance directe. Resolver toujours NOT_IMPLEMENTED cote nous (deja documente dans le registry), independant de la disponibilite des cotes."
+    },
+    {
+      "registry_id": "BTTS",
+      "registry_status": "MODELLED_AND_VALIDATED",
+      "matched_bet_ids": [
+        8
+      ],
+      "matched_bet_names": [
+        "Both Teams Score"
+      ],
+      "real_frequency_max": 1,
+      "bookmaker_count_max": 11,
+      "classification": "MODEL_AND_ODDS",
+      "mapping_note": "bet_id 8 'Both Teams Score' plein match = correspondance directe."
+    },
+    {
+      "registry_id": "CLEAN_SHEET",
+      "registry_status": "MODELLED_EXPERIMENTAL",
+      "matched_bet_ids": [
+        27,
+        28
+      ],
+      "matched_bet_names": [
+        "Clean Sheet - Home",
+        "Clean Sheet - Away"
+      ],
+      "real_frequency_max": 0.9,
+      "bookmaker_count_max": 2,
+      "classification": "MODEL_AND_ODDS",
+      "mapping_note": "bet_id 27/28 'Clean Sheet - Home/Away' = correspondance directe (split home/away). Le bet type combine 'Clean Sheet' [188] n'a lui pas ete observe chez nos bookmakers echantillonnes."
+    },
+    {
+      "registry_id": "WIN_TO_NIL",
+      "registry_status": "MODELLED_EXPERIMENTAL",
+      "matched_bet_ids": [
+        36,
+        29,
+        30
+      ],
+      "matched_bet_names": [
+        "Win To Nil",
+        "Win to Nil - Home",
+        "Win to Nil - Away"
+      ],
+      "real_frequency_max": 1,
+      "bookmaker_count_max": 3,
+      "classification": "MODEL_AND_ODDS",
+      "mapping_note": "bet_id 36 'Win To Nil' (generique) + 29/30 (split home/away) = correspondance directe."
+    },
+    {
+      "registry_id": "EXACT_SCORE",
+      "registry_status": "MODELLED_EXPERIMENTAL",
+      "matched_bet_ids": [
+        10
+      ],
+      "matched_bet_names": [
+        "Exact Score"
+      ],
+      "real_frequency_max": 1,
+      "bookmaker_count_max": 12,
+      "classification": "MODEL_AND_ODDS",
+      "mapping_note": "bet_id 10 'Exact Score' plein match = correspondance directe."
+    },
+    {
+      "registry_id": "GOAL_BANDS",
+      "registry_status": "MODELLED_EXPERIMENTAL",
+      "matched_bet_ids": [],
+      "matched_bet_names": [],
+      "real_frequency_max": 0,
+      "bookmaker_count_max": 0,
+      "classification": "MODEL_SUPPORTED",
+      "mapping_note": "Aucun bet type 'bandes de buts' (0-1/2-3/4-5/6+) dans le catalogue API-Football - les bookmakers ne pricent pas ce decoupage, c'est une metrique propre a IASHARK."
+    },
+    {
+      "registry_id": "HANDICAP_WHOLE_HALF",
+      "registry_status": "MODELLED_AND_VALIDATED",
+      "matched_bet_ids": [
+        4
+      ],
+      "matched_bet_names": [
+        "Asian Handicap"
+      ],
+      "real_frequency_max": 1,
+      "bookmaker_count_max": 11,
+      "classification": "MODEL_AND_ODDS",
+      "mapping_note": "bet_id 4 'Asian Handicap' plein match = correspondance directe (lignes entieres et demi-lignes incluses dans le meme flux)."
+    },
+    {
+      "registry_id": "HANDICAP_QUARTER",
+      "registry_status": "NOT_SUPPORTED",
+      "matched_bet_ids": [
+        4
+      ],
+      "matched_bet_names": [
+        "Asian Handicap"
+      ],
+      "real_frequency_max": 1,
+      "bookmaker_count_max": 11,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "mapping_note": "Les lignes quart (.25/.75) sont retournees dans le MEME flux 'Asian Handicap' [4] que les lignes entieres/demies - impossible de les isoler par bet_id. La cote existe donc bien, mais notre resolver refuse explicitement de regler ces lignes (voir lib/resolvers.js) : c'est une limite de modele/resolver cote nous, pas un manque de donnee bookmaker."
+    },
+    {
+      "registry_id": "HALF_TIME_MARKETS",
+      "registry_status": "NOT_SUPPORTED",
+      "matched_bet_ids": [
+        13,
+        6,
+        34,
+        7
+      ],
+      "matched_bet_names": [
+        "First Half Winner",
+        "Goals Over/Under First Half",
+        "Both Teams Score - First Half",
+        "HT/FT Double"
+      ],
+      "real_frequency_max": 1,
+      "bookmaker_count_max": 13,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "mapping_note": "bet_id 13 'First Half Winner', 6 'Goals O/U First Half', 34 'BTTS First Half', 7 'HT/FT Double' = marches mi-temps reellement proposes par les bookmakers. Aucun modele temporel IASHARK dedie (MASTER §10.W) : jamais de probabilite IASHARK affichee dessus."
+    },
+    {
+      "registry_id": "CORNERS",
+      "registry_status": "NOT_SUPPORTED",
+      "matched_bet_ids": [
+        45,
+        55,
+        57,
+        58
+      ],
+      "matched_bet_names": [
+        "Corners Over Under",
+        "Corners 1x2",
+        "Home Corners Over/Under",
+        "Away Corners Over/Under"
+      ],
+      "real_frequency_max": 1,
+      "bookmaker_count_max": 9,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "mapping_note": "bet_id 45 'Corners Over Under', 55 'Corners 1x2', 57/58 Home/Away = marches corners reellement proposes et liquides (frequence maximale observee). Aucun modele corners cote nous."
+    },
+    {
+      "registry_id": "CARDS",
+      "registry_status": "NOT_SUPPORTED",
+      "matched_bet_ids": [
+        80,
+        81,
+        82,
+        83
+      ],
+      "matched_bet_names": [
+        "Cards Over/Under",
+        "Cards Asian Handicap",
+        "Home Team Total Cards",
+        "Away Team Total Cards"
+      ],
+      "real_frequency_max": 0.733,
+      "bookmaker_count_max": 6,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "mapping_note": "bet_id 80 'Cards Over/Under', 81 'Cards Asian Handicap', 82/83 Home/Away Total Cards = reellement proposes (frequence ~0.73). Aucun modele cartons cote nous."
+    },
+    {
+      "registry_id": "PLAYER_PROPS",
+      "registry_status": "NOT_SUPPORTED",
+      "matched_bet_ids": [
+        212,
+        257,
+        275,
+        276,
+        240,
+        241,
+        242,
+        215
+      ],
+      "matched_bet_names": [
+        "Player Assists",
+        "Player to Score or Assist",
+        "Away Player Shots On Target Total",
+        "Away Player Shots Total",
+        "Home Player Shots",
+        "Away Player Shots",
+        "Player Shots On Target",
+        "Player Singles"
+      ],
+      "real_frequency_max": 1,
+      "bookmaker_count_max": 5,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "mapping_note": "Player Assists/Shots/Singles etc. reellement proposes (frequence variable, 0.13 a 1.0 selon le prop). Necessite le Player Impact Engine (§10.G) + Lineup Strength Engine (§10.J), aucun des deux construit - MASTER §8.6/§10.Z."
+    }
+  ],
+  "unmapped_observed_markets": [
+    {
+      "bet_id": 2,
+      "market_name_api": "Home/Away",
+      "real_frequency": 1,
+      "bookmaker_count": 10,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 3,
+      "market_name_api": "Second Half Winner",
+      "real_frequency": 1,
+      "bookmaker_count": 9,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 9,
+      "market_name_api": "Handicap Result",
+      "real_frequency": 1,
+      "bookmaker_count": 6,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 11,
+      "market_name_api": "Highest Scoring Half",
+      "real_frequency": 1,
+      "bookmaker_count": 5,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 14,
+      "market_name_api": "Team To Score First",
+      "real_frequency": 1,
+      "bookmaker_count": 3,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 15,
+      "market_name_api": "Team To Score Last",
+      "real_frequency": 1,
+      "bookmaker_count": 3,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 18,
+      "market_name_api": "Handicap Result - First Half",
+      "real_frequency": 1,
+      "bookmaker_count": 4,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 19,
+      "market_name_api": "Asian Handicap First Half",
+      "real_frequency": 1,
+      "bookmaker_count": 9,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 20,
+      "market_name_api": "Double Chance - First Half",
+      "real_frequency": 1,
+      "bookmaker_count": 8,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 21,
+      "market_name_api": "Odd/Even",
+      "real_frequency": 1,
+      "bookmaker_count": 10,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 22,
+      "market_name_api": "Odd/Even - First Half",
+      "real_frequency": 1,
+      "bookmaker_count": 6,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 23,
+      "market_name_api": "Home Odd/Even",
+      "real_frequency": 1,
+      "bookmaker_count": 4,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 24,
+      "market_name_api": "Results/Both Teams Score",
+      "real_frequency": 1,
+      "bookmaker_count": 4,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 25,
+      "market_name_api": "Result/Total Goals",
+      "real_frequency": 1,
+      "bookmaker_count": 5,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 26,
+      "market_name_api": "Goals Over/Under - Second Half",
+      "real_frequency": 1,
+      "bookmaker_count": 9,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 31,
+      "market_name_api": "Correct Score - First Half",
+      "real_frequency": 1,
+      "bookmaker_count": 11,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 32,
+      "market_name_api": "Win Both Halves",
+      "real_frequency": 1,
+      "bookmaker_count": 3,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 33,
+      "market_name_api": "Double Chance - Second Half",
+      "real_frequency": 1,
+      "bookmaker_count": 6,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 35,
+      "market_name_api": "Both Teams To Score - Second Half",
+      "real_frequency": 1,
+      "bookmaker_count": 7,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 38,
+      "market_name_api": "Exact Goals Number",
+      "real_frequency": 1,
+      "bookmaker_count": 4,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 39,
+      "market_name_api": "To Win Either Half",
+      "real_frequency": 1,
+      "bookmaker_count": 4,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 40,
+      "market_name_api": "Home Team Exact Goals Number",
+      "real_frequency": 1,
+      "bookmaker_count": 5,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 41,
+      "market_name_api": "Away Team Exact Goals Number",
+      "real_frequency": 1,
+      "bookmaker_count": 5,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 42,
+      "market_name_api": "Second Half Exact Goals Number",
+      "real_frequency": 1,
+      "bookmaker_count": 2,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 43,
+      "market_name_api": "Home Team Score a Goal",
+      "real_frequency": 1,
+      "bookmaker_count": 2,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 44,
+      "market_name_api": "Away Team Score a Goal",
+      "real_frequency": 1,
+      "bookmaker_count": 2,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 46,
+      "market_name_api": "Exact Goals Number - First Half",
+      "real_frequency": 1,
+      "bookmaker_count": 3,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 49,
+      "market_name_api": "Total Goals/Both Teams To Score",
+      "real_frequency": 1,
+      "bookmaker_count": 2,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 54,
+      "market_name_api": "First 10 min Winner",
+      "real_frequency": 1,
+      "bookmaker_count": 3,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 59,
+      "market_name_api": "Own Goal",
+      "real_frequency": 1,
+      "bookmaker_count": 3,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 60,
+      "market_name_api": "Away Odd/Even",
+      "real_frequency": 1,
+      "bookmaker_count": 4,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 62,
+      "market_name_api": "Correct Score - Second Half",
+      "real_frequency": 1,
+      "bookmaker_count": 4,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 63,
+      "market_name_api": "Odd/Even - Second Half",
+      "real_frequency": 1,
+      "bookmaker_count": 5,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 99,
+      "market_name_api": "To Score A Penalty",
+      "real_frequency": 1,
+      "bookmaker_count": 2,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 100,
+      "market_name_api": "To Miss A Penalty",
+      "real_frequency": 1,
+      "bookmaker_count": 2,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 104,
+      "market_name_api": "Asian Handicap (2nd Half)",
+      "real_frequency": 1,
+      "bookmaker_count": 3,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 105,
+      "market_name_api": "Home Team Total Goals(1st Half)",
+      "real_frequency": 1,
+      "bookmaker_count": 7,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 106,
+      "market_name_api": "Away Team Total Goals(1st Half)",
+      "real_frequency": 1,
+      "bookmaker_count": 7,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 107,
+      "market_name_api": "Home Team Total Goals(2nd Half)",
+      "real_frequency": 1,
+      "bookmaker_count": 5,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 108,
+      "market_name_api": "Away Team Total Goals(2nd Half)",
+      "real_frequency": 1,
+      "bookmaker_count": 5,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 109,
+      "market_name_api": "Draw No Bet (1st Half)",
+      "real_frequency": 1,
+      "bookmaker_count": 5,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 110,
+      "market_name_api": "Scoring Draw",
+      "real_frequency": 1,
+      "bookmaker_count": 1,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 111,
+      "market_name_api": "Home team will score in both halves",
+      "real_frequency": 1,
+      "bookmaker_count": 3,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 112,
+      "market_name_api": "Away team will score in both halves",
+      "real_frequency": 1,
+      "bookmaker_count": 3,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 114,
+      "market_name_api": "Home Team Score a Goal (1st Half)",
+      "real_frequency": 1,
+      "bookmaker_count": 1,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 115,
+      "market_name_api": "Home Team Score a Goal (2nd Half)",
+      "real_frequency": 1,
+      "bookmaker_count": 1,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 116,
+      "market_name_api": "Away Team Score a Goal (1st Half)",
+      "real_frequency": 1,
+      "bookmaker_count": 1,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 117,
+      "market_name_api": "Away Team Score a Goal (2nd Half)",
+      "real_frequency": 1,
+      "bookmaker_count": 1,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 124,
+      "market_name_api": "Home Come From Behind and Win",
+      "real_frequency": 1,
+      "bookmaker_count": 1,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 137,
+      "market_name_api": "1x2 - 60 minutes",
+      "real_frequency": 1,
+      "bookmaker_count": 3,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 139,
+      "market_name_api": "1x2 - 30 minutes",
+      "real_frequency": 1,
+      "bookmaker_count": 3,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 144,
+      "market_name_api": "Goal in 1-15 minutes",
+      "real_frequency": 1,
+      "bookmaker_count": 1,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 145,
+      "market_name_api": "Goal in 16-30 minutes",
+      "real_frequency": 1,
+      "bookmaker_count": 1,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 146,
+      "market_name_api": "Goal in 31-45 minutes",
+      "real_frequency": 1,
+      "bookmaker_count": 1,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 147,
+      "market_name_api": "Goal in 46-60 minutes",
+      "real_frequency": 1,
+      "bookmaker_count": 1,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 148,
+      "market_name_api": "Goal in 61-75 minutes",
+      "real_frequency": 1,
+      "bookmaker_count": 1,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 149,
+      "market_name_api": "Goal in 76-90 minutes",
+      "real_frequency": 1,
+      "bookmaker_count": 1,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 181,
+      "market_name_api": "European Handicap (2nd Half)",
+      "real_frequency": 1,
+      "bookmaker_count": 3,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 182,
+      "market_name_api": "Draw No Bet (2nd Half)",
+      "real_frequency": 1,
+      "bookmaker_count": 4,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 184,
+      "market_name_api": "To Score in Both Halves",
+      "real_frequency": 1,
+      "bookmaker_count": 2,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 185,
+      "market_name_api": "First Team to Score (3 way) 1st Half",
+      "real_frequency": 1,
+      "bookmaker_count": 2,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 192,
+      "market_name_api": "Home Highest Scoring Half",
+      "real_frequency": 1,
+      "bookmaker_count": 2,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 193,
+      "market_name_api": "Away Highest Scoring Half",
+      "real_frequency": 1,
+      "bookmaker_count": 2,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 197,
+      "market_name_api": "Over/Under 15m-30m",
+      "real_frequency": 1,
+      "bookmaker_count": 1,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 198,
+      "market_name_api": "Over/Under 30m-45m",
+      "real_frequency": 1,
+      "bookmaker_count": 1,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 37,
+      "market_name_api": "Home win both halves",
+      "real_frequency": 0.967,
+      "bookmaker_count": 2,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 53,
+      "market_name_api": "Away win both halves",
+      "real_frequency": 0.933,
+      "bookmaker_count": 2,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 129,
+      "market_name_api": "Away Come From Behind and Win",
+      "real_frequency": 0.933,
+      "bookmaker_count": 1,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 47,
+      "market_name_api": "Winning Margin",
+      "real_frequency": 0.9,
+      "bookmaker_count": 1,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 48,
+      "market_name_api": "To Score In Both Halves By Teams",
+      "real_frequency": 0.9,
+      "bookmaker_count": 1,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 50,
+      "market_name_api": "Goal Line",
+      "real_frequency": 0.9,
+      "bookmaker_count": 1,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 72,
+      "market_name_api": "Goal Line (1st Half)",
+      "real_frequency": 0.9,
+      "bookmaker_count": 1,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 78,
+      "market_name_api": "RTG_H1",
+      "real_frequency": 0.9,
+      "bookmaker_count": 2,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 136,
+      "market_name_api": "1x2 - 15 minutes",
+      "real_frequency": 0.9,
+      "bookmaker_count": 1,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 138,
+      "market_name_api": "1x2 - 75 minutes",
+      "real_frequency": 0.9,
+      "bookmaker_count": 1,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 222,
+      "market_name_api": "To Win From Behind",
+      "real_frequency": 0.9,
+      "bookmaker_count": 1,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 229,
+      "market_name_api": "Goal Method Outside the Box",
+      "real_frequency": 0.9,
+      "bookmaker_count": 3,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 349,
+      "market_name_api": "Number Of Goals In Match",
+      "real_frequency": 0.9,
+      "bookmaker_count": 1,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 56,
+      "market_name_api": "Corners Asian Handicap",
+      "real_frequency": 0.867,
+      "bookmaker_count": 6,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 77,
+      "market_name_api": "Total Corners (1st Half)",
+      "real_frequency": 0.867,
+      "bookmaker_count": 8,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 85,
+      "market_name_api": "Total Corners (3 way)",
+      "real_frequency": 0.867,
+      "bookmaker_count": 3,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 92,
+      "market_name_api": "Anytime Goal Scorer",
+      "real_frequency": 0.867,
+      "bookmaker_count": 1,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 93,
+      "market_name_api": "First Goal Scorer",
+      "real_frequency": 0.867,
+      "bookmaker_count": 1,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 94,
+      "market_name_api": "Last Goal Scorer",
+      "real_frequency": 0.867,
+      "bookmaker_count": 1,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 127,
+      "market_name_api": "Total Corners (2nd Half)",
+      "real_frequency": 0.867,
+      "bookmaker_count": 2,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 130,
+      "market_name_api": "Corners 1x2 (1st Half)",
+      "real_frequency": 0.867,
+      "bookmaker_count": 4,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 132,
+      "market_name_api": "Home Total Corners (1st Half)",
+      "real_frequency": 0.867,
+      "bookmaker_count": 3,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 134,
+      "market_name_api": "Away Total Corners (1st Half)",
+      "real_frequency": 0.867,
+      "bookmaker_count": 3,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 218,
+      "market_name_api": "Away Anytime Goal Scorer",
+      "real_frequency": 0.867,
+      "bookmaker_count": 2,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 219,
+      "market_name_api": "Away First Goal Scorer",
+      "real_frequency": 0.867,
+      "bookmaker_count": 2,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 226,
+      "market_name_api": "Away Last Goal Scorer",
+      "real_frequency": 0.867,
+      "bookmaker_count": 2,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 231,
+      "market_name_api": "Home Anytime Goal Scorer",
+      "real_frequency": 0.867,
+      "bookmaker_count": 2,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 232,
+      "market_name_api": "Home First Goal Scorer",
+      "real_frequency": 0.867,
+      "bookmaker_count": 2,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 233,
+      "market_name_api": "Home Last Goal Scorer",
+      "real_frequency": 0.867,
+      "bookmaker_count": 2,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 239,
+      "market_name_api": "Corners. European Handicap",
+      "real_frequency": 0.867,
+      "bookmaker_count": 1,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 247,
+      "market_name_api": "Corners Race To",
+      "real_frequency": 0.867,
+      "bookmaker_count": 2,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 249,
+      "market_name_api": "Multicorners",
+      "real_frequency": 0.867,
+      "bookmaker_count": 1,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 295,
+      "market_name_api": "Corners. Total (Range)",
+      "real_frequency": 0.867,
+      "bookmaker_count": 1,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 297,
+      "market_name_api": "Corners. total between 0 and 10m",
+      "real_frequency": 0.867,
+      "bookmaker_count": 1,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 338,
+      "market_name_api": "Corners. Odd/Even",
+      "real_frequency": 0.867,
+      "bookmaker_count": 4,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 87,
+      "market_name_api": "Total ShotOnGoal",
+      "real_frequency": 0.767,
+      "bookmaker_count": 5,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 125,
+      "market_name_api": "Corners Asian Handicap (1st Half)",
+      "real_frequency": 0.767,
+      "bookmaker_count": 2,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 126,
+      "market_name_api": "Corners Asian Handicap (2nd Half)",
+      "real_frequency": 0.767,
+      "bookmaker_count": 1,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 131,
+      "market_name_api": "Corners 1x2 (2nd Half)",
+      "real_frequency": 0.767,
+      "bookmaker_count": 2,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 133,
+      "market_name_api": "Home Total Corners (2nd Half)",
+      "real_frequency": 0.767,
+      "bookmaker_count": 1,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 135,
+      "market_name_api": "Away Total Corners (2nd Half)",
+      "real_frequency": 0.767,
+      "bookmaker_count": 1,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 211,
+      "market_name_api": "Total Shots",
+      "real_frequency": 0.767,
+      "bookmaker_count": 5,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 228,
+      "market_name_api": "Home Goal Method Header",
+      "real_frequency": 0.767,
+      "bookmaker_count": 2,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 245,
+      "market_name_api": "Away Goal Method Header",
+      "real_frequency": 0.767,
+      "bookmaker_count": 2,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 339,
+      "market_name_api": "Corners. Double Chance",
+      "real_frequency": 0.767,
+      "bookmaker_count": 1,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 269,
+      "market_name_api": "Home Player Shots On Target Total",
+      "real_frequency": 0.733,
+      "bookmaker_count": 1,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 97,
+      "market_name_api": "First Goal Method",
+      "real_frequency": 0.7,
+      "bookmaker_count": 1,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 342,
+      "market_name_api": "Red Card In The Match (1st Half)",
+      "real_frequency": 0.7,
+      "bookmaker_count": 1,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 176,
+      "market_name_api": "ShotOnTarget 1x2",
+      "real_frequency": 0.667,
+      "bookmaker_count": 3,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 340,
+      "market_name_api": "Shots.1x2",
+      "real_frequency": 0.667,
+      "bookmaker_count": 3,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 164,
+      "market_name_api": "Offsides Total",
+      "real_frequency": 0.567,
+      "bookmaker_count": 4,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 167,
+      "market_name_api": "Offsides Home Total",
+      "real_frequency": 0.567,
+      "bookmaker_count": 4,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 168,
+      "market_name_api": "Offsides Away Total",
+      "real_frequency": 0.567,
+      "bookmaker_count": 4,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 170,
+      "market_name_api": "Fouls. Away Total",
+      "real_frequency": 0.567,
+      "bookmaker_count": 3,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 171,
+      "market_name_api": "Fouls. Home Total",
+      "real_frequency": 0.567,
+      "bookmaker_count": 3,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 173,
+      "market_name_api": "Fouls. Total",
+      "real_frequency": 0.567,
+      "bookmaker_count": 3,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 267,
+      "market_name_api": "Goalkeeper Saves",
+      "real_frequency": 0.567,
+      "bookmaker_count": 2,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 79,
+      "market_name_api": "Cards European Handicap",
+      "real_frequency": 0.533,
+      "bookmaker_count": 1,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 250,
+      "market_name_api": "First Card Received (3 way)",
+      "real_frequency": 0.533,
+      "bookmaker_count": 1,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 299,
+      "market_name_api": "Cards over/under between 0 and 10 m",
+      "real_frequency": 0.533,
+      "bookmaker_count": 1,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 113,
+      "market_name_api": "Both Teams To Score in Both Halves",
+      "real_frequency": 0.5,
+      "bookmaker_count": 1,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 150,
+      "market_name_api": "Home Team Yellow Cards",
+      "real_frequency": 0.467,
+      "bookmaker_count": 1,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 151,
+      "market_name_api": "Away Team Yellow Cards",
+      "real_frequency": 0.467,
+      "bookmaker_count": 1,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 152,
+      "market_name_api": "Yellow Asian Handicap",
+      "real_frequency": 0.467,
+      "bookmaker_count": 1,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 153,
+      "market_name_api": "Yellow Over/Under",
+      "real_frequency": 0.467,
+      "bookmaker_count": 1,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 154,
+      "market_name_api": "Yellow Double Chance",
+      "real_frequency": 0.467,
+      "bookmaker_count": 1,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 155,
+      "market_name_api": "Yellow Over/Under (1st Half)",
+      "real_frequency": 0.467,
+      "bookmaker_count": 1,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 157,
+      "market_name_api": "Yellow Odd/Even",
+      "real_frequency": 0.467,
+      "bookmaker_count": 1,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 158,
+      "market_name_api": "Yellow Cards 1x2",
+      "real_frequency": 0.467,
+      "bookmaker_count": 1,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 159,
+      "market_name_api": "Yellow Asian Handicap (1st Half)",
+      "real_frequency": 0.467,
+      "bookmaker_count": 1,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 161,
+      "market_name_api": "Yellow Cards 1x2 (1st Half)",
+      "real_frequency": 0.467,
+      "bookmaker_count": 1,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 166,
+      "market_name_api": "Offsides Handicap",
+      "real_frequency": 0.467,
+      "bookmaker_count": 2,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 156,
+      "market_name_api": "Yellow Over/Under (2nd Half)",
+      "real_frequency": 0.433,
+      "bookmaker_count": 1,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 160,
+      "market_name_api": "Yellow Asian Handicap (2nd Half)",
+      "real_frequency": 0.433,
+      "bookmaker_count": 1,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 162,
+      "market_name_api": "Yellow Cards 1x2 (2nd Half)",
+      "real_frequency": 0.433,
+      "bookmaker_count": 1,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 86,
+      "market_name_api": "RCARD",
+      "real_frequency": 0.367,
+      "bookmaker_count": 1,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 266,
+      "market_name_api": "Player Fouls Committed",
+      "real_frequency": 0.367,
+      "bookmaker_count": 1,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 213,
+      "market_name_api": "Player Triples",
+      "real_frequency": 0.133,
+      "bookmaker_count": 1,
+      "classification": "INSUFFICIENT_DATA",
+      "rule": "1 seul bookmaker ET frequence < 0.3 sur l'echantillon reel - trop marginal pour s'appuyer dessus, meme comme simple affichage de cote."
+    },
+    {
+      "bet_id": 281,
+      "market_name_api": "Total Tackles",
+      "real_frequency": 0.1,
+      "bookmaker_count": 3,
+      "classification": "ODDS_AVAILABLE_ONLY",
+      "rule": "Bookmaker(s) et frequence reelle suffisants pour un affichage de cote brute, mais aucun modele IASHARK - jamais de probabilite IASHARK dessus (regle explicite)."
+    },
+    {
+      "bet_id": 165,
+      "market_name_api": "Offsides 1x2",
+      "real_frequency": 0.033,
+      "bookmaker_count": 1,
+      "classification": "INSUFFICIENT_DATA",
+      "rule": "1 seul bookmaker ET frequence < 0.3 sur l'echantillon reel - trop marginal pour s'appuyer dessus, meme comme simple affichage de cote."
+    },
+    {
+      "bet_id": 169,
+      "market_name_api": "Offsides Double Chance",
+      "real_frequency": 0.033,
+      "bookmaker_count": 1,
+      "classification": "INSUFFICIENT_DATA",
+      "rule": "1 seul bookmaker ET frequence < 0.3 sur l'echantillon reel - trop marginal pour s'appuyer dessus, meme comme simple affichage de cote."
+    },
+    {
+      "bet_id": 172,
+      "market_name_api": "Fouls. Double Chance",
+      "real_frequency": 0.033,
+      "bookmaker_count": 1,
+      "classification": "INSUFFICIENT_DATA",
+      "rule": "1 seul bookmaker ET frequence < 0.3 sur l'echantillon reel - trop marginal pour s'appuyer dessus, meme comme simple affichage de cote."
+    },
+    {
+      "bet_id": 174,
+      "market_name_api": "Fouls. Handicap",
+      "real_frequency": 0.033,
+      "bookmaker_count": 1,
+      "classification": "INSUFFICIENT_DATA",
+      "rule": "1 seul bookmaker ET frequence < 0.3 sur l'echantillon reel - trop marginal pour s'appuyer dessus, meme comme simple affichage de cote."
+    },
+    {
+      "bet_id": 175,
+      "market_name_api": "Fouls. 1x2",
+      "real_frequency": 0.033,
+      "bookmaker_count": 1,
+      "classification": "INSUFFICIENT_DATA",
+      "rule": "1 seul bookmaker ET frequence < 0.3 sur l'echantillon reel - trop marginal pour s'appuyer dessus, meme comme simple affichage de cote."
+    },
+    {
+      "bet_id": 177,
+      "market_name_api": "ShotOnTarget Handicap",
+      "real_frequency": 0.033,
+      "bookmaker_count": 1,
+      "classification": "INSUFFICIENT_DATA",
+      "rule": "1 seul bookmaker ET frequence < 0.3 sur l'echantillon reel - trop marginal pour s'appuyer dessus, meme comme simple affichage de cote."
+    },
+    {
+      "bet_id": 343,
+      "market_name_api": "Fouls. Odd/Even",
+      "real_frequency": 0.033,
+      "bookmaker_count": 1,
+      "classification": "INSUFFICIENT_DATA",
+      "rule": "1 seul bookmaker ET frequence < 0.3 sur l'echantillon reel - trop marginal pour s'appuyer dessus, meme comme simple affichage de cote."
+    }
+  ],
+  "catalog_markets_never_observed_count": 154,
+  "summary": {
+    "MODEL_AND_ODDS": 9,
+    "MODEL_SUPPORTED": 2,
+    "ODDS_AVAILABLE_ONLY": 148,
+    "INSUFFICIENT_DATA": 8,
+    "NOT_AVAILABLE": 0,
+    "catalog_markets_never_observed_in_this_audit": 154
+  }
+}

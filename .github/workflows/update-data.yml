@@ -2320,6 +2320,14 @@ jobs:
           APISPORTS_KEY: ${{ secrets.APISPORTS_KEY }}
         run: node scripts/verify-league-coverage.js
 
+      - name: Sauvegarder un snapshot reel des cotes (historique API limite)
+        continue-on-error: true
+        env:
+          APISPORTS_KEY: ${{ secrets.APISPORTS_KEY }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: node scripts/save-odds-snapshot.js
+
       - name: Run pipeline
         env:
           APISPORTS_KEY:      ${{ secrets.APISPORTS_KEY }}

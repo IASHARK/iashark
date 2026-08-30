@@ -6,6 +6,103 @@ Rédigé le 2026-08-30, suite au refus explicite de la V2 par l'utilisateur apr�
 
 **Méthode et limite honnête à connaître avant de lire la suite** : l'extension Claude in Chrome (navigateur réel) n'est pas connectée dans cet environnement — impossible d'obtenir une session authentifiée réelle dans un navigateur avec accès réseau complet. Pour vérifier les états FREE/PRO malgré cette contrainte : (1) deux vrais comptes de test ont été créés dans Supabase (production), un FREE et un PRO, avec connexion réelle via `curl` (mot de passe réel, token réel obtenu via l'API Auth réelle) ; (2) la réponse RÉELLE de l'API a été injectée dans le code RÉEL de la page (via `javascript_tool`, en remplaçant uniquement l'appel réseau bloqué par le sandbox) pour observer le rendu réel. C'est la vérification la plus rigoureuse possible dans cet environnement — mais ce n'est PAS une navigation authentifiée de bout en bout dans un vrai navigateur. Signalé explicitement à chaque ligne concernée. Les deux comptes de test ont été supprimés après usage (aucune trace résiduelle en base).
 
+## Mise à jour 2026-08-30 (suite 5) : audit RÉEL odds/marchés + démarrage des snapshots de cotes
+
+Demande explicite : auditer réellement les marchés/cotes API-Football sur les 13 ligues de lancement, comparer au Market Registry interne (`lib/market-registry.js`), classer chaque marché (`MODEL_SUPPORTED` / `ODDS_AVAILABLE_ONLY` / `MODEL_AND_ODDS` / `INSUFFICIENT_DATA` / `NOT_AVAILABLE`), ne jamais publier une probabilité IASHARK juste parce qu'un bookmaker propose le marché, et démarrer immédiatement la sauvegarde de nos propres snapshots de cotes.
+
+### 1-2. Catalogues réels (`scripts/audit-odds-markets.js`, appels `/odds/bets` et `/odds/bookmakers`)
+
+- **338 types de marché** dans le catalogue API-Football.
+- **33 bookmakers** dans le catalogue API-Football.
+
+### 3. Cotes réelles sur plusieurs fixtures de chacune des 13 ligues
+
+3 fixtures réelles à venir par ligue (39 au total), `/odds` interrogé pour chacune :
+
+| Ligue | Fixtures avec cote | Bookmakers/fixture | Marchés distincts/fixture |
+|---|---|---|---|
+| Premier League | 3/3 | 12-13 | 175-177 |
+| La Liga | 3/3 | 13 | 170-179 |
+| Serie A | 3/3 | 13 | 173-175 |
+| Bundesliga | 3/3 | 11-14 | 120-175 |
+| Ligue 1 | 3/3 | 13 | 173-174 |
+| Eredivisie | 3/3 | 13 | 152-155 |
+| Liga Portugal | 3/3 | 13 | 149 |
+| MLS | 3/3 | 10-12 | 114-143 |
+| Allsvenskan | 3/3 | 13 | 129 |
+| J1 League | 3/3 | 9-10 | 88 |
+| **Champions League** | **0/3** | — | — |
+| **Europa League** | **0/3** | — | — |
+| **Conference League** | **0/3** | — | — |
+
+**30/39 fixtures avec cote réelle, 184 marchés distincts réellement observés** sur l'ensemble. Les 3 compétitions UEFA n'ont **aucune cote publiée** sur leurs prochaines fixtures — cohérent avec le constat déjà fait dans la "suite 4" (phase de ligue 2026-27 pas encore démarrée, `standings` également absent côté couverture). Pas une anomalie de cet audit, la même cause réelle des deux côtés.
+
+**Odds live (in-play)** : endpoint `/odds/live` interrogé réellement — 23 fixtures avec cote live tous sports/ligues confondus au moment du run, **0 dans nos 13 ligues de lancement** (aucun match de nos ligues n'était en cours à cet instant précis). Confirme que l'endpoint fonctionne, mais échantillon nul par pur hasard de timing — à ré-observer lors d'un run pendant un vrai créneau de matchs.
+
+### 4. Rapport marché par marché (`odds-market-audit-report.json`)
+
+Pour chacun des 184 marchés réellement observés : `bet_id`, nom API, liste des bookmakers qui le proposent réellement, nombre de fixtures où il apparaît, ligues où il apparaît, `pre_match_or_live`, et **fréquence réelle** (`fixture_count / fixtures_checked_with_odds`). Exemples réels :
+
+| bet_id | Marché | Bookmakers | Fréquence réelle | Ligues |
+|---|---|---|---|---|
+| 1 | Match Winner | 14 | 1.0 (30/30) | 10/10 |
+| 5 | Goals Over/Under | 12 | 1.0 (30/30) | 10/10 |
+| 45 | Corners Over Under | 9 | 1.0 (30/30) | 10/10 |
+| 80 | Cards Over/Under | 6 | 0.733 (22/30) | 8/10 |
+| 212 | Player Assists | 3 | 1.0 (30/30) | 10/10 |
+| 213 | Player Triples | 1 | 0.133 (4/30) | — |
+| 172 | Fouls. Double Chance | 1 | 0.033 (1/30) | 1/10 |
+
+Constat marquant, vérifié en direct (pas supposé) : **aucun bet type plein-match "Draw No Bet"** n'existe dans le catalogue des 338 marchés — seuls "Draw No Bet (1st Half)" et "(2nd Half)" existent. Les marchés Corners/Cards/Player Props sont réellement proposés et liquides chez les bookmakers (fréquence 0.13 à 1.0 selon le prop) — confirme que le Market Registry a raison de les marquer `NOT_SUPPORTED` : la donnée bookmaker existe, c'est bien nous qui n'avons aucun modèle.
+
+### 5-7. Comparaison au Market Registry + classification (`scripts/classify-market-audit.js`, `market-audit-classification.json`)
+
+Règle appliquée sans exception : **un marché n'est jamais publié avec une probabilité IASHARK juste parce qu'un bookmaker le propose** — il faut un modèle mathématique spécifique côté nous (`model_function` réel dans le registry). Résumé réel :
+
+| Statut | Nombre |
+|---|---|
+| `MODEL_AND_ODDS` | 9 |
+| `MODEL_SUPPORTED` | 2 |
+| `ODDS_AVAILABLE_ONLY` | 148 |
+| `INSUFFICIENT_DATA` | 8 |
+| `NOT_AVAILABLE` (marché registry sans aucune correspondance) | 0 |
+| Marchés du catalogue jamais observés dans cet audit | 154 |
+
+Détail par marché du Market Registry :
+
+| Marché IASHARK | Statut registry | Classification de cet audit | Cote(s) bookmaker correspondante(s) |
+|---|---|---|---|
+| MATCH_WINNER | MODELLED_AND_VALIDATED | **MODEL_AND_ODDS** | Match Winner |
+| DOUBLE_CHANCE | MODELLED_AND_VALIDATED | **MODEL_AND_ODDS** | Double Chance |
+| DRAW_NO_BET | MODELLED_EXPERIMENTAL | **MODEL_SUPPORTED** | aucune (pas de bet type plein-match équivalent dans le catalogue) |
+| TOTAL_GOALS | MODELLED_AND_VALIDATED | **MODEL_AND_ODDS** | Goals Over/Under |
+| TEAM_TOTALS | MODELLED_EXPERIMENTAL | **MODEL_AND_ODDS** | Total - Home, Total - Away |
+| BTTS | MODELLED_AND_VALIDATED | **MODEL_AND_ODDS** | Both Teams Score |
+| CLEAN_SHEET | MODELLED_EXPERIMENTAL | **MODEL_AND_ODDS** | Clean Sheet - Home/Away |
+| WIN_TO_NIL | MODELLED_EXPERIMENTAL | **MODEL_AND_ODDS** | Win To Nil (+ Home/Away) |
+| EXACT_SCORE | MODELLED_EXPERIMENTAL | **MODEL_AND_ODDS** | Exact Score |
+| GOAL_BANDS | MODELLED_EXPERIMENTAL | **MODEL_SUPPORTED** | aucune (bandes de buts = métrique propre à IASHARK, pas pricée par les bookmakers) |
+| HANDICAP_WHOLE_HALF | MODELLED_AND_VALIDATED | **MODEL_AND_ODDS** | Asian Handicap |
+| HANDICAP_QUARTER | NOT_SUPPORTED | **ODDS_AVAILABLE_ONLY** | Asian Handicap (lignes quart incluses dans le même flux ; notre resolver refuse explicitement de les régler) |
+| HALF_TIME_MARKETS | NOT_SUPPORTED | **ODDS_AVAILABLE_ONLY** | First Half Winner, Goals O/U 1st Half, BTTS 1st Half, HT/FT Double |
+| CORNERS | NOT_SUPPORTED | **ODDS_AVAILABLE_ONLY** | Corners O/U, Corners 1x2, Home/Away Corners O/U |
+| CARDS | NOT_SUPPORTED | **ODDS_AVAILABLE_ONLY** | Cards O/U, Cards Asian Handicap, Home/Away Total Cards |
+| PLAYER_PROPS | NOT_SUPPORTED | **ODDS_AVAILABLE_ONLY** | Player Assists, Shots, Singles, Score-or-Assist |
+
+**Incohérence trouvée et corrigée dans le Market Registry lui-même** (effet de bord positif de cet audit) : `DRAW_NO_BET` était codé `availability_status: "MODELLED_AND_VALIDATED"` alors que sa propre note interne disait déjà "à considérer MODELLED_EXPERIMENTAL tant qu'aucun échantillon réel n'existe" — corrigé en `MODELLED_EXPERIMENTAL` dans `lib/market-registry.js`, cohérent maintenant avec le fait (confirmé par cet audit) qu'aucune cote réelle plein-match n'existe pour ce marché.
+
+Les 148 marchés `ODDS_AVAILABLE_ONLY` restants (non mappés à une entrée du registry) sont classés par une règle objective et documentée dans le script : bookmaker(s)/fréquence suffisants → `ODDS_AVAILABLE_ONLY` (cote brute affichable, jamais de probabilité IASHARK) ; 1 seul bookmaker ET fréquence < 0.3 → `INSUFFICIENT_DATA` (8 marchés, ex. "Fouls. Odd/Even" à 0.033/1 bookmaker — trop marginal même pour un simple affichage de cote).
+
+### 8. Démarrage réel de nos propres snapshots de cotes (l'historique API est limité)
+
+- **Nouvelle table Supabase `odds_snapshots`** (migration `create_odds_snapshots_table`, projet `ksvjraqitxouwiabecai`) : append-only, `raw_odds jsonb`, RLS activé sans policy publique (même pattern que `match_snapshots`/`match_premium_data` — accès service_role uniquement). Créée réellement et vérifiée par une requête `information_schema.columns` indépendante (pas seulement le `{"success":true}` de la migration).
+- **`scripts/save-odds-snapshot.js`** (nouveau) : capture réellement `/odds` sur les fixtures à venir des 13 ligues et écrit dans `odds_snapshots` (insert direct via `SUPABASE_SERVICE_ROLE_KEY`, même pattern `upsertJSON` que `writeSnapshots`/`writePremiumData` dans le pipeline). Sans clé Supabase, le script récupère quand même les cotes réelles mais les écrit dans un fichier local (`odds-snapshots-local.json`, gitignoré) plutôt que de prétendre les avoir persistées — testé réellement dans cette session (30 fixtures, 30 snapshots réels capturés en local, fichier ensuite supprimé du dépôt car 19 Mo, bien trop volumineux pour être commité).
+- **Bootstrap réel effectué aujourd'hui** : 2 lignes réelles insérées directement dans `odds_snapshots` (Premier League Chelsea vs Brighton, MLS Columbus Crew vs New England Revolution — cotes réelles William Hill/10Bet), vérifiées par une requête `select` indépendante (pas seulement le retour de l'insert). Colonnes `bookmaker_count`/`market_count` renseignées avec les vrais totaux observés (12/177 et 11/143) même si le `raw_odds` de ce bootstrap est volontairement réduit à 1 bookmaker pour rester gérable manuellement (`source: 'manual_audit_bootstrap_proof'`, distinct du `source: 'pipeline'` que les runs automatisés utiliseront).
+- **Nouvelle étape CI** ajoutée dans `.github/workflows/update-data.yml` ("Sauvegarder un snapshot reel des cotes") : s'exécute avant chaque run du pipeline, avec les vrais secrets `APISPORTS_KEY`/`SUPABASE_URL`/`SUPABASE_SERVICE_ROLE_KEY` de la CI — c'est ce mécanisme, pas le bootstrap manuel d'aujourd'hui, qui capturera la capture RAW complète (tous bookmakers, tous marchés) à chaque run à partir de la mise en production de cette branche.
+- **`tests/classify-market-audit.test.js`** (nouveau, 6 tests) : verrouille la règle §8 (jamais de `MODEL_AND_ODDS` sans modèle réel, même si la cote est très fréquente) au niveau du code, pas seulement de la documentation.
+
+npm test : 178/178 (172 + 6 nouveaux). Toujours sur `hotfix-v2-acceptance`, `main` reste en maintenance — aucun merge.
+
 ## Mise à jour 2026-08-30 (suite 4) : vérification RÉELLE des 13 compétitions (clé API-Football fournie)
 
 L'utilisateur a fourni `APISPORTS_KEY` dans un `.env` local (confirmé gitignoré avant toute manipulation : `.gitignore` contient déjà `.env` et `.env.*`, jamais affichée/loguée/committée). `scripts/verify-league-coverage.js` a été exécuté pour de vrai contre l'API-Football en production — ceci remplace/complète la limite honnête documentée dans la mise à jour précédente (suite 3), qui n'avait pu construire que l'architecture sans pouvoir l'exécuter.
@@ -152,6 +249,7 @@ Légende : **PASS** = vérifié réellement (preuve indiquée) · **TO_VERIFY** 
 | Design (passe 21st.dev pragmatique) | Composants réellement améliorés, design IASHARK conservé strictement, pas de React installé | **PASS** — dropdowns (`marches`/`pro`/`historique`) et états vides (`marches`/`historique`) améliorés et vérifiés en direct ; modal/paywall/pricing/tabs inspectés et jugés déjà conformes (non retouchés, décision assumée) | **PASS** — vérifié à 375px sur `marches.html` (EN), aucune régression | **PASS** | N/A | N/A | — | **PASS** pour les composants listés dans la demande qui ont été jugés nécessitant une amélioration ; les autres (modal/paywall/tabs) sont `PASS` par inspection, pas par réécriture |
 | i18n (6 langues) + sélecteur de langue | Rendu réel dans le navigateur, sélecteur visible et fonctionnel sur desktop + mobile, redirige vers l'équivalent localisé et mémorise le choix | **PASS** — FR/EN/DE : sélecteur vérifié en direct (dropdown ouvert, clic testé, redirection confirmée). ES/IT/PT : nav structurelle vérifiée sur les 7 pages + captures d'écran réelles (ES `pro.html`, IT `match.html`, PT `index.html`) confirmant sélecteur visible et contenu traduit | **PASS** — FR/EN/DE vérifiés à 375px. ES/IT/PT vérifiés à 375px également (ES `marches.html`, IT `compte.html`, PT `historique.html`), aucun débordement | **PASS** | N/A | N/A | — | **PASS pour les 6 langues** (FR/EN/DE en profondeur, ES/IT/PT structurel + captures réelles desktop/mobile) |
 | Compétitions (liste de lancement) | 13 compétitions fortes (Premier League, La Liga, Serie A, Bundesliga, Ligue 1, Champions League, Europa League, Conference League, Eredivisie, Liga Portugal, MLS, Allsvenskan, J1 League), configurable, tiers dépendants de la vraie couverture API, pas de cote obligatoire | N/A (backend/config) | N/A (backend/config) | N/A | N/A | N/A | `league-coverage-report.json` réel (13/13 ids confirmés, appels `/leagues`/`/standings`/`/fixtures`/`/injuries`/lineups/fixture-statistics testés en direct sur 4 ligues) | **PASS** — 13/13 ids et saisons vérifiés réellement contre l'API : **8 `FULL_ANALYSIS`** (Premier League, La Liga, Serie A, Bundesliga, Ligue 1, Eredivisie, MLS, Allsvenskan), **2 `STANDARD_ANALYSIS`** (Liga Portugal, J1 League — `injuries` non couvert, non fabriqué), **3 `LIMITED_DATA`** (Champions League, Europa League, Conference League — `standings` réellement absent pour la saison en cours, investigué et expliqué : phase de ligue UEFA pas encore démarrée mi-septembre, ré-évaluation automatique attendue sans changement de code) |
+| Marchés/odds (audit réel + classification) | Comparer les marchés bookmaker réellement disponibles au Market Registry, ne jamais afficher de probabilité IASHARK sans modèle propre, démarrer la sauvegarde de nos cotes | N/A (backend/config) | N/A (backend/config) | N/A | N/A | N/A | `odds-market-audit-report.json` (338 bet types, 33 bookmakers, 39 fixtures réelles testées sur les 13 ligues, 184 marchés réellement observés) + `market-audit-classification.json` (9 `MODEL_AND_ODDS`, 2 `MODEL_SUPPORTED`, 148 `ODDS_AVAILABLE_ONLY`, 8 `INSUFFICIENT_DATA`) + table Supabase `odds_snapshots` (2 lignes bootstrap réelles vérifiées) | **PASS** — audit et classification réels, aucun marché publié sans modèle propre (règle §8 verrouillée par 6 tests unitaires), 1 incohérence trouvée et corrigée dans `lib/market-registry.js` (DRAW_NO_BET), snapshots de cotes démarrés réellement (2 lignes bootstrap + mécanisme CI automatisé en place pour la capture complète à partir du premier run réel) |
 
 ## Ce qui reste `TO_VERIFY` (honnêtement, pas encore re-contrôlé dans cette recette)
 

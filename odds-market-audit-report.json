@@ -1,0 +1,5306 @@
+{
+  "generatedAt": "2026-08-30T08:47:47.987Z",
+  "source": "scripts/audit-odds-markets.js (appels reels API-Football /odds/bets, /odds/bookmakers, /odds, /odds/live)",
+  "bets_catalog_total": 338,
+  "bookmakers_catalog_total": 33,
+  "bookmakers_catalog": [
+    {
+      "id": 1,
+      "name": "10Bet"
+    },
+    {
+      "id": 2,
+      "name": "Marathonbet"
+    },
+    {
+      "id": 3,
+      "name": "Betfair"
+    },
+    {
+      "id": 4,
+      "name": "Pinnacle"
+    },
+    {
+      "id": 5,
+      "name": "SBO"
+    },
+    {
+      "id": 6,
+      "name": "Bwin"
+    },
+    {
+      "id": 7,
+      "name": "William Hill"
+    },
+    {
+      "id": 8,
+      "name": "Bet365"
+    },
+    {
+      "id": 9,
+      "name": "Dafabet"
+    },
+    {
+      "id": 10,
+      "name": "Ladbrokes"
+    },
+    {
+      "id": 11,
+      "name": "1xBet"
+    },
+    {
+      "id": 12,
+      "name": "BetFred"
+    },
+    {
+      "id": 13,
+      "name": "188Bet"
+    },
+    {
+      "id": 15,
+      "name": "Interwetten"
+    },
+    {
+      "id": 16,
+      "name": "Unibet"
+    },
+    {
+      "id": 17,
+      "name": "5Dimes"
+    },
+    {
+      "id": 18,
+      "name": "Intertops"
+    },
+    {
+      "id": 19,
+      "name": "Bovada"
+    },
+    {
+      "id": 20,
+      "name": "Betcris"
+    },
+    {
+      "id": 21,
+      "name": "888Sport"
+    },
+    {
+      "id": 22,
+      "name": "Tipico"
+    },
+    {
+      "id": 23,
+      "name": "Sportingbet"
+    },
+    {
+      "id": 24,
+      "name": "Betway"
+    },
+    {
+      "id": 25,
+      "name": "Expekt"
+    },
+    {
+      "id": 26,
+      "name": "Betsson"
+    },
+    {
+      "id": 27,
+      "name": "NordicBet"
+    },
+    {
+      "id": 28,
+      "name": "ComeOn"
+    },
+    {
+      "id": 30,
+      "name": "Netbet"
+    },
+    {
+      "id": 32,
+      "name": "Betano"
+    },
+    {
+      "id": 33,
+      "name": "Fonbet"
+    },
+    {
+      "id": 34,
+      "name": "Superbet"
+    },
+    {
+      "id": 36,
+      "name": "BetVictor"
+    },
+    {
+      "id": 37,
+      "name": null
+    }
+  ],
+  "fixtures_checked_total": 39,
+  "fixtures_checked_with_odds": 30,
+  "fixtures_checked_without_odds": 9,
+  "fixtures_checked": [
+    {
+      "league": "premier",
+      "apiFootballId": 39,
+      "fixtureId": 1557379,
+      "home": "Chelsea",
+      "away": "Brighton",
+      "date": "2026-08-30T13:00:00+00:00",
+      "oddsBookmakerCount": 12
+    },
+    {
+      "league": "premier",
+      "apiFootballId": 39,
+      "fixtureId": 1557382,
+      "home": "Leeds",
+      "away": "Brentford",
+      "date": "2026-08-30T13:00:00+00:00",
+      "oddsBookmakerCount": 13
+    },
+    {
+      "league": "premier",
+      "apiFootballId": 39,
+      "fixtureId": 1557385,
+      "home": "Sunderland",
+      "away": "Fulham",
+      "date": "2026-08-30T13:00:00+00:00",
+      "oddsBookmakerCount": 13
+    },
+    {
+      "league": "laliga",
+      "apiFootballId": 140,
+      "fixtureId": 1570360,
+      "home": "Real Madrid",
+      "away": "Malaga",
+      "date": "2026-08-30T15:00:00+00:00",
+      "oddsBookmakerCount": 13
+    },
+    {
+      "league": "laliga",
+      "apiFootballId": 140,
+      "fixtureId": 1570356,
+      "home": "Deportivo La Coruna",
+      "away": "Valencia",
+      "date": "2026-08-30T17:30:00+00:00",
+      "oddsBookmakerCount": 13
+    },
+    {
+      "league": "laliga",
+      "apiFootballId": 140,
+      "fixtureId": 1570355,
+      "home": "Celta Vigo",
+      "away": "Athletic Club",
+      "date": "2026-08-30T19:30:00+00:00",
+      "oddsBookmakerCount": 13
+    },
+    {
+      "league": "seriea",
+      "apiFootballId": 135,
+      "fixtureId": 1550105,
+      "home": "Napoli",
+      "away": "Como",
+      "date": "2026-08-30T16:30:00+00:00",
+      "oddsBookmakerCount": 13
+    },
+    {
+      "league": "seriea",
+      "apiFootballId": 135,
+      "fixtureId": 1550102,
+      "home": "Lazio",
+      "away": "Genoa",
+      "date": "2026-08-30T18:45:00+00:00",
+      "oddsBookmakerCount": 13
+    },
+    {
+      "league": "seriea",
+      "apiFootballId": 135,
+      "fixtureId": 1550099,
+      "home": "Cagliari",
+      "away": "Inter",
+      "date": "2026-08-30T18:45:00+00:00",
+      "oddsBookmakerCount": 13
+    },
+    {
+      "league": "bundesliga",
+      "apiFootballId": 78,
+      "fixtureId": 1575145,
+      "home": "SC Freiburg",
+      "away": "Werder Bremen",
+      "date": "2026-08-30T13:30:00+00:00",
+      "oddsBookmakerCount": 14
+    },
+    {
+      "league": "bundesliga",
+      "apiFootballId": 78,
+      "fixtureId": 1575141,
+      "home": "FC Augsburg",
+      "away": "FC Schalke 04",
+      "date": "2026-08-30T15:30:00+00:00",
+      "oddsBookmakerCount": 14
+    },
+    {
+      "league": "bundesliga",
+      "apiFootballId": 78,
+      "fixtureId": 1575149,
+      "home": "VfB Stuttgart",
+      "away": "1. FC Köln",
+      "date": "2026-09-04T18:30:00+00:00",
+      "oddsBookmakerCount": 11
+    },
+    {
+      "league": "ligue1",
+      "apiFootballId": 61,
+      "fixtureId": 1552743,
+      "home": "Paris FC",
+      "away": "Nice",
+      "date": "2026-08-30T13:00:00+00:00",
+      "oddsBookmakerCount": 13
+    },
+    {
+      "league": "ligue1",
+      "apiFootballId": 61,
+      "fixtureId": 1552744,
+      "home": "Rennes",
+      "away": "Le Mans",
+      "date": "2026-08-30T15:15:00+00:00",
+      "oddsBookmakerCount": 13
+    },
+    {
+      "league": "ligue1",
+      "apiFootballId": 61,
+      "fixtureId": 1552742,
+      "home": "Monaco",
+      "away": "Marseille",
+      "date": "2026-08-30T18:45:00+00:00",
+      "oddsBookmakerCount": 13
+    },
+    {
+      "league": "ldc",
+      "apiFootballId": 2,
+      "fixtureId": 1635643,
+      "home": "Club Brugge KV",
+      "away": "Aston Villa",
+      "date": "2026-09-08T16:45:00+00:00",
+      "oddsBookmakerCount": 0
+    },
+    {
+      "league": "ldc",
+      "apiFootballId": 2,
+      "fixtureId": 1635609,
+      "home": "AEK Athens FC",
+      "away": "Lask Linz",
+      "date": "2026-09-08T16:45:00+00:00",
+      "oddsBookmakerCount": 0
+    },
+    {
+      "league": "ldc",
+      "apiFootballId": 2,
+      "fixtureId": 1635683,
+      "home": "Lille",
+      "away": "Real Betis",
+      "date": "2026-09-08T19:00:00+00:00",
+      "oddsBookmakerCount": 0
+    },
+    {
+      "league": "el",
+      "apiFootballId": 3,
+      "fixtureId": 1636235,
+      "home": "Bournemouth",
+      "away": "AC Milan",
+      "date": "2026-09-16T19:00:00+00:00",
+      "oddsBookmakerCount": 0
+    },
+    {
+      "league": "el",
+      "apiFootballId": 3,
+      "fixtureId": 1636238,
+      "home": "Bournemouth",
+      "away": "Hapoel Beer Sheva",
+      "date": "2026-09-16T19:00:00+00:00",
+      "oddsBookmakerCount": 0
+    },
+    {
+      "league": "el",
+      "apiFootballId": 3,
+      "fixtureId": 1636237,
+      "home": "Bournemouth",
+      "away": "Plzen",
+      "date": "2026-09-16T19:00:00+00:00",
+      "oddsBookmakerCount": 0
+    },
+    {
+      "league": "ecl",
+      "apiFootballId": 848,
+      "fixtureId": 1636394,
+      "home": "Brighton",
+      "away": "Monaco",
+      "date": "2026-10-15T19:00:00+00:00",
+      "oddsBookmakerCount": 0
+    },
+    {
+      "league": "ecl",
+      "apiFootballId": 848,
+      "fixtureId": 1636395,
+      "home": "Brighton",
+      "away": "Universitatea Craiova",
+      "date": "2026-10-15T19:00:00+00:00",
+      "oddsBookmakerCount": 0
+    },
+    {
+      "league": "ecl",
+      "apiFootballId": 848,
+      "fixtureId": 1636396,
+      "home": "Brighton",
+      "away": "Kauno Žalgiris",
+      "date": "2026-10-15T19:00:00+00:00",
+      "oddsBookmakerCount": 0
+    },
+    {
+      "league": "eredivisie",
+      "apiFootballId": 88,
+      "fixtureId": 1552148,
+      "home": "Utrecht",
+      "away": "PSV Eindhoven",
+      "date": "2026-08-30T10:15:00+00:00",
+      "oddsBookmakerCount": 13
+    },
+    {
+      "league": "eredivisie",
+      "apiFootballId": 88,
+      "fixtureId": 1552150,
+      "home": "Willem II",
+      "away": "Heerenveen",
+      "date": "2026-08-30T12:30:00+00:00",
+      "oddsBookmakerCount": 13
+    },
+    {
+      "league": "eredivisie",
+      "apiFootballId": 88,
+      "fixtureId": 1552149,
+      "home": "Feyenoord",
+      "away": "ADO Den Haag",
+      "date": "2026-08-30T12:30:00+00:00",
+      "oddsBookmakerCount": 13
+    },
+    {
+      "league": "primeira",
+      "apiFootballId": 94,
+      "fixtureId": 1575480,
+      "home": "Nacional",
+      "away": "Estrela",
+      "date": "2026-08-30T14:30:00+00:00",
+      "oddsBookmakerCount": 13
+    },
+    {
+      "league": "primeira",
+      "apiFootballId": 94,
+      "fixtureId": 1575478,
+      "home": "Casa Pia",
+      "away": "Moreirense",
+      "date": "2026-08-30T17:00:00+00:00",
+      "oddsBookmakerCount": 13
+    },
+    {
+      "league": "primeira",
+      "apiFootballId": 94,
+      "fixtureId": 1575479,
+      "home": "Famalicao",
+      "away": "GIL Vicente",
+      "date": "2026-08-30T19:30:00+00:00",
+      "oddsBookmakerCount": 13
+    },
+    {
+      "league": "mls",
+      "apiFootballId": 253,
+      "fixtureId": 1490427,
+      "home": "Columbus Crew",
+      "away": "New England Revolution",
+      "date": "2026-08-30T20:30:00+00:00",
+      "oddsBookmakerCount": 11
+    },
+    {
+      "league": "mls",
+      "apiFootballId": 253,
+      "fixtureId": 1490435,
+      "home": "St. Louis City",
+      "away": "FC Dallas",
+      "date": "2026-08-30T23:00:00+00:00",
+      "oddsBookmakerCount": 12
+    },
+    {
+      "league": "mls",
+      "apiFootballId": 253,
+      "fixtureId": 1490436,
+      "home": "New York City FC",
+      "away": "Nashville SC",
+      "date": "2026-09-04T23:30:00+00:00",
+      "oddsBookmakerCount": 10
+    },
+    {
+      "league": "suede",
+      "apiFootballId": 113,
+      "fixtureId": 1494257,
+      "home": "AIK Stockholm",
+      "away": "Hammarby FF",
+      "date": "2026-08-30T12:00:00+00:00",
+      "oddsBookmakerCount": 13
+    },
+    {
+      "league": "suede",
+      "apiFootballId": 113,
+      "fixtureId": 1494261,
+      "home": "IFK Goteborg",
+      "away": "Orgryte IS",
+      "date": "2026-08-30T14:30:00+00:00",
+      "oddsBookmakerCount": 13
+    },
+    {
+      "league": "suede",
+      "apiFootballId": 113,
+      "fixtureId": 1494258,
+      "home": "Djurgardens IF",
+      "away": "Mjallby AIF",
+      "date": "2026-08-31T17:00:00+00:00",
+      "oddsBookmakerCount": 13
+    },
+    {
+      "league": "jleague",
+      "apiFootballId": 98,
+      "fixtureId": 1556041,
+      "home": "Avispa Fukuoka",
+      "away": "Urawa",
+      "date": "2026-09-02T10:00:00+00:00",
+      "oddsBookmakerCount": 9
+    },
+    {
+      "league": "jleague",
+      "apiFootballId": 98,
+      "fixtureId": 1556042,
+      "home": "Cerezo Osaka",
+      "away": "Kashiwa Reysol",
+      "date": "2026-09-02T10:00:00+00:00",
+      "oddsBookmakerCount": 10
+    },
+    {
+      "league": "jleague",
+      "apiFootballId": 98,
+      "fixtureId": 1556043,
+      "home": "JEF United Chiba",
+      "away": "Fagiano Okayama",
+      "date": "2026-09-02T10:00:00+00:00",
+      "oddsBookmakerCount": 10
+    }
+  ],
+  "fixtures_without_odds_detail": [
+    {
+      "league": "ldc",
+      "fixtureId": 1635643,
+      "home": "Club Brugge KV",
+      "away": "Aston Villa",
+      "date": "2026-09-08T16:45:00+00:00"
+    },
+    {
+      "league": "ldc",
+      "fixtureId": 1635609,
+      "home": "AEK Athens FC",
+      "away": "Lask Linz",
+      "date": "2026-09-08T16:45:00+00:00"
+    },
+    {
+      "league": "ldc",
+      "fixtureId": 1635683,
+      "home": "Lille",
+      "away": "Real Betis",
+      "date": "2026-09-08T19:00:00+00:00"
+    },
+    {
+      "league": "el",
+      "fixtureId": 1636235,
+      "home": "Bournemouth",
+      "away": "AC Milan",
+      "date": "2026-09-16T19:00:00+00:00"
+    },
+    {
+      "league": "el",
+      "fixtureId": 1636238,
+      "home": "Bournemouth",
+      "away": "Hapoel Beer Sheva",
+      "date": "2026-09-16T19:00:00+00:00"
+    },
+    {
+      "league": "el",
+      "fixtureId": 1636237,
+      "home": "Bournemouth",
+      "away": "Plzen",
+      "date": "2026-09-16T19:00:00+00:00"
+    },
+    {
+      "league": "ecl",
+      "fixtureId": 1636394,
+      "home": "Brighton",
+      "away": "Monaco",
+      "date": "2026-10-15T19:00:00+00:00"
+    },
+    {
+      "league": "ecl",
+      "fixtureId": 1636395,
+      "home": "Brighton",
+      "away": "Universitatea Craiova",
+      "date": "2026-10-15T19:00:00+00:00"
+    },
+    {
+      "league": "ecl",
+      "fixtureId": 1636396,
+      "home": "Brighton",
+      "away": "Kauno Žalgiris",
+      "date": "2026-10-15T19:00:00+00:00"
+    }
+  ],
+  "odds_live_check": {
+    "endpointTested": true,
+    "liveFixturesFoundInLaunchLeagues": 0,
+    "sample": null,
+    "totalLiveFixturesAllLeagues": 23
+  },
+  "markets_observed": [
+    {
+      "bet_id": 1,
+      "market_name_api": "Match Winner",
+      "bookmakers": [
+        "10Bet",
+        "1xBet",
+        "888Sport",
+        "Bet365",
+        "BetVictor",
+        "Betano",
+        "Betfair",
+        "Dafabet",
+        "Marathonbet",
+        "Pinnacle",
+        "SBO",
+        "Superbet",
+        "Unibet",
+        "William Hill"
+      ],
+      "bookmaker_count": 14,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "jleague",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 10,
+      "fixture_count": 30,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 1,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 2,
+      "market_name_api": "Home/Away",
+      "bookmakers": [
+        "10Bet",
+        "888Sport",
+        "Bet365",
+        "BetVictor",
+        "Betano",
+        "Betfair",
+        "SBO",
+        "Superbet",
+        "Unibet",
+        "William Hill"
+      ],
+      "bookmaker_count": 10,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "jleague",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 10,
+      "fixture_count": 30,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 1,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 3,
+      "market_name_api": "Second Half Winner",
+      "bookmakers": [
+        "10Bet",
+        "1xBet",
+        "888Sport",
+        "Bet365",
+        "Betano",
+        "Marathonbet",
+        "Superbet",
+        "Unibet",
+        "William Hill"
+      ],
+      "bookmaker_count": 9,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "jleague",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 10,
+      "fixture_count": 30,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 1,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 4,
+      "market_name_api": "Asian Handicap",
+      "bookmakers": [
+        "10Bet",
+        "1xBet",
+        "Bet365",
+        "BetVictor",
+        "Betano",
+        "Betfair",
+        "Marathonbet",
+        "Pinnacle",
+        "SBO",
+        "Superbet",
+        "Unibet"
+      ],
+      "bookmaker_count": 11,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "jleague",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 10,
+      "fixture_count": 30,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 1,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 5,
+      "market_name_api": "Goals Over/Under",
+      "bookmakers": [
+        "10Bet",
+        "1xBet",
+        "888Sport",
+        "Bet365",
+        "BetVictor",
+        "Betano",
+        "Betfair",
+        "Marathonbet",
+        "Pinnacle",
+        "SBO",
+        "Superbet",
+        "Unibet"
+      ],
+      "bookmaker_count": 12,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "jleague",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 10,
+      "fixture_count": 30,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 1,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 6,
+      "market_name_api": "Goals Over/Under First Half",
+      "bookmakers": [
+        "10Bet",
+        "1xBet",
+        "Bet365",
+        "BetVictor",
+        "Betano",
+        "Betfair",
+        "Marathonbet",
+        "Pinnacle",
+        "SBO",
+        "Superbet",
+        "Unibet",
+        "William Hill"
+      ],
+      "bookmaker_count": 12,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "jleague",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 10,
+      "fixture_count": 30,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 1,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 7,
+      "market_name_api": "HT/FT Double",
+      "bookmakers": [
+        "10Bet",
+        "1xBet",
+        "Bet365",
+        "Betano",
+        "Betfair",
+        "Marathonbet",
+        "SBO",
+        "Superbet",
+        "Unibet"
+      ],
+      "bookmaker_count": 9,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "jleague",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 10,
+      "fixture_count": 30,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 1,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 8,
+      "market_name_api": "Both Teams Score",
+      "bookmakers": [
+        "10Bet",
+        "1xBet",
+        "888Sport",
+        "Bet365",
+        "BetVictor",
+        "Betano",
+        "Betfair",
+        "Marathonbet",
+        "Superbet",
+        "Unibet",
+        "William Hill"
+      ],
+      "bookmaker_count": 11,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "jleague",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 10,
+      "fixture_count": 30,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 1,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 9,
+      "market_name_api": "Handicap Result",
+      "bookmakers": [
+        "10Bet",
+        "Bet365",
+        "Betfair",
+        "Marathonbet",
+        "Superbet",
+        "Unibet"
+      ],
+      "bookmaker_count": 6,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "jleague",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 10,
+      "fixture_count": 30,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 1,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 10,
+      "market_name_api": "Exact Score",
+      "bookmakers": [
+        "10Bet",
+        "1xBet",
+        "888Sport",
+        "Bet365",
+        "BetVictor",
+        "Betano",
+        "Betfair",
+        "Marathonbet",
+        "Pinnacle",
+        "SBO",
+        "Unibet",
+        "William Hill"
+      ],
+      "bookmaker_count": 12,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "jleague",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 10,
+      "fixture_count": 30,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 1,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 11,
+      "market_name_api": "Highest Scoring Half",
+      "bookmakers": [
+        "10Bet",
+        "1xBet",
+        "Bet365",
+        "Betano",
+        "William Hill"
+      ],
+      "bookmaker_count": 5,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "jleague",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 10,
+      "fixture_count": 30,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 1,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 12,
+      "market_name_api": "Double Chance",
+      "bookmakers": [
+        "10Bet",
+        "1xBet",
+        "888Sport",
+        "Bet365",
+        "BetVictor",
+        "Betano",
+        "Betfair",
+        "Marathonbet",
+        "SBO",
+        "Superbet",
+        "Unibet",
+        "William Hill"
+      ],
+      "bookmaker_count": 12,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "jleague",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 10,
+      "fixture_count": 30,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 1,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 13,
+      "market_name_api": "First Half Winner",
+      "bookmakers": [
+        "10Bet",
+        "1xBet",
+        "888Sport",
+        "Bet365",
+        "BetVictor",
+        "Betano",
+        "Betfair",
+        "Marathonbet",
+        "Pinnacle",
+        "SBO",
+        "Superbet",
+        "Unibet",
+        "William Hill"
+      ],
+      "bookmaker_count": 13,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "jleague",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 10,
+      "fixture_count": 30,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 1,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 14,
+      "market_name_api": "Team To Score First",
+      "bookmakers": [
+        "10Bet",
+        "Bet365",
+        "Marathonbet"
+      ],
+      "bookmaker_count": 3,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "jleague",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 10,
+      "fixture_count": 30,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 1,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 15,
+      "market_name_api": "Team To Score Last",
+      "bookmakers": [
+        "10Bet",
+        "Bet365",
+        "Marathonbet"
+      ],
+      "bookmaker_count": 3,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "jleague",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 10,
+      "fixture_count": 30,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 1,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 16,
+      "market_name_api": "Total - Home",
+      "bookmakers": [
+        "10Bet",
+        "1xBet",
+        "888Sport",
+        "Bet365",
+        "BetVictor",
+        "Betano",
+        "Betfair",
+        "Marathonbet",
+        "Pinnacle",
+        "Superbet",
+        "Unibet"
+      ],
+      "bookmaker_count": 11,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "jleague",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 10,
+      "fixture_count": 30,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 1,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 17,
+      "market_name_api": "Total - Away",
+      "bookmakers": [
+        "10Bet",
+        "1xBet",
+        "888Sport",
+        "Bet365",
+        "BetVictor",
+        "Betano",
+        "Betfair",
+        "Marathonbet",
+        "Pinnacle",
+        "Superbet",
+        "Unibet"
+      ],
+      "bookmaker_count": 11,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "jleague",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 10,
+      "fixture_count": 30,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 1,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 18,
+      "market_name_api": "Handicap Result - First Half",
+      "bookmakers": [
+        "10Bet",
+        "Bet365",
+        "Marathonbet",
+        "Superbet"
+      ],
+      "bookmaker_count": 4,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "jleague",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 10,
+      "fixture_count": 30,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 1,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 19,
+      "market_name_api": "Asian Handicap First Half",
+      "bookmakers": [
+        "10Bet",
+        "1xBet",
+        "Bet365",
+        "BetVictor",
+        "Betano",
+        "Marathonbet",
+        "Pinnacle",
+        "SBO",
+        "Superbet"
+      ],
+      "bookmaker_count": 9,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "jleague",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 10,
+      "fixture_count": 30,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 1,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 20,
+      "market_name_api": "Double Chance - First Half",
+      "bookmakers": [
+        "10Bet",
+        "1xBet",
+        "Bet365",
+        "Betano",
+        "Marathonbet",
+        "Superbet",
+        "Unibet",
+        "William Hill"
+      ],
+      "bookmaker_count": 8,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "jleague",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 10,
+      "fixture_count": 30,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 1,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 21,
+      "market_name_api": "Odd/Even",
+      "bookmakers": [
+        "10Bet",
+        "1xBet",
+        "888Sport",
+        "Bet365",
+        "BetVictor",
+        "Betano",
+        "Marathonbet",
+        "SBO",
+        "Superbet",
+        "William Hill"
+      ],
+      "bookmaker_count": 10,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "jleague",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 10,
+      "fixture_count": 30,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 1,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 22,
+      "market_name_api": "Odd/Even - First Half",
+      "bookmakers": [
+        "10Bet",
+        "1xBet",
+        "Bet365",
+        "Marathonbet",
+        "Superbet",
+        "William Hill"
+      ],
+      "bookmaker_count": 6,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "jleague",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 10,
+      "fixture_count": 30,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 1,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 23,
+      "market_name_api": "Home Odd/Even",
+      "bookmakers": [
+        "10Bet",
+        "1xBet",
+        "Bet365",
+        "Superbet"
+      ],
+      "bookmaker_count": 4,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "jleague",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 10,
+      "fixture_count": 30,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 1,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 24,
+      "market_name_api": "Results/Both Teams Score",
+      "bookmakers": [
+        "10Bet",
+        "Bet365",
+        "Betano",
+        "William Hill"
+      ],
+      "bookmaker_count": 4,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "jleague",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 10,
+      "fixture_count": 30,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 1,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 25,
+      "market_name_api": "Result/Total Goals",
+      "bookmakers": [
+        "10Bet",
+        "Bet365",
+        "Betfair",
+        "Marathonbet",
+        "Superbet"
+      ],
+      "bookmaker_count": 5,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "jleague",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 10,
+      "fixture_count": 30,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 1,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 26,
+      "market_name_api": "Goals Over/Under - Second Half",
+      "bookmakers": [
+        "10Bet",
+        "1xBet",
+        "888Sport",
+        "Bet365",
+        "Betano",
+        "Marathonbet",
+        "Superbet",
+        "Unibet",
+        "William Hill"
+      ],
+      "bookmaker_count": 9,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "jleague",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 10,
+      "fixture_count": 30,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 1,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 29,
+      "market_name_api": "Win to Nil - Home",
+      "bookmakers": [
+        "10Bet",
+        "Marathonbet"
+      ],
+      "bookmaker_count": 2,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "jleague",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 10,
+      "fixture_count": 30,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 1,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 30,
+      "market_name_api": "Win to Nil - Away",
+      "bookmakers": [
+        "10Bet",
+        "Marathonbet"
+      ],
+      "bookmaker_count": 2,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "jleague",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 10,
+      "fixture_count": 30,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 1,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 31,
+      "market_name_api": "Correct Score - First Half",
+      "bookmakers": [
+        "10Bet",
+        "1xBet",
+        "Bet365",
+        "BetVictor",
+        "Betano",
+        "Betfair",
+        "Pinnacle",
+        "SBO",
+        "Superbet",
+        "Unibet",
+        "William Hill"
+      ],
+      "bookmaker_count": 11,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "jleague",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 10,
+      "fixture_count": 30,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 1,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 32,
+      "market_name_api": "Win Both Halves",
+      "bookmakers": [
+        "10Bet",
+        "Bet365",
+        "William Hill"
+      ],
+      "bookmaker_count": 3,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "jleague",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 10,
+      "fixture_count": 30,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 1,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 33,
+      "market_name_api": "Double Chance - Second Half",
+      "bookmakers": [
+        "1xBet",
+        "Betano",
+        "Marathonbet",
+        "Superbet",
+        "Unibet",
+        "William Hill"
+      ],
+      "bookmaker_count": 6,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "jleague",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 10,
+      "fixture_count": 30,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 1,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 34,
+      "market_name_api": "Both Teams Score - First Half",
+      "bookmakers": [
+        "10Bet",
+        "1xBet",
+        "Bet365",
+        "Betano",
+        "Marathonbet",
+        "Superbet",
+        "William Hill"
+      ],
+      "bookmaker_count": 7,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "jleague",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 10,
+      "fixture_count": 30,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 1,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 35,
+      "market_name_api": "Both Teams To Score - Second Half",
+      "bookmakers": [
+        "10Bet",
+        "1xBet",
+        "Bet365",
+        "Betano",
+        "Marathonbet",
+        "Superbet",
+        "William Hill"
+      ],
+      "bookmaker_count": 7,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "jleague",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 10,
+      "fixture_count": 30,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 1,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 36,
+      "market_name_api": "Win To Nil",
+      "bookmakers": [
+        "10Bet",
+        "Bet365",
+        "William Hill"
+      ],
+      "bookmaker_count": 3,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "jleague",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 10,
+      "fixture_count": 30,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 1,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 38,
+      "market_name_api": "Exact Goals Number",
+      "bookmakers": [
+        "Bet365",
+        "Betano",
+        "Superbet",
+        "William Hill"
+      ],
+      "bookmaker_count": 4,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "jleague",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 10,
+      "fixture_count": 30,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 1,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 39,
+      "market_name_api": "To Win Either Half",
+      "bookmakers": [
+        "10Bet",
+        "Bet365",
+        "Betano",
+        "William Hill"
+      ],
+      "bookmaker_count": 4,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "jleague",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 10,
+      "fixture_count": 30,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 1,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 40,
+      "market_name_api": "Home Team Exact Goals Number",
+      "bookmakers": [
+        "10Bet",
+        "Bet365",
+        "Betano",
+        "Superbet",
+        "William Hill"
+      ],
+      "bookmaker_count": 5,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "jleague",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 10,
+      "fixture_count": 30,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 1,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 41,
+      "market_name_api": "Away Team Exact Goals Number",
+      "bookmakers": [
+        "10Bet",
+        "Bet365",
+        "Betano",
+        "Superbet",
+        "William Hill"
+      ],
+      "bookmaker_count": 5,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "jleague",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 10,
+      "fixture_count": 30,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 1,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 42,
+      "market_name_api": "Second Half Exact Goals Number",
+      "bookmakers": [
+        "Bet365",
+        "William Hill"
+      ],
+      "bookmaker_count": 2,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "jleague",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 10,
+      "fixture_count": 30,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 1,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 43,
+      "market_name_api": "Home Team Score a Goal",
+      "bookmakers": [
+        "Marathonbet",
+        "William Hill"
+      ],
+      "bookmaker_count": 2,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "jleague",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 10,
+      "fixture_count": 30,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 1,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 44,
+      "market_name_api": "Away Team Score a Goal",
+      "bookmakers": [
+        "Marathonbet",
+        "William Hill"
+      ],
+      "bookmaker_count": 2,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "jleague",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 10,
+      "fixture_count": 30,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 1,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 45,
+      "market_name_api": "Corners Over Under",
+      "bookmakers": [
+        "10Bet",
+        "1xBet",
+        "Bet365",
+        "Betano",
+        "Betfair",
+        "Marathonbet",
+        "Pinnacle",
+        "Superbet",
+        "Unibet"
+      ],
+      "bookmaker_count": 9,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "jleague",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 10,
+      "fixture_count": 30,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 1,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 46,
+      "market_name_api": "Exact Goals Number - First Half",
+      "bookmakers": [
+        "Bet365",
+        "Betano",
+        "William Hill"
+      ],
+      "bookmaker_count": 3,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "jleague",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 10,
+      "fixture_count": 30,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 1,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 49,
+      "market_name_api": "Total Goals/Both Teams To Score",
+      "bookmakers": [
+        "10Bet",
+        "Bet365"
+      ],
+      "bookmaker_count": 2,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "jleague",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 10,
+      "fixture_count": 30,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 1,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 54,
+      "market_name_api": "First 10 min Winner",
+      "bookmakers": [
+        "10Bet",
+        "Bet365",
+        "Betano"
+      ],
+      "bookmaker_count": 3,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "jleague",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 10,
+      "fixture_count": 30,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 1,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 55,
+      "market_name_api": "Corners 1x2",
+      "bookmakers": [
+        "1xBet",
+        "Betano",
+        "Betfair",
+        "Marathonbet",
+        "Superbet",
+        "Unibet",
+        "William Hill"
+      ],
+      "bookmaker_count": 7,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "jleague",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 10,
+      "fixture_count": 30,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 1,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 57,
+      "market_name_api": "Home Corners Over/Under",
+      "bookmakers": [
+        "10Bet",
+        "1xBet",
+        "Bet365",
+        "Betano",
+        "Marathonbet",
+        "Pinnacle",
+        "Superbet",
+        "Unibet"
+      ],
+      "bookmaker_count": 8,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "jleague",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 10,
+      "fixture_count": 30,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 1,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 58,
+      "market_name_api": "Away Corners Over/Under",
+      "bookmakers": [
+        "10Bet",
+        "1xBet",
+        "Bet365",
+        "Betano",
+        "Marathonbet",
+        "Pinnacle",
+        "Superbet",
+        "Unibet"
+      ],
+      "bookmaker_count": 8,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "jleague",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 10,
+      "fixture_count": 30,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 1,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 59,
+      "market_name_api": "Own Goal",
+      "bookmakers": [
+        "Bet365",
+        "Betano",
+        "Marathonbet"
+      ],
+      "bookmaker_count": 3,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "jleague",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 10,
+      "fixture_count": 30,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 1,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 60,
+      "market_name_api": "Away Odd/Even",
+      "bookmakers": [
+        "10Bet",
+        "1xBet",
+        "Bet365",
+        "Superbet"
+      ],
+      "bookmaker_count": 4,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "jleague",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 10,
+      "fixture_count": 30,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 1,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 62,
+      "market_name_api": "Correct Score - Second Half",
+      "bookmakers": [
+        "10Bet",
+        "1xBet",
+        "Superbet",
+        "William Hill"
+      ],
+      "bookmaker_count": 4,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "jleague",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 10,
+      "fixture_count": 30,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 1,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 63,
+      "market_name_api": "Odd/Even - Second Half",
+      "bookmakers": [
+        "10Bet",
+        "1xBet",
+        "Bet365",
+        "Marathonbet",
+        "William Hill"
+      ],
+      "bookmaker_count": 5,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "jleague",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 10,
+      "fixture_count": 30,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 1,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 99,
+      "market_name_api": "To Score A Penalty",
+      "bookmakers": [
+        "Bet365",
+        "Betano"
+      ],
+      "bookmaker_count": 2,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "jleague",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 10,
+      "fixture_count": 30,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 1,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 100,
+      "market_name_api": "To Miss A Penalty",
+      "bookmakers": [
+        "Bet365",
+        "Betano"
+      ],
+      "bookmaker_count": 2,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "jleague",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 10,
+      "fixture_count": 30,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 1,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 104,
+      "market_name_api": "Asian Handicap (2nd Half)",
+      "bookmakers": [
+        "1xBet",
+        "Marathonbet",
+        "Superbet"
+      ],
+      "bookmaker_count": 3,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "jleague",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 10,
+      "fixture_count": 30,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 1,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 105,
+      "market_name_api": "Home Team Total Goals(1st Half)",
+      "bookmakers": [
+        "10Bet",
+        "1xBet",
+        "Betano",
+        "Marathonbet",
+        "Pinnacle",
+        "Superbet",
+        "Unibet"
+      ],
+      "bookmaker_count": 7,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "jleague",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 10,
+      "fixture_count": 30,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 1,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 106,
+      "market_name_api": "Away Team Total Goals(1st Half)",
+      "bookmakers": [
+        "10Bet",
+        "1xBet",
+        "Betano",
+        "Marathonbet",
+        "Pinnacle",
+        "Superbet",
+        "Unibet"
+      ],
+      "bookmaker_count": 7,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "jleague",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 10,
+      "fixture_count": 30,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 1,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 107,
+      "market_name_api": "Home Team Total Goals(2nd Half)",
+      "bookmakers": [
+        "10Bet",
+        "1xBet",
+        "Betano",
+        "Marathonbet",
+        "Superbet"
+      ],
+      "bookmaker_count": 5,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "jleague",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 10,
+      "fixture_count": 30,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 1,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 108,
+      "market_name_api": "Away Team Total Goals(2nd Half)",
+      "bookmakers": [
+        "10Bet",
+        "1xBet",
+        "Betano",
+        "Marathonbet",
+        "Superbet"
+      ],
+      "bookmaker_count": 5,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "jleague",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 10,
+      "fixture_count": 30,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 1,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 109,
+      "market_name_api": "Draw No Bet (1st Half)",
+      "bookmakers": [
+        "10Bet",
+        "Betano",
+        "SBO",
+        "Superbet",
+        "Unibet"
+      ],
+      "bookmaker_count": 5,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "jleague",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 10,
+      "fixture_count": 30,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 1,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 110,
+      "market_name_api": "Scoring Draw",
+      "bookmakers": [
+        "Marathonbet"
+      ],
+      "bookmaker_count": 1,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "jleague",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 10,
+      "fixture_count": 30,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 1,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 111,
+      "market_name_api": "Home team will score in both halves",
+      "bookmakers": [
+        "Betano",
+        "Marathonbet",
+        "William Hill"
+      ],
+      "bookmaker_count": 3,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "jleague",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 10,
+      "fixture_count": 30,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 1,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 112,
+      "market_name_api": "Away team will score in both halves",
+      "bookmakers": [
+        "Betano",
+        "Marathonbet",
+        "William Hill"
+      ],
+      "bookmaker_count": 3,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "jleague",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 10,
+      "fixture_count": 30,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 1,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 114,
+      "market_name_api": "Home Team Score a Goal (1st Half)",
+      "bookmakers": [
+        "William Hill"
+      ],
+      "bookmaker_count": 1,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "jleague",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 10,
+      "fixture_count": 30,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 1,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 115,
+      "market_name_api": "Home Team Score a Goal (2nd Half)",
+      "bookmakers": [
+        "William Hill"
+      ],
+      "bookmaker_count": 1,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "jleague",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 10,
+      "fixture_count": 30,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 1,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 116,
+      "market_name_api": "Away Team Score a Goal (1st Half)",
+      "bookmakers": [
+        "William Hill"
+      ],
+      "bookmaker_count": 1,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "jleague",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 10,
+      "fixture_count": 30,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 1,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 117,
+      "market_name_api": "Away Team Score a Goal (2nd Half)",
+      "bookmakers": [
+        "William Hill"
+      ],
+      "bookmaker_count": 1,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "jleague",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 10,
+      "fixture_count": 30,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 1,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 124,
+      "market_name_api": "Home Come From Behind and Win",
+      "bookmakers": [
+        "Betano"
+      ],
+      "bookmaker_count": 1,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "jleague",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 10,
+      "fixture_count": 30,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 1,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 137,
+      "market_name_api": "1x2 - 60 minutes",
+      "bookmakers": [
+        "10Bet",
+        "Betano",
+        "Marathonbet"
+      ],
+      "bookmaker_count": 3,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "jleague",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 10,
+      "fixture_count": 30,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 1,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 139,
+      "market_name_api": "1x2 - 30 minutes",
+      "bookmakers": [
+        "10Bet",
+        "Betano",
+        "Marathonbet"
+      ],
+      "bookmaker_count": 3,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "jleague",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 10,
+      "fixture_count": 30,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 1,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 144,
+      "market_name_api": "Goal in 1-15 minutes",
+      "bookmakers": [
+        "William Hill"
+      ],
+      "bookmaker_count": 1,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "jleague",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 10,
+      "fixture_count": 30,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 1,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 145,
+      "market_name_api": "Goal in 16-30 minutes",
+      "bookmakers": [
+        "William Hill"
+      ],
+      "bookmaker_count": 1,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "jleague",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 10,
+      "fixture_count": 30,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 1,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 146,
+      "market_name_api": "Goal in 31-45 minutes",
+      "bookmakers": [
+        "William Hill"
+      ],
+      "bookmaker_count": 1,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "jleague",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 10,
+      "fixture_count": 30,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 1,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 147,
+      "market_name_api": "Goal in 46-60 minutes",
+      "bookmakers": [
+        "William Hill"
+      ],
+      "bookmaker_count": 1,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "jleague",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 10,
+      "fixture_count": 30,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 1,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 148,
+      "market_name_api": "Goal in 61-75 minutes",
+      "bookmakers": [
+        "William Hill"
+      ],
+      "bookmaker_count": 1,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "jleague",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 10,
+      "fixture_count": 30,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 1,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 149,
+      "market_name_api": "Goal in 76-90 minutes",
+      "bookmakers": [
+        "William Hill"
+      ],
+      "bookmaker_count": 1,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "jleague",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 10,
+      "fixture_count": 30,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 1,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 181,
+      "market_name_api": "European Handicap (2nd Half)",
+      "bookmakers": [
+        "10Bet",
+        "Marathonbet",
+        "Superbet"
+      ],
+      "bookmaker_count": 3,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "jleague",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 10,
+      "fixture_count": 30,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 1,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 182,
+      "market_name_api": "Draw No Bet (2nd Half)",
+      "bookmakers": [
+        "10Bet",
+        "Betano",
+        "Superbet",
+        "Unibet"
+      ],
+      "bookmaker_count": 4,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "jleague",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 10,
+      "fixture_count": 30,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 1,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 184,
+      "market_name_api": "To Score in Both Halves",
+      "bookmakers": [
+        "Betano",
+        "Marathonbet"
+      ],
+      "bookmaker_count": 2,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "jleague",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 10,
+      "fixture_count": 30,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 1,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 185,
+      "market_name_api": "First Team to Score (3 way) 1st Half",
+      "bookmakers": [
+        "10Bet",
+        "Marathonbet"
+      ],
+      "bookmaker_count": 2,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "jleague",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 10,
+      "fixture_count": 30,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 1,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 192,
+      "market_name_api": "Home Highest Scoring Half",
+      "bookmakers": [
+        "Bet365",
+        "William Hill"
+      ],
+      "bookmaker_count": 2,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "jleague",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 10,
+      "fixture_count": 30,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 1,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 193,
+      "market_name_api": "Away Highest Scoring Half",
+      "bookmakers": [
+        "Bet365",
+        "William Hill"
+      ],
+      "bookmaker_count": 2,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "jleague",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 10,
+      "fixture_count": 30,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 1,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 197,
+      "market_name_api": "Over/Under 15m-30m",
+      "bookmakers": [
+        "Betano"
+      ],
+      "bookmaker_count": 1,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "jleague",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 10,
+      "fixture_count": 30,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 1,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 198,
+      "market_name_api": "Over/Under 30m-45m",
+      "bookmakers": [
+        "Betano"
+      ],
+      "bookmaker_count": 1,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "jleague",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 10,
+      "fixture_count": 30,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 1,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 212,
+      "market_name_api": "Player Assists",
+      "bookmakers": [
+        "1xBet",
+        "Bet365",
+        "Betano"
+      ],
+      "bookmaker_count": 3,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "jleague",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 10,
+      "fixture_count": 30,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 1,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 37,
+      "market_name_api": "Home win both halves",
+      "bookmakers": [
+        "Betano",
+        "Marathonbet"
+      ],
+      "bookmaker_count": 2,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "jleague",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 10,
+      "fixture_count": 29,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 0.967,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 53,
+      "market_name_api": "Away win both halves",
+      "bookmakers": [
+        "Betano",
+        "Marathonbet"
+      ],
+      "bookmaker_count": 2,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "jleague",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 10,
+      "fixture_count": 28,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 0.933,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 129,
+      "market_name_api": "Away Come From Behind and Win",
+      "bookmakers": [
+        "Betano"
+      ],
+      "bookmaker_count": 1,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "jleague",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 10,
+      "fixture_count": 28,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 0.933,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 27,
+      "market_name_api": "Clean Sheet - Home",
+      "bookmakers": [
+        "10Bet",
+        "Bet365"
+      ],
+      "bookmaker_count": 2,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 9,
+      "fixture_count": 27,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 0.9,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 28,
+      "market_name_api": "Clean Sheet - Away",
+      "bookmakers": [
+        "10Bet",
+        "Bet365"
+      ],
+      "bookmaker_count": 2,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 9,
+      "fixture_count": 27,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 0.9,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 47,
+      "market_name_api": "Winning Margin",
+      "bookmakers": [
+        "Bet365"
+      ],
+      "bookmaker_count": 1,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 9,
+      "fixture_count": 27,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 0.9,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 48,
+      "market_name_api": "To Score In Both Halves By Teams",
+      "bookmakers": [
+        "Bet365"
+      ],
+      "bookmaker_count": 1,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 9,
+      "fixture_count": 27,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 0.9,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 50,
+      "market_name_api": "Goal Line",
+      "bookmakers": [
+        "Bet365"
+      ],
+      "bookmaker_count": 1,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 9,
+      "fixture_count": 27,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 0.9,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 72,
+      "market_name_api": "Goal Line (1st Half)",
+      "bookmakers": [
+        "Bet365"
+      ],
+      "bookmaker_count": 1,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 9,
+      "fixture_count": 27,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 0.9,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 78,
+      "market_name_api": "RTG_H1",
+      "bookmakers": [
+        "10Bet",
+        "Bet365"
+      ],
+      "bookmaker_count": 2,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 9,
+      "fixture_count": 27,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 0.9,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 136,
+      "market_name_api": "1x2 - 15 minutes",
+      "bookmakers": [
+        "Marathonbet"
+      ],
+      "bookmaker_count": 1,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 9,
+      "fixture_count": 27,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 0.9,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 138,
+      "market_name_api": "1x2 - 75 minutes",
+      "bookmakers": [
+        "Marathonbet"
+      ],
+      "bookmaker_count": 1,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 9,
+      "fixture_count": 27,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 0.9,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 222,
+      "market_name_api": "To Win From Behind",
+      "bookmakers": [
+        "Bet365"
+      ],
+      "bookmaker_count": 1,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 9,
+      "fixture_count": 27,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 0.9,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 229,
+      "market_name_api": "Goal Method Outside the Box",
+      "bookmakers": [
+        "Bet365",
+        "Betano",
+        "Unibet"
+      ],
+      "bookmaker_count": 3,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 9,
+      "fixture_count": 27,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 0.9,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 349,
+      "market_name_api": "Number Of Goals In Match",
+      "bookmakers": [
+        "Bet365"
+      ],
+      "bookmaker_count": 1,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 9,
+      "fixture_count": 27,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 0.9,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 56,
+      "market_name_api": "Corners Asian Handicap",
+      "bookmakers": [
+        "1xBet",
+        "Bet365",
+        "Betano",
+        "Marathonbet",
+        "Pinnacle",
+        "Superbet"
+      ],
+      "bookmaker_count": 6,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 9,
+      "fixture_count": 26,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 0.867,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 77,
+      "market_name_api": "Total Corners (1st Half)",
+      "bookmakers": [
+        "10Bet",
+        "1xBet",
+        "Bet365",
+        "Betano",
+        "Marathonbet",
+        "Pinnacle",
+        "Superbet",
+        "Unibet"
+      ],
+      "bookmaker_count": 8,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 9,
+      "fixture_count": 26,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 0.867,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 85,
+      "market_name_api": "Total Corners (3 way)",
+      "bookmakers": [
+        "10Bet",
+        "Bet365",
+        "Marathonbet"
+      ],
+      "bookmaker_count": 3,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 9,
+      "fixture_count": 26,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 0.867,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 92,
+      "market_name_api": "Anytime Goal Scorer",
+      "bookmakers": [
+        "Bet365"
+      ],
+      "bookmaker_count": 1,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 9,
+      "fixture_count": 26,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 0.867,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 93,
+      "market_name_api": "First Goal Scorer",
+      "bookmakers": [
+        "Bet365"
+      ],
+      "bookmaker_count": 1,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 9,
+      "fixture_count": 26,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 0.867,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 94,
+      "market_name_api": "Last Goal Scorer",
+      "bookmakers": [
+        "Bet365"
+      ],
+      "bookmaker_count": 1,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 9,
+      "fixture_count": 26,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 0.867,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 127,
+      "market_name_api": "Total Corners (2nd Half)",
+      "bookmakers": [
+        "1xBet",
+        "Betano"
+      ],
+      "bookmaker_count": 2,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 9,
+      "fixture_count": 26,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 0.867,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 130,
+      "market_name_api": "Corners 1x2 (1st Half)",
+      "bookmakers": [
+        "1xBet",
+        "Betano",
+        "Superbet",
+        "William Hill"
+      ],
+      "bookmaker_count": 4,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 9,
+      "fixture_count": 26,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 0.867,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 132,
+      "market_name_api": "Home Total Corners (1st Half)",
+      "bookmakers": [
+        "1xBet",
+        "Betano",
+        "Superbet"
+      ],
+      "bookmaker_count": 3,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 9,
+      "fixture_count": 26,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 0.867,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 134,
+      "market_name_api": "Away Total Corners (1st Half)",
+      "bookmakers": [
+        "1xBet",
+        "Betano",
+        "Superbet"
+      ],
+      "bookmaker_count": 3,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 9,
+      "fixture_count": 26,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 0.867,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 218,
+      "market_name_api": "Away Anytime Goal Scorer",
+      "bookmakers": [
+        "Bet365",
+        "Betano"
+      ],
+      "bookmaker_count": 2,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 9,
+      "fixture_count": 26,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 0.867,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 219,
+      "market_name_api": "Away First Goal Scorer",
+      "bookmakers": [
+        "Bet365",
+        "Betano"
+      ],
+      "bookmaker_count": 2,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 9,
+      "fixture_count": 26,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 0.867,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 226,
+      "market_name_api": "Away Last Goal Scorer",
+      "bookmakers": [
+        "Bet365",
+        "Betano"
+      ],
+      "bookmaker_count": 2,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 9,
+      "fixture_count": 26,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 0.867,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 231,
+      "market_name_api": "Home Anytime Goal Scorer",
+      "bookmakers": [
+        "Bet365",
+        "Betano"
+      ],
+      "bookmaker_count": 2,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 9,
+      "fixture_count": 26,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 0.867,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 232,
+      "market_name_api": "Home First Goal Scorer",
+      "bookmakers": [
+        "Bet365",
+        "Betano"
+      ],
+      "bookmaker_count": 2,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 9,
+      "fixture_count": 26,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 0.867,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 233,
+      "market_name_api": "Home Last Goal Scorer",
+      "bookmakers": [
+        "Bet365",
+        "Betano"
+      ],
+      "bookmaker_count": 2,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 9,
+      "fixture_count": 26,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 0.867,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 239,
+      "market_name_api": "Corners. European Handicap",
+      "bookmakers": [
+        "Bet365"
+      ],
+      "bookmaker_count": 1,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 9,
+      "fixture_count": 26,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 0.867,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 247,
+      "market_name_api": "Corners Race To",
+      "bookmakers": [
+        "1xBet",
+        "Bet365"
+      ],
+      "bookmaker_count": 2,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 9,
+      "fixture_count": 26,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 0.867,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 249,
+      "market_name_api": "Multicorners",
+      "bookmakers": [
+        "Bet365"
+      ],
+      "bookmaker_count": 1,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 9,
+      "fixture_count": 26,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 0.867,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 295,
+      "market_name_api": "Corners. Total (Range)",
+      "bookmakers": [
+        "Bet365"
+      ],
+      "bookmaker_count": 1,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 9,
+      "fixture_count": 26,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 0.867,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 297,
+      "market_name_api": "Corners. total between 0 and 10m",
+      "bookmakers": [
+        "Bet365"
+      ],
+      "bookmaker_count": 1,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 9,
+      "fixture_count": 26,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 0.867,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 338,
+      "market_name_api": "Corners. Odd/Even",
+      "bookmakers": [
+        "10Bet",
+        "1xBet",
+        "Betano",
+        "Superbet"
+      ],
+      "bookmaker_count": 4,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 9,
+      "fixture_count": 26,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 0.867,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 257,
+      "market_name_api": "Player to Score or Assist",
+      "bookmakers": [
+        "Bet365",
+        "Unibet"
+      ],
+      "bookmaker_count": 2,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea"
+      ],
+      "league_count": 8,
+      "fixture_count": 24,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 0.8,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 275,
+      "market_name_api": "Away Player Shots On Target Total",
+      "bookmakers": [
+        "Bet365",
+        "Betano",
+        "Unibet"
+      ],
+      "bookmaker_count": 3,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea"
+      ],
+      "league_count": 8,
+      "fixture_count": 24,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 0.8,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 87,
+      "market_name_api": "Total ShotOnGoal",
+      "bookmakers": [
+        "1xBet",
+        "Bet365",
+        "Betano",
+        "Superbet",
+        "Unibet"
+      ],
+      "bookmaker_count": 5,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea"
+      ],
+      "league_count": 8,
+      "fixture_count": 23,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 0.767,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 125,
+      "market_name_api": "Corners Asian Handicap (1st Half)",
+      "bookmakers": [
+        "1xBet",
+        "Superbet"
+      ],
+      "bookmaker_count": 2,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "laliga",
+        "ligue1",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 8,
+      "fixture_count": 23,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 0.767,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 126,
+      "market_name_api": "Corners Asian Handicap (2nd Half)",
+      "bookmakers": [
+        "1xBet"
+      ],
+      "bookmaker_count": 1,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "laliga",
+        "ligue1",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 8,
+      "fixture_count": 23,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 0.767,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 131,
+      "market_name_api": "Corners 1x2 (2nd Half)",
+      "bookmakers": [
+        "1xBet",
+        "William Hill"
+      ],
+      "bookmaker_count": 2,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "laliga",
+        "ligue1",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 8,
+      "fixture_count": 23,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 0.767,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 133,
+      "market_name_api": "Home Total Corners (2nd Half)",
+      "bookmakers": [
+        "1xBet"
+      ],
+      "bookmaker_count": 1,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "laliga",
+        "ligue1",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 8,
+      "fixture_count": 23,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 0.767,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 135,
+      "market_name_api": "Away Total Corners (2nd Half)",
+      "bookmakers": [
+        "1xBet"
+      ],
+      "bookmaker_count": 1,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "laliga",
+        "ligue1",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 8,
+      "fixture_count": 23,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 0.767,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 211,
+      "market_name_api": "Total Shots",
+      "bookmakers": [
+        "1xBet",
+        "Bet365",
+        "Betano",
+        "Superbet",
+        "Unibet"
+      ],
+      "bookmaker_count": 5,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea"
+      ],
+      "league_count": 8,
+      "fixture_count": 23,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 0.767,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 228,
+      "market_name_api": "Home Goal Method Header",
+      "bookmakers": [
+        "Bet365",
+        "Betano"
+      ],
+      "bookmaker_count": 2,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea"
+      ],
+      "league_count": 8,
+      "fixture_count": 23,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 0.767,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 245,
+      "market_name_api": "Away Goal Method Header",
+      "bookmakers": [
+        "Bet365",
+        "Betano"
+      ],
+      "bookmaker_count": 2,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea"
+      ],
+      "league_count": 8,
+      "fixture_count": 23,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 0.767,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 276,
+      "market_name_api": "Away Player Shots Total",
+      "bookmakers": [
+        "1xBet",
+        "Bet365",
+        "Betano",
+        "Superbet",
+        "Unibet"
+      ],
+      "bookmaker_count": 5,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea"
+      ],
+      "league_count": 8,
+      "fixture_count": 23,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 0.767,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 339,
+      "market_name_api": "Corners. Double Chance",
+      "bookmakers": [
+        "1xBet"
+      ],
+      "bookmaker_count": 1,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "laliga",
+        "ligue1",
+        "premier",
+        "primeira",
+        "seriea",
+        "suede"
+      ],
+      "league_count": 8,
+      "fixture_count": 23,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 0.767,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 80,
+      "market_name_api": "Cards Over/Under",
+      "bookmakers": [
+        "1xBet",
+        "Bet365",
+        "Betano",
+        "Pinnacle",
+        "Superbet",
+        "Unibet"
+      ],
+      "bookmaker_count": 6,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea"
+      ],
+      "league_count": 8,
+      "fixture_count": 22,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 0.733,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 81,
+      "market_name_api": "Cards Asian Handicap",
+      "bookmakers": [
+        "Bet365",
+        "Betano",
+        "Pinnacle"
+      ],
+      "bookmaker_count": 3,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea"
+      ],
+      "league_count": 8,
+      "fixture_count": 22,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 0.733,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 82,
+      "market_name_api": "Home Team Total Cards",
+      "bookmakers": [
+        "Bet365",
+        "Betano",
+        "Superbet"
+      ],
+      "bookmaker_count": 3,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea"
+      ],
+      "league_count": 8,
+      "fixture_count": 22,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 0.733,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 83,
+      "market_name_api": "Away Team Total Cards",
+      "bookmakers": [
+        "Bet365",
+        "Betano",
+        "Superbet"
+      ],
+      "bookmaker_count": 3,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea"
+      ],
+      "league_count": 8,
+      "fixture_count": 22,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 0.733,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 215,
+      "market_name_api": "Player Singles",
+      "bookmakers": [
+        "Bet365"
+      ],
+      "bookmaker_count": 1,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea"
+      ],
+      "league_count": 8,
+      "fixture_count": 22,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 0.733,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 240,
+      "market_name_api": "Home Player Shots",
+      "bookmakers": [
+        "Bet365"
+      ],
+      "bookmaker_count": 1,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea"
+      ],
+      "league_count": 8,
+      "fixture_count": 22,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 0.733,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 241,
+      "market_name_api": "Away Player Shots",
+      "bookmakers": [
+        "Bet365"
+      ],
+      "bookmaker_count": 1,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea"
+      ],
+      "league_count": 8,
+      "fixture_count": 22,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 0.733,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 242,
+      "market_name_api": "Player Shots On Target",
+      "bookmakers": [
+        "Bet365"
+      ],
+      "bookmaker_count": 1,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea"
+      ],
+      "league_count": 8,
+      "fixture_count": 22,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 0.733,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 269,
+      "market_name_api": "Home Player Shots On Target Total",
+      "bookmakers": [
+        "Bet365"
+      ],
+      "bookmaker_count": 1,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea"
+      ],
+      "league_count": 8,
+      "fixture_count": 22,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 0.733,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 97,
+      "market_name_api": "First Goal Method",
+      "bookmakers": [
+        "Bet365"
+      ],
+      "bookmaker_count": 1,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "laliga",
+        "ligue1",
+        "premier",
+        "primeira",
+        "seriea"
+      ],
+      "league_count": 7,
+      "fixture_count": 21,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 0.7,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 342,
+      "market_name_api": "Red Card In The Match (1st Half)",
+      "bookmakers": [
+        "Betano"
+      ],
+      "bookmaker_count": 1,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "primeira",
+        "seriea"
+      ],
+      "league_count": 8,
+      "fixture_count": 21,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 0.7,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 176,
+      "market_name_api": "ShotOnTarget 1x2",
+      "bookmakers": [
+        "1xBet",
+        "Bet365",
+        "Superbet"
+      ],
+      "bookmaker_count": 3,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "laliga",
+        "ligue1",
+        "premier",
+        "primeira",
+        "seriea"
+      ],
+      "league_count": 7,
+      "fixture_count": 20,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 0.667,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 340,
+      "market_name_api": "Shots.1x2",
+      "bookmakers": [
+        "1xBet",
+        "Bet365",
+        "Superbet"
+      ],
+      "bookmaker_count": 3,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "laliga",
+        "ligue1",
+        "premier",
+        "primeira",
+        "seriea"
+      ],
+      "league_count": 7,
+      "fixture_count": 20,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 0.667,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 164,
+      "market_name_api": "Offsides Total",
+      "bookmakers": [
+        "1xBet",
+        "Bet365",
+        "Betano",
+        "Superbet"
+      ],
+      "bookmaker_count": 4,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "laliga",
+        "ligue1",
+        "premier",
+        "seriea"
+      ],
+      "league_count": 6,
+      "fixture_count": 17,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 0.567,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 167,
+      "market_name_api": "Offsides Home Total",
+      "bookmakers": [
+        "1xBet",
+        "Bet365",
+        "Betano",
+        "Superbet"
+      ],
+      "bookmaker_count": 4,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "laliga",
+        "ligue1",
+        "premier",
+        "seriea"
+      ],
+      "league_count": 6,
+      "fixture_count": 17,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 0.567,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 168,
+      "market_name_api": "Offsides Away Total",
+      "bookmakers": [
+        "1xBet",
+        "Bet365",
+        "Betano",
+        "Superbet"
+      ],
+      "bookmaker_count": 4,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "laliga",
+        "ligue1",
+        "premier",
+        "seriea"
+      ],
+      "league_count": 6,
+      "fixture_count": 17,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 0.567,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 170,
+      "market_name_api": "Fouls. Away Total",
+      "bookmakers": [
+        "1xBet",
+        "Betano",
+        "Superbet"
+      ],
+      "bookmaker_count": 3,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "laliga",
+        "ligue1",
+        "premier",
+        "seriea"
+      ],
+      "league_count": 6,
+      "fixture_count": 17,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 0.567,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 171,
+      "market_name_api": "Fouls. Home Total",
+      "bookmakers": [
+        "1xBet",
+        "Betano",
+        "Superbet"
+      ],
+      "bookmaker_count": 3,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "laliga",
+        "ligue1",
+        "premier",
+        "seriea"
+      ],
+      "league_count": 6,
+      "fixture_count": 17,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 0.567,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 173,
+      "market_name_api": "Fouls. Total",
+      "bookmakers": [
+        "1xBet",
+        "Betano",
+        "Superbet"
+      ],
+      "bookmaker_count": 3,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "laliga",
+        "ligue1",
+        "premier",
+        "seriea"
+      ],
+      "league_count": 6,
+      "fixture_count": 17,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 0.567,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 267,
+      "market_name_api": "Goalkeeper Saves",
+      "bookmakers": [
+        "Bet365",
+        "Betano"
+      ],
+      "bookmaker_count": 2,
+      "leagues": [
+        "bundesliga",
+        "laliga",
+        "ligue1",
+        "premier",
+        "primeira",
+        "seriea"
+      ],
+      "league_count": 6,
+      "fixture_count": 17,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 0.567,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 79,
+      "market_name_api": "Cards European Handicap",
+      "bookmakers": [
+        "Bet365"
+      ],
+      "bookmaker_count": 1,
+      "leagues": [
+        "bundesliga",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "seriea"
+      ],
+      "league_count": 6,
+      "fixture_count": 16,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 0.533,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 250,
+      "market_name_api": "First Card Received (3 way)",
+      "bookmakers": [
+        "Bet365"
+      ],
+      "bookmaker_count": 1,
+      "leagues": [
+        "bundesliga",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "seriea"
+      ],
+      "league_count": 6,
+      "fixture_count": 16,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 0.533,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 299,
+      "market_name_api": "Cards over/under between 0 and 10 m",
+      "bookmakers": [
+        "Bet365"
+      ],
+      "bookmaker_count": 1,
+      "leagues": [
+        "bundesliga",
+        "laliga",
+        "ligue1",
+        "mls",
+        "premier",
+        "seriea"
+      ],
+      "league_count": 6,
+      "fixture_count": 16,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 0.533,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 113,
+      "market_name_api": "Both Teams To Score in Both Halves",
+      "bookmakers": [
+        "Marathonbet"
+      ],
+      "bookmaker_count": 1,
+      "leagues": [
+        "bundesliga",
+        "eredivisie",
+        "ligue1",
+        "mls",
+        "premier",
+        "suede"
+      ],
+      "league_count": 6,
+      "fixture_count": 15,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 0.5,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 150,
+      "market_name_api": "Home Team Yellow Cards",
+      "bookmakers": [
+        "1xBet"
+      ],
+      "bookmaker_count": 1,
+      "leagues": [
+        "bundesliga",
+        "laliga",
+        "ligue1",
+        "premier",
+        "seriea"
+      ],
+      "league_count": 5,
+      "fixture_count": 14,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 0.467,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 151,
+      "market_name_api": "Away Team Yellow Cards",
+      "bookmakers": [
+        "1xBet"
+      ],
+      "bookmaker_count": 1,
+      "leagues": [
+        "bundesliga",
+        "laliga",
+        "ligue1",
+        "premier",
+        "seriea"
+      ],
+      "league_count": 5,
+      "fixture_count": 14,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 0.467,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 152,
+      "market_name_api": "Yellow Asian Handicap",
+      "bookmakers": [
+        "1xBet"
+      ],
+      "bookmaker_count": 1,
+      "leagues": [
+        "bundesliga",
+        "laliga",
+        "ligue1",
+        "premier",
+        "seriea"
+      ],
+      "league_count": 5,
+      "fixture_count": 14,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 0.467,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 153,
+      "market_name_api": "Yellow Over/Under",
+      "bookmakers": [
+        "1xBet"
+      ],
+      "bookmaker_count": 1,
+      "leagues": [
+        "bundesliga",
+        "laliga",
+        "ligue1",
+        "premier",
+        "seriea"
+      ],
+      "league_count": 5,
+      "fixture_count": 14,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 0.467,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 154,
+      "market_name_api": "Yellow Double Chance",
+      "bookmakers": [
+        "1xBet"
+      ],
+      "bookmaker_count": 1,
+      "leagues": [
+        "bundesliga",
+        "laliga",
+        "ligue1",
+        "premier",
+        "seriea"
+      ],
+      "league_count": 5,
+      "fixture_count": 14,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 0.467,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 155,
+      "market_name_api": "Yellow Over/Under (1st Half)",
+      "bookmakers": [
+        "1xBet"
+      ],
+      "bookmaker_count": 1,
+      "leagues": [
+        "bundesliga",
+        "laliga",
+        "ligue1",
+        "premier",
+        "seriea"
+      ],
+      "league_count": 5,
+      "fixture_count": 14,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 0.467,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 157,
+      "market_name_api": "Yellow Odd/Even",
+      "bookmakers": [
+        "1xBet"
+      ],
+      "bookmaker_count": 1,
+      "leagues": [
+        "bundesliga",
+        "laliga",
+        "ligue1",
+        "premier",
+        "seriea"
+      ],
+      "league_count": 5,
+      "fixture_count": 14,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 0.467,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 158,
+      "market_name_api": "Yellow Cards 1x2",
+      "bookmakers": [
+        "1xBet"
+      ],
+      "bookmaker_count": 1,
+      "leagues": [
+        "bundesliga",
+        "laliga",
+        "ligue1",
+        "premier",
+        "seriea"
+      ],
+      "league_count": 5,
+      "fixture_count": 14,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 0.467,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 159,
+      "market_name_api": "Yellow Asian Handicap (1st Half)",
+      "bookmakers": [
+        "1xBet"
+      ],
+      "bookmaker_count": 1,
+      "leagues": [
+        "bundesliga",
+        "laliga",
+        "ligue1",
+        "premier",
+        "seriea"
+      ],
+      "league_count": 5,
+      "fixture_count": 14,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 0.467,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 161,
+      "market_name_api": "Yellow Cards 1x2 (1st Half)",
+      "bookmakers": [
+        "1xBet"
+      ],
+      "bookmaker_count": 1,
+      "leagues": [
+        "bundesliga",
+        "laliga",
+        "ligue1",
+        "premier",
+        "seriea"
+      ],
+      "league_count": 5,
+      "fixture_count": 14,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 0.467,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 166,
+      "market_name_api": "Offsides Handicap",
+      "bookmakers": [
+        "1xBet",
+        "Betano"
+      ],
+      "bookmaker_count": 2,
+      "leagues": [
+        "bundesliga",
+        "laliga",
+        "ligue1",
+        "premier",
+        "seriea"
+      ],
+      "league_count": 5,
+      "fixture_count": 14,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 0.467,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 156,
+      "market_name_api": "Yellow Over/Under (2nd Half)",
+      "bookmakers": [
+        "1xBet"
+      ],
+      "bookmaker_count": 1,
+      "leagues": [
+        "bundesliga",
+        "laliga",
+        "ligue1",
+        "premier",
+        "seriea"
+      ],
+      "league_count": 5,
+      "fixture_count": 13,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 0.433,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 160,
+      "market_name_api": "Yellow Asian Handicap (2nd Half)",
+      "bookmakers": [
+        "1xBet"
+      ],
+      "bookmaker_count": 1,
+      "leagues": [
+        "bundesliga",
+        "laliga",
+        "ligue1",
+        "premier",
+        "seriea"
+      ],
+      "league_count": 5,
+      "fixture_count": 13,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 0.433,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 162,
+      "market_name_api": "Yellow Cards 1x2 (2nd Half)",
+      "bookmakers": [
+        "1xBet"
+      ],
+      "bookmaker_count": 1,
+      "leagues": [
+        "bundesliga",
+        "laliga",
+        "ligue1",
+        "premier",
+        "seriea"
+      ],
+      "league_count": 5,
+      "fixture_count": 13,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 0.433,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 86,
+      "market_name_api": "RCARD",
+      "bookmakers": [
+        "William Hill"
+      ],
+      "bookmaker_count": 1,
+      "leagues": [
+        "bundesliga",
+        "ligue1",
+        "premier",
+        "seriea"
+      ],
+      "league_count": 4,
+      "fixture_count": 11,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 0.367,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 266,
+      "market_name_api": "Player Fouls Committed",
+      "bookmakers": [
+        "Bet365"
+      ],
+      "bookmaker_count": 1,
+      "leagues": [
+        "bundesliga",
+        "laliga",
+        "premier",
+        "seriea"
+      ],
+      "league_count": 4,
+      "fixture_count": 11,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 0.367,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 213,
+      "market_name_api": "Player Triples",
+      "bookmakers": [
+        "Bet365"
+      ],
+      "bookmaker_count": 1,
+      "leagues": [
+        "laliga",
+        "premier",
+        "seriea"
+      ],
+      "league_count": 3,
+      "fixture_count": 4,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 0.133,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 281,
+      "market_name_api": "Total Tackles",
+      "bookmakers": [
+        "Bet365",
+        "Betano",
+        "Superbet"
+      ],
+      "bookmaker_count": 3,
+      "leagues": [
+        "premier"
+      ],
+      "league_count": 1,
+      "fixture_count": 3,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 0.1,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 165,
+      "market_name_api": "Offsides 1x2",
+      "bookmakers": [
+        "1xBet"
+      ],
+      "bookmaker_count": 1,
+      "leagues": [
+        "laliga"
+      ],
+      "league_count": 1,
+      "fixture_count": 1,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 0.033,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 169,
+      "market_name_api": "Offsides Double Chance",
+      "bookmakers": [
+        "1xBet"
+      ],
+      "bookmaker_count": 1,
+      "leagues": [
+        "laliga"
+      ],
+      "league_count": 1,
+      "fixture_count": 1,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 0.033,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 172,
+      "market_name_api": "Fouls. Double Chance",
+      "bookmakers": [
+        "1xBet"
+      ],
+      "bookmaker_count": 1,
+      "leagues": [
+        "laliga"
+      ],
+      "league_count": 1,
+      "fixture_count": 1,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 0.033,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 174,
+      "market_name_api": "Fouls. Handicap",
+      "bookmakers": [
+        "1xBet"
+      ],
+      "bookmaker_count": 1,
+      "leagues": [
+        "laliga"
+      ],
+      "league_count": 1,
+      "fixture_count": 1,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 0.033,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 175,
+      "market_name_api": "Fouls. 1x2",
+      "bookmakers": [
+        "1xBet"
+      ],
+      "bookmaker_count": 1,
+      "leagues": [
+        "laliga"
+      ],
+      "league_count": 1,
+      "fixture_count": 1,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 0.033,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 177,
+      "market_name_api": "ShotOnTarget Handicap",
+      "bookmakers": [
+        "1xBet"
+      ],
+      "bookmaker_count": 1,
+      "leagues": [
+        "laliga"
+      ],
+      "league_count": 1,
+      "fixture_count": 1,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 0.033,
+      "pre_match_or_live": "pre_match"
+    },
+    {
+      "bet_id": 343,
+      "market_name_api": "Fouls. Odd/Even",
+      "bookmakers": [
+        "1xBet"
+      ],
+      "bookmaker_count": 1,
+      "leagues": [
+        "laliga"
+      ],
+      "league_count": 1,
+      "fixture_count": 1,
+      "fixtures_checked_with_odds": 30,
+      "real_frequency": 0.033,
+      "pre_match_or_live": "pre_match"
+    }
+  ]
+}

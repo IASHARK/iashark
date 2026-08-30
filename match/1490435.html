@@ -620,18 +620,23 @@ body{font-family:'Inter',sans-serif;background:#060b11;}
 .wrap{max-width:1040px;margin:18px auto 0;padding:0 16px;}
 .card{background:#07111b;border:1px solid #132c40;border-radius:12px;overflow:hidden;box-shadow:0 22px 70px rgba(0,0,0,.26);}
 .hero{padding:15px 20px 10px;border:0;border-radius:0;background:linear-gradient(145deg,#071522,#06101a 72%);}
-.league-v4{display:flex;align-items:center;gap:7px;color:var(--cyan);font-size:9px;font-weight:700;text-transform:uppercase;margin-bottom:9px;}
-.league-v4-mark{width:17px;height:17px;border:1px solid rgba(34,211,238,.3);border-radius:50%;display:grid;place-items:center;font-size:8px;}
+.league-v4{display:flex;align-items:center;gap:8px;color:var(--cyan);font-size:9px;font-weight:700;text-transform:uppercase;margin-bottom:9px;}
+.league-v4-logo{width:21px;height:21px;object-fit:contain;filter:drop-shadow(0 0 6px rgba(34,211,238,.2));}
+.league-v4-mark{width:21px;height:21px;border:1px solid rgba(34,211,238,.3);border-radius:50%;display:grid;place-items:center;font-size:8px;}
 .teams{grid-template-columns:1fr 54px 1fr;gap:14px;margin:0;}
-.team{grid-template-columns:52px minmax(0,1fr);gap:12px;}
+.team{display:grid!important;grid-template-columns:52px minmax(0,1fr);gap:12px;}
 .team.away{grid-template-columns:minmax(0,1fr) 52px;}
 .team-logo,.team-logo-ph{width:48px;height:48px;}
 .team-name{font-family:'Inter',sans-serif;font-size:17px;font-weight:700;letter-spacing:-.25px;text-transform:none;}
+.team.away .team-name{color:var(--text);}
 .team-sub{font-family:'Inter',sans-serif;font-size:8px;color:#6f879a;text-transform:capitalize;letter-spacing:0;}
 .vs{font-family:'Inter',sans-serif;font-size:18px;font-weight:800;color:#e7f1f8;}
 .vs:after{content:'';display:block;width:20px;height:2px;margin:7px auto 0;background:var(--cyan);border-radius:2px;}
 .vs-hr{font-family:'Inter',sans-serif;font-size:10px;color:#9eb1c0;}
-.stade-row{max-width:none;margin:10px 0 0;padding:9px 0 0;border:0;border-top:1px solid #102638;border-radius:0;background:transparent;justify-content:center;}
+.stade-row{display:none;}
+.match-meta-v4{display:flex;align-items:center;gap:13px;margin-top:10px;padding-top:9px;border-top:1px solid #102638;color:#8296a6;font-size:8px;}
+.match-meta-v4 span{display:inline-flex;align-items:center;gap:5px;}
+.match-meta-v4 .meta-stadium{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .stade-name,.stade-meta{font-family:'Inter',sans-serif;font-size:8px;color:#8296a6;}
 .stade-status{margin-left:auto;display:flex;align-items:center;gap:6px;color:#91a9b9;font-size:8px;line-height:1.25;}
 .stade-status-dot{width:7px;height:7px;border-radius:50%;background:#18d39a;box-shadow:0 0 8px rgba(24,211,154,.45);}
@@ -680,7 +685,8 @@ body{font-family:'Inter',sans-serif;background:#060b11;}
 .v4-players-top{grid-template-columns:1.35fr .85fr}.v4-lineup-columns{display:grid;grid-template-columns:1fr 1fr;gap:14px}.v4-lineup-team{display:flex;justify-content:space-between;font-size:9px;margin-bottom:10px}.v4-pitch{height:150px;border:1px solid #24445a;border-radius:5px;background:linear-gradient(rgba(5,30,43,.8),rgba(5,25,38,.85)),repeating-linear-gradient(0deg,transparent 0 29px,rgba(60,112,137,.13) 30px);position:relative}.v4-pitch:before{content:'';position:absolute;left:50%;top:0;bottom:0;width:1px;background:#24445a}.v4-pitch-empty{position:absolute;inset:0;display:grid;place-items:center;text-align:center;color:#6f8798;font-size:8px;padding:18px;line-height:1.5}
 .v4-absence-team{font-size:9px;color:var(--cyan);margin:11px 0 4px}.v4-absence{display:flex;justify-content:space-between;gap:8px;padding:8px 0;border-bottom:1px solid #122b3e;font-size:9px}.v4-absence span:last-child{color:#f5b94e}.v4-player-watch{margin-top:9px}.v4-player-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.v4-player{padding:11px;border:1px solid #17344a;border-radius:6px;background:#081522}.v4-player-name{font-size:10px;font-weight:700}.v4-player-role{font-size:8px;color:#7290a4;margin-top:3px}.v4-player-stat{display:flex;justify-content:space-between;font-size:8px;padding-top:8px;margin-top:8px;border-top:1px solid #142d40;color:#8ba0af}.v4-player-empty{color:#7f95a5;font-size:9px;line-height:1.6}.v4-scorer-card{margin-top:9px;display:flex;justify-content:space-between;align-items:center}.v4-scorer-copy strong{display:block;font-size:12px;margin-bottom:7px}.v4-scorer-copy span{font-size:9px;color:#8196a6}.v4-lock{width:40px;height:40px;border:1px solid #17435a;border-radius:50%;display:grid;place-items:center;color:var(--cyan);font-size:17px}
 .page-section-label,.summary-layout,.summary-reasons,.summary-markets,.summary-context-grid,.summary-faq,.advanced-intro,.advanced-grid,.players-intro,.players-grid{display:none!important;}
-@media(max-width:720px){.wrap{padding:0 8px;margin-top:8px}.hero{padding:13px 12px 9px}.team-logo,.team-logo-ph{width:42px;height:42px}.team{grid-template-columns:42px minmax(0,1fr);gap:8px}.team.away{grid-template-columns:minmax(0,1fr) 42px}.team-name{font-size:13px}.stade-status{display:none}.tab-panel{padding:8px}.v4-summary-top,.v4-advanced-top,.v4-advanced-bottom,.v4-players-top{grid-template-columns:1fr}.v4-why-items,.v4-player-grid{grid-template-columns:1fr}.v4-market-row{grid-template-columns:1.25fr .5fr .5fr .65fr 16px;padding-left:9px;padding-right:9px}.v4-stat-row{grid-template-columns:34px 1fr 70px 1fr 34px}.v4-lineup-columns{grid-template-columns:1fr}.v4-bet{font-size:22px}}
+@media(max-width:720px){.wrap{padding:0 8px;margin-top:8px}.hero{padding:13px 12px 9px}.team-logo,.team-logo-ph{width:42px;height:42px}.team{display:grid!important;grid-template-columns:42px minmax(0,1fr);gap:8px;flex-direction:initial!important}.team.away{display:grid!important;grid-template-columns:minmax(0,1fr) 42px;flex-direction:initial!important}.team-name{font-size:13px}.stade-status{display:none}.match-meta-v4{gap:8px}.tab-panel{padding:8px}.v4-summary-top,.v4-advanced-top,.v4-advanced-bottom,.v4-players-top{grid-template-columns:1fr}.v4-why-items,.v4-player-grid{grid-template-columns:1fr}.v4-market-row{grid-template-columns:1.25fr .5fr .5fr .65fr 16px;padding-left:9px;padding-right:9px}.v4-stat-row{grid-template-columns:34px 1fr 70px 1fr 34px}.v4-lineup-columns{grid-template-columns:1fr}.v4-bet{font-size:22px}}
+@media(max-width:430px){.teams{grid-template-columns:1fr 38px 1fr;gap:5px}.team,.team.away{grid-template-columns:34px minmax(0,1fr)!important}.team.away{grid-template-columns:minmax(0,1fr) 34px!important}.team-logo,.team-logo-ph{width:34px;height:34px}.team-name{font-size:11px}.team-sub{font-size:7px}.vs{font-size:14px}.match-meta-v4 .meta-stadium{display:none}}
 </style>
 </head>
 <body>
@@ -1967,16 +1973,21 @@ function render(m){
   }
   function teamDisplay(team,name,side,forme_str,isTennis){
     var logo=lgImg(team,(name||'?').slice(0,2).toUpperCase(),name);
-    return '<div class="team '+side+'">'+logo+'<div class="team-name">'+name.toUpperCase()+'</div><div class="team-sub">'+(isTennis?(side==='home'?'JOUEUR 1':'JOUEUR 2'):(side==='home'?'DOMICILE':'EXTÉRIEUR'))+'</div></div>';
+    return '<div class="team '+side+'">'+logo+'<div class="team-name">'+esc(name)+'</div><div class="team-sub">'+(isTennis?(side==='home'?'JOUEUR 1':'JOUEUR 2'):(side==='home'?'Domicile':'Extérieur'))+'</div></div>';
   }
+  var leagueLogo=m.league_id?'<img class="league-v4-logo" src="https://media.api-sports.io/football/leagues/'+encodeURIComponent(m.league_id)+'.png" alt="" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'grid\'">':'';
+  var leagueFallback='<span class="league-v4-mark" style="'+(leagueLogo?'display:none':'')+'">◈</span>';
+  var dateParts=(m.date||'').split(' '),matchDate=dateParts[0]||'',matchTime=dateParts[1]||heure||'—';
+  var dateLabel=matchDate?new Date(matchDate+'T12:00:00').toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'}):'Date à confirmer';
+  var stadiumLabel=(m.stade&&m.stade.nom)||'Stade à confirmer';
   var teamsHtml='<div class="hero">'
-    +'<div class="league-v4"><span class="league-v4-mark">◈</span>'+esc(m.league||'MATCH')+'</div>'
+    +'<div class="league-v4">'+leagueLogo+leagueFallback+'<span>'+esc(m.league||'Match')+'</span></div>'
     +'<div class="teams">'
     +teamDisplay(m.home,hn,'home',m.forme_h||m.form_p1,isTennis)
     +'<div class="vs-col"><span class="vs">VS</span>'+(heure?'<div class="vs-hr">'+heure+'</div>':'')+'</div>'
     +teamDisplay(m.away,an,'away',m.forme_a||m.form_p2,isTennis)
     +'</div>'
-    +stadeHtml.replace('</div>','<span class="stade-status"><i class="stade-status-dot"></i>Données à jour</span></div>')
+    +'<div class="match-meta-v4"><span>▣ '+esc(dateLabel)+'</span><span>◷ '+esc(matchTime)+'</span><span class="meta-stadium">⌖ '+esc(stadiumLabel)+'</span><span class="stade-status"><i class="stade-status-dot"></i>Données à jour</span></div>'
     +'</div>'
     +'<div class="proba"><div class="pbar"><div class="pb1" style="width:'+(m.p1||0)+'%"></div><div class="pbn" style="width:'+(m.pn||0)+'%"></div><div class="pb2" style="width:'+(m.p2||0)+'%"></div></div>'
     +'<div class="plabels"><div class="pi"><div class="pi-pct" style="color:var(--cyan)">'+(m.p1||0)+'%</div><div class="pi-lbl">'+hn.slice(0,8).toUpperCase()+'</div></div>'+(m.pn?'<div class="pi"><div class="pi-pct" style="color:rgba(255,255,255,0.25)">'+(m.pn||0)+'%</div><div class="pi-lbl">NUL</div></div>':'')+'<div class="pi"><div class="pi-pct" style="color:rgba(255,255,255,0.35)">'+(m.p2||0)+'%</div><div class="pi-lbl">'+an.slice(0,8).toUpperCase()+'</div></div></div>'

@@ -67,3 +67,11 @@ test("la page suit le contrat visuel compact de la maquette validée", () => {
   assert.match(matchPage, /class="[^"]*v4-absences-card/);
   assert.match(matchPage, /class="[^"]*v4-player-watch/);
 });
+
+test("le bandeau reprend la disposition de la maquette avec le vrai logo de ligue", () => {
+  assert.match(matchPage, /media\.api-sports\.io\/football\/leagues\//);
+  assert.match(matchPage, /class="league-v4-logo"/);
+  assert.match(matchPage, /class="match-meta-v4"/);
+  assert.match(matchPage, /\.team\{display:grid!important/);
+  assert.match(matchPage, /\.team\.away \.team-name\{color:var\(--text\)/);
+});

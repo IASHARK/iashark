@@ -93,30 +93,32 @@ Les 7 pages coeur du produit (Marchés/Accueil/Match[chrome]/Outils/Compte/Archi
 
 Mis à jour à chaque jalon, comme demandé. Statuts honnêtes uniquement — rien n'est marqué `PASS`/`EXECUTED` sans preuve vérifiée dans ce document ou dans un commit référencé.
 
-## CLASSIFICATION FINALE (2026-08-29, demandée explicitement)
+## CLASSIFICATION FINALE (mise à jour 2026-08-30 — voir `IASHARK_V2_RAPPORT_FINAL.md` pour la synthèse consolidée demandée par l'utilisateur)
 
 ### LAUNCH_READY
 
 - Moteur : Kelly/edge/EV réels, PURE_IASHARK_PROBABILITY pure pour tous les marchés (vérifié mathématiquement + garde-fou anti-régression), LLM strictement narratif, VOID/Handicap/O-U-générique/DNB résolus correctement, Monte-Carlo seedé.
-- Pipeline : SportMonks supprimé, exit code non-zéro sur erreur fatale, concurrency, tests automatisés réels branchés en production (159/159), CI GitHub Actions.
-- Sécurité : XSS réfléchie corrigée (re-vérifiée en direct lors de la QA finale, 0 régression), CSP en place, RLS versionnée et vérifiée indépendamment sur chaque table, `billing_customers`/`subscriptions` retirés de la visibilité `anon` (Supabase Advisors), policies RLS optimisées (`(select auth.uid())`), rate limiting réel (Postgres, pas mémoire), aucun secret client (scan grep confirmé), 0 dépendance npm tierce (surface d'attaque vérifiée nulle), premium (kelly/edge/verdict) jamais exposé publiquement, aucun flag de bypass actif (`eval`/`Function`/`document.write` absents du code).
-- Frontend (probabilité/fiabilité) : plus aucune confusion "confiance"=probabilité nulle part sur le site, vérifié par balayage complet + tests visuels.
-- Archives : la perte de données réelle (`slice(0,300)`) est corrigée, plus aucune prédiction n'est supprimée définitivement, et l'historique complet (au-delà des 500 plus récents) est consultable via un chargement à la demande depuis Supabase.
-- Mobile (spot-check) : index/pro/compte/match ne montrent aucun overflow horizontal à 375px, alt text et labels boutons présents sur match.html.
-- Business : FREE permanent cohérent, prix PRO 19,95€/mois cohérent partout, aucun essai "1€" contradictoire, guides sans fausse statistique de performance.
-- Billing : scaffold de paiement désactivé (`PAYMENT_PROVIDER=disabled`, architecture agnostique du prestataire — Stripe est l'implémentation câblée, le choix définitif du prestataire est une décision séparée et différée de l'utilisateur, ne bloque pas la V2) déployé et vérifié inerte en conditions réelles.
+- Pipeline : SportMonks supprimé, exit code non-zéro sur erreur fatale, concurrency, tests automatisés réels branchés en production (163/163), CI GitHub Actions.
+- Sécurité : XSS réfléchie corrigée, **1 vraie faille XSS supplémentaire trouvée et corrigée lors de l'audit `innerHTML` exhaustif de ce chantier** (noms d'équipe/ligue/marché non échappés sur 5 pages, vérifié avec un vrai payload), CSP en place, RLS versionnée et vérifiée indépendamment sur chaque table (dont `funnel_events`, nouvelle ce chantier), policies RLS optimisées (`(select auth.uid())`), rate limiting réel (Postgres, pas mémoire), aucun secret client (scan grep confirmé), 0 dépendance npm tierce (surface d'attaque vérifiée nulle, y compris après l'ajout du tunnel de conversion), premium (kelly/edge/verdict) jamais exposé publiquement, aucun flag de bypass actif.
+- Frontend (probabilité/fiabilité) : plus aucune confusion "confiance"=probabilité nulle part sur le site.
+- Archives : perte de données réelle corrigée, historique complet consultable via chargement à la demande.
+- i18n (§19) : **FAIT** — 6 langues réelles (FR/EN/ES/DE/IT/PT), 7 pages coeur du produit (Accueil/Marchés/Match[chrome]/Outils/Compte/Archives/Tarifs) réellement générées et vérifiées en direct avec de vraies données de production.
+- SEO international (§20) : **FAIT** — sitemaps i18n réels (hreflang+x-default par URL) générés et commités, `_redirects` étendu (suggestion de langue + redirections legacy), vérifié inerte tant que la pause maintenance est active.
+- Tunnel de conversion (§21) : **FAIT, sans vendor analytics tiers** (demande explicite) — CTA priciés cohérents 6 langues, checkout réellement câblé bout-en-bout (Edge Function déployée et testée), onboarding, pages succès/annulation, tracking interne `funnel_events` vérifié par insert réel.
+- Admin (§29) : **FAIT, scope minimal lecture seule** — RPC `admin_stats()` vérifiée avec le vrai compte admin ET un vrai compte non-admin (rejet confirmé).
+- Design (passe explicite finale) : emojis d'interface supprimés partout, identité visuelle IASHARK strictement conservée, vérifié en direct desktop+mobile+3 langues.
+- Mobile (spot-check étendu ce chantier) : historique.html/blog-guides-index.html/pro.html/match.html à 375px, aucun overflow, aucune icône manquante.
+- Business : FREE permanent cohérent, prix PRO 19,95€/mois cohérent partout (y compris les nouveaux CTA du tunnel de conversion), aucune promesse de gain dans les nouveaux textes (audité explicitement).
+- Billing : scaffold de paiement désactivé (`PAYMENT_PROVIDER=disabled`) déployé et vérifié inerte, **checkout frontend maintenant câblé bout-en-bout** (nouveau ce chantier) en attente uniquement du choix de prestataire.
 
 ### REMAINING_NON_BLOCKING (améliore le produit, ne bloque pas un lancement honnête)
 
-- Page Match : onglets détaillés du §7.2 (Joueurs/Stats/Compos/Modèles/Cotes séparés) — le contenu existe déjà dans la structure actuelle à 4 onglets, juste pas dans la présentation idéale du MASTER.
-- Page Marchés (§12) : **FAITE** (`marches.html`, MVP réel, dans le nav). Outils (§13) : calculateurs FREE de base faits (cote↔probabilité, marge) ; Kelly/EV avancés + simulateur bankroll restent à faire.
-- Compte : dashboard/favoris/bankroll UI/export RGPD/suppression de compte.
-- Admin (§29) : n'existe pas — outil interne, pas requis pour un lancement public.
-- i18n (§19) : NON_STARTED, 6 langues. Le produit est actuellement 100% FR ; lancer en FR seul est cohérent si le marché cible est la France.
-- SEO avancé (§20) : hreflang/sitemaps par locale dépendent de l'i18n. Le SEO de base (meta, JSON-LD, canonical, robots.txt correct, maintenance.html en noindex) est déjà en place.
-- Tunnel de conversion dédié (§21) : les CTA existent et sont cohérents en vocabulaire, mais pas de funnel/analytics dédié construit ce chantier.
-- Checkout Stripe frontend réel + portail client : le scaffold backend est prêt, mais `compte.html` n'a pas encore de bouton qui crée une vraie session Stripe (attendu — Stripe réel reste pour la fin, choix explicite de l'utilisateur).
-- QA finale exhaustive (§40) : cette classification EST un QA partiel, mais pas le passage complet page par page desktop+mobile+accessibilité formel que le MASTER décrit.
+- Page Match : onglets détaillés du §7.2 (Joueurs/Stats/Compos/Modèles/Cotes séparés) — le contenu existe déjà dans la structure actuelle à 4 onglets. Contenu narratif LLM par match (`verdict_shark`/`facteur_x`) reste non traduit dans les 5 langues non-FR (décision de scope documentée).
+- Outils (§13) : Kelly/EV avancé fait ; simulateur de croissance de bankroll volontairement pas fait (risque de ressembler à une promesse de gain).
+- Compte : favoris (aucun modèle de données), bankroll UI dédiée (le suivi existe déjà dans `pro.html`).
+- i18n : guides/blog restent 100% FR (architecture de traduction à la demande pas construite), `generateMatchPages()` pas encore étendue en `/{locale}/match/{id}.html` par fixture.
+- Checkout Stripe réel + portail client : le scaffold frontend+backend est prêt et testé en mode désactivé ; l'activation réelle reste `BLOCKED_EXTERNAL_STRIPE` (choix de prestataire différé, décision utilisateur).
+- QA finale exhaustive (§40) : audit `innerHTML` fait, Advisors fait ; reste le passage formel desktop+mobile+accessibilité page par page complet que le MASTER décrit dans le détail (spot-checks représentatifs faits, pas une checklist exhaustive de chaque page × chaque breakpoint).
 
 ### FORWARD_VALIDATION_ONLY (infrastructure prête, valeur mesurable seulement après collecte réelle)
 

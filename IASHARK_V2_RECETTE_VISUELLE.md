@@ -6,6 +6,41 @@ Rédigé le 2026-08-30, suite au refus explicite de la V2 par l'utilisateur apr�
 
 **Méthode et limite honnête à connaître avant de lire la suite** : l'extension Claude in Chrome (navigateur réel) n'est pas connectée dans cet environnement — impossible d'obtenir une session authentifiée réelle dans un navigateur avec accès réseau complet. Pour vérifier les états FREE/PRO malgré cette contrainte : (1) deux vrais comptes de test ont été créés dans Supabase (production), un FREE et un PRO, avec connexion réelle via `curl` (mot de passe réel, token réel obtenu via l'API Auth réelle) ; (2) la réponse RÉELLE de l'API a été injectée dans le code RÉEL de la page (via `javascript_tool`, en remplaçant uniquement l'appel réseau bloqué par le sandbox) pour observer le rendu réel. C'est la vérification la plus rigoureuse possible dans cet environnement — mais ce n'est PAS une navigation authentifiée de bout en bout dans un vrai navigateur. Signalé explicitement à chaque ligne concernée. Les deux comptes de test ont été supprimés après usage (aucune trace résiduelle en base).
 
+## Mise à jour 2026-08-30 (suite 6) : Player Engine réel + recette de lancement (rapport final honnête)
+
+Demande : exploiter l'audit odds/marchés (suite 5) pour construire un vrai Player Engine (buteur, tirs, tirs cadrés), le brancher dans le pipeline, l'afficher sur `match.html`, mettre à jour le Market Registry, continuer les snapshots de cotes avec une vraie cadence, puis produire un rapport de lancement final avec 17 statuts.
+
+**Livré et vérifié réellement dans cette passe** : `lib/markets/player-engine.js` (19 tests) — minutes attendues réelles (jamais fixes), P(buteur) via Poisson jamais un passthrough de `goals_per_90`, modèle tirs/tirs cadrés distinct, `chooseDistributionModel` qui ne retourne JAMAIS `VALIDATED` automatiquement (toujours `FORWARD_VALIDATION_ONLY`, testé même sur un grand échantillon synthétique), suppression totale du résultat si données insuffisantes. Vérifié end-to-end avec de vrais joueurs Chelsea (N. Jackson, Pedro Neto, M. Mudryk) et leurs vraies stats saison 2025 via `/players?id=X&season=2025&team=49` — Mudryk (2 apparitions) correctement supprimé, Jackson/Neto avec des probabilités réelles et distinctes selon leurs minutes attendues réelles (25 vs 76 min). 3 nouvelles entrées Market Registry (`ANYTIME_GOALSCORER`/`PLAYER_SHOTS`/`PLAYER_SHOTS_ON_TARGET`) avec les vrais `bet_id` de l'audit. Pipeline branché (`getPlayerSeasonStats` caché en mémoire par run, `computePlayerMarketsForFixture` gaté sur `analysis_tier` FULL/STANDARD uniquement et sur composition officiellement confirmée) — syntaxiquement vérifié mais **jamais exécuté de bout en bout** (pas de `SUPABASE_SERVICE_ROLE_KEY`/`ANTHROPIC_KEY` dans cette session). Nouvelle section JOUEURS sur `match.html`, vérifiée visuellement (capture d'écran + rendu DOM avec données de forme réelle), séparant explicitement Probabilité IASHARK / Cote / Probabilité marché. Cadence de snapshots FIRST_SEEN/T72/T24/T6/CLOSE + dedup réel contre Supabase (6 tests). Correction de coherence trouvée en chemin : l'ancien badge "proba de marquer" (goals/games via Poisson, sans ajustement minutes/contexte) relabelisé honnêtement "ratio buts/match (saison)".
+
+**Non fait dans cette passe, à signaler honnêtement** : filtres Buteurs/Tirs/Tirs cadrés sur `marches.html` (risque jugé trop élevé d'éditer `renderMatchMarkets()` sans pouvoir l'exécuter en conditions réelles) ; traduction de la nouvelle section JOUEURS dans les 6 langues (copiée telle quelle en français par le build i18n, aucune règle de traduction ajoutée) ; re-vérification mobile 375px de la nouvelle section ; exécution réelle du pipeline complet (bloquée par les mêmes clés manquantes que d'habitude) ; revue de sécurité dédiée sur les nouveaux fichiers (au-delà des pratiques déjà en place : `esc()` systématique, aucun `eval`, aucune donnée non fiable injectée en HTML brut) ; Stripe (toujours `PAYMENT_PROVIDER=disabled`, jamais touché cette session, comme depuis le début de l'engagement).
+
+npm test : 203/203.
+
+### Rapport de lancement final
+
+| Statut demandé | Valeur | Justification |
+|---|---|---|
+| `LAUNCH_READY` | **NON** | Plusieurs items ci-dessous restent `PARTIAL`/`TO_VERIFY`/`BLOCKED_EXTERNAL` — voir détail |
+| `PLAYER_ENGINE_STATUS` | **FORWARD_VALIDATION_ONLY** | Modèle réel, testé, vérifié avec de vraies données ; aucun backtest hors échantillon réel exécuté — jamais promu `VALIDATED` par construction |
+| `PIPELINE_PASS` | **PARTIAL** | Code branché et syntaxiquement vérifié (config/leagues.json, analysis_tier, Market Registry, odds snapshots, Player Engine tous réellement reliés) mais jamais exécuté de bout en bout cette session (secrets manquants localement) — `BLOCKED_EXTERNAL` pour la vérification E2E complète |
+| `LEAGUES_PASS` | **PASS** | 13/13 ids et saisons vérifiés réellement contre l'API (suite 4) |
+| `FREE_PRO_PASS` | **PASS** | Vérifié avec 2 vrais comptes Supabase + curl (jalons précédents) |
+| `PAYWALL_PASS` | **PASS** | FREE verrouillé/PRO déverrouillé avec vraies données de compte (jalons précédents) |
+| `MATCH_PASS` | **PARTIAL** | Structure/nav/JOUEURS vérifiés ; edge-function PRO toujours bloquée par la pause maintenance elle-même ; JOUEURS jamais peuplé avec un vrai match live (pas de run pipeline complet) |
+| `MARKETS_PASS` | **PARTIAL** | Market Registry + audit réels et cohérents ; filtres Buteurs/Tirs/Tirs cadrés sur `marches.html` non ajoutés cette passe |
+| `TOOLS_PASS` | **PASS** (jalon précédent, non retesté cette passe) | Calculateurs + séparation FREE/PRO déjà vérifiés |
+| `ACCOUNT_PASS` | **PASS** (jalon précédent, non retesté cette passe) | Auth/onboarding/badges déjà vérifiés |
+| `STRIPE_READY` | **BLOCKED_EXTERNAL** | `PAYMENT_PROVIDER=disabled` depuis le début de l'engagement, jamais de clé Stripe fournie |
+| `SEO_PASS` | **PASS** pour ce qui a été vérifié (Historique noindex/sitemaps, jalon précédent) | Nouvelle section JOUEURS fait partie de `match.html` existant, pas une nouvelle page indexable |
+| `I18N_PASS` | **PARTIAL** | Sélecteur 6 langues vérifié (jalon précédent) ; nouvelle section JOUEURS non traduite (copiée en français dans les 6 copies) |
+| `MOBILE_PASS` | **PARTIAL** | Pages cœur vérifiées à 375px (jalon précédent) ; nouvelle section JOUEURS non retestée à 375px |
+| `SECURITY_PASS` | **TO_VERIFY** | Pratiques sûres respectées dans le nouveau code (`esc()`, pas d'`eval`) mais pas de revue de sécurité dédiée cette passe |
+| `TESTS_PASS` | **PASS** | 203/203, exécutés réellement |
+| `FORWARD_VALIDATION_ONLY` | Voir `PLAYER_ENGINE_STATUS` | Statut du Player Engine, jamais `VALIDATED` sans backtest réel |
+| `BLOCKED_EXTERNAL` | Pipeline E2E complet, Stripe, vraie session navigateur authentifiée | Limitations d'environnement documentées et inchangées depuis le début de l'engagement |
+
+**Maintenance toujours active sur `main`, aucun merge.** Travail sur `hotfix-v2-acceptance` uniquement.
+
 ## Mise à jour 2026-08-30 (suite 5) : audit RÉEL odds/marchés + démarrage des snapshots de cotes
 
 Demande explicite : auditer réellement les marchés/cotes API-Football sur les 13 ligues de lancement, comparer au Market Registry interne (`lib/market-registry.js`), classer chaque marché (`MODEL_SUPPORTED` / `ODDS_AVAILABLE_ONLY` / `MODEL_AND_ODDS` / `INSUFFICIENT_DATA` / `NOT_AVAILABLE`), ne jamais publier une probabilité IASHARK juste parce qu'un bookmaker propose le marché, et démarrer immédiatement la sauvegarde de nos propres snapshots de cotes.

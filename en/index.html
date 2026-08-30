@@ -242,6 +242,8 @@ body::before{top:-180px;width:1080px;height:700px;background:radial-gradient(ell
 .feature-card::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% -20%,rgba(32,213,239,.12),transparent 45%);pointer-events:none;}
 .feature-card:hover{transform:translateY(-3px);border-color:rgba(32,213,239,.48);}
 .feature-meta{display:flex;align-items:center;justify-content:space-between;color:#8393a7;font-size:11px;position:relative;}
+.feature-meta-right{display:flex;align-items:center;gap:10px;}
+.feature-free{font-family:'Space Mono',monospace;font-size:7px;letter-spacing:1px;color:var(--green);border:1px solid rgba(16,185,129,.24);background:rgba(16,185,129,.06);border-radius:999px;padding:5px 8px;text-transform:uppercase;}
 .feature-league{display:flex;align-items:center;gap:9px;text-transform:uppercase;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1.3px;color:#a9bdd0;}
 .feature-league img{width:27px;height:27px;object-fit:contain;}
 .feature-teams{display:grid;grid-template-columns:1fr 54px 1fr;align-items:center;margin:22px 0 20px;position:relative;}
@@ -258,18 +260,17 @@ body::before{top:-180px;width:1080px;height:700px;background:radial-gradient(ell
 .feature-evidence{display:flex;justify-content:center;gap:8px;margin-top:12px;}
 .evidence-chip{padding:7px 10px;border:1px solid var(--line);border-radius:8px;color:#a7b3c2;font-size:10px;white-space:nowrap;}
 .feature-loading{height:370px;border:1px solid var(--line);border-radius:18px;display:grid;place-items:center;color:#6d7d90;font-family:'Space Mono',monospace;font-size:10px;}
-.league-rail{border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:rgba(9,17,27,.72);position:relative;z-index:2;}
-.league-rail-inner{max-width:1280px;height:72px;margin:auto;padding:0 28px;display:grid;grid-template-columns:repeat(6,1fr);align-items:center;}
-.league-link{height:72px;display:flex;align-items:center;justify-content:center;gap:11px;color:#93a1b3;text-decoration:none;font-size:11px;font-weight:700;text-transform:uppercase;border-bottom:2px solid transparent;transition:.2s;position:relative;}
-.league-link:not(:last-child)::after{content:'';position:absolute;right:0;width:1px;height:26px;background:var(--line);}
-.league-link:hover,.league-link.active{color:var(--cyan);border-bottom-color:var(--cyan);}
-.league-link img{width:30px;height:30px;object-fit:contain;filter:drop-shadow(0 4px 10px rgba(0,0,0,.4));}
-.league-link[data-league="ligue1"] img{filter:brightness(0) saturate(100%) invert(83%) sepia(86%) saturate(1010%) hue-rotate(25deg) brightness(104%);}
-.league-link[data-league="premier"] img{filter:brightness(1.65) saturate(1.2) drop-shadow(0 4px 10px rgba(0,0,0,.4));}
-.league-link[data-league="ldc"] img{filter:brightness(0) saturate(100%) invert(70%) sepia(83%) saturate(1460%) hue-rotate(147deg) brightness(100%);}
-.league-link[data-league="ligue1"] img{transform:scale(1.55);}
-.league-link[data-league="premier"] img{transform:scale(1.22);}
-.league-link[data-league="ldc"] img{transform:scale(1.4);}
+.league-rail{border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:rgba(9,17,27,.72);position:relative;z-index:2;overflow:hidden;}
+.league-rail::before,.league-rail::after{content:'';position:absolute;top:0;bottom:0;width:90px;z-index:2;pointer-events:none;}
+.league-rail::before{left:0;background:linear-gradient(90deg,var(--page),transparent);}
+.league-rail::after{right:0;background:linear-gradient(270deg,var(--page),transparent);}
+.league-rail-inner{height:72px;width:max-content;display:flex;align-items:center;animation:league-marquee 28s linear infinite;will-change:transform;}
+.league-track{display:flex;align-items:center;flex:none;}
+.league-badge{height:72px;min-width:210px;padding:0 30px;display:flex;align-items:center;justify-content:center;gap:12px;color:#9eabba;font-size:11px;font-weight:700;text-transform:uppercase;position:relative;white-space:nowrap;}
+.league-badge::after{content:'';position:absolute;right:0;width:1px;height:26px;background:var(--line);}
+.league-badge img{width:31px;height:31px;object-fit:contain;filter:drop-shadow(0 5px 12px rgba(0,0,0,.45));}
+@keyframes league-marquee{to{transform:translateX(-50%);}}
+@media(prefers-reduced-motion:reduce){.league-rail-inner{animation:none;}}
 .decisions{max-width:1280px;margin:0 auto;padding:28px 28px 60px;position:relative;z-index:1;}
 .decisions-head{display:flex;align-items:end;justify-content:space-between;gap:24px;margin-bottom:20px;}
 .decisions-title h2{font-size:25px;letter-spacing:-.8px;margin-bottom:5px;}
@@ -316,7 +317,9 @@ body::before{top:-180px;width:1080px;height:700px;background:radial-gradient(ell
 .nav-bottom{display:flex;}
 .responsible-footer{max-width:1280px!important;}
 @media(min-width:901px){
-  .desktop-nav,.header-actions{display:none;}
+  .desktop-nav{display:none;}
+  .header-actions{display:flex;margin-left:auto;}
+  .btn-start{display:none;}
   .hdr{justify-content:flex-start;}
   .nav-item{min-height:58px;}
 }
@@ -324,7 +327,7 @@ body::before{top:-180px;width:1080px;height:700px;background:radial-gradient(ell
   body{padding-bottom:80px;}
   .hdr{height:62px;padding:0 18px;}.brand-logo{width:126px;height:42px}.brand-logo img{width:126px}.desktop-nav,.btn-start{display:none}.header-actions{margin-left:auto}.btn-login{padding:0 6px;font-size:10px}
   .hero-premium{padding:38px 18px 24px;display:block}.hero-title{font-size:42px;letter-spacing:-2px}.hero-sub{font-size:15px}.hero-trust{gap:15px;overflow:auto;margin-top:25px}.hero-feature{margin-top:30px;min-height:0}.feature-card{min-height:0;padding:18px}.feature-team img{width:58px;height:58px}.feature-evidence{overflow:auto;justify-content:flex-start}.evidence-chip{flex:none}
-  .league-rail-inner{display:flex;height:64px;overflow-x:auto;padding:0 18px}.league-link{height:64px;min-width:135px;flex:none}.league-link img{width:25px;height:25px}
+  .league-rail-inner{height:64px}.league-badge{height:64px;min-width:170px;padding:0 22px}.league-badge img{width:27px;height:27px}
   .decisions{padding:24px 18px 45px}.decisions-head{display:block}.decision-controls{margin-top:15px;justify-content:space-between}.champ-dropdown{width:150px}.cards-list{grid-template-columns:1fr}.mc{min-height:235px}
   .nav-bottom{display:flex}.responsible-footer{padding-bottom:30px!important}
 }
@@ -366,16 +369,26 @@ body::before{top:-180px;width:1080px;height:700px;background:radial-gradient(ell
   </div>
 </section>
 
-<nav class="league-rail" aria-label="Compétitions populaires">
+<div class="league-rail" aria-hidden="true">
   <div class="league-rail-inner">
-    <a class="league-link" data-league="ligue1" href="#decisions" onclick="selectChampionnat('ligue1')"><img src="https://media.api-sports.io/football/leagues/61.png" alt="">Ligue 1</a>
-    <a class="league-link" data-league="premier" href="#decisions" onclick="selectChampionnat('premier')"><img src="https://media.api-sports.io/football/leagues/39.png" alt="">Premier League</a>
-    <a class="league-link" data-league="ldc" href="#decisions" onclick="selectChampionnat('ldc')"><img src="https://media.api-sports.io/football/leagues/2.png" alt="">Champions League</a>
-    <a class="league-link" data-league="laliga" href="#decisions" onclick="selectChampionnat('laliga')"><img src="https://media.api-sports.io/football/leagues/140.png" alt="">LaLiga</a>
-    <a class="league-link" data-league="seriea" href="#decisions" onclick="selectChampionnat('seriea')"><img src="https://media.api-sports.io/football/leagues/135.png" alt="">Serie A</a>
-    <a class="league-link" data-league="bundesliga" href="#decisions" onclick="selectChampionnat('bundesliga')"><img src="https://media.api-sports.io/football/leagues/78.png" alt="">Bundesliga</a>
+    <div class="league-track">
+      <span class="league-badge"><img src="https://media.api-sports.io/football/leagues/61.png" alt="">Ligue 1</span>
+      <span class="league-badge"><img src="https://media.api-sports.io/football/leagues/39.png" alt="">Premier League</span>
+      <span class="league-badge"><img src="https://media.api-sports.io/football/leagues/2.png" alt="">Champions League</span>
+      <span class="league-badge"><img src="https://media.api-sports.io/football/leagues/140.png" alt="">LaLiga</span>
+      <span class="league-badge"><img src="https://media.api-sports.io/football/leagues/135.png" alt="">Serie A</span>
+      <span class="league-badge"><img src="https://media.api-sports.io/football/leagues/78.png" alt="">Bundesliga</span>
+    </div>
+    <div class="league-track">
+      <span class="league-badge"><img src="https://media.api-sports.io/football/leagues/61.png" alt="">Ligue 1</span>
+      <span class="league-badge"><img src="https://media.api-sports.io/football/leagues/39.png" alt="">Premier League</span>
+      <span class="league-badge"><img src="https://media.api-sports.io/football/leagues/2.png" alt="">Champions League</span>
+      <span class="league-badge"><img src="https://media.api-sports.io/football/leagues/140.png" alt="">LaLiga</span>
+      <span class="league-badge"><img src="https://media.api-sports.io/football/leagues/135.png" alt="">Serie A</span>
+      <span class="league-badge"><img src="https://media.api-sports.io/football/leagues/78.png" alt="">Bundesliga</span>
+    </div>
   </div>
-</nav>
+</div>
 
 <section class="decisions" id="decisions">
   <div class="decisions-head">
@@ -653,14 +666,18 @@ function buildHeroFeature(m){
   var market=m.pari_rec?translateMarket(m.pari_rec):(m.no_signal_label||'Analyse en cours');
   function heroLogo(t,name){var u=t&&(t.photo||t.logo||(t.id?'https://media.api-sports.io/football/teams/'+t.id+'.png':''));return u?'<img src="'+u+'" alt="Logo '+esc(name)+'">':'<div class="mc-team-logo-placeholder">'+esc(name.slice(0,2).toUpperCase())+'</div>';}
   return'<a class="feature-card" href="/match/'+m.id+'.html" aria-label="View analysis '+esc(hn)+' vs '+esc(an)+'">'
-    +'<div class="feature-meta"><div class="feature-league">'+leagueHeader(m)+'</div><div>Today · '+heure+'</div></div>'
+    +'<div class="feature-meta"><div class="feature-league">'+leagueHeader(m)+'</div><div class="feature-meta-right"><span class="feature-free">Free analysis</span><span>Today · '+heure+'</span></div></div>'
     +'<div class="feature-teams"><div class="feature-team">'+heroLogo(m.home,hn)+esc(hn)+'</div><div class="feature-vs">VS</div><div class="feature-team">'+heroLogo(m.away,an)+esc(an)+'</div></div>'
     +'<div class="feature-signal"><div class="signal-label">RECOMMENDED MARKET</div><div class="signal-market">'+market+'</div>'
     +'<div class="signal-data"><div class="signal-stat"><span>Analysis confidence</span><strong>'+Math.round(ovrConf(m))+' %</strong></div></div>'
     +'<div class="feature-evidence"><span class="evidence-chip">Recent form</span><span class="evidence-chip">Advanced data</span><span class="evidence-chip">Match context</span></div></div></a>';
 }
 
-function getChoc(list){return list.reduce(function(best,m){return ovrConf(m)>ovrConf(best)?m:best;},list[0]);}
+function getChoc(list){
+  var actionable=list.filter(function(m){return !!m.pari_rec&&!m.no_signal;});
+  var pool=actionable.length?actionable:list;
+  return pool.reduce(function(best,m){return ovrConf(m)>ovrConf(best)?m:best;},pool[0]);
+}
 
 function renderMatchs(){
   var sl=getSportMatchs(),dayList=applyDayFilter(sl),list=applySearchFilter(filterMatchs(dayList,currentFilter)),isDemain=currentDayFilter==='tomorrow',el=document.getElementById('cardsList'),hero=document.getElementById('heroFeature');

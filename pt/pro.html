@@ -305,7 +305,7 @@ body{background:#080c12;color:var(--text);font-family:'DM Sans',sans-serif;min-h
     <button class="tab-btn" onclick="switchTab('calc',this)">CALCULADORAS</button>
   </div>
 
-  <div class="pro-wall locked" id="proWall">
+  <div class="pro-wall" id="proWall">
     <div class="pro-wall-inner" id="proWallInner">
 
       <!-- SÉLECTIONS -->
@@ -499,11 +499,8 @@ var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJ
 var sb = supabase.createClient(SUPA_URL, SUPA_KEY);
 var currentUser = null;
 
-// Paywall reel : les paliers FREE/PRO sont decides (MASTER V2.1 §3.1) - le
-// flag de bypass permanent (OUTILS_OPEN_FOR_ALL=true) explicitement banni
-// par le MASTER (§24 : "Supprimer : OUTILS_OPEN_FOR_ALL=true") est retire.
-// Le deverrouillage ne depend plus que du plan reel verifie cote serveur
-// (table users, RLS restreint chaque utilisateur a sa propre ligne).
+// La page Outils est ouverte à tous. La session reste facultative et sert
+// uniquement à retrouver le capital et les préférences de l'utilisateur.
 
 function unlockProWall(){
   document.getElementById('proWall').classList.remove('locked');
@@ -513,22 +510,13 @@ function unlockProWall(){
 var currentCapital = 0;
 
 async function checkProAccess(){
+  unlockProWall();
   if(window.iasharkTrack) iasharkTrack('tool_page_view');
   try{
     var res = await sb.auth.getSession();
-    if(!res.data || !res.data.session){
-      if(window.iasharkTrack) iasharkTrack('paywall_view', {reason:'anonymous'});
-      return;
-    }
+    if(!res.data || !res.data.session)return;
     currentUser = res.data.session.user;
-    var ures = await sb.from('users').select('plan,role,capital').eq('id', currentUser.id).maybeSingle();
-    var plan = ures.data && ures.data.plan ? ures.data.plan : 'free';
-    var role = ures.data && ures.data.role;
-    if(plan === 'pro' || role === 'admin'){
-      unlockProWall();
-    } else if(window.iasharkTrack){
-      iasharkTrack('paywall_view', {reason:'free_plan'}, currentUser.id);
-    }
+    var ures = await sb.from('users').select('capital').eq('id', currentUser.id).maybeSingle();
     showCapital(ures.data && ures.data.capital);
   }catch(e){}
 }

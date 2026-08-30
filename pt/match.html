@@ -2080,13 +2080,10 @@ function render(m){
     +'<div id="tab-donnees" class="tab-panel" role="tabpanel" aria-labelledby="tab-btn-donnees">'+tabDonneesAvancees+'</div>'
     +'<div id="tab-joueurs" class="tab-panel" role="tabpanel" aria-labelledby="tab-btn-joueurs">'+tabJoueurs+'</div>';
 
-  var proWall=!isPro&&!isTennis?buildProWall():'';
-
   return '<div class="wrap"><div class="card'+(isHot?' hot':'')+(isWC?' wc':'')+'">'
     +teamsHtml
     +tabsNav
     +tabsContent
-    +proWall
     +'<div class="card-footer"></div></div></div>';
 }
 

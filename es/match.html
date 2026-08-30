@@ -1924,7 +1924,12 @@ function togglePlayerCard(id){
 var SUPA_URL='https://ksvjraqitxouwiabecai.supabase.co';
 var SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtzdmpyYXFpdHhvdXdpYWJlY2FpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3ODcwMjMsImV4cCI6MjA4ODM2MzAyM30.Eh3qk4tATM40hoYxdErAllLEo1y8KNt4BSCET_fAgT8';
 async function checkSession(){
-  try{var sb=supabase.createClient(SUPA_URL,SUPA_KEY);var res=await sb.auth.getSession();var s=res.data&&res.data.session;if(!s)return false;var u=await sb.from('users').select('plan').eq('id',s.user.id).maybeSingle();return u.data&&u.data.plan==='pro';}catch(e){return false;}
+  // Bug reel trouve en recette (2026-08-30) : ce check ne testait QUE
+  // plan==='pro', jamais role==='admin' - contrairement a pro.html et au
+  // chip du header (auth-header.js) qui testent bien les deux. Un compte
+  // admin avec plan='free' (cas reel : role et plan sont deux colonnes
+  // independantes) se voyait donc affiche le mur PRO malgre son role.
+  try{var sb=supabase.createClient(SUPA_URL,SUPA_KEY);var res=await sb.auth.getSession();var s=res.data&&res.data.session;if(!s)return false;var u=await sb.from('users').select('plan,role').eq('id',s.user.id).maybeSingle();return !!(u.data&&(u.data.plan==='pro'||u.data.role==='admin'));}catch(e){return false;}
 }
 async function fetchMatchDataWithAuth(){
   // Les champs premium (kelly/edge/verdict_shark/facteur_x) ne sont plus dans

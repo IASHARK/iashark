@@ -335,12 +335,6 @@ var PAGES = [
         var t = d.match_page;
         return "+'<button class=\"tab-btn active\" id=\"tab-btn-resume\" role=\"tab\" aria-selected=\"true\" aria-controls=\"tab-resume\" data-tab=\"resume\" onclick=\"switchTab(this,\\'resume\\')\">" + esc(t.tab_summary) + "</button>'\n    +'<button class=\"tab-btn\" id=\"tab-btn-donnees\" role=\"tab\" aria-selected=\"false\" aria-controls=\"tab-donnees\" data-tab=\"donnees\" onclick=\"switchTab(this,\\'donnees\\')\">" + esc(t.tab_advanced_data) + "</button>'\n    +'<button class=\"tab-btn\" id=\"tab-btn-joueurs\" role=\"tab\" aria-selected=\"false\" aria-controls=\"tab-joueurs\" data-tab=\"joueurs\" onclick=\"switchTab(this,\\'joueurs\\')\">" + esc(t.tab_players) + "</button>'";
       }},
-      {find: '<div class="page-section-label">LECTURE DU MATCH</div>', build: function(d, l, esc){ return '<div class="page-section-label">' + esc(d.match_page.summary_reading) + '</div>'; }},
-      {find: '<div class="page-section-label">DÉCISION IASHARK</div>', build: function(d, l, esc){ return '<div class="page-section-label">' + esc(d.match_page.summary_decision) + '</div>'; }},
-      {find: '<div class="page-section-label">DONNÉES AVANCÉES</div><h2>Vérifier la lecture du modèle</h2>', build: function(d, l, esc){ return '<div class="page-section-label">' + esc(d.match_page.tab_advanced_data) + '</div><h2>' + esc(d.match_page.advanced_title) + '</h2>'; }},
-      {find: 'Probabilités, simulations et dynamiques du match. Ces données complètent la décision sans garantir le résultat.', build: function(d, l, esc){ return esc(d.match_page.advanced_description); }},
-      {find: '<div class="page-section-label">JOUEURS</div><h2>Les individualités qui peuvent changer le match</h2>', build: function(d, l, esc){ return '<div class="page-section-label">' + esc(d.match_page.tab_players) + '</div><h2>' + esc(d.match_page.players_title) + '</h2>'; }},
-      {find: 'Les marchés joueurs restent prudents tant que les compositions et les minutes attendues ne sont pas suffisamment fiables.', build: function(d, l, esc){ return esc(d.match_page.players_description); }},
       {find: '<div class="stitle">PROBABILITÉS 1X2</div>', build: function(d, l, esc){ return '<div class="stitle">' + esc(d.match_page.section_1x2) + '</div>'; }},
       {find: '<div class="stitle">CONSENSUS DES MARCHÉS</div>', build: function(d, l, esc){ return '<div class="stitle">' + esc(d.match_page.section_consensus) + '</div>'; }},
       {find: '<div class="stitle">SCORES SIMULÉS — MONTE-CARLO</div>', build: function(d, l, esc){ return '<div class="stitle">' + esc(d.match_page.section_montecarlo) + '</div>'; }},
@@ -380,7 +374,6 @@ var PAGES = [
       {find: '<div class="stitle">PALMARÈS CE TOURNOI</div>', build: function(d, l, esc){ return '<div class="stitle">' + esc(d.match_page.section_palmares) + '</div>'; }},
       {find: '<div class="stitle">CONTEXTE</div>', build: function(d, l, esc){ return '<div class="stitle">' + esc(d.match_page.section_context) + '</div>'; }},
       {find: '<div class="stitle">POURQUOI CE PARI ?</div>', build: function(d, l, esc){ return '<div class="stitle">' + esc(d.match_page.section_why) + '</div>'; }},
-      {find: '<div class="stitle">ANALYSE COMPARATIVE</div>', build: function(d, l, esc){ return '<div class="stitle">' + esc(d.match_page.section_comparative) + '</div>'; }},
       {find: "<div class=\"pm-lbl\">SÉLECTION IA DU JOUR</div>", build: function(d, l, esc){ return "<div class=\"pm-lbl\">" + esc(d.match_page.label_ia_pick) + "</div>"; }},
       {find: "<div class=\"pmm-lbl\">PROBABILITÉ MODÈLE</div>", build: function(d, l, esc){ return "<div class=\"pmm-lbl\">" + esc(d.match_page.label_model_prob) + "</div>"; }},
       {find: "<div class=\"pmm-lbl\">COTE IMPL.</div>", build: function(d, l, esc){ return "<div class=\"pmm-lbl\">" + esc(d.match_page.label_implied_odds) + "</div>"; }},

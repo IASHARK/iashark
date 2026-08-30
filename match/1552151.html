@@ -6,7 +6,7 @@
 <title>Telstar vs Ajax — Analyse et pronostic IASHARK</title>
 <meta name="description" content="Analyse statistique de Telstar vs Ajax en Eredivisie. Marché analysé : DC 1X."><link rel="canonical" href="https://iashark.com/match/1552151.html"><meta property="og:type" content="website"><meta property="og:title" content="Telstar vs Ajax — Analyse et pronostic IASHARK"><meta property="og:description" content="Analyse statistique de Telstar vs Ajax en Eredivisie. Marché analysé : DC 1X."><meta property="og:url" content="https://iashark.com/match/1552151.html"><meta name="twitter:card" content="summary"><meta name="twitter:title" content="Telstar vs Ajax — Analyse et pronostic IASHARK"><meta name="twitter:description" content="Analyse statistique de Telstar vs Ajax en Eredivisie. Marché analysé : DC 1X."><script type="application/ld+json">{"@context":"https://schema.org","@type":"SportsEvent","name":"Telstar vs Ajax","description":"Analyse statistique de Telstar vs Ajax en Eredivisie. Marché analysé : DC 1X.","competitor":[{"@type":"SportsTeam","name":"Telstar"},{"@type":"SportsTeam","name":"Ajax"}],"url":"https://iashark.com/match/1552151.html","startDate":"2026-08-30T16:45","superEvent":{"@type":"SportsEvent","name":"Eredivisie"}}</script>
 <script type="module" src="https://widgets.api-sports.io/3.1.0/widgets.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <style>
 :root{
@@ -614,6 +614,73 @@ api-sports-widget[data-theme="iashark"]{
   .summary-markets .mkt-table{min-width:520px;}
   .advanced-card .donut-row{gap:18px;}
 }
+
+/* ── MATCH V4 — reproduction stricte de la maquette ───────────── */
+body{font-family:'Inter',sans-serif;background:#060b11;}
+.wrap{max-width:1040px;margin:18px auto 0;padding:0 16px;}
+.card{background:#07111b;border:1px solid #132c40;border-radius:12px;overflow:hidden;box-shadow:0 22px 70px rgba(0,0,0,.26);}
+.hero{padding:15px 20px 10px;border:0;border-radius:0;background:linear-gradient(145deg,#071522,#06101a 72%);}
+.league-v4{display:flex;align-items:center;gap:7px;color:var(--cyan);font-size:9px;font-weight:700;text-transform:uppercase;margin-bottom:9px;}
+.league-v4-mark{width:17px;height:17px;border:1px solid rgba(34,211,238,.3);border-radius:50%;display:grid;place-items:center;font-size:8px;}
+.teams{grid-template-columns:1fr 54px 1fr;gap:14px;margin:0;}
+.team{grid-template-columns:52px minmax(0,1fr);gap:12px;}
+.team.away{grid-template-columns:minmax(0,1fr) 52px;}
+.team-logo,.team-logo-ph{width:48px;height:48px;}
+.team-name{font-family:'Inter',sans-serif;font-size:17px;font-weight:700;letter-spacing:-.25px;text-transform:none;}
+.team-sub{font-family:'Inter',sans-serif;font-size:8px;color:#6f879a;text-transform:capitalize;letter-spacing:0;}
+.vs{font-family:'Inter',sans-serif;font-size:18px;font-weight:800;color:#e7f1f8;}
+.vs:after{content:'';display:block;width:20px;height:2px;margin:7px auto 0;background:var(--cyan);border-radius:2px;}
+.vs-hr{font-family:'Inter',sans-serif;font-size:10px;color:#9eb1c0;}
+.stade-row{max-width:none;margin:10px 0 0;padding:9px 0 0;border:0;border-top:1px solid #102638;border-radius:0;background:transparent;justify-content:center;}
+.stade-name,.stade-meta{font-family:'Inter',sans-serif;font-size:8px;color:#8296a6;}
+.stade-status{margin-left:auto;display:flex;align-items:center;gap:6px;color:#91a9b9;font-size:8px;line-height:1.25;}
+.stade-status-dot{width:7px;height:7px;border-radius:50%;background:#18d39a;box-shadow:0 0 8px rgba(24,211,154,.45);}
+.proba{display:none;}
+.tabbar{position:static;top:auto;border:0;border-top:1px solid #102638;border-bottom:1px solid #102638;border-radius:0;background:#07111b;overflow:visible;}
+.tab-btn{min-height:45px;font-family:'Inter',sans-serif;font-size:9px;font-weight:500;letter-spacing:0;color:#8195a5;padding:0 14px;border-bottom:2px solid transparent;}
+.tab-btn.active{color:var(--cyan);border-bottom-color:var(--cyan);background:transparent;}
+.tab-panel{padding:10px;background:#060e17;}
+.v4-grid{display:grid;gap:9px;}
+.v4-card{border:1px solid #153047;border-radius:7px;background:linear-gradient(145deg,#091827,#07131f);padding:13px;min-width:0;}
+.v4-card-title{display:flex;align-items:center;gap:8px;font-size:10px;font-weight:600;color:#e3edf5;margin-bottom:12px;}
+.v4-card-title .ico{color:var(--cyan);font-size:12px;}
+.v4-summary-top{grid-template-columns:1.18fr .95fr;}
+.v4-reading-card p{font-size:10px;line-height:1.7;color:#b2c0ca;margin:0 0 9px;}
+.v4-decision-head{display:flex;align-items:center;justify-content:space-between;color:var(--cyan);font-size:10px;font-weight:600;}
+.v4-reliability{color:#21d49a;font-size:8px;}
+.v4-bet{font-size:26px;font-weight:800;line-height:1.08;color:#f4f8fb;margin:14px 0 16px;}
+.v4-decision-metrics{display:grid;grid-template-columns:1fr 1px 1fr;gap:15px;align-items:center;}
+.v4-divider{width:1px;height:40px;background:#193449;}
+.v4-metric strong{display:block;color:var(--cyan);font-size:24px;line-height:1;}
+.v4-metric span{display:block;margin-top:5px;color:#7f95a7;font-size:8px;}
+.v4-metric.cote strong{color:#eaf2f8;}
+.v4-note{margin-top:12px;padding:8px 9px;border:1px solid rgba(245,158,11,.25);background:rgba(245,158,11,.06);border-radius:5px;color:#c9b378;font-size:8px;line-height:1.45;}
+.v4-why-card{margin-top:9px;}
+.v4-why-items{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+.v4-why-item{display:flex;gap:8px;color:#b4c2cc;font-size:9px;line-height:1.5;}
+.v4-check{width:17px;height:17px;flex:0 0 17px;border:1px solid #19cda0;border-radius:50%;display:grid;place-items:center;color:#19cda0;font-size:9px;}
+.v4-risk-strip,.v4-info-strip{display:flex;align-items:center;gap:12px;margin-top:9px;padding:10px 13px;border:1px solid rgba(245,158,11,.27);border-radius:6px;background:rgba(245,158,11,.055);font-size:9px;color:#aebcc7;}
+.v4-risk-strip strong,.v4-info-strip strong{color:#f0bd51;white-space:nowrap;}
+.v4-markets{margin-top:9px;padding:0;overflow-x:auto;}
+.v4-markets .v4-card-title{padding:13px 13px 9px;margin:0;}
+.v4-market-row{display:grid;grid-template-columns:1.5fr .55fr .55fr .7fr 20px;align-items:center;gap:8px;min-width:560px;padding:10px 13px;border-top:1px solid #10293d;font-size:9px;color:#c4d0d8;}
+.v4-market-row.head{padding-top:7px;padding-bottom:7px;color:#72899b;font-size:8px;}
+.v4-market-row.selected{background:rgba(34,211,238,.075);box-shadow:inset 3px 0 var(--cyan);color:#e8f6fa;}
+.v4-market-row .blue{color:var(--cyan);font-weight:700;}
+.v4-market-row .good{color:#31d5a2;}.v4-market-row .bad{color:#ff6969;}
+.v4-advanced-top{grid-template-columns:1fr 1fr;}
+.v4-prob-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.v4-prob-item span{font-size:8px;color:#8195a5}.v4-prob-item strong{display:block;margin-top:6px;font-size:19px;color:#e8f0f6}.v4-prob-item:first-child strong{color:var(--cyan)}
+.v4-prob-bar{display:flex;height:5px;margin-top:10px;border-radius:6px;overflow:hidden;background:#122536}.v4-prob-bar i{display:block;height:100%}.v4-prob-bar i:first-child{background:var(--cyan)}.v4-prob-bar i:nth-child(2){background:#536878}.v4-prob-bar i:last-child{background:#90a0ac}
+.v4-xg-values{display:flex;align-items:end;justify-content:space-between}.v4-xg-team{font-size:8px;color:#8398a9}.v4-xg-team strong{display:block;margin-top:6px;font-size:18px;color:#f1f5f8}.v4-xg-team.right{text-align:right}.v4-xg-total{text-align:center;color:#6f8596;font-size:8px}.v4-xg-line{height:4px;background:#10283b;border-radius:5px;margin-top:11px;overflow:hidden}.v4-xg-line i{display:block;width:62%;height:100%;background:var(--cyan)}
+.v4-scores-card{margin-top:9px}.v4-score-list{display:grid;grid-template-columns:repeat(3,1fr)}.v4-score{text-align:center;border-right:1px solid #173047}.v4-score:last-child{border:0}.v4-score strong{display:block;font-size:15px}.v4-score span{display:block;color:#7990a2;font-size:8px;margin-top:5px}
+.v4-team-compare{margin-top:9px}.v4-stat-row{display:grid;grid-template-columns:42px 1fr 96px 1fr 42px;align-items:center;gap:9px;margin:8px 0;font-size:8px;color:#9eb0bd}.v4-stat-row strong{font-size:10px;color:#e6eef4}.v4-stat-row strong:last-child{text-align:right}.v4-stat-label{text-align:center;color:#c7d1d8}.v4-stat-bar{height:3px;background:#1a3041;border-radius:3px;overflow:hidden}.v4-stat-bar i{display:block;height:100%;background:var(--cyan)}.v4-stat-bar.away i{background:#91a5b3;margin-left:auto}
+.v4-patterns-card{margin-top:9px}.v4-patterns-card>.s{padding:0}.v4-patterns-card>.sep{display:none}.v4-patterns-card .stitle{font-family:'Inter',sans-serif;font-size:10px;font-weight:600;color:#e3edf5;letter-spacing:0;margin-bottom:12px}.v4-patterns-card .stitle:after{background:#153047}
+.v4-advanced-bottom{grid-template-columns:.9fr 1.15fr;margin-top:9px}.v4-agreement{display:flex;align-items:center;gap:17px}.v4-ring{width:70px;height:70px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(var(--cyan) 0 72%,#183246 72%);position:relative;font-size:17px;font-weight:700}.v4-ring:after{content:'';position:absolute;inset:7px;background:#091725;border-radius:50%}.v4-ring span{position:relative;z-index:1}.v4-agreement-copy{font-size:9px;line-height:1.6;color:#8ea2b1}.v4-sim-row{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid #112b3f;font-size:9px}.v4-sim-row:last-child{border:0}.v4-sim-row strong{color:var(--cyan)}
+.v4-players-top{grid-template-columns:1.35fr .85fr}.v4-lineup-columns{display:grid;grid-template-columns:1fr 1fr;gap:14px}.v4-lineup-team{display:flex;justify-content:space-between;font-size:9px;margin-bottom:10px}.v4-pitch{height:150px;border:1px solid #24445a;border-radius:5px;background:linear-gradient(rgba(5,30,43,.8),rgba(5,25,38,.85)),repeating-linear-gradient(0deg,transparent 0 29px,rgba(60,112,137,.13) 30px);position:relative}.v4-pitch:before{content:'';position:absolute;left:50%;top:0;bottom:0;width:1px;background:#24445a}.v4-pitch-empty{position:absolute;inset:0;display:grid;place-items:center;text-align:center;color:#6f8798;font-size:8px;padding:18px;line-height:1.5}
+.v4-absence-team{font-size:9px;color:var(--cyan);margin:11px 0 4px}.v4-absence{display:flex;justify-content:space-between;gap:8px;padding:8px 0;border-bottom:1px solid #122b3e;font-size:9px}.v4-absence span:last-child{color:#f5b94e}.v4-player-watch{margin-top:9px}.v4-player-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.v4-player{padding:11px;border:1px solid #17344a;border-radius:6px;background:#081522}.v4-player-name{font-size:10px;font-weight:700}.v4-player-role{font-size:8px;color:#7290a4;margin-top:3px}.v4-player-stat{display:flex;justify-content:space-between;font-size:8px;padding-top:8px;margin-top:8px;border-top:1px solid #142d40;color:#8ba0af}.v4-player-empty{color:#7f95a5;font-size:9px;line-height:1.6}.v4-scorer-card{margin-top:9px;display:flex;justify-content:space-between;align-items:center}.v4-scorer-copy strong{display:block;font-size:12px;margin-bottom:7px}.v4-scorer-copy span{font-size:9px;color:#8196a6}.v4-lock{width:40px;height:40px;border:1px solid #17435a;border-radius:50%;display:grid;place-items:center;color:var(--cyan);font-size:17px}
+.page-section-label,.summary-layout,.summary-reasons,.summary-markets,.summary-context-grid,.summary-faq,.advanced-intro,.advanced-grid,.players-intro,.players-grid{display:none!important;}
+@media(max-width:720px){.wrap{padding:0 8px;margin-top:8px}.hero{padding:13px 12px 9px}.team-logo,.team-logo-ph{width:42px;height:42px}.team{grid-template-columns:42px minmax(0,1fr);gap:8px}.team.away{grid-template-columns:minmax(0,1fr) 42px}.team-name{font-size:13px}.stade-status{display:none}.tab-panel{padding:8px}.v4-summary-top,.v4-advanced-top,.v4-advanced-bottom,.v4-players-top{grid-template-columns:1fr}.v4-why-items,.v4-player-grid{grid-template-columns:1fr}.v4-market-row{grid-template-columns:1.25fr .5fr .5fr .65fr 16px;padding-left:9px;padding-right:9px}.v4-stat-row{grid-template-columns:34px 1fr 70px 1fr 34px}.v4-lineup-columns{grid-template-columns:1fr}.v4-bet{font-size:22px}}
 </style>
 </head>
 <body>
@@ -646,7 +713,7 @@ api-sports-widget[data-theme="iashark"]{
     <span id="authHeaderSlot"><a class="btn-conn" href="/compte.html">CONNEXION</a></span>
   </div>
 </header>
-<div id="root"><div style="padding:24px 16px;font-family:'DM Sans',sans-serif;color:#94a3b8;font-size:13px;line-height:1.6"><h1 style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:.5px;color:#e2e8f0;margin-bottom:8px">Telstar vs Ajax</h1><p>Eredivisie — 2026-08-30</p><p>Analyse complète générée par le modèle statistique IASHARK.</p></div><div class="loading"><div class="spinner"></div><div class="loading-lbl">CHARGEMENT...</div></div></div>
+<div id="root"><div style="padding:24px 16px;font-family:'Inter',sans-serif;color:#94a3b8;font-size:13px"><h1>Telstar vs Ajax</h1></div><div class="loading"><div class="spinner"></div><div class="loading-lbl">CHARGEMENT...</div></div></div>
 <div style="max-width:1100px;margin:24px auto 0;padding:0 20px 20px;text-align:center;">
   <div style="font-family:'Space Mono',monospace;font-size:8px;color:rgba(74,101,128,0.5);line-height:2;letter-spacing:1px;">
     <div>⚠️ LE JEU PEUT ÊTRE DANGEREUX — JOUEZ RESPONSABLE · INTERDIT AUX MOINS DE 18 ANS</div>
@@ -1903,12 +1970,13 @@ function render(m){
     return '<div class="team '+side+'">'+logo+'<div class="team-name">'+name.toUpperCase()+'</div><div class="team-sub">'+(isTennis?(side==='home'?'JOUEUR 1':'JOUEUR 2'):(side==='home'?'DOMICILE':'EXTÉRIEUR'))+'</div></div>';
   }
   var teamsHtml='<div class="hero">'
+    +'<div class="league-v4"><span class="league-v4-mark">◈</span>'+esc(m.league||'MATCH')+'</div>'
     +'<div class="teams">'
     +teamDisplay(m.home,hn,'home',m.forme_h||m.form_p1,isTennis)
     +'<div class="vs-col"><span class="vs">VS</span>'+(heure?'<div class="vs-hr">'+heure+'</div>':'')+'</div>'
     +teamDisplay(m.away,an,'away',m.forme_a||m.form_p2,isTennis)
     +'</div>'
-    +stadeHtml
+    +stadeHtml.replace('</div>','<span class="stade-status"><i class="stade-status-dot"></i>Données à jour</span></div>')
     +'</div>'
     +'<div class="proba"><div class="pbar"><div class="pb1" style="width:'+(m.p1||0)+'%"></div><div class="pbn" style="width:'+(m.pn||0)+'%"></div><div class="pb2" style="width:'+(m.p2||0)+'%"></div></div>'
     +'<div class="plabels"><div class="pi"><div class="pi-pct" style="color:var(--cyan)">'+(m.p1||0)+'%</div><div class="pi-lbl">'+hn.slice(0,8).toUpperCase()+'</div></div>'+(m.pn?'<div class="pi"><div class="pi-pct" style="color:rgba(255,255,255,0.25)">'+(m.pn||0)+'%</div><div class="pi-lbl">NUL</div></div>':'')+'<div class="pi"><div class="pi-pct" style="color:rgba(255,255,255,0.35)">'+(m.p2||0)+'%</div><div class="pi-lbl">'+an.slice(0,8).toUpperCase()+'</div></div></div>'
@@ -2019,43 +2087,69 @@ function render(m){
     :'';
   var absentsHtml=!isTennis?buildAbsentsTable(m.injuries,m.home&&m.home.id,hn,an):'';
   var arbitreHtml=!isTennis?buildArbitre(m.arbitre):'';
-  // La page est organisée selon les trois questions réelles de l'utilisateur :
-  // comprendre rapidement, vérifier les calculs, puis étudier les joueurs.
-  // Les calculateurs et sources existants restent inchangés ; seule leur
-  // hiérarchie visuelle évolue.
-  var tabResume=
-    '<div class="summary-layout">'
-      +'<section class="summary-reading"><div class="page-section-label">LECTURE DU MATCH</div>'+ctxHtml+insightHtml+'</section>'
-      +'<aside class="summary-decision"><div class="page-section-label">DÉCISION IASHARK</div>'+parisHtml+skipHtml+'</aside>'
-    +'</div>'
-    +'<section class="summary-reasons">'+buildPourquoiCePari(m,pariRec,paricote)+'</section>'
-    +'<section class="summary-markets">'+(!isTennis?buildMarketsTable(m,pariRec):'')+'</section>'
-    +'<div class="summary-context-grid">'
-      +'<section>'+classementHtml+h2hCustomHtml+'</section>'
-      +'<section>'+absentsHtml+meteoHtml+'</section>'
-    +'</div>'
-    +'<section class="summary-faq">'+buildFAQ(m,hn,an,pariRec,paricote)+'</section>';
+  function v4Num(value){var n=parseFloat(value);return value!==null&&value!==''&&isFinite(n)?n:null;}
+  function v4Pct(value){var n=v4Num(value);return n===null?null:Math.max(0,Math.min(100,Math.round(n)));}
+  function v4Show(value,digits,suffix){var n=v4Num(value);return n===null?'—':n.toFixed(digits||0)+(suffix||'');}
+  function v4MarketRows(){
+    var rows=[
+      {name:pariRec||'Marché principal',prob:m.model_probability||m.po25||0,odds:paricote,verdict:'Favorable'},
+      {name:'BTTS — Oui',prob:m.btts_oui||m.btts||0,odds:m.cbtts||'—',verdict:'Neutre'},
+      {name:hn+' gagne',prob:m.p1||0,odds:m.c1||'—',verdict:'Neutre'},
+      {name:'Moins de 3,5 buts',prob:null,odds:m.cu35||'—',verdict:'Prudence'}
+    ];
+    return '<div class="v4-market-row head"><span>Marché</span><span>Probabilité</span><span>Cote</span><span>Verdict</span><span></span></div>'+rows.map(function(r,i){var rp=v4Pct(r.prob);return '<div class="v4-market-row'+(i===0?' selected':'')+'"><span>'+esc(r.name)+'</span><span class="'+(i===0?'blue':'')+'">'+(rp===null?'—':rp+' %')+'</span><span>'+esc(r.odds||'—')+'</span><span class="'+(i===0?'good':i===3?'bad':'')+'">'+r.verdict+'</span><span>'+(i===0?'●':'○')+'</span></div>';}).join('');
+  }
+  function v4Why(){
+    var sh=m.match_stats_home||{},sa=m.match_stats_away||{};
+    return [
+      v4Num(sh.shots_total)===null?'Volume de tirs domicile indisponible.':hn+' affiche '+v4Show(sh.shots_total,1)+' tirs de moyenne.',
+      v4Num(sa.xg)===null?'xG extérieur indisponible.':an+' produit '+v4Show(sa.xg,2)+' xG par match.',
+      'Accord du modèle : '+esc((m.reliability&&m.reliability.model_agreement)||m.model_agreement||'à confirmer')+'.'
+    ].map(function(txt){return '<div class="v4-why-item"><span class="v4-check">✓</span><span>'+esc(txt)+'</span></div>';}).join('');
+  }
+  function v4Reading(){
+    var sh=m.match_stats_home||{},sa=m.match_stats_away||{};
+    if(m.contexte)return '<p>'+esc(cleanJargon(m.contexte))+'</p>';
+    return '<p>'+esc(hn)+' arrive avec '+v4Show(sh.shots_total,1)+' tirs et '+v4Show(sh.xg,2)+' xG par match.</p><p>'+esc(an)+' présente '+v4Show(sa.shots_total,1)+' tirs et '+v4Show(sa.xg,2)+' xG. Le modèle compare uniquement les dynamiques réellement disponibles.</p>';
+  }
+  function v4StatsRows(){
+    var h=m.match_stats_home||{},a=m.match_stats_away||{};
+    var rows=[['Buts attendus',h.xg,a.xg,3],['Tirs cadrés',h.shots_on,a.shots_on,10],['Tirs',h.shots_total,a.shots_total,22],['Possession',h.possession,a.possession,100]];
+    return rows.map(function(r){var hv=v4Num(r[1]),av=v4Num(r[2]),hd=hv===null?'—':hv.toFixed(r[0]==='Possession'?0:2)+(r[0]==='Possession'?'%':''),ad=av===null?'—':av.toFixed(r[0]==='Possession'?0:2)+(r[0]==='Possession'?'%':'');return '<div class="v4-stat-row"><strong>'+hd+'</strong><span class="v4-stat-bar"><i style="width:'+(hv===null?0:Math.min(100,hv/r[3]*100))+'%"></i></span><span class="v4-stat-label">'+r[0]+'</span><span class="v4-stat-bar away"><i style="width:'+(av===null?0:Math.min(100,av/r[3]*100))+'%"></i></span><strong>'+ad+'</strong></div>';}).join('');
+  }
+  function v4Absences(){
+    var list=(m.injuries||[]).slice(0,8);if(!list.length)return '<div class="v4-player-empty">Aucune absence confirmée dans les données disponibles.</div>';
+    return list.map(function(p){return '<div class="v4-absence"><span>'+esc(p.name||'Joueur')+'</span><span>'+((p.status||'').toLowerCase()==='out'?'Absent':'Incertain')+'</span></div>';}).join('');
+  }
+  function v4Players(){
+    var list=[].concat(m.top_scorers_home||[],m.top_scorers_away||[]).slice(0,3);if(!list.length)return '<div class="v4-player-empty">Les données individuelles fiables ne sont pas encore disponibles pour cette rencontre.</div>';
+    return list.map(function(p){return '<div class="v4-player"><div class="v4-player-name">'+esc(p.name||p.player||'Joueur')+'</div><div class="v4-player-role">Joueur à suivre</div><div class="v4-player-stat"><span>Buts</span><strong>'+esc(p.goals||p.buts||'—')+'</strong></div><div class="v4-player-stat"><span>Matchs</span><strong>'+esc(p.matches||p.apps||'—')+'</strong></div></div>';}).join('');
+  }
 
-  var tabDonneesAvancees=
-    '<div class="advanced-intro"><div><div class="page-section-label">DONNÉES AVANCÉES</div><h2>Vérifier la lecture du modèle</h2></div><p>Probabilités, simulations et dynamiques du match. Ces données complètent la décision sans garantir le résultat.</p></div>'
-    +'<div class="advanced-grid">'
-      +'<section class="advanced-card">'+(!isTennis?buildDonut(hn,an,m.p1||0,m.pn||0,m.p2||0):'')+'</section>'
-      +'<section class="advanced-card">'+(!isTennis?buildScoresProbables(m.lambda_h,m.lambda_a,m.scores,m):'')+'</section>'
-      +'<section class="advanced-card advanced-wide">'+(!isTennis?'<div class="s"><div class="stitle">ANALYSE COMPARATIVE</div>'+buildCompTable(hn,an,m.crit_home,m.crit_away)+'</div><div class="sep"></div>':'')+'</section>'
-      +'<section class="advanced-card advanced-wide">'+(!isTennis?buildMatchStats(hn,an,m.match_stats_home,m.match_stats_away):'')+'</section>'
-      +'<section class="advanced-card advanced-wide advanced-patterns">'+(!isTennis?buildPatterns(hn,an,m.events_home,m.events_away):'')+'</section>'
-      +'<section class="advanced-card advanced-wide">'+buildScen(m)+'</section>'
-      +'<section class="advanced-card advanced-wide">'+buildWCModel(m)+(!isTennis&&!isWC?buildElo(hn,an,m.elo_home,m.elo_away,m.elo_signal):'')+(!isTennis?buildDropping(m.dropping_odds):'')+'</section>'
-      +'<section class="advanced-card advanced-wide">'+arbitreHtml+'</section>'
-    +'</div>';
+  var prob=v4Pct(m.model_probability),probLabel=prob===null?'—':prob+' %',cote=paricote||'—';
+  var riskText=(m.key_absences&&m.key_absences.length)?m.key_absences.join(', '):((m.injuries||[]).length+' absence(s) signalée(s) — les compositions peuvent encore évoluer.');
+  var tabResume='<div class="v4-grid v4-summary-top">'
+    +'<section class="v4-card v4-reading-card"><div class="v4-card-title"><span class="ico">▣</span>Lecture du match</div>'+v4Reading()+'</section>'
+    +'<section class="v4-card v4-decision-card"><div class="v4-decision-head"><span>↗ Décision IAshark</span><span class="v4-reliability">◆ Fiabilité '+esc((m.reliability&&m.reliability.label)||'à confirmer')+'</span></div><div class="v4-bet">'+esc(pariRec||'Pas de décision fiable')+'</div><div class="v4-decision-metrics"><div class="v4-metric"><strong>'+probLabel+'</strong><span>Probabilité estimée</span></div><div class="v4-divider"></div><div class="v4-metric cote"><strong>'+esc(cote)+'</strong><span>Cote observée</span></div></div><div class="v4-note">⚠ Les cotes peuvent évoluer jusqu’au coup d’envoi.</div></section>'
+    +'</div><section class="v4-card v4-why-card"><div class="v4-card-title"><span class="ico">♧</span>Pourquoi cette prédiction ?</div><div class="v4-why-items">'+v4Why()+'</div></section>'
+    +'<div class="v4-risk-strip"><strong>⚠ Risque principal</strong><span>'+esc(riskText)+'</span></div>'
+    +'<section class="v4-card v4-markets"><div class="v4-card-title"><span class="ico">⚖</span>Marchés comparés</div>'+v4MarketRows()+'</section>';
 
-  var tabJoueurs=
-    '<div class="players-intro"><div><div class="page-section-label">JOUEURS</div><h2>Les individualités qui peuvent changer le match</h2></div><p>Les marchés joueurs restent prudents tant que les compositions et les minutes attendues ne sont pas suffisamment fiables.</p></div>'
-    +'<div class="players-grid">'
-      +(isTennis
-        ?'<section class="players-card players-wide">'+buildSurface(hn,an,m.surf_stats_p1,m.surf_stats_p2,m.surface)+buildTennisH2H(hn,an,m.h2h_tennis)+buildTourRecord(hn,an,m.tour_record_p1,m.tour_record_p2)+'</section>'
-        :'<section class="players-card players-wide">'+absentsHtml+'</section><section class="players-card players-wide">'+buildPlayerEngineSection(m)+'</section><section class="players-card players-wide">'+buildPlayerStatCards(hn,an,m.top_scorers_home,m.top_scorers_away)+'</section>')
-    +'</div>';
+  var scores=(m.mc_scores||m.scores||[]).slice(0,3);
+  var scoreHtml=scores.length?scores.map(function(s){return '<div class="v4-score"><strong>'+esc(s.score||s.s||'—')+'</strong><span>'+v4Pct(s.pct||s.p||0)+' %</span></div>';}).join(''):'<div class="v4-player-empty">Scores non disponibles</div>';
+  var sh=m.match_stats_home||{},sa=m.match_stats_away||{};
+  var p1v=v4Pct(m.p1),pnv=v4Pct(m.pn),p2v=v4Pct(m.p2);
+  var tabDonneesAvancees='<div class="v4-grid v4-advanced-top"><section class="v4-card v4-prob-card"><div class="v4-card-title">Probabilités 1X2</div><div class="v4-prob-row"><div class="v4-prob-item"><span>'+esc(hn)+'</span><strong>'+(p1v===null?'—':p1v+' %')+'</strong></div><div class="v4-prob-item"><span>Match nul</span><strong>'+(pnv===null?'—':pnv+' %')+'</strong></div><div class="v4-prob-item"><span>'+esc(an)+'</span><strong>'+(p2v===null?'—':p2v+' %')+'</strong></div></div><div class="v4-prob-bar"><i style="width:'+(p1v||0)+'%"></i><i style="width:'+(pnv||0)+'%"></i><i style="width:'+(p2v||0)+'%"></i></div></section>'
+    +'<section class="v4-card v4-xg-card"><div class="v4-card-title">Buts attendus (xG)</div><div class="v4-xg-values"><div class="v4-xg-team"><span>'+esc(hn)+'</span><strong>'+v4Show(sh.xg,2)+'</strong></div><div class="v4-xg-total">xG total<br><strong>'+((v4Num(sh.xg)===null||v4Num(sa.xg)===null)?'—':(v4Num(sh.xg)+v4Num(sa.xg)).toFixed(2))+'</strong></div><div class="v4-xg-team right"><span>'+esc(an)+'</span><strong>'+v4Show(sa.xg,2)+'</strong></div></div><div class="v4-xg-line"><i></i></div></section></div>'
+    +'<section class="v4-card v4-scores-card"><div class="v4-card-title">Scores les plus probables</div><div class="v4-score-list">'+scoreHtml+'</div></section>'
+    +'<section class="v4-card v4-team-compare"><div class="v4-card-title">Comparaison des équipes (moyennes par match)</div>'+v4StatsRows()+'</section>'
+    +'<section class="v4-card v4-patterns-card">'+buildPatterns(hn,an,m.events_home,m.events_away)+'</section>'
+    +'<div class="v4-grid v4-advanced-bottom"><section class="v4-card"><div class="v4-card-title">Accord du modèle</div><div class="v4-agreement"><div class="v4-ring"><span>—</span></div><div class="v4-agreement-copy">'+esc((m.reliability&&m.reliability.model_agreement)||'Accord numérique non disponible')+'<br><span class="v4-reliability">◆ Fiabilité '+esc((m.reliability&&m.reliability.label)||'à confirmer')+'</span></div></div></section><section class="v4-card"><div class="v4-card-title">Simulations IA</div><div class="v4-sim-row"><span>'+esc(pariRec||'Marché principal')+'</span><strong>'+probLabel+'</strong></div><div class="v4-sim-row"><span>Plus de 2,5 buts</span><strong>'+(v4Pct(m.po25)===null?'—':v4Pct(m.po25)+' %')+'</strong></div><div class="v4-sim-row"><span>BTTS — Oui</span><strong>'+(v4Pct(m.btts_oui||m.btts)===null?'—':v4Pct(m.btts_oui||m.btts)+' %')+'</strong></div></section></div>'
+    +'<div class="v4-info-strip"><strong>ⓘ</strong><span>Les données avancées complètent l’analyse, mais ne garantissent pas le résultat.</span></div>';
+
+  var tabJoueurs=isTennis?'<section class="v4-card v4-player-watch">'+buildSurface(hn,an,m.surf_stats_p1,m.surf_stats_p2,m.surface)+buildTennisH2H(hn,an,m.h2h_tennis)+buildTourRecord(hn,an,m.tour_record_p1,m.tour_record_p2)+'</section>':'<div class="v4-grid v4-players-top"><section class="v4-card v4-lineups-card"><div class="v4-card-title"><span class="ico">◎</span>Compositions probables</div><div class="v4-lineup-columns"><div><div class="v4-lineup-team"><strong>'+esc(hn)+'</strong><span>À confirmer</span></div><div class="v4-pitch"><div class="v4-pitch-empty">Composition officielle non disponible</div></div></div><div><div class="v4-lineup-team"><strong>'+esc(an)+'</strong><span>À confirmer</span></div><div class="v4-pitch"><div class="v4-pitch-empty">Composition officielle non disponible</div></div></div></div></section><section class="v4-card v4-absences-card"><div class="v4-card-title">Absents / Incertains</div>'+v4Absences()+'</section></div>'
+    +'<section class="v4-card v4-player-watch"><div class="v4-card-title"><span class="ico">♙</span>Joueurs à suivre</div><div class="v4-player-grid">'+v4Players()+'</div></section>'
+    +'<section class="v4-card v4-scorer-card"><div class="v4-scorer-copy"><strong>Marché buteur</strong><span>Ce marché devient fiable après la confirmation des compositions.</span></div><div class="v4-lock">⌾</div></section><div class="v4-info-strip"><strong>⚠</strong><span>Les informations joueurs peuvent évoluer jusqu’au coup d’envoi.</span></div>';
 
   function trimSep(html){return (html||'').replace(/<div class="sep"><\/div>\s*$/,'');}
   tabResume=trimSep(tabResume);
@@ -2085,6 +2179,17 @@ function switchTab(btn,tabName){
   btn.classList.add('active');
   document.getElementById('tab-'+tabName).classList.add('active');
 }
+document.addEventListener('keydown',function(e){
+  if(!e.target.classList||!e.target.classList.contains('tab-btn'))return;
+  var tabs=Array.prototype.slice.call(document.querySelectorAll('.tab-btn'));
+  var current=tabs.indexOf(e.target),next=current;
+  if(e.key==='ArrowRight')next=(current+1)%tabs.length;
+  else if(e.key==='ArrowLeft')next=(current-1+tabs.length)%tabs.length;
+  else if(e.key==='Home')next=0;
+  else if(e.key==='End')next=tabs.length-1;
+  else return;
+  e.preventDefault();tabs[next].focus();tabs[next].click();
+});
 
 function switchAnalyseSub(btn,subName){
   document.querySelectorAll('.analyse-sub-btn').forEach(function(b){

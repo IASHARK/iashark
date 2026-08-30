@@ -235,7 +235,7 @@ var PAGES = [
       {find: '<div class="stitle">ABSENTS &amp; RETOURS</div>', build: function(d, l, esc){ return '<div class="stitle">' + esc(d.match_page.section_absences) + '</div>'; }},
       {find: '<div class="stitle">HEAD TO HEAD</div>', count: 2, build: function(d, l, esc){ return '<div class="stitle">' + esc(d.match_page.section_h2h) + '</div>'; }},
       {find: '<div class="stitle">INDICE DE FORCE</div>', build: function(d, l, esc){ return '<div class="stitle">' + esc(d.match_page.section_force_index) + '</div>'; }},
-      {find: '<div class="stitle">ARBITRE — \'+esc(arb.nom)+\'</div>', build: function(d, l, esc){ return '<div class="stitle">' + esc(d.match_page.section_referee_prefix) + '\'+esc(arb.nom)+\'</div>'; }},
+      {find: '<div class="stitle">ARBITRE & DISCIPLINE — \'+esc(arb.nom)+\'</div>', build: function(d, l, esc){ return '<div class="stitle">' + esc(d.match_page.section_referee_prefix) + '\'+esc(arb.nom)+\'</div>'; }},
       {find: '<div class="stitle">MODÈLE IA SHARK — CM 2026</div>', build: function(d, l, esc){ return '<div class="stitle">' + esc(d.match_page.section_wc_model) + '</div>'; }},
       {find: '<div class="stitle">SCÉNARIO ATTENDU</div>', build: function(d, l, esc){ return '<div class="stitle">' + esc(d.match_page.section_scenario) + '</div>'; }},
       {find: '<div class="stitle">JOUEURS À SUIVRE — CLASSEMENT</div>', build: function(d, l, esc){ return '<div class="stitle">' + esc(d.match_page.section_players) + '</div>'; }},

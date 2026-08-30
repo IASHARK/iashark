@@ -555,6 +555,26 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 .advanced-patterns{border-color:rgba(34,211,238,.18);}
 .advanced-patterns .stitle{color:var(--cyan);}
 .advanced-patterns .curve-wrap{border:1px solid var(--border);border-radius:12px;padding:14px;background:rgba(255,255,255,.015);}
+.advanced-context{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.advanced-context .advanced-card{height:100%;}
+.condition-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;}
+.condition-item{border:1px solid var(--border);border-radius:11px;background:rgba(255,255,255,.018);padding:13px;min-width:0;}
+.condition-label{font-family:'Space Mono',monospace;font-size:7px;letter-spacing:1px;color:var(--muted);margin-bottom:6px;}
+.condition-value{font-size:13px;line-height:1.35;color:var(--text);overflow-wrap:anywhere;}
+.condition-empty{color:#71879b;font-size:12px;line-height:1.6;}
+.momentum-legend{display:flex;justify-content:space-between;gap:12px;margin-bottom:15px;font-family:'Space Mono',monospace;font-size:7px;color:var(--muted);}
+.momentum-bars{display:grid;grid-template-columns:repeat(6,1fr);gap:9px;align-items:end;min-height:142px;padding:10px 6px 0;border-bottom:1px solid var(--border);}
+.momentum-slot{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:132px;min-width:0;}
+.momentum-value{font-family:'Space Mono',monospace;font-size:7px;color:#8297aa;margin-bottom:5px;}
+.momentum-track{width:min(34px,78%);height:92px;background:rgba(255,255,255,.035);border-radius:7px 7px 2px 2px;display:flex;align-items:flex-end;overflow:hidden;}
+.momentum-fill{width:100%;min-height:5px;border-radius:7px 7px 2px 2px;background:linear-gradient(180deg,var(--cyan),rgba(6,182,212,.35));}
+.momentum-slot.hot .momentum-fill{background:linear-gradient(180deg,var(--amber),rgba(245,158,11,.35));}
+.momentum-time{font-family:'Space Mono',monospace;font-size:7px;color:var(--muted);margin-top:8px;white-space:nowrap;}
+.momentum-note{font-size:11px;color:#8297aa;line-height:1.6;margin-top:13px;}
+.advanced-faq{grid-column:1/-1;}
+.advanced-faq>.s{padding:0;display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.advanced-faq>.s.pt{padding-top:0;}
+.advanced-faq>.s>div{margin:0!important;height:100%;}
 .players-intro{padding-bottom:22px;}
 .players-card .abs-table{font-size:12px;}
 .players-card .abs-table td{padding:13px 8px;}
@@ -587,6 +607,8 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
   .advanced-intro h2,.players-intro h2{font-size:22px;}
   .advanced-intro p,.players-intro p{text-align:left;margin-top:10px;}
   .advanced-card,.players-card{grid-column:1;padding:18px;}
+  .advanced-context{grid-template-columns:1fr;}
+  .advanced-faq>.s{grid-template-columns:1fr;}
   .advanced-patterns .curve-wrap{padding:10px;}
 }
 .tab-btn:focus-visible{outline:2px solid var(--cyan);outline-offset:-3px;}
@@ -597,6 +619,9 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
   .summary-markets{overflow-x:auto;}
   .summary-markets .mkt-table{min-width:520px;}
   .advanced-card .donut-row{gap:18px;}
+  .condition-grid{grid-template-columns:1fr;}
+  .momentum-bars{gap:4px;padding-left:0;padding-right:0;}
+  .momentum-time{font-size:6px;}
 }
 </style>
 </head>
@@ -1274,14 +1299,65 @@ function buildDropping(drops){
 }
 
 function buildArbitre(arb){
-  if(!arb)return '';
+  if(!arb||!arb.nom){
+    return '<div class="s"><div class="stitle">ARBITRE & DISCIPLINE</div>'
+      +'<div class="condition-empty">Arbitre non encore désigné ou données disciplinaires indisponibles. Cette section sera actualisée dès confirmation officielle.</div>'
+      +'</div><div class="sep"></div>';
+  }
   var cartonColor=parseFloat(arb.cartons)>=5?'var(--red)':parseFloat(arb.cartons)>=4?'var(--amber)':'var(--green)';
-  return '<div class="s"><div class="stitle">ÁRBITRO — '+esc(arb.nom)+'</div>'
+  return '<div class="s"><div class="stitle">ÁRBITRO E DISCIPLINA — '+esc(arb.nom)+'</div>'
     +'<div class="arb-block">'
     +'<div class="arb-stat"><div class="arb-n" style="color:'+cartonColor+'">'+arb.cartons+'</div><div class="arb-l">CARTÕES/JOGO</div></div>'
     +'<div class="arb-stat"><div class="arb-n">'+arb.penaltys+'</div><div class="arb-l">PÊNALTIS/JOGO</div></div>'
     +'<div class="arb-stat"><div class="arb-n" style="color:var(--muted)">'+arb.matchs+'</div><div class="arb-l">MATCHS ANALYSÉS</div></div>'
     +'</div></div><div class="sep"></div>';
+}
+
+function buildMatchConditions(m){
+  var stade=m.stade||{};
+  var conditions=[];
+  function add(label,value){
+    if(value!==undefined&&value!==null&&String(value).trim()!=='')conditions.push({label:label,value:String(value)});
+  }
+  add('STADE',stade.nom);
+  add('MÉTÉO',stade.desc||stade.meteo);
+  add('TEMPÉRATURE',stade.temp);
+  add('PELOUSE',stade.pitch||stade.pelouse||stade.surface);
+  add('VENT',stade.wind||stade.vent);
+  add('VILLE',stade.city||stade.ville);
+
+  var content=conditions.length
+    ?'<div class="condition-grid">'+conditions.map(function(item){
+      return '<div class="condition-item"><div class="condition-label">'+esc(item.label)+'</div><div class="condition-value">'+esc(item.value)+'</div></div>';
+    }).join('')+'</div>'
+    :'<div class="condition-empty">Conditions non encore disponibles pour cette rencontre. Aucune valeur de remplacement n’est inventée.</div>';
+  return '<div class="s"><div class="stitle">CONDITIONS DU MATCH</div>'+content+'</div><div class="sep"></div>';
+}
+
+function buildMomentum(hn,an,evH,evA){
+  var scoredH=(evH&&evH.slots)||[];
+  var scoredA=(evA&&evA.slots)||[];
+  var concededH=(evH&&evH.slots_against)||[];
+  var concededA=(evA&&evA.slots_against)||[];
+  if(!scoredH.length&&!scoredA.length&&!concededH.length&&!concededA.length)return '';
+
+  var labels=["0-15'","15-30'","30-45'","45-60'","60-75'","75-90'"];
+  var values=labels.map(function(_,i){
+    var attack=((scoredH[i]&&scoredH[i].n)||0)+((scoredA[i]&&scoredA[i].n)||0);
+    var vulnerability=((concededH[i]&&concededH[i].n)||0)+((concededA[i]&&concededA[i].n)||0);
+    return attack+vulnerability;
+  });
+  var max=Math.max.apply(null,values.concat([1]));
+  var peak=values.indexOf(max);
+  var bars=values.map(function(value,i){
+    var height=Math.max(8,Math.round(value/max*100));
+    return '<div class="momentum-slot'+(i===peak?' hot':'')+'"><div class="momentum-value">'+value+'</div><div class="momentum-track"><div class="momentum-fill" style="height:'+height+'%"></div></div><div class="momentum-time">'+labels[i]+'</div></div>';
+  }).join('');
+  return '<div class="s"><div class="stitle">MOMENTUM HISTORIQUE PAR PÉRIODE</div>'
+    +'<div class="momentum-legend"><span>'+esc(hn)+' + '+esc(an)+'</span><span>activité buts marqués/encaissés</span></div>'
+    +'<div class="momentum-bars">'+bars+'</div>'
+    +'<div class="momentum-note">Ce graphique compare l’intensité offensive et défensive historique par tranche de 15 minutes. Il ne représente pas un momentum en direct.</div>'
+    +'</div><div class="sep"></div>';
 }
 
 function buildWCModel(m){
@@ -1966,14 +2042,19 @@ function render(m){
   var tabDonneesAvancees=
     '<div class="advanced-intro"><div><div class="page-section-label">DADOS AVANÇADOS</div><h2>Verificar a leitura do modelo</h2></div><p>Probabilidades, simulações e dinâmicas do jogo. Estes dados complementam a decisão sem garantir o resultado.</p></div>'
     +'<div class="advanced-grid">'
+      +'<div class="advanced-context">'
+        +'<section class="advanced-card">'+(!isTennis?buildMatchConditions(m):'')+'</section>'
+        +'<section class="advanced-card">'+arbitreHtml+'</section>'
+      +'</div>'
       +'<section class="advanced-card">'+(!isTennis?buildDonut(hn,an,m.p1||0,m.pn||0,m.p2||0):'')+'</section>'
       +'<section class="advanced-card">'+(!isTennis?buildScoresProbables(m.lambda_h,m.lambda_a,m.scores,m):'')+'</section>'
       +'<section class="advanced-card advanced-wide">'+(!isTennis?'<div class="s"><div class="stitle">ANÁLISE COMPARATIVA</div>'+buildCompTable(hn,an,m.crit_home,m.crit_away)+'</div><div class="sep"></div>':'')+'</section>'
       +'<section class="advanced-card advanced-wide">'+(!isTennis?buildMatchStats(hn,an,m.match_stats_home,m.match_stats_away):'')+'</section>'
       +'<section class="advanced-card advanced-wide advanced-patterns">'+(!isTennis?buildPatterns(hn,an,m.events_home,m.events_away):'')+'</section>'
+      +'<section class="advanced-card advanced-wide">'+(!isTennis?buildMomentum(hn,an,m.events_home,m.events_away):'')+'</section>'
       +'<section class="advanced-card advanced-wide">'+buildScen(m)+'</section>'
       +'<section class="advanced-card advanced-wide">'+buildWCModel(m)+(!isTennis&&!isWC?buildElo(hn,an,m.elo_home,m.elo_away,m.elo_signal):'')+(!isTennis?buildDropping(m.dropping_odds):'')+'</section>'
-      +'<section class="advanced-card advanced-wide">'+arbitreHtml+'</section>'
+      +'<section class="advanced-card advanced-faq"><div class="stitle">QUESTIONS CLÉS SUR CE MATCH</div>'+buildFAQ(m,hn,an,pariRec,paricote)+'</section>'
     +'</div>';
 
   var tabJoueurs=

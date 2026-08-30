@@ -312,7 +312,7 @@ var PAGES = [
     },
     replacements: [
       {find: '<a class="hdr-back" href="javascript:history.back()">← RETOUR</a>', build: function(d){ return '<a class="hdr-back" href="javascript:history.back()">' + d.match_page.back + '</a>'; }},
-      {find: '<span id="authHeaderSlot"><a class="btn-conn" href="/compte.html">CONNEXION</a></span>', build: function(d){ return '<span id="authHeaderSlot"><a class="btn-conn" href="/compte.html">' + d.cta.login + '</a></span>'; }},
+      {find: '<span id="authHeaderSlot"><a class="btn-login" href="/compte.html">CONNEXION</a></span>', build: function(d){ return '<span id="authHeaderSlot"><a class="btn-login" href="/compte.html">' + d.cta.login + '</a></span>'; }},
       {find: '<div class="loading-lbl">CHARGEMENT...</div>', build: function(d){ return '<div class="loading-lbl">' + d.common.loading + '</div>'; }},
       {find:
         '    <div>⚠️ LE JEU PEUT ÊTRE DANGEREUX — JOUEZ RESPONSABLE · INTERDIT AUX MOINS DE 18 ANS</div>\n' +
@@ -323,7 +323,6 @@ var PAGES = [
           '    <div>' + f.disclaimer_help_label + ' <a href="https://www.joueurs-info-service.fr" style="color:rgba(34,211,238,0.4);text-decoration:none;">' + f.disclaimer_help_site + '</a> · ' + f.disclaimer_help_phone + '</div>';
       }},
       {find: '<div class="nav-lbl">ACCUEIL</div>', build: function(d){ return '<div class="nav-lbl">' + d.nav.home + '</div>'; }},
-      {find: '<div class="nav-lbl">MARCHÉS</div>', build: function(d){ return '<div class="nav-lbl">' + d.nav.markets + '</div>'; }},
       {find: '<div class="nav-lbl">OUTILS</div>', build: function(d){ return '<div class="nav-lbl">' + d.nav.tools + '</div>'; }},
       {find: '<div class="nav-lbl">GUIDES</div>', build: function(d){ return '<div class="nav-lbl">' + d.nav.guides + '</div>'; }},
       {find: '<div class="nav-lbl">COMPTE</div>', build: function(d){ return '<div class="nav-lbl">' + d.nav.account + '</div>'; }},
@@ -349,7 +348,7 @@ var PAGES = [
       {find: '<div class="stitle">ABSENTS &amp; RETOURS</div>', build: function(d, l, esc){ return '<div class="stitle">' + esc(d.match_page.section_absences) + '</div>'; }},
       {find: '<div class="stitle">HEAD TO HEAD</div>', count: 2, build: function(d, l, esc){ return '<div class="stitle">' + esc(d.match_page.section_h2h) + '</div>'; }},
       {find: '<div class="stitle">INDICE DE FORCE</div>', build: function(d, l, esc){ return '<div class="stitle">' + esc(d.match_page.section_force_index) + '</div>'; }},
-      {find: '<div class="stitle">ARBITRE — \'+esc(arb.nom)+\'</div>', build: function(d, l, esc){ return '<div class="stitle">' + esc(d.match_page.section_referee_prefix) + '\'+esc(arb.nom)+\'</div>'; }},
+      {find: '<div class="stitle">ARBITRE & DISCIPLINE — \'+esc(arb.nom)+\'</div>', build: function(d, l, esc){ return '<div class="stitle">' + esc(d.match_page.section_referee_prefix) + '\'+esc(arb.nom)+\'</div>'; }},
       {find: '<div class="stitle">MODÈLE IA SHARK — CM 2026</div>', build: function(d, l, esc){ return '<div class="stitle">' + esc(d.match_page.section_wc_model) + '</div>'; }},
       {find: '<div class="stitle">SCÉNARIO ATTENDU</div>', build: function(d, l, esc){ return '<div class="stitle">' + esc(d.match_page.section_scenario) + '</div>'; }},
       {find: '<div class="stitle">JOUEURS À SUIVRE — CLASSEMENT</div>', build: function(d, l, esc){ return '<div class="stitle">' + esc(d.match_page.section_players) + '</div>'; }},
@@ -386,14 +385,6 @@ var PAGES = [
       {find: "<div class=\"ir-lbl sig\">SIGNAL DÉCISIF</div>", build: function(d, l, esc){ return "<div class=\"ir-lbl sig\">" + esc(d.match_page.signal_decisif) + "</div>"; }},
       {find: "<div class=\"ir-lbl\" style=\"color:var(--red)\">PASSE TON TOUR</div><div class=\"ir-txt\">'+(m.no_signal_label||'Signaux contradictoires. Ne pas jouer.')+'</div>",
        build: function(d, l, esc){ return "<div class=\"ir-lbl\" style=\"color:var(--red)\">" + esc(d.match_page.passe_ton_tour) + "</div><div class=\"ir-txt\">'+(m.no_signal_label||'" + esc(d.match_page.no_signal_fallback) + "')+'</div>"; }},
-      {find: '<span class="pw-top-lbl">CONTENU PRO</span>', build: function(d, l, esc){ return '<span class="pw-top-lbl">' + esc(d.match_page.content_pro_badge) + '</span>'; }},
-      {find: "<div class=\"pw-title\">Accès <span>complet</span></div>", build: function(d, l, esc){ return "<div class=\"pw-title\">" + esc(d.match_page.paywall_title_pre) + "<span>" + esc(d.match_page.paywall_title_hl) + "</span></div>"; }},
-      {find: "<div class=\"pw-sub\">Analyses avancées, avantage statistique calculé, mise conseillée, alertes en temps réel.</div>", build: function(d, l, esc){ return "<div class=\"pw-sub\">" + esc(d.match_page.paywall_sub) + "</div>"; }},
-      {find: '<div class="pw-feat-name">AVANTAGE + MISE CONSEILLÉE</div><div class="pw-feat-desc">Avantage statistique par marché</div></div></div><span class="pw-badge c1">PRO</span></div>',
-       build: function(d, l, esc){ var m = d.match_page; return '<div class="pw-feat-name">' + esc(m.paywall_feat1_name) + '</div><div class="pw-feat-desc">' + esc(m.paywall_feat1_desc) + '</div></div></div><span class="pw-badge c1">' + esc(m.paywall_pro_badge) + '</span></div>'; }},
-      {find: '<div class="pw-feat-name">ALERTES DROPPING ODDS</div><div class="pw-feat-desc">Mouvements de cotes en temps réel</div></div></div><span class="pw-badge c1">PRO</span></div>',
-       build: function(d, l, esc){ var m = d.match_page; return '<div class="pw-feat-name">' + esc(m.paywall_feat2_name) + '</div><div class="pw-feat-desc">' + esc(m.paywall_feat2_desc) + '</div></div></div><span class="pw-badge c1">' + esc(m.paywall_pro_badge) + '</span></div>'; }},
-      {find: "<a class=\"pw-cta\" href=\"/compte.html\">PASSER PRO — 19.95€/MOIS</a>", build: function(d, l, esc){ return "<a class=\"pw-cta\" href=\"/compte.html\">" + esc(d.match_page.paywall_cta) + "</a>"; }},
       {find: "<div class=\"arb-l\">CARTONS/MATCH</div>", build: function(d, l, esc){ return "<div class=\"arb-l\">" + esc(d.match_page.arb_cards_per_match) + "</div>"; }},
       {find: "<div class=\"arb-l\">PÉNALTYS/MATCH</div>", build: function(d, l, esc){ return "<div class=\"arb-l\">" + esc(d.match_page.arb_penalties_per_match) + "</div>"; }},
       {find: "num:String(blocs.length+1), titre:'Le pari recommandé',\n    txt:'Le modèle statistique estime <strong>'+esc(marketFr)+'</strong> à <strong>'+modelProbTxt+'%</strong> de probabilité, à la cote de <strong>'+esc(paricote)+'</strong>'+(reliabilityTxt?' (fiabilité : <strong>'+esc(reliabilityTxt.toUpperCase())+'</strong>, mesurée par l\\'accord des modèles et la qualité des données disponibles — pas par la probabilité elle-même)':'')+'.'",

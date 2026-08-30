@@ -24,15 +24,39 @@ test("le scénario par tranches de 15 minutes reste dans les données avancées"
   assert.match(advancedSource, /buildPatterns\(/);
 });
 
-test("le résumé garde la décision, la lecture, les risques et les marchés comparés", () => {
+test("les données avancées commencent par le contexte utile et se terminent par la FAQ", () => {
+  const advancedStart = matchPage.indexOf("var tabDonneesAvancees=");
+  const playersStart = matchPage.indexOf("var tabJoueurs=");
+  const advancedSource = matchPage.slice(advancedStart, playersStart);
+  const conditions = advancedSource.indexOf("buildMatchConditions(");
+  const referee = advancedSource.indexOf("arbitreHtml");
+  const probabilities = advancedSource.indexOf("buildDonut(");
+  const faq = advancedSource.lastIndexOf("buildFAQ(");
+
+  assert.ok(conditions > -1, "les conditions du match doivent être affichées");
+  assert.ok(referee > conditions, "l’arbitre doit suivre les conditions");
+  assert.ok(probabilities > referee, "les données existantes doivent rester après le contexte");
+  assert.ok(faq > probabilities, "la FAQ doit fermer l’onglet avancé");
+});
+
+test("le momentum avancé est calculé depuis les événements disponibles", () => {
+  assert.match(matchPage, /function buildMomentum\(/);
+  assert.match(matchPage, /events_home/);
+  assert.match(matchPage, /events_away/);
+  const advancedStart = matchPage.indexOf("var tabDonneesAvancees=");
+  const playersStart = matchPage.indexOf("var tabJoueurs=");
+  assert.match(matchPage.slice(advancedStart, playersStart), /buildMomentum\(/);
+});
+
+test("le résumé garde la décision, le contexte, les risques et les marchés comparés", () => {
   const summaryStart = matchPage.indexOf("var tabResume=");
   const advancedStart = matchPage.indexOf("var tabDonneesAvancees=");
   assert.ok(summaryStart > -1 && advancedStart > summaryStart);
   const summarySource = matchPage.slice(summaryStart, advancedStart);
-  assert.match(summarySource, /v4-reading-card/);
-  assert.match(summarySource, /v4-decision-card/);
-  assert.match(summarySource, /v4-risk-strip/);
-  assert.match(summarySource, /v4MarketRows\(/);
+  assert.match(summarySource, /parisHtml/);
+  assert.match(summarySource, /ctxHtml/);
+  assert.match(summarySource, /insightHtml/);
+  assert.match(summarySource, /buildMarketsTable\(/);
 });
 
 test("les onglets exposent leur état et leur panneau aux technologies d’assistance", () => {
@@ -51,27 +75,4 @@ test("les cartes avancées vides sont masquées et le tennis conserve un espace 
   assert.match(playersSource, /buildSurface\(/);
   assert.match(playersSource, /buildTennisH2H\(/);
   assert.match(playersSource, /buildTourRecord\(/);
-});
-
-test("la page suit le contrat visuel compact de la maquette validée", () => {
-  assert.match(matchPage, /MATCH V4 — reproduction stricte de la maquette/);
-  assert.match(matchPage, /font-family:'Inter'/);
-  assert.match(matchPage, /class="[^"]*v4-reading-card/);
-  assert.match(matchPage, /class="[^"]*v4-decision-card/);
-  assert.match(matchPage, /class="[^"]*v4-why-card/);
-  assert.match(matchPage, /class="v4-risk-strip"/);
-  assert.match(matchPage, /class="[^"]*v4-prob-card/);
-  assert.match(matchPage, /class="[^"]*v4-xg-card/);
-  assert.match(matchPage, /class="[^"]*v4-team-compare/);
-  assert.match(matchPage, /class="[^"]*v4-lineups-card/);
-  assert.match(matchPage, /class="[^"]*v4-absences-card/);
-  assert.match(matchPage, /class="[^"]*v4-player-watch/);
-});
-
-test("le bandeau reprend la disposition de la maquette avec le vrai logo de ligue", () => {
-  assert.match(matchPage, /media\.api-sports\.io\/football\/leagues\//);
-  assert.match(matchPage, /class="league-v4-logo"/);
-  assert.match(matchPage, /class="match-meta-v4"/);
-  assert.match(matchPage, /\.team\{display:grid!important/);
-  assert.match(matchPage, /\.team\.away \.team-name\{color:var\(--text\)/);
 });

@@ -2203,6 +2203,17 @@ jobs:
               // "le moteur doit fonctionner a 100% sans lui").
               var pickedMarket=pickMarketDeterministic(allMarkets,{minOdds:1.50});
               var eligibleMarkets=allMarkets.filter(function(m){return parseFloat(m.cote)>=1.50;});
+              // Vue comparative publique : uniquement des marchés réellement modélisés
+              // ET cotés. Aucun chiffre de secours n'est fabriqué pour remplir la carte.
+              var marketsCompared=allMarkets.slice().sort(function(a,b){return b.prob-a.prob;}).slice(0,4).map(function(m){
+                return {
+                  id:m.id,
+                  market:m.market,
+                  probability:Math.round(m.prob*10)/10,
+                  consensus:Number.isFinite(Number(m.marketProb))?Math.round(Number(m.marketProb)*10)/10:null,
+                  edge:Number.isFinite(Number(m.marketProb))?Math.round((m.prob-Number(m.marketProb))*10)/10:null
+                };
+              });
               var noSignalReason=!modelDataAvailable?'INSUFFICIENT_MODEL_DATA':(!supportedQuoteCount?'NO_REAL_ODDS':(!allMarkets.length?'NO_RELIABLE_MODEL_FOR_QUOTED_MARKETS':(!eligibleMarkets.length?'NO_ODDS_AT_OR_ABOVE_1_50':null)));
               console.log('  [SELECTION] modeles='+allMarketCandidates.filter(function(m){return Number.isFinite(Number(m.prob));}).length+' cotes_supportees='+supportedQuoteCount+' modeles_et_cotes='+allMarkets.length+' eligibles_1.50='+eligibleMarkets.length+' top='+eligibleMarkets.slice().sort(function(a,b){return b.prob-a.prob;}).slice(0,3).map(function(m){return m.id+':'+m.prob.toFixed(1)+'%@'+m.cote;}).join(', ')+(noSignalReason?' raison='+noSignalReason:''));
               var riskLabelCode=pickedMarket?computeRiskLabel(pickedMarket.cote):'MODERE';
@@ -2413,6 +2424,7 @@ jobs:
                 cbtts:odds.btts_oui,cbtts_non:odds.btts_non,btts_oui:odds.btts_oui,btts_non:odds.btts_non,
                 marche:pickedMarket?categorizeMarket(pickedMarket.market):'RESULTAT',market_id:pickedMarket?pickedMarket.id:null,
                 risque:riskLabelCode,pari_rec:pickedMarket?pickedMarket.market:'',
+                markets_compared:marketsCompared,
                 cote_rec:pickedMarket?String(pickedMarket.cote):'',
                 no_signal:noSignal,
                 no_signal_label:noSignal?'Aucun signal clair sur ce match':'',
@@ -2422,6 +2434,8 @@ jobs:
                 analyse_card:an?(an.analyse_card||an.conseil||''):'',
                 conseil_public:an?(an.conseil||an.analyse_card||''):'',
                 contexte:an?(an.contexte||''):'',
+                decision_factors:([pickedMarket&&pickedMarket.why].concat(keyAbsenceAlerts||[])).filter(Boolean).slice(0,3),
+                risk_principal:(keyAbsenceAlerts&&keyAbsenceAlerts.length)?keyAbsenceAlerts[0]:null,
                 vbet:(!noSignal&&kellyVal!=='0')?'OUI':'NON',
                 scores:an&&an.score_central?[an.score_central]:[],
                 mc_scores:pureProbs.montecarlo?pureProbs.montecarlo.top_scores:[],
@@ -2433,6 +2447,7 @@ jobs:
                 form_home:last10H.slice(0,5),form_away:last10A.slice(0,5),
                 forme_h:(sH&&sH.form)||'',forme_a:(sA&&sA.form)||'',
                 h2h:h2hFormatted,injuries,
+                lineups:lineups?{home:lineups.home||null,away:lineups.away||null}:null,
                 fatigue:{home:{val:fatigueH.val,info:fatigueH.info},away:{val:fatigueA.val,info:fatigueA.info}},
                 fatigue_home:{val:fatigueH.val,info:fatigueH.info},fatigue_away:{val:fatigueA.val,info:fatigueA.info},
                 tendances,classement:classementObj,actu:(nH||[]).concat(nA||[]),

@@ -57,6 +57,33 @@ test('les données fiables alimentent les cartes avancées', () => {
   assert.equal(vm.comparison.rows.length, 5);
 });
 
+test('les probabilités sont normalisées pour éviter tout débordement visuel', () => {
+  const vm = buildMatchViewModel(base({ model_output_available: true, data_quality_score: 70, p1: 48.601830397586355, pn: 26.707811362118562, p2: 24.690358240295097 }));
+  assert.deepEqual(vm.model.probabilities, { home: 48.6, draw: 26.7, away: 24.7 });
+});
+
+test('la lecture utilise les textes réels disponibles et expose les marchés comparés', () => {
+  const vm = buildMatchViewModel(base({
+    model_output_available: true, data_quality_score: 70,
+    analyse_card: 'Lecture détaillée du match.', facteur_x: 'Signal statistique principal.',
+    markets_compared: [{ id:'btts-yes', market:'BTTS Oui', probability:61.2, consensus:55.1, edge:6.1 }]
+  }));
+  assert.equal(vm.editorial.reading, 'Lecture détaillée du match.');
+  assert.equal(vm.editorial.decisiveFactor, 'Signal statistique principal.');
+  assert.deepEqual(vm.model.marketsCompared, [{ id:'btts-yes', market:'BTTS Oui', probability:61.2, consensus:55.1, edge:6.1 }]);
+});
+
+test('les champs arbitre du pipeline sont normalisés pour la maquette', () => {
+  const vm = buildMatchViewModel(base({ arbitre:{ nom:'A. Ref', cartons:'4.2', penaltys:'0.3', matchs:18 } }));
+  assert.deepEqual(vm.referee, { name:'A. Ref', cardsPerMatch:4.2, penaltiesPerMatch:0.3, matches:18 });
+});
+
+test('les projections premium utilisent le schéma réel du Player Engine', () => {
+  const raw=base({ player_markets:[{player_name:'Joueur Test',market:'ANYTIME_GOALSCORER',lineup_status:'confirmed_starter',expected_minutes:84,data_quality:'high',output:{probability:.426}}] });
+  const vm=buildMatchViewModel(raw);
+  assert.deepEqual(vm.players.projections,[{player:'Joueur Test',market:'Buteur',status:'Titulaire confirmé',minutes:84,probability:42.6,quality:'Élevée'}]);
+});
+
 test('les patterns exigent une provenance et cinq matchs par équipe', () => {
   const sparse = { source: 'api-sports-fixture-events', games: 1, slots: Array(6).fill({ n: 0 }), slots_against: Array(6).fill({ n: 0 }) };
   const vm = buildMatchViewModel(base({ events_home: sparse, events_away: sparse }));

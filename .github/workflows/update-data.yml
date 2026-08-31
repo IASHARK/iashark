@@ -38,6 +38,7 @@ jobs:
           const { parseOdds } = require('./lib/odds.js');
           const { pickMarketDeterministic, computeRiskLabel, computeModelAgreement, computeDataQualityScore, computeReliability } = require('./lib/decision.js');
           const { buildPlayerMarketOutput, MIN_APPEARANCES_FOR_RATE } = require('./lib/markets/player-engine.js');
+          const { buildPoissonMatrix, buildDixonColesMatrix, blendMatrices, deriveMarketsFromMatrix } = require('./lib/markets/score-matrix.js');
           const I18N_LOCALES = require('./i18n/locales.json');
           const I18N_PAGES = require('./scripts/i18n-manifest.js');
           const { generateLocalizedSitemaps } = require('./scripts/i18n-sitemaps.js');
@@ -2122,6 +2123,22 @@ jobs:
               var fairOU=fairPairProbs(odds.co25,odds.cu25);
               var fairBTTS=fairPairProbs(odds.btts_oui,odds.btts_non);
 
+              // Marches derives de la matrice de scores (clean sheet, gagne sans
+              // encaisser, totaux par equipe, marches combines resultat+total/BTTS) -
+              // lib/markets/score-matrix.js, deja teste (22 tests), jusqu'ici jamais
+              // branche dans ce pipeline. Meme lambdas que pureProbs (jamais influences
+              // par une cote), mais blend Poisson/Dixon-Coles UNIQUEMENT (pas de
+              // Monte-Carlo/Elo dans une matrice de cellules) - poids relatifs 35/40
+              // de calcFinalProbs renormalises a 1 (0.4667/0.5333), approximation
+              // honnetement documentee plutot que fabriquee comme rigoureusement
+              // identique a pureProbs (meme principe que le pont attack/defense du
+              // Player Engine plus haut).
+              var matrixBlend=blendMatrices([
+                {matrix:buildPoissonMatrix(lambdas.lambdaH,lambdas.lambdaA,10), weight:0.4667},
+                {matrix:buildDixonColesMatrix(lambdas.lambdaH,lambdas.lambdaA,10), weight:0.5333},
+              ]);
+              var matrixMarkets=matrixBlend?deriveMarketsFromMatrix(matrixBlend):null;
+
               // MARKET_AWARE_PROBABILITY : modele SEPARE et FACULTATIF qui utilise le
               // marche comme feature (S10.2 : "son but est la meilleure estimation
               // probabiliste absolue possible, PAS la detection d'un ecart de
@@ -2149,7 +2166,53 @@ jobs:
                 {market:'DC X2',     cote:odds.dc2x,      prob:purePropProbX2,   marketProb:naiveImplied(odds.dc2x),                     label:'Victoire ou nul exterieur'},
                 {market:'Victoire Domicile', cote:odds.c1, prob:pureProbs.p1, marketProb:shinProbs?shinProbs.p1:naiveImplied(odds.c1), label:'Victoire seche domicile'},
                 {market:'Victoire Exterieur',cote:odds.c2, prob:pureProbs.p2, marketProb:shinProbs?shinProbs.p2:naiveImplied(odds.c2), label:'Victoire seche exterieur'},
-              ].filter(function(m){
+              ];
+              // Marches supplementaires derives de la matrice de scores
+              // (matrixMarkets) - ajoutes uniquement si la matrice a pu etre
+              // construite (lambdas valides) ET qu'une vraie cote existe pour ce
+              // marche precis (jamais un marche sans prix reel en face). Meme
+              // filtre cote>=1.50 applique plus bas a l'ensemble de allMarkets.
+              if(matrixMarkets){
+                allMarkets.push(
+                  {market:'Clean Sheet Domicile', cote:odds.cs_home, prob:matrixMarkets.cleanSheet.home*100, marketProb:naiveImplied(odds.cs_home), label:'Domicile termine sans encaisser'},
+                  {market:'Clean Sheet Exterieur', cote:odds.cs_away, prob:matrixMarkets.cleanSheet.away*100, marketProb:naiveImplied(odds.cs_away), label:'Exterieur termine sans encaisser'},
+                  {market:'Gagne Sans Encaisser Domicile', cote:odds.wtn_home, prob:matrixMarkets.winToNil.home*100, marketProb:naiveImplied(odds.wtn_home), label:'Domicile gagne sans encaisser'},
+                  {market:'Gagne Sans Encaisser Exterieur', cote:odds.wtn_away, prob:matrixMarkets.winToNil.away*100, marketProb:naiveImplied(odds.wtn_away), label:'Exterieur gagne sans encaisser'}
+                );
+                [0.5,1.5,2.5,3.5].forEach(function(line){
+                  var key=String(line).replace('.','');
+                  var fairHome=fairPairProbs(odds['th_o'+key],odds['th_u'+key]);
+                  var fairAway=fairPairProbs(odds['ta_o'+key],odds['ta_u'+key]);
+                  allMarkets.push(
+                    {market:'Total Domicile Over '+line, cote:odds['th_o'+key], prob:matrixMarkets.teamTotals.home[line].over*100, marketProb:fairHome?fairHome.a:naiveImplied(odds['th_o'+key]), label:'Domicile marque plus de '+line},
+                    {market:'Total Domicile Under '+line, cote:odds['th_u'+key], prob:matrixMarkets.teamTotals.home[line].under*100, marketProb:fairHome?fairHome.b:naiveImplied(odds['th_u'+key]), label:'Domicile marque moins de '+line},
+                    {market:'Total Exterieur Over '+line, cote:odds['ta_o'+key], prob:matrixMarkets.teamTotals.away[line].over*100, marketProb:fairAway?fairAway.a:naiveImplied(odds['ta_o'+key]), label:'Exterieur marque plus de '+line},
+                    {market:'Total Exterieur Under '+line, cote:odds['ta_u'+key], prob:matrixMarkets.teamTotals.away[line].under*100, marketProb:fairAway?fairAway.b:naiveImplied(odds['ta_u'+key]), label:'Exterieur marque moins de '+line}
+                  );
+                });
+                // Marches combines (resultat + total/BTTS) : vraies cotes reelles
+                // (bet_id 25 "Result/Total Goals", bet_id 24 "Results/Both Teams
+                // Score" - fetchees comme le reste via /odds?fixture=X, parsees par
+                // parseOdds). marketProb = simple probabilite implicite (pas de
+                // Shin ici : chaque case n'a pas de complementaire a 2 issues comme
+                // p1/pN/p2, meme principe que DC1X/DC2X plus haut qui utilisent deja
+                // naiveImplied plutot qu'un pairing force et fabrique).
+                allMarkets.push(
+                  {market:'Victoire Domicile & Over 2.5', cote:odds.combo_home_over25, prob:matrixMarkets.resultAndOver25.home*100, marketProb:naiveImplied(odds.combo_home_over25), label:'Domicile gagne et plus de 2.5 buts'},
+                  {market:'Victoire Domicile & Under 2.5', cote:odds.combo_home_under25, prob:matrixMarkets.resultAndUnder25.home*100, marketProb:naiveImplied(odds.combo_home_under25), label:'Domicile gagne et moins de 2.5 buts'},
+                  {market:'Nul & Over 2.5', cote:odds.combo_draw_over25, prob:matrixMarkets.resultAndOver25.draw*100, marketProb:naiveImplied(odds.combo_draw_over25), label:'Match nul et plus de 2.5 buts'},
+                  {market:'Nul & Under 2.5', cote:odds.combo_draw_under25, prob:matrixMarkets.resultAndUnder25.draw*100, marketProb:naiveImplied(odds.combo_draw_under25), label:'Match nul et moins de 2.5 buts'},
+                  {market:'Victoire Exterieur & Over 2.5', cote:odds.combo_away_over25, prob:matrixMarkets.resultAndOver25.away*100, marketProb:naiveImplied(odds.combo_away_over25), label:'Exterieur gagne et plus de 2.5 buts'},
+                  {market:'Victoire Exterieur & Under 2.5', cote:odds.combo_away_under25, prob:matrixMarkets.resultAndUnder25.away*100, marketProb:naiveImplied(odds.combo_away_under25), label:'Exterieur gagne et moins de 2.5 buts'},
+                  {market:'Victoire Domicile & BTTS', cote:odds.combo_home_btts, prob:matrixMarkets.resultAndBtts.home*100, marketProb:naiveImplied(odds.combo_home_btts), label:'Domicile gagne et les deux marquent'},
+                  {market:'Victoire Domicile & Non BTTS', cote:odds.combo_home_nobtts, prob:matrixMarkets.resultAndNoBtts.home*100, marketProb:naiveImplied(odds.combo_home_nobtts), label:'Domicile gagne et une equipe ne marque pas'},
+                  {market:'Nul & BTTS', cote:odds.combo_draw_btts, prob:matrixMarkets.resultAndBtts.draw*100, marketProb:naiveImplied(odds.combo_draw_btts), label:'Match nul et les deux marquent'},
+                  {market:'Nul & Non BTTS', cote:odds.combo_draw_nobtts, prob:matrixMarkets.resultAndNoBtts.draw*100, marketProb:naiveImplied(odds.combo_draw_nobtts), label:'Match nul et une equipe ne marque pas'},
+                  {market:'Victoire Exterieur & BTTS', cote:odds.combo_away_btts, prob:matrixMarkets.resultAndBtts.away*100, marketProb:naiveImplied(odds.combo_away_btts), label:'Exterieur gagne et les deux marquent'},
+                  {market:'Victoire Exterieur & Non BTTS', cote:odds.combo_away_nobtts, prob:matrixMarkets.resultAndNoBtts.away*100, marketProb:naiveImplied(odds.combo_away_nobtts), label:'Exterieur gagne et une equipe ne marque pas'}
+                );
+              }
+              allMarkets=allMarkets.filter(function(m){
                 return m.cote&&m.cote!=='--'&&parseFloat(m.cote)>=1.50;
               });
               var nodeKelly=null;

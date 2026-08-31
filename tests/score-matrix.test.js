@@ -125,3 +125,45 @@ test("deriveMarketsFromMatrix: favori net a domicile -> p1 nettement superieur a
   const m = deriveMarketsFromMatrix(mat);
   assert.ok(m.p1 > m.p2 + 0.3, JSON.stringify({ p1: m.p1, p2: m.p2 }));
 });
+
+test("deriveMarketsFromMatrix: resultat+total buts - les 6 cases (home/draw/away x over/under 2.5) sommes a 1", () => {
+  const mat = buildPoissonMatrix(1.6, 1.2, 10);
+  const m = deriveMarketsFromMatrix(mat);
+  const total = m.resultAndOver25.home + m.resultAndOver25.draw + m.resultAndOver25.away
+    + m.resultAndUnder25.home + m.resultAndUnder25.draw + m.resultAndUnder25.away;
+  assert.ok(Math.abs(total - 1) < 1e-5, "total=" + total);
+});
+
+test("deriveMarketsFromMatrix: resultat+total buts - chaque case <= la probabilite du resultat seul (c'est une intersection, jamais plus grand que l'ensemble)", () => {
+  const mat = buildPoissonMatrix(1.6, 1.2, 10);
+  const m = deriveMarketsFromMatrix(mat);
+  assert.ok(m.resultAndOver25.home <= m.p1 + 1e-9);
+  assert.ok(m.resultAndUnder25.home <= m.p1 + 1e-9);
+  assert.ok(Math.abs(m.resultAndOver25.home + m.resultAndUnder25.home - m.p1) < 1e-9, "over+under d'un meme resultat doit reconstituer p1 exactement");
+});
+
+test("deriveMarketsFromMatrix: resultat+total buts - jamais une simple multiplication naive (les deux evenements ne sont pas independants)", () => {
+  // Favori net a domicile : un match avec beaucoup de buts est structurellement
+  // plus souvent un match ou le favori s'impose largement (et donc gagne) que
+  // l'inverse - la vraie proba jointe doit differ de p1 * pOver25 (independance
+  // supposee a tort), pas seulement dans un cas limite artificiel.
+  const mat = buildPoissonMatrix(2.3, 0.7, 10);
+  const m = deriveMarketsFromMatrix(mat);
+  const naiveMultiplication = m.p1 * m.overUnder[2.5].over;
+  assert.ok(Math.abs(m.resultAndOver25.home - naiveMultiplication) > 0.01, "la jointe reelle (" + m.resultAndOver25.home + ") ne doit pas coincider avec la multiplication naive (" + naiveMultiplication + ")");
+});
+
+test("deriveMarketsFromMatrix: resultat+BTTS - les 6 cases sommes a 1, et over/under d'un meme resultat reconstitue ce resultat", () => {
+  const mat = buildPoissonMatrix(1.5, 1.3, 10);
+  const m = deriveMarketsFromMatrix(mat);
+  const total = m.resultAndBtts.home + m.resultAndBtts.draw + m.resultAndBtts.away
+    + m.resultAndNoBtts.home + m.resultAndNoBtts.draw + m.resultAndNoBtts.away;
+  assert.ok(Math.abs(total - 1) < 1e-6, "total=" + total);
+  assert.ok(Math.abs(m.resultAndBtts.away + m.resultAndNoBtts.away - m.p2) < 1e-9);
+});
+
+test("deriveMarketsFromMatrix: resultat+BTTS - un match nul avec BTTS est impossible sur 0-0 uniquement, mais possible sur 1-1/2-2/etc -> resultAndBtts.draw > 0 des que lambda > 0 des deux cotes", () => {
+  const mat = buildPoissonMatrix(1.2, 1.2, 10);
+  const m = deriveMarketsFromMatrix(mat);
+  assert.ok(m.resultAndBtts.draw > 0, "un nul BTTS (1-1, 2-2...) doit avoir une probabilite reelle non nulle");
+});

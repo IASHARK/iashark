@@ -145,6 +145,52 @@ test("resolveMarketWin: score tres eleve (cas limite) sans crash", () => {
   assert.equal(resolveMarketWin("Handicap -5 Domicile", 10, 2), true);
 });
 
+// --- Clean Sheet / Gagne Sans Encaisser (Win To Nil) ---
+test("resolveMarketWin: Clean Sheet Domicile - depend uniquement des buts adverses, peu importe si le domicile marque", () => {
+  assert.equal(resolveMarketWin("Clean Sheet Domicile", 2, 0), true, "domicile marque 2, exterieur 0 -> clean sheet domicile vrai");
+  assert.equal(resolveMarketWin("Clean Sheet Domicile", 0, 0), true, "0-0 est aussi un clean sheet domicile");
+  assert.equal(resolveMarketWin("Clean Sheet Domicile", 1, 1), false);
+});
+test("resolveMarketWin: Clean Sheet Exterieur - symetrique", () => {
+  assert.equal(resolveMarketWin("Clean Sheet Exterieur", 0, 3), true);
+  assert.equal(resolveMarketWin("Clean Sheet Exterieur", 1, 0), false);
+});
+test("resolveMarketWin: Gagne Sans Encaisser Domicile - GAGNE ET ne concede rien, distinct du clean sheet seul", () => {
+  assert.equal(resolveMarketWin("Gagne Sans Encaisser Domicile", 2, 0), true);
+  assert.equal(resolveMarketWin("Gagne Sans Encaisser Domicile", 0, 0), false, "0-0 est un clean sheet mais PAS un win to nil - le domicile n'a pas gagne");
+});
+test("resolveMarketWin: Gagne Sans Encaisser Exterieur - symetrique", () => {
+  assert.equal(resolveMarketWin("Gagne Sans Encaisser Exterieur", 0, 2), true);
+  assert.equal(resolveMarketWin("Gagne Sans Encaisser Exterieur", 1, 1), false);
+});
+
+// --- Total par equipe ---
+test("resolveMarketWin: Total Domicile Over/Under - porte sur les buts d'UNE SEULE equipe, jamais le total du match", () => {
+  assert.equal(resolveMarketWin("Total Domicile Over 1.5", 2, 3), true, "domicile seul a 2 buts > 1.5, peu importe le total du match (5)");
+  assert.equal(resolveMarketWin("Total Domicile Under 1.5", 2, 0), false);
+  assert.equal(resolveMarketWin("Total Exterieur Over 1.5", 0, 2), true);
+  assert.equal(resolveMarketWin("Total Exterieur Under 1.5", 3, 2), false);
+});
+
+// --- Marches combines (resultat + condition) ---
+test("resolveMarketWin: Victoire Domicile & Over 2.5 - les DEUX conditions doivent etre vraies", () => {
+  assert.equal(resolveMarketWin("Victoire Domicile & Over 2.5", 3, 1), true, "domicile gagne (3>1) ET total=4>2.5");
+  assert.equal(resolveMarketWin("Victoire Domicile & Over 2.5", 1, 0), false, "domicile gagne mais total=1, pas over 2.5 -> perdu");
+  assert.equal(resolveMarketWin("Victoire Domicile & Over 2.5", 1, 3), false, "over 2.5 vrai (total=4) mais domicile NE gagne PAS -> perdu, pas juste ignore");
+});
+test("resolveMarketWin: Nul & Under 2.5", () => {
+  assert.equal(resolveMarketWin("Nul & Under 2.5", 1, 1), true, "nul et total=2 < 2.5");
+  assert.equal(resolveMarketWin("Nul & Under 2.5", 2, 2), false, "nul mais total=4, pas under 2.5");
+});
+test("resolveMarketWin: Victoire Exterieur & BTTS / Non BTTS", () => {
+  assert.equal(resolveMarketWin("Victoire Exterieur & BTTS", 1, 2), true, "exterieur gagne et les deux marquent");
+  assert.equal(resolveMarketWin("Victoire Exterieur & BTTS", 0, 2), false, "exterieur gagne mais domicile n'a pas marque -> pas BTTS");
+  assert.equal(resolveMarketWin("Victoire Domicile & Non BTTS", 2, 0), true, "domicile gagne, exterieur n'a pas marque -> non BTTS vrai");
+});
+test("resolveMarketWin: marche combine avec un separateur '&' mais un contenu non reconnu -> null, jamais un resultat invente", () => {
+  assert.equal(resolveMarketWin("Truc & Bidule", 1, 0), null);
+});
+
 // --- Statut fixture -> VOID/FINISHED/PENDING ---
 test("classifyFixtureStatus: statuts d'annulation -> VOID", () => {
   assert.equal(classifyFixtureStatus("PST"), "VOID");

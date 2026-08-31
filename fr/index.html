@@ -268,7 +268,7 @@ body::before{top:-180px;width:1080px;height:700px;background:radial-gradient(ell
 .league-track{display:flex;align-items:center;flex:none;}
 .league-badge{height:72px;min-width:210px;padding:0 30px;display:flex;align-items:center;justify-content:center;gap:12px;color:#9eabba;font-size:11px;font-weight:700;text-transform:uppercase;position:relative;white-space:nowrap;}
 .league-badge::after{content:'';position:absolute;right:0;width:1px;height:26px;background:var(--line);}
-.league-badge img{width:31px;height:31px;object-fit:contain;filter:drop-shadow(0 5px 12px rgba(0,0,0,.45));}
+.league-badge img{width:31px;height:31px;object-fit:contain;filter:drop-shadow(0 5px 12px rgba(0,0,0,.45));}.league-badge img.ligue1-logo{filter:brightness(0) invert(1) drop-shadow(0 5px 12px rgba(0,0,0,.45));}
 @keyframes league-marquee{to{transform:translateX(-50%);}}
 @media(prefers-reduced-motion:reduce){.league-rail-inner{animation:none;}}
 .decisions{max-width:1280px;margin:0 auto;padding:28px 28px 60px;position:relative;z-index:1;}
@@ -340,9 +340,8 @@ body::before{top:-180px;width:1080px;height:700px;background:radial-gradient(ell
   <a href="/fr/" class="brand-logo" aria-label="IASHARK — Accueil"><img src="/assets/iashark-logo.png" alt="IASHARK"></a>
   <nav class="desktop-nav" aria-label="Navigation principale">
     <a href="#decisions">Matchs</a>
-    <a href="/fr/marches.html">Marchés</a>
     <a href="/a-propos.html">Méthode</a>
-    <a href="/blog/">Guides</a>
+    <a href="/blog.html">Guides</a>
   </nav>
   <div class="header-actions">
     <span id="langSwitchSlot"></span>
@@ -372,20 +371,34 @@ body::before{top:-180px;width:1080px;height:700px;background:radial-gradient(ell
 <div class="league-rail" aria-hidden="true">
   <div class="league-rail-inner">
     <div class="league-track">
-      <span class="league-badge"><img src="https://media.api-sports.io/football/leagues/61.png" alt="">Ligue 1</span>
+      <span class="league-badge"><img class="ligue1-logo" src="https://media.api-sports.io/football/leagues/61.png" alt="">Ligue 1</span>
       <span class="league-badge"><img src="https://media.api-sports.io/football/leagues/39.png" alt="">Premier League</span>
       <span class="league-badge"><img src="https://media.api-sports.io/football/leagues/2.png" alt="">Champions League</span>
       <span class="league-badge"><img src="https://media.api-sports.io/football/leagues/140.png" alt="">LaLiga</span>
       <span class="league-badge"><img src="https://media.api-sports.io/football/leagues/135.png" alt="">Serie A</span>
       <span class="league-badge"><img src="https://media.api-sports.io/football/leagues/78.png" alt="">Bundesliga</span>
+      <span class="league-badge"><img src="https://media.api-sports.io/football/leagues/3.png" alt="">Europa League</span>
+      <span class="league-badge"><img src="https://media.api-sports.io/football/leagues/848.png" alt="">Conference League</span>
+      <span class="league-badge"><img src="https://media.api-sports.io/football/leagues/88.png" alt="">Eredivisie</span>
+      <span class="league-badge"><img src="https://media.api-sports.io/football/leagues/94.png" alt="">Liga Portugal</span>
+      <span class="league-badge"><img src="https://media.api-sports.io/football/leagues/253.png" alt="">MLS</span>
+      <span class="league-badge"><img src="https://media.api-sports.io/football/leagues/113.png" alt="">Allsvenskan</span>
+      <span class="league-badge"><img src="https://media.api-sports.io/football/leagues/98.png" alt="">J1 League</span>
     </div>
     <div class="league-track">
-      <span class="league-badge"><img src="https://media.api-sports.io/football/leagues/61.png" alt="">Ligue 1</span>
+      <span class="league-badge"><img class="ligue1-logo" src="https://media.api-sports.io/football/leagues/61.png" alt="">Ligue 1</span>
       <span class="league-badge"><img src="https://media.api-sports.io/football/leagues/39.png" alt="">Premier League</span>
       <span class="league-badge"><img src="https://media.api-sports.io/football/leagues/2.png" alt="">Champions League</span>
       <span class="league-badge"><img src="https://media.api-sports.io/football/leagues/140.png" alt="">LaLiga</span>
       <span class="league-badge"><img src="https://media.api-sports.io/football/leagues/135.png" alt="">Serie A</span>
       <span class="league-badge"><img src="https://media.api-sports.io/football/leagues/78.png" alt="">Bundesliga</span>
+      <span class="league-badge"><img src="https://media.api-sports.io/football/leagues/3.png" alt="">Europa League</span>
+      <span class="league-badge"><img src="https://media.api-sports.io/football/leagues/848.png" alt="">Conference League</span>
+      <span class="league-badge"><img src="https://media.api-sports.io/football/leagues/88.png" alt="">Eredivisie</span>
+      <span class="league-badge"><img src="https://media.api-sports.io/football/leagues/94.png" alt="">Liga Portugal</span>
+      <span class="league-badge"><img src="https://media.api-sports.io/football/leagues/253.png" alt="">MLS</span>
+      <span class="league-badge"><img src="https://media.api-sports.io/football/leagues/113.png" alt="">Allsvenskan</span>
+      <span class="league-badge"><img src="https://media.api-sports.io/football/leagues/98.png" alt="">J1 League</span>
     </div>
   </div>
 </div>
@@ -435,17 +448,13 @@ body::before{top:-180px;width:1080px;height:700px;background:radial-gradient(ell
     <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5L12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg></div>
     <div class="nav-lbl">ACCUEIL</div>
   </a>
-  <a href="/fr/marches.html" class="nav-item">
-    <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 17V9M13 17V5M8 17v-4"/></svg></div>
-    <div class="nav-lbl">MARCHÉS</div>
-  </a>
   <a href="/fr/pro.html" class="nav-item">
     <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.9 6.6L22 9.3l-5 4.9L18.2 22 12 18.3 5.8 22 7 14.2 2 9.3l7.1-.7z"/></svg></div>
     <div class="nav-lbl">OUTILS</div>
   </a>
-  <a href="/blog/" class="nav-item">
+  <a href="/blog.html" class="nav-item">
     <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg></div>
-    <div class="nav-lbl">GUIDES</div>
+    <div class="nav-lbl">BLOG</div>
   </a>
   <a href="/fr/compte.html" class="nav-item">
     <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg></div>

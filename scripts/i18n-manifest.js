@@ -143,9 +143,8 @@ var PAGES = [
           "  </p>";
       }},
       {find: '<div class="nav-lbl">ACCUEIL</div>', build: function(d){ return '<div class="nav-lbl">' + d.nav.home + "</div>"; }},
-      {find: '<div class="nav-lbl">MARCHÉS</div>', build: function(d){ return '<div class="nav-lbl">' + d.nav.markets + "</div>"; }},
       {find: '<div class="nav-lbl">OUTILS</div>', build: function(d){ return '<div class="nav-lbl">' + d.nav.tools + "</div>"; }},
-      {find: '<div class="nav-lbl">GUIDES</div>', build: function(d){ return '<div class="nav-lbl">' + d.nav.guides + "</div>"; }},
+      {find: '<div class="nav-lbl">BLOG</div>', build: function(d){ return '<div class="nav-lbl">' + d.nav.guides + "</div>"; }},
       {find: '<div class="nav-lbl">COMPTE</div>', build: function(d){ return '<div class="nav-lbl">' + d.nav.account + "</div>"; }},
       {find:
         "    <div>⚠️ LE JEU PEUT ÊTRE DANGEREUX — JOUEZ RESPONSABLE · INTERDIT AUX MOINS DE 18 ANS</div>\n" +
@@ -219,9 +218,8 @@ var PAGES = [
       }},
       {find: 'class="btn-login">CONNEXION<', build: function(d){ return 'class="btn-login">' + d.cta.login + '<'; }},
       {find: '<a href="#decisions">Matchs</a>', build: function(d,l){ return '<a href="#decisions">' + HOME_V2[l].matches + '</a>'; }},
-      {find: '<a href="/marches.html">Marchés</a>', build: function(d,l){ return '<a href="/marches.html">' + HOME_V2[l].markets + '</a>'; }},
       {find: '<a href="/a-propos.html">Méthode</a>', build: function(d,l){ return '<a href="/a-propos.html">' + HOME_V2[l].method + '</a>'; }},
-      {find: '<a href="/blog/">Guides</a>', build: function(d,l){ return '<a href="/blog/">' + HOME_V2[l].guides + '</a>'; }},
+      {find: '<a href="/blog.html">Guides</a>', build: function(d,l){ return '<a href="/blog.html">' + HOME_V2[l].guides + '</a>'; }},
       {find: '<a href="#decisions" class="btn-start">Commencer</a>', build: function(d,l){ return '<a href="#decisions" class="btn-start">' + HOME_V2[l].start + '</a>'; }},
       {find: '<div class="hero-eyebrow">L\'ANALYSE SPORTIVE, SANS LE BRUIT</div>', build: function(d,l){ return '<div class="hero-eyebrow">' + HOME_V2[l].eyebrow + '</div>'; }},
       {find: '<h1 class="hero-title">Comprenez le match.<br>Identifiez le marché juste.</h1>', build: function(d,l){ var h=HOME_V2[l]; return '<h1 class="hero-title">' + h.title1 + '<br>' + h.title2 + '</h1>'; }},
@@ -254,9 +252,8 @@ var PAGES = [
           '    </div>';
       }},
       {find: '<div class="nav-lbl">ACCUEIL</div>', build: function(d){ return '<div class="nav-lbl">' + d.nav.home + '</div>'; }},
-      {find: '<div class="nav-lbl">MARCHÉS</div>', build: function(d){ return '<div class="nav-lbl">' + d.nav.markets + '</div>'; }},
       {find: '<div class="nav-lbl">OUTILS</div>', build: function(d){ return '<div class="nav-lbl">' + d.nav.tools + '</div>'; }},
-      {find: '<div class="nav-lbl">GUIDES</div>', build: function(d){ return '<div class="nav-lbl">' + d.nav.guides + '</div>'; }},
+      {find: '<div class="nav-lbl">BLOG</div>', build: function(d){ return '<div class="nav-lbl">' + d.nav.guides + '</div>'; }},
       {find: '<div class="nav-lbl">COMPTE</div>', build: function(d){ return '<div class="nav-lbl">' + d.nav.account + '</div>'; }},
       {find: LEAGUE_LABELS_FR_TEXT, build: function(d){ return renderLeagueLabels(d); }},
       {find: "return'Plus de 2,5 buts';if(s.includes('under 2.5'))return'Moins de 2,5 buts';if(s.includes('over 1.5'))return'Plus de 1,5 but';if(s.includes('btts non')||s.includes('une équipe ne marque'))return'Une équipe ne marque pas';if(s.includes('btts')||s.includes('les deux équipes'))return'Les deux équipes marquent';if(s.includes('dc 1x')||s==='1x')return'DC 1X';if(s.includes('dc x2')||s==='x2')return'DC X2';return r;}",

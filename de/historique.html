@@ -143,26 +143,26 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 <header class="hdr">
   <a href="/de/" class="logo"><span>IA</span>SHARK</a>
   <div class="hdr-right">
-    <span class="hdr-badge" id="totalBadge">— WETTEN</span>
+    <span class="hdr-badge" id="totalBadge">— PARIS</span>
     <span id="langSwitchSlot"></span>
-    <span id="authHeaderSlot"><a href="/de/compte.html" class="btn-login">ANMELDEN</a></span>
+    <span id="authHeaderSlot"><a href="/de/compte.html" class="btn-login">CONNEXION</a></span>
   </div>
 </header>
 
 <div style="max-width:720px;margin:0 auto;padding:0 20px;">
   <div class="hero">
-    <h1 class="hero-title"><span>HISTOR</span>IE</h1>
+    <h1 class="hero-title"><span>HISTO</span>RIQUE</h1>
 
     <div class="sport-toggle" id="sportToggle">
-      <button class="sp-btn active" id="spAll" onclick="setStatSport('all')">🌐 ALLE</button>
-      <button class="sp-btn" id="spFootball" onclick="setStatSport('football')">⚽ FUSSBALL</button>
-      <button class="sp-btn pro-btn" id="spPro" onclick="setStatSport('pro')">TOOLS</button>
+      <button class="sp-btn active" id="spAll" onclick="setStatSport('all')">🌐 TOUS</button>
+      <button class="sp-btn" id="spFootball" onclick="setStatSport('football')">⚽ FOOTBALL</button>
+      <button class="sp-btn pro-btn" id="spPro" onclick="setStatSport('pro')">OUTILS</button>
     </div>
 
     <div class="stats-merged">
       <div class="sm-top">
         <div>
-          <div class="sm-lbl">TREFFERQUOTE</div>
+          <div class="sm-lbl">WINRATE</div>
           <div class="sm-val" id="statWinrate">—</div>
         </div>
         <div>
@@ -170,85 +170,81 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
           <div class="sm-val" id="statRoi">—</div>
         </div>
         <div>
-          <div class="sm-lbl">AKTUELLE FORM</div>
+          <div class="sm-lbl">FORME RÉCENTE</div>
           <div class="sm-trend" id="statTrend"></div>
           <div class="sm-trend-lbl" id="statTrendLbl"></div>
         </div>
       </div>
       <div class="sm-bilan">
-        <span><b class="green" id="statWins">—</b> S</span>
+        <span><b class="green" id="statWins">—</b> V</span>
         <span style="color:var(--muted)">/</span>
-        <span><b class="red" id="statLosses">—</b> N</span>
-        <span style="color:var(--muted);margin-left:auto;" id="statTotal">— Wetten insgesamt</span>
+        <span><b class="red" id="statLosses">—</b> D</span>
+        <span style="color:var(--muted);margin-left:auto;" id="statTotal">— paris au total</span>
       </div>
     </div>
   </div>
 
   <div class="tabs">
-    <button class="tab active" onclick="setTab('paris',this)">WETTEN</button>
+    <button class="tab active" onclick="setTab('paris',this)">PARIS</button>
     <button class="tab" onclick="setTab('backtesting',this)">BACKTESTING</button>
   </div>
 
   <div id="tabParis">
     <div class="search-wrap">
       <span class="search-icon"><svg viewBox="0 0 24 24" width="14" height="14" style="stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg></span>
-      <input type="text" class="search-input" id="searchInput" placeholder="Team oder Liga suchen..." oninput="onSearch()">
+      <input type="text" class="search-input" id="searchInput" placeholder="Rechercher une équipe, un championnat..." oninput="onSearch()">
       <button class="search-clear" id="searchClear" onclick="clearSearch()">✕</button>
     </div>
     <div class="filter-row">
-      <select class="fsel" id="mktSel" onchange="renderPredictions()"><option value="">ALLE MÄRKTE</option></select>
-      <select class="fsel" id="leagueSel" onchange="renderPredictions()"><option value="">ALLE LIGEN</option></select>
-      <button class="filter-btn active" onclick="setFilter('all',this)">ALLE</button>
+      <select class="fsel" id="mktSel" onchange="renderPredictions()"><option value="">TOUS LES MARCHÉS</option></select>
+      <select class="fsel" id="leagueSel" onchange="renderPredictions()"><option value="">TOUS CHAMPIONNATS</option></select>
+      <button class="filter-btn active" onclick="setFilter('all',this)">TOUS</button>
       <button class="filter-btn" onclick="setFilter('win',this)">✓</button>
       <button class="filter-btn" onclick="setFilter('loss',this)">✕</button>
       <span class="filter-count" id="countLbl"></span>
     </div>
     <div class="pred-list" id="predList">
-      <div class="empty"><h3>LÄDT...</h3></div>
+      <div class="empty"><h3>CHARGEMENT...</h3></div>
     </div>
     <div style="text-align:center;margin-top:14px;" id="archiveMoreWrap">
-      <button class="tab" id="btnLoadArchive" onclick="loadFullArchive()" style="cursor:pointer;">VOLLSTÄNDIGE HISTORIE LADEN (ÜBER DIE LETZTEN 500 HINAUS)</button>
+      <button class="tab" id="btnLoadArchive" onclick="loadFullArchive()" style="cursor:pointer;">CHARGER L'HISTORIQUE COMPLET (AU-DELÀ DES 500 DERNIERS)</button>
       <div style="font-family:'Space Mono',monospace;font-size:8px;color:var(--muted);margin-top:8px;" id="archiveMoreStatus"></div>
     </div>
   </div>
 
   <div id="tabBacktesting" style="display:none;">
-    <div class="bt-sort-note">Sortiert nach Anzahl der Wetten — Märkte mit wenigen Wetten werden abgeblendet und markiert, um eine Überinterpretation kleiner Stichproben zu vermeiden.</div>
-    <div id="btContent"><div class="empty"><h3>LÄDT...</h3></div></div>
+    <div class="bt-sort-note">Trié par nombre de paris — les marchés testés sur peu de paris sont estompés et marqués, pour éviter de sur-interpréter un petit échantillon.</div>
+    <div id="btContent"><div class="empty"><h3>CHARGEMENT...</h3></div></div>
   </div>
 </div>
 
 <div style="max-width:720px;margin:24px auto 0;padding:0 20px 20px;text-align:center;">
   <div style="font-family:'Space Mono',monospace;font-size:8px;color:rgba(74,101,128,0.5);line-height:2;letter-spacing:1px;">
-    <div>⚠️ GLÜCKSSPIEL KANN GEFÄHRLICH SEIN — SPIELEN SIE VERANTWORTUNGSVOLL · VERBOTEN UNTER 18 JAHREN</div>
-    <div>Hilfe (Frankreich): <a href="https://www.joueurs-info-service.fr" style="color:rgba(34,211,238,0.4);text-decoration:none;">joueurs-info-service.fr</a> · 09 74 75 13 13</div>
+    <div>⚠️ LE JEU PEUT ÊTRE DANGEREUX — JOUEZ RESPONSABLE · INTERDIT AUX MOINS DE 18 ANS</div>
+    <div>Aide : <a href="https://www.joueurs-info-service.fr" style="color:rgba(34,211,238,0.4);text-decoration:none;">joueurs-info-service.fr</a> · 09 74 75 13 13</div>
   </div>
 </div>
 
 <nav class="nav-bottom">
   <a href="/de/" class="nav-item">
     <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5L12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg></div>
-    <div class="nav-lbl">START</div>
-  </a>
-  <a href="/de/marches.html" class="nav-item">
-    <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 17V9M13 17V5M8 17v-4"/></svg></div>
-    <div class="nav-lbl">MÄRKTE</div>
+    <div class="nav-lbl">ACCUEIL</div>
   </a>
   <a href="/de/historique.html" class="nav-item active">
     <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20v-4"/></svg></div>
-    <div class="nav-lbl">VERLAUF</div>
+    <div class="nav-lbl">HISTORIQUE</div>
   </a>
   <a href="/de/pro.html" class="nav-item">
     <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.9 6.6L22 9.3l-5 4.9L18.2 22 12 18.3 5.8 22 7 14.2 2 9.3l7.1-.7z"/></svg></div>
-    <div class="nav-lbl">TOOLS</div>
+    <div class="nav-lbl">OUTILS</div>
   </a>
-  <a href="/blog/" class="nav-item">
+  <a href="/blog.html" class="nav-item">
     <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg></div>
-    <div class="nav-lbl">GUIDES</div>
+    <div class="nav-lbl">BLOG</div>
   </a>
   <a href="/de/compte.html" class="nav-item">
     <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg></div>
-    <div class="nav-lbl">KONTO</div>
+    <div class="nav-lbl">COMPTE</div>
   </a>
 </nav>
 <script>
@@ -256,7 +252,7 @@ var allPredictions=[], historiqueData={}, currentFilter='all', currentStatSport=
 
 function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
 
-var MARKET_LABELS={'over25':'Über 2,5 Tore','over15':'Über 1,5 Tore','under25':'Unter 2,5 Tore','btts_non':'Ein Team trifft nicht','btts_oui':'Beide Teams treffen','dc1x':'DC 1X','dc_x1':'DC 1X','dc_x2':'DC X2','victoire_dom':'Heimsieg','victoire_ext':'Auswärtssieg','handicap_dom':'Handicap -0.5 Heim','handicap_ext':'Handicap +0.5 Auswärts','match_winner':'Sieger','autre':'Andere'};
+var MARKET_LABELS={'over25':'Plus de 2,5 buts','over15':'Plus de 1,5 but','under25':'Moins de 2,5 buts','btts_non':'Une équipe ne marque pas','btts_oui':'Les deux équipes marquent','dc1x':'DC 1X','dc_x1':'DC 1X','dc_x2':'DC X2','victoire_dom':'Victoire domicile','victoire_ext':'Victoire extérieur','handicap_dom':'Handicap -0.5 dom','handicap_ext':'Handicap +0.5 ext','match_winner':'Vainqueur','autre':'Autre'};
 var RESOLVED=['win','loss'];
 var DISPLAYABLE=['win','loss','neutral','no_signal','void'];
 
@@ -312,7 +308,7 @@ function renderStats(){
   document.getElementById('statRoi').style.color=roi>=0?'var(--green)':'var(--red)';
   document.getElementById('statWins').textContent=s.wins||0;
   document.getElementById('statLosses').textContent=s.losses||0;
-  document.getElementById('statTotal').textContent=(s.total||0)+' Wetten insgesamt';
+  document.getElementById('statTotal').textContent=(s.total||0)+' paris au total';
 
   var resolved=filtered.filter(function(p){return p.type==='single'&&(p.result==='win'||p.result==='loss');})
     .slice().sort(function(a,b){return(b.resolved_date||b.date||'').localeCompare(a.resolved_date||a.date||'');})
@@ -320,7 +316,7 @@ function renderStats(){
   document.getElementById('statTrend').innerHTML=resolved.map(function(p){
     return '<div class="sm-dot '+(p.result==='win'?'w':'l')+'">'+(p.result==='win'?'V':'D')+'</div>';
   }).join('');
-  document.getElementById('statTrendLbl').textContent=resolved.length?resolved.length+' LETZTE WETTEN':'KEINE AKTUELLE WETTE';
+  document.getElementById('statTrendLbl').textContent=resolved.length?resolved.length+' DERNIERS PARIS':'AUCUN PARI RÉCENT';
 }
 function buildFilterOptions(){
   var filtered=getSportFilteredPredictions().filter(function(p){return p.type==='single'&&DISPLAYABLE.indexOf(p.result)!==-1;});
@@ -331,13 +327,13 @@ function buildFilterOptions(){
   });
   var mktSel=document.getElementById('mktSel');
   var curMkt=mktSel.value;
-  mktSel.innerHTML='<option value="">ALLE MÄRKTE</option>'+Object.keys(markets).sort().map(function(k){
+  mktSel.innerHTML='<option value="">TOUS LES MARCHÉS</option>'+Object.keys(markets).sort().map(function(k){
     return '<option value="'+esc(k)+'">'+esc((MARKET_LABELS[k]||k).toUpperCase())+'</option>';
   }).join('');
   mktSel.value=curMkt;
   var leagueSel=document.getElementById('leagueSel');
   var curLeague=leagueSel.value;
-  leagueSel.innerHTML='<option value="">ALLE LIGEN</option>'+Object.keys(leagues).sort().map(function(l){
+  leagueSel.innerHTML='<option value="">TOUS CHAMPIONNATS</option>'+Object.keys(leagues).sort().map(function(l){
     return '<option value="'+esc(l)+'">'+esc(l.toUpperCase())+'</option>';
   }).join('');
   leagueSel.value=curLeague;
@@ -369,14 +365,14 @@ function renderPredictions(){
   if(q)list=list.filter(function(p){return (p.match||'').toLowerCase().indexOf(q)!==-1||(p.league||'').toLowerCase().indexOf(q)!==-1;});
   list=list.slice().sort(function(a,b){return(b.resolved_date||b.date||'').localeCompare(a.resolved_date||a.date||'');});
   var resolvedTotal=sportList.filter(function(p){return p.type==='single'&&RESOLVED.indexOf(p.result)!==-1;}).length;
-  document.getElementById('countLbl').textContent=list.length+' '+(list.length>1?'Wetten':'Wette');
-  document.getElementById('totalBadge').textContent=resolvedTotal+' WETTEN';
-  if(!list.length){document.getElementById('predList').innerHTML='<div class="empty"><div class="empty-icon"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg></div><h3>KEINE WETTEN</h3><p>Keine Ergebnisse für diese Filterkombination.</p></div>';return;}
+  document.getElementById('countLbl').textContent=list.length+' pari'+(list.length>1?'s':'');
+  document.getElementById('totalBadge').textContent=resolvedTotal+' PARIS';
+  if(!list.length){document.getElementById('predList').innerHTML='<div class="empty"><div class="empty-icon"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg></div><h3>AUCUN PARIS</h3><p>Aucun résultat pour cette combinaison de filtres.</p></div>';return;}
   document.getElementById('predList').innerHTML=list.map(function(p){
     if(p.result==='no_signal')return'';
     var ml=MARKET_LABELS[p.market]||p.prediction_fr||p.prediction||'';
     var coteStr=p.cote&&p.result!=='neutral'?parseFloat(p.cote).toFixed(2):'';
-    var proTag=isPro(p)?'<span class="pred-tag tag-pro">TOOLS</span>':'';
+    var proTag=isPro(p)?'<span class="pred-tag tag-pro">OUTILS</span>':'';
     return'<div class="pred-card '+p.result+'">'
       +'<div>'
       +'<div class="pred-match">'+esc(p.match)+'</div>'
@@ -385,18 +381,18 @@ function renderPredictions(){
       +(coteStr?'<span class="pred-cote">'+coteStr+'</span>':'')
       +proTag
       +(p.league?'<span class="pred-tag tag-league" onclick="filterByTag(\'league\',\''+esc(p.league)+'\')">'+esc(p.league)+'</span>':'')
-      +'<span class="tag-date">'+(p.date||p.resolved_date||'')+(p.resolved_date&&p.date&&p.resolved_date!==p.date?' · abgeschlossen am '+p.resolved_date:'')+'</span>'
+      +'<span class="tag-date">'+(p.date||p.resolved_date||'')+(p.resolved_date&&p.date&&p.resolved_date!==p.date?' · résolu '+p.resolved_date:'')+'</span>'
       +'</div>'
       +'</div>'
       +'<div class="pred-right">'
-      +'<div class="pred-result '+p.result+'">'+(p.result==='win'?'WIN':p.result==='void'?'ANNULLIERT':'LOSS')+'</div>'
+      +'<div class="pred-result '+p.result+'">'+(p.result==='win'?'WIN':p.result==='void'?'ANNULÉ':'LOSS')+'</div>'
       +'<div class="pred-score">'+(p.score||'—')+'</div>'
       +'</div>'
       +'</div>';
   }).filter(Boolean).join('');
 }
 function renderBacktesting(bt){
-  if(!bt||!bt.by_market||!bt.by_market.length){document.getElementById('btContent').innerHTML='<div class="empty"><h3>NOCH KEINE DATEN</h3><p>Statistiken erscheinen, sobald die ersten Wetten abgeschlossen sind.</p></div>';return;}
+  if(!bt||!bt.by_market||!bt.by_market.length){document.getElementById('btContent').innerHTML='<div class="empty"><h3>PAS ENCORE DE DONNÉES</h3><p>Les stats apparaîtront après les premiers paris résolus.</p></div>';return;}
   function section(title,rows,useMarketLabels){
     if(!rows||!rows.length)return'';
     var sorted=rows.slice().sort(function(a,b){return b.total-a.total;});
@@ -411,14 +407,14 @@ function renderBacktesting(bt){
         +'<div class="bt-bar-wrap"><div class="bt-bar" style="width:'+Math.min(wr,100)+'%;background:'+color+'"></div></div>'
         +'<div class="bt-wr" style="color:'+color+'">'+wr+'%</div>'
         +'<div class="bt-roi" style="color:'+roiColor+'">'+(roi>=0?'+':'')+roi+'%</div>'
-        +(lowSample?'<div style="grid-column:1/-1;margin-top:2px"><span class="low-badge">KLEINE STICHPROBE</span></div>':'')
+        +(lowSample?'<div style="grid-column:1/-1;margin-top:2px"><span class="low-badge">ÉCHANTILLON FAIBLE</span></div>':'')
         +'</div>';
     }).join('')+'</div>';
   }
   document.getElementById('btContent').innerHTML=''
-    +section('NACH MARKT',bt.by_market,true)
-    +section('NACH LIGA',bt.by_league,false)
-    +section('NACH WAHRSCHEINLICHKEIT',bt.by_conf,false);
+    +section('PAR MARCHÉ',bt.by_market,true)
+    +section('PAR LIGUE',bt.by_league,false)
+    +section('PAR PROBABILITÉ',bt.by_conf,false);
 }
 async function loadData(){
   try{
@@ -430,7 +426,7 @@ async function loadData(){
     buildFilterOptions();
     renderPredictions();
     renderBacktesting(d.backtesting);
-  }catch(e){document.getElementById('predList').innerHTML='<div class="empty"><h3>FEHLER</h3><p>Verlauf konnte nicht geladen werden.</p></div>';}
+  }catch(e){document.getElementById('predList').innerHTML='<div class="empty"><h3>ERREUR</h3><p>Impossible de charger l\'historique.</p></div>';}
 }
 loadData();
 
@@ -447,7 +443,7 @@ async function loadFullArchive(){
   if(archiveLoaded)return;
   var btn=document.getElementById('btnLoadArchive');
   var status=document.getElementById('archiveMoreStatus');
-  btn.disabled=true; btn.textContent='LÄDT...';
+  btn.disabled=true; btn.textContent='CHARGEMENT...';
   var existingIds={};
   allPredictions.forEach(function(p){ if(p.fixture_id!=null) existingIds[p.fixture_id]=true; });
   var added=0, offset=0, pageSize=1000, more=true, totalFetched=0;
@@ -478,12 +474,12 @@ async function loadFullArchive(){
     archiveLoaded=true;
     renderStats(); buildFilterOptions(); renderPredictions();
     status.textContent = added>0
-      ? (added+' weitere Vorhersage(n) aus dem vollständigen Archiv geladen ('+totalFetched+' insgesamt im Supabase-Archiv).')
-      : 'Keine weitere Vorhersage über das bereits Angezeigte hinaus.';
+      ? (added+' prédiction(s) supplémentaire(s) chargée(s) depuis l\'archive complète ('+totalFetched+' au total dans l\'archive Supabase).')
+      : 'Aucune prédiction supplémentaire au-delà de ce qui est déjà affiché.';
     document.getElementById('btnLoadArchive').style.display='none';
   }catch(e){
-    status.textContent='Vollständiges Archiv konnte nicht geladen werden — versuche es später erneut.';
-    btn.disabled=false; btn.textContent="VOLLSTÄNDIGE HISTORIE LADEN (ÜBER DIE LETZTEN 500 HINAUS)";
+    status.textContent='Erreur de chargement de l\'archive complète — réessaie plus tard.';
+    btn.disabled=false; btn.textContent="CHARGER L'HISTORIQUE COMPLET (AU-DELÀ DES 500 DERNIERS)";
   }
 }
 </script>

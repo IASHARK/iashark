@@ -138,7 +138,7 @@ function buildPage(pageConfig) {
     // These pages are now small data-driven shells. Their interface is
     // rendered by shared client modules, so the legacy inline substitutions
     // must not be applied to their new markup.
-    var modularShell = ["match.html", "pro.html", "compte.html"].includes(pageConfig.file);
+    var modularShell = ["match.html", "pro.html", "compte.html", "historique.html"].includes(pageConfig.file);
     html = applyReplacements(html, locale, modularShell ? [] : pageConfig.replacements);
     html = buildHead(html, locale, pageConfig.file, pageConfig.metas);
     html = rewriteInternalLinks(html, locale);

@@ -132,7 +132,10 @@ function buildPage(pageConfig) {
   var srcHtml = fs.readFileSync(srcPath, "utf8");
   LOCALES.supported.forEach(function (locale) {
     var html = srcHtml;
-    html = applyReplacements(html, locale, pageConfig.replacements);
+    // match.html is now a small shell; its interface is rendered from the
+    // validated view-model in match-page.js. Never apply the legacy inline
+    // string substitutions to this new architecture.
+    html = applyReplacements(html, locale, pageConfig.file === "match.html" ? [] : pageConfig.replacements);
     html = buildHead(html, locale, pageConfig.file, pageConfig.metas);
     html = rewriteInternalLinks(html, locale);
     var outDir = path.join(ROOT, locale);

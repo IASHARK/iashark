@@ -1219,12 +1219,13 @@ jobs:
           }
           function seoSummaryHtmlFor(m){
             var d=(m.date||'').split(' ')[0];
-            var pariTxt=(m.pari_rec&&!m.no_signal)?('<p>Marché recommandé par le modèle : <strong>'+escHtml(m.pari_rec)+'</strong> (confiance '+escHtml(String(m.conf||''))+'/10).</p>'):'';
+            var modelAvailable=m.model_output_available!==false&&Number(m.data_quality_score||0)>0;
+            var pariTxt=(modelAvailable&&m.pari_rec&&!m.no_signal)?('<p>Marché recommandé par le modèle : <strong>'+escHtml(m.pari_rec)+'</strong> (confiance '+escHtml(String(m.conf||''))+'/10).</p>'):'';
             return '<div style="padding:24px 16px;font-family:\'DM Sans\',sans-serif;color:#94a3b8;font-size:13px;line-height:1.6">'
               +'<h1 style="font-family:\'Bebas Neue\',sans-serif;font-size:22px;letter-spacing:.5px;color:#e2e8f0;margin-bottom:8px">'+escHtml(m.home.n)+' vs '+escHtml(m.away.n)+'</h1>'
               +'<p>'+(m.league?escHtml(m.league)+' — ':'')+escHtml(d)+'</p>'
               +pariTxt
-              +'<p>Analyse complète générée par le modèle statistique IASHARK (Poisson, Dixon-Coles, Monte Carlo, Elo).</p>'
+              +(modelAvailable?'<p>Analyse statistique IASHARK disponible pour ce match.</p>':'<p>Les données disponibles ne permettent pas encore de publier une analyse chiffrée fiable.</p>')
               +'</div>';
           }
           function generateMatchPages(matchsData){

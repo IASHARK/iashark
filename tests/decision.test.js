@@ -31,6 +31,28 @@ test("pickMarketDeterministic: egalite de probabilite -> deterministe (premier r
   assert.equal(pickMarketDeterministic(markets).market, "A");
 });
 
+test("pickMarketDeterministic: ignore une meilleure probabilite si sa cote reelle est sous 1,50", () => {
+  const markets = [
+    { id: "dc-1x", market: "Double chance 1X", prob: 82, cote: 1.31 },
+    { id: "under-35", market: "Moins de 3,5 buts", prob: 74, cote: 1.52 },
+  ];
+  assert.equal(pickMarketDeterministic(markets, { minOdds: 1.5 }).id, "under-35");
+});
+
+test("pickMarketDeterministic: le resultat ne depend pas de l'ordre ni de la famille", () => {
+  const a = { id: "btts-no", market: "BTTS Non", prob: 63, cote: 1.72, reliability: 80 };
+  const b = { id: "home-win", market: "Victoire domicile", prob: 63, cote: 1.85, reliability: 70 };
+  assert.equal(pickMarketDeterministic([a, b], { minOdds: 1.5 }).id, "btts-no");
+  assert.equal(pickMarketDeterministic([b, a], { minOdds: 1.5 }).id, "btts-no");
+});
+
+test("pickMarketDeterministic: aucune cote reelle eligible -> abstention", () => {
+  assert.equal(pickMarketDeterministic([
+    { id: "home", prob: 75, cote: null },
+    { id: "over", prob: 70, cote: 1.49 },
+  ], { minOdds: 1.5 }), null);
+});
+
 test("computeRiskLabel: cote basse -> FAIBLE, moyenne -> MODERE, haute -> ELEVE", () => {
   assert.equal(computeRiskLabel(1.5), "FAIBLE");
   assert.equal(computeRiskLabel(1.9), "MODERE");

@@ -61,3 +61,19 @@ test("parseOdds: bookmakers vide -> pas de crash, retourne l'objet vide", () => 
   const p = parseOdds({ bookmakers: [] });
   assert.equal(p.c1, "--");
 });
+
+test("parseOdds: expose les cotes reelles des totaux equipe, win-to-nil et resultat+total", () => {
+  const raw = bookmaker([
+    { name: "Home Team Total Goals", values: [{ value: "Over 1.5", odd: "1.72" }, { value: "Under 1.5", odd: "2.05" }] },
+    { name: "Away Team Total Goals", values: [{ value: "Over 1.5", odd: "2.30" }] },
+    { name: "Win to Nil - Home", values: [{ value: "Yes", odd: "2.80" }] },
+    { name: "Result/Total Goals", values: [{ value: "Home/Over 2.5", odd: "2.12" }, { value: "Away/Under 3.5", odd: "4.40" }] },
+  ]);
+  const p = parseOdds(raw);
+  assert.equal(p.home_over15, "1.72");
+  assert.equal(p.home_under15, "2.05");
+  assert.equal(p.away_over15, "2.30");
+  assert.equal(p.home_win_to_nil, "2.80");
+  assert.equal(p.home_win_over25, "2.12");
+  assert.equal(p.away_win_under35, "4.40");
+});

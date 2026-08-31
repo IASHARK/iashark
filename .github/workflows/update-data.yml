@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
     inputs:
       force_refresh:
-        description: 'Vider le cache et recalculer tous les matchs'
+        description: 'Compatibilite historique (les matchs sont maintenant toujours recalcules)'
         required: false
         default: 'false'
       test_wc_only:
@@ -37,6 +37,8 @@ jobs:
           const { resolveMarketWin } = require('./lib/resolvers.js');
           const { parseOdds } = require('./lib/odds.js');
           const { pickMarketDeterministic, computeRiskLabel, computeModelAgreement, computeDataQualityScore, computeReliability } = require('./lib/decision.js');
+          const { buildPoissonMatrix, buildDixonColesMatrix, blendMatrices, deriveMarketsFromMatrix } = require('./lib/markets/score-matrix.js');
+          const { blendEarlySeasonRate } = require('./lib/markets/early-season.js');
           const { buildPlayerMarketOutput } = require('./lib/markets/player-engine.js');
           const I18N_LOCALES = require('./i18n/locales.json');
           const I18N_PAGES = require('./scripts/i18n-manifest.js');
@@ -79,7 +81,7 @@ jobs:
           // multi-modeles §10 du MASTER) pour pouvoir comparer les performances
           // d'un modele a l'autre dans match_snapshots/match_premium_data plutot
           // que de tout attribuer au meme "modele" indistinct.
-          const MODEL_VERSION = 'legacy-poisson-dc-mc-v1';
+          const MODEL_VERSION = 'score-matrix-dc-early-season-v2';
           const APS_KEY    = process.env.APISPORTS_KEY;
           const OWM_KEY    = process.env.OPENWEATHER_KEY;
           const NEWS_KEY   = process.env.NEWSAPI_KEY;
@@ -451,44 +453,24 @@ jobs:
             return hh+':'+mm;
           }
           function calcFinalProbs(lambdaH, lambdaA, eloStats) {
+            var poissonMatrix=buildPoissonMatrix(lambdaH,lambdaA,10);
+            var dixonMatrix=buildDixonColesMatrix(lambdaH,lambdaA,10);
+            var matrix=blendMatrices([{matrix:poissonMatrix,weight:0.35},{matrix:dixonMatrix,weight:0.65}]);
+            var markets=deriveMarketsFromMatrix(matrix);
+            function pct(value){return value*100;}
             var po = calcPoissonProbs(lambdaH, lambdaA);
             var dc = calcDixonColesProbs(lambdaH, lambdaA);
             var mc = calcMonteCarlo(lambdaH, lambdaA);
-            var eloP1=null, eloPN=null, eloP2=null;
-            if(eloStats && eloStats.probH && eloStats.probA) {
-              var avgPN = Math.round((po.pN + dc.pN + mc.pN) / 3);
-              var rawH = eloStats.probH, rawA = eloStats.probA;
-              var scale = (100 - avgPN) / Math.max(rawH + rawA, 1);
-              eloP1 = Math.round(rawH * scale);
-              eloP2 = Math.round(rawA * scale);
-              eloPN = 100 - eloP1 - eloP2;
-            }
-            var hasElo = eloP1 !== null;
-            var w = hasElo
-              ? {po:0.32, dc:0.36, mc:0.22, elo:0.10}
-              : {po:0.35, dc:0.40, mc:0.25, elo:0};
-            function blend1X2(key, eloVal) {
-              var base = po[key]*w.po + dc[key]*w.dc + mc[key]*w.mc;
-              if(hasElo && eloVal!==null) base += eloVal*w.elo;
-              return Math.round(base);
-            }
-            function blendMarket(key) {
-              return Math.round(po[key]*0.35 + dc[key]*0.40 + mc[key]*0.25);
-            }
-            var p1  = blend1X2('p1',  eloP1);
-            var pN  = blend1X2('pN',  eloPN);
-            var p2  = blend1X2('p2',  eloP2);
-            var total = p1+pN+p2;
-            if(total !== 100) { var diff=100-total; p1+=diff; }
             return {
-              p1:p1, pN:pN, p2:p2,
-              over15:blendMarket('over15'), over25:blendMarket('over25'),
-              under25:blendMarket('under25'), over35:blendMarket('over35'),
-              bttsY:blendMarket('bttsY'), bttsN:blendMarket('bttsN'),
+              p1:pct(markets.p1), pN:pct(markets.pN), p2:pct(markets.p2),
+              over15:pct(markets.overUnder['1.5'].over), over25:pct(markets.overUnder['2.5'].over),
+              under25:pct(markets.overUnder['2.5'].under), over35:pct(markets.overUnder['3.5'].over),
+              under35:pct(markets.overUnder['3.5'].under), bttsY:pct(markets.btts.yes), bttsN:pct(markets.btts.no),
+              derived:markets,
               poisson:{p1:po.p1,pN:po.pN,p2:po.p2,over25:po.over25,bttsN:po.bttsN},
               dixon:{p1:dc.p1,pN:dc.pN,p2:dc.p2,over25:dc.over25,bttsN:dc.bttsN},
               montecarlo:{p1:mc.p1,pN:mc.pN,p2:mc.p2,over25:mc.over25,bttsN:mc.bttsN,top_scores:mc.top_scores||[],simulations:mc.simulations||null},
-              elo_used:hasElo,
+              elo_used:false,
             };
           }
           function calcLambdas(bmHdom, beHdom, mdHdom, bmAext, beAext, meAext, leagueAvgH, leagueAvgA, leagueId) {
@@ -575,20 +557,23 @@ jobs:
             return uniqueFixtures;
           }
           async function getTeamStats(teamId, leagueId, season) {
+            var explicitSeason=season!=null;
             var s = season || seasonForLeague(leagueId, SEASON);
             var r = await get('https://v3.football.api-sports.io/teams/statistics?team='+teamId+'&league='+leagueId+'&season='+s, APS);
             var isEmpty = !r.response || (typeof r.response==='object' && !Array.isArray(r.response) && Object.keys(r.response).length===0);
-            if(isEmpty && s!==2026){
+            if(isEmpty && !explicitSeason && s!==2026){
               var r2 = await get('https://v3.football.api-sports.io/teams/statistics?team='+teamId+'&league='+leagueId+'&season=2026', APS);
               var isEmpty2 = !r2.response || (typeof r2.response==='object' && !Array.isArray(r2.response) && Object.keys(r2.response).length===0);
               return isEmpty2 ? null : r2.response;
             }
             return isEmpty ? null : r.response;
           }
-          async function getLast10(teamId, season) {
+          async function getLast10(teamId, season, leagueId) {
+            var explicitSeason=season!=null;
             var s = season || SEASON;
-            var r = await get('https://v3.football.api-sports.io/fixtures?team='+teamId+'&last=20&status=FT&season='+s, APS);
-            if((!r.response||!r.response.length)&&s!==2026){
+            var leagueFilter=leagueId?'&league='+leagueId:'';
+            var r = await get('https://v3.football.api-sports.io/fixtures?team='+teamId+'&last=20&status=FT&season='+s+leagueFilter, APS);
+            if((!r.response||!r.response.length)&&!explicitSeason&&s!==2026){
               var r2=await get('https://v3.football.api-sports.io/fixtures?team='+teamId+'&last=20&status=FT&season=2026',APS);
               return r2.response||[];
             }
@@ -1385,8 +1370,8 @@ jobs:
               if(!alreadyExists&&m.pari_rec){
                 var betLabel=m.pari_rec;
                 var betCote=parseFloat(m.cote_rec)||null;
-                var marketType='autre';
-                if(betLabel){
+                var marketType=m.market_id||m.marche||'autre';
+                if(!m.market_id&&betLabel){
                   var bl=betLabel.toLowerCase();
                   if(bl.includes('under 2.5'))marketType='under25';
                   else if(bl.includes('over 2.5'))marketType='over25';
@@ -1805,7 +1790,7 @@ jobs:
                   var lgIdF=fixtures.find(function(f){return f.teams.home.id===tid||f.teams.away.id===tid;});
                   lgIdF=lgIdF?lgIdF.league.id:null;
                   if(!lgIdF){xgConcededCache[tid]=null;continue;}
-                  var rs=await get('https://v3.football.api-sports.io/teams/statistics?team='+tid+'&season='+SEASON+'&league='+lgIdF,APS);
+                  var rs=await get('https://v3.football.api-sports.io/teams/statistics?team='+tid+'&season='+seasonForLeague(lgIdF,SEASON)+'&league='+lgIdF,APS);
                   var played=rs&&rs.response&&rs.response.fixtures&&rs.response.fixtures.played&&rs.response.fixtures.played.total||null;
                   var conceded=rs&&rs.response&&rs.response.goals&&rs.response.goals.against&&rs.response.goals.against.total&&rs.response.goals.against.total.total||null;
                   xgConcededCache[tid]=(played&&conceded&&played>0)?(conceded/played):null;
@@ -1816,17 +1801,7 @@ jobs:
             var eloData=await loadClubElo();
             var prevPinnacleOdds={};
             try{if(fs.existsSync('data.json')){var prevData=JSON.parse(fs.readFileSync('data.json','utf8'));(prevData.matchs||[]).forEach(function(m){if(m.pinnacle_snapshot){prevPinnacleOdds[m.home.n+'|'+m.away.n]=m.pinnacle_snapshot;}});}}catch(e){}
-            console.log('Cache actif - matchs deja verrouilles reutilises, seuls les nouveaux sont calcules');
-            var matchCache = {};
-            try {
-              if (fs.existsSync('data.json')) {
-                var prevDataForCache = JSON.parse(fs.readFileSync('data.json', 'utf8'));
-                (prevDataForCache.matchs || []).forEach(function(m) {
-                  matchCache[String(m.id)] = m;
-                });
-              }
-            } catch (e) {}
-            console.log('Cache persistant : ' + Object.keys(matchCache).length + ' match(s) deja verrouille(s) depuis un run precedent - prediction conservee a l\'identique');
+            console.log('Recalcul actif : chaque fixture est reevaluee avec les dernieres donnees et cotes disponibles');
             var matchsData=[];
             var premiumRows=[];
             var snapshotRows=[];
@@ -1847,12 +1822,6 @@ jobs:
                 wcRound.includes('third place')||wcRound.includes('3rd place')
               );
               if(isKnockout) console.log('  [WC KNOCKOUT] '+home.name+' vs '+away.name+' - '+lg.round);
-              var cacheKeyMatch = String(f.id);
-              if (matchCache[cacheKeyMatch]) {
-                console.log('  Deja verrouille: '+home.name+' vs '+away.name+' - prediction conservee');
-                matchsData.push(matchCache[cacheKeyMatch]);
-                continue;
-              }
               console.log('\n-> '+home.name+' vs '+away.name+' ('+lg.name+')'+(isWorldCupMatch?' [WC]':''));
               if(!standingsCache[lg.id]){
                 var stSeason=seasonForLeague(lg.id, SEASON);
@@ -1865,11 +1834,17 @@ jobs:
               var entryA=standings.find(function(s){return s.team.id===away.id;});
               var rkH=entryH?entryH.rank:null;
               var rkA=entryA?entryA.rank:null;
-              var batch1=await Promise.all([getTeamStats(home.id,lg.id),getTeamStats(away.id,lg.id),getLast10(home.id),getLast10(away.id)]);
+              var currentSeason=seasonForLeague(lg.id, SEASON);
+              var previousSeason=currentSeason-1;
+              var batch1=await Promise.all([
+                getTeamStats(home.id,lg.id,currentSeason),getTeamStats(away.id,lg.id,currentSeason),
+                getLast10(home.id,currentSeason,lg.id),getLast10(away.id,currentSeason,lg.id),
+                getTeamStats(home.id,lg.id,previousSeason),getTeamStats(away.id,lg.id,previousSeason)
+              ]);
               await sleep(400);
               var batch2=await Promise.all([getOdds(f.id),getInjuries(f.id),getH2H(home.id,away.id),getWeather(f.venue&&f.venue.city?f.venue.city:'',f.date),getNews(home.name),getNews(away.name),getPredictions(f.id),getLineups(f.id),getRefereeStats(f.referee||null),getPinnacleOdds(home.name,away.name,lgKey(lg.id))]);
               await sleep(400);
-              var sH=batch1[0],sA=batch1[1],raw10H=batch1[2],raw10A=batch1[3];
+              var sH=batch1[0],sA=batch1[1],raw10H=batch1[2],raw10A=batch1[3],sHPrev=batch1[4],sAPrev=batch1[5];
               function isEmptySH(s){
                 return !s || !(s.fixtures && s.fixtures.played && ((s.fixtures.played.home||0)>0 || (s.fixtures.played.away||0)>0));
               }
@@ -1975,9 +1950,9 @@ jobs:
               var matchsLeft=totalTeams*2-Math.max(matchsPlayedH,1);
               var motivH=calcMotivation(rkH,totalTeams,entryH?entryH.points:0,standings[0]?standings[0].points:0,matchsLeft,true,lg.name,home.name,away.name,lgKey(lg.id));
               var motivA=calcMotivation(rkA,totalTeams,entryA?entryA.points:0,standings[0]?standings[0].points:0,matchsLeft,false,lg.name,home.name,away.name,lgKey(lg.id));
-              var totalH=(sH&&sH.fixtures&&sH.fixtures.played&&sH.fixtures.played.total)||30;
-              var totalA=(sA&&sA.fixtures&&sA.fixtures.played&&sA.fixtures.played.total)||30;
-              var mdHdom_elo=(sH&&sH.fixtures&&sH.fixtures.played&&sH.fixtures.played.home)||Math.round(totalH/2);
+              var totalH=statNumber(sH,['fixtures','played','total']);
+              var totalA=statNumber(sA,['fixtures','played','total']);
+              var mdHdom_elo=statNumber(sH,['fixtures','played','home']);
               var vdH_elo=(sH&&sH.fixtures&&sH.fixtures.wins&&sH.fixtures.wins.home)||0;
               var eloH=getElo(eloData,home.name);
               var eloA=getElo(eloData,away.name);
@@ -1991,8 +1966,8 @@ jobs:
                 if(prev.c2&&pinnacleOdds.c2){var d2=Math.round(((prev.c2-pinnacleOdds.c2)/prev.c2)*100);if(Math.abs(d2)>=5)drops.push({team:away.name,pct:d2,dir:d2>0?'baisse':'hausse',coteOuv:prev.c2,coteCurr:pinnacleOdds.c2});}
                 if(drops.length)droppingOdds=drops;
               }
-              var mdHdom=(sH&&sH.fixtures&&sH.fixtures.played&&sH.fixtures.played.home)||Math.round(totalH/2);
-              var meAext=(sA&&sA.fixtures&&sA.fixtures.played&&sA.fixtures.played.away)||Math.round(totalA/2);
+              var mdHdom=statNumber(sH,['fixtures','played','home']);
+              var meAext=statNumber(sA,['fixtures','played','away']);
               var bmHdom=(sH&&sH.goals&&sH.goals.for&&sH.goals.for.home)||0;
               var beHdom=(sH&&sH.goals&&sH.goals.against&&sH.goals.against.home)||0;
               var bmAext=(sA&&sA.goals&&sA.goals.for&&sA.goals.for.away)||0;
@@ -2001,9 +1976,26 @@ jobs:
               var beHdom_p=(sH&&sH.goals&&sH.goals.against&&sH.goals.against.total&&sH.goals.against.total.home)||0;
               var bmAext_p=(sA&&sA.goals&&sA.goals.for&&sA.goals.for.total&&sA.goals.for.total.away)||0;
               var beAext_p=(sA&&sA.goals&&sA.goals.against&&sA.goals.against.total&&sA.goals.against.total.away)||0;
-              var meAext_p=(sA&&sA.fixtures&&sA.fixtures.played&&sA.fixtures.played.away)||10;
-              var lambdas=calcLambdas(bmHdom_p,beHdom_p,mdHdom,bmAext_p,beAext_p,meAext_p,null,null,lg.id);
-              if(xgH.xg_avg&&xgA.xg_avg){
+              var meAext_p=statNumber(sA,['fixtures','played','away']);
+              function statNumber(obj,path){
+                var value=path.reduce(function(acc,key){return acc&&acc[key]!=null?acc[key]:null;},obj);
+                return Number(value)||0;
+              }
+              function regularizedRate(currentEvents,currentMatches,previousStats,eventPath,matchPath,leagueRate){
+                return blendEarlySeasonRate({
+                  current:{events:currentEvents,matches:currentMatches},
+                  previous:{events:statNumber(previousStats,eventPath),matches:statNumber(previousStats,matchPath)},
+                  leaguePrior:{rate:leagueRate,equivalentMatches:6}
+                }).rate;
+              }
+              var rateHFor=regularizedRate(bmHdom_p,mdHdom,sHPrev,['goals','for','total','home'],['fixtures','played','home'],1.35);
+              var rateHAgainst=regularizedRate(beHdom_p,mdHdom,sHPrev,['goals','against','total','home'],['fixtures','played','home'],1.10);
+              var rateAFor=regularizedRate(bmAext_p,meAext_p,sAPrev,['goals','for','total','away'],['fixtures','played','away'],1.10);
+              var rateAAgainst=regularizedRate(beAext_p,meAext_p,sAPrev,['goals','against','total','away'],['fixtures','played','away'],1.35);
+              var modelDataAvailable=(mdHdom+statNumber(sHPrev,['fixtures','played','home'])>0)&&(meAext_p+statNumber(sAPrev,['fixtures','played','away'])>0);
+              var lambdas=calcLambdas(rateHFor,rateHAgainst,1,rateAFor,rateAAgainst,1,null,null,lg.id);
+              var enoughCurrentMatchStats=raw10H.length>=5&&raw10A.length>=5;
+              if(enoughCurrentMatchStats&&xgH.xg_avg&&xgA.xg_avg){
                 lambdas.lambdaH=parseFloat((lambdas.lambdaH*0.6+parseFloat(xgH.xg_avg)*0.4).toFixed(3));
                 lambdas.lambdaA=parseFloat((lambdas.lambdaA*0.6+parseFloat(xgA.xg_avg)*0.4).toFixed(3));
               }
@@ -2013,8 +2005,8 @@ jobs:
                 var ratio=on/tot, baseline=0.35;
                 return Math.max(0.85, Math.min(1.15, ratio/baseline));
               }
-              var shotQualH=calcShotQualityFactor(xgH.shots_on_avg, xgH.shots_total_avg);
-              var shotQualA=calcShotQualityFactor(xgA.shots_on_avg, xgA.shots_total_avg);
+              var shotQualH=enoughCurrentMatchStats?calcShotQualityFactor(xgH.shots_on_avg, xgH.shots_total_avg):1;
+              var shotQualA=enoughCurrentMatchStats?calcShotQualityFactor(xgA.shots_on_avg, xgA.shots_total_avg):1;
               lambdas.lambdaH=parseFloat((lambdas.lambdaH*shotQualH).toFixed(3));
               lambdas.lambdaA=parseFloat((lambdas.lambdaA*shotQualA).toFixed(3));
               if(isWorldCupMatch){
@@ -2080,18 +2072,39 @@ jobs:
                 marketAware={p1:ap1,pN:apN,p2:ap2};
               }
 
-              var allMarkets=[
-                {market:'Over 2.5',  cote:odds.co25,      prob:pureProbs.over25, marketProb:fairOU?fairOU.a:naiveImplied(odds.co25),      label:'Plus de 2.5 buts'},
-                {market:'Under 2.5', cote:odds.cu25,      prob:pureProbs.under25,marketProb:fairOU?fairOU.b:naiveImplied(odds.cu25),      label:'Moins de 2.5 buts'},
-                {market:'BTTS Oui',  cote:odds.btts_oui,  prob:pureProbs.bttsY,  marketProb:fairBTTS?fairBTTS.a:naiveImplied(odds.btts_oui), label:'Les deux equipes marquent'},
-                {market:'BTTS Non',  cote:odds.btts_non,  prob:pureProbs.bttsN,  marketProb:fairBTTS?fairBTTS.b:naiveImplied(odds.btts_non), label:'Une equipe ne marque pas'},
-                {market:'DC 1X',     cote:odds.dc1x,      prob:purePropProb1X,   marketProb:naiveImplied(odds.dc1x),                     label:'Victoire ou nul domicile'},
-                {market:'DC X2',     cote:odds.dc2x,      prob:purePropProbX2,   marketProb:naiveImplied(odds.dc2x),                     label:'Victoire ou nul exterieur'},
-                {market:'Victoire Domicile', cote:odds.c1, prob:pureProbs.p1, marketProb:shinProbs?shinProbs.p1:naiveImplied(odds.c1), label:'Victoire seche domicile'},
-                {market:'Victoire Exterieur',cote:odds.c2, prob:pureProbs.p2, marketProb:shinProbs?shinProbs.p2:naiveImplied(odds.c2), label:'Victoire seche exterieur'},
-              ].filter(function(m){
-                return m.cote&&m.cote!=='--'&&parseFloat(m.cote)>=1.50;
-              });
+              function candidate(id,market,cote,prob,label,marketProb){return{id:id,market:market,cote:cote,prob:prob,label:label,marketProb:marketProb};}
+              var d=pureProbs.derived;
+              var allMarketCandidates=[
+                candidate('home-win','Victoire Domicile',odds.c1,pureProbs.p1,'Victoire seche domicile',shinProbs?shinProbs.p1:naiveImplied(odds.c1)),
+                candidate('draw','Match nul',odds.cn,pureProbs.pN,'Match nul',shinProbs?shinProbs.pN:naiveImplied(odds.cn)),
+                candidate('away-win','Victoire Exterieur',odds.c2,pureProbs.p2,'Victoire seche exterieur',shinProbs?shinProbs.p2:naiveImplied(odds.c2)),
+                candidate('dc-1x','DC 1X',odds.dc1x,purePropProb1X,'Victoire ou nul domicile',naiveImplied(odds.dc1x)),
+                candidate('dc-x2','DC X2',odds.dc2x,purePropProbX2,'Victoire ou nul exterieur',naiveImplied(odds.dc2x)),
+                candidate('dc-12','DC 12',odds.dc12,d.doubleChance.oneTwo*100,'Une des deux equipes gagne',naiveImplied(odds.dc12)),
+                candidate('over-25','Over 2.5',odds.co25,pureProbs.over25,'Plus de 2.5 buts',fairOU?fairOU.a:naiveImplied(odds.co25)),
+                candidate('under-25','Under 2.5',odds.cu25,pureProbs.under25,'Moins de 2.5 buts',fairOU?fairOU.b:naiveImplied(odds.cu25)),
+                candidate('over-35','Over 3.5',odds.co35,pureProbs.over35,'Plus de 3.5 buts',naiveImplied(odds.co35)),
+                candidate('under-35','Under 3.5',odds.cu35,pureProbs.under35,'Moins de 3.5 buts',naiveImplied(odds.cu35)),
+                candidate('btts-yes','BTTS Oui',odds.btts_oui,pureProbs.bttsY,'Les deux equipes marquent',fairBTTS?fairBTTS.a:naiveImplied(odds.btts_oui)),
+                candidate('btts-no','BTTS Non',odds.btts_non,pureProbs.bttsN,'Une equipe ne marque pas',fairBTTS?fairBTTS.b:naiveImplied(odds.btts_non)),
+                candidate('home-team-over-15','Domicile plus de 1.5 but',odds.home_over15,d.teamTotals.home['1.5'].over*100,'Domicile marque au moins 2 buts',naiveImplied(odds.home_over15)),
+                candidate('home-team-under-15','Domicile moins de 1.5 but',odds.home_under15,d.teamTotals.home['1.5'].under*100,'Domicile marque au plus 1 but',naiveImplied(odds.home_under15)),
+                candidate('away-team-over-15','Exterieur plus de 1.5 but',odds.away_over15,d.teamTotals.away['1.5'].over*100,'Exterieur marque au moins 2 buts',naiveImplied(odds.away_over15)),
+                candidate('away-team-under-15','Exterieur moins de 1.5 but',odds.away_under15,d.teamTotals.away['1.5'].under*100,'Exterieur marque au plus 1 but',naiveImplied(odds.away_under15)),
+                candidate('home-win-to-nil','Domicile gagne sans encaisser',odds.home_win_to_nil,d.winToNil.home*100,'Domicile gagne sans encaisser',naiveImplied(odds.home_win_to_nil)),
+                candidate('away-win-to-nil','Exterieur gagne sans encaisser',odds.away_win_to_nil,d.winToNil.away*100,'Exterieur gagne sans encaisser',naiveImplied(odds.away_win_to_nil)),
+                candidate('home-win-over-15','Domicile gagne + plus de 1.5 but',odds.home_win_over15,d.resultTotals.home.over1_5*100,'Domicile gagne et plus de 1.5 but',naiveImplied(odds.home_win_over15)),
+                candidate('home-win-over-25','Domicile gagne + plus de 2.5 buts',odds.home_win_over25,d.resultTotals.home.over2_5*100,'Domicile gagne et plus de 2.5 buts',naiveImplied(odds.home_win_over25)),
+                candidate('home-win-over-35','Domicile gagne + plus de 3.5 buts',odds.home_win_over35,d.resultTotals.home.over3_5*100,'Domicile gagne et plus de 3.5 buts',naiveImplied(odds.home_win_over35)),
+                candidate('home-win-under-25','Domicile gagne + moins de 2.5 buts',odds.home_win_under25,d.resultTotals.home.under2_5*100,'Domicile gagne et moins de 2.5 buts',naiveImplied(odds.home_win_under25)),
+                candidate('home-win-under-35','Domicile gagne + moins de 3.5 buts',odds.home_win_under35,d.resultTotals.home.under3_5*100,'Domicile gagne et moins de 3.5 buts',naiveImplied(odds.home_win_under35)),
+                candidate('away-win-over-15','Exterieur gagne + plus de 1.5 but',odds.away_win_over15,d.resultTotals.away.over1_5*100,'Exterieur gagne et plus de 1.5 but',naiveImplied(odds.away_win_over15)),
+                candidate('away-win-over-25','Exterieur gagne + plus de 2.5 buts',odds.away_win_over25,d.resultTotals.away.over2_5*100,'Exterieur gagne et plus de 2.5 buts',naiveImplied(odds.away_win_over25)),
+                candidate('away-win-over-35','Exterieur gagne + plus de 3.5 buts',odds.away_win_over35,d.resultTotals.away.over3_5*100,'Exterieur gagne et plus de 3.5 buts',naiveImplied(odds.away_win_over35)),
+                candidate('away-win-under-25','Exterieur gagne + moins de 2.5 buts',odds.away_win_under25,d.resultTotals.away.under2_5*100,'Exterieur gagne et moins de 2.5 buts',naiveImplied(odds.away_win_under25)),
+                candidate('away-win-under-35','Exterieur gagne + moins de 3.5 buts',odds.away_win_under35,d.resultTotals.away.under3_5*100,'Exterieur gagne et moins de 3.5 buts',naiveImplied(odds.away_win_under35))
+              ];
+              var allMarkets=modelDataAvailable?allMarketCandidates.filter(function(m){return m.cote&&m.cote!=='--'&&Number.isFinite(parseFloat(m.cote));}):[];
               var nodeKelly=null;
               // Selection du marche, edge, Kelly et niveau de risque : entierement
               // deterministes, calcules AVANT l'appel au LLM (MASTER V2.1 §1.3/§7.8/
@@ -2100,7 +2113,7 @@ jobs:
               // le resultat deja decide pour le commenter en texte - si Claude est
               // indisponible, ce bloc produit exactement la meme decision (§10.AJ:
               // "le moteur doit fonctionner a 100% sans lui").
-              var pickedMarket=pickMarketDeterministic(allMarkets);
+              var pickedMarket=pickMarketDeterministic(allMarkets,{minOdds:1.50});
               var riskLabelCode=pickedMarket?computeRiskLabel(pickedMarket.cote):'MODERE';
               var kellyVal='0';
               var edgeVal='';
@@ -2306,7 +2319,7 @@ jobs:
                 dc1x:odds.dc1x,dc2x:odds.dc2x,dc12:odds.dc12,cdc1x:odds.dc1x,cdc2x:odds.dc2x,
                 ah_dom:odds.ah_dom||'--',ah_ext:odds.ah_ext||'--',co35:odds.co35||'--',
                 cbtts:odds.btts_oui,cbtts_non:odds.btts_non,btts_oui:odds.btts_oui,btts_non:odds.btts_non,
-                marche:pickedMarket?categorizeMarket(pickedMarket.market):'RESULTAT',
+                marche:pickedMarket?categorizeMarket(pickedMarket.market):'RESULTAT',market_id:pickedMarket?pickedMarket.id:null,
                 risque:riskLabelCode,pari_rec:pickedMarket?pickedMarket.market:'',
                 cote_rec:pickedMarket?String(pickedMarket.cote):'',
                 no_signal:noSignal,
@@ -2321,7 +2334,7 @@ jobs:
                 scores:an&&an.score_central?[an.score_central]:[],
                 mc_scores:pureProbs.montecarlo?pureProbs.montecarlo.top_scores:[],
                 simulation_count:pureProbs.montecarlo?pureProbs.montecarlo.simulations:null,
-                paris_safe:{bet:pickedMarket?pickedMarket.market:'',cote:pickedMarket?parseFloat(pickedMarket.cote):odds.c1,proba:pickedMarket?Math.round(pickedMarket.prob)+'%':''},
+                paris_safe:{bet:pickedMarket?pickedMarket.market:'',cote:pickedMarket?parseFloat(pickedMarket.cote):null,proba:pickedMarket?Math.round(pickedMarket.prob)+'%':''},
                 paris_risque:{bet:'',cote:'',proba:''},
                 stade:{nom:f.venue&&f.venue.name?(f.venue.name+(f.venue.city?' - '+f.venue.city:'')):home.name+' (domicile)',cap:'',meteo:wx?wx.emoji:'',temp:wx?wx.temp:'',desc:wx?wx.desc:'',wind:wx?wx.wind:'',weather_source:wx?wx.source:'',weather_forecast_at:wx?wx.forecast_at:''},
                 crit_home:critH,crit_away:critA,
@@ -2413,14 +2426,9 @@ jobs:
           }
           main().catch(function(e){console.error('FATAL:',e.message,e.stack);process.exit(1);});
           JSEOF
-      - name: Vider le cache uniquement si force_refresh demande
+      - name: Signaler le mode de recalcul
         run: |
-          if [ "${{ github.event.inputs.force_refresh }}" = "true" ]; then
-            echo '{"matchs":[]}' > data.json
-            echo "force_refresh=true : cache vide, tous les matchs seront recalcules"
-          else
-            echo "Cache conserve : les matchs deja verrouilles gardent leur prediction (matchCache actif)"
-          fi
+          echo "Les fixtures sont recalculees a chaque execution; les snapshots historiques restent conserves separement."
       - name: Verifier la couverture reelle des ligues de lancement (API-Football)
         continue-on-error: true
         env:

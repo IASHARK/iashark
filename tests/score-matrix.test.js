@@ -125,3 +125,18 @@ test("deriveMarketsFromMatrix: favori net a domicile -> p1 nettement superieur a
   const m = deriveMarketsFromMatrix(mat);
   assert.ok(m.p1 > m.p2 + 0.3, JSON.stringify({ p1: m.p1, p2: m.p2 }));
 });
+
+test("deriveMarketsFromMatrix: les combines resultat + total sont calcules cellule par cellule", () => {
+  const matrix = [
+    [0.10, 0.05, 0.05],
+    [0.10, 0.10, 0.05],
+    [0.20, 0.15, 0.20],
+  ];
+  const m = deriveMarketsFromMatrix(matrix);
+  assert.equal(m.resultTotals.home.over1_5, 0.35);
+  assert.equal(m.resultTotals.home.over2_5, 0.15);
+  assert.equal(m.resultTotals.away.over1_5, 0.10);
+  assert.equal(m.resultTotals.away.under2_5, 0.10);
+  assert.ok(m.resultTotals.home.over2_5 <= m.p1);
+  assert.ok(m.resultTotals.home.over2_5 <= m.overUnder["2.5"].over);
+});

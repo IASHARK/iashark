@@ -54,6 +54,30 @@ test("resolveMarketWin: DC X2 gagne sur victoire exterieur ou nul", () => {
   assert.equal(resolveMarketWin("DC X2", 1, 1), true);
   assert.equal(resolveMarketWin("DC X2", 2, 0), false);
 });
+test("resolveMarketWin: DC 12 gagne seulement si le match ne finit pas nul", () => {
+  assert.equal(resolveMarketWin("DC 12", 2, 1), true);
+  assert.equal(resolveMarketWin("DC 12", 1, 2), true);
+  assert.equal(resolveMarketWin("DC 12", 1, 1), false);
+});
+
+test("resolveMarketWin: totaux equipe utilisent uniquement les buts de l'equipe concernee", () => {
+  assert.equal(resolveMarketWin("Domicile plus de 1.5 but", 2, 0), true);
+  assert.equal(resolveMarketWin("Domicile plus de 1.5 but", 1, 4), false);
+  assert.equal(resolveMarketWin("Exterieur moins de 1.5 but", 4, 1), true);
+});
+
+test("resolveMarketWin: victoire sans encaisser exige simultanement victoire et clean sheet", () => {
+  assert.equal(resolveMarketWin("Domicile gagne sans encaisser", 2, 0), true);
+  assert.equal(resolveMarketWin("Domicile gagne sans encaisser", 2, 1), false);
+  assert.equal(resolveMarketWin("Exterieur gagne sans encaisser", 0, 1), true);
+});
+
+test("resolveMarketWin: combines resultat + total exigent les deux conditions", () => {
+  assert.equal(resolveMarketWin("Domicile gagne + plus de 2.5 buts", 2, 1), true);
+  assert.equal(resolveMarketWin("Domicile gagne + plus de 2.5 buts", 1, 2), false);
+  assert.equal(resolveMarketWin("Domicile gagne + moins de 3.5 buts", 2, 0), true);
+  assert.equal(resolveMarketWin("Domicile gagne + moins de 3.5 buts", 3, 1), false);
+});
 
 // --- Victoire seche (1X2 partiel) ---
 test("resolveMarketWin: Victoire Domicile / Exterieur", () => {

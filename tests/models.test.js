@@ -68,6 +68,11 @@ test("calcMonteCarlo: avec seed fixe, deux runs produisent le meme resultat (rep
   assert.deepEqual(r1, r2, "meme seed doit donner exactement le meme resultat");
 });
 
+test("calcMonteCarlo: expose le nombre réel de simulations exécutées", () => {
+  const result = calcMonteCarlo(1.4, 1.1, { n: 1234, seed: 7 });
+  assert.equal(result.simulations, 1234);
+});
+
 test("calcMonteCarlo: sans seed, deux runs peuvent differer (aleatoire reel par defaut)", () => {
   const r1 = calcMonteCarlo(1.4, 1.1, { n: 500 });
   const r2 = calcMonteCarlo(1.4, 1.1, { n: 500 });

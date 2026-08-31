@@ -487,7 +487,7 @@ jobs:
               bttsY:blendMarket('bttsY'), bttsN:blendMarket('bttsN'),
               poisson:{p1:po.p1,pN:po.pN,p2:po.p2,over25:po.over25,bttsN:po.bttsN},
               dixon:{p1:dc.p1,pN:dc.pN,p2:dc.p2,over25:dc.over25,bttsN:dc.bttsN},
-              montecarlo:{p1:mc.p1,pN:mc.pN,p2:mc.p2,over25:mc.over25,bttsN:mc.bttsN,top_scores:mc.top_scores||[]},
+              montecarlo:{p1:mc.p1,pN:mc.pN,p2:mc.p2,over25:mc.over25,bttsN:mc.bttsN,top_scores:mc.top_scores||[],simulations:mc.simulations||null},
               elo_used:hasElo,
             };
           }
@@ -622,11 +622,14 @@ jobs:
                 var diff=Math.abs(item.dt-targetTs);
                 if(diff<bestDiff){bestDiff=diff;slot=item;}
               });
+              // Le forecast OpenWeather ne couvre qu'une fenetre courte. Ne jamais
+              // recycler le dernier créneau disponible pour un match plus lointain.
+              if(bestDiff>4*60*60) return null;
             }
             if(!slot||!slot.main) return null;
             var icon=(slot.weather&&slot.weather[0]&&slot.weather[0].main)||'';
             var emoji='';
-            return {emoji,temp:Math.round(slot.main.temp)+'C',desc:(slot.weather&&slot.weather[0]&&slot.weather[0].description)||'',wind:Math.round((slot.wind&&slot.wind.speed)||0)+' km/h'};
+            return {emoji,temp:Math.round(slot.main.temp)+'C',desc:(slot.weather&&slot.weather[0]&&slot.weather[0].description)||'',wind:Math.round((slot.wind&&slot.wind.speed)||0)+' km/h',source:'openweathermap',forecast_at:new Date(slot.dt*1000).toISOString()};
           }
           async function getNews(team) {
             if(!NEWS_KEY) return [];
@@ -903,8 +906,9 @@ jobs:
             return {probH:Math.round(probHadj*100),probA:Math.round((1-probHadj)*100),diff:Math.round(eloH-eloA),homeBonus,signal:Math.abs(eloH-eloA)>=100?'FORT':Math.abs(eloH-eloA)>=50?'MODERE':'FAIBLE'};
           }
           function calcCriteres(stats,isDom,rank){
-            if(!stats)return{fd:50,att:50,def:50,fr:50,mot:70,fat:50};
-            var total=(stats.fixtures&&stats.fixtures.played&&stats.fixtures.played.total)||30;
+            if(!stats)return null;
+            var total=(stats.fixtures&&stats.fixtures.played&&stats.fixtures.played.total)||0;
+            if(total<3)return null;
             var bm=(stats.goals&&stats.goals.for&&stats.goals.for.total&&stats.goals.for.total.total)||0;
             var be=(stats.goals&&stats.goals.against&&stats.goals.against.total&&stats.goals.against.total.total)||0;
             var form=(stats.form||'').slice(-5);
@@ -925,7 +929,7 @@ jobs:
             var fd=isDom?Math.min(100,Math.round(vd/Math.max(md,1)*100)):Math.min(100,Math.round((stats.fixtures&&stats.fixtures.wins&&stats.fixtures.wins.away||0)/Math.max(me,1)*100));
             var mot=70;
             if(rank){if(rank<=3)mot=95;else if(rank<=6)mot=85;else if(rank<=10)mot=70;else if(rank>=17)mot=90;else mot=60;}
-            return{fd:Math.max(0,Math.min(100,fd)),att:Math.max(0,Math.min(100,att)),def:Math.max(0,Math.min(100,def)),fr:Math.max(0,Math.min(100,fr)),mot:Math.max(0,Math.min(100,mot)),fat:50};
+            return{fd:Math.max(0,Math.min(100,fd)),att:Math.max(0,Math.min(100,att)),def:Math.max(0,Math.min(100,def)),fr:Math.max(0,Math.min(100,fr)),mot:Math.max(0,Math.min(100,mot)),fat:50,source:'api-sports-team-statistics',sample_size:total};
           }
           function calcFatigue(last10){
             if(!last10||!last10.length)return{val:40,info:'Calendrier inconnu'};
@@ -1895,7 +1899,7 @@ jobs:
                 return{goals_avg:avg(allGoals.length),conceded_avg:avg(concGoals.length),
                   slots:[{t:'0-15',n:goalsIn(0,15,allGoals)},{t:'15-30',n:goalsIn(15,30,allGoals)},{t:'30-45',n:goalsIn(30,45,allGoals)},{t:'45-60',n:goalsIn(45,60,allGoals)},{t:'60-75',n:goalsIn(60,75,allGoals)},{t:'75-90',n:goalsIn(75,91,allGoals)}],
                   slots_against:[{t:'0-15',n:goalsIn(0,15,concGoals)},{t:'15-30',n:goalsIn(15,30,concGoals)},{t:'30-45',n:goalsIn(30,45,concGoals)},{t:'45-60',n:goalsIn(45,60,concGoals)},{t:'60-75',n:goalsIn(60,75,concGoals)},{t:'75-90',n:goalsIn(75,91,concGoals)}],
-                  red_cards:redCards,yellow_per_game:(yellowCards/games).toFixed(1),games};
+                  red_cards:redCards,yellow_per_game:(yellowCards/games).toFixed(1),games,source:'api-sports-fixture-events'};
               }
               var evPatH=calcEventsPattern(eventsH_raw,home.id);
               var evPatA=calcEventsPattern(eventsA_raw,away.id);
@@ -2175,6 +2179,7 @@ jobs:
                 dixon_p2:pureProbs.dixon?pureProbs.dixon.p2:pureProbs.p2,
                 mc_p1:pureProbs.montecarlo?pureProbs.montecarlo.p1:pureProbs.p1,
                 mc_scores:pureProbs.montecarlo?pureProbs.montecarlo.top_scores:[],
+                simulation_count:pureProbs.montecarlo?pureProbs.montecarlo.simulations:null,
                 mc_pN:pureProbs.montecarlo?pureProbs.montecarlo.pN:pureProbs.pN,
                 mc_p2:pureProbs.montecarlo?pureProbs.montecarlo.p2:pureProbs.p2,
                 pinnacle_p1:shinProbs?shinProbs.p1:null,pinnacle_pN:shinProbs?shinProbs.pN:null,pinnacle_p2:shinProbs?shinProbs.p2:null,
@@ -2291,6 +2296,7 @@ jobs:
                 conf:pickedMarket?Math.round((pickedMarket.prob/10)*10)/10:Math.round((dataQuality.score/10)*10)/10,
                 data_quality_score:dataQuality.score,data_quality_label:dataQuality.label,
                 model_agreement:modelAgreement.label,
+                model_output_available:!isEmptySH(sH)&&!isEmptySH(sA),
                 // p1/pn/p2 : PURE_IASHARK_PROBABILITY (jamais market_aware -
                 // c'etait le bug corrige ce jalon pour 1X2/DC specifiquement).
                 p1:pureProbs.p1||0,pn:pureProbs.pN||0,p2:pureProbs.p2||0,
@@ -2313,9 +2319,10 @@ jobs:
                 vbet:(!noSignal&&kellyVal!=='0')?'OUI':'NON',
                 scores:an&&an.score_central?[an.score_central]:[],
                 mc_scores:pureProbs.montecarlo?pureProbs.montecarlo.top_scores:[],
+                simulation_count:pureProbs.montecarlo?pureProbs.montecarlo.simulations:null,
                 paris_safe:{bet:pickedMarket?pickedMarket.market:'',cote:pickedMarket?parseFloat(pickedMarket.cote):odds.c1,proba:pickedMarket?Math.round(pickedMarket.prob)+'%':''},
                 paris_risque:{bet:'',cote:'',proba:''},
-                stade:{nom:f.venue&&f.venue.name?(f.venue.name+(f.venue.city?' - '+f.venue.city:'')):home.name+' (domicile)',cap:'',meteo:wx?wx.emoji:'',temp:wx?wx.temp:'',desc:wx?wx.desc:''},
+                stade:{nom:f.venue&&f.venue.name?(f.venue.name+(f.venue.city?' - '+f.venue.city:'')):home.name+' (domicile)',cap:'',meteo:wx?wx.emoji:'',temp:wx?wx.temp:'',desc:wx?wx.desc:'',wind:wx?wx.wind:'',weather_source:wx?wx.source:'',weather_forecast_at:wx?wx.forecast_at:''},
                 crit_home:critH,crit_away:critA,
                 form_home:last10H.slice(0,5),form_away:last10A.slice(0,5),
                 forme_h:(sH&&sH.form)||'',forme_a:(sA&&sA.form)||'',

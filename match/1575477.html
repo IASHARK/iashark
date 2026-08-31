@@ -7,6 +7,7 @@
 <meta name="description" content="Analyse IA du match SC Braga vs Vitória SC (Primeira Liga) le 2026-08-31. Probabilites, statistiques et niveau de confiance sur IASHARK."><link rel="canonical" href="https://iashark.com/match/1575477.html"><meta property="og:type" content="website"><meta property="og:title" content="SC Braga vs Vitória SC — Pronostic &amp; Analyse IA | IASHARK"><meta property="og:description" content="Analyse IA du match SC Braga vs Vitória SC (Primeira Liga) le 2026-08-31. Probabilites, statistiques et niveau de confiance sur IASHARK."><meta property="og:url" content="https://iashark.com/match/1575477.html"><meta name="twitter:card" content="summary"><meta name="twitter:title" content="SC Braga vs Vitória SC — Pronostic &amp; Analyse IA | IASHARK"><meta name="twitter:description" content="Analyse IA du match SC Braga vs Vitória SC (Primeira Liga) le 2026-08-31. Probabilites, statistiques et niveau de confiance sur IASHARK."><script type="application/ld+json">{"@context":"https://schema.org","@type":"SportsEvent","name":"SC Braga vs Vitória SC","sport":"Football","homeTeam":{"@type":"SportsTeam","name":"SC Braga"},"awayTeam":{"@type":"SportsTeam","name":"Vitória SC"},"url":"https://iashark.com/match/1575477.html","startDate":"2026-08-31T21:15:00.000Z","superEvent":{"@type":"SportsEvent","name":"Primeira Liga"}}</script>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="/lib/display-data.js"></script>
 <style>
 :root{
   --bg:#060a10;--card:#0c1520;--card2:#101d2a;
@@ -912,6 +913,7 @@ function buildDonut(hn,an,p1,pn,p2){
 }
 
 function buildCompactProbabilities(m){
+  if(!window.IasharkDisplayData||!window.IasharkDisplayData.hasReliableModelOutput(m))return '';
   return '<div class="s"><div class="stitle">PROBABILITÉS 1X2</div><div class="compact-probs">'
     +'<div class="compact-prob"><div class="compact-prob-label">DOMICILE</div><div class="compact-prob-value">'+Math.round(m.p1||0)+'%</div></div>'
     +'<div class="compact-prob"><div class="compact-prob-label">NUL</div><div class="compact-prob-value">'+Math.round(m.pn||0)+'%</div></div>'
@@ -920,8 +922,9 @@ function buildCompactProbabilities(m){
 }
 
 function buildCompactXg(m,hn,an){
-  var h=m.lambda_h!=null?m.lambda_h:(m.match_stats_home&&m.match_stats_home.xg);
-  var a=m.lambda_a!=null?m.lambda_a:(m.match_stats_away&&m.match_stats_away.xg);
+  var values=window.IasharkDisplayData?window.IasharkDisplayData.expectedGoalsForDisplay(m):null;
+  if(!values)return '';
+  var h=values.home,a=values.away;
   function team(team,name,value){
     var logo=(team&&team.logo)||(team&&team.id?'https://media.api-sports.io/football/teams/'+team.id+'.png':'');
     return '<div>'+(logo?'<img class="xg-logo" src="'+esc(logo)+'" alt="">':'')+'<div class="xg-name">'+esc(name)+'</div><div class="xg-value">'+(value!=null?Number(value).toFixed(2):'—')+'</div></div>';
@@ -930,6 +933,7 @@ function buildCompactXg(m,hn,an){
 }
 
 function buildCompactScores(m){
+  if(!window.IasharkDisplayData||!window.IasharkDisplayData.hasReliableModelOutput(m))return '';
   var scores=(m.mc_scores||[]).slice(0,3);
   if(!scores.length&&m.scores)scores=String(m.scores).split(',').slice(0,3).map(function(s){return {score:s.trim(),pct:null};});
   if(!scores.length)return '<div class="s"><div class="stitle">SCORES LES PLUS PROBABLES</div><div class="condition-empty">Simulation indisponible.</div></div>';
@@ -947,11 +951,12 @@ function buildModelStatus(m){
   var agreement=(m.reliability&&m.reliability.model_agreement)||m.model_agreement||'—';
   var quality=(m.reliability&&m.reliability.data_quality)||m.data_quality_label||'—';
   var score=m.data_quality_score!=null?Math.round(m.data_quality_score)+'%':'—';
+  var sources=window.IasharkDisplayData?window.IasharkDisplayData.sourceLabels(m):[];
   return '<div class="model-status-grid">'
-    +'<div class="model-status"><div class="model-status-label">SIMULATION IA</div><div class="model-status-value">10 000</div><div class="model-status-copy">Scénarios simulés pour estimer les issues principales.</div></div>'
-    +'<div class="model-status"><div class="model-status-label">ACCORD DES MODÈLES</div><div class="model-status-value">'+esc(agreement)+'</div><div class="model-status-copy">Convergence Poisson, Dixon-Coles, Monte-Carlo et Elo.</div></div>'
+    +(m.simulation_count?'<div class="model-status"><div class="model-status-label">SIMULATION IA</div><div class="model-status-value">'+esc(m.simulation_count)+'</div><div class="model-status-copy">Scénarios simulés pour estimer les issues principales.</div></div>':'')
+    +(Number(m.data_quality_score)>0?'<div class="model-status"><div class="model-status-label">ACCORD DES MODÈLES</div><div class="model-status-value">'+esc(agreement)+'</div><div class="model-status-copy">Accord calculé entre les modèles réellement exécutés.</div></div>':'')
     +'<div class="model-status"><div class="model-status-label">QUALITÉ DES DONNÉES</div><div class="model-status-value">'+esc(quality)+'</div><div class="model-status-copy">Score de complétude : '+esc(score)+'.</div></div>'
-    +'<div class="model-status"><div class="model-status-label">SOURCES UTILISÉES</div><div class="model-status-copy">API-Football<br>Forme et statistiques<br>Blessures et suspensions<br>Consensus disponible</div></div>'
+    +'<div class="model-status"><div class="model-status-label">SOURCES RÉELLEMENT DISPONIBLES</div><div class="model-status-copy">'+sources.map(esc).join('<br>')+'</div></div>'
     +'</div>';
 }
 
@@ -1268,7 +1273,7 @@ function buildMatchStats(hn,an,stH,stA){
 }
 
 function buildPatterns(hn, an, evH, evA) {
-  if(!evH && !evA) return '';
+  if(!window.IasharkDisplayData||!window.IasharkDisplayData.hasReliableEventPatterns(evH,evA))return '';
   var sH = (evH && evH.slots) || [];
   var sA = (evA && evA.slots) || [];
   if(!sH.length && !sA.length) return '';
@@ -1366,6 +1371,7 @@ function buildPatterns(hn, an, evH, evA) {
 }
 
 function buildCompTable(hn,an,ch,ca){
+  if(!window.IasharkDisplayData||!window.IasharkDisplayData.hasReliableCriteria(ch,ca))return '';
   var def=[{label:'ATTAQUE',key:'att'},{label:'DÉFENSE',key:'def'},{label:'FORME',key:'fr'},{label:'MOTIVATION',key:'mot'}];
   var dh=ch||{}, da=ca||{};
   var rows=def.map(function(c){
@@ -1478,15 +1484,19 @@ function buildArbitre(arb){
 
 function buildMatchConditions(m){
   var stade=m.stade||{};
+  var weather=window.IasharkDisplayData?window.IasharkDisplayData.weatherForDisplay(stade):null;
   var conditions=[];
   function add(label,value){
     if(value!==undefined&&value!==null&&String(value).trim()!=='')conditions.push({label:label,value:String(value)});
   }
   add('STADE',stade.nom);
-  add('MÉTÉO',stade.desc||stade.meteo);
-  add('TEMPÉRATURE',stade.temp);
+  if(weather){
+    add('MÉTÉO',weather.description);
+    add('TEMPÉRATURE',weather.temperature);
+    add('VENT',weather.wind);
+    add('SOURCE MÉTÉO',weather.source+' · prévision '+weather.forecastAt);
+  }
   add('PELOUSE',stade.pitch||stade.pelouse||stade.surface);
-  add('VENT',stade.wind||stade.vent);
   add('VILLE',stade.city||stade.ville);
 
   var content=conditions.length
@@ -1498,6 +1508,7 @@ function buildMatchConditions(m){
 }
 
 function buildMomentum(hn,an,evH,evA){
+  if(!window.IasharkDisplayData||!window.IasharkDisplayData.hasReliableEventPatterns(evH,evA))return '';
   var scoredH=(evH&&evH.slots)||[];
   var scoredA=(evA&&evA.slots)||[];
   var concededH=(evH&&evH.slots_against)||[];
@@ -1874,6 +1885,7 @@ function buildContexteMatch(m,hn,an,isWC,isTennis){
 }
 
 function buildFAQ(m,hn,an,pariRec,paricote){
+  if(!window.IasharkDisplayData||!window.IasharkDisplayData.hasReliableModelOutput(m))return '<div class="condition-empty">FAQ chiffrée indisponible : les données nécessaires au modèle ne sont pas suffisamment complètes.</div>';
   var qa=[];
 
   if(m.p1!=null&&m.p2!=null){
@@ -2071,7 +2083,8 @@ function render(m){
   function getFlag(name){return FLAG_MAP[name]||'';}
   var stadeHtml='';
   if(m.stade&&m.stade.nom){
-    stadeHtml='<div class="stade-row"><span class="stade-icon"><svg viewBox="0 0 24 24" width="14" height="14" style="stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="9" ry="4"/></svg></span><span class="stade-name">'+esc(m.stade.nom)+'</span>'+(m.stade.temp?'<span class="stade-meta">'+esc(m.stade.temp)+'</span>':'')+'</div>';
+    var headerWeather=window.IasharkDisplayData?window.IasharkDisplayData.weatherForDisplay(m.stade):null;
+    stadeHtml='<div class="stade-row"><span class="stade-icon"><svg viewBox="0 0 24 24" width="14" height="14" style="stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="9" ry="4"/></svg></span><span class="stade-name">'+esc(m.stade.nom)+'</span>'+(headerWeather&&headerWeather.temperature?'<span class="stade-meta">'+esc(headerWeather.temperature)+'</span>':'')+'</div>';
   }
   function teamDisplay(team,name,side,forme_str,isTennis){
     var logo=lgImg(team,(name||'?').slice(0,2).toUpperCase(),name);
@@ -2079,6 +2092,10 @@ function render(m){
   }
   var leagueLogo=m.league_id?'https://media.api-sports.io/football/leagues/'+encodeURIComponent(m.league_id)+'.png':'';
   var matchDay=(m.date||'').slice(0,10);
+  var modelOutputVisible=window.IasharkDisplayData&&window.IasharkDisplayData.hasReliableModelOutput(m);
+  var probabilityHtml=modelOutputVisible?'<div class="proba"><div class="pbar"><div class="pb1" style="width:'+(m.p1||0)+'%"></div><div class="pbn" style="width:'+(m.pn||0)+'%"></div><div class="pb2" style="width:'+(m.p2||0)+'%"></div></div>'
+    +'<div class="plabels"><div class="pi"><div class="pi-pct" style="color:var(--cyan)">'+(m.p1||0)+'%</div><div class="pi-lbl">'+hn.slice(0,8).toUpperCase()+'</div></div>'+(m.pn?'<div class="pi"><div class="pi-pct" style="color:rgba(255,255,255,0.25)">'+(m.pn||0)+'%</div><div class="pi-lbl">NUL</div></div>':'')+'<div class="pi"><div class="pi-pct" style="color:rgba(255,255,255,0.35)">'+(m.p2||0)+'%</div><div class="pi-lbl">'+an.slice(0,8).toUpperCase()+'</div></div></div>'
+    +'</div>':'<div class="proba"><div class="condition-empty">Analyse chiffrée indisponible : données d’équipe insuffisantes.</div></div>';
   var teamsHtml='<div class="hero">'
     +'<div class="match-meta-row"><div class="match-league">'+(leagueLogo?'<img src="'+leagueLogo+'" alt="">':'')+'<span>'+esc(m.league||'Compétition')+'</span></div><div class="match-date">'+esc(matchDay)+(heure?' · '+esc(heure):'')+'</div></div>'
     +'<div class="teams">'
@@ -2087,10 +2104,7 @@ function render(m){
     +teamDisplay(m.away,an,'away',m.forme_a||m.form_p2,isTennis)
     +'</div>'
     +stadeHtml
-    +'</div>'
-    +'<div class="proba"><div class="pbar"><div class="pb1" style="width:'+(m.p1||0)+'%"></div><div class="pbn" style="width:'+(m.pn||0)+'%"></div><div class="pb2" style="width:'+(m.p2||0)+'%"></div></div>'
-    +'<div class="plabels"><div class="pi"><div class="pi-pct" style="color:var(--cyan)">'+(m.p1||0)+'%</div><div class="pi-lbl">'+hn.slice(0,8).toUpperCase()+'</div></div>'+(m.pn?'<div class="pi"><div class="pi-pct" style="color:rgba(255,255,255,0.25)">'+(m.pn||0)+'%</div><div class="pi-lbl">NUL</div></div>':'')+'<div class="pi"><div class="pi-pct" style="color:rgba(255,255,255,0.35)">'+(m.p2||0)+'%</div><div class="pi-lbl">'+an.slice(0,8).toUpperCase()+'</div></div></div>'
-    +'</div>';
+    +'</div>'+probabilityHtml;
 
   var parisHtml='';
   if(pariRec){
@@ -2197,6 +2211,7 @@ function render(m){
     :'';
   var absentsHtml=!isTennis?buildAbsentsTable(m.injuries,m.home&&m.home.id,hn,an):'';
   var arbitreHtml=!isTennis?buildArbitre(m.arbitre):'';
+  var comparisonHtml=!isTennis?buildCompTable(hn,an,m.crit_home,m.crit_away):'';
   // La page est organisée selon les trois questions réelles de l'utilisateur :
   // comprendre rapidement, vérifier les calculs, puis étudier les joueurs.
   // Les calculateurs et sources existants restent inchangés ; seule leur
@@ -2223,7 +2238,7 @@ function render(m){
       +'<section class="advanced-card advanced-third">'+(!isTennis?buildCompactProbabilities(m):'')+'</section>'
       +'<section class="advanced-card advanced-third">'+(!isTennis?buildCompactXg(m,hn,an):'')+'</section>'
       +'<section class="advanced-card advanced-third">'+(!isTennis?buildCompactScores(m):'')+'</section>'
-      +'<section class="advanced-card advanced-wide">'+(!isTennis?'<div class="s"><div class="stitle">ANALYSE COMPARATIVE</div>'+buildCompTable(hn,an,m.crit_home,m.crit_away)+'</div><div class="sep"></div>':'')+'</section>'
+      +(comparisonHtml?'<section class="advanced-card advanced-wide"><div class="s"><div class="stitle">ANALYSE COMPARATIVE</div>'+comparisonHtml+'</div><div class="sep"></div></section>':'')
       +'<section class="advanced-card advanced-wide advanced-patterns">'+(!isTennis?buildPatterns(hn,an,m.events_home,m.events_away):'')+'</section>'
       +'<section class="advanced-card advanced-wide">'+(!isTennis?buildMomentum(hn,an,m.events_home,m.events_away):'')+'</section>'
       +'<section class="advanced-card advanced-wide">'+buildModelStatus(m)+'</section>'

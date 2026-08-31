@@ -16,4 +16,6 @@ test("le bandeau d’accueil expose exactement les 13 compétitions couvertes de
   const html=fs.readFileSync(path.join(root,"index.html"),"utf8");
   assert.equal((html.match(/class="league-badge"/g)||[]).length,26);
   assert.equal((html.match(/class="ligue1-logo"/g)||[]).length,2);
+  assert.match(html,/\.league-badge img\{[^}]*background:#f4f7fa/);
+  assert.doesNotMatch(html,/brightness\(0\) invert\(1\)/);
 });

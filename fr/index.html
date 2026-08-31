@@ -268,7 +268,7 @@ body::before{top:-180px;width:1080px;height:700px;background:radial-gradient(ell
 .league-track{display:flex;align-items:center;flex:none;}
 .league-badge{height:72px;min-width:210px;padding:0 30px;display:flex;align-items:center;justify-content:center;gap:12px;color:#9eabba;font-size:11px;font-weight:700;text-transform:uppercase;position:relative;white-space:nowrap;}
 .league-badge::after{content:'';position:absolute;right:0;width:1px;height:26px;background:var(--line);}
-.league-badge img{width:31px;height:31px;object-fit:contain;filter:drop-shadow(0 5px 12px rgba(0,0,0,.45));}.league-badge img.ligue1-logo{filter:brightness(0) invert(1) drop-shadow(0 5px 12px rgba(0,0,0,.45));}
+.league-badge img{width:40px;height:40px;box-sizing:border-box;padding:5px;object-fit:contain;border:1px solid rgba(255,255,255,.72);border-radius:9px;background:#f4f7fa;box-shadow:0 5px 14px rgba(0,0,0,.28);filter:none}
 @keyframes league-marquee{to{transform:translateX(-50%);}}
 @media(prefers-reduced-motion:reduce){.league-rail-inner{animation:none;}}
 .decisions{max-width:1280px;margin:0 auto;padding:28px 28px 60px;position:relative;z-index:1;}
@@ -327,7 +327,7 @@ body::before{top:-180px;width:1080px;height:700px;background:radial-gradient(ell
   body{padding-bottom:80px;}
   .hdr{height:62px;padding:0 18px;}.brand-logo{width:126px;height:42px}.brand-logo img{width:126px}.desktop-nav,.btn-start{display:none}.header-actions{margin-left:auto}.btn-login{padding:0 6px;font-size:10px}
   .hero-premium{padding:38px 18px 24px;display:block}.hero-title{font-size:42px;letter-spacing:-2px}.hero-sub{font-size:15px}.hero-trust{gap:15px;overflow:auto;margin-top:25px}.hero-feature{margin-top:30px;min-height:0}.feature-card{min-height:0;padding:18px}.feature-team img{width:58px;height:58px}.feature-evidence{overflow:auto;justify-content:flex-start}.evidence-chip{flex:none}
-  .league-rail-inner{height:64px}.league-badge{height:64px;min-width:170px;padding:0 22px}.league-badge img{width:27px;height:27px}
+  .league-rail-inner{height:64px}.league-badge{height:64px;min-width:170px;padding:0 22px}.league-badge img{width:34px;height:34px;padding:4px;border-radius:8px}
   .decisions{padding:24px 18px 45px}.decisions-head{display:block}.decision-controls{margin-top:15px;justify-content:space-between}.champ-dropdown{width:150px}.cards-list{grid-template-columns:1fr}.mc{min-height:235px}
   .nav-bottom{display:flex}.responsible-footer{padding-bottom:30px!important}
 }

@@ -31,6 +31,46 @@ test("pickMarketDeterministic: egalite de probabilite -> deterministe (premier r
   assert.equal(pickMarketDeterministic(markets).market, "A");
 });
 
+test("pickMarketDeterministic: ignore le marche de plus haute probabilite brute s'il n'a aucun edge reel (le marche est deja plus confiant que nous dessus), lui prefere un marche a edge positif", () => {
+  const markets = [
+    // Probabilite modele la plus haute du lot, mais le marche est ENCORE plus
+    // confiant dessus (marketProb 80 > prob 72) - aucune valeur reelle, ne
+    // doit jamais etre choisi juste parce qu'il est "le plus probable" dans
+    // l'absolu.
+    { market: "Victoire Domicile", prob: 72, marketProb: 80, cote: 1.4 },
+    // Edge reel positif (modele plus confiant que le marche) meme si la
+    // probabilite brute est plus basse - c'est ce marche qui doit etre
+    // recommande.
+    { market: "BTTS Oui", prob: 58, marketProb: 47, cote: 1.9 },
+  ];
+  assert.equal(pickMarketDeterministic(markets).market, "BTTS Oui");
+});
+
+test("pickMarketDeterministic: entre deux marches a edge positif, retient celui de plus haute probabilite modele (pas le plus gros edge)", () => {
+  const markets = [
+    { market: "Faible proba, gros edge", prob: 30, marketProb: 12, cote: 3.2 },
+    { market: "Forte proba, petit edge", prob: 65, marketProb: 60, cote: 1.6 },
+  ];
+  assert.equal(pickMarketDeterministic(markets).market, "Forte proba, petit edge");
+});
+
+test("pickMarketDeterministic: aucun marche a edge positif -> repli sur la plus haute probabilite brute (couverture preservee, jamais aucune recommandation)", () => {
+  const markets = [
+    { market: "A", prob: 55, marketProb: 60, cote: 1.7 },
+    { market: "B", prob: 70, marketProb: 75, cote: 1.3 },
+  ];
+  assert.equal(pickMarketDeterministic(markets).market, "B");
+});
+
+test("pickMarketDeterministic: marketProb absent (pas de cote fiable pour ce marche precis) -> traite comme sans edge connu, jamais exclu ni fabrique", () => {
+  const markets = [
+    { market: "Sans marketProb", prob: 50, cote: 2.0 },
+    { market: "Avec edge negatif", prob: 55, marketProb: 65, cote: 1.6 },
+  ];
+  // Aucun des deux n'a d'edge positif verifiable -> repli plus haute proba brute.
+  assert.equal(pickMarketDeterministic(markets).market, "Avec edge negatif");
+});
+
 test("computeRiskLabel: cote basse -> FAIBLE, moyenne -> MODERE, haute -> ELEVE", () => {
   assert.equal(computeRiskLabel(1.5), "FAIBLE");
   assert.equal(computeRiskLabel(1.9), "MODERE");

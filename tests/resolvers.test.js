@@ -3,6 +3,23 @@ const test = require("node:test");
 const assert = require("node:assert/strict");
 const { resolveMarketWin, classifyFixtureStatus } = require("../lib/resolvers.js");
 
+test("resolveMarketWin: marchés première mi-temps utilisent le score à la pause", () => {
+  assert.equal(resolveMarketWin("Premiere mi-temps plus de 0.5 but", 2, 1, { halftimeHome: 1, halftimeAway: 0 }), true);
+  assert.equal(resolveMarketWin("Premiere mi-temps moins de 1.5 but", 2, 2, { halftimeHome: 1, halftimeAway: 0 }), true);
+  assert.equal(resolveMarketWin("Premiere mi-temps plus de 0.5 but", 2, 1), null);
+});
+
+test("resolveMarketWin: gagne les deux mi-temps vérifie séparément chaque période", () => {
+  assert.equal(resolveMarketWin("Domicile gagne les deux mi-temps", 3, 0, { halftimeHome: 1, halftimeAway: 0 }), true);
+  assert.equal(resolveMarketWin("Domicile gagne les deux mi-temps", 2, 1, { halftimeHome: 1, halftimeAway: 0 }), false);
+});
+
+test("resolveMarketWin: totaux tirs utilisent les statistiques finales", () => {
+  assert.equal(resolveMarketWin("Tirs du match over 23.5", 1, 1, { totalShots: 27 }), true);
+  assert.equal(resolveMarketWin("Tirs cadres du match under 8.5", 1, 1, { totalShotsOnTarget: 7 }), true);
+  assert.equal(resolveMarketWin("Tirs du match over 23.5", 1, 1), null);
+});
+
 // --- Over/Under ---
 test("resolveMarketWin: Over 2.5 gagne sur 3 buts ou plus", () => {
   assert.equal(resolveMarketWin("Over 2.5", 2, 1), true);

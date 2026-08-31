@@ -28,9 +28,15 @@ Les cotes sont donc un filtre d'éligibilité et une information de prix. Elles 
 
 Le moteur compare actuellement, lorsque leurs cotes API-Football existent : 1N2, doubles chances, Over/Under 2,5 et 3,5, BTTS, totaux d'équipe 1,5, victoire sans encaisser et combinaisons victoire + total de buts.
 
+Il compare aussi les lignes première mi-temps 0,5/1,5 et « gagne les deux mi-temps » uniquement quand au moins cinq matchs officiels et cinq buts horodatés alimentent l'estimation temporelle. Le prior de ligue ne suffit jamais, à lui seul, à activer ces marchés.
+
+Les totaux de tirs et tirs cadrés du match sont modélisés par Poisson ou binomiale négative selon la dispersion observée. Leur moyenne combine la production offensive de chaque équipe et les volumes concédés par l'adversaire. Les quatre sous-échantillons doivent contenir au moins cinq observations réelles. Les lignes entières, qui peuvent produire un remboursement, restent exclues tant que ce règlement n'est pas représenté par le contrat du modèle.
+
 Les probabilités combinées sont additionnées directement dans les cellules compatibles de la matrice de scores. Elles ne sont jamais obtenues en multipliant deux probabilités marginales.
 
-Les marchés de première mi-temps, tirs d'équipe, tirs joueur et tirs cadrés joueur exigent des modèles de comptage ou temporels distincts. Ils ne sont pas injectés artificiellement dans le modèle de buts : ils restent expérimentaux jusqu'à validation chronologique et disponibilité réelle de leurs lignes/cotes.
+Les tirs joueur et tirs cadrés joueur ne participent pas encore à la sélection principale : le moteur joueur existe, mais le mapping exact joueur/ligne des cotes et le resolver après-match ne sont pas suffisamment validés. Ils restent exclus plutôt que de publier une sélection non réglable ou de faire correspondre le mauvais joueur.
+
+Chaque match publie un audit de sélection minimal (marchés modélisés, cotes supportées, couples modèle+cote et candidats éligibles à 1,50) et le workflow journalise le top 3. Une abstention distingue désormais données insuffisantes, cotes absentes, modèle fiable absent pour les cotes disponibles et cotes toutes inférieures au seuil.
 
 ## Validation
 

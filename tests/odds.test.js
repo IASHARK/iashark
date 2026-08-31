@@ -77,3 +77,22 @@ test("parseOdds: expose les cotes reelles des totaux equipe, win-to-nil et resul
   assert.equal(p.home_win_over25, "2.12");
   assert.equal(p.away_win_under35, "4.40");
 });
+
+test("parseOdds: normalise les lignes premiere mi-temps et tirs sans ligne codee en dur", () => {
+  const raw = bookmaker([
+    { id: 6, name: "Goals Over/Under First Half", values: [{ value: "Over 0.5", odd: "1.61" }, { value: "Under 1.5", odd: "1.74" }] },
+    { id: 211, name: "Total Shots", values: [{ value: "Over 23.5", odd: "1.83" }, { value: "Under 23.5", odd: "1.91" }] },
+    { id: 87, name: "Total ShotOnGoal", values: [{ value: "Over 8.5", odd: "1.88" }] },
+    { id: 32, name: "Win Both Halves", values: [{ value: "Home", odd: "3.40" }, { value: "Away", odd: "7.00" }] },
+  ]);
+  const p = parseOdds(raw);
+  assert.equal(p.fh_over05, "1.61");
+  assert.equal(p.fh_under15, "1.74");
+  assert.equal(p.home_win_both_halves, "3.40");
+  assert.equal(p.away_win_both_halves, "7.00");
+  assert.deepEqual(p.dynamic_count_offers, [
+    { market: "total-shots", side: "over", line: 23.5, odds: 1.83 },
+    { market: "total-shots", side: "under", line: 23.5, odds: 1.91 },
+    { market: "total-shots-on-target", side: "over", line: 8.5, odds: 1.88 },
+  ]);
+});

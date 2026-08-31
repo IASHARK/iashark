@@ -39,6 +39,9 @@ jobs:
           const { pickMarketDeterministic, computeRiskLabel, computeModelAgreement, computeDataQualityScore, computeReliability } = require('./lib/decision.js');
           const { buildPoissonMatrix, buildDixonColesMatrix, blendMatrices, deriveMarketsFromMatrix } = require('./lib/markets/score-matrix.js');
           const { blendEarlySeasonRate } = require('./lib/markets/early-season.js');
+          const { countLineProbability } = require('./lib/markets/count-model.js');
+          const { combineCountMatchup } = require('./lib/markets/count-matchup.js');
+          const { buildSegmentMarkets, estimateFirstHalfShare } = require('./lib/markets/segment-model.js');
           const { buildPlayerMarketOutput } = require('./lib/markets/player-engine.js');
           const I18N_LOCALES = require('./i18n/locales.json');
           const I18N_PAGES = require('./scripts/i18n-manifest.js');
@@ -796,8 +799,14 @@ jobs:
                 function numOrPct(v){if(v==null)return null;var str=String(v).replace('%','').trim();var n=parseFloat(str);return isNaN(n)?null:n;}
                 var xgTeam=parseFloat(s['expected_goals'])||null;
                 var xgAgainst=parseFloat(sOpp['expected_goals'])||null;
-                var shots_on=parseInt(s['shots_on_goal'])||0;
-                var shots_total=parseInt(s['total_shots'])||0;
+                var shots_on=s['shots_on_goal']==null?null:parseInt(s['shots_on_goal']);
+                var shots_total=s['total_shots']==null?null:parseInt(s['total_shots']);
+                if(!Number.isFinite(shots_on))shots_on=null;
+                if(!Number.isFinite(shots_total))shots_total=null;
+                var shots_on_against=sOpp['shots_on_goal']==null?null:parseInt(sOpp['shots_on_goal']);
+                var shots_total_against=sOpp['total_shots']==null?null:parseInt(sOpp['total_shots']);
+                if(!Number.isFinite(shots_on_against))shots_on_against=null;
+                if(!Number.isFinite(shots_total_against))shots_total_against=null;
                 var fouls=parseInt(s['fouls'])||0;
                 var shots_off=parseInt(s['shots_off_goal'])||null;
                 var shots_blocked=parseInt(s['blocked_shots'])||null;
@@ -811,21 +820,28 @@ jobs:
                 var oppId=fx?(fx.teams.home.id===teamId?fx.teams.away.id:fx.teams.home.id):null;
                 var xgWeighted=null;
                 if(xgTeam!==null&&oppId&&xgConcededCache[oppId]) xgWeighted=parseFloat((xgTeam/xgConcededCache[oppId]).toFixed(3));
-                results.push({xg:xgTeam,xga:xgAgainst,xg_weighted:xgWeighted,shots_on,shots_total,fouls,
+                results.push({xg:xgTeam,xga:xgAgainst,xg_weighted:xgWeighted,shots_on,shots_total,shots_on_against,shots_total_against,fouls,
                   shots_off,shots_blocked,corners,offsides,possession,saves,passes_total,passes_pct});
                 await sleep(150);
               }catch(e){}
             }
-            if(!results.length) return {xg_avg:null,xga_avg:null,xg_weighted:null,shots_on_avg:null,shots_total_avg:null,fouls_avg:null,
+            if(!results.length) return {xg_avg:null,xga_avg:null,xg_weighted:null,shots_on_avg:null,shots_total_avg:null,shots_on_n:0,shots_total_n:0,shots_on_variance:null,shots_total_variance:null,fouls_avg:null,
               possession_avg:null,corners_avg:null,offsides_avg:null,saves_avg:null,passes_pct_avg:null,shots_off_avg:null,shots_blocked_avg:null};
             function avg(arr){return arr.length?arr.reduce(function(a,b){return a+b;},0)/arr.length:null;}
             function avgField(key){var vals=results.map(function(r){return r[key];}).filter(function(v){return v!=null;});return avg(vals);}
             var xgs=results.filter(function(r){return r.xg!==null;}).map(function(r){return r.xg;});
             var xgas=results.filter(function(r){return r.xga!==null;}).map(function(r){return r.xga;});
             var xgsW=results.filter(function(r){return r.xg_weighted!==null;}).map(function(r){return r.xg_weighted;});
-            var shots=results.map(function(r){return r.shots_on;}).filter(Boolean);
-            var shotsT=results.map(function(r){return r.shots_total;}).filter(Boolean);
-            var foulsArr=results.map(function(r){return r.fouls;}).filter(Boolean);
+            var shots=results.map(function(r){return r.shots_on;}).filter(Number.isFinite);
+            var shotsT=results.map(function(r){return r.shots_total;}).filter(Number.isFinite);
+            var shotsAgainst=results.map(function(r){return r.shots_on_against;}).filter(Number.isFinite);
+            var shotsTAgainst=results.map(function(r){return r.shots_total_against;}).filter(Number.isFinite);
+            var foulsArr=results.map(function(r){return r.fouls;}).filter(Number.isFinite);
+            function sampleVariance(arr){
+              if(!arr||arr.length<2)return null;
+              var m=avg(arr);
+              return arr.reduce(function(sum,v){return sum+Math.pow(v-m,2);},0)/(arr.length-1);
+            }
             var avgXGA=avg(xgas);
             var surchauffe=false;
             if(avgXGA&&avgXGA>=1.5){var recentBE=results.slice(0,5).filter(function(r){return r.xga!==null&&r.xga>=1.5;}).length;if(recentBE>=3)surchauffe=true;}
@@ -833,8 +849,18 @@ jobs:
               xg_avg:avg(xgs)?parseFloat(avg(xgs).toFixed(2)):null,
               xga_avg:avgXGA?parseFloat(avgXGA.toFixed(2)):null,
               xg_weighted:avg(xgsW)?parseFloat(avg(xgsW).toFixed(3)):null,
-              shots_on_avg:avg(shots)?avg(shots).toFixed(1):null,
-              shots_total_avg:avg(shotsT)?avg(shotsT).toFixed(1):null,
+              shots_on_avg:avg(shots)!=null?avg(shots).toFixed(1):null,
+              shots_total_avg:avg(shotsT)!=null?avg(shotsT).toFixed(1):null,
+              shots_on_n:shots.length,
+              shots_total_n:shotsT.length,
+              shots_on_against_avg:avg(shotsAgainst)!=null?avg(shotsAgainst).toFixed(1):null,
+              shots_total_against_avg:avg(shotsTAgainst)!=null?avg(shotsTAgainst).toFixed(1):null,
+              shots_on_against_n:shotsAgainst.length,
+              shots_total_against_n:shotsTAgainst.length,
+              shots_on_variance:sampleVariance(shots),
+              shots_total_variance:sampleVariance(shotsT),
+              shots_on_against_variance:sampleVariance(shotsAgainst),
+              shots_total_against_variance:sampleVariance(shotsTAgainst),
               fouls_avg:avg(foulsArr)?avg(foulsArr).toFixed(1):null,
               possession_avg:avgField('possession')?Math.round(avgField('possession')):null,
               corners_avg:avgField('corners')?parseFloat(avgField('corners').toFixed(1)):null,
@@ -1334,6 +1360,28 @@ jobs:
                 console.log('  Resultats '+rDate+': '+(fClassic.response||[]).length+' classique + '+(fWC.response||[]).length+' World Cup');
                 await sleep(150);
               }
+              async function buildSettlementContext(fix,prediction){
+                var ctx={
+                  halftimeHome:fix.score&&fix.score.halftime?fix.score.halftime.home:null,
+                  halftimeAway:fix.score&&fix.score.halftime?fix.score.halftime.away:null
+                };
+                if(!/tirs( cadres)? du match/i.test(prediction||''))return ctx;
+                var sr=await get('https://v3.football.api-sports.io/fixtures/statistics?fixture='+(fix.fixture&&fix.fixture.id),APS);
+                var blocks=(sr&&sr.response)||[];
+                function statTotal(type){
+                  var found=0;
+                  var total=blocks.reduce(function(sum,b){
+                    var row=(b.statistics||[]).find(function(x){return x.type===type;});
+                    var value=row?parseFloat(row.value):NaN;
+                    if(Number.isFinite(value))found++;
+                    return sum+(Number.isFinite(value)?value:0);
+                  },0);
+                  return found===2?total:null;
+                }
+                ctx.totalShots=statTotal('Total Shots');
+                ctx.totalShotsOnTarget=statTotal('Shots on Goal');
+                return ctx;
+              }
               for(var yr=0;yr<yResults.length;yr++){
                 var fix=yResults[yr];
                 var fid=fix.fixture&&fix.fixture.id;
@@ -1353,7 +1401,8 @@ jobs:
                   console.log('  VOID (match '+status+'): '+found.match);
                   continue;
                 }
-                var isWin=resolveMarketWin(found.prediction, gh, ga);
+                var settlementContext=await buildSettlementContext(fix,found.prediction);
+                var isWin=resolveMarketWin(found.prediction, gh, ga, settlementContext);
                 if(isWin===null){ continue; }
                 if(isWin==='void'){
                   found.result='void';found.score=gh+'-'+ga;found.fixture_id=fid;found.resolved_date=TODAY;
@@ -1736,7 +1785,10 @@ jobs:
                     found.result='void';found.score=null;found.fixture_id=fid;found.resolved_date=TODAY;
                     return;
                   }
-                  var isWin=resolveMarketWin(found.prediction, gh, ga);
+                  var isWin=resolveMarketWin(found.prediction, gh, ga, {
+                    halftimeHome:fix.score&&fix.score.halftime?fix.score.halftime.home:null,
+                    halftimeAway:fix.score&&fix.score.halftime?fix.score.halftime.away:null
+                  });
                   if(isWin===null){ return; }
                   if(isWin==='void'){
                     found.result='void';found.score=gh+'-'+ga;found.fixture_id=fid;found.resolved_date=TODAY;
@@ -1839,23 +1891,26 @@ jobs:
               var batch1=await Promise.all([
                 getTeamStats(home.id,lg.id,currentSeason),getTeamStats(away.id,lg.id,currentSeason),
                 getLast10(home.id,currentSeason,lg.id),getLast10(away.id,currentSeason,lg.id),
-                getTeamStats(home.id,lg.id,previousSeason),getTeamStats(away.id,lg.id,previousSeason)
+                getTeamStats(home.id,lg.id,previousSeason),getTeamStats(away.id,lg.id,previousSeason),
+                getLast10(home.id,previousSeason,lg.id),getLast10(away.id,previousSeason,lg.id)
               ]);
               await sleep(400);
               var batch2=await Promise.all([getOdds(f.id),getInjuries(f.id),getH2H(home.id,away.id),getWeather(f.venue&&f.venue.city?f.venue.city:'',f.date),getNews(home.name),getNews(away.name),getPredictions(f.id),getLineups(f.id),getRefereeStats(f.referee||null),getPinnacleOdds(home.name,away.name,lgKey(lg.id))]);
               await sleep(400);
-              var sH=batch1[0],sA=batch1[1],raw10H=batch1[2],raw10A=batch1[3],sHPrev=batch1[4],sAPrev=batch1[5];
+              var sH=batch1[0],sA=batch1[1],raw10H=batch1[2],raw10A=batch1[3],sHPrev=batch1[4],sAPrev=batch1[5],rawPrevH=batch1[6],rawPrevA=batch1[7];
               function isEmptySH(s){
                 return !s || !(s.fixtures && s.fixtures.played && ((s.fixtures.played.home||0)>0 || (s.fixtures.played.away||0)>0));
               }
               if(isEmptySH(sH) || isEmptySH(sA)){
-                console.log('  [DONNEES LIMITEES] '+lg.name+': stats equipe absentes de api-football pour '+(isEmptySH(sH)?home.name:'')+(isEmptySH(sH)&&isEmptySH(sA)?' et ':'')+(isEmptySH(sA)?away.name:'')+' - le moteur utilisera les valeurs par defaut de la ligue (aucune substitution via un autre fournisseur).');
+                console.log('  [DONNEES LIMITEES] '+lg.name+': stats de la saison courante absentes pour '+(isEmptySH(sH)?home.name:'')+(isEmptySH(sH)&&isEmptySH(sA)?' et ':'')+(isEmptySH(sA)?away.name:'')+' - regularisation sur la saison precedente et le prior de ligue; abstention si cet historique est lui aussi absent.');
               }
               var oddsRaw=batch2[0],injRaw=batch2[1],h2hRaw=batch2[2],wx=batch2[3],nH=batch2[4],nA=batch2[5];
               var predictions=batch2[6]||null,lineups=batch2[7]||null,refStats=batch2[8]||null;
               var pinnacleOdds=batch2[9]||null;
-              var last20IdsH=(raw10H||[]).slice(0,20).map(function(fx){return fx.fixture.id;});
-              var last20IdsA=(raw10A||[]).slice(0,20).map(function(fx){return fx.fixture.id;});
+              var modelFixturesH=(raw10H||[]).concat(rawPrevH||[]).slice(0,20);
+              var modelFixturesA=(raw10A||[]).concat(rawPrevA||[]).slice(0,20);
+              var last20IdsH=modelFixturesH.map(function(fx){return fx.fixture.id;});
+              var last20IdsA=modelFixturesA.map(function(fx){return fx.fixture.id;});
               var topScorersH=null;
               var topScorersA=null;
               var eventsH_raw=[],eventsA_raw=[];
@@ -1919,10 +1974,10 @@ jobs:
               var hotA=calcHotPlayers(eventsA_raw,away.id,topScorersA);
               var last10H=formatLast10(raw10H,home.id);
               var last10A=formatLast10(raw10A,away.id);
-              var last10IdsH_xg=raw10H.slice(0,10).map(function(fx){return fx.fixture.id;});
-              var last10IdsA_xg=raw10A.slice(0,10).map(function(fx){return fx.fixture.id;});
-              var xgH=await getWeightedXGStats(home.id,last10IdsH_xg,raw10H,xgConcededCache);
-              var xgA=await getWeightedXGStats(away.id,last10IdsA_xg,raw10A,xgConcededCache);
+              var last10IdsH_xg=modelFixturesH.slice(0,10).map(function(fx){return fx.fixture.id;});
+              var last10IdsA_xg=modelFixturesA.slice(0,10).map(function(fx){return fx.fixture.id;});
+              var xgH=await getWeightedXGStats(home.id,last10IdsH_xg,modelFixturesH,xgConcededCache);
+              var xgA=await getWeightedXGStats(away.id,last10IdsA_xg,modelFixturesA,xgConcededCache);
           
               var matchStatsH={
                 possession:xgH.possession_avg, shots_total:xgH.shots_total_avg?parseFloat(xgH.shots_total_avg):null,
@@ -1994,8 +2049,8 @@ jobs:
               var rateAAgainst=regularizedRate(beAext_p,meAext_p,sAPrev,['goals','against','total','away'],['fixtures','played','away'],1.35);
               var modelDataAvailable=(mdHdom+statNumber(sHPrev,['fixtures','played','home'])>0)&&(meAext_p+statNumber(sAPrev,['fixtures','played','away'])>0);
               var lambdas=calcLambdas(rateHFor,rateHAgainst,1,rateAFor,rateAAgainst,1,null,null,lg.id);
-              var enoughCurrentMatchStats=raw10H.length>=5&&raw10A.length>=5;
-              if(enoughCurrentMatchStats&&xgH.xg_avg&&xgA.xg_avg){
+              var enoughModelMatchStats=modelFixturesH.length>=5&&modelFixturesA.length>=5;
+              if(enoughModelMatchStats&&xgH.xg_avg&&xgA.xg_avg){
                 lambdas.lambdaH=parseFloat((lambdas.lambdaH*0.6+parseFloat(xgH.xg_avg)*0.4).toFixed(3));
                 lambdas.lambdaA=parseFloat((lambdas.lambdaA*0.6+parseFloat(xgA.xg_avg)*0.4).toFixed(3));
               }
@@ -2005,8 +2060,8 @@ jobs:
                 var ratio=on/tot, baseline=0.35;
                 return Math.max(0.85, Math.min(1.15, ratio/baseline));
               }
-              var shotQualH=enoughCurrentMatchStats?calcShotQualityFactor(xgH.shots_on_avg, xgH.shots_total_avg):1;
-              var shotQualA=enoughCurrentMatchStats?calcShotQualityFactor(xgA.shots_on_avg, xgA.shots_total_avg):1;
+              var shotQualH=enoughModelMatchStats?calcShotQualityFactor(xgH.shots_on_avg, xgH.shots_total_avg):1;
+              var shotQualA=enoughModelMatchStats?calcShotQualityFactor(xgA.shots_on_avg, xgA.shots_total_avg):1;
               lambdas.lambdaH=parseFloat((lambdas.lambdaH*shotQualH).toFixed(3));
               lambdas.lambdaA=parseFloat((lambdas.lambdaA*shotQualA).toFixed(3));
               if(isWorldCupMatch){
@@ -2074,6 +2129,12 @@ jobs:
 
               function candidate(id,market,cote,prob,label,marketProb){return{id:id,market:market,cote:cote,prob:prob,label:label,marketProb:marketProb};}
               var d=pureProbs.derived;
+              var homeFirstHalfShare=estimateFirstHalfShare({forSlots:evPatH.slots,opponentAgainstSlots:evPatA.slots_against,sampleMatches:Math.min(evPatH.games,evPatA.games)});
+              var awayFirstHalfShare=estimateFirstHalfShare({forSlots:evPatA.slots,opponentAgainstSlots:evPatH.slots_against,sampleMatches:Math.min(evPatH.games,evPatA.games)});
+              var segmentMarkets=(homeFirstHalfShare!=null&&awayFirstHalfShare!=null)?buildSegmentMarkets({
+                lambdaHome:lambdas.lambdaH,lambdaAway:lambdas.lambdaA,
+                homeFirstHalfShare:homeFirstHalfShare,awayFirstHalfShare:awayFirstHalfShare
+              }):null;
               var allMarketCandidates=[
                 candidate('home-win','Victoire Domicile',odds.c1,pureProbs.p1,'Victoire seche domicile',shinProbs?shinProbs.p1:naiveImplied(odds.c1)),
                 candidate('draw','Match nul',odds.cn,pureProbs.pN,'Match nul',shinProbs?shinProbs.pN:naiveImplied(odds.cn)),
@@ -2102,9 +2163,36 @@ jobs:
                 candidate('away-win-over-25','Exterieur gagne + plus de 2.5 buts',odds.away_win_over25,d.resultTotals.away.over2_5*100,'Exterieur gagne et plus de 2.5 buts',naiveImplied(odds.away_win_over25)),
                 candidate('away-win-over-35','Exterieur gagne + plus de 3.5 buts',odds.away_win_over35,d.resultTotals.away.over3_5*100,'Exterieur gagne et plus de 3.5 buts',naiveImplied(odds.away_win_over35)),
                 candidate('away-win-under-25','Exterieur gagne + moins de 2.5 buts',odds.away_win_under25,d.resultTotals.away.under2_5*100,'Exterieur gagne et moins de 2.5 buts',naiveImplied(odds.away_win_under25)),
-                candidate('away-win-under-35','Exterieur gagne + moins de 3.5 buts',odds.away_win_under35,d.resultTotals.away.under3_5*100,'Exterieur gagne et moins de 3.5 buts',naiveImplied(odds.away_win_under35))
+                candidate('away-win-under-35','Exterieur gagne + moins de 3.5 buts',odds.away_win_under35,d.resultTotals.away.under3_5*100,'Exterieur gagne et moins de 3.5 buts',naiveImplied(odds.away_win_under35)),
+                candidate('fh-over-05','Premiere mi-temps plus de 0.5 but',odds.fh_over05,segmentMarkets?segmentMarkets.firstHalf.over05*100:null,'Au moins un but en premiere mi-temps',naiveImplied(odds.fh_over05)),
+                candidate('fh-under-05','Premiere mi-temps moins de 0.5 but',odds.fh_under05,segmentMarkets?segmentMarkets.firstHalf.under05*100:null,'Aucun but en premiere mi-temps',naiveImplied(odds.fh_under05)),
+                candidate('fh-over-15','Premiere mi-temps plus de 1.5 but',odds.fh_over15,segmentMarkets?segmentMarkets.firstHalf.over15*100:null,'Au moins deux buts en premiere mi-temps',naiveImplied(odds.fh_over15)),
+                candidate('fh-under-15','Premiere mi-temps moins de 1.5 but',odds.fh_under15,segmentMarkets?segmentMarkets.firstHalf.under15*100:null,'Au plus un but en premiere mi-temps',naiveImplied(odds.fh_under15)),
+                candidate('home-win-both-halves','Domicile gagne les deux mi-temps',odds.home_win_both_halves,segmentMarkets?segmentMarkets.winBothHalves.home*100:null,'Domicile gagne chaque mi-temps',naiveImplied(odds.home_win_both_halves)),
+                candidate('away-win-both-halves','Exterieur gagne les deux mi-temps',odds.away_win_both_halves,segmentMarkets?segmentMarkets.winBothHalves.away*100:null,'Exterieur gagne chaque mi-temps',naiveImplied(odds.away_win_both_halves))
               ];
-              var allMarkets=modelDataAvailable?allMarketCandidates.filter(function(m){return m.cote&&m.cote!=='--'&&Number.isFinite(parseFloat(m.cote));}):[];
+              if(enoughModelMatchStats){
+                (odds.dynamic_count_offers||[]).forEach(function(offer){
+                  var isOnTarget=offer.market==='total-shots-on-target';
+                  var prefix=isOnTarget?'shots_on':'shots_total';
+                  var shotMatchup=combineCountMatchup({
+                    homeFor:{mean:xgH[prefix+'_avg'],variance:xgH[prefix+'_variance'],n:xgH[prefix+'_n']},
+                    awayAgainst:{mean:xgA[prefix+'_against_avg'],variance:xgA[prefix+'_against_variance'],n:xgA[prefix+'_against_n']},
+                    awayFor:{mean:xgA[prefix+'_avg'],variance:xgA[prefix+'_variance'],n:xgA[prefix+'_n']},
+                    homeAgainst:{mean:xgH[prefix+'_against_avg'],variance:xgH[prefix+'_against_variance'],n:xgH[prefix+'_against_n']}
+                  });
+                  if(!shotMatchup)return;
+                  var countProb=countLineProbability({mean:shotMatchup.mean,variance:shotMatchup.variance,line:offer.line});
+                  if(!countProb)return;
+                  var probability=(offer.side==='over'?countProb.over:countProb.under)*100;
+                  var label=(isOnTarget?'Tirs cadres':'Tirs')+' du match '+offer.side+' '+offer.line;
+                  allMarketCandidates.push(candidate(offer.market+'-'+offer.side+'-'+String(offer.line).replace('.','_'),label,offer.odds,probability,label,naiveImplied(offer.odds)));
+                });
+              }
+              var allMarkets=modelDataAvailable?allMarketCandidates.filter(function(m){return Number.isFinite(Number(m.prob))&&m.cote&&m.cote!=='--'&&Number.isFinite(parseFloat(m.cote));}):[];
+              var quotedSupportedCandidates=allMarketCandidates.filter(function(m){return m.cote&&m.cote!=='--'&&Number.isFinite(parseFloat(m.cote));});
+              var unmodelledDynamicQuoteCount=(odds.dynamic_count_offers||[]).filter(function(offer){return !allMarketCandidates.some(function(m){return m.id===offer.market+'-'+offer.side+'-'+String(offer.line).replace('.','_');});}).length;
+              var supportedQuoteCount=quotedSupportedCandidates.length+unmodelledDynamicQuoteCount;
               var nodeKelly=null;
               // Selection du marche, edge, Kelly et niveau de risque : entierement
               // deterministes, calcules AVANT l'appel au LLM (MASTER V2.1 §1.3/§7.8/
@@ -2114,6 +2202,9 @@ jobs:
               // indisponible, ce bloc produit exactement la meme decision (§10.AJ:
               // "le moteur doit fonctionner a 100% sans lui").
               var pickedMarket=pickMarketDeterministic(allMarkets,{minOdds:1.50});
+              var eligibleMarkets=allMarkets.filter(function(m){return parseFloat(m.cote)>=1.50;});
+              var noSignalReason=!modelDataAvailable?'INSUFFICIENT_MODEL_DATA':(!supportedQuoteCount?'NO_REAL_ODDS':(!allMarkets.length?'NO_RELIABLE_MODEL_FOR_QUOTED_MARKETS':(!eligibleMarkets.length?'NO_ODDS_AT_OR_ABOVE_1_50':null)));
+              console.log('  [SELECTION] modeles='+allMarketCandidates.filter(function(m){return Number.isFinite(Number(m.prob));}).length+' cotes_supportees='+supportedQuoteCount+' modeles_et_cotes='+allMarkets.length+' eligibles_1.50='+eligibleMarkets.length+' top='+eligibleMarkets.slice().sort(function(a,b){return b.prob-a.prob;}).slice(0,3).map(function(m){return m.id+':'+m.prob.toFixed(1)+'%@'+m.cote;}).join(', ')+(noSignalReason?' raison='+noSignalReason:''));
               var riskLabelCode=pickedMarket?computeRiskLabel(pickedMarket.cote):'MODERE';
               var kellyVal='0';
               var edgeVal='';
@@ -2201,7 +2292,8 @@ jobs:
                 market_source:usingPinnacle?'Pinnacle (sharp)':(marketOdds?'Cotes moyennes multi-bookmakers':null),
                 final_p1:pureProbs.p1,final_pN:pureProbs.pN,final_p2:pureProbs.p2,
                 all_markets:allMarkets,node_kelly:nodeKelly,
-                picked_market:pickedMarket,no_signal:noSignal,
+                picked_market:pickedMarket,no_signal:noSignal,no_signal_reason:noSignalReason,
+                market_selection_audit:{modelled:allMarketCandidates.filter(function(m){return Number.isFinite(Number(m.prob));}).length,supported_quotes:supportedQuoteCount,modelled_and_quoted:allMarkets.length,eligible:eligibleMarkets.length,minimum_odds:1.50,rejected_no_reliable_model:unmodelledDynamicQuoteCount},
                 lineup_home_formation:lineups&&lineups.home?lineups.home.formation:null,
                 lineup_away_formation:lineups&&lineups.away?lineups.away.formation:null,
                 streakH,streakA,forme5H,forme5A,

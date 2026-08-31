@@ -135,7 +135,11 @@ function buildPage(pageConfig) {
     // match.html is now a small shell; its interface is rendered from the
     // validated view-model in match-page.js. Never apply the legacy inline
     // string substitutions to this new architecture.
-    html = applyReplacements(html, locale, pageConfig.file === "match.html" ? [] : pageConfig.replacements);
+    // These pages are now small data-driven shells. Their interface is
+    // rendered by shared client modules, so the legacy inline substitutions
+    // must not be applied to their new markup.
+    var modularShell = ["match.html", "pro.html", "compte.html"].includes(pageConfig.file);
+    html = applyReplacements(html, locale, modularShell ? [] : pageConfig.replacements);
     html = buildHead(html, locale, pageConfig.file, pageConfig.metas);
     html = rewriteInternalLinks(html, locale);
     var outDir = path.join(ROOT, locale);

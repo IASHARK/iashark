@@ -17,7 +17,9 @@ test("la page match n’insère plus de mur PRO", () => {
 test("la page Outils est ouverte sans flou ni contrôle d’abonnement", () => {
   const source = read("pro.html");
   assert.doesNotMatch(source, /class="pro-wall locked"/);
-  assert.match(source, /function checkProAccess\(\)\{\s*unlockProWall\(\);/);
+  assert.match(source, /id="stakeResult"/);
+  assert.match(source, /tools-page\.js/);
+  assert.match(source, /Le calculateur est accessible à tous/);
 });
 
 test("toutes les pages SEO de match utilisent la nouvelle structure sans mur PRO", () => {

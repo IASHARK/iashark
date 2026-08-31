@@ -9,7 +9,7 @@ test("la page Match est un shell léger sans ancien rendu inline",()=>{
   assert.doesNotMatch(html,/function render\(/);assert.doesNotMatch(html,/crit_home\.att===0/);
 });
 test("la nouvelle interface expose les trois espaces validés",()=>{
-  for(const value of ['data-tab="summary"','data-tab="advanced"','data-tab="players"','Marchés comparés','Scénario probable','Conditions du match','Arbitre & discipline','Scénario par tranches de 15 min','Questions sur ce match','Projections joueurs IASHARK','pitch-player'])assert.match(js,new RegExp(value));
+  for(const value of ['data-tab="summary"','data-tab="advanced"','data-tab="players"','Marchés recommandés','Scénario probable','Conditions du match','Arbitre & discipline','Scénario par tranches de 15 min','Questions sur ce match','Projections joueurs IASHARK','pitch-player'])assert.match(js,new RegExp(value));
 });
 test("les onglets sont accessibles et la page est responsive",()=>{
   assert.match(js,/role="tablist"/);assert.match(js,/hidden/);assert.match(css,/@media\(max-width:720px\)/);

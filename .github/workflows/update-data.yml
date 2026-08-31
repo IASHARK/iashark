@@ -628,9 +628,13 @@ jobs:
             var r = await get('https://v3.football.api-sports.io/fixtures/lineups?fixture='+fixtureId, APS);
             if(!r.response||!r.response.length) return null;
             function extractLineup(team){
+              // grid : position reelle sur le terrain ("ligne:colonne", ex "3:2"),
+              // champ reel de /fixtures/lineups, jamais capture jusqu'ici - permet
+              // un rendu tactique reel (positions par ligne) plutot qu'un simple
+              // regroupement par poste F/M/D/G sans ordre horizontal.
               return {formation:team.formation||null,coach:team.coach&&team.coach.name||null,
-                startXI:(team.startXI||[]).map(function(p){return {id:(p.player&&p.player.id)||null,name:(p.player&&p.player.name)||'',pos:(p.player&&p.player.pos)||''};}),
-                substitutes:(team.substitutes||[]).map(function(p){return {id:(p.player&&p.player.id)||null,name:(p.player&&p.player.name)||'',pos:(p.player&&p.player.pos)||''};})};
+                startXI:(team.startXI||[]).map(function(p){return {id:(p.player&&p.player.id)||null,name:(p.player&&p.player.name)||'',pos:(p.player&&p.player.pos)||'',grid:(p.player&&p.player.grid)||null};}),
+                substitutes:(team.substitutes||[]).map(function(p){return {id:(p.player&&p.player.id)||null,name:(p.player&&p.player.name)||'',pos:(p.player&&p.player.pos)||'',grid:(p.player&&p.player.grid)||null};})};
             }
             return {home:extractLineup(r.response[0]),away:extractLineup(r.response[1]||{})};
           }
@@ -2416,6 +2420,13 @@ jobs:
                 model_output_available:!isEmptySH(sH)&&!isEmptySH(sA),
                 // p1/pn/p2 : PURE_IASHARK_PROBABILITY (jamais market_aware -
                 // c'etait le bug corrige ce jalon pour 1X2/DC specifiquement).
+                // lambda_h/lambda_a : buts attendus reels (parametre du modele
+                // Poisson/Dixon-Coles, deja calcules pour p1/pn/p2 ci-dessus) - jamais
+                // exposes publiquement jusqu'ici alors que lib/display-data.js#
+                // expectedGoalsForDisplay les attend deja sous ce nom exact pour le
+                // bloc "Buts attendus (xG)" du frontend. Retire des matchs.xg_home
+                // (post-match reel, presque jamais disponible avant coup d'envoi).
+                lambda_h:lambdas.lambdaH,lambda_a:lambdas.lambdaA,
                 p1:pureProbs.p1||0,pn:pureProbs.pN||0,p2:pureProbs.p2||0,
                 po15:0,po25:pureProbs.over25||0,btts:pureProbs.bttsY||0,
                 c1:odds.c1,cn:odds.cn,c2:odds.c2,co15:odds.co15,co25:odds.co25,cu25:odds.cu25,

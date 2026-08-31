@@ -1,3 +1,328 @@
-:root{--bg:#050b12;--panel:#081522;--line:#17374b;--cyan:#16d6f4;--text:#f2f6fa;--soft:#a4b3c3;--muted:#66829a;--green:#26d7a3;--amber:#f5b946}*{box-sizing:border-box}html,body{background:var(--bg)}body{margin:0;color:var(--text);font-family:"DM Sans",sans-serif;min-height:100vh;padding-bottom:76px}.site-header{height:64px;border-bottom:1px solid #142637;background:#050b12;display:flex;align-items:center;padding:0 max(20px,calc((100vw - 1320px)/2));position:sticky;top:0;z-index:20}.brand img{width:150px;height:54px;object-fit:contain}.back-link{margin-left:24px;color:var(--soft);text-decoration:none;font-size:12px}.btn-login{margin-left:auto;color:var(--cyan);border:1px solid #224d64;padding:9px 14px;border-radius:7px;text-decoration:none;font:700 10px "Space Mono"}.match-shell{width:min(1320px,calc(100% - 30px));margin:18px auto 28px}.match-shell>.seo-summary{display:none}.match-card{border:1px solid var(--line);border-radius:13px;overflow:hidden;background:#06111b}.match-head{padding:12px 18px 0;background:linear-gradient(135deg,#0b2030,#07131f 70%)}.meta-row{display:flex;justify-content:space-between;align-items:center;color:var(--soft);font:8px "Space Mono";letter-spacing:.07em}.league{display:flex;align-items:center;gap:7px;color:var(--cyan);text-transform:uppercase}.league img{width:18px;height:18px;object-fit:contain}.teams{display:grid;grid-template-columns:1fr 70px 1fr;align-items:center;padding:9px 15% 7px}.team{text-align:center;min-width:0}.team img{height:54px;width:54px;object-fit:contain}.team h1{font:20px "Bebas Neue";letter-spacing:.03em;margin:4px 0 0}.team small{color:var(--muted);font:7px "Space Mono";text-transform:uppercase}.versus{text-align:center}.versus b{font:20px "Bebas Neue"}.versus i{display:block;width:22px;height:2px;background:var(--cyan);margin:4px auto}.venue{border-top:1px solid var(--line);padding:7px 0;text-align:center;color:var(--soft);font-size:8px}.venue span{margin-left:14px;color:var(--green)}.tabs{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--line);margin:0 -18px}.tab{appearance:none;background:none;color:var(--muted);border:0;border-bottom:2px solid transparent;padding:10px 5px;font:8px "Space Mono";letter-spacing:.1em;text-transform:uppercase;cursor:pointer}.tab.active{color:var(--cyan);border-color:var(--cyan)}.tab-panel{padding:9px;background:#06101a}.panel{background:linear-gradient(145deg,#0a1825,#08131e);border:1px solid var(--line);border-radius:6px;padding:9px;min-width:0}.panel-title{display:flex;align-items:center;gap:7px;margin:0 0 8px;color:var(--text);font:700 8px "Space Mono";letter-spacing:.03em}.panel-title:after{content:"";height:1px;background:#193043;flex:1}.copy{font-size:9px;line-height:1.55;color:var(--soft);margin:0}.empty{min-height:58px;display:flex;align-items:center;justify-content:center;text-align:center;color:var(--muted);font-size:9px;line-height:1.45;padding:10px}.micro{color:var(--cyan);font:7px "Space Mono";letter-spacing:.1em;text-transform:uppercase}.summary-top{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.12fr);gap:7px}.decision{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center}.decision h3{font-size:17px;margin:4px 0}.decision-metrics{display:flex}.decision-metrics>div{min-width:86px;text-align:center;padding:3px 10px;border-left:1px solid var(--line)}.decision-metrics b{display:block;color:var(--cyan);font:23px "Bebas Neue"}.decision-metrics small,.condition-grid small,.referee small,.quality-grid small,.xg-teams small{display:block;color:var(--muted);font:6px "Space Mono";text-transform:uppercase}.summary-factors{margin-top:7px}.factor-grid{display:grid;grid-template-columns:repeat(3,1fr)}.factor-grid>div{display:grid;grid-template-columns:20px 1fr auto;align-items:center;gap:5px;padding:4px 8px;border-left:1px solid var(--line);font-size:7px}.factor-grid>div:first-child{border-left:0}.factor-grid i{color:var(--cyan);font-style:normal}.factor-grid b{color:var(--green);font-size:6px}.risk-strip{display:flex;gap:18px;align-items:center;border:1px solid #5b451b;background:#16140f;border-radius:5px;margin:7px 0;padding:6px 10px;font-size:7px;color:var(--soft)}.risk-strip b{color:var(--amber);white-space:nowrap}.summary-bottom{display:grid;grid-template-columns:1.08fr .92fr;gap:7px}.market-table,.projection-table{width:100%;border-collapse:collapse;font-size:7px}.market-table th,.market-table td,.projection-table th,.projection-table td{text-align:left;padding:5px;border-bottom:1px solid #182b3b}.market-table th,.projection-table th{color:var(--muted);font:6px "Space Mono"}.positive{color:var(--green)}.scenario{display:grid;grid-template-columns:44px 1fr;gap:5px 8px;align-items:center}.scenario span{color:var(--cyan);border:1px solid #1f5268;border-radius:4px;padding:4px;text-align:center;font:7px "Space Mono"}.scenario p{margin:0;color:var(--soft);font-size:7px;line-height:1.4}.context-top{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:7px}.advanced-top{display:grid;grid-template-columns:1.05fr 1fr 1fr;gap:7px}.advanced-wide{margin-top:7px}.condition-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}.condition-grid>div{background:#101e2a;border-radius:5px;padding:7px}.condition-grid b{display:block;font-size:9px;margin-top:4px}.referee{display:grid;grid-template-columns:1.3fr repeat(3,1fr);align-items:center;text-align:center}.referee>b{text-align:left;font-size:10px}.referee span{display:block;color:var(--cyan);font:18px "Bebas Neue"}.probabilities{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));text-align:center}.probabilities>div{min-width:0;border-left:1px solid var(--line)}.probabilities>div:first-child{border-left:0}.probabilities span{display:block;color:var(--muted);font-size:7px}.probabilities strong{display:block;font:clamp(20px,2.4vw,30px) "Bebas Neue";white-space:nowrap}.probabilities>div:first-child strong{color:var(--cyan)}.xg-teams{display:grid;grid-template-columns:1fr 1fr;text-align:center}.xg-teams img{height:30px;width:30px;object-fit:contain}.xg-teams strong{display:block;font:22px "Bebas Neue"}.score{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #182b3b;font-size:8px}.comparison{padding:0 5px}.compare-row{display:grid;grid-template-columns:28px 1fr 74px 1fr 28px;align-items:center;gap:6px;margin:5px 0;font-size:7px}.compare-row>b:first-child{color:var(--cyan)}.compare-row>b:last-child{text-align:right}.compare-row>span{text-align:center;color:var(--soft)}.bar{height:3px;background:#142635;border-radius:3px;overflow:hidden}.bar i{display:block;height:100%;background:var(--cyan)}.bar.away i{background:#7d91a5;margin-left:auto}.patterns{display:grid;grid-template-columns:repeat(6,1fr);height:84px;align-items:end}.patterns>div{text-align:center}.patterns>div>span{font-size:6px;color:var(--cyan);margin:0 3px}.patterns>div>span:nth-child(2){color:#8297ad}.patterns>div>div{height:58px;display:flex;gap:3px;justify-content:center;align-items:end}.patterns i{width:6px;background:var(--cyan);border-radius:2px 2px 0 0}.patterns i+i{background:#7d91a5}.patterns small{font:6px "Space Mono";color:var(--muted)}.quality-grid{display:grid;grid-template-columns:repeat(4,1fr);text-align:center}.quality-grid>div{border-left:1px solid var(--line)}.quality-grid>div:first-child{border-left:0}.quality-grid b{display:block;color:var(--cyan);font:22px "Bebas Neue"}.faq details{border-top:1px solid #172b3b;padding:6px}.faq details:first-child{border-top:0}.faq summary{cursor:pointer;font-size:8px}.faq p{color:var(--soft);font-size:7px}.players-top{display:grid;grid-template-columns:1.35fr 1fr;gap:7px}.players-wide{margin-top:7px}.lineup-grid,.absence-cols{display:grid;grid-template-columns:1fr 1fr;gap:8px}.lineup-grid>div{min-height:80px;border:1px solid var(--line);border-radius:5px;display:flex;flex-direction:column;align-items:center;justify-content:center}.lineup-grid b,.absence-cols h3{font-size:8px;color:var(--cyan);margin:0 0 4px}.lineup-grid small,.muted{color:var(--muted);font-size:7px}.detail-list,.absence-list{list-style:none;padding:0;margin:0}.detail-list li,.absence-list li{border-bottom:1px solid #172b3b;padding:4px;font-size:7px;color:var(--soft)}.watch-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}.watch{display:grid;grid-template-columns:34px 1fr;align-items:center;border:1px solid var(--line);border-radius:5px;padding:5px}.watch img{width:30px;height:30px;border-radius:50%;object-fit:cover;grid-row:1/3}.watch b{font-size:8px}.watch small{font-size:6px;color:var(--muted)}.table-scroll{overflow-x:auto}.projection-table{min-width:580px}.scorer-lock{margin-top:7px;border:1px solid var(--line);border-radius:6px;padding:10px;display:flex;gap:20px;align-items:center;font-size:8px}.scorer-lock b{color:var(--cyan)}.scorer-lock span{color:var(--soft)}.legal-footer{text-align:center;color:#3f5d73;font:7px "Space Mono"}.bottom-nav{position:fixed;left:0;right:0;bottom:0;height:62px;background:rgba(4,10,17,.98);border-top:1px solid #142637;display:flex;justify-content:center;gap:min(8vw,110px);z-index:30}.bottom-nav a{width:76px;color:#58738b;text-decoration:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px}.bottom-nav a.active{color:var(--cyan)}.bottom-nav span{font-size:19px}.bottom-nav b{font:6px "Space Mono";letter-spacing:.1em;text-transform:uppercase}.loading-card{min-height:360px;border:1px solid var(--line);border-radius:12px;display:flex;flex-direction:column;justify-content:center;align-items:center;color:var(--muted)}.match-shell>div:not(#matchRoot){display:none!important}
-@media(max-width:720px){body{padding-bottom:65px}.site-header{height:56px;padding:0 12px}.brand img{width:115px}.back-link{display:none}.btn-login{padding:7px 9px}.match-shell{width:calc(100% - 12px);margin:8px auto 18px}.match-head{padding:10px 10px 0}.teams{grid-template-columns:1fr 45px 1fr;padding:12px 0 8px}.team img{width:44px;height:44px}.team h1{font-size:16px}.tabs{margin:0 -10px}.tab-panel{padding:6px}.summary-top,.summary-bottom,.context-top,.advanced-top,.players-top{grid-template-columns:1fr}.factor-grid{grid-template-columns:1fr}.factor-grid>div{border-left:0;border-top:1px solid var(--line)}.decision{grid-template-columns:1fr}.decision-metrics>div:first-child{border-left:0}.risk-strip{align-items:flex-start;gap:6px;flex-direction:column}.condition-grid{grid-template-columns:1fr}.referee{grid-template-columns:1fr 1fr}.referee>b{grid-column:1/-1;text-align:center;margin-bottom:5px}.compare-row{grid-template-columns:24px 1fr 58px 1fr 24px}.quality-grid{grid-template-columns:1fr 1fr;gap:8px}.quality-grid>div:nth-child(3){border-left:0}.watch-grid{grid-template-columns:1fr}.bottom-nav{height:58px;gap:0;justify-content:space-around}.bottom-nav a{width:25%}}
-.lineup-grid>div{min-height:142px;display:block}.pitch{padding:5px;background:linear-gradient(90deg,rgba(18,77,60,.32),rgba(13,64,55,.24));position:relative;overflow:hidden}.pitch:before{content:"";position:absolute;inset:29px 7px 7px;border:1px solid rgba(117,197,169,.25);background:linear-gradient(90deg,transparent 49.7%,rgba(117,197,169,.22) 50%,transparent 50.3%)}.pitch header{display:flex;justify-content:space-between;position:relative;z-index:1}.pitch-lines{height:105px;display:flex;flex-direction:column;justify-content:space-around;position:relative;z-index:1}.pitch-lines>div{display:flex;justify-content:space-around;gap:2px}.pitch-player{width:22%;min-width:0;text-align:center}.pitch-player i{display:block;width:9px;height:9px;margin:auto;background:var(--cyan);border:1px solid #d8f8ff;border-radius:50%;box-shadow:0 0 6px rgba(22,214,244,.5)}.pitch-player em{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text);font:5px "DM Sans";font-style:normal;margin-top:1px}.pitch-empty{display:flex!important;flex-direction:column;align-items:center;justify-content:center}.pitch-empty span{font-size:7px;color:var(--muted);margin-top:8px}
+:root{
+  --bg:#020A11;--bg2:#030D15;
+  --panel:#051521;--panel2:#061824;--panel3:#071A27;--panel-elevated:#092130;
+  --line:rgba(0,200,255,.18);--line-active:rgba(0,213,255,.75);
+  --cyan:#00D5FF;--cyan2:#18BFE9;
+  --text:#F5F8FA;--soft:#8FA5B6;--muted:#557087;
+  --green:#20E68A;--amber:#F5B942;--red:#FF515B;
+  --glow:0 0 0 1px rgba(0,213,255,.18),0 0 25px rgba(0,213,255,.08);
+  --glow-strong:0 0 0 1px rgba(0,213,255,.35),0 0 34px rgba(0,213,255,.16);
+}
+*{box-sizing:border-box}
+html,body{background:var(--bg)}
+body{margin:0;color:var(--text);font-family:"DM Sans",sans-serif;min-height:100vh;padding-bottom:76px}
+.site-header{height:64px;border-bottom:1px solid rgba(0,200,255,.1);background:var(--bg);display:flex;align-items:center;padding:0 max(20px,calc((100vw - 1320px)/2));position:sticky;top:0;z-index:20}
+.brand img{width:150px;height:54px;object-fit:contain}
+.back-link{margin-left:24px;color:var(--soft);text-decoration:none;font-size:12px}
+.btn-login{margin-left:auto;color:var(--cyan);border:1px solid rgba(0,200,255,.3);padding:9px 14px;border-radius:7px;text-decoration:none;font:700 10px "Space Mono"}
+.match-shell{width:min(1320px,calc(100% - 30px));margin:18px auto 28px}
+.match-shell>.seo-summary{display:none}
+.match-card{border:1px solid var(--line);border-radius:13px;overflow:hidden;background:var(--panel)}
+.match-head{padding:12px 18px 0;background:linear-gradient(135deg,#081b2c,#050f19 70%)}
+.meta-row{display:flex;justify-content:space-between;align-items:center;color:var(--soft);font:8px "Space Mono";letter-spacing:.07em}
+.league{display:flex;align-items:center;gap:7px;color:var(--cyan);text-transform:uppercase}
+.league img{width:18px;height:18px;object-fit:contain}
+.teams{display:grid;grid-template-columns:1fr 70px 1fr;align-items:center;padding:9px 15% 7px}
+.team{text-align:center;min-width:0}
+.team img{height:54px;width:54px;object-fit:contain}
+.team h1{font:20px "Bebas Neue";letter-spacing:.03em;margin:4px 0 0}
+.team small{color:var(--muted);font:7px "Space Mono";text-transform:uppercase}
+.versus{text-align:center}
+.versus b{font:20px "Bebas Neue"}
+.versus i{display:block;width:22px;height:2px;background:var(--cyan);margin:4px auto}
+.venue{border-top:1px solid var(--line);padding:7px 0;text-align:center;color:var(--soft);font-size:8px}
+.venue span{margin-left:14px;color:var(--green)}
+.tabs{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--line);margin:0 -18px}
+.tab{appearance:none;background:none;color:var(--muted);border:0;border-bottom:2px solid transparent;padding:10px 5px;font:8px "Space Mono";letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:color .15s,border-color .15s}
+.tab.active{color:var(--cyan);border-color:var(--cyan);text-shadow:0 0 12px rgba(0,213,255,.35)}
+.tab-panel{padding:9px;background:var(--bg2)}
+.panel{background:linear-gradient(145deg,var(--panel3),var(--panel2));border:1px solid var(--line);border-radius:9px;padding:10px;min-width:0}
+.panel-title{display:flex;align-items:center;gap:7px;margin:0 0 8px;color:var(--text);font:700 8px "Space Mono";letter-spacing:.03em;text-transform:uppercase}
+.panel-title:after{content:"";height:1px;background:rgba(0,200,255,.12);flex:1}
+.copy{font-size:9px;line-height:1.55;color:var(--soft);margin:0}
+.empty{min-height:58px;display:flex;align-items:center;justify-content:center;text-align:center;color:var(--muted);font-size:9px;line-height:1.45;padding:10px}
+.micro{color:var(--cyan);font:7px "Space Mono";letter-spacing:.1em;text-transform:uppercase}
+.summary-top{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.12fr);gap:7px}
+
+/* ===== Signal IASHARK premium (carte centrale, pleine largeur - reproduit
+   la capture "OPPORTUNITES IASHARK") ===== */
+.signal-card{margin-bottom:7px;background:linear-gradient(150deg,var(--panel-elevated),var(--panel3) 80%);border:1px solid var(--line-active);border-radius:12px;padding:16px;box-shadow:var(--glow)}
+.signal-top{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;margin-bottom:14px}
+.signal-market{font:22px "Bebas Neue";letter-spacing:.02em;margin:4px 0 0;color:var(--text)}
+.signal-sub{font-size:9px;color:var(--soft);margin:5px 0 0;max-width:60ch;line-height:1.5}
+.value-pill{display:inline-flex;flex-direction:column;align-items:center;gap:2px;background:rgba(32,230,138,.08);border:1px solid rgba(32,230,138,.35);border-radius:10px;padding:8px 14px;flex-shrink:0}
+.value-pill b{color:var(--green);font:18px "Bebas Neue"}
+.value-pill small{color:var(--muted);font:6px "Space Mono";text-transform:uppercase;letter-spacing:.05em}
+.signal-main{display:flex;align-items:center;gap:16px;padding:10px 0;border-top:1px solid rgba(0,200,255,.1);border-bottom:1px solid rgba(0,200,255,.1)}
+.score-ring{position:relative;width:64px;height:64px;flex-shrink:0}
+.score-ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.score-ring circle{fill:none;stroke-width:4}
+.score-ring .track{stroke:rgba(0,200,255,.12)}
+.score-ring .fill{stroke:var(--cyan);stroke-linecap:round;filter:drop-shadow(0 0 4px rgba(0,213,255,.6));transition:stroke-dashoffset .6s ease}
+.score-ring .val{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;font:16px "Bebas Neue";color:var(--cyan)}
+.score-ring .val small{font:5px "Space Mono";color:var(--muted);text-transform:uppercase}
+.signal-metrics{display:flex;gap:0;flex:1}
+.signal-metrics>div{flex:1;text-align:center;padding:4px 8px;border-left:1px solid var(--line)}
+.signal-metrics>div:first-child{border-left:0}
+.signal-metrics b{display:block;color:var(--cyan);font:24px "Bebas Neue"}
+.signal-metrics small{display:block;color:var(--muted);font:6px "Space Mono";text-transform:uppercase;letter-spacing:.05em;margin-top:2px}
+.badge-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px}
+.badge-col{display:flex;flex-direction:column;gap:6px}
+
+/* Marchés recommandés (table etoile + Prob/Cote/Value) */
+.reco-table{width:100%;border-collapse:collapse;font-size:8px;margin-top:6px}
+.reco-table th{text-align:left;color:var(--muted);font:6px "Space Mono";text-transform:uppercase;padding:5px 6px;border-bottom:1px solid rgba(0,200,255,.12)}
+.reco-table td{padding:8px 6px;border-bottom:1px solid rgba(0,200,255,.06)}
+.reco-table tr.top td{background:rgba(0,213,255,.05)}
+.reco-table .rk-mkt{display:flex;align-items:center;gap:6px}
+.reco-table .rk-mkt i{color:var(--amber);font-style:normal;width:10px;flex-shrink:0}
+.reco-table .rk-val{color:var(--green);font-weight:700}
+
+/* Consensus bookmakers */
+.consensus-row{display:grid;grid-template-columns:1.3fr 2fr auto auto;align-items:center;gap:8px;padding:6px 0;font-size:7px}
+.consensus-row .cbar{height:4px;background:rgba(0,200,255,.1);border-radius:3px;overflow:hidden}
+.consensus-row .cbar i{display:block;height:100%;background:var(--cyan2)}
+.consensus-row b{color:var(--text);font-size:8px}
+.consensus-foot{font-size:6px;color:var(--muted);margin-top:4px}
+
+/* Gestion de mise + Info marché */
+.signal-bottom{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.stake-tiers{display:flex;gap:6px}
+.stake-tier{flex:1;text-align:center;padding:8px 4px;border-radius:8px;border:1px solid var(--line);color:var(--soft);font:7px "Space Mono";text-transform:uppercase;cursor:pointer}
+.stake-tier b{display:block;font:13px "Bebas Neue";color:var(--text);margin-bottom:2px}
+.stake-tier.active{border-color:var(--line-active);background:rgba(0,213,255,.08);color:var(--cyan)}
+.stake-tier.active b{color:var(--cyan)}
+.info-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.info-list li{display:flex;align-items:center;gap:6px;font-size:8px;color:var(--soft)}
+.info-list i{color:var(--cyan);font-style:normal;width:10px;flex-shrink:0}
+.cta-watchlist{display:block;width:100%;margin-top:12px;background:var(--cyan);color:#02121c;border:none;border-radius:9px;padding:12px;font:700 9px "Space Mono";letter-spacing:.08em;text-transform:uppercase;text-align:center;cursor:pointer;box-shadow:var(--glow-strong)}
+.badge{display:inline-flex;align-items:center;gap:4px;font:700 7px "Space Mono";letter-spacing:.06em;text-transform:uppercase;padding:5px 9px;border-radius:20px;border:1px solid transparent}
+.badge:before{content:"";width:5px;height:5px;border-radius:50%}
+.badge.b-high,.badge.b-low-risk,.badge.b-positive{color:var(--green);background:rgba(32,230,138,.08);border-color:rgba(32,230,138,.3)}
+.badge.b-high:before,.badge.b-low-risk:before,.badge.b-positive:before{background:var(--green);box-shadow:0 0 5px var(--green)}
+.badge.b-medium,.badge.b-medium-risk{color:var(--amber);background:rgba(245,185,66,.08);border-color:rgba(245,185,66,.3)}
+.badge.b-medium:before,.badge.b-medium-risk:before{background:var(--amber);box-shadow:0 0 5px var(--amber)}
+.badge.b-low,.badge.b-high-risk,.badge.b-negative{color:var(--red);background:rgba(255,81,91,.08);border-color:rgba(255,81,91,.3)}
+.badge.b-low:before,.badge.b-high-risk:before,.badge.b-negative:before{background:var(--red);box-shadow:0 0 5px var(--red)}
+.badge.b-neutral{color:var(--muted);background:rgba(85,112,135,.1);border-color:rgba(85,112,135,.25)}
+.badge.b-neutral:before{background:var(--muted)}
+
+.decision{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center}
+.decision h3{font-size:17px;margin:4px 0}
+.decision-metrics{display:flex}
+.decision-metrics>div{min-width:86px;text-align:center;padding:3px 10px;border-left:1px solid var(--line)}
+.decision-metrics b{display:block;color:var(--cyan);font:23px "Bebas Neue"}
+.decision-metrics small,.condition-grid small,.referee small,.quality-grid small,.xg-teams small{display:block;color:var(--muted);font:6px "Space Mono";text-transform:uppercase}
+.summary-factors{margin-top:7px}
+.factor-grid{display:grid;grid-template-columns:repeat(3,1fr)}
+.factor-grid>div{display:grid;grid-template-columns:20px 1fr auto;align-items:center;gap:5px;padding:4px 8px;border-left:1px solid var(--line);font-size:7px}
+.factor-grid>div:first-child{border-left:0}
+.factor-grid i{color:var(--cyan);font-style:normal}
+.factor-grid b{color:var(--green);font-size:6px}
+.risk-strip{display:flex;gap:18px;align-items:center;border:1px solid rgba(245,185,66,.3);background:rgba(245,185,66,.06);border-radius:7px;margin:7px 0;padding:6px 10px;font-size:7px;color:var(--soft)}
+.risk-strip b{color:var(--amber);white-space:nowrap}
+.summary-bottom{display:grid;grid-template-columns:1.08fr .92fr;gap:7px}
+.market-table,.projection-table{width:100%;border-collapse:collapse;font-size:7px}
+.market-table th,.market-table td,.projection-table th,.projection-table td{text-align:left;padding:5px;border-bottom:1px solid rgba(0,200,255,.08)}
+.market-table th,.projection-table th{color:var(--muted);font:6px "Space Mono"}
+.positive{color:var(--green)}
+.negative{color:var(--red)}
+.scenario{display:grid;grid-template-columns:44px 1fr;gap:5px 8px;align-items:center}
+.scenario span{color:var(--cyan);border:1px solid rgba(0,200,255,.3);border-radius:4px;padding:4px;text-align:center;font:7px "Space Mono"}
+.scenario p{margin:0;color:var(--soft);font-size:7px;line-height:1.4}
+.context-top{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:7px}
+.advanced-top{display:grid;grid-template-columns:1.05fr 1fr 1fr;gap:7px}
+.advanced-wide{margin-top:7px}
+.condition-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+.condition-grid>div{background:var(--panel-elevated);border-radius:6px;padding:7px}
+.condition-grid b{display:block;font-size:9px;margin-top:4px}
+.referee{display:grid;grid-template-columns:1.3fr repeat(3,1fr);align-items:center;text-align:center}
+.referee>b{text-align:left;font-size:10px}
+.referee span{display:block;color:var(--cyan);font:18px "Bebas Neue"}
+.probabilities{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));text-align:center}
+.probabilities>div{min-width:0;border-left:1px solid var(--line)}
+.probabilities>div:first-child{border-left:0}
+.probabilities span{display:block;color:var(--muted);font-size:7px}
+.probabilities strong{display:block;font:clamp(20px,2.4vw,30px) "Bebas Neue";white-space:nowrap}
+.probabilities>div:first-child strong{color:var(--cyan)}
+.xg-teams{display:grid;grid-template-columns:1fr 1fr;text-align:center}
+.xg-teams img{height:30px;width:30px;object-fit:contain}
+.xg-teams strong{display:block;font:22px "Bebas Neue"}
+.score{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid rgba(0,200,255,.08);font-size:8px}
+.comparison{padding:0 5px}
+.compare-row{display:grid;grid-template-columns:28px 1fr 74px 1fr 28px;align-items:center;gap:6px;margin:5px 0;font-size:7px}
+.compare-row>b:first-child{color:var(--cyan)}
+.compare-row>b:last-child{text-align:right}
+.compare-row>span{text-align:center;color:var(--soft)}
+.bar{height:3px;background:rgba(0,200,255,.1);border-radius:3px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--cyan)}
+.bar.away i{background:var(--soft);margin-left:auto}
+.patterns{display:grid;grid-template-columns:repeat(6,1fr);height:84px;align-items:end}
+.patterns>div{text-align:center}
+.patterns>div>span{font-size:6px;color:var(--cyan);margin:0 3px}
+.patterns>div>span:nth-child(2){color:var(--soft)}
+.patterns>div>div{height:58px;display:flex;gap:3px;justify-content:center;align-items:end}
+.patterns i{width:6px;background:var(--cyan);border-radius:2px 2px 0 0}
+.patterns i+i{background:var(--soft)}
+.patterns small{font:6px "Space Mono";color:var(--muted)}
+.quality-grid{display:grid;grid-template-columns:repeat(4,1fr);text-align:center}
+.quality-grid>div{border-left:1px solid var(--line)}
+.quality-grid>div:first-child{border-left:0}
+.quality-grid b{display:block;color:var(--cyan);font:22px "Bebas Neue"}
+
+/* Indicateurs avances : 4 cards icone + chiffre (remplace l'ancien tableau) */
+.indicator-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.indicator-card{background:var(--panel2);border:1px solid var(--line);border-radius:9px;padding:10px}
+.indicator-card i{display:block;color:var(--cyan);font-style:normal;font-size:13px;margin-bottom:8px}
+.indicator-card b{display:block;color:var(--text);font:20px "Bebas Neue"}
+.indicator-card small{display:block;color:var(--muted);font:6px "Space Mono";text-transform:uppercase;margin-top:3px;letter-spacing:.04em}
+
+/* Shot Profile + Precision offensive */
+.shots-top{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.shot-profile{display:flex;flex-direction:column;gap:10px}
+.shot-team{display:flex;align-items:center;gap:8px}
+.shot-team img{width:16px;height:16px;object-fit:contain;flex-shrink:0}
+.shot-team .name{font-size:7px;color:var(--soft);width:64px;flex-shrink:0}
+.shot-bar{flex:1;height:12px;border-radius:3px;overflow:hidden;display:flex;background:rgba(0,200,255,.06)}
+.shot-bar i{display:block;height:100%}
+.shot-bar .on{background:var(--cyan)}
+.shot-bar .off{background:var(--muted)}
+.shot-bar .blocked{background:var(--amber)}
+.shot-total{font-size:8px;color:var(--text);width:26px;text-align:right;flex-shrink:0}
+.shot-legend{display:flex;gap:12px;justify-content:center;font:6px "Space Mono";color:var(--soft);text-transform:uppercase}
+.shot-legend span{display:flex;align-items:center;gap:4px}
+.shot-legend i{width:7px;height:7px;border-radius:2px;display:inline-block}
+.precision-wrap{display:flex;flex-direction:column;gap:12px;justify-content:center;height:100%}
+.precision-row{display:flex;align-items:center;gap:8px}
+.precision-row .name{font-size:7px;color:var(--soft);width:64px;flex-shrink:0}
+.precision-gauge{flex:1;height:6px;background:rgba(0,200,255,.08);border-radius:4px;overflow:hidden}
+.precision-gauge i{display:block;height:100%;background:linear-gradient(90deg,var(--cyan2),var(--cyan))}
+.precision-val{font:12px "Bebas Neue";color:var(--cyan);width:34px;text-align:right;flex-shrink:0}
+.precision-note{font-size:6px;color:var(--muted);line-height:1.5;margin-top:2px}
+.faq details{border-top:1px solid rgba(0,200,255,.1);padding:6px}
+.faq details:first-child{border-top:0}
+.faq summary{cursor:pointer;font-size:8px}
+.faq p{color:var(--soft);font-size:7px}
+
+/* ===== Momentum IASHARK ===== */
+.momentum-wrap{position:relative}
+.momentum-legend{display:flex;gap:14px;margin-bottom:6px;font:6px "Space Mono";letter-spacing:.05em;text-transform:uppercase}
+.momentum-legend span{display:flex;align-items:center;gap:4px;color:var(--soft)}
+.momentum-legend i{width:8px;height:2px;display:inline-block;border-radius:2px}
+.momentum-legend .l-home i{background:var(--cyan)}
+.momentum-legend .l-away i{background:var(--red)}
+.momentum-chart{width:100%;height:auto;display:block}
+.momentum-note{margin-top:6px;font-size:6px;color:var(--muted);line-height:1.5}
+
+/* ===== Distribution Monte-Carlo ===== */
+.mc-distribution{width:100%;height:auto;display:block}
+.mc-stats{display:flex;gap:0;margin-top:8px}
+.mc-stats>div{flex:1;text-align:center;padding:3px 6px;border-left:1px solid var(--line)}
+.mc-stats>div:first-child{border-left:0}
+.mc-stats b{display:block;color:var(--cyan);font:15px "Bebas Neue"}
+.mc-stats small{display:block;color:var(--muted);font:6px "Space Mono";text-transform:uppercase}
+
+/* ===== Matchups à cibler ===== */
+.matchup-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+.matchup-card{background:var(--panel-elevated);border:1px solid var(--line);border-radius:7px;padding:8px}
+.matchup-card b{display:block;color:var(--cyan);font-size:8px;margin-bottom:4px}
+.matchup-card p{margin:0;color:var(--soft);font-size:7px;line-height:1.4}
+
+/* ===== Player Impact / props ===== */
+.impact-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+.impact-card{background:var(--panel-elevated);border:1px solid var(--line);border-radius:8px;padding:9px;text-align:center}
+.impact-avatar{width:44px;height:44px;border-radius:50%;object-fit:cover;margin:0 auto 6px;border:1px solid var(--line);background:var(--panel3)}
+.impact-avatar.empty{display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:14px}
+.impact-card b{display:block;font-size:9px}
+.impact-card small{display:block;color:var(--muted);font:6px "Space Mono";text-transform:uppercase;margin-bottom:6px}
+.impact-stats{display:flex;justify-content:space-around;font-size:7px;color:var(--soft)}
+.impact-stats div{display:flex;flex-direction:column;gap:1px}
+.impact-stats b{color:var(--cyan);font:11px "Bebas Neue"}
+.props-list{display:flex;flex-direction:column;gap:5px}
+.prop-row{display:flex;align-items:center;justify-content:space-between;background:var(--panel-elevated);border:1px solid var(--line);border-radius:6px;padding:7px 9px}
+.prop-row b{font-size:8px;display:block}
+.prop-row small{color:var(--muted);font-size:6px;text-transform:uppercase}
+.prop-row .prop-val{color:var(--cyan);font:15px "Bebas Neue"}
+
+.players-top{display:grid;grid-template-columns:1.35fr 1fr;gap:7px}
+.players-wide{margin-top:7px}
+.lineup-grid,.absence-cols{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.lineup-grid>div{min-height:80px;border:1px solid var(--line);border-radius:7px;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.lineup-grid b,.absence-cols h3{font-size:8px;color:var(--cyan);margin:0 0 4px}
+.lineup-grid small,.muted{color:var(--muted);font-size:7px}
+.detail-list,.absence-list{list-style:none;padding:0;margin:0}
+.detail-list li,.absence-list li{border-bottom:1px solid rgba(0,200,255,.08);padding:4px;font-size:7px;color:var(--soft)}
+.watch-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+.watch{display:grid;grid-template-columns:34px 1fr;align-items:center;border:1px solid var(--line);border-radius:6px;padding:5px}
+.watch img{width:30px;height:30px;border-radius:50%;object-fit:cover;grid-row:1/3}
+.watch b{font-size:8px}
+.watch small{font-size:6px;color:var(--muted)}
+.table-scroll{overflow-x:auto}
+.projection-table{min-width:580px}
+.scorer-lock{margin-top:7px;border:1px solid var(--line);border-radius:7px;padding:10px;display:flex;gap:20px;align-items:center;font-size:8px}
+.scorer-lock b{color:var(--cyan)}
+.scorer-lock span{color:var(--soft)}
+.legal-footer{text-align:center;color:var(--muted);font:7px "Space Mono"}
+.bottom-nav{position:fixed;left:0;right:0;bottom:0;height:62px;background:rgba(2,10,17,.98);border-top:1px solid rgba(0,200,255,.1);display:flex;justify-content:center;gap:min(8vw,110px);z-index:30}
+.bottom-nav a{width:76px;color:var(--muted);text-decoration:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px}
+.bottom-nav a.active{color:var(--cyan)}
+.bottom-nav span{font-size:19px}
+.bottom-nav b{font:6px "Space Mono";letter-spacing:.1em;text-transform:uppercase}
+.loading-card{min-height:360px;border:1px solid var(--line);border-radius:12px;display:flex;flex-direction:column;justify-content:center;align-items:center;color:var(--muted)}
+.match-shell>div:not(#matchRoot){display:none!important}
+
+@media(max-width:720px){
+  body{padding-bottom:65px}
+  .site-header{height:56px;padding:0 12px}
+  .brand img{width:115px}
+  .back-link{display:none}
+  .btn-login{padding:7px 9px}
+  .match-shell{width:calc(100% - 12px);margin:8px auto 18px}
+  .match-head{padding:10px 10px 0}
+  .teams{grid-template-columns:1fr 45px 1fr;padding:12px 0 8px}
+  .team img{width:44px;height:44px}
+  .team h1{font-size:16px}
+  .tabs{margin:0 -10px}
+  .tab-panel{padding:6px}
+  .summary-top,.summary-bottom,.context-top,.advanced-top,.players-top{grid-template-columns:1fr}
+  .factor-grid{grid-template-columns:1fr}
+  .factor-grid>div{border-left:0;border-top:1px solid var(--line)}
+  .decision{grid-template-columns:1fr}
+  .decision-metrics>div:first-child{border-left:0}
+  .risk-strip{align-items:flex-start;gap:6px;flex-direction:column}
+  .condition-grid{grid-template-columns:1fr}
+  .referee{grid-template-columns:1fr 1fr}
+  .referee>b{grid-column:1/-1;text-align:center;margin-bottom:5px}
+  .compare-row{grid-template-columns:24px 1fr 58px 1fr 24px}
+  .quality-grid{grid-template-columns:1fr 1fr;gap:8px}
+  .quality-grid>div:nth-child(3){border-left:0}
+  .shots-top{grid-template-columns:1fr}
+  .indicator-grid{grid-template-columns:1fr 1fr}
+  .watch-grid{grid-template-columns:1fr}
+  .matchup-grid{grid-template-columns:1fr}
+  .impact-grid{grid-template-columns:1fr}
+  .signal-top{flex-direction:column;align-items:flex-start}
+  .signal-main{flex-wrap:wrap}
+  .signal-bottom{grid-template-columns:1fr}
+  .reco-table{font-size:7px}
+  .consensus-row{grid-template-columns:1fr;gap:2px;padding:8px 0;border-bottom:1px solid rgba(0,200,255,.06)}
+  .bottom-nav{height:58px;gap:0;justify-content:space-around}
+  .bottom-nav a{width:25%}
+}
+
+/* ===== Terrain tactique ===== */
+.lineup-grid>div{min-height:170px;display:block}
+.pitch{padding:6px;background:linear-gradient(180deg,rgba(18,77,60,.32),rgba(13,64,55,.2));position:relative;overflow:hidden;border-radius:7px}
+.pitch:before{content:"";position:absolute;inset:30px 8px 8px;border:1px solid rgba(117,197,169,.28);background:linear-gradient(180deg,transparent 49.6%,rgba(117,197,169,.24) 50%,transparent 50.4%)}
+.pitch:after{content:"";position:absolute;left:50%;top:calc(30px + (100% - 38px)/2);width:44px;height:44px;margin:-22px 0 0 -22px;border:1px solid rgba(117,197,169,.28);border-radius:50%}
+.pitch header{display:flex;justify-content:space-between;position:relative;z-index:1}
+.pitch header b{font-size:8px;color:var(--text)}
+.pitch header small{font:6px "Space Mono";color:var(--muted);text-transform:uppercase}
+.pitch-formation{position:relative;z-index:1;height:150px;margin-top:4px}
+.pitch-row{position:absolute;left:6px;right:6px;display:flex;justify-content:space-around}
+.pitch-player{width:15%;min-width:0;text-align:center}
+.pitch-player i{display:block;width:11px;height:11px;margin:auto;background:var(--cyan);border:1px solid rgba(255,255,255,.7);border-radius:50%;box-shadow:0 0 7px rgba(0,213,255,.6)}
+.pitch-player.away i{background:var(--panel2);border-color:var(--soft);box-shadow:none}
+.pitch-player em{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text);font:5.5px "DM Sans";font-style:normal;margin-top:2px}
+.pitch-empty{display:flex!important;flex-direction:column;align-items:center;justify-content:center}
+.pitch-empty span{font-size:7px;color:var(--muted);margin-top:8px;text-align:center;padding:0 10px}

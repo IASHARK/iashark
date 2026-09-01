@@ -36,7 +36,7 @@ jobs:
           const { fractionalKelly } = require('./lib/betting.js');
           const { resolveMarketWin } = require('./lib/resolvers.js');
           const { parseOdds } = require('./lib/odds.js');
-          const { pickMarketDeterministic, computeRiskLabel, computeModelAgreement, computeDataQualityScore, computeReliability } = require('./lib/decision.js');
+          const { pickMarketDeterministic, computeRiskLabel, computeModelAgreement, computeDataQualityScore, computeReliability, scoresConsistentWithMarket } = require('./lib/decision.js');
           const { buildPoissonMatrix, buildDixonColesMatrix, blendMatrices, deriveMarketsFromMatrix } = require('./lib/markets/score-matrix.js');
           const { blendEarlySeasonRate } = require('./lib/markets/early-season.js');
           const { countLineProbability } = require('./lib/markets/count-model.js');
@@ -2251,6 +2251,12 @@ jobs:
               // "le moteur doit fonctionner a 100% sans lui").
               var pickedMarket=pickMarketDeterministic(allMarkets,{minOdds:1.50});
               var eligibleMarkets=allMarkets.filter(function(m){return parseFloat(m.cote)>=1.50;});
+              // Score(s) le(s) plus probable(s) affiches a l'utilisateur : filtres
+              // pour rester coherents avec le marche recommande (ex: pas de "1-0"
+              // affiche a cote d'un pick "Over 2.5") - repli honnete sur le
+              // classement Monte-Carlo brut si le marche n'est pas evaluable depuis
+              // un score seul ou si aucun score simule ne le satisfait.
+              var displayScores=pureProbs.montecarlo?scoresConsistentWithMarket(pureProbs.montecarlo.top_scores_full,pickedMarket&&pickedMarket.id,3):[];
               // Vue comparative publique : uniquement des marchés réellement modélisés
               // ET cotés. Aucun chiffre de secours n'est fabriqué pour remplir la carte.
               var marketsCompared=allMarkets.slice().sort(function(a,b){return b.prob-a.prob;}).slice(0,4).map(function(m){
@@ -2342,7 +2348,7 @@ jobs:
                 dixon_pN:pureProbs.dixon?pureProbs.dixon.pN:pureProbs.pN,
                 dixon_p2:pureProbs.dixon?pureProbs.dixon.p2:pureProbs.p2,
                 mc_p1:pureProbs.montecarlo?pureProbs.montecarlo.p1:pureProbs.p1,
-                mc_scores:pureProbs.montecarlo?pureProbs.montecarlo.top_scores:[],
+                mc_scores:displayScores,
                 simulation_count:pureProbs.montecarlo?pureProbs.montecarlo.simulations:null,
                 mc_pN:pureProbs.montecarlo?pureProbs.montecarlo.pN:pureProbs.pN,
                 mc_p2:pureProbs.montecarlo?pureProbs.montecarlo.p2:pureProbs.p2,
@@ -2493,7 +2499,7 @@ jobs:
                 risk_principal:(keyAbsenceAlerts&&keyAbsenceAlerts.length)?keyAbsenceAlerts[0]:null,
                 vbet:(!noSignal&&kellyVal!=='0')?'OUI':'NON',
                 scores:an&&an.score_central?[an.score_central]:[],
-                mc_scores:pureProbs.montecarlo?pureProbs.montecarlo.top_scores:[],
+                mc_scores:displayScores,
                 simulation_count:pureProbs.montecarlo?pureProbs.montecarlo.simulations:null,
                 paris_safe:{bet:pickedMarket?pickedMarket.market:'',cote:pickedMarket?parseFloat(pickedMarket.cote):null,proba:pickedMarket?Math.round(pickedMarket.prob)+'%':''},
                 paris_risque:{bet:'',cote:'',proba:''},

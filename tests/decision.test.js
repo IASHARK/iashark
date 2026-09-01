@@ -1,7 +1,7 @@
 "use strict";
 const test = require("node:test");
 const assert = require("node:assert/strict");
-const { pickMarketDeterministic, computeRiskLabel, computeModelAgreement, computeDataQualityScore, computeReliability } = require("../lib/decision.js");
+const { pickMarketDeterministic, computeRiskLabel, computeModelAgreement, computeDataQualityScore, computeReliability, scoreMatchesMarket, scoresConsistentWithMarket } = require("../lib/decision.js");
 
 test("pickMarketDeterministic: choisit le marche de plus haute probabilite modele", () => {
   const markets = [
@@ -151,4 +151,48 @@ test("computeReliability: expose les composants individuels, pas juste un label 
   assert.equal(r.model_agreement, "Moyen");
   assert.equal(r.data_quality, "Moyenne");
   assert.equal(r.sample_size, 10);
+});
+
+test("scoreMatchesMarket: over/under total de buts", () => {
+  assert.equal(scoreMatchesMarket(2, 1, "over-25"), true);
+  assert.equal(scoreMatchesMarket(1, 0, "over-25"), false);
+  assert.equal(scoreMatchesMarket(1, 0, "under-25"), true);
+});
+test("scoreMatchesMarket: resultat et double chance", () => {
+  assert.equal(scoreMatchesMarket(2, 0, "home-win"), true);
+  assert.equal(scoreMatchesMarket(1, 1, "draw"), true);
+  assert.equal(scoreMatchesMarket(1, 1, "dc-1x"), true);
+  assert.equal(scoreMatchesMarket(0, 1, "dc-1x"), false);
+});
+test("scoreMatchesMarket: BTTS et clean sheet", () => {
+  assert.equal(scoreMatchesMarket(1, 1, "btts-yes"), true);
+  assert.equal(scoreMatchesMarket(1, 0, "btts-yes"), false);
+  assert.equal(scoreMatchesMarket(2, 0, "home-clean-sheet"), true);  // away n'a pas marque
+  assert.equal(scoreMatchesMarket(2, 0, "away-clean-sheet"), false); // home a marque 2, away a encaisse
+  assert.equal(scoreMatchesMarket(0, 2, "away-clean-sheet"), true);  // home n'a pas marque
+});
+test("scoreMatchesMarket: marche non evaluable depuis le score seul (1re mi-temps, tirs) -> null, jamais un filtrage errone", () => {
+  assert.equal(scoreMatchesMarket(2, 1, "fh-over-05"), null);
+  assert.equal(scoreMatchesMarket(2, 1, "total-shots-over-9_5"), null);
+});
+
+test("scoresConsistentWithMarket: reordonne pour ne garder que les scores compatibles avec le marche recommande", () => {
+  const raw = [
+    { score: "1-0", n: 800, pct: 16 },
+    { score: "1-1", n: 550, pct: 11 },
+    { score: "2-1", n: 400, pct: 8 },
+    { score: "2-0", n: 350, pct: 7 },
+    { score: "3-1", n: 200, pct: 4 },
+  ];
+  const result = scoresConsistentWithMarket(raw, "over-25", 3);
+  assert.deepEqual(result.map((s) => s.score), ["2-1", "3-1"]);
+});
+test("scoresConsistentWithMarket: sans marche recommande (NO_PICK) -> classement brut inchange", () => {
+  const raw = [{ score: "1-0", n: 800, pct: 16 }, { score: "0-0", n: 500, pct: 10 }];
+  assert.deepEqual(scoresConsistentWithMarket(raw, null, 3), raw);
+});
+test("scoresConsistentWithMarket: marche non evaluable ou aucun score compatible simule -> repli honnete sur le brut, jamais une liste vide ni un score invente", () => {
+  const raw = [{ score: "0-0", n: 900, pct: 90 }, { score: "1-0", n: 100, pct: 10 }];
+  assert.deepEqual(scoresConsistentWithMarket(raw, "fh-over-05", 3), raw.slice(0, 3));
+  assert.deepEqual(scoresConsistentWithMarket(raw, "over-35", 3), raw.slice(0, 3));
 });

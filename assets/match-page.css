@@ -39,6 +39,12 @@ a{color:inherit}
 .hero-team{display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;min-width:0}
 .hero-team img{width:56px;height:56px;object-fit:contain}
 .hero-team b{font:22px var(--display);letter-spacing:.03em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.hero-team small{display:block;margin-top:-4px;color:var(--muted);font-size:10.5px}
+.form-strip{display:flex;gap:3px;margin-top:-2px}
+.form-strip i{width:16px;height:16px;display:grid;place-items:center;border-radius:4px;font:8px var(--mono);font-style:normal;font-weight:700;color:#02121c}
+.form-strip .f-w{background:var(--green)}
+.form-strip .f-d{background:var(--dim);color:var(--text)}
+.form-strip .f-l{background:var(--red)}
 .hero-vs{text-align:center;color:var(--dim);font:16px var(--display)}
 .hero-venue{display:flex;align-items:center;justify-content:center;gap:8px;padding-top:12px;border-top:1px solid var(--line);color:var(--muted);font-size:12px}
 .hero-venue svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.7}

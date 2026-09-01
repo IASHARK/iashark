@@ -9,17 +9,30 @@ const img=(src,alt)=>src?`<img src="${esc(src)}" alt="${esc(alt)}" loading="lazy
 const empty=t=>`<div class="empty">${esc(t)}</div>`;
 const card=(title,body,cls='')=>`<section class="card ${cls}"><h2>${esc(title)}</h2>${body}</section>`;
 
+// Forme recente (5 derniers resultats du championnat, raw.classement.form) :
+// simples pastilles colorees, aucune interpretation ajoutee.
+function formStrip(form){
+  if(!form)return '';
+  const chars=String(form).slice(-5).split('').filter(c=>'WDL'.includes(c.toUpperCase()));
+  if(!chars.length)return '';
+  return `<div class="form-strip">${chars.map(c=>`<i class="f-${c.toLowerCase()}">${esc(c)}</i>`).join('')}</div>`;
+}
+function teamMeta(s){
+  if(!s)return '';
+  return `<small>${s.rank}${s.rank===1?'er':'e'} · ${s.pts} pts</small>${formStrip(s.form)}`;
+}
 function hero(vm){
   const i=vm.identity;
+  const s=i.standings||{};
   return `<section class="card hero">
     <div class="hero-top">
       <div class="hero-league">${img(i.league.logo,i.league.name)}<span>${esc(i.league.name)}</span></div>
       <span class="hero-time">${esc(i.date||'Date à confirmer')} · ${esc(i.time||'—')}${vm.model.available?' · <span class="ready">● Analyse disponible</span>':''}</span>
     </div>
     <div class="hero-teams">
-      <div class="hero-team">${img(i.home.logo,i.home.name)}<b>${esc(i.home.name)}</b></div>
+      <div class="hero-team">${img(i.home.logo,i.home.name)}<b>${esc(i.home.name)}</b>${teamMeta(s.home)}</div>
       <div class="hero-vs">VS</div>
-      <div class="hero-team">${img(i.away.logo,i.away.name)}<b>${esc(i.away.name)}</b></div>
+      <div class="hero-team">${img(i.away.logo,i.away.name)}<b>${esc(i.away.name)}</b>${teamMeta(s.away)}</div>
     </div>
     ${vm.conditions.venue?`<div class="hero-venue"><svg viewBox="0 0 24 24"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.4"/></svg>${esc(vm.conditions.venue)}</div>`:''}
   </section>`;

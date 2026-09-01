@@ -89,6 +89,14 @@ test("resolveMarketWin: victoire sans encaisser exige simultanement victoire et 
   assert.equal(resolveMarketWin("Exterieur gagne sans encaisser", 0, 1), true);
 });
 
+test("resolveMarketWin: clean sheet ne depend que de la cage inviolee, pas du resultat final (distinct de 'gagne sans encaisser')", () => {
+  assert.equal(resolveMarketWin("Domicile clean sheet", 2, 0), true);
+  assert.equal(resolveMarketWin("Domicile clean sheet", 0, 0), true);  // nul mais cage inviolee -> gagne quand meme
+  assert.equal(resolveMarketWin("Domicile clean sheet", 0, 1), false); // domicile encaisse -> perdu, meme si le match est ailleurs
+  assert.equal(resolveMarketWin("Exterieur clean sheet", 0, 2), true);
+  assert.equal(resolveMarketWin("Exterieur clean sheet", 1, 0), false);
+});
+
 test("resolveMarketWin: combines resultat + total exigent les deux conditions", () => {
   assert.equal(resolveMarketWin("Domicile gagne + plus de 2.5 buts", 2, 1), true);
   assert.equal(resolveMarketWin("Domicile gagne + plus de 2.5 buts", 1, 2), false);

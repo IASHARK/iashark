@@ -78,6 +78,16 @@ test("parseOdds: expose les cotes reelles des totaux equipe, win-to-nil et resul
   assert.equal(p.away_win_under35, "4.40");
 });
 
+test("parseOdds: expose les cotes reelles Clean Sheet - Home/Away (bet_id 27/28, confirmes chez les bookmakers)", () => {
+  const raw = bookmaker([
+    { name: "Clean Sheet - Home", values: [{ value: "Yes", odd: "2.45" }, { value: "No", odd: "1.55" }] },
+    { name: "Clean Sheet - Away", values: [{ value: "Yes", odd: "3.60" }] },
+  ]);
+  const p = parseOdds(raw);
+  assert.equal(p.home_clean_sheet, "2.45");
+  assert.equal(p.away_clean_sheet, "3.60");
+});
+
 test("parseOdds: normalise les lignes premiere mi-temps et tirs sans ligne codee en dur", () => {
   const raw = bookmaker([
     { id: 6, name: "Goals Over/Under First Half", values: [{ value: "Over 0.5", odd: "1.61" }, { value: "Under 1.5", odd: "1.74" }] },

@@ -2200,6 +2200,8 @@ jobs:
                 candidate('away-team-under-15','Exterieur moins de 1.5 but',odds.away_under15,d.teamTotals.away['1.5'].under*100,'Exterieur marque au plus 1 but',naiveImplied(odds.away_under15)),
                 candidate('home-win-to-nil','Domicile gagne sans encaisser',odds.home_win_to_nil,d.winToNil.home*100,'Domicile gagne sans encaisser',naiveImplied(odds.home_win_to_nil)),
                 candidate('away-win-to-nil','Exterieur gagne sans encaisser',odds.away_win_to_nil,d.winToNil.away*100,'Exterieur gagne sans encaisser',naiveImplied(odds.away_win_to_nil)),
+                candidate('home-clean-sheet','Domicile clean sheet',odds.home_clean_sheet,d.cleanSheet.home*100,'Domicile garde sa cage inviolee',naiveImplied(odds.home_clean_sheet)),
+                candidate('away-clean-sheet','Exterieur clean sheet',odds.away_clean_sheet,d.cleanSheet.away*100,'Exterieur garde sa cage inviolee',naiveImplied(odds.away_clean_sheet)),
                 candidate('home-win-over-15','Domicile gagne + plus de 1.5 but',odds.home_win_over15,d.resultTotals.home.over1_5*100,'Domicile gagne et plus de 1.5 but',naiveImplied(odds.home_win_over15)),
                 candidate('home-win-over-25','Domicile gagne + plus de 2.5 buts',odds.home_win_over25,d.resultTotals.home.over2_5*100,'Domicile gagne et plus de 2.5 buts',naiveImplied(odds.home_win_over25)),
                 candidate('home-win-over-35','Domicile gagne + plus de 3.5 buts',odds.home_win_over35,d.resultTotals.home.over3_5*100,'Domicile gagne et plus de 3.5 buts',naiveImplied(odds.home_win_over35)),

@@ -8,19 +8,18 @@ test("la page Match est un shell léger sans ancien rendu inline",()=>{
   assert.match(html,/id="matchRoot"/);assert.match(html,/match-page\.js/);
   assert.doesNotMatch(html,/function render\(/);assert.doesNotMatch(html,/crit_home\.att===0/);
 });
-test("la nouvelle interface expose les trois espaces validés",()=>{
-  for(const value of ['data-tab="summary"','data-tab="advanced"','data-tab="players"','Marchés recommandés','Scénario probable','Conditions du match','Arbitre & discipline','Scénario par tranches de 15 min','Questions sur ce match','Projections joueurs IASHARK','pitch-player'])assert.match(js,new RegExp(value));
+test("la page simple expose une seule colonne de sections réelles, sans onglets",()=>{
+  assert.doesNotMatch(js,/data-tab=/);assert.doesNotMatch(js,/role="tablist"/);
+  for(const value of ['Recommandation IASHARK','Probabilités 1X2','Buts attendus','Comparatif des équipes','Scores les plus probables','Lecture du match','Joueurs clés','Absents & incertains'])assert.match(js,new RegExp(value));
 });
-test("les onglets sont accessibles et la page est responsive",()=>{
-  assert.match(js,/role="tablist"/);assert.match(js,/hidden/);assert.match(css,/@media\(max-width:720px\)/);
+test("la page est responsive",()=>{
+  assert.match(css,/@media\(max-width:640px\)/);
 });
 test("le rendu ne contient plus les valeurs métier précédemment codées en dur",()=>{
   assert.doesNotMatch(js,/10[\s.,]?000 simulations/i);assert.doesNotMatch(js,/37%/);assert.doesNotMatch(js,/33%/);assert.doesNotMatch(js,/30%/);
 });
-test("la maquette compacte verrouille les trois compositions de grille",()=>{
-  assert.match(css,/\.summary-top\{display:grid;grid-template-columns:minmax\(0,1fr\) minmax\(0,1\.12fr\)/);
-  assert.match(css,/\.advanced-top\{display:grid;grid-template-columns:1\.05fr 1fr 1fr/);
-  assert.match(css,/\.players-top\{display:grid;grid-template-columns:1\.35fr 1fr/);
+test("aucune section ne prétend avoir une donnée absente : chaque bloc a un état vide honnête",()=>{
+  for(const value of ['Aucun marché ne franchit les seuils','Probabilités indisponibles','xG indisponibles','Statistiques comparatives indisponibles','Scores probables indisponibles','Lecture du match indisponible'])assert.match(js,new RegExp(value.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')));
 });
 test("le workflow alimente les blocs comparatifs sans valeur de secours",()=>{
   const workflow=read(".github/workflows/update-data.yml");

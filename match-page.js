@@ -1,248 +1,149 @@
 (function(){'use strict';
 const root=document.getElementById('matchRoot');
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const fmt=v=>Number.isFinite(Number(v))?Number(v).toLocaleString('fr-FR',{maximumFractionDigits:1}):'—';
+const n=v=>Number.isFinite(Number(v))?Number(v):null;
+const fmt=(v,d=1)=>n(v)===null?'—':Number(v).toLocaleString('fr-FR',{maximumFractionDigits:d});
+const pct=v=>n(v)===null?'—':fmt(v)+'%';
+const clamp=v=>Math.max(0,Math.min(100,n(v)||0));
+const img=(src,alt)=>src?`<img src="${esc(src)}" alt="${esc(alt)}" loading="lazy">`:'';
 const empty=t=>`<div class="empty">${esc(t)}</div>`;
-const logo=(url,name)=>url?`<img src="${esc(url)}" alt="${esc(name)}">`:'';
-const panel=(title,body,cls='')=>`<section class="panel ${cls}"><h2 class="panel-title">${esc(title)}</h2>${body}</section>`;
-const list=(items,cls='detail-list')=>`<ul class="${cls}">${items.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`;
+const card=(title,body,cls='')=>`<section class="card ${cls}"><h2>${esc(title)}</h2>${body}</section>`;
 
-// Bandeaux confiance/risque/value : traduisent des champs REELS deja
-// calcules par le pipeline (reliability.label, editorial.risk, model.value)
-// en pastille visuelle - aucune nouvelle logique de decision ici, juste un
-// mappage texte -> classe CSS.
+function hero(vm){
+  const i=vm.identity;
+  return `<section class="card hero">
+    <div class="hero-top">
+      <div class="hero-league">${img(i.league.logo,i.league.name)}<span>${esc(i.league.name)}</span></div>
+      <span class="hero-time">${esc(i.date||'Date à confirmer')} · ${esc(i.time||'—')}${vm.model.available?' · <span class="ready">● Analyse disponible</span>':''}</span>
+    </div>
+    <div class="hero-teams">
+      <div class="hero-team">${img(i.home.logo,i.home.name)}<b>${esc(i.home.name)}</b></div>
+      <div class="hero-vs">VS</div>
+      <div class="hero-team">${img(i.away.logo,i.away.name)}<b>${esc(i.away.name)}</b></div>
+    </div>
+    ${vm.conditions.venue?`<div class="hero-venue"><svg viewBox="0 0 24 24"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.4"/></svg>${esc(vm.conditions.venue)}</div>`:''}
+  </section>`;
+}
+
+// Badge confiance/risque : mappage texte -> couleur, aucune logique de
+// decision ici, uniquement les champs deja calcules par le pipeline.
 function confidenceBadge(label){
   if(!label)return '';
   const l=label.toLowerCase();
-  const cls=l.includes('élev')||l.includes('elev')?'b-high':l.includes('moy')?'b-medium':l.includes('faib')?'b-low':'b-neutral';
+  const cls=l.includes('élev')||l.includes('elev')?'b-green':l.includes('moy')?'b-orange':l.includes('faib')?'b-red':'b-cyan';
   return `<span class="badge ${cls}">Confiance ${esc(label)}</span>`;
 }
-function riskBadge(riskCode){
-  if(!riskCode)return '';
-  const map={FAIBLE:['b-low-risk','Risque faible'],MODERE:['b-medium-risk','Risque modéré'],ELEVE:['b-high-risk','Risque élevé']};
-  const [cls,label]=map[riskCode]||['b-neutral',riskCode];
+function riskBadge(code){
+  if(!code)return '';
+  const map={FAIBLE:['b-green','Risque faible'],MODERE:['b-orange','Risque modéré'],ELEVE:['b-red','Risque élevé']};
+  const [cls,label]=map[code]||['b-cyan',code];
   return `<span class="badge ${cls}">${esc(label)}</span>`;
 }
-function valueBadge(value){
-  if(value===null||value===undefined)return '';
-  const cls=value>0?'b-positive':value<0?'b-negative':'b-neutral';
-  return `<span class="badge ${cls}">${value>0?'+':''}${fmt(value)} pts value</span>`;
+
+function recommendation(vm){
+  const r=vm.model.recommendation;
+  if(!r)return card('Recommandation IASHARK',empty(vm.model.unavailableReason||'Aucun marché ne franchit les seuils de confiance ou de cote minimale pour ce match — IASHARK préfère ne pas se prononcer.'));
+  const fair=r.probability>0?100/r.probability:null;
+  return `<section class="card reco">
+    <div class="reco-head">
+      <div><span class="reco-eyebrow">Recommandation IASHARK</span><h1 class="reco-market">${esc(r.market)}</h1></div>
+      <div class="reco-badges">${confidenceBadge(r.reliability)}${riskBadge(vm.editorial.riskCode)}</div>
+    </div>
+    <div class="reco-stats">
+      <div><small>Probabilité</small><b>${pct(r.probability)}</b></div>
+      <div><small>Score IASHARK</small><b>${vm.model.iasharkScore===null?'—':Math.round(vm.model.iasharkScore)+'/100'}</b></div>
+      <div><small>Cote équitable</small><b>${fmt(fair,2)}</b></div>
+      <div><small>Cote moyenne</small><b>${fmt(vm.model.recommendedOdds,2)}</b></div>
+    </div>
+  </section>`;
 }
 
-// Score IASHARK : anneau SVG, rempli proportionnellement (jamais un simple
-// texte decoratif). r=22, circonference = 2*pi*22.
-function scoreRing(score){
-  if(score===null)return '';
-  const r=22,c=2*Math.PI*r,offset=c*(1-Math.max(0,Math.min(100,score))/100);
-  return `<div class="score-ring" title="Score IASHARK : combine probabilité modèle, qualité des données, accord des modèles et taille d'échantillon"><svg viewBox="0 0 52 52"><circle class="track" cx="26" cy="26" r="${r}"></circle><circle class="fill" cx="26" cy="26" r="${r}" stroke-dasharray="${c.toFixed(1)}" stroke-dashoffset="${offset.toFixed(1)}"></circle></svg><div class="val">${Math.round(score)}<small>/100</small></div></div>`;
+function probabilities(vm){
+  const p=vm.model.probabilities;
+  if(!p)return empty('Probabilités indisponibles.');
+  return `<div class="prob-bar"><span class="home" style="width:${clamp(p.home)}%">${p.home>=10?pct(p.home):''}</span><span class="draw" style="width:${clamp(p.draw)}%">${p.draw>=10?pct(p.draw):''}</span><span class="away" style="width:${clamp(p.away)}%">${p.away>=10?pct(p.away):''}</span></div><div class="prob-legend"><span>Domicile</span><span>Nul</span><span>Extérieur</span></div>`;
+}
+function xg(vm){
+  const x=vm.model.expectedGoals;
+  if(!x)return empty('xG indisponibles.');
+  return `<div class="xg-row"><div class="xg-team">${img(vm.identity.home.logo,vm.identity.home.name)}<b>${fmt(x.home)}</b><small>${esc(vm.identity.home.name)}</small></div><span class="xg-sep">xG</span><div class="xg-team">${img(vm.identity.away.logo,vm.identity.away.name)}<b>${fmt(x.away)}</b><small>${esc(vm.identity.away.name)}</small></div></div>`;
 }
 
-function header(vm){const i=vm.identity;return `<header class="match-head"><div class="meta-row"><div class="league">${logo(i.league.logo,i.league.name)}<span>${esc(i.league.name)}</span></div><span>${esc(i.date||'Date à confirmer')} · ${esc(i.time||'—')}</span></div><div class="teams"><div class="team">${logo(i.home.logo,i.home.name)}<h1>${esc(i.home.name)}</h1><small>Domicile</small></div><div class="versus"><b>VS</b><i></i></div><div class="team">${logo(i.away.logo,i.away.name)}<h1>${esc(i.away.name)}</h1><small>Extérieur</small></div></div><div class="venue">${vm.conditions.venue?`⌾ ${esc(vm.conditions.venue)}`:'Lieu à confirmer'}${vm.model.available?' <span>● Analyse disponible</span>':''}</div><div class="tabs" role="tablist" aria-label="Analyse du match"><button class="tab active" role="tab" aria-selected="true" data-tab="summary">Résumé</button><button class="tab" role="tab" aria-selected="false" data-tab="advanced">Données avancées</button><button class="tab" role="tab" aria-selected="false" data-tab="players">Joueurs</button></div></header>`}
+function comparison(vm){
+  const c=vm.comparison;
+  if(!c||!c.rows.length)return empty('Statistiques comparatives indisponibles.');
+  return c.rows.map(row=>{
+    const max=Math.max(row.home,row.away,1);
+    return `<div class="compare-row"><b>${fmt(row.home)}</b><div class="compare-bar home"><i style="width:${row.home/max*100}%"></i></div><span>${esc(row.label)}</span><div class="compare-bar away"><i style="width:${row.away/max*100}%"></i></div><b>${fmt(row.away)}</b></div>`;
+  }).join('');
+}
 
-// Table "Marchés recommandés" : la ligne du haut (etoile) est le marche
-// retenu par le moteur (pari_rec/recommendation), les lignes suivantes sont
-// les autres marches reellement compares (raw.markets_compared). Cote
-// equitable = 1/probabilite (calcul documente, pas une donnee bookmaker).
-function recoTable(vm){
-  const r=vm.model.recommendation;
-  const compared=vm.model.marketsCompared||[];
-  let rows=compared.length?compared:(r?[{market:r.market,probability:r.probability,consensus:null,edge:null}]:[]);
-  if(!rows.length)return empty('Aucun marché comparable ne franchit encore les seuils du moteur.');
-  return `<table class="reco-table"><thead><tr><th>Marché</th><th>Prob. IA</th><th>Cote équitable</th><th>Value</th></tr></thead><tbody>${rows.map((x,i)=>{const fair=x.probability>0?(100/x.probability):null;return `<tr class="${i===0?'top':''}"><td class="rk-mkt">${i===0?'<i>★</i>':'<i></i>'}${esc(x.market)}</td><td>${fmt(x.probability)}%</td><td>${fair?fmt(fair):'—'}</td><td class="rk-val">${x.edge===null||x.edge===undefined?'—':`${x.edge>0?'+':''}${fmt(x.edge)} pts`}</td></tr>`}).join('')}</tbody></table>`;
+function scores(vm){
+  const s=vm.model.scores;
+  if(!s.length)return empty('Scores probables indisponibles.');
+  return `<div class="scores-row">${s.map(x=>`<div class="score-pill"><b>${esc(x.score)}</b><small>${pct(x.probability)}</small></div>`).join('')}</div>`;
 }
-// Consensus bookmakers : barres a partir du champ consensus reel de
-// raw.markets_compared (moyenne de cotes/probabilite implicite calculee par
-// le pipeline, jamais generee ici).
-function consensusSection(vm){
-  const rows=(vm.model.marketsCompared||[]).filter(x=>x.consensus!==null&&x.consensus!==undefined);
-  if(!rows.length)return empty('Consensus bookmakers indisponible pour ce match.');
-  const max=Math.max(...rows.map(x=>x.consensus),1);
-  return `${rows.map(x=>`<div class="consensus-row"><span>${esc(x.market)}</span><div class="cbar"><i style="width:${(x.consensus/max*100).toFixed(0)}%"></i></div><b>${fmt(x.consensus)}%</b><span>${x.consensus>0?fmt(100/x.consensus):'—'}</span></div>`).join('')}<p class="consensus-foot">(i) Probabilité implicite calculée à partir des cotes moyennes agrégées par le moteur IASHARK.</p>`;
+
+// Le risque n'est affiche en toutes lettres ici que s'il s'agit d'un texte
+// descriptif reel (raw.risk_principal) - le simple CODE FAIBLE/MODERE/ELEVE
+// (raw.risque) est deja rendu par le badge de la recommandation, pas repete
+// tel quel en pseudo-phrase ici.
+function reading(vm){
+  const text=vm.editorial.reading;
+  const risk=vm.editorial.risk;
+  const risqueDescriptif=risk&&!['FAIBLE','MODERE','ELEVE'].includes(risk)?risk:null;
+  if(!text&&!risqueDescriptif)return empty('Lecture du match indisponible.');
+  return `${text?`<p class="reading">${esc(text)}</p>`:''}${risqueDescriptif?`<div class="risk-note"><b>⚠</b><span>${esc(risqueDescriptif)}</span></div>`:''}`;
 }
-function infoMarche(vm){
-  const items=[];
-  if(vm.model.sources.length)items.push(`${vm.model.sources.length} sources de données confirmées`);
-  if(vm.model.simulationCount)items.push(`${Number(vm.model.simulationCount).toLocaleString('fr-FR')} simulations Monte-Carlo`);
-  const r=vm.model.recommendation;
-  if(r&&r.reliability)items.push(`Fiabilité modèle : ${r.reliability}`);
-  if(!items.length)items.push('Détails du marché non disponibles pour ce match.');
-  return `<ul class="info-list">${items.map(x=>`<li><i>●</i>${esc(x)}</li>`).join('')}</ul>`;
+
+function players(vm){
+  const list=vm.players.impactRanking.slice(0,2);
+  if(!list.length)return '';
+  return card('Joueurs clés',`<div class="players">${list.map(p=>`<div class="player">${img(p.photo,p.name)}<div class="player-info"><b>${esc(p.name)}</b><small>${esc(p.team)} · ${esc(p.position||'—')}</small></div><div class="player-impact"><b>${p.impact===null?'—':p.impact}</b><small>Impact</small></div></div>`).join('')}</div>`,'players-card');
 }
-function signal(vm){
-  const r=vm.model.recommendation;
-  if(!r)return `<div class="signal-card">${empty(vm.model.unavailableReason||'Aucun marché ne franchit les seuils de confiance ou de cote minimale pour ce match — IASHARK préfère ne pas se prononcer.')}</div>`;
-  const riskCode=vm.editorial.riskCode||null;
-  const value=vm.model.value;
-  return `<div class="signal-card">
-    <div class="signal-top">
-      <div><span class="micro">Signal IASHARK</span><h3 class="signal-market">${esc(r.market)}</h3><p class="signal-sub">${esc(vm.editorial.reading||'Analyse en cours de consolidation.')}</p></div>
-      ${value!==null&&value!==undefined?`<div class="value-pill"><b>${value>0?'+':''}${fmt(value)}%</b><small>Value estimée</small></div>`:''}
-    </div>
-    <div class="signal-main">
-      ${scoreRing(vm.model.iasharkScore)}
-      <div class="badge-col">${confidenceBadge(r.reliability)}${riskBadge(riskCode)}</div>
-      <div class="signal-metrics"><div><b>${fmt(r.probability)}%</b><small>Probabilité modèle</small></div><div><b>${vm.model.simulationCount?Number(vm.model.simulationCount).toLocaleString('fr-FR'):'—'}</b><small>Simulations</small></div></div>
-    </div>
-    <h4 class="micro" style="display:block;margin:12px 0 2px">Marchés recommandés</h4>
-    ${recoTable(vm)}
-    <h4 class="micro" style="display:block;margin:14px 0 2px">Consensus bookmakers</h4>
-    ${consensusSection(vm)}
-    <div class="signal-bottom">
-      <div><h4 class="micro" style="display:block;margin:0 0 8px">Gestion de mise</h4><div class="stake-tiers"><div class="stake-tier"><b>1u</b>Prudent</div><div class="stake-tier active"><b>1.5u</b>Standard</div><div class="stake-tier"><b>2u</b>Agressif</div></div></div>
-      <div><h4 class="micro" style="display:block;margin:0 0 8px">Info marché</h4>${infoMarche(vm)}</div>
-    </div>
-    <button class="cta-watchlist" type="button">★ Ajouter à ma watchlist</button>
+
+function absences(vm){
+  const a=vm.players.absences;
+  if(!a.home.length&&!a.away.length&&!vm.players.injuriesFetchOk)return '';
+  const side=(team,items)=>`<div><h3>${img(team.logo,team.name)}${esc(team.name)}</h3>${items.length?items.slice(0,5).map(x=>`<div class="abs-row"><b>${esc(x.name)}</b><span>${esc(x.status||'Incertain')}</span></div>`).join(''):'<p class="abs-none">Aucune absence signalée</p>'}</div>`;
+  return card('Absents & incertains',`<div class="absences">${side(vm.identity.home,a.home)}${side(vm.identity.away,a.away)}</div>`);
+}
+
+function render(raw){
+  const vm=IasharkMatchViewModel.buildMatchViewModel(raw);
+  document.title=`${vm.identity.home.name} vs ${vm.identity.away.name} — IASHARK`;
+  root.innerHTML=`<div class="page">
+    ${hero(vm)}
+    ${recommendation(vm)}
+    <div class="row2">${card('Probabilités 1X2',probabilities(vm))}${card('Buts attendus',xg(vm))}</div>
+    ${card('Comparatif des équipes',comparison(vm))}
+    ${card('Scores les plus probables',scores(vm))}
+    ${card('Lecture du match',reading(vm))}
+    ${players(vm)}
+    ${absences(vm)}
   </div>`;
 }
-function factors(vm){const rows=[...vm.editorial.reasons];if(vm.editorial.decisiveFactor)rows.push(vm.editorial.decisiveFactor);return rows.length?`<div class="factor-grid">${rows.slice(0,3).map((x,i)=>`<div><i>${i===0?'↗':i===1?'◉':'◎'}</i><span>${esc(x)}</span></div>`).join('')}</div>`:empty('Les facteurs détaillés seront publiés dès que les données seront suffisamment complètes.')}
-function scenario(vm){const slots=vm.editorial.scenario15;if(!slots.length)return vm.editorial.scenario?`<p class="copy">${esc(vm.editorial.scenario)}</p>`:empty('Scénario indisponible.');const groups=[[slots[0],slots[1]],[slots[2],slots[3]],[slots[4],slots[5]]];return `<div class="scenario">${groups.map((items,i)=>{const available=items.filter(Boolean);if(!available.length)return'';const label=['0–30′','30–60′','60–90′'][i];return `<span>${label}</span><p>${esc(available.map(x=>x.txt).filter(Boolean).join(' '))}</p>`}).join('')}</div>`}
-function matchupsSection(vm){const m=vm.matchups;if(!m||!m.length)return empty('Aucun écart statistique assez net entre les deux équipes pour cibler un matchup fiable.');return `<div class="matchup-grid">${m.slice(0,3).map(x=>`<div class="matchup-card"><b>${esc(x.title)}</b><p>${esc(x.text)}</p></div>`).join('')}</div>`}
-function summary(vm){return `${signal(vm)}${panel('Pourquoi ce choix ?',factors(vm),'summary-factors')}<div class="risk-strip"><b>⚠ Risque principal</b><span>${esc(vm.editorial.risk||'Risque spécifique non disponible dans les données actuelles.')}</span></div><div class="summary-bottom">${panel('Lecture du match',vm.editorial.reading?`<p class="copy">${esc(vm.editorial.reading)}</p>`:empty('Lecture en attente de données fiables.'))}${panel('Scénario probable',scenario(vm))}</div>${panel('Matchups à cibler',matchupsSection(vm),'advanced-wide')}`}
 
-function probabilities(vm){const p=vm.model.probabilities;if(!p)return empty('Probabilités indisponibles.');return `<div class="probabilities"><div><span>Domicile</span><strong>${fmt(p.home)}%</strong></div><div><span>Nul</span><strong>${fmt(p.draw)}%</strong></div><div><span>Extérieur</span><strong>${fmt(p.away)}%</strong></div></div>`}
-function xg(vm){const x=vm.model.expectedGoals;if(!x)return empty('xG indisponibles.');return `<div class="xg-teams"><div>${logo(vm.identity.home.logo,vm.identity.home.name)}<strong>${fmt(x.home)}</strong><small>${esc(vm.identity.home.name)}</small></div><div>${logo(vm.identity.away.logo,vm.identity.away.name)}<strong>${fmt(x.away)}</strong><small>${esc(vm.identity.away.name)}</small></div></div>`}
-function scores(vm){return vm.model.scores.length?vm.model.scores.map(s=>`<div class="score"><b>${esc(s.score)}</b><span>${fmt(s.probability)} %</span></div>`).join(''):empty('Scores indisponibles.')}
-function conditions(vm){const w=vm.conditions.weather;return `<div class="condition-grid"><div><small>Stade</small><b>${esc(vm.conditions.venue||'À confirmer')}</b></div><div><small>Météo</small><b>${w?esc(w.description||w.temperature):'À confirmer'}</b></div>${w&&w.temperature?`<div><small>Température</small><b>${esc(w.temperature)}</b></div>`:''}</div>`}
-function referee(vm){const a=vm.referee;if(!a)return empty('Arbitre non encore désigné ou données disciplinaires indisponibles.');return `<div class="referee"><b>${esc(a.name)}</b><div><span>${fmt(a.cardsPerMatch)}</span><small>Cartons / match</small></div><div><span>${fmt(a.penaltiesPerMatch)}</span><small>Penaltys / match</small></div><div><span>${fmt(a.matches)}</span><small>Matchs analysés</small></div></div>`}
-function comparison(vm){if(!vm.comparison)return empty('Comparaison indisponible.');return `<div class="comparison">${vm.comparison.rows.map(r=>{const max=Math.max(r.home,r.away,1);return `<div class="compare-row"><b>${fmt(r.home)}</b><div class="bar"><i style="width:${r.home/max*100}%"></i></div><span>${esc(r.label)}</span><div class="bar away"><i style="width:${r.away/max*100}%"></i></div><b>${fmt(r.away)}</b></div>`}).join('')}</div>`}
-function patterns(vm){if(!vm.patterns)return empty('Tranches de 15 minutes indisponibles : échantillon insuffisant.');const h=vm.patterns.home.slots||[],a=vm.patterns.away.slots||[],max=Math.max(...h.map(x=>+x.n||0),...a.map(x=>+x.n||0),1);return `<div class="patterns">${h.map((x,n)=>`<div><span>${fmt(x.n)}%</span><span>${fmt(a[n]&&a[n].n)}%</span><div><i style="height:${(+x.n||0)/max*54}px"></i><i style="height:${(+(a[n]&&a[n].n)||0)/max*54}px"></i></div><small>${esc(x.t)}</small></div>`).join('')}</div>`}
-
-// Momentum IASHARK : SVG courbe, 2 series (domicile/exterieur), echelle
-// fixe -100/+100 (bornee visuellement, les valeurs reelles peuvent depasser
-// legerement - clampees ici uniquement pour l'affichage, jamais dans le
-// calcul lui-meme qui reste dans lib/match-view-model.js).
-// Courbe lissee (Catmull-Rom -> Bezier cubique) : purement cosmetique, ne
-// modifie aucune valeur - les points d'ancrage restent les vraies valeurs
-// calculees par slotPercents()/momentumSeries() dans le view-model.
-function smoothPath(points){
-  if(points.length<2)return `M${points[0][0].toFixed(1)},${points[0][1].toFixed(1)}`;
-  let d=`M${points[0][0].toFixed(1)},${points[0][1].toFixed(1)} `;
-  for(let i=0;i<points.length-1;i++){
-    const p0=points[i===0?0:i-1],p1=points[i],p2=points[i+1],p3=points[i+2<points.length?i+2:i+1];
-    const c1x=p1[0]+(p2[0]-p0[0])/6,c1y=p1[1]+(p2[1]-p0[1])/6;
-    const c2x=p2[0]-(p3[0]-p1[0])/6,c2y=p2[1]-(p3[1]-p1[1])/6;
-    d+=`C${c1x.toFixed(1)},${c1y.toFixed(1)} ${c2x.toFixed(1)},${c2y.toFixed(1)} ${p2[0].toFixed(1)},${p2[1].toFixed(1)} `;
+async function init(){
+  try{
+    const id=typeof FIXED_MATCH_ID!=='undefined'?String(FIXED_MATCH_ID):new URLSearchParams(location.search).get('id');
+    let raw=typeof PRELOADED_MATCH!=='undefined'?PRELOADED_MATCH:null;
+    if(window.IasharkApp){
+      const session=(await window.IasharkApp.supabase.auth.getSession()).data.session;
+      if(session){
+        const result=await window.IasharkApp.supabase.functions.invoke('match-data');
+        if(result.data&&!result.error)raw=(result.data.matchs||[]).find(x=>String(x.id)===String(id))||raw;
+      }
+    }
+    if(!raw){
+      const data=await fetch(`/data.json?t=${Date.now()}`).then(r=>r.json());
+      raw=(data.matchs||[]).find(x=>String(x.id)===String(id));
+    }
+    if(!raw)throw new Error('Match introuvable');
+    render(raw);
+  }catch(e){
+    root.innerHTML=`<div class="match-error"><b>${esc(e.message||'Erreur de chargement')}</b><a href="/">Retour à l'accueil</a></div>`;
   }
-  return d.trim();
 }
-function momentumChart(vm){
-  const pts=vm.momentum;
-  if(!pts)return empty('Momentum IASHARK indisponible : historique événementiel insuffisant pour les deux équipes.');
-  const W=300,H=110,padX=8,padY=10,clamp=v=>Math.max(-100,Math.min(100,v));
-  const x=i=>padX+(i*(W-2*padX)/(pts.length-1));
-  const y=v=>padY+(H-2*padY)/2-(clamp(v)/100)*((H-2*padY)/2);
-  const line=key=>smoothPath(pts.map((p,i)=>[x(i),y(p[key])]));
-  const ticks=[0,15,30,45,60,75,90];
-  const tx=t=>padX+(t/90)*(W-2*padX);
-  const grid=[0.2,0.4,0.6,0.8].map(f=>`<line x1="${padX}" y1="${(padY+f*(H-2*padY)).toFixed(1)}" x2="${W-padX}" y2="${(padY+f*(H-2*padY)).toFixed(1)}" stroke="rgba(0,200,255,.06)" stroke-width="1"></line>`).join('');
-  const vgrid=ticks.map(t=>`<line x1="${tx(t).toFixed(1)}" y1="${padY}" x2="${tx(t).toFixed(1)}" y2="${H-padY}" stroke="rgba(0,200,255,.05)" stroke-width="1"></line>`).join('');
-  const axis=ticks.map(t=>`<text x="${tx(t).toFixed(1)}" y="${H-1}" text-anchor="middle" font-size="6" fill="var(--muted)">${t}</text>`).join('');
-  return `<div class="momentum-wrap"><div class="momentum-legend"><span class="l-home"><i></i>${esc(vm.identity.home.name)}</span><span class="l-away"><i></i>${esc(vm.identity.away.name)}</span></div><svg class="momentum-chart" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">${grid}${vgrid}<line x1="${padX}" y1="${(padY+(H-2*padY)/2).toFixed(1)}" x2="${W-padX}" y2="${(padY+(H-2*padY)/2).toFixed(1)}" stroke="rgba(0,200,255,.15)" stroke-width="1"></line><path d="${line('home')}" fill="none" stroke="var(--cyan)" stroke-width="1.8" stroke-linecap="round"></path><path d="${line('away')}" fill="none" stroke="var(--red)" stroke-width="1.8" stroke-linecap="round"></path>${axis}</svg><p class="momentum-note">Momentum IASHARK — projection pré-match construite à partir des tendances historiques par tranche de 15 minutes (API-Football), pas une mesure live.</p></div>`;
-}
-
-// Distribution Monte-Carlo : barres SVG a partir des vrais mc_scores (top
-// scores exacts issus des simulations reelles du pipeline).
-function mcDistributionChart(vm){
-  const d=vm.model.monteCarloDistribution;
-  if(!d)return empty('Distribution Monte-Carlo indisponible.');
-  const W=300,H=70,pad=4,gap=6,n=d.bars.length,bw=(W-2*pad-gap*(n-1))/n,max=Math.max(...d.bars.map(b=>b.pct),1);
-  const bars=d.bars.map((b,i)=>{const h=(b.pct/max)*(H-16);const bx=pad+i*(bw+gap);return `<rect x="${bx.toFixed(1)}" y="${(H-h).toFixed(1)}" width="${bw.toFixed(1)}" height="${h.toFixed(1)}" rx="2" fill="var(--cyan)" opacity="${i===0?1:0.55}"></rect><text x="${(bx+bw/2).toFixed(1)}" y="${H-h-4}" text-anchor="middle" font-size="6" fill="var(--soft)">${b.pct}%</text><text x="${(bx+bw/2).toFixed(1)}" y="${H+8}" text-anchor="middle" font-size="6" fill="var(--muted)">${esc(b.score)}</text>`;}).join('');
-  return `<svg class="mc-distribution" viewBox="0 0 ${W} ${H+12}" preserveAspectRatio="none">${bars}</svg><div class="mc-stats"><div><b>${Number(d.simulationCount||0).toLocaleString('fr-FR')}</b><small>Simulations</small></div><div><b>${esc(d.bars[0].score)}</b><small>Score le + probable</small></div><div><b>${d.bars[0].pct}%</b><small>Probabilité</small></div></div>`;
-}
-
-// Indicateurs avances : 4 cards (icone + gros chiffre), memes 4 champs
-// reels qu'avant (agreementLabel/simulationCount/quality/sources), juste
-// restyles en cards au lieu d'un tableau - pas de "delta" invente faute de
-// donnee de reference reelle a comparer.
-// Shot Profile : repartition reelle cadres/non-cadres/contres par equipe
-// (match_stats_home/away.shots_on/off/blocked). Precision offensive : xG
-// par tir cadre (proxy honnete de "qualite des occasions" - API-Football ne
-// fournit pas de coordonnees de tir, donc pas de vraies zones spatiales).
-function shotProfile(vm){
-  const s=vm.shotStats;
-  if(!s)return empty('Profil de tirs indisponible pour ce match.');
-  const row=(team,d)=>{const total=Math.max(d.total||0,d.on+d.off+d.blocked,1);return `<div class="shot-team">${logo(team.logo,team.name)}<span class="name">${esc(team.name)}</span><div class="shot-bar"><i class="on" style="width:${(d.on/total*100).toFixed(1)}%"></i><i class="off" style="width:${(d.off/total*100).toFixed(1)}%"></i><i class="blocked" style="width:${(d.blocked/total*100).toFixed(1)}%"></i></div><span class="shot-total">${fmt(d.total)}</span></div>`};
-  return `<div class="shot-profile">${row(vm.identity.home,s.home)}${row(vm.identity.away,s.away)}<div class="shot-legend"><span><i style="background:var(--cyan)"></i>Cadrés</span><span><i style="background:var(--muted)"></i>Non cadrés</span><span><i style="background:var(--amber)"></i>Contrés</span></div></div>`;
-}
-function precisionOffensive(vm){
-  const s=vm.shotStats;
-  if(!s||s.precision.home===null||s.precision.away===null)return empty('Qualité des occasions indisponible : xG ou tirs cadrés manquants.');
-  const max=Math.max(s.precision.home,s.precision.away,0.1);
-  const row=(team,val)=>`<div class="precision-row"><span class="name">${esc(team.name)}</span><div class="precision-gauge"><i style="width:${(val/max*100).toFixed(0)}%"></i></div><span class="precision-val">${fmt(val)}</span></div>`;
-  return `<div class="precision-wrap">${row(vm.identity.home,s.precision.home)}${row(vm.identity.away,s.precision.away)}<p class="precision-note">xG par tir cadré — donnée de zones de tir non fournie par API-Football, indicateur de qualité d'occasion utilisé à la place.</p></div>`;
-}
-function quality(vm){
-  const items=[
-    ['◈',esc(vm.model.agreementLabel||'—'),'Accord des modèles'],
-    ['◉',vm.model.simulationCount?Number(vm.model.simulationCount).toLocaleString('fr-FR'):'—','Simulations IA'],
-    ['▣',`${fmt(vm.model.quality)}%`,'Qualité des données'],
-    ['✓',String(vm.model.sources.length),'Sources confirmées']
-  ];
-  return `<div class="indicator-grid">${items.map(([icon,val,label])=>`<div class="indicator-card"><i>${icon}</i><b>${val}</b><small>${label}</small></div>`).join('')}</div>`;
-}
-function faq(vm){return `<div class="faq"><details open><summary>Pourquoi ce marché est-il retenu ?</summary><p>Il obtient le meilleur compromis calculé entre probabilité, fiabilité des données et cote admissible parmi les marchés modélisés.</p></details><details><summary>D'où viennent les données ?</summary><p>${esc(vm.model.sources.join(' · ')||'API-Football.')}</p></details><details><summary>C'est quoi le Momentum IASHARK ?</summary><p>Une projection pré-match de la pression offensive par tranche de 15 minutes, construite à partir des tendances historiques réelles des deux équipes — pas un tracking live.</p></details><details><summary>Pourquoi certains blocs manquent-ils ?</summary><p>IASHARK masque une donnée lorsqu'elle n'est pas confirmée ou que son échantillon est insuffisant.</p></details></div>`}
-function advanced(vm){return `<div class="context-top">${panel('Conditions du match',conditions(vm))}${panel('Arbitre & discipline',referee(vm))}</div><div class="advanced-top">${panel('Probabilités 1X2',probabilities(vm))}${panel('Buts attendus (xG)',xg(vm))}${panel('Scores les plus probables',scores(vm))}</div>${panel('Momentum offensif IASHARK',momentumChart(vm),'advanced-wide')}${panel('Distribution Monte-Carlo',mcDistributionChart(vm),'advanced-wide')}<div class="shots-top">${panel('Shot Profile',shotProfile(vm))}${panel('Qualité des occasions',precisionOffensive(vm))}</div>${panel('Comparaison des équipes',comparison(vm),'advanced-wide')}${panel('Scénario par tranches de 15 min',patterns(vm),'advanced-wide')}${panel('Indicateurs avancés',quality(vm),'advanced-wide')}${panel('Questions sur ce match',faq(vm),'advanced-wide')}`}
-
-function absences(vm){const side=(team,items)=>`<div><h3>${esc(team.name)}</h3>${items.length?list(items.map(x=>`${x.name}${x.reason?` — ${x.reason}`:''}`),'absence-list'):`<p class="muted">Aucune absence disponible dans les données.</p>`}</div>`;return `<div class="absence-cols">${side(vm.identity.home,vm.players.absences.home)}${side(vm.identity.away,vm.players.absences.away)}</div>`}
-
-// Terrain tactique : positions REELLES par ligne (vm.players.formations,
-// derive du champ grid API-Football) quand disponible ; sinon repli honnete
-// sur un regroupement par poste (ancien comportement) ; sinon etat vide.
-const POS_ORDER=['G','D','M','F'];
-function pitchTeam(team,data,formationRows,isAway){
-  if(!data||!Array.isArray(data.startXI)||!data.startXI.length)return `<div class="pitch-empty"><b>${esc(team.name)}</b><small>${esc((data&&data.formation)||'Formation à confirmer')}</small><span>Onze non confirmé</span></div>`;
-  const rows=formationRows||POS_ORDER.map(pos=>data.startXI.filter(p=>p.pos===pos)).filter(g=>g.length);
-  const orderedRows=isAway?rows.slice().reverse():rows;
-  return `<div class="pitch"><header><b>${esc(team.name)}</b><small>${esc(data.formation||'—')}</small></header><div class="pitch-formation">${orderedRows.map((group,i)=>`<div class="pitch-row" style="top:${(i/(Math.max(orderedRows.length-1,1)))*100}%">${group.map(p=>`<span class="pitch-player${isAway?' away':''}" title="${esc(p.name)}"><i></i><em>${esc(p.name)}</em></span>`).join('')}</div>`).join('')}</div></div>`;
-}
-function lineups(vm){const l=vm.players.lineups;if(!l)return empty('Compositions probables — confirmation attendue environ une heure avant le match.');const f=vm.players.formations||{home:null,away:null};return `<div class="lineup-grid">${pitchTeam(vm.identity.home,l.home,f.home,false)}${pitchTeam(vm.identity.away,l.away,f.away,true)}</div>`}
-
-function watches(vm){return vm.players.watch.length?`<div class="watch-grid">${vm.players.watch.slice(0,3).map(x=>`<article class="watch">${x.photo?`<img src="${esc(x.photo)}" alt="">`:''}<b>${esc(x.name)}</b><small>${x.value!==null?`${fmt(x.value)} contribution(s) récente(s)`:'Joueur à suivre'}</small></article>`).join('')}</div>`:empty('Aucun joueur suffisamment documenté.')}
-
-// Joueurs clés a suivre : classes par IASHARK Player Impact Score (deja
-// calcule dans le view-model a partir des vrais marches joueur reels) -
-// distinct de watches() ci-dessus (qui vient de hot_scorer/hot_assist,
-// signal different mais tout aussi reel).
-function impactSection(vm){
-  const ranked=vm.players.impactRanking;
-  if(!ranked.length)return empty('Player Impact Score indisponible : nécessite des marchés joueurs modélisés (compositions/statistiques insuffisantes pour ce match).');
-  return `<div class="impact-grid">${ranked.map(p=>`<div class="impact-card"><div class="impact-avatar empty">♟</div><b>${esc(p.player)}</b><small>${esc(p.market)}</small><div class="impact-stats"><div><b>${fmt(p.probability)}%</b><span>Probabilité</span></div><div><b>${p.minutes===null?'—':fmt(p.minutes)}</b><span>Min. att.</span></div></div></div>`).join('')}</div>`;
-}
-function propsSection(vm){
-  const rows=vm.players.projections;
-  if(!rows.length)return empty('Aucune prop joueur fiable pour ce match — compositions ou échantillon insuffisants.');
-  return `<div class="props-list">${rows.slice(0,5).map(x=>`<div class="prop-row"><div><b>${esc(x.player)}</b><small>${esc(x.market)} · ${esc(x.status)}</small></div><span class="prop-val">${x.probability===null?'N/D':`${fmt(x.probability)}%`}</span></div>`).join('')}</div>`;
-}
-function projections(vm){if(!vm.players.projections.length)return empty('Aucune projection joueur fiable pour ce match.');return `<div class="table-scroll"><table class="projection-table"><thead><tr><th>Joueur</th><th>Marché</th><th>Statut</th><th>Minutes</th><th>Probabilité</th><th>Qualité</th></tr></thead><tbody>${vm.players.projections.slice(0,6).map(x=>`<tr><td>${esc(x.player)}</td><td>${esc(x.market)}</td><td>${esc(x.status)}</td><td>${x.minutes===null?'—':fmt(x.minutes)}</td><td>${x.probability===null?'—':`${fmt(x.probability)} %`}</td><td>${esc(x.quality)}</td></tr>`).join('')}</tbody></table></div>`}
-function players(vm){return `<div class="players-top">${panel('Compositions probables',lineups(vm))}${panel('Absents & incertains',absences(vm))}</div>${panel('Joueurs clés — Player Impact Score IASHARK',impactSection(vm),'players-wide')}${panel('Joueurs à suivre',watches(vm),'players-wide')}${panel('Props joueurs IASHARK',propsSection(vm),'players-wide')}${panel('Projections joueurs IASHARK',projections(vm),'players-wide')}<div class="scorer-lock"><b>Marché buteur</b><span>Disponible quand les compositions et les minutes attendues sont suffisamment fiables.</span></div>`}
-
-function rankLine(team,standing){return standing&&standing.rank?`${standing.rank}e · ${standing.pts??'—'} pts`:team===null?'—':''}
-function headerV3(vm){const i=vm.identity,s=i.standings||{};return `<header class="match-head v3-head"><div class="meta-row"><div class="league">${logo(i.league.logo,i.league.name)}<span>${esc(i.league.name)}</span></div>${vm.model.available?'<span class="available-dot">● Analyse disponible</span>':''}</div><div class="teams"><div class="team">${logo(i.home.logo,i.home.name)}<h1>${esc(i.home.name)}</h1><small>${esc(rankLine(i.home,s.home)||'Domicile')}</small></div><div class="versus"><time>${esc(i.date||'Date à confirmer')} · ${esc(i.time||'—')}</time><b>VS</b><i></i><small>${esc(vm.conditions.venue||'Stade à confirmer')}</small></div><div class="team">${logo(i.away.logo,i.away.name)}<h1>${esc(i.away.name)}</h1><small>${esc(rankLine(i.away,s.away)||'Extérieur')}</small></div></div><div class="context-strip"><span>▣ Contexte pré-match</span><span>▣ ${esc(i.date||'Date à confirmer')}</span>${vm.conditions.weather?`<span>☀ ${esc(vm.conditions.weather.temperature||vm.conditions.weather.description||'Météo disponible')}</span>`:`<span>⌖ ${esc(vm.conditions.venue||'Lieu à confirmer')}</span>`}<span>${vm.model.quality!==null?`Qualité data ${fmt(vm.model.quality)}%`:'Données en consolidation'}</span></div><div class="tabs" role="tablist" aria-label="Analyse du match"><button class="tab active" role="tab" aria-selected="true" data-tab="summary">Résumé</button><button class="tab" role="tab" aria-selected="false" data-tab="advanced">Données avancées</button><button class="tab" role="tab" aria-selected="false" data-tab="players">Joueurs</button></div></header>`}
-
-function primaryRecommendation(vm){const r=vm.model.recommendation;if(!r)return `<section class="panel principal-reco"><h2 class="panel-title">Recommandation principale IASHARK</h2>${empty('NO PICK — aucun marché ne réunit actuellement robustesse, qualité de données et cote admissible.')}</section>`;const fair=r.probability>0?100/r.probability:null;return `<section class="panel principal-reco"><div class="section-line"><h2 class="panel-title">Recommandation principale IASHARK</h2></div><div class="principal-grid">${scoreRing(vm.model.iasharkScore)}<div class="principal-market"><small>Marché sélectionné</small><strong>${esc(r.market)}</strong></div><div class="principal-kpi"><small>Confiance</small><b class="green">${esc(r.reliability||'N/D')}</b></div><div class="principal-kpi"><small>Risque</small><b class="amber">${esc(vm.editorial.riskCode||'N/D')}</b></div>${vm.model.value!==null?`<div class="principal-kpi"><small>Value / edge</small><b class="cyan">${vm.model.value>0?'+':''}${fmt(vm.model.value)} pts</b></div>`:''}</div><div class="metric-triplet"><div><small>Probabilité prudente</small><b>${fmt(r.probability)}%</b></div><div><small>Cote équitable</small><b>${fair?fmt(fair):'N/D'}</b></div><div><small>Cote moyenne</small><b>${vm.model.recommendedOdds?fmt(vm.model.recommendedOdds):'N/D'}</b></div></div></section>`}
-function radarV3(vm){const r=vm.decisionRadar,metric=(label,h,a)=>`<div class="radar-cell"><small>${esc(label)}</small><div><span>${h===null?'N/D':fmt(h)}</span><i><b style="width:${h===null?0:Math.max(0,Math.min(100,h))}%"></b></i></div><div class="away"><span>${a===null?'N/D':fmt(a)}</span><i><b style="width:${a===null?0:Math.max(0,Math.min(100,a))}%"></b></i></div></div>`;return `<div class="radar-grid"><div class="radar-cell"><small>Forme récente</small><b>${esc(r.home.form||'N/D')}</b><b class="away-form">${esc(r.away.form||'N/D')}</b></div>${metric('Force offensive',r.home.attack,r.away.attack)}${metric('Force défensive',r.home.defence,r.away.defence)}${metric('Momentum',r.home.momentum,r.away.momentum)}</div>`}
-function quickFacts(vm){const facts=[];if(vm.editorial.reasons.length)facts.push(...vm.editorial.reasons);if(vm.editorial.reading)facts.push(vm.editorial.reading);if(vm.comparison)vm.comparison.rows.slice(0,2).forEach(r=>facts.push(`${r.label} : ${vm.identity.home.name} ${fmt(r.home)} · ${vm.identity.away.name} ${fmt(r.away)}`));return facts.length?list(facts.slice(0,4),'quick-facts'):empty('Aucun fait suffisamment documenté à afficher.')}
-function injuriesCompact(vm){const h=vm.players.absences.home,a=vm.players.absences.away;if(!vm.players.injuriesFetchOk&&!h.length&&!a.length)return `<p class="coverage-note">Données blessures non couvertes pour cette rencontre.</p>`;const side=(team,items)=>`<div><h3>${logo(team.logo,team.name)}${esc(team.name)}</h3>${items.length?items.slice(0,4).map(x=>`<p><b>${esc(x.name)}</b><span>${esc(x.reason||x.status||'Absence signalée')}</span></p>`).join(''):'<p class="ok-state">Aucune absence signalée</p>'}</div>`;return `<div class="injury-compact">${side(vm.identity.home,h)}${side(vm.identity.away,a)}</div>`}
-function oddsCompact(vm){const rows=(vm.model.marketsCompared||[]).filter(x=>x.consensus).slice(0,4);if(!rows.length)return empty('Aucune cote réelle disponible.');return `<table class="odds-table"><thead><tr><th>Marché</th><th>Cote moy.</th><th>Prob. implicite</th></tr></thead><tbody>${rows.map(x=>`<tr><td>${esc(x.market)}</td><td>${fmt(100/x.consensus)}</td><td>${fmt(x.consensus)}%</td></tr>`).join('')}</tbody></table>`}
-function summaryV3(vm){const flow=vm.momentum&&vm.momentum.length?vm.momentum.slice().sort((a,b)=>Math.max(b.home,b.away)-Math.max(a.home,a.away))[0]:null;return `${primaryRecommendation(vm)}${panel('Radar de décision',radarV3(vm),'summary-block')}<div class="summary-duo">${panel('Aperçu rapide',quickFacts(vm))}${panel('Match flow — temps fort prévu',flow?`<div class="key-period"><b>${esc(flow.label)}</b><span>${Math.max(flow.home,flow.away)>=0?'Accélération attendue':'Période plus fermée'}</span><small>Projection pré-match issue des tendances historiques</small></div>`:empty('Projection par tranche insuffisante.'))}</div><div class="summary-duo summary-lower">${panel('Blessés & suspendus',injuriesCompact(vm))}${panel('Cotes',oddsCompact(vm))}</div>`}
-
-function dataOverviewV3(vm){const d=vm.dataOverview,h=d.home||{},a=d.away||{};const rows=[['Buts / match',d.goalsHome,d.goalsAway],['Tirs / match',h.shots_total,a.shots_total],['Tirs cadrés / match',h.shots_on,a.shots_on],['Possession',h.possession,a.possession,'%'],['Corners / match',h.corners,a.corners],['Fautes / match',h.fouls,a.fouls]];const valid=rows.filter(x=>Number.isFinite(Number(x[1]))&&Number.isFinite(Number(x[2])));return valid.length?`<div class="data-overview">${valid.map(x=>`<div><small>${esc(x[0])}</small><p><b>${fmt(x[1])}${x[3]||''}</b><span>${esc(vm.identity.home.name.slice(0,3).toUpperCase())}</span></p><p><b>${fmt(x[2])}${x[3]||''}</b><span>${esc(vm.identity.away.name.slice(0,3).toUpperCase())}</span></p></div>`).join('')}</div>`:empty('Statistiques comparatives insuffisantes.')}
-function flowV3(vm){if(!vm.momentum)return empty('Projection par tranches indisponible : historique insuffisant.');const cards=vm.momentum.map((x,i)=>{const score=Math.round(50+(x.home-x.away)/4);return `<button class="flow-slot ${i===0?'active':''}" data-flow="${i}" type="button"><small>${esc(x.label)}</small><b>${Math.max(0,Math.min(100,score))}<sup>/100</sup></b><span>${x.home>x.away?esc(vm.identity.home.name):x.away>x.home?esc(vm.identity.away.name):'Équilibré'}</span></button>`}).join('');return `<div class="flow-slots">${cards}</div><div class="flow-detail" id="flowDetail"><b>${esc(vm.momentum[0].label)} — projection pré-match</b><p>${esc(vm.identity.home.name)} ${fmt(vm.momentum[0].home)} · ${esc(vm.identity.away.name)} ${fmt(vm.momentum[0].away)} sur l’indice de pression historique IASHARK.</p></div>`}
-function realIndicators(vm){const h=vm.dataOverview.home||{},a=vm.dataOverview.away||{};const rows=[['Précision passes',h.passes_pct,a.passes_pct,'%'],['Hors-jeu',h.offsides,a.offsides],['Arrêts gardien',h.saves,a.saves],['Tirs contrés',h.shots_blocked,a.shots_blocked]];return `<div class="real-indicators">${rows.filter(x=>Number.isFinite(Number(x[1]))&&Number.isFinite(Number(x[2]))).map(x=>`<div><span>${esc(x[0])}</span><b>${fmt(x[1])}${x[3]||''}</b><b>${fmt(x[2])}${x[3]||''}</b></div>`).join('')}</div>`}
-function advancedV3(vm){return `${panel('1. Vue data avancée',dataOverviewV3(vm),'advanced-section')}${panel('2. Match flow — projection par tranches de 15 min',flowV3(vm),'advanced-section')}${panel('3. Momentum offensif',momentumChart(vm),'advanced-section')}<div class="advanced-duo">${panel('4. Profil des tirs',shotProfile(vm))}${panel('5. Indicateurs avancés réels',realIndicators(vm))}</div>${vm.model.expectedGoals?panel('Buts attendus IASHARK',xg(vm),'advanced-section'):''}`}
-
-function playerReason(p){if(p.goals90!==null&&p.goals90>=.5)return 'Finition récente et contribution offensive';if(p.keyPasses90!==null&&p.keyPasses90>=2)return 'Création et passes clés régulières';if(p.shots90!==null&&p.shots90>=3)return 'Volume de tirs élevé';return 'Temps de jeu et forme récente solides'}
-function keyPlayersV3(vm){const rows=vm.players.analytics.keyPlayers;if(!rows.length)return '';return `<section class="panel player-section"><h2 class="panel-title">Joueurs clés IASHARK</h2><div class="key-player-grid">${rows.map(p=>`<article class="key-player-card"><div class="player-head">${p.photo?`<img src="${esc(p.photo)}" alt="${esc(p.name)}">`:''}<div><h3>${esc(p.name)}</h3><small>${esc(p.position||'Position N/D')} · ${esc(p.team)}</small></div><div class="impact-ring"><b>${fmt(p.impact)}</b><small>/100</small></div></div><div class="player-stat-grid"><div><small>Tirs/90</small><b>${fmt(p.shots90)}</b></div><div><small>Tirs cadrés/90</small><b>${fmt(p.shotsOn90)}</b></div><div><small>Passes clés/90</small><b>${fmt(p.keyPasses90)}</b></div><div><small>Note 5 derniers</small><b>${fmt(p.rating5)}</b></div><div><small>Min. récentes</small><b>${fmt(p.minutesRecent)}′</b></div><div><small>Forme récente</small><b class="form-dots">${p.ratings.map(r=>`<i class="${r>=7?'good':r>=6?'mid':'low'}"></i>`).join('')}</b></div></div><p class="player-reason">↗ ${esc(playerReason(p))}</p></article>`).join('')}</div></section>`}
-function projectedSide(vm,key){const team=vm.identity[key],rows=vm.players.analytics.projected[key];if(!rows.length)return '';const role=p=>{const v=(p.position||'').toLowerCase();return v.includes('goal')?'gk':v.includes('def')?'def':v.includes('mid')?'mid':'att'};const groups=['att','mid','def','gk'].map(r=>rows.filter(p=>role(p)===r)).filter(x=>x.length);return `<article class="projection-pitch"><header>${logo(team.logo,team.name)}<b>${esc(team.name)}</b><span>Confiance ${rows.filter(p=>p.startProbability!==null).length?`${Math.round(rows.reduce((n,p)=>n+(p.startProbability||0),0)/rows.filter(p=>p.startProbability!==null).length)}%`:'N/D'}</span></header><div class="projection-field">${groups.map((group,index)=>`<div class="projection-row" style="top:${groups.length===1?46:index/(groups.length-1)*86+4}%">${group.map(p=>`<div class="projection-player"><i>${p.number!==null?fmt(p.number):'•'}</i><b>${esc(p.name.split(' ').slice(-1)[0])}</b>${p.startProbability!==null?`<small>${p.startProbability}%</small>`:''}</div>`).join('')}</div>`).join('')}</div></article>`}
-function lineupV3(vm){if(vm.players.lineupMode==='OFFICIAL')return `<div class="lineup-title"><b>Composition officielle</b><span>Publiée par l’API</span></div>${lineups(vm)}`;if(vm.players.lineupMode==='PROJECTED'){const enough=vm.players.analytics.home.fixtureCount>=5&&vm.players.analytics.away.fixtureCount>=5;return `<div class="lineup-title"><b>${enough?'Composition projetée IASHARK':'Joueurs les plus utilisés'}</b><span>Projection avant composition officielle</span></div><div class="projected-grid">${projectedSide(vm,'home')}${projectedSide(vm,'away')}</div>`}return ''}
-function playerFormV3(vm){const rows=vm.players.analytics.home.players.concat(vm.players.analytics.away.players).filter(p=>p.ratings.length).sort((a,b)=>(b.rating5||0)-(a.rating5||0)).slice(0,5);if(!rows.length)return '';return panel('Forme des joueurs',`<div class="player-form-table">${rows.map(p=>`<div>${p.photo?`<img src="${esc(p.photo)}" alt="">`:''}<span><b>${esc(p.name)}</b><small>${esc(p.team)}</small></span><p>${p.ratings.map(r=>`<i class="${r>=7?'good':r>=6?'mid':'low'}">${fmt(r)}</i>`).join('')}</p><strong>${p.rating5>=7?'Très forte ↗':p.rating5>=6?'Stable →':'En baisse ↘'}</strong></div>`).join('')}</div>`,'player-section')}
-function threatsV3(vm){const groups=[['Volume de tirs','shots90',vm.players.analytics.threats.volume],['Création','keyPasses90',vm.players.analytics.threats.creation],['Finition','goals90',vm.players.analytics.threats.finishing]];if(!groups.some(g=>g[2].length))return '';return panel('Menaces offensives — par 90′',`<div class="threat-grid">${groups.map(g=>`<div><h3>${esc(g[0])}</h3>${g[2].map((p,i)=>`<p><i>${i+1}</i><span>${esc(p.name)}</span><b>${fmt(p[g[1]])}</b></p>`).join('')}</div>`).join('')}</div>`,'player-section')}
-function availabilityV3(vm){return panel('Disponibilité & absences',injuriesCompact(vm),'player-section')}
-function matchImpactV3(vm){const rows=vm.players.analytics.keyPlayers;if(!rows.length)return '';const score=Math.round(rows.reduce((n,p)=>n+p.impact,0)/rows.length);const level=score>=75?'Élevé':score>=55?'Modéré':'Faible';return panel('Impact sur le match',`<div class="match-impact"><div class="impact-gauge"><b>${score}</b><small>/100</small></div><div><small>Impact global</small><strong>${level}</strong><p>Indice calculé à partir de la forme, du temps de jeu et des contributions récentes disponibles.</p></div></div>`,'player-section')}
-function playersV3(vm){const top=keyPlayersV3(vm);const lineup=lineupV3(vm);const form=playerFormV3(vm),threats=threatsV3(vm);const middle=form||threats?`<div class="player-split">${form}${threats}</div>`:'';const props=vm.players.projections.length?panel('Props joueurs IASHARK',propsSection(vm),'player-section'):'';const impact=matchImpactV3(vm);return `${top}${lineup?panel(vm.players.lineupMode==='OFFICIAL'?'Compositions officielles':'Composition projetée IASHARK',lineup,'player-section'):''}${middle}${props||impact?`<div class="player-split">${props}${impact}</div>`:''}<div class="player-split">${availabilityV3(vm)}</div>`}
-
-function bindFlow(vm){root.querySelectorAll('.flow-slot').forEach(btn=>btn.addEventListener('click',()=>{root.querySelectorAll('.flow-slot').forEach(x=>x.classList.toggle('active',x===btn));const item=vm.momentum&&vm.momentum[Number(btn.dataset.flow)],detail=root.querySelector('#flowDetail');if(item&&detail)detail.innerHTML=`<b>${esc(item.label)} — projection pré-match</b><p>${esc(vm.identity.home.name)} ${fmt(item.home)} · ${esc(vm.identity.away.name)} ${fmt(item.away)} sur l’indice de pression historique IASHARK.</p>`}))}
-function render(raw){const vm=IasharkMatchViewModel.buildMatchViewModel(raw);document.title=`${vm.identity.home.name} vs ${vm.identity.away.name} — IASHARK`;root.innerHTML=`<article class="match-card">${headerV3(vm)}<main class="tab-panel" id="summary">${summaryV3(vm)}</main><main class="tab-panel" id="advanced" hidden>${advancedV3(vm)}</main><main class="tab-panel" id="players" hidden>${playersV3(vm)}</main></article>`;root.querySelectorAll('.tab').forEach(btn=>btn.addEventListener('click',()=>{root.querySelectorAll('.tab').forEach(x=>{const active=x===btn;x.classList.toggle('active',active);x.setAttribute('aria-selected',String(active))});root.querySelectorAll('.tab-panel').forEach(x=>x.hidden=x.id!==btn.dataset.tab)}));bindFlow(vm)}
-async function init(){try{const id=typeof FIXED_MATCH_ID!=='undefined'?String(FIXED_MATCH_ID):new URLSearchParams(location.search).get('id');let raw=typeof PRELOADED_MATCH!=='undefined'?PRELOADED_MATCH:null;if(window.IasharkApp){const session=(await window.IasharkApp.supabase.auth.getSession()).data.session;if(session){const result=await window.IasharkApp.supabase.functions.invoke('match-data');if(result.data&&!result.error)raw=(result.data.matchs||[]).find(x=>String(x.id)===String(id))||raw}}if(!raw){const data=await fetch(`/data.json?t=${Date.now()}`).then(r=>r.json());raw=(data.matchs||[]).find(x=>String(x.id)===String(id))}if(!raw)throw new Error('Match introuvable');render(raw)}catch(e){root.innerHTML=`<div class="loading-card"><p>${esc(e.message||'Erreur de chargement')}</p><a class="btn-login" href="/">Retour à l'accueil</a></div>`}}
 init();
 })();

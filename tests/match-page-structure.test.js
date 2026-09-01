@@ -10,7 +10,7 @@ test("la page Match est un shell léger sans ancien rendu inline",()=>{
 });
 test("la page simple expose une seule colonne de sections réelles, sans onglets",()=>{
   assert.doesNotMatch(js,/data-tab=/);assert.doesNotMatch(js,/role="tablist"/);
-  for(const value of ['Recommandation IASHARK','Probabilités 1X2','Buts attendus','Comparatif des équipes','Scores les plus probables','Lecture du match','Joueurs clés','Absents & incertains'])assert.match(js,new RegExp(value));
+  for(const value of ['Recommandation IASHARK','Probabilités 1X2','Buts attendus','Comparatif des équipes','Scores les plus probables','Lecture du match','Scénario par tranches de 15 minutes','Joueurs clés','Absents & incertains'])assert.match(js,new RegExp(value));
 });
 test("la page est responsive",()=>{
   assert.match(css,/@media\(max-width:640px\)/);
@@ -19,7 +19,7 @@ test("le rendu ne contient plus les valeurs métier précédemment codées en du
   assert.doesNotMatch(js,/10[\s.,]?000 simulations/i);assert.doesNotMatch(js,/37%/);assert.doesNotMatch(js,/33%/);assert.doesNotMatch(js,/30%/);
 });
 test("aucune section ne prétend avoir une donnée absente : chaque bloc a un état vide honnête",()=>{
-  for(const value of ['Aucun marché ne franchit les seuils','Probabilités indisponibles','xG indisponibles','Statistiques comparatives indisponibles','Scores probables indisponibles','Lecture du match indisponible'])assert.match(js,new RegExp(value.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')));
+  for(const value of ['Aucun marché ne franchit les seuils','Probabilités indisponibles','xG indisponibles','Statistiques comparatives indisponibles','Scores probables indisponibles','Lecture du match indisponible','Scénario par tranches de 15 minutes indisponible'])assert.match(js,new RegExp(value.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')));
 });
 test("le workflow alimente les blocs comparatifs sans valeur de secours",()=>{
   const workflow=read(".github/workflows/update-data.yml");

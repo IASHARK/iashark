@@ -109,10 +109,35 @@ function reading(vm){
   return `${text?`<p class="reading">${esc(text)}</p>`:''}${risqueDescriptif?`<div class="risk-note"><b>⚠</b><span>${esc(risqueDescriptif)}</span></div>`:''}`;
 }
 
+// Joueurs cles : vm.players.impactRanking vient soit des vraies stats
+// historiques du joueur (playerAnalytics, name/team/position/rating5/
+// goals90/keyPasses90/minutesRecent), soit - a defaut - des props joueur
+// (playerImpactRanking, player/impactScore, sans team/photo/position).
+// Les deux formes sont gerees ici, chaque stat n'est affichee que si elle
+// existe reellement pour CE joueur.
 function players(vm){
-  const list=vm.players.impactRanking.slice(0,2);
+  const list=vm.players.impactRanking.slice(0,3);
   if(!list.length)return '';
-  return card('Joueurs clés',`<div class="players">${list.map(p=>`<div class="player">${img(p.photo,p.name)}<div class="player-info"><b>${esc(p.name)}</b><small>${esc(p.team)} · ${esc(p.position||'—')}</small></div><div class="player-impact"><b>${p.impact===null?'—':p.impact}</b><small>Impact</small></div></div>`).join('')}</div>`,'players-card');
+  return card('Joueurs clés',`<div class="players">${list.map(p=>{
+    const name=p.name||p.player||'Joueur';
+    const impactVal=n(p.impact)!==null?n(p.impact):n(p.impactScore);
+    const stats=[];
+    if(n(p.rating5)!==null)stats.push(['Note moy.',fmt(p.rating5)]);
+    if(n(p.goals90)!==null)stats.push(['Buts/90',fmt(p.goals90)]);
+    if(n(p.keyPasses90)!==null)stats.push(['Passes clés/90',fmt(p.keyPasses90)]);
+    if(n(p.minutesRecent)!==null)stats.push(['Min. récentes',fmt(p.minutesRecent,0)]);
+    if(n(p.startProbability)!==null)stats.push(['Proba. titulaire',pct(p.startProbability)]);
+    return `<div class="player">${img(p.photo,name)}<div class="player-info"><b>${esc(name)}</b><small>${esc(p.team||'')}${p.team&&p.position?' · ':''}${esc(p.position||'')}</small>${stats.length?`<div class="player-stats">${stats.map(([l,v])=>`<span>${esc(l)} <b>${esc(v)}</b></span>`).join('')}</div>`:''}</div><div class="player-impact"><b>${impactVal===null?'—':Math.round(impactVal)}</b><small>Impact</small></div></div>`;
+  }).join('')}</div>`,'players-card');
+}
+
+// Scenario par tranches de 15 minutes : texte reel genere par le pipeline
+// (raw.scenario_15min) a partir des tendances historiques par tranche,
+// deja calcule - aucune nouvelle logique ici, juste l'affichage.
+function scenario15(vm){
+  const slots=vm.editorial.scenario15;
+  if(!slots.length)return empty('Scénario par tranches de 15 minutes indisponible.');
+  return `<div class="scenario-15">${slots.map(s=>`<div class="scenario-row"><div class="scenario-row-head"><b>${esc(s.t)}</b><span>${pct(s.prob)}</span></div><p>${esc(s.txt)}</p></div>`).join('')}</div>`;
 }
 
 function absences(vm){
@@ -132,6 +157,7 @@ function render(raw){
     ${card('Comparatif des équipes',comparison(vm))}
     ${card('Scores les plus probables',scores(vm))}
     ${card('Lecture du match',reading(vm))}
+    ${card('Scénario par tranches de 15 minutes',scenario15(vm))}
     ${players(vm)}
     ${absences(vm)}
   </div>`;

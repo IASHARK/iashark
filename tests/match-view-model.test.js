@@ -99,6 +99,37 @@ test('les projections premium utilisent le schéma réel du Player Engine', () =
   assert.deepEqual(vm.players.projections,[{player:'Joueur Test',playerId:99,market:'Buteur',status:'Titulaire confirmé',minutes:84,probability:42.6,quality:'Élevée',sampleSize:14}]);
 });
 
+test('Player Impact est calculé depuis les performances réelles, indépendamment des props', () => {
+  const history = [1, 2, 3, 4, 5].map((fixtureId, index) => ({
+    fixture_id: fixtureId, player_id: 99, team_id: 867, name: 'Joueur Réel', position: 'Attacker',
+    minutes: 80, rating: 7.1 + index / 10, starter: true, shots_total: 3, shots_on: 2,
+    goals: index < 2 ? 1 : 0, assists: 0, key_passes: 2
+  }));
+  const vm = buildMatchViewModel(base({
+    player_history: { home: history, away: [] },
+    current_squads: { home: [{ player_id: 99, name: 'Joueur Réel' }], away: [] },
+    player_markets: []
+  }));
+  assert.equal(vm.players.analytics.keyPlayers[0].name, 'Joueur Réel');
+  assert.ok(vm.players.analytics.keyPlayers[0].impact > 0);
+  assert.equal(vm.players.lineupMode, 'PROJECTED');
+});
+
+test('un joueur transféré absent de l’effectif courant est exclu des projections', () => {
+  const history = [1, 2, 3].map(fixtureId => ({ fixture_id: fixtureId, player_id: 77, team_id: 867, name: 'Ancien Joueur', minutes: 90, rating: 9, starter: true }));
+  const vm = buildMatchViewModel(base({
+    player_history: { home: history, away: [] },
+    current_squads: { home: [{ player_id: 99, name: 'Joueur Actuel' }], away: [] }
+  }));
+  assert.equal(vm.players.analytics.home.players.length, 0);
+  assert.equal(vm.players.lineupMode, 'HIDDEN');
+});
+
+test('le statut des blessures distingue une réponse vide fiable d’un appel indisponible', () => {
+  assert.equal(buildMatchViewModel(base({ injuries: [], injuries_fetch_ok: true })).players.injuriesFetchOk, true);
+  assert.equal(buildMatchViewModel(base({ injuries: [], injuries_fetch_ok: false })).players.injuriesFetchOk, false);
+});
+
 test('les patterns exigent une provenance et cinq matchs par équipe', () => {
   const sparse = { source: 'api-sports-fixture-events', games: 1, slots: Array(6).fill({ n: 0 }), slots_against: Array(6).fill({ n: 0 }) };
   const vm = buildMatchViewModel(base({ events_home: sparse, events_away: sparse }));

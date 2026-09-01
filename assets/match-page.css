@@ -326,3 +326,51 @@ body{margin:0;color:var(--text);font-family:"DM Sans",sans-serif;min-height:100v
 .pitch-player em{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text);font:5.5px "DM Sans";font-style:normal;margin-top:2px}
 .pitch-empty{display:flex!important;flex-direction:column;align-items:center;justify-content:center}
 .pitch-empty span{font-size:7px;color:var(--muted);margin-top:8px;text-align:center;padding:0 10px}
+
+/* ===== Match page V3 — mockup-aligned layout ===== */
+.match-shell{max-width:1180px}
+.match-card{font-size:12px}
+.v3-head .teams{padding:20px 28px 14px}
+.available-dot{color:#20d98a;font-weight:700;font-size:11px}
+.versus time{display:block;white-space:nowrap;color:var(--soft);font:9px "Space Mono";line-height:1.45}
+.versus b{display:block;margin-top:3px}
+.versus small{display:block;color:var(--soft);font-size:8px;line-height:1.35}
+.context-strip{display:grid;grid-template-columns:repeat(4,1fr);margin:0 16px 10px;border:1px solid var(--line);border-radius:8px;background:rgba(5,25,38,.55)}
+.context-strip span{padding:10px;text-align:center;color:var(--soft);border-right:1px solid var(--line);font-size:10px}
+.context-strip span:last-child{border-right:0}
+.section-line{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}
+.section-line h2,.lineup-title h2{margin:0;color:var(--cyan);font:15px "Bebas Neue";letter-spacing:.12em;text-transform:uppercase}
+.section-line a{color:var(--cyan);font:9px "Space Mono";text-decoration:none;text-transform:uppercase}
+.principal-reco{padding:16px}
+.principal-grid{display:grid;grid-template-columns:120px minmax(180px,1.4fr) repeat(3,1fr);gap:12px;align-items:stretch}
+.principal-grid>div{border-left:1px solid var(--line);padding:8px 14px;display:flex;flex-direction:column;justify-content:center}
+.principal-grid>div:first-child{border-left:0;padding-left:0;align-items:center}
+.principal-score{width:74px;height:74px;border-radius:50%;display:grid;place-items:center;border:8px solid rgba(0,213,255,.18);box-shadow:inset 0 0 0 2px var(--cyan);color:var(--text);font:30px "Bebas Neue"}
+.principal-score small{font:8px "Space Mono";color:var(--muted)}
+.principal-market small,.principal-kpi small{color:var(--muted);font:8px "Space Mono";text-transform:uppercase}
+.principal-market b{font-size:17px;margin-top:5px}.principal-kpi b{font:22px "Bebas Neue";color:var(--cyan);margin-top:4px}
+.metric-triplet{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px}.metric-triplet .panel{text-align:center}
+.metric-triplet strong{display:block;font:24px "Bebas Neue";color:var(--text)}.metric-triplet small{font:8px "Space Mono";color:var(--muted)}
+.summary-block,.advanced-section,.player-section{margin-top:10px}.summary-duo,.summary-lower,.advanced-duo{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.radar-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.radar-cell{padding:10px;border:1px solid var(--line);border-radius:7px}.radar-cell small{display:block;color:var(--muted);font:8px "Space Mono";text-transform:uppercase}.radar-cell b{display:block;margin-top:8px;font-size:13px}.radar-cell i{display:block;height:3px;margin-top:8px;background:linear-gradient(90deg,var(--cyan) var(--value,60%),rgba(255,255,255,.08) 0)}
+.quick-facts{display:grid;gap:8px}.quick-facts li{color:var(--soft);line-height:1.5}.quick-facts li::marker{color:#24db89}.key-period{margin-top:12px;padding:12px;border:1px solid var(--line);border-radius:8px}.key-period b{font:24px "Bebas Neue";color:var(--cyan)}
+.injury-compact{display:grid;grid-template-columns:1fr 1fr;gap:12px}.injury-compact h3{display:flex;align-items:center;gap:7px;font-size:11px}.injury-compact h3 img{width:20px;height:20px;object-fit:contain}.injury-compact p{display:flex;justify-content:space-between;gap:10px;padding:7px 0;margin:0;border-bottom:1px solid var(--line)}.injury-compact p span{color:var(--muted);text-align:right}.coverage-note{padding:12px;border:1px dashed var(--line);border-radius:7px;color:var(--muted);line-height:1.5}.ok-state{color:#20d98a}
+.odds-table,.player-form-table{width:100%;border-collapse:collapse}.odds-table th,.odds-table td,.player-form-table th,.player-form-table td{padding:8px;border-bottom:1px solid var(--line);text-align:left}.odds-table th,.player-form-table th{font:8px "Space Mono";color:var(--muted);text-transform:uppercase}
+.data-overview{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}.data-overview>div{padding:10px;border:1px solid var(--line);border-radius:7px;text-align:center}.data-overview small{display:block;min-height:24px;color:var(--muted);font:7px "Space Mono";text-transform:uppercase}.data-overview b{font:20px "Bebas Neue"}.data-overview em{display:block;color:var(--soft);font-style:normal;font-size:10px}
+.flow-slots{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}.flow-slot{padding:10px 6px;border:1px solid var(--line);border-radius:8px;background:transparent;color:var(--soft);cursor:pointer}.flow-slot.active{border-color:var(--cyan);box-shadow:0 0 16px rgba(0,213,255,.12)}.flow-slot b,.flow-slot span{display:block}.flow-slot b{font:18px "Bebas Neue";color:var(--text)}.flow-slot span{font-size:8px}.flow-detail{display:grid;grid-template-columns:180px 1fr;gap:18px;margin-top:12px;padding:13px;border-top:1px solid var(--line);color:var(--soft);line-height:1.55}.flow-detail strong{color:var(--cyan)}
+.real-indicators{display:grid;grid-template-columns:1fr 1fr;gap:8px}.real-indicators div{display:flex;justify-content:space-between;padding:8px;border-bottom:1px solid var(--line)}
+.key-player-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.key-player-card{padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--panel-elevated)}.player-head{display:grid;grid-template-columns:54px 1fr 54px;gap:10px;align-items:center}.player-head img{width:54px;height:54px;border-radius:8px;object-fit:cover}.player-head b{display:block;font-size:13px}.player-head small{color:var(--muted)}.impact-ring{width:52px;height:52px;display:grid;place-items:center;border-radius:50%;border:4px solid rgba(0,213,255,.2);box-shadow:inset 0 0 0 1px var(--cyan);font:18px "Bebas Neue";color:var(--cyan)}.player-stat-grid{display:grid;grid-template-columns:repeat(3,1fr);margin-top:10px;border-top:1px solid var(--line)}.player-stat-grid div{text-align:center;padding-top:9px}.player-stat-grid small{display:block;color:var(--muted);font-size:7px}.player-stat-grid b{font-size:12px}.form-dots{display:flex;gap:4px;margin-top:9px}.form-dots i{width:8px;height:8px;border-radius:50%;background:#20c97b}.player-reason{margin:10px 0 0;padding-top:9px;border-top:1px solid var(--line);color:var(--soft);font-size:9px}
+.lineup-title{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}.lineup-title span{color:var(--muted);font-size:9px}.projected-grid,.used-players{display:grid;grid-template-columns:1fr 1fr;gap:10px}.used-players>div{padding:12px;border:1px solid var(--line);border-radius:8px}.used-players h3{margin-top:0;font-size:11px}.used-players ol{columns:2;padding-left:20px;color:var(--soft);line-height:1.8}.threat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.threat-grid>div{border:1px solid var(--line);border-radius:8px;padding:10px}.threat-grid h3{margin:0 0 8px;color:var(--cyan);font:13px "Bebas Neue";letter-spacing:.08em}.threat-grid ol{margin:0;padding-left:18px;color:var(--soft);line-height:1.8}
+
+@media(max-width:720px){
+  .v3-head .teams{grid-template-columns:minmax(0,1fr) 84px minmax(0,1fr);padding:12px 0 10px;gap:4px}
+  .v3-head .team h1{font-size:14px}.v3-head .team img{width:42px;height:42px}
+  .v3-head .versus time{font-size:7px;white-space:normal}.v3-head .versus b{font-size:17px}.v3-head .versus small{font-size:7px}
+  .context-strip{grid-template-columns:1fr 1fr}.context-strip span:nth-child(2){border-right:0}.context-strip span:nth-child(-n+2){border-bottom:1px solid var(--line)}
+  .principal-grid{grid-template-columns:90px 1fr}.principal-grid>div:nth-child(n+3){border-top:1px solid var(--line)}
+  .metric-triplet,.data-overview{grid-template-columns:repeat(3,1fr)}
+  .summary-duo,.summary-lower,.advanced-duo,.projected-grid,.used-players{grid-template-columns:1fr}
+  .flow-slots{grid-template-columns:repeat(3,1fr)}.flow-detail{grid-template-columns:1fr}
+  .key-player-grid,.threat-grid{grid-template-columns:1fr}.injury-compact{grid-template-columns:1fr}.radar-grid{grid-template-columns:1fr}
+  .player-form-table{min-width:560px}.player-section .table-scroll{overflow:auto}
+}

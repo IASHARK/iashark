@@ -174,6 +174,40 @@ test('dribbles90 : calcule depuis le vrai champ dribbles par match (deja recuper
   assert.equal(vm.players.analytics.home.players[0].dribbles90, 2);
 });
 
+test('matchupScores : expose le vrai comparatif calcule depuis match_stats_home/away', () => {
+  const vm = buildMatchViewModel(base({
+    match_stats_home: { xg: 2.1, xga: 0.9, possession: 61, fouls: 9.2, corners: 6.7 },
+    match_stats_away: { xg: 1.4, xga: 1.6, possession: 39, fouls: 11.4, corners: 5.1 }
+  }));
+  assert.ok(vm.matchupScores);
+  assert.ok(vm.matchupScores.globalHome > vm.matchupScores.globalAway);
+});
+
+test('marketsWatch : reprend markets_compared reel, classe par ecart absolu', () => {
+  const vm = buildMatchViewModel(base({
+    markets_compared: [{ id: 'a', market: 'Nul', probability: 27, consensus: 27, edge: 0.2 }, { id: 'b', market: 'Over 2.5', probability: 63, consensus: 55, edge: 8 }]
+  }));
+  assert.equal(vm.marketsWatch[0].market, 'Over 2.5');
+});
+
+test('formNote/formTrend : derives des vrais resultats recents (form_home/away), jamais une note fabriquee', () => {
+  const vm = buildMatchViewModel(base({
+    form_home: [{ result: 'W', score: '2-1' }, { result: 'W', score: '1-0' }, { result: 'W', score: '3-0' }, { result: 'L', score: '0-1' }, { result: 'D', score: '1-1' }]
+  }));
+  assert.ok(vm.formNote.home);
+  assert.equal(vm.formNote.home.wins, 3);
+});
+
+test('scoringThreat expose scoringProbability (Poisson reel depuis goals90), jamais une probabilite inventee', () => {
+  const history = [1, 2, 3].map(fid => ({ fixture_id: fid, player_id: 30, team_id: 867, name: 'Buteur', minutes: 90, rating: 7, starter: true, shots_total: 3, shots_on: 2, goals: 1 }));
+  const vm = buildMatchViewModel(base({
+    player_history: { home: history, away: [] },
+    current_squads: { home: [{ player_id: 30, name: 'Buteur' }], away: [] }
+  }));
+  assert.ok(vm.players.scoringThreat.length);
+  assert.ok(Number.isFinite(vm.players.scoringThreat[0].scoringProbability));
+});
+
 test('un joueur transféré absent de l’effectif courant est exclu des projections', () => {
   const history = [1, 2, 3].map(fixtureId => ({ fixture_id: fixtureId, player_id: 77, team_id: 867, name: 'Ancien Joueur', minutes: 90, rating: 9, starter: true }));
   const vm = buildMatchViewModel(base({

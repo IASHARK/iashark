@@ -10,7 +10,7 @@ test("la page Match est un shell léger sans ancien rendu inline",()=>{
 });
 test("la page simple expose une seule colonne de sections réelles, sans onglets",()=>{
   assert.doesNotMatch(js,/data-tab=/);assert.doesNotMatch(js,/role="tablist"/);
-  for(const value of ['Recommandation IASHARK','Probabilités 1X2','Buts attendus','Comparatif des équipes','Scores probables','Lecture du match','Scénario du match','Menaces de but','Absents & incertains'])assert.match(js,new RegExp(value));
+  for(const value of ['Recommandation IASHARK','Probabilités 1X2','Buts attendus','Pourquoi le pari ressort','Scores probables','Lecture du match','Scénario probable du match','Buteur à surveiller','Absents & incertains'])assert.match(js,new RegExp(value));
 });
 test("la page est responsive",()=>{
   assert.match(css,/@media\(max-width:640px\)/);

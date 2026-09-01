@@ -19,7 +19,11 @@ const ICONS={
   chart:'<path d="M4 19V5M4 19h16M8 15l3-4 3 2 4-6"/>',
   trophy:'<path d="M8 3h8v4a4 4 0 0 1-8 0V3Z"/><path d="M8 4H5a3 3 0 0 0 3 5M16 4h3a3 3 0 0 1-3 5"/><path d="M12 11v3M9.5 18h5M10 15h4l.5 3h-5l.5-3Z"/>',
   leaf:'<path d="M5 19c8 0 14-6 14-14-8 0-14 6-14 14Z"/><path d="M5 19c2-4 5-7 9-9"/>',
-  cloud:'<path d="M7 18a4 4 0 0 1-.5-7.97A5 5 0 0 1 16 8.5 4.5 4.5 0 0 1 15.5 18H7Z"/>'
+  cloud:'<path d="M7 18a4 4 0 0 1-.5-7.97A5 5 0 0 1 16 8.5 4.5 4.5 0 0 1 15.5 18H7Z"/>',
+  bulb:'<path d="M9 18h6M10 21h4M7 9a5 5 0 1 1 10 0c0 2-1 3-2 4.2-.5.6-.8 1.1-.8 1.8H9.8c0-.7-.3-1.2-.8-1.8C8 12 7 11 7 9Z"/>',
+  scale:'<path d="M12 3v18M7 7 4 13a3 3 0 0 0 6 0L7 7ZM17 7l-3 6a3 3 0 0 0 6 0l-3-6ZM4 7h6M14 7h6"/>',
+  alert:'<path d="M12 3 2 20h20L12 3Z"/><path d="M12 10v4M12 17v.01"/>',
+  trend:'<path d="M4 17 10 11l4 4 6-8"/><path d="M16 6h4v4"/>'
 };
 const cardIcon=key=>ICONS[key]?`<svg viewBox="0 0 24 24" class="card-icon">${ICONS[key]}</svg>`:'';
 const card=(title,body,cls='',icon='')=>`<section class="card reveal ${cls}"><h2>${cardIcon(icon)}${esc(title)}</h2>${body}</section>`;
@@ -116,27 +120,115 @@ function reasonsCard(vm){
   return card('Pourquoi ce pari ?',`<div class="reasons">${list.map((r,i)=>`<div class="reason"><b>${i+1}</b><p>${esc(r)}</p></div>`).join('')}</div>`,'','reasons');
 }
 
-// Buteurs potentiels ("Menaces de but") : vm.players.scoringThreat, classe
+// Buteur a surveiller ("Menaces de but") : vm.players.scoringThreat, classe
 // par vrai signal de menace (buts/90 + tirs cadres/90, min 3 apparitions,
-// jamais un joueur absent - cf lib/match-view-model.js). Le chiffre mis en
-// avant (buts/90) est une vraie stat, jamais une "probabilite de marquer"
-// fabriquee - on n'a pas modelise ca.
+// jamais un joueur absent - cf lib/match-view-model.js). scoringProbability
+// = vraie probabilite de Poisson (1-e^-lambda) depuis buts/90 reel, jamais
+// une "probabilite de marquer" inventee. "Cote equitable" = notre propre
+// calcul (100/proba), jamais une cote de marche qu'on n'a pas reellement
+// pour un joueur precis.
 function threatsCard(vm){
   const list=vm.players.scoringThreat;
   if(!list.length)return '';
-  const max=Math.max(...list.map(p=>p.threatScore),.01);
-  return card('Menaces de but',`<div class="threats">${list.slice(0,2).map(p=>{
+  return card('Buteur à surveiller',`<div class="threats">${list.slice(0,1).map(p=>{
     const pid=n(p.id);
     const href=pid!==null?` href="/joueur.html?m=${esc(vm.id)}&p=${pid}"`:'';
     const tag=pid!==null?'a':'div';
-    const bar=Math.max(6,p.threatScore/max*100);
+    const sp=n(p.scoringProbability);
+    const fairOdds=sp&&sp>0?100/sp:null;
     return `<${tag} class="threat"${href}>
-      <div class="threat-top">${img(p.photo,p.name)}<div><b>${esc(p.name)}</b><small>${esc(p.team||'')}</small></div></div>
-      <div class="threat-figure"><b>${fmt(p.goals90)}</b><small>Buts /90</small></div>
-      <div class="threat-bar"><i style="width:${bar}%"></i></div>
-      <div class="threat-stats"><span>Tirs cadrés/90 <b>${fmt(p.shotsOn90)}</b></span>${n(p.startProbability)!==null?`<span>Titulaire <b>${pct(p.startProbability)}</b></span>`:''}</div>
+      <div class="threat-top">${img(p.photo,p.name)}<div><b>${esc(p.name)}</b><small>${esc(p.team||'')}${p.position?' · '+esc(p.position):''}</small></div></div>
+      <div class="threat-figures">
+        ${sp!==null?`<div><b class="pos">${pct(sp)}</b><small>Probabilité de marquer</small></div>`:''}
+        ${fairOdds!==null?`<div><b>${fmt(fairOdds,2)}</b><small>Cote équitable</small></div>`:''}
+      </div>
+      <div class="threat-stats"><span>Buts/90 <b>${fmt(p.goals90)}</b></span><span>Tirs cadrés/90 <b>${fmt(p.shotsOn90)}</b></span>${n(p.startProbability)!==null?`<span>Titulaire <b>${pct(p.startProbability)}</b></span>`:''}</div>
     </${tag}>`;
   }).join('')}</div>`,'threats-card','target2');
+}
+
+// "Ce qu'il faut savoir" : classification deja faite par
+// lib/insights.js#classifyKeyInsights a partir de signaux DEJA reels
+// (matchups a cibler, absences cles, ecart modele/marche) - simple
+// affichage ici, aucune nouvelle donnee.
+const INSIGHT_STYLE={
+  positive_home:['b-green','✓'],positive_away:['b-green','✓'],
+  watch:['b-orange','!'],contradiction:['b-orange','⇄']
+};
+function keyInsightsCard(vm){
+  const list=vm.keyInsights;
+  if(!list.length)return '';
+  return card('Ce qu\'il faut savoir',`<div class="insights-grid">${list.map(item=>{
+    const [cls,mark]=INSIGHT_STYLE[item.type]||['b-cyan','·'];
+    return `<div class="insight"><div class="insight-head"><span class="insight-mark ${cls}">${mark}</span><b>${esc(item.title)}</b></div><p>${esc(item.text)}</p></div>`;
+  }).join('')}</div>`,'','bulb');
+}
+
+// Modele vs marche : vm.model.marketsCompared, deja reel (raw.markets_compared,
+// calcule cote pipeline) - simple tableau, aucune nouvelle donnee.
+function marketsVsMarketCard(vm){
+  const list=vm.model.marketsCompared;
+  if(!list.length)return '';
+  const rows=list.map(m=>`<tr><td>${esc(m.market)}</td><td>${pct(m.probability)}</td><td>${m.consensus!==null?pct(m.consensus):'—'}</td><td class="${m.edge>=0?'pos':'neg'}">${m.edge>=0?'+':''}${fmt(m.edge)}%</td></tr>`).join('');
+  return card('Modèle vs marché',`<div class="table-scroll"><table class="mvm-table"><thead><tr><th>Pari</th><th>Modèle</th><th>Marché</th><th>Écart</th></tr></thead><tbody>${rows}</tbody></table></div>`,'','scale');
+}
+
+// Value potentielle : le marche du plus gros ecart absolu deja identifie
+// par vm.marketsWatch (lui-meme derive de markets_compared reel) - jamais
+// un nouveau calcul, juste la mise en avant du 1er de la liste deja triee.
+function valuePotentialCard(vm){
+  const top=vm.marketsWatch[0];
+  if(!top||top.edge===null||Math.abs(top.edge)<4)return '';
+  return card('Value potentielle',`<div class="value-potential"><b>${esc(top.market)}</b><p>${top.edge>=0?`Ce marché présente la plus grosse value selon notre modèle (écart de +${fmt(top.edge)}% avec le marché).`:`Le marché est nettement au-dessus de notre modèle sur ce pari (écart de ${fmt(top.edge)}%) - à interpréter avec prudence.`}</p></div>`,'value-card','trophy');
+}
+
+// Matchup : vm.matchupScores, categories reellement mesurables (attaque/
+// defense/possession/discipline/coups de pied arretes - cf
+// lib/insights.js#computeMatchup). Categories non mesurables avec nos
+// donnees (pressing, transitions, bloc defensif...) volontairement
+// absentes plutot qu'inventees.
+function matchupCard(vm){
+  const m=vm.matchupScores;
+  if(!m)return '';
+  const homeName=vm.identity.home.name,awayName=vm.identity.away.name;
+  const rows=m.categories.map(c=>`<div class="matchup-row"><span class="${c.advantage==='home'?'adv':''}">${c.advantage==='home'?homeName:c.advantage==='away'?'':''}</span><b>${esc(c.label)}</b><span class="${c.advantage==='away'?'adv':''}">${c.advantage==='away'?awayName:c.advantage==='home'?'':c.advantage==='égalité'?'Équilibré':''}</span></div>`).join('');
+  return card('Matchup : comment les équipes se correspondent',`<div class="matchup-rows">${rows}</div><div class="matchup-global"><div class="mg-side"><b class="pos">${fmt(m.globalHome)}<small>/10</small></b><small>${esc(homeName)}</small></div><div class="mg-bar"><i style="width:${clamp(m.globalHome/(m.globalHome+m.globalAway)*100)}%"></i></div><div class="mg-side"><b class="neg">${fmt(m.globalAway)}<small>/10</small></b><small>${esc(awayName)}</small></div></div>`,'','scale');
+}
+
+// "Stats a ne pas surinterpreter" : signale les victoires a marge etroite
+// dans le vrai historique recent (vm.formNote, cf
+// lib/insights.js#formMarginNote) - repli honnete a la place d'un indice
+// de force des adversaires recents qu'on ne peut pas calculer sans appel
+// API supplementaire par adversaire.
+function formNoteCard(vm){
+  const home=vm.formNote.home,away=vm.formNote.away;
+  if(!home&&!away)return '';
+  const line=(name,note)=>note?`<div class="caveat"><b>!</b><span><b>${esc(name)}</b> : ${note.wins} victoire${note.wins>1?'s':''} sur les ${note.sample} derniers matchs, mais ${note.narrowWins} à un seul but d'écart.</span></div>`:'';
+  return card('Stats à ne pas surinterpréter',`${line(vm.identity.home.name,home)}${line(vm.identity.away.name,away)}`,'','alert');
+}
+
+// Forme reelle : vrais resultats recents (form_home/away deja exposes),
+// tendance reelle (vm.formTrend, points W/D/L des vrais resultats - cf
+// lib/insights.js#computeFormTrend). Jamais une note de forme fabriquee.
+function formReelleCard(vm){
+  const s=vm.identity.standings||{};
+  const side=(team,st,trend)=>{
+    if(!st||!st.form)return '';
+    const arrow=trend&&trend.trend==='up'?'↑':trend&&trend.trend==='down'?'↓':'';
+    return `<div class="form-side"><b>${esc(team.name)}</b>${arrow?`<span class="trend-${trend.trend}">${arrow}</span>`:''}${formStrip(st.form)}</div>`;
+  };
+  const body=side(vm.identity.home,s.home,vm.formTrend.home)+side(vm.identity.away,s.away,vm.formTrend.away);
+  if(!body)return '';
+  return card('Forme réelle (5 derniers matchs)',`<div class="form-reelle">${body}</div>`,'','trend');
+}
+
+// 3 marches a surveiller : vm.marketsWatch, deja trie par ecart absolu reel
+// (cf lib/insights.js#topMarketsToWatch) - simple affichage.
+function marketsWatchCard(vm){
+  const list=vm.marketsWatch;
+  if(!list.length)return '';
+  const rows=list.map(m=>`<tr><td>${esc(m.market)}</td><td>${esc(m.interest)}</td><td>${m.confidence!==null?m.confidence+'/10':'—'}</td></tr>`).join('');
+  return card('Marchés à surveiller',`<div class="table-scroll"><table class="mvm-table"><thead><tr><th>Marché</th><th>Intérêt</th><th>Confiance</th></tr></thead><tbody>${rows}</tbody></table></div>`,'','target');
 }
 
 function probabilities(vm){
@@ -208,16 +300,15 @@ function h2hCard(vm){
   return card('Face-à-face',`<div class="h2h-summary">${over25}/${rows.length} <small>&gt; 2.5 buts</small></div><div class="h2h-list">${body}</div>`,'','h2h');
 }
 
-function matchupsCard(vm){
-  const list=vm.matchups;
-  if(!list.length)return '';
-  return card('Matchups à cibler',`<div class="matchups">${list.map(mchp=>`<div class="matchup"><b>${esc(mchp.title)}</b><p>${esc(mchp.text)}</p></div>`).join('')}</div>`,'','target');
-}
-
+// outputShare (vm.players.absences[].outputShare) : part reelle du joueur
+// dans les buts+passes decisives+passes cles recents de son equipe (cf
+// lib/insights.js#computeOutputShare) - une estimation, jamais un modele
+// causal "l'equipe perd X% sans lui". N'apparait que si le joueur absent a
+// ete retrouve dans l'historique recent (sinon aucun chiffre affiche).
 function absences(vm){
   const a=vm.players.absences;
   if(!a.home.length&&!a.away.length&&!vm.players.injuriesFetchOk)return '';
-  const side=(team,items)=>`<div><h3>${img(team.logo,team.name)}${esc(team.name)}</h3>${items.length?items.slice(0,4).map(x=>`<div class="abs-row"><b>${esc(x.name)}</b><span>${esc(x.status||'Incertain')}</span></div>`).join(''):'<p class="abs-none">Aucune absence signalée</p>'}</div>`;
+  const side=(team,items)=>`<div><h3>${img(team.logo,team.name)}${esc(team.name)}</h3>${items.length?items.slice(0,4).map(x=>`<div class="abs-row"><div class="abs-row-head"><b>${esc(x.name)}</b><span>${esc(x.status||'Incertain')}</span></div>${n(x.outputShare)!==null?`<small class="abs-impact">Estimation : ${pct(x.outputShare)} de la production offensive récente de l'équipe</small>`:''}</div>`).join(''):'<p class="abs-none">Aucune absence signalée</p>'}</div>`;
   return card('Absents & incertains',`<div class="absences">${side(vm.identity.home,a.home)}${side(vm.identity.away,a.away)}</div>`);
 }
 
@@ -234,16 +325,34 @@ function refereeCard(vm){
 function render(raw){
   const vm=IasharkMatchViewModel.buildMatchViewModel(raw);
   document.title=`${vm.identity.home.name} vs ${vm.identity.away.name} — IASHARK`;
-  const bottomRow=[h2hCard(vm),matchupsCard(vm),absences(vm),refereeCard(vm)].filter(Boolean);
+  const mainCol=[
+    keyInsightsCard(vm),
+    card('Pourquoi le pari ressort ?',comparison(vm),'','compare'),
+    threatsCard(vm),
+    matchupCard(vm),
+    formNoteCard(vm),
+    card('Scénario probable du match',scenarioCard(vm),'','chart')
+  ].filter(Boolean);
+  const asideCol=[
+    marketsVsMarketCard(vm),
+    valuePotentialCard(vm),
+    absences(vm),
+    formReelleCard(vm),
+    marketsWatchCard(vm),
+    h2hCard(vm),
+    refereeCard(vm)
+  ].filter(Boolean);
   root.innerHTML=`<div class="page">
     ${hero(vm)}
     ${tagsRow(vm)}
     ${recommendation(vm)}
-    <div class="grid2">${reasonsCard(vm)}${threatsCard(vm)}</div>
+    ${reasonsCard(vm)}
     ${outputsCard(vm)}
-    <div class="grid2 grid2-wide">${card('Comparatif des équipes',comparison(vm),'','compare')}${card('Scénario du match',scenarioCard(vm),'','chart')}</div>
     ${card('Lecture du match',reading(vm))}
-    ${bottomRow.length?`<div class="grid-bottom">${bottomRow.join('')}</div>`:''}
+    <div class="lead-grid">
+      <div class="lead-main">${mainCol.join('')}</div>
+      <div class="lead-aside">${asideCol.join('')}</div>
+    </div>
   </div>`;
   bindMotion();
 }

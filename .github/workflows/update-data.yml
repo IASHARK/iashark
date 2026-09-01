@@ -1245,7 +1245,17 @@ jobs:
             return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
           }
           function seoTitleFor(m){
-            return m.home.n+' vs '+m.away.n+' — Pronostic & Analyse IA | IASHARK';
+            // Raccourci (etait "Pronostic & Analyse IA", souvent >70
+            // caracteres et tronque dans les resultats Google au-dela de
+            // ~60) - garde le mot-cle "Pronostic" seul, retire "Analyse IA"
+            // redondant avec le nom du site.
+            return m.home.n+' vs '+m.away.n+' — Pronostic IA | IASHARK';
+          }
+          function seoImageFor(m){
+            // Vrai blason de l'equipe a domicile (media.api-sports.io,
+            // deja utilise partout ailleurs sur le site) - pas d'image OG
+            // dediee generee, mais mieux qu'aucune image de partage.
+            return m.home&&m.home.id?'https://media.api-sports.io/football/teams/'+m.home.id+'.png':null;
           }
           function seoDescriptionFor(m){
             var d=(m.date||'').split(' ')[0];
@@ -1290,18 +1300,25 @@ jobs:
               var title=seoTitleFor(m);
               var desc=seoDescriptionFor(m);
               var canonical='https://iashark.com/match/'+m.id+'.html';
+              var image=seoImageFor(m);
               var metaBlock='<meta name="description" content="'+escHtml(desc)+'">'
                 +'<link rel="canonical" href="'+canonical+'">'
                 +'<meta property="og:type" content="website">'
                 +'<meta property="og:title" content="'+escHtml(title)+'">'
                 +'<meta property="og:description" content="'+escHtml(desc)+'">'
                 +'<meta property="og:url" content="'+canonical+'">'
+                +(image?'<meta property="og:image" content="'+escHtml(image)+'">':'')
                 +'<meta name="twitter:card" content="summary">'
                 +'<meta name="twitter:title" content="'+escHtml(title)+'">'
                 +'<meta name="twitter:description" content="'+escHtml(desc)+'">'
+                +(image?'<meta name="twitter:image" content="'+escHtml(image)+'">':'')
                 +'<script type="application/ld+json">'+seoJsonLdFor(m)+'</script>';
               var page=tpl
                 .replace('<title>Analyse Match — IASHARK</title>','<title>'+escHtml(title)+'</title>')
+                // Le shell match.html porte un noindex par defaut (route
+                // dynamique orpheline ?id=) - retire pour ces pages
+                // statiques reelles, qui doivent etre indexees.
+                .replace('<meta name="robots" content="noindex,follow">', '')
                 .replace('<!--SEO_META--><!--/SEO_META-->', metaBlock)
                 .replace('<!--SEO_SUMMARY--><!--/SEO_SUMMARY-->', seoSummaryHtmlFor(m))
                 .replace('<!--FIXED_ID_SCRIPT--><!--/FIXED_ID_SCRIPT-->', '<script>var FIXED_MATCH_ID='+JSON.stringify(String(m.id))+';</script>')

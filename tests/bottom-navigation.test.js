@@ -9,7 +9,7 @@ const excluded=new Set(['admin.html','maintenance.html']);
 function htmlFiles(dir=root,prefix=''){
   return fs.readdirSync(dir,{withFileTypes:true}).flatMap((entry)=>{
     const rel=path.join(prefix,entry.name);
-    if(entry.isDirectory()&&!['node_modules','.git'].includes(entry.name))return htmlFiles(path.join(dir,entry.name),rel);
+    if(entry.isDirectory()&&!['node_modules','.git','.agents','.codex','docs','iashark-v2-concept','prototypes'].includes(entry.name))return htmlFiles(path.join(dir,entry.name),rel);
     return entry.isFile()&&entry.name.endsWith('.html')?[rel]:[];
   });
 }

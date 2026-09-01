@@ -54,7 +54,36 @@ test('les données fiables alimentent les cartes avancées', () => {
   assert.deepEqual(vm.model.probabilities, { home: 45, draw: 27, away: 28 });
   assert.deepEqual(vm.model.expectedGoals, { home: 1.4, away: 1.1 });
   assert.equal(vm.model.simulationCount, 5000);
-  assert.equal(vm.comparison.rows.length, 5);
+  assert.equal(vm.comparison.rows.length, 6);
+});
+
+test('Comparatif : corners/fautes/hors-jeu/arrets ne s\'affichent que si les deux equipes ont la valeur reelle', () => {
+  const vm = buildMatchViewModel(base({
+    crit_home: { source: 'api-sports-team-statistics', sample_size: 8, att: 58, def: 63, fr: 60 },
+    crit_away: { source: 'api-sports-team-statistics', sample_size: 9, att: 54, def: 59, fr: 47 },
+    match_stats_home: { shots_total: 12, shots_on: 5, corners: 6, fouls: 11, offsides: 2, saves: 3 },
+    match_stats_away: { shots_total: 9, shots_on: 3, corners: 4, fouls: 9 }
+  }));
+  const labels = vm.comparison.rows.map(r => r.label);
+  assert.ok(labels.includes('Corners'));
+  assert.ok(labels.includes('Fautes'));
+  assert.ok(!labels.includes('Hors-jeu'), 'hors-jeu absent cote away -> pas de ligne inventee');
+  assert.ok(!labels.includes('Arrêts'), 'arrets absent cote away -> pas de ligne inventee');
+});
+
+test('Face-a-face : reprend les 5 confrontations reelles deja formatees par le pipeline', () => {
+  const vm = buildMatchViewModel(base({
+    h2h: [{ d: '2026-02-01', home: 'Lecce', away: 'AS Roma', s: '1-1', w: 'N' }, { d: '2025-09-14', home: 'AS Roma', away: 'Lecce', s: '2-0', w: '2' }]
+  }));
+  assert.deepEqual(vm.h2h, [
+    { date: '2026-02-01', home: 'Lecce', away: 'AS Roma', score: '1-1', winner: 'N' },
+    { date: '2025-09-14', home: 'AS Roma', away: 'Lecce', score: '2-0', winner: '2' }
+  ]);
+});
+
+test('Face-a-face : aucune confrontation -> h2h absent, jamais un tableau vide affiche comme "aucun historique"', () => {
+  assert.equal(buildMatchViewModel(base({ h2h: [] })).h2h, null);
+  assert.equal(buildMatchViewModel(base({})).h2h, null);
 });
 
 test('Shot Profile / Qualité des occasions : uniquement des champs match_stats réels, xG par tir cadré calculé, jamais de coordonnées de tir inventées', () => {

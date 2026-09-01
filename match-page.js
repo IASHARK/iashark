@@ -34,7 +34,7 @@ function hero(vm){
       <div class="hero-vs">VS</div>
       <div class="hero-team">${img(i.away.logo,i.away.name)}<b>${esc(i.away.name)}</b>${teamMeta(s.away)}</div>
     </div>
-    ${vm.conditions.venue?`<div class="hero-venue"><svg viewBox="0 0 24 24"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.4"/></svg>${esc(vm.conditions.venue)}</div>`:''}
+    ${vm.conditions.venue||vm.conditions.weather?`<div class="hero-venue">${vm.conditions.venue?`<svg viewBox="0 0 24 24"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.4"/></svg>${esc(vm.conditions.venue)}`:''}${vm.conditions.weather?`${vm.conditions.venue?'<i class="sep"></i>':''}${esc(vm.conditions.weather.temperature)} · ${esc(vm.conditions.weather.description)}`:''}</div>`:''}
   </section>`;
 }
 
@@ -57,6 +57,7 @@ function recommendation(vm){
   const r=vm.model.recommendation;
   if(!r)return card('Recommandation IASHARK',empty(vm.model.unavailableReason||'Aucun marché ne franchit les seuils de confiance ou de cote minimale pour ce match — IASHARK préfère ne pas se prononcer.'));
   const fair=r.probability>0?100/r.probability:null;
+  const value=vm.model.value;
   return `<section class="card reco">
     <div class="reco-head">
       <div><span class="reco-eyebrow">Recommandation IASHARK</span><h1 class="reco-market">${esc(r.market)}</h1></div>
@@ -67,6 +68,7 @@ function recommendation(vm){
       <div><small>Score IASHARK</small><b>${vm.model.iasharkScore===null?'—':Math.round(vm.model.iasharkScore)+'/100'}</b></div>
       <div><small>Cote équitable</small><b>${fmt(fair,2)}</b></div>
       <div><small>Cote moyenne</small><b>${fmt(vm.model.recommendedOdds,2)}</b></div>
+      ${value!==null?`<div><small>Value</small><b class="${value>=0?'pos':'neg'}">${value>=0?'+':''}${fmt(value)}%</b></div>`:''}
     </div>
   </section>`;
 }
@@ -170,6 +172,51 @@ function absences(vm){
   return card('Absents & incertains',`<div class="absences">${side(vm.identity.home,a.home)}${side(vm.identity.away,a.away)}</div>`);
 }
 
+// Face-a-face : vm.h2h deja formate/filtre par le view-model (5 dernieres
+// confrontations reelles). Le camp gagnant (winner '1'/'2') est deja
+// relatif a l'equipe domicile DU MATCH ACTUEL - on retrouve juste laquelle
+// des deux equipes de CETTE ligne correspond a ce camp pour la mettre en
+// evidence, aucune donnee recalculee.
+function h2hCard(vm){
+  const rows=vm.h2h;
+  if(!rows)return '';
+  const homeName=vm.identity.home.name,awayName=vm.identity.away.name;
+  const body=rows.map(row=>{
+    const homeWin=row.winner==='1'&&row.home===homeName||row.winner==='2'&&row.home===awayName;
+    const awayWin=row.winner==='1'&&row.away===homeName||row.winner==='2'&&row.away===awayName;
+    return `<div class="h2h-row"><span class="h2h-date">${esc(row.date)}</span><span class="h2h-teams"><span class="${homeWin?'win':''}">${esc(row.home)}</span><b class="h2h-score">${esc(row.score)}</b><span class="${awayWin?'win':''}">${esc(row.away)}</span></span></div>`;
+  }).join('');
+  return card('Face-à-face',`<div class="h2h-list">${body}</div>`);
+}
+
+function refereeCard(vm){
+  const r=vm.referee;
+  if(!r)return '';
+  const stats=[];
+  if(n(r.cardsPerMatch)!==null)stats.push(['Cartons/match',fmt(r.cardsPerMatch)]);
+  if(n(r.penaltiesPerMatch)!==null)stats.push(['Penaltys/match',fmt(r.penaltiesPerMatch)]);
+  if(n(r.matches)!==null)stats.push(['Matchs observés',fmt(r.matches,0)]);
+  return card('Arbitre',`<div class="referee"><b>${esc(r.name)}</b>${stats.length?`<div class="referee-stats">${stats.map(([l,v])=>`<div><small>${esc(l)}</small><b>${esc(v)}</b></div>`).join('')}</div>`:''}</div>`);
+}
+
+// Matchups a cibler : vm.matchups deja calcule (ecart reel >= seuil, cf
+// lib/match-view-model.js) - simple affichage, aucune nouvelle logique.
+function matchupsCard(vm){
+  const list=vm.matchups;
+  if(!list.length)return '';
+  return card('Matchups à cibler',`<div class="matchups">${list.map(mchp=>`<div class="matchup"><b>${esc(mchp.title)}</b><p>${esc(mchp.text)}</p></div>`).join('')}</div>`);
+}
+
+// Joueurs en forme : vm.players.watch (buteur/passeur le plus actif sur les
+// evenements reels des derniers matchs, deja calcule) - distinct des
+// "Joueurs cles" (impact toutes stats confondues), volontairement plus
+// discret / secondaire.
+function watchCard(vm){
+  const list=vm.players.watch;
+  if(!list.length)return '';
+  return card('Joueurs en forme',`<div class="watch-list">${list.map(p=>`<div class="watch-pill">${img(p.photo,p.name)}<span>${esc(p.name)}</span>${n(p.value)!==null?`<b>${esc(fmt(p.value,0))}</b>`:''}</div>`).join('')}</div>`,'watch-card');
+}
+
 function render(raw){
   const vm=IasharkMatchViewModel.buildMatchViewModel(raw);
   document.title=`${vm.identity.home.name} vs ${vm.identity.away.name} — IASHARK`;
@@ -177,12 +224,16 @@ function render(raw){
     ${hero(vm)}
     ${recommendation(vm)}
     <div class="row2">${card('Probabilités 1X2',probabilities(vm))}${card('Buts attendus',xg(vm))}</div>
+    ${h2hCard(vm)}
     ${card('Comparatif des équipes',comparison(vm))}
+    ${matchupsCard(vm)}
     ${card('Scores les plus probables',scores(vm))}
     ${card('Lecture du match',reading(vm))}
     ${card('Scénario par tranches de 15 minutes',scenario15(vm))}
     ${players(vm)}
+    ${watchCard(vm)}
     ${absences(vm)}
+    ${refereeCard(vm)}
   </div>`;
 }
 

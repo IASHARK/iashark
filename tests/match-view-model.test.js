@@ -165,6 +165,15 @@ test('Buteurs potentiels : un joueur absent/blesse n\'est jamais publie comme me
   assert.deepEqual(vm.players.scoringThreat, []);
 });
 
+test('dribbles90 : calcule depuis le vrai champ dribbles par match (deja recupere par le pipeline), jamais fabrique', () => {
+  const history = [1, 2, 3].map(fixtureId => ({ fixture_id: fixtureId, player_id: 20, team_id: 867, name: 'Dribbleur', minutes: 90, rating: 7, starter: true, dribbles: 2 }));
+  const vm = buildMatchViewModel(base({
+    player_history: { home: history, away: [] },
+    current_squads: { home: [{ player_id: 20, name: 'Dribbleur' }], away: [] }
+  }));
+  assert.equal(vm.players.analytics.home.players[0].dribbles90, 2);
+});
+
 test('un joueur transféré absent de l’effectif courant est exclu des projections', () => {
   const history = [1, 2, 3].map(fixtureId => ({ fixture_id: fixtureId, player_id: 77, team_id: 867, name: 'Ancien Joueur', minutes: 90, rating: 9, starter: true }));
   const vm = buildMatchViewModel(base({

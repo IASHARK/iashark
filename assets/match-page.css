@@ -40,6 +40,10 @@ a{color:inherit}
 @media(min-width:900px){
   :root{--container:1120px}
   .dashboard{grid-template-columns:1fr 380px}
+  /* colonne principale plus longue que le rail secondaire sur la plupart
+     des matchs (H2H/matchups/arbitre sont souvent absents) : sticky evite
+     un grand vide sous le rail pendant qu'on lit la colonne principale */
+  .col-side{position:sticky;top:16px;max-height:calc(100vh - 32px);overflow-y:auto;scrollbar-width:thin}
 }
 .empty{min-height:64px;display:grid;place-items:center;padding:14px;color:var(--muted);text-align:center;font-size:12.5px;line-height:1.5}
 
@@ -60,9 +64,9 @@ a{color:inherit}
 .form-strip .f-d{background:var(--dim);color:var(--text)}
 .form-strip .f-l{background:var(--red)}
 .hero-vs{text-align:center;color:var(--dim);font:16px var(--display)}
-.hero-venue{display:flex;align-items:center;justify-content:center;gap:8px;padding-top:12px;border-top:1px solid var(--line);color:var(--muted);font-size:12px}
+.hero-venue{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:6px 18px;padding-top:12px;border-top:1px solid var(--line);color:var(--muted);font-size:12px}
+.hero-venue .hv-venue{display:inline-flex;align-items:center;gap:8px;text-align:left}
 .hero-venue svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.7;flex-shrink:0}
-.hero-venue i.sep{width:3px;height:3px;border-radius:50%;background:var(--dim);flex-shrink:0}
 .ready{color:var(--green)}
 
 /* recommandation */

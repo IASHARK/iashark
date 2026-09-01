@@ -10,25 +10,30 @@ const empty=t=>`<div class="empty">${esc(t)}</div>`;
 
 // Icones de titre de carte : purement decoratives (memes tokens de couleur
 // que le reste de la page), aucune information supplementaire encodee -
-// juste un reperage visuel plus rapide entre les sections, comme demande.
+// juste un reperage visuel plus rapide entre les sections.
 const ICONS={
   h2h:'<path d="M8 3v4M16 3v4M4 9h16M5 5h14a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Z"/>',
   compare:'<path d="M6 20V10M12 20V4M18 20v-7"/>',
   target:'<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r=".6" fill="currentColor"/>',
   whistle:'<path d="M4 12a5 5 0 0 1 5-5h6.5A4.5 4.5 0 0 1 20 11.5a4.5 4.5 0 0 1-4.5 4.5H12l-3 3v-3a5 5 0 0 1-5-4Z"/><circle cx="8.5" cy="12" r="1.4"/>',
-  reasons:'<path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1.4" fill="currentColor" stroke="none"/><circle cx="4.5" cy="12" r="1.4" fill="currentColor" stroke="none"/><circle cx="4.5" cy="18" r="1.4" fill="currentColor" stroke="none"/>'
+  reasons:'<path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1.4" fill="currentColor" stroke="none"/><circle cx="4.5" cy="12" r="1.4" fill="currentColor" stroke="none"/><circle cx="4.5" cy="18" r="1.4" fill="currentColor" stroke="none"/>',
+  target2:'<path d="M13 2 3 14h7l-1 8 10-12h-7l1-8Z"/>',
+  chart:'<path d="M4 19V5M4 19h16M8 15l3-4 3 2 4-6"/>',
+  players:'<circle cx="9" cy="8" r="3"/><path d="M3 20c0-3 2.7-5 6-5s6 2 6 5"/><circle cx="17" cy="9" r="2.4"/><path d="M15.5 20c.3-2.3 1.8-3.8 4-4.2"/>',
+  info:'<circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5v.01"/>'
 };
 const cardIcon=key=>ICONS[key]?`<svg viewBox="0 0 24 24" class="card-icon">${ICONS[key]}</svg>`:'';
-const card=(title,body,cls='',icon='')=>`<section class="card ${cls}"><h2>${cardIcon(icon)}${esc(title)}</h2>${body}</section>`;
+const card=(title,body,cls='',icon='')=>`<section class="card reveal ${cls}"><h2>${cardIcon(icon)}${esc(title)}</h2>${body}</section>`;
+const sectionTitle=(icon,label)=>`<div class="section-title reveal">${cardIcon(icon)}<h2>${esc(label)}</h2></div>`;
 
-// Ring de probabilite : meme technique que score-ring (fiche joueur,
-// player-page.js) - stroke-dasharray/-offset sur un cercle SVG reel, aucune
-// approximation visuelle. Version compacte pour tenir dans une cellule de
-// stat de la carte Recommandation.
-function probRing(value){
+// Ring de probabilite : stroke-dasharray/-offset sur un cercle SVG reel,
+// aucune approximation visuelle. data-target porte le vrai offset final -
+// init() bascule dessus au premier frame pour obtenir un remplissage
+// anime au chargement (cf CSS transition sur .fill).
+function probRing(value,big){
   if(n(value)===null)return '';
-  const r=20,c=2*Math.PI*r,offset=c*(1-clamp(value)/100);
-  return `<div class="prob-ring"><svg viewBox="0 0 48 48"><circle class="track" cx="24" cy="24" r="${r}"></circle><circle class="fill" cx="24" cy="24" r="${r}" stroke-dasharray="${c.toFixed(1)}" stroke-dashoffset="${offset.toFixed(1)}"></circle></svg><div class="val">${Math.round(value)}<small>%</small></div></div>`;
+  const r=big?52:20,c=2*Math.PI*r,offset=c*(1-clamp(value)/100),size=big?128:48,cx=size/2;
+  return `<div class="prob-ring${big?' big':''}"><svg viewBox="0 0 ${size} ${size}"><circle class="track" cx="${cx}" cy="${cx}" r="${r}"></circle><circle class="fill" cx="${cx}" cy="${cx}" r="${r}" stroke-dasharray="${c.toFixed(1)}" stroke-dashoffset="${c.toFixed(1)}" data-target="${offset.toFixed(1)}"></circle></svg><div class="val">${Math.round(value)}<small>%</small></div></div>`;
 }
 
 // Forme recente (5 derniers resultats du championnat, raw.classement.form) :
@@ -43,25 +48,7 @@ function teamMeta(s){
   if(!s)return '';
   return `<small>${s.rank}${s.rank===1?'er':'e'} · ${s.pts} pts</small>${formStrip(s.form)}`;
 }
-function hero(vm){
-  const i=vm.identity;
-  const s=i.standings||{};
-  return `<section class="card hero">
-    <div class="hero-top">
-      <div class="hero-league">${img(i.league.logo,i.league.name)}<span>${esc(i.league.name)}</span></div>
-      <span class="hero-time">${esc(i.date||'Date à confirmer')} · ${esc(i.time||'—')}${vm.model.available?' · <span class="ready">● Analyse disponible</span>':''}</span>
-    </div>
-    <div class="hero-teams">
-      <div class="hero-team">${img(i.home.logo,i.home.name)}<b>${esc(i.home.name)}</b>${teamMeta(s.home)}</div>
-      <div class="hero-vs">VS</div>
-      <div class="hero-team">${img(i.away.logo,i.away.name)}<b>${esc(i.away.name)}</b>${teamMeta(s.away)}</div>
-    </div>
-    ${vm.conditions.venue||vm.conditions.weather?`<div class="hero-venue">${vm.conditions.venue?`<span class="hv-venue"><svg viewBox="0 0 24 24"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.4"/></svg>${esc(vm.conditions.venue)}</span>`:''}${vm.conditions.weather?`<span class="hv-weather">${esc(vm.conditions.weather.temperature)} · ${esc(vm.conditions.weather.description)}</span>`:''}</div>`:''}
-  </section>`;
-}
 
-// Badge confiance/risque : mappage texte -> couleur, aucune logique de
-// decision ici, uniquement les champs deja calcules par le pipeline.
 function confidenceBadge(label){
   if(!label)return '';
   const l=label.toLowerCase();
@@ -75,27 +62,44 @@ function riskBadge(code){
   return `<span class="badge ${cls}">${esc(label)}</span>`;
 }
 
-function recommendation(vm){
-  const r=vm.model.recommendation;
-  if(!r)return card('Recommandation IASHARK',empty(vm.model.unavailableReason||'Aucun marché ne franchit les seuils de confiance ou de cote minimale pour ce match — IASHARK préfère ne pas se prononcer.'));
-  const fair=r.probability>0?100/r.probability:null;
-  return `<section class="card reco">
-    <div class="reco-head">
-      <div><span class="reco-eyebrow">Recommandation IASHARK</span><h1 class="reco-market">${esc(r.market)}</h1></div>
-      <div class="reco-badges">${confidenceBadge(r.reliability)}${riskBadge(vm.editorial.riskCode)}</div>
+// Hero + Recommandation fusionnes en un seul bloc d'ouverture ("le hook") :
+// c'est la toute premiere chose vue, donc le seul endroit ou on peut se
+// permettre plus d'impact visuel - tout le reste de la page reste sobre.
+// Aucune nouvelle donnee : mêmes champs que l'ancien hero()+recommendation().
+function heroHook(vm){
+  const i=vm.identity,s=i.standings||{},r=vm.model.recommendation;
+  const fair=r&&r.probability>0?100/r.probability:null;
+  const venueLine=vm.conditions.venue||vm.conditions.weather?`<div class="hero-venue">${vm.conditions.venue?`<span class="hv-venue"><svg viewBox="0 0 24 24"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.4"/></svg>${esc(vm.conditions.venue)}</span>`:''}${vm.conditions.weather?`<span class="hv-weather">${esc(vm.conditions.weather.temperature)} · ${esc(vm.conditions.weather.description)}</span>`:''}</div>`:'';
+  return `<section class="card hook">
+    <div class="hero-top">
+      <div class="hero-league">${img(i.league.logo,i.league.name)}<span>${esc(i.league.name)}</span></div>
+      <span class="hero-time">${esc(i.date||'Date à confirmer')} · ${esc(i.time||'—')}${vm.model.available?' · <span class="ready"><i></i>Analyse disponible</span>':''}</span>
     </div>
-    <div class="reco-stats">
-      <div class="reco-prob"><small>Probabilité</small>${probRing(r.probability)}</div>
-      <div><small>Cote juste</small><b>${fmt(fair,2)}</b></div>
-      <div><small>Cote du marché</small><b>${fmt(vm.model.recommendedOdds,2)}</b></div>
+    <div class="hero-teams">
+      <div class="hero-team">${img(i.home.logo,i.home.name)}<b>${esc(i.home.name)}</b>${teamMeta(s.home)}</div>
+      <div class="hero-vs">VS</div>
+      <div class="hero-team">${img(i.away.logo,i.away.name)}<b>${esc(i.away.name)}</b>${teamMeta(s.away)}</div>
     </div>
+    ${venueLine}
+    ${r?`<div class="pick">
+      <div class="pick-head">
+        <div><span class="pick-eyebrow">Recommandation IASHARK</span><h1 class="pick-market">${esc(r.market)}</h1></div>
+        <div class="pick-badges">${confidenceBadge(r.reliability)}${riskBadge(vm.editorial.riskCode)}</div>
+      </div>
+      <div class="pick-body">
+        ${probRing(r.probability,true)}
+        <div class="pick-odds">
+          <div><small>Cote juste</small><b>${fmt(fair,2)}</b></div>
+          <div><small>Cote du marché</small><b>${fmt(vm.model.recommendedOdds,2)}</b></div>
+        </div>
+      </div>
+    </div>`:`<div class="pick pick-empty">${empty(vm.model.unavailableReason||'Aucun marché ne franchit les seuils de confiance ou de cote minimale pour ce match — IASHARK préfère ne pas se prononcer.')}</div>`}
   </section>`;
 }
 
 // "Pourquoi ce pari" : vm.editorial.reasons (raw.decision_factors, deja
-// calcule cote pipeline - cf lib/decision.js) - jamais rempli ici, juste mis
-// en avant visuellement en liste numerotee plutot que noye dans le texte de
-// lecture. Absent -> carte absente, jamais une raison generique inventee.
+// calcule cote pipeline) - jamais rempli ici. Absent -> carte absente,
+// jamais une raison generique inventee.
 function reasonsCard(vm){
   const list=vm.editorial.reasons;
   if(!list.length)return '';
@@ -112,6 +116,11 @@ function xg(vm){
   if(!x)return empty('xG indisponibles.');
   return `<div class="xg-row"><div class="xg-team">${img(vm.identity.home.logo,vm.identity.home.name)}<b>${fmt(x.home)}</b><small>${esc(vm.identity.home.name)}</small></div><span class="xg-sep">xG</span><div class="xg-team">${img(vm.identity.away.logo,vm.identity.away.name)}<b>${fmt(x.away)}</b><small>${esc(vm.identity.away.name)}</small></div></div>`;
 }
+function scores(vm){
+  const s=vm.model.scores;
+  if(!s.length)return empty('Scores probables indisponibles.');
+  return `<div class="scores-row">${s.map(x=>`<div class="score-pill"><b>${esc(x.score)}</b><small>${pct(x.probability)}</small></div>`).join('')}</div>`;
+}
 
 function comparison(vm){
   const c=vm.comparison;
@@ -122,16 +131,10 @@ function comparison(vm){
   }).join('');
 }
 
-function scores(vm){
-  const s=vm.model.scores;
-  if(!s.length)return empty('Scores probables indisponibles.');
-  return `<div class="scores-row">${s.map(x=>`<div class="score-pill"><b>${esc(x.score)}</b><small>${pct(x.probability)}</small></div>`).join('')}</div>`;
-}
-
 // Le risque n'est affiche en toutes lettres ici que s'il s'agit d'un texte
 // descriptif reel (raw.risk_principal) - le simple CODE FAIBLE/MODERE/ELEVE
-// (raw.risque) est deja rendu par le badge de la recommandation, pas repete
-// tel quel en pseudo-phrase ici.
+// est deja rendu par le badge de la recommandation, pas repete en pseudo-
+// phrase ici.
 function reading(vm){
   const text=vm.editorial.reading;
   const risk=vm.editorial.risk;
@@ -140,41 +143,10 @@ function reading(vm){
   return `${text?`<p class="reading">${esc(text)}</p>`:''}${risqueDescriptif?`<div class="risk-note"><b>⚠</b><span>${esc(risqueDescriptif)}</span></div>`:''}`;
 }
 
-// Joueurs cles : vm.players.impactRanking vient soit des vraies stats
-// historiques du joueur (playerAnalytics, name/team/position/rating5/
-// goals90/keyPasses90/minutesRecent), soit - a defaut - des props joueur
-// (playerImpactRanking, player/impactScore, sans team/photo/position).
-// Les deux formes sont gerees ici, chaque stat n'est affichee que si elle
-// existe reellement pour CE joueur.
-function players(vm){
-  const list=vm.players.impactRanking.slice(0,3);
-  if(!list.length)return '';
-  return card('Joueurs clés',`<div class="players">${list.map(p=>{
-    const name=p.name||p.player||'Joueur';
-    const impactVal=n(p.impact)!==null?n(p.impact):n(p.impactScore);
-    const stats=[];
-    if(n(p.rating5)!==null)stats.push(['Note moy.',fmt(p.rating5)]);
-    if(n(p.goals90)!==null)stats.push(['Buts/90',fmt(p.goals90)]);
-    if(n(p.keyPasses90)!==null)stats.push(['Passes clés/90',fmt(p.keyPasses90)]);
-    if(n(p.minutesRecent)!==null)stats.push(['Min. récentes',fmt(p.minutesRecent,0)]);
-    if(n(p.startProbability)!==null)stats.push(['Proba. titulaire',pct(p.startProbability)]);
-    // Fiche joueur cliquable uniquement quand on a un vrai id joueur
-    // (forme playerAnalytics) - la forme de repli (props joueur) n'a pas
-    // toujours d'id exploitable, reste alors une simple carte non cliquable.
-    const pid=n(p.id)!==null?n(p.id):n(p.playerId);
-    const tag=pid!==null?'a':'div';
-    const href=pid!==null?` href="/joueur.html?m=${esc(vm.id)}&p=${pid}"`:'';
-    return `<${tag} class="player"${href}>${img(p.photo,name)}<div class="player-info"><b>${esc(name)}</b><small>${esc(p.team||'')}${p.team&&p.position?' · ':''}${esc(p.position||'')}</small>${stats.length?`<div class="player-stats">${stats.map(([l,v])=>`<span>${esc(l)} <b>${esc(v)}</b></span>`).join('')}</div>`:''}</div><div class="player-impact"><b>${impactVal===null?'—':Math.round(impactVal)}</b><small>Impact</small></div></${tag}>`;
-  }).join('')}</div>`,'players-card');
-}
-
 // Scenario par tranches de 15 minutes : texte reel genere par le pipeline
-// (raw.scenario_15min) a partir des tendances historiques par tranche,
-// deja calcule - aucune nouvelle logique ici, juste l'affichage.
-// Petit graphique en barres au-dessus de la liste : reprend les memes
-// probabilites reelles par tranche (s.prob) deja affichees en texte,
-// aucune nouvelle donnee - juste une lecture visuelle plus rapide qu'un
-// bloc de texte uniforme.
+// (raw.scenario_15min), aucune nouvelle logique. Graphique en barres au-
+// dessus : mêmes probabilites reelles par tranche (s.prob), juste une
+// lecture visuelle plus rapide qu'un bloc de texte uniforme.
 function scenario15Chart(slots,max){
   const W=300,H=80,pad=6,gap=6,base=64,top=14,nBars=slots.length,bw=(W-2*pad-gap*(nBars-1))/nBars;
   const bars=slots.map((s,i)=>{
@@ -194,18 +166,10 @@ function scenario15(vm){
   return `${scenario15Chart(slots,max)}<div class="scenario-15">${rows}</div>`;
 }
 
-function absences(vm){
-  const a=vm.players.absences;
-  if(!a.home.length&&!a.away.length&&!vm.players.injuriesFetchOk)return '';
-  const side=(team,items)=>`<div><h3>${img(team.logo,team.name)}${esc(team.name)}</h3>${items.length?items.slice(0,5).map(x=>`<div class="abs-row"><b>${esc(x.name)}</b><span>${esc(x.status||'Incertain')}</span></div>`).join(''):'<p class="abs-none">Aucune absence signalée</p>'}</div>`;
-  return card('Absents & incertains',`<div class="absences">${side(vm.identity.home,a.home)}${side(vm.identity.away,a.away)}</div>`);
-}
-
-// Face-a-face : vm.h2h deja formate/filtre par le view-model (5 dernieres
-// confrontations reelles). Le camp gagnant (winner '1'/'2') est deja
-// relatif a l'equipe domicile DU MATCH ACTUEL - on retrouve juste laquelle
-// des deux equipes de CETTE ligne correspond a ce camp pour la mettre en
-// evidence, aucune donnee recalculee.
+// Face-a-face : vm.h2h deja formate/filtre (5 dernieres confrontations
+// reelles). Le camp gagnant (winner '1'/'2') est deja relatif a l'equipe
+// domicile DU MATCH ACTUEL - on retrouve juste laquelle des deux equipes de
+// CETTE ligne correspond a ce camp, aucune donnee recalculee.
 function h2hCard(vm){
   const rows=vm.h2h;
   if(!rows)return '';
@@ -218,6 +182,40 @@ function h2hCard(vm){
   return card('Face-à-face',`<div class="h2h-list">${body}</div>`,'','h2h');
 }
 
+// Matchups a cibler : vm.matchups deja calcule (ecart reel >= seuil,
+// domicile et exterieur sur deux metriques reelles differentes - cf
+// lib/match-view-model.js) - simple affichage, aucune nouvelle logique.
+function matchupsCard(vm){
+  const list=vm.matchups;
+  if(!list.length)return '';
+  return card('Matchups à cibler',`<div class="matchups">${list.map(mchp=>`<div class="matchup"><b>${esc(mchp.title)}</b><p>${esc(mchp.text)}</p></div>`).join('')}</div>`,'','target');
+}
+
+// Buteurs potentiels : vm.players.scoringThreat, classement REEL par signal
+// de menace de but (buts/90 + tirs cadres/90, cf lib/match-view-model.js) -
+// distinct de l'ancien classement "impact" generique. Barre de menace
+// relative au max du lot affiche, purement visuelle (pas une nouvelle
+// donnee). Absent -> section absente, jamais un joueur invente.
+function scoringThreatCard(vm){
+  const list=vm.players.scoringThreat;
+  if(!list.length)return '';
+  const max=Math.max(...list.map(p=>p.threatScore),.01);
+  return card('Buteurs potentiels',`<div class="threats">${list.map(p=>{
+    const pid=n(p.id);
+    const href=pid!==null?` href="/joueur.html?m=${esc(vm.id)}&p=${pid}"`:'';
+    const tag=pid!==null?'a':'div';
+    const bar=Math.max(6,p.threatScore/max*100);
+    return `<${tag} class="threat"${href}>${img(p.photo,p.name)}<div class="threat-info"><b>${esc(p.name)}</b><small>${esc(p.team||'')}</small><div class="threat-bar"><i style="width:${bar}%"></i></div><div class="threat-stats"><span>But/90 <b>${fmt(p.goals90)}</b></span><span>Tirs cadrés/90 <b>${fmt(p.shotsOn90)}</b></span>${n(p.startProbability)!==null?`<span>Titulaire <b>${pct(p.startProbability)}</b></span>`:''}</div></div></${tag}>`;
+  }).join('')}</div>`,'threats-card','target2');
+}
+
+function absences(vm){
+  const a=vm.players.absences;
+  if(!a.home.length&&!a.away.length&&!vm.players.injuriesFetchOk)return '';
+  const side=(team,items)=>`<div><h3>${img(team.logo,team.name)}${esc(team.name)}</h3>${items.length?items.slice(0,5).map(x=>`<div class="abs-row"><b>${esc(x.name)}</b><span>${esc(x.status||'Incertain')}</span></div>`).join(''):'<p class="abs-none">Aucune absence signalée</p>'}</div>`;
+  return card('Absents & incertains',`<div class="absences">${side(vm.identity.home,a.home)}${side(vm.identity.away,a.away)}</div>`);
+}
+
 function refereeCard(vm){
   const r=vm.referee;
   if(!r)return '';
@@ -228,38 +226,93 @@ function refereeCard(vm){
   return card('Arbitre',`<div class="referee"><b>${esc(r.name)}</b>${stats.length?`<div class="referee-stats">${stats.map(([l,v])=>`<div><small>${esc(l)}</small><b>${esc(v)}</b></div>`).join('')}</div>`:''}</div>`,'','whistle');
 }
 
-// Matchups a cibler : vm.matchups deja calcule (ecart reel >= seuil, cf
-// lib/match-view-model.js) - simple affichage, aucune nouvelle logique.
-function matchupsCard(vm){
-  const list=vm.matchups;
-  if(!list.length)return '';
-  return card('Matchups à cibler',`<div class="matchups">${list.map(mchp=>`<div class="matchup"><b>${esc(mchp.title)}</b><p>${esc(mchp.text)}</p></div>`).join('')}</div>`,'','target');
+// Navigation d'ancres : uniquement les sections qui existent reellement pour
+// CE match (jamais un lien mort vers une section vide). Le suivi de section
+// active (scroll-spy) et le scroll fluide sont geres par bindNav() apres
+// insertion dans le DOM.
+function buildSections(vm){
+  const analyseBody=`
+    <div class="signal-strip">
+      ${card('Probabilités 1X2',probabilities(vm))}
+      ${card('Buts attendus',xg(vm))}
+      ${card('Scores les plus probables',scores(vm))}
+    </div>
+    ${card('Lecture du match',reading(vm),'','info')}
+    ${card('Scénario par tranches de 15 minutes',scenario15(vm),'','chart')}
+  `;
+  const compareBody=`
+    ${card('Comparatif des équipes',comparison(vm),'','compare')}
+    <div class="row2">${h2hCard(vm)}${matchupsCard(vm)}</div>
+  `;
+  const buteursBody=scoringThreatCard(vm);
+  const contexteBody=`<div class="row2">${absences(vm)}${refereeCard(vm)}</div>`;
+  const sections=[
+    {id:'analyse',label:'Analyse',icon:'chart',body:analyseBody,always:true},
+    {id:'comparatif',label:'Comparatif',icon:'compare',body:compareBody,present:!!(vm.comparison||vm.h2h||vm.matchups.length)},
+    {id:'buteurs',label:'Buteurs',icon:'target2',body:buteursBody,present:!!buteursBody},
+    {id:'contexte',label:'Contexte',icon:'whistle',body:contexteBody,present:!!(vm.players.absences.home.length||vm.players.absences.away.length||vm.players.injuriesFetchOk||vm.referee)}
+  ].filter(s=>s.always||s.present);
+  const nav=`<nav class="section-nav"><div class="section-nav-inner">${sections.map(s=>`<a href="#sec-${s.id}" data-target="sec-${s.id}">${cardIcon(s.icon)}${esc(s.label)}</a>`).join('')}</div></nav>`;
+  const body=sections.map(s=>`<section id="sec-${s.id}" class="page-section">${sectionTitle(s.icon,s.label)}${s.body}</section>`).join('');
+  return nav+body;
 }
 
 function render(raw){
   const vm=IasharkMatchViewModel.buildMatchViewModel(raw);
   document.title=`${vm.identity.home.name} vs ${vm.identity.away.name} — IASHARK`;
   root.innerHTML=`<div class="page">
-    ${hero(vm)}
-    ${recommendation(vm)}
-    <div class="dashboard">
-      <div class="col-main">
-        ${reasonsCard(vm)}
-        <div class="row2">${card('Probabilités 1X2',probabilities(vm))}${card('Buts attendus',xg(vm))}</div>
-        ${card('Comparatif des équipes',comparison(vm),'','compare')}
-        ${card('Scénario par tranches de 15 minutes',scenario15(vm))}
-        ${card('Lecture du match',reading(vm))}
-        ${players(vm)}
-      </div>
-      <div class="col-side">
-        ${h2hCard(vm)}
-        ${matchupsCard(vm)}
-        ${card('Scores les plus probables',scores(vm))}
-        ${absences(vm)}
-        ${refereeCard(vm)}
-      </div>
-    </div>
+    ${heroHook(vm)}
+    ${reasonsCard(vm)}
+    ${buildSections(vm)}
   </div>`;
+  bindMotion();
+}
+
+// Scroll-spy + scroll fluide pour la nav de sections, et remplissage anime
+// du ring de probabilite au chargement. reveal-on-scroll respecte
+// prefers-reduced-motion (les elements restent simplement visibles, sans
+// classe .reveal appliquee par CSS dans ce cas - cf assets/match-page.css).
+function bindMotion(){
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    root.querySelectorAll('.prob-ring .fill').forEach(c=>{c.style.strokeDashoffset=c.dataset.target;});
+  }));
+  const reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(!reduce&&'IntersectionObserver' in window){
+    const items=root.querySelectorAll('.reveal');
+    let i=0;
+    const io=new IntersectionObserver(entries=>{
+      entries.forEach(en=>{
+        if(en.isIntersecting){
+          en.target.style.transitionDelay=(i%6)*55+'ms';
+          i++;
+          en.target.classList.add('in');
+          io.unobserve(en.target);
+        }
+      });
+    },{threshold:.12,rootMargin:'0px 0px -6% 0px'});
+    items.forEach(el=>io.observe(el));
+    // Filet de securite : un onglet en arriere-plan au chargement (ouvert
+    // depuis un lien externe, prerender...) suspend IntersectionObserver -
+    // sans ce filet le contenu resterait invisible indefiniment. Jamais de
+    // contenu bloque a opacite 0 : au pire l'animation d'entree est sautee.
+    setTimeout(()=>{items.forEach(el=>el.classList.add('in'));},2500);
+  }else{
+    root.querySelectorAll('.reveal').forEach(el=>el.classList.add('in'));
+  }
+  const nav=root.querySelector('.section-nav');
+  if(!nav)return;
+  const links=[...nav.querySelectorAll('a')];
+  const sections=links.map(a=>document.getElementById(a.dataset.target)).filter(Boolean);
+  if('IntersectionObserver' in window && sections.length){
+    const spy=new IntersectionObserver(entries=>{
+      entries.forEach(en=>{
+        if(en.isIntersecting){
+          links.forEach(a=>a.classList.toggle('active',a.dataset.target===en.target.id));
+        }
+      });
+    },{rootMargin:'-40% 0px -55% 0px',threshold:0});
+    sections.forEach(s=>spy.observe(s));
+  }
 }
 
 async function init(){

@@ -144,6 +144,27 @@ test('Player Impact est calculé depuis les performances réelles, indépendamme
   assert.equal(vm.players.lineupMode, 'PROJECTED');
 });
 
+test('Buteurs potentiels : classe par signal de menace reel (buts/90 + tirs cadres/90), distinct de l\'impact generique', () => {
+  const attacker = [1, 2, 3, 4, 5].map(fixtureId => ({ fixture_id: fixtureId, player_id: 10, team_id: 867, name: 'Buteur Reel', position: 'Attacker', minutes: 90, rating: 7, starter: true, shots_total: 3, shots_on: 2, goals: 1, assists: 0, key_passes: 0 }));
+  const passer = [1, 2, 3, 4, 5].map(fixtureId => ({ fixture_id: fixtureId, player_id: 11, team_id: 867, name: 'Milieu Passeur', position: 'Midfielder', minutes: 90, rating: 8, starter: true, shots_total: 0, shots_on: 0, goals: 0, assists: 1, key_passes: 5 }));
+  const vm = buildMatchViewModel(base({
+    player_history: { home: attacker.concat(passer), away: [] },
+    current_squads: { home: [{ player_id: 10, name: 'Buteur Reel' }, { player_id: 11, name: 'Milieu Passeur' }], away: [] }
+  }));
+  assert.equal(vm.players.scoringThreat[0].name, 'Buteur Reel', 'le milieu a un impact generique plus haut (rating+passes cles) mais aucun signal de menace de but reel');
+  assert.ok(!vm.players.scoringThreat.some(p => p.name === 'Milieu Passeur'), 'aucun but ni tir cadre reel -> pas de menace de but publiee');
+});
+
+test('Buteurs potentiels : un joueur absent/blesse n\'est jamais publie comme menace de but', () => {
+  const history = [1, 2, 3, 4, 5].map(fixtureId => ({ fixture_id: fixtureId, player_id: 12, team_id: 867, name: 'Blesse', minutes: 90, rating: 7, starter: true, shots_total: 3, shots_on: 2, goals: 1 }));
+  const vm = buildMatchViewModel(base({
+    player_history: { home: history, away: [] },
+    current_squads: { home: [{ player_id: 12, name: 'Blesse' }], away: [] },
+    injuries: [{ team: 867, name: 'Blesse', reason: 'Genou', status: 'Absent' }]
+  }));
+  assert.deepEqual(vm.players.scoringThreat, []);
+});
+
 test('un joueur transféré absent de l’effectif courant est exclu des projections', () => {
   const history = [1, 2, 3].map(fixtureId => ({ fixture_id: fixtureId, player_id: 77, team_id: 867, name: 'Ancien Joueur', minutes: 90, rating: 9, starter: true }));
   const vm = buildMatchViewModel(base({

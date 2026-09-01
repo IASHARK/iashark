@@ -589,10 +589,10 @@ jobs:
           }
           async function getInjuries(fixtureId) {
             var r = await get('https://v3.football.api-sports.io/injuries?fixture='+fixtureId, APS);
-            if(!r.response||!r.response.length) return [];
-            return r.response.map(function(inj){
+            if(!Array.isArray(r.response))return{fetch_ok:false,items:[]};
+            return {fetch_ok:true,items:r.response.map(function(inj){
               return {name:(inj.player&&inj.player.name)||'',team:(inj.team&&inj.team.id)||0,reason:(inj.player&&inj.player.reason)||'Blessure',status:(inj.player&&inj.player.type)||'Injured'};
-            });
+            })};
           }
           async function getH2H(homeId, awayId) {
             var r = await get('https://v3.football.api-sports.io/fixtures?h2h='+homeId+'-'+awayId+'&last=8', APS);
@@ -739,6 +739,43 @@ jobs:
           async function getFixtureEvents(fixtureId) {
             var r = await get('https://v3.football.api-sports.io/fixtures/events?fixture='+fixtureId, APS);
             return (r&&r.response)||[];
+          }
+          var FIXTURE_PLAYERS_CACHE={};
+          async function getFixturePlayers(fixtureId){
+            if(Object.prototype.hasOwnProperty.call(FIXTURE_PLAYERS_CACHE,fixtureId))return FIXTURE_PLAYERS_CACHE[fixtureId];
+            var r=await get('https://v3.football.api-sports.io/fixtures/players?fixture='+fixtureId,APS);
+            FIXTURE_PLAYERS_CACHE[fixtureId]=Array.isArray(r.response)?r.response:[];
+            return FIXTURE_PLAYERS_CACHE[fixtureId];
+          }
+          async function getRecentPlayerHistory(fixtureIds,teamId){
+            var rows=[];
+            for(var i=0;i<Math.min((fixtureIds||[]).length,10);i++){
+              var blocks=await getFixturePlayers(fixtureIds[i]);
+              var block=blocks.find(function(item){return item.team&&item.team.id===teamId;});
+              (block&&block.players||[]).forEach(function(entry){
+                var s=entry.statistics&&entry.statistics[0],g=s&&s.games;
+                if(!entry.player||!s||!g)return;
+                rows.push({fixture_id:fixtureIds[i],player_id:entry.player.id,team_id:teamId,name:entry.player.name||null,photo:entry.player.photo||null,
+                  position:g.position||null,minutes:g.minutes==null?null:Number(g.minutes),rating:g.rating==null?null:Number(g.rating),starter:g.substitute==null?null:!g.substitute,
+                  shots_total:s.shots&&s.shots.total==null?null:Number(s.shots.total),shots_on:s.shots&&s.shots.on==null?null:Number(s.shots.on),
+                  goals:s.goals&&s.goals.total==null?null:Number(s.goals.total),assists:s.goals&&s.goals.assists==null?null:Number(s.goals.assists),
+                  passes:s.passes&&s.passes.total==null?null:Number(s.passes.total),key_passes:s.passes&&s.passes.key==null?null:Number(s.passes.key),
+                  pass_accuracy:s.passes&&s.passes.accuracy==null?null:Number(String(s.passes.accuracy).replace('%','')),
+                  tackles:s.tackles&&s.tackles.total==null?null:Number(s.tackles.total),interceptions:s.tackles&&s.tackles.interceptions==null?null:Number(s.tackles.interceptions),
+                  duels:s.duels&&s.duels.total==null?null:Number(s.duels.total),dribbles:s.dribbles&&s.dribbles.attempts==null?null:Number(s.dribbles.attempts),
+                  fouls:s.fouls&&s.fouls.committed==null?null:Number(s.fouls.committed),yellow:s.cards&&s.cards.yellow==null?null:Number(s.cards.yellow),red:s.cards&&s.cards.red==null?null:Number(s.cards.red)});
+              });
+              await sleep(120);
+            }
+            return rows;
+          }
+          var SQUAD_CACHE={};
+          async function getCurrentSquad(teamId){
+            if(Object.prototype.hasOwnProperty.call(SQUAD_CACHE,teamId))return SQUAD_CACHE[teamId];
+            var r=await get('https://v3.football.api-sports.io/players/squads?team='+teamId,APS);
+            var block=Array.isArray(r.response)&&r.response[0];
+            SQUAD_CACHE[teamId]=(block&&block.players||[]).map(function(p){return{player_id:p.id,name:p.name||null,photo:p.photo||null,position:p.position||null,number:p.number||null,age:p.age||null,team_id:teamId};});
+            return SQUAD_CACHE[teamId];
           }
           var TEAM_NAME_MAP = {
             'Manchester City':'Manchester City','Manchester United':'Manchester United',
@@ -1908,7 +1945,7 @@ jobs:
               if(isEmptySH(sH) || isEmptySH(sA)){
                 console.log('  [DONNEES LIMITEES] '+lg.name+': stats de la saison courante absentes pour '+(isEmptySH(sH)?home.name:'')+(isEmptySH(sH)&&isEmptySH(sA)?' et ':'')+(isEmptySH(sA)?away.name:'')+' - regularisation sur la saison precedente et le prior de ligue; abstention si cet historique est lui aussi absent.');
               }
-              var oddsRaw=batch2[0],injRaw=batch2[1],h2hRaw=batch2[2],wx=batch2[3],nH=batch2[4],nA=batch2[5];
+              var oddsRaw=batch2[0],injuryFetch=batch2[1]||{fetch_ok:false,items:[]},injRaw=injuryFetch.items||[],h2hRaw=batch2[2],wx=batch2[3],nH=batch2[4],nA=batch2[5];
               var predictions=batch2[6]||null,lineups=batch2[7]||null,refStats=batch2[8]||null;
               var pinnacleOdds=batch2[9]||null;
               var modelFixturesH=(raw10H||[]).concat(rawPrevH||[]).slice(0,20);
@@ -1982,6 +2019,11 @@ jobs:
               var last10IdsA_xg=modelFixturesA.slice(0,10).map(function(fx){return fx.fixture.id;});
               var xgH=await getWeightedXGStats(home.id,last10IdsH_xg,modelFixturesH,xgConcededCache);
               var xgA=await getWeightedXGStats(away.id,last10IdsA_xg,modelFixturesA,xgConcededCache);
+              var playerDataBatch=await Promise.all([
+                getRecentPlayerHistory(last10IdsH_xg,home.id),getRecentPlayerHistory(last10IdsA_xg,away.id),
+                getCurrentSquad(home.id),getCurrentSquad(away.id)
+              ]);
+              var playerHistoryH=playerDataBatch[0],playerHistoryA=playerDataBatch[1],currentSquadH=playerDataBatch[2],currentSquadA=playerDataBatch[3];
           
               var matchStatsH={
                 possession:xgH.possession_avg, shots_total:xgH.shots_total_avg?parseFloat(xgH.shots_total_avg):null,
@@ -2457,8 +2499,10 @@ jobs:
                 crit_home:critH,crit_away:critA,
                 form_home:last10H.slice(0,5),form_away:last10A.slice(0,5),
                 forme_h:(sH&&sH.form)||'',forme_a:(sA&&sA.form)||'',
-                h2h:h2hFormatted,injuries,
+                h2h:h2hFormatted,injuries,injuries_fetch_ok:injuryFetch.fetch_ok===true,injuries_count:injuries.length,
                 lineups:lineups?{home:lineups.home||null,away:lineups.away||null}:null,
+                player_history:{home:playerHistoryH,away:playerHistoryA},
+                current_squads:{home:currentSquadH,away:currentSquadA},
                 fatigue:{home:{val:fatigueH.val,info:fatigueH.info},away:{val:fatigueA.val,info:fatigueA.info}},
                 fatigue_home:{val:fatigueH.val,info:fatigueH.info},fatigue_away:{val:fatigueA.val,info:fatigueA.info},
                 tendances,classement:classementObj,actu:(nH||[]).concat(nA||[]),

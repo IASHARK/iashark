@@ -649,12 +649,39 @@ jobs:
             if(PLAYER_STATS_CACHE[cacheKey]!==undefined) return PLAYER_STATS_CACHE[cacheKey];
             var r = await get('https://v3.football.api-sports.io/players?id='+playerId+'&season='+season+'&team='+teamId, APS);
             var p = (r.response&&r.response[0])||null;
+            var st = p&&p.statistics&&p.statistics[0];
+            // Champs historiques (games/goalsTotal/shotsTotal/shotsOnTarget/
+            // penaltyScored) inchanges - deja utilises par
+            // computePlayerMarketsForFixture, ne jamais renommer/retirer.
+            // bio/seasonFull : champs supplementaires du MEME appel (aucune
+            // requete en plus) pour la fiche joueur (age/taille/poids/blessure,
+            // stats saison completes) - reels, jamais un seul devine.
             var result = p ? {
-              games:{appearences:(p.statistics[0].games&&p.statistics[0].games.appearences)||0, lineups:(p.statistics[0].games&&p.statistics[0].games.lineups)||0, minutes:(p.statistics[0].games&&p.statistics[0].games.minutes)||0},
-              goalsTotal:(p.statistics[0].goals&&p.statistics[0].goals.total)||0,
-              shotsTotal:(p.statistics[0].shots&&p.statistics[0].shots.total)||0,
-              shotsOnTarget:(p.statistics[0].shots&&p.statistics[0].shots.on)||0,
-              penaltyScored:(p.statistics[0].penalty&&p.statistics[0].penalty.scored)||0,
+              games:{appearences:(st&&st.games&&st.games.appearences)||0, lineups:(st&&st.games&&st.games.lineups)||0, minutes:(st&&st.games&&st.games.minutes)||0},
+              goalsTotal:(st&&st.goals&&st.goals.total)||0,
+              shotsTotal:(st&&st.shots&&st.shots.total)||0,
+              shotsOnTarget:(st&&st.shots&&st.shots.on)||0,
+              penaltyScored:(st&&st.penalty&&st.penalty.scored)||0,
+              bio:{
+                age:p.player&&p.player.age!=null?Number(p.player.age):null,
+                birthDate:(p.player&&p.player.birth&&p.player.birth.date)||null,
+                nationality:(p.player&&p.player.nationality)||null,
+                heightCm:(function(){var h=p.player&&p.player.height;var m=h&&/^(\d+)/.exec(h);return m?Number(m[1]):null;})(),
+                weightKg:(function(){var w=p.player&&p.player.weight;var m=w&&/^(\d+)/.exec(w);return m?Number(m[1]):null;})(),
+                injured:p.player&&typeof p.player.injured==='boolean'?p.player.injured:null,
+              },
+              seasonFull:st?{
+                appearances:(st.games&&st.games.appearences)||0,lineups:(st.games&&st.games.lineups)||0,minutes:(st.games&&st.games.minutes)||0,
+                position:(st.games&&st.games.position)||null,
+                goals:(st.goals&&st.goals.total)||0,assists:(st.goals&&st.goals.assists)||0,
+                shotsTotal:(st.shots&&st.shots.total)||0,shotsOn:(st.shots&&st.shots.on)||0,
+                passesTotal:(st.passes&&st.passes.total)||0,passesKey:(st.passes&&st.passes.key)||0,
+                passesAccuracy:(st.passes&&st.passes.accuracy!=null)?Number(String(st.passes.accuracy).replace('%','')):null,
+                dribblesAttempts:(st.dribbles&&st.dribbles.attempts)||0,dribblesSuccess:(st.dribbles&&st.dribbles.success)||0,
+                tacklesTotal:(st.tackles&&st.tackles.total)||0,
+                cardsYellow:(st.cards&&st.cards.yellow)||0,cardsRed:(st.cards&&st.cards.red)||0,
+                penaltyWon:(st.penalty&&st.penalty.won)||0,penaltyScored:(st.penalty&&st.penalty.scored)||0,penaltyMissed:(st.penalty&&st.penalty.missed)||0,
+              }:null,
             } : null;
             PLAYER_STATS_CACHE[cacheKey] = result;
             return result;
@@ -2099,6 +2126,19 @@ jobs:
               var critH=calcCriteres(sH,true,rkH);
               var critA=calcCriteres(sA,false,rkA);
               var topScorerCandidates=pickTopScorerCandidates(playerHistoryH,playerHistoryA,home.id,away.id,critH,critA);
+              // Bio + stats saison completes UNIQUEMENT pour les 2 candidats
+              // buteurs deja selectionnes (pas tout l'effectif - cout API
+              // borne, meme appel que getPlayerSeasonStats deja utilise et
+              // cache ailleurs, aucune requete dupliquee si le meme joueur
+              // ressort par ailleurs). Alimente la fiche joueur (age/taille/
+              // poids/blessure, stats saison, moyennes/90).
+              for(var tsi=0;tsi<topScorerCandidates.length;tsi++){
+                var tsCand=topScorerCandidates[tsi];
+                var tsStats=await getPlayerSeasonStats(tsCand.player_id,tsCand.team_id,seasonForLeague(lg.id,SEASON));
+                await sleep(150);
+                tsCand.bio=tsStats?tsStats.bio:null;
+                tsCand.seasonFull=tsStats?tsStats.seasonFull:null;
+              }
               var fatigueH=calcFatigue(last10H);
               var fatigueA=calcFatigue(last10A);
               var tendances=calcTendances(last10H,last10A);
@@ -2560,7 +2600,8 @@ jobs:
                     appearances:p.appearances,goals:p.goals,shots_on_90:p.shotsOn90,shots_total_90:p.shotsTotal90,
                     conversion_rate:p.smoothedConversion,opponent_defense_multiplier:p.opponentDefenseMultiplier,
                     goal_threat_score:p.goalThreatScore,
-                    analyse:reasonEntry?(reasonEntry.raison||null):null
+                    analyse:reasonEntry?(reasonEntry.raison||null):null,
+                    bio:p.bio||null,season:p.seasonFull||null
                   };
                 }):[],
                 analyse_card:an?(an.analyse_card||an.conseil||''):'',

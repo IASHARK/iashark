@@ -39,8 +39,16 @@
   }
 
   var _sbInstance = null;
+  // Reutilise le client Supabase d'app-client.js quand il est present sur la
+  // page (window.IasharkApp.supabase) plutot que d'en creer un second -
+  // deux instances distinctes du meme projet declenchent l'avertissement
+  // "Multiple GoTrue Client instances" et peuvent desynchroniser l'etat de
+  // session affiche par le header vs le reste de la page. Repli sur une
+  // instance dediee uniquement sur les pages qui ne chargent pas
+  // app-client.js (ex: blog.html, index.html).
   function getSb(){
     if(window.sb) return window.sb;
+    if(window.IasharkApp && window.IasharkApp.supabase) return window.IasharkApp.supabase;
     if(!_sbInstance) _sbInstance = window.supabase.createClient(SUPA_URL, SUPA_KEY);
     return _sbInstance;
   }

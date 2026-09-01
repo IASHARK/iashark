@@ -26,7 +26,8 @@ a{color:inherit}
 /* squelette de page */
 .page{display:flex;flex-direction:column;gap:var(--gap);padding:18px 0}
 .card{padding:18px 20px;border:1px solid var(--line);border-radius:var(--radius);background:linear-gradient(145deg,var(--surface2),var(--surface));box-shadow:inset 0 1px 0 rgba(255,255,255,.02)}
-.card>h2{margin:0 0 14px;color:var(--cyan);font:700 12px var(--mono);letter-spacing:.08em;text-transform:uppercase}
+.card>h2{display:flex;align-items:center;gap:7px;margin:0 0 14px;color:var(--cyan);font:700 12px var(--mono);letter-spacing:.08em;text-transform:uppercase}
+.card-icon{width:14px;height:14px;flex-shrink:0;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:var(--gap)}
 .empty{min-height:64px;display:grid;place-items:center;padding:14px;color:var(--muted);text-align:center;font-size:12.5px;line-height:1.5}
 
@@ -71,6 +72,20 @@ a{color:inherit}
 .reco-stats b{display:block;margin-top:8px;font-size:22px;font-weight:600}
 .reco-stats b.pos{color:var(--green)}
 .reco-stats b.neg{color:var(--red)}
+.reco-prob{display:flex;flex-direction:column;gap:6px}
+.prob-ring{position:relative;width:48px;height:48px;margin-top:2px}
+.prob-ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.prob-ring circle{fill:none;stroke-width:4}
+.prob-ring .track{stroke:rgba(0,213,255,.12)}
+.prob-ring .fill{stroke:var(--cyan);stroke-linecap:round;transition:stroke-dashoffset .4s}
+.prob-ring .val{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font:13px var(--display);color:var(--cyan)}
+.prob-ring .val small{font-size:8px;margin-left:1px}
+
+/* pourquoi ce pari */
+.reasons{display:flex;flex-direction:column;gap:10px}
+.reason{display:flex;gap:12px;align-items:flex-start}
+.reason>b{flex-shrink:0;width:22px;height:22px;display:grid;place-items:center;border-radius:50%;background:rgba(0,213,255,.1);color:var(--cyan);font:11px var(--mono)}
+.reason>p{margin:0;color:var(--muted);font-size:12.5px;line-height:1.5}
 
 /* probabilites 1x2 */
 .prob-bar{display:flex;height:34px;border-radius:8px;overflow:hidden;background:#0b2233}

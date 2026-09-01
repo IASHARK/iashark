@@ -7,7 +7,30 @@ const pct=v=>n(v)===null?'—':fmt(v)+'%';
 const clamp=v=>Math.max(0,Math.min(100,n(v)||0));
 const img=(src,alt)=>src?`<img src="${esc(src)}" alt="${esc(alt)}" loading="lazy">`:'';
 const empty=t=>`<div class="empty">${esc(t)}</div>`;
-const card=(title,body,cls='')=>`<section class="card ${cls}"><h2>${esc(title)}</h2>${body}</section>`;
+
+// Icones de titre de carte : purement decoratives (memes tokens de couleur
+// que le reste de la page), aucune information supplementaire encodee -
+// juste un reperage visuel plus rapide entre les sections, comme demande.
+const ICONS={
+  h2h:'<path d="M8 3v4M16 3v4M4 9h16M5 5h14a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Z"/>',
+  compare:'<path d="M6 20V10M12 20V4M18 20v-7"/>',
+  target:'<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r=".6" fill="currentColor"/>',
+  whistle:'<path d="M4 12a5 5 0 0 1 5-5h6.5A4.5 4.5 0 0 1 20 11.5a4.5 4.5 0 0 1-4.5 4.5H12l-3 3v-3a5 5 0 0 1-5-4Z"/><circle cx="8.5" cy="12" r="1.4"/>',
+  flame:'<path d="M12 3s4 3.5 4 7.5a4 4 0 0 1-8 0C8 8.5 9 6.5 9 6.5s-1 3-.5 4.5C9 13 10.3 14 12 14s3-1 3-3c0-2.5-1.5-4.5-3-8Z"/><path d="M8.5 14.5a5 5 0 0 0 7 5 5 5 0 0 0 2-6.5"/>',
+  reasons:'<path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1.4" fill="currentColor" stroke="none"/><circle cx="4.5" cy="12" r="1.4" fill="currentColor" stroke="none"/><circle cx="4.5" cy="18" r="1.4" fill="currentColor" stroke="none"/>'
+};
+const cardIcon=key=>ICONS[key]?`<svg viewBox="0 0 24 24" class="card-icon">${ICONS[key]}</svg>`:'';
+const card=(title,body,cls='',icon='')=>`<section class="card ${cls}"><h2>${cardIcon(icon)}${esc(title)}</h2>${body}</section>`;
+
+// Ring de probabilite : meme technique que score-ring (fiche joueur,
+// player-page.js) - stroke-dasharray/-offset sur un cercle SVG reel, aucune
+// approximation visuelle. Version compacte pour tenir dans une cellule de
+// stat de la carte Recommandation.
+function probRing(value){
+  if(n(value)===null)return '';
+  const r=20,c=2*Math.PI*r,offset=c*(1-clamp(value)/100);
+  return `<div class="prob-ring"><svg viewBox="0 0 48 48"><circle class="track" cx="24" cy="24" r="${r}"></circle><circle class="fill" cx="24" cy="24" r="${r}" stroke-dasharray="${c.toFixed(1)}" stroke-dashoffset="${offset.toFixed(1)}"></circle></svg><div class="val">${Math.round(value)}<small>%</small></div></div>`;
+}
 
 // Forme recente (5 derniers resultats du championnat, raw.classement.form) :
 // simples pastilles colorees, aucune interpretation ajoutee.
@@ -64,13 +87,23 @@ function recommendation(vm){
       <div class="reco-badges">${confidenceBadge(r.reliability)}${riskBadge(vm.editorial.riskCode)}</div>
     </div>
     <div class="reco-stats">
-      <div><small>Probabilité</small><b>${pct(r.probability)}</b></div>
+      <div class="reco-prob"><small>Probabilité</small>${probRing(r.probability)}</div>
       <div><small>Score IASHARK</small><b>${vm.model.iasharkScore===null?'—':Math.round(vm.model.iasharkScore)+'/100'}</b></div>
       <div><small>Cote équitable</small><b>${fmt(fair,2)}</b></div>
       <div><small>Cote moyenne</small><b>${fmt(vm.model.recommendedOdds,2)}</b></div>
       ${value!==null?`<div><small>Value</small><b class="${value>=0?'pos':'neg'}">${value>=0?'+':''}${fmt(value)}%</b></div>`:''}
     </div>
   </section>`;
+}
+
+// "Pourquoi ce pari" : vm.editorial.reasons (raw.decision_factors, deja
+// calcule cote pipeline - cf lib/decision.js) - jamais rempli ici, juste mis
+// en avant visuellement en liste numerotee plutot que noye dans le texte de
+// lecture. Absent -> carte absente, jamais une raison generique inventee.
+function reasonsCard(vm){
+  const list=vm.editorial.reasons;
+  if(!list.length)return '';
+  return card('Pourquoi ce pari ?',`<div class="reasons">${list.map((r,i)=>`<div class="reason"><b>${i+1}</b><p>${esc(r)}</p></div>`).join('')}</div>`,'','reasons');
 }
 
 function probabilities(vm){
@@ -186,7 +219,7 @@ function h2hCard(vm){
     const awayWin=row.winner==='1'&&row.away===homeName||row.winner==='2'&&row.away===awayName;
     return `<div class="h2h-row"><span class="h2h-date">${esc(row.date)}</span><span class="h2h-teams"><span class="${homeWin?'win':''}">${esc(row.home)}</span><b class="h2h-score">${esc(row.score)}</b><span class="${awayWin?'win':''}">${esc(row.away)}</span></span></div>`;
   }).join('');
-  return card('Face-à-face',`<div class="h2h-list">${body}</div>`);
+  return card('Face-à-face',`<div class="h2h-list">${body}</div>`,'','h2h');
 }
 
 function refereeCard(vm){
@@ -196,7 +229,7 @@ function refereeCard(vm){
   if(n(r.cardsPerMatch)!==null)stats.push(['Cartons/match',fmt(r.cardsPerMatch)]);
   if(n(r.penaltiesPerMatch)!==null)stats.push(['Penaltys/match',fmt(r.penaltiesPerMatch)]);
   if(n(r.matches)!==null)stats.push(['Matchs observés',fmt(r.matches,0)]);
-  return card('Arbitre',`<div class="referee"><b>${esc(r.name)}</b>${stats.length?`<div class="referee-stats">${stats.map(([l,v])=>`<div><small>${esc(l)}</small><b>${esc(v)}</b></div>`).join('')}</div>`:''}</div>`);
+  return card('Arbitre',`<div class="referee"><b>${esc(r.name)}</b>${stats.length?`<div class="referee-stats">${stats.map(([l,v])=>`<div><small>${esc(l)}</small><b>${esc(v)}</b></div>`).join('')}</div>`:''}</div>`,'','whistle');
 }
 
 // Matchups a cibler : vm.matchups deja calcule (ecart reel >= seuil, cf
@@ -204,7 +237,7 @@ function refereeCard(vm){
 function matchupsCard(vm){
   const list=vm.matchups;
   if(!list.length)return '';
-  return card('Matchups à cibler',`<div class="matchups">${list.map(mchp=>`<div class="matchup"><b>${esc(mchp.title)}</b><p>${esc(mchp.text)}</p></div>`).join('')}</div>`);
+  return card('Matchups à cibler',`<div class="matchups">${list.map(mchp=>`<div class="matchup"><b>${esc(mchp.title)}</b><p>${esc(mchp.text)}</p></div>`).join('')}</div>`,'','target');
 }
 
 // Joueurs en forme : vm.players.watch (buteur/passeur le plus actif sur les
@@ -214,7 +247,7 @@ function matchupsCard(vm){
 function watchCard(vm){
   const list=vm.players.watch;
   if(!list.length)return '';
-  return card('Joueurs en forme',`<div class="watch-list">${list.map(p=>`<div class="watch-pill">${img(p.photo,p.name)}<span>${esc(p.name)}</span>${n(p.value)!==null?`<b>${esc(fmt(p.value,0))}</b>`:''}</div>`).join('')}</div>`,'watch-card');
+  return card('Joueurs en forme',`<div class="watch-list">${list.map(p=>`<div class="watch-pill">${img(p.photo,p.name)}<span>${esc(p.name)}</span>${n(p.value)!==null?`<b>${esc(fmt(p.value,0))}</b>`:''}</div>`).join('')}</div>`,'watch-card','flame');
 }
 
 function render(raw){
@@ -223,9 +256,10 @@ function render(raw){
   root.innerHTML=`<div class="page">
     ${hero(vm)}
     ${recommendation(vm)}
+    ${reasonsCard(vm)}
     <div class="row2">${card('Probabilités 1X2',probabilities(vm))}${card('Buts attendus',xg(vm))}</div>
     ${h2hCard(vm)}
-    ${card('Comparatif des équipes',comparison(vm))}
+    ${card('Comparatif des équipes',comparison(vm),'','compare')}
     ${matchupsCard(vm)}
     ${card('Scores les plus probables',scores(vm))}
     ${card('Lecture du match',reading(vm))}

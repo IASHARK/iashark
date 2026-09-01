@@ -269,10 +269,29 @@ test('Score IASHARK : modèle indisponible -> jamais de score fabriqué', () => 
 });
 
 test('Value : uniquement si markets_compared expose un edge réel sur le marché retenu, jamais recalculée', () => {
-  const withEdge = buildMatchViewModel(base({ model_output_available: true, data_quality_score: 70, markets_compared: [{ market: 'BTTS Oui', probability: 61, edge: 6.1 }] }));
+  const withEdge = buildMatchViewModel(base({ model_output_available: true, data_quality_score: 70, pari_rec: 'BTTS Oui', markets_compared: [{ market: 'BTTS Oui', probability: 61, edge: 6.1 }] }));
   assert.equal(withEdge.model.value, 6.1);
   const withoutEdge = buildMatchViewModel(base({ model_output_available: true, data_quality_score: 70 }));
   assert.equal(withoutEdge.model.value, null);
+});
+
+test('Value : trouve le marche retenu par NOM dans markets_compared, jamais par position [0] - markets_compared est trie par probabilite, pas par marche recommande en premier', () => {
+  const vm = buildMatchViewModel(base({
+    model_output_available: true, data_quality_score: 70, pari_rec: 'Over 2.5',
+    markets_compared: [
+      { market: 'DC 12', probability: 79.4, edge: -4.6 },
+      { market: 'Over 2.5', probability: 74.4, edge: 14.9 }
+    ]
+  }));
+  assert.equal(vm.model.value, 14.9, 'doit reprendre l\'edge du marche reellement recommande (Over 2.5), pas celui du premier de la liste (DC 12)');
+});
+
+test('Value : le marche retenu n\'a pas d\'entree dans markets_compared -> indisponible, jamais l\'edge d\'un autre marche', () => {
+  const vm = buildMatchViewModel(base({
+    model_output_available: true, data_quality_score: 70, pari_rec: 'Over 2.5',
+    markets_compared: [{ market: 'DC 12', probability: 79.4, edge: -4.6 }]
+  }));
+  assert.equal(vm.model.value, null);
 });
 
 test('Momentum IASHARK : convertit les comptages bruts en %, jamais utilisés tels quels', () => {

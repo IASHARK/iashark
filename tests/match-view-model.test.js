@@ -248,6 +248,16 @@ test('Matchups à cibler : écart trop faible -> aucun matchup publié', () => {
   assert.deepEqual(vm.matchups, []);
 });
 
+test('Matchups à cibler : domicile et extérieur utilisent deux métriques réelles différentes, jamais le même écart reformulé deux fois', () => {
+  const vm = buildMatchViewModel(base({
+    match_stats_home: { shots_total: 16, shots_on: 4, possession: 50 },
+    match_stats_away: { shots_total: 8, shots_on: 7, possession: 50 }
+  }));
+  assert.equal(vm.matchups.length, 2);
+  assert.ok(vm.matchups[0].text.includes('16') && vm.matchups[0].text.includes('tirs'));
+  assert.ok(vm.matchups[1].text.includes('cadre'));
+});
+
 test('Terrain tactique : positionne réellement via le champ grid, jamais une position devinée', () => {
   const raw = base({ lineups: { home: { formation: '4-3-3', startXI: [
     { id:1, name:'GK', pos:'G', grid:'1:1' },

@@ -86,8 +86,6 @@ a{color:inherit}
 .reco-stats>div:first-child{border-left:0}
 .reco-stats small{display:block;color:var(--muted);font:9px var(--mono);text-transform:uppercase;letter-spacing:.04em}
 .reco-stats b{display:block;margin-top:8px;font-size:22px;font-weight:600}
-.reco-stats b.pos{color:var(--green)}
-.reco-stats b.neg{color:var(--red)}
 .reco-prob{display:flex;flex-direction:column;gap:6px}
 .prob-ring{position:relative;width:48px;height:48px;margin-top:2px}
 .prob-ring svg{width:100%;height:100%;transform:rotate(-90deg)}
@@ -196,12 +194,6 @@ a.player:hover{border-color:var(--line2);background:#082133}
 .matchup b{display:block;margin-bottom:4px;color:var(--cyan);font-size:12px}
 .matchup p{margin:0;color:var(--muted);font-size:11.5px;line-height:1.5}
 
-/* joueurs en forme */
-.watch-list{display:flex;flex-wrap:wrap;gap:8px}
-.watch-pill{display:flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid var(--line);border-radius:20px;background:#061725;font-size:11.5px}
-.watch-pill img{width:24px;height:24px;border-radius:50%;object-fit:cover;background:#0b2233}
-.watch-pill b{color:var(--cyan)}
-
 /* arbitre */
 .referee b{font-size:14px}
 .referee-stats{display:flex;gap:20px;margin-top:12px}
@@ -229,6 +221,7 @@ a.player:hover{border-color:var(--line2);background:#082133}
   .reco-stats>div{padding:10px 12px}
   .reco-stats>div:nth-child(odd){border-left:0}
   .reco-stats>div:nth-child(n+3){border-top:1px solid var(--line)}
+  .reco-stats>div:nth-child(3):last-child{grid-column:1/-1}
   .reco-stats b{font-size:18px}
   .compare-row{grid-template-columns:40px 1fr 70px 1fr 40px;font-size:10.5px}
   .h2h-date{width:48px;font-size:8px}

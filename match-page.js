@@ -16,7 +16,6 @@ const ICONS={
   compare:'<path d="M6 20V10M12 20V4M18 20v-7"/>',
   target:'<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r=".6" fill="currentColor"/>',
   whistle:'<path d="M4 12a5 5 0 0 1 5-5h6.5A4.5 4.5 0 0 1 20 11.5a4.5 4.5 0 0 1-4.5 4.5H12l-3 3v-3a5 5 0 0 1-5-4Z"/><circle cx="8.5" cy="12" r="1.4"/>',
-  flame:'<path d="M12 3s4 3.5 4 7.5a4 4 0 0 1-8 0C8 8.5 9 6.5 9 6.5s-1 3-.5 4.5C9 13 10.3 14 12 14s3-1 3-3c0-2.5-1.5-4.5-3-8Z"/><path d="M8.5 14.5a5 5 0 0 0 7 5 5 5 0 0 0 2-6.5"/>',
   reasons:'<path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1.4" fill="currentColor" stroke="none"/><circle cx="4.5" cy="12" r="1.4" fill="currentColor" stroke="none"/><circle cx="4.5" cy="18" r="1.4" fill="currentColor" stroke="none"/>'
 };
 const cardIcon=key=>ICONS[key]?`<svg viewBox="0 0 24 24" class="card-icon">${ICONS[key]}</svg>`:'';
@@ -80,7 +79,6 @@ function recommendation(vm){
   const r=vm.model.recommendation;
   if(!r)return card('Recommandation IASHARK',empty(vm.model.unavailableReason||'Aucun marché ne franchit les seuils de confiance ou de cote minimale pour ce match — IASHARK préfère ne pas se prononcer.'));
   const fair=r.probability>0?100/r.probability:null;
-  const value=vm.model.value;
   return `<section class="card reco">
     <div class="reco-head">
       <div><span class="reco-eyebrow">Recommandation IASHARK</span><h1 class="reco-market">${esc(r.market)}</h1></div>
@@ -88,10 +86,8 @@ function recommendation(vm){
     </div>
     <div class="reco-stats">
       <div class="reco-prob"><small>Probabilité</small>${probRing(r.probability)}</div>
-      <div><small>Score IASHARK</small><b>${vm.model.iasharkScore===null?'—':Math.round(vm.model.iasharkScore)+'/100'}</b></div>
-      <div><small>Cote équitable</small><b>${fmt(fair,2)}</b></div>
-      <div><small>Cote moyenne</small><b>${fmt(vm.model.recommendedOdds,2)}</b></div>
-      ${value!==null?`<div><small>Value</small><b class="${value>=0?'pos':'neg'}">${value>=0?'+':''}${fmt(value)}%</b></div>`:''}
+      <div><small>Cote juste</small><b>${fmt(fair,2)}</b></div>
+      <div><small>Cote du marché</small><b>${fmt(vm.model.recommendedOdds,2)}</b></div>
     </div>
   </section>`;
 }
@@ -240,16 +236,6 @@ function matchupsCard(vm){
   return card('Matchups à cibler',`<div class="matchups">${list.map(mchp=>`<div class="matchup"><b>${esc(mchp.title)}</b><p>${esc(mchp.text)}</p></div>`).join('')}</div>`,'','target');
 }
 
-// Joueurs en forme : vm.players.watch (buteur/passeur le plus actif sur les
-// evenements reels des derniers matchs, deja calcule) - distinct des
-// "Joueurs cles" (impact toutes stats confondues), volontairement plus
-// discret / secondaire.
-function watchCard(vm){
-  const list=vm.players.watch;
-  if(!list.length)return '';
-  return card('Joueurs en forme',`<div class="watch-list">${list.map(p=>`<div class="watch-pill">${img(p.photo,p.name)}<span>${esc(p.name)}</span>${n(p.value)!==null?`<b>${esc(fmt(p.value,0))}</b>`:''}</div>`).join('')}</div>`,'watch-card','flame');
-}
-
 function render(raw){
   const vm=IasharkMatchViewModel.buildMatchViewModel(raw);
   document.title=`${vm.identity.home.name} vs ${vm.identity.away.name} — IASHARK`;
@@ -266,7 +252,6 @@ function render(raw){
         ${players(vm)}
       </div>
       <div class="col-side">
-        ${watchCard(vm)}
         ${h2hCard(vm)}
         ${matchupsCard(vm)}
         ${card('Scores les plus probables',scores(vm))}

@@ -43,6 +43,7 @@ jobs:
           const { combineCountMatchup } = require('./lib/markets/count-matchup.js');
           const { buildSegmentMarkets, estimateFirstHalfShare } = require('./lib/markets/segment-model.js');
           const { buildPlayerMarketOutput } = require('./lib/markets/player-engine.js');
+          const { pickTopScorerCandidates } = require('./lib/markets/top-scorer-picker.js');
           const I18N_LOCALES = require('./i18n/locales.json');
           const I18N_PAGES = require('./scripts/i18n-manifest.js');
           const { generateLocalizedSitemaps } = require('./scripts/i18n-sitemaps.js');
@@ -1230,12 +1231,19 @@ jobs:
                      +' | '+d.away+' marque '+s.pct_away_mark+'%, encaisse '+s.pct_home_conc+'% - Probabilite but: '+s.prob+'%';
                  }).join('\n')+'\n'
                 :'')
+              +(d.topScorerCandidates&&d.topScorerCandidates.length
+                ?'\n=== BUTEURS PROBABLES - DEJA SELECTIONNES PAR LE SYSTEME (ne pas en choisir d\'autres) ===\n'
+                 +'Ces '+d.topScorerCandidates.length+' joueurs sont deja retenus par un calcul deterministe (volume de tirs cadres/90, taux de conversion lisse statistiquement, fiabilite du temps de jeu, force defensive de l\'adversaire) - PAS sur leurs seuls buts recents, souvent trompeurs sur petit echantillon. Ton role : explique pourquoi CES chiffres precis en font une menace de but credible, sans en proposer d\'autres.\n'
+                 +d.topScorerCandidates.map(function(p){
+                   return '- '+p.name+' ('+(p.team_id===d.homeId?d.home:d.away)+', '+(p.position||'poste inconnu')+') : '+p.appearances+' matchs suivis cette saison, '+p.goals+' but(s), '+(p.shotsOn90!=null?p.shotsOn90:'?')+' tirs cadres/90, '+(p.shotsTotal90!=null?p.shotsTotal90:'?')+' tirs/90, taux de conversion lisse '+Math.round(p.smoothedConversion*100)+'% (moyenne du groupe compare : '+Math.round(p.baselineConversion*100)+'%), multiplicateur adversaire '+p.opponentDefenseMultiplier+' (1.0=neutre, >1=defense adverse plus permeable), score de menace '+p.goalThreatScore+'/100.';
+                 }).join('\n')+'\n'
+                :'')
               +'\n=== DECISION DEJA PRISE PAR LE SYSTEME (ne pas la remettre en cause) ===\n'
               +(d.no_signal
                 ?'Aucun marche exploitable (pas de cote fiable >= 1.50 disponible pour ce match). N\'invente ni marche ni cote : explique factuellement, en 1-2 phrases, pourquoi ce match manque de signal exploitable aujourd\'hui.\n'
                 :'Marche retenu : '+d.picked_market.market+' (cote '+d.picked_market.cote+', probabilite modele '+Math.round(d.picked_market.prob)+'%). C\'est mathematiquement le marche de plus haute probabilite modele parmi ceux disponibles avec une cote exploitable - deja calcule par le systeme. Ne le remets JAMAIS en cause, n\'en propose jamais un autre, ne cite jamais un autre marche comme "meilleur choix".\n')
               +'\n=== TON ROLE (STRICT) ===\n'
-              +'Tu es un analyste sportif professionnel. Tu ne calcules RIEN : le marche, la cote, la probabilite, l\'edge et le niveau de risque sont deja decides ci-dessus par du code deterministe, pas par toi. Tu ne renvoies AUCUN nombre de probabilite, AUCUNE cote, AUCUN marche choisi, AUCUN score de confiance - uniquement du texte qui EXPLIQUE la decision deja prise, en citant les donnees reelles fournies plus haut.\n'
+              +'Tu es un analyste sportif professionnel. Tu ne calcules RIEN : le marche, la cote, la probabilite, l\'edge, le niveau de risque ET les buteurs probables sont deja decides ci-dessus par du code deterministe, pas par toi. Tu ne renvoies AUCUN nombre de probabilite, AUCUNE cote, AUCUN marche choisi, AUCUN score de confiance, AUCUN autre buteur que ceux listes ci-dessus - uniquement du texte qui EXPLIQUE les decisions deja prises, en citant les donnees reelles fournies plus haut.\n'
               +'ANCRAGE OBLIGATOIRE DES TEXTES : contexte et facteur_x doivent citer un chiffre EXACT tire des donnees ci-dessus (classement #X, forme 5 derniers, xG, ecart ELO, % de buts par tranche, etc.). N\'invente jamais un enjeu ou un classement qui n\'apparait pas dans les donnees fournies - si aucune donnee d\'enjeu n\'est disponible (pas de ligne "Enjeu DOM/EXT"), ne mentionne pas d\'enjeu du tout plutot que d\'en inventer un vague. Une phrase sans chiffre precis est invalide.\n\n';
             var jsonTpl = 'Reponds UNIQUEMENT avec ce JSON valide. Aucun texte avant ou apres. Aucun backtick. Ne renvoie AUCUN champ numerique de probabilite/cote/marche/confiance - uniquement les champs texte listes ci-dessous.\n'
               +'REGLE ABSOLUE: tous les champs texte sont TOUJOURS remplis, meme si aucun marche exploitable n\'est disponible.\n\n'
@@ -1251,8 +1259,14 @@ jobs:
                 ?'"scenario_15min": [\n'
                  +d.slotSummary.map(function(s,i){
                    return '  {"t":"'+s.t+'","prob":'+s.prob+',"txt":"[narrative factuelle - cite les vrais chiffres des donnees]"}';
+                 }).join(',\n')+'\n]'
+                :'"scenario_15min": null')
+              +(d.topScorerCandidates&&d.topScorerCandidates.length
+                ?',\n"buteurs_probables": [\n'
+                 +d.topScorerCandidates.map(function(p){
+                   return '  {"joueur":"'+p.name+'","raison":"[2 phrases factuelles ancrees sur les tirs/conversion/adversaire fournis pour '+p.name+' ci-dessus - jamais un autre joueur]"}';
                  }).join(',\n')+'\n]\n'
-                :'"scenario_15min": null\n')
+                :'')
               +'}';
             var r = await postJSONWithRetry('api.anthropic.com', '/v1/messages', {
               model: 'claude-sonnet-4-6',
@@ -2084,6 +2098,7 @@ jobs:
               var odds=parseOdds(oddsRaw);
               var critH=calcCriteres(sH,true,rkH);
               var critA=calcCriteres(sA,false,rkA);
+              var topScorerCandidates=pickTopScorerCandidates(playerHistoryH,playerHistoryA,home.id,away.id,critH,critA);
               var fatigueH=calcFatigue(last10H);
               var fatigueA=calcFatigue(last10A);
               var tendances=calcTendances(last10H,last10A);
@@ -2399,6 +2414,7 @@ jobs:
                 final_p1:pureProbs.p1,final_pN:pureProbs.pN,final_p2:pureProbs.p2,
                 all_markets:allMarkets,node_kelly:nodeKelly,
                 picked_market:pickedMarket,no_signal:noSignal,no_signal_reason:noSignalReason,
+                topScorerCandidates:topScorerCandidates,
                 market_selection_audit:{modelled:allMarketCandidates.filter(function(m){return Number.isFinite(Number(m.prob));}).length,supported_quotes:supportedQuoteCount,modelled_and_quoted:allMarkets.length,eligible:eligibleMarkets.length,minimum_odds:1.50,rejected_no_reliable_model:unmodelledDynamicQuoteCount},
                 lineup_home_formation:lineups&&lineups.home?lineups.home.formation:null,
                 lineup_away_formation:lineups&&lineups.away?lineups.away.formation:null,
@@ -2533,6 +2549,20 @@ jobs:
                 mise:'2-3% bankroll',
                 scenario:an?(an.scenario||{phase1:'',phase2:'',phase3:''}):null,
                 scenario_15min:an?(an.scenario_15min||null):null,
+                // Buteurs probables : selection et TOUS les chiffres viennent du
+                // calcul deterministe (topScorerCandidates, cf
+                // pickTopScorerCandidates) - seul le champ "analyse" (texte)
+                // vient de Claude, jamais un nombre.
+                top_scorers:topScorerCandidates.length?topScorerCandidates.map(function(p){
+                  var reasonEntry=(an&&Array.isArray(an.buteurs_probables))?an.buteurs_probables.find(function(b){return b&&b.joueur===p.name;}):null;
+                  return {
+                    player_id:p.player_id,name:p.name,photo:p.photo,position:p.position,team_id:p.team_id,
+                    appearances:p.appearances,goals:p.goals,shots_on_90:p.shotsOn90,shots_total_90:p.shotsTotal90,
+                    conversion_rate:p.smoothedConversion,opponent_defense_multiplier:p.opponentDefenseMultiplier,
+                    goal_threat_score:p.goalThreatScore,
+                    analyse:reasonEntry?(reasonEntry.raison||null):null
+                  };
+                }):[],
                 analyse_card:an?(an.analyse_card||an.conseil||''):'',
                 conseil_public:an?(an.conseil||an.analyse_card||''):'',
                 contexte:an?(an.contexte||''):'',

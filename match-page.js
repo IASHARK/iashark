@@ -127,7 +127,13 @@ function players(vm){
     if(n(p.keyPasses90)!==null)stats.push(['Passes clés/90',fmt(p.keyPasses90)]);
     if(n(p.minutesRecent)!==null)stats.push(['Min. récentes',fmt(p.minutesRecent,0)]);
     if(n(p.startProbability)!==null)stats.push(['Proba. titulaire',pct(p.startProbability)]);
-    return `<div class="player">${img(p.photo,name)}<div class="player-info"><b>${esc(name)}</b><small>${esc(p.team||'')}${p.team&&p.position?' · ':''}${esc(p.position||'')}</small>${stats.length?`<div class="player-stats">${stats.map(([l,v])=>`<span>${esc(l)} <b>${esc(v)}</b></span>`).join('')}</div>`:''}</div><div class="player-impact"><b>${impactVal===null?'—':Math.round(impactVal)}</b><small>Impact</small></div></div>`;
+    // Fiche joueur cliquable uniquement quand on a un vrai id joueur
+    // (forme playerAnalytics) - la forme de repli (props joueur) n'a pas
+    // toujours d'id exploitable, reste alors une simple carte non cliquable.
+    const pid=n(p.id)!==null?n(p.id):n(p.playerId);
+    const tag=pid!==null?'a':'div';
+    const href=pid!==null?` href="/joueur.html?m=${esc(vm.id)}&p=${pid}"`:'';
+    return `<${tag} class="player"${href}>${img(p.photo,name)}<div class="player-info"><b>${esc(name)}</b><small>${esc(p.team||'')}${p.team&&p.position?' · ':''}${esc(p.position||'')}</small>${stats.length?`<div class="player-stats">${stats.map(([l,v])=>`<span>${esc(l)} <b>${esc(v)}</b></span>`).join('')}</div>`:''}</div><div class="player-impact"><b>${impactVal===null?'—':Math.round(impactVal)}</b><small>Impact</small></div></${tag}>`;
   }).join('')}</div>`,'players-card');
 }
 

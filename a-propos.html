@@ -114,37 +114,37 @@ footer p{font-family:'Space Mono',monospace;font-size:8px;color:rgba(74,101,128,
 
   <div class="hero">
     <div class="hero-eyebrow">À PROPOS</div>
-    <h1>Pas de flair.<br>Des <b>données</b>, un modèle,<br>un résultat vérifiable.</h1>
-    <p>IASHARK analyse chaque match à partir de données statistiques publiques et de modèles mathématiques établis. Pas de martingale ni de système miracle — juste des probabilités calculées et documentées.</p>
+    <h1>Pas de flair.<br>Des <b>données</b>, des années d'historique,<br>un résultat vérifiable.</h1>
+    <p>IASHARK analyse chaque match à partir de données sportives accumulées sur plusieurs saisons et de modèles statistiques rigoureux. Pas de martingale ni de système miracle — une méthode appliquée de façon strictement identique, match après match.</p>
   </div>
 
   <!-- ═══ METHODOLOGIE ═══ -->
   <div class="sec">
     <div class="sec-lbl">MÉTHODOLOGIE</div>
     <h2>Comment le modèle fonctionne</h2>
-    <p>Pour chaque match, le système croise plusieurs sources de données : calendriers, statistiques d'équipe et de joueurs, expected goals (xG) quand la donnée est disponible, cotes de marché de référence, et classement Elo. Ces données alimentent quatre modèles statistiques distincts, combinés ensemble :</p>
+    <p>Pour chaque match, notre système s'appuie sur un large historique de données réelles : résultats et statistiques des équipes et des joueurs sur plusieurs saisons, tendances de forme récente, et éléments de contexte (compositions probables, absences, calendrier). Cet historique alimente plusieurs modèles statistiques complémentaires, dont les résultats sont systématiquement croisés avant qu'une conclusion ne soit retenue — jamais un seul modèle isolé, jamais une intuition.</p>
 
     <div class="model-grid">
       <div class="model-card">
-        <div class="mtitle">POISSON</div>
-        <div class="mdesc">Distribution statistique classique utilisée pour modéliser le nombre de buts probable de chaque équipe.</div>
+        <div class="mtitle">HISTORIQUE MULTI-SAISONS</div>
+        <div class="mdesc">Chaque calcul s'appuie sur plusieurs saisons de résultats et de statistiques réelles, pas sur un ressenti ponctuel ou l'actualité du moment.</div>
       </div>
       <div class="model-card">
-        <div class="mtitle">DIXON-COLES</div>
-        <div class="mdesc">Correction du modèle de Poisson pour les scores faibles (0-0, 1-0, 0-1, 1-1), statistiquement sous/sur-représentés par Poisson seul.</div>
+        <div class="mtitle">MODÈLES CROISÉS</div>
+        <div class="mdesc">Plusieurs modèles statistiques indépendants analysent chaque rencontre en parallèle ; une conclusion n'est retenue que lorsqu'ils convergent.</div>
       </div>
       <div class="model-card">
-        <div class="mtitle">MONTE-CARLO</div>
-        <div class="mdesc">5000 simulations du match par rencontre, pour vérifier la cohérence des scores probables avec le marché choisi.</div>
+        <div class="mtitle">SIMULATIONS</div>
+        <div class="mdesc">Des milliers de scénarios de match sont simulés pour chaque rencontre, afin de vérifier la cohérence statistique des résultats obtenus.</div>
       </div>
       <div class="model-card">
-        <div class="mtitle">ELO</div>
-        <div class="mdesc">Classement de force relative des équipes (méthode ClubElo), utilisé comme signal de confirmation supplémentaire.</div>
+        <div class="mtitle">SCORE DE FIABILITÉ</div>
+        <div class="mdesc">Un indicateur séparé mesure l'accord entre les modèles et la qualité des données disponibles pour ce match précis — jamais une réécriture de la probabilité elle-même.</div>
       </div>
     </div>
 
-    <p>Le marché mis en avant pour chaque match est choisi automatiquement : c'est celui dont la probabilité calculée par les modèles est la plus élevée parmi les marchés disponibles. La <b>probabilité affichée</b> est directement celle du modèle, jamais modifiée. La <b>fiabilité</b> affichée à côté est un indicateur séparé — reflet de l'accord entre les modèles, de la qualité des données disponibles pour ce match et de la taille de l'échantillon statistique — jamais une réécriture de la probabilité elle-même. Un modèle de langage rédige ensuite le texte d'explication qui accompagne ce choix, mais ne calcule, ne choisit ni ne modifie aucun chiffre : les probabilités, cotes, marché retenu et niveau de fiabilité sont entièrement déterminés par du code, pas par le modèle de langage.</p>
-    <p><b>La notion d'edge</b> : le modèle compare sa probabilité calculée à la cote proposée par les bookmakers. Quand la probabilité du modèle est supérieure à celle qu'implique la cote, on parle de "value bet" — une cote potentiellement sur-évaluée par le marché.</p>
+    <p>Le marché mis en avant pour chaque match est sélectionné automatiquement selon des critères statistiques déterministes, sans intervention manuelle. La <b>probabilité affichée</b> est directement celle du modèle, jamais modifiée après coup. Un modèle de langage rédige ensuite le texte d'explication qui accompagne ce choix, mais ne calcule, ne choisit ni ne modifie aucun chiffre : les probabilités, cotes, marché retenu et niveau de fiabilité sont entièrement déterminés par notre méthode statistique, jamais par ce texte.</p>
+    <p><b>La notion de value</b> : notre modèle compare sa probabilité calculée à la cote proposée par les bookmakers. Quand notre estimation diverge sensiblement de celle qu'implique la cote, on parle de "value bet" — une cote potentiellement mal évaluée par le marché. Le détail exact de notre méthode de calcul reste propriétaire et n'est pas divulgué publiquement.</p>
   </div>
 
   <!-- ═══ SIMPLE VS COMBINE ═══ -->

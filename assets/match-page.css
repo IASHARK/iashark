@@ -108,6 +108,8 @@ a{color:inherit}
 /* joueurs cles */
 .players{display:flex;flex-direction:column;gap:10px}
 .player{display:flex;align-items:center;gap:12px;padding:12px;border:1px solid var(--line);border-radius:10px;background:#061725}
+a.player{color:inherit;text-decoration:none;transition:border-color .15s,background .15s}
+a.player:hover{border-color:var(--line2);background:#082133}
 .player img{width:44px;height:44px;border-radius:50%;object-fit:cover;background:#0b2233;flex-shrink:0}
 .player-info{min-width:0;flex:1}
 .player-info b{display:block;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}

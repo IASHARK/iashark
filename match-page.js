@@ -134,10 +134,27 @@ function players(vm){
 // Scenario par tranches de 15 minutes : texte reel genere par le pipeline
 // (raw.scenario_15min) a partir des tendances historiques par tranche,
 // deja calcule - aucune nouvelle logique ici, juste l'affichage.
+// Petit graphique en barres au-dessus de la liste : reprend les memes
+// probabilites reelles par tranche (s.prob) deja affichees en texte,
+// aucune nouvelle donnee - juste une lecture visuelle plus rapide qu'un
+// bloc de texte uniforme.
+function scenario15Chart(slots,max){
+  const W=300,H=80,pad=6,gap=6,base=64,top=14,nBars=slots.length,bw=(W-2*pad-gap*(nBars-1))/nBars;
+  const bars=slots.map((s,i)=>{
+    const val=n(s.prob)||0,h=Math.max(3,val/max*(base-top)),x=pad+i*(bw+gap),y=base-h,labelY=Math.max(9,y-4);
+    return `<rect class="sc-bar" x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${bw.toFixed(1)}" height="${h.toFixed(1)}" rx="2" style="animation-delay:${i*60}ms"></rect><text x="${(x+bw/2).toFixed(1)}" y="${labelY.toFixed(1)}" text-anchor="middle" font-size="7" fill="var(--cyan)">${Math.round(val)}%</text><text x="${(x+bw/2).toFixed(1)}" y="${(H-2).toFixed(1)}" text-anchor="middle" font-size="6" fill="var(--muted)">${esc((s.t||'').replace('min',''))}</text>`;
+  }).join('');
+  return `<svg class="scenario-chart" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none"><line x1="${pad}" y1="${base}" x2="${W-pad}" y2="${base}" stroke="rgba(0,213,255,.12)"></line>${bars}</svg>`;
+}
 function scenario15(vm){
   const slots=vm.editorial.scenario15;
   if(!slots.length)return empty('Scénario par tranches de 15 minutes indisponible.');
-  return `<div class="scenario-15">${slots.map(s=>`<div class="scenario-row"><div class="scenario-row-head"><b>${esc(s.t)}</b><span>${pct(s.prob)}</span></div><p>${esc(s.txt)}</p></div>`).join('')}</div>`;
+  const max=Math.max(...slots.map(s=>n(s.prob)||0),1);
+  const rows=slots.map(s=>{
+    const intensity=Math.max(.15,(n(s.prob)||0)/max).toFixed(2);
+    return `<div class="scenario-row" style="border-left:3px solid rgba(0,213,255,${intensity})"><div class="scenario-row-head"><b>${esc(s.t)}</b><span>${pct(s.prob)}</span></div><p>${esc(s.txt)}</p></div>`;
+  }).join('');
+  return `${scenario15Chart(slots,max)}<div class="scenario-15">${rows}</div>`;
 }
 
 function absences(vm){

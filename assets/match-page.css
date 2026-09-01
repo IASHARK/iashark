@@ -29,6 +29,18 @@ a{color:inherit}
 .card>h2{display:flex;align-items:center;gap:7px;margin:0 0 14px;color:var(--cyan);font:700 12px var(--mono);letter-spacing:.08em;text-transform:uppercase}
 .card-icon{width:14px;height:14px;flex-shrink:0;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:var(--gap)}
+
+/* dashboard 2 colonnes : rail secondaire (contexte/donnees d'appoint) a
+   cote de la colonne principale (recommandation/analyse), plutot qu'un
+   long feed vertical unique - repond au retour explicite sur la maquette */
+.dashboard{display:grid;grid-template-columns:1fr;gap:var(--gap);align-items:start}
+.col-main,.col-side{display:flex;flex-direction:column;gap:var(--gap);min-width:0}
+.col-side .card{padding:15px 16px}
+.col-side .card>h2{font-size:10.5px;margin-bottom:11px}
+@media(min-width:900px){
+  :root{--container:1120px}
+  .dashboard{grid-template-columns:1fr 380px}
+}
 .empty{min-height:64px;display:grid;place-items:center;padding:14px;color:var(--muted);text-align:center;font-size:12.5px;line-height:1.5}
 
 /* hero */

@@ -256,18 +256,24 @@ function render(raw){
   root.innerHTML=`<div class="page">
     ${hero(vm)}
     ${recommendation(vm)}
-    ${reasonsCard(vm)}
-    <div class="row2">${card('Probabilités 1X2',probabilities(vm))}${card('Buts attendus',xg(vm))}</div>
-    ${h2hCard(vm)}
-    ${card('Comparatif des équipes',comparison(vm),'','compare')}
-    ${matchupsCard(vm)}
-    ${card('Scores les plus probables',scores(vm))}
-    ${card('Lecture du match',reading(vm))}
-    ${card('Scénario par tranches de 15 minutes',scenario15(vm))}
-    ${players(vm)}
-    ${watchCard(vm)}
-    ${absences(vm)}
-    ${refereeCard(vm)}
+    <div class="dashboard">
+      <div class="col-main">
+        ${reasonsCard(vm)}
+        <div class="row2">${card('Probabilités 1X2',probabilities(vm))}${card('Buts attendus',xg(vm))}</div>
+        ${card('Comparatif des équipes',comparison(vm),'','compare')}
+        ${card('Scénario par tranches de 15 minutes',scenario15(vm))}
+        ${card('Lecture du match',reading(vm))}
+        ${players(vm)}
+      </div>
+      <div class="col-side">
+        ${watchCard(vm)}
+        ${h2hCard(vm)}
+        ${matchupsCard(vm)}
+        ${card('Scores les plus probables',scores(vm))}
+        ${absences(vm)}
+        ${refereeCard(vm)}
+      </div>
+    </div>
   </div>`;
 }
 

@@ -747,15 +747,39 @@ jobs:
             FIXTURE_PLAYERS_CACHE[fixtureId]=Array.isArray(r.response)?r.response:[];
             return FIXTURE_PLAYERS_CACHE[fixtureId];
           }
-          async function getRecentPlayerHistory(fixtureIds,teamId){
+          // fixtures : tableau d'OBJETS fixture reels (pas juste des ids) -
+          // deja recuperes par ailleurs (modelFixturesH/A), qui portent la
+          // vraie competition/saison/date/adversaire de chaque match. On les
+          // reutilise ici pour taguer chaque ligne joueur avec ce contexte
+          // reel (jamais devine), et pour marquer si le match appartient a
+          // la saison EN COURS (currentSeason) - necessaire pour ne montrer
+          // que les matchs de la saison en cours cote page joueur, sans les
+          // melanger silencieusement a la saison precedente meme si elle
+          // sert de repli ailleurs (echantillon insuffisant en debut de
+          // saison).
+          async function getRecentPlayerHistory(fixtures,teamId,currentSeason){
             var rows=[];
-            for(var i=0;i<Math.min((fixtureIds||[]).length,10);i++){
-              var blocks=await getFixturePlayers(fixtureIds[i]);
+            for(var i=0;i<Math.min((fixtures||[]).length,10);i++){
+              var fx=fixtures[i],fixtureId=fx.fixture.id;
+              var blocks=await getFixturePlayers(fixtureId);
               var block=blocks.find(function(item){return item.team&&item.team.id===teamId;});
+              var isHome=fx.teams&&fx.teams.home&&fx.teams.home.id===teamId;
+              var opponent=isHome?(fx.teams.away&&fx.teams.away.name):(fx.teams.home&&fx.teams.home.name);
+              var teamGoals=fx.goals?(isHome?fx.goals.home:fx.goals.away):null;
+              var opponentGoals=fx.goals?(isHome?fx.goals.away:fx.goals.home):null;
+              var context={
+                date:(fx.fixture.date||'').split('T')[0],
+                league_name:(fx.league&&fx.league.name)||null,
+                round:(fx.league&&fx.league.round)||null,
+                season:(fx.league&&fx.league.season)!=null?Number(fx.league.season):null,
+                is_current_season:currentSeason!=null&&fx.league&&Number(fx.league.season)===Number(currentSeason),
+                opponent:opponent||null,is_home:!!isHome,
+                team_goals:teamGoals==null?null:Number(teamGoals),opponent_goals:opponentGoals==null?null:Number(opponentGoals)
+              };
               (block&&block.players||[]).forEach(function(entry){
                 var s=entry.statistics&&entry.statistics[0],g=s&&s.games;
                 if(!entry.player||!s||!g)return;
-                rows.push({fixture_id:fixtureIds[i],player_id:entry.player.id,team_id:teamId,name:entry.player.name||null,photo:entry.player.photo||null,
+                rows.push(Object.assign({fixture_id:fixtureId,player_id:entry.player.id,team_id:teamId,name:entry.player.name||null,photo:entry.player.photo||null,
                   position:g.position||null,minutes:g.minutes==null?null:Number(g.minutes),rating:g.rating==null?null:Number(g.rating),starter:g.substitute==null?null:!g.substitute,
                   shots_total:s.shots&&s.shots.total==null?null:Number(s.shots.total),shots_on:s.shots&&s.shots.on==null?null:Number(s.shots.on),
                   goals:s.goals&&s.goals.total==null?null:Number(s.goals.total),assists:s.goals&&s.goals.assists==null?null:Number(s.goals.assists),
@@ -763,7 +787,7 @@ jobs:
                   pass_accuracy:s.passes&&s.passes.accuracy==null?null:Number(String(s.passes.accuracy).replace('%','')),
                   tackles:s.tackles&&s.tackles.total==null?null:Number(s.tackles.total),interceptions:s.tackles&&s.tackles.interceptions==null?null:Number(s.tackles.interceptions),
                   duels:s.duels&&s.duels.total==null?null:Number(s.duels.total),dribbles:s.dribbles&&s.dribbles.attempts==null?null:Number(s.dribbles.attempts),
-                  fouls:s.fouls&&s.fouls.committed==null?null:Number(s.fouls.committed),yellow:s.cards&&s.cards.yellow==null?null:Number(s.cards.yellow),red:s.cards&&s.cards.red==null?null:Number(s.cards.red)});
+                  fouls:s.fouls&&s.fouls.committed==null?null:Number(s.fouls.committed),yellow:s.cards&&s.cards.yellow==null?null:Number(s.cards.yellow),red:s.cards&&s.cards.red==null?null:Number(s.cards.red)},context));
               });
               await sleep(120);
             }
@@ -2037,7 +2061,7 @@ jobs:
               var xgH=await getWeightedXGStats(home.id,last10IdsH_xg,modelFixturesH,xgConcededCache);
               var xgA=await getWeightedXGStats(away.id,last10IdsA_xg,modelFixturesA,xgConcededCache);
               var playerDataBatch=await Promise.all([
-                getRecentPlayerHistory(last10IdsH_xg,home.id),getRecentPlayerHistory(last10IdsA_xg,away.id),
+                getRecentPlayerHistory(modelFixturesH.slice(0,10),home.id,currentSeason),getRecentPlayerHistory(modelFixturesA.slice(0,10),away.id,currentSeason),
                 getCurrentSquad(home.id),getCurrentSquad(away.id)
               ]);
               var playerHistoryH=playerDataBatch[0],playerHistoryA=playerDataBatch[1],currentSquadH=playerDataBatch[2],currentSquadA=playerDataBatch[3];

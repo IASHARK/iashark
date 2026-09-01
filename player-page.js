@@ -59,12 +59,24 @@ function ratingTrend(player){
   return `<svg class="rating-trend" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none"><path d="${path}" fill="none" stroke="var(--cyan)" stroke-width="1.6"></path>${dots}</svg><p class="rating-trend-note">Note par match (5 derniers matchs suivis), du plus ancien au plus récent.</p>`;
 }
 
-function matchHistory(rows){
-  if(!rows.length)return empty('Historique match par match indisponible pour ce joueur.');
-  return `<div class="table-scroll"><table class="history-table"><thead><tr><th>#</th><th>Min</th><th>Note</th><th>Statut</th><th>Buts</th><th>Passes D.</th><th>Tirs (cadrés)</th><th>Passes clés</th><th>Cartons</th></tr></thead><tbody>${rows.map((r,i)=>{
+// Historique match par match : ne garde que les matchs reellement tagues
+// "saison en cours" par le pipeline (is_current_season, base sur la vraie
+// saison/competition de chaque match, jamais devine). Si le champ est
+// absent (ancien format de donnees), repli honnete sur les lignes
+// disponibles plutot que de tout masquer. Si la saison vient de
+// reprendre, la liste est simplement plus courte que 10 - jamais
+// completee avec des matchs d'une autre saison.
+function matchHistory(allRows){
+  const hasSeasonInfo=allRows.some(r=>r.is_current_season!==undefined);
+  const rows=hasSeasonInfo?allRows.filter(r=>r.is_current_season!==false):allRows;
+  if(!rows.length)return empty('Aucun match de la saison en cours suivi pour ce joueur.');
+  const seasonNote=hasSeasonInfo?`<p class="history-note">${rows.length} match${rows.length>1?'s':''} de la saison en cours suivi${rows.length>1?'s':''} pour ce joueur — le plus récent en haut. Si la saison vient de reprendre, la liste est volontairement courte plutôt que complétée avec la saison précédente.</p>`:`<p class="history-note">Le plus récent en haut.</p>`;
+  return `<div class="table-scroll"><table class="history-table"><thead><tr><th>Date</th><th>Compétition</th><th>Match</th><th>Min</th><th>Note</th><th>Statut</th><th>Buts</th><th>Passes D.</th><th>Tirs (cadrés)</th><th>Passes clés</th><th>Cartons</th></tr></thead><tbody>${rows.map(r=>{
     const cards=[n(r.yellow)>0?`${r.yellow}🟨`:'',n(r.red)>0?`${r.red}🟥`:''].filter(Boolean).join(' ')||'—';
-    return `<tr><td>${rows.length-i}</td><td>${n(r.minutes)!==null?fmt(r.minutes,0):'—'}</td><td>${n(r.rating)!==null?fmt(r.rating):'—'}</td><td>${r.starter?'Titulaire':'Remplaçant'}</td><td>${n(r.goals)!==null?fmt(r.goals,0):'—'}</td><td>${n(r.assists)!==null?fmt(r.assists,0):'—'}</td><td>${n(r.shots_total)!==null?fmt(r.shots_total,0):'—'}${n(r.shots_on)!==null?` (${fmt(r.shots_on,0)})`:''}</td><td>${n(r.key_passes)!==null?fmt(r.key_passes,0):'—'}</td><td>${cards}</td></tr>`;
-  }).join('')}</tbody></table></div><p class="history-note">Le plus récent en haut. "#" numérote les matchs suivis pour ce joueur (pas l'historique complet de sa carrière).</p>`;
+    const scored=n(r.goals)>0;
+    const matchLbl=r.opponent?`${r.is_home?'vs':'@'} ${esc(r.opponent)}${n(r.team_goals)!==null&&n(r.opponent_goals)!==null?` (${fmt(r.team_goals,0)}-${fmt(r.opponent_goals,0)})`:''}`:'—';
+    return `<tr class="${scored?'scored':''}"><td>${r.date?esc(r.date):'—'}</td><td>${r.league_name?esc(r.league_name):'—'}</td><td>${matchLbl}</td><td>${n(r.minutes)!==null?fmt(r.minutes,0):'—'}</td><td>${n(r.rating)!==null?fmt(r.rating):'—'}</td><td>${r.starter?'Titulaire':'Remplaçant'}</td><td>${scored?'⚽ ':''}${n(r.goals)!==null?fmt(r.goals,0):'—'}</td><td>${n(r.assists)!==null?fmt(r.assists,0):'—'}</td><td>${n(r.shots_total)!==null?fmt(r.shots_total,0):'—'}${n(r.shots_on)!==null?` (${fmt(r.shots_on,0)})`:''}</td><td>${n(r.key_passes)!==null?fmt(r.key_passes,0):'—'}</td><td>${cards}</td></tr>`;
+  }).join('')}</tbody></table></div>${seasonNote}`;
 }
 
 async function load(){

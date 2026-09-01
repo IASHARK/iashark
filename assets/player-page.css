@@ -35,6 +35,8 @@
 .history-table{width:100%;border-collapse:collapse;font-size:11px;white-space:nowrap}
 .history-table th{text-align:left;color:var(--muted);font:9px var(--mono);text-transform:uppercase;padding:8px 10px;border-bottom:1px solid var(--line)}
 .history-table td{padding:9px 10px;border-bottom:1px solid rgba(0,177,228,.08);color:var(--text)}
+.history-table tr.scored{background:rgba(16,185,129,.06)}
+.history-table tr.scored td:nth-child(7){color:var(--green);font-weight:700}
 
 @media(max-width:640px){
   .player-hero-main{align-items:flex-start}

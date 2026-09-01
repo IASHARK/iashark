@@ -5,10 +5,12 @@
    la page match qui masquerait #playerRoot par collision de selecteur. */
 .player-shell{width:min(var(--container),calc(100% - 32px));margin:0 auto}
 
-.back-to-match{display:inline-block;margin-bottom:14px;color:var(--cyan);font:10px var(--mono);text-decoration:none}
+.player-hero{border-color:var(--line2);position:relative;overflow:hidden}
+.player-hero:before{content:"";position:absolute;top:-60%;left:50%;translate:-50% 0;width:140%;height:200px;background:radial-gradient(ellipse at center,rgba(0,213,255,.09),transparent 70%);pointer-events:none}
+.back-to-match{display:inline-block;margin-bottom:14px;color:var(--cyan);font:10px var(--mono);text-decoration:none;position:relative}
 .back-to-match:hover{text-decoration:underline}
 
-.player-hero-main{display:flex;align-items:flex-start;gap:18px}
+.player-hero-main{display:flex;align-items:flex-start;gap:18px;position:relative}
 /* Carre arrondi (pas de contrainte API - un seul portrait fourni, le style
    rond/carre est purement un choix CSS) */
 .player-hero-photo{width:88px;height:88px;border-radius:14px;object-fit:cover;background:#0b2233;flex-shrink:0}
@@ -24,12 +26,13 @@
 .player-bio-row b{font-size:12px;color:var(--text);font-weight:600}
 
 .hero-ring-wrap{display:flex;flex-direction:column;align-items:center;gap:6px;flex-shrink:0}
-.score-ring{position:relative;width:76px;height:76px;flex-shrink:0}
+.score-ring{position:relative;width:88px;height:88px;flex-shrink:0}
 .score-ring svg{width:100%;height:100%;transform:rotate(-90deg)}
-.score-ring circle{fill:none;stroke-width:4}
+.score-ring circle{fill:none;stroke-width:5}
 .score-ring .track{stroke:rgba(0,213,255,.12)}
-.score-ring .fill{stroke:var(--cyan);stroke-linecap:round}
-.score-ring .val{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;font:22px var(--display);color:var(--cyan)}
+.score-ring .fill{stroke:var(--cyan);stroke-linecap:round;transition:stroke-dashoffset 1s cubic-bezier(.16,1,.3,1)}
+@media(prefers-reduced-motion:reduce){.score-ring .fill{transition:none}}
+.score-ring .val{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;font:24px var(--display);color:var(--cyan)}
 .score-ring .val small{font:8px var(--mono);color:var(--muted)}
 .score-ring-label{color:var(--muted);font:8px var(--mono);text-transform:uppercase;letter-spacing:.03em;text-align:center;max-width:100px}
 
@@ -46,12 +49,21 @@
 .rating-trend{width:100%;height:auto;display:block}
 .rating-trend-note,.history-note{margin:6px 0 0;color:var(--muted);font-size:10px;line-height:1.5}
 
-.table-scroll{overflow-x:auto}
-.history-table{width:100%;border-collapse:collapse;font-size:11px;white-space:nowrap}
-.history-table th{text-align:left;color:var(--muted);font:9px var(--mono);text-transform:uppercase;padding:8px 10px;border-bottom:1px solid var(--line)}
-.history-table td{padding:9px 10px;border-bottom:1px solid rgba(0,177,228,.08);color:var(--text)}
-.history-table tr.scored{background:rgba(16,185,129,.06)}
-.history-table tr.scored td:nth-child(7){color:var(--green);font-weight:700}
+/* historique : liste de cartes plutot qu'un tableau - lisible sans scroll
+   horizontal sur mobile. But signale par la couleur ET le texte ("Buts"
+   en vert + valeur en gras), jamais la couleur seule. */
+.hist-list{display:flex;flex-direction:column;gap:8px}
+.hist-row{padding:11px 14px;border:1px solid var(--line);border-left:3px solid var(--line);border-radius:10px;background:#061725}
+.hist-row.scored{border-left-color:var(--green)}
+.hist-top{display:flex;justify-content:space-between;gap:10px;color:var(--muted);font:9px var(--mono);text-transform:uppercase;letter-spacing:.03em}
+.hist-match{margin-top:5px;font-size:13px;font-weight:600}
+.hist-stats{display:flex;flex-wrap:wrap;gap:5px 14px;margin-top:8px}
+.hist-stats span{color:var(--muted);font-size:10.5px}
+.hist-stats span b{color:var(--text);font-weight:600}
+.hist-stats span.pos b{color:var(--green)}
+.card-chip{padding:2px 8px;border-radius:8px;font:700 9.5px var(--mono);text-transform:uppercase}
+.card-chip.yellow{background:rgba(255,174,22,.12);color:var(--orange)}
+.card-chip.red{background:rgba(255,61,78,.12);color:var(--red)}
 
 .start-prob{text-align:center;padding:6px 0}
 .start-prob>b{display:block;font:32px var(--display);color:var(--cyan);margin-bottom:10px}

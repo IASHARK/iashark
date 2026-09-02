@@ -26,7 +26,8 @@ import Stripe from "npm:stripe@17";
 // - a defaut, on ne cherche que le customer Stripe deja associe au compte,
 //   ou celui portant l'email verifie du compte ;
 // - le plan n'est jamais eleve a "pro" sans un statut d'abonnement reel
-//   ("active"/"trialing") lu chez Stripe a l'instant meme.
+//   ("active"/"trialing", ou "past_due" dans la tolerance de 4 jours) lu
+//   chez Stripe a l'instant meme.
 // Un utilisateur ne peut donc pas s'offrir Pro en appelant cette URL.
 
 const SUPA_URL = Deno.env.get("SUPABASE_URL")!;
@@ -46,6 +47,19 @@ const HEADERS = {
 };
 
 const ACTIVE_LIKE_STATUSES = new Set(["active", "trialing"]);
+
+// Tolerance impaye : meme regle que stripe-webhook (decision produit du
+// 02/09/2026 - on garde l'acces 4 jours apres la fin de la periode payee
+// pendant que Stripe relance le prelevement, puis on coupe).
+const PAST_DUE_GRACE_DAYS = 4;
+
+function grantsProAccess(status: string, periodEnd: string | null): boolean {
+  if (ACTIVE_LIKE_STATUSES.has(status)) return true;
+  if (status === "past_due" && periodEnd) {
+    return Date.now() < new Date(periodEnd).getTime() + PAST_DUE_GRACE_DAYS * 86400000;
+  }
+  return false;
+}
 
 function periodEndIso(sub: Stripe.Subscription): string | null {
   const anySub = sub as unknown as Record<string, unknown>;
@@ -137,24 +151,26 @@ Deno.serve(async (req: Request) => {
     // 3. Etat reel de l'abonnement chez Stripe, maintenant.
     if (!subscription) {
       const subs = await stripe.subscriptions.list({ customer: customerId, status: "all", limit: 20 });
-      subscription = subs.data.find((s) => ACTIVE_LIKE_STATUSES.has(s.status)) ?? subs.data[0] ?? null;
+      subscription = subs.data.find((s) => ACTIVE_LIKE_STATUSES.has(s.status)) ??
+        subs.data.find((s) => s.status === "past_due") ?? subs.data[0] ?? null;
     }
     if (!subscription) {
       return json({ ok: true, processed: false, plan: null, reason: "no_subscription" });
     }
 
     const status = subscription.status;
+    const periodEnd = periodEndIso(subscription);
     const { error: subError } = await admin.from("subscriptions").upsert({
       stripe_subscription_id: subscription.id,
       user_id: user.id,
       status,
       price_id: subscription.items.data[0]?.price?.id || null,
-      current_period_end: periodEndIso(subscription),
+      current_period_end: periodEnd,
       cancel_at_period_end: !!subscription.cancel_at_period_end,
     }, { onConflict: "stripe_subscription_id" });
     if (subError) throw new Error("ecriture subscriptions: " + subError.message);
 
-    const plan = ACTIVE_LIKE_STATUSES.has(status) ? "pro" : "free";
+    const plan = grantsProAccess(status, periodEnd) ? "pro" : "free";
     const { data: updated, error: planError } = await admin
       .from("users")
       .update({ plan })
@@ -169,7 +185,7 @@ Deno.serve(async (req: Request) => {
     }
 
     console.log("[sync-subscription] compte " + user.id + " synchronise : statut " + status + ", plan " + plan + ".");
-    return json({ ok: true, processed: true, plan, status, current_period_end: periodEndIso(subscription) });
+    return json({ ok: true, processed: true, plan, status, current_period_end: periodEnd });
   } catch (err) {
     console.error("[sync-subscription] echec synchronisation pour " + user.id + ":", (err as Error).message);
     return json({ error: "sync_failed" }, 500);

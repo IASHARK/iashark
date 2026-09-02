@@ -88,6 +88,26 @@ const CORS_HEADERS = {
 // n'est actuellement vendu (§3.1 : pas de "1€ 3 jours", plan FREE permanent).
 const ACTIVE_LIKE_STATUSES = new Set(["active", "trialing"]);
 
+// TOLERANCE IMPAYE (decision produit explicite de l'utilisateur, 02/09/2026).
+// Quand le prelevement du renouvellement echoue (carte expiree, plafond),
+// Stripe passe l'abonnement en "past_due" et relance le paiement pendant
+// plusieurs jours. Couper l'acces des la premiere tentative echouee
+// punirait un client fidele pour un incident bancaire de quelques heures.
+// On garde donc l'acces 4 jours apres la fin de la periode payee, puis on
+// coupe. Re-evalue a chaque evenement Stripe, a chaque appel de
+// sync-subscription, et une fois par jour par la tache planifiee
+// public.expire_past_due_access() (migration 0007) - pour que la coupure
+// tombe bien meme si aucun evenement n'arrive ce jour-la.
+const PAST_DUE_GRACE_DAYS = 4;
+
+function grantsProAccess(status: string, periodEnd: string | null): boolean {
+  if (ACTIVE_LIKE_STATUSES.has(status)) return true;
+  if (status === "past_due" && periodEnd) {
+    return Date.now() < new Date(periodEnd).getTime() + PAST_DUE_GRACE_DAYS * 86400000;
+  }
+  return false;
+}
+
 // `current_period_end` a change d'emplacement selon la version d'API Stripe :
 // sur l'abonnement avant, sur chaque item depuis les versions "dahlia".
 // On lit les deux pour ne dependre d'aucune version.
@@ -228,19 +248,20 @@ Deno.serve(async (req: Request) => {
       throw new Error("utilisateur IASHARK introuvable pour le customer " + customerId);
     }
     const status = deleted ? "canceled" : sub.status;
+    const periodEnd = periodEndIso(sub);
     const { error: subError } = await supabase.from("subscriptions").upsert({
       stripe_subscription_id: sub.id,
       user_id: userId,
       status,
       price_id: sub.items.data[0]?.price?.id || null,
-      current_period_end: periodEndIso(sub),
+      current_period_end: periodEnd,
       cancel_at_period_end: !!sub.cancel_at_period_end,
     }, { onConflict: "stripe_subscription_id" });
     if (subError) throw new Error("ecriture subscriptions: " + subError.message);
 
     // users.plan reflete l'etat reel de l'abonnement - jamais mis a jour
     // par le client (voir compte.html, aucune ecriture directe).
-    const newPlan = ACTIVE_LIKE_STATUSES.has(status) ? "pro" : "free";
+    const newPlan = grantsProAccess(status, periodEnd) ? "pro" : "free";
     const { data: updated, error: planError } = await supabase
       .from("users")
       .update({ plan: newPlan })
@@ -289,10 +310,13 @@ Deno.serve(async (req: Request) => {
         break;
       }
       case "invoice.paid":
-      case "invoice.payment_succeeded": {
+      case "invoice.payment_succeeded":
+      case "invoice.payment_failed": {
         // Troisieme chemin independant vers le passage en Pro : meme si les
         // deux evenements ci-dessus se perdent, une facture payee suffit a
-        // reconstituer l'etat reel de l'abonnement.
+        // reconstituer l'etat reel de l'abonnement. invoice.payment_failed
+        // est traite par le meme chemin : chaque relance de Stripe re-evalue
+        // la tolerance impaye de 4 jours (voir grantsProAccess).
         const invoice = event.data.object as unknown as Record<string, unknown>;
         const rawSub = invoice.subscription ??
           (invoice.parent as Record<string, Record<string, unknown>> | undefined)?.subscription_details?.subscription;

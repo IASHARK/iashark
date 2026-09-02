@@ -106,3 +106,27 @@ test("parseOdds: normalise les lignes premiere mi-temps et tirs sans ligne codee
     { market: "total-shots-on-target", side: "over", line: 8.5, odds: 1.88 },
   ]);
 });
+
+test("les totaux par equipe sont lus sous le nom REEL renvoye par l'API (Total - Home/Away)", () => {
+  // Bug reel trouve le 02/09/2026 en comparant le code aux 29 snapshots de
+  // cotes reellement enregistres : le parseur cherchait "Home Team Total
+  // Goals" / "Away Team Total Goals", noms qu'API-Football ne renvoie
+  // jamais. Ces deux marches n'ont donc jamais ete recuperes depuis la mise
+  // en service, sans la moindre erreur visible.
+  const cotes = { bookmakers: [{ name: "Bet365", bets: [
+    { name: "Total - Home", values: [{ value: "Over 1.5", odd: "2.20" }, { value: "Under 1.5", odd: "1.65" }] },
+    { name: "Total - Away", values: [{ value: "Over 1.5", odd: "2.50" }, { value: "Under 1.5", odd: "1.52" }] }
+  ] }] };
+  const r = parseOdds(cotes);
+  assert.equal(String(r.home_over15), '2.20');
+  assert.equal(String(r.home_under15), '1.65');
+  assert.equal(String(r.away_over15), '2.50');
+  assert.equal(String(r.away_under15), '1.52');
+});
+
+test("l'ancien nom reste accepte, pour ne rien casser si l'API le renvoyait un jour", () => {
+  const cotes = { bookmakers: [{ name: "X", bets: [
+    { name: "Home Team Total Goals", values: [{ value: "Over 1.5", odd: "2.10" }] }
+  ] }] };
+  assert.equal(String(parseOdds(cotes).home_over15), '2.10');
+});

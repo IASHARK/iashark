@@ -185,6 +185,58 @@ test('Buteurs potentiels : un remplacant a gros ratio sur peu de minutes ne pass
     'le temps de jeu reel est expose, pour pouvoir etre affiche a l\'utilisateur');
 });
 
+test('Buteurs potentiels : seule la saison en cours compte, jamais les matchs de la saison passee', () => {
+  // Demande explicite (02/09/2026) : "il y a des championnats qui ont repris
+  // depuis 2 journees, faut mettre les stats depuis les 2 journees". Le
+  // pipeline etiquette deja chaque match avec is_current_season ; ce champ
+  // etait ignore, donc un joueur qui n'a pas joue cette saison remontait
+  // grace a ses matchs de l'an dernier.
+  const saisonPassee = [1, 2, 3, 4, 5, 6, 7, 8].map(fixtureId => ({
+    fixture_id: fixtureId, player_id: 40, team_id: 867, name: 'Star Saison Passee',
+    position: 'Attacker', minutes: 90, rating: 7.5, starter: true,
+    shots_total: 5, shots_on: 3, goals: 1, is_current_season: false
+  }));
+  const saisonEnCours = [9, 10].map(fixtureId => ({
+    fixture_id: fixtureId, player_id: 41, team_id: 867, name: 'Titulaire Actuel',
+    position: 'Attacker', minutes: 90, rating: 7, starter: true,
+    shots_total: 4, shots_on: 2, goals: 0, is_current_season: true
+  }));
+  const vm = buildMatchViewModel(base({
+    player_history: { home: saisonPassee.concat(saisonEnCours), away: [] },
+    current_squads: { home: [{ player_id: 40, name: 'Star Saison Passee' }, { player_id: 41, name: 'Titulaire Actuel' }], away: [] }
+  }));
+  assert.ok(!vm.players.scoringThreat.some(p => p.name === 'Star Saison Passee'),
+    'un joueur sans une seule minute cette saison ne doit jamais etre propose');
+  assert.equal(vm.players.scoringThreat[0].name, 'Titulaire Actuel');
+  assert.equal(vm.players.scoringThreat[0].minutes, 180,
+    'seules les 2 journees de la saison en cours sont comptees, pas les 8 de la saison passee');
+});
+
+test('Buteurs potentiels : un joueur qui cadre beaucoup sans marquer passe devant un buteur a un seul tir', () => {
+  // Demande explicite : "des fois tu peux trouver un mec qui n'a pas marque
+  // mais qui fait beaucoup de tirs cadres, au bout d'un moment ca va rentrer".
+  // Sur quelques matchs les buts sont domines par le hasard, le volume de
+  // tirs cadres est le signal stable.
+  const cadreur = [1, 2, 3].map(fixtureId => ({
+    fixture_id: fixtureId, player_id: 50, team_id: 867, name: 'Cadreur Sans But',
+    position: 'Attacker', minutes: 90, rating: 7, starter: true,
+    shots_total: 6, shots_on: 4, goals: 0, is_current_season: true
+  }));
+  const chanceux = [1, 2, 3].map(fixtureId => ({
+    fixture_id: fixtureId, player_id: 51, team_id: 867, name: 'Buteur Chanceux',
+    position: 'Attacker', minutes: 90, rating: 7, starter: true,
+    shots_total: 1, shots_on: fixtureId === 1 ? 1 : 0, goals: fixtureId === 1 ? 1 : 0, is_current_season: true
+  }));
+  const vm = buildMatchViewModel(base({
+    player_history: { home: cadreur.concat(chanceux), away: [] },
+    current_squads: { home: [{ player_id: 50, name: 'Cadreur Sans But' }, { player_id: 51, name: 'Buteur Chanceux' }], away: [] }
+  }));
+  assert.equal(vm.players.scoringThreat[0].name, 'Cadreur Sans But',
+    '4 tirs cadres/90 sans but doit primer sur 1 but marque sur l\'unique tir de la periode');
+  assert.ok(vm.players.scoringThreat[0].expectedGoals90 > 0,
+    'les buts attendus derives des tirs cadres sont exposes');
+});
+
 test('Buteurs potentiels : un joueur absent/blesse n\'est jamais publie comme menace de but', () => {
   const history = [1, 2, 3, 4, 5].map(fixtureId => ({ fixture_id: fixtureId, player_id: 12, team_id: 867, name: 'Blesse', minutes: 90, rating: 7, starter: true, shots_total: 3, shots_on: 2, goals: 1 }));
   const vm = buildMatchViewModel(base({

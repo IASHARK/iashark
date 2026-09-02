@@ -2346,6 +2346,33 @@ jobs:
               // indisponible, ce bloc produit exactement la meme decision (§10.AJ:
               // "le moteur doit fonctionner a 100% sans lui").
               var pickedMarket=pickMarketDeterministic(allMarkets,{minOdds:1.50});
+              // ECHELLE DE REPLI (demande explicite : "le moteur ne doit plus
+              // passer, il doit forcement me trouver un marche").
+              // Avant, tout match sans marche cote >= 1.50 sortait sans aucune
+              // recommandation - le 02/09, 2 matchs sur 21 (Toulouse-Lille,
+              // Porto-Moreirense) parce qu'AUCUN bookmaker ne les cotait.
+              // On descend maintenant les paliers plutot que d'abandonner, mais
+              // on n'invente JAMAIS de cote : quand il n'y en a pas, le marche
+              // est publie sans prix et le drapeau odds_available le dit.
+              var pickDowngrade=null;
+              if(!pickedMarket&&allMarkets.length){
+                // Des marches sont cotes, mais tous sous 1.50. On prend le plus
+                // probable quand meme : la cote est reelle, seul le seuil de
+                // rentabilite qu'on s'etait fixe n'est pas atteint.
+                pickedMarket=pickMarketDeterministic(allMarkets,{});
+                if(pickedMarket)pickDowngrade='LOW_ODDS';
+              }
+              if(!pickedMarket&&modelDataAvailable){
+                // Aucune cote disponible du tout. Le modele a pourtant tourne :
+                // on publie son marche le plus probable, sans prix, sans edge et
+                // sans Kelly - il n'y a rien a comparer.
+                var modelOnly=allMarketCandidates.filter(function(m){return Number.isFinite(Number(m.prob));})
+                  .slice().sort(function(a,b){return Number(b.prob)-Number(a.prob);});
+                if(modelOnly.length){
+                  pickedMarket={id:modelOnly[0].id,market:modelOnly[0].market,prob:Number(modelOnly[0].prob),cote:null,marketProb:null};
+                  pickDowngrade='NO_ODDS';
+                }
+              }
               var eligibleMarkets=allMarkets.filter(function(m){return parseFloat(m.cote)>=1.50;});
               // Score(s) le(s) plus probable(s) affiches a l'utilisateur : filtres
               // pour rester coherents avec le marche recommande (ex: pas de "1-0"
@@ -2380,9 +2407,10 @@ jobs:
                   if(k!=null) kellyVal=k;
                 }
               }
-              // Pas de marche exploitable (aucune cote >= 1.50) -> aucun signal a
-              // afficher, decide en code (reprend la regle 5 de l'ancien prompt,
-              // qui n'a plus besoin d'etre laissee a l'appreciation du LLM).
+              // Un match ne sort desormais sans recommandation que si le modele
+              // lui-meme n'a rien pu calculer (INSUFFICIENT_MODEL_DATA) : il n'y
+              // a alors aucune probabilite honnete a publier. Dans tous les
+              // autres cas, l'echelle de repli ci-dessus a fourni un marche.
               var noSignal=!pickedMarket;
               var injuries=(injRaw||[]).map(function(inj){return{name:inj.name,team:inj.team===home.id?home.id:away.id,reason:inj.reason||'Blessure',status:(inj.status||'out').toLowerCase().includes('suspend')?'suspended':'out',impact:'medium'};});
               var matchup=calcMatchup(xgH,xgA,sH,sA);
@@ -2583,7 +2611,9 @@ jobs:
                 marche:pickedMarket?categorizeMarket(pickedMarket.market):'RESULTAT',market_id:pickedMarket?pickedMarket.id:null,
                 risque:riskLabelCode,pari_rec:pickedMarket?pickedMarket.market:'',
                 markets_compared:marketsCompared,
-                cote_rec:pickedMarket?String(pickedMarket.cote):'',
+                cote_rec:(pickedMarket&&pickedMarket.cote!=null&&pickedMarket.cote!=='')?String(pickedMarket.cote):'',
+                odds_available:!!(pickedMarket&&pickedMarket.cote!=null&&pickedMarket.cote!==''),
+                pick_downgrade:pickDowngrade||'',
                 no_signal:noSignal,
                 no_signal_label:noSignal?'Aucun signal clair sur ce match':'',
                 mise:'2-3% bankroll',

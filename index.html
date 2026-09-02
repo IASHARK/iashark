@@ -66,6 +66,38 @@ body::before{content:'';position:fixed;top:-300px;left:50%;transform:translateX(
 .champ-item{padding:9px 10px;border-radius:8px;font-size:13px;cursor:pointer;color:var(--text);font-family:'DM Sans',sans-serif;}
 .champ-item:hover,.champ-item.active{background:rgba(245,158,11,0.12);color:var(--amber);}
 
+/* Cartes "Hier" : verdict au premier coup d'oeil. Le contour porte le
+   resultat (vert = pari valide, rouge = perdu), double d'un symbole ET d'un
+   mot - jamais la couleur seule, qui exclurait les daltoniens. */
+.res-list{max-width:720px;margin:0 auto;padding:0 20px;display:flex;flex-direction:column;gap:10px;}
+.res-card{display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:12px;background:var(--card);border:1px solid var(--border);}
+.res-card.win{border-color:rgba(16,185,129,0.55);background:linear-gradient(180deg,rgba(16,185,129,0.06),var(--card));}
+.res-card.loss{border-color:rgba(239,68,68,0.5);background:linear-gradient(180deg,rgba(239,68,68,0.05),var(--card));}
+.res-verdict{flex:none;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-size:15px;font-weight:700;}
+.res-card.win .res-verdict{background:rgba(16,185,129,0.14);color:var(--green);border:1px solid rgba(16,185,129,0.45);}
+.res-card.loss .res-verdict{background:rgba(239,68,68,0.12);color:var(--red);border:1px solid rgba(239,68,68,0.4);}
+.res-card.pending .res-verdict{background:rgba(255,255,255,0.05);color:var(--muted);border:1px solid var(--border);}
+.res-main{flex:1;min-width:0;}
+.res-teams{font-size:14.5px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.res-pick{margin-top:3px;font-size:12.5px;color:var(--muted);}
+.res-pick b{color:var(--cyan);font-weight:600;}
+.res-right{flex:none;text-align:right;}
+.res-score{font-family:'Space Mono',monospace;font-size:16px;font-weight:700;color:var(--text);}
+.res-label{margin-top:3px;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;}
+.res-card.win .res-label{color:var(--green);}
+.res-card.loss .res-label{color:var(--red);}
+.res-card.pending .res-label{color:var(--muted);}
+.res-empty{max-width:720px;margin:0 auto;padding:28px 20px;text-align:center;color:var(--muted);font-size:13.5px;}
+/* Inseres dans #cardsList, qui est deja une grille a largeur contrainte :
+   on annule la mise en page autonome, sinon les cartes ressortent plus
+   etroites que le reste de la page. */
+.cards-list .res-list,.cards-list .res-summary,.cards-list .res-empty{max-width:none;margin-left:0;margin-right:0;padding-left:0;padding-right:0;}
+.cards-list .res-wrap{display:flex;flex-direction:column;}
+.cards-list .res-summary{margin-bottom:14px;padding:12px 16px;}
+.res-summary{max-width:720px;margin:0 auto 14px;padding:12px 16px;border-radius:12px;background:var(--card2);border:1px solid var(--border);display:flex;gap:22px;justify-content:center;flex-wrap:wrap;}
+.res-summary div{text-align:center;}
+.res-summary b{display:block;font-size:19px;font-weight:700;color:var(--text);}
+.res-summary span{font-size:10.5px;color:var(--muted);letter-spacing:.05em;text-transform:uppercase;}
 .day-tabs{max-width:720px;margin:0 auto 14px;padding:0 20px;display:flex;gap:8px;position:relative;z-index:1;}
 .day-tab{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:2px;padding:8px 20px;border-radius:10px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:.2s;}
 .day-tab.active{background:rgba(34,211,238,0.1);border-color:var(--border-cyan);color:var(--cyan);}
@@ -417,6 +449,7 @@ body::before{top:-180px;width:1080px;height:700px;background:radial-gradient(ell
     <div class="decisions-title"><h2>Les décisions du jour</h2><p>Un marché prioritaire par match, choisi selon la convergence des données.</p></div>
     <div class="decision-controls">
       <div class="day-tabs">
+        <button class="day-tab" id="tabYesterday" onclick="setDayTab('yesterday')">Hier <span class="tab-count" id="countYesterday">—</span></button>
         <button class="day-tab active" id="tabToday" onclick="setDayTab('today')">Aujourd'hui <span class="tab-count" id="countToday">—</span></button>
         <button class="day-tab" id="tabTomorrow" onclick="setDayTab('tomorrow')">Demain <span class="tab-count" id="countTomorrow">—</span></button>
       </div>
@@ -502,11 +535,81 @@ function getSportMatchs(){return allMatchs.filter(function(m){return(m.sport||'f
 
 function getTodayStr(){var p=new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Paris',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date());return p.map(function(x){return x.value;}).join('');}
 function getTomorrowStr(){var d=new Date();d.setDate(d.getDate()+1);var p=new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Paris',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(d);return p.map(function(x){return x.value;}).join('');}
+function getYesterdayStr(){var d=new Date();d.setDate(d.getDate()-1);var p=new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Paris',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(d);return p.map(function(x){return x.value;}).join('');}
 function isToday(m){return(m.date||'').startsWith(getTodayStr());}
 function isTomorrow(m){return(m.date||'').startsWith(getTomorrowStr());}
-function setDayTab(day){currentDayFilter=day;document.getElementById('tabToday').classList.toggle('active',day==='today');document.getElementById('tabTomorrow').classList.toggle('active',day==='tomorrow');renderMatchs();}
+function setDayTab(day){
+  currentDayFilter=day;
+  ['tabYesterday','tabToday','tabTomorrow'].forEach(function(id,i){
+    var el=document.getElementById(id);
+    if(el)el.classList.toggle('active',day===['yesterday','today','tomorrow'][i]);
+  });
+  renderMatchs();
+}
 function applyDayFilter(list){if(currentDayFilter==='today')return list.filter(isToday);if(currentDayFilter==='tomorrow')return list.filter(isTomorrow);return list;}
-function updateCounts(){var sl=getSportMatchs();var ct=sl.filter(isToday).length,cm=sl.filter(isTomorrow).length;var et=document.getElementById('countToday'),em=document.getElementById('countTomorrow');if(et)et.textContent=ct;if(em)em.textContent=cm;if(ct===0&&cm>0)setDayTab('tomorrow');}
+function updateCounts(){
+  var sl=getSportMatchs();var ct=sl.filter(isToday).length,cm=sl.filter(isTomorrow).length;
+  var et=document.getElementById('countToday'),em=document.getElementById('countTomorrow'),ey=document.getElementById('countYesterday');
+  if(et)et.textContent=ct;if(em)em.textContent=cm;
+  if(ey)ey.textContent=yesterdayPicks.length;
+  if(ct===0&&cm>0)setDayTab('tomorrow');
+}
+
+// --- Onglet "Hier" -------------------------------------------------------
+// Les matchs passes ne sont pas dans data.json (qui ne contient que le jour
+// meme et le lendemain) : ils viennent de historique.json, ou le pipeline a
+// deja resolu chaque pari en win/loss avec le score final. On ne recalcule
+// donc aucun resultat ici, on affiche celui qui a ete verifie.
+var yesterdayPicks=[];
+async function loadYesterday(){
+  try{
+    var r=await fetch('/historique.json?t='+Date.now());
+    if(!r.ok)return;
+    var d=await r.json();
+    var y=getYesterdayStr();
+    yesterdayPicks=(d.predictions||[])
+      .filter(function(p){return String(p.date||'').slice(0,10)===y;})
+      .sort(function(a,b){return String(a.date||'')<String(b.date||'')?-1:1;});
+  }catch(e){}
+  updateCounts();
+  if(currentDayFilter==='yesterday')renderMatchs();
+}
+
+function buildResultCard(p){
+  var res=String(p.result||'').toLowerCase();
+  var win=res==='win',loss=res==='loss';
+  var cls=win?'win':loss?'loss':'pending';
+  var mark=win?'\u2713':loss?'\u2715':'\u00b7';
+  var label=win?'Validé':loss?'Perdu':'En attente';
+  var teams=esc((p.home||'')+' – '+(p.away||''))||esc(p.match||'');
+  var cote=(p.cote!=null&&p.cote!=='')?' @ '+esc(String(p.cote)):'';
+  return '<div class="res-card '+cls+'">'
+    +'<div class="res-verdict" aria-hidden="true">'+mark+'</div>'
+    +'<div class="res-main"><div class="res-teams">'+teams+'</div>'
+    +'<div class="res-pick"><b>'+esc(p.prediction||'—')+'</b>'+cote+'</div></div>'
+    +'<div class="res-right"><div class="res-score">'+(p.score?esc(p.score):'—')+'</div>'
+    +'<div class="res-label">'+label+'</div></div></div>';
+}
+
+function renderYesterday(){
+  var el=document.getElementById('cardsList'),hero=document.getElementById('heroFeature');
+  if(hero)hero.innerHTML='';
+  if(!yesterdayPicks.length){
+    el.innerHTML='<div class="res-empty">Aucun pari publié hier.</div>';
+    return;
+  }
+  var w=yesterdayPicks.filter(function(p){return String(p.result).toLowerCase()==='win';}).length;
+  var l=yesterdayPicks.filter(function(p){return String(p.result).toLowerCase()==='loss';}).length;
+  var resolus=w+l;
+  var taux=resolus?Math.round(w/resolus*100):null;
+  var resume='<div class="res-summary">'
+    +'<div><b>'+yesterdayPicks.length+'</b><span>paris</span></div>'
+    +'<div><b>'+w+'</b><span>validés</span></div>'
+    +'<div><b>'+l+'</b><span>perdus</span></div>'
+    +(taux!==null?'<div><b>'+taux+'%</b><span>réussite</span></div>':'')
+    +'</div>';
+  el.innerHTML='<div class="res-wrap">'+resume+'<div class="res-list">'+yesterdayPicks.map(buildResultCard).join('')+'</div></div>';
+}
 
 function leagueKey(m){return(m.league_key||'').toLowerCase();}
 
@@ -713,6 +816,9 @@ function getChoc(list){
 }
 
 function renderMatchs(){
+  // L'onglet "Hier" ne lit pas data.json (qui n'a que aujourd'hui/demain) :
+  // il affiche les paris deja resolus de historique.json.
+  if(currentDayFilter==='yesterday'){renderYesterday();return;}
   var sl=getSportMatchs(),dayList=applyDayFilter(sl),list=applySearchFilter(filterMatchs(dayList,currentFilter)),isDemain=currentDayFilter==='tomorrow',el=document.getElementById('cardsList'),hero=document.getElementById('heroFeature');
   var nowStr=(function(){var d=new Date(),f=new Intl.DateTimeFormat('fr-FR',{timeZone:'Europe/Paris',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false}).formatToParts(d),r={};f.forEach(function(x){r[x.type]=x.value;});return r.year+'-'+r.month+'-'+r.day+' '+r.hour+':'+r.minute;})();
   var heroSource=filterMatchs(dayList,currentFilter),heroUpcoming=heroSource.filter(function(m){return(m.date||'')>=nowStr;}),heroPool=heroUpcoming.length?heroUpcoming:heroSource;
@@ -738,6 +844,7 @@ async function loadData(){
     var d=await r.json();
     allMatchs=d.matchs||[];
     updateCounts();
+    loadYesterday();
     buildLeagueBtns(getSportMatchs());
     setupFilters();
     renderMatchs();

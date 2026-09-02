@@ -122,7 +122,10 @@ function matchReadingCard(vm){
   const btts=findMarket(vm.model.marketsCompared,/btts/i);
   const x=vm.model.expectedGoals;
   const totalXg=x&&n(x.home)!==null&&n(x.away)!==null?x.home+x.away:null;
+  const risk=vm.editorial.risk;
+  const risqueDescriptif=risk&&!['FAIBLE','MODERE','ELEVE'].includes(risk)?risk:null;
   return `<section class="card lecture reveal">
+    <h2>${cardIcon('bulb')}Notre lecture du match</h2>
     <div class="lecture-top">
       <p class="reading">${esc(sentence)}${reason?' '+esc(reason):''}</p>
       <div class="lecture-1x2">
@@ -131,6 +134,7 @@ function matchReadingCard(vm){
         <div><small>${esc(awayName)}</small><b class="neg">${pct(p.away)}</b></div>
       </div>
     </div>
+    ${risqueDescriptif?`<div class="risk-note"><b>⚠</b><span>${esc(risqueDescriptif)}</span></div>`:''}
     <div class="lecture-stats">
       ${totalXg!==null?`<div><small>Buts attendus</small><b>${fmt(totalXg)}</b></div>`:''}
       ${btts?`<div><small>BTTS</small><b>${pct(btts.probability)}</b></div>`:''}
@@ -140,22 +144,24 @@ function matchReadingCard(vm){
   </section>`;
 }
 
+// Tient sur une seule ligne (desktop) : marche + probabilite (ring
+// compact) + cotes + value + badges, plus de rangee separee "Score
+// IASHARK" (retire, redondant avec la confiance deja affichee dans
+// "Notre lecture du match").
 function recommendation(vm){
   const r=vm.model.recommendation;
   if(!r)return card('Recommandation IASHARK',empty(vm.model.unavailableReason||'Aucun marché ne franchit les seuils de confiance ou de cote minimale pour ce match — IASHARK préfère ne pas se prononcer.'));
   const fair=r.probability>0?100/r.probability:null;
   const value=vm.model.value;
   return `<section class="card reco reveal">
-    <div class="reco-head">
-      <div><span class="reco-eyebrow">Recommandation IASHARK</span><h1 class="reco-market">${esc(r.market)}</h1></div>
+    <span class="reco-eyebrow">Recommandation IASHARK</span>
+    <div class="reco-line">
+      <h1 class="reco-market">${esc(r.market)}</h1>
+      ${probRing(r.probability)}
+      <div class="reco-mini"><small>Cote équitable</small><b>${fmt(fair,2)}</b></div>
+      <div class="reco-mini"><small>Cote marché</small><b>${fmt(vm.model.recommendedOdds,2)}</b></div>
+      ${value!==null?`<div class="reco-mini"><small>Value</small><b class="${value>=0?'pos':'neg'}">${value>=0?'+':''}${fmt(value)}%</b></div>`:''}
       <div class="reco-badges">${confidenceBadge(r.reliability)}${riskBadge(vm.editorial.riskCode)}</div>
-    </div>
-    <div class="reco-stats">
-      <div class="reco-prob"><small>Probabilité modèle</small>${probRing(r.probability,true)}</div>
-      <div><small>Score IASHARK</small><b>${vm.model.iasharkScore===null?'—':Math.round(vm.model.iasharkScore)+'/100'}</b></div>
-      <div><small>Cote équitable</small><b>${fmt(fair,2)}</b></div>
-      <div><small>Cote marché</small><b>${fmt(vm.model.recommendedOdds,2)}</b></div>
-      ${value!==null?`<div><small>Value</small><b class="${value>=0?'pos':'neg'}">${value>=0?'+':''}${fmt(value)}%</b></div>`:''}
     </div>
   </section>`;
 }
@@ -173,15 +179,29 @@ function reasonsCard(vm){
 // une "probabilite de marquer" inventee. "Cote equitable" = notre propre
 // calcul (100/proba), jamais une cote de marche qu'on n'a pas reellement
 // pour un joueur precis.
+// Justification "pourquoi ce joueur" : phrase deterministe (jamais un
+// nouvel appel LLM), assemblee uniquement a partir des vraies stats deja
+// calculees pour ce candidat (goals90/shotsOn90/startProbability, cf
+// scoringThreatRanking). Rien n'est invente, juste mis en phrase.
+function buteurReason(p){
+  const parts=[];
+  if(n(p.goals90)!==null&&p.goals90>0)parts.push(`${fmt(p.goals90)} but/90`);
+  if(n(p.shotsOn90)!==null&&p.shotsOn90>0)parts.push(`${fmt(p.shotsOn90)} tirs cadrés/90`);
+  if(!parts.length)return '';
+  let s=`${p.name} affiche ${parts.join(' et ')} sur son échantillon récent`;
+  if(n(p.startProbability)!==null)s+=`, avec ${pct(p.startProbability)} de chances d'être titulaire`;
+  return s+' — un profil parmi les plus dangereux de la rencontre.';
+}
 function threatsCard(vm){
   const list=vm.players.scoringThreat;
   if(!list.length)return '';
-  return card('Buteur à surveiller',`<div class="threats">${list.slice(0,1).map(p=>{
+  return card('Buteur à surveiller',list.slice(0,1).map(p=>{
     const pid=n(p.id);
     const href=pid!==null?` href="/joueur.html?m=${esc(vm.id)}&p=${pid}"`:'';
     const tag=pid!==null?'a':'div';
     const sp=n(p.scoringProbability);
     const fairOdds=sp&&sp>0?100/sp:null;
+    const reason=buteurReason(p);
     return `<${tag} class="threat"${href}>
       <div class="threat-top">${img(p.photo,p.name)}<div><b>${esc(p.name)}</b><small>${esc(p.team||'')}${p.position?' · '+esc(p.position):''}</small></div></div>
       <div class="threat-figures">
@@ -189,8 +209,9 @@ function threatsCard(vm){
         ${fairOdds!==null?`<div><b>${fmt(fairOdds,2)}</b><small>Cote équitable</small></div>`:''}
       </div>
       <div class="threat-stats"><span>Buts/90 <b>${fmt(p.goals90)}</b></span><span>Tirs cadrés/90 <b>${fmt(p.shotsOn90)}</b></span>${n(p.startProbability)!==null?`<span>Titulaire <b>${pct(p.startProbability)}</b></span>`:''}</div>
+      ${reason?`<p class="threat-reason">${esc(reason)}</p>`:''}
     </${tag}>`;
-  }).join('')}</div>`,'threats-card','target2');
+  }).join(''),'threats-card','target2');
 }
 
 // "Ce qu'il faut savoir" : classification deja faite par
@@ -277,19 +298,13 @@ function marketsWatchCard(vm){
   return card('Marchés à surveiller',`<div class="table-scroll"><table class="mvm-table"><thead><tr><th>Marché</th><th>Intérêt</th><th>Confiance</th></tr></thead><tbody>${rows}</tbody></table></div>`,'','target');
 }
 
-function probabilities(vm){
-  const p=vm.model.probabilities;
-  if(!p)return empty('Probabilités indisponibles.');
-  return `<div class="prob-bar"><span class="home" style="width:${clamp(p.home)}%">${p.home>=10?pct(p.home):''}</span><span class="draw" style="width:${clamp(p.draw)}%">${p.draw>=10?pct(p.draw):''}</span><span class="away" style="width:${clamp(p.away)}%">${p.away>=10?pct(p.away):''}</span></div><div class="prob-legend"><span>Domicile</span><span>Nul</span><span>Extérieur</span></div>`;
-}
-
-// Sorties modele : 1X2 + xG + Scores probables reunis dans une seule carte
-// (au lieu de 3 cartes eparses) - meme densite que la maquette de reference.
+// Sorties modele : xG (avec les logos des 2 equipes) + Scores probables -
+// les probabilites 1X2 sont retirees d'ici (deja dans "Notre lecture du
+// match" juste au-dessus, redondant).
 function outputsCard(vm){
-  const x=vm.model.expectedGoals,s=vm.model.scores;
-  return card('Sorties modèle',`<div class="outputs">
-    <div class="outputs-col"><small>Probabilités 1X2</small>${probabilities(vm)}</div>
-    <div class="outputs-col outputs-xg"><small>Buts attendus (xG)</small>${x?`<div class="xg-row"><b>${fmt(x.home)}</b><span>xG</span><b>${fmt(x.away)}</b></div>`:empty('xG indisponibles.')}</div>
+  const x=vm.model.expectedGoals,s=vm.model.scores,i=vm.identity;
+  return card('Sorties modèle',`<div class="outputs outputs-2col">
+    <div class="outputs-col outputs-xg"><small>Buts attendus (xG)</small>${x?`<div class="xg-row">${img(i.home.logo,i.home.name)}<b>${fmt(x.home)}</b><span>xG</span><b>${fmt(x.away)}</b>${img(i.away.logo,i.away.name)}</div>`:empty('xG indisponibles.')}</div>
     <div class="outputs-col"><small>Scores probables</small>${s.length?`<div class="scores-row">${s.map(sc=>`<div class="score-pill"><b>${esc(sc.score)}</b><small>${pct(sc.probability)}</small></div>`).join('')}</div>`:empty('Scores probables indisponibles.')}</div>
   </div>`);
 }
@@ -301,14 +316,6 @@ function comparison(vm){
     const max=Math.max(row.home,row.away,1);
     return `<div class="compare-row"><b>${fmt(row.home)}</b><div class="compare-bar home"><i style="width:${row.home/max*100}%"></i></div><span>${esc(row.label)}</span><div class="compare-bar away"><i style="width:${row.away/max*100}%"></i></div><b>${fmt(row.away)}</b></div>`;
   }).join('');
-}
-
-function reading(vm){
-  const text=vm.editorial.reading;
-  const risk=vm.editorial.risk;
-  const risqueDescriptif=risk&&!['FAIBLE','MODERE','ELEVE'].includes(risk)?risk:null;
-  if(!text&&!risqueDescriptif)return empty('Lecture du match indisponible.');
-  return `${text?`<p class="reading">${esc(text)}</p>`:''}${risqueDescriptif?`<div class="risk-note"><b>⚠</b><span>${esc(risqueDescriptif)}</span></div>`:''}`;
 }
 
 // Scenario par tranches de 15 minutes : courbe reliant les 6 vraies valeurs
@@ -395,7 +402,6 @@ function render(raw){
     ${recommendation(vm)}
     ${reasonsCard(vm)}
     ${outputsCard(vm)}
-    ${card('Lecture du match',reading(vm))}
     <div class="lead-grid">
       <div class="lead-main">${mainCol.join('')}</div>
       <div class="lead-aside">${asideCol.join('')}</div>

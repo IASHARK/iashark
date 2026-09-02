@@ -560,8 +560,18 @@ function faqCard(vm){
       `L’écart le plus marqué porte sur ${esc(top.market)} : le modèle l’estime à ${pct(top.probability)} quand le marché en fait ${pct(top.consensus)}, soit ${e>0?'+':''}${fmt(e)} points d’écart. ${Math.abs(e)>=5?'Un écart de cette ampleur mérite d’être vérifié avant de miser.':'Les deux lectures restent proches sur l’ensemble des marchés suivis.'}`]);
   }
 
-  if(vm.editorial.risk){
-    qa.push(['Quel est le principal risque de ce pari ?',esc(vm.editorial.risk)]);
+  // vm.editorial.risk contient soit une vraie phrase (raw.risk_principal),
+  // soit le simple code de niveau (raw.risque = "FAIBLE"/"MODERE"/"ELEVE").
+  // Repondre "FAIBLE" a la question "quel est le principal risque ?" est une
+  // non-reponse : on ne pose la question que si on a du texte exploitable,
+  // et on reformule proprement le cas du simple niveau.
+  const NIVEAUX={FAIBLE:'faible',MODERE:'modéré',ELEVE:'élevé'};
+  const riskRaw=String(vm.editorial.risk||'').trim();
+  if(NIVEAUX[riskRaw.toUpperCase()]){
+    qa.push(['Quel est le niveau de risque de ce pari ?',
+      `Le modèle classe ce pari en risque <b>${NIVEAUX[riskRaw.toUpperCase()]}</b>. Ce niveau reflète la stabilité des données et la cohérence des marchés sur ce match, pas une garantie sur le résultat.`]);
+  } else if(riskRaw.length>12){
+    qa.push(['Quel est le principal risque de ce pari ?',esc(riskRaw)]);
   }
 
   const sources=Array.isArray(vm.model.sources)?vm.model.sources.filter(Boolean):[];

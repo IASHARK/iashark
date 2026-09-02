@@ -116,6 +116,60 @@ Deno.serve(async (req: Request) => {
     });
   }
 
+  // Resout user_id <-> stripe_customer_id, en creant le mapping au passage
+  // s'il n'existe pas encore. BUG REEL trouve en conditions live (premier
+  // vrai abonnement du site) : Stripe n'envoie pas checkout.session.completed
+  // en premier de maniere garantie - ici customer.subscription.created est
+  // arrive AVANT checkout.session.completed, donc billing_customers n'existait
+  // pas encore quand le handler d'abonnement cherchait le mapping, et
+  // l'evenement etait silencieusement ignore (paiement reel, plan jamais
+  // passe a pro). Repli : si billing_customers n'a rien, on va chercher
+  // l'email du customer cote Stripe et on le relie a auth.users par email -
+  // fonctionne quel que soit l'ordre d'arrivee des evenements.
+  async function resolveUserId(customerId: string): Promise<string | null> {
+    const { data: mapping } = await supabase
+      .from("billing_customers")
+      .select("user_id")
+      .eq("stripe_customer_id", customerId)
+      .maybeSingle();
+    if (mapping) return mapping.user_id;
+    try {
+      const customer = await stripe.customers.retrieve(customerId);
+      const email = !customer.deleted ? customer.email : null;
+      if (!email) return null;
+      const { data: authUser } = await supabase.auth.admin.listUsers();
+      const match = authUser?.users?.find((u) => u.email?.toLowerCase() === email.toLowerCase());
+      if (!match) return null;
+      await supabase.from("billing_customers").upsert({ user_id: match.id, stripe_customer_id: customerId }, { onConflict: "user_id" });
+      return match.id;
+    } catch (err) {
+      console.error("[stripe-webhook] resolveUserId: echec repli par email pour customer " + customerId + ":", (err as Error).message);
+      return null;
+    }
+  }
+
+  async function applySubscription(sub: Stripe.Subscription, deleted: boolean) {
+    const customerId = typeof sub.customer === "string" ? sub.customer : sub.customer.id;
+    const userId = await resolveUserId(customerId);
+    if (!userId) {
+      console.error("[stripe-webhook] subscription pour customer " + customerId + " sans utilisateur IASHARK resolvable - evenement ignore.");
+      return;
+    }
+    const status = deleted ? "canceled" : sub.status;
+    await supabase.from("subscriptions").upsert({
+      stripe_subscription_id: sub.id,
+      user_id: userId,
+      status,
+      price_id: sub.items.data[0]?.price?.id || null,
+      current_period_end: sub.current_period_end ? new Date(sub.current_period_end * 1000).toISOString() : null,
+      cancel_at_period_end: !!sub.cancel_at_period_end,
+    }, { onConflict: "stripe_subscription_id" });
+    // users.plan reflete l'etat reel de l'abonnement - jamais mis a jour
+    // par le client (voir compte.html, aucune ecriture directe).
+    const newPlan = ACTIVE_LIKE_STATUSES.has(status) ? "pro" : "free";
+    await supabase.from("users").update({ plan: newPlan }).eq("id", userId);
+  }
+
   try {
     switch (event.type) {
       case "checkout.session.completed": {
@@ -127,35 +181,23 @@ Deno.serve(async (req: Request) => {
           break;
         }
         await supabase.from("billing_customers").upsert({ user_id: userId, stripe_customer_id: customerId }, { onConflict: "user_id" });
+        // Repli : si l'evenement d'abonnement est deja arrive/reparti avant
+        // que ce mapping existe (voir resolveUserId ci-dessus), on rattrape
+        // ici en recuperant directement l'abonnement associe a la session -
+        // garantit que le plan passe a "pro" meme si les deux evenements
+        // arrivent dans le pire ordre possible.
+        const subscriptionId = typeof session.subscription === "string" ? session.subscription : session.subscription?.id;
+        if (subscriptionId) {
+          const sub = await stripe.subscriptions.retrieve(subscriptionId);
+          await applySubscription(sub, false);
+        }
         break;
       }
       case "customer.subscription.created":
       case "customer.subscription.updated":
       case "customer.subscription.deleted": {
         const sub = event.data.object as Stripe.Subscription;
-        const customerId = typeof sub.customer === "string" ? sub.customer : sub.customer.id;
-        const { data: mapping } = await supabase
-          .from("billing_customers")
-          .select("user_id")
-          .eq("stripe_customer_id", customerId)
-          .maybeSingle();
-        if (!mapping) {
-          console.error("[stripe-webhook] subscription pour customer " + customerId + " sans mapping billing_customers connu - evenement ignore.");
-          break;
-        }
-        const status = event.type === "customer.subscription.deleted" ? "canceled" : sub.status;
-        await supabase.from("subscriptions").upsert({
-          stripe_subscription_id: sub.id,
-          user_id: mapping.user_id,
-          status,
-          price_id: sub.items.data[0]?.price?.id || null,
-          current_period_end: sub.current_period_end ? new Date(sub.current_period_end * 1000).toISOString() : null,
-          cancel_at_period_end: !!sub.cancel_at_period_end,
-        }, { onConflict: "stripe_subscription_id" });
-        // users.plan reflete l'etat reel de l'abonnement - jamais mis a
-        // jour par le client (voir compte.html, aucune ecriture directe).
-        const newPlan = ACTIVE_LIKE_STATUSES.has(status) ? "pro" : "free";
-        await supabase.from("users").update({ plan: newPlan }).eq("id", mapping.user_id);
+        await applySubscription(sub, event.type === "customer.subscription.deleted");
         break;
       }
       default:

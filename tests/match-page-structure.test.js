@@ -10,7 +10,14 @@ test("la page Match est un shell léger sans ancien rendu inline",()=>{
 });
 test("la page simple expose une seule colonne de sections réelles, sans onglets",()=>{
   assert.doesNotMatch(js,/data-tab=/);assert.doesNotMatch(js,/role="tablist"/);
-  for(const value of ['Recommandation IASHARK','Notre lecture du match','Buts attendus','Pourquoi le pari ressort','Scores probables','Scénario probable du match','Buteur à surveiller','Absents & incertains'])assert.match(js,new RegExp(value));
+  // Libelles mis a jour le 02/09/2026 apres decisions produit explicites :
+  // "Recommandation IASHARK" -> "Le signal IASHARK" (remontee en tete de page) ;
+  // "Pourquoi le pari ressort" -> "Comparatif des deux equipes" (l'ancien titre
+  // promettait une justification que le tableau ne donnait pas) ;
+  // "Absents & incertains" supprimee (n'affichait le plus souvent que
+  // "aucune absence" pour les deux equipes) ;
+  // "Questions sur ce match" ajoutee.
+  for(const value of ['Le signal IASHARK','Notre lecture du match','Buts attendus','Comparatif des deux équipes','Scores probables','Scénario probable du match','Buteur à surveiller','Questions sur ce match'])assert.match(js,new RegExp(value));
 });
 test("la page est responsive",()=>{
   assert.match(css,/@media\(max-width:640px\)/);

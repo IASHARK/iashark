@@ -2740,9 +2740,54 @@ jobs:
         run: node pipeline.js
 
       - name: Commit and push
+        # Le pipeline tourne ~20 minutes. Un simple "git push" echoue des que
+        # quiconque pousse sur main pendant ce temps (arrive le 02/09/2026 :
+        # "! [rejected] main -> main (fetch first)", 20 minutes de calcul et
+        # toutes les analyses du jour perdues).
+        #
+        # Strategie : les fichiers ci-dessous sont des SORTIES regenerees
+        # integralement a chaque execution, jamais des sources editees a la
+        # main. On peut donc, sans rien perdre, repartir de l'etat distant a
+        # jour et y reposer les sorties fraiches. Pas de rebase, donc pas de
+        # resolution de conflit hasardeuse : le code distant est conserve tel
+        # quel, les donnees du jour sont celles qui viennent d'etre calculees.
         run: |
+          set -euo pipefail
+          OUTPUTS="data.json historique.json transferts.json actus.json sitemap.xml match index.html league-coverage-report.json"
+
           git config user.name "IASHARK"
           git config user.email "yaramode81@gmail.com"
-          git add data.json historique.json transferts.json actus.json sitemap.xml sitemap-*.xml match/ index.html league-coverage-report.json
-          git diff --staged --quiet || git commit -m "Daily update - $(date +%Y-%m-%d)"
-          git push
+
+          git add $OUTPUTS sitemap-*.xml
+          if git diff --staged --quiet; then
+            echo "Aucun changement a publier."
+            exit 0
+          fi
+
+          SAVE="$(mktemp -d)"
+          for f in $OUTPUTS; do
+            [ -e "$f" ] && cp -R "$f" "$SAVE/"
+          done
+          cp sitemap-*.xml "$SAVE/" 2>/dev/null || true
+
+          for attempt in 1 2 3 4 5; do
+            git add $OUTPUTS sitemap-*.xml
+            git diff --staged --quiet || git commit -m "Daily update - $(date +%Y-%m-%d)"
+
+            if git push; then
+              echo "Publie (tentative $attempt)."
+              exit 0
+            fi
+
+            echo "Push refuse : main a avance pendant le pipeline. Rattrapage (tentative $attempt)..."
+            git fetch origin main
+            git reset --hard origin/main
+            for f in $OUTPUTS; do
+              rm -rf "$f"
+              [ -e "$SAVE/$f" ] && cp -R "$SAVE/$f" .
+            done
+            cp "$SAVE"/sitemap-*.xml . 2>/dev/null || true
+          done
+
+          echo "Echec de publication apres 5 tentatives." >&2
+          exit 1

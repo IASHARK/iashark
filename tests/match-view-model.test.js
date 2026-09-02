@@ -155,6 +155,36 @@ test('Buteurs potentiels : classe par signal de menace reel (buts/90 + tirs cadr
   assert.ok(!vm.players.scoringThreat.some(p => p.name === 'Milieu Passeur'), 'aucun but ni tir cadre reel -> pas de menace de but publiee');
 });
 
+test('Buteurs potentiels : un remplacant a gros ratio sur peu de minutes ne passe jamais devant un titulaire regulier', () => {
+  // Bug reel signale le 02/09/2026 : la page proposait "des vieux joueurs qui
+  // n'ont meme pas joue". Cause : le tri se faisait sur les ratios par 90
+  // minutes sans exiger de temps de jeu. Ici le remplacant affiche 3 buts/90
+  // (1 but en 30 minutes) contre 0,6 pour le titulaire (6 buts en 900
+  // minutes) : sans correction, le remplacant sortait premier.
+  const remplacant = [1, 2, 3].map(fixtureId => ({
+    fixture_id: fixtureId, player_id: 30, team_id: 867, name: 'Remplacant Ephemere',
+    position: 'Attacker', minutes: 10, rating: 6.5, starter: false,
+    shots_total: 1, shots_on: 1, goals: fixtureId === 1 ? 1 : 0
+  }));
+  const titulaire = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(fixtureId => ({
+    fixture_id: fixtureId, player_id: 31, team_id: 867, name: 'Titulaire Regulier',
+    position: 'Attacker', minutes: 90, rating: 7, starter: true,
+    shots_total: 3, shots_on: 2, goals: fixtureId <= 6 ? 1 : 0
+  }));
+  const vm = buildMatchViewModel(base({
+    player_history: { home: remplacant.concat(titulaire), away: [] },
+    current_squads: { home: [{ player_id: 30, name: 'Remplacant Ephemere' }, { player_id: 31, name: 'Titulaire Regulier' }], away: [] }
+  }));
+  assert.equal(vm.players.scoringThreat[0].name, 'Titulaire Regulier',
+    '3 buts/90 mesures sur 30 minutes ne doivent pas battre 0,6 but/90 mesure sur 900 minutes');
+  assert.ok(!vm.players.scoringThreat.some(p => p.name === 'Remplacant Ephemere'),
+    '30 minutes de jeu au total : sous le plancher de temps de jeu, jamais publie');
+  assert.equal(vm.players.scoringThreat[0].thinSample, false,
+    'le titulaire depasse le plancher : aucun avertissement d\'echantillon faible');
+  assert.equal(vm.players.scoringThreat[0].minutes, 900,
+    'le temps de jeu reel est expose, pour pouvoir etre affiche a l\'utilisateur');
+});
+
 test('Buteurs potentiels : un joueur absent/blesse n\'est jamais publie comme menace de but', () => {
   const history = [1, 2, 3, 4, 5].map(fixtureId => ({ fixture_id: fixtureId, player_id: 12, team_id: 867, name: 'Blesse', minutes: 90, rating: 7, starter: true, shots_total: 3, shots_on: 2, goals: 1 }));
   const vm = buildMatchViewModel(base({

@@ -275,30 +275,13 @@ function threatSample(p){
   const bits=[];
   if(n(p.appearances)!==null)bits.push(`${p.appearances} match${p.appearances>1?'s':''} joué${p.appearances>1?'s':''}`);
   if(n(p.starts)!==null)bits.push(p.starts>0?`${p.starts} titularisation${p.starts>1?'s':''}`:'aucune titularisation');
-  if(n(p.minutesRecent)!==null&&p.minutesRecent>0)bits.push(`${Math.round(p.minutesRecent)} minutes sur les 5 derniers matchs`);
+  if(n(p.minutes)!==null&&p.minutes>0)bits.push(`${Math.round(p.minutes)} minutes jouées`);
   return bits.length?bits.join(' · '):'';
-}
-// Choix du joueur mis en avant. La liste est deja triee par menace
-// (buts/90 + tirs cadres/90), mais un ratio "par 90 minutes" calcule sur
-// 30 minutes de jeu est un artefact, pas un signal : en conditions reelles
-// le premier candidat pouvait etre un joueur a 2,9 buts/90 sur 31 minutes
-// et AUCUNE titularisation. Mettre ca en avant sur un produit payant
-// detruit la credibilite de la page.
-// On prefere donc le meilleur candidat qui dispose aussi d'un echantillon
-// exploitable (au moins l'equivalent d'un match complet sur les 5
-// dernieres rencontres). Si aucun ne qualifie, on garde le premier mais on
-// affiche un avertissement explicite. Aucun filtrage cote modele n'est
-// modifie : c'est un choix d'affichage sur des donnees deja calculees.
-const THREAT_MIN_MINUTES=90;
-function pickThreat(list){
-  const solid=list.find(p=>n(p.minutesRecent)!==null&&p.minutesRecent>=THREAT_MIN_MINUTES);
-  return solid?{player:solid,thin:false}:{player:list[0],thin:true};
 }
 function threatsCard(vm){
   const list=vm.players.scoringThreat;
   if(!list.length)return '';
-  const picked=pickThreat(list);
-  const p=picked.player;
+  const p=list[0];
   const pid=n(p.id);
   const href=pid!==null?` href="/joueur.html?m=${esc(vm.id)}&p=${pid}"`:'';
   const tag=pid!==null?'a':'div';
@@ -321,7 +304,7 @@ function threatsCard(vm){
       ${fairOdds!==null?`<div><b>${odds(fairOdds)}</b><span>Cote équitable</span></div>`:''}
     </div>`:''}
     ${rows.length?`<table class="threat-table"><tbody>${rows.map(([k,v])=>`<tr><th scope="row">${esc(k)}</th><td>${v}</td></tr>`).join('')}</tbody></table>`:''}
-    ${sample?`<p class="threat-sample${picked.thin?' is-thin':''}"><span>Échantillon</span>${esc(sample)}${picked.thin?'<em>Échantillon réduit : ces moyennes par 90 minutes sont calculées sur peu de temps de jeu et restent fragiles.</em>':''}</p>`:''}
+    ${sample?`<p class="threat-sample${p.thinSample?' is-thin':''}"><span>Échantillon</span>${esc(sample)}${p.thinSample?'<em>Temps de jeu limité sur ce championnat : ces moyennes par 90 minutes reposent sur peu de minutes et restent fragiles.</em>':''}</p>`:''}
   </${tag}>`,'threats-card','target2');
 }
 
@@ -406,18 +389,23 @@ function marketsWatchCard(vm){
 // match" juste au-dessus, redondant).
 function outputsCard(vm){
   const x=vm.model.expectedGoals,s=vm.model.scores,i=vm.identity;
-  // Une colonne qui n'affiche que "indisponible" occupe la moitie d'une
-  // carte pour ne rien dire : on ne rend que ce qui existe reellement, et
-  // rien du tout si les deux moities sont vides.
-  const cols=[];
+  // Une colonne qui n'affiche que "indisponible" occupait la moitie de la
+  // carte pour ne rien dire. Mais taire completement l'absence serait pire :
+  // le lecteur ne sait plus si la donnee manque ou si elle n'existe pas.
+  // Compromis : on n'affiche que les colonnes qui ont du contenu, et ce qui
+  // manque est signale en une ligne discrete sous la carte. Si TOUT manque,
+  // la carte disparait - une carte vide n'affirme rien d'utile.
+  const cols=[],manquant=[];
   if(x){
     cols.push(`<div class="outputs-col outputs-xg"><small>Buts attendus (xG)</small><div class="xg-row">${img(i.home.logo,i.home.name)}<b>${fmt(x.home)}</b><span>xG</span><b>${fmt(x.away)}</b>${img(i.away.logo,i.away.name)}</div></div>`);
-  }
+  } else manquant.push('xG indisponibles');
   if(s.length){
     cols.push(`<div class="outputs-col"><small>Scores probables</small><div class="scores-row">${s.map(sc=>`<div class="score-pill"><b>${esc(sc.score)}</b><small>${pct(sc.probability)}</small></div>`).join('')}</div></div>`);
-  }
+  } else manquant.push('Scores probables indisponibles');
   if(!cols.length)return '';
-  return card('Ce que dit le modèle',`<div class="outputs${cols.length===1?' outputs-1col':' outputs-2col'}">${cols.join('')}</div>`);
+  return card('Ce que dit le modèle',
+    `<div class="outputs${cols.length===1?' outputs-1col':' outputs-2col'}">${cols.join('')}</div>`
+    +(manquant.length?`<p class="outputs-missing">${esc(manquant.join(' · '))}.</p>`:''));
 }
 
 // Comparatif des deux equipes. AVANT : ce tableau etait titre "Pourquoi le

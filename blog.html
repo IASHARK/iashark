@@ -150,6 +150,17 @@
 
 </div>
 
+<!-- Navigation de repli presente dans le HTML servi : bottom-navigation.js
+     la remplace par la barre partagee au chargement, mais sans JavaScript
+     (ou avant son execution) le menu reste la. Meme principe d'amelioration
+     progressive que la liste d'articles ci-dessus. -->
+<nav class="bottom-nav" aria-label="Navigation principale">
+  <a href="/"><span>&#8962;</span><b>Accueil</b></a>
+  <a href="/pro.html"><span>&#9734;</span><b>Outils</b></a>
+  <a class="active" href="/blog.html"><span>&#9636;</span><b>Blog</b></a>
+  <a href="/compte.html"><span>&#9817;</span><b>Compte</b></a>
+</nav>
+
 <script>
 /* Filtres de categorie — amelioration progressive uniquement.
    Les articles sont dans le HTML servi : sans JavaScript, la page reste

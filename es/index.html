@@ -120,6 +120,9 @@ body::before{content:'';position:fixed;top:-300px;left:50%;transform:translateX(
 .conf-circle.low .conf-num{color:var(--muted);}
 .conf-sub{font-family:'Space Mono',monospace;font-size:7px;color:var(--muted);margin-top:-2px;}
 .mc-cta{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:1px;padding:5px 10px;border-radius:8px;border:1px solid var(--border-cyan);background:rgba(34,211,238,0.08);color:var(--cyan);cursor:pointer;transition:.2s;white-space:nowrap;}
+.mc.locked{border-color:rgba(245,158,11,0.25);}
+.mc-pari-blurred{color:var(--amber);font-style:italic;}
+.mc-cta-locked{border-color:rgba(245,158,11,0.3);background:rgba(245,158,11,0.08);color:var(--amber);}
 .mc-probas{padding:8px 14px 12px;border-top:1px solid var(--border);}
 .prob-bar-wrap{height:5px;border-radius:5px;overflow:hidden;display:flex;margin-bottom:7px;}
 .pb-1{background:linear-gradient(90deg,var(--cyan2),var(--cyan));height:100%;}
@@ -223,6 +226,11 @@ body::before{top:-180px;width:1080px;height:700px;background:radial-gradient(ell
 .desktop-nav a{color:#c3ccd8;text-decoration:none;font-size:13px;font-weight:600;transition:.2s;}
 .desktop-nav a:hover{color:var(--cyan);}
 .header-actions{display:flex;align-items:center;gap:14px;}
+/* Empeche le decalage du bouton Connexion quand le selecteur de langue
+   (vide au chargement, rempli en JS par lang-switcher.js apres coup) se
+   peuple - sans cette reserve d'espace, le bouton se decale vers la
+   droite juste apres l'affichage initial et un clic rapide le manque. */
+#langSwitchSlot{display:inline-flex;min-width:48px;min-height:27px;}
 .btn-login{height:38px;padding:0 16px;border:0;background:transparent;font-family:'Inter',sans-serif;font-size:12px;font-weight:600;color:#d7dee8;}
 .btn-login:hover{color:var(--cyan);background:transparent;}
 .btn-start{height:40px;padding:0 20px;border:1px solid rgba(32,213,239,.6);border-radius:8px;color:var(--cyan);text-decoration:none;display:inline-flex;align-items:center;font-size:12px;font-weight:700;transition:.2s;}
@@ -422,7 +430,7 @@ body::before{top:-180px;width:1080px;height:700px;background:radial-gradient(ell
   </div>
 
   <div id="cardsList" class="cards-list">
-  <!--SEO_MATCHES_SUMMARY--><div style="padding:4px 0 12px"><h2 style="font-family:'Bebas Neue',sans-serif;font-size:20px;color:#e2e8f0;margin-bottom:10px">Analyses IA du jour — 2026-08-31</h2><ul style="list-style:none;padding:0;margin:0;color:#94a3b8;font-size:12.5px;line-height:1.8"><li>01:00 — <strong>St. Louis City vs FC Dallas</strong> (Major League Soccer)</li><li>18:30 — <strong>Lecce vs AS Roma</strong> (Serie A)</li><li>19:00 — <strong>Djurgardens IF vs Mjallby AIF</strong> (Allsvenskan)</li><li>19:00 — <strong>Sirius vs Malmo FF</strong> (Allsvenskan)</li><li>19:00 — <strong>Gais vs IF Brommapojkarna</strong> (Allsvenskan)</li><li>19:30 — <strong>Osasuna vs Getafe</strong> (La Liga)</li><li>20:45 — <strong>Atalanta vs Bologna</strong> (Serie A)</li><li>21:00 — <strong>Aston Villa vs Arsenal</strong> (Premier League)</li><li>21:15 — <strong>Benfica vs Estoril</strong> (Primeira Liga)</li><li>21:15 — <strong>SC Braga vs Vitória SC</strong> (Primeira Liga)</li><li>21:30 — <strong>Barcelona vs Rayo Vallecano</strong> (La Liga)</li></ul></div><!--/SEO_MATCHES_SUMMARY-->
+  <!--SEO_MATCHES_SUMMARY--><!--/SEO_MATCHES_SUMMARY-->
   <div class="loading-state">
     <div class="loading-spinner"></div>
     <div class="loading-text">CHARGEMENT DES ANALYSES...</div>
@@ -462,8 +470,11 @@ body::before{top:-180px;width:1080px;height:700px;background:radial-gradient(ell
   </a>
 </nav>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="/app-client.js"></script>
 <script>
 var allMatchs=[],currentFilter='all',currentDayFilter='today',currentSport='football',currentSearch='';
+var authCtx={session:null,isPro:false};
 
 // Echappement HTML pour tout texte semi-externe (noms d'equipe issus
 // d'api-football via le pipeline) avant insertion en innerHTML - defense
@@ -654,18 +665,25 @@ function buildCard(m){
   var heure=(m.date||'').split(' ')[1]||'';
   var isWC=isWorldCup(m);
   var isHot=!!m.hot,isVal=m.val||m.vbet==='OUI';
-  var css='mc'+(isHot&&!isWC?' hot':'')+(isVal&&!isWC?' value':'')+(isWC?' worldcup':'');
+  var locked=!authCtx.isPro;
+  var css='mc'+(isHot&&!isWC?' hot':'')+(isVal&&!isWC?' value':'')+(isWC?' worldcup':'')+(locked?' locked':'');
   var pariLabel=m.pari_rec?translateMarket(m.pari_rec):(m.no_signal_label||'Nada aprovechable aquí — esperamos una mejor oportunidad.');
-  return'<a class="'+css+'" href="/match/'+m.id+'.html" aria-label="Ver análisis '+esc((m.home&&m.home.n||''))+' contra '+esc((m.away&&m.away.n||''))+'">'
+  var pariRest=locked
+    ?'<span class="mc-pari-bet mc-pari-blurred">Reserve aux membres Pro</span>'
+    :'<span class="mc-pari-bet">'+pariLabel+'</span><p class="mc-insight">'+marketInsight(m)+'</p>';
+  var pariBlock='<div class="mc-pari'+(locked?' mc-pari-locked':'')+'"><span class="mc-pari-label">MERCADO RECOMENDADO</span>'+pariRest+'</div>';
+  var href=locked?'/compte.html#plan':'/match/'+m.id+'.html';
+  var cta=locked?'<span class="mc-cta mc-cta-locked">🔒 Passer Pro →</span>':'<span class="mc-cta">Ver análisis →</span>';
+  return'<a class="'+css+'" href="'+href+'" aria-label="Ver análisis '+esc((m.home&&m.home.n||''))+' contra '+esc((m.away&&m.away.n||''))+'">'
     +'<div class="mc-top"><div class="mc-league">'+leagueHeader(m)+' <span class="mc-league-country">· '+heure+'</span></div></div>'
     +'<div class="mc-body"><div class="mc-left"><div class="mc-teams">'
     +'<div class="mc-team home">'+teamLogo(m.home)+'<div class="mc-team-name">'+esc((m.home&&m.home.n||'').toUpperCase())+'</div></div>'
     +'<div class="mc-teams-sep"><div class="mc-vs">VS</div></div>'
     +'<div class="mc-team away">'+teamLogo(m.away)+'<div class="mc-team-name">'+esc((m.away&&m.away.n||'').toUpperCase())+'</div></div>'
     +'</div>'
-    +'<div class="mc-pari"><span class="mc-pari-label">MERCADO RECOMENDADO</span><span class="mc-pari-bet">'+pariLabel+'</span><p class="mc-insight">'+marketInsight(m)+'</p></div>'
+    +pariBlock
     +'</div>'
-    +'<div class="mc-right"><div class="conf-ring '+confTier(m)+'"><span class="conf-label">CONFIANZA</span><div class="conf-ring-val">'+Math.round(ovrConf(m))+'</div><div class="conf-ring-sub"></div></div><span class="mc-cta">Ver análisis →</span></div>'
+    +'<div class="mc-right"><div class="conf-ring '+confTier(m)+'"><span class="conf-label">CONFIANZA</span><div class="conf-ring-val">'+Math.round(ovrConf(m))+'</div><div class="conf-ring-sub"></div></div>'+cta+'</div>'
     +'</div>'
     +'</a>';
 }
@@ -708,6 +726,7 @@ function renderMatchs(){
 
 async function loadData(){
   try{
+    if(window.IasharkApp){try{authCtx=await IasharkApp.context();}catch(e){}}
     var r=await fetch('/data.json?t='+Date.now());
     if(!r.ok)throw new Error('HTTP '+r.status);
     var d=await r.json();
@@ -726,7 +745,6 @@ async function loadData(){
 setupFilters();
 loadData();
 </script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="/auth-header.js"></script>
 <script>IasharkAuthHeader.mount('#authHeaderSlot');</script>
 <script src="/lang-switcher.js"></script>

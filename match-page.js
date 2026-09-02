@@ -8,6 +8,34 @@ const clamp=v=>Math.max(0,Math.min(100,n(v)||0));
 const img=(src,alt)=>src?`<img src="${esc(src)}" alt="${esc(alt)}" loading="lazy">`:'';
 const empty=t=>`<div class="empty">${esc(t)}</div>`;
 
+// Selection du "match gratuit du jour" - doit rester identique a getChoc()
+// dans index.html (meme calcul de confiance ovrConf/normEdge/normConf) pour
+// que ce soit toujours EXACTEMENT le match mis en avant sur l'accueil qui
+// reste accessible sans Pro, jamais un autre. m.hot n'est PAS ce signal
+// (plusieurs matchs peuvent etre "hot" le meme jour - ecart trouve en test
+// reel : 7 matchs hot sur 13, alors qu'un seul doit rester gratuit).
+function normConf_(c){c=parseFloat(c)||0;return c<=1?c*10:c;}
+function parseEdge_(m){if(m==null||m.edge==null||m.edge==='')return null;const v=parseFloat(String(m.edge).replace(',','.'));return isNaN(v)?null:v;}
+function normEdge_(e){if(e==null||isNaN(e))return null;if(e<=1)return e*100;if(e<=10)return e*10;return Math.min(e,100);}
+function ovrConf_(m){const e=normEdge_(parseEdge_(m));return e!=null?e:Math.min(normConf_(m.conf)*10,100);}
+function todayParis_(){
+  const f=new Intl.DateTimeFormat('fr-FR',{timeZone:'Europe/Paris',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false}).formatToParts(new Date()),r={};
+  f.forEach(x=>{r[x.type]=x.value;});
+  return {day:`${r.year}-${r.month}-${r.day}`,now:`${r.year}-${r.month}-${r.day} ${r.hour}:${r.minute}`};
+}
+function pickFreeMatchId(list){
+  if(!Array.isArray(list)||!list.length)return null;
+  const {day,now}=todayParis_();
+  const today=list.filter(m=>String(m.date||'').slice(0,10)===day);
+  const pool=today.length?today:list;
+  const upcoming=pool.filter(m=>String(m.date||'')>=now);
+  const source=upcoming.length?upcoming:pool;
+  const actionable=source.filter(m=>!!m.pari_rec&&!m.no_signal);
+  const candidates=actionable.length?actionable:source;
+  if(!candidates.length)return null;
+  return candidates.reduce((best,m)=>ovrConf_(m)>ovrConf_(best)?m:best,candidates[0]).id;
+}
+
 // Icones : purement decoratives, memes tokens de couleur, aucune emoticone.
 const ICONS={
   h2h:'<path d="M8 3v4M16 3v4M4 9h16M5 5h14a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Z"/>',
@@ -23,7 +51,8 @@ const ICONS={
   bulb:'<path d="M9 18h6M10 21h4M7 9a5 5 0 1 1 10 0c0 2-1 3-2 4.2-.5.6-.8 1.1-.8 1.8H9.8c0-.7-.3-1.2-.8-1.8C8 12 7 11 7 9Z"/>',
   scale:'<path d="M12 3v18M7 7 4 13a3 3 0 0 0 6 0L7 7ZM17 7l-3 6a3 3 0 0 0 6 0l-3-6ZM4 7h6M14 7h6"/>',
   alert:'<path d="M12 3 2 20h20L12 3Z"/><path d="M12 10v4M12 17v.01"/>',
-  trend:'<path d="M4 17 10 11l4 4 6-8"/><path d="M16 6h4v4"/>'
+  trend:'<path d="M4 17 10 11l4 4 6-8"/><path d="M16 6h4v4"/>',
+  lock:'<rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>'
 };
 const cardIcon=key=>ICONS[key]?`<svg viewBox="0 0 24 24" class="card-icon">${ICONS[key]}</svg>`:'';
 const card=(title,body,cls='',icon='')=>`<section class="card reveal ${cls}"><h2>${cardIcon(icon)}${esc(title)}</h2>${body}</section>`;
@@ -450,22 +479,72 @@ function bindMotion(){
   }
 }
 
+// Mur d'acces : le match du jour choisi par pickFreeMatchId() (identique au
+// choix de la carte "Analyse gratuite" sur l'accueil) reste gratuit mais
+// exige un compte (inscription ou connexion) ; tous les autres necessitent
+// Pro. Rendu cote client uniquement (comme le reste du site) - une vraie
+// protection cote serveur existe deja separement sur les champs premium via
+// la fonction match-data (voir supabase/functions/match-data).
+function gateCard(vm,opts){
+  const homeName=vm.identity.home.name,awayName=vm.identity.away.name;
+  return `<div class="page">
+    ${hero(vm)}
+    <section class="card gate reveal">
+      ${cardIcon('lock')}
+      <h2>${esc(opts.title)}</h2>
+      <p>${esc(opts.text)}</p>
+      <a class="btn-gate" href="${opts.href}">${esc(opts.cta)}</a>
+    </section>
+  </div>`;
+}
+function renderAuthWall(raw){
+  const vm=IasharkMatchViewModel.buildMatchViewModel(raw);
+  document.title=`${vm.identity.home.name} vs ${vm.identity.away.name} — IASHARK`;
+  root.innerHTML=gateCard(vm,{
+    title:'Match gratuit du jour',
+    text:'Ce match est gratuit, mais il faut un compte IASHARK (inscription ou connexion) pour voir l’analyse complete.',
+    href:'/compte.html',
+    cta:'Se connecter / Creer un compte'
+  });
+  bindMotion();
+}
+function renderProWall(raw){
+  const vm=IasharkMatchViewModel.buildMatchViewModel(raw);
+  document.title=`${vm.identity.home.name} vs ${vm.identity.away.name} — IASHARK`;
+  root.innerHTML=gateCard(vm,{
+    title:'Analyse reservee aux membres Pro',
+    text:'Le marche recommande, la confiance du modele et l’analyse complete de ce match sont reserves aux membres Pro. Le match du jour, lui, reste gratuit.',
+    href:'/compte.html#plan',
+    cta:'Passer Pro'
+  });
+  bindMotion();
+}
+
 async function init(){
   try{
     const id=typeof FIXED_MATCH_ID!=='undefined'?String(FIXED_MATCH_ID):new URLSearchParams(location.search).get('id');
     let raw=typeof PRELOADED_MATCH!=='undefined'?PRELOADED_MATCH:null;
+    let list=null;
+    let ctx={session:null,isPro:false};
     if(window.IasharkApp){
-      const session=(await window.IasharkApp.supabase.auth.getSession()).data.session;
-      if(session){
+      ctx=await window.IasharkApp.context();
+      if(ctx.session){
         const result=await window.IasharkApp.supabase.functions.invoke('match-data');
-        if(result.data&&!result.error)raw=(result.data.matchs||[]).find(x=>String(x.id)===String(id))||raw;
+        if(result.data&&!result.error){
+          list=result.data.matchs||[];
+          raw=list.find(x=>String(x.id)===String(id))||raw;
+        }
       }
     }
-    if(!raw){
+    if(!raw||!list){
       const data=await fetch(`/data.json?t=${Date.now()}`).then(r=>r.json());
-      raw=(data.matchs||[]).find(x=>String(x.id)===String(id));
+      list=list||data.matchs||[];
+      raw=raw||list.find(x=>String(x.id)===String(id));
     }
     if(!raw)throw new Error('Match introuvable');
+    const isFree=String(raw.id)===String(pickFreeMatchId(list));
+    if(isFree&&!ctx.session){renderAuthWall(raw);return;}
+    if(!isFree&&!ctx.isPro){renderProWall(raw);return;}
     render(raw);
   }catch(e){
     root.innerHTML=`<div class="match-error"><b>${esc(e.message||'Erreur de chargement')}</b><a href="/">Retour à l'accueil</a></div>`;

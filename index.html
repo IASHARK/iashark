@@ -113,6 +113,9 @@ body::before{content:'';position:fixed;top:-300px;left:50%;transform:translateX(
 .conf-circle.low .conf-num{color:var(--muted);}
 .conf-sub{font-family:'Space Mono',monospace;font-size:7px;color:var(--muted);margin-top:-2px;}
 .mc-cta{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:1px;padding:5px 10px;border-radius:8px;border:1px solid var(--border-cyan);background:rgba(34,211,238,0.08);color:var(--cyan);cursor:pointer;transition:.2s;white-space:nowrap;}
+.mc.locked{border-color:rgba(245,158,11,0.25);}
+.mc-pari-blurred{color:var(--amber);font-style:italic;}
+.mc-cta-locked{border-color:rgba(245,158,11,0.3);background:rgba(245,158,11,0.08);color:var(--amber);}
 .mc-probas{padding:8px 14px 12px;border-top:1px solid var(--border);}
 .prob-bar-wrap{height:5px;border-radius:5px;overflow:hidden;display:flex;margin-bottom:7px;}
 .pb-1{background:linear-gradient(90deg,var(--cyan2),var(--cyan));height:100%;}
@@ -460,8 +463,11 @@ body::before{top:-180px;width:1080px;height:700px;background:radial-gradient(ell
   </a>
 </nav>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="/app-client.js"></script>
 <script>
 var allMatchs=[],currentFilter='all',currentDayFilter='today',currentSport='football',currentSearch='';
+var authCtx={session:null,isPro:false};
 
 // Echappement HTML pour tout texte semi-externe (noms d'equipe issus
 // d'api-football via le pipeline) avant insertion en innerHTML - defense
@@ -657,18 +663,25 @@ function buildCard(m){
   var heure=(m.date||'').split(' ')[1]||'';
   var isWC=isWorldCup(m);
   var isHot=!!m.hot,isVal=m.val||m.vbet==='OUI';
-  var css='mc'+(isHot&&!isWC?' hot':'')+(isVal&&!isWC?' value':'')+(isWC?' worldcup':'');
+  var locked=!authCtx.isPro;
+  var css='mc'+(isHot&&!isWC?' hot':'')+(isVal&&!isWC?' value':'')+(isWC?' worldcup':'')+(locked?' locked':'');
   var pariLabel=m.pari_rec?translateMarket(m.pari_rec):(m.no_signal_label||'Analyse en cours — aucun marché prioritaire.');
-  return'<a class="'+css+'" href="/match/'+m.id+'.html" aria-label="Voir l\'analyse '+esc((m.home&&m.home.n||''))+' contre '+esc((m.away&&m.away.n||''))+'">'
+  var pariRest=locked
+    ?'<span class="mc-pari-bet mc-pari-blurred">Reserve aux membres Pro</span>'
+    :'<span class="mc-pari-bet">'+pariLabel+'</span><p class="mc-insight">'+marketInsight(m)+'</p>';
+  var pariBlock='<div class="mc-pari'+(locked?' mc-pari-locked':'')+'"><span class="mc-pari-label">MARCHÉ RECOMMANDÉ</span>'+pariRest+'</div>';
+  var href=locked?'/compte.html#plan':'/match/'+m.id+'.html';
+  var cta=locked?'<span class="mc-cta mc-cta-locked">🔒 Passer Pro →</span>':'<span class="mc-cta">Voir l\'analyse →</span>';
+  return'<a class="'+css+'" href="'+href+'" aria-label="Voir l\'analyse '+esc((m.home&&m.home.n||''))+' contre '+esc((m.away&&m.away.n||''))+'">'
     +'<div class="mc-top"><div class="mc-league">'+leagueHeader(m)+' <span class="mc-league-country">· '+heure+'</span></div></div>'
     +'<div class="mc-body"><div class="mc-left"><div class="mc-teams">'
     +'<div class="mc-team home">'+teamLogo(m.home)+'<div class="mc-team-name">'+esc((m.home&&m.home.n||'').toUpperCase())+'</div></div>'
     +'<div class="mc-teams-sep"><div class="mc-vs">VS</div></div>'
     +'<div class="mc-team away">'+teamLogo(m.away)+'<div class="mc-team-name">'+esc((m.away&&m.away.n||'').toUpperCase())+'</div></div>'
     +'</div>'
-    +'<div class="mc-pari"><span class="mc-pari-label">MARCHÉ RECOMMANDÉ</span><span class="mc-pari-bet">'+pariLabel+'</span><p class="mc-insight">'+marketInsight(m)+'</p></div>'
+    +pariBlock
     +'</div>'
-    +'<div class="mc-right"><div class="conf-ring '+confTier(m)+'"><span class="conf-label">CONFIANCE</span><div class="conf-ring-val">'+Math.round(ovrConf(m))+'</div><div class="conf-ring-sub"></div></div><span class="mc-cta">Voir l\'analyse →</span></div>'
+    +'<div class="mc-right"><div class="conf-ring '+confTier(m)+'"><span class="conf-label">CONFIANCE</span><div class="conf-ring-val">'+Math.round(ovrConf(m))+'</div><div class="conf-ring-sub"></div></div>'+cta+'</div>'
     +'</div>'
     +'</a>';
 }
@@ -711,6 +724,7 @@ function renderMatchs(){
 
 async function loadData(){
   try{
+    if(window.IasharkApp){try{authCtx=await IasharkApp.context();}catch(e){}}
     var r=await fetch('/data.json?t='+Date.now());
     if(!r.ok)throw new Error('HTTP '+r.status);
     var d=await r.json();
@@ -729,7 +743,6 @@ async function loadData(){
 setupFilters();
 loadData();
 </script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="/auth-header.js"></script>
 <script>IasharkAuthHeader.mount('#authHeaderSlot');</script>
 <script src="/lang-switcher.js"></script>

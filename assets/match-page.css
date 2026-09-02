@@ -318,3 +318,242 @@ a.threat:hover{border-color:var(--line2);background:var(--card)}
   .bottom-nav span{font-size:20px}
   .bottom-nav b{font-size:8px}
 }
+
+
+/* ==========================================================================
+   REFONTE V3 — « pas un site généré », une page qui donne envie de payer
+   --------------------------------------------------------------------------
+   Retour utilisateur sur la V2 : « ça fait trop site généré statique »,
+   « trop de couleurs différentes en même temps », « ça ne donne pas envie
+   de s'abonner ».
+   Ce qui produisait cet effet, et ce qui change :
+
+   1. TOUT ÉTAIT UNE BOÎTE IDENTIQUE. Même bordure, même rayon, même fond,
+      même padding sur les 9 cartes : aucun relief, aucune hiérarchie — la
+      signature visuelle d'une page générée. On passe à une hiérarchie de
+      SURFACES : une seule surface haute (le signal), des surfaces basses
+      sans bordure pour le reste, et du texte éditorial pas encadré du tout.
+      La profondeur remplace les traits.
+
+   2. ÉTIQUETTES EN MONOSPACE MAJUSCULE PARTOUT. « PROBABILITÉ MODÈLE »,
+      « MARCHÉ RECOMMANDÉ », « COTE ÉQUITABLE » : de la sortie machine, pas
+      un produit éditorial. Le monospace est désormais réservé aux CHIFFRES
+      (alignement tabulaire), et les libellés repassent en DM Sans casse
+      normale.
+
+   3. QUATRE COULEURS EN CONCURRENCE (cyan + vert + orange + rouge dans le
+      même bloc). Décision explicite de l'utilisateur : cyan et gris
+      uniquement ; le vert et le rouge ne servent plus QUE sur la valeur
+      chiffrée de l'écart. Plus aucun bandeau ni badge coloré.
+
+   NOTE : la carte « Scénario probable du match » n'est pas touchée — ni son
+   graphique, ni son texte, ni ses couleurs. Seul le style commun des TITRES
+   de carte change, sinon elle serait la seule en majuscules monospace au
+   milieu d'une page qui n'en a plus.
+   ========================================================================== */
+
+/* ---------- Titres de carte : éditoriaux, plus des en-têtes de tableau ---------- */
+.card>h2{
+  margin:0 0 14px;
+  color:var(--text);
+  font:600 15.5px/1.3 var(--body);
+  letter-spacing:-.005em;
+  text-transform:none;
+  gap:8px;
+}
+.card>h2 .card-icon{width:15px;height:15px;color:var(--accent);opacity:.85}
+
+/* ---------- Hiérarchie de surfaces (la profondeur remplace les bordures) ---------- */
+.card{
+  padding:18px 20px;
+  border-color:transparent;
+  background:var(--card);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.035);
+}
+.card:hover{border-color:transparent;background:#0e1724}
+.empty{font-size:13.5px}
+
+/* Le texte éditorial n'est pas une donnée : il n'est pas encadré. */
+.card.lecture{background:transparent;box-shadow:none;padding:6px 2px 10px}
+.card.lecture p{font-size:15.5px;line-height:1.72;color:#c3d1de}
+.card.lecture>h2{color:var(--accent);font-size:12.5px;font-weight:600;letter-spacing:.02em}
+
+/* ==================== LE SIGNAL — la seule surface « haute » ==================== */
+.signal-card{
+  position:relative;overflow:hidden;
+  padding:26px 24px 22px;
+  border:1px solid rgba(34,211,238,.16);
+  border-radius:14px;
+  background:
+    radial-gradient(120% 130% at 82% -20%,rgba(34,211,238,.13),transparent 58%),
+    linear-gradient(168deg,#12202e 0%,#0c1622 46%,#0a121c 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.06),
+    0 18px 44px -22px rgba(0,0,0,.9);
+}
+.signal-card:hover{border-color:rgba(34,211,238,.24)}
+.sig-head{position:relative;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.sig-eyebrow{display:inline-flex;align-items:center;gap:8px;color:var(--accent);
+  font:600 13px var(--body);letter-spacing:.01em;text-transform:none}
+.sig-eyebrow .card-icon{width:15px;height:15px}
+.sig-badges{display:flex;gap:7px;align-items:center}
+
+.sig-body{position:relative;display:flex;align-items:center;justify-content:space-between;
+  gap:22px;margin-top:18px;flex-wrap:wrap}
+.sig-pick{min-width:0;flex:1 1 240px}
+.sig-label{display:block;color:var(--muted);font:400 13px var(--body);letter-spacing:0;text-transform:none}
+/* Le marché recommandé : gros, mais en casse normale et en DM Sans.
+   Le Bebas Neue condensé tout en majuscules lisait « template appli de
+   paris » — c'est précisément ce que l'utilisateur n'aimait pas. */
+.sig-market{display:block;margin-top:6px;color:#fff;
+  font:700 clamp(30px,4.6vw,40px)/1.08 var(--body);letter-spacing:-.022em;text-wrap:balance}
+
+/* Les chiffres : une rangée aérée séparée par des filets, plus une grille
+   de cases. Moins de traits = plus de tenue. */
+.sig-kpis{position:relative;display:flex;flex-wrap:wrap;gap:0;margin-top:22px;
+  padding-top:18px;border-top:1px solid rgba(255,255,255,.07);
+  background:none;border-radius:0;overflow:visible}
+.sig-kpi{flex:1 1 auto;min-width:112px;padding:0 18px;background:none;
+  border-left:1px solid rgba(255,255,255,.06)}
+.sig-kpi:first-child{padding-left:0;border-left:0}
+.sig-kpi span{display:block;color:var(--muted);font:400 12.5px var(--body);
+  letter-spacing:0;text-transform:none}
+.sig-kpi b{display:block;margin-top:5px;color:var(--text);
+  font:600 20px var(--body);font-variant-numeric:tabular-nums;letter-spacing:-.015em}
+/* Vert et rouge UNIQUEMENT ici, sur la valeur chiffrée de l'écart. */
+.sig-kpi b.pos{color:var(--green)}
+.sig-kpi b.neg{color:var(--red)}
+.sig-kpi b.flat{color:var(--text)}
+
+/* Le verdict est une phrase, plus un bandeau coloré. */
+.sig-verdict{position:relative;margin:18px 0 0;padding:0;border:0;background:none;
+  color:#9fb3c4;font:400 14px/1.6 var(--body)}
+.sig-verdict:before{display:none}
+.sig-verdict.pos,.sig-verdict.neg,.sig-verdict.flat{background:none;border:0}
+
+/* Badges confiance / risque : contour neutre, un simple point coloré. */
+.signal-card .badge{border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.03);
+  color:#a8bccd;font:500 12px var(--body);letter-spacing:0;text-transform:none;
+  padding:5px 11px;border-radius:20px}
+
+/* ==================== Comparatif ==================== */
+.cmp-intro{margin:0 0 16px;color:#9fb3c4;font:400 14px/1.6 var(--body)}
+.cmp-intro b{color:var(--text);font-weight:600}
+.compare-row{font-size:13.5px;font-variant-numeric:tabular-nums}
+.compare-row b{font-weight:600}
+.compare-row span{color:#8ba0b3;font:400 12.5px var(--body);letter-spacing:0;text-transform:none}
+/* La ligne clé se distingue par un filet et la couleur du libellé,
+   pas par un pavé coloré de plus. */
+.compare-row.is-key{position:relative;padding:6px 0;margin:4px 0}
+.compare-row.is-key span{color:var(--accent);font-weight:600}
+.compare-row.is-key em{margin-left:7px;color:var(--accent);opacity:.75;
+  font:400 11.5px var(--body);font-style:normal;letter-spacing:0;
+  background:none;border:0;padding:0;text-transform:none}
+
+/* ==================== Buteur ==================== */
+.threat{display:block;padding:0;border:0;background:none;color:inherit;text-decoration:none}
+.threat:hover{border:0;background:none}
+.threat-id{display:flex;align-items:center;gap:13px}
+.threat-id img{width:52px;height:52px;border-radius:50%;object-fit:cover;
+  background:var(--line);flex-shrink:0;box-shadow:0 0 0 1px rgba(255,255,255,.07)}
+.threat-id b{display:block;font:600 17px var(--body);color:var(--text);letter-spacing:-.01em;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.threat-id small{color:var(--muted);font-size:13px}
+.threat-headline{display:flex;gap:34px;margin-top:18px;padding:16px 0;
+  border-top:1px solid rgba(255,255,255,.07);border-bottom:1px solid rgba(255,255,255,.07)}
+.threat-headline b{display:block;font:700 30px/1 var(--body);color:var(--text);
+  font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.threat-headline b.pos{color:var(--accent)}
+.threat-headline span{display:block;margin-top:6px;color:var(--muted);
+  font:400 12.5px var(--body);letter-spacing:0;text-transform:none}
+.threat-table{width:100%;border-collapse:collapse;margin-top:14px}
+.threat-table th{text-align:left;font:400 14px var(--body);color:#9fb3c4;padding:9px 0}
+.threat-table td{text-align:right;color:var(--text);font:600 15px var(--body);
+  font-variant-numeric:tabular-nums;padding:9px 0}
+.threat-table tr+tr th,.threat-table tr+tr td{border-top:1px solid rgba(255,255,255,.055)}
+.threat-sample{margin:16px 0 0;padding-top:14px;border-top:1px solid rgba(255,255,255,.07);
+  color:var(--muted);font:400 13.5px/1.6 var(--body)}
+.threat-sample span{display:block;color:#8ba0b3;font:600 12.5px var(--body);
+  letter-spacing:0;text-transform:none;margin-bottom:5px}
+.threat-sample.is-thin,.threat-sample.is-thin span{color:var(--muted)}
+.threat-sample em{display:block;margin-top:7px;color:#9fb3c4;font-style:normal;
+  font-size:13px;line-height:1.6}
+
+/* ==================== FAQ ==================== */
+.faq-list details{border:0;border-radius:0;background:none;margin:0;
+  border-bottom:1px solid rgba(255,255,255,.07)}
+.faq-list details:last-child{border-bottom:0}
+.faq-list summary{cursor:pointer;list-style:none;padding:15px 0;
+  color:var(--text);font:500 15px/1.45 var(--body);
+  display:flex;align-items:flex-start;justify-content:space-between;gap:14px;min-height:44px}
+.faq-list summary::-webkit-details-marker{display:none}
+.faq-list summary:after{content:"";flex-shrink:0;width:9px;height:9px;margin-top:6px;
+  border-right:1.6px solid var(--accent);border-bottom:1.6px solid var(--accent);
+  transform:rotate(45deg);transition:transform .18s ease;opacity:.8}
+.faq-list details[open] summary:after{transform:rotate(-135deg)}
+.faq-list summary:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:4px}
+.faq-list p{margin:0;padding:0 0 16px;color:#9fb3c4;font:400 14.5px/1.7 var(--body);max-width:62ch}
+
+/* ==================== En-tête : stade + météo ==================== */
+.hero-venue{flex-wrap:wrap;gap:6px 20px}
+.hero-venue span{display:inline-flex;align-items:center;gap:6px}
+
+@media(min-width:900px){ .sig-body{flex-wrap:nowrap} }
+@media(max-width:640px){
+  .card{padding:16px}
+  .signal-card{padding:22px 18px 18px}
+  .sig-kpis{gap:16px 0}
+  .sig-kpi{flex:1 1 44%;min-width:0;padding:0 0 0 16px}
+  .sig-kpi:nth-child(odd){padding-left:0;border-left:0}
+  .threat-headline{gap:24px}
+  .hero-top{flex-wrap:wrap;gap:4px 12px}
+  .hero-league,.hero-time{flex:1 1 100%}
+}
+@media(prefers-reduced-motion:reduce){ .faq-list summary:after{transition:none} }
+/* Les pastilles colorées des badges sont retirées du signal : la consigne
+   est vert/rouge UNIQUEMENT sur la valeur chiffrée de l'écart. Le texte
+   « Confiance moyenne » / « Risque faible » se suffit à lui-même. */
+.signal-card .badge:before{display:none}
+.signal-card .badge{gap:0}
+
+/* ---------- En-tête : même langage typographique que le reste ---------- */
+.hero-top{font:400 13px var(--body);letter-spacing:0;text-transform:none}
+.hero-league{color:#9fb3c4;font-weight:500}
+.hero-time{color:var(--muted)}
+.hero-team small{font-size:12px}
+.hero-venue{font-size:12.5px;padding-top:12px;border-top-color:rgba(255,255,255,.07)}
+.prob-legend{font-family:var(--body);font-size:12px;text-transform:none;letter-spacing:0;color:var(--muted)}
+.prob-bar{height:26px;border-radius:7px}
+.prob-bar span{font:600 12px var(--body);color:#0a121c;font-variant-numeric:tabular-nums}
+/* Gris pour les issues, cyan pour la plus probable. */
+.prob-bar .home,.prob-bar .draw,.prob-bar .away{background:#24374a;color:#c3d1de}
+.prob-bar .draw{background:#1c2b3a}
+.prob-bar .is-lead{background:var(--accent);color:#06121a}
+/* Pastilles de forme (V/N/D) : versions désaturées. Elles restent
+   distinguables mais ne crient plus — c'est de la donnée de contexte, pas
+   une alerte. Seul l'écart chiffré du signal garde une couleur forte. */
+.form-strip i{font-family:var(--body);font-size:10px;width:16px;height:16px;border-radius:4px}
+.form-strip .f-w{background:rgba(16,185,129,.22);color:#7ee0bd}
+.form-strip .f-d{background:rgba(255,255,255,.08);color:#9fb3c4}
+.form-strip .f-l{background:rgba(255,255,255,.05);color:#7b8fa1}
+
+/* ---------- Comparatif : deux tons neutres, plus de vert/rouge ---------- */
+/* Les barres opposaient du vert (domicile) au rouge (extérieur) : deux
+   couleurs fortes qui ne veulent rien dire d'autre que « équipe A / équipe
+   B », et le plus gros aplat coloré de la page. Cyan contre ardoise. */
+.compare-bar{height:6px;background:rgba(255,255,255,.05)}
+.compare-bar i{background:#2f4a60}
+.compare-bar.home i{background:var(--accent);opacity:.85}
+.compare-bar.away i{background:#3d5a72}
+.compare-row.is-key .compare-bar.home i{opacity:1}
+
+/* ---------- Chiffres sous la lecture ---------- */
+.lecture-stats{border-top-color:rgba(255,255,255,.07);gap:10px 30px}
+.lecture-stats small{font:400 12.5px var(--body);text-transform:none;letter-spacing:0}
+.lecture-stats b{font:600 19px var(--body);font-variant-numeric:tabular-nums;letter-spacing:-.015em}
+
+/* ---------- Ce que dit le modèle ---------- */
+.outputs-col>small{font:400 12.5px var(--body);text-transform:none;letter-spacing:0}
+.outputs-1col{display:block}
+.outputs-xg .xg-row b{font:600 22px var(--body);font-variant-numeric:tabular-nums}
+.outputs-xg .xg-row span{font:400 12.5px var(--body);color:var(--muted)}

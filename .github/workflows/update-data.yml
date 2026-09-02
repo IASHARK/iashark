@@ -96,6 +96,34 @@ jobs:
           const APS        = {'x-apisports-key': APS_KEY};
           var WC_DATA = null, WC_MODEL = null;
           function sleep(ms) { return new Promise(function(r){ setTimeout(r,ms); }); }
+          // Compteur global des refus de l'API-Football.
+          // PROBLEME REEL (02/09/2026) : api-sports repond HTTP 200 avec un
+          // corps {"errors":{"requests":"You have reached the request limit"},
+          // "response":[]} quand le quota journalier est epuise. Le code
+          // parsait ce corps sans erreur, recuperait une reponse vide, et le
+          // pipeline concluait "ce match n'a pas de donnees". Resultat : 14
+          // matchs publies en "aucun signal" - dont Real Madrid, PSG et
+          // Liverpool avec 0 match joue en saison courante ET precedente,
+          // ce qui est physiquement impossible. Rien dans les logs ne
+          // permettait de le diagnostiquer.
+          var API_ERRORS = { count: 0, quota: false, samples: {} };
+          function noteApiError(url, parsed) {
+            if (!parsed || typeof parsed !== 'object') return;
+            var errs = parsed.errors;
+            if (!errs) return;
+            var list = Array.isArray(errs) ? errs : Object.keys(errs).map(function(k){ return k + ': ' + errs[k]; });
+            if (!list.length) return;
+            API_ERRORS.count++;
+            list.forEach(function(msg){
+              var text = String(msg);
+              if (/limit|quota|subscription|plan/i.test(text)) API_ERRORS.quota = true;
+              if (!API_ERRORS.samples[text]) {
+                API_ERRORS.samples[text] = true;
+                console.log('  [API] refus api-sports : ' + text);
+              }
+            });
+          }
+
           function get(url, headers) {
             return new Promise(function(resolve) {
               var u = new URL(url);
@@ -108,7 +136,7 @@ jobs:
                 res.on('data',function(c){d+=c;});
                 res.on('end',function(){
                   clearTimeout(timer);
-                  try{ resolve(JSON.parse(d)); }catch(e){ resolve({}); }
+                  try{ var parsed=JSON.parse(d); noteApiError(url,parsed); resolve(parsed); }catch(e){ resolve({}); }
                 });
               }).on('error',function(){ clearTimeout(timer); resolve({}); });
             });
@@ -127,6 +155,7 @@ jobs:
                   clearTimeout(timer);
                   try{
                     var parsed = JSON.parse(d);
+                    noteApiError(url, parsed);
                     resolve(Array.isArray(parsed) ? parsed : (parsed.data||parsed.response||[]));
                   }catch(e){ resolve([]); }
                 });

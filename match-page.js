@@ -249,13 +249,14 @@ function reasonsCard(vm){
   return card('Pourquoi ce pari ?',`<div class="reasons">${list.map((r,i)=>`<div class="reason"><b>${i+1}</b><p>${esc(r)}</p></div>`).join('')}</div>`,'','reasons');
 }
 
-// Buteur a surveiller ("Menaces de but") : vm.players.scoringThreat, classe
-// par vrai signal de menace (buts/90 + tirs cadres/90, min 3 apparitions,
-// jamais un joueur absent - cf lib/match-view-model.js). scoringProbability
-// = vraie probabilite de Poisson (1-e^-lambda) depuis buts/90 reel, jamais
-// une "probabilite de marquer" inventee. "Cote equitable" = notre propre
-// calcul (100/proba), jamais une cote de marche qu'on n'a pas reellement
-// pour un joueur precis.
+// Buteur a surveiller : vm.players.scoringThreat, classe cote view-model
+// (saison en cours uniquement, score pilote par les tirs cadres).
+// La carte n'affiche QUE des statistiques mesurees. La "probabilite de
+// marquer" et la "cote equitable" du joueur ont ete retirees : elles
+// n'avaient pas ete demandees, et la seconde n'etait que l'inverse de la
+// premiere - jamais une cote reellement proposee par un operateur pour ce
+// joueur. Sur un produit payant, mieux vaut ne rien afficher qu'un prix
+// qui n'existe nulle part.
 // Justification "pourquoi ce joueur" : phrase deterministe (jamais un
 // nouvel appel LLM), assemblee uniquement a partir des vraies stats deja
 // calculees pour ce candidat (goals90/shotsOn90/startProbability, cf
@@ -270,7 +271,6 @@ function reasonsCard(vm){
 // l'affaiblit.
 // Toutes les valeurs viennent de vm.players.scoringThreat (deja calculees
 // par lib/match-view-model.js) - aucune donnee nouvelle, aucun chiffre
-// invente. scoringProbability reste la vraie probabilite de Poisson.
 function threatSample(p){
   const bits=[];
   if(n(p.appearances)!==null)bits.push(`${p.appearances} match${p.appearances>1?'s':''} joué${p.appearances>1?'s':''}`);
@@ -285,8 +285,6 @@ function threatsCard(vm){
   const pid=n(p.id);
   const href=pid!==null?` href="/joueur.html?m=${esc(vm.id)}&p=${pid}"`:'';
   const tag=pid!==null?'a':'div';
-  const sp=n(p.scoringProbability);
-  const fairOdds=sp!==null&&sp>0?100/sp:null;
   const rows=[
     ['Buts par 90 minutes',fmt(p.goals90,2)],
     ['Tirs cadrés par 90 minutes',fmt(p.shotsOn90,2)],
@@ -299,10 +297,7 @@ function threatsCard(vm){
       ${img(p.photo,p.name)}
       <div><b>${esc(p.name)}</b><small>${esc(p.team||'')}${p.position?' · '+esc(p.position):''}</small></div>
     </div>
-    ${sp!==null?`<div class="threat-headline">
-      <div><b class="pos">${pct(sp)}</b><span>Probabilité qu'il marque</span></div>
-      ${fairOdds!==null?`<div><b>${odds(fairOdds)}</b><span>Cote équitable</span></div>`:''}
-    </div>`:''}
+
     ${rows.length?`<table class="threat-table"><tbody>${rows.map(([k,v])=>`<tr><th scope="row">${esc(k)}</th><td>${v}</td></tr>`).join('')}</tbody></table>`:''}
     ${sample?`<p class="threat-sample${p.thinSample?' is-thin':''}"><span>Échantillon</span>${esc(sample)}${p.thinSample?'<em>Temps de jeu limité sur ce championnat : ces moyennes par 90 minutes reposent sur peu de minutes et restent fragiles.</em>':''}</p>`:''}
   </${tag}>`,'threats-card','target2');

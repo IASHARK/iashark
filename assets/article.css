@@ -1,0 +1,151 @@
+/* Feuille de style partagee des articles de blog IASHARK.
+   Reprend les jetons de couleur et les polices de assets/product-pages.css
+   (--bg #050b12, --cyan #16d6f4, "Bebas Neue"/"DM Sans"/"Space Mono") pour que
+   le blog cesse d'etre un ilot visuel : avant, chaque article embarquait son
+   propre theme (#060a0c / #00e5ff) et ne ressemblait a aucune autre page. */
+:root{--bg:#050b12;--card:#091724;--card2:#0c1c2b;--line:#17364a;--cyan:#16d6f4;
+  --text:#f4f7fa;--soft:#9baec0;--muted:#58758e;--green:#25d6a2;--red:#ff625f;--amber:#f5b84b}
+*{box-sizing:border-box}
+html{background:var(--bg);scroll-behavior:smooth}
+body{margin:0;background:radial-gradient(circle at 70% -15%,#10283a 0,transparent 40%),var(--bg);
+  color:var(--text);font-family:"DM Sans",system-ui,sans-serif;line-height:1.72;padding-bottom:86px}
+img{max-width:100%;display:block}
+a{color:var(--cyan);text-decoration:none}
+a:hover{text-decoration:underline}
+
+.wrap{width:min(760px,calc(100% - 40px));margin:0 auto}
+
+/* ---- En-tete d'article ---- */
+.art-hero{border-bottom:1px solid var(--line);padding:34px 0 0;margin-bottom:36px}
+.crumb{font:10px/1 "Space Mono",ui-monospace,monospace;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--muted);margin-bottom:18px}
+.crumb a{color:var(--muted)}.crumb a:hover{color:var(--cyan)}
+.tag{display:inline-block;background:rgba(22,214,244,.09);border:1px solid rgba(22,214,244,.28);
+  color:var(--cyan);font:700 9.5px "Space Mono",ui-monospace,monospace;letter-spacing:.18em;
+  text-transform:uppercase;padding:6px 12px;border-radius:20px;margin-bottom:16px}
+.art-hero h1{font:clamp(32px,5.4vw,52px)/1.03 "Bebas Neue",Impact,sans-serif;letter-spacing:.01em;margin:0 0 14px}
+.art-hero h1 em{color:var(--cyan);font-style:normal}
+.chapo{color:var(--soft);font-size:17px;line-height:1.62;margin:0 0 20px}
+.meta{display:flex;flex-wrap:wrap;gap:14px;color:var(--muted);
+  font:9.5px "Space Mono",ui-monospace,monospace;letter-spacing:.1em;text-transform:uppercase;margin-bottom:26px}
+.cover{border:1px solid var(--line);border-radius:14px;overflow:hidden;margin-bottom:0}
+.cover img{width:100%;height:auto;aspect-ratio:16/9;object-fit:cover}
+.cover figcaption{background:var(--card);border-top:1px solid var(--line);padding:9px 14px;
+  color:var(--muted);font-size:11.5px;line-height:1.5}
+
+/* ---- Sommaire ---- */
+.toc{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px 22px;margin:34px 0}
+.toc h2{margin:0 0 12px;font:700 10px "Space Mono",ui-monospace,monospace;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--cyan);border:0;padding:0}
+.toc ol{margin:0;padding-left:0;list-style:none;counter-reset:toc}
+.toc li{counter-increment:toc;margin:7px 0;display:flex;gap:10px;align-items:baseline}
+.toc li::before{content:counter(toc,decimal-leading-zero);color:var(--cyan);
+  font:10px "Space Mono",ui-monospace,monospace;flex:none}
+.toc a{color:var(--soft);font-size:14.5px}
+.toc a:hover{color:var(--cyan);text-decoration:none}
+
+/* ---- Corps ---- */
+.body h2{font:clamp(23px,3.6vw,30px)/1.12 "Bebas Neue",Impact,sans-serif;letter-spacing:.02em;
+  color:var(--text);margin:52px 0 14px;padding-bottom:11px;border-bottom:1px solid var(--line);scroll-margin-top:80px}
+.body h2 em{color:var(--cyan);font-style:normal}
+.body h3{font:600 17px/1.35 "DM Sans",sans-serif;color:var(--cyan);margin:30px 0 9px}
+.body p{color:var(--soft);font-size:15.5px;line-height:1.78;margin:0 0 16px}
+.body strong{color:var(--text);font-weight:600}
+.body ul,.body ol{color:var(--soft);font-size:15.5px;line-height:1.75;padding-left:20px;margin:0 0 18px}
+.body li{margin:8px 0}
+.body li::marker{color:var(--cyan)}
+
+/* ---- Encadres ---- */
+.box{border:1px solid var(--line);border-left:3px solid var(--cyan);background:var(--card);
+  border-radius:0 12px 12px 0;padding:18px 20px;margin:26px 0}
+.box.warn{border-left-color:var(--amber)}
+.box.stop{border-left-color:var(--red)}
+.box .box-t{font:700 9.5px "Space Mono",ui-monospace,monospace;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--cyan);margin-bottom:9px}
+.box.warn .box-t{color:var(--amber)}
+.box.stop .box-t{color:var(--red)}
+.box p:last-child{margin-bottom:0}
+
+.keyfig{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1px;background:var(--line);
+  border:1px solid var(--line);border-radius:12px;overflow:hidden;margin:26px 0}
+.keyfig div{background:var(--card);padding:16px 18px}
+.keyfig b{display:block;color:var(--cyan);font:34px/1 "Bebas Neue",Impact,sans-serif;margin-bottom:5px}
+.keyfig span{color:var(--muted);font:8.5px "Space Mono",ui-monospace,monospace;letter-spacing:.12em;text-transform:uppercase}
+
+/* ---- Tableaux ---- */
+.tw{overflow-x:auto;margin:24px 0;border:1px solid var(--line);border-radius:12px}
+table{border-collapse:collapse;width:100%;min-width:440px;font-size:14px}
+th,td{padding:11px 14px;text-align:left;border-bottom:1px solid var(--line)}
+th{background:var(--card2);color:var(--cyan);font:700 9.5px "Space Mono",ui-monospace,monospace;
+  letter-spacing:.12em;text-transform:uppercase;white-space:nowrap}
+td{color:var(--soft)}
+tbody tr:last-child td{border-bottom:0}
+td.num{font-family:"Space Mono",ui-monospace,monospace;color:var(--text);white-space:nowrap}
+tr.hi td{background:rgba(22,214,244,.06)}
+tr.hi td.num{color:var(--cyan)}
+
+/* ---- Figures / graphiques ---- */
+figure.fig{margin:30px 0;border:1px solid var(--line);border-radius:12px;background:var(--card);padding:20px 18px 14px}
+figure.fig svg{width:100%;height:auto;display:block}
+figure.fig figcaption{color:var(--muted);font-size:12px;line-height:1.55;margin-top:12px;
+  padding-top:11px;border-top:1px solid var(--line)}
+
+/* ---- Formule ---- */
+.formula{background:#04121c;border:1px solid var(--line);border-radius:10px;padding:15px 18px;margin:20px 0;
+  font-family:"Space Mono",ui-monospace,monospace;font-size:13.5px;color:var(--text);
+  overflow-x:auto;white-space:nowrap;line-height:1.9}
+.formula i{color:var(--cyan);font-style:normal}
+.formula small{display:block;white-space:normal;color:var(--muted);font-size:11px;margin-top:7px;font-family:"DM Sans",sans-serif}
+
+/* ---- Calculateur ---- */
+.calc{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px;margin:30px 0}
+.calc h3{margin:0 0 4px;color:var(--cyan);font:700 10px "Space Mono",ui-monospace,monospace;
+  letter-spacing:.16em;text-transform:uppercase}
+.calc .hint{color:var(--muted);font-size:12.5px;margin:0 0 16px}
+.calc .row{display:grid;grid-template-columns:1fr 92px;gap:12px;align-items:center;margin:10px 0}
+.calc label{color:var(--soft);font-size:13.5px}
+.calc input{width:100%;background:#04121c;border:1px solid var(--line);border-radius:8px;padding:9px 11px;
+  color:var(--text);font-family:"Space Mono",ui-monospace,monospace;font-size:13.5px;text-align:right}
+.calc input:focus{outline:none;border-color:var(--cyan)}
+.calc .out{margin-top:18px;padding-top:16px;border-top:1px solid var(--line);display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:14px}
+.calc .out div b{display:block;color:var(--cyan);font:30px/1 "Bebas Neue",Impact,sans-serif;margin-bottom:4px}
+.calc .out div span{color:var(--muted);font:8.5px "Space Mono",ui-monospace,monospace;
+  letter-spacing:.1em;text-transform:uppercase}
+.calc .verdict{margin-top:16px;font-size:13.5px;color:var(--soft)}
+.calc .verdict b{color:var(--text)}
+
+/* ---- FAQ ---- */
+.faq details{border:1px solid var(--line);border-radius:10px;background:var(--card);margin:10px 0;padding:0}
+.faq summary{cursor:pointer;padding:15px 18px;color:var(--text);font-weight:600;font-size:15px;list-style:none}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary::after{content:'+';float:right;color:var(--cyan);font-family:"Space Mono",monospace}
+.faq details[open] summary::after{content:'–'}
+.faq details p{padding:0 18px 16px;margin:0;color:var(--soft);font-size:14.5px}
+
+/* ---- Liens internes / CTA ---- */
+.related{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px;margin:26px 0}
+.related a{display:block;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;
+  color:var(--text);transition:.18s}
+.related a:hover{border-color:#27728e;transform:translateY(-2px);text-decoration:none}
+.related span{display:block;color:var(--cyan);font:700 8.5px "Space Mono",ui-monospace,monospace;
+  letter-spacing:.16em;text-transform:uppercase;margin-bottom:7px}
+.related b{font-size:14.5px;font-weight:600;line-height:1.4}
+
+.cta{background:linear-gradient(145deg,#0b1c2b,#07131f);border:1px solid rgba(22,214,244,.24);
+  border-radius:16px;padding:28px 24px;margin:40px 0;text-align:center}
+.cta h2{border:0;margin:0 0 10px;padding:0;font:clamp(24px,4vw,32px)/1.1 "Bebas Neue",Impact,sans-serif}
+.cta p{color:var(--soft);font-size:14.5px;margin:0 auto 20px;max-width:480px}
+.cta a.btn{display:inline-block;background:rgba(22,214,244,.12);border:1px solid rgba(22,214,244,.4);
+  color:var(--cyan);border-radius:10px;padding:13px 26px;
+  font:700 10.5px "Space Mono",ui-monospace,monospace;letter-spacing:.16em;text-transform:uppercase}
+.cta a.btn:hover{background:rgba(22,214,244,.2);text-decoration:none}
+
+footer.art-foot{border-top:1px solid var(--line);margin-top:46px;padding:26px 0 10px}
+footer.art-foot p{color:var(--muted);font-size:11.5px;line-height:1.7;margin:0}
+
+@media(max-width:640px){
+  .body h2{margin-top:40px}
+  .calc .row{grid-template-columns:1fr 78px}
+  .art-hero{padding-top:22px}
+}

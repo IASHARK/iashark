@@ -1,8 +1,180 @@
-<!doctype html>
-<html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Blog football, statistiques et paris sportifs — IASHARK</title><meta name="description" content="Guides IASHARK pour comprendre les statistiques football, les probabilités, les xG, la value et la gestion des paris sportifs.">
-<link rel="canonical" href="https://iashark.com/blog.html"><link rel="stylesheet" href="/assets/product-pages.css"><link rel="stylesheet" href="/assets/blog-page.css"><link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"><link rel="stylesheet" href="/assets/bottom-navigation.css"></head>
-<body><header class="topbar"><a class="brand" href="/"><img src="/assets/iashark-logo.png" alt="IASHARK"></a><div class="top-actions"><span class="lang">FR⌄</span><span id="authHeaderSlot"><a class="btn-login" href="/compte.html">Connexion</a></span></div></header>
-<main class="page"><section class="hero"><div><span class="eyebrow">Analyses, méthode & data</span><h1>Comprendre le football<br>au-delà du score.</h1><p>Des guides clairs pour interpréter les données, les probabilités et les marchés sans confondre analyse et certitude.</p></div><article class="card article-hero" id="featured"></article></section><div class="filters" id="filters"></div><div class="account-layout"><section class="grid articles" id="articles"></section><aside class="stack"><div class="card"><div class="card-head"><h2>À lire en priorité</h2></div><div id="popular"></div></div><div class="card"><div class="card-head"><h2>La lecture IASHARK</h2></div><p class="muted">Des articles pédagogiques fondés sur la méthode, les données et leurs limites.</p></div></aside></div></main>
-<nav class="bottom-nav"><a href="/"><span>⌂</span><b>Accueil</b></a><a href="/pro.html"><span>☆</span><b>Outils</b></a><a class="active" href="/blog.html"><span>▤</span><b>Blog</b></a><a href="/compte.html"><span>♙</span><b>Compte</b></a></nav>
-<script src="/blog-page.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script><script src="/auth-header.js"></script><script>IasharkAuthHeader.mount('#authHeaderSlot')</script><script src="/bottom-navigation.js"></script></body></html>
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Blog IASHARK — Statistiques football, probabilités et méthode</title>
+<meta name="description" content="Des guides clairs pour comprendre les statistiques du football : xG, loi de Poisson, value bet, gestion de bankroll. La méthode et ses limites, sans promesse de gain.">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<link rel="canonical" href="https://iashark.com/blog.html">
+<meta property="og:title" content="Blog IASHARK — Statistiques football, probabilités et méthode">
+<meta property="og:description" content="Des guides clairs pour comprendre les statistiques du football : xG, loi de Poisson, value bet, gestion de bankroll.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://iashark.com/blog.html">
+<meta property="og:image" content="https://iashark.com/assets/blog/xg-shot-map-hero.jpg">
+<meta property="og:locale" content="fr_FR">
+<meta property="og:site_name" content="IASHARK">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Blog IASHARK — Statistiques football et méthode">
+<meta name="twitter:description" content="xG, loi de Poisson, value bet, bankroll : la méthode et ses limites.">
+<meta name="twitter:image" content="https://iashark.com/assets/blog/xg-shot-map-hero.jpg">
+<link rel="icon" href="/favicon.ico">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/blog-index.css">
+<link rel="stylesheet" href="/assets/bottom-navigation.css">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"Blog",
+"name":"Blog IASHARK","url":"https://iashark.com/blog.html",
+"description":"Guides sur les statistiques du football, les probabilités et la méthode d'analyse.",
+"inLanguage":"fr-FR",
+"publisher":{"@type":"Organization","name":"IASHARK","url":"https://iashark.com","logo":{"@type":"ImageObject","url":"https://iashark.com/icon-512.png"}},
+"blogPost":[
+{"@type":"BlogPosting","headline":"Plus de 2,5 buts : calculer la probabilité, pas la deviner","url":"https://iashark.com/blog/guides/plus-de-2-5-buts-probabilite-methode-poisson.html","datePublished":"2026-09-02","image":"https://iashark.com/assets/blog/over-25-goals-hero.jpg"},
+{"@type":"BlogPosting","headline":"xG : ce que la statistique dit vraiment, et où elle ment","url":"https://iashark.com/blog/guides/xg-expected-goals-guide-complet.html","datePublished":"2026-09-02","image":"https://iashark.com/assets/blog/xg-shot-map-hero.jpg"},
+{"@type":"BlogPosting","headline":"Prédiction football par IA : comprendre les modèles et leurs limites","url":"https://iashark.com/blog/guides/prediction-ia-football-guide-2026.html","datePublished":"2026-08-31"},
+{"@type":"BlogPosting","headline":"Value bet : comparer une probabilité à une cote sans se tromper","url":"https://iashark.com/blog/guides/value-bet-guide-complet-2026.html","datePublished":"2026-08-30"},
+{"@type":"BlogPosting","headline":"Paris sportifs : le guide complet pour débuter avec méthode","url":"https://iashark.com/blog/guides/guide-paris-sportifs-debutant-complet.html","datePublished":"2026-08-29"},
+{"@type":"BlogPosting","headline":"Choisir un bookmaker : critères de sécurité, cotes et limites","url":"https://iashark.com/blog/guides/meilleurs-bookmakers-monde-2026.html","datePublished":"2026-08-28"},
+{"@type":"BlogPosting","headline":"Coupe du monde 2026 : format, calendrier et méthode d'analyse","url":"https://iashark.com/blog/guides/coupe-du-monde-2026-guide-complet.html","datePublished":"2026-08-27"}]}
+</script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[
+{"@type":"ListItem","position":1,"name":"Accueil","item":"https://iashark.com/"},
+{"@type":"ListItem","position":2,"name":"Blog"}]}
+</script>
+</head>
+<body>
+
+<div class="wrap">
+
+  <section class="blog-hero">
+    <span class="eyebrow">Analyses · Méthode · Données</span>
+    <h1>Comprendre le football<br><em>au-delà du score.</em></h1>
+    <p>Des guides qui expliquent comment on transforme des données en probabilités — et où ces probabilités s'arrêtent. Aucune promesse de gain, aucun pronostic miracle : la méthode, et ses limites.</p>
+  </section>
+
+  <!-- Article mis en avant -->
+  <a class="feat" href="/blog/guides/plus-de-2-5-buts-probabilite-methode-poisson.html">
+    <div class="ph">
+      <img src="/assets/blog/over-25-goals-hero.jpg" width="1344" height="768" alt="Ballon de football frappant le fond des filets lors d'un match en nocturne" fetchpriority="high">
+    </div>
+    <div class="txt">
+      <span class="badge">À la une · Méthode</span>
+      <h2>Plus de 2,5 buts : calculer la probabilité, pas la deviner</h2>
+      <p>La méthode complète pour transformer des statistiques d'équipes en un pourcentage vérifiable : forces offensives et défensives, loi de Poisson, comparaison à la cote — et la marge d'erreur que personne ne montre. Calculateur inclus.</p>
+      <span class="m">2 septembre 2026 · 13 min de lecture · <b>Lire l'article →</b></span>
+    </div>
+  </a>
+
+  <div class="filters" id="filters" role="group" aria-label="Filtrer par catégorie">
+    <button type="button" data-cat="all" aria-pressed="true">Tous</button>
+    <button type="button" data-cat="Analyse" aria-pressed="false">Analyse</button>
+    <button type="button" data-cat="Méthode" aria-pressed="false">Méthode</button>
+    <button type="button" data-cat="Guide" aria-pressed="false">Guide</button>
+    <button type="button" data-cat="Football" aria-pressed="false">Football</button>
+  </div>
+
+  <div class="grid" id="grid">
+
+    <a class="post" href="/blog/guides/xg-expected-goals-guide-complet.html" data-cat="Analyse">
+      <div class="ph"><img src="/assets/blog/xg-shot-map-hero.jpg" width="1344" height="768" alt="Terrain de football en filaire bleu nuit parsemé de points lumineux représentant des tirs" loading="lazy"></div>
+      <div class="txt">
+        <span class="cat">Analyse</span>
+        <h3>xG : ce que la statistique dit vraiment, et où elle ment</h3>
+        <p>Comment un xG est fabriqué, le piège du xG cumulé, combien de matchs il faut avant d'y croire, et pourquoi deux sites donnent deux valeurs différentes.</p>
+        <span class="m">2 sept. 2026 · 11 min</span>
+      </div>
+    </a>
+
+    <a class="post" href="/blog/guides/prediction-ia-football-guide-2026.html" data-cat="Analyse">
+      <div class="ph"><img src="/assets/blog/cover-prediction-ia.jpg" width="1024" height="576" alt="Particules lumineuses cyan s'élevant au-dessus d'une cage de football, évoquant un modèle de données" loading="lazy"></div>
+      <div class="txt">
+        <span class="cat">Analyse</span>
+        <h3>Prédiction football par IA : comprendre les modèles et leurs limites</h3>
+        <p>Comment les modèles transforment les données d'un match en probabilités, sans jamais garantir un résultat.</p>
+        <span class="m">31 août 2026 · 9 min</span>
+      </div>
+    </a>
+
+    <a class="post" href="/blog/guides/value-bet-guide-complet-2026.html" data-cat="Méthode">
+      <div class="ph"><img src="/assets/blog/cover-value-bet.jpg" width="1024" height="576" alt="Deux colonnes lumineuses cyan de hauteurs différentes, évoquant la comparaison de deux probabilités" loading="lazy"></div>
+      <div class="txt">
+        <span class="cat">Méthode</span>
+        <h3>Value bet : comparer une probabilité à une cote sans se tromper</h3>
+        <p>Probabilité implicite, marge du bookmaker, avantage estimé, et limites d'une décision fondée sur la value.</p>
+        <span class="m">30 août 2026 · 10 min</span>
+      </div>
+    </a>
+
+    <a class="post" href="/blog/guides/guide-paris-sportifs-debutant-complet.html" data-cat="Guide">
+      <div class="ph"><img src="/assets/blog/cover-debutant.jpg" width="1024" height="576" alt="Piles de jetons lumineux cyan de hauteurs différentes, évoquant la gestion d'une bankroll" loading="lazy"></div>
+      <div class="txt">
+        <span class="cat">Guide</span>
+        <h3>Paris sportifs : le guide complet pour débuter avec méthode</h3>
+        <p>Bankroll, mise, variance et discipline : les bases indispensables avant même d'évaluer un marché.</p>
+        <span class="m">29 août 2026 · 12 min</span>
+      </div>
+    </a>
+
+    <a class="post" href="/blog/guides/meilleurs-bookmakers-monde-2026.html" data-cat="Guide">
+      <div class="ph"><img src="/assets/blog/cover-bookmakers.jpg" width="1024" height="576" alt="Bouclier lumineux cyan en filaire au-dessus de cercles concentriques, évoquant la sécurité d'une plateforme" loading="lazy"></div>
+      <div class="txt">
+        <span class="cat">Guide</span>
+        <h3>Choisir un bookmaker : critères de sécurité, cotes et limites</h3>
+        <p>Les critères concrets à examiner avant d'utiliser une plateforme, sans classement publicitaire trompeur.</p>
+        <span class="m">28 août 2026 · 8 min</span>
+      </div>
+    </a>
+
+    <a class="post" href="/blog/guides/coupe-du-monde-2026-guide-complet.html" data-cat="Football">
+      <div class="ph"><img src="/assets/blog/cover-coupe-du-monde.jpg" width="1024" height="576" alt="Globe terrestre lumineux en filaire cyan entouré de particules, évoquant une compétition internationale" loading="lazy"></div>
+      <div class="txt">
+        <span class="cat">Football</span>
+        <h3>Coupe du monde 2026 : format, calendrier et méthode d'analyse</h3>
+        <p>Les repères utiles pour suivre la compétition et analyser les rencontres avec leur contexte réel.</p>
+        <span class="m">27 août 2026 · 11 min</span>
+      </div>
+    </a>
+
+  </div>
+
+  <section class="cta">
+    <h2>La méthode, appliquée aux matchs du jour</h2>
+    <p>IASHARK calcule chaque matin des probabilités à partir de données réelles et explique le raisonnement, match par match. Le match du jour est gratuit, en permanence.</p>
+    <a href="/">Voir les analyses du jour →</a>
+  </section>
+
+  <footer class="blog-foot">
+    <p>IASHARK — analyses statistiques de football. Les probabilités publiées sont indicatives et ne garantissent aucun résultat. Les paris sportifs comportent un risque de perte financière et de dépendance : ne misez que ce que vous pouvez vous permettre de perdre. Interdit aux mineurs. Besoin d'aide ? Joueurs Info Service : 09 74 75 13 13 (appel non surtaxé).</p>
+  </footer>
+
+</div>
+
+<script>
+/* Filtres de categorie — amelioration progressive uniquement.
+   Les articles sont dans le HTML servi : sans JavaScript, la page reste
+   entierement lisible et indexable, on perd seulement le filtrage.
+   (L'ancienne version construisait toute la liste en JavaScript depuis
+   blog-posts.json : aucun article n'existait dans le HTML servi.) */
+(function(){
+  var filters=document.getElementById('filters'), grid=document.getElementById('grid');
+  if(!filters||!grid) return;
+  var posts=Array.prototype.slice.call(grid.querySelectorAll('.post'));
+  filters.addEventListener('click',function(e){
+    var btn=e.target.closest('button[data-cat]');
+    if(!btn) return;
+    var cat=btn.getAttribute('data-cat');
+    filters.querySelectorAll('button').forEach(function(b){
+      b.setAttribute('aria-pressed', String(b===btn));
+    });
+    posts.forEach(function(p){
+      p.hidden = (cat!=='all' && p.getAttribute('data-cat')!==cat);
+    });
+  });
+})();
+</script>
+<script src="/site-header.js"></script>
+<script src="/site-prefs.js"></script>
+<script src="/bottom-navigation.js"></script>
+</body>
+</html>

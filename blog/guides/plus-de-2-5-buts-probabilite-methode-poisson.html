@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Plus de 2,5 buts : calculer la probabilité avec la loi de Poisson | IASHARK</title>
+<meta name="description" content="La méthode complète pour estimer la probabilité de plus de 2,5 buts dans un match : forces offensives et défensives, loi de Poisson, comparaison à la cote, et la marge d'erreur que personne ne montre. Calculateur inclus.">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<link rel="canonical" href="https://iashark.com/blog/guides/plus-de-2-5-buts-probabilite-methode-poisson.html">
+<meta property="og:title" content="Plus de 2,5 buts : calculer la probabilité au lieu de la deviner">
+<meta property="og:description" content="Forces offensives et défensives, loi de Poisson, comparaison à la cote, et la marge d'erreur que personne ne montre. Calculateur inclus.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://iashark.com/blog/guides/plus-de-2-5-buts-probabilite-methode-poisson.html">
+<meta property="og:image" content="https://iashark.com/assets/blog/over-25-goals-hero.jpg">
+<meta property="og:locale" content="fr_FR">
+<meta property="og:site_name" content="IASHARK">
+<meta property="article:published_time" content="2026-09-02">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Plus de 2,5 buts : calculer la probabilité au lieu de la deviner">
+<meta name="twitter:description" content="La méthode Poisson pas à pas, avec calculateur et marge d'erreur.">
+<meta name="twitter:image" content="https://iashark.com/assets/blog/over-25-goals-hero.jpg">
+<link rel="icon" href="/favicon.ico">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/article.css">
+<link rel="stylesheet" href="/assets/bottom-navigation.css">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"Article",
+"headline":"Plus de 2,5 buts : calculer la probabilité avec la loi de Poisson",
+"description":"La méthode complète pour estimer la probabilité de plus de 2,5 buts dans un match : forces offensives et défensives, loi de Poisson, comparaison à la cote, et la marge d'erreur que personne ne montre.",
+"image":"https://iashark.com/assets/blog/over-25-goals-hero.jpg",
+"datePublished":"2026-09-02","dateModified":"2026-09-02",
+"author":{"@type":"Organization","name":"IASHARK","url":"https://iashark.com"},
+"publisher":{"@type":"Organization","name":"IASHARK","url":"https://iashark.com","logo":{"@type":"ImageObject","url":"https://iashark.com/icon-512.png"}},
+"mainEntityOfPage":{"@type":"WebPage","@id":"https://iashark.com/blog/guides/plus-de-2-5-buts-probabilite-methode-poisson.html"},
+"inLanguage":"fr-FR"}
+</script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[
+{"@type":"ListItem","position":1,"name":"Accueil","item":"https://iashark.com/"},
+{"@type":"ListItem","position":2,"name":"Blog","item":"https://iashark.com/blog.html"},
+{"@type":"ListItem","position":3,"name":"Plus de 2,5 buts : la méthode Poisson"}]}
+</script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[
+{"@type":"Question","name":"Que veut dire plus de 2,5 buts ?","acceptedAnswer":{"@type":"Answer","text":"Le pari « plus de 2,5 buts » porte sur le nombre total de buts inscrits par les deux équipes pendant le temps réglementaire. Comme un match ne peut pas produire un demi-but, le seuil de 2,5 sert uniquement à supprimer le match nul : il faut 3 buts ou plus pour gagner, 0, 1 ou 2 buts font perdre. Les prolongations et les tirs au but ne comptent pas."}},
+{"@type":"Question","name":"Comment calculer la probabilité de plus de 2,5 buts ?","acceptedAnswer":{"@type":"Answer","text":"On estime d'abord le nombre de buts attendu pour chaque équipe à partir de sa force offensive et de la faiblesse défensive de l'adversaire, rapportées aux moyennes du championnat. On additionne ces deux valeurs pour obtenir le nombre total de buts attendu, appelé lambda. On applique ensuite la loi de Poisson pour obtenir la probabilité de 0, 1 et 2 buts, et la probabilité de plus de 2,5 buts est simplement 100 % moins la somme de ces trois valeurs."}},
+{"@type":"Question","name":"Quelle est la probabilité moyenne de plus de 2,5 buts dans un match ?","acceptedAnswer":{"@type":"Answer","text":"Elle dépend entièrement du championnat et des équipes. Avec un total attendu de 2,6 buts, la probabilité est d'environ 48 %. Avec 2,8 buts attendus, elle monte à environ 53 %. Avec 3,0 buts attendus, elle atteint environ 58 %. Un écart de seulement 0,2 but attendu déplace donc la probabilité de près de 5 points."}},
+{"@type":"Question","name":"La loi de Poisson est-elle fiable pour le football ?","acceptedAnswer":{"@type":"Answer","text":"Elle constitue une bonne première approximation, mais elle repose sur des hypothèses fausses en pratique. Elle suppose que les buts des deux équipes sont indépendants, ce qui est démenti par les données : les scores nuls et vierges sont plus fréquents que la loi ne le prédit. Elle suppose aussi un taux de marquage constant sur 90 minutes, alors qu'un carton rouge ou un but tardif change tout. Les corrections de type Dixon-Coles existent précisément pour rattraper ces écarts."}},
+{"@type":"Question","name":"Comment savoir si une cote sur plus de 2,5 buts est intéressante ?","acceptedAnswer":{"@type":"Answer","text":"Convertissez la cote en probabilité implicite en divisant 100 par la cote. Une cote de 1,90 correspond à environ 52,6 %. Comparez ensuite cette valeur à votre propre estimation. Si votre modèle donne 53 % contre 52,6 % implicites, l'avantage théorique est inférieur à un point : il est plus petit que votre marge d'erreur, et ne constitue donc pas une raison suffisante de miser."}}]}
+</script>
+</head>
+<body>
+
+<div class="wrap">
+
+<header class="art-hero">
+  <nav class="crumb"><a href="/">Accueil</a> › <a href="/blog.html">Blog</a> › Plus de 2,5 buts</nav>
+  <span class="tag">Méthode · Calcul</span>
+  <h1>Plus de 2,5 buts :<br>calculer la probabilité, <em>pas la deviner</em></h1>
+  <p class="chapo">« Les deux équipes marquent beaucoup, ça va être un match à buts. » C'est une intuition, pas une probabilité. Voici la méthode complète pour transformer des statistiques d'équipes en un pourcentage vérifiable — et la marge d'erreur que presque personne ne vous montre.</p>
+  <div class="meta">
+    <span>Publié le 2 septembre 2026</span>
+    <span>·</span>
+    <span>13 min de lecture</span>
+    <span>·</span>
+    <span>Calculateur inclus</span>
+  </div>
+  <figure class="cover">
+    <img src="/assets/blog/over-25-goals-hero.jpg" width="1344" height="768" alt="Ballon de football frappant le fond des filets lors d'un match en nocturne, éclairé en bleu cyan par les projecteurs du stade" fetchpriority="high">
+    <figcaption>Trois buts ou plus : au-delà de l'intuition, la question est de savoir à quelle fréquence cela arrive dans ce match précis.</figcaption>
+  </figure>
+</header>
+
+<nav class="toc" aria-label="Sommaire">
+  <h2>Au sommaire</h2>
+  <ol>
+    <li><a href="#definition">Ce que « plus de 2,5 buts » veut dire exactement</a></li>
+    <li><a href="#moyennes">Pourquoi les moyennes d'équipe ne suffisent pas</a></li>
+    <li><a href="#lambda">Étape 1 : estimer les buts attendus de chaque équipe</a></li>
+    <li><a href="#poisson">Étape 2 : de lambda à la probabilité</a></li>
+    <li><a href="#exemple">L'exemple complet, chiffre par chiffre</a></li>
+    <li><a href="#cote">Étape 3 : comparer à la cote du bookmaker</a></li>
+    <li><a href="#erreur">La marge d'erreur qu'on ne vous montre jamais</a></li>
+    <li><a href="#limites">Les quatre failles de la méthode</a></li>
+    <li><a href="#calculateur">Le calculateur</a></li>
+    <li><a href="#faq">Questions fréquentes</a></li>
+  </ol>
+</nav>
+
+<main class="body">
+
+<h2 id="definition">1. Ce que « plus de 2,5 buts » veut dire <em>exactement</em></h2>
+
+<p>Le pari porte sur le <strong>nombre total de buts inscrits par les deux équipes</strong> pendant le temps réglementaire. Un match ne pouvant pas produire un demi-but, le seuil de 2,5 sert uniquement à supprimer toute possibilité de match nul sur le pari :</p>
+
+<ul>
+  <li><strong>3 buts ou plus</strong> → « plus de 2,5 » gagne</li>
+  <li><strong>0, 1 ou 2 buts</strong> → « moins de 2,5 » gagne</li>
+</ul>
+
+<div class="box">
+  <div class="box-t">Deux détails qui coûtent cher</div>
+  <p>Les <strong>prolongations et les tirs au but ne comptent pas</strong> : seul le score à la 90ᵉ minute, temps additionnel inclus, est pris en compte. Et le pari ignore totalement <em>qui</em> marque : un 3-0 et un 2-1 donnent le même résultat.</p>
+</div>
+
+<h2 id="moyennes">2. Pourquoi les moyennes d'équipe ne suffisent pas</h2>
+
+<p>Le raisonnement courant consiste à additionner les moyennes : « l'équipe A marque 1,8 but par match, l'équipe B en marque 1,3, donc on attend 3,1 buts, donc plus de 2,5 est probable ». Ce calcul comporte deux erreurs.</p>
+
+<p><strong>Première erreur : il ignore les défenses.</strong> Une attaque à 1,8 but par match ne produit pas 1,8 but contre n'importe qui. Face à la meilleure défense du championnat, elle en produira nettement moins.</p>
+
+<p><strong>Deuxième erreur, plus grave : une moyenne n'est pas une probabilité.</strong> Un match dont on attend 3,1 buts ne produit pas 3 buts « en général ». Il produit 0 but parfois, 5 buts parfois. Savoir combien de buts on attend <em>en moyenne</em> ne dit pas encore à quelle fréquence on dépasse 2,5. C'est précisément le rôle de la loi de Poisson que de convertir l'un en l'autre.</p>
+
+<h2 id="lambda">3. Étape 1 : estimer les buts attendus de chaque équipe</h2>
+
+<p>L'objectif est d'obtenir un nombre, appelé <strong>lambda (λ)</strong> : le nombre de buts qu'une équipe devrait marquer dans <em>ce</em> match précis. On l'obtient en comparant chaque équipe à la moyenne de son championnat.</p>
+
+<div class="formula">
+  <i>force offensive</i> = buts marqués par match ÷ moyenne du championnat<br>
+  <i>faiblesse défensive</i> = buts encaissés par match ÷ moyenne du championnat<br>
+  <i>λ</i> = force offensive × faiblesse défensive adverse × moyenne du championnat
+  <small>Les statistiques à domicile et à l'extérieur sont traitées séparément : une équipe ne marque pas au même rythme dans les deux contextes, et les mélanger efface l'avantage du terrain.</small>
+</div>
+
+<h2 id="poisson">4. Étape 2 : de lambda à la probabilité</h2>
+
+<p>Une fois les deux lambdas obtenus, on les additionne pour obtenir le <strong>total de buts attendu dans le match</strong>. La loi de Poisson transforme alors ce total en une probabilité pour chaque score possible : 0 but, 1 but, 2 buts, et ainsi de suite.</p>
+
+<div class="formula">
+  P(<i>k</i> buts) = e<sup>−λ</sup> × λ<sup><i>k</i></sup> ÷ <i>k</i>!
+  <small>e est la constante d'Euler (≈ 2,718) et k! la factorielle de k. Aucun calcul mental n'est nécessaire : le calculateur plus bas fait le travail.</small>
+</div>
+
+<p>La probabilité de plus de 2,5 buts est alors immédiate : on additionne les probabilités de 0, 1 et 2 buts, et on retire le résultat de 100 %.</p>
+
+<h2 id="exemple">5. L'exemple complet, chiffre par chiffre</h2>
+
+<p>Prenons un match entre une équipe A qui reçoit et une équipe B qui se déplace, dans un championnat où les équipes à domicile marquent en moyenne <strong>1,55 but</strong> par match et les équipes à l'extérieur <strong>1,20 but</strong>.</p>
+
+<div class="tw">
+<table>
+  <thead><tr><th>Donnée</th><th>Équipe A (domicile)</th><th>Équipe B (extérieur)</th></tr></thead>
+  <tbody>
+    <tr><td>Buts marqués par match</td><td class="num">1,80</td><td class="num">1,30</td></tr>
+    <tr><td>Buts encaissés par match</td><td class="num">1,10</td><td class="num">1,40</td></tr>
+    <tr><td>Force offensive</td><td class="num">1,80 ÷ 1,55 = 1,161</td><td class="num">1,30 ÷ 1,20 = 1,083</td></tr>
+    <tr><td>Faiblesse défensive</td><td class="num">1,10 ÷ 1,20 = 0,917</td><td class="num">1,40 ÷ 1,55 = 0,903</td></tr>
+    <tr class="hi"><td>Buts attendus (λ)</td><td class="num">1,63</td><td class="num">1,19</td></tr>
+  </tbody>
+</table>
+</div>
+
+<p>Le total attendu du match est donc <strong>1,63 + 1,19 = 2,82 buts</strong>. Voici ce que la loi de Poisson en fait :</p>
+
+<figure class="fig">
+  <svg viewBox="0 0 640 350" role="img" aria-labelledby="poisson-title poisson-desc">
+    <title id="poisson-title">Distribution de Poisson du nombre total de buts pour un total attendu de 2,82</title>
+    <desc id="poisson-desc">Diagramme en barres : 0 but 6,0 %, 1 but 16,8 %, 2 buts 23,7 %, 3 buts 22,3 %, 4 buts 15,7 %, 5 buts 8,8 %, 6 buts 4,2 %, 7 buts 1,7 %. Les trois premières barres, qui totalisent 46,5 %, correspondent à moins de 2,5 buts ; les suivantes, 53,5 %, à plus de 2,5 buts.</desc>
+    <rect x="0" y="0" width="640" height="350" fill="#04121c"/>
+    <line x1="55" y1="270" x2="600" y2="270" stroke="#1d4a63" stroke-width="1.4"/>
+    <g font-family="'Space Mono',monospace">
+      <!-- moins de 2,5 -->
+      <g fill="#3f6c86">
+        <rect x="69" y="219.6" width="54" height="50.4" rx="2"/>
+        <rect x="133" y="128" width="54" height="142" rx="2"/>
+        <rect x="197" y="70" width="54" height="200" rx="2"/>
+      </g>
+      <!-- plus de 2,5 -->
+      <g fill="#16d6f4">
+        <rect x="261" y="82.2" width="54" height="187.8" rx="2"/>
+        <rect x="325" y="137.6" width="54" height="132.4" rx="2"/>
+        <rect x="389" y="195.4" width="54" height="74.6" rx="2"/>
+        <rect x="453" y="235" width="54" height="35" rx="2"/>
+        <rect x="517" y="256" width="54" height="14" rx="2"/>
+      </g>
+      <g font-size="11" font-weight="700" text-anchor="middle" fill="#9baec0">
+        <text x="96" y="211">6,0 %</text>
+        <text x="160" y="119">16,8 %</text>
+        <text x="224" y="61">23,7 %</text>
+      </g>
+      <g font-size="11" font-weight="700" text-anchor="middle" fill="#16d6f4">
+        <text x="288" y="73">22,3 %</text>
+        <text x="352" y="129">15,7 %</text>
+        <text x="416" y="187">8,8 %</text>
+        <text x="480" y="226">4,2 %</text>
+        <text x="544" y="247">1,7 %</text>
+      </g>
+      <g font-size="12" text-anchor="middle" fill="#58758e">
+        <text x="96" y="290">0</text><text x="160" y="290">1</text><text x="224" y="290">2</text>
+        <text x="288" y="290">3</text><text x="352" y="290">4</text><text x="416" y="290">5</text>
+        <text x="480" y="290">6</text><text x="544" y="290">7</text>
+      </g>
+      <text x="320" y="312" font-size="10" text-anchor="middle" fill="#58758e" letter-spacing="1.5">NOMBRE TOTAL DE BUTS DANS LE MATCH</text>
+      <line x1="256" y1="40" x2="256" y2="278" stroke="#f5b84b" stroke-width="1.3" stroke-dasharray="5 4"/>
+      <text x="250" y="36" font-size="10" text-anchor="end" fill="#f5b84b" font-weight="700">MOINS DE 2,5 · 46,5 %</text>
+      <text x="262" y="36" font-size="10" text-anchor="start" fill="#f5b84b" font-weight="700">PLUS DE 2,5 · 53,5 %</text>
+    </g>
+  </svg>
+  <figcaption>Distribution de Poisson pour un total attendu de 2,82 buts. Le score le plus probable pris isolément est 2 buts (23,7 %) — mais l'ensemble des scores à 3 buts et plus pèse 53,5 %. C'est toute la différence entre « le résultat le plus probable » et « le camp le plus probable ».</figcaption>
+</figure>
+
+<div class="keyfig">
+  <div><b>2,82</b><span>buts attendus</span></div>
+  <div><b>53,5 %</b><span>plus de 2,5 buts</span></div>
+  <div><b>1,87</b><span>cote équitable</span></div>
+</div>
+
+<p>La <strong>cote équitable</strong> est l'inverse de la probabilité : 1 ÷ 0,535 = 1,87. C'est la cote à laquelle le pari ne rapporte ni ne coûte rien sur le long terme. Tout ce qui est en dessous vous fait perdre de l'argent en moyenne ; ce qui est au-dessus vous en fait gagner — <em>si</em> votre estimation est juste.</p>
+
+<h2 id="cote">6. Étape 3 : comparer à la cote du bookmaker</h2>
+
+<p>Une cote se convertit en probabilité implicite en divisant 100 par la cote. Une cote de 1,90 correspond à 100 ÷ 1,90 = <strong>52,6 %</strong>. Il ne reste qu'à comparer.</p>
+
+<div class="tw">
+<table>
+  <thead><tr><th>Total attendu</th><th>Probabilité modèle</th><th>Implicite à 1,90</th><th>Espérance</th></tr></thead>
+  <tbody>
+    <tr><td class="num">2,6</td><td class="num">48,2 %</td><td class="num">52,6 %</td><td class="num" style="color:#ff625f">−8,5 %</td></tr>
+    <tr class="hi"><td class="num">2,8</td><td class="num">53,1 %</td><td class="num">52,6 %</td><td class="num">+0,8 %</td></tr>
+    <tr><td class="num">3,0</td><td class="num">57,7 %</td><td class="num">52,6 %</td><td class="num" style="color:#25d6a2">+9,6 %</td></tr>
+  </tbody>
+</table>
+</div>
+
+<p>Ce tableau est le cœur du sujet. Il montre qu'à cote identique, <strong>un écart de 0,4 but attendu fait passer le pari de nettement perdant à nettement gagnant</strong>. Toute la difficulté n'est pas dans le calcul de Poisson — qui est mécanique — mais dans la justesse du lambda qu'on lui donne à manger. La démarche complète de comparaison entre probabilité et cote est détaillée dans notre <a href="/blog/guides/value-bet-guide-complet-2026.html">guide sur la value bet</a>.</p>
+
+<h2 id="erreur">7. La marge d'erreur qu'on ne vous montre jamais</h2>
+
+<p>Voici la section que les sites de pronostics omettent systématiquement. Votre lambda n'est pas un fait : c'est une estimation construite sur une poignée de matchs. Elle est incertaine. Regardez ce que cette incertitude produit :</p>
+
+<div class="tw">
+<table>
+  <thead><tr><th>Total attendu (λ)</th><th>Plus de 2,5 buts</th><th>Cote équitable</th></tr></thead>
+  <tbody>
+    <tr><td class="num">2,0</td><td class="num">32,3 %</td><td class="num">3,09</td></tr>
+    <tr><td class="num">2,2</td><td class="num">37,7 %</td><td class="num">2,65</td></tr>
+    <tr><td class="num">2,4</td><td class="num">43,0 %</td><td class="num">2,32</td></tr>
+    <tr><td class="num">2,6</td><td class="num">48,2 %</td><td class="num">2,08</td></tr>
+    <tr class="hi"><td class="num">2,8</td><td class="num">53,1 %</td><td class="num">1,88</td></tr>
+    <tr><td class="num">3,0</td><td class="num">57,7 %</td><td class="num">1,73</td></tr>
+    <tr><td class="num">3,2</td><td class="num">62,0 %</td><td class="num">1,61</td></tr>
+    <tr><td class="num">3,4</td><td class="num">66,0 %</td><td class="num">1,51</td></tr>
+  </tbody>
+</table>
+</div>
+
+<div class="box warn">
+  <div class="box-t">Ce que ce tableau vous dit vraiment</div>
+  <p>Une erreur de <strong>0,2 sur le lambda</strong> — parfaitement banale quand on estime à partir d'une dizaine de matchs — déplace la probabilité de <strong>près de 5 points</strong> et la cote équitable de 2,08 à 1,88. Or un avantage théorique de 5 points est déjà considéré comme énorme. Autrement dit : <strong>votre marge d'erreur est du même ordre de grandeur que l'avantage que vous cherchez.</strong></p>
+</div>
+
+<p>La conclusion pratique est inconfortable mais honnête. Un écart de moins de 3 à 4 points entre votre estimation et la probabilité implicite du bookmaker <strong>ne devrait pas déclencher un pari</strong> : il est indiscernable du bruit de votre propre méthode.</p>
+
+<h2 id="limites">8. Les quatre failles de la méthode</h2>
+
+<h3>L'indépendance des buts est fausse</h3>
+<p>Poisson suppose que les buts de A et de B sont indépendants. Les données disent le contraire : les scores 0-0 et 1-1 apparaissent <strong>plus souvent</strong> que la loi ne le prévoit. Une équipe qui encaisse change de comportement, une équipe qui mène se replie. La correction de <strong>Dixon-Coles</strong> a été inventée exactement pour ça : elle ajuste à la hausse la probabilité des petits scores.</p>
+
+<h3>Le taux de marquage n'est pas constant</h3>
+<p>Poisson suppose une intensité identique de la 1ʳᵉ à la 90ᵉ minute. En réalité, il se marque plus de buts en fin de match. Un carton rouge à la 20ᵉ minute rend le lambda calculé avant le coup d'envoi obsolète.</p>
+
+<h3>Les données d'entrée sont fragiles</h3>
+<p>Dix matchs, c'est peu. Un 5-0 dans l'échantillon tire toute la moyenne vers le haut. Utiliser les <a href="/blog/guides/xg-expected-goals-guide-complet.html">xG plutôt que les buts réels</a> comme entrée réduit nettement ce problème : les xG sont moins bruités que les buts, parce qu'ils comptent les occasions plutôt que leur conversion.</p>
+
+<h3>Le contexte n'est nulle part</h3>
+<p>Absences, enjeu de la rencontre, calendrier chargé, météo : rien de tout cela n'entre dans le calcul. Un modèle statistique donne un point de départ rigoureux, pas une conclusion.</p>
+
+<h2 id="calculateur">9. Le calculateur</h2>
+
+<div class="calc">
+  <h3>Probabilité de plus de 2,5 buts</h3>
+  <p class="hint">Saisissez les buts attendus de chaque équipe (leur λ), puis la cote proposée par le bookmaker. Tous les calculs se font dans votre navigateur.</p>
+  <div class="row"><label for="lh">Buts attendus — équipe à domicile</label><input id="lh" type="number" step="0.05" min="0" max="8" value="1.63"></div>
+  <div class="row"><label for="la">Buts attendus — équipe à l'extérieur</label><input id="la" type="number" step="0.05" min="0" max="8" value="1.19"></div>
+  <div class="row"><label for="od">Cote « plus de 2,5 buts »</label><input id="od" type="number" step="0.01" min="1.01" max="50" value="1.90"></div>
+  <div class="out">
+    <div><b id="rTot">2,82</b><span>total attendu</span></div>
+    <div><b id="rOver">53,5 %</b><span>plus de 2,5</span></div>
+    <div><b id="rUnder">46,5 %</b><span>moins de 2,5</span></div>
+    <div><b id="rFair">1,87</b><span>cote équitable</span></div>
+  </div>
+  <p class="verdict" id="rVerdict"></p>
+</div>
+
+<div class="related">
+  <a href="/blog/guides/xg-expected-goals-guide-complet.html"><span>Étape précédente</span><b>xG : ce que la statistique dit vraiment, et où elle ment</b></a>
+  <a href="/blog/guides/value-bet-guide-complet-2026.html"><span>Étape suivante</span><b>Value bet : comparer une probabilité à une cote sans se tromper</b></a>
+</div>
+
+<h2 id="faq">10. Questions fréquentes</h2>
+
+<div class="faq">
+  <details><summary>Que veut dire plus de 2,5 buts ?</summary><p>Le pari porte sur le nombre total de buts inscrits par les deux équipes pendant le temps réglementaire. Comme un match ne peut pas produire un demi-but, le seuil de 2,5 sert uniquement à supprimer le match nul : il faut 3 buts ou plus pour gagner, tandis que 0, 1 ou 2 buts font perdre. Les prolongations et les tirs au but ne comptent pas.</p></details>
+  <details><summary>Comment calculer la probabilité de plus de 2,5 buts ?</summary><p>On estime d'abord les buts attendus de chaque équipe à partir de sa force offensive et de la faiblesse défensive de l'adversaire, rapportées aux moyennes du championnat. On additionne ces deux valeurs pour obtenir le total attendu (lambda). On applique ensuite la loi de Poisson pour obtenir la probabilité de 0, 1 et 2 buts : la probabilité de plus de 2,5 buts est 100 % moins la somme de ces trois valeurs.</p></details>
+  <details><summary>Quelle est la probabilité moyenne de plus de 2,5 buts ?</summary><p>Elle dépend entièrement du championnat et des équipes. Avec un total attendu de 2,6 buts, elle est d'environ 48 %. À 2,8 buts attendus, environ 53 %. À 3,0 buts attendus, environ 58 %. Un écart de seulement 0,2 but attendu déplace la probabilité de près de 5 points, ce qui explique pourquoi une estimation approximative ne suffit pas.</p></details>
+  <details><summary>La loi de Poisson est-elle fiable pour le football ?</summary><p>C'est une bonne première approximation, mais elle repose sur des hypothèses fausses en pratique. Elle suppose que les buts des deux équipes sont indépendants, alors que les scores nuls et vierges sont plus fréquents que la loi ne le prédit. Elle suppose aussi un taux de marquage constant sur 90 minutes. Les corrections de type Dixon-Coles existent précisément pour rattraper ces écarts.</p></details>
+  <details><summary>Comment savoir si une cote sur plus de 2,5 buts est intéressante ?</summary><p>Convertissez la cote en probabilité implicite en divisant 100 par la cote : une cote de 1,90 correspond à environ 52,6 %. Comparez à votre estimation. Si votre modèle donne 53 % contre 52,6 % implicites, l'avantage est inférieur à un point — plus petit que votre marge d'erreur, donc insuffisant pour justifier une mise.</p></details>
+</div>
+
+<div class="cta">
+  <h2>Ce calcul, fait chaque matin sur tous les matchs</h2>
+  <p>IASHARK applique ce type de modèle — Poisson, Dixon-Coles, Monte-Carlo — sur les rencontres du jour, à partir de données réelles, et affiche la probabilité obtenue à côté de la cote du marché. Le match du jour est gratuit, en permanence.</p>
+  <a class="btn" href="/">Voir les analyses du jour →</a>
+</div>
+
+</main>
+
+<footer class="art-foot">
+  <p>IASHARK — analyses statistiques de football. Les probabilités publiées sont indicatives et ne garantissent aucun résultat. Les paris sportifs comportent un risque de perte financière et de dépendance : ne misez que ce que vous pouvez vous permettre de perdre. Interdit aux mineurs. Besoin d'aide ? Joueurs Info Service : 09 74 75 13 13 (appel non surtaxé).</p>
+</footer>
+
+</div>
+
+<script>
+/* Calculateur Poisson — tout se calcule dans le navigateur, aucune donnee envoyee.
+   P(k buts) = e^-lambda * lambda^k / k!  ;  P(plus de 2,5) = 1 - P(0) - P(1) - P(2). */
+(function(){
+  var ids=['lh','la','od'],el={};
+  ids.concat(['rTot','rOver','rUnder','rFair','rVerdict']).forEach(function(i){el[i]=document.getElementById(i);});
+  function pois(k,lam){
+    var f=1; for(var i=2;i<=k;i++) f*=i;
+    return Math.exp(-lam)*Math.pow(lam,k)/f;
+  }
+  function pct(x){ return (x*100).toFixed(1).replace('.',',')+' %'; }
+  function num(x,d){ return x.toFixed(d).replace('.',','); }
+  function update(){
+    var lh=parseFloat(el.lh.value), la=parseFloat(el.la.value), od=parseFloat(el.od.value);
+    if(!isFinite(lh)||!isFinite(la)||lh<0||la<0){ el.rVerdict.textContent='Saisissez deux nombres de buts attendus valides.'; return; }
+    var tot=lh+la;
+    var under=pois(0,tot)+pois(1,tot)+pois(2,tot);
+    var over=1-under;
+    el.rTot.textContent=num(tot,2);
+    el.rOver.textContent=pct(over);
+    el.rUnder.textContent=pct(under);
+    el.rFair.textContent=over>0?num(1/over,2):'—';
+    if(!isFinite(od)||od<=1){ el.rVerdict.textContent='Saisissez une cote supérieure à 1 pour comparer.'; return; }
+    var implied=1/od, edge=over-implied, ev=over*od-1;
+    var verdict;
+    if(Math.abs(edge)*100<3){
+      verdict='<b>Écart trop faible pour conclure.</b> Votre estimation ('+pct(over)+') et la probabilité implicite de la cote ('+pct(implied)+') diffèrent de '+num(Math.abs(edge)*100,1)+' point(s) — c\'est à l\'intérieur de la marge d\'erreur d\'un modèle de ce type. Espérance théorique : '+num(ev*100,1)+' %.';
+    } else if(edge>0){
+      verdict='<b>Avantage théorique de '+num(edge*100,1)+' points</b> en faveur du pari (modèle '+pct(over)+' contre '+pct(implied)+' implicites). Espérance théorique : +'+num(ev*100,1)+' %. À ne considérer que si vous avez confiance dans vos buts attendus.';
+    } else {
+      verdict='<b>Cote défavorable.</b> Le marché estime '+pct(implied)+' quand votre modèle donne '+pct(over)+', soit '+num(Math.abs(edge)*100,1)+' points de moins. Espérance théorique : '+num(ev*100,1)+' %.';
+    }
+    el.rVerdict.innerHTML=verdict;
+  }
+  ids.forEach(function(i){ el[i].addEventListener('input',update); });
+  update();
+})();
+</script>
+<script src="/site-header.js"></script>
+<script src="/site-prefs.js"></script>
+<script src="/bottom-navigation.js"></script>
+</body>
+</html>

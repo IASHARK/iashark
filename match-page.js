@@ -76,6 +76,27 @@ function tagsRow(vm){
   return `<div class="tags-row reveal">${tags.map(([icon,label])=>`<span class="tag">${cardIcon(icon)}${label}</span>`).join('')}</div>`;
 }
 
+// Barre 1X2 : une seule bande divisee en 3 (domicile/nul/exterieur), sous
+// les series de forme des deux equipes dans la carte d'en-tete - remplace
+// l'ancien affichage en 3 chiffres empiles dans "Notre lecture du match"
+// (retire de la, le pari recommande y reste seul narratif). Meme donnee
+// (vm.model.probabilities), juste deplacee et reformattee en bande.
+function probBar(vm){
+  const p=vm.model.probabilities;
+  if(!p)return '';
+  const homeName=vm.identity.home.name,awayName=vm.identity.away.name;
+  const home=n(p.home)||0,draw=n(p.draw)||0,away=n(p.away)||0,total=home+draw+away;
+  if(total<=0)return '';
+  const seg=(v,cls,label)=>{
+    const w=v/total*100;
+    return `<span class="${cls}" style="width:${w.toFixed(2)}%">${w>=13?pct(v):''}</span>`;
+  };
+  return `<div class="hero-probbar">
+    <div class="prob-bar">${seg(home,'home')}${seg(draw,'draw')}${seg(away,'away')}</div>
+    <div class="prob-legend"><span>${esc(homeName)}</span><span>Nul</span><span>${esc(awayName)}</span></div>
+  </div>`;
+}
+
 function hero(vm){
   const i=vm.identity,s=i.standings||{};
   return `<section class="card hero reveal">
@@ -88,6 +109,7 @@ function hero(vm){
       <div class="hero-vs">VS</div>
       <div class="hero-team">${img(i.away.logo,i.away.name)}<b>${esc(i.away.name)}</b>${teamMeta(s.away)}</div>
     </div>
+    ${probBar(vm)}
     ${vm.conditions.venue?`<div class="hero-venue"><svg viewBox="0 0 24 24"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.4"/></svg>${esc(vm.conditions.venue)}</div>`:''}
   </section>`;
 }
@@ -126,14 +148,7 @@ function matchReadingCard(vm){
   const risqueDescriptif=risk&&!['FAIBLE','MODERE','ELEVE'].includes(risk)?risk:null;
   return `<section class="card lecture reveal">
     <h2>${cardIcon('bulb')}Notre lecture du match</h2>
-    <div class="lecture-top">
-      <p class="reading">${esc(sentence)}${reason?' '+esc(reason):''}</p>
-      <div class="lecture-1x2">
-        <div><small>${esc(homeName)}</small><b class="pos">${pct(p.home)}</b></div>
-        <div><small>Nul</small><b>${pct(p.draw)}</b></div>
-        <div><small>${esc(awayName)}</small><b class="neg">${pct(p.away)}</b></div>
-      </div>
-    </div>
+    <p class="reading">${esc(sentence)}${reason?' '+esc(reason):''}</p>
     ${risqueDescriptif?`<div class="risk-note"><b>⚠</b><span>${esc(risqueDescriptif)}</span></div>`:''}
     <div class="lecture-stats">
       ${totalXg!==null?`<div><small>Buts attendus</small><b>${fmt(totalXg)}</b></div>`:''}

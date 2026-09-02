@@ -50,6 +50,28 @@ var sb = supabase.createClient(SUPA_URL, SUPA_KEY);
 // customer.subscription.* recu apres le retour sur cette page) - on
 // interroge quelques fois avec un delai croissant plutot que d'affirmer un
 // succes qui n'est pas encore reellement en base.
+//
+// FILET DE SECURITE (bug reel du 02/09/2026 : premier vrai abonnement du
+// site, paiement encaisse, compte reste gratuit parce que les evenements
+// webhook sont arrives dans le mauvais ordre) : on ne se contente plus
+// d'attendre le webhook. On demande au serveur de verifier l'abonnement
+// directement chez Stripe a partir du session_id de ce paiement. Le serveur
+// re-verifie que la session appartient bien a ce compte et qu'elle est
+// payee avant d'accorder quoi que ce soit - voir
+// supabase/functions/sync-subscription/index.ts.
+async function syncAccess(){
+  try{
+    var res = await sb.auth.getSession();
+    if(!res.data || !res.data.session) return;
+    var sessionId = new URLSearchParams(location.search).get('session_id');
+    await fetch(SUPA_URL+'/functions/v1/sync-subscription',{
+      method:'POST',
+      headers:{apikey:SUPA_KEY,Authorization:'Bearer '+res.data.session.access_token,'Content-Type':'application/json'},
+      body: JSON.stringify(sessionId?{session_id:sessionId}:{})
+    });
+  }catch(e){}
+}
+
 async function pollAccess(attempt){
   var statusEl = document.getElementById('statusTxt');
   try{
@@ -63,12 +85,15 @@ async function pollAccess(attempt){
     }
   }catch(e){}
   if(attempt < 5){
+    // Nouvelle tentative de synchronisation a chaque passage : au tout
+    // premier retour, Stripe peut encore avoir l'abonnement en "incomplete".
+    syncAccess();
     setTimeout(function(){ pollAccess(attempt+1); }, 1500);
   } else {
     statusEl.textContent = "L'activation peut prendre un peu plus de temps — rends-toi sur ton compte dans une minute.";
   }
 }
-pollAccess(0);
+syncAccess().then(function(){ pollAccess(0); });
 </script>
 <script src="/site-prefs.js"></script>
 <script src="/bottom-navigation.js"></script></body>

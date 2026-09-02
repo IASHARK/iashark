@@ -14,12 +14,26 @@ test("la page match n’insère plus de mur PRO", () => {
   assert.doesNotMatch(source, /\+proWall/);
 });
 
-test("la page Outils est ouverte sans flou ni contrôle d’abonnement", () => {
+// Decision produit revisee le 02/09/2026 : les outils qui exploitent le
+// modele (scanner de value, combine, variance) deviennent reserves aux
+// abonnes, un visiteur gratuit devant les VOIR sans pouvoir s'en servir.
+// Le calculateur de mise, lui, reste ouvert a tous - c'est ce que ce test
+// continue de garantir, avec le fait qu'aucun outil n'est cache purement
+// et simplement (le visiteur doit comprendre ce qu'on lui propose).
+test("la page Outils garde le calculateur ouvert et montre les outils Pro sans les cacher", () => {
   const source = read("pro.html");
-  assert.doesNotMatch(source, /class="pro-wall locked"/);
-  assert.match(source, /id="stakeResult"/);
+  assert.doesNotMatch(source, /class="pro-wall locked"/, "l'ancien mur opaque ne revient pas");
+  assert.match(source, /id="stakeResult"/, "le calculateur de mise reste present");
   assert.match(source, /tools-page\.js/);
-  assert.match(source, /Le calculateur est accessible à tous/);
+  assert.match(source, /Le calculateur de mise est accessible à tous/);
+  // Les outils Pro sont dans le HTML servi, titres et explications compris :
+  // un visiteur gratuit voit ce qu'il achete, il ne peut simplement pas s'en servir.
+  for (const id of ["toolScan", "toolCombo", "toolVariance"]) {
+    assert.match(source, new RegExp('id="' + id + '"'), id + " doit exister dans la page");
+  }
+  assert.match(source, /Scanner de value du jour/);
+  assert.match(source, /class="pro-veil"/, "le verrou est un voile explicite avec un appel a l'abonnement");
+  assert.match(source, /abonnement\.html/, "le voile renvoie vers la page d'abonnement");
 });
 
 test("toutes les pages SEO de match utilisent la nouvelle structure sans mur PRO", () => {

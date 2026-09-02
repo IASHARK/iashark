@@ -320,6 +320,14 @@ body::before{top:-180px;width:1080px;height:700px;background:radial-gradient(ell
 .conf-ring-val::after{content:'%';}
 .conf-ring-sub{display:none;}
 .mc-cta{padding:0;border:0;background:transparent;font-family:'Inter',sans-serif;font-size:10px;font-weight:700;}
+.mc.locked{border-color:rgba(245,158,11,.24);}
+.mc.locked .mc-pari{flex:1;min-height:122px;margin:0 -6px;padding:28px 12px 24px;border:1px solid rgba(245,158,11,.16);border-radius:11px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;background:rgba(4,10,17,.22);}
+.mc-lock-icon{width:24px;height:24px;margin-bottom:12px;color:var(--amber);filter:drop-shadow(0 0 7px rgba(245,158,11,.18));}
+.mc-lock-icon svg{width:100%;height:100%;display:block;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;}
+.mc.locked .mc-pari-bet{min-height:0;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;color:var(--text);font-style:normal;}
+.mc.locked .mc-right{margin-top:12px;}
+.mc.locked .mc-cta{color:var(--amber);}
+.mc.locked .mc-cta:hover{text-decoration:underline;text-underline-offset:3px;}
 .choc-card-wrap{display:none;}
 .empty-state{grid-column:1/-1;}
 .nav-bottom{display:flex;}
@@ -669,11 +677,11 @@ function buildCard(m){
   var css='mc'+(isHot&&!isWC?' hot':'')+(isVal&&!isWC?' value':'')+(isWC?' worldcup':'')+(locked?' locked':'');
   var pariLabel=m.pari_rec?translateMarket(m.pari_rec):(m.no_signal_label||'Niente di sfruttabile qui — aspettiamo un\'occasione migliore.');
   var pariRest=locked
-    ?'<span class="mc-pari-bet mc-pari-blurred">Reserve aux membres Pro</span>'
+    ?'<span class="mc-lock-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/><path d="M12 14v3"/></svg></span><span class="mc-pari-bet">Analisi riservata ai membri Pro</span>'
     :'<span class="mc-pari-bet">'+pariLabel+'</span><p class="mc-insight">'+marketInsight(m)+'</p>';
-  var pariBlock='<div class="mc-pari'+(locked?' mc-pari-locked':'')+'"><span class="mc-pari-label">MERCATO CONSIGLIATO</span>'+pariRest+'</div>';
-  var href=locked?'/compte.html#plan':'/match/'+m.id+'.html';
-  var cta=locked?'<span class="mc-cta mc-cta-locked">🔒 Passer Pro →</span>':'<span class="mc-cta">Vedi l\'analisi →</span>';
+  var pariBlock='<div class="mc-pari'+(locked?' mc-pari-locked':'')+'">'+(locked?'':'<span class="mc-pari-label">MERCATO CONSIGLIATO</span>')+pariRest+'</div>';
+  var href=locked?'/abonnement.html':'/match/'+m.id+'.html';
+  var cta=locked?'<span class="mc-cta mc-cta-locked">Passa a Pro →</span>':'<span class="mc-cta">Vedi l\'analisi →</span>';
   return'<a class="'+css+'" href="'+href+'" aria-label="Vedi l\'analisi '+esc((m.home&&m.home.n||''))+' contro '+esc((m.away&&m.away.n||''))+'">'
     +'<div class="mc-top"><div class="mc-league">'+leagueHeader(m)+' <span class="mc-league-country">· '+heure+'</span></div></div>'
     +'<div class="mc-body"><div class="mc-left"><div class="mc-teams">'

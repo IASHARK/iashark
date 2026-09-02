@@ -514,8 +514,8 @@ function renderProWall(raw){
   root.innerHTML=gateCard(vm,{
     title:'Analyse reservee aux membres Pro',
     text:'Le marche recommande, la confiance du modele et l’analyse complete de ce match sont reserves aux membres Pro. Le match du jour, lui, reste gratuit.',
-    href:'/compte.html#plan',
-    cta:'Passer Pro'
+    href:'/abonnement.html',
+    cta:'Devenir Pro'
   });
   bindMotion();
 }

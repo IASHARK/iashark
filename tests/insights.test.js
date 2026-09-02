@@ -12,13 +12,19 @@ const {
 } = require("../lib/insights.js");
 
 test("computeMatchup: attaque plus forte -> avantage home sur un vrai ecart xG", () => {
-  const home = { xg: 2.1, xga: 0.9, possession: 61, fouls: 9.2, corners: 6.7 };
-  const away = { xg: 1.4, xga: 1.6, possession: 39, fouls: 11.4, corners: 5.1 };
+  const home = { xg: 2.1, xga: 0.9, possession: 61, passes_pct: 84, fouls: 9.2, corners: 6.7 };
+  const away = { xg: 1.4, xga: 1.6, possession: 39, passes_pct: 78, fouls: 11.4, corners: 5.1 };
   const m = computeMatchup(home, away);
-  assert.ok(m.categories.length === 5);
+  assert.ok(m.categories.length === 6);
   const attaque = m.categories.find((c) => c.key === "attaque");
   assert.equal(attaque.advantage, "home");
   assert.ok(m.globalHome > m.globalAway, "home domine sur un vrai ecart favorable partout");
+});
+
+test("computeMatchup: relance utilise passes_pct reel (precision de passes), meilleure precision = avantage", () => {
+  const m = computeMatchup({ passes_pct: 84 }, { passes_pct: 76 });
+  const relance = m.categories.find((c) => c.key === "relance");
+  assert.equal(relance.advantage, "home");
 });
 
 test("computeMatchup: defense - la valeur xGA la plus basse gagne (moins de buts concedes = mieux)", () => {

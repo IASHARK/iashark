@@ -94,6 +94,52 @@ function hero(vm){
 
 // Recommandation : ring + Score IASHARK + Cote juste + Cote marche + Value -
 // tous deja calcules cote pipeline/view-model, aucune nouvelle donnee.
+// Notre lecture du match : phrase deterministe (jamais un nouvel appel
+// LLM) qui distingue l'equipe en tete au 1X2 du marche reellement
+// recommande quand ils different, en reutilisant le texte de raison DEJA
+// genere (facteur_x) - jamais un nouveau texte invente ici, juste un
+// gabarit autour de donnees et de textes deja reels.
+function leadingSide(p,homeName,awayName){
+  if(!p)return null;
+  if(p.home>=p.draw&&p.home>=p.away)return{label:homeName,key:'home'};
+  if(p.away>=p.draw&&p.away>=p.home)return{label:awayName,key:'away'};
+  return{label:'Le nul',key:'draw'};
+}
+function findMarket(list,re){return (list||[]).find(m=>re.test(m.market||''))||null;}
+function matchReadingCard(vm){
+  const p=vm.model.probabilities,r=vm.model.recommendation,homeName=vm.identity.home.name,awayName=vm.identity.away.name;
+  if(!p||!r)return '';
+  const leading=leadingSide(p,homeName,awayName);
+  const marketLower=(r.market||'').toLowerCase();
+  const matchesLeader=(leading.key==='home'&&(marketLower.includes('domicile')||marketLower===homeName.toLowerCase()))
+    ||(leading.key==='away'&&(marketLower.includes('exterieur')||marketLower.includes('extérieur')||marketLower===awayName.toLowerCase()))
+    ||(leading.key==='draw'&&marketLower.includes('nul'));
+  const locSuffix=leading.key==='home'?' à domicile':leading.key==='away'?' à l\'extérieur':'';
+  const sentence=matchesLeader
+    ?`${leading.label} a l'avantage${locSuffix}, et c'est le marché que nous recommandons.`
+    :`${leading.label} a l'avantage${locSuffix}, mais ce n'est pas le marché que nous recommandons — nous recommandons plutôt ${r.market}.`;
+  const reason=vm.editorial.decisiveFactor;
+  const btts=findMarket(vm.model.marketsCompared,/btts/i);
+  const x=vm.model.expectedGoals;
+  const totalXg=x&&n(x.home)!==null&&n(x.away)!==null?x.home+x.away:null;
+  return `<section class="card lecture reveal">
+    <div class="lecture-top">
+      <p class="reading">${esc(sentence)}${reason?' '+esc(reason):''}</p>
+      <div class="lecture-1x2">
+        <div><small>${esc(homeName)}</small><b class="pos">${pct(p.home)}</b></div>
+        <div><small>Nul</small><b>${pct(p.draw)}</b></div>
+        <div><small>${esc(awayName)}</small><b class="neg">${pct(p.away)}</b></div>
+      </div>
+    </div>
+    <div class="lecture-stats">
+      ${totalXg!==null?`<div><small>Buts attendus</small><b>${fmt(totalXg)}</b></div>`:''}
+      ${btts?`<div><small>BTTS</small><b>${pct(btts.probability)}</b></div>`:''}
+      <div><small>${esc(r.market)}</small><b>${pct(r.probability)}</b></div>
+      ${vm.model.iasharkScore!==null?`<div><small>Confiance analyse</small><b>${fmt(vm.model.iasharkScore/10)}/10</b></div>`:''}
+    </div>
+  </section>`;
+}
+
 function recommendation(vm){
   const r=vm.model.recommendation;
   if(!r)return card('Recommandation IASHARK',empty(vm.model.unavailableReason||'Aucun marché ne franchit les seuils de confiance ou de cote minimale pour ce match — IASHARK préfère ne pas se prononcer.'));
@@ -345,6 +391,7 @@ function render(raw){
   root.innerHTML=`<div class="page">
     ${hero(vm)}
     ${tagsRow(vm)}
+    ${matchReadingCard(vm)}
     ${recommendation(vm)}
     ${reasonsCard(vm)}
     ${outputsCard(vm)}

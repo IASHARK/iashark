@@ -258,7 +258,7 @@ function matchupCard(vm){
   const m=vm.matchupScores;
   if(!m)return '';
   const homeName=vm.identity.home.name,awayName=vm.identity.away.name;
-  const rows=m.categories.map(c=>`<div class="matchup-row"><span class="${c.advantage==='home'?'adv':''}">${c.advantage==='home'?homeName:c.advantage==='away'?'':''}</span><b>${esc(c.label)}</b><span class="${c.advantage==='away'?'adv':''}">${c.advantage==='away'?awayName:c.advantage==='home'?'':c.advantage==='égalité'?'Équilibré':''}</span></div>`).join('');
+  const rows=m.categories.map(c=>`<div class="matchup-row"><span class="${c.advantage==='home'?'adv':''}">${esc(homeName)}</span><b>${esc(c.label)}${c.advantage==='égalité'?' · égalité':''}</b><span class="${c.advantage==='away'?'adv':''}">${esc(awayName)}</span></div>`).join('');
   return card('Matchup : comment les équipes se correspondent',`<div class="matchup-rows">${rows}</div><div class="matchup-global"><div class="mg-side"><b class="pos">${fmt(m.globalHome)}<small>/10</small></b><small>${esc(homeName)}</small></div><div class="mg-bar"><i style="width:${clamp(m.globalHome/(m.globalHome+m.globalAway)*100)}%"></i></div><div class="mg-side"><b class="neg">${fmt(m.globalAway)}<small>/10</small></b><small>${esc(awayName)}</small></div></div>`,'','scale');
 }
 

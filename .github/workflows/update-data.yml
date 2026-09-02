@@ -2004,7 +2004,8 @@ jobs:
             }
             var eloData=await loadClubElo();
             var prevPinnacleOdds={};
-            try{if(fs.existsSync('data.json')){var prevData=JSON.parse(fs.readFileSync('data.json','utf8'));(prevData.matchs||[]).forEach(function(m){if(m.pinnacle_snapshot){prevPinnacleOdds[m.home.n+'|'+m.away.n]=m.pinnacle_snapshot;}});}}catch(e){}
+            var prevByFixture={};
+            try{if(fs.existsSync('data.json')){var prevData=JSON.parse(fs.readFileSync('data.json','utf8'));(prevData.matchs||[]).forEach(function(m){if(m.pinnacle_snapshot){prevPinnacleOdds[m.home.n+'|'+m.away.n]=m.pinnacle_snapshot;}if(m&&m.id!=null){prevByFixture[String(m.id)]=m;}});}}catch(e){}
             console.log('Recalcul actif : chaque fixture est reevaluee avec les dernieres donnees et cotes disponibles');
             var matchsData=[];
             var premiumRows=[];
@@ -2750,6 +2751,35 @@ jobs:
               });
               matchsData.push(matchObj);
               console.log('  OK conf='+matchObj.conf+' edge='+edgeVal+' pari='+matchObj.pari_rec);
+            }
+            // FILET DE PROTECTION DE L'ABONNE.
+            // Le 02/09/2026, un quota d'API epuise a fait publier 14 matchs en
+            // "aucun signal" - dont Real Madrid, PSG et Liverpool - alors que
+            // l'execution precedente avait produit de vraies analyses pour ces
+            // memes rencontres. Des clients payants se sont retrouves devant
+            // des pages vides a cause d'une panne d'infrastructure, pas d'un
+            // manque reel de donnees.
+            // Desormais : si l'API a refuse des appels pendant l'execution ET
+            // qu'une fixture ressort sans marche recommande ALORS qu'on avait
+            // deja une analyse valide pour elle, on conserve l'analyse
+            // precedente plutot que de la remplacer par du vide. Le drapeau
+            // stale_from_previous_run permet a l'interface de le signaler.
+            // Aucune analyse n'est jamais fabriquee : on ne fait que refuser
+            // d'effacer une analyse reelle deja calculee.
+            if(API_ERRORS.count>0){
+              var restaurees=0;
+              for(var ri=0;ri<matchsData.length;ri++){
+                var cur=matchsData[ri];
+                if(cur&&cur.pari_rec)continue;
+                var prev=prevByFixture[String(cur&&cur.id)];
+                if(!prev||!prev.pari_rec)continue;
+                prev.stale_from_previous_run=true;
+                matchsData[ri]=prev;
+                restaurees++;
+              }
+              console.log('  [API] '+API_ERRORS.count+' refus de l\'API pendant cette execution'+(API_ERRORS.quota?' (QUOTA EPUISE)':'')+'.');
+              if(restaurees)console.log('  [FILET] '+restaurees+' analyse(s) conservee(s) de l\'execution precedente plutot que publiees vides.');
+              else console.log('  [FILET] aucune analyse precedente exploitable a conserver.');
             }
             var allMatchsData = matchsData.slice();
             allMatchsData.sort(function(a,b){return (a.date||'').localeCompare(b.date||'');});

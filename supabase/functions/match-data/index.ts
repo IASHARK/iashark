@@ -10,7 +10,25 @@ const DATA_URL = "https://iashark.com/data.json";
 // uniquement de garde-fou si un ancien commit de data.json les contenait
 // encore par erreur - on les retire quand meme explicitement pour un
 // visiteur non-pro, en plus de ne jamais les rapporter depuis la table.
-const PREMIUM_FIELDS = ["kelly", "edge", "verdict_shark", "facteur_x", "dropping_odds", "player_markets"];
+// Le PARI RECOMMANDE fait partie des champs premium depuis le 03/09/2026.
+// Avant, cette liste ne couvrait que des metriques secondaires : le marche
+// recommande, sa cote et la probabilite du modele - c'est-a-dire le produit
+// lui-meme - partaient en clair dans data.json public. La serrure existait,
+// elle etait posee sur la mauvaise porte.
+//
+// conf (indice 0-10) reste volontairement public : sans le marche recommande,
+// c'est une amorce, pas le produit.
+const PREMIUM_FIELDS = [
+  "kelly", "edge", "verdict_shark", "facteur_x", "dropping_odds", "player_markets",
+  "pari_rec", "cote_rec", "model_probability", "markets_compared",
+];
+
+// Un match marque is_free par le pipeline est l'offre d'appel du jour : ses
+// champs premium restent lisibles par tout le monde, y compris un visiteur
+// non authentifie. C'est le seul cas ou on ne retire rien.
+function estGratuit(m: Record<string, unknown>): boolean {
+  return m && m.is_free === true;
+}
 
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
@@ -65,6 +83,7 @@ Deno.serve(async (req: Request) => {
   // trainent encore dans data.json (ancien commit, transition).
   if (!isPro) {
     data.matchs = matchs.map((m) => {
+      if (estGratuit(m)) return m;              // analyse offerte du jour
       const copy = { ...m };
       for (const f of PREMIUM_FIELDS) delete copy[f];
       return copy;
@@ -82,7 +101,7 @@ Deno.serve(async (req: Request) => {
   if (fixtureIds.length) {
     const { data: premiumRows, error } = await supabase
       .from("match_premium_data")
-      .select("fixture_id,kelly,edge,verdict_shark,facteur_x,dropping_odds,player_markets")
+      .select("fixture_id,kelly,edge,verdict_shark,facteur_x,dropping_odds,player_markets,pari_rec,cote_rec,model_probability,markets_compared")
       .in("fixture_id", fixtureIds);
     if (error) {
       console.error("match_premium_data query failed:", error.message);
@@ -102,6 +121,13 @@ Deno.serve(async (req: Request) => {
           facteur_x: premium.facteur_x ?? null,
           dropping_odds: premium.dropping_odds ?? null,
           player_markets: premium.player_markets ?? null,
+          // Le pari recommande revient ici, depuis la table protegee, pour un
+          // abonne confirme. On ne fait jamais confiance a ce qui pourrait
+          // trainer dans data.json.
+          pari_rec: premium.pari_rec ?? m.pari_rec ?? null,
+          cote_rec: premium.cote_rec ?? m.cote_rec ?? null,
+          model_probability: premium.model_probability ?? m.model_probability ?? null,
+          markets_compared: premium.markets_compared ?? m.markets_compared ?? null,
         }
       : m;
   });

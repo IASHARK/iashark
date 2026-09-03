@@ -408,7 +408,7 @@ body::before{top:-180px;width:1080px;height:700px;background:radial-gradient(ell
 /* Le marche reste PRESENT dans la carte mais illisible : le visiteur voit
    qu'un signal existe, sans pouvoir le lire. Plus honnete et plus desirable
    qu'un bloc "reserve aux membres" qui ne montre rien. */
-.mc-pari-hidden{filter:blur(7px);opacity:.75;user-select:none;}
+.mc-pari-locked-label{font-size:14px;font-weight:600;color:var(--soft);}
 .mc-pari-none .mc-pari-bet{font-size:13.5px;font-weight:500;color:var(--soft);}
 
 .mc-conf{display:flex;align-items:baseline;gap:7px;}
@@ -1024,7 +1024,10 @@ function marketInsight(){return'Abra a análise para ver os fatores, limites e r
 function buildCard(m){
   var heure=(m.date||'').split(' ')[1]||'';
   var isWC=isWorldCup(m);
-  var aSignal=!!m.pari_rec&&!m.no_signal;
+  // Le pari recommande n'est plus servi pour les matchs payants. has_signal
+  // dit qu'une analyse existe, sans la reveler : la carte verrouillee reste
+  // donc juste, au lieu d'annoncer a tort "aucun marche prioritaire".
+  var aSignal=!!(m.pari_rec||m.has_signal)&&!m.no_signal;
   // TROIS ETATS, pas deux. Avant, un visiteur voyait trois cartes
   // integralement verrouillees : le mur payant sans jamais la preuve. Le
   // match gratuit du jour est desormais entierement lisible, et les autres
@@ -1042,8 +1045,11 @@ function buildCard(m){
   var confBlock=aSignal
     ?'<div class="mc-conf"><span class="mc-conf-lbl">CONFIANÇA</span><b class="mc-conf-val">'+fmtConf(m)+'</b><span class="mc-conf-max">/10</span></div>'
     :'';
+  // Avant, on floutait le vrai marche en CSS - une protection de facade, la
+  // donnee etant lisible dans le DOM. Le serveur ne l'envoie plus du tout :
+  // on affiche donc une mention honnete plutot qu'un faux flou.
   var pariRest=locked
-    ?'<span class="mc-pari-bet mc-pari-hidden" aria-hidden="true">'+esc(pariLabel)+'</span><span class="sr-only">Mercado recomendado reservado aos membros Pro</span>'
+    ?'<span class="mc-pari-bet mc-pari-locked-label">Reservado aos membros Pro</span>'
     :'<span class="mc-pari-bet">'+esc(pariLabel)+'</span>';
   var pariBlock=aSignal
     ?'<div class="mc-pari'+(locked?' mc-pari-locked':'')+'"><span class="mc-pari-label">MERCADO RECOMENDADO</span>'+pariRest+'</div>'

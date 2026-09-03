@@ -1433,7 +1433,12 @@ jobs:
             if(!todays.length) return '';
             var items=todays.map(function(m){
               var heure=(m.date||'').split(' ')[1]||'';
-              var pari=(m.pari_rec&&!m.no_signal)?(' — Pronostic IA : '+escHtml(m.pari_rec)+' (confiance '+escHtml(String(m.conf||''))+'/10)'):'';
+              // Le pari n'est nomme que pour l'analyse offerte du jour. Le
+              // nommer pour tous les matchs revenait a publier le produit en
+              // clair dans le HTML de la page d'accueil, indexe par Google.
+              var pari=(m.is_free&&m.pari_rec&&!m.no_signal)
+                ?(' — Pronostic IA : '+escHtml(m.pari_rec)+' (confiance '+escHtml(String(m.conf||''))+'/10)')
+                :((m.conf!=null&&!m.no_signal)?(' — confiance '+escHtml(String(m.conf))+'/10'):'');
               return '<li>'+escHtml(heure)+' — <strong>'+escHtml(m.home.n)+' vs '+escHtml(m.away.n)+'</strong>'+(m.league?' ('+escHtml(m.league)+')':'')+pari+'</li>';
             }).join('');
             return '<div style="padding:4px 0 12px"><h2 style="font-family:\'Bebas Neue\',sans-serif;font-size:20px;color:#e2e8f0;margin-bottom:10px">Analyses IA du jour — '+escHtml(TODAY)+'</h2><ul style="list-style:none;padding:0;margin:0;color:#94a3b8;font-size:12.5px;line-height:1.8">'+items+'</ul></div>';
@@ -2718,6 +2723,16 @@ jobs:
               // kellyVal/edgeVal deja calcules plus haut (reels, pas de valeur codee en dur).
               premiumRows.push({
                 fixture_id:f.id,kelly:kellyVal,edge:edgeVal,
+                // LE PRODUIT LUI-MEME (corrige le 03/09/2026). Le marche
+                // recommande, sa cote et la probabilite du modele partaient
+                // jusqu'ici en clair dans data.json public : n'importe qui
+                // pouvait telecharger toutes les analyses sans compte. Ils
+                // sont desormais persistes ici, et retires du fichier public
+                // pour tous les matchs sauf l'analyse offerte du jour.
+                pari_rec:pickedMarket?pickedMarket.market:'',
+                cote_rec:(pickedMarket&&pickedMarket.cote!=null&&pickedMarket.cote!=='')?Number(pickedMarket.cote):null,
+                model_probability:pickedMarket?Math.round(pickedMarket.prob*10)/10:null,
+                markets_compared:marketsCompared||null,
                 verdict_shark:an?(an.verdict_shark||''):'',
                 facteur_x:an?(an.facteur_x||''):'',
                 dropping_odds:droppingOdds||null,
@@ -2786,14 +2801,70 @@ jobs:
             var allMatchsData = matchsData.slice();
             allMatchsData.sort(function(a,b){return (a.date||'').localeCompare(b.date||'');});
             matchsData.sort(function(a,b){var tA=(a.date||'').split(' ')[1]||'99:99';var tB=(b.date||'').split(' ')[1]||'99:99';return tA<tB?-1:tA>tB?1:0;});
-            fs.writeFileSync('data.json',JSON.stringify({matchs:allMatchsData},null,2));
+            // ================= PROTECTION DU FICHIER PUBLIC =================
+            // data.json est servi sans authentification. Il ne doit donc plus
+            // contenir le marche recommande, sa cote, la probabilite du modele
+            // ni le comparatif par marche - sauf pour UNE analyse, l'offre
+            // d'appel du jour, designee ici cote serveur.
+            //
+            // La designation est faite par le pipeline (et non calculee dans le
+            // navigateur) pour que le site, la page match et la fonction Edge
+            // parlent tous du meme match. conf reste public : sans le marche,
+            // c'est une amorce, pas le produit.
+            var CHAMPS_PREMIUM=['pari_rec','cote_rec','model_probability','markets_compared'];
+            // GARDE-FOU. Retirer ces champs du fichier public n'est sur QUE si la
+            // table protegee peut reellement les recevoir. Sans la cle service
+            // role, writePremiumData() n'ecrit rien : on se retrouverait avec des
+            // analyses nulle part, et un abonne payant ne verrait plus aucun pari.
+            // Dans ce cas on prefere ne rien retirer et le crier dans les logs :
+            // une fuite connue vaut mieux qu'un produit casse pour les clients.
+            var PEUT_PROTEGER=!!(SUPA_URL_PIPELINE&&SUPA_SERVICE_KEY);
+            if(!PEUT_PROTEGER){
+              console.log('  [ACCES] ATTENTION : SUPABASE_SERVICE_ROLE_KEY absente. Les champs premium ne peuvent pas etre persliste ailleurs, ils restent donc dans data.json public. A CORRIGER.');
+            }
+            (function designerMatchGratuit(){
+              var candidats=allMatchsData.filter(function(m){
+                return m && m.pari_rec && !m.no_signal && (m.date||'').split(' ')[0]===TODAY;
+              });
+              if(!candidats.length){
+                candidats=allMatchsData.filter(function(m){return m && m.pari_rec && !m.no_signal;});
+              }
+              var choisi=null;
+              candidats.forEach(function(m){
+                var c=Number(m.conf)||0;
+                if(!choisi||c>(Number(choisi.conf)||0))choisi=m;
+              });
+              allMatchsData.forEach(function(m){ if(m) m.is_free=(choisi&&m.id===choisi.id); });
+              console.log(choisi
+                ? '  [ACCES] analyse offerte du jour : '+choisi.id+' ('+(choisi.home&&choisi.home.n)+' vs '+(choisi.away&&choisi.away.n)+')'
+                : '  [ACCES] aucune analyse exploitable a offrir aujourd\'hui.');
+            })();
+            // Copie assainie pour le fichier public. allMatchsData reste complet :
+            // l'historique, les pages match et les lignes premium en ont besoin.
+            var matchsPublics=allMatchsData.map(function(m){
+              if(!m||m.is_free||!PEUT_PROTEGER)return m;
+              var copie={};
+              Object.keys(m).forEach(function(k){ if(CHAMPS_PREMIUM.indexOf(k)===-1)copie[k]=m[k]; });
+              // Le site doit pouvoir dire "une analyse existe sur ce match"
+              // sans nommer le marche. Sans ce drapeau, une carte verrouillee
+              // afficherait a tort "aucun marche prioritaire".
+              copie.has_signal=!!(m.pari_rec&&!m.no_signal);
+              return copie;
+            });
+            var retires=allMatchsData.length-matchsPublics.filter(function(m){return m&&m.pari_rec;}).length;
+            console.log('  [ACCES] '+retires+' analyse(s) retiree(s) du data.json public.');
+            fs.writeFileSync('data.json',JSON.stringify({matchs:matchsPublics},null,2));
             console.log('\n=== DONE: '+allMatchsData.length+' matchs total ===');
             await writePremiumData(premiumRows);
             await writeSnapshots(snapshotRows);
             await updateHistorique(allMatchsData);
             await updateTransferts(fixtures);
             await updateRumeurs();
-            generateMatchPages(allMatchsData);
+            // Les pages match sont generees a partir de la copie ASSAINIE : sans
+            // cela, le HTML d'un match payant embarquait le pari recommande en
+            // clair dans PRELOADED_MATCH, sous le mur d'abonnement. Un abonne
+            // recupere la version complete a l'execution via match-data.
+            generateMatchPages(matchsPublics);
             generateSitemaps(allMatchsData);
             injectHomeSeoSummary(allMatchsData);
           }

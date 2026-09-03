@@ -130,3 +130,28 @@ test("formMarginNote: aucune victoire -> null, jamais une note inventee", () => 
   assert.equal(formMarginNote([{ result: "L", score: "0-2" }]), null);
   assert.equal(formMarginNote([]), null);
 });
+
+// L'affichage met en avant le PLUS PETIT chiffre sur defense et discipline.
+// Sans l'unite ni le sens de lecture, ce choix est incomprehensible a
+// l'ecran ("Defense 1,9 vs 1,1" avec 1,1 en avant). Ces deux champs sont
+// donc contractuels pour la page match, pas decoratifs.
+test("computeMatchup: chaque categorie porte son unite et son sens de lecture", () => {
+  const m = computeMatchup(
+    { xg: 2.1, xga: 0.9, possession: 61, passes_pct: 84, fouls: 9.2, corners: 6.7 },
+    { xg: 1.4, xga: 1.6, possession: 39, passes_pct: 78, fouls: 11.4, corners: 5.1 }
+  );
+  m.categories.forEach((c) => {
+    assert.ok(c.unit && c.unit.length > 0, `unite manquante sur ${c.key}`);
+    assert.equal(typeof c.lowerIsBetter, "boolean", `sens de lecture manquant sur ${c.key}`);
+  });
+  assert.equal(m.categories.find((c) => c.key === "defense").lowerIsBetter, true);
+  assert.equal(m.categories.find((c) => c.key === "discipline").lowerIsBetter, true);
+  assert.equal(m.categories.find((c) => c.key === "attaque").lowerIsBetter, false);
+});
+
+test("computeMatchup: sans xG, l'attaque bascule sur les tirs ET l'unite le dit", () => {
+  const avecXg = computeMatchup({ xg: 2.1 }, { xg: 1.4 });
+  assert.equal(avecXg.categories.find((c) => c.key === "attaque").unit, "xG par match");
+  const sansXg = computeMatchup({ shots_total: 14 }, { shots_total: 9 });
+  assert.equal(sansXg.categories.find((c) => c.key === "attaque").unit, "tirs par match");
+});

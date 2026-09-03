@@ -48,9 +48,6 @@ a{color:inherit}
    - piege CSS classique (grid item min-width:auto par defaut). */
 /* mise en page principale : colonne large (analyse) + rail etroit
    (donnees d'appoint), comme la maquette de reference */
-.lead-grid{display:grid;grid-template-columns:1fr;gap:var(--gap);align-items:start}
-.lead-main,.lead-aside{display:flex;flex-direction:column;gap:var(--gap);min-width:0}
-@media(min-width:900px){.lead-grid{grid-template-columns:1fr 340px}}
 
 .reveal{opacity:0;transform:translateY(12px);transition:opacity .45s cubic-bezier(.16,1,.3,1),transform .45s cubic-bezier(.16,1,.3,1)}
 .reveal.in{opacity:1;transform:none}
@@ -135,10 +132,6 @@ a{color:inherit}
 .prob-ring.big .val small{font-size:11px}
 
 /* pourquoi ce pari */
-.reasons{display:flex;flex-direction:column;gap:9px}
-.reason{display:flex;gap:10px;align-items:flex-start}
-.reason>b{flex-shrink:0;width:19px;height:19px;display:grid;place-items:center;border-radius:50%;background:var(--accent-bg);color:var(--accent);font:700 11px var(--mono)}
-.reason>p{margin:0;color:var(--muted);font-size:12px;line-height:1.5}
 
 /* buteur a surveiller */
 .threat{display:block;padding:14px;border:1px solid var(--line);border-radius:9px;background:var(--card2);color:inherit;text-decoration:none;transition:border-color .15s,background .15s}
@@ -170,10 +163,6 @@ a.threat:hover{border-color:var(--line2);background:var(--card)}
 .outputs-xg .xg-row img{width:26px;height:26px;border-radius:50%;object-fit:contain;background:var(--card2);flex-shrink:0}
 .outputs-xg .xg-row b{font:700 20px var(--display);color:var(--text)}
 .outputs-xg .xg-row span{color:var(--dim);font:11.5px var(--mono)}
-.scores-row{display:flex;gap:6px;flex-wrap:wrap}
-.score-pill{flex:1;min-width:56px;padding:8px;text-align:center;border:1px solid var(--line);border-radius:8px;background:var(--card2)}
-.score-pill b{display:block;font:700 14px var(--display);color:var(--text)}
-.score-pill small{color:var(--muted);font:10px var(--mono)}
 
 /* comparatif */
 .compare-row{display:grid;grid-template-columns:44px 1fr 92px 1fr 44px;align-items:center;gap:8px;margin:8px 0;font-size:11.5px}
@@ -207,19 +196,6 @@ a.threat:hover{border-color:var(--line2);background:var(--card)}
 .risk-note{display:flex;gap:8px;align-items:flex-start;margin-top:12px;padding:11px 13px;border:1px solid rgba(245,158,11,.3);border-radius:9px;background:var(--orange-bg);color:var(--muted);font-size:12px;line-height:1.5}
 .risk-note b{color:var(--orange);flex-shrink:0}
 
-/* face-a-face */
-.h2h-summary{font:700 22px var(--display);color:var(--accent);margin-bottom:8px}
-.h2h-summary small{margin-left:6px;font:10px var(--mono);color:var(--muted);text-transform:uppercase}
-.h2h-list{display:flex;flex-direction:column;gap:0}
-/* colonne etroite (carte sur 1/4 de largeur en desktop) : date/equipes/score
-   empiles plutot que sur une seule ligne, pour ne jamais tronquer un nom
-   d'equipe (ex. "Manchester City") avec des points de suspension */
-.h2h-row{padding:8px 0;border-top:1px solid var(--line);text-align:center}
-.h2h-row:first-child{border-top:0}
-.h2h-date{display:block;color:var(--muted);font:9.5px var(--mono)}
-.h2h-team{display:block;color:var(--muted);font-size:11px;line-height:1.4}
-.h2h-team.win{color:var(--text);font-weight:700}
-.h2h-score{display:block;color:var(--accent);font:700 13px var(--mono);margin:2px 0}
 
 /* ce qu'il faut savoir */
 .insights-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
@@ -233,11 +209,6 @@ a.threat:hover{border-color:var(--line2);background:var(--card)}
 .insight p{margin:0;color:var(--muted);font-size:11.5px;line-height:1.5}
 
 /* modele vs marche / marches a surveiller */
-.mvm-table{width:100%;border-collapse:collapse;font-size:11.5px}
-.mvm-table th{text-align:left;color:var(--muted);font:9.5px var(--mono);text-transform:uppercase;padding:6px 8px;border-bottom:1px solid var(--line)}
-.mvm-table td{padding:7px 8px;border-bottom:1px solid var(--line);color:var(--text)}
-.mvm-table td.pos{color:var(--green);font-weight:700}
-.mvm-table td.neg{color:var(--red);font-weight:700}
 
 /* value potentielle */
 .value-card{border-color:rgba(16,185,129,.3);background:var(--green-bg)}
@@ -246,22 +217,6 @@ a.threat:hover{border-color:var(--line2);background:var(--card)}
 .value-potential p{margin:0;color:var(--muted);font-size:11.5px;line-height:1.5}
 
 /* matchup */
-.matchup-rows{display:flex;flex-direction:column;gap:0}
-.matchup-row{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px;padding:8px 0;border-top:1px solid var(--line);font-size:11.5px}
-.matchup-row:first-child{border-top:0}
-.matchup-row>span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted);font-size:10px}
-.matchup-row>span.adv{color:var(--green);font-weight:700}
-.matchup-row>span:first-child{text-align:right}
-.matchup-row>b{text-align:center;font-size:11.5px;color:var(--text);white-space:nowrap}
-.matchup-global{display:flex;align-items:center;gap:10px;margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
-.mg-side{text-align:center;flex-shrink:0}
-.mg-side b{display:block;font:700 18px var(--display)}
-.mg-side b small{font-size:11px;color:var(--muted);font-weight:400}
-.mg-side b.pos{color:var(--green)}
-.mg-side b.neg{color:var(--red)}
-.mg-side small{display:block;color:var(--muted);font-size:10px;text-transform:uppercase}
-.mg-bar{flex:1;height:5px;border-radius:4px;background:var(--red);overflow:hidden}
-.mg-bar i{display:block;height:100%;background:var(--green)}
 
 /* stats a ne pas surinterpreter */
 .caveat{display:flex;gap:8px;align-items:flex-start;padding:10px 0;border-top:1px solid var(--line);font-size:11.5px;line-height:1.5;color:var(--muted)}
@@ -289,11 +244,6 @@ a.threat:hover{border-color:var(--line2);background:var(--card)}
 .abs-impact{display:block;margin-top:3px;color:var(--muted);font-size:10.5px;line-height:1.4}
 .abs-none{color:var(--green);font-size:11.5px}
 
-/* arbitre */
-.referee b{font-size:13px;color:var(--text)}
-.referee-stats{display:flex;flex-wrap:wrap;gap:14px;margin-top:10px}
-.referee-stats small{display:block;color:var(--muted);font:9.5px var(--mono);text-transform:uppercase}
-.referee-stats b{display:block;margin-top:4px;font-size:14px;font-weight:700;color:var(--text)}
 
 @media(max-width:640px){
   :root{--gap:8px;--radius:10px}
@@ -312,7 +262,6 @@ a.threat:hover{border-color:var(--line2);background:var(--card)}
   .reco-market{font-size:19px}
   .insights-grid{grid-template-columns:1fr}
   .compare-row{grid-template-columns:36px 1fr 64px 1fr 36px;font-size:11px}
-  .referee-stats{gap:12px}
   .bottom-nav{height:65px;gap:0;justify-content:space-around}
   .bottom-nav a{width:25%}
   .bottom-nav span{font-size:20px}
@@ -561,3 +510,220 @@ a.threat:hover{border-color:var(--line2);background:var(--card)}
    qu'une demi-carte occupee a annoncer une absence. */
 .outputs-missing{margin:12px 0 0;padding-top:11px;border-top:1px solid rgba(255,255,255,.07);
   color:var(--muted);font:400 12.5px/1.55 var(--body)}
+
+/* =========================================================================
+   GRAPHIQUES V4 — Modele vs marche / scores / matchup
+   Cyan + gris uniquement. Le vert et le rouge restent reserves aux ecarts
+   chiffres (colonne "ecart"), jamais a la decoration.
+   ========================================================================= */
+
+/* --- Graphe haltere : modele vs marche ---------------------------------- */
+.db-lede{margin:0 0 12px;color:var(--dim);font-size:12px;line-height:1.5}
+.dumbbell{display:flex;flex-direction:column;gap:2px}
+.db-row{display:grid;grid-template-columns:minmax(0,116px) 1fr 46px;align-items:center;
+  gap:10px;padding:9px 0;border-top:1px solid var(--line)}
+.db-row:first-child{border-top:0}
+.db-name{min-width:0;font-size:11.5px;color:var(--text);line-height:1.3}
+.db-track{position:relative;height:16px;border-radius:8px;background:var(--card2);
+  box-shadow:inset 0 0 0 1px var(--line)}
+/* Le segment EST l'ecart : sa longueur porte l'information. */
+.db-seg{position:absolute;top:50%;transform:translateY(-50%);height:3px;border-radius:2px;
+  background:linear-gradient(90deg,var(--muted),var(--cyan))}
+.db-seg.down{background:linear-gradient(90deg,var(--cyan),var(--muted))}
+.db-dot{position:absolute;top:50%;width:9px;height:9px;margin-left:-4.5px;border-radius:50%;
+  transform:translateY(-50%)}
+.db-mkt{background:var(--muted);box-shadow:0 0 0 2px var(--card)}
+.db-model{background:var(--cyan);box-shadow:0 0 0 2px var(--card),0 0 8px rgba(34,211,238,.5)}
+.db-edge{text-align:right;font:700 12px var(--body);font-variant-numeric:tabular-nums}
+.db-edge.pos{color:var(--green)}
+.db-edge.neg{color:var(--red)}
+.db-legend{display:flex;align-items:center;gap:14px;margin-top:12px;padding-top:10px;
+  border-top:1px solid var(--line);color:var(--dim);font-size:10.5px}
+.db-legend span{display:flex;align-items:center;gap:5px}
+.db-key{width:8px;height:8px;border-radius:50%;display:inline-block}
+.db-key.db-mkt{background:var(--muted);box-shadow:none}
+.db-key.db-model{background:var(--cyan);box-shadow:none}
+.db-scale{margin-left:auto;font-family:var(--mono);font-size:10px}
+
+/* --- Scores les plus probables ------------------------------------------ */
+.score-bars{display:flex;flex-direction:column;gap:7px}
+.score-bar{display:grid;grid-template-columns:34px 1fr 38px;align-items:center;gap:9px}
+.score-bar b{font:700 13px var(--body);color:var(--text);font-variant-numeric:tabular-nums}
+.score-bar i{display:block;height:8px;border-radius:4px;background:var(--card2);
+  box-shadow:inset 0 0 0 1px var(--line);overflow:hidden}
+.score-bar i span{display:block;height:100%;border-radius:4px;
+  background:linear-gradient(90deg,var(--cyan2),var(--cyan))}
+.score-bar small{text-align:right;color:var(--dim);font-size:11px;font-variant-numeric:tabular-nums}
+
+/* --- Matchup ------------------------------------------------------------ */
+.mu-head{display:flex;justify-content:space-between;gap:12px;padding-bottom:9px;
+  margin-bottom:4px;border-bottom:1px solid var(--line)}
+.mu-head span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  color:var(--text);font-size:11.5px;font-weight:600}
+.mu-head span:last-child{text-align:right}
+.mu-rows{display:flex;flex-direction:column}
+.mu-row{display:grid;grid-template-columns:38px 1fr 38px;align-items:center;gap:10px;padding:8px 0}
+.mu-val{color:var(--dim);font-size:12px;font-variant-numeric:tabular-nums;text-align:left}
+.mu-row>.mu-val:last-child{text-align:right}
+.mu-val.win{color:var(--cyan);font-weight:700}
+.mu-mid{min-width:0}
+.mu-mid b{display:block;margin-bottom:5px;text-align:center;color:var(--dim);
+  font-size:10.5px;font-weight:500}
+/* L'unite dit ce que le chiffre mesure et dans quel sens le lire. */
+.mu-mid b em{display:block;margin-top:1px;color:var(--muted);font-style:normal;
+  font-size:9.5px;font-weight:400;letter-spacing:.01em}
+.mu-bar{display:flex;height:6px;border-radius:3px;overflow:hidden;background:var(--card2)}
+.mu-bar i{display:block;height:100%;background:var(--line2)}
+.mu-bar i.win{background:var(--cyan)}
+.mu-bar .mu-h{border-radius:3px 0 0 3px}
+.mu-bar .mu-a{border-radius:0 3px 3px 0}
+.mu-global{display:flex;align-items:center;gap:12px;margin-top:12px;padding-top:12px;
+  border-top:1px solid var(--line)}
+.mu-g-side b{font:700 19px var(--display);color:var(--dim)}
+.mu-g-side b.win{color:var(--cyan)}
+.mu-g-side b small{font:400 10px var(--mono);color:var(--muted)}
+.mu-g-bar{flex:1;height:6px;border-radius:3px;background:var(--line2);overflow:hidden}
+.mu-g-bar i{display:block;height:100%;border-radius:3px;
+  background:linear-gradient(90deg,var(--cyan2),var(--cyan))}
+.mu-foot{margin:8px 0 0;color:var(--muted);font-size:10.5px;text-align:center}
+
+@media(max-width:520px){
+  .db-row{grid-template-columns:minmax(0,88px) 1fr 42px;gap:8px}
+  .db-name{font-size:11px}
+}
+
+/* =========================================================================
+   V5 — LECTURE EN DOSSIER
+   Une seule colonne, un ordre fixe, chaque section numerotee. Le but est
+   qu'on sache toujours ou on en est et ce qui reste a lire.
+   Palette inchangee : sombre + cyan. Aucune couleur nouvelle.
+   ========================================================================= */
+
+.secs{display:flex;flex-direction:column;gap:26px}
+.sec{min-width:0}
+/* Le numero est un reperage, pas une decoration : il reste discret et ne
+   prend jamais le pas sur le titre de la carte. */
+.sec-num{
+  display:block;margin:0 0 7px 2px;
+  color:var(--accent);opacity:.5;
+  font:700 10.5px var(--mono);letter-spacing:.16em;
+}
+
+/* Sur large ecran le numero passe dans la marge : la carte gagne toute la
+   largeur et la colonne de chiffres donne le rythme du dossier. */
+@media(min-width:900px){
+  .secs{display:grid;grid-template-columns:40px 1fr;column-gap:16px;row-gap:30px}
+  .sec{display:contents}
+  .sec-num{
+    align-self:start;margin:22px 0 0;text-align:right;
+    font-size:12px;opacity:.38;
+  }
+  .sec>.card,.sec>section{min-width:0}
+}
+
+/* Un peu plus d'air autour du signal : c'est le seul bloc qu'on veut voir
+   isole du reste. */
+.sec:first-child .sec-num{opacity:.75}
+
+/* ---------- Barre collante du pari ---------- */
+/* Elle n'apparait qu'une fois le signal sorti de l'ecran par le HAUT :
+   pendant qu'il est visible, elle ferait doublon. */
+.sig-sticky{
+  position:fixed;top:0;left:0;right:0;z-index:30;
+  transform:translateY(-102%);opacity:0;pointer-events:none;
+  transition:transform .28s cubic-bezier(.16,1,.3,1),opacity .2s;
+  background:rgba(10,17,26,.92);
+  -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
+  border-bottom:1px solid rgba(34,211,238,.18);
+  box-shadow:0 14px 34px -24px rgba(0,0,0,.95);
+}
+.sig-sticky.on{transform:none;opacity:1}
+.ss-in{
+  width:min(var(--container),calc(100% - 32px));margin:0 auto;
+  display:flex;align-items:center;gap:12px;height:52px;
+}
+.ss-tag{
+  flex:none;color:var(--muted);font:400 11.5px var(--body);
+  white-space:nowrap;
+}
+.ss-market{
+  min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  color:var(--text);font:600 14.5px var(--body);letter-spacing:-.01em;
+}
+.ss-odds,.ss-prob{
+  flex:none;margin-left:auto;padding:4px 10px;border-radius:7px;
+  font:700 13px var(--body);font-variant-numeric:tabular-nums;
+}
+.ss-odds{background:rgba(34,211,238,.12);color:var(--accent);
+  box-shadow:inset 0 0 0 1px rgba(34,211,238,.2)}
+.ss-prob{margin-left:0;background:rgba(255,255,255,.05);color:var(--dim)}
+@media(max-width:560px){
+  .ss-tag{display:none}
+  .ss-in{height:48px;gap:9px}
+  .ss-market{font-size:13.5px}
+}
+@media(prefers-reduced-motion:reduce){
+  .sig-sticky{transition:opacity .2s}
+}
+
+/* ---------- En-tete : la premiere impression ---------- */
+/* Elle etait aussi discrete qu'une ligne de tableau : 46px d'ecusson et un
+   nom d'equipe en 18px. C'est la premiere chose que voit un abonne, elle a
+   maintenant l'echelle d'une affiche. HTML inchange, uniquement du CSS. */
+.card.hero{
+  position:relative;overflow:hidden;
+  padding:22px 22px 20px;gap:16px;
+  background:
+    radial-gradient(90% 120% at 50% -30%,rgba(34,211,238,.09),transparent 62%),
+    var(--card);
+}
+.hero-teams{grid-template-columns:1fr 72px 1fr;gap:10px;align-items:start}
+.hero-team{gap:11px}
+/* Le disque reste visible meme si l'ecusson distant ne charge pas : un trou
+   de 64px au milieu de l'en-tete ressemble a une page cassee, un disque
+   sobre ressemble a un choix. */
+.hero-team img{
+  width:64px;height:64px;
+  background:rgba(255,255,255,.035);border-radius:50%;
+  filter:drop-shadow(0 8px 18px rgba(0,0,0,.55));
+}
+.hero-team b{
+  font-size:26px;line-height:1.05;letter-spacing:.01em;
+  white-space:normal;overflow:visible;text-overflow:clip;
+}
+/* Le VS s'aligne sur les ECUSSONS, pas sur le centre de la colonne : sinon
+   il derive des qu'un nom d'equipe passe sur deux lignes, et son filet vient
+   toucher le nom d'en face. */
+.hero-vs{
+  align-self:start;margin-top:24px;
+  font-size:12px;letter-spacing:.18em;color:var(--muted);
+  position:relative;
+}
+/* Deux filets fins de part et d'autre du VS : la separation se voit sans
+   ajouter d'element dans le HTML. */
+.hero-vs:before,.hero-vs:after{
+  content:"";position:absolute;top:50%;width:18px;height:1px;
+  background:var(--line2);
+}
+.hero-vs:before{right:calc(100% + 6px)}
+.hero-vs:after{left:calc(100% + 6px)}
+
+/* ---------- Le signal : le bloc qu'on doit voir en premier ---------- */
+.signal-card{padding:30px 26px 24px}
+.sig-market{font-size:clamp(30px,5.6vw,46px);line-height:1.02;letter-spacing:.005em}
+.sig-label{font-size:13.5px}
+/* La cote est ce que le parieur cherche en premier apres le marche :
+   elle ne doit plus se confondre avec les autres chiffres de la rangee. */
+.sig-kpi b{font-size:20px}
+.sig-kpis{margin-top:26px}
+
+@media(max-width:640px){
+  .card.hero{padding:18px 16px 16px}
+  .hero-teams{grid-template-columns:1fr 46px 1fr}
+  .hero-team img{width:52px;height:52px}
+  .hero-team b{font-size:19px}
+  .hero-vs{margin-top:18px}
+  /* Trop etroit pour des filets : ils viendraient mordre sur les noms. */
+  .hero-vs:before,.hero-vs:after{display:none}
+  .signal-card{padding:22px 18px 18px}
+}

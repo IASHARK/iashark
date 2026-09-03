@@ -6,10 +6,48 @@
 <link rel="alternate" hreflang="de" href="https://iashark.com/de/pro.html">
 <link rel="alternate" hreflang="it" href="https://iashark.com/it/pro.html">
 <link rel="alternate" hreflang="pt" href="https://iashark.com/pt/pro.html">
-<link rel="alternate" hreflang="x-default" href="https://iashark.com/fr/pro.html"><meta name="description" content="Seleções com alta probabilidade de modelo, registo automático de apostas e verificação de odd num clique — o espaço Ferramentas do IASHARK."><link rel="stylesheet" href="/assets/product-pages.css"><link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script><link rel="stylesheet" href="/assets/bottom-navigation.css"></head><body>
+<link rel="alternate" hreflang="x-default" href="https://iashark.com/fr/pro.html"><meta name="description" content="Seleções com alta probabilidade de modelo, registo automático de apostas e verificação de odd num clique — o espaço Ferramentas do IASHARK."><link rel="stylesheet" href="/assets/product-pages.css"><link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script><link rel="stylesheet" href="/assets/tools-page.css"><link rel="stylesheet" href="/assets/bottom-navigation.css"></head><body>
 <header class="topbar"><a class="brand" href="/pt/"><img src="/assets/iashark-logo.png" alt="IASHARK"></a><div class="top-actions"><span class="lang">FR⌄</span><span id="authHeaderSlot"><a class="btn-login" href="/pt/compte.html">Connexion</a></span></div></header>
-<main class="page"><section class="hero"><div><span class="eyebrow">Pilotez vos décisions</span><h1>Des outils simples.<br>Une gestion disciplinée.</h1><p>Gérez votre bankroll, calculez une mise cohérente et mesurez la qualité de vos décisions dans le temps.</p></div><div class="card"><div class="card-head"><h2>Aperçu performance</h2><span id="planPill" class="pill">Invité</span></div><div class="metrics"><div class="metric"><b id="metricBankroll">—</b><span>Bankroll actuelle</span></div><div class="metric"><b id="metricProfit">0 €</b><span>Profit réalisé</span></div><div class="metric"><b id="metricRoi">0%</b><span>ROI</span></div><div class="metric"><b id="metricTotal">0</b><span>Décisions suivies</span></div></div></div></section>
-<div class="notice" id="toolsNotice">Le calculateur est accessible à tous. Connectez-vous pour enregistrer votre bankroll ; le journal synchronisé est inclus avec Pro.</div>
+<main class="page"><section class="hero"><div><span class="eyebrow">Pilotez vos décisions</span><h1>Vos outils.<br>Nos probabilités.</h1><p>Trois outils qui exploitent directement les calculs du modèle : où est la value aujourd'hui, ce qu'un combiné coûte réellement, et ce que la variance peut faire à votre capital.</p></div><div class="card"><div class="card-head"><h2>Aperçu performance</h2><span id="planPill" class="pill">Invité</span></div><div class="metrics"><div class="metric"><b id="metricBankroll">—</b><span>Bankroll actuelle</span></div><div class="metric"><b id="metricProfit">0 €</b><span>Profit réalisé</span></div><div class="metric"><b id="metricRoi">0%</b><span>ROI</span></div><div class="metric"><b id="metricTotal">0</b><span>Décisions suivies</span></div></div></div></section>
+<div class="notice" id="toolsNotice">Le calculateur de mise est accessible à tous. Les trois outils qui exploitent le modèle sont réservés aux abonnés.</div>
+<section class="card tool" id="toolScan" data-locked="1" style="margin-bottom:14px">
+  <div class="card-head"><h2>Scanner de value du jour</h2><span class="pill pro">Pro</span></div>
+  <p class="tool-intro">Le modèle compare sa probabilité à celle du marché sur <b>chaque marché de chaque match</b>. Cette information existe déjà, mais elle est enterrée une rencontre à la fois. Ici, tout est classé par écart : vous voyez en un écran où le marché s'écarte le plus de nos calculs.</p>
+  <div class="tool-body">
+    <div class="field"><label>Écart minimum</label><select id="scanMinEdge"><option value="0">Tout afficher</option><option value="3">3 points ou plus</option><option value="5" selected>5 points ou plus</option><option value="10">10 points ou plus</option></select></div>
+    <div class="scan-list" id="scanList"><div class="scan-empty">Chargement des matchs du jour…</div></div>
+  </div>
+  <div class="pro-veil"><div><b>Réservé aux abonnés</b><p>Le scanner classe tous les marchés du jour par écart entre notre modèle et le marché.</p><a href="/abonnement.html">Débloquer les outils</a></div></div>
+</section>
+
+<section class="card tool" id="toolCombo" data-locked="1" style="margin-bottom:14px">
+  <div class="card-head"><h2>Ce que coûte vraiment un combiné</h2><span class="pill pro">Pro</span></div>
+  <p class="tool-intro">Les probabilités se multiplient. <b>Deux paris à 70 % ne font pas un combiné à 70 %, mais à 49 %.</b> Cochez des sélections du jour : l'outil calcule la probabilité réelle, la cote équitable, et compare l'espérance du combiné à celle du meilleur pari joué seul.</p>
+  <div class="tool-body">
+    <div class="combo-picks" id="comboPicks"><div class="scan-empty">Chargement des sélections du jour…</div></div>
+    <div class="combo-out" id="comboOut"></div>
+    <p class="combo-verdict" id="comboVerdict">Sélectionnez au moins deux paris.</p>
+  </div>
+  <div class="pro-veil"><div><b>Réservé aux abonnés</b><p>Mesurez ce qu'un combiné retire réellement à votre espérance de gain.</p><a href="/abonnement.html">Débloquer les outils</a></div></div>
+</section>
+
+<section class="card tool" id="toolVariance" data-locked="1" style="margin-bottom:14px">
+  <div class="card-head"><h2>Ce que la variance peut faire à votre capital</h2><span class="pill pro">Pro</span></div>
+  <p class="tool-intro">Un taux de réussite moyen ne dit rien du chemin parcouru. L'outil rejoue votre saison <b>5 000 fois</b> à partir de vos propres chiffres et montre la dispersion réelle : le scénario médian, les mauvais, et la probabilité de subir une forte baisse en cours de route.</p>
+  <div class="tool-body">
+    <div class="var-grid">
+      <div class="field"><label>Capital de départ</label><input id="varBankroll" class="input" type="number" min="1" step="1" value="1000"></div>
+      <div class="field"><label>Mise par pari (% du capital)</label><input id="varStake" class="input" type="number" min="0.1" max="20" step="0.1" value="3"></div>
+      <div class="field"><label>Nombre de paris</label><input id="varBets" class="input" type="number" min="10" max="2000" step="10" value="300"></div>
+      <div class="field"><label>Taux de réussite (%)</label><input id="varWinRate" class="input" type="number" min="1" max="99" step="0.1" value="54"></div>
+      <div class="field"><label>Cote moyenne</label><input id="varOdds" class="input" type="number" min="1.01" step="0.01" value="1.80"></div>
+    </div>
+    <div class="var-out" id="varOut"></div>
+    <p class="var-note" id="varNote"></p>
+  </div>
+  <div class="pro-veil"><div><b>Réservé aux abonnés</b><p>Découvrez la dispersion réelle derrière un taux de réussite moyen.</p><a href="/abonnement.html">Débloquer les outils</a></div></div>
+</section>
+
 <section class="grid three"><div class="card"><div class="card-head"><h2>01 · Bankroll</h2></div><div class="field"><label>Capital actuel</label><input id="bankroll" class="input" type="number" min="1" step="0.01" placeholder="1 250"></div><button class="primary" id="saveBankroll">Enregistrer</button><div class="message" id="bankrollMsg"></div></div>
 <div class="card"><div class="card-head"><h2>02 · Calculateur de mise</h2></div><div class="field"><label>Cote décimale</label><input id="odds" class="input" type="number" min="1.01" step="0.01" value="2.10"></div><div class="field"><label>Probabilité estimée</label><input id="probability" class="input" type="number" min="1" max="99" step="0.1" value="55"></div><div class="field"><label>Profil de risque</label><select id="fraction"><option value="0.25">Prudent · Kelly ¼</option><option value="0.5" selected>Modéré · Kelly ½</option><option value="1">Dynamique · Kelly plein</option></select></div><div class="result"><div><span class="eyebrow">Mise recommandée</span><strong id="stakeResult">—</strong></div><div><b id="stakePct">—</b><div class="metric-label">de la bankroll</div></div></div><div class="message" id="calcMsg"></div></div>
 <div class="card"><div class="card-head"><h2>03 · Nouvelle décision</h2><span class="pill pro">Pro</span></div><div class="field"><label>Match</label><input id="decisionMatch" class="input" placeholder="PSG — Marseille"></div><div class="field"><label>Marché</label><input id="decisionMarket" class="input" placeholder="Plus de 2,5 buts"></div><div class="field"><label>Mise</label><input id="decisionStake" class="input" type="number" min="1" step="0.01"></div><button class="primary" id="saveDecision">Ajouter au journal</button><div class="message" id="decisionMsg"></div></div></section>

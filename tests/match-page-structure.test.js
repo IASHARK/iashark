@@ -37,3 +37,33 @@ test("le workflow alimente les blocs comparatifs sans valeur de secours",()=>{
   assert.match(html,/app-client\.js/);
   assert.match(js,/functions\.invoke\('match-data'\)/);
 });
+
+// ORDRE DE LECTURE fixe par l'utilisateur le 03/09/2026. Il a ete demande
+// explicitement, section par section : ce n'est pas un detail cosmetique,
+// donc il est verrouille ici plutot que laisse a la relecture.
+test("la page match assemble les sections dans l'ordre demande",()=>{
+  const bloc=js.slice(js.indexOf("const sections=["),js.indexOf("];",js.indexOf("const sections=[")));
+  const attendu=[
+    "signalCard","matchReadingCard","keyInsightsCard","outputsCard",
+    "Comparatif des deux équipes","threatsCard","matchupCard",
+    "formNoteCard","valuePotentialCard","Scénario probable du match","faqCard"
+  ];
+  let curseur=-1;
+  for(const jalon of attendu){
+    const i=bloc.indexOf(jalon);
+    assert.ok(i>curseur,`"${jalon}" n'est pas a sa place dans l'ordre de lecture`);
+    curseur=i;
+  }
+});
+
+test("les blocs retires a la demande de l'utilisateur ne reviennent pas",()=>{
+  for(const parti of ["reasonsCard","marketsVsMarketCard","marketsWatchCard","h2hCard","refereeCard"]){
+    assert.doesNotMatch(js,new RegExp("function\\s+"+parti+"\\s*\\("),`${parti} a ete reintroduit`);
+  }
+});
+
+// La numerotation doit suivre ce qui est REELLEMENT affiche : une section
+// absente faute de donnees ne doit pas laisser un trou (01, 02, 04...).
+test("la numerotation des sections se base sur les sections non vides",()=>{
+  assert.match(js,/sections\.filter\(Boolean\)/);
+});

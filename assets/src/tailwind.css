@@ -1,0 +1,24 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Entree en fondu, reprise du motif 21st.dev (fadeSlideIn + delais etages).
+   Respecte prefers-reduced-motion : le contenu s'affiche sans animation. */
+@layer utilities {
+  .animate-fade-in { opacity: 0; }
+  .d1 { animation-delay: .05s } .d2 { animation-delay: .12s }
+  .d3 { animation-delay: .19s } .d4 { animation-delay: .26s }
+  .d5 { animation-delay: .33s }
+  .mask-fade-x {
+    -webkit-mask-image: linear-gradient(to right,transparent,black 12%,black 88%,transparent);
+            mask-image: linear-gradient(to right,transparent,black 12%,black 88%,transparent);
+  }
+}
+/* Le chevron "+" de la FAQ : on retire le marqueur natif du <summary>. */
+summary::-webkit-details-marker { display: none; }
+summary { list-style: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-in { animation: none !important; opacity: 1 !important; transform: none !important; }
+  .animate-marquee { animation: none !important; }
+}

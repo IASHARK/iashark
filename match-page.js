@@ -24,18 +24,6 @@ function todayParis_(){
   f.forEach(x=>{r[x.type]=x.value;});
   return {day:`${r.year}-${r.month}-${r.day}`,now:`${r.year}-${r.month}-${r.day} ${r.hour}:${r.minute}`};
 }
-function pickFreeMatchId(list){
-  if(!Array.isArray(list)||!list.length)return null;
-  const {day,now}=todayParis_();
-  const today=list.filter(m=>String(m.date||'').slice(0,10)===day);
-  const pool=today.length?today:list;
-  const upcoming=pool.filter(m=>String(m.date||'')>=now);
-  const source=upcoming.length?upcoming:pool;
-  const actionable=source.filter(m=>!!m.pari_rec&&!m.no_signal);
-  const candidates=actionable.length?actionable:source;
-  if(!candidates.length)return null;
-  return candidates.reduce((best,m)=>ovrConf_(m)>ovrConf_(best)?m:best,candidates[0]).id;
-}
 
 // Icones : purement decoratives, memes tokens de couleur, aucune emoticone.
 const ICONS={
@@ -243,11 +231,6 @@ function signalCard(vm){
   </section>`;
 }
 
-function reasonsCard(vm){
-  const list=vm.editorial.reasons;
-  if(!list.length)return '';
-  return card('Pourquoi ce pari ?',`<div class="reasons">${list.map((r,i)=>`<div class="reason"><b>${i+1}</b><p>${esc(r)}</p></div>`).join('')}</div>`,'','reasons');
-}
 
 // Buteur a surveiller : vm.players.scoringThreat, classe cote view-model
 // (saison en cours uniquement, score pilote par les tirs cadres).
@@ -320,14 +303,6 @@ function keyInsightsCard(vm){
   }).join('')}</div>`,'','bulb');
 }
 
-// Modele vs marche : vm.model.marketsCompared, deja reel (raw.markets_compared,
-// calcule cote pipeline) - simple tableau, aucune nouvelle donnee.
-function marketsVsMarketCard(vm){
-  const list=vm.model.marketsCompared;
-  if(!list.length)return '';
-  const rows=list.map(m=>`<tr><td>${esc(m.market)}</td><td>${pct(m.probability)}</td><td>${m.consensus!==null?pct(m.consensus):'—'}</td><td class="${m.edge>=0?'pos':'neg'}">${m.edge>=0?'+':''}${fmt(m.edge)}%</td></tr>`).join('');
-  return card('Modèle vs marché',`<div class="table-scroll"><table class="mvm-table"><thead><tr><th>Pari</th><th>Modèle</th><th>Marché</th><th>Écart</th></tr></thead><tbody>${rows}</tbody></table></div>`,'','scale');
-}
 
 // Value potentielle : le marche du plus gros ecart absolu deja identifie
 // par vm.marketsWatch (lui-meme derive de markets_compared reel) - jamais
@@ -347,8 +322,42 @@ function matchupCard(vm){
   const m=vm.matchupScores;
   if(!m)return '';
   const homeName=vm.identity.home.name,awayName=vm.identity.away.name;
-  const rows=m.categories.map(c=>`<div class="matchup-row"><span class="${c.advantage==='home'?'adv':''}">${esc(homeName)}</span><b>${esc(c.label)}${c.advantage==='égalité'?' · égalité':''}</b><span class="${c.advantage==='away'?'adv':''}">${esc(awayName)}</span></div>`).join('');
-  return card('Matchup : comment les équipes se correspondent',`<div class="matchup-rows">${rows}</div><div class="matchup-global"><div class="mg-side"><b class="pos">${fmt(m.globalHome)}<small>/10</small></b><small>${esc(homeName)}</small></div><div class="mg-bar"><i style="width:${clamp(m.globalHome/(m.globalHome+m.globalAway)*100)}%"></i></div><div class="mg-side"><b class="neg">${fmt(m.globalAway)}<small>/10</small></b><small>${esc(awayName)}</small></div></div>`,'','scale');
+  // AVANT : le nom des deux equipes etait repete a CHAQUE ligne, en 10px,
+  // ce qui remplissait la carte de bruit et masquait la seule information
+  // utile - qui domine, et de combien. Desormais les noms n'apparaissent
+  // qu'une fois en en-tete, et chaque categorie devient une barre centree
+  // dont l'inclinaison montre l'ecart reel.
+  // L'avantage vient de c.advantage, deja calcule dans lib/insights.js :
+  // on ne le recalcule pas ici, car il tient compte du sens de la mesure
+  // (encaisser MOINS de buts est un avantage, pas un desavantage).
+  const rows=m.categories.map(c=>{
+    const h=Math.abs(Number(c.home)||0),a=Math.abs(Number(c.away)||0),tot=h+a;
+    const ecart=tot?Math.abs(h-a)/tot:0;
+    const pente=clamp(50+ecart*50);
+    const homeWin=c.advantage==='home',awayWin=c.advantage==='away';
+    const partHome=homeWin?pente:awayWin?100-pente:50;
+    return `<div class="mu-row">
+      <span class="mu-val${homeWin?' win':''}">${fmt(c.home)}</span>
+      <div class="mu-mid">
+        <b>${esc(c.label)}${c.advantage==='égalité'?' · égalité':''}<em>${esc(c.unit||'')}${c.lowerIsBetter?' · moins = mieux':''}</em></b>
+        <div class="mu-bar"><i class="mu-h${homeWin?' win':''}" style="width:${partHome}%"></i><i class="mu-a${awayWin?' win':''}" style="width:${100-partHome}%"></i></div>
+      </div>
+      <span class="mu-val${awayWin?' win':''}">${fmt(c.away)}</span>
+    </div>`;
+  }).join('');
+  const total=(Number(m.globalHome)||0)+(Number(m.globalAway)||0);
+  const partGlobal=total?clamp(Number(m.globalHome)/total*100):50;
+  const homeMieux=Number(m.globalHome)>=Number(m.globalAway);
+  return card('Matchup : comment les équipes se correspondent',
+    `<div class="mu-head"><span>${esc(homeName)}</span><span>${esc(awayName)}</span></div>
+     <div class="mu-rows">${rows}</div>
+     <div class="mu-global">
+       <div class="mu-g-side"><b class="${homeMieux?'win':''}">${fmt(m.globalHome)}<small>/10</small></b></div>
+       <div class="mu-g-bar"><i style="width:${partGlobal}%"></i></div>
+       <div class="mu-g-side right"><b class="${homeMieux?'':'win'}">${fmt(m.globalAway)}<small>/10</small></b></div>
+     </div>
+     <p class="mu-foot">Note globale, toutes catégories confondues.</p>`,
+    '','scale');
 }
 
 // "Stats a ne pas surinterpreter" : signale les victoires a marge etroite
@@ -370,14 +379,6 @@ function formNoteCard(vm){
 // equipes, deja presente dans l'en-tete de la page (formStrip dans hero()).
 // Pure duplication, retiree a la demande de l'utilisateur.
 
-// 3 marches a surveiller : vm.marketsWatch, deja trie par ecart absolu reel
-// (cf lib/insights.js#topMarketsToWatch) - simple affichage.
-function marketsWatchCard(vm){
-  const list=vm.marketsWatch;
-  if(!list.length)return '';
-  const rows=list.map(m=>`<tr><td>${esc(m.market)}</td><td>${esc(m.interest)}</td><td>${m.confidence!==null?m.confidence+'/10':'—'}</td></tr>`).join('');
-  return card('Marchés à surveiller',`<div class="table-scroll"><table class="mvm-table"><thead><tr><th>Marché</th><th>Intérêt</th><th>Confiance</th></tr></thead><tbody>${rows}</tbody></table></div>`,'','target');
-}
 
 // Sorties modele : xG (avec les logos des 2 equipes) + Scores probables -
 // les probabilites 1X2 sont retirees d'ici (deja dans "Notre lecture du
@@ -395,7 +396,11 @@ function outputsCard(vm){
     cols.push(`<div class="outputs-col outputs-xg"><small>Buts attendus (xG)</small><div class="xg-row">${img(i.home.logo,i.home.name)}<b>${fmt(x.home)}</b><span>xG</span><b>${fmt(x.away)}</b>${img(i.away.logo,i.away.name)}</div></div>`);
   } else manquant.push('xG indisponibles');
   if(s.length){
-    cols.push(`<div class="outputs-col"><small>Scores probables</small><div class="scores-row">${s.map(sc=>`<div class="score-pill"><b>${esc(sc.score)}</b><small>${pct(sc.probability)}</small></div>`).join('')}</div></div>`);
+    // Trois pastilles de largeur egale se cassaient sur deux lignes et ne
+    // disaient rien de la hierarchie entre les scores. Des barres classees
+    // montrent tout de suite lequel domine, et ne debordent jamais.
+    const maxP=Math.max.apply(null,s.map(sc=>Number(sc.probability)||0))||1;
+    cols.push(`<div class="outputs-col"><small>Scores les plus probables</small><div class="score-bars">${s.map(sc=>`<div class="score-bar"><b>${esc(sc.score)}</b><i><span style="width:${clamp(Number(sc.probability)/maxP*100)}%"></span></i><small>${pct(sc.probability)}</small></div>`).join('')}</div></div>`);
   } else manquant.push('Scores probables indisponibles');
   if(!cols.length)return '';
   return card('Ce que dit le modèle',
@@ -460,18 +465,6 @@ function scenarioCard(vm){
   return `${scenarioChart(slots)}<div class="scenario-insight"><b>!</b><span>${esc(peak.txt||`Fenêtre la plus dangereuse : ${peak.t} (${Math.round(n(peak.prob)||0)}% des buts observés sur cette tranche).`)}</span></div>`;
 }
 
-function h2hCard(vm){
-  const rows=vm.h2h;
-  if(!rows)return '';
-  const homeName=vm.identity.home.name,awayName=vm.identity.away.name;
-  const over25=rows.filter(r=>{const parts=(r.score||'').split('-').map(Number);return parts.length===2&&parts.every(Number.isFinite)&&parts[0]+parts[1]>2.5;}).length;
-  const body=rows.slice(0,5).map(row=>{
-    const homeWin=row.winner==='1'&&row.home===homeName||row.winner==='2'&&row.home===awayName;
-    const awayWin=row.winner==='1'&&row.away===homeName||row.winner==='2'&&row.away===awayName;
-    return `<div class="h2h-row"><span class="h2h-date">${esc(row.date)}</span><span class="h2h-team ${homeWin?'win':''}">${esc(row.home)}</span><b class="h2h-score">${esc(row.score)}</b><span class="h2h-team ${awayWin?'win':''}">${esc(row.away)}</span></div>`;
-  }).join('');
-  return card('Face-à-face',`<div class="h2h-summary">${over25}/${rows.length} <small>&gt; 2.5 buts</small></div><div class="h2h-list">${body}</div>`,'','h2h');
-}
 
 // outputShare (vm.players.absences[].outputShare) : part reelle du joueur
 // dans les buts+passes decisives+passes cles recents de son equipe (cf
@@ -574,56 +567,67 @@ function faqCard(vm){
     'faq-card','faq');
 }
 
-function refereeCard(vm){
-  const r=vm.referee;
+
+// Une fois le signal depasse, le parieur lit 10 sections sans plus voir CE
+// QU'ON LUI RECOMMANDE ni A QUELLE COTE. Cette barre le garde sous les yeux
+// pendant toute la lecture. Elle ne calcule rien : elle recopie le signal
+// deja affiche, et disparait tant qu'il est visible.
+function signalSticky(vm){
+  const r=vm.model.recommendation;
   if(!r)return '';
-  const stats=[];
-  if(n(r.cardsPerMatch)!==null)stats.push(['Cartons/match',fmt(r.cardsPerMatch)]);
-  if(n(r.penaltiesPerMatch)!==null)stats.push(['Penaltys/match',fmt(r.penaltiesPerMatch)]);
-  if(n(r.matches)!==null)stats.push(['Matchs observés',fmt(r.matches,0)]);
-  return card('Arbitre',`<div class="referee"><b>${esc(r.name)}</b>${stats.length?`<div class="referee-stats">${stats.map(([l,v])=>`<div><small>${esc(l)}</small><b>${esc(v)}</b></div>`).join('')}</div>`:''}</div>`,'','whistle');
+  const marketOdds=n(vm.model.recommendedOdds);
+  return `<div class="sig-sticky" id="sigSticky" aria-hidden="true">
+    <div class="ss-in">
+      <span class="ss-tag">Marché recommandé</span>
+      <b class="ss-market">${esc(r.market)}</b>
+      ${marketOdds!==null?`<span class="ss-odds">${odds(marketOdds)}</span>`:''}
+      ${n(r.probability)!==null?`<span class="ss-prob">${pct(r.probability)}</span>`:''}
+    </div>
+  </div>`;
+}
+function bindSticky(){
+  const bar=document.getElementById('sigSticky'),anchor=root.querySelector('.signal-card');
+  if(!bar||!anchor||!('IntersectionObserver' in window))return;
+  new IntersectionObserver(([en])=>{
+    bar.classList.toggle('on',!en.isIntersecting&&en.boundingClientRect.top<0);
+  },{threshold:0}).observe(anchor);
 }
 
 function render(raw){
   const vm=IasharkMatchViewModel.buildMatchViewModel(raw);
   document.title=`${vm.identity.home.name} vs ${vm.identity.away.name} — IASHARK`;
-  // ORDRE DE LECTURE. Avant, la recommandation - le produit vendu -
-  // n'apparaissait qu'en 4e position, sous l'en-tete, une ligne de tags et
-  // un paragraphe editorial : un parieur devait defiler pour savoir ce
-  // qu'on lui conseille. Desormais : QUOI (le signal), puis POURQUOI
-  // (lecture + raisons), puis LES PREUVES (comparatif, buteur, scenario),
-  // puis LES QUESTIONS RESTANTES (FAQ). La ligne de tags a ete supprimee :
-  // elle repetait le nom de la competition deja affiche dans l'en-tete.
-  const mainCol=[
+  // ORDRE DE LECTURE, fixe par l'utilisateur le 03/09/2026. Une seule
+  // colonne : la page se lit comme un dossier, de haut en bas, au lieu de
+  // deux colonnes ou l'oeil ne sait pas laquelle lire en premier.
+  // On sort le signal, puis on l'interprete, puis on l'etaye par les
+  // donnees, puis le scenario, puis les questions restantes.
+  // Retires a la meme occasion : "Pourquoi ce pari ?", "Modele vs marche",
+  // "Marches a surveiller", "Face a face" et "Arbitre".
+  const sections=[
+    signalCard(vm),
+    matchReadingCard(vm),
+    keyInsightsCard(vm),
+    outputsCard(vm),
     card('Comparatif des deux équipes',comparison(vm),'compare-card','compare'),
     threatsCard(vm),
-    // "Scenario probable du match" : NE PAS MODIFIER (carte preferee de
-    // l'utilisateur, explicitement gelee - ni le contenu, ni le style).
+    matchupCard(vm),
+    formNoteCard(vm),
+    valuePotentialCard(vm),
+    // "Scenario probable du match" : contenu et style geles a la demande de
+    // l'utilisateur. Seule sa POSITION change ici.
     card('Scénario probable du match',scenarioCard(vm),'','chart'),
     faqCard(vm)
-  ].filter(Boolean);
-  const asideCol=[
-    marketsVsMarketCard(vm),
-    outputsCard(vm),
-    matchupCard(vm),
-    valuePotentialCard(vm),
-    formNoteCard(vm),
-    marketsWatchCard(vm),
-    h2hCard(vm),
-    refereeCard(vm)
-  ].filter(Boolean);
-  root.innerHTML=`<div class="page">
-    ${hero(vm)}
-    ${signalCard(vm)}
-    ${matchReadingCard(vm)}
-    ${reasonsCard(vm)}
-    ${keyInsightsCard(vm)}
-    <div class="lead-grid">
-      <div class="lead-main">${mainCol.join('')}</div>
-      <div class="lead-aside">${asideCol.join('')}</div>
-    </div>
-  </div>`;
+  ];
+  // La numerotation suit ce qui est REELLEMENT affiche : une section absente
+  // faute de donnees ne laisse pas de trou dans la suite des numeros.
+  let rang=0;
+  const corps=sections.filter(Boolean).map(node=>{
+    rang++;
+    return `<div class="sec"><span class="sec-num" aria-hidden="true">${String(rang).padStart(2,'0')}</span>${node}</div>`;
+  }).join('');
+  root.innerHTML=`<div class="page">${hero(vm)}<div class="secs">${corps}</div></div>${signalSticky(vm)}`;
   bindMotion();
+  bindSticky();
 }
 
 function bindMotion(){
@@ -714,7 +718,7 @@ async function init(){
       raw=raw||list.find(x=>String(x.id)===String(id));
     }
     if(!raw)throw new Error('Match introuvable');
-    const isFree=String(raw.id)===String(pickFreeMatchId(list));
+    const isFree=String(raw.id)===String(IasharkFreeMatch.pickFreeMatchId(list));
     if(isFree&&!ctx.session){renderAuthWall(raw);return;}
     if(!isFree&&!ctx.isPro){renderProWall(raw);return;}
     render(raw);

@@ -62,8 +62,43 @@ test("les blocs retires a la demande de l'utilisateur ne reviennent pas",()=>{
   }
 });
 
-// La numerotation doit suivre ce qui est REELLEMENT affiche : une section
-// absente faute de donnees ne doit pas laisser un trou (01, 02, 04...).
-test("la numerotation des sections se base sur les sections non vides",()=>{
+// Les sections vides ne doivent toujours pas laisser de trou dans la page.
+test("seules les sections non vides sont rendues",()=>{
   assert.match(js,/sections\.filter\(Boolean\)/);
+});
+
+// Numerotation "01 02 03..." retiree a la demande de l'utilisateur : les
+// titres de cartes suffisent a situer la lecture.
+test("les sections ne sont plus numerotees",()=>{
+  assert.doesNotMatch(js,/sec-num/);
+  assert.doesNotMatch(css,/sec-num/);
+  assert.doesNotMatch(js,/padStart\(2,'0'\)/);
+});
+
+// Bug remonte par l'utilisateur : sur un match dont le pari recommande est un
+// BTTS, la rangee "Notre lecture du match" affichait DEUX tuiles BTTS cote a
+// cote, avec le meme libelle et le meme pourcentage.
+test("le bandeau 'Notre lecture' ne repete pas BTTS quand le pari recommande est deja un BTTS",()=>{
+  // On evalue la condition REELLEMENT ecrite dans la page, pas une copie.
+  const m=js.match(/const btts=(\/[^\n]*?\/i)\n?\s*\.test\(marketLower\)|const btts=(\/[^\n]*?\/i)\.test\(marketLower\)/);
+  assert.ok(m,"le garde-fou BTTS a disparu de matchReadingCard");
+  const litteral=m[1]||m[2];
+  const re=new RegExp(litteral.slice(1,-2),"i");
+  for(const marche of ["BTTS Oui","BTTS Non","Les deux équipes marquent Oui","Les deux equipes marquent Non"]){
+    assert.ok(re.test(marche.toLowerCase()),`la tuile BTTS devrait etre masquee pour "${marche}"`);
+  }
+  for(const marche of ["Over 2.5","Domicile plus de 1.5 but","DC 12","Premiere mi-temps moins de 1.5 but","Tirs du match over 22.5"]){
+    assert.ok(!re.test(marche.toLowerCase()),`la tuile BTTS reste utile pour "${marche}"`);
+  }
+});
+
+// La carte buteur menait avec un tableau plat de quatre lignes. Elle mene
+// desormais avec la probabilite de marquer, une donnee deja calculee par
+// lib/insights.js mais qui n'etait affichee nulle part.
+test("la carte buteur met en avant la probabilite de marquer",()=>{
+  assert.match(js,/scoringProbability/);
+  assert.match(js,/Probabilité de marquer/);
+  assert.match(css,/\.threat-headline \.is-hero/);
+  // Aucun chiffre de tete ne doit etre repete dans le tableau juste en dessous.
+  assert.match(js,/const dansTete=/);
 });

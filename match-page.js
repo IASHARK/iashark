@@ -159,7 +159,12 @@ function matchReadingCard(vm){
     ?`${leading.label} a l'avantage${locSuffix}, et c'est le marché que nous recommandons.`
     :`${leading.label} a l'avantage${locSuffix}, mais ce n'est pas le marché que nous recommandons — nous recommandons plutôt ${r.market}.`;
   const reason=vm.editorial.decisiveFactor;
-  const btts=findMarket(vm.model.marketsCompared,/btts/i);
+  // Le marche recommande est deja affiche dans cette rangee. Quand c'est
+  // lui-meme un BTTS, la tuile BTTS generique repetait exactement le meme
+  // libelle et le meme pourcentage deux fois cote a cote.
+  const btts=/btts|deux [eé]quipes marquent/i.test(marketLower)
+    ?null
+    :findMarket(vm.model.marketsCompared,/btts/i);
   const x=vm.model.expectedGoals;
   const totalXg=x&&n(x.home)!==null&&n(x.away)!==null?x.home+x.away:null;
   const risk=vm.editorial.risk;
@@ -255,6 +260,17 @@ function threatSample(p){
   if(n(p.minutes)!==null&&p.minutes>0)bits.push(`${Math.round(p.minutes)} minutes jouées`);
   return bits.length?bits.join(' · '):'';
 }
+// L'API renvoie le poste en anglais. Repli sur la valeur brute si elle sort
+// de ces quatre cas : mieux vaut un mot anglais qu'un poste efface.
+const POSTES={goalkeeper:'Gardien',defender:'Défenseur',midfielder:'Milieu',attacker:'Attaquant'};
+const poste=v=>{const k=String(v||'').trim();return POSTES[k.toLowerCase()]||k;};
+
+// Le joueur le plus dangereux du match. Cette carte etait un tableau plat de
+// quatre lignes : on ne voyait ni de qui il s'agissait, ni pourquoi il etait
+// la. Elle mene maintenant avec le chiffre qui interesse vraiment un parieur,
+// sa probabilite de marquer - une donnee DEJA calculee (loi de Poisson sur ses
+// buts/90 et son temps de jeu attendu, cf lib/insights.js#computeScoringProbability)
+// mais qui n'etait affichee nulle part sur la page.
 function threatsCard(vm){
   const list=vm.players.scoringThreat;
   if(!list.length)return '';
@@ -262,19 +278,37 @@ function threatsCard(vm){
   const pid=n(p.id);
   const href=pid!==null?` href="/joueur.html?m=${esc(vm.id)}&p=${pid}"`:'';
   const tag=pid!==null?'a':'div';
+
+  // Les trois chiffres de tete, dans l'ordre de ce qu'un parieur regarde.
+  // Chacun n'apparait que s'il existe vraiment : pas de tuile vide.
+  const heads=[
+    n(p.scoringProbability)!==null?{v:pct(p.scoringProbability),k:'Probabilité de marquer',hero:true}:null,
+    n(p.goals90)!==null&&p.goals90>0?{v:fmt(p.goals90,2),k:'Buts / 90 min'}:null,
+    n(p.shotsOn90)!==null&&p.shotsOn90>0?{v:fmt(p.shotsOn90,2),k:'Tirs cadrés / 90 min'}:null
+  ].filter(Boolean);
+
+  // Le reste passe en tableau, sans jamais repeter un chiffre deja en tete.
+  const dansTete=k=>heads.some(h=>h.k===k);
   const rows=[
-    ['Buts par 90 minutes',fmt(p.goals90,2)],
-    ['Tirs cadrés par 90 minutes',fmt(p.shotsOn90,2)],
+    !dansTete('Buts / 90 min')&&n(p.goals90)!==null?['Buts par 90 minutes',fmt(p.goals90,2)]:null,
+    !dansTete('Tirs cadrés / 90 min')&&n(p.shotsOn90)!==null?['Tirs cadrés par 90 minutes',fmt(p.shotsOn90,2)]:null,
+    n(p.expectedGoals90)!==null?['Buts attendus par 90 minutes',fmt(p.expectedGoals90,2)]:null,
     ['Passes décisives par 90 minutes',fmt(p.assists90,2)],
     ['Note moyenne',n(p.rating5)!==null?Number(p.rating5).toLocaleString('fr-FR',{minimumFractionDigits:1,maximumFractionDigits:1}):null]
-  ].filter(r=>r[1]&&r[1]!=='—');
+  ].filter(r=>r&&r[1]&&r[1]!=='—');
   const sample=threatSample(p);
+
   return card('Buteur à surveiller',`<${tag} class="threat"${href}>
     <div class="threat-id">
       ${img(p.photo,p.name)}
-      <div><b>${esc(p.name)}</b><small>${esc(p.team||'')}${p.position?' · '+esc(p.position):''}</small></div>
+      <div class="threat-who">
+        <b>${esc(p.name)}</b>
+        <small>${esc(p.team||'')}${p.position?' · '+esc(poste(p.position)):''}</small>
+      </div>
+      ${list.length>1?'<span class="threat-rank">Menace n°1</span>':''}
     </div>
-
+    ${heads.length?`<div class="threat-headline">${heads.map(h=>
+      `<div${h.hero?' class="is-hero"':''}><b${h.hero?' class="pos"':''}>${h.v}</b><span>${esc(h.k)}</span></div>`).join('')}</div>`:''}
     ${rows.length?`<table class="threat-table"><tbody>${rows.map(([k,v])=>`<tr><th scope="row">${esc(k)}</th><td>${v}</td></tr>`).join('')}</tbody></table>`:''}
     ${sample?`<p class="threat-sample${p.thinSample?' is-thin':''}"><span>Échantillon</span>${esc(sample)}${p.thinSample?'<em>Temps de jeu limité sur ce championnat : ces moyennes par 90 minutes reposent sur peu de minutes et restent fragiles.</em>':''}</p>`:''}
   </${tag}>`,'threats-card','target2');
@@ -612,13 +646,10 @@ function render(raw){
     card('Scénario probable du match',scenarioCard(vm),'','chart'),
     faqCard(vm)
   ];
-  // La numerotation suit ce qui est REELLEMENT affiche : une section absente
-  // faute de donnees ne laisse pas de trou dans la suite des numeros.
-  let rang=0;
-  const corps=sections.filter(Boolean).map(node=>{
-    rang++;
-    return `<div class="sec"><span class="sec-num" aria-hidden="true">${String(rang).padStart(2,'0')}</span>${node}</div>`;
-  }).join('');
+  // Pas de numerotation : les titres de cartes suffisent a situer la lecture.
+  // La colonne de chiffres ajoutait un repere que personne ne suit et volait
+  // de la largeur a la carte sur grand ecran.
+  const corps=sections.filter(Boolean).map(node=>`<div class="sec">${node}</div>`).join('');
   root.innerHTML=`<div class="page">${hero(vm)}<div class="secs">${corps}</div></div>${signalSticky(vm)}`;
   bindMotion();
   bindSticky();

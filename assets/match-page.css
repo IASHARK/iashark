@@ -364,14 +364,49 @@ a.threat:hover{border-color:var(--line2);background:var(--card)}
 /* ==================== Buteur ==================== */
 .threat{display:block;padding:0;border:0;background:none;color:inherit;text-decoration:none}
 .threat:hover{border:0;background:none}
-.threat-id{display:flex;align-items:center;gap:13px}
-.threat-id img{width:52px;height:52px;border-radius:50%;object-fit:cover;
-  background:var(--line);flex-shrink:0;box-shadow:0 0 0 1px rgba(255,255,255,.07)}
-.threat-id b{display:block;font:600 17px var(--body);color:var(--text);letter-spacing:-.01em;
+.threat-id{display:flex;align-items:center;gap:14px}
+/* Le portrait est l'accroche de la carte : cercle net, cerne cyan discret,
+   assez grand pour qu'on identifie le joueur sans lire son nom. */
+.threat-id img{width:64px;height:64px;border-radius:50%;object-fit:cover;
+  background:var(--line);flex-shrink:0;
+  box-shadow:0 0 0 1px rgba(255,255,255,.08),0 0 0 4px rgba(34,211,238,.11)}
+.threat-who{min-width:0;flex:1}
+.threat-id b{display:block;font:600 18px var(--body);color:var(--text);letter-spacing:-.01em;
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .threat-id small{color:var(--muted);font-size:13px}
-.threat-headline{display:flex;gap:34px;margin-top:18px;padding:16px 0;
+/* Rang honnete : ce joueur est le 1er d'un classement reel, il n'apparait
+   que s'il y a bien plusieurs joueurs classes. */
+.threat-rank{flex-shrink:0;align-self:flex-start;
+  border:1px solid rgba(34,211,238,.28);border-radius:20px;padding:4px 10px;
+  color:var(--accent);font:600 11.5px var(--body);letter-spacing:.01em;
+  background:rgba(34,211,238,.07)}
+/* Trois chiffres de tete. Le premier - la probabilite de marquer - occupe
+   toute la premiere colonne et porte la couleur : c'est lui qu'on doit voir
+   en arrivant sur la carte. */
+.threat-headline{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:18px 22px;margin-top:18px;padding:18px 0;
   border-top:1px solid rgba(255,255,255,.07);border-bottom:1px solid rgba(255,255,255,.07)}
+.threat-headline .is-hero{grid-column:1/-1}
+.threat-headline .is-hero b{font-size:42px;letter-spacing:-.02em}
+@media(min-width:620px){
+  .threat-headline{grid-template-columns:minmax(0,1.25fr) minmax(0,1fr) minmax(0,1fr);
+    align-items:end}
+  .threat-headline .is-hero{grid-column:auto}
+}
+/* Sur telephone le badge de rang volait la place du nom, qui partait en
+   points de suspension. Le nom est l'information de la carte : il passe sur
+   deux lignes s'il le faut, et le badge descend sous lui. */
+@media(max-width:520px){
+  /* Grille plutot que flex : le portrait tient la premiere colonne, le nom et
+     le badge s'empilent dans la seconde. En flex, le badge restait colle au
+     nom et le comprimait. */
+  .threat-id{display:grid;grid-template-columns:64px minmax(0,1fr);
+    column-gap:14px;row-gap:8px;align-items:center}
+  .threat-id img{grid-row:1}
+  .threat-who{grid-column:2}
+  .threat-id b{white-space:normal;overflow:visible;text-overflow:clip;line-height:1.25}
+  .threat-rank{grid-column:2;justify-self:start;align-self:start}
+}
 .threat-headline b{display:block;font:700 30px/1 var(--body);color:var(--text);
   font-variant-numeric:tabular-nums;letter-spacing:-.02em}
 .threat-headline b.pos{color:var(--accent)}
@@ -563,29 +598,7 @@ a.threat:hover{border-color:var(--line2);background:var(--card)}
 
 .secs{display:flex;flex-direction:column;gap:26px}
 .sec{min-width:0}
-/* Le numero est un reperage, pas une decoration : il reste discret et ne
-   prend jamais le pas sur le titre de la carte. */
-.sec-num{
-  display:block;margin:0 0 7px 2px;
-  color:var(--accent);opacity:.5;
-  font:700 10.5px var(--mono);letter-spacing:.16em;
-}
-
-/* Sur large ecran le numero passe dans la marge : la carte gagne toute la
-   largeur et la colonne de chiffres donne le rythme du dossier. */
-@media(min-width:900px){
-  .secs{display:grid;grid-template-columns:40px 1fr;column-gap:16px;row-gap:30px}
-  .sec{display:contents}
-  .sec-num{
-    align-self:start;margin:22px 0 0;text-align:right;
-    font-size:12px;opacity:.38;
-  }
-  .sec>.card,.sec>section{min-width:0}
-}
-
-/* Un peu plus d'air autour du signal : c'est le seul bloc qu'on veut voir
-   isole du reste. */
-.sec:first-child .sec-num{opacity:.75}
+@media(min-width:900px){.secs{gap:30px}}
 
 /* ---------- Barre collante du pari ---------- */
 /* Elle n'apparait qu'une fois le signal sorti de l'ecran par le HAUT :

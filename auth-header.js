@@ -16,7 +16,8 @@
     no_account_label:'Pas de compte ?', signup_link:'Inscription', fill_both_fields:'Remplis les deux champs.',
     too_many_attempts:'Trop de tentatives.', generic_login_error:'Erreur de connexion',
     connected_reloading:'Connecté ! Rechargement...', invalid_login:'Email ou mot de passe incorrect.',
-    confirm_email:'Confirme ton email avant de te connecter.'
+    confirm_email:'Confirme ton email avant de te connecter.',
+    forgot_link:'Mot de passe oublie ?'
   };
   var T = FALLBACK_T;
 
@@ -33,7 +34,15 @@
     if(locale === 'fr'){ _dictPromise = Promise.resolve(FALLBACK_T); return _dictPromise; }
     _dictPromise = fetch('/i18n/dict/'+locale+'.json')
       .then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
-      .then(function(d){ T = (d && d.auth_header) ? d.auth_header : FALLBACK_T; return T; })
+      .then(function(d){
+        var distant = (d && d.auth_header) ? d.auth_header : {};
+        // Fusion avec le repli : une cle ajoutee ici et pas encore traduite
+        // dans i18n/dict/*.json doit s'afficher en francais, jamais
+        // "undefined".
+        T = {};
+        Object.keys(FALLBACK_T).forEach(function(k){ T[k] = distant[k] || FALLBACK_T[k]; });
+        return T;
+      })
       .catch(function(){ T = FALLBACK_T; return T; });
     return _dictPromise;
   }
@@ -99,7 +108,8 @@
       +'<input type="password" id="quickLoginPwd" placeholder="'+T.password_placeholder+'" autocomplete="current-password" onkeydown="if(event.key===\'Enter\')IasharkAuthHeader.quickLogin()">'
       +'<button type="button" class="submit" id="quickLoginSubmit" onclick="IasharkAuthHeader.quickLogin()">'+T.submit_login+'</button>'
       +'<div class="qmsg" id="quickLoginMsg"></div>'
-      +'<div class="foot">'+T.no_account_label+' <a href="/compte.html">'+T.signup_link+'</a></div>';
+      +'<div class="foot">'+T.no_account_label+' <a href="/inscription.html">'+T.signup_link+'</a>'
+      +'<br><a href="/mot-de-passe-oublie.html">'+T.forgot_link+'</a></div>';
   }
 
   function injectStyle(){

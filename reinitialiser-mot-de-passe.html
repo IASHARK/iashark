@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Nouveau mot de passe — IASHARK</title>
+<meta name="description" content="Choisissez un nouveau mot de passe pour votre compte IASHARK.">
+<meta name="robots" content="noindex,nofollow">
+<link rel="icon" href="/assets/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<link rel="stylesheet" href="/assets/tailwind.css">
+<link rel="stylesheet" href="/assets/account.css">
+</head>
+<body class="min-h-[100dvh] bg-page text-ink antialiased">
+
+<header class="border-b border-hairline">
+  <div class="mx-auto flex h-14 w-full max-w-[1080px] items-center px-5">
+    <a href="/" aria-label="IASHARK, accueil"><img src="/assets/iashark-logo.png" alt="IASHARK" class="h-7 w-auto object-contain"></a>
+  </div>
+</header>
+
+<main class="mx-auto w-full max-w-[440px] px-5 py-14 sm:py-20">
+
+  <p class="text-[11px] font-bold uppercase tracking-[0.2em] text-cyan">Réinitialisation</p>
+  <h1 class="mt-3 text-[30px] font-extrabold leading-[1.1] tracking-tight">Nouveau mot de passe</h1>
+
+  <!-- Le lien du mail porte la session de recuperation. On attend que le SDK
+       l'ait consommee avant d'autoriser la saisie : sans elle, la mise a jour
+       echouerait et on afficherait une erreur incomprehensible. -->
+  <p id="chargement" class="mt-4 text-[14.5px] text-soft">Vérification du lien…</p>
+
+  <div id="lienInvalide" hidden class="mt-6 rounded-2xl border border-hairline bg-surface p-6">
+    <p class="text-[14.5px] leading-relaxed text-soft">Ce lien n’est plus valide. Les liens de réinitialisation expirent au bout d’une heure et ne servent qu’une fois.</p>
+    <a href="/mot-de-passe-oublie.html" class="mt-5 inline-flex h-11 items-center rounded-xl bg-cyan px-5 text-[14px] font-bold text-[#04141b] transition hover:bg-cyan/90">Demander un nouveau lien</a>
+  </div>
+
+  <form id="formulaire" hidden novalidate class="mt-6 rounded-2xl border border-hairline bg-surface p-6">
+    <div>
+      <label for="password" class="block text-[13px] font-semibold text-soft">Nouveau mot de passe</label>
+      <div class="relative mt-2">
+        <input id="password" name="password" type="password" autocomplete="new-password" minlength="8" required
+               class="fld fld-pwd" placeholder="8 caractères minimum" aria-describedby="passwordAide passwordErr">
+        <button type="button" id="oeil" aria-label="Afficher le mot de passe" aria-pressed="false"
+                class="absolute right-1 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-lg text-soft transition hover:text-ink">
+          <svg viewBox="0 0 24 24" class="h-[18px] w-[18px]" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+        </button>
+      </div>
+      <p id="passwordAide" class="mt-1.5 text-[12.5px] text-soft">8 caractères minimum.</p>
+      <p id="passwordErr" hidden class="mt-1.5 text-[12.5px] text-red-300"></p>
+    </div>
+
+    <div class="mt-4">
+      <label for="password2" class="block text-[13px] font-semibold text-soft">Confirmer</label>
+      <input id="password2" name="password2" type="password" autocomplete="new-password" required
+             class="fld mt-2" placeholder="Répétez le mot de passe" aria-describedby="password2Err">
+      <p id="password2Err" hidden class="mt-1.5 text-[12.5px] text-red-300"></p>
+    </div>
+
+    <button type="submit" id="submit"
+            class="mt-6 h-12 w-full rounded-xl bg-cyan text-[15px] font-bold text-[#04141b] transition hover:bg-cyan/90 disabled:cursor-wait disabled:opacity-60">Mettre à jour</button>
+    <p id="formMsg" hidden role="alert" aria-live="polite"></p>
+  </form>
+
+  <div id="termine" hidden class="mt-6 rounded-2xl border border-hairline bg-surface p-6">
+    <div class="flex h-11 w-11 items-center justify-center rounded-full border border-emerald-500/30 bg-emerald-500/10 text-emerald-400" aria-hidden="true">
+      <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2"><path d="m4 12.5 5 5L20 7"/></svg>
+    </div>
+    <h2 class="mt-4 text-[19px] font-bold tracking-tight">Mot de passe mis à jour</h2>
+    <p class="mt-2 text-[14.5px] leading-relaxed text-soft">Vous pouvez désormais l’utiliser pour vous connecter.</p>
+    <a href="/compte.html" class="mt-5 inline-flex h-11 items-center rounded-xl bg-cyan px-5 text-[14px] font-bold text-[#04141b] transition hover:bg-cyan/90">Aller sur mon compte</a>
+  </div>
+
+</main>
+
+<script src="/app-client.js"></script>
+<script src="/auth-pages.js"></script>
+<script>
+  IasharkAuth.brancherOeil('oeil', 'password');
+  document.getElementById('formulaire').addEventListener('submit', IasharkAuth.reinitialiser);
+  IasharkAuth.preparerReinit();
+</script>
+</body>
+</html>

@@ -3,7 +3,14 @@
  *  maison qui pilotent la liste de matchs generee en JS. Activer preflight
  *  reinitialiserait ces styles et casserait tout l'existant. */
 module.exports = {
-  content: ["./index.html", "./match.html", "./exemple-analyse.html", "./match-page.js", "./pro.html", "./tools-page.js"],
+  content: [
+    "./index.html", "./match.html", "./exemple-analyse.html", "./match-page.js",
+    "./pro.html", "./tools-page.js",
+    // Parcours de compte et d'authentification.
+    "./compte.html", "./account-page.js",
+    "./connexion.html", "./inscription.html",
+    "./mot-de-passe-oublie.html", "./reinitialiser-mot-de-passe.html", "./auth-pages.js"
+  ],
   corePlugins: { preflight: false },
   theme: {
     extend: {

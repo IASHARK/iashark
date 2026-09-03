@@ -4,7 +4,16 @@ const fs=require('node:fs');
 const path=require('node:path');
 
 const root=path.resolve(__dirname,'..');
-const excluded=new Set(['admin.html','maintenance.html']);
+// Pages volontairement sans navigation produit. admin.html et
+// maintenance.html ne s'adressent pas au public. Les quatre pages
+// d'authentification non plus : la barre du bas y proposerait "Compte" a
+// quelqu'un qui n'a justement pas encore de session, et l'ecran de connexion
+// doit rester sans distraction. Le retour au site s'y fait par le lien du
+// bandeau haut, present sur chacune.
+const excluded=new Set([
+  'admin.html','maintenance.html',
+  'connexion.html','inscription.html','mot-de-passe-oublie.html','reinitialiser-mot-de-passe.html'
+]);
 
 function htmlFiles(dir=root,prefix=''){
   return fs.readdirSync(dir,{withFileTypes:true}).flatMap((entry)=>{

@@ -1,0 +1,92 @@
+/* IASHARK — Compte et parcours d'authentification.
+   Le strict complement de Tailwind : tout le reste est en utilitaires.
+
+   Reset minimal, comme assets/tools-page.css. Le preflight de Tailwind est
+   desactive dans tailwind.config.js pour ne pas ecraser le CSS maison des
+   autres pages ; ces pages ne chargent pas product-pages.css et doivent donc
+   porter elles-memes le box-sizing, sinon width:100% + padding deborde. */
+*,*::before,*::after{box-sizing:border-box}
+html,body{margin:0}
+body{font-family:'Inter',system-ui,sans-serif}
+h1,h2,h3,h4,p,ul,ol,figure,fieldset{margin:0}
+/* Surtout PAS de margin:0 sur <dialog> : le centrage d'une fenetre modale
+   vient du `margin:auto` de la feuille du navigateur. Le remettre a zero
+   collait le dialogue en haut a gauche de l'ecran. */
+dialog{margin:auto;border:0}
+fieldset{border:0;padding:0;min-width:0}
+ul,ol{list-style:none;padding:0}
+/* Sans preflight, un <button> garde le fond gris clair du navigateur
+   (buttonface) : texte blanc illisible sur fond sombre. */
+button{background:transparent;border:0;padding:0;cursor:pointer}
+button,input,select,textarea{font:inherit;color:inherit}
+input,select,textarea{background:transparent;border:0}
+select{-webkit-appearance:none;appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath fill='none' stroke='%23a6b4c6' stroke-width='1.6' d='m1 1.5 5 5 5-5'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 12px center;background-size:11px;padding-right:34px}
+input[type=checkbox]{appearance:auto;-webkit-appearance:auto}
+img,svg{display:block;max-width:100%}
+/* Le navigateur repeint les champs auto-remplis en bleu clair : illisible
+   ici. On force le rendu sombre en gelant la transition de fond. */
+input:-webkit-autofill,input:-webkit-autofill:focus{
+  -webkit-text-fill-color:#f4f7fb;
+  transition:background-color 6000s ease-in-out 0s;
+}
+
+/* ---------- Champs ---------- */
+/* Un champ doit se distinguer du fond au premier coup d'oeil : c'est le
+   reproche principal fait aux anciens formulaires. Fond legerement plus
+   clair que la carte, bordure visible, hauteur confortable (44px mini,
+   cible tactile). */
+.fld{
+  width:100%;height:46px;padding:0 13px;
+  border:1px solid rgba(141,179,211,.2);border-radius:9px;
+  background:rgba(255,255,255,.035);color:#f4f7fb;
+  font-size:15px;outline:none;
+  transition:border-color .15s,background .15s,box-shadow .15s;
+}
+.fld::placeholder{color:#6b7d92}
+.fld:hover{border-color:rgba(141,179,211,.32)}
+.fld:focus{border-color:#20d5ef;background:rgba(255,255,255,.05);
+  box-shadow:0 0 0 3px rgba(32,213,239,.14)}
+.fld[aria-invalid="true"]{border-color:#f87171}
+.fld[aria-invalid="true"]:focus{box-shadow:0 0 0 3px rgba(248,113,113,.16)}
+.fld:disabled{opacity:.55;cursor:not-allowed}
+/* Le champ mot de passe laisse la place au bouton afficher/masquer. */
+.fld-pwd{padding-right:46px}
+
+/* ---------- Focus clavier ---------- */
+/* Anneau cyan sobre, jamais un halo. Visible partout ou l'on peut tabuler. */
+:where(a,button,input,select,textarea,summary,[tabindex]):focus-visible{
+  outline:2px solid #20d5ef;outline-offset:2px;border-radius:6px;
+}
+.fld:focus-visible{outline:none}
+
+/* ---------- Interrupteurs ---------- */
+/* Etat porte par la position ET par la couleur : jamais la couleur seule. */
+.sw{position:relative;width:44px;height:25px;flex:none;border-radius:99px;
+  background:rgba(141,179,211,.2);border:1px solid rgba(141,179,211,.22);
+  transition:background .16s,border-color .16s}
+.sw::after{content:"";position:absolute;top:2px;left:2px;width:19px;height:19px;
+  border-radius:50%;background:#7d8fa3;transition:transform .16s,background .16s}
+.sw[aria-checked="true"]{background:rgba(32,213,239,.24);border-color:rgba(32,213,239,.5)}
+.sw[aria-checked="true"]::after{transform:translateX(19px);background:#20d5ef}
+@media(prefers-reduced-motion:reduce){.sw,.sw::after{transition:none}}
+
+/* ---------- Navigation de sections ---------- */
+/* Onglet actif : lisere cyan a gauche, pas un cadre de plus. Meme motif que
+   la sidebar du Tool Center, pour que les deux espaces se ressemblent. */
+.acc-tab[aria-current="page"]{background:rgba(32,213,239,.06);box-shadow:inset 2px 0 0 #20d5ef;color:#f4f7fb}
+@media(max-width:1023px){
+  /* En onglets horizontaux, le lisere passe sous l'onglet. */
+  .acc-tab[aria-current="page"]{box-shadow:inset 0 -2px 0 #20d5ef}
+}
+
+/* ---------- Apparition d'une section ---------- */
+.acc-panel{animation:accIn .2s ease-out}
+@keyframes accIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){.acc-panel{animation:none}}
+
+/* ---------- Dialogue ---------- */
+dialog::backdrop{background:rgba(3,8,14,.72)}
+dialog[open]{animation:accIn .16s ease-out}
+@media(prefers-reduced-motion:reduce){dialog[open]{animation:none}}

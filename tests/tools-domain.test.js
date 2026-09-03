@@ -55,3 +55,59 @@ test('simulateVariance est deterministe et montre la dispersion, pas une moyenne
   assert.ok(a.drawdown30Probability >= 0 && a.drawdown30Probability <= 100);
   assert.equal(d.simulateVariance({ bankroll: 0 }), null, 'entrees invalides -> null, jamais un chiffre invente');
 });
+
+// ---------------------------------------------------------------------------
+// FAIR ODDS / EDGE CHECKER
+// ---------------------------------------------------------------------------
+test("fairOdds : derive cote juste, probabilite implicite et ecart en points", () => {
+  const r = d.fairOdds({ probability: 58, odds: 1.9 });
+  assert.equal(r.impliedProbability, 52.6);
+  assert.equal(r.fairOdds, 1.72);
+  assert.equal(r.edgePoints, 5.4);
+  assert.equal(r.favourable, true);
+});
+
+test("fairOdds : une cote defavorable donne un ecart negatif, jamais masque", () => {
+  const r = d.fairOdds({ probability: 45, odds: 1.8 });
+  assert.ok(r.edgePoints < 0, "45% a 1.80 est defavorable");
+  assert.equal(r.favourable, false);
+  assert.ok(r.expectedValue < 0);
+});
+
+test("fairOdds : entrees invalides -> null, jamais un resultat invente", () => {
+  assert.equal(d.fairOdds({ probability: 0, odds: 2 }), null);
+  assert.equal(d.fairOdds({ probability: 100, odds: 2 }), null);
+  assert.equal(d.fairOdds({ probability: 50, odds: 1 }), null);
+  assert.equal(d.fairOdds({ probability: 50 }), null);
+  assert.equal(d.fairOdds(null), null);
+});
+
+test("fairOdds : a la cote juste exacte, l'ecart est nul", () => {
+  const r = d.fairOdds({ probability: 50, odds: 2 });
+  assert.equal(r.edgePoints, 0);
+  assert.equal(r.expectedValue, 0);
+});
+
+// ---------------------------------------------------------------------------
+// CORRELATION D'UN COMBINE
+// Le projet n'a AUCUNE donnee de dependance entre marches. On ne detecte donc
+// que ce qui est certain (meme match) et on ne fabrique jamais de coefficient.
+// ---------------------------------------------------------------------------
+test("comboRisk : signale plusieurs selections sur le meme match", () => {
+  const r = d.comboRisk([{ matchKey: "psg-om" }, { matchKey: "psg-om" }, { matchKey: "ol-lille" }]);
+  assert.equal(r.correlated, true);
+  assert.equal(r.sameMatchGroups, 1);
+  assert.equal(r.selections, 3);
+});
+
+test("comboRisk : selections toutes sur des matchs differents -> aucune alerte", () => {
+  const r = d.comboRisk([{ matchKey: "a" }, { matchKey: "b" }, { matchKey: "c" }]);
+  assert.equal(r.correlated, false);
+  assert.equal(r.sameMatchGroups, 0);
+});
+
+test("comboRisk : ne fabrique jamais de coefficient de correlation", () => {
+  const r = d.comboRisk([{ matchKey: "a" }, { matchKey: "a" }]);
+  assert.equal(r.correlationCoefficient, null,
+    "sans donnee de dependance, tout coefficient serait invente");
+});

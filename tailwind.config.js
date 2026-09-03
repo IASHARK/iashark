@@ -3,7 +3,7 @@
  *  maison qui pilotent la liste de matchs generee en JS. Activer preflight
  *  reinitialiserait ces styles et casserait tout l'existant. */
 module.exports = {
-  content: ["./index.html"],
+  content: ["./index.html", "./match.html", "./exemple-analyse.html", "./match-page.js", "./pro.html", "./tools-page.js"],
   corePlugins: { preflight: false },
   theme: {
     extend: {
@@ -11,6 +11,7 @@ module.exports = {
         page:    "#060b12",
         surface: "#0a1420",
         panel:   "#0d1926",
+        "surface-2": "#0d1926",
         cyan:     { DEFAULT: "#20d5ef", deep: "#06b6d4" },
         ink:      "#f4f7fb",
         soft:     "#91a0b3",

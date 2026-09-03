@@ -1,4 +1,10 @@
-<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>IASHARK HERRAMIENTAS</title>
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>IASHARK HERRAMIENTAS</title>
+<meta name="description" content="Selecciones con alta probabilidad de modelo, seguimiento automático de apuestas y verificación de cuota en un clic — el espacio Herramientas de IASHARK.">
 <link rel="canonical" href="https://iashark.com/es/pro.html">
 <link rel="alternate" hreflang="fr" href="https://iashark.com/fr/pro.html">
 <link rel="alternate" hreflang="en" href="https://iashark.com/en/pro.html">
@@ -6,52 +12,135 @@
 <link rel="alternate" hreflang="de" href="https://iashark.com/de/pro.html">
 <link rel="alternate" hreflang="it" href="https://iashark.com/it/pro.html">
 <link rel="alternate" hreflang="pt" href="https://iashark.com/pt/pro.html">
-<link rel="alternate" hreflang="x-default" href="https://iashark.com/fr/pro.html"><meta name="description" content="Selecciones con alta probabilidad de modelo, seguimiento automático de apuestas y verificación de cuota en un clic — el espacio Herramientas de IASHARK."><link rel="stylesheet" href="/assets/product-pages.css"><link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script><link rel="stylesheet" href="/assets/tools-page.css"><link rel="stylesheet" href="/assets/bottom-navigation.css"></head><body>
-<header class="topbar"><a class="brand" href="/es/"><img src="/assets/iashark-logo.png" alt="IASHARK"></a><div class="top-actions"><span class="lang">FR⌄</span><span id="authHeaderSlot"><a class="btn-login" href="/es/compte.html">Connexion</a></span></div></header>
-<main class="page"><section class="hero"><div><span class="eyebrow">Pilotez vos décisions</span><h1>Vos outils.<br>Nos probabilités.</h1><p>Trois outils qui exploitent directement les calculs du modèle : où est la value aujourd'hui, ce qu'un combiné coûte réellement, et ce que la variance peut faire à votre capital.</p></div><div class="card"><div class="card-head"><h2>Aperçu performance</h2><span id="planPill" class="pill">Invité</span></div><div class="metrics"><div class="metric"><b id="metricBankroll">—</b><span>Bankroll actuelle</span></div><div class="metric"><b id="metricProfit">0 €</b><span>Profit réalisé</span></div><div class="metric"><b id="metricRoi">0%</b><span>ROI</span></div><div class="metric"><b id="metricTotal">0</b><span>Décisions suivies</span></div></div></div></section>
-<div class="notice" id="toolsNotice">Le calculateur de mise est accessible à tous. Les trois outils qui exploitent le modèle sont réservés aux abonnés.</div>
-<section class="card tool" id="toolScan" data-locked="1" style="margin-bottom:14px">
-  <div class="card-head"><h2>Scanner de value du jour</h2><span class="pill pro">Pro</span></div>
-  <p class="tool-intro">Le modèle compare sa probabilité à celle du marché sur <b>chaque marché de chaque match</b>. Cette information existe déjà, mais elle est enterrée une rencontre à la fois. Ici, tout est classé par écart : vous voyez en un écran où le marché s'écarte le plus de nos calculs.</p>
-  <div class="tool-body">
-    <div class="field"><label>Écart minimum</label><select id="scanMinEdge"><option value="0">Tout afficher</option><option value="3">3 points ou plus</option><option value="5" selected>5 points ou plus</option><option value="10">10 points ou plus</option></select></div>
-    <div class="scan-list" id="scanList"><div class="scan-empty">Chargement des matchs du jour…</div></div>
-  </div>
-  <div class="pro-veil"><div><b>Réservé aux abonnés</b><p>Le scanner classe tous les marchés du jour par écart entre notre modèle et le marché.</p><a href="/abonnement.html">Débloquer les outils</a></div></div>
-</section>
+<link rel="alternate" hreflang="x-default" href="https://iashark.com/fr/pro.html">
+<link rel="icon" href="/assets/favicon.png">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<link rel="stylesheet" href="/assets/tailwind.css">
+<link rel="stylesheet" href="/assets/tools-page.css">
+<link rel="stylesheet" href="/assets/bottom-navigation.css">
+</head>
+<body class="min-h-screen bg-page text-ink antialiased">
 
-<section class="card tool" id="toolCombo" data-locked="1" style="margin-bottom:14px">
-  <div class="card-head"><h2>Ce que coûte vraiment un combiné</h2><span class="pill pro">Pro</span></div>
-  <p class="tool-intro">Les probabilités se multiplient. <b>Deux paris à 70 % ne font pas un combiné à 70 %, mais à 49 %.</b> Cochez des sélections du jour : l'outil calcule la probabilité réelle, la cote équitable, et compare l'espérance du combiné à celle du meilleur pari joué seul.</p>
-  <div class="tool-body">
-    <div class="combo-picks" id="comboPicks"><div class="scan-empty">Chargement des sélections du jour…</div></div>
-    <div class="combo-out" id="comboOut"></div>
-    <p class="combo-verdict" id="comboVerdict">Sélectionnez au moins deux paris.</p>
+<header class="sticky top-0 z-40 border-b border-hairline bg-page/95 backdrop-blur">
+  <div class="mx-auto flex h-14 w-full max-w-[1440px] items-center gap-4 px-4 sm:px-6">
+    <a href="/es/" class="shrink-0" aria-label="IASHARK, accueil"><img src="/assets/iashark-logo.png" alt="IASHARK" class="h-7 w-auto object-contain"></a>
+    <span class="ml-auto" id="authHeaderSlot"><a class="rounded-lg border border-hairline px-3 py-1.5 text-[12.5px] font-semibold text-ink transition hover:border-cyan/40" href="/es/compte.html">Connexion</a></span>
   </div>
-  <div class="pro-veil"><div><b>Réservé aux abonnés</b><p>Mesurez ce qu'un combiné retire réellement à votre espérance de gain.</p><a href="/abonnement.html">Débloquer les outils</a></div></div>
-</section>
+</header>
 
-<section class="card tool" id="toolVariance" data-locked="1" style="margin-bottom:14px">
-  <div class="card-head"><h2>Ce que la variance peut faire à votre capital</h2><span class="pill pro">Pro</span></div>
-  <p class="tool-intro">Un taux de réussite moyen ne dit rien du chemin parcouru. L'outil rejoue votre saison <b>5 000 fois</b> à partir de vos propres chiffres et montre la dispersion réelle : le scénario médian, les mauvais, et la probabilité de subir une forte baisse en cours de route.</p>
-  <div class="tool-body">
-    <div class="var-grid">
-      <div class="field"><label>Capital de départ</label><input id="varBankroll" class="input" type="number" min="1" step="1" value="1000"></div>
-      <div class="field"><label>Mise par pari (% du capital)</label><input id="varStake" class="input" type="number" min="0.1" max="20" step="0.1" value="3"></div>
-      <div class="field"><label>Nombre de paris</label><input id="varBets" class="input" type="number" min="10" max="2000" step="10" value="300"></div>
-      <div class="field"><label>Taux de réussite (%)</label><input id="varWinRate" class="input" type="number" min="1" max="99" step="0.1" value="54"></div>
-      <div class="field"><label>Cote moyenne</label><input id="varOdds" class="input" type="number" min="1.01" step="0.01" value="1.80"></div>
+<main class="mx-auto w-full max-w-[1440px] px-4 pb-24 sm:px-6">
+
+  <div class="border-b border-hairline py-7 sm:py-9">
+    <p class="mb-2.5 inline-flex items-center gap-2 text-[11px] font-bold tracking-[0.18em] text-soft">
+      <span aria-hidden="true" class="h-1 w-1 rounded-full bg-cyan"></span>TOOL CENTER
+    </p>
+    <h1 class="text-[clamp(26px,3.4vw,38px)] font-extrabold leading-[1.1] tracking-[-0.035em] text-ink">Vos outils. <span class="text-cyan">Nos probabilites.</span></h1>
+    <p class="mt-3 max-w-2xl text-[15px] leading-relaxed text-soft">Six outils qui transforment les probabilites du modele en decisions mesurables : detecter, evaluer, dimensionner, simuler, combiner, mesurer.</p>
+  </div>
+
+  <div class="grid grid-cols-1 gap-6 py-6 lg:grid-cols-[248px_minmax(0,1fr)] lg:gap-8">
+
+    <nav aria-label="Outils" class="hidden lg:block">
+      <div class="sticky top-[76px] flex flex-col gap-1" role="tablist" aria-orientation="vertical">
+      <button type="button" role="tab" id="tab-scanner" aria-controls="panel-scanner" aria-selected="true" data-tool="scanner" data-active="1"
+        class="tool-tab group flex w-full items-start gap-3 rounded-xl border border-transparent px-3 py-3 text-left transition hover:bg-white/[0.04]">
+        <svg viewBox="0 0 24 24" aria-hidden="true" class="mt-0.5 h-[18px] w-[18px] shrink-0 fill-none stroke-current stroke-[1.7] text-soft transition group-data-[active=1]:text-cyan"><path d="M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14Z"/><path d="m16.5 16.5 4 4"/></svg>
+        <span class="min-w-0">
+          <span class="block text-[9.5px] font-bold tracking-[0.16em] text-soft/70">SCAN</span>
+          <span class="block text-[14px] font-semibold leading-tight text-ink">Value Scanner</span>
+          <span class="mt-0.5 block text-[12px] leading-snug text-soft">Détecter les écarts.</span>
+        </span>
+      </button>
+      <button type="button" role="tab" id="tab-fair" aria-controls="panel-fair" aria-selected="false" data-tool="fair"
+        class="tool-tab group flex w-full items-start gap-3 rounded-xl border border-transparent px-3 py-3 text-left transition hover:bg-white/[0.04]">
+        <svg viewBox="0 0 24 24" aria-hidden="true" class="mt-0.5 h-[18px] w-[18px] shrink-0 fill-none stroke-current stroke-[1.7] text-soft transition group-data-[active=1]:text-cyan"><path d="M12 4v16"/><path d="M5 8h14"/><path d="m5 8-2.5 6h5L5 8Z"/><path d="m19 8-2.5 6h5L19 8Z"/></svg>
+        <span class="min-w-0">
+          <span class="block text-[9.5px] font-bold tracking-[0.16em] text-soft/70">CALCULATE</span>
+          <span class="block text-[14px] font-semibold leading-tight text-ink">Fair Odds</span>
+          <span class="mt-0.5 block text-[12px] leading-snug text-soft">Comparer prix et probabilité.</span>
+        </span>
+      </button>
+      <button type="button" role="tab" id="tab-stake" aria-controls="panel-stake" aria-selected="false" data-tool="stake"
+        class="tool-tab group flex w-full items-start gap-3 rounded-xl border border-transparent px-3 py-3 text-left transition hover:bg-white/[0.04]">
+        <svg viewBox="0 0 24 24" aria-hidden="true" class="mt-0.5 h-[18px] w-[18px] shrink-0 fill-none stroke-current stroke-[1.7] text-soft transition group-data-[active=1]:text-cyan"><path d="M3 17V7"/><path d="M9 17V11"/><path d="M15 17V9"/><path d="M21 17V5"/></svg>
+        <span class="min-w-0">
+          <span class="block text-[9.5px] font-bold tracking-[0.16em] text-soft/70">SIZE</span>
+          <span class="block text-[14px] font-semibold leading-tight text-ink">Stake Planner</span>
+          <span class="mt-0.5 block text-[12px] leading-snug text-soft">Dimensionner le risque.</span>
+        </span>
+      </button>
+      <button type="button" role="tab" id="tab-bankroll" aria-controls="panel-bankroll" aria-selected="false" data-tool="bankroll"
+        class="tool-tab group flex w-full items-start gap-3 rounded-xl border border-transparent px-3 py-3 text-left transition hover:bg-white/[0.04]">
+        <svg viewBox="0 0 24 24" aria-hidden="true" class="mt-0.5 h-[18px] w-[18px] shrink-0 fill-none stroke-current stroke-[1.7] text-soft transition group-data-[active=1]:text-cyan"><path d="M3 15c3-8 6 4 9-2s6 3 9-5"/><path d="M3 20h18"/></svg>
+        <span class="min-w-0">
+          <span class="block text-[9.5px] font-bold tracking-[0.16em] text-soft/70">SIMULATE</span>
+          <span class="block text-[14px] font-semibold leading-tight text-ink">Bankroll Lab</span>
+          <span class="mt-0.5 block text-[12px] leading-snug text-soft">Visualiser la variance.</span>
+        </span>
+      </button>
+      <button type="button" role="tab" id="tab-combo" aria-controls="panel-combo" aria-selected="false" data-tool="combo"
+        class="tool-tab group flex w-full items-start gap-3 rounded-xl border border-transparent px-3 py-3 text-left transition hover:bg-white/[0.04]">
+        <svg viewBox="0 0 24 24" aria-hidden="true" class="mt-0.5 h-[18px] w-[18px] shrink-0 fill-none stroke-current stroke-[1.7] text-soft transition group-data-[active=1]:text-cyan"><path d="M7 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z"/><path d="M17 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z"/><path d="M11 12h2"/></svg>
+        <span class="min-w-0">
+          <span class="block text-[9.5px] font-bold tracking-[0.16em] text-soft/70">COMBINE</span>
+          <span class="block text-[14px] font-semibold leading-tight text-ink">Combo Auditor</span>
+          <span class="mt-0.5 block text-[12px] leading-snug text-soft">Auditer un combiné.</span>
+        </span>
+      </button>
+      <button type="button" role="tab" id="tab-journal" aria-controls="panel-journal" aria-selected="false" data-tool="journal"
+        class="tool-tab group flex w-full items-start gap-3 rounded-xl border border-transparent px-3 py-3 text-left transition hover:bg-white/[0.04]">
+        <svg viewBox="0 0 24 24" aria-hidden="true" class="mt-0.5 h-[18px] w-[18px] shrink-0 fill-none stroke-current stroke-[1.7] text-soft transition group-data-[active=1]:text-cyan"><path d="M5 4h11l3 3v13H5z"/><path d="M9 10h6"/><path d="M9 14h6"/></svg>
+        <span class="min-w-0">
+          <span class="block text-[9.5px] font-bold tracking-[0.16em] text-soft/70">TRACK</span>
+          <span class="block text-[14px] font-semibold leading-tight text-ink">Journal</span>
+          <span class="mt-0.5 block text-[12px] leading-snug text-soft">Mesurer les décisions.</span>
+        </span>
+      </button>
+        <div id="sidebarFoot" class="mt-4 border-t border-hairline pt-4"></div>
+      </div>
+    </nav>
+
+    <div class="-mx-4 overflow-x-auto px-4 lg:hidden">
+      <div class="flex gap-2 pb-1" role="tablist" aria-label="Outils" aria-orientation="horizontal">
+      <button type="button" role="tab" id="mtab-scanner" aria-controls="panel-scanner" aria-selected="true" data-tool="scanner" data-active="1"
+        class="tool-tab shrink-0 rounded-full border border-hairline px-4 py-2 text-[13px] font-semibold text-soft transition data-[active=1]:border-cyan/40 data-[active=1]:bg-cyan/[0.08] data-[active=1]:text-cyan">Value Scanner</button>
+      <button type="button" role="tab" id="mtab-fair" aria-controls="panel-fair" aria-selected="false" data-tool="fair"
+        class="tool-tab shrink-0 rounded-full border border-hairline px-4 py-2 text-[13px] font-semibold text-soft transition data-[active=1]:border-cyan/40 data-[active=1]:bg-cyan/[0.08] data-[active=1]:text-cyan">Fair Odds</button>
+      <button type="button" role="tab" id="mtab-stake" aria-controls="panel-stake" aria-selected="false" data-tool="stake"
+        class="tool-tab shrink-0 rounded-full border border-hairline px-4 py-2 text-[13px] font-semibold text-soft transition data-[active=1]:border-cyan/40 data-[active=1]:bg-cyan/[0.08] data-[active=1]:text-cyan">Stake Planner</button>
+      <button type="button" role="tab" id="mtab-bankroll" aria-controls="panel-bankroll" aria-selected="false" data-tool="bankroll"
+        class="tool-tab shrink-0 rounded-full border border-hairline px-4 py-2 text-[13px] font-semibold text-soft transition data-[active=1]:border-cyan/40 data-[active=1]:bg-cyan/[0.08] data-[active=1]:text-cyan">Bankroll Lab</button>
+      <button type="button" role="tab" id="mtab-combo" aria-controls="panel-combo" aria-selected="false" data-tool="combo"
+        class="tool-tab shrink-0 rounded-full border border-hairline px-4 py-2 text-[13px] font-semibold text-soft transition data-[active=1]:border-cyan/40 data-[active=1]:bg-cyan/[0.08] data-[active=1]:text-cyan">Combo Auditor</button>
+      <button type="button" role="tab" id="mtab-journal" aria-controls="panel-journal" aria-selected="false" data-tool="journal"
+        class="tool-tab shrink-0 rounded-full border border-hairline px-4 py-2 text-[13px] font-semibold text-soft transition data-[active=1]:border-cyan/40 data-[active=1]:bg-cyan/[0.08] data-[active=1]:text-cyan">Journal</button>
+      </div>
     </div>
-    <div class="var-out" id="varOut"></div>
-    <p class="var-note" id="varNote"></p>
-  </div>
-  <div class="pro-veil"><div><b>Réservé aux abonnés</b><p>Découvrez la dispersion réelle derrière un taux de réussite moyen.</p><a href="/abonnement.html">Débloquer les outils</a></div></div>
-</section>
 
-<section class="grid three"><div class="card"><div class="card-head"><h2>01 · Bankroll</h2></div><div class="field"><label>Capital actuel</label><input id="bankroll" class="input" type="number" min="1" step="0.01" placeholder="1 250"></div><button class="primary" id="saveBankroll">Enregistrer</button><div class="message" id="bankrollMsg"></div></div>
-<div class="card"><div class="card-head"><h2>02 · Calculateur de mise</h2></div><div class="field"><label>Cote décimale</label><input id="odds" class="input" type="number" min="1.01" step="0.01" value="2.10"></div><div class="field"><label>Probabilité estimée</label><input id="probability" class="input" type="number" min="1" max="99" step="0.1" value="55"></div><div class="field"><label>Profil de risque</label><select id="fraction"><option value="0.25">Prudent · Kelly ¼</option><option value="0.5" selected>Modéré · Kelly ½</option><option value="1">Dynamique · Kelly plein</option></select></div><div class="result"><div><span class="eyebrow">Mise recommandée</span><strong id="stakeResult">—</strong></div><div><b id="stakePct">—</b><div class="metric-label">de la bankroll</div></div></div><div class="message" id="calcMsg"></div></div>
-<div class="card"><div class="card-head"><h2>03 · Nouvelle décision</h2><span class="pill pro">Pro</span></div><div class="field"><label>Match</label><input id="decisionMatch" class="input" placeholder="PSG — Marseille"></div><div class="field"><label>Marché</label><input id="decisionMarket" class="input" placeholder="Plus de 2,5 buts"></div><div class="field"><label>Mise</label><input id="decisionStake" class="input" type="number" min="1" step="0.01"></div><button class="primary" id="saveDecision">Ajouter au journal</button><div class="message" id="decisionMsg"></div></div></section>
-<section class="card" style="margin-top:14px"><div class="card-head"><h2>Journal des décisions</h2><span id="journalCount" class="pill">0 décision</span></div><div id="journal"></div></section>
-<section class="card" style="margin-top:14px"><div class="card-head"><h2>04 · Discipline & limites</h2></div><div class="metrics"><div class="metric"><b id="dailyExposure">5%</b><span>Exposition maximum/jour</span></div><div class="metric"><b id="stopLoss" style="color:var(--red)">-10%</b><span>Seuil stop-loss</span></div><div class="metric" style="grid-column:span 2"><p class="muted">Ces limites protègent le capital. Elles sont enregistrées dans vos préférences personnelles et ne modifient jamais les probabilités du moteur.</p></div></div></section></main>
-<nav class="bottom-nav"><a href="/es/"><span>⌂</span><b>Accueil</b></a><a class="active" href="/es/pro.html"><span>☆</span><b>Outils</b></a><a href="/blog.html"><span>▤</span><b>Blog</b></a><a href="/es/compte.html"><span>♙</span><b>Compte</b></a></nav>
-<script src="/app-client.js"></script><script src="/lib/tools-domain.js"></script><script src="/tools-page.js"></script><script src="/auth-header.js"></script><script>IasharkAuthHeader.mount('#authHeaderSlot')</script><script src="/bottom-navigation.js"></script></body></html>
+    <div class="min-w-0">
+    <section role="tabpanel" id="panel-scanner" aria-labelledby="tab-scanner" data-panel="scanner" hidden class="tool-panel"></section>
+    <section role="tabpanel" id="panel-fair" aria-labelledby="tab-fair" data-panel="fair" hidden class="tool-panel"></section>
+    <section role="tabpanel" id="panel-stake" aria-labelledby="tab-stake" data-panel="stake" hidden class="tool-panel"></section>
+    <section role="tabpanel" id="panel-bankroll" aria-labelledby="tab-bankroll" data-panel="bankroll" hidden class="tool-panel"></section>
+    <section role="tabpanel" id="panel-combo" aria-labelledby="tab-combo" data-panel="combo" hidden class="tool-panel"></section>
+    <section role="tabpanel" id="panel-journal" aria-labelledby="tab-journal" data-panel="journal" hidden class="tool-panel"></section>
+    </div>
+  </div>
+</main>
+
+<nav class="bottom-nav">
+  <a href="/es/"><span>&#8962;</span><b>Accueil</b></a>
+  <a class="active" href="/es/pro.html"><span>&#9734;</span><b>Outils</b></a>
+  <a href="/blog.html"><span>&#9636;</span><b>Blog</b></a>
+  <a href="/es/compte.html"><span>&#9817;</span><b>Compte</b></a>
+</nav>
+
+<script src="/app-client.js"></script>
+<script src="/lib/tools-domain.js"></script>
+<script src="/tools-page.js"></script>
+<script src="/auth-header.js"></script>
+<script>IasharkAuthHeader.mount('#authHeaderSlot')</script>
+<script src="/bottom-navigation.js"></script>
+</body>
+</html>

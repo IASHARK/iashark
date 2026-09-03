@@ -698,6 +698,14 @@ function renderProWall(raw){
 
 async function init(){
   try{
+    // MODE DEMO (exemple-analyse.html) : la page de demonstration montre une
+    // analyse REELLE et complete, sans compte et sans appel reseau. Aucune
+    // logique d'acces n'est contournee ailleurs - le drapeau n'existe que sur
+    // cette page marketing, et le match y est fige dans le HTML.
+    if(typeof IASHARK_DEMO!=='undefined'&&IASHARK_DEMO&&typeof PRELOADED_MATCH!=='undefined'){
+      render(PRELOADED_MATCH);
+      return;
+    }
     const id=typeof FIXED_MATCH_ID!=='undefined'?String(FIXED_MATCH_ID):new URLSearchParams(location.search).get('id');
     let raw=typeof PRELOADED_MATCH!=='undefined'?PRELOADED_MATCH:null;
     let list=null;

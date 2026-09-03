@@ -36,19 +36,9 @@ body::before{content:'';position:fixed;top:-300px;left:50%;transform:translateX(
 .logo span{color:var(--cyan);}
 .btn-login{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1px;padding:6px 14px;border-radius:8px;border:1px solid rgba(34,211,238,0.3);background:rgba(34,211,238,0.06);color:var(--cyan);cursor:pointer;transition:.2s;text-decoration:none;display:inline-flex;align-items:center;}
 .btn-login:hover{background:rgba(34,211,238,0.12);}
-.hero-predator{position:relative;padding:38px 20px 24px;max-width:720px;margin:0 auto;text-align:center;overflow:hidden;z-index:1;}
-.hero-predator::before{content:'';position:absolute;top:-100px;left:50%;transform:translateX(-50%);width:600px;height:400px;background:radial-gradient(ellipse,rgba(34,211,238,0.08) 0%,transparent 60%);pointer-events:none;}
-.hp-eyebrow{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:3px;color:var(--amber);margin-bottom:14px;display:flex;align-items:center;justify-content:center;gap:8px;position:relative;z-index:1;}
 .hp-eyebrow .line{width:24px;height:1px;background:var(--amber);opacity:0.4;}
-.hp-eyebrow .dot{width:5px;height:5px;background:var(--amber);border-radius:50%;animation:blink 1.2s infinite;}
-.hp-shark-big{position:relative;z-index:1;font-size:46px;margin-bottom:4px;display:inline-block;filter:drop-shadow(0 0 24px rgba(34,211,238,0.25));animation:float 3s ease-in-out infinite;}
-.hp-title{position:relative;z-index:1;font-family:'Bebas Neue',sans-serif;font-size:clamp(26px,6.5vw,40px);letter-spacing:1px;line-height:1.05;margin:6px auto 14px;max-width:480px;color:var(--text);}
-.hp-title b{color:var(--cyan);}
-.hp-sub{position:relative;z-index:1;font-size:13.5px;color:#94a3b8;line-height:1.6;margin:0 auto 20px;max-width:420px;}
-.hp-sub b{color:var(--text);font-weight:600;}
 @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
-.sport-selector{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;justify-content:center;position:relative;z-index:1;}
 .sport-btn{display:flex;align-items:center;gap:8px;padding:10px 20px;border-radius:12px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:.2s;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1px;}
 .sport-btn .sport-icon{font-size:18px;}
 .sport-btn.active-foot{background:rgba(34,211,238,0.08);border-color:var(--border-cyan);color:var(--cyan);}
@@ -59,14 +49,7 @@ body::before{content:'';position:fixed;top:-300px;left:50%;transform:translateX(
 .filter-btn{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:1px;padding:6px 14px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:.2s;white-space:nowrap;flex-shrink:0;}
 .filter-btn:hover,.filter-btn.active{background:rgba(34,211,238,0.1);border-color:var(--border-cyan);color:var(--cyan);}
 
-.hp-method-pill{display:inline-flex;align-items:center;gap:5px;margin:16px auto 22px;padding:8px 18px;border:1px solid var(--border-cyan);border-radius:20px;background:rgba(34,211,238,0.06);color:var(--cyan);font-family:'Space Mono',monospace;font-size:10px;letter-spacing:0.5px;text-decoration:none;position:relative;z-index:1;transition:.2s;}
-.hp-method-pill:hover{background:rgba(34,211,238,0.12);border-color:rgba(34,211,238,0.35);}
 
-.search-wrap{position:relative;margin-bottom:8px;}
-.search-wrap .prompt{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--amber);font-family:'Space Mono',monospace;font-size:12px;}
-.search-input{width:100%;background:var(--card);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:'Space Mono',monospace;font-size:12px;padding:10px 12px 10px 28px;}
-.search-input:focus{outline:none;border-color:var(--border-cyan);}
-.search-input::placeholder{color:var(--muted);}
 .champ-dropdown{position:relative;}
 .champ-dropdown-btn{width:100%;display:flex;justify-content:space-between;align-items:center;background:var(--card);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.5px;padding:10px 12px;cursor:pointer;}
 .champ-dropdown-btn:hover{border-color:rgba(255,255,255,0.15);}
@@ -110,8 +93,6 @@ body::before{content:'';position:fixed;top:-300px;left:50%;transform:translateX(
 .day-tab{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:2px;padding:8px 20px;border-radius:10px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:.2s;}
 .day-tab.active{background:rgba(34,211,238,0.1);border-color:var(--border-cyan);color:var(--cyan);}
 .day-tab .tab-count{font-size:7px;background:rgba(34,211,238,0.15);border-radius:10px;padding:1px 6px;margin-left:6px;}
-.sec-hdr{max-width:720px;margin:0 auto 10px;padding:0 20px;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:3px;color:var(--muted);display:flex;align-items:center;gap:10px;position:relative;z-index:1;}
-.sec-hdr::after{content:'';flex:1;height:1px;background:var(--border);}
 .cards-list{max-width:720px;margin:0 auto;padding:0 20px;display:flex;flex-direction:column;gap:10px;position:relative;z-index:1;}
 .mc{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;cursor:pointer;transition:border-color .2s,transform .2s,box-shadow .2s;animation:fadeup .4s ease forwards;opacity:0;}
 .mc:nth-child(1){animation-delay:.05s}.mc:nth-child(2){animation-delay:.10s}.mc:nth-child(3){animation-delay:.15s}.mc:nth-child(n+4){animation-delay:.20s}
@@ -124,13 +105,8 @@ body::before{content:'';position:fixed;top:-300px;left:50%;transform:translateX(
 .mc-top{padding:8px 14px;background:rgba(0,0,0,0.18);display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);}
 .mc-league{display:flex;align-items:center;gap:6px;font-family:'Space Mono',monospace;font-size:8px;color:var(--muted);letter-spacing:1px;}
 .mc-league-country{color:rgba(74,101,128,0.7);}
-.mc-badges{display:flex;gap:5px;align-items:center;flex-wrap:wrap;}
 .badge{font-family:'Space Mono',monospace;font-size:7px;letter-spacing:1px;padding:3px 8px;border-radius:20px;}
-.badge-value{background:rgba(34,211,238,0.08);border:1px solid var(--border-cyan);color:var(--cyan);}
-.badge-hot{background:linear-gradient(135deg,rgba(245,158,11,0.15),rgba(239,68,68,0.08));border:1px solid rgba(245,158,11,0.3);color:var(--amber);}
 .badge-free{background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.2);color:var(--green);}
-.mc-body{padding:14px 14px 10px;display:flex;align-items:center;gap:12px;}
-.mc-left{flex:1;min-width:0;}
 .mc-teams{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
 .mc-team{display:flex;flex-direction:column;align-items:center;gap:4px;min-width:0;}
 .mc-team-logo{width:32px;height:32px;border-radius:50%;object-fit:contain;background:rgba(255,255,255,0.03);flex-shrink:0;}
@@ -139,48 +115,16 @@ body::before{content:'';position:fixed;top:-300px;left:50%;transform:translateX(
 .mc-team.away .mc-team-name{color:rgba(226,232,240,0.6);}
 .mc-teams-sep{display:flex;flex-direction:column;align-items:center;gap:2px;flex-shrink:0;}
 .mc-vs{font-family:'Bebas Neue',sans-serif;font-size:13px;color:var(--muted);}
-.mc-time{font-family:'Space Mono',monospace;font-size:9px;color:var(--cyan);}
 .mc-pari{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
 .mc-pari-label{font-family:'Space Mono',monospace;font-size:7px;color:var(--amber);letter-spacing:1px;}
 .mc-pari-bet{font-size:13px;font-weight:600;color:var(--text);}
-.mc-pari-cote{font-family:'Bebas Neue',sans-serif;font-size:17px;color:var(--amber);}
-.mc-right{display:flex;flex-direction:column;align-items:center;gap:8px;flex-shrink:0;}
-.conf-circle{width:52px;height:52px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;border:2px solid rgba(255,255,255,0.08);}
 .conf-circle.high{border-color:rgba(245,158,11,0.4);background:rgba(245,158,11,0.06);}
 .conf-circle.med{border-color:rgba(34,211,238,0.35);background:rgba(34,211,238,0.05);}
-.conf-num{font-family:'Bebas Neue',sans-serif;font-size:18px;line-height:1;color:var(--amber);}
 .conf-circle.med .conf-num{color:var(--cyan);}
 .conf-circle.low .conf-num{color:var(--muted);}
-.conf-sub{font-family:'Space Mono',monospace;font-size:7px;color:var(--muted);margin-top:-2px;}
 .mc-cta{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:1px;padding:5px 10px;border-radius:8px;border:1px solid var(--border-cyan);background:rgba(34,211,238,0.08);color:var(--cyan);cursor:pointer;transition:.2s;white-space:nowrap;}
 .mc.locked{border-color:rgba(245,158,11,0.25);}
-.mc-pari-blurred{color:var(--amber);font-style:italic;}
 .mc-cta-locked{border-color:rgba(245,158,11,0.3);background:rgba(245,158,11,0.08);color:var(--amber);}
-.mc-probas{padding:8px 14px 12px;border-top:1px solid var(--border);}
-.prob-bar-wrap{height:5px;border-radius:5px;overflow:hidden;display:flex;margin-bottom:7px;}
-.prob-labels{display:flex;justify-content:space-between;}
-.prob-lbl-item{display:flex;flex-direction:column;align-items:center;gap:1px;}
-.prob-lbl-pct{font-family:'Bebas Neue',sans-serif;font-size:14px;line-height:1;}
-.prob-lbl-txt{font-family:'Space Mono',monospace;font-size:7px;color:var(--muted);letter-spacing:1px;max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.choc-card-wrap{max-width:720px;margin:0 auto 10px;padding:0 20px;}
-.choc-card{background:linear-gradient(135deg,var(--card2),var(--card));border:1px solid rgba(245,158,11,0.2);border-radius:16px;overflow:hidden;cursor:pointer;transition:.2s;position:relative;}
-.choc-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(245,158,11,0.4),transparent);}
-.choc-card:hover{border-color:rgba(245,158,11,0.4);transform:translateY(-2px);}
-.choc-inner{padding:18px 18px 14px;}
-.choc-league{font-family:'Space Mono',monospace;font-size:8px;color:var(--amber);letter-spacing:2px;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
-.choc-dot{width:5px;height:5px;background:var(--amber);border-radius:50%;animation:blink 1.2s infinite;}
-.choc-teams-row{display:grid;grid-template-columns:1fr 50px 1fr;align-items:center;gap:8px;margin-bottom:14px;}
-.choc-team{text-align:center;}
-.choc-logo{width:42px;height:42px;border-radius:50%;object-fit:contain;background:rgba(255,255,255,0.03);margin:0 auto 6px;display:block;}
-.choc-logo-ph{width:42px;height:42px;border-radius:50%;background:rgba(255,255,255,0.05);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:13px;color:var(--muted);margin:0 auto 6px;}
-.choc-name{font-family:'Bebas Neue',sans-serif;font-size:clamp(15px,4vw,20px);letter-spacing:1px;line-height:1;}
-.choc-sub-lbl{font-family:'Space Mono',monospace;font-size:7px;color:var(--muted);margin-top:3px;}
-.choc-vs{font-family:'Bebas Neue',sans-serif;font-size:14px;color:var(--muted);text-align:center;display:block;}
-.choc-hr{font-family:'Space Mono',monospace;font-size:10px;color:var(--cyan);text-align:center;margin-top:2px;}
-.choc-pari-strip{background:rgba(245,158,11,0.04);border-top:1px solid rgba(245,158,11,0.1);padding:12px 18px;display:flex;align-items:center;justify-content:space-between;}
-.choc-pari-lbl{font-family:'Space Mono',monospace;font-size:7px;color:rgba(245,158,11,0.6);letter-spacing:1px;margin-bottom:3px;}
-.choc-pari-bet{font-size:15px;font-weight:500;color:var(--text);}
-.choc-cote{font-family:'Bebas Neue',sans-serif;font-size:36px;color:var(--amber);line-height:1;}
 .loading-state{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 20px;gap:16px;}
 .loading-spinner{width:40px;height:40px;border:2px solid var(--border);border-top-color:var(--cyan);border-radius:50%;animation:spin 1s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -211,18 +155,12 @@ body::before{content:'';position:fixed;top:-300px;left:50%;transform:translateX(
   .mc-team-name{max-width:110px;}
 }
 
-.conf-pct-wrap{display:flex;flex-direction:column;align-items:center;gap:3px;flex-shrink:0;}
-.conf-pct-val{font-family:'Bebas Neue',sans-serif;font-size:22px;line-height:1;color:var(--amber);}
-.conf-pct-note{font-family:'Space Mono',monospace;font-size:8px;color:var(--muted);}
-.conf-ring{width:54px;height:54px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;border:2px solid;flex-shrink:0;}
 .conf-ring.tier-blue{border-color:rgba(34,211,238,0.5);background:rgba(34,211,238,0.08);}
 .conf-ring.tier-blue .conf-ring-val{color:var(--cyan);}
 .conf-ring.tier-orange{border-color:rgba(245,158,11,0.55);background:rgba(245,158,11,0.08);}
 .conf-ring.tier-orange .conf-ring-val{color:var(--amber);}
 .conf-ring.tier-red{border-color:rgba(239,68,68,0.55);background:rgba(239,68,68,0.08);}
 .conf-ring.tier-red .conf-ring-val{color:var(--red);}
-.conf-ring-val{font-family:'Bebas Neue',sans-serif;font-size:18px;line-height:1;}
-.conf-ring-sub{font-family:'Space Mono',monospace;font-size:7px;color:var(--muted);margin-top:-1px;}
 @media(min-width:1024px){
   .hero-predator,.filters,.day-tabs,.sec-hdr,.cards-list,.choc-card-wrap{max-width:960px;}
 }
@@ -232,21 +170,13 @@ body::before{content:'';position:fixed;top:-300px;left:50%;transform:translateX(
   .sport-btn{padding:8px 14px;font-size:8px;}
 }
 .lang-switch{position:relative;}
-.lang-switch-btn{display:flex;align-items:center;gap:5px;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1px;color:var(--muted);background:transparent;border:1px solid var(--border);padding:6px 9px;border-radius:8px;cursor:pointer;transition:.2s;}
-.lang-switch-btn:hover{border-color:rgba(34,211,238,0.3);color:var(--cyan);}
-.lang-switch-menu{display:none;position:absolute;top:calc(100% + 6px);right:0;background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:6px;min-width:170px;z-index:200;box-shadow:0 10px 30px rgba(0,0,0,0.45);}
 .lang-switch-menu.open{display:block;}
-.lang-switch-item{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;color:var(--text);text-decoration:none;font-size:13px;transition:.15s;}
-.lang-switch-item:hover{background:rgba(34,211,238,0.08);}
 .lang-switch-item.active{color:var(--cyan);}
-.lang-switch-code{font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);width:22px;flex-shrink:0;}
 .lang-switch-item.active .lang-switch-code{color:var(--cyan);}
-.lang-switch-name{flex:1;}
-.lang-switch-check{color:var(--cyan);font-family:'Space Mono',monospace;font-size:10px;}
 @media(max-width:480px){.lang-switch-menu{right:-8px;}}
 
 /* Accueil premium 2026 — la logique reste pilotée par data.json. */
-:root{--page:#060b12;--surface:#0a1420;--surface-2:#0d1926;--cyan:#20d5ef;--text:#f4f7fb;--soft:#91a0b3;--line:rgba(141,179,211,.14);}
+:root{--page:#060b12;--surface:#0a1420;--surface-2:#0d1926;--cyan:#20d5ef;--text:#f4f7fb;--soft:#a6b4c6;--line:rgba(141,179,211,.14);}
 body{font-family:'Inter',sans-serif;background:var(--page);padding-bottom:90px;}
 body::before{top:-180px;width:1080px;height:700px;background:radial-gradient(ellipse,rgba(18,123,171,.13),transparent 66%);}
 .hdr{height:72px;padding:0 max(28px,calc((100vw - 1280px)/2));background:rgba(6,11,18,.9);border-bottom:1px solid var(--line);}
@@ -265,17 +195,6 @@ body::before{top:-180px;width:1080px;height:700px;background:radial-gradient(ell
 .btn-login:hover{color:var(--cyan);background:transparent;}
 .btn-start{height:40px;padding:0 20px;border:1px solid rgba(32,213,239,.6);border-radius:8px;color:var(--cyan);text-decoration:none;display:inline-flex;align-items:center;font-size:12px;font-weight:700;transition:.2s;}
 .btn-start:hover{background:rgba(32,213,239,.08);}
-.hero-premium{max-width:1280px;margin:0 auto;padding:62px 28px 42px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:48px;align-items:center;position:relative;z-index:1;}
-.hero-copy{min-width:0;}
-.hero-eyebrow{font-family:'Space Mono',monospace;font-size:10px;font-weight:700;letter-spacing:2.2px;color:var(--cyan);margin-bottom:20px;}
-.hero-title{font-size:clamp(42px,4.2vw,64px);letter-spacing:-3.2px;line-height:1.04;max-width:590px;color:var(--text);margin-bottom:22px;font-weight:800;}
-.hero-sub{font-size:17px;line-height:1.72;color:#9aa8b9;max-width:570px;}
-.hero-actions{margin-top:26px;display:flex;align-items:center;}
-.hero-method{display:inline-flex;align-items:center;gap:10px;color:var(--cyan);font-size:14px;font-weight:700;text-decoration:none;padding:11px 0;border-bottom:1px solid rgba(32,213,239,.45);}
-.hero-trust{display:flex;align-items:center;gap:26px;margin-top:34px;color:#8190a3;font-size:11px;}
-.trust-item{display:flex;align-items:center;gap:8px;white-space:nowrap;}
-.trust-item svg{width:18px;height:18px;stroke:var(--cyan);}
-.hero-feature{min-width:0;min-height:370px;}
 .feature-card{display:block;width:100%;max-width:100%;height:100%;min-height:370px;border-radius:18px;border:1px solid rgba(32,213,239,.28);background:linear-gradient(145deg,rgba(14,29,44,.97),rgba(7,16,26,.98));box-shadow:0 24px 70px rgba(0,0,0,.38),inset 0 1px 0 rgba(255,255,255,.035);padding:24px;position:relative;overflow:hidden;cursor:pointer;transition:.25s;color:inherit;text-decoration:none;}
 .feature-card::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% -20%,rgba(32,213,239,.12),transparent 45%);pointer-events:none;}
 .feature-card:hover{transform:translateY(-3px);border-color:rgba(32,213,239,.48);}
@@ -298,12 +217,6 @@ body::before{top:-180px;width:1080px;height:700px;background:radial-gradient(ell
 .feature-evidence{display:flex;justify-content:center;gap:8px;margin-top:12px;}
 .evidence-chip{padding:7px 10px;border:1px solid var(--line);border-radius:8px;color:#a7b3c2;font-size:10px;white-space:nowrap;}
 .feature-loading{height:370px;border:1px solid var(--line);border-radius:18px;display:grid;place-items:center;color:#6d7d90;font-family:'Space Mono',monospace;font-size:10px;}
-.league-rail{border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:rgba(9,17,27,.72);position:relative;z-index:2;overflow:hidden;}
-.league-rail::before,.league-rail::after{content:'';position:absolute;top:0;bottom:0;width:90px;z-index:2;pointer-events:none;}
-.league-rail::before{left:0;background:linear-gradient(90deg,var(--page),transparent);}
-.league-rail::after{right:0;background:linear-gradient(270deg,var(--page),transparent);}
-.league-rail-inner{height:72px;width:max-content;display:flex;align-items:center;animation:league-marquee 28s linear infinite;will-change:transform;}
-.league-track{display:flex;align-items:center;flex:none;}
 .league-badge{height:72px;min-width:210px;padding:0 30px;display:flex;align-items:center;justify-content:center;gap:12px;color:#9eabba;font-size:11px;font-weight:700;text-transform:uppercase;position:relative;white-space:nowrap;}
 .league-badge::after{content:'';position:absolute;right:0;width:1px;height:26px;background:var(--line);}
 .league-badge img{width:40px;height:40px;box-sizing:border-box;padding:5px;object-fit:contain;border:1px solid rgba(255,255,255,.72);border-radius:9px;background:#f4f7fa;box-shadow:0 5px 14px rgba(0,0,0,.28);filter:none}
@@ -319,46 +232,30 @@ body::before{top:-180px;width:1080px;height:700px;background:radial-gradient(ell
 .day-tab.active{background:transparent;border-color:var(--cyan);color:var(--cyan);}
 .day-tab .tab-count{font-size:10px;background:transparent;padding:0;margin-left:6px;}
 .filters{margin:0;padding:0;max-width:none;z-index:30;}
-.search-wrap{display:none;}
 .champ-dropdown{width:180px;}
 .champ-dropdown-btn{height:38px;border-radius:8px;background:var(--surface);font-family:'Inter',sans-serif;font-size:10px;color:#c8d1dc;}
 .champ-dropdown-panel{left:auto;width:260px;}
 .cards-list{max-width:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-auto-rows:1fr;gap:14px;}
-.sec-hdr{display:none;}
 .mc{height:100%;min-height:250px;border-radius:14px;background:linear-gradient(145deg,var(--surface-2),var(--surface));border:1px solid var(--line);padding:18px;display:flex;flex-direction:column;overflow:hidden;color:inherit;text-decoration:none;}
 .mc:hover{border-color:rgba(32,213,239,.34);box-shadow:0 15px 36px rgba(0,0,0,.25);}
 .mc-top{padding:0 0 16px;background:transparent;border:0;}
 .mc-league{font-size:8px;color:#8191a5;}
 .league-icon{width:19px;height:19px;object-fit:contain;vertical-align:middle;margin-right:6px;}
-.mc-badges{display:none;}
-.mc-body{padding:0;display:flex;flex:1;flex-direction:column;align-items:stretch;gap:0;}
-.mc-left{display:flex;flex-direction:column;flex:1;}
 .mc-teams{display:grid;grid-template-columns:1fr 34px 1fr;gap:7px;margin-bottom:18px;}
 .mc-team-logo,.mc-team-logo-placeholder{width:39px;height:39px;margin-bottom:3px;background:transparent;border-radius:0;}
 .mc-team-name{font-family:'Inter',sans-serif;font-size:11px;font-weight:700;letter-spacing:0;max-width:115px;}
 .mc-team.away .mc-team-name{color:#dce3eb;}
-.mc-time{font-size:8px;}
 .mc-pari{display:block;border-top:1px solid var(--line);padding-top:15px;}
 .mc-pari-label{display:block;color:var(--cyan);font-size:8px;margin-bottom:7px;}
 .mc-pari-bet{display:block;font-size:18px;line-height:1.25;font-weight:750;min-height:45px;}
-.mc-pari-cote,.mc-probas{display:none!important;}
 .mc-insight{font-size:10px;line-height:1.45;color:#7f8fa2;margin-top:8px;min-height:30px;}
-.mc-right{margin-top:16px;padding-top:13px;border-top:1px solid var(--line);display:flex;flex-direction:row;align-items:center;justify-content:space-between;}
-.conf-ring{width:auto;height:auto;border:0!important;background:transparent!important;display:flex;flex-direction:row;gap:6px;}
-.conf-label{font-family:'Space Mono',monospace;font-size:7px;color:#708197;letter-spacing:.8px;}
-.conf-ring-val{font-family:'Inter',sans-serif!important;font-size:16px!important;color:var(--cyan)!important;font-weight:750;}
-.conf-ring-val::after{content:'%';}
-.conf-ring-sub{display:none;}
 .mc-cta{padding:0;border:0;background:transparent;font-family:'Inter',sans-serif;font-size:10px;font-weight:700;}
 .mc.locked{border-color:rgba(245,158,11,.24);}
 .mc.locked .mc-pari{flex:1;min-height:122px;margin:0 -6px;padding:28px 12px 24px;border:1px solid rgba(245,158,11,.16);border-radius:11px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;background:rgba(4,10,17,.22);}
-.mc-lock-icon{width:24px;height:24px;margin-bottom:12px;color:var(--amber);filter:drop-shadow(0 0 7px rgba(245,158,11,.18));}
-.mc-lock-icon svg{width:100%;height:100%;display:block;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;}
 .mc.locked .mc-pari-bet{min-height:0;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;color:var(--text);font-style:normal;}
 .mc.locked .mc-right{margin-top:12px;}
 .mc.locked .mc-cta{color:var(--amber);}
 .mc.locked .mc-cta:hover{text-decoration:underline;text-underline-offset:3px;}
-.choc-card-wrap{display:none;}
 .empty-state{grid-column:1/-1;}
 .nav-bottom{display:flex;}
 .responsible-footer{max-width:1280px!important;}
@@ -383,67 +280,27 @@ body::before{top:-180px;width:1080px;height:700px;background:radial-gradient(ell
    TUNNEL DE VENTE — sections ajoutees sous la liste des matchs.
    Aucune couleur nouvelle : --cyan, --surface, --line, --soft uniquement.
    ======================================================================= */
-.hero-offer{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin:26px 0 18px;}
-.hero-offer b{font-size:34px;font-weight:800;letter-spacing:-1px;color:var(--text);}
-.hero-offer span{font-size:15px;color:var(--soft);}
-.hero-offer i{flex-basis:100%;font-style:normal;font-size:13px;color:var(--soft);opacity:.85;}
 .hero-cta{display:inline-flex;align-items:center;justify-content:center;padding:15px 26px;border-radius:12px;
   background:var(--cyan);color:#04121a;font-size:13px;font-weight:800;letter-spacing:.06em;text-decoration:none;
   box-shadow:0 14px 34px -16px rgba(32,213,239,.75);transition:transform .18s,filter .18s;}
 .hero-cta:hover{filter:brightness(1.07);}
 .hero-cta:active{transform:translateY(1px);}
-.hero-actions{display:flex;align-items:center;gap:20px;flex-wrap:wrap;}
 
-.sell{position:relative;z-index:1;border-top:1px solid var(--line);}
-.sell-wrap{max-width:1280px;margin:0 auto;padding:66px 28px;}
-.sell-lbl{font-size:11px;font-weight:700;letter-spacing:.18em;color:var(--cyan);opacity:.8;margin-bottom:14px;}
-.sell-title{font-size:clamp(26px,3.4vw,40px);line-height:1.15;letter-spacing:-1px;font-weight:800;color:var(--text);margin-bottom:36px;}
-.sell-title b{color:var(--cyan);font-weight:800;}
 
-.model-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;}
-.model-card{padding:22px 20px;border:1px solid var(--line);border-radius:14px;background:var(--surface);}
-.model-tag{font-size:10px;font-weight:700;letter-spacing:.16em;color:var(--cyan);opacity:.75;}
-.model-name{margin:9px 0 8px;font-size:19px;font-weight:700;color:var(--text);}
-.model-desc{font-size:13.5px;line-height:1.6;color:var(--soft);}
 
-.step-list{list-style:none;display:grid;grid-template-columns:repeat(3,1fr);gap:22px;padding:0;margin:0;}
-.step{display:flex;gap:16px;align-items:flex-start;}
-.step-num{flex:none;width:42px;height:42px;display:grid;place-items:center;border-radius:12px;
   border:1px solid rgba(32,213,239,.28);background:rgba(32,213,239,.08);
   color:var(--cyan);font-size:14px;font-weight:800;letter-spacing:.04em;}
-.step-title{font-size:16px;font-weight:700;color:var(--text);margin-bottom:6px;}
-.step-desc{font-size:13.5px;line-height:1.65;color:var(--soft);}
 
-.plan-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;max-width:840px;}
 .plan{position:relative;padding:28px 26px;border:1px solid var(--line);border-radius:16px;background:var(--surface);
   display:flex;flex-direction:column;}
 /* Le plan payant est la seule surface mise en avant : une bordure cyan et
    une lueur, pas une couleur de fond differente qui casserait le theme. */
-.plan-hi{border-color:rgba(32,213,239,.34);
   background:linear-gradient(165deg,rgba(32,213,239,.07),var(--surface) 58%);
   box-shadow:0 26px 60px -34px rgba(32,213,239,.55);}
-.plan-badge{position:absolute;top:-11px;left:26px;padding:4px 11px;border-radius:999px;
   background:var(--cyan);color:#04121a;font-size:10px;font-weight:800;letter-spacing:.12em;}
-.plan-name{font-size:11px;font-weight:700;letter-spacing:.18em;color:var(--soft);}
-.plan-price{margin:12px 0 4px;display:flex;align-items:baseline;gap:6px;}
-.plan-price b{font-size:38px;font-weight:800;letter-spacing:-1.5px;color:var(--text);}
-.plan-price span{font-size:14px;color:var(--soft);}
-.plan-note{font-size:12.5px;color:var(--soft);opacity:.85;margin-bottom:16px;}
-.plan-feats{list-style:none;padding:0;margin:16px 0 24px;display:flex;flex-direction:column;gap:11px;flex:1;}
-.plan-feats li{position:relative;padding-left:26px;font-size:13.5px;line-height:1.55;color:var(--soft);}
-.plan-feats li::before{content:'';position:absolute;left:0;top:6px;width:15px;height:8px;
   border-left:2px solid var(--cyan);border-bottom:2px solid var(--cyan);transform:rotate(-45deg);opacity:.85;}
-.plan-cta{display:block;text-align:center;padding:14px 20px;border-radius:12px;text-decoration:none;
   font-size:12.5px;font-weight:800;letter-spacing:.06em;transition:filter .18s,background .18s;}
-.plan-cta-free{border:1px solid var(--line);color:var(--text);background:rgba(255,255,255,.03);}
-.plan-cta-free:hover{background:rgba(255,255,255,.06);}
-.plan-cta-pro{background:var(--cyan);color:#04121a;box-shadow:0 14px 34px -18px rgba(32,213,239,.8);}
-.plan-cta-pro:hover{filter:brightness(1.07);}
 
-.sell-final .sell-wrap{text-align:center;padding:74px 28px 84px;}
-.final-title{font-size:clamp(26px,3.6vw,42px);line-height:1.15;letter-spacing:-1px;font-weight:800;color:var(--text);}
-.final-title b{color:var(--cyan);}
-.final-sub{margin:12px 0 28px;font-size:15px;color:var(--soft);}
 
 @media(max-width:900px){
   .model-grid{grid-template-columns:repeat(2,1fr);}
@@ -466,12 +323,9 @@ body::before{top:-180px;width:1080px;height:700px;background:radial-gradient(ell
    le meme skill et corrige ici : "couleurs ternes, basse energie".
    Palette inchangee : cyan #20d5ef sur fond sombre.
    ========================================================================= */
-.hero-badge{display:inline-block;margin-bottom:18px;line-height:1.45;
   padding:7px 14px 7px 11px;border-radius:999px;
   border:1px solid rgba(32,213,239,.24);background:rgba(32,213,239,.07);
   font-size:12.5px;color:var(--soft);letter-spacing:.01em;}
-.hero-badge b{color:var(--text);font-weight:600;}
-.hero-dot{display:inline-block;vertical-align:middle;margin-right:9px;position:relative;top:-1px;
   width:7px;height:7px;border-radius:50%;background:var(--cyan);
   box-shadow:0 0 0 0 rgba(32,213,239,.7);animation:heroPulse 2.4s ease-out infinite;}
 @keyframes heroPulse{0%{box-shadow:0 0 0 0 rgba(32,213,239,.55)}
@@ -480,24 +334,13 @@ body::before{top:-180px;width:1080px;height:700px;background:radial-gradient(ell
 
 /* Le titre devient l'element dominant de la page, et la seconde ligne
    porte l'accent : c'est la promesse, elle doit se detacher. */
-.hero-title{font-size:clamp(36px,4.4vw,56px);line-height:1.06;letter-spacing:-1.8px;font-weight:800;}
-.hero-title br + *,.hero-title{color:var(--text);}
-.hero-sub{font-size:16.5px;line-height:1.65;max-width:52ch;}
 
 /* Chiffres verifiables, jamais un taux de reussite : 13 championnats et
    4 modeles sont lisibles dans config/leagues.json et lib/models.js. */
-.hero-stats{display:flex;gap:0;margin:26px 0 4px;padding:0;border-top:1px solid var(--line);}
-.hero-stats>div{flex:1 1 0;min-width:0;padding:16px 18px 0 0;}
-.hero-stats>div+div{padding-left:18px;border-left:1px solid var(--line);}
-.hero-stats dt{font-size:12px;line-height:1.35;color:var(--soft);opacity:.9;order:2;}
-.hero-stats dd{margin:0 0 5px;font-size:30px;font-weight:800;letter-spacing:-1.2px;
   color:var(--cyan);font-variant-numeric:tabular-nums;order:1;}
-.hero-stats>div{display:flex;flex-direction:column;}
 
 /* La carte du match gratuit est notre demo produit : elle doit avoir le
    poids d'un ecran d'application, pas d'une vignette. */
-.hero-feature{position:relative;}
-.hero-feature::before{content:'';position:absolute;inset:-14% 0 -10% 0;z-index:0;
   background:radial-gradient(60% 55% at 60% 40%,rgba(32,213,239,.14),transparent 70%);
   filter:blur(14px);pointer-events:none;}
 .feature-card{position:relative;z-index:1;
@@ -514,6 +357,114 @@ body::before{top:-180px;width:1080px;height:700px;background:radial-gradient(ell
   .hero-badge{font-size:11.5px;padding:6px 12px 6px 10px;}
   .hero-stats{margin:20px 0 2px;}
 }
+
+/* =======================================================================
+   CARTES "DECISIONS DU JOUR" — v2 CRO
+   Trois etats : gratuite (tout visible), verrouillee (partiellement
+   revelee), sans signal. Le cyan reste reserve au signal et aux actions.
+   ======================================================================= */
+.cards-list{display:grid;grid-template-columns:1fr;gap:14px;}
+@media(min-width:700px){.cards-list{grid-template-columns:repeat(2,1fr);}}
+@media(min-width:1040px){.cards-list{grid-template-columns:repeat(3,1fr);}}
+
+.mc{position:relative;display:flex;flex-direction:column;gap:14px;padding:20px;
+  border:1px solid var(--line);border-radius:16px;background:rgba(10,20,32,.6);
+  text-decoration:none;color:inherit;overflow:hidden;
+  transition:border-color .22s ease,background .22s ease,transform .22s ease;}
+.mc:hover{border-color:rgba(32,213,239,.28);background:rgba(13,25,38,.8);}
+.mc:focus-visible{outline:2px solid var(--cyan);outline-offset:3px;}
+/* La carte gratuite porte un peu plus de poids : c'est la demonstration. */
+.mc-free{border-color:rgba(32,213,239,.3);background:linear-gradient(168deg,rgba(32,213,239,.06),rgba(10,20,32,.7) 60%);}
+
+/* Spotlight tres sobre : une seule lueur douce qui suit le curseur, pas un
+   effet permanent. Desactive si l'utilisateur reduit les animations. */
+.mc::before,.spot::before{content:'';position:absolute;inset:0;pointer-events:none;opacity:0;
+  transition:opacity .25s ease;border-radius:inherit;
+  background:radial-gradient(240px circle at var(--mx,50%) var(--my,50%),rgba(32,213,239,.09),transparent 62%);}
+.mc:hover::before,.spot:hover::before{opacity:1;}
+@media(prefers-reduced-motion:reduce){.mc::before,.spot::before{display:none;}}
+.spot{position:relative;overflow:hidden;}
+
+.mc-top{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.mc-league{display:flex;align-items:center;gap:7px;min-width:0;font-size:12px;font-weight:600;color:var(--soft);}
+.mc-league img{width:16px;height:16px;object-fit:contain;flex:none;}
+.mc-league-country{color:var(--soft);opacity:.7;font-weight:400;}
+.mc-badge-free{flex:none;border-radius:999px;background:var(--cyan);color:var(--page);
+  padding:3px 9px;font-size:9.5px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;}
+
+.mc-teams{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px;}
+.mc-team{display:flex;flex-direction:column;align-items:center;gap:8px;min-width:0;text-align:center;}
+.mc-team-logo,.mc-team-logo-placeholder{width:38px;height:38px;object-fit:contain;}
+.mc-team-logo-placeholder{display:grid;place-items:center;border-radius:50%;
+  background:rgba(255,255,255,.05);font-size:12px;font-weight:700;color:var(--soft);}
+.mc-team-name{font-size:13px;font-weight:600;line-height:1.25;color:var(--text);
+  overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;}
+.mc-vs{font-size:10.5px;font-weight:700;letter-spacing:.12em;color:var(--soft);opacity:.6;}
+
+.mc-pari{border-top:1px solid var(--line);padding-top:13px;}
+.mc-pari-label{display:block;margin-bottom:5px;font-size:9.5px;font-weight:800;
+  letter-spacing:.14em;text-transform:uppercase;color:var(--soft);opacity:.75;}
+.mc-pari-bet{display:block;font-size:17px;font-weight:700;line-height:1.2;letter-spacing:-.01em;color:var(--text);}
+/* Le marche reste PRESENT dans la carte mais illisible : le visiteur voit
+   qu'un signal existe, sans pouvoir le lire. Plus honnete et plus desirable
+   qu'un bloc "reserve aux membres" qui ne montre rien. */
+.mc-pari-hidden{filter:blur(7px);opacity:.75;user-select:none;}
+.mc-pari-none .mc-pari-bet{font-size:13.5px;font-weight:500;color:var(--soft);}
+
+.mc-conf{display:flex;align-items:baseline;gap:7px;}
+.mc-conf-lbl{font-size:9.5px;font-weight:800;letter-spacing:.14em;color:var(--soft);opacity:.75;}
+.mc-conf-val{font-size:22px;font-weight:800;letter-spacing:-.03em;color:var(--cyan);font-variant-numeric:tabular-nums;}
+.mc-conf-max{font-size:12px;color:var(--soft);opacity:.7;}
+.mc-insight{margin:0;font-size:13px;line-height:1.55;color:var(--soft);}
+
+.mc-foot{margin-top:auto;padding-top:4px;}
+.mc-cta{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:700;color:var(--cyan);}
+.mc-cta::after{content:'→';transition:transform .2s ease;}
+.mc:hover .mc-cta::after{transform:translateX(3px);}
+.mc-cta-locked{color:var(--text);}
+
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;
+  clip:rect(0 0 0 0);white-space:nowrap;border:0;}
+
+/* Lignes de convergence des modeles : un trace unique, discret, joue une
+   fois a l'apparition. Aucune boucle permanente. */
+.conv-line{stroke-dasharray:220;stroke-dashoffset:220;animation:convDraw 1.1s ease-out forwards;}
+.conv-line:nth-child(2){animation-delay:.08s}.conv-line:nth-child(3){animation-delay:.16s}
+.conv-line:nth-child(4){animation-delay:.24s}
+@keyframes convDraw{to{stroke-dashoffset:0}}
+@media(prefers-reduced-motion:reduce){.conv-line{animation:none;stroke-dashoffset:0;}}
+
+.hero-preview{transition:transform .35s cubic-bezier(.16,1,.3,1);}
+@media(hover:hover) and (prefers-reduced-motion:no-preference){
+  .hero-preview:hover{transform:translateY(-3px);}
+}
+
+/* Filet global : tout element interactif de la landing montre un anneau de
+   focus au clavier. Ne s'applique pas au clic souris (focus-visible). */
+main a:focus-visible,main button:focus-visible,main summary:focus-visible,
+.hdr a:focus-visible,.nav-bottom a:focus-visible{
+  outline:2px solid var(--cyan);outline-offset:3px;border-radius:10px;
+}
+
+/* Classes injectees a l'execution par lang-switcher.js, auth-header.js,
+   site-prefs.js et bottom-navigation.js : elles n'apparaissent jamais dans
+   ce fichier, il ne faut donc pas les considerer comme du CSS mort. */
+.btn-login{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1px;padding:6px 14px;border-radius:8px;border:1px solid rgba(34,211,238,0.3);background:rgba(34,211,238,0.06);color:var(--cyan);cursor:pointer;transition:.2s;text-decoration:none;display:inline-flex;align-items:center;}
+.btn-login:hover{background:rgba(34,211,238,0.12);}
+.lang-switch{position:relative;}
+.lang-switch-btn{display:flex;align-items:center;gap:5px;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1px;color:var(--muted);background:transparent;border:1px solid var(--border);padding:6px 9px;border-radius:8px;cursor:pointer;transition:.2s;}
+.lang-switch-btn:hover{border-color:rgba(34,211,238,0.3);color:var(--cyan);}
+.lang-switch-menu{display:none;position:absolute;top:calc(100% + 6px);right:0;background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:6px;min-width:170px;z-index:200;box-shadow:0 10px 30px rgba(0,0,0,0.45);}
+.lang-switch-menu.open{display:block;}
+.lang-switch-item{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;color:var(--text);text-decoration:none;font-size:13px;transition:.15s;}
+.lang-switch-item:hover{background:rgba(34,211,238,0.08);}
+.lang-switch-item.active{color:var(--cyan);}
+.lang-switch-code{font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);width:22px;flex-shrink:0;}
+.lang-switch-item.active .lang-switch-code{color:var(--cyan);}
+.lang-switch-name{flex:1;}
+.lang-switch-check{color:var(--cyan);font-family:'Space Mono',monospace;font-size:10px;}
+.btn-login{height:38px;padding:0 16px;border:0;background:transparent;font-family:'Inter',sans-serif;font-size:12px;font-weight:600;color:#d7dee8;}
+.btn-login:hover{color:var(--cyan);background:transparent;}
 </style>
 <link rel="stylesheet" href="/assets/bottom-navigation.css"></head>
 <body>
@@ -533,62 +484,33 @@ body::before{top:-180px;width:1080px;height:700px;background:radial-gradient(ell
 </header>
 
 <main>
-<section class="relative mx-auto grid max-w-7xl grid-cols-1 items-start gap-10 px-5 pb-12 pt-12 sm:px-7 lg:grid-cols-12 lg:gap-10 lg:pt-20">
-
-  <div class="flex flex-col justify-center gap-7 lg:col-span-7">
-
+<section class="mx-auto w-full max-w-[1200px] px-5 sm:px-8 grid grid-cols-1 items-center gap-12 pb-14 pt-12 lg:min-h-[86vh] lg:grid-cols-12 lg:gap-12 lg:pb-16 lg:pt-16">
+  <div class="flex flex-col justify-center gap-6 lg:col-span-6">
     <div class="animate-fade-in d1">
-      <span class="inline-flex items-center gap-2.5 rounded-full border border-cyan/25 bg-cyan/[0.07] px-3.5 py-1.5 backdrop-blur-md">
-        <span class="relative flex h-2 w-2 shrink-0">
-          <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-cyan opacity-70"></span>
-          <span class="relative inline-flex h-2 w-2 rounded-full bg-cyan"></span>
+      <span class="inline-flex items-center gap-2.5 rounded-full border border-hairline bg-white/[0.03] px-3.5 py-1.5">
+        <span class="relative flex h-1.5 w-1.5 shrink-0">
+          <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-cyan opacity-60"></span>
+          <span class="relative inline-flex h-1.5 w-1.5 rounded-full bg-cyan"></span>
         </span>
-        <span class="text-[12.5px] leading-snug text-soft"><b class="font-semibold text-ink">13 Wettbewerbe</b> · Analyse vor dem Anpfiff veröffentlicht</span>
+        <span class="text-[12px] leading-snug text-soft"><b class="font-semibold text-ink">13 Wettbewerbe</b> · Analyse vor dem Anpfiff veröffentlicht</span>
       </span>
     </div>
-
-    <h1 class="animate-fade-in d2 text-[40px] font-extrabold leading-[1.04] tracking-[-0.035em] text-ink sm:text-[54px] lg:text-[62px]">
-      Verstehe das Spiel.<br><span class="bg-gradient-to-br from-ink via-ink to-cyan bg-clip-text text-transparent">Finde den richtigen Markt.</span>
+    <h1 class="animate-fade-in d2 text-[clamp(38px,5vw,60px)] font-extrabold leading-[1.03] tracking-[-0.04em] text-ink">
+      Verstehe das Spiel.<br>Finde den richtigen Markt<span class="text-cyan">.</span>
     </h1>
-
-    <p class="animate-fade-in d3 max-w-xl text-[16.5px] leading-relaxed text-soft">IASHARK verwandelt Millionen von Sportdaten in eine klare, erklärte und messbare Entscheidung.</p>
-
-    <div class="animate-fade-in d4 flex flex-col gap-4 sm:flex-row sm:items-center">
-      <a href="#decisions" class="hero-cta group inline-flex items-center justify-center gap-2.5 rounded-full bg-cyan px-8 py-4 text-[13px] font-extrabold tracking-[0.06em] text-page shadow-[0_18px_45px_-18px_rgba(32,213,239,.85)] transition hover:brightness-110 active:scale-[.985]">HEUTIGES GRATISSPIEL ANSEHEN<span aria-hidden="true" class="transition-transform group-hover:translate-x-1">→</span></a>
-      <a href="/a-propos.html" class="inline-flex items-center justify-center gap-2 rounded-full border border-hairline bg-white/[0.03] px-7 py-4 text-[13px] font-semibold text-ink backdrop-blur-sm transition hover:border-cyan/35 hover:bg-cyan/[0.06]">Methode entdecken <span aria-hidden="true">→</span></a>
+    <p class="animate-fade-in d3 max-w-xl text-[17px] leading-relaxed text-soft">IASHARK verwandelt Millionen von Sportdaten in eine klare, erklärte und messbare Entscheidung.</p>
+    <div class="animate-fade-in d4 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
+      <a href="#decisions" class="hero-cta group inline-flex items-center justify-center gap-2.5 rounded-xl bg-cyan px-7 py-4 text-[14px] font-extrabold tracking-[0.02em] text-page shadow-[0_16px_40px_-16px_rgba(32,213,239,.8)] transition hover:brightness-110 active:scale-[.985]">Die heutige Gratis-Analyse ansehen<span aria-hidden="true" class="transition-transform group-hover:translate-x-1">→</span></a>
+      <a href="/exemple-analyse.html" class="inline-flex items-center justify-center gap-2 rounded-xl border border-hairline px-6 py-4 text-[14px] font-semibold text-ink transition hover:border-cyan/40 hover:bg-white/[0.04]">Beispielanalyse ansehen</a>
     </div>
-
-    <div data-vente class="animate-fade-in d5 flex flex-wrap items-baseline gap-x-3 gap-y-1">
-      <b class="text-[32px] font-extrabold leading-none tracking-[-0.04em] text-ink">19,95 €</b>
-      <span class="text-[15px] text-soft">/Monat</span>
-      <i class="w-full not-italic text-[13px] text-soft/80">Keine Bindung · Kündigung mit einem Klick</i>
-    </div>
+    <p data-vente class="animate-fade-in d5 text-[13px] text-soft/75">Gratis testen · Pro für 19,95 € im Monat, ohne Bindung</p>
   </div>
 
-  <div class="relative animate-fade-in d3 lg:col-span-5 lg:mt-2">
-    <div class="pointer-events-none absolute -inset-y-10 inset-x-0 z-0 rounded-[40px] bg-[radial-gradient(60%_55%_at_60%_40%,rgba(32,213,239,.16),transparent_70%)] blur-2xl"></div>
-    <div class="relative z-10 rounded-3xl border border-white/10 bg-white/[0.045] p-2.5 shadow-2xl backdrop-blur-xl">
-      <div id="heroFeature" class="min-h-[220px]">
-        <div class="feature-loading grid min-h-[220px] place-items-center text-[11px] tracking-[0.18em] text-soft">TOPSPIEL WIRD AUSGEWÄHLT…</div>
-      </div>
-      <dl class="mt-2.5 grid grid-cols-3 divide-x divide-white/10 rounded-2xl border border-white/10 bg-white/[0.03] py-4">
-        <div class="flex flex-col items-center gap-1 px-2 text-center">
-          <dd class="m-0 text-[26px] font-extrabold leading-none tracking-[-0.04em] text-cyan tabular-nums">13</dd>
-          <dt class="text-[10.5px] leading-tight text-soft">Abgedeckte Wettbewerbe</dt>
-        </div>
-        <div class="flex flex-col items-center gap-1 px-2 text-center">
-          <dd class="m-0 text-[26px] font-extrabold leading-none tracking-[-0.04em] text-cyan tabular-nums">4</dd>
-          <dt class="text-[10.5px] leading-tight text-soft">Statistische Modelle</dt>
-        </div>
-        <div class="flex flex-col items-center gap-1 px-2 text-center">
-          <dd class="m-0 text-[26px] font-extrabold leading-none tracking-[-0.04em] text-cyan tabular-nums">1</dd>
-          <dt class="text-[10.5px] leading-tight text-soft">Gratis-Analyse pro Tag</dt>
-        </div>
-      </dl>
-      <div class="mt-2.5 flex flex-wrap gap-2 px-1 pb-1">
-        <span class="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-[10px] font-semibold tracking-[0.1em] text-soft">Aktuelle Daten</span>
-        <span class="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-[10px] font-semibold tracking-[0.1em] text-soft">Multifaktor-Analyse</span>
-        <span class="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1 text-[10px] font-semibold tracking-[0.1em] text-soft">Erklärte Entscheidung</span>
+  <div class="relative animate-fade-in d3 lg:col-span-6">
+    <div aria-hidden="true" class="pointer-events-none absolute -inset-y-8 inset-x-0 z-0 rounded-[36px] bg-[radial-gradient(58%_52%_at_62%_38%,rgba(32,213,239,.13),transparent_72%)] blur-2xl"></div>
+    <div class="hero-preview relative z-10 rounded-2xl border border-white/10 bg-surface/70 p-2.5 shadow-[0_40px_90px_-45px_rgba(0,0,0,.95)]">
+      <div id="heroFeature" class="min-h-[230px]">
+        <div class="feature-loading grid min-h-[230px] place-items-center text-[11px] tracking-[0.18em] text-soft">TOPSPIEL WIRD AUSGEWÄHLT…</div>
       </div>
     </div>
   </div>
@@ -604,24 +526,9 @@ body::before{top:-180px;width:1080px;height:700px;background:radial-gradient(ell
   </div>
 </section>
 
-<section id="analyse" class="relative border-t border-hairline">
-  <div class="mx-auto max-w-7xl px-5 py-16 sm:px-7 sm:py-20">
-    <div class="mb-3.5 text-[11px] font-bold tracking-[0.18em] text-cyan/80">WAS DU BEKOMMST</div>
-    <h2 class="mb-9 max-w-3xl text-[clamp(26px,3.4vw,40px)] font-extrabold leading-[1.14] tracking-[-0.035em] text-ink">Eine Analyse, <b class="font-extrabold text-cyan">kein Tipp</b> ohne jede Erklärung.</h2>
-    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-      <div class=" group rounded-2xl border border-white/10 bg-white/[0.035] p-6 backdrop-blur-xl transition hover:border-cyan/30 hover:bg-white/[0.06]"><div class="mb-3 inline-grid h-9 w-9 place-items-center rounded-lg border border-cyan/25 bg-cyan/[0.08] text-[12px] font-extrabold text-cyan">01</div><h3 class="mb-2 text-[17px] font-bold text-ink">Das Signal</h3><p class="text-[13.5px] leading-relaxed text-soft">Der gewählte Markt, seine Modellwahrscheinlichkeit, die des Marktes und die Abweichung — auch wenn sie gegen dich spricht.</p></div>
-      <div class=" group rounded-2xl border border-white/10 bg-white/[0.035] p-6 backdrop-blur-xl transition hover:border-cyan/30 hover:bg-white/[0.06]"><div class="mb-3 inline-grid h-9 w-9 place-items-center rounded-lg border border-cyan/25 bg-cyan/[0.08] text-[12px] font-extrabold text-cyan">02</div><h3 class="mb-2 text-[17px] font-bold text-ink">Unsere Einschätzung des Spiels</h3><p class="text-[13.5px] leading-relaxed text-soft">Was das Modell gesehen hat, in klaren Worten, mit dem ausschlaggebenden Faktor.</p></div>
-      <div class=" group rounded-2xl border border-white/10 bg-white/[0.035] p-6 backdrop-blur-xl transition hover:border-cyan/30 hover:bg-white/[0.06]"><div class="mb-3 inline-grid h-9 w-9 place-items-center rounded-lg border border-cyan/25 bg-cyan/[0.08] text-[12px] font-extrabold text-cyan">03</div><h3 class="mb-2 text-[17px] font-bold text-ink">Was das Modell sagt</h3><p class="text-[13.5px] leading-relaxed text-soft">Erwartete Tore pro Team und die wahrscheinlichsten Ergebnisse, klar dargestellt.</p></div>
-      <div class=" group rounded-2xl border border-white/10 bg-white/[0.035] p-6 backdrop-blur-xl transition hover:border-cyan/30 hover:bg-white/[0.06]"><div class="mb-3 inline-grid h-9 w-9 place-items-center rounded-lg border border-cyan/25 bg-cyan/[0.08] text-[12px] font-extrabold text-cyan">04</div><h3 class="mb-2 text-[17px] font-bold text-ink">Vergleich beider Teams</h3><p class="text-[13.5px] leading-relaxed text-soft">Schüsse, Schüsse aufs Tor, Ballbesitz, Ecken — mit hervorgehobenen Zeilen, die den empfohlenen Markt bestimmen.</p></div>
-      <div class=" group rounded-2xl border border-white/10 bg-white/[0.035] p-6 backdrop-blur-xl transition hover:border-cyan/30 hover:bg-white/[0.06]"><div class="mb-3 inline-grid h-9 w-9 place-items-center rounded-lg border border-cyan/25 bg-cyan/[0.08] text-[12px] font-extrabold text-cyan">05</div><h3 class="mb-2 text-[17px] font-bold text-ink">Wahrscheinliches Szenario</h3><p class="text-[13.5px] leading-relaxed text-soft">Die Torwahrscheinlichkeit, 15-Minuten-Abschnitt für 15-Minuten-Abschnitt.</p></div>
-      <div class=" group rounded-2xl border border-white/10 bg-white/[0.035] p-6 backdrop-blur-xl transition hover:border-cyan/30 hover:bg-white/[0.06]"><div class="mb-3 inline-grid h-9 w-9 place-items-center rounded-lg border border-cyan/25 bg-cyan/[0.08] text-[12px] font-extrabold text-cyan">06</div><h3 class="mb-2 text-[17px] font-bold text-ink">Die Grenzen</h3><p class="text-[13.5px] leading-relaxed text-soft">Die Statistiken, die man nicht überbewerten sollte, und was die Daten nicht hergeben.</p></div>
-    </div>
-  </div>
-</section>
-
 <section class="decisions" id="decisions">
   <div class="decisions-head">
-    <div class="decisions-title"><h2>Die Entscheidungen des Tages</h2><p>Ein vorrangiger Markt pro Spiel, ausgewählt wenn die Daten übereinstimmen.</p></div>
+    <div class="decisions-title"><h2>Les décisions du jour</h2><p>Die heutigen Spiele mit einer nutzbaren Abweichung zwischen Modell und Markt.</p></div>
     <div class="decision-controls">
       <div class="day-tabs">
         <button class="day-tab" id="tabYesterday" onclick="setDayTab('yesterday')">Hier <span class="tab-count" id="countYesterday">—</span></button>
@@ -647,95 +554,145 @@ body::before{top:-180px;width:1080px;height:700px;background:radial-gradient(ell
   </div>
 </section>
 
-<section id="methode" class="relative border-t border-hairline">
-  <div class="mx-auto max-w-7xl px-5 py-16 sm:px-7 sm:py-20">
-    <div class="mb-3.5 text-[11px] font-bold tracking-[0.18em] text-cyan/80">DIE METHODE</div>
-    <h2 class="mb-9 text-[clamp(26px,3.4vw,40px)] font-extrabold leading-[1.14] tracking-[-0.035em] text-ink">Vier Modelle, <b class="font-extrabold text-cyan">ein Signal</b> pro Spiel.</h2>
-    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-      <div class="rounded-2xl border border-white/10 bg-white/[0.035] p-6 backdrop-blur-xl transition hover:border-cyan/25 hover:bg-white/[0.055]"><div class="text-[10px] font-bold tracking-[0.16em] text-cyan/75">MODELL 1</div><div class="mb-2 mt-2.5 text-[19px] font-bold text-ink">Poisson</div><p class="text-[13.5px] leading-relaxed text-soft">Verteilung der erwarteten Tore für jedes Team, zu Hause und auswärts.</p></div>
-      <div class="rounded-2xl border border-white/10 bg-white/[0.035] p-6 backdrop-blur-xl transition hover:border-cyan/25 hover:bg-white/[0.055]"><div class="text-[10px] font-bold tracking-[0.16em] text-cyan/75">MODELL 2</div><div class="mb-2 mt-2.5 text-[19px] font-bold text-ink">Dixon-Coles</div><p class="text-[13.5px] leading-relaxed text-soft">Korrektur niedriger Ergebnisse (0:0, 1:0, 1:1), die das reine Poisson-Modell unterschätzt.</p></div>
-      <div class="rounded-2xl border border-white/10 bg-white/[0.035] p-6 backdrop-blur-xl transition hover:border-cyan/25 hover:bg-white/[0.055]"><div class="text-[10px] font-bold tracking-[0.16em] text-cyan/75">MODELL 3</div><div class="mb-2 mt-2.5 text-[19px] font-bold text-ink">Monte Carlo</div><p class="text-[13.5px] leading-relaxed text-soft">Tausende Spielsimulationen für eine robuste Ergebnisverteilung.</p></div>
-      <div class="rounded-2xl border border-white/10 bg-white/[0.035] p-6 backdrop-blur-xl transition hover:border-cyan/25 hover:bg-white/[0.055]"><div class="text-[10px] font-bold tracking-[0.16em] text-cyan/75">MODELL 4</div><div class="mb-2 mt-2.5 text-[19px] font-bold text-ink">Elo &amp; Shin</div><p class="text-[13.5px] leading-relaxed text-soft">Echte Teamstärke über die Zeit, und Korrektur der Verzerrung impliziter Wahrscheinlichkeiten.</p></div>
+<section id="analyse" class="relative border-t border-hairline">
+  <div class="mx-auto w-full max-w-[1200px] px-5 sm:px-8 py-16 sm:py-24">
+    <div class="mb-4 inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.2em] text-soft"><span aria-hidden="true" class="h-1 w-1 rounded-full bg-cyan"></span>WAS DU BEKOMMST</div>
+    <h2 class="text-[clamp(28px,3.2vw,42px)] font-extrabold leading-[1.12] tracking-[-0.035em] text-ink">Eine Analyse, <span class="text-cyan">kein Tipp</span> ohne jede Erklärung.</h2>
+    <div class="mt-8 grid grid-cols-1 gap-5 md:grid-cols-3">
+      <article class="spot rounded-2xl border border-hairline bg-surface/60 p-7 transition hover:border-cyan/25"><div class="mb-4 text-[12px] font-bold tracking-[0.16em] text-cyan/70">01</div><h3 class="mb-2.5 text-[19px] font-bold text-ink">Das Signal</h3><p class="text-[14px] leading-relaxed text-soft">Der Markt, bei dem das Modell die größte Abweichung zum Buchmacherpreis findet.</p></article>
+      <article class="spot rounded-2xl border border-hairline bg-surface/60 p-7 transition hover:border-cyan/25"><div class="mb-4 text-[12px] font-bold tracking-[0.16em] text-cyan/70">02</div><h3 class="mb-2.5 text-[19px] font-bold text-ink">Die Begründung</h3><p class="text-[14px] leading-relaxed text-soft">Die Daten und Faktoren, die das Modell dorthin geführt haben, klar formuliert.</p></article>
+      <article class="spot rounded-2xl border border-hairline bg-surface/60 p-7 transition hover:border-cyan/25"><div class="mb-4 text-[12px] font-bold tracking-[0.16em] text-cyan/70">03</div><h3 class="mb-2.5 text-[19px] font-bold text-ink">Die Unsicherheit</h3><p class="text-[14px] leading-relaxed text-soft">Wenn die Daten nicht belastbar sind, wird kein Signal veröffentlicht. Das steht da, es wird nicht versteckt.</p></article>
     </div>
   </div>
 </section>
 
 <section class="relative border-t border-hairline">
-  <div class="mx-auto max-w-7xl px-5 py-16 sm:px-7 sm:py-20">
-    <div class="mb-3.5 text-[11px] font-bold tracking-[0.18em] text-cyan/80">IN DER PRAXIS</div>
-    <h2 class="mb-9 text-[clamp(26px,3.4vw,40px)] font-extrabold leading-[1.14] tracking-[-0.035em] text-ink">Von Rohdaten zu einem <b class="font-extrabold text-cyan">nutzbaren Signal.</b></h2>
-    <ol class="grid grid-cols-1 gap-6 lg:grid-cols-3">
-      <li class="flex items-start gap-4"><span class="grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-cyan/30 bg-cyan/[0.08] text-[14px] font-extrabold tracking-wide text-cyan">01</span><div><h3 class="mb-1.5 text-[16px] font-bold text-ink">Wir erfassen die Daten</h3><p class="text-[13.5px] leading-relaxed text-soft">Spielpläne, voraussichtliche Aufstellungen, direkter Vergleich und xG-Statistiken, laufend aktualisiert, Liga für Liga.</p></div></li>
-      <li class="flex items-start gap-4"><span class="grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-cyan/30 bg-cyan/[0.08] text-[14px] font-extrabold tracking-wide text-cyan">02</span><div><h3 class="mb-1.5 text-[16px] font-bold text-ink">Das Modell rechnet</h3><p class="text-[13.5px] leading-relaxed text-soft">Poisson, Dixon-Coles und Monte Carlo laufen parallel, um eine Wahrscheinlichkeitsverteilung für jeden Markt zu erzeugen.</p></div></li>
-      <li class="flex items-start gap-4"><span class="grid h-11 w-11 shrink-0 place-items-center rounded-xl border border-cyan/30 bg-cyan/[0.08] text-[14px] font-extrabold tracking-wide text-cyan">03</span><div><h3 class="mb-1.5 text-[16px] font-bold text-ink">Du erhältst das Signal</h3><p class="text-[13.5px] leading-relaxed text-soft">Ein klares Datenblatt pro Spiel: Wahrscheinlichkeit, Zuverlässigkeitsstufe, und der Markt, bei dem das Modell eine Abweichung vom realen Markt erkennt.</p></div></li>
-    </ol>
+  <div class="mx-auto w-full max-w-[1200px] px-5 sm:px-8 py-10 sm:py-14">
+    <div class="mb-4 inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.2em] text-soft"><span aria-hidden="true" class="h-1 w-1 rounded-full bg-cyan"></span>WAS DIE ENGINE BEREITS VERARBEITET HAT</div>
+    <dl class="mt-6 grid grid-cols-2 divide-hairline md:grid-cols-4 md:divide-x">
+      <div class="flex flex-col gap-1.5 px-2 py-4 text-center sm:px-4"><b id="kpiAnalyses" class="text-[clamp(30px,4vw,44px)] font-extrabold leading-none tracking-[-0.04em] text-ink tabular-nums">—</b><span class="text-[12.5px] leading-snug text-soft">Veröffentlichte Analysen</span></div>
+      <div class="flex flex-col gap-1.5 px-2 py-4 text-center sm:px-4"><b id="kpiLigues" class="text-[clamp(30px,4vw,44px)] font-extrabold leading-none tracking-[-0.04em] text-ink tabular-nums">13</b><span class="text-[12.5px] leading-snug text-soft">Abgedeckte Wettbewerbe</span></div>
+      <div class="flex flex-col gap-1.5 px-2 py-4 text-center sm:px-4"><b id="kpiModeles" class="text-[clamp(30px,4vw,44px)] font-extrabold leading-none tracking-[-0.04em] text-ink tabular-nums">4</b><span class="text-[12.5px] leading-snug text-soft">Gekreuzte Modelle</span></div>
+      <div class="flex flex-col gap-1.5 px-2 py-4 text-center sm:px-4"><b id="kpiJour" class="text-[clamp(30px,4vw,44px)] font-extrabold leading-none tracking-[-0.04em] text-ink tabular-nums">—</b><span class="text-[12.5px] leading-snug text-soft">Heute analysierte Spiele</span></div>
+    </dl>
   </div>
 </section>
 
-<section class="relative border-t border-hairline">
-  <div class="mx-auto max-w-7xl px-5 py-16 sm:px-7 sm:py-20">
-    <div class="mb-3.5 text-[11px] font-bold tracking-[0.18em] text-cyan/80">WAS WIR NICHT TUN</div>
-    <h2 class="mb-9 max-w-3xl text-[clamp(26px,3.4vw,40px)] font-extrabold leading-[1.14] tracking-[-0.035em] text-ink">Wir sagen dir lieber, <b class="font-extrabold text-cyan">wann wir es nicht wissen.</b></h2>
-    <ul class="max-w-3xl list-none p-0">
-      <li class="flex gap-4 border-t border-hairline py-5 first:border-t-0 first:pt-0"><span aria-hidden="true" class="mt-0.5 shrink-0 text-[15px] text-cyan">—</span><div><h3 class="mb-1 text-[15.5px] font-bold text-ink">Kein Gewinnversprechen</h3><p class="text-[13.5px] leading-relaxed text-soft">Eine Wette bleibt eine Wette. Wir berechnen Wahrscheinlichkeiten, garantieren aber kein Ergebnis.</p></div></li>
-      <li class="flex gap-4 border-t border-hairline py-5 first:border-t-0 first:pt-0"><span aria-hidden="true" class="mt-0.5 shrink-0 text-[15px] text-cyan">—</span><div><h3 class="mb-1 text-[15.5px] font-bold text-ink">Die Abweichung wird auch dann gezeigt, wenn sie gegen dich spricht</h3><p class="text-[13.5px] leading-relaxed text-soft">Ist die angebotene Quote schlechter als unsere Schätzung, steht das schwarz auf weiß da.</p></div></li>
-      <li class="flex gap-4 border-t border-hairline py-5 first:border-t-0 first:pt-0"><span aria-hidden="true" class="mt-0.5 shrink-0 text-[15px] text-cyan">—</span><div><h3 class="mb-1 text-[15.5px] font-bold text-ink">Eine Analyse wird nach dem Spiel nie umgeschrieben</h3><p class="text-[13.5px] leading-relaxed text-soft">Sie erscheint vor dem Anpfiff und bleibt unverändert, egal wie es ausgeht.</p></div></li>
-      <li class="flex gap-4 border-t border-hairline py-5 first:border-t-0 first:pt-0"><span aria-hidden="true" class="mt-0.5 shrink-0 text-[15px] text-cyan">—</span><div><h3 class="mb-1 text-[15.5px] font-bold text-ink">Kein erzwungenes Signal</h3><p class="text-[13.5px] leading-relaxed text-soft">Wenn kein Markt unsere Schwellen erreicht, sagen wir das, statt eine Wette zu erfinden.</p></div></li>
+<section class="relative border-t border-hairline bg-surface/30">
+  <div class="mx-auto w-full max-w-[1200px] px-5 sm:px-8 py-16 sm:py-24 grid grid-cols-1 gap-10 lg:grid-cols-12 lg:gap-16">
+    <div class="lg:col-span-5">
+      <div class="mb-4 inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.2em] text-soft"><span aria-hidden="true" class="h-1 w-1 rounded-full bg-cyan"></span>WAS WIR NICHT TUN</div>
+      <h2 class="text-[clamp(28px,3.2vw,42px)] font-extrabold leading-[1.12] tracking-[-0.035em] text-ink">Wir sagen dir lieber, <span class="text-cyan">wann wir es nicht wissen.</span></h2>
+      <p class="mt-4 max-w-2xl text-[15.5px] leading-relaxed text-soft">Ein Modell, das in jedem Spiel ein Signal findet, sucht keines — es erfindet eines.</p>
+    </div>
+    <ul class="list-none p-0 lg:col-span-7">
+      <li class="border-t border-hairline py-5 first:border-t-0 first:pt-0"><h3 class="mb-1.5 text-[15.5px] font-bold text-ink">Kein Gewinnversprechen</h3><p class="text-[14px] leading-relaxed text-soft">Eine Wette bleibt eine Wette. Wir berechnen Wahrscheinlichkeiten, garantieren aber kein Ergebnis.</p></li>
+      <li class="border-t border-hairline py-5 first:border-t-0 first:pt-0"><h3 class="mb-1.5 text-[15.5px] font-bold text-ink">Die Abweichung wird auch dann gezeigt, wenn sie gegen dich spricht</h3><p class="text-[14px] leading-relaxed text-soft">Ist die angebotene Quote schlechter als unsere Schätzung, steht das schwarz auf weiß da.</p></li>
+      <li class="border-t border-hairline py-5 first:border-t-0 first:pt-0"><h3 class="mb-1.5 text-[15.5px] font-bold text-ink">Eine Analyse wird nach dem Spiel nie umgeschrieben</h3><p class="text-[14px] leading-relaxed text-soft">Sie erscheint vor dem Anpfiff und bleibt unverändert, egal wie es ausgeht.</p></li>
+      <li class="border-t border-hairline py-5 first:border-t-0 first:pt-0"><h3 class="mb-1.5 text-[15.5px] font-bold text-ink">Kein erzwungenes Signal</h3><p class="text-[14px] leading-relaxed text-soft">Wenn kein Markt unsere Schwellen erreicht, sagen wir das, statt eine Wette zu erfinden.</p></li>
     </ul>
   </div>
 </section>
 
 <section id="acces" data-vente class="relative border-t border-hairline">
-  <div class="mx-auto max-w-7xl px-5 py-16 sm:px-7 sm:py-20">
-    <div class="mb-3.5 text-[11px] font-bold tracking-[0.18em] text-cyan/80">DER ZUGANG</div>
-    <h2 class="mb-9 text-[clamp(26px,3.4vw,40px)] font-extrabold leading-[1.14] tracking-[-0.035em] text-ink">Starte kostenlos. <b class="font-extrabold text-cyan">Wechsle zu Pro</b>, wenn du alles sehen willst.</h2>
-    <div class="grid max-w-3xl grid-cols-1 gap-5 sm:grid-cols-2">
-      <div class="flex flex-col rounded-3xl border border-white/10 bg-white/[0.035] p-7 backdrop-blur-xl">
-        <div class="text-[11px] font-bold tracking-[0.18em] text-soft">KOSTENLOS</div>
-        <div class="mb-5 mt-3 text-[38px] font-extrabold leading-none tracking-[-0.04em] text-ink">0 €</div>
-        <ul class="mb-7 flex flex-1 list-none flex-col gap-3 p-0">
-          <li class="flex gap-2.5 text-[13.5px] leading-snug text-soft"><span aria-hidden="true" class="mt-[3px] shrink-0 text-cyan">✓</span>1 vollständige Analyse jeden Tag kostenlos</li>
-          <li class="flex gap-2.5 text-[13.5px] leading-snug text-soft"><span aria-hidden="true" class="mt-[3px] shrink-0 text-cyan">✓</span>Alle Spiele des Tages sichtbar</li>
-          <li class="flex gap-2.5 text-[13.5px] leading-snug text-soft"><span aria-hidden="true" class="mt-[3px] shrink-0 text-cyan">✓</span>Unsere Methode ausführlich erklärt</li>
-        </ul>
-        <a href="#decisions" class="block rounded-full border border-hairline bg-white/[0.03] px-6 py-3.5 text-center text-[12.5px] font-extrabold tracking-[0.06em] text-ink transition hover:bg-white/[0.07]">LOSLEGEN</a>
-      </div>
-      <div class="relative flex flex-col rounded-3xl border border-cyan/35 bg-gradient-to-br from-cyan/[0.09] to-white/[0.02] p-7 shadow-[0_30px_70px_-40px_rgba(32,213,239,.6)] backdrop-blur-xl">
-        <span class="absolute -top-3 left-7 rounded-full bg-cyan px-3 py-1 text-[10px] font-extrabold tracking-[0.12em] text-page">EMPFOHLEN</span>
-        <div class="text-[11px] font-bold tracking-[0.18em] text-soft">PRO</div>
-        <div class="mt-3 flex items-baseline gap-1.5"><b class="text-[38px] font-extrabold leading-none tracking-[-0.04em] text-ink">19,95 €</b><span class="text-[14px] text-soft">/Monat</span></div>
-        <div class="mb-5 mt-1.5 text-[12.5px] text-soft/85">Keine Bindung · Kündigung mit einem Klick</div>
-        <ul class="mb-7 flex flex-1 list-none flex-col gap-3 p-0">
-          <li class="flex gap-2.5 text-[13.5px] leading-snug text-soft"><span aria-hidden="true" class="mt-[3px] shrink-0 text-cyan">✓</span>Alle Analysen, alle Ligen</li>
-          <li class="flex gap-2.5 text-[13.5px] leading-snug text-soft"><span aria-hidden="true" class="mt-[3px] shrink-0 text-cyan">✓</span>Erweiterte Filter und detaillierte Zuverlässigkeitsstufe</li>
-          <li class="flex gap-2.5 text-[13.5px] leading-snug text-soft"><span aria-hidden="true" class="mt-[3px] shrink-0 text-cyan">✓</span>Pro-Tools: Value-Scanner, Kombiwette, Simulator</li>
-          <li class="flex gap-2.5 text-[13.5px] leading-snug text-soft"><span aria-hidden="true" class="mt-[3px] shrink-0 text-cyan">✓</span>Jederzeit kündbar</li>
-        </ul>
-        <a href="/abonnement.html" class="block rounded-full bg-cyan px-6 py-3.5 text-center text-[12.5px] font-extrabold tracking-[0.06em] text-page shadow-[0_16px_38px_-18px_rgba(32,213,239,.9)] transition hover:brightness-110">PRO FREISCHALTEN</a>
+  <div class="mx-auto w-full max-w-[1200px] px-5 sm:px-8 py-16 sm:py-24">
+    <div class="mb-4 inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.2em] text-soft"><span aria-hidden="true" class="h-1 w-1 rounded-full bg-cyan"></span>DER ZUGANG</div>
+    <h2 class="text-[clamp(28px,3.2vw,42px)] font-extrabold leading-[1.12] tracking-[-0.035em] text-ink">Starte kostenlos. <span class="text-cyan">Wechsle zu Pro</span> wenn du alles sehen willst.</h2>
+
+    <div class="mt-8 rounded-3xl border border-hairline bg-surface/40 p-1.5">
+      <div class="flex flex-col gap-1.5 lg:flex-row">
+
+        <div class="flex flex-1 flex-col p-6 sm:p-7">
+          <h3 class="text-[12px] font-bold uppercase tracking-[0.18em] text-soft">Gratis</h3>
+          <div class="mt-3 text-[36px] font-extrabold leading-none tracking-[-0.04em] text-ink">0 €</div>
+          <p class="mt-2.5 text-[13.5px] leading-snug text-soft">Um das Produkt selbst zu beurteilen, ohne Karte.</p>
+          <a href="#decisions" class="mt-6 block rounded-xl border border-hairline px-6 py-3.5 text-center text-[13.5px] font-bold text-ink transition hover:border-cyan/40 hover:bg-white/[0.05]">Starten</a>
+          <ul class="mt-7 flex list-none flex-col gap-3 border-t border-hairline p-0 pt-6">
+            <li class="flex items-start gap-2.5 text-[14px] leading-snug text-soft"><svg aria-hidden="true" viewBox="0 0 16 16" class="mt-[3px] h-3.5 w-3.5 shrink-0 text-cyan"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M2.5 8.5l3.5 3.5 7.5-8"/></svg>Die heutige Gratis-Analyse, vollständig</li>
+            <li class="flex items-start gap-2.5 text-[14px] leading-snug text-soft"><svg aria-hidden="true" viewBox="0 0 16 16" class="mt-[3px] h-3.5 w-3.5 shrink-0 text-cyan"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M2.5 8.5l3.5 3.5 7.5-8"/></svg>Identifizierter Markt und Konfidenzwert</li>
+            <li class="flex items-start gap-2.5 text-[14px] leading-snug text-soft"><svg aria-hidden="true" viewBox="0 0 16 16" class="mt-[3px] h-3.5 w-3.5 shrink-0 text-cyan"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M2.5 8.5l3.5 3.5 7.5-8"/></svg>Detaillierte Erklärung des Signals</li>
+          </ul>
+        </div>
+
+        <div class="flex flex-col rounded-[18px] bg-surface-2 p-6 sm:p-7 lg:w-[54%]">
+          <div class="flex items-center justify-between gap-3">
+            <h3 class="text-[12px] font-bold uppercase tracking-[0.18em] text-soft">Pro</h3>
+            <span class="rounded-full bg-cyan px-2.5 py-1 text-[10px] font-extrabold tracking-[0.1em] text-page">EMPFOHLEN</span>
+          </div>
+          <div class="mt-3 flex items-baseline gap-1.5">
+            <b class="text-[36px] font-extrabold leading-none tracking-[-0.04em] text-ink">19,95 €</b>
+            <span class="text-[14px] text-soft">/Monat</span>
+          </div>
+          <p class="mt-2.5 text-[13.5px] leading-snug text-soft">Ohne Bindung · Kündigung mit einem Klick</p>
+          <a href="/abonnement.html" class="mt-6 block rounded-xl bg-cyan px-6 py-3.5 text-center text-[13.5px] font-extrabold text-page shadow-[0_16px_38px_-18px_rgba(32,213,239,.9)] transition hover:brightness-110">Pro freischalten</a>
+          <div class="mt-7 border-t border-hairline pt-6 text-[13px] font-semibold text-ink">Alles aus Gratis, plus:</div>
+          <ul class="mt-4 flex list-none flex-col gap-3 p-0">
+            <li class="flex items-start gap-2.5 text-[14px] leading-snug text-soft"><svg aria-hidden="true" viewBox="0 0 16 16" class="mt-[3px] h-3.5 w-3.5 shrink-0 text-cyan"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M2.5 8.5l3.5 3.5 7.5-8"/></svg>Alle Analysen, alle Ligen</li>
+            <li class="flex items-start gap-2.5 text-[14px] leading-snug text-soft"><svg aria-hidden="true" viewBox="0 0 16 16" class="mt-[3px] h-3.5 w-3.5 shrink-0 text-cyan"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M2.5 8.5l3.5 3.5 7.5-8"/></svg>Erweiterte Filter und detaillierte Zuverlässigkeitsstufe</li>
+            <li class="flex items-start gap-2.5 text-[14px] leading-snug text-soft"><svg aria-hidden="true" viewBox="0 0 16 16" class="mt-[3px] h-3.5 w-3.5 shrink-0 text-cyan"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M2.5 8.5l3.5 3.5 7.5-8"/></svg>Pro-Tools: Value-Scanner, Kombiwette, Simulator</li>
+            <li class="flex items-start gap-2.5 text-[14px] leading-snug text-soft"><svg aria-hidden="true" viewBox="0 0 16 16" class="mt-[3px] h-3.5 w-3.5 shrink-0 text-cyan"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M2.5 8.5l3.5 3.5 7.5-8"/></svg>Jederzeit kündbar</li>
+          </ul>
+        </div>
+
       </div>
     </div>
   </div>
 </section>
 
+<section id="methode" class="relative border-t border-hairline">
+  <div class="mx-auto w-full max-w-[1200px] px-5 sm:px-8 py-16 sm:py-24">
+    <div class="mb-4 inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.2em] text-soft"><span aria-hidden="true" class="h-1 w-1 rounded-full bg-cyan"></span>DIE METHODE</div>
+    <h2 class="text-[clamp(28px,3.2vw,42px)] font-extrabold leading-[1.12] tracking-[-0.035em] text-ink">Vier Modelle, <span class="text-cyan">ein Signal</span> pro Spiel.</h2>
+    <p class="mt-4 max-w-2xl text-[15.5px] leading-relaxed text-soft">Jedes Modell beantwortet eine andere Frage. Ein Signal entsteht nur dort, wo ihre Antworten übereinstimmen.</p>
+    <div class="mt-8 grid grid-cols-1 items-center gap-8 lg:grid-cols-[minmax(0,1fr)_240px_minmax(0,260px)]">
+      <ul class="flex list-none flex-col gap-3 p-0">
+        <li class="rounded-xl border border-hairline bg-surface/60 px-5 py-4"><div class="text-[15px] font-bold text-ink">Poisson</div><p class="mt-1 text-[12.5px] leading-snug text-soft">Verteilung der erwarteten Tore je Team.</p></li>
+        <li class="rounded-xl border border-hairline bg-surface/60 px-5 py-4"><div class="text-[15px] font-bold text-ink">Dixon-Coles</div><p class="mt-1 text-[12.5px] leading-snug text-soft">Korrektur der niedrigen Ergebnisse, die reines Poisson unterschätzt.</p></li>
+        <li class="rounded-xl border border-hairline bg-surface/60 px-5 py-4"><div class="text-[15px] font-bold text-ink">Monte Carlo</div><p class="mt-1 text-[12.5px] leading-snug text-soft">Tausende Simulationen für eine robuste Verteilung.</p></li>
+        <li class="rounded-xl border border-hairline bg-surface/60 px-5 py-4"><div class="text-[15px] font-bold text-ink">Elo &amp; Shin</div><p class="mt-1 text-[12.5px] leading-snug text-soft">Echte Stärke über die Zeit und Entfernung des Quoten-Bias.</p></li>
+      </ul>
+      <svg class="hidden h-[300px] w-full lg:block" viewBox="0 0 240 300" fill="none" aria-hidden="true" focusable="false"><defs><linearGradient id="flux" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#20d5ef" stop-opacity=".08"/><stop offset="1" stop-color="#20d5ef" stop-opacity=".55"/></linearGradient></defs><path d="M0 38 C 110 38, 130 150, 196 150" stroke="url(#flux)" stroke-width="1.5" class="conv-line"/><path d="M0 113 C 110 113, 130 150, 196 150" stroke="url(#flux)" stroke-width="1.5" class="conv-line"/><path d="M0 188 C 110 188, 130 150, 196 150" stroke="url(#flux)" stroke-width="1.5" class="conv-line"/><path d="M0 263 C 110 263, 130 150, 196 150" stroke="url(#flux)" stroke-width="1.5" class="conv-line"/><circle cx="196" cy="150" r="26" fill="#0d1926" stroke="#20d5ef" stroke-opacity=".45"/><circle cx="196" cy="150" r="6" fill="#20d5ef"/></svg>
+      <div class="rounded-2xl border border-cyan/25 bg-cyan/[0.05] p-6">
+        <div class="text-[11px] font-bold uppercase tracking-[0.18em] text-cyan/80">IASHARK-Signal</div>
+        <p class="mt-2.5 text-[14px] leading-relaxed text-soft">Ein vorrangiger Markt, eine Wahrscheinlichkeit und die gemessene Abweichung zum Marktpreis.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="relative border-t border-hairline bg-surface/30">
+  <div class="mx-auto w-full max-w-[1200px] px-5 sm:px-8 py-12 sm:py-16">
+    <div class="mb-4 inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.2em] text-soft"><span aria-hidden="true" class="h-1 w-1 rounded-full bg-cyan"></span>IN DER PRAXIS</div>
+    <h2 class="text-[clamp(28px,3.2vw,42px)] font-extrabold leading-[1.12] tracking-[-0.035em] text-ink">Von Rohdaten zu einem <span class="text-cyan">nutzbaren Signal.</span></h2>
+    <ol class="mt-7 flex list-none flex-col gap-6 p-0 md:flex-row md:items-start md:gap-6">
+      <li class="flex flex-1 items-start gap-4 md:flex-col md:items-stretch md:gap-3"><span class="shrink-0 text-[12px] font-extrabold tracking-[0.14em] text-cyan/70">01</span><div><h3 class="text-[15.5px] font-bold text-ink">Wir erfassen die Daten</h3><p class="mt-1.5 text-[13.5px] leading-relaxed text-soft">Spielpläne, wahrscheinliche Aufstellungen, Direktvergleiche und xG-Statistiken, Wettbewerb für Wettbewerb.</p></div></li><span aria-hidden="true" class="hidden text-[18px] text-soft/40 md:block">→</span>
+      <li class="flex flex-1 items-start gap-4 md:flex-col md:items-stretch md:gap-3"><span class="shrink-0 text-[12px] font-extrabold tracking-[0.14em] text-cyan/70">02</span><div><h3 class="text-[15.5px] font-bold text-ink">Die Modelle rechnen</h3><p class="mt-1.5 text-[13.5px] leading-relaxed text-soft">Poisson, Dixon-Coles und Monte Carlo laufen parallel über jeden Markt.</p></div></li><span aria-hidden="true" class="hidden text-[18px] text-soft/40 md:block">→</span>
+      <li class="flex flex-1 items-start gap-4 md:flex-col md:items-stretch md:gap-3"><span class="shrink-0 text-[12px] font-extrabold tracking-[0.14em] text-cyan/70">03</span><div><h3 class="text-[15.5px] font-bold text-ink">Du erhältst das Signal</h3><p class="mt-1.5 text-[13.5px] leading-relaxed text-soft">Ein klares Blatt: Wahrscheinlichkeit, Verlässlichkeit und die Abweichung zum echten Markt.</p></div></li>
+    </ol>
+  </div>
+</section>
+
 <section class="relative border-t border-hairline">
-  <div class="mx-auto max-w-7xl px-5 py-16 sm:px-7 sm:py-20">
-    <div class="mb-3.5 text-[11px] font-bold tracking-[0.18em] text-cyan/80">HÄUFIGE FRAGEN</div>
-    <h2 class="mb-9 max-w-3xl text-[clamp(26px,3.4vw,40px)] font-extrabold leading-[1.14] tracking-[-0.035em] text-ink">Was du dich fragst, <b class="font-extrabold text-cyan">bevor du zahlst.</b></h2>
-    <div class="max-w-3xl">
-      <details class="group border-t border-hairline py-5 first:border-t-0"><summary class="flex cursor-pointer list-none items-center justify-between gap-4 text-[15.5px] font-semibold text-ink marker:hidden">Kann ich vor dem Kauf testen?<span aria-hidden="true" class="shrink-0 text-cyan transition-transform duration-200 group-open:rotate-45">+</span></summary><p class="mt-3 max-w-2xl text-[13.5px] leading-relaxed text-soft">Ja. Eine vollständige Analyse ist täglich gratis, ohne Karte. Du siehst genau, was ein Abonnent bekommt.</p></details>
-      <details class="group border-t border-hairline py-5 first:border-t-0"><summary class="flex cursor-pointer list-none items-center justify-between gap-4 text-[15.5px] font-semibold text-ink marker:hidden">Werde ich Geld verdienen?<span aria-hidden="true" class="shrink-0 text-cyan transition-transform duration-200 group-open:rotate-45">+</span></summary><p class="mt-3 max-w-2xl text-[13.5px] leading-relaxed text-soft">Das kann dir niemand versprechen, und wir tun es nicht. Das Modell sucht Märkte, in denen die berechnete Wahrscheinlichkeit von der des Marktes abweicht. Eine Methode, keine Garantie.</p></details>
-      <details class="group border-t border-hairline py-5 first:border-t-0"><summary class="flex cursor-pointer list-none items-center justify-between gap-4 text-[15.5px] font-semibold text-ink marker:hidden">Kann ich jederzeit kündigen?<span aria-hidden="true" class="shrink-0 text-cyan transition-transform duration-200 group-open:rotate-45">+</span></summary><p class="mt-3 max-w-2xl text-[13.5px] leading-relaxed text-soft">Ja, mit einem Klick in deinem Konto. Ohne Bindung, ohne Frist, ohne Begründung.</p></details>
-      <details class="group border-t border-hairline py-5 first:border-t-0"><summary class="flex cursor-pointer list-none items-center justify-between gap-4 text-[15.5px] font-semibold text-ink marker:hidden">Woher kommen die Daten?<span aria-hidden="true" class="shrink-0 text-cyan transition-transform duration-200 group-open:rotate-45">+</span></summary><p class="mt-3 max-w-2xl text-[13.5px] leading-relaxed text-soft">Aus offiziellen Spieldaten: Aufstellungen, Direktvergleiche, Schuss- und Expected-Goals-Statistiken sowie echte Buchmacherquoten.</p></details>
-      <details class="group border-t border-hairline py-5 first:border-t-0"><summary class="flex cursor-pointer list-none items-center justify-between gap-4 text-[15.5px] font-semibold text-ink marker:hidden">Wie viele Spiele pro Tag?<span aria-hidden="true" class="shrink-0 text-cyan transition-transform duration-200 group-open:rotate-45">+</span></summary><p class="mt-3 max-w-2xl text-[13.5px] leading-relaxed text-soft">Alle Spiele der 13 abgedeckten Wettbewerbe. Die Zahl hängt vom Spielplan ab — die vollständige Tagesliste siehst du auf dieser Seite.</p></details>
+  <div class="mx-auto w-full max-w-[1200px] px-5 sm:px-8 py-16 sm:py-20">
+    <div class="mb-4 inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.2em] text-soft"><span aria-hidden="true" class="h-1 w-1 rounded-full bg-cyan"></span>HÄUFIGE FRAGEN</div>
+    <h2 class="text-[clamp(28px,3.2vw,42px)] font-extrabold leading-[1.12] tracking-[-0.035em] text-ink">Was du dich fragst, <span class="text-cyan">bevor du zahlst.</span></h2>
+    <div class="mt-7 max-w-3xl">
+      <details class="group border-b border-hairline"><summary class="flex cursor-pointer list-none items-center justify-between gap-4 py-5 text-[15.5px] font-semibold text-ink transition hover:text-cyan focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan"><span>Kann ich vor dem Kauf testen?</span><span aria-hidden="true" class="shrink-0 text-[20px] font-normal leading-none text-cyan transition-transform duration-200 group-open:rotate-45">+</span></summary><p class="max-w-2xl pb-5 text-[14px] leading-relaxed text-soft">Ja. Eine vollständige Analyse ist täglich gratis, ohne Karte. Du siehst genau, was ein Abonnent bekommt.</p></details>
+      <details class="group border-b border-hairline"><summary class="flex cursor-pointer list-none items-center justify-between gap-4 py-5 text-[15.5px] font-semibold text-ink transition hover:text-cyan focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan"><span>Garantiert IASHARK Gewinne?</span><span aria-hidden="true" class="shrink-0 text-[20px] font-normal leading-none text-cyan transition-transform duration-200 group-open:rotate-45">+</span></summary><p class="max-w-2xl pb-5 text-[14px] leading-relaxed text-soft">Nein, und das kann niemand. Das Modell sucht Märkte, in denen die berechnete Wahrscheinlichkeit von der des Marktes abweicht. Eine Methode, keine Garantie.</p></details>
+      <details class="group border-b border-hairline"><summary class="flex cursor-pointer list-none items-center justify-between gap-4 py-5 text-[15.5px] font-semibold text-ink transition hover:text-cyan focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan"><span>Wie wird das Signal berechnet?</span><span aria-hidden="true" class="shrink-0 text-[20px] font-normal leading-none text-cyan transition-transform duration-200 group-open:rotate-45">+</span></summary><p class="max-w-2xl pb-5 text-[14px] leading-relaxed text-soft">Vier Modelle laufen parallel — Poisson, Dixon-Coles, Monte Carlo, Elo und Shin. Gewählt wird der Markt, bei dem ihre Wahrscheinlichkeiten übereinstimmen und am stärksten vom Buchmacherpreis abweichen.</p></details>
+      <details class="group border-b border-hairline"><summary class="flex cursor-pointer list-none items-center justify-between gap-4 py-5 text-[15.5px] font-semibold text-ink transition hover:text-cyan focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan"><span>Was passiert, wenn die Daten nicht reichen?</span><span aria-hidden="true" class="shrink-0 text-[20px] font-normal leading-none text-cyan transition-transform duration-200 group-open:rotate-45">+</span></summary><p class="max-w-2xl pb-5 text-[14px] leading-relaxed text-soft">Für dieses Spiel wird kein Signal veröffentlicht. Das steht ausdrücklich da, statt durch eine Füllwette ersetzt zu werden.</p></details>
+      <details class="group border-b border-hairline"><summary class="flex cursor-pointer list-none items-center justify-between gap-4 py-5 text-[15.5px] font-semibold text-ink transition hover:text-cyan focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan"><span>Welche Wettbewerbe sind abgedeckt?</span><span aria-hidden="true" class="shrink-0 text-[20px] font-normal leading-none text-cyan transition-transform duration-200 group-open:rotate-45">+</span></summary><p class="max-w-2xl pb-5 text-[14px] leading-relaxed text-soft">Dreizehn Wettbewerbe, darunter Ligue 1, Premier League, LaLiga, Serie A, Bundesliga, Champions League und Europa League. Die vollständige Liste läuft oben auf dieser Seite.</p></details>
+      <details class="group border-b border-hairline"><summary class="flex cursor-pointer list-none items-center justify-between gap-4 py-5 text-[15.5px] font-semibold text-ink transition hover:text-cyan focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan"><span>Kann ich jederzeit kündigen?</span><span aria-hidden="true" class="shrink-0 text-[20px] font-normal leading-none text-cyan transition-transform duration-200 group-open:rotate-45">+</span></summary><p class="max-w-2xl pb-5 text-[14px] leading-relaxed text-soft">Ja, mit einem Klick in deinem Konto. Ohne Bindung, ohne Frist, ohne Begründung.</p></details>
+      <details class="group border-b border-hairline"><summary class="flex cursor-pointer list-none items-center justify-between gap-4 py-5 text-[15.5px] font-semibold text-ink transition hover:text-cyan focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan"><span>Wie oft werden die Analysen aktualisiert?</span><span aria-hidden="true" class="shrink-0 text-[20px] font-normal leading-none text-cyan transition-transform duration-200 group-open:rotate-45">+</span></summary><p class="max-w-2xl pb-5 text-[14px] leading-relaxed text-soft">Täglich, vor dem Anpfiff. Eine veröffentlichte Analyse wird nachträglich nie umgeschrieben.</p></details>
     </div>
   </div>
 </section>
 
 <section class="relative border-t border-hairline">
-  <div class="mx-auto max-w-7xl px-5 py-20 text-center sm:px-7 sm:py-24">
-    <h2 class="text-[clamp(26px,3.6vw,42px)] font-extrabold leading-[1.14] tracking-[-0.035em] text-ink">Das nächste Spiel hat bereits <b class="font-extrabold text-cyan">ein Signal.</b></h2>
-    <p class="mb-7 mt-3 text-[15px] text-soft">Schau es dir an, es ist kostenlos.</p>
-    <a href="#decisions" class="inline-flex items-center justify-center gap-2.5 rounded-full bg-cyan px-9 py-4 text-[13px] font-extrabold tracking-[0.06em] text-page shadow-[0_18px_45px_-18px_rgba(32,213,239,.85)] transition hover:brightness-110">HEUTIGES SPIEL ANSEHEN</a>
+  <div class="mx-auto w-full max-w-[1200px] px-5 sm:px-8 py-20 text-center sm:py-24">
+    <h2 class="text-[clamp(30px,4vw,48px)] font-extrabold leading-[1.1] tracking-[-0.04em] text-ink">Das nächste Spiel hat bereits <span class="text-cyan">ein Signal.</span></h2>
+    <p class="mx-auto mt-4 max-w-md text-[15.5px] text-soft">Schau es dir an, es ist kostenlos.</p>
+    <a href="#decisions" class="hero-cta mt-9 inline-flex items-center justify-center gap-2.5 rounded-xl bg-cyan px-9 py-4 text-[14px] font-extrabold tracking-[0.02em] text-page shadow-[0_18px_45px_-18px_rgba(32,213,239,.85)] transition hover:brightness-110">Voir le match du jour<span aria-hidden="true">→</span></a>
   </div>
 </section>
 </main>
@@ -776,6 +733,7 @@ body::before{top:-180px;width:1080px;height:700px;background:radial-gradient(ell
 <script src="/app-client.js"></script>
 <script>
 var allMatchs=[],currentFilter='all',currentDayFilter='today',currentSport='football',currentSearch='';
+var freeMatchId=null;
 var authCtx={session:null,isPro:false};
 
 // Echappement HTML pour tout texte semi-externe (noms d'equipe issus
@@ -783,6 +741,34 @@ var authCtx={session:null,isPro:false};
 // en profondeur, meme si la source n'est pas un input utilisateur direct
 // (voir match.html, meme fonction, deja appliquee la-bas depuis le fix XSS
 // reflechie plus tot dans ce chantier).
+// Chiffres de preuve : uniquement des comptages reels, jamais une
+// performance ni un taux de reussite. Le compteur s'anime une fois, et pas
+// du tout si l'utilisateur a demande a reduire les animations.
+function setKpi(id,valeur){
+  var el=document.getElementById(id);
+  if(!el)return;
+  var fin=Number(valeur)||0;
+  var reduit=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(reduit||fin<=0||!('IntersectionObserver' in window)){el.textContent=fin.toLocaleString('fr-FR');return;}
+  // La valeur reelle est posee TOUT DE SUITE : si l'observateur ne se
+  // declenche jamais (section jamais atteinte, onglet en arriere-plan), le
+  // visiteur voit le chiffre, pas un tiret.
+  el.textContent=fin.toLocaleString('fr-FR');
+  var lance=false;
+  new IntersectionObserver(function(entrees,obs){
+    entrees.forEach(function(e){
+      if(!e.isIntersecting||lance)return;
+      lance=true; obs.disconnect();
+      var t0=performance.now(),duree=900;
+      (function pas(t){
+        var k=Math.min(1,(t-t0)/duree);
+        el.textContent=Math.round(fin*(1-Math.pow(1-k,3))).toLocaleString('fr-FR');
+        if(k<1)requestAnimationFrame(pas);
+      })(t0);
+    });
+  },{threshold:.4}).observe(el);
+}
+
 function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
 
 var WC_TROPHY_EMOJI = '🏆';
@@ -835,6 +821,8 @@ async function loadYesterday(){
     if(!r.ok)return;
     var d=await r.json();
     var y=getYesterdayStr();
+    var totalAnalyses=(d.predictions||[]).length;
+    if(totalAnalyses)setKpi('kpiAnalyses',totalAnalyses);
     yesterdayPicks=(d.predictions||[])
       .filter(function(p){return String(p.date||'').slice(0,10)===y;})
       .sort(function(a,b){return String(a.date||'')<String(b.date||'')?-1:1;});
@@ -1036,31 +1024,54 @@ function marketInsight(){return'Öffne die Analyse, um Faktoren, Grenzen und Ris
 function buildCard(m){
   var heure=(m.date||'').split(' ')[1]||'';
   var isWC=isWorldCup(m);
-  var isHot=!!m.hot,isVal=m.val||m.vbet==='OUI';
-  var locked=!authCtx.isPro;
-  var css='mc'+(isHot&&!isWC?' hot':'')+(isVal&&!isWC?' value':'')+(isWC?' worldcup':'')+(locked?' locked':'');
+  var aSignal=!!m.pari_rec&&!m.no_signal;
+  // TROIS ETATS, pas deux. Avant, un visiteur voyait trois cartes
+  // integralement verrouillees : le mur payant sans jamais la preuve. Le
+  // match gratuit du jour est desormais entierement lisible, et les autres
+  // sont PARTIELLEMENT reveles - equipes, heure et niveau de confiance
+  // visibles, seul le marche recommande est masque. Montrer la valeur, puis
+  // le paywall ; jamais le paywall seul.
+  var gratuit=authCtx.isPro||String(m.id)===String(freeMatchId);
+  var locked=!gratuit;
+  var css='mc'+(isWC?' worldcup':'')+(locked?' locked':'')+(gratuit&&!authCtx.isPro?' mc-free':'');
   var pariLabel=m.pari_rec?translateMarket(m.pari_rec):(m.no_signal_label||'Hier nichts Verwertbares — wir warten auf eine bessere Gelegenheit.');
-  var pariRest=locked
-    ?'<span class="mc-lock-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/><path d="M12 14v3"/></svg></span><span class="mc-pari-bet">Analyse für Pro-Mitglieder reserviert</span>'
-    :'<span class="mc-pari-bet">'+pariLabel+'</span><p class="mc-insight">'+marketInsight(m)+'</p>';
-  var pariBlock='<div class="mc-pari'+(locked?' mc-pari-locked':'')+'">'+(locked?'':'<span class="mc-pari-label">EMPFOHLENER MARKT</span>')+pariRest+'</div>';
-  var confBlock=(!!m.pari_rec&&!m.no_signal)
-    ?'<div class="conf-ring '+confTier(m)+'"><span class="conf-label">KONFIDENZ</span><div class="conf-ring-val">'+Math.round(ovrConf(m))+'</div><div class="conf-ring-sub"></div></div>'
+
+  var badge=(gratuit&&!authCtx.isPro)?'<span class="mc-badge-free">Kostenlose Analyse</span>':'';
+  // La confiance reste visible meme verrouillee : c'est ce qui donne envie
+  // de debloquer, et ce n'est pas le pari lui-meme.
+  var confBlock=aSignal
+    ?'<div class="mc-conf"><span class="mc-conf-lbl">KONFIDENZ</span><b class="mc-conf-val">'+fmtConf(m)+'</b><span class="mc-conf-max">/10</span></div>'
     :'';
+  var pariRest=locked
+    ?'<span class="mc-pari-bet mc-pari-hidden" aria-hidden="true">'+esc(pariLabel)+'</span><span class="sr-only">Empfohlener Markt nur für Pro-Mitglieder</span>'
+    :'<span class="mc-pari-bet">'+esc(pariLabel)+'</span>';
+  var pariBlock=aSignal
+    ?'<div class="mc-pari'+(locked?' mc-pari-locked':'')+'"><span class="mc-pari-label">EMPFOHLENER MARKT</span>'+pariRest+'</div>'
+    :'<div class="mc-pari mc-pari-none"><span class="mc-pari-bet">'+esc(pariLabel)+'</span></div>';
+  var raison=(!locked&&aSignal)?'<p class="mc-insight">'+marketInsight(m)+'</p>':'';
+
   var href=locked?'/abonnement.html':'/match/'+m.id+'.html';
-  var cta=locked?'<span class="mc-cta mc-cta-locked">Pro werden →</span>':'<span class="mc-cta">Analyse ansehen →</span>';
-  return'<a class="'+css+'" href="'+href+'" aria-label="Analyse ansehen '+esc((m.home&&m.home.n||''))+' gegen '+esc((m.away&&m.away.n||''))+'">'
-    +'<div class="mc-top"><div class="mc-league">'+leagueHeader(m)+' <span class="mc-league-country">· '+heure+'</span></div></div>'
-    +'<div class="mc-body"><div class="mc-left"><div class="mc-teams">'
-    +'<div class="mc-team home">'+teamLogo(m.home)+'<div class="mc-team-name">'+esc((m.home&&m.home.n||'').toUpperCase())+'</div></div>'
+  var cta=locked
+    ?'<span class="mc-cta mc-cta-locked">Mit Pro freischalten</span>'
+    :'<span class="mc-cta">Vollständige Analyse ansehen</span>';
+  var libelle=locked
+    ?'Débloquer l\'analyse '+esc((m.home&&m.home.n||''))+' contre '+esc((m.away&&m.away.n||''))
+    :'Voir l\'analyse '+esc((m.home&&m.home.n||''))+' contre '+esc((m.away&&m.away.n||''));
+
+  return'<a class="'+css+'" href="'+href+'" aria-label="'+libelle+'">'
+    +'<div class="mc-top"><div class="mc-league">'+leagueHeader(m)+' <span class="mc-league-country">· '+heure+'</span></div>'+badge+'</div>'
+    +'<div class="mc-teams">'
+    +'<div class="mc-team home">'+teamLogo(m.home)+'<div class="mc-team-name">'+esc((m.home&&m.home.n||''))+'</div></div>'
     +'<div class="mc-teams-sep"><div class="mc-vs">VS</div></div>'
-    +'<div class="mc-team away">'+teamLogo(m.away)+'<div class="mc-team-name">'+esc((m.away&&m.away.n||'').toUpperCase())+'</div></div>'
+    +'<div class="mc-team away">'+teamLogo(m.away)+'<div class="mc-team-name">'+esc((m.away&&m.away.n||''))+'</div></div>'
     +'</div>'
-    +pariBlock
-    +'</div>'
-    +'<div class="mc-right">'+confBlock+cta+'</div>'
-    +'</div>'
+    +pariBlock+confBlock+raison
+    +'<div class="mc-foot">'+cta+'</div>'
     +'</a>';
+}
+function fmtConf(m){
+  var v=ovrConf(m)/10;
+  return (Math.round(v*10)/10).toLocaleString('fr-FR',{minimumFractionDigits:1,maximumFractionDigits:1});
 }
 
 var DAY_LABELS={today:'Heute',tomorrow:'Morgen'};
@@ -1074,7 +1085,7 @@ function buildHeroFeature(m){
   var heure=(m.date||'').split(' ')[1]||'',hn=m.home&&m.home.n||'',an=m.away&&m.away.n||'';
   var market=m.pari_rec?translateMarket(m.pari_rec):(m.no_signal_label||'Analyse en cours');
   function heroLogo(t,name){var u=t&&(t.photo||t.logo||(t.id?'https://media.api-sports.io/football/teams/'+t.id+'.png':''));return u?'<img src="'+u+'" alt="Logo '+esc(name)+'">':'<div class="mc-team-logo-placeholder">'+esc(name.slice(0,2).toUpperCase())+'</div>';}
-  return'<a class="feature-card" href="/match/'+m.id+'.html" aria-label="Analyse ansehen '+esc(hn)+' gegen '+esc(an)+'">'
+  return'<a class="feature-card" href="/match/'+m.id+'.html" aria-label="Voir l\'analyse '+esc(hn)+' contre '+esc(an)+'">'
     +'<div class="feature-meta"><div class="feature-league">'+leagueHeader(m)+'</div><div class="feature-meta-right"><span class="feature-free">Kostenlose Analyse</span><span>'+dayLabel(m)+' · '+heure+'</span></div></div>'
     +'<div class="feature-teams"><div class="feature-team">'+heroLogo(m.home,hn)+esc(hn)+'</div><div class="feature-vs">VS</div><div class="feature-team">'+heroLogo(m.away,an)+esc(an)+'</div></div>'
     +'<div class="feature-signal"><div class="signal-label">EMPFOHLENER MARKT</div><div class="signal-market">'+market+'</div>'
@@ -1099,12 +1110,17 @@ function renderMatchs(){
   // (lib/free-match.js). Deux algorithmes separes se contredisaient, et le
   // bouton "Voir le match gratuit du jour" ouvrait un match payant.
   var featured=IasharkFreeMatch.pickFreeMatch(getSportMatchs());
+  freeMatchId=featured?featured.id:null;
   if(hero)hero.innerHTML=featured?buildHeroFeature(featured):'<div class="feature-loading">KEIN SPIEL VERFÜGBAR</div>';
-  // Le bouton principal promet d'ouvrir le match gratuit : il doit le faire.
-  // Tant que la vitrine n'est pas connue, il retombe sur l'ancre #decisions.
+  // PARCOURS. Le bouton principal promet l'analyse gratuite du jour : il
+  // l'ouvre vraiment. Le visiteur hesitant a, juste a cote, "Voir un exemple
+  // d'analyse" qui montre une analyse complete SANS compte - la friction est
+  // donc sur le second bouton, pas sur le premier. Tant que le match n'est
+  // pas resolu, le lien reste l'ancre #decisions : jamais de lien mort.
   var ctaHero=document.querySelector('.hero-cta');
   if(ctaHero&&featured)ctaHero.setAttribute('href','/match/'+featured.id+'.html');
-  if(featured&&currentFilter==='all'&&!currentSearch)list=list.filter(function(m){return m.id!==featured.id;});
+  // On ne retire PLUS le match gratuit de la liste : il en devient la
+  // premiere carte, entierement lisible. C'est la demonstration de valeur.
   if(!list.length){
     el.innerHTML='<div class="empty-state"><h3>'+(isDemain?'MORGEN KEIN WEITERES SPIEL':'KEIN WEITERES SPIEL GEFUNDEN')+'</h3><p>Versuche einen anderen Wettbewerb.</p></div>';
     return;
@@ -1113,7 +1129,12 @@ function renderMatchs(){
   list.forEach(function(m){if((m.date||'')<nowStr)lp.push(m);else la.push(m);});
   la.sort(function(a,b){return(a.date||'')<(b.date||'')?-1:1;});
   lp.sort(function(a,b){return(a.date||'')>(b.date||'')?-1:1;});
-  el.innerHTML=la.concat(lp).map(buildCard).join('');
+  var ordonnee=la.concat(lp);
+  if(freeMatchId){
+    var i=ordonnee.findIndex(function(m){return String(m.id)===String(freeMatchId);});
+    if(i>0)ordonnee.unshift(ordonnee.splice(i,1)[0]);
+  }
+  el.innerHTML=ordonnee.map(buildCard).join('');
 }
 
 async function loadData(){
@@ -1123,6 +1144,7 @@ async function loadData(){
     if(!r.ok)throw new Error('HTTP '+r.status);
     var d=await r.json();
     allMatchs=d.matchs||[];
+    setKpi('kpiJour',allMatchs.length);
     // Un abonne n'a pas a relire l'argumentaire de vente et le tarif a chaque
     // visite : il paie deja. On retire les blocs purement commerciaux et on
     // laisse la methode, la transparence et la FAQ, qui restent utiles.
@@ -1138,6 +1160,18 @@ async function loadData(){
     if(el)el.innerHTML='<div class="empty-state"><h3>LADEFEHLER</h3><p>Versuch es gleich noch einmal.</p></div>';
   }
 }
+
+// Spotlight sobre : la lueur suit le curseur uniquement pendant le survol.
+(function(){
+  if(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+  document.addEventListener('pointermove',function(e){
+    var c=e.target.closest&&e.target.closest('.mc,.spot');
+    if(!c)return;
+    var r=c.getBoundingClientRect();
+    c.style.setProperty('--mx',(e.clientX-r.left)+'px');
+    c.style.setProperty('--my',(e.clientY-r.top)+'px');
+  },{passive:true});
+})();
 
 setupFilters();
 loadData();

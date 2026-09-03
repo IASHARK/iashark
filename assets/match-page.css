@@ -330,57 +330,17 @@ a.threat:hover{border-color:var(--line2);background:var(--card)}
 .card.lecture>h2{color:var(--accent);font-size:12.5px;font-weight:600;letter-spacing:.02em}
 
 /* ==================== LE SIGNAL — la seule surface « haute » ==================== */
-.signal-card{
-  position:relative;overflow:hidden;
-  padding:26px 24px 22px;
-  border:1px solid rgba(34,211,238,.16);
-  border-radius:14px;
-  background:
-    radial-gradient(120% 130% at 82% -20%,rgba(34,211,238,.13),transparent 58%),
-    linear-gradient(168deg,#12202e 0%,#0c1622 46%,#0a121c 100%);
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.06),
-    0 18px 44px -22px rgba(0,0,0,.9);
-}
-.signal-card:hover{border-color:rgba(34,211,238,.24)}
-.sig-head{position:relative;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
-.sig-eyebrow{display:inline-flex;align-items:center;gap:8px;color:var(--accent);
-  font:600 13px var(--body);letter-spacing:.01em;text-transform:none}
-.sig-eyebrow .card-icon{width:15px;height:15px}
 .sig-badges{display:flex;gap:7px;align-items:center}
 
-.sig-body{position:relative;display:flex;align-items:center;justify-content:space-between;
-  gap:22px;margin-top:18px;flex-wrap:wrap}
-.sig-pick{min-width:0;flex:1 1 240px}
-.sig-label{display:block;color:var(--muted);font:400 13px var(--body);letter-spacing:0;text-transform:none}
 /* Le marché recommandé : gros, mais en casse normale et en DM Sans.
    Le Bebas Neue condensé tout en majuscules lisait « template appli de
    paris » — c'est précisément ce que l'utilisateur n'aimait pas. */
-.sig-market{display:block;margin-top:6px;color:#fff;
-  font:700 clamp(30px,4.6vw,40px)/1.08 var(--body);letter-spacing:-.022em;text-wrap:balance}
 
 /* Les chiffres : une rangée aérée séparée par des filets, plus une grille
    de cases. Moins de traits = plus de tenue. */
-.sig-kpis{position:relative;display:flex;flex-wrap:wrap;gap:0;margin-top:22px;
-  padding-top:18px;border-top:1px solid rgba(255,255,255,.07);
-  background:none;border-radius:0;overflow:visible}
-.sig-kpi{flex:1 1 auto;min-width:112px;padding:0 18px;background:none;
-  border-left:1px solid rgba(255,255,255,.06)}
-.sig-kpi:first-child{padding-left:0;border-left:0}
-.sig-kpi span{display:block;color:var(--muted);font:400 12.5px var(--body);
-  letter-spacing:0;text-transform:none}
-.sig-kpi b{display:block;margin-top:5px;color:var(--text);
-  font:600 20px var(--body);font-variant-numeric:tabular-nums;letter-spacing:-.015em}
 /* Vert et rouge UNIQUEMENT ici, sur la valeur chiffrée de l'écart. */
-.sig-kpi b.pos{color:var(--green)}
-.sig-kpi b.neg{color:var(--red)}
-.sig-kpi b.flat{color:var(--text)}
 
 /* Le verdict est une phrase, plus un bandeau coloré. */
-.sig-verdict{position:relative;margin:18px 0 0;padding:0;border:0;background:none;
-  color:#9fb3c4;font:400 14px/1.6 var(--body)}
-.sig-verdict:before{display:none}
-.sig-verdict.pos,.sig-verdict.neg,.sig-verdict.flat{background:none;border:0}
 
 /* Badges confiance / risque : contour neutre, un simple point coloré. */
 .signal-card .badge{border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.03);
@@ -668,62 +628,6 @@ a.threat:hover{border-color:var(--line2);background:var(--card)}
   .sig-sticky{transition:opacity .2s}
 }
 
-/* V6 — page d'analyse : décision pleine largeur, puis lecture 8/4.
-   Tailwind porte le détail des composants ; ces règles ne couvrent que la
-   composition partagée et les SVG/détails générés par les données. */
-:root{--container:1240px;--muted:#8295a8;--dim:#9aabba}
-.match-shell{width:min(var(--container),calc(100% - 32px))}
-.match-page-v6{gap:20px;padding-bottom:28px}
-.analysis-layout{display:grid;grid-template-columns:minmax(0,1fr);gap:28px;align-items:start}
-.analysis-layout>aside{align-self:stretch;height:100%}
-.analysis-main{display:flex;min-width:0;flex-direction:column;gap:36px}
-.analysis-section{min-width:0;padding:2px 0}
-.analysis-section>h2,.upgrade-panel>h2{margin:5px 0 0;color:var(--text);font:700 clamp(22px,2.2vw,30px)/1.2 var(--body);letter-spacing:-.025em}
-.section-kicker{color:var(--accent);font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase}
-.analysis-details summary::-webkit-details-marker{display:none}
-.analysis-details summary span:last-child{color:var(--accent);font-size:20px;line-height:1;transition:transform .18s ease}
-.analysis-details[open] summary span:last-child{transform:rotate(45deg)}
-.analysis-main>.card{padding:22px;border:1px solid rgba(255,255,255,.07);border-radius:14px;background:rgba(13,21,32,.7);box-shadow:none}
-.analysis-main>.card:hover{background:rgba(13,21,32,.9);border-color:rgba(255,255,255,.1)}
-.analysis-main>.card>h2{margin-bottom:20px;font-size:18px;font-weight:650}
-.upgrade-panel{padding:28px;border:1px solid rgba(34,211,238,.15);border-radius:16px;background:linear-gradient(145deg,rgba(34,211,238,.07),rgba(13,21,32,.82) 52%)}
-.upgrade-panel>p:not(.section-kicker){max-width:56ch;margin:10px 0 0;color:var(--muted);font-size:14px;line-height:1.65}
-.upgrade-panel>div{display:flex;flex-wrap:wrap;gap:10px;margin-top:20px}
-.upgrade-panel a,.analysis-nav a{display:inline-flex;min-height:44px;align-items:center;justify-content:center;border-radius:11px;padding:0 18px;text-decoration:none;font-size:13px;font-weight:700}
-.upgrade-panel a:first-child{background:var(--accent);color:#06121a}
-.upgrade-panel a:last-child,.analysis-nav a{border:1px solid var(--line2);color:var(--text)}
-.analysis-nav{padding-top:4px}
-.signal-card{background:radial-gradient(85% 110% at 88% -15%,rgba(34,211,238,.13),transparent 60%),linear-gradient(160deg,#101d2a,#0a131e 68%)}
-.signal-card .card-icon{width:16px;height:16px}
-.signal-card .badge{border-color:rgba(255,255,255,.1);background:rgba(255,255,255,.035);color:#b4c3d1;font:500 12px var(--body);letter-spacing:0;text-transform:none}
-.signal-card h1{font-family:var(--body)}
-.card.hero{padding:24px 30px}
-.hero-teams{grid-template-columns:1fr 92px 1fr}
-.hero-team b{font-family:var(--body);font-size:clamp(21px,2.2vw,30px);font-weight:700;letter-spacing:-.025em}
-.hero-probbar{max-width:880px;width:100%;margin:2px auto 0}
-.prob-legend{font-size:12.5px}
-.scenario-chart text{font-family:var(--body)}
-.faq-list summary{min-height:52px;padding:17px 0;font-size:15.5px}
-.empty{min-height:0;padding:12px 0;text-align:left;place-items:start}
-@media(min-width:1024px){
-  .analysis-layout{grid-template-columns:minmax(0,8fr) minmax(270px,4fr);gap:28px}
-  .analysis-main{gap:42px}
-}
-@media(max-width:767px){
-  .match-shell{width:min(100% - 24px,var(--container))}
-  .analysis-main{gap:30px}
-  .analysis-main>.card{padding:18px}
-  .card.hero{padding:20px 16px}
-  .hero-teams{grid-template-columns:minmax(0,1fr) 42px minmax(0,1fr)}
-  .hero-team b{font-size:18px}
-  .hero-team img{width:52px;height:52px}
-  .upgrade-panel{padding:22px 18px}
-  .upgrade-panel>div{display:grid}
-}
-@media(prefers-reduced-motion:reduce){
-  .analysis-details summary span:last-child{transition:none}
-}
-
 /* ---------- En-tete : la premiere impression ---------- */
 /* Elle etait aussi discrete qu'une ligne de tableau : 46px d'ecusson et un
    nom d'equipe en 18px. C'est la premiere chose que voit un abonne, elle a
@@ -767,13 +671,8 @@ a.threat:hover{border-color:var(--line2);background:var(--card)}
 .hero-vs:after{left:calc(100% + 6px)}
 
 /* ---------- Le signal : le bloc qu'on doit voir en premier ---------- */
-.signal-card{padding:30px 26px 24px}
-.sig-market{font-size:clamp(30px,5.6vw,46px);line-height:1.02;letter-spacing:.005em}
-.sig-label{font-size:13.5px}
 /* La cote est ce que le parieur cherche en premier apres le marche :
    elle ne doit plus se confondre avec les autres chiffres de la rangee. */
-.sig-kpi b{font-size:20px}
-.sig-kpis{margin-top:26px}
 
 @media(max-width:640px){
   .card.hero{padding:18px 16px 16px}
@@ -785,56 +684,3 @@ a.threat:hover{border-color:var(--line2);background:var(--card)}
   .hero-vs:before,.hero-vs:after{display:none}
   .signal-card{padding:22px 18px 18px}
 }
-
-/* ---------- Zone de preuves : pleine largeur, deux colonnes ----------
-   Les blocs de donnees restaient dans la colonne narrative etroite, ce qui
-   laissait la moitie droite de l'ecran vide sur toute leur hauteur. Ils
-   occupent desormais la largeur complete, en deux colonnes a partir de
-   1100px. Le contenu ne change pas, seule sa mise en page. */
-.proof-zone{margin-top:var(--gap)}
-.proof-grid{display:grid;grid-template-columns:1fr;gap:var(--gap);align-items:start}
-@media(min-width:1100px){.proof-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
-/* Le scenario et le comparatif portent des graphiques : ils respirent mieux
-   sur toute la largeur quand la place le permet. */
-@media(min-width:1100px){
-  /* Le comparatif prend toute la largeur QUAND il a des donnees a comparer.
-     Vide, il reste dans une colonne : une absence de donnee ne doit pas
-     barrer la page pour annoncer qu'elle est absente. */
-  .proof-grid > .compare-card:not(.is-empty){grid-column:1 / -1}
-}
-.proof-grid > .compare-card.is-empty .empty{min-height:0;padding:6px 0;font-size:13px}
-.analysis-end{margin-top:var(--gap)}
-
-/* ---------- Compactage cible (brief page match) ----------
-   Deux blocs etaient explicitement pointes comme trop hauts. On reduit leur
-   encombrement SANS toucher au contenu ni rapetisser le texte de lecture :
-   uniquement les respirations internes et la mise en page des lignes. */
-
-/* Matchup : le bloc le plus haut de la zone de preuves. Les lignes passent
-   d'une composition sur deux etages a une ligne compacte. */
-.mu-row{padding:5px 0}
-.mu-mid b{margin-bottom:3px;font-size:11px}
-.mu-mid b em{display:inline;margin-left:5px;font-size:9.5px}
-.mu-head{padding-bottom:7px;margin-bottom:2px}
-.mu-global{margin-top:9px;padding-top:9px}
-.mu-g-side b{font-size:17px}
-.mu-foot{margin-top:6px}
-
-/* Buteur a surveiller : c'est une information secondaire, elle ne doit pas
-   peser autant que le signal. Les statistiques passent en grille 2x2 au lieu
-   d'une liste de quatre lignes. */
-.threat-figures{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 16px;margin-top:9px}
-.threat-figures b{font-size:19px}
-.threat-stats{margin-top:8px;padding-top:8px}
-
-/* FAQ : une ligne par question, sans carte autour de chacune. */
-.faq-item summary{padding:11px 0}
-.faq-item p{padding-bottom:11px}
-
-/* Buteur : la liste de statistiques passe en grille 2x2. C'est une donnee
-   secondaire, elle ne doit pas occuper autant de hauteur que le signal. */
-.threat-table{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:2px 18px}
-.threat-table tbody,.threat-table thead{display:contents}
-.threat-table tr{display:flex;align-items:baseline;justify-content:space-between;gap:10px;
-  padding:7px 0;border-bottom:1px solid var(--line)}
-.threat-table td{padding:0;border:0}

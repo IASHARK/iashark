@@ -8,7 +8,7 @@ test("la page Match est un shell léger sans ancien rendu inline",()=>{
   assert.match(html,/id="matchRoot"/);assert.match(html,/match-page\.js/);
   assert.doesNotMatch(html,/function render\(/);assert.doesNotMatch(html,/crit_home\.att===0/);
 });
-test("la page expose une lecture principale et un résumé sticky desktop, sans onglets",()=>{
+test("la page simple expose une seule colonne de sections réelles, sans onglets",()=>{
   assert.doesNotMatch(js,/data-tab=/);assert.doesNotMatch(js,/role="tablist"/);
   // Libelles mis a jour le 02/09/2026 apres decisions produit explicites :
   // "Recommandation IASHARK" -> "Le signal IASHARK" (remontee en tete de page) ;
@@ -17,7 +17,7 @@ test("la page expose une lecture principale et un résumé sticky desktop, sans 
   // "Absents & incertains" supprimee (n'affichait le plus souvent que
   // "aucune absence" pour les deux equipes) ;
   // "Questions sur ce match" ajoutee.
-  for(const value of ['Le signal IASHARK','Pourquoi ce signal','Buts attendus','Comparatif des deux équipes','Scores probables','Scénario probable du match','Buteur à surveiller','Questions sur ce match','Résumé du signal'])assert.match(js,new RegExp(value));
+  for(const value of ['Le signal IASHARK','Notre lecture du match','Buts attendus','Comparatif des deux équipes','Scores probables','Scénario probable du match','Buteur à surveiller','Questions sur ce match'])assert.match(js,new RegExp(value));
 });
 test("la page est responsive",()=>{
   assert.match(css,/@media\(max-width:640px\)/);
@@ -38,43 +38,22 @@ test("le workflow alimente les blocs comparatifs sans valeur de secours",()=>{
   assert.match(js,/functions\.invoke\('match-data'\)/);
 });
 
-// ORDRE DE LECTURE. Trois niveaux, dans cet ordre : la decision (en-tete +
-// signal), le pourquoi (narratif + resume collant), puis les preuves. Les
-// preuves sortent volontairement de la colonne narrative pour occuper toute
-// la largeur en deux colonnes : dans la version precedente elles restaient
-// dans la colonne etroite et laissaient ~3 100 px de vide a droite sur un
-// ecran 1440.
+// ORDRE DE LECTURE fixe par l'utilisateur le 03/09/2026. Il a ete demande
+// explicitement, section par section : ce n'est pas un detail cosmetique,
+// donc il est verrouille ici plutot que laisse a la relecture.
 test("la page match assemble les sections dans l'ordre demande",()=>{
-  const render=js.slice(js.indexOf('function render(raw'),js.indexOf('function bindMotion'));
+  const bloc=js.slice(js.indexOf("const sections=["),js.indexOf("];",js.indexOf("const sections=[")));
   const attendu=[
-    "hero(vm)","signalCard(vm)","analysis-layout","proof-zone","analysis-end"
+    "signalCard","matchReadingCard","keyInsightsCard","outputsCard",
+    "Comparatif des deux équipes","threatsCard","matchupCard",
+    "formNoteCard","valuePotentialCard","Scénario probable du match","faqCard"
   ];
   let curseur=-1;
   for(const jalon of attendu){
-    const i=render.indexOf(jalon);
+    const i=bloc.indexOf(jalon);
     assert.ok(i>curseur,`"${jalon}" n'est pas a sa place dans l'ordre de lecture`);
     curseur=i;
   }
-  // Le narratif precede les preuves, et la fin de page ferme la lecture.
-  const narratif=js.slice(js.indexOf('const narratif='),js.indexOf('const preuves='));
-  for(const bloc of ["whySignal(vm)","risksSection(vm)"]){
-    assert.ok(narratif.includes(bloc),bloc+" doit etre dans le narratif");
-  }
-  const preuves=js.slice(js.indexOf('const preuves='),js.indexOf('const fin='));
-  for(const bloc of ["outputsCard","Comparatif des deux équipes","matchupCard","threatsCard","formNoteCard","Scénario probable du match"]){
-    assert.ok(preuves.includes(bloc),bloc+" doit etre dans la zone de preuves");
-  }
-  const finBloc=js.slice(js.indexOf('const fin='),js.indexOf('root.innerHTML'));
-  for(const bloc of ["methodology(vm)","faqCard(vm)","contextualCta("]){
-    assert.ok(finBloc.includes(bloc),bloc+" doit fermer la page");
-  }
-});
-
-test("le signal principal précède la grille d'analyse et la value n'est pas répétée",()=>{
-  const render=js.slice(js.indexOf('function render(raw'),js.indexOf('function bindMotion'));
-  assert.ok(render.indexOf('signalCard(vm)')<render.indexOf('analysis-layout'));
-  assert.doesNotMatch(render,/valuePotentialCard\(vm\)/);
-  assert.match(render,/stickySummary\(vm\)/);
 });
 
 test("les blocs retires a la demande de l'utilisateur ne reviennent pas",()=>{
@@ -83,13 +62,8 @@ test("les blocs retires a la demande de l'utilisateur ne reviennent pas",()=>{
   }
 });
 
-test("les sections absentes sont filtrées sans créer de vide",()=>{
-  const render=js.slice(js.indexOf('function render(raw'),js.indexOf('function bindMotion'));
-  // Les trois groupes filtrent leurs blocs vides : une donnee absente ne doit
-  // jamais produire une carte vide ni un trou dans la page.
-  assert.equal((render.match(/\.filter\(Boolean\)/g)||[]).length,3,
-    "narratif, preuves et fin doivent chacun filtrer leurs blocs vides");
-  // Et les conteneurs eux-memes disparaissent s'ils n'ont rien a montrer.
-  assert.match(render,/narratif\?`<div class="analysis-layout"/);
-  assert.match(render,/preuves\.length\?`<section class="proof-zone reveal"/);
+// La numerotation doit suivre ce qui est REELLEMENT affiche : une section
+// absente faute de donnees ne doit pas laisser un trou (01, 02, 04...).
+test("la numerotation des sections se base sur les sections non vides",()=>{
+  assert.match(js,/sections\.filter\(Boolean\)/);
 });

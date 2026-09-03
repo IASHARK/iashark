@@ -207,28 +207,58 @@ function signalCard(vm){
   const implied=marketOdds!==null&&marketOdds>0?100/marketOdds:null;
   const edge=(prob!==null&&implied!==null)?Math.round((prob-implied)*10)/10:null;
   const verdict=edgeVerdict(edge);
-  const kpi=(label,value,cls)=>`<div class="sig-kpi"><span>${esc(label)}</span><b class="${cls||''}">${value}</b></div>`;
-  return `<section class="card signal-card reveal">
-    <div class="sig-head">
-      <span class="sig-eyebrow">${cardIcon('target')}Le signal IASHARK</span>
-      <div class="sig-badges">${confidenceBadge(r.reliability)}${riskBadge(vm.editorial.riskCode)}</div>
+  const kpi=(label,value,accent)=>`<div class="min-w-0 border-l border-white/[.07] pl-4 first:border-l-0 first:pl-0"><span class="block text-xs leading-5 text-soft">${esc(label)}</span><b class="mt-1 block text-xl font-semibold tabular-nums ${accent?'text-cyan':'text-ink'}">${value}</b></div>`;
+  const compare=(label,value,isModel)=>value===null?'':`<div><div class="mb-2 flex items-baseline justify-between gap-3 text-sm"><span class="text-soft">${label}</span><b class="tabular-nums ${isModel?'text-cyan':'text-ink'}">${pct(value)}</b></div><div class="h-2 overflow-hidden rounded-full bg-white/[.07]" role="img" aria-label="${label} ${pct(value)}"><span class="block h-full rounded-full ${isModel?'bg-cyan':'bg-white/40'} motion-safe:transition-[width] motion-safe:duration-700" style="width:${clamp(value)}%"></span></div></div>`;
+  return `<section class="signal-card reveal overflow-hidden rounded-2xl border border-cyan/20 bg-panel p-5 shadow-2xl shadow-black/30 sm:p-7 lg:p-8">
+    <div class="flex flex-wrap items-center justify-between gap-3"><span class="inline-flex items-center gap-2 text-sm font-semibold text-cyan">${cardIcon('target')}Le signal IASHARK</span><div class="sig-badges flex flex-wrap gap-2">${confidenceBadge(r.reliability)}${riskBadge(vm.editorial.riskCode)}</div></div>
+    <div class="mt-7 grid gap-7 lg:grid-cols-[minmax(0,1.1fr)_minmax(280px,.9fr)] lg:items-end">
+      <div><span class="block text-sm text-soft">Marché recommandé</span><h1 class="mt-2 max-w-3xl text-balance text-3xl font-bold leading-tight tracking-tight text-white sm:text-4xl lg:text-5xl">${esc(r.market)}</h1></div>
+      <div class="space-y-4 rounded-xl border border-white/[.07] bg-black/15 p-4" aria-label="Comparaison du modèle et du marché">${compare('Probabilité modèle',prob,true)}${compare('Probabilité marché',implied,false)}${edge!==null?`<p class="flex items-center justify-between border-t border-white/[.07] pt-3 text-sm text-soft"><span>Écart détecté</span><b class="tabular-nums text-cyan">${edge>0?'+':''}${fmt(edge)} pts</b></p>`:''}</div>
     </div>
-    <div class="sig-body">
-      <div class="sig-pick">
-        <span class="sig-label">Marché recommandé</span>
-        <strong class="sig-market">${esc(r.market)}</strong>
-      </div>
-      ${probRing(prob,true)}
-    </div>
-    <div class="sig-kpis">
-      ${kpi('Probabilité modèle',pct(prob))}
-      ${implied!==null?kpi('Probabilité marché',pct(implied)):''}
-      ${kpi('Cote équitable',odds(fair))}
-      ${kpi('Cote marché',odds(marketOdds))}
-      ${edge!==null?kpi('Écart',(edge>0?'+':'')+fmt(edge)+' pts',edge>=3?'pos':edge<=-3?'neg':'flat'):''}
-    </div>
-    ${verdict?`<p class="sig-verdict ${verdict.cls}">${esc(verdict.text)}</p>`:''}
+    <div class="mt-7 grid grid-cols-2 gap-x-4 gap-y-5 border-t border-white/[.07] pt-5 sm:grid-cols-3 lg:grid-cols-5">${kpi('Probabilité modèle',pct(prob),true)}${implied!==null?kpi('Probabilité marché',pct(implied)):''}${kpi('Cote juste',odds(fair))}${kpi('Cote marché',odds(marketOdds))}${edge!==null?kpi('Écart',(edge>0?'+':'')+fmt(edge)+' pts',edge>=3):''}</div>
+    ${verdict?`<p class="mt-6 max-w-3xl text-sm leading-6 text-soft">${esc(verdict.text)}</p>`:''}
   </section>`;
+}
+
+function whySignal(vm){
+  if(!vm.model.recommendation)return '';
+  const candidates=[];
+  if(vm.editorial.decisiveFactor)candidates.push(vm.editorial.decisiveFactor);
+  vm.keyInsights.filter(x=>x.type==='positive_home'||x.type==='positive_away').forEach(x=>candidates.push(x.text));
+  const points=[...new Set(candidates.filter(Boolean))].slice(0,3);
+  if(!points.length)return '';
+  return `<section class="analysis-section reveal" id="pourquoi"><div class="section-kicker">Lecture</div><h2>Pourquoi ce signal ?</h2><div class="mt-5 grid gap-3 sm:grid-cols-3">${points.map((text,i)=>`<article class="rounded-xl border border-white/[.07] bg-white/[.025] p-4"><span class="text-xs font-semibold tabular-nums text-cyan/70">0${i+1}</span><p class="mt-3 text-sm leading-6 text-ink">${esc(text)}</p></article>`).join('')}</div>${vm.editorial.reading?`<details class="analysis-details mt-5 border-t border-white/[.07] pt-2"><summary class="flex min-h-11 cursor-pointer items-center justify-between gap-3 py-3 font-semibold text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan">Lire l’analyse complète <span aria-hidden="true">+</span></summary><p class="max-w-3xl pb-2 text-base leading-7 text-soft">${esc(vm.editorial.reading)}</p></details>`:''}</section>`;
+}
+
+function risksSection(vm){
+  const support=vm.keyInsights.filter(x=>x.type==='positive_home'||x.type==='positive_away').slice(0,2);
+  const risks=vm.keyInsights.filter(x=>x.type==='watch'||x.type==='contradiction').slice(0,3);
+  const riskText=String(vm.editorial.risk||'').trim();
+  if(riskText&&!['FAIBLE','MODERE','ELEVE'].includes(riskText.toUpperCase()))risks.unshift({title:'Risque principal',text:riskText});
+  if(!support.length&&!risks.length)return '';
+  const block=(title,items,caution)=>items.length?`<article class="rounded-xl border ${caution?'border-amber-400/20 bg-amber-400/[.045]':'border-white/[.07] bg-white/[.025]'} p-5"><h3 class="text-sm font-semibold ${caution?'text-amber-200':'text-ink'}">${title}</h3><ul class="mt-4 space-y-3">${items.map(x=>`<li class="flex gap-3 text-sm leading-6 text-soft"><span class="mt-2 h-1.5 w-1.5 shrink-0 rounded-full ${caution?'bg-amber-300':'bg-cyan'}"></span><span><b class="text-ink">${esc(x.title||'')}</b>${x.title?' — ':''}${esc(x.text||'')}</span></li>`).join('')}</ul></article>`:'';
+  return `<section class="analysis-section reveal"><div class="section-kicker">Incertitude</div><h2>Ce qui soutient — et ce qui fragilise</h2><div class="mt-5 grid gap-4 md:grid-cols-2">${block('Ce qui soutient le signal',support,false)}${block('Ce qui pourrait l’invalider',risks,true)}</div></section>`;
+}
+
+function methodology(vm){
+  const bits=[];
+  if(n(vm.model.simulationCount)!==null)bits.push(`${vm.model.simulationCount.toLocaleString('fr-FR')} simulations`);
+  if(n(vm.model.quality)!==null)bits.push(`qualité des données ${fmt(vm.model.quality)}/100`);
+  if(Array.isArray(vm.model.sources)&&vm.model.sources.length)bits.push(vm.model.sources.filter(Boolean).join(', '));
+  if(!bits.length)return '';
+  return `<section class="analysis-section reveal"><details class="analysis-details border-y border-white/[.07]"><summary class="flex min-h-14 cursor-pointer items-center justify-between gap-4 py-4 font-semibold text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan"><span>Sur quoi repose cette analyse ?</span><span aria-hidden="true">+</span></summary><p class="max-w-3xl pb-5 text-sm leading-6 text-soft">${esc(bits.join(' · '))}. Les probabilités décrivent une fréquence attendue, jamais une certitude sur ce match précis.</p></details></section>`;
+}
+
+function stickySummary(vm){
+  const r=vm.model.recommendation;if(!r)return '';
+  const prob=n(r.probability),od=n(vm.model.recommendedOdds),implied=od&&od>0?100/od:null,edge=prob!==null&&implied!==null?Math.round((prob-implied)*10)/10:null;
+  const row=(k,v,accent)=>v&&v!=='—'?`<div class="flex items-center justify-between gap-4 border-t border-white/[.07] py-3 first:border-0"><span class="text-xs text-soft">${esc(k)}</span><b class="text-sm tabular-nums ${accent?'text-cyan':'text-ink'}">${v}</b></div>`:'';
+  return `<aside class="hidden lg:block"><div class="sticky top-6 rounded-2xl border border-white/10 bg-surface p-5 shadow-xl shadow-black/20"><span class="text-xs font-semibold uppercase tracking-widest text-cyan">Résumé du signal</span><h2 class="mt-3 text-xl font-bold leading-snug text-white">${esc(r.market)}</h2><div class="mt-5">${row('Probabilité modèle',pct(prob),true)}${row('Probabilité marché',pct(implied))}${row('Écart',edge===null?'':`${edge>0?'+':''}${fmt(edge)} pts`,true)}${row('Cote juste',prob?odds(100/prob):'')}${row('Cote marché',odds(od))}${row('Confiance',r.reliability||'')}${row('Risque',vm.editorial.riskCode?vm.editorial.riskCode.toLowerCase():'')}</div><a href="#pourquoi" class="mt-4 inline-flex min-h-11 w-full items-center justify-center rounded-xl border border-white/10 px-4 text-sm font-semibold text-ink transition hover:border-cyan/30 hover:bg-white/[.04] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan">Revoir l’explication</a></div></aside>`;
+}
+
+function contextualCta(isPro,isDemo){
+  if(isPro)return `<nav class="analysis-nav reveal" aria-label="Navigation des analyses"><a href="/#decisions">Retour aux analyses</a></nav>`;
+  return `<section class="upgrade-panel reveal"><p class="section-kicker">IAShark Pro</p><h2>${isDemo?'Cette analyse est un exemple.':'Ce match n’est qu’une analyse.'}</h2><p>Accédez à toutes les décisions IAShark du jour, avec leurs preuves et leurs limites.</p><div><a href="/abonnement.html">Débloquer toutes les analyses</a><a href="/#decisions">Retour aux matchs du jour</a></div></section>`;
 }
 
 
@@ -593,41 +623,40 @@ function bindSticky(){
   },{threshold:0}).observe(anchor);
 }
 
-function render(raw){
+function render(raw,access={isPro:false,isDemo:false}){
   const vm=IasharkMatchViewModel.buildMatchViewModel(raw);
   document.title=`${vm.identity.home.name} vs ${vm.identity.away.name} — IASHARK`;
-  // ORDRE DE LECTURE, fixe par l'utilisateur le 03/09/2026. Une seule
-  // colonne : la page se lit comme un dossier, de haut en bas, au lieu de
-  // deux colonnes ou l'oeil ne sait pas laquelle lire en premier.
-  // On sort le signal, puis on l'interprete, puis on l'etaye par les
-  // donnees, puis le scenario, puis les questions restantes.
-  // Retires a la meme occasion : "Pourquoi ce pari ?", "Modele vs marche",
-  // "Marches a surveiller", "Face a face" et "Arbitre".
-  const sections=[
-    signalCard(vm),
-    matchReadingCard(vm),
-    keyInsightsCard(vm),
+
+  // TROIS NIVEAUX DE LECTURE.
+  // 1. La decision : en-tete du match + signal, pleine largeur.
+  // 2. Le pourquoi : narratif etroit, avec le resume du signal en vis-a-vis
+  //    (colonne collante) - c'est la que le rappel sert vraiment.
+  // 3. Les preuves : elles sortent de cette grille et occupent TOUTE la
+  //    largeur, sur deux colonnes. Avant, elles restaient dans la colonne
+  //    etroite et laissaient ~3 100 px de vide a droite sur un ecran 1440.
+  const narratif=[whySignal(vm),risksSection(vm)].filter(Boolean).join('');
+  const preuves=[
     outputsCard(vm),
-    card('Comparatif des deux équipes',comparison(vm),'compare-card','compare'),
-    threatsCard(vm),
+    (function(){
+      // Une donnee absente ne merite pas une pleine largeur pour dire qu'elle
+      // manque. Quand le comparatif n'a rien a montrer, sa carte reste dans
+      // une colonne et se compacte au lieu de barrer la page.
+      var corps=comparison(vm);
+      var vide=/class="empty"/.test(corps);
+      return card('Comparatif des deux équipes',corps,'compare-card'+(vide?' is-empty':''),'compare');
+    })(),
     matchupCard(vm),
+    threatsCard(vm),
     formNoteCard(vm),
-    valuePotentialCard(vm),
-    // "Scenario probable du match" : contenu et style geles a la demande de
-    // l'utilisateur. Seule sa POSITION change ici.
-    card('Scénario probable du match',scenarioCard(vm),'','chart'),
-    faqCard(vm)
-  ];
-  // La numerotation suit ce qui est REELLEMENT affiche : une section absente
-  // faute de donnees ne laisse pas de trou dans la suite des numeros.
-  let rang=0;
-  const corps=sections.filter(Boolean).map(node=>{
-    rang++;
-    return `<div class="sec"><span class="sec-num" aria-hidden="true">${String(rang).padStart(2,'0')}</span>${node}</div>`;
-  }).join('');
-  root.innerHTML=`<div class="page">${hero(vm)}<div class="secs">${corps}</div></div>${signalSticky(vm)}`;
+    card('Scénario probable du match',scenarioCard(vm),'','chart')
+  ].filter(Boolean);
+  const fin=[methodology(vm),faqCard(vm),contextualCta(access.isPro,access.isDemo)].filter(Boolean).join('');
+
+  root.innerHTML=`<div class="page match-page-v6">${hero(vm)}${signalCard(vm)}`
+    +(narratif?`<div class="analysis-layout"><div class="analysis-main">${narratif}</div>${stickySummary(vm)}</div>`:'')
+    +(preuves.length?`<section class="proof-zone reveal"><h2 class="sr-only">Les données derrière ce signal</h2><div class="proof-grid">${preuves.join('')}</div></section>`:'')
+    +`<div class="analysis-main analysis-end">${fin}</div></div>`;
   bindMotion();
-  bindSticky();
 }
 
 function bindMotion(){
@@ -662,14 +691,15 @@ function bindMotion(){
 // protection cote serveur existe deja separement sur les champs premium via
 // la fonction match-data (voir supabase/functions/match-data).
 function gateCard(vm,opts){
-  const homeName=vm.identity.home.name,awayName=vm.identity.away.name;
   return `<div class="page">
     ${hero(vm)}
-    <section class="card gate reveal">
-      ${cardIcon('lock')}
-      <h2>${esc(opts.title)}</h2>
-      <p>${esc(opts.text)}</p>
-      <a class="btn-gate" href="${opts.href}">${esc(opts.cta)}</a>
+    <section class="gate reveal overflow-hidden rounded-2xl border border-cyan/15 bg-panel p-6 text-center sm:p-10">
+      <div class="mx-auto grid h-12 w-12 place-items-center rounded-full border border-cyan/20 bg-cyan/10 text-cyan">${cardIcon('lock')}</div>
+      <p class="mt-6 text-xs font-semibold uppercase tracking-widest text-cyan">Aperçu de l’analyse</p>
+      <h1 class="mx-auto mt-3 max-w-2xl text-2xl font-bold text-white sm:text-3xl">${esc(opts.title)}</h1>
+      <p class="mx-auto mt-4 max-w-xl text-base leading-7 text-soft">${esc(opts.text)}</p>
+      ${opts.teaser?`<div class="mx-auto mt-6 max-w-xl rounded-xl border border-white/[.07] bg-black/15 p-5 text-left"><span class="text-xs text-soft">Signal détecté</span><p class="mt-2 text-lg font-semibold text-ink">${esc(opts.teaser)}</p><div class="mt-4 h-2 overflow-hidden rounded-full bg-white/[.07]"><span class="block h-full w-2/3 rounded-full bg-cyan/50"></span></div></div>`:''}
+      <a class="mt-7 inline-flex min-h-12 items-center justify-center rounded-xl bg-cyan px-6 text-sm font-bold text-page transition hover:bg-cyan/90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan" href="${opts.href}">${esc(opts.cta)}</a>
     </section>
   </div>`;
 }
@@ -691,7 +721,8 @@ function renderProWall(raw){
     title:'Analyse reservee aux membres Pro',
     text:'Le marche recommande, la confiance du modele et l’analyse complete de ce match sont reserves aux membres Pro. Le match du jour, lui, reste gratuit.',
     href:'/abonnement.html',
-    cta:'Devenir Pro'
+    cta:'Débloquer l’analyse complète',
+    teaser:'Le modèle détecte un écart entre sa probabilité et celle du marché.'
   });
   bindMotion();
 }
@@ -703,7 +734,7 @@ async function init(){
     // logique d'acces n'est contournee ailleurs - le drapeau n'existe que sur
     // cette page marketing, et le match y est fige dans le HTML.
     if(typeof IASHARK_DEMO!=='undefined'&&IASHARK_DEMO&&typeof PRELOADED_MATCH!=='undefined'){
-      render(PRELOADED_MATCH);
+      render(PRELOADED_MATCH,{isDemo:true,isPro:false});
       return;
     }
     const id=typeof FIXED_MATCH_ID!=='undefined'?String(FIXED_MATCH_ID):new URLSearchParams(location.search).get('id');
@@ -729,7 +760,7 @@ async function init(){
     const isFree=String(raw.id)===String(IasharkFreeMatch.pickFreeMatchId(list));
     if(isFree&&!ctx.session){renderAuthWall(raw);return;}
     if(!isFree&&!ctx.isPro){renderProWall(raw);return;}
-    render(raw);
+    render(raw,{isPro:ctx.isPro,isDemo:false});
   }catch(e){
     root.innerHTML=`<div class="match-error"><b>${esc(e.message||'Erreur de chargement')}</b><a href="/">Retour à l'accueil</a></div>`;
   }

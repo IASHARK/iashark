@@ -9,7 +9,9 @@ module.exports = {
     // Parcours de compte et d'authentification.
     "./compte.html", "./account-page.js",
     "./connexion.html", "./inscription.html",
-    "./mot-de-passe-oublie.html", "./reinitialiser-mot-de-passe.html", "./auth-pages.js"
+    "./mot-de-passe-oublie.html", "./reinitialiser-mot-de-passe.html", "./auth-pages.js",
+    // Blog.
+    "./blog.html"
   ],
   corePlugins: { preflight: false },
   theme: {

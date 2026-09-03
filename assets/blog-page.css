@@ -1,0 +1,62 @@
+/* IASHARK — Blog. Le strict complement de Tailwind : tout le reste de la page
+   est en classes utilitaires.
+
+   Reset minimal, comme assets/tools-page.css et assets/account.css. Le
+   preflight de Tailwind est desactive dans tailwind.config.js pour ne pas
+   ecraser le CSS maison des autres pages ; cette page ne charge plus
+   blog-index.css (supprimee) et doit donc porter elle-meme le box-sizing. */
+*,*::before,*::after{box-sizing:border-box}
+html,body{margin:0}
+body{font-family:'Inter',system-ui,sans-serif}
+h1,h2,h3,h4,p,ul,ol,figure{margin:0}
+ul,ol{list-style:none;padding:0}
+button{background:transparent;border:0;padding:0;cursor:pointer}
+button{font:inherit;color:inherit}
+/* Sans preflight, un <a> garde le bleu souligne du navigateur : le titre de
+   l'article a la une s'affichait en bleu-violet souligne au milieu de la
+   page. La couleur est portee par les utilitaires Tailwind, pas par le lien. */
+a{color:inherit;text-decoration:none}
+img,svg{display:block;max-width:100%}
+
+/* Titres condenses : identite IASHARK, reservee aux grands titres et aux
+   titres d'articles. Jamais aux paragraphes ni aux extraits, qui doivent
+   rester dans une typo de lecture. */
+.titre{font-family:'Bebas Neue',Impact,sans-serif;letter-spacing:.012em}
+
+/* ---------- Cartes d'article ---------- */
+/* Toute la carte est cliquable, mais le lien reel est porte par le titre :
+   c'est lui que les lecteurs d'ecran et la navigation clavier annoncent, et
+   c'est lui qui part dans l'onglet quand on fait clic-milieu. Le reste de la
+   carte n'est qu'une zone de clic, via le pseudo-element ci-dessous. */
+.carte{position:relative}
+.carte a::after{content:"";position:absolute;inset:0}
+.carte:hover{border-color:rgba(141,179,211,.26)}
+.carte:hover .vignette img{transform:scale(1.02)}
+.carte:hover .carte-titre{color:#20d5ef}
+/* Le focus clavier arrive sur le lien du titre : c'est la carte entiere qu'on
+   entoure, sinon l'anneau se dessine autour d'un texte au milieu du bloc. */
+.carte:focus-within{border-color:rgba(32,213,239,.45);outline:2px solid #20d5ef;outline-offset:2px}
+.carte:focus-within a:focus-visible{outline:none}
+/* La vignette garde toujours le meme rapport : les images ne decident jamais
+   de la hauteur d'une carte, et la place est reservee avant leur arrivee. */
+.vignette{position:relative;overflow:hidden;background:#081420;aspect-ratio:16/9}
+.vignette img{width:100%;height:100%;object-fit:cover;transition:transform .35s ease}
+@media(prefers-reduced-motion:reduce){.vignette img{transition:none}}
+
+/* Le titre doit s'arreter proprement plutot que d'etirer la carte : trois
+   lignes au maximum, l'extrait deux. */
+.ligne3{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.ligne2{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+
+/* ---------- Focus clavier ---------- */
+:where(a,button,summary,[tabindex]):focus-visible{outline:2px solid #20d5ef;outline-offset:2px;border-radius:4px}
+
+/* ---------- Sujets ---------- */
+.sujet[aria-pressed="true"]{background:#20d5ef;border-color:#20d5ef;color:#04141b}
+.sujet{transition:background .15s,border-color .15s,color .15s}
+
+/* La fleche des liens de lecture avance legerement au survol. C'est la seule
+   animation de la page en dehors du zoom d'image. */
+.fleche{display:inline-block;transition:transform .18s ease}
+.groupe-lire:hover .fleche,.carte:hover .fleche{transform:translateX(3px)}
+@media(prefers-reduced-motion:reduce){.fleche{transition:none}}

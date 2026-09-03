@@ -12,6 +12,8 @@
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://iashark.com/blog.html">
 <meta property="og:image" content="https://iashark.com/assets/blog/xg-shot-map-hero.jpg">
+<meta property="og:image:width" content="1344">
+<meta property="og:image:height" content="768">
 <meta property="og:locale" content="fr_FR">
 <meta property="og:site_name" content="IASHARK">
 <meta name="twitter:card" content="summary_large_image">
@@ -19,141 +21,200 @@
 <meta name="twitter:description" content="xG, loi de Poisson, value bet, bankroll : la méthode et ses limites.">
 <meta name="twitter:image" content="https://iashark.com/assets/blog/xg-shot-map-hero.jpg">
 <link rel="icon" href="/favicon.ico">
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/assets/blog-index.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/tailwind.css">
+<link rel="stylesheet" href="/assets/blog-page.css">
 <link rel="stylesheet" href="/assets/bottom-navigation.css">
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"Blog",
-"name":"Blog IASHARK","url":"https://iashark.com/blog.html",
-"description":"Guides sur les statistiques du football, les probabilités et la méthode d'analyse.",
-"inLanguage":"fr-FR",
-"publisher":{"@type":"Organization","name":"IASHARK","url":"https://iashark.com","logo":{"@type":"ImageObject","url":"https://iashark.com/icon-512.png"}},
-"blogPost":[
-{"@type":"BlogPosting","headline":"Plus de 2,5 buts : calculer la probabilité, pas la deviner","url":"https://iashark.com/blog/guides/plus-de-2-5-buts-probabilite-methode-poisson.html","datePublished":"2026-09-02","image":"https://iashark.com/assets/blog/over-25-goals-hero.jpg"},
-{"@type":"BlogPosting","headline":"xG : ce que la statistique dit vraiment, et où elle ment","url":"https://iashark.com/blog/guides/xg-expected-goals-guide-complet.html","datePublished":"2026-09-02","image":"https://iashark.com/assets/blog/xg-shot-map-hero.jpg"},
-{"@type":"BlogPosting","headline":"Prédiction football par IA : comprendre les modèles et leurs limites","url":"https://iashark.com/blog/guides/prediction-ia-football-guide-2026.html","datePublished":"2026-08-31"},
-{"@type":"BlogPosting","headline":"Value bet : comparer une probabilité à une cote sans se tromper","url":"https://iashark.com/blog/guides/value-bet-guide-complet-2026.html","datePublished":"2026-08-30"},
-{"@type":"BlogPosting","headline":"Paris sportifs : le guide complet pour débuter avec méthode","url":"https://iashark.com/blog/guides/guide-paris-sportifs-debutant-complet.html","datePublished":"2026-08-29"},
-{"@type":"BlogPosting","headline":"Choisir un bookmaker : critères de sécurité, cotes et limites","url":"https://iashark.com/blog/guides/meilleurs-bookmakers-monde-2026.html","datePublished":"2026-08-28"},
-{"@type":"BlogPosting","headline":"Coupe du monde 2026 : format, calendrier et méthode d'analyse","url":"https://iashark.com/blog/guides/coupe-du-monde-2026-guide-complet.html","datePublished":"2026-08-27"}]}
+{"@context":"https://schema.org","@type":"Blog","name":"Blog IASHARK","url":"https://iashark.com/blog.html","description":"Guides sur les statistiques du football, les probabilités et la méthode d'analyse.","inLanguage":"fr-FR","publisher":{"@type":"Organization","name":"IASHARK","url":"https://iashark.com","logo":{"@type":"ImageObject","url":"https://iashark.com/icon-512.png"}},"blogPost":[{"@type":"BlogPosting","headline":"Plus de 2,5 buts : calculer la probabilité, pas la deviner","url":"https://iashark.com/blog/guides/plus-de-2-5-buts-probabilite-methode-poisson.html","datePublished":"2026-09-02","image":"https://iashark.com/assets/blog/over-25-goals-hero.jpg","author":{"@type":"Organization","name":"IASHARK"},"publisher":{"@type":"Organization","name":"IASHARK"},"timeRequired":"PT10M"},{"@type":"BlogPosting","headline":"xG : ce que la statistique dit vraiment, et où elle ment","url":"https://iashark.com/blog/guides/xg-expected-goals-guide-complet.html","datePublished":"2026-09-02","image":"https://iashark.com/assets/blog/xg-shot-map-hero.jpg","author":{"@type":"Organization","name":"IASHARK"},"publisher":{"@type":"Organization","name":"IASHARK"},"timeRequired":"PT9M"},{"@type":"BlogPosting","headline":"Prédiction football par IA : comprendre les modèles et leurs limites","url":"https://iashark.com/blog/guides/prediction-ia-football-guide-2026.html","datePublished":"2026-08-31","image":"https://iashark.com/assets/blog/cover-prediction-ia.jpg","author":{"@type":"Organization","name":"IASHARK"},"publisher":{"@type":"Organization","name":"IASHARK"},"timeRequired":"PT5M"},{"@type":"BlogPosting","headline":"Value bet : comparer une probabilité à une cote sans se tromper","url":"https://iashark.com/blog/guides/value-bet-guide-complet-2026.html","datePublished":"2026-08-30","image":"https://iashark.com/assets/blog/cover-value-bet.jpg","author":{"@type":"Organization","name":"IASHARK"},"publisher":{"@type":"Organization","name":"IASHARK"},"timeRequired":"PT6M"},{"@type":"BlogPosting","headline":"Paris sportifs : le guide complet pour débuter avec méthode","url":"https://iashark.com/blog/guides/guide-paris-sportifs-debutant-complet.html","datePublished":"2026-08-29","image":"https://iashark.com/assets/blog/cover-debutant.jpg","author":{"@type":"Organization","name":"IASHARK"},"publisher":{"@type":"Organization","name":"IASHARK"},"timeRequired":"PT5M"},{"@type":"BlogPosting","headline":"Choisir un bookmaker : critères de sécurité, cotes et limites","url":"https://iashark.com/blog/guides/meilleurs-bookmakers-monde-2026.html","datePublished":"2026-08-28","image":"https://iashark.com/assets/blog/cover-bookmakers.jpg","author":{"@type":"Organization","name":"IASHARK"},"publisher":{"@type":"Organization","name":"IASHARK"},"timeRequired":"PT4M"},{"@type":"BlogPosting","headline":"Coupe du monde 2026 : format, calendrier et méthode d'analyse","url":"https://iashark.com/blog/guides/coupe-du-monde-2026-guide-complet.html","datePublished":"2026-08-27","image":"https://iashark.com/assets/blog/cover-coupe-du-monde.jpg","author":{"@type":"Organization","name":"IASHARK"},"publisher":{"@type":"Organization","name":"IASHARK"},"timeRequired":"PT5M"}]}
 </script>
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[
-{"@type":"ListItem","position":1,"name":"Accueil","item":"https://iashark.com/"},
-{"@type":"ListItem","position":2,"name":"Blog"}]}
+{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Accueil","item":"https://iashark.com/"},{"@type":"ListItem","position":2,"name":"Blog"}]}
 </script>
 </head>
-<body>
+<body class="bg-page pb-24 text-ink antialiased">
 
-<div class="wrap">
+<main class="mx-auto w-full max-w-[1240px] px-4 sm:px-6">
 
-  <section class="blog-hero">
-    <span class="eyebrow">Analyses · Méthode · Données</span>
-    <h1>Comprendre le football<br><em>au-delà du score.</em></h1>
-    <p>Des guides qui expliquent comment on transforme des données en probabilités — et où ces probabilités s'arrêtent. Aucune promesse de gain, aucun pronostic miracle : la méthode, et ses limites.</p>
+  <!-- Hero editorial : il annonce le sujet, il ne vend rien. Pas de gros
+       appel a l'action ici, le pont vers le produit est en bas de page. -->
+  <section class="border-b border-hairline py-11 sm:py-14">
+    <p class="text-[11px] font-bold uppercase tracking-[0.2em] text-cyan">Analyses · Méthode · Données</p>
+    <h1 class="titre mt-4 text-[44px] leading-[0.95] sm:text-[62px] lg:text-[72px]">Comprendre le football<br><span class="text-cyan">au-delà du score.</span></h1>
+    <p class="mt-5 max-w-[52ch] text-[16px] leading-[1.7] text-soft">Comment on transforme des données en probabilités — et où ces probabilités s'arrêtent. Aucune promesse de gain, aucun pronostic miracle&nbsp;: la méthode, et ses limites.</p>
   </section>
 
-  <!-- Article mis en avant -->
-  <a class="feat" href="/blog/guides/plus-de-2-5-buts-probabilite-methode-poisson.html">
-    <div class="ph">
-      <img src="/assets/blog/over-25-goals-hero.jpg" width="1344" height="768" alt="Ballon de football frappant le fond des filets lors d'un match en nocturne" fetchpriority="high">
-    </div>
-    <div class="txt">
-      <span class="badge">À la une · Méthode</span>
-      <h2>Plus de 2,5 buts : calculer la probabilité, pas la deviner</h2>
-      <p>La méthode complète pour transformer des statistiques d'équipes en un pourcentage vérifiable : forces offensives et défensives, loi de Poisson, comparaison à la cote — et la marge d'erreur que personne ne montre. Calculateur inclus.</p>
-      <span class="m">2 septembre 2026 · 13 min de lecture · <b>Lire l'article →</b></span>
-    </div>
-  </a>
-
-  <div class="filters" id="filters" role="group" aria-label="Filtrer par catégorie">
-    <button type="button" data-cat="all" aria-pressed="true">Tous</button>
-    <button type="button" data-cat="Analyse" aria-pressed="false">Analyse</button>
-    <button type="button" data-cat="Méthode" aria-pressed="false">Méthode</button>
-    <button type="button" data-cat="Guide" aria-pressed="false">Guide</button>
-    <button type="button" data-cat="Football" aria-pressed="false">Football</button>
-  </div>
-
-  <div class="grid" id="grid">
-
-    <a class="post" href="/blog/guides/xg-expected-goals-guide-complet.html" data-cat="Analyse">
-      <div class="ph"><img src="/assets/blog/xg-shot-map-hero.jpg" width="1344" height="768" alt="Terrain de football en filaire bleu nuit parsemé de points lumineux représentant des tirs" loading="lazy"></div>
-      <div class="txt">
-        <span class="cat">Analyse</span>
-        <h3>xG : ce que la statistique dit vraiment, et où elle ment</h3>
-        <p>Comment un xG est fabriqué, le piège du xG cumulé, combien de matchs il faut avant d'y croire, et pourquoi deux sites donnent deux valeurs différentes.</p>
-        <span class="m">2 sept. 2026 · 11 min</span>
+  <!-- À LA UNE -->
+  <section id="une" class="py-10 sm:py-12" data-sujet="methode" aria-labelledby="t-une">
+    <h2 id="t-une" class="text-[11px] font-bold uppercase tracking-[0.18em] text-soft">À la une</h2>
+    <article class="carte mt-5 grid overflow-hidden rounded-2xl border border-[rgba(141,179,211,.22)] bg-surface transition-colors lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)]">
+      <div class="vignette lg:aspect-auto lg:h-full">
+        <img src="/assets/blog/over-25-goals-hero.jpg" width="1344" height="768" alt="Ballon de football frappant le fond des filets lors d'un match en nocturne" fetchpriority="high" decoding="async" sizes="(min-width:1024px) 620px, 100vw">
       </div>
-    </a>
-
-    <a class="post" href="/blog/guides/prediction-ia-football-guide-2026.html" data-cat="Analyse">
-      <div class="ph"><img src="/assets/blog/cover-prediction-ia.jpg" width="1024" height="576" alt="Particules lumineuses cyan s'élevant au-dessus d'une cage de football, évoquant un modèle de données" loading="lazy"></div>
-      <div class="txt">
-        <span class="cat">Analyse</span>
-        <h3>Prédiction football par IA : comprendre les modèles et leurs limites</h3>
-        <p>Comment les modèles transforment les données d'un match en probabilités, sans jamais garantir un résultat.</p>
-        <span class="m">31 août 2026 · 9 min</span>
+      <div class="flex flex-col justify-center p-5 sm:p-7 lg:p-9">
+        <p class="text-[11px] font-bold uppercase tracking-[0.16em] text-cyan">Méthode</p>
+        <h3 class="carte-titre titre mt-3 text-[30px] leading-[1.02] transition-colors sm:text-[38px] lg:text-[42px]"><a href="/blog/guides/plus-de-2-5-buts-probabilite-methode-poisson.html">Plus de 2,5 buts : calculer la probabilité, pas la deviner</a></h3>
+        <p class="mt-4 max-w-[56ch] text-[14.5px] leading-[1.7] text-soft">La méthode complète pour transformer des statistiques d'équipes en un pourcentage vérifiable : forces offensives et défensives, loi de Poisson, comparaison à la cote — et la marge d'erreur que personne ne montre.</p>
+        <p class="mt-6 flex flex-wrap items-center gap-x-4 gap-y-2 text-[13px] text-soft">
+          <time datetime="2026-09-02">2 septembre 2026</time>
+          <span aria-hidden="true">·</span>
+          <span>10 min de lecture</span>
+          <span class="ml-auto font-semibold text-cyan">Lire l'article <span class="fleche" aria-hidden="true">→</span></span>
+        </p>
       </div>
-    </a>
-
-    <a class="post" href="/blog/guides/value-bet-guide-complet-2026.html" data-cat="Méthode">
-      <div class="ph"><img src="/assets/blog/cover-value-bet.jpg" width="1024" height="576" alt="Deux colonnes lumineuses cyan de hauteurs différentes, évoquant la comparaison de deux probabilités" loading="lazy"></div>
-      <div class="txt">
-        <span class="cat">Méthode</span>
-        <h3>Value bet : comparer une probabilité à une cote sans se tromper</h3>
-        <p>Probabilité implicite, marge du bookmaker, avantage estimé, et limites d'une décision fondée sur la value.</p>
-        <span class="m">30 août 2026 · 10 min</span>
-      </div>
-    </a>
-
-    <a class="post" href="/blog/guides/guide-paris-sportifs-debutant-complet.html" data-cat="Guide">
-      <div class="ph"><img src="/assets/blog/cover-debutant.jpg" width="1024" height="576" alt="Piles de jetons lumineux cyan de hauteurs différentes, évoquant la gestion d'une bankroll" loading="lazy"></div>
-      <div class="txt">
-        <span class="cat">Guide</span>
-        <h3>Paris sportifs : le guide complet pour débuter avec méthode</h3>
-        <p>Bankroll, mise, variance et discipline : les bases indispensables avant même d'évaluer un marché.</p>
-        <span class="m">29 août 2026 · 12 min</span>
-      </div>
-    </a>
-
-    <a class="post" href="/blog/guides/meilleurs-bookmakers-monde-2026.html" data-cat="Guide">
-      <div class="ph"><img src="/assets/blog/cover-bookmakers.jpg" width="1024" height="576" alt="Bouclier lumineux cyan en filaire au-dessus de cercles concentriques, évoquant la sécurité d'une plateforme" loading="lazy"></div>
-      <div class="txt">
-        <span class="cat">Guide</span>
-        <h3>Choisir un bookmaker : critères de sécurité, cotes et limites</h3>
-        <p>Les critères concrets à examiner avant d'utiliser une plateforme, sans classement publicitaire trompeur.</p>
-        <span class="m">28 août 2026 · 8 min</span>
-      </div>
-    </a>
-
-    <a class="post" href="/blog/guides/coupe-du-monde-2026-guide-complet.html" data-cat="Football">
-      <div class="ph"><img src="/assets/blog/cover-coupe-du-monde.jpg" width="1024" height="576" alt="Globe terrestre lumineux en filaire cyan entouré de particules, évoquant une compétition internationale" loading="lazy"></div>
-      <div class="txt">
-        <span class="cat">Football</span>
-        <h3>Coupe du monde 2026 : format, calendrier et méthode d'analyse</h3>
-        <p>Les repères utiles pour suivre la compétition et analyser les rencontres avec leur contexte réel.</p>
-        <span class="m">27 août 2026 · 11 min</span>
-      </div>
-    </a>
-
-  </div>
-
-  <section class="cta">
-    <h2>La méthode, appliquée aux matchs du jour</h2>
-    <p>IASHARK calcule chaque matin des probabilités à partir de données réelles et explique le raisonnement, match par match. Le match du jour est gratuit, en permanence.</p>
-    <a href="/">Voir les analyses du jour →</a>
+    </article>
   </section>
 
-  <footer class="blog-foot">
-    <p>IASHARK — analyses statistiques de football. Les probabilités publiées sont indicatives et ne garantissent aucun résultat. Les paris sportifs comportent un risque de perte financière et de dépendance : ne misez que ce que vous pouvez vous permettre de perdre. Interdit aux mineurs. Besoin d'aide ? Joueurs Info Service : 09 74 75 13 13 (appel non surtaxé).</p>
+  <!-- EXPLORER PAR SUJET -->
+  <section class="border-t border-hairline py-9 sm:py-11" aria-labelledby="t-sujets">
+    <h2 id="t-sujets" class="text-[11px] font-bold uppercase tracking-[0.18em] text-soft">Explorer par sujet</h2>
+    <div id="sujets" class="-mx-4 mt-4 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:flex-wrap sm:px-0" role="group" aria-label="Filtrer les articles par sujet">
+      <button type="button" class="sujet shrink-0 rounded-full border border-hairline px-4 py-2 text-[13.5px] font-semibold text-soft hover:border-cyan/40 hover:text-ink" data-sujet="all" aria-pressed="true">Tous</button>
+      <button type="button" class="sujet shrink-0 rounded-full border border-hairline px-4 py-2 text-[13.5px] font-semibold text-soft hover:border-cyan/40 hover:text-ink" data-sujet="analyse" aria-pressed="false">Analyse</button>
+      <button type="button" class="sujet shrink-0 rounded-full border border-hairline px-4 py-2 text-[13.5px] font-semibold text-soft hover:border-cyan/40 hover:text-ink" data-sujet="methode" aria-pressed="false">Méthode</button>
+      <button type="button" class="sujet shrink-0 rounded-full border border-hairline px-4 py-2 text-[13.5px] font-semibold text-soft hover:border-cyan/40 hover:text-ink" data-sujet="guide" aria-pressed="false">Guide</button>
+      <button type="button" class="sujet shrink-0 rounded-full border border-hairline px-4 py-2 text-[13.5px] font-semibold text-soft hover:border-cyan/40 hover:text-ink" data-sujet="football" aria-pressed="false">Football</button>
+    </div>
+  </section>
+
+  <!-- DERNIERS ARTICLES -->
+  <section class="pb-12" aria-labelledby="t-recents">
+    <h2 id="t-recents" class="titre text-[26px] leading-none sm:text-[30px]">Derniers articles</h2>
+    <div id="grille" class="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+      <article class="carte flex flex-col overflow-hidden rounded-xl border border-hairline bg-surface transition-colors" data-sujet="analyse">
+        <div class="vignette"><img src="/assets/blog/xg-shot-map-hero.jpg" width="1344" height="768" alt="Terrain de football en filaire bleu nuit parsemé de points lumineux représentant des tirs" loading="lazy" decoding="async" sizes="(min-width:1024px) 33vw, (min-width:640px) 50vw, 100vw"></div>
+        <div class="flex flex-1 flex-col p-4 sm:p-5">
+          <p class="text-[11px] font-bold uppercase tracking-[0.16em] text-cyan">Analyse</p>
+          <h3 class="carte-titre titre mt-2 text-[21px] leading-[1.08] transition-colors sm:text-[23px]"><a href="/blog/guides/xg-expected-goals-guide-complet.html">xG : ce que la statistique dit vraiment, et où elle ment</a></h3>
+          <p class="ligne2 mt-2.5 text-[13.5px] leading-relaxed text-soft">Comment un xG est fabriqué, le piège du xG cumulé, combien de matchs il faut avant d'y croire, et pourquoi deux sites donnent deux valeurs différentes.</p>
+          <p class="mt-4 pt-3 border-t border-hairline text-[12.5px] text-soft"><time datetime="2026-09-02">2 sept. 2026</time> · 9 min de lecture</p>
+        </div>
+      </article>
+      <article class="carte flex flex-col overflow-hidden rounded-xl border border-hairline bg-surface transition-colors" data-sujet="analyse">
+        <div class="vignette"><img src="/assets/blog/cover-prediction-ia.jpg" width="1024" height="576" alt="Particules lumineuses cyan s'élevant au-dessus d'une cage de football, évoquant un modèle de données" loading="lazy" decoding="async" sizes="(min-width:1024px) 33vw, (min-width:640px) 50vw, 100vw"></div>
+        <div class="flex flex-1 flex-col p-4 sm:p-5">
+          <p class="text-[11px] font-bold uppercase tracking-[0.16em] text-cyan">Analyse</p>
+          <h3 class="carte-titre titre mt-2 text-[21px] leading-[1.08] transition-colors sm:text-[23px]"><a href="/blog/guides/prediction-ia-football-guide-2026.html">Prédiction football par IA : comprendre les modèles et leurs limites</a></h3>
+          <p class="ligne2 mt-2.5 text-[13.5px] leading-relaxed text-soft">Comment les modèles transforment les données d'un match en probabilités, sans jamais garantir un résultat.</p>
+          <p class="mt-4 pt-3 border-t border-hairline text-[12.5px] text-soft"><time datetime="2026-08-31">31 août 2026</time> · 5 min de lecture</p>
+        </div>
+      </article>
+      <article class="carte flex flex-col overflow-hidden rounded-xl border border-hairline bg-surface transition-colors" data-sujet="methode">
+        <div class="vignette"><img src="/assets/blog/cover-value-bet.jpg" width="1024" height="576" alt="Deux colonnes lumineuses cyan de hauteurs différentes, évoquant la comparaison de deux probabilités" loading="lazy" decoding="async" sizes="(min-width:1024px) 33vw, (min-width:640px) 50vw, 100vw"></div>
+        <div class="flex flex-1 flex-col p-4 sm:p-5">
+          <p class="text-[11px] font-bold uppercase tracking-[0.16em] text-cyan">Méthode</p>
+          <h3 class="carte-titre titre mt-2 text-[21px] leading-[1.08] transition-colors sm:text-[23px]"><a href="/blog/guides/value-bet-guide-complet-2026.html">Value bet : comparer une probabilité à une cote sans se tromper</a></h3>
+          <p class="ligne2 mt-2.5 text-[13.5px] leading-relaxed text-soft">Probabilité implicite, marge du bookmaker, avantage estimé, et limites d'une décision fondée sur la value.</p>
+          <p class="mt-4 pt-3 border-t border-hairline text-[12.5px] text-soft"><time datetime="2026-08-30">30 août 2026</time> · 6 min de lecture</p>
+        </div>
+      </article>
+      <article class="carte flex flex-col overflow-hidden rounded-xl border border-hairline bg-surface transition-colors" data-sujet="guide">
+        <div class="vignette"><img src="/assets/blog/cover-debutant.jpg" width="1024" height="576" alt="Piles de jetons lumineux cyan de hauteurs différentes, évoquant la gestion d'une bankroll" loading="lazy" decoding="async" sizes="(min-width:1024px) 33vw, (min-width:640px) 50vw, 100vw"></div>
+        <div class="flex flex-1 flex-col p-4 sm:p-5">
+          <p class="text-[11px] font-bold uppercase tracking-[0.16em] text-cyan">Guide</p>
+          <h3 class="carte-titre titre mt-2 text-[21px] leading-[1.08] transition-colors sm:text-[23px]"><a href="/blog/guides/guide-paris-sportifs-debutant-complet.html">Paris sportifs : le guide complet pour débuter avec méthode</a></h3>
+          <p class="ligne2 mt-2.5 text-[13.5px] leading-relaxed text-soft">Bankroll, mise, variance et discipline : les bases indispensables avant même d'évaluer un marché.</p>
+          <p class="mt-4 pt-3 border-t border-hairline text-[12.5px] text-soft"><time datetime="2026-08-29">29 août 2026</time> · 5 min de lecture</p>
+        </div>
+      </article>
+      <article class="carte flex flex-col overflow-hidden rounded-xl border border-hairline bg-surface transition-colors" data-sujet="guide">
+        <div class="vignette"><img src="/assets/blog/cover-bookmakers.jpg" width="1024" height="576" alt="Bouclier lumineux cyan en filaire au-dessus de cercles concentriques, évoquant la sécurité d'une plateforme" loading="lazy" decoding="async" sizes="(min-width:1024px) 33vw, (min-width:640px) 50vw, 100vw"></div>
+        <div class="flex flex-1 flex-col p-4 sm:p-5">
+          <p class="text-[11px] font-bold uppercase tracking-[0.16em] text-cyan">Guide</p>
+          <h3 class="carte-titre titre mt-2 text-[21px] leading-[1.08] transition-colors sm:text-[23px]"><a href="/blog/guides/meilleurs-bookmakers-monde-2026.html">Choisir un bookmaker : critères de sécurité, cotes et limites</a></h3>
+          <p class="ligne2 mt-2.5 text-[13.5px] leading-relaxed text-soft">Les critères concrets à examiner avant d'utiliser une plateforme, sans classement publicitaire trompeur.</p>
+          <p class="mt-4 pt-3 border-t border-hairline text-[12.5px] text-soft"><time datetime="2026-08-28">28 août 2026</time> · 4 min de lecture</p>
+        </div>
+      </article>
+      <article class="carte flex flex-col overflow-hidden rounded-xl border border-hairline bg-surface transition-colors" data-sujet="football">
+        <div class="vignette"><img src="/assets/blog/cover-coupe-du-monde.jpg" width="1024" height="576" alt="Globe terrestre lumineux en filaire cyan entouré de particules, évoquant une compétition internationale" loading="lazy" decoding="async" sizes="(min-width:1024px) 33vw, (min-width:640px) 50vw, 100vw"></div>
+        <div class="flex flex-1 flex-col p-4 sm:p-5">
+          <p class="text-[11px] font-bold uppercase tracking-[0.16em] text-cyan">Football</p>
+          <h3 class="carte-titre titre mt-2 text-[21px] leading-[1.08] transition-colors sm:text-[23px]"><a href="/blog/guides/coupe-du-monde-2026-guide-complet.html">Coupe du monde 2026 : format, calendrier et méthode d'analyse</a></h3>
+          <p class="ligne2 mt-2.5 text-[13.5px] leading-relaxed text-soft">Les repères utiles pour suivre la compétition et analyser les rencontres avec leur contexte réel.</p>
+          <p class="mt-4 pt-3 border-t border-hairline text-[12.5px] text-soft"><time datetime="2026-08-27">27 août 2026</time> · 5 min de lecture</p>
+        </div>
+      </article>
+    </div>
+    <!-- Etat vide : une categorie sans article ne doit pas laisser un trou. -->
+    <p id="vide" hidden class="mt-8 text-[14.5px] text-soft">Aucun article dans ce sujet pour le moment. <button type="button" id="toutVoir" class="font-semibold text-cyan hover:underline">Voir tous les articles</button></p>
+  </section>
+
+  <!-- PAR OÙ COMMENCER : un ORDRE de lecture, pas une seconde liste des memes
+       articles. Chaque etape suppose la precedente. -->
+  <section class="border-t border-hairline py-11 sm:py-14" aria-labelledby="t-parcours">
+    <h2 id="t-parcours" class="titre text-[26px] leading-none sm:text-[30px]">Par où commencer</h2>
+    <p class="mt-2.5 max-w-[56ch] text-[14.5px] leading-relaxed text-soft">Quatre lectures dans l'ordre, des bases jusqu'au calcul complet d'une probabilité. Chaque étape suppose la précédente.</p>
+    <ol class="mt-6">
+        <li class="carte group border-b border-hairline last:border-0">
+          <a href="/blog/guides/guide-paris-sportifs-debutant-complet.html" class="flex items-baseline gap-4 py-4 sm:gap-6 sm:py-5">
+            <span aria-hidden="true" class="titre w-7 shrink-0 text-[20px] text-cyan/60 sm:w-9 sm:text-[24px]">01</span>
+            <span class="min-w-0 flex-1">
+              <span class="carte-titre titre block text-[21px] leading-[1.1] transition-colors sm:text-[24px]">Paris sportifs : le guide complet pour débuter avec méthode</span>
+              <span class="mt-1 block text-[13.5px] leading-relaxed text-soft">Bankroll, mise et variance : le vocabulaire avant tout le reste.</span>
+            </span>
+            <span class="shrink-0 whitespace-nowrap text-[12.5px] text-soft">5 min</span>
+          </a>
+        </li>
+        <li class="carte group border-b border-hairline last:border-0">
+          <a href="/blog/guides/value-bet-guide-complet-2026.html" class="flex items-baseline gap-4 py-4 sm:gap-6 sm:py-5">
+            <span aria-hidden="true" class="titre w-7 shrink-0 text-[20px] text-cyan/60 sm:w-9 sm:text-[24px]">02</span>
+            <span class="min-w-0 flex-1">
+              <span class="carte-titre titre block text-[21px] leading-[1.1] transition-colors sm:text-[24px]">Value bet : comparer une probabilité à une cote sans se tromper</span>
+              <span class="mt-1 block text-[13.5px] leading-relaxed text-soft">Lire une cote, en retirer la marge, et savoir ce qu'elle dit vraiment.</span>
+            </span>
+            <span class="shrink-0 whitespace-nowrap text-[12.5px] text-soft">6 min</span>
+          </a>
+        </li>
+        <li class="carte group border-b border-hairline last:border-0">
+          <a href="/blog/guides/xg-expected-goals-guide-complet.html" class="flex items-baseline gap-4 py-4 sm:gap-6 sm:py-5">
+            <span aria-hidden="true" class="titre w-7 shrink-0 text-[20px] text-cyan/60 sm:w-9 sm:text-[24px]">03</span>
+            <span class="min-w-0 flex-1">
+              <span class="carte-titre titre block text-[21px] leading-[1.1] transition-colors sm:text-[24px]">xG : ce que la statistique dit vraiment, et où elle ment</span>
+              <span class="mt-1 block text-[13.5px] leading-relaxed text-soft">La statistique la plus citée du football, et ce qu'elle ne mesure pas.</span>
+            </span>
+            <span class="shrink-0 whitespace-nowrap text-[12.5px] text-soft">9 min</span>
+          </a>
+        </li>
+        <li class="carte group border-b border-hairline last:border-0">
+          <a href="/blog/guides/plus-de-2-5-buts-probabilite-methode-poisson.html" class="flex items-baseline gap-4 py-4 sm:gap-6 sm:py-5">
+            <span aria-hidden="true" class="titre w-7 shrink-0 text-[20px] text-cyan/60 sm:w-9 sm:text-[24px]">04</span>
+            <span class="min-w-0 flex-1">
+              <span class="carte-titre titre block text-[21px] leading-[1.1] transition-colors sm:text-[24px]">Plus de 2,5 buts : calculer la probabilité, pas la deviner</span>
+              <span class="mt-1 block text-[13.5px] leading-relaxed text-soft">Le calcul complet, de la statistique d'équipe au pourcentage.</span>
+            </span>
+            <span class="shrink-0 whitespace-nowrap text-[12.5px] text-soft">10 min</span>
+          </a>
+        </li>
+    </ol>
+  </section>
+
+  <!-- LE PONT VERS LE PRODUIT. Il envoie vers les analyses, pas vers l'offre
+       payante : le blog doit d'abord montrer la methode en action. -->
+  <section class="rounded-2xl border border-hairline bg-surface p-6 sm:p-9 lg:p-11" aria-labelledby="t-cta">
+    <div class="grid gap-7 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)] lg:items-end">
+      <div>
+        <p class="text-[11px] font-bold uppercase tracking-[0.18em] text-cyan">La méthode en pratique</p>
+        <h2 id="t-cta" class="titre mt-3 text-[30px] leading-[1.02] sm:text-[38px]">La méthode,<br>appliquée aux matchs du jour.</h2>
+        <p class="mt-4 max-w-[54ch] text-[14.5px] leading-[1.7] text-soft">IASHARK calcule chaque matin les probabilités des matchs à partir de données réelles, et explique le raisonnement derrière chaque signal. L'analyse du jour est gratuite, en permanence.</p>
+      </div>
+      <div class="groupe-lire lg:justify-self-end">
+        <a href="/" class="inline-flex h-12 items-center rounded-xl bg-cyan px-6 text-[15px] font-bold text-[#04141b] transition hover:bg-cyan/90">Voir les analyses du jour <span class="fleche ml-2" aria-hidden="true">→</span></a>
+      </div>
+    </div>
+  </section>
+
+  <footer class="mt-12 border-t border-hairline py-8">
+    <p class="max-w-[80ch] text-[12.5px] leading-relaxed text-soft">IASHARK — analyses statistiques de football. Les probabilités publiées sont indicatives et ne garantissent aucun résultat. Les paris sportifs comportent un risque de perte financière et de dépendance&nbsp;: ne misez que ce que vous pouvez vous permettre de perdre. Interdit aux mineurs. Besoin d'aide&nbsp;? Joueurs Info Service&nbsp;: 09 74 75 13 13 (appel non surtaxé).</p>
   </footer>
 
-</div>
+</main>
 
 <!-- Navigation de repli presente dans le HTML servi : bottom-navigation.js
      la remplace par la barre partagee au chargement, mais sans JavaScript
-     (ou avant son execution) le menu reste la. Meme principe d'amelioration
-     progressive que la liste d'articles ci-dessus. -->
+     (ou avant son execution) le menu reste la. -->
 <nav class="bottom-nav" aria-label="Navigation principale">
   <a href="/"><span>&#8962;</span><b>Accueil</b></a>
   <a href="/pro.html"><span>&#9734;</span><b>Outils</b></a>
@@ -162,26 +223,57 @@
 </nav>
 
 <script>
-/* Filtres de categorie — amelioration progressive uniquement.
-   Les articles sont dans le HTML servi : sans JavaScript, la page reste
+/* Filtre par sujet — amelioration progressive uniquement.
+   Les sept articles sont dans le HTML servi : sans JavaScript la page reste
    entierement lisible et indexable, on perd seulement le filtrage.
-   (L'ancienne version construisait toute la liste en JavaScript depuis
-   blog-posts.json : aucun article n'existait dans le HTML servi.) */
+   Le sujet choisi est ecrit dans l'URL (?sujet=methode) pour qu'un filtre
+   puisse etre partage et survive au bouton Retour. */
 (function(){
-  var filters=document.getElementById('filters'), grid=document.getElementById('grid');
-  if(!filters||!grid) return;
-  var posts=Array.prototype.slice.call(grid.querySelectorAll('.post'));
-  filters.addEventListener('click',function(e){
-    var btn=e.target.closest('button[data-cat]');
-    if(!btn) return;
-    var cat=btn.getAttribute('data-cat');
-    filters.querySelectorAll('button').forEach(function(b){
-      b.setAttribute('aria-pressed', String(b===btn));
+  var barre=document.getElementById('sujets'), grille=document.getElementById('grille'),
+      vide=document.getElementById('vide'), tout=document.getElementById('toutVoir'),
+      une=document.getElementById('une');
+  if(!barre||!grille) return;
+  // L'article a la une fait partie du catalogue : filtrer sur "Methode" doit
+  // le garder et filtrer sur "Football" doit le masquer. Sans cela, le
+  // lecteur voyait un article Methode rester affiche pendant qu'il demandait
+  // du Football.
+  var cartes=Array.prototype.slice.call(grille.querySelectorAll('[data-sujet]'));
+  var connus=Array.prototype.slice.call(barre.querySelectorAll('[data-sujet]'))
+              .map(function(b){return b.getAttribute('data-sujet');});
+
+  function appliquer(sujet, ecrireUrl){
+    if(connus.indexOf(sujet)===-1) sujet='all';
+    barre.querySelectorAll('[data-sujet]').forEach(function(b){
+      b.setAttribute('aria-pressed', String(b.getAttribute('data-sujet')===sujet));
     });
-    posts.forEach(function(p){
-      p.hidden = (cat!=='all' && p.getAttribute('data-cat')!==cat);
+    var visibles=0;
+    cartes.forEach(function(c){
+      var montre = sujet==='all' || c.getAttribute('data-sujet')===sujet;
+      c.hidden=!montre;
+      if(montre) visibles++;
     });
+    if(une){
+      var uneMontre = sujet==='all' || une.getAttribute('data-sujet')===sujet;
+      une.hidden=!uneMontre;
+      if(uneMontre) visibles++;
+    }
+    vide.hidden = visibles>0;
+    if(ecrireUrl){
+      var u=new URL(location.href);
+      if(sujet==='all') u.searchParams.delete('sujet'); else u.searchParams.set('sujet',sujet);
+      history.pushState({sujet:sujet},'',u);
+    }
+  }
+
+  barre.addEventListener('click',function(e){
+    var b=e.target.closest('[data-sujet]');
+    if(b) appliquer(b.getAttribute('data-sujet'), true);
   });
+  tout.addEventListener('click',function(){ appliquer('all', true); });
+  window.addEventListener('popstate',function(){
+    appliquer(new URLSearchParams(location.search).get('sujet')||'all', false);
+  });
+  appliquer(new URLSearchParams(location.search).get('sujet')||'all', false);
 })();
 </script>
 <script src="/site-header.js"></script>

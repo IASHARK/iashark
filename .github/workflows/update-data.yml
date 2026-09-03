@@ -1467,12 +1467,21 @@ jobs:
             // Page d'exemple d'analyse : vitrine publique, indexable, sans compte.
             {loc:'https://iashark.com/exemple-analyse.html',priority:'0.7'},
             {loc:'https://iashark.com/blog/',priority:'0.6'},
+            // Le hub editorial lui-meme. Il manquait au sitemap alors que
+            // c'est la cible canonique de /blog/guides/ : la page la plus
+            // importante du blog n'etait declaree nulle part.
+            {loc:'https://iashark.com/blog.html',priority:'0.7'},
             {loc:'https://iashark.com/blog/guides/',priority:'0.6'},
             {loc:'https://iashark.com/blog/guides/coupe-du-monde-2026-guide-complet.html',priority:'0.6'},
             {loc:'https://iashark.com/blog/guides/guide-paris-sportifs-debutant-complet.html',priority:'0.6'},
             {loc:'https://iashark.com/blog/guides/meilleurs-bookmakers-monde-2026.html',priority:'0.6'},
             {loc:'https://iashark.com/blog/guides/prediction-ia-football-guide-2026.html',priority:'0.6'},
-            {loc:'https://iashark.com/blog/guides/value-bet-guide-complet-2026.html',priority:'0.6'}
+            {loc:'https://iashark.com/blog/guides/value-bet-guide-complet-2026.html',priority:'0.6'},
+            // Ces deux guides, les plus recents et les plus longs, n'avaient
+            // jamais ete ajoutes ici : ils etaient publies, lies depuis le
+            // blog, mais absents du sitemap depuis leur mise en ligne.
+            {loc:'https://iashark.com/blog/guides/xg-expected-goals-guide-complet.html',priority:'0.6'},
+            {loc:'https://iashark.com/blog/guides/plus-de-2-5-buts-probabilite-methode-poisson.html',priority:'0.6'}
           ];
           function generateSitemaps(matchsData){
             console.log('  Generating sitemaps...');

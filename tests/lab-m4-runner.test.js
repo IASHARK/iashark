@@ -30,14 +30,14 @@ function fixedKappaFitter(rows) {
   return { kappa_hat: 8, convergence: true, log_kappa_hat: Math.log(8), training_N: rows.length, numerical_boundary_status: "OK" };
 }
 
-test("support complet : COMMON_SUPPORT M4 = 760/760 (identique a M2), 0 matrixFailures", () => {
-  const result = runWalkForwardM4({ ...BASE_OPTIONS, candidateKappaFitter: fixedKappaFitter });
+test("support complet : COMMON_SUPPORT M4 = 760/760 (identique a M2), 0 matrixFailures", async () => {
+  const result = await runWalkForwardM4({ ...BASE_OPTIONS, candidateKappaFitter: fixedKappaFitter });
   assert.equal(result.predictions.length, 760);
   assert.equal(result.matrixFailures.length, 0);
 });
 
-test("M4_BASE_MEANS == M2_MEANS (runtime) : muHome/muAway du M4 runner sont BYTE-IDENTIQUES a lambdaH_m2/lambdaA_m2 du champion ferme, sur les 760 OOS ET sur les 380 TRAIN 2022-23", () => {
-  const result = runWalkForwardM4({ ...BASE_OPTIONS, candidateKappaFitter: fixedKappaFitter });
+test("M4_BASE_MEANS == M2_MEANS (runtime) : muHome/muAway du M4 runner sont BYTE-IDENTIQUES a lambdaH_m2/lambdaA_m2 du champion ferme, sur les 760 OOS ET sur les 380 TRAIN 2022-23", async () => {
+  const result = await runWalkForwardM4({ ...BASE_OPTIONS, candidateKappaFitter: fixedKappaFitter });
   const closedReport = JSON.parse(fs.readFileSync(path.join(__dirname, "..", "scripts", "experiments", "exp002c_report.json"), "utf8"));
   const closedById = new Map(closedReport.predictions.map((p) => [p.fixture_id, p]));
 
@@ -67,22 +67,22 @@ test("M4_BASE_MEANS == M2_MEANS (runtime) : muHome/muAway du M4 runner sont BYTE
   }
 });
 
-test("determinisme (item 21.H) : deux runs independants avec le meme fitter sont BYTE-IDENTIQUES", () => {
-  const r1 = runWalkForwardM4({ ...BASE_OPTIONS, candidateKappaFitter: fixedKappaFitter });
-  const r2 = runWalkForwardM4({ ...BASE_OPTIONS, candidateKappaFitter: fixedKappaFitter });
+test("determinisme (item 21.H) : deux runs independants avec le meme fitter sont BYTE-IDENTIQUES", async () => {
+  const r1 = await runWalkForwardM4({ ...BASE_OPTIONS, candidateKappaFitter: fixedKappaFitter });
+  const r2 = await runWalkForwardM4({ ...BASE_OPTIONS, candidateKappaFitter: fixedKappaFitter });
   assert.deepEqual(r1.predictions, r2.predictions);
   assert.deepEqual(r1.fitLog, r2.fitLog);
 });
 
-test("anti-leakage (item 21.G) : muter le score d'un match OOS FUTUR ne change AUCUNE prediction/fitLog anterieure", () => {
-  const resultBefore = runWalkForwardM4({ ...BASE_OPTIONS, candidateKappaFitter: fixedKappaFitter });
+test("anti-leakage (item 21.G) : muter le score d'un match OOS FUTUR ne change AUCUNE prediction/fitLog anterieure", async () => {
+  const resultBefore = await runWalkForwardM4({ ...BASE_OPTIONS, candidateKappaFitter: fixedKappaFitter });
 
   // Mute le DERNIER match OOS chronologique (2024-25) vers un score aberrant.
   const oos2024 = f2024.slice().sort((a, b) => new Date(b.kickoff_timestamp) - new Date(a.kickoff_timestamp));
   const lastFixtureId = oos2024[0].fixture_id;
   const mutatedF2024 = f2024.map((f) => (f.fixture_id === lastFixtureId ? { ...f, goals_home_90: 19, goals_away_90: 0, goals_home_final: 19, goals_away_final: 0 } : f));
 
-  const resultAfter = runWalkForwardM4({
+  const resultAfter = await runWalkForwardM4({
     ...BASE_OPTIONS,
     allFixtures: [...f2021, ...f2022, ...f2023, ...mutatedF2024],
     candidateKappaFitter: fixedKappaFitter,

@@ -42,14 +42,11 @@ function main() {
 
   // A partir d'ici, le gating a valide DATASET_EXISTS + B6_FIDELITY_PASSED
   // + DATASET_VERSION_COMPUTED + LOCKBOX_SEALED : un dataset reel et une
-  // lockbox scellee doivent donc exister. Le chargement concret depuis
-  // lib/data/cache.js (emplacement exact des fixtures collectees par B1)
-  // sera implemente au moment ou B1 sera reellement execute - ecrire ce
-  // chargement maintenant, contre des donnees qui n'existent pas encore,
-  // reviendrait a deviner une interface jamais verifiee.
+  // lockbox scellee existent (GATE B1 execute le 2026-09-04, voir
+  // lib/lab/load-real-dataset.js et data/gate-b1/).
   let loadRealDataset;
   try {
-    loadRealDataset = require("../lib/lab/load-real-dataset.js");
+    ({ loadRealDataset } = require("../lib/lab/load-real-dataset.js"));
   } catch (e) {
     console.error("EXP-001 : gating satisfait mais lib/lab/load-real-dataset.js n'existe pas encore.");
     console.error("A implementer au moment de B1 (chargement reel des fixtures Premier League depuis lib/data/cache.js) - jamais avant, pour ne pas deviner une interface contre des donnees inexistantes.");

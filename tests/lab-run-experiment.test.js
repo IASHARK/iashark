@@ -55,8 +55,25 @@ function fullySatisfiedManifest(overrides = {}) {
   };
 }
 
-test("runExperiment: manifest BLOCKED_DATA (tel que commite) -> refuse de lancer, jamais de calcul effectue", () => {
+// Construit un manifest explicitement BLOCKED (toutes conditions a false),
+// independamment de l'etat REEL du manifest commite - depuis que GATE B1
+// a reellement collecte les donnees Premier League (2026-09-04), le
+// manifest commite est passe a REGISTERED/gate satisfait, ce test ne peut
+// donc plus supposer qu'il est bloque par defaut.
+function blockedManifest() {
   const manifest = loadManifest();
+  return {
+    ...manifest,
+    status: "BLOCKED_DATA",
+    gating_to_running: {
+      ...manifest.gating_to_running,
+      conditions: manifest.gating_to_running.conditions.map((c) => ({ ...c, satisfied: false })),
+    },
+  };
+}
+
+test("runExperiment: manifest avec gating explicitement bloque -> refuse de lancer, jamais de calcul effectue", () => {
+  const manifest = blockedManifest();
   const result = runExperiment({ manifest, allFixtures: [] });
   assert.equal(result.launched, false);
   assert.equal(result.reason, "GATING_BLOCKED");

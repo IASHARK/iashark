@@ -34,7 +34,7 @@ jobs:
           const fs    = require('fs');
           const { poissonProb, calcPoissonProbs, dixonColesCorr, calcDixonColesProbs, calcMonteCarlo, shinProbabilities } = require('./lib/models.js');
           const { fractionalKelly } = require('./lib/betting.js');
-          const { resolveMarketWin } = require('./lib/resolvers.js');
+          const { resolveMarketWin, extractRegulationScore } = require('./lib/resolvers.js');
           const { parseOdds } = require('./lib/odds.js');
           const { pickMarketDeterministic, computeRiskLabel, computeModelAgreement, computeDataQualityScore, computeReliability, scoresConsistentWithMarket } = require('./lib/decision.js');
           const { buildPoissonMatrix, buildDixonColesMatrix, blendMatrices, deriveMarketsFromMatrix } = require('./lib/markets/score-matrix.js');
@@ -1500,8 +1500,8 @@ jobs:
                 var fid=fix.fixture&&fix.fixture.id;
                 var homeN=fix.teams&&fix.teams.home&&fix.teams.home.name||'';
                 var awayN=fix.teams&&fix.teams.away&&fix.teams.away.name||'';
-                var gh=fix.goals&&fix.goals.home!=null?fix.goals.home:null;
-                var ga=fix.goals&&fix.goals.away!=null?fix.goals.away:null;
+                var regScore=extractRegulationScore(fix);
+                var gh=regScore.gh, ga=regScore.ga;
                 var status=fix.fixture&&fix.fixture.status&&fix.fixture.status.short||'';
                 var isVoidStatus=(status==='PST'||status==='CANC'||status==='ABD');
                 if(!isVoidStatus&&status!=='FT'&&status!=='AET'&&status!=='PEN')continue;
@@ -1885,8 +1885,8 @@ jobs:
                   var fid=fix.fixture&&fix.fixture.id;
                   var homeN=fix.teams&&fix.teams.home&&fix.teams.home.name||'';
                   var awayN=fix.teams&&fix.teams.away&&fix.teams.away.name||'';
-                  var gh=fix.goals&&fix.goals.home!=null?fix.goals.home:null;
-                  var ga=fix.goals&&fix.goals.away!=null?fix.goals.away:null;
+                  var regScoreE=extractRegulationScore(fix);
+                  var gh=regScoreE.gh, ga=regScoreE.ga;
                   var status=fix.fixture&&fix.fixture.status&&fix.fixture.status.short||'';
                   var isVoidStatusE=(status==='PST'||status==='CANC'||status==='ABD');
                   if(!isVoidStatusE&&status!=='FT'&&status!=='AET'&&status!=='PEN')return;

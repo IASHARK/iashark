@@ -1,27 +1,45 @@
 "use strict";
-// GATE A1 (SPEC LAB PRO v1.0 §19) - regression permanente : lib/engine.js
-// doit produire des sorties identiques (tolerance 1e-12) a l'ancien moteur
-// inline qui tournait dans .github/workflows/update-data.yml avant
-// l'extraction (SHA 04825140). Le fixture a ete capture depuis le code
-// inline original AVANT sa suppression - voir tests/fixtures/engine-golden-master.json
-// (133 entrees : 46 lambdas reels de production du 2026-09-04, une grille
-// synthetique deterministe sur tout le domaine autorise par calcLambdas,
-// et des cas limites explicites aux bornes 0.80/3.40/3.00).
+// GATE A1+A3 (SPEC LAB PRO v1.0 §19) - regression permanente, PORTEE
+// EXPLICITE : verifie que la construction de matrice a maxGoals=10 FIXE
+// (extraction A1 + remplacement du blend par DC pur A3) reste identique
+// aux sorties capturees depuis l'ancien moteur inline avant toute
+// modification (SHA 04825140, voir tests/fixtures/engine-golden-master.json,
+// 133 entrees).
 //
-// Si ce test echoue apres une modification volontaire du moteur (EXP-000
-// et suivants), c'est attendu : regenerer le fixture consciemment plutot
-// que d'assouplir la tolerance.
+// Ce test appelle DELIBEREMENT buildDixonColesMatrix a maxGoals=10 en
+// dur (pas calcFinalProbs, qui depuis GATE A4 utilise une troncature
+// adaptative >=10 et produit donc legitimement des sorties legerement
+// differentes - voir tests/adaptive-tail-mass.test.js pour le garde-fou
+// d'A4, et scripts/experiments/exp005_truncation_delta_report.json pour
+// la mesure exacte de l'ecart cause par A4, attendu et documente, pas un
+// echec). Isoler ainsi la portee du test : il continue de prouver que
+// l'extraction (A1) et l'equivalence algebrique du blend (A3) n'ont
+// introduit AUCUN changement de comportement a troncature egale, sans
+// jamais se confondre avec l'amelioration numerique volontaire d'A4.
 
 const test = require("node:test");
 const assert = require("node:assert/strict");
 const fs = require("fs");
 const path = require("path");
-const { calcFinalProbs } = require("../lib/engine.js");
+const { buildDixonColesMatrix, blendMatrices, deriveMarketsFromMatrix } = require("../lib/markets/score-matrix.js");
 
 const FIXTURE_PATH = path.join(__dirname, "fixtures", "engine-golden-master.json");
 const TOLERANCE = 1e-12;
 
-test("engine golden master: calcFinalProbs reproduit exactement les sorties capturees avant extraction (133 paires lambda, tolerance 1e-12)", () => {
+function calcFinalProbsFixedTruncation(lambdaH, lambdaA) {
+  const dixonMatrix = buildDixonColesMatrix(lambdaH, lambdaA, 10);
+  const matrix = blendMatrices([{ matrix: dixonMatrix, weight: 1 }]);
+  const markets = deriveMarketsFromMatrix(matrix);
+  const pct = (v) => v * 100;
+  return {
+    p1: pct(markets.p1), pN: pct(markets.pN), p2: pct(markets.p2),
+    over15: pct(markets.overUnder["1.5"].over), over25: pct(markets.overUnder["2.5"].over),
+    under25: pct(markets.overUnder["2.5"].under), over35: pct(markets.overUnder["3.5"].over),
+    under35: pct(markets.overUnder["3.5"].under), bttsY: pct(markets.btts.yes), bttsN: pct(markets.btts.no),
+  };
+}
+
+test("engine golden master (portee A1+A3, maxGoals=10 fixe): reproduit exactement les sorties capturees avant extraction (133 paires lambda, tolerance 1e-12)", () => {
   const goldenMaster = JSON.parse(fs.readFileSync(FIXTURE_PATH, "utf8"));
   assert.ok(goldenMaster.length >= 100, "le fixture doit contenir un echantillon representatif (>=100 paires)");
 
@@ -30,7 +48,7 @@ test("engine golden master: calcFinalProbs reproduit exactement les sorties capt
   let maxDeltaDetail = null;
 
   for (const entry of goldenMaster) {
-    const actual = calcFinalProbs(entry.lambdaH, entry.lambdaA, null);
+    const actual = calcFinalProbsFixedTruncation(entry.lambdaH, entry.lambdaA);
     for (const f of fields) {
       const delta = Math.abs(actual[f] - entry.output[f]);
       if (delta > maxDelta) {
@@ -42,6 +60,6 @@ test("engine golden master: calcFinalProbs reproduit exactement les sorties capt
 
   assert.ok(
     maxDelta <= TOLERANCE,
-    `delta max ${maxDelta} depasse la tolerance ${TOLERANCE} : ${JSON.stringify(maxDeltaDetail)}`
+    `delta max ${maxDelta} depasse la tolerance ${TOLERANCE} (a troncature egale - un echec ici signale une vraie regression, pas un effet d'A4) : ${JSON.stringify(maxDeltaDetail)}`
   );
 });

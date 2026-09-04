@@ -1,7 +1,7 @@
 {
   "experiment_id": "EXP-001",
   "registration_status": "REGISTERED",
-  "status": "BLOCKED_DATA",
+  "status": "REGISTERED",
   "created_at": "2026-09-04",
   "hypothesis": "M1 (Dixon-Coles avec rho appris par walk-forward via scripts/fit_rho.py) ameliore le NLL exact-score hors-echantillon par rapport a M0 (Dixon-Coles rho=-0.0845 fixe, champion actuel de production - lib/models.js), sans degrader significativement les marches secondaires (1X2, Over/Under 2.5, BTTS) ni les diagnostics bas-score (0-0/1-0/0-1/1-1).",
   "champion_model": {
@@ -16,15 +16,32 @@
   "dataset": {
     "competition": "Premier League",
     "api_football_league_id": 39,
-    "seasons_target": ["2022-2023", "2023-2024", "2024-2025", "2025-2026"],
-    "dataset_version": null,
-    "lockbox_sealed": false
+    "seasons_target": [
+      "2022-2023",
+      "2023-2024",
+      "2024-2025",
+      "2025-2026"
+    ],
+    "dataset_version": "403e31d057ba094993f29e3c8c88dec21119f8438acc2c7b10a21200dd6a2942",
+    "lockbox_sealed": true
   },
   "methodology": {
     "walk_forward": "refit par journee/cutoff logique (lib/lab/walkforward-runner.js#buildCutoffs), anti-leakage strict (kickoff_timestamp < cutoff, jamais <=)",
     "primary_metric": "exact_score_nll (lib/lab/metrics.js#exactScoreNLL)",
-    "secondary_metrics": ["1x2_logloss", "1x2_brier", "ou25_logloss", "ou25_brier", "btts_logloss", "btts_brier"],
-    "low_score_diagnostics": ["0-0", "1-0", "0-1", "1-1"],
+    "secondary_metrics": [
+      "1x2_logloss",
+      "1x2_brier",
+      "ou25_logloss",
+      "ou25_brier",
+      "btts_logloss",
+      "btts_brier"
+    ],
+    "low_score_diagnostics": [
+      "0-0",
+      "1-0",
+      "0-1",
+      "1-1"
+    ],
     "bootstrap": {
       "method": "paired_block_bootstrap (lib/lab/bootstrap.js)",
       "n_resamples": 10000,
@@ -37,10 +54,26 @@
   "gating_to_running": {
     "description": "Conditions OBLIGATOIRES, toutes vraies, avant que status puisse passer de BLOCKED_DATA a RUNNING. Verifiees par lib/lab/experiment-manifest.js#evaluateGate - jamais a la main, jamais suppose.",
     "conditions": [
-      { "id": "DATASET_EXISTS", "description": "Fixtures reelles Premier League 2022-23 -> 2025-26 presentes dans le cache (lib/data/cache.js), collectees via l'API (GATE B1)", "satisfied": false },
-      { "id": "B6_FIDELITY_PASSED", "description": "Test de fidelite live B6 (comparaison predictions lab vs production sur donnees reelles) passe", "satisfied": false },
-      { "id": "DATASET_VERSION_COMPUTED", "description": "dataset_version calcule sur les fixtures reelles (lib/data/dataset-version.js#buildDatasetVersion), non null", "satisfied": false },
-      { "id": "LOCKBOX_SEALED", "description": "Lockbox scelle sur le jeu de donnees reel (lib/data/dataset-version.js#sealLockbox), verifie integre (verifyLockboxIntegrity)", "satisfied": false }
+      {
+        "id": "DATASET_EXISTS",
+        "description": "Fixtures reelles Premier League 2022-23 -> 2025-26 presentes dans le cache (lib/data/cache.js), collectees via l'API (GATE B1)",
+        "satisfied": true
+      },
+      {
+        "id": "B6_FIDELITY_PASSED",
+        "description": "Test de fidelite live B6 (comparaison predictions lab vs production sur donnees reelles) passe",
+        "satisfied": true
+      },
+      {
+        "id": "DATASET_VERSION_COMPUTED",
+        "description": "dataset_version calcule sur les fixtures reelles (lib/data/dataset-version.js#buildDatasetVersion), non null",
+        "satisfied": true
+      },
+      {
+        "id": "LOCKBOX_SEALED",
+        "description": "Lockbox scelle sur le jeu de donnees reel (lib/data/dataset-version.js#sealLockbox), verifie integre (verifyLockboxIntegrity)",
+        "satisfied": true
+      }
     ]
   },
   "constraints": [

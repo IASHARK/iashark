@@ -47,7 +47,7 @@ test("multiclassBrier: cas calculable a la main", () => {
   assert.ok(Math.abs(b - 0.38) < 1e-9, `brier=${b}, attendu 0.38`);
 });
 
-test("lowScoreDiagnostics: compte et moyennes correctes sur un jeu synthetique controle", () => {
+test("lowScoreDiagnostics: compte, frequence et moyennes correctes sur un jeu synthetique controle", () => {
   const preds = [
     { lambdaH: 1, lambdaA: 1, h: 0, a: 0, rhoM0: 0, rhoM1: 0 },
     { lambdaH: 1, lambdaA: 1, h: 0, a: 0, rhoM0: 0, rhoM1: 0 },
@@ -58,9 +58,37 @@ test("lowScoreDiagnostics: compte et moyennes correctes sur un jeu synthetique c
   assert.equal(diag["1-0"].count_observed, 1);
   assert.equal(diag["0-1"].count_observed, 0);
   assert.equal(diag["1-1"].count_observed, 0);
+  assert.ok(Math.abs(diag["0-0"].observed_frequency - 2 / 3) < 1e-9);
+  assert.ok(Math.abs(diag["1-0"].observed_frequency - 1 / 3) < 1e-9);
+  assert.equal(diag["0-1"].observed_frequency, 0);
   // P(0,0) avec lambdaH=lambdaA=1, rho=0 : e^-1*e^-1*1 = e^-2
   const expectedP00 = Math.exp(-1) * Math.exp(-1) * 1;
   assert.ok(Math.abs(diag["0-0"].mean_prob_m0 - expectedP00) < 1e-9);
+});
+
+test("lowScoreDiagnostics: mean_prob_m0/m1 est calcule sur TOUS les matchs (calibration), jamais restreint aux matchs ou ce score s'est produit - regression du bug corrige le 2026-09-05", () => {
+  // Deux matchs a lambdas DIFFERENTS : seul le premier a effectivement
+  // fini 0-0. Un bug qui restreindrait la moyenne aux matchs "matching"
+  // donnerait mean_prob_m0["0-0"] = P(0,0|lambdas du match 1) SEUL ; la
+  // version correcte doit moyenner P(0,0) sur LES DEUX matchs, meme si
+  // le second n'a pas fini 0-0.
+  const predA = { lambdaH: 0.5, lambdaA: 0.5, h: 0, a: 0, rhoM0: 0, rhoM1: 0 }; // a fini 0-0
+  const predB = { lambdaH: 2.5, lambdaA: 2.0, h: 3, a: 1, rhoM0: 0, rhoM1: 0 }; // n'a PAS fini 0-0, lambdas tres differents
+  const diag = lowScoreDiagnostics([predA, predB]);
+
+  const { logProbability } = require("../lib/lab/dc-log-probability.js");
+  const pA00 = Math.exp(logProbability(predA.lambdaH, predA.lambdaA, 0, 0, 0));
+  const pB00 = Math.exp(logProbability(predB.lambdaH, predB.lambdaA, 0, 0, 0));
+  const expectedMeanOverAll = (pA00 + pB00) / 2; // moyenne CORRECTE (calibration)
+  const wrongMeanOverMatchingOnly = pA00; // ce que l'ancien bug aurait donne (n=1, le seul match "0-0")
+
+  assert.ok(Math.abs(diag["0-0"].mean_prob_m0 - expectedMeanOverAll) < 1e-12, `mean_prob_m0=${diag["0-0"].mean_prob_m0} devrait etre la moyenne sur les 2 matchs, pas ${wrongMeanOverMatchingOnly} (bug corrige)`);
+  assert.ok(Math.abs(diag["0-0"].mean_prob_m0 - wrongMeanOverMatchingOnly) > 1e-6, "mean_prob_m0 ne doit PAS coincider avec l'ancienne valeur buguee (restreinte aux matchs 'matching')");
+  assert.equal(diag["0-0"].count_observed, 1);
+  assert.equal(diag["0-0"].observed_frequency, 0.5);
+  // nll_contribution reste, lui, calcule UNIQUEMENT sur les matchs ou ce score est arrive (pas de bug la-dessus)
+  const nllA00 = -logProbability(predA.lambdaH, predA.lambdaA, 0, 0, 0);
+  assert.ok(Math.abs(diag["0-0"].nll_contribution_m0 - nllA00) < 1e-12);
 });
 
 test("exactScoreNLL: liste vide -> null, jamais une valeur fabriquee", () => {

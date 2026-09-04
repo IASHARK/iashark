@@ -46,18 +46,39 @@ test("2. N OOS trop faible -> SHADOW_MORE_DATA (N_OOS_TOO_LOW)", () => {
   assert.ok(res.reason_codes.includes(REASON.N_OOS_TOO_LOW));
 });
 
-test("3. gain de 0.10% (sous le plancher economique) -> REJECT (GAIN_BELOW_ECONOMIC_FLOOR)", () => {
+test("3. gain de 0.10% (sous le seuil de promotion pre-enregistre de 0.25%) -> REJECT (GAIN_BELOW_PROMOTION_THRESHOLD)", () => {
   // nll_m0=1.20, gain souhaite = 0.10% -> nll_m1 = 1.20 * (1 - 0.001) = 1.1988
   const res = evaluatePromotion(excellentInput({ nll_m0: 1.20, nll_m1: 1.1988, ci_lower: -0.0025, ci_upper: -0.0005 }));
   assert.equal(res.status, STATUS.REJECT);
-  assert.ok(res.reason_codes.includes(REASON.GAIN_BELOW_ECONOMIC_FLOOR));
+  assert.ok(res.reason_codes.includes(REASON.GAIN_BELOW_PROMOTION_THRESHOLD));
+  assert.equal(res.details.promotion_threshold, 0.0025);
 });
 
-test("4. IC du delta traverse zero (gain non significatif statistiquement) -> SHADOW_MORE_DATA (CI_CROSSES_ZERO)", () => {
-  // gain ponctuel correct (1%, au-dessus du plancher de 0.5%) mais IC large qui traverse zero
+test("3bis. gain de 0.20% (entre l'ancien seuil 0.5% et le seuil officiel 0.25%) -> toujours REJECT sous le seuil officiel", () => {
+  // Verifie explicitement qu'on utilise bien 0.25% et pas l'ancien 0.5% :
+  // 0.20% est sous LES DEUX seuils, donc REJECT dans les deux cas - ce
+  // test isole plutot la valeur exacte via details.promotion_threshold.
+  const res = evaluatePromotion(excellentInput({ nll_m0: 1.20, nll_m1: 1.1976, ci_lower: -0.004, ci_upper: -0.0008 })); // gain=0.20%
+  assert.equal(res.status, STATUS.REJECT);
+  assert.ok(res.reason_codes.includes(REASON.GAIN_BELOW_PROMOTION_THRESHOLD));
+  assert.ok(Math.abs(res.details.relative_gain - 0.002) < 1e-9);
+});
+
+test("4. IC du delta traverse zero (gain non significatif statistiquement) -> SHADOW_MORE_DATA (BOOTSTRAP_CI_CROSSES_ZERO)", () => {
+  // gain ponctuel correct (1%, au-dessus du seuil de 0.25%) mais IC large qui traverse zero
   const res = evaluatePromotion(excellentInput({ nll_m0: 1.20, nll_m1: 1.188, ci_lower: -0.05, ci_upper: 0.01 }));
   assert.equal(res.status, STATUS.SHADOW_MORE_DATA);
-  assert.ok(res.reason_codes.includes(REASON.CI_CROSSES_ZERO));
+  assert.ok(res.reason_codes.includes(REASON.BOOTSTRAP_CI_CROSSES_ZERO));
+});
+
+test("4ter. REJECT pour gain insuffisant ET IC qui traverse zero -> BOOTSTRAP_CI_CROSSES_ZERO reste liste comme diagnostic supplementaire (reproduit le cas reel EXP-001)", () => {
+  // Reproduit exactement la forme du resultat reel EXP-001 : gain minuscule
+  // (0.0387%, sous le seuil 0.25%) ET IC qui traverse zero - les DEUX
+  // signaux doivent apparaitre, pas seulement le premier trouve.
+  const res = evaluatePromotion(excellentInput({ nll_m0: 3.100578105466863, nll_m1: 3.0993768038324094, ci_lower: -0.005849174423906135, ci_upper: 0.003655270769539586 }));
+  assert.equal(res.status, STATUS.REJECT);
+  assert.ok(res.reason_codes.includes(REASON.GAIN_BELOW_PROMOTION_THRESHOLD));
+  assert.ok(res.reason_codes.includes(REASON.BOOTSTRAP_CI_CROSSES_ZERO), "le franchissement de zero par l'IC doit rester visible meme quand REJECT vient d'une autre cause");
 });
 
 test("4bis. IC du delta ENTIEREMENT positif (candidat confidemment PIRE) -> REJECT (CI_CONFIRMS_CANDIDATE_WORSE)", () => {

@@ -127,7 +127,7 @@ test("CAS INVERSE - candidat STRICTEMENT pire sur CHAQUE match -> mean_delta>0, 
     rho_stability: { std: 0.01 },
   });
   assert.equal(decision.status, STATUS.REJECT, `attendu REJECT, obtenu ${decision.status}`);
-  assert.ok(decision.reason_codes.includes(REASON.CI_CONFIRMS_CANDIDATE_WORSE) || decision.reason_codes.includes(REASON.GAIN_BELOW_ECONOMIC_FLOOR));
+  assert.ok(decision.reason_codes.includes(REASON.CI_CONFIRMS_CANDIDATE_WORSE) || decision.reason_codes.includes(REASON.GAIN_BELOW_PROMOTION_THRESHOLD));
 });
 
 test("run-experiment.js#buildNllDeltaBlocks utilise bien la convention officielle (M1=candidat, M0=champion)", () => {

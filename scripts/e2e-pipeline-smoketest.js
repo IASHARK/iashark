@@ -17,7 +17,7 @@ require("./load-env.js");
 const fs = require("fs");
 const https = require("https");
 const path = require("path");
-const { calcPoissonProbs, calcDixonColesProbs, calcMonteCarlo } = require("../lib/models.js");
+const { calcPoissonProbs, calcDixonColesProbs, calcMonteCarlo, seedFromLambdas } = require("../lib/models.js");
 const { deriveMarketsFromMatrix, buildPoissonMatrix } = require("../lib/markets/score-matrix.js");
 const { computeDataQualityScore, computeModelAgreement, computeReliability } = require("../lib/decision.js");
 const { buildPlayerMarketOutput } = require("../lib/markets/player-engine.js");
@@ -71,7 +71,13 @@ async function buildMatchOutput(apsKey, league, tier, season) {
 
   var poisson = calcPoissonProbs(lamH.lambda, lamA.lambda);
   var dixon = calcDixonColesProbs(lamH.lambda, lamA.lambda);
-  var mc = calcMonteCarlo(lamH.lambda, lamA.lambda);
+  // Trouve lors de l'audit du 2026-09-04 (item 6) : mc.p1 alimente pureP1/
+  // pureP2 (le "score pur" de sortie) et modelAgreement ci-dessous, donc
+  // fait bien partie de l'objet de decision de ce script - un appel sans
+  // seed le rendrait non deterministe, en contradiction avec le but affiche
+  // de ce fichier ("preuve... de la chaine deterministe centrale"). Meme
+  // correctif que lib/engine.js (GATE C9) : seed derive des lambdas.
+  var mc = calcMonteCarlo(lamH.lambda, lamA.lambda, { seed: seedFromLambdas(lamH.lambda, lamA.lambda) });
   var pureP1 = Math.round((poisson.p1 * 0.35 + dixon.p1 * 0.4 + mc.p1 * 0.25));
   var pureP2 = Math.round((poisson.p2 * 0.35 + dixon.p2 * 0.4 + mc.p2 * 0.25));
   var purePN = 100 - pureP1 - pureP2;

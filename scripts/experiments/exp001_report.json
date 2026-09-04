@@ -94,29 +94,33 @@
   "low_score_diagnostics": {
     "0-0": {
       "count_observed": 27,
-      "mean_prob_m0": 0.04512940528869262,
-      "mean_prob_m1": 0.0381276538447252,
+      "observed_frequency": 0.03609625668449198,
+      "mean_prob_m0": 0.04003847838001517,
+      "mean_prob_m1": 0.03350908558954419,
       "nll_contribution_m0": 3.2489422923527194,
       "nll_contribution_m1": 3.4452455367354946
     },
     "1-0": {
       "count_observed": 51,
-      "mean_prob_m0": 0.056110811558919005,
-      "mean_prob_m1": 0.06270618073273541,
+      "observed_frequency": 0.06818181818181818,
+      "mean_prob_m0": 0.05137157314918507,
+      "mean_prob_m1": 0.05790096593965611,
       "nll_contribution_m0": 2.9801104162887735,
       "nll_contribution_m1": 2.8576872423339306
     },
     "0-1": {
       "count_observed": 45,
-      "mean_prob_m0": 0.0517936988110975,
-      "mean_prob_m1": 0.05862955789772076,
+      "observed_frequency": 0.06016042780748663,
+      "mean_prob_m0": 0.041834351703862585,
+      "mean_prob_m1": 0.048363744494333526,
       "nll_contribution_m0": 3.096431162658134,
       "nll_contribution_m1": 2.9568314996106726
     },
     "1-1": {
       "count_observed": 82,
-      "mean_prob_m0": 0.09409100732178546,
-      "mean_prob_m1": 0.08705083008907846,
+      "observed_frequency": 0.10962566844919786,
+      "mean_prob_m0": 0.08766797243334422,
+      "mean_prob_m1": 0.08113857964287312,
       "nll_contribution_m0": 2.409585528466333,
       "nll_contribution_m1": 2.486741692953229
     }
@@ -136,10 +140,12 @@
   "promotion": {
     "status": "REJECT",
     "reason_codes": [
-      "GAIN_BELOW_ECONOMIC_FLOOR"
+      "GAIN_BELOW_PROMOTION_THRESHOLD",
+      "BOOTSTRAP_CI_CROSSES_ZERO"
     ],
     "details": {
       "relative_gain": 0.0003874444034598957,
+      "promotion_threshold": 0.0025,
       "ci_lower": -0.005849174423906135,
       "ci_upper": 0.003655270769539586
     }
@@ -225631,5 +225637,145 @@
         }
       }
     }
-  ]
+  ],
+  "exclusions": {
+    "total_oos_fixtures": 760,
+    "predictions_produced": 748,
+    "n_excluded": 12,
+    "exclusion_reason_summary": "calcCriteres (lib/engine.js) exige >=3 matchs joues avant le cutoff pour l'equipe domicile ET l'equipe exterieur - regle PRE-DEFINIE, identique a la production, appliquee AVANT toute prediction (jamais un filtre post-hoc sur le resultat). Les 12 cas sont les 3 premiers matchs de chaque equipe fraichement promue (Burnley/Sheffield Utd/Luton en 2023-24, Ipswich en 2024-25), qui n'ont aucun historique Premier League dans le dataset collecte (elles jouaient en Championship la saison precedente, hors perimetre de GATE B1).",
+    "fixtures": [
+      {
+        "fixture_id": 1035037,
+        "date": "2023-08-11",
+        "home_team": "Burnley",
+        "away_team": "Manchester City",
+        "home_played_at_cutoff": 0,
+        "away_played_at_cutoff": 38,
+        "reason_code": "INSUFFICIENT_TEAM_HISTORY(home)"
+      },
+      {
+        "fixture_id": 1035040,
+        "date": "2023-08-12",
+        "home_team": "Brighton",
+        "away_team": "Luton",
+        "home_played_at_cutoff": 38,
+        "away_played_at_cutoff": 0,
+        "reason_code": "INSUFFICIENT_TEAM_HISTORY(away)"
+      },
+      {
+        "fixture_id": 1035042,
+        "date": "2023-08-12",
+        "home_team": "Sheffield Utd",
+        "away_team": "Crystal Palace",
+        "home_played_at_cutoff": 0,
+        "away_played_at_cutoff": 38,
+        "reason_code": "INSUFFICIENT_TEAM_HISTORY(home)"
+      },
+      {
+        "fixture_id": 1035053,
+        "date": "2023-08-18",
+        "home_team": "Nottingham Forest",
+        "away_team": "Sheffield Utd",
+        "home_played_at_cutoff": 39,
+        "away_played_at_cutoff": 1,
+        "reason_code": "INSUFFICIENT_TEAM_HISTORY(away)"
+      },
+      {
+        "fixture_id": 1035062,
+        "date": "2023-08-25",
+        "home_team": "Chelsea",
+        "away_team": "Luton",
+        "home_played_at_cutoff": 40,
+        "away_played_at_cutoff": 1,
+        "reason_code": "INSUFFICIENT_TEAM_HISTORY(away)"
+      },
+      {
+        "fixture_id": 1035061,
+        "date": "2023-08-27",
+        "home_team": "Burnley",
+        "away_team": "Aston Villa",
+        "home_played_at_cutoff": 1,
+        "away_played_at_cutoff": 40,
+        "reason_code": "INSUFFICIENT_TEAM_HISTORY(home)"
+      },
+      {
+        "fixture_id": 1035066,
+        "date": "2023-08-27",
+        "home_team": "Sheffield Utd",
+        "away_team": "Manchester City",
+        "home_played_at_cutoff": 2,
+        "away_played_at_cutoff": 40,
+        "reason_code": "INSUFFICIENT_TEAM_HISTORY(home)"
+      },
+      {
+        "fixture_id": 1035074,
+        "date": "2023-09-01",
+        "home_team": "Luton",
+        "away_team": "West Ham",
+        "home_played_at_cutoff": 2,
+        "away_played_at_cutoff": 41,
+        "reason_code": "INSUFFICIENT_TEAM_HISTORY(home)"
+      },
+      {
+        "fixture_id": 1035070,
+        "date": "2023-09-02",
+        "home_team": "Burnley",
+        "away_team": "Tottenham",
+        "home_played_at_cutoff": 2,
+        "away_played_at_cutoff": 41,
+        "reason_code": "INSUFFICIENT_TEAM_HISTORY(home)"
+      },
+      {
+        "fixture_id": 1208022,
+        "date": "2024-08-17",
+        "home_team": "Ipswich",
+        "away_team": "Liverpool",
+        "home_played_at_cutoff": 0,
+        "away_played_at_cutoff": 76,
+        "reason_code": "INSUFFICIENT_TEAM_HISTORY(home)"
+      },
+      {
+        "fixture_id": 1208037,
+        "date": "2024-08-24",
+        "home_team": "Manchester City",
+        "away_team": "Ipswich",
+        "home_played_at_cutoff": 77,
+        "away_played_at_cutoff": 1,
+        "reason_code": "INSUFFICIENT_TEAM_HISTORY(away)"
+      },
+      {
+        "fixture_id": 1208045,
+        "date": "2024-08-31",
+        "home_team": "Ipswich",
+        "away_team": "Fulham",
+        "home_played_at_cutoff": 2,
+        "away_played_at_cutoff": 78,
+        "reason_code": "INSUFFICIENT_TEAM_HISTORY(home)"
+      }
+    ],
+    "m0_m1_same_support": "M0 et M1 sont calcules dans la MEME iteration pour chaque match retenu (lib/lab/walkforward-runner.js) - aucune exclusion independante possible entre les deux modeles. Verifie : true (100% des predictions ont markets_m0 ET markets_m1)."
+  },
+  "methodology_notes": {
+    "cutoff_definition": "Un cutoff = un jour calendaire UTC (YYYY-MM-DDT00:00:00.000Z) contenant au moins un match OOS. lib/lab/walkforward-runner.js#buildCutoffs groupe les fixtures OOS par date calendaire de kickoff_timestamp (YYYY-MM-DD, tronque a l'heure) ; le cutoff est le DEBUT de cette journee.",
+    "same_day_batching": "Tous les matchs partageant la meme date calendaire (meme si des heures de coup d'envoi differentes, ex: samedi 12h30/15h00/17h30) sont traites dans le MEME batch, au MEME cutoff - aucun match d'un batch n'informe la prediction d'un autre match du meme batch, meme si l'un a deja ete joue au moment ou l'autre commence.",
+    "train_strictly_before_cutoff": "lib/data/team-state.js#buildTeamState filtre kickoff_timestamp < cutoff, STRICTEMENT (jamais <=). Verifie par tests/lab-walkforward-anti-leakage.test.js (ajout d'un match futur aberrant, predictions anterieures inchangees).",
+    "batch_never_in_own_train": "Consequence directe de train_strictly_before_cutoff : les matchs du batch ont kickoff >= cutoff (meme jour), donc structurellement exclus de leur propre pool d'entrainement - jamais besoin d'un filtre special.",
+    "rescheduled_matches_ordering": "API-Football expose fixture.date comme l'horodatage REEL du coup d'envoi (deja tenant compte de tout report/decalage TV) - jamais une date 'initialement prevue'. Aucune ambiguite d'ordre : le cutoff est toujours calcule sur la date EFFECTIVEMENT jouee. Confirme par la collecte reelle : 0 statut PST/CANC/ABD sur les 4 saisons (aucun cas de report-puis-rejoue avec deux dates concurrentes dans ce dataset). Le tri des cutoffs (Array.sort() sur des chaines ISO 8601) est lexicographique = chronologique, deterministe (aucun alea).",
+    "n_cutoffs_total": 229,
+    "n_cutoffs_with_predictions": 225,
+    "n_cutoffs_zero_predictions": 4,
+    "cutoffs_zero_predictions_detail": [
+      "2023-08-11T00:00:00.000Z",
+      "2023-08-18T00:00:00.000Z",
+      "2023-08-25T00:00:00.000Z",
+      "2023-09-01T00:00:00.000Z"
+    ],
+    "cutoffs_zero_predictions_explanation": "Ces 4 journees ne contenaient qu'UN SEUL match OOS, et ce match impliquait une equipe fraichement promue sans historique suffisant (voir report.exclusions) - aucune prediction resoluble ce jour-la, donc aucun bloc de bootstrap pour ce cutoff.",
+    "batch_size_min": 1,
+    "batch_size_max": 10,
+    "batch_size_avg": 3.3244444444444445,
+    "bootstrap_block_definition": "Un bloc = l'ensemble des deltas (loss_candidate - loss_champion, lib/lab/loss-delta.js) de TOUS les matchs partageant le MEME cutoff (meme jour calendaire) - PAS un bootstrap IID match par match. lib/lab/bootstrap.js#pairedBlockBootstrap rechantillonne des BLOCS ENTIERS (tous les deltas d'un cutoff ensemble), preservant la dependance temporelle intra-journee tout en cassant la dependance inter-journees, conformement a la SPEC.",
+    "bootstrap_n_blocks_declared": 225,
+    "bootstrap_n_blocks_check": "OK (egal au nombre de cutoffs avec >=1 prediction)"
+  }
 }

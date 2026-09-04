@@ -49,7 +49,18 @@
       "block_unit": "cutoff (journee)",
       "delta_sign_convention": "delta = loss_candidate - loss_champion (lib/lab/loss-delta.js) - candidat meilleur -> delta<0. PROMOTE exige ci_upper<0."
     },
-    "promotion_rule": "lib/promotion.js#evaluatePromotion (PROMOTE / SHADOW_MORE_DATA / REJECT)"
+    "promotion_rule": "lib/promotion.js#evaluatePromotion (PROMOTE / SHADOW_MORE_DATA / REJECT) - reason codes: FITTER_NON_CONVERGENT, RHO_ON_BOUNDARY, RHO_UNSTABLE, CI_CONFIRMS_CANDIDATE_WORSE, GAIN_BELOW_PROMOTION_THRESHOLD, SECONDARY_MARKET_DEGRADED, LOW_SCORE_DEGRADED, N_OOS_TOO_LOW, BOOTSTRAP_CI_CROSSES_ZERO",
+    "promotion_thresholds": {
+      "min_n_oos": 500,
+      "min_convergence_rate": 0.95,
+      "max_boundary_hit_rate": 0.1,
+      "min_relative_gain": 0.0025,
+      "max_secondary_degradation": 0.03,
+      "max_rho_std": 0.05,
+      "min_low_score_count_for_check": 5,
+      "max_low_score_relative_degradation": 0.1,
+      "note": "Seuils enregistres AVANT experience (jamais modifies apres avoir vu un resultat) - source unique lib/promotion.js, ce bloc est un miroir en lecture, jamais une seconde source de verite."
+    }
   },
   "gating_to_running": {
     "description": "Conditions OBLIGATOIRES, toutes vraies, avant que status puisse passer de BLOCKED_DATA a RUNNING. Verifiees par lib/lab/experiment-manifest.js#evaluateGate - jamais a la main, jamais suppose.",

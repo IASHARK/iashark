@@ -1,0 +1,147 @@
+{
+  "experiment_id": "EXP-002C",
+  "supersedes": "EXP-002 (INVALID_IMPLEMENTATION) et EXP-002R (INVALID_BASELINE_REPLAY, CHAMPION_REPLAY_MISMATCH) - AUCUN resultat numerique de ces deux experiences n'est reutilise. Historiquement invalides.",
+  "registration_status": "REGISTERED",
+  "status": "RUNNING",
+  "created_at": "2026-09-05",
+  "hypothesis": "M2 (M0_PRODUCTION_REPLAY + mecanisme Bayes early-season, prior_weight(n)=max(0,8-0.5n), source=saison precedente complete) ameliore le NLL exact-score hors-echantillon sur le bucket EARLY (n_min<=8) par rapport a M0_PRODUCTION_REPLAY (rho=-0.0845 fixe), SANS degrader le NLL global, et est STRUCTURELLEMENT identique a M0 des que les deux equipes ont un poids Bayes nul.",
+  "champion_model": {
+    "id": "M0_PRODUCTION_REPLAY",
+    "description": "Dixon-Coles pur, rho fixe=-0.0845. Lambdas via lib/data/production-replay.js#buildProductionStateAtCutoff (fixtures.season===targetSeason ET kickoff<cutoff, JAMAIS une autre saison) + lib/engine.js#calcLambdas. Gate calcCriteres>=3 matchs saison courante. Statut CURRENT_CHAMPION accepte le 2026-09-05 (EXP-001R, CLOSED_REJECT pour M1)."
+  },
+  "candidate_model": {
+    "id": "M2",
+    "description": "M0_PRODUCTION_REPLAY + shrinkage Bayes early-season UNIQUEMENT, applique comme mutation ADDITIVE sur le baseState (jamais un remplacement). La SEULE difference structurelle autorisee avec M0 est ce mecanisme. baseState_M2 == state_M0 et lambda_base_M2 == lambda_M0 par CONSTRUCTION (verifie a <=1e-12 sur 699/699 fixtures COMMON_SUPPORT, tests/lab-m2c-runner.test.js#TEST_B)."
+  },
+  "code": {
+    "runner": "lib/lab/walkforward-m2c-runner.js#runWalkForwardM2C",
+    "reused_components": [
+      "lib/data/production-replay.js#buildProductionStateAtCutoff (M0 season-scope, INCHANGE, deja audite EXP-001R)",
+      "lib/lab/bayes-early-season.js#blendWithDecayingPrior (formule Bayes deja auditee, prior_weight(n)=max(0,8-0.5n), JAMAIS reimplementee)",
+      "lib/lab/walkforward-m2r-runner.js#isReturningTeam / computeRealLeagueAverageRates / previousSeasonState (provenance du prior deja construite et testee pour EXP-002R)",
+      "lib/lab/walkforward-runner.js#buildCutoffs (politique de cutoff/batch, INCHANGEE)",
+      "lib/lab/promotion-m2.js#evaluatePromotionM2 (regle de promotion DEJA enregistree pour la famille M2, seuils inchanges)"
+    ],
+    "new_code": "lib/lab/walkforward-m2c-runner.js - orchestration UNIQUEMENT : construit baseState via buildProductionStateAtCutoff (n=baseState.playedTotal DIRECTEMENT, car baseState est deja season-scope), calcule le prior (provenance reutilisee EXP-002R), appelle blendWithDecayingPrior telle quelle, et CRASH immediatement si LATE_IDENTITY_VIOLATIONS>0 avant tout calcul de performance.",
+    "code_sha": null
+  },
+  "early_season_formula": {
+    "version": "prior_weight(n) = max(0, 8 - 0.5*n), IDENTIQUE a lib/markets/early-season.js#blendEarlySeasonRate en production, MOINS le terme de plancher-ligue permanent (omis deliberement pour satisfaire l'invariant LATE : a n>=16, weight doit etre EXACTEMENT 0, pas seulement tres petit)",
+    "reference_table": { "n=0": 8, "n=4": 6, "n=8": 4, "n=12": 2, "n=15": 0.5, "n=16": 0, "n>=16": 0 },
+    "implementation": "lib/lab/bayes-early-season.js#priorWeight + #blendWithDecayingPrior",
+    "blend_mechanism": "blended_events = current.events + priorRate*weight ; blended_matches = current.matches + weight (mutation additive, jamais un remplacement) - lambda_base_M2 converge vers lambda_M0 exactement a weight=0"
+  },
+  "prior_definition": {
+    "returning_team": {
+      "source": "MEME equipe, saison PRECEDENTE COMPLETE UNIQUEMENT (jamais une autre saison, jamais la Championship, jamais une donnee future)",
+      "fallback_if_zero_matches_previous_season_in_that_venue": "REAL_LEAGUE_AVERAGE_PREVIOUS_SEASON (moyenne reelle calculee sur les fixtures de la saison precedente, jamais une constante generique)",
+      "persisted_fields": ["prior_type", "source_season", "source_fixture_count", "source_max_timestamp"],
+      "invariant": "source_max_timestamp < cutoff, TOUJOURS (verifie tests/lab-m2c-runner.test.js)"
+    },
+    "promoted_team": {
+      "source": "REAL_LEAGUE_AVERAGE_PREVIOUS_SEASON exactement (fallback de ligue pre-enregistre pour M2, reutilise de EXP-002R, JAMAIS une constante appelee 'league average' sans provenance reelle)",
+      "computation": "lib/lab/walkforward-m2r-runner.js#computeRealLeagueAverageRates(previousSeasonFixtures) - moyenne reelle sur TOUTES les fixtures de la saison precedente complete",
+      "persisted_fields": ["prior_type", "source_season", "source_fixture_count", "source_max_timestamp"]
+    },
+    "forbidden": ["Championship (division inferieure)", "donnee future (kickoff>=cutoff)", "lockbox 2025-2026", "constante generique sans provenance documentee"]
+  },
+  "supports": {
+    "COMMON_SUPPORT": {
+      "definition": "m0_valid===true ET m2 predit (toujours vrai si m0_valid, car M2 predit un strict superset de M0)",
+      "usage": "SEUL support pour toute comparaison NLL M2-vs-M0 (delta, bootstrap, secondaires). Attendu N=699 (identique EXP-001R accepte).",
+      "expected_n": 699
+    },
+    "M2_COVERAGE_GAIN": {
+      "definition": "m0_valid===false (calcCriteres<3 sur au moins une equipe) ET M2 predit via le prior",
+      "usage": "Rapporte SEPAREMENT, jamais mele au delta de performance apparie. Aucune probabilite M0 fabriquee. Beneifice operationnel distinct, ne compte pas pour la promotion.",
+      "expected_n_max": 61
+    }
+  },
+  "buckets": {
+    "definition": "n_min = min(n_home, n_away), calcule sur COMMON_SUPPORT uniquement",
+    "EARLY": "n_min <= 8",
+    "TRANSITION": "9 <= n_min <= 16",
+    "LATE": "n_min >= 17",
+    "persisted_fields": ["n_home", "n_away", "n_min", "bucket"]
+  },
+  "late_identity_invariant": {
+    "description": "Quand prior_weight_home===0 ET prior_weight_away===0, M2 doit etre EXACTEMENT M0 : etat, lambdas, matrice de score, 1X2, O/U, BTTS, tolerance <=1e-12.",
+    "enforcement": "Le runner (lib/lab/walkforward-m2c-runner.js) CRASH immediatement (throw, code=LATE_IDENTITY_VIOLATED) si LATE_IDENTITY_VIOLATIONS>0, AVANT tout calcul de performance. Aucun rapport ne peut etre genere en cas de violation.",
+    "pre_verified": "tests/lab-m2c-runner.test.js#TEST_A : 439 fixtures REELLES a poids nul des deux cotes, 0 violation, verifie AVANT ce lancement."
+  },
+  "dataset": {
+    "competition": "Premier League",
+    "api_football_league_id": 39,
+    "seasons_used_for_oos": ["2023-2024", "2024-2025"],
+    "seasons_used_for_prior_source": ["2022-2023", "2023-2024"],
+    "dataset_version": "403e31d057ba094993f29e3c8c88dec21119f8438acc2c7b10a21200dd6a2942",
+    "lockbox_sealed": true,
+    "lockbox_hash_2025_2026": "f611ad31213505fd69edfc8941e79ec7d182dc83b426df3a8fb04d67ec4fa01a",
+    "note": "AUCUNE recollecte. Memes fichiers data/gate-b1/*.json que EXP-001R (accepte)."
+  },
+  "methodology": {
+    "walk_forward": "lib/lab/walkforward-m2c-runner.js#runWalkForwardM2C",
+    "primary_metric": "exact_score_nll",
+    "delta_sign_convention": "delta_i = NLL_M2 - NLL_M0 (lib/lab/loss-delta.js), negatif = M2 meilleur",
+    "primary_comparison_scope": "COMMON_SUPPORT uniquement, rapporte GLOBAL / EARLY / TRANSITION / LATE, ET separement par saison (2023-24, 2024-25)",
+    "secondary_metrics": ["1x2_logloss", "1x2_brier", "ou25_logloss", "ou25_brier", "btts_logloss", "btts_brier"],
+    "secondary_metrics_scope": "COMMON_SUPPORT, GLOBAL et EARLY (ainsi que TRANSITION/LATE et par saison pour completude)",
+    "low_score_diagnostics": {
+      "scores": ["0-0", "1-0", "0-1", "1-1"],
+      "mean_probability_scope": "calculee sur l'ensemble des predictions du perimetre (jamais uniquement sur les matchs ou ce score s'est produit)"
+    },
+    "coverage_gain_reporting": {
+      "fields": ["fixture_id", "promoted_or_returning", "n_home", "n_away", "prior_type", "lambdaH_m2", "lambdaA_m2", "observed_score", "nll_m2"],
+      "constraint": "coverage_gain != gain de performance apparie. N'est jamais utilise pour satisfaire artificiellement le seuil de promotion. Beneifice operationnel rapporte separement."
+    },
+    "bootstrap": {
+      "method": "paired_block_bootstrap (lib/lab/bootstrap.js)",
+      "n_resamples": 10000,
+      "seed": "EXP-002C-v1",
+      "block_definition": "league_id+season+ISO_YEAR_WEEK(kickoff_timestamp_utc) (lib/lab/iso-week.js#getIsoYearWeek)"
+    },
+    "promotion_rule": "lib/lab/promotion-m2.js#evaluatePromotionM2 (regle DEJA enregistree pour M2, INCHANGEE)"
+  },
+  "promotion_thresholds": {
+    "min_early_relative_gain": 0.005,
+    "max_global_relative_degradation": 0.001,
+    "note": "0.50% EARLY / 0.10% degradation globale max - seuils enregistres AVANT tout calcul de performance, INCHANGES quel que soit le resultat observe."
+  },
+  "promotion_criteria": [
+    "1. gain relatif NLL EARLY >= 0.50%",
+    "2. bootstrap CI95 EARLY upper < 0",
+    "3. degradation NLL GLOBAL <= 0.10%",
+    "4. invariant LATE parfait (0 violation)",
+    "5. aucune fuite temporelle",
+    "6. determinisme complet (2 runs independants byte-identiques)"
+  ],
+  "decision_outcomes": {
+    "PROMOTE": "NEXT_CHAMPION = M2",
+    "SHADOW_MORE_DATA": "NEXT_CHAMPION = M0_PRODUCTION_REPLAY (M2 non promu, donnees insuffisantes pour conclure)",
+    "REJECT": "NEXT_CHAMPION = M0_PRODUCTION_REPLAY"
+  },
+  "gating_to_running": {
+    "description": "Conditions OBLIGATOIRES avant status=RUNNING.",
+    "conditions": [
+      { "id": "DATASET_EXISTS", "description": "Fixtures reelles Premier League 2022-23 -> 2024-25 presentes localement (GATE B1, INCHANGEES)", "satisfied": true },
+      { "id": "CHAMPION_M0_CANONICAL", "description": "lib/data/production-replay.js deja audite et re-valide contre l'API reelle (EXP-001R, 30/30 PASS)", "satisfied": true },
+      { "id": "BAYES_FORMULA_REUSED_NOT_REINVENTED", "description": "lib/lab/bayes-early-season.js#blendWithDecayingPrior importee telle quelle, contrat teste (frontieres n=15/16/17)", "satisfied": true },
+      { "id": "BASELINE_IDENTITY_TESTED", "description": "tests/lab-m2c-runner.test.js#TEST_B : lambda_base_M2==lambda_M0 verifie sur 699/699 fixtures COMMON_SUPPORT contre le vrai rapport EXP-001R accepte, 0 divergence", "satisfied": true },
+      { "id": "LATE_IDENTITY_TESTED", "description": "tests/lab-m2c-runner.test.js#TEST_A : 439 fixtures reelles a poids nul verifiees a <=1e-12 (etat/lambdas/1X2/OU/BTTS), 0 violation, ET le crash obligatoire du runner confirme structurellement absent d'exception sur donnees reelles", "satisfied": true },
+      { "id": "PRIOR_PROVENANCE_TESTED", "description": "source_max_timestamp<cutoff verifie, prior_type jamais une constante sans provenance", "satisfied": true },
+      { "id": "DETERMINISM_TESTED", "description": "2 runs independants byte-identiques verifie (tests/lab-m2c-runner.test.js)", "satisfied": true },
+      { "id": "COMMON_SUPPORT_MATCHES_ACCEPTED_CHAMPION", "description": "699/61 verifie exactement egal a EXP-001R (accepte le 2026-09-05)", "satisfied": true }
+    ]
+  },
+  "constraints": [
+    "AUCUN resultat numerique de EXP-002 ou EXP-002R reutilise",
+    "AUCUNE reinvention de la formule Bayes - blendWithDecayingPrior importee telle quelle",
+    "AUCUNE fausse probabilite M0 fabriquee pour M2_COVERAGE_GAIN",
+    "AUCUNE constante 'league average' sans provenance documentee (source_season, source_fixture_count, source_max_timestamp toujours persistes)",
+    "AUCUNE Championship, AUCUNE donnee future, AUCUNE lockbox consultee",
+    "Le runner DOIT crash si LATE_IDENTITY_VIOLATIONS>0 avant tout calcul de performance",
+    "Manifest IMMUABLE une fois status=RUNNING",
+    "Aucun seuil de promotion modifie apres avoir vu un resultat",
+    "Apres decision : STOP. Ne pas commencer M3 sans instruction explicite."
+  ]
+}

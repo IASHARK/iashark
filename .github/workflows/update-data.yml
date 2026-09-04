@@ -1324,15 +1324,37 @@ jobs:
                  }).join(',\n')+'\n]\n'
                 :'')
               +'}';
+            if(!ANT_KEY){
+              console.error('  [genAnalyse] ANTHROPIC_KEY absente : aucun texte editorial ne sera produit.');
+              return null;
+            }
             var r = await postJSONWithRetry('api.anthropic.com', '/v1/messages', {
-              model: 'claude-sonnet-4-6',
+              // Identifiant de modele VALIDE. Il valait 'claude-sonnet-4-6',
+              // qui n'existe pas : l'API repondait not_found_error, la reponse
+              // n'avait pas de champ `content`, et le code retombait sur '{}'
+              // sans lever la moindre erreur. Resultat observe le 04/09/2026 :
+              // verdict, contexte, analyse, scenario et scenario_15min vides
+              // sur 45 des 46 matchs publies - toute la couche editoriale
+              // manquait, sans un seul message dans les journaux.
+              model: 'claude-sonnet-5',
               max_tokens: 2500,
               system: 'Tu es IASHARK, un analyste sportif professionnel. Tu reponds EXCLUSIVEMENT en JSON valide. Aucun backtick. Tu n\'inventes jamais de statistiques. Le marche, la cote, la probabilite et le niveau de risque sont deja decides par du code deterministe avant que tu n\'intervienne - tu ne les recalcules jamais, tu ne les modifies jamais, tu ne renvoies aucun champ numerique de probabilite/cote/confiance. Ton unique role est d\'ecrire un texte factuel qui explique la decision deja prise, en citant les donnees statistiques fournies.',
               messages: [{role:'user', content:prompt+jsonTpl}]
             }, {'x-api-key':ANT_KEY, 'anthropic-version':'2023-06-01'});
-            var txt=((r.content||[]).find(function(b){return b.type==='text';})||{}).text||'{}';
+            // Une reponse sans `content` est une ERREUR, pas un texte vide.
+            // Sans ce test, une cle invalide ou un modele inconnu produisait
+            // silencieusement des analyses vides pendant des semaines.
+            if(!r||!Array.isArray(r.content)){
+              console.error('  [genAnalyse] reponse inexploitable de l\'API :',JSON.stringify(r&&r.error?r.error:r).slice(0,300));
+              return null;
+            }
+            var txt=(r.content.find(function(b){return b.type==='text';})||{}).text||'';
+            if(!txt.trim()){
+              console.error('  [genAnalyse] reponse sans texte.');
+              return null;
+            }
             try{return JSON.parse(txt.replace(/```json|```/g,'').trim());}
-            catch(e){console.log('Parse error genAnalyse:',txt.slice(0,200));return null;}
+            catch(e){console.error('  [genAnalyse] JSON illisible :',txt.slice(0,200));return null;}
           }
           // Pages statiques a forte valeur SEO, en plus des matchs du jour.
           function escHtml(s){

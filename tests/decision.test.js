@@ -196,3 +196,31 @@ test("scoresConsistentWithMarket: marche non evaluable ou aucun score compatible
   assert.deepEqual(scoresConsistentWithMarket(raw, "fh-over-05", 3), raw.slice(0, 3));
   assert.deepEqual(scoresConsistentWithMarket(raw, "over-35", 3), raw.slice(0, 3));
 });
+
+// Filet de securite general, pose apres le bug des lignes basses de tirs :
+// une probabilite de 100 % face a une cote de 1.60 n'est pas un ecart a
+// exploiter, c'est le signe que notre nombre et celui du bookmaker ne
+// decrivent pas le meme evenement.
+test("un marche donne quasi certain n'est jamais recommande", () => {
+  const marches = [
+    { id: "tirs-bas", market: "Tirs du match over 9.5", prob: 100, cote: "1.60" },
+    { id: "over-25", market: "Over 2.5", prob: 72, cote: "1.85" }
+  ];
+  const choisi = pickMarketDeterministic(marches, { minOdds: 1.5 });
+  assert.equal(choisi.id, "over-25",
+    "le marche a 100 % a ete recommande alors qu'il est incoherent avec sa cote");
+
+  // Et s'il ne reste que la quasi-certitude, on ne recommande rien plutot que
+  // de la publier.
+  assert.equal(pickMarketDeterministic([marches[0]], { minOdds: 1.5 }), null);
+  assert.equal(pickMarketDeterministic([marches[0]], {}), null);
+});
+
+test("le seuil de quasi-certitude ne coupe pas les marches legitimes", () => {
+  // Sur les 46 matchs du 03/09/2026, aucune recommandation legitime ne
+  // depassait 90 % : le plus haut palier reel etait 80-90 %.
+  const haut = { id: "haut", market: "DC 1X", prob: 89.4, cote: "1.55" };
+  assert.equal(pickMarketDeterministic([haut], { minOdds: 1.5 }).id, "haut");
+  const limite = { id: "limite", market: "Limite", prob: 96.9, cote: "1.55" };
+  assert.equal(pickMarketDeterministic([limite], { minOdds: 1.5 }).id, "limite");
+});

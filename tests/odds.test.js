@@ -107,6 +107,50 @@ test("parseOdds: normalise les lignes premiere mi-temps et tirs sans ligne codee
   ]);
 });
 
+// Bug remonte par l'utilisateur le 04/09/2026 : "les tirs, pas cadres, tirs
+// normal, elle existe pas la cote, elle doit etre a 1,01".
+//
+// Le flux contient deux familles de lignes sous le nom "Total Shots". Celles
+// autour de 20 sont coherentes avec un match entier. Celles sous 12 ne
+// peuvent pas designer le total de tirs d'un match de football : notre
+// modele leur repond 100 %, alors que le bookmaker price "over 9.5" a 1.60,
+// soit 62 %. Si les deux parlaient de la meme chose, cette cote serait a
+// 1.01. Comparer les deux fabriquait un ecart de +40 points entierement faux.
+test("parseOdds: les lignes de tirs du match trop basses pour un match entier sont ecartees", () => {
+  const raw = bookmaker([
+    { id: 211, name: "Total Shots", values: [
+      { value: "Over 7.5", odd: "1.30" },
+      { value: "Over 8.5", odd: "1.47" },
+      { value: "Over 9.5", odd: "1.60" },
+      { value: "Over 10.5", odd: "1.98" },
+      { value: "Over 11.5", odd: "2.55" },
+      { value: "Over 19.5", odd: "1.21" },
+      { value: "Over 21.5", odd: "1.55" },
+      { value: "Over 22.5", odd: "1.57" },
+      { value: "Under 22.5", odd: "2.30" },
+      { value: "Over 24.5", odd: "1.73" }
+    ] },
+    // Les tirs CADRES ne sont pas concernes : leurs lignes basses sont
+    // coherentes avec un match entier et le modele s'accorde avec le marche.
+    { id: 87, name: "Total ShotOnGoal", values: [
+      { value: "Over 4.5", odd: "1.06" },
+      { value: "Over 5.5", odd: "1.12" },
+      { value: "Over 7.5", odd: "1.50" }
+    ] }
+  ]);
+  const p = parseOdds(raw);
+  const tirs = p.dynamic_count_offers.filter((o) => o.market === "total-shots");
+  const cadres = p.dynamic_count_offers.filter((o) => o.market === "total-shots-on-target");
+
+  assert.deepEqual(tirs.map((o) => o.line).sort((a, b) => a - b), [19.5, 21.5, 22.5, 22.5, 24.5],
+    "les lignes de tirs du match sous 15.5 doivent disparaitre, les autres rester");
+  for (const o of tirs) {
+    assert.ok(o.line >= 15.5, `ligne ${o.line} conservee alors qu'elle est impossible sur un match entier`);
+  }
+  assert.deepEqual(cadres.map((o) => o.line).sort((a, b) => a - b), [4.5, 5.5, 7.5],
+    "les tirs cadres ne doivent pas etre touches");
+});
+
 test("les totaux par equipe sont lus sous le nom REEL renvoye par l'API (Total - Home/Away)", () => {
   // Bug reel trouve le 02/09/2026 en comparant le code aux 29 snapshots de
   // cotes reellement enregistres : le parseur cherchait "Home Team Total

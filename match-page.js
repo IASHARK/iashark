@@ -474,25 +474,138 @@ function keyRowsForMarket(market){
   for(const [re,rows,topic] of MARKET_KEY_ROWS){ if(re.test(label))return{rows,topic}; }
   return{rows:[],topic:null};
 }
+// Comparatif des deux equipes.
+//
+// Un vrai tableau, plus une seule barre pleine largeur. Trois idees reprises
+// de tableaux de donnees sombres examines sur 21st.dev, adaptees :
+//   - le repere visuel vit DANS la ligne, minuscule, et ne remplace jamais le
+//     nombre : une micro-barre centree qui penche du cote de l'equipe devant ;
+//   - les lignes sont regroupees par theme, sinon neuf rangees se lisent
+//     comme une liste sans relief ;
+//   - un pied conclut, au lieu de laisser le lecteur compter lui-meme.
+//
+// Le sens compte : sur "Buts concedes" et "Fautes", le plus petit gagne.
+// Sur "Hors-jeu" et "Arrets", aucun des deux ne gagne - plus d'arrets veut
+// surtout dire plus de tirs subis. Ces deux-la n'ont donc pas de verdict et
+// ne comptent pas dans le total du pied.
+const CMP_SENS={
+  'Buts marqués':'haut','Tirs':'haut','Tirs cadrés':'haut','Possession':'haut','Corners':'haut',
+  'Buts concédés':'bas','Fautes':'bas',
+  'Hors-jeu':'neutre','Arrêts':'neutre'
+};
+const CMP_GROUPES=[
+  ['Attaque',['Buts marqués','Tirs','Tirs cadrés']],
+  ['Maîtrise',['Possession','Corners']],
+  ['Défense',['Buts concédés','Arrêts']],
+  ['Discipline',['Fautes','Hors-jeu']]
+];
+const CMP_UNITE={'Possession':'%'};
+
 function comparison(vm){
   const c=vm.comparison;
   if(!c||!c.rows.length)return empty('Statistiques comparatives indisponibles.');
-  const rec=vm.model.recommendation;
-  const key=rec?keyRowsForMarket(rec.market):{rows:[],topic:null};
-  const intro=rec&&key.topic?`<p class="cmp-intro">Les lignes en surbrillance sont celles qui pèsent le plus sur <b>${esc(rec.market)}</b> — c’est-à-dire sur ${esc(key.topic)}.</p>`:'';
-  const body=c.rows.map(row=>{
-    const max=Math.max(row.home,row.away,1);
-    const isKey=key.rows.includes(row.label);
-    return `<div class="compare-row${isKey?' is-key':''}"><b>${fmt(row.home)}</b><div class="compare-bar home"><i style="width:${row.home/max*100}%"></i></div><span>${esc(row.label)}${isKey?'<em>clé</em>':''}</span><div class="compare-bar away"><i style="width:${row.away/max*100}%"></i></div><b>${fmt(row.away)}</b></div>`;
-  }).join('');
-  return intro+body;
+  const parLabel={};
+  c.rows.forEach(r=>{parLabel[r.label]=r;});
+  const dom=vm.identity.home.name,ext=vm.identity.away.name;
+
+  // Une decimale partout dans les colonnes : "1" a cote de "1,4" donne
+  // l'impression d'une mesure moins precise que sa voisine.
+  // Une decimale sur les moyennes, aucune sur les pourcentages : "69,0 %"
+  // suggere une precision que la possession n'a pas.
+  const un=(v,unite)=>Number(v).toLocaleString('fr-FR',
+    unite==='%'?{maximumFractionDigits:0}:{minimumFractionDigits:1,maximumFractionDigits:1});
+
+  let gagnesDom=0,gagnesExt=0,depart=0;
+  const lignes=[];
+
+  // Les barres sont mises a l'echelle du plus grand ecart relatif du tableau :
+  // rapportees dans l'absolu, un +0,3 sur 2,2 buts donnait un trait de 4px,
+  // illisible. Le plus grand ecart remplit la demi-largeur, les autres
+  // suivent proportionnellement.
+  const relatif=r=>Math.abs(r.home-r.away)/Math.max(Math.abs(r.home),Math.abs(r.away),0.0001);
+  const comparables=c.rows.filter(r=>(CMP_SENS[r.label]||'neutre')!=='neutre');
+  const ecartMax=comparables.length?Math.max(...comparables.map(relatif),0.0001):1;
+
+  CMP_GROUPES.forEach(([groupe,labels])=>{
+    const presentes=labels.map(l=>parLabel[l]).filter(Boolean);
+    if(!presentes.length)return;
+    lignes.push(`<tr class="cmp-groupe"><th scope="rowgroup" colspan="4">${esc(groupe)}</th></tr>`);
+    presentes.forEach(r=>{
+      const sens=CMP_SENS[r.label]||'neutre';
+      const unite=CMP_UNITE[r.label]||'';
+      const ecart=r.home-r.away;
+      // Qui est devant, selon le sens de la mesure. Sur une egalite parfaite,
+      // personne.
+      let devant=null;
+      if(sens!=='neutre'&&Math.abs(ecart)>0.001) devant=(sens==='haut')===(ecart>0)?'dom':'ext';
+      if(devant==='dom')gagnesDom++; else if(devant==='ext')gagnesExt++; else if(sens!=='neutre')depart++;
+      // Longueur de la micro-barre : l'ecart rapporte a la plus grande des
+      // deux valeurs. Un +15 de possession et un +0,3 de buts deviennent
+      // comparables, parce que c'est l'ecart RELATIF qu'on montre.
+      const part=Math.min(100,Math.round(relatif(r)/ecartMax*100));
+      const cote=ecart>0?'g':'d';
+      const barre=devant===null
+        ? '<span class="cmp-jauge" aria-hidden="true"><i class="axe"></i></span>'
+        : `<span class="cmp-jauge" aria-hidden="true"><i class="axe"></i><i class="trait ${cote} ${devant}" style="width:${part/2}%"></i></span>`;
+      const signe=ecart>0?'+':ecart<0?'−':'';
+      const valeurEcart=Math.abs(ecart)<0.001?'—':signe+un(Math.abs(ecart),unite)+unite;
+      lignes.push(`<tr>
+        <th scope="row">${esc(r.label)}</th>
+        <td class="${devant==='dom'?'gagne':''}">${un(r.home,unite)}${esc(unite)}</td>
+        <td class="${devant==='ext'?'gagne':''}">${un(r.away,unite)}${esc(unite)}</td>
+        <td class="cmp-ecart">${barre}<span class="cmp-val ${devant||'nul'}">${valeurEcart}</span></td>
+      </tr>`);
+    });
+  });
+
+  // Les mesures qu'on n'a pas su ranger dans un theme ne sont pas perdues.
+  const rangees=new Set(CMP_GROUPES.flatMap(g=>g[1]));
+  const orphelines=c.rows.filter(r=>!rangees.has(r.label));
+  if(orphelines.length){
+    lignes.push('<tr class="cmp-groupe"><th scope="rowgroup" colspan="4">Autres</th></tr>');
+    orphelines.forEach(r=>{
+      lignes.push(`<tr><th scope="row">${esc(r.label)}</th><td>${un(r.home)}</td><td>${un(r.away)}</td><td class="cmp-ecart"><span class="cmp-val nul">—</span></td></tr>`);
+    });
+  }
+
+  const total=gagnesDom+gagnesExt+depart;
+  let conclusion='';
+  if(total){
+    const meneur=gagnesDom>gagnesExt?dom:gagnesExt>gagnesDom?ext:null;
+    const compte=Math.max(gagnesDom,gagnesExt);
+    conclusion=meneur
+      ? `<b>${esc(meneur)}</b> est devant sur ${compte} des ${total} mesures comparables.`
+      : `Les deux équipes se partagent les ${total} mesures comparables.`;
+  }
+
+  const note=n(c.sampleSize)!==null
+    ? `Moyennes par match sur ${c.sampleSize} rencontre${c.sampleSize>1?'s':''}${c.sampleSize<5?' — échantillon encore court':''}.`
+    : 'Moyennes par match.';
+
+  return `<div class="cmp-scroll"><table class="cmp-table">
+      <thead><tr>
+        <th scope="col">Par match</th>
+        <th scope="col">${esc(dom)}</th>
+        <th scope="col">${esc(ext)}</th>
+        <th scope="col">Écart</th>
+      </tr></thead>
+      <tbody>${lignes.join('')}</tbody>
+    </table></div>
+    ${conclusion?`<p class="cmp-conclusion">${conclusion}</p>`:''}
+    <p class="cmp-note">${note} Hors-jeu et arrêts sont donnés sans verdict&nbsp;: plus d'arrêts signifie surtout plus de tirs subis.</p>`;
 }
 
 // Scenario par tranches de 15 minutes : courbe reliant les 6 vraies valeurs
-// par tranche (raw.scenario_15min) - une ligne plutot que des barres pour se
-// rapprocher du style de reference, mais toujours les 6 memes points reels,
-// jamais une interpolation minute par minute qui laisserait croire a une
-// precision qu'on n'a pas.
+// par tranche - une ligne plutot que des barres, et toujours les 6 memes
+// points reels, jamais une interpolation minute par minute qui laisserait
+// croire a une precision qu'on n'a pas.
+//
+// La courbe est inchangee. Ce qui change, c'est CE QU'ELLE TRACE. Elle lisait
+// scenario_15min, un texte redige par le modele de langage : il n'existait
+// que sur 1 des 46 matchs publies, la section annoncait donc "indisponible"
+// partout ailleurs. Elle trace desormais les buts REELLEMENT comptes par
+// tranche pour les deux equipes (vm.editorial.goalTiming), disponibles sur
+// 43 matchs sur 46. Aucun texte n'est requis pour l'afficher.
 function scenarioChart(slots){
   const W=460,H=140,pad=22,top=18,base=H-20;
   const max=Math.max(...slots.map(s=>n(s.prob)||0),1);
@@ -504,10 +617,13 @@ function scenarioChart(slots){
   return `<svg class="scenario-chart" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none"><line x1="${pad}" y1="${base}" x2="${W-pad}" y2="${base}" stroke="var(--line)"></line><path d="${area}" fill="url(#scGrad)" class="sc-area"></path><path d="${path}" fill="none" stroke="var(--accent)" stroke-width="2" class="sc-line"></path>${dots}<defs><linearGradient id="scGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--accent)" stop-opacity=".2"/><stop offset="100%" stop-color="var(--accent)" stop-opacity="0"/></linearGradient></defs></svg>`;
 }
 function scenarioCard(vm){
-  const slots=vm.editorial.scenario15;
-  if(!slots.length)return empty('Scénario du match indisponible.');
-  const peak=slots.reduce((a,b)=>(n(b.prob)||0)>(n(a.prob)||0)?b:a,slots[0]);
-  return `${scenarioChart(slots)}<div class="scenario-insight"><b>!</b><span>${esc(peak.txt||`Fenêtre la plus dangereuse : ${peak.t} (${Math.round(n(peak.prob)||0)}% des buts observés sur cette tranche).`)}</span></div>`;
+  const g=vm.editorial.goalTiming;
+  if(!g||!g.slots.length)return empty('Pas assez de buts enregistrés pour établir une répartition fiable.');
+  // Meme forme d'entree que la courbe attendait deja : { t, prob }.
+  const slots=g.slots.map(sl=>({t:sl.label,prob:sl.share}));
+  return `${scenarioChart(slots)}
+    <div class="scenario-insight"><b>!</b><span>Tranche la plus fournie : <b>${esc(g.peak.label)} min</b> — ${Math.round(g.peak.share)} % des buts des deux équipes y sont tombés.</span></div>
+    <p class="scenario-source">Sur ${g.totalGoals} buts marqués par ${esc(vm.identity.home.name)} et ${esc(vm.identity.away.name)} cette saison. Fréquence observée sur leurs matchs passés, pas une prévision pour celui-ci.</p>`;
 }
 
 

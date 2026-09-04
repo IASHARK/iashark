@@ -26,7 +26,7 @@ test("le rendu ne contient plus les valeurs métier précédemment codées en du
   assert.doesNotMatch(js,/10[\s.,]?000 simulations/i);assert.doesNotMatch(js,/37%/);assert.doesNotMatch(js,/33%/);assert.doesNotMatch(js,/30%/);
 });
 test("aucune section ne prétend avoir une donnée absente : chaque bloc a un état vide honnête",()=>{
-  for(const value of ['Aucun marché ne franchit les seuils','xG indisponibles','Statistiques comparatives indisponibles','Scores probables indisponibles','Scénario du match indisponible'])assert.match(js,new RegExp(value.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')));
+  for(const value of ['Aucun marché ne franchit les seuils','xG indisponibles','Statistiques comparatives indisponibles','Scores probables indisponibles','Pas assez de buts enregistrés pour établir une répartition fiable'])assert.match(js,new RegExp(value.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')));
 });
 test("le workflow alimente les blocs comparatifs sans valeur de secours",()=>{
   const workflow=read(".github/workflows/update-data.yml");

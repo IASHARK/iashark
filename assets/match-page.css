@@ -153,13 +153,6 @@ a{color:inherit}
 .outputs-xg .xg-row span{color:var(--dim);font:11.5px var(--mono)}
 
 /* comparatif */
-.compare-row{display:grid;grid-template-columns:44px 1fr 92px 1fr 44px;align-items:center;gap:8px;margin:8px 0;font-size:11.5px}
-.compare-row b{text-align:center;color:var(--text)}
-.compare-row span{text-align:center;color:var(--muted);font:10px var(--mono);text-transform:uppercase}
-.compare-bar{height:5px;border-radius:4px;background:var(--line);overflow:hidden}
-.compare-bar.home{display:flex;justify-content:flex-end}
-.compare-bar i{display:block;height:100%;background:var(--green);border-radius:4px}
-.compare-bar.away i{background:var(--red)}
 
 /* scenario du match */
 .scenario-chart{width:100%;height:auto;display:block}
@@ -334,18 +327,8 @@ a{color:inherit}
   padding:5px 11px;border-radius:20px}
 
 /* ==================== Comparatif ==================== */
-.cmp-intro{margin:0 0 16px;color:#9fb3c4;font:400 14px/1.6 var(--body)}
-.cmp-intro b{color:var(--text);font-weight:600}
-.compare-row{font-size:13.5px;font-variant-numeric:tabular-nums}
-.compare-row b{font-weight:600}
-.compare-row span{color:#8ba0b3;font:400 12.5px var(--body);letter-spacing:0;text-transform:none}
 /* La ligne clé se distingue par un filet et la couleur du libellé,
    pas par un pavé coloré de plus. */
-.compare-row.is-key{position:relative;padding:6px 0;margin:4px 0}
-.compare-row.is-key span{color:var(--accent);font-weight:600}
-.compare-row.is-key em{margin-left:7px;color:var(--accent);opacity:.75;
-  font:400 11.5px var(--body);font-style:normal;letter-spacing:0;
-  background:none;border:0;padding:0;text-transform:none}
 
 /* ==================== Buteur ==================== */
 /* Hierarchie voulue : le NOM d'abord, le reste ensuite. Rien au-dessus de
@@ -406,6 +389,83 @@ a{color:inherit}
 .threat:hover .threat-lien i{transform:translateX(3px)}
 @media(prefers-reduced-motion:reduce){.threat-lien i{transition:none}}
 .threat-alerte{margin:11px 0 0;color:#c8a97a;font:400 12px/1.55 var(--body)}
+/* Source de la repartition des buts : sur quoi elle repose, et ce qu'elle
+   n'est pas. */
+.scenario-source{margin:9px 0 0;color:var(--muted);font-size:12px;line-height:1.55}
+
+/* ==================== Comparatif : tableau d'ecart ==================== */
+/* Un vrai tableau. Le repere visuel vit DANS la ligne - une micro-barre
+   centree qui penche du cote de l'equipe devant - et ne remplace jamais le
+   nombre. Les lignes sont groupees par theme, sinon neuf rangees se lisent
+   comme une liste sans relief. */
+.cmp-scroll{overflow-x:auto;margin:0 -2px}
+.cmp-table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+.cmp-table thead th{
+  padding:0 0 10px;text-align:right;color:var(--muted);
+  font:600 10.5px/1.35 var(--body);letter-spacing:.1em;text-transform:uppercase;
+  vertical-align:bottom;max-width:120px;
+}
+.cmp-table thead th:first-child{text-align:left}
+.cmp-table thead th:last-child{width:140px}
+
+/* Le titre de groupe : un simple libelle en retrait, pas une ligne de plus a
+   encadrer. */
+.cmp-groupe th{
+  padding:16px 0 6px;text-align:left;color:var(--accent);
+  font:600 10px var(--body);letter-spacing:.16em;text-transform:uppercase;
+}
+.cmp-table tbody tr:first-child .cmp-groupe th,
+.cmp-table tbody tr.cmp-groupe:first-child th{padding-top:0}
+
+.cmp-table th[scope=row]{
+  text-align:left;padding:8px 12px 8px 0;color:#9fb3c4;
+  font:400 13.5px var(--body);white-space:nowrap;
+}
+.cmp-table td{
+  text-align:right;padding:8px 0 8px 14px;color:#8ba0b3;
+  font:500 14px var(--body);white-space:nowrap;
+}
+/* Seul le meilleur des deux est mis en avant : deux valeurs en gras ne
+   designent plus rien. */
+.cmp-table td.gagne{color:var(--text);font-weight:700}
+.cmp-table tbody tr:not(.cmp-groupe)+tr:not(.cmp-groupe) th,
+.cmp-table tbody tr:not(.cmp-groupe)+tr:not(.cmp-groupe) td{
+  border-top:1px solid rgba(255,255,255,.05);
+}
+
+/* Colonne d'ecart : micro-barre + valeur signee. */
+.cmp-ecart{display:flex;align-items:center;justify-content:flex-end;gap:10px}
+.cmp-jauge{position:relative;flex:none;width:64px;height:14px}
+.cmp-jauge .axe{
+  position:absolute;left:50%;top:2px;width:1px;height:10px;
+  background:rgba(141,179,211,.28);
+}
+.cmp-jauge .trait{position:absolute;top:5px;height:4px;border-radius:2px;min-width:3px}
+/* Penche a gauche pour l'equipe a domicile, a droite pour l'exterieur. */
+.cmp-jauge .trait.g{right:50%}
+.cmp-jauge .trait.d{left:50%}
+.cmp-jauge .trait.dom{background:var(--accent)}
+.cmp-jauge .trait.ext{background:rgba(159,182,201,.75)}
+.cmp-val{display:inline-block;min-width:52px;text-align:right;font-weight:600}
+.cmp-val.dom{color:var(--accent)}
+.cmp-val.ext{color:#b3c5d4}
+.cmp-val.nul{color:var(--muted);font-weight:400}
+
+/* Le pied conclut, au lieu de laisser le lecteur compter lui-meme. */
+.cmp-conclusion{
+  margin:16px 0 0;padding-top:13px;border-top:1px solid rgba(255,255,255,.07);
+  color:#9fb3c4;font:400 14px/1.6 var(--body);
+}
+.cmp-conclusion b{color:var(--text);font-weight:700}
+.cmp-note{margin:7px 0 0;color:var(--muted);font-size:12px;line-height:1.55}
+
+@media(max-width:560px){
+  .cmp-table thead th:last-child{width:104px}
+  .cmp-jauge{width:34px}
+  .cmp-val{min-width:46px}
+  .cmp-table th[scope=row]{white-space:normal}
+}
+
 /* ==================== FAQ ==================== */
 .faq-list details{border:0;border-radius:0;background:none;margin:0;
   border-bottom:1px solid rgba(255,255,255,.07)}
@@ -467,11 +527,6 @@ a{color:inherit}
 /* Les barres opposaient du vert (domicile) au rouge (extérieur) : deux
    couleurs fortes qui ne veulent rien dire d'autre que « équipe A / équipe
    B », et le plus gros aplat coloré de la page. Cyan contre ardoise. */
-.compare-bar{height:6px;background:rgba(255,255,255,.05)}
-.compare-bar i{background:#2f4a60}
-.compare-bar.home i{background:var(--accent);opacity:.85}
-.compare-bar.away i{background:#3d5a72}
-.compare-row.is-key .compare-bar.home i{opacity:1}
 
 /* ---------- Chiffres sous la lecture ---------- */
 .lecture-stats{border-top-color:rgba(255,255,255,.07);gap:10px 30px}

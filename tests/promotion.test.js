@@ -2,20 +2,26 @@
 // GATE C7 - les 7 cas explicitement requis, un par un, chacun isolant une
 // SEULE condition de rejet/shadow pour verifier que la regle qui doit
 // declencher declenche bien, et qu'aucune autre ne declenche par accident.
+//
+// Convention de signe (corrigee le 2026-09-04, voir
+// tests/lab-loss-delta-sign-convention.test.js) : ci_lower/ci_upper sont
+// les bornes du delta = loss_candidate - loss_champion (lib/lab/loss-delta.js).
+// candidat MEILLEUR -> ci_upper<0 ; candidat PIRE -> ci_lower>0.
 
 const test = require("node:test");
 const assert = require("node:assert/strict");
 const { evaluatePromotion, REASON, STATUS } = require("../lib/promotion.js");
 
 // Base "candidat excellent" - sert de point de depart pour chaque cas, en
-// ne degradant qu'UN SEUL champ a la fois.
+// ne degradant qu'UN SEUL champ a la fois. ci_lower/ci_upper negatifs :
+// le candidat est confidemment meilleur (convention lossDelta ci-dessus).
 function excellentInput(overrides = {}) {
   return {
     n_oos: 2000,
     nll_m0: 1.20,
     nll_m1: 1.15, // gain relatif = 0.05/1.20 = 4.17%
-    ci_lower: 0.02,
-    ci_upper: 0.08,
+    ci_lower: -0.08,
+    ci_upper: -0.02,
     convergence_rate: 1.0,
     boundary_hit_rate: 0.0,
     rho_stability: { std: 0.01 },
@@ -42,16 +48,22 @@ test("2. N OOS trop faible -> SHADOW_MORE_DATA (N_OOS_TOO_LOW)", () => {
 
 test("3. gain de 0.10% (sous le plancher economique) -> REJECT (GAIN_BELOW_ECONOMIC_FLOOR)", () => {
   // nll_m0=1.20, gain souhaite = 0.10% -> nll_m1 = 1.20 * (1 - 0.001) = 1.1988
-  const res = evaluatePromotion(excellentInput({ nll_m0: 1.20, nll_m1: 1.1988, ci_lower: 0.0005, ci_upper: 0.0025 }));
+  const res = evaluatePromotion(excellentInput({ nll_m0: 1.20, nll_m1: 1.1988, ci_lower: -0.0025, ci_upper: -0.0005 }));
   assert.equal(res.status, STATUS.REJECT);
   assert.ok(res.reason_codes.includes(REASON.GAIN_BELOW_ECONOMIC_FLOOR));
 });
 
 test("4. IC du delta traverse zero (gain non significatif statistiquement) -> SHADOW_MORE_DATA (CI_CROSSES_ZERO)", () => {
   // gain ponctuel correct (1%, au-dessus du plancher de 0.5%) mais IC large qui traverse zero
-  const res = evaluatePromotion(excellentInput({ nll_m0: 1.20, nll_m1: 1.188, ci_lower: -0.01, ci_upper: 0.05 }));
+  const res = evaluatePromotion(excellentInput({ nll_m0: 1.20, nll_m1: 1.188, ci_lower: -0.05, ci_upper: 0.01 }));
   assert.equal(res.status, STATUS.SHADOW_MORE_DATA);
   assert.ok(res.reason_codes.includes(REASON.CI_CROSSES_ZERO));
+});
+
+test("4bis. IC du delta ENTIEREMENT positif (candidat confidemment PIRE) -> REJECT (CI_CONFIRMS_CANDIDATE_WORSE)", () => {
+  const res = evaluatePromotion(excellentInput({ ci_lower: 0.01, ci_upper: 0.06 }));
+  assert.equal(res.status, STATUS.REJECT);
+  assert.ok(res.reason_codes.includes(REASON.CI_CONFIRMS_CANDIDATE_WORSE));
 });
 
 test("5. non-convergence du fitter -> REJECT (FITTER_NON_CONVERGENT)", () => {

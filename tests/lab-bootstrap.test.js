@@ -3,6 +3,11 @@
 // clairement pire) + determinisme du seed. Les deltas sont construits a la
 // main (jamais des vraies donnees EXP-001, purement pour tester le code du
 // bootstrap lui-meme).
+//
+// Convention de signe (corrigee le 2026-09-04, voir
+// tests/lab-loss-delta-sign-convention.test.js) : delta = loss_candidate -
+// loss_champion (lib/lab/loss-delta.js). candidat MEILLEUR -> delta<0,
+// candidat PIRE -> delta>0.
 
 const test = require("node:test");
 const assert = require("node:assert/strict");
@@ -25,30 +30,33 @@ function buildBlocks(centerDelta, nBlocks, perBlock, noiseAmplitude) {
   return blocks;
 }
 
-test("pairedBlockBootstrap: candidat CLAIREMENT MEILLEUR (deltas positifs) -> IC ne traverse pas zero, borne basse > 0", () => {
-  const blocks = buildBlocks(0.5, 40, 6, 0.1);
+test("pairedBlockBootstrap: candidat CLAIREMENT MEILLEUR (deltas negatifs) -> IC ne traverse pas zero, borne haute < 0, P(meilleur) eleve", () => {
+  const blocks = buildBlocks(-0.5, 40, 6, 0.1);
   const res = pairedBlockBootstrap(blocks, { seed: "EXP-TEST-BETTER", nResamples: 10000 });
   assert.equal(res.valid, true);
-  assert.ok(res.observed_mean_delta > 0.3, `moyenne observee=${res.observed_mean_delta}`);
+  assert.ok(res.observed_mean_delta < -0.3, `moyenne observee=${res.observed_mean_delta}`);
   assert.equal(res.ci_crosses_zero, false, "IC ne doit pas traverser zero pour un candidat clairement meilleur");
-  assert.ok(res.ci_lower > 0, `ci_lower=${res.ci_lower} doit etre strictement positif`);
+  assert.ok(res.ci_upper < 0, `ci_upper=${res.ci_upper} doit etre strictement negatif`);
+  assert.ok(res.probability_candidate_better > 0.95, `probability_candidate_better=${res.probability_candidate_better} devrait etre >0.95`);
 });
 
-test("pairedBlockBootstrap: candidat IDENTIQUE (deltas bruit symetrique autour de 0) -> IC traverse zero", () => {
+test("pairedBlockBootstrap: candidat IDENTIQUE (deltas bruit symetrique autour de 0) -> IC traverse zero, P(meilleur) proche de 0.5", () => {
   const blocks = buildBlocks(0, 40, 6, 0.3);
   const res = pairedBlockBootstrap(blocks, { seed: "EXP-TEST-IDENTICAL", nResamples: 10000 });
   assert.equal(res.valid, true);
   assert.ok(Math.abs(res.observed_mean_delta) < 0.1, `moyenne observee=${res.observed_mean_delta} devrait etre proche de 0`);
   assert.equal(res.ci_crosses_zero, true, "IC doit traverser zero pour deux modeles equivalents");
+  assert.ok(Math.abs(res.probability_candidate_better - 0.5) < 0.2, `probability_candidate_better=${res.probability_candidate_better} devrait etre proche de 0.5 (ni confidemment meilleur ni confidemment pire)`);
 });
 
-test("pairedBlockBootstrap: candidat CLAIREMENT PIRE (deltas negatifs) -> IC ne traverse pas zero, borne haute < 0", () => {
-  const blocks = buildBlocks(-0.5, 40, 6, 0.1);
+test("pairedBlockBootstrap: candidat CLAIREMENT PIRE (deltas positifs) -> IC ne traverse pas zero, borne basse > 0, P(meilleur) faible", () => {
+  const blocks = buildBlocks(0.5, 40, 6, 0.1);
   const res = pairedBlockBootstrap(blocks, { seed: "EXP-TEST-WORSE", nResamples: 10000 });
   assert.equal(res.valid, true);
-  assert.ok(res.observed_mean_delta < -0.3, `moyenne observee=${res.observed_mean_delta}`);
+  assert.ok(res.observed_mean_delta > 0.3, `moyenne observee=${res.observed_mean_delta}`);
   assert.equal(res.ci_crosses_zero, false);
-  assert.ok(res.ci_upper < 0, `ci_upper=${res.ci_upper} doit etre strictement negatif`);
+  assert.ok(res.ci_lower > 0, `ci_lower=${res.ci_lower} doit etre strictement positif`);
+  assert.ok(res.probability_candidate_better < 0.05, `probability_candidate_better=${res.probability_candidate_better} devrait etre <0.05`);
 });
 
 test("pairedBlockBootstrap: determinisme strict - meme seed (venant du manifest) -> resultat byte-identique", () => {

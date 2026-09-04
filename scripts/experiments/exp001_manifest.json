@@ -29,7 +29,8 @@
       "method": "paired_block_bootstrap (lib/lab/bootstrap.js)",
       "n_resamples": 10000,
       "seed": "EXP-001-v1",
-      "block_unit": "cutoff (journee)"
+      "block_unit": "cutoff (journee)",
+      "delta_sign_convention": "delta = loss_candidate - loss_champion (lib/lab/loss-delta.js) - candidat meilleur -> delta<0. PROMOTE exige ci_upper<0."
     },
     "promotion_rule": "lib/promotion.js#evaluatePromotion (PROMOTE / SHADOW_MORE_DATA / REJECT)"
   },

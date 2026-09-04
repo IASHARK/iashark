@@ -1,0 +1,100 @@
+{
+  "experiment_id": "EXP-001R",
+  "supersedes": "EXP-001 (marque INVALID_BASELINE_REPLAY - voir scripts/experiments/exp001_protocol_addendum_2.json, CHAMPION_REPLAY_MISMATCH)",
+  "registration_status": "REGISTERED",
+  "status": "RUNNING",
+  "created_at": "2026-09-05",
+  "hypothesis": "M1 (Dixon-Coles avec rho appris par walk-forward, MEME champion M0 que M0_PRODUCTION_REPLAY) ameliore le NLL exact-score hors-echantillon par rapport a M0 (rho=-0.0845 fixe), tous deux calcules avec le VRAI contrat production : agregats STRICTEMENT saison courante (jamais poolees avec une saison anterieure).",
+  "champion_model": {
+    "id": "M0_PRODUCTION_REPLAY",
+    "description": "Dixon-Coles pur, rho fixe=-0.0845. Lambdas via lib/data/production-replay.js#buildProductionStateAtCutoff (fixtures.season===targetSeason ET kickoff<cutoff, JAMAIS une autre saison) + lib/engine.js#calcLambdas. Gate calcCriteres>=3 matchs SAISON COURANTE (pas poolee). Re-valide contre l'API reelle (30/30 PASS, scripts/validate_gate_b6_canonical_replay.js, y compris a des cutoffs tres precoces - 2e/3e match de la saison)."
+  },
+  "candidate_model": {
+    "id": "M1",
+    "description": "MEME champion M0_PRODUCTION_REPLAY (memes lambdas, meme gate), rho appris par walk-forward via scripts/fit_rho.py (SciPy, bounded), bornes derivees des contraintes tau>0 (lib/lab/rho-bounds.js). Les paires d'entrainement de rho sont elles-memes calculees via buildProductionStateAtCutoff (season-scope PAR EXEMPLE), pooled ACROSS seasons uniquement comme ECHANTILLON d'entrainement (2022-23 complet + 2023-24 deja jouee) - jamais comme source du lambda d'un match d'une AUTRE saison."
+  },
+  "dataset": {
+    "competition": "Premier League",
+    "api_football_league_id": 39,
+    "seasons_target": [
+      "2022-2023",
+      "2023-2024",
+      "2024-2025",
+      "2025-2026"
+    ],
+    "dataset_version": "403e31d057ba094993f29e3c8c88dec21119f8438acc2c7b10a21200dd6a2942",
+    "lockbox_sealed": true,
+    "lockbox_hash_2025_2026": "f611ad31213505fd69edfc8941e79ec7d182dc83b426df3a8fb04d67ec4fa01a",
+    "note": "IDENTIQUE au dataset GATE B1 original - aucune nouvelle collecte, aucune modification. Ce n'est pas un probleme de donnees brutes mais de replay experimental (voir CHAMPION_REPLAY_MISMATCH)."
+  },
+  "methodology": {
+    "walk_forward": "lib/lab/walkforward-runner-r.js#runWalkForwardR - MEME politique de cutoff/batch que EXP-001 (buildCutoffs reutilisee), MAIS chaque lambda (entrainement ET prediction OOS) calcule via lib/data/production-replay.js#buildProductionStateAtCutoff, STRICTEMENT season-scope.",
+    "primary_metric": "exact_score_nll",
+    "delta_sign_convention": "delta_i = NLL_M1 - NLL_M0 (convention officielle, lib/lab/loss-delta.js), negatif=M1 meilleur",
+    "secondary_metrics": [
+      "1x2_logloss",
+      "1x2_brier",
+      "ou25_logloss",
+      "ou25_brier",
+      "btts_logloss",
+      "btts_brier"
+    ],
+    "low_score_diagnostics": {
+      "scores": [
+        "0-0",
+        "1-0",
+        "0-1",
+        "1-1"
+      ],
+      "mean_probability_scope": "calculee sur l'ensemble des predictions, jamais uniquement sur les matchs ou ce score s'est produit (calibration correcte)"
+    },
+    "bootstrap": {
+      "method": "paired_block_bootstrap (lib/lab/bootstrap.js)",
+      "n_resamples": 10000,
+      "seed": "EXP-001R-v1",
+      "block_definition": "league_id+season+ISO_YEAR_WEEK(kickoff_timestamp_utc)"
+    },
+    "promotion_rule": "lib/promotion.js#evaluatePromotion (seuil 0.25%, deja corrige - voir commit 105e5fd3)"
+  },
+  "promotion_thresholds": {
+    "min_relative_gain": 0.0025,
+    "note": "Seuil IDENTIQUE a celui deja corrige pour EXP-001 (0.25%, pas 0.5%) - aucun nouveau changement de seuil suite a cet audit."
+  },
+  "gating_to_running": {
+    "description": "Conditions OBLIGATOIRES avant status=RUNNING.",
+    "conditions": [
+      {
+        "id": "DATASET_EXISTS",
+        "description": "Fixtures reelles Premier League 2022-23 -> 2025-26 presentes localement (GATE B1, reutilisees, INCHANGEES)",
+        "satisfied": true
+      },
+      {
+        "id": "CHAMPION_REPLAY_CANONICAL_TESTED",
+        "description": "lib/data/production-replay.js teste (tests/lab-production-replay.test.js, 8/8 verts) et re-valide contre l'API reelle a des cutoffs precoces (B6 canonical replay, 30/30 PASS)",
+        "satisfied": true
+      },
+      {
+        "id": "WALKFORWARD_R_TESTED",
+        "description": "tests/lab-walkforward-runner-r.test.js (anti-leakage + exclusion count reel ~61 verifie) verts AVANT tout lancement reel",
+        "satisfied": true
+      },
+      {
+        "id": "DATASET_VERSION_COMPUTED",
+        "description": "Inchange par rapport a EXP-001 (403e31d0...) - aucune redefinition du manifest de dataset",
+        "satisfied": true
+      },
+      {
+        "id": "LOCKBOX_SEALED",
+        "description": "Lockbox 2025-2026 scellee, inchangee, jamais consultee",
+        "satisfied": true
+      }
+    ]
+  },
+  "constraints": [
+    "JAMAIS un pool multi-saisons pour le lambda d'UN match donne - uniquement sa propre saison",
+    "JAMAIS de fabrication de prediction quand M0 est indisponible (calcCriteres<3 matchs saison courante) - le match est exclu, jamais un repli silencieux",
+    "JAMAIS de modification de ce manifest une fois status=RUNNING",
+    "JAMAIS de consultation de 2025-2026",
+    "Aucun seuil de promotion modifie apres avoir vu un resultat"
+  ]
+}

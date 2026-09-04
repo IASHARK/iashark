@@ -5,18 +5,17 @@
 // identiques, exigence necessaire pour qu'un replay backtest ait un sens
 // (§21 du protocole).
 //
-// Exception documentee, pas cachee : le sous-objet `montecarlo` (champ
-// informationnel, jamais consomme par pickMarketDeterministic - verifie
-// par tests/pipeline-source-guards.test.js) reste NON deterministe,
-// parce que calcMonteCarlo() est appele sans seed dans calcFinalProbs
-// (lib/engine.js ligne ~61). C'est un ecart reel a SPEC LAB PRO v1.0 §39
-// ("toute stochasticite... jamais Math.random() sans seed"), a corriger
-// dans une prochaine passe (hors perimetre GATE A) - ce test le rend
-// visible plutot que de l'ignorer silencieusement.
+// GATE C9 : l'ecart historique (le sous-objet `montecarlo` non
+// deterministe car calcMonteCarlo() etait appele sans seed) est corrige -
+// lib/engine.js seede desormais calcMonteCarlo() via
+// lib/models.js#seedFromLambdas(lambdaH,lambdaA). calcFinalProbs() est
+// maintenant deterministe sur la TOTALITE de son objet de sortie, pas
+// seulement les champs decision-relevants.
 
 const test = require("node:test");
 const assert = require("node:assert/strict");
 const { calcFinalProbs, calcLambdas, calcCriteres, calcFatigue } = require("../lib/engine.js");
+const { seedFromLambdas } = require("../lib/models.js");
 
 const DECISION_RELEVANT_FIELDS = [
   "p1", "pN", "p2", "over15", "over25", "under25", "over35", "under35", "bttsY", "bttsN",
@@ -35,14 +34,27 @@ test("calcFinalProbs: deterministe sur tous les champs decision-relevants (deux 
   }
 });
 
-test("calcFinalProbs: le sous-objet montecarlo (informationnel, hors decision) N'est PAS garanti deterministe - ecart connu, documente, pas un bug de ce GATE", () => {
-  // Ce test ne verifie pas l'egalite - il documente executablement le
-  // comportement actuel pour qu'un futur correctif (seed systematique)
-  // se remarque comme un CHANGEMENT de ce test, pas une surprise.
+test("calcFinalProbs: le sous-objet montecarlo est maintenant deterministe (GATE C9 - seed derive des lambdas)", () => {
   const r1 = calcFinalProbs(1.5, 1.2, null);
   const r2 = calcFinalProbs(1.5, 1.2, null);
   assert.ok(r1.montecarlo && r2.montecarlo, "le champ montecarlo doit exister");
-  // Pas d'assertion d'egalite/inegalite forcee : le but est la visibilite, pas un verdict.
+  assert.deepEqual(r1.montecarlo, r2.montecarlo, "montecarlo doit etre byte-identique entre deux appels avec les memes lambdas");
+});
+
+test("calcFinalProbs: 20 appels identiques -> objet de decision COMPLET byte-identique (deepEqual strict, GATE C9)", () => {
+  const cases = [[1.35, 1.10], [0.80, 0.80], [3.40, 3.00], [2.605, 2.674]];
+  for (const [lh, la] of cases) {
+    const reference = calcFinalProbs(lh, la, null);
+    for (let i = 0; i < 20; i++) {
+      const r = calcFinalProbs(lh, la, null);
+      assert.deepEqual(r, reference, `run ${i + 1}/20 differe de la reference pour lambdaH=${lh} lambdaA=${la}`);
+    }
+  }
+});
+
+test("seedFromLambdas: deterministe et distinct pour des lambdas differents", () => {
+  assert.equal(seedFromLambdas(1.35, 1.10), seedFromLambdas(1.35, 1.10));
+  assert.notEqual(seedFromLambdas(1.35, 1.10), seedFromLambdas(1.35, 1.11));
 });
 
 test("calcLambdas: deterministe (memes stats -> memes lambdas)", () => {

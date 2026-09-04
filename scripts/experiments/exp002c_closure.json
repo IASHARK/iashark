@@ -1,0 +1,28 @@
+{
+  "experiment_id": "EXP-002C",
+  "artifact_type": "CLOSURE",
+  "description": "Artefact de cloture IMMUABLE, distinct du manifest (jamais reouvert ni modifie retroactivement). Persiste definitivement la decision de promotion pour que toute experience future (EXP-003 et suivantes) puisse s'y referencer sans recalculer EXP-002C.",
+  "manifest_sha256": "545b7fa9b3ce7181fff8605231bd0c1288d96a2096d9cff0012fa518c6f9486e",
+  "report_sha256": "a418b012af613f95808df2968977076f419123e18e9e05195eba267f398ea9b6",
+  "decision": "PROMOTE",
+  "promoted_model": "M2",
+  "previous_champion": "M0_PRODUCTION_REPLAY",
+  "decision_timestamp": "2026-09-04T20:29:20Z",
+  "code_sha": "b8cb9ff3f3a8d03d529b8ebbdb7c4147faf2438f",
+  "head_sha_at_closure": "59dbb39dd3cbc60601de6bf441052e9aa2b817bc",
+  "tests": { "pass": 741, "fail": 0, "total": 741 },
+  "lockbox_2025_2026": "SEALED_UNREAD",
+  "effective_from": {
+    "current_champion": "M2",
+    "note": "A partir de cet artefact, AUCUNE experience future ne peut utiliser M0 comme baseline. Toute experience suivante (EXP-003+) doit declarer champion=M2 dans son propre manifest et reutiliser l'implementation EXACTE promue ici (lib/lab/walkforward-m2c-runner.js a code_sha=b8cb9ff3f3a8d03d529b8ebbdb7c4147faf2438f, lib/lab/bayes-early-season.js#blendWithDecayingPrior INCHANGE)."
+  },
+  "key_results_summary": {
+    "common_support_n": 699,
+    "m2_coverage_gain_n": 61,
+    "early_relative_gain_pct": 4.731,
+    "early_ci95_delta_nll": [-0.2945771240070809, -0.02671232584954878],
+    "global_relative_gain_pct": 1.092,
+    "late_invariant_violations": 0,
+    "mechanism_deterministic": true
+  }
+}

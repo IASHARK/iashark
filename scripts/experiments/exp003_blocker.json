@@ -1,0 +1,50 @@
+{
+  "experiment_id": "EXP-003",
+  "artifact_type": "BLOCKER",
+  "status": "BLOCKED_EXTERNAL_DATA_SOURCE",
+  "blocked_at": "2026-09-04T20:42:10Z",
+  "current_champion": "M2",
+  "champion_unchanged": true,
+  "dataset_version": "341f69f3aac81f7c772198e001e6885192d051d3577e5ceac7132120cb5d9116",
+  "fixtures_required": 1140,
+  "fixtures_required_breakdown": { "2022-2023_TRAIN": 380, "2023-2024_OOS": 380, "2024-2025_OOS": 380 },
+  "unique_reference_dates": 346,
+  "min_reference_date": "2022-08-04",
+  "max_reference_date": "2025-05-24",
+  "reference_date_rule": "UTC calendar day before kickoff",
+  "clubelo_dates_needed_report_sha256": "661ad05b7521a7823753bb93ed6f286bb7d8ae8eac0d7ff0355706a3f643c7ca",
+  "api_host": "api.clubelo.com",
+  "dns_resolution": {
+    "api.clubelo.com": "37.128.134.74 (resolves, dedicated non-Cloudflare host)",
+    "clubelo.com": "canonical name flerosport-83869.ondigitalocean.app -> 162.159.140.98 / 172.66.0.96 (Cloudflare-fronted)"
+  },
+  "timeout_diagnostics": [
+    { "target": "https://api.clubelo.com/2023-12-16", "attempt": 1, "timeout_s": 20, "result": "connection timed out, 0 bytes" },
+    { "target": "https://api.clubelo.com/2023-12-16", "attempt": 2, "timeout_s": 15, "result": "connection timed out, 0 bytes" },
+    { "target": "https://api.clubelo.com/2023-12-16", "attempt": 3, "timeout_s": 10, "result": "connection timed out, 0 bytes" },
+    { "target": "http://api.clubelo.com/2023-12-16", "attempt": 1, "timeout_s": 10, "result": "connection timed out, 0 bytes (plain HTTP, same outcome)" },
+    { "target": "https://api.clubelo.com/2023-12-16", "attempt": "ipv4-forced retry", "timeout_s": 10, "result": "connection timed out, 0 bytes" },
+    { "target": "https://api.clubelo.com/2023-12-16", "attempt": "final retry", "timeout_s": 30, "result": "connection timed out, 0 bytes" }
+  ],
+  "control_diagnostics": [
+    { "target": "https://www.google.com", "result": "200 OK, 0.18s" },
+    { "target": "https://api.github.com", "result": "200 OK" },
+    { "target": "https://example.com", "result": "200 OK" },
+    { "target": "https://v3.football.api-sports.io/status", "result": "403 (reachable, expected without key - same host successfully used minutes earlier in this session for real GATE B1 / 2021-22 warm-up collection)" },
+    { "target": "https://clubelo.com", "result": "200 OK, 0.23s (bare root apex, Cloudflare-fronted marketing site)" },
+    { "target": "https://www.clubelo.com", "result": "connection timed out" }
+  ],
+  "public_clubelo_com_reachable": true,
+  "clubelo_api_reachable": false,
+  "conclusion": "General internet egress confirmed working (multiple unrelated hosts + the exact api-sports.io host used successfully earlier this session). The ClubElo API's dedicated host (api.clubelo.com, 37.128.134.74) specifically does not respond at all - true connection timeout, not an HTTP-level rejection (403/429). Could not be distinguished from here between a real outage and an IP-range-based restriction on that specific host. NOT worked around: no HTML scraping of clubelo.com, no alternate/non-pre-registered Elo source, no synthetic data.",
+  "bulk_collection_started": false,
+  "synthetic_substitution": false,
+  "today_fallback": false,
+  "lockbox_2025_2026": "SEALED_UNREAD",
+  "resume_instructions": "If api.clubelo.com becomes reachable from a different network, resume exactly at the probe (scripts/probe_clubelo.js: schema check on one representative date, D-1/D/D+1 temporal semantics check, then team mapping, then historical coverage check, then bulk collection). The 346 unique reference dates are already computed and persisted (data/gate-b1/clubelo_dates_needed_report.json, data/gate-b1/clubelo_dates_needed_per_fixture.json) - no need to recompute them.",
+  "decision": {
+    "exp003_status": "BLOCKED_EXTERNAL_DATA_SOURCE",
+    "m3_promoted": "UNDECIDED",
+    "note": "Neither PROMOTE nor REJECT. No beta fitted, no NLL computed, no manifest set to RUNNING. scripts/experiments/exp003_manifest.json does not exist and must not be created with status=RUNNING until historical ClubElo data is actually available."
+  }
+}

@@ -125,3 +125,77 @@ test("la carte buteur ne repete pas la probabilite dans son panneau",()=>{
   // Trois chiffres au maximum, pour que le panneau reste lisible.
   assert.match(bloc,/\.slice\(0,3\)/);
 });
+
+// ---------------------------------------------------------------------------
+// Vocabulaire (04/09/2026) : plus de jargon de bookmaker a l'ecran
+// ---------------------------------------------------------------------------
+
+// "DC 12" ou "Over 2.5" ne veulent rien dire pour qui decouvre le site, et
+// c'est la premiere chose qu'il lit.
+test("les libelles de marches sont traduits en francais courant",()=>{
+  const {marketLabelFr}=require("../lib/market-labels.js");
+  const eq={home:"PSG",away:"Monaco"};
+  const cas=[
+    ["DC 12","PSG ou Monaco gagne, sans match nul"],
+    ["DC 1X","PSG gagne ou match nul"],
+    ["DC X2","Monaco gagne ou match nul"],
+    ["BTTS Oui","Les deux équipes marquent"],
+    ["BTTS Non","Au moins une équipe ne marque pas"],
+    ["Over 2.5","Au moins 3 buts dans le match"],
+    ["Under 3.5","Au plus 3 buts dans le match"],
+    ["Premiere mi-temps moins de 1.5 but","Au plus 1 but en première mi-temps"],
+    ["Premiere mi-temps plus de 0.5 but","Au moins 1 but en première mi-temps"],
+    ["Tirs du match over 22.5","Au moins 23 tirs dans le match"],
+    ["Tirs cadres du match over 7.5","Au moins 8 tirs cadrés dans le match"],
+    ["Domicile plus de 1.5 but","PSG marque au moins 2 buts"],
+    ["Exterieur moins de 1.5 but","Monaco marque au plus 1 but"],
+    ["Domicile clean sheet","PSG n’encaisse aucun but"]
+  ];
+  for(const [brut,attendu] of cas)assert.equal(marketLabelFr(brut,eq),attendu,`traduction incorrecte pour "${brut}"`);
+  // Un marche non prevu doit ressortir tel quel plutot que reformule au hasard.
+  assert.equal(marketLabelFr("Marché jamais vu",eq),"Marché jamais vu");
+});
+
+// Aucun seuil a virgule ne doit survivre a la traduction : le ".5" des
+// bookmakers sert a exclure l'egalite, il n'a pas de sens pour un lecteur.
+test("aucun seuil a virgule ne subsiste dans les libelles traduits",()=>{
+  const {marketLabelFr}=require("../lib/market-labels.js");
+  const bruts=["Over 1.5","Over 2.5","Over 3.5","Under 2.5","Under 3.5",
+    "Premiere mi-temps plus de 1.5 but","Tirs du match under 21.5",
+    "Domicile gagne + plus de 2.5 buts","Exterieur plus de 1.5 but"];
+  for(const b of bruts){
+    const t=marketLabelFr(b,{home:"A",away:"B"});
+    assert.ok(!/\d[.,]\d/.test(t),`"${b}" traduit en "${t}", qui contient encore un seuil a virgule`);
+  }
+});
+
+test("la page match affiche les marches traduits, jamais le libelle brut",()=>{
+  // Chaque endroit qui montre un nom de marche passe par marcheFr().
+  assert.match(js,/function marcheFr\(vm,libelle\)/);
+  assert.ok(!/\$\{esc\(r\.market\)\}/.test(js),"un libelle de marche brut est encore affiche");
+  assert.ok(!/\$\{esc\(top\.market\)\}/.test(js),"un libelle de marche brut est encore affiche");
+  assert.match(html,/lib\/market-labels\.js/);
+});
+
+// La FAQ ne doit reposer aucune question dont la reponse est deja affichee.
+test("la FAQ ne repose pas les questions deja traitees dans la page",()=>{
+  const bloc=js.slice(js.indexOf("function faqCard(vm)"));
+  for(const deja of ["Qui est favori","Combien de buts sont attendus","Quel pari IASHARK retient",
+                     "d’accord avec le marché","niveau de risque de ce pari"]){
+    assert.ok(!bloc.includes(deja),`la FAQ repose une question deja traitee : "${deja}"`);
+  }
+  // Elle s'appuie sur des donnees qu'aucune carte n'affiche.
+  assert.match(bloc,/exclusiveFacts/);
+  for(const attendu of ["marque le plus tôt","craque-t-elle en fin de match","cartons","occasions"]){
+    assert.ok(bloc.includes(attendu),`question exclusive manquante : "${attendu}"`);
+  }
+});
+
+// Les logos d'equipe ne doivent jamais etre masques en rond : un ecusson a sa
+// propre forme.
+test("les logos d'equipe sont detoures, pas mis en pastille ronde",()=>{
+  assert.match(js,/function logoEquipe/);
+  assert.match(css,/\.logo-eq\{[^}]*border-radius:0/);
+  assert.match(css,/\.logo-eq\{[^}]*object-fit:contain/);
+  assert.match(css,/\.logo-eq\{[^}]*background:none/);
+});

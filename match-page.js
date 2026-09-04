@@ -157,7 +157,7 @@ function matchReadingCard(vm){
   const locSuffix=leading.key==='home'?' à domicile':leading.key==='away'?' à l\'extérieur':'';
   const sentence=matchesLeader
     ?`${leading.label} a l'avantage${locSuffix}, et c'est le marché que nous recommandons.`
-    :`${leading.label} a l'avantage${locSuffix}, mais ce n'est pas le marché que nous recommandons — nous recommandons plutôt ${r.market}.`;
+    :`${leading.label} a l'avantage${locSuffix}, mais ce n'est pas le marché que nous recommandons — nous recommandons plutôt ${marcheFr(vm,r.market)}.`;
   const reason=vm.editorial.decisiveFactor;
   // Le marche recommande est deja affiche dans cette rangee. Quand c'est
   // lui-meme un BTTS, la tuile BTTS generique repetait exactement le meme
@@ -171,12 +171,12 @@ function matchReadingCard(vm){
   const risqueDescriptif=risk&&!['FAIBLE','MODERE','ELEVE'].includes(risk)?risk:null;
   return `<section class="card lecture reveal">
     <h2>${cardIcon('bulb')}Notre lecture du match</h2>
-    <p class="reading">${esc(sentence)}${reason?' '+esc(reason):''}</p>
-    ${risqueDescriptif?`<div class="risk-note"><b>⚠</b><span>${esc(risqueDescriptif)}</span></div>`:''}
+    <p class="reading">${esc(texteLisible(vm,sentence))}${reason?' '+esc(texteLisible(vm,reason)):''}</p>
+    ${risqueDescriptif?`<div class="risk-note"><b>⚠</b><span>${esc(texteLisible(vm,risqueDescriptif))}</span></div>`:''}
     <div class="lecture-stats">
       ${totalXg!==null?`<div><small>Buts attendus</small><b>${fmt(totalXg)}</b></div>`:''}
       ${btts?`<div><small>BTTS</small><b>${pct(btts.probability)}</b></div>`:''}
-      <div><small>${esc(r.market)}</small><b>${pct(r.probability)}</b></div>
+      <div><small>${esc(marcheFr(vm,r.market))}</small><b>${pct(r.probability)}</b></div>
       ${vm.model.iasharkScore!==null?`<div><small>Confiance analyse</small><b>${fmt(vm.model.iasharkScore/10)}/10</b></div>`:''}
     </div>
   </section>`;
@@ -222,7 +222,7 @@ function signalCard(vm){
   return `<section class="signal-card reveal overflow-hidden rounded-2xl border border-cyan/20 bg-panel p-5 shadow-2xl shadow-black/30 sm:p-7 lg:p-8">
     <div class="flex flex-wrap items-center justify-between gap-3"><span class="inline-flex items-center gap-2 text-sm font-semibold text-cyan">${cardIcon('target')}Le signal IASHARK</span><div class="sig-badges flex flex-wrap gap-2">${confidenceBadge(r.reliability)}${riskBadge(vm.editorial.riskCode)}</div></div>
     <div class="mt-7 grid gap-7 lg:grid-cols-[minmax(0,1.35fr)_minmax(250px,1fr)] lg:items-end">
-      <div><span class="block text-sm text-soft">Marché recommandé</span><h1 class="mt-2 max-w-3xl text-balance text-3xl font-bold leading-[1.08] tracking-tight text-white sm:text-4xl">${esc(r.market)}</h1></div>
+      <div><span class="block text-sm text-soft">Marché recommandé</span><h1 class="mt-2 max-w-3xl text-balance text-3xl font-bold leading-[1.08] tracking-tight text-white sm:text-4xl">${esc(marcheFr(vm,r.market))}</h1></div>
       <div class="space-y-4 rounded-xl border border-white/[.07] bg-black/15 p-4" aria-label="Comparaison du modèle et du marché">${compare('Probabilité modèle',prob,true)}${compare('Probabilité marché',implied,false)}${edge!==null?`<p class="flex items-center justify-between border-t border-white/[.07] pt-3 text-sm text-soft"><span>Écart détecté</span><b class="tabular-nums text-cyan">${edge>0?'+':''}${fmt(edge)} pts</b></p>`:''}</div>
     </div>
     <div class="mt-7 grid grid-cols-2 gap-x-4 gap-y-5 border-t border-white/[.07] pt-5">${kpi('Cote juste',odds(fair))}${kpi('Cote marché',odds(marketOdds))}</div>
@@ -344,7 +344,7 @@ function keyInsightsCard(vm){
   if(!list.length)return '';
   return card('Ce qu\'il faut savoir',`<div class="insights-grid">${list.map(item=>{
     const [cls,mark]=INSIGHT_STYLE[item.type]||['b-cyan','·'];
-    return `<div class="insight"><div class="insight-head"><span class="insight-mark ${cls}">${mark}</span><b>${esc(item.title)}</b></div><p>${esc(item.text)}</p></div>`;
+    return `<div class="insight"><div class="insight-head"><span class="insight-mark ${cls}">${mark}</span><b>${esc(texteLisible(vm,item.title))}</b></div><p>${esc(texteLisible(vm,item.text))}</p></div>`;
   }).join('')}</div>`,'','bulb');
 }
 
@@ -355,7 +355,7 @@ function keyInsightsCard(vm){
 function valuePotentialCard(vm){
   const top=vm.marketsWatch[0];
   if(!top||top.edge===null||Math.abs(top.edge)<4)return '';
-  return card('Value potentielle',`<div class="value-potential"><b>${esc(top.market)}</b><p>${top.edge>=0?`Ce marché présente la plus grosse value selon notre modèle (écart de +${fmt(top.edge)}% avec le marché).`:`Le marché est nettement au-dessus de notre modèle sur ce pari (écart de ${fmt(top.edge)}%) - à interpréter avec prudence.`}</p></div>`,'value-card','trophy');
+  return card('Value potentielle',`<div class="value-potential"><b>${esc(marcheFr(vm,top.market))}</b><p>${top.edge>=0?`Ce marché présente la plus grosse value selon notre modèle (écart de +${fmt(top.edge)}% avec le marché).`:`Le marché est nettement au-dessus de notre modèle sur ce pari (écart de ${fmt(top.edge)}%) - à interpréter avec prudence.`}</p></div>`,'value-card','trophy');
 }
 
 // Matchup : vm.matchupScores, categories reellement mesurables (attaque/
@@ -394,7 +394,7 @@ function matchupCard(vm){
   const partGlobal=total?clamp(Number(m.globalHome)/total*100):50;
   const homeMieux=Number(m.globalHome)>=Number(m.globalAway);
   return card('Matchup : comment les équipes se correspondent',
-    `<div class="mu-head"><span>${esc(homeName)}</span><span>${esc(awayName)}</span></div>
+    `<div class="mu-head"><span>${logoEquipe(vm.identity.home.logo,homeName)}${esc(homeName)}</span><span>${logoEquipe(vm.identity.away.logo,awayName)}${esc(awayName)}</span></div>
      <div class="mu-rows">${rows}</div>
      <div class="mu-global">
        <div class="mu-g-side"><b class="${homeMieux?'win':''}">${fmt(m.globalHome)}<small>/10</small></b></div>
@@ -488,6 +488,48 @@ function keyRowsForMarket(market){
 // Sur "Hors-jeu" et "Arrets", aucun des deux ne gagne - plus d'arrets veut
 // surtout dire plus de tirs subis. Ces deux-la n'ont donc pas de verdict et
 // ne comptent pas dans le total du pied.
+// Logo d'equipe accole a son nom. Volontairement SANS pastille ronde ni
+// fond : les ecussons de club ont leur propre forme (bouclier, cercle,
+// blason) et un masque circulaire leur rogne les angles. On les pose tels
+// qu'ils sont, sur le fond de la carte.
+// Traduction d'un libelle de marche en francais courant, avec les noms des
+// deux equipes. Voir lib/market-labels.js : "DC 12" devient "PSG ou Monaco
+// gagne, sans match nul", et tous les seuils a virgule disparaissent.
+// Appliquee a l'AFFICHAGE seulement : les donnees gardent les libelles du
+// moteur, dont dependent la selection du marche et le comparatif.
+function marcheFr(vm,libelle){
+  const t=window.IasharkMarketLabels;
+  return t?t.marketLabelFr(libelle,{home:vm.identity.home.name,away:vm.identity.away.name}):String(libelle||'');
+}
+
+// Nettoyage des textes rediges (editorial, matchups, points de vigilance).
+// Ils citent parfois le libelle brut d'un marche - "Miser sur Premiere
+// mi-temps moins de 1.5 but..." - et ecrivent les decimales avec un point.
+//
+// On remplace donc, DANS le texte, tout libelle de marche connu par sa
+// version francaise, puis on passe les decimales a la virgule. Le texte
+// lui-meme n'est jamais reecrit : seuls ces deux motifs sont touches.
+function texteLisible(vm,texte){
+  var t=String(texte==null?'':texte);
+  if(!t)return t;
+  var libelles=[];
+  if(vm.model.recommendation&&vm.model.recommendation.market)libelles.push(vm.model.recommendation.market);
+  (vm.marketsWatch||[]).forEach(function(m){if(m&&m.market)libelles.push(m.market);});
+  // Les plus longs d'abord : "DC 12" ne doit pas etre remplace a l'interieur
+  // d'un libelle plus complet.
+  libelles.sort(function(a,b){return b.length-a.length;}).forEach(function(brut){
+    var lisible=marcheFr(vm,brut);
+    if(lisible&&lisible!==brut)t=t.split(brut).join(lisible);
+  });
+  // Decimales a la francaise, sans toucher aux nombres deja corrects ni aux
+  // eventuelles URL.
+  return t.replace(/(\d),(\d)/g,'$1<VIRG>$2').replace(/(\d)\.(\d)/g,'$1,$2').replace(/<VIRG>/g,',');
+}
+
+function logoEquipe(src,nom){
+  return src?`<img class="logo-eq" src="${esc(src)}" alt="" width="16" height="16" loading="lazy">`:'';
+}
+
 const CMP_SENS={
   'Buts marqués':'haut','Tirs':'haut','Tirs cadrés':'haut','Possession':'haut','Corners':'haut',
   'Buts concédés':'bas','Fautes':'bas',
@@ -585,8 +627,8 @@ function comparison(vm){
   return `<div class="cmp-scroll"><table class="cmp-table">
       <thead><tr>
         <th scope="col">Par match</th>
-        <th scope="col">${esc(dom)}</th>
-        <th scope="col">${esc(ext)}</th>
+        <th scope="col"><span class="cmp-eq">${logoEquipe(vm.identity.home.logo,dom)}${esc(dom)}</span></th>
+        <th scope="col"><span class="cmp-eq">${logoEquipe(vm.identity.away.logo,ext)}${esc(ext)}</span></th>
         <th scope="col">Écart</th>
       </tr></thead>
       <tbody>${lignes.join('')}</tbody>
@@ -638,88 +680,94 @@ function scenarioCard(vm){
 // Les absences reelles restent prises en compte par le modele en amont
 // (lib/match-view-model.js) et dans "Ce qu'il faut savoir".
 
-// FAQ du match. Chaque reponse est ASSEMBLEE A PARTIR DES DONNEES DEJA
-// CALCULEES du view-model - jamais un appel a un modele de langage, jamais
-// une reponse generique. Une question dont la donnee manque n'est tout
-// simplement pas affichee : mieux vaut 3 vraies questions que 6 dont la
-// moitie repond "information indisponible".
-// Repond aux questions qu'un parieur se pose reellement avant de miser, et
-// que le reste de la page traite de facon dispersee.
+// FAQ.
+//
+// Regle posee par l'utilisateur : "il faut se poser des questions dont les
+// gens n'ont pas la reponse dans la page". Les anciennes questions - qui est
+// favori, quel pari est retenu, le modele est-il d'accord avec le marche,
+// quel niveau de risque - reprenaient toutes une information deja affichee
+// en grand plus haut. Elles sont retirees.
+//
+// Ne restent que des questions dont la reponse n'existe nulle part ailleurs,
+// nourries par vm.editorial.exclusiveFacts : cartons, buts attendus de
+// saison, precision de passe, tranches d'encaissement. Ces donnees etaient
+// relevees par le pipeline sans etre affichees par aucune carte.
 function faqCard(vm){
   const qa=[];
-  const p=vm.model.probabilities;
-  const i=vm.identity;
+  const id=vm.identity, f=vm.editorial.exclusiveFacts||{}, g=vm.editorial.goalTiming;
+  const dom=id.home.name, ext=id.away.name;
+  const plusGrand=(p)=>p.home>=p.away?dom:ext;
+  const plusPetit=(p)=>p.home<=p.away?dom:ext;
 
-  if(p){
-    const rows=[[i.home.name,n(p.home)],['Le match nul',n(p.draw)],[i.away.name,n(p.away)]]
-      .filter(r=>r[1]!==null).sort((a,b)=>b[1]-a[1]);
-    if(rows.length===3){
-      const gap=Math.round((rows[0][1]-rows[1][1])*10)/10;
-      const serre=gap<8?" L’écart avec l’option suivante n’est que de "+fmt(gap)+" points : le match est ouvert.":"";
-      qa.push(['Qui est favori sur ce match ?',
-        `${esc(rows[0][0])} sort en tête avec ${pct(rows[0][1])} de probabilité, devant ${esc(rows[1][0])} (${pct(rows[1][1])}) et ${esc(rows[2][0])} (${pct(rows[2][1])}).${serre}`]);
+  // 1. Qui ouvre le score le plus tot. Le graphique du scenario cumule les
+  // deux equipes : la repartition equipe par equipe n'est visible nulle part.
+  if(g&&g.slots.length>=6){
+    const totD=g.slots.reduce((a,x)=>a+x.home,0),totE=g.slots.reduce((a,x)=>a+x.away,0);
+    const avD=g.slots.slice(0,3).reduce((a,x)=>a+x.home,0);
+    const avE=g.slots.slice(0,3).reduce((a,x)=>a+x.away,0);
+    if(totD>0&&totE>0){
+      const pD=Math.round(avD/totD*100),pE=Math.round(avE/totE*100);
+      // Sur une egalite, on ne designe personne : "X entre plus vite" serait
+      // faux a 35 % contre 35 %.
+      const verdict=Math.abs(pD-pE)<3
+        ? 'Les deux entrent dans leurs matchs au même rythme.'
+        : `${esc(pD>pE?dom:ext)} entre donc plus vite dans ses matchs.`;
+      qa.push(['Laquelle des deux marque le plus tôt ?',
+        `${esc(dom)} inscrit ${pD} % de ses buts avant la mi-temps, ${esc(ext)} ${pE} %. ${verdict} Le graphique plus haut cumule les deux équipes&nbsp;: ce détail par équipe n’y apparaît pas.`]);
     }
   }
 
-  const x=vm.model.expectedGoals;
-  if(x&&n(x.home)!==null&&n(x.away)!==null){
-    const total=Math.round((x.home+x.away)*10)/10;
-    const lecture=total>=2.8?'un match plutôt ouvert offensivement':total<=2.2?'un match plutôt fermé':'un volume de buts dans la moyenne';
-    qa.push(['Combien de buts sont attendus ?',
-      `Le modèle attend ${fmt(total)} buts au total : ${fmt(x.home)} pour ${esc(i.home.name)} et ${fmt(x.away)} pour ${esc(i.away.name)}. Cela correspond à ${lecture}.`]);
+  // 2. Encaissement en fin de match : releve, jamais affiche.
+  if(f.encaisseFin){
+    const ecartFin=Math.abs(f.encaisseFin.home-f.encaisseFin.away);
+    const verdictFin=ecartFin<4
+      ? 'Les deux tiennent la fin de match de la même façon.'
+      : `${esc(plusGrand(f.encaisseFin))} est la plus exposée sur la fin, ce qui compte pour un pari qui se joue au score final.`;
+    qa.push(['Une des deux craque-t-elle en fin de match ?',
+      `${esc(dom)} encaisse ${f.encaisseFin.home} % de ses buts sur la dernière demi-heure, ${esc(ext)} ${f.encaisseFin.away} %. ${verdictFin}`]);
   }
 
-  const r=vm.model.recommendation;
-  if(r){
-    const prob=n(r.probability), mktOdds=n(vm.model.recommendedOdds);
-    const fair=prob!==null&&prob>0?100/prob:null;
-    let txt=`IASHARK retient ${esc(r.market)}, estimé à ${pct(prob)} de probabilité.`;
-    if(fair!==null)txt+=` Cela correspond à une cote équitable de ${odds(fair)}.`;
-    if(mktOdds!==null){
-      const implied=mktOdds>0?100/mktOdds:null;
-      txt+=` La cote relevée sur le marché est de ${odds(mktOdds)}`;
-      if(implied!==null)txt+=`, soit ${pct(implied)} de probabilité implicite`;
-      txt+='.';
-      if(implied!==null&&prob!==null){
-        txt+=prob-implied>=3?' Le pari est donc joué à une cote plus généreuse que notre estimation.'
-            :prob-implied<=-3?' Le pari est donc joué à une cote moins généreuse que notre estimation : l’intérêt est faible.'
-            :' Les deux estimations sont très proches.';
-      }
-    }
-    qa.push(['Quel pari IASHARK retient-il, et à quelle cote ?',txt]);
+  // 3. Cartons : donnee relevee par le pipeline, affichee nulle part.
+  if(f.cartons){
+    const rugueux=Math.abs(f.cartons.home-f.cartons.away)<0.3?null:plusGrand(f.cartons);
+    const rouges=f.rouges&&(f.rouges.home+f.rouges.away)>0
+      ? ` Sur la période suivie, ${f.rouges.home+f.rouges.away} carton${f.rouges.home+f.rouges.away>1?'s':''} rouge${f.rouges.home+f.rouges.away>1?'s':''} au total.` : '';
+    qa.push(['Combien de cartons dans un match de ces équipes ?',
+      `${esc(dom)} en prend ${fmt(f.cartons.home)} par match et ${esc(ext)} ${fmt(f.cartons.away)}.${rugueux?` ${esc(rugueux)} est la plus sanctionnée des deux.`:' Les deux sont sanctionnées au même rythme.'}${rouges}`]);
   }
 
-  const mc=(vm.model.marketsCompared||[]).filter(m=>n(m.edge)!==null);
-  if(mc.length){
-    const top=mc.slice().sort((a,b)=>Math.abs(n(b.edge))-Math.abs(n(a.edge)))[0];
-    const e=n(top.edge);
-    qa.push(['Le modèle est-il d’accord avec le marché ?',
-      `L’écart le plus marqué porte sur ${esc(top.market)} : le modèle l’estime à ${pct(top.probability)} quand le marché en fait ${pct(top.consensus)}, soit ${e>0?'+':''}${fmt(e)} points d’écart. ${Math.abs(e)>=5?'Un écart de cette ampleur mérite d’être vérifié avant de miser.':'Les deux lectures restent proches sur l’ensemble des marchés suivis.'}`]);
+  // 4. Buts attendus de saison : a ne pas confondre avec les buts attendus
+  // DE CE MATCH, affiches plus haut. Ceux-ci decrivent la saison entiere.
+  if(f.xg&&f.xga){
+    const meilleure=plusGrand(f.xg), solide=plusPetit(f.xga);
+    qa.push(['Ces équipes se créent-elles beaucoup d’occasions ?',
+      `Sur la saison, ${esc(dom)} génère ${fmt(f.xg.home)} buts attendus par match et en concède ${fmt(f.xga.home)}&nbsp;; ${esc(ext)} ${fmt(f.xg.away)} et ${fmt(f.xga.away)}. ${esc(meilleure)} se procure le plus d’occasions, ${esc(solide)} en concède le moins.`]);
   }
 
-  // vm.editorial.risk contient soit une vraie phrase (raw.risk_principal),
-  // soit le simple code de niveau (raw.risque = "FAIBLE"/"MODERE"/"ELEVE").
-  // Repondre "FAIBLE" a la question "quel est le principal risque ?" est une
-  // non-reponse : on ne pose la question que si on a du texte exploitable,
-  // et on reformule proprement le cas du simple niveau.
-  const NIVEAUX={FAIBLE:'faible',MODERE:'modéré',ELEVE:'élevé'};
-  const riskRaw=String(vm.editorial.risk||'').trim();
-  if(NIVEAUX[riskRaw.toUpperCase()]){
-    qa.push(['Quel est le niveau de risque de ce pari ?',
-      `Le modèle classe ce pari en risque <b>${NIVEAUX[riskRaw.toUpperCase()]}</b>. Ce niveau reflète la stabilité des données et la cohérence des marchés sur ce match, pas une garantie sur le résultat.`]);
-  } else if(riskRaw.length>12){
-    qa.push(['Quel est le principal risque de ce pari ?',esc(riskRaw)]);
+  // 5. Precision de passe : jamais affichee non plus.
+  if(f.passes&&Math.abs(f.passes.home-f.passes.away)>=2){
+    const propre=plusGrand(f.passes);
+    qa.push(['Laquelle joue le plus proprement ?',
+      `${esc(propre)} réussit ${fmt(Math.max(f.passes.home,f.passes.away),0)} % de ses passes, contre ${fmt(Math.min(f.passes.home,f.passes.away),0)} % en face. Une différence de cet ordre se traduit souvent par plus de possession et moins de contres subis.`]);
   }
 
+  // 6. Methode : sa reponse n'est affichee nulle part.
   const sources=Array.isArray(vm.model.sources)?vm.model.sources.filter(Boolean):[];
-  const sims=n(vm.model.simulationCount), quality=n(vm.model.quality);
+  const sims=n(vm.model.simulationCount),quality=n(vm.model.quality);
   if(sims!==null||sources.length||quality!==null){
     const bits=[];
     if(sims!==null)bits.push(`${sims.toLocaleString('fr-FR')} simulations de Monte-Carlo`);
-    if(sources.length)bits.push(`les données ${sources.map(x=>String(x)).join(', ')}`);
+    if(sources.length)bits.push(`les données ${sources.map(x=>esc(String(x))).join(', ')}`);
     if(quality!==null)bits.push(`un score de qualité des données de ${fmt(quality)}/100`);
     qa.push(['Sur quoi repose cette analyse ?',
-      `L’analyse s’appuie sur ${bits.join(', ')}. Les probabilités sont issues de modèles statistiques, pas d’un avis : elles décrivent une fréquence attendue, jamais une certitude sur ce match précis.`]);
+      `L’analyse s’appuie sur ${bits.join(', ')}. Les probabilités décrivent une fréquence attendue sur un grand nombre de matchs semblables, jamais une certitude sur celui-ci.`]);
+  }
+
+  // 7. Risque : uniquement s'il y a une vraie phrase, pas un simple niveau.
+  const NIVEAUX={FAIBLE:1,MODERE:1,ELEVE:1};
+  const risque=String(vm.editorial.risk||'').trim();
+  if(risque.length>12&&!NIVEAUX[risque.toUpperCase()]){
+    qa.push(['Quel est le principal risque de ce pari ?',esc(risque)]);
   }
 
   if(qa.length<2)return '';
@@ -727,6 +775,7 @@ function faqCard(vm){
     `<div class="faq-list">${qa.map(([q,a])=>`<details><summary>${esc(q)}</summary><p>${a}</p></details>`).join('')}</div>`,
     'faq-card','faq');
 }
+
 
 
 // Une fois le signal depasse, le parieur lit 10 sections sans plus voir CE
@@ -740,7 +789,7 @@ function signalSticky(vm){
   return `<div class="sig-sticky" id="sigSticky" aria-hidden="true">
     <div class="ss-in">
       <span class="ss-tag">Marché recommandé</span>
-      <b class="ss-market">${esc(r.market)}</b>
+      <b class="ss-market">${esc(marcheFr(vm,r.market))}</b>
       ${marketOdds!==null?`<span class="ss-odds">${odds(marketOdds)}</span>`:''}
       ${n(r.probability)!==null?`<span class="ss-prob">${pct(r.probability)}</span>`:''}
     </div>

@@ -34,14 +34,14 @@
      Elles ne doivent jamais pouvoir etre confondues avec une vraie analyse.
      --------------------------------------------------------------------- */
   var DEMO_SCAN = [
-    { edge: 6.4, match: 'Club A – Club B', market: 'Moins de 1,5 but en 1re mi-temps', league: 'Championnat 1', modelProbability: 64.2, marketProbability: 57.8, fairOdds: 1.56, risk: 'Faible' },
-    { edge: 4.1, match: 'Club C – Club D', market: 'Les deux equipes marquent', league: 'Championnat 2', modelProbability: 61.0, marketProbability: 56.9, fairOdds: 1.64, risk: 'Modere' },
-    { edge: 3.2, match: 'Club E – Club F', market: 'Plus de 2,5 buts', league: 'Championnat 1', modelProbability: 55.4, marketProbability: 52.2, fairOdds: 1.81, risk: 'Modere' }
+    { edge: 6.4, match: 'Club A – Club B', market: 'Au plus 1 but en 1re mi-temps', league: 'Championnat 1', modelProbability: 64.2, marketProbability: 57.8, fairOdds: 1.56, risk: 'Faible' },
+    { edge: 4.1, match: 'Club C – Club D', market: 'Les deux équipes marquent', league: 'Championnat 2', modelProbability: 61.0, marketProbability: 56.9, fairOdds: 1.64, risk: 'Modéré' },
+    { edge: 3.2, match: 'Club E – Club F', market: 'Au moins 3 buts dans le match', league: 'Championnat 1', modelProbability: 55.4, marketProbability: 52.2, fairOdds: 1.81, risk: 'Modéré' }
   ];
   var DEMO_COMBO = [
-    { id: 'd1', matchKey: 'd1', match: 'Club A – Club B', market: 'Moins de 1,5 but 1re MT', probability: 64.2, odds: 1.73 },
-    { id: 'd2', matchKey: 'd2', match: 'Club C – Club D', market: 'Les deux equipes marquent', probability: 61.0, odds: 1.72 },
-    { id: 'd3', matchKey: 'd3', match: 'Club E – Club F', market: 'Plus de 2,5 buts', probability: 55.4, odds: 1.90 }
+    { id: 'd1', matchKey: 'd1', match: 'Club A – Club B', market: 'Au plus 1 but en 1re mi-temps', probability: 64.2, odds: 1.73 },
+    { id: 'd2', matchKey: 'd2', match: 'Club C – Club D', market: 'Les deux équipes marquent', probability: 61.0, odds: 1.72 },
+    { id: 'd3', matchKey: 'd3', match: 'Club E – Club F', market: 'Au moins 3 buts dans le match', probability: 55.4, odds: 1.90 }
   ];
 
   /* ---------------------------------------------------------------------
@@ -165,14 +165,23 @@
     return '<li class="flex items-center gap-3 border-t border-hairline px-1 py-3 first:border-t-0 sm:gap-4">'
       + edge
       + '<div class="min-w-0 flex-1"><div class="truncate text-[14px] font-semibold text-ink">' + titre + '</div>'
-      + '<div class="truncate text-[12.5px] text-soft">' + esc(r.market) + ' · ' + esc(r.league || '') + '</div></div>'
+      + '<div class="truncate text-[12.5px] text-soft">' + esc(marcheLisible(r.market)) + ' · ' + esc(r.league || '') + '</div></div>'
       + '<div class="hidden w-[76px] shrink-0 text-right sm:block"><div class="text-[14px] font-bold text-ink tabular-nums">' + num(r.modelProbability, 1) + '%</div><div class="text-[11px] text-soft">modèle</div></div>'
       + '<div class="hidden w-[76px] shrink-0 text-right sm:block"><div class="text-[14px] font-semibold text-soft tabular-nums">' + (r.marketProbability != null ? num(r.marketProbability, 1) + '%' : '—') + '</div><div class="text-[11px] text-soft">marché</div></div>'
       + action + '</li>';
   }
 
+  // Traduit un libelle de marche en francais courant (lib/market-labels.js) :
+  // "DC 12" ou "Over 2.5" n'ont aucun sens pour qui decouvre le site. Les
+  // noms d'equipes ne sont pas connus ici, la traduction reste donc generique
+  // ("l'equipe a domicile"), ce qui suffit dans une liste de marches.
+  function marcheLisible(libelle) {
+    var t = window.IasharkMarketLabels;
+    return t ? t.marketLabelFr(libelle) : String(libelle == null ? '' : libelle);
+  }
+
   function rendreScanner(panneau) {
-    var html = enTete('Value Scanner', 'Les écarts les plus significatifs détectés aujourd’hui entre le modèle et le marché.');
+    var html = enTete('Détecteur d’écarts', 'Compare nos probabilités aux cotes du jour et remonte les écarts les plus marqués.');
 
     if (!ctx.isPro) {
       // Aucun vrai match n'est charge ni rendu : uniquement la structure et
@@ -237,7 +246,7 @@
   }
 
   function rendreFair(panneau) {
-    panneau.innerHTML = enTete('Fair Odds', 'Compare la probabilité que tu estimes au prix réellement proposé par le bookmaker.')
+    panneau.innerHTML = enTete('Cote juste', 'Traduit une probabilité en cote équitable, et la compare au prix réellement proposé.')
       + '<div class="grid grid-cols-1 gap-6 lg:grid-cols-[320px_minmax(0,1fr)]">'
       + '<div class="' + S.carte + ' space-y-4">'
       + champ('foProb', 'Probabilité estimée', { unit: '%', min: 0.1, max: 99.9, step: 0.1, value: 58, help: 'Ta propre estimation, ou celle d’une analyse IASHARK.' })
@@ -291,7 +300,7 @@
     var plafondJour = etat.prefs && etat.prefs.daily_exposure_pct != null ? Number(etat.prefs.daily_exposure_pct) : 5;
     var stopLoss = etat.prefs && etat.prefs.stop_loss_pct != null ? Number(etat.prefs.stop_loss_pct) : 10;
 
-    panneau.innerHTML = enTete('Stake Planner', 'Dimensionne la mise à partir de ton capital, de la cote et de ton profil de risque.')
+    panneau.innerHTML = enTete('Calculateur de mise', 'Calcule la mise à partir du capital, de la cote et du profil de risque choisi.')
       + '<div class="grid grid-cols-1 gap-6 lg:grid-cols-[340px_minmax(0,1fr)]">'
       + '<div class="' + S.carte + ' space-y-4">'
       + champ('spBank', 'Capital disponible', { unit: '€', min: 1, step: 1, value: bk })
@@ -387,7 +396,7 @@
   }
 
   function rendreBankroll(panneau) {
-    panneau.innerHTML = enTete('Bankroll Lab', 'Rejoue des milliers de séries à partir de tes hypothèses et montre la dispersion réelle.')
+    panneau.innerHTML = enTete('Simulateur de capital', 'Rejoue des milliers de séries à partir des hypothèses saisies et montre la dispersion réelle.')
       + '<div class="grid grid-cols-1 gap-6 lg:grid-cols-[320px_minmax(0,1fr)]">'
       + '<div class="' + S.carte + ' space-y-4">'
       + champ('blBank', 'Capital de départ', { unit: '€', min: 1, step: 1, value: etat.bankroll || 1000 })
@@ -442,7 +451,7 @@
      ===================================================================== */
   function rendreCombo(panneau) {
     var reel = ctx.isPro;
-    panneau.innerHTML = enTete('Combo Auditor', 'Mesure ce qu’un combiné retire réellement à ton espérance de gain.')
+    panneau.innerHTML = enTete('Analyse de combiné', 'Mesure ce qu’un combiné retire réellement à l’espérance de gain.')
       + (reel ? '' : bandeauDemo('Les trois sélections ci-dessous sont fictives et servent à montrer le fonctionnement de l’outil.'))
       + '<div class="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">'
       + '<div><div id="cbList" class="' + S.carte + '"><p class="py-6 text-center text-[13.5px] text-soft">Chargement…</p></div>'
@@ -479,7 +488,7 @@
         return '<li class="border-t border-hairline first:border-t-0"><label class="flex cursor-pointer items-center gap-3 py-3">'
           + '<input type="checkbox" data-cb="' + i + '" class="h-4 w-4 shrink-0 accent-[#20d5ef]">'
           + '<span class="min-w-0 flex-1"><span class="block truncate text-[14px] font-semibold text-ink">' + esc(s.match) + '</span>'
-          + '<span class="block truncate text-[12.5px] text-soft">' + esc(s.market) + ' · ' + num(s.probability, 1) + ' % estimés</span></span>'
+          + '<span class="block truncate text-[12.5px] text-soft">' + esc(marcheLisible(s.market)) + ' · ' + num(s.probability, 1) + ' % estimés</span></span>'
           + '<span class="shrink-0 text-[14px] font-bold text-ink tabular-nums">' + num(s.odds, 2) + '</span></label></li>';
       }).join('') + '</ul>';
       $$('input[data-cb]', box).forEach(function (input) {
@@ -542,7 +551,7 @@
      06 — JOURNAL / PERFORMANCE   "Mes decisions sont-elles bonnes ?"
      ===================================================================== */
   function rendreJournal(panneau) {
-    var head = enTete('Journal de décisions', 'Mesure tes décisions dans la durée : rien n’est calculé sur des données de démonstration.');
+    var head = enTete('Journal des décisions', 'Mesure les décisions enregistrées dans la durée : rien n’est calculé sur des données de démonstration.');
 
     if (!ctx.user) {
       panneau.innerHTML = head + vide('Connecte-toi pour ouvrir ton journal',
@@ -563,7 +572,7 @@
         var badge = d.status === 'won' ? 'text-cyan' : d.status === 'lost' ? 'text-[#ff8f85]' : 'text-soft';
         return '<li class="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 border-t border-hairline py-3 first:border-t-0 sm:grid-cols-[minmax(0,1fr)_80px_80px_90px]">'
           + '<div class="min-w-0"><div class="truncate text-[14px] font-semibold text-ink">' + esc(d.match_label) + '</div>'
-          + '<div class="truncate text-[12.5px] text-soft">' + esc(d.market) + '</div></div>'
+          + '<div class="truncate text-[12.5px] text-soft">' + esc(marcheLisible(d.market)) + '</div></div>'
           + '<div class="hidden text-right text-[13.5px] text-soft tabular-nums sm:block">' + num(d.odds, 2) + '</div>'
           + '<div class="hidden text-right text-[13.5px] text-soft tabular-nums sm:block">' + euros(d.stake) + '</div>'
           + '<div class="text-right text-[14px] font-bold ' + badge + ' tabular-nums">' + (d.status === 'pending' ? '—' : signe(pl, 0) + ' €') + '</div></li>';
@@ -588,7 +597,7 @@
       + '<form method="dialog" class="p-6"><h3 class="text-[17px] font-bold text-ink">Nouvelle décision</h3>'
       + '<div class="mt-4 space-y-3">'
       + champ('jrMatch', 'Match', { type: 'text', placeholder: 'PSG – Marseille' })
-      + champ('jrMarket', 'Marché', { type: 'text', placeholder: 'Plus de 2,5 buts' })
+      + champ('jrMarket', 'Marché', { type: 'text', placeholder: 'Au moins 3 buts dans le match' })
       + champ('jrOdds', 'Cote', { min: 1.01, step: 0.01, value: 1.90 })
       + champ('jrStake', 'Mise', { unit: '€', min: 0.01, step: 0.01 })
       + '</div><p id="jrMsg" class="mt-3 text-[12.5px] text-soft"></p>'

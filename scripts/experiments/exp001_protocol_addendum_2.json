@@ -1,0 +1,51 @@
+{
+  "addendum_id": "EXP-001-PROTOCOL-ADDENDUM-2-2026-09-05",
+  "experiment_id": "EXP-001",
+  "created_at": "2026-09-05",
+  "purpose": "Documente un ecart CRITIQUE encore plus fondamental que ceux du premier addendum (scripts/experiments/exp001_protocol_addendum.json) : le champion M0 lui-meme, tel qu'implemente par lib/lab/walkforward-runner.js, n'etait PAS un replay fidele du contrat production. Ce fichier NE MODIFIE AUCUN artefact historique (exp001_report.json, exp001_manifest.json, exp001_manifest_as_used_at_launch.json restent inchanges tels que produits le 2026-09-04) - il documente l'ecart et re-qualifie le statut scientifique du resultat.",
+  "critical_finding": {
+    "id": "CHAMPION_REPLAY_MISMATCH",
+    "confirmed": true,
+    "description": "lib/lab/walkforward-runner.js#runWalkForward construisait trainFixtures via `trainPoolFixtures.filter(f => kickoff<cutoff)`, ou trainPoolFixtures = allFixtures.filter(f => trainSeasons.includes(f.season) || oosSeasons.includes(f.season)) - un POOL MULTI-SAISONS (2022-23 + 2023-24 + 2024-25 confondues), jamais filtre par f.season===targetSeason. Consequence : buildTeamState(trainFixtures, teamId, cutoff) melangeait la saison precedente COMPLETE avec la saison courante deja jouee, produisant un state permanent et non-decroissant au lieu d'un state strictement saison-courante comme le fait la vraie production (verifie via /teams/statistics?season=X, GATE B6 original).",
+    "proof_arsenal": {
+      "fixture": "1035038 (Arsenal vs Nottingham Forest, 2023-08-12, 1er match PL 2023-24 d'Arsenal)",
+      "playedTotal_pooled_walkforward_runner": 38,
+      "playedTotal_correct_season_scoped": 0,
+      "conclusion": "Le pool multi-saisons debloquait M0 des le premier match de la nouvelle saison (calcCriteres exige >=3, 38>=3 passe a tort), alors que la regle production correcte (season-scoped) donne playedTotal=0, calcCriteres indisponible."
+    },
+    "proof_manchester_city_liverpool": {
+      "manchester_city_1st_match_2023_24": { "playedTotal_pooled": 38, "playedTotal_correct": 0 },
+      "liverpool_1st_match_2023_24": { "playedTotal_pooled": 38, "playedTotal_correct": 0 }
+    },
+    "root_cause_location": "lib/lab/walkforward-runner.js lignes 43 et 53 (trainPoolFixtures construit par union de saisons, jamais filtre par saison cible avant le filtre temporel <cutoff)."
+  },
+  "true_exclusion_count": {
+    "description": "Avec la regle production CORRECTE (calcCriteres>=3 matchs, agregats STRICTEMENT saison courante), le nombre reel d'exclusions M0 est BEAUCOUP plus eleve que les 12 rapportees par EXP-001 (qui n'excluait quasiment que les equipes promues, car les equipes revenantes etaient a tort 'debloquees' par leur historique multi-saisons pooled).",
+    "season_2023_24": { "total_fixtures": 380, "true_exclusions": 31, "usable": 349 },
+    "season_2024_25": { "total_fixtures": 380, "true_exclusions": 30, "usable": 350 },
+    "total_true_exclusions_both_seasons": 61,
+    "total_previously_reported_by_exp001": 12,
+    "script": "scripts/audit_true_m0_exclusions.js",
+    "detail_file": "scripts/experiments/true_m0_exclusion_audit.json"
+  },
+  "b6_canonical_replay_revalidation": {
+    "description": "lib/data/production-replay.js#buildProductionStateAtCutoff (nouvelle definition canonique unique du state M0) re-valide contre l'API reelle, avec un accent specifique sur des cutoffs TRES precoces (2e/3e match de la saison) - jamais testes par le premier B6 (qui utilisait deja des fixtures season-scoped correctement, mais a des cutoffs mi-saison uniquement).",
+    "cases": ["Arsenal 2023-24 (cutoff avant match #2 et #3)", "Manchester City 2023-24 et 2024-25", "Liverpool 2023-24"],
+    "result": "30/30 PASS, 0 FAIL",
+    "script": "scripts/validate_gate_b6_canonical_replay.js",
+    "detail_file": "data/gate-b1/gate_b6_canonical_replay_report.json",
+    "note_methodologique": "Le premier B6 (data/gate-b1/gate_b6_validation_report.json) avait deja correctement utilise des fixtures season-scoped (pas le pool multi-saisons bugue) - il validait donc deja lib/data/team-state.js#buildTeamState lui-meme. Le bug n'etait PAS dans buildTeamState ni dans B6, mais specifiquement dans la facon dont lib/lab/walkforward-runner.js appelait cette fonction (avec un pool non filtre par saison)."
+  },
+  "correction": {
+    "canonical_function": "lib/data/production-replay.js#buildProductionStateAtCutoff - LA definition unique desormais utilisee par tout replay/backtest. Filtre EXPLICITEMENT allFixtures.filter(f => f.season===season) AVANT tout filtre temporel.",
+    "tests": "tests/lab-production-replay.test.js (8 tests, dont la preuve Arsenal/Man City/Liverpool ci-dessus et un test contractuel : alterer ou supprimer completement la saison precedente du dataset ne change RIEN au state M0 d'une fixture de la saison suivante)."
+  },
+  "verdict": {
+    "EXP001_STATUS": "INVALID_BASELINE_REPLAY",
+    "supersedes": "CLOSED_REJECT (verdict du 2026-09-04/05, base sur des artefacts desormais reconnus non-fideles au contrat production)",
+    "reasoning": "Le champion M0 mesure par EXP-001 n'etait pas un replay fidele de la production (contamination multi-saisons confirmee empiriquement, 61 exclusions reelles attendues contre 12 rapportees). Le resultat REJECT de M1 (rho appris) reste PLAUSIBLE mais NE PEUT PLUS etre considere comme une conclusion scientifique valide tant qu'il n'a pas ete rejoue contre le vrai champion M0_PRODUCTION_REPLAY (voir EXP-001R).",
+    "artifacts_not_modified": ["scripts/experiments/exp001_report.json", "scripts/experiments/exp001_manifest.json", "scripts/experiments/exp001_manifest_as_used_at_launch.json", "scripts/experiments/exp001_protocol_addendum.json"],
+    "next_step": "EXP-001R (nouveau manifest, nouvel experiment_id, cree AVANT tout calcul de performance) rejoue M0 (M0_PRODUCTION_REPLAY, season-scoped) vs M1 (meme M0 + rho appris) - voir scripts/experiments/exp001r_manifest.json / exp001r_report.json.",
+    "lockbox_2025_2026": "SEALED, jamais consultee, dataset (1520 fixtures, DATASET_VERSION) INCHANGE - ce n'est pas un probleme de donnees brutes mais de replay experimental."
+  }
+}

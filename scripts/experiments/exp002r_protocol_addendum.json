@@ -1,0 +1,16 @@
+{
+  "addendum_id": "EXP-002R-PROTOCOL-ADDENDUM-2026-09-05",
+  "experiment_id": "EXP-002R",
+  "created_at": "2026-09-05",
+  "purpose": "EXP-002R (scripts/experiments/exp002r_report.json) construisait 'baseState = exact_M0_state' en reutilisant lib/data/team-state.js#buildTeamState sur le MEME pool multi-saisons que lib/lab/walkforward-runner.js - c'est-a-dire en croyant fidelement reproduire le champion M0, alors que ce pool lui-meme etait la source du CHAMPION_REPLAY_MISMATCH (voir scripts/experiments/exp001_protocol_addendum_2.json). L'invariant LATE d'EXP-002R (verifie a l'epoque contre ce M0 pool) est donc verifie contre un M0 QUI N'ETAIT LUI-MEME PAS FIDELE A LA PRODUCTION - toute la comparaison M2 vs M0 d'EXP-002R herite du meme biais.",
+  "artifacts_not_modified": ["scripts/experiments/exp002r_report.json", "scripts/experiments/exp002r_manifest.json"],
+  "verdict": {
+    "EXP002R_STATUS": "INVALID_BASELINE_REPLAY",
+    "supersedes": "REJECT (verdict du 2026-09-05, base sur un M0 desormais reconnu non-fidele au contrat production)",
+    "M2_PROMOTED": "UNDECIDED",
+    "reasoning": "Le mecanisme additif Bayes de lib/lab/walkforward-m2r-runner.js reste architecturalement correct (baseState+ajustement additif, invariant LATE garanti PAR CONSTRUCTION quel que soit ce que 'baseState' represente) - mais baseState lui-meme etait mal defini (pool multi-saisons au lieu de season-scoped). Aucune conclusion PROMOTE/REJECT sur M2 ne peut etre tiree tant que M2 n'a pas ete rejoue sur le vrai M0_PRODUCTION_REPLAY.",
+    "coverage_gain_note": "Le M2_COVERAGE_GAIN=12 rapporte par EXP-002R est lui-meme sous-estime (herite des 12 exclusions pooled d'EXP-001 au lieu des 61 exclusions reelles season-scoped) - a recalculer une fois M0_PRODUCTION_REPLAY etabli.",
+    "next_step": "Une fois EXP-001R clos (M0 vs M1 sur le vrai champion), une nouvelle experience M2 (EXP-002R2 ou identifiant explicite) pourra etre construite sur le champion retenu par EXP-001R, avec le meme mecanisme additif Bayes (deja valide architecturalement) applique a un baseState CETTE FOIS season-scoped.",
+    "lockbox_2025_2026": "SEALED, jamais consultee."
+  }
+}

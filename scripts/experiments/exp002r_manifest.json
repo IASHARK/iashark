@@ -1,0 +1,121 @@
+{
+  "experiment_id": "EXP-002R",
+  "supersedes": "EXP-002 (marque INVALID_IMPLEMENTATION - voir scripts/experiments/exp002_protocol_addendum.json, CHAMPION_BASELINE_MISMATCH puis LATE_IDENTITY_VIOLATION)",
+  "registration_status": "REGISTERED",
+  "status": "RUNNING",
+  "created_at": "2026-09-05",
+  "hypothesis": "M2 = M0 + mecanisme Bayes early-season UNIQUEMENT (variable experimentale unique) ameliore le NLL exact-score hors-echantillon en debut de saison (bucket EARLY) sans degrader significativement la performance globale, compare au VRAI champion M0 gele (identique a EXP-001, pas une reimplementation).",
+  "champion_model": {
+    "id": "M0",
+    "description": "IDENTIQUE a EXP-001 : Dixon-Coles pur, rho fixe=-0.0845, lambdas via lib/engine.js#calcLambdas nourri par lib/data/team-state.js#buildTeamState sur le pool multi-saisons (trainSeasons=[2022] union oosSeasons=[2023,2024], filtre strictement <cutoff), gate calcCriteres>=3 matchs (agregats POOLES, pas de distinction saison courante/precedente)."
+  },
+  "candidate_model": {
+    "id": "M2",
+    "description": "baseState = EXACTEMENT le meme etat que M0 (meme fonction buildTeamState, meme pool, meme cutoff - AUCUNE reconstruction alternative). Ajustement Bayes ADDITIF sur baseState (lib/lab/walkforward-m2r-runner.js#additiveBayesAdjustment) : blended_events=baseState.events+priorRate*prior_weight(n), blended_matches=baseState.matches+prior_weight(n). prior_weight(n)=max(0,8-0.5n), n=matchs de la SEULE saison courante (audite tests/lab-bayes-prior-weight-contract.test.js). A weight=0 (n>=16), blended_events===baseState.events et blended_matches===baseState.matches EXACTEMENT -> lambdasM2===lambdasM0 PAR CONSTRUCTION.",
+    "single_experimental_variable": "earlySeasonBayes (ajustement additif uniquement) - AUCUN autre changement : meme fenetre historique, meme reconstruction d'equipe, memes bounds calcLambdas, meme calcul lambda, meme rho.",
+    "prior_source": {
+      "returning_team": "taux REEL de la saison precedente (meme cote venue-specifique), calcule depuis le dataset collecte (GATE B1)",
+      "promoted_team": "HARDCODED_GENERIC_PRIOR remplace par REAL_LEAGUE_AVERAGE_PREVIOUS_SEASON : moyenne REELLE de toute la ligue sur la saison precedente COMPLETE (lib/lab/walkforward-m2r-runner.js#computeRealLeagueAverageRates), jamais une constante devinee. Provenance persistee par prediction : prior_type, source_season, source_fixture_count, source_max_timestamp, values."
+    },
+    "runtime_sanity_check": "lib/lab/walkforward-m2r-runner.js leve une exception IMMEDIATE (jamais un rapport silencieusement errone) si un seul cas a poids nul des deux cotes produit lambdasM2 != lambdasM0 (>1e-12)."
+  },
+  "dataset": {
+    "competition": "Premier League",
+    "api_football_league_id": 39,
+    "seasons_previous_season_prior_only": [
+      "2022-2023"
+    ],
+    "seasons_oos_development": [
+      "2023-2024"
+    ],
+    "seasons_oos_validation": [
+      "2024-2025"
+    ],
+    "seasons_lockbox_forbidden": [
+      "2025-2026"
+    ],
+    "dataset_version": "403e31d057ba094993f29e3c8c88dec21119f8438acc2c7b10a21200dd6a2942",
+    "lockbox_hash_2025_2026": "f611ad31213505fd69edfc8941e79ec7d182dc83b426df3a8fb04d67ec4fa01a",
+    "note": "Identique a EXP-001/EXP-002 - aucune nouvelle collecte, 2025-26 jamais chargee."
+  },
+  "methodology": {
+    "walk_forward": "MEME politique de cutoff/batch que EXP-001 (lib/lab/walkforward-runner.js#buildCutoffs, reutilisee telle quelle). M0 GATE par calcCriteres (comme EXP-001). M2 JAMAIS gate (interet operationnel explicite : M2_COVERAGE_GAIN).",
+    "common_support_is_primary": "La comparaison scientifique principale (delta, bootstrap, decision de promotion) porte EXCLUSIVEMENT sur COMMON_SUPPORT = fixtures ou M0 (gate calcCriteres reussi) ET M2 produisent tous les deux une prediction. Attendu N=748 (identique a EXP-001).",
+    "buckets": {
+      "definition": "n_min=min(n_home,n_away), n_home/n_away=matchs saison courante avant le match",
+      "EARLY": "0<=n_min<=8",
+      "TRANSITION": "9<=n_min<=16",
+      "LATE": "n_min>=17"
+    },
+    "late_identity_invariant": "OBLIGATOIRE, verifie par sanity check RUNTIME (arret immediat si viole) : quand prior_weight_home=0 ET prior_weight_away=0, lambdasM2==lambdasM0 a <=1e-12, chaque cellule de matrice et chaque marche identiques a <=1e-12.",
+    "primary_metric": "exact_score_nll, delta_i = NLL_M2 - NLL_M0 (convention officielle, lib/lab/loss-delta.js), negatif=M2 meilleur",
+    "bootstrap": {
+      "method": "paired_block_bootstrap (lib/lab/bootstrap.js)",
+      "n_resamples": 10000,
+      "seed": "EXP-002R-v1",
+      "block_definition": "league_id+season+ISO_YEAR_WEEK(kickoff_timestamp_utc) - lib/lab/iso-week.js"
+    },
+    "m2_coverage_gain": "Fixtures ou M0 seul refuse de predire (m0_valid=false, INSUFFICIENT_TEAM_HISTORY) - rapportees SEPAREMENT (n_home/n_away, lambdas M2, poids Bayes, source du prior, raison), JAMAIS incorporees dans un delta M2-M0. Attendu n=12 (identique a EXP-001)."
+  },
+  "promotion_thresholds": {
+    "criteria_all_required_for_promote": [
+      "gain NLL EARLY >= 0.50% (common support, relatif)",
+      "bootstrap CI95 EARLY upper < 0 (common support, bloc semaine x league-season)",
+      "degradation NLL GLOBAL <= 0.10% (common support)",
+      "aucune violation de l'invariant LATE (verifie par sanity check runtime AVANT tout calcul de metrique)",
+      "aucune fuite temporelle",
+      "mecanisme stable et deterministe"
+    ],
+    "min_early_relative_gain": 0.005,
+    "max_global_relative_degradation": 0.001,
+    "shadow_more_data_condition": "gain EARLY positif et >=seuil mais CI95 EARLY ne permet pas de conclure (traverse zero)",
+    "note": "Seuils IDENTIQUES a ceux pre-enregistres pour EXP-002 (aucun seuil modifie suite a l'audit) - seule l'implementation est corrigee."
+  },
+  "reason_codes": [
+    "EARLY_GAIN_BELOW_THRESHOLD",
+    "EARLY_CI_CROSSES_ZERO_OR_POSITIVE",
+    "GLOBAL_DEGRADATION_EXCEEDS_LIMIT",
+    "LATE_INVARIANT_VIOLATED",
+    "EARLY_GAIN_PROMISING_BUT_UNDERPOWERED",
+    "MECHANISM_NON_DETERMINISTIC"
+  ],
+  "gating_to_running": {
+    "description": "Conditions OBLIGATOIRES avant status=RUNNING.",
+    "conditions": [
+      {
+        "id": "DATASET_EXISTS",
+        "description": "Fixtures reelles Premier League 2022-23 -> 2024-25 presentes localement (GATE B1, reutilisees)",
+        "satisfied": true
+      },
+      {
+        "id": "LATE_IDENTITY_TESTS_PASS",
+        "description": "TEST A/B/C/D (tests/lab-m2r-runner.test.js) tous verts, y compris contre les VRAIES predictions EXP-001, AVANT tout lancement reel",
+        "satisfied": true
+      },
+      {
+        "id": "PRIOR_WEIGHT_FORMULA_AUDITED",
+        "description": "prior_weight(n)=max(0,8-0.5n) confirme (tests/lab-bayes-prior-weight-contract.test.js)",
+        "satisfied": true
+      },
+      {
+        "id": "PROMOTED_TEAM_PRIOR_IS_REAL_DATA",
+        "description": "Le prior des equipes promues est calcule depuis la saison precedente reelle (REAL_LEAGUE_AVERAGE_PREVIOUS_SEASON), jamais une constante devinee sans provenance",
+        "satisfied": true
+      },
+      {
+        "id": "LOCKBOX_2025_2026_UNTOUCHED",
+        "description": "Aucun code de ce manifest ne charge 2025-2026",
+        "satisfied": true
+      }
+    ]
+  },
+  "constraints": [
+    "JAMAIS une seconde reconstruction de l'etat equipe pour M0 - reutilise EXACTEMENT lib/data/team-state.js#buildTeamState sur le meme pool que EXP-001",
+    "JAMAIS de donnees Championship ou d'autre division pour le prior d'une equipe promue",
+    "JAMAIS de fuzzy-match inter-division",
+    "JAMAIS de nouvelle feature au-dela du shrinkage early-season (pas d'Elo, pas de NB, pas d'odds, pas de rho appris)",
+    "JAMAIS de consultation de la saison 2025-2026",
+    "JAMAIS de modification de ce manifest une fois status=RUNNING",
+    "Aucun seuil de promotion modifie apres avoir vu un resultat"
+  ]
+}

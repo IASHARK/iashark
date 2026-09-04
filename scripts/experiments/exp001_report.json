@@ -127,15 +127,16 @@
   },
   "bootstrap": {
     "valid": true,
-    "n_blocks": 225,
+    "n_blocks": 73,
     "n_total_deltas": 748,
     "n_resamples": 10000,
     "seed": 3485359184,
     "observed_mean_delta": -0.001201301634454789,
-    "ci_lower": -0.005849174423906135,
-    "ci_upper": 0.003655270769539586,
+    "ci_lower": -0.005471596661156491,
+    "ci_upper": 0.003143783210985581,
     "ci_crosses_zero": true,
-    "probability_candidate_better": 0.6895
+    "probability_candidate_better": 0.7121,
+    "block_definition": "league_id + season + ISO_YEAR_WEEK(kickoff_timestamp_utc) - conforme SPEC pre-enregistree"
   },
   "promotion": {
     "status": "REJECT",
@@ -146,8 +147,8 @@
     "details": {
       "relative_gain": 0.0003874444034598957,
       "promotion_threshold": 0.0025,
-      "ci_lower": -0.005849174423906135,
-      "ci_upper": 0.003655270769539586
+      "ci_lower": -0.005471596661156491,
+      "ci_upper": 0.003143783210985581
     }
   },
   "fit_log": [
@@ -225774,8 +225775,21 @@
     "batch_size_min": 1,
     "batch_size_max": 10,
     "batch_size_avg": 3.3244444444444445,
-    "bootstrap_block_definition": "Un bloc = l'ensemble des deltas (loss_candidate - loss_champion, lib/lab/loss-delta.js) de TOUS les matchs partageant le MEME cutoff (meme jour calendaire) - PAS un bootstrap IID match par match. lib/lab/bootstrap.js#pairedBlockBootstrap rechantillonne des BLOCS ENTIERS (tous les deltas d'un cutoff ensemble), preservant la dependance temporelle intra-journee tout en cassant la dependance inter-journees, conformement a la SPEC.",
-    "bootstrap_n_blocks_declared": 225,
-    "bootstrap_n_blocks_check": "OK (egal au nombre de cutoffs avec >=1 prediction)"
+    "bootstrap_block_definition": "CORRIGE (2026-09-05) : un bloc = league_id + season + semaine ISO 8601 (annee-semaine) du kickoff_timestamp UTC - PAS un bloc par jour/cutoff comme dans le calcul initial (conserve dans bootstrap_daily_block_superseded pour audit). lib/lab/iso-week.js#getIsoYearWeek, lib/lab/bootstrap.js#pairedBlockBootstrap rechantillonne des semaines entieres.",
+    "bootstrap_n_blocks_declared": 73,
+    "bootstrap_n_blocks_check": "73 blocs hebdomadaires (vs 225 blocs journaliers precedemment) - 73 semaines distinctes couvertes sur 2023-24+2024-25"
+  },
+  "bootstrap_daily_block_superseded": {
+    "valid": true,
+    "n_blocks": 225,
+    "n_total_deltas": 748,
+    "n_resamples": 10000,
+    "seed": 3485359184,
+    "observed_mean_delta": -0.001201301634454789,
+    "ci_lower": -0.005849174423906135,
+    "ci_upper": 0.003655270769539586,
+    "ci_crosses_zero": true,
+    "probability_candidate_better": 0.6895,
+    "note": "Bootstrap ORIGINAL du run reel (2026-09-04), bloc = jour/cutoff - NE RESPECTAIT PAS la SPEC pre-enregistree (bloc = semaine x league-season). Conserve tel quel pour l'audit, remplace par bootstrap_weekly_block ci-dessous comme resultat officiel."
   }
 }

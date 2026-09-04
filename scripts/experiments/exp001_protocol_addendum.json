@@ -1,0 +1,50 @@
+{
+  "addendum_id": "EXP-001-PROTOCOL-ADDENDUM-2026-09-05",
+  "experiment_id": "EXP-001",
+  "created_at": "2026-09-05",
+  "purpose": "Documente deux ecarts entre l'implementation reellement executee lors du lancement d'EXP-001 (2026-09-04) et la SPEC pre-enregistree, decouverts par audit APRES le run. Le manifest original n'a pas ete modifie retroactivement pour faire disparaitre ces ecarts - voir exp001_manifest_as_used_at_launch.json (SHA256 verifie ci-dessous) pour la version EXACTE utilisee au moment du lancement.",
+  "manifest_as_used": {
+    "file": "scripts/experiments/exp001_manifest_as_used_at_launch.json",
+    "sha256": "f0dd4a608108ea84a8a61d5fc634d414787d7f2d395c151bd5d366db9bbea07e",
+    "git_commit_at_capture": "744d00e5",
+    "note": "Verifie par git diff : ce contenu est BYTE-IDENTIQUE a scripts/experiments/exp001_manifest.json tel qu'il existait sur disque au moment ou 'npm run lab:exp001' a reellement tourne (aucune modification du manifest entre le commit 744d00e5 - GATE B7/B8 - et le commit f766b3fd - run reel + rapport). C'est la reference d'audit permanente ; le fichier exp001_manifest.json 'vivant' a depuis ete modifie (ajout de methodology.promotion_thresholds) et ne doit plus etre confondu avec cette version figee."
+  },
+  "mismatches": [
+    {
+      "id": "PROMOTION_THRESHOLD_IMPLEMENTATION_MISMATCH",
+      "description": "Le seuil de gain relatif minimal pour PROMOTE, tel qu'implemente dans lib/promotion.js au moment du premier run, ne correspondait pas a la SPEC M1 pre-enregistree externe.",
+      "code_value_at_first_run": "0.5% (MIN_RELATIVE_GAIN=0.005, libelle GAIN_BELOW_ECONOMIC_FLOOR)",
+      "spec_preregistered_external": "0.25%",
+      "correction_applied": "0.25% (MIN_RELATIVE_GAIN=0.0025, lib/promotion.js commit 105e5fd3, renomme GAIN_BELOW_PROMOTION_THRESHOLD)",
+      "manifest_as_used_recorded_this_value": false,
+      "note_manifest": "Le manifest tel qu'utilise au lancement (exp001_manifest_as_used_at_launch.json) ne contenait AUCUN champ promotion_thresholds - le seuil de 0.5% n'existait que dans le code (lib/promotion.js), jamais explicitement ecrit dans le manifest. methodology.promotion_thresholds a ete ajoute au manifest vivant APRES ce constat, comme documentation permanente pour EXP-002 et au-dela - jamais presente comme ayant existe au moment du run EXP-001.",
+      "verdict_affected": false,
+      "verdict_affected_reasoning": "0.0387% < 0.25% ET 0.0387% < 0.5% - le gain reel est sous les DEUX seuils, REJECT dans les deux cas. Le renommage/la correction du seuil ne change aucune decision deja rendue."
+    },
+    {
+      "id": "BOOTSTRAP_BLOCK_IMPLEMENTATION_MISMATCH",
+      "description": "L'unite de bloc du paired block bootstrap, telle qu'implementee au moment du premier run, ne correspondait pas a la SPEC pre-enregistree.",
+      "first_report_value": "bloc = jour calendaire (cutoff/journee) - lib/lab/walkforward-runner.js#buildCutoffs, block_unit='cutoff (journee)' dans le manifest tel qu'utilise (voir manifest_as_used ci-dessus)",
+      "spec_preregistered": "bloc = semaine ISO 8601 x league-season (block_key = league_id + season + ISO_YEAR_WEEK(kickoff_timestamp_utc))",
+      "correction_applied": "Bootstrap RECALCULE sans aucun refit (scripts/recompute_exp001_bootstrap_weekly.js) : reutilise EXACTEMENT les 748 differentiels d_i=NLL_M1-NLL_M0 deja produits par le run reel, regroupes par lib/lab/iso-week.js#getIsoYearWeek, meme seed ('EXP-001-v1'), 10000 resamples. 73 blocs hebdomadaires (vs 225 blocs journaliers precedemment). Resultat conserve sous bootstrap_daily_block_superseded (ancien) et bootstrap (nouveau, officiel) dans scripts/experiments/exp001_report.json.",
+      "weekly_bootstrap_result": {
+        "n_blocks": 73,
+        "seed": 3485359184,
+        "observed_mean_delta": -0.001201301634454789,
+        "ci95_lower": -0.005471596661156491,
+        "ci95_upper": 0.003143783210985581,
+        "ci_crosses_zero": true,
+        "probability_candidate_better": 0.7121
+      },
+      "verdict_affected": "NON",
+      "verdict_affected_reasoning": "Le CI hebdomadaire ([-0.00547,+0.00314]) traverse toujours zero (statistiquement inconclusif, comme le CI journalier [-0.00585,+0.00366]) - meme signal qualitatif. De toute facon, le seuil primaire (relative_gain=0.0387% < 0.25%) suffit a lui seul a determiner REJECT, independamment du resultat du bootstrap - M1 n'etait et ne reste pas promouvable."
+    }
+  ],
+  "final_verdict_after_addendum": {
+    "EXP001_STATUS": "CLOSED_REJECT",
+    "M1_PROMOTED": false,
+    "NEXT_CHAMPION": "M0",
+    "rho_champion": -0.0845,
+    "lockbox_2025_2026": "SEALED, jamais consultee"
+  }
+}

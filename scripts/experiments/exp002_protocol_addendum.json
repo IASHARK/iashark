@@ -1,0 +1,54 @@
+{
+  "addendum_id": "EXP-002-PROTOCOL-ADDENDUM-2026-09-05",
+  "experiment_id": "EXP-002",
+  "created_at": "2026-09-05",
+  "purpose": "Documente un ecart CRITIQUE de protocole identifie par audit utilisateur APRES le premier run reel (commits 20701baa, d39f5933) : le M0 utilise dans le calcul original d'EXP-002 N'ETAIT PAS le meme champion que le M0 gele d'EXP-001. Le manifest scripts/experiments/exp002_manifest.json (status=RUNNING) n'a pas ete modifie retroactivement - voir son SHA256 ci-dessous. Cet addendum invalide la decision PROMOTE du rapport original et la remplace par une analyse corrigee.",
+  "manifest_frozen_at_running": {
+    "file": "scripts/experiments/exp002_manifest.json",
+    "sha256": "a08e2b54056edb2594e4a3fc086db0642efbfe1d12cdc41b75748c477c7ff862",
+    "git_commit": "d39f5933",
+    "manifest_modified_after_RUNNING": false,
+    "note": "Fichier ecrit UNE SEULE FOIS (transition BLOCKED/REGISTERED -> RUNNING), jamais retouche depuis (verifie par git log --all sur ce fichier : un seul commit le touche). scripts/run_exp002.js ne fait que LIRE ce fichier (evaluateGate), jamais ecrire - le contenu au moment du calcul de performance est donc identique au contenu commite."
+  },
+  "critical_finding": {
+    "id": "M0_DEFINITION_MISMATCH",
+    "description": "lib/lab/walkforward-m2-runner.js (et donc scripts/run_exp002.js) calcule un M0 'agregats saison courante uniquement, aucun gate calcCriteres' - DIFFERENT du vrai champion M0 utilise dans EXP-001 (lib/data/team-state.js, agregats MULTI-SAISONS POOLES, gate calcCriteres>=3). Confirme empiriquement le 2026-09-05 : sur les 748 fixtures communes aux deux rapports, 724 (96.8%) ont des lambdas M0 NUMERIQUEMENT DIFFERENTS entre exp001_report.json et le champ lambdaH_m0/lambdaA_m0 de exp002_report.json (max diff lambdaH=2.35, max diff lambdaA=2.043 - sur une plage typique de lambdas de 0.8 a 3.4, un ecart enorme). A n=0 (tout premier match d'une equipe cette saison), le M0 d'EXP-002 retombe sur le repli generique de calcLambdas (attH=defA=1, soit lambdaH=leagAvgH=1.35 exactement) - ignorant TOTALEMENT l'historique multi-saisons que le vrai champion M0 exploite.",
+    "root_cause": "Erreur de conception lors de la construction d'EXP-002 : la description methodologique 'agregats saison courante uniquement avant cutoff' (destinee a definir la fenetre de donnees COURANTES pour le MECANISME DE SHRINKAGE de M2) a ete appliquee PAR ERREUR aussi a M0 lui-meme, qui aurait du rester EXACTEMENT le pipeline gele d'EXP-001 (lib/data/team-state.js + gate calcCriteres), inchange.",
+    "consequence_on_original_verdict": "Le rapport original (scripts/experiments/exp002_report.json, decision PROMOTE) comparait M2 a un champion M0 ARTIFICIELLEMENT AFFAIBLI (repli generique en debut de saison, jamais l'historique reel pool multi-saisons) plutot qu'au VRAI champion de production. Une grande partie du gain EARLY observe (+4.14%) etait donc un artefact de comparaison, pas une preuve que M2 bat le vrai M0.",
+    "original_verdict_status": "INVALID - ne doit plus etre cite comme preuve de superiorite de M2"
+  },
+  "corrected_analysis": {
+    "method": "COMMON_SUPPORT : reutilise EXCLUSIVEMENT les lambdas DEJA PERSISTES (aucun refit, aucun nouveau calcul d'optimisation) - M0 = scripts/experiments/exp001_report.json#predictions[].{lambdaH,lambdaA,rho_m0} (le VRAI champion gele), M2 = scripts/experiments/exp002_report.json#predictions[].{lambdaH_m2,lambdaA_m2}. Jointure par fixture_id, evaluation deterministe de logProbability aux points deja connus. Script : scripts/exp002_common_support_audit.js. Rapport complet : scripts/experiments/exp002_common_support_report.json.",
+    "common_support_n": 748,
+    "global": { "nll_m0": 3.100578105466863, "nll_m2": 3.155823706364096, "relative_gain": -0.01781783880877743, "ci95": [0.029055539589990288, 0.08223704212848813], "ci_crosses_zero": false, "probability_candidate_better": 0, "interpretation": "M2 CONFIDEMMENT PIRE que le vrai M0 (IC entierement positif)" },
+    "early": { "n": 168, "nll_m0": 2.9743285122163305, "nll_m2": 3.035857099704336, "relative_gain": -0.020686547311533236, "ci95": [0.008457522766708086, 0.11803046078526613], "ci_crosses_zero": false, "probability_candidate_better": 0.0125, "interpretation": "M2 CONFIDEMMENT PIRE en EARLY aussi - l'inverse du resultat original" },
+    "early_by_season": {
+      "2023": { "n": 81, "relative_gain": -0.020373798365889192, "ci95": [-0.019541560546702676, 0.13697350303601252] },
+      "2024": { "n": 87, "relative_gain": -0.020975086933322985, "ci95": [-0.00717075034601894, 0.14353176986322186] }
+    },
+    "transition": { "n": 162, "nll_m0": 3.1797818762276253, "nll_m2": 3.2134865887007855, "relative_gain": -0.01059969324472854, "ci_crosses_zero": true },
+    "late": { "n": 418, "nll_m0": 3.12062337054544, "nll_m2": 3.181692134546629, "relative_gain": -0.019569411860975446, "ci_crosses_zero": false, "note": "L'invariant M2==M0 ne s'applique QU'AU M0 interne d'EXP-002 (jamais au vrai champion pool multi-saisons) - c'est attendu et documente, pas une contradiction." }
+  },
+  "m2_coverage_gain": {
+    "description": "Les 12 fixtures ou le vrai champion M0 (EXP-001, gate calcCriteres) ne produit AUCUNE prediction (INSUFFICIENT_TEAM_HISTORY) - jamais incorporees dans un delta M2-M0, rapportees separement comme benefice de couverture operationnel distinct.",
+    "n": 12,
+    "detail_file": "scripts/experiments/exp002_common_support_report.json#m2_coverage_gain"
+  },
+  "anti_leakage_prior_audit": {
+    "promoted_teams_checked": ["Luton 2023-24", "Sheffield United 2023-24", "Burnley 2023-24", "Ipswich 2024-25"],
+    "prior_source": "CONSTANTE de ligue codee en dur (LEAGUE_AVG_H=1.35, LEAGUE_AVG_A=1.10, lib/lab/walkforward-m2-runner.js) - aucune donnee, aucun timestamp, structurellement impossible de fuiter.",
+    "returning_team_checked": "Arsenal 2023-24 (premier match, fixture 1035038)",
+    "returning_team_prior_source_season": "2022-2023 (max_source_timestamp=2023-05-28T15:30:00+00:00)",
+    "cutoff": "2023-08-12T00:00:00.000Z",
+    "max_source_timestamp_lt_cutoff": true,
+    "contract_test": "tests/lab-m2-prior-anti-leakage.test.js (9 tests, tous verts)"
+  },
+  "verdict": {
+    "EXP002_STATUS": "CLOSED_REJECT",
+    "M2_PROMOTED": false,
+    "NEXT_CHAMPION": "M0",
+    "rho_champion": -0.0845,
+    "reasoning": "L'analyse COMMON_SUPPORT (methode corrigee, aucun refit, comparaison au VRAI champion M0 gele) montre que M2 est CONFIDEMMENT PIRE que M0, globalement ET dans le bucket EARLY specifiquement (celui-la meme ou M2 etait cense apporter le plus de valeur). Le mecanisme Bayes early-season, bien que deja valide en production pour d'autres usages, n'ameliore PAS le NLL exact-score walk-forward par rapport au vrai champion pool multi-saisons sur ce dataset. Le gain de couverture (12 matchs supplementaires predits par M2 la ou M0 refuse) reste un avantage operationnel reel et distinct, documente separement, mais ne justifie pas une promotion.",
+    "lockbox_2025_2026": "SEALED, jamais consultee"
+  }
+}

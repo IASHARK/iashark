@@ -46,3 +46,58 @@ test("des rho_true distincts produisent des rho_hat distincts et dans le bon ord
   assert.ok(r0.rho_hat > rMinus05.rho_hat, `rho_hat(0)=${r0.rho_hat} devrait etre > rho_hat(-0.05)=${rMinus05.rho_hat}`);
   assert.ok(rMinus05.rho_hat > rMinus10.rho_hat, `rho_hat(-0.05)=${rMinus05.rho_hat} devrait etre > rho_hat(-0.10)=${rMinus10.rho_hat}`);
 });
+
+// --- Durcissement demande le 2026-09-04 : le smoke test ci-dessus (±0.03
+// sur rho_hat) reste en place tel quel, mais ne detecte PAS a coup sur une
+// fonction objectif ou une parametrisation incoherente entre le fitter et
+// l'evaluation - rho_hat pourrait "ressembler" a rho_true par coincidence
+// avec une objective legerement fausse. Ce bloc verifie directement les
+// VALEURS de NLL sur le MEME echantillon, avec un jeu de donnees beaucoup
+// plus grand (20 equipes x 19 adversaires x 100 saisons = 38000 matchs),
+// et exige :
+//   NLL(rho_hat) <= NLL(rho_true) + tolerance   (proprie du minimiseur -
+//     doit TOUJOURS etre vrai si l'objectif est correctement implemente,
+//     quelle que soit la taille de l'echantillon)
+//   NLL(rho_hat) <= NLL(0) + tolerance           (idem)
+//   pour rho_true != 0 : NLL(0) - NLL(rho_hat) capture une fraction
+//     substantielle de l'ecart theorique NLL(0)-NLL(rho_true) (coherence
+//     de signe/magnitude - la correction doit reellement aider, pas juste
+//     "ne pas empirer")
+const LARGE_N_SEASONS = 100; // 38000 matchs
+const NLL_OPTIMALITY_TOLERANCE = 1e-6; // marge numerique pure (convergence SciPy xatol=1e-10), jamais un vrai relachement statistique
+
+for (const rhoTrue of [0, -0.05, -0.10]) {
+  test(`DURCI - rho_true=${rhoTrue}, N=38000 : NLL(rho_hat)<=NLL(rho_true)<=NLL(0) et coherence signe/magnitude`, () => {
+    const res = runIdentifiabilityCheck({ rhoTrue, nTeams: 20, nSeasons: LARGE_N_SEASONS, seed: 9001 });
+    assert.equal(res.fit.convergence, true);
+
+    const report = `rho_true=${rhoTrue} rho_hat=${res.rho_hat} abs_error=${res.abs_error} ` +
+      `NLL(rho_hat)=${res.nll_at_rho_hat} NLL(0)=${res.nll_at_zero} NLL(rho_true)=${res.nll_at_rho_true}`;
+
+    // Propriete du minimiseur - doit TOUJOURS etre vraie si l'objectif est
+    // correctement implemente, quelle que soit la taille de l'echantillon.
+    assert.ok(
+      res.nll_at_rho_hat <= res.nll_at_rho_true + NLL_OPTIMALITY_TOLERANCE,
+      `NLL(rho_hat) devrait etre <= NLL(rho_true) - ${report}`
+    );
+    assert.ok(
+      res.nll_at_rho_hat <= res.nll_at_zero + NLL_OPTIMALITY_TOLERANCE,
+      `NLL(rho_hat) devrait etre <= NLL(0) - ${report}`
+    );
+
+    if (rhoTrue !== 0) {
+      // Coherence de signe/magnitude : la correction apprise doit capturer
+      // une fraction substantielle du gain theorique vs rho=0, pas juste
+      // "ne pas empirer" - sinon la fonction objectif ou la parametrisation
+      // du fitter est suspecte, meme si rho_hat "ressemble" a rho_true.
+      const theoreticalGain = res.nll_at_zero - res.nll_at_rho_true;
+      const observedGain = res.nll_at_zero - res.nll_at_rho_hat;
+      assert.ok(theoreticalGain > 0, `pre-condition : gain theorique doit etre positif - ${report}`);
+      assert.ok(
+        observedGain >= 0.3 * theoreticalGain,
+        `gain observe=${observedGain} devrait capturer >=30% du gain theorique=${theoreticalGain} - ${report}`
+      );
+      assert.ok(res.rho_hat < 0, `rho_hat devrait etre negatif comme rho_true - ${report}`);
+    }
+  });
+}

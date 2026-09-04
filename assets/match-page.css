@@ -153,6 +153,13 @@ a{color:inherit}
 .outputs-xg .xg-row span{color:var(--dim);font:11.5px var(--mono)}
 
 /* comparatif */
+.compare-row{display:grid;grid-template-columns:44px 1fr 92px 1fr 44px;align-items:center;gap:8px;margin:8px 0;font-size:11.5px}
+.compare-row b{text-align:center;color:var(--text)}
+.compare-row span{text-align:center;color:var(--muted);font:10px var(--mono);text-transform:uppercase}
+.compare-bar{height:5px;border-radius:4px;background:var(--line);overflow:hidden}
+.compare-bar.home{display:flex;justify-content:flex-end}
+.compare-bar i{display:block;height:100%;background:var(--green);border-radius:4px}
+.compare-bar.away i{background:var(--red)}
 
 /* scenario du match */
 .scenario-chart{width:100%;height:auto;display:block}
@@ -327,8 +334,18 @@ a{color:inherit}
   padding:5px 11px;border-radius:20px}
 
 /* ==================== Comparatif ==================== */
+.cmp-intro{margin:0 0 16px;color:#9fb3c4;font:400 14px/1.6 var(--body)}
+.cmp-intro b{color:var(--text);font-weight:600}
+.compare-row{font-size:13.5px;font-variant-numeric:tabular-nums}
+.compare-row b{font-weight:600}
+.compare-row span{color:#8ba0b3;font:400 12.5px var(--body);letter-spacing:0;text-transform:none}
 /* La ligne clé se distingue par un filet et la couleur du libellé,
    pas par un pavé coloré de plus. */
+.compare-row.is-key{position:relative;padding:6px 0;margin:4px 0}
+.compare-row.is-key span{color:var(--accent);font-weight:600}
+.compare-row.is-key em{margin-left:7px;color:var(--accent);opacity:.75;
+  font:400 11.5px var(--body);font-style:normal;letter-spacing:0;
+  background:none;border:0;padding:0;text-transform:none}
 
 /* ==================== Buteur ==================== */
 /* Hierarchie voulue : le NOM d'abord, le reste ensuite. Rien au-dessus de
@@ -389,87 +406,6 @@ a{color:inherit}
 .threat:hover .threat-lien i{transform:translateX(3px)}
 @media(prefers-reduced-motion:reduce){.threat-lien i{transition:none}}
 .threat-alerte{margin:11px 0 0;color:#c8a97a;font:400 12px/1.55 var(--body)}
-
-/* ==================== Comparatif : radar ==================== */
-/* Neuf rangees de barres, c'etait beaucoup de batonnets pour peu de lecture.
-   Le profil de jeu passe en radar. Il ne porte QUE des mesures ou "plus"
-   veut dire "plus de" : sur un radar, une aire plus grande se lit comme une
-   superiorite, ce qui serait faux pour les buts encaisses ou les fautes.
-   Ces trois-la restent en chiffres sous le graphique. */
-.radar-wrap{display:grid;gap:20px;align-items:center;margin-top:4px}
-@media(min-width:720px){.radar-wrap{grid-template-columns:280px minmax(0,1fr);gap:28px}}
-.radar{width:100%;max-width:300px;margin:0 auto;overflow:visible}
-.radar-home{fill:rgba(34,211,238,.20);stroke:#22d3ee;stroke-width:2;stroke-linejoin:round}
-.radar-away{fill:rgba(148,170,190,.14);stroke:#94aabe;stroke-width:2;stroke-linejoin:round;stroke-dasharray:4 3}
-.radar-pt-home{fill:#22d3ee}
-.radar-pt-away{fill:#94aabe}
-
-.radar-table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
-.radar-table thead th{text-align:right;padding:0 0 8px;color:#8ba0b3;
-  font:600 11px var(--body);text-transform:uppercase;letter-spacing:.08em}
-.radar-table thead th:first-child{text-align:left}
-.radar-table th[scope=row]{text-align:left;font:400 13.5px var(--body);color:#9fb3c4;padding:7px 0}
-.radar-table td{text-align:right;padding:7px 0 7px 14px;font:500 14px var(--body);color:#9fb3c4}
-.radar-table td.fort{color:var(--text);font-weight:700}
-.radar-table tbody tr+tr th,.radar-table tbody tr+tr td{border-top:1px solid rgba(255,255,255,.055)}
-
-.radar-legende{display:flex;flex-wrap:wrap;gap:8px 20px;margin-top:14px}
-.radar-legende span{display:inline-flex;align-items:center;gap:7px;color:#9fb3c4;font-size:12.5px}
-.radar-legende i{width:12px;height:3px;border-radius:2px}
-.radar-legende i.pt-home{background:#22d3ee}
-.radar-legende i.pt-away{background:#94aabe}
-
-/* Les mesures ou "plus" ne veut pas dire "mieux" : en clair, sans barre. */
-.cmp-reste{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:16px;
-  padding-top:14px;border-top:1px solid rgba(255,255,255,.07)}
-@media(min-width:720px){.cmp-reste{grid-template-columns:repeat(4,minmax(0,1fr))}}
-.cmp-reste>div{display:flex;flex-wrap:wrap;align-items:baseline;gap:5px}
-.cmp-reste small{flex:1 1 100%;color:var(--muted);font-size:11px}
-.cmp-reste b{font:600 14.5px var(--body);color:#9fb3c4;font-variant-numeric:tabular-nums}
-.cmp-reste b.fort{color:var(--text)}
-.cmp-reste span{color:var(--muted);font-size:11px}
-.cmp-note{margin:14px 0 0;color:var(--muted);font-size:12px}
-
-/* ==================== Ce qu'il faut savoir : deux colonnes ============== */
-.savoir-grid{display:grid;gap:18px}
-@media(min-width:720px){
-  .savoir-grid:not(.savoir-solo){grid-template-columns:1fr 1fr;gap:26px}
-  /* Un filet vertical separe les deux colonnes, plutot qu'un cadre autour
-     de chacune : deux cadres de plus dans une carte deja encadree. */
-  .savoir-grid:not(.savoir-solo)>.savoir-col+.savoir-col{
-    padding-left:26px;border-left:1px solid rgba(255,255,255,.08)}
-}
-.savoir-titre{margin:0 0 12px;font:700 11px var(--body);letter-spacing:.14em;text-transform:uppercase}
-.savoir-titre.pour{color:var(--accent)}
-.savoir-titre.contre{color:#c8a97a}
-.savoir-item+.savoir-item{margin-top:13px;padding-top:13px;border-top:1px solid rgba(255,255,255,.055)}
-.savoir-item b{display:block;font:600 14px var(--body);color:var(--text)}
-.savoir-item p{margin:4px 0 0;color:#9fb3c4;font:400 13.5px/1.6 var(--body)}
-
-/* ==================== Ce qu'il faut relativiser ==================== */
-.prud-grid{display:grid;gap:18px}
-@media(min-width:720px){
-  .prud-grid:not(.prud-solo){grid-template-columns:1fr 1fr;gap:26px}
-  .prud-grid:not(.prud-solo)>.prud-col+.prud-col{
-    padding-left:26px;border-left:1px solid rgba(255,255,255,.08)}
-}
-.prud-titre{margin:0 0 10px;font:700 11px var(--body);letter-spacing:.14em;
-  text-transform:uppercase;color:#c8a97a}
-.prud-item{margin:0 0 7px;color:#9fb3c4;font:400 13.5px/1.6 var(--body)}
-.prud-item b{color:var(--text);font-weight:600}
-.prud-muted{color:var(--muted)}
-
-/* ==================== Quand les buts tombent ==================== */
-.gt-chart{width:100%;height:auto;margin-top:2px}
-.gt-bar{fill:rgba(141,179,211,.28)}
-.gt-pic{fill:var(--accent)}
-.gt-note{margin:12px 0 0;color:#9fb3c4;font:400 13.5px/1.6 var(--body)}
-.gt-note b{color:var(--accent);font-weight:700}
-.gt-source{margin:7px 0 0;color:var(--muted);font-size:12px;line-height:1.55}
-
-.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;
-  clip:rect(0,0,0,0);white-space:nowrap;border:0}
-
 /* ==================== FAQ ==================== */
 .faq-list details{border:0;border-radius:0;background:none;margin:0;
   border-bottom:1px solid rgba(255,255,255,.07)}
@@ -531,6 +467,11 @@ a{color:inherit}
 /* Les barres opposaient du vert (domicile) au rouge (extérieur) : deux
    couleurs fortes qui ne veulent rien dire d'autre que « équipe A / équipe
    B », et le plus gros aplat coloré de la page. Cyan contre ardoise. */
+.compare-bar{height:6px;background:rgba(255,255,255,.05)}
+.compare-bar i{background:#2f4a60}
+.compare-bar.home i{background:var(--accent);opacity:.85}
+.compare-bar.away i{background:#3d5a72}
+.compare-row.is-key .compare-bar.home i{opacity:1}
 
 /* ---------- Chiffres sous la lecture ---------- */
 .lecture-stats{border-top-color:rgba(255,255,255,.07);gap:10px 30px}

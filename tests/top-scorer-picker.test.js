@@ -69,3 +69,38 @@ test("pickTopScorerCandidates : limit personnalise renvoie moins/plus de candida
   assert.equal(pickTopScorerCandidates(home, [], 100, 200, null, null, 1).length, 1);
   assert.equal(pickTopScorerCandidates(home, [], 100, 200, null, null, 3).length, 3);
 });
+
+// Les composantes exposees doivent RECOMPOSER exactement le score affiche.
+// Sans cette garantie, le detail montre sur la fiche joueur serait une
+// jolie decomposition qui ne correspond pas au chiffre a cote.
+test("les composantes du score le recomposent exactement", () => {
+  const home = [
+    ...repeat(4, () => fixture({ playerId: 1, teamId: 100, name: "Attaquant", minutes: 88, shotsTotal: 5, shotsOn: 3, goals: 0 })),
+    ...repeat(4, () => fixture({ playerId: 3, teamId: 100, name: "Ailier", minutes: 75, shotsTotal: 3, shotsOn: 1, goals: 0 }))
+  ];
+  home[0].goals = 1; home[1].goals = 1;
+  const away = repeat(4, () => fixture({ playerId: 2, teamId: 200, name: "Avant-centre", minutes: 90, shotsTotal: 4, shotsOn: 2, goals: 0 }));
+  away[0].goals = 1;
+  const picks = pickTopScorerCandidates(home, away, 100, 200, { att: 50, def: 40 }, { att: 50, def: 55 }, 2);
+  assert.ok(picks.length, "aucun candidat");
+  for (const p of picks) {
+    const c = p.scoreComponents;
+    assert.ok(c, "composantes absentes");
+    assert.equal(c.weights.shotsOn + c.weights.shotsTotal + c.weights.conversion, 1,
+      "les poids doivent totaliser 1");
+    const base = c.weights.shotsOn * c.shotsOnNorm
+      + c.weights.shotsTotal * c.shotsTotalNorm
+      + c.weights.conversion * c.conversionNorm;
+    const recompose = Math.round(100 * base * p.reliability * p.opponentDefenseMultiplier);
+    // Les composantes sont arrondies au millieme pour l'export : on tolere
+    // le point d'ecart que cet arrondi peut produire, pas davantage.
+    assert.ok(Math.abs(recompose - p.goalThreatScore) <= 1,
+      `le detail donne ${recompose} alors que le score affiche est ${p.goalThreatScore}`);
+    for (const v of [c.shotsOnNorm, c.shotsTotalNorm, c.conversionNorm]) {
+      assert.ok(v >= 0 && v <= 1, "une composante normalisee sort de [0,1] : " + v);
+    }
+    assert.ok(p.minutes > 0, "minutes absentes, l'echantillon ne peut pas etre affiche");
+    assert.ok(Number.isFinite(p.baselineConversion), "conversion de reference absente");
+  }
+});
+

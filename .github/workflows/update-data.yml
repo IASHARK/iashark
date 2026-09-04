@@ -2676,6 +2676,18 @@ jobs:
                     appearances:p.appearances,goals:p.goals,shots_on_90:p.shotsOn90,shots_total_90:p.shotsTotal90,
                     conversion_rate:p.smoothedConversion,opponent_defense_multiplier:p.opponentDefenseMultiplier,
                     goal_threat_score:p.goalThreatScore,
+                    // Ce qu'il faut pour EXPLIQUER le score sur la fiche
+                    // joueur plutot que de l'afficher seul : les trois
+                    // composantes normalisees, les deux multiplicateurs, et
+                    // la conversion moyenne du match qui sert de point de
+                    // comparaison. Aucune n'est recalculable cote client.
+                    score_components:p.scoreComponents||null,
+                    reliability:p.reliability,
+                    baseline_conversion:p.baselineConversion,
+                    // Minutes reelles : indispensables pour dire sur quel
+                    // echantillon reposent les moyennes par 90.
+                    minutes:p.minutes,
+                    shots_on:p.shotsOn,shots_total:p.shotsTotal,
                     analyse:reasonEntry?(reasonEntry.raison||null):null,
                     bio:p.bio||null,season:p.seasonFull||null
                   };

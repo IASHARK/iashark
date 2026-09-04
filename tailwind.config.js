@@ -11,7 +11,9 @@ module.exports = {
     "./connexion.html", "./inscription.html",
     "./mot-de-passe-oublie.html", "./reinitialiser-mot-de-passe.html", "./auth-pages.js",
     // Blog.
-    "./blog.html"
+    "./blog.html",
+    // Fiche joueur.
+    "./joueur.html", "./player-page.js"
   ],
   corePlugins: { preflight: false },
   theme: {

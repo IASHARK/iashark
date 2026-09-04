@@ -1,6 +1,75 @@
-<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Fiche joueur — IASHARK</title><meta name="robots" content="noindex,follow"><link rel="icon" href="/assets/favicon.png"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"><link rel="stylesheet" href="/assets/match-page.css"><link rel="stylesheet" href="/assets/player-page.css"><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script><link rel="stylesheet" href="/assets/bottom-navigation.css"></head><body>
-<header class="site-header"><a class="brand" href="/" aria-label="IASHARK accueil"><img src="/assets/iashark-logo.png" alt="IASHARK"></a><a class="back-link" href="javascript:history.back()">← Retour</a><span id="authHeaderSlot"><a class="btn-login" href="/connexion.html">Connexion</a></span></header>
-<main class="player-shell"><div id="playerRoot" aria-live="polite"><div class="loading-card"><span></span><p>Chargement de la fiche joueur…</p></div></div></main>
-<footer class="legal-footer"><p>Information statistique, pas une garantie de résultat. Jouez responsable · 18+</p><p>Aide : <a href="https://www.joueurs-info-service.fr">joueurs-info-service.fr</a> · 09 74 75 13 13</p></footer>
-<nav class="bottom-nav" aria-label="Navigation principale"><a href="/"><span>⌂</span><b>Accueil</b></a><a href="/pro.html"><span>☆</span><b>Outils</b></a><a href="/blog.html"><span>▤</span><b>Blog</b></a><a href="/compte.html"><span>♙</span><b>Compte</b></a></nav>
-<script src="/app-client.js"></script><script src="/lib/display-data.js"></script><script src="/lib/insights.js"></script><script src="/lib/match-view-model.js"></script><script src="/player-page.js"></script><script src="/auth-header.js"></script><script>IasharkAuthHeader.mount('#authHeaderSlot');</script><script src="/bottom-navigation.js"></script></body></html>
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Fiche joueur — IASHARK</title>
+<meta name="description" content="La menace offensive d'un joueur pour un match précis : score, contexte adverse, forme récente et production réelle.">
+<!-- Page de detail rattachee a un match precis (?m=&p=) : son contenu n'a
+     pas de sens hors de ce contexte et changerait a chaque journee. Elle
+     reste suivie pour transmettre la valeur des liens, mais pas indexee. -->
+<meta name="robots" content="noindex,follow">
+<link rel="icon" href="/assets/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<link rel="stylesheet" href="/assets/tailwind.css">
+<link rel="stylesheet" href="/assets/player-page.css">
+<link rel="stylesheet" href="/assets/bottom-navigation.css">
+</head>
+<body class="bg-page pb-24 text-ink antialiased">
+
+<header class="border-b border-hairline">
+  <div class="mx-auto flex h-14 w-full max-w-[1240px] items-center gap-4 px-4 sm:px-6">
+    <a href="/" aria-label="IASHARK, accueil"><img src="/assets/iashark-logo.png" alt="IASHARK" class="h-7 w-auto object-contain"></a>
+    <span class="ml-auto" id="authHeaderSlot"><a class="rounded-lg border border-hairline px-3 py-1.5 text-[12.5px] font-semibold transition hover:border-cyan/40" href="/connexion.html">Connexion</a></span>
+  </div>
+</header>
+
+<main class="mx-auto w-full max-w-[1240px] px-4 sm:px-6">
+
+  <!-- Squelette calque sur la vraie mise en page : en-tete, score, quatre
+       indicateurs. Pas un rond qui tourne au milieu de l'ecran. -->
+  <div id="squelette" class="py-8" aria-busy="true" aria-live="polite">
+    <div class="h-4 w-56 animate-pulse rounded bg-white/[.06]"></div>
+    <div class="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_260px]">
+      <div class="flex items-center gap-5">
+        <div class="h-24 w-24 shrink-0 animate-pulse rounded-2xl bg-white/[.05]"></div>
+        <div class="flex-1 space-y-3">
+          <div class="h-9 w-2/3 animate-pulse rounded bg-white/[.06]"></div>
+          <div class="h-4 w-1/3 animate-pulse rounded bg-white/[.04]"></div>
+          <div class="h-4 w-1/4 animate-pulse rounded bg-white/[.04]"></div>
+        </div>
+      </div>
+      <div class="h-32 animate-pulse rounded-2xl bg-white/[.04]"></div>
+    </div>
+    <div class="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <div class="h-20 animate-pulse rounded-xl bg-white/[.04]"></div>
+      <div class="h-20 animate-pulse rounded-xl bg-white/[.04]"></div>
+      <div class="h-20 animate-pulse rounded-xl bg-white/[.04]"></div>
+      <div class="h-20 animate-pulse rounded-xl bg-white/[.04]"></div>
+    </div>
+    <span class="sr-only">Chargement de la fiche joueur…</span>
+  </div>
+
+  <div id="playerRoot" hidden></div>
+
+</main>
+
+<footer class="mx-auto mt-12 w-full max-w-[1240px] border-t border-hairline px-4 py-8 sm:px-6">
+  <p class="max-w-[80ch] text-[12.5px] leading-relaxed text-soft">Information statistique, jamais une garantie de résultat. Les paris sportifs comportent un risque de perte financière et de dépendance. Interdit aux mineurs. Aide&nbsp;: <a href="https://www.joueurs-info-service.fr" class="text-cyan hover:underline">joueurs-info-service.fr</a> · 09 74 75 13 13</p>
+</footer>
+
+<nav class="bottom-nav" aria-label="Navigation principale"><a href="/"><span>&#8962;</span><b>Accueil</b></a><a href="/pro.html"><span>&#9734;</span><b>Outils</b></a><a href="/blog.html"><span>&#9636;</span><b>Blog</b></a><a href="/compte.html"><span>&#9817;</span><b>Compte</b></a></nav>
+
+<script src="/app-client.js"></script>
+<script src="/lib/display-data.js"></script>
+<script src="/lib/insights.js"></script>
+<script src="/lib/match-view-model.js"></script>
+<script src="/player-page.js"></script>
+<script src="/auth-header.js"></script>
+<script>IasharkAuthHeader.mount('#authHeaderSlot');</script>
+<script src="/bottom-navigation.js"></script>
+</body>
+</html>

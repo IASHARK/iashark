@@ -17,7 +17,7 @@ const path = require("path");
 const { runWalkForwardM2C } = require("../lib/lab/walkforward-m2c-runner.js");
 const { logProbability } = require("../lib/lab/dc-log-probability.js");
 const { lossDelta } = require("../lib/lab/loss-delta.js");
-const { pairedBlockBootstrap } = require("../lib/lab/bootstrap.js");
+const { pairedBlockBootstrap, pairedBlockBootstrapRelativeGain } = require("../lib/lab/bootstrap.js");
 const { getIsoYearWeek } = require("../lib/lab/iso-week.js");
 const { evaluatePromotionM2 } = require("../lib/lab/promotion-m2.js");
 const { binaryLogLoss, binaryBrier, multiclassLogLoss, multiclassBrier } = require("../lib/lab/metrics.js");
@@ -62,7 +62,10 @@ function mean(arr) { return arr.length ? arr.reduce((a, b) => a + b, 0) / arr.le
 function median(arr) { if (!arr.length) return null; const s = arr.slice().sort((a, b) => a - b); const m = Math.floor(s.length / 2); return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2; }
 function percentile(arr, p) { if (!arr.length) return null; const s = arr.slice().sort((a, b) => a - b); return s[Math.min(s.length - 1, Math.max(0, Math.round(p * (s.length - 1))))]; }
 
-function bootstrapOn(rows, seed) {
+// CI95 sur le DELTA ABSOLU de NLL (delta_i = nll_m2 - nll_m0, unite = NLL,
+// PAS un pourcentage). C'est CETTE forme (upper<0) qu'utilise la decision
+// de promotion (convention pre-enregistree, inchangee).
+function bootstrapDeltaNllOn(rows, seed) {
   const byBlock = new Map();
   for (const r of rows) {
     const { isoYear, isoWeek } = getIsoYearWeek(r.cutoff);
@@ -73,6 +76,25 @@ function bootstrapOn(rows, seed) {
   const blocks = Array.from(byBlock.values());
   if (!blocks.length) return { valid: false, reason: "NO_DATA" };
   return pairedBlockBootstrap(blocks, { seed, nResamples: 10000 });
+}
+
+// CI95 sur le GAIN RELATIF (%), calcule par un reechantillonnage bootstrap
+// INDEPENDANT sur la paire (nll_m0,nll_m2) - PAS une mise a l'echelle du
+// CI du delta absolu (relative_gain n'est pas une fonction lineaire des
+// deltas individuels, cf lib/lab/bootstrap.js#pairedBlockBootstrapRelativeGain).
+// Diagnostic complementaire de lisibilite UNIQUEMENT - ne participe jamais
+// a la decision de promotion.
+function bootstrapRelativeGainOn(rows, seed) {
+  const byBlock = new Map();
+  for (const r of rows) {
+    const { isoYear, isoWeek } = getIsoYearWeek(r.cutoff);
+    const key = `${LEAGUE_ID}-${r.season}-${isoYear}-W${String(isoWeek).padStart(2, "0")}`;
+    if (!byBlock.has(key)) byBlock.set(key, []);
+    byBlock.get(key).push({ nllM0: r.nll_m0, nllM2: r.nll_m2 });
+  }
+  const blocks = Array.from(byBlock.values());
+  if (!blocks.length) return { valid: false, reason: "NO_DATA" };
+  return pairedBlockBootstrapRelativeGain(blocks, { seed, nResamples: 10000 });
 }
 
 function secondaryOn(rows) {
@@ -126,11 +148,20 @@ function summarize(rows, seed) {
   if (!rows.length) return { n: 0 };
   const nllM0 = mean(rows.map((r) => r.nll_m0));
   const nllM2 = mean(rows.map((r) => r.nll_m2));
+  const bootstrapDeltaNll = bootstrapDeltaNllOn(rows, seed);
+  const bootstrapRelativeGain = bootstrapRelativeGainOn(rows, seed + "-relgain");
   return {
     n: rows.length, nll_m0: nllM0, nll_m2: nllM2,
-    delta_mean: nllM2 - nllM0,
-    relative_gain: (nllM0 - nllM2) / nllM0,
-    bootstrap: bootstrapOn(rows, seed),
+    // delta_nll_mean : difference ABSOLUE de NLL (unite=NLL, PAS un %). delta = nll_m2-nll_m0, negatif = M2 meilleur (convention officielle lib/lab/loss-delta.js)
+    delta_nll_mean: nllM2 - nllM0,
+    // relative_gain_pct : gain RELATIF en fraction (multiplier par 100 pour un %). positif = M2 meilleur
+    relative_gain_pct: (nllM0 - nllM2) / nllM0,
+    // CI95 sur le delta ABSOLU (unite=NLL) - c'est CETTE forme qu'utilise la decision de promotion (upper<0)
+    ci95_delta_nll: bootstrapDeltaNll.valid ? { lower: bootstrapDeltaNll.ci_lower, upper: bootstrapDeltaNll.ci_upper, unit: "NLL_absolute_difference" } : { valid: false },
+    // CI95 sur le gain RELATIF (%) - reechantillonnage INDEPENDANT (pas une mise a l'echelle du CI absolu), diagnostic complementaire uniquement
+    ci95_relative_gain_pct: bootstrapRelativeGain.valid ? { lower_pct: bootstrapRelativeGain.ci_lower, upper_pct: bootstrapRelativeGain.ci_upper, unit: "fraction_multiply_by_100_for_percent" } : { valid: false },
+    bootstrap: bootstrapDeltaNll, // CONSERVE tel quel (retro-compatibilite lecture manuelle + evaluatePromotionM2 lit .ci_lower/.ci_upper d'ici, delta absolu)
+    bootstrap_relative_gain_raw: bootstrapRelativeGain,
     secondary_metrics: secondaryOn(rows),
   };
 }
@@ -179,10 +210,11 @@ const coverageGainDetail = coverageGain.map((p) => ({
 
 // --- Decision ---
 const promotion = evaluatePromotionM2({
-  earlyRelativeGain: byBucket.EARLY.relative_gain,
+  earlyRelativeGain: byBucket.EARLY.relative_gain_pct,
+  // convention pre-enregistree : CI95 sur le delta ABSOLU de NLL (delta=nll_m2-nll_m0), upper<0 = M2 meilleur avec confiance
   earlyCiLower: byBucket.EARLY.bootstrap.valid ? byBucket.EARLY.bootstrap.ci_lower : -Infinity,
   earlyCiUpper: byBucket.EARLY.bootstrap.valid ? byBucket.EARLY.bootstrap.ci_upper : Infinity,
-  globalRelativeDegradation: -GLOBAL.relative_gain,
+  globalRelativeDegradation: -GLOBAL.relative_gain_pct,
   lateInvariantViolated,
   temporalLeakageDetected: false, // verifie par tests/lab-m2c-runner.test.js (provenance source_max_timestamp<cutoff) AVANT ce run
   mechanismDeterministic,
@@ -190,6 +222,11 @@ const promotion = evaluatePromotionM2({
 
 console.log("\n=== DECISION EXP-002C (common support) ===");
 console.log(JSON.stringify(promotion, null, 2));
+
+console.log("\n=== UNITES CLARIFIEES (EARLY) ===");
+console.log(`CI95_delta_NLL (unite=NLL, PAS un %)       = [${byBucket.EARLY.ci95_delta_nll.lower}, ${byBucket.EARLY.ci95_delta_nll.upper}]`);
+console.log(`CI95_relative_gain_pct (bootstrap independant, reechantillonnage sur nll_m0/nll_m2, PAS une mise a l'echelle du CI ci-dessus) = [${(byBucket.EARLY.ci95_relative_gain_pct.lower_pct * 100).toFixed(3)}%, ${(byBucket.EARLY.ci95_relative_gain_pct.upper_pct * 100).toFixed(3)}%]`);
+console.log(`GLOBAL relative_gain = +${(GLOBAL.relative_gain_pct * 100).toFixed(3)}% (M2 ameliore M0) ; global_degradation = ${(-GLOBAL.relative_gain_pct * 100).toFixed(3)}%`);
 
 const manifestSha256 = require("crypto").createHash("sha256").update(fs.readFileSync(MANIFEST_PATH)).digest("hex");
 

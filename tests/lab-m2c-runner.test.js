@@ -9,7 +9,8 @@ const assert = require("node:assert/strict");
 const fs = require("fs");
 const path = require("path");
 const { runWalkForwardM2C } = require("../lib/lab/walkforward-m2c-runner.js");
-const { priorWeight } = require("../lib/lab/bayes-early-season.js");
+const bayesModule = require("../lib/lab/bayes-early-season.js");
+const { priorWeight, blendWithDecayingPrior } = bayesModule;
 
 const GATE_B1_DIR = path.join(__dirname, "..", "data", "gate-b1");
 function loadSeason(s) { return JSON.parse(fs.readFileSync(path.join(GATE_B1_DIR, `premier-league-${s}.json`), "utf8")); }
@@ -67,6 +68,27 @@ test("TEST A - LATE identity sur >=20 fixtures REELLES a poids nul des deux cote
     assert.ok(Math.abs(p.markets_m2.btts.yes - p.markets_m0.btts.yes) <= 1e-12, `BTTS, fixture ${p.fixture_id}`);
   }
   console.log(`  TEST A : ${zeroWeightBoth.length} fixtures LATE reelles verifiees, identite parfaite`);
+});
+
+test("le runner IMPORTE litteralement lib/lab/bayes-early-season.js#blendWithDecayingPrior (meme reference de fonction, meme module-cache Node) - jamais une reimplementation locale ni une nouvelle formule creee pour EXP-002C", () => {
+  const runnerSource = fs.readFileSync(path.join(__dirname, "..", "lib", "lab", "walkforward-m2c-runner.js"), "utf8");
+  assert.match(runnerSource, /require\(["']\.\.\/lab\/bayes-early-season\.js["']\)|require\(["']\.\/bayes-early-season\.js["']\)/, "le runner doit importer bayes-early-season.js par require(), pas redefinir sa propre formule");
+  assert.doesNotMatch(runnerSource, /function\s+blendWithDecayingPrior|function\s+priorWeight/, "le runner ne doit JAMAIS redefinir localement blendWithDecayingPrior ou priorWeight");
+  // preuve la plus forte : le module require() par le runner et celui require() ici sont EXACTEMENT le meme objet (cache Node), donc EXACTEMENT la meme fonction executee
+  const runnerModulePath = require.resolve("../lib/lab/walkforward-m2c-runner.js");
+  delete require.cache[runnerModulePath];
+  require(runnerModulePath); // repeuple le cache
+  const bayesModulePathResolved = require.resolve("../lib/lab/bayes-early-season.js");
+  assert.equal(require.cache[bayesModulePathResolved].exports.blendWithDecayingPrior, blendWithDecayingPrior, "meme reference de fonction exacte");
+});
+
+test("blendWithDecayingPrior, appelee par le runner via le module partage, ne subit AUCUNE transformation supplementaire : rate=blended_events/blended_matches exactement, aucun arrondi ni post-traitement", () => {
+  const r = blendWithDecayingPrior({ events: 10, matches: 4 }, 1.5, 8);
+  const w = priorWeight(8);
+  assert.equal(w, 4);
+  assert.equal(r.blended_events, 10 + 1.5 * 4);
+  assert.equal(r.blended_matches, 4 + 4);
+  assert.equal(r.rate, r.blended_events / r.blended_matches);
 });
 
 test("frontiere n=16 (formule deja auditee, reutilisee telle quelle) : poids(15)=0.5, poids(16)=0, poids(17)=0", () => {

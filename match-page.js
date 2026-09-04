@@ -241,7 +241,7 @@ function signalCard(vm){
 // qui n'existe nulle part.
 // Justification "pourquoi ce joueur" : phrase deterministe (jamais un
 // nouvel appel LLM), assemblee uniquement a partir des vraies stats deja
-// calculees pour ce candidat (goals90/shotsOn90/startProbability, cf
+// calculees pour ce candidat (goals90/shotsOn90/minutes, cf
 // scoringThreatRanking). Rien n'est invente, juste mis en phrase.
 // Buteur a surveiller. AVANT : la carte affichait "Titulaire 8%" a cote
 // d'un discours sur "le profil le plus dangereux de la rencontre" - une

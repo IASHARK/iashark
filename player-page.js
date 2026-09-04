@@ -140,12 +140,6 @@ function per90Grid(player){
   return card('Moyennes par 90',`<div class="player-stats-grid player-stats-grid-5">${items.map(([l,v])=>`<div class="player-stat-card"><b>${esc(v)}</b><small>${esc(l)}</small></div>`).join('')}</div>`);
 }
 
-function startProbCard(player){
-  if(n(player.startProbability)===null)return '';
-  const p=clamp(player.startProbability);
-  return card('Probabilité de titularisation',`<div class="start-prob"><b>${pct(player.startProbability)}</b><div class="progress-bar"><i style="width:${p}%"></i></div><small>Probabilité d'être titulaire lors du prochain match</small></div>`);
-}
-
 function availability(ts){
   if(!ts||!ts.bio||ts.bio.injured===null||ts.bio.injured===undefined)return '';
   const injured=ts.bio.injured===true;
@@ -193,7 +187,6 @@ function render({vm,player,rawRows,matchId,ts}){
     </div>
     <div class="row3">
       ${per90Grid(player)}
-      ${startProbCard(player)}
       ${availability(ts)}
     </div>
   </div>`;

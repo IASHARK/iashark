@@ -265,12 +265,17 @@ function threatSample(p){
 const POSTES={goalkeeper:'Gardien',defender:'Défenseur',midfielder:'Milieu',attacker:'Attaquant'};
 const poste=v=>{const k=String(v||'').trim();return POSTES[k.toLowerCase()]||k;};
 
-// Le joueur le plus dangereux du match. Cette carte etait un tableau plat de
-// quatre lignes : on ne voyait ni de qui il s'agissait, ni pourquoi il etait
-// la. Elle mene maintenant avec le chiffre qui interesse vraiment un parieur,
-// sa probabilite de marquer - une donnee DEJA calculee (loi de Poisson sur ses
-// buts/90 et son temps de jeu attendu, cf lib/insights.js#computeScoringProbability)
-// mais qui n'etait affichee nulle part sur la page.
+// Le joueur le plus dangereux du match.
+//
+// La carte menait avec sa probabilite de marquer en 42px cyan. Le chiffre
+// etait juste, mais il criait plus fort que le nom du joueur - or on vient
+// d'abord savoir DE QUI on parle. Reprise plus sobre : rien au-dessus de
+// 20px, une seule couleur d'accent, et les chiffres secondaires regroupes
+// dans un panneau encastre plutot qu'en tableau borde.
+//
+// Aucune donnee nouvelle : ce sont exactement les memes valeurs qu'avant,
+// toutes deja calculees (probabilite de marquer par lib/insights.js, le
+// reste par playerAnalytics).
 function threatsCard(vm){
   const list=vm.players.scoringThreat;
   if(!list.length)return '';
@@ -278,27 +283,26 @@ function threatsCard(vm){
   const pid=n(p.id);
   const href=pid!==null?` href="/joueur.html?m=${esc(vm.id)}&p=${pid}"`:'';
   const tag=pid!==null?'a':'div';
+  const prob=n(p.scoringProbability);
 
-  // Les trois chiffres de tete, dans l'ordre de ce qu'un parieur regarde.
-  // Chacun n'apparait que s'il existe vraiment : pas de tuile vide.
-  const heads=[
-    n(p.scoringProbability)!==null?{v:pct(p.scoringProbability),k:'Probabilité de marquer',hero:true}:null,
-    n(p.goals90)!==null&&p.goals90>0?{v:fmt(p.goals90,2),k:'Buts / 90 min'}:null,
-    n(p.shotsOn90)!==null&&p.shotsOn90>0?{v:fmt(p.shotsOn90,2),k:'Tirs cadrés / 90 min'}:null
-  ].filter(Boolean);
+  // Trois chiffres au maximum dans le panneau, et seulement ceux qui
+  // existent vraiment : une colonne vide vaut moins que deux colonnes
+  // pleines.
+  // Deux decimales fixes sur les moyennes par 90 : "1,30" et non "1,3", pour
+  // que les trois colonnes du panneau s'alignent au lieu de danser.
+  const deux=v=>Number(v).toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2});
+  const stats=[
+    n(p.goals90)!==null&&p.goals90>0?[deux(p.goals90),'Buts / 90 min']:null,
+    n(p.shotsOn90)!==null&&p.shotsOn90>0?[deux(p.shotsOn90),'Tirs cadrés / 90 min']:null,
+    n(p.expectedGoals90)!==null?[deux(p.expectedGoals90),'Buts attendus / 90 min']:null,
+    n(p.assists90)!==null&&p.assists90>0?[deux(p.assists90),'Passes déc. / 90 min']:null,
+    n(p.rating5)!==null?[Number(p.rating5).toLocaleString('fr-FR',{minimumFractionDigits:1,maximumFractionDigits:1}),'Note moyenne']:null
+  ].filter(Boolean).slice(0,3);
 
-  // Le reste passe en tableau, sans jamais repeter un chiffre deja en tete.
-  const dansTete=k=>heads.some(h=>h.k===k);
-  const rows=[
-    !dansTete('Buts / 90 min')&&n(p.goals90)!==null?['Buts par 90 minutes',fmt(p.goals90,2)]:null,
-    !dansTete('Tirs cadrés / 90 min')&&n(p.shotsOn90)!==null?['Tirs cadrés par 90 minutes',fmt(p.shotsOn90,2)]:null,
-    n(p.expectedGoals90)!==null?['Buts attendus par 90 minutes',fmt(p.expectedGoals90,2)]:null,
-    ['Passes décisives par 90 minutes',fmt(p.assists90,2)],
-    ['Note moyenne',n(p.rating5)!==null?Number(p.rating5).toLocaleString('fr-FR',{minimumFractionDigits:1,maximumFractionDigits:1}):null]
-  ].filter(r=>r&&r[1]&&r[1]!=='—');
   const sample=threatSample(p);
+  const largeur=prob===null?null:Math.max(0,Math.min(100,prob));
 
-  return card('Buteur à surveiller',`<${tag} class="threat"${href}>
+  return card('Buteur à surveiller',`<${tag} class="threat group"${href}>
     <div class="threat-id">
       ${img(p.photo,p.name)}
       <div class="threat-who">
@@ -307,10 +311,23 @@ function threatsCard(vm){
       </div>
       ${list.length>1?'<span class="threat-rank">Menace n°1</span>':''}
     </div>
-    ${heads.length?`<div class="threat-headline">${heads.map(h=>
-      `<div${h.hero?' class="is-hero"':''}><b${h.hero?' class="pos"':''}>${h.v}</b><span>${esc(h.k)}</span></div>`).join('')}</div>`:''}
-    ${rows.length?`<table class="threat-table"><tbody>${rows.map(([k,v])=>`<tr><th scope="row">${esc(k)}</th><td>${v}</td></tr>`).join('')}</tbody></table>`:''}
-    ${sample?`<p class="threat-sample${p.thinSample?' is-thin':''}"><span>Échantillon</span>${esc(sample)}${p.thinSample?'<em>Temps de jeu limité sur ce championnat : ces moyennes par 90 minutes reposent sur peu de minutes et restent fragiles.</em>':''}</p>`:''}
+
+    ${prob===null?'':`<div class="threat-prob">
+      <div class="threat-prob-tete">
+        <span>Probabilité de marquer</span>
+        <b>${pct(prob)}</b>
+      </div>
+      <div class="threat-jauge" role="img" aria-label="Probabilité de marquer : ${pct(prob)}"><i style="width:${largeur}%"></i></div>
+    </div>`}
+
+    ${stats.length?`<div class="threat-panneau">${stats.map(([v,k])=>
+      `<div><b>${v}</b><span>${esc(k)}</span></div>`).join('')}</div>`:''}
+
+    <div class="threat-pied">
+      ${sample?`<span class="threat-sample${p.thinSample?' is-thin':''}">${esc(sample)}</span>`:'<span></span>'}
+      ${pid!==null?'<span class="threat-lien">Voir la fiche <i aria-hidden="true">→</i></span>':''}
+    </div>
+    ${p.thinSample?'<p class="threat-alerte">Temps de jeu limité sur ce championnat : ces moyennes par 90 minutes reposent sur peu de minutes et restent fragiles.</p>':''}
   </${tag}>`,'threats-card','target2');
 }
 

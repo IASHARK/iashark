@@ -136,20 +136,6 @@ a{color:inherit}
 /* pourquoi ce pari */
 
 /* buteur a surveiller */
-.threat{display:block;padding:14px;border:1px solid var(--line);border-radius:9px;background:var(--card2);color:inherit;text-decoration:none;transition:border-color .15s,background .15s}
-a.threat:hover{border-color:var(--line2);background:var(--card)}
-.threat-top{display:flex;align-items:center;gap:9px}
-.threat-top img{width:38px;height:38px;border-radius:50%;object-fit:cover;background:var(--line);flex-shrink:0}
-.threat-top b{display:block;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text)}
-.threat-top small{color:var(--muted);font-size:10.5px}
-.threat-figures{display:flex;gap:20px;margin-top:10px}
-.threat-figures b{display:block;font:700 22px var(--display);color:var(--text)}
-.threat-figures b.pos{color:var(--green)}
-.threat-figures small{display:block;margin-top:2px;color:var(--muted);font-size:10px;text-transform:uppercase}
-.threat-stats{display:flex;flex-wrap:wrap;gap:4px 12px;margin-top:9px;padding-top:9px;border-top:1px solid var(--line)}
-.threat-stats span{color:var(--muted);font-size:10.5px}
-.threat-stats span b{color:var(--text);font-weight:600}
-.threat-reason{margin:10px 0 0;padding-top:9px;border-top:1px solid var(--line);color:var(--muted);font-size:11.5px;line-height:1.55}
 
 /* sorties modele : xg (avec logos) + scores dans une seule carte */
 .outputs{display:grid;grid-template-columns:1.3fr 1fr 1.3fr;gap:16px;align-items:center}
@@ -362,69 +348,64 @@ a.threat:hover{border-color:var(--line2);background:var(--card)}
   background:none;border:0;padding:0;text-transform:none}
 
 /* ==================== Buteur ==================== */
+/* Hierarchie voulue : le NOM d'abord, le reste ensuite. Rien au-dessus de
+   20px, une seule couleur d'accent. La version precedente menait avec la
+   probabilite en 42px cyan, qui ecrasait le joueur dont on parle. */
 .threat{display:block;padding:0;border:0;background:none;color:inherit;text-decoration:none}
 .threat:hover{border:0;background:none}
-.threat-id{display:flex;align-items:center;gap:14px}
-/* Le portrait est l'accroche de la carte : cercle net, cerne cyan discret,
-   assez grand pour qu'on identifie le joueur sans lire son nom. */
-.threat-id img{width:64px;height:64px;border-radius:50%;object-fit:cover;
+
+/* --- Identite --- */
+.threat-id{display:flex;align-items:center;gap:13px}
+.threat-id img{width:54px;height:54px;border-radius:50%;object-fit:cover;
   background:var(--line);flex-shrink:0;
-  box-shadow:0 0 0 1px rgba(255,255,255,.08),0 0 0 4px rgba(34,211,238,.11)}
+  box-shadow:0 0 0 1px rgba(255,255,255,.08),0 0 0 4px rgba(34,211,238,.10)}
 .threat-who{min-width:0;flex:1}
-.threat-id b{display:block;font:600 18px var(--body);color:var(--text);letter-spacing:-.01em;
+.threat-id b{display:block;font:600 17px var(--body);color:var(--text);letter-spacing:-.01em;
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.threat-id small{color:var(--muted);font-size:13px}
+.threat-id small{color:var(--muted);font-size:12.5px}
 /* Rang honnete : ce joueur est le 1er d'un classement reel, il n'apparait
    que s'il y a bien plusieurs joueurs classes. */
 .threat-rank{flex-shrink:0;align-self:flex-start;
-  border:1px solid rgba(34,211,238,.28);border-radius:20px;padding:4px 10px;
-  color:var(--accent);font:600 11.5px var(--body);letter-spacing:.01em;
-  background:rgba(34,211,238,.07)}
-/* Trois chiffres de tete. Le premier - la probabilite de marquer - occupe
-   toute la premiere colonne et porte la couleur : c'est lui qu'on doit voir
-   en arrivant sur la carte. */
-.threat-headline{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
-  gap:18px 22px;margin-top:18px;padding:18px 0;
-  border-top:1px solid rgba(255,255,255,.07);border-bottom:1px solid rgba(255,255,255,.07)}
-.threat-headline .is-hero{grid-column:1/-1}
-.threat-headline .is-hero b{font-size:42px;letter-spacing:-.02em}
-@media(min-width:620px){
-  .threat-headline{grid-template-columns:minmax(0,1.25fr) minmax(0,1fr) minmax(0,1fr);
-    align-items:end}
-  .threat-headline .is-hero{grid-column:auto}
-}
-/* Sur telephone le badge de rang volait la place du nom, qui partait en
-   points de suspension. Le nom est l'information de la carte : il passe sur
-   deux lignes s'il le faut, et le badge descend sous lui. */
-@media(max-width:520px){
-  /* Grille plutot que flex : le portrait tient la premiere colonne, le nom et
-     le badge s'empilent dans la seconde. En flex, le badge restait colle au
-     nom et le comprimait. */
-  .threat-id{display:grid;grid-template-columns:64px minmax(0,1fr);
-    column-gap:14px;row-gap:8px;align-items:center}
-  .threat-id img{grid-row:1}
-  .threat-who{grid-column:2}
-  .threat-id b{white-space:normal;overflow:visible;text-overflow:clip;line-height:1.25}
-  .threat-rank{grid-column:2;justify-self:start;align-self:start}
-}
-.threat-headline b{display:block;font:700 30px/1 var(--body);color:var(--text);
-  font-variant-numeric:tabular-nums;letter-spacing:-.02em}
-.threat-headline b.pos{color:var(--accent)}
-.threat-headline span{display:block;margin-top:6px;color:var(--muted);
-  font:400 12.5px var(--body);letter-spacing:0;text-transform:none}
-.threat-table{width:100%;border-collapse:collapse;margin-top:14px}
-.threat-table th{text-align:left;font:400 14px var(--body);color:#9fb3c4;padding:9px 0}
-.threat-table td{text-align:right;color:var(--text);font:600 15px var(--body);
-  font-variant-numeric:tabular-nums;padding:9px 0}
-.threat-table tr+tr th,.threat-table tr+tr td{border-top:1px solid rgba(255,255,255,.055)}
-.threat-sample{margin:16px 0 0;padding-top:14px;border-top:1px solid rgba(255,255,255,.07);
-  color:var(--muted);font:400 13.5px/1.6 var(--body)}
-.threat-sample span{display:block;color:#8ba0b3;font:600 12.5px var(--body);
-  letter-spacing:0;text-transform:none;margin-bottom:5px}
-.threat-sample.is-thin,.threat-sample.is-thin span{color:var(--muted)}
-.threat-sample em{display:block;margin-top:7px;color:#9fb3c4;font-style:normal;
-  font-size:13px;line-height:1.6}
+  border:1px solid rgba(34,211,238,.24);border-radius:20px;padding:3px 9px;
+  color:var(--accent);font:600 11px var(--body);
+  background:rgba(34,211,238,.06)}
 
+/* --- Probabilite : une ligne et une jauge fine, pas un chiffre geant --- */
+.threat-prob{margin-top:18px}
+.threat-prob-tete{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.threat-prob-tete span{color:#9fb3c4;font:400 13px var(--body)}
+.threat-prob-tete b{font:700 20px var(--body);color:var(--accent);
+  font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.threat-jauge{margin-top:7px;height:5px;border-radius:99px;
+  background:rgba(255,255,255,.07);overflow:hidden}
+.threat-jauge>i{display:block;height:100%;border-radius:99px;background:var(--accent)}
+
+/* --- Panneau encastre : regroupe les chiffres secondaires sans multiplier
+       les cadres. Le tableau borde precedent decoupait la carte en lignes. */
+.threat-panneau{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:14px;margin-top:16px;padding:14px 16px;
+  border-radius:10px;background:rgba(255,255,255,.03)}
+.threat-panneau b{display:block;font:600 17px var(--body);color:var(--text);
+  font-variant-numeric:tabular-nums}
+.threat-panneau span{display:block;margin-top:3px;color:var(--muted);
+  font:400 11.5px/1.35 var(--body)}
+@media(max-width:520px){
+  /* Trois colonnes deviennent illisibles sous 520px : on passe a deux, la
+     troisieme valeur prend la ligne suivante. */
+  .threat-panneau{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+
+/* --- Pied : echantillon a gauche, lien a droite --- */
+.threat-pied{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;
+  gap:8px 14px;margin-top:16px;padding-top:13px;
+  border-top:1px solid rgba(255,255,255,.07)}
+.threat-sample{color:var(--muted);font:400 12.5px var(--body)}
+.threat-sample.is-thin{color:#c8a97a}
+.threat-lien{color:var(--accent);font:600 12.5px var(--body);white-space:nowrap}
+.threat-lien i{display:inline-block;font-style:normal;transition:transform .18s ease}
+.threat:hover .threat-lien i{transform:translateX(3px)}
+@media(prefers-reduced-motion:reduce){.threat-lien i{transition:none}}
+.threat-alerte{margin:11px 0 0;color:#c8a97a;font:400 12px/1.55 var(--body)}
 /* ==================== FAQ ==================== */
 .faq-list details{border:0;border-radius:0;background:none;margin:0;
   border-bottom:1px solid rgba(255,255,255,.07)}
@@ -451,7 +432,6 @@ a.threat:hover{border-color:var(--line2);background:var(--card)}
   .sig-kpis{gap:16px 0}
   .sig-kpi{flex:1 1 44%;min-width:0;padding:0 0 0 16px}
   .sig-kpi:nth-child(odd){padding-left:0;border-left:0}
-  .threat-headline{gap:24px}
   .hero-top{flex-wrap:wrap;gap:4px 12px}
   .hero-league,.hero-time{flex:1 1 100%}
 }

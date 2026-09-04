@@ -92,13 +92,36 @@ test("le bandeau 'Notre lecture' ne repete pas BTTS quand le pari recommande est
   }
 });
 
-// La carte buteur menait avec un tableau plat de quatre lignes. Elle mene
-// desormais avec la probabilite de marquer, une donnee deja calculee par
-// lib/insights.js mais qui n'etait affichee nulle part.
-test("la carte buteur met en avant la probabilite de marquer",()=>{
+// La carte buteur menait avec un tableau plat de quatre lignes, puis avec la
+// probabilite de marquer en 42px cyan. Le chiffre etait juste mais criait
+// plus fort que le nom du joueur. Elle est desormais lue dans l'ordre : qui,
+// puis quelle probabilite, puis les chiffres de contexte.
+test("la carte buteur affiche la probabilite de marquer sans ecraser le joueur",()=>{
   assert.match(js,/scoringProbability/);
   assert.match(js,/Probabilité de marquer/);
-  assert.match(css,/\.threat-headline \.is-hero/);
-  // Aucun chiffre de tete ne doit etre repete dans le tableau juste en dessous.
-  assert.match(js,/const dansTete=/);
+  // La probabilite est aussi lisible autrement que par la jauge.
+  assert.match(js,/role="img" aria-label="Probabilité de marquer/);
+  assert.match(css,/\.threat-jauge/);
+  assert.match(css,/\.threat-panneau/);
+});
+
+// "Un truc propre, pas trop ecrit en gros" : plus rien au-dessus de 20px
+// dans cette carte, contre 42px auparavant.
+test("la carte buteur ne comporte plus de tres gros caracteres",()=>{
+  const bloc=css.slice(css.indexOf("==================== Buteur"),css.indexOf("==================== FAQ"));
+  assert.ok(bloc.length>400,"bloc CSS de la carte buteur introuvable");
+  const tailles=[...bloc.matchAll(/font(?:-size)?:[^;}]*?(\d+(?:\.\d+)?)px/g)].map(m=>Number(m[1]));
+  assert.ok(tailles.length>0,"aucune taille de police trouvee");
+  const maxi=Math.max(...tailles);
+  assert.ok(maxi<=20,`la carte buteur contient du ${maxi}px, au-dela des 20px voulus`);
+});
+
+// Le panneau ne doit jamais reprendre un chiffre deja donne juste au-dessus.
+test("la carte buteur ne repete pas la probabilite dans son panneau",()=>{
+  const bloc=js.slice(js.indexOf("function threatsCard"),js.indexOf("function keyInsightsCard"));
+  const panneau=bloc.slice(bloc.indexOf("const stats=["),bloc.indexOf("].filter(Boolean)"));
+  assert.ok(!/scoringProbability/.test(panneau),
+    "la probabilite de marquer est repetee dans le panneau de chiffres");
+  // Trois chiffres au maximum, pour que le panneau reste lisible.
+  assert.match(bloc,/\.slice\(0,3\)/);
 });

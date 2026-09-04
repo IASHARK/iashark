@@ -1,0 +1,149 @@
+{
+  "experiment_id": "EXP-004",
+  "registration_status": "REGISTERED",
+  "status": "RUNNING",
+  "created_at": "2026-09-04",
+  "hypothesis": "La distribution conditionnelle des buts presente-t-elle une surdispersion residuelle que M2/DC ne capture pas, alors que les moyennes de buts restent EXACTEMENT celles de M2 ? Champion M2 (EXP-002C, PROMOTE, ferme) reste inchange ; le candidat M4 remplace uniquement la FAMILLE de distribution (Poisson/DC -> NB2 independant partageant un seul kappa), jamais les moyennes.",
+  "champion_model": {
+    "id": "M2",
+    "description": "Exactement l'implementation promue EXP-002C (lib/lab/walkforward-m2c-runner.js, code_sha=b8cb9ff3f3a8d03d529b8ebbdb7c4147faf2438f) - Dixon-Coles + shrinkage Bayes early-season, rho=-0.0845 fixe. INCHANGE : code, parametres, resultats, closure (scripts/experiments/exp002c_closure.json)."
+  },
+  "candidate_model": {
+    "id": "M4_NB2",
+    "description": "Marges independantes conditionnellement aux moyennes M2 : P(H=h,A=a) = NB2(h|lambdaH_M2,kappa) * NB2(a|lambdaA_M2,kappa). Une SEULE variable apprise : kappa (dispersion partagee). muHome=lambdaH_M2 et muAway=lambdaA_M2 TOUJOURS, jamais une nouvelle estimation de force d'equipe. AUCUN tau Dixon-Coles applique aux cellules NB (verifie tests/lab-m4-no-dixon-coles.test.js)."
+  },
+  "nb_parameterization": {
+    "family": "NB2",
+    "formula": "P(Y=y) = Gamma(y+kappa)/(Gamma(kappa)*y!) * (kappa/(kappa+mu))^kappa * (mu/(kappa+mu))^y",
+    "variance": "Var(Y) = mu + mu^2/kappa",
+    "poisson_limit": "kappa -> infini",
+    "implementation": "lib/lab/nb2.js#logPmfNB2 (Node), scripts/fit_kappa.py#log_nb2_pmf (Python) - identite numeriquement stable log[Gamma(y+kappa)/Gamma(kappa)] via produit croissant (y entier), verifiee Node<->Python <=1e-12 (tests/lab-nb2-node-python-fidelity.test.js)",
+    "one_shared_kappa": true,
+    "means_source": "M2",
+    "dc_tau_in_candidate": false
+  },
+  "code": {
+    "runner": "lib/lab/walkforward-m4-runner.js#runWalkForwardM4",
+    "reused_components": [
+      "lib/lab/walkforward-m2c-runner.js#runWalkForwardM2C (mu M2 EXACT, jamais recalcule differemment)",
+      "lib/lab/walkforward-runner.js#buildCutoffs (politique de cutoff/batch, INCHANGEE)",
+      "lib/lab/nb2.js, lib/lab/nb2-matrix.js, lib/lab/nb2-log-probability.js (formule NB2, matrice adaptative, vraisemblance exacte)",
+      "lib/lab/nb2-python-fitter.js -> scripts/fit_kappa.py (fitter REEL, jamais reimplemente)",
+      "lib/lab/promotion-m4.js#evaluatePromotionM4 (regle de promotion DEDIEE M4, seuils enregistres ci-dessous)"
+    ],
+    "code_sha": null
+  },
+  "matrix": {
+    "adaptive": true,
+    "tail_threshold": 1e-10,
+    "hard_safety_cap": 100,
+    "reuses_poisson_tail": false,
+    "failure_code": "NB_TAIL_TRUNCATION_FAILURE",
+    "persisted_fields": ["matrix_max_goal", "matrix_tail_mass", "matrix_hash"]
+  },
+  "likelihood": {
+    "training_objective": "logP = logNB(goals_home|lambdaH,kappa) + logNB(goals_away|lambdaA,kappa), calcule DIRECTEMENT (jamais via la matrice tronquee)",
+    "fitter": "scripts/fit_kappa.py, SciPy minimize_scalar bounded sur eta=log(kappa), eta in [log(1e-4), log(1e7)]",
+    "poisson_limit_reason_code": "KAPPA_POISSON_LIMIT (eta_hat au voisinage de la borne haute)"
+  },
+  "dataset": {
+    "competition": "Premier League",
+    "api_football_league_id": 39,
+    "train_only_seasons": ["2022-2023"],
+    "oos_seasons": ["2023-2024", "2024-2025"],
+    "warmup_season": "2021-2022 (prior previous-season M2 uniquement, permet de reconstruire 2022-23 avec M2 complet)",
+    "dataset_version": "341f69f3aac81f7c772198e001e6885192d051d3577e5ceac7132120cb5d9116",
+    "lockbox_sealed": true,
+    "lockbox_hash_2025_2026": "f611ad31213505fd69edfc8941e79ec7d182dc83b426df3a8fb04d67ec4fa01a",
+    "note": "2025-26 JAMAIS lue, JAMAIS utilisee pour choisir kappa."
+  },
+  "walk_forward": {
+    "description": "A chaque cutoff OOS (2023-24, 2024-25) : train = lignes M2 precalculees (mu M2 point-in-time, jamais recalcule au cutoff M4) strictement < cutoff (incluant 2022-23 entier des le premier cutoff 2023-24 grace au warm-up), fit kappa (scripts/fit_kappa.py), predit le batch, passe au cutoff suivant.",
+    "target_match_never_in_train": true,
+    "future_data_never_in_train": true
+  },
+  "methodology": {
+    "primary_metric": "exact_score_nll",
+    "delta_sign_convention": "delta_i = NLL_M4 - NLL_M2 (lib/lab/loss-delta.js), negatif = M4 meilleur",
+    "primary_comparison_scope": "COMMON_SUPPORT (cible 760/760), GLOBAL, ET separement par saison (2023-24, 2024-25)",
+    "secondary_metrics": ["1x2_logloss", "1x2_brier", "ou25_logloss", "ou25_brier", "ou35_logloss", "ou35_brier", "five_plus_goals_logloss", "five_plus_goals_brier"],
+    "low_score_diagnostics": {
+      "scores": ["0-0", "1-0", "0-1", "1-1"],
+      "aggregate": "LOW_SCORE_SET",
+      "mean_probability_scope": "calculee sur l'ensemble des predictions du perimetre, jamais uniquement sur les matchs ou ce score s'est produit"
+    },
+    "marginal_diagnostics": ["home_goals_marginal_nll", "away_goals_marginal_nll", "mean_predicted_vs_observed_home_goals", "mean_predicted_vs_observed_away_goals", "residual_dispersion"],
+    "bootstrap": {
+      "method": "paired_block_bootstrap (lib/lab/bootstrap.js) + pairedBlockBootstrapRelativeGain pour CI95_relative_gain_pct",
+      "n_resamples": 10000,
+      "seed": "EXP-004-v1",
+      "block_definition": "league_id+season+ISO_YEAR_WEEK(kickoff_timestamp_utc)",
+      "refit_during_bootstrap": false
+    },
+    "tail_tolerance": 1e-10,
+    "convergence_policy": "100% des cutoffs doivent converger (scipy result.success=true) - un seul echec non convergent bloque la promotion",
+    "kappa_stability_policy": "p95/p05<=10 ET pas de majorite de fits a la limite Poisson"
+  },
+  "promotion_thresholds": {
+    "min_global_relative_gain": 0.005,
+    "max_low_score_set_degradation": 0.001,
+    "max_kappa_p95_p05_ratio": 10,
+    "note": "0.50% gain global / 0.10% degradation LOW_SCORE_SET max / p95/p05<=10 - seuils enregistres AVANT tout calcul de performance, INCHANGES quel que soit le resultat observe."
+  },
+  "promotion_criteria": [
+    "1. gain relatif NLL exact-score GLOBAL >= 0.50%",
+    "2. CI95_delta_NLL.upper < 0",
+    "3. convergence = 100%",
+    "4. kappa stable/identifiable (p95/p05<=10)",
+    "5. pas de KAPPA_POISSON_LIMIT (majorite des fits)",
+    "6. O/U2.5 log-loss non degrade",
+    "7. O/U3.5 log-loss ameliore",
+    "8. 5+ buts log-loss non degrade",
+    "9. LOW_SCORE_SET degradation <=0.10%",
+    "10. gain positif sur 2023-24 ET 2024-25",
+    "11. aucune fuite temporelle",
+    "12. mecanisme deterministe",
+    "13. COMMON_SUPPORT complet (760/760) ou exclusions expliquees/non biaisees"
+  ],
+  "decision_outcomes": {
+    "PROMOTE": "EXP004_STATUS=CLOSED_PROMOTE, M4_PROMOTED=TRUE, NEXT_CHAMPION=M4",
+    "SHADOW_MORE_DATA": "M4 non promu, NEXT_CHAMPION=M2",
+    "REJECT": "NEXT_CHAMPION=M2"
+  },
+  "sanity_contracts_pre_verified": {
+    "A_means_identity": "tests/lab-m4-runner.test.js - muHome/muAway BYTE-IDENTIQUES a lambdaH_m2/lambdaA_m2 sur 760 OOS + 380 TRAIN",
+    "B_no_dixon_coles": "tests/lab-m4-no-dixon-coles.test.js - aucun appel dixonColesCorr/tau/predictWithRho dans le code M4",
+    "C_matrix_sums_to_1": "tests/lab-nb2-matrix.test.js",
+    "D_tail_below_threshold": "tests/lab-nb2-matrix.test.js",
+    "E_node_python_fidelity": "tests/lab-nb2-node-python-fidelity.test.js - <=1e-12 sur kappa={1,2,5,20,1000}",
+    "F_synthetic_kappa_recovery": "tests/lab-nb2-synthetic-identifiability.test.js - kappa_true={2,5,20,quasi-Poisson}",
+    "G_anti_leakage": "tests/lab-m4-runner.test.js - mutation d'un match futur sans effet sur predictions anterieures",
+    "H_determinism": "tests/lab-m4-runner.test.js - deux runs byte-identiques",
+    "I_lockbox_never_read": "structurel - oosSeasons ne contient jamais 2025",
+    "J_no_odds_elo_llm": "structurel - aucune entree de ce type dans le runner M4"
+  },
+  "gating_to_running": {
+    "description": "Conditions OBLIGATOIRES avant status=RUNNING.",
+    "conditions": [
+      { "id": "M2_CHAMPION_CLOSED", "description": "EXP-002C ferme (PROMOTE), closure persistee (scripts/experiments/exp002c_closure.json)", "satisfied": true },
+      { "id": "M4_BASE_MEANS_IDENTITY_TESTED", "description": "tests/lab-m4-base-mean-identity.test.js + tests/lab-m4-runner.test.js verts", "satisfied": true },
+      { "id": "NB2_MATH_TESTED", "description": "tests/lab-nb2.test.js + tests/lab-nb2-matrix.test.js verts", "satisfied": true },
+      { "id": "NODE_PYTHON_FIDELITY_TESTED", "description": "tests/lab-nb2-node-python-fidelity.test.js vert, <=1e-12", "satisfied": true },
+      { "id": "SYNTHETIC_IDENTIFIABILITY_TESTED", "description": "tests/lab-nb2-synthetic-identifiability.test.js vert (kappa_true=2,5,20,quasi-Poisson)", "satisfied": true },
+      { "id": "NO_DIXON_COLES_IN_M4", "description": "tests/lab-m4-no-dixon-coles.test.js vert", "satisfied": true },
+      { "id": "DETERMINISM_ANTI_LEAKAGE_TESTED", "description": "tests/lab-m4-runner.test.js vert (determinisme + anti-leakage)", "satisfied": true },
+      { "id": "PROMOTION_RULE_TESTED", "description": "tests/lab-promotion-m4.test.js vert (17/17)", "satisfied": true },
+      { "id": "LOCKBOX_SEALED", "description": "Lockbox 2025-2026 scellee, inchangee, jamais consultee", "satisfied": true }
+    ]
+  },
+  "constraints": [
+    "Aucun nouveau coefficient d'attaque/defense, aucun nouveau lambda, aucun Elo, aucun odds bookmaker, aucun LLM, aucun Monte-Carlo dans la decision",
+    "M4 n'applique JAMAIS le tau Dixon-Coles aux cellules NB",
+    "Le fitter kappa optimise EXACTEMENT le modele execute par Node (verifie Node<->Python)",
+    "Aucune methode-des-moments match par match, aucun switch heuristique variance>mean*1.05",
+    "2025-26 JAMAIS lue, JAMAIS utilisee pour choisir kappa",
+    "Manifest IMMUABLE une fois status=RUNNING",
+    "Aucun seuil de promotion modifie apres avoir vu un resultat",
+    "Apres decision : STOP. Ne pas commencer M5 sans instruction explicite."
+  ]
+}

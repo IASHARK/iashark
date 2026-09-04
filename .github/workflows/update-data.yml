@@ -48,6 +48,7 @@ jobs:
           const I18N_PAGES = require('./scripts/i18n-manifest.js');
           const { generateLocalizedSitemaps } = require('./scripts/i18n-sitemaps.js');
           const LEAGUES_CONFIG = require('./config/leagues.json');
+          const { calcFinalProbs, calcLambdas, calcCriteres, calcFatigue } = require('./lib/engine.js');
           var LEAGUE_COVERAGE_REPORT = null;
           try { LEAGUE_COVERAGE_REPORT = JSON.parse(fs.readFileSync('./league-coverage-report.json', 'utf8')); }
           catch (e) { console.log('league-coverage-report.json absent ou illisible : ' + e.message + ' (lancer scripts/verify-league-coverage.js). Saisons/tiers en repli.'); }
@@ -484,47 +485,6 @@ jobs:
             var hh = String(paris.getUTCHours()).padStart(2,'0');
             var mm = String(paris.getUTCMinutes()).padStart(2,'0');
             return hh+':'+mm;
-          }
-          function calcFinalProbs(lambdaH, lambdaA, eloStats) {
-            var poissonMatrix=buildPoissonMatrix(lambdaH,lambdaA,10);
-            var dixonMatrix=buildDixonColesMatrix(lambdaH,lambdaA,10);
-            var matrix=blendMatrices([{matrix:poissonMatrix,weight:0.35},{matrix:dixonMatrix,weight:0.65}]);
-            var markets=deriveMarketsFromMatrix(matrix);
-            function pct(value){return value*100;}
-            var po = calcPoissonProbs(lambdaH, lambdaA);
-            var dc = calcDixonColesProbs(lambdaH, lambdaA);
-            var mc = calcMonteCarlo(lambdaH, lambdaA);
-            return {
-              p1:pct(markets.p1), pN:pct(markets.pN), p2:pct(markets.p2),
-              over15:pct(markets.overUnder['1.5'].over), over25:pct(markets.overUnder['2.5'].over),
-              under25:pct(markets.overUnder['2.5'].under), over35:pct(markets.overUnder['3.5'].over),
-              under35:pct(markets.overUnder['3.5'].under), bttsY:pct(markets.btts.yes), bttsN:pct(markets.btts.no),
-              derived:markets,
-              poisson:{p1:po.p1,pN:po.pN,p2:po.p2,over25:po.over25,bttsN:po.bttsN},
-              dixon:{p1:dc.p1,pN:dc.pN,p2:dc.p2,over25:dc.over25,bttsN:dc.bttsN},
-              montecarlo:{p1:mc.p1,pN:mc.pN,p2:mc.p2,over25:mc.over25,bttsN:mc.bttsN,top_scores:mc.top_scores||[],top_scores_full:mc.top_scores_full||[],simulations:mc.simulations||null},
-              elo_used:false,
-            };
-          }
-          function calcLambdas(bmHdom, beHdom, mdHdom, bmAext, beAext, meAext, leagueAvgH, leagueAvgA, leagueId) {
-            var leagAvgH=leagueAvgH||1.35, leagAvgA=leagueAvgA||1.10;
-            // La liste de lancement (config/leagues.json) est deja restreinte a 13
-            // competitions fortes et bien couvertes : toutes recoivent le seuil
-            // "isTop" (avant : sous-liste ad hoc [39,61,140,135,78,2,3] parmi ~35
-            // championnats melanges, dont plusieurs seconds/faibles).
-            var isTop=leagueId&&LEAGUE_IDS.indexOf(leagueId)!==-1;
-            var isWC=leagueId===1;
-            var minLH=isWC?0.90:isTop?1.05:0.95;
-            var minLA=isWC?0.80:isTop?0.90:0.80;
-            var attH=mdHdom>0?(bmHdom/mdHdom)/leagAvgH:1;
-            var defH=mdHdom>0?(beHdom/mdHdom)/leagAvgA:1;
-            var attA=meAext>0?(bmAext/meAext)/leagAvgA:1;
-            var defA=meAext>0?(beAext/meAext)/leagAvgH:1;
-            var maxLH=3.4, maxLA=3.0;
-            return {
-              lambdaH:parseFloat(Math.min(maxLH,Math.max(minLH,attH*defA*leagAvgH)).toFixed(3)),
-              lambdaA:parseFloat(Math.min(maxLA,Math.max(minLA,attA*defH*leagAvgA)).toFixed(3))
-            };
           }
           // Liste de lancement officielle (decision utilisateur du 2026-08-30) :
           // 13 competitions fortes et bien couvertes, configurables dans
@@ -1037,43 +997,6 @@ jobs:
             }
             var probHadj=1/(1+Math.pow(10,(eloA-(eloH+homeBonus))/400));
             return {probH:Math.round(probHadj*100),probA:Math.round((1-probHadj)*100),diff:Math.round(eloH-eloA),homeBonus,signal:Math.abs(eloH-eloA)>=100?'FORT':Math.abs(eloH-eloA)>=50?'MODERE':'FAIBLE'};
-          }
-          function calcCriteres(stats,isDom,rank){
-            if(!stats)return null;
-            var total=(stats.fixtures&&stats.fixtures.played&&stats.fixtures.played.total)||0;
-            if(total<3)return null;
-            var bm=(stats.goals&&stats.goals.for&&stats.goals.for.total&&stats.goals.for.total.total)||0;
-            var be=(stats.goals&&stats.goals.against&&stats.goals.against.total&&stats.goals.against.total.total)||0;
-            var form=(stats.form||'').slice(-5);
-            var formWeights=[1.50,1.35,1.20,1.10,1.00];
-            var formChars=form.split('').reverse();
-            var ptsW=0,maxPtsW=0;
-            formChars.forEach(function(ch,i){
-              var w=formWeights[i]||1.00;
-              ptsW+=(ch==='W'?3:ch==='D'?1:0)*w;
-              maxPtsW+=3*w;
-            });
-            var fr=Math.round(ptsW/Math.max(maxPtsW,0.01)*100);
-            var att=Math.min(100,Math.round(bm/Math.max(total,1)*40));
-            var def=Math.max(0,Math.min(100,Math.round((2.5-be/Math.max(total,1))*35)));
-            var vd=(stats.fixtures&&stats.fixtures.wins&&stats.fixtures.wins.home)||0;
-            var md=(stats.fixtures&&stats.fixtures.played&&stats.fixtures.played.home)||Math.round(total/2);
-            var me=(stats.fixtures&&stats.fixtures.played&&stats.fixtures.played.away)||Math.round(total/2);
-            var fd=isDom?Math.min(100,Math.round(vd/Math.max(md,1)*100)):Math.min(100,Math.round((stats.fixtures&&stats.fixtures.wins&&stats.fixtures.wins.away||0)/Math.max(me,1)*100));
-            var mot=70;
-            if(rank){if(rank<=3)mot=95;else if(rank<=6)mot=85;else if(rank<=10)mot=70;else if(rank>=17)mot=90;else mot=60;}
-            return{fd:Math.max(0,Math.min(100,fd)),att:Math.max(0,Math.min(100,att)),def:Math.max(0,Math.min(100,def)),fr:Math.max(0,Math.min(100,fr)),mot:Math.max(0,Math.min(100,mot)),fat:50,source:'api-sports-team-statistics',sample_size:total};
-          }
-          function calcFatigue(last10){
-            if(!last10||!last10.length)return{val:40,info:'Calendrier inconnu'};
-            var now=new Date();
-            var last=new Date(last10[0].date_full||last10[0].d);
-            var daysSince=Math.round((now-last)/(1000*60*60*24));
-            var matchesIn14=last10.filter(function(m){return (now-new Date(m.date_full||m.d))/(1000*60*60*24)<=14;}).length;
-            var score=0;
-            if(daysSince<=2)score=90;else if(daysSince<=4)score=70;else if(daysSince<=6)score=50;else if(daysSince<=8)score=30;else score=15;
-            if(matchesIn14>=3)score=Math.min(100,score+20);
-            return{val:Math.round(score),info:daysSince<=7?'Dernier match il y a '+daysSince+'j - '+matchesIn14+' match(s) en 14j':'Repos '+daysSince+' jours'};
           }
           function calcTendances(last10Home,last10Away){
             function countOver25(games){return games.filter(function(g){var p=(g.score||'').split('-');return parseInt(p[0]||0)+parseInt(p[1]||0)>2;}).length;}

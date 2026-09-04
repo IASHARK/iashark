@@ -208,6 +208,44 @@ function edgeVerdict(edge){
 // la probabilite modele, la probabilite marche ni l'ecart : ils sont deja
 // dans le tableau au-dessus. Il ne porte que ce que le tableau ne dit pas,
 // les deux cotes.
+// Traduction du marche en francais courant.
+//
+// "Premiere mi-temps moins de 1.5 but" ne dit rien a quelqu'un qui debute :
+// il faut savoir que 1.5 signifie "0 ou 1". C'est la premiere chose que voit
+// un visiteur, et jusqu'ici la page ne l'expliquait nulle part.
+//
+// Correspondances explicites uniquement. Un marche non reconnu ne produit
+// aucune phrase : on prefere ne rien dire qu'approximer une regle de pari.
+function marcheEnClair(marche,dom,ext){
+  const m=String(marche||'').trim();
+  const l=m.toLowerCase();
+  const seuil=(l.match(/(\d+(?:[.,]\d+)?)/)||[])[1];
+  const entier=seuil?Math.floor(parseFloat(String(seuil).replace(',','.'))):null;
+  const plus=/over|plus de/.test(l), moins=/under|moins de/.test(l);
+
+  if(/tirs cadr/.test(l)&&entier!==null)
+    return plus?`Au moins ${entier+1} tirs cadrés dans le match, les deux équipes confondues.`
+              :`Au plus ${entier} tirs cadrés dans le match, les deux équipes confondues.`;
+  if(/tirs/.test(l)&&entier!==null)
+    return plus?`Au moins ${entier+1} tirs dans le match, les deux équipes confondues.`
+              :`Au plus ${entier} tirs dans le match, les deux équipes confondues.`;
+  if(/mi-temps/.test(l)&&entier!==null)
+    return plus?`Au moins ${entier+1} but${entier+1>1?'s':''} inscrit${entier+1>1?'s':''} avant la pause.`
+              :`Au plus ${entier} but${entier>1?'s':''} inscrit${entier>1?'s':''} avant la pause.`;
+  if(/^domicile/.test(l)&&entier!==null)
+    return plus?`${dom} marque au moins ${entier+1} but${entier+1>1?'s':''}.`:`${dom} marque au plus ${entier} but${entier>1?'s':''}.`;
+  if(/^ext[eé]rieur/.test(l)&&entier!==null)
+    return plus?`${ext} marque au moins ${entier+1} but${entier+1>1?'s':''}.`:`${ext} marque au plus ${entier} but${entier>1?'s':''}.`;
+  if(/btts oui|deux [eé]quipes marquent oui/.test(l))return 'Les deux équipes marquent au moins une fois.';
+  if(/btts non|deux [eé]quipes marquent non/.test(l))return 'Au moins une des deux équipes ne marque pas.';
+  if(/^dc 1x/.test(l))return `${dom} gagne ou match nul.`;
+  if(/^dc x2/.test(l))return `${ext} gagne ou match nul.`;
+  if(/^dc 12/.test(l))return 'Une des deux équipes gagne : pas de match nul.';
+  if((plus||moins)&&entier!==null)
+    return plus?`Au moins ${entier+1} but${entier+1>1?'s':''} dans le match.`:`Au plus ${entier} but${entier>1?'s':''} dans le match.`;
+  return null;
+}
+
 function signalCard(vm){
   const r=vm.model.recommendation;
   if(!r)return card('Le signal IASHARK',empty(vm.model.unavailableReason||'Aucun marché ne franchit les seuils de confiance ou de cote minimale pour ce match — IASHARK préfère ne pas se prononcer.'),'signal-card','target');
@@ -217,12 +255,13 @@ function signalCard(vm){
   const implied=marketOdds!==null&&marketOdds>0?100/marketOdds:null;
   const edge=(prob!==null&&implied!==null)?Math.round((prob-implied)*10)/10:null;
   const verdict=edgeVerdict(edge);
+  const enClair=marcheEnClair(r.market,vm.identity.home.name,vm.identity.away.name);
   const kpi=(label,value,accent)=>`<div class="min-w-0 border-l border-white/[.07] pl-4 first:border-l-0 first:pl-0"><span class="block text-xs leading-5 text-soft">${esc(label)}</span><b class="mt-1 block text-xl font-semibold tabular-nums ${accent?'text-cyan':'text-ink'}">${value}</b></div>`;
   const compare=(label,value,isModel)=>value===null?'':`<div><div class="mb-2 flex items-baseline justify-between gap-3 text-sm"><span class="text-soft">${label}</span><b class="tabular-nums ${isModel?'text-cyan':'text-ink'}">${pct(value)}</b></div><div class="h-2 overflow-hidden rounded-full bg-white/[.07]" role="img" aria-label="${label} ${pct(value)}"><span class="block h-full rounded-full ${isModel?'bg-cyan':'bg-white/40'} motion-safe:transition-[width] motion-safe:duration-700" style="width:${clamp(value)}%"></span></div></div>`;
   return `<section class="signal-card reveal overflow-hidden rounded-2xl border border-cyan/20 bg-panel p-5 shadow-2xl shadow-black/30 sm:p-7 lg:p-8">
     <div class="flex flex-wrap items-center justify-between gap-3"><span class="inline-flex items-center gap-2 text-sm font-semibold text-cyan">${cardIcon('target')}Le signal IASHARK</span><div class="sig-badges flex flex-wrap gap-2">${confidenceBadge(r.reliability)}${riskBadge(vm.editorial.riskCode)}</div></div>
     <div class="mt-7 grid gap-7 lg:grid-cols-[minmax(0,1.35fr)_minmax(250px,1fr)] lg:items-end">
-      <div><span class="block text-sm text-soft">Marché recommandé</span><h1 class="mt-2 max-w-3xl text-balance text-3xl font-bold leading-[1.08] tracking-tight text-white sm:text-4xl">${esc(r.market)}</h1></div>
+      <div><span class="block text-sm text-soft">Marché recommandé</span><h1 class="mt-2 max-w-3xl text-balance text-3xl font-bold leading-[1.08] tracking-tight text-white sm:text-4xl">${esc(r.market)}</h1>${enClair?`<p class="mt-3 max-w-xl text-[14.5px] leading-relaxed text-soft"><span class="text-soft/70">Autrement dit&nbsp;:</span> ${esc(enClair)}</p>`:''}</div>
       <div class="space-y-4 rounded-xl border border-white/[.07] bg-black/15 p-4" aria-label="Comparaison du modèle et du marché">${compare('Probabilité modèle',prob,true)}${compare('Probabilité marché',implied,false)}${edge!==null?`<p class="flex items-center justify-between border-t border-white/[.07] pt-3 text-sm text-soft"><span>Écart détecté</span><b class="tabular-nums text-cyan">${edge>0?'+':''}${fmt(edge)} pts</b></p>`:''}</div>
     </div>
     <div class="mt-7 grid grid-cols-2 gap-x-4 gap-y-5 border-t border-white/[.07] pt-5">${kpi('Cote juste',odds(fair))}${kpi('Cote marché',odds(marketOdds))}</div>
@@ -340,23 +379,32 @@ const INSIGHT_STYLE={
   watch:['b-orange','!'],contradiction:['b-orange','⇄']
 };
 function keyInsightsCard(vm){
-  const list=vm.keyInsights;
-  if(!list.length)return '';
-  return card('Ce qu\'il faut savoir',`<div class="insights-grid">${list.map(item=>{
-    const [cls,mark]=INSIGHT_STYLE[item.type]||['b-cyan','·'];
-    return `<div class="insight"><div class="insight-head"><span class="insight-mark ${cls}">${mark}</span><b>${esc(item.title)}</b></div><p>${esc(item.text)}</p></div>`;
-  }).join('')}</div>`,'','bulb');
+  // Deux blocs cote a cote, et ils ne disent pas la meme chose : a gauche ce
+  // qui JUSTIFIE le marche recommande, chiffres a l'appui ; a droite ce qui
+  // pourrait le contrarier. La version precedente empilait jusqu'a quatre
+  // encarts de meme poids, dont deux reprenaient les matchups deja detailles
+  // plus bas dans la page.
+  const just=vm.editorial.marketJustifications||[];
+  const vigilance=(vm.keyInsights||[]).filter(i=>i.type==='watch'||i.type==='contradiction');
+  if(!just.length&&!vigilance.length)return '';
+
+  const colonneJust=just.length?`<div class="savoir-col">
+    <h3 class="savoir-titre pour">Ce qui va dans ce sens</h3>
+    ${just.map(f=>`<div class="savoir-item"><b>${esc(f.titre)}</b><p>${esc(f.texte)}</p></div>`).join('')}
+  </div>`:'';
+
+  const colonneRisque=vigilance.length?`<div class="savoir-col">
+    <h3 class="savoir-titre contre">Ce qui peut le contrarier</h3>
+    ${vigilance.slice(0,2).map(i=>`<div class="savoir-item"><b>${esc(i.title)}</b><p>${esc(i.text)}</p></div>`).join('')}
+  </div>`:'';
+
+  return card('Ce qu\'il faut savoir',
+    `<div class="savoir-grid${colonneJust&&colonneRisque?'':' savoir-solo'}">${colonneJust}${colonneRisque}</div>`,
+    '','bulb');
 }
 
 
-// Value potentielle : le marche du plus gros ecart absolu deja identifie
-// par vm.marketsWatch (lui-meme derive de markets_compared reel) - jamais
-// un nouveau calcul, juste la mise en avant du 1er de la liste deja triee.
-function valuePotentialCard(vm){
-  const top=vm.marketsWatch[0];
-  if(!top||top.edge===null||Math.abs(top.edge)<4)return '';
-  return card('Value potentielle',`<div class="value-potential"><b>${esc(top.market)}</b><p>${top.edge>=0?`Ce marché présente la plus grosse value selon notre modèle (écart de +${fmt(top.edge)}% avec le marché).`:`Le marché est nettement au-dessus de notre modèle sur ce pari (écart de ${fmt(top.edge)}%) - à interpréter avec prudence.`}</p></div>`,'value-card','trophy');
-}
+
 
 // Matchup : vm.matchupScores, categories reellement mesurables (attaque/
 // defense/possession/discipline/coups de pied arretes - cf
@@ -410,11 +458,30 @@ function matchupCard(vm){
 // lib/insights.js#formMarginNote) - repli honnete a la place d'un indice
 // de force des adversaires recents qu'on ne peut pas calculer sans appel
 // API supplementaire par adversaire.
-function formNoteCard(vm){
+// Les deux mises en garde de la page, reunies : ce qu'il ne faut pas
+// surinterpreter a gauche, la value reperee a droite, separees d'un simple
+// filet. Elles repondent a la meme question - "jusqu'ou faire confiance a ce
+// qui est affiche ?" - et n'avaient pas besoin de deux cartes entieres.
+function prudenceCard(vm){
   const home=vm.formNote.home,away=vm.formNote.away;
-  if(!home&&!away)return '';
-  const line=(name,note)=>note?`<div class="caveat"><b>!</b><span><b>${esc(name)}</b> : ${note.wins} victoire${note.wins>1?'s':''} sur les ${note.sample} derniers matchs, mais ${note.narrowWins} à un seul but d'écart.</span></div>`:'';
-  return card('Stats à ne pas surinterpréter',`${line(vm.identity.home.name,home)}${line(vm.identity.away.name,away)}`,'','alert');
+  const ligne=(nom,note)=>note?`<p class="prud-item"><b>${esc(nom)}</b> : ${note.wins} victoire${note.wins>1?'s':''} sur les ${note.sample} derniers matchs, mais ${note.narrowWins} à un seul but d'écart.</p>`:'';
+  const gauche=(home||away)?`<div class="prud-col">
+    <h3 class="prud-titre">À ne pas surinterpréter</h3>
+    ${ligne(vm.identity.home.name,home)}${ligne(vm.identity.away.name,away)}
+  </div>`:'';
+
+  const top=vm.marketsWatch[0];
+  const droite=(top&&top.edge!==null&&Math.abs(top.edge)>=4)?`<div class="prud-col">
+    <h3 class="prud-titre">Value potentielle</h3>
+    <p class="prud-item"><b>${esc(top.market)}</b></p>
+    <p class="prud-item prud-muted">${top.edge>=0
+      ? `C'est le marché où notre modèle s'écarte le plus du marché, de +${fmt(top.edge)} points.`
+      : `Le marché est nettement au-dessus de notre modèle sur ce pari (${fmt(top.edge)} points) — à interpréter avec prudence.`}</p>
+  </div>`:'';
+
+  if(!gauche&&!droite)return '';
+  return card('Ce qu\'il faut relativiser',
+    `<div class="prud-grid${gauche&&droite?'':' prud-solo'}">${gauche}${droite}</div>`,'','alert');
 }
 
 // Forme reelle : vrais resultats recents (form_home/away deja exposes),
@@ -474,40 +541,116 @@ function keyRowsForMarket(market){
   for(const [re,rows,topic] of MARKET_KEY_ROWS){ if(re.test(label))return{rows,topic}; }
   return{rows:[],topic:null};
 }
+// Comparatif des deux equipes.
+//
+// Neuf lignes de barres empilees, c'etait beaucoup de batonnets pour peu de
+// lecture. Le profil de jeu passe en radar - deux polygones superposes, un
+// par equipe - et les chiffres defensifs restent en clair juste en dessous.
+//
+// IMPORTANT : le radar ne compare que des mesures ou "plus" veut dire "plus
+// de", jamais "mieux". Les buts encaisses, les fautes et les hors-jeu en
+// sont exclus : sur un radar, une aire plus grande se lit spontanement comme
+// une superiorite, ce qui serait faux pour ces trois-la. Ils sont donnes
+// tels quels sous le graphique.
+const AXES_RADAR=[
+  ['Buts marqués','Buts marqués'],
+  ['Tirs','Tirs'],
+  ['Tirs cadrés','Tirs cadrés'],
+  ['Possession','Possession'],
+  ['Corners','Corners']
+];
+const LIGNES_CHIFFREES=['Buts concédés','Fautes','Hors-jeu','Arrêts'];
+
+function radarComparatif(rows,nomDom,nomExt){
+  const axes=AXES_RADAR.map(([cle,libelle])=>{
+    const row=rows.find(r=>r.label===cle);
+    return row?{libelle,home:row.home,away:row.away}:null;
+  }).filter(Boolean);
+  if(axes.length<3)return '';
+
+  const T=280,c=T/2,rayon=T/2-46,N=axes.length;
+  const angle=i=>(Math.PI*2*i)/N-Math.PI/2;
+  const point=(i,v)=>[c+Math.cos(angle(i))*rayon*v,c+Math.sin(angle(i))*rayon*v];
+  // Chaque axe est normalise sur le maximum des DEUX equipes : le radar
+  // compare les deux profils entre eux, il ne les note pas sur une echelle
+  // absolue qui n'existe pas.
+  const valeurs=cote=>axes.map(a=>{const max=Math.max(a.home,a.away,0.0001);return Math.max(0.04,a[cote]/max);});
+  const polygone=vals=>vals.map((v,i)=>point(i,v).map(x=>x.toFixed(1)).join(',')).join(' ');
+
+  const toiles=[1,.75,.5,.25].map(f=>
+    `<polygon points="${axes.map((_,i)=>point(i,f).map(x=>x.toFixed(1)).join(',')).join(' ')}" fill="none" stroke="rgba(141,179,211,.14)" stroke-width="1"/>`).join('');
+  const rayons=axes.map((_,i)=>{const [x,y]=point(i,1);return `<line x1="${c}" y1="${c}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}" stroke="rgba(141,179,211,.12)"/>`;}).join('');
+  const etiquettes=axes.map((a,i)=>{
+    const [x,y]=point(i,1.24);
+    const ancre=Math.abs(x-c)<8?'middle':(x>c?'start':'end');
+    return `<text x="${x.toFixed(1)}" y="${(y+3).toFixed(1)}" text-anchor="${ancre}" font-size="10.5" fill="#8ba0b3">${esc(a.libelle)}</text>`;
+  }).join('');
+
+  const vDom=valeurs('home'),vExt=valeurs('away');
+  return `<div class="radar-wrap">
+    <svg class="radar" viewBox="0 0 ${T} ${T}" role="img" aria-label="Profil de jeu comparé : ${esc(nomDom)} et ${esc(nomExt)}. Le détail chiffré suit dans le tableau.">
+      ${toiles}${rayons}
+      <polygon class="radar-away" points="${polygone(vExt)}"/>
+      <polygon class="radar-home" points="${polygone(vDom)}"/>
+      ${axes.map((_,i)=>{const [x,y]=point(i,vDom[i]);return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="3" class="radar-pt-home"/>`;}).join('')}
+      ${axes.map((_,i)=>{const [x,y]=point(i,vExt[i]);return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="3" class="radar-pt-away"/>`;}).join('')}
+      ${etiquettes}
+    </svg>
+    <table class="radar-table"><caption class="sr-only">Valeurs comparées, moyennes par match</caption>
+      <thead><tr><th scope="col">Par match</th><th scope="col">${esc(nomDom)}</th><th scope="col">${esc(nomExt)}</th></tr></thead>
+      <tbody>${axes.map(a=>`<tr><th scope="row">${esc(a.libelle)}</th><td class="${a.home>=a.away?'fort':''}">${fmt(a.home)}</td><td class="${a.away>=a.home?'fort':''}">${fmt(a.away)}</td></tr>`).join('')}</tbody>
+    </table>
+  </div>`;
+}
+
 function comparison(vm){
   const c=vm.comparison;
   if(!c||!c.rows.length)return empty('Statistiques comparatives indisponibles.');
-  const rec=vm.model.recommendation;
-  const key=rec?keyRowsForMarket(rec.market):{rows:[],topic:null};
-  const intro=rec&&key.topic?`<p class="cmp-intro">Les lignes en surbrillance sont celles qui pèsent le plus sur <b>${esc(rec.market)}</b> — c’est-à-dire sur ${esc(key.topic)}.</p>`:'';
-  const body=c.rows.map(row=>{
-    const max=Math.max(row.home,row.away,1);
-    const isKey=key.rows.includes(row.label);
-    return `<div class="compare-row${isKey?' is-key':''}"><b>${fmt(row.home)}</b><div class="compare-bar home"><i style="width:${row.home/max*100}%"></i></div><span>${esc(row.label)}${isKey?'<em>clé</em>':''}</span><div class="compare-bar away"><i style="width:${row.away/max*100}%"></i></div><b>${fmt(row.away)}</b></div>`;
-  }).join('');
-  return intro+body;
+  const dom=vm.identity.home.name,ext=vm.identity.away.name;
+  const radar=radarComparatif(c.rows,dom,ext);
+  const autres=LIGNES_CHIFFREES.map(l=>c.rows.find(r=>r.label===l)).filter(Boolean);
+  const legende=`<div class="radar-legende">
+    <span><i class="pt-home"></i>${esc(dom)}</span>
+    <span><i class="pt-away"></i>${esc(ext)}</span>
+  </div>`;
+  const reste=autres.length?`<div class="cmp-reste">${autres.map(r=>
+    `<div><small>${esc(r.label)}</small><b class="${r.home<=r.away?'fort':''}">${fmt(r.home)}</b><span>vs</span><b class="${r.away<=r.home?'fort':''}">${fmt(r.away)}</b></div>`).join('')}</div>`:'';
+  const note=n(c.sampleSize)!==null
+    ? `<p class="cmp-note">Moyennes par match sur ${c.sampleSize} rencontre${c.sampleSize>1?'s':''}${c.sampleSize<5?' — échantillon encore court':''}.</p>`
+    : '<p class="cmp-note">Moyennes par match.</p>';
+  return (radar||'')+legende+reste+note;
 }
 
-// Scenario par tranches de 15 minutes : courbe reliant les 6 vraies valeurs
-// par tranche (raw.scenario_15min) - une ligne plutot que des barres pour se
-// rapprocher du style de reference, mais toujours les 6 memes points reels,
-// jamais une interpolation minute par minute qui laisserait croire a une
-// precision qu'on n'a pas.
-function scenarioChart(slots){
-  const W=460,H=140,pad=22,top=18,base=H-20;
-  const max=Math.max(...slots.map(s=>n(s.prob)||0),1);
-  const x=i=>pad+i*(W-2*pad)/(slots.length-1);
-  const y=v=>base-(v/max)*(base-top);
-  const path=slots.map((s,i)=>`${i===0?'M':'L'}${x(i).toFixed(1)},${y(n(s.prob)||0).toFixed(1)}`).join(' ');
-  const area=`${path} L${x(slots.length-1).toFixed(1)},${base} L${x(0).toFixed(1)},${base} Z`;
-  const dots=slots.map((s,i)=>`<circle cx="${x(i).toFixed(1)}" cy="${y(n(s.prob)||0).toFixed(1)}" r="3" fill="var(--accent)"></circle><text x="${x(i).toFixed(1)}" y="${(y(n(s.prob)||0)-9).toFixed(1)}" text-anchor="middle" font-size="9" fill="var(--accent)" font-weight="700">${Math.round(n(s.prob)||0)}%</text><text x="${x(i).toFixed(1)}" y="${H-4}" text-anchor="middle" font-size="8" fill="var(--muted)">${esc((s.t||'').replace('min',''))}</text>`).join('');
-  return `<svg class="scenario-chart" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none"><line x1="${pad}" y1="${base}" x2="${W-pad}" y2="${base}" stroke="var(--line)"></line><path d="${area}" fill="url(#scGrad)" class="sc-area"></path><path d="${path}" fill="none" stroke="var(--accent)" stroke-width="2" class="sc-line"></path>${dots}<defs><linearGradient id="scGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--accent)" stop-opacity=".2"/><stop offset="100%" stop-color="var(--accent)" stop-opacity="0"/></linearGradient></defs></svg>`;
-}
+// Repartition des buts par tranche de 15 minutes.
+//
+// L'ancienne version affichait scenario_15min, un texte redige par le LLM :
+// il n'existait que sur 1 des 46 matchs publies, la section annoncait donc
+// "Scénario du match indisponible" partout ailleurs. Elle repose desormais
+// sur les buts reellement comptes par tranche pour les deux equipes
+// (vm.editorial.goalTiming), disponibles sur 43 des 46 matchs.
+//
+// C'est une frequence observee sur leurs matchs passes, pas une prevision
+// pour cette rencontre : le titre et la note le disent en toutes lettres.
 function scenarioCard(vm){
-  const slots=vm.editorial.scenario15;
-  if(!slots.length)return empty('Scénario du match indisponible.');
-  const peak=slots.reduce((a,b)=>(n(b.prob)||0)>(n(a.prob)||0)?b:a,slots[0]);
-  return `${scenarioChart(slots)}<div class="scenario-insight"><b>!</b><span>${esc(peak.txt||`Fenêtre la plus dangereuse : ${peak.t} (${Math.round(n(peak.prob)||0)}% des buts observés sur cette tranche).`)}</span></div>`;
+  const g=vm.editorial.goalTiming;
+  if(!g||!g.slots.length)return empty('Pas assez de buts enregistrés pour établir une répartition fiable.');
+  const W=460,H=150,padX=26,haut=22,bas=H-30;
+  const max=Math.max(...g.slots.map(x=>x.share),1);
+  const n2=g.slots.length;
+  const largeur=(W-2*padX)/n2;
+  const barres=g.slots.map((sl,i)=>{
+    const h=Math.max(2,(sl.share/max)*(bas-haut));
+    const x=padX+i*largeur+largeur*0.18, w=largeur*0.64, y=bas-h;
+    const pic=sl.label===g.peak.label;
+    return `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${w.toFixed(1)}" height="${h.toFixed(1)}" rx="3" class="${pic?'gt-pic':'gt-bar'}"></rect>`
+      +`<text x="${(x+w/2).toFixed(1)}" y="${(y-6).toFixed(1)}" text-anchor="middle" font-size="10" font-weight="700" fill="${pic?'var(--accent)':'#8ba0b3'}">${fmt(sl.share)}%</text>`
+      +`<text x="${(x+w/2).toFixed(1)}" y="${H-9}" text-anchor="middle" font-size="9.5" fill="#6f8296">${esc(sl.label)}</text>`;
+  }).join('');
+  return `<svg class="gt-chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Répartition des buts des deux équipes par tranche de 15 minutes. Tranche la plus fournie : ${esc(g.peak.label)} minutes, ${fmt(g.peak.share)} pour cent des buts.">
+      <line x1="${padX}" y1="${bas}" x2="${W-padX}" y2="${bas}" stroke="rgba(141,179,211,.18)"></line>${barres}
+    </svg>
+    <p class="gt-note"><b>${esc(g.peak.label)} min</b> est la tranche la plus fournie : ${fmt(g.peak.share)} % des buts des deux équipes y sont tombés.</p>
+    <p class="gt-source">Sur ${g.totalGoals} buts marqués par ${esc(vm.identity.home.name)} et ${esc(vm.identity.away.name)} cette saison. Fréquence observée, pas une prévision pour ce match.</p>`;
 }
 
 
@@ -529,81 +672,75 @@ function scenarioCard(vm){
 // moitie repond "information indisponible".
 // Repond aux questions qu'un parieur se pose reellement avant de miser, et
 // que le reste de la page traite de facon dispersee.
+// FAQ.
+//
+// Regle posee par l'utilisateur : "il faudrait repondre a des questions
+// qu'il n'y a pas indique sur la page". Les questions qui reprenaient le
+// favori, le pari retenu ou l'ecart modele/marche sont retirees : ces trois
+// reponses sont deja lisibles plus haut, en grand.
+//
+// Ne restent que des questions dont la reponse n'existe nulle part ailleurs
+// dans la page, et toujours calculee sur des donnees reelles.
 function faqCard(vm){
   const qa=[];
-  const p=vm.model.probabilities;
-  const i=vm.identity;
+  const id=vm.identity;
+  const g=vm.editorial.goalTiming;
+  const c=vm.comparison;
+  const stat=l=>c&&c.rows?c.rows.find(r=>r.label===l):null;
 
-  if(p){
-    const rows=[[i.home.name,n(p.home)],['Le match nul',n(p.draw)],[i.away.name,n(p.away)]]
-      .filter(r=>r[1]!==null).sort((a,b)=>b[1]-a[1]);
-    if(rows.length===3){
-      const gap=Math.round((rows[0][1]-rows[1][1])*10)/10;
-      const serre=gap<8?" L’écart avec l’option suivante n’est que de "+fmt(gap)+" points : le match est ouvert.":"";
-      qa.push(['Qui est favori sur ce match ?',
-        `${esc(rows[0][0])} sort en tête avec ${pct(rows[0][1])} de probabilité, devant ${esc(rows[1][0])} (${pct(rows[1][1])}) et ${esc(rows[2][0])} (${pct(rows[2][1])}).${serre}`]);
+  // 1. Marquer avant la pause : calcule sur les tranches reelles.
+  if(g&&g.slots.length>=6){
+    const totDom=g.slots.reduce((a,x)=>a+x.home,0),totExt=g.slots.reduce((a,x)=>a+x.away,0);
+    const avantDom=g.slots.slice(0,3).reduce((a,x)=>a+x.home,0);
+    const avantExt=g.slots.slice(0,3).reduce((a,x)=>a+x.away,0);
+    if(totDom>0&&totExt>0){
+      const pDom=Math.round(avantDom/totDom*100),pExt=Math.round(avantExt/totExt*100);
+      const plus=pDom>=pExt?id.home.name:id.away.name;
+      qa.push(['Ces équipes marquent-elles avant la mi-temps ?',
+        `${esc(id.home.name)} inscrit ${pDom} % de ses buts avant la 45<sup>e</sup> minute, ${esc(id.away.name)} ${pExt} %. ${esc(plus)} est donc la plus prompte à ouvrir le score.`]);
+    }
+    // 2. But tardif : la derniere tranche.
+    const der=g.slots[g.slots.length-1];
+    if(der&&der.share>=18){
+      qa.push(['Faut-il craindre un but tardif ?',
+        `Oui : ${fmt(der.share)} % des buts de ces deux équipes tombent sur la tranche ${esc(der.label)} minutes. C’est la plus chargée du match, à garder en tête sur un pari qui se joue au score final.`]);
     }
   }
 
-  const x=vm.model.expectedGoals;
-  if(x&&n(x.home)!==null&&n(x.away)!==null){
-    const total=Math.round((x.home+x.away)*10)/10;
-    const lecture=total>=2.8?'un match plutôt ouvert offensivement':total<=2.2?'un match plutôt fermé':'un volume de buts dans la moyenne';
-    qa.push(['Combien de buts sont attendus ?',
-      `Le modèle attend ${fmt(total)} buts au total : ${fmt(x.home)} pour ${esc(i.home.name)} et ${fmt(x.away)} pour ${esc(i.away.name)}. Cela correspond à ${lecture}.`]);
+  // 3. Discipline : cette information n'apparait nulle part ailleurs.
+  const fautes=stat('Fautes'),hj=stat('Hors-jeu');
+  if(fautes){
+    const rugueux=fautes.home>=fautes.away?id.home.name:id.away.name;
+    qa.push(['Le match risque-t-il d’être haché ?',
+      `Les deux équipes commettent ${fmt(fautes.home+fautes.away)} fautes par match en cumulé (${fmt(fautes.home)} pour ${esc(id.home.name)}, ${fmt(fautes.away)} pour ${esc(id.away.name)}). ${esc(rugueux)} est la plus rugueuse des deux.${hj?` Côté hors-jeu, ${fmt(hj.home)} contre ${fmt(hj.away)} par match.`:''}`]);
   }
 
-  const r=vm.model.recommendation;
-  if(r){
-    const prob=n(r.probability), mktOdds=n(vm.model.recommendedOdds);
-    const fair=prob!==null&&prob>0?100/prob:null;
-    let txt=`IASHARK retient ${esc(r.market)}, estimé à ${pct(prob)} de probabilité.`;
-    if(fair!==null)txt+=` Cela correspond à une cote équitable de ${odds(fair)}.`;
-    if(mktOdds!==null){
-      const implied=mktOdds>0?100/mktOdds:null;
-      txt+=` La cote relevée sur le marché est de ${odds(mktOdds)}`;
-      if(implied!==null)txt+=`, soit ${pct(implied)} de probabilité implicite`;
-      txt+='.';
-      if(implied!==null&&prob!==null){
-        txt+=prob-implied>=3?' Le pari est donc joué à une cote plus généreuse que notre estimation.'
-            :prob-implied<=-3?' Le pari est donc joué à une cote moins généreuse que notre estimation : l’intérêt est faible.'
-            :' Les deux estimations sont très proches.';
-      }
-    }
-    qa.push(['Quel pari IASHARK retient-il, et à quelle cote ?',txt]);
+  // 4. Sollicitation des gardiens.
+  const arrets=stat('Arrêts'),cadres=stat('Tirs cadrés');
+  if(arrets&&cadres){
+    const sollicite=arrets.home>=arrets.away?id.home.name:id.away.name;
+    qa.push(['Quel gardien est le plus sollicité ?',
+      `Celui de ${esc(sollicite)} : ${fmt(Math.max(arrets.home,arrets.away))} arrêts par match, contre ${fmt(Math.min(arrets.home,arrets.away))} en face. En miroir, ${esc(id.home.name)} cadre ${fmt(cadres.home)} tirs par match et ${esc(id.away.name)} ${fmt(cadres.away)}.`]);
   }
 
-  const mc=(vm.model.marketsCompared||[]).filter(m=>n(m.edge)!==null);
-  if(mc.length){
-    const top=mc.slice().sort((a,b)=>Math.abs(n(b.edge))-Math.abs(n(a.edge)))[0];
-    const e=n(top.edge);
-    qa.push(['Le modèle est-il d’accord avec le marché ?',
-      `L’écart le plus marqué porte sur ${esc(top.market)} : le modèle l’estime à ${pct(top.probability)} quand le marché en fait ${pct(top.consensus)}, soit ${e>0?'+':''}${fmt(e)} points d’écart. ${Math.abs(e)>=5?'Un écart de cette ampleur mérite d’être vérifié avant de miser.':'Les deux lectures restent proches sur l’ensemble des marchés suivis.'}`]);
-  }
-
-  // vm.editorial.risk contient soit une vraie phrase (raw.risk_principal),
-  // soit le simple code de niveau (raw.risque = "FAIBLE"/"MODERE"/"ELEVE").
-  // Repondre "FAIBLE" a la question "quel est le principal risque ?" est une
-  // non-reponse : on ne pose la question que si on a du texte exploitable,
-  // et on reformule proprement le cas du simple niveau.
-  const NIVEAUX={FAIBLE:'faible',MODERE:'modéré',ELEVE:'élevé'};
-  const riskRaw=String(vm.editorial.risk||'').trim();
-  if(NIVEAUX[riskRaw.toUpperCase()]){
-    qa.push(['Quel est le niveau de risque de ce pari ?',
-      `Le modèle classe ce pari en risque <b>${NIVEAUX[riskRaw.toUpperCase()]}</b>. Ce niveau reflète la stabilité des données et la cohérence des marchés sur ce match, pas une garantie sur le résultat.`]);
-  } else if(riskRaw.length>12){
-    qa.push(['Quel est le principal risque de ce pari ?',esc(riskRaw)]);
-  }
-
+  // 5. Methode : la seule question de fond conservee, sa reponse n'est
+  // affichee nulle part ailleurs.
   const sources=Array.isArray(vm.model.sources)?vm.model.sources.filter(Boolean):[];
-  const sims=n(vm.model.simulationCount), quality=n(vm.model.quality);
+  const sims=n(vm.model.simulationCount),quality=n(vm.model.quality);
   if(sims!==null||sources.length||quality!==null){
     const bits=[];
     if(sims!==null)bits.push(`${sims.toLocaleString('fr-FR')} simulations de Monte-Carlo`);
-    if(sources.length)bits.push(`les données ${sources.map(x=>String(x)).join(', ')}`);
+    if(sources.length)bits.push(`les données ${sources.map(x=>esc(String(x))).join(', ')}`);
     if(quality!==null)bits.push(`un score de qualité des données de ${fmt(quality)}/100`);
     qa.push(['Sur quoi repose cette analyse ?',
-      `L’analyse s’appuie sur ${bits.join(', ')}. Les probabilités sont issues de modèles statistiques, pas d’un avis : elles décrivent une fréquence attendue, jamais une certitude sur ce match précis.`]);
+      `L’analyse s’appuie sur ${bits.join(', ')}. Les probabilités décrivent une fréquence attendue sur un grand nombre de matchs semblables, jamais une certitude sur celui-ci.`]);
+  }
+
+  // 6. Risque, seulement s'il y a une vraie phrase.
+  const NIVEAUX={FAIBLE:1,MODERE:1,ELEVE:1};
+  const riskRaw=String(vm.editorial.risk||'').trim();
+  if(riskRaw.length>12&&!NIVEAUX[riskRaw.toUpperCase()]){
+    qa.push(['Quel est le principal risque de ce pari ?',esc(riskRaw)]);
   }
 
   if(qa.length<2)return '';
@@ -611,6 +748,7 @@ function faqCard(vm){
     `<div class="faq-list">${qa.map(([q,a])=>`<details><summary>${esc(q)}</summary><p>${a}</p></details>`).join('')}</div>`,
     'faq-card','faq');
 }
+
 
 
 // Une fois le signal depasse, le parieur lit 10 sections sans plus voir CE
@@ -656,11 +794,10 @@ function render(raw){
     card('Comparatif des deux équipes',comparison(vm),'compare-card','compare'),
     threatsCard(vm),
     matchupCard(vm),
-    formNoteCard(vm),
-    valuePotentialCard(vm),
-    // "Scenario probable du match" : contenu et style geles a la demande de
-    // l'utilisateur. Seule sa POSITION change ici.
-    card('Scénario probable du match',scenarioCard(vm),'','chart'),
+    // Deux mises en garde de meme nature, cote a cote et separees d'un filet
+    // vertical, plutot que deux cartes pleine largeur l'une sous l'autre.
+    prudenceCard(vm),
+    card('Quand les buts tombent',scenarioCard(vm),'','chart'),
     faqCard(vm)
   ];
   // Pas de numerotation : les titres de cartes suffisent a situer la lecture.

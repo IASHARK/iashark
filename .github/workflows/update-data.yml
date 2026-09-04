@@ -2171,7 +2171,10 @@ jobs:
               var odds=parseOdds(oddsRaw);
               var critH=calcCriteres(sH,true,rkH);
               var critA=calcCriteres(sA,false,rkA);
-              var topScorerCandidates=pickTopScorerCandidates(playerHistoryH,playerHistoryA,home.id,away.id,critH,critA);
+              // Effectif actuel passe au selecteur : un joueur transfere garde son
+              // historique sous son ancien club et ressortait comme "buteur a
+              // surveiller" pour une equipe qu'il a quittee.
+              var topScorerCandidates=pickTopScorerCandidates(playerHistoryH,playerHistoryA,home.id,away.id,critH,critA,2,{home:currentSquadH,away:currentSquadA});
               // Bio + stats saison completes UNIQUEMENT pour les 2 candidats
               // buteurs deja selectionnes (pas tout l'effectif - cout API
               // borne, meme appel que getPlayerSeasonStats deja utilise et

@@ -104,3 +104,32 @@ test("les composantes du score le recomposent exactement", () => {
   }
 });
 
+
+// Signale par l'utilisateur le 04/09/2026 : "il propose Sinayoko par exemple
+// mais il n'est plus a Auxerre, il est au PFC". Un joueur transfere garde son
+// historique sous son ancien club et ressortait comme buteur a surveiller
+// pour une equipe qu'il avait quittee - 16 des 86 candidats publies.
+test("un joueur qui n'est plus dans l'effectif n'est plus propose", () => {
+  const rows = [
+    ...repeat(6, () => fixture({ playerId: 1, teamId: 100, name: "Parti au mercato", minutes: 90, shotsTotal: 6, shotsOn: 4, goals: 2 })),
+    ...repeat(6, () => fixture({ playerId: 2, teamId: 100, name: "Toujours la", minutes: 90, shotsTotal: 4, shotsOn: 2, goals: 1 }))
+  ];
+  const effectif = Array.from({ length: 14 }, (_, i) => ({ player_id: i + 2 })); // 2..15, sans le 1
+  const avec = pickTopScorerCandidates(rows, [], 100, 200, { att: 50, def: 50 }, { att: 50, def: 50 }, 2, { home: effectif, away: [] });
+  assert.ok(!avec.some((p) => p.player_id === 1), "le joueur transfere est encore propose");
+  assert.ok(avec.some((p) => p.player_id === 2), "le joueur toujours au club a disparu");
+
+  // Sans effectif fourni, comportement inchange : on n'exclut personne.
+  const sans = pickTopScorerCandidates(rows, [], 100, 200, { att: 50, def: 50 }, { att: 50, def: 50 }, 2);
+  assert.ok(sans.some((p) => p.player_id === 1));
+});
+
+// Un effectif tronque par une requete a moitie echouee ne doit pas vider la
+// selection : on prefere ne rien filtrer plutot que filtrer sur du faux.
+test("un effectif manifestement incomplet n'exclut personne", () => {
+  const rows = repeat(6, () => fixture({ playerId: 1, teamId: 100, name: "Attaquant", minutes: 90, shotsTotal: 6, shotsOn: 4, goals: 2 }));
+  const tronque = [{ player_id: 999 }, { player_id: 998 }]; // 2 joueurs : impossible
+  const r = pickTopScorerCandidates(rows, [], 100, 200, { att: 50, def: 50 }, { att: 50, def: 50 }, 2, { home: tronque, away: [] });
+  assert.ok(r.some((p) => p.player_id === 1),
+    "un effectif de 2 joueurs a suffi a exclure un titulaire");
+});

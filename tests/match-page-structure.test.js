@@ -17,7 +17,7 @@ test("la page simple expose une seule colonne de sections réelles, sans onglets
   // "Absents & incertains" supprimee (n'affichait le plus souvent que
   // "aucune absence" pour les deux equipes) ;
   // "Questions sur ce match" ajoutee.
-  for(const value of ['Le signal IASHARK','Notre lecture du match','Buts attendus','Comparatif des deux équipes','Scores probables','Scénario probable du match','Buteur à surveiller','Questions sur ce match'])assert.match(js,new RegExp(value));
+  for(const value of ['Le signal IASHARK','Notre lecture du match','Buts attendus','Comparatif des deux équipes','Scores probables','Quand les buts tombent','Buteur à surveiller','Questions sur ce match'])assert.match(js,new RegExp(value));
 });
 test("la page est responsive",()=>{
   assert.match(css,/@media\(max-width:640px\)/);
@@ -43,10 +43,14 @@ test("le workflow alimente les blocs comparatifs sans valeur de secours",()=>{
 // donc il est verrouille ici plutot que laisse a la relecture.
 test("la page match assemble les sections dans l'ordre demande",()=>{
   const bloc=js.slice(js.indexOf("const sections=["),js.indexOf("];",js.indexOf("const sections=[")));
+  // Ordre revu le 04/09/2026 : "Stats a ne pas surinterpreter" et "Valeur
+  // potentielle" fusionnent dans prudenceCard (deux colonnes separees d'un
+  // filet), et "Scenario probable du match" devient "Quand les buts tombent",
+  // desormais construit sur les buts reellement comptes par tranche.
   const attendu=[
     "signalCard","matchReadingCard","keyInsightsCard","outputsCard",
     "Comparatif des deux équipes","threatsCard","matchupCard",
-    "formNoteCard","valuePotentialCard","Scénario probable du match","faqCard"
+    "prudenceCard","Quand les buts tombent","faqCard"
   ];
   let curseur=-1;
   for(const jalon of attendu){
@@ -57,7 +61,7 @@ test("la page match assemble les sections dans l'ordre demande",()=>{
 });
 
 test("les blocs retires a la demande de l'utilisateur ne reviennent pas",()=>{
-  for(const parti of ["reasonsCard","marketsVsMarketCard","marketsWatchCard","h2hCard","refereeCard"]){
+  for(const parti of ["reasonsCard","marketsVsMarketCard","marketsWatchCard","h2hCard","refereeCard","valuePotentialCard","formNoteCard"]){
     assert.doesNotMatch(js,new RegExp("function\\s+"+parti+"\\s*\\("),`${parti} a ete reintroduit`);
   }
 });
@@ -124,4 +128,120 @@ test("la carte buteur ne repete pas la probabilite dans son panneau",()=>{
     "la probabilite de marquer est repetee dans le panneau de chiffres");
   // Trois chiffres au maximum, pour que le panneau reste lisible.
   assert.match(bloc,/\.slice\(0,3\)/);
+});
+
+// ---------------------------------------------------------------------------
+// Page match V3 (04/09/2026)
+// ---------------------------------------------------------------------------
+
+// Le comparatif etait conditionne a crit_home/crit_away, des donnees qu'il
+// n'affiche PAS. crit_* est null tant qu'une equipe n'a pas trois matchs
+// joues : en debut de saison le comparatif disparaissait de toute la Premier
+// League, de la Bundesliga, de la Ligue 1 et de la Serie A.
+test("le comparatif ne depend plus d'une donnee qu'il n'affiche pas",()=>{
+  const vmSrc=fs.readFileSync(path.join(__dirname,"..","lib","match-view-model.js"),"utf8");
+  const bloc=vmSrc.slice(vmSrc.indexOf("function comparison(raw)"),vmSrc.indexOf("function headToHead"));
+  assert.ok(!/hasReliableCriteria/.test(bloc),
+    "le comparatif est de nouveau conditionne aux criteres d'equipe");
+  // Il expose la taille d'echantillon, pour que le lecteur sache sur combien
+  // de matchs reposent ces moyennes.
+  assert.match(bloc,/sampleSize/);
+});
+
+// Sur un radar, une aire plus grande se lit comme une superiorite. Les buts
+// encaisses, les fautes et les hors-jeu n'y ont donc pas leur place.
+test("le radar ne compare que des mesures ou 'plus' veut dire 'plus de'",()=>{
+  const axes=js.slice(js.indexOf("const AXES_RADAR=["),js.indexOf("const LIGNES_CHIFFREES"));
+  for(const interdit of ["Buts concédés","Fautes","Hors-jeu","Arrêts"]){
+    assert.ok(!axes.includes(interdit),`"${interdit}" ne doit pas etre un axe du radar`);
+  }
+  const chiffrees=js.slice(js.indexOf("const LIGNES_CHIFFREES"),js.indexOf("function radarComparatif"));
+  for(const attendu of ["Buts concédés","Fautes","Hors-jeu","Arrêts"]){
+    assert.ok(chiffrees.includes(attendu),`"${attendu}" doit rester affiche en clair`);
+  }
+  // Le radar reste lisible sans le graphique : un tableau porte les valeurs.
+  assert.match(js,/radar-table/);
+  assert.match(js,/role="img" aria-label="Profil de jeu comparé/);
+});
+
+// "Scenario probable du match" affichait un texte du LLM present sur 1 seul
+// des 46 matchs publies. Il est remplace par les buts reellement comptes.
+test("la repartition des buts est calculee, pas redigee",()=>{
+  const vmSrc=fs.readFileSync(path.join(__dirname,"..","lib","match-view-model.js"),"utf8");
+  assert.match(vmSrc,/function goalTiming\(raw\)/);
+  const bloc=js.slice(js.indexOf("function scenarioCard(vm)"),js.indexOf("function scenarioCard(vm)")+2600);
+  assert.match(bloc,/vm\.editorial\.goalTiming/);
+  // La page dit que c'est une frequence observee, jamais une prevision.
+  assert.match(bloc,/Fréquence observée, pas une prévision/);
+  // Et elle indique sur combien de buts elle repose.
+  assert.match(bloc,/totalGoals/);
+});
+
+// Deux blocs cote a cote qui ne disent pas la meme chose.
+test("'Ce qu'il faut savoir' oppose ce qui soutient le pari et ce qui le menace",()=>{
+  const bloc=js.slice(js.indexOf("function keyInsightsCard(vm)"),js.indexOf("function outputsCard"));
+  assert.match(bloc,/Ce qui va dans ce sens/);
+  assert.match(bloc,/Ce qui peut le contrarier/);
+  assert.match(bloc,/marketJustifications/);
+  // Les matchups sont detailles plus bas dans la page : ils ne doivent plus
+  // etre repris ici.
+  assert.ok(!/positive_home|positive_away/.test(bloc),
+    "les matchups sont repetes dans 'Ce qu'il faut savoir'");
+});
+
+// Chaque justification doit porter un nombre : sans chiffre, ce n'est pas une
+// justification, c'est une formule.
+test("les justifications du marche s'appuient toutes sur un nombre",()=>{
+  const ins=require("../lib/insights.js");
+  const cas={market:"Over 2.5",homeName:"Alpha",awayName:"Beta",
+    statsHome:{shots_total:12.1,shots_on:4.3,possession:53,xg:1.6},
+    statsAway:{shots_total:11.9,shots_on:2.9,possession:47,xg:1.1},
+    eventsHome:{goals_avg:"1.60",conceded_avg:"1.40",slots:[{t:"0-15",n:5},{t:"15-30",n:2},{t:"30-45",n:3},{t:"45-60",n:9},{t:"60-75",n:4},{t:"75-90",n:9}]},
+    eventsAway:{goals_avg:"2.20",conceded_avg:"1.00",slots:[{t:"0-15",n:10},{t:"15-30",n:7},{t:"30-45",n:5},{t:"45-60",n:9},{t:"60-75",n:4},{t:"75-90",n:9}]}};
+  const faits=ins.buildMarketJustifications(cas);
+  assert.ok(faits.length>=1&&faits.length<=2,"il faut une ou deux justifications, pas davantage");
+  for(const f of faits){
+    assert.ok(/\d/.test(f.texte),`justification sans chiffre : "${f.texte}"`);
+    assert.ok(f.titre&&f.texte.length>20);
+  }
+  // Jamais deux fois le meme angle.
+  assert.equal(new Set(faits.map(f=>f.titre)).size,faits.length);
+  // Un marche inconnu ne doit pas produire de phrase creuse.
+  const inconnu=ins.buildMarketJustifications(Object.assign({},cas,{market:"???"}));
+  for(const f of inconnu)assert.ok(/\d/.test(f.texte));
+});
+
+// La FAQ ne doit plus reposer les questions dont la reponse est deja en grand
+// plus haut dans la page.
+test("la FAQ ne repete pas ce que la page affiche deja",()=>{
+  const bloc=js.slice(js.indexOf("function faqCard(vm)"));
+  for(const repetition of ["Qui est favori","Quel pari IASHARK retient","d’accord avec le marché","niveau de risque de ce pari"]){
+    assert.ok(!bloc.includes(repetition),`la FAQ repose la question deja traitee : "${repetition}"`);
+  }
+  // Et elle pose bien des questions dont la reponse n'est nulle part ailleurs.
+  assert.match(bloc,/marquent-elles avant la mi-temps/);
+  assert.match(bloc,/but tardif/);
+  assert.match(bloc,/gardien est le plus sollicité/);
+});
+
+// Le marche recommande est la premiere chose que voit un visiteur : il doit
+// etre comprehensible sans connaitre la notation des bookmakers.
+test("le marche recommande est traduit en francais courant",()=>{
+  // La fonction est extraite du fichier reel et instanciee ici : le test
+  // verifie la traduction reellement livree, pas une copie.
+  const src=js.slice(js.indexOf("function marcheEnClair"),js.indexOf("function signalCard"));
+  const marcheEnClair=new Function(src+"; return marcheEnClair;")();
+  const cas=[
+    ["Premiere mi-temps moins de 1.5 but","Au plus 1 but inscrit avant la pause."],
+    ["Over 2.5","Au moins 3 buts dans le match."],
+    ["Under 3.5","Au plus 3 buts dans le match."],
+    ["DC 12","Une des deux équipes gagne : pas de match nul."],
+    ["BTTS Oui","Les deux équipes marquent au moins une fois."],
+    ["Tirs cadres du match over 7.5","Au moins 8 tirs cadrés dans le match, les deux équipes confondues."]
+  ];
+  for(const [marche,attendu] of cas){
+    assert.equal(marcheEnClair(marche,"Alpha","Beta"),attendu,`traduction incorrecte pour "${marche}"`);
+  }
+  assert.equal(marcheEnClair("Marché jamais vu","Alpha","Beta"),null,
+    "un marche inconnu doit rester sans phrase plutot que d'etre approxime");
 });

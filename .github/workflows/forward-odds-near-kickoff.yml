@@ -1,0 +1,32 @@
+name: forward-odds-near-kickoff
+
+# Market Lab Phase 3A (item 6) - collecteur NEAR-KICKOFF, cadence
+# horaire. Cible UNIQUEMENT les fixtures DEJA suivies par le collecteur
+# broad (forward-odds-broad.yml) dont le coup d'envoi tombe dans les 6
+# prochaines heures - AUCUN nouvel appel /fixtures de decouverte,
+# reutilise la liste deja construite en base (forward_odds_timeline).
+# Budget dur et circuit-breaker rate-limit dans
+# scripts/collect-near-kickoff-odds.js - jamais de retry infini.
+
+on:
+  schedule:
+    - cron: '0 * * * *'
+  workflow_dispatch: {}
+
+concurrency:
+  group: forward-odds-near-kickoff
+  cancel-in-progress: false
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Collecte near-kickoff (fixtures deja suivies, <6h avant coup d'envoi)
+        env:
+          APISPORTS_KEY: ${{ secrets.APISPORTS_KEY }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: node scripts/collect-near-kickoff-odds.js

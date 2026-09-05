@@ -84,7 +84,11 @@ async function main() {
 
   let offset = 0;
   const pageSize = 20;
-  let totalSnapshots = 0, totalRows = 0;
+  // item 5 : rapport explicite inserted/skipped/errors - jamais un
+  // simple "termine" opaque. return=representation (pas minimal) pour
+  // pouvoir compter reellement les lignes inserees vs ignorees par
+  // ON CONFLICT DO NOTHING (skipped = envoyees - effectivement inserees).
+  let totalSnapshots = 0, totalAttempted = 0, totalInserted = 0, totalSkipped = 0, totalErrors = 0;
   for (;;) {
     const page = await get(u.hostname, `/rest/v1/odds_snapshots?select=fixture_id,league_id,snapshot_phase,captured_at,raw_odds&order=id.asc&limit=${pageSize}&offset=${offset}`, headers);
     if (!Array.isArray(page) || !page.length) break;
@@ -94,14 +98,23 @@ async function main() {
       batch = batch.concat(transformSnapshotRow(row));
     }
     if (batch.length) {
-      const r = await postJSON(u.hostname, "/rest/v1/forward_odds_timeline?on_conflict=fixture_id,snapshot_phase,bookmaker_id,canonical_market_id,selection", batch, Object.assign({ Prefer: "resolution=ignore-duplicates,return=minimal" }, headers));
-      if (!r.ok) console.error(`  echec insert offset=${offset}: status=${r.status} ${(r.error || r.body || "").toString().slice(0, 300)}`);
-      else totalRows += batch.length;
+      totalAttempted += batch.length;
+      const r = await postJSON(u.hostname, "/rest/v1/forward_odds_timeline?on_conflict=fixture_id,snapshot_phase,bookmaker_id,canonical_market_id,selection", batch, Object.assign({ Prefer: "resolution=ignore-duplicates,return=representation" }, headers));
+      if (!r.ok) {
+        totalErrors += batch.length;
+        console.error(`  echec insert offset=${offset}: status=${r.status} ${(r.error || r.body || "").toString().slice(0, 300)}`);
+      } else {
+        let inserted = 0;
+        try { inserted = JSON.parse(r.body).length; } catch (e) { inserted = 0; }
+        totalInserted += inserted;
+        totalSkipped += batch.length - inserted;
+      }
     }
     console.log(`page offset=${offset}: ${page.length} snapshot(s), ${batch.length} offre(s) canoniques transformees`);
     offset += pageSize;
   }
-  console.log(`Backfill termine : ${totalSnapshots} snapshot(s) source, ${totalRows} offre(s) canoniques envoyees (idempotent - doublons ignores par la base).`);
+  console.log(`Backfill termine : ${totalSnapshots} snapshot(s) source, ${totalAttempted} offre(s) tentees.`);
+  console.log(`  inserted=${totalInserted} skipped(doublons deja presents)=${totalSkipped} errors=${totalErrors}`);
 }
 
 if (require.main === module) {

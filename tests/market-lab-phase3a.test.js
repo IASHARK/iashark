@@ -9,7 +9,7 @@ const assert = require("node:assert/strict");
 const { resolveCanonicalMarketOutcome, buildResultsLink, RESULT_STATUS } = require("../lib/market-lab/results-link.js");
 const { EXECUTION_HORIZONS, decisionHorizons } = require("../lib/market-lab/execution-horizons.js");
 const { logloss, brier, computeDescriptiveMetrics } = require("../lib/market-lab/descriptive-metrics.js");
-const { PHASE3_STATUS, READINESS_GATE, checkReadinessGate, logit, buildLogisticModelVsMarketRow, buildCalibrationBuckets } = require("../lib/market-lab/calibration-scaffold.js");
+const { PHASE3_STATUS, READINESS_GATE, READINESS_GATE_IMPLEMENTATION, checkReadinessGate, logit, buildLogisticModelVsMarketRow, buildCalibrationBuckets } = require("../lib/market-lab/calibration-scaffold.js");
 const { computeShadowEv, EV_STATUS } = require("../lib/market-lab/ev-shadow.js");
 const { computeClv } = require("../lib/market-lab/clv.js");
 const { buildDailyMonitoringReport } = require("../lib/market-lab/monitoring-report.js");
@@ -138,6 +138,16 @@ test("readiness gate : PAS pret avec un petit echantillon, pret uniquement au-de
   assert.equal(big.ready, true);
   assert.deepEqual(big.reasons, []);
   assert.equal(READINESS_GATE.CLUSTERING_UNIT, "fixture_id");
+});
+
+test("READINESS_GATE_IMPLEMENTATION (code) et DATA_READINESS (donnees reelles) sont deux valeurs distinctes, jamais confondues", () => {
+  assert.equal(READINESS_GATE_IMPLEMENTATION, "PASS", "le CODE du gate est correct et teste");
+  // Etat reel au 2026-09-05 (retour Phase 3A) : ~12 fixtures settled,
+  // tres en-dessous du minimum de 300 - DATA_READINESS doit rester
+  // FALSE meme si l'implementation du gate elle-meme est PASS.
+  const dataReadiness = checkReadinessGate({ nSettledFixtures: 12, nCompleteMarketObservations: 264, nCalendarPeriods: 1 });
+  assert.equal(dataReadiness.ready, false, "DATA_READINESS doit etre FALSE avec les donnees reelles actuelles");
+  assert.notEqual(READINESS_GATE_IMPLEMENTATION, dataReadiness.ready, "READINESS_GATE_IMPLEMENTATION=PASS ne doit jamais s'afficher comme si DATA_READINESS=true");
 });
 
 test("PHASE3_STATUS reste SHADOW_COLLECTING - jamais MODEL_BEATS_MARKET/VALUE_VALIDATED/PROFITABLE", () => {

@@ -1,0 +1,25 @@
+name: backfill-forward-odds-timeline
+
+# Market Lab Phase 3A (item 5) - execute scripts/backfill-forward-odds-timeline.js
+# avec les vrais secrets CI (indisponibles dans le sandbox local qui a
+# construit ce script). MANUEL UNIQUEMENT (workflow_dispatch) - jamais
+# programme, ce backfill n'a besoin d'etre rejoue qu'a la demande.
+# Idempotent (Prefer: resolution=ignore-duplicates + on_conflict sur la
+# contrainte unique de forward_odds_timeline) - rejouer ce workflow ne
+# duplique jamais une ligne deja ecrite.
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  backfill:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Backfill complet depuis odds_snapshots deja stockes
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: node scripts/backfill-forward-odds-timeline.js

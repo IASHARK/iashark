@@ -105,6 +105,20 @@ function postJSON(host, urlPath, body, headers) {
   });
 }
 
+// Marche LAB Phase 3A (item 6) : budget dur par execution - protege le
+// quota API-Football meme si la config (nombre de ligues x
+// fixturesPerLeague) grossit un jour sans que ce fichier soit revu.
+// Jamais de retry infini : un appel qui echoue ou qui signale un
+// rate-limit arrete proprement la boucle, ne la relance jamais.
+var MAX_API_CALLS_PER_RUN = 100;
+
+function isRateLimitOrQuotaError(resp) {
+  if (!resp || !resp.errors) return false;
+  var keys = Object.keys(resp.errors);
+  if (!keys.length) return false;
+  return keys.some(function (k) { return /rate|limit|quota|subscription|plan/i.test(k) || /rate|limit|quota|subscription|plan/i.test(String(resp.errors[k])); });
+}
+
 async function main() {
   var apsKey = process.env.APISPORTS_KEY;
   if (!apsKey) { console.error("APISPORTS_KEY absent : aucun snapshot ne sera collecte."); process.exitCode = 1; return; }
@@ -114,6 +128,8 @@ async function main() {
     var m = /^--fixtures-per-league=(\d+)$/.exec(a);
     if (m) fixturesPerLeague = parseInt(m[1], 10);
   });
+  var apiCallCount = 0;
+  var stoppedForBudgetOrRateLimit = false;
 
   var supaUrl = process.env.SUPABASE_URL;
   var supaKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -125,13 +141,17 @@ async function main() {
   var rows = [];
   var pipelineSha = process.env.GITHUB_SHA || null;
 
-  for (var li = 0; li < LEAGUES_CONFIG.leagues.length; li++) {
+  for (var li = 0; li < LEAGUES_CONFIG.leagues.length && !stoppedForBudgetOrRateLimit; li++) {
     var league = LEAGUES_CONFIG.leagues[li];
     var season = seasonFor(league.apiFootballId);
+    if (apiCallCount >= MAX_API_CALLS_PER_RUN) { console.log("Budget d'appels API atteint (" + MAX_API_CALLS_PER_RUN + ") avant meme la ligue " + league.key + " - arret propre, pas de retry."); break; }
     var fxResp = await get("https://v3.football.api-sports.io/fixtures?league=" + league.apiFootballId + "&season=" + season + "&next=" + fixturesPerLeague, headers);
+    apiCallCount++;
     await sleep(300);
+    if (isRateLimitOrQuotaError(fxResp)) { console.log("Rate-limit/quota signale par l'API sur /fixtures (" + league.key + ") : " + JSON.stringify(fxResp.errors) + " - arret immediat du run, pas de retry."); stoppedForBudgetOrRateLimit = true; break; }
     var fixtures = (fxResp.response || []).slice(0, fixturesPerLeague);
     for (var fi = 0; fi < fixtures.length; fi++) {
+      if (apiCallCount >= MAX_API_CALLS_PER_RUN) { console.log("Budget d'appels API atteint (" + MAX_API_CALLS_PER_RUN + ") - arret propre, pas de retry."); stoppedForBudgetOrRateLimit = true; break; }
       var fx = fixtures[fi];
       var phase = computeSnapshotPhase(fx.fixture.date);
       if (canWriteSupabase) {
@@ -142,7 +162,9 @@ async function main() {
         }
       }
       var oddsResp = await get("https://v3.football.api-sports.io/odds?fixture=" + fx.fixture.id, headers);
+      apiCallCount++;
       await sleep(300);
+      if (isRateLimitOrQuotaError(oddsResp)) { console.log("Rate-limit/quota signale par l'API sur /odds (fixture " + fx.fixture.id + ") : " + JSON.stringify(oddsResp.errors) + " - arret immediat du run, pas de retry."); stoppedForBudgetOrRateLimit = true; break; }
       var oddsRows = oddsResp.response || [];
       if (!oddsRows.length) {
         console.log(league.key + " " + fx.teams.home.name + " vs " + fx.teams.away.name + " : pas de cote publiee, snapshot ignore (rien a capturer).");
@@ -165,6 +187,8 @@ async function main() {
       console.log(league.key + " " + fx.teams.home.name + " vs " + fx.teams.away.name + " : snapshot capture, phase " + phase + " (" + bookmakerCount + " bookmakers, " + Object.keys(marketIds).length + " marches).");
     }
   }
+
+  console.log("Appels API-Football utilises ce run : " + apiCallCount + "/" + MAX_API_CALLS_PER_RUN + (stoppedForBudgetOrRateLimit ? " (arret anticipe)" : ""));
 
   if (!rows.length) {
     console.log("Aucune fixture avec cote reelle trouvee sur cette passe - rien a sauvegarder.");
@@ -201,4 +225,4 @@ if (require.main === module) {
   main().catch(function (e) { console.error("FATAL:", e.message); process.exitCode = 1; });
 }
 
-module.exports = { computeSnapshotPhase: computeSnapshotPhase };
+module.exports = { computeSnapshotPhase: computeSnapshotPhase, isRateLimitOrQuotaError: isRateLimitOrQuotaError, MAX_API_CALLS_PER_RUN: MAX_API_CALLS_PER_RUN };

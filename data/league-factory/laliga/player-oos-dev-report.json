@@ -1,0 +1,241 @@
+{
+  "league_key": "laliga",
+  "generated_at": "2026-09-05T23:25:30.300Z",
+  "oos_dev_season": 2023,
+  "manifest_hash": "6993d74e201a941eaf4b2977e7b28435675a50f6473eb0725866d8e62f0a5f96",
+  "coverage": {
+    "fixtures_evaluated": 377,
+    "total_player_rows": 16552,
+    "coverage_A": 16552,
+    "coverage_B": 14610,
+    "coverage_C": 16552,
+    "support_C_vs_A": 16552,
+    "support_C_vs_B": 14610
+  },
+  "logloss": {
+    "A": {
+      "n": 16552,
+      "mean_logloss": 0.36751210340553236,
+      "total_logloss": 6083.060335568372
+    },
+    "C_on_CvA": {
+      "n": 16552,
+      "mean_logloss": 0.16774307064315444,
+      "total_logloss": 2776.4833052854924
+    },
+    "B": {
+      "n": 14610,
+      "mean_logloss": 0.4094477151052135,
+      "total_logloss": 5982.031117687169
+    },
+    "C_on_CvB": {
+      "n": 14610,
+      "mean_logloss": 0.18365983110717987,
+      "total_logloss": 2683.2701324758978
+    }
+  },
+  "delta": {
+    "CA": {
+      "n_blocks": 37,
+      "n_reps": 10000,
+      "observed_delta": -0.19976903276237792,
+      "relative_gain_pct": 54.35713025808627,
+      "ci_lower": -0.2316310186386917,
+      "ci_upper": -0.16846260154701326,
+      "probability_a_better": 1
+    },
+    "CB": {
+      "n_blocks": 37,
+      "n_reps": 10000,
+      "observed_delta": -0.22578788399803362,
+      "relative_gain_pct": 55.14449725040331,
+      "ci_lower": -0.26396451491535855,
+      "ci_upper": -0.18774341312112866,
+      "probability_a_better": 1
+    }
+  },
+  "brier": {
+    "A": {
+      "n": 16552,
+      "mean_brier": 0.04509028053525504
+    },
+    "C_on_CvA": {
+      "n": 16552,
+      "mean_brier": 0.044264946849735184
+    },
+    "B": {
+      "n": 14610,
+      "mean_brier": 0.050674252930869
+    },
+    "C_on_CvB": {
+      "n": 14610,
+      "mean_brier": 0.048667439433171915
+    },
+    "delta_CA": {
+      "n_blocks": 37,
+      "n_reps": 10000,
+      "observed_delta": -0.0008253336855198537,
+      "relative_gain_pct": 1.8304026404860014,
+      "ci_lower": -0.0011809650687165107,
+      "ci_upper": -0.0004906761375940288,
+      "probability_a_better": 1
+    }
+  },
+  "calibration": {
+    "A": {
+      "n": 16552,
+      "intercept": -1.9726038944141409,
+      "slope": 0.11539792429349467,
+      "converged": true,
+      "ece": 0.01600781987068211
+    },
+    "C_on_CvA": {
+      "n": 16552,
+      "intercept": -0.2553701913932204,
+      "slope": 0.8770083255513748,
+      "converged": true,
+      "ece": 0.003713599933343751
+    },
+    "B": {
+      "n": 14610,
+      "intercept": -1.9282250862921728,
+      "slope": 0.1113768184943303,
+      "converged": true,
+      "ece": 0.02560527036276522
+    },
+    "C_on_CvB": {
+      "n": 14610,
+      "intercept": -0.2917279477346542,
+      "slope": 0.8551228685260968,
+      "converged": true,
+      "ece": 0.004666555417402776
+    }
+  },
+  "top1_hit_rate": {
+    "A": {
+      "n": 377,
+      "hits": 119,
+      "hit_rate": 0.3156498673740053,
+      "mean_selected_probability": 0.3837235869120451
+    },
+    "B": {
+      "n": 377,
+      "hits": 117,
+      "hit_rate": 0.3103448275862069,
+      "mean_selected_probability": 0.47433103448275854
+    },
+    "C": {
+      "n": 377,
+      "hits": 126,
+      "hit_rate": 0.33421750663129973,
+      "mean_selected_probability": 0.35281087228676355
+    }
+  },
+  "outfield_only_sensitivity": {
+    "vs_A": {
+      "n": 14583,
+      "delta": {
+        "n_blocks": 37,
+        "n_reps": 10000,
+        "observed_delta": -0.2260199938284271,
+        "relative_gain_pct": 54.27800289753112,
+        "ci_lower": -0.26262632612229025,
+        "ci_upper": -0.1895799843721962,
+        "probability_a_better": 1
+      }
+    },
+    "vs_B": {
+      "n": 13367,
+      "delta": {
+        "n_blocks": 37,
+        "n_reps": 10000,
+        "observed_delta": -0.24678394443115845,
+        "relative_gain_pct": 55.14449725041434,
+        "ci_lower": -0.2897229262317765,
+        "ci_upper": -0.2051556621476297,
+        "probability_a_better": 1
+      }
+    }
+  },
+  "played_minutes_sensitivity": {
+    "vs_A": {
+      "n": 11795,
+      "logloss_C": {
+        "n": 11795,
+        "mean_logloss": 0.22995234151574587,
+        "total_logloss": 2712.2878681782227
+      },
+      "logloss_A": {
+        "n": 11795,
+        "mean_logloss": 0.5157321183182685,
+        "total_logloss": 6083.060335563977
+      }
+    },
+    "vs_B": {
+      "n": 11330,
+      "logloss_C": {
+        "n": 11330,
+        "mean_logloss": 0.2321509351338303,
+        "total_logloss": 2630.2700950662975
+      },
+      "logloss_B": {
+        "n": 11330,
+        "mean_logloss": 0.5261651136374156,
+        "total_logloss": 5961.450737511918
+      }
+    }
+  },
+  "position_diagnostics": {
+    "F": {
+      "n": 3394,
+      "observed_rate": 0.1314083677077195,
+      "logloss_C": 0.32994960211967134,
+      "logloss_A": 0.9343278677371438
+    },
+    "M": {
+      "n": 5695,
+      "observed_rate": 0.05443371378402107,
+      "logloss_C": 0.1962096496682033,
+      "logloss_A": 0.3689633464854091
+    },
+    "D": {
+      "n": 5494,
+      "observed_rate": 0.02056789224608664,
+      "logloss_C": 0.09814714248799829,
+      "logloss_A": 0.14564576518923655
+    },
+    "G": {
+      "n": 1969,
+      "observed_rate": 0,
+      "logloss_C": 9.999778782803385e-13,
+      "logloss_A": 0.005346602480893416
+    },
+    "UNKNOWN": null
+  },
+  "temporal_diagnostics": {
+    "first_half_season": {
+      "n": 8341,
+      "logloss_C": 0.172007484633725,
+      "logloss_A": 0.36505797711295396
+    },
+    "second_half_season": {
+      "n": 8211,
+      "logloss_C": 0.1634111406595651,
+      "logloss_A": 0.37000508445613967
+    }
+  },
+  "numerical_sanity": {
+    "n_nan": 0,
+    "n_inf": 0,
+    "determinism_failures": 0
+  },
+  "decision": {
+    "vsA_pass": true,
+    "vsB_pass": true,
+    "brier_no_degradation_vs_A": true,
+    "numerical_clean": true,
+    "determinism_clean": true,
+    "status": "VALIDATED",
+    "reason_code": "VALIDATED_LEAGUE_PLAYER"
+  }
+}

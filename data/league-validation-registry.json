@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-05T23:08:09.208Z",
+  "generated_at": "2026-09-05T23:30:46.190Z",
   "leagues": {
     "laliga": {
       "league_key": "laliga",
@@ -14,24 +14,29 @@
         ],
         "player_lab_seasons": [
           2021,
-          2022
+          2022,
+          2023
         ]
       },
-      "score_champion": "CANDIDATE_SCORE_CHAMPION_LALIGA_UNVALIDATED",
-      "score_status": "PRE_OOS_READY",
-      "player_champion": "PLAYER_SCORER_V1_AGGREGATED_SHARE_LALIGA_FITTED_UNVALIDATED",
-      "player_status": "PRE_OOS_READY",
+      "score_champion": "SCORE_M0_LALIGA",
+      "score_status": "OOS_DEV_M2_REJECTED_M0_STANDS",
+      "player_champion": "PLAYER_SCORER_V1_AGGREGATED_SHARE_LALIGA",
+      "player_status": "OOS_DEV_PASSED_PENDING_OOS_FINAL",
       "market_status": "NOT_ASSESSED_THIS_PASS",
-      "oos_report_hashes": {},
+      "oos_report_hashes": {
+        "score_oos_dev_manifest_hash": "67c12795353b37f664accc253737c138e952f2aeb226ee27f8ab848da66fa87a",
+        "player_oos_dev_manifest_hash": "6993d74e201a941eaf4b2977e7b28435675a50f6473eb0725866d8e62f0a5f96"
+      },
       "score_runnable": false,
       "player_runnable": false,
       "live_eligible": false,
-      "updated_at": "2026-09-05T23:00:44.867Z",
+      "updated_at": "2026-09-05T23:26:32.352Z",
       "pre_oos_score_rho_candidate": -0.016248274946499275,
       "pre_oos_score_convergence_rate": 1,
       "pre_oos_player_anti_leakage_pass": true,
       "pre_oos_player_determinism_pass": true,
-      "pre_oos_goal_reconciliation_pct": 100
+      "pre_oos_goal_reconciliation_pct": 100,
+      "note": "OOS_DEV termine (2023-24). OOS_FINAL (2024-25) reste SEALED_UNREAD - VALIDATED final et *_runnable=true attendent cette confirmation, jamais accordes sur la seule base de OOS_DEV."
     }
   }
 }

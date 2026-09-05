@@ -1,0 +1,137 @@
+{
+  "description": "Registre central APPEND-ONLY des experiences de ce depot. Resout l'ambiguite decouverte le 2026-09-05 : DEUX familles d'experiences distinctes ont utilise, a des moments differents de l'historique, le meme identifiant informel 'EXP-005' (une collision de nommage, pas une erreur scientifique). Aucun contenu historique n'a ete supprime ou modifie - ce fichier documente uniquement les chemins/hashes canoniques pour lever toute ambiguite future. Ne pas relancer, ne pas recalculer de valeur scientifique a partir de ce fichier.",
+  "created_at": "2026-09-05",
+  "families": {
+    "GATE-A": {
+      "description": "Gates numerotees du moteur de production (GATE A1-A9+), engine.js/models.js/score-matrix.js - precede et est INDEPENDANT du SCORE-LAB (SPEC LAB PRO v1.0). A parfois reutilise des identifiants informels 'EXP-000', 'EXP-005' pour des comparaisons numeriques isolees et ponctuelles, sans rapport avec la sequence M0->M5 du SCORE-LAB.",
+      "canonical_prefix": "GATE-A-EXP"
+    },
+    "SCORE-LAB": {
+      "description": "SPEC LAB PRO v1.0 - laboratoire de comparaison de modeles walk-forward M0 (Dixon-Coles production) -> M5 (shared-gamma+DC mean-preserving), sequence EXP-001 a EXP-005, cloturee le 2026-09-05 avec CURRENT_CHAMPION=M2 (EXP-002C, PROMOTE).",
+      "canonical_prefix": "SCORE-LAB-EXP"
+    }
+  },
+  "known_collisions": [
+    {
+      "colliding_informal_id": "EXP-005",
+      "description": "GATE-A a cree scripts/experiments/exp005_report.json (+ exp005_truncation_delta.js) le 2026-09-04 18:10 (commit 613e3976) pour une comparaison isolee de troncature de matrice de production. SCORE-LAB a independamment utilise le meme identifiant informel 'EXP-005' le 2026-09-05 pour son 5e candidat (M5_SHARED_GAMMA_DC_MEAN_PRESERVING), et a initialement (par erreur) ecrase exp005_report.json avec son propre contenu (commit e1575a7a). CORRIGE le meme jour : le contenu original GATE-A a ete restaure INTACT sous un chemin non-ambigu (gate_a4_adaptive_matrix_exp005_report.json) AVANT que l'ecrasement ne soit definitif dans l'historique visible - aucune perte de contenu.",
+      "resolution": "gate_a4_adaptive_matrix_exp005_report.json = contenu GATE-A original (verifie octet-pour-octet identique au commit 613e3976). scripts/experiments/exp005_report.json = contenu SCORE-LAB (M5) definitif, canonique a partir de maintenant."
+    }
+  ],
+  "experiments": [
+    {
+      "legacy_informal_id": "EXP-000",
+      "canonical_id": "GATE-A-EXP-000",
+      "family": "GATE-A",
+      "description": "Equivalence algebrique blend Poisson/DC vs DC(rho=-0.0845) pur",
+      "status": "CLOSED (refactor adopte)",
+      "artifacts": [
+        { "path": "scripts/experiments/exp000_report.json", "sha256": "7701ac957034ac11c80d88ce06a51f3112f5b31ecc2c10851648832d234c5d43", "role": "report" },
+        { "path": "scripts/experiments/exp000_blend_equivalence.js", "role": "script" }
+      ]
+    },
+    {
+      "legacy_informal_id": "EXP-001",
+      "canonical_id": "SCORE-LAB-EXP-001",
+      "family": "SCORE-LAB",
+      "status": "INVALID_BASELINE_REPLAY (CHAMPION_REPLAY_MISMATCH - superseded by EXP-001R)",
+      "artifacts": [
+        { "path": "scripts/experiments/exp001_manifest.json", "sha256": "f2fc78e2a34c58837bd5160ea5d0a50e2cff28cfcad228fcb46cf3db6adc5759", "role": "manifest" },
+        { "path": "scripts/experiments/exp001_manifest_as_used_at_launch.json", "role": "manifest_snapshot" },
+        { "path": "scripts/experiments/exp001_report.json", "sha256": "152a639b4ff6bed10eba2ca0aeb7795f3beb3d1b4fd394ab5856204b98d0682d", "role": "report" },
+        { "path": "scripts/experiments/exp001_protocol_addendum.json", "role": "addendum" },
+        { "path": "scripts/experiments/exp001_protocol_addendum_2.json", "role": "addendum" },
+        { "path": "scripts/experiments/true_m0_exclusion_audit.json", "role": "audit" }
+      ]
+    },
+    {
+      "legacy_informal_id": "EXP-001R",
+      "canonical_id": "SCORE-LAB-EXP-001R",
+      "family": "SCORE-LAB",
+      "status": "CLOSED_REJECT (M1 rho appris - gain negligeable, CI traverse zero)",
+      "artifacts": [
+        { "path": "scripts/experiments/exp001r_manifest.json", "sha256": "baaeee07fc5ed69675c170009fc34b43d05d25a00b3251e39aa53b8cf2d9e85a", "role": "manifest" },
+        { "path": "scripts/experiments/exp001r_report.json", "sha256": "b05c71f51f2afaa699b50c9806b0191a35687abb73bc5f66892e5109cd5748e4", "role": "report" }
+      ]
+    },
+    {
+      "legacy_informal_id": "EXP-002",
+      "canonical_id": "SCORE-LAB-EXP-002",
+      "family": "SCORE-LAB",
+      "status": "INVALID_IMPLEMENTATION (superseded by EXP-002R puis EXP-002C)",
+      "artifacts": [
+        { "path": "scripts/experiments/exp002_manifest.json", "sha256": "a08e2b54056edb2594e4a3fc086db0642efbfe1d12cdc41b75748c477c7ff862", "role": "manifest" },
+        { "path": "scripts/experiments/exp002_report.json", "sha256": "43103283c0fd7e358095e211a0fc03bcd1a0e302d1bde8dacb795bcdd9705208", "role": "report" },
+        { "path": "scripts/experiments/exp002_protocol_addendum.json", "role": "addendum" },
+        { "path": "scripts/experiments/exp002_common_support_report.json", "role": "diagnostic" }
+      ]
+    },
+    {
+      "legacy_informal_id": "EXP-002R",
+      "canonical_id": "SCORE-LAB-EXP-002R",
+      "family": "SCORE-LAB",
+      "status": "INVALID_BASELINE_REPLAY (CHAMPION_REPLAY_MISMATCH - superseded by EXP-002C)",
+      "artifacts": [
+        { "path": "scripts/experiments/exp002r_manifest.json", "sha256": "aa491d6a701c87512437c5cbcd76857b5fcb010b08b838ed4a74ee8aa2cb7db7", "role": "manifest" },
+        { "path": "scripts/experiments/exp002r_report.json", "sha256": "0be93215ad72e4efafef11c2f391a6977bf901b5b1c9fb86c4c50f130ff12946", "role": "report" },
+        { "path": "scripts/experiments/exp002r_protocol_addendum.json", "role": "addendum" }
+      ]
+    },
+    {
+      "legacy_informal_id": "EXP-002C",
+      "canonical_id": "SCORE-LAB-EXP-002C",
+      "family": "SCORE-LAB",
+      "status": "CLOSED_PROMOTE - CURRENT_CHAMPION=M2, FINAL_SCORE_ENGINE_CHAMPION",
+      "artifacts": [
+        { "path": "scripts/experiments/exp002c_manifest.json", "sha256": "545b7fa9b3ce7181fff8605231bd0c1288d96a2096d9cff0012fa518c6f9486e", "role": "manifest" },
+        { "path": "scripts/experiments/exp002c_report.json", "sha256": "a418b012af613f95808df2968977076f419123e18e9e05195eba267f398ea9b6", "role": "report" },
+        { "path": "scripts/experiments/exp002c_closure.json", "sha256": "536195511acb859ad82faed6eb3319f70962d766a56e743b7b7005ff41a3390d", "role": "closure" }
+      ]
+    },
+    {
+      "legacy_informal_id": "EXP-003",
+      "canonical_id": "SCORE-LAB-EXP-003",
+      "family": "SCORE-LAB",
+      "status": "BLOCKED_EXTERNAL_DATA_SOURCE (api.clubelo.com injoignable, M3_PROMOTED=UNDECIDED)",
+      "artifacts": [
+        { "path": "scripts/experiments/exp003_blocker.json", "sha256": "58f37ed547625bcd6274a97acf93125fc45a073964a623362ecf3cb9bdb85633", "role": "blocker" }
+      ]
+    },
+    {
+      "legacy_informal_id": "EXP-004",
+      "canonical_id": "SCORE-LAB-EXP-004",
+      "family": "SCORE-LAB",
+      "status": "CLOSED_REJECT (M4 NB2 independant - signal insuffisant/heterogene par saison)",
+      "artifacts": [
+        { "path": "scripts/experiments/exp004_manifest.json", "sha256": "466695013aabcdc7bf847b0da555b004558ce1bea2b8ccf48ca5cab7915328f0", "role": "manifest" },
+        { "path": "scripts/experiments/exp004_report.json", "sha256": "9638312da68216e3b2b28a7e117b2f94246de3420022487d12389178103d0336", "role": "report" },
+        { "path": "scripts/experiments/exp004_closure.json", "sha256": "fb8ea0e836e23ad52c66a5cc7324f8ee9c7f5cfb12e0d8ab9680c8e702a5571b", "role": "closure" },
+        { "path": "scripts/experiments/exp004_decision_addendum.json", "sha256": "a613ebfa560f54ebf580f62902e209c66fefe2817e5c9b4c856ce4d526a83b2f", "role": "audit_addendum" }
+      ]
+    },
+    {
+      "legacy_informal_id": "EXP-005",
+      "canonical_id": "SCORE-LAB-EXP-005",
+      "family": "SCORE-LAB",
+      "status": "CLOSED_REJECT (M5 shared-gamma+DC mean-preserving - gain sous seuil, CI traverse zero)",
+      "artifacts": [
+        { "path": "scripts/experiments/exp005_protocol_amendment.json", "sha256": "c5c1e45bc3d1fd63547512433227f640419a64b309d0cfc48e38c1acf2fe43b9", "role": "protocol_amendment" },
+        { "path": "scripts/experiments/exp005_mean_preservation_addendum.json", "sha256": "67119ba1fb6b8eec1fb5cbdc7345bbe477424a83f5e39207bcd3cceac26dd03a", "role": "math_correction_addendum" },
+        { "path": "scripts/experiments/exp005_manifest.json", "sha256": "484f2bbfb494e36660f2d98bf01935c3d4e957f0a382fd9d3c8e66c0f2540ad9", "role": "manifest" },
+        { "path": "scripts/experiments/exp005_report.json", "sha256": "c83778a396000d9363b467bd63b62f4b4433d500d16daa2592462f3e7cab4415", "role": "report" },
+        { "path": "scripts/experiments/exp005_closure.json", "sha256": "97c32892513d8a2289365e220a149da74355a67a15109d5d4bec92d04c8218fd", "role": "closure" }
+      ]
+    },
+    {
+      "legacy_informal_id": "EXP-005",
+      "canonical_id": "GATE-A4-EXP-005",
+      "family": "GATE-A",
+      "description": "Comparaison isolee : effet de la troncature adaptative de matrice (GATE A4, tail_mass<1e-10 vs maxGoals=10 fixe) sur 46 matchs de production reels. Totalement independant du SCORE-LAB - collision de nommage informelle avec SCORE-LAB-EXP-005 (voir known_collisions), resolue par deplacement de chemin sans alteration de contenu.",
+      "status": "CLOSED (troncature adaptative adoptee en production)",
+      "artifacts": [
+        { "path": "scripts/experiments/gate_a4_adaptive_matrix_exp005_report.json", "sha256": "285bdc50f7bf7e7de1014610f98a22c032a253d1713dd200bff76043d8468edb", "role": "report", "original_path_before_disambiguation": "scripts/experiments/exp005_report.json" },
+        { "path": "scripts/experiments/exp005_truncation_delta.js", "sha256": "6cc5076b481cca5da944986aa2d71d4c3e64010ad5621d38ce05e4fcb99ebd5c", "role": "script", "note": "chemin/nom INCHANGE (nom generique 'exp005' d'origine, ne collisionne pas physiquement avec un autre fichier actif - conserve tel quel, seul le report.json colliderait, deja disambiguation ci-dessus)" }
+      ]
+    }
+  ]
+}

@@ -1,8 +1,9 @@
 {
   "experiment_id": "EXP-005",
   "registration_status": "REGISTERED",
-  "status": "REGISTERED",
+  "status": "RUNNING",
   "created_at": "2026-09-05",
+  "frozen_at": "2026-09-05T05:53:54Z",
   "hypothesis": "Un facteur latent commun de rythme/ouverture du match, affectant simultanement les buts des deux equipes, ameliore-t-il la distribution jointe du score au-dela de M2 ? Champion M2 (EXP-002C, PROMOTE, ferme) reste inchange ; le candidat M5_SHARED_GAMMA_DC ajoute UN SEUL parametre (kappa) au-dessus de la MEME correction Dixon-Coles (rho=-0.0845 FIXE, jamais reestime).",
   "champion_model": {
     "id": "M2",
@@ -15,6 +16,7 @@
   "not_baseline": "M4 (EXP-004, CLOSED_REJECT) - son modele (marges NB2 INDEPENDANTES, sans DC) n'est PAS la baseline de M5. Aucun kappa/fitter/decision M4 reutilise (verifie tests/lab-m5-no-m4.test.js).",
   "mean_preservation_correction": {
     "addendum_file": "scripts/experiments/exp005_mean_preservation_addendum.json",
+    "addendum_sha256": "67119ba1fb6b8eec1fb5cbdc7345bbe477424a83f5e39207bcd3cceac26dd03a",
     "reason": "theta=lambda directement ne preserve PAS les moyennes finales sous shared-gamma+DC (jusqu'a 2.99% d'ecart releve). Corrige AVANT toute NLL M5 reelle.",
     "solver": "lib/lab/shared-gamma-theta-solver.js#solveThetaForTargetMeans"
   },
@@ -42,7 +44,7 @@
       "lib/lab/promotion-m5.js#evaluatePromotionM5 (regle DEDIEE M5, reason_codes cumulatifs des le depart)"
     ],
     "not_reused_from_m4": ["lib/lab/nb2*.js", "lib/lab/promotion-m4.js", "lib/lab/walkforward-m4-runner.js", "lib/lab/nb2-python-worker.js", "lib/lab/nb2-python-fitter.js"],
-    "code_sha": null
+    "code_sha": "b81357cc83227e6b7ce08c4049fd15a958d1c99f"
   },
   "matrix": {
     "adaptive": true,
@@ -107,13 +109,30 @@
     "8. deterministic", "9. common support complet", "10. no secondary market damage >0.10%",
     "11. low-score damage <=0.10%", "12. tail construction PASS"
   ],
+  "reason_codes": {
+    "module": "lib/lab/promotion-m5.js",
+    "all_possible_codes": [
+      "GAIN_BELOW_PROMOTION_THRESHOLD", "BOOTSTRAP_CI_CROSSES_ZERO", "PERIOD_MATERIAL_DEGRADATION",
+      "CONVERGENCE_INCOMPLETE", "KAPPA_UNSTABLE", "KAPPA_M2_LIMIT", "SECONDARY_MARKET_DAMAGE",
+      "LOW_SCORE_DAMAGE", "TAIL_CONSTRUCTION_FAILED", "TEMPORAL_LEAKAGE_DETECTED",
+      "MECHANISM_NON_DETERMINISTIC", "COMMON_SUPPORT_INCOMPLETE"
+    ],
+    "diagnostic_only_codes": ["PERIOD_HETEROGENEITY_WARN", "PERIOD_HETEROGENEITY_SIGNAL"],
+    "cumulative_policy": "TOUS les reason_codes applicables sont retournes ensemble, jamais un court-circuit sur le premier trouve (correctif applique le 2026-09-05 apres audit EXP-004, teste explicitement des le depart pour M5 - tests/lab-promotion-m5.test.js#REASONS_CUMULATIFS)"
+  },
+  "determinism_policy": {
+    "requirement": "deux runs complets avec les memes inputs/cache produisent des predictions, un fitLog et une decision BYTE-IDENTIQUES",
+    "bootstrap_seed": "EXP-005-v1 (deterministe, jamais Math.random)",
+    "theta_solver": "deterministe (Newton + backtracking borne, point de depart fixe theta=lambda)",
+    "kappa_fitter_start": "eta_start=log(10) fixe, jamais adaptatif"
+  },
   "decision_outcomes": {
     "PROMOTE": "EXP005_STATUS=CLOSED_PROMOTE, M5_PROMOTED=TRUE, NEXT_CHAMPION=M5",
     "SHADOW_MORE_DATA": "NEXT_CHAMPION=M2",
     "REJECT": "NEXT_CHAMPION=M2"
   },
   "gating_to_running": {
-    "description": "Conditions OBLIGATOIRES avant status=RUNNING (pas encore satisfaites - manifest encore REGISTERED, aucun lancement reel).",
+    "description": "Conditions OBLIGATOIRES avant status=RUNNING - TOUTES satisfaites au moment du freeze (2026-09-05T05:53:54Z). REAL_RUN_SCRIPT_WRITTEN est delibrement false AU MOMENT DU FREEZE (le script scripts/run_exp005.js est ecrit APRES ce freeze, jamais avant - meme sequence que EXP-002C/EXP-004).",
     "conditions": [
       { "id": "PROTOCOL_AMENDMENT_COMMITTED", "description": "exp005_protocol_amendment.json commit AVANT tout resultat", "satisfied": true },
       { "id": "M2_CHAMPION_CLOSED", "description": "EXP-002C ferme (PROMOTE), closure inchangee", "satisfied": true },
@@ -138,8 +157,7 @@
     "thetaH/thetaA sont des intensites INTERNES resolues deterministement, JAMAIS un parametre statistique appris - le seul parametre global appris reste kappa",
     "kappa_min=1.0 (domaine pre-enregistre AVANT tout resultat) - tout optimum touchant cette borne produit KAPPA_LOWER_BOUND_HIT, non-promouvable",
     "2025-26 JAMAIS lue",
-    "Manifest IMMUABLE une fois status=RUNNING (PAS ENCORE le cas)",
-    "Aucun seuil modifie apres avoir vu un resultat",
-    "AUCUNE NLL M5 reelle avant que ce gate soit accepte par l'utilisateur"
+    "Manifest IMMUABLE a partir de ce freeze (status=RUNNING) - AUCUNE modification methodologique apres ce point",
+    "Aucun seuil modifie apres avoir vu un resultat"
   ]
 }

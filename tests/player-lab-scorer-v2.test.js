@@ -6,7 +6,7 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
 const { buildFieldTimeline, playersOnFieldAt, buildRiskSetForGoal, computeReconciliationRate } = require("../lib/player-lab/v2/risk-set.js");
-const { designVector, fitRelativeRiskModel, POSITION_ORDER } = require("../lib/player-lab/v2/relative-risk-model.js");
+const { designVector, fitRelativeRiskModel, multiStartStability, deterministicMultiStartThetas, N_PARAMS, POSITION_ORDER } = require("../lib/player-lab/v2/relative-risk-model.js");
 const { fitPlayerEffects, playerEffect } = require("../lib/player-lab/v2/player-effects.js");
 const { fitGoalRatePriors, posteriorGoalRate, fitShotRatePriors, posteriorShotRate, fitSotConversionPriors, posteriorSotConversion } = require("../lib/player-lab/v2/rate-priors.js");
 const { fitGoalClock, N_BINS } = require("../lib/player-lab/v2/goal-clock.js");
@@ -183,6 +183,53 @@ test("relative risk model : Newton-Raphson converge et attribue un beta_goal pos
   const result = fitRelativeRiskModel(events);
   const betaGoalIdx = POSITION_ORDER.length;
   assert.ok(result.theta[betaGoalIdx] > 0, "beta_goal doit etre positif : X_goal plus eleve explique le buteur le plus probable");
+});
+
+test("identification constraint : UNKNOWN est la reference (alpha=0 implicite), N_PARAMS reduit de 1 (item 3)", () => {
+  assert.equal(POSITION_ORDER.length, 4, "F/M/D/G ont chacun un alpha estime, UNKNOWN n'en a pas");
+  assert.equal(N_PARAMS, 7);
+  const vUnknown = designVector("UNKNOWN", 1, 1, 1);
+  assert.ok(vUnknown.slice(0, POSITION_ORDER.length).every((v) => v === 0), "groupe UNKNOWN/non reconnu -> bloc position entierement nul (reference)");
+  const vForward = designVector("F", 1, 1, 1);
+  assert.equal(vForward.filter((v) => v === 1 && vForward.indexOf(v) < POSITION_ORDER.length).length >= 1, true);
+});
+
+test("FIT_NUMERICAL_CLOSURE : converged=true avec diagnostics complets sur un cas synthetique bien identifie (item 5)", () => {
+  const strong = designVector("F", 2.0, 1.0, 0.5);
+  const weak = designVector("M", 0.1, 0.1, 0.1);
+  const events = Array.from({ length: 80 }, (_, i) => ({ riskSetDesignVectors: [strong, weak], scorerIndex: i % 4 === 0 ? 1 : 0 }));
+  const result = fitRelativeRiskModel(events);
+  assert.equal(result.converged, true, "le fit doit converger au sens objectif+gradient, pas seulement logL stable");
+  assert.equal(result.convergence_reason, "OBJECTIVE_AND_GRADIENT_TOLERANCE_MET");
+  assert.ok(result.max_abs_gradient < 1e-6);
+  assert.ok(result.relative_objective_change < 1e-9);
+  assert.ok(Number.isFinite(result.penalized_objective) && Number.isFinite(result.logL));
+  assert.equal(result.solve_status, "OK", "hess_penalized est definie negative partout -> jamais de pivot quasi-singulier");
+});
+
+test("FIT_NUMERICAL_CLOSURE : quasi-separation (position qui ne marque jamais) reste finie et convergee (item 4)", () => {
+  const scorerVec = designVector("F", 1.0, 0.5, 0.3);
+  const neverScoresVec = designVector("G", -0.2, -0.2, -0.2); // gardien : jamais scorerIndex
+  const events = Array.from({ length: 200 }, () => ({ riskSetDesignVectors: [scorerVec, neverScoresVec], scorerIndex: 0 }));
+  const result = fitRelativeRiskModel(events);
+  assert.equal(result.converged, true, "le ridge sur l'objectif PENALISE doit rendre l'optimum fini meme en quasi-separation totale");
+  assert.ok(result.theta.every((v) => Number.isFinite(v)), "aucun parametre ne diverge vers l'infini");
+  const alphaG = result.theta[POSITION_ORDER.indexOf("G")];
+  assert.ok(Number.isFinite(alphaG) && alphaG < 0, "alpha_G doit rester negatif (jamais buteur) mais fini");
+});
+
+test("multi-start stability (item 6) : 5 initialisations deterministes convergent vers le meme optimum penalise et les memes probabilites", () => {
+  const strong = designVector("F", 2.0, 1.0, 0.5);
+  const weak = designVector("M", 0.1, 0.1, 0.1);
+  const gk = designVector("G", -0.5, -0.5, -0.5);
+  const events = Array.from({ length: 150 }, (_, i) => ({ riskSetDesignVectors: [strong, weak, gk], scorerIndex: i % 5 === 0 ? 1 : 0 }));
+  const starts = deterministicMultiStartThetas();
+  assert.ok(starts.length >= 5, "au moins 5 initialisations deterministes raisonnables");
+  const stability = multiStartStability(events, 100, undefined, undefined, starts);
+  assert.equal(stability.any_non_finite, false);
+  assert.equal(stability.all_converged, true);
+  assert.ok(stability.max_objective_spread < 1e-6, "meme optimum penalise a tolerance numerique pres");
+  assert.ok(stability.max_risk_set_probability_spread < 1e-6, "memes probabilites de risk-set a tolerance stricte");
 });
 
 test("goal clock : Dirichlet shrinkage - aucun bin exactement nul meme sans observation dans ce bin", () => {

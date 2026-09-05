@@ -26,7 +26,7 @@ const { extractGoalEvents } = require("../lib/player-lab/goal-events.js");
 const { resolvePositionGroup } = require("../lib/player-lab/position-policy.js");
 const { buildRiskSetForGoal, computeReconciliationRate } = require("../lib/player-lab/v2/risk-set.js");
 const { fitGoalRatePriors, posteriorGoalRate, fitShotRatePriors, posteriorShotRate, fitSotConversionPriors, posteriorSotConversion, logit, EPS } = require("../lib/player-lab/v2/rate-priors.js");
-const { designVector, fitRelativeRiskModel, POSITION_ORDER } = require("../lib/player-lab/v2/relative-risk-model.js");
+const { designVector, fitRelativeRiskModel, multiStartStability, POSITION_ORDER } = require("../lib/player-lab/v2/relative-risk-model.js");
 const { fitPlayerEffects, playerEffect } = require("../lib/player-lab/v2/player-effects.js");
 const { fitGoalClock } = require("../lib/player-lab/v2/goal-clock.js");
 const { fitSubstitutionModel } = require("../lib/player-lab/v2/substitution-model.js");
@@ -127,6 +127,7 @@ function main() {
   const substitutionEntries = [];
   const penaltyAttempts = [];
   const ownGoalEventsTrain = [];
+  const unreconciledEvents = []; // item 1 : aucune exclusion silencieuse - reason_code explicite par evenement
   const goalClockHomeEvents = [], goalClockAwayEvents = [];
   const residualsByPlayer = new Map(); // pour player-effects (rempli apres 1er fit fixed-effects)
 
@@ -155,7 +156,23 @@ function main() {
       for (const g of teamGoals) {
         if (g.own_goal_flag) continue;
         const riskSet = buildRiskSetForGoal(startingXI, teamEvents, g.minute);
-        goalsWithRiskSets.push({ scorerId: g.player_id, riskSet });
+        goalsWithRiskSets.push({ scorerId: g.player_id, riskSet, penaltyFlag: g.penalty_flag });
+        if (!(g.player_id != null && riskSet.has(g.player_id))) {
+          // Diagnostic READ-ONLY (item 1) : ne modifie ni riskSet ni nrEvents,
+          // classe uniquement la raison de l'exclusion deja actee par la
+          // reconciliation ci-dessus. g.minute vient de goal-events.js
+          // (e.time.elapsed SEUL) alors que buildFieldTimeline (risk-set.js)
+          // combine elapsed+extra pour les substitutions/cartons - un but en
+          // temps additionnel peut donc etre compare a un minute-repere plus
+          // petit que la vraie minute d'horloge d'une substitution qui l'a
+          // pourtant precede en realite.
+          const trueMinute = g.minute + (g.extra_minute || 0);
+          const riskSetAtTrueMinute = buildRiskSetForGoal(startingXI, teamEvents, trueMinute);
+          const reasonCode = (g.extra_minute && g.player_id != null && riskSetAtTrueMinute.has(g.player_id))
+            ? "STOPPAGE_TIME_MINUTE_UNIT_MISMATCH_ELAPSED_ONLY_VS_ELAPSED_PLUS_EXTRA"
+            : "SCORER_NOT_ON_FIELD_AT_RECORDED_MINUTE_UNEXPLAINED";
+          unreconciledEvents.push({ fixture_id: fx.fixture_id, team_id: teamId, scorer_id: g.player_id, minute: g.minute, extra_minute: g.extra_minute, penalty_flag: g.penalty_flag, reason_code: reasonCode });
+        }
         if (g.penalty_flag) { if (g.player_id != null) penaltyAttempts.push({ team_id: teamId, player_id: g.player_id }); continue; }
         if (g.player_id == null || !riskSet.has(g.player_id)) continue; // reconciliation echouee - exclu du fit, compte deja dans le taux ci-dessus
         const riskSetIds = [...riskSet];
@@ -174,10 +191,34 @@ function main() {
   console.log(`reconciliation: n_total=${reconciliation.n_total} n_matched=${reconciliation.n_matched} rate=${reconciliation.rate_pct.toFixed(2)}%`);
   console.log(`nr_training_events (open-play, reconcilies)=${nrEvents.length}`);
 
-  console.log("\n=== 5. Fit Newton-Raphson (relative risk model) ===");
+  console.log("\n=== 4b. Event accounting (item 1 - contrat explicite, aucune exclusion silencieuse) ===");
+  const TOTAL_GOALS = ownGoalEventsTrain.length;
+  const OWN_GOALS = ownGoalEventsTrain.filter((g) => g.own_goal_flag).length;
+  const NON_OWN_GOALS = goalsWithRiskSets.length;
+  const PENALTY_GOALS = goalsWithRiskSets.filter((g) => g.penaltyFlag).length;
+  const UNRECONCILED = unreconciledEvents.length;
+  const OPEN_PLAY_FIT_EVENTS = nrEvents.length;
+  console.log(`TOTAL_GOALS=${TOTAL_GOALS} OWN_GOALS=${OWN_GOALS} NON_OWN_GOALS=${NON_OWN_GOALS} PENALTY_GOALS=${PENALTY_GOALS} UNRECONCILED=${UNRECONCILED} OPEN_PLAY_FIT_EVENTS=${OPEN_PLAY_FIT_EVENTS}`);
+  console.log(`identity 1 : TOTAL_GOALS(${TOTAL_GOALS}) - OWN_GOALS(${OWN_GOALS}) = ${TOTAL_GOALS - OWN_GOALS} == NON_OWN_GOALS(${NON_OWN_GOALS}) ? ${TOTAL_GOALS - OWN_GOALS === NON_OWN_GOALS}`);
+  console.log(`identity 2 : NON_OWN_GOALS(${NON_OWN_GOALS}) - PENALTY_GOALS(${PENALTY_GOALS}) - UNRECONCILED(${UNRECONCILED}) = ${NON_OWN_GOALS - PENALTY_GOALS - UNRECONCILED} == OPEN_PLAY_FIT_EVENTS(${OPEN_PLAY_FIT_EVENTS}) ? ${NON_OWN_GOALS - PENALTY_GOALS - UNRECONCILED === OPEN_PLAY_FIT_EVENTS}`);
+  console.log("unreconciled_events=" + JSON.stringify(unreconciledEvents));
+
+  console.log("\n=== 5. Fit Newton-Raphson penalise (relative risk model) - FIT_NUMERICAL_CLOSURE ===");
   const fit = fitRelativeRiskModel(nrEvents, 100);
-  console.log(`theta=${JSON.stringify(fit.theta.map((t) => Number(t.toFixed(4))))} converged=${fit.converged} n_iterations=${fit.n_iterations} logL=${fit.logL.toFixed(3)}`);
+  console.log(`theta=${JSON.stringify(fit.theta.map((t) => Number(t.toFixed(4))))}`);
+  console.log(`converged=${fit.converged} convergence_reason=${fit.convergence_reason} n_iterations=${fit.n_iterations} solve_status=${fit.solve_status} ridge=${fit.ridge}`);
+  console.log(`logL=${fit.logL.toFixed(4)} penalized_objective_initial=${fit.objective_initial.toFixed(4)} penalized_objective_final=${fit.objective_final.toFixed(4)}`);
+  console.log(`relative_objective_change=${fit.relative_objective_change.toExponential(3)} max_abs_gradient=${fit.max_abs_gradient.toExponential(3)}`);
   console.log(`position_order=${JSON.stringify(fit.position_order)}`);
+
+  console.log("\n=== 5b. Multi-start stability (TRAIN uniquement, item 6, 5 initialisations deterministes) ===");
+  const stability = multiStartStability(nrEvents, 100);
+  console.log(`n_starts=${stability.n_starts} all_converged=${stability.all_converged} any_non_finite=${stability.any_non_finite}`);
+  console.log(`max_objective_spread=${stability.max_objective_spread.toExponential(3)} beta_max_spread=${stability.beta_max_spread.toExponential(3)} max_risk_set_probability_spread=${stability.max_risk_set_probability_spread.toExponential(3)}`);
+  console.log("per_start_theta=" + JSON.stringify(stability.fits.map((f) => f.theta.map((t) => Number(t.toFixed(4))))));
+
+  const FIT_CONVERGENCE = fit.converged && stability.all_converged && !stability.any_non_finite && stability.max_objective_spread < 1e-6 && stability.max_risk_set_probability_spread < 1e-6 ? "PASS" : "FAIL";
+  console.log(`\nFIT_CONVERGENCE=${FIT_CONVERGENCE}`);
 
   console.log("\n=== 6. Effets joueurs (empirical Bayes sur residus, APRES le fit a effets fixes) ===");
   const minutes90ByPlayerTrain = new Map();
@@ -248,8 +289,9 @@ function main() {
     const etaByPlayer = new Map();
     for (const pid of [...startingXI, ...bench]) {
       const feat = pointInTimeFeatures(pid, fixtureMeta.kickoff_timestamp);
-      const alphaIdx = POSITION_ORDER.indexOf(feat.group) >= 0 ? POSITION_ORDER.indexOf(feat.group) : POSITION_ORDER.length - 1;
-      const eta = fit.theta[alphaIdx] + fit.theta[POSITION_ORDER.length] * feat.xGoal + fit.theta[POSITION_ORDER.length + 1] * feat.xShot + fit.theta[POSITION_ORDER.length + 2] * feat.xSot + playerEffect(playerEffects, pid);
+      const alphaIdx = POSITION_ORDER.indexOf(feat.group);
+      const alpha = alphaIdx >= 0 ? fit.theta[alphaIdx] : 0; // UNKNOWN = reference, alpha=0 (voir IDENTIFICATION_CONSTRAINT)
+      const eta = alpha + fit.theta[POSITION_ORDER.length] * feat.xGoal + fit.theta[POSITION_ORDER.length + 1] * feat.xShot + fit.theta[POSITION_ORDER.length + 2] * feat.xSot + playerEffect(playerEffects, pid);
       etaByPlayer.set(pid, eta);
     }
     return { startingXI, bench, positionByPlayer, etaByPlayer, substitutionModel, goalClock, penaltyTakerCounts: penaltyTakerCounts.get(lineupTeam.team.id) || null };

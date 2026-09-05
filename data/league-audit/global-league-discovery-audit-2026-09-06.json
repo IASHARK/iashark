@@ -1,0 +1,4699 @@
+{
+  "audit_id": "GLOBAL_LEAGUE_DISCOVERY_AUDIT",
+  "generated_at": "2026-09-05T22:23:46.147Z",
+  "method": "1 call /leagues (full worldwide universe, no params) + 1 call/id x0 (reused bulk dump) + real probes: 68 leagues x 3 seasons x {fixtures-list,lineups,events,players} (~750 calls) + 2 follow-up Serie B (Brazil/Italy) probes (~18 calls). No collection at scale, no model fit, no forecasts run. Africa excluded by owner request. International/national-team competitions excluded (country=World). Youth/women/reserve competitions excluded by name pattern.",
+  "totals": {
+    "countries_scanned": 171,
+    "total_competitions_found_all_types": 1244,
+    "total_after_africa_and_type_filter": 787,
+    "total_after_first_filter_3plus_seasons_non_youth_women": 70,
+    "player_data_gate_pass": 42,
+    "player_data_gate_partial": 12,
+    "player_data_gate_blocked": 16
+  },
+  "ranked_leagues": [
+    {
+      "id": 144,
+      "name": "Jupiler Pro League",
+      "country": "Belgium",
+      "calendar_type": "EUROPEAN_SEASON",
+      "n_seasons_total": 17,
+      "covered_years": [
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ],
+      "current_season_odds_flag": true,
+      "probe_analysis": {
+        "n_seasons_probed": 3,
+        "n_valid": 3,
+        "n_empty": 0,
+        "n_no_fixtures": 0,
+        "empty_seasons": [],
+        "no_fixture_seasons": [],
+        "avg_shots_non_null": 0.33499999999999996,
+        "avg_sot_non_null": 0.2303333333333333,
+        "avg_minutes_non_null": 0.8069999999999999,
+        "avg_scorer_id_mapping": 1,
+        "season_matrix": [
+          {
+            "season": 2021,
+            "status": "PASS",
+            "n_fixtures": 332,
+            "player_rows": 36,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2023,
+            "status": "PASS",
+            "n_fixtures": 314,
+            "player_rows": 37,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2025,
+            "status": "PASS",
+            "n_fixtures": 319,
+            "player_rows": 40,
+            "lineups_teams": 2
+          }
+        ]
+      },
+      "SCORE_DATA_GATE": "PASS",
+      "PLAYER_DATA_GATE": "PASS",
+      "coverage_score": 92,
+      "score_breakdown": {
+        "total": 92,
+        "depthScore": 17,
+        "fixturesScore": 10,
+        "eventsScore": 10,
+        "lineupsScore": 15,
+        "statPlScore": 16.3,
+        "idStabilityScore": 10,
+        "substMinutesScore": 4,
+        "oddsScore": 10
+      },
+      "calendar_type_confirmed": "EUROPEAN_SEASON",
+      "proposed_split": "WARMUP=2021-22, TRAIN=2022-23, OOS_DEV=2023-24, OOS_FINAL=2024-25 (identique au split PL)"
+    },
+    {
+      "id": 61,
+      "name": "Ligue 1",
+      "country": "France",
+      "calendar_type": "EUROPEAN_SEASON",
+      "n_seasons_total": 17,
+      "covered_years": [
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ],
+      "current_season_odds_flag": true,
+      "probe_analysis": {
+        "n_seasons_probed": 3,
+        "n_valid": 3,
+        "n_empty": 0,
+        "n_no_fixtures": 0,
+        "empty_seasons": [],
+        "no_fixture_seasons": [],
+        "avg_shots_non_null": 0.32,
+        "avg_sot_non_null": 0.19366666666666665,
+        "avg_minutes_non_null": 0.7313333333333333,
+        "avg_scorer_id_mapping": 1,
+        "season_matrix": [
+          {
+            "season": 2021,
+            "status": "PASS",
+            "n_fixtures": 381,
+            "player_rows": 39,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2023,
+            "status": "PASS",
+            "n_fixtures": 307,
+            "player_rows": 40,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2025,
+            "status": "PASS",
+            "n_fixtures": 307,
+            "player_rows": 40,
+            "lineups_teams": 2
+          }
+        ]
+      },
+      "SCORE_DATA_GATE": "PASS",
+      "PLAYER_DATA_GATE": "PASS",
+      "coverage_score": 91,
+      "score_breakdown": {
+        "total": 91,
+        "depthScore": 17,
+        "fixturesScore": 10,
+        "eventsScore": 10,
+        "lineupsScore": 15,
+        "statPlScore": 15.3,
+        "idStabilityScore": 10,
+        "substMinutesScore": 3.7,
+        "oddsScore": 10
+      },
+      "calendar_type_confirmed": "EUROPEAN_SEASON",
+      "proposed_split": "WARMUP=2021-22, TRAIN=2022-23, OOS_DEV=2023-24, OOS_FINAL=2024-25 (identique au split PL)"
+    },
+    {
+      "id": 94,
+      "name": "Primeira Liga",
+      "country": "Portugal",
+      "calendar_type": "EUROPEAN_SEASON",
+      "n_seasons_total": 17,
+      "covered_years": [
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ],
+      "current_season_odds_flag": true,
+      "probe_analysis": {
+        "n_seasons_probed": 3,
+        "n_valid": 3,
+        "n_empty": 0,
+        "n_no_fixtures": 0,
+        "empty_seasons": [],
+        "no_fixture_seasons": [],
+        "avg_shots_non_null": 0.3103333333333333,
+        "avg_sot_non_null": 0.17633333333333331,
+        "avg_minutes_non_null": 0.7813333333333333,
+        "avg_scorer_id_mapping": 1,
+        "season_matrix": [
+          {
+            "season": 2021,
+            "status": "PASS",
+            "n_fixtures": 308,
+            "player_rows": 40,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2023,
+            "status": "PASS",
+            "n_fixtures": 308,
+            "player_rows": 39,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2025,
+            "status": "PASS",
+            "n_fixtures": 308,
+            "player_rows": 40,
+            "lineups_teams": 2
+          }
+        ]
+      },
+      "SCORE_DATA_GATE": "PASS",
+      "PLAYER_DATA_GATE": "PASS",
+      "coverage_score": 91,
+      "score_breakdown": {
+        "total": 91,
+        "depthScore": 17,
+        "fixturesScore": 10,
+        "eventsScore": 10,
+        "lineupsScore": 15,
+        "statPlScore": 14.7,
+        "idStabilityScore": 10,
+        "substMinutesScore": 3.9,
+        "oddsScore": 10
+      },
+      "calendar_type_confirmed": "EUROPEAN_SEASON",
+      "proposed_split": "WARMUP=2021-22, TRAIN=2022-23, OOS_DEV=2023-24, OOS_FINAL=2024-25 (identique au split PL)"
+    },
+    {
+      "id": 179,
+      "name": "Premiership",
+      "country": "Scotland",
+      "calendar_type": "EUROPEAN_SEASON",
+      "n_seasons_total": 17,
+      "covered_years": [
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ],
+      "current_season_odds_flag": true,
+      "probe_analysis": {
+        "n_seasons_probed": 3,
+        "n_valid": 3,
+        "n_empty": 0,
+        "n_no_fixtures": 0,
+        "empty_seasons": [],
+        "no_fixture_seasons": [],
+        "avg_shots_non_null": 0.308,
+        "avg_sot_non_null": 0.18066666666666667,
+        "avg_minutes_non_null": 0.7726666666666665,
+        "avg_scorer_id_mapping": 1,
+        "season_matrix": [
+          {
+            "season": 2021,
+            "status": "PASS",
+            "n_fixtures": 233,
+            "player_rows": 33,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2023,
+            "status": "PASS",
+            "n_fixtures": 233,
+            "player_rows": 40,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2025,
+            "status": "PASS",
+            "n_fixtures": 234,
+            "player_rows": 40,
+            "lineups_teams": 2
+          }
+        ]
+      },
+      "SCORE_DATA_GATE": "PASS",
+      "PLAYER_DATA_GATE": "PASS",
+      "coverage_score": 91,
+      "score_breakdown": {
+        "total": 91,
+        "depthScore": 17,
+        "fixturesScore": 10,
+        "eventsScore": 10,
+        "lineupsScore": 15,
+        "statPlScore": 14.8,
+        "idStabilityScore": 10,
+        "substMinutesScore": 3.9,
+        "oddsScore": 10
+      },
+      "calendar_type_confirmed": "EUROPEAN_SEASON",
+      "proposed_split": "WARMUP=2021-22, TRAIN=2022-23, OOS_DEV=2023-24, OOS_FINAL=2024-25 (identique au split PL)"
+    },
+    {
+      "id": 119,
+      "name": "Superliga",
+      "country": "Denmark",
+      "calendar_type": "EUROPEAN_SEASON",
+      "n_seasons_total": 16,
+      "covered_years": [
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ],
+      "current_season_odds_flag": true,
+      "probe_analysis": {
+        "n_seasons_probed": 3,
+        "n_valid": 3,
+        "n_empty": 0,
+        "n_no_fixtures": 0,
+        "empty_seasons": [],
+        "no_fixture_seasons": [],
+        "avg_shots_non_null": 0.33966666666666673,
+        "avg_sot_non_null": 0.21766666666666667,
+        "avg_minutes_non_null": 0.7786666666666666,
+        "avg_scorer_id_mapping": 1,
+        "season_matrix": [
+          {
+            "season": 2021,
+            "status": "PASS",
+            "n_fixtures": 192,
+            "player_rows": 36,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2023,
+            "status": "PASS",
+            "n_fixtures": 193,
+            "player_rows": 40,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2025,
+            "status": "PASS",
+            "n_fixtures": 192,
+            "player_rows": 40,
+            "lineups_teams": 2
+          }
+        ]
+      },
+      "SCORE_DATA_GATE": "PASS",
+      "PLAYER_DATA_GATE": "PASS",
+      "coverage_score": 91,
+      "score_breakdown": {
+        "total": 91,
+        "depthScore": 16,
+        "fixturesScore": 10,
+        "eventsScore": 10,
+        "lineupsScore": 15,
+        "statPlScore": 16.1,
+        "idStabilityScore": 10,
+        "substMinutesScore": 3.9,
+        "oddsScore": 10
+      },
+      "calendar_type_confirmed": "EUROPEAN_SEASON",
+      "proposed_split": "WARMUP=2021-22, TRAIN=2022-23, OOS_DEV=2023-24, OOS_FINAL=2024-25 (identique au split PL)"
+    },
+    {
+      "id": 62,
+      "name": "Ligue 2",
+      "country": "France",
+      "calendar_type": "EUROPEAN_SEASON",
+      "n_seasons_total": 17,
+      "covered_years": [
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ],
+      "current_season_odds_flag": true,
+      "probe_analysis": {
+        "n_seasons_probed": 3,
+        "n_valid": 3,
+        "n_empty": 0,
+        "n_no_fixtures": 0,
+        "empty_seasons": [],
+        "no_fixture_seasons": [],
+        "avg_shots_non_null": 0.29,
+        "avg_sot_non_null": 0.15866666666666665,
+        "avg_minutes_non_null": 0.8413333333333334,
+        "avg_scorer_id_mapping": 1,
+        "season_matrix": [
+          {
+            "season": 2021,
+            "status": "PASS",
+            "n_fixtures": 383,
+            "player_rows": 35,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2023,
+            "status": "PASS",
+            "n_fixtures": 381,
+            "player_rows": 36,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2025,
+            "status": "PASS",
+            "n_fixtures": 308,
+            "player_rows": 36,
+            "lineups_teams": 2
+          }
+        ]
+      },
+      "SCORE_DATA_GATE": "PASS",
+      "PLAYER_DATA_GATE": "PASS",
+      "coverage_score": 90,
+      "score_breakdown": {
+        "total": 90,
+        "depthScore": 17,
+        "fixturesScore": 10,
+        "eventsScore": 10,
+        "lineupsScore": 15,
+        "statPlScore": 14,
+        "idStabilityScore": 10,
+        "substMinutesScore": 4.2,
+        "oddsScore": 10
+      },
+      "calendar_type_confirmed": "EUROPEAN_SEASON",
+      "proposed_split": "WARMUP=2021-22, TRAIN=2022-23, OOS_DEV=2023-24, OOS_FINAL=2024-25 (identique au split PL)"
+    },
+    {
+      "id": 71,
+      "name": "Serie A",
+      "country": "Brazil",
+      "calendar_type": "CALENDAR_YEAR_SEASON",
+      "n_seasons_total": 17,
+      "covered_years": [
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ],
+      "current_season_odds_flag": true,
+      "probe_analysis": {
+        "n_seasons_probed": 3,
+        "n_valid": 3,
+        "n_empty": 0,
+        "n_no_fixtures": 0,
+        "empty_seasons": [],
+        "no_fixture_seasons": [],
+        "avg_shots_non_null": 0.312,
+        "avg_sot_non_null": 0.17799999999999996,
+        "avg_minutes_non_null": 0.7106666666666667,
+        "avg_scorer_id_mapping": 1,
+        "season_matrix": [
+          {
+            "season": 2021,
+            "status": "PASS",
+            "n_fixtures": 380,
+            "player_rows": 42,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2023,
+            "status": "PASS",
+            "n_fixtures": 380,
+            "player_rows": 46,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2025,
+            "status": "PASS",
+            "n_fixtures": 380,
+            "player_rows": 46,
+            "lineups_teams": 2
+          }
+        ]
+      },
+      "SCORE_DATA_GATE": "PASS",
+      "PLAYER_DATA_GATE": "PASS",
+      "coverage_score": 90,
+      "score_breakdown": {
+        "total": 90,
+        "depthScore": 17,
+        "fixturesScore": 10,
+        "eventsScore": 10,
+        "lineupsScore": 15,
+        "statPlScore": 14.8,
+        "idStabilityScore": 10,
+        "substMinutesScore": 3.6,
+        "oddsScore": 10
+      },
+      "calendar_type_confirmed": "CALENDAR_YEAR_SEASON",
+      "proposed_split": "WARMUP=2021, TRAIN=2022, OOS_DEV=2023, OOS_FINAL=2024 (annees civiles, meme principe que PL adapte au calendrier)"
+    },
+    {
+      "id": 78,
+      "name": "Bundesliga",
+      "country": "Germany",
+      "calendar_type": "EUROPEAN_SEASON",
+      "n_seasons_total": 17,
+      "covered_years": [
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ],
+      "current_season_odds_flag": true,
+      "probe_analysis": {
+        "n_seasons_probed": 3,
+        "n_valid": 3,
+        "n_empty": 0,
+        "n_no_fixtures": 0,
+        "empty_seasons": [],
+        "no_fixture_seasons": [],
+        "avg_shots_non_null": 0.2833333333333333,
+        "avg_sot_non_null": 0.17500000000000002,
+        "avg_minutes_non_null": 0.7416666666666667,
+        "avg_scorer_id_mapping": 1,
+        "season_matrix": [
+          {
+            "season": 2021,
+            "status": "PASS",
+            "n_fixtures": 308,
+            "player_rows": 40,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2023,
+            "status": "PASS",
+            "n_fixtures": 307,
+            "player_rows": 40,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2025,
+            "status": "PASS",
+            "n_fixtures": 307,
+            "player_rows": 40,
+            "lineups_teams": 2
+          }
+        ]
+      },
+      "SCORE_DATA_GATE": "PASS",
+      "PLAYER_DATA_GATE": "PASS",
+      "coverage_score": 90,
+      "score_breakdown": {
+        "total": 90,
+        "depthScore": 17,
+        "fixturesScore": 10,
+        "eventsScore": 10,
+        "lineupsScore": 15,
+        "statPlScore": 14.2,
+        "idStabilityScore": 10,
+        "substMinutesScore": 3.7,
+        "oddsScore": 10
+      },
+      "calendar_type_confirmed": "EUROPEAN_SEASON",
+      "proposed_split": "WARMUP=2021-22, TRAIN=2022-23, OOS_DEV=2023-24, OOS_FINAL=2024-25 (identique au split PL)"
+    },
+    {
+      "id": 140,
+      "name": "La Liga",
+      "country": "Spain",
+      "calendar_type": "EUROPEAN_SEASON",
+      "n_seasons_total": 17,
+      "covered_years": [
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ],
+      "current_season_odds_flag": true,
+      "probe_analysis": {
+        "n_seasons_probed": 3,
+        "n_valid": 3,
+        "n_empty": 0,
+        "n_no_fixtures": 0,
+        "empty_seasons": [],
+        "no_fixture_seasons": [],
+        "avg_shots_non_null": 0.33666666666666667,
+        "avg_sot_non_null": 0.141,
+        "avg_minutes_non_null": 0.7026666666666667,
+        "avg_scorer_id_mapping": 1,
+        "season_matrix": [
+          {
+            "season": 2021,
+            "status": "PASS",
+            "n_fixtures": 380,
+            "player_rows": 42,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2023,
+            "status": "PASS",
+            "n_fixtures": 380,
+            "player_rows": 46,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2025,
+            "status": "PASS",
+            "n_fixtures": 380,
+            "player_rows": 46,
+            "lineups_teams": 2
+          }
+        ]
+      },
+      "SCORE_DATA_GATE": "PASS",
+      "PLAYER_DATA_GATE": "PASS",
+      "coverage_score": 90,
+      "score_breakdown": {
+        "total": 90,
+        "depthScore": 17,
+        "fixturesScore": 10,
+        "eventsScore": 10,
+        "lineupsScore": 15,
+        "statPlScore": 14.6,
+        "idStabilityScore": 10,
+        "substMinutesScore": 3.5,
+        "oddsScore": 10
+      },
+      "calendar_type_confirmed": "EUROPEAN_SEASON",
+      "proposed_split": "WARMUP=2021-22, TRAIN=2022-23, OOS_DEV=2023-24, OOS_FINAL=2024-25 (identique au split PL)"
+    },
+    {
+      "id": 41,
+      "name": "League One",
+      "country": "England",
+      "calendar_type": "EUROPEAN_SEASON",
+      "n_seasons_total": 16,
+      "covered_years": [
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ],
+      "current_season_odds_flag": true,
+      "probe_analysis": {
+        "n_seasons_probed": 3,
+        "n_valid": 3,
+        "n_empty": 0,
+        "n_no_fixtures": 0,
+        "empty_seasons": [],
+        "no_fixture_seasons": [],
+        "avg_shots_non_null": 0.31466666666666665,
+        "avg_sot_non_null": 0.213,
+        "avg_minutes_non_null": 0.7873333333333333,
+        "avg_scorer_id_mapping": 1,
+        "season_matrix": [
+          {
+            "season": 2021,
+            "status": "PASS",
+            "n_fixtures": 557,
+            "player_rows": 36,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2023,
+            "status": "PASS",
+            "n_fixtures": 557,
+            "player_rows": 36,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2025,
+            "status": "PASS",
+            "n_fixtures": 557,
+            "player_rows": 36,
+            "lineups_teams": 2
+          }
+        ]
+      },
+      "SCORE_DATA_GATE": "PASS",
+      "PLAYER_DATA_GATE": "PASS",
+      "coverage_score": 90,
+      "score_breakdown": {
+        "total": 90,
+        "depthScore": 16,
+        "fixturesScore": 10,
+        "eventsScore": 10,
+        "lineupsScore": 15,
+        "statPlScore": 15.6,
+        "idStabilityScore": 10,
+        "substMinutesScore": 3.9,
+        "oddsScore": 10
+      },
+      "calendar_type_confirmed": "EUROPEAN_SEASON",
+      "proposed_split": "WARMUP=2021-22, TRAIN=2022-23, OOS_DEV=2023-24, OOS_FINAL=2024-25 (identique au split PL)"
+    },
+    {
+      "id": 42,
+      "name": "League Two",
+      "country": "England",
+      "calendar_type": "EUROPEAN_SEASON",
+      "n_seasons_total": 16,
+      "covered_years": [
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ],
+      "current_season_odds_flag": true,
+      "probe_analysis": {
+        "n_seasons_probed": 3,
+        "n_valid": 3,
+        "n_empty": 0,
+        "n_no_fixtures": 0,
+        "empty_seasons": [],
+        "no_fixture_seasons": [],
+        "avg_shots_non_null": 0.31966666666666665,
+        "avg_sot_non_null": 0.19699999999999998,
+        "avg_minutes_non_null": 0.7839999999999999,
+        "avg_scorer_id_mapping": 1,
+        "season_matrix": [
+          {
+            "season": 2021,
+            "status": "PASS",
+            "n_fixtures": 556,
+            "player_rows": 36,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2023,
+            "status": "PASS",
+            "n_fixtures": 556,
+            "player_rows": 36,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2025,
+            "status": "PASS",
+            "n_fixtures": 556,
+            "player_rows": 34,
+            "lineups_teams": 2
+          }
+        ]
+      },
+      "SCORE_DATA_GATE": "PASS",
+      "PLAYER_DATA_GATE": "PASS",
+      "coverage_score": 90,
+      "score_breakdown": {
+        "total": 90,
+        "depthScore": 16,
+        "fixturesScore": 10,
+        "eventsScore": 10,
+        "lineupsScore": 15,
+        "statPlScore": 15.3,
+        "idStabilityScore": 10,
+        "substMinutesScore": 3.9,
+        "oddsScore": 10
+      },
+      "calendar_type_confirmed": "EUROPEAN_SEASON",
+      "proposed_split": "WARMUP=2021-22, TRAIN=2022-23, OOS_DEV=2023-24, OOS_FINAL=2024-25 (identique au split PL)"
+    },
+    {
+      "id": 203,
+      "name": "Süper Lig",
+      "country": "Turkey",
+      "calendar_type": "EUROPEAN_SEASON",
+      "n_seasons_total": 16,
+      "covered_years": [
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ],
+      "current_season_odds_flag": true,
+      "probe_analysis": {
+        "n_seasons_probed": 3,
+        "n_valid": 3,
+        "n_empty": 0,
+        "n_no_fixtures": 0,
+        "empty_seasons": [],
+        "no_fixture_seasons": [],
+        "avg_shots_non_null": 0.35000000000000003,
+        "avg_sot_non_null": 0.18233333333333332,
+        "avg_minutes_non_null": 0.6999999999999998,
+        "avg_scorer_id_mapping": 1,
+        "season_matrix": [
+          {
+            "season": 2021,
+            "status": "PASS",
+            "n_fixtures": 380,
+            "player_rows": 39,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2023,
+            "status": "PASS",
+            "n_fixtures": 380,
+            "player_rows": 39,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2025,
+            "status": "PASS",
+            "n_fixtures": 306,
+            "player_rows": 42,
+            "lineups_teams": 2
+          }
+        ]
+      },
+      "SCORE_DATA_GATE": "PASS",
+      "PLAYER_DATA_GATE": "PASS",
+      "coverage_score": 90,
+      "score_breakdown": {
+        "total": 90,
+        "depthScore": 16,
+        "fixturesScore": 10,
+        "eventsScore": 10,
+        "lineupsScore": 15,
+        "statPlScore": 15.6,
+        "idStabilityScore": 10,
+        "substMinutesScore": 3.5,
+        "oddsScore": 10
+      },
+      "calendar_type_confirmed": "EUROPEAN_SEASON",
+      "proposed_split": "WARMUP=2021-22, TRAIN=2022-23, OOS_DEV=2023-24, OOS_FINAL=2024-25 (identique au split PL)"
+    },
+    {
+      "id": 79,
+      "name": "2. Bundesliga",
+      "country": "Germany",
+      "calendar_type": "EUROPEAN_SEASON",
+      "n_seasons_total": 16,
+      "covered_years": [
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ],
+      "current_season_odds_flag": true,
+      "probe_analysis": {
+        "n_seasons_probed": 3,
+        "n_valid": 3,
+        "n_empty": 0,
+        "n_no_fixtures": 0,
+        "empty_seasons": [],
+        "no_fixture_seasons": [],
+        "avg_shots_non_null": 0.34166666666666673,
+        "avg_sot_non_null": 0.17499999999999996,
+        "avg_minutes_non_null": 0.7833333333333333,
+        "avg_scorer_id_mapping": 1,
+        "season_matrix": [
+          {
+            "season": 2021,
+            "status": "PASS",
+            "n_fixtures": 308,
+            "player_rows": 40,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2023,
+            "status": "PASS",
+            "n_fixtures": 308,
+            "player_rows": 40,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2025,
+            "status": "PASS",
+            "n_fixtures": 308,
+            "player_rows": 40,
+            "lineups_teams": 2
+          }
+        ]
+      },
+      "SCORE_DATA_GATE": "PASS",
+      "PLAYER_DATA_GATE": "PASS",
+      "coverage_score": 90,
+      "score_breakdown": {
+        "total": 90,
+        "depthScore": 16,
+        "fixturesScore": 10,
+        "eventsScore": 10,
+        "lineupsScore": 15,
+        "statPlScore": 15.3,
+        "idStabilityScore": 10,
+        "substMinutesScore": 3.9,
+        "oddsScore": 10
+      },
+      "calendar_type_confirmed": "EUROPEAN_SEASON",
+      "proposed_split": "WARMUP=2021-22, TRAIN=2022-23, OOS_DEV=2023-24, OOS_FINAL=2024-25 (identique au split PL)"
+    },
+    {
+      "id": 98,
+      "name": "J1 League",
+      "country": "Japan",
+      "calendar_type": "CALENDAR_YEAR_SEASON",
+      "n_seasons_total": 16,
+      "covered_years": [
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ],
+      "current_season_odds_flag": true,
+      "probe_analysis": {
+        "n_seasons_probed": 3,
+        "n_valid": 3,
+        "n_empty": 0,
+        "n_no_fixtures": 0,
+        "empty_seasons": [],
+        "no_fixture_seasons": [],
+        "avg_shots_non_null": 0.3066666666666667,
+        "avg_sot_non_null": 0.161,
+        "avg_minutes_non_null": 0.8333333333333334,
+        "avg_scorer_id_mapping": 1,
+        "season_matrix": [
+          {
+            "season": 2021,
+            "status": "PASS",
+            "n_fixtures": 380,
+            "player_rows": 36,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2023,
+            "status": "PASS",
+            "n_fixtures": 306,
+            "player_rows": 36,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2025,
+            "status": "PASS",
+            "n_fixtures": 380,
+            "player_rows": 40,
+            "lineups_teams": 2
+          }
+        ]
+      },
+      "SCORE_DATA_GATE": "PASS",
+      "PLAYER_DATA_GATE": "PASS",
+      "coverage_score": 90,
+      "score_breakdown": {
+        "total": 90,
+        "depthScore": 16,
+        "fixturesScore": 10,
+        "eventsScore": 10,
+        "lineupsScore": 15,
+        "statPlScore": 14.4,
+        "idStabilityScore": 10,
+        "substMinutesScore": 4.2,
+        "oddsScore": 10
+      },
+      "calendar_type_confirmed": "CALENDAR_YEAR_SEASON",
+      "proposed_split": "WARMUP=2021, TRAIN=2022, OOS_DEV=2023, OOS_FINAL=2024 (annees civiles, meme principe que PL adapte au calendrier)"
+    },
+    {
+      "id": 39,
+      "name": "Premier League",
+      "country": "England",
+      "calendar_type": "EUROPEAN_SEASON",
+      "n_seasons_total": 17,
+      "covered_years": [
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ],
+      "current_season_odds_flag": true,
+      "probe_analysis": {
+        "n_seasons_probed": 3,
+        "n_valid": 3,
+        "n_empty": 0,
+        "n_no_fixtures": 0,
+        "empty_seasons": [],
+        "no_fixture_seasons": [],
+        "avg_shots_non_null": 0.2416666666666667,
+        "avg_sot_non_null": 0.15,
+        "avg_minutes_non_null": 0.7416666666666666,
+        "avg_scorer_id_mapping": 1,
+        "season_matrix": [
+          {
+            "season": 2021,
+            "status": "PASS",
+            "n_fixtures": 380,
+            "player_rows": 40,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2023,
+            "status": "PASS",
+            "n_fixtures": 380,
+            "player_rows": 40,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2025,
+            "status": "PASS",
+            "n_fixtures": 380,
+            "player_rows": 40,
+            "lineups_teams": 2
+          }
+        ]
+      },
+      "SCORE_DATA_GATE": "PASS",
+      "PLAYER_DATA_GATE": "PASS",
+      "coverage_score": 89,
+      "score_breakdown": {
+        "total": 89,
+        "depthScore": 17,
+        "fixturesScore": 10,
+        "eventsScore": 10,
+        "lineupsScore": 15,
+        "statPlScore": 12.8,
+        "idStabilityScore": 10,
+        "substMinutesScore": 3.7,
+        "oddsScore": 10
+      },
+      "calendar_type_confirmed": "EUROPEAN_SEASON",
+      "proposed_split": "WARMUP=2021-22, TRAIN=2022-23, OOS_DEV=2023-24, OOS_FINAL=2024-25 (identique au split PL)"
+    },
+    {
+      "id": 88,
+      "name": "Eredivisie",
+      "country": "Netherlands",
+      "calendar_type": "EUROPEAN_SEASON",
+      "n_seasons_total": 17,
+      "covered_years": [
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ],
+      "current_season_odds_flag": true,
+      "probe_analysis": {
+        "n_seasons_probed": 3,
+        "n_valid": 3,
+        "n_empty": 0,
+        "n_no_fixtures": 0,
+        "empty_seasons": [],
+        "no_fixture_seasons": [],
+        "avg_shots_non_null": 0.25266666666666665,
+        "avg_sot_non_null": 0.18133333333333335,
+        "avg_minutes_non_null": 0.7246666666666667,
+        "avg_scorer_id_mapping": 1,
+        "season_matrix": [
+          {
+            "season": 2021,
+            "status": "PASS",
+            "n_fixtures": 322,
+            "player_rows": 42,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2023,
+            "status": "PASS",
+            "n_fixtures": 320,
+            "player_rows": 43,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2025,
+            "status": "PASS",
+            "n_fixtures": 308,
+            "player_rows": 42,
+            "lineups_teams": 2
+          }
+        ]
+      },
+      "SCORE_DATA_GATE": "PASS",
+      "PLAYER_DATA_GATE": "PASS",
+      "coverage_score": 89,
+      "score_breakdown": {
+        "total": 89,
+        "depthScore": 17,
+        "fixturesScore": 10,
+        "eventsScore": 10,
+        "lineupsScore": 15,
+        "statPlScore": 13.7,
+        "idStabilityScore": 10,
+        "substMinutesScore": 3.6,
+        "oddsScore": 10
+      },
+      "calendar_type_confirmed": "EUROPEAN_SEASON",
+      "proposed_split": "WARMUP=2021-22, TRAIN=2022-23, OOS_DEV=2023-24, OOS_FINAL=2024-25 (identique au split PL)"
+    },
+    {
+      "id": 40,
+      "name": "Championship",
+      "country": "England",
+      "calendar_type": "EUROPEAN_SEASON",
+      "n_seasons_total": 16,
+      "covered_years": [
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ],
+      "current_season_odds_flag": true,
+      "probe_analysis": {
+        "n_seasons_probed": 3,
+        "n_valid": 3,
+        "n_empty": 0,
+        "n_no_fixtures": 0,
+        "empty_seasons": [],
+        "no_fixture_seasons": [],
+        "avg_shots_non_null": 0.301,
+        "avg_sot_non_null": 0.16033333333333333,
+        "avg_minutes_non_null": 0.7716666666666666,
+        "avg_scorer_id_mapping": 1,
+        "season_matrix": [
+          {
+            "season": 2021,
+            "status": "PASS",
+            "n_fixtures": 556,
+            "player_rows": 34,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2023,
+            "status": "PASS",
+            "n_fixtures": 557,
+            "player_rows": 40,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2025,
+            "status": "PASS",
+            "n_fixtures": 556,
+            "player_rows": 40,
+            "lineups_teams": 2
+          }
+        ]
+      },
+      "SCORE_DATA_GATE": "PASS",
+      "PLAYER_DATA_GATE": "PASS",
+      "coverage_score": 89,
+      "score_breakdown": {
+        "total": 89,
+        "depthScore": 16,
+        "fixturesScore": 10,
+        "eventsScore": 10,
+        "lineupsScore": 15,
+        "statPlScore": 14.2,
+        "idStabilityScore": 10,
+        "substMinutesScore": 3.9,
+        "oddsScore": 10
+      },
+      "calendar_type_confirmed": "EUROPEAN_SEASON",
+      "proposed_split": "WARMUP=2021-22, TRAIN=2022-23, OOS_DEV=2023-24, OOS_FINAL=2024-25 (identique au split PL)"
+    },
+    {
+      "id": 218,
+      "name": "Bundesliga",
+      "country": "Austria",
+      "calendar_type": "EUROPEAN_SEASON",
+      "n_seasons_total": 16,
+      "covered_years": [
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ],
+      "current_season_odds_flag": true,
+      "probe_analysis": {
+        "n_seasons_probed": 3,
+        "n_valid": 3,
+        "n_empty": 0,
+        "n_no_fixtures": 0,
+        "empty_seasons": [],
+        "no_fixture_seasons": [],
+        "avg_shots_non_null": 0.2786666666666667,
+        "avg_sot_non_null": 0.18166666666666667,
+        "avg_minutes_non_null": 0.7506666666666666,
+        "avg_scorer_id_mapping": 1,
+        "season_matrix": [
+          {
+            "season": 2021,
+            "status": "PASS",
+            "n_fixtures": 195,
+            "player_rows": 36,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2023,
+            "status": "PASS",
+            "n_fixtures": 195,
+            "player_rows": 36,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2025,
+            "status": "PASS",
+            "n_fixtures": 195,
+            "player_rows": 40,
+            "lineups_teams": 2
+          }
+        ]
+      },
+      "SCORE_DATA_GATE": "PASS",
+      "PLAYER_DATA_GATE": "PASS",
+      "coverage_score": 89,
+      "score_breakdown": {
+        "total": 89,
+        "depthScore": 16,
+        "fixturesScore": 10,
+        "eventsScore": 10,
+        "lineupsScore": 15,
+        "statPlScore": 14.2,
+        "idStabilityScore": 10,
+        "substMinutesScore": 3.8,
+        "oddsScore": 10
+      },
+      "calendar_type_confirmed": "EUROPEAN_SEASON",
+      "proposed_split": "WARMUP=2021-22, TRAIN=2022-23, OOS_DEV=2023-24, OOS_FINAL=2024-25 (identique au split PL)"
+    },
+    {
+      "id": 253,
+      "name": "Major League Soccer",
+      "country": "USA",
+      "calendar_type": "CALENDAR_YEAR_SEASON",
+      "n_seasons_total": 15,
+      "covered_years": [
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ],
+      "current_season_odds_flag": true,
+      "probe_analysis": {
+        "n_seasons_probed": 3,
+        "n_valid": 3,
+        "n_empty": 0,
+        "n_no_fixtures": 0,
+        "empty_seasons": [],
+        "no_fixture_seasons": [],
+        "avg_shots_non_null": 0.3,
+        "avg_sot_non_null": 0.18333333333333335,
+        "avg_minutes_non_null": 0.7833333333333332,
+        "avg_scorer_id_mapping": 1,
+        "season_matrix": [
+          {
+            "season": 2021,
+            "status": "PASS",
+            "n_fixtures": 467,
+            "player_rows": 40,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2023,
+            "status": "PASS",
+            "n_fixtures": 516,
+            "player_rows": 40,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2025,
+            "status": "PASS",
+            "n_fixtures": 533,
+            "player_rows": 40,
+            "lineups_teams": 2
+          }
+        ]
+      },
+      "SCORE_DATA_GATE": "PASS",
+      "PLAYER_DATA_GATE": "PASS",
+      "coverage_score": 89,
+      "score_breakdown": {
+        "total": 89,
+        "depthScore": 15,
+        "fixturesScore": 10,
+        "eventsScore": 10,
+        "lineupsScore": 15,
+        "statPlScore": 14.7,
+        "idStabilityScore": 10,
+        "substMinutesScore": 3.9,
+        "oddsScore": 10
+      },
+      "calendar_type_confirmed": "CALENDAR_YEAR_SEASON",
+      "proposed_split": "WARMUP=2021, TRAIN=2022, OOS_DEV=2023, OOS_FINAL=2024 (annees civiles, meme principe que PL adapte au calendrier)"
+    },
+    {
+      "id": 135,
+      "name": "Serie A",
+      "country": "Italy",
+      "calendar_type": "EUROPEAN_SEASON",
+      "n_seasons_total": 17,
+      "covered_years": [
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ],
+      "current_season_odds_flag": true,
+      "probe_analysis": {
+        "n_seasons_probed": 3,
+        "n_valid": 3,
+        "n_empty": 0,
+        "n_no_fixtures": 0,
+        "empty_seasons": [],
+        "no_fixture_seasons": [],
+        "avg_shots_non_null": 0.25766666666666665,
+        "avg_sot_non_null": 0.14566666666666667,
+        "avg_minutes_non_null": 0.6853333333333333,
+        "avg_scorer_id_mapping": 1,
+        "season_matrix": [
+          {
+            "season": 2021,
+            "status": "PASS",
+            "n_fixtures": 380,
+            "player_rows": 45,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2023,
+            "status": "PASS",
+            "n_fixtures": 380,
+            "player_rows": 41,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2025,
+            "status": "PASS",
+            "n_fixtures": 380,
+            "player_rows": 47,
+            "lineups_teams": 2
+          }
+        ]
+      },
+      "SCORE_DATA_GATE": "PASS",
+      "PLAYER_DATA_GATE": "PASS",
+      "coverage_score": 88,
+      "score_breakdown": {
+        "total": 88,
+        "depthScore": 17,
+        "fixturesScore": 10,
+        "eventsScore": 10,
+        "lineupsScore": 15,
+        "statPlScore": 13.1,
+        "idStabilityScore": 10,
+        "substMinutesScore": 3.4,
+        "oddsScore": 10
+      },
+      "calendar_type_confirmed": "EUROPEAN_SEASON",
+      "proposed_split": "WARMUP=2021-22, TRAIN=2022-23, OOS_DEV=2023-24, OOS_FINAL=2024-25 (identique au split PL)"
+    },
+    {
+      "id": 204,
+      "name": "1. Lig",
+      "country": "Turkey",
+      "calendar_type": "EUROPEAN_SEASON",
+      "n_seasons_total": 16,
+      "covered_years": [
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ],
+      "current_season_odds_flag": true,
+      "probe_analysis": {
+        "n_seasons_probed": 3,
+        "n_valid": 3,
+        "n_empty": 0,
+        "n_no_fixtures": 0,
+        "empty_seasons": [],
+        "no_fixture_seasons": [],
+        "avg_shots_non_null": 0.25233333333333335,
+        "avg_sot_non_null": 0.13933333333333334,
+        "avg_minutes_non_null": 0.7999999999999999,
+        "avg_scorer_id_mapping": 1,
+        "season_matrix": [
+          {
+            "season": 2021,
+            "status": "PASS",
+            "n_fixtures": 347,
+            "player_rows": 38,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2023,
+            "status": "PASS",
+            "n_fixtures": 309,
+            "player_rows": 39,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2025,
+            "status": "PASS",
+            "n_fixtures": 383,
+            "player_rows": 38,
+            "lineups_teams": 2
+          }
+        ]
+      },
+      "SCORE_DATA_GATE": "PASS",
+      "PLAYER_DATA_GATE": "PASS",
+      "coverage_score": 88,
+      "score_breakdown": {
+        "total": 88,
+        "depthScore": 16,
+        "fixturesScore": 10,
+        "eventsScore": 10,
+        "lineupsScore": 15,
+        "statPlScore": 12.8,
+        "idStabilityScore": 10,
+        "substMinutesScore": 4,
+        "oddsScore": 10
+      },
+      "calendar_type_confirmed": "EUROPEAN_SEASON",
+      "proposed_split": "WARMUP=2021-22, TRAIN=2022-23, OOS_DEV=2023-24, OOS_FINAL=2024-25 (identique au split PL)"
+    },
+    {
+      "id": 113,
+      "name": "Allsvenskan",
+      "country": "Sweden",
+      "calendar_type": "CALENDAR_YEAR_SEASON",
+      "n_seasons_total": 11,
+      "covered_years": [
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ],
+      "current_season_odds_flag": true,
+      "probe_analysis": {
+        "n_seasons_probed": 3,
+        "n_valid": 3,
+        "n_empty": 0,
+        "n_no_fixtures": 0,
+        "empty_seasons": [],
+        "no_fixture_seasons": [],
+        "avg_shots_non_null": 0.34299999999999997,
+        "avg_sot_non_null": 0.218,
+        "avg_minutes_non_null": 0.8213333333333335,
+        "avg_scorer_id_mapping": 1,
+        "season_matrix": [
+          {
+            "season": 2021,
+            "status": "PASS",
+            "n_fixtures": 242,
+            "player_rows": 35,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2023,
+            "status": "PASS",
+            "n_fixtures": 242,
+            "player_rows": 40,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2025,
+            "status": "PASS",
+            "n_fixtures": 242,
+            "player_rows": 40,
+            "lineups_teams": 2
+          }
+        ]
+      },
+      "SCORE_DATA_GATE": "PASS",
+      "PLAYER_DATA_GATE": "PASS",
+      "coverage_score": 86,
+      "score_breakdown": {
+        "total": 86,
+        "depthScore": 11,
+        "fixturesScore": 10,
+        "eventsScore": 10,
+        "lineupsScore": 15,
+        "statPlScore": 16.2,
+        "idStabilityScore": 10,
+        "substMinutesScore": 4.1,
+        "oddsScore": 10
+      },
+      "calendar_type_confirmed": "CALENDAR_YEAR_SEASON",
+      "proposed_split": "WARMUP=2021, TRAIN=2022, OOS_DEV=2023, OOS_FINAL=2024 (annees civiles, meme principe que PL adapte au calendrier)"
+    },
+    {
+      "id": 103,
+      "name": "Eliteserien",
+      "country": "Norway",
+      "calendar_type": "CALENDAR_YEAR_SEASON",
+      "n_seasons_total": 11,
+      "covered_years": [
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ],
+      "current_season_odds_flag": true,
+      "probe_analysis": {
+        "n_seasons_probed": 3,
+        "n_valid": 3,
+        "n_empty": 0,
+        "n_no_fixtures": 0,
+        "empty_seasons": [],
+        "no_fixture_seasons": [],
+        "avg_shots_non_null": 0.25933333333333336,
+        "avg_sot_non_null": 0.19000000000000003,
+        "avg_minutes_non_null": 0.7583333333333333,
+        "avg_scorer_id_mapping": 1,
+        "season_matrix": [
+          {
+            "season": 2021,
+            "status": "PASS",
+            "n_fixtures": 240,
+            "player_rows": 38,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2023,
+            "status": "PASS",
+            "n_fixtures": 241,
+            "player_rows": 39,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2025,
+            "status": "PASS",
+            "n_fixtures": 241,
+            "player_rows": 39,
+            "lineups_teams": 2
+          }
+        ]
+      },
+      "SCORE_DATA_GATE": "PASS",
+      "PLAYER_DATA_GATE": "PASS",
+      "coverage_score": 84,
+      "score_breakdown": {
+        "total": 84,
+        "depthScore": 11,
+        "fixturesScore": 10,
+        "eventsScore": 10,
+        "lineupsScore": 15,
+        "statPlScore": 14,
+        "idStabilityScore": 10,
+        "substMinutesScore": 3.8,
+        "oddsScore": 10
+      },
+      "calendar_type_confirmed": "CALENDAR_YEAR_SEASON",
+      "proposed_split": "WARMUP=2021, TRAIN=2022, OOS_DEV=2023, OOS_FINAL=2024 (annees civiles, meme principe que PL adapte au calendrier)"
+    },
+    {
+      "id": 207,
+      "name": "Super League",
+      "country": "Switzerland",
+      "calendar_type": "EUROPEAN_SEASON",
+      "n_seasons_total": 11,
+      "covered_years": [
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ],
+      "current_season_odds_flag": true,
+      "probe_analysis": {
+        "n_seasons_probed": 3,
+        "n_valid": 3,
+        "n_empty": 0,
+        "n_no_fixtures": 0,
+        "empty_seasons": [],
+        "no_fixture_seasons": [],
+        "avg_shots_non_null": 0.25533333333333336,
+        "avg_sot_non_null": 0.16933333333333334,
+        "avg_minutes_non_null": 0.8036666666666669,
+        "avg_scorer_id_mapping": 1,
+        "season_matrix": [
+          {
+            "season": 2021,
+            "status": "PASS",
+            "n_fixtures": 182,
+            "player_rows": 37,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2023,
+            "status": "PASS",
+            "n_fixtures": 230,
+            "player_rows": 40,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2025,
+            "status": "PASS",
+            "n_fixtures": 229,
+            "player_rows": 40,
+            "lineups_teams": 2
+          }
+        ]
+      },
+      "SCORE_DATA_GATE": "PASS",
+      "PLAYER_DATA_GATE": "PASS",
+      "coverage_score": 84,
+      "score_breakdown": {
+        "total": 84,
+        "depthScore": 11,
+        "fixturesScore": 10,
+        "eventsScore": 10,
+        "lineupsScore": 15,
+        "statPlScore": 13.5,
+        "idStabilityScore": 10,
+        "substMinutesScore": 4,
+        "oddsScore": 10
+      },
+      "calendar_type_confirmed": "EUROPEAN_SEASON",
+      "proposed_split": "WARMUP=2021-22, TRAIN=2022-23, OOS_DEV=2023-24, OOS_FINAL=2024-25 (identique au split PL)"
+    },
+    {
+      "id": 72,
+      "name": "Serie B",
+      "country": "Brazil",
+      "n_seasons_total": 15,
+      "covered_years": [
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ],
+      "current_season_odds_flag": true,
+      "probe_analysis": {
+        "n_seasons_probed": 3,
+        "n_valid": 3,
+        "n_empty": 0,
+        "n_no_fixtures": 0,
+        "empty_seasons": [],
+        "no_fixture_seasons": [],
+        "avg_shots_non_null": 0.2663333333333333,
+        "avg_sot_non_null": 0.126,
+        "avg_minutes_non_null": 0.6893333333333334,
+        "avg_scorer_id_mapping": null,
+        "season_matrix": [
+          {
+            "season": 2021,
+            "status": "PASS",
+            "n_fixtures": 380,
+            "player_rows": 45,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2023,
+            "status": "PASS",
+            "n_fixtures": 380,
+            "player_rows": 44,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2025,
+            "status": "PASS",
+            "n_fixtures": 380,
+            "player_rows": 46,
+            "lineups_teams": 2
+          }
+        ]
+      },
+      "SCORE_DATA_GATE": "PASS",
+      "PLAYER_DATA_GATE": "PASS",
+      "coverage_score": 84,
+      "score_breakdown": {
+        "total": 84,
+        "depthScore": 15,
+        "fixturesScore": 10,
+        "eventsScore": 10,
+        "lineupsScore": 15,
+        "statPlScore": 12.8,
+        "idStabilityScore": 8,
+        "substMinutesScore": 3.4,
+        "oddsScore": 10
+      },
+      "calendar_type_confirmed": "CALENDAR_YEAR_SEASON",
+      "proposed_split": "WARMUP=2021, TRAIN=2022, OOS_DEV=2023, OOS_FINAL=2024 (annees civiles, meme principe que PL adapte au calendrier)"
+    },
+    {
+      "id": 141,
+      "name": "Segunda División",
+      "country": "Spain",
+      "calendar_type": "EUROPEAN_SEASON",
+      "n_seasons_total": 11,
+      "covered_years": [
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ],
+      "current_season_odds_flag": true,
+      "probe_analysis": {
+        "n_seasons_probed": 3,
+        "n_valid": 3,
+        "n_empty": 0,
+        "n_no_fixtures": 0,
+        "empty_seasons": [],
+        "no_fixture_seasons": [],
+        "avg_shots_non_null": 0.283,
+        "avg_sot_non_null": 0.122,
+        "avg_minutes_non_null": 0.7513333333333333,
+        "avg_scorer_id_mapping": 1,
+        "season_matrix": [
+          {
+            "season": 2021,
+            "status": "PASS",
+            "n_fixtures": 468,
+            "player_rows": 42,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2023,
+            "status": "PASS",
+            "n_fixtures": 468,
+            "player_rows": 39,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2025,
+            "status": "PASS",
+            "n_fixtures": 468,
+            "player_rows": 43,
+            "lineups_teams": 2
+          }
+        ]
+      },
+      "SCORE_DATA_GATE": "PASS",
+      "PLAYER_DATA_GATE": "PASS",
+      "coverage_score": 83,
+      "score_breakdown": {
+        "total": 83,
+        "depthScore": 11,
+        "fixturesScore": 10,
+        "eventsScore": 10,
+        "lineupsScore": 15,
+        "statPlScore": 13.1,
+        "idStabilityScore": 10,
+        "substMinutesScore": 3.8,
+        "oddsScore": 10
+      },
+      "calendar_type_confirmed": "EUROPEAN_SEASON",
+      "proposed_split": "WARMUP=2021-22, TRAIN=2022-23, OOS_DEV=2023-24, OOS_FINAL=2024-25 (identique au split PL)"
+    },
+    {
+      "id": 89,
+      "name": "Eerste Divisie",
+      "country": "Netherlands",
+      "calendar_type": "EUROPEAN_SEASON",
+      "n_seasons_total": 11,
+      "covered_years": [
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ],
+      "current_season_odds_flag": true,
+      "probe_analysis": {
+        "n_seasons_probed": 3,
+        "n_valid": 3,
+        "n_empty": 0,
+        "n_no_fixtures": 0,
+        "empty_seasons": [],
+        "no_fixture_seasons": [],
+        "avg_shots_non_null": 0.26366666666666666,
+        "avg_sot_non_null": 0.14666666666666667,
+        "avg_minutes_non_null": 0.7226666666666667,
+        "avg_scorer_id_mapping": 1,
+        "season_matrix": [
+          {
+            "season": 2021,
+            "status": "PASS",
+            "n_fixtures": 380,
+            "player_rows": 44,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2023,
+            "status": "PASS",
+            "n_fixtures": 380,
+            "player_rows": 45,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2025,
+            "status": "PASS",
+            "n_fixtures": 390,
+            "player_rows": 40,
+            "lineups_teams": 2
+          }
+        ]
+      },
+      "SCORE_DATA_GATE": "PASS",
+      "PLAYER_DATA_GATE": "PASS",
+      "coverage_score": 83,
+      "score_breakdown": {
+        "total": 83,
+        "depthScore": 11,
+        "fixturesScore": 10,
+        "eventsScore": 10,
+        "lineupsScore": 15,
+        "statPlScore": 13.2,
+        "idStabilityScore": 10,
+        "substMinutesScore": 3.6,
+        "oddsScore": 10
+      },
+      "calendar_type_confirmed": "EUROPEAN_SEASON",
+      "proposed_split": "WARMUP=2021-22, TRAIN=2022-23, OOS_DEV=2023-24, OOS_FINAL=2024-25 (identique au split PL)"
+    },
+    {
+      "id": 235,
+      "name": "Premier League",
+      "country": "Russia",
+      "calendar_type": "EUROPEAN_SEASON",
+      "n_seasons_total": 11,
+      "covered_years": [
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ],
+      "current_season_odds_flag": true,
+      "probe_analysis": {
+        "n_seasons_probed": 3,
+        "n_valid": 3,
+        "n_empty": 0,
+        "n_no_fixtures": 0,
+        "empty_seasons": [],
+        "no_fixture_seasons": [],
+        "avg_shots_non_null": 0.2703333333333333,
+        "avg_sot_non_null": 0.147,
+        "avg_minutes_non_null": 0.6853333333333333,
+        "avg_scorer_id_mapping": 1,
+        "season_matrix": [
+          {
+            "season": 2021,
+            "status": "PASS",
+            "n_fixtures": 244,
+            "player_rows": 39,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2023,
+            "status": "PASS",
+            "n_fixtures": 244,
+            "player_rows": 43,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2025,
+            "status": "PASS",
+            "n_fixtures": 244,
+            "player_rows": 44,
+            "lineups_teams": 2
+          }
+        ]
+      },
+      "SCORE_DATA_GATE": "PASS",
+      "PLAYER_DATA_GATE": "PASS",
+      "coverage_score": 83,
+      "score_breakdown": {
+        "total": 83,
+        "depthScore": 11,
+        "fixturesScore": 10,
+        "eventsScore": 10,
+        "lineupsScore": 15,
+        "statPlScore": 13.3,
+        "idStabilityScore": 10,
+        "substMinutesScore": 3.4,
+        "oddsScore": 10
+      },
+      "calendar_type_confirmed": "EUROPEAN_SEASON",
+      "proposed_split": "WARMUP=2021-22, TRAIN=2022-23, OOS_DEV=2023-24, OOS_FINAL=2024-25 (identique au split PL)"
+    },
+    {
+      "id": 128,
+      "name": "Liga Profesional Argentina",
+      "country": "Argentina",
+      "calendar_type": "CALENDAR_YEAR_SEASON",
+      "n_seasons_total": 12,
+      "covered_years": [
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ],
+      "current_season_odds_flag": true,
+      "probe_analysis": {
+        "n_seasons_probed": 3,
+        "n_valid": 3,
+        "n_empty": 0,
+        "n_no_fixtures": 0,
+        "empty_seasons": [],
+        "no_fixture_seasons": [],
+        "avg_shots_non_null": 0.20766666666666667,
+        "avg_sot_non_null": 0.09333333333333334,
+        "avg_minutes_non_null": 0.7066666666666667,
+        "avg_scorer_id_mapping": 1,
+        "season_matrix": [
+          {
+            "season": 2021,
+            "status": "PASS",
+            "n_fixtures": 496,
+            "player_rows": 40,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2023,
+            "status": "PASS",
+            "n_fixtures": 378,
+            "player_rows": 46,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2025,
+            "status": "PASS",
+            "n_fixtures": 503,
+            "player_rows": 46,
+            "lineups_teams": 2
+          }
+        ]
+      },
+      "SCORE_DATA_GATE": "PASS",
+      "PLAYER_DATA_GATE": "PASS",
+      "coverage_score": 82,
+      "score_breakdown": {
+        "total": 82,
+        "depthScore": 12,
+        "fixturesScore": 10,
+        "eventsScore": 10,
+        "lineupsScore": 15,
+        "statPlScore": 11,
+        "idStabilityScore": 10,
+        "substMinutesScore": 3.5,
+        "oddsScore": 10
+      },
+      "calendar_type_confirmed": "CALENDAR_YEAR_SEASON",
+      "proposed_split": "WARMUP=2021, TRAIN=2022, OOS_DEV=2023, OOS_FINAL=2024 (annees civiles, meme principe que PL adapte au calendrier)"
+    },
+    {
+      "id": 169,
+      "name": "Super League",
+      "country": "China",
+      "calendar_type": "CALENDAR_YEAR_SEASON",
+      "n_seasons_total": 11,
+      "covered_years": [
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ],
+      "current_season_odds_flag": true,
+      "probe_analysis": {
+        "n_seasons_probed": 3,
+        "n_valid": 3,
+        "n_empty": 0,
+        "n_no_fixtures": 0,
+        "empty_seasons": [],
+        "no_fixture_seasons": [],
+        "avg_shots_non_null": 0.22633333333333336,
+        "avg_sot_non_null": 0.13133333333333333,
+        "avg_minutes_non_null": 0.6786666666666666,
+        "avg_scorer_id_mapping": 1,
+        "season_matrix": [
+          {
+            "season": 2021,
+            "status": "PASS",
+            "n_fixtures": 180,
+            "player_rows": 46,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2023,
+            "status": "PASS",
+            "n_fixtures": 240,
+            "player_rows": 46,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2025,
+            "status": "PASS",
+            "n_fixtures": 240,
+            "player_rows": 45,
+            "lineups_teams": 2
+          }
+        ]
+      },
+      "SCORE_DATA_GATE": "PASS",
+      "PLAYER_DATA_GATE": "PASS",
+      "coverage_score": 82,
+      "score_breakdown": {
+        "total": 82,
+        "depthScore": 11,
+        "fixturesScore": 10,
+        "eventsScore": 10,
+        "lineupsScore": 15,
+        "statPlScore": 12.2,
+        "idStabilityScore": 10,
+        "substMinutesScore": 3.4,
+        "oddsScore": 10
+      },
+      "calendar_type_confirmed": "CALENDAR_YEAR_SEASON",
+      "proposed_split": "WARMUP=2021, TRAIN=2022, OOS_DEV=2023, OOS_FINAL=2024 (annees civiles, meme principe que PL adapte au calendrier)"
+    },
+    {
+      "id": 262,
+      "name": "Liga MX",
+      "country": "Mexico",
+      "calendar_type": "EUROPEAN_SEASON",
+      "n_seasons_total": 11,
+      "covered_years": [
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ],
+      "current_season_odds_flag": true,
+      "probe_analysis": {
+        "n_seasons_probed": 3,
+        "n_valid": 3,
+        "n_empty": 0,
+        "n_no_fixtures": 0,
+        "empty_seasons": [],
+        "no_fixture_seasons": [],
+        "avg_shots_non_null": 0.246,
+        "avg_sot_non_null": 0.127,
+        "avg_minutes_non_null": 0.714,
+        "avg_scorer_id_mapping": 1,
+        "season_matrix": [
+          {
+            "season": 2021,
+            "status": "PASS",
+            "n_fixtures": 337,
+            "player_rows": 42,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2023,
+            "status": "PASS",
+            "n_fixtures": 337,
+            "player_rows": 42,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2025,
+            "status": "PASS",
+            "n_fixtures": 336,
+            "player_rows": 42,
+            "lineups_teams": 2
+          }
+        ]
+      },
+      "SCORE_DATA_GATE": "PASS",
+      "PLAYER_DATA_GATE": "PASS",
+      "coverage_score": 82,
+      "score_breakdown": {
+        "total": 82,
+        "depthScore": 11,
+        "fixturesScore": 10,
+        "eventsScore": 10,
+        "lineupsScore": 15,
+        "statPlScore": 12.5,
+        "idStabilityScore": 10,
+        "substMinutesScore": 3.6,
+        "oddsScore": 10
+      },
+      "calendar_type_confirmed": "EUROPEAN_SEASON",
+      "proposed_split": "WARMUP=2021-22, TRAIN=2022-23, OOS_DEV=2023-24, OOS_FINAL=2024-25 (identique au split PL)"
+    },
+    {
+      "id": 136,
+      "name": "Serie B",
+      "country": "Italy",
+      "n_seasons_total": 11,
+      "covered_years": [
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ],
+      "current_season_odds_flag": true,
+      "probe_analysis": {
+        "n_seasons_probed": 3,
+        "n_valid": 3,
+        "n_empty": 0,
+        "n_no_fixtures": 0,
+        "empty_seasons": [],
+        "no_fixture_seasons": [],
+        "avg_shots_non_null": 0.2866666666666667,
+        "avg_sot_non_null": 0.18333333333333335,
+        "avg_minutes_non_null": 0.699,
+        "avg_scorer_id_mapping": null,
+        "season_matrix": [
+          {
+            "season": 2021,
+            "status": "PASS",
+            "n_fixtures": 388,
+            "player_rows": 46,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2023,
+            "status": "PASS",
+            "n_fixtures": 389,
+            "player_rows": 44,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2025,
+            "status": "PASS",
+            "n_fixtures": 390,
+            "player_rows": 46,
+            "lineups_teams": 2
+          }
+        ]
+      },
+      "SCORE_DATA_GATE": "PASS",
+      "PLAYER_DATA_GATE": "PASS",
+      "coverage_score": 82,
+      "score_breakdown": {
+        "total": 82,
+        "depthScore": 11,
+        "fixturesScore": 10,
+        "eventsScore": 10,
+        "lineupsScore": 15,
+        "statPlScore": 14.4,
+        "idStabilityScore": 8,
+        "substMinutesScore": 3.5,
+        "oddsScore": 10
+      },
+      "calendar_type_confirmed": "EUROPEAN_SEASON",
+      "proposed_split": "WARMUP=2021-22, TRAIN=2022-23, OOS_DEV=2023-24, OOS_FINAL=2024-25 (identique au split PL)"
+    },
+    {
+      "id": 210,
+      "name": "HNL",
+      "country": "Croatia",
+      "calendar_type": "EUROPEAN_SEASON",
+      "n_seasons_total": 11,
+      "covered_years": [
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ],
+      "current_season_odds_flag": true,
+      "probe_analysis": {
+        "n_seasons_probed": 3,
+        "n_valid": 3,
+        "n_empty": 0,
+        "n_no_fixtures": 0,
+        "empty_seasons": [],
+        "no_fixture_seasons": [],
+        "avg_shots_non_null": 0.21933333333333335,
+        "avg_sot_non_null": 0.12633333333333333,
+        "avg_minutes_non_null": 0.7066666666666667,
+        "avg_scorer_id_mapping": 1,
+        "season_matrix": [
+          {
+            "season": 2021,
+            "status": "PASS",
+            "n_fixtures": 180,
+            "player_rows": 40,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2023,
+            "status": "PASS",
+            "n_fixtures": 180,
+            "player_rows": 43,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2025,
+            "status": "PASS",
+            "n_fixtures": 180,
+            "player_rows": 45,
+            "lineups_teams": 2
+          }
+        ]
+      },
+      "SCORE_DATA_GATE": "PASS",
+      "PLAYER_DATA_GATE": "PASS",
+      "coverage_score": 81,
+      "score_breakdown": {
+        "total": 81,
+        "depthScore": 11,
+        "fixturesScore": 10,
+        "eventsScore": 10,
+        "lineupsScore": 15,
+        "statPlScore": 11.9,
+        "idStabilityScore": 10,
+        "substMinutesScore": 3.5,
+        "oddsScore": 10
+      },
+      "calendar_type_confirmed": "EUROPEAN_SEASON",
+      "proposed_split": "WARMUP=2021-22, TRAIN=2022-23, OOS_DEV=2023-24, OOS_FINAL=2024-25 (identique au split PL)"
+    },
+    {
+      "id": 281,
+      "name": "Primera División",
+      "country": "Peru",
+      "calendar_type": "CALENDAR_YEAR_SEASON",
+      "n_seasons_total": 11,
+      "covered_years": [
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ],
+      "current_season_odds_flag": true,
+      "probe_analysis": {
+        "n_seasons_probed": 3,
+        "n_valid": 3,
+        "n_empty": 0,
+        "n_no_fixtures": 0,
+        "empty_seasons": [],
+        "no_fixture_seasons": [],
+        "avg_shots_non_null": 0.21033333333333334,
+        "avg_sot_non_null": 0.07033333333333334,
+        "avg_minutes_non_null": 0.786,
+        "avg_scorer_id_mapping": 1,
+        "season_matrix": [
+          {
+            "season": 2021,
+            "status": "PASS",
+            "n_fixtures": 235,
+            "player_rows": 36,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2023,
+            "status": "PASS",
+            "n_fixtures": 344,
+            "player_rows": 40,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2025,
+            "status": "PASS",
+            "n_fixtures": 331,
+            "player_rows": 40,
+            "lineups_teams": 2
+          }
+        ]
+      },
+      "SCORE_DATA_GATE": "PASS",
+      "PLAYER_DATA_GATE": "PASS",
+      "coverage_score": 81,
+      "score_breakdown": {
+        "total": 81,
+        "depthScore": 11,
+        "fixturesScore": 10,
+        "eventsScore": 10,
+        "lineupsScore": 15,
+        "statPlScore": 10.6,
+        "idStabilityScore": 10,
+        "substMinutesScore": 3.9,
+        "oddsScore": 10
+      },
+      "calendar_type_confirmed": "CALENDAR_YEAR_SEASON",
+      "proposed_split": "WARMUP=2021, TRAIN=2022, OOS_DEV=2023, OOS_FINAL=2024 (annees civiles, meme principe que PL adapte au calendrier)"
+    },
+    {
+      "id": 307,
+      "name": "Pro League",
+      "country": "Saudi-Arabia",
+      "calendar_type": "EUROPEAN_SEASON",
+      "n_seasons_total": 11,
+      "covered_years": [
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ],
+      "current_season_odds_flag": true,
+      "probe_analysis": {
+        "n_seasons_probed": 3,
+        "n_valid": 3,
+        "n_empty": 0,
+        "n_no_fixtures": 0,
+        "empty_seasons": [],
+        "no_fixture_seasons": [],
+        "avg_shots_non_null": 0.275,
+        "avg_sot_non_null": 0.125,
+        "avg_minutes_non_null": 0.7416666666666666,
+        "avg_scorer_id_mapping": 0.8333333333333334,
+        "season_matrix": [
+          {
+            "season": 2021,
+            "status": "PASS",
+            "n_fixtures": 240,
+            "player_rows": 40,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2023,
+            "status": "PASS",
+            "n_fixtures": 306,
+            "player_rows": 40,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2025,
+            "status": "PASS",
+            "n_fixtures": 306,
+            "player_rows": 40,
+            "lineups_teams": 2
+          }
+        ]
+      },
+      "SCORE_DATA_GATE": "PASS",
+      "PLAYER_DATA_GATE": "PASS",
+      "coverage_score": 81,
+      "score_breakdown": {
+        "total": 81,
+        "depthScore": 11,
+        "fixturesScore": 10,
+        "eventsScore": 10,
+        "lineupsScore": 15,
+        "statPlScore": 13,
+        "idStabilityScore": 8.3,
+        "substMinutesScore": 3.7,
+        "oddsScore": 10
+      },
+      "calendar_type_confirmed": "EUROPEAN_SEASON",
+      "proposed_split": "WARMUP=2021-22, TRAIN=2022-23, OOS_DEV=2023-24, OOS_FINAL=2024-25 (identique au split PL)"
+    },
+    {
+      "id": 106,
+      "name": "Ekstraklasa",
+      "country": "Poland",
+      "calendar_type": "EUROPEAN_SEASON",
+      "n_seasons_total": 9,
+      "covered_years": [
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ],
+      "current_season_odds_flag": true,
+      "probe_analysis": {
+        "n_seasons_probed": 3,
+        "n_valid": 3,
+        "n_empty": 0,
+        "n_no_fixtures": 0,
+        "empty_seasons": [],
+        "no_fixture_seasons": [],
+        "avg_shots_non_null": 0.27899999999999997,
+        "avg_sot_non_null": 0.12266666666666666,
+        "avg_minutes_non_null": 0.7476666666666666,
+        "avg_scorer_id_mapping": 1,
+        "season_matrix": [
+          {
+            "season": 2021,
+            "status": "PASS",
+            "n_fixtures": 306,
+            "player_rows": 40,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2023,
+            "status": "PASS",
+            "n_fixtures": 306,
+            "player_rows": 39,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2025,
+            "status": "PASS",
+            "n_fixtures": 306,
+            "player_rows": 43,
+            "lineups_teams": 2
+          }
+        ]
+      },
+      "SCORE_DATA_GATE": "PASS",
+      "PLAYER_DATA_GATE": "PASS",
+      "coverage_score": 81,
+      "score_breakdown": {
+        "total": 81,
+        "depthScore": 9,
+        "fixturesScore": 10,
+        "eventsScore": 10,
+        "lineupsScore": 15,
+        "statPlScore": 13,
+        "idStabilityScore": 10,
+        "substMinutesScore": 3.7,
+        "oddsScore": 10
+      },
+      "calendar_type_confirmed": "EUROPEAN_SEASON",
+      "proposed_split": "WARMUP=2021-22, TRAIN=2022-23, OOS_DEV=2023-24, OOS_FINAL=2024-25 (identique au split PL)"
+    },
+    {
+      "id": 145,
+      "name": "Challenger Pro League",
+      "country": "Belgium",
+      "calendar_type": "EUROPEAN_SEASON",
+      "n_seasons_total": 11,
+      "covered_years": [
+        2023,
+        2024,
+        2025
+      ],
+      "current_season_odds_flag": true,
+      "probe_analysis": {
+        "n_seasons_probed": 3,
+        "n_valid": 3,
+        "n_empty": 0,
+        "n_no_fixtures": 0,
+        "empty_seasons": [],
+        "no_fixture_seasons": [],
+        "avg_shots_non_null": 0.30633333333333335,
+        "avg_sot_non_null": 0.18333333333333335,
+        "avg_minutes_non_null": 0.7526666666666667,
+        "avg_scorer_id_mapping": 1,
+        "season_matrix": [
+          {
+            "season": 2023,
+            "status": "PASS",
+            "n_fixtures": 246,
+            "player_rows": 36,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2024,
+            "status": "PASS",
+            "n_fixtures": 230,
+            "player_rows": 40,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2025,
+            "status": "PASS",
+            "n_fixtures": 271,
+            "player_rows": 40,
+            "lineups_teams": 2
+          }
+        ]
+      },
+      "SCORE_DATA_GATE": "PASS",
+      "PLAYER_DATA_GATE": "PASS",
+      "coverage_score": 81,
+      "score_breakdown": {
+        "total": 81,
+        "depthScore": 11,
+        "fixturesScore": 6,
+        "eventsScore": 10,
+        "lineupsScore": 15,
+        "statPlScore": 14.8,
+        "idStabilityScore": 10,
+        "substMinutesScore": 3.8,
+        "oddsScore": 10
+      },
+      "calendar_type_confirmed": "EUROPEAN_SEASON",
+      "proposed_split": "WARMUP=2021-22, TRAIN=2022-23, OOS_DEV=2023-24, OOS_FINAL=2024-25 (identique au split PL)"
+    },
+    {
+      "id": 265,
+      "name": "Primera División",
+      "country": "Chile",
+      "calendar_type": "CALENDAR_YEAR_SEASON",
+      "n_seasons_total": 9,
+      "covered_years": [
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ],
+      "current_season_odds_flag": true,
+      "probe_analysis": {
+        "n_seasons_probed": 3,
+        "n_valid": 3,
+        "n_empty": 0,
+        "n_no_fixtures": 0,
+        "empty_seasons": [],
+        "no_fixture_seasons": [],
+        "avg_shots_non_null": 0.324,
+        "avg_sot_non_null": 0.1386666666666667,
+        "avg_minutes_non_null": 0.7873333333333333,
+        "avg_scorer_id_mapping": 0.75,
+        "season_matrix": [
+          {
+            "season": 2021,
+            "status": "PASS",
+            "n_fixtures": 272,
+            "player_rows": 36,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2023,
+            "status": "PASS",
+            "n_fixtures": 240,
+            "player_rows": 36,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2025,
+            "status": "PASS",
+            "n_fixtures": 240,
+            "player_rows": 36,
+            "lineups_teams": 2
+          }
+        ]
+      },
+      "SCORE_DATA_GATE": "PASS",
+      "PLAYER_DATA_GATE": "PASS",
+      "coverage_score": 80,
+      "score_breakdown": {
+        "total": 80,
+        "depthScore": 9,
+        "fixturesScore": 10,
+        "eventsScore": 10,
+        "lineupsScore": 15,
+        "statPlScore": 14.3,
+        "idStabilityScore": 7.5,
+        "substMinutesScore": 3.9,
+        "oddsScore": 10
+      },
+      "calendar_type_confirmed": "CALENDAR_YEAR_SEASON",
+      "proposed_split": "WARMUP=2021, TRAIN=2022, OOS_DEV=2023, OOS_FINAL=2024 (annees civiles, meme principe que PL adapte au calendrier)"
+    },
+    {
+      "id": 188,
+      "name": "A-League",
+      "country": "Australia",
+      "calendar_type": "EUROPEAN_SEASON",
+      "n_seasons_total": 16,
+      "covered_years": [
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ],
+      "current_season_odds_flag": false,
+      "probe_analysis": {
+        "n_seasons_probed": 3,
+        "n_valid": 3,
+        "n_empty": 0,
+        "n_no_fixtures": 0,
+        "empty_seasons": [],
+        "no_fixture_seasons": [],
+        "avg_shots_non_null": 0.3176666666666667,
+        "avg_sot_non_null": 0.17800000000000002,
+        "avg_minutes_non_null": 0.8693333333333332,
+        "avg_scorer_id_mapping": 1,
+        "season_matrix": [
+          {
+            "season": 2021,
+            "status": "PASS",
+            "n_fixtures": 162,
+            "player_rows": 35,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2023,
+            "status": "PASS",
+            "n_fixtures": 166,
+            "player_rows": 36,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2025,
+            "status": "PASS",
+            "n_fixtures": 161,
+            "player_rows": 36,
+            "lineups_teams": 2
+          }
+        ]
+      },
+      "SCORE_DATA_GATE": "PASS",
+      "PLAYER_DATA_GATE": "PASS",
+      "coverage_score": 80,
+      "score_breakdown": {
+        "total": 80,
+        "depthScore": 16,
+        "fixturesScore": 10,
+        "eventsScore": 10,
+        "lineupsScore": 15,
+        "statPlScore": 14.9,
+        "idStabilityScore": 10,
+        "substMinutesScore": 4.3,
+        "oddsScore": 0
+      },
+      "calendar_type_confirmed": "EUROPEAN_SEASON",
+      "proposed_split": "WARMUP=2021-22, TRAIN=2022-23, OOS_DEV=2023-24, OOS_FINAL=2024-25 (identique au split PL)"
+    },
+    {
+      "id": 333,
+      "name": "Premier League",
+      "country": "Ukraine",
+      "calendar_type": "EUROPEAN_SEASON",
+      "n_seasons_total": 16,
+      "covered_years": [
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ],
+      "current_season_odds_flag": true,
+      "probe_analysis": {
+        "n_seasons_probed": 3,
+        "n_valid": 1,
+        "n_empty": 2,
+        "n_no_fixtures": 0,
+        "empty_seasons": [
+          2021,
+          2023
+        ],
+        "no_fixture_seasons": [],
+        "avg_shots_non_null": 0.5,
+        "avg_sot_non_null": 1,
+        "avg_minutes_non_null": 1,
+        "avg_scorer_id_mapping": 1,
+        "season_matrix": [
+          {
+            "season": 2021,
+            "status": "EMPTY_PLAYER_DATA",
+            "n_fixtures": 143,
+            "player_rows": 0,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2023,
+            "status": "EMPTY_PLAYER_DATA",
+            "n_fixtures": 244,
+            "player_rows": 0,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2025,
+            "status": "PASS",
+            "n_fixtures": 242,
+            "player_rows": 26,
+            "lineups_teams": 2
+          }
+        ]
+      },
+      "SCORE_DATA_GATE": "PASS",
+      "PLAYER_DATA_GATE": "BLOCKED",
+      "coverage_score": 79,
+      "score_breakdown": {
+        "total": 79,
+        "depthScore": 16,
+        "fixturesScore": 10,
+        "eventsScore": 3.333333333333333,
+        "lineupsScore": 5,
+        "statPlScore": 20,
+        "idStabilityScore": 10,
+        "substMinutesScore": 5,
+        "oddsScore": 10
+      },
+      "calendar_type_confirmed": "EUROPEAN_SEASON",
+      "proposed_split": "WARMUP=2021-22, TRAIN=2022-23, OOS_DEV=2023-24, OOS_FINAL=2024-25 (identique au split PL) - ATTENTION anomalie(s) detectee(s) sur [2021,2023] : split ci-dessus INVALIDE tel quel, redecoupage necessaire en evitant ces annees pour TRAIN/OOS_DEV/OOS_FINAL"
+    },
+    {
+      "id": 301,
+      "name": "Pro League",
+      "country": "United-Arab-Emirates",
+      "calendar_type": "EUROPEAN_SEASON",
+      "n_seasons_total": 16,
+      "covered_years": [
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ],
+      "current_season_odds_flag": true,
+      "probe_analysis": {
+        "n_seasons_probed": 3,
+        "n_valid": 2,
+        "n_empty": 1,
+        "n_no_fixtures": 0,
+        "empty_seasons": [
+          2021
+        ],
+        "no_fixture_seasons": [],
+        "avg_shots_non_null": 0.2835,
+        "avg_sot_non_null": 0.129,
+        "avg_minutes_non_null": 0.7210000000000001,
+        "avg_scorer_id_mapping": 1,
+        "season_matrix": [
+          {
+            "season": 2021,
+            "status": "EMPTY_PLAYER_DATA",
+            "n_fixtures": 182,
+            "player_rows": 0,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2023,
+            "status": "PASS",
+            "n_fixtures": 182,
+            "player_rows": 40,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2025,
+            "status": "PASS",
+            "n_fixtures": 182,
+            "player_rows": 45,
+            "lineups_teams": 2
+          }
+        ]
+      },
+      "SCORE_DATA_GATE": "PASS",
+      "PLAYER_DATA_GATE": "PARTIAL",
+      "coverage_score": 78,
+      "score_breakdown": {
+        "total": 78,
+        "depthScore": 16,
+        "fixturesScore": 10,
+        "eventsScore": 6.666666666666666,
+        "lineupsScore": 10,
+        "statPlScore": 11.6,
+        "idStabilityScore": 10,
+        "substMinutesScore": 3.6,
+        "oddsScore": 10
+      },
+      "calendar_type_confirmed": "EUROPEAN_SEASON",
+      "proposed_split": "WARMUP=2021-22, TRAIN=2022-23, OOS_DEV=2023-24, OOS_FINAL=2024-25 (identique au split PL) - ATTENTION anomalie(s) detectee(s) sur [2021] : split ci-dessus INVALIDE tel quel, redecoupage necessaire en evitant ces annees pour TRAIN/OOS_DEV/OOS_FINAL"
+    },
+    {
+      "id": 242,
+      "name": "Liga Pro",
+      "country": "Ecuador",
+      "calendar_type": "CALENDAR_YEAR_SEASON",
+      "n_seasons_total": 15,
+      "covered_years": [
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ],
+      "current_season_odds_flag": true,
+      "probe_analysis": {
+        "n_seasons_probed": 3,
+        "n_valid": 2,
+        "n_empty": 1,
+        "n_no_fixtures": 0,
+        "empty_seasons": [
+          2021
+        ],
+        "no_fixture_seasons": [],
+        "avg_shots_non_null": 0.3115,
+        "avg_sot_non_null": 0.15,
+        "avg_minutes_non_null": 0.75,
+        "avg_scorer_id_mapping": 1,
+        "season_matrix": [
+          {
+            "season": 2021,
+            "status": "EMPTY_PLAYER_DATA",
+            "n_fixtures": 242,
+            "player_rows": 0,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2023,
+            "status": "PASS",
+            "n_fixtures": 241,
+            "player_rows": 41,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2025,
+            "status": "PASS",
+            "n_fixtures": 311,
+            "player_rows": 39,
+            "lineups_teams": 2
+          }
+        ]
+      },
+      "SCORE_DATA_GATE": "PASS",
+      "PLAYER_DATA_GATE": "PARTIAL",
+      "coverage_score": 78,
+      "score_breakdown": {
+        "total": 78,
+        "depthScore": 15,
+        "fixturesScore": 10,
+        "eventsScore": 6.666666666666666,
+        "lineupsScore": 10,
+        "statPlScore": 12.6,
+        "idStabilityScore": 10,
+        "substMinutesScore": 3.8,
+        "oddsScore": 10
+      },
+      "calendar_type_confirmed": "CALENDAR_YEAR_SEASON",
+      "proposed_split": "WARMUP=2021, TRAIN=2022, OOS_DEV=2023, OOS_FINAL=2024 (annees civiles, meme principe que PL adapte au calendrier) - ATTENTION anomalie(s) detectee(s) sur [2021] : split ci-dessus INVALIDE tel quel, redecoupage necessaire en evitant ces annees pour TRAIN/OOS_DEV/OOS_FINAL"
+    },
+    {
+      "id": 197,
+      "name": "Super League 1",
+      "country": "Greece",
+      "calendar_type": "EUROPEAN_SEASON",
+      "n_seasons_total": 16,
+      "covered_years": [
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ],
+      "current_season_odds_flag": true,
+      "probe_analysis": {
+        "n_seasons_probed": 3,
+        "n_valid": 2,
+        "n_empty": 1,
+        "n_no_fixtures": 0,
+        "empty_seasons": [
+          2021
+        ],
+        "no_fixture_seasons": [],
+        "avg_shots_non_null": 0.2415,
+        "avg_sot_non_null": 0.12,
+        "avg_minutes_non_null": 0.7355,
+        "avg_scorer_id_mapping": 1,
+        "season_matrix": [
+          {
+            "season": 2021,
+            "status": "EMPTY_PLAYER_DATA",
+            "n_fixtures": 242,
+            "player_rows": 0,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2023,
+            "status": "PASS",
+            "n_fixtures": 240,
+            "player_rows": 40,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2025,
+            "status": "PASS",
+            "n_fixtures": 236,
+            "player_rows": 46,
+            "lineups_teams": 2
+          }
+        ]
+      },
+      "SCORE_DATA_GATE": "PASS",
+      "PLAYER_DATA_GATE": "PARTIAL",
+      "coverage_score": 77,
+      "score_breakdown": {
+        "total": 77,
+        "depthScore": 16,
+        "fixturesScore": 10,
+        "eventsScore": 6.666666666666666,
+        "lineupsScore": 10,
+        "statPlScore": 10.6,
+        "idStabilityScore": 10,
+        "substMinutesScore": 3.7,
+        "oddsScore": 10
+      },
+      "calendar_type_confirmed": "EUROPEAN_SEASON",
+      "proposed_split": "WARMUP=2021-22, TRAIN=2022-23, OOS_DEV=2023-24, OOS_FINAL=2024-25 (identique au split PL) - ATTENTION anomalie(s) detectee(s) sur [2021] : split ci-dessus INVALIDE tel quel, redecoupage necessaire en evitant ces annees pour TRAIN/OOS_DEV/OOS_FINAL"
+    },
+    {
+      "id": 239,
+      "name": "Primera A",
+      "country": "Colombia",
+      "calendar_type": "CALENDAR_YEAR_SEASON",
+      "n_seasons_total": 11,
+      "covered_years": [
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ],
+      "current_season_odds_flag": true,
+      "probe_analysis": {
+        "n_seasons_probed": 3,
+        "n_valid": 2,
+        "n_empty": 1,
+        "n_no_fixtures": 0,
+        "empty_seasons": [
+          2021
+        ],
+        "no_fixture_seasons": [],
+        "avg_shots_non_null": 0.398,
+        "avg_sot_non_null": 0.20700000000000002,
+        "avg_minutes_non_null": 0.849,
+        "avg_scorer_id_mapping": 1,
+        "season_matrix": [
+          {
+            "season": 2021,
+            "status": "EMPTY_PLAYER_DATA",
+            "n_fixtures": 411,
+            "player_rows": 0,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2023,
+            "status": "PASS",
+            "n_fixtures": 450,
+            "player_rows": 36,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2025,
+            "status": "PASS",
+            "n_fixtures": 450,
+            "player_rows": 37,
+            "lineups_teams": 2
+          }
+        ]
+      },
+      "SCORE_DATA_GATE": "PASS",
+      "PLAYER_DATA_GATE": "PARTIAL",
+      "coverage_score": 77,
+      "score_breakdown": {
+        "total": 77,
+        "depthScore": 11,
+        "fixturesScore": 10,
+        "eventsScore": 6.666666666666666,
+        "lineupsScore": 10,
+        "statPlScore": 15.4,
+        "idStabilityScore": 10,
+        "substMinutesScore": 4.2,
+        "oddsScore": 10
+      },
+      "calendar_type_confirmed": "CALENDAR_YEAR_SEASON",
+      "proposed_split": "WARMUP=2021, TRAIN=2022, OOS_DEV=2023, OOS_FINAL=2024 (annees civiles, meme principe que PL adapte au calendrier) - ATTENTION anomalie(s) detectee(s) sur [2021] : split ci-dessus INVALIDE tel quel, redecoupage necessaire en evitant ces annees pour TRAIN/OOS_DEV/OOS_FINAL"
+    },
+    {
+      "id": 344,
+      "name": "Primera División",
+      "country": "Bolivia",
+      "calendar_type": "CALENDAR_YEAR_SEASON",
+      "n_seasons_total": 9,
+      "covered_years": [
+        2023,
+        2024,
+        2025
+      ],
+      "current_season_odds_flag": true,
+      "probe_analysis": {
+        "n_seasons_probed": 3,
+        "n_valid": 3,
+        "n_empty": 0,
+        "n_no_fixtures": 0,
+        "empty_seasons": [],
+        "no_fixture_seasons": [],
+        "avg_shots_non_null": 0.24333333333333332,
+        "avg_sot_non_null": 0.13133333333333333,
+        "avg_minutes_non_null": 0.7013333333333334,
+        "avg_scorer_id_mapping": 1,
+        "season_matrix": [
+          {
+            "season": 2023,
+            "status": "PASS",
+            "n_fixtures": 273,
+            "player_rows": 46,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2024,
+            "status": "PASS",
+            "n_fixtures": 319,
+            "player_rows": 41,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2025,
+            "status": "PASS",
+            "n_fixtures": 241,
+            "player_rows": 46,
+            "lineups_teams": 2
+          }
+        ]
+      },
+      "SCORE_DATA_GATE": "PASS",
+      "PLAYER_DATA_GATE": "PASS",
+      "coverage_score": 76,
+      "score_breakdown": {
+        "total": 76,
+        "depthScore": 9,
+        "fixturesScore": 6,
+        "eventsScore": 10,
+        "lineupsScore": 15,
+        "statPlScore": 12.5,
+        "idStabilityScore": 10,
+        "substMinutesScore": 3.5,
+        "oddsScore": 10
+      },
+      "calendar_type_confirmed": "CALENDAR_YEAR_SEASON",
+      "proposed_split": "WARMUP=2021, TRAIN=2022, OOS_DEV=2023, OOS_FINAL=2024 (annees civiles, meme principe que PL adapte au calendrier)"
+    },
+    {
+      "id": 305,
+      "name": "Stars League",
+      "country": "Qatar",
+      "calendar_type": "EUROPEAN_SEASON",
+      "n_seasons_total": 16,
+      "covered_years": [
+        2023,
+        2024,
+        2025
+      ],
+      "current_season_odds_flag": true,
+      "probe_analysis": {
+        "n_seasons_probed": 3,
+        "n_valid": 2,
+        "n_empty": 1,
+        "n_no_fixtures": 0,
+        "empty_seasons": [
+          2025
+        ],
+        "no_fixture_seasons": [],
+        "avg_shots_non_null": 0.276,
+        "avg_sot_non_null": 0.242,
+        "avg_minutes_non_null": 0.6890000000000001,
+        "avg_scorer_id_mapping": 0.9375,
+        "season_matrix": [
+          {
+            "season": 2023,
+            "status": "PASS",
+            "n_fixtures": 132,
+            "player_rows": 43,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2024,
+            "status": "PASS",
+            "n_fixtures": 132,
+            "player_rows": 44,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2025,
+            "status": "EMPTY_PLAYER_DATA",
+            "n_fixtures": 133,
+            "player_rows": 0,
+            "lineups_teams": 2
+          }
+        ]
+      },
+      "SCORE_DATA_GATE": "PASS",
+      "PLAYER_DATA_GATE": "PARTIAL",
+      "coverage_score": 75,
+      "score_breakdown": {
+        "total": 75,
+        "depthScore": 16,
+        "fixturesScore": 6,
+        "eventsScore": 6.666666666666666,
+        "lineupsScore": 10,
+        "statPlScore": 13.7,
+        "idStabilityScore": 9.4,
+        "substMinutesScore": 3.4,
+        "oddsScore": 10
+      },
+      "calendar_type_confirmed": "EUROPEAN_SEASON",
+      "proposed_split": "WARMUP=2021-22, TRAIN=2022-23, OOS_DEV=2023-24, OOS_FINAL=2024-25 (identique au split PL) - ATTENTION anomalie(s) detectee(s) sur [2025] : split ci-dessus INVALIDE tel quel, redecoupage necessaire en evitant ces annees pour TRAIN/OOS_DEV/OOS_FINAL"
+    },
+    {
+      "id": 283,
+      "name": "Liga I",
+      "country": "Romania",
+      "calendar_type": "EUROPEAN_SEASON",
+      "n_seasons_total": 11,
+      "covered_years": [
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ],
+      "current_season_odds_flag": true,
+      "probe_analysis": {
+        "n_seasons_probed": 3,
+        "n_valid": 2,
+        "n_empty": 1,
+        "n_no_fixtures": 0,
+        "empty_seasons": [
+          2021
+        ],
+        "no_fixture_seasons": [],
+        "avg_shots_non_null": 0.329,
+        "avg_sot_non_null": 0.159,
+        "avg_minutes_non_null": 0.7115,
+        "avg_scorer_id_mapping": 1,
+        "season_matrix": [
+          {
+            "season": 2021,
+            "status": "EMPTY_PLAYER_DATA",
+            "n_fixtures": 316,
+            "player_rows": 0,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2023,
+            "status": "PASS",
+            "n_fixtures": 320,
+            "player_rows": 40,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2025,
+            "status": "PASS",
+            "n_fixtures": 318,
+            "player_rows": 43,
+            "lineups_teams": 2
+          }
+        ]
+      },
+      "SCORE_DATA_GATE": "PASS",
+      "PLAYER_DATA_GATE": "PARTIAL",
+      "coverage_score": 74,
+      "score_breakdown": {
+        "total": 74,
+        "depthScore": 11,
+        "fixturesScore": 10,
+        "eventsScore": 6.666666666666666,
+        "lineupsScore": 10,
+        "statPlScore": 13.1,
+        "idStabilityScore": 10,
+        "substMinutesScore": 3.6,
+        "oddsScore": 10
+      },
+      "calendar_type_confirmed": "EUROPEAN_SEASON",
+      "proposed_split": "WARMUP=2021-22, TRAIN=2022-23, OOS_DEV=2023-24, OOS_FINAL=2024-25 (identique au split PL) - ATTENTION anomalie(s) detectee(s) sur [2021] : split ci-dessus INVALIDE tel quel, redecoupage necessaire en evitant ces annees pour TRAIN/OOS_DEV/OOS_FINAL"
+    },
+    {
+      "id": 292,
+      "name": "K League 1",
+      "country": "South-Korea",
+      "calendar_type": "CALENDAR_YEAR_SEASON",
+      "n_seasons_total": 11,
+      "covered_years": [
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ],
+      "current_season_odds_flag": true,
+      "probe_analysis": {
+        "n_seasons_probed": 3,
+        "n_valid": 2,
+        "n_empty": 1,
+        "n_no_fixtures": 0,
+        "empty_seasons": [
+          2023
+        ],
+        "no_fixture_seasons": [],
+        "avg_shots_non_null": 0.232,
+        "avg_sot_non_null": 0.154,
+        "avg_minutes_non_null": 0.803,
+        "avg_scorer_id_mapping": 1,
+        "season_matrix": [
+          {
+            "season": 2021,
+            "status": "PASS",
+            "n_fixtures": 230,
+            "player_rows": 36,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2023,
+            "status": "EMPTY_PLAYER_DATA",
+            "n_fixtures": 231,
+            "player_rows": 0,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2025,
+            "status": "PASS",
+            "n_fixtures": 232,
+            "player_rows": 40,
+            "lineups_teams": 2
+          }
+        ]
+      },
+      "SCORE_DATA_GATE": "PASS",
+      "PLAYER_DATA_GATE": "PARTIAL",
+      "coverage_score": 73,
+      "score_breakdown": {
+        "total": 73,
+        "depthScore": 11,
+        "fixturesScore": 10,
+        "eventsScore": 6.666666666666666,
+        "lineupsScore": 10,
+        "statPlScore": 11.1,
+        "idStabilityScore": 10,
+        "substMinutesScore": 4,
+        "oddsScore": 10
+      },
+      "calendar_type_confirmed": "CALENDAR_YEAR_SEASON",
+      "proposed_split": "WARMUP=2021, TRAIN=2022, OOS_DEV=2023, OOS_FINAL=2024 (annees civiles, meme principe que PL adapte au calendrier) - ATTENTION anomalie(s) detectee(s) sur [2023] : split ci-dessus INVALIDE tel quel, redecoupage necessaire en evitant ces annees pour TRAIN/OOS_DEV/OOS_FINAL"
+    },
+    {
+      "id": 296,
+      "name": "Thai League 1",
+      "country": "Thailand",
+      "calendar_type": "EUROPEAN_SEASON",
+      "n_seasons_total": 15,
+      "covered_years": [
+        2023,
+        2024,
+        2025
+      ],
+      "current_season_odds_flag": true,
+      "probe_analysis": {
+        "n_seasons_probed": 3,
+        "n_valid": 2,
+        "n_empty": 1,
+        "n_no_fixtures": 0,
+        "empty_seasons": [
+          2025
+        ],
+        "no_fixture_seasons": [],
+        "avg_shots_non_null": 0.2635,
+        "avg_sot_non_null": 0.1795,
+        "avg_minutes_non_null": 0.7024999999999999,
+        "avg_scorer_id_mapping": 1,
+        "season_matrix": [
+          {
+            "season": 2023,
+            "status": "PASS",
+            "n_fixtures": 240,
+            "player_rows": 40,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2024,
+            "status": "PASS",
+            "n_fixtures": 240,
+            "player_rows": 44,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2025,
+            "status": "EMPTY_PLAYER_DATA",
+            "n_fixtures": 240,
+            "player_rows": 0,
+            "lineups_teams": 2
+          }
+        ]
+      },
+      "SCORE_DATA_GATE": "PASS",
+      "PLAYER_DATA_GATE": "PARTIAL",
+      "coverage_score": 73,
+      "score_breakdown": {
+        "total": 73,
+        "depthScore": 15,
+        "fixturesScore": 6,
+        "eventsScore": 6.666666666666666,
+        "lineupsScore": 10,
+        "statPlScore": 12.2,
+        "idStabilityScore": 10,
+        "substMinutesScore": 3.5,
+        "oddsScore": 10
+      },
+      "calendar_type_confirmed": "EUROPEAN_SEASON",
+      "proposed_split": "WARMUP=2021-22, TRAIN=2022-23, OOS_DEV=2023-24, OOS_FINAL=2024-25 (identique au split PL) - ATTENTION anomalie(s) detectee(s) sur [2025] : split ci-dessus INVALIDE tel quel, redecoupage necessaire en evitant ces annees pour TRAIN/OOS_DEV/OOS_FINAL"
+    },
+    {
+      "id": 286,
+      "name": "Super Liga",
+      "country": "Serbia",
+      "calendar_type": "EUROPEAN_SEASON",
+      "n_seasons_total": 11,
+      "covered_years": [
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ],
+      "current_season_odds_flag": true,
+      "probe_analysis": {
+        "n_seasons_probed": 3,
+        "n_valid": 2,
+        "n_empty": 1,
+        "n_no_fixtures": 0,
+        "empty_seasons": [
+          2021
+        ],
+        "no_fixture_seasons": [],
+        "avg_shots_non_null": 0.253,
+        "avg_sot_non_null": 0.10400000000000001,
+        "avg_minutes_non_null": 0.6785,
+        "avg_scorer_id_mapping": 1,
+        "season_matrix": [
+          {
+            "season": 2021,
+            "status": "EMPTY_PLAYER_DATA",
+            "n_fixtures": 300,
+            "player_rows": 0,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2023,
+            "status": "PASS",
+            "n_fixtures": 300,
+            "player_rows": 43,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2025,
+            "status": "PASS",
+            "n_fixtures": 296,
+            "player_rows": 44,
+            "lineups_teams": 2
+          }
+        ]
+      },
+      "SCORE_DATA_GATE": "PASS",
+      "PLAYER_DATA_GATE": "PARTIAL",
+      "coverage_score": 72,
+      "score_breakdown": {
+        "total": 72,
+        "depthScore": 11,
+        "fixturesScore": 10,
+        "eventsScore": 6.666666666666666,
+        "lineupsScore": 10,
+        "statPlScore": 10.5,
+        "idStabilityScore": 10,
+        "substMinutesScore": 3.4,
+        "oddsScore": 10
+      },
+      "calendar_type_confirmed": "EUROPEAN_SEASON",
+      "proposed_split": "WARMUP=2021-22, TRAIN=2022-23, OOS_DEV=2023-24, OOS_FINAL=2024-25 (identique au split PL) - ATTENTION anomalie(s) detectee(s) sur [2021] : split ci-dessus INVALIDE tel quel, redecoupage necessaire en evitant ces annees pour TRAIN/OOS_DEV/OOS_FINAL"
+    },
+    {
+      "id": 172,
+      "name": "First League",
+      "country": "Bulgaria",
+      "calendar_type": "EUROPEAN_SEASON",
+      "n_seasons_total": 9,
+      "covered_years": [
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ],
+      "current_season_odds_flag": true,
+      "probe_analysis": {
+        "n_seasons_probed": 3,
+        "n_valid": 1,
+        "n_empty": 2,
+        "n_no_fixtures": 0,
+        "empty_seasons": [
+          2021,
+          2023
+        ],
+        "no_fixture_seasons": [],
+        "avg_shots_non_null": 0.3,
+        "avg_sot_non_null": 1,
+        "avg_minutes_non_null": 1,
+        "avg_scorer_id_mapping": 1,
+        "season_matrix": [
+          {
+            "season": 2021,
+            "status": "EMPTY_PLAYER_DATA",
+            "n_fixtures": 223,
+            "player_rows": 0,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2023,
+            "status": "EMPTY_PLAYER_DATA",
+            "n_fixtures": 283,
+            "player_rows": 0,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2025,
+            "status": "PASS",
+            "n_fixtures": 292,
+            "player_rows": 30,
+            "lineups_teams": 2
+          }
+        ]
+      },
+      "SCORE_DATA_GATE": "PASS",
+      "PLAYER_DATA_GATE": "BLOCKED",
+      "coverage_score": 72,
+      "score_breakdown": {
+        "total": 72,
+        "depthScore": 9,
+        "fixturesScore": 10,
+        "eventsScore": 3.333333333333333,
+        "lineupsScore": 5,
+        "statPlScore": 20,
+        "idStabilityScore": 10,
+        "substMinutesScore": 5,
+        "oddsScore": 10
+      },
+      "calendar_type_confirmed": "EUROPEAN_SEASON",
+      "proposed_split": "WARMUP=2021-22, TRAIN=2022-23, OOS_DEV=2023-24, OOS_FINAL=2024-25 (identique au split PL) - ATTENTION anomalie(s) detectee(s) sur [2021,2023] : split ci-dessus INVALIDE tel quel, redecoupage necessaire en evitant ces annees pour TRAIN/OOS_DEV/OOS_FINAL"
+    },
+    {
+      "id": 332,
+      "name": "Super Liga",
+      "country": "Slovakia",
+      "calendar_type": "EUROPEAN_SEASON",
+      "n_seasons_total": 9,
+      "covered_years": [
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ],
+      "current_season_odds_flag": true,
+      "probe_analysis": {
+        "n_seasons_probed": 3,
+        "n_valid": 2,
+        "n_empty": 1,
+        "n_no_fixtures": 0,
+        "empty_seasons": [
+          2021
+        ],
+        "no_fixture_seasons": [],
+        "avg_shots_non_null": 0.241,
+        "avg_sot_non_null": 0.16499999999999998,
+        "avg_minutes_non_null": 0.8105,
+        "avg_scorer_id_mapping": 0.75,
+        "season_matrix": [
+          {
+            "season": 2021,
+            "status": "EMPTY_PLAYER_DATA",
+            "n_fixtures": 195,
+            "player_rows": 0,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2023,
+            "status": "PASS",
+            "n_fixtures": 194,
+            "player_rows": 39,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2025,
+            "status": "PASS",
+            "n_fixtures": 192,
+            "player_rows": 40,
+            "lineups_teams": 2
+          }
+        ]
+      },
+      "SCORE_DATA_GATE": "PASS",
+      "PLAYER_DATA_GATE": "PARTIAL",
+      "coverage_score": 69,
+      "score_breakdown": {
+        "total": 69,
+        "depthScore": 9,
+        "fixturesScore": 10,
+        "eventsScore": 6.666666666666666,
+        "lineupsScore": 10,
+        "statPlScore": 11.5,
+        "idStabilityScore": 7.5,
+        "substMinutesScore": 4.1,
+        "oddsScore": 10
+      },
+      "calendar_type_confirmed": "EUROPEAN_SEASON",
+      "proposed_split": "WARMUP=2021-22, TRAIN=2022-23, OOS_DEV=2023-24, OOS_FINAL=2024-25 (identique au split PL) - ATTENTION anomalie(s) detectee(s) sur [2021] : split ci-dessus INVALIDE tel quel, redecoupage necessaire en evitant ces annees pour TRAIN/OOS_DEV/OOS_FINAL"
+    },
+    {
+      "id": 323,
+      "name": "Indian Super League",
+      "country": "India",
+      "calendar_type": "EUROPEAN_SEASON",
+      "n_seasons_total": 8,
+      "covered_years": [
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ],
+      "current_season_odds_flag": false,
+      "probe_analysis": {
+        "n_seasons_probed": 3,
+        "n_valid": 3,
+        "n_empty": 0,
+        "n_no_fixtures": 0,
+        "empty_seasons": [],
+        "no_fixture_seasons": [],
+        "avg_shots_non_null": 0.26666666666666666,
+        "avg_sot_non_null": 0.13333333333333333,
+        "avg_minutes_non_null": 0.6833333333333332,
+        "avg_scorer_id_mapping": 1,
+        "season_matrix": [
+          {
+            "season": 2021,
+            "status": "PASS",
+            "n_fixtures": 114,
+            "player_rows": 40,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2023,
+            "status": "PASS",
+            "n_fixtures": 138,
+            "player_rows": 40,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2025,
+            "status": "PASS",
+            "n_fixtures": 91,
+            "player_rows": 40,
+            "lineups_teams": 2
+          }
+        ]
+      },
+      "SCORE_DATA_GATE": "PASS",
+      "PLAYER_DATA_GATE": "PASS",
+      "coverage_score": 69,
+      "score_breakdown": {
+        "total": 69,
+        "depthScore": 8,
+        "fixturesScore": 10,
+        "eventsScore": 10,
+        "lineupsScore": 15,
+        "statPlScore": 13,
+        "idStabilityScore": 10,
+        "substMinutesScore": 3.4,
+        "oddsScore": 0
+      },
+      "calendar_type_confirmed": "EUROPEAN_SEASON",
+      "proposed_split": "WARMUP=2021-22, TRAIN=2022-23, OOS_DEV=2023-24, OOS_FINAL=2024-25 (identique au split PL)"
+    },
+    {
+      "id": 475,
+      "name": "Paulista - A1",
+      "country": "Brazil",
+      "calendar_type": "CALENDAR_YEAR_SEASON",
+      "n_seasons_total": 7,
+      "covered_years": [
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ],
+      "current_season_odds_flag": false,
+      "probe_analysis": {
+        "n_seasons_probed": 3,
+        "n_valid": 3,
+        "n_empty": 0,
+        "n_no_fixtures": 0,
+        "empty_seasons": [],
+        "no_fixture_seasons": [],
+        "avg_shots_non_null": 0.2623333333333333,
+        "avg_sot_non_null": 0.13833333333333334,
+        "avg_minutes_non_null": 0.6936666666666667,
+        "avg_scorer_id_mapping": 1,
+        "season_matrix": [
+          {
+            "season": 2021,
+            "status": "PASS",
+            "n_fixtures": 107,
+            "player_rows": 46,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2023,
+            "status": "PASS",
+            "n_fixtures": 104,
+            "player_rows": 45,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2025,
+            "status": "PASS",
+            "n_fixtures": 104,
+            "player_rows": 46,
+            "lineups_teams": 2
+          }
+        ]
+      },
+      "SCORE_DATA_GATE": "PASS",
+      "PLAYER_DATA_GATE": "PASS",
+      "coverage_score": 68,
+      "score_breakdown": {
+        "total": 68,
+        "depthScore": 7,
+        "fixturesScore": 10,
+        "eventsScore": 10,
+        "lineupsScore": 15,
+        "statPlScore": 13,
+        "idStabilityScore": 10,
+        "substMinutesScore": 3.5,
+        "oddsScore": 0
+      },
+      "calendar_type_confirmed": "CALENDAR_YEAR_SEASON",
+      "proposed_split": "WARMUP=2021, TRAIN=2022, OOS_DEV=2023, OOS_FINAL=2024 (annees civiles, meme principe que PL adapte au calendrier)"
+    },
+    {
+      "id": 357,
+      "name": "Premier Division",
+      "country": "Ireland",
+      "calendar_type": "CALENDAR_YEAR_SEASON",
+      "n_seasons_total": 8,
+      "covered_years": [
+        2023,
+        2024,
+        2025
+      ],
+      "current_season_odds_flag": true,
+      "probe_analysis": {
+        "n_seasons_probed": 3,
+        "n_valid": 2,
+        "n_empty": 1,
+        "n_no_fixtures": 0,
+        "empty_seasons": [
+          2023
+        ],
+        "no_fixture_seasons": [],
+        "avg_shots_non_null": 0.3125,
+        "avg_sot_non_null": 0.1875,
+        "avg_minutes_non_null": 0.725,
+        "avg_scorer_id_mapping": 1,
+        "season_matrix": [
+          {
+            "season": 2023,
+            "status": "EMPTY_PLAYER_DATA",
+            "n_fixtures": 180,
+            "player_rows": 0,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2024,
+            "status": "PASS",
+            "n_fixtures": 181,
+            "player_rows": 40,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2025,
+            "status": "PASS",
+            "n_fixtures": 181,
+            "player_rows": 40,
+            "lineups_teams": 2
+          }
+        ]
+      },
+      "SCORE_DATA_GATE": "PASS",
+      "PLAYER_DATA_GATE": "PARTIAL",
+      "coverage_score": 68,
+      "score_breakdown": {
+        "total": 68,
+        "depthScore": 8,
+        "fixturesScore": 6,
+        "eventsScore": 6.666666666666666,
+        "lineupsScore": 10,
+        "statPlScore": 13.3,
+        "idStabilityScore": 10,
+        "substMinutesScore": 3.6,
+        "oddsScore": 10
+      },
+      "calendar_type_confirmed": "CALENDAR_YEAR_SEASON",
+      "proposed_split": "WARMUP=2021, TRAIN=2022, OOS_DEV=2023, OOS_FINAL=2024 (annees civiles, meme principe que PL adapte au calendrier) - ATTENTION anomalie(s) detectee(s) sur [2023] : split ci-dessus INVALIDE tel quel, redecoupage necessaire en evitant ces annees pour TRAIN/OOS_DEV/OOS_FINAL"
+    },
+    {
+      "id": 271,
+      "name": "NB I",
+      "country": "Hungary",
+      "calendar_type": "EUROPEAN_SEASON",
+      "n_seasons_total": 16,
+      "covered_years": [
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ],
+      "current_season_odds_flag": true,
+      "probe_analysis": {
+        "n_seasons_probed": 3,
+        "n_valid": 1,
+        "n_empty": 2,
+        "n_no_fixtures": 0,
+        "empty_seasons": [
+          2021,
+          2025
+        ],
+        "no_fixture_seasons": [],
+        "avg_shots_non_null": 0.239,
+        "avg_sot_non_null": 0.087,
+        "avg_minutes_non_null": 0.652,
+        "avg_scorer_id_mapping": 1,
+        "season_matrix": [
+          {
+            "season": 2021,
+            "status": "EMPTY_PLAYER_DATA",
+            "n_fixtures": 198,
+            "player_rows": 0,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2023,
+            "status": "PASS",
+            "n_fixtures": 198,
+            "player_rows": 46,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2025,
+            "status": "EMPTY_PLAYER_DATA",
+            "n_fixtures": 198,
+            "player_rows": 0,
+            "lineups_teams": 2
+          }
+        ]
+      },
+      "SCORE_DATA_GATE": "PASS",
+      "PLAYER_DATA_GATE": "BLOCKED",
+      "coverage_score": 66,
+      "score_breakdown": {
+        "total": 66,
+        "depthScore": 16,
+        "fixturesScore": 10,
+        "eventsScore": 3.333333333333333,
+        "lineupsScore": 5,
+        "statPlScore": 8.2,
+        "idStabilityScore": 10,
+        "substMinutesScore": 3.3,
+        "oddsScore": 10
+      },
+      "calendar_type_confirmed": "EUROPEAN_SEASON",
+      "proposed_split": "WARMUP=2021-22, TRAIN=2022-23, OOS_DEV=2023-24, OOS_FINAL=2024-25 (identique au split PL) - ATTENTION anomalie(s) detectee(s) sur [2021,2025] : split ci-dessus INVALIDE tel quel, redecoupage necessaire en evitant ces annees pour TRAIN/OOS_DEV/OOS_FINAL"
+    },
+    {
+      "id": 479,
+      "name": "Canadian Premier League",
+      "country": "Canada",
+      "calendar_type": "CALENDAR_YEAR_SEASON",
+      "n_seasons_total": 7,
+      "covered_years": [
+        2023,
+        2024,
+        2025
+      ],
+      "current_season_odds_flag": true,
+      "probe_analysis": {
+        "n_seasons_probed": 3,
+        "n_valid": 2,
+        "n_empty": 1,
+        "n_no_fixtures": 0,
+        "empty_seasons": [
+          2025
+        ],
+        "no_fixture_seasons": [],
+        "avg_shots_non_null": 0.306,
+        "avg_sot_non_null": 0.153,
+        "avg_minutes_non_null": 0.8475,
+        "avg_scorer_id_mapping": 1,
+        "season_matrix": [
+          {
+            "season": 2023,
+            "status": "PASS",
+            "n_fixtures": 116,
+            "player_rows": 36,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2024,
+            "status": "PASS",
+            "n_fixtures": 116,
+            "player_rows": 36,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2025,
+            "status": "EMPTY_PLAYER_DATA",
+            "n_fixtures": 115,
+            "player_rows": 0,
+            "lineups_teams": 2
+          }
+        ]
+      },
+      "SCORE_DATA_GATE": "PASS",
+      "PLAYER_DATA_GATE": "PARTIAL",
+      "coverage_score": 66,
+      "score_breakdown": {
+        "total": 66,
+        "depthScore": 7,
+        "fixturesScore": 6,
+        "eventsScore": 6.666666666666666,
+        "lineupsScore": 10,
+        "statPlScore": 12.5,
+        "idStabilityScore": 10,
+        "substMinutesScore": 4.2,
+        "oddsScore": 10
+      },
+      "calendar_type_confirmed": "CALENDAR_YEAR_SEASON",
+      "proposed_split": "WARMUP=2021, TRAIN=2022, OOS_DEV=2023, OOS_FINAL=2024 (annees civiles, meme principe que PL adapte au calendrier) - ATTENTION anomalie(s) detectee(s) sur [2025] : split ci-dessus INVALIDE tel quel, redecoupage necessaire en evitant ces annees pour TRAIN/OOS_DEV/OOS_FINAL"
+    },
+    {
+      "id": 345,
+      "name": "Czech Liga",
+      "country": "Czech-Republic",
+      "calendar_type": "EUROPEAN_SEASON",
+      "n_seasons_total": 9,
+      "covered_years": [
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ],
+      "current_season_odds_flag": true,
+      "probe_analysis": {
+        "n_seasons_probed": 3,
+        "n_valid": 1,
+        "n_empty": 2,
+        "n_no_fixtures": 0,
+        "empty_seasons": [
+          2021,
+          2023
+        ],
+        "no_fixture_seasons": [],
+        "avg_shots_non_null": 0.372,
+        "avg_sot_non_null": 0.163,
+        "avg_minutes_non_null": 0.767,
+        "avg_scorer_id_mapping": 1,
+        "season_matrix": [
+          {
+            "season": 2021,
+            "status": "EMPTY_PLAYER_DATA",
+            "n_fixtures": 280,
+            "player_rows": 0,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2023,
+            "status": "EMPTY_PLAYER_DATA",
+            "n_fixtures": 281,
+            "player_rows": 0,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2025,
+            "status": "PASS",
+            "n_fixtures": 277,
+            "player_rows": 43,
+            "lineups_teams": 2
+          }
+        ]
+      },
+      "SCORE_DATA_GATE": "PASS",
+      "PLAYER_DATA_GATE": "BLOCKED",
+      "coverage_score": 64,
+      "score_breakdown": {
+        "total": 64,
+        "depthScore": 9,
+        "fixturesScore": 10,
+        "eventsScore": 3.333333333333333,
+        "lineupsScore": 5,
+        "statPlScore": 12.4,
+        "idStabilityScore": 10,
+        "substMinutesScore": 3.8,
+        "oddsScore": 10
+      },
+      "calendar_type_confirmed": "EUROPEAN_SEASON",
+      "proposed_split": "WARMUP=2021-22, TRAIN=2022-23, OOS_DEV=2023-24, OOS_FINAL=2024-25 (identique au split PL) - ATTENTION anomalie(s) detectee(s) sur [2021,2023] : split ci-dessus INVALIDE tel quel, redecoupage necessaire en evitant ces annees pour TRAIN/OOS_DEV/OOS_FINAL"
+    },
+    {
+      "id": 383,
+      "name": "Ligat Ha'al",
+      "country": "Israel",
+      "calendar_type": "EUROPEAN_SEASON",
+      "n_seasons_total": 11,
+      "covered_years": [
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ],
+      "current_season_odds_flag": true,
+      "probe_analysis": {
+        "n_seasons_probed": 3,
+        "n_valid": 1,
+        "n_empty": 2,
+        "n_no_fixtures": 0,
+        "empty_seasons": [
+          2021,
+          2023
+        ],
+        "no_fixture_seasons": [],
+        "avg_shots_non_null": 0.25,
+        "avg_sot_non_null": 0.1,
+        "avg_minutes_non_null": 0.8,
+        "avg_scorer_id_mapping": 1,
+        "season_matrix": [
+          {
+            "season": 2021,
+            "status": "EMPTY_PLAYER_DATA",
+            "n_fixtures": 240,
+            "player_rows": 0,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2023,
+            "status": "EMPTY_PLAYER_DATA",
+            "n_fixtures": 240,
+            "player_rows": 0,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2025,
+            "status": "PASS",
+            "n_fixtures": 239,
+            "player_rows": 40,
+            "lineups_teams": 2
+          }
+        ]
+      },
+      "SCORE_DATA_GATE": "PASS",
+      "PLAYER_DATA_GATE": "BLOCKED",
+      "coverage_score": 62,
+      "score_breakdown": {
+        "total": 62,
+        "depthScore": 11,
+        "fixturesScore": 10,
+        "eventsScore": 3.333333333333333,
+        "lineupsScore": 5,
+        "statPlScore": 8.7,
+        "idStabilityScore": 10,
+        "substMinutesScore": 4,
+        "oddsScore": 10
+      },
+      "calendar_type_confirmed": "EUROPEAN_SEASON",
+      "proposed_split": "WARMUP=2021-22, TRAIN=2022-23, OOS_DEV=2023-24, OOS_FINAL=2024-25 (identique au split PL) - ATTENTION anomalie(s) detectee(s) sur [2021,2023] : split ci-dessus INVALIDE tel quel, redecoupage necessaire en evitant ces annees pour TRAIN/OOS_DEV/OOS_FINAL"
+    },
+    {
+      "id": 219,
+      "name": "2. Liga",
+      "country": "Austria",
+      "calendar_type": "EUROPEAN_SEASON",
+      "n_seasons_total": 16,
+      "covered_years": [
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ],
+      "current_season_odds_flag": true,
+      "probe_analysis": {
+        "n_seasons_probed": 3,
+        "n_valid": 0,
+        "n_empty": 3,
+        "n_no_fixtures": 0,
+        "empty_seasons": [
+          2021,
+          2023,
+          2025
+        ],
+        "no_fixture_seasons": [],
+        "avg_shots_non_null": null,
+        "avg_sot_non_null": null,
+        "avg_minutes_non_null": null,
+        "avg_scorer_id_mapping": null,
+        "season_matrix": [
+          {
+            "season": 2021,
+            "status": "EMPTY_PLAYER_DATA",
+            "n_fixtures": 240,
+            "player_rows": 0,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2023,
+            "status": "EMPTY_PLAYER_DATA",
+            "n_fixtures": 240,
+            "player_rows": 0,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2025,
+            "status": "EMPTY_PLAYER_DATA",
+            "n_fixtures": 222,
+            "player_rows": 0,
+            "lineups_teams": 2
+          }
+        ]
+      },
+      "SCORE_DATA_GATE": "PASS",
+      "PLAYER_DATA_GATE": "BLOCKED",
+      "coverage_score": 47,
+      "score_breakdown": {
+        "total": 47,
+        "depthScore": 16,
+        "fixturesScore": 10,
+        "eventsScore": 0,
+        "lineupsScore": 0,
+        "statPlScore": 0,
+        "idStabilityScore": 8,
+        "substMinutesScore": 3,
+        "oddsScore": 10
+      },
+      "calendar_type_confirmed": "EUROPEAN_SEASON",
+      "proposed_split": "WARMUP=2021-22, TRAIN=2022-23, OOS_DEV=2023-24, OOS_FINAL=2024-25 (identique au split PL) - ATTENTION anomalie(s) detectee(s) sur [2021,2023,2025] : split ci-dessus INVALIDE tel quel, redecoupage necessaire en evitant ces annees pour TRAIN/OOS_DEV/OOS_FINAL"
+    },
+    {
+      "id": 80,
+      "name": "3. Liga",
+      "country": "Germany",
+      "calendar_type": "EUROPEAN_SEASON",
+      "n_seasons_total": 16,
+      "covered_years": [
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ],
+      "current_season_odds_flag": true,
+      "probe_analysis": {
+        "n_seasons_probed": 3,
+        "n_valid": 0,
+        "n_empty": 3,
+        "n_no_fixtures": 0,
+        "empty_seasons": [
+          2021,
+          2023,
+          2025
+        ],
+        "no_fixture_seasons": [],
+        "avg_shots_non_null": null,
+        "avg_sot_non_null": null,
+        "avg_minutes_non_null": null,
+        "avg_scorer_id_mapping": null,
+        "season_matrix": [
+          {
+            "season": 2021,
+            "status": "EMPTY_PLAYER_DATA",
+            "n_fixtures": 373,
+            "player_rows": 0,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2023,
+            "status": "EMPTY_PLAYER_DATA",
+            "n_fixtures": 380,
+            "player_rows": 0,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2025,
+            "status": "EMPTY_PLAYER_DATA",
+            "n_fixtures": 380,
+            "player_rows": 0,
+            "lineups_teams": 2
+          }
+        ]
+      },
+      "SCORE_DATA_GATE": "PASS",
+      "PLAYER_DATA_GATE": "BLOCKED",
+      "coverage_score": 47,
+      "score_breakdown": {
+        "total": 47,
+        "depthScore": 16,
+        "fixturesScore": 10,
+        "eventsScore": 0,
+        "lineupsScore": 0,
+        "statPlScore": 0,
+        "idStabilityScore": 8,
+        "substMinutesScore": 3,
+        "oddsScore": 10
+      },
+      "calendar_type_confirmed": "EUROPEAN_SEASON",
+      "proposed_split": "WARMUP=2021-22, TRAIN=2022-23, OOS_DEV=2023-24, OOS_FINAL=2024-25 (identique au split PL) - ATTENTION anomalie(s) detectee(s) sur [2021,2023,2025] : split ci-dessus INVALIDE tel quel, redecoupage necessaire en evitant ces annees pour TRAIN/OOS_DEV/OOS_FINAL"
+    },
+    {
+      "id": 268,
+      "name": "Primera División",
+      "country": "Uruguay",
+      "calendar_type": "CALENDAR_YEAR_SEASON",
+      "n_seasons_total": 15,
+      "covered_years": [
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ],
+      "current_season_odds_flag": true,
+      "probe_analysis": {
+        "n_seasons_probed": 3,
+        "n_valid": 0,
+        "n_empty": 3,
+        "n_no_fixtures": 0,
+        "empty_seasons": [
+          2021,
+          2023,
+          2025
+        ],
+        "no_fixture_seasons": [],
+        "avg_shots_non_null": null,
+        "avg_sot_non_null": null,
+        "avg_minutes_non_null": null,
+        "avg_scorer_id_mapping": null,
+        "season_matrix": [
+          {
+            "season": 2021,
+            "status": "EMPTY_PLAYER_DATA",
+            "n_fixtures": 120,
+            "player_rows": 0,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2023,
+            "status": "EMPTY_PLAYER_DATA",
+            "n_fixtures": 177,
+            "player_rows": 0,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2025,
+            "status": "EMPTY_PLAYER_DATA",
+            "n_fixtures": 176,
+            "player_rows": 0,
+            "lineups_teams": 2
+          }
+        ]
+      },
+      "SCORE_DATA_GATE": "PASS",
+      "PLAYER_DATA_GATE": "BLOCKED",
+      "coverage_score": 46,
+      "score_breakdown": {
+        "total": 46,
+        "depthScore": 15,
+        "fixturesScore": 10,
+        "eventsScore": 0,
+        "lineupsScore": 0,
+        "statPlScore": 0,
+        "idStabilityScore": 8,
+        "substMinutesScore": 3,
+        "oddsScore": 10
+      },
+      "calendar_type_confirmed": "CALENDAR_YEAR_SEASON",
+      "proposed_split": "WARMUP=2021, TRAIN=2022, OOS_DEV=2023, OOS_FINAL=2024 (annees civiles, meme principe que PL adapte au calendrier) - ATTENTION anomalie(s) detectee(s) sur [2021,2023,2025] : split ci-dessus INVALIDE tel quel, redecoupage necessaire en evitant ces annees pour TRAIN/OOS_DEV/OOS_FINAL"
+    },
+    {
+      "id": 244,
+      "name": "Veikkausliiga",
+      "country": "Finland",
+      "calendar_type": "CALENDAR_YEAR_SEASON",
+      "n_seasons_total": 15,
+      "covered_years": [
+        2021,
+        2022,
+        2023,
+        2025
+      ],
+      "current_season_odds_flag": true,
+      "probe_analysis": {
+        "n_seasons_probed": 3,
+        "n_valid": 0,
+        "n_empty": 3,
+        "n_no_fixtures": 0,
+        "empty_seasons": [
+          2021,
+          2023,
+          2025
+        ],
+        "no_fixture_seasons": [],
+        "avg_shots_non_null": null,
+        "avg_sot_non_null": null,
+        "avg_minutes_non_null": null,
+        "avg_scorer_id_mapping": null,
+        "season_matrix": [
+          {
+            "season": 2021,
+            "status": "EMPTY_PLAYER_DATA",
+            "n_fixtures": 164,
+            "player_rows": 0,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2023,
+            "status": "EMPTY_PLAYER_DATA",
+            "n_fixtures": 167,
+            "player_rows": 0,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2025,
+            "status": "EMPTY_PLAYER_DATA",
+            "n_fixtures": 179,
+            "player_rows": 0,
+            "lineups_teams": 2
+          }
+        ]
+      },
+      "SCORE_DATA_GATE": "PASS",
+      "PLAYER_DATA_GATE": "BLOCKED",
+      "coverage_score": 44,
+      "score_breakdown": {
+        "total": 44,
+        "depthScore": 15,
+        "fixturesScore": 8,
+        "eventsScore": 0,
+        "lineupsScore": 0,
+        "statPlScore": 0,
+        "idStabilityScore": 8,
+        "substMinutesScore": 3,
+        "oddsScore": 10
+      },
+      "calendar_type_confirmed": "CALENDAR_YEAR_SEASON",
+      "proposed_split": "WARMUP=2021, TRAIN=2022, OOS_DEV=2023, OOS_FINAL=2024 (annees civiles, meme principe que PL adapte au calendrier) - ATTENTION anomalie(s) detectee(s) sur [2021,2023,2025] : split ci-dessus INVALIDE tel quel, redecoupage necessaire en evitant ces annees pour TRAIN/OOS_DEV/OOS_FINAL"
+    },
+    {
+      "id": 116,
+      "name": "Premier League",
+      "country": "Belarus",
+      "calendar_type": "CALENDAR_YEAR_SEASON",
+      "n_seasons_total": 15,
+      "covered_years": [
+        2022,
+        2023,
+        2024,
+        2025
+      ],
+      "current_season_odds_flag": true,
+      "probe_analysis": {
+        "n_seasons_probed": 3,
+        "n_valid": 0,
+        "n_empty": 3,
+        "n_no_fixtures": 0,
+        "empty_seasons": [
+          2022,
+          2024,
+          2025
+        ],
+        "no_fixture_seasons": [],
+        "avg_shots_non_null": null,
+        "avg_sot_non_null": null,
+        "avg_minutes_non_null": null,
+        "avg_scorer_id_mapping": null,
+        "season_matrix": [
+          {
+            "season": 2022,
+            "status": "EMPTY_PLAYER_DATA",
+            "n_fixtures": 242,
+            "player_rows": 0,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2024,
+            "status": "EMPTY_PLAYER_DATA",
+            "n_fixtures": 242,
+            "player_rows": 0,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2025,
+            "status": "EMPTY_PLAYER_DATA",
+            "n_fixtures": 242,
+            "player_rows": 0,
+            "lineups_teams": 2
+          }
+        ]
+      },
+      "SCORE_DATA_GATE": "PASS",
+      "PLAYER_DATA_GATE": "BLOCKED",
+      "coverage_score": 44,
+      "score_breakdown": {
+        "total": 44,
+        "depthScore": 15,
+        "fixturesScore": 8,
+        "eventsScore": 0,
+        "lineupsScore": 0,
+        "statPlScore": 0,
+        "idStabilityScore": 8,
+        "substMinutesScore": 3,
+        "oddsScore": 10
+      },
+      "calendar_type_confirmed": "CALENDAR_YEAR_SEASON",
+      "proposed_split": "WARMUP=2021, TRAIN=2022, OOS_DEV=2023, OOS_FINAL=2024 (annees civiles, meme principe que PL adapte au calendrier) - ATTENTION anomalie(s) detectee(s) sur [2022,2024,2025] : split ci-dessus INVALIDE tel quel, redecoupage necessaire en evitant ces annees pour TRAIN/OOS_DEV/OOS_FINAL"
+    },
+    {
+      "id": 95,
+      "name": "Segunda Liga",
+      "country": "Portugal",
+      "calendar_type": "EUROPEAN_SEASON",
+      "n_seasons_total": 11,
+      "covered_years": [
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ],
+      "current_season_odds_flag": true,
+      "probe_analysis": {
+        "n_seasons_probed": 3,
+        "n_valid": 0,
+        "n_empty": 3,
+        "n_no_fixtures": 0,
+        "empty_seasons": [
+          2021,
+          2023,
+          2025
+        ],
+        "no_fixture_seasons": [],
+        "avg_shots_non_null": null,
+        "avg_sot_non_null": null,
+        "avg_minutes_non_null": null,
+        "avg_scorer_id_mapping": null,
+        "season_matrix": [
+          {
+            "season": 2021,
+            "status": "EMPTY_PLAYER_DATA",
+            "n_fixtures": 308,
+            "player_rows": 0,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2023,
+            "status": "EMPTY_PLAYER_DATA",
+            "n_fixtures": 308,
+            "player_rows": 0,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2025,
+            "status": "EMPTY_PLAYER_DATA",
+            "n_fixtures": 308,
+            "player_rows": 0,
+            "lineups_teams": 2
+          }
+        ]
+      },
+      "SCORE_DATA_GATE": "PASS",
+      "PLAYER_DATA_GATE": "BLOCKED",
+      "coverage_score": 42,
+      "score_breakdown": {
+        "total": 42,
+        "depthScore": 11,
+        "fixturesScore": 10,
+        "eventsScore": 0,
+        "lineupsScore": 0,
+        "statPlScore": 0,
+        "idStabilityScore": 8,
+        "substMinutesScore": 3,
+        "oddsScore": 10
+      },
+      "calendar_type_confirmed": "EUROPEAN_SEASON",
+      "proposed_split": "WARMUP=2021-22, TRAIN=2022-23, OOS_DEV=2023-24, OOS_FINAL=2024-25 (identique au split PL) - ATTENTION anomalie(s) detectee(s) sur [2021,2023,2025] : split ci-dessus INVALIDE tel quel, redecoupage necessaire en evitant ces annees pour TRAIN/OOS_DEV/OOS_FINAL"
+    },
+    {
+      "id": 236,
+      "name": "First League",
+      "country": "Russia",
+      "calendar_type": "EUROPEAN_SEASON",
+      "n_seasons_total": 11,
+      "covered_years": [
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ],
+      "current_season_odds_flag": true,
+      "probe_analysis": {
+        "n_seasons_probed": 3,
+        "n_valid": 0,
+        "n_empty": 3,
+        "n_no_fixtures": 0,
+        "empty_seasons": [
+          2021,
+          2023,
+          2025
+        ],
+        "no_fixture_seasons": [],
+        "avg_shots_non_null": null,
+        "avg_sot_non_null": null,
+        "avg_minutes_non_null": null,
+        "avg_scorer_id_mapping": null,
+        "season_matrix": [
+          {
+            "season": 2021,
+            "status": "EMPTY_PLAYER_DATA",
+            "n_fixtures": 380,
+            "player_rows": 0,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2023,
+            "status": "EMPTY_PLAYER_DATA",
+            "n_fixtures": 306,
+            "player_rows": 0,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2025,
+            "status": "EMPTY_PLAYER_DATA",
+            "n_fixtures": 305,
+            "player_rows": 0,
+            "lineups_teams": 2
+          }
+        ]
+      },
+      "SCORE_DATA_GATE": "PASS",
+      "PLAYER_DATA_GATE": "BLOCKED",
+      "coverage_score": 42,
+      "score_breakdown": {
+        "total": 42,
+        "depthScore": 11,
+        "fixturesScore": 10,
+        "eventsScore": 0,
+        "lineupsScore": 0,
+        "statPlScore": 0,
+        "idStabilityScore": 8,
+        "substMinutesScore": 3,
+        "oddsScore": 10
+      },
+      "calendar_type_confirmed": "EUROPEAN_SEASON",
+      "proposed_split": "WARMUP=2021-22, TRAIN=2022-23, OOS_DEV=2023-24, OOS_FINAL=2024-25 (identique au split PL) - ATTENTION anomalie(s) detectee(s) sur [2021,2023,2025] : split ci-dessus INVALIDE tel quel, redecoupage necessaire en evitant ces annees pour TRAIN/OOS_DEV/OOS_FINAL"
+    },
+    {
+      "id": 114,
+      "name": "Superettan",
+      "country": "Sweden",
+      "calendar_type": "CALENDAR_YEAR_SEASON",
+      "n_seasons_total": 11,
+      "covered_years": [
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ],
+      "current_season_odds_flag": true,
+      "probe_analysis": {
+        "n_seasons_probed": 3,
+        "n_valid": 0,
+        "n_empty": 3,
+        "n_no_fixtures": 0,
+        "empty_seasons": [
+          2021,
+          2023,
+          2025
+        ],
+        "no_fixture_seasons": [],
+        "avg_shots_non_null": null,
+        "avg_sot_non_null": null,
+        "avg_minutes_non_null": null,
+        "avg_scorer_id_mapping": null,
+        "season_matrix": [
+          {
+            "season": 2021,
+            "status": "EMPTY_PLAYER_DATA",
+            "n_fixtures": 244,
+            "player_rows": 0,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2023,
+            "status": "EMPTY_PLAYER_DATA",
+            "n_fixtures": 244,
+            "player_rows": 0,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2025,
+            "status": "EMPTY_PLAYER_DATA",
+            "n_fixtures": 243,
+            "player_rows": 0,
+            "lineups_teams": 2
+          }
+        ]
+      },
+      "SCORE_DATA_GATE": "PASS",
+      "PLAYER_DATA_GATE": "BLOCKED",
+      "coverage_score": 42,
+      "score_breakdown": {
+        "total": 42,
+        "depthScore": 11,
+        "fixturesScore": 10,
+        "eventsScore": 0,
+        "lineupsScore": 0,
+        "statPlScore": 0,
+        "idStabilityScore": 8,
+        "substMinutesScore": 3,
+        "oddsScore": 10
+      },
+      "calendar_type_confirmed": "CALENDAR_YEAR_SEASON",
+      "proposed_split": "WARMUP=2021, TRAIN=2022, OOS_DEV=2023, OOS_FINAL=2024 (annees civiles, meme principe que PL adapte au calendrier) - ATTENTION anomalie(s) detectee(s) sur [2021,2023,2025] : split ci-dessus INVALIDE tel quel, redecoupage necessaire en evitant ces annees pour TRAIN/OOS_DEV/OOS_FINAL"
+    },
+    {
+      "id": 318,
+      "name": "1. Division",
+      "country": "Cyprus",
+      "calendar_type": "EUROPEAN_SEASON",
+      "n_seasons_total": 9,
+      "covered_years": [
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ],
+      "current_season_odds_flag": true,
+      "probe_analysis": {
+        "n_seasons_probed": 3,
+        "n_valid": 0,
+        "n_empty": 3,
+        "n_no_fixtures": 0,
+        "empty_seasons": [
+          2021,
+          2023,
+          2025
+        ],
+        "no_fixture_seasons": [],
+        "avg_shots_non_null": null,
+        "avg_sot_non_null": null,
+        "avg_minutes_non_null": null,
+        "avg_scorer_id_mapping": null,
+        "season_matrix": [
+          {
+            "season": 2021,
+            "status": "EMPTY_PLAYER_DATA",
+            "n_fixtures": 192,
+            "player_rows": 0,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2023,
+            "status": "EMPTY_PLAYER_DATA",
+            "n_fixtures": 268,
+            "player_rows": 0,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2025,
+            "status": "EMPTY_PLAYER_DATA",
+            "n_fixtures": 240,
+            "player_rows": 0,
+            "lineups_teams": 2
+          }
+        ]
+      },
+      "SCORE_DATA_GATE": "PASS",
+      "PLAYER_DATA_GATE": "BLOCKED",
+      "coverage_score": 40,
+      "score_breakdown": {
+        "total": 40,
+        "depthScore": 9,
+        "fixturesScore": 10,
+        "eventsScore": 0,
+        "lineupsScore": 0,
+        "statPlScore": 0,
+        "idStabilityScore": 8,
+        "substMinutesScore": 3,
+        "oddsScore": 10
+      },
+      "calendar_type_confirmed": "EUROPEAN_SEASON",
+      "proposed_split": "WARMUP=2021-22, TRAIN=2022-23, OOS_DEV=2023-24, OOS_FINAL=2024-25 (identique au split PL) - ATTENTION anomalie(s) detectee(s) sur [2021,2023,2025] : split ci-dessus INVALIDE tel quel, redecoupage necessaire en evitant ces annees pour TRAIN/OOS_DEV/OOS_FINAL"
+    },
+    {
+      "id": 373,
+      "name": "1. SNL",
+      "country": "Slovenia",
+      "calendar_type": "EUROPEAN_SEASON",
+      "n_seasons_total": 9,
+      "covered_years": [
+        2021,
+        2022,
+        2023
+      ],
+      "current_season_odds_flag": true,
+      "probe_analysis": {
+        "n_seasons_probed": 3,
+        "n_valid": 0,
+        "n_empty": 3,
+        "n_no_fixtures": 0,
+        "empty_seasons": [
+          2021,
+          2022,
+          2023
+        ],
+        "no_fixture_seasons": [],
+        "avg_shots_non_null": null,
+        "avg_sot_non_null": null,
+        "avg_minutes_non_null": null,
+        "avg_scorer_id_mapping": null,
+        "season_matrix": [
+          {
+            "season": 2021,
+            "status": "EMPTY_PLAYER_DATA",
+            "n_fixtures": 182,
+            "player_rows": 0,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2022,
+            "status": "EMPTY_PLAYER_DATA",
+            "n_fixtures": 182,
+            "player_rows": 0,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2023,
+            "status": "EMPTY_PLAYER_DATA",
+            "n_fixtures": 180,
+            "player_rows": 0,
+            "lineups_teams": 2
+          }
+        ]
+      },
+      "SCORE_DATA_GATE": "PASS",
+      "PLAYER_DATA_GATE": "BLOCKED",
+      "coverage_score": 36,
+      "score_breakdown": {
+        "total": 36,
+        "depthScore": 9,
+        "fixturesScore": 6,
+        "eventsScore": 0,
+        "lineupsScore": 0,
+        "statPlScore": 0,
+        "idStabilityScore": 8,
+        "substMinutesScore": 3,
+        "oddsScore": 10
+      },
+      "calendar_type_confirmed": "EUROPEAN_SEASON",
+      "proposed_split": "WARMUP=2021-22, TRAIN=2022-23, OOS_DEV=2023-24, OOS_FINAL=2024-25 (identique au split PL) - ATTENTION anomalie(s) detectee(s) sur [2021,2022,2023] : split ci-dessus INVALIDE tel quel, redecoupage necessaire en evitant ces annees pour TRAIN/OOS_DEV/OOS_FINAL"
+    },
+    {
+      "id": 270,
+      "name": "Primera División - Clausura",
+      "country": "Uruguay",
+      "calendar_type": "CALENDAR_YEAR_SEASON",
+      "n_seasons_total": 14,
+      "covered_years": [
+        2021,
+        2022,
+        2023
+      ],
+      "current_season_odds_flag": false,
+      "probe_analysis": {
+        "n_seasons_probed": 3,
+        "n_valid": 0,
+        "n_empty": 3,
+        "n_no_fixtures": 0,
+        "empty_seasons": [
+          2021,
+          2022,
+          2023
+        ],
+        "no_fixture_seasons": [],
+        "avg_shots_non_null": null,
+        "avg_sot_non_null": null,
+        "avg_minutes_non_null": null,
+        "avg_scorer_id_mapping": null,
+        "season_matrix": [
+          {
+            "season": 2021,
+            "status": "EMPTY_PLAYER_DATA",
+            "n_fixtures": 120,
+            "player_rows": 0,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2022,
+            "status": "EMPTY_PLAYER_DATA",
+            "n_fixtures": 120,
+            "player_rows": 0,
+            "lineups_teams": 2
+          },
+          {
+            "season": 2023,
+            "status": "EMPTY_PLAYER_DATA",
+            "n_fixtures": 123,
+            "player_rows": 0,
+            "lineups_teams": 2
+          }
+        ]
+      },
+      "SCORE_DATA_GATE": "PASS",
+      "PLAYER_DATA_GATE": "BLOCKED",
+      "coverage_score": 31,
+      "score_breakdown": {
+        "total": 31,
+        "depthScore": 14,
+        "fixturesScore": 6,
+        "eventsScore": 0,
+        "lineupsScore": 0,
+        "statPlScore": 0,
+        "idStabilityScore": 8,
+        "substMinutesScore": 3,
+        "oddsScore": 0
+      },
+      "calendar_type_confirmed": "CALENDAR_YEAR_SEASON",
+      "proposed_split": "WARMUP=2021, TRAIN=2022, OOS_DEV=2023, OOS_FINAL=2024 (annees civiles, meme principe que PL adapte au calendrier) - ATTENTION anomalie(s) detectee(s) sur [2021,2022,2023] : split ci-dessus INVALIDE tel quel, redecoupage necessaire en evitant ces annees pour TRAIN/OOS_DEV/OOS_FINAL"
+    }
+  ]
+}

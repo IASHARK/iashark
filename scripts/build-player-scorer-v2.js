@@ -26,7 +26,7 @@ const { extractGoalEvents } = require("../lib/player-lab/goal-events.js");
 const { resolvePositionGroup } = require("../lib/player-lab/position-policy.js");
 const { buildRiskSetForGoal, computeReconciliationRate } = require("../lib/player-lab/v2/risk-set.js");
 const { fitGoalRatePriors, posteriorGoalRate, fitShotRatePriors, posteriorShotRate, fitSotConversionPriors, posteriorSotConversion, logit, EPS } = require("../lib/player-lab/v2/rate-priors.js");
-const { designVector, fitRelativeRiskModel, multiStartStability, POSITION_ORDER } = require("../lib/player-lab/v2/relative-risk-model.js");
+const { designVector, fitRelativeRiskModel, multiStartStability, codingInvarianceTest, recoverCanonicalAlpha, DEFAULT_REFERENCE_CATEGORY, POSITION_ORDER } = require("../lib/player-lab/v2/relative-risk-model.js");
 const { fitPlayerEffects, playerEffect } = require("../lib/player-lab/v2/player-effects.js");
 const { fitGoalClock } = require("../lib/player-lab/v2/goal-clock.js");
 const { fitSubstitutionModel } = require("../lib/player-lab/v2/substitution-model.js");
@@ -176,11 +176,13 @@ function main() {
         if (g.penalty_flag) { if (g.player_id != null) penaltyAttempts.push({ team_id: teamId, player_id: g.player_id }); continue; }
         if (g.player_id == null || !riskSet.has(g.player_id)) continue; // reconciliation echouee - exclu du fit, compte deja dans le taux ci-dessus
         const riskSetIds = [...riskSet];
-        const designVectors = riskSetIds.map((pid) => {
-          const feat = pointInTimeFeatures(pid, fx.kickoff_timestamp);
-          return designVector(feat.group, feat.xGoal, feat.xShot, feat.xSot);
-        });
-        nrEvents.push({ riskSetDesignVectors: designVectors, scorerIndex: riskSetIds.indexOf(g.player_id), riskSetIds });
+        const riskSetRawFeatures = riskSetIds.map((pid) => pointInTimeFeatures(pid, fx.kickoff_timestamp));
+        const designVectors = riskSetRawFeatures.map((feat) => designVector(feat.group, feat.xGoal, feat.xShot, feat.xSot));
+        // riskSetRawFeatures (traits BRUTS, pre-encodage) conserves pour le
+        // test de coding invariance (item 1) - permet de reconstruire un
+        // design vector sous n'importe quelle categorie de reference SANS
+        // toucher au risk-set ni aux features point-in-time eux-memes.
+        nrEvents.push({ riskSetDesignVectors: designVectors, scorerIndex: riskSetIds.indexOf(g.player_id), riskSetIds, riskSetRawFeatures });
         if (teamId === fx.home_team_id) goalClockHomeEvents.push(g); else goalClockAwayEvents.push(g);
       }
     }
@@ -219,6 +221,22 @@ function main() {
 
   const FIT_CONVERGENCE = fit.converged && stability.all_converged && !stability.any_non_finite && stability.max_objective_spread < 1e-6 && stability.max_risk_set_probability_spread < 1e-6 ? "PASS" : "FAIL";
   console.log(`\nFIT_CONVERGENCE=${FIT_CONVERGENCE}`);
+
+  console.log("\n=== 5c. Coding invariance (memes 964 evenements TRAIN, 4 categories de reference : UNKNOWN/F/M/D) ===");
+  const invariance = codingInvarianceTest(nrEvents, ["UNKNOWN", "F", "M", "D"], 100);
+  console.log(`references_tested=${JSON.stringify(invariance.references_tested)} all_converged=${invariance.all_converged}`);
+  console.log(`max_penalty_matrix_diff=${invariance.max_penalty_matrix_diff.toExponential(3)} (doit etre ~0 : la matrice de penalite canonique I+J ne depend pas de la reference)`);
+  console.log(`max_canonical_alpha_diff=${invariance.max_canonical_alpha_diff.toExponential(3)}`);
+  console.log(`max_abs_probability_difference=${invariance.max_abs_probability_difference.toExponential(3)}`);
+  for (const r of invariance.results) console.log(`  ref=${r.referenceCategory} converged=${r.converged} penalized_objective=${r.penalized_objective.toFixed(4)} canonicalAlpha=${JSON.stringify(r.canonicalAlpha.map(([k, v]) => [k, Number(v.toFixed(4))]))}`);
+
+  const CODING_INVARIANCE = invariance.all_converged && invariance.max_abs_probability_difference <= 1e-8 ? "PASS" : "FAIL";
+  console.log(`CODING_INVARIANCE=${CODING_INVARIANCE}`);
+
+  const PLAYER_V2_PRE_OOS_GATE = FIT_CONVERGENCE === "PASS" && CODING_INVARIANCE === "PASS" ? "PASS_FINAL" : "FAIL";
+  console.log(`\nPLAYER_V2_PRE_OOS_GATE=${PLAYER_V2_PRE_OOS_GATE}`);
+
+  const canonicalAlphaProd = recoverCanonicalAlpha(fit.theta, POSITION_ORDER, DEFAULT_REFERENCE_CATEGORY);
 
   console.log("\n=== 6. Effets joueurs (empirical Bayes sur residus, APRES le fit a effets fixes) ===");
   const minutes90ByPlayerTrain = new Map();
@@ -289,8 +307,7 @@ function main() {
     const etaByPlayer = new Map();
     for (const pid of [...startingXI, ...bench]) {
       const feat = pointInTimeFeatures(pid, fixtureMeta.kickoff_timestamp);
-      const alphaIdx = POSITION_ORDER.indexOf(feat.group);
-      const alpha = alphaIdx >= 0 ? fit.theta[alphaIdx] : 0; // UNKNOWN = reference, alpha=0 (voir IDENTIFICATION_CONSTRAINT)
+      const alpha = canonicalAlphaProd.get(feat.group) ?? canonicalAlphaProd.get(DEFAULT_REFERENCE_CATEGORY); // alpha CANONIQUE (contrainte Sum=0), pas 0 arbitraire - voir CODING_INVARIANCE
       const eta = alpha + fit.theta[POSITION_ORDER.length] * feat.xGoal + fit.theta[POSITION_ORDER.length + 1] * feat.xShot + fit.theta[POSITION_ORDER.length + 2] * feat.xSot + playerEffect(playerEffects, pid);
       etaByPlayer.set(pid, eta);
     }

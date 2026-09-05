@@ -6,7 +6,7 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
 const { buildFieldTimeline, playersOnFieldAt, buildRiskSetForGoal, computeReconciliationRate } = require("../lib/player-lab/v2/risk-set.js");
-const { designVector, fitRelativeRiskModel, multiStartStability, deterministicMultiStartThetas, N_PARAMS, POSITION_ORDER } = require("../lib/player-lab/v2/relative-risk-model.js");
+const { designVector, fitRelativeRiskModel, multiStartStability, deterministicMultiStartThetas, codingInvarianceTest, N_PARAMS, POSITION_ORDER } = require("../lib/player-lab/v2/relative-risk-model.js");
 const { fitPlayerEffects, playerEffect } = require("../lib/player-lab/v2/player-effects.js");
 const { fitGoalRatePriors, posteriorGoalRate, fitShotRatePriors, posteriorShotRate, fitSotConversionPriors, posteriorSotConversion } = require("../lib/player-lab/v2/rate-priors.js");
 const { fitGoalClock, N_BINS } = require("../lib/player-lab/v2/goal-clock.js");
@@ -185,11 +185,11 @@ test("relative risk model : Newton-Raphson converge et attribue un beta_goal pos
   assert.ok(result.theta[betaGoalIdx] > 0, "beta_goal doit etre positif : X_goal plus eleve explique le buteur le plus probable");
 });
 
-test("identification constraint : UNKNOWN est la reference (alpha=0 implicite), N_PARAMS reduit de 1 (item 3)", () => {
-  assert.equal(POSITION_ORDER.length, 4, "F/M/D/G ont chacun un alpha estime, UNKNOWN n'en a pas");
+test("identification constraint : contrainte somme-a-zero (UNKNOWN eliminee), N_PARAMS reduit de 1 (item 3)", () => {
+  assert.equal(POSITION_ORDER.length, 4, "F/M/D/G sont les 4 categories libres, UNKNOWN est eliminee par la contrainte Sum=0");
   assert.equal(N_PARAMS, 7);
   const vUnknown = designVector("UNKNOWN", 1, 1, 1);
-  assert.ok(vUnknown.slice(0, POSITION_ORDER.length).every((v) => v === 0), "groupe UNKNOWN/non reconnu -> bloc position entierement nul (reference)");
+  assert.ok(vUnknown.slice(0, POSITION_ORDER.length).every((v) => v === -1), "sum-to-zero : UNKNOWN = -(somme des 4 autres), jamais un bloc nul arbitraire (voir coding invariance)");
   const vForward = designVector("F", 1, 1, 1);
   assert.equal(vForward.filter((v) => v === 1 && vForward.indexOf(v) < POSITION_ORDER.length).length >= 1, true);
 });
@@ -230,6 +230,22 @@ test("multi-start stability (item 6) : 5 initialisations deterministes convergen
   assert.equal(stability.all_converged, true);
   assert.ok(stability.max_objective_spread < 1e-6, "meme optimum penalise a tolerance numerique pres");
   assert.ok(stability.max_risk_set_probability_spread < 1e-6, "memes probabilites de risk-set a tolerance stricte");
+});
+
+test("coding invariance : le fit penalise est independant de la categorie de position choisie comme reference", () => {
+  // Evenements synthetiques avec riskSetRawFeatures (traits BRUTS, PAS
+  // encore encodes) - le meme dataset physique est refitte sous 4
+  // codages differents (UNKNOWN/F/M/D comme reference).
+  const rawByGroup = { F: { group: "F", xGoal: 1.5, xShot: 1.0, xSot: 0.5 }, M: { group: "M", xGoal: 0.3, xShot: 0.4, xSot: 0.1 }, D: { group: "D", xGoal: -0.5, xShot: -0.2, xSot: -0.3 }, G: { group: "G", xGoal: -2.0, xShot: -1.5, xSot: -1.0 }, UNKNOWN: { group: "UNKNOWN", xGoal: 0, xShot: 0, xSot: 0 } };
+  const events = Array.from({ length: 120 }, (_, i) => ({
+    riskSetRawFeatures: [rawByGroup.F, rawByGroup.M, rawByGroup.D, rawByGroup.G, rawByGroup.UNKNOWN],
+    scorerIndex: i % 6 === 0 ? 1 : (i % 6 === 1 ? 4 : 0), // le "F" marque le plus souvent, jamais le "G" (quasi-separation)
+  }));
+  const result = codingInvarianceTest(events, ["UNKNOWN", "F", "M", "D"]);
+  assert.equal(result.all_converged, true);
+  assert.ok(result.max_penalty_matrix_diff < 1e-12, "la matrice de penalite canonique (I+J) doit etre algebriquement identique quelle que soit la reference");
+  assert.ok(result.max_canonical_alpha_diff <= 1e-8, `alpha canoniques doivent concorder entre codages (obtenu ${result.max_canonical_alpha_diff})`);
+  assert.ok(result.max_abs_probability_difference <= 1e-8, `probabilites de risk-set doivent concorder entre codages (obtenu ${result.max_abs_probability_difference})`);
 });
 
 test("goal clock : Dirichlet shrinkage - aucun bin exactement nul meme sans observation dans ce bin", () => {

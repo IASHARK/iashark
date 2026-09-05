@@ -3,7 +3,7 @@
   "artifact_type": "MEAN_PRESERVATION_CORRECTION_ADDENDUM",
   "description": "Correction MATHEMATIQUE du candidat M5, decouverte et corrigee AVANT toute observation de performance reelle (aucune NLL M5 n'a jamais ete calculee au moment de cette correction). Append-only : ne reecrit aucun artefact anterieur.",
   "created_at": "2026-09-05T05:42:30Z",
-  "code_sha": null,
+  "code_sha": "c04b8568e6fa8db26f81943beb02ce49b3a71ba4",
   "original_diagnostic": {
     "problem": "Appliquer tau Dixon-Coles directement a la PMF jointe shared-gamma q(h,a|lambdaH,lambdaA,kappa) puis normaliser par Zdc NE preserve PAS E[H]=lambdaH, E[A]=lambdaA en general (les cellules basses n'ont pas les memes proportions sous shared-gamma dependante que sous Poisson independant).",
     "grid_tested": { "lambdaH_lambdaA": [0.5, 1.0, 1.5, 2.0, 3.0], "kappa": [2, 5, 10, 20, 100], "rho": -0.0845, "n_points": 125 },

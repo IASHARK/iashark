@@ -1,0 +1,63 @@
+{
+ "experiment_id": "EXP-005",
+ "description": "Delta cause uniquement par la troncature adaptative (A4) vs maxGoals=10 fixe, sur les 46 matchs reels de production du jour",
+ "n_matches": 46,
+ "max_goal_distribution": {
+  "15": 23,
+  "20": 23
+ },
+ "max_tail_mass_before_fixed10": 0.00011113158299058679,
+ "max_tail_mass_after_adaptive": 9.630418684736242e-11,
+ "delta_by_market": {
+  "p1": {
+   "mean_abs_delta": 0.0000031911027419709424,
+   "p95_abs_delta": 0.00001511017328548192,
+   "max_abs_delta": 0.000022475488623330264,
+   "n": 46
+  },
+  "pN": {
+   "mean_abs_delta": 0.000002485734749918654,
+   "p95_abs_delta": 0.000013682642345080875,
+   "max_abs_delta": 0.000020649471397904406,
+   "n": 46
+  },
+  "p2": {
+   "mean_abs_delta": 0.0000031325866875459623,
+   "p95_abs_delta": 0.00001057910465673828,
+   "max_abs_delta": 0.00004213869878366694,
+   "n": 46
+  },
+  "OU1.5": {
+   "mean_abs_delta": 0.0000014752761122823705,
+   "p95_abs_delta": 0.000004224509934425136,
+   "max_abs_delta": 0.000011945916367883669,
+   "n": 46
+  },
+  "OU2.5": {
+   "mean_abs_delta": 0.0000036684467800044467,
+   "p95_abs_delta": 0.000010970084093342436,
+   "max_abs_delta": 0.00002913277007199344,
+   "n": 46
+  },
+  "OU3.5": {
+   "mean_abs_delta": 0.000006186305991184497,
+   "p95_abs_delta": 0.00002207013820765269,
+   "max_abs_delta": 0.00004829342737427966,
+   "n": 46
+  },
+  "BTTS": {
+   "mean_abs_delta": 8.280927913987799e-7,
+   "p95_abs_delta": 0.000003194649968008001,
+   "max_abs_delta": 0.000005521522795204348,
+   "n": 46
+  },
+  "DNB": {
+   "mean_abs_delta": 0.00000325098780325036,
+   "p95_abs_delta": 0.000012273833284281999,
+   "max_abs_delta": 0.000032598474965866986,
+   "n": 46
+  }
+ },
+ "n_decision_changes": 0,
+ "decision_changes": []
+}

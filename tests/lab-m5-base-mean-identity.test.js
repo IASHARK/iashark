@@ -77,12 +77,12 @@ test("aucune trace de M4 (NB2/kappa) ni d'Elo/odds/LLM dans la chaine de dependa
   }
 });
 
-test("HISTORIQUE (avant que le contrat mathematique M5 ne soit fige par l'utilisateur) : ce gate a bloque toute infrastructure M5 tant qu'aucune formule n'etait validee. Desormais que le contrat est fige (shared-gamma+DC, voir lib/lab/shared-gamma-dc.js), ce test verifie la contrainte encore active : AUCUN lancement reel (scripts/run_exp005.js) et AUCUN manifest fige a RUNNING avant instruction explicite de l'utilisateur", () => {
+test("HISTORIQUE : ce gate a bloque toute infrastructure M5 tant qu'aucune formule n'etait validee, PUIS tout lancement reel tant que le contrat mathematique + mean-preservation n'etaient pas explicitement acceptes par l'utilisateur. Les DEUX etapes ont ete franchies explicitement (contrat shared-gamma+DC accepte, correctif mean-preservation accepte, freeze manifest=RUNNING demande, lancement reel demande) - ce test verifie desormais que le manifest FIGE reference bien tous les artefacts d'audit attendus, jamais qu'il devrait etre absent", () => {
   const repoRoot = path.join(__dirname, "..");
-  assert.equal(fs.existsSync(path.join(repoRoot, "scripts/run_exp005.js")), false, "scripts/run_exp005.js ne doit pas encore exister - aucun lancement reel avant instruction explicite");
   const manifestPath = path.join(repoRoot, "scripts/experiments/exp005_manifest.json");
-  if (fs.existsSync(manifestPath)) {
-    const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
-    assert.notEqual(manifest.status, "RUNNING", "le manifest EXP-005 ne doit pas encore etre fige a RUNNING - aucune NLL M5 reelle avant validation explicite de ce gate par l'utilisateur");
-  }
+  assert.ok(fs.existsSync(manifestPath), "le manifest EXP-005 doit exister");
+  const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
+  assert.equal(manifest.status, "RUNNING", "le manifest doit etre fige a RUNNING (freeze explicitement demande par l'utilisateur)");
+  assert.ok(manifest.mean_preservation_correction && manifest.mean_preservation_correction.addendum_sha256, "le manifest fige doit referencer l'addendum mean-preservation");
+  assert.ok(fs.existsSync(path.join(repoRoot, "scripts/run_exp005.js")), "scripts/run_exp005.js doit exister (lancement reel explicitement demande)");
 });

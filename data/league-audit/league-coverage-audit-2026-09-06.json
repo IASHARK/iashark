@@ -1,0 +1,94 @@
+{
+  "audit_id": "LEAGUE_COVERAGE_AUDIT",
+  "generated_at": "2026-09-06T00:00:00Z",
+  "head_sha": "a4231495663e125d4de34c459d26eb4e9992f9d1",
+  "method": "Read-only audit. Repo config inspection + Supabase read-only queries + 19 live /leagues metadata calls + 30 targeted fixture-level probe calls (lineups/events/players) for 6 non-configured candidate leagues + 8 follow-up calls to confirm a K League 1 anomaly. No collection at scale, no model changes, no league validated by extrapolation from Premier League.",
+  "premier_league_reference": {
+    "league_id": 39,
+    "score_status": "VALIDATED_PL",
+    "player_status": "VALIDATED_PL",
+    "market_status": "SHADOW_COLLECTING / FORWARD_VALIDATION_PENDING",
+    "evidence": "Score+Player validated via lib/player-lab (V1/V2, OOS_DEV 2023-24 + OOS_FINAL 2024-25, commits dc39690e/a4231495). Market: Supabase odds_snapshots shows real T72/T24/T6 phases (4 fixtures, source=pipeline) but zero CLOSE snapshot and zero forward_odds_timeline rows for premier as of 2026-09-05 - no forward-vs-outcome validation performed yet."
+  },
+  "configured_leagues_repo": [
+    { "key": "premier", "id": 39, "country": "England", "in_config_leagues_json": true },
+    { "key": "laliga", "id": 140, "country": "Spain", "in_config_leagues_json": true },
+    { "key": "seriea", "id": 135, "country": "Italy", "in_config_leagues_json": true },
+    { "key": "bundesliga", "id": 78, "country": "Germany", "in_config_leagues_json": true },
+    { "key": "ligue1", "id": 61, "country": "France", "in_config_leagues_json": true },
+    { "key": "ldc", "id": 2, "country": "UEFA (Champions League)", "in_config_leagues_json": true },
+    { "key": "el", "id": 3, "country": "UEFA (Europa League)", "in_config_leagues_json": true },
+    { "key": "ecl", "id": 848, "country": "UEFA (Conference League)", "in_config_leagues_json": true },
+    { "key": "eredivisie", "id": 88, "country": "Netherlands", "in_config_leagues_json": true },
+    { "key": "primeira", "id": 94, "country": "Portugal", "in_config_leagues_json": true },
+    { "key": "mls", "id": 253, "country": "USA/Canada", "in_config_leagues_json": true },
+    { "key": "suede", "id": 113, "country": "Sweden (Allsvenskan)", "in_config_leagues_json": true },
+    { "key": "jleague", "id": 98, "country": "Japan (J1 League)", "in_config_leagues_json": true }
+  ],
+  "candidate_leagues_resolved": [
+    { "key": "championship", "id": 40, "name": "Championship", "country": "England", "resolved_via": "GET /leagues?search=Championship, filtered by country=England (never guessed)" },
+    { "key": "ligue2", "id": 62, "name": "Ligue 2", "country": "France", "resolved_via": "GET /leagues?search=Ligue 2" },
+    { "key": "belgium_pro", "id": 144, "name": "Jupiler Pro League", "country": "Belgium", "resolved_via": "GET /leagues?search=Jupiler Pro League" },
+    { "key": "eliteserien", "id": 103, "name": "Eliteserien", "country": "Norway", "resolved_via": "GET /leagues?search=Eliteserien" },
+    { "key": "denmark_superliga", "id": 119, "name": "Superliga", "country": "Denmark", "resolved_via": "GET /leagues?search=Superliga, filtered by country=Denmark (6 same-named leagues exist worldwide)" },
+    { "key": "kleague1", "id": 292, "name": "K League 1", "country": "South Korea", "resolved_via": "GET /leagues?search=K League 1" }
+  ],
+  "supabase_snapshot": {
+    "project": "IASHARK (ksvjraqitxouwiabecai)",
+    "tables_present": ["users", "rate_limit_buckets", "match_premium_data(111)", "match_snapshots(156)", "predictions_archive(259)", "odds_snapshots(92)", "forward_odds_timeline(264)", "billing/subscription/funnel tables (unrelated)"],
+    "note_no_fixtures_or_player_markets_table": "No dedicated 'fixtures' or 'player_markets' relational table exists. Player market data lives inline as JSONB in match_premium_data.player_markets. No historical bulk store - this project's Supabase is an OPERATIONAL live-tracking store, not a Score/Player Lab dataset warehouse (that role is filled locally by data/gate-b1 + data/player-lab/raw, currently Premier-League-only).",
+    "predictions_archive": {
+      "date_range": "2026-07-09 to 2026-07-30 only (stale, 3-week window)",
+      "n_rows": 259,
+      "distinct_league_keys": 13,
+      "leagues_present": ["equateur/Liga Pro", "mls", "bresil/Serie A (Brazil, NOT Italy)", "chine/Super League", "kleague/K League 1", "suede/Allsvenskan", "finlande/Veikkausliiga", "islande/Urvalsdeild", "lettonie/Virsliga", "lituanie/A Lyga", "other/World Cup", "irlande/Premier Division", "canada/Canadian Premier League"],
+      "overlap_with_config_leagues_json": ["mls", "suede"],
+      "interpretation": "Summer/civil-calendar rotation captured while the 11 European big-5-style launch leagues were in their off-season. Not representative of current pipeline league set. Zero rows for premier/laliga/seriea/bundesliga/ligue1/eredivisie/primeira/jleague/ldc/el/ecl at any date."
+    },
+    "odds_snapshots_current": {
+      "date_range": "2026-09-02 to 2026-09-05 (current, active)",
+      "leagues_with_rows": {
+        "premier": { "n": 9, "phases_seen": ["T72", "T24", "T6"], "bookmakers": "12-13", "markets": "145-176" },
+        "ligue1": { "n": 11, "phases_seen": ["T72", "T24", "T6"], "bookmakers": "6-13", "markets": "145-173" },
+        "laliga": { "n": 10, "phases_seen": ["T72", "T24", "T6"], "bookmakers": "6-13", "markets": "139-178" },
+        "seriea": { "n": 9, "phases_seen": ["T72", "T24", "T6"], "bookmakers": "6-13", "markets": "138-173" },
+        "bundesliga": { "n": 8, "phases_seen": ["T72", "T24", "T6"], "bookmakers": "6-13", "markets": "131-172" },
+        "eredivisie": { "n": 9, "phases_seen": ["FIRST_SEEN", "T72", "T24", "T6"], "bookmakers": "6-13", "markets": "124-146" },
+        "primeira": { "n": 9, "phases_seen": ["FIRST_SEEN", "T72", "T24", "T6"], "bookmakers": "6-13", "markets": "119-144" },
+        "mls": { "n": 9, "phases_seen": ["FIRST_SEEN", "T72", "T24"], "bookmakers": "4-12", "markets": "108-142" },
+        "suede": { "n": 10, "phases_seen": ["T72", "T24", "T6"], "bookmakers": "6-13", "markets": "112-128" },
+        "jleague": { "n": 5, "phases_seen": ["T72", "T24", "CLOSE"], "bookmakers": "6-11", "markets": "75-121" },
+        "ldc": { "n": 3, "phases_seen": ["FIRST_SEEN"], "bookmakers": "12", "markets": "107" }
+      },
+      "leagues_absent": ["el", "ecl"],
+      "leagues_never_in_this_table": ["championship", "ligue2", "belgium_pro", "eliteserien", "denmark_superliga", "kleague1"],
+      "only_close_phase_reached": ["jleague"],
+      "forward_odds_timeline_populated_for": { "suede": 147, "mls": 116, "bundesliga": 1 }
+    }
+  },
+  "local_historical_backfill": {
+    "premier_league": "1520 fixtures fully backfilled (lineups+players+events), seasons 2021-2025, data/gate-b1 + data/player-lab/raw. Fully validated through Score Lab (M2/rho) and Player Lab (V1/V2, OOS_DEV+OOS_FINAL).",
+    "all_other_leagues": "ZERO local historical backfill exists for any of the other 18 leagues examined (12 already-configured + 6 candidates). This is the single most important finding: CONFIGURED (13) is not HAS_DATA (1)."
+  },
+  "api_football_coverage_current_season_2026": "See league-coverage-report.json (2026-09-03, real /leagues calls) for the 13 configured leagues' current-season analysisTier (12/13 FULL_ANALYSIS, el/ecl/primeira/jleague STANDARD_ANALYSIS due to missing injuries or statistics_players for el).",
+  "historical_seasons_coverage_flags_2021_2025": "Re-verified live for all 19 leagues examined (13 configured + 6 candidates): events/lineups/statistics_fixtures/statistics_players/standings = true for every league and every season 2021-2025 (with the noted exception of el 2021-2024 missing statistics_players/injuries, ecl/primeira/jleague missing injuries in several years). odds coverage flag = false for ALL leagues for seasons 2021-2025 (only true for the current 2026-27 season) - historical bulk odds via this endpoint is not indicated as available for any league, including Premier League.",
+  "real_fixture_level_probes": {
+    "method": "1 mid-season 2023 FT fixture per candidate league: lineups + events + fixtures/players, plus a current-season (2026) fixture count check.",
+    "premier_league_baseline_for_comparison": { "sample": "50 real 2023-24 fixtures from local cache, 1992 player rows", "shots_non_null_rate": 0.296, "sot_non_null_rate": 0.176 },
+    "results": {
+      "championship": { "lineups_ok": true, "player_rows": 40, "shots_non_null_rate": 0.275, "sot_non_null_rate": 0.15, "verdict": "comparable to PL baseline, not a red flag" },
+      "ligue2": { "lineups_ok": true, "player_rows": 36, "shots_non_null_rate": 0.306, "sot_non_null_rate": 0.194, "verdict": "comparable to PL baseline" },
+      "belgium_pro": { "lineups_ok": true, "player_rows": 37, "shots_non_null_rate": 0.324, "sot_non_null_rate": 0.216, "verdict": "comparable to PL baseline" },
+      "eliteserien": { "lineups_ok": true, "player_rows": 39, "shots_non_null_rate": 0.231, "sot_non_null_rate": 0.154, "verdict": "comparable to PL baseline" },
+      "denmark_superliga": { "lineups_ok": true, "player_rows": 40, "shots_non_null_rate": 0.3, "sot_non_null_rate": 0.225, "verdict": "comparable to PL baseline" },
+      "kleague1": {
+        "lineups_ok": true, "events_ok": true,
+        "player_fixture_stats_2023": 0, "player_fixture_stats_2024": 0,
+        "player_fixture_stats_2021": 36, "player_fixture_stats_2022": 36, "player_fixture_stats_2025": 40, "player_fixture_stats_2026_current": 40,
+        "verdict": "CONFIRMED GAP: fixtures/players returns ZERO rows for 2023 and 2024 seasons specifically (verified across 5 sampled fixtures: 3 in 2023, 1 in 2024, cross-checked against populated 2021/2022/2025/2026), despite lineups and events being present and the /leagues coverage flag claiming statistics_players=true for those years. This is exactly the kind of gap a boolean-only check would miss."
+      }
+    },
+    "interpretation": "The shots/SOT sparsity initially looked like a weakness of the 5 populated candidates but is statistically indistinguishable from Premier League's own established baseline (which the entire V1/V2 Player Scorer pipeline already handles via null!=0 Bayesian shrinkage) - NOT a blocker. The K League 1 2023-2024 player-stats hole is a genuine, real, single-league finding that would break the exact WARMUP/TRAIN/OOS_DEV/OOS_FINAL season split used for Premier League and require a redesigned split for that league specifically.",
+    "sample_size_caveat": "Each of the 5 non-K-League probes is a SINGLE fixture (~36-40 player rows). This is sufficient to confirm the coverage flags are not entirely fictitious, but NOT sufficient to certify league-wide data quality - a larger multi-fixture sample is recommended before any backfill commitment, per the audit's explicit instruction not to validate by extrapolation."
+  }
+}

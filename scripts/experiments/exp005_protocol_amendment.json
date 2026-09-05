@@ -1,0 +1,37 @@
+{
+  "artifact_type": "PROTOCOL_AMENDMENT",
+  "description": "Amendement APPEND-ONLY au protocole de promotion, cree et hashe AVANT toute observation M5 (avant tout fit reel, avant tout calcul de NLL M5). S'applique a EXP-005 et aux experiences futures. Ne modifie ni ne reecrit aucun artefact anterieur (exp002c_*, exp004_*) - ceux-ci restent inchanges et regis par leurs propres seuils d'origine, deja clos.",
+  "created_at": "2026-09-05T05:00:00Z",
+  "applies_from": "EXP-005",
+  "reason_for_amendment": "La regle M4 'gain positif dans CHAQUE saison' etait trop binaire pour seulement 380 matchs par saison (bruit d'echantillonnage a cette taille peut facilement produire un signe negatif meme quand l'effet reel est positif ou nul). Elle a ete correctement appliquee pour EXP-004 (regle en vigueur au moment de ce resultat, jamais changee retroactivement) mais est remplacee ICI, AVANT tout resultat EXP-005, pour les experiences futures.",
+  "old_rule_exp004": {
+    "primary_threshold": "relative_gain >= 0.50%",
+    "season_rule": "gain > 0 obligatoire sur LES DEUX saisons, sinon PERIOD_HETEROGENEITY_FAIL (rejet direct)"
+  },
+  "new_rule_exp005_and_later": {
+    "primary_global": {
+      "relative_exact_score_nll_gain_threshold": 0.0025,
+      "note": "0.25% (abaisse depuis 0.50%) - justifie par la complexite ajoutee : M5 n'ajoute qu'UN SEUL parametre global (kappa) a une architecture qui NESTE M2 (kappa->infini recupere M2 exactement) - un gain OOS robuste mais plus modeste suffit a justifier cette faible complexite supplementaire.",
+      "ci95_delta_nll_condition": "upper < 0",
+      "delta_convention": "delta = NLL_candidate - NLL_champion (negatif = candidat meilleur), INCHANGEE"
+    },
+    "season_heterogeneity": {
+      "no_longer_automatic_reject_on_any_negative_season": true,
+      "hard_fail_reason_code": "PERIOD_MATERIAL_DEGRADATION",
+      "hard_fail_conditions": [
+        "relative_gain <= -0.50% sur au moins une saison (A)",
+        "OU CI95_delta_NLL.lower > 0 sur au moins une saison (B) - preuve bootstrap que le candidat est reellement pire sur cette saison"
+      ],
+      "soft_warning_reason_code": "PERIOD_HETEROGENEITY_WARN",
+      "soft_warning_condition": "une saison est negative mais ne remplit ni (A) ni (B) - diagnostic uniquement, jamais un veto automatique",
+      "heterogeneity_signal": {
+        "reason_code": "PERIOD_HETEROGENEITY_SIGNAL",
+        "computation": "bootstrap de (mean_delta_2024_25 - mean_delta_2023_24)",
+        "condition": "CI exclut zero",
+        "nature": "diagnostic, pas un veto automatique"
+      }
+    },
+    "reason_codes_are_cumulative": "TOUS les reason_codes applicables doivent etre retournes ensemble par la fonction de decision, jamais un court-circuit sur le premier trouve (correctif deja applique a lib/lab/promotion-m4.js le 2026-09-05, reconduit et teste explicitement pour lib/lab/promotion-m5.js)."
+  },
+  "immutability": "Cet amendement est fige a partir de ce commit. Aucune regle ne pourra changer apres observation d'un resultat EXP-005. Toute correction future = nouvel amendement ou nouvelle experience, jamais une reecriture retroactive de celui-ci ou des seuils EXP-004 deja clos."
+}

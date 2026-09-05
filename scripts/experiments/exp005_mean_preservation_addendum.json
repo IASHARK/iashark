@@ -1,0 +1,79 @@
+{
+  "experiment_id": "EXP-005",
+  "artifact_type": "MEAN_PRESERVATION_CORRECTION_ADDENDUM",
+  "description": "Correction MATHEMATIQUE du candidat M5, decouverte et corrigee AVANT toute observation de performance reelle (aucune NLL M5 n'a jamais ete calculee au moment de cette correction). Append-only : ne reecrit aucun artefact anterieur.",
+  "created_at": "2026-09-05T05:42:30Z",
+  "code_sha": null,
+  "original_diagnostic": {
+    "problem": "Appliquer tau Dixon-Coles directement a la PMF jointe shared-gamma q(h,a|lambdaH,lambdaA,kappa) puis normaliser par Zdc NE preserve PAS E[H]=lambdaH, E[A]=lambdaA en general (les cellules basses n'ont pas les memes proportions sous shared-gamma dependante que sous Poisson independant).",
+    "grid_tested": { "lambdaH_lambdaA": [0.5, 1.0, 1.5, 2.0, 3.0], "kappa": [2, 5, 10, 20, 100], "rho": -0.0845, "n_points": 125 },
+    "max_absolute_shift": 0.0896,
+    "max_relative_shift_pct": 2.99,
+    "median_absolute_shift": 0.0025,
+    "median_relative_shift_pct": 0.21,
+    "worst_case": { "lambdaH": 3, "lambdaA": 3, "kappa": 2 }
+  },
+  "reason_for_correction": "Le contrat scientifique M5 exige 'M5 adds dependence while preserving the M2 scoring means'. M5_BASE_INTENSITIES==M2_LAMBDAS (identite des PARAMETRES D'ENTREE) n'implique PAS M5_FINAL_MARGINAL_MEANS==M2_MEANS (identite des MOYENNES DE LA DISTRIBUTION FINALE apres tau+Zdc) sous une distribution jointe dependante. Ces deux proprietes sont DISTINCTES et doivent etre demontrees separement.",
+  "final_candidate": "M5_SHARED_GAMMA_DC_MEAN_PRESERVING",
+  "theta_equations": {
+    "base_distribution": "q(h,a|thetaH,thetaA,kappa) = Gamma(h+a+kappa)/(Gamma(kappa)*h!*a!) * kappa^kappa * thetaH^h * thetaA^a / (kappa+thetaH+thetaA)^(h+a+kappa)",
+    "tau_uses_theta_not_lambda": "tau00=1-thetaH*thetaA*rho, tau01=1+thetaH*rho, tau10=1+thetaA*rho, tau11=1-rho, rho=-0.0845 FIXE (item 2, jamais lambdaH/lambdaA directement dans tau)",
+    "zdc": "Zdc = 1 + sum_4_cellules_basses q(h,a|theta)*(tau(h,a)-1)",
+    "final_distribution": "P_M5(h,a) = q(h,a|theta)*tau(h,a)/Zdc",
+    "constraint_solved": "thetaH,thetaA>0 tels que E_M5[H]=lambdaH ET E_M5[A]=lambdaA (les DEUX moments finaux, pas seulement les intensites d'entree)",
+    "closed_form_moments": {
+      "E_M5_H": "(thetaH + correctionH) / Zdc, correctionH = q10*(tau10-1) + q11*(tau11-1)",
+      "E_M5_A": "(thetaA + correctionA) / Zdc, correctionA = q01*(tau01-1) + q11*(tau11-1)",
+      "E_M5_H2": "(thetaH + thetaH^2*(kappa+1)/kappa + correctionH) / Zdc (meme correctionH : h^2=h sur {0,1})",
+      "E_M5_A2": "(thetaA + thetaA^2*(kappa+1)/kappa + correctionA) / Zdc",
+      "E_M5_HA": "(thetaH*thetaA*(1+1/kappa) - rho*q11) / Zdc",
+      "note": "Var_M5(H)=E_M5[H2]-lambdaH^2, Var_M5(A)=E_M5[A2]-lambdaA^2, Cov_M5(H,A)=E_M5[HA]-lambdaH*lambdaA - JAMAIS la formule brute thetaH*thetaA/kappa (verifiee differer de 5-30% dans des cas realistes, tests/lab-shared-gamma-theta-solver.test.js)"
+    },
+    "cost": "O(1) par evaluation (4 evaluations de q aux cellules basses uniquement, jamais une somme sur toute la matrice)"
+  },
+  "solver_policy": {
+    "module": "lib/lab/shared-gamma-theta-solver.js#solveThetaForTargetMeans (Node), scripts/fit_m5_kappa_worker.py + scripts/eval_shared_gamma_log_probability.py (Python, ecrits independamment)",
+    "method": "Newton 2D (jacobien numerique par differences finies) avec repli backtracking borne (reduit le pas si le residu grossit ou sort du domaine positif - stabilise Newton, ne force JAMAIS une solution dans une region reellement sans solution)",
+    "start": "thetaH=lambdaH, thetaA=lambdaA (exact a kappa infini)",
+    "max_iterations": 30,
+    "tolerance": 1e-10,
+    "max_backtrack": 20,
+    "positivity_contract": "thetaH>0, thetaA>0, tau00>0, tau01>0, tau10>0, tau11>0, Zdc>0 - verifie a CHAQUE iteration, jamais un clipping silencieux",
+    "error_codes": ["M5_INVALID_PARAMETER_REGION", "JACOBIAN_SINGULAR", "BACKTRACKING_EXHAUSTED", "MAX_ITERATIONS_EXCEEDED"],
+    "feasibility_results": {
+      "requested_grid_convergence": "125/125 (100%)",
+      "max_iterations_observed": 2,
+      "max_residual_observed": 6.75e-11,
+      "uniqueness_stress_test": "5 points de depart internes distincts convergent vers la meme solution (ecart <1e-6)",
+      "benchmark_standalone_js": "0.012ms/fixture, ~0.3s estime pour un cutoff complet (negligeable face au round-trip Python existant)",
+      "benchmark_production_python": "700 lignes, 18 iterations d'optimiseur (12600 resolutions theta) : ~1.3s a chaud (vs cible non-prohibitive)"
+    }
+  },
+  "kappa_domain": {
+    "stress_grid": { "lambda_range": [0.1, 0.3, 0.6, 1.0, 1.5, 2.0, 3.0, 4.5, 6.0], "kappas_tested": [0.25, 0.5, 1, 2, 5, 20, 100, 1000], "n_combinations_per_kappa": 81 },
+    "results_by_kappa": {
+      "0.25": "15/81 echecs (18.5%)",
+      "0.5": "4/81 echecs (4.9%), concentres aux lambda extremes (4.5-6.0)",
+      "1": "0/81 echecs (100% robuste)",
+      "2": "0/81 echecs", "5": "0/81 echecs", "20": "0/81 echecs", "100": "0/81 echecs", "1000": "0/81 echecs"
+    },
+    "kappa_min_robust_registered": 1.0,
+    "kappa_max": 1000000,
+    "boundary_reason_code": "KAPPA_LOWER_BOUND_HIT",
+    "boundary_policy": "tout optimum touchant kappa_min=1.0 est diagnostique et NON-PROMOUVABLE (jamais accepte silencieusement)",
+    "note": "Borne choisie AVANT tout resultat EXP-005 reel, sur stress test synthetique/parametrique uniquement - jamais ajustee apres observation de donnees OOS."
+  },
+  "nested_limit_contract_reconfirmed": "quand kappa->infini, thetaH->lambdaH et thetaA->lambdaA (verifie : shift<1e-6 a kappa=1e6), et P_M5->P_M2 (rho=-0.0845 identique) - tests/lab-shared-gamma-theta-solver.test.js#NESTED_LIMIT",
+  "files_changed": [
+    "lib/lab/shared-gamma-theta-solver.js (NOUVEAU - solveur production)",
+    "lib/lab/shared-gamma-matrix.js (buildSharedGammaMatrix prend maintenant lambdaH/lambdaA et resout theta en interne; buildSharedGammaMatrixFromTheta = ancienne API bas niveau, theta explicite)",
+    "lib/lab/walkforward-m5-runner.js (persiste theta_home/theta_away/theta_residual_h/theta_residual_a par prediction)",
+    "scripts/fit_m5_kappa_worker.py (resout theta par row par candidat kappa, jamais theta=lambda)",
+    "scripts/eval_shared_gamma_log_probability.py (fidelity Node/Python reecrite pour comparer theta/Zdc/E[H]/E[A]/logP finaux)",
+    "tests/lab-shared-gamma-theta-solver.test.js (NOUVEAU)",
+    "tests/lab-shared-gamma-matrix.test.js, tests/lab-m5-node-python-fidelity.test.js (reecrits)"
+  ],
+  "files_not_reopened": ["scripts/experiments/exp002c_report.json", "scripts/experiments/exp002c_closure.json", "scripts/experiments/exp004_report.json", "scripts/experiments/exp004_closure.json", "scripts/experiments/exp005_protocol_amendment.json"],
+  "promotion_rules_unchanged": true,
+  "no_real_m5_performance_observed_at_time_of_correction": true
+}

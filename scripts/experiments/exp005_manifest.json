@@ -9,25 +9,28 @@
     "description": "Exactement l'implementation promue EXP-002C (lib/lab/walkforward-m2c-runner.js, code_sha=b8cb9ff3f3a8d03d529b8ebbdb7c4147faf2438f). INCHANGE : code, parametres, resultats, closure."
   },
   "candidate_model": {
-    "id": "M5_SHARED_GAMMA_DC",
-    "description": "muHome=lambdaH_M2, muAway=lambdaA_M2 TOUJOURS. Latent commun Z~Gamma(shape=kappa,rate=kappa), H|Z~Poisson(muH*Z), A|Z~Poisson(muA*Z) independants sachant Z. PMF jointe q(h,a) fermee (NB2 bivariee partageant kappa), PUIS correction Dixon-Coles FIXE (rho=-0.0845, tau identique a M2) appliquee et renormalisee (Zdc). NESTE M2 exactement : kappa->infini => M5->M2 Dixon-Coles rho=-0.0845 (verifie numeriquement, convergence monotone O(1/kappa))."
+    "id": "M5_SHARED_GAMMA_DC_MEAN_PRESERVING",
+    "description": "CORRECTIF mean-preservation (voir scripts/experiments/exp005_mean_preservation_addendum.json, AVANT toute performance reelle) : muHome=lambdaH_M2, muAway=lambdaA_M2 sont les moyennes CIBLES de la distribution FINALE (pas les intensites d'entree directes). Pour chaque (lambdaH,lambdaA,kappa), des intensites INTERNES thetaH,thetaA sont resolues deterministement (Newton 2D, PAS un parametre statistique appris) telles que la distribution shared-gamma+DC normalisee ait EXACTEMENT E[H]=lambdaH, E[A]=lambdaA. Latent commun Z~Gamma(shape=kappa,rate=kappa), H|Z~Poisson(thetaH*Z), A|Z~Poisson(thetaA*Z). PMF jointe q(h,a|theta) fermee, PUIS correction Dixon-Coles FIXE (rho=-0.0845, tau EVALUE A theta) appliquee et renormalisee (Zdc). NESTE M2 exactement : kappa->infini => thetaH->lambdaH, thetaA->lambdaA => M5->M2 Dixon-Coles rho=-0.0845 (reconfirme apres correctif)."
   },
   "not_baseline": "M4 (EXP-004, CLOSED_REJECT) - son modele (marges NB2 INDEPENDANTES, sans DC) n'est PAS la baseline de M5. Aucun kappa/fitter/decision M4 reutilise (verifie tests/lab-m5-no-m4.test.js).",
+  "mean_preservation_correction": {
+    "addendum_file": "scripts/experiments/exp005_mean_preservation_addendum.json",
+    "reason": "theta=lambda directement ne preserve PAS les moyennes finales sous shared-gamma+DC (jusqu'a 2.99% d'ecart releve). Corrige AVANT toute NLL M5 reelle.",
+    "solver": "lib/lab/shared-gamma-theta-solver.js#solveThetaForTargetMeans"
+  },
   "formula": {
     "rho_fixed": -0.0845,
     "one_new_parameter": "kappa",
+    "internal_reparametrization_not_learned": "thetaH, thetaA (resolus deterministement par match/kappa, jamais appris statistiquement)",
     "nested_in_m2": true,
     "latent_factor": "Z ~ Gamma(shape=kappa, rate=kappa), E[Z]=1, Var(Z)=1/kappa",
-    "conditional": "H|Z ~ Poisson(muH*Z), A|Z ~ Poisson(muA*Z), independants sachant Z",
-    "implied_moments": {
-      "E_H": "muH", "E_A": "muA",
-      "Var_H": "muH + muH^2/kappa", "Var_A": "muA + muA^2/kappa",
-      "Cov_H_A": "muH*muA/kappa"
-    },
-    "joint_pmf_pre_dc": "q(h,a) = Gamma(h+a+kappa)/(Gamma(kappa)*h!*a!) * kappa^kappa * muH^h * muA^a / (kappa+muH+muA)^(h+a+kappa)",
-    "dc_correction": "tau identique a M2 (0-0:1-muH*muA*rho, 0-1:1+muH*rho, 1-0:1+muA*rho, 1-1:1-rho, ailleurs:1)",
-    "normalization": "Zdc = 1 + sum_4_low_cells q(h,a)*(tau(h,a)-1) ; P_M5(h,a) = q(h,a)*tau(h,a)/Zdc",
-    "implementation": "lib/lab/shared-gamma-dc.js (Node), scripts/fit_m5_kappa_worker.py / scripts/eval_shared_gamma_log_probability.py (Python) - identite numeriquement stable (produit croissant), verifiee <=1e-12 (tests/lab-m5-node-python-fidelity.test.js)"
+    "conditional": "H|Z ~ Poisson(thetaH*Z), A|Z ~ Poisson(thetaA*Z), independants sachant Z",
+    "mean_preservation_constraint": "E_M5[H]=lambdaH (=lambdaH_M2), E_M5[A]=lambdaA (=lambdaA_M2), resolu via lib/lab/shared-gamma-theta-solver.js, tolerance cible <=1e-10",
+    "final_moments_note": "Var_M5(H)/Var_M5(A)/Cov_M5(H,A) sont calcules sur la distribution FINALE (E[H^2],E[A^2],E[HA] corriges DC) - la formule brute shared-gamma thetaH*thetaA/kappa N'EST PAS la covariance finale (differe de 5-30% dans des cas realistes, voir addendum)",
+    "joint_pmf_pre_dc": "q(h,a|theta) = Gamma(h+a+kappa)/(Gamma(kappa)*h!*a!) * kappa^kappa * thetaH^h * thetaA^a / (kappa+thetaH+thetaA)^(h+a+kappa)",
+    "dc_correction": "tau IDENTIQUE a M2, EVALUE A theta (jamais lambda) : 0-0:1-thetaH*thetaA*rho, 0-1:1+thetaH*rho, 1-0:1+thetaA*rho, 1-1:1-rho, ailleurs:1",
+    "normalization": "Zdc = 1 + sum_4_low_cells q(h,a|theta)*(tau(h,a)-1) ; P_M5(h,a) = q(h,a|theta)*tau(h,a)/Zdc",
+    "implementation": "lib/lab/shared-gamma-dc.js + lib/lab/shared-gamma-theta-solver.js (Node), scripts/fit_m5_kappa_worker.py / scripts/eval_shared_gamma_log_probability.py (Python) - identite numeriquement stable (produit croissant), fidelite finale (theta/Zdc/E[H]/E[A]/logP) verifiee (tests/lab-m5-node-python-fidelity.test.js, delta observe ~7e-15 sur logP)"
   },
   "code": {
     "runner": "lib/lab/walkforward-m5-runner.js#runWalkForwardM5",
@@ -43,18 +46,20 @@
   },
   "matrix": {
     "adaptive": true,
-    "tail_bound_method": "borne d'UNION (P(H>M)+P(A>M) sur les marges NB2-shared-gamma NON corrigees DC, divisee par Zdc) - PAS CDF_H*CDF_A (distribution dependante, ce produit serait invalide)",
+    "tail_bound_method": "borne d'UNION (P(H>M)+P(A>M) sur les marges NB2-shared-gamma NON corrigees DC, evaluees a thetaH/thetaA, divisee par Zdc) - PAS CDF_H*CDF_A (distribution dependante, ce produit serait invalide)",
     "tail_threshold": 1e-10,
     "hard_safety_cap": 100,
     "failure_code": "M5_TAIL_TRUNCATION_FAILURE",
-    "invalid_normalization_code": "M5_INVALID_NORMALIZATION",
-    "persisted_fields": ["matrix_max_goal", "matrix_guaranteed_tail_upper_bound", "matrix_zdc"]
+    "invalid_parameter_region_code": "M5_INVALID_PARAMETER_REGION",
+    "persisted_fields": ["matrix_max_goal", "matrix_guaranteed_tail_upper_bound", "matrix_zdc", "theta_home", "theta_away", "theta_residual_h", "theta_residual_a"]
   },
   "fitter": {
     "worker": "lib/lab/shared-gamma-python-worker.js#SharedGammaKappaWorker -> scripts/fit_m5_kappa_worker.py",
     "optimized_parameter": "eta = log(kappa)",
     "eta_start_registered": "log(10) (kappa_start=10, JAMAIS le kappa observe EXP-004 comme start adaptatif)",
-    "bounds": { "kappa_min": 0.01, "kappa_max": 1000000 },
+    "theta_solved_per_row_per_kappa_candidate": true,
+    "bounds": { "kappa_min": 1.0, "kappa_max": 1000000, "kappa_min_source": "scripts/experiments/exp005_mean_preservation_addendum.json (item 8) - stress test grille football large (lambda 0.1-6.0), kappa=1 est 100% robuste (0/81 echecs), kappa=0.5 montre deja 4/81 echecs reels" },
+    "kappa_lower_bound_hit_reason_code": "KAPPA_LOWER_BOUND_HIT",
     "poisson_limit_reason_code": "KAPPA_M2_LIMIT",
     "poisson_limit_condition": "50% des cutoffs avec kappa>=1000 OU limite superieure d'optimisation atteinte de facon repetee"
   },
@@ -78,7 +83,7 @@
     "delta_sign_convention": "delta_i = NLL_M5 - NLL_M2, negatif = M5 meilleur",
     "primary_comparison_scope": "COMMON_SUPPORT (cible 760/760), GLOBAL, ET separement par saison",
     "secondary_metrics": ["1x2_logloss", "1x2_brier", "ou25_logloss", "ou25_brier", "btts_logloss", "btts_brier", "ou35_diagnostic_only"],
-    "dependence_diagnostics": ["Cov(H,A)=muH*muA/kappa", "implied_correlation", "Draw/BTTS_yes/0-0/1-1 observed_vs_predicted"],
+    "dependence_diagnostics": ["Var_M5(H)/Var_M5(A)/Cov_M5(H,A) FINAUX (lib/lab/shared-gamma-theta-solver.js#finalDependenceDiagnostics, PAS la formule brute thetaH*thetaA/kappa)", "implied_correlation_finale", "Draw/BTTS_yes/0-0/1-1 observed_vs_predicted"],
     "low_score_diagnostics": { "scores": ["0-0", "1-0", "0-1", "1-1"], "aggregate": "LOW_SCORE_SET" },
     "bootstrap": {
       "method": "paired_block_bootstrap (lib/lab/bootstrap.js) + pairedBlockBootstrapRelativeGain",
@@ -114,7 +119,8 @@
       { "id": "M2_CHAMPION_CLOSED", "description": "EXP-002C ferme (PROMOTE), closure inchangee", "satisfied": true },
       { "id": "M5_BASE_MEANS_IDENTITY_TESTED", "description": "tests/lab-m5-base-mean-identity.test.js + tests/lab-m5-runner.test.js verts (760 OOS + 380 TRAIN)", "satisfied": true },
       { "id": "SHARED_GAMMA_MATH_TESTED", "description": "tests/lab-shared-gamma-dc.test.js + tests/lab-shared-gamma-matrix.test.js verts, NESTED LIMIT CONTRACT confirme (convergence monotone O(1/kappa))", "satisfied": true },
-      { "id": "NODE_PYTHON_FIDELITY_TESTED", "description": "tests/lab-m5-node-python-fidelity.test.js vert, <=1e-12", "satisfied": true },
+      { "id": "MEAN_PRESERVATION_CORRECTION_APPLIED", "description": "scripts/experiments/exp005_mean_preservation_addendum.json - shift jusqu'a 2.99% releve AVANT theta, corrige par lib/lab/shared-gamma-theta-solver.js, tests/lab-shared-gamma-theta-solver.test.js vert (mean-preservation, positivite, nested limit, domaine kappa, determinisme, unicite)", "satisfied": true },
+      { "id": "NODE_PYTHON_FIDELITY_TESTED", "description": "tests/lab-m5-node-python-fidelity.test.js vert (POST-correctif theta : thetaH/thetaA/Zdc/E[H]/E[A]/logP), delta logP observe ~7e-15", "satisfied": true },
       { "id": "SYNTHETIC_IDENTIFIABILITY_TESTED", "description": "tests/lab-m5-synthetic-identifiability.test.js vert (kappa_true=2,5,20,quasi-M2)", "satisfied": true },
       { "id": "NO_M4_IN_M5", "description": "tests/lab-m5-no-m4.test.js vert", "satisfied": true },
       { "id": "DETERMINISM_ANTI_LEAKAGE_TESTED", "description": "tests/lab-m5-runner.test.js vert", "satisfied": true },
@@ -127,7 +133,10 @@
     "rho JAMAIS reestime - toujours -0.0845 (evite le confound entre ajout de dependance et suppression de Dixon-Coles)",
     "Aucun kappa/fitter/modele/decision M4 reutilise",
     "Aucun Elo, aucune cote bookmaker, aucun LLM",
-    "M5 doit revenir vers M2 exactement quand kappa->infini (verifie)",
+    "M5 doit revenir vers M2 exactement quand kappa->infini (verifie, reconfirme post-correctif theta)",
+    "E_M5[H]=lambdaH_M2 et E_M5[A]=lambdaA_M2 EXACTEMENT (tolerance <=1e-10) - jamais theta=lambda directement",
+    "thetaH/thetaA sont des intensites INTERNES resolues deterministement, JAMAIS un parametre statistique appris - le seul parametre global appris reste kappa",
+    "kappa_min=1.0 (domaine pre-enregistre AVANT tout resultat) - tout optimum touchant cette borne produit KAPPA_LOWER_BOUND_HIT, non-promouvable",
     "2025-26 JAMAIS lue",
     "Manifest IMMUABLE une fois status=RUNNING (PAS ENCORE le cas)",
     "Aucun seuil modifie apres avoir vu un resultat",

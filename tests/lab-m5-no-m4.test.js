@@ -16,6 +16,7 @@ const path = require("path");
 const M5_SOURCE_FILES = [
   "lib/lab/shared-gamma-dc.js",
   "lib/lab/shared-gamma-matrix.js",
+  "lib/lab/shared-gamma-theta-solver.js",
   "lib/lab/shared-gamma-python-worker.js",
   "lib/lab/shared-gamma-synthetic-identifiability.js",
   "lib/lab/walkforward-m5-runner.js",

@@ -31,10 +31,10 @@ test("1. tous les criteres au vert -> PROMOTE", () => {
   assert.deepEqual(res.reason_codes, []);
 });
 
-test("2. gain global de 0.10% (sous le seuil 0.50%) -> REJECT (GLOBAL_GAIN_BELOW_THRESHOLD)", () => {
+test("2. gain global de 0.10% (sous le seuil 0.50%) -> REJECT (GAIN_BELOW_PROMOTION_THRESHOLD)", () => {
   const res = evaluatePromotionM4(excellentInput({ globalRelativeGain: 0.001 }));
   assert.equal(res.status, STATUS.REJECT);
-  assert.ok(res.reason_codes.includes(REASON.GLOBAL_GAIN_BELOW_THRESHOLD));
+  assert.ok(res.reason_codes.includes(REASON.GAIN_BELOW_PROMOTION_THRESHOLD));
 });
 
 test("3. gain suffisant mais CI traverse zero -> SHADOW_MORE_DATA (GAIN_PROMISING_BUT_UNDERPOWERED)", () => {
@@ -112,7 +112,7 @@ test("14. COMMON_SUPPORT incomplet non explique -> REJECT (COMMON_SUPPORT_INCOMP
 test("gain global negatif (M4 pire) -> REJECT direct, jamais SHADOW", () => {
   const res = evaluatePromotionM4(excellentInput({ globalRelativeGain: -0.02, globalCiLower: 0.01, globalCiUpper: 0.03 }));
   assert.equal(res.status, STATUS.REJECT);
-  assert.ok(res.reason_codes.includes(REASON.GLOBAL_GAIN_BELOW_THRESHOLD));
+  assert.ok(res.reason_codes.includes(REASON.GAIN_BELOW_PROMOTION_THRESHOLD));
 });
 
 test("plusieurs raisons structurelles simultanees -> toutes rapportees", () => {
@@ -121,6 +121,21 @@ test("plusieurs raisons structurelles simultanees -> toutes rapportees", () => {
   assert.ok(res.reason_codes.includes(REASON.TEMPORAL_LEAKAGE_DETECTED));
   assert.ok(res.reason_codes.includes(REASON.MECHANISM_NON_DETERMINISTIC));
   assert.ok(res.reason_codes.includes(REASON.KAPPA_POISSON_LIMIT));
+});
+
+test("CORRECTIF AUDIT EXP-004 : un candidat qui rate le seuil de gain, a une CI traversant zero, ET echoue l'heterogeneite retourne LES TROIS reason_codes ensemble, pas seulement le premier trouve", () => {
+  // Reproduit exactement la configuration reelle EXP-004 (avant correctif, seul PERIOD_HETEROGENEITY_FAIL etait rapporte).
+  const res = evaluatePromotionM4(excellentInput({
+    globalRelativeGain: 0.00162, // 0.162% < seuil 0.50%
+    globalCiLower: -0.0152, globalCiUpper: 0.0043, // traverse zero (upper>0)
+    season2023RelativeGain: -0.000053, // negatif
+    season2024RelativeGain: 0.00334, // positif - une seule saison negative suffit
+  }));
+  assert.equal(res.status, STATUS.REJECT);
+  assert.equal(res.reason_codes.length, 3, `attendu exactement 3 raisons, obtenu ${JSON.stringify(res.reason_codes)}`);
+  assert.ok(res.reason_codes.includes(REASON.GAIN_BELOW_PROMOTION_THRESHOLD));
+  assert.ok(res.reason_codes.includes(REASON.BOOTSTRAP_CI_CROSSES_ZERO));
+  assert.ok(res.reason_codes.includes(REASON.PERIOD_HETEROGENEITY_FAIL));
 });
 
 test("determinisme : memes entrees -> meme decision", () => {

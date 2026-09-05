@@ -1,0 +1,36 @@
+{
+  "experiment_id": "EXP-004",
+  "artifact_type": "DECISION_ADDENDUM",
+  "description": "Correction d'AUDIT de la decision persistee - append-only. Ne modifie ni ne remplace scripts/experiments/exp004_report.json ni scripts/experiments/exp004_closure.json (tous deux INCHANGES, jamais reecrits). Aucune NLL, aucun bootstrap, aucun kappa, aucun seuil, aucune prediction n'est recalcule ou modifie ici - uniquement la completude des reason_codes de la fonction de decision.",
+  "created_at": "2026-09-05T04:31:12Z",
+  "original_report_sha256": "9638312da68216e3b2b28a7e117b2f94246de3420022487d12389178103d0336",
+  "original_closure_sha256": "fb8ea0e836e23ad52c66a5cc7324f8ee9c7f5cfb12e0d8ab9680c8e702a5571b",
+  "manifest_sha256": "466695013aabcdc7bf847b0da555b004558ce1bea2b8ccf48ca5cab7915328f0",
+  "run_code_sha": "ade08e889724b28990b0514e50b95f9dcaf90a49",
+  "audit_finding": {
+    "bug": "lib/lab/promotion-m4.js#evaluatePromotionM4 retournait au PREMIER critere structurel trouve (court-circuit) sans jamais evaluer/combiner le gain global et le CI du bootstrap, meme quand ces deux regles pre-enregistrees echouaient AUSSI independamment sur les memes donnees deja calculees.",
+    "fix_commit_note": "lib/lab/promotion-m4.js corrige : toutes les regles sont desormais evaluees independamment et TOUS les reason_codes applicables sont retournes ensemble - voir commit de ce meme changement et tests/lab-promotion-m4.test.js#\"CORRECTIF AUDIT EXP-004\".",
+    "verification_method": "La fonction evaluatePromotionM4 CORRIGEE a ete rejouee sur EXACTEMENT les memes valeurs deja calculees et persistees dans scripts/experiments/exp004_report.json (global.relative_gain_pct, global.ci95_delta_nll, by_season[*].relative_gain_pct, kappa_stats.p95_p05_ratio, secondary_metrics, low_score_diagnostics.LOW_SCORE_SET, mechanism_deterministic, convergence_rate, common_support_n) - aucune valeur scientifique n'a ete recalculee, seule la fonction de decision a ete rejouee sur les memes entrees."
+  },
+  "three_failed_pre_registered_rules": [
+    { "rule": "global relative gain >= 0.50%", "observed": "+0.162%", "reason_code": "GAIN_BELOW_PROMOTION_THRESHOLD" },
+    { "rule": "CI95_delta_NLL.upper < 0", "observed": "+0.0043 (traverse zero)", "reason_code": "BOOTSTRAP_CI_CROSSES_ZERO" },
+    { "rule": "gain positif sur 2023-24 ET 2024-25", "observed": "2023-24 = -0.0053% (negatif)", "reason_code": "PERIOD_HETEROGENEITY_FAIL" }
+  ],
+  "reason_codes_original_persisted": ["PERIOD_HETEROGENEITY_FAIL"],
+  "reason_codes_corrected": ["GAIN_BELOW_PROMOTION_THRESHOLD", "BOOTSTRAP_CI_CROSSES_ZERO", "PERIOD_HETEROGENEITY_FAIL"],
+  "decision_status": "CLOSED_REJECT",
+  "decision_unchanged": true,
+  "m4_promoted": false,
+  "next_champion": "M2",
+  "current_champion": "M2",
+  "m3_status_unchanged": "BLOCKED_EXTERNAL_DATA_SOURCE",
+  "lockbox_2025_2026": "SEALED_UNREAD",
+  "nothing_recomputed": {
+    "nll": "UNCHANGED",
+    "bootstrap": "UNCHANGED",
+    "kappa": "UNCHANGED",
+    "thresholds": "UNCHANGED",
+    "predictions": "UNCHANGED"
+  }
+}

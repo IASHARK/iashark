@@ -17,10 +17,18 @@ const path = require("path");
 const https = require("https");
 const { isCached, writeCached } = require("../lib/player-lab/raw-cache.js");
 
-const SEASON = 2024;
 const LEAGUE_ID = 39;
 const ENDPOINTS = ["lineups", "players", "events"];
-const MAX_API_CALLS_PER_RUN = 1200; // budget dur (pilot attendu ~1140)
+const MAX_API_CALLS_PER_RUN = 3600; // budget dur (3 saisons restantes attendu ~3420, item 1 PLAYER_SCORER_ENGINE_V1)
+
+// --seasons=2021,2022,2023 (defaut : 2024, comportement pilot original
+// inchange). Meme collecteur EXACT que le pilot valide - seule la liste
+// de saisons a parcourir change, jamais la logique par fixture/endpoint.
+function parseSeasonsArg() {
+  const arg = process.argv.find((a) => /^--seasons=/.test(a));
+  if (!arg) return [2024];
+  return arg.replace("--seasons=", "").split(",").map((s) => parseInt(s.trim(), 10));
+}
 
 function sleep(ms) { return new Promise((r) => setTimeout(r, ms)); }
 
@@ -51,25 +59,29 @@ async function main() {
   const apsKey = process.env.APISPORTS_KEY;
   if (!apsKey) { console.error("APISPORTS_KEY absent."); process.exitCode = 1; return; }
   const headers = { "x-apisports-key": apsKey };
-
-  const fixturesPath = path.join(__dirname, "..", "data", "gate-b1", "premier-league-2024.json");
-  const fixtures = JSON.parse(fs.readFileSync(fixturesPath, "utf8"));
-  console.log(`Pilot Premier League 2024-25 : ${fixtures.length} fixtures connues (0 appel /fixtures necessaire).`);
+  const seasons = parseSeasonsArg();
 
   let apiCallCount = 0, cacheHits = 0, newFetches = 0, stopped = false;
 
-  for (const fx of fixtures) {
+  for (const season of seasons) {
     if (stopped) break;
-    for (const endpoint of ENDPOINTS) {
-      if (isCached(endpoint, fx.fixture_id)) { cacheHits++; continue; }
-      if (apiCallCount >= MAX_API_CALLS_PER_RUN) { console.log(`Budget d'appels atteint (${MAX_API_CALLS_PER_RUN}) - arret propre, pas de retry.`); stopped = true; break; }
-      const resp = await get(ENDPOINT_PATH[endpoint](fx.fixture_id), headers);
-      apiCallCount++;
-      if (isRateLimitOrQuotaError(resp)) { console.log(`Rate-limit/quota signale (${endpoint}, fixture ${fx.fixture_id}) : ${JSON.stringify(resp.errors)} - arret immediat, pas de retry.`); stopped = true; break; }
-      writeCached({ endpoint, fixtureId: fx.fixture_id, apiSeason: SEASON, rawPayload: resp });
-      newFetches++;
-      if (newFetches % 50 === 0) console.log(`  progres: ${newFetches} nouvelles reponses, ${apiCallCount} appels utilises...`);
-      await sleep(250);
+    const fixturesPath = path.join(__dirname, "..", "data", "gate-b1", `premier-league-${season}.json`);
+    const fixtures = JSON.parse(fs.readFileSync(fixturesPath, "utf8"));
+    console.log(`Saison ${season} : ${fixtures.length} fixtures connues (0 appel /fixtures necessaire).`);
+
+    for (const fx of fixtures) {
+      if (stopped) break;
+      for (const endpoint of ENDPOINTS) {
+        if (isCached(endpoint, fx.fixture_id)) { cacheHits++; continue; }
+        if (apiCallCount >= MAX_API_CALLS_PER_RUN) { console.log(`Budget d'appels atteint (${MAX_API_CALLS_PER_RUN}) - arret propre, pas de retry.`); stopped = true; break; }
+        const resp = await get(ENDPOINT_PATH[endpoint](fx.fixture_id), headers);
+        apiCallCount++;
+        if (isRateLimitOrQuotaError(resp)) { console.log(`Rate-limit/quota signale (${endpoint}, fixture ${fx.fixture_id}) : ${JSON.stringify(resp.errors)} - arret immediat, pas de retry.`); stopped = true; break; }
+        writeCached({ endpoint, fixtureId: fx.fixture_id, apiSeason: season, rawPayload: resp });
+        newFetches++;
+        if (newFetches % 100 === 0) console.log(`  progres: ${newFetches} nouvelles reponses, ${apiCallCount} appels utilises...`);
+        await sleep(250);
+      }
     }
   }
 
@@ -80,4 +92,4 @@ if (require.main === module) {
   main().catch((e) => { console.error("FATAL:", e.message); process.exitCode = 1; });
 }
 
-module.exports = { ENDPOINTS, SEASON, LEAGUE_ID, isRateLimitOrQuotaError };
+module.exports = { ENDPOINTS, LEAGUE_ID, isRateLimitOrQuotaError, parseSeasonsArg };

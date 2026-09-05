@@ -1,0 +1,190 @@
+{
+  "fixtures_total": 380,
+  "fixtures_fully_cached": 380,
+  "fixtures_skipped": [],
+  "lineup_available_pct": 100,
+  "both_teams_lineup_pct": 100,
+  "fixture_player_available_pct": 100,
+  "events_available_pct": 100,
+  "player_match_rows": 15188,
+  "starters_rows": 8360,
+  "bench_rows": 6828,
+  "bench_used_rows": 3207,
+  "bench_zero_minute_rows": 3621,
+  "minutes_non_null_pct": 100,
+  "shots_non_null_pct": 28.75,
+  "shots_on_target_non_null_pct": 17.18,
+  "goals_non_null_pct": 100,
+  "player_id_mapping_pct": 99.97,
+  "missing_player_stats_count": 5,
+  "event_scorer_mapping_pct": 100,
+  "substitutions_mapping_note": "verifie via minutes-consistency (voir minutes_consistency_issues_count) - meme mecanisme d'appariement que le scorer mapping",
+  "minutes_consistency_issues_count": 260,
+  "minutes_consistency_issue_breakdown": {
+    "SUBST_ON_MINUTE_MISMATCH": 186,
+    "SUBST_OFF_MINUTE_MISMATCH": 74
+  },
+  "position_distribution": [
+    {
+      "position": "M",
+      "count": 5617
+    },
+    {
+      "position": "D",
+      "count": 4953
+    },
+    {
+      "position": "F",
+      "count": 3022
+    },
+    {
+      "position": "G",
+      "count": 1591
+    },
+    {
+      "position": "UNKNOWN",
+      "count": 5
+    }
+  ],
+  "total_goal_events": 1115,
+  "penalty_goals_scored": 69,
+  "missed_penalties_detected": 14,
+  "own_goals_detected": 33,
+  "own_goal_detail_strings": [
+    "Own Goal"
+  ],
+  "regulatory_goal_reconciliation_pct": 100,
+  "regulatory_goal_mismatches": [],
+  "transferred_players": [
+    {
+      "player_id": 909,
+      "teams": [
+        33,
+        66
+      ]
+    },
+    {
+      "player_id": 195993,
+      "teams": [
+        41,
+        45
+      ]
+    },
+    {
+      "player_id": 1468,
+      "teams": [
+        42,
+        52
+      ]
+    },
+    {
+      "player_id": 20355,
+      "teams": [
+        42,
+        41
+      ]
+    },
+    {
+      "player_id": 727,
+      "teams": [
+        42,
+        36
+      ]
+    },
+    {
+      "player_id": 912,
+      "teams": [
+        35,
+        42
+      ]
+    },
+    {
+      "player_id": 2938,
+      "teams": [
+        48,
+        65
+      ]
+    },
+    {
+      "player_id": 138931,
+      "teams": [
+        66,
+        57
+      ]
+    },
+    {
+      "player_id": 2729,
+      "teams": [
+        52,
+        36
+      ]
+    },
+    {
+      "player_id": 1135,
+      "teams": [
+        52,
+        46
+      ]
+    },
+    {
+      "player_id": 3428,
+      "teams": [
+        52,
+        46
+      ]
+    },
+    {
+      "player_id": 19143,
+      "teams": [
+        52,
+        39
+      ]
+    },
+    {
+      "player_id": 70747,
+      "teams": [
+        51,
+        57
+      ]
+    },
+    {
+      "player_id": 21998,
+      "teams": [
+        49,
+        66
+      ]
+    },
+    {
+      "player_id": 129643,
+      "teams": [
+        51,
+        48
+      ]
+    },
+    {
+      "player_id": 402329,
+      "teams": [
+        42,
+        33
+      ]
+    },
+    {
+      "player_id": 19720,
+      "teams": [
+        52,
+        49
+      ]
+    }
+  ],
+  "pilot_gate": {
+    "status": "PASS",
+    "reasons": [],
+    "thresholds": {
+      "MIN_LINEUP_PCT": 99,
+      "MIN_FIXTURE_PLAYER_PCT": 99,
+      "MIN_EVENTS_PCT": 99,
+      "MIN_PLAYER_ID_MAPPING_PCT": 99.5,
+      "MIN_REGULATORY_GOAL_RECONCILIATION_PCT": 99.5
+    }
+  }
+}

@@ -77,16 +77,12 @@ test("aucune trace de M4 (NB2/kappa) ni d'Elo/odds/LLM dans la chaine de dependa
   }
 });
 
-test("aucun fichier M5 n'existe encore dans le depot - le contrat mathematique M5 n'a pas ete fige, aucun fit/formule ne doit avoir ete ecrit avant validation explicite de l'utilisateur", () => {
+test("HISTORIQUE (avant que le contrat mathematique M5 ne soit fige par l'utilisateur) : ce gate a bloque toute infrastructure M5 tant qu'aucune formule n'etait validee. Desormais que le contrat est fige (shared-gamma+DC, voir lib/lab/shared-gamma-dc.js), ce test verifie la contrainte encore active : AUCUN lancement reel (scripts/run_exp005.js) et AUCUN manifest fige a RUNNING avant instruction explicite de l'utilisateur", () => {
   const repoRoot = path.join(__dirname, "..");
-  const candidatePaths = [
-    "lib/lab/walkforward-m5-runner.js",
-    "lib/lab/bivariate-gamma.js",
-    "scripts/fit_m5.py",
-    "scripts/run_exp005.js",
-    "scripts/experiments/exp005_manifest.json",
-  ];
-  for (const rel of candidatePaths) {
-    assert.equal(fs.existsSync(path.join(repoRoot, rel)), false, `${rel} ne devrait pas encore exister - le contrat mathematique M5 doit etre fige par l'utilisateur AVANT tout code de formule/fit`);
+  assert.equal(fs.existsSync(path.join(repoRoot, "scripts/run_exp005.js")), false, "scripts/run_exp005.js ne doit pas encore exister - aucun lancement reel avant instruction explicite");
+  const manifestPath = path.join(repoRoot, "scripts/experiments/exp005_manifest.json");
+  if (fs.existsSync(manifestPath)) {
+    const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
+    assert.notEqual(manifest.status, "RUNNING", "le manifest EXP-005 ne doit pas encore etre fige a RUNNING - aucune NLL M5 reelle avant validation explicite de ce gate par l'utilisateur");
   }
 });

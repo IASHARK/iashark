@@ -1,0 +1,136 @@
+{
+  "experiment_id": "EXP-005",
+  "registration_status": "REGISTERED",
+  "status": "REGISTERED",
+  "created_at": "2026-09-05",
+  "hypothesis": "Un facteur latent commun de rythme/ouverture du match, affectant simultanement les buts des deux equipes, ameliore-t-il la distribution jointe du score au-dela de M2 ? Champion M2 (EXP-002C, PROMOTE, ferme) reste inchange ; le candidat M5_SHARED_GAMMA_DC ajoute UN SEUL parametre (kappa) au-dessus de la MEME correction Dixon-Coles (rho=-0.0845 FIXE, jamais reestime).",
+  "champion_model": {
+    "id": "M2",
+    "description": "Exactement l'implementation promue EXP-002C (lib/lab/walkforward-m2c-runner.js, code_sha=b8cb9ff3f3a8d03d529b8ebbdb7c4147faf2438f). INCHANGE : code, parametres, resultats, closure."
+  },
+  "candidate_model": {
+    "id": "M5_SHARED_GAMMA_DC",
+    "description": "muHome=lambdaH_M2, muAway=lambdaA_M2 TOUJOURS. Latent commun Z~Gamma(shape=kappa,rate=kappa), H|Z~Poisson(muH*Z), A|Z~Poisson(muA*Z) independants sachant Z. PMF jointe q(h,a) fermee (NB2 bivariee partageant kappa), PUIS correction Dixon-Coles FIXE (rho=-0.0845, tau identique a M2) appliquee et renormalisee (Zdc). NESTE M2 exactement : kappa->infini => M5->M2 Dixon-Coles rho=-0.0845 (verifie numeriquement, convergence monotone O(1/kappa))."
+  },
+  "not_baseline": "M4 (EXP-004, CLOSED_REJECT) - son modele (marges NB2 INDEPENDANTES, sans DC) n'est PAS la baseline de M5. Aucun kappa/fitter/decision M4 reutilise (verifie tests/lab-m5-no-m4.test.js).",
+  "formula": {
+    "rho_fixed": -0.0845,
+    "one_new_parameter": "kappa",
+    "nested_in_m2": true,
+    "latent_factor": "Z ~ Gamma(shape=kappa, rate=kappa), E[Z]=1, Var(Z)=1/kappa",
+    "conditional": "H|Z ~ Poisson(muH*Z), A|Z ~ Poisson(muA*Z), independants sachant Z",
+    "implied_moments": {
+      "E_H": "muH", "E_A": "muA",
+      "Var_H": "muH + muH^2/kappa", "Var_A": "muA + muA^2/kappa",
+      "Cov_H_A": "muH*muA/kappa"
+    },
+    "joint_pmf_pre_dc": "q(h,a) = Gamma(h+a+kappa)/(Gamma(kappa)*h!*a!) * kappa^kappa * muH^h * muA^a / (kappa+muH+muA)^(h+a+kappa)",
+    "dc_correction": "tau identique a M2 (0-0:1-muH*muA*rho, 0-1:1+muH*rho, 1-0:1+muA*rho, 1-1:1-rho, ailleurs:1)",
+    "normalization": "Zdc = 1 + sum_4_low_cells q(h,a)*(tau(h,a)-1) ; P_M5(h,a) = q(h,a)*tau(h,a)/Zdc",
+    "implementation": "lib/lab/shared-gamma-dc.js (Node), scripts/fit_m5_kappa_worker.py / scripts/eval_shared_gamma_log_probability.py (Python) - identite numeriquement stable (produit croissant), verifiee <=1e-12 (tests/lab-m5-node-python-fidelity.test.js)"
+  },
+  "code": {
+    "runner": "lib/lab/walkforward-m5-runner.js#runWalkForwardM5",
+    "reused_components": [
+      "lib/lab/walkforward-m2c-runner.js#runWalkForwardM2C (mu M2 EXACT)",
+      "lib/lab/dc-log-probability.js#tau (MEME fonction tau que M2, rho FIXE, jamais reimplementee)",
+      "lib/lab/walkforward-runner.js#buildCutoffs",
+      "lib/lab/python-jsonl-worker.js#PersistentPythonJsonlWorker (infrastructure GENERIQUE factorisee depuis le worker M4 deja valide - plomberie process/JSONL/timeout uniquement, aucune hypothese statistique)",
+      "lib/lab/promotion-m5.js#evaluatePromotionM5 (regle DEDIEE M5, reason_codes cumulatifs des le depart)"
+    ],
+    "not_reused_from_m4": ["lib/lab/nb2*.js", "lib/lab/promotion-m4.js", "lib/lab/walkforward-m4-runner.js", "lib/lab/nb2-python-worker.js", "lib/lab/nb2-python-fitter.js"],
+    "code_sha": null
+  },
+  "matrix": {
+    "adaptive": true,
+    "tail_bound_method": "borne d'UNION (P(H>M)+P(A>M) sur les marges NB2-shared-gamma NON corrigees DC, divisee par Zdc) - PAS CDF_H*CDF_A (distribution dependante, ce produit serait invalide)",
+    "tail_threshold": 1e-10,
+    "hard_safety_cap": 100,
+    "failure_code": "M5_TAIL_TRUNCATION_FAILURE",
+    "invalid_normalization_code": "M5_INVALID_NORMALIZATION",
+    "persisted_fields": ["matrix_max_goal", "matrix_guaranteed_tail_upper_bound", "matrix_zdc"]
+  },
+  "fitter": {
+    "worker": "lib/lab/shared-gamma-python-worker.js#SharedGammaKappaWorker -> scripts/fit_m5_kappa_worker.py",
+    "optimized_parameter": "eta = log(kappa)",
+    "eta_start_registered": "log(10) (kappa_start=10, JAMAIS le kappa observe EXP-004 comme start adaptatif)",
+    "bounds": { "kappa_min": 0.01, "kappa_max": 1000000 },
+    "poisson_limit_reason_code": "KAPPA_M2_LIMIT",
+    "poisson_limit_condition": "50% des cutoffs avec kappa>=1000 OU limite superieure d'optimisation atteinte de facon repetee"
+  },
+  "dataset": {
+    "competition": "Premier League",
+    "api_football_league_id": 39,
+    "train_only_seasons": ["2022-2023"],
+    "oos_seasons": ["2023-2024", "2024-2025"],
+    "warmup_season": "2021-2022 (prior previous-season M2 uniquement)",
+    "dataset_version": "341f69f3aac81f7c772198e001e6885192d051d3577e5ceac7132120cb5d9116",
+    "lockbox_sealed": true,
+    "lockbox_hash_2025_2026": "f611ad31213505fd69edfc8941e79ec7d182dc83b426df3a8fb04d67ec4fa01a"
+  },
+  "protocol_amendment": {
+    "file": "scripts/experiments/exp005_protocol_amendment.json",
+    "sha256": "c5c1e45bc3d1fd63547512433227f640419a64b309d0cfc48e38c1acf2fe43b9",
+    "committed_before_first_fit": true
+  },
+  "methodology": {
+    "primary_metric": "exact_score_nll",
+    "delta_sign_convention": "delta_i = NLL_M5 - NLL_M2, negatif = M5 meilleur",
+    "primary_comparison_scope": "COMMON_SUPPORT (cible 760/760), GLOBAL, ET separement par saison",
+    "secondary_metrics": ["1x2_logloss", "1x2_brier", "ou25_logloss", "ou25_brier", "btts_logloss", "btts_brier", "ou35_diagnostic_only"],
+    "dependence_diagnostics": ["Cov(H,A)=muH*muA/kappa", "implied_correlation", "Draw/BTTS_yes/0-0/1-1 observed_vs_predicted"],
+    "low_score_diagnostics": { "scores": ["0-0", "1-0", "0-1", "1-1"], "aggregate": "LOW_SCORE_SET" },
+    "bootstrap": {
+      "method": "paired_block_bootstrap (lib/lab/bootstrap.js) + pairedBlockBootstrapRelativeGain",
+      "n_resamples": 10000, "seed": "EXP-005-v1",
+      "block_definition": "league_id+season+ISO_YEAR_WEEK(kickoff_timestamp_utc)",
+      "refit_during_bootstrap": false,
+      "season_difference_bootstrap": "bootstrap(mean_delta_2024_25 - mean_delta_2023_24)"
+    }
+  },
+  "promotion_thresholds": {
+    "min_global_relative_gain": 0.0025,
+    "max_low_score_set_degradation": 0.001,
+    "max_secondary_market_degradation": 0.001,
+    "max_kappa_p95_p05_ratio": 10,
+    "period_material_degradation_gain_threshold": -0.005,
+    "source": "scripts/experiments/exp005_protocol_amendment.json (amende AVANT tout resultat)"
+  },
+  "promotion_criteria": [
+    "1. global exact-score gain >=0.25%", "2. global CI95_delta.upper<0", "3. aucune PERIOD_MATERIAL_DEGRADATION",
+    "4. convergence=100%", "5. kappa stable (p95/p05<=10)", "6. pas KAPPA_M2_LIMIT", "7. no leakage",
+    "8. deterministic", "9. common support complet", "10. no secondary market damage >0.10%",
+    "11. low-score damage <=0.10%", "12. tail construction PASS"
+  ],
+  "decision_outcomes": {
+    "PROMOTE": "EXP005_STATUS=CLOSED_PROMOTE, M5_PROMOTED=TRUE, NEXT_CHAMPION=M5",
+    "SHADOW_MORE_DATA": "NEXT_CHAMPION=M2",
+    "REJECT": "NEXT_CHAMPION=M2"
+  },
+  "gating_to_running": {
+    "description": "Conditions OBLIGATOIRES avant status=RUNNING (pas encore satisfaites - manifest encore REGISTERED, aucun lancement reel).",
+    "conditions": [
+      { "id": "PROTOCOL_AMENDMENT_COMMITTED", "description": "exp005_protocol_amendment.json commit AVANT tout resultat", "satisfied": true },
+      { "id": "M2_CHAMPION_CLOSED", "description": "EXP-002C ferme (PROMOTE), closure inchangee", "satisfied": true },
+      { "id": "M5_BASE_MEANS_IDENTITY_TESTED", "description": "tests/lab-m5-base-mean-identity.test.js + tests/lab-m5-runner.test.js verts (760 OOS + 380 TRAIN)", "satisfied": true },
+      { "id": "SHARED_GAMMA_MATH_TESTED", "description": "tests/lab-shared-gamma-dc.test.js + tests/lab-shared-gamma-matrix.test.js verts, NESTED LIMIT CONTRACT confirme (convergence monotone O(1/kappa))", "satisfied": true },
+      { "id": "NODE_PYTHON_FIDELITY_TESTED", "description": "tests/lab-m5-node-python-fidelity.test.js vert, <=1e-12", "satisfied": true },
+      { "id": "SYNTHETIC_IDENTIFIABILITY_TESTED", "description": "tests/lab-m5-synthetic-identifiability.test.js vert (kappa_true=2,5,20,quasi-M2)", "satisfied": true },
+      { "id": "NO_M4_IN_M5", "description": "tests/lab-m5-no-m4.test.js vert", "satisfied": true },
+      { "id": "DETERMINISM_ANTI_LEAKAGE_TESTED", "description": "tests/lab-m5-runner.test.js vert", "satisfied": true },
+      { "id": "PROMOTION_RULE_TESTED", "description": "tests/lab-promotion-m5.test.js vert (19/19, y compris reasons cumulatifs)", "satisfied": true },
+      { "id": "LOCKBOX_SEALED", "description": "Lockbox 2025-2026 scellee, inchangee, jamais consultee", "satisfied": true },
+      { "id": "REAL_RUN_SCRIPT_WRITTEN", "description": "scripts/run_exp005.js pas encore ecrit - AUCUN lancement reel avant instruction explicite de l'utilisateur", "satisfied": false }
+    ]
+  },
+  "constraints": [
+    "rho JAMAIS reestime - toujours -0.0845 (evite le confound entre ajout de dependance et suppression de Dixon-Coles)",
+    "Aucun kappa/fitter/modele/decision M4 reutilise",
+    "Aucun Elo, aucune cote bookmaker, aucun LLM",
+    "M5 doit revenir vers M2 exactement quand kappa->infini (verifie)",
+    "2025-26 JAMAIS lue",
+    "Manifest IMMUABLE une fois status=RUNNING (PAS ENCORE le cas)",
+    "Aucun seuil modifie apres avoir vu un resultat",
+    "AUCUNE NLL M5 reelle avant que ce gate soit accepte par l'utilisateur"
+  ]
+}

@@ -14,8 +14,22 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
-      - name: Run unit tests (lib/ - moteur mathematique du pipeline)
-        run: node --test
+      # PRODUCTION_CI_GATE (2026-09-06). Ce job est le GATE QUOTIDIEN de
+      # production : il doit rester rapide et 100% deterministe, limite
+      # aux composants reellement necessaires au live (lib/, RUN_OUTPUT_
+      # ENGINE, League Expansion Factory, garde-fous de source du
+      # pipeline). La suite scientifique lourde (fitters Python M4/M5/NB2,
+      # synthetic identifiability, walk-forward experiments, tests
+      # dependants de l'historique git complet type experiment registry)
+      # est volontairement EXCLUE d'ici - elle ne doit jamais bloquer le
+      # deploiement pour une experience scientifique deja rejetee/fermee
+      # qui ne participe pas au runtime. Elle vit dans
+      # scientific-regression.yml (nightly/manual, fetch-depth:0).
+      # Ce job DOIT echouer si un test LIVE cible echoue - jamais ignore.
+      - name: List production preflight tests (excludes heavy scientific suite)
+        run: node scripts/list-preflight-tests.js > /tmp/preflight-tests.txt
+      - name: Run production preflight tests (lib/ - moteur du pipeline live)
+        run: xargs node --test < /tmp/preflight-tests.txt
       - name: Verify pipeline script syntax (extracted from update-data.yml)
         run: |
           awk '/cat > pipeline.js << .JSEOF./{flag=1;next}/^          JSEOF/{flag=0}flag' .github/workflows/update-data.yml | sed 's/^          //' > /tmp/pipeline_check.js

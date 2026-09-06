@@ -34,8 +34,15 @@ test("la fonction Edge laisse passer l'analyse offerte du jour", () => {
 test("le pipeline retire ces champs du fichier public et des pages match", () => {
   const wf = read(".github/workflows/update-data.yml");
   assert.match(wf, /var CHAMPS_PREMIUM=\['pari_rec','cote_rec','model_probability','markets_compared'\]/);
-  assert.match(wf, /fs\.writeFileSync\('data\.json',JSON\.stringify\(\{matchs:matchsPublics\}/,
-    "data.json doit etre ecrit depuis la copie assainie");
+  // Depuis le branchement RUN_OUTPUT_ENGINE (2026-09-06), data.json est
+  // serialise depuis dataJsonPayload (qui ajoute run_output/legacy_output
+  // a cote) plutot qu'un objet litteral inline - mais son champ `matchs`
+  // doit TOUJOURS venir de la copie assainie matchsPublics, jamais de
+  // allMatchsData brut (la garantie de securite reste identique).
+  assert.match(wf, /var dataJsonPayload = \{\s*matchs: matchsPublics,/,
+    "data.json doit etre ecrit depuis la copie assainie (matchsPublics)");
+  assert.match(wf, /fs\.writeFileSync\('data\.json',JSON\.stringify\(dataJsonPayload/,
+    "data.json doit etre serialise depuis dataJsonPayload (qui porte matchs:matchsPublics)");
   assert.match(wf, /generateMatchPages\(matchsPublics\)/,
     "les pages match doivent etre generees depuis la copie assainie");
 });

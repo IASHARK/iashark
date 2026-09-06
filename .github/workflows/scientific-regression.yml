@@ -1,0 +1,65 @@
+name: Scientific Regression (Lab)
+
+# PRODUCTION_CI_GATE (2026-09-06). Suite scientifique LOURDE : fitters
+# Python (M4/NB2 research, M5/shared-gamma, fit_rho), synthetic
+# identifiability, anciens walk-forward experiments, et tout test
+# consultant l'historique git complet (ex: tests/lab-experiment-registry
+# .test.js via `git show <sha>:...`). Deliberement SEPAREE du gate
+# quotidien de production (.github/workflows/tests.yml) : ces
+# experiences sont pour la plupart deja fermees/rejetees et ne
+# participent JAMAIS au runtime du pipeline live - leur instabilite
+# occasionnelle en CI (concurrence, workers Python) ne doit jamais
+# bloquer le deploiement de production.
+#
+# Ne "repare" jamais un resultat scientifique historique ici : ce
+# workflow ne fait qu'executer les tests existants tels quels, avec un
+# environnement adapte a leur nature (historique git complet, Python,
+# concurrence controlee).
+
+on:
+  schedule:
+    - cron: '0 3 * * *' # nightly, decale du cron production (0 6 * * *)
+  workflow_dispatch: {}
+
+jobs:
+  scientific-regression:
+    runs-on: ubuntu-latest
+    steps:
+      # fetch-depth: 0 (ROOT CAUSE 1) : plusieurs tests de ce lot lisent
+      # des commits scientifiques passes via `git show <sha>:chemin`
+      # (ex: tests/lab-experiment-registry.test.js -> scripts/experiments/
+      # exp005_report.json a un commit precis). Un checkout shallow
+      # (defaut actions/checkout) ne contient pas ces objets git et
+      # echoue avec "fatal: invalid object name" - jamais contourne en
+      # modifiant l'artefact scientifique lui-meme.
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      # Environnement Python EXPLICITE (item demande) : les fitters
+      # (scripts/fit_rho.py, fit_kappa.py, fit_m5_kappa_worker.py, etc.)
+      # n'utilisent que la stdlib (json/math/sys, verifie) - aucune
+      # dependance tierce a installer aujourd'hui. Cette etape reste
+      # explicite pour que toute dependance future ajoutee a ces scripts
+      # soit visible ici, jamais silencieusement absente en CI.
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Verifier l'environnement Python (aucune dependance tierce requise aujourd'hui)
+        run: |
+          python3 --version
+          grep -hE "^import |^from " scripts/*.py | sort -u
+
+      # Concurrence controlee (item demande) : ces fitters spawnent des
+      # process Python et se sont montres instables sous la concurrence
+      # par defaut de `node --test` en CI (workers/Promise annules, NB2
+      # FIT_SCRIPT_ERROR, fit_rho.py status=1) - jamais un signe de
+      # regression du modele lui-meme, une contrainte de ressources CI.
+      # --test-concurrency=1 : un fichier de test a la fois.
+      - name: Run scientific regression suite (heavy Lab fitters, git-history dependent)
+        run: |
+          node scripts/list-scientific-tests.js > /tmp/scientific-tests.txt
+          echo "Fichiers executes :"; cat /tmp/scientific-tests.txt
+          xargs node --test --test-concurrency=1 < /tmp/scientific-tests.txt

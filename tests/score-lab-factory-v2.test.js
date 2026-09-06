@@ -106,20 +106,30 @@ test("getHoldoutSealStatus : Serie A est detectee CONSUMED (fichier 2025 deja fe
   assert.equal(status.access_count, 1);
 });
 
-test("getHoldoutSealStatus : Ligue 1 (pas encore ouverte) est detectee SEALED", () => {
-  const league = { key: "ligue1", seasonSplit: { sealed_unread: 2025 } };
+test("getHoldoutSealStatus : Eredivisie (pas encore ouverte) est detectee SEALED", () => {
+  const league = { key: "eredivisie", seasonSplit: { sealed_unread: 2025 } };
   const status = getHoldoutSealStatus(league);
   assert.equal(status.sealed, true);
   assert.equal(status.access_count, 0);
 });
 
-test("assertHoldoutSealedBeforeAccess : leve une exception pour Serie A (deja consommee) - jamais un acces silencieux", () => {
-  const league = { key: "seriea", seasonSplit: { sealed_unread: 2025 } };
-  assert.throws(() => assertHoldoutSealedBeforeAccess(league), /HOLDOUT_ALREADY_CONSUMED|HOLDOUT DEJA CONSOMME/);
+test("getHoldoutSealStatus : Serie A ET Ligue 1 sont detectees CONSUMED (holdouts deja ouverts lors des runs precedents) - sans aucun cas particulier code en dur", () => {
+  for (const key of ["seriea", "ligue1"]) {
+    const status = getHoldoutSealStatus({ key, seasonSplit: { sealed_unread: 2025 } });
+    assert.equal(status.sealed, false, key + " doit etre detectee consommee");
+    assert.equal(status.access_count, 1);
+  }
+});
+
+test("assertHoldoutSealedBeforeAccess : leve une exception pour Serie A ET Ligue 1 (deja consommees) - jamais un acces silencieux", () => {
+  for (const key of ["seriea", "ligue1"]) {
+    const league = { key, seasonSplit: { sealed_unread: 2025 } };
+    assert.throws(() => assertHoldoutSealedBeforeAccess(league), /HOLDOUT_ALREADY_CONSUMED|HOLDOUT DEJA CONSOMME/);
+  }
 });
 
 test("assertHoldoutSealedBeforeAccess : ne leve rien pour une ligue encore scellee", () => {
-  const league = { key: "ligue1", seasonSplit: { sealed_unread: 2025 } };
+  const league = { key: "eredivisie", seasonSplit: { sealed_unread: 2025 } };
   assert.doesNotThrow(() => assertHoldoutSealedBeforeAccess(league));
 });
 

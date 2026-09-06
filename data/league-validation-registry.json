@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-06T17:33:53.761Z",
+  "generated_at": "2026-09-06T18:14:20.140Z",
   "leagues": {
     "laliga": {
       "league_key": "laliga",
@@ -32,7 +32,7 @@
       "score_runnable": false,
       "player_runnable": true,
       "live_eligible": false,
-      "updated_at": "2026-09-05T23:53:07.020Z",
+      "updated_at": "2026-09-06T18:14:20.140Z",
       "pre_oos_score_rho_candidate": -0.016248274946499275,
       "pre_oos_score_convergence_rate": 1,
       "pre_oos_player_anti_leakage_pass": true,
@@ -41,7 +41,23 @@
       "note": "OOS_FINAL (2024-25) termine. Player VALIDATED (confirme, reproductible). Score INCONCLUSIVE (M0 non rejete face au baseline B0=Poisson independant mais gain non confirme statistiquement, CI traverse zero, n=377) - pas un echec du Score Engine, un signal insuffisant sur cet echantillon. score_runnable/live_eligible restent false tant que SCORE_LALIGA n'est pas VALIDATED. Aucun nouveau modele/tuning post-hoc.",
       "current_player_champion_laliga": "PLAYER_SCORER_V1_AGGREGATED_SHARE_LALIGA",
       "current_score_champion_laliga": null,
-      "laliga_full_model_status": "PARTIAL_PLAYER_ONLY"
+      "laliga_full_model_status": "PARTIAL_PLAYER_ONLY",
+      "score_lab_factory_v2": {
+        "protocol": "SCORE_LAB_FACTORY_V2",
+        "champion_selected": "M0",
+        "pre_holdout_sha": "788f498e7593ec182fd152328ab477c38f26514c",
+        "holdout_season": 2025,
+        "verdict": "INCONCLUSIVE",
+        "score_runnable_under_v2": false,
+        "reject_triggers": [],
+        "inconclusive_triggers": [
+          "MARKET_MARGINALS"
+        ],
+        "reproducible": true,
+        "exact_score_nll_holdout": 2.804348985540965,
+        "exact_score_nll_threshold": 2.9786306649337413,
+        "note": "Holdout 2025 CONSOMME (une seule fois), batch avec primeira/championship/jleague, 4e et dernier de ce batch. INCONCLUSIVE : EXACT_SCORE_NLL/CALIBRATION/TEMPORAL_STABILITY/COVERAGE/REPRODUCIBILITY tous PASS (couverture 99.2%, reproductible run1==run2), seul MARKET_MARGINALS echoue (O/U2.5 logloss 0.668->0.696 sur holdout vs OOS_DEV, BTTS et 1X2 stables). Champion=M0 (calcul plus lent que M2R pour les autres ligues du batch, ~7min vs quelques secondes - verifie non-bloquant, non un bug de harnais : rho/league_avg coherents entre Phase A et Phase B, run reproductible). Aucun forcage, aucun retuning, aucune deuxieme tentative."
+      }
     },
     "bundesliga": {
       "league_key": "bundesliga",
@@ -296,11 +312,25 @@
       "score_runnable": false,
       "player_runnable": true,
       "live_eligible": false,
-      "updated_at": "2026-09-06T02:39:28.026Z",
+      "updated_at": "2026-09-06T18:14:20.129Z",
       "current_score_champion_primeira": null,
       "current_player_champion_primeira": "PLAYER_SCORER_V1_AGGREGATED_SHARE_PRIMEIRA",
       "primeira_full_model_status": "PARTIAL_PLAYER_ONLY",
-      "note": "OOS_DEV(2023) puis OOS_FINAL(2024) termines, chaque etape gelee avant lecture. Score=INCONCLUSIVE (M0_APPROX_B0_CI_CROSSES_ZERO). Player=VALIDATED (VALIDATED_LEAGUE_PLAYER_FINAL). Reproductibilite : Score=true Player=true."
+      "note": "OOS_DEV(2023) puis OOS_FINAL(2024) termines, chaque etape gelee avant lecture. Score=INCONCLUSIVE (M0_APPROX_B0_CI_CROSSES_ZERO). Player=VALIDATED (VALIDATED_LEAGUE_PLAYER_FINAL). Reproductibilite : Score=true Player=true.",
+      "score_lab_factory_v2": {
+        "protocol": "SCORE_LAB_FACTORY_V2",
+        "champion_selected": "M2",
+        "pre_holdout_sha": "788f498e7593ec182fd152328ab477c38f26514c",
+        "holdout_season": 2025,
+        "verdict": "VALIDATED",
+        "score_runnable_under_v2": true,
+        "reject_triggers": [],
+        "inconclusive_triggers": [],
+        "reproducible": true,
+        "exact_score_nll_holdout": 2.83395255995655,
+        "exact_score_nll_threshold": 3.0989729941008277,
+        "note": "Holdout 2025 CONSOMME (une seule fois), batch avec championship/jleague/laliga. VALIDATED : les 8 gates passent (NLL=2.833953<=3.098973 ; ECE=0.044737<=0.071152 ; O/U2.5/BTTS/1X2 tous stables ; couverture 98.4% ; stabilite temporelle OK ; reproductible). Premiere ligue VALIDATED sous SCORE_LAB_FACTORY_V2. Aucun forcage, aucun retuning, aucune deuxieme tentative."
+      }
     },
     "championship": {
       "league_key": "championship",
@@ -334,11 +364,25 @@
       "score_runnable": false,
       "player_runnable": true,
       "live_eligible": false,
-      "updated_at": "2026-09-06T03:32:22.686Z",
+      "updated_at": "2026-09-06T18:14:20.136Z",
       "current_score_champion_championship": null,
       "current_player_champion_championship": "PLAYER_SCORER_V1_AGGREGATED_SHARE_CHAMPIONSHIP",
       "championship_full_model_status": "PARTIAL_PLAYER_ONLY",
-      "note": "OOS_DEV(2023) puis OOS_FINAL(2024) termines, chaque etape gelee avant lecture. Score=INCONCLUSIVE (M0_APPROX_B0_CI_CROSSES_ZERO). Player=VALIDATED (VALIDATED_LEAGUE_PLAYER_FINAL). Reproductibilite : Score=true Player=true."
+      "note": "OOS_DEV(2023) puis OOS_FINAL(2024) termines, chaque etape gelee avant lecture. Score=INCONCLUSIVE (M0_APPROX_B0_CI_CROSSES_ZERO). Player=VALIDATED (VALIDATED_LEAGUE_PLAYER_FINAL). Reproductibilite : Score=true Player=true.",
+      "score_lab_factory_v2": {
+        "protocol": "SCORE_LAB_FACTORY_V2",
+        "champion_selected": "M2",
+        "pre_holdout_sha": "788f498e7593ec182fd152328ab477c38f26514c",
+        "holdout_season": 2025,
+        "verdict": "VALIDATED",
+        "score_runnable_under_v2": true,
+        "reject_triggers": [],
+        "inconclusive_triggers": [],
+        "reproducible": true,
+        "exact_score_nll_holdout": 2.87481199591548,
+        "exact_score_nll_threshold": 3.0189560034822316,
+        "note": "Holdout 2025 CONSOMME (une seule fois), batch avec primeira/jleague/laliga. VALIDATED : les 8 gates passent (NLL=2.874812<=3.018956 ; ECE=0.041087<=0.069322 ; O/U2.5/BTTS/1X2 tous stables ; couverture 98.7% ; stabilite temporelle OK ; reproductible). Aucun forcage, aucun retuning, aucune deuxieme tentative."
+      }
     },
     "belgium_pro": {
       "league_key": "belgium_pro",
@@ -448,11 +492,27 @@
       "score_runnable": false,
       "player_runnable": true,
       "live_eligible": false,
-      "updated_at": "2026-09-06T04:54:59.853Z",
+      "updated_at": "2026-09-06T18:14:20.137Z",
       "current_score_champion_jleague": null,
       "current_player_champion_jleague": "PLAYER_SCORER_V1_AGGREGATED_SHARE_JLEAGUE",
       "jleague_full_model_status": "PARTIAL_PLAYER_ONLY",
-      "note": "OOS_DEV(2023) puis OOS_FINAL(2024) termines, chaque etape gelee avant lecture. Score=INCONCLUSIVE (M0_APPROX_B0_CI_CROSSES_ZERO). Player=VALIDATED (VALIDATED_LEAGUE_PLAYER_FINAL). Reproductibilite : Score=true Player=true."
+      "note": "OOS_DEV(2023) puis OOS_FINAL(2024) termines, chaque etape gelee avant lecture. Score=INCONCLUSIVE (M0_APPROX_B0_CI_CROSSES_ZERO). Player=VALIDATED (VALIDATED_LEAGUE_PLAYER_FINAL). Reproductibilite : Score=true Player=true.",
+      "score_lab_factory_v2": {
+        "protocol": "SCORE_LAB_FACTORY_V2",
+        "champion_selected": "M2",
+        "pre_holdout_sha": "788f498e7593ec182fd152328ab477c38f26514c",
+        "holdout_season": 2025,
+        "verdict": "INCONCLUSIVE",
+        "score_runnable_under_v2": false,
+        "reject_triggers": [],
+        "inconclusive_triggers": [
+          "TEMPORAL_STABILITY"
+        ],
+        "reproducible": true,
+        "exact_score_nll_holdout": 2.853649998328097,
+        "exact_score_nll_threshold": 2.944798511070271,
+        "note": "Holdout 2025 CONSOMME (une seule fois), batch avec primeira/championship/laliga. INCONCLUSIVE : EXACT_SCORE_NLL/CALIBRATION/MARKET_MARGINALS/COVERAGE tous PASS (couverture 99.2%), seul TEMPORAL_STABILITY echoue de justesse sur la 2e moitie de saison (half2 NLL=2.995280 > seuil 2.944799 ; half1=2.711266 largement sous le seuil). Aucun forcage, aucun retuning, aucune deuxieme tentative."
+      }
     },
     "scotland_premiership": {
       "league_key": "scotland_premiership",

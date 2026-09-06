@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-06T16:27:18.223Z",
+  "generated_at": "2026-09-06T17:13:08.821Z",
   "leagues": {
     "laliga": {
       "league_key": "laliga",
@@ -169,11 +169,29 @@
       "score_runnable": false,
       "player_runnable": true,
       "live_eligible": false,
-      "updated_at": "2026-09-06T01:43:53.659Z",
+      "updated_at": "2026-09-06T17:13:08.819Z",
       "current_score_champion_ligue1": null,
       "current_player_champion_ligue1": "PLAYER_SCORER_V1_AGGREGATED_SHARE_LIGUE1",
       "ligue1_full_model_status": "PARTIAL_PLAYER_ONLY",
-      "note": "OOS_DEV(2023) puis OOS_FINAL(2024) termines, chaque etape gelee avant lecture. Score=INCONCLUSIVE (M0_APPROX_B0_CI_CROSSES_ZERO). Player=VALIDATED (VALIDATED_LEAGUE_PLAYER_FINAL). Reproductibilite : Score=true Player=true."
+      "note": "OOS_DEV(2023) puis OOS_FINAL(2024) termines, chaque etape gelee avant lecture. Score=INCONCLUSIVE (M0_APPROX_B0_CI_CROSSES_ZERO). Player=VALIDATED (VALIDATED_LEAGUE_PLAYER_FINAL). Reproductibilite : Score=true Player=true.",
+      "score_lab_factory_v2": {
+        "protocol": "SCORE_LAB_FACTORY_V2",
+        "champion_selected": "M2",
+        "pre_holdout_sha": "c5e54eb2b886bfc7dcc066e5bdd3f661f1a50744",
+        "holdout_season": 2025,
+        "verdict": "REJECTED",
+        "score_runnable_under_v2": false,
+        "reject_triggers": [
+          "EXACT_SCORE_NLL"
+        ],
+        "inconclusive_triggers": [
+          "TEMPORAL_STABILITY"
+        ],
+        "reproducible": true,
+        "exact_score_nll_holdout": 3.0590587709312063,
+        "exact_score_nll_threshold": 3.0010405696500486,
+        "note": "Holdout 2025 CONSOMME (une seule fois). REJECTED sur EXACT_SCORE_NLL (3.059 > seuil 3.001 derive d'OOS_DEV) et TEMPORAL_STABILITY. Aucun forcage, aucun retuning, aucune deuxieme tentative. Ne remplace pas score_status/score_champion existants (protocole V1 historique different)."
+      }
     },
     "eredivisie": {
       "league_key": "eredivisie",

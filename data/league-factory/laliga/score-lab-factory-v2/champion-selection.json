@@ -1,0 +1,63 @@
+{
+  "protocol": "SCORE_LAB_FACTORY_V2",
+  "phase": "A_CHAMPION_SELECTION",
+  "league_key": "laliga",
+  "generated_at": "2026-09-06T18:02:28.004Z",
+  "train_seasons": [
+    2021,
+    2022
+  ],
+  "oos_dev_season": 2023,
+  "rho_frozen": -0.016248274946499275,
+  "league_avg_h": 1.4552631578947368,
+  "league_avg_a": 1.0578947368421052,
+  "candidates": {
+    "B0": {
+      "nll": 2.8829746216744785,
+      "secondary": {
+        "ou25_logloss": 0.6683549771581271,
+        "btts_logloss": 0.6885234583131469,
+        "x12_logloss": 0.981140560434452
+      },
+      "n_oos": 377,
+      "structural": {
+        "convergence_rate": 1,
+        "boundary_hit_rate": 0,
+        "rho_std": 0
+      }
+    },
+    "M0": {
+      "nll": 2.88249310448833,
+      "secondary": {
+        "ou25_logloss": 0.6683549771581271,
+        "btts_logloss": 0.6885155817365208,
+        "x12_logloss": 0.9803715716239283
+      },
+      "n_oos": 377,
+      "structural": {
+        "convergence_rate": 1,
+        "boundary_hit_rate": 0,
+        "rho_std": 0.026359425006248976
+      }
+    },
+    "M2": {
+      "nll": 2.885261307686716,
+      "secondary": {
+        "ou25_logloss": 0.6703175876785141,
+        "btts_logloss": 0.6897913470131033,
+        "x12_logloss": 0.9798507747084657
+      },
+      "n_oos": 377,
+      "structural": {
+        "convergence_rate": 1,
+        "boundary_hit_rate": 0,
+        "rho_std": 0.026359425006248976
+      }
+    }
+  },
+  "vetoed": {},
+  "primary_winner_before_secondary_veto": "M0",
+  "secondary_veto": null,
+  "champion_selected": "M0",
+  "champion_selection_reason": "M0 a le meilleur EXACT_SCORE_NLL absolu (2.882493) parmi les candidats non-vetoes structurellement, sans degradation secondaire disqualifiante vs les autres."
+}

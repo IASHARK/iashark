@@ -1,0 +1,110 @@
+{
+  "contract": {
+    "protocol": "SCORE_LAB_FACTORY_V2",
+    "phase": "CONTRACT_FREEZE",
+    "league_key": "laliga",
+    "frozen_at": "2026-09-06T18:02:40.055Z",
+    "frozen_before_holdout_access": true,
+    "champion": {
+      "model_id": "M0",
+      "rho": -0.016248274946499275,
+      "league_avg_h": 1.4552631578947368,
+      "league_avg_a": 1.0578947368421052,
+      "structural_formula": "N/A",
+      "code_sha_at_freeze": "b6e0304b8b3a23a31627d1f3332b42a97287d8be",
+      "dataset_hashes_train_oos_dev": {
+        "warmup": "95c4db5b9a0deb77b505d19a9b36d1b9ad178b6ad250ea1b1c68fe0fdbdef869",
+        "train": "e46ea5a89cb5c29dbd0cd9cec7a89751cdc0f2fd2a39f80adbd8926cb418905c",
+        "oos_dev": "380b1e93849b5caad5250eb81fada09cda57b66b464e7d69553270f79806ab3c"
+      },
+      "n_oos_dev_used_for_thresholds": 377
+    },
+    "champion_frozen": true,
+    "gates": {
+      "POINT_IN_TIME_INTEGRITY": {
+        "description": "Chaque prediction du holdout doit venir d'un cutoff dans la saison holdout elle-meme ; rho/leagueAvg/structure restent EXACTEMENT ceux geles ici, jamais refittes.",
+        "pass_condition": "0 violation (assertion programmatique dans le runner de holdout)"
+      },
+      "DATA_COVERAGE": {
+        "description": "VALID_FIXTURE_COVERAGE_RATE (proportion des fixtures de la saison holdout ayant produit une prediction valide) - remplace MIN_N_OOS=500 (inatteignable pour une seule saison, erreur decouverte lors du protocole V1 Serie A).",
+        "rate_threshold": 0.9,
+        "absolute_floor": 200,
+        "source": "lib/score-lab-factory-v2/coverage-gate.js - convention documentee (90% = seuil standard de donnees manquantes acceptable ; 200 = plancher de blocs bootstrap credible), pas un seuil copie d'un contexte inapplicable.",
+        "pass_condition": "coverage_rate >= 0.9 ET n_valid >= 200"
+      },
+      "REPRODUCIBILITY": {
+        "description": "Le runner de holdout execute deux fois (meme process) - hash SHA-256 du rapport (hors horodatage) doit etre identique.",
+        "pass_condition": "hash_run1 === hash_run2"
+      },
+      "EXACT_SCORE_NLL": {
+        "description": "NLL du champion gele sur le holdout, comparee a l'enveloppe de variabilite DEJA OBSERVEE sur OOS_DEV (bootstrap par blocs, seed pre-enregistre).",
+        "oos_dev_observed_mean_nll": 2.88249310448833,
+        "oos_dev_bootstrap_ci": [
+          2.7892578214125052,
+          2.9786306649337413
+        ],
+        "threshold": 2.9786306649337413,
+        "source": "lib/lab/bootstrap.js#pairedBlockBootstrap reutilise tel quel sur OOS_DEV, jamais un nombre invente ni copie d'une autre ligue.",
+        "pass_condition": "nll_holdout <= 2.9786306649337413"
+      },
+      "CALIBRATION": {
+        "description": "Calibration 1X2 (intercept/slope + ECE, lib/player-lab/oos-eval-metrics.js, reutilise tel quel).",
+        "oos_dev_slope": 1.2730182289068768,
+        "oos_dev_intercept": 0.17769276449027332,
+        "oos_dev_converged": true,
+        "oos_dev_ece": 0.019556585062764236,
+        "threshold_ece": 0.03911317012552847,
+        "source": "Tolerance = 2x l'ECE deja mesure du champion sur OOS_DEV (aucune convention absolue pre-existante ailleurs dans ce codebase).",
+        "pass_condition": "calibration_converged_holdout === true ET ece_holdout <= 0.039113"
+      },
+      "MARKET_MARGINALS": {
+        "description": "Logloss O/U2.5, BTTS, 1X2 sur le holdout vs OOS_DEV.",
+        "oos_dev_logloss": {
+          "ou25_logloss": 0.6683549771581271,
+          "btts_logloss": 0.6885155817365208,
+          "x12_logloss": 0.9803715716239283
+        },
+        "max_relative_degradation": 0.03,
+        "source": "lib/promotion.js#MAX_SECONDARY_DEGRADATION (deja pre-enregistre, reutilise tel quel)",
+        "pass_condition": "pour chaque marche, logloss_holdout <= logloss_oos_dev * (1+0.03)"
+      },
+      "TEMPORAL_STABILITY": {
+        "description": "Le holdout est coupe en 2 moities par date de coup d'envoi ; chaque moitie doit independamment satisfaire le seuil EXACT_SCORE_NLL ci-dessus.",
+        "source": "Reutilise le seuil EXACT_SCORE_NLL deja derive - jamais un nouveau nombre.",
+        "pass_condition": "nll_half1 <= 2.9786306649337413 ET nll_half2 <= 2.9786306649337413"
+      },
+      "NO_CATASTROPHIC_SECONDARY_DEGRADATION": {
+        "description": "Scores bas frequents (0-0,1-0,0-1,1-1) : contribution NLL par cellule, holdout vs OOS_DEV.",
+        "oos_dev_low_score": {
+          "0-0": {
+            "count_observed": 30,
+            "nll_contribution": 2.4881288034065463
+          },
+          "1-0": {
+            "count_observed": 47,
+            "nll_contribution": 2.16391424752523
+          },
+          "0-1": {
+            "count_observed": 29,
+            "nll_contribution": 2.3530603907744583
+          },
+          "1-1": {
+            "count_observed": 50,
+            "nll_contribution": 2.1228752867061043
+          }
+        },
+        "max_relative_degradation": 0.1,
+        "source": "lib/promotion.js#MAX_LOW_SCORE_RELATIVE_DEGRADATION (deja pre-enregistre, reutilise tel quel)",
+        "pass_condition": "pour chaque cellule avec >=5 observations, degradation relative <= 0.1"
+      }
+    },
+    "decision_rule": {
+      "REJECT_if": "POINT_IN_TIME_INTEGRITY echoue OU REPRODUCIBILITY echoue OU EXACT_SCORE_NLL echoue",
+      "INCONCLUSIVE_if": "DATA_COVERAGE echoue OU au moins un des gates {CALIBRATION, MARKET_MARGINALS, TEMPORAL_STABILITY, NO_CATASTROPHIC_SECONDARY_DEGRADATION} echoue sans REJECT deja declenche",
+      "VALIDATED_if": "TOUS les gates PASS",
+      "never": "Aucun seuil ci-dessus ne sera modifie apres lecture du holdout. Aucun retuning. Aucune deuxieme tentative."
+    },
+    "pre_registration_rule": "Contrat ecrit et hashe AVANT le premier fetch de laliga saison sealed_unread."
+  },
+  "hash": "b3efaaefd5164c3800e976b405c24332c5aced2043316610bafc04771ca79caa"
+}

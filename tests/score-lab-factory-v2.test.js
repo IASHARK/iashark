@@ -106,30 +106,47 @@ test("getHoldoutSealStatus : Serie A est detectee CONSUMED (fichier 2025 deja fe
   assert.equal(status.access_count, 1);
 });
 
-test("getHoldoutSealStatus : Eredivisie (pas encore ouverte) est detectee SEALED", () => {
-  const league = { key: "eredivisie", seasonSplit: { sealed_unread: 2025 } };
+// NOTE MAINTENANCE : le nombre de ligues CONSUMED grandit a chaque
+// batch (Serie A, Ligue 1, Bundesliga, Eredivisie, puis le batch
+// Primeira/Championship/J1/LaLiga...). Plutot que de coder une liste
+// figee qui redeviendrait fausse a chaque nouveau holdout ouvert (deja
+// arrive 2 fois), ces tests DERIVENT la liste des ligues consommees en
+// lisant reellement config/league-expansion.json + l'existence des
+// fichiers gate-b1/*-2025.json sur disque au moment du test. MLS sert
+// de reference "toujours scellee" : sa Factory A+B n'a jamais ete
+// lancee et elle est explicitement hors scope de tout batch en cours.
+function consumedLeagueKeys() {
+  const cfg = require("../config/league-expansion.json");
+  const fs2 = require("fs");
+  return cfg.leagues.filter((l) => fs2.existsSync(path.join(__dirname, "..", "data", "gate-b1", `${l.key}-${l.seasonSplit.sealed_unread}.json`))).map((l) => l.key);
+}
+
+test("getHoldoutSealStatus : MLS (Factory jamais lancee, hors scope) est detectee SEALED", () => {
+  const league = { key: "mls", seasonSplit: { sealed_unread: 2025 } };
   const status = getHoldoutSealStatus(league);
   assert.equal(status.sealed, true);
   assert.equal(status.access_count, 0);
 });
 
-test("getHoldoutSealStatus : Serie A ET Ligue 1 sont detectees CONSUMED (holdouts deja ouverts lors des runs precedents) - sans aucun cas particulier code en dur", () => {
-  for (const key of ["seriea", "ligue1"]) {
+test("getHoldoutSealStatus : toutes les ligues deja ouvertes sont detectees CONSUMED, sans aucun cas particulier code en dur", () => {
+  const consumed = consumedLeagueKeys();
+  assert.ok(consumed.length >= 1, "au moins une ligue doit deja etre consommee a ce stade du projet");
+  for (const key of consumed) {
     const status = getHoldoutSealStatus({ key, seasonSplit: { sealed_unread: 2025 } });
     assert.equal(status.sealed, false, key + " doit etre detectee consommee");
     assert.equal(status.access_count, 1);
   }
 });
 
-test("assertHoldoutSealedBeforeAccess : leve une exception pour Serie A ET Ligue 1 (deja consommees) - jamais un acces silencieux", () => {
-  for (const key of ["seriea", "ligue1"]) {
+test("assertHoldoutSealedBeforeAccess : leve une exception pour TOUTE ligue deja consommee - jamais un acces silencieux", () => {
+  for (const key of consumedLeagueKeys()) {
     const league = { key, seasonSplit: { sealed_unread: 2025 } };
     assert.throws(() => assertHoldoutSealedBeforeAccess(league), /HOLDOUT_ALREADY_CONSUMED|HOLDOUT DEJA CONSOMME/);
   }
 });
 
-test("assertHoldoutSealedBeforeAccess : ne leve rien pour une ligue encore scellee", () => {
-  const league = { key: "eredivisie", seasonSplit: { sealed_unread: 2025 } };
+test("assertHoldoutSealedBeforeAccess : ne leve rien pour une ligue encore scellee (MLS)", () => {
+  const league = { key: "mls", seasonSplit: { sealed_unread: 2025 } };
   assert.doesNotThrow(() => assertHoldoutSealedBeforeAccess(league));
 });
 

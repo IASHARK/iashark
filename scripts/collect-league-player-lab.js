@@ -89,6 +89,13 @@ async function main() {
   }
 
   console.log(`Termine${stopped ? " (arret anticipe)" : ""} : ${newFetches} nouvelles reponses collectees, ${cacheHits} deja en cache (evitees), ${apiCallCount} appels API reellement utilises ce run.`);
+  // Code de sortie distinct (2) si la collecte s'est arretee AVANT
+  // d'avoir traite toutes les fixtures demandees (budget ou rate-limit/
+  // quota) - permet a un orchestrateur appelant (execFileSync) de
+  // detecter une collecte INCOMPLETE et de ne PAS enchainer sur un fit/
+  // OOS avec des donnees partielles silencieusement traitees comme
+  // completes. Code 0 = collecte reellement terminee (ou deja 100% en cache).
+  if (stopped) process.exitCode = 2;
 }
 
 if (require.main === module) {

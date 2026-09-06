@@ -24,21 +24,778 @@
       "country": "Spain",
       "apiFootballId": 140,
       "calendarType": "EUROPEAN_SEASON",
-      "seasonSplit": { "warmup": 2021, "train": 2022, "oos_dev": 2023, "oos_final": 2024, "sealed_unread": 2025 },
+      "seasonSplit": {
+        "warmup": 2021,
+        "train": 2022,
+        "oos_dev": 2023,
+        "oos_final": 2024,
+        "sealed_unread": 2025
+      },
       "player_data_gate_audit": "PASS",
       "coverage_score_audit": 90,
       "status": "NOT_STARTED",
       "wave": 1,
       "wave_order": 1
     },
-    { "key": "bundesliga", "displayName": "Bundesliga", "country": "Germany", "apiFootballId": 78, "calendarType": "EUROPEAN_SEASON", "seasonSplit": { "warmup": 2021, "train": 2022, "oos_dev": 2023, "oos_final": 2024, "sealed_unread": 2025 }, "player_data_gate_audit": "PASS", "coverage_score_audit": 90, "status": "NOT_STARTED", "wave": 1, "wave_order": 2 },
-    { "key": "seriea", "displayName": "Serie A", "country": "Italy", "apiFootballId": 135, "calendarType": "EUROPEAN_SEASON", "seasonSplit": { "warmup": 2021, "train": 2022, "oos_dev": 2023, "oos_final": 2024, "sealed_unread": 2025 }, "player_data_gate_audit": "PASS", "coverage_score_audit": 88, "status": "NOT_STARTED", "wave": 1, "wave_order": 3 },
-    { "key": "ligue1", "displayName": "Ligue 1", "country": "France", "apiFootballId": 61, "calendarType": "EUROPEAN_SEASON", "seasonSplit": { "warmup": 2021, "train": 2022, "oos_dev": 2023, "oos_final": 2024, "sealed_unread": 2025 }, "player_data_gate_audit": "PASS", "coverage_score_audit": 91, "status": "NOT_STARTED", "wave": 1, "wave_order": 4 },
-    { "key": "eredivisie", "displayName": "Eredivisie", "country": "Netherlands", "apiFootballId": 88, "calendarType": "EUROPEAN_SEASON", "seasonSplit": { "warmup": 2021, "train": 2022, "oos_dev": 2023, "oos_final": 2024, "sealed_unread": 2025 }, "player_data_gate_audit": "PASS", "coverage_score_audit": 89, "status": "NOT_STARTED", "wave": 1, "wave_order": 5 },
-    { "key": "primeira", "displayName": "Primeira Liga", "country": "Portugal", "apiFootballId": 94, "calendarType": "EUROPEAN_SEASON", "seasonSplit": { "warmup": 2021, "train": 2022, "oos_dev": 2023, "oos_final": 2024, "sealed_unread": 2025 }, "player_data_gate_audit": "PASS", "coverage_score_audit": 91, "status": "NOT_STARTED", "wave": 1, "wave_order": 6 },
-    { "key": "championship", "displayName": "Championship", "country": "England", "apiFootballId": 40, "calendarType": "EUROPEAN_SEASON", "seasonSplit": { "warmup": 2021, "train": 2022, "oos_dev": 2023, "oos_final": 2024, "sealed_unread": 2025 }, "player_data_gate_audit": "PASS", "coverage_score_audit": 89, "status": "NOT_STARTED", "wave": 1, "wave_order": 7 },
-    { "key": "belgium_pro", "displayName": "Jupiler Pro League", "country": "Belgium", "apiFootballId": 144, "calendarType": "EUROPEAN_SEASON", "seasonSplit": { "warmup": 2021, "train": 2022, "oos_dev": 2023, "oos_final": 2024, "sealed_unread": 2025 }, "player_data_gate_audit": "PASS", "coverage_score_audit": 92, "status": "NOT_STARTED", "wave": 1, "wave_order": 8 },
-    { "key": "brazil_seriea", "displayName": "Serie A", "country": "Brazil", "apiFootballId": 71, "calendarType": "CALENDAR_YEAR_SEASON", "seasonSplit": { "warmup": 2021, "train": 2022, "oos_dev": 2023, "oos_final": 2024, "sealed_unread": 2025 }, "player_data_gate_audit": "PASS", "coverage_score_audit": 90, "status": "NOT_STARTED", "wave": 1, "wave_order": 9 },
-    { "key": "jleague", "displayName": "J1 League", "country": "Japan", "apiFootballId": 98, "calendarType": "CALENDAR_YEAR_SEASON", "seasonSplit": { "warmup": 2021, "train": 2022, "oos_dev": 2023, "oos_final": 2024, "sealed_unread": 2025 }, "player_data_gate_audit": "PASS", "coverage_score_audit": 90, "status": "NOT_STARTED", "wave": 1, "wave_order": 10 }
+    {
+      "key": "bundesliga",
+      "displayName": "Bundesliga",
+      "country": "Germany",
+      "apiFootballId": 78,
+      "calendarType": "EUROPEAN_SEASON",
+      "seasonSplit": {
+        "warmup": 2021,
+        "train": 2022,
+        "oos_dev": 2023,
+        "oos_final": 2024,
+        "sealed_unread": 2025
+      },
+      "player_data_gate_audit": "PASS",
+      "coverage_score_audit": 90,
+      "status": "NOT_STARTED",
+      "wave": 1,
+      "wave_order": 2
+    },
+    {
+      "key": "seriea",
+      "displayName": "Serie A",
+      "country": "Italy",
+      "apiFootballId": 135,
+      "calendarType": "EUROPEAN_SEASON",
+      "seasonSplit": {
+        "warmup": 2021,
+        "train": 2022,
+        "oos_dev": 2023,
+        "oos_final": 2024,
+        "sealed_unread": 2025
+      },
+      "player_data_gate_audit": "PASS",
+      "coverage_score_audit": 88,
+      "status": "NOT_STARTED",
+      "wave": 1,
+      "wave_order": 3
+    },
+    {
+      "key": "ligue1",
+      "displayName": "Ligue 1",
+      "country": "France",
+      "apiFootballId": 61,
+      "calendarType": "EUROPEAN_SEASON",
+      "seasonSplit": {
+        "warmup": 2021,
+        "train": 2022,
+        "oos_dev": 2023,
+        "oos_final": 2024,
+        "sealed_unread": 2025
+      },
+      "player_data_gate_audit": "PASS",
+      "coverage_score_audit": 91,
+      "status": "NOT_STARTED",
+      "wave": 1,
+      "wave_order": 4
+    },
+    {
+      "key": "eredivisie",
+      "displayName": "Eredivisie",
+      "country": "Netherlands",
+      "apiFootballId": 88,
+      "calendarType": "EUROPEAN_SEASON",
+      "seasonSplit": {
+        "warmup": 2021,
+        "train": 2022,
+        "oos_dev": 2023,
+        "oos_final": 2024,
+        "sealed_unread": 2025
+      },
+      "player_data_gate_audit": "PASS",
+      "coverage_score_audit": 89,
+      "status": "NOT_STARTED",
+      "wave": 1,
+      "wave_order": 5
+    },
+    {
+      "key": "primeira",
+      "displayName": "Primeira Liga",
+      "country": "Portugal",
+      "apiFootballId": 94,
+      "calendarType": "EUROPEAN_SEASON",
+      "seasonSplit": {
+        "warmup": 2021,
+        "train": 2022,
+        "oos_dev": 2023,
+        "oos_final": 2024,
+        "sealed_unread": 2025
+      },
+      "player_data_gate_audit": "PASS",
+      "coverage_score_audit": 91,
+      "status": "NOT_STARTED",
+      "wave": 1,
+      "wave_order": 6
+    },
+    {
+      "key": "championship",
+      "displayName": "Championship",
+      "country": "England",
+      "apiFootballId": 40,
+      "calendarType": "EUROPEAN_SEASON",
+      "seasonSplit": {
+        "warmup": 2021,
+        "train": 2022,
+        "oos_dev": 2023,
+        "oos_final": 2024,
+        "sealed_unread": 2025
+      },
+      "player_data_gate_audit": "PASS",
+      "coverage_score_audit": 89,
+      "status": "NOT_STARTED",
+      "wave": 1,
+      "wave_order": 7
+    },
+    {
+      "key": "belgium_pro",
+      "displayName": "Jupiler Pro League",
+      "country": "Belgium",
+      "apiFootballId": 144,
+      "calendarType": "EUROPEAN_SEASON",
+      "seasonSplit": {
+        "warmup": 2021,
+        "train": 2022,
+        "oos_dev": 2023,
+        "oos_final": 2024,
+        "sealed_unread": 2025
+      },
+      "player_data_gate_audit": "PASS",
+      "coverage_score_audit": 92,
+      "status": "NOT_STARTED",
+      "wave": 1,
+      "wave_order": 8
+    },
+    {
+      "key": "brazil_seriea",
+      "displayName": "Serie A",
+      "country": "Brazil",
+      "apiFootballId": 71,
+      "calendarType": "CALENDAR_YEAR_SEASON",
+      "seasonSplit": {
+        "warmup": 2021,
+        "train": 2022,
+        "oos_dev": 2023,
+        "oos_final": 2024,
+        "sealed_unread": 2025
+      },
+      "player_data_gate_audit": "PASS",
+      "coverage_score_audit": 90,
+      "status": "NOT_STARTED",
+      "wave": 1,
+      "wave_order": 9
+    },
+    {
+      "key": "jleague",
+      "displayName": "J1 League",
+      "country": "Japan",
+      "apiFootballId": 98,
+      "calendarType": "CALENDAR_YEAR_SEASON",
+      "seasonSplit": {
+        "warmup": 2021,
+        "train": 2022,
+        "oos_dev": 2023,
+        "oos_final": 2024,
+        "sealed_unread": 2025
+      },
+      "player_data_gate_audit": "PASS",
+      "coverage_score_audit": 90,
+      "status": "NOT_STARTED",
+      "wave": 1,
+      "wave_order": 10
+    },
+    {
+      "key": "scotland_premiership",
+      "displayName": "Premiership",
+      "country": "Scotland",
+      "apiFootballId": 179,
+      "calendarType": "EUROPEAN_SEASON",
+      "seasonSplit": {
+        "warmup": 2021,
+        "train": 2022,
+        "oos_dev": 2023,
+        "oos_final": 2024,
+        "sealed_unread": 2025
+      },
+      "player_data_gate_audit": "PASS",
+      "coverage_score_audit": 91,
+      "status": "NOT_STARTED",
+      "wave": 2,
+      "wave_order": 11
+    },
+    {
+      "key": "denmark_superliga",
+      "displayName": "Superliga",
+      "country": "Denmark",
+      "apiFootballId": 119,
+      "calendarType": "EUROPEAN_SEASON",
+      "seasonSplit": {
+        "warmup": 2021,
+        "train": 2022,
+        "oos_dev": 2023,
+        "oos_final": 2024,
+        "sealed_unread": 2025
+      },
+      "player_data_gate_audit": "PASS",
+      "coverage_score_audit": 91,
+      "status": "NOT_STARTED",
+      "wave": 2,
+      "wave_order": 12
+    },
+    {
+      "key": "ligue2",
+      "displayName": "Ligue 2",
+      "country": "France",
+      "apiFootballId": 62,
+      "calendarType": "EUROPEAN_SEASON",
+      "seasonSplit": {
+        "warmup": 2021,
+        "train": 2022,
+        "oos_dev": 2023,
+        "oos_final": 2024,
+        "sealed_unread": 2025
+      },
+      "player_data_gate_audit": "PASS",
+      "coverage_score_audit": 90,
+      "status": "NOT_STARTED",
+      "wave": 2,
+      "wave_order": 13
+    },
+    {
+      "key": "league_one",
+      "displayName": "League One",
+      "country": "England",
+      "apiFootballId": 41,
+      "calendarType": "EUROPEAN_SEASON",
+      "seasonSplit": {
+        "warmup": 2021,
+        "train": 2022,
+        "oos_dev": 2023,
+        "oos_final": 2024,
+        "sealed_unread": 2025
+      },
+      "player_data_gate_audit": "PASS",
+      "coverage_score_audit": 90,
+      "status": "NOT_STARTED",
+      "wave": 2,
+      "wave_order": 14
+    },
+    {
+      "key": "league_two",
+      "displayName": "League Two",
+      "country": "England",
+      "apiFootballId": 42,
+      "calendarType": "EUROPEAN_SEASON",
+      "seasonSplit": {
+        "warmup": 2021,
+        "train": 2022,
+        "oos_dev": 2023,
+        "oos_final": 2024,
+        "sealed_unread": 2025
+      },
+      "player_data_gate_audit": "PASS",
+      "coverage_score_audit": 90,
+      "status": "NOT_STARTED",
+      "wave": 2,
+      "wave_order": 15
+    },
+    {
+      "key": "turkey_superlig",
+      "displayName": "Süper Lig",
+      "country": "Turkey",
+      "apiFootballId": 203,
+      "calendarType": "EUROPEAN_SEASON",
+      "seasonSplit": {
+        "warmup": 2021,
+        "train": 2022,
+        "oos_dev": 2023,
+        "oos_final": 2024,
+        "sealed_unread": 2025
+      },
+      "player_data_gate_audit": "PASS",
+      "coverage_score_audit": 90,
+      "status": "NOT_STARTED",
+      "wave": 2,
+      "wave_order": 16
+    },
+    {
+      "key": "bundesliga2",
+      "displayName": "2. Bundesliga",
+      "country": "Germany",
+      "apiFootballId": 79,
+      "calendarType": "EUROPEAN_SEASON",
+      "seasonSplit": {
+        "warmup": 2021,
+        "train": 2022,
+        "oos_dev": 2023,
+        "oos_final": 2024,
+        "sealed_unread": 2025
+      },
+      "player_data_gate_audit": "PASS",
+      "coverage_score_audit": 90,
+      "status": "NOT_STARTED",
+      "wave": 2,
+      "wave_order": 17
+    },
+    {
+      "key": "austria_bundesliga",
+      "displayName": "Bundesliga",
+      "country": "Austria",
+      "apiFootballId": 218,
+      "calendarType": "EUROPEAN_SEASON",
+      "seasonSplit": {
+        "warmup": 2021,
+        "train": 2022,
+        "oos_dev": 2023,
+        "oos_final": 2024,
+        "sealed_unread": 2025
+      },
+      "player_data_gate_audit": "PASS",
+      "coverage_score_audit": 89,
+      "status": "NOT_STARTED",
+      "wave": 2,
+      "wave_order": 18
+    },
+    {
+      "key": "mls",
+      "displayName": "Major League Soccer",
+      "country": "USA",
+      "apiFootballId": 253,
+      "calendarType": "CALENDAR_YEAR_SEASON",
+      "seasonSplit": {
+        "warmup": 2021,
+        "train": 2022,
+        "oos_dev": 2023,
+        "oos_final": 2024,
+        "sealed_unread": 2025
+      },
+      "player_data_gate_audit": "PASS",
+      "coverage_score_audit": 89,
+      "status": "NOT_STARTED",
+      "wave": 2,
+      "wave_order": 19
+    },
+    {
+      "key": "turkey_1lig",
+      "displayName": "1. Lig",
+      "country": "Turkey",
+      "apiFootballId": 204,
+      "calendarType": "EUROPEAN_SEASON",
+      "seasonSplit": {
+        "warmup": 2021,
+        "train": 2022,
+        "oos_dev": 2023,
+        "oos_final": 2024,
+        "sealed_unread": 2025
+      },
+      "player_data_gate_audit": "PASS",
+      "coverage_score_audit": 88,
+      "status": "NOT_STARTED",
+      "wave": 2,
+      "wave_order": 20
+    },
+    {
+      "key": "allsvenskan",
+      "displayName": "Allsvenskan",
+      "country": "Sweden",
+      "apiFootballId": 113,
+      "calendarType": "CALENDAR_YEAR_SEASON",
+      "seasonSplit": {
+        "warmup": 2021,
+        "train": 2022,
+        "oos_dev": 2023,
+        "oos_final": 2024,
+        "sealed_unread": 2025
+      },
+      "player_data_gate_audit": "PASS",
+      "coverage_score_audit": 86,
+      "status": "NOT_STARTED",
+      "wave": 2,
+      "wave_order": 21
+    },
+    {
+      "key": "eliteserien",
+      "displayName": "Eliteserien",
+      "country": "Norway",
+      "apiFootballId": 103,
+      "calendarType": "CALENDAR_YEAR_SEASON",
+      "seasonSplit": {
+        "warmup": 2021,
+        "train": 2022,
+        "oos_dev": 2023,
+        "oos_final": 2024,
+        "sealed_unread": 2025
+      },
+      "player_data_gate_audit": "PASS",
+      "coverage_score_audit": 84,
+      "status": "NOT_STARTED",
+      "wave": 2,
+      "wave_order": 22
+    },
+    {
+      "key": "switzerland_superleague",
+      "displayName": "Super League",
+      "country": "Switzerland",
+      "apiFootballId": 207,
+      "calendarType": "EUROPEAN_SEASON",
+      "seasonSplit": {
+        "warmup": 2021,
+        "train": 2022,
+        "oos_dev": 2023,
+        "oos_final": 2024,
+        "sealed_unread": 2025
+      },
+      "player_data_gate_audit": "PASS",
+      "coverage_score_audit": 84,
+      "status": "NOT_STARTED",
+      "wave": 2,
+      "wave_order": 23
+    },
+    {
+      "key": "brazil_serieb",
+      "displayName": "Serie B",
+      "country": "Brazil",
+      "apiFootballId": 72,
+      "calendarType": "CALENDAR_YEAR_SEASON",
+      "seasonSplit": {
+        "warmup": 2021,
+        "train": 2022,
+        "oos_dev": 2023,
+        "oos_final": 2024,
+        "sealed_unread": 2025
+      },
+      "player_data_gate_audit": "PASS",
+      "coverage_score_audit": 84,
+      "status": "NOT_STARTED",
+      "wave": 2,
+      "wave_order": 24
+    },
+    {
+      "key": "spain_segunda",
+      "displayName": "Segunda División",
+      "country": "Spain",
+      "apiFootballId": 141,
+      "calendarType": "EUROPEAN_SEASON",
+      "seasonSplit": {
+        "warmup": 2021,
+        "train": 2022,
+        "oos_dev": 2023,
+        "oos_final": 2024,
+        "sealed_unread": 2025
+      },
+      "player_data_gate_audit": "PASS",
+      "coverage_score_audit": 83,
+      "status": "NOT_STARTED",
+      "wave": 2,
+      "wave_order": 25
+    },
+    {
+      "key": "eerste_divisie",
+      "displayName": "Eerste Divisie",
+      "country": "Netherlands",
+      "apiFootballId": 89,
+      "calendarType": "EUROPEAN_SEASON",
+      "seasonSplit": {
+        "warmup": 2021,
+        "train": 2022,
+        "oos_dev": 2023,
+        "oos_final": 2024,
+        "sealed_unread": 2025
+      },
+      "player_data_gate_audit": "PASS",
+      "coverage_score_audit": 83,
+      "status": "NOT_STARTED",
+      "wave": 2,
+      "wave_order": 26
+    },
+    {
+      "key": "russia_premierleague",
+      "displayName": "Premier League",
+      "country": "Russia",
+      "apiFootballId": 235,
+      "calendarType": "EUROPEAN_SEASON",
+      "seasonSplit": {
+        "warmup": 2021,
+        "train": 2022,
+        "oos_dev": 2023,
+        "oos_final": 2024,
+        "sealed_unread": 2025
+      },
+      "player_data_gate_audit": "PASS",
+      "coverage_score_audit": 83,
+      "status": "NOT_STARTED",
+      "wave": 2,
+      "wave_order": 27
+    },
+    {
+      "key": "argentina_liga_profesional",
+      "displayName": "Liga Profesional Argentina",
+      "country": "Argentina",
+      "apiFootballId": 128,
+      "calendarType": "CALENDAR_YEAR_SEASON",
+      "seasonSplit": {
+        "warmup": 2021,
+        "train": 2022,
+        "oos_dev": 2023,
+        "oos_final": 2024,
+        "sealed_unread": 2025
+      },
+      "player_data_gate_audit": "PASS",
+      "coverage_score_audit": 82,
+      "status": "NOT_STARTED",
+      "wave": 2,
+      "wave_order": 28
+    },
+    {
+      "key": "china_superleague",
+      "displayName": "Super League",
+      "country": "China",
+      "apiFootballId": 169,
+      "calendarType": "CALENDAR_YEAR_SEASON",
+      "seasonSplit": {
+        "warmup": 2021,
+        "train": 2022,
+        "oos_dev": 2023,
+        "oos_final": 2024,
+        "sealed_unread": 2025
+      },
+      "player_data_gate_audit": "PASS",
+      "coverage_score_audit": 82,
+      "status": "NOT_STARTED",
+      "wave": 2,
+      "wave_order": 29
+    },
+    {
+      "key": "liga_mx",
+      "displayName": "Liga MX",
+      "country": "Mexico",
+      "apiFootballId": 262,
+      "calendarType": "EUROPEAN_SEASON",
+      "seasonSplit": {
+        "warmup": 2021,
+        "train": 2022,
+        "oos_dev": 2023,
+        "oos_final": 2024,
+        "sealed_unread": 2025
+      },
+      "player_data_gate_audit": "PASS",
+      "coverage_score_audit": 82,
+      "status": "NOT_STARTED",
+      "wave": 2,
+      "wave_order": 30
+    },
+    {
+      "key": "italy_serieb",
+      "displayName": "Serie B",
+      "country": "Italy",
+      "apiFootballId": 136,
+      "calendarType": "EUROPEAN_SEASON",
+      "seasonSplit": {
+        "warmup": 2021,
+        "train": 2022,
+        "oos_dev": 2023,
+        "oos_final": 2024,
+        "sealed_unread": 2025
+      },
+      "player_data_gate_audit": "PASS",
+      "coverage_score_audit": 82,
+      "status": "NOT_STARTED",
+      "wave": 2,
+      "wave_order": 31
+    },
+    {
+      "key": "croatia_hnl",
+      "displayName": "HNL",
+      "country": "Croatia",
+      "apiFootballId": 210,
+      "calendarType": "EUROPEAN_SEASON",
+      "seasonSplit": {
+        "warmup": 2021,
+        "train": 2022,
+        "oos_dev": 2023,
+        "oos_final": 2024,
+        "sealed_unread": 2025
+      },
+      "player_data_gate_audit": "PASS",
+      "coverage_score_audit": 81,
+      "status": "NOT_STARTED",
+      "wave": 2,
+      "wave_order": 32
+    },
+    {
+      "key": "peru_primera",
+      "displayName": "Primera División",
+      "country": "Peru",
+      "apiFootballId": 281,
+      "calendarType": "CALENDAR_YEAR_SEASON",
+      "seasonSplit": {
+        "warmup": 2021,
+        "train": 2022,
+        "oos_dev": 2023,
+        "oos_final": 2024,
+        "sealed_unread": 2025
+      },
+      "player_data_gate_audit": "PASS",
+      "coverage_score_audit": 81,
+      "status": "NOT_STARTED",
+      "wave": 2,
+      "wave_order": 33
+    },
+    {
+      "key": "saudi_proleague",
+      "displayName": "Pro League",
+      "country": "Saudi-Arabia",
+      "apiFootballId": 307,
+      "calendarType": "EUROPEAN_SEASON",
+      "seasonSplit": {
+        "warmup": 2021,
+        "train": 2022,
+        "oos_dev": 2023,
+        "oos_final": 2024,
+        "sealed_unread": 2025
+      },
+      "player_data_gate_audit": "PASS",
+      "coverage_score_audit": 81,
+      "status": "NOT_STARTED",
+      "wave": 2,
+      "wave_order": 34
+    },
+    {
+      "key": "ekstraklasa",
+      "displayName": "Ekstraklasa",
+      "country": "Poland",
+      "apiFootballId": 106,
+      "calendarType": "EUROPEAN_SEASON",
+      "seasonSplit": {
+        "warmup": 2021,
+        "train": 2022,
+        "oos_dev": 2023,
+        "oos_final": 2024,
+        "sealed_unread": 2025
+      },
+      "player_data_gate_audit": "PASS",
+      "coverage_score_audit": 81,
+      "status": "NOT_STARTED",
+      "wave": 2,
+      "wave_order": 35
+    },
+    {
+      "key": "challenger_pro_league",
+      "displayName": "Challenger Pro League",
+      "country": "Belgium",
+      "apiFootballId": 145,
+      "calendarType": "EUROPEAN_SEASON",
+      "seasonSplit": {
+        "warmup": 2021,
+        "train": 2022,
+        "oos_dev": 2023,
+        "oos_final": 2024,
+        "sealed_unread": 2025
+      },
+      "player_data_gate_audit": "PASS",
+      "coverage_score_audit": 81,
+      "status": "NOT_STARTED",
+      "wave": 2,
+      "wave_order": 36
+    },
+    {
+      "key": "chile_primera",
+      "displayName": "Primera División",
+      "country": "Chile",
+      "apiFootballId": 265,
+      "calendarType": "CALENDAR_YEAR_SEASON",
+      "seasonSplit": {
+        "warmup": 2021,
+        "train": 2022,
+        "oos_dev": 2023,
+        "oos_final": 2024,
+        "sealed_unread": 2025
+      },
+      "player_data_gate_audit": "PASS",
+      "coverage_score_audit": 80,
+      "status": "NOT_STARTED",
+      "wave": 2,
+      "wave_order": 37
+    },
+    {
+      "key": "aleague",
+      "displayName": "A-League",
+      "country": "Australia",
+      "apiFootballId": 188,
+      "calendarType": "EUROPEAN_SEASON",
+      "seasonSplit": {
+        "warmup": 2021,
+        "train": 2022,
+        "oos_dev": 2023,
+        "oos_final": 2024,
+        "sealed_unread": 2025
+      },
+      "player_data_gate_audit": "PASS",
+      "coverage_score_audit": 80,
+      "status": "NOT_STARTED",
+      "wave": 2,
+      "wave_order": 38
+    },
+    {
+      "key": "bolivia_primera",
+      "displayName": "Primera División",
+      "country": "Bolivia",
+      "apiFootballId": 344,
+      "calendarType": "CALENDAR_YEAR_SEASON",
+      "seasonSplit": {
+        "warmup": 2021,
+        "train": 2022,
+        "oos_dev": 2023,
+        "oos_final": 2024,
+        "sealed_unread": 2025
+      },
+      "player_data_gate_audit": "PASS",
+      "coverage_score_audit": 76,
+      "status": "NOT_STARTED",
+      "wave": 2,
+      "wave_order": 39
+    },
+    {
+      "key": "indian_super_league",
+      "displayName": "Indian Super League",
+      "country": "India",
+      "apiFootballId": 323,
+      "calendarType": "EUROPEAN_SEASON",
+      "seasonSplit": {
+        "warmup": 2021,
+        "train": 2022,
+        "oos_dev": 2023,
+        "oos_final": 2024,
+        "sealed_unread": 2025
+      },
+      "player_data_gate_audit": "PASS",
+      "coverage_score_audit": 69,
+      "status": "NOT_STARTED",
+      "wave": 2,
+      "wave_order": 40
+    },
+    {
+      "key": "paulista_a1",
+      "displayName": "Paulista - A1",
+      "country": "Brazil",
+      "apiFootballId": 475,
+      "calendarType": "CALENDAR_YEAR_SEASON",
+      "seasonSplit": {
+        "warmup": 2021,
+        "train": 2022,
+        "oos_dev": 2023,
+        "oos_final": 2024,
+        "sealed_unread": 2025
+      },
+      "player_data_gate_audit": "PASS",
+      "coverage_score_audit": 68,
+      "status": "NOT_STARTED",
+      "wave": 2,
+      "wave_order": 41
+    }
   ]
 }

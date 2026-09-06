@@ -215,11 +215,11 @@ function computeAll(leagueKey) {
   const antiLeakageClean = antiLeakageChecks.every((v) => v === true);
   const guardrailsPass = brierNoDegradationVsA && brierNoDegradationVsB && calibrationFinite && numericalClean && determinismClean && antiLeakageClean;
 
-  let PLAYER_SCORER_LALIGA, reasonCode;
-  if (vsA_pass && (vsB_pass === true || vsB_pass === null) && guardrailsPass) { PLAYER_SCORER_LALIGA = "VALIDATED"; reasonCode = "VALIDATED_LEAGUE_PLAYER_FINAL"; }
-  else if (vsA_pass && guardrailsPass) { PLAYER_SCORER_LALIGA = "INCONCLUSIVE"; reasonCode = "B_COMPARISON_NOT_FAVORABLE"; }
-  else if (!guardrailsPass) { PLAYER_SCORER_LALIGA = "INCONCLUSIVE"; reasonCode = "GUARDRAIL_FAILURE"; }
-  else { PLAYER_SCORER_LALIGA = "REJECTED"; reasonCode = "DOES_NOT_BEAT_PRIMARY_BASELINE"; }
+  let playerStatus, reasonCode;
+  if (vsA_pass && (vsB_pass === true || vsB_pass === null) && guardrailsPass) { playerStatus = "VALIDATED"; reasonCode = "VALIDATED_LEAGUE_PLAYER_FINAL"; }
+  else if (vsA_pass && guardrailsPass) { playerStatus = "INCONCLUSIVE"; reasonCode = "B_COMPARISON_NOT_FAVORABLE"; }
+  else if (!guardrailsPass) { playerStatus = "INCONCLUSIVE"; reasonCode = "GUARDRAIL_FAILURE"; }
+  else { playerStatus = "REJECTED"; reasonCode = "DOES_NOT_BEAT_PRIMARY_BASELINE"; }
 
   return {
     league_key: leagueKey, oos_final_season: sp.oos_final, manifest_hash: playerManifestHash,
@@ -231,7 +231,7 @@ function computeAll(leagueKey) {
     top1_hit_rate: { A: topA, B: topB, C: topC },
     outfield_only_sensitivity: outfield, played_minutes_sensitivity: playedMinutes,
     numerical_sanity: { n_nan: numericalNaN, n_inf: numericalInf, determinism_failures: determinismFailures, anti_leakage_checked: antiLeakageChecks.length, anti_leakage_clean: antiLeakageClean },
-    decision: { vsA_pass, vsB_pass, brier_no_degradation_vs_A: brierNoDegradationVsA, brier_no_degradation_vs_B: brierNoDegradationVsB, calibration_finite: calibrationFinite, numerical_clean: numericalClean, determinism_clean: determinismClean, anti_leakage_clean: antiLeakageClean, guardrails_pass: guardrailsPass, PLAYER_SCORER_LALIGA, reason_code: reasonCode },
+    decision: { vsA_pass, vsB_pass, brier_no_degradation_vs_A: brierNoDegradationVsA, brier_no_degradation_vs_B: brierNoDegradationVsB, calibration_finite: calibrationFinite, numerical_clean: numericalClean, determinism_clean: determinismClean, anti_leakage_clean: antiLeakageClean, guardrails_pass: guardrailsPass, status: playerStatus, reason_code: reasonCode },
   };
 }
 

@@ -1,0 +1,54 @@
+{
+  "manifest": {
+    "manifest_id": "PLAYER_BUNDESLIGA_OOS_FINAL_MANIFEST",
+    "league_key": "bundesliga",
+    "league_id": 78,
+    "calendar_type": "EUROPEAN_SEASON",
+    "created_at": "2026-09-06T00:31:37.097Z",
+    "dataset_hash_final": "bb51d8303df57caaae00ae8fb6e59e2a58bd909ab75fd115a504e208a0b81ceb",
+    "frozen_from_dev_manifest_hash": "287290907c55c15c41a707f7d2c89e8bf44eb2c9716a649d870d216a5e20f2a5",
+    "season_split": {
+      "warmup": 2021,
+      "train": 2022,
+      "oos_dev": 2023,
+      "oos_final": 2024,
+      "sealed_unread": 2025
+    },
+    "freeze_statement": "priors positions/exposure/penalty/own-goal/shrinkage REUTILISES EXACTEMENT tels que geles au DEV - aucun retuning, aucune nouvelle formule.",
+    "candidate_c": {
+      "id": "PLAYER_SCORER_V1_AGGREGATED_SHARE_BUNDESLIGA",
+      "fitted_priors_hash": "3384af94ca478deec983ad53af9e0686f32937000b6af99b52b3a3ca41de0911",
+      "source": "IDENTIQUE au manifest DEV"
+    },
+    "baselines": {
+      "a": {
+        "id": "SHRUNK_GOALS90_BASELINE"
+      },
+      "b": {
+        "id": "LEGACY_PLAYER_ENGINE"
+      }
+    },
+    "v2_status": "NON CONSTRUIT - toujours hors perimetre.",
+    "primary_metric": "ANYTIME_SCORER_LOGLOSS",
+    "supports": "C-vs-A et C-vs-B evalues sur leur SUPPORT COMMUN MAXIMAL RESPECTIF, jamais reduit inutilement au plus faible des deux.",
+    "secondary_metrics": [
+      "brier",
+      "calibration_intercept_slope_ece",
+      "top1_hit_rate",
+      "outfield_only_sensitivity",
+      "played_minutes_gt_0_sensitivity"
+    ],
+    "bootstrap_policy": {
+      "method": "paired block bootstrap par ISO_WEEK (lib/player-lab/oos-eval-metrics.js#pairedBlockBootstrapDelta, code partage inchange)",
+      "n_resamples": 10000,
+      "seed": "PLAYER-OOS-FINAL-BUNDESLIGA-2026-09-06"
+    },
+    "decision_rule": {
+      "VALIDATED": "C bat A ET B en mean logloss avec CI95(delta).upper<0 pour chacun, ET guardrails (Brier sans degradation claire, calibration finie, 0 NaN/Inf, determinism PASS, anti-leakage PASS).",
+      "INCONCLUSIVE": "signal positif mais preuve statistique insuffisante (CI traverse zero) ou guardrail non-bloquant en zone grise.",
+      "REJECTED": "C ne bat pas les baselines selon la regle ci-dessus."
+    },
+    "pre_registration_rule": "Aucun critere modifie apres resultat. 2025-26 reste SEALED_UNREAD, jamais consulte."
+  },
+  "hash": "5bc36f662903ba40a89f30937f3717210ea8f62804e6d6cd0335b1df2bbe8dd4"
+}

@@ -1,0 +1,241 @@
+{
+  "league_key": "primeira",
+  "generated_at": "2026-09-06T02:31:34.011Z",
+  "oos_dev_season": 2023,
+  "manifest_hash": "c60ed3b585e85d687566706c94884ee0aa7f0c10e66e320269e0073f2be89c3b",
+  "coverage": {
+    "fixtures_evaluated": 302,
+    "total_player_rows": 12065,
+    "coverage_A": 12065,
+    "coverage_B": 10813,
+    "coverage_C": 12065,
+    "support_C_vs_A": 12065,
+    "support_C_vs_B": 10813
+  },
+  "logloss": {
+    "A": {
+      "n": 12065,
+      "mean_logloss": 0.4385991405982143,
+      "total_logloss": 5291.698631317456
+    },
+    "C_on_CvA": {
+      "n": 12065,
+      "mean_logloss": 0.19730906905199955,
+      "total_logloss": 2380.5339181123745
+    },
+    "B": {
+      "n": 10813,
+      "mean_logloss": 0.500262206606339,
+      "total_logloss": 5409.335240034344
+    },
+    "C_on_CvB": {
+      "n": 10813,
+      "mean_logloss": 0.20968692529542354,
+      "total_logloss": 2267.344723219415
+    }
+  },
+  "delta": {
+    "CA": {
+      "n_blocks": 36,
+      "n_reps": 10000,
+      "observed_delta": -0.24129007154621476,
+      "relative_gain_pct": 55.01380399813696,
+      "ci_lower": -0.2896356479684963,
+      "ci_upper": -0.1970493657615427,
+      "probability_a_better": 1
+    },
+    "CB": {
+      "n_blocks": 36,
+      "n_reps": 10000,
+      "observed_delta": -0.2905752813109155,
+      "relative_gain_pct": 58.08459593262296,
+      "ci_lower": -0.3373402330081552,
+      "ci_upper": -0.24541023787048838,
+      "probability_a_better": 1
+    }
+  },
+  "brier": {
+    "A": {
+      "n": 12065,
+      "mean_brier": 0.05470995336684177
+    },
+    "C_on_CvA": {
+      "n": 12065,
+      "mean_brier": 0.05351604071495362
+    },
+    "B": {
+      "n": 10813,
+      "mean_brier": 0.06200365514288339
+    },
+    "C_on_CvB": {
+      "n": 10813,
+      "mean_brier": 0.057070303884737834
+    },
+    "delta_CA": {
+      "n_blocks": 36,
+      "n_reps": 10000,
+      "observed_delta": -0.001193912651888153,
+      "relative_gain_pct": 2.182258580779108,
+      "ci_lower": -0.0017018341501880488,
+      "ci_upper": -0.0007121636187328376,
+      "probability_a_better": 1
+    }
+  },
+  "calibration": {
+    "A": {
+      "n": 12065,
+      "intercept": -1.8960835520048944,
+      "slope": 0.10430972182954007,
+      "converged": true,
+      "ece": 0.01943389638642471
+    },
+    "C_on_CvA": {
+      "n": 12065,
+      "intercept": -0.1718172849718379,
+      "slope": 0.8963299914738453,
+      "converged": true,
+      "ece": 0.004525211128776303
+    },
+    "B": {
+      "n": 10813,
+      "intercept": -1.8374427082501217,
+      "slope": 0.10059783811977706,
+      "converged": true,
+      "ece": 0.036367520577083166
+    },
+    "C_on_CvB": {
+      "n": 10813,
+      "intercept": -0.19707846636887963,
+      "slope": 0.8812173422953453,
+      "converged": true,
+      "ece": 0.004999786040515542
+    }
+  },
+  "top1_hit_rate": {
+    "A": {
+      "n": 302,
+      "hits": 106,
+      "hit_rate": 0.3509933774834437,
+      "mean_selected_probability": 0.3849684745855934
+    },
+    "B": {
+      "n": 302,
+      "hits": 113,
+      "hit_rate": 0.3741721854304636,
+      "mean_selected_probability": 0.5247966887417218
+    },
+    "C": {
+      "n": 302,
+      "hits": 112,
+      "hit_rate": 0.3708609271523179,
+      "mean_selected_probability": 0.3711687946794126
+    }
+  },
+  "outfield_only_sensitivity": {
+    "vs_A": {
+      "n": 10839,
+      "delta": {
+        "n_blocks": 36,
+        "n_reps": 10000,
+        "observed_delta": -0.2676188693076358,
+        "relative_gain_pct": 54.92484288132179,
+        "ci_lower": -0.32302297222317533,
+        "ci_upper": -0.21910316660577434,
+        "probability_a_better": 1
+      }
+    },
+    "vs_B": {
+      "n": 9955,
+      "delta": {
+        "n_blocks": 36,
+        "n_reps": 10000,
+        "observed_delta": -0.3156193387056709,
+        "relative_gain_pct": 58.08459593263194,
+        "ci_lower": -0.3660691230642692,
+        "ci_upper": -0.2659756421257765,
+        "probability_a_better": 1
+      }
+    }
+  },
+  "played_minutes_sensitivity": {
+    "vs_A": {
+      "n": 9446,
+      "logloss_C": {
+        "n": 9446,
+        "mean_logloss": 0.2472181858349506,
+        "total_logloss": 2335.222983396943
+      },
+      "logloss_A": {
+        "n": 9446,
+        "mean_logloss": 0.5602052330420315,
+        "total_logloss": 5291.69863131503
+      }
+    },
+    "vs_B": {
+      "n": 8941,
+      "logloss_C": {
+        "n": 8941,
+        "mean_logloss": 0.24942564509285572,
+        "total_logloss": 2230.114692775223
+      },
+      "logloss_B": {
+        "n": 8941,
+        "mean_logloss": 0.6029546677169707,
+        "total_logloss": 5391.017684057435
+      }
+    }
+  },
+  "position_diagnostics": {
+    "F": {
+      "n": 2872,
+      "observed_rate": 0.13614206128133705,
+      "logloss_C": 0.3423227834596077,
+      "logloss_A": 1.0843427547353337
+    },
+    "M": {
+      "n": 4324,
+      "observed_rate": 0.06591119333950046,
+      "logloss_C": 0.22008323003836436,
+      "logloss_A": 0.35717062860460125
+    },
+    "D": {
+      "n": 3643,
+      "observed_rate": 0.026900905846829536,
+      "logloss_C": 0.12235602452081352,
+      "logloss_A": 0.17090767303066712
+    },
+    "G": {
+      "n": 1226,
+      "observed_rate": 0,
+      "logloss_C": 9.999778782803666e-13,
+      "logloss_A": 0.008518587912586988
+    },
+    "UNKNOWN": null
+  },
+  "temporal_diagnostics": {
+    "first_half_season": {
+      "n": 6027,
+      "logloss_C": 0.20607852684573363,
+      "logloss_A": 0.47752886364595726
+    },
+    "second_half_season": {
+      "n": 6038,
+      "logloss_C": 0.18855558741523598,
+      "logloss_A": 0.3997403395368318
+    }
+  },
+  "numerical_sanity": {
+    "n_nan": 0,
+    "n_inf": 0,
+    "determinism_failures": 0
+  },
+  "decision": {
+    "vsA_pass": true,
+    "vsB_pass": true,
+    "brier_no_degradation_vs_A": true,
+    "numerical_clean": true,
+    "determinism_clean": true,
+    "status": "VALIDATED",
+    "reason_code": "VALIDATED_LEAGUE_PLAYER"
+  }
+}

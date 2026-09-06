@@ -1,0 +1,182 @@
+{
+  "league_key": "bundesliga",
+  "league_id": 78,
+  "generated_at": "2026-09-06T00:25:22.201Z",
+  "warmup_season": 2021,
+  "train_season": 2022,
+  "disclaimer": "PRE-OOS - seuls WARMUP et TRAIN sont charges. OOS_DEV/OOS_FINAL ni charges ni consultes.",
+  "fixtures": {
+    "total": 616,
+    "cached": 616,
+    "missing": 0,
+    "missing_sample": []
+  },
+  "goal_reconciliation_rate_pct": 100,
+  "rows_by_split": {
+    "WARMUP": 12205,
+    "TRAIN": 12252
+  },
+  "n_train_rows": 12252,
+  "n_train_goal_events": 978,
+  "priors_candidate": {
+    "status": "PLAYER_SCORER_V1_AGGREGATED_SHARE_BUNDESLIGA_FITTED_UNVALIDATED",
+    "core_rate_priors": [
+      [
+        "G",
+        {
+          "alpha": 0,
+          "beta": 10,
+          "mean_rate_per_90": 0,
+          "n_observations_minutes90": 616.088888888889
+        }
+      ],
+      [
+        "D",
+        {
+          "alpha": 0.45926407684418546,
+          "beta": 10,
+          "mean_rate_per_90": 0.045926407684418545,
+          "n_observations_minutes90": 2220.9444444444443
+        }
+      ],
+      [
+        "M",
+        {
+          "alpha": 1.5376260991248776,
+          "beta": 10,
+          "mean_rate_per_90": 0.15376260991248775,
+          "n_observations_minutes90": 2659.9444444444443
+        }
+      ],
+      [
+        "F",
+        {
+          "alpha": 3.4453325056258244,
+          "beta": 10,
+          "mean_rate_per_90": 0.34453325056258244,
+          "n_observations_minutes90": 1288.7
+        }
+      ]
+    ],
+    "conversion_priors": [
+      [
+        "M",
+        {
+          "mean_conversion": 0.3272,
+          "n_sot": 1250
+        }
+      ],
+      [
+        "F",
+        {
+          "mean_conversion": 0.34850863422291994,
+          "n_sot": 1274
+        }
+      ],
+      [
+        "D",
+        {
+          "mean_conversion": 0.2905982905982906,
+          "n_sot": 351
+        }
+      ],
+      [
+        "G",
+        {
+          "mean_conversion": 0,
+          "n_sot": 1
+        }
+      ]
+    ],
+    "exposure_priors": [
+      [
+        "G",
+        {
+          "start_rate": 0.49398556535685645,
+          "bench_enter_rate": 0.004754358161648178,
+          "mean_minutes_if_starter": 89.73051948051948,
+          "mean_minutes_if_sub_used": 58,
+          "n_matches": 1247
+        }
+      ],
+      [
+        "D",
+        {
+          "start_rate": 0.5950903695710817,
+          "bench_enter_rate": 0.4110592938041306,
+          "mean_minutes_if_starter": 85.20806890299184,
+          "mean_minutes_if_sub_used": 19.312803889789304,
+          "n_matches": 3707
+        }
+      ],
+      [
+        "M",
+        {
+          "start_rate": 0.5935047951176984,
+          "bench_enter_rate": 0.5946380697050938,
+          "mean_minutes_if_starter": 79.40323172970987,
+          "mean_minutes_if_sub_used": 20.901713255184852,
+          "n_matches": 4588
+        }
+      ],
+      [
+        "F",
+        {
+          "start_rate": 0.45457902511078285,
+          "bench_enter_rate": 0.7000677048070413,
+          "mean_minutes_if_starter": 77.40292445166531,
+          "mean_minutes_if_sub_used": 20.01934235976789,
+          "n_matches": 2708
+        }
+      ],
+      [
+        "UNKNOWN",
+        {
+          "start_rate": 0,
+          "bench_enter_rate": 0,
+          "mean_minutes_if_starter": 90,
+          "mean_minutes_if_sub_used": 25,
+          "n_matches": 2
+        }
+      ]
+    ],
+    "goal_timing_distribution": [
+      0.03254437869822485,
+      0.05128205128205128,
+      0.04930966469428008,
+      0.04437869822485207,
+      0.046351084812623275,
+      0.05226824457593689,
+      0.05621301775147929,
+      0.05917159763313609,
+      0.047337278106508875,
+      0.0621301775147929,
+      0.05621301775147929,
+      0.05917159763313609,
+      0.04437869822485207,
+      0.03944773175542406,
+      0.055226824457593686,
+      0.0601577909270217,
+      0.0641025641025641,
+      0.1203155818540434
+    ],
+    "own_goal_rate": {
+      "own_goal_mass": 0.023517382413087935,
+      "n_total_goals": 978,
+      "n_own_goals": 23
+    },
+    "penalty_rate": {
+      "penalty_mass_share": 0.0869120654396728,
+      "n_total_goals": 978,
+      "n_penalty_goals": 85
+    }
+  },
+  "anti_leakage_smoke_test": {
+    "n_checked": 200,
+    "pass": true
+  },
+  "determinism_smoke_test": {
+    "n_draws": 2000,
+    "pass": true
+  }
+}

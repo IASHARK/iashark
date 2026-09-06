@@ -154,7 +154,7 @@ function computeAll(leagueKey) {
     marginals: { home_nll: marginalHomeNll, away_nll: marginalAwayNll },
     secondary, low_score_diagnostics: lowScore, bootstrap,
     temporal_stability: { first_half_season: firstHalf, second_half_season: secondHalf },
-    decision: { ci_confirms_worse: ciConfirmsWorse, ci_favorable: ciFavorable, numerical_clean: numericalClean, status, reason_code: reasonCode, SCORE_LALIGA: status },
+    decision: { ci_confirms_worse: ciConfirmsWorse, ci_favorable: ciFavorable, numerical_clean: numericalClean, status, reason_code: reasonCode },
   };
 }
 

@@ -1,0 +1,35 @@
+{
+  "league_key": "eredivisie",
+  "league_id": 88,
+  "generated_at": "2026-09-06T01:55:50.952Z",
+  "warmup_season": 2021,
+  "train_season": 2022,
+  "disclaimer": "DIAGNOSTIC TRAIN-ONLY - oosSeasons ici = saison TRAIN elle-meme, jamais OOS_DEV/OOS_FINAL. Aucune metrique OOS reelle n'a ete calculee ni consultee.",
+  "league_avg_h_real": 1.712962962962963,
+  "league_avg_a_real": 1.3148148148148149,
+  "n_cutoffs": 110,
+  "n_predictions": 311,
+  "production_champion_rho_m0": -0.0845,
+  "fitted_rho_candidate_m2": {
+    "value": -0.03825551914203654,
+    "convergence": true,
+    "on_boundary": false,
+    "n_train_at_last_cutoff": 597,
+    "status": "CANDIDATE_SCORE_CHAMPION_EREDIVISIE_UNVALIDATED"
+  },
+  "rho_across_train_cutoffs": {
+    "mean": -0.010336340118117241,
+    "median": -0.017544014775079476,
+    "std": 0.024040577563678087,
+    "min": -0.040750932688232856,
+    "max": 0.03597301603479129,
+    "n_fits": 110
+  },
+  "convergence_rate": 1,
+  "boundary_hit_rate": 0,
+  "train_window_diagnostic_nll": {
+    "nll_m0_production_rho": 3.1171041587394632,
+    "nll_m1_league_fitted_rho": 3.1215662752020115,
+    "note": "Diagnostic sur TRAIN (donnee visible, pas tenue secrete) - PAS une decision de promotion. La vraie comparaison M0 vs M2 se fera sur OOS_DEV/OOS_FINAL dans une passe future explicitement autorisee."
+  }
+}

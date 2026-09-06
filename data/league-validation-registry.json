@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-06T00:00:14.872Z",
+  "generated_at": "2026-09-06T02:43:08.358Z",
   "leagues": {
     "laliga": {
       "league_key": "laliga",
@@ -42,6 +42,196 @@
       "current_player_champion_laliga": "PLAYER_SCORER_V1_AGGREGATED_SHARE_LALIGA",
       "current_score_champion_laliga": null,
       "laliga_full_model_status": "PARTIAL_PLAYER_ONLY"
+    },
+    "bundesliga": {
+      "league_key": "bundesliga",
+      "league_id": 78,
+      "calendar_type": "EUROPEAN_SEASON",
+      "dataset_versions": {
+        "fixtures_seasons": [
+          2021,
+          2022,
+          2023,
+          2024
+        ],
+        "player_lab_seasons": [
+          2021,
+          2022,
+          2023,
+          2024
+        ]
+      },
+      "score_champion": "SCORE_M0_BUNDESLIGA",
+      "score_status": "INCONCLUSIVE",
+      "player_champion": "PLAYER_SCORER_V1_AGGREGATED_SHARE_BUNDESLIGA",
+      "player_status": "VALIDATED",
+      "market_status": "MARKET_VALIDATION_PENDING",
+      "oos_report_hashes": {
+        "score_oos_dev_manifest_hash": "5b1d51fb32ae63a3be62626b67b81dbe7fc53a48d085f29645ab8fa4ceb206bf",
+        "player_oos_dev_manifest_hash": "287290907c55c15c41a707f7d2c89e8bf44eb2c9716a649d870d216a5e20f2a5",
+        "score_oos_final_manifest_hash": "1b4a9ded3cf9a03d403bf7b2062b959fbb98b163daec1dcbea53fb4374ac69a1",
+        "player_oos_final_manifest_hash": "5bc36f662903ba40a89f30937f3717210ea8f62804e6d6cd0335b1df2bbe8dd4"
+      },
+      "score_runnable": false,
+      "player_runnable": true,
+      "live_eligible": false,
+      "updated_at": "2026-09-06T00:40:54.793Z",
+      "current_score_champion_bundesliga": null,
+      "current_player_champion_bundesliga": "PLAYER_SCORER_V1_AGGREGATED_SHARE_BUNDESLIGA",
+      "bundesliga_full_model_status": "PARTIAL_PLAYER_ONLY",
+      "note": "OOS_DEV(2023) puis OOS_FINAL(2024) termines, chaque etape gelee avant lecture. Score=INCONCLUSIVE (M0_APPROX_B0_CI_CROSSES_ZERO). Player=VALIDATED (VALIDATED_LEAGUE_PLAYER_FINAL). Reproductibilite : Score=true Player=true."
+    },
+    "seriea": {
+      "league_key": "seriea",
+      "league_id": 135,
+      "calendar_type": "EUROPEAN_SEASON",
+      "dataset_versions": {
+        "fixtures_seasons": [
+          2021,
+          2022,
+          2023,
+          2024
+        ],
+        "player_lab_seasons": [
+          2021,
+          2022,
+          2023,
+          2024
+        ]
+      },
+      "score_champion": "SCORE_M0_SERIEA",
+      "score_status": "INCONCLUSIVE",
+      "player_champion": "PLAYER_SCORER_V1_AGGREGATED_SHARE_SERIEA",
+      "player_status": "VALIDATED",
+      "market_status": "MARKET_VALIDATION_PENDING",
+      "oos_report_hashes": {
+        "score_oos_dev_manifest_hash": "c9192f23a7fc2b2d6b702d58fadac68603a2f5b4f11f151b15788eeb1b5264eb",
+        "player_oos_dev_manifest_hash": "c5bc410dfdd0cf0cb3d38b87676422887e34e40ea7e5f0e9392bc375af4acfa3",
+        "score_oos_final_manifest_hash": "4cdd3c72d1d3cfac7f4278e6ae852487d306e03044507ceff4133bc08f23c5c4",
+        "player_oos_final_manifest_hash": "fe5c221a3e793dea05b149576ba43133f488aa11a94f607a223c20dd40bd9136"
+      },
+      "score_runnable": false,
+      "player_runnable": true,
+      "live_eligible": false,
+      "updated_at": "2026-09-06T01:16:17.348Z",
+      "current_score_champion_seriea": null,
+      "current_player_champion_seriea": "PLAYER_SCORER_V1_AGGREGATED_SHARE_SERIEA",
+      "seriea_full_model_status": "PARTIAL_PLAYER_ONLY",
+      "note": "OOS_DEV(2023) puis OOS_FINAL(2024) termines, chaque etape gelee avant lecture. Score=INCONCLUSIVE (M0_APPROX_B0_CI_CROSSES_ZERO). Player=VALIDATED (VALIDATED_LEAGUE_PLAYER_FINAL). Reproductibilite : Score=true Player=true."
+    },
+    "ligue1": {
+      "league_key": "ligue1",
+      "league_id": 61,
+      "calendar_type": "EUROPEAN_SEASON",
+      "dataset_versions": {
+        "fixtures_seasons": [
+          2021,
+          2022,
+          2023,
+          2024
+        ],
+        "player_lab_seasons": [
+          2021,
+          2022,
+          2023,
+          2024
+        ]
+      },
+      "score_champion": "SCORE_M0_LIGUE1",
+      "score_status": "INCONCLUSIVE",
+      "player_champion": "PLAYER_SCORER_V1_AGGREGATED_SHARE_LIGUE1",
+      "player_status": "VALIDATED",
+      "market_status": "MARKET_VALIDATION_PENDING",
+      "oos_report_hashes": {
+        "score_oos_dev_manifest_hash": "9eabe2b0521fe4d8926de2bc69ec108b44b08fbba6f205330d92a94c4b726f8f",
+        "player_oos_dev_manifest_hash": "eaeb2e3aa7221b92dbde0317cb7453a9b897d5eb36db52b80b502a072eccb5af",
+        "score_oos_final_manifest_hash": "9a7201da86f62c730e82c90e11d13103714699eada9b412bc35b64bf6346776e",
+        "player_oos_final_manifest_hash": "61feb54fda83f75fe297eb873031a53d53e62f93a1681935dc23b8c70a260f28"
+      },
+      "score_runnable": false,
+      "player_runnable": true,
+      "live_eligible": false,
+      "updated_at": "2026-09-06T01:43:53.659Z",
+      "current_score_champion_ligue1": null,
+      "current_player_champion_ligue1": "PLAYER_SCORER_V1_AGGREGATED_SHARE_LIGUE1",
+      "ligue1_full_model_status": "PARTIAL_PLAYER_ONLY",
+      "note": "OOS_DEV(2023) puis OOS_FINAL(2024) termines, chaque etape gelee avant lecture. Score=INCONCLUSIVE (M0_APPROX_B0_CI_CROSSES_ZERO). Player=VALIDATED (VALIDATED_LEAGUE_PLAYER_FINAL). Reproductibilite : Score=true Player=true."
+    },
+    "eredivisie": {
+      "league_key": "eredivisie",
+      "league_id": 88,
+      "calendar_type": "EUROPEAN_SEASON",
+      "dataset_versions": {
+        "fixtures_seasons": [
+          2021,
+          2022,
+          2023,
+          2024
+        ],
+        "player_lab_seasons": [
+          2021,
+          2022,
+          2023,
+          2024
+        ]
+      },
+      "score_champion": "SCORE_M0_EREDIVISIE",
+      "score_status": "INCONCLUSIVE",
+      "player_champion": "PLAYER_SCORER_V1_AGGREGATED_SHARE_EREDIVISIE",
+      "player_status": "VALIDATED",
+      "market_status": "MARKET_VALIDATION_PENDING",
+      "oos_report_hashes": {
+        "score_oos_dev_manifest_hash": "b07ea100d42f7ddde3220b2bd3a494b8b506c4eec9ac56c41829e4f7dc3aa642",
+        "player_oos_dev_manifest_hash": "d98fae190aed133f23b99964ac6e340c9313ab197ab54b916ee505ec0f09495b",
+        "score_oos_final_manifest_hash": "0d576802879ba0fe40a69056950e5ac2617a46284b2ad0dfa97c677479a736ee",
+        "player_oos_final_manifest_hash": "e0056d878a1a69b44c936960b90a73262a3b60a027fb8693b840605ca18cac05"
+      },
+      "score_runnable": false,
+      "player_runnable": true,
+      "live_eligible": false,
+      "updated_at": "2026-09-06T02:10:26.218Z",
+      "current_score_champion_eredivisie": null,
+      "current_player_champion_eredivisie": "PLAYER_SCORER_V1_AGGREGATED_SHARE_EREDIVISIE",
+      "eredivisie_full_model_status": "PARTIAL_PLAYER_ONLY",
+      "note": "OOS_DEV(2023) puis OOS_FINAL(2024) termines, chaque etape gelee avant lecture. Score=INCONCLUSIVE (M0_APPROX_B0_CI_CROSSES_ZERO). Player=VALIDATED (VALIDATED_LEAGUE_PLAYER_FINAL). Reproductibilite : Score=true Player=true."
+    },
+    "primeira": {
+      "league_key": "primeira",
+      "league_id": 94,
+      "calendar_type": "EUROPEAN_SEASON",
+      "dataset_versions": {
+        "fixtures_seasons": [
+          2021,
+          2022,
+          2023,
+          2024
+        ],
+        "player_lab_seasons": [
+          2021,
+          2022,
+          2023,
+          2024
+        ]
+      },
+      "score_champion": "SCORE_M0_PRIMEIRA",
+      "score_status": "INCONCLUSIVE",
+      "player_champion": "PLAYER_SCORER_V1_AGGREGATED_SHARE_PRIMEIRA",
+      "player_status": "VALIDATED",
+      "market_status": "MARKET_VALIDATION_PENDING",
+      "oos_report_hashes": {
+        "score_oos_dev_manifest_hash": "3cfa010e22df0f3f86ab4ca89d27c353656636cb90263a3fbb67a6d9e8e2a03e",
+        "player_oos_dev_manifest_hash": "c60ed3b585e85d687566706c94884ee0aa7f0c10e66e320269e0073f2be89c3b",
+        "score_oos_final_manifest_hash": "c845022fc38d0ddc73379971a27b3440fe515b2aaa91515ce68aa602be9e8ad7",
+        "player_oos_final_manifest_hash": "a6e640bbdb8b754e6bfefa0ffa82011c36b7891eaf6f4e2921d9aceec4c7af46"
+      },
+      "score_runnable": false,
+      "player_runnable": true,
+      "live_eligible": false,
+      "updated_at": "2026-09-06T02:39:28.026Z",
+      "current_score_champion_primeira": null,
+      "current_player_champion_primeira": "PLAYER_SCORER_V1_AGGREGATED_SHARE_PRIMEIRA",
+      "primeira_full_model_status": "PARTIAL_PLAYER_ONLY",
+      "note": "OOS_DEV(2023) puis OOS_FINAL(2024) termines, chaque etape gelee avant lecture. Score=INCONCLUSIVE (M0_APPROX_B0_CI_CROSSES_ZERO). Player=VALIDATED (VALIDATED_LEAGUE_PLAYER_FINAL). Reproductibilite : Score=true Player=true."
     }
   }
 }

@@ -1,0 +1,91 @@
+{
+  "league_key": "eredivisie",
+  "generated_at": "2026-09-06T02:00:59.776Z",
+  "oos_dev_season": 2023,
+  "manifest_hash": "b07ea100d42f7ddde3220b2bd3a494b8b506c4eec9ac56c41829e4f7dc3aa642",
+  "coverage": {
+    "total_predictions": 321,
+    "m0_valid_predictions": 317
+  },
+  "primary": {
+    "nll_m0": 3.1422333278941754,
+    "nll_m2": 3.1377462105067253,
+    "delta": -0.0044871173874501125,
+    "relative_gain": 0.0014280026080867889
+  },
+  "marginals": {
+    "home_nll_m0": 1.6367217041337174,
+    "home_nll_m2": 1.6323902021830337,
+    "away_nll_m0": 1.5082927464022444,
+    "away_nll_m2": 1.50809163461583
+  },
+  "secondary": {
+    "ou25": {
+      "logloss_m0": 0.6517165172139631,
+      "logloss_m2": 0.6517070634749172,
+      "brier_m0": 0.2300104012117078,
+      "brier_m2": 0.2296850500695347
+    },
+    "btts": {
+      "logloss_m0": 0.6987004008237984,
+      "logloss_m2": 0.6989199155890556,
+      "brier_m0": 0.25265916896726237,
+      "brier_m2": 0.252697777267122
+    },
+    "x12": {
+      "logloss_m0": 0.949218480924514,
+      "logloss_m2": 0.9421689753310328,
+      "brier_m0": 0.5631878187112711,
+      "brier_m2": 0.5583933147849607
+    }
+  },
+  "low_score_diagnostics": {
+    "0-0": {
+      "count_observed": 15,
+      "nll_contribution_m0": 2.9895333333333336,
+      "nll_contribution_m2": 2.9483333333333333
+    },
+    "1-0": {
+      "count_observed": 19,
+      "nll_contribution_m0": 2.4086668631086767,
+      "nll_contribution_m2": 2.3934495288486577
+    },
+    "0-1": {
+      "count_observed": 11,
+      "nll_contribution_m0": 2.632070725827038,
+      "nll_contribution_m2": 2.637262803214136
+    },
+    "1-1": {
+      "count_observed": 34,
+      "nll_contribution_m0": 2.1981536888623068,
+      "nll_contribution_m2": 2.1913271722006975
+    }
+  },
+  "bootstrap": {
+    "valid": true,
+    "n_blocks": 105,
+    "n_total_deltas": 317,
+    "n_resamples": 10000,
+    "seed": 2055240345,
+    "observed_mean_delta": -0.004487117387449438,
+    "ci_lower": -0.02009193843808819,
+    "ci_upper": 0.010248259202490756,
+    "ci_crosses_zero": true,
+    "probability_candidate_better": 0.724
+  },
+  "promotion": {
+    "status": "REJECT",
+    "reason_codes": [
+      "GAIN_BELOW_PROMOTION_THRESHOLD",
+      "BOOTSTRAP_CI_CROSSES_ZERO"
+    ],
+    "details": {
+      "relative_gain": 0.0014280026080867889,
+      "promotion_threshold": 0.0025,
+      "n_oos": 317,
+      "ci_lower": -0.02009193843808819,
+      "ci_upper": 0.010248259202490756
+    },
+    "decision_label": "M2_REJECT_DEV"
+  }
+}

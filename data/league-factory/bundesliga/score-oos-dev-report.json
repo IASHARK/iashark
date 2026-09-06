@@ -1,0 +1,91 @@
+{
+  "league_key": "bundesliga",
+  "generated_at": "2026-09-06T00:29:55.908Z",
+  "oos_dev_season": 2023,
+  "manifest_hash": "5b1d51fb32ae63a3be62626b67b81dbe7fc53a48d085f29645ab8fa4ceb206bf",
+  "coverage": {
+    "total_predictions": 308,
+    "m0_valid_predictions": 300
+  },
+  "primary": {
+    "nll_m0": 3.09304867536462,
+    "nll_m2": 3.0833876136794305,
+    "delta": -0.00966106168518932,
+    "relative_gain": 0.0031234754765217007
+  },
+  "marginals": {
+    "home_nll_m0": 1.6407279902982606,
+    "home_nll_m2": 1.6363181594145455,
+    "away_nll_m0": 1.4587246640602813,
+    "away_nll_m2": 1.4535398652335203
+  },
+  "secondary": {
+    "ou25": {
+      "logloss_m0": 0.6715098524907419,
+      "logloss_m2": 0.6679488477782894,
+      "brier_m0": 0.237696416689691,
+      "brier_m2": 0.2368440054001278
+    },
+    "btts": {
+      "logloss_m0": 0.667759354508708,
+      "logloss_m2": 0.6628402056429079,
+      "brier_m0": 0.23670195124153737,
+      "brier_m2": 0.23481870671795577
+    },
+    "x12": {
+      "logloss_m0": 0.9975333087816026,
+      "logloss_m2": 0.9941808944951613,
+      "brier_m0": 0.5962753300476531,
+      "brier_m2": 0.5936641817273977
+    }
+  },
+  "low_score_diagnostics": {
+    "0-0": {
+      "count_observed": 13,
+      "nll_contribution_m0": 3.415230769230769,
+      "nll_contribution_m2": 3.352
+    },
+    "1-0": {
+      "count_observed": 13,
+      "nll_contribution_m0": 2.7156964187969495,
+      "nll_contribution_m2": 2.5964962243681
+    },
+    "0-1": {
+      "count_observed": 18,
+      "nll_contribution_m0": 2.8403357691136426,
+      "nll_contribution_m2": 2.8319485845250094
+    },
+    "1-1": {
+      "count_observed": 41,
+      "nll_contribution_m0": 2.313916411552771,
+      "nll_contribution_m2": 2.308616886370115
+    }
+  },
+  "bootstrap": {
+    "valid": true,
+    "n_blocks": 98,
+    "n_total_deltas": 300,
+    "n_resamples": 10000,
+    "seed": 65263844,
+    "observed_mean_delta": -0.009661061685189598,
+    "ci_lower": -0.02277686868291535,
+    "ci_upper": 0.0006722960145781477,
+    "ci_crosses_zero": true,
+    "probability_candidate_better": 0.9627
+  },
+  "promotion": {
+    "status": "SHADOW_MORE_DATA",
+    "reason_codes": [
+      "N_OOS_TOO_LOW",
+      "BOOTSTRAP_CI_CROSSES_ZERO"
+    ],
+    "details": {
+      "relative_gain": 0.0031234754765217007,
+      "promotion_threshold": 0.0025,
+      "n_oos": 300,
+      "ci_lower": -0.02277686868291535,
+      "ci_upper": 0.0006722960145781477
+    },
+    "decision_label": "INCONCLUSIVE"
+  }
+}

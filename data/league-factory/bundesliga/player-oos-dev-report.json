@@ -1,0 +1,246 @@
+{
+  "league_key": "bundesliga",
+  "generated_at": "2026-09-06T00:31:36.910Z",
+  "oos_dev_season": 2023,
+  "manifest_hash": "287290907c55c15c41a707f7d2c89e8bf44eb2c9716a649d870d216a5e20f2a5",
+  "coverage": {
+    "fixtures_evaluated": 300,
+    "total_player_rows": 11912,
+    "coverage_A": 11912,
+    "coverage_B": 10853,
+    "coverage_C": 11912,
+    "support_C_vs_A": 11912,
+    "support_C_vs_B": 10853
+  },
+  "logloss": {
+    "A": {
+      "n": 11912,
+      "mean_logloss": 0.4696056165010962,
+      "total_logloss": 5593.942103761058
+    },
+    "C_on_CvA": {
+      "n": 11912,
+      "mean_logloss": 0.2108907721182252,
+      "total_logloss": 2512.130877472299
+    },
+    "B": {
+      "n": 10853,
+      "mean_logloss": 0.5242248758531047,
+      "total_logloss": 5689.412577633746
+    },
+    "C_on_CvB": {
+      "n": 10853,
+      "mean_logloss": 0.22421997272473704,
+      "total_logloss": 2433.459363981571
+    }
+  },
+  "delta": {
+    "CA": {
+      "n_blocks": 34,
+      "n_reps": 10000,
+      "observed_delta": -0.258714844382871,
+      "relative_gain_pct": 55.09193997944168,
+      "ci_lower": -0.31018015162409385,
+      "ci_upper": -0.20870283679716362,
+      "probability_a_better": 1
+    },
+    "CB": {
+      "n_blocks": 34,
+      "n_reps": 10000,
+      "observed_delta": -0.3000049031283677,
+      "relative_gain_pct": 57.22828445333703,
+      "ci_lower": -0.35669244206446515,
+      "ci_upper": -0.2468057442533955,
+      "probability_a_better": 1
+    }
+  },
+  "brier": {
+    "A": {
+      "n": 11912,
+      "mean_brier": 0.05924034335240614
+    },
+    "C_on_CvA": {
+      "n": 11912,
+      "mean_brier": 0.05804475594587499
+    },
+    "B": {
+      "n": 10853,
+      "mean_brier": 0.06565172442826872
+    },
+    "C_on_CvB": {
+      "n": 10853,
+      "mean_brier": 0.06209138120030777
+    },
+    "delta_CA": {
+      "n_blocks": 34,
+      "n_reps": 10000,
+      "observed_delta": -0.001195587406531147,
+      "relative_gain_pct": 2.018197969277277,
+      "ci_lower": -0.0017619903555318728,
+      "ci_upper": -0.0006872469398050418,
+      "probability_a_better": 1
+    }
+  },
+  "calibration": {
+    "A": {
+      "n": 11912,
+      "intercept": -1.8388593120217118,
+      "slope": 0.10248565991355695,
+      "converged": true,
+      "ece": 0.023155417432877124
+    },
+    "C_on_CvA": {
+      "n": 11912,
+      "intercept": -0.236961293334766,
+      "slope": 0.8942179435266593,
+      "converged": true,
+      "ece": 0.003945984677652009
+    },
+    "B": {
+      "n": 10853,
+      "intercept": -1.7946216089238263,
+      "slope": 0.09857214083681977,
+      "converged": true,
+      "ece": 0.03452223348382935
+    },
+    "C_on_CvB": {
+      "n": 10853,
+      "intercept": -0.25580725466774756,
+      "slope": 0.8759075692641407,
+      "converged": true,
+      "ece": 0.005683632100360552
+    }
+  },
+  "top1_hit_rate": {
+    "A": {
+      "n": 300,
+      "hits": 119,
+      "hit_rate": 0.39666666666666667,
+      "mean_selected_probability": 0.4268029163737511
+    },
+    "B": {
+      "n": 300,
+      "hits": 115,
+      "hit_rate": 0.38333333333333336,
+      "mean_selected_probability": 0.5233356666666663
+    },
+    "C": {
+      "n": 300,
+      "hits": 118,
+      "hit_rate": 0.3933333333333333,
+      "mean_selected_probability": 0.39134048366245944
+    }
+  },
+  "outfield_only_sensitivity": {
+    "vs_A": {
+      "n": 10687,
+      "delta": {
+        "n_blocks": 34,
+        "n_reps": 10000,
+        "observed_delta": -0.2873836171857068,
+        "relative_gain_pct": 55.00714873047905,
+        "ci_lower": -0.34529088494812027,
+        "ci_upper": -0.2311110236383581,
+        "probability_a_better": 1
+      }
+    },
+    "vs_B": {
+      "n": 9958,
+      "delta": {
+        "n_blocks": 34,
+        "n_reps": 10000,
+        "observed_delta": -0.32696858944087104,
+        "relative_gain_pct": 57.228284453345736,
+        "ci_lower": -0.3899369675134822,
+        "ci_upper": -0.2689359025812422,
+        "probability_a_better": 1
+      }
+    }
+  },
+  "played_minutes_sensitivity": {
+    "vs_A": {
+      "n": 9338,
+      "logloss_C": {
+        "n": 9338,
+        "mean_logloss": 0.2640022297606304,
+        "total_logloss": 2465.252821504767
+      },
+      "logloss_A": {
+        "n": 9338,
+        "mean_logloss": 0.5990514139814384,
+        "total_logloss": 5593.942103758672
+      }
+    },
+    "vs_B": {
+      "n": 8953,
+      "logloss_C": {
+        "n": 8953,
+        "mean_logloss": 0.26755669868501053,
+        "total_logloss": 2395.4351233268994
+      },
+      "logloss_B": {
+        "n": 8953,
+        "mean_logloss": 0.6341050950743946,
+        "total_logloss": 5677.1429162010545
+      }
+    }
+  },
+  "position_diagnostics": {
+    "F": {
+      "n": 2627,
+      "observed_rate": 0.1545489151122954,
+      "logloss_C": 0.37166036958331794,
+      "logloss_A": 1.0231104001027367
+    },
+    "M": {
+      "n": 4416,
+      "observed_rate": 0.07336956521739131,
+      "logloss_C": 0.2435038285360896,
+      "logloss_A": 0.4950330138847325
+    },
+    "D": {
+      "n": 3644,
+      "observed_rate": 0.028265642151481887,
+      "logloss_C": 0.12636273659587163,
+      "logloss_A": 0.19473721634058946
+    },
+    "G": {
+      "n": 1221,
+      "observed_rate": 0,
+      "logloss_C": 9.99977878280367e-13,
+      "logloss_A": 0.008634624923305644
+    },
+    "UNKNOWN": {
+      "n": 4,
+      "observed_rate": 0,
+      "logloss_C": 0.00009190125990249327,
+      "logloss_A": 9.999778782803785e-13
+    }
+  },
+  "temporal_diagnostics": {
+    "first_half_season": {
+      "n": 5961,
+      "logloss_C": 0.21154067729492504,
+      "logloss_A": 0.453869950078924
+    },
+    "second_half_season": {
+      "n": 5951,
+      "logloss_C": 0.2102397748474729,
+      "logloss_A": 0.48536772497743286
+    }
+  },
+  "numerical_sanity": {
+    "n_nan": 0,
+    "n_inf": 0,
+    "determinism_failures": 0
+  },
+  "decision": {
+    "vsA_pass": true,
+    "vsB_pass": true,
+    "brier_no_degradation_vs_A": true,
+    "numerical_clean": true,
+    "determinism_clean": true,
+    "status": "VALIDATED",
+    "reason_code": "VALIDATED_LEAGUE_PLAYER"
+  }
+}

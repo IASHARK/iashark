@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-06T05:59:17.950Z",
+  "generated_at": "2026-09-06T16:27:18.223Z",
   "leagues": {
     "laliga": {
       "league_key": "laliga",
@@ -113,11 +113,29 @@
       "score_runnable": false,
       "player_runnable": true,
       "live_eligible": false,
-      "updated_at": "2026-09-06T01:16:17.348Z",
+      "updated_at": "2026-09-06T16:27:09.173Z",
       "current_score_champion_seriea": null,
       "current_player_champion_seriea": "PLAYER_SCORER_V1_AGGREGATED_SHARE_SERIEA",
       "seriea_full_model_status": "PARTIAL_PLAYER_ONLY",
-      "note": "OOS_DEV(2023) puis OOS_FINAL(2024) termines, chaque etape gelee avant lecture. Score=INCONCLUSIVE (M0_APPROX_B0_CI_CROSSES_ZERO). Player=VALIDATED (VALIDATED_LEAGUE_PLAYER_FINAL). Reproductibilite : Score=true Player=true."
+      "note": "OOS_DEV(2023) puis OOS_FINAL(2024) termines, chaque etape gelee avant lecture. Score=INCONCLUSIVE (M0_APPROX_B0_CI_CROSSES_ZERO). Player=VALIDATED (VALIDATED_LEAGUE_PLAYER_FINAL). Reproductibilite : Score=true Player=true.",
+      "score_production_validation_v1": {
+        "protocol": "LEAGUE_SCORE_PRODUCTION_VALIDATION_V1",
+        "champion_selected": "M2",
+        "champion_selection_reason": "M2 a le meilleur EXACT_SCORE_NLL absolu (2.807583) parmi les candidats non-vetoes structurellement, sans degradation secondaire disqualifiante vs les autres.",
+        "pre_holdout_contract_sha": "f2f9f8f541a3b208328d856d1261dc8305d23070",
+        "holdout_season": 2025,
+        "verdict": "INCONCLUSIVE",
+        "score_runnable_under_v1": false,
+        "reject_triggers": [],
+        "inconclusive_triggers": [
+          "DATA_COVERAGE",
+          "CALIBRATION",
+          "MARKET_MARGINALS",
+          "TEMPORAL_STABILITY"
+        ],
+        "reproducible": true,
+        "note": "Ne remplace PAS score_status/score_runnable existants (protocole CHALLENGER_PROMOTION historique, deja INCONCLUSIVE) - trace separement le resultat du nouveau protocole CHAMPION_PRODUCTION_VALIDATION, lui aussi INCONCLUSIVE mais pour des raisons differentes (coverage/calibration/marginals/stabilite temporelle sur holdout 2025 reellement neuf). Aucun forcage."
+      }
     },
     "ligue1": {
       "league_key": "ligue1",

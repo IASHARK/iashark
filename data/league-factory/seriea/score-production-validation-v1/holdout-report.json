@@ -1,0 +1,99 @@
+{
+  "protocol": "LEAGUE_SCORE_PRODUCTION_VALIDATION_V1",
+  "phase": "3_HOLDOUT_EVALUATION",
+  "league_key": "seriea",
+  "holdout_season": 2025,
+  "champion": "M2",
+  "generated_at": "2026-09-06T16:26:29.813Z",
+  "gates": {
+    "POINT_IN_TIME_INTEGRITY": {
+      "pass": true,
+      "all_predictions_are_holdout": true,
+      "rho_never_refit": true
+    },
+    "DATA_COVERAGE": {
+      "pass": false,
+      "n_oos_holdout": 377,
+      "threshold": 500
+    },
+    "EXACT_SCORE_NLL": {
+      "pass": true,
+      "nll_holdout": 2.8237522580904124,
+      "threshold": 2.8856013913092666,
+      "oos_dev_observed": 2.8075832287045173
+    },
+    "CALIBRATION": {
+      "pass": false,
+      "slope": 1.0092534168565876,
+      "intercept": 0.00603515313542149,
+      "converged": true,
+      "ece": 0.030623804826544882,
+      "threshold_ece": 0.01893491088664398
+    },
+    "MARKET_MARGINALS": {
+      "pass": false,
+      "detail": {
+        "ou25": {
+          "oos_dev": 0.6672325649680452,
+          "holdout": 0.7197302177682373,
+          "pass": false
+        },
+        "btts": {
+          "oos_dev": 0.686593120685965,
+          "holdout": 0.7095823264354997,
+          "pass": false
+        },
+        "x12": {
+          "oos_dev": 0.589484368129576,
+          "holdout": 0.5918584882253595,
+          "pass": true
+        }
+      }
+    },
+    "TEMPORAL_STABILITY": {
+      "pass": false,
+      "nll_half1": 2.757201659403694,
+      "nll_half2": 2.8899507372073585,
+      "threshold": 2.8856013913092666,
+      "n_half1": 188,
+      "n_half2": 189
+    },
+    "NO_CATASTROPHIC_SECONDARY_DEGRADATION": {
+      "pass": true,
+      "holdout_low_score": {
+        "0-0": {
+          "count_observed": 36,
+          "nll_contribution": 2.5315235118346275
+        },
+        "1-0": {
+          "count_observed": 41,
+          "nll_contribution": 2.44772687696076
+        },
+        "0-1": {
+          "count_observed": 35,
+          "nll_contribution": 2.4736069889590193
+        },
+        "1-1": {
+          "count_observed": 36,
+          "nll_contribution": 2.1680505576207723
+        }
+      },
+      "degraded": []
+    },
+    "REPRODUCIBILITY": {
+      "pass": true
+    }
+  },
+  "reject_triggers": [],
+  "inconclusive_triggers": [
+    "DATA_COVERAGE",
+    "CALIBRATION",
+    "MARKET_MARGINALS",
+    "TEMPORAL_STABILITY"
+  ],
+  "verdict": "INCONCLUSIVE",
+  "score_runnable": false,
+  "hash_run1": "cbc33c38143a87aaaebbc6e854107b720375b6e07ccd13801a1abe39a32cbe20",
+  "hash_run2": "cbc33c38143a87aaaebbc6e854107b720375b6e07ccd13801a1abe39a32cbe20",
+  "reproducible": true
+}

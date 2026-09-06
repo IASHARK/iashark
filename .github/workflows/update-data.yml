@@ -50,6 +50,16 @@ jobs:
           const LEAGUES_CONFIG = require('./config/leagues.json');
           const { calcFinalProbs, calcLambdas, calcCriteres, calcFatigue } = require('./lib/engine.js');
           const { classifyApiResponse, decideSeasonFallback, decideCurrentSeasonGate, createThrottledFetcher } = require('./lib/api-fetch-policy.js');
+          // RUN OUTPUT ENGINE (item unique de ce jalon) : CONSOMMATEUR pur des
+          // marches deja calcules ci-dessous (allMarkets) et du registry
+          // League Expansion Factory + Premier League (canonical-registry.js,
+          // deja fusionnes automatiquement par runOutputForSnapshot). Aucune
+          // formule Score/Player n'est modifiee ou reimplementee ici.
+          const crypto = require('crypto');
+          const { loadRegistry: loadLeagueFactoryRegistry } = require('./lib/league-factory/registry.js');
+          const LEAGUE_EXPANSION_CONFIG = require('./config/league-expansion.json');
+          const { runOutputForSnapshot, loadCanonicalEligibilityRegistry, leagueKeyForApiFootballId, buildScoreCandidatesFromLegacyMatch, buildPlayerCandidatesFromLegacyMatch } = require('./lib/run-output/index.js');
+          const RUN_OUTPUT_ENGINE_VERSION = 'run-output-engine-v1';
           var LEAGUE_COVERAGE_REPORT = null;
           try { LEAGUE_COVERAGE_REPORT = JSON.parse(fs.readFileSync('./league-coverage-report.json', 'utf8')); }
           catch (e) { console.log('league-coverage-report.json absent ou illisible : ' + e.message + ' (lancer scripts/verify-league-coverage.js). Saisons/tiers en repli.'); }
@@ -1939,6 +1949,17 @@ jobs:
           }
           async function main(){
             console.log('=== IASHARK',TODAY,'===');
+            // OBSERVABILITE RUN_OUTPUT_ENGINE : identifie sans ambiguite,
+            // au tout debut de chaque run, EXACTEMENT quel code/registry a
+            // reellement tourne - la meme classe de probleme que le mismatch
+            // LOCAL vs GITHUB ACTIONS deja rencontre ne doit plus jamais
+            // rester invisible dans les logs.
+            var RUN_OUTPUT_CANONICAL_REGISTRY = loadCanonicalEligibilityRegistry(loadLeagueFactoryRegistry());
+            var CANONICAL_REGISTRY_HASH = crypto.createHash('sha256').update(JSON.stringify(RUN_OUTPUT_CANONICAL_REGISTRY)).digest('hex');
+            console.log('GITHUB_SHA='+(process.env.GITHUB_SHA||'UNKNOWN_LOCAL_RUN'));
+            console.log('RUN_OUTPUT_ENGINE_VERSION='+RUN_OUTPUT_ENGINE_VERSION);
+            console.log('CANONICAL_REGISTRY_HASH='+CANONICAL_REGISTRY_HASH);
+            var RUN_OUTPUT_CANDIDATES = [];
             var fixtures = await getFixtures();
             console.log('Football fixtures:', fixtures.length);
             if(!fixtures.length){
@@ -2440,6 +2461,28 @@ jobs:
                 });
               }
               var allMarkets=modelDataAvailable?allMarketCandidates.filter(function(m){return Number.isFinite(Number(m.prob))&&m.cote&&m.cote!=='--'&&Number.isFinite(parseFloat(m.cote));}):[];
+              // RUN_OUTPUT_ENGINE : accumule les jambes Score CANONIQUES de
+              // cette fixture (deja gelees ci-dessus, VRAIES cotes reelles
+              // uniquement - allMarkets est deja []  si NO_REAL_ODDS ou
+              // DATA_QUALITY_FAIL). buildScoreCandidatesFromLegacyMatch ne
+              // garde QUE les marches deja canoniques (1X2/DC/BTTS/Total buts/
+              // Team totals) - jamais shots/shots-on-target/1ere-mi-temps, et
+              // jamais une ligue hors registry (league_key=null -> []).
+              // L'eligibilite reelle (SCORE_STATUS=VALIDATED, score_runnable)
+              // est verifiee plus tard par runOutputForSnapshot lui-meme,
+              // jamais ici.
+              RUN_OUTPUT_CANDIDATES.push.apply(RUN_OUTPUT_CANDIDATES, buildScoreCandidatesFromLegacyMatch({
+                allMarkets: allMarkets, leagueId: lg.id, leagueExpansionConfig: LEAGUE_EXPANSION_CONFIG,
+                fixtureId: f.id, kickoff: f.date, homeTeam: home.name, awayTeam: away.name,
+                scoreModelVersion: MODEL_VERSION,
+              }));
+              // buildPlayerCandidatesFromLegacyMatch() retourne toujours []
+              // aujourd'hui (voir lib/run-output/build-legacy-score-candidates.js) :
+              // le Player Scorer CANONIQUE (V1_AGGREGATED_SHARE) a besoin d'un
+              // historique par joueur que ce pipeline ne recupere pas encore -
+              // jamais remplace par le moteur legacy (topScorerCandidates),
+              // rejete lors de la validation OOS du modele canonique.
+              RUN_OUTPUT_CANDIDATES.push.apply(RUN_OUTPUT_CANDIDATES, buildPlayerCandidatesFromLegacyMatch());
               var quotedSupportedCandidates=allMarketCandidates.filter(function(m){return m.cote&&m.cote!=='--'&&Number.isFinite(parseFloat(m.cote));});
               var unmodelledDynamicQuoteCount=(odds.dynamic_count_offers||[]).filter(function(offer){return !allMarketCandidates.some(function(m){return m.id===offer.market+'-'+offer.side+'-'+String(offer.line).replace('.','_');});}).length;
               var supportedQuoteCount=quotedSupportedCandidates.length+unmodelledDynamicQuoteCount;
@@ -2960,7 +3003,53 @@ jobs:
             });
             var retires=allMatchsData.length-matchsPublics.filter(function(m){return m&&m.pari_rec;}).length;
             console.log('  [ACCES] '+retires+' analyse(s) retiree(s) du data.json public.');
-            fs.writeFileSync('data.json',JSON.stringify({matchs:matchsPublics},null,2));
+            // ============= RUN OUTPUT ENGINE (moteur produit canonique) =============
+            // Appele UNE SEULE FOIS ici, apres le calcul de TOUTES les fixtures
+            // (RUN_OUTPUT_CANDIDATES deja rempli fixture par fixture ci-dessus) et
+            // AVANT la publication finale de data.json - jamais un nouveau calcul
+            // de probabilite, uniquement selection/classement/assemblage au-dessus
+            // des marches deja geles. runOutputForSnapshot fusionne lui-meme le
+            // registry League Expansion Factory avec le statut canonique Premier
+            // League (lib/run-output/canonical-registry.js) : aucune ligue n'est
+            // jamais eligible ici sans etre passee par cette meme porte.
+            var RUN_OUTPUT_SNAPSHOT_TIME = new Date().toISOString();
+            var runOutput = runOutputForSnapshot({
+              candidates: RUN_OUTPUT_CANDIDATES,
+              registry: RUN_OUTPUT_CANONICAL_REGISTRY,
+              snapshotTime: RUN_OUTPUT_SNAPSHOT_TIME,
+              runId: 'DAILY_'+TODAY,
+            });
+            // legacy_output : separation EXPLICITE demandee - matchsPublics
+            // (l'ancienne analyse par match, marches shots/1ere-mi-temps inclus)
+            // ne doit JAMAIS servir de source a SAFE/Top5/Combos ni a de futurs
+            // premium picks canoniques. C'est deja le cas par construction
+            // (RUN_OUTPUT_CANDIDATES vient exclusivement de allMarkets filtre
+            // aux marches canoniques, jamais de matchObj/matchsPublics) ; ce
+            // bloc rend cette separation visible dans la sortie elle-meme,
+            // sans renommer/deplacer le champ `matchs` existant (deja lu par le
+            // site en production - un renommage est un changement de contrat
+            // frontend distinct, hors perimetre de ce branchement).
+            var dataJsonPayload = {
+              matchs: matchsPublics,
+              legacy_output: { note: 'Alias explicite de `matchs` ci-dessus - ancien moteur (shots/shots-on-target/1ere-mi-temps inclus), jamais utilise comme source de run_output.', source_field: 'matchs' },
+              run_output: {
+                run_id: runOutput.run_id,
+                snapshot: runOutput.snapshot_time,
+                betting_validation_status: runOutput.betting_validation_status,
+                safe_pick: runOutput.SAFE_PICK_OF_THE_DAY,
+                top5_scorers: runOutput.TOP_5_SCORERS_OF_DAY,
+                daily_combos: runOutput.DAILY_COMBOS,
+                run_output_engine_version: RUN_OUTPUT_ENGINE_VERSION,
+                canonical_registry_hash: CANONICAL_REGISTRY_HASH,
+              },
+            };
+            fs.writeFileSync('data.json',JSON.stringify(dataJsonPayload,null,2));
+            // OBSERVABILITE (fin de run) : memes valeurs meme quand elles sont
+            // "vides" (NO_SAFE_SELECTION/0/0) - jamais omises, jamais un silence
+            // qui masquerait un run degrade.
+            console.log('SAFE_PICK_OF_THE_DAY='+(runOutput.SAFE_PICK_OF_THE_DAY.status==='SELECTED'?(runOutput.SAFE_PICK_OF_THE_DAY.league+'/'+runOutput.SAFE_PICK_OF_THE_DAY.selection):runOutput.SAFE_PICK_OF_THE_DAY.status));
+            console.log('TOP_5_SCORERS_COUNT='+runOutput.TOP_5_SCORERS_OF_DAY.count_returned);
+            console.log('DAILY_COMBOS_COUNT='+runOutput.DAILY_COMBOS.combos.filter(function(c){return c.status==='GENERATED';}).length);
             console.log('\n=== DONE: '+allMatchsData.length+' matchs total ===');
             await writePremiumData(premiumRows);
             await writeSnapshots(snapshotRows);

@@ -134,3 +134,51 @@ test("pipeline source: seul v3.football.api-sports.io passe par la file API_FETC
   const getFnBlock = source.slice(source.indexOf("function get(url, headers) {"), source.indexOf("function getArr(url, headers) {"));
   assert.match(getFnBlock, /rawHttpGetJson\(url, headers\)/, "la branche non-api-sports de get() doit transmettre les headers de l'appelant, jamais forcer APS");
 });
+
+// ---------------------------------------------------------------
+// RUN OUTPUT ENGINE - branchement production (2026-09-06).
+// ---------------------------------------------------------------
+
+test("pipeline source: RUN OUTPUT ENGINE branche via require, jamais reimplemente inline", () => {
+  assert.match(source, /require\('\.\/lib\/run-output\/index\.js'\)/);
+  assert.match(source, /require\('\.\/lib\/run-output\/build-legacy-score-candidates\.js'\)|buildScoreCandidatesFromLegacyMatch, buildPlayerCandidatesFromLegacyMatch \} = require\('\.\/lib\/run-output\/index\.js'\)/);
+});
+
+test("pipeline source: observabilite - GITHUB_SHA/RUN_OUTPUT_ENGINE_VERSION/CANONICAL_REGISTRY_HASH logues au debut, SAFE/TOP5/COMBOS logues a la fin (meme si vides)", () => {
+  assert.match(source, /console\.log\('GITHUB_SHA='\+/);
+  assert.match(source, /console\.log\('RUN_OUTPUT_ENGINE_VERSION='\+RUN_OUTPUT_ENGINE_VERSION\)/);
+  assert.match(source, /console\.log\('CANONICAL_REGISTRY_HASH='\+CANONICAL_REGISTRY_HASH\)/);
+  assert.match(source, /console\.log\('SAFE_PICK_OF_THE_DAY='\+/);
+  assert.match(source, /console\.log\('TOP_5_SCORERS_COUNT='\+runOutput\.TOP_5_SCORERS_OF_DAY\.count_returned\)/);
+  assert.match(source, /console\.log\('DAILY_COMBOS_COUNT='\+/);
+});
+
+test("pipeline source: runOutputForSnapshot appele UNE SEULE FOIS, apres le calcul de toutes les fixtures et avant l'ecriture finale de data.json", () => {
+  const runOutputCallIndex = source.indexOf("var runOutput = runOutputForSnapshot(");
+  const loopStartIndex = source.indexOf("for(var fi=0;fi<fixtures.length;fi++){");
+  const finalWriteIndex = source.lastIndexOf("fs.writeFileSync('data.json'");
+  assert.ok(runOutputCallIndex > loopStartIndex, "runOutputForSnapshot doit etre appele apres le debut de la boucle des fixtures");
+  assert.ok(runOutputCallIndex < finalWriteIndex, "runOutputForSnapshot doit etre appele avant l'ecriture finale de data.json");
+  // Un seul appel dans tout le pipeline.
+  const occurrences = source.split("runOutputForSnapshot(").length - 1;
+  assert.equal(occurrences, 1, "runOutputForSnapshot ne doit etre appele qu'UNE SEULE fois par run");
+});
+
+test("pipeline source: run_output et legacy_output sont deux blocs separes dans data.json, jamais la meme source", () => {
+  const payloadBlock = source.slice(source.indexOf("var dataJsonPayload = {"), source.indexOf("fs.writeFileSync('data.json',JSON.stringify(dataJsonPayload"));
+  assert.match(payloadBlock, /legacy_output:/);
+  assert.match(payloadBlock, /run_output:/);
+  assert.match(payloadBlock, /safe_pick: runOutput\.SAFE_PICK_OF_THE_DAY/);
+  assert.match(payloadBlock, /top5_scorers: runOutput\.TOP_5_SCORERS_OF_DAY/);
+  assert.match(payloadBlock, /daily_combos: runOutput\.DAILY_COMBOS/);
+  assert.match(payloadBlock, /betting_validation_status: runOutput\.betting_validation_status/);
+});
+
+test("pipeline source: RUN_OUTPUT_CANDIDATES construit exclusivement depuis allMarkets (jamais depuis matchObj/matchsPublics/topScorerCandidates)", () => {
+  const pushBlock = source.slice(source.indexOf("RUN_OUTPUT_CANDIDATES.push.apply"), source.indexOf("RUN_OUTPUT_CANDIDATES.push.apply", source.indexOf("RUN_OUTPUT_CANDIDATES.push.apply")+1)+400);
+  assert.match(pushBlock, /buildScoreCandidatesFromLegacyMatch\(\{\s*allMarkets: allMarkets/);
+});
+
+test("pipeline source: buildPlayerCandidatesFromLegacyMatch (toujours []) est utilise, jamais topScorerCandidates comme source de candidats Player canoniques", () => {
+  assert.match(source, /RUN_OUTPUT_CANDIDATES\.push\.apply\(RUN_OUTPUT_CANDIDATES, buildPlayerCandidatesFromLegacyMatch\(\)\)/);
+});

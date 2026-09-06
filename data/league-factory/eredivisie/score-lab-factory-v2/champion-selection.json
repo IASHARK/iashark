@@ -1,0 +1,63 @@
+{
+  "protocol": "SCORE_LAB_FACTORY_V2",
+  "phase": "A_CHAMPION_SELECTION",
+  "league_key": "eredivisie",
+  "generated_at": "2026-09-06T17:32:24.923Z",
+  "train_seasons": [
+    2021,
+    2022
+  ],
+  "oos_dev_season": 2023,
+  "rho_frozen": -0.03825551914203654,
+  "league_avg_h": 1.712962962962963,
+  "league_avg_a": 1.3148148148148149,
+  "candidates": {
+    "B0": {
+      "nll": 3.1450144505359625,
+      "secondary": {
+        "ou25_logloss": 0.6517165172139632,
+        "btts_logloss": 0.699342882888535,
+        "x12_logloss": 0.9507042728657045
+      },
+      "n_oos": 317,
+      "structural": {
+        "convergence_rate": 1,
+        "boundary_hit_rate": 0,
+        "rho_std": 0
+      }
+    },
+    "M0": {
+      "nll": 3.1422333278941754,
+      "secondary": {
+        "ou25_logloss": 0.6517165172139631,
+        "btts_logloss": 0.6987004008237984,
+        "x12_logloss": 0.949218480924514
+      },
+      "n_oos": 317,
+      "structural": {
+        "convergence_rate": 1,
+        "boundary_hit_rate": 0,
+        "rho_std": 0.024040577563678087
+      }
+    },
+    "M2": {
+      "nll": 3.1377462105067253,
+      "secondary": {
+        "ou25_logloss": 0.6517070634749172,
+        "btts_logloss": 0.6989199155890556,
+        "x12_logloss": 0.9421689753310328
+      },
+      "n_oos": 317,
+      "structural": {
+        "convergence_rate": 1,
+        "boundary_hit_rate": 0,
+        "rho_std": 0.024040577563678087
+      }
+    }
+  },
+  "vetoed": {},
+  "primary_winner_before_secondary_veto": "M2",
+  "secondary_veto": null,
+  "champion_selected": "M2",
+  "champion_selection_reason": "M2 a le meilleur EXACT_SCORE_NLL absolu (3.137746) parmi les candidats non-vetoes structurellement, sans degradation secondaire disqualifiante vs les autres."
+}

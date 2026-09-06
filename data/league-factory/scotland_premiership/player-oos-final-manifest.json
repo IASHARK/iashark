@@ -1,0 +1,54 @@
+{
+  "manifest": {
+    "manifest_id": "PLAYER_SCOTLAND_PREMIERSHIP_OOS_FINAL_MANIFEST",
+    "league_key": "scotland_premiership",
+    "league_id": 179,
+    "calendar_type": "EUROPEAN_SEASON",
+    "created_at": "2026-09-06T05:08:04.341Z",
+    "dataset_hash_final": "95ae2e660d4dd2626089053c51db74f90bb2723606b11cb3af7e25a92f2d8385",
+    "frozen_from_dev_manifest_hash": "6337db49fa052d9dae82fe6fbfc87b2daedbcab591701c795275b12ce74da8a7",
+    "season_split": {
+      "warmup": 2021,
+      "train": 2022,
+      "oos_dev": 2023,
+      "oos_final": 2024,
+      "sealed_unread": 2025
+    },
+    "freeze_statement": "priors positions/exposure/penalty/own-goal/shrinkage REUTILISES EXACTEMENT tels que geles au DEV - aucun retuning, aucune nouvelle formule.",
+    "candidate_c": {
+      "id": "PLAYER_SCORER_V1_AGGREGATED_SHARE_SCOTLAND_PREMIERSHIP",
+      "fitted_priors_hash": "18bb5f0ae2bab1bdd32725a0149a240d0016cbf58e646e7d089a44ced080ae81",
+      "source": "IDENTIQUE au manifest DEV"
+    },
+    "baselines": {
+      "a": {
+        "id": "SHRUNK_GOALS90_BASELINE"
+      },
+      "b": {
+        "id": "LEGACY_PLAYER_ENGINE"
+      }
+    },
+    "v2_status": "NON CONSTRUIT - toujours hors perimetre.",
+    "primary_metric": "ANYTIME_SCORER_LOGLOSS",
+    "supports": "C-vs-A et C-vs-B evalues sur leur SUPPORT COMMUN MAXIMAL RESPECTIF, jamais reduit inutilement au plus faible des deux.",
+    "secondary_metrics": [
+      "brier",
+      "calibration_intercept_slope_ece",
+      "top1_hit_rate",
+      "outfield_only_sensitivity",
+      "played_minutes_gt_0_sensitivity"
+    ],
+    "bootstrap_policy": {
+      "method": "paired block bootstrap par ISO_WEEK (lib/player-lab/oos-eval-metrics.js#pairedBlockBootstrapDelta, code partage inchange)",
+      "n_resamples": 10000,
+      "seed": "PLAYER-OOS-FINAL-SCOTLAND_PREMIERSHIP-2026-09-06"
+    },
+    "decision_rule": {
+      "VALIDATED": "C bat A ET B en mean logloss avec CI95(delta).upper<0 pour chacun, ET guardrails (Brier sans degradation claire, calibration finie, 0 NaN/Inf, determinism PASS, anti-leakage PASS).",
+      "INCONCLUSIVE": "signal positif mais preuve statistique insuffisante (CI traverse zero) ou guardrail non-bloquant en zone grise.",
+      "REJECTED": "C ne bat pas les baselines selon la regle ci-dessus."
+    },
+    "pre_registration_rule": "Aucun critere modifie apres resultat. 2025-26 reste SEALED_UNREAD, jamais consulte."
+  },
+  "hash": "99c951ab4a4a70c085ca5c2f11186642932c636a4bd16d96bd384ab8ed58d582"
+}

@@ -1,0 +1,54 @@
+{
+  "manifest": {
+    "manifest_id": "PLAYER_DENMARK_SUPERLIGA_OOS_FINAL_MANIFEST",
+    "league_key": "denmark_superliga",
+    "league_id": 119,
+    "calendar_type": "EUROPEAN_SEASON",
+    "created_at": "2026-09-06T05:24:34.846Z",
+    "dataset_hash_final": "8e24a7351dae6dc817cdfcf980bce2bbf4adc315916178055038466c8494a86e",
+    "frozen_from_dev_manifest_hash": "f85441d7b331c30776026bec8638c3dd13c709be8b60d9f1e4f964739d0a6d93",
+    "season_split": {
+      "warmup": 2021,
+      "train": 2022,
+      "oos_dev": 2023,
+      "oos_final": 2024,
+      "sealed_unread": 2025
+    },
+    "freeze_statement": "priors positions/exposure/penalty/own-goal/shrinkage REUTILISES EXACTEMENT tels que geles au DEV - aucun retuning, aucune nouvelle formule.",
+    "candidate_c": {
+      "id": "PLAYER_SCORER_V1_AGGREGATED_SHARE_DENMARK_SUPERLIGA",
+      "fitted_priors_hash": "8a6cb825a0544ce64ac39a4a50cadb55aa23fb2b3e57db4b5ccd1a9f55ee3ca2",
+      "source": "IDENTIQUE au manifest DEV"
+    },
+    "baselines": {
+      "a": {
+        "id": "SHRUNK_GOALS90_BASELINE"
+      },
+      "b": {
+        "id": "LEGACY_PLAYER_ENGINE"
+      }
+    },
+    "v2_status": "NON CONSTRUIT - toujours hors perimetre.",
+    "primary_metric": "ANYTIME_SCORER_LOGLOSS",
+    "supports": "C-vs-A et C-vs-B evalues sur leur SUPPORT COMMUN MAXIMAL RESPECTIF, jamais reduit inutilement au plus faible des deux.",
+    "secondary_metrics": [
+      "brier",
+      "calibration_intercept_slope_ece",
+      "top1_hit_rate",
+      "outfield_only_sensitivity",
+      "played_minutes_gt_0_sensitivity"
+    ],
+    "bootstrap_policy": {
+      "method": "paired block bootstrap par ISO_WEEK (lib/player-lab/oos-eval-metrics.js#pairedBlockBootstrapDelta, code partage inchange)",
+      "n_resamples": 10000,
+      "seed": "PLAYER-OOS-FINAL-DENMARK_SUPERLIGA-2026-09-06"
+    },
+    "decision_rule": {
+      "VALIDATED": "C bat A ET B en mean logloss avec CI95(delta).upper<0 pour chacun, ET guardrails (Brier sans degradation claire, calibration finie, 0 NaN/Inf, determinism PASS, anti-leakage PASS).",
+      "INCONCLUSIVE": "signal positif mais preuve statistique insuffisante (CI traverse zero) ou guardrail non-bloquant en zone grise.",
+      "REJECTED": "C ne bat pas les baselines selon la regle ci-dessus."
+    },
+    "pre_registration_rule": "Aucun critere modifie apres resultat. 2025-26 reste SEALED_UNREAD, jamais consulte."
+  },
+  "hash": "8caa7a061a9b7d5feab44f5224d7276d9befbfe4cf0698f774b652c14850fa15"
+}

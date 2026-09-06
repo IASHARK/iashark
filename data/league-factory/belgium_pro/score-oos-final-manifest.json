@@ -1,0 +1,67 @@
+{
+  "manifest": {
+    "manifest_id": "SCORE_BELGIUM_PRO_OOS_FINAL_MANIFEST",
+    "league_key": "belgium_pro",
+    "league_id": 144,
+    "calendar_type": "EUROPEAN_SEASON",
+    "created_at": "2026-09-06T03:49:54.334Z",
+    "dataset_hash_final": "c962349439a54c6302e3e473ad3e20c357b04fd1e1470aa34fefad98268b0af1",
+    "frozen_from_dev_manifest_hash": "3c21cef296142bcf90c95364d366ace9c51526b1f0189b2462ee18e9d9e72d14",
+    "season_split": {
+      "warmup": 2021,
+      "train": 2022,
+      "oos_dev": 2023,
+      "oos_final": 2024,
+      "sealed_unread": 2025
+    },
+    "freeze_statement": "rho, league averages, Bayes, priors Player, shrinkage, exposure, penalties, own-goals, eligibility et cutoff rules sont REUTILISES EXACTEMENT tels que geles au DEV - aucune valeur re-derivee, aucun retuning. 2023-24 ne sert plus a aucune decision dans cette passe.",
+    "league_averages": {
+      "leagueAvgH": 1.6515151515151516,
+      "leagueAvgA": 1.412121212121212,
+      "source": "IDENTIQUE au manifest DEV, jamais recalcule"
+    },
+    "rho": {
+      "final_value": 0.0006786623530531116,
+      "source": "IDENTIQUE au manifest DEV (rho gele), jamais refit"
+    },
+    "model_b0": {
+      "id": "SCORE_B0_BELGIUM_PRO_INDEPENDENT_POISSON",
+      "definition": "MEMES inputs point-in-time et MEMES lambdas que SCORE_M0 (lib/data/team-state.js#buildTeamState + lib/engine.js#calcLambdas, saison courante uniquement) mais rho=0 (aucune correction Dixon-Coles, Poisson home/away independants).",
+      "purpose": "Verifie sur OOS_FINAL uniquement que le Score Engine La Liga (rho appris) apporte reellement quelque chose par rapport a une version independante plus simple - PAS un candidat a tuner, jamais promu.",
+      "not_a_tunable_candidate": true
+    },
+    "model_m0": {
+      "id": "SCORE_M0_BELGIUM_PRO",
+      "definition": "IDENTIQUE au manifest DEV (rho gele ci-dessus)."
+    },
+    "model_m2_status": "ARCHIVE (M2_REJECT_DEV) - aucune possibilite de promotion dans cette passe, non recalcule.",
+    "primary_metric": "EXACT_SCORE_NLL - delta = NLL_M0 - NLL_B0 via lib/lab/loss-delta.js#lossDelta (candidat M0 meilleur => delta<0)",
+    "secondary_metrics": [
+      "home_goals_marginal_nll",
+      "away_goals_marginal_nll",
+      "1x2_logloss",
+      "1x2_brier",
+      "over_under_2.5_logloss",
+      "over_under_2.5_brier",
+      "btts_logloss",
+      "btts_brier",
+      "calibration",
+      "low_score_diagnostics",
+      "first_half_season",
+      "second_half_season"
+    ],
+    "bootstrap_policy": {
+      "method": "paired block bootstrap (lib/lab/bootstrap.js#pairedBlockBootstrap, code partage inchange)",
+      "n_resamples": 10000,
+      "block_unit": "cutoff (jour de coup d'envoi)",
+      "seed": "SCORE-OOS-FINAL-BELGIUM_PRO-2026-09-06"
+    },
+    "decision_rule": {
+      "VALIDATED": "metriques propres/finies ET calibration acceptable ET 0 fuite/determinism failure ET M0 n'est PAS statistiquement clairement pire que B0 (ci_lower du delta <= 0, i.e. pas de CI_CONFIRMS_CANDIDATE_WORSE) ET idealement M0 ameliore le primary avec CI favorable (ci_upper<0).",
+      "INCONCLUSIVE": "M0~=B0 sans degradation claire (CI traverse zero).",
+      "REJECTED": "M0 est statistiquement clairement pire que B0 (ci_lower>0)."
+    },
+    "pre_registration_rule": "Aucun critere modifie apres resultat. 2025-26 reste SEALED_UNREAD, jamais consulte."
+  },
+  "hash": "ace4dcc80cb4735422570ff1245be014734dd014937fec4e590e2dff97c306b1"
+}

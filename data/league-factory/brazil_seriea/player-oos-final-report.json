@@ -1,0 +1,220 @@
+{
+  "generated_at": "2026-09-06T04:28:53.708Z",
+  "reproducible": true,
+  "hash_run1": "8defd9eed675ed9a7cf5a28097be20bbcff9ebcf44d2c971cb4cc93cb2be64bd",
+  "hash_run2": "8defd9eed675ed9a7cf5a28097be20bbcff9ebcf44d2c971cb4cc93cb2be64bd",
+  "league_key": "brazil_seriea",
+  "oos_final_season": 2024,
+  "manifest_hash": "b0f6e75c7dc963f773551aee21df127567cdbbbebe397e83aeaad287e7bbad3e",
+  "coverage": {
+    "fixtures_evaluated": 374,
+    "total_player_rows": 17008,
+    "coverage_A": 17008,
+    "coverage_B": 14949,
+    "coverage_C": 17008,
+    "support_C_vs_A": 17008,
+    "support_C_vs_B": 14949
+  },
+  "logloss": {
+    "A": {
+      "n": 17008,
+      "mean_logloss": 0.37071400602906407,
+      "total_logloss": 6305.103814542322
+    },
+    "C_on_CvA": {
+      "n": 17008,
+      "mean_logloss": 0.16882760739250974,
+      "total_logloss": 2871.4199465318056
+    },
+    "B": {
+      "n": 14949,
+      "mean_logloss": 0.40280081434620696,
+      "total_logloss": 6021.469373661448
+    },
+    "C_on_CvB": {
+      "n": 14949,
+      "mean_logloss": 0.17966687254844296,
+      "total_logloss": 2685.840077726674
+    }
+  },
+  "delta": {
+    "CA": {
+      "n_blocks": 34,
+      "n_reps": 10000,
+      "observed_delta": -0.20188639863655433,
+      "relative_gain_pct": 54.4587998708434,
+      "ci_lower": -0.23121043214397757,
+      "ci_upper": -0.1742125847498976,
+      "probability_a_better": 1
+    },
+    "CB": {
+      "n_blocks": 34,
+      "n_reps": 10000,
+      "observed_delta": -0.223133941797764,
+      "relative_gain_pct": 55.39560344731095,
+      "ci_lower": -0.26356821796580054,
+      "ci_upper": -0.18533583972838277,
+      "probability_a_better": 1
+    }
+  },
+  "brier": {
+    "A": {
+      "n": 17008,
+      "mean_brier": 0.04424937218179224
+    },
+    "C_on_CvA": {
+      "n": 17008,
+      "mean_brier": 0.0434510290688986
+    },
+    "B": {
+      "n": 14949,
+      "mean_brier": 0.05005410166900798
+    },
+    "C_on_CvB": {
+      "n": 14949,
+      "mean_brier": 0.047345500269192986
+    },
+    "delta_CA": {
+      "n_blocks": 34,
+      "n_reps": 10000,
+      "observed_delta": -0.0007983431128936458,
+      "relative_gain_pct": 1.8041908247054146,
+      "ci_lower": -0.0011772214452691887,
+      "ci_upper": -0.0004534146663703817,
+      "probability_a_better": 1
+    },
+    "delta_CB": {
+      "n_blocks": 34,
+      "n_reps": 10000,
+      "observed_delta": -0.0027086013998149916,
+      "relative_gain_pct": 5.411347540959021,
+      "ci_lower": -0.0033722393656953897,
+      "ci_upper": -0.002100021561697099,
+      "probability_a_better": 1
+    }
+  },
+  "calibration": {
+    "A": {
+      "n": 17008,
+      "intercept": -2.0463829546304173,
+      "slope": 0.10823291003695343,
+      "converged": true,
+      "ece": 0.017009584375011867
+    },
+    "C_on_CvA": {
+      "n": 17008,
+      "intercept": -0.40410552603810007,
+      "slope": 0.8150359624316953,
+      "converged": true,
+      "ece": 0.00451167745636071
+    },
+    "B": {
+      "n": 14949,
+      "intercept": -2.095171073802471,
+      "slope": 0.09881895403803834,
+      "converged": true,
+      "ece": 0.024127252659040768
+    },
+    "C_on_CvB": {
+      "n": 14949,
+      "intercept": -0.35782380936447994,
+      "slope": 0.8253466778823789,
+      "converged": true,
+      "ece": 0.005694449127510485
+    }
+  },
+  "top1_hit_rate": {
+    "A": {
+      "n": 374,
+      "hits": 97,
+      "hit_rate": 0.25935828877005346,
+      "mean_selected_probability": 0.3505075852636121
+    },
+    "B": {
+      "n": 374,
+      "hits": 91,
+      "hit_rate": 0.24331550802139038,
+      "mean_selected_probability": 0.4255700534759355
+    },
+    "C": {
+      "n": 374,
+      "hits": 111,
+      "hit_rate": 0.2967914438502674,
+      "mean_selected_probability": 0.30680344695582334
+    }
+  },
+  "outfield_only_sensitivity": {
+    "vs_A": {
+      "n": 15249,
+      "delta": {
+        "n_blocks": 34,
+        "n_reps": 10000,
+        "observed_delta": -0.22607231332990171,
+        "relative_gain_pct": 55.13342869885043,
+        "ci_lower": -0.25967032198148704,
+        "ci_upper": -0.1948331869500819,
+        "probability_a_better": 1
+      }
+    },
+    "vs_B": {
+      "n": 13655,
+      "delta": {
+        "n_blocks": 34,
+        "n_reps": 10000,
+        "observed_delta": -0.24246242607381321,
+        "relative_gain_pct": 55.31015297305346,
+        "ci_lower": -0.28631484503409,
+        "ci_upper": -0.20182354245697362,
+        "probability_a_better": 1
+      }
+    }
+  },
+  "played_minutes_sensitivity": {
+    "vs_A": {
+      "n": 11729,
+      "logloss_C": {
+        "n": 11729,
+        "mean_logloss": 0.23349976807491532,
+        "total_logloss": 2738.7187797506817
+      },
+      "logloss_A": {
+        "n": 11729,
+        "mean_logloss": 0.533865637598255,
+        "total_logloss": 6261.710063389934
+      }
+    },
+    "vs_B": {
+      "n": 11136,
+      "logloss_C": {
+        "n": 11136,
+        "mean_logloss": 0.2357221916408596,
+        "total_logloss": 2625.0023261126125
+      },
+      "logloss_B": {
+        "n": 11136,
+        "mean_logloss": 0.5340445311026669,
+        "total_logloss": 5947.1198983592985
+      }
+    }
+  },
+  "numerical_sanity": {
+    "n_nan": 0,
+    "n_inf": 0,
+    "determinism_failures": 0,
+    "anti_leakage_checked": 300,
+    "anti_leakage_clean": true
+  },
+  "decision": {
+    "vsA_pass": true,
+    "vsB_pass": true,
+    "brier_no_degradation_vs_A": true,
+    "brier_no_degradation_vs_B": true,
+    "calibration_finite": true,
+    "numerical_clean": true,
+    "determinism_clean": true,
+    "anti_leakage_clean": true,
+    "guardrails_pass": true,
+    "status": "VALIDATED",
+    "reason_code": "VALIDATED_LEAGUE_PLAYER_FINAL"
+  }
+}

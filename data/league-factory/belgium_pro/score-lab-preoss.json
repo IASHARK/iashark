@@ -1,0 +1,35 @@
+{
+  "league_key": "belgium_pro",
+  "league_id": 144,
+  "generated_at": "2026-09-06T03:44:06.109Z",
+  "warmup_season": 2021,
+  "train_season": 2022,
+  "disclaimer": "DIAGNOSTIC TRAIN-ONLY - oosSeasons ici = saison TRAIN elle-meme, jamais OOS_DEV/OOS_FINAL. Aucune metrique OOS reelle n'a ete calculee ni consultee.",
+  "league_avg_h_real": 1.6515151515151516,
+  "league_avg_a_real": 1.412121212121212,
+  "n_cutoffs": 117,
+  "n_predictions": 327,
+  "production_champion_rho_m0": -0.0845,
+  "fitted_rho_candidate_m2": {
+    "value": 0.0006786623530531116,
+    "convergence": true,
+    "on_boundary": false,
+    "n_train_at_last_cutoff": 628,
+    "status": "CANDIDATE_SCORE_CHAMPION_BELGIUM_PRO_UNVALIDATED"
+  },
+  "rho_across_train_cutoffs": {
+    "mean": 0.03905128999469478,
+    "median": 0.03819654957279712,
+    "std": 0.022041679389287954,
+    "min": 0.0006786623530531116,
+    "max": 0.07683387096997336,
+    "n_fits": 117
+  },
+  "convergence_rate": 1,
+  "boundary_hit_rate": 0,
+  "train_window_diagnostic_nll": {
+    "nll_m0_production_rho": 3.092137900809188,
+    "nll_m1_league_fitted_rho": 3.09347708495948,
+    "note": "Diagnostic sur TRAIN (donnee visible, pas tenue secrete) - PAS une decision de promotion. La vraie comparaison M0 vs M2 se fera sur OOS_DEV/OOS_FINAL dans une passe future explicitement autorisee."
+  }
+}

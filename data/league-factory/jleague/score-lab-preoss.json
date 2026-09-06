@@ -1,0 +1,35 @@
+{
+  "league_key": "jleague",
+  "league_id": 98,
+  "generated_at": "2026-09-06T04:40:35.160Z",
+  "warmup_season": 2021,
+  "train_season": 2022,
+  "disclaimer": "DIAGNOSTIC TRAIN-ONLY - oosSeasons ici = saison TRAIN elle-meme, jamais OOS_DEV/OOS_FINAL. Aucune metrique OOS reelle n'a ete calculee ni consultee.",
+  "league_avg_h_real": 1.3856209150326797,
+  "league_avg_a_real": 1.1339869281045751,
+  "n_cutoffs": 75,
+  "n_predictions": 301,
+  "production_champion_rho_m0": -0.0845,
+  "fitted_rho_candidate_m2": {
+    "value": -0.05738092292333713,
+    "convergence": true,
+    "on_boundary": false,
+    "n_train_at_last_cutoff": 639,
+    "status": "CANDIDATE_SCORE_CHAMPION_JLEAGUE_UNVALIDATED"
+  },
+  "rho_across_train_cutoffs": {
+    "mean": -0.045400311957951085,
+    "median": -0.04637148387718487,
+    "std": 0.01240816204670275,
+    "min": -0.06336505505718676,
+    "max": -0.012122559311842406,
+    "n_fits": 75
+  },
+  "convergence_rate": 1,
+  "boundary_hit_rate": 0,
+  "train_window_diagnostic_nll": {
+    "nll_m0_production_rho": 2.9572599413322793,
+    "nll_m1_league_fitted_rho": 2.9598074006744013,
+    "note": "Diagnostic sur TRAIN (donnee visible, pas tenue secrete) - PAS une decision de promotion. La vraie comparaison M0 vs M2 se fera sur OOS_DEV/OOS_FINAL dans une passe future explicitement autorisee."
+  }
+}

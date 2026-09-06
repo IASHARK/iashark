@@ -1,0 +1,55 @@
+{
+  "manifest": {
+    "manifest_id": "PLAYER_DENMARK_SUPERLIGA_OOS_MANIFEST",
+    "league_key": "denmark_superliga",
+    "league_id": 119,
+    "calendar_type": "EUROPEAN_SEASON",
+    "created_at": "2026-09-06T05:21:09.153Z",
+    "dataset_hash": "2c501baa53a12d9fb848611f38b366503b1736b6a91de85bda5f8ea7835f8937",
+    "season_split": {
+      "warmup": 2021,
+      "train": 2022,
+      "oos_dev": 2023,
+      "oos_final": 2024,
+      "sealed_unread": 2025
+    },
+    "candidate_c": {
+      "id": "PLAYER_SCORER_V1_AGGREGATED_SHARE_DENMARK_SUPERLIGA",
+      "definition": "lib/player-lab/simulation.js#simulateAnytimeScorer (code partage, non modifie) alimente par des priors ENTIEREMENT REAPPRIS sur TRAIN de cette ligue via lib/player-lab/fit-all-priors.js (core-rate, exposure, conversion, goal-timing, own-goal, penalty) - AUCUN parametre copie de PL.",
+      "fitted_priors_hash": "8a6cb825a0544ce64ac39a4a50cadb55aa23fb2b3e57db4b5ccd1a9f55ee3ca2"
+    },
+    "baselines": {
+      "a": {
+        "id": "SHRUNK_GOALS90_BASELINE",
+        "definition": "lib/player-lab/baselines.js#baselineA_simpleShrunkRate, meme formule que PL, shrunk vers la moyenne de ligue REELLE de cette ligue (TRAIN)."
+      },
+      "b": {
+        "id": "LEGACY_PLAYER_ENGINE",
+        "definition": "lib/markets/player-engine.js#buildPlayerMarketOutput, meme moteur que PL, alimente par l'historique reel de cette ligue.",
+        "compatibility_note": "Inclus si les memes champs d'entree (historicalMinutes, ratePer90, teamAttackMultiplier derive de M2 de cette ligue) sont disponibles - sinon exclu explicitement, jamais fabrique."
+      }
+    },
+    "v2_status": "NON CONSTRUIT - rejete proprement en PL (OOS_DEV commit dc39690e), n'est PAS un challenger automatique de la factory.",
+    "primary_metric": "ANYTIME_SCORER_LOGLOSS (meme definition que PL : y=1 si le joueur marque >=1 fois en temps reglementaire, sinon 0)",
+    "secondary_metrics": [
+      "brier",
+      "calibration_intercept_slope_ece",
+      "top1_hit_rate",
+      "outfield_only_sensitivity",
+      "played_minutes_gt_0_sensitivity",
+      "position_diagnostics",
+      "first_second_half_season"
+    ],
+    "bootstrap_policy": {
+      "method": "paired block bootstrap par ISO_WEEK (lib/player-lab/oos-eval-metrics.js#pairedBlockBootstrapDelta, code partage inchange)",
+      "n_resamples": 10000,
+      "seed": "PLAYER-OOS-DEV-DENMARK_SUPERLIGA-2026-09-06"
+    },
+    "decision_rule": {
+      "source": "meme structure que scripts/run-player-scorer-oos-dev-2023-24.js (PL) - reutilisee sans modification de seuil",
+      "rule": "relative_gain(C vs baseline) > 0 ET CI95(delta).upper < 0 => candidat bat la baseline ; sinon INCONCLUSIVE ou REJECT selon le signe."
+    },
+    "pre_registration_rule": "Aucun seuil, aucune formule, aucun parametre modifie apres avoir vu un resultat OOS_DEV. 2024-25 (OOS_FINAL) reste SEALED_UNREAD dans cette passe."
+  },
+  "hash": "f85441d7b331c30776026bec8638c3dd13c709be8b60d9f1e4f964739d0a6d93"
+}

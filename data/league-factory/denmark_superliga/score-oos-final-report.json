@@ -1,0 +1,95 @@
+{
+  "generated_at": "2026-09-06T05:27:54.646Z",
+  "reproducible": true,
+  "hash_run1": "5a438d2573e60f50d07a1d1ee23c4b8d889d2499b75c22c855ee1fdd27644535",
+  "hash_run2": "5a438d2573e60f50d07a1d1ee23c4b8d889d2499b75c22c855ee1fdd27644535",
+  "league_key": "denmark_superliga",
+  "oos_final_season": 2024,
+  "manifest_hash": "694812aabfa81eda7c12a920060fb63442faf86a9e889506d7fc1ac9fdebf81b",
+  "coverage": {
+    "n": 193
+  },
+  "primary": {
+    "nll_b0": 3.0294557155781083,
+    "nll_m0": 3.0261660665255885,
+    "delta": -0.0032896490525198274,
+    "relative_gain": 0.0010858878166146312
+  },
+  "marginals": {
+    "home_nll": 1.5681188864814883,
+    "away_nll": 1.4613368290966158
+  },
+  "secondary": {
+    "ou25": {
+      "logloss_b0": 0.6816702531501206,
+      "logloss_m0": 0.6816702531501206,
+      "brier_b0": 0.24432947970927626,
+      "brier_m0": 0.24432947970927626
+    },
+    "btts": {
+      "logloss_b0": 0.6752299355565083,
+      "logloss_m0": 0.6709525156246258,
+      "brier_b0": 0.24113574712359298,
+      "brier_m0": 0.23902522770639492
+    },
+    "x12": {
+      "logloss_b0": 1.0113805776580174,
+      "logloss_m0": 1.007098281104319,
+      "brier_b0": 0.6044478283467274,
+      "brier_m0": 0.6024905068432581
+    }
+  },
+  "low_score_diagnostics": {
+    "0-0": {
+      "count_observed": 9,
+      "nll_contribution_b0": 2.760555555555555,
+      "nll_contribution_m0": 2.600259389262958
+    },
+    "1-0": {
+      "count_observed": 16,
+      "nll_contribution_b0": 2.287753928481883,
+      "nll_contribution_m0": 2.3979133303179987
+    },
+    "0-1": {
+      "count_observed": 7,
+      "nll_contribution_b0": 2.6942277455826775,
+      "nll_contribution_m0": 2.8637741587981638
+    },
+    "1-1": {
+      "count_observed": 24,
+      "nll_contribution_b0": 2.216636864585885,
+      "nll_contribution_m0": 2.127403027403009
+    }
+  },
+  "bootstrap": {
+    "valid": true,
+    "n_blocks": 96,
+    "n_total_deltas": 193,
+    "n_resamples": 10000,
+    "seed": 1913916798,
+    "observed_mean_delta": -0.003289649052518906,
+    "ci_lower": -0.012065023958667839,
+    "ci_upper": 0.005655545299694972,
+    "ci_crosses_zero": true,
+    "probability_candidate_better": 0.7663
+  },
+  "temporal_stability": {
+    "first_half_season": {
+      "n": 97,
+      "nll_b0": 2.976687838904891,
+      "nll_m0": 2.971850447638399
+    },
+    "second_half_season": {
+      "n": 96,
+      "nll_b0": 3.082773257633334,
+      "nll_m0": 3.081047473109516
+    }
+  },
+  "decision": {
+    "ci_confirms_worse": false,
+    "ci_favorable": false,
+    "numerical_clean": true,
+    "status": "INCONCLUSIVE",
+    "reason_code": "M0_APPROX_B0_CI_CROSSES_ZERO"
+  }
+}

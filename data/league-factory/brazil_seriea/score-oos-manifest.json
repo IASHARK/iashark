@@ -1,0 +1,81 @@
+{
+  "manifest": {
+    "manifest_id": "SCORE_BRAZIL_SERIEA_OOS_MANIFEST",
+    "league_key": "brazil_seriea",
+    "league_id": 71,
+    "calendar_type": "CALENDAR_YEAR_SEASON",
+    "created_at": "2026-09-06T04:12:12.774Z",
+    "dataset_hash": "cba2330fd5a4c294e7e943fccacac86a015c13dfdc0251d8a2d76cbad57af826",
+    "season_split": {
+      "warmup": 2021,
+      "train": 2022,
+      "oos_dev": 2023,
+      "oos_final": 2024,
+      "sealed_unread": 2025
+    },
+    "league_averages": {
+      "leagueAvgH": 1.4052631578947368,
+      "leagueAvgA": 0.9763157894736842,
+      "source": "TRAIN reel de cette ligue, jamais 1.35/1.10 par defaut ni une valeur PL"
+    },
+    "rho": {
+      "final_value": 0.022707419077869745,
+      "method": "Bounded scalar MLE (scipy.optimize.minimize_scalar, method=bounded) sur la log-vraisemblance Dixon-Coles exacte, via scripts/fit_rho.py (le VRAI fitter, jamais reimplemente) - identique a la methode PL, appliquee aux donnees de cette ligue uniquement.",
+      "fitted_on": "WARMUP+TRAIN de cette ligue (walk-forward jour-par-jour a travers TRAIN, TRAIN n'etant pas une donnee secrete) - valeur retenue = fit du DERNIER cutoff TRAIN (le plus de donnees disponibles avant OOS_DEV).",
+      "bounds": null,
+      "convergence": true,
+      "n_train_fixtures_at_final_fit": 709,
+      "frozen_after_manifest": "rho ne change plus une fois ce manifest hashe - aucun refit sur OOS_DEV/OOS_FINAL, jamais."
+    },
+    "model_m0": {
+      "id": "SCORE_M0_BRAZIL_SERIEA",
+      "definition": "Dixon-Coles point-in-time, etat SAISON COURANTE UNIQUEMENT (lib/data/team-state.js#buildTeamState + lib/engine.js#calcLambdas, gate calcCriteres>=3 matchs joues), leagueAvgH/leagueAvgA de CETTE ligue, rho = rho final ci-dessus (jamais rho_PL=-0.0845).",
+      "no_pl_values": true
+    },
+    "model_m2": {
+      "id": "SCORE_M2_BRAZIL_SERIEA",
+      "definition": "IDENTIQUE a M0 (memes lambdas de base, meme rho final) PLUS la couche structurelle EARLY_SEASON_BAYES : ajustement additif du taux courant vers un prior de saison precedente (equipe deja presente : taux reel meme cote ; equipe promue : moyenne de ligue reelle de la saison precedente), pondere par prior_weight(n)=max(0, 8 - 0.5*n) ou n = matchs de la SEULE saison courante deja joues (lib/lab/bayes-early-season.js, lib/lab/walkforward-m2r-runner.js - code partage, non modifie).",
+      "structural_formula": "prior_equivalents(n) = max(0, 8 - 0.5*n)",
+      "structural_formula_status": "TRANSFERRED_STRUCTURE_UNVALIDATED_FOR_BRAZIL_SERIEA",
+      "structural_formula_note": "Formule gagnante en PL, reutilisee ICI comme CANDIDAT STRUCTUREL uniquement - les constantes 8 et 0.5 ne sont PAS retunees sur les donnees de cette ligue, precisement pour tester si la structure elle-meme se transfere.",
+      "promoted_team_fallback": "moyenne de ligue REELLE de la saison precedente (lib/lab/walkforward-m2r-runner.js#computeRealLeagueAverageRates), jamais une constante devinee ni une valeur PL."
+    },
+    "primary_metric": "EXACT_SCORE_NLL (lib/lab/metrics.js#exactScoreNLL, delta = NLL_M2 - NLL_M0 via lib/lab/loss-delta.js#lossDelta - candidat meilleur => delta<0)",
+    "secondary_metrics": [
+      "home_goals_marginal_nll",
+      "away_goals_marginal_nll",
+      "1x2_logloss",
+      "1x2_brier",
+      "over_under_2.5_logloss",
+      "over_under_2.5_brier",
+      "btts_logloss",
+      "btts_brier",
+      "calibration",
+      "low_score_diagnostics"
+    ],
+    "bootstrap_policy": {
+      "method": "paired block bootstrap (lib/lab/bootstrap.js#pairedBlockBootstrap, code partage inchange)",
+      "n_resamples": 10000,
+      "block_unit": "cutoff (jour de coup d'envoi)",
+      "seed": "SCORE-OOS-DEV-BRAZIL_SERIEA-2026-09-06"
+    },
+    "promotion_policy": {
+      "source": "lib/promotion.js#evaluatePromotion - REUTILISE TEL QUEL, aucun seuil modifie",
+      "thresholds": {
+        "MIN_N_OOS": 500,
+        "MIN_CONVERGENCE_RATE": 0.95,
+        "MAX_BOUNDARY_HIT_RATE": 0.1,
+        "MIN_RELATIVE_GAIN": 0.0025,
+        "MAX_SECONDARY_DEGRADATION": 0.03,
+        "MAX_RHO_STD": 0.05
+      },
+      "decision_labels": {
+        "PROMOTE": "M2_BEATS_M0",
+        "SHADOW_MORE_DATA": "INCONCLUSIVE",
+        "REJECT": "M2_REJECT_DEV"
+      }
+    },
+    "pre_registration_rule": "Aucun seuil, aucune formule, aucun parametre modifie apres avoir vu un resultat OOS_DEV. 2024-25 (OOS_FINAL) reste SEALED_UNREAD dans cette passe."
+  },
+  "hash": "b4a4b0510ce91f7c22b440f4218afc33320320b6e075369a962e66f2cbe056f1"
+}

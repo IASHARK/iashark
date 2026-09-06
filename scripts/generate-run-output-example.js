@@ -56,4 +56,16 @@ const scoreCandidates = [
 const candidates = [...playerCandidates, ...scoreCandidates];
 const runOutput = runOutputForSnapshot({ candidates, registry, snapshotTime, snapshotLabel: "T24", runId: "RUN_EXAMPLE_2026-09-07" });
 
-console.log(JSON.stringify(runOutput, null, 2));
+// Marqueur explicite : fixtures, cotes et model_probability ci-dessus
+// sont ILLUSTRATIFS (saisis a la main pour la demonstration), y compris
+// "fake_score_league_demo" (aucune vraie ligue Score n'est VALIDATED a
+// ce jour - voir SAFE_PICK_OF_THE_DAY = NO_SAFE_SELECTION sur le vrai
+// registry, teste dans tests/run-output-engine.test.js). Les ligues
+// PLAYER (ligue2, laliga, seriea, ...) sont en revanche REELLEMENT
+// PLAYER_STATUS=VALIDATED - seules les fixtures/joueurs/cotes de cet
+// exemple sont fabriques, jamais les portes d'eligibilite elles-memes.
+// Ce flag doit accompagner toute diffusion de cet exemple pour qu'il ne
+// soit jamais confondu avec une sortie de production reelle.
+const output = { EXAMPLE_SYNTHETIC_DATA: true, synthetic_data_note: "Fixtures/joueurs/cotes fabriques a la main pour illustrer le format. La ligue Score 'fake_score_league_demo' n'existe pas reellement - aucune vraie ligue n'a SCORE_STATUS=VALIDATED a ce jour. Les ligues PLAYER utilisees (ligue2, laliga, seriea, eredivisie, jleague, championship, brazil_seriea, denmark_superliga) sont en revanche reellement PLAYER_STATUS=VALIDATED : seules les donnees de match/joueur/cote sont synthetiques, pas les portes d'eligibilite.", ...runOutput };
+
+console.log(JSON.stringify(output, null, 2));

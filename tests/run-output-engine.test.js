@@ -17,8 +17,11 @@ const {
   generateDailyCombos,
   computeSafePickOfDay,
   diffSnapshots,
+  loadCanonicalEligibilityRegistry,
+  eligibility,
 } = require("../lib/run-output/index.js");
 const { loadRegistry } = require("../lib/league-factory/registry.js");
+const { PL_LEAGUE_KEY, buildPremierLeagueCanonicalEntry } = require("../lib/run-output/canonical-registry.js");
 
 const SNAPSHOT_T = "2026-09-06T10:00:00.000Z";
 
@@ -339,4 +342,107 @@ test("diffRunOutputs : bout-en-bout entre deux RUN OUTPUT complets", () => {
   const changes = diffRunOutputs(runT168, runT72);
   const top5Change = changes.find((c) => c.slot_id === "TOP5_RANK_1");
   assert.equal(top5Change.change_reason, "MODEL_PROBABILITY_CHANGED");
+});
+
+// ---------------------------------------------------------------
+// CORRECTIF PASS FINAL, point 1 : Premier League visible via une
+// source d'eligibilite CANONIQUE (factory + PL legacy fusionnes),
+// jamais uniquement data/league-validation-registry.json.
+// ---------------------------------------------------------------
+
+test("BUG DOCUMENTE + CORRIGE : PL est invisible du registry factory brut, visible apres fusion canonique", () => {
+  const rawFactoryRegistry = loadRegistry();
+  assert.equal(rawFactoryRegistry.leagues[PL_LEAGUE_KEY], undefined, "PL ne doit jamais apparaitre dans le registry factory brut (validee avant la factory)");
+
+  const plCandidate = scoreCandidate({ league_key: PL_LEAGUE_KEY, model_probability: 0.6 });
+  assert.equal(eligibility.isCandidateEligible(plCandidate, rawFactoryRegistry), false, "sans fusion, une jambe PL est a tort jugee inegible");
+
+  const canonical = loadCanonicalEligibilityRegistry(rawFactoryRegistry);
+  assert.equal(eligibility.isCandidateEligible(plCandidate, canonical), true, "apres fusion canonique, une jambe Score PL doit etre eligible");
+});
+
+test("buildPremierLeagueCanonicalEntry : derive VALIDATED+runnable des DEUX fichiers legacy reels (EXP-002C + oos-final-2024-25-report.json)", () => {
+  const entry = buildPremierLeagueCanonicalEntry();
+  assert.equal(entry.score_status, "VALIDATED");
+  assert.equal(entry.score_runnable, true);
+  assert.equal(entry.player_status, "VALIDATED");
+  assert.equal(entry.player_runnable, true);
+  assert.equal(entry.live_eligible, true);
+  assert.equal(entry.canonical_source, "LEGACY_PRE_FACTORY");
+  assert.ok(entry.score_source_note.includes("SCORE-LAB-EXP-002C"));
+  assert.ok(entry.player_source_note.includes("oos-final-2024-25-report.json"));
+});
+
+test("runOutputForSnapshot : une fixture PL valide est eligible a TOP5 (Player), jambe de combo (Score) et SAFE_PICK (Score), en ne passant QUE le registry factory brut", () => {
+  const rawFactoryRegistry = loadRegistry(); // le vrai registry factory, SANS PL - jamais pre-fusionne par l'appelant
+  const candidates = [
+    // TOP5 cote Player : probabilite tres elevee pour garantir un rang top5.
+    playerCandidate({ league_key: PL_LEAGUE_KEY, player_id: "pl_striker", fixture_id: 90001, model_probability: 0.72, decimal_odds: 1.7, player_model_version: "PLAYER_SCORER_V1_AGGREGATED_SHARE" }),
+    // quelques concurrents non-PL pour un TOP5 realiste
+    playerCandidate({ league_key: "ligue2", player_id: "p_other1", fixture_id: 90002, model_probability: 0.2, decimal_odds: 3.0 }),
+    playerCandidate({ league_key: "ligue2", player_id: "p_other2", fixture_id: 90003, model_probability: 0.15, decimal_odds: 3.5 }),
+    // jambe de combo cote Score PL + concurrents PLAYER pour completer 2 combos
+    scoreCandidate({ league_key: PL_LEAGUE_KEY, fixture_id: 90010, market: "FT_1X2_HOME", selection: "HOME", model_probability: 0.6, decimal_odds: 4.0 }),
+    playerCandidate({ league_key: "ligue2", player_id: "p_leg1", fixture_id: 90011, model_probability: 0.5, decimal_odds: 3.5 }),
+    // SAFE_PICK cote Score PL : criteres stricts + freres de marche pour le calcul d'ecart
+    scoreCandidate({ league_key: PL_LEAGUE_KEY, fixture_id: 90020, market: "FT_1X2_HOME", selection: "HOME", model_probability: 0.63, model_probability_uncertainty: 0.02, decimal_odds: 1.6 }),
+    scoreCandidate({ league_key: PL_LEAGUE_KEY, fixture_id: 90020, market: "FT_1X2_DRAW", selection: "DRAW", model_probability: 0.24 }),
+    scoreCandidate({ league_key: PL_LEAGUE_KEY, fixture_id: 90020, market: "FT_1X2_AWAY", selection: "AWAY", model_probability: 0.13 }),
+  ];
+
+  const result = runOutputForSnapshot({ candidates, registry: rawFactoryRegistry, snapshotTime: SNAPSHOT_T });
+
+  const plInTop5 = result.TOP_5_SCORERS_OF_DAY.players.find((p) => p.league === PL_LEAGUE_KEY);
+  assert.ok(plInTop5, "PL doit pouvoir apparaitre dans TOP_5_SCORERS_OF_DAY");
+  assert.equal(plInTop5.rank, 1);
+
+  const plLegInAnyCombo = result.DAILY_COMBOS.combos.some((c) => c.status === "GENERATED" && c.legs.some((l) => l.league === PL_LEAGUE_KEY));
+  assert.ok(plLegInAnyCombo, "une jambe Score PL doit pouvoir entrer dans un combo genere");
+
+  assert.equal(result.SAFE_PICK_OF_THE_DAY.status, "SELECTED");
+  assert.equal(result.SAFE_PICK_OF_THE_DAY.league, PL_LEAGUE_KEY);
+});
+
+// ---------------------------------------------------------------
+// CORRECTIF PASS FINAL, point 2 : les gates reelles ne sont JAMAIS
+// contournees pour atteindre la cote >=10, meme si des jambes Score
+// non-VALIDATED/non-runnable auraient trivialement suffi.
+// ---------------------------------------------------------------
+
+test("COMBOS : registry sans AUCUNE ligue Score eligible -> aucun combo GENERATED, jamais de detour par des jambes Score non-runnable", () => {
+  const registry = fakeRegistry({ unvalidated_score_league: { score_status: "INCONCLUSIVE", score_runnable: false, player_status: "NOT_STARTED", player_runnable: false } });
+  const candidates = [
+    scoreCandidate({ league_key: "unvalidated_score_league", fixture_id: 20001, model_probability: 0.9, decimal_odds: 12.0 }),
+    scoreCandidate({ league_key: "unvalidated_score_league", fixture_id: 20002, model_probability: 0.9, decimal_odds: 15.0 }),
+    scoreCandidate({ league_key: "unvalidated_score_league", fixture_id: 20003, model_probability: 0.9, decimal_odds: 20.0 }),
+  ];
+  const result = generateDailyCombos({ candidates, registry, snapshotTime: SNAPSHOT_T });
+  assert.equal(result.eligible_pool_size, 0);
+  assert.ok(result.combos.every((c) => c.status === "NO_QUALIFYING_COMBINATION"), "sans aucune jambe Score eligible, DAILY_COMBOS ne doit jamais forcer un combo");
+});
+
+test("COMBOS : une jambe Score tres rentable mais non-runnable n'est JAMAIS utilisee pour franchir le seuil de cote, meme si le pool eligible est insuffisant seul", () => {
+  const registry = fakeRegistry({ ligue2: REG_PLAYER_OK, unvalidated_score_league: { score_status: "INCONCLUSIVE", score_runnable: false } });
+  const candidates = [
+    playerCandidate({ player_id: "p1", fixture_id: 21001, model_probability: 0.5, decimal_odds: 2.0 }),
+    playerCandidate({ player_id: "p2", fixture_id: 21002, model_probability: 0.5, decimal_odds: 2.0 }), // produit = 4.0, insuffisant seul (<10)
+    scoreCandidate({ league_key: "unvalidated_score_league", fixture_id: 21003, model_probability: 0.9, decimal_odds: 50.0 }), // aurait trivialement franchi 10 si autorise
+  ];
+  const result = generateDailyCombos({ candidates, registry, snapshotTime: SNAPSHOT_T });
+  assert.equal(result.eligible_pool_size, 2, "la jambe Score non-runnable ne doit jamais entrer dans le pool eligible");
+  for (const c of result.combos) {
+    if (c.status === "GENERATED") assert.ok(!c.legs.some((l) => l.league === "unvalidated_score_league"), "jamais une jambe d'une ligue Score non-runnable dans un combo genere");
+    else assert.equal(c.status, "NO_QUALIFYING_COMBINATION");
+  }
+  assert.equal(result.combos[0].status, "NO_QUALIFYING_COMBINATION", "sans la jambe interdite, le pool eligible (4.0) n'atteint pas 10.00 - jamais force");
+});
+
+test("EXAMPLE_SYNTHETIC_DATA : le script d'exemple marque explicitement ses donnees comme synthetiques", () => {
+  // Verification statique du contrat plutot que de re-executer le
+  // script (qui imprime sur stdout) - garantit que le flag ne peut pas
+  // etre silencieusement retire sans faire echouer ce test.
+  const fs = require("fs");
+  const path = require("path");
+  const src = fs.readFileSync(path.join(__dirname, "..", "scripts", "generate-run-output-example.js"), "utf8");
+  assert.ok(src.includes("EXAMPLE_SYNTHETIC_DATA: true"), "le generateur d'exemple doit toujours marquer EXAMPLE_SYNTHETIC_DATA=true dans sa sortie");
 });

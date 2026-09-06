@@ -49,6 +49,7 @@ jobs:
           const { generateLocalizedSitemaps } = require('./scripts/i18n-sitemaps.js');
           const LEAGUES_CONFIG = require('./config/leagues.json');
           const { calcFinalProbs, calcLambdas, calcCriteres, calcFatigue } = require('./lib/engine.js');
+          const { classifyApiResponse, decideSeasonFallback, decideCurrentSeasonGate, createThrottledFetcher } = require('./lib/api-fetch-policy.js');
           var LEAGUE_COVERAGE_REPORT = null;
           try { LEAGUE_COVERAGE_REPORT = JSON.parse(fs.readFileSync('./league-coverage-report.json', 'utf8')); }
           catch (e) { console.log('league-coverage-report.json absent ou illisible : ' + e.message + ' (lancer scripts/verify-league-coverage.js). Saisons/tiers en repli.'); }
@@ -125,10 +126,17 @@ jobs:
             });
           }
 
-          function get(url, headers) {
+          // rawHttpGetJson : UNIQUEMENT le transport HTTP brut (timeout,
+          // parsing JSON) - plus aucune decision de cache/retry/classification
+          // ici (deportee dans lib/api-fetch-policy.js, testable). Un echec
+          // reseau/timeout/JSON illisible retourne un sentinel EXPLICITE
+          // (__ia_network_error) au lieu d'un objet vide indistinguable
+          // d'une vraie reponse API OK vide - meme discipline que le bug
+          // rate-limit corrige ci-dessous, applique aussi au niveau reseau.
+          function rawHttpGetJson(url, headers) {
             return new Promise(function(resolve) {
               var u = new URL(url);
-              var timer = setTimeout(function(){ resolve({}); }, 10000);
+              var timer = setTimeout(function(){ resolve({ __ia_network_error: true }); }, 10000);
               https.get({
                 hostname: u.hostname, path: u.pathname+u.search,
                 headers: Object.assign({'User-Agent':'IASHARK/1.0'}, headers||{})
@@ -137,30 +145,54 @@ jobs:
                 res.on('data',function(c){d+=c;});
                 res.on('end',function(){
                   clearTimeout(timer);
-                  try{ var parsed=JSON.parse(d); noteApiError(url,parsed); resolve(parsed); }catch(e){ resolve({}); }
+                  try{ resolve(JSON.parse(d)); }catch(e){ resolve({ __ia_network_error: true }); }
                 });
-              }).on('error',function(){ clearTimeout(timer); resolve({}); });
+              }).on('error',function(){ clearTimeout(timer); resolve({ __ia_network_error: true }); });
+            });
+          }
+          // File d'attente API globale (item 2 : throttling, cache
+          // systematique, retry/backoff sur 429 - jamais de martelement),
+          // UNIQUEMENT pour v3.football.api-sports.io - c'est la ou le bug
+          // rate-limit reel a ete observe et la seule API de ce pipeline
+          // soumise a un quota strict partage entre tous les appels. Les
+          // autres hotes (OpenWeatherMap, NewsAPI, the-odds-api) gardent
+          // leur transport direct inchange, avec leurs propres headers
+          // (souvent {} - jamais la cle api-sports, qui ne doit jamais leur
+          // etre envoyee).
+          var API_FETCHER = createThrottledFetcher(
+            function(url){ return rawHttpGetJson(url, APS); },
+            { minIntervalMs: 150, maxRetries: 2, baseBackoffMs: 800, onError: noteApiError }
+          );
+          function isApiSportsUrl(url) { return url.indexOf('v3.football.api-sports.io') !== -1; }
+          function tagStatus(value, status) {
+            try { Object.defineProperty(value, '__ia_status', { value: status, enumerable: false, configurable: true }); } catch(e){}
+            return value;
+          }
+          function get(url, headers) {
+            if (isApiSportsUrl(url)) {
+              return API_FETCHER.fetchWithPolicy(url).then(function(r){
+                return tagStatus((r.parsed && typeof r.parsed==='object') ? r.parsed : {}, r.status);
+              });
+            }
+            return rawHttpGetJson(url, headers).then(function(parsed){
+              var status = classifyApiResponse(parsed);
+              noteApiError(url, parsed);
+              return tagStatus((parsed && typeof parsed==='object') ? parsed : {}, status);
             });
           }
           function getArr(url, headers) {
-            return new Promise(function(resolve) {
-              var u = new URL(url);
-              var timer = setTimeout(function(){ resolve([]); }, 10000);
-              https.get({
-                hostname: u.hostname, path: u.pathname+u.search,
-                headers: Object.assign({'User-Agent':'IASHARK/1.0'}, headers||{})
-              }, function(res) {
-                var d='';
-                res.on('data',function(c){d+=c;});
-                res.on('end',function(){
-                  clearTimeout(timer);
-                  try{
-                    var parsed = JSON.parse(d);
-                    noteApiError(url, parsed);
-                    resolve(Array.isArray(parsed) ? parsed : (parsed.data||parsed.response||[]));
-                  }catch(e){ resolve([]); }
-                });
-              }).on('error',function(){ clearTimeout(timer); resolve([]); });
+            if (isApiSportsUrl(url)) {
+              return API_FETCHER.fetchWithPolicy(url).then(function(r){
+                var parsed = (r.parsed && typeof r.parsed==='object') ? r.parsed : {};
+                var arr = Array.isArray(parsed) ? parsed : (parsed.data||parsed.response||[]);
+                return tagStatus(arr, r.status);
+              });
+            }
+            return rawHttpGetJson(url, headers).then(function(parsed){
+              var status = classifyApiResponse(parsed);
+              noteApiError(url, parsed);
+              var arr = Array.isArray(parsed) ? parsed : ((parsed&&(parsed.data||parsed.response))||[]);
+              return tagStatus(arr, status);
             });
           }
           function getText(url, headers) {
@@ -549,28 +581,62 @@ jobs:
             }
             return uniqueFixtures;
           }
+          // TEAM_STATS_STATUS : trace, par (equipe, ligue, saison), le VRAI
+          // statut du dernier appel teams/statistics (OK/RATE_LIMIT/
+          // API_ERROR) - jamais devinable depuis la seule valeur de retour
+          // (null peut vouloir dire "vraiment aucun match" OU "l'API a
+          // refuse l'appel"). Consomme par decideCurrentSeasonGate() au
+          // site d'assemblage du match pour interdire tout repli silencieux
+          // sur la saison precedente quand la cause est un rate-limit/erreur
+          // API - jamais une absence de donnee confirmee (item 1).
+          var TEAM_STATS_STATUS = {};
+          function teamStatsStatusKey(teamId, leagueId, season) { return teamId+'|'+leagueId+'|'+season; }
+          function getTeamStatsStatus(teamId, leagueId, season) { return TEAM_STATS_STATUS[teamStatsStatusKey(teamId, leagueId, season)] || 'UNKNOWN'; }
           async function getTeamStats(teamId, leagueId, season) {
             var explicitSeason=season!=null;
             var s = season || seasonForLeague(leagueId, SEASON);
+            var key = teamStatsStatusKey(teamId, leagueId, s);
             var r = await get('https://v3.football.api-sports.io/teams/statistics?team='+teamId+'&league='+leagueId+'&season='+s, APS);
+            var status = r.__ia_status || classifyApiResponse(r);
             var isEmpty = !r.response || (typeof r.response==='object' && !Array.isArray(r.response) && Object.keys(r.response).length===0);
-            if(isEmpty && !explicitSeason && s!==2026){
+            var decision = decideSeasonFallback({ status: status, isEmpty: isEmpty });
+            if (status!=='OK') {
+              TEAM_STATS_STATUS[key] = status;
+              console.log('  [DATA_QUALITY] teams/statistics '+status+' (team='+teamId+', league='+leagueId+', season='+s+') - '+decision.reason+', aucun repli automatique de saison.');
+              return null;
+            }
+            if(!decision.fallback){ TEAM_STATS_STATUS[key] = isEmpty ? 'EMPTY_CONFIRMED' : 'OK'; return isEmpty ? null : r.response; }
+            // decision.fallback===true implique status==='OK' et isEmpty===true
+            // (vrai debut de saison potentiel, jamais un rate-limit) - SEUL cas
+            // ou le repli existant (saison World Cup 2026) reste legitime.
+            if (!explicitSeason && s!==2026) {
               var r2 = await get('https://v3.football.api-sports.io/teams/statistics?team='+teamId+'&league='+leagueId+'&season=2026', APS);
+              var status2 = r2.__ia_status || classifyApiResponse(r2);
+              if (status2!=='OK') { TEAM_STATS_STATUS[key] = status2; console.log('  [DATA_QUALITY] repli saison 2026 egalement '+status2+' (team='+teamId+') - aucune donnee, aucun repli supplementaire.'); return null; }
               var isEmpty2 = !r2.response || (typeof r2.response==='object' && !Array.isArray(r2.response) && Object.keys(r2.response).length===0);
+              TEAM_STATS_STATUS[key] = isEmpty2 ? 'EMPTY_CONFIRMED' : 'OK';
               return isEmpty2 ? null : r2.response;
             }
-            return isEmpty ? null : r.response;
+            TEAM_STATS_STATUS[key] = 'EMPTY_CONFIRMED';
+            return null;
           }
           async function getLast10(teamId, season, leagueId) {
             var explicitSeason=season!=null;
             var s = season || SEASON;
             var leagueFilter=leagueId?'&league='+leagueId:'';
             var r = await get('https://v3.football.api-sports.io/fixtures?team='+teamId+'&last=20&status=FT&season='+s+leagueFilter, APS);
-            if((!r.response||!r.response.length)&&!explicitSeason&&s!==2026){
+            var status = r.__ia_status || classifyApiResponse(r);
+            var isEmpty = !r.response || !r.response.length;
+            var decision = decideSeasonFallback({ status: status, isEmpty: isEmpty });
+            if (status!=='OK') { console.log('  [DATA_QUALITY] fixtures (last10) '+status+' (team='+teamId+', season='+s+') - '+decision.reason+', aucun repli automatique de saison.'); return []; }
+            if(!decision.fallback) return r.response||[];
+            if (!explicitSeason && s!==2026) {
               var r2=await get('https://v3.football.api-sports.io/fixtures?team='+teamId+'&last=20&status=FT&season=2026',APS);
+              var status2 = r2.__ia_status || classifyApiResponse(r2);
+              if (status2!=='OK') return [];
               return r2.response||[];
             }
-            return r.response||[];
+            return [];
           }
           async function getOdds(fixtureId) {
             var r = await get('https://v3.football.api-sports.io/odds?fixture='+fixtureId, APS);
@@ -585,7 +651,12 @@ jobs:
             })};
           }
           async function getH2H(homeId, awayId) {
-            var r = await get('https://v3.football.api-sports.io/fixtures?h2h='+homeId+'-'+awayId+'&last=8', APS);
+            // BUG REEL CORRIGE (item 3) : 'h2h' n'est pas un filtre valide sur
+            // l'endpoint generique /fixtures en v3 (c'etait le comportement
+            // de l'API v2, deprecated) - l'API repondait "The H2h field do
+            // not exist" et le pipeline recevait un tableau vide en
+            // permanence. Le vrai endpoint dedie v3 est /fixtures/headtohead.
+            var r = await get('https://v3.football.api-sports.io/fixtures/headtohead?h2h='+homeId+'-'+awayId+'&last=8', APS);
             return r.response||[];
           }
           async function getWeather(city, matchDateISO) {
@@ -744,15 +815,16 @@ jobs:
             var p=r.response[0];
             return {winner:p.predictions&&p.predictions.winner&&p.predictions.winner.name||null,advice:p.predictions&&p.predictions.advice||null};
           }
-          async function getRefereeStats(refName) {
-            if(!refName) return null;
-            var r = await get('https://v3.football.api-sports.io/fixtures?referee='+encodeURIComponent(refName)+'&last=20', APS);
-            var games=(r&&r.response)||[];
-            if(!games.length) return null;
-            var totalCards=0,totalPens=0;
-            games.forEach(function(g){(g.events||[]).forEach(function(e){if(e.type==='Card')totalCards++;if(e.detail&&e.detail.toLowerCase().includes('penalty'))totalPens++;});});
-            return {name:refName,games:games.length,cards_per_game:(totalCards/games.length).toFixed(1),pens_per_game:(totalPens/games.length).toFixed(1)};
-          }
+          // BUG REEL CORRIGE (item 3) : 'referee' n'est PAS un filtre valide
+          // sur /fixtures (ni sur aucun autre endpoint v3) - il n'existe
+          // aucune recherche "fixtures par nom d'arbitre" dans l'API-Football.
+          // L'appel echouait systematiquement ("The Referee field do not
+          // exist"), consommait un appel API a chaque fixture pour rien, et
+          // aggravait la pression sur le quota (item 2). refStats a toujours
+          // ete null en pratique (calcDisciplineRisk(null,...) retourne deja
+          // null explicitement) : suppression de l'appel, zero changement de
+          // comportement observable, un appel API en moins par match.
+          function getRefereeStats(refName) { return null; }
           async function getFixtureEvents(fixtureId) {
             var r = await get('https://v3.football.api-sports.io/fixtures/events?fixture='+fixtureId, APS);
             return (r&&r.response)||[];
@@ -1276,7 +1348,23 @@ jobs:
               console.error('  [genAnalyse] reponse sans texte.');
               return null;
             }
-            try{return JSON.parse(txt.replace(/```json|```/g,'').trim());}
+            // item 4 : couche d'explication UNIQUEMENT - jamais lu ni ecrit
+            // par la selection deterministe (pickedMarket/edgeVal/probabilites
+            // sont deja tous calcules et figes avant cet appel, plus haut).
+            // Parsing tolerant a une legere prose residuelle malgre la
+            // consigne stricte du prompt (extrait entre la 1ere '{' et la
+            // derniere '}' avant de parser) - si le JSON reste illisible,
+            // return null SANS jamais inventer de contenu ; l'appelant
+            // publie alors EXPLANATION_STATUS=FAILED et la selection reste
+            // intacte (verifie : aucun consommateur de `an` ne touche
+            // pickedMarket/edgeVal/probabilites, tous en lecture defensive
+            // an?(...):'' / an&&...).
+            try{
+              var cleaned=txt.replace(/```json|```/g,'').trim();
+              var firstBrace=cleaned.indexOf('{'), lastBrace=cleaned.lastIndexOf('}');
+              if(firstBrace>=0&&lastBrace>firstBrace) cleaned=cleaned.slice(firstBrace,lastBrace+1);
+              return JSON.parse(cleaned);
+            }
             catch(e){console.error('  [genAnalyse] JSON illisible :',txt.slice(0,200));return null;}
           }
           // Pages statiques a forte valeur SEO, en plus des matchs du jour.
@@ -2015,8 +2103,25 @@ jobs:
               function isEmptySH(s){
                 return !s || !(s.fixtures && s.fixtures.played && ((s.fixtures.played.home||0)>0 || (s.fixtures.played.away||0)>0));
               }
+              // currentSeasonGate (item 1) : distingue EXPLICITEMENT "saison
+              // courante reellement vide" (early-season legitime, le blend
+              // canonique lib/markets/early-season.js reste valide) de
+              // "l'API a refuse l'appel (429/erreur)" - dans ce 2e cas,
+              // JAMAIS de regularisation silencieuse sur la saison
+              // precedente : le match sera force en abstention plus bas
+              // (noSignalReason=DATA_QUALITY_FAIL_*) plutot que de publier
+              // un pick construit sur une saison courante dont on ignore en
+              // realite l'etat reel.
+              var currentSeasonGate = decideCurrentSeasonGate({
+                statusHome: getTeamStatsStatus(home.id, lg.id, currentSeason),
+                statusAway: getTeamStatsStatus(away.id, lg.id, currentSeason),
+              });
               if(isEmptySH(sH) || isEmptySH(sA)){
-                console.log('  [DONNEES LIMITEES] '+lg.name+': stats de la saison courante absentes pour '+(isEmptySH(sH)?home.name:'')+(isEmptySH(sH)&&isEmptySH(sA)?' et ':'')+(isEmptySH(sA)?away.name:'')+' - regularisation sur la saison precedente et le prior de ligue; abstention si cet historique est lui aussi absent.');
+                if (!currentSeasonGate.dataQualityOk) {
+                  console.log('  [DATA_QUALITY_FAIL] '+lg.name+': API rate-limit/erreur sur les stats saison courante ('+JSON.stringify(currentSeasonGate.failing)+') - AUCUNE regularisation automatique sur la saison precedente (interdit). Abstention prevue (DATA_QUALITY_FAIL), jamais un pick construit sur une donnee dont l\'etat reel est inconnu.');
+                } else {
+                  console.log('  [DONNEES LIMITEES] '+lg.name+': stats de la saison courante reellement absentes (confirme, pas un rate-limit/erreur API) pour '+(isEmptySH(sH)?home.name:'')+(isEmptySH(sH)&&isEmptySH(sA)?' et ':'')+(isEmptySH(sA)?away.name:'')+' - regularisation sur la saison precedente et le prior de ligue (comportement Score Engine valide, inchange); abstention si cet historique est lui aussi absent.');
+                }
               }
               var oddsRaw=batch2[0],injuryFetch=batch2[1]||{fetch_ok:false,items:[]},injRaw=injuryFetch.items||[],h2hRaw=batch2[2],wx=batch2[3],nH=batch2[4],nA=batch2[5];
               var predictions=batch2[6]||null,lineups=batch2[7]||null,refStats=batch2[8]||null;
@@ -2183,7 +2288,14 @@ jobs:
               var rateHAgainst=regularizedRate(beHdom_p,mdHdom,sHPrev,['goals','against','total','home'],['fixtures','played','home'],1.10);
               var rateAFor=regularizedRate(bmAext_p,meAext_p,sAPrev,['goals','for','total','away'],['fixtures','played','away'],1.10);
               var rateAAgainst=regularizedRate(beAext_p,meAext_p,sAPrev,['goals','against','total','away'],['fixtures','played','away'],1.35);
-              var modelDataAvailable=(mdHdom+statNumber(sHPrev,['fixtures','played','home'])>0)&&(meAext_p+statNumber(sAPrev,['fixtures','played','away'])>0);
+              // item 1 : currentSeasonGate.dataQualityOk===false (429/erreur
+              // API sur la saison courante) force modelDataAvailable=false
+              // INCONDITIONNELLEMENT, meme si sHPrev/sAPrev contiennent de
+              // vraies donnees - un blend early-season n'est legitime que
+              // quand la saison courante est CONFIRMEE vide (comportement
+              // Score Engine valide, inchange), jamais quand son etat reel
+              // est simplement inconnu suite a un echec d'appel API.
+              var modelDataAvailable=currentSeasonGate.dataQualityOk&&(mdHdom+statNumber(sHPrev,['fixtures','played','home'])>0)&&(meAext_p+statNumber(sAPrev,['fixtures','played','away'])>0);
               var lambdas=calcLambdas(rateHFor,rateHAgainst,1,rateAFor,rateAAgainst,1,null,null,lg.id);
               var enoughModelMatchStats=modelFixturesH.length>=5&&modelFixturesA.length>=5;
               if(enoughModelMatchStats&&xgH.xg_avg&&xgA.xg_avg){
@@ -2385,7 +2497,11 @@ jobs:
                   edge:Number.isFinite(Number(m.marketProb))?Math.round((m.prob-Number(m.marketProb))*10)/10:null
                 };
               });
-              var noSignalReason=!modelDataAvailable?'INSUFFICIENT_MODEL_DATA':(!supportedQuoteCount?'NO_REAL_ODDS':(!allMarkets.length?'NO_RELIABLE_MODEL_FOR_QUOTED_MARKETS':(!eligibleMarkets.length?'NO_ODDS_AT_OR_ABOVE_1_50':null)));
+              // DATA_QUALITY_FAIL_* (item 1) : distinct de INSUFFICIENT_MODEL_DATA
+              // (qui reste le cas legitime "vraie saison vide, meme apres
+              // repli") - permet a l'operateur/au monitoring de distinguer un
+              // vrai debut de saison d'un run degrade par le quota API.
+              var noSignalReason=!currentSeasonGate.dataQualityOk?currentSeasonGate.reason:(!modelDataAvailable?'INSUFFICIENT_MODEL_DATA':(!supportedQuoteCount?'NO_REAL_ODDS':(!allMarkets.length?'NO_RELIABLE_MODEL_FOR_QUOTED_MARKETS':(!eligibleMarkets.length?'NO_ODDS_AT_OR_ABOVE_1_50':null))));
               console.log('  [SELECTION] modeles='+allMarketCandidates.filter(function(m){return Number.isFinite(Number(m.prob));}).length+' cotes_supportees='+supportedQuoteCount+' modeles_et_cotes='+allMarkets.length+' eligibles_1.50='+eligibleMarkets.length+' top='+eligibleMarkets.slice().sort(function(a,b){return b.prob-a.prob;}).slice(0,3).map(function(m){return m.id+':'+m.prob.toFixed(1)+'%@'+m.cote;}).join(', ')+(noSignalReason?' raison='+noSignalReason:''));
               var riskLabelCode=pickedMarket?computeRiskLabel(pickedMarket.cote):'MODERE';
               var kellyVal='0';
@@ -2704,6 +2820,16 @@ jobs:
                 markets_compared:marketsCompared||null,
                 verdict_shark:an?(an.verdict_shark||''):'',
                 facteur_x:an?(an.facteur_x||''):'',
+                // explanation_status (item 4) : distingue explicitement "le
+                // LLM a produit un texte exploitable" (OK) de "cle absente/
+                // reponse API inexploitable/JSON illisible" (FAILED) - une
+                // chaine vide seule ne permet pas de savoir laquelle des deux
+                // situations s'est produite. Ne remplace jamais et ne fabrique
+                // jamais de texte : `an` est deja null dans tous les cas
+                // d'echec (voir genAnalyse ci-dessus), la selection
+                // (pari_rec/cote_rec/model_probability ci-dessus) reste
+                // strictement inchangee que an soit present ou non.
+                explanation_status:an?'OK':'FAILED',
                 dropping_odds:droppingOdds||null,
                 // player_markets (Player Engine) : meme traitement que
                 // kelly/edge/verdict_shark - analyse premium, jamais ecrite
@@ -2736,7 +2862,13 @@ jobs:
                 },
               });
               matchsData.push(matchObj);
-              console.log('  OK conf='+matchObj.conf+' edge='+edgeVal+' pari='+matchObj.pari_rec);
+              // item 5 : 'conf' est l'alias legacy deprecie (model_probability/10,
+              // voir commentaire matchObj.conf ci-dessus) - jamais un score de
+              // robustesse independant. Le log expose aussi explicitement
+              // model_probability et reliability.label (les vraies mesures
+              // separees) pour qu'un operateur lisant les journaux ne confonde
+              // jamais les deux.
+              console.log('  OK conf(legacy,=model_probability/10)='+matchObj.conf+' model_probability='+matchObj.model_probability+' reliability='+(reliability&&reliability.label)+' edge='+edgeVal+' pari='+matchObj.pari_rec);
             }
             // FILET DE PROTECTION DE L'ABONNE.
             // Le 02/09/2026, un quota d'API epuise a fait publier 14 matchs en
@@ -2767,6 +2899,12 @@ jobs:
               if(restaurees)console.log('  [FILET] '+restaurees+' analyse(s) conservee(s) de l\'execution precedente plutot que publiees vides.');
               else console.log('  [FILET] aucune analyse precedente exploitable a conserver.');
             }
+            // item 2 : compteurs honnetes de la file d'attente API globale
+            // (v3.football.api-sports.io uniquement - voir API_FETCHER) pour
+            // que le quota reellement consomme, le cache reellement reutilise
+            // et les 429 reellement rencontres/rattrapes soient visibles a
+            // chaque run, jamais devinables depuis les seuls logs par match.
+            console.log('  [API_STATS] API_CALLS='+API_FETCHER.stats.calls+' CACHE_HITS='+API_FETCHER.stats.cache_hits+' RATE_LIMIT_RETRIES='+API_FETCHER.stats.rate_limit_retries+' RATE_LIMIT_FAILURES='+API_FETCHER.stats.rate_limit_failures+' (v3.football.api-sports.io uniquement)');
             var allMatchsData = matchsData.slice();
             allMatchsData.sort(function(a,b){return (a.date||'').localeCompare(b.date||'');});
             matchsData.sort(function(a,b){var tA=(a.date||'').split(' ')[1]||'99:99';var tB=(b.date||'').split(' ')[1]||'99:99';return tA<tB?-1:tA>tB?1:0;});

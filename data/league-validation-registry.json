@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-06T17:24:05.645Z",
+  "generated_at": "2026-09-06T17:33:53.761Z",
   "leagues": {
     "laliga": {
       "league_key": "laliga",
@@ -241,11 +241,28 @@
       "score_runnable": false,
       "player_runnable": true,
       "live_eligible": false,
-      "updated_at": "2026-09-06T02:10:26.218Z",
+      "updated_at": "2026-09-06T17:33:53.758Z",
       "current_score_champion_eredivisie": null,
       "current_player_champion_eredivisie": "PLAYER_SCORER_V1_AGGREGATED_SHARE_EREDIVISIE",
       "eredivisie_full_model_status": "PARTIAL_PLAYER_ONLY",
-      "note": "OOS_DEV(2023) puis OOS_FINAL(2024) termines, chaque etape gelee avant lecture. Score=INCONCLUSIVE (M0_APPROX_B0_CI_CROSSES_ZERO). Player=VALIDATED (VALIDATED_LEAGUE_PLAYER_FINAL). Reproductibilite : Score=true Player=true."
+      "note": "OOS_DEV(2023) puis OOS_FINAL(2024) termines, chaque etape gelee avant lecture. Score=INCONCLUSIVE (M0_APPROX_B0_CI_CROSSES_ZERO). Player=VALIDATED (VALIDATED_LEAGUE_PLAYER_FINAL). Reproductibilite : Score=true Player=true.",
+      "score_lab_factory_v2": {
+        "protocol": "SCORE_LAB_FACTORY_V2",
+        "champion_selected": "M2",
+        "pre_holdout_sha": "943cf9fd2dd7b0d166067f86ef1707e52a2e2584",
+        "holdout_season": 2025,
+        "verdict": "INCONCLUSIVE",
+        "score_runnable_under_v2": false,
+        "reject_triggers": [],
+        "inconclusive_triggers": [
+          "CALIBRATION",
+          "MARKET_MARGINALS"
+        ],
+        "reproducible": true,
+        "exact_score_nll_holdout": 3.0352323123298848,
+        "exact_score_nll_threshold": 3.263061311593927,
+        "note": "Holdout 2025 CONSOMME (une seule fois). INCONCLUSIVE : EXACT_SCORE_NLL/TEMPORAL_STABILITY/COVERAGE tous PASS. CALIBRATION echoue (ECE=0.0468>seuil 0.0299) et MARKET_MARGINALS echoue (1X2 logloss degrade +7% ; BTTS ameliore, O/U2.5 stable). Aucun forcage, aucun retuning, aucune deuxieme tentative."
+      }
     },
     "primeira": {
       "league_key": "primeira",

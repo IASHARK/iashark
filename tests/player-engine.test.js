@@ -8,6 +8,7 @@ const {
   chooseDistributionModel,
   assessDataQuality,
   buildPlayerMarketOutput,
+  blendPlayerRateAcrossSeasons,
 } = require("../lib/markets/player-engine.js");
 
 test("resolveExpectedMinutes: titulaire confirme avec historique -> minutes moyennes de titularisation reelles, pas une valeur fixe arbitraire", () => {
@@ -145,4 +146,44 @@ test("buildPlayerMarketOutput: marche non supporte par ce moteur -> null", () =>
 test("buildPlayerMarketOutput: parametres identifiants manquants -> null immediatement", () => {
   assert.equal(buildPlayerMarketOutput({ playerId: 1, market: "ANYTIME_GOALSCORER" }), null);
   assert.equal(buildPlayerMarketOutput({ fixtureId: 1, market: "ANYTIME_GOALSCORER" }), null);
+});
+
+test("blendPlayerRateAcrossSeasons: reproduit le cas reel (5 buts en 229 minutes = 2.0 buts/90 brut) - le taux brut explose, le taux lisse reste plausible", () => {
+  var currentMatches90 = 229 / 90;
+  var currentEvents = 5; // 5/(229/90) = 2.0 buts/90, la valeur reellement affichee sur le site pour ce cas
+  // Saison precedente reelle : 12 buts sur 30 matchs pleins (0.4/90), un ailier solide mais pas hors-norme.
+  var previousMatches90 = 30;
+  var previousEvents = 12;
+  var blended = blendPlayerRateAcrossSeasons(currentEvents, currentMatches90, previousEvents, previousMatches90);
+  var rawRate = currentEvents / currentMatches90;
+  assert.ok(blended.shrinkage_applied, "le lissage doit s'appliquer quand une saison precedente existe");
+  assert.ok(blended.rate < rawRate, "le taux lisse doit etre strictement inferieur au taux brut explosif");
+  assert.ok(blended.rate > previousEvents / previousMatches90, "le taux lisse doit rester au-dessus du seul prior (le sur-echantillon courant compte quand meme)");
+  // Verification concrete : la probabilite qui en decoule ne doit plus etre extreme.
+  var probaBrute = computeGoalscorerProbability({ expectedMinutes: 90, goalsPer90: rawRate, teamAttackMultiplier: 1.2, opponentDefenseMultiplier: 1.3 });
+  var probaLissee = computeGoalscorerProbability({ expectedMinutes: 90, goalsPer90: blended.rate, teamAttackMultiplier: 1.2, opponentDefenseMultiplier: 1.3 });
+  assert.ok(probaBrute.probability > 0.8, "confirme le bug reproduit : le taux brut donne bien une probabilite extreme (>80%)");
+  assert.ok(probaLissee.probability < probaBrute.probability, "le taux lisse doit produire une probabilite moins extreme que le taux brut");
+});
+
+test("blendPlayerRateAcrossSeasons: aucune saison precedente (transfert/nouveau joueur) -> taux brut retourne tel quel, jamais un prior invente", () => {
+  var r = blendPlayerRateAcrossSeasons(2, 229 / 90, null, null);
+  assert.equal(r.shrinkage_applied, false);
+  assert.equal(r.previous_equivalent_matches, 0);
+  assert.ok(Math.abs(r.rate - 2 / (229 / 90)) < 1e-9);
+});
+
+test("blendPlayerRateAcrossSeasons: grand echantillon courant (>=16 matchs) -> le prior converge vers zero, quasi aucun lissage restant", () => {
+  var r = blendPlayerRateAcrossSeasons(10, 16, 12, 30);
+  assert.equal(r.previous_equivalent_matches, 0, "prior_weight(16)=max(0,8-8)=0 - identique a la convention deja testee de lib/lab/bayes-early-season.js");
+  assert.ok(Math.abs(r.rate - 10 / 16) < 1e-9);
+});
+
+test("blendPlayerRateAcrossSeasons: donnees courantes manquantes (null) -> null, jamais une division par zero silencieuse", () => {
+  assert.equal(blendPlayerRateAcrossSeasons(2, null, 12, 30).rate, null);
+});
+
+test("blendPlayerRateAcrossSeasons: 0 minute cette saison mais saison precedente connue -> repli entier sur le prior (0.4), pas null", () => {
+  var r = blendPlayerRateAcrossSeasons(0, 0, 12, 30);
+  assert.ok(Math.abs(r.rate - 0.4) < 1e-9);
 });

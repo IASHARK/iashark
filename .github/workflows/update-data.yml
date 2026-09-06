@@ -42,7 +42,7 @@ jobs:
           const { countLineProbability } = require('./lib/markets/count-model.js');
           const { combineCountMatchup } = require('./lib/markets/count-matchup.js');
           const { buildSegmentMarkets, estimateFirstHalfShare } = require('./lib/markets/segment-model.js');
-          const { buildPlayerMarketOutput } = require('./lib/markets/player-engine.js');
+          const { buildPlayerMarketOutput, blendPlayerRateAcrossSeasons } = require('./lib/markets/player-engine.js');
           const { pickTopScorerCandidates } = require('./lib/markets/top-scorer-picker.js');
           const I18N_LOCALES = require('./i18n/locales.json');
           const I18N_PAGES = require('./scripts/i18n-manifest.js');
@@ -779,6 +779,25 @@ jobs:
             var defenseMultHome = critHome ? Math.max(0.5, Math.min(1.5, critHome.def/50)) : 1;
             var defenseMultAway = critAway ? Math.max(0.5, Math.min(1.5, critAway.def/50)) : 1;
             var results = [];
+            // Lisse un taux par-90 vers la saison precedente du MEME joueur
+            // quand l'echantillon courant est petit (lib/markets/player-
+            // engine.js#blendPlayerRateAcrossSeasons, prior_weight(n)=
+            // max(0,8-0.5n) - identique a la convention deja en place pour
+            // les equipes). N'appelle l'API saison precedente que si
+            // necessaire (appearences<16, sinon le poids du prior est deja
+            // nul par construction - jamais un appel gaspille).
+            async function shrinkRate(playerId, teamId, rawRate, currentGames, currentMinutes, eventsField){
+              if(rawRate==null) return rawRate;
+              if((currentGames.appearences||0) >= 16) return rawRate;
+              var prevStats = await getPlayerSeasonStats(playerId, teamId, season-1);
+              await sleep(150);
+              if(!prevStats || !prevStats.games.minutes) return rawRate;
+              var blended = blendPlayerRateAcrossSeasons(
+                rawRate*(currentMinutes/90), currentMinutes/90,
+                prevStats[eventsField], prevStats.games.minutes/90
+              );
+              return blended.rate!=null ? blended.rate : rawRate;
+            }
             async function processTeamSide(teamLineup, teamId, teamAttackMult, opponentDefenseMult) {
               if(!teamLineup) return;
               var starters = (teamLineup.startXI||[]).filter(function(p){return p.id;});
@@ -789,8 +808,11 @@ jobs:
                 var stats = await getPlayerSeasonStats(p.id, teamId, season);
                 await sleep(150);
                 if(!stats) continue;
-                ['ANYTIME_GOALSCORER','PLAYER_SHOTS','PLAYER_SHOTS_ON_TARGET'].forEach(function(market){
-                  var ratePer90 = stats.games.minutes>0 ? (market==='ANYTIME_GOALSCORER'?stats.goalsTotal:market==='PLAYER_SHOTS'?stats.shotsTotal:stats.shotsOnTarget)/(stats.games.minutes/90) : null;
+                for(var mi=0; mi<3; mi++){
+                  var market = ['ANYTIME_GOALSCORER','PLAYER_SHOTS','PLAYER_SHOTS_ON_TARGET'][mi];
+                  var eventsField = market==='ANYTIME_GOALSCORER'?'goalsTotal':market==='PLAYER_SHOTS'?'shotsTotal':'shotsOnTarget';
+                  var rawRatePer90 = stats.games.minutes>0 ? stats[eventsField]/(stats.games.minutes/90) : null;
+                  var ratePer90 = await shrinkRate(p.id, teamId, rawRatePer90, stats.games, stats.games.minutes, eventsField);
                   var out = buildPlayerMarketOutput({
                     fixtureId:fixtureId, playerId:p.id, market:market,
                     lineupStatus:'confirmed_starter', historicalMinutes:stats.games,
@@ -798,7 +820,7 @@ jobs:
                     penaltyGoalsPer90: market==='ANYTIME_GOALSCORER' && stats.games.minutes>0 ? stats.penaltyScored/(stats.games.minutes/90) : undefined,
                   });
                   if(out){ out.player_name=p.name; results.push(out); }
-                });
+                }
               }
               for(var bi=0; bi<bench.length; bi++){
                 var pb = bench[bi];
@@ -806,7 +828,8 @@ jobs:
                 var statsB = await getPlayerSeasonStats(pb.id, teamId, season);
                 await sleep(150);
                 if(!statsB) continue;
-                var goalRateB = statsB.games.minutes>0 ? statsB.goalsTotal/(statsB.games.minutes/90) : null;
+                var rawGoalRateB = statsB.games.minutes>0 ? statsB.goalsTotal/(statsB.games.minutes/90) : null;
+                var goalRateB = await shrinkRate(pb.id, teamId, rawGoalRateB, statsB.games, statsB.games.minutes, 'goalsTotal');
                 var outB = buildPlayerMarketOutput({
                   fixtureId:fixtureId, playerId:pb.id, market:'ANYTIME_GOALSCORER',
                   lineupStatus:'confirmed_bench', historicalMinutes:statsB.games,

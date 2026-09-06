@@ -1,0 +1,98 @@
+{
+  "protocol": "SCORE_LAB_FACTORY_V2",
+  "phase": "C_HOLDOUT_EVALUATION",
+  "league_key": "bundesliga",
+  "holdout_season": 2025,
+  "champion": "M2",
+  "generated_at": "2026-09-06T17:23:26.972Z",
+  "gates": {
+    "POINT_IN_TIME_INTEGRITY": {
+      "pass": true,
+      "all_predictions_are_holdout": true,
+      "rho_never_refit": true
+    },
+    "DATA_COVERAGE": {
+      "pass": true,
+      "coverage_rate": 0.9935064935064936,
+      "n_valid": 306,
+      "total_fixtures": 308,
+      "rate_threshold": 0.9,
+      "absolute_floor": 200,
+      "rate_ok": true,
+      "floor_ok": true
+    },
+    "EXACT_SCORE_NLL": {
+      "pass": true,
+      "nll_holdout": 3.081654304643451,
+      "threshold": 3.182831045128937
+    },
+    "CALIBRATION": {
+      "pass": true,
+      "slope": 1.1678891828782467,
+      "intercept": 0.1086467168166068,
+      "converged": true,
+      "ece": 0.027589541444881294,
+      "threshold_ece": 0.07388632126732357
+    },
+    "MARKET_MARGINALS": {
+      "pass": false,
+      "detail": {
+        "ou25": {
+          "oos_dev": 0.6679488477782894,
+          "holdout": 0.658386418955506,
+          "pass": true
+        },
+        "btts": {
+          "oos_dev": 0.6628402056429079,
+          "holdout": 0.6841239153411645,
+          "pass": false
+        },
+        "x12": {
+          "oos_dev": 0.9941808944951613,
+          "holdout": 0.9787438999403479,
+          "pass": true
+        }
+      }
+    },
+    "TEMPORAL_STABILITY": {
+      "pass": true,
+      "nll_half1": 3.160720798673589,
+      "nll_half2": 3.002587810613312,
+      "threshold": 3.182831045128937
+    },
+    "NO_CATASTROPHIC_SECONDARY_DEGRADATION": {
+      "pass": true,
+      "holdout_low_score": {
+        "0-0": {
+          "count_observed": 12,
+          "nll_contribution": 2.588699400436319
+        },
+        "1-0": {
+          "count_observed": 22,
+          "nll_contribution": 2.7938695943705643
+        },
+        "0-1": {
+          "count_observed": 16,
+          "nll_contribution": 2.7107155842029447
+        },
+        "1-1": {
+          "count_observed": 34,
+          "nll_contribution": 2.1456483999106064
+        }
+      },
+      "degraded": []
+    },
+    "REPRODUCIBILITY": {
+      "pass": true
+    }
+  },
+  "reject_triggers": [],
+  "inconclusive_triggers": [
+    "MARKET_MARGINALS"
+  ],
+  "verdict": "INCONCLUSIVE",
+  "score_runnable": false,
+  "hash_run1": "714e9587491e1f9f36892d8b1cff751a6b471a9284c055e7d5b0b7601bf9ffce",
+  "hash_run2": "714e9587491e1f9f36892d8b1cff751a6b471a9284c055e7d5b0b7601bf9ffce",
+  "reproducible": true
+}

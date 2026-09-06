@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-06T17:13:08.821Z",
+  "generated_at": "2026-09-06T17:24:05.645Z",
   "leagues": {
     "laliga": {
       "league_key": "laliga",
@@ -75,11 +75,27 @@
       "score_runnable": false,
       "player_runnable": true,
       "live_eligible": false,
-      "updated_at": "2026-09-06T00:40:54.793Z",
+      "updated_at": "2026-09-06T17:24:05.638Z",
       "current_score_champion_bundesliga": null,
       "current_player_champion_bundesliga": "PLAYER_SCORER_V1_AGGREGATED_SHARE_BUNDESLIGA",
       "bundesliga_full_model_status": "PARTIAL_PLAYER_ONLY",
-      "note": "OOS_DEV(2023) puis OOS_FINAL(2024) termines, chaque etape gelee avant lecture. Score=INCONCLUSIVE (M0_APPROX_B0_CI_CROSSES_ZERO). Player=VALIDATED (VALIDATED_LEAGUE_PLAYER_FINAL). Reproductibilite : Score=true Player=true."
+      "note": "OOS_DEV(2023) puis OOS_FINAL(2024) termines, chaque etape gelee avant lecture. Score=INCONCLUSIVE (M0_APPROX_B0_CI_CROSSES_ZERO). Player=VALIDATED (VALIDATED_LEAGUE_PLAYER_FINAL). Reproductibilite : Score=true Player=true.",
+      "score_lab_factory_v2": {
+        "protocol": "SCORE_LAB_FACTORY_V2",
+        "champion_selected": "M2",
+        "pre_holdout_sha": "322b266ab12b17b9ce05c846cd3e4fb3271654e8",
+        "holdout_season": 2025,
+        "verdict": "INCONCLUSIVE",
+        "score_runnable_under_v2": false,
+        "reject_triggers": [],
+        "inconclusive_triggers": [
+          "MARKET_MARGINALS"
+        ],
+        "reproducible": true,
+        "exact_score_nll_holdout": 3.081654304643451,
+        "exact_score_nll_threshold": 3.182831045128937,
+        "note": "Holdout 2025 CONSOMME (une seule fois). INCONCLUSIVE : EXACT_SCORE_NLL/CALIBRATION/TEMPORAL_STABILITY tous PASS, seul MARKET_MARGINALS echoue (BTTS logloss +3.2% > seuil 3%, tres proche). Aucun forcage, aucun retuning, aucune deuxieme tentative."
+      }
     },
     "seriea": {
       "league_key": "seriea",

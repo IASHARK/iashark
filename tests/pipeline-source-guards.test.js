@@ -140,8 +140,11 @@ test("pipeline source: seul v3.football.api-sports.io passe par la file API_FETC
 // ---------------------------------------------------------------
 
 test("pipeline source: RUN OUTPUT ENGINE branche via require, jamais reimplemente inline", () => {
-  assert.match(source, /require\('\.\/lib\/run-output\/index\.js'\)/);
-  assert.match(source, /require\('\.\/lib\/run-output\/build-legacy-score-candidates\.js'\)|buildScoreCandidatesFromLegacyMatch, buildPlayerCandidatesFromLegacyMatch \} = require\('\.\/lib\/run-output\/index\.js'\)/);
+  const requireLine = source.match(/const \{[^}]*\} = require\('\.\/lib\/run-output\/index\.js'\);/);
+  assert.ok(requireLine, "require('./lib/run-output/index.js') introuvable");
+  for (const name of ["runOutputForSnapshot", "buildScoreCandidatesFromLegacyMatch", "buildPlayerCandidatesFromLegacyMatch"]) {
+    assert.ok(requireLine[0].includes(name), name + " doit etre importe depuis lib/run-output/index.js");
+  }
 });
 
 test("pipeline source: observabilite - GITHUB_SHA/RUN_OUTPUT_ENGINE_VERSION/CANONICAL_REGISTRY_HASH logues au debut, SAFE/TOP5/COMBOS logues a la fin (meme si vides)", () => {
@@ -181,4 +184,25 @@ test("pipeline source: RUN_OUTPUT_CANDIDATES construit exclusivement depuis allM
 
 test("pipeline source: buildPlayerCandidatesFromLegacyMatch (toujours []) est utilise, jamais topScorerCandidates comme source de candidats Player canoniques", () => {
   assert.match(source, /RUN_OUTPUT_CANDIDATES\.push\.apply\(RUN_OUTPUT_CANDIDATES, buildPlayerCandidatesFromLegacyMatch\(\)\)/);
+});
+
+test("pipeline source: SAFE_PICK_OF_THE_DAY canonique est injectee sur la carte EXISTANTE de son match (pari_rec/cote_rec/model_probability), et devient prioritairement l'analyse offerte du jour", () => {
+  assert.match(source, /matchCibleSafePick\.pari_rec=legacyLabelForCanonicalMarket\(safePick\.market\)/);
+  assert.match(source, /matchCibleSafePick\.cote_rec=safePick\.decimal_odds/);
+  assert.match(source, /matchCibleSafePick\.model_probability=safePick\.model_probability_pct/);
+  assert.match(source, /matchCibleSafePick\.is_canonical_pick=true/);
+  // designerMatchGratuit doit verifier is_canonical_pick EN PREMIER, avant
+  // toute logique de confiance legacy.
+  const designerBlock = source.slice(source.indexOf("(function designerMatchGratuit(){"), source.indexOf("})();"));
+  const canoniqueCheckIndex = designerBlock.indexOf("m.is_canonical_pick");
+  const legacyCandidatsIndex = designerBlock.indexOf("var candidats=allMatchsData.filter");
+  assert.ok(canoniqueCheckIndex >= 0 && canoniqueCheckIndex < legacyCandidatsIndex, "la verification is_canonical_pick doit precéder la logique de selection legacy par confiance");
+});
+
+test("pipeline source: l'injection SAFE_PICK a lieu AVANT designerMatchGratuit/matchsPublics, jamais apres", () => {
+  const runOutputCallIndex = source.indexOf("var runOutput = runOutputForSnapshot(");
+  const designerIndex = source.indexOf("(function designerMatchGratuit(){");
+  const matchsPublicsIndex = source.indexOf("var matchsPublics=allMatchsData.map");
+  assert.ok(runOutputCallIndex < designerIndex, "runOutputForSnapshot doit etre appele avant designerMatchGratuit");
+  assert.ok(runOutputCallIndex < matchsPublicsIndex, "runOutputForSnapshot doit etre appele avant la construction de matchsPublics");
 });

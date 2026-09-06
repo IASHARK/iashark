@@ -14,6 +14,7 @@ const {
   leagueKeyForApiFootballId,
   buildScoreCandidatesFromLegacyMatch,
   buildPlayerCandidatesFromLegacyMatch,
+  legacyLabelForCanonicalMarket,
 } = require("../lib/run-output/build-legacy-score-candidates.js");
 const { runOutputForSnapshot, loadCanonicalEligibilityRegistry } = require("../lib/run-output/index.js");
 const { loadRegistry } = require("../lib/league-factory/registry.js");
@@ -81,6 +82,13 @@ test("buildScoreCandidatesFromLegacyMatch : model_probability et decimal_odds co
 
 test("buildPlayerCandidatesFromLegacyMatch : retourne toujours [] aujourd'hui (jamais le moteur legacy rejete)", () => {
   assert.deepEqual(buildPlayerCandidatesFromLegacyMatch(), []);
+});
+
+test("legacyLabelForCanonicalMarket : libelles FR coherents avec les candidat(...) legacy existants, jamais le marche brut affiche a l'utilisateur", () => {
+  assert.equal(legacyLabelForCanonicalMarket("FT_BTTS_YES"), "BTTS Oui");
+  assert.equal(legacyLabelForCanonicalMarket("FT_1X2_HOME"), "Victoire Domicile");
+  assert.equal(legacyLabelForCanonicalMarket("FT_TEAM_TOTAL_HOME_1.5_UNDER"), "Domicile moins de 1.5 but");
+  assert.equal(legacyLabelForCanonicalMarket("UNKNOWN_MARKET_ID"), "UNKNOWN_MARKET_ID", "repli honnete sur l'id brut plutot qu'un libelle invente, si jamais un nouveau marche canonique apparait sans traduction");
 });
 
 // ---------------------------------------------------------------

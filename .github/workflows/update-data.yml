@@ -58,7 +58,7 @@ jobs:
           const crypto = require('crypto');
           const { loadRegistry: loadLeagueFactoryRegistry } = require('./lib/league-factory/registry.js');
           const LEAGUE_EXPANSION_CONFIG = require('./config/league-expansion.json');
-          const { runOutputForSnapshot, loadCanonicalEligibilityRegistry, leagueKeyForApiFootballId, buildScoreCandidatesFromLegacyMatch, buildPlayerCandidatesFromLegacyMatch } = require('./lib/run-output/index.js');
+          const { runOutputForSnapshot, loadCanonicalEligibilityRegistry, leagueKeyForApiFootballId, buildScoreCandidatesFromLegacyMatch, buildPlayerCandidatesFromLegacyMatch, legacyLabelForCanonicalMarket } = require('./lib/run-output/index.js');
           const RUN_OUTPUT_ENGINE_VERSION = 'run-output-engine-v1';
           var LEAGUE_COVERAGE_REPORT = null;
           try { LEAGUE_COVERAGE_REPORT = JSON.parse(fs.readFileSync('./league-coverage-report.json', 'utf8')); }
@@ -2951,6 +2951,45 @@ jobs:
             var allMatchsData = matchsData.slice();
             allMatchsData.sort(function(a,b){return (a.date||'').localeCompare(b.date||'');});
             matchsData.sort(function(a,b){var tA=(a.date||'').split(' ')[1]||'99:99';var tB=(b.date||'').split(' ')[1]||'99:99';return tA<tB?-1:tA>tB?1:0;});
+            // ============= RUN OUTPUT ENGINE (moteur produit canonique) =============
+            // Appele UNE SEULE FOIS ici, apres le calcul de TOUTES les fixtures
+            // (RUN_OUTPUT_CANDIDATES deja rempli fixture par fixture ci-dessus) et
+            // AVANT designerMatchGratuit()/matchsPublics - pour pouvoir faire
+            // apparaitre une SAFE_PICK_OF_THE_DAY canonique directement sur la
+            // carte EXISTANTE du match concerne (reutilise l'affichage deja en
+            // place, aucun nouvel ecran). Jamais un nouveau calcul de
+            // probabilite : uniquement selection/classement/assemblage au-dessus
+            // des marches deja geles. runOutputForSnapshot fusionne lui-meme le
+            // registry League Expansion Factory avec le statut canonique Premier
+            // League (lib/run-output/canonical-registry.js) : aucune ligue n'est
+            // jamais eligible ici sans etre passee par cette meme porte.
+            var RUN_OUTPUT_SNAPSHOT_TIME = new Date().toISOString();
+            var runOutput = runOutputForSnapshot({
+              candidates: RUN_OUTPUT_CANDIDATES,
+              registry: RUN_OUTPUT_CANONICAL_REGISTRY,
+              snapshotTime: RUN_OUTPUT_SNAPSHOT_TIME,
+              runId: 'DAILY_'+TODAY,
+            });
+            // Injection directe de la SAFE_PICK_OF_THE_DAY sur la carte
+            // existante de son match (jamais l'inverse : le pick canonique
+            // remplace l'ancien pour CE match precis, uniquement quand le
+            // moteur canonique en a reellement selectionne un). is_canonical_pick
+            // trace explicitement l'origine du champ pour tout audit futur.
+            if(runOutput.SAFE_PICK_OF_THE_DAY.status==='SELECTED'){
+              var safePick=runOutput.SAFE_PICK_OF_THE_DAY;
+              var matchCibleSafePick=allMatchsData.find(function(m){ return m && m.id===safePick.fixture.fixture_id; });
+              if(matchCibleSafePick){
+                matchCibleSafePick.pari_rec=legacyLabelForCanonicalMarket(safePick.market);
+                matchCibleSafePick.cote_rec=safePick.decimal_odds;
+                matchCibleSafePick.model_probability=safePick.model_probability_pct;
+                matchCibleSafePick.conf=Math.round((safePick.model_probability_pct/10)*10)/10;
+                matchCibleSafePick.no_signal=false;
+                matchCibleSafePick.is_canonical_pick=true;
+                console.log('  [RUN_OUTPUT] SAFE_PICK_OF_THE_DAY injectee sur la carte existante du match '+matchCibleSafePick.id+' ('+(matchCibleSafePick.home&&matchCibleSafePick.home.n)+' vs '+(matchCibleSafePick.away&&matchCibleSafePick.away.n)+') : '+matchCibleSafePick.pari_rec+' @ '+matchCibleSafePick.cote_rec);
+              } else {
+                console.log('  [RUN_OUTPUT] SAFE_PICK_OF_THE_DAY selectionnee (fixture '+safePick.fixture.fixture_id+') mais match introuvable dans allMatchsData - injection ignoree, aucune carte modifiee.');
+              }
+            }
             // ================= PROTECTION DU FICHIER PUBLIC =================
             // data.json est servi sans authentification. Il ne doit donc plus
             // contenir le marche recommande, sa cote, la probabilite du modele
@@ -2973,6 +3012,16 @@ jobs:
               console.log('  [ACCES] ATTENTION : SUPABASE_SERVICE_ROLE_KEY absente. Les champs premium ne peuvent pas etre persliste ailleurs, ils restent donc dans data.json public. A CORRIGER.');
             }
             (function designerMatchGratuit(){
+              // Priorite absolue : si le moteur canonique (RUN_OUTPUT_ENGINE) a
+              // reellement selectionne une SAFE_PICK_OF_THE_DAY ci-dessus, c'est
+              // TOUJOURS elle l'analyse offerte du jour - jamais un pick legacy
+              // non valide, meme avec une confiance affichee plus haute.
+              var matchCanonique=allMatchsData.find(function(m){ return m && m.is_canonical_pick; });
+              if(matchCanonique){
+                allMatchsData.forEach(function(m){ if(m) m.is_free=(m===matchCanonique); });
+                console.log('  [ACCES] analyse offerte du jour (SAFE_PICK_OF_THE_DAY canonique) : '+matchCanonique.id+' ('+(matchCanonique.home&&matchCanonique.home.n)+' vs '+(matchCanonique.away&&matchCanonique.away.n)+')');
+                return;
+              }
               var candidats=allMatchsData.filter(function(m){
                 return m && m.pari_rec && !m.no_signal && (m.date||'').split(' ')[0]===TODAY;
               });
@@ -3003,22 +3052,6 @@ jobs:
             });
             var retires=allMatchsData.length-matchsPublics.filter(function(m){return m&&m.pari_rec;}).length;
             console.log('  [ACCES] '+retires+' analyse(s) retiree(s) du data.json public.');
-            // ============= RUN OUTPUT ENGINE (moteur produit canonique) =============
-            // Appele UNE SEULE FOIS ici, apres le calcul de TOUTES les fixtures
-            // (RUN_OUTPUT_CANDIDATES deja rempli fixture par fixture ci-dessus) et
-            // AVANT la publication finale de data.json - jamais un nouveau calcul
-            // de probabilite, uniquement selection/classement/assemblage au-dessus
-            // des marches deja geles. runOutputForSnapshot fusionne lui-meme le
-            // registry League Expansion Factory avec le statut canonique Premier
-            // League (lib/run-output/canonical-registry.js) : aucune ligue n'est
-            // jamais eligible ici sans etre passee par cette meme porte.
-            var RUN_OUTPUT_SNAPSHOT_TIME = new Date().toISOString();
-            var runOutput = runOutputForSnapshot({
-              candidates: RUN_OUTPUT_CANDIDATES,
-              registry: RUN_OUTPUT_CANONICAL_REGISTRY,
-              snapshotTime: RUN_OUTPUT_SNAPSHOT_TIME,
-              runId: 'DAILY_'+TODAY,
-            });
             // legacy_output : separation EXPLICITE demandee - matchsPublics
             // (l'ancienne analyse par match, marches shots/1ere-mi-temps inclus)
             // ne doit JAMAIS servir de source a SAFE/Top5/Combos ni a de futurs

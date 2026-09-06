@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-05T23:30:46.190Z",
+  "generated_at": "2026-09-06T00:00:14.872Z",
   "leagues": {
     "laliga": {
       "league_key": "laliga",
@@ -19,24 +19,29 @@
         ]
       },
       "score_champion": "SCORE_M0_LALIGA",
-      "score_status": "OOS_DEV_M2_REJECTED_M0_STANDS",
+      "score_status": "INCONCLUSIVE",
       "player_champion": "PLAYER_SCORER_V1_AGGREGATED_SHARE_LALIGA",
-      "player_status": "OOS_DEV_PASSED_PENDING_OOS_FINAL",
-      "market_status": "NOT_ASSESSED_THIS_PASS",
+      "player_status": "VALIDATED",
+      "market_status": "MARKET_VALIDATION_PENDING",
       "oos_report_hashes": {
         "score_oos_dev_manifest_hash": "67c12795353b37f664accc253737c138e952f2aeb226ee27f8ab848da66fa87a",
-        "player_oos_dev_manifest_hash": "6993d74e201a941eaf4b2977e7b28435675a50f6473eb0725866d8e62f0a5f96"
+        "player_oos_dev_manifest_hash": "6993d74e201a941eaf4b2977e7b28435675a50f6473eb0725866d8e62f0a5f96",
+        "score_oos_final_manifest_hash": "653e8b49959e53a363b66734fe28e84917c348a315dc765c42de89597388af02",
+        "player_oos_final_manifest_hash": "cd045fee991d664c28a60c0187a80842fdfe604daa8249ea520a88be7e73b911"
       },
       "score_runnable": false,
-      "player_runnable": false,
+      "player_runnable": true,
       "live_eligible": false,
-      "updated_at": "2026-09-05T23:26:32.352Z",
+      "updated_at": "2026-09-05T23:53:07.020Z",
       "pre_oos_score_rho_candidate": -0.016248274946499275,
       "pre_oos_score_convergence_rate": 1,
       "pre_oos_player_anti_leakage_pass": true,
       "pre_oos_player_determinism_pass": true,
       "pre_oos_goal_reconciliation_pct": 100,
-      "note": "OOS_DEV termine (2023-24). OOS_FINAL (2024-25) reste SEALED_UNREAD - VALIDATED final et *_runnable=true attendent cette confirmation, jamais accordes sur la seule base de OOS_DEV."
+      "note": "OOS_FINAL (2024-25) termine. Player VALIDATED (confirme, reproductible). Score INCONCLUSIVE (M0 non rejete face au baseline B0=Poisson independant mais gain non confirme statistiquement, CI traverse zero, n=377) - pas un echec du Score Engine, un signal insuffisant sur cet echantillon. score_runnable/live_eligible restent false tant que SCORE_LALIGA n'est pas VALIDATED. Aucun nouveau modele/tuning post-hoc.",
+      "current_player_champion_laliga": "PLAYER_SCORER_V1_AGGREGATED_SHARE_LALIGA",
+      "current_score_champion_laliga": null,
+      "laliga_full_model_status": "PARTIAL_PLAYER_ONLY"
     }
   }
 }

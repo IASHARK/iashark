@@ -1,0 +1,68 @@
+{
+  "protocol": "LEAGUE_SCORE_PRODUCTION_VALIDATION_V1",
+  "phase": "1A_CHAMPION_SELECTION",
+  "league_key": "seriea",
+  "generated_at": "2026-09-06T16:17:55.375Z",
+  "train_seasons": [
+    2021,
+    2022
+  ],
+  "oos_dev_season": 2023,
+  "consistency_check_nll_m0_matches_existing_oos_dev_report": true,
+  "candidates": {
+    "B0": {
+      "model_id": "SCORE_B0_SERIEA",
+      "nll": 2.8159942202946664,
+      "secondary": {
+        "ou25_logloss": 0.6701306813445661,
+        "btts_logloss": 0.6869735298086408,
+        "x12_logloss": 1.0116726947884311
+      },
+      "n_oos": 377,
+      "structural": {
+        "convergence_rate": 1,
+        "boundary_hit_rate": 0,
+        "rho_std": 0,
+        "note": "rho=0 fixe, jamais fitte - aucune instabilite possible"
+      }
+    },
+    "M0": {
+      "model_id": "SCORE_M0_SERIEA",
+      "nll": 2.814636397002593,
+      "secondary": {
+        "ou25_logloss": 0.6701306813445661,
+        "btts_logloss": 0.6872557488994379,
+        "x12_logloss": 1.0086149625219363
+      },
+      "n_oos": 377,
+      "structural": {
+        "convergence_rate": 1,
+        "boundary_hit_rate": 0,
+        "rho_std": 0.019021964881483864,
+        "source": "data/league-factory/seriea/score-lab-preoss.json (deja calcule, jamais retunee ici)"
+      }
+    },
+    "M2": {
+      "model_id": "SCORE_M2_SERIEA",
+      "nll": 2.8075832287045173,
+      "secondary": {
+        "ou25_logloss": 0.6672325649680452,
+        "btts_logloss": 0.686593120685965,
+        "x12_logloss": 1.0080566037103904
+      },
+      "n_oos": 377,
+      "structural": {
+        "convergence_rate": 1,
+        "boundary_hit_rate": 0,
+        "rho_std": 0.019021964881483864,
+        "source": "data/league-factory/seriea/score-lab-preoss.json (deja calcule, jamais retunee ici)"
+      },
+      "note": "partage le rho de M0 (meme fit) - ajoute la structure early-season Bayes par-dessus"
+    }
+  },
+  "vetoed": {},
+  "primary_winner_before_secondary_veto": "M2",
+  "secondary_veto": null,
+  "champion_selected": "M2",
+  "champion_selection_reason": "M2 a le meilleur EXACT_SCORE_NLL absolu (2.807583) parmi les candidats non-vetoes structurellement, sans degradation secondaire disqualifiante vs les autres."
+}

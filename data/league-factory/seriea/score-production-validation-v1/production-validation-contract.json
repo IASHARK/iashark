@@ -1,0 +1,110 @@
+{
+  "contract": {
+    "protocol": "LEAGUE_SCORE_PRODUCTION_VALIDATION_V1",
+    "phase": "1B_CONTRACT_FREEZE",
+    "league_key": "seriea",
+    "frozen_at": "2026-09-06T16:22:45.130Z",
+    "frozen_before_holdout_access": true,
+    "champion": {
+      "model_id": "M2",
+      "selection_reason": "M2 a le meilleur EXACT_SCORE_NLL absolu (2.807583) parmi les candidats non-vetoes structurellement, sans degradation secondaire disqualifiante vs les autres.",
+      "rho": -0.04071411055697992,
+      "league_avg_h": 1.4120734908136483,
+      "league_avg_a": 1.1548556430446195,
+      "structural_formula": "prior_equivalents(n)=max(0,8-0.5n) (lib/lab/bayes-early-season.js, transferee de PL sans retuning, testee ici honnetement)",
+      "code_sha_at_freeze": "b0a92c24f3b9d9e44525ffdce448c39568110329",
+      "dataset_hashes_train_oos_dev": {
+        "warmup_2021": "70dda9e13c79b7ae881d12522278350fba7143fbdf1db630979db3ccfaf9bde4",
+        "train_2022": "2f505ebce391664ba58088c596352b328fe2e661760bd508cc1989133afc6d27",
+        "oos_dev_2023": "c0172d322c53fb997a1df52587ea4c6d28d3d0f89ea56ac450a3e4cd292985d9"
+      },
+      "n_oos_dev_used_for_thresholds": 377
+    },
+    "champion_frozen": true,
+    "gates": {
+      "POINT_IN_TIME_INTEGRITY": {
+        "description": "Chaque prediction du holdout doit avoir un cutoff strictement anterieur a son coup d'envoi ; aucune fixture 2025 (ni 2024) ne doit jamais apparaitre dans la reconstruction d'etat d'equipe utilisee pour une prediction d'une AUTRE fixture 2025 anterieure ; rho/leagueAvg restent EXACTEMENT ceux geles ci-dessus, jamais refittes.",
+        "pass_condition": "0 violation detectee (assertion programmatique dans le script Phase 3)"
+      },
+      "DATA_COVERAGE": {
+        "description": "Nombre de predictions valides sur le holdout 2025.",
+        "threshold": 500,
+        "source": "lib/promotion.js#MIN_N_OOS (deja pre-enregistre, reutilise tel quel)",
+        "pass_condition": "n_oos_holdout >= 500"
+      },
+      "REPRODUCIBILITY": {
+        "description": "Le script Phase 3 execute deux fois (meme process) - hash SHA-256 du rapport complet doit etre identique.",
+        "pass_condition": "hash_run1 === hash_run2"
+      },
+      "EXACT_SCORE_NLL": {
+        "description": "NLL du champion gele sur le holdout, comparee a l'enveloppe de variabilite DEJA OBSERVEE sur OOS_DEV (bootstrap par blocs, 10000 reechantillonnages, seed pre-enregistre).",
+        "oos_dev_observed_mean_nll": 2.8075832287045173,
+        "oos_dev_bootstrap_ci": [
+          2.7347615949114226,
+          2.8856013913092666
+        ],
+        "threshold": 2.8856013913092666,
+        "source": "Bootstrap par blocs (lib/lab/bootstrap.js#pairedBlockBootstrap, reutilise tel quel - deltas=NLL du champion lui-meme) sur OOS_DEV(2023), jamais un nombre invente ni copie d'une autre ligue.",
+        "pass_condition": "nll_holdout <= 2.8856013913092666"
+      },
+      "CALIBRATION": {
+        "description": "Calibration 1X2 (intercept/slope logistique, lib/player-lab/oos-eval-metrics.js#calibrationInterceptSlope, reutilise tel quel) + Expected Calibration Error (ECE).",
+        "oos_dev_slope": 0.9277153079927336,
+        "oos_dev_intercept": -0.046790665609423195,
+        "oos_dev_converged": true,
+        "oos_dev_ece": 0.00946745544332199,
+        "threshold_ece": 0.01893491088664398,
+        "source": "Tolerance = 2x l'ECE DEJA MESURE du champion sur OOS_DEV (jamais un seuil absolu invente - aucune convention numerique pre-existante trouvee ailleurs dans ce codebase pour un seuil de calibration absolu, donc derive de la propre performance du champion).",
+        "pass_condition": "calibration_converged_holdout === true ET ece_holdout <= 0.018935"
+      },
+      "MARKET_MARGINALS": {
+        "description": "Logloss O/U2.5, BTTS, 1X2 sur le holdout vs OOS_DEV.",
+        "oos_dev_logloss": {
+          "ou25": 0.6672325649680452,
+          "btts": 0.686593120685965,
+          "x12": 0.589484368129576
+        },
+        "max_relative_degradation": 0.03,
+        "source": "lib/promotion.js#MAX_SECONDARY_DEGRADATION (3%, deja pre-enregistre, reutilise tel quel)",
+        "pass_condition": "pour chaque marche, logloss_holdout <= logloss_oos_dev * (1+0.03)"
+      },
+      "TEMPORAL_STABILITY": {
+        "description": "Le holdout 2025 est coupe en 2 moities par date de coup d'envoi ; CHAQUE moitie doit independamment satisfaire le meme seuil EXACT_SCORE_NLL ci-dessus.",
+        "source": "Reutilise le seuil EXACT_SCORE_NLL deja derive ci-dessus, applique separement a chaque moitie temporelle - jamais un nouveau nombre.",
+        "pass_condition": "nll_holdout_half1 <= 2.8856013913092666 ET nll_holdout_half2 <= 2.8856013913092666"
+      },
+      "NO_CATASTROPHIC_SECONDARY_DEGRADATION": {
+        "description": "Scores bas frequents (0-0,1-0,0-1,1-1) : contribution NLL par cellule, holdout vs OOS_DEV.",
+        "oos_dev_low_score": {
+          "0-0": {
+            "count_observed": 29,
+            "nll_contribution": 2.621206124975412
+          },
+          "1-0": {
+            "count_observed": 43,
+            "nll_contribution": 2.361551708112178
+          },
+          "0-1": {
+            "count_observed": 24,
+            "nll_contribution": 2.626936440092268
+          },
+          "1-1": {
+            "count_observed": 51,
+            "nll_contribution": 2.1474938407910678
+          }
+        },
+        "max_relative_degradation": 0.1,
+        "source": "lib/promotion.js#MAX_LOW_SCORE_RELATIVE_DEGRADATION (10%, deja pre-enregistre, reutilise tel quel)",
+        "pass_condition": "pour chaque cellule avec >=5 observations sur le holdout, degradation relative <= 0.1"
+      }
+    },
+    "decision_rule": {
+      "REJECT_if": "POINT_IN_TIME_INTEGRITY echoue OU REPRODUCIBILITY echoue OU EXACT_SCORE_NLL echoue (integrite structurelle ou performance primaire compromise - jamais reparable en attendant plus de donnees)",
+      "INCONCLUSIVE_if": "DATA_COVERAGE echoue (pas encore assez de matchs) OU au moins un des gates {CALIBRATION, MARKET_MARGINALS, TEMPORAL_STABILITY, NO_CATASTROPHIC_SECONDARY_DEGRADATION} echoue sans que REJECT ne soit deja declenche",
+      "VALIDATED_if": "TOUS les gates PASS",
+      "never": "Aucun seuil ci-dessus ne sera modifie apres lecture du holdout 2025. Aucun retuning. Aucune deuxieme tentative."
+    },
+    "pre_registration_rule": "Ce contrat est ecrit et hashe AVANT le premier fetch de seriea saison 2025. Un commit git dedie (PRE_HOLDOUT_CONTRACT_SHA) doit exister avant scripts/collect-league-fixtures.js --seasons=2025."
+  },
+  "hash": "68e8c0f3a7a19780d3967640c8ad0d90e1233de451a42205470649255ed7fcad"
+}

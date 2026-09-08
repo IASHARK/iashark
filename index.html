@@ -1144,10 +1144,25 @@ function renderMatchs(){
 async function loadData(){
   try{
     if(window.IasharkApp){try{authCtx=await IasharkApp.context();}catch(e){}}
-    var r=await fetch('/data.json?t='+Date.now());
-    if(!r.ok)throw new Error('HTTP '+r.status);
-    var d=await r.json();
-    allMatchs=d.matchs||[];
+    // Meme source que la page match (match-page.js) : un abonne connecte lit
+    // la fonction Edge 'match-data', qui renvoie les champs premium
+    // (pari_rec/cote_rec/model_probability) non retires. Sans ca, la vitrine
+    // lisait toujours data.json (public, champs premium retires) meme pour
+    // un abonne Pro : les cartes affichaient "aucun marche prioritaire" alors
+    // que la page du meme match, elle, montrait l'analyse complete.
+    allMatchs=null;
+    if(authCtx.session){
+      try{
+        var res=await IasharkApp.supabase.functions.invoke('match-data');
+        if(res.data&&!res.error)allMatchs=res.data.matchs||[];
+      }catch(e){}
+    }
+    if(!allMatchs){
+      var r=await fetch('/data.json?t='+Date.now());
+      if(!r.ok)throw new Error('HTTP '+r.status);
+      var d=await r.json();
+      allMatchs=d.matchs||[];
+    }
     setKpi('kpiJour',allMatchs.length);
     // Un abonne n'a pas a relire l'argumentaire de vente et le tarif a chaque
     // visite : il paie deja. On retire les blocs purement commerciaux et on

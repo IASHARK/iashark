@@ -722,6 +722,7 @@ main a:focus-visible,main button:focus-visible,main summary:focus-visible,
 </nav>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="/lib/display-data.js"></script>
 <script src="/lib/free-match.js"></script>
 <script src="/app-client.js"></script>
 <script>
@@ -1025,7 +1026,15 @@ function buildCard(m){
   // Le pari recommande n'est plus servi pour les matchs payants. has_signal
   // dit qu'une analyse existe, sans la reveler : la carte verrouillee reste
   // donc juste, au lieu d'annoncer a tort "aucun marche prioritaire".
-  var aSignal=!!(m.pari_rec||m.has_signal)&&!m.no_signal;
+  //
+  // hasReliableModelOutput est le MEME filtre que la page match
+  // (lib/match-view-model.js#modelAvailable). Sans lui, un match dont le
+  // pipeline a bien choisi un marche (pari_rec present) mais dont la
+  // qualite de donnees est insuffisante (data_quality_score<=0) affichait
+  // "Les deux equipes marquent" sur la carte pendant que la fiche du match,
+  // plus stricte, refusait de se prononcer : deux pages, deux verdicts.
+  var fiable=window.IasharkDisplayData?IasharkDisplayData.hasReliableModelOutput(m):true;
+  var aSignal=fiable&&!!(m.pari_rec||m.has_signal)&&!m.no_signal;
   // TROIS ETATS, pas deux. Avant, un visiteur voyait trois cartes
   // integralement verrouillees : le mur payant sans jamais la preuve. Le
   // match gratuit du jour est desormais entierement lisible, et les autres
@@ -1087,7 +1096,8 @@ function dayLabel(m){
 }
 function buildHeroFeature(m){
   var heure=(m.date||'').split(' ')[1]||'',hn=m.home&&m.home.n||'',an=m.away&&m.away.n||'';
-  var market=m.pari_rec?translateMarket(m.pari_rec):(m.no_signal_label||'Analyse en cours');
+  var fiableHero=window.IasharkDisplayData?IasharkDisplayData.hasReliableModelOutput(m):true;
+  var market=(fiableHero&&m.pari_rec)?translateMarket(m.pari_rec):(m.no_signal_label||'Analyse en cours');
   function heroLogo(t,name){var u=t&&(t.photo||t.logo||(t.id?'https://media.api-sports.io/football/teams/'+t.id+'.png':''));return u?'<img src="'+u+'" alt="Logo '+esc(name)+'">':'<div class="mc-team-logo-placeholder">'+esc(name.slice(0,2).toUpperCase())+'</div>';}
   return'<a class="feature-card" href="/match/'+m.id+'.html" aria-label="Voir l\'analyse '+esc(hn)+' contre '+esc(an)+'">'
     +'<div class="feature-meta"><div class="feature-league">'+leagueHeader(m)+'</div><div class="feature-meta-right"><span class="feature-free">Analyse gratuite</span><span>'+dayLabel(m)+' · '+heure+'</span></div></div>'

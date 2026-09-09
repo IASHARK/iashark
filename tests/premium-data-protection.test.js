@@ -85,6 +85,6 @@ test("la page d'accueil ne floute plus une donnee premium", () => {
   assert.doesNotMatch(html, /filter:blur\(7px\)/,
     "flouter une vraie donnee en CSS n'est pas une protection : elle reste lisible dans le DOM");
   assert.match(html, /mc-pari-locked-label/, "une mention honnete remplace le faux flou");
-  assert.match(html, /m\.pari_rec\|\|m\.has_signal/,
+  assert.match(html, /m\.pari_rec\|\|m\.market_id\|\|m\.has_signal/,
     "la carte doit rester juste quand le pari n'est pas servi");
 });

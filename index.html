@@ -724,6 +724,7 @@ main a:focus-visible,main button:focus-visible,main summary:focus-visible,
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="/lib/display-data.js"></script>
 <script src="/lib/free-match.js"></script>
+<script src="/lib/market-labels.js"></script>
 <script src="/app-client.js"></script>
 <script>
 var allMatchs=[],currentFilter='all',currentDayFilter='today',currentSport='football',currentSearch='';
@@ -1020,6 +1021,16 @@ function marketInsight(m){
   return'Ouvrez l\'analyse pour voir les facteurs, limites et risques de cette sélection.';
 }
 
+// Le pipeline recent choisit le marche via market_id/marche (voir
+// lib/decision.js#pickMarketDeterministic) - pari_rec n'est plus jamais
+// renseigne. Sans ce repli, buildCard/buildHeroFeature affichaient
+// "Analyse en cours - aucun marche prioritaire" pour des matchs dont le
+// pick etait deja calcule, invisible pour les abonnes payants.
+function marketIdLabel(m){
+  return (m.market_id&&window.IasharkMarketLabels)
+    ?window.IasharkMarketLabels.marketIdLabelFr(m.market_id,{home:m.home&&m.home.n,away:m.away&&m.away.n})
+    :null;
+}
 function buildCard(m){
   var heure=(m.date||'').split(' ')[1]||'';
   var isWC=isWorldCup(m);
@@ -1034,7 +1045,7 @@ function buildCard(m){
   // "Les deux equipes marquent" sur la carte pendant que la fiche du match,
   // plus stricte, refusait de se prononcer : deux pages, deux verdicts.
   var fiable=window.IasharkDisplayData?IasharkDisplayData.hasReliableModelOutput(m):true;
-  var aSignal=fiable&&!!(m.pari_rec||m.has_signal)&&!m.no_signal;
+  var aSignal=fiable&&!!(m.pari_rec||m.market_id||m.has_signal)&&!m.no_signal;
   // TROIS ETATS, pas deux. Avant, un visiteur voyait trois cartes
   // integralement verrouillees : le mur payant sans jamais la preuve. Le
   // match gratuit du jour est desormais entierement lisible, et les autres
@@ -1044,7 +1055,7 @@ function buildCard(m){
   var gratuit=authCtx.isPro||String(m.id)===String(freeMatchId);
   var locked=!gratuit;
   var css='mc'+(isWC?' worldcup':'')+(locked?' locked':'')+(gratuit&&!authCtx.isPro?' mc-free':'');
-  var pariLabel=m.pari_rec?translateMarket(m.pari_rec):(m.no_signal_label||'Analyse en cours — aucun marché prioritaire.');
+  var pariLabel=m.pari_rec?translateMarket(m.pari_rec):(marketIdLabel(m)||m.no_signal_label||'Analyse en cours — aucun marché prioritaire.');
 
   var badge=(gratuit&&!authCtx.isPro)?'<span class="mc-badge-free">Analyse gratuite</span>':'';
   // La confiance reste visible meme verrouillee : c'est ce qui donne envie
@@ -1096,8 +1107,12 @@ function dayLabel(m){
 }
 function buildHeroFeature(m){
   var heure=(m.date||'').split(' ')[1]||'',hn=m.home&&m.home.n||'',an=m.away&&m.away.n||'';
-  var fiableHero=window.IasharkDisplayData?IasharkDisplayData.hasReliableModelOutput(m):true;
-  var market=(fiableHero&&m.pari_rec)?translateMarket(m.pari_rec):(m.no_signal_label||'Analyse en cours');
+  // Pas de gate fiableHero ici : la confiance est deja affichee sans lui
+  // juste en dessous (feature-signal), et ce bandeau met en avant le SEUL
+  // match entierement gratuit de la page - le garder bloque sur
+  // "Analyse en cours" alors que le marche est connu prive la vitrine de
+  // sa seule preuve non verrouillee.
+  var market=m.pari_rec?translateMarket(m.pari_rec):(marketIdLabel(m)||m.no_signal_label||'Analyse en cours');
   function heroLogo(t,name){var u=t&&(t.photo||t.logo||(t.id?'https://media.api-sports.io/football/teams/'+t.id+'.png':''));return u?'<img src="'+u+'" alt="Logo '+esc(name)+'">':'<div class="mc-team-logo-placeholder">'+esc(name.slice(0,2).toUpperCase())+'</div>';}
   return'<a class="feature-card" href="/match/'+m.id+'.html" aria-label="Voir l\'analyse '+esc(hn)+' contre '+esc(an)+'">'
     +'<div class="feature-meta"><div class="feature-league">'+leagueHeader(m)+'</div><div class="feature-meta-right"><span class="feature-free">Analyse gratuite</span><span>'+dayLabel(m)+' · '+heure+'</span></div></div>'

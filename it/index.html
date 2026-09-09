@@ -730,6 +730,7 @@ main a:focus-visible,main button:focus-visible,main summary:focus-visible,
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="/lib/free-match.js"></script>
+<script src="/lib/market-labels.js"></script>
 <script src="/app-client.js"></script>
 <script>
 var allMatchs=[],currentFilter='all',currentDayFilter='today',currentSport='football',currentSearch='';
@@ -1021,13 +1022,23 @@ function leagueHeader(m){
 }
 function marketInsight(){return'Apri l\'analisi per vedere fattori, limiti e rischi di questa selezione.';}
 
+// Le pipeline recent choisit le marche via market_id/marche (voir
+// lib/decision.js#pickMarketDeterministic) - pari_rec n'est plus jamais
+// renseigne. Sans ce repli, buildCard/buildHeroFeature affichaient
+// "Analyse en cours - aucun marche prioritaire" pour des matchs dont le
+// pick etait deja calcule, invisible pour les abonnes payants.
+function marketIdLabel(m){
+  return (m.market_id&&window.IasharkMarketLabels)
+    ?window.IasharkMarketLabels.marketIdLabelFr(m.market_id,{home:m.home&&m.home.n,away:m.away&&m.away.n})
+    :null;
+}
 function buildCard(m){
   var heure=(m.date||'').split(' ')[1]||'';
   var isWC=isWorldCup(m);
   // Le pari recommande n'est plus servi pour les matchs payants. has_signal
   // dit qu'une analyse existe, sans la reveler : la carte verrouillee reste
   // donc juste, au lieu d'annoncer a tort "aucun marche prioritaire".
-  var aSignal=!!(m.pari_rec||m.has_signal)&&!m.no_signal;
+  var aSignal=!!(m.pari_rec||m.market_id||m.has_signal)&&!m.no_signal;
   // TROIS ETATS, pas deux. Avant, un visiteur voyait trois cartes
   // integralement verrouillees : le mur payant sans jamais la preuve. Le
   // match gratuit du jour est desormais entierement lisible, et les autres
@@ -1037,7 +1048,7 @@ function buildCard(m){
   var gratuit=authCtx.isPro||String(m.id)===String(freeMatchId);
   var locked=!gratuit;
   var css='mc'+(isWC?' worldcup':'')+(locked?' locked':'')+(gratuit&&!authCtx.isPro?' mc-free':'');
-  var pariLabel=m.pari_rec?translateMarket(m.pari_rec):(m.no_signal_label||'Niente di sfruttabile qui — aspettiamo un\'occasione migliore.');
+  var pariLabel=m.pari_rec?translateMarket(m.pari_rec):(marketIdLabel(m)||m.no_signal_label||'Niente di sfruttabile qui — aspettiamo un\'occasione migliore.');
 
   var badge=(gratuit&&!authCtx.isPro)?'<span class="mc-badge-free">Analisi gratuita</span>':'';
   // La confiance reste visible meme verrouillee : c'est ce qui donne envie
@@ -1089,7 +1100,7 @@ function dayLabel(m){
 }
 function buildHeroFeature(m){
   var heure=(m.date||'').split(' ')[1]||'',hn=m.home&&m.home.n||'',an=m.away&&m.away.n||'';
-  var market=m.pari_rec?translateMarket(m.pari_rec):(m.no_signal_label||'Analisi disponibile prima del calcio d\'inizio');
+  var market=m.pari_rec?translateMarket(m.pari_rec):(marketIdLabel(m)||m.no_signal_label||'Analyse en cours');
   function heroLogo(t,name){var u=t&&(t.photo||t.logo||(t.id?'https://media.api-sports.io/football/teams/'+t.id+'.png':''));return u?'<img src="'+u+'" alt="Logo '+esc(name)+'">':'<div class="mc-team-logo-placeholder">'+esc(name.slice(0,2).toUpperCase())+'</div>';}
   return'<a class="feature-card" href="/match/'+m.id+'.html" aria-label="Voir l\'analyse '+esc(hn)+' contre '+esc(an)+'">'
     +'<div class="feature-meta"><div class="feature-league">'+leagueHeader(m)+'</div><div class="feature-meta-right"><span class="feature-free">Analisi gratuita</span><span>'+dayLabel(m)+' · '+heure+'</span></div></div>'
@@ -1146,10 +1157,25 @@ function renderMatchs(){
 async function loadData(){
   try{
     if(window.IasharkApp){try{authCtx=await IasharkApp.context();}catch(e){}}
-    var r=await fetch('/data.json?t='+Date.now());
-    if(!r.ok)throw new Error('HTTP '+r.status);
-    var d=await r.json();
-    allMatchs=d.matchs||[];
+    // Meme source que la page match (match-page.js) : un abonne connecte lit
+    // la fonction Edge 'match-data', qui renvoie les champs premium
+    // (pari_rec/cote_rec/model_probability) non retires. Sans ca, la vitrine
+    // lisait toujours data.json (public, champs premium retires) meme pour
+    // un abonne Pro : les cartes affichaient "aucun marche prioritaire" alors
+    // que la page du meme match, elle, montrait l'analyse complete.
+    allMatchs=null;
+    if(authCtx.session){
+      try{
+        var res=await IasharkApp.supabase.functions.invoke('match-data');
+        if(res.data&&!res.error)allMatchs=res.data.matchs||[];
+      }catch(e){}
+    }
+    if(!allMatchs){
+      var r=await fetch('/data.json?t='+Date.now());
+      if(!r.ok)throw new Error('HTTP '+r.status);
+      var d=await r.json();
+      allMatchs=d.matchs||[];
+    }
     setKpi('kpiJour',allMatchs.length);
     // Un abonne n'a pas a relire l'argumentaire de vente et le tarif a chaque
     // visite : il paie deja. On retire les blocs purement commerciaux et on

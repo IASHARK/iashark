@@ -415,6 +415,7 @@ body::before{top:-180px;width:1080px;height:700px;background:radial-gradient(ell
 .mc-conf-lbl{font-size:9.5px;font-weight:800;letter-spacing:.14em;color:var(--soft);opacity:.75;}
 .mc-conf-val{font-size:22px;font-weight:800;letter-spacing:-.03em;color:var(--cyan);font-variant-numeric:tabular-nums;}
 .mc-conf-max{font-size:12px;color:var(--soft);opacity:.7;}
+.mc-conf-preliminary .mc-conf-lbl{font-size:11px;font-weight:600;letter-spacing:normal;font-style:italic;opacity:.85;text-transform:none;}
 .mc-insight{margin:0;font-size:13px;line-height:1.55;color:var(--soft);}
 
 .mc-foot{margin-top:auto;padding-top:4px;}
@@ -1040,14 +1041,14 @@ function buildCard(m){
   // dit qu'une analyse existe, sans la reveler : la carte verrouillee reste
   // donc juste, au lieu d'annoncer a tort "aucun marche prioritaire".
   //
-  // hasReliableModelOutput est le MEME filtre que la page match
-  // (lib/match-view-model.js#modelAvailable). Sans lui, un match dont le
-  // pipeline a bien choisi un marche (pari_rec present) mais dont la
-  // qualite de donnees est insuffisante (data_quality_score<=0) affichait
-  // "Les deux equipes marquent" sur la carte pendant que la fiche du match,
-  // plus stricte, refusait de se prononcer : deux pages, deux verdicts.
+  // hasReliableModelOutput ne conditionne plus l'affichage du marche
+  // (retour utilisateur : deux cartes CL avec un vrai pick, l'une avec le
+  // badge "MARCHE RECOMMANDE" et l'autre sans, ca lit comme un bug). Il
+  // ne conditionne plus que le CHIFFRE de confiance : sous le seuil de
+  // qualite de donnees, on garde le pick visible mais on remplace le
+  // chiffre par une mention honnete plutot que de l'inventer.
   var fiable=window.IasharkDisplayData?IasharkDisplayData.hasReliableModelOutput(m):true;
-  var aSignal=fiable&&!!(m.pari_rec||m.market_id||m.has_signal)&&!m.no_signal;
+  var aSignal=!!(m.pari_rec||m.market_id||m.has_signal)&&!m.no_signal;
   // TROIS ETATS, pas deux. Avant, un visiteur voyait trois cartes
   // integralement verrouillees : le mur payant sans jamais la preuve. Le
   // match gratuit du jour est desormais entierement lisible, et les autres
@@ -1062,9 +1063,9 @@ function buildCard(m){
   var badge=(gratuit&&!authCtx.isPro)?'<span class="mc-badge-free">Análisis gratuito</span>':'';
   // La confiance reste visible meme verrouillee : c'est ce qui donne envie
   // de debloquer, et ce n'est pas le pari lui-meme.
-  var confBlock=aSignal
+  var confBlock=!aSignal?'':(fiable
     ?'<div class="mc-conf"><span class="mc-conf-lbl">CONFIANZA</span><b class="mc-conf-val">'+fmtConf(m)+'</b><span class="mc-conf-max">/10</span></div>'
-    :'';
+    :'<div class="mc-conf mc-conf-preliminary"><span class="mc-conf-lbl">Análisis preliminar</span></div>');
   // Avant, on floutait le vrai marche en CSS - une protection de facade, la
   // donnee etant lisible dans le DOM. Le serveur ne l'envoie plus du tout :
   // on affiche donc une mention honnete plutot qu'un faux flou.

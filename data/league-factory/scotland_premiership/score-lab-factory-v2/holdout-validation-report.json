@@ -1,0 +1,98 @@
+{
+  "protocol": "SCORE_LAB_FACTORY_V2",
+  "phase": "C_HOLDOUT_EVALUATION",
+  "league_key": "scotland_premiership",
+  "holdout_season": 2025,
+  "champion": "M2",
+  "generated_at": "2026-09-12T22:05:11.182Z",
+  "gates": {
+    "POINT_IN_TIME_INTEGRITY": {
+      "pass": true,
+      "all_predictions_are_holdout": true,
+      "rho_never_refit": true
+    },
+    "DATA_COVERAGE": {
+      "pass": true,
+      "coverage_rate": 0.9743589743589743,
+      "n_valid": 228,
+      "total_fixtures": 234,
+      "rate_threshold": 0.9,
+      "absolute_floor": 200,
+      "rate_ok": true,
+      "floor_ok": true
+    },
+    "EXACT_SCORE_NLL": {
+      "pass": true,
+      "nll_holdout": 2.938698392897742,
+      "threshold": 3.029874744973433
+    },
+    "CALIBRATION": {
+      "pass": true,
+      "slope": 0.9181215272244154,
+      "intercept": -0.05273659145308498,
+      "converged": true,
+      "ece": 0.042580792745160294,
+      "threshold_ece": 0.05472577908677273
+    },
+    "MARKET_MARGINALS": {
+      "pass": false,
+      "detail": {
+        "ou25": {
+          "oos_dev": 0.6879202304523977,
+          "holdout": 0.6933078473094598,
+          "pass": true
+        },
+        "btts": {
+          "oos_dev": 0.7083768863735385,
+          "holdout": 0.6892543466530768,
+          "pass": true
+        },
+        "x12": {
+          "oos_dev": 0.9588161091326167,
+          "holdout": 0.9961541066119403,
+          "pass": false
+        }
+      }
+    },
+    "TEMPORAL_STABILITY": {
+      "pass": true,
+      "nll_half1": 2.849276492231443,
+      "nll_half2": 3.028120293564037,
+      "threshold": 3.029874744973433
+    },
+    "NO_CATASTROPHIC_SECONDARY_DEGRADATION": {
+      "pass": true,
+      "holdout_low_score": {
+        "0-0": {
+          "count_observed": 16,
+          "nll_contribution": 2.5892633993610943
+        },
+        "1-0": {
+          "count_observed": 24,
+          "nll_contribution": 2.242866147917694
+        },
+        "0-1": {
+          "count_observed": 11,
+          "nll_contribution": 2.3440136170794657
+        },
+        "1-1": {
+          "count_observed": 24,
+          "nll_contribution": 2.1595691029062576
+        }
+      },
+      "degraded": []
+    },
+    "REPRODUCIBILITY": {
+      "pass": true
+    }
+  },
+  "reject_triggers": [],
+  "inconclusive_triggers": [
+    "MARKET_MARGINALS"
+  ],
+  "verdict": "INCONCLUSIVE",
+  "score_runnable": false,
+  "hash_run1": "6e8468f7e77399453d00756522c9320f224621bfb0de24691b8216d75d5d5b3f",
+  "hash_run2": "6e8468f7e77399453d00756522c9320f224621bfb0de24691b8216d75d5d5b3f",
+  "reproducible": true
+}

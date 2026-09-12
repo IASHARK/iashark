@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-09T16:09:08.207Z",
+  "generated_at": "2026-09-12T21:58:41.728Z",
   "leagues": {
     "laliga": {
       "league_key": "laliga",
@@ -420,7 +420,24 @@
       "current_score_champion_belgium_pro": null,
       "current_player_champion_belgium_pro": "PLAYER_SCORER_V1_AGGREGATED_SHARE_BELGIUM_PRO",
       "belgium_pro_full_model_status": "PARTIAL_PLAYER_ONLY",
-      "note": "OOS_DEV(2023) puis OOS_FINAL(2024) termines, chaque etape gelee avant lecture. Score=REJECTED (CI_CONFIRMS_M0_WORSE_THAN_B0). Player=VALIDATED (VALIDATED_LEAGUE_PLAYER_FINAL). Reproductibilite : Score=true Player=true."
+      "note": "OOS_DEV(2023) puis OOS_FINAL(2024) termines, chaque etape gelee avant lecture. Score=REJECTED (CI_CONFIRMS_M0_WORSE_THAN_B0). Player=VALIDATED (VALIDATED_LEAGUE_PLAYER_FINAL). Reproductibilite : Score=true Player=true.",
+      "score_lab_factory_v2": {
+        "protocol": "SCORE_LAB_FACTORY_V2",
+        "champion_selected": "M2",
+        "pre_holdout_sha": "4acdba675c484b3ea467b312f85b390da61ba72e",
+        "holdout_season": 2025,
+        "verdict": "INCONCLUSIVE",
+        "score_runnable_under_v2": false,
+        "reject_triggers": [],
+        "inconclusive_triggers": [
+          "MARKET_MARGINALS",
+          "TEMPORAL_STABILITY"
+        ],
+        "reproducible": true,
+        "exact_score_nll_holdout": 2.9689917648711583,
+        "exact_score_nll_threshold": 3.0341464260416466,
+        "note": "Holdout 2025 CONSOMME (une seule fois). INCONCLUSIVE : EXACT_SCORE_NLL/CALIBRATION/COVERAGE/REPRODUCIBILITY/NO_CATASTROPHIC_SECONDARY_DEGRADATION tous PASS, mais MARKET_MARGINALS (1X2 logloss 0.990->1.052) et TEMPORAL_STABILITY (half2 NLL=3.1237 > seuil 3.0341, half1=2.8133 sous le seuil) echouent. Aucun forcage, aucun retuning, aucune deuxieme tentative. Ne remplace pas score_status/score_champion existants (protocole V1 historique different)."
+      }
     },
     "brazil_seriea": {
       "league_key": "brazil_seriea",
@@ -458,7 +475,21 @@
       "current_score_champion_brazil_seriea": null,
       "current_player_champion_brazil_seriea": "PLAYER_SCORER_V1_AGGREGATED_SHARE_BRAZIL_SERIEA",
       "brazil_seriea_full_model_status": "PARTIAL_PLAYER_ONLY",
-      "note": "OOS_DEV(2023) puis OOS_FINAL(2024) termines, chaque etape gelee avant lecture. Score=INCONCLUSIVE (M0_APPROX_B0_CI_CROSSES_ZERO). Player=VALIDATED (VALIDATED_LEAGUE_PLAYER_FINAL). Reproductibilite : Score=true Player=true."
+      "note": "OOS_DEV(2023) puis OOS_FINAL(2024) termines, chaque etape gelee avant lecture. Score=INCONCLUSIVE (M0_APPROX_B0_CI_CROSSES_ZERO). Player=VALIDATED (VALIDATED_LEAGUE_PLAYER_FINAL). Reproductibilite : Score=true Player=true.",
+      "score_lab_factory_v2": {
+        "protocol": "SCORE_LAB_FACTORY_V2",
+        "champion_selected": "M2",
+        "pre_holdout_sha": "fa624579fb0530d5e0e531b2357d151d90cf2b42",
+        "holdout_season": 2025,
+        "verdict": "VALIDATED",
+        "score_runnable_under_v2": true,
+        "reject_triggers": [],
+        "inconclusive_triggers": [],
+        "reproducible": true,
+        "exact_score_nll_holdout": 2.814312613927218,
+        "exact_score_nll_threshold": 2.9810120982083603,
+        "note": "Holdout 2025 CONSOMME (une seule fois). VALIDATED : les 8 gates passent (NLL=2.814313<=2.981012 ; ECE=0.030432<=0.068558 ; O/U2.5/BTTS/1X2 tous stables ; couverture 99.2% ; stabilite temporelle OK ; reproductible run1==run2). Aucun forcage, aucun retuning, aucune deuxieme tentative. Ne remplace pas score_status/score_champion existants (protocole V1 historique different)."
+      }
     },
     "jleague": {
       "league_key": "jleague",
@@ -550,7 +581,23 @@
       "current_score_champion_scotland_premiership": null,
       "current_player_champion_scotland_premiership": "PLAYER_SCORER_V1_AGGREGATED_SHARE_SCOTLAND_PREMIERSHIP",
       "scotland_premiership_full_model_status": "PARTIAL_PLAYER_ONLY",
-      "note": "OOS_DEV(2023) puis OOS_FINAL(2024) termines, chaque etape gelee avant lecture. Score=INCONCLUSIVE (M0_APPROX_B0_CI_CROSSES_ZERO). Player=VALIDATED (VALIDATED_LEAGUE_PLAYER_FINAL). Reproductibilite : Score=true Player=true."
+      "note": "OOS_DEV(2023) puis OOS_FINAL(2024) termines, chaque etape gelee avant lecture. Score=INCONCLUSIVE (M0_APPROX_B0_CI_CROSSES_ZERO). Player=VALIDATED (VALIDATED_LEAGUE_PLAYER_FINAL). Reproductibilite : Score=true Player=true.",
+      "score_lab_factory_v2": {
+        "protocol": "SCORE_LAB_FACTORY_V2",
+        "champion_selected": "M2",
+        "pre_holdout_sha": "fa624579fb0530d5e0e531b2357d151d90cf2b42",
+        "holdout_season": 2025,
+        "verdict": "INCONCLUSIVE",
+        "score_runnable_under_v2": false,
+        "reject_triggers": [],
+        "inconclusive_triggers": [
+          "MARKET_MARGINALS"
+        ],
+        "reproducible": true,
+        "exact_score_nll_holdout": 2.938698392897742,
+        "exact_score_nll_threshold": 3.029874744973433,
+        "note": "Holdout 2025 CONSOMME (une seule fois). INCONCLUSIVE : EXACT_SCORE_NLL/CALIBRATION/COVERAGE/TEMPORAL_STABILITY/REPRODUCIBILITY/NO_CATASTROPHIC_SECONDARY_DEGRADATION tous PASS, seul MARKET_MARGINALS echoue (1X2 logloss 0.958816->0.996154, O/U2.5 et BTTS stables). Aucun forcage, aucun retuning, aucune deuxieme tentative. Ne remplace pas score_status/score_champion existants (protocole V1 historique different)."
+      }
     },
     "denmark_superliga": {
       "league_key": "denmark_superliga",
@@ -626,7 +673,21 @@
       "current_score_champion_ligue2": null,
       "current_player_champion_ligue2": "PLAYER_SCORER_V1_AGGREGATED_SHARE_LIGUE2",
       "ligue2_full_model_status": "PARTIAL_PLAYER_ONLY",
-      "note": "OOS_DEV(2023) puis OOS_FINAL(2024) termines, chaque etape gelee avant lecture. Score=INCONCLUSIVE (M0_APPROX_B0_CI_CROSSES_ZERO). Player=VALIDATED (VALIDATED_LEAGUE_PLAYER_FINAL). Reproductibilite : Score=true Player=true."
+      "note": "OOS_DEV(2023) puis OOS_FINAL(2024) termines, chaque etape gelee avant lecture. Score=INCONCLUSIVE (M0_APPROX_B0_CI_CROSSES_ZERO). Player=VALIDATED (VALIDATED_LEAGUE_PLAYER_FINAL). Reproductibilite : Score=true Player=true.",
+      "score_lab_factory_v2": {
+        "protocol": "SCORE_LAB_FACTORY_V2",
+        "champion_selected": "M2",
+        "pre_holdout_sha": "fa624579fb0530d5e0e531b2357d151d90cf2b42",
+        "holdout_season": 2025,
+        "verdict": "VALIDATED",
+        "score_runnable_under_v2": true,
+        "reject_triggers": [],
+        "inconclusive_triggers": [],
+        "reproducible": true,
+        "exact_score_nll_holdout": 2.926752782386689,
+        "exact_score_nll_threshold": 3.024334110091122,
+        "note": "Holdout 2025 CONSOMME (une seule fois). VALIDATED : les 8 gates passent (NLL=2.926753<=3.024334 ; ECE=0.033697<=0.053568 ; O/U2.5/BTTS/1X2 tous stables ; couverture 96.5% ; stabilite temporelle OK ; reproductible run1==run2). Aucun forcage, aucun retuning, aucune deuxieme tentative. Ne remplace pas score_status/score_champion existants (protocole V1 historique different)."
+      }
     }
   }
 }

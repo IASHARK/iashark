@@ -37,24 +37,37 @@ const SITE_URL = Deno.env.get("SITE_URL") || "https://iashark.com";
 // pour CE marche - les valeurs elles-memes doivent etre creees dans le
 // dashboard Stripe (action externe, hors de portee de ce code) avant que le
 // marche correspondant ne passe reellement "LIVE" dans markets.json.
-// Marche non reconnu ou variable d'env pas encore configuree => on retombe
-// sur STRIPE_PRICE_ID, comportement identique a avant cette fonctionnalite,
-// jamais de rupture pour le flux FR existant.
+//
+// Repli sur STRIPE_PRICE_ID (FR) UNIQUEMENT quand aucun marche n'est precise
+// du tout (retro-compatibilite du flux FR existant, qui n'envoie jamais ce
+// champ). Si un marche EST precise mais que sa variable n'est pas configuree,
+// on NE bascule PAS silencieusement sur le prix FR - un visiteur UK qui voit
+// "£14.99" ne doit jamais etre facture au tarif FR en euros parce que la cle
+// manquait cote serveur. On renvoie une erreur explicite a la place, et le
+// frontend doit alors afficher un message "bientot disponible" pour ce
+// marche precis (meme discipline honnete que PAYMENT_PROVIDER != "stripe").
 const MARKET_STRIPE_PRICE_ENV: Record<string, string> = {
   gb: "STRIPE_PRICE_ID_GB",
   mx: "STRIPE_PRICE_ID_MX",
   za: "STRIPE_PRICE_ID_ZA",
 };
 
-function resolvePriceId(market: unknown): { priceId: string | undefined; usedMarket: string } {
+type PriceResolution =
+  | { ok: true; priceId: string; usedMarket: string }
+  | { ok: false; requestedMarket: string };
+
+function resolvePriceId(market: unknown): PriceResolution {
   const key = typeof market === "string" ? market.toLowerCase() : "";
-  const envName = MARKET_STRIPE_PRICE_ENV[key];
-  if (envName) {
-    const marketPriceId = Deno.env.get(envName);
-    if (marketPriceId) return { priceId: marketPriceId, usedMarket: key };
-    console.log(`[create-checkout-session] marche="${key}" demande mais ${envName} non configure - repli sur STRIPE_PRICE_ID (FR).`);
+  if (!key) {
+    // Aucun marche precise : comportement historique, flux FR sur STRIPE_PRICE_ID.
+    return STRIPE_PRICE_ID
+      ? { ok: true, priceId: STRIPE_PRICE_ID, usedMarket: "fr" }
+      : { ok: false, requestedMarket: "fr" };
   }
-  return { priceId: STRIPE_PRICE_ID, usedMarket: "fr" };
+  const envName = MARKET_STRIPE_PRICE_ENV[key];
+  const marketPriceId = envName ? Deno.env.get(envName) : undefined;
+  if (marketPriceId) return { ok: true, priceId: marketPriceId, usedMarket: key };
+  return { ok: false, requestedMarket: key };
 }
 
 const CORS_HEADERS = {
@@ -96,15 +109,17 @@ Deno.serve(async (req: Request) => {
   } catch (_e) {
     // pas de corps JSON - comportement par defaut (marche FR).
   }
-  const { priceId: STRIPE_PRICE_ID_RESOLVED, usedMarket } = resolvePriceId(requestedMarket);
+  const resolution = resolvePriceId(requestedMarket);
 
-  if (!STRIPE_PRICE_ID_RESOLVED) {
-    console.error(`[create-checkout-session] aucun Price Stripe disponible pour le marche resolu="${usedMarket}" (ni prix marche, ni STRIPE_PRICE_ID de repli) - refus de traiter.`);
-    return new Response(JSON.stringify({ error: "billing_misconfigured" }), {
-      status: 500,
+  if (!resolution.ok) {
+    console.log(`[create-checkout-session] marche="${resolution.requestedMarket}" demande mais aucun Price Stripe configure pour lui - refus explicite (jamais de repli silencieux vers un autre marche/devise).`);
+    return new Response(JSON.stringify({ ok: true, processed: false, market: resolution.requestedMarket, reason: "market_not_configured" }), {
+      status: 200,
       headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
     });
   }
+  const STRIPE_PRICE_ID_RESOLVED = resolution.priceId;
+  const usedMarket = resolution.usedMarket;
 
   // Authentification reelle du JWT (pas de confiance dans un id envoye par
   // le corps de la requete) - meme pattern que les autres fonctions Edge du

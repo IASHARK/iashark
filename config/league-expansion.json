@@ -801,6 +801,26 @@
       "status": "NOT_STARTED",
       "wave": 2,
       "wave_order": 41
+    },
+    {
+      "key": "south_africa_premiership",
+      "displayName": "Premier Soccer League",
+      "country": "South Africa",
+      "apiFootballId": 288,
+      "calendarType": "EUROPEAN_SEASON",
+      "seasonSplit": {
+        "warmup": 2021,
+        "train": 2022,
+        "oos_dev": 2023,
+        "oos_final": 2024,
+        "sealed_unread": 2025
+      },
+      "player_data_gate_audit": null,
+      "coverage_score_audit": null,
+      "status": "NOT_STARTED",
+      "status_note": "Added 2026-09-13, out-of-band from LEAGUE_EXPANSION_FACTORY_V1's normal onboarding path: this league is NOT in data/league-audit/global-league-discovery-audit-2026-09-06.json (never audited there) and scripts/verify-league-coverage.js was NOT run for it in this session (out of scope - deliberately not invoked, per this session's instructions to only do Gate B1 raw collection). player_data_gate_audit/coverage_score_audit are left null rather than fabricated. Identity verified live against api-football on 2026-09-13: GET /leagues?code=ZA and GET /leagues?id=288 confirm apiFootballId=288 = \"Premier Soccer League\" (country api-football calls \"South-Africa\", code ZA; commercially branded \"Betway Premiership\"/\"DStv Premiership\" depending on season sponsor - api-football's own league.name stays \"Premier Soccer League\" across seasons, used here as displayName for consistency with the API). calendarType=EUROPEAN_SEASON confirmed from the API's own season boundaries (e.g. season 2024: 2024-09-14 to 2025-06-30; season 2021: 2021-08-20 to 2022-06-15), not assumed. All of seasons 2021-2024 report coverage.fixtures.events=true and coverage.fixtures.lineups=true per the API. Season 2025 (2025-08-09 to 2026-06-13) exists at the API but was deliberately NOT collected - remains sealed_unread per this session's scope.",
+      "wave": 2,
+      "wave_order": 42
     }
   ]
 }

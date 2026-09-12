@@ -41,7 +41,7 @@
   function date(v) {
     if (!v) return null;
     var d = new Date(v);
-    return isNaN(d) ? null : d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+    return isNaN(d) ? null : d.toLocaleDateString(localeTag(), { day: 'numeric', month: 'long', year: 'numeric' });
   }
   function euros(v) {
     // null et chaine vide ne valent pas zero : une bankroll non renseignee
@@ -49,9 +49,25 @@
     // le test explicite avant la conversion.
     if (v == null || v === '') return null;
     var n = Number(v);
-    return isFinite(n) ? n.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }) : null;
+    // Le tag de locale devient dynamique (separateur decimal, ordre) ; la devise
+    // reste EUR volontairement - la conversion multi-devise est un chantier
+    // separe en cours en parallele, hors perimetre ici.
+    return isFinite(n) ? n.toLocaleString(localeTag(), { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }) : null;
   }
   var $ = function (id) { return document.getElementById(id); };
+
+  /* ---------- i18n ----------
+     Nomme "tr" (et non "t") : plusieurs fonctions de ce fichier utilisent deja
+     une variable locale "var t = typeDeCompte()" (badgePlan, apercu,
+     abonnement) - un helper global nomme "t" serait silencieusement masque
+     par cette variable locale et casserait ces sections. Degrade toujours
+     vers le libelle francais d'origine si I18N n'est pas charge. */
+  function tr(key, fallback) {
+    return (window.I18N && window.I18N.t) ? window.I18N.t(key, fallback) : fallback;
+  }
+  function localeTag() {
+    return (window.I18N && window.I18N.localeTag) ? window.I18N.localeTag() : 'fr-FR';
+  }
 
   /* Feedback de section : une ligne sous le bouton d'enregistrement, jamais
      un toast pour chaque interaction. */
@@ -67,7 +83,7 @@
   function nomAffiche() {
     var meta = (ctx.user && ctx.user.user_metadata) || {};
     return prefs.display_name || meta.display_name || meta.full_name || meta.username
-      || String(ctx.user.email || '').split('@')[0] || 'Mon compte';
+      || String(ctx.user.email || '').split('@')[0] || tr('compte_page.default_display_name', 'Mon compte');
   }
   function initiales(nom) {
     var mots = String(nom).trim().split(/[\s._-]+/).filter(Boolean);
@@ -87,9 +103,9 @@
   }
   function badgePlan() {
     var t = typeDeCompte();
-    if (t === 'admin') return { texte: 'ADMIN', classe: 'border-violet-400/35 bg-violet-400/10 text-violet-300' };
-    if (t === 'pro') return { texte: 'PRO', classe: 'border-cyan/40 bg-cyan/10 text-cyan' };
-    return { texte: 'GRATUIT', classe: 'border-hairline bg-white/[.04] text-soft' };
+    if (t === 'admin') return { texte: tr('compte_page.role_admin', 'ADMIN'), classe: 'border-violet-400/35 bg-violet-400/10 text-violet-300' };
+    if (t === 'pro') return { texte: tr('compte_page.badge_pro', 'PRO'), classe: 'border-cyan/40 bg-cyan/10 text-cyan' };
+    return { texte: tr('compte_page.badge_free', 'GRATUIT'), classe: 'border-hairline bg-white/[.04] text-soft' };
   }
 
   /* Etat lisible de l'abonnement, a partir du statut Stripe reel. Chaque cas
@@ -98,25 +114,25 @@
     if (!abo) return null;
     var fin = date(abo.current_period_end);
     if (abo.status === 'active' && abo.cancel_at_period_end) {
-      return { ton: 'attention', titre: 'Annulation programmée',
-        detail: fin ? 'Votre abonnement reste actif jusqu’au ' + fin + '.' : 'Votre abonnement reste actif jusqu’à la fin de la période en cours.' };
+      return { ton: 'attention', titre: tr('compte_page.sub_status_cancel_scheduled_title', 'Annulation programmée'),
+        detail: fin ? tr('compte_page.sub_status_cancel_scheduled_detail_prefix', 'Votre abonnement reste actif jusqu’au ') + fin + '.' : tr('compte_page.sub_status_cancel_scheduled_detail_generic', 'Votre abonnement reste actif jusqu’à la fin de la période en cours.') };
     }
     if (abo.status === 'active') {
-      return { ton: 'ok', titre: 'Actif', detail: fin ? 'Prochain renouvellement le ' + fin + '.' : null };
+      return { ton: 'ok', titre: tr('compte_page.sub_status_active_title', 'Actif'), detail: fin ? tr('compte_page.sub_status_active_detail_prefix', 'Prochain renouvellement le ') + fin + '.' : null };
     }
     if (abo.status === 'trialing') {
-      return { ton: 'ok', titre: 'Période d’essai', detail: fin ? 'L’essai se termine le ' + fin + '.' : null };
+      return { ton: 'ok', titre: tr('compte_page.sub_status_trialing_title', 'Période d’essai'), detail: fin ? tr('compte_page.sub_status_trialing_detail_prefix', 'L’essai se termine le ') + fin + '.' : null };
     }
     if (abo.status === 'past_due' || abo.status === 'unpaid') {
-      return { ton: 'alerte', titre: 'Paiement en attente',
-        detail: 'Votre dernier paiement n’a pas abouti. Mettez votre moyen de paiement à jour pour ne pas perdre l’accès.' };
+      return { ton: 'alerte', titre: tr('compte_page.sub_status_past_due_title', 'Paiement en attente'),
+        detail: tr('compte_page.sub_status_past_due_detail', 'Votre dernier paiement n’a pas abouti. Mettez votre moyen de paiement à jour pour ne pas perdre l’accès.') };
     }
     if (abo.status === 'canceled') {
-      return { ton: 'neutre', titre: 'Abonnement terminé', detail: fin ? 'Il a pris fin le ' + fin + '.' : null };
+      return { ton: 'neutre', titre: tr('compte_page.sub_status_canceled_title', 'Abonnement terminé'), detail: fin ? tr('compte_page.sub_status_canceled_detail_prefix', 'Il a pris fin le ') + fin + '.' : null };
     }
     if (abo.status === 'incomplete' || abo.status === 'incomplete_expired') {
-      return { ton: 'alerte', titre: 'Paiement non finalisé',
-        detail: 'Le paiement n’a jamais été confirmé. Reprenez la souscription pour activer Pro.' };
+      return { ton: 'alerte', titre: tr('compte_page.sub_status_incomplete_title', 'Paiement non finalisé'),
+        detail: tr('compte_page.sub_status_incomplete_detail', 'Le paiement n’a jamais été confirmé. Reprenez la souscription pour activer Pro.') };
     }
     return null;
   }
@@ -144,8 +160,8 @@
   function ligneResume(libelle, valeur, lien, texteLien) {
     return '<div class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-t border-hairline py-3.5 first:border-t-0 first:pt-0">'
       + '<span class="text-[13.5px] text-soft">' + esc(libelle) + '</span>'
-      + '<span class="flex items-baseline gap-3"><b class="text-[14.5px] font-semibold">' + (valeur || '<span class="font-normal text-soft">Non renseigné</span>') + '</b>'
-      + (lien ? '<button type="button" data-aller="' + lien + '" class="text-[13px] text-cyan transition hover:underline">' + esc(texteLien || 'Modifier') + '</button>' : '')
+      + '<span class="flex items-baseline gap-3"><b class="text-[14.5px] font-semibold">' + (valeur || '<span class="font-normal text-soft">' + tr('compte_page.not_provided', 'Non renseigné') + '</span>') + '</b>'
+      + (lien ? '<button type="button" data-aller="' + lien + '" class="text-[13px] text-cyan transition hover:underline">' + esc(texteLien || tr('compte_page.edit_link', 'Modifier')) + '</button>' : '')
       + '</span></div>';
   }
   function interrupteur(id, titre, texte, actif) {
@@ -172,20 +188,24 @@
      l'ancienne page interminable. */
   function apercu() {
     var t = typeDeCompte();
-    var langues = { fr: 'Francais', en: 'English', es: 'Espanol', de: 'Deutsch', it: 'Italiano', pt: 'Portugues' };
+    var langues = {
+      fr: tr('compte_page.lang_name_fr', 'Francais'), en: tr('compte_page.lang_name_en', 'English'),
+      es: tr('compte_page.lang_name_es', 'Espanol'), de: tr('compte_page.lang_name_de', 'Deutsch'),
+      it: tr('compte_page.lang_name_it', 'Italiano'), pt: tr('compte_page.lang_name_pt', 'Portugues')
+    };
     var ligues = Array.isArray(prefs.favorite_leagues) ? prefs.favorite_leagues : [];
     var etat = etatAbonnement();
 
     var planResume;
     if (t === 'admin') {
-      planResume = '<p class="text-[15px] font-semibold">Accès administrateur</p>'
-        + '<p class="mt-1.5 text-[13.5px] leading-relaxed text-soft">Votre compte dispose d’un accès de service à l’ensemble du produit. Aucun abonnement n’est requis.</p>';
+      planResume = '<p class="text-[15px] font-semibold">' + tr('compte_page.plan_admin_title', 'Accès administrateur') + '</p>'
+        + '<p class="mt-1.5 text-[13.5px] leading-relaxed text-soft">' + tr('compte_page.plan_admin_detail', 'Votre compte dispose d’un accès de service à l’ensemble du produit. Aucun abonnement n’est requis.') + '</p>';
     } else if (t === 'pro') {
-      planResume = '<p class="text-[15px] font-semibold">IASHARK Pro</p>'
+      planResume = '<p class="text-[15px] font-semibold">' + tr('compte_page.plan_pro_name', 'IASHARK Pro') + '</p>'
         + (etat ? '<p class="mt-1.5 text-[13.5px] leading-relaxed text-soft">' + esc(etat.titre) + (etat.detail ? ' — ' + esc(etat.detail) : '') + '</p>' : '');
     } else {
-      planResume = '<p class="text-[15px] font-semibold">IASHARK Gratuit</p>'
-        + '<p class="mt-1.5 text-[13.5px] leading-relaxed text-soft">L’analyse offerte du jour, le blog et les outils en découverte.</p>';
+      planResume = '<p class="text-[15px] font-semibold">' + tr('compte_page.plan_free_name', 'IASHARK Gratuit') + '</p>'
+        + '<p class="mt-1.5 text-[13.5px] leading-relaxed text-soft">' + tr('compte_page.plan_free_detail', 'L’analyse offerte du jour, le blog et les outils en découverte.') + '</p>';
     }
 
     var activite = '';
@@ -193,31 +213,33 @@
     // n'affiche l'activite que lorsqu'il y a quelque chose a montrer, et un
     // etat vide court sinon.
     if (nbDecisions > 0) {
-      activite = carte('<h2 class="text-[12px] font-bold uppercase tracking-[0.16em] text-soft">Activité</h2>'
+      activite = carte('<h2 class="text-[12px] font-bold uppercase tracking-[0.16em] text-soft">' + tr('compte_page.activity_heading', 'Activité') + '</h2>'
         + '<p class="mt-3 text-[30px] font-extrabold leading-none">' + nbDecisions + '</p>'
-        + '<p class="mt-1.5 text-[13.5px] text-soft">décision' + (nbDecisions > 1 ? 's' : '') + ' enregistrée' + (nbDecisions > 1 ? 's' : '') + ' dans votre journal.</p>');
+        + '<p class="mt-1.5 text-[13.5px] text-soft">' + (nbDecisions > 1
+            ? tr('compte_page.activity_count_plural', 'décisions enregistrées dans votre journal.')
+            : tr('compte_page.activity_count_singular', 'décision enregistrée dans votre journal.')) + '</p>');
     } else {
-      activite = carte('<h2 class="text-[12px] font-bold uppercase tracking-[0.16em] text-soft">Activité</h2>'
-        + '<p class="mt-3 text-[14px] leading-relaxed text-soft">Aucune décision enregistrée. Celles que vous ajoutez depuis les outils apparaîtront ici.</p>'
-        + '<a href="/pro.html" class="mt-4 inline-flex h-10 items-center rounded-lg border border-hairline px-4 text-[13.5px] font-semibold transition hover:border-cyan/40">Voir les outils</a>');
+      activite = carte('<h2 class="text-[12px] font-bold uppercase tracking-[0.16em] text-soft">' + tr('compte_page.activity_heading', 'Activité') + '</h2>'
+        + '<p class="mt-3 text-[14px] leading-relaxed text-soft">' + tr('compte_page.activity_empty_detail', 'Aucune décision enregistrée. Celles que vous ajoutez depuis les outils apparaîtront ici.') + '</p>'
+        + '<a href="/pro.html" class="mt-4 inline-flex h-10 items-center rounded-lg border border-hairline px-4 text-[13.5px] font-semibold transition hover:border-cyan/40">' + tr('compte_page.activity_empty_cta', 'Voir les outils') + '</a>');
     }
 
-    return titreSection('Vue d’ensemble', 'Un résumé de votre compte. Chaque section porte le détail.')
+    return titreSection(tr('compte_page.section_overview_title', 'Vue d’ensemble'), tr('compte_page.section_overview_subtitle', 'Un résumé de votre compte. Chaque section porte le détail.'))
       + '<div class="space-y-4">'
-      + carte('<h2 class="text-[12px] font-bold uppercase tracking-[0.16em] text-soft">Plan actuel</h2><div class="mt-3">' + planResume + '</div>'
-          + '<div class="mt-4"><button type="button" data-aller="abonnement" class="text-[13.5px] font-semibold text-cyan transition hover:underline">Voir l’abonnement</button></div>')
-      + carte('<h2 class="text-[12px] font-bold uppercase tracking-[0.16em] text-soft">Profil et préférences</h2><div class="mt-4">'
-          + ligneResume('Nom affiché', esc(nomAffiche()), 'preferences')
-          + ligneResume('Email', esc(ctx.user.email))
-          + ligneResume('Langue', esc(langues[prefs.language] || langues.fr), 'preferences')
-          + ligneResume('Fuseau horaire', esc(prefs.timezone || 'Europe/Paris'), 'preferences')
-          + ligneResume('Championnats suivis', ligues.length ? esc(ligues.join(', ')) : '', 'preferences')
-          + ligneResume('Bankroll', euros(ctx.profile.capital) ? esc(euros(ctx.profile.capital)) : '', 'preferences')
+      + carte('<h2 class="text-[12px] font-bold uppercase tracking-[0.16em] text-soft">' + tr('compte_page.plan_current_heading', 'Plan actuel') + '</h2><div class="mt-3">' + planResume + '</div>'
+          + '<div class="mt-4"><button type="button" data-aller="abonnement" class="text-[13.5px] font-semibold text-cyan transition hover:underline">' + tr('compte_page.view_subscription_cta', 'Voir l’abonnement') + '</button></div>')
+      + carte('<h2 class="text-[12px] font-bold uppercase tracking-[0.16em] text-soft">' + tr('compte_page.profile_prefs_heading', 'Profil et préférences') + '</h2><div class="mt-4">'
+          + ligneResume(tr('compte_page.display_name_label', 'Nom affiché'), esc(nomAffiche()), 'preferences')
+          + ligneResume(tr('compte_page.email_label', 'Email'), esc(ctx.user.email))
+          + ligneResume(tr('compte_page.language_label', 'Langue'), esc(langues[prefs.language] || langues.fr), 'preferences')
+          + ligneResume(tr('compte_page.timezone_label', 'Fuseau horaire'), esc(prefs.timezone || 'Europe/Paris'), 'preferences')
+          + ligneResume(tr('compte_page.leagues_label', 'Championnats suivis'), ligues.length ? esc(ligues.join(', ')) : '', 'preferences')
+          + ligneResume(tr('compte_page.bankroll_label', 'Bankroll'), euros(ctx.profile.capital) ? esc(euros(ctx.profile.capital)) : '', 'preferences')
           + '</div>')
       + activite
-      + carte('<h2 class="text-[12px] font-bold uppercase tracking-[0.16em] text-soft">Sécurité</h2>'
-          + '<p class="mt-3 text-[14px] leading-relaxed text-soft">Votre compte est protégé par un mot de passe.</p>'
-          + '<div class="mt-4"><button type="button" data-aller="securite" class="text-[13.5px] font-semibold text-cyan transition hover:underline">Gérer la sécurité</button></div>')
+      + carte('<h2 class="text-[12px] font-bold uppercase tracking-[0.16em] text-soft">' + tr('compte_page.security_heading', 'Sécurité') + '</h2>'
+          + '<p class="mt-3 text-[14px] leading-relaxed text-soft">' + tr('compte_page.security_summary', 'Votre compte est protégé par un mot de passe.') + '</p>'
+          + '<div class="mt-4"><button type="button" data-aller="securite" class="text-[13.5px] font-semibold text-cyan transition hover:underline">' + tr('compte_page.manage_security_cta', 'Gérer la sécurité') + '</button></div>')
       + '</div>';
   }
 
@@ -228,11 +250,11 @@
     var etat = etatAbonnement();
 
     if (t === 'admin') {
-      return titreSection('Abonnement', 'L’état de votre accès à IASHARK.')
-        + carte('<span class="inline-flex items-center rounded-full border border-violet-400/35 bg-violet-400/10 px-2.5 py-1 text-[11px] font-bold tracking-wider text-violet-300">ADMIN</span>'
-          + '<h2 class="mt-4 text-[22px] font-extrabold tracking-tight">Accès administrateur</h2>'
-          + '<p class="mt-2 max-w-xl text-[14px] leading-relaxed text-soft">Votre compte donne accès à l’ensemble du produit pour l’exploitation du service. Ce n’est pas un abonnement : rien n’est facturé et il n’y a rien à renouveler.</p>'
-          + '<div class="mt-6 flex flex-wrap gap-3"><a href="/admin.html" class="inline-flex h-11 items-center rounded-xl border border-hairline px-5 text-[14px] font-semibold transition hover:border-cyan/40">Ouvrir l’espace admin</a></div>');
+      return titreSection(tr('compte_page.subscription_heading', 'Abonnement'), tr('compte_page.subscription_admin_subtitle', 'L’état de votre accès à IASHARK.'))
+        + carte('<span class="inline-flex items-center rounded-full border border-violet-400/35 bg-violet-400/10 px-2.5 py-1 text-[11px] font-bold tracking-wider text-violet-300">' + tr('compte_page.role_admin', 'ADMIN') + '</span>'
+          + '<h2 class="mt-4 text-[22px] font-extrabold tracking-tight">' + tr('compte_page.plan_admin_title', 'Accès administrateur') + '</h2>'
+          + '<p class="mt-2 max-w-xl text-[14px] leading-relaxed text-soft">' + tr('compte_page.admin_access_full_detail', 'Votre compte donne accès à l’ensemble du produit pour l’exploitation du service. Ce n’est pas un abonnement : rien n’est facturé et il n’y a rien à renouveler.') + '</p>'
+          + '<div class="mt-6 flex flex-wrap gap-3"><a href="/admin.html" class="inline-flex h-11 items-center rounded-xl border border-hairline px-5 text-[14px] font-semibold transition hover:border-cyan/40">' + tr('compte_page.open_admin_space_cta', 'Ouvrir l’espace admin') + '</a></div>');
     }
 
     if (t === 'pro') {
@@ -241,44 +263,47 @@
       // Le portail Stripe porte deja le montant exact, le moyen de paiement,
       // les factures et la resiliation. On ne reconstruit pas cette interface
       // et on n'affiche pas un prix qu'on ne peut pas verifier pour CE client.
-      return titreSection('Abonnement', 'L’état réel de votre abonnement et sa gestion.')
+      return titreSection(tr('compte_page.subscription_heading', 'Abonnement'), tr('compte_page.subscription_pro_subtitle', 'L’état réel de votre abonnement et sa gestion.'))
         + carte('<div class="flex flex-wrap items-start justify-between gap-4">'
-          + '<div><h2 class="text-[12px] font-bold uppercase tracking-[0.16em] text-soft">Plan actuel</h2>'
-          + '<p class="mt-2.5 text-[26px] font-extrabold leading-none tracking-tight">IASHARK Pro</p></div>'
-          + '<span class="inline-flex items-center rounded-full border border-cyan/40 bg-cyan/10 px-2.5 py-1 text-[11px] font-bold tracking-wider text-cyan">PRO</span></div>'
+          + '<div><h2 class="text-[12px] font-bold uppercase tracking-[0.16em] text-soft">' + tr('compte_page.plan_current_heading', 'Plan actuel') + '</h2>'
+          + '<p class="mt-2.5 text-[26px] font-extrabold leading-none tracking-tight">' + tr('compte_page.plan_pro_name', 'IASHARK Pro') + '</p></div>'
+          + '<span class="inline-flex items-center rounded-full border border-cyan/40 bg-cyan/10 px-2.5 py-1 text-[11px] font-bold tracking-wider text-cyan">' + tr('compte_page.badge_pro', 'PRO') + '</span></div>'
           + bandeau
-          + (abo ? '' : '<p class="mt-5 text-[13.5px] leading-relaxed text-soft">Aucun abonnement payant n’est enregistré sur ce compte : l’accès Pro y a été accordé manuellement.</p>')
+          + (abo ? '' : '<p class="mt-5 text-[13.5px] leading-relaxed text-soft">' + tr('compte_page.pro_manual_grant_detail', 'Aucun abonnement payant n’est enregistré sur ce compte : l’accès Pro y a été accordé manuellement.') + '</p>')
           + '<div class="mt-6 flex flex-wrap gap-3">'
-          + (abo ? boutonPrimaire('portail', 'Gérer mon abonnement') : '')
+          + (abo ? boutonPrimaire('portail', tr('compte_page.manage_subscription_cta', 'Gérer mon abonnement')) : '')
           + '</div>'
-          + (abo ? '<p class="mt-3 text-[12.5px] leading-relaxed text-soft">Moyen de paiement, factures et résiliation se gèrent dans l’espace sécurisé de notre prestataire de paiement.</p>' : '')
+          + (abo ? '<p class="mt-3 text-[12.5px] leading-relaxed text-soft">' + tr('compte_page.billing_portal_note', 'Moyen de paiement, factures et résiliation se gèrent dans l’espace sécurisé de notre prestataire de paiement.') + '</p>' : '')
           + '<p id="msgFacturation" hidden aria-live="polite"></p>');
     }
 
     // Gratuit : un seul appel a l'action, et quatre benefices au maximum.
-    return titreSection('Abonnement', 'Votre plan actuel et ce que Pro ajoute.')
+    return titreSection(tr('compte_page.subscription_heading', 'Abonnement'), tr('compte_page.subscription_free_subtitle', 'Votre plan actuel et ce que Pro ajoute.'))
       + '<div class="space-y-4">'
       + carte('<div class="flex flex-wrap items-start justify-between gap-4">'
-        + '<div><h2 class="text-[12px] font-bold uppercase tracking-[0.16em] text-soft">Plan actuel</h2>'
-        + '<p class="mt-2.5 text-[26px] font-extrabold leading-none tracking-tight">IASHARK Gratuit</p>'
+        + '<div><h2 class="text-[12px] font-bold uppercase tracking-[0.16em] text-soft">' + tr('compte_page.plan_current_heading', 'Plan actuel') + '</h2>'
+        + '<p class="mt-2.5 text-[26px] font-extrabold leading-none tracking-tight">' + tr('compte_page.plan_free_name', 'IASHARK Gratuit') + '</p>'
+        // Prix affiche en EUR uniquement : la conversion multi-devise est un
+        // chantier separe en cours en parallele, hors perimetre ici.
         + '<p class="mt-2 text-[14px] text-soft">0 €</p></div>'
-        + '<span class="inline-flex items-center rounded-full border border-hairline bg-white/[.04] px-2.5 py-1 text-[11px] font-bold tracking-wider text-soft">GRATUIT</span></div>'
+        + '<span class="inline-flex items-center rounded-full border border-hairline bg-white/[.04] px-2.5 py-1 text-[11px] font-bold tracking-wider text-soft">' + tr('compte_page.badge_free', 'GRATUIT') + '</span></div>'
         + '<ul class="mt-5 space-y-2.5">'
-        + '<li class="flex gap-2.5 text-[14px] text-soft"><span aria-hidden="true" class="text-soft">✓</span>L’analyse complète offerte chaque jour</li>'
-        + '<li class="flex gap-2.5 text-[14px] text-soft"><span aria-hidden="true" class="text-soft">✓</span>Le blog et les guides</li>'
-        + '<li class="flex gap-2.5 text-[14px] text-soft"><span aria-hidden="true" class="text-soft">✓</span>Les outils en découverte</li>'
+        + '<li class="flex gap-2.5 text-[14px] text-soft"><span aria-hidden="true" class="text-soft">✓</span>' + tr('compte_page.benefit_free_analysis', 'L’analyse complète offerte chaque jour') + '</li>'
+        + '<li class="flex gap-2.5 text-[14px] text-soft"><span aria-hidden="true" class="text-soft">✓</span>' + tr('compte_page.benefit_free_blog', 'Le blog et les guides') + '</li>'
+        + '<li class="flex gap-2.5 text-[14px] text-soft"><span aria-hidden="true" class="text-soft">✓</span>' + tr('compte_page.benefit_free_tools', 'Les outils en découverte') + '</li>'
         + '</ul>'
         + (etat && etat.ton === 'alerte' ? '<div class="mt-5 rounded-xl border px-4 py-3.5 text-[13.5px] leading-relaxed ' + TON[etat.ton] + '"><b class="font-semibold">' + esc(etat.titre) + '</b><span class="mt-0.5 block opacity-90">' + esc(etat.detail) + '</span></div>' : ''))
-      + carte('<h2 class="text-[12px] font-bold uppercase tracking-[0.16em] text-cyan">Avec Pro</h2>'
+      + carte('<h2 class="text-[12px] font-bold uppercase tracking-[0.16em] text-cyan">' + tr('compte_page.with_pro_heading', 'Avec Pro') + '</h2>'
+        // Prix affiche en EUR uniquement : voir note ci-dessus, hors perimetre ici.
         + '<p class="mt-2.5 text-[22px] font-extrabold leading-none tracking-tight">19,95 € / mois</p>'
-        + '<p class="mt-2 text-[13.5px] text-soft">Sans engagement, résiliable à tout moment.</p>'
+        + '<p class="mt-2 text-[13.5px] text-soft">' + tr('compte_page.pro_no_commitment', 'Sans engagement, résiliable à tout moment.') + '</p>'
         + '<ul class="mt-5 space-y-2.5">'
-        + '<li class="flex gap-2.5 text-[14px]"><span aria-hidden="true" class="text-cyan">✓</span>L’analyse complète sur tous les matchs</li>'
-        + '<li class="flex gap-2.5 text-[14px]"><span aria-hidden="true" class="text-cyan">✓</span>Les six outils branchés sur les probabilités du modèle</li>'
-        + '<li class="flex gap-2.5 text-[14px]"><span aria-hidden="true" class="text-cyan">✓</span>Le journal des décisions synchronise</li>'
-        + '<li class="flex gap-2.5 text-[14px]"><span aria-hidden="true" class="text-cyan">✓</span>Le suivi de bankroll lié au compte</li>'
+        + '<li class="flex gap-2.5 text-[14px]"><span aria-hidden="true" class="text-cyan">✓</span>' + tr('compte_page.benefit_pro_all_matches', 'L’analyse complète sur tous les matchs') + '</li>'
+        + '<li class="flex gap-2.5 text-[14px]"><span aria-hidden="true" class="text-cyan">✓</span>' + tr('compte_page.benefit_pro_six_tools', 'Les six outils branchés sur les probabilités du modèle') + '</li>'
+        + '<li class="flex gap-2.5 text-[14px]"><span aria-hidden="true" class="text-cyan">✓</span>' + tr('compte_page.benefit_pro_decisions_log', 'Le journal des décisions synchronise') + '</li>'
+        + '<li class="flex gap-2.5 text-[14px]"><span aria-hidden="true" class="text-cyan">✓</span>' + tr('compte_page.benefit_pro_bankroll', 'Le suivi de bankroll lié au compte') + '</li>'
         + '</ul>'
-        + '<div class="mt-6">' + boutonPrimaire('souscrire', 'Découvrir Pro', 'w-full sm:w-auto') + '</div>'
+        + '<div class="mt-6">' + boutonPrimaire('souscrire', tr('compte_page.discover_pro_cta', 'Découvrir Pro'), 'w-full sm:w-auto') + '</div>'
         + '<p id="msgFacturation" hidden aria-live="polite"></p>')
       + '</div>';
   }
@@ -305,93 +330,100 @@
     var ligues = Array.isArray(prefs.favorite_leagues) ? prefs.favorite_leagues.slice() : [];
     var connues = CHAMPIONNATS.slice();
     ligues.forEach(function (l) { if (connues.indexOf(l) === -1) connues.push(l); });
-    var langues = [['fr', 'Francais'], ['en', 'English'], ['es', 'Espanol'], ['de', 'Deutsch'], ['it', 'Italiano'], ['pt', 'Portugues']];
+    var langues = [
+      ['fr', tr('compte_page.lang_name_fr', 'Francais')], ['en', tr('compte_page.lang_name_en', 'English')],
+      ['es', tr('compte_page.lang_name_es', 'Espanol')], ['de', tr('compte_page.lang_name_de', 'Deutsch')],
+      ['it', tr('compte_page.lang_name_it', 'Italiano')], ['pt', tr('compte_page.lang_name_pt', 'Portugues')]
+    ];
     var tz = prefs.timezone || 'Europe/Paris';
 
-    return titreSection('Préférences', 'Comment IASHARK s’affiche et ce qu’il met en avant.')
+    return titreSection(tr('compte_page.preferences_heading', 'Préférences'), tr('compte_page.preferences_subtitle', 'Comment IASHARK s’affiche et ce qu’il met en avant.'))
       + '<div class="space-y-4">'
-      + carte('<h2 class="text-[12px] font-bold uppercase tracking-[0.16em] text-soft">Profil</h2>'
+      + carte('<h2 class="text-[12px] font-bold uppercase tracking-[0.16em] text-soft">' + tr('compte_page.profile_heading', 'Profil') + '</h2>'
         + '<div class="mt-4 space-y-4">'
-        + champ('nomAffiche', 'Nom affiché', nomAffiche(), { attrs: ' maxlength="40" autocomplete="nickname"', aide: '40 caractères maximum.' })
-        + '<div><label for="emailLecture" class="block text-[13px] font-semibold text-soft">Email</label>'
+        + champ('nomAffiche', tr('compte_page.display_name_label', 'Nom affiché'), nomAffiche(), { attrs: ' maxlength="40" autocomplete="nickname"', aide: tr('compte_page.display_name_hint', '40 caractères maximum.') })
+        + '<div><label for="emailLecture" class="block text-[13px] font-semibold text-soft">' + tr('compte_page.email_label', 'Email') + '</label>'
         + '<input id="emailLecture" class="fld mt-2 cursor-not-allowed opacity-70" type="email" value="' + esc(ctx.user.email) + '" readonly aria-readonly="true">'
         // Le changement d'adresse passe par un mail de confirmation cote
         // fournisseur. Tant que ce parcours n'existe pas dans le produit, on
         // ne met pas un champ libre qui laisserait croire le contraire.
-        + '<p class="mt-1.5 text-[12.5px] text-soft">Pour changer d’adresse, écrivez à <a href="mailto:contact@iashark.com" class="text-cyan transition hover:underline">contact@iashark.com</a>.</p></div>'
+        // "contact@iashark.com" n'est pas traduit : c'est une adresse email.
+        + '<p class="mt-1.5 text-[12.5px] text-soft">' + tr('compte_page.change_email_note_prefix', 'Pour changer d’adresse, écrivez à ') + '<a href="mailto:contact@iashark.com" class="text-cyan transition hover:underline">contact@iashark.com</a>.</p></div>'
         + '</div>')
-      + carte('<h2 class="text-[12px] font-bold uppercase tracking-[0.16em] text-soft">Championnats suivis</h2>'
-        + '<p class="mt-2 text-[13.5px] text-soft">Utilisés pour mettre vos compétitions en avant.</p>'
-        + '<fieldset class="mt-4"><legend class="sr-only">Championnats suivis</legend>'
+      + carte('<h2 class="text-[12px] font-bold uppercase tracking-[0.16em] text-soft">' + tr('compte_page.leagues_label', 'Championnats suivis') + '</h2>'
+        + '<p class="mt-2 text-[13.5px] text-soft">' + tr('compte_page.leagues_hint', 'Utilisés pour mettre vos compétitions en avant.') + '</p>'
+        + '<fieldset class="mt-4"><legend class="sr-only">' + tr('compte_page.leagues_label', 'Championnats suivis') + '</legend>'
         + '<div class="grid gap-x-5 gap-y-2.5 sm:grid-cols-2">'
+        // Noms de championnats jamais traduits (identifiants sportifs, voir
+        // i18n/i18n.js en tete de fichier).
         + connues.map(function (nom, i) {
             return '<label class="flex cursor-pointer items-center gap-2.5 text-[14px]">'
               + '<input type="checkbox" class="h-4 w-4 accent-cyan" data-ligue="' + i + '" value="' + esc(nom) + '"'
               + (ligues.indexOf(nom) !== -1 ? ' checked' : '') + '>' + esc(nom) + '</label>';
           }).join('')
         + '</div></fieldset>')
-      + carte('<h2 class="text-[12px] font-bold uppercase tracking-[0.16em] text-soft">Affichage</h2>'
+      + carte('<h2 class="text-[12px] font-bold uppercase tracking-[0.16em] text-soft">' + tr('compte_page.display_heading', 'Affichage') + '</h2>'
         + '<div class="mt-4 grid gap-4 sm:grid-cols-2">'
-        + '<div><label for="langue" class="block text-[13px] font-semibold text-soft">Langue</label>'
+        + '<div><label for="langue" class="block text-[13px] font-semibold text-soft">' + tr('compte_page.language_label', 'Langue') + '</label>'
         + '<select id="langue" class="fld mt-2">' + langues.map(function (l) {
             return '<option value="' + l[0] + '"' + ((prefs.language || 'fr') === l[0] ? ' selected' : '') + '>' + l[1] + '</option>';
           }).join('') + '</select></div>'
-        + '<div><label for="fuseau" class="block text-[13px] font-semibold text-soft">Fuseau horaire</label>'
+        + '<div><label for="fuseau" class="block text-[13px] font-semibold text-soft">' + tr('compte_page.timezone_label', 'Fuseau horaire') + '</label>'
         + '<input id="fuseau" class="fld mt-2" list="listeFuseaux" value="' + esc(tz) + '" autocomplete="off" spellcheck="false">'
         + '<datalist id="listeFuseaux">' + fuseaux().map(function (z) { return '<option value="' + esc(z) + '">'; }).join('') + '</datalist>'
-        + '<p class="mt-1.5 text-[12.5px] text-soft">Tapez pour rechercher.</p></div>'
+        + '<p class="mt-1.5 text-[12.5px] text-soft">' + tr('compte_page.timezone_hint', 'Tapez pour rechercher.') + '</p></div>'
         + '</div>')
-      + carte('<h2 class="text-[12px] font-bold uppercase tracking-[0.16em] text-soft">Bankroll</h2>'
-        + '<p class="mt-2 text-[13.5px] leading-relaxed text-soft">Le capital de référence des calculs de mise. Il est privé et n’est utilisé que par vos outils.</p>'
-        + '<div class="mt-4 max-w-xs">' + champ('bankroll', 'Bankroll', ctx.profile.capital == null ? '' : ctx.profile.capital, { type: 'number', attrs: ' min="1" step="1" inputmode="decimal"', placeholder: 'Ex. 500' }) + '</div>')
-      + '<div class="flex flex-wrap items-center gap-3">' + boutonPrimaire('enregistrerPrefs', 'Enregistrer') + '</div>'
+      + carte('<h2 class="text-[12px] font-bold uppercase tracking-[0.16em] text-soft">' + tr('compte_page.bankroll_label', 'Bankroll') + '</h2>'
+        + '<p class="mt-2 text-[13.5px] leading-relaxed text-soft">' + tr('compte_page.bankroll_detail', 'Le capital de référence des calculs de mise. Il est privé et n’est utilisé que par vos outils.') + '</p>'
+        + '<div class="mt-4 max-w-xs">' + champ('bankroll', tr('compte_page.bankroll_label', 'Bankroll'), ctx.profile.capital == null ? '' : ctx.profile.capital, { type: 'number', attrs: ' min="1" step="1" inputmode="decimal"', placeholder: tr('compte_page.bankroll_placeholder', 'Ex. 500') }) + '</div>')
+      + '<div class="flex flex-wrap items-center gap-3">' + boutonPrimaire('enregistrerPrefs', tr('compte_page.save_btn', 'Enregistrer')) + '</div>'
       + '<p id="msgPrefs" hidden aria-live="polite"></p>'
       + '</div>';
   }
 
   function notifications() {
-    return titreSection('Notifications', 'Ce que IASHARK vous envoie par email.')
-      + carte(interrupteur('notifMatch', 'Nouvelle analyse', 'Recevoir un email quand une nouvelle analyse est publiée.', prefs.notify_match_analysis !== false)
-        + interrupteur('notifHebdo', 'Récapitulatif hebdomadaire', 'Recevoir un résumé chaque semaine.', prefs.notify_weekly_recap !== false))
-      + '<div class="mt-4 flex flex-wrap items-center gap-3">' + boutonPrimaire('enregistrerNotifs', 'Enregistrer') + '</div>'
+    return titreSection(tr('compte_page.notifications_heading', 'Notifications'), tr('compte_page.notifications_subtitle', 'Ce que IASHARK vous envoie par email.'))
+      + carte(interrupteur('notifMatch', tr('compte_page.notif_new_analysis_title', 'Nouvelle analyse'), tr('compte_page.notif_new_analysis_detail', 'Recevoir un email quand une nouvelle analyse est publiée.'), prefs.notify_match_analysis !== false)
+        + interrupteur('notifHebdo', tr('compte_page.notif_weekly_title', 'Récapitulatif hebdomadaire'), tr('compte_page.notif_weekly_detail', 'Recevoir un résumé chaque semaine.'), prefs.notify_weekly_recap !== false))
+      + '<div class="mt-4 flex flex-wrap items-center gap-3">' + boutonPrimaire('enregistrerNotifs', tr('compte_page.save_btn', 'Enregistrer')) + '</div>'
       + '<p id="msgNotifs" hidden aria-live="polite"></p>';
   }
 
   function securite() {
-    return titreSection('Sécurité', 'L’accès à votre compte.')
+    return titreSection(tr('compte_page.security_heading', 'Sécurité'), tr('compte_page.security_subtitle', 'L’accès à votre compte.'))
       + '<div class="space-y-4">'
       + carte('<div class="flex flex-wrap items-start justify-between gap-4">'
-        + '<div><h2 class="text-[14.5px] font-semibold">Mot de passe</h2>'
-        + '<p class="mt-1.5 max-w-lg text-[13.5px] leading-relaxed text-soft">Pour le changer, vous devrez saisir le mot de passe actuel. Si vous l’avez oublié, passez par le lien de réinitialisation.</p></div>'
-        + boutonSecondaire('ouvrirMdp', 'Modifier le mot de passe') + '</div>'
-        + '<p class="mt-3 text-[13px]"><a href="/mot-de-passe-oublie.html" class="text-cyan transition hover:underline">J\'ai oublie mon mot de passe</a></p>')
+        + '<div><h2 class="text-[14.5px] font-semibold">' + tr('compte_page.password_heading', 'Mot de passe') + '</h2>'
+        + '<p class="mt-1.5 max-w-lg text-[13.5px] leading-relaxed text-soft">' + tr('compte_page.password_change_detail', 'Pour le changer, vous devrez saisir le mot de passe actuel. Si vous l’avez oublié, passez par le lien de réinitialisation.') + '</p></div>'
+        + boutonSecondaire('ouvrirMdp', tr('compte_page.change_password_cta', 'Modifier le mot de passe')) + '</div>'
+        + '<p class="mt-3 text-[13px]"><a href="/mot-de-passe-oublie.html" class="text-cyan transition hover:underline">' + tr('compte_page.forgot_password_link', 'J\'ai oublie mon mot de passe') + '</a></p>')
       + carte('<div class="flex flex-wrap items-start justify-between gap-4">'
-        + '<div><h2 class="text-[14.5px] font-semibold">Déconnexion</h2>'
-        + '<p class="mt-1.5 text-[13.5px] leading-relaxed text-soft">Ferme la session sur cet appareil.</p></div>'
-        + boutonSecondaire('deconnexion2', 'Se déconnecter') + '</div>')
+        + '<div><h2 class="text-[14.5px] font-semibold">' + tr('compte_page.logout_label', 'Déconnexion') + '</h2>'
+        + '<p class="mt-1.5 text-[13.5px] leading-relaxed text-soft">' + tr('compte_page.logout_detail', 'Ferme la session sur cet appareil.') + '</p></div>'
+        + boutonSecondaire('deconnexion2', tr('compte_page.logout_cta', 'Se déconnecter')) + '</div>')
       + '</div>'
       + dialogueMotDePasse();
   }
 
   function donnees() {
-    return titreSection('Données et confidentialité', 'Ce que nous conservons, et comment le récupérer ou l’effacer.')
+    return titreSection(tr('compte_page.data_heading', 'Données et confidentialité'), tr('compte_page.data_subtitle', 'Ce que nous conservons, et comment le récupérer ou l’effacer.'))
       + '<div class="space-y-4">'
       + carte('<div class="flex flex-wrap items-start justify-between gap-4">'
-        + '<div><h2 class="text-[14.5px] font-semibold">Exporter mes données</h2>'
-        + '<p class="mt-1.5 max-w-lg text-[13.5px] leading-relaxed text-soft">Téléchargez un fichier JSON contenant votre compte, vos préférences, votre journal de décisions et l’état de votre abonnement.</p></div>'
-        + boutonSecondaire('exporter', 'Exporter') + '</div>'
+        + '<div><h2 class="text-[14.5px] font-semibold">' + tr('compte_page.export_data_heading', 'Exporter mes données') + '</h2>'
+        + '<p class="mt-1.5 max-w-lg text-[13.5px] leading-relaxed text-soft">' + tr('compte_page.export_data_detail', 'Téléchargez un fichier JSON contenant votre compte, vos préférences, votre journal de décisions et l’état de votre abonnement.') + '</p></div>'
+        + boutonSecondaire('exporter', tr('compte_page.export_cta', 'Exporter')) + '</div>'
         + '<p id="msgExport" hidden aria-live="polite"></p>')
       // Zone dangereuse en bas de la derniere section, jamais sur la vue
       // d'ensemble : on ne met pas un bouton de suppression sous les yeux de
       // quelqu'un venu changer sa langue.
       + '<section class="rounded-2xl border border-red-500/25 bg-red-500/[.04] p-5 sm:p-6">'
-        + '<h2 class="text-[12px] font-bold uppercase tracking-[0.16em] text-red-300">Zone dangereuse</h2>'
+        + '<h2 class="text-[12px] font-bold uppercase tracking-[0.16em] text-red-300">' + tr('compte_page.danger_zone_heading', 'Zone dangereuse') + '</h2>'
         + '<div class="mt-4 flex flex-wrap items-start justify-between gap-4">'
-        + '<div><h3 class="text-[14.5px] font-semibold">Supprimer mon compte</h3>'
-        + '<p class="mt-1.5 max-w-lg text-[13.5px] leading-relaxed text-soft">Efface définitivement votre compte, vos préférences et votre journal.'
-        + (ctx.isPro && abo && ['active', 'trialing', 'past_due'].indexOf(abo.status) !== -1 ? ' Votre abonnement en cours sera résilié avant la suppression.' : '')
-        + ' Cette action est irréversible.</p></div>'
-        + '<button type="button" id="ouvrirSuppression" class="h-11 rounded-xl border border-red-500/40 px-5 text-[14px] font-semibold text-red-300 transition hover:bg-red-500/10">Supprimer</button>'
+        + '<div><h3 class="text-[14.5px] font-semibold">' + tr('compte_page.delete_account_heading', 'Supprimer mon compte') + '</h3>'
+        + '<p class="mt-1.5 max-w-lg text-[13.5px] leading-relaxed text-soft">' + tr('compte_page.delete_account_detail_prefix', 'Efface définitivement votre compte, vos préférences et votre journal.')
+        + (ctx.isPro && abo && ['active', 'trialing', 'past_due'].indexOf(abo.status) !== -1 ? tr('compte_page.delete_account_stripe_clause', ' Votre abonnement en cours sera résilié avant la suppression.') : '')
+        + tr('compte_page.delete_account_irreversible', ' Cette action est irréversible.') + '</p></div>'
+        + '<button type="button" id="ouvrirSuppression" class="h-11 rounded-xl border border-red-500/40 px-5 text-[14px] font-semibold text-red-300 transition hover:bg-red-500/10">' + tr('compte_page.delete_cta', 'Supprimer') + '</button>'
         + '</div></section>'
       + '</div>'
       + dialogueSuppression();
@@ -400,32 +432,35 @@
   /* ---------- Dialogues ---------- */
   function dialogueMotDePasse() {
     return '<dialog id="dlgMdp" class="w-[min(420px,calc(100vw-2rem))] rounded-2xl border border-hairline bg-surface p-6 text-ink backdrop:bg-black/70">'
-      + '<h2 class="text-[18px] font-bold tracking-tight">Modifier le mot de passe</h2>'
+      + '<h2 class="text-[18px] font-bold tracking-tight">' + tr('compte_page.change_password_cta', 'Modifier le mot de passe') + '</h2>'
       + '<form id="formMdp" novalidate class="mt-5">'
-      + '<div><label for="mdpActuel" class="block text-[13px] font-semibold text-soft">Mot de passe actuel</label>'
+      + '<div><label for="mdpActuel" class="block text-[13px] font-semibold text-soft">' + tr('compte_page.current_password_label', 'Mot de passe actuel') + '</label>'
       + '<input id="mdpActuel" class="fld mt-2" type="password" autocomplete="current-password" required></div>'
-      + '<div class="mt-4"><label for="mdpNouveau" class="block text-[13px] font-semibold text-soft">Nouveau mot de passe</label>'
+      + '<div class="mt-4"><label for="mdpNouveau" class="block text-[13px] font-semibold text-soft">' + tr('compte_page.new_password_field_label', 'Nouveau mot de passe') + '</label>'
       + '<input id="mdpNouveau" class="fld mt-2" type="password" autocomplete="new-password" minlength="8" required>'
-      + '<p class="mt-1.5 text-[12.5px] text-soft">8 caracteres minimum.</p></div>'
-      + '<div class="mt-4"><label for="mdpConfirme" class="block text-[13px] font-semibold text-soft">Confirmer</label>'
+      + '<p class="mt-1.5 text-[12.5px] text-soft">' + tr('compte_page.password_min_hint', '8 caracteres minimum.') + '</p></div>'
+      + '<div class="mt-4"><label for="mdpConfirme" class="block text-[13px] font-semibold text-soft">' + tr('compte_page.confirm_password_label', 'Confirmer') + '</label>'
       + '<input id="mdpConfirme" class="fld mt-2" type="password" autocomplete="new-password" required></div>'
       + '<p id="msgMdp" hidden aria-live="polite"></p>'
       + '<div class="mt-6 flex justify-end gap-3">'
-      + boutonSecondaire('annulerMdp', 'Annuler')
-      + '<button type="submit" id="validerMdp" class="h-11 rounded-xl bg-cyan px-5 text-[14px] font-bold text-[#04141b] transition hover:bg-cyan/90 disabled:cursor-wait disabled:opacity-60">Mettre a jour</button>'
+      + boutonSecondaire('annulerMdp', tr('compte_page.cancel_btn', 'Annuler'))
+      + '<button type="submit" id="validerMdp" class="h-11 rounded-xl bg-cyan px-5 text-[14px] font-bold text-[#04141b] transition hover:bg-cyan/90 disabled:cursor-wait disabled:opacity-60">' + tr('compte_page.update_password_cta', 'Mettre a jour') + '</button>'
       + '</div></form></dialog>';
   }
   function dialogueSuppression() {
     return '<dialog id="dlgSuppr" class="w-[min(460px,calc(100vw-2rem))] rounded-2xl border border-red-500/25 bg-surface p-6 text-ink backdrop:bg-black/70">'
-      + '<h2 class="text-[18px] font-bold tracking-tight">Supprimer votre compte ?</h2>'
-      + '<p class="mt-3 text-[13.5px] leading-relaxed text-soft">Votre compte, vos préférences et votre journal seront définitivement effacés. Cette action ne peut pas être annulée.</p>'
+      + '<h2 class="text-[18px] font-bold tracking-tight">' + tr('compte_page.delete_confirm_heading', 'Supprimer votre compte ?') + '</h2>'
+      + '<p class="mt-3 text-[13.5px] leading-relaxed text-soft">' + tr('compte_page.delete_confirm_detail', 'Votre compte, vos préférences et votre journal seront définitivement effacés. Cette action ne peut pas être annulée.') + '</p>'
       + '<form id="formSuppr" novalidate class="mt-5">'
-      + '<label for="confirmationSuppr" class="block text-[13px] font-semibold text-soft">Pour confirmer, saisissez <b class="text-ink">SUPPRIMER</b></label>'
+      // Le mot en gras doit rester identique a celui verifie par
+      // supprimerCompte() (meme cle compte_page.delete_confirm_word) : sinon
+      // la confirmation ne matcherait jamais dans une langue traduite.
+      + '<label for="confirmationSuppr" class="block text-[13px] font-semibold text-soft">' + tr('compte_page.delete_confirm_instruction_prefix', 'Pour confirmer, saisissez ') + '<b class="text-ink">' + esc(tr('compte_page.delete_confirm_word', 'SUPPRIMER')) + '</b></label>'
       + '<input id="confirmationSuppr" class="fld mt-2" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false" required>'
       + '<p id="msgSuppr" hidden aria-live="polite"></p>'
       + '<div class="mt-6 flex justify-end gap-3">'
-      + boutonSecondaire('annulerSuppr', 'Annuler')
-      + '<button type="submit" id="validerSuppr" class="h-11 rounded-xl bg-red-500/90 px-5 text-[14px] font-bold text-white transition hover:bg-red-500 disabled:cursor-wait disabled:opacity-60">Supprimer définitivement</button>'
+      + boutonSecondaire('annulerSuppr', tr('compte_page.cancel_btn', 'Annuler'))
+      + '<button type="submit" id="validerSuppr" class="h-11 rounded-xl bg-red-500/90 px-5 text-[14px] font-bold text-white transition hover:bg-red-500 disabled:cursor-wait disabled:opacity-60">' + tr('compte_page.delete_confirm_cta', 'Supprimer définitivement') + '</button>'
       + '</div></form></dialog>';
   }
 
@@ -445,9 +480,9 @@
       return '<button type="button" class="acc-tab shrink-0 rounded-lg px-3.5 py-2.5 text-left text-[14px] font-medium text-soft transition hover:text-ink lg:w-full"'
         + (actif ? ' aria-current="page"' : '') + ' data-aller="' + s.id + '">' + esc(s.titre) + '</button>';
     }).join('');
-    return '<nav aria-label="Sections du compte">'
+    return '<nav aria-label="' + esc(tr('compte_page.nav_aria_label', 'Sections du compte')) + '">'
       + '<div class="-mx-4 flex gap-1 overflow-x-auto border-b border-hairline px-4 pb-2 lg:mx-0 lg:flex-col lg:gap-0.5 lg:border-0 lg:px-0 lg:pb-0">' + liens + '</div>'
-      + '<button type="button" id="deconnexion" class="mt-4 hidden w-full rounded-lg px-3.5 py-2.5 text-left text-[14px] font-medium text-soft transition hover:text-ink lg:block">Déconnexion</button>'
+      + '<button type="button" id="deconnexion" class="mt-4 hidden w-full rounded-lg px-3.5 py-2.5 text-left text-[14px] font-medium text-soft transition hover:text-ink lg:block">' + tr('compte_page.logout_label', 'Déconnexion') + '</button>'
       + '</nav>';
   }
 
@@ -460,7 +495,7 @@
       + '<div class="flex flex-wrap items-center gap-2.5"><p class="truncate text-[18px] font-bold tracking-tight">' + esc(nom) + '</p>'
       + '<span class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-[10.5px] font-bold tracking-wider ' + b.classe + '">' + b.texte + '</span></div>'
       + '<p class="mt-0.5 truncate text-[13.5px] text-soft">' + esc(ctx.user.email) + '</p>'
-      + (depuis ? '<p class="mt-0.5 text-[12.5px] text-soft">Membre depuis le ' + esc(depuis) + '</p>' : '')
+      + (depuis ? '<p class="mt-0.5 text-[12.5px] text-soft">' + tr('compte_page.member_since_prefix', 'Membre depuis le ') + esc(depuis) + '</p>' : '')
       + '</div></div>';
   }
 
@@ -667,12 +702,18 @@
      ni le droit d'effacer auth.users, ni les cles Stripe. */
   async function supprimerCompte(e) {
     e.preventDefault();
-    if ($('confirmationSuppr').value.trim().toUpperCase() !== 'SUPPRIMER') {
-      retour('msgSuppr', 'Saisissez SUPPRIMER pour confirmer.', 'error');
+    // Compare au meme mot que celui affiche en gras dans le dialogue (meme
+    // cle compte_page.delete_confirm_word) : indispensable pour que la
+    // confirmation reste possible une fois la page traduite. Le payload
+    // envoye au serveur (plus bas) reste 'SUPPRIMER' en dur : c'est un
+    // contrat d'API interne, pas du texte affiche, il ne se traduit pas.
+    var motAttendu = tr('compte_page.delete_confirm_word', 'SUPPRIMER').trim().toUpperCase();
+    if ($('confirmationSuppr').value.trim().toUpperCase() !== motAttendu) {
+      retour('msgSuppr', tr('compte_page.msg_type_supprimer_to_confirm', 'Saisissez SUPPRIMER pour confirmer.'), 'error');
       $('confirmationSuppr').focus();
       return;
     }
-    var relacher = occuper($('validerSuppr'), 'Suppression…');
+    var relacher = occuper($('validerSuppr'), tr('compte_page.deleting_label', 'Suppression…'));
     retour('msgSuppr', '');
     try {
       var s = await sb.auth.getSession();
@@ -690,7 +731,7 @@
       relacher();
       retour('msgSuppr', (err && err.message && err.message !== 'suppression_impossible')
         ? err.message
-        : 'La suppression n’a pas pu aboutir. Écrivez à contact@iashark.com et nous la traiterons.', 'error');
+        : tr('compte_page.err_deletion_failed_contact', 'La suppression n’a pas pu aboutir. Écrivez à contact@iashark.com et nous la traiterons.'), 'error');
     }
   }
 

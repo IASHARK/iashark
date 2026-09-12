@@ -34,6 +34,10 @@
   var squelette = document.getElementById('squelette');
 
   /* ---------- Utilitaires ---------- */
+  // Repli local : si I18N n'est pas charge (ou pas encore pret), on renvoie
+  // toujours le libelle francais d'origine, jamais une erreur.
+  function t(key, fallback) { return (window.I18N && window.I18N.t) ? window.I18N.t(key, fallback) : fallback; }
+  function localeTag() { return (window.I18N && window.I18N.localeTag) ? window.I18N.localeTag() : 'fr-FR'; }
   function esc(v) {
     return String(v == null ? '' : v).replace(/[&<>"']/g, function (c) {
       return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
@@ -42,12 +46,15 @@
   function n(v) { return Number.isFinite(Number(v)) && v !== null && v !== '' ? Number(v) : null; }
   function fmt(v, d) {
     var x = n(v);
-    return x === null ? null : x.toLocaleString('fr-FR', { maximumFractionDigits: d == null ? 1 : d });
+    return x === null ? null : x.toLocaleString(localeTag(), { maximumFractionDigits: d == null ? 1 : d });
   }
   function pct(v, d) { var s = fmt(v, d); return s === null ? null : s + ' %'; }
-  var INCONNU = '<span class="text-[13px] font-normal text-soft">Donnée indisponible</span>';
+  // Fonction (et non plus constante figee) : t() doit etre relu a chaque
+  // appel, une fois I18N pret, sinon la traduction reste bloquee sur le
+  // francais evalue avant le chargement du dictionnaire.
+  function inconnu() { return '<span class="text-[13px] font-normal text-soft">' + esc(t('player_page.value_unavailable', 'Donnée indisponible')) + '</span>'; }
   // Toute valeur passe par ici : une absence ne devient jamais un zero.
-  function ou(valeur, secours) { return valeur == null ? (secours || INCONNU) : valeur; }
+  function ou(valeur, secours) { return valeur == null ? (secours || inconnu()) : valeur; }
 
   function infobulle(texte, fin) {
     return '<details class="infobulle' + (fin ? ' infobulle-fin' : '') + '">'
@@ -73,10 +80,13 @@
   // du match. Si aucun des deux n'est renseigne, on ne conclut pas.
   function statutDisponibilite(joueur, ts) {
     var blesse = ts && ts.bio && ts.bio.injured;
-    if (joueur.absent) return { texte: 'Absence signalée', classe: 'border-red-500/35 bg-red-500/10 text-red-300', point: 'bg-red-400' };
-    if (blesse === true) return { texte: 'Blessure signalée', classe: 'border-amber-500/35 bg-amber-500/10 text-amber-200', point: 'bg-amber-400' };
-    if (blesse === false) return { texte: 'Disponible', classe: 'border-emerald-500/35 bg-emerald-500/10 text-emerald-300', point: 'bg-emerald-400' };
-    return { texte: 'Statut indisponible', classe: 'border-hairline bg-white/[.04] text-soft', point: 'bg-slate-400' };
+    // `code` porte la decision logique (jamais traduit) ; `texte` est le
+    // libelle affiche. tempsDeJeu() doit brancher sur `code`, pas sur
+    // `texte`, sinon la comparaison casse des que `texte` change de langue.
+    if (joueur.absent) return { code: 'absent', texte: t('player_page.status_absent', 'Absence signalée'), classe: 'border-red-500/35 bg-red-500/10 text-red-300', point: 'bg-red-400' };
+    if (blesse === true) return { code: 'injured', texte: t('player_page.status_injured', 'Blessure signalée'), classe: 'border-amber-500/35 bg-amber-500/10 text-amber-200', point: 'bg-amber-400' };
+    if (blesse === false) return { code: 'available', texte: t('player_page.status_available', 'Disponible'), classe: 'border-emerald-500/35 bg-emerald-500/10 text-emerald-300', point: 'bg-emerald-400' };
+    return { code: 'unknown', texte: t('player_page.status_unknown', 'Statut indisponible'), classe: 'border-hairline bg-white/[.04] text-soft', point: 'bg-slate-400' };
   }
 
   function enTete(vm, joueur, matchId, ts) {
@@ -86,8 +96,8 @@
     var meta = [];
     if (bio) {
       if (bio.nationality) meta.push(esc(bio.nationality));
-      if (n(bio.age) !== null) meta.push(esc(bio.age) + ' ans');
-      if (n(bio.heightCm) !== null) meta.push((bio.heightCm / 100).toFixed(2).replace('.', ',') + ' m');
+      if (n(bio.age) !== null) meta.push(esc(bio.age) + ' ' + esc(t('player_page.unit_years', 'ans')));
+      if (n(bio.heightCm) !== null) meta.push((window.I18N && window.I18N.formatNumber ? window.I18N.formatNumber(bio.heightCm / 100, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : (bio.heightCm / 100).toFixed(2).replace('.', ',')) + ' m');
       if (n(bio.weightKg) !== null) meta.push(esc(bio.weightKg) + ' kg');
     }
     var photo = joueur.photo
@@ -116,9 +126,15 @@
       + '</div></div>';
   }
 
-  var POSTES = { G: 'Gardien', D: 'Défenseur', M: 'Milieu', F: 'Attaquant',
-    goalkeeper: 'Gardien', defender: 'Défenseur', midfielder: 'Milieu', attacker: 'Attaquant' };
-  function poste(v) { var k = String(v || '').trim(); return POSTES[k] || POSTES[k.toLowerCase()] || k; }
+  // Traduit a l'appel (pas de table figee au chargement du script) pour que
+  // le libelle suive la langue active une fois I18N pret.
+  function poste(v) {
+    var k = String(v || '').trim();
+    var G = t('player_page.position_goalkeeper', 'Gardien'), D = t('player_page.position_defender', 'Défenseur'),
+      M = t('player_page.position_midfielder', 'Milieu'), F = t('player_page.position_forward', 'Attaquant');
+    var POSTES = { G: G, D: D, M: M, F: F, goalkeeper: G, defender: D, midfielder: M, attacker: F };
+    return POSTES[k] || POSTES[k.toLowerCase()] || k;
+  }
 
   /* ---------- 2. Anneau du score ---------- */
   function anneauMenace(ts) {
@@ -127,7 +143,7 @@
     var r = 52, c = 2 * Math.PI * r, borne = Math.max(0, Math.min(100, score));
     return '<div class="shrink-0 lg:pl-8">'
       + '<div class="flex items-center gap-5 rounded-2xl border border-hairline bg-panel px-5 py-4 lg:flex-col lg:gap-3 lg:px-7 lg:py-6">'
-      + '<div class="relative h-[104px] w-[104px] shrink-0" role="img" aria-label="Score de menace de but : ' + score + ' sur 100">'
+      + '<div class="relative h-[104px] w-[104px] shrink-0" role="img" aria-label="' + esc(t('player_page.aria_goal_threat_score', 'Score de menace de but : {n} sur 100').replace('{n}', score)) + '">'
       + '<svg viewBox="0 0 120 120" class="anneau h-full w-full" aria-hidden="true">'
       + '<circle class="piste" cx="60" cy="60" r="' + r + '" fill="none" stroke-width="9"></circle>'
       + '<circle class="trace" cx="60" cy="60" r="' + r + '" fill="none" stroke-width="9"'
@@ -136,8 +152,8 @@
       + '<div class="absolute inset-0 flex flex-col items-center justify-center">'
       + '<span class="chiffres text-[32px] font-extrabold leading-none">' + score + '</span>'
       + '<span class="text-[11px] text-soft">/ 100</span></div></div>'
-      + '<div class="lg:text-center"><p class="text-[11px] font-bold uppercase tracking-[0.16em] text-cyan">Menace de but</p>'
-      + '<p class="mt-1 text-[12.5px] leading-relaxed text-soft lg:max-w-[150px]">Volume et précision des tirs, efficacité, échantillon et adversaire.</p></div>'
+      + '<div class="lg:text-center"><p class="text-[11px] font-bold uppercase tracking-[0.16em] text-cyan">' + esc(t('player_page.label_goal_threat_short', 'Menace de but')) + '</p>'
+      + '<p class="mt-1 text-[12.5px] leading-relaxed text-soft lg:max-w-[150px]">' + esc(t('player_page.goal_threat_ring_desc', 'Volume et précision des tirs, efficacité, échantillon et adversaire.')) + '</p></div>'
       + '</div></div>';
   }
 
@@ -152,17 +168,17 @@
     var fiab = n(ts.reliability), adv = n(ts.opponent_defense_multiplier);
 
     if (!c || n(c.shotsOnNorm) === null) {
-      return bloc(titre('D’où vient ce score')
-        + '<p class="mt-3 max-w-[62ch] text-[14px] leading-[1.7] text-soft">Ce score combine le volume de tirs du joueur, sa précision, son efficacité devant le but, la taille de son échantillon et la solidité de la défense adverse. Le détail chiffré de chaque composante sera disponible à la prochaine mise à jour des données.</p>');
+      return bloc(titre(t('player_page.score_breakdown_title', 'D’où vient ce score'))
+        + '<p class="mt-3 max-w-[62ch] text-[14px] leading-[1.7] text-soft">' + esc(t('player_page.score_breakdown_unavailable', 'Ce score combine le volume de tirs du joueur, sa précision, son efficacité devant le but, la taille de son échantillon et la solidité de la défense adverse. Le détail chiffré de chaque composante sera disponible à la prochaine mise à jour des données.')) + '</p>');
     }
 
     var lignes = [
-      ['Tirs cadrés par 90 minutes', c.shotsOnNorm, c.weights.shotsOn,
-       'La composante la plus lourde. Mesurée par rapport au meilleur joueur des deux équipes sur ce match.'],
-      ['Volume de tirs par 90 minutes', c.shotsTotalNorm, c.weights.shotsTotal,
-       'Le nombre de tentatives, cadrées ou non, rapporté au meilleur volume des deux équipes.'],
-      ['Efficacité devant le but', c.conversionNorm, c.weights.conversion,
-       'Son taux de conversion comparé à la moyenne des joueurs de ce match, lissé quand l’échantillon est petit.']
+      [t('player_page.stat_shots_on_target_long', 'Tirs cadrés par 90 minutes'), c.shotsOnNorm, c.weights.shotsOn,
+       t('player_page.tooltip_shots_on_target', 'La composante la plus lourde. Mesurée par rapport au meilleur joueur des deux équipes sur ce match.')],
+      [t('player_page.stat_shots_volume_long', 'Volume de tirs par 90 minutes'), c.shotsTotalNorm, c.weights.shotsTotal,
+       t('player_page.tooltip_shots_volume', 'Le nombre de tentatives, cadrées ou non, rapporté au meilleur volume des deux équipes.')],
+      [t('player_page.stat_finishing_efficiency', 'Efficacité devant le but'), c.conversionNorm, c.weights.conversion,
+       t('player_page.tooltip_finishing_efficiency', 'Son taux de conversion comparé à la moyenne des joueurs de ce match, lissé quand l’échantillon est petit.')]
     ];
     var base = lignes.reduce(function (s, l) { return s + l[1] * l[2]; }, 0);
 
@@ -171,7 +187,7 @@
       return '<div class="border-t border-hairline py-3.5 first:border-0 first:pt-0">'
         + '<div class="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">'
         + '<span class="text-[13.5px]">' + esc(l[0]) + ' ' + infobulle(l[3]) + '</span>'
-        + '<span class="chiffres text-[13px] text-soft">poids ' + Math.round(l[2] * 100) + ' %'
+        + '<span class="chiffres text-[13px] text-soft">' + esc(t('player_page.weight_label', 'poids')) + ' ' + Math.round(l[2] * 100) + ' %'
         + ' <b class="ml-2 text-[14.5px] font-semibold text-ink">' + p + '</b><span class="text-[11.5px]">/100</span></span></div>'
         + '<div class="barre mt-2"><i data-largeur="' + p + '"></i></div></div>';
     }).join('');
@@ -183,17 +199,17 @@
         + '<b class="chiffres text-[14.5px] font-semibold">× ' + fmt(valeur, 2) + '</b></div>';
     };
 
-    return bloc(titre('D’où vient ce score')
-      + '<p class="mt-2.5 text-[13px] leading-relaxed text-soft">Trois composantes pondérées, puis deux ajustements. Le résultat est exactement le score affiché en haut de page.</p>'
+    return bloc(titre(t('player_page.score_breakdown_title', 'D’où vient ce score'))
+      + '<p class="mt-2.5 text-[13px] leading-relaxed text-soft">' + esc(t('player_page.score_breakdown_intro', 'Trois composantes pondérées, puis deux ajustements. Le résultat est exactement le score affiché en haut de page.')) + '</p>'
       + '<div class="mt-4">' + corps + '</div>'
       + '<div class="mt-2 rounded-xl border border-hairline bg-black/15 px-4 py-2">'
       + '<div class="flex items-baseline justify-between gap-3 py-2">'
-      + '<span class="text-[13.5px] font-semibold">Base pondérée</span>'
+      + '<span class="text-[13.5px] font-semibold">' + esc(t('player_page.weighted_base', 'Base pondérée')) + '</span>'
       + '<b class="chiffres text-[14.5px] font-semibold">' + Math.round(base * 100) + '<span class="text-[11.5px] font-normal text-soft">/100</span></b></div>'
-      + multiplicateur('Fiabilité de l’échantillon', fiab, 'Réduit le score quand le joueur a peu de matchs ou peu de minutes. Vaut 1 à partir de cinq apparitions complètes.')
-      + multiplicateur('Contexte adverse', adv, 'Mesure la perméabilité de la défense d’en face. 1,00 = défense moyenne ; au-dessus, contexte plus favorable au buteur.')
+      + multiplicateur(t('player_page.stat_sample_reliability', 'Fiabilité de l’échantillon'), fiab, t('player_page.tooltip_sample_reliability', 'Réduit le score quand le joueur a peu de matchs ou peu de minutes. Vaut 1 à partir de cinq apparitions complètes.'))
+      + multiplicateur(t('player_page.stat_opponent_context', 'Contexte adverse'), adv, t('player_page.tooltip_opponent_context', 'Mesure la perméabilité de la défense d’en face. 1,00 = défense moyenne ; au-dessus, contexte plus favorable au buteur.'))
       + '<div class="flex items-baseline justify-between gap-3 border-t border-cyan/25 py-3">'
-      + '<span class="text-[13.5px] font-bold text-cyan">Menace de but</span>'
+      + '<span class="text-[13.5px] font-bold text-cyan">' + esc(t('player_page.label_goal_threat_short', 'Menace de but')) + '</span>'
       + '<b class="chiffres text-[18px] font-extrabold text-cyan">' + n(ts.goal_threat_score) + '<span class="text-[11.5px] font-normal">/100</span></b></div>'
       + '</div>');
   }

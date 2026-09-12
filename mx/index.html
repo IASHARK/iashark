@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>IASHARK México — Modelos de probabilidad de fútbol, comparados con el mercado</title>
+<link rel="canonical" href="https://iashark.com/mx/">
+<!-- New market-specific acquisition layer (config/markets.json "mx" entry) - not a
+     locale variant of /es/, so no hreflang alternate set is declared here (its
+     underlying interface locale is "es-mx" per i18n/i18n.js MARKET_LOCALE, used
+     only for the shared chrome below, not as a full page set - see the /es/
+     fallback comments further down). Status of the underlying market is
+     DRAFT_PENDING_LEGAL_REVIEW (see config/markets.json) and paid ads are not
+     enabled yet - kept out of the index while that holds, same as GB/ZA. -->
+<meta name="robots" content="noindex, follow">
+<meta name="description" content="Cuatro modelos estadísticos calculan la probabilidad de cada partido, la comparan con el mercado, y mantienen el pronóstico en un historial público después del silbatazo inicial. Análisis diario gratis, sin necesidad de tarjeta.">
+<meta property="og:title" content="IASHARK México — Modelos de probabilidad de fútbol, comparados con el mercado">
+<meta property="og:description" content="Cuatro modelos estadísticos calculan la probabilidad de cada partido, la comparan con el mercado, y mantienen el pronóstico en un historial público después del silbatazo inicial.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://iashark.com/mx/">
+<meta property="og:image" content="https://iashark.com/icon-512.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23080c12'/%3E%3Ctext x='50%25' y='54%25' dominant-baseline='middle' text-anchor='middle' font-size='40' fill='%2322d3ee'%3E🦈%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<style>
+:root{
+  --bg:#080c12;--card:#0d1520;--card2:#0f1a28;
+  --cyan:#22d3ee;--cyan2:#06b6d4;--amber:#f59e0b;--green:#10b981;--red:#ef4444;
+  --text:#e2e8f0;--muted:#4a6580;--border:rgba(255,255,255,0.06);--border-cyan:rgba(34,211,238,0.18);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;overflow-x:hidden;}
+body::before{content:'';position:fixed;top:-300px;left:50%;transform:translateX(-50%);width:900px;height:600px;background:radial-gradient(ellipse,rgba(34,211,238,0.05) 0%,transparent 65%);pointer-events:none;z-index:0;}
+a{color:inherit;}
+.wrap{max-width:1100px;margin:0 auto;padding:0 20px;position:relative;z-index:1;}
+.eyebrow{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:3px;color:var(--amber);display:flex;align-items:center;justify-content:center;gap:8px;}
+.eyebrow .line{width:24px;height:1px;background:var(--amber);opacity:.4;}
+.eyebrow .dot{width:5px;height:5px;background:var(--amber);border-radius:50%;animation:blink 1.2s infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+@keyframes fadeup{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.reveal{animation:fadeup .5s ease forwards;opacity:0;}
+
+/* HEADER */
+.hdr{position:sticky;top:0;z-index:99;background:rgba(8,12,18,0.96);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);}
+.hdr-in{max-width:1100px;margin:0 auto;padding:0 20px;height:56px;display:flex;align-items:center;justify-content:space-between;}
+.logo{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:3px;text-decoration:none;}
+.logo span{color:var(--cyan);}
+.market-badge{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1px;color:var(--muted);border:1px solid var(--border);border-radius:8px;padding:5px 9px;margin-left:8px;}
+.btn-nav{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1px;padding:8px 16px;border-radius:8px;border:1px solid rgba(34,211,238,0.3);background:rgba(34,211,238,0.08);color:var(--cyan);text-decoration:none;transition:.2s;}
+.btn-nav:hover{background:rgba(34,211,238,0.16);}
+
+/* HERO */
+.hero{position:relative;padding:56px 20px 40px;text-align:center;overflow:hidden;}
+.hero::before{content:'';position:absolute;top:-140px;left:50%;transform:translateX(-50%);width:700px;height:460px;background:radial-gradient(ellipse,rgba(34,211,238,0.09) 0%,transparent 60%);pointer-events:none;}
+.hero-shark{position:relative;z-index:1;font-size:52px;margin-bottom:6px;display:inline-block;filter:drop-shadow(0 0 24px rgba(34,211,238,0.28));animation:float 3s ease-in-out infinite;}
+.hero h1{position:relative;z-index:1;font-family:'Bebas Neue',sans-serif;font-size:clamp(30px,7vw,58px);letter-spacing:1px;line-height:1.05;margin:10px auto 18px;max-width:720px;}
+.hero h1 b{color:var(--cyan);}
+.hero p.sub{position:relative;z-index:1;font-size:15px;color:#94a3b8;line-height:1.7;margin:0 auto 28px;max-width:540px;}
+.hero p.sub b{color:var(--text);font-weight:600;}
+.cta-row{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:10px;}
+.cta-pair{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;}
+.btn-primary{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:1px;padding:15px 38px;border-radius:14px;background:linear-gradient(135deg,var(--cyan),var(--cyan2));color:#04141a;text-decoration:none;box-shadow:0 8px 30px rgba(34,211,238,0.25);transition:.2s;display:inline-block;}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 12px 34px rgba(34,211,238,0.35);}
+.btn-secondary{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:1px;padding:15px 34px;border-radius:14px;border:1px solid var(--border-cyan);color:var(--cyan);text-decoration:none;transition:.2s;display:inline-block;}
+.btn-secondary:hover{background:rgba(34,211,238,0.08);}
+.cta-note{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1px;color:var(--muted);}
+.cta-note b{color:var(--green);}
+
+/* SIGNAL STRIP */
+.signal-strip{position:relative;z-index:1;max-width:760px;margin:44px auto 0;padding:16px 22px;border:1px solid var(--border-cyan);border-radius:16px;background:rgba(34,211,238,0.04);font-family:'Space Mono',monospace;font-size:10.5px;color:var(--cyan);letter-spacing:.5px;overflow:hidden;white-space:nowrap;}
+.signal-strip .track{display:inline-block;animation:scroll-left 22s linear infinite;}
+.signal-strip span{margin-right:36px;color:var(--muted);}
+.signal-strip span b{color:var(--cyan);}
+@keyframes scroll-left{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+/* SECTION LABEL */
+.sec-lbl{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:3px;color:var(--muted);display:flex;align-items:center;gap:10px;margin-bottom:18px;}
+.sec-lbl::after{content:'';flex:1;height:1px;background:var(--border);}
+.sec-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(24px,4.5vw,36px);letter-spacing:.5px;margin-bottom:14px;max-width:640px;}
+.sec-title b{color:var(--cyan);}
+.sec-sub{font-size:13.5px;color:#94a3b8;line-height:1.7;max-width:600px;margin-bottom:8px;}
+
+/* PROOF / TRACK RECORD */
+.proof{padding:60px 0;}
+.proof-box{background:linear-gradient(135deg,var(--card2),var(--card));border:1px solid rgba(245,158,11,0.2);border-radius:20px;padding:32px 24px;display:flex;flex-direction:column;gap:18px;align-items:flex-start;}
+@media(min-width:820px){.proof-box{flex-direction:row;align-items:center;justify-content:space-between;}}
+.proof-txt h3{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:.5px;margin-bottom:8px;}
+.proof-txt h3 b{color:var(--amber);}
+.proof-txt p{font-size:13.5px;color:#94a3b8;line-height:1.6;max-width:480px;}
+.proof-txt p.hook{color:#cbd5e1;font-weight:600;margin-top:10px;}
+.btn-ghost{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1px;padding:12px 22px;border-radius:10px;border:1px solid rgba(245,158,11,0.35);background:rgba(245,158,11,0.06);color:var(--amber);text-decoration:none;white-space:nowrap;transition:.2s;}
+.btn-ghost:hover{background:rgba(245,158,11,0.14);}
+
+/* MODEL VS MARKET */
+.mvm{padding:20px 0 60px;}
+.mvm-card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:28px 24px;}
+.mvm-example{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1px;color:var(--muted);margin-bottom:16px;}
+.mvm-bars{display:flex;flex-direction:column;gap:14px;max-width:520px;}
+.mvm-row{display:flex;align-items:center;gap:12px;}
+.mvm-row-lbl{width:170px;flex-shrink:0;font-size:12.5px;color:#cbd5e1;}
+.mvm-track{flex:1;height:22px;border-radius:8px;background:rgba(255,255,255,0.04);overflow:hidden;position:relative;}
+.mvm-fill{height:100%;border-radius:8px;display:flex;align-items:center;justify-content:flex-end;padding-right:8px;font-family:'Space Mono',monospace;font-size:10px;font-weight:700;}
+.mvm-fill.model{background:linear-gradient(90deg,var(--cyan2),var(--cyan));color:#04141a;}
+.mvm-fill.market{background:rgba(148,163,184,0.35);color:#0b141c;}
+.mvm-note{margin-top:16px;font-size:12.5px;color:#94a3b8;line-height:1.6;}
+
+/* METODO */
+.methode{padding:70px 0 20px;}
+.model-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:26px;}
+@media(min-width:820px){.model-grid{grid-template-columns:repeat(4,1fr);}}
+.model-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px 16px;transition:.2s;}
+.model-card:hover{border-color:rgba(34,211,238,0.25);transform:translateY(-3px);}
+.model-tag{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:1px;color:var(--amber);margin-bottom:10px;}
+.model-name{font-family:'Bebas Neue',sans-serif;font-size:19px;letter-spacing:.5px;margin-bottom:6px;}
+.model-desc{font-size:12px;color:#94a3b8;line-height:1.55;}
+
+/* STEPS */
+.steps{padding:60px 0;}
+.step-list{display:flex;flex-direction:column;gap:2px;margin-top:26px;border-radius:16px;overflow:hidden;border:1px solid var(--border);}
+.step{display:grid;grid-template-columns:56px 1fr;gap:16px;padding:22px 20px;background:var(--card);border-bottom:1px solid var(--border);}
+.step:last-child{border-bottom:none;}
+.step-num{font-family:'Bebas Neue',sans-serif;font-size:30px;color:var(--cyan);opacity:.5;line-height:1;}
+.step-title{font-family:'Bebas Neue',sans-serif;font-size:17px;letter-spacing:.5px;margin-bottom:4px;}
+.step-desc{font-size:12.5px;color:#94a3b8;line-height:1.55;}
+
+/* TOOLS PREVIEW (product demo substitute - real tools, no fabricated screenshot) */
+.tools-prev{padding:20px 0 60px;}
+.tools-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:22px;}
+@media(min-width:820px){.tools-grid{grid-template-columns:repeat(3,1fr);}}
+.tool-chip{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 16px;font-size:12.5px;color:#cbd5e1;}
+.tool-chip b{display:block;font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:.3px;color:var(--text);margin-bottom:3px;}
+.tools-cta{margin-top:20px;}
+
+/* OFERTAS */
+.offres{padding:60px 0 20px;}
+.plan-grid{display:grid;grid-template-columns:1fr;gap:14px;margin-top:26px;}
+@media(min-width:700px){.plan-grid{grid-template-columns:1fr 1fr;}}
+@media(min-width:1040px){.plan-grid{grid-template-columns:repeat(4,1fr);}}
+.plan{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:26px 20px;display:flex;flex-direction:column;gap:14px;}
+.plan.hi{border-color:rgba(34,211,238,0.3);background:linear-gradient(160deg,var(--card2),var(--card));position:relative;}
+.plan.hi::before{content:'RECOMENDADO';position:absolute;top:-1px;right:16px;transform:translateY(-50%);font-family:'Space Mono',monospace;font-size:7px;letter-spacing:1.5px;background:var(--cyan);color:#04141a;padding:4px 10px;border-radius:20px;font-weight:700;}
+.plan.annual{border-color:rgba(245,158,11,0.28);}
+.plan.annual::before{content:'MEJOR VALOR';position:absolute;top:-1px;right:16px;transform:translateY(-50%);font-family:'Space Mono',monospace;font-size:7px;letter-spacing:1.5px;background:var(--amber);color:#1a1204;padding:4px 10px;border-radius:20px;font-weight:700;}
+.plan.annual{position:relative;}
+.plan-name{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--muted);}
+.plan.hi .plan-name{color:var(--cyan);}
+.plan.annual .plan-name{color:var(--amber);}
+.plan-price{font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:.5px;line-height:1;}
+.plan-price span{font-family:'Space Mono',monospace;font-size:11px;color:var(--muted);letter-spacing:0;margin-left:5px;}
+.plan-feats{list-style:none;display:flex;flex-direction:column;gap:8px;flex:1;}
+.plan-feats li{font-size:12.5px;color:#cbd5e1;display:flex;gap:8px;align-items:flex-start;line-height:1.4;}
+.plan-feats li::before{content:'✓';color:var(--cyan);font-weight:700;flex-shrink:0;}
+.plan-cta{margin-top:4px;text-align:center;padding:12px;border-radius:12px;font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:1px;text-decoration:none;transition:.2s;border:none;cursor:pointer;width:100%;}
+.plan-cta.free{border:1px solid var(--border);color:var(--text);background:transparent;}
+.plan-cta.free:hover{border-color:rgba(255,255,255,0.2);}
+.plan-cta.pro{background:linear-gradient(135deg,var(--cyan),var(--cyan2));color:#04141a;}
+.plan-cta.pro:hover{transform:translateY(-2px);}
+.plan-cta.edge{background:rgba(34,211,238,0.1);border:1px solid var(--border-cyan);color:var(--cyan);}
+.plan-cta.annual{background:linear-gradient(135deg,var(--amber),#d97706);color:#1a1204;}
+.plan-cta:disabled{opacity:.6;cursor:progress;}
+.plan-msg{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:.5px;color:var(--muted);min-height:12px;line-height:1.5;}
+.plan-msg.error{color:var(--amber);}
+.pricing-note{margin-top:18px;font-size:11.5px;color:var(--muted);line-height:1.6;}
+
+/* FAQ */
+.faq{padding:20px 0 60px;}
+.faq-list{display:flex;flex-direction:column;gap:2px;margin-top:26px;border-radius:16px;overflow:hidden;border:1px solid var(--border);}
+.faq-item{background:var(--card);border-bottom:1px solid var(--border);padding:18px 20px;}
+.faq-item:last-child{border-bottom:none;}
+.faq-q{font-family:'Bebas Neue',sans-serif;font-size:15.5px;letter-spacing:.3px;margin-bottom:6px;}
+.faq-a{font-size:12.5px;color:#94a3b8;line-height:1.6;}
+
+/* CTA FINAL */
+.final-cta{padding:70px 0 40px;text-align:center;}
+.final-cta h2{font-family:'Bebas Neue',sans-serif;font-size:clamp(26px,5vw,42px);letter-spacing:.5px;max-width:600px;margin:0 auto 14px;}
+.final-cta h2 b{color:var(--cyan);}
+.final-cta p{font-size:13.5px;color:#94a3b8;margin-bottom:26px;}
+
+/* COMPLIANCE / FOOTER */
+.compliance{padding:0 20px 30px;}
+.compliance-box{max-width:1100px;margin:0 auto;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:22px 22px 6px;}
+.compliance-box h3{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:10px;}
+.compliance-box p{font-size:12px;color:#94a3b8;line-height:1.7;margin-bottom:14px;}
+.age-warn{max-width:1100px;margin:0 auto 18px;background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.2);border-radius:12px;padding:16px 20px;}
+.age-warn p{font-family:'Space Mono',monospace;font-size:9.5px;color:rgba(245,158,11,0.85);line-height:1.9;letter-spacing:.4px;margin:0;}
+.age-warn a{color:rgba(245,158,11,0.95);}
+footer{padding:20px 20px 100px;text-align:center;border-top:1px solid var(--border);margin-top:20px;}
+.foot-legal{font-family:'Space Mono',monospace;font-size:8px;color:rgba(74,101,128,0.6);line-height:2;letter-spacing:.5px;}
+.foot-legal a{color:rgba(34,211,238,0.5);text-decoration:none;}
+.foot-links a{color:rgba(74,101,128,0.7);text-decoration:none;margin:0 8px;}
+.foot-todo{color:rgba(239,68,68,0.75);}
+</style>
+<link rel="stylesheet" href="/assets/bottom-navigation.css"></head>
+<body>
+
+<header class="hdr">
+  <div class="hdr-in">
+    <a href="https://iashark.com/mx/" class="logo"><span>IA</span>SHARK<span class="market-badge">MX · MXN</span></a>
+    <!-- GB linked to /en/ here ("VISIT THE INTERNATIONAL SITE"). MX's own
+         underlying interface locale is "es-mx" (i18n/i18n.js MARKET_LOCALE),
+         but there is no /es-mx/ page directory in this repo (only the
+         dictionary file, used for shared chrome like the bottom nav below) -
+         verified by listing the repo root before writing this file. /es/
+         (Spain Spanish) is the nearest real, working full site, same
+         "nearest existing locale" choice this page makes for the Track
+         Record link further down. -->
+    <a href="https://iashark.com/es/" class="btn-nav">IR AL SITIO EN ESPAÑOL →</a>
+  </div>
+</header>
+
+<div class="hero">
+  <div class="wrap">
+    <div class="hero-shark reveal">🦈</div>
+    <div class="eyebrow reveal" style="animation-delay:.05s"><span class="dot"></span> MODELOS DE PROBABILIDAD DE FÚTBOL</div>
+    <!-- Hero headline uses hook #6 from doc 07 (07_IAShark_Mexico_Launch_Kit)
+         verbatim: "No confíes en nuestra IA: compruébala." -->
+    <h1 class="reveal" style="animation-delay:.1s">No confíes en nuestra IA:<br><b>compruébala.</b></h1>
+    <p class="sub reveal" style="animation-delay:.15s">Cuatro modelos estadísticos calculan la probabilidad de cada partido de Liga MX, Champions League, Premier League, LaLiga y MLS, la comparan con el momio del mercado, y mantienen el pronóstico en un historial público después del silbatazo inicial.</p>
+    <div class="cta-row reveal" style="animation-delay:.2s">
+      <div class="cta-pair">
+        <!-- Free-trial CTA: same /es/ fallback as the header link above (no
+             /es-mx/ page set exists to send this to). -->
+        <a href="https://iashark.com/es/" class="btn-primary">PRUEBA UN PARTIDO GRATIS</a>
+        <a href="https://iashark.com/es/historique.html" class="btn-secondary">VER HISTORIAL PÚBLICO</a>
+      </div>
+      <div class="cta-note">No se necesita tarjeta · <b>1 análisis gratis cada día</b></div>
+    </div>
+  </div>
+
+  <div class="signal-strip reveal" style="animation-delay:.3s">
+    <div class="track">
+      <span><b>MODELO POISSON</b></span><span><b>DIXON-COLES</b> AJUSTE DE MARCADORES BAJOS</span><span><b>SIMULACIÓN MONTE CARLO</b></span><span><b>RANKING ELO</b> DINÁMICO</span><span><b>PROBABILIDADES SHIN</b></span>
+      <span><b>MODELO POISSON</b></span><span><b>DIXON-COLES</b> AJUSTE DE MARCADORES BAJOS</span><span><b>SIMULACIÓN MONTE CARLO</b></span><span><b>RANKING ELO</b> DINÁMICO</span><span><b>PROBABILIDADES SHIN</b></span>
+    </div>
+  </div>
+</div>
+
+<!-- BLOCK 2: PROOF / TRACK RECORD - never fabricated numbers here, always a link to
+     the real, already-working ledger. "se publica antes del partido y se
+     mantiene en el historial" replaces hook #10's "la bloqueamos" on
+     purpose: nothing about the storage is claimed to be technically locked
+     or immutable on this page (same guardrail GB's page follows - see its
+     equivalent comment). Also folds in hooks #2 and #7 from doc 07. -->
+<section class="proof">
+  <div class="wrap">
+    <div class="proof-box">
+      <div class="proof-txt">
+        <h3>Cada pronóstico se <b>publica antes del partido</b> — y se mantiene en el historial.</h3>
+        <p>Los aciertos y los errores permanecen visibles. Cada entrada incluye el partido, la probabilidad del modelo, el momio del mercado cuando está disponible, y el resultado una vez terminado el partido — nada se agrega ni se modifica después.</p>
+        <p class="hook">No borramos las predicciones perdedoras. Si el modelo pierde, también queda documentado.</p>
+      </div>
+      <a href="https://iashark.com/es/historique.html" class="btn-ghost">VER HISTORIAL COMPLETO →</a>
+    </div>
+  </div>
+</section>
+
+<!-- BLOCK 3: MODEL VS MARKET - a labelled illustrative example (not a real fixture),
+     using hook #1 from doc 07 ("La casa marca 48%. El modelo de IAShark marca
+     57%.") - same 57/48 figures as GB's own illustrative example, kept
+     consistent across markets since both are explicitly labelled as
+     illustrative, not live data. Folds in hook #9 (Liga MX) as the labelled
+     context, and hook #3 in the closing note. -->
+<section class="mvm">
+  <div class="wrap">
+    <div class="sec-lbl">MODELO VS. MERCADO</div>
+    <h2 class="sec-title">Dos números para cada resultado: <b>el nuestro, y el del mercado.</b></h2>
+    <div class="mvm-card">
+      <div class="mvm-example">EJEMPLO ILUSTRATIVO — LIGA MX — NO ES UNA PREDICCIÓN EN VIVO</div>
+      <div class="mvm-bars">
+        <div class="mvm-row">
+          <div class="mvm-row-lbl">Modelo IASHARK</div>
+          <div class="mvm-track"><div class="mvm-fill model" style="width:57%">57%</div></div>
+        </div>
+        <div class="mvm-row">
+          <div class="mvm-row-lbl">Momio implícito del mercado</div>
+          <div class="mvm-track"><div class="mvm-fill market" style="width:48%">48%</div></div>
+        </div>
+      </div>
+      <p class="mvm-note">Cada partido recibe el mismo tratamiento: la probabilidad del modelo para la selección, junto a lo que implica el momio ofrecido. Momio no significa probabilidad real. <a href="https://iashark.com/es/">Así se calcula →</a></p>
+    </div>
+  </div>
+</section>
+
+<section class="methode">
+  <div class="wrap">
+    <div class="sec-lbl">EL MÉTODO</div>
+    <!-- Sub-heading echoes hook #5 ("Cuatro modelos, una sola lectura."). -->
+    <h2 class="sec-title">Cuatro modelos, <b>una sola probabilidad</b> por partido.</h2>
+    <div class="model-grid">
+      <div class="model-card"><div class="model-tag">MODELO 1</div><div class="model-name">Poisson</div><div class="model-desc">Distribución de goles esperados para cada equipo, de local y de visitante.</div></div>
+      <div class="model-card"><div class="model-tag">MODELO 2</div><div class="model-name">Dixon-Coles</div><div class="model-desc">Corrección para marcadores bajos (0-0, 1-0, 1-1) que el Poisson puro subestima.</div></div>
+      <div class="model-card"><div class="model-tag">MODELO 3</div><div class="model-name">Monte Carlo</div><div class="model-desc">Miles de simulaciones de partido para obtener una distribución robusta de resultados.</div></div>
+      <div class="model-card"><div class="model-tag">MODELO 4</div><div class="model-name">Elo y Shin</div><div class="model-desc">Fuerza real del equipo a lo largo del tiempo, y corrección del sesgo en la probabilidad implícita.</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="steps">
+  <div class="wrap">
+    <div class="sec-lbl">EL MÉTODO, DE PRINCIPIO A FIN</div>
+    <h2 class="sec-title">De datos crudos a un <b>historial público.</b></h2>
+    <div class="step-list">
+      <div class="step reveal"><div class="step-num">01</div><div><div class="step-title">Datos</div><div class="step-desc">Calendarios, alineaciones probables, historial de enfrentamientos y estadísticas de goles esperados, recopilados de forma continua liga por liga.</div></div></div>
+      <div class="step reveal"><div class="step-num">02</div><div><div class="step-title">Modelos</div><div class="step-desc">Poisson, Dixon-Coles y Monte Carlo se ejecutan en paralelo para producir una distribución de probabilidad para cada mercado.</div></div></div>
+      <!-- Hook #4 from doc 07 ("Así cambia una cuota antes del cierre.") used
+           "cuota" in the source document, which conflicts with the MX
+           terminology rule established this session in i18n/dict/es-mx.json
+           (use "momios", never "cuota" - checked that file before writing
+           this page). Corrected to "momios" here rather than reproduced
+           verbatim. -->
+      <div class="step reveal"><div class="step-num">03</div><div><div class="step-title">Comparación con el mercado</div><div class="step-desc">La probabilidad del modelo se coloca junto al momio implícito del mercado, para que cualquier diferencia entre ambos sea visible. Así cambian los momios antes del cierre.</div></div></div>
+      <div class="step reveal"><div class="step-num">04</div><div><div class="step-title">Historial público</div><div class="step-desc">El pronóstico se publica antes del partido y se mantiene en el historial, se acierte o no.</div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- BLOCK 5: PRODUCT DEMO substitute. No fabricated dashboard screenshot -
+     instead, a link to the real, already-working example analysis, plus the
+     six real tools that exist today on pro.html (Tool Center), named
+     honestly - same substitution GB's page makes. -->
+<section class="tools-prev">
+  <div class="wrap">
+    <div class="sec-lbl">COMPRUÉBALO TÚ MISMO</div>
+    <h2 class="sec-title">Un análisis completo, <b>sin necesidad de cuenta.</b></h2>
+    <p class="sec-sub">Este es un ejemplo real y fechado — no es el partido de hoy — para que veas la forma completa de un análisis antes de registrarte. El contenido de esa página puede seguir apareciendo en francés en algunos lugares mientras se completa la localización a México.</p>
+    <div class="tools-grid">
+      <div class="tool-chip"><b>Gap Scanner</b>Dónde el momio del mercado y la probabilidad del modelo se alejan más.</div>
+      <div class="tool-chip"><b>Momio Justo</b>El momio que justifica una probabilidad, junto al momio ofrecido.</div>
+      <div class="tool-chip"><b>Calculadora de Apuesta</b>Tamaño de la posición según el capital y el momio que ingreses.</div>
+      <div class="tool-chip"><b>Simulador de Banca</b>Cómo se comporta un perfil de apuestas a lo largo de miles de series simuladas.</div>
+      <div class="tool-chip"><b>Análisis de Apuesta Combinada</b>Qué le hace realmente combinar selecciones al retorno esperado.</div>
+      <div class="tool-chip"><b>Diario de Decisiones</b>Un registro de las decisiones que anotas, y lo que generaron.</div>
+    </div>
+    <div class="tools-cta"><a href="https://iashark.com/exemple-analyse.html" class="btn-ghost">EXPLORA UN ANÁLISIS REAL →</a></div>
+  </div>
+</section>
+
+<section class="offres" id="pricing">
+  <div class="wrap">
+    <div class="sec-lbl">PRECIOS</div>
+    <h2 class="sec-title">Empieza gratis. <b>Ve más lejos cuando quieras.</b></h2>
+    <div class="plan-grid">
+      <div class="plan">
+        <div class="plan-name">GRATIS</div>
+        <div class="plan-price"><span id="priceFree">$0</span><span>/mes</span></div>
+        <ul class="plan-feats">
+          <li>1 análisis completo cada día</li>
+          <li>Acceso completo al historial público</li>
+          <li>Acceso completo al blog</li>
+          <li>No se necesita tarjeta</li>
+        </ul>
+        <a href="https://iashark.com/es/" class="plan-cta free">COMENZAR</a>
+      </div>
+      <div class="plan hi">
+        <div class="plan-name">PRO</div>
+        <div class="plan-price"><span id="pricePro">MX$199</span><span>/mes</span></div>
+        <ul class="plan-feats">
+          <li>Todos los análisis, todas las ligas cubiertas</li>
+          <li>Las seis herramientas del Centro de Herramientas</li>
+          <li>Filtros avanzados y detalle de confiabilidad</li>
+          <li>Cancela cuando quieras desde tu cuenta</li>
+        </ul>
+        <button type="button" id="subscribeProBtn" class="plan-cta pro">DESBLOQUEAR PRO</button>
+        <div class="plan-msg" id="proMsg"></div>
+      </div>
+      <div class="plan">
+        <div class="plan-name">EDGE</div>
+        <div class="plan-price"><span id="priceEdge">MX$299</span><span>/mes</span></div>
+        <ul class="plan-feats">
+          <li>Todo lo de Pro</li>
+          <li>Acceso prioritario a nuevas herramientas en cuanto se lancen</li>
+          <li>Cancela cuando quieras desde tu cuenta</li>
+        </ul>
+        <button type="button" id="subscribeEdgeBtn" class="plan-cta edge">DESBLOQUEAR EDGE</button>
+        <div class="plan-msg" id="edgeMsg"></div>
+      </div>
+      <div class="plan annual">
+        <div class="plan-name">EDGE ANUAL</div>
+        <div class="plan-price"><span id="priceAnnual">MX$1,990</span><span>/año</span></div>
+        <ul class="plan-feats">
+          <li>Todo lo de Edge</li>
+          <li>Facturación una vez al año en lugar de mensual</li>
+          <li>Cancela cuando quieras desde tu cuenta</li>
+        </ul>
+        <button type="button" id="subscribeAnnualBtn" class="plan-cta annual">OBTENER EDGE ANUAL</button>
+        <div class="plan-msg" id="annualMsg"></div>
+      </div>
+    </div>
+    <p class="pricing-note">Precios mostrados en pesos mexicanos (MXN). El checkout para México está en preparación — si todavía no está abierto cuando hagas clic, verás un aviso honesto en vez de un cobro, y no se te cobrará nada mientras tanto.</p>
+  </div>
+</section>
+
+<section class="faq">
+  <div class="wrap">
+    <div class="sec-lbl">PREGUNTAS FRECUENTES</div>
+    <h2 class="sec-title">Antes de registrarte.</h2>
+    <div class="faq-list">
+      <div class="faq-item">
+        <div class="faq-q">¿IASHARK garantiza algún resultado?</div>
+        <div class="faq-a">No. Cada número es una estimación estadística, no una promesa. Ningún resultado es seguro, y los resultados pasados no garantizan los futuros.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">¿Qué es el valor esperado?</div>
+        <div class="faq-a">Es un concepto estadístico que compara la probabilidad del modelo con el momio ofrecido — no una promesa de ganancias. Un valor esperado positivo describe una ventaja estadística a largo plazo, no un resultado garantizado en un partido concreto.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">¿Puedo cancelar cuando quiera?</div>
+        <div class="faq-a">Sí. Pro y Edge se facturan mensualmente y se pueden cancelar cuando quieras desde tu cuenta. Edge Anual sigue los mismos términos de suscripción, facturados una vez al año.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">¿Qué datos usa el modelo?</div>
+        <div class="faq-a">Datos públicos de fútbol: calendarios, alineaciones, historial de enfrentamientos y estadísticas de goles esperados, además de los momios del mercado cuando están disponibles. No se requiere ninguna actividad de apuestas personal para usarlo.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">¿Cuáles son los límites del modelo?</div>
+        <div class="faq-a">Estima probabilidades a partir de datos históricos y estadísticos. No puede considerar todos los factores del mundo real y, como cualquier estimación estadística, puede equivocarse.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">¿Para quién es IASHARK?</div>
+        <div class="faq-a">Personas adultas de 18 años o más en México. IASHARK es un servicio de suscripción de análisis deportivo — no acepta apuestas y no es una casa de apuestas.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="final-cta">
+  <div class="wrap">
+    <div class="hero-shark" style="font-size:36px;margin-bottom:14px;">🦈</div>
+    <h2>El próximo partido ya tiene <b>dos probabilidades.</b></h2>
+    <p>Ve a compararlas. Es gratis.</p>
+    <a href="https://iashark.com/es/" class="btn-primary">VER EL PARTIDO DE HOY</a>
+  </div>
+</section>
+
+<!-- BLOCK 9: LEGAL FOOTER -->
+<section class="compliance">
+  <div class="compliance-box">
+    <h3>Acerca de IASHARK</h3>
+    <!-- Official business description, doc 04, translated to Mexican Spanish
+         with the exact same legal meaning preserved (does not accept
+         wagers / does not place wagers / does not hold gambling funds / is
+         not a bookmaker) - same four clauses GB's page carries in English. -->
+    <p>IASHARK es una plataforma de suscripción de análisis deportivo e información de apuestas. Ofrece probabilidades de fútbol, comparación de modelos, análisis de momios del mercado y métricas históricas de rendimiento del modelo. IASHARK no acepta apuestas, no realiza apuestas en nombre de los usuarios, no retiene fondos de juego y no es una casa de apuestas.</p>
+    <h3>Entidad legal en México</h3>
+    <p class="foot-todo">[TODO: datos reales de la entidad legal mexicana — razón social, RFC y domicilio fiscal registrado, pendientes de la constitución de la sociedad y de la revisión legal local exigida por el 07_IAShark_Mexico_Launch_Kit (validación jurídica local del servicio de información de apuestas). No publicar esta página a tráfico pagado de México hasta completar este apartado con datos reales y verificados.]</p>
+  </div>
+</section>
+
+<!--
+  DRAFT_PENDING_LEGAL_REVIEW: the responsible-gambling copy in the box below is
+  sourced from config/markets.json -> mx.compliance (status field:
+  "DRAFT_PENDING_LEGAL_REVIEW" as of 2026-09-13, legalPagesLocalized: false,
+  responsibleGamblingHelpline: null). No real Mexican responsible-gambling
+  resource has been confirmed in this session - its "note" field says so
+  explicitly ("BLOCKED_DECISION : aucune ressource d'aide au jeu responsable
+  confirmee pour le Mexique"). Unlike GB (which has a real, named UK
+  helpline) or ZA, this block below deliberately contains NO phone number
+  and NO named organisation - only the same kind of clearly marked
+  placeholder GB uses for its own unresolved legal entity details. Do not
+  fill this in with an invented number. Re-check config/markets.json before
+  this page goes live to paid traffic - if mx.compliance has since been
+  updated with a real, confirmed resource, this block must be re-synced.
+-->
+<div class="age-warn">
+  <p>⚠ APOSTAR PUEDE SER PELIGROSO PARA TU SALUD: LA DEPENDENCIA Y EL RIESGO FINANCIERO SON REALES. IASHARK OFRECE ÚNICAMENTE ANÁLISIS ESTADÍSTICO — NO ACEPTA NI REALIZA APUESTAS Y NO ES UNA CASA DE APUESTAS.<br>
+  AYUDA PARA JUEGO RESPONSABLE: [TODO: recurso local de ayuda para el juego responsable en México pendiente de validación legal — no publicar un número o nombre inventado].<br>
+  SOLO PARA RESIDENTES DE MÉXICO DE 18 AÑOS O MÁS.</p>
+</div>
+
+<footer>
+  <div class="foot-legal">
+    <div>⚠ INFORMACIÓN CON FINES ESTADÍSTICOS — NO CONSTITUYE ASESORÍA DE APUESTAS · SOLO 18+</div>
+    <div class="foot-links" style="margin-top:8px;">
+      <a href="https://iashark.com/mentions-legales.html">Aviso Legal</a>
+      <a href="https://iashark.com/cgv.html">Términos</a>
+      <a href="https://iashark.com/confidentialite.html">Privacidad</a>
+      <a href="https://iashark.com/es/historique.html">Historial</a>
+      <a href="https://iashark.com/blog.html">Blog</a>
+    </div>
+    <!-- Track Record links above point to /es/historique.html, not an
+         /es-mx/ page: es-mx has no historique.html copy of its own, so /es/
+         (Spain Spanish, existing and working) is the nearest reasonable
+         fit. Known limitation, same honest disclosure GB gives its own
+         gaps - flagged again here rather than only once, since this exact
+         link appears three times on this page (hero, proof section, footer). -->
+    <div style="margin-top:6px;">Aviso Legal / Términos / Privacidad son las páginas ya existentes del sitio y pueden seguir apareciendo en francés mientras se completa la localización a México (ver GEO_EXPANSION_STATUS.md). El Historial enlaza a /es/ (español de España), la copia traducida más cercana disponible, ya que es-mx no tiene su propia versión de esta página.</div>
+  </div>
+</footer>
+
+<script src="/i18n/i18n.js"></script>
+<script src="/funnel-track.js"></script>
+<script src="/app-client.js"></script>
+<script src="/mx/mx-page.js"></script>
+<script src="/site-prefs.js"></script>
+<!--
+  KNOWN GAP, surfaced rather than hidden (found by reading bottom-navigation.js
+  fresh before wiring this page, per instructions): this shared component
+  resolves the market "mx" to interface locale "es-mx" (i18n/i18n.js
+  MARKET_LOCALE) and then routes its "Tools" and "Account" nav items to
+  "/es-mx/pro.html" and "/es-mx/compte.html". Unlike GB's "en" locale (a full
+  /en/ page set backs it), there is NO /es-mx/ directory anywhere in this
+  repo - those two nav links will 404 as shipped. This is a bug in the
+  shared component when applied to the mx market specifically (za is fine:
+  its locale is also "en"). Not fixed here because bottom-navigation.js is a
+  shared file outside this task's scope (new files under mx/ only) and other
+  agents may be touching shared files this session - flagged via spawn_task
+  instead so it gets its own fix (either point mx's bottom nav at /es/ as a
+  fallback, the same choice this page's own links make, or build out a real
+  /es-mx/ page set).
+-->
+<script src="/bottom-navigation.js"></script>
+</body>
+</html>

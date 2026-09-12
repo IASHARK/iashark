@@ -1,0 +1,151 @@
+"use strict";
+// IASHARK /mx/ acquisition page - MXN pricing display, P0 landing analytics
+// (doc 18 S7) and Pro/Edge/Annual Edge checkout wiring against the shared
+// create-checkout-session Supabase Edge Function. Mirrors gb/gb-page.js
+// exactly (same client pattern as abonnement-page.js/account-page.js's
+// facturation(), with { market: "mx" } added to the request body - see
+// supabase/functions/create-checkout-session which already resolves a
+// market-specific Stripe price via STRIPE_PRICE_ID_MX and returns
+// { processed:false, reason:"market_not_configured" } honestly when that env
+// var isn't set, exactly the current real state for MX - confirmed by
+// reading resolvePriceId()/MARKET_ENV_KEYS in that function before writing
+// this file).
+(function () {
+  // ---- MXN price display --------------------------------------------------
+  // config/markets.json -> mx.currency = "MXN". This page is MXN-only by
+  // definition, so we format directly with Intl rather than pulling in the
+  // full i18n runtime's currency logic (same choice gb-page.js made for GBP).
+  // The HTML already contains a correct hardcoded value in each span
+  // (progressive enhancement: price is right even if this script fails to
+  // load), this just re-renders it through the real formatter for
+  // correctness/consistency. Amounts match doc 07 (07_IAShark_Mexico_Launch_Kit)
+  // verbatim: Pro MX$199/mo, Edge MX$299/mo, Annual (Edge) MX$1,990/yr.
+  try {
+    var mxn2 = new Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN" });
+    var mxn0 = new Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN", minimumFractionDigits: 0 });
+    var prices = { priceFree: [0, mxn0], pricePro: [199, mxn2], priceEdge: [299, mxn2], priceAnnual: [1990, mxn0] };
+    Object.keys(prices).forEach(function (id) {
+      var el = document.getElementById(id);
+      if (!el) return;
+      var amount = prices[id][0], fmt = prices[id][1];
+      el.textContent = fmt.format(amount);
+    });
+  } catch (e) {
+    // Formatting failure leaves the hardcoded HTML value in place - never
+    // blank, never wrong currency symbol.
+  }
+
+  // ---- P0 analytics: landing_view --------------------------------------
+  // doc 18 S7 lists country/locale/source/campaign/creative_id as the
+  // minimal properties for this event on /mx arrival. funnel-track.js's
+  // iasharkTrack(eventType, metadata, userId) already accepts an arbitrary
+  // metadata object - nothing in that shared script needed to change (same
+  // shared script GB uses, verified unchanged before writing this file).
+  function utmParam(name) {
+    try { return new URLSearchParams(location.search).get(name) || null; }
+    catch (e) { return null; }
+  }
+  var landingMeta = {
+    market: "mx",
+    country: "MX",
+    locale: "es-mx",
+    source: utmParam("utm_source"),
+    campaign: utmParam("utm_campaign"),
+    creative_id: utmParam("utm_content") || utmParam("creative_id")
+  };
+  if (window.iasharkTrack) iasharkTrack("landing_view", landingMeta);
+
+  // ---- Checkout wiring ----------------------------------------------------
+  // KNOWN LIMITATION, surfaced here rather than hidden (same discipline as
+  // gb-page.js): create-checkout-session resolves ONE Stripe price per
+  // market (STRIPE_PRICE_ID_MX) - it has no concept yet of Pro vs Edge vs
+  // Annual Edge as distinct server-side prices, and "Edge" does not exist
+  // anywhere else in the codebase as a plan value (only 'pro' exists on
+  // public.users.plan). Until real per-tier Stripe prices exist and the
+  // function is extended to resolve them, all three buttons below call the
+  // same endpoint with the same { market: "mx" } body, and - today, with
+  // STRIPE_PRICE_ID_MX unset - all get back processed:false /
+  // reason:"market_not_configured" from the server. That is shown to the
+  // visitor honestly below, in Mexican Spanish, never papered over with a
+  // fake URL or a fake success state.
+  function wireCheckout(buttonId, msgId, tierLabel) {
+    var btn = document.getElementById(buttonId);
+    var msg = document.getElementById(msgId);
+    if (!btn) return;
+
+    function show(text, isError) {
+      if (!msg) return;
+      msg.textContent = text;
+      msg.className = "plan-msg" + (isError ? " error" : "");
+    }
+
+    btn.addEventListener("click", async function () {
+      if (!window.IasharkApp) {
+        show("El checkout todavía se está cargando — inténtalo de nuevo en un momento.", true);
+        return;
+      }
+      var ctx;
+      try {
+        ctx = await window.IasharkApp.context();
+      } catch (e) {
+        show("No pudimos verificar tu cuenta. Inténtalo de nuevo en un momento.", true);
+        return;
+      }
+      if (!ctx.user) {
+        // Same convention as abonnement-page.js's /compte.html#plan redirect
+        // and gb-page.js's own /en/compte.html#plan redirect. A market like
+        // "mx" has no account pages of its own. Its underlying interface
+        // locale is "es-mx" (i18n/i18n.js MARKET_LOCALE), but unlike GB's
+        // "en" - which has a full /en/ page set - there is NO /es-mx/
+        // directory anywhere in this repo (verified: no compte.html/pro.html
+        // exist under an /es-mx/ prefix). Redirecting there would 404. /es/
+        // (Spain Spanish) is the nearest real, working account page - same
+        // "nearest existing locale" fallback this page's own HTML already
+        // uses for the Track Record link (see mx/index.html comment next to
+        // that link). Flagged as a follow-up: either build /es-mx/ account
+        // pages or teach bottom-navigation.js the same fallback (see the
+        // spawn_task filed alongside this change).
+        location.href = "/es/compte.html#plan";
+        return;
+      }
+
+      btn.disabled = true;
+      show("Abriendo el pago seguro…");
+      if (window.iasharkTrack) iasharkTrack("checkout_started", { market: "mx", tier: tierLabel });
+
+      try {
+        var session = await window.IasharkApp.supabase.auth.getSession();
+        var token = session.data.session && session.data.session.access_token;
+        var response = await fetch(window.IasharkApp.url + "/functions/v1/create-checkout-session", {
+          method: "POST",
+          headers: { apikey: window.IasharkApp.key, Authorization: "Bearer " + token, "Content-Type": "application/json" },
+          body: JSON.stringify({ market: "mx" })
+        });
+        var data = await response.json();
+        if (data && data.url) {
+          location.href = data.url;
+          return;
+        }
+        // Honest "próximamente" - matches the site's existing
+        // PAYMENT_PROVIDER=disabled messaging pattern (abonnement-page.js /
+        // account-page.js / gb-page.js), covers both processed:false shapes
+        // the function can return (generic disabled, and
+        // reason:"market_not_configured", which is the real current state
+        // for MX since STRIPE_PRICE_ID_MX is not set - confirmed by reading
+        // supabase/functions/create-checkout-session before writing this).
+        if (window.iasharkTrack) {
+          iasharkTrack("checkout_unavailable", { market: "mx", tier: tierLabel, reason: (data && data.reason) || "payment_disabled" });
+        }
+        show("El checkout para México se abrirá muy pronto — gracias por tu paciencia. No se te ha cobrado nada.", true);
+      } catch (e) {
+        if (window.iasharkTrack) iasharkTrack("checkout_unavailable", { market: "mx", tier: tierLabel, reason: "network_error" });
+        show("No pudimos abrir el checkout en este momento. Inténtalo de nuevo en un momento.", true);
+      }
+      btn.disabled = false;
+    });
+  }
+
+  wireCheckout("subscribeProBtn", "proMsg", "pro");
+  wireCheckout("subscribeEdgeBtn", "edgeMsg", "edge");
+  wireCheckout("subscribeAnnualBtn", "annualMsg", "annual_edge");
+})();

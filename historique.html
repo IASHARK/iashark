@@ -93,6 +93,12 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 .pred-cote{font-family:'Bebas Neue',sans-serif;font-size:14px;color:var(--amber);}
 
 .bt-sort-note{font-size:11px;color:var(--muted);margin-bottom:10px;}
+.mt-disclaimer{font-size:11px;color:var(--amber);background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.25);border-radius:10px;padding:10px 12px;margin-bottom:14px;line-height:1.5;}
+.mt-summary{display:flex;gap:20px;flex-wrap:wrap;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px 16px;margin-bottom:14px;}
+.mt-summary-item{display:flex;flex-direction:column;gap:2px;}
+.mt-summary-lbl{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:1px;color:var(--muted);}
+.mt-summary-val{font-family:'Bebas Neue',sans-serif;font-size:22px;}
+.pred-tag.tag-pick{background:rgba(34,211,238,0.08);border:1px solid var(--border-cyan);color:var(--cyan);}
 .bt-grid{display:flex;flex-direction:column;gap:6px;margin-bottom:20px;}
 .bt-row{display:grid;grid-template-columns:120px 1fr 60px 60px;gap:8px;align-items:center;padding:8px 12px;background:var(--card);border-radius:10px;border:1px solid var(--border);}
 .bt-row.low-sample{opacity:0.6;}
@@ -180,6 +186,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
   <div class="tabs">
     <button class="tab active" onclick="setTab('paris',this)" data-i18n="history_page.tab_bets">PARIS</button>
     <button class="tab" onclick="setTab('backtesting',this)" data-i18n="history_page.tab_backtesting">BACKTESTING</button>
+    <button class="tab" onclick="setTab('modeltest',this)" data-i18n="history_page.tab_model_test">TEST DU MOTEUR</button>
   </div>
 
   <div id="tabParis">
@@ -208,6 +215,29 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
   <div id="tabBacktesting" style="display:none;">
     <div class="bt-sort-note" data-i18n="history_page.bt_sort_note">Trié par nombre de paris — les marchés testés sur peu de paris sont estompés et marqués, pour éviter de sur-interpréter un petit échantillon.</div>
     <div id="btContent"><div class="empty"><h3 data-i18n="history_page.archive_loading">CHARGEMENT...</h3></div></div>
+  </div>
+
+  <div id="tabModelTest" style="display:none;">
+    <div class="mt-disclaimer" data-i18n="history_page.model_test_disclaimer">Rejeu rétroactif du moteur actuel (recalibré) sur des matchs déjà terminés, calculé aujourd'hui — jamais un pari pris en direct à l'époque. Sert à vérifier la méthode sur un grand nombre de matchs réels, pas à remplacer le suivi en temps réel ci-dessus.</div>
+    <div id="mtSummary" class="mt-summary"></div>
+    <div class="search-wrap">
+      <span class="search-icon"><svg viewBox="0 0 24 24" width="14" height="14" style="stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35"/></svg></span>
+      <input type="text" class="search-input" id="mtSearchInput" placeholder="Rechercher une équipe, un championnat..." oninput="onMtSearch()" data-i18n-attr="placeholder:history_page.search_placeholder">
+      <button class="search-clear" id="mtSearchClear" onclick="clearMtSearch()">✕</button>
+    </div>
+    <div class="filter-row">
+      <select class="fsel" id="mtLeagueSel" onchange="renderModelTest()"><option value="" data-i18n="history_page.filter_all_leagues">TOUS CHAMPIONNATS</option></select>
+      <button class="filter-btn active" onclick="setMtFilter('all',this)" data-i18n="history_page.filter_all">TOUS</button>
+      <button class="filter-btn" onclick="setMtFilter('correct',this)">✓</button>
+      <button class="filter-btn" onclick="setMtFilter('incorrect',this)">✕</button>
+      <span class="filter-count" id="mtCountLbl"></span>
+    </div>
+    <div class="pred-list" id="mtList">
+      <div class="empty"><h3 data-i18n="history_page.archive_loading">CHARGEMENT...</h3></div>
+    </div>
+    <div style="text-align:center;margin-top:14px;" id="mtLoadMoreWrap">
+      <button class="tab" id="btnMtLoadMore" onclick="loadMoreModelTest()" style="cursor:pointer;" data-i18n="history_page.model_test_load_more">AFFICHER PLUS DE MATCHS</button>
+    </div>
   </div>
 </div>
 
@@ -263,8 +293,10 @@ function isPro(p){
 function setTab(tab,btn){
   document.getElementById('tabParis').style.display=tab==='paris'?'block':'none';
   document.getElementById('tabBacktesting').style.display=tab==='backtesting'?'block':'none';
-  document.querySelectorAll('.tab').forEach(function(b){b.classList.remove('active');});
+  document.getElementById('tabModelTest').style.display=tab==='modeltest'?'block':'none';
+  document.querySelectorAll('.tabs .tab').forEach(function(b){b.classList.remove('active');});
   btn.classList.add('active');
+  if(tab==='modeltest')ensureModelTestLoaded();
 }
 function setFilter(f,btn){
   currentFilter=f;
@@ -478,6 +510,106 @@ async function loadFullArchive(){
     status.textContent=t('history_page.archive_error',"Erreur de chargement de l'archive complète — réessaie plus tard.");
     btn.disabled=false; btn.textContent=t('history_page.archive_btn',"CHARGER L'HISTORIQUE COMPLET (AU-DELÀ DES 500 DERNIERS)");
   }
+}
+
+/* ═══ Test du moteur (rejeu retroactif) : backtest-matches.json est un
+   fichier statique genere hors-ligne par scripts/export-backtest-matches.js
+   (voir CURRENT_ENGINE_CALIBRATION_REPORT.md / ENGINE_RECALIBRATION_REPORT.md
+   pour la methodologie complete). Charge SEULEMENT quand cet onglet est
+   ouvert pour la premiere fois - jamais au chargement de la page (fichier
+   de ~2 Mo, la grande majorite des visiteurs ne l'ouvriront jamais). ═══ */
+var mtData=null, mtFilter='all', mtVisibleCount=50;
+var MT_PAGE_SIZE=50;
+function mtOutcomeLabel(code){
+  return code==='HOME'?t('history_page.mt_outcome_home','Victoire domicile')
+    :code==='AWAY'?t('history_page.mt_outcome_away','Victoire extérieur')
+    :t('history_page.mt_outcome_draw','Match nul');
+}
+async function ensureModelTestLoaded(){
+  if(mtData)return;
+  document.getElementById('mtList').innerHTML='<div class="empty"><h3 data-i18n="history_page.archive_loading">'+esc(t('history_page.archive_loading','CHARGEMENT...'))+'</h3></div>';
+  try{
+    var r=await fetch('/backtest-matches.json?t='+Math.floor(Date.now()/3600000));
+    mtData=await r.json();
+    buildMtFilterOptions();
+    renderModelTestSummary();
+    renderModelTest();
+  }catch(e){
+    document.getElementById('mtList').innerHTML='<div class="empty"><h3>'+esc(t('history_page.empty_error_title','ERREUR'))+'</h3><p>'+esc(t('history_page.model_test_load_error','Impossible de charger le test du moteur.'))+'</p></div>';
+  }
+}
+function renderModelTestSummary(){
+  if(!mtData)return;
+  document.getElementById('mtSummary').innerHTML=
+    '<div class="mt-summary-item"><div class="mt-summary-lbl">'+esc(t('history_page.model_test_total','MATCHS TESTÉS'))+'</div><div class="mt-summary-val">'+mtData.total_matches+'</div></div>'
+    +'<div class="mt-summary-item"><div class="mt-summary-lbl">'+esc(t('history_page.model_test_correct','PRONOSTICS CORRECTS'))+'</div><div class="mt-summary-val">'+mtData.correct_picks+'</div></div>'
+    +'<div class="mt-summary-item"><div class="mt-summary-lbl">'+esc(t('history_page.model_test_accuracy','PRÉCISION'))+'</div><div class="mt-summary-val">'+mtData.accuracy_pct+'%</div></div>';
+}
+function buildMtFilterOptions(){
+  var leagues={};
+  mtData.matches.forEach(function(m){leagues[m.league_display]=true;});
+  var sel=document.getElementById('mtLeagueSel');
+  var cur=sel.value;
+  sel.innerHTML='<option value="">'+esc(t('history_page.filter_all_leagues','TOUS CHAMPIONNATS'))+'</option>'+Object.keys(leagues).sort().map(function(l){
+    return '<option value="'+esc(l)+'">'+esc(l.toUpperCase())+'</option>';
+  }).join('');
+  sel.value=cur;
+}
+function setMtFilter(f,btn){
+  mtFilter=f;
+  var wrap=btn.parentElement;
+  wrap.querySelectorAll('.filter-btn').forEach(function(b){b.classList.remove('active');});
+  btn.classList.add('active');
+  mtVisibleCount=MT_PAGE_SIZE;
+  renderModelTest();
+}
+function onMtSearch(){
+  document.getElementById('mtSearchClear').classList.toggle('show', document.getElementById('mtSearchInput').value.length>0);
+  mtVisibleCount=MT_PAGE_SIZE;
+  renderModelTest();
+}
+function clearMtSearch(){
+  document.getElementById('mtSearchInput').value='';
+  document.getElementById('mtSearchClear').classList.remove('show');
+  mtVisibleCount=MT_PAGE_SIZE;
+  renderModelTest();
+}
+function loadMoreModelTest(){
+  mtVisibleCount+=MT_PAGE_SIZE;
+  renderModelTest();
+}
+function renderModelTest(){
+  if(!mtData)return;
+  var league=document.getElementById('mtLeagueSel').value;
+  var q=(document.getElementById('mtSearchInput').value||'').trim().toLowerCase();
+  var list=mtData.matches.filter(function(m){
+    if(mtFilter==='correct'&&!m.correct)return false;
+    if(mtFilter==='incorrect'&&m.correct)return false;
+    if(league&&m.league_display!==league)return false;
+    if(q&&(m.home_team+' '+m.away_team+' '+m.league_display).toLowerCase().indexOf(q)===-1)return false;
+    return true;
+  });
+  document.getElementById('mtCountLbl').textContent=list.length+' '+(list.length>1?t('history_page.bet_many','paris'):t('history_page.bet_one','pari'));
+  var shown=list.slice(0,mtVisibleCount);
+  document.getElementById('mtList').innerHTML=shown.map(function(m){
+    var d=new Date(m.kickoff);
+    var dateStr=isNaN(d.getTime())?'':d.toISOString().slice(0,10);
+    return '<div class="pred-card '+(m.correct?'win':'loss')+'">'
+      +'<div>'
+      +'<div class="pred-match">'+esc(m.home_team)+' - '+esc(m.away_team)+'</div>'
+      +'<div class="pred-meta">'
+      +'<span class="pred-tag tag-pick">'+esc(mtOutcomeLabel(m.pick_outcome))+' ('+m.pick_probability_pct+'%)</span>'
+      +'<span class="pred-tag tag-league">'+esc(m.league_display)+'</span>'
+      +'<span class="tag-date">'+esc(dateStr)+'</span>'
+      +'</div>'
+      +'</div>'
+      +'<div class="pred-right">'
+      +'<div class="pred-result '+(m.correct?'win':'loss')+'">'+(m.correct?'✓':'✕')+'</div>'
+      +'<div class="pred-score">'+esc(m.score)+'</div>'
+      +'</div>'
+      +'</div>';
+  }).join('')||'<div class="empty"><h3>'+esc(t('history_page.empty_no_bets_title','AUCUN PARIS'))+'</h3></div>';
+  document.getElementById('mtLoadMoreWrap').style.display=list.length>mtVisibleCount?'block':'none';
 }
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>

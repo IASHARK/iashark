@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-12T22:59:31.029Z",
+  "generated_at": "2026-09-12T23:22:48.881Z",
   "leagues": {
     "laliga": {
       "league_key": "laliga",
@@ -725,7 +725,23 @@
       "current_score_champion_liga_mx": null,
       "current_player_champion_liga_mx": "PLAYER_SCORER_V1_AGGREGATED_SHARE_LIGA_MX",
       "liga_mx_full_model_status": "PARTIAL_PLAYER_ONLY",
-      "note": "OOS_DEV(2023) puis OOS_FINAL(2024) termines, chaque etape gelee avant lecture. Score=INCONCLUSIVE (M0_APPROX_B0_CI_CROSSES_ZERO). Player=VALIDATED (VALIDATED_LEAGUE_PLAYER_FINAL). Reproductibilite : Score=true Player=true."
+      "note": "OOS_DEV(2023) puis OOS_FINAL(2024) termines, chaque etape gelee avant lecture. Score=INCONCLUSIVE (M0_APPROX_B0_CI_CROSSES_ZERO). Player=VALIDATED (VALIDATED_LEAGUE_PLAYER_FINAL). Reproductibilite : Score=true Player=true.",
+      "score_lab_factory_v2": {
+        "protocol": "SCORE_LAB_FACTORY_V2",
+        "champion_selected": "M2",
+        "pre_holdout_sha": "30a2c13b2fcfa3304e7997dd86b3cf67b6fe10c5",
+        "holdout_season": 2025,
+        "verdict": "INCONCLUSIVE",
+        "score_runnable_under_v2": false,
+        "reject_triggers": [],
+        "inconclusive_triggers": [
+          "CALIBRATION"
+        ],
+        "reproducible": true,
+        "exact_score_nll_holdout": 2.987832891522442,
+        "exact_score_nll_threshold": 3.132660717176439,
+        "note": "Holdout 2025 CONSOMME (une seule fois). INCONCLUSIVE : POINT_IN_TIME_INTEGRITY/DATA_COVERAGE/EXACT_SCORE_NLL/MARKET_MARGINALS/TEMPORAL_STABILITY/NO_CATASTROPHIC_SECONDARY_DEGRADATION/REPRODUCIBILITY tous PASS, seul CALIBRATION echoue (ECE 0.019894 > seuil 0.018465, depassement marginal ~7.7% relatif ; slope=1.086, intercept=0.056, converged=true). Aucun forcage, aucun retuning, aucune deuxieme tentative. Ne remplace pas score_status/score_champion existants (protocole V1 historique different)."
+      }
     }
   }
 }

@@ -589,7 +589,8 @@
       },
       "player_data_gate_audit": "PASS",
       "coverage_score_audit": 82,
-      "status": "NOT_STARTED",
+      "status": "INCONCLUSIVE",
+      "status_note": "Corrected 2026-09-13 (was stale NOT_STARTED). This field is LEAGUE_EXPANSION_FACTORY_V1's terminal OOS_FINAL(2024) verdict: INCONCLUSIVE, cross-verified via commit 7ea19fd90 (\"Step 10 : Score OOS_FINAL=INCONCLUSIVE\") and data/league-validation-registry.json score_status. Separately, SCORE_LAB_FACTORY_V2 Phase C (2025 sealed holdout, run this session) verdict = INCONCLUSIVE (different trigger: CALIBRATION only) - see data/league-validation-registry.json leagues.liga_mx.score_lab_factory_v2 for that result; do not conflate the two protocols/verdicts.",
       "wave": 2,
       "wave_order": 30
     },

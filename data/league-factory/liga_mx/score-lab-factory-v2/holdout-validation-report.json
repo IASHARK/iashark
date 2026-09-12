@@ -1,0 +1,98 @@
+{
+  "protocol": "SCORE_LAB_FACTORY_V2",
+  "phase": "C_HOLDOUT_EVALUATION",
+  "league_key": "liga_mx",
+  "holdout_season": 2025,
+  "champion": "M2",
+  "generated_at": "2026-09-12T23:54:06.659Z",
+  "gates": {
+    "POINT_IN_TIME_INTEGRITY": {
+      "pass": true,
+      "all_predictions_are_holdout": true,
+      "rho_never_refit": true
+    },
+    "DATA_COVERAGE": {
+      "pass": true,
+      "coverage_rate": 1,
+      "n_valid": 337,
+      "total_fixtures": 337,
+      "rate_threshold": 0.9,
+      "absolute_floor": 200,
+      "rate_ok": true,
+      "floor_ok": true
+    },
+    "EXACT_SCORE_NLL": {
+      "pass": true,
+      "nll_holdout": 2.987832891522442,
+      "threshold": 3.132660717176439
+    },
+    "CALIBRATION": {
+      "pass": false,
+      "slope": 1.0860158159085893,
+      "intercept": 0.056104612240028315,
+      "converged": true,
+      "ece": 0.019894226134486447,
+      "threshold_ece": 0.01846474344313509
+    },
+    "MARKET_MARGINALS": {
+      "pass": true,
+      "detail": {
+        "ou25": {
+          "oos_dev": 0.7100789083506951,
+          "holdout": 0.7044422779098742,
+          "pass": true
+        },
+        "btts": {
+          "oos_dev": 0.7033578949449089,
+          "holdout": 0.6923433716783696,
+          "pass": true
+        },
+        "x12": {
+          "oos_dev": 1.0295222804548838,
+          "holdout": 1.0147892381347698,
+          "pass": true
+        }
+      }
+    },
+    "TEMPORAL_STABILITY": {
+      "pass": true,
+      "nll_half1": 3.067971174371075,
+      "nll_half2": 2.908168799696587,
+      "threshold": 3.132660717176439
+    },
+    "NO_CATASTROPHIC_SECONDARY_DEGRADATION": {
+      "pass": true,
+      "holdout_low_score": {
+        "0-0": {
+          "count_observed": 22,
+          "nll_contribution": 2.495694480954144
+        },
+        "1-0": {
+          "count_observed": 33,
+          "nll_contribution": 2.348792029987083
+        },
+        "0-1": {
+          "count_observed": 20,
+          "nll_contribution": 2.633143837288372
+        },
+        "1-1": {
+          "count_observed": 37,
+          "nll_contribution": 2.0696426912012638
+        }
+      },
+      "degraded": []
+    },
+    "REPRODUCIBILITY": {
+      "pass": true
+    }
+  },
+  "reject_triggers": [],
+  "inconclusive_triggers": [
+    "CALIBRATION"
+  ],
+  "verdict": "INCONCLUSIVE",
+  "score_runnable": false,
+  "hash_run1": "387bd3bb28ef141ea115d464d145eb560a393d5fd7ffcf99583d52f92caeab75",
+  "hash_run2": "387bd3bb28ef141ea115d464d145eb560a393d5fd7ffcf99583d52f92caeab75",
+  "reproducible": true
+}

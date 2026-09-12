@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-12T21:58:41.728Z",
+  "generated_at": "2026-09-12T22:59:31.029Z",
   "leagues": {
     "laliga": {
       "league_key": "laliga",
@@ -688,6 +688,44 @@
         "exact_score_nll_threshold": 3.024334110091122,
         "note": "Holdout 2025 CONSOMME (une seule fois). VALIDATED : les 8 gates passent (NLL=2.926753<=3.024334 ; ECE=0.033697<=0.053568 ; O/U2.5/BTTS/1X2 tous stables ; couverture 96.5% ; stabilite temporelle OK ; reproductible run1==run2). Aucun forcage, aucun retuning, aucune deuxieme tentative. Ne remplace pas score_status/score_champion existants (protocole V1 historique different)."
       }
+    },
+    "liga_mx": {
+      "league_key": "liga_mx",
+      "league_id": 262,
+      "calendar_type": "EUROPEAN_SEASON",
+      "dataset_versions": {
+        "fixtures_seasons": [
+          2021,
+          2022,
+          2023,
+          2024
+        ],
+        "player_lab_seasons": [
+          2021,
+          2022,
+          2023,
+          2024
+        ]
+      },
+      "score_champion": "SCORE_M0_LIGA_MX",
+      "score_status": "INCONCLUSIVE",
+      "player_champion": "PLAYER_SCORER_V1_AGGREGATED_SHARE_LIGA_MX",
+      "player_status": "VALIDATED",
+      "market_status": "MARKET_VALIDATION_PENDING",
+      "oos_report_hashes": {
+        "score_oos_dev_manifest_hash": "97f340ae3d358ea39e92eeb509f5a6e06f02468a156b84e26b9035e1a6c03a7a",
+        "player_oos_dev_manifest_hash": "27318ef2ae061257da808e5a6ff450f17b3ce81977286989127b02ed841534e2",
+        "score_oos_final_manifest_hash": "51479661cc6dc8177b7c40195208d7c69589a207ea7329330fa5c62c1fbbc4b9",
+        "player_oos_final_manifest_hash": "2f4babe8cb79843d1cc14535136a8e68ab4ffbf62a35f119b8c02d4279d1e94b"
+      },
+      "score_runnable": false,
+      "player_runnable": true,
+      "live_eligible": false,
+      "updated_at": "2026-09-12T22:59:31.026Z",
+      "current_score_champion_liga_mx": null,
+      "current_player_champion_liga_mx": "PLAYER_SCORER_V1_AGGREGATED_SHARE_LIGA_MX",
+      "liga_mx_full_model_status": "PARTIAL_PLAYER_ONLY",
+      "note": "OOS_DEV(2023) puis OOS_FINAL(2024) termines, chaque etape gelee avant lecture. Score=INCONCLUSIVE (M0_APPROX_B0_CI_CROSSES_ZERO). Player=VALIDATED (VALIDATED_LEAGUE_PLAYER_FINAL). Reproductibilite : Score=true Player=true."
     }
   }
 }

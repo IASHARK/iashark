@@ -7,13 +7,21 @@
   // page keeps its own prefix for its own home link, but routes Outils/Compte
   // through the underlying locale instead of 404-ing on e.g. /gb/pro.html.
   var MARKET_LOCALE={gb:'en',mx:'es-mx',za:'en'};
+  // Repertoire de PAGES partagees (pro.html/compte.html) reellement present
+  // sur disque pour chaque marche - distinct de MARKET_LOCALE (dictionnaire
+  // de traduction) car es-mx n'a pas son propre repertoire de pages, juste
+  // un dictionnaire. mx retombe donc sur les pages /es/ (le plus proche
+  // repertoire reel), jamais sur /es-mx/pro.html qui n'existe pas (404 reel
+  // trouve et corrige - voir historique du depot).
+  var MARKET_PAGE_LOCALE={gb:'en',mx:'es',za:'en'};
   var segMatch=location.pathname.match(/^\/([a-z]{2}(?:-[a-z]{2})?)(?:\/|$)/);
   var seg=segMatch?segMatch[1]:'';
   var isLocale=/^(fr|en|es|de|it|pt)$/.test(seg);
   var isMarket=MARKET_LOCALE.hasOwnProperty(seg);
   var locale=isLocale?seg:(isMarket?MARKET_LOCALE[seg]:'');
+  var pageLocale=isLocale?seg:(isMarket?MARKET_PAGE_LOCALE[seg]:'');
   var ownPrefix=(isLocale||isMarket)?'/'+seg:'';
-  var sharedPrefix=locale?'/'+locale:'';
+  var sharedPrefix=pageLocale?'/'+pageLocale:'';
   var path=location.pathname.replace(/\/+$/,'')||'/';
   var active=path.indexOf('/blog')===0?'blog':path.endsWith('/pro.html')?'tools':path.endsWith('/compte.html')?'account':(path==='/'||path===ownPrefix||path===ownPrefix+'/'||path.endsWith('/index.html')||path.endsWith('/landing.html'))?'home':'';
   // Libelles : les 4 valeurs par defaut ci-dessous sont le repli FR - ce

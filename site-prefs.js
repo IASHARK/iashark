@@ -48,17 +48,20 @@
     document.head.appendChild(s);
   }
 
+  // t() : meme discipline i18n que le reste du chantier (repli FR si I18N
+  // n'est pas charge sur la page, jamais un texte fige different du repli).
+  function t(key,fallback){return (window.I18N && window.I18N.t) ? window.I18N.t(key,fallback) : fallback;}
+
   function showBanner(){
     injectStyle();
     var bar = document.createElement('div');
     bar.className = 'iashark-notice-bar';
     bar.id = 'iasharkNoticeBar';
-    bar.innerHTML = '<p>On utilise des cookies essentiels au fonctionnement du site, et des cookies analytiques '
-      +'(Google Analytics) pour comprendre l\'usage du site — uniquement avec ton accord. '
-      +'<a href="/confidentialite.html">En savoir plus</a></p>'
+    bar.innerHTML = '<p>'+t('cookie_banner.text',"On utilise des cookies essentiels au fonctionnement du site, et des cookies analytiques (Google Analytics) pour comprendre l'usage du site — uniquement avec ton accord.")+' '
+      +'<a href="/confidentialite.html">'+t('cookie_banner.learn_more','En savoir plus')+'</a></p>'
       +'<div class="iashark-notice-actions">'
-      +'<button type="button" class="iashark-notice-decline" id="iasharkNoticeDecline">REFUSER</button>'
-      +'<button type="button" class="iashark-notice-accept" id="iasharkNoticeAccept">ACCEPTER</button>'
+      +'<button type="button" class="iashark-notice-decline" id="iasharkNoticeDecline">'+t('cookie_banner.decline','REFUSER')+'</button>'
+      +'<button type="button" class="iashark-notice-accept" id="iasharkNoticeAccept">'+t('cookie_banner.accept','ACCEPTER')+'</button>'
       +'</div>';
     document.body.appendChild(bar);
     var nav = document.querySelector('.nav-bottom');
@@ -78,6 +81,19 @@
   if(consent === 'accepted'){
     loadGA();
   } else if(consent !== 'refused'){
-    showBanner();
+    // I18N.init() est asynchrone (fetch du dictionnaire) - si on affiche la
+    // banniere avant qu'il resolve, t() retombe sur le repli FR et reste
+    // fige ainsi (contrairement a bottom-navigation.js, ce bandeau n'a pas
+    // de re-etiquetage a chaud). On attend donc I18N avant de l'afficher,
+    // avec un filet de securite (timeout) pour ne jamais bloquer l'affichage
+    // si I18N.init() ne resolvait jamais pour une raison quelconque.
+    if(window.I18N && window.I18N.init){
+      var shown=false;
+      var show=function(){ if(shown)return; shown=true; showBanner(); };
+      window.I18N.init().then(show).catch(show);
+      setTimeout(show, 1500);
+    } else {
+      showBanner();
+    }
   }
 })();

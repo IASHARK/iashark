@@ -58,7 +58,7 @@
 
   function infobulle(texte, fin) {
     return '<details class="infobulle' + (fin ? ' infobulle-fin' : '') + '">'
-      + '<summary aria-label="Que mesure cette valeur ?">i</summary>'
+      + '<summary aria-label="' + esc(t('player_page.aria_tooltip_hint', 'Que mesure cette valeur ?')) + '">i</summary>'
       + '<p class="infobulle-texte">' + esc(texte) + '</p></details>';
   }
   function bloc(contenu, classes) {
@@ -220,12 +220,12 @@
     // Meme precision sur les trois moyennes par 90 : "1" a cote de "2,57" et
     // "1,93" donne l'impression que la premiere est moins mesuree que les
     // autres. Deux decimales partout, et les colonnes s'alignent.
-    var deux = function (v) { var x = n(v); return x === null ? null : x.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); };
+    var deux = function (v) { var x = n(v); return x === null ? null : x.toLocaleString(localeTag(), { minimumFractionDigits: 2, maximumFractionDigits: 2 }); };
     var items = [
-      ['Buts / 90 min', deux(joueur.goals90)],
-      ['Tirs / 90 min', deux(ts ? ts.shots_total_90 : joueur.shots90)],
-      ['Tirs cadrés / 90 min', deux(ts ? ts.shots_on_90 : joueur.shotsOn90)],
-      ['Conversion', pct(conv, 1)]
+      [t('player_page.stat_goals_per90', 'Buts / 90 min'), deux(joueur.goals90)],
+      [t('player_page.stat_shots_per90', 'Tirs / 90 min'), deux(ts ? ts.shots_total_90 : joueur.shots90)],
+      [t('player_page.stat_shots_on_target_per90', 'Tirs cadrés / 90 min'), deux(ts ? ts.shots_on_90 : joueur.shotsOn90)],
+      [t('player_page.stat_conversion', 'Conversion'), pct(conv, 1)]
     ];
     return '<div class="grid grid-cols-2 gap-3 sm:grid-cols-4">' + items.map(function (i) {
       return '<div class="entree rounded-xl border border-hairline bg-surface p-4">'
@@ -249,34 +249,44 @@
     var so = ts ? n(ts.shots_on_90) : n(joueur.shotsOn90);
     var st = ts ? n(ts.shots_total_90) : n(joueur.shots90);
     if (st !== null && so !== null) {
-      faits.push(['Volume offensif', fmt(st, 2) + ' tir' + (st >= 2 ? 's' : '') + ' par 90 minutes, dont ' + fmt(so, 2) + ' cadré' + (so >= 2 ? 's' : '') + '.']);
+      var motTir = st >= 2 ? t('player_page.unit_shot_plural', 'tirs') : t('player_page.unit_shot_singular', 'tir');
+      var motCadre = so >= 2 ? t('player_page.unit_shot_on_target_plural', 'cadrés') : t('player_page.unit_shot_on_target_singular', 'cadré');
+      faits.push([t('player_page.fact_shot_volume_label', 'Volume offensif'),
+        t('player_page.fact_shot_volume_text', '{shots} par 90 minutes, dont {shotsOn}.')
+          .replace('{shots}', fmt(st, 2) + ' ' + motTir).replace('{shotsOn}', fmt(so, 2) + ' ' + motCadre)]);
     }
     if (ts && n(ts.conversion_rate) !== null && n(ts.baseline_conversion) !== null) {
       var moi = ts.conversion_rate * 100, moyenne = ts.baseline_conversion * 100;
       var ecart = moi - moyenne;
-      faits.push(['Efficacité',
-        fmt(moi, 1) + ' % de conversion, contre ' + fmt(moyenne, 1) + ' % en moyenne sur ce match — '
-        + (ecart >= 2 ? 'au-dessus.' : ecart <= -2 ? 'en dessous.' : 'au niveau de la moyenne.')]);
+      var comparaison = ecart >= 2 ? t('player_page.comparison_above', 'au-dessus.')
+        : ecart <= -2 ? t('player_page.comparison_below', 'en dessous.')
+        : t('player_page.comparison_average', 'au niveau de la moyenne.');
+      faits.push([t('player_page.fact_efficiency_label', 'Efficacité'),
+        t('player_page.fact_efficiency_text', '{rate} % de conversion, contre {avg} % en moyenne sur ce match — {comparison}')
+          .replace('{rate}', fmt(moi, 1)).replace('{avg}', fmt(moyenne, 1)).replace('{comparison}', comparaison)]);
     }
     if (ts && n(ts.opponent_defense_multiplier) !== null) {
       var m = ts.opponent_defense_multiplier;
-      faits.push(['Adversaire',
-        m > 1.05 ? 'La défense d’en face concède plus qu’une défense moyenne (facteur ' + fmt(m, 2) + ').'
-        : m < 0.95 ? 'La défense d’en face est plus solide que la moyenne (facteur ' + fmt(m, 2) + ').'
-        : 'La défense d’en face se situe dans la moyenne (facteur ' + fmt(m, 2) + ').']);
+      var texteAdv = m > 1.05 ? t('player_page.fact_opponent_stronger', 'La défense d’en face concède plus qu’une défense moyenne (facteur {factor}).')
+        : m < 0.95 ? t('player_page.fact_opponent_solid', 'La défense d’en face est plus solide que la moyenne (facteur {factor}).')
+        : t('player_page.fact_opponent_average', 'La défense d’en face se situe dans la moyenne (facteur {factor}).');
+      faits.push([t('player_page.fact_opponent_label', 'Adversaire'), texteAdv.replace('{factor}', fmt(m, 2))]);
     }
     var recents = lignes.slice(0, 5);
     var butsRecents = recents.reduce(function (s, r) { return s + (n(r.goals) || 0); }, 0);
     if (recents.length) {
-      faits.push(['Forme',
-        butsRecents > 0
-          ? butsRecents + ' but' + (butsRecents > 1 ? 's' : '') + ' sur ses ' + recents.length + ' dernier' + (recents.length > 1 ? 's' : '') + ' match' + (recents.length > 1 ? 's' : '') + '.'
-          : 'Aucun but sur ses ' + recents.length + ' dernier' + (recents.length > 1 ? 's' : '') + ' match' + (recents.length > 1 ? 's' : '') + '.']);
+      var motMatch = recents.length > 1 ? t('player_page.unit_last_matches_plural', 'derniers matchs') : t('player_page.unit_last_matches_singular', 'dernier match');
+      var matchsPhrase = recents.length + ' ' + motMatch;
+      var motBut = butsRecents > 1 ? t('player_page.unit_goal_plural', 'buts') : t('player_page.unit_goal_singular', 'but');
+      var formeTexte = butsRecents > 0
+        ? t('player_page.fact_form_goals_text', '{goals} sur ses {matches}.').replace('{goals}', butsRecents + ' ' + motBut).replace('{matches}', matchsPhrase)
+        : t('player_page.fact_form_no_goals_text', 'Aucun but sur ses {matches}.').replace('{matches}', matchsPhrase);
+      faits.push([t('player_page.fact_form_label', 'Forme'), formeTexte]);
     }
     if (!faits.length) return '';
     faits = faits.slice(0, 4);
 
-    return bloc(titre('Pourquoi il est à surveiller')
+    return bloc(titre(t('player_page.why_watch_title', 'Pourquoi il est à surveiller'))
       + '<ol class="mt-4">' + faits.map(function (f, i) {
         return '<li class="flex gap-4 border-t border-hairline py-3.5 first:border-0 first:pt-0">'
           + '<span aria-hidden="true" class="chiffres w-6 shrink-0 text-[13px] font-bold text-cyan/70">' + ('0' + (i + 1)).slice(-2) + '</span>'
@@ -301,7 +311,7 @@
     }).filter(function (p) { return p.y !== null; });
     var d = xy.map(function (p, i) { return (i ? 'L' : 'M') + p.x.toFixed(1) + ' ' + p.y.toFixed(1); }).join(' ');
     var zone = d + ' L' + xy[xy.length - 1].x.toFixed(1) + ' ' + h + ' L' + xy[0].x.toFixed(1) + ' ' + h + ' Z';
-    return '<svg viewBox="0 0 ' + l + ' ' + h + '" class="mt-3 h-11 w-full" role="img" aria-label="Évolution de la note sur les matchs affichés, de ' + fmt(min) + ' à ' + fmt(max) + '">'
+    return '<svg viewBox="0 0 ' + l + ' ' + h + '" class="mt-3 h-11 w-full" role="img" aria-label="' + esc(t('player_page.aria_rating_evolution', 'Évolution de la note sur les matchs affichés, de {min} à {max}').replace('{min}', fmt(min)).replace('{max}', fmt(max))) + '">'
       + '<path class="courbe-zone" d="' + zone + '"></path><path class="courbe" d="' + d + '"></path>'
       + xy.map(function (p) { return '<circle class="courbe-point" cx="' + p.x.toFixed(1) + '" cy="' + p.y.toFixed(1) + '" r="2.5"></circle>'; }).join('')
       + '</svg>';
@@ -311,19 +321,19 @@
     var aSaison = toutes.some(function (r) { return r.is_current_season !== undefined; });
     var lignes = (aSaison ? toutes.filter(function (r) { return r.is_current_season !== false; }) : toutes).slice(0, 5);
     if (!lignes.length) {
-      return bloc(titre('Forme récente') + '<p class="mt-3 text-[14px] text-soft">Pas assez de données récentes pour ce joueur.</p>');
+      return bloc(titre(t('player_page.recent_form_title', 'Forme récente')) + '<p class="mt-3 text-[14px] text-soft">' + esc(t('player_page.recent_form_empty', 'Pas assez de données récentes pour ce joueur.')) + '</p>');
     }
     var cellule = function (v, d) { var s = fmt(v, d == null ? 0 : d); return s === null ? '—' : s; };
-    var lib = function (r) { return (r.is_home ? 'vs ' : '@ ') + (r.opponent || 'Adversaire'); };
+    var lib = function (r) { return (r.is_home ? 'vs ' : '@ ') + (r.opponent || t('player_page.label_opponent', 'Adversaire')); };
 
-    var tete = ['Date', 'Adversaire', 'Min', 'Buts', 'Tirs', 'Cadrés', 'Note'];
+    var tete = [t('player_page.table_header_date', 'Date'), t('player_page.label_opponent', 'Adversaire'), t('player_page.table_header_minutes_short', 'Min'), t('player_page.stat_goals', 'Buts'), t('player_page.stat_shots', 'Tirs'), t('player_page.stat_shots_on_target_short', 'Cadrés'), t('player_page.label_rating', 'Note')];
     var tableau = '<div class="mt-4 hidden overflow-x-auto sm:block"><table class="forme chiffres text-[13.5px]">'
       + '<thead><tr class="text-left text-[11.5px] uppercase tracking-wider text-soft">'
-      + tete.map(function (t, i) { return '<th scope="col" class="pb-2 ' + (i > 1 ? 'text-right' : '') + '">' + esc(t) + '</th>'; }).join('')
+      + tete.map(function (libColonne, i) { return '<th scope="col" class="pb-2 ' + (i > 1 ? 'text-right' : '') + '">' + esc(libColonne) + '</th>'; }).join('')
       + '</tr></thead><tbody>' + lignes.map(function (r) {
         return '<tr>'
           + '<td class="py-2.5 pr-3 text-soft">' + esc(r.date || '—') + '</td>'
-          + '<td class="py-2.5 pr-3">' + esc(lib(r)) + (r.starter ? '' : '<span class="ml-1.5 text-[11px] text-soft">(remplaçant)</span>') + '</td>'
+          + '<td class="py-2.5 pr-3">' + esc(lib(r)) + (r.starter ? '' : '<span class="ml-1.5 text-[11px] text-soft">' + esc(t('player_page.badge_substitute', '(remplaçant)')) + '</span>') + '</td>'
           + '<td class="py-2.5 text-right">' + cellule(r.minutes) + '</td>'
           + '<td class="py-2.5 text-right' + (n(r.goals) > 0 ? ' font-bold text-cyan' : '') + '">' + cellule(r.goals) + '</td>'
           + '<td class="py-2.5 text-right">' + cellule(r.shots_total) + '</td>'
@@ -339,16 +349,17 @@
         + '<b class="text-[14px] font-semibold">' + esc(lib(r)) + '</b>'
         + '<span class="text-[12px] text-soft">' + esc(r.date || '') + '</span></div>'
         + '<div class="chiffres mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[13px] text-soft">'
-        + '<span>' + cellule(r.minutes) + ' min</span>'
-        + '<span' + (n(r.goals) > 0 ? ' class="font-semibold text-cyan"' : '') + '>' + cellule(r.goals) + ' but' + (n(r.goals) > 1 ? 's' : '') + '</span>'
-        + '<span>' + cellule(r.shots_total) + ' tirs</span>'
-        + '<span>' + cellule(r.shots_on) + ' cadrés</span>'
-        + '<span>Note ' + cellule(r.rating, 1) + '</span></div></li>';
+        + '<span>' + cellule(r.minutes) + ' ' + esc(t('player_page.unit_minutes_short', 'min')) + '</span>'
+        + '<span' + (n(r.goals) > 0 ? ' class="font-semibold text-cyan"' : '') + '>' + cellule(r.goals) + ' ' + esc(n(r.goals) > 1 ? t('player_page.unit_goal_plural', 'buts') : t('player_page.unit_goal_singular', 'but')) + '</span>'
+        + '<span>' + cellule(r.shots_total) + ' ' + esc(t('player_page.unit_shot_plural', 'tirs')) + '</span>'
+        + '<span>' + cellule(r.shots_on) + ' ' + esc(t('player_page.unit_shot_on_target_plural', 'cadrés')) + '</span>'
+        + '<span>' + esc(t('player_page.label_rating', 'Note')) + ' ' + cellule(r.rating, 1) + '</span></div></li>';
     }).join('') + '</ul>';
 
     var notes = lignes.slice().reverse().map(function (r) { return n(r.rating); });
-    return bloc(titre('Forme récente')
-      + '<p class="mt-1.5 text-[13px] text-soft">' + lignes.length + ' dernier' + (lignes.length > 1 ? 's' : '') + ' match' + (lignes.length > 1 ? 's' : '') + ' de la saison en cours.</p>'
+    var motDerniersMatchs = lignes.length > 1 ? t('player_page.unit_last_matches_plural', 'derniers matchs') : t('player_page.unit_last_matches_singular', 'dernier match');
+    return bloc(titre(t('player_page.recent_form_title', 'Forme récente'))
+      + '<p class="mt-1.5 text-[13px] text-soft">' + esc(t('player_page.recent_form_note', '{matches} de la saison en cours.').replace('{matches}', lignes.length + ' ' + motDerniersMatchs)) + '</p>'
       + courbe(notes) + tableau + cartes);
   }
 
@@ -360,12 +371,12 @@
     var s = ts && ts.season;
     if (!s) {
       var per90 = [
-        ['Buts', joueur.goals90], ['Tirs', joueur.shots90], ['Tirs cadrés', joueur.shotsOn90],
-        ['Passes clés', joueur.keyPasses90], ['Passes décisives', joueur.assists90], ['Dribbles', joueur.dribbles90]
+        [t('player_page.stat_goals', 'Buts'), joueur.goals90], [t('player_page.stat_shots', 'Tirs'), joueur.shots90], [t('player_page.stat_shots_on_target', 'Tirs cadrés'), joueur.shotsOn90],
+        [t('player_page.stat_key_passes', 'Passes clés'), joueur.keyPasses90], [t('player_page.stat_assists', 'Passes décisives'), joueur.assists90], [t('player_page.stat_dribbles', 'Dribbles'), joueur.dribbles90]
       ].filter(function (i) { return n(i[1]) !== null; });
       if (!per90.length) return '';
-      return bloc(titre('Profil de production')
-        + '<p class="mt-1.5 text-[13px] text-soft">Moyennes par 90 minutes sur les matchs suivis. Les totaux de saison ne sont pas disponibles pour ce joueur.</p>'
+      return bloc(titre(t('player_page.production_title', 'Profil de production'))
+        + '<p class="mt-1.5 text-[13px] text-soft">' + esc(t('player_page.production_no_season_note', 'Moyennes par 90 minutes sur les matchs suivis. Les totaux de saison ne sont pas disponibles pour ce joueur.')) + '</p>'
         + '<div class="mt-4 grid gap-x-8 gap-y-0 sm:grid-cols-2">' + per90.map(function (i) {
           return ligneStat(i[0], fmt(i[1], 2));
         }).join('') + '</div>');
@@ -377,27 +388,27 @@
     var par90 = function (v) {
       var x = n(v);
       if (x === null || !minutes) return null;
-      return ((x * 90) / minutes).toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      return ((x * 90) / minutes).toLocaleString(localeTag(), { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     };
     var groupes = [
-      ['Finition', [
-        ['Buts', s.goals, true], ['Tirs', s.shotsTotal, true], ['Tirs cadrés', s.shotsOn, true],
-        ['Conversion', ts && n(ts.conversion_rate) !== null ? pct(ts.conversion_rate * 100, 1) : null, false]
+      [t('player_page.section_finishing', 'Finition'), [
+        [t('player_page.stat_goals', 'Buts'), s.goals, true], [t('player_page.stat_shots', 'Tirs'), s.shotsTotal, true], [t('player_page.stat_shots_on_target', 'Tirs cadrés'), s.shotsOn, true],
+        [t('player_page.stat_conversion', 'Conversion'), ts && n(ts.conversion_rate) !== null ? pct(ts.conversion_rate * 100, 1) : null, false]
       ]],
-      ['Création', [
-        ['Passes clés', s.passesKey, true], ['Passes décisives', s.assists, true],
-        ['Passes réussies', n(s.passesAccuracy) !== null ? pct(s.passesAccuracy, 0) : null, false]
+      [t('player_page.section_creation', 'Création'), [
+        [t('player_page.stat_key_passes', 'Passes clés'), s.passesKey, true], [t('player_page.stat_assists', 'Passes décisives'), s.assists, true],
+        [t('player_page.stat_pass_accuracy', 'Passes réussies'), n(s.passesAccuracy) !== null ? pct(s.passesAccuracy, 0) : null, false]
       ]],
-      ['Temps de jeu', [
-        ['Apparitions', s.appearances, false], ['Titularisations', s.lineups, false], ['Minutes', s.minutes, false]
+      [t('player_page.section_playing_time', 'Temps de jeu'), [
+        [t('player_page.stat_appearances', 'Apparitions'), s.appearances, false], [t('player_page.stat_lineups', 'Titularisations'), s.lineups, false], [t('player_page.stat_minutes', 'Minutes'), s.minutes, false]
       ]],
-      ['Discipline', [
-        ['Cartons jaunes', s.cardsYellow, false], ['Cartons rouges', s.cardsRed, false]
+      [t('player_page.section_discipline', 'Discipline'), [
+        [t('player_page.stat_yellow_cards', 'Cartons jaunes'), s.cardsYellow, false], [t('player_page.stat_red_cards', 'Cartons rouges'), s.cardsRed, false]
       ]]
     ];
     // Les penaltys n'apparaissent que s'il s'est reellement passe quelque
     // chose : quatre grosses cases a zero n'apprennent rien.
-    var penaltys = [['Pénaltys marqués', s.penaltyScored], ['Pénaltys manqués', s.penaltyMissed], ['Pénaltys obtenus', s.penaltyWon]]
+    var penaltys = [[t('player_page.stat_penalty_scored', 'Pénaltys marqués'), s.penaltyScored], [t('player_page.stat_penalty_missed', 'Pénaltys manqués'), s.penaltyMissed], [t('player_page.stat_penalty_won', 'Pénaltys obtenus'), s.penaltyWon]]
       .filter(function (i) { return n(i[1]) !== null && n(i[1]) > 0; });
     if (penaltys.length) groupes[0][1] = groupes[0][1].concat(penaltys.map(function (i) { return [i[0], i[1], false]; }));
 
@@ -412,14 +423,14 @@
         }).join('') + '</div></div>';
     }).join('');
 
-    var bascule = minutes ? '<div class="ml-auto flex rounded-lg border border-hairline p-0.5" role="group" aria-label="Unité des statistiques">'
-      + '<button type="button" class="bascule rounded-[6px] px-3 py-1.5 text-[12.5px] font-semibold" data-unite="total" aria-pressed="true">Total</button>'
-      + '<button type="button" class="bascule rounded-[6px] px-3 py-1.5 text-[12.5px] font-semibold" data-unite="p90" aria-pressed="false">Par 90</button>'
+    var bascule = minutes ? '<div class="ml-auto flex rounded-lg border border-hairline p-0.5" role="group" aria-label="' + esc(t('player_page.unit_toggle_aria', 'Unité des statistiques')) + '">'
+      + '<button type="button" class="bascule rounded-[6px] px-3 py-1.5 text-[12.5px] font-semibold" data-unite="total" aria-pressed="true">' + esc(t('player_page.unit_toggle_total', 'Total')) + '</button>'
+      + '<button type="button" class="bascule rounded-[6px] px-3 py-1.5 text-[12.5px] font-semibold" data-unite="p90" aria-pressed="false">' + esc(t('player_page.unit_toggle_per90', 'Par 90')) + '</button>'
       + '</div>' : '';
 
-    return bloc('<div class="flex flex-wrap items-center gap-3">' + titre('Profil de production') + bascule + '</div>'
+    return bloc('<div class="flex flex-wrap items-center gap-3">' + titre(t('player_page.production_title', 'Profil de production')) + bascule + '</div>'
       + '<div class="mt-5 grid gap-x-10 gap-y-6 sm:grid-cols-2">' + contenu + '</div>'
-      + (minutes ? '<p class="mt-5 border-t border-hairline pt-3 text-[12.5px] text-soft">Saison en cours, ' + fmt(minutes, 0) + ' minutes jouées.</p>' : ''));
+      + (minutes ? '<p class="mt-5 border-t border-hairline pt-3 text-[12.5px] text-soft">' + esc(t('player_page.production_season_note', 'Saison en cours, {minutes} minutes jouées.').replace('{minutes}', fmt(minutes, 0))) + '</p>' : ''));
   }
 
   function ligneStat(libelle, brut, p90) {
@@ -427,7 +438,7 @@
       + '<span class="text-[13.5px] text-soft">' + esc(libelle) + '</span>'
       + '<b class="chiffres text-[14.5px] font-semibold">'
       + '<span data-unite-total>' + ou(brut) + '</span>'
-      + (p90 !== null && p90 !== undefined ? '<span data-unite-p90 hidden>' + p90 + '<span class="text-[11.5px] font-normal text-soft"> /90</span></span>' : '')
+      + (p90 !== null && p90 !== undefined ? '<span data-unite-p90 hidden>' + p90 + '<span class="text-[11.5px] font-normal text-soft"> ' + esc(t('player_page.unit_per90_suffix', '/90')) + '</span></span>' : '')
       + '</b></div>';
   }
 
@@ -441,15 +452,19 @@
     // avant ajustement plutot que d'en fabriquer une.
     var avant = m ? Math.round(score / m) : null;
     var pourcent = Math.round((m - 1) * 100);
+    var teamHtml = '<b class="text-ink">' + esc(adverse.name) + '</b>';
+    var percentHtml = '<b class="text-ink">' + (pourcent >= 0 ? '+' : '') + pourcent + '&nbsp;%</b>';
+    var intro = t('player_page.opponent_impact_intro', 'Le score de menace n’est pas un profil de saison figé&nbsp;: il est ajusté par la défense qu’il affronte. Face à {team}, l’ajustement est de {percent}.')
+      .replace('{team}', teamHtml).replace('{percent}', percentHtml);
 
-    return bloc(titre('Ce que l’adversaire change')
-      + '<p class="mt-2.5 max-w-[62ch] text-[14px] leading-[1.7] text-soft">Le score de menace n’est pas un profil de saison figé&nbsp;: il est ajusté par la défense qu’il affronte. Face à <b class="text-ink">' + esc(adverse.name) + '</b>, l’ajustement est de <b class="text-ink">' + (pourcent >= 0 ? '+' : '') + pourcent + '&nbsp;%</b>.</p>'
+    return bloc(titre(t('player_page.opponent_impact_title', 'Ce que l’adversaire change'))
+      + '<p class="mt-2.5 max-w-[62ch] text-[14px] leading-[1.7] text-soft">' + intro + '</p>'
       + '<div class="mt-5 grid gap-4 sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] sm:items-center">'
-      + (avant !== null ? etage('Avant ajustement', avant) : '')
+      + (avant !== null ? etage(t('player_page.label_before_adjustment', 'Avant ajustement'), avant) : '')
       + '<div class="text-center"><span class="chiffres inline-flex items-center rounded-full border border-cyan/30 bg-cyan/10 px-3 py-1.5 text-[13px] font-bold text-cyan">× ' + fmt(m, 2) + '</span></div>'
-      + etage('Menace retenue', score, true)
+      + etage(t('player_page.label_threat_retained', 'Menace retenue'), score, true)
       + '</div>'
-      + '<p class="mt-5 border-t border-hairline pt-3 text-[12.5px] leading-relaxed text-soft">Le facteur vaut 1,00 devant une défense moyenne du championnat. Au-dessus, la défense encaisse plus que la moyenne&nbsp;; en dessous, elle est plus solide. Il est borné entre 0,70 et 1,30.</p>');
+      + '<p class="mt-5 border-t border-hairline pt-3 text-[12.5px] leading-relaxed text-soft">' + t('player_page.opponent_impact_footer', 'Le facteur vaut 1,00 devant une défense moyenne du championnat. Au-dessus, la défense encaisse plus que la moyenne&nbsp;; en dessous, elle est plus solide. Il est borné entre 0,70 et 1,30.') + '</p>');
   }
   function etage(libelle, valeur, fort) {
     var largeur = Math.max(0, Math.min(100, valeur));
@@ -464,24 +479,28 @@
     var s = ts && ts.season;
     var moyenne = joueur.appearances && n(joueur.minutesRecent) !== null
       ? Math.round(joueur.minutesRecent / joueur.appearances) : null;
+    var gabaritTitularisations = t('player_page.lineups_of_appearances', '{lineups} sur {appearances} apparitions');
     var lignes = [
-      ['Minutes moyennes par match joué', moyenne === null ? null : fmt(moyenne, 0) + ' min'],
-      ['Titularisations', s && n(s.lineups) !== null ? fmt(s.lineups, 0) + ' sur ' + fmt(s.appearances, 0) + ' apparitions'
-        : (n(joueur.starts) !== null ? fmt(joueur.starts, 0) + ' sur ' + fmt(joueur.appearances, 0) + ' apparitions' : null)]
+      [t('player_page.label_avg_minutes_per_match', 'Minutes moyennes par match joué'), moyenne === null ? null : fmt(moyenne, 0) + ' min'],
+      [t('player_page.stat_lineups', 'Titularisations'), s && n(s.lineups) !== null ? gabaritTitularisations.replace('{lineups}', fmt(s.lineups, 0)).replace('{appearances}', fmt(s.appearances, 0))
+        : (n(joueur.starts) !== null ? gabaritTitularisations.replace('{lineups}', fmt(joueur.starts, 0)).replace('{appearances}', fmt(joueur.appearances, 0)) : null)]
     ];
-    return bloc(titre('Temps de jeu et disponibilité')
+    return bloc(titre(t('player_page.playing_time_title', 'Temps de jeu et disponibilité'))
       + '<p class="mt-3"><span class="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-[12.5px] font-semibold ' + dispo.classe + '">'
       + '<span aria-hidden="true" class="h-1.5 w-1.5 rounded-full ' + dispo.point + '"></span>' + esc(dispo.texte) + '</span></p>'
       + '<p class="mt-2.5 text-[13px] leading-relaxed text-soft">'
-      + (dispo.texte === 'Statut indisponible'
-        ? 'Aucune information de blessure n’est publiée pour ce joueur. Cela ne signifie pas qu’il est disponible.'
-        : dispo.texte === 'Disponible' ? 'Aucun problème signalé avant cette rencontre.'
-        : 'À confirmer avant le coup d’envoi.') + '</p>'
+      // Branche sur `dispo.code` (jamais traduit), pas sur `dispo.texte` : un
+      // test sur le libelle affiche casserait des que la langue change (voir
+      // le commentaire de statutDisponibilite plus haut).
+      + (dispo.code === 'unknown'
+        ? t('player_page.status_explain_unknown', 'Aucune information de blessure n’est publiée pour ce joueur. Cela ne signifie pas qu’il est disponible.')
+        : dispo.code === 'available' ? t('player_page.status_explain_available', 'Aucun problème signalé avant cette rencontre.')
+        : t('player_page.status_explain_pending', 'À confirmer avant le coup d’envoi.')) + '</p>'
       + '<div class="mt-4">' + lignes.map(function (l) { return ligneStat(l[0], l[1]); }).join('') + '</div>'
       // Retire le 04/09/2026 : la "probabilite d'etre titulaire" n'etait
       // qu'une frequence passee presentee comme une prevision. Le temps de
       // jeu reellement observe ci-dessus est une mesure, pas une promesse.
-      + '<p class="mt-4 border-t border-hairline pt-3 text-[12.5px] leading-relaxed text-soft">Nous ne publions pas de probabilité de titularisation&nbsp;: la composition n’est pas connue avant l’annonce officielle.</p>');
+      + '<p class="mt-4 border-t border-hairline pt-3 text-[12.5px] leading-relaxed text-soft">' + t('player_page.no_start_probability_note', 'Nous ne publions pas de probabilité de titularisation&nbsp;: la composition n’est pas connue avant l’annonce officielle.') + '</p>');
   }
 
   /* ---------- 10. Echantillon ---------- */
@@ -490,19 +509,19 @@
     var matchs = ts && n(ts.appearances) !== null ? n(ts.appearances) : n(joueur.appearances);
     if (minutes === null && matchs === null) return '';
     var morceaux = [];
-    if (minutes !== null) morceaux.push(fmt(minutes, 0) + ' minutes');
-    if (matchs !== null) morceaux.push(fmt(matchs, 0) + ' apparition' + (matchs > 1 ? 's' : ''));
+    if (minutes !== null) morceaux.push(fmt(minutes, 0) + ' ' + t('player_page.unit_minutes_plural', 'minutes'));
+    if (matchs !== null) morceaux.push(fmt(matchs, 0) + ' ' + (matchs > 1 ? t('player_page.unit_appearance_plural', 'apparitions') : t('player_page.unit_appearance_singular', 'apparition')));
     // Seuil repris de lib/markets/top-scorer-picker.js#MIN_APPEARANCES : le
     // moteur considere lui-meme qu'en dessous de 5 matchs, la fiabilite
     // n'est pas pleine (reliability = min(1, apparitions/5)).
     var limite = matchs !== null && matchs < 5;
     return '<section class="entree rounded-2xl border ' + (limite ? 'border-amber-500/25 bg-amber-500/[.04]' : 'border-hairline bg-surface') + ' p-5 sm:p-6">'
-      + titre('Échantillon')
+      + titre(t('player_page.sample_title', 'Échantillon'))
       + '<p class="chiffres mt-3 text-[18px] font-bold">' + morceaux.join(' · ') + '</p>'
       + '<p class="mt-2 max-w-[68ch] text-[13.5px] leading-relaxed text-soft">'
       + (limite
-        ? 'Échantillon limité. Les moyennes par 90 minutes calculées sur cette base peuvent bouger fortement d’un match à l’autre. Le score de menace en tient déjà compte&nbsp;: il est réduit tant que le joueur n’a pas cinq apparitions.'
-        : 'Toutes les moyennes par 90 minutes de cette page sont calculées sur cette base.')
+        ? t('player_page.sample_limited_note', 'Échantillon limité. Les moyennes par 90 minutes calculées sur cette base peuvent bouger fortement d’un match à l’autre. Le score de menace en tient déjà compte&nbsp;: il est réduit tant que le joueur n’a pas cinq apparitions.')
+        : t('player_page.sample_full_note', 'Toutes les moyennes par 90 minutes de cette page sont calculées sur cette base.'))
       + '</p></section>';
   }
 
@@ -511,7 +530,7 @@
     var autres = (Array.isArray(raw.top_scorers) ? raw.top_scorers : [])
       .filter(function (p) { return Number(p.player_id) !== Number(idActuel); });
     if (!autres.length) return '';
-    return bloc(titre('Autre joueur à surveiller')
+    return bloc(titre(t('player_page.other_player_title', 'Autre joueur à surveiller'))
       + '<div class="mt-3 space-y-2">' + autres.map(function (p) {
         return '<a href="/joueur.html?m=' + esc(matchId) + '&p=' + esc(p.player_id) + '" class="flex items-center gap-3 rounded-xl border border-hairline bg-panel p-3 transition hover:border-cyan/40">'
           + (p.photo ? '<img src="' + esc(p.photo) + '" alt="" width="40" height="40" loading="lazy" class="h-10 w-10 shrink-0 rounded-full border border-hairline object-cover">' : '')
@@ -525,7 +544,7 @@
   /* ---------- Assemblage ---------- */
   function rendre(d) {
     var vm = d.vm, joueur = d.player, ts = d.ts;
-    document.title = joueur.name + ' — Fiche joueur | IASHARK';
+    document.title = joueur.name + t('player_page.document_title_suffix', ' — Fiche joueur | IASHARK');
 
     var colonneGauche = [detailScore(ts), pourquoi(joueur, ts, d.rawRows), formeRecente(d.rawRows), production(joueur, ts)].filter(Boolean);
     var colonneDroite = [adversaire(vm, joueur, ts), tempsDeJeu(joueur, ts), echantillon(joueur, ts), autreJoueur(d.raw, d.matchId, joueur.id)].filter(Boolean);
@@ -538,7 +557,7 @@
       + '</div>'
       + '<div class="mt-8 border-t border-hairline pt-6">'
       + '<a href="/match.html?id=' + esc(d.matchId) + '" class="inline-flex h-11 items-center rounded-xl border border-hairline px-5 text-[14px] font-semibold transition hover:border-cyan/40">'
-      + '<span aria-hidden="true" class="mr-2">←</span>Retour à l’analyse du match</a></div>';
+      + '<span aria-hidden="true" class="mr-2">←</span>' + esc(t('player_page.back_to_match_analysis', 'Retour à l’analyse du match')) + '</a></div>';
 
     squelette.hidden = true;
     root.hidden = false;
@@ -599,7 +618,7 @@
   async function charger() {
     var params = new URLSearchParams(location.search);
     var matchId = params.get('m'), playerId = Number(params.get('p'));
-    if (!matchId || !Number.isFinite(playerId)) throw new Error('Lien incomplet : ce joueur ne peut pas être affiché.');
+    if (!matchId || !Number.isFinite(playerId)) throw new Error(t('player_page.error_incomplete_link', 'Lien incomplet : ce joueur ne peut pas être affiché.'));
 
     var raw = null;
     try {
@@ -612,13 +631,13 @@
       var data = await fetch('/data.json?t=' + Date.now()).then(function (r) { return r.json(); });
       raw = (data.matchs || []).find(function (x) { return String(x.id) === String(matchId); });
     }
-    if (!raw) throw new Error('Match introuvable.');
+    if (!raw) throw new Error(t('player_page.error_match_not_found', 'Match introuvable.'));
 
     var vm = window.IasharkMatchViewModel.buildMatchViewModel(raw);
     var analytics = vm.players.analytics;
     var trouve = function (cote) { return analytics[cote].players.find(function (p) { return p.id === playerId; }); };
     var player = trouve('home') || trouve('away');
-    if (!player) throw new Error('Aucune statistique suivie pour ce joueur sur ce match.');
+    if (!player) throw new Error(t('player_page.error_no_stats_tracked', 'Aucune statistique suivie pour ce joueur sur ce match.'));
     var cote = trouve('home') ? 'home' : 'away';
     var rawRows = ((raw.player_history && raw.player_history[cote]) || [])
       .filter(function (r) { return Number(r.player_id) === playerId; }).slice(0, 10);
@@ -627,12 +646,20 @@
     return { vm: vm, player: player, rawRows: rawRows, matchId: matchId, ts: ts, raw: raw };
   }
 
-  charger().then(rendre).catch(function (e) {
+  // I18N.init() charge le dictionnaire de la langue active avant tout rendu :
+  // sans cette attente, t() renverrait systematiquement le repli francais
+  // meme pour un visiteur EN/ES, le dictionnaire n'etant pas encore charge.
+  // Si le script i18n/i18n.js n'est pas present (ou a echoue a se charger),
+  // window.I18N est absent et on ne bloque pas le rendu pour autant : repli
+  // silencieux sur une promesse déjà résolue, comme t() le fait deja au
+  // niveau de chaque appel individuel.
+  var i18nPret = (window.I18N && window.I18N.init) ? window.I18N.init() : Promise.resolve();
+  i18nPret.then(charger).then(rendre).catch(function (e) {
     squelette.hidden = true;
     root.hidden = false;
     root.innerHTML = '<div class="mx-auto max-w-[520px] py-16 text-center">'
-      + '<h1 class="text-[22px] font-bold tracking-tight">' + esc(e && e.message ? e.message : 'Fiche joueur indisponible') + '</h1>'
-      + '<p class="mt-3 text-[14px] leading-relaxed text-soft">Vous pouvez revenir aux analyses du jour et rouvrir la fiche depuis un match.</p>'
-      + '<a href="/" class="mt-6 inline-flex h-11 items-center rounded-xl bg-cyan px-5 text-[14px] font-bold text-[#04141b] transition hover:bg-cyan/90">Voir les analyses du jour</a></div>';
+      + '<h1 class="text-[22px] font-bold tracking-tight">' + esc(e && e.message ? e.message : t('player_page.error_default_title', 'Fiche joueur indisponible')) + '</h1>'
+      + '<p class="mt-3 text-[14px] leading-relaxed text-soft">' + esc(t('player_page.error_recovery_text', 'Vous pouvez revenir aux analyses du jour et rouvrir la fiche depuis un match.')) + '</p>'
+      + '<a href="/" class="mt-6 inline-flex h-11 items-center rounded-xl bg-cyan px-5 text-[14px] font-bold text-[#04141b] transition hover:bg-cyan/90">' + esc(t('player_page.error_recovery_link', 'Voir les analyses du jour')) + '</a></div>';
   });
 })();

@@ -7,18 +7,34 @@
    (cotes, probabilites, scores) - uniquement le texte d'interface. */
 (function(global){
   "use strict";
-  var SUPPORTED = ["fr","en","es","de","it","pt"];
+  var SUPPORTED = ["fr","en","es","es-mx","de","it","pt"];
   var DEFAULT_LOCALE = "fr";
+  // Marches GEO (config/markets.json = devise/legal/pricing) - chaque marche
+  // pointe vers UN dictionnaire de langue existant, pas de fork de dico pour
+  // UK/ZA qui parlent la meme langue d'interface que "en". Ne pas confondre
+  // marche (routage /gb /mx /za, devise, conformite) et locale (dictionnaire
+  // de traduction) : voir config/markets.json.
+  var MARKET_LOCALE = {gb:"en", mx:"es-mx", za:"en"};
 
   function detectLocale(){
-    var m = location.pathname.match(/^\/([a-z]{2})(\/|$)/);
-    if (m && SUPPORTED.indexOf(m[1]) !== -1) return m[1];
+    var m = location.pathname.match(/^\/([a-z]{2}(?:-[a-z]{2})?)(\/|$)/);
+    if (m){
+      if (MARKET_LOCALE.hasOwnProperty(m[1])) return MARKET_LOCALE[m[1]];
+      if (SUPPORTED.indexOf(m[1]) !== -1) return m[1];
+    }
+    // Pas de prefixe dans l'URL (ex: /match/12345.html, genere sans variante
+    // par marche) - retombe sur le dernier choix explicite de l'utilisateur
+    // avant le defaut FR, pour que ces pages restent localisees elles aussi.
+    try{
+      var saved = localStorage.getItem("iashark_lang");
+      if (saved && SUPPORTED.indexOf(saved) !== -1) return saved;
+    }catch(e){}
     return DEFAULT_LOCALE;
   }
 
   function localizePath(path, locale){
     // Remplace un eventuel prefixe de locale existant, sinon en ajoute un.
-    var stripped = path.replace(/^\/([a-z]{2})(\/|$)/, "/");
+    var stripped = path.replace(/^\/([a-z]{2}(?:-[a-z]{2})?)(\/|$)/, "/");
     if (stripped === "/") return "/" + locale + "/";
     return "/" + locale + stripped;
   }
@@ -71,7 +87,7 @@
       catch(e){ return n + " " + (currency||"EUR"); }
     },
     localeTag: function(){
-      var map = {fr:"fr-FR", en:"en-GB", es:"es-ES", de:"de-DE", it:"it-IT", pt:"pt-PT"};
+      var map = {fr:"fr-FR", en:"en-GB", es:"es-ES", "es-mx":"es-MX", de:"de-DE", it:"it-IT", pt:"pt-PT"};
       return map[this.locale] || "fr-FR";
     },
 

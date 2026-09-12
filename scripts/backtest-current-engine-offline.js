@@ -148,19 +148,46 @@ function isEvaluable(f) {
 }
 
 // Construit les lignes {prob, outcome} par marche pour UN match deja predit
-// (finalProbs = sortie de calcFinalProbs, deja en pourcentage 0-100).
+// (finalProbs = sortie de calcFinalProbs).
+//
+// IMPORTANT (recalibration post-hoc, 2026-09-13 - voir
+// ENGINE_RECALIBRATION_REPORT.md) : lit les probabilites depuis
+// finalProbs.derived, JAMAIS depuis finalProbs.p1/over25/bttsY directement.
+// Raison : lib/engine.js#calcFinalProbs applique desormais une
+// recalibration post-hoc SUR ses champs top-level (p1/pN/p2/over25/bttsY)
+// quand lib/data/calibration-params.json marque un marche wired:true -
+// mais `derived` reste TOUJOURS la sortie BRUTE du Dixon-Coles (jamais
+// touchee par la calibration, par construction de calcFinalProbs). Lire
+// les champs top-level ici casserait silencieusement la portee documentee
+// de ce script ("mesure le moteur COEUR", voir en-tete) des qu'une
+// calibration est branchee, ET fausserait tout refit futur
+// (scripts/fit-and-validate-calibration.js fitterait alors une correction
+// par-dessus une correction deja appliquee). Equivalent mathematiquement a
+// l'ancien code quand aucune calibration n'est branchee (pct() ne fait
+// qu'un *100 sans arrondi) - aucun changement retroactif des chiffres deja
+// publies dans CURRENT_ENGINE_CALIBRATION_REPORT.md.
+//
+// over15Raw/over35Raw (pourcentage 0-100) : ajoutes uniquement sur la ligne
+// OVER_2_5, pour permettre a un script de validation externe de reproduire
+// EXACTEMENT le garde-fou de monotonie (Over1.5>=Over2.5>=Over3.5) que
+// lib/engine.js applique en production avant de mesurer un effet "avant/
+// apres" honnete (voir scripts/fit-and-validate-calibration.js).
 function buildCalibrationRows(finalProbs, homeGoals, awayGoals, meta) {
   const isHome = homeGoals > awayGoals;
   const isDraw = homeGoals === awayGoals;
   const isAway = homeGoals < awayGoals;
   const isOver25 = homeGoals + awayGoals > 2.5;
   const isBtts = homeGoals > 0 && awayGoals > 0;
+  const d = finalProbs.derived;
   return [
-    { prob: finalProbs.p1 / 100, outcome: isHome ? 1 : 0, market: "1X2", outcomeLabel: "HOME", ...meta },
-    { prob: finalProbs.pN / 100, outcome: isDraw ? 1 : 0, market: "1X2", outcomeLabel: "DRAW", ...meta },
-    { prob: finalProbs.p2 / 100, outcome: isAway ? 1 : 0, market: "1X2", outcomeLabel: "AWAY", ...meta },
-    { prob: finalProbs.over25 / 100, outcome: isOver25 ? 1 : 0, market: "OVER_2_5", outcomeLabel: "OVER_2_5", ...meta },
-    { prob: finalProbs.bttsY / 100, outcome: isBtts ? 1 : 0, market: "BTTS_YES", outcomeLabel: "BTTS_YES", ...meta },
+    { prob: d.p1, outcome: isHome ? 1 : 0, market: "1X2", outcomeLabel: "HOME", ...meta },
+    { prob: d.pN, outcome: isDraw ? 1 : 0, market: "1X2", outcomeLabel: "DRAW", ...meta },
+    { prob: d.p2, outcome: isAway ? 1 : 0, market: "1X2", outcomeLabel: "AWAY", ...meta },
+    {
+      prob: d.overUnder["2.5"].over, outcome: isOver25 ? 1 : 0, market: "OVER_2_5", outcomeLabel: "OVER_2_5",
+      over15Raw: d.overUnder["1.5"].over * 100, over35Raw: d.overUnder["3.5"].over * 100, ...meta,
+    },
+    { prob: d.btts.yes, outcome: isBtts ? 1 : 0, market: "BTTS_YES", outcomeLabel: "BTTS_YES", ...meta },
   ];
 }
 
@@ -315,6 +342,15 @@ function runBacktest(options) {
     perLeagueResults,
     overall,
     overall2025Only,
+    // allRows : ajoute pour la tache de recalibration (ENGINE_RECALIBRATION_REPORT.md,
+    // scripts/fit-and-validate-calibration.js) - chaque ligne {prob, outcome, market,
+    // league, season, fixture_id, outcomeLabel} deja construite par
+    // buildCalibrationRows(), simplement exposee ici en plus des agregats
+    // (overall/perLeagueResults) deja retournes, pour permettre a un script
+    // externe de repartir train/holdout par saison SANS rejouer le replay -
+    // reutilise TEL QUEL, aucune reimplementation de la boucle anti-leakage
+    // ci-dessus. N'affecte aucun consommateur existant (champ additif).
+    allRows,
   };
 }
 

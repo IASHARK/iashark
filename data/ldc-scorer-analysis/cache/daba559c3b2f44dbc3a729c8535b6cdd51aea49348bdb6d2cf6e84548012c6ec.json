@@ -1,0 +1,119 @@
+{
+  "endpoint": "/players",
+  "params": {
+    "id": 1707,
+    "season": 2026
+  },
+  "retrieved_at": "2026-09-08T13:21:09Z",
+  "response_hash": "089c30494aeef14ce84576f23d30a71bde204dfd2921b2f3a98881e9417c999c",
+  "response": {
+    "get": "players",
+    "parameters": {
+      "id": "1707",
+      "season": "2026"
+    },
+    "errors": [],
+    "results": 1,
+    "paging": {
+      "current": 1,
+      "total": 1
+    },
+    "response": [
+      {
+        "player": {
+          "id": 1707,
+          "name": "Gerard Moreno",
+          "firstname": "Gerard",
+          "lastname": "Moreno Balaguer\u00f3",
+          "age": 33,
+          "birth": {
+            "date": "1992-04-07",
+            "place": "Santa Perp\u00e8tua de Mogoda",
+            "country": "Spain"
+          },
+          "nationality": "Spain",
+          "height": "180",
+          "weight": "77",
+          "injured": false,
+          "photo": "https://media.api-sports.io/football/players/1707.png"
+        },
+        "statistics": [
+          {
+            "team": {
+              "id": 533,
+              "name": "Villarreal",
+              "logo": "https://media.api-sports.io/football/teams/533.png"
+            },
+            "league": {
+              "id": 140,
+              "name": "La Liga",
+              "country": "Spain",
+              "logo": "https://media.api-sports.io/football/leagues/140.png",
+              "flag": "https://media.api-sports.io/flags/es.svg",
+              "season": 2026
+            },
+            "games": {
+              "appearences": 4,
+              "lineups": 2,
+              "minutes": 211,
+              "number": 7,
+              "position": "Attacker",
+              "rating": "6.98",
+              "captain": false
+            },
+            "substitutes": {
+              "in": 2,
+              "out": 2,
+              "bench": 2
+            },
+            "shots": {
+              "total": 4,
+              "on": 2
+            },
+            "goals": {
+              "total": 1,
+              "conceded": 0,
+              "assists": 0,
+              "saves": null
+            },
+            "passes": {
+              "total": 103,
+              "key": 6,
+              "accuracy": 86
+            },
+            "tackles": {
+              "total": 2,
+              "blocks": null,
+              "interceptions": null
+            },
+            "duels": {
+              "total": 22,
+              "won": 14
+            },
+            "dribbles": {
+              "attempts": 10,
+              "success": 8,
+              "past": null
+            },
+            "fouls": {
+              "drawn": 1,
+              "committed": 3
+            },
+            "cards": {
+              "yellow": 0,
+              "yellowred": 0,
+              "red": 0
+            },
+            "penalty": {
+              "won": null,
+              "commited": null,
+              "scored": 1,
+              "missed": 0,
+              "saved": null
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

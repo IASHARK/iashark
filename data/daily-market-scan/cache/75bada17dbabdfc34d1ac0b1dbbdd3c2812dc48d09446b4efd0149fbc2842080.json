@@ -1,0 +1,96 @@
+{
+  "endpoint": "/fixtures",
+  "params": {
+    "last": 1,
+    "status": "FT-AET-PEN",
+    "team": 1610
+  },
+  "retrieved_at": "2026-09-08T20:46:49Z",
+  "response_hash": "146da4e095fd52bcfb3f613b09cef40a6ea6201eb6c736a8cab309457851f63f",
+  "response": {
+    "get": "fixtures",
+    "parameters": {
+      "last": "1",
+      "status": "FT-AET-PEN",
+      "team": "1610"
+    },
+    "errors": [],
+    "results": 1,
+    "paging": {
+      "current": 1,
+      "total": 1
+    },
+    "response": [
+      {
+        "fixture": {
+          "id": 1490441,
+          "referee": "Alexis Da Silva, USA",
+          "timezone": "UTC",
+          "date": "2026-09-05T23:30:00+00:00",
+          "timestamp": 1788651000,
+          "periods": {
+            "first": null,
+            "second": null
+          },
+          "venue": {
+            "id": null,
+            "name": "Lower.com Field",
+            "city": "Columbus"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": null
+          }
+        },
+        "league": {
+          "id": 253,
+          "name": "Major League Soccer",
+          "country": "USA",
+          "logo": "https://media.api-sports.io/football/leagues/253.png",
+          "flag": "https://media.api-sports.io/flags/us.svg",
+          "season": 2026,
+          "round": "Regular Season - 23",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 1613,
+            "name": "Columbus Crew",
+            "logo": "https://media.api-sports.io/football/teams/1613.png",
+            "winner": true
+          },
+          "away": {
+            "id": 1610,
+            "name": "Colorado Rapids",
+            "logo": "https://media.api-sports.io/football/teams/1610.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 3,
+          "away": 0
+        },
+        "score": {
+          "halftime": {
+            "home": 1,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 3,
+            "away": 0
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      }
+    ]
+  }
+}

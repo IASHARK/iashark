@@ -1,0 +1,119 @@
+{
+  "endpoint": "/players",
+  "params": {
+    "id": 282126,
+    "season": 2026
+  },
+  "retrieved_at": "2026-09-08T13:20:53Z",
+  "response_hash": "187cd30f5ddb9faa53dfaa6a11a142a65b5659378efc862acbea1e5b448d973d",
+  "response": {
+    "get": "players",
+    "parameters": {
+      "id": "282126",
+      "season": "2026"
+    },
+    "errors": [],
+    "results": 1,
+    "paging": {
+      "current": 1,
+      "total": 1
+    },
+    "response": [
+      {
+        "player": {
+          "id": 282126,
+          "name": "Carlos Forbs",
+          "firstname": "Carlos Roberto",
+          "lastname": "Forbs Borges",
+          "age": 21,
+          "birth": {
+            "date": "2004-03-19",
+            "place": null,
+            "country": "Portugal"
+          },
+          "nationality": "Portugal",
+          "height": "169",
+          "weight": "62",
+          "injured": false,
+          "photo": "https://media.api-sports.io/football/players/282126.png"
+        },
+        "statistics": [
+          {
+            "team": {
+              "id": 569,
+              "name": "Club Brugge KV",
+              "logo": "https://media.api-sports.io/football/teams/569.png"
+            },
+            "league": {
+              "id": 144,
+              "name": "Jupiler Pro League",
+              "country": "Belgium",
+              "logo": "https://media.api-sports.io/football/leagues/144.png",
+              "flag": "https://media.api-sports.io/flags/be.svg",
+              "season": 2026
+            },
+            "games": {
+              "appearences": 4,
+              "lineups": 4,
+              "minutes": 340,
+              "number": 9,
+              "position": "Attacker",
+              "rating": "7.45",
+              "captain": false
+            },
+            "substitutes": {
+              "in": 0,
+              "out": 0,
+              "bench": 0
+            },
+            "shots": {
+              "total": 5,
+              "on": 3
+            },
+            "goals": {
+              "total": 1,
+              "conceded": 0,
+              "assists": 3,
+              "saves": 0
+            },
+            "passes": {
+              "total": 128,
+              "key": 10,
+              "accuracy": 78
+            },
+            "tackles": {
+              "total": 8,
+              "blocks": 0,
+              "interceptions": 2
+            },
+            "duels": {
+              "total": 46,
+              "won": 26
+            },
+            "dribbles": {
+              "attempts": 23,
+              "success": 14,
+              "past": null
+            },
+            "fouls": {
+              "drawn": 4,
+              "committed": 0
+            },
+            "cards": {
+              "yellow": 0,
+              "yellowred": 0,
+              "red": 1
+            },
+            "penalty": {
+              "won": null,
+              "commited": null,
+              "scored": 0,
+              "missed": 0,
+              "saved": null
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

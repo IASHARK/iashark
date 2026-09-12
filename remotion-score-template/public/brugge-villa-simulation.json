@@ -1,0 +1,311 @@
+{
+  "match": {
+    "fixtureId": 1635643,
+    "date": "2026-09-08T16:45:00+00:00",
+    "venue": {
+      "id": null,
+      "name": "Jan Breydel Stadion",
+      "city": "Brugge"
+    },
+    "league": {
+      "id": 2,
+      "name": "UEFA Champions League",
+      "country": "World",
+      "logo": "https://media.api-sports.io/football/leagues/2.png",
+      "flag": null,
+      "season": 2026,
+      "round": "League Stage - 1",
+      "standings": true
+    },
+    "home": {
+      "id": 569,
+      "name": "Club Brugge KV",
+      "logo": "https://media.api-sports.io/football/teams/569.png",
+      "winner": null
+    },
+    "away": {
+      "id": 66,
+      "name": "Aston Villa",
+      "logo": "https://media.api-sports.io/football/teams/66.png",
+      "winner": null
+    }
+  },
+  "realData": {
+    "recentMatches": {
+      "home": 10,
+      "away": 10
+    },
+    "injuries": 14,
+    "lineups": "estimated-or-unavailable"
+  },
+  "model": {
+    "strength": {
+      "homeLambda": 1.419008,
+      "awayLambda": 1.04125,
+      "evidence": [
+        "Forme récente: 1.80 vs 1.40 buts/match",
+        "Défenses: 1.30 vs 1.80 encaissés/match",
+        "Signal API-Sports Predictions pondéré",
+        "14 absence(s) API détectée(s)"
+      ]
+    },
+    "disclaimer": "Prédiction statistique, pas un résultat réel."
+  },
+  "aggregates": {
+    "simulations": 50000,
+    "homeWin": 45.8,
+    "draw": 26.5,
+    "awayWin": 27.7,
+    "btts": 48.8,
+    "over25": 44.5,
+    "under25": 55.5,
+    "homeFirst": 52.9,
+    "awayFirst": 38.6,
+    "topScores": [
+      {
+        "score": "1-0",
+        "pct": 12.3
+      },
+      {
+        "score": "1-1",
+        "pct": 12.3
+      },
+      {
+        "score": "2-1",
+        "pct": 9
+      },
+      {
+        "score": "0-1",
+        "pct": 9
+      },
+      {
+        "score": "2-0",
+        "pct": 8.7
+      }
+    ],
+    "topScorers": [
+      {
+        "player": "N. Tresoldi",
+        "pct": 27.9
+      },
+      {
+        "player": "M. Diakhon",
+        "pct": 19.1
+      },
+      {
+        "player": "Carlos Forbs",
+        "pct": 19
+      },
+      {
+        "player": "N. Jackson",
+        "pct": 15
+      },
+      {
+        "player": "H. Vetlesen",
+        "pct": 12.2
+      }
+    ]
+  },
+  "scenario": {
+    "score": "1-2",
+    "goals": [
+      {
+        "minute": 21,
+        "player": "Theodore Carroll",
+        "side": "away"
+      },
+      {
+        "minute": 37,
+        "player": "N. Jackson",
+        "side": "away"
+      },
+      {
+        "minute": 73,
+        "player": "N. Tresoldi",
+        "side": "home"
+      }
+    ],
+    "timeline": [
+      {
+        "minute": 1,
+        "type": "kickoff",
+        "text": "Coup d’envoi."
+      },
+      {
+        "minute": 8,
+        "type": "domination",
+        "side": "home",
+        "text": "Club Brugge KV installe sa possession dans le camp adverse."
+      },
+      {
+        "minute": 14,
+        "type": "chance",
+        "side": "away",
+        "text": "Première transition dangereuse de Aston Villa, arrêt du gardien."
+      },
+      {
+        "minute": 21,
+        "type": "goal",
+        "side": "away",
+        "player": "Theodore Carroll",
+        "text": "BUT Aston Villa — Theodore Carroll."
+      },
+      {
+        "minute": 27,
+        "type": "chance",
+        "side": "home",
+        "text": "Grosse occasion pour Club Brugge KV, frappe repoussée."
+      },
+      {
+        "minute": 37,
+        "type": "goal",
+        "side": "away",
+        "player": "N. Jackson",
+        "text": "BUT Aston Villa — N. Jackson."
+      },
+      {
+        "minute": 45,
+        "type": "half-time",
+        "text": "Mi-temps — 0-2."
+      },
+      {
+        "minute": 55,
+        "type": "domination",
+        "side": "away",
+        "text": "Aston Villa augmente le rythme au retour des vestiaires."
+      },
+      {
+        "minute": 63,
+        "type": "substitution",
+        "text": "Premier changement tactique."
+      },
+      {
+        "minute": 72,
+        "type": "card",
+        "text": "Carton jaune après une transition stoppée."
+      },
+      {
+        "minute": 73,
+        "type": "goal",
+        "side": "home",
+        "player": "N. Tresoldi",
+        "text": "BUT Club Brugge KV — N. Tresoldi."
+      },
+      {
+        "minute": 84,
+        "type": "chance",
+        "text": "Dernière grosse occasion, le gardien intervient."
+      },
+      {
+        "minute": 90,
+        "type": "full-time",
+        "text": "Fin du match — 1-2."
+      }
+    ],
+    "stats": {
+      "possession": {
+        "home": 52,
+        "away": 48
+      },
+      "shots": {
+        "home": 13,
+        "away": 15
+      },
+      "shotsOnTarget": {
+        "home": 4,
+        "away": 4
+      },
+      "bigChances": {
+        "home": 2,
+        "away": 3
+      },
+      "corners": {
+        "home": 6,
+        "away": 5
+      },
+      "xg": {
+        "home": 1.37,
+        "away": 1.86
+      },
+      "fouls": {
+        "home": 11,
+        "away": 13
+      },
+      "yellowCards": {
+        "home": 2,
+        "away": 3
+      }
+    },
+    "manOfTheMatch": "N. Tresoldi"
+  },
+  "apiAudit": {
+    "retrievedAt": "2026-09-08T06:57:19.699Z",
+    "endpoints": [
+      {
+        "endpoint": "/fixtures?date=2026-09-08",
+        "available": true,
+        "cached": true
+      },
+      {
+        "endpoint": "/fixtures?team=569&last=10",
+        "available": true,
+        "cached": true
+      },
+      {
+        "endpoint": "/predictions?fixture=1635643",
+        "available": true,
+        "cached": true
+      },
+      {
+        "endpoint": "/fixtures/headtohead?h2h=569-66&last=10",
+        "available": true,
+        "cached": true
+      },
+      {
+        "endpoint": "/injuries?fixture=1635643",
+        "available": true,
+        "cached": true
+      },
+      {
+        "endpoint": "/fixtures?team=66&last=10",
+        "available": true,
+        "cached": true
+      },
+      {
+        "endpoint": "/teams/statistics?team=569&league=2&season=2026",
+        "available": false,
+        "cached": true
+      },
+      {
+        "endpoint": "/teams/statistics?team=66&league=2&season=2026",
+        "available": false,
+        "cached": true
+      },
+      {
+        "endpoint": "/players?team=66&season=2026",
+        "available": true,
+        "cached": true
+      },
+      {
+        "endpoint": "/fixtures/lineups?fixture=1635643",
+        "available": false,
+        "cached": false
+      },
+      {
+        "endpoint": "/players/squads?team=66",
+        "available": true,
+        "cached": false
+      },
+      {
+        "endpoint": "/players?team=569&season=2026",
+        "available": true,
+        "cached": false
+      },
+      {
+        "endpoint": "/odds?fixture=1635643",
+        "available": true,
+        "cached": false
+      }
+    ]
+  }
+}

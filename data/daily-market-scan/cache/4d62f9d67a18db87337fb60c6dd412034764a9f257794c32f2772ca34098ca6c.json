@@ -1,0 +1,168 @@
+{
+  "endpoint": "/fixtures",
+  "params": {
+    "league": 2,
+    "season": 2025,
+    "status": "FT-AET-PEN",
+    "team": 209
+  },
+  "retrieved_at": "2026-09-08T21:45:25Z",
+  "response_hash": "03c73f35b55ad2bae973ee3935a0b9936f4bc1a9d2ada52c69743d93c01342e7",
+  "response": {
+    "get": "fixtures",
+    "parameters": {
+      "league": "2",
+      "season": "2025",
+      "status": "FT-AET-PEN",
+      "team": "209"
+    },
+    "errors": [],
+    "results": 2,
+    "paging": {
+      "current": 1,
+      "total": 1
+    },
+    "response": [
+      {
+        "fixture": {
+          "id": 1414142,
+          "referee": "G. Nyberg",
+          "timezone": "UTC",
+          "date": "2025-08-06T19:00:00+00:00",
+          "timestamp": 1754506800,
+          "periods": {
+            "first": 1754506800,
+            "second": 1754510400
+          },
+          "venue": {
+            "id": null,
+            "name": "De Kuip",
+            "city": "Rotterdam"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 6
+          }
+        },
+        "league": {
+          "id": 2,
+          "name": "UEFA Champions League",
+          "country": "World",
+          "logo": "https://media.api-sports.io/football/leagues/2.png",
+          "flag": null,
+          "season": 2025,
+          "round": "3rd Qualifying Round",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 209,
+            "name": "Feyenoord",
+            "logo": "https://media.api-sports.io/football/teams/209.png",
+            "winner": true
+          },
+          "away": {
+            "id": 611,
+            "name": "Fenerbah\u00e7e",
+            "logo": "https://media.api-sports.io/football/teams/611.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 2,
+          "away": 1
+        },
+        "score": {
+          "halftime": {
+            "home": 1,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 2,
+            "away": 1
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1414144,
+          "referee": "I. Kovacs",
+          "timezone": "UTC",
+          "date": "2025-08-12T17:00:00+00:00",
+          "timestamp": 1755018000,
+          "periods": {
+            "first": 1755018000,
+            "second": 1755021600
+          },
+          "venue": {
+            "id": null,
+            "name": "Chobani Stadium Fenerbahce Sukru Saracoglu",
+            "city": "Istanbul"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 8
+          }
+        },
+        "league": {
+          "id": 2,
+          "name": "UEFA Champions League",
+          "country": "World",
+          "logo": "https://media.api-sports.io/football/leagues/2.png",
+          "flag": null,
+          "season": 2025,
+          "round": "3rd Qualifying Round",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 611,
+            "name": "Fenerbah\u00e7e",
+            "logo": "https://media.api-sports.io/football/teams/611.png",
+            "winner": true
+          },
+          "away": {
+            "id": 209,
+            "name": "Feyenoord",
+            "logo": "https://media.api-sports.io/football/teams/209.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 5,
+          "away": 2
+        },
+        "score": {
+          "halftime": {
+            "home": 2,
+            "away": 1
+          },
+          "fulltime": {
+            "home": 5,
+            "away": 2
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      }
+    ]
+  }
+}

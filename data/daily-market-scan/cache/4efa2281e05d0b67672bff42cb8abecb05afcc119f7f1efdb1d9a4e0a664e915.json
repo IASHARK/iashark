@@ -1,0 +1,96 @@
+{
+  "endpoint": "/fixtures",
+  "params": {
+    "last": 1,
+    "status": "FT-AET-PEN",
+    "team": 646
+  },
+  "retrieved_at": "2026-09-08T18:53:17Z",
+  "response_hash": "85f899203fa54118b2e8a60b47f1110446652ec99817be6ee87e0532d2f6a294",
+  "response": {
+    "get": "fixtures",
+    "parameters": {
+      "last": "1",
+      "status": "FT-AET-PEN",
+      "team": "646"
+    },
+    "errors": [],
+    "results": 1,
+    "paging": {
+      "current": 1,
+      "total": 1
+    },
+    "response": [
+      {
+        "fixture": {
+          "id": 1551098,
+          "referee": "Marijan Grebencharski, Bulgaria",
+          "timezone": "UTC",
+          "date": "2026-09-05T18:15:00+00:00",
+          "timestamp": 1788632100,
+          "periods": {
+            "first": null,
+            "second": null
+          },
+          "venue": {
+            "id": null,
+            "name": "Georgi Asparuhov Stadium",
+            "city": "Sofia"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": null
+          }
+        },
+        "league": {
+          "id": 172,
+          "name": "First League",
+          "country": "Bulgaria",
+          "logo": "https://media.api-sports.io/football/leagues/172.png",
+          "flag": "https://media.api-sports.io/flags/bg.svg",
+          "season": 2026,
+          "round": "Regular Season - 8",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 646,
+            "name": "Levski Sofia",
+            "logo": "https://media.api-sports.io/football/teams/646.png",
+            "winner": true
+          },
+          "away": {
+            "id": 1426,
+            "name": "CSKA 1948",
+            "logo": "https://media.api-sports.io/football/teams/1426.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 1,
+          "away": 0
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 1,
+            "away": 0
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      }
+    ]
+  }
+}

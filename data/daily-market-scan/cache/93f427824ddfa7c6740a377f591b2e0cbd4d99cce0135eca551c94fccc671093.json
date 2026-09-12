@@ -1,0 +1,96 @@
+{
+  "endpoint": "/fixtures",
+  "params": {
+    "last": 1,
+    "status": "FT-AET-PEN",
+    "team": 1602
+  },
+  "retrieved_at": "2026-09-08T16:04:22Z",
+  "response_hash": "2f42c798e76c17304b3476fc6866b5b35cec31a426fe160bd47fc5b7a711aa6a",
+  "response": {
+    "get": "fixtures",
+    "parameters": {
+      "last": "1",
+      "status": "FT-AET-PEN",
+      "team": "1602"
+    },
+    "errors": [],
+    "results": 1,
+    "paging": {
+      "current": 1,
+      "total": 1
+    },
+    "response": [
+      {
+        "fixture": {
+          "id": 1490444,
+          "referee": "Ricardo Fierro, USA",
+          "timezone": "UTC",
+          "date": "2026-09-06T00:30:00+00:00",
+          "timestamp": 1788654600,
+          "periods": {
+            "first": null,
+            "second": null
+          },
+          "venue": {
+            "id": null,
+            "name": "Lumen Field",
+            "city": "Seattle"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": null
+          }
+        },
+        "league": {
+          "id": 253,
+          "name": "Major League Soccer",
+          "country": "USA",
+          "logo": "https://media.api-sports.io/football/leagues/253.png",
+          "flag": "https://media.api-sports.io/flags/us.svg",
+          "season": 2026,
+          "round": "Regular Season - 23",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 1595,
+            "name": "Seattle Sounders",
+            "logo": "https://media.api-sports.io/football/teams/1595.png",
+            "winner": null
+          },
+          "away": {
+            "id": 1602,
+            "name": "New York Red Bulls",
+            "logo": "https://media.api-sports.io/football/teams/1602.png",
+            "winner": null
+          }
+        },
+        "goals": {
+          "home": 0,
+          "away": 0
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 0,
+            "away": 0
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      }
+    ]
+  }
+}

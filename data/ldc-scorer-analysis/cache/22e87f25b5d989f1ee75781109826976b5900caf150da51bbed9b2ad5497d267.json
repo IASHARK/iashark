@@ -1,0 +1,584 @@
+{
+  "endpoint": "/fixtures",
+  "params": {
+    "last": 8,
+    "team": 79
+  },
+  "retrieved_at": "2026-09-08T13:22:57Z",
+  "response_hash": "b49f54513e3491d9afacb0eb02ec5fa146e5da0e6808e09387414259eb52ef60",
+  "response": {
+    "get": "fixtures",
+    "parameters": {
+      "last": "8",
+      "team": "79"
+    },
+    "errors": [],
+    "results": 8,
+    "paging": {
+      "current": 1,
+      "total": 1
+    },
+    "response": [
+      {
+        "fixture": {
+          "id": 1552754,
+          "referee": "Mathieu Vernice, France",
+          "timezone": "UTC",
+          "date": "2026-09-03T18:45:00+00:00",
+          "timestamp": 1788461100,
+          "periods": {
+            "first": null,
+            "second": null
+          },
+          "venue": {
+            "id": 682,
+            "name": "Stadium de Toulouse",
+            "city": "Toulouse"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": null
+          }
+        },
+        "league": {
+          "id": 61,
+          "name": "Ligue 1",
+          "country": "France",
+          "logo": "https://media.api-sports.io/football/leagues/61.png",
+          "flag": "https://media.api-sports.io/flags/fr.svg",
+          "season": 2026,
+          "round": "Regular Season - 3",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 96,
+            "name": "Toulouse",
+            "logo": "https://media.api-sports.io/football/teams/96.png",
+            "winner": false
+          },
+          "away": {
+            "id": 79,
+            "name": "Lille",
+            "logo": "https://media.api-sports.io/football/teams/79.png",
+            "winner": true
+          }
+        },
+        "goals": {
+          "home": 0,
+          "away": 1
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 0,
+            "away": 1
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1552746,
+          "referee": "Eric Wattellier, France",
+          "timezone": "UTC",
+          "date": "2026-08-28T18:45:00+00:00",
+          "timestamp": 1787942700,
+          "periods": {
+            "first": 1787942700,
+            "second": 1787946300
+          },
+          "venue": {
+            "id": null,
+            "name": "Decathlon Arena - Stade Pierre Mauroy",
+            "city": "Lille"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": null
+          }
+        },
+        "league": {
+          "id": 61,
+          "name": "Ligue 1",
+          "country": "France",
+          "logo": "https://media.api-sports.io/football/leagues/61.png",
+          "flag": "https://media.api-sports.io/flags/fr.svg",
+          "season": 2026,
+          "round": "Regular Season - 2",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 79,
+            "name": "Lille",
+            "logo": "https://media.api-sports.io/football/teams/79.png",
+            "winner": null
+          },
+          "away": {
+            "id": 85,
+            "name": "Paris Saint Germain",
+            "logo": "https://media.api-sports.io/football/teams/85.png",
+            "winner": null
+          }
+        },
+        "goals": {
+          "home": 2,
+          "away": 2
+        },
+        "score": {
+          "halftime": {
+            "home": 1,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 2,
+            "away": 2
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1552729,
+          "referee": "Jeremy Stinat, France",
+          "timezone": "UTC",
+          "date": "2026-08-23T13:00:00+00:00",
+          "timestamp": 1787490000,
+          "periods": {
+            "first": 1787490000,
+            "second": 1787493600
+          },
+          "venue": {
+            "id": 634,
+            "name": "Stade Raymond-Kopa",
+            "city": "Angers"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 6
+          }
+        },
+        "league": {
+          "id": 61,
+          "name": "Ligue 1",
+          "country": "France",
+          "logo": "https://media.api-sports.io/football/leagues/61.png",
+          "flag": "https://media.api-sports.io/flags/fr.svg",
+          "season": 2026,
+          "round": "Regular Season - 1",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 77,
+            "name": "Angers",
+            "logo": "https://media.api-sports.io/football/teams/77.png",
+            "winner": false
+          },
+          "away": {
+            "id": 79,
+            "name": "Lille",
+            "logo": "https://media.api-sports.io/football/teams/79.png",
+            "winner": true
+          }
+        },
+        "goals": {
+          "home": 0,
+          "away": 2
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 2
+          },
+          "fulltime": {
+            "home": 0,
+            "away": 2
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1598618,
+          "referee": null,
+          "timezone": "UTC",
+          "date": "2026-08-15T14:00:00+00:00",
+          "timestamp": 1786802400,
+          "periods": {
+            "first": 1786802400,
+            "second": 1786806000
+          },
+          "venue": {
+            "id": null,
+            "name": "Hill Dickinson Stadium",
+            "city": "Liverpool"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 4
+          }
+        },
+        "league": {
+          "id": 667,
+          "name": "Friendlies Clubs",
+          "country": "World",
+          "logo": "https://media.api-sports.io/football/leagues/667.png",
+          "flag": null,
+          "season": 2026,
+          "round": "Club Friendlies",
+          "standings": false
+        },
+        "teams": {
+          "home": {
+            "id": 45,
+            "name": "Everton",
+            "logo": "https://media.api-sports.io/football/teams/45.png",
+            "winner": null
+          },
+          "away": {
+            "id": 79,
+            "name": "Lille",
+            "logo": "https://media.api-sports.io/football/teams/79.png",
+            "winner": null
+          }
+        },
+        "goals": {
+          "home": 1,
+          "away": 1
+        },
+        "score": {
+          "halftime": {
+            "home": 1,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 1,
+            "away": 1
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1604775,
+          "referee": null,
+          "timezone": "UTC",
+          "date": "2026-08-08T13:00:00+00:00",
+          "timestamp": 1786194000,
+          "periods": {
+            "first": 1786194000,
+            "second": 1786197600
+          },
+          "venue": {
+            "id": null,
+            "name": null,
+            "city": null
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": null
+          }
+        },
+        "league": {
+          "id": 667,
+          "name": "Friendlies Clubs",
+          "country": "World",
+          "logo": "https://media.api-sports.io/football/leagues/667.png",
+          "flag": null,
+          "season": 2026,
+          "round": "Club Friendlies",
+          "standings": false
+        },
+        "teams": {
+          "home": {
+            "id": 175,
+            "name": "Hamburger SV",
+            "logo": "https://media.api-sports.io/football/teams/175.png",
+            "winner": null
+          },
+          "away": {
+            "id": 79,
+            "name": "Lille",
+            "logo": "https://media.api-sports.io/football/teams/79.png",
+            "winner": null
+          }
+        },
+        "goals": {
+          "home": 2,
+          "away": 2
+        },
+        "score": {
+          "halftime": {
+            "home": null,
+            "away": null
+          },
+          "fulltime": {
+            "home": 2,
+            "away": 2
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1583577,
+          "referee": null,
+          "timezone": "UTC",
+          "date": "2026-08-01T15:00:00+00:00",
+          "timestamp": 1785596400,
+          "periods": {
+            "first": 1785596400,
+            "second": 1785600000
+          },
+          "venue": {
+            "id": null,
+            "name": null,
+            "city": null
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 3
+          }
+        },
+        "league": {
+          "id": 667,
+          "name": "Friendlies Clubs",
+          "country": "World",
+          "logo": "https://media.api-sports.io/football/leagues/667.png",
+          "flag": null,
+          "season": 2026,
+          "round": "Club Friendlies",
+          "standings": false
+        },
+        "teams": {
+          "home": {
+            "id": 260,
+            "name": "OH Leuven",
+            "logo": "https://media.api-sports.io/football/teams/260.png",
+            "winner": false
+          },
+          "away": {
+            "id": 79,
+            "name": "Lille",
+            "logo": "https://media.api-sports.io/football/teams/79.png",
+            "winner": true
+          }
+        },
+        "goals": {
+          "home": 3,
+          "away": 6
+        },
+        "score": {
+          "halftime": {
+            "home": 2,
+            "away": 2
+          },
+          "fulltime": {
+            "home": 3,
+            "away": 6
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1604495,
+          "referee": null,
+          "timezone": "UTC",
+          "date": "2026-07-25T15:00:00+00:00",
+          "timestamp": 1784991600,
+          "periods": {
+            "first": 1784991600,
+            "second": 1784995200
+          },
+          "venue": {
+            "id": null,
+            "name": null,
+            "city": null
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": null
+          }
+        },
+        "league": {
+          "id": 667,
+          "name": "Friendlies Clubs",
+          "country": "World",
+          "logo": "https://media.api-sports.io/football/leagues/667.png",
+          "flag": null,
+          "season": 2026,
+          "round": "Club Friendly",
+          "standings": false
+        },
+        "teams": {
+          "home": {
+            "id": 1393,
+            "name": "Union St. Gilloise",
+            "logo": "https://media.api-sports.io/football/teams/1393.png",
+            "winner": true
+          },
+          "away": {
+            "id": 79,
+            "name": "Lille",
+            "logo": "https://media.api-sports.io/football/teams/79.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 2,
+          "away": 1
+        },
+        "score": {
+          "halftime": {
+            "home": 1,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 2,
+            "away": 1
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1567683,
+          "referee": null,
+          "timezone": "UTC",
+          "date": "2026-07-18T15:00:00+00:00",
+          "timestamp": 1784386800,
+          "periods": {
+            "first": 1784386800,
+            "second": 1784390400
+          },
+          "venue": {
+            "id": null,
+            "name": null,
+            "city": null
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": null
+          }
+        },
+        "league": {
+          "id": 667,
+          "name": "Friendlies Clubs",
+          "country": "World",
+          "logo": "https://media.api-sports.io/football/leagues/667.png",
+          "flag": null,
+          "season": 2026,
+          "round": "Club Friendlies",
+          "standings": false
+        },
+        "teams": {
+          "home": {
+            "id": 79,
+            "name": "Lille",
+            "logo": "https://media.api-sports.io/football/teams/79.png",
+            "winner": true
+          },
+          "away": {
+            "id": 5902,
+            "name": "RAAL La Louvi\u00e8re",
+            "logo": "https://media.api-sports.io/football/teams/5902.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 3,
+          "away": 0
+        },
+        "score": {
+          "halftime": {
+            "home": 2,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 3,
+            "away": 0
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      }
+    ]
+  }
+}

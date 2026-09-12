@@ -1,0 +1,866 @@
+{
+  "endpoint": "/fixtures",
+  "params": {
+    "last": 12,
+    "status": "FT-AET-PEN",
+    "team": 1386
+  },
+  "retrieved_at": "2026-09-08T16:05:44Z",
+  "response_hash": "a955fc32dc8fab36cbbec7ae71a15e94fb307b0cd33939733d17755a2e8093c4",
+  "response": {
+    "get": "fixtures",
+    "parameters": {
+      "last": "12",
+      "status": "FT-AET-PEN",
+      "team": "1386"
+    },
+    "errors": [],
+    "results": 12,
+    "paging": {
+      "current": 1,
+      "total": 1
+    },
+    "response": [
+      {
+        "fixture": {
+          "id": 1556659,
+          "referee": "D. McFarlane",
+          "timezone": "UTC",
+          "date": "2026-09-05T14:00:00+00:00",
+          "timestamp": 1788616800,
+          "periods": {
+            "first": 1788616800,
+            "second": 1788620400
+          },
+          "venue": {
+            "id": 1388,
+            "name": "Tannadice Park",
+            "city": "Dundee"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": null
+          }
+        },
+        "league": {
+          "id": 179,
+          "name": "Premiership",
+          "country": "Scotland",
+          "logo": "https://media.api-sports.io/football/leagues/179.png",
+          "flag": "https://media.api-sports.io/flags/gb-sct.svg",
+          "season": 2026,
+          "round": "Regular Season - 6",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 1386,
+            "name": "Dundee Utd",
+            "logo": "https://media.api-sports.io/football/teams/1386.png",
+            "winner": null
+          },
+          "away": {
+            "id": 1389,
+            "name": "Falkirk",
+            "logo": "https://media.api-sports.io/football/teams/1389.png",
+            "winner": null
+          }
+        },
+        "goals": {
+          "home": 1,
+          "away": 1
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 1
+          },
+          "fulltime": {
+            "home": 1,
+            "away": 1
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1556657,
+          "referee": "C. Scott",
+          "timezone": "UTC",
+          "date": "2026-09-02T18:45:00+00:00",
+          "timestamp": 1788374700,
+          "periods": {
+            "first": 1788374700,
+            "second": 1788378300
+          },
+          "venue": {
+            "id": 1398,
+            "name": "Fir Park",
+            "city": "Motherwell"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": null
+          }
+        },
+        "league": {
+          "id": 179,
+          "name": "Premiership",
+          "country": "Scotland",
+          "logo": "https://media.api-sports.io/football/leagues/179.png",
+          "flag": "https://media.api-sports.io/flags/gb-sct.svg",
+          "season": 2026,
+          "round": "Regular Season - 5",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 256,
+            "name": "Motherwell",
+            "logo": "https://media.api-sports.io/football/teams/256.png",
+            "winner": true
+          },
+          "away": {
+            "id": 1386,
+            "name": "Dundee Utd",
+            "logo": "https://media.api-sports.io/football/teams/1386.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 3,
+          "away": 0
+        },
+        "score": {
+          "halftime": {
+            "home": 1,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 3,
+            "away": 0
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1556650,
+          "referee": "N. Walsh",
+          "timezone": "UTC",
+          "date": "2026-08-29T14:00:00+00:00",
+          "timestamp": 1788012000,
+          "periods": {
+            "first": 1788012000,
+            "second": 1788015600
+          },
+          "venue": {
+            "id": null,
+            "name": "Rugby Park",
+            "city": "Kilmarnock"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": null
+          }
+        },
+        "league": {
+          "id": 179,
+          "name": "Premiership",
+          "country": "Scotland",
+          "logo": "https://media.api-sports.io/football/leagues/179.png",
+          "flag": "https://media.api-sports.io/flags/gb-sct.svg",
+          "season": 2026,
+          "round": "Regular Season - 4",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 250,
+            "name": "Kilmarnock",
+            "logo": "https://media.api-sports.io/football/teams/250.png",
+            "winner": false
+          },
+          "away": {
+            "id": 1386,
+            "name": "Dundee Utd",
+            "logo": "https://media.api-sports.io/football/teams/1386.png",
+            "winner": true
+          }
+        },
+        "goals": {
+          "home": 0,
+          "away": 4
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 3
+          },
+          "fulltime": {
+            "home": 0,
+            "away": 4
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1556640,
+          "referee": "David Dickinson, Scotland",
+          "timezone": "UTC",
+          "date": "2026-08-22T16:45:00+00:00",
+          "timestamp": 1787417100,
+          "periods": {
+            "first": 1787417100,
+            "second": 1787420700
+          },
+          "venue": {
+            "id": 1388,
+            "name": "Tannadice Park",
+            "city": "Dundee"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 4
+          }
+        },
+        "league": {
+          "id": 179,
+          "name": "Premiership",
+          "country": "Scotland",
+          "logo": "https://media.api-sports.io/football/leagues/179.png",
+          "flag": "https://media.api-sports.io/flags/gb-sct.svg",
+          "season": 2026,
+          "round": "Regular Season - 3",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 1386,
+            "name": "Dundee Utd",
+            "logo": "https://media.api-sports.io/football/teams/1386.png",
+            "winner": false
+          },
+          "away": {
+            "id": 253,
+            "name": "Dundee",
+            "logo": "https://media.api-sports.io/football/teams/253.png",
+            "winner": true
+          }
+        },
+        "goals": {
+          "home": 0,
+          "away": 2
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 1
+          },
+          "fulltime": {
+            "home": 0,
+            "away": 2
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1603957,
+          "referee": "S. McLean",
+          "timezone": "UTC",
+          "date": "2026-08-15T16:45:00+00:00",
+          "timestamp": 1786812300,
+          "periods": {
+            "first": 1786812300,
+            "second": 1786815900
+          },
+          "venue": {
+            "id": 1388,
+            "name": "Tannadice Park",
+            "city": "Dundee"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 2
+          }
+        },
+        "league": {
+          "id": 185,
+          "name": "League Cup",
+          "country": "Scotland",
+          "logo": "https://media.api-sports.io/football/leagues/185.png",
+          "flag": "https://media.api-sports.io/flags/gb-sct.svg",
+          "season": 2026,
+          "round": "Round of 16",
+          "standings": false
+        },
+        "teams": {
+          "home": {
+            "id": 1386,
+            "name": "Dundee Utd",
+            "logo": "https://media.api-sports.io/football/teams/1386.png",
+            "winner": false
+          },
+          "away": {
+            "id": 247,
+            "name": "Celtic",
+            "logo": "https://media.api-sports.io/football/teams/247.png",
+            "winner": true
+          }
+        },
+        "goals": {
+          "home": 0,
+          "away": 4
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 2
+          },
+          "fulltime": {
+            "home": 0,
+            "away": 4
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1556635,
+          "referee": "K. Clancy",
+          "timezone": "UTC",
+          "date": "2026-08-09T14:00:00+00:00",
+          "timestamp": 1786284000,
+          "periods": {
+            "first": 1786284000,
+            "second": 1786287600
+          },
+          "venue": {
+            "id": 1393,
+            "name": "Tynecastle Park",
+            "city": "Edinburgh"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 3
+          }
+        },
+        "league": {
+          "id": 179,
+          "name": "Premiership",
+          "country": "Scotland",
+          "logo": "https://media.api-sports.io/football/leagues/179.png",
+          "flag": "https://media.api-sports.io/flags/gb-sct.svg",
+          "season": 2026,
+          "round": "Regular Season - 2",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 254,
+            "name": "Heart Of Midlothian",
+            "logo": "https://media.api-sports.io/football/teams/254.png",
+            "winner": true
+          },
+          "away": {
+            "id": 1386,
+            "name": "Dundee Utd",
+            "logo": "https://media.api-sports.io/football/teams/1386.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 4,
+          "away": 0
+        },
+        "score": {
+          "halftime": {
+            "home": 2,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 4,
+            "away": 0
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1556628,
+          "referee": "Nick Walsh, Scotland",
+          "timezone": "UTC",
+          "date": "2026-07-31T19:00:00+00:00",
+          "timestamp": 1785524400,
+          "periods": {
+            "first": 1785524400,
+            "second": 1785528000
+          },
+          "venue": {
+            "id": 1388,
+            "name": "Tannadice Park",
+            "city": "Dundee"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 4
+          }
+        },
+        "league": {
+          "id": 179,
+          "name": "Premiership",
+          "country": "Scotland",
+          "logo": "https://media.api-sports.io/football/leagues/179.png",
+          "flag": "https://media.api-sports.io/flags/gb-sct.svg",
+          "season": 2026,
+          "round": "Regular Season - 1",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 1386,
+            "name": "Dundee Utd",
+            "logo": "https://media.api-sports.io/football/teams/1386.png",
+            "winner": null
+          },
+          "away": {
+            "id": 257,
+            "name": "Rangers",
+            "logo": "https://media.api-sports.io/football/teams/257.png",
+            "winner": null
+          }
+        },
+        "goals": {
+          "home": 1,
+          "away": 1
+        },
+        "score": {
+          "halftime": {
+            "home": 1,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 1,
+            "away": 1
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1563038,
+          "referee": null,
+          "timezone": "UTC",
+          "date": "2026-07-25T14:00:00+00:00",
+          "timestamp": 1784988000,
+          "periods": {
+            "first": 1784988000,
+            "second": 1784991600
+          },
+          "venue": {
+            "id": null,
+            "name": null,
+            "city": null
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": null
+          }
+        },
+        "league": {
+          "id": 667,
+          "name": "Friendlies Clubs",
+          "country": "World",
+          "logo": "https://media.api-sports.io/football/leagues/667.png",
+          "flag": null,
+          "season": 2026,
+          "round": "Club Friendlies",
+          "standings": false
+        },
+        "teams": {
+          "home": {
+            "id": 1844,
+            "name": "Salford City",
+            "logo": "https://media.api-sports.io/football/teams/1844.png",
+            "winner": true
+          },
+          "away": {
+            "id": 1386,
+            "name": "Dundee Utd",
+            "logo": "https://media.api-sports.io/football/teams/1386.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 3,
+          "away": 2
+        },
+        "score": {
+          "halftime": {
+            "home": 2,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 3,
+            "away": 2
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1548155,
+          "referee": null,
+          "timezone": "UTC",
+          "date": "2026-07-21T18:45:00+00:00",
+          "timestamp": 1784659500,
+          "periods": {
+            "first": 1784659500,
+            "second": 1784663100
+          },
+          "venue": {
+            "id": 1388,
+            "name": "Tannadice Park",
+            "city": "Dundee"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 4
+          }
+        },
+        "league": {
+          "id": 185,
+          "name": "League Cup",
+          "country": "Scotland",
+          "logo": "https://media.api-sports.io/football/leagues/185.png",
+          "flag": "https://media.api-sports.io/flags/gb-sct.svg",
+          "season": 2026,
+          "round": "Group Stage",
+          "standings": false
+        },
+        "teams": {
+          "home": {
+            "id": 1386,
+            "name": "Dundee Utd",
+            "logo": "https://media.api-sports.io/football/teams/1386.png",
+            "winner": true
+          },
+          "away": {
+            "id": 6781,
+            "name": "Spartans",
+            "logo": "https://media.api-sports.io/football/teams/6781.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 4,
+          "away": 0
+        },
+        "score": {
+          "halftime": {
+            "home": 1,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 4,
+            "away": 0
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1548142,
+          "referee": null,
+          "timezone": "UTC",
+          "date": "2026-07-18T18:00:00+00:00",
+          "timestamp": 1784397600,
+          "periods": {
+            "first": 1784397600,
+            "second": 1784401200
+          },
+          "venue": {
+            "id": 1388,
+            "name": "Tannadice Park",
+            "city": "Dundee"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 3
+          }
+        },
+        "league": {
+          "id": 185,
+          "name": "League Cup",
+          "country": "Scotland",
+          "logo": "https://media.api-sports.io/football/leagues/185.png",
+          "flag": "https://media.api-sports.io/flags/gb-sct.svg",
+          "season": 2026,
+          "round": "Group Stage",
+          "standings": false
+        },
+        "teams": {
+          "home": {
+            "id": 1386,
+            "name": "Dundee Utd",
+            "logo": "https://media.api-sports.io/football/teams/1386.png",
+            "winner": true
+          },
+          "away": {
+            "id": 4249,
+            "name": "Arbroath",
+            "logo": "https://media.api-sports.io/football/teams/4249.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 3,
+          "away": 0
+        },
+        "score": {
+          "halftime": {
+            "home": 1,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 3,
+            "away": 0
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1548134,
+          "referee": null,
+          "timezone": "UTC",
+          "date": "2026-07-14T18:45:00+00:00",
+          "timestamp": 1784054700,
+          "periods": {
+            "first": 1784054700,
+            "second": 1784058300
+          },
+          "venue": {
+            "id": 3246,
+            "name": "Links Park",
+            "city": "Montrose"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": null
+          }
+        },
+        "league": {
+          "id": 185,
+          "name": "League Cup",
+          "country": "Scotland",
+          "logo": "https://media.api-sports.io/football/leagues/185.png",
+          "flag": "https://media.api-sports.io/flags/gb-sct.svg",
+          "season": 2026,
+          "round": "Group Stage",
+          "standings": false
+        },
+        "teams": {
+          "home": {
+            "id": 4251,
+            "name": "Montrose",
+            "logo": "https://media.api-sports.io/football/teams/4251.png",
+            "winner": true
+          },
+          "away": {
+            "id": 1386,
+            "name": "Dundee Utd",
+            "logo": "https://media.api-sports.io/football/teams/1386.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 1,
+          "away": 0
+        },
+        "score": {
+          "halftime": {
+            "home": 1,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 1,
+            "away": 0
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1548119,
+          "referee": null,
+          "timezone": "UTC",
+          "date": "2026-07-11T16:30:00+00:00",
+          "timestamp": 1783787400,
+          "periods": {
+            "first": 1783787400,
+            "second": 1783791000
+          },
+          "venue": {
+            "id": 3520,
+            "name": "Forthbank Stadium",
+            "city": "Stirling"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 6
+          }
+        },
+        "league": {
+          "id": 185,
+          "name": "League Cup",
+          "country": "Scotland",
+          "logo": "https://media.api-sports.io/football/leagues/185.png",
+          "flag": "https://media.api-sports.io/flags/gb-sct.svg",
+          "season": 2026,
+          "round": "Group Stage",
+          "standings": false
+        },
+        "teams": {
+          "home": {
+            "id": 4669,
+            "name": "Stirling Albion",
+            "logo": "https://media.api-sports.io/football/teams/4669.png",
+            "winner": false
+          },
+          "away": {
+            "id": 1386,
+            "name": "Dundee Utd",
+            "logo": "https://media.api-sports.io/football/teams/1386.png",
+            "winner": true
+          }
+        },
+        "goals": {
+          "home": 0,
+          "away": 1
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 0,
+            "away": 1
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      }
+    ]
+  }
+}

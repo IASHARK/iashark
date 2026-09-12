@@ -1,0 +1,96 @@
+{
+  "endpoint": "/fixtures",
+  "params": {
+    "last": 1,
+    "status": "FT-AET-PEN",
+    "team": 488
+  },
+  "retrieved_at": "2026-09-08T15:57:38Z",
+  "response_hash": "d4fe52beb21346b1deecbaf37252a599a5f4ab3f52b8235505f305087d444ded",
+  "response": {
+    "get": "fixtures",
+    "parameters": {
+      "last": "1",
+      "status": "FT-AET-PEN",
+      "team": "488"
+    },
+    "errors": [],
+    "results": 1,
+    "paging": {
+      "current": 1,
+      "total": 1
+    },
+    "response": [
+      {
+        "fixture": {
+          "id": 1550108,
+          "referee": "Marco Di Bello, Italy",
+          "timezone": "UTC",
+          "date": "2026-09-06T16:00:00+00:00",
+          "timestamp": 1788710400,
+          "periods": {
+            "first": null,
+            "second": null
+          },
+          "venue": {
+            "id": null,
+            "name": "Renato Dall'Ara",
+            "city": "Bologna"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": null
+          }
+        },
+        "league": {
+          "id": 135,
+          "name": "Serie A",
+          "country": "Italy",
+          "logo": "https://media.api-sports.io/football/leagues/135.png",
+          "flag": "https://media.api-sports.io/flags/it.svg",
+          "season": 2026,
+          "round": "Regular Season - 3",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 500,
+            "name": "Bologna",
+            "logo": "https://media.api-sports.io/football/teams/500.png",
+            "winner": null
+          },
+          "away": {
+            "id": 488,
+            "name": "Sassuolo",
+            "logo": "https://media.api-sports.io/football/teams/488.png",
+            "winner": null
+          }
+        },
+        "goals": {
+          "home": 2,
+          "away": 2
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 1
+          },
+          "fulltime": {
+            "home": 2,
+            "away": 2
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      }
+    ]
+  }
+}

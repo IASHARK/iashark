@@ -1,0 +1,362 @@
+{
+  "endpoint": "/teams/statistics",
+  "params": {
+    "league": 307,
+    "season": 2025,
+    "team": 10511
+  },
+  "retrieved_at": "2026-09-06T22:27:11Z",
+  "response_hash": "aaebe650fde3638e6f156eee22050e95ddfa3be60520fa2c8e6edc5d75dbc409",
+  "response": {
+    "get": "teams/statistics",
+    "parameters": {
+      "league": "307",
+      "season": "2025",
+      "team": "10511"
+    },
+    "errors": [],
+    "results": 11,
+    "paging": {
+      "current": 1,
+      "total": 1
+    },
+    "response": {
+      "league": {
+        "id": 307,
+        "name": "Pro League",
+        "country": "Saudi-Arabia",
+        "logo": "https://media.api-sports.io/football/leagues/307.png",
+        "flag": "https://media.api-sports.io/flags/sa.svg",
+        "season": 2025
+      },
+      "team": {
+        "id": 10511,
+        "name": "Al Riyadh",
+        "logo": "https://media.api-sports.io/football/teams/10511.png"
+      },
+      "form": "LWLLLWDDLLLLDLLDDDLLDWLLLWDWLLLWDW",
+      "fixtures": {
+        "played": {
+          "home": 17,
+          "away": 17,
+          "total": 34
+        },
+        "wins": {
+          "home": 5,
+          "away": 2,
+          "total": 7
+        },
+        "draws": {
+          "home": 5,
+          "away": 4,
+          "total": 9
+        },
+        "loses": {
+          "home": 7,
+          "away": 11,
+          "total": 18
+        }
+      },
+      "goals": {
+        "for": {
+          "total": {
+            "home": 17,
+            "away": 18,
+            "total": 35
+          },
+          "average": {
+            "home": "1.0",
+            "away": "1.1",
+            "total": "1.0"
+          },
+          "minute": {
+            "0-15": {
+              "total": 4,
+              "percentage": "11.11%"
+            },
+            "16-30": {
+              "total": 6,
+              "percentage": "16.67%"
+            },
+            "31-45": {
+              "total": 6,
+              "percentage": "16.67%"
+            },
+            "46-60": {
+              "total": 6,
+              "percentage": "16.67%"
+            },
+            "61-75": {
+              "total": 4,
+              "percentage": "11.11%"
+            },
+            "76-90": {
+              "total": 10,
+              "percentage": "27.78%"
+            },
+            "91-105": {
+              "total": null,
+              "percentage": null
+            },
+            "106-120": {
+              "total": null,
+              "percentage": null
+            }
+          },
+          "under_over": {
+            "0.5": {
+              "over": 26,
+              "under": 8
+            },
+            "1.5": {
+              "over": 7,
+              "under": 27
+            },
+            "2.5": {
+              "over": 2,
+              "under": 32
+            },
+            "3.5": {
+              "over": 0,
+              "under": 34
+            },
+            "4.5": {
+              "over": 0,
+              "under": 34
+            }
+          }
+        },
+        "against": {
+          "total": {
+            "home": 23,
+            "away": 40,
+            "total": 63
+          },
+          "average": {
+            "home": "1.4",
+            "away": "2.4",
+            "total": "1.9"
+          },
+          "minute": {
+            "0-15": {
+              "total": 11,
+              "percentage": "17.74%"
+            },
+            "16-30": {
+              "total": 10,
+              "percentage": "16.13%"
+            },
+            "31-45": {
+              "total": 8,
+              "percentage": "12.90%"
+            },
+            "46-60": {
+              "total": 12,
+              "percentage": "19.35%"
+            },
+            "61-75": {
+              "total": 7,
+              "percentage": "11.29%"
+            },
+            "76-90": {
+              "total": 14,
+              "percentage": "22.58%"
+            },
+            "91-105": {
+              "total": null,
+              "percentage": null
+            },
+            "106-120": {
+              "total": null,
+              "percentage": null
+            }
+          },
+          "under_over": {
+            "0.5": {
+              "over": 30,
+              "under": 4
+            },
+            "1.5": {
+              "over": 17,
+              "under": 17
+            },
+            "2.5": {
+              "over": 10,
+              "under": 24
+            },
+            "3.5": {
+              "over": 5,
+              "under": 29
+            },
+            "4.5": {
+              "over": 1,
+              "under": 33
+            }
+          }
+        }
+      },
+      "biggest": {
+        "streak": {
+          "wins": 1,
+          "draws": 3,
+          "loses": 4
+        },
+        "wins": {
+          "home": "3-1",
+          "away": "0-2"
+        },
+        "loses": {
+          "home": "0-4",
+          "away": "5-1"
+        },
+        "goals": {
+          "for": {
+            "home": 3,
+            "away": 3
+          },
+          "against": {
+            "home": 4,
+            "away": 5
+          }
+        }
+      },
+      "clean_sheet": {
+        "home": 3,
+        "away": 1,
+        "total": 4
+      },
+      "failed_to_score": {
+        "home": 4,
+        "away": 4,
+        "total": 8
+      },
+      "penalty": {
+        "scored": {
+          "total": 3,
+          "percentage": "100.00%"
+        },
+        "missed": {
+          "total": 0,
+          "percentage": "0%"
+        },
+        "total": 3
+      },
+      "lineups": [
+        {
+          "formation": "4-2-3-1",
+          "played": 7
+        },
+        {
+          "formation": "4-1-4-1",
+          "played": 6
+        },
+        {
+          "formation": "5-4-1",
+          "played": 5
+        },
+        {
+          "formation": "4-4-2",
+          "played": 5
+        },
+        {
+          "formation": "4-3-3",
+          "played": 4
+        },
+        {
+          "formation": "5-3-2",
+          "played": 2
+        },
+        {
+          "formation": "3-5-2",
+          "played": 1
+        },
+        {
+          "formation": "4-5-1",
+          "played": 1
+        },
+        {
+          "formation": "3-4-3",
+          "played": 1
+        },
+        {
+          "formation": "3-4-1-2",
+          "played": 1
+        },
+        {
+          "formation": "4-4-1-1",
+          "played": 1
+        }
+      ],
+      "cards": {
+        "yellow": {
+          "0-15": {
+            "total": 5,
+            "percentage": "7.69%"
+          },
+          "16-30": {
+            "total": 12,
+            "percentage": "18.46%"
+          },
+          "31-45": {
+            "total": 4,
+            "percentage": "6.15%"
+          },
+          "46-60": {
+            "total": 9,
+            "percentage": "13.85%"
+          },
+          "61-75": {
+            "total": 7,
+            "percentage": "10.77%"
+          },
+          "76-90": {
+            "total": 21,
+            "percentage": "32.31%"
+          },
+          "91-105": {
+            "total": 7,
+            "percentage": "10.77%"
+          },
+          "106-120": {
+            "total": null,
+            "percentage": null
+          }
+        },
+        "red": {
+          "0-15": {
+            "total": null,
+            "percentage": null
+          },
+          "16-30": {
+            "total": null,
+            "percentage": null
+          },
+          "31-45": {
+            "total": null,
+            "percentage": null
+          },
+          "46-60": {
+            "total": 1,
+            "percentage": "25.00%"
+          },
+          "61-75": {
+            "total": null,
+            "percentage": null
+          },
+          "76-90": {
+            "total": null,
+            "percentage": null
+          },
+          "91-105": {
+            "total": 3,
+            "percentage": "75.00%"
+          },
+          "106-120": {
+            "total": null,
+            "percentage": null
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,96 @@
+{
+  "endpoint": "/fixtures",
+  "params": {
+    "last": 1,
+    "status": "FT-AET-PEN",
+    "team": 110
+  },
+  "retrieved_at": "2026-09-08T15:25:33Z",
+  "response_hash": "6c506cbc54fe2944d4025d14ebfe47ccc1a73c3f4f8f2b85de7eeb9aa97d429b",
+  "response": {
+    "get": "fixtures",
+    "parameters": {
+      "last": "1",
+      "status": "FT-AET-PEN",
+      "team": "110"
+    },
+    "errors": [],
+    "results": 1,
+    "paging": {
+      "current": 1,
+      "total": 1
+    },
+    "response": [
+      {
+        "fixture": {
+          "id": 1552755,
+          "referee": "Guillaume Paradis, France",
+          "timezone": "UTC",
+          "date": "2026-09-06T13:00:00+00:00",
+          "timestamp": 1788699600,
+          "periods": {
+            "first": null,
+            "second": null
+          },
+          "venue": {
+            "id": 684,
+            "name": "Stade de l'Aube",
+            "city": "Troyes"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": null
+          }
+        },
+        "league": {
+          "id": 61,
+          "name": "Ligue 1",
+          "country": "France",
+          "logo": "https://media.api-sports.io/football/leagues/61.png",
+          "flag": "https://media.api-sports.io/flags/fr.svg",
+          "season": 2026,
+          "round": "Regular Season - 3",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 110,
+            "name": "Estac Troyes",
+            "logo": "https://media.api-sports.io/football/teams/110.png",
+            "winner": false
+          },
+          "away": {
+            "id": 95,
+            "name": "Strasbourg",
+            "logo": "https://media.api-sports.io/football/teams/95.png",
+            "winner": true
+          }
+        },
+        "goals": {
+          "home": 2,
+          "away": 6
+        },
+        "score": {
+          "halftime": {
+            "home": 1,
+            "away": 2
+          },
+          "fulltime": {
+            "home": 2,
+            "away": 6
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      }
+    ]
+  }
+}

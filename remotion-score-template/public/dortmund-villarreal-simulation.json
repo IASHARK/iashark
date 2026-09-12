@@ -1,0 +1,311 @@
+{
+  "match": {
+    "fixtureId": 1635652,
+    "date": "2026-09-08T19:00:00+00:00",
+    "venue": {
+      "id": null,
+      "name": "Signal Iduna Park",
+      "city": "Dortmund"
+    },
+    "league": {
+      "id": 2,
+      "name": "UEFA Champions League",
+      "country": "World",
+      "logo": "https://media.api-sports.io/football/leagues/2.png",
+      "flag": null,
+      "season": 2026,
+      "round": "League Stage - 1",
+      "standings": true
+    },
+    "home": {
+      "id": 165,
+      "name": "Borussia Dortmund",
+      "logo": "https://media.api-sports.io/football/teams/165.png",
+      "winner": null
+    },
+    "away": {
+      "id": 533,
+      "name": "Villarreal",
+      "logo": "https://media.api-sports.io/football/teams/533.png",
+      "winner": null
+    }
+  },
+  "realData": {
+    "recentMatches": {
+      "home": 10,
+      "away": 10
+    },
+    "injuries": 18,
+    "lineups": "estimated-or-unavailable"
+  },
+  "model": {
+    "strength": {
+      "homeLambda": 1.553545,
+      "awayLambda": 1.0562496000000001,
+      "evidence": [
+        "Forme récente: 2.10 vs 1.70 buts/match",
+        "Défenses: 1.20 vs 1.40 encaissés/match",
+        "Signal API-Sports Predictions pondéré",
+        "18 absence(s) API détectée(s)"
+      ]
+    },
+    "disclaimer": "Prédiction statistique, pas un résultat réel."
+  },
+  "aggregates": {
+    "simulations": 50000,
+    "homeWin": 48.7,
+    "draw": 25.5,
+    "awayWin": 25.9,
+    "btts": 51.5,
+    "over25": 48.4,
+    "under25": 51.6,
+    "homeFirst": 55.3,
+    "awayFirst": 37.4,
+    "topScores": [
+      {
+        "score": "1-1",
+        "pct": 12.1
+      },
+      {
+        "score": "1-0",
+        "pct": 11.3
+      },
+      {
+        "score": "2-1",
+        "pct": 9.3
+      },
+      {
+        "score": "2-0",
+        "pct": 9
+      },
+      {
+        "score": "0-1",
+        "pct": 7.8
+      }
+    ],
+    "topScorers": [
+      {
+        "player": "Fábio Silva",
+        "pct": 20.5
+      },
+      {
+        "player": "K. Karetsas",
+        "pct": 15.6
+      },
+      {
+        "player": "G. Mikautadze",
+        "pct": 15
+      },
+      {
+        "player": "S. Guirassy",
+        "pct": 14.4
+      },
+      {
+        "player": "Gerard Moreno",
+        "pct": 12.5
+      }
+    ]
+  },
+  "scenario": {
+    "score": "3-0",
+    "goals": [
+      {
+        "minute": 18,
+        "player": "M. Albert",
+        "side": "home"
+      },
+      {
+        "minute": 44,
+        "player": "Fábio Silva",
+        "side": "home"
+      },
+      {
+        "minute": 72,
+        "player": "Fábio Silva",
+        "side": "home"
+      }
+    ],
+    "timeline": [
+      {
+        "minute": 1,
+        "type": "kickoff",
+        "text": "Coup d’envoi."
+      },
+      {
+        "minute": 8,
+        "type": "domination",
+        "side": "home",
+        "text": "Borussia Dortmund installe sa possession dans le camp adverse."
+      },
+      {
+        "minute": 14,
+        "type": "chance",
+        "side": "away",
+        "text": "Première transition dangereuse de Villarreal, arrêt du gardien."
+      },
+      {
+        "minute": 18,
+        "type": "goal",
+        "side": "home",
+        "player": "M. Albert",
+        "text": "BUT Borussia Dortmund — M. Albert."
+      },
+      {
+        "minute": 27,
+        "type": "chance",
+        "side": "home",
+        "text": "Grosse occasion pour Borussia Dortmund, frappe repoussée."
+      },
+      {
+        "minute": 44,
+        "type": "goal",
+        "side": "home",
+        "player": "Fábio Silva",
+        "text": "BUT Borussia Dortmund — Fábio Silva."
+      },
+      {
+        "minute": 45,
+        "type": "half-time",
+        "text": "Mi-temps — 2-0."
+      },
+      {
+        "minute": 55,
+        "type": "domination",
+        "side": "away",
+        "text": "Villarreal augmente le rythme au retour des vestiaires."
+      },
+      {
+        "minute": 63,
+        "type": "substitution",
+        "text": "Premier changement tactique."
+      },
+      {
+        "minute": 72,
+        "type": "goal",
+        "side": "home",
+        "player": "Fábio Silva",
+        "text": "BUT Borussia Dortmund — Fábio Silva."
+      },
+      {
+        "minute": 72,
+        "type": "card",
+        "text": "Carton jaune après une transition stoppée."
+      },
+      {
+        "minute": 84,
+        "type": "chance",
+        "text": "Dernière grosse occasion, le gardien intervient."
+      },
+      {
+        "minute": 90,
+        "type": "full-time",
+        "text": "Fin du match — 3-0."
+      }
+    ],
+    "stats": {
+      "possession": {
+        "home": 52,
+        "away": 48
+      },
+      "shots": {
+        "home": 19,
+        "away": 9
+      },
+      "shotsOnTarget": {
+        "home": 6,
+        "away": 2
+      },
+      "bigChances": {
+        "home": 4,
+        "away": 1
+      },
+      "corners": {
+        "home": 6,
+        "away": 5
+      },
+      "xg": {
+        "home": 2.61,
+        "away": 0.62
+      },
+      "fouls": {
+        "home": 11,
+        "away": 13
+      },
+      "yellowCards": {
+        "home": 2,
+        "away": 3
+      }
+    },
+    "manOfTheMatch": "Fábio Silva"
+  },
+  "apiAudit": {
+    "retrievedAt": "2026-09-08T06:57:20.117Z",
+    "endpoints": [
+      {
+        "endpoint": "/fixtures?date=2026-09-08",
+        "available": true,
+        "cached": true
+      },
+      {
+        "endpoint": "/fixtures/headtohead?h2h=165-533&last=10",
+        "available": true,
+        "cached": true
+      },
+      {
+        "endpoint": "/fixtures?team=533&last=10",
+        "available": true,
+        "cached": true
+      },
+      {
+        "endpoint": "/fixtures?team=165&last=10",
+        "available": true,
+        "cached": true
+      },
+      {
+        "endpoint": "/injuries?fixture=1635652",
+        "available": true,
+        "cached": true
+      },
+      {
+        "endpoint": "/teams/statistics?team=533&league=2&season=2026",
+        "available": false,
+        "cached": true
+      },
+      {
+        "endpoint": "/players?team=533&season=2026",
+        "available": true,
+        "cached": true
+      },
+      {
+        "endpoint": "/players/squads?team=165",
+        "available": true,
+        "cached": true
+      },
+      {
+        "endpoint": "/players/squads?team=533",
+        "available": true,
+        "cached": true
+      },
+      {
+        "endpoint": "/odds?fixture=1635652",
+        "available": true,
+        "cached": true
+      },
+      {
+        "endpoint": "/predictions?fixture=1635652",
+        "available": true,
+        "cached": false
+      },
+      {
+        "endpoint": "/teams/statistics?team=165&league=2&season=2026",
+        "available": false,
+        "cached": false
+      },
+      {
+        "endpoint": "/players?team=165&season=2026",
+        "available": true,
+        "cached": false
+      }
+    ]
+  }
+}

@@ -1,0 +1,378 @@
+{
+  "endpoint": "/fixtures",
+  "params": {
+    "league": 88,
+    "season": 2026,
+    "status": "FT-AET-PEN",
+    "team": 420
+  },
+  "retrieved_at": "2026-09-08T16:01:20Z",
+  "response_hash": "b2e765a5010c64920cbb1886fc5127563548d88e89f0a696c2f661c2a3aa02b7",
+  "response": {
+    "get": "fixtures",
+    "parameters": {
+      "league": "88",
+      "season": "2026",
+      "status": "FT-AET-PEN",
+      "team": "420"
+    },
+    "errors": [],
+    "results": 5,
+    "paging": {
+      "current": 1,
+      "total": 1
+    },
+    "response": [
+      {
+        "fixture": {
+          "id": 1552117,
+          "referee": "Allard Lindhout, Netherlands",
+          "timezone": "UTC",
+          "date": "2026-08-07T18:00:00+00:00",
+          "timestamp": 1786125600,
+          "periods": {
+            "first": 1786125600,
+            "second": 1786129200
+          },
+          "venue": {
+            "id": 22721,
+            "name": "Kooi Stadion",
+            "city": "Leeuwarden"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 4
+          }
+        },
+        "league": {
+          "id": 88,
+          "name": "Eredivisie",
+          "country": "Netherlands",
+          "logo": "https://media.api-sports.io/football/leagues/88.png",
+          "flag": "https://media.api-sports.io/flags/nl.svg",
+          "season": 2026,
+          "round": "Regular Season - 1",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 420,
+            "name": "Cambuur",
+            "logo": "https://media.api-sports.io/football/teams/420.png",
+            "winner": false
+          },
+          "away": {
+            "id": 196,
+            "name": "Excelsior",
+            "logo": "https://media.api-sports.io/football/teams/196.png",
+            "winner": true
+          }
+        },
+        "goals": {
+          "home": 0,
+          "away": 4
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 3
+          },
+          "fulltime": {
+            "home": 0,
+            "away": 4
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1552130,
+          "referee": "Martin Van den Kerkhof, Netherlands",
+          "timezone": "UTC",
+          "date": "2026-08-15T19:00:00+00:00",
+          "timestamp": 1786820400,
+          "periods": {
+            "first": 1786820400,
+            "second": 1786824000
+          },
+          "venue": {
+            "id": 1129,
+            "name": "Fortuna Sittard Stadion",
+            "city": "Sitard"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 7
+          }
+        },
+        "league": {
+          "id": 88,
+          "name": "Eredivisie",
+          "country": "Netherlands",
+          "logo": "https://media.api-sports.io/football/leagues/88.png",
+          "flag": "https://media.api-sports.io/flags/nl.svg",
+          "season": 2026,
+          "round": "Regular Season - 2",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 205,
+            "name": "Fortuna Sittard",
+            "logo": "https://media.api-sports.io/football/teams/205.png",
+            "winner": true
+          },
+          "away": {
+            "id": 420,
+            "name": "Cambuur",
+            "logo": "https://media.api-sports.io/football/teams/420.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 3,
+          "away": 1
+        },
+        "score": {
+          "halftime": {
+            "home": 2,
+            "away": 1
+          },
+          "fulltime": {
+            "home": 3,
+            "away": 1
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1552141,
+          "referee": "Danny Makkelie, Netherlands",
+          "timezone": "UTC",
+          "date": "2026-08-23T15:15:00+00:00",
+          "timestamp": 1787498100,
+          "periods": {
+            "first": 1787498100,
+            "second": 1787501700
+          },
+          "venue": {
+            "id": 22721,
+            "name": "Kooi Stadion",
+            "city": "Leeuwarden"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 3
+          }
+        },
+        "league": {
+          "id": 88,
+          "name": "Eredivisie",
+          "country": "Netherlands",
+          "logo": "https://media.api-sports.io/football/leagues/88.png",
+          "flag": "https://media.api-sports.io/flags/nl.svg",
+          "season": 2026,
+          "round": "Regular Season - 3",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 420,
+            "name": "Cambuur",
+            "logo": "https://media.api-sports.io/football/teams/420.png",
+            "winner": false
+          },
+          "away": {
+            "id": 209,
+            "name": "Feyenoord",
+            "logo": "https://media.api-sports.io/football/teams/209.png",
+            "winner": true
+          }
+        },
+        "goals": {
+          "home": 2,
+          "away": 5
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 4
+          },
+          "fulltime": {
+            "home": 2,
+            "away": 5
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1552152,
+          "referee": "Erwin Blank, Netherlands",
+          "timezone": "UTC",
+          "date": "2026-08-30T18:00:00+00:00",
+          "timestamp": 1788112800,
+          "periods": {
+            "first": 1788112800,
+            "second": 1788116400
+          },
+          "venue": {
+            "id": 22721,
+            "name": "Kooi Stadion",
+            "city": "Leeuwarden"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 2
+          }
+        },
+        "league": {
+          "id": 88,
+          "name": "Eredivisie",
+          "country": "Netherlands",
+          "logo": "https://media.api-sports.io/football/leagues/88.png",
+          "flag": "https://media.api-sports.io/flags/nl.svg",
+          "season": 2026,
+          "round": "Regular Season - 4",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 420,
+            "name": "Cambuur",
+            "logo": "https://media.api-sports.io/football/teams/420.png",
+            "winner": false
+          },
+          "away": {
+            "id": 415,
+            "name": "Twente",
+            "logo": "https://media.api-sports.io/football/teams/415.png",
+            "winner": true
+          }
+        },
+        "goals": {
+          "home": 1,
+          "away": 4
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 2
+          },
+          "fulltime": {
+            "home": 1,
+            "away": 4
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1552160,
+          "referee": "Joey Kooij, Netherlands",
+          "timezone": "UTC",
+          "date": "2026-09-06T12:30:00+00:00",
+          "timestamp": 1788697800,
+          "periods": {
+            "first": null,
+            "second": null
+          },
+          "venue": {
+            "id": null,
+            "name": "BUKO Stadion",
+            "city": "Velsen"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": null
+          }
+        },
+        "league": {
+          "id": 88,
+          "name": "Eredivisie",
+          "country": "Netherlands",
+          "logo": "https://media.api-sports.io/football/leagues/88.png",
+          "flag": "https://media.api-sports.io/flags/nl.svg",
+          "season": 2026,
+          "round": "Regular Season - 5",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 427,
+            "name": "Telstar",
+            "logo": "https://media.api-sports.io/football/teams/427.png",
+            "winner": null
+          },
+          "away": {
+            "id": 420,
+            "name": "Cambuur",
+            "logo": "https://media.api-sports.io/football/teams/420.png",
+            "winner": null
+          }
+        },
+        "goals": {
+          "home": 2,
+          "away": 2
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 2,
+            "away": 2
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      }
+    ]
+  }
+}

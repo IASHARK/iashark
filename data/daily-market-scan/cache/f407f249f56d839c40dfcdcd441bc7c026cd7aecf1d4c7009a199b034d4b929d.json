@@ -1,0 +1,96 @@
+{
+  "endpoint": "/fixtures",
+  "params": {
+    "last": 1,
+    "status": "FT-AET-PEN",
+    "team": 1612
+  },
+  "retrieved_at": "2026-09-08T15:26:43Z",
+  "response_hash": "66751e475477ed28142c26a7bf0708fafcb41ebb60bd9f849a7d819a09948848",
+  "response": {
+    "get": "fixtures",
+    "parameters": {
+      "last": "1",
+      "status": "FT-AET-PEN",
+      "team": "1612"
+    },
+    "errors": [],
+    "results": 1,
+    "paging": {
+      "current": 1,
+      "total": 1
+    },
+    "response": [
+      {
+        "fixture": {
+          "id": 1490450,
+          "referee": "Filip Dujic, Canada",
+          "timezone": "UTC",
+          "date": "2026-09-06T02:30:00+00:00",
+          "timestamp": 1788661800,
+          "periods": {
+            "first": null,
+            "second": null
+          },
+          "venue": {
+            "id": null,
+            "name": "Providence Park",
+            "city": "Portland"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": null
+          }
+        },
+        "league": {
+          "id": 253,
+          "name": "Major League Soccer",
+          "country": "USA",
+          "logo": "https://media.api-sports.io/football/leagues/253.png",
+          "flag": "https://media.api-sports.io/flags/us.svg",
+          "season": 2026,
+          "round": "Regular Season - 23",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 1617,
+            "name": "Portland Timbers",
+            "logo": "https://media.api-sports.io/football/teams/1617.png",
+            "winner": true
+          },
+          "away": {
+            "id": 1612,
+            "name": "Minnesota United FC",
+            "logo": "https://media.api-sports.io/football/teams/1612.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 5,
+          "away": 4
+        },
+        "score": {
+          "halftime": {
+            "home": 3,
+            "away": 2
+          },
+          "fulltime": {
+            "home": 5,
+            "away": 4
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      }
+    ]
+  }
+}

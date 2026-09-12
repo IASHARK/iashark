@@ -1,0 +1,318 @@
+{
+  "match": {
+    "fixtureId": 1635714,
+    "date": "2026-09-08T19:00:00+00:00",
+    "venue": {
+      "id": null,
+      "name": null,
+      "city": "Madrid"
+    },
+    "league": {
+      "id": 2,
+      "name": "UEFA Champions League",
+      "country": "World",
+      "logo": "https://media.api-sports.io/football/leagues/2.png",
+      "flag": null,
+      "season": 2026,
+      "round": "League Stage - 1",
+      "standings": true
+    },
+    "home": {
+      "id": 541,
+      "name": "Real Madrid",
+      "logo": "https://media.api-sports.io/football/teams/541.png",
+      "winner": null
+    },
+    "away": {
+      "id": 505,
+      "name": "Inter",
+      "logo": "https://media.api-sports.io/football/teams/505.png",
+      "winner": null
+    }
+  },
+  "realData": {
+    "recentMatches": {
+      "home": 10,
+      "away": 10
+    },
+    "injuries": 20,
+    "lineups": "estimated-or-unavailable"
+  },
+  "model": {
+    "strength": {
+      "homeLambda": 1.7297500000000001,
+      "awayLambda": 1.009664,
+      "evidence": [
+        "Forme récente: 2.60 vs 1.90 buts/match",
+        "Défenses: 0.90 vs 1.10 encaissés/match",
+        "Signal API-Sports Predictions pondéré",
+        "20 absence(s) API détectée(s)"
+      ]
+    },
+    "disclaimer": "Prédiction statistique, pas un résultat réel."
+  },
+  "aggregates": {
+    "simulations": 50000,
+    "homeWin": 54.1,
+    "draw": 23.9,
+    "awayWin": 22,
+    "btts": 52.3,
+    "over25": 51.7,
+    "under25": 48.3,
+    "homeFirst": 59.4,
+    "awayFirst": 34.3,
+    "topScores": [
+      {
+        "score": "1-1",
+        "pct": 11.2
+      },
+      {
+        "score": "1-0",
+        "pct": 11.2
+      },
+      {
+        "score": "2-1",
+        "pct": 9.7
+      },
+      {
+        "score": "2-0",
+        "pct": 9.6
+      },
+      {
+        "score": "0-1",
+        "pct": 6.5
+      }
+    ],
+    "topScorers": [
+      {
+        "player": "Kylian Mbappé",
+        "pct": 48.8
+      },
+      {
+        "player": "J. Bellingham",
+        "pct": 25.9
+      },
+      {
+        "player": "Lautaro Martínez",
+        "pct": 21.2
+      },
+      {
+        "player": "Vinícius Júnior",
+        "pct": 19.4
+      },
+      {
+        "player": "Carlos Espí",
+        "pct": 15.7
+      }
+    ]
+  },
+  "scenario": {
+    "score": "2-2",
+    "goals": [
+      {
+        "minute": 26,
+        "player": "A. Diouf",
+        "side": "away"
+      },
+      {
+        "minute": 36,
+        "player": "Kylian Mbappé",
+        "side": "home"
+      },
+      {
+        "minute": 50,
+        "player": "Kylian Mbappé",
+        "side": "home"
+      },
+      {
+        "minute": 66,
+        "player": "Lautaro Martínez",
+        "side": "away"
+      }
+    ],
+    "timeline": [
+      {
+        "minute": 1,
+        "type": "kickoff",
+        "text": "Coup d’envoi."
+      },
+      {
+        "minute": 8,
+        "type": "domination",
+        "side": "home",
+        "text": "Real Madrid installe sa possession dans le camp adverse."
+      },
+      {
+        "minute": 14,
+        "type": "chance",
+        "side": "away",
+        "text": "Première transition dangereuse de Inter, arrêt du gardien."
+      },
+      {
+        "minute": 26,
+        "type": "goal",
+        "side": "away",
+        "player": "A. Diouf",
+        "text": "BUT Inter — A. Diouf."
+      },
+      {
+        "minute": 27,
+        "type": "chance",
+        "side": "home",
+        "text": "Grosse occasion pour Real Madrid, frappe repoussée."
+      },
+      {
+        "minute": 36,
+        "type": "goal",
+        "side": "home",
+        "player": "Kylian Mbappé",
+        "text": "BUT Real Madrid — Kylian Mbappé."
+      },
+      {
+        "minute": 45,
+        "type": "half-time",
+        "text": "Mi-temps — 1-1."
+      },
+      {
+        "minute": 50,
+        "type": "goal",
+        "side": "home",
+        "player": "Kylian Mbappé",
+        "text": "BUT Real Madrid — Kylian Mbappé."
+      },
+      {
+        "minute": 55,
+        "type": "domination",
+        "side": "away",
+        "text": "Inter augmente le rythme au retour des vestiaires."
+      },
+      {
+        "minute": 63,
+        "type": "substitution",
+        "text": "Premier changement tactique."
+      },
+      {
+        "minute": 66,
+        "type": "goal",
+        "side": "away",
+        "player": "Lautaro Martínez",
+        "text": "BUT Inter — Lautaro Martínez."
+      },
+      {
+        "minute": 72,
+        "type": "card",
+        "text": "Carton jaune après une transition stoppée."
+      },
+      {
+        "minute": 84,
+        "type": "chance",
+        "text": "Dernière grosse occasion, le gardien intervient."
+      },
+      {
+        "minute": 90,
+        "type": "full-time",
+        "text": "Fin du match — 2-2."
+      }
+    ],
+    "stats": {
+      "possession": {
+        "home": 52,
+        "away": 48
+      },
+      "shots": {
+        "home": 16,
+        "away": 15
+      },
+      "shotsOnTarget": {
+        "home": 5,
+        "away": 4
+      },
+      "bigChances": {
+        "home": 3,
+        "away": 3
+      },
+      "corners": {
+        "home": 6,
+        "away": 5
+      },
+      "xg": {
+        "home": 1.99,
+        "away": 1.86
+      },
+      "fouls": {
+        "home": 11,
+        "away": 13
+      },
+      "yellowCards": {
+        "home": 2,
+        "away": 3
+      }
+    },
+    "manOfTheMatch": "Kylian Mbappé"
+  },
+  "apiAudit": {
+    "retrievedAt": "2026-09-08T05:31:56.164Z",
+    "endpoints": [
+      {
+        "endpoint": "/fixtures?date=2026-09-08",
+        "available": true,
+        "cached": true
+      },
+      {
+        "endpoint": "/fixtures/headtohead?h2h=541-505&last=10",
+        "available": true,
+        "cached": true
+      },
+      {
+        "endpoint": "/fixtures?team=541&last=10",
+        "available": true,
+        "cached": true
+      },
+      {
+        "endpoint": "/injuries?fixture=1635714",
+        "available": true,
+        "cached": true
+      },
+      {
+        "endpoint": "/fixtures?team=505&last=10",
+        "available": true,
+        "cached": true
+      },
+      {
+        "endpoint": "/teams/statistics?team=541&league=2&season=2026",
+        "available": false,
+        "cached": true
+      },
+      {
+        "endpoint": "/fixtures/lineups?fixture=1635714",
+        "available": false,
+        "cached": true
+      },
+      {
+        "endpoint": "/players?team=541&season=2026",
+        "available": true,
+        "cached": true
+      },
+      {
+        "endpoint": "/predictions?fixture=1635714",
+        "available": true,
+        "cached": true
+      },
+      {
+        "endpoint": "/teams/statistics?team=505&league=2&season=2026",
+        "available": false,
+        "cached": true
+      },
+      {
+        "endpoint": "/players?team=505&season=2026",
+        "available": true,
+        "cached": true
+      },
+      {
+        "endpoint": "/odds?fixture=1635714",
+        "available": true,
+        "cached": true
+      }
+    ]
+  }
+}

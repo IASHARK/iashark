@@ -1,0 +1,238 @@
+{
+  "endpoint": "/fixtures",
+  "params": {
+    "league": 61,
+    "season": 2026,
+    "status": "FT-AET-PEN",
+    "team": 116
+  },
+  "retrieved_at": "2026-09-08T15:56:34Z",
+  "response_hash": "8be109a2b0c5ca55c57d752daaf055b8a9b61a3a6112f9e2f86219abe96aab79",
+  "response": {
+    "get": "fixtures",
+    "parameters": {
+      "league": "61",
+      "season": "2026",
+      "status": "FT-AET-PEN",
+      "team": "116"
+    },
+    "errors": [],
+    "results": 3,
+    "paging": {
+      "current": 1,
+      "total": 1
+    },
+    "response": [
+      {
+        "fixture": {
+          "id": 1552732,
+          "referee": "Mathieu Vernice, France",
+          "timezone": "UTC",
+          "date": "2026-08-22T15:15:00+00:00",
+          "timestamp": 1787411700,
+          "periods": {
+            "first": 1787411700,
+            "second": 1787415300
+          },
+          "venue": {
+            "id": 654,
+            "name": "Stade Bollaert-Delelis",
+            "city": "Lens"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": null
+          }
+        },
+        "league": {
+          "id": 61,
+          "name": "Ligue 1",
+          "country": "France",
+          "logo": "https://media.api-sports.io/football/leagues/61.png",
+          "flag": "https://media.api-sports.io/flags/fr.svg",
+          "season": 2026,
+          "round": "Regular Season - 1",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 116,
+            "name": "Lens",
+            "logo": "https://media.api-sports.io/football/teams/116.png",
+            "winner": true
+          },
+          "away": {
+            "id": 108,
+            "name": "Auxerre",
+            "logo": "https://media.api-sports.io/football/teams/108.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 5,
+          "away": 2
+        },
+        "score": {
+          "halftime": {
+            "home": 1,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 5,
+            "away": 2
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1552745,
+          "referee": "Bastien Dechepy, France",
+          "timezone": "UTC",
+          "date": "2026-08-29T15:15:00+00:00",
+          "timestamp": 1788016500,
+          "periods": {
+            "first": 1788016500,
+            "second": 1788020100
+          },
+          "venue": {
+            "id": 681,
+            "name": "Stade de la Meinau",
+            "city": "Strasbourg"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": null
+          }
+        },
+        "league": {
+          "id": 61,
+          "name": "Ligue 1",
+          "country": "France",
+          "logo": "https://media.api-sports.io/football/leagues/61.png",
+          "flag": "https://media.api-sports.io/flags/fr.svg",
+          "season": 2026,
+          "round": "Regular Season - 2",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 95,
+            "name": "Strasbourg",
+            "logo": "https://media.api-sports.io/football/teams/95.png",
+            "winner": true
+          },
+          "away": {
+            "id": 116,
+            "name": "Lens",
+            "logo": "https://media.api-sports.io/football/teams/116.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 2,
+          "away": 1
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 1
+          },
+          "fulltime": {
+            "home": 2,
+            "away": 1
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1552749,
+          "referee": "Eric Wattellier, France",
+          "timezone": "UTC",
+          "date": "2026-09-05T15:15:00+00:00",
+          "timestamp": 1788621300,
+          "periods": {
+            "first": null,
+            "second": null
+          },
+          "venue": {
+            "id": 654,
+            "name": "Stade Bollaert-Delelis",
+            "city": "Lens"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": null
+          }
+        },
+        "league": {
+          "id": 61,
+          "name": "Ligue 1",
+          "country": "France",
+          "logo": "https://media.api-sports.io/football/leagues/61.png",
+          "flag": "https://media.api-sports.io/flags/fr.svg",
+          "season": 2026,
+          "round": "Regular Season - 3",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 116,
+            "name": "Lens",
+            "logo": "https://media.api-sports.io/football/teams/116.png",
+            "winner": false
+          },
+          "away": {
+            "id": 97,
+            "name": "Lorient",
+            "logo": "https://media.api-sports.io/football/teams/97.png",
+            "winner": true
+          }
+        },
+        "goals": {
+          "home": 0,
+          "away": 1
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 0,
+            "away": 1
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      }
+    ]
+  }
+}

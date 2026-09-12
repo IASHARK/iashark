@@ -1,0 +1,308 @@
+{
+  "endpoint": "/fixtures",
+  "params": {
+    "league": 203,
+    "season": 2026,
+    "status": "FT-AET-PEN",
+    "team": 1004
+  },
+  "retrieved_at": "2026-09-08T16:02:51Z",
+  "response_hash": "112fad3fd9cf79ed7a88df188cdccdf65ff65a43360a18115141590e8d1c8396",
+  "response": {
+    "get": "fixtures",
+    "parameters": {
+      "league": "203",
+      "season": "2026",
+      "status": "FT-AET-PEN",
+      "team": "1004"
+    },
+    "errors": [],
+    "results": 4,
+    "paging": {
+      "current": 1,
+      "total": 1
+    },
+    "response": [
+      {
+        "fixture": {
+          "id": 1584373,
+          "referee": "Gurcan Hasova, T\u00fcrkiye",
+          "timezone": "UTC",
+          "date": "2026-08-15T16:00:00+00:00",
+          "timestamp": 1786809600,
+          "periods": {
+            "first": 1786809600,
+            "second": 1786813200
+          },
+          "venue": {
+            "id": null,
+            "name": "Recep Tayyip Erdogan Stadium",
+            "city": "Istanbul"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 6
+          }
+        },
+        "league": {
+          "id": 203,
+          "name": "S\u00fcper Lig",
+          "country": "Turkey",
+          "logo": "https://media.api-sports.io/football/leagues/203.png",
+          "flag": "https://media.api-sports.io/flags/tr.svg",
+          "season": 2026,
+          "round": "Regular Season - 1",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 1004,
+            "name": "Kas\u0131mpa\u015fa",
+            "logo": "https://media.api-sports.io/football/teams/1004.png",
+            "winner": null
+          },
+          "away": {
+            "id": 998,
+            "name": "Trabzonspor",
+            "logo": "https://media.api-sports.io/football/teams/998.png",
+            "winner": null
+          }
+        },
+        "goals": {
+          "home": 1,
+          "away": 1
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 1
+          },
+          "fulltime": {
+            "home": 1,
+            "away": 1
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1584377,
+          "referee": "Fatih Tokail, T\u00fcrkiye",
+          "timezone": "UTC",
+          "date": "2026-08-22T16:00:00+00:00",
+          "timestamp": 1787414400,
+          "periods": {
+            "first": 1787414400,
+            "second": 1787418000
+          },
+          "venue": {
+            "id": 20306,
+            "name": "Corum Stadyumu",
+            "city": "Corum"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 4
+          }
+        },
+        "league": {
+          "id": 203,
+          "name": "S\u00fcper Lig",
+          "country": "Turkey",
+          "logo": "https://media.api-sports.io/football/leagues/203.png",
+          "flag": "https://media.api-sports.io/flags/tr.svg",
+          "season": 2026,
+          "round": "Regular Season - 2",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 6343,
+            "name": "\u00c7orum FK",
+            "logo": "https://media.api-sports.io/football/teams/6343.png",
+            "winner": false
+          },
+          "away": {
+            "id": 1004,
+            "name": "Kas\u0131mpa\u015fa",
+            "logo": "https://media.api-sports.io/football/teams/1004.png",
+            "winner": true
+          }
+        },
+        "goals": {
+          "home": 0,
+          "away": 1
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 1
+          },
+          "fulltime": {
+            "home": 0,
+            "away": 1
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1584386,
+          "referee": "Halil Umut Meler, T\u00fcrkiye",
+          "timezone": "UTC",
+          "date": "2026-08-30T18:30:00+00:00",
+          "timestamp": 1788114600,
+          "periods": {
+            "first": 1788114600,
+            "second": 1788118200
+          },
+          "venue": {
+            "id": null,
+            "name": "Basaksehir Fatih Terim Stadium",
+            "city": "Istanbul"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 3
+          }
+        },
+        "league": {
+          "id": 203,
+          "name": "S\u00fcper Lig",
+          "country": "Turkey",
+          "logo": "https://media.api-sports.io/football/leagues/203.png",
+          "flag": "https://media.api-sports.io/flags/tr.svg",
+          "season": 2026,
+          "round": "Regular Season - 3",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 564,
+            "name": "Ba\u015fak\u015fehir",
+            "logo": "https://media.api-sports.io/football/teams/564.png",
+            "winner": null
+          },
+          "away": {
+            "id": 1004,
+            "name": "Kas\u0131mpa\u015fa",
+            "logo": "https://media.api-sports.io/football/teams/1004.png",
+            "winner": null
+          }
+        },
+        "goals": {
+          "home": 1,
+          "away": 1
+        },
+        "score": {
+          "halftime": {
+            "home": 1,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 1,
+            "away": 1
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1584399,
+          "referee": "Oguzhan Cakir, T\u00fcrkiye",
+          "timezone": "UTC",
+          "date": "2026-09-06T14:00:00+00:00",
+          "timestamp": 1788703200,
+          "periods": {
+            "first": null,
+            "second": null
+          },
+          "venue": {
+            "id": null,
+            "name": "Recep Tayyip Erdogan Stadium",
+            "city": "Istanbul"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": null
+          }
+        },
+        "league": {
+          "id": 203,
+          "name": "S\u00fcper Lig",
+          "country": "Turkey",
+          "logo": "https://media.api-sports.io/football/leagues/203.png",
+          "flag": "https://media.api-sports.io/flags/tr.svg",
+          "season": 2026,
+          "round": "Regular Season - 4",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 1004,
+            "name": "Kas\u0131mpa\u015fa",
+            "logo": "https://media.api-sports.io/football/teams/1004.png",
+            "winner": null
+          },
+          "away": {
+            "id": 3579,
+            "name": "Amed",
+            "logo": "https://media.api-sports.io/football/teams/3579.png",
+            "winner": null
+          }
+        },
+        "goals": {
+          "home": 2,
+          "away": 2
+        },
+        "score": {
+          "halftime": {
+            "home": 1,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 2,
+            "away": 2
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      }
+    ]
+  }
+}

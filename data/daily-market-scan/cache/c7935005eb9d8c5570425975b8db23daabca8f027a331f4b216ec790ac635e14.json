@@ -1,0 +1,168 @@
+{
+  "endpoint": "/fixtures",
+  "params": {
+    "league": 2,
+    "season": 2026,
+    "status": "FT-AET-PEN",
+    "team": 1026
+  },
+  "retrieved_at": "2026-09-08T18:52:47Z",
+  "response_hash": "25dc75c51406a91603ed253951e4906adac7625e44e38ca0b84b1fc4a1bf3f83",
+  "response": {
+    "get": "fixtures",
+    "parameters": {
+      "league": "2",
+      "season": "2026",
+      "status": "FT-AET-PEN",
+      "team": "1026"
+    },
+    "errors": [],
+    "results": 2,
+    "paging": {
+      "current": 1,
+      "total": 1
+    },
+    "response": [
+      {
+        "fixture": {
+          "id": 1610923,
+          "referee": "S. Scharer",
+          "timezone": "UTC",
+          "date": "2026-08-19T19:00:00+00:00",
+          "timestamp": 1787166000,
+          "periods": {
+            "first": 1787166000,
+            "second": 1787169600
+          },
+          "venue": {
+            "id": null,
+            "name": "Celtic Park",
+            "city": "Glasgow"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 4
+          }
+        },
+        "league": {
+          "id": 2,
+          "name": "UEFA Champions League",
+          "country": "World",
+          "logo": "https://media.api-sports.io/football/leagues/2.png",
+          "flag": null,
+          "season": 2026,
+          "round": "Play-offs",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 247,
+            "name": "Celtic",
+            "logo": "https://media.api-sports.io/football/teams/247.png",
+            "winner": true
+          },
+          "away": {
+            "id": 1026,
+            "name": "Lask Linz",
+            "logo": "https://media.api-sports.io/football/teams/1026.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 3,
+          "away": 0
+        },
+        "score": {
+          "halftime": {
+            "home": 2,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 3,
+            "away": 0
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1610924,
+          "referee": "S. Marciniak",
+          "timezone": "UTC",
+          "date": "2026-08-25T19:00:00+00:00",
+          "timestamp": 1787684400,
+          "periods": {
+            "first": 1787684400,
+            "second": 1787688000
+          },
+          "venue": {
+            "id": null,
+            "name": "Raiffeisen Arena",
+            "city": "Linz"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "AET",
+            "elapsed": 120,
+            "extra": null
+          }
+        },
+        "league": {
+          "id": 2,
+          "name": "UEFA Champions League",
+          "country": "World",
+          "logo": "https://media.api-sports.io/football/leagues/2.png",
+          "flag": null,
+          "season": 2026,
+          "round": "Play-offs",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 1026,
+            "name": "Lask Linz",
+            "logo": "https://media.api-sports.io/football/teams/1026.png",
+            "winner": true
+          },
+          "away": {
+            "id": 247,
+            "name": "Celtic",
+            "logo": "https://media.api-sports.io/football/teams/247.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 5,
+          "away": 1
+        },
+        "score": {
+          "halftime": {
+            "home": 1,
+            "away": 1
+          },
+          "fulltime": {
+            "home": 4,
+            "away": 1
+          },
+          "extratime": {
+            "home": 1,
+            "away": 0
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,121 @@
+{
+  "endpoint": "/players",
+  "params": {
+    "page": 3,
+    "season": 2025,
+    "team": 205
+  },
+  "retrieved_at": "2026-09-08T15:26:32Z",
+  "response_hash": "717041d4bd0e4d21fb1670d12a5c680e77505d20c9e7c2dc164728d499ddef2c",
+  "response": {
+    "get": "players",
+    "parameters": {
+      "page": "3",
+      "season": "2025",
+      "team": "205"
+    },
+    "errors": [],
+    "results": 1,
+    "paging": {
+      "current": 3,
+      "total": 3
+    },
+    "response": [
+      {
+        "player": {
+          "id": 660777,
+          "name": "Ganni Buyukhan",
+          "firstname": null,
+          "lastname": null,
+          "age": 16,
+          "birth": {
+            "date": null,
+            "place": null,
+            "country": null
+          },
+          "nationality": null,
+          "height": null,
+          "weight": null,
+          "injured": false,
+          "photo": "https://media.api-sports.io/football/players/660777.png"
+        },
+        "statistics": [
+          {
+            "team": {
+              "id": 205,
+              "name": "Fortuna Sittard",
+              "logo": "https://media.api-sports.io/football/teams/205.png"
+            },
+            "league": {
+              "id": 88,
+              "name": "Eredivisie",
+              "country": "Netherlands",
+              "logo": "https://media.api-sports.io/football/leagues/88.png",
+              "flag": "https://media.api-sports.io/flags/nl.svg",
+              "season": 2025
+            },
+            "games": {
+              "appearences": 1,
+              "lineups": 0,
+              "minutes": 1,
+              "number": 40,
+              "position": "Midfielder",
+              "rating": null,
+              "captain": false
+            },
+            "substitutes": {
+              "in": 1,
+              "out": 0,
+              "bench": 2
+            },
+            "shots": {
+              "total": null,
+              "on": null
+            },
+            "goals": {
+              "total": 0,
+              "conceded": 0,
+              "assists": 0,
+              "saves": null
+            },
+            "passes": {
+              "total": 1,
+              "key": null,
+              "accuracy": 100
+            },
+            "tackles": {
+              "total": 1,
+              "blocks": null,
+              "interceptions": 1
+            },
+            "duels": {
+              "total": 3,
+              "won": 1
+            },
+            "dribbles": {
+              "attempts": 1,
+              "success": null,
+              "past": null
+            },
+            "fouls": {
+              "drawn": null,
+              "committed": null
+            },
+            "cards": {
+              "yellow": 0,
+              "yellowred": 0,
+              "red": 0
+            },
+            "penalty": {
+              "won": null,
+              "commited": null,
+              "scored": 0,
+              "missed": 0,
+              "saved": null
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

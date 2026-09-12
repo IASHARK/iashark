@@ -1,0 +1,63 @@
+{
+  "protocol": "SCORE_LAB_FACTORY_V2",
+  "phase": "A_CHAMPION_SELECTION",
+  "league_key": "brazil_seriea",
+  "generated_at": "2026-09-06T19:16:06.026Z",
+  "train_seasons": [
+    2021,
+    2022
+  ],
+  "oos_dev_season": 2023,
+  "rho_frozen": 0.022707419077869745,
+  "league_avg_h": 1.4052631578947368,
+  "league_avg_a": 0.9763157894736842,
+  "candidates": {
+    "B0": {
+      "nll": 2.867230657293926,
+      "secondary": {
+        "ou25_logloss": 0.6918109144071773,
+        "btts_logloss": 0.6971818046358246,
+        "x12_logloss": 1.0375464609850855
+      },
+      "n_oos": 374,
+      "structural": {
+        "convergence_rate": 1,
+        "boundary_hit_rate": 0,
+        "rho_std": 0
+      }
+    },
+    "M0": {
+      "nll": 2.867492561547831,
+      "secondary": {
+        "ou25_logloss": 0.6918109144071773,
+        "btts_logloss": 0.6973996236439932,
+        "x12_logloss": 1.0373874373730148
+      },
+      "n_oos": 374,
+      "structural": {
+        "convergence_rate": 1,
+        "boundary_hit_rate": 0,
+        "rho_std": 0.012711453135977727
+      }
+    },
+    "M2": {
+      "nll": 2.8664014197235437,
+      "secondary": {
+        "ou25_logloss": 0.6897805499448699,
+        "btts_logloss": 0.6970604106947368,
+        "x12_logloss": 1.0367123900098103
+      },
+      "n_oos": 374,
+      "structural": {
+        "convergence_rate": 1,
+        "boundary_hit_rate": 0,
+        "rho_std": 0.012711453135977727
+      }
+    }
+  },
+  "vetoed": {},
+  "primary_winner_before_secondary_veto": "M2",
+  "secondary_veto": null,
+  "champion_selected": "M2",
+  "champion_selection_reason": "M2 a le meilleur EXACT_SCORE_NLL absolu (2.866401) parmi les candidats non-vetoes structurellement, sans degradation secondaire disqualifiante vs les autres."
+}

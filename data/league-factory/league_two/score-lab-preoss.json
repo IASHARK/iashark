@@ -1,0 +1,35 @@
+{
+  "league_key": "league_two",
+  "league_id": 42,
+  "generated_at": "2026-09-06T19:19:18.476Z",
+  "warmup_season": 2021,
+  "train_season": 2022,
+  "disclaimer": "DIAGNOSTIC TRAIN-ONLY - oosSeasons ici = saison TRAIN elle-meme, jamais OOS_DEV/OOS_FINAL. Aucune metrique OOS reelle n'a ete calculee ni consultee.",
+  "league_avg_h_real": 1.2800718132854578,
+  "league_avg_a_real": 1.0538599640933572,
+  "n_cutoffs": 77,
+  "n_predictions": 541,
+  "production_champion_rho_m0": -0.0845,
+  "fitted_rho_candidate_m2": {
+    "value": -0.04077346732045514,
+    "convergence": true,
+    "on_boundary": false,
+    "n_train_at_last_cutoff": 1057,
+    "status": "CANDIDATE_SCORE_CHAMPION_LEAGUE_TWO_UNVALIDATED"
+  },
+  "rho_across_train_cutoffs": {
+    "mean": -0.03760266713630266,
+    "median": -0.03493845539503384,
+    "std": 0.009890022407100027,
+    "min": -0.057525666998493374,
+    "max": -0.02214150499631209,
+    "n_fits": 77
+  },
+  "convergence_rate": 1,
+  "boundary_hit_rate": 0,
+  "train_window_diagnostic_nll": {
+    "nll_m0_production_rho": 2.7974785044612753,
+    "nll_m1_league_fitted_rho": 2.796993782449717,
+    "note": "Diagnostic sur TRAIN (donnee visible, pas tenue secrete) - PAS une decision de promotion. La vraie comparaison M0 vs M2 se fera sur OOS_DEV/OOS_FINAL dans une passe future explicitement autorisee."
+  }
+}

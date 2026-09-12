@@ -1,0 +1,378 @@
+{
+  "endpoint": "/fixtures",
+  "params": {
+    "league": 88,
+    "season": 2026,
+    "status": "FT-AET-PEN",
+    "team": 197
+  },
+  "retrieved_at": "2026-09-08T16:01:47Z",
+  "response_hash": "c3a6a92ff9fcb172a77472f678fc779a11765671e5cfd90914a139e58c2a3d06",
+  "response": {
+    "get": "fixtures",
+    "parameters": {
+      "league": "88",
+      "season": "2026",
+      "status": "FT-AET-PEN",
+      "team": "197"
+    },
+    "errors": [],
+    "results": 5,
+    "paging": {
+      "current": 1,
+      "total": 1
+    },
+    "response": [
+      {
+        "fixture": {
+          "id": 1552120,
+          "referee": "Alex Bos, Netherlands",
+          "timezone": "UTC",
+          "date": "2026-08-08T18:00:00+00:00",
+          "timestamp": 1786212000,
+          "periods": {
+            "first": 1786212000,
+            "second": 1786215600
+          },
+          "venue": {
+            "id": 1143,
+            "name": "Philips Stadion",
+            "city": "Eindhoven"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 5
+          }
+        },
+        "league": {
+          "id": 88,
+          "name": "Eredivisie",
+          "country": "Netherlands",
+          "logo": "https://media.api-sports.io/football/leagues/88.png",
+          "flag": "https://media.api-sports.io/flags/nl.svg",
+          "season": 2026,
+          "round": "Regular Season - 1",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 197,
+            "name": "PSV Eindhoven",
+            "logo": "https://media.api-sports.io/football/teams/197.png",
+            "winner": null
+          },
+          "away": {
+            "id": 205,
+            "name": "Fortuna Sittard",
+            "logo": "https://media.api-sports.io/football/teams/205.png",
+            "winner": null
+          }
+        },
+        "goals": {
+          "home": 2,
+          "away": 2
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 1
+          },
+          "fulltime": {
+            "home": 2,
+            "away": 2
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1552129,
+          "referee": "Marc Nagtegaal, Netherlands",
+          "timezone": "UTC",
+          "date": "2026-08-15T18:00:00+00:00",
+          "timestamp": 1786816800,
+          "periods": {
+            "first": 1786816800,
+            "second": 1786820400
+          },
+          "venue": {
+            "id": 2901,
+            "name": "Van Donge & De Roo Stadion",
+            "city": "Rotterdam"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 5
+          }
+        },
+        "league": {
+          "id": 88,
+          "name": "Eredivisie",
+          "country": "Netherlands",
+          "logo": "https://media.api-sports.io/football/leagues/88.png",
+          "flag": "https://media.api-sports.io/flags/nl.svg",
+          "season": 2026,
+          "round": "Regular Season - 2",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 196,
+            "name": "Excelsior",
+            "logo": "https://media.api-sports.io/football/teams/196.png",
+            "winner": false
+          },
+          "away": {
+            "id": 197,
+            "name": "PSV Eindhoven",
+            "logo": "https://media.api-sports.io/football/teams/197.png",
+            "winner": true
+          }
+        },
+        "goals": {
+          "home": 1,
+          "away": 2
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 1
+          },
+          "fulltime": {
+            "home": 1,
+            "away": 2
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1552140,
+          "referee": "Allard Lindhout, Netherlands",
+          "timezone": "UTC",
+          "date": "2026-08-23T12:30:00+00:00",
+          "timestamp": 1787488200,
+          "periods": {
+            "first": 1787488200,
+            "second": 1787491800
+          },
+          "venue": {
+            "id": 1143,
+            "name": "Philips Stadion",
+            "city": "Eindhoven"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 4
+          }
+        },
+        "league": {
+          "id": 88,
+          "name": "Eredivisie",
+          "country": "Netherlands",
+          "logo": "https://media.api-sports.io/football/leagues/88.png",
+          "flag": "https://media.api-sports.io/flags/nl.svg",
+          "season": 2026,
+          "round": "Regular Season - 3",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 197,
+            "name": "PSV Eindhoven",
+            "logo": "https://media.api-sports.io/football/teams/197.png",
+            "winner": true
+          },
+          "away": {
+            "id": 202,
+            "name": "Groningen",
+            "logo": "https://media.api-sports.io/football/teams/202.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 5,
+          "away": 1
+        },
+        "score": {
+          "halftime": {
+            "home": 3,
+            "away": 1
+          },
+          "fulltime": {
+            "home": 5,
+            "away": 1
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1552148,
+          "referee": "Freek Vandeursen, Netherlands",
+          "timezone": "UTC",
+          "date": "2026-08-30T10:15:00+00:00",
+          "timestamp": 1788084900,
+          "periods": {
+            "first": 1788084900,
+            "second": 1788088500
+          },
+          "venue": {
+            "id": 1154,
+            "name": "Stadion Galgenwaard",
+            "city": "Utrecht"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 4
+          }
+        },
+        "league": {
+          "id": 88,
+          "name": "Eredivisie",
+          "country": "Netherlands",
+          "logo": "https://media.api-sports.io/football/leagues/88.png",
+          "flag": "https://media.api-sports.io/flags/nl.svg",
+          "season": 2026,
+          "round": "Regular Season - 4",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 207,
+            "name": "Utrecht",
+            "logo": "https://media.api-sports.io/football/teams/207.png",
+            "winner": false
+          },
+          "away": {
+            "id": 197,
+            "name": "PSV Eindhoven",
+            "logo": "https://media.api-sports.io/football/teams/197.png",
+            "winner": true
+          }
+        },
+        "goals": {
+          "home": 1,
+          "away": 6
+        },
+        "score": {
+          "halftime": {
+            "home": 1,
+            "away": 2
+          },
+          "fulltime": {
+            "home": 1,
+            "away": 6
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1552156,
+          "referee": "Sander van der Eijk, Netherlands",
+          "timezone": "UTC",
+          "date": "2026-09-05T18:00:00+00:00",
+          "timestamp": 1788631200,
+          "periods": {
+            "first": null,
+            "second": null
+          },
+          "venue": {
+            "id": 1117,
+            "name": "Johan Cruijff Arena",
+            "city": "Amsterdam"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": null
+          }
+        },
+        "league": {
+          "id": 88,
+          "name": "Eredivisie",
+          "country": "Netherlands",
+          "logo": "https://media.api-sports.io/football/leagues/88.png",
+          "flag": "https://media.api-sports.io/flags/nl.svg",
+          "season": 2026,
+          "round": "Regular Season - 5",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 194,
+            "name": "Ajax",
+            "logo": "https://media.api-sports.io/football/teams/194.png",
+            "winner": false
+          },
+          "away": {
+            "id": 197,
+            "name": "PSV Eindhoven",
+            "logo": "https://media.api-sports.io/football/teams/197.png",
+            "winner": true
+          }
+        },
+        "goals": {
+          "home": 1,
+          "away": 3
+        },
+        "score": {
+          "halftime": {
+            "home": 1,
+            "away": 2
+          },
+          "fulltime": {
+            "home": 1,
+            "away": 3
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      }
+    ]
+  }
+}

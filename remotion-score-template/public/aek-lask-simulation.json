@@ -1,0 +1,311 @@
+{
+  "match": {
+    "fixtureId": 1635609,
+    "date": "2026-09-08T16:45:00+00:00",
+    "venue": {
+      "id": null,
+      "name": "Allwyn Arena",
+      "city": "Athens"
+    },
+    "league": {
+      "id": 2,
+      "name": "UEFA Champions League",
+      "country": "World",
+      "logo": "https://media.api-sports.io/football/leagues/2.png",
+      "flag": null,
+      "season": 2026,
+      "round": "League Stage - 1",
+      "standings": true
+    },
+    "home": {
+      "id": 575,
+      "name": "AEK Athens FC",
+      "logo": "https://media.api-sports.io/football/teams/575.png",
+      "winner": null
+    },
+    "away": {
+      "id": 1026,
+      "name": "Lask Linz",
+      "logo": "https://media.api-sports.io/football/teams/1026.png",
+      "winner": null
+    }
+  },
+  "realData": {
+    "recentMatches": {
+      "home": 10,
+      "away": 10
+    },
+    "injuries": 0,
+    "lineups": "estimated-or-unavailable"
+  },
+  "model": {
+    "strength": {
+      "homeLambda": 1.8571,
+      "awayLambda": 1.7640000000000002,
+      "evidence": [
+        "Forme récente: 2.60 vs 3.50 buts/match",
+        "Défenses: 0.50 vs 0.70 encaissés/match",
+        "Signal API-Sports Predictions pondéré",
+        "0 absence(s) API détectée(s)"
+      ]
+    },
+    "disclaimer": "Prédiction statistique, pas un résultat réel."
+  },
+  "aggregates": {
+    "simulations": 50000,
+    "homeWin": 40.7,
+    "draw": 21.8,
+    "awayWin": 37.5,
+    "btts": 69.8,
+    "over25": 70,
+    "under25": 30,
+    "homeFirst": 50.1,
+    "awayFirst": 47.3,
+    "topScores": [
+      {
+        "score": "1-1",
+        "pct": 8.8
+      },
+      {
+        "score": "2-1",
+        "pct": 8.2
+      },
+      {
+        "score": "1-2",
+        "pct": 7.8
+      },
+      {
+        "score": "2-2",
+        "pct": 7.2
+      },
+      {
+        "score": "3-1",
+        "pct": 5.1
+      }
+    ],
+    "topScorers": [
+      {
+        "player": "B. Varga",
+        "pct": 37.9
+      },
+      {
+        "player": "S. Adeniran",
+        "pct": 32.1
+      },
+      {
+        "player": "R. Marin",
+        "pct": 24.4
+      },
+      {
+        "player": "M. Usor",
+        "pct": 23.1
+      },
+      {
+        "player": "M. Vitális",
+        "pct": 14.8
+      }
+    ]
+  },
+  "scenario": {
+    "score": "2-1",
+    "goals": [
+      {
+        "minute": 9,
+        "player": "B. Varga",
+        "side": "home"
+      },
+      {
+        "minute": 35,
+        "player": "S. Adeniran",
+        "side": "away"
+      },
+      {
+        "minute": 59,
+        "player": "B. Varga",
+        "side": "home"
+      }
+    ],
+    "timeline": [
+      {
+        "minute": 1,
+        "type": "kickoff",
+        "text": "Coup d’envoi."
+      },
+      {
+        "minute": 8,
+        "type": "domination",
+        "side": "home",
+        "text": "AEK Athens FC installe sa possession dans le camp adverse."
+      },
+      {
+        "minute": 9,
+        "type": "goal",
+        "side": "home",
+        "player": "B. Varga",
+        "text": "BUT AEK Athens FC — B. Varga."
+      },
+      {
+        "minute": 14,
+        "type": "chance",
+        "side": "away",
+        "text": "Première transition dangereuse de Lask Linz, arrêt du gardien."
+      },
+      {
+        "minute": 27,
+        "type": "chance",
+        "side": "home",
+        "text": "Grosse occasion pour AEK Athens FC, frappe repoussée."
+      },
+      {
+        "minute": 35,
+        "type": "goal",
+        "side": "away",
+        "player": "S. Adeniran",
+        "text": "BUT Lask Linz — S. Adeniran."
+      },
+      {
+        "minute": 45,
+        "type": "half-time",
+        "text": "Mi-temps — 1-1."
+      },
+      {
+        "minute": 55,
+        "type": "domination",
+        "side": "away",
+        "text": "Lask Linz augmente le rythme au retour des vestiaires."
+      },
+      {
+        "minute": 59,
+        "type": "goal",
+        "side": "home",
+        "player": "B. Varga",
+        "text": "BUT AEK Athens FC — B. Varga."
+      },
+      {
+        "minute": 63,
+        "type": "substitution",
+        "text": "Premier changement tactique."
+      },
+      {
+        "minute": 72,
+        "type": "card",
+        "text": "Carton jaune après une transition stoppée."
+      },
+      {
+        "minute": 84,
+        "type": "chance",
+        "text": "Dernière grosse occasion, le gardien intervient."
+      },
+      {
+        "minute": 90,
+        "type": "full-time",
+        "text": "Fin du match — 2-1."
+      }
+    ],
+    "stats": {
+      "possession": {
+        "home": 52,
+        "away": 48
+      },
+      "shots": {
+        "home": 16,
+        "away": 12
+      },
+      "shotsOnTarget": {
+        "home": 5,
+        "away": 3
+      },
+      "bigChances": {
+        "home": 3,
+        "away": 2
+      },
+      "corners": {
+        "home": 6,
+        "away": 5
+      },
+      "xg": {
+        "home": 1.99,
+        "away": 1.24
+      },
+      "fouls": {
+        "home": 11,
+        "away": 13
+      },
+      "yellowCards": {
+        "home": 2,
+        "away": 3
+      }
+    },
+    "manOfTheMatch": "B. Varga"
+  },
+  "apiAudit": {
+    "retrievedAt": "2026-09-08T06:57:18.804Z",
+    "endpoints": [
+      {
+        "endpoint": "/fixtures?date=2026-09-08",
+        "available": true,
+        "cached": true
+      },
+      {
+        "endpoint": "/predictions?fixture=1635609",
+        "available": true,
+        "cached": true
+      },
+      {
+        "endpoint": "/fixtures?team=1026&last=10",
+        "available": true,
+        "cached": true
+      },
+      {
+        "endpoint": "/fixtures?team=575&last=10",
+        "available": true,
+        "cached": true
+      },
+      {
+        "endpoint": "/teams/statistics?team=575&league=2&season=2026",
+        "available": false,
+        "cached": true
+      },
+      {
+        "endpoint": "/players?team=1026&season=2026",
+        "available": true,
+        "cached": true
+      },
+      {
+        "endpoint": "/injuries?fixture=1635609",
+        "available": false,
+        "cached": true
+      },
+      {
+        "endpoint": "/fixtures/headtohead?h2h=575-1026&last=10",
+        "available": false,
+        "cached": true
+      },
+      {
+        "endpoint": "/fixtures/lineups?fixture=1635609",
+        "available": false,
+        "cached": false
+      },
+      {
+        "endpoint": "/players/squads?team=1026",
+        "available": true,
+        "cached": false
+      },
+      {
+        "endpoint": "/teams/statistics?team=1026&league=2&season=2026",
+        "available": false,
+        "cached": false
+      },
+      {
+        "endpoint": "/players?team=575&season=2026",
+        "available": true,
+        "cached": false
+      },
+      {
+        "endpoint": "/odds?fixture=1635609",
+        "available": true,
+        "cached": false
+      }
+    ]
+  }
+}

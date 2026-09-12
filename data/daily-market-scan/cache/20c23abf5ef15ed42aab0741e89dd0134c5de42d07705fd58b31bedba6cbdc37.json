@@ -1,0 +1,96 @@
+{
+  "endpoint": "/fixtures",
+  "params": {
+    "last": 1,
+    "status": "FT-AET-PEN",
+    "team": 512
+  },
+  "retrieved_at": "2026-09-08T15:57:54Z",
+  "response_hash": "c8ef5de09a435e4370b2aae129cb9d303c3b7b17b6de8f73ff9f422371f0d397",
+  "response": {
+    "get": "fixtures",
+    "parameters": {
+      "last": "1",
+      "status": "FT-AET-PEN",
+      "team": "512"
+    },
+    "errors": [],
+    "results": 1,
+    "paging": {
+      "current": 1,
+      "total": 1
+    },
+    "response": [
+      {
+        "fixture": {
+          "id": 1550111,
+          "referee": "Mario Perri, Italy",
+          "timezone": "UTC",
+          "date": "2026-09-06T13:00:00+00:00",
+          "timestamp": 1788699600,
+          "periods": {
+            "first": null,
+            "second": null
+          },
+          "venue": {
+            "id": 904,
+            "name": "Stadio Benito Stirpe",
+            "city": "Frosinone"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": null
+          }
+        },
+        "league": {
+          "id": 135,
+          "name": "Serie A",
+          "country": "Italy",
+          "logo": "https://media.api-sports.io/football/leagues/135.png",
+          "flag": "https://media.api-sports.io/flags/it.svg",
+          "season": 2026,
+          "round": "Regular Season - 3",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 512,
+            "name": "Frosinone",
+            "logo": "https://media.api-sports.io/football/teams/512.png",
+            "winner": true
+          },
+          "away": {
+            "id": 517,
+            "name": "Venezia",
+            "logo": "https://media.api-sports.io/football/teams/517.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 3,
+          "away": 2
+        },
+        "score": {
+          "halftime": {
+            "home": 2,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 3,
+            "away": 2
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      }
+    ]
+  }
+}

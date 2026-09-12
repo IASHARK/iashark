@@ -1,0 +1,378 @@
+{
+  "endpoint": "/fixtures",
+  "params": {
+    "league": 88,
+    "season": 2026,
+    "status": "FT-AET-PEN",
+    "team": 426
+  },
+  "retrieved_at": "2026-09-08T16:02:02Z",
+  "response_hash": "1298e110e56348789e2e580a257c9d2545e9b468a83d83ef092bc49d60c17b2c",
+  "response": {
+    "get": "fixtures",
+    "parameters": {
+      "league": "88",
+      "season": "2026",
+      "status": "FT-AET-PEN",
+      "team": "426"
+    },
+    "errors": [],
+    "results": 5,
+    "paging": {
+      "current": 1,
+      "total": 1
+    },
+    "response": [
+      {
+        "fixture": {
+          "id": 1552122,
+          "referee": "Sander van der Eijk, Netherlands",
+          "timezone": "UTC",
+          "date": "2026-08-09T10:15:00+00:00",
+          "timestamp": 1786270500,
+          "periods": {
+            "first": 1786270500,
+            "second": 1786274100
+          },
+          "venue": {
+            "id": 10505,
+            "name": "Sparta Stadium Het Kasteel",
+            "city": "Rotterdam"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 8
+          }
+        },
+        "league": {
+          "id": 88,
+          "name": "Eredivisie",
+          "country": "Netherlands",
+          "logo": "https://media.api-sports.io/football/leagues/88.png",
+          "flag": "https://media.api-sports.io/flags/nl.svg",
+          "season": 2026,
+          "round": "Regular Season - 1",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 426,
+            "name": "Sparta Rotterdam",
+            "logo": "https://media.api-sports.io/football/teams/426.png",
+            "winner": false
+          },
+          "away": {
+            "id": 209,
+            "name": "Feyenoord",
+            "logo": "https://media.api-sports.io/football/teams/209.png",
+            "winner": true
+          }
+        },
+        "goals": {
+          "home": 0,
+          "away": 1
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 1
+          },
+          "fulltime": {
+            "home": 0,
+            "away": 1
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1552126,
+          "referee": "Ingmar Oostrom, Netherlands",
+          "timezone": "UTC",
+          "date": "2026-08-14T18:00:00+00:00",
+          "timestamp": 1786730400,
+          "periods": {
+            "first": 1786730400,
+            "second": 1786734000
+          },
+          "venue": {
+            "id": null,
+            "name": "BUKO Stadion",
+            "city": "Velsen"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 8
+          }
+        },
+        "league": {
+          "id": 88,
+          "name": "Eredivisie",
+          "country": "Netherlands",
+          "logo": "https://media.api-sports.io/football/leagues/88.png",
+          "flag": "https://media.api-sports.io/flags/nl.svg",
+          "season": 2026,
+          "round": "Regular Season - 2",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 427,
+            "name": "Telstar",
+            "logo": "https://media.api-sports.io/football/teams/427.png",
+            "winner": false
+          },
+          "away": {
+            "id": 426,
+            "name": "Sparta Rotterdam",
+            "logo": "https://media.api-sports.io/football/teams/426.png",
+            "winner": true
+          }
+        },
+        "goals": {
+          "home": 1,
+          "away": 3
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 1
+          },
+          "fulltime": {
+            "home": 1,
+            "away": 3
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1552137,
+          "referee": "Dennis Higler, Netherlands",
+          "timezone": "UTC",
+          "date": "2026-08-22T16:45:00+00:00",
+          "timestamp": 1787417100,
+          "periods": {
+            "first": 1787417100,
+            "second": 1787420700
+          },
+          "venue": {
+            "id": 10505,
+            "name": "Sparta Stadium Het Kasteel",
+            "city": "Rotterdam"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 8
+          }
+        },
+        "league": {
+          "id": 88,
+          "name": "Eredivisie",
+          "country": "Netherlands",
+          "logo": "https://media.api-sports.io/football/leagues/88.png",
+          "flag": "https://media.api-sports.io/flags/nl.svg",
+          "season": 2026,
+          "round": "Regular Season - 3",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 426,
+            "name": "Sparta Rotterdam",
+            "logo": "https://media.api-sports.io/football/teams/426.png",
+            "winner": null
+          },
+          "away": {
+            "id": 207,
+            "name": "Utrecht",
+            "logo": "https://media.api-sports.io/football/teams/207.png",
+            "winner": null
+          }
+        },
+        "goals": {
+          "home": 3,
+          "away": 3
+        },
+        "score": {
+          "halftime": {
+            "home": 1,
+            "away": 1
+          },
+          "fulltime": {
+            "home": 3,
+            "away": 3
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1552145,
+          "referee": "Serdar Gozubuyuk, Netherlands",
+          "timezone": "UTC",
+          "date": "2026-08-29T14:30:00+00:00",
+          "timestamp": 1788013800,
+          "periods": {
+            "first": 1788013800,
+            "second": 1788017400
+          },
+          "venue": {
+            "id": 2901,
+            "name": "Van Donge & De Roo Stadion",
+            "city": "Rotterdam"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": null
+          }
+        },
+        "league": {
+          "id": 88,
+          "name": "Eredivisie",
+          "country": "Netherlands",
+          "logo": "https://media.api-sports.io/football/leagues/88.png",
+          "flag": "https://media.api-sports.io/flags/nl.svg",
+          "season": 2026,
+          "round": "Regular Season - 4",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 196,
+            "name": "Excelsior",
+            "logo": "https://media.api-sports.io/football/teams/196.png",
+            "winner": true
+          },
+          "away": {
+            "id": 426,
+            "name": "Sparta Rotterdam",
+            "logo": "https://media.api-sports.io/football/teams/426.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 2,
+          "away": 1
+        },
+        "score": {
+          "halftime": {
+            "home": 1,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 2,
+            "away": 1
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1552153,
+          "referee": "Stan Teuben, Netherlands",
+          "timezone": "UTC",
+          "date": "2026-09-04T18:00:00+00:00",
+          "timestamp": 1788544800,
+          "periods": {
+            "first": null,
+            "second": null
+          },
+          "venue": {
+            "id": 10505,
+            "name": "Sparta Stadium Het Kasteel",
+            "city": "Rotterdam"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": null
+          }
+        },
+        "league": {
+          "id": 88,
+          "name": "Eredivisie",
+          "country": "Netherlands",
+          "logo": "https://media.api-sports.io/football/leagues/88.png",
+          "flag": "https://media.api-sports.io/flags/nl.svg",
+          "season": 2026,
+          "round": "Regular Season - 5",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 426,
+            "name": "Sparta Rotterdam",
+            "logo": "https://media.api-sports.io/football/teams/426.png",
+            "winner": null
+          },
+          "away": {
+            "id": 193,
+            "name": "PEC Zwolle",
+            "logo": "https://media.api-sports.io/football/teams/193.png",
+            "winner": null
+          }
+        },
+        "goals": {
+          "home": 2,
+          "away": 2
+        },
+        "score": {
+          "halftime": {
+            "home": 1,
+            "away": 1
+          },
+          "fulltime": {
+            "home": 2,
+            "away": 2
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,866 @@
+{
+  "endpoint": "/fixtures",
+  "params": {
+    "last": 12,
+    "status": "FT-AET-PEN",
+    "team": 495
+  },
+  "retrieved_at": "2026-09-08T15:58:24Z",
+  "response_hash": "a3c9c38a3747c37250789e93fa0d4be952c1aa9438f0155b4e7054bdfe0af311",
+  "response": {
+    "get": "fixtures",
+    "parameters": {
+      "last": "12",
+      "status": "FT-AET-PEN",
+      "team": "495"
+    },
+    "errors": [],
+    "results": 12,
+    "paging": {
+      "current": 1,
+      "total": 1
+    },
+    "response": [
+      {
+        "fixture": {
+          "id": 1550112,
+          "referee": "Marco Guida, Italy",
+          "timezone": "UTC",
+          "date": "2026-09-04T18:45:00+00:00",
+          "timestamp": 1788547500,
+          "periods": {
+            "first": null,
+            "second": null
+          },
+          "venue": {
+            "id": null,
+            "name": "Luigi Ferraris",
+            "city": "Genova"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": null
+          }
+        },
+        "league": {
+          "id": 135,
+          "name": "Serie A",
+          "country": "Italy",
+          "logo": "https://media.api-sports.io/football/leagues/135.png",
+          "flag": "https://media.api-sports.io/flags/it.svg",
+          "season": 2026,
+          "round": "Regular Season - 3",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 495,
+            "name": "Genoa",
+            "logo": "https://media.api-sports.io/football/teams/495.png",
+            "winner": false
+          },
+          "away": {
+            "id": 895,
+            "name": "Como",
+            "logo": "https://media.api-sports.io/football/teams/895.png",
+            "winner": true
+          }
+        },
+        "goals": {
+          "home": 1,
+          "away": 4
+        },
+        "score": {
+          "halftime": {
+            "home": 1,
+            "away": 3
+          },
+          "fulltime": {
+            "home": 1,
+            "away": 4
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1550102,
+          "referee": "Ermanno Feliciani, Italy",
+          "timezone": "UTC",
+          "date": "2026-08-30T18:45:00+00:00",
+          "timestamp": 1788115500,
+          "periods": {
+            "first": 1788115500,
+            "second": 1788119100
+          },
+          "venue": {
+            "id": null,
+            "name": "Stadio Olimpico",
+            "city": "Rome"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 7
+          }
+        },
+        "league": {
+          "id": 135,
+          "name": "Serie A",
+          "country": "Italy",
+          "logo": "https://media.api-sports.io/football/leagues/135.png",
+          "flag": "https://media.api-sports.io/flags/it.svg",
+          "season": 2026,
+          "round": "Regular Season - 2",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 487,
+            "name": "Lazio",
+            "logo": "https://media.api-sports.io/football/teams/487.png",
+            "winner": true
+          },
+          "away": {
+            "id": 495,
+            "name": "Genoa",
+            "logo": "https://media.api-sports.io/football/teams/495.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 1,
+          "away": 0
+        },
+        "score": {
+          "halftime": {
+            "home": 1,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 1,
+            "away": 0
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1550091,
+          "referee": "Marco Di Bello, Italy",
+          "timezone": "UTC",
+          "date": "2026-08-22T18:45:00+00:00",
+          "timestamp": 1787424300,
+          "periods": {
+            "first": 1787424300,
+            "second": 1787427900
+          },
+          "venue": {
+            "id": null,
+            "name": "Luigi Ferraris",
+            "city": "Genova"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 6
+          }
+        },
+        "league": {
+          "id": 135,
+          "name": "Serie A",
+          "country": "Italy",
+          "logo": "https://media.api-sports.io/football/leagues/135.png",
+          "flag": "https://media.api-sports.io/flags/it.svg",
+          "season": 2026,
+          "round": "Regular Season - 1",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 495,
+            "name": "Genoa",
+            "logo": "https://media.api-sports.io/football/teams/495.png",
+            "winner": false
+          },
+          "away": {
+            "id": 492,
+            "name": "Napoli",
+            "logo": "https://media.api-sports.io/football/teams/492.png",
+            "winner": true
+          }
+        },
+        "goals": {
+          "home": 0,
+          "away": 2
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 0,
+            "away": 2
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1619315,
+          "referee": "Mario Perri, Italy",
+          "timezone": "UTC",
+          "date": "2026-08-16T16:30:00+00:00",
+          "timestamp": 1786897800,
+          "periods": {
+            "first": 1786897800,
+            "second": 1786901400
+          },
+          "venue": {
+            "id": null,
+            "name": "Stadio Luigi Ferraris",
+            "city": "Genoa"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 4
+          }
+        },
+        "league": {
+          "id": 137,
+          "name": "Coppa Italia",
+          "country": "Italy",
+          "logo": "https://media.api-sports.io/football/leagues/137.png",
+          "flag": "https://media.api-sports.io/flags/it.svg",
+          "season": 2026,
+          "round": "Round of 64",
+          "standings": false
+        },
+        "teams": {
+          "home": {
+            "id": 495,
+            "name": "Genoa",
+            "logo": "https://media.api-sports.io/football/teams/495.png",
+            "winner": true
+          },
+          "away": {
+            "id": 507,
+            "name": "Ascoli",
+            "logo": "https://media.api-sports.io/football/teams/507.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 4,
+          "away": 1
+        },
+        "score": {
+          "halftime": {
+            "home": 2,
+            "away": 1
+          },
+          "fulltime": {
+            "home": 4,
+            "away": 1
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1585052,
+          "referee": null,
+          "timezone": "UTC",
+          "date": "2026-08-08T18:45:00+00:00",
+          "timestamp": 1786214700,
+          "periods": {
+            "first": 1786214700,
+            "second": 1786218300
+          },
+          "venue": {
+            "id": null,
+            "name": null,
+            "city": null
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 4
+          }
+        },
+        "league": {
+          "id": 667,
+          "name": "Friendlies Clubs",
+          "country": "World",
+          "logo": "https://media.api-sports.io/football/leagues/667.png",
+          "flag": null,
+          "season": 2026,
+          "round": "Club Friendlies",
+          "standings": false
+        },
+        "teams": {
+          "home": {
+            "id": 495,
+            "name": "Genoa",
+            "logo": "https://media.api-sports.io/football/teams/495.png",
+            "winner": false
+          },
+          "away": {
+            "id": 544,
+            "name": "Deportivo La Coruna",
+            "logo": "https://media.api-sports.io/football/teams/544.png",
+            "winner": true
+          }
+        },
+        "goals": {
+          "home": 0,
+          "away": 1
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 0,
+            "away": 1
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1585032,
+          "referee": null,
+          "timezone": "UTC",
+          "date": "2026-08-04T13:00:00+00:00",
+          "timestamp": 1785848400,
+          "periods": {
+            "first": 1785848400,
+            "second": 1785852000
+          },
+          "venue": {
+            "id": null,
+            "name": null,
+            "city": null
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": null
+          }
+        },
+        "league": {
+          "id": 667,
+          "name": "Friendlies Clubs",
+          "country": "World",
+          "logo": "https://media.api-sports.io/football/leagues/667.png",
+          "flag": null,
+          "season": 2026,
+          "round": "Club Friendlies",
+          "standings": false
+        },
+        "teams": {
+          "home": {
+            "id": 35,
+            "name": "Bournemouth",
+            "logo": "https://media.api-sports.io/football/teams/35.png",
+            "winner": true
+          },
+          "away": {
+            "id": 495,
+            "name": "Genoa",
+            "logo": "https://media.api-sports.io/football/teams/495.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 10,
+          "away": 1
+        },
+        "score": {
+          "halftime": {
+            "home": null,
+            "away": null
+          },
+          "fulltime": {
+            "home": 10,
+            "away": 1
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1585028,
+          "referee": null,
+          "timezone": "UTC",
+          "date": "2026-08-01T18:30:00+00:00",
+          "timestamp": 1785609000,
+          "periods": {
+            "first": 1785609000,
+            "second": 1785612600
+          },
+          "venue": {
+            "id": null,
+            "name": null,
+            "city": null
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 2
+          }
+        },
+        "league": {
+          "id": 667,
+          "name": "Friendlies Clubs",
+          "country": "World",
+          "logo": "https://media.api-sports.io/football/leagues/667.png",
+          "flag": null,
+          "season": 2026,
+          "round": "Club Friendlies",
+          "standings": false
+        },
+        "teams": {
+          "home": {
+            "id": 46,
+            "name": "Leicester",
+            "logo": "https://media.api-sports.io/football/teams/46.png",
+            "winner": false
+          },
+          "away": {
+            "id": 495,
+            "name": "Genoa",
+            "logo": "https://media.api-sports.io/football/teams/495.png",
+            "winner": true
+          }
+        },
+        "goals": {
+          "home": 0,
+          "away": 1
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 0,
+            "away": 1
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1562997,
+          "referee": null,
+          "timezone": "UTC",
+          "date": "2026-07-25T15:00:00+00:00",
+          "timestamp": 1784991600,
+          "periods": {
+            "first": 1784991600,
+            "second": 1784995200
+          },
+          "venue": {
+            "id": null,
+            "name": null,
+            "city": null
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 1
+          }
+        },
+        "league": {
+          "id": 667,
+          "name": "Friendlies Clubs",
+          "country": "World",
+          "logo": "https://media.api-sports.io/football/leagues/667.png",
+          "flag": null,
+          "season": 2026,
+          "round": "Club Friendlies",
+          "standings": false
+        },
+        "teams": {
+          "home": {
+            "id": 495,
+            "name": "Genoa",
+            "logo": "https://media.api-sports.io/football/teams/495.png",
+            "winner": null
+          },
+          "away": {
+            "id": 1584,
+            "name": "Vicenza Virtus",
+            "logo": "https://media.api-sports.io/football/teams/1584.png",
+            "winner": null
+          }
+        },
+        "goals": {
+          "home": 2,
+          "away": 2
+        },
+        "score": {
+          "halftime": {
+            "home": 1,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 2,
+            "away": 2
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1560753,
+          "referee": null,
+          "timezone": "UTC",
+          "date": "2026-07-19T15:00:00+00:00",
+          "timestamp": 1784473200,
+          "periods": {
+            "first": 1784473200,
+            "second": 1784476800
+          },
+          "venue": {
+            "id": null,
+            "name": null,
+            "city": null
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": null
+          }
+        },
+        "league": {
+          "id": 667,
+          "name": "Friendlies Clubs",
+          "country": "World",
+          "logo": "https://media.api-sports.io/football/leagues/667.png",
+          "flag": null,
+          "season": 2026,
+          "round": "Club Friendlies",
+          "standings": false
+        },
+        "teams": {
+          "home": {
+            "id": 495,
+            "name": "Genoa",
+            "logo": "https://media.api-sports.io/football/teams/495.png",
+            "winner": true
+          },
+          "away": {
+            "id": 17147,
+            "name": "Trento",
+            "logo": "https://media.api-sports.io/football/teams/17147.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 2,
+          "away": 1
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 1
+          },
+          "fulltime": {
+            "home": 2,
+            "away": 1
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1378238,
+          "referee": "D. Doveri",
+          "timezone": "UTC",
+          "date": "2026-05-24T18:45:00+00:00",
+          "timestamp": 1779648300,
+          "periods": {
+            "first": 1779648300,
+            "second": 1779651900
+          },
+          "venue": {
+            "id": null,
+            "name": "Stadio Via del Mare",
+            "city": "Lecce"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 3
+          }
+        },
+        "league": {
+          "id": 135,
+          "name": "Serie A",
+          "country": "Italy",
+          "logo": "https://media.api-sports.io/football/leagues/135.png",
+          "flag": "https://media.api-sports.io/flags/it.svg",
+          "season": 2025,
+          "round": "Regular Season - 38",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 867,
+            "name": "Lecce",
+            "logo": "https://media.api-sports.io/football/teams/867.png",
+            "winner": true
+          },
+          "away": {
+            "id": 495,
+            "name": "Genoa",
+            "logo": "https://media.api-sports.io/football/teams/495.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 1,
+          "away": 0
+        },
+        "score": {
+          "halftime": {
+            "home": 1,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 1,
+            "away": 0
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1378227,
+          "referee": "S. Sozza",
+          "timezone": "UTC",
+          "date": "2026-05-17T10:00:00+00:00",
+          "timestamp": 1779012000,
+          "periods": {
+            "first": 1779012000,
+            "second": 1779015600
+          },
+          "venue": {
+            "id": 905,
+            "name": "Stadio Luigi Ferraris",
+            "city": "Genoa"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 11
+          }
+        },
+        "league": {
+          "id": 135,
+          "name": "Serie A",
+          "country": "Italy",
+          "logo": "https://media.api-sports.io/football/leagues/135.png",
+          "flag": "https://media.api-sports.io/flags/it.svg",
+          "season": 2025,
+          "round": "Regular Season - 37",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 495,
+            "name": "Genoa",
+            "logo": "https://media.api-sports.io/football/teams/495.png",
+            "winner": false
+          },
+          "away": {
+            "id": 489,
+            "name": "AC Milan",
+            "logo": "https://media.api-sports.io/football/teams/489.png",
+            "winner": true
+          }
+        },
+        "goals": {
+          "home": 1,
+          "away": 2
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 1,
+            "away": 2
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1378216,
+          "referee": "L. Massimi",
+          "timezone": "UTC",
+          "date": "2026-05-10T13:00:00+00:00",
+          "timestamp": 1778418000,
+          "periods": {
+            "first": 1778418000,
+            "second": 1778421600
+          },
+          "venue": {
+            "id": null,
+            "name": "Stadio Artemio Franchi",
+            "city": "Florence"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 5
+          }
+        },
+        "league": {
+          "id": 135,
+          "name": "Serie A",
+          "country": "Italy",
+          "logo": "https://media.api-sports.io/football/leagues/135.png",
+          "flag": "https://media.api-sports.io/flags/it.svg",
+          "season": 2025,
+          "round": "Regular Season - 36",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 502,
+            "name": "Fiorentina",
+            "logo": "https://media.api-sports.io/football/teams/502.png",
+            "winner": null
+          },
+          "away": {
+            "id": 495,
+            "name": "Genoa",
+            "logo": "https://media.api-sports.io/football/teams/495.png",
+            "winner": null
+          }
+        },
+        "goals": {
+          "home": 0,
+          "away": 0
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 0,
+            "away": 0
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      }
+    ]
+  }
+}

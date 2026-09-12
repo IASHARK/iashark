@@ -1,0 +1,164 @@
+{
+  "endpoint": "/fixtures/headtohead",
+  "params": {
+    "h2h": "3872-620",
+    "last": 5
+  },
+  "retrieved_at": "2026-09-08T18:57:05Z",
+  "response_hash": "b72f2bfb9d0a6c7cd0a0d39fd74dde063147700e5de9581d5609773741f43d1e",
+  "response": {
+    "get": "fixtures/headtohead",
+    "parameters": {
+      "h2h": "3872-620",
+      "last": "5"
+    },
+    "errors": [],
+    "results": 2,
+    "paging": {
+      "current": 1,
+      "total": 1
+    },
+    "response": [
+      {
+        "fixture": {
+          "id": 1607171,
+          "referee": "D. Massa",
+          "timezone": "UTC",
+          "date": "2026-08-11T17:00:00+00:00",
+          "timestamp": 1786467600,
+          "periods": {
+            "first": 1786467600,
+            "second": 1786471200
+          },
+          "venue": {
+            "id": null,
+            "name": "Steponas Darius and Stasys Girenas",
+            "city": "Kaunas"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 3
+          }
+        },
+        "league": {
+          "id": 2,
+          "name": "UEFA Champions League",
+          "country": "World",
+          "logo": "https://media.api-sports.io/football/leagues/2.png",
+          "flag": null,
+          "season": 2026,
+          "round": "3rd Qualifying Round",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 3872,
+            "name": "Kauno \u017dalgiris",
+            "logo": "https://media.api-sports.io/football/teams/3872.png",
+            "winner": false
+          },
+          "away": {
+            "id": 620,
+            "name": "Dinamo Zagreb",
+            "logo": "https://media.api-sports.io/football/teams/620.png",
+            "winner": true
+          }
+        },
+        "goals": {
+          "home": 1,
+          "away": 2
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 2
+          },
+          "fulltime": {
+            "home": 1,
+            "away": 2
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1607164,
+          "referee": "E. Lambrechts",
+          "timezone": "UTC",
+          "date": "2026-08-04T18:00:00+00:00",
+          "timestamp": 1785866400,
+          "periods": {
+            "first": 1785866400,
+            "second": 1785870000
+          },
+          "venue": {
+            "id": null,
+            "name": "Stadion Maksimir",
+            "city": "Zagreb"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 6
+          }
+        },
+        "league": {
+          "id": 2,
+          "name": "UEFA Champions League",
+          "country": "World",
+          "logo": "https://media.api-sports.io/football/leagues/2.png",
+          "flag": null,
+          "season": 2026,
+          "round": "3rd Qualifying Round",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 620,
+            "name": "Dinamo Zagreb",
+            "logo": "https://media.api-sports.io/football/teams/620.png",
+            "winner": true
+          },
+          "away": {
+            "id": 3872,
+            "name": "Kauno \u017dalgiris",
+            "logo": "https://media.api-sports.io/football/teams/3872.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 5,
+          "away": 0
+        },
+        "score": {
+          "halftime": {
+            "home": 2,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 5,
+            "away": 0
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      }
+    ]
+  }
+}

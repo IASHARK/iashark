@@ -1,0 +1,868 @@
+{
+  "endpoint": "/fixtures",
+  "params": {
+    "last": 12,
+    "league": 61,
+    "season": 2025,
+    "team": 85
+  },
+  "retrieved_at": "2026-09-06T17:47:56Z",
+  "response_hash": "c2f4e0a4a1014fc6e39971f9808522f4055035a0cfccfa60cca45430f1198b94",
+  "response": {
+    "get": "fixtures",
+    "parameters": {
+      "last": "12",
+      "league": "61",
+      "season": "2025",
+      "team": "85"
+    },
+    "errors": [],
+    "results": 12,
+    "paging": {
+      "current": 1,
+      "total": 1
+    },
+    "response": [
+      {
+        "fixture": {
+          "id": 1388002,
+          "referee": "G. Paradis",
+          "timezone": "UTC",
+          "date": "2026-05-17T19:00:00+00:00",
+          "timestamp": 1779044400,
+          "periods": {
+            "first": 1779044400,
+            "second": 1779048000
+          },
+          "venue": {
+            "id": 18861,
+            "name": "Stade Jean Bouin",
+            "city": "Paris"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 5
+          }
+        },
+        "league": {
+          "id": 61,
+          "name": "Ligue 1",
+          "country": "France",
+          "logo": "https://media.api-sports.io/football/leagues/61.png",
+          "flag": "https://media.api-sports.io/flags/fr.svg",
+          "season": 2025,
+          "round": "Regular Season - 34",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 114,
+            "name": "Paris FC",
+            "logo": "https://media.api-sports.io/football/teams/114.png",
+            "winner": true
+          },
+          "away": {
+            "id": 85,
+            "name": "Paris Saint Germain",
+            "logo": "https://media.api-sports.io/football/teams/85.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 2,
+          "away": 1
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 2,
+            "away": 1
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1387952,
+          "referee": "B. Bastien",
+          "timezone": "UTC",
+          "date": "2026-05-13T19:00:00+00:00",
+          "timestamp": 1778698800,
+          "periods": {
+            "first": 1778698800,
+            "second": 1778702400
+          },
+          "venue": {
+            "id": 654,
+            "name": "Stade Bollaert-Delelis",
+            "city": "Lens"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 6
+          }
+        },
+        "league": {
+          "id": 61,
+          "name": "Ligue 1",
+          "country": "France",
+          "logo": "https://media.api-sports.io/football/leagues/61.png",
+          "flag": "https://media.api-sports.io/flags/fr.svg",
+          "season": 2025,
+          "round": "Regular Season - 29",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 116,
+            "name": "Lens",
+            "logo": "https://media.api-sports.io/football/teams/116.png",
+            "winner": false
+          },
+          "away": {
+            "id": 85,
+            "name": "Paris Saint Germain",
+            "logo": "https://media.api-sports.io/football/teams/85.png",
+            "winner": true
+          }
+        },
+        "goals": {
+          "home": 0,
+          "away": 2
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 1
+          },
+          "fulltime": {
+            "home": 0,
+            "away": 2
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1387992,
+          "referee": "J. Brisard",
+          "timezone": "UTC",
+          "date": "2026-05-10T19:00:00+00:00",
+          "timestamp": 1778439600,
+          "periods": {
+            "first": 1778439600,
+            "second": 1778443200
+          },
+          "venue": {
+            "id": 671,
+            "name": "Parc des Princes",
+            "city": "Paris"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 7
+          }
+        },
+        "league": {
+          "id": 61,
+          "name": "Ligue 1",
+          "country": "France",
+          "logo": "https://media.api-sports.io/football/leagues/61.png",
+          "flag": "https://media.api-sports.io/flags/fr.svg",
+          "season": 2025,
+          "round": "Regular Season - 33",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 85,
+            "name": "Paris Saint Germain",
+            "logo": "https://media.api-sports.io/football/teams/85.png",
+            "winner": true
+          },
+          "away": {
+            "id": 106,
+            "name": "Stade Brestois 29",
+            "logo": "https://media.api-sports.io/football/teams/106.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 1,
+          "away": 0
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 1,
+            "away": 0
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1387984,
+          "referee": "B. Dechepy",
+          "timezone": "UTC",
+          "date": "2026-05-02T15:00:00+00:00",
+          "timestamp": 1777734000,
+          "periods": {
+            "first": 1777734000,
+            "second": 1777737600
+          },
+          "venue": {
+            "id": 671,
+            "name": "Parc des Princes",
+            "city": "Paris"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 6
+          }
+        },
+        "league": {
+          "id": 61,
+          "name": "Ligue 1",
+          "country": "France",
+          "logo": "https://media.api-sports.io/football/leagues/61.png",
+          "flag": "https://media.api-sports.io/flags/fr.svg",
+          "season": 2025,
+          "round": "Regular Season - 32",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 85,
+            "name": "Paris Saint Germain",
+            "logo": "https://media.api-sports.io/football/teams/85.png",
+            "winner": null
+          },
+          "away": {
+            "id": 97,
+            "name": "Lorient",
+            "logo": "https://media.api-sports.io/football/teams/97.png",
+            "winner": null
+          }
+        },
+        "goals": {
+          "home": 2,
+          "away": 2
+        },
+        "score": {
+          "halftime": {
+            "home": 1,
+            "away": 1
+          },
+          "fulltime": {
+            "home": 2,
+            "away": 2
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1387968,
+          "referee": "J. Stinat",
+          "timezone": "UTC",
+          "date": "2026-04-25T17:00:00+00:00",
+          "timestamp": 1777136400,
+          "periods": {
+            "first": 1777136400,
+            "second": 1777140000
+          },
+          "venue": {
+            "id": 634,
+            "name": "Stade Raymond-Kopa",
+            "city": "Angers"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 4
+          }
+        },
+        "league": {
+          "id": 61,
+          "name": "Ligue 1",
+          "country": "France",
+          "logo": "https://media.api-sports.io/football/leagues/61.png",
+          "flag": "https://media.api-sports.io/flags/fr.svg",
+          "season": 2025,
+          "round": "Regular Season - 31",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 77,
+            "name": "Angers",
+            "logo": "https://media.api-sports.io/football/teams/77.png",
+            "winner": false
+          },
+          "away": {
+            "id": 85,
+            "name": "Paris Saint Germain",
+            "logo": "https://media.api-sports.io/football/teams/85.png",
+            "winner": true
+          }
+        },
+        "goals": {
+          "home": 0,
+          "away": 3
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 2
+          },
+          "fulltime": {
+            "home": 0,
+            "away": 3
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1387929,
+          "referee": "C. Turpin",
+          "timezone": "UTC",
+          "date": "2026-04-22T17:00:00+00:00",
+          "timestamp": 1776877200,
+          "periods": {
+            "first": 1776877200,
+            "second": 1776880800
+          },
+          "venue": {
+            "id": 671,
+            "name": "Parc des Princes",
+            "city": "Paris"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 4
+          }
+        },
+        "league": {
+          "id": 61,
+          "name": "Ligue 1",
+          "country": "France",
+          "logo": "https://media.api-sports.io/football/leagues/61.png",
+          "flag": "https://media.api-sports.io/flags/fr.svg",
+          "season": 2025,
+          "round": "Regular Season - 26",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 85,
+            "name": "Paris Saint Germain",
+            "logo": "https://media.api-sports.io/football/teams/85.png",
+            "winner": true
+          },
+          "away": {
+            "id": 83,
+            "name": "Nantes",
+            "logo": "https://media.api-sports.io/football/teams/83.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 3,
+          "away": 0
+        },
+        "score": {
+          "halftime": {
+            "home": 2,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 3,
+            "away": 0
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1387966,
+          "referee": "J. Brisard",
+          "timezone": "UTC",
+          "date": "2026-04-19T18:45:00+00:00",
+          "timestamp": 1776624300,
+          "periods": {
+            "first": 1776624300,
+            "second": 1776627900
+          },
+          "venue": {
+            "id": 671,
+            "name": "Parc des Princes",
+            "city": "Paris"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 5
+          }
+        },
+        "league": {
+          "id": 61,
+          "name": "Ligue 1",
+          "country": "France",
+          "logo": "https://media.api-sports.io/football/leagues/61.png",
+          "flag": "https://media.api-sports.io/flags/fr.svg",
+          "season": 2025,
+          "round": "Regular Season - 30",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 85,
+            "name": "Paris Saint Germain",
+            "logo": "https://media.api-sports.io/football/teams/85.png",
+            "winner": false
+          },
+          "away": {
+            "id": 80,
+            "name": "Lyon",
+            "logo": "https://media.api-sports.io/football/teams/80.png",
+            "winner": true
+          }
+        },
+        "goals": {
+          "home": 1,
+          "away": 2
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 2
+          },
+          "fulltime": {
+            "home": 1,
+            "away": 2
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1387948,
+          "referee": "E. Wattellier",
+          "timezone": "UTC",
+          "date": "2026-04-03T18:45:00+00:00",
+          "timestamp": 1775241900,
+          "periods": {
+            "first": 1775241900,
+            "second": 1775245500
+          },
+          "venue": {
+            "id": 671,
+            "name": "Parc des Princes",
+            "city": "Paris"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 4
+          }
+        },
+        "league": {
+          "id": 61,
+          "name": "Ligue 1",
+          "country": "France",
+          "logo": "https://media.api-sports.io/football/leagues/61.png",
+          "flag": "https://media.api-sports.io/flags/fr.svg",
+          "season": 2025,
+          "round": "Regular Season - 28",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 85,
+            "name": "Paris Saint Germain",
+            "logo": "https://media.api-sports.io/football/teams/85.png",
+            "winner": true
+          },
+          "away": {
+            "id": 96,
+            "name": "Toulouse",
+            "logo": "https://media.api-sports.io/football/teams/96.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 3,
+          "away": 1
+        },
+        "score": {
+          "halftime": {
+            "home": 2,
+            "away": 1
+          },
+          "fulltime": {
+            "home": 3,
+            "away": 1
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1387937,
+          "referee": "W. Delajod",
+          "timezone": "UTC",
+          "date": "2026-03-21T20:05:00+00:00",
+          "timestamp": 1774123500,
+          "periods": {
+            "first": 1774123500,
+            "second": 1774127100
+          },
+          "venue": {
+            "id": 663,
+            "name": "Allianz Riviera",
+            "city": "Nice"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 3
+          }
+        },
+        "league": {
+          "id": 61,
+          "name": "Ligue 1",
+          "country": "France",
+          "logo": "https://media.api-sports.io/football/leagues/61.png",
+          "flag": "https://media.api-sports.io/flags/fr.svg",
+          "season": 2025,
+          "round": "Regular Season - 27",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 84,
+            "name": "Nice",
+            "logo": "https://media.api-sports.io/football/teams/84.png",
+            "winner": false
+          },
+          "away": {
+            "id": 85,
+            "name": "Paris Saint Germain",
+            "logo": "https://media.api-sports.io/football/teams/85.png",
+            "winner": true
+          }
+        },
+        "goals": {
+          "home": 0,
+          "away": 4
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 1
+          },
+          "fulltime": {
+            "home": 0,
+            "away": 4
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1387921,
+          "referee": "R. Buquet",
+          "timezone": "UTC",
+          "date": "2026-03-06T19:45:00+00:00",
+          "timestamp": 1772826300,
+          "periods": {
+            "first": 1772826300,
+            "second": 1772829900
+          },
+          "venue": {
+            "id": 671,
+            "name": "Parc des Princes",
+            "city": "Paris"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 7
+          }
+        },
+        "league": {
+          "id": 61,
+          "name": "Ligue 1",
+          "country": "France",
+          "logo": "https://media.api-sports.io/football/leagues/61.png",
+          "flag": "https://media.api-sports.io/flags/fr.svg",
+          "season": 2025,
+          "round": "Regular Season - 25",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 85,
+            "name": "Paris Saint Germain",
+            "logo": "https://media.api-sports.io/football/teams/85.png",
+            "winner": false
+          },
+          "away": {
+            "id": 91,
+            "name": "Monaco",
+            "logo": "https://media.api-sports.io/football/teams/91.png",
+            "winner": true
+          }
+        },
+        "goals": {
+          "home": 1,
+          "away": 3
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 1
+          },
+          "fulltime": {
+            "home": 1,
+            "away": 3
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1387905,
+          "referee": "M. Bollengier",
+          "timezone": "UTC",
+          "date": "2026-02-28T20:05:00+00:00",
+          "timestamp": 1772309100,
+          "periods": {
+            "first": 1772309100,
+            "second": 1772312700
+          },
+          "venue": {
+            "id": 652,
+            "name": "Stade Oc\u00e9ane",
+            "city": "Le Havre"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 5
+          }
+        },
+        "league": {
+          "id": 61,
+          "name": "Ligue 1",
+          "country": "France",
+          "logo": "https://media.api-sports.io/football/leagues/61.png",
+          "flag": "https://media.api-sports.io/flags/fr.svg",
+          "season": 2025,
+          "round": "Regular Season - 24",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 111,
+            "name": "Le Havre",
+            "logo": "https://media.api-sports.io/football/teams/111.png",
+            "winner": false
+          },
+          "away": {
+            "id": 85,
+            "name": "Paris Saint Germain",
+            "logo": "https://media.api-sports.io/football/teams/85.png",
+            "winner": true
+          }
+        },
+        "goals": {
+          "home": 0,
+          "away": 1
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 1
+          },
+          "fulltime": {
+            "home": 0,
+            "away": 1
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1387902,
+          "referee": "A. Kherradji",
+          "timezone": "UTC",
+          "date": "2026-02-21T20:05:00+00:00",
+          "timestamp": 1771704300,
+          "periods": {
+            "first": 1771704300,
+            "second": 1771707900
+          },
+          "venue": {
+            "id": 671,
+            "name": "Parc des Princes",
+            "city": "Paris"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 3
+          }
+        },
+        "league": {
+          "id": 61,
+          "name": "Ligue 1",
+          "country": "France",
+          "logo": "https://media.api-sports.io/football/leagues/61.png",
+          "flag": "https://media.api-sports.io/flags/fr.svg",
+          "season": 2025,
+          "round": "Regular Season - 23",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 85,
+            "name": "Paris Saint Germain",
+            "logo": "https://media.api-sports.io/football/teams/85.png",
+            "winner": true
+          },
+          "away": {
+            "id": 112,
+            "name": "Metz",
+            "logo": "https://media.api-sports.io/football/teams/112.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 3,
+          "away": 0
+        },
+        "score": {
+          "halftime": {
+            "home": 2,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 3,
+            "away": 0
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      }
+    ]
+  }
+}

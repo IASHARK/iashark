@@ -1,0 +1,238 @@
+{
+  "endpoint": "/fixtures",
+  "params": {
+    "league": 135,
+    "season": 2026,
+    "status": "FT-AET-PEN",
+    "team": 499
+  },
+  "retrieved_at": "2026-09-08T15:58:00Z",
+  "response_hash": "9c66fd75c98aecb6bb632766548d63ec78948b29138ecacbeed863a9dafce522",
+  "response": {
+    "get": "fixtures",
+    "parameters": {
+      "league": "135",
+      "season": "2026",
+      "status": "FT-AET-PEN",
+      "team": "499"
+    },
+    "errors": [],
+    "results": 3,
+    "paging": {
+      "current": 1,
+      "total": 1
+    },
+    "response": [
+      {
+        "fixture": {
+          "id": 1550088,
+          "referee": "Valerio Crezzini, Italy",
+          "timezone": "UTC",
+          "date": "2026-08-23T18:45:00+00:00",
+          "timestamp": 1787510700,
+          "periods": {
+            "first": 1787510700,
+            "second": 1787514300
+          },
+          "venue": {
+            "id": null,
+            "name": "New Balance Arena",
+            "city": "Bergamo"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 5
+          }
+        },
+        "league": {
+          "id": 135,
+          "name": "Serie A",
+          "country": "Italy",
+          "logo": "https://media.api-sports.io/football/leagues/135.png",
+          "flag": "https://media.api-sports.io/flags/it.svg",
+          "season": 2026,
+          "round": "Regular Season - 1",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 499,
+            "name": "Atalanta",
+            "logo": "https://media.api-sports.io/football/teams/499.png",
+            "winner": true
+          },
+          "away": {
+            "id": 488,
+            "name": "Sassuolo",
+            "logo": "https://media.api-sports.io/football/teams/488.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 2,
+          "away": 1
+        },
+        "score": {
+          "halftime": {
+            "home": 1,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 2,
+            "away": 1
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1550098,
+          "referee": "Daniele Doveri, Italy",
+          "timezone": "UTC",
+          "date": "2026-08-31T18:45:00+00:00",
+          "timestamp": 1788201900,
+          "periods": {
+            "first": 1788201900,
+            "second": 1788205500
+          },
+          "venue": {
+            "id": null,
+            "name": "New Balance Arena",
+            "city": "Bergamo"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 7
+          }
+        },
+        "league": {
+          "id": 135,
+          "name": "Serie A",
+          "country": "Italy",
+          "logo": "https://media.api-sports.io/football/leagues/135.png",
+          "flag": "https://media.api-sports.io/flags/it.svg",
+          "season": 2026,
+          "round": "Regular Season - 2",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 499,
+            "name": "Atalanta",
+            "logo": "https://media.api-sports.io/football/teams/499.png",
+            "winner": true
+          },
+          "away": {
+            "id": 500,
+            "name": "Bologna",
+            "logo": "https://media.api-sports.io/football/teams/500.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 1,
+          "away": 0
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 1,
+            "away": 0
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1550107,
+          "referee": "Andrea Colombo, Italy",
+          "timezone": "UTC",
+          "date": "2026-09-05T18:45:00+00:00",
+          "timestamp": 1788633900,
+          "periods": {
+            "first": null,
+            "second": null
+          },
+          "venue": {
+            "id": null,
+            "name": "Stadio Olimpico",
+            "city": "Rome"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": null
+          }
+        },
+        "league": {
+          "id": 135,
+          "name": "Serie A",
+          "country": "Italy",
+          "logo": "https://media.api-sports.io/football/leagues/135.png",
+          "flag": "https://media.api-sports.io/flags/it.svg",
+          "season": 2026,
+          "round": "Regular Season - 3",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 497,
+            "name": "AS Roma",
+            "logo": "https://media.api-sports.io/football/teams/497.png",
+            "winner": true
+          },
+          "away": {
+            "id": 499,
+            "name": "Atalanta",
+            "logo": "https://media.api-sports.io/football/teams/499.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 2,
+          "away": 1
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 2,
+            "away": 1
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,96 @@
+{
+  "endpoint": "/fixtures",
+  "params": {
+    "last": 1,
+    "status": "FT-AET-PEN",
+    "team": 252
+  },
+  "retrieved_at": "2026-09-08T16:05:19Z",
+  "response_hash": "0e4bc5e97deae62803e2b8e3e053d124252b3298b38c193243248e046cdf6a74",
+  "response": {
+    "get": "fixtures",
+    "parameters": {
+      "last": "1",
+      "status": "FT-AET-PEN",
+      "team": "252"
+    },
+    "errors": [],
+    "results": 1,
+    "paging": {
+      "current": 1,
+      "total": 1
+    },
+    "response": [
+      {
+        "fixture": {
+          "id": 1556658,
+          "referee": "J. Beaton",
+          "timezone": "UTC",
+          "date": "2026-09-05T14:00:00+00:00",
+          "timestamp": 1788616800,
+          "periods": {
+            "first": 1788616800,
+            "second": 1788620400
+          },
+          "venue": {
+            "id": 1383,
+            "name": "Pittodrie Stadium",
+            "city": "Aberdeen"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": null
+          }
+        },
+        "league": {
+          "id": 179,
+          "name": "Premiership",
+          "country": "Scotland",
+          "logo": "https://media.api-sports.io/football/leagues/179.png",
+          "flag": "https://media.api-sports.io/flags/gb-sct.svg",
+          "season": 2026,
+          "round": "Regular Season - 6",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 252,
+            "name": "Aberdeen",
+            "logo": "https://media.api-sports.io/football/teams/252.png",
+            "winner": null
+          },
+          "away": {
+            "id": 250,
+            "name": "Kilmarnock",
+            "logo": "https://media.api-sports.io/football/teams/250.png",
+            "winner": null
+          }
+        },
+        "goals": {
+          "home": 0,
+          "away": 0
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 0,
+            "away": 0
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      }
+    ]
+  }
+}

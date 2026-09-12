@@ -1,0 +1,238 @@
+{
+  "endpoint": "/fixtures",
+  "params": {
+    "league": 39,
+    "season": 2026,
+    "status": "FT-AET-PEN",
+    "team": 33
+  },
+  "retrieved_at": "2026-09-08T15:24:51Z",
+  "response_hash": "1860b809ee663e66c5fbc945c97956a7e12e7d45be2324390aeea95bf7273d9a",
+  "response": {
+    "get": "fixtures",
+    "parameters": {
+      "league": "39",
+      "season": "2026",
+      "status": "FT-AET-PEN",
+      "team": "33"
+    },
+    "errors": [],
+    "results": 3,
+    "paging": {
+      "current": 1,
+      "total": 1
+    },
+    "response": [
+      {
+        "fixture": {
+          "id": 1557368,
+          "referee": "Darren England, England",
+          "timezone": "UTC",
+          "date": "2026-08-22T11:30:00+00:00",
+          "timestamp": 1787398200,
+          "periods": {
+            "first": 1787398200,
+            "second": 1787401800
+          },
+          "venue": {
+            "id": null,
+            "name": "MKM Stadium",
+            "city": "Hull"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 7
+          }
+        },
+        "league": {
+          "id": 39,
+          "name": "Premier League",
+          "country": "England",
+          "logo": "https://media.api-sports.io/football/leagues/39.png",
+          "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+          "season": 2026,
+          "round": "Regular Season - 1",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 64,
+            "name": "Hull City",
+            "logo": "https://media.api-sports.io/football/teams/64.png",
+            "winner": true
+          },
+          "away": {
+            "id": 33,
+            "name": "Manchester United",
+            "logo": "https://media.api-sports.io/football/teams/33.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 2,
+          "away": 0
+        },
+        "score": {
+          "halftime": {
+            "home": 2,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 2,
+            "away": 0
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1557384,
+          "referee": "Craig Pawson, England",
+          "timezone": "UTC",
+          "date": "2026-08-30T15:30:00+00:00",
+          "timestamp": 1788103800,
+          "periods": {
+            "first": 1788103800,
+            "second": 1788107400
+          },
+          "venue": {
+            "id": 556,
+            "name": "Old Trafford",
+            "city": "Manchester"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 9
+          }
+        },
+        "league": {
+          "id": 39,
+          "name": "Premier League",
+          "country": "England",
+          "logo": "https://media.api-sports.io/football/leagues/39.png",
+          "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+          "season": 2026,
+          "round": "Regular Season - 2",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 33,
+            "name": "Manchester United",
+            "logo": "https://media.api-sports.io/football/teams/33.png",
+            "winner": true
+          },
+          "away": {
+            "id": 57,
+            "name": "Ipswich",
+            "logo": "https://media.api-sports.io/football/teams/57.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 5,
+          "away": 2
+        },
+        "score": {
+          "halftime": {
+            "home": 1,
+            "away": 1
+          },
+          "fulltime": {
+            "home": 5,
+            "away": 2
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1557390,
+          "referee": "John Brooks, England",
+          "timezone": "UTC",
+          "date": "2026-09-06T13:00:00+00:00",
+          "timestamp": 1788699600,
+          "periods": {
+            "first": null,
+            "second": null
+          },
+          "venue": {
+            "id": null,
+            "name": "Hill Dickinson Stadium",
+            "city": "Liverpool"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": null
+          }
+        },
+        "league": {
+          "id": 39,
+          "name": "Premier League",
+          "country": "England",
+          "logo": "https://media.api-sports.io/football/leagues/39.png",
+          "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+          "season": 2026,
+          "round": "Regular Season - 3",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 45,
+            "name": "Everton",
+            "logo": "https://media.api-sports.io/football/teams/45.png",
+            "winner": null
+          },
+          "away": {
+            "id": 33,
+            "name": "Manchester United",
+            "logo": "https://media.api-sports.io/football/teams/33.png",
+            "winner": null
+          }
+        },
+        "goals": {
+          "home": 2,
+          "away": 2
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 2,
+            "away": 2
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,96 @@
+{
+  "endpoint": "/fixtures",
+  "params": {
+    "last": 1,
+    "status": "FT-AET-PEN",
+    "team": 3573
+  },
+  "retrieved_at": "2026-09-08T15:26:56Z",
+  "response_hash": "be53dacd8eb1b6f71f05ce90aee767be2a7938b9e70ba5566ebd60324e91e385",
+  "response": {
+    "get": "fixtures",
+    "parameters": {
+      "last": "1",
+      "status": "FT-AET-PEN",
+      "team": "3573"
+    },
+    "errors": [],
+    "results": 1,
+    "paging": {
+      "current": 1,
+      "total": 1
+    },
+    "response": [
+      {
+        "fixture": {
+          "id": 1584398,
+          "referee": "Umit Ozturk, T\u00fcrkiye",
+          "timezone": "UTC",
+          "date": "2026-09-07T17:00:00+00:00",
+          "timestamp": 1788800400,
+          "periods": {
+            "first": null,
+            "second": null
+          },
+          "venue": {
+            "id": null,
+            "name": "Gursel Aksel Stadium",
+            "city": "Izmir"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": null
+          }
+        },
+        "league": {
+          "id": 203,
+          "name": "S\u00fcper Lig",
+          "country": "Turkey",
+          "logo": "https://media.api-sports.io/football/leagues/203.png",
+          "flag": "https://media.api-sports.io/flags/tr.svg",
+          "season": 2026,
+          "round": "Regular Season - 4",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 994,
+            "name": "G\u00f6ztepe",
+            "logo": "https://media.api-sports.io/football/teams/994.png",
+            "winner": false
+          },
+          "away": {
+            "id": 3573,
+            "name": "Gaziantep FK",
+            "logo": "https://media.api-sports.io/football/teams/3573.png",
+            "winner": true
+          }
+        },
+        "goals": {
+          "home": 2,
+          "away": 4
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 4
+          },
+          "fulltime": {
+            "home": 2,
+            "away": 4
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      }
+    ]
+  }
+}

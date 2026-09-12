@@ -1,0 +1,238 @@
+{
+  "endpoint": "/fixtures",
+  "params": {
+    "league": 135,
+    "season": 2026,
+    "status": "FT-AET-PEN",
+    "team": 495
+  },
+  "retrieved_at": "2026-09-08T15:58:22Z",
+  "response_hash": "0f99e978831294e4781c27ced476f6dfa02c81c4c73a3d6464643322056861c3",
+  "response": {
+    "get": "fixtures",
+    "parameters": {
+      "league": "135",
+      "season": "2026",
+      "status": "FT-AET-PEN",
+      "team": "495"
+    },
+    "errors": [],
+    "results": 3,
+    "paging": {
+      "current": 1,
+      "total": 1
+    },
+    "response": [
+      {
+        "fixture": {
+          "id": 1550091,
+          "referee": "Marco Di Bello, Italy",
+          "timezone": "UTC",
+          "date": "2026-08-22T18:45:00+00:00",
+          "timestamp": 1787424300,
+          "periods": {
+            "first": 1787424300,
+            "second": 1787427900
+          },
+          "venue": {
+            "id": null,
+            "name": "Luigi Ferraris",
+            "city": "Genova"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 6
+          }
+        },
+        "league": {
+          "id": 135,
+          "name": "Serie A",
+          "country": "Italy",
+          "logo": "https://media.api-sports.io/football/leagues/135.png",
+          "flag": "https://media.api-sports.io/flags/it.svg",
+          "season": 2026,
+          "round": "Regular Season - 1",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 495,
+            "name": "Genoa",
+            "logo": "https://media.api-sports.io/football/teams/495.png",
+            "winner": false
+          },
+          "away": {
+            "id": 492,
+            "name": "Napoli",
+            "logo": "https://media.api-sports.io/football/teams/492.png",
+            "winner": true
+          }
+        },
+        "goals": {
+          "home": 0,
+          "away": 2
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 0,
+            "away": 2
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1550102,
+          "referee": "Ermanno Feliciani, Italy",
+          "timezone": "UTC",
+          "date": "2026-08-30T18:45:00+00:00",
+          "timestamp": 1788115500,
+          "periods": {
+            "first": 1788115500,
+            "second": 1788119100
+          },
+          "venue": {
+            "id": null,
+            "name": "Stadio Olimpico",
+            "city": "Rome"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 7
+          }
+        },
+        "league": {
+          "id": 135,
+          "name": "Serie A",
+          "country": "Italy",
+          "logo": "https://media.api-sports.io/football/leagues/135.png",
+          "flag": "https://media.api-sports.io/flags/it.svg",
+          "season": 2026,
+          "round": "Regular Season - 2",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 487,
+            "name": "Lazio",
+            "logo": "https://media.api-sports.io/football/teams/487.png",
+            "winner": true
+          },
+          "away": {
+            "id": 495,
+            "name": "Genoa",
+            "logo": "https://media.api-sports.io/football/teams/495.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 1,
+          "away": 0
+        },
+        "score": {
+          "halftime": {
+            "home": 1,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 1,
+            "away": 0
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1550112,
+          "referee": "Marco Guida, Italy",
+          "timezone": "UTC",
+          "date": "2026-09-04T18:45:00+00:00",
+          "timestamp": 1788547500,
+          "periods": {
+            "first": null,
+            "second": null
+          },
+          "venue": {
+            "id": null,
+            "name": "Luigi Ferraris",
+            "city": "Genova"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": null
+          }
+        },
+        "league": {
+          "id": 135,
+          "name": "Serie A",
+          "country": "Italy",
+          "logo": "https://media.api-sports.io/football/leagues/135.png",
+          "flag": "https://media.api-sports.io/flags/it.svg",
+          "season": 2026,
+          "round": "Regular Season - 3",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 495,
+            "name": "Genoa",
+            "logo": "https://media.api-sports.io/football/teams/495.png",
+            "winner": false
+          },
+          "away": {
+            "id": 895,
+            "name": "Como",
+            "logo": "https://media.api-sports.io/football/teams/895.png",
+            "winner": true
+          }
+        },
+        "goals": {
+          "home": 1,
+          "away": 4
+        },
+        "score": {
+          "halftime": {
+            "home": 1,
+            "away": 3
+          },
+          "fulltime": {
+            "home": 1,
+            "away": 4
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,866 @@
+{
+  "endpoint": "/fixtures",
+  "params": {
+    "last": 12,
+    "status": "FT-AET-PEN",
+    "team": 1609
+  },
+  "retrieved_at": "2026-09-08T16:03:56Z",
+  "response_hash": "6989378d324ebe10956aa9871ebd7400503f615d64f252c9f9416498782962ab",
+  "response": {
+    "get": "fixtures",
+    "parameters": {
+      "last": "12",
+      "status": "FT-AET-PEN",
+      "team": "1609"
+    },
+    "errors": [],
+    "results": 12,
+    "paging": {
+      "current": 1,
+      "total": 1
+    },
+    "response": [
+      {
+        "fixture": {
+          "id": 1490448,
+          "referee": null,
+          "timezone": "UTC",
+          "date": "2026-09-06T01:30:00+00:00",
+          "timestamp": 1788658200,
+          "periods": {
+            "first": null,
+            "second": null
+          },
+          "venue": {
+            "id": null,
+            "name": "Dignity Health Sports Park",
+            "city": "Los Angeles"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": null
+          }
+        },
+        "league": {
+          "id": 253,
+          "name": "Major League Soccer",
+          "country": "USA",
+          "logo": "https://media.api-sports.io/football/leagues/253.png",
+          "flag": "https://media.api-sports.io/flags/us.svg",
+          "season": 2026,
+          "round": "Regular Season - 23",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 1605,
+            "name": "Los Angeles Galaxy",
+            "logo": "https://media.api-sports.io/football/teams/1605.png",
+            "winner": true
+          },
+          "away": {
+            "id": 1609,
+            "name": "New England Revolution",
+            "logo": "https://media.api-sports.io/football/teams/1609.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 2,
+          "away": 1
+        },
+        "score": {
+          "halftime": {
+            "home": 2,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 2,
+            "away": 1
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1490427,
+          "referee": "Jon Freemon, USA",
+          "timezone": "UTC",
+          "date": "2026-08-30T20:30:00+00:00",
+          "timestamp": 1788121800,
+          "periods": {
+            "first": 1788121800,
+            "second": 1788125400
+          },
+          "venue": {
+            "id": null,
+            "name": "Lower.com Field",
+            "city": "Columbus"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 7
+          }
+        },
+        "league": {
+          "id": 253,
+          "name": "Major League Soccer",
+          "country": "USA",
+          "logo": "https://media.api-sports.io/football/leagues/253.png",
+          "flag": "https://media.api-sports.io/flags/us.svg",
+          "season": 2026,
+          "round": "Regular Season - 22",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 1613,
+            "name": "Columbus Crew",
+            "logo": "https://media.api-sports.io/football/teams/1613.png",
+            "winner": false
+          },
+          "away": {
+            "id": 1609,
+            "name": "New England Revolution",
+            "logo": "https://media.api-sports.io/football/teams/1609.png",
+            "winner": true
+          }
+        },
+        "goals": {
+          "home": 1,
+          "away": 3
+        },
+        "score": {
+          "halftime": {
+            "home": 1,
+            "away": 2
+          },
+          "fulltime": {
+            "home": 1,
+            "away": 3
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1490419,
+          "referee": "Guido Gonzales Jr, USA",
+          "timezone": "UTC",
+          "date": "2026-08-23T20:30:00+00:00",
+          "timestamp": 1787517000,
+          "periods": {
+            "first": 1787517000,
+            "second": 1787520600
+          },
+          "venue": {
+            "id": null,
+            "name": "Gillette Stadium",
+            "city": "Foxborough"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 3
+          }
+        },
+        "league": {
+          "id": 253,
+          "name": "Major League Soccer",
+          "country": "USA",
+          "logo": "https://media.api-sports.io/football/leagues/253.png",
+          "flag": "https://media.api-sports.io/flags/us.svg",
+          "season": 2026,
+          "round": "Regular Season - 21",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 1609,
+            "name": "New England Revolution",
+            "logo": "https://media.api-sports.io/football/teams/1609.png",
+            "winner": null
+          },
+          "away": {
+            "id": 1604,
+            "name": "New York City FC",
+            "logo": "https://media.api-sports.io/football/teams/1604.png",
+            "winner": null
+          }
+        },
+        "goals": {
+          "home": 1,
+          "away": 1
+        },
+        "score": {
+          "halftime": {
+            "home": 1,
+            "away": 1
+          },
+          "fulltime": {
+            "home": 1,
+            "away": 1
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1490397,
+          "referee": "Ricardo Fierro, USA",
+          "timezone": "UTC",
+          "date": "2026-08-19T23:30:00+00:00",
+          "timestamp": 1787182200,
+          "periods": {
+            "first": 1787182200,
+            "second": 1787185800
+          },
+          "venue": {
+            "id": null,
+            "name": "Audi Field",
+            "city": "Washington"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 5
+          }
+        },
+        "league": {
+          "id": 253,
+          "name": "Major League Soccer",
+          "country": "USA",
+          "logo": "https://media.api-sports.io/football/leagues/253.png",
+          "flag": "https://media.api-sports.io/flags/us.svg",
+          "season": 2026,
+          "round": "Regular Season - 20",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 1615,
+            "name": "DC United",
+            "logo": "https://media.api-sports.io/football/teams/1615.png",
+            "winner": false
+          },
+          "away": {
+            "id": 1609,
+            "name": "New England Revolution",
+            "logo": "https://media.api-sports.io/football/teams/1609.png",
+            "winner": true
+          }
+        },
+        "goals": {
+          "home": 0,
+          "away": 3
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 2
+          },
+          "fulltime": {
+            "home": 0,
+            "away": 3
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1490379,
+          "referee": "J. Dickerson",
+          "timezone": "UTC",
+          "date": "2026-08-15T23:30:00+00:00",
+          "timestamp": 1786836600,
+          "periods": {
+            "first": 1786836600,
+            "second": 1786840200
+          },
+          "venue": {
+            "id": null,
+            "name": "BMO Field",
+            "city": "Toronto"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 6
+          }
+        },
+        "league": {
+          "id": 253,
+          "name": "Major League Soccer",
+          "country": "USA",
+          "logo": "https://media.api-sports.io/football/leagues/253.png",
+          "flag": "https://media.api-sports.io/flags/us.svg",
+          "season": 2026,
+          "round": "Regular Season - 19",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 1601,
+            "name": "Toronto FC",
+            "logo": "https://media.api-sports.io/football/teams/1601.png",
+            "winner": true
+          },
+          "away": {
+            "id": 1609,
+            "name": "New England Revolution",
+            "logo": "https://media.api-sports.io/football/teams/1609.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 2,
+          "away": 1
+        },
+        "score": {
+          "halftime": {
+            "home": 2,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 2,
+            "away": 1
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1490136,
+          "referee": "Malik Badawi, USA",
+          "timezone": "UTC",
+          "date": "2026-08-08T20:30:00+00:00",
+          "timestamp": 1786221000,
+          "periods": {
+            "first": 1786221000,
+            "second": 1786224600
+          },
+          "venue": {
+            "id": null,
+            "name": "Gillette Stadium",
+            "city": "Foxborough"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 8
+          }
+        },
+        "league": {
+          "id": 253,
+          "name": "Major League Soccer",
+          "country": "USA",
+          "logo": "https://media.api-sports.io/football/leagues/253.png",
+          "flag": "https://media.api-sports.io/flags/us.svg",
+          "season": 2026,
+          "round": "Regular Season - 3",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 1609,
+            "name": "New England Revolution",
+            "logo": "https://media.api-sports.io/football/teams/1609.png",
+            "winner": false
+          },
+          "away": {
+            "id": 1600,
+            "name": "Houston Dynamo",
+            "logo": "https://media.api-sports.io/football/teams/1600.png",
+            "winner": true
+          }
+        },
+        "goals": {
+          "home": 0,
+          "away": 2
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 1
+          },
+          "fulltime": {
+            "home": 0,
+            "away": 2
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1490368,
+          "referee": "J. Marrufo",
+          "timezone": "UTC",
+          "date": "2026-08-01T23:30:00+00:00",
+          "timestamp": 1785627000,
+          "periods": {
+            "first": 1785627000,
+            "second": 1785630600
+          },
+          "venue": {
+            "id": null,
+            "name": "Saputo Stadium",
+            "city": "Montr\u00e9al"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 4
+          }
+        },
+        "league": {
+          "id": 253,
+          "name": "Major League Soccer",
+          "country": "USA",
+          "logo": "https://media.api-sports.io/football/leagues/253.png",
+          "flag": "https://media.api-sports.io/flags/us.svg",
+          "season": 2026,
+          "round": "Regular Season - 18",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 1614,
+            "name": "CF Montreal",
+            "logo": "https://media.api-sports.io/football/teams/1614.png",
+            "winner": null
+          },
+          "away": {
+            "id": 1609,
+            "name": "New England Revolution",
+            "logo": "https://media.api-sports.io/football/teams/1609.png",
+            "winner": null
+          }
+        },
+        "goals": {
+          "home": 2,
+          "away": 2
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 2
+          },
+          "fulltime": {
+            "home": 2,
+            "away": 2
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1490351,
+          "referee": "Pierre-Luc Lauziere, USA",
+          "timezone": "UTC",
+          "date": "2026-07-25T23:30:00+00:00",
+          "timestamp": 1785022200,
+          "periods": {
+            "first": 1785022200,
+            "second": 1785025800
+          },
+          "venue": {
+            "id": null,
+            "name": "Gillette Stadium",
+            "city": "Foxborough"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 7
+          }
+        },
+        "league": {
+          "id": 253,
+          "name": "Major League Soccer",
+          "country": "USA",
+          "logo": "https://media.api-sports.io/football/leagues/253.png",
+          "flag": "https://media.api-sports.io/flags/us.svg",
+          "season": 2026,
+          "round": "Regular Season - 17",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 1609,
+            "name": "New England Revolution",
+            "logo": "https://media.api-sports.io/football/teams/1609.png",
+            "winner": true
+          },
+          "away": {
+            "id": 1608,
+            "name": "Atlanta United FC",
+            "logo": "https://media.api-sports.io/football/teams/1608.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 4,
+          "away": 1
+        },
+        "score": {
+          "halftime": {
+            "home": 2,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 4,
+            "away": 1
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1490335,
+          "referee": "Sergii Demianchuk, USA",
+          "timezone": "UTC",
+          "date": "2026-07-22T23:30:00+00:00",
+          "timestamp": 1784763000,
+          "periods": {
+            "first": 1784763000,
+            "second": 1784766600
+          },
+          "venue": {
+            "id": null,
+            "name": "Gillette Stadium",
+            "city": "Foxborough"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 6
+          }
+        },
+        "league": {
+          "id": 253,
+          "name": "Major League Soccer",
+          "country": "USA",
+          "logo": "https://media.api-sports.io/football/leagues/253.png",
+          "flag": "https://media.api-sports.io/flags/us.svg",
+          "season": 2026,
+          "round": "Regular Season - 16",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 1609,
+            "name": "New England Revolution",
+            "logo": "https://media.api-sports.io/football/teams/1609.png",
+            "winner": null
+          },
+          "away": {
+            "id": 1601,
+            "name": "Toronto FC",
+            "logo": "https://media.api-sports.io/football/teams/1601.png",
+            "winner": null
+          }
+        },
+        "goals": {
+          "home": 0,
+          "away": 0
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 0,
+            "away": 0
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1490312,
+          "referee": "F. Bazakos",
+          "timezone": "UTC",
+          "date": "2026-05-23T23:30:00+00:00",
+          "timestamp": 1779579000,
+          "periods": {
+            "first": 1779579000,
+            "second": 1779582600
+          },
+          "venue": {
+            "id": null,
+            "name": "Bank of America Stadium",
+            "city": "Charlotte"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 5
+          }
+        },
+        "league": {
+          "id": 253,
+          "name": "Major League Soccer",
+          "country": "USA",
+          "logo": "https://media.api-sports.io/football/leagues/253.png",
+          "flag": "https://media.api-sports.io/flags/us.svg",
+          "season": 2026,
+          "round": "Regular Season - 15",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 18310,
+            "name": "Charlotte",
+            "logo": "https://media.api-sports.io/football/teams/18310.png",
+            "winner": true
+          },
+          "away": {
+            "id": 1609,
+            "name": "New England Revolution",
+            "logo": "https://media.api-sports.io/football/teams/1609.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 1,
+          "away": 0
+        },
+        "score": {
+          "halftime": {
+            "home": 1,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 1,
+            "away": 0
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1490300,
+          "referee": "R. Mendoza",
+          "timezone": "UTC",
+          "date": "2026-05-16T23:30:00+00:00",
+          "timestamp": 1778974200,
+          "periods": {
+            "first": 1778974200,
+            "second": 1778977800
+          },
+          "venue": {
+            "id": null,
+            "name": "Gillette Stadium",
+            "city": "Foxborough"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 6
+          }
+        },
+        "league": {
+          "id": 253,
+          "name": "Major League Soccer",
+          "country": "USA",
+          "logo": "https://media.api-sports.io/football/leagues/253.png",
+          "flag": "https://media.api-sports.io/flags/us.svg",
+          "season": 2026,
+          "round": "Regular Season - 14",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 1609,
+            "name": "New England Revolution",
+            "logo": "https://media.api-sports.io/football/teams/1609.png",
+            "winner": true
+          },
+          "away": {
+            "id": 1612,
+            "name": "Minnesota United FC",
+            "logo": "https://media.api-sports.io/football/teams/1612.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 2,
+          "away": 1
+        },
+        "score": {
+          "halftime": {
+            "home": 1,
+            "away": 1
+          },
+          "fulltime": {
+            "home": 2,
+            "away": 1
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1490285,
+          "referee": "Sergii Demianchuk, USA",
+          "timezone": "UTC",
+          "date": "2026-05-13T23:30:00+00:00",
+          "timestamp": 1778715000,
+          "periods": {
+            "first": 1778715000,
+            "second": 1778718600
+          },
+          "venue": {
+            "id": null,
+            "name": "Gillette Stadium",
+            "city": "Foxborough"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 6
+          }
+        },
+        "league": {
+          "id": 253,
+          "name": "Major League Soccer",
+          "country": "USA",
+          "logo": "https://media.api-sports.io/football/leagues/253.png",
+          "flag": "https://media.api-sports.io/flags/us.svg",
+          "season": 2026,
+          "round": "Regular Season - 13",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 1609,
+            "name": "New England Revolution",
+            "logo": "https://media.api-sports.io/football/teams/1609.png",
+            "winner": false
+          },
+          "away": {
+            "id": 9569,
+            "name": "Nashville SC",
+            "logo": "https://media.api-sports.io/football/teams/9569.png",
+            "winner": true
+          }
+        },
+        "goals": {
+          "home": 0,
+          "away": 3
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 2
+          },
+          "fulltime": {
+            "home": 0,
+            "away": 3
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      }
+    ]
+  }
+}

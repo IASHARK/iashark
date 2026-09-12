@@ -1,0 +1,308 @@
+{
+  "endpoint": "/fixtures",
+  "params": {
+    "league": 88,
+    "season": 2026,
+    "status": "FT-AET-PEN",
+    "team": 427
+  },
+  "retrieved_at": "2026-09-08T16:01:19Z",
+  "response_hash": "2b249fa650bd33245ac10636364524c5668c0abe25fead26777b276497d1a2f9",
+  "response": {
+    "get": "fixtures",
+    "parameters": {
+      "league": "88",
+      "season": "2026",
+      "status": "FT-AET-PEN",
+      "team": "427"
+    },
+    "errors": [],
+    "results": 4,
+    "paging": {
+      "current": 1,
+      "total": 1
+    },
+    "response": [
+      {
+        "fixture": {
+          "id": 1552118,
+          "referee": "Allard Lindhout, Netherlands",
+          "timezone": "UTC",
+          "date": "2026-08-08T14:30:00+00:00",
+          "timestamp": 1786199400,
+          "periods": {
+            "first": 1786199400,
+            "second": 1786203000
+          },
+          "venue": {
+            "id": 1140,
+            "name": "Stadion de Goffert",
+            "city": "Nijmegen"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 6
+          }
+        },
+        "league": {
+          "id": 88,
+          "name": "Eredivisie",
+          "country": "Netherlands",
+          "logo": "https://media.api-sports.io/football/leagues/88.png",
+          "flag": "https://media.api-sports.io/flags/nl.svg",
+          "season": 2026,
+          "round": "Regular Season - 1",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 413,
+            "name": "NEC Nijmegen",
+            "logo": "https://media.api-sports.io/football/teams/413.png",
+            "winner": false
+          },
+          "away": {
+            "id": 427,
+            "name": "Telstar",
+            "logo": "https://media.api-sports.io/football/teams/427.png",
+            "winner": true
+          }
+        },
+        "goals": {
+          "home": 1,
+          "away": 2
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 2
+          },
+          "fulltime": {
+            "home": 1,
+            "away": 2
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1552126,
+          "referee": "Ingmar Oostrom, Netherlands",
+          "timezone": "UTC",
+          "date": "2026-08-14T18:00:00+00:00",
+          "timestamp": 1786730400,
+          "periods": {
+            "first": 1786730400,
+            "second": 1786734000
+          },
+          "venue": {
+            "id": null,
+            "name": "BUKO Stadion",
+            "city": "Velsen"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 8
+          }
+        },
+        "league": {
+          "id": 88,
+          "name": "Eredivisie",
+          "country": "Netherlands",
+          "logo": "https://media.api-sports.io/football/leagues/88.png",
+          "flag": "https://media.api-sports.io/flags/nl.svg",
+          "season": 2026,
+          "round": "Regular Season - 2",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 427,
+            "name": "Telstar",
+            "logo": "https://media.api-sports.io/football/teams/427.png",
+            "winner": false
+          },
+          "away": {
+            "id": 426,
+            "name": "Sparta Rotterdam",
+            "logo": "https://media.api-sports.io/football/teams/426.png",
+            "winner": true
+          }
+        },
+        "goals": {
+          "home": 1,
+          "away": 3
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 1
+          },
+          "fulltime": {
+            "home": 1,
+            "away": 3
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1552151,
+          "referee": "Dennis Higler, Netherlands",
+          "timezone": "UTC",
+          "date": "2026-08-30T14:45:00+00:00",
+          "timestamp": 1788101100,
+          "periods": {
+            "first": 1788101100,
+            "second": 1788104700
+          },
+          "venue": {
+            "id": null,
+            "name": "BUKO Stadion",
+            "city": "Velsen"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 2
+          }
+        },
+        "league": {
+          "id": 88,
+          "name": "Eredivisie",
+          "country": "Netherlands",
+          "logo": "https://media.api-sports.io/football/leagues/88.png",
+          "flag": "https://media.api-sports.io/flags/nl.svg",
+          "season": 2026,
+          "round": "Regular Season - 4",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 427,
+            "name": "Telstar",
+            "logo": "https://media.api-sports.io/football/teams/427.png",
+            "winner": false
+          },
+          "away": {
+            "id": 194,
+            "name": "Ajax",
+            "logo": "https://media.api-sports.io/football/teams/194.png",
+            "winner": true
+          }
+        },
+        "goals": {
+          "home": 0,
+          "away": 4
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 1
+          },
+          "fulltime": {
+            "home": 0,
+            "away": 4
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1552160,
+          "referee": "Joey Kooij, Netherlands",
+          "timezone": "UTC",
+          "date": "2026-09-06T12:30:00+00:00",
+          "timestamp": 1788697800,
+          "periods": {
+            "first": null,
+            "second": null
+          },
+          "venue": {
+            "id": null,
+            "name": "BUKO Stadion",
+            "city": "Velsen"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": null
+          }
+        },
+        "league": {
+          "id": 88,
+          "name": "Eredivisie",
+          "country": "Netherlands",
+          "logo": "https://media.api-sports.io/football/leagues/88.png",
+          "flag": "https://media.api-sports.io/flags/nl.svg",
+          "season": 2026,
+          "round": "Regular Season - 5",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 427,
+            "name": "Telstar",
+            "logo": "https://media.api-sports.io/football/teams/427.png",
+            "winner": null
+          },
+          "away": {
+            "id": 420,
+            "name": "Cambuur",
+            "logo": "https://media.api-sports.io/football/teams/420.png",
+            "winner": null
+          }
+        },
+        "goals": {
+          "home": 2,
+          "away": 2
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 2,
+            "away": 2
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      }
+    ]
+  }
+}

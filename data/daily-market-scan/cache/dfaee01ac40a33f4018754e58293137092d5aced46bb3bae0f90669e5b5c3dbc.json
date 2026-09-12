@@ -1,0 +1,238 @@
+{
+  "endpoint": "/fixtures",
+  "params": {
+    "last": 3,
+    "league": 2,
+    "season": 2026,
+    "status": "FT"
+  },
+  "retrieved_at": "2026-09-08T15:24:36Z",
+  "response_hash": "151d3676cfca0431ef26734639f496ca4f21a575aa76f6d029aa746bb869dd71",
+  "response": {
+    "get": "fixtures",
+    "parameters": {
+      "last": "3",
+      "league": "2",
+      "season": "2026",
+      "status": "FT"
+    },
+    "errors": [],
+    "results": 3,
+    "paging": {
+      "current": 1,
+      "total": 1
+    },
+    "response": [
+      {
+        "fixture": {
+          "id": 1622630,
+          "referee": "M. Mariani",
+          "timezone": "UTC",
+          "date": "2026-08-26T19:00:00+00:00",
+          "timestamp": 1787770800,
+          "periods": {
+            "first": 1787770800,
+            "second": 1787774400
+          },
+          "venue": {
+            "id": null,
+            "name": "Parc Olympique Lyonnais",
+            "city": "Lyon"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 7
+          }
+        },
+        "league": {
+          "id": 2,
+          "name": "UEFA Champions League",
+          "country": "World",
+          "logo": "https://media.api-sports.io/football/leagues/2.png",
+          "flag": null,
+          "season": 2026,
+          "round": "Play-offs",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 80,
+            "name": "Lyon",
+            "logo": "https://media.api-sports.io/football/teams/80.png",
+            "winner": false
+          },
+          "away": {
+            "id": 611,
+            "name": "Fenerbah\u00e7e",
+            "logo": "https://media.api-sports.io/football/teams/611.png",
+            "winner": true
+          }
+        },
+        "goals": {
+          "home": 1,
+          "away": 2
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 2
+          },
+          "fulltime": {
+            "home": 1,
+            "away": 2
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1622629,
+          "referee": "C. Turpin",
+          "timezone": "UTC",
+          "date": "2026-08-26T19:00:00+00:00",
+          "timestamp": 1787770800,
+          "periods": {
+            "first": 1787770800,
+            "second": 1787774400
+          },
+          "venue": {
+            "id": null,
+            "name": "Allwyn Arena",
+            "city": "Athens"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 4
+          }
+        },
+        "league": {
+          "id": 2,
+          "name": "UEFA Champions League",
+          "country": "World",
+          "logo": "https://media.api-sports.io/football/leagues/2.png",
+          "flag": null,
+          "season": 2026,
+          "round": "Play-offs",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 575,
+            "name": "AEK Athens FC",
+            "logo": "https://media.api-sports.io/football/teams/575.png",
+            "winner": true
+          },
+          "away": {
+            "id": 646,
+            "name": "Levski Sofia",
+            "logo": "https://media.api-sports.io/football/teams/646.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 4,
+          "away": 0
+        },
+        "score": {
+          "halftime": {
+            "home": 3,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 4,
+            "away": 0
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1622631,
+          "referee": "J. Sanchez",
+          "timezone": "UTC",
+          "date": "2026-08-26T19:00:00+00:00",
+          "timestamp": 1787770800,
+          "periods": {
+            "first": 1787770800,
+            "second": 1787774400
+          },
+          "venue": {
+            "id": null,
+            "name": "Lyse Arena",
+            "city": "Stavanger"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 4
+          }
+        },
+        "league": {
+          "id": 2,
+          "name": "UEFA Champions League",
+          "country": "World",
+          "logo": "https://media.api-sports.io/football/leagues/2.png",
+          "flag": null,
+          "season": 2026,
+          "round": "Play-offs",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 759,
+            "name": "Viking",
+            "logo": "https://media.api-sports.io/football/teams/759.png",
+            "winner": true
+          },
+          "away": {
+            "id": 620,
+            "name": "Dinamo Zagreb",
+            "logo": "https://media.api-sports.io/football/teams/620.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 3,
+          "away": 1
+        },
+        "score": {
+          "halftime": {
+            "home": 1,
+            "away": 1
+          },
+          "fulltime": {
+            "home": 3,
+            "away": 1
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      }
+    ]
+  }
+}

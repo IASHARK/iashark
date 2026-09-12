@@ -1,0 +1,343 @@
+<title>Le contre-pied Fafaa</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap">
+<style>
+:root{
+  --bg:#080c12; --surface:#0d1520; --surface2:#0f1a28;
+  --line:rgba(255,255,255,.07); --line-cyan:rgba(34,211,238,.20);
+  --text:#e2e8f0; --soft:#93a9bd; --muted:#4a6580;
+  --cyan:#22d3ee; --amber:#f59e0b; --green:#10b981; --red:#ef4444;
+  --display:'Bebas Neue',Impact,sans-serif;
+  --body:'DM Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:var(--body);font-size:16px;line-height:1.62;
+  -webkit-font-smoothing:antialiased;padding:0 0 88px}
+.wrap{width:min(760px,calc(100% - 40px));margin:0 auto}
+.wide{width:min(1040px,calc(100% - 32px));margin:0 auto}
+
+/* ---- header ---- */
+header{border-bottom:1px solid var(--line);
+  background:radial-gradient(ellipse 70% 130% at 12% 0%,rgba(34,211,238,.09) 0%,transparent 62%);
+  padding:58px 0 34px;margin-bottom:46px}
+.eyebrow{color:var(--cyan);font-size:13px;font-weight:500;letter-spacing:.06em;margin:0 0 14px}
+h1{font-family:var(--display);font-size:clamp(48px,8vw,82px);line-height:.92;letter-spacing:.015em;
+  margin:0 0 18px;text-wrap:balance}
+.standfirst{font-size:19px;line-height:1.55;color:var(--soft);max-width:62ch;margin:0 0 26px;font-weight:300}
+.standfirst b{color:var(--text);font-weight:500}
+.prov{display:flex;flex-wrap:wrap;gap:8px 26px;font-size:13.5px;color:var(--muted);
+  border-top:1px solid var(--line);padding-top:16px;margin:0}
+.prov span{display:block}
+.prov b{color:var(--soft);font-weight:500;font-variant-numeric:tabular-nums}
+
+/* ---- typography ---- */
+h2{font-family:var(--display);font-size:32px;letter-spacing:.02em;line-height:1.06;
+  margin:0 0 6px;text-wrap:balance}
+.kicker{color:var(--cyan);font-size:13px;font-weight:500;margin:0 0 4px}
+section{margin-bottom:58px}
+p{margin:0 0 17px;max-width:70ch}
+p.lead{font-size:17.5px;color:var(--soft)}
+a{color:var(--cyan)}
+strong{font-weight:600}
+.num{font-variant-numeric:tabular-nums}
+.up{color:var(--green);font-variant-numeric:tabular-nums;font-weight:600}
+.down{color:var(--red);font-variant-numeric:tabular-nums;font-weight:600}
+
+/* ---- distribution strip ---- */
+.chart{margin:26px 0 10px}
+.chart svg{display:block;width:100%;height:auto;overflow:visible}
+.chart rect.n{fill:#22364a}
+.chart rect.f{fill:var(--cyan)}
+.chart rect.s{fill:#1c6d80}
+.medline{stroke:var(--muted);stroke-width:1;stroke-dasharray:3 4}
+.medlab{fill:var(--muted);font-family:var(--body);font-size:11.5px}
+.chartfoot{display:flex;flex-wrap:wrap;gap:8px 22px;font-size:13px;color:var(--muted);margin:14px 0 0}
+.key{display:inline-flex;align-items:center;gap:7px}
+.dot{width:10px;height:10px;border-radius:2px;display:inline-block}
+
+/* ---- table ---- */
+.scroll{overflow-x:auto;margin:24px 0 8px}
+table{border-collapse:collapse;width:100%;min-width:600px;font-size:14.5px}
+th{text-align:left;font-weight:500;color:var(--muted);font-size:13px;padding:0 14px 9px 0;
+  border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:11px 14px 11px 0;border-bottom:1px solid var(--line);vertical-align:top}
+tbody tr:last-child td{border-bottom:none}
+td.r,th.r{text-align:right;padding-right:0;font-variant-numeric:tabular-nums}
+.vtitle{color:var(--text);font-weight:500;display:block;margin-bottom:2px}
+.vdate{color:var(--muted);font-size:12.5px}
+.mult{color:var(--cyan);font-weight:600;font-variant-numeric:tabular-nums}
+
+/* ---- comment evidence ---- */
+.quotes{display:flex;flex-direction:column;gap:2px;margin:24px 0 10px;
+  border-left:2px solid var(--line-cyan);padding-left:20px}
+.q{padding:11px 0;border-bottom:1px solid var(--line)}
+.q:last-child{border-bottom:none}
+.q p{margin:0 0 5px;font-size:16px;max-width:64ch}
+.q .meta{font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.q.hero p{font-size:19px;line-height:1.45;color:var(--text)}
+
+/* ---- the script ---- */
+.scriptbox{background:var(--surface);border:1px solid var(--line-cyan);border-radius:12px;
+  padding:8px 0;margin:26px 0 0}
+.sline{display:grid;grid-template-columns:118px 1fr;gap:20px;padding:13px 24px;align-items:baseline}
+.sline + .sline{border-top:1px solid var(--line)}
+.sline .int{color:var(--cyan);font-size:12.5px;line-height:1.4;opacity:.85}
+.sline .txt{font-size:18px;line-height:1.5}
+.sline.beat .txt{color:var(--text);font-weight:500}
+.scriptmeta{display:flex;flex-wrap:wrap;gap:10px 26px;font-size:13.5px;color:var(--muted);
+  margin:16px 0 0;padding-top:15px;border-top:1px solid var(--line)}
+.scriptmeta b{color:var(--soft);font-weight:500;font-variant-numeric:tabular-nums}
+.ok{color:var(--green);font-weight:600}
+
+/* ---- plain list ---- */
+ol,ul{margin:0 0 17px;padding-left:22px;max-width:70ch}
+li{margin-bottom:9px}
+li::marker{color:var(--muted)}
+
+/* ---- caveat ---- */
+.caveat{border-top:1px solid var(--line);padding-top:22px;color:var(--muted);font-size:14.5px}
+.caveat h2{color:var(--soft);font-size:24px}
+.caveat p{max-width:70ch;margin-bottom:12px}
+
+@media(max-width:620px){
+  header{padding:40px 0 28px;margin-bottom:34px}
+  .sline{grid-template-columns:1fr;gap:5px;padding:14px 18px}
+  .sline .txt{font-size:17px}
+  section{margin-bottom:46px}
+}
+</style>
+
+<header>
+  <div class="wrap">
+    <p class="eyebrow">Analyse de @ia_with_fafaa, appliquée à IAshark</p>
+    <h1>Le contre-pied Fafaa</h1>
+    <p class="standfirst">Ses cinq vidéos football sont <b>toutes au-dessus de sa médiane</b>, et quatre sont dans son top 13. Le moteur n'est pas le prono : c'est que le public revient vérifier après le match. IAshark a exactement ce qu'il faut pour tenir cette boucle, et une chose qu'elle n'a pas.</p>
+    <p class="prov">
+      <span><b>60</b> vidéos analysées (mai à sept. 2026)</span>
+      <span><b>375</b> commentaires lus sur 4 vidéos foot</span>
+      <span><b>138 499</b> abonnés</span>
+      <span>Données extraites le 4 sept. 2026</span>
+    </p>
+  </div>
+</header>
+
+<div class="wrap">
+
+<section>
+  <p class="kicker">Le constat</p>
+  <h2>Le football est sa meilleure verticale, et de loin</h2>
+  <p class="lead">Sur 60 vidéos, sa médiane est de <span class="num">8 667</span> vues. Ses cinq vidéos football font <span class="num">32 344</span>, <span class="num">57 545</span>, <span class="num">67 246</span>, <span class="num">116 123</span> et <span class="num">296 347</span> vues. Aucune sous la médiane, quatre dans son top 13.</p>
+</section>
+
+</div>
+
+<div class="wide">
+  <div class="chart">
+    <svg viewBox="0 0 980 214" role="img" aria-label="Les 60 vidéos classées par vues, échelle logarithmique. Les cinq vidéos football se situent toutes au-dessus de la médiane du compte.">
+      <line class="medline" x1="0" y1="102.6" x2="980" y2="102.6"/>
+      <text class="medlab" x="0" y="96">médiane du compte : 8 667 vues</text>
+      <g>
+<rect class="f" x="0.0" y="2.2" width="12.4" height="187.8" rx="1"/>
+<rect class="n" x="16.4" y="10.6" width="12.4" height="179.4" rx="1"/>
+<rect class="n" x="32.8" y="16.8" width="12.4" height="173.2" rx="1"/>
+<rect class="n" x="49.2" y="21.7" width="12.4" height="168.3" rx="1"/>
+<rect class="f" x="65.6" y="28.8" width="12.4" height="161.2" rx="1"/>
+<rect class="n" x="82.0" y="32.0" width="12.4" height="158.0" rx="1"/>
+<rect class="n" x="98.4" y="33.6" width="12.4" height="156.4" rx="1"/>
+<rect class="n" x="114.8" y="34.8" width="12.4" height="155.2" rx="1"/>
+<rect class="s" x="131.2" y="36.0" width="12.4" height="154.0" rx="1"/>
+<rect class="n" x="147.6" y="38.2" width="12.4" height="151.8" rx="1"/>
+<rect class="f" x="164.0" y="44.3" width="12.4" height="145.7" rx="1"/>
+<rect class="n" x="180.4" y="45.4" width="12.4" height="144.6" rx="1"/>
+<rect class="f" x="196.8" y="48.8" width="12.4" height="141.2" rx="1"/>
+<rect class="n" x="213.2" y="51.4" width="12.4" height="138.6" rx="1"/>
+<rect class="n" x="229.6" y="51.7" width="12.4" height="138.3" rx="1"/>
+<rect class="n" x="246.0" y="59.9" width="12.4" height="130.1" rx="1"/>
+<rect class="n" x="262.4" y="64.3" width="12.4" height="125.7" rx="1"/>
+<rect class="f" x="278.8" y="65.1" width="12.4" height="124.9" rx="1"/>
+<rect class="n" x="295.2" y="67.9" width="12.4" height="122.1" rx="1"/>
+<rect class="n" x="311.6" y="70.6" width="12.4" height="119.4" rx="1"/>
+<rect class="n" x="328.0" y="74.7" width="12.4" height="115.3" rx="1"/>
+<rect class="n" x="344.4" y="81.2" width="12.4" height="108.8" rx="1"/>
+<rect class="n" x="360.8" y="84.0" width="12.4" height="106.0" rx="1"/>
+<rect class="n" x="377.2" y="88.6" width="12.4" height="101.4" rx="1"/>
+<rect class="n" x="393.6" y="90.2" width="12.4" height="99.8" rx="1"/>
+<rect class="n" x="410.0" y="92.8" width="12.4" height="97.2" rx="1"/>
+<rect class="n" x="426.4" y="93.5" width="12.4" height="96.5" rx="1"/>
+<rect class="n" x="442.8" y="94.4" width="12.4" height="95.6" rx="1"/>
+<rect class="n" x="459.2" y="102.1" width="12.4" height="87.9" rx="1"/>
+<rect class="n" x="475.6" y="102.5" width="12.4" height="87.5" rx="1"/>
+<rect class="n" x="492.0" y="102.6" width="12.4" height="87.4" rx="1"/>
+<rect class="n" x="508.4" y="108.1" width="12.4" height="81.9" rx="1"/>
+<rect class="n" x="524.8" y="112.2" width="12.4" height="77.8" rx="1"/>
+<rect class="n" x="541.2" y="112.3" width="12.4" height="77.7" rx="1"/>
+<rect class="n" x="557.6" y="116.0" width="12.4" height="74.0" rx="1"/>
+<rect class="n" x="574.0" y="117.8" width="12.4" height="72.2" rx="1"/>
+<rect class="n" x="590.4" y="117.8" width="12.4" height="72.2" rx="1"/>
+<rect class="n" x="606.8" y="122.3" width="12.4" height="67.7" rx="1"/>
+<rect class="n" x="623.2" y="124.1" width="12.4" height="65.9" rx="1"/>
+<rect class="n" x="639.6" y="124.2" width="12.4" height="65.8" rx="1"/>
+<rect class="n" x="656.0" y="124.4" width="12.4" height="65.6" rx="1"/>
+<rect class="n" x="672.4" y="129.7" width="12.4" height="60.3" rx="1"/>
+<rect class="n" x="688.8" y="132.2" width="12.4" height="57.8" rx="1"/>
+<rect class="n" x="705.2" y="132.3" width="12.4" height="57.7" rx="1"/>
+<rect class="n" x="721.6" y="133.2" width="12.4" height="56.8" rx="1"/>
+<rect class="n" x="738.0" y="134.1" width="12.4" height="55.9" rx="1"/>
+<rect class="n" x="754.4" y="141.9" width="12.4" height="48.1" rx="1"/>
+<rect class="n" x="770.8" y="142.4" width="12.4" height="47.6" rx="1"/>
+<rect class="n" x="787.2" y="143.0" width="12.4" height="47.0" rx="1"/>
+<rect class="n" x="803.6" y="146.6" width="12.4" height="43.4" rx="1"/>
+<rect class="n" x="820.0" y="147.1" width="12.4" height="42.9" rx="1"/>
+<rect class="n" x="836.4" y="150.9" width="12.4" height="39.1" rx="1"/>
+<rect class="n" x="852.8" y="153.3" width="12.4" height="36.7" rx="1"/>
+<rect class="n" x="869.2" y="155.1" width="12.4" height="34.9" rx="1"/>
+<rect class="n" x="885.6" y="155.3" width="12.4" height="34.7" rx="1"/>
+<rect class="n" x="902.0" y="157.7" width="12.4" height="32.3" rx="1"/>
+<rect class="n" x="918.4" y="159.3" width="12.4" height="30.7" rx="1"/>
+<rect class="n" x="934.8" y="165.0" width="12.4" height="25.0" rx="1"/>
+<rect class="n" x="951.2" y="170.3" width="12.4" height="19.7" rx="1"/>
+<rect class="n" x="967.6" y="181.9" width="12.4" height="8.1" rx="1"/>
+      </g>
+      <text class="medlab" x="0" y="208">296 347 vues</text>
+      <text class="medlab" x="980" y="208" text-anchor="end">532 vues</text>
+    </svg>
+    <p class="chartfoot">
+      <span class="key"><i class="dot" style="background:#22d3ee"></i>vidéo football (5)</span>
+      <span class="key"><i class="dot" style="background:#1c6d80"></i>« crée ta Skill IA », exemple foot (1)</span>
+      <span class="key"><i class="dot" style="background:#22364a"></i>autres vidéos (54)</span>
+      <span>échelle logarithmique</span>
+    </p>
+  </div>
+</div>
+
+<div class="wrap">
+
+<section>
+  <div class="scroll">
+    <table>
+      <thead>
+        <tr>
+          <th>Vidéo</th><th class="r">Vues</th><th class="r">vs médiane</th>
+          <th class="r">Comm.</th><th class="r">Taux comm.</th><th class="r">Durée</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td><span class="vtitle">« J'ai demandé à un agent IA de prédire les prochains matchs »</span><span class="vdate">26 juin</span></td>
+          <td class="r">296 347</td><td class="r mult">×34,2</td><td class="r">160</td><td class="r">0,054 %</td><td class="r">90 s</td></tr>
+        <tr><td><span class="vtitle">« Je n'y connais presque rien en football »</span><span class="vdate">29 juin</span></td>
+          <td class="r">116 123</td><td class="r mult">×13,4</td><td class="r">194</td><td class="r">0,167 %</td><td class="r">87 s</td></tr>
+        <tr><td><span class="vtitle">« Comment il fonctionne, étape par étape »</span><span class="vdate">11 juil.</span></td>
+          <td class="r">67 246</td><td class="r mult">×7,8</td><td class="r">92</td><td class="r">0,137 %</td><td class="r">61 s</td></tr>
+        <tr><td><span class="vtitle">« Une IA peut-elle analyser mieux que moi ? »</span><span class="vdate">2 juil.</span></td>
+          <td class="r">57 545</td><td class="r mult">×6,6</td><td class="r">103</td><td class="r">0,179 %</td><td class="r">71 s</td></tr>
+        <tr><td><span class="vtitle">« Cette IA analyse les matchs et te donne les scores »</span><span class="vdate">28 août</span></td>
+          <td class="r">32 344</td><td class="r mult">×3,7</td><td class="r">29</td><td class="r">0,090 %</td><td class="r">88 s</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>Le taux de commentaires médian de ses vidéos football est de <strong>0,113 %</strong>, contre <strong>0,060 %</strong> pour ses vingt vidéos les plus vues hors football. À audience égale, le foot fait donc <strong>près du double de commentaires</strong>. C'est ce que tu avais repéré, et les chiffres le confirment.</p>
+</section>
+
+<section>
+  <p class="kicker">Le mécanisme</p>
+  <h2>Ce n'est pas le prono qui fait commenter. C'est la vérification.</h2>
+  <p class="lead">Sur les 375 commentaires lus, le plus liké de tout le corpus n'est pas une question sur l'outil ni un avis sur elle. C'est quelqu'un qui revient après le coup de sifflet.</p>
+
+  <div class="quotes">
+    <div class="q hero">
+      <p>« Les gars vous voyez le match Brésil contre Japon l'IA a bien prédit le 2-1 😳😳😳!! »</p>
+      <p class="meta">71 likes, 13 réponses. Commentaire le plus liké du corpus.</p>
+    </div>
+    <div class="q">
+      <p>« L'IA a vu juste sur les matchs suivants : Portugal Croatie et Suisse Algérie »</p>
+      <p class="meta">9 likes, 10 réponses</p>
+    </div>
+    <div class="q">
+      <p>« L'IA a prédit la victoire du Sénégal mais avec un 2-1, on a mis 5-0 »</p>
+      <p class="meta">4 likes. La vérification marche aussi quand le modèle se trompe.</p>
+    </div>
+    <div class="q">
+      <p>« donc c'est vrai tu as bien analysé match Portugal »</p>
+      <p class="meta">3 likes, 8 réponses</p>
+    </div>
+  </div>
+
+  <p>La boucle est simple et elle est reproductible : <strong>elle publie avant le match, le résultat tombe, les gens reviennent commenter</strong>. Chaque vidéo se rouvre toute seule 48 h après sa publication. C'est ce qui explique un taux de commentaires deux fois supérieur, et ça n'a rien à voir avec la qualité de son montage.</p>
+  <p>Deuxième moteur, plus faible mais réel : les demandes de match. « salut peux tu analyser pour la Suisse », « donne l'analyse du match France vs Espagne », « Vue que tu y es déjà donne pour la Norvège vs Côte d'Ivoire ». Son CTA de description sur la vidéo à 296 k vues était d'ailleurs <em>« Dis-moi en commentaire le match sur lequel tu n'es pas d'accord »</em>, ce qui invite au désaccord plutôt qu'à l'approbation.</p>
+</section>
+
+<section>
+  <p class="kicker">L'objection à traiter</p>
+  <h2>« C'est payant » revient 41 fois</h2>
+  <p class="lead">C'est le frein numéro un de son audience, environ 11 % des commentaires lus, très au-dessus des demandes de nom d'outil (6 occurrences). Son outil coûte 2,99 $ et ça suffit à faire décrocher.</p>
+  <p>IAshark a une réponse que Fafaa n'a pas : <strong>un match complet par jour en accès gratuit</strong>, plus le calculateur de mise. La ligne « vérifie toi-même, c'est gratuit » n'est pas un argument commercial ici, c'est ce qui rend la promesse d'honnêteté vérifiable. Elle doit être dans le script, pas dans la description.</p>
+  <p>Le second frein est le scepticisme, autour de 11 % aussi : « c'est archi faux », « le foot c'est pas tellement les stats », « c'est tellement random que c'est parfait ». À côté, un commentaire revendique « 90 % de winrate » avec Claude. C'est exactement le terrain sur lequel IAshark peut gagner.</p>
+</section>
+
+<section>
+  <p class="kicker">L'angle</p>
+  <h2>Elle montre ses coups gagnants. Montre tes pertes.</h2>
+  <p class="lead">Le fichier <span class="num">historique.json</span> du dépôt donne, au 3 septembre 2026, <strong>349 pronos réglés</strong> depuis le 9 juillet : 191 gagnés, 158 perdus, <span class="num">54,7 %</span> de réussite, et un rendement de <span class="down">−5,2 %</span>.</p>
+  <p>Un ROI négatif est un mauvais argument de vente et un excellent argument de crédibilité. Dans une niche où tout le monde annonce 90 %, c'est la seule chose que personne ne peut copier sans publier son propre historique. Et la moyenne cache un écart réel, qui est le vrai contenu de la vidéo :</p>
+  <div class="scroll">
+    <table>
+      <thead><tr><th>Marché</th><th class="r">Paris réglés</th><th class="r">Réussite</th><th class="r">Rendement</th></tr></thead>
+      <tbody>
+        <tr><td>Moins de 2,5 buts</td><td class="r">70</td><td class="r num">65,7 %</td><td class="r up">+13,3 %</td></tr>
+        <tr><td>Les deux équipes marquent</td><td class="r">56</td><td class="r num">62,5 %</td><td class="r up">+5,4 %</td></tr>
+        <tr><td>Victoire à domicile</td><td class="r">33</td><td class="r num">57,6 %</td><td class="r up">+5,7 %</td></tr>
+        <tr><td>Plus de 2,5 buts</td><td class="r">97</td><td class="r num">49,5 %</td><td class="r down">−17,0 %</td></tr>
+        <tr><td>Double chance X2</td><td class="r">36</td><td class="r num">41,7 %</td><td class="r down">−26,0 %</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>Même modèle, même période, deux marchés opposés. C'est concret, c'est vérifiable sur le site, et ça donne une vraie raison de commenter : l'audience se divise entre « enfin quelqu'un d'honnête » et « donc ton IA est nulle ». Les deux camps commentent.</p>
+</section>
+
+<section>
+  <p class="kicker">Le livrable</p>
+  <h2>Le script</h2>
+  <p class="lead">Mécanique de rétention : contradiction, puis analyse vers découverte. Émotion vocale dominante : <strong>assurée</strong>, avec une pointe de provocation retenue sur la chute. Émotion visée chez le spectateur : le doute, puis l'envie de répondre.</p>
+
+  <div class="scriptbox">
+    <div class="sline beat"><span class="int">accroche, ton posé</span><span class="txt">Les IA foot sur TikTok te montrent que leurs matchs gagnés.</span></div>
+    <div class="sline"><span class="int">enchaîne, factuel</span><span class="txt">Nous c'est l'inverse. Sur IAshark tout est public. Trois cent quarante-neuf pronos réglés, cent cinquante-huit perdus.</span></div>
+    <div class="sline beat"><span class="int">le chiffre qui pique, sans s'excuser</span><span class="txt">Et le rendement est négatif. Moins cinq virgule deux.</span></div>
+    <div class="sline"><span class="int">relance la curiosité</span><span class="txt">Sauf que cette moyenne cache un truc.</span></div>
+    <div class="sline"><span class="int">montée, on accélère</span><span class="txt">Sur les moins de deux buts et demi, le modèle est à soixante-cinq pour cent. Il gagne de l'argent.</span></div>
+    <div class="sline"><span class="int">bascule</span><span class="txt">Sur les plus de deux buts et demi, il tombe à quarante-neuf. Il en perd.</span></div>
+    <div class="sline beat"><span class="int">on ralentit, conviction</span><span class="txt">Même modèle. Tu vois ça seulement si personne n'efface les pertes.</span></div>
+    <div class="sline beat"><span class="int">pique, provocation retenue</span><span class="txt">Donc une IA qui te promet quatre-vingt-dix pour cent, soit elle ment, soit elle compte mal.</span></div>
+    <div class="sline"><span class="int">lève l'objection prix</span><span class="txt">Un match complet par jour c'est gratuit. Vérifie toi-même.</span></div>
+    <div class="sline beat"><span class="int">chute, question ouverte</span><span class="txt">Tu préfères une IA qui montre ses pertes, ou une qui montre que ses coups gagnants ?</span></div>
+  </div>
+
+  <p class="scriptmeta">
+    <span><b>130</b> mots</span>
+    <span><b>50,0 s</b> estimées</span>
+    <span>cible pipeline 14 à 50 s</span>
+    <span>phrases bannies : <b>0</b></span>
+    <span><code class="ok">check_script → ok: true</code></span>
+  </p>
+</section>
+
+<section>
+  <p class="kicker">Ce qui reste à trancher</p>
+  <h2>Une tension à assumer sur la durée</h2>
+  <p>Le script tient à 50,0 s, soit tout juste dans la cible de <span class="num">pipeline.py</span>. Mais ses cinq vidéos football tournent entre <strong>61 et 90 s</strong>, et la plus vue est la plus longue. Sur cette verticale précise, la contrainte des 50 s du pipeline joue peut-être contre toi.</p>
+  <p>Je n'ai pas modifié <span class="num">SCRIPT_DURATION_TARGET_SECONDS</span> : c'est ton réglage et ta méthodologie à variable unique s'applique. La version longue existe (74 s, même angle, développement des chiffres par marché), elle est prête si tu veux en faire le test. Ce serait une variable propre à isoler : même script, même voix, deux durées.</p>
+  <p>Trois autres choses à décider avant tournage :</p>
+  <ol>
+    <li><strong>Le disclaimer.</strong> Fafaa en met un systématiquement en description sur ses vidéos foot (« ne constitue ni un conseil en paris sportifs ni une incitation à jouer »). Tes pages portent déjà la mention équivalente. À reprendre en description, pas dans le script, qui est déjà à la limite haute.</li>
+    <li><strong>Le CTA de description.</strong> Reprendre sa structure de désaccord plutôt qu'une question molle. Par exemple : « Le marché où le modèle perd le plus, c'est les plus de 2,5 buts. Dis-moi en commentaire si tu joues quand même dessus. »</li>
+    <li><strong>La boucle de vérification.</strong> C'est le vrai enjeu, pas cette vidéo. Publier avant le match, puis revenir dans les commentaires quand le résultat tombe, gagnant ou perdant. C'est ce qui fait rouvrir une vidéo 48 h plus tard, et c'est la seule partie du système de Fafaa qui explique vraiment son écart de commentaires.</li>
+  </ol>
+</section>
+
+<section class="caveat">
+  <h2>Limites de cette analyse</h2>
+  <p>Les 60 vidéos couvrent mai à septembre 2026, pas les 165 du compte. La classification football repose sur les descriptions, pas sur le visionnage : la vidéo à 90 090 vues (« transforme ton expertise en Skill IA ») utilise le foot comme exemple et je l'ai comptée à part.</p>
+  <p>Les 375 commentaires proviennent de 4 des 5 vidéos foot et représentent environ 70 % des commentaires visibles sur ces vidéos. Je n'ai pas regardé les vidéos elles-mêmes, donc le montage, le rythme de coupe et l'habillage à l'écran ne sont pas dans cette analyse. Les taux de commentaires sont calculés sur les vues, pas sur la rétention, que TikTok n'expose pas.</p>
+  <p>Côté IAshark, les chiffres viennent de <span class="num">historique.json</span> au 3 septembre 2026 et bougeront. Le script devra être revérifié contre le fichier le jour du tournage : si le rendement global ou l'écart entre les deux marchés a changé, les phrases changent.</p>
+</section>
+
+</div>

@@ -1,0 +1,96 @@
+{
+  "endpoint": "/fixtures",
+  "params": {
+    "last": 1,
+    "status": "FT-AET-PEN",
+    "team": 215
+  },
+  "retrieved_at": "2026-09-08T16:00:51Z",
+  "response_hash": "969de680935f7b1549d0f0ad89bcaccb099704f0d67f89f51dbe477f65020ff0",
+  "response": {
+    "get": "fixtures",
+    "parameters": {
+      "last": "1",
+      "status": "FT-AET-PEN",
+      "team": "215"
+    },
+    "errors": [],
+    "results": 1,
+    "paging": {
+      "current": 1,
+      "total": 1
+    },
+    "response": [
+      {
+        "fixture": {
+          "id": 1575485,
+          "referee": "Antonio Nobre, Portugal",
+          "timezone": "UTC",
+          "date": "2026-09-04T19:15:00+00:00",
+          "timestamp": 1788549300,
+          "periods": {
+            "first": null,
+            "second": null
+          },
+          "venue": {
+            "id": 1286,
+            "name": "Est\u00e1dio do Drag\u00e3o",
+            "city": "Porto"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": null
+          }
+        },
+        "league": {
+          "id": 94,
+          "name": "Primeira Liga",
+          "country": "Portugal",
+          "logo": "https://media.api-sports.io/football/leagues/94.png",
+          "flag": "https://media.api-sports.io/flags/pt.svg",
+          "season": 2026,
+          "round": "Regular Season - 5",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 212,
+            "name": "FC Porto",
+            "logo": "https://media.api-sports.io/football/teams/212.png",
+            "winner": true
+          },
+          "away": {
+            "id": 215,
+            "name": "Moreirense",
+            "logo": "https://media.api-sports.io/football/teams/215.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 2,
+          "away": 1
+        },
+        "score": {
+          "halftime": {
+            "home": 1,
+            "away": 1
+          },
+          "fulltime": {
+            "home": 2,
+            "away": 1
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,308 @@
+{
+  "endpoint": "/fixtures",
+  "params": {
+    "league": 140,
+    "season": 2026,
+    "status": "FT-AET-PEN",
+    "team": 546
+  },
+  "retrieved_at": "2026-09-08T15:25:01Z",
+  "response_hash": "b8e85677cfab4a32efe18e6574664614b7ee5eb719fb67d8c58cabe369da9dcf",
+  "response": {
+    "get": "fixtures",
+    "parameters": {
+      "league": "140",
+      "season": "2026",
+      "status": "FT-AET-PEN",
+      "team": "546"
+    },
+    "errors": [],
+    "results": 4,
+    "paging": {
+      "current": 1,
+      "total": 1
+    },
+    "response": [
+      {
+        "fixture": {
+          "id": 1570333,
+          "referee": "Manuel Jesus Orellana Cid, Spain",
+          "timezone": "UTC",
+          "date": "2026-08-15T17:30:00+00:00",
+          "timestamp": 1786815000,
+          "periods": {
+            "first": 1786815000,
+            "second": 1786818600
+          },
+          "venue": {
+            "id": 1470,
+            "name": "Estadio Mendizorrotza",
+            "city": "Vitoria-Gasteiz"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 10
+          }
+        },
+        "league": {
+          "id": 140,
+          "name": "La Liga",
+          "country": "Spain",
+          "logo": "https://media.api-sports.io/football/leagues/140.png",
+          "flag": "https://media.api-sports.io/flags/es.svg",
+          "season": 2026,
+          "round": "Regular Season - 1",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 542,
+            "name": "Alaves",
+            "logo": "https://media.api-sports.io/football/teams/542.png",
+            "winner": true
+          },
+          "away": {
+            "id": 546,
+            "name": "Getafe",
+            "logo": "https://media.api-sports.io/football/teams/546.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 3,
+          "away": 0
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 3,
+            "away": 0
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1570348,
+          "referee": "Juan Martinez Munuera, Spain",
+          "timezone": "UTC",
+          "date": "2026-08-23T17:30:00+00:00",
+          "timestamp": 1787506200,
+          "periods": {
+            "first": 1787506200,
+            "second": 1787509800
+          },
+          "venue": {
+            "id": null,
+            "name": "Coliseum Alfonso P\u00e9rez",
+            "city": "Getafe"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 7
+          }
+        },
+        "league": {
+          "id": 140,
+          "name": "La Liga",
+          "country": "Spain",
+          "logo": "https://media.api-sports.io/football/leagues/140.png",
+          "flag": "https://media.api-sports.io/flags/es.svg",
+          "season": 2026,
+          "round": "Regular Season - 2",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 546,
+            "name": "Getafe",
+            "logo": "https://media.api-sports.io/football/teams/546.png",
+            "winner": true
+          },
+          "away": {
+            "id": 4665,
+            "name": "Racing Santander",
+            "logo": "https://media.api-sports.io/football/teams/4665.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 1,
+          "away": 0
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 1,
+            "away": 0
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1570358,
+          "referee": "Jon Ander Gonzalez Esteban, Spain",
+          "timezone": "UTC",
+          "date": "2026-08-31T17:30:00+00:00",
+          "timestamp": 1788197400,
+          "periods": {
+            "first": 1788197400,
+            "second": 1788201000
+          },
+          "venue": {
+            "id": null,
+            "name": "Estadio El Sadar",
+            "city": "Pamplona"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 6
+          }
+        },
+        "league": {
+          "id": 140,
+          "name": "La Liga",
+          "country": "Spain",
+          "logo": "https://media.api-sports.io/football/leagues/140.png",
+          "flag": "https://media.api-sports.io/flags/es.svg",
+          "season": 2026,
+          "round": "Regular Season - 3",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 727,
+            "name": "Osasuna",
+            "logo": "https://media.api-sports.io/football/teams/727.png",
+            "winner": true
+          },
+          "away": {
+            "id": 546,
+            "name": "Getafe",
+            "logo": "https://media.api-sports.io/football/teams/546.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 1,
+          "away": 0
+        },
+        "score": {
+          "halftime": {
+            "home": 1,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 1,
+            "away": 0
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1570368,
+          "referee": "C\u00e9sar Soto Grado, Spain",
+          "timezone": "UTC",
+          "date": "2026-09-07T17:00:00+00:00",
+          "timestamp": 1788800400,
+          "periods": {
+            "first": null,
+            "second": null
+          },
+          "venue": {
+            "id": null,
+            "name": "Coliseum Alfonso P\u00e9rez",
+            "city": "Getafe"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": null
+          }
+        },
+        "league": {
+          "id": 140,
+          "name": "La Liga",
+          "country": "Spain",
+          "logo": "https://media.api-sports.io/football/leagues/140.png",
+          "flag": "https://media.api-sports.io/flags/es.svg",
+          "season": 2026,
+          "round": "Regular Season - 4",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 546,
+            "name": "Getafe",
+            "logo": "https://media.api-sports.io/football/teams/546.png",
+            "winner": null
+          },
+          "away": {
+            "id": 538,
+            "name": "Celta Vigo",
+            "logo": "https://media.api-sports.io/football/teams/538.png",
+            "winner": null
+          }
+        },
+        "goals": {
+          "home": 1,
+          "away": 1
+        },
+        "score": {
+          "halftime": {
+            "home": 1,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 1,
+            "away": 1
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      }
+    ]
+  }
+}

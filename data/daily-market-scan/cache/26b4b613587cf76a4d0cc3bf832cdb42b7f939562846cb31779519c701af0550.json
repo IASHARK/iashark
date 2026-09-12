@@ -1,0 +1,96 @@
+{
+  "endpoint": "/fixtures",
+  "params": {
+    "last": 1,
+    "status": "FT-AET-PEN",
+    "team": 3872
+  },
+  "retrieved_at": "2026-09-08T18:57:06Z",
+  "response_hash": "1b9fbe05439c8d1e6ad07fb69943bd0c18ce86e7f9a93da929fc771a12b22a19",
+  "response": {
+    "get": "fixtures",
+    "parameters": {
+      "last": "1",
+      "status": "FT-AET-PEN",
+      "team": "3872"
+    },
+    "errors": [],
+    "results": 1,
+    "paging": {
+      "current": 1,
+      "total": 1
+    },
+    "response": [
+      {
+        "fixture": {
+          "id": 1547625,
+          "referee": "M. Lukjancukas",
+          "timezone": "UTC",
+          "date": "2026-09-06T15:45:00+00:00",
+          "timestamp": 1788709500,
+          "periods": {
+            "first": 1788709500,
+            "second": 1788713100
+          },
+          "venue": {
+            "id": null,
+            "name": null,
+            "city": "Kaunas"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 1
+          }
+        },
+        "league": {
+          "id": 362,
+          "name": "A Lyga",
+          "country": "Lithuania",
+          "logo": "https://media.api-sports.io/football/leagues/362.png",
+          "flag": "https://media.api-sports.io/flags/lt.svg",
+          "season": 2026,
+          "round": "Regular Season - 30",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 3872,
+            "name": "Kauno \u017dalgiris",
+            "logo": "https://media.api-sports.io/football/teams/3872.png",
+            "winner": true
+          },
+          "away": {
+            "id": 3860,
+            "name": "D\u017eiugas Tel\u0161iai",
+            "logo": "https://media.api-sports.io/football/teams/3860.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 5,
+          "away": 0
+        },
+        "score": {
+          "halftime": {
+            "home": 2,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 5,
+            "away": 0
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,63 @@
+{
+  "protocol": "SCORE_LAB_FACTORY_V2",
+  "phase": "A_CHAMPION_SELECTION",
+  "league_key": "ligue2",
+  "generated_at": "2026-09-06T19:16:40.437Z",
+  "train_seasons": [
+    2021,
+    2022
+  ],
+  "oos_dev_season": 2023,
+  "rho_frozen": -0.018800474510364894,
+  "league_avg_h": 1.324538258575198,
+  "league_avg_a": 1.0897097625329815,
+  "candidates": {
+    "B0": {
+      "nll": 2.912949250943523,
+      "secondary": {
+        "ou25_logloss": 0.717308348638662,
+        "btts_logloss": 0.7008386300300339,
+        "x12_logloss": 1.0892638749443466
+      },
+      "n_oos": 373,
+      "structural": {
+        "convergence_rate": 1,
+        "boundary_hit_rate": 0,
+        "rho_std": 0
+      }
+    },
+    "M0": {
+      "nll": 2.9128675266332014,
+      "secondary": {
+        "ou25_logloss": 0.717308348638662,
+        "btts_logloss": 0.7004636822779611,
+        "x12_logloss": 1.0892361189200703
+      },
+      "n_oos": 373,
+      "structural": {
+        "convergence_rate": 1,
+        "boundary_hit_rate": 0,
+        "rho_std": 0.009290283064275909
+      }
+    },
+    "M2": {
+      "nll": 2.9065933352267543,
+      "secondary": {
+        "ou25_logloss": 0.7161166624196286,
+        "btts_logloss": 0.7002054178733043,
+        "x12_logloss": 1.0838464074897576
+      },
+      "n_oos": 373,
+      "structural": {
+        "convergence_rate": 1,
+        "boundary_hit_rate": 0,
+        "rho_std": 0.009290283064275909
+      }
+    }
+  },
+  "vetoed": {},
+  "primary_winner_before_secondary_veto": "M2",
+  "secondary_veto": null,
+  "champion_selected": "M2",
+  "champion_selection_reason": "M2 a le meilleur EXACT_SCORE_NLL absolu (2.906593) parmi les candidats non-vetoes structurellement, sans degradation secondaire disqualifiante vs les autres."
+}

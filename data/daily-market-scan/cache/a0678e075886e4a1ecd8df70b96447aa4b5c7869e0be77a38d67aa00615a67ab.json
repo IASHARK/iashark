@@ -1,0 +1,121 @@
+{
+  "endpoint": "/players",
+  "params": {
+    "page": 3,
+    "season": 2025,
+    "team": 1617
+  },
+  "retrieved_at": "2026-09-08T15:26:45Z",
+  "response_hash": "83c7a6f97cf09eb0e1a5fd296d17afc09607745f4eceb8aab5515471e2fa1ef3",
+  "response": {
+    "get": "players",
+    "parameters": {
+      "page": "3",
+      "season": "2025",
+      "team": "1617"
+    },
+    "errors": [],
+    "results": 1,
+    "paging": {
+      "current": 3,
+      "total": 3
+    },
+    "response": [
+      {
+        "player": {
+          "id": 513428,
+          "name": "Danny Nunez",
+          "firstname": null,
+          "lastname": null,
+          "age": null,
+          "birth": {
+            "date": null,
+            "place": null,
+            "country": null
+          },
+          "nationality": null,
+          "height": null,
+          "weight": null,
+          "injured": false,
+          "photo": "https://media.api-sports.io/football/players/513428.png"
+        },
+        "statistics": [
+          {
+            "team": {
+              "id": 1617,
+              "name": "Portland Timbers",
+              "logo": "https://media.api-sports.io/football/teams/1617.png"
+            },
+            "league": {
+              "id": 257,
+              "name": "US Open Cup",
+              "country": "USA",
+              "logo": "https://media.api-sports.io/football/leagues/257.png",
+              "flag": "https://media.api-sports.io/flags/us.svg",
+              "season": 2025
+            },
+            "games": {
+              "appearences": 2,
+              "lineups": 0,
+              "minutes": 47,
+              "number": null,
+              "position": null,
+              "rating": "6.66",
+              "captain": false
+            },
+            "substitutes": {
+              "in": 0,
+              "out": 0,
+              "bench": 0
+            },
+            "shots": {
+              "total": 1,
+              "on": 0
+            },
+            "goals": {
+              "total": 0,
+              "conceded": 2,
+              "assists": 0,
+              "saves": 0
+            },
+            "passes": {
+              "total": 14,
+              "key": 0,
+              "accuracy": 64
+            },
+            "tackles": {
+              "total": 1,
+              "blocks": 1,
+              "interceptions": 0
+            },
+            "duels": {
+              "total": null,
+              "won": null
+            },
+            "dribbles": {
+              "attempts": null,
+              "success": 0,
+              "past": null
+            },
+            "fouls": {
+              "drawn": null,
+              "committed": null
+            },
+            "cards": {
+              "yellow": 0,
+              "yellowred": null,
+              "red": 0
+            },
+            "penalty": {
+              "won": null,
+              "commited": null,
+              "scored": null,
+              "missed": null,
+              "saved": null
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,378 @@
+{
+  "endpoint": "/fixtures",
+  "params": {
+    "league": 88,
+    "season": 2026,
+    "status": "FT-AET-PEN",
+    "team": 209
+  },
+  "retrieved_at": "2026-09-08T16:01:55Z",
+  "response_hash": "dfab46ae5ea8388f5a5eb8b9a927754aaf0bd2a1f1c9ffc83c1328c14797e9cd",
+  "response": {
+    "get": "fixtures",
+    "parameters": {
+      "league": "88",
+      "season": "2026",
+      "status": "FT-AET-PEN",
+      "team": "209"
+    },
+    "errors": [],
+    "results": 5,
+    "paging": {
+      "current": 1,
+      "total": 1
+    },
+    "response": [
+      {
+        "fixture": {
+          "id": 1552122,
+          "referee": "Sander van der Eijk, Netherlands",
+          "timezone": "UTC",
+          "date": "2026-08-09T10:15:00+00:00",
+          "timestamp": 1786270500,
+          "periods": {
+            "first": 1786270500,
+            "second": 1786274100
+          },
+          "venue": {
+            "id": 10505,
+            "name": "Sparta Stadium Het Kasteel",
+            "city": "Rotterdam"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 8
+          }
+        },
+        "league": {
+          "id": 88,
+          "name": "Eredivisie",
+          "country": "Netherlands",
+          "logo": "https://media.api-sports.io/football/leagues/88.png",
+          "flag": "https://media.api-sports.io/flags/nl.svg",
+          "season": 2026,
+          "round": "Regular Season - 1",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 426,
+            "name": "Sparta Rotterdam",
+            "logo": "https://media.api-sports.io/football/teams/426.png",
+            "winner": false
+          },
+          "away": {
+            "id": 209,
+            "name": "Feyenoord",
+            "logo": "https://media.api-sports.io/football/teams/209.png",
+            "winner": true
+          }
+        },
+        "goals": {
+          "home": 0,
+          "away": 1
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 1
+          },
+          "fulltime": {
+            "home": 0,
+            "away": 1
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1552132,
+          "referee": "Joey Kooij, Netherlands",
+          "timezone": "UTC",
+          "date": "2026-08-16T12:30:00+00:00",
+          "timestamp": 1786883400,
+          "periods": {
+            "first": 1786883400,
+            "second": 1786887000
+          },
+          "venue": {
+            "id": 1128,
+            "name": "Stadion Feijenoord",
+            "city": "Rotterdam"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 5
+          }
+        },
+        "league": {
+          "id": 88,
+          "name": "Eredivisie",
+          "country": "Netherlands",
+          "logo": "https://media.api-sports.io/football/leagues/88.png",
+          "flag": "https://media.api-sports.io/flags/nl.svg",
+          "season": 2026,
+          "round": "Regular Season - 2",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 209,
+            "name": "Feyenoord",
+            "logo": "https://media.api-sports.io/football/teams/209.png",
+            "winner": null
+          },
+          "away": {
+            "id": 410,
+            "name": "GO Ahead Eagles",
+            "logo": "https://media.api-sports.io/football/teams/410.png",
+            "winner": null
+          }
+        },
+        "goals": {
+          "home": 2,
+          "away": 2
+        },
+        "score": {
+          "halftime": {
+            "home": 2,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 2,
+            "away": 2
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1552141,
+          "referee": "Danny Makkelie, Netherlands",
+          "timezone": "UTC",
+          "date": "2026-08-23T15:15:00+00:00",
+          "timestamp": 1787498100,
+          "periods": {
+            "first": 1787498100,
+            "second": 1787501700
+          },
+          "venue": {
+            "id": 22721,
+            "name": "Kooi Stadion",
+            "city": "Leeuwarden"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 3
+          }
+        },
+        "league": {
+          "id": 88,
+          "name": "Eredivisie",
+          "country": "Netherlands",
+          "logo": "https://media.api-sports.io/football/leagues/88.png",
+          "flag": "https://media.api-sports.io/flags/nl.svg",
+          "season": 2026,
+          "round": "Regular Season - 3",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 420,
+            "name": "Cambuur",
+            "logo": "https://media.api-sports.io/football/teams/420.png",
+            "winner": false
+          },
+          "away": {
+            "id": 209,
+            "name": "Feyenoord",
+            "logo": "https://media.api-sports.io/football/teams/209.png",
+            "winner": true
+          }
+        },
+        "goals": {
+          "home": 2,
+          "away": 5
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 4
+          },
+          "fulltime": {
+            "home": 2,
+            "away": 5
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1552149,
+          "referee": "Robin Hensgens, Netherlands",
+          "timezone": "UTC",
+          "date": "2026-08-30T12:30:00+00:00",
+          "timestamp": 1788093000,
+          "periods": {
+            "first": 1788093000,
+            "second": 1788096600
+          },
+          "venue": {
+            "id": 1128,
+            "name": "Stadion Feijenoord",
+            "city": "Rotterdam"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 4
+          }
+        },
+        "league": {
+          "id": 88,
+          "name": "Eredivisie",
+          "country": "Netherlands",
+          "logo": "https://media.api-sports.io/football/leagues/88.png",
+          "flag": "https://media.api-sports.io/flags/nl.svg",
+          "season": 2026,
+          "round": "Regular Season - 4",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 209,
+            "name": "Feyenoord",
+            "logo": "https://media.api-sports.io/football/teams/209.png",
+            "winner": null
+          },
+          "away": {
+            "id": 198,
+            "name": "ADO Den Haag",
+            "logo": "https://media.api-sports.io/football/teams/198.png",
+            "winner": null
+          }
+        },
+        "goals": {
+          "home": 2,
+          "away": 2
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 1
+          },
+          "fulltime": {
+            "home": 2,
+            "away": 2
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1552154,
+          "referee": "Allard Lindhout, Netherlands",
+          "timezone": "UTC",
+          "date": "2026-09-05T14:30:00+00:00",
+          "timestamp": 1788618600,
+          "periods": {
+            "first": null,
+            "second": null
+          },
+          "venue": {
+            "id": 1140,
+            "name": "Stadion de Goffert",
+            "city": "Nijmegen"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": null
+          }
+        },
+        "league": {
+          "id": 88,
+          "name": "Eredivisie",
+          "country": "Netherlands",
+          "logo": "https://media.api-sports.io/football/leagues/88.png",
+          "flag": "https://media.api-sports.io/flags/nl.svg",
+          "season": 2026,
+          "round": "Regular Season - 5",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 413,
+            "name": "NEC Nijmegen",
+            "logo": "https://media.api-sports.io/football/teams/413.png",
+            "winner": false
+          },
+          "away": {
+            "id": 209,
+            "name": "Feyenoord",
+            "logo": "https://media.api-sports.io/football/teams/209.png",
+            "winner": true
+          }
+        },
+        "goals": {
+          "home": 1,
+          "away": 3
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 1,
+            "away": 3
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      }
+    ]
+  }
+}

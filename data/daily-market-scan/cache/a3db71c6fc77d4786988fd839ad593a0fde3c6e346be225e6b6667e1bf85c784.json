@@ -1,0 +1,96 @@
+{
+  "endpoint": "/fixtures",
+  "params": {
+    "last": 1,
+    "status": "FT-AET-PEN",
+    "team": 170
+  },
+  "retrieved_at": "2026-09-08T15:14:57Z",
+  "response_hash": "8c93e214565ce3cc5d40b1dd0550ae3e6c38dca0c996daf6c709f3d705611731",
+  "response": {
+    "get": "fixtures",
+    "parameters": {
+      "last": "1",
+      "status": "FT-AET-PEN",
+      "team": "170"
+    },
+    "errors": [],
+    "results": 1,
+    "paging": {
+      "current": 1,
+      "total": 1
+    },
+    "response": [
+      {
+        "fixture": {
+          "id": 1575152,
+          "referee": "Daniel Schlager, Germany",
+          "timezone": "UTC",
+          "date": "2026-09-06T15:30:00+00:00",
+          "timestamp": 1788708600,
+          "periods": {
+            "first": null,
+            "second": null
+          },
+          "venue": {
+            "id": 0,
+            "name": "Deutsche Bank Park",
+            "city": "Frankfurt"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": null
+          }
+        },
+        "league": {
+          "id": 78,
+          "name": "Bundesliga",
+          "country": "Germany",
+          "logo": "https://media.api-sports.io/football/leagues/78.png",
+          "flag": "https://media.api-sports.io/flags/de.svg",
+          "season": 2026,
+          "round": "Regular Season - 2",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 169,
+            "name": "Eintracht Frankfurt",
+            "logo": "https://media.api-sports.io/football/teams/169.png",
+            "winner": false
+          },
+          "away": {
+            "id": 170,
+            "name": "FC Augsburg",
+            "logo": "https://media.api-sports.io/football/teams/170.png",
+            "winner": true
+          }
+        },
+        "goals": {
+          "home": 1,
+          "away": 4
+        },
+        "score": {
+          "halftime": {
+            "home": 1,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 1,
+            "away": 4
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      }
+    ]
+  }
+}

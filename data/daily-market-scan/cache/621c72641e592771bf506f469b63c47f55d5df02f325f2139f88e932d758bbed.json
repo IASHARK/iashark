@@ -1,0 +1,378 @@
+{
+  "endpoint": "/fixtures",
+  "params": {
+    "league": 179,
+    "season": 2026,
+    "status": "FT-AET-PEN",
+    "team": 250
+  },
+  "retrieved_at": "2026-09-08T16:05:17Z",
+  "response_hash": "d837a5bb3f543923ae880a3219a66ea28bf2e251f2aba3cf5d6782c532a5fac3",
+  "response": {
+    "get": "fixtures",
+    "parameters": {
+      "league": "179",
+      "season": "2026",
+      "status": "FT-AET-PEN",
+      "team": "250"
+    },
+    "errors": [],
+    "results": 5,
+    "paging": {
+      "current": 1,
+      "total": 1
+    },
+    "response": [
+      {
+        "fixture": {
+          "id": 1556631,
+          "referee": "John Beaton, Scotland",
+          "timezone": "UTC",
+          "date": "2026-08-02T13:00:00+00:00",
+          "timestamp": 1785675600,
+          "periods": {
+            "first": 1785675600,
+            "second": 1785679200
+          },
+          "venue": {
+            "id": 1403,
+            "name": "McDiarmid Park",
+            "city": "Perth"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 6
+          }
+        },
+        "league": {
+          "id": 179,
+          "name": "Premiership",
+          "country": "Scotland",
+          "logo": "https://media.api-sports.io/football/leagues/179.png",
+          "flag": "https://media.api-sports.io/flags/gb-sct.svg",
+          "season": 2026,
+          "round": "Regular Season - 1",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 258,
+            "name": "ST Johnstone",
+            "logo": "https://media.api-sports.io/football/teams/258.png",
+            "winner": true
+          },
+          "away": {
+            "id": 250,
+            "name": "Kilmarnock",
+            "logo": "https://media.api-sports.io/football/teams/250.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 4,
+          "away": 3
+        },
+        "score": {
+          "halftime": {
+            "home": 1,
+            "away": 1
+          },
+          "fulltime": {
+            "home": 4,
+            "away": 3
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1556638,
+          "referee": "R. Lee",
+          "timezone": "UTC",
+          "date": "2026-08-09T12:30:00+00:00",
+          "timestamp": 1786278600,
+          "periods": {
+            "first": 1786278600,
+            "second": 1786282200
+          },
+          "venue": {
+            "id": null,
+            "name": "Rugby Park",
+            "city": "Kilmarnock"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 4
+          }
+        },
+        "league": {
+          "id": 179,
+          "name": "Premiership",
+          "country": "Scotland",
+          "logo": "https://media.api-sports.io/football/leagues/179.png",
+          "flag": "https://media.api-sports.io/flags/gb-sct.svg",
+          "season": 2026,
+          "round": "Regular Season - 2",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 250,
+            "name": "Kilmarnock",
+            "logo": "https://media.api-sports.io/football/teams/250.png",
+            "winner": false
+          },
+          "away": {
+            "id": 247,
+            "name": "Celtic",
+            "logo": "https://media.api-sports.io/football/teams/247.png",
+            "winner": true
+          }
+        },
+        "goals": {
+          "home": 1,
+          "away": 5
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 3
+          },
+          "fulltime": {
+            "home": 1,
+            "away": 5
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1556650,
+          "referee": "N. Walsh",
+          "timezone": "UTC",
+          "date": "2026-08-29T14:00:00+00:00",
+          "timestamp": 1788012000,
+          "periods": {
+            "first": 1788012000,
+            "second": 1788015600
+          },
+          "venue": {
+            "id": null,
+            "name": "Rugby Park",
+            "city": "Kilmarnock"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": null
+          }
+        },
+        "league": {
+          "id": 179,
+          "name": "Premiership",
+          "country": "Scotland",
+          "logo": "https://media.api-sports.io/football/leagues/179.png",
+          "flag": "https://media.api-sports.io/flags/gb-sct.svg",
+          "season": 2026,
+          "round": "Regular Season - 4",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 250,
+            "name": "Kilmarnock",
+            "logo": "https://media.api-sports.io/football/teams/250.png",
+            "winner": false
+          },
+          "away": {
+            "id": 1386,
+            "name": "Dundee Utd",
+            "logo": "https://media.api-sports.io/football/teams/1386.png",
+            "winner": true
+          }
+        },
+        "goals": {
+          "home": 0,
+          "away": 4
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 3
+          },
+          "fulltime": {
+            "home": 0,
+            "away": 4
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1556656,
+          "referee": "D. Dickinson",
+          "timezone": "UTC",
+          "date": "2026-09-02T18:45:00+00:00",
+          "timestamp": 1788374700,
+          "periods": {
+            "first": 1788374700,
+            "second": 1788378300
+          },
+          "venue": {
+            "id": null,
+            "name": "Rugby Park",
+            "city": "Kilmarnock"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": null
+          }
+        },
+        "league": {
+          "id": 179,
+          "name": "Premiership",
+          "country": "Scotland",
+          "logo": "https://media.api-sports.io/football/leagues/179.png",
+          "flag": "https://media.api-sports.io/flags/gb-sct.svg",
+          "season": 2026,
+          "round": "Regular Season - 5",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 250,
+            "name": "Kilmarnock",
+            "logo": "https://media.api-sports.io/football/teams/250.png",
+            "winner": false
+          },
+          "away": {
+            "id": 251,
+            "name": "ST Mirren",
+            "logo": "https://media.api-sports.io/football/teams/251.png",
+            "winner": true
+          }
+        },
+        "goals": {
+          "home": 0,
+          "away": 1
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 1
+          },
+          "fulltime": {
+            "home": 0,
+            "away": 1
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1556658,
+          "referee": "J. Beaton",
+          "timezone": "UTC",
+          "date": "2026-09-05T14:00:00+00:00",
+          "timestamp": 1788616800,
+          "periods": {
+            "first": 1788616800,
+            "second": 1788620400
+          },
+          "venue": {
+            "id": 1383,
+            "name": "Pittodrie Stadium",
+            "city": "Aberdeen"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": null
+          }
+        },
+        "league": {
+          "id": 179,
+          "name": "Premiership",
+          "country": "Scotland",
+          "logo": "https://media.api-sports.io/football/leagues/179.png",
+          "flag": "https://media.api-sports.io/flags/gb-sct.svg",
+          "season": 2026,
+          "round": "Regular Season - 6",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 252,
+            "name": "Aberdeen",
+            "logo": "https://media.api-sports.io/football/teams/252.png",
+            "winner": null
+          },
+          "away": {
+            "id": 250,
+            "name": "Kilmarnock",
+            "logo": "https://media.api-sports.io/football/teams/250.png",
+            "winner": null
+          }
+        },
+        "goals": {
+          "home": 0,
+          "away": 0
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 0,
+            "away": 0
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      }
+    ]
+  }
+}

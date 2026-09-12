@@ -1,0 +1,96 @@
+{
+  "endpoint": "/fixtures",
+  "params": {
+    "last": 1,
+    "status": "FT-AET-PEN",
+    "team": 564
+  },
+  "retrieved_at": "2026-09-08T16:03:23Z",
+  "response_hash": "b19278f066e69036cbc7cd813ac3359eb63e07e66123af445f29f6b1706670e5",
+  "response": {
+    "get": "fixtures",
+    "parameters": {
+      "last": "1",
+      "status": "FT-AET-PEN",
+      "team": "564"
+    },
+    "errors": [],
+    "results": 1,
+    "paging": {
+      "current": 1,
+      "total": 1
+    },
+    "response": [
+      {
+        "fixture": {
+          "id": 1584394,
+          "referee": "Kadir Saglam, T\u00fcrkiye",
+          "timezone": "UTC",
+          "date": "2026-09-04T17:00:00+00:00",
+          "timestamp": 1788541200,
+          "periods": {
+            "first": null,
+            "second": null
+          },
+          "venue": {
+            "id": null,
+            "name": "Basaksehir Fatih Terim Stadium",
+            "city": "Istanbul"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": null
+          }
+        },
+        "league": {
+          "id": 203,
+          "name": "S\u00fcper Lig",
+          "country": "Turkey",
+          "logo": "https://media.api-sports.io/football/leagues/203.png",
+          "flag": "https://media.api-sports.io/flags/tr.svg",
+          "season": 2026,
+          "round": "Regular Season - 4",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 564,
+            "name": "Ba\u015fak\u015fehir",
+            "logo": "https://media.api-sports.io/football/teams/564.png",
+            "winner": false
+          },
+          "away": {
+            "id": 645,
+            "name": "Galatasaray",
+            "logo": "https://media.api-sports.io/football/teams/645.png",
+            "winner": true
+          }
+        },
+        "goals": {
+          "home": 2,
+          "away": 3
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 1
+          },
+          "fulltime": {
+            "home": 2,
+            "away": 3
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      }
+    ]
+  }
+}

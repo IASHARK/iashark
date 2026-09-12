@@ -1,0 +1,96 @@
+{
+  "endpoint": "/fixtures",
+  "params": {
+    "last": 1,
+    "status": "FT-AET-PEN",
+    "team": 118
+  },
+  "retrieved_at": "2026-09-08T18:39:35Z",
+  "response_hash": "76f8ea3e43e094823f5124b91f141ecaeca0ff1c054540b6b72169c5cecdadda",
+  "response": {
+    "get": "fixtures",
+    "parameters": {
+      "last": "1",
+      "status": "FT-AET-PEN",
+      "team": "118"
+    },
+    "errors": [],
+    "results": 1,
+    "paging": {
+      "current": 1,
+      "total": 1
+    },
+    "response": [
+      {
+        "fixture": {
+          "id": 1492361,
+          "referee": "Maguielson Lima Barbosa, Brazil",
+          "timezone": "UTC",
+          "date": "2026-09-05T19:00:00+00:00",
+          "timestamp": 1788634800,
+          "periods": {
+            "first": null,
+            "second": null
+          },
+          "venue": {
+            "id": null,
+            "name": "Est\u00e1dio C\u00edcero de Souza Marques",
+            "city": "Bragan\u00e7a Paulista"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": null
+          }
+        },
+        "league": {
+          "id": 71,
+          "name": "Serie A",
+          "country": "Brazil",
+          "logo": "https://media.api-sports.io/football/leagues/71.png",
+          "flag": "https://media.api-sports.io/flags/br.svg",
+          "season": 2026,
+          "round": "Regular Season - 26",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 794,
+            "name": "RB Bragantino",
+            "logo": "https://media.api-sports.io/football/teams/794.png",
+            "winner": false
+          },
+          "away": {
+            "id": 118,
+            "name": "Bahia",
+            "logo": "https://media.api-sports.io/football/teams/118.png",
+            "winner": true
+          }
+        },
+        "goals": {
+          "home": 2,
+          "away": 3
+        },
+        "score": {
+          "halftime": {
+            "home": 2,
+            "away": 2
+          },
+          "fulltime": {
+            "home": 2,
+            "away": 3
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,448 @@
+{
+  "endpoint": "/fixtures",
+  "params": {
+    "league": 2,
+    "season": 2026,
+    "status": "FT-AET-PEN",
+    "team": 656
+  },
+  "retrieved_at": "2026-09-08T18:54:45Z",
+  "response_hash": "ed7637aa7fd1293419d54b4e08ae1e3b232fe542a84bab13894e553464f0e36f",
+  "response": {
+    "get": "fixtures",
+    "parameters": {
+      "league": "2",
+      "season": "2026",
+      "status": "FT-AET-PEN",
+      "team": "656"
+    },
+    "errors": [],
+    "results": 6,
+    "paging": {
+      "current": 1,
+      "total": 1
+    },
+    "response": [
+      {
+        "fixture": {
+          "id": 1589416,
+          "referee": "L. Fahndrich",
+          "timezone": "UTC",
+          "date": "2026-07-21T16:00:00+00:00",
+          "timestamp": 1784649600,
+          "periods": {
+            "first": 1784649600,
+            "second": 1784653200
+          },
+          "venue": {
+            "id": null,
+            "name": "Mikheil Meskhi Stadium",
+            "city": "Tbilisi"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 7
+          }
+        },
+        "league": {
+          "id": 2,
+          "name": "UEFA Champions League",
+          "country": "World",
+          "logo": "https://media.api-sports.io/football/leagues/2.png",
+          "flag": null,
+          "season": 2026,
+          "round": "2nd Qualifying Round",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 3502,
+            "name": "FC Iberia 1999",
+            "logo": "https://media.api-sports.io/football/teams/3502.png",
+            "winner": false
+          },
+          "away": {
+            "id": 656,
+            "name": "Slovan Bratislava",
+            "logo": "https://media.api-sports.io/football/teams/656.png",
+            "winner": true
+          }
+        },
+        "goals": {
+          "home": 0,
+          "away": 2
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 2
+          },
+          "fulltime": {
+            "home": 0,
+            "away": 2
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1589426,
+          "referee": "P. Ciochirca",
+          "timezone": "UTC",
+          "date": "2026-07-29T18:15:00+00:00",
+          "timestamp": 1785348900,
+          "periods": {
+            "first": 1785348900,
+            "second": 1785352500
+          },
+          "venue": {
+            "id": null,
+            "name": "Tehelne Pole Stadion",
+            "city": "Bratislava"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 5
+          }
+        },
+        "league": {
+          "id": 2,
+          "name": "UEFA Champions League",
+          "country": "World",
+          "logo": "https://media.api-sports.io/football/leagues/2.png",
+          "flag": null,
+          "season": 2026,
+          "round": "2nd Qualifying Round",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 656,
+            "name": "Slovan Bratislava",
+            "logo": "https://media.api-sports.io/football/teams/656.png",
+            "winner": null
+          },
+          "away": {
+            "id": 3502,
+            "name": "FC Iberia 1999",
+            "logo": "https://media.api-sports.io/football/teams/3502.png",
+            "winner": null
+          }
+        },
+        "goals": {
+          "home": 1,
+          "away": 1
+        },
+        "score": {
+          "halftime": {
+            "home": 1,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 1,
+            "away": 1
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1607168,
+          "referee": "N. Walsh",
+          "timezone": "UTC",
+          "date": "2026-08-04T16:00:00+00:00",
+          "timestamp": 1785859200,
+          "periods": {
+            "first": 1785859200,
+            "second": 1785862800
+          },
+          "venue": {
+            "id": null,
+            "name": "Strandvallen",
+            "city": "Hallevik"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 7
+          }
+        },
+        "league": {
+          "id": 2,
+          "name": "UEFA Champions League",
+          "country": "World",
+          "logo": "https://media.api-sports.io/football/leagues/2.png",
+          "flag": null,
+          "season": 2026,
+          "round": "3rd Qualifying Round",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 2240,
+            "name": "Mjallby AIF",
+            "logo": "https://media.api-sports.io/football/teams/2240.png",
+            "winner": false
+          },
+          "away": {
+            "id": 656,
+            "name": "Slovan Bratislava",
+            "logo": "https://media.api-sports.io/football/teams/656.png",
+            "winner": true
+          }
+        },
+        "goals": {
+          "home": 1,
+          "away": 2
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 1,
+            "away": 2
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1607173,
+          "referee": "M. Oliver",
+          "timezone": "UTC",
+          "date": "2026-08-11T18:15:00+00:00",
+          "timestamp": 1786472100,
+          "periods": {
+            "first": 1786472100,
+            "second": 1786475700
+          },
+          "venue": {
+            "id": null,
+            "name": "Tehelne Pole Stadion",
+            "city": "Bratislava"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 2
+          }
+        },
+        "league": {
+          "id": 2,
+          "name": "UEFA Champions League",
+          "country": "World",
+          "logo": "https://media.api-sports.io/football/leagues/2.png",
+          "flag": null,
+          "season": 2026,
+          "round": "3rd Qualifying Round",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 656,
+            "name": "Slovan Bratislava",
+            "logo": "https://media.api-sports.io/football/teams/656.png",
+            "winner": true
+          },
+          "away": {
+            "id": 2240,
+            "name": "Mjallby AIF",
+            "logo": "https://media.api-sports.io/football/teams/2240.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 2,
+          "away": 0
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 2,
+            "away": 0
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1622625,
+          "referee": "F. Zwayer",
+          "timezone": "UTC",
+          "date": "2026-08-19T19:00:00+00:00",
+          "timestamp": 1787166000,
+          "periods": {
+            "first": 1787166000,
+            "second": 1787169600
+          },
+          "venue": {
+            "id": null,
+            "name": "Tehelne Pole Stadion",
+            "city": "Bratislava"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 8
+          }
+        },
+        "league": {
+          "id": 2,
+          "name": "UEFA Champions League",
+          "country": "World",
+          "logo": "https://media.api-sports.io/football/leagues/2.png",
+          "flag": null,
+          "season": 2026,
+          "round": "Play-offs",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 656,
+            "name": "Slovan Bratislava",
+            "logo": "https://media.api-sports.io/football/teams/656.png",
+            "winner": null
+          },
+          "away": {
+            "id": 4360,
+            "name": "Celje",
+            "logo": "https://media.api-sports.io/football/teams/4360.png",
+            "winner": null
+          }
+        },
+        "goals": {
+          "home": 1,
+          "away": 1
+        },
+        "score": {
+          "halftime": {
+            "home": 1,
+            "away": 1
+          },
+          "fulltime": {
+            "home": 1,
+            "away": 1
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1622628,
+          "referee": "A. Hernandez",
+          "timezone": "UTC",
+          "date": "2026-08-26T19:00:00+00:00",
+          "timestamp": 1787770800,
+          "periods": {
+            "first": 1787770800,
+            "second": 1787774400
+          },
+          "venue": {
+            "id": null,
+            "name": "Arena Z\u2019dezele",
+            "city": "Celje"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "AET",
+            "elapsed": 120,
+            "extra": null
+          }
+        },
+        "league": {
+          "id": 2,
+          "name": "UEFA Champions League",
+          "country": "World",
+          "logo": "https://media.api-sports.io/football/leagues/2.png",
+          "flag": null,
+          "season": 2026,
+          "round": "Play-offs",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 4360,
+            "name": "Celje",
+            "logo": "https://media.api-sports.io/football/teams/4360.png",
+            "winner": false
+          },
+          "away": {
+            "id": 656,
+            "name": "Slovan Bratislava",
+            "logo": "https://media.api-sports.io/football/teams/656.png",
+            "winner": true
+          }
+        },
+        "goals": {
+          "home": 1,
+          "away": 2
+        },
+        "score": {
+          "halftime": {
+            "home": 1,
+            "away": 1
+          },
+          "fulltime": {
+            "home": 1,
+            "away": 1
+          },
+          "extratime": {
+            "home": 0,
+            "away": 1
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      }
+    ]
+  }
+}

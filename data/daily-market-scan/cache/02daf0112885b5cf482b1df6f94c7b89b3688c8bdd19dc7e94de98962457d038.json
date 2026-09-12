@@ -1,0 +1,164 @@
+{
+  "endpoint": "/fixtures/headtohead",
+  "params": {
+    "h2h": "598-563",
+    "last": 5
+  },
+  "retrieved_at": "2026-09-08T18:56:48Z",
+  "response_hash": "06a5e0ace26da056fd6759e7d75d6124a502a0e3b44ac7b6f99a27377c2d526a",
+  "response": {
+    "get": "fixtures/headtohead",
+    "parameters": {
+      "h2h": "598-563",
+      "last": "5"
+    },
+    "errors": [],
+    "results": 2,
+    "paging": {
+      "current": 1,
+      "total": 1
+    },
+    "response": [
+      {
+        "fixture": {
+          "id": 1607169,
+          "referee": "G. Nyberg",
+          "timezone": "UTC",
+          "date": "2026-08-11T18:00:00+00:00",
+          "timestamp": 1786471200,
+          "periods": {
+            "first": 1786471200,
+            "second": 1786474800
+          },
+          "venue": {
+            "id": null,
+            "name": "Stadion Rajko Mit",
+            "city": "Belgrade"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 7
+          }
+        },
+        "league": {
+          "id": 2,
+          "name": "UEFA Champions League",
+          "country": "World",
+          "logo": "https://media.api-sports.io/football/leagues/2.png",
+          "flag": null,
+          "season": 2026,
+          "round": "3rd Qualifying Round",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 598,
+            "name": "FK Crvena Zvezda",
+            "logo": "https://media.api-sports.io/football/teams/598.png",
+            "winner": false
+          },
+          "away": {
+            "id": 563,
+            "name": "Hapoel Beer Sheva",
+            "logo": "https://media.api-sports.io/football/teams/563.png",
+            "winner": true
+          }
+        },
+        "goals": {
+          "home": 0,
+          "away": 2
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 0,
+            "away": 2
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1607166,
+          "referee": "J. Manzano",
+          "timezone": "UTC",
+          "date": "2026-08-04T17:30:00+00:00",
+          "timestamp": 1785864600,
+          "periods": {
+            "first": 1785864600,
+            "second": 1785868200
+          },
+          "venue": {
+            "id": null,
+            "name": "Halad\u00e1s Sportkomplexum",
+            "city": "Szombathely"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 8
+          }
+        },
+        "league": {
+          "id": 2,
+          "name": "UEFA Champions League",
+          "country": "World",
+          "logo": "https://media.api-sports.io/football/leagues/2.png",
+          "flag": null,
+          "season": 2026,
+          "round": "3rd Qualifying Round",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 563,
+            "name": "Hapoel Beer Sheva",
+            "logo": "https://media.api-sports.io/football/teams/563.png",
+            "winner": true
+          },
+          "away": {
+            "id": 598,
+            "name": "FK Crvena Zvezda",
+            "logo": "https://media.api-sports.io/football/teams/598.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 1,
+          "away": 0
+        },
+        "score": {
+          "halftime": {
+            "home": 1,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 1,
+            "away": 0
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      }
+    ]
+  }
+}

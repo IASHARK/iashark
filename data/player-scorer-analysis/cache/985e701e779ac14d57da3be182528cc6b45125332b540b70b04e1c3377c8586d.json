@@ -1,0 +1,330 @@
+{
+  "endpoint": "/teams/statistics",
+  "params": {
+    "league": 113,
+    "season": 2026,
+    "team": 370
+  },
+  "retrieved_at": "2026-09-06T17:45:06Z",
+  "response_hash": "17ef3f549c63fed25152c4eceab67378787528e74f91c2e1694ee8c12eb91a17",
+  "response": {
+    "get": "teams/statistics",
+    "parameters": {
+      "league": "113",
+      "season": "2026",
+      "team": "370"
+    },
+    "errors": [],
+    "results": 11,
+    "paging": {
+      "current": 1,
+      "total": 1
+    },
+    "response": {
+      "league": {
+        "id": 113,
+        "name": "Allsvenskan",
+        "country": "Sweden",
+        "logo": "https://media.api-sports.io/football/leagues/113.png",
+        "flag": "https://media.api-sports.io/flags/se.svg",
+        "season": 2026
+      },
+      "team": {
+        "id": 370,
+        "name": "Sirius",
+        "logo": "https://media.api-sports.io/football/teams/370.png"
+      },
+      "form": "WWWWDWWWWWDWWWWDLLLW",
+      "fixtures": {
+        "played": {
+          "home": 10,
+          "away": 10,
+          "total": 20
+        },
+        "wins": {
+          "home": 6,
+          "away": 8,
+          "total": 14
+        },
+        "draws": {
+          "home": 2,
+          "away": 1,
+          "total": 3
+        },
+        "loses": {
+          "home": 2,
+          "away": 1,
+          "total": 3
+        }
+      },
+      "goals": {
+        "for": {
+          "total": {
+            "home": 23,
+            "away": 25,
+            "total": 48
+          },
+          "average": {
+            "home": "2.3",
+            "away": "2.5",
+            "total": "2.4"
+          },
+          "minute": {
+            "0-15": {
+              "total": 8,
+              "percentage": "16.00%"
+            },
+            "16-30": {
+              "total": 7,
+              "percentage": "14.00%"
+            },
+            "31-45": {
+              "total": 10,
+              "percentage": "20.00%"
+            },
+            "46-60": {
+              "total": 7,
+              "percentage": "14.00%"
+            },
+            "61-75": {
+              "total": 8,
+              "percentage": "16.00%"
+            },
+            "76-90": {
+              "total": 10,
+              "percentage": "20.00%"
+            },
+            "91-105": {
+              "total": null,
+              "percentage": null
+            },
+            "106-120": {
+              "total": null,
+              "percentage": null
+            }
+          },
+          "under_over": {
+            "0.5": {
+              "over": 18,
+              "under": 2
+            },
+            "1.5": {
+              "over": 17,
+              "under": 3
+            },
+            "2.5": {
+              "over": 10,
+              "under": 10
+            },
+            "3.5": {
+              "over": 3,
+              "under": 17
+            },
+            "4.5": {
+              "over": 0,
+              "under": 20
+            }
+          }
+        },
+        "against": {
+          "total": {
+            "home": 15,
+            "away": 12,
+            "total": 27
+          },
+          "average": {
+            "home": "1.5",
+            "away": "1.2",
+            "total": "1.4"
+          },
+          "minute": {
+            "0-15": {
+              "total": 1,
+              "percentage": "4.00%"
+            },
+            "16-30": {
+              "total": 5,
+              "percentage": "20.00%"
+            },
+            "31-45": {
+              "total": 5,
+              "percentage": "20.00%"
+            },
+            "46-60": {
+              "total": 6,
+              "percentage": "24.00%"
+            },
+            "61-75": {
+              "total": 2,
+              "percentage": "8.00%"
+            },
+            "76-90": {
+              "total": 6,
+              "percentage": "24.00%"
+            },
+            "91-105": {
+              "total": null,
+              "percentage": null
+            },
+            "106-120": {
+              "total": null,
+              "percentage": null
+            }
+          },
+          "under_over": {
+            "0.5": {
+              "over": 14,
+              "under": 6
+            },
+            "1.5": {
+              "over": 8,
+              "under": 12
+            },
+            "2.5": {
+              "over": 3,
+              "under": 17
+            },
+            "3.5": {
+              "over": 2,
+              "under": 18
+            },
+            "4.5": {
+              "over": 0,
+              "under": 20
+            }
+          }
+        }
+      },
+      "biggest": {
+        "streak": {
+          "wins": 5,
+          "draws": 1,
+          "loses": 3
+        },
+        "wins": {
+          "home": "4-1",
+          "away": "0-3"
+        },
+        "loses": {
+          "home": "0-3",
+          "away": "4-3"
+        },
+        "goals": {
+          "for": {
+            "home": 4,
+            "away": 3
+          },
+          "against": {
+            "home": 4,
+            "away": 4
+          }
+        }
+      },
+      "clean_sheet": {
+        "home": 2,
+        "away": 4,
+        "total": 6
+      },
+      "failed_to_score": {
+        "home": 2,
+        "away": 0,
+        "total": 2
+      },
+      "penalty": {
+        "scored": {
+          "total": 5,
+          "percentage": "83.33%"
+        },
+        "missed": {
+          "total": 1,
+          "percentage": "16.67%"
+        },
+        "total": 6
+      },
+      "lineups": [
+        {
+          "formation": "4-2-3-1",
+          "played": 13
+        },
+        {
+          "formation": "4-3-3",
+          "played": 5
+        },
+        {
+          "formation": "3-4-3",
+          "played": 1
+        }
+      ],
+      "cards": {
+        "yellow": {
+          "0-15": {
+            "total": 2,
+            "percentage": "7.69%"
+          },
+          "16-30": {
+            "total": 2,
+            "percentage": "7.69%"
+          },
+          "31-45": {
+            "total": 6,
+            "percentage": "23.08%"
+          },
+          "46-60": {
+            "total": 5,
+            "percentage": "19.23%"
+          },
+          "61-75": {
+            "total": 1,
+            "percentage": "3.85%"
+          },
+          "76-90": {
+            "total": 8,
+            "percentage": "30.77%"
+          },
+          "91-105": {
+            "total": 2,
+            "percentage": "7.69%"
+          },
+          "106-120": {
+            "total": null,
+            "percentage": null
+          }
+        },
+        "red": {
+          "0-15": {
+            "total": null,
+            "percentage": null
+          },
+          "16-30": {
+            "total": null,
+            "percentage": null
+          },
+          "31-45": {
+            "total": null,
+            "percentage": null
+          },
+          "46-60": {
+            "total": null,
+            "percentage": null
+          },
+          "61-75": {
+            "total": null,
+            "percentage": null
+          },
+          "76-90": {
+            "total": 1,
+            "percentage": "100.00%"
+          },
+          "91-105": {
+            "total": null,
+            "percentage": null
+          },
+          "106-120": {
+            "total": null,
+            "percentage": null
+          }
+        }
+      }
+    }
+  }
+}

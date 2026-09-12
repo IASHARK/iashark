@@ -1,0 +1,96 @@
+{
+  "endpoint": "/fixtures",
+  "params": {
+    "last": 1,
+    "status": "FT-AET-PEN",
+    "team": 1614
+  },
+  "retrieved_at": "2026-09-08T16:04:40Z",
+  "response_hash": "c2e317d21e6423ec00aaf4c87761e6a36bc9362d048f29cb2475dc96b3f1fdc9",
+  "response": {
+    "get": "fixtures",
+    "parameters": {
+      "last": "1",
+      "status": "FT-AET-PEN",
+      "team": "1614"
+    },
+    "errors": [],
+    "results": 1,
+    "paging": {
+      "current": 1,
+      "total": 1
+    },
+    "response": [
+      {
+        "fixture": {
+          "id": 1490438,
+          "referee": "Chris Penso, USA",
+          "timezone": "UTC",
+          "date": "2026-09-05T23:30:00+00:00",
+          "timestamp": 1788651000,
+          "periods": {
+            "first": null,
+            "second": null
+          },
+          "venue": {
+            "id": null,
+            "name": "Subaru Park",
+            "city": "Chester"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": null
+          }
+        },
+        "league": {
+          "id": 253,
+          "name": "Major League Soccer",
+          "country": "USA",
+          "logo": "https://media.api-sports.io/football/leagues/253.png",
+          "flag": "https://media.api-sports.io/flags/us.svg",
+          "season": 2026,
+          "round": "Regular Season - 23",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 1599,
+            "name": "Philadelphia Union",
+            "logo": "https://media.api-sports.io/football/teams/1599.png",
+            "winner": true
+          },
+          "away": {
+            "id": 1614,
+            "name": "CF Montreal",
+            "logo": "https://media.api-sports.io/football/teams/1614.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 2,
+          "away": 0
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 2,
+            "away": 0
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      }
+    ]
+  }
+}

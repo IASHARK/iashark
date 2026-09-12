@@ -1,0 +1,96 @@
+{
+  "endpoint": "/fixtures",
+  "params": {
+    "last": 1,
+    "status": "FT-AET-PEN",
+    "team": 628
+  },
+  "retrieved_at": "2026-09-08T18:55:44Z",
+  "response_hash": "e55ef70a48465924962afb0f4461119eb161bac90e2e4cf99a1daf84ea45c115",
+  "response": {
+    "get": "fixtures",
+    "parameters": {
+      "last": "1",
+      "status": "FT-AET-PEN",
+      "team": "628"
+    },
+    "errors": [],
+    "results": 1,
+    "paging": {
+      "current": 1,
+      "total": 1
+    },
+    "response": [
+      {
+        "fixture": {
+          "id": 1560009,
+          "referee": "Marek Radina, Czechia",
+          "timezone": "UTC",
+          "date": "2026-09-06T16:00:00+00:00",
+          "timestamp": 1788710400,
+          "periods": {
+            "first": null,
+            "second": null
+          },
+          "venue": {
+            "id": 20749,
+            "name": "Malsovicka arena",
+            "city": "Hradec Kralove"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": null
+          }
+        },
+        "league": {
+          "id": 345,
+          "name": "Czech Liga",
+          "country": "Czech-Republic",
+          "logo": "https://media.api-sports.io/football/leagues/345.png",
+          "flag": "https://media.api-sports.io/flags/cz.svg",
+          "season": 2026,
+          "round": "Regular Season - 7",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 3723,
+            "name": "Hradec Kr\u00e1lov\u00e9",
+            "logo": "https://media.api-sports.io/football/teams/3723.png",
+            "winner": true
+          },
+          "away": {
+            "id": 628,
+            "name": "Sparta Praha",
+            "logo": "https://media.api-sports.io/football/teams/628.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 2,
+          "away": 1
+        },
+        "score": {
+          "halftime": {
+            "home": 2,
+            "away": 1
+          },
+          "fulltime": {
+            "home": 2,
+            "away": 1
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      }
+    ]
+  }
+}

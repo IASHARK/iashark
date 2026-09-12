@@ -1,0 +1,238 @@
+{
+  "endpoint": "/fixtures",
+  "params": {
+    "league": 135,
+    "season": 2026,
+    "status": "FT-AET-PEN",
+    "team": 523
+  },
+  "retrieved_at": "2026-09-08T15:57:42Z",
+  "response_hash": "b09d183fbdd8064a7fb767ce0298e3d358d1a107ff9479726319e28c2f93eccf",
+  "response": {
+    "get": "fixtures",
+    "parameters": {
+      "league": "135",
+      "season": "2026",
+      "status": "FT-AET-PEN",
+      "team": "523"
+    },
+    "errors": [],
+    "results": 3,
+    "paging": {
+      "current": 1,
+      "total": 1
+    },
+    "response": [
+      {
+        "fixture": {
+          "id": 1550093,
+          "referee": "Daniele Perenzoni, Italy",
+          "timezone": "UTC",
+          "date": "2026-08-22T18:45:00+00:00",
+          "timestamp": 1787424300,
+          "periods": {
+            "first": 1787424300,
+            "second": 1787427900
+          },
+          "venue": {
+            "id": 921,
+            "name": "Stadio Ennio Tardini",
+            "city": "Parma"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 6
+          }
+        },
+        "league": {
+          "id": 135,
+          "name": "Serie A",
+          "country": "Italy",
+          "logo": "https://media.api-sports.io/football/leagues/135.png",
+          "flag": "https://media.api-sports.io/flags/it.svg",
+          "season": 2026,
+          "round": "Regular Season - 1",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 523,
+            "name": "Parma",
+            "logo": "https://media.api-sports.io/football/teams/523.png",
+            "winner": false
+          },
+          "away": {
+            "id": 490,
+            "name": "Cagliari",
+            "logo": "https://media.api-sports.io/football/teams/490.png",
+            "winner": true
+          }
+        },
+        "goals": {
+          "home": 0,
+          "away": 1
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 0,
+            "away": 1
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1550101,
+          "referee": "Francesco Fourneau, Italy",
+          "timezone": "UTC",
+          "date": "2026-08-29T18:45:00+00:00",
+          "timestamp": 1788029100,
+          "periods": {
+            "first": 1788029100,
+            "second": 1788032700
+          },
+          "venue": {
+            "id": null,
+            "name": "Allianz Stadium",
+            "city": "Turin"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 1
+          }
+        },
+        "league": {
+          "id": 135,
+          "name": "Serie A",
+          "country": "Italy",
+          "logo": "https://media.api-sports.io/football/leagues/135.png",
+          "flag": "https://media.api-sports.io/flags/it.svg",
+          "season": 2026,
+          "round": "Regular Season - 2",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 496,
+            "name": "Juventus",
+            "logo": "https://media.api-sports.io/football/teams/496.png",
+            "winner": true
+          },
+          "away": {
+            "id": 523,
+            "name": "Parma",
+            "logo": "https://media.api-sports.io/football/teams/523.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 2,
+          "away": 0
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 2,
+            "away": 0
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1550115,
+          "referee": "Federico La Penna, Italy",
+          "timezone": "UTC",
+          "date": "2026-09-06T13:00:00+00:00",
+          "timestamp": 1788699600,
+          "periods": {
+            "first": null,
+            "second": null
+          },
+          "venue": {
+            "id": 921,
+            "name": "Stadio Ennio Tardini",
+            "city": "Parma"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": null
+          }
+        },
+        "league": {
+          "id": 135,
+          "name": "Serie A",
+          "country": "Italy",
+          "logo": "https://media.api-sports.io/football/leagues/135.png",
+          "flag": "https://media.api-sports.io/flags/it.svg",
+          "season": 2026,
+          "round": "Regular Season - 3",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 523,
+            "name": "Parma",
+            "logo": "https://media.api-sports.io/football/teams/523.png",
+            "winner": null
+          },
+          "away": {
+            "id": 1579,
+            "name": "Monza",
+            "logo": "https://media.api-sports.io/football/teams/1579.png",
+            "winner": null
+          }
+        },
+        "goals": {
+          "home": 1,
+          "away": 1
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 1
+          },
+          "fulltime": {
+            "home": 1,
+            "away": 1
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,168 @@
+{
+  "endpoint": "/fixtures",
+  "params": {
+    "league": 78,
+    "season": 2026,
+    "status": "FT-AET-PEN",
+    "team": 170
+  },
+  "retrieved_at": "2026-09-08T15:14:54Z",
+  "response_hash": "0699c60f9f135afba9ddef8928d5e831c4582f3104864d5ec63bcba15ff713d3",
+  "response": {
+    "get": "fixtures",
+    "parameters": {
+      "league": "78",
+      "season": "2026",
+      "status": "FT-AET-PEN",
+      "team": "170"
+    },
+    "errors": [],
+    "results": 2,
+    "paging": {
+      "current": 1,
+      "total": 1
+    },
+    "response": [
+      {
+        "fixture": {
+          "id": 1575141,
+          "referee": "Sascha Stegemann, Germany",
+          "timezone": "UTC",
+          "date": "2026-08-30T15:30:00+00:00",
+          "timestamp": 1788103800,
+          "periods": {
+            "first": 1788103800,
+            "second": 1788107400
+          },
+          "venue": {
+            "id": 0,
+            "name": "WWK Arena",
+            "city": "Augsburg"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 4
+          }
+        },
+        "league": {
+          "id": 78,
+          "name": "Bundesliga",
+          "country": "Germany",
+          "logo": "https://media.api-sports.io/football/leagues/78.png",
+          "flag": "https://media.api-sports.io/flags/de.svg",
+          "season": 2026,
+          "round": "Regular Season - 1",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 170,
+            "name": "FC Augsburg",
+            "logo": "https://media.api-sports.io/football/teams/170.png",
+            "winner": true
+          },
+          "away": {
+            "id": 174,
+            "name": "FC Schalke 04",
+            "logo": "https://media.api-sports.io/football/teams/174.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 3,
+          "away": 0
+        },
+        "score": {
+          "halftime": {
+            "home": 1,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 3,
+            "away": 0
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1575152,
+          "referee": "Daniel Schlager, Germany",
+          "timezone": "UTC",
+          "date": "2026-09-06T15:30:00+00:00",
+          "timestamp": 1788708600,
+          "periods": {
+            "first": null,
+            "second": null
+          },
+          "venue": {
+            "id": 0,
+            "name": "Deutsche Bank Park",
+            "city": "Frankfurt"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": null
+          }
+        },
+        "league": {
+          "id": 78,
+          "name": "Bundesliga",
+          "country": "Germany",
+          "logo": "https://media.api-sports.io/football/leagues/78.png",
+          "flag": "https://media.api-sports.io/flags/de.svg",
+          "season": 2026,
+          "round": "Regular Season - 2",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 169,
+            "name": "Eintracht Frankfurt",
+            "logo": "https://media.api-sports.io/football/teams/169.png",
+            "winner": false
+          },
+          "away": {
+            "id": 170,
+            "name": "FC Augsburg",
+            "logo": "https://media.api-sports.io/football/teams/170.png",
+            "winner": true
+          }
+        },
+        "goals": {
+          "home": 1,
+          "away": 4
+        },
+        "score": {
+          "halftime": {
+            "home": 1,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 1,
+            "away": 4
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      }
+    ]
+  }
+}

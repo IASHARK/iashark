@@ -1,0 +1,96 @@
+{
+  "endpoint": "/fixtures",
+  "params": {
+    "last": 1,
+    "status": "FT-AET-PEN",
+    "team": 173
+  },
+  "retrieved_at": "2026-09-08T15:59:24Z",
+  "response_hash": "28b9d92b6a548b5b1bcdb8a4ff0ef6e0863ff8540d643a410981f5ed392f7330",
+  "response": {
+    "get": "fixtures",
+    "parameters": {
+      "last": "1",
+      "status": "FT-AET-PEN",
+      "team": "173"
+    },
+    "errors": [],
+    "results": 1,
+    "paging": {
+      "current": 1,
+      "total": 1
+    },
+    "response": [
+      {
+        "fixture": {
+          "id": 1575155,
+          "referee": "Benjamin Brand, Germany",
+          "timezone": "UTC",
+          "date": "2026-09-05T13:30:00+00:00",
+          "timestamp": 1788615000,
+          "periods": {
+            "first": null,
+            "second": null
+          },
+          "venue": {
+            "id": 0,
+            "name": "Weserstadion",
+            "city": "Bremen"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": null
+          }
+        },
+        "league": {
+          "id": 78,
+          "name": "Bundesliga",
+          "country": "Germany",
+          "logo": "https://media.api-sports.io/football/leagues/78.png",
+          "flag": "https://media.api-sports.io/flags/de.svg",
+          "season": 2026,
+          "round": "Regular Season - 2",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 162,
+            "name": "Werder Bremen",
+            "logo": "https://media.api-sports.io/football/teams/162.png",
+            "winner": true
+          },
+          "away": {
+            "id": 173,
+            "name": "RB Leipzig",
+            "logo": "https://media.api-sports.io/football/teams/173.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 3,
+          "away": 1
+        },
+        "score": {
+          "halftime": {
+            "home": 1,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 3,
+            "away": 1
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      }
+    ]
+  }
+}

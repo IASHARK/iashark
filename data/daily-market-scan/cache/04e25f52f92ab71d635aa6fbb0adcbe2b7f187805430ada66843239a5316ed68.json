@@ -1,0 +1,96 @@
+{
+  "endpoint": "/fixtures",
+  "params": {
+    "last": 1,
+    "status": "FT-AET-PEN",
+    "team": 2242
+  },
+  "retrieved_at": "2026-09-08T20:47:57Z",
+  "response_hash": "33e0fb566bf30708e2f813dfa91fad1b01e308d92e9d4d2eab7bb97143b429f2",
+  "response": {
+    "get": "fixtures",
+    "parameters": {
+      "last": "1",
+      "status": "FT-AET-PEN",
+      "team": "2242"
+    },
+    "errors": [],
+    "results": 1,
+    "paging": {
+      "current": 1,
+      "total": 1
+    },
+    "response": [
+      {
+        "fixture": {
+          "id": 1490428,
+          "referee": "Armando Villarrea, USA",
+          "timezone": "UTC",
+          "date": "2026-08-30T00:30:00+00:00",
+          "timestamp": 1788049800,
+          "periods": {
+            "first": 1788049800,
+            "second": 1788053400
+          },
+          "venue": {
+            "id": null,
+            "name": "Geodis Park",
+            "city": "Nashville"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 11
+          }
+        },
+        "league": {
+          "id": 253,
+          "name": "Major League Soccer",
+          "country": "USA",
+          "logo": "https://media.api-sports.io/football/leagues/253.png",
+          "flag": "https://media.api-sports.io/flags/us.svg",
+          "season": 2026,
+          "round": "Regular Season - 22",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 9569,
+            "name": "Nashville SC",
+            "logo": "https://media.api-sports.io/football/teams/9569.png",
+            "winner": true
+          },
+          "away": {
+            "id": 2242,
+            "name": "FC Cincinnati",
+            "logo": "https://media.api-sports.io/football/teams/2242.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 4,
+          "away": 0
+        },
+        "score": {
+          "halftime": {
+            "home": 1,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 4,
+            "away": 0
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      }
+    ]
+  }
+}

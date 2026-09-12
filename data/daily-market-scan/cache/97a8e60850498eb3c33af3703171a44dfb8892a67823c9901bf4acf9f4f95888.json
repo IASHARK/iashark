@@ -1,0 +1,308 @@
+{
+  "endpoint": "/fixtures",
+  "params": {
+    "league": 140,
+    "season": 2026,
+    "status": "FT-AET-PEN",
+    "team": 797
+  },
+  "retrieved_at": "2026-09-08T15:14:11Z",
+  "response_hash": "87995ba40f1cd511818d99f385b6b50370cedf5dce2ddb10706dec3e465fe500",
+  "response": {
+    "get": "fixtures",
+    "parameters": {
+      "league": "140",
+      "season": "2026",
+      "status": "FT-AET-PEN",
+      "team": "797"
+    },
+    "errors": [],
+    "results": 4,
+    "paging": {
+      "current": 1,
+      "total": 1
+    },
+    "response": [
+      {
+        "fixture": {
+          "id": 1570337,
+          "referee": "Francisco Hernandez Maeso, Spain",
+          "timezone": "UTC",
+          "date": "2026-08-17T19:00:00+00:00",
+          "timestamp": 1786993200,
+          "periods": {
+            "first": 1786993200,
+            "second": 1786996800
+          },
+          "venue": {
+            "id": null,
+            "name": "Estadio Riazor",
+            "city": "La Coruna"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 7
+          }
+        },
+        "league": {
+          "id": 140,
+          "name": "La Liga",
+          "country": "Spain",
+          "logo": "https://media.api-sports.io/football/leagues/140.png",
+          "flag": "https://media.api-sports.io/flags/es.svg",
+          "season": 2026,
+          "round": "Regular Season - 1",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 544,
+            "name": "Deportivo La Coruna",
+            "logo": "https://media.api-sports.io/football/teams/544.png",
+            "winner": null
+          },
+          "away": {
+            "id": 797,
+            "name": "Elche",
+            "logo": "https://media.api-sports.io/football/teams/797.png",
+            "winner": null
+          }
+        },
+        "goals": {
+          "home": 1,
+          "away": 1
+        },
+        "score": {
+          "halftime": {
+            "home": 1,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 1,
+            "away": 1
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1570346,
+          "referee": "Alejandro Quintero Gonzalez, Spain",
+          "timezone": "UTC",
+          "date": "2026-08-23T19:30:00+00:00",
+          "timestamp": 1787513400,
+          "periods": {
+            "first": 1787513400,
+            "second": 1787517000
+          },
+          "venue": {
+            "id": null,
+            "name": "Estadio Mart\u00ednez Valero",
+            "city": "Elche"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 4
+          }
+        },
+        "league": {
+          "id": 140,
+          "name": "La Liga",
+          "country": "Spain",
+          "logo": "https://media.api-sports.io/football/leagues/140.png",
+          "flag": "https://media.api-sports.io/flags/es.svg",
+          "season": 2026,
+          "round": "Regular Season - 2",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 797,
+            "name": "Elche",
+            "logo": "https://media.api-sports.io/football/teams/797.png",
+            "winner": false
+          },
+          "away": {
+            "id": 529,
+            "name": "Barcelona",
+            "logo": "https://media.api-sports.io/football/teams/529.png",
+            "winner": true
+          }
+        },
+        "goals": {
+          "home": 0,
+          "away": 5
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 2
+          },
+          "fulltime": {
+            "home": 0,
+            "away": 5
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1570359,
+          "referee": "Carlos Muniz Munoz, Spain",
+          "timezone": "UTC",
+          "date": "2026-08-28T17:00:00+00:00",
+          "timestamp": 1787936400,
+          "periods": {
+            "first": 1787936400,
+            "second": 1787940000
+          },
+          "venue": {
+            "id": null,
+            "name": "El Sardinero",
+            "city": "Santander"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 7
+          }
+        },
+        "league": {
+          "id": 140,
+          "name": "La Liga",
+          "country": "Spain",
+          "logo": "https://media.api-sports.io/football/leagues/140.png",
+          "flag": "https://media.api-sports.io/flags/es.svg",
+          "season": 2026,
+          "round": "Regular Season - 3",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 4665,
+            "name": "Racing Santander",
+            "logo": "https://media.api-sports.io/football/teams/4665.png",
+            "winner": true
+          },
+          "away": {
+            "id": 797,
+            "name": "Elche",
+            "logo": "https://media.api-sports.io/football/teams/797.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 3,
+          "away": 2
+        },
+        "score": {
+          "halftime": {
+            "home": 3,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 3,
+            "away": 2
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1570366,
+          "referee": "Miguel Angel Ortiz Arias, Spain",
+          "timezone": "UTC",
+          "date": "2026-09-07T19:30:00+00:00",
+          "timestamp": 1788809400,
+          "periods": {
+            "first": null,
+            "second": null
+          },
+          "venue": {
+            "id": null,
+            "name": "Estadio Mart\u00ednez Valero",
+            "city": "Elche"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": null
+          }
+        },
+        "league": {
+          "id": 140,
+          "name": "La Liga",
+          "country": "Spain",
+          "logo": "https://media.api-sports.io/football/leagues/140.png",
+          "flag": "https://media.api-sports.io/flags/es.svg",
+          "season": 2026,
+          "round": "Regular Season - 4",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 797,
+            "name": "Elche",
+            "logo": "https://media.api-sports.io/football/teams/797.png",
+            "winner": false
+          },
+          "away": {
+            "id": 548,
+            "name": "Real Sociedad",
+            "logo": "https://media.api-sports.io/football/teams/548.png",
+            "winner": true
+          }
+        },
+        "goals": {
+          "home": 2,
+          "away": 3
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 2
+          },
+          "fulltime": {
+            "home": 2,
+            "away": 3
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      }
+    ]
+  }
+}

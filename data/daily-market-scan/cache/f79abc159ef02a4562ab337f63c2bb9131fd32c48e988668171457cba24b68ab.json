@@ -1,0 +1,96 @@
+{
+  "endpoint": "/fixtures",
+  "params": {
+    "last": 1,
+    "status": "FT-AET-PEN",
+    "team": 738
+  },
+  "retrieved_at": "2026-09-08T18:36:49Z",
+  "response_hash": "03c32e7f9e16a41ff5820964d64c7996cff7d72f3a9c67d55f0c3062f764b787",
+  "response": {
+    "get": "fixtures",
+    "parameters": {
+      "last": "1",
+      "status": "FT-AET-PEN",
+      "team": "738"
+    },
+    "errors": [],
+    "results": 1,
+    "paging": {
+      "current": 1,
+      "total": 1
+    },
+    "response": [
+      {
+        "fixture": {
+          "id": 1558625,
+          "referee": "Wim Smet, Belgium",
+          "timezone": "UTC",
+          "date": "2026-09-06T17:15:00+00:00",
+          "timestamp": 1788714900,
+          "periods": {
+            "first": null,
+            "second": null
+          },
+          "venue": {
+            "id": 189,
+            "name": "Freethielstadion",
+            "city": "Beveren"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": null
+          }
+        },
+        "league": {
+          "id": 144,
+          "name": "Jupiler Pro League",
+          "country": "Belgium",
+          "logo": "https://media.api-sports.io/football/leagues/144.png",
+          "flag": "https://media.api-sports.io/flags/be.svg",
+          "season": 2026,
+          "round": "Regular Season - 5",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 738,
+            "name": "SK Beveren",
+            "logo": "https://media.api-sports.io/football/teams/738.png",
+            "winner": true
+          },
+          "away": {
+            "id": 260,
+            "name": "OH Leuven",
+            "logo": "https://media.api-sports.io/football/teams/260.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 3,
+          "away": 0
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 3,
+            "away": 0
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,62 @@
+{
+  "endpoint": "/teams",
+  "params": {
+    "search": "Paris Saint Germain"
+  },
+  "retrieved_at": "2026-09-06T17:40:22Z",
+  "response_hash": "649920a8255d2b83cd57cedd55cc759da0dd8b2b5afbe9ca1e96f30142abc55a",
+  "response": {
+    "get": "teams",
+    "parameters": {
+      "search": "Paris Saint Germain"
+    },
+    "errors": [],
+    "results": 2,
+    "paging": {
+      "current": 1,
+      "total": 1
+    },
+    "response": [
+      {
+        "team": {
+          "id": 85,
+          "name": "Paris Saint Germain",
+          "code": "PSG",
+          "country": "France",
+          "founded": 1970,
+          "national": false,
+          "logo": "https://media.api-sports.io/football/teams/85.png"
+        },
+        "venue": {
+          "id": 671,
+          "name": "Parc des Princes",
+          "address": "24, rue du Commandant Guilbaud",
+          "city": "Paris",
+          "capacity": 47929,
+          "surface": "grass",
+          "image": "https://media.api-sports.io/football/venues/671.png"
+        }
+      },
+      {
+        "team": {
+          "id": 1667,
+          "name": "Paris Saint Germain W",
+          "code": null,
+          "country": "France",
+          "founded": 1991,
+          "national": false,
+          "logo": "https://media.api-sports.io/football/teams/1667.png"
+        },
+        "venue": {
+          "id": 22043,
+          "name": "Campus PSG",
+          "address": "Rue Guy Crescent",
+          "city": "Poissy",
+          "capacity": 5000,
+          "surface": "grass",
+          "image": "https://media.api-sports.io/football/venues/22043.png"
+        }
+      }
+    ]
+  }
+}

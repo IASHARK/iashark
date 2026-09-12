@@ -1,0 +1,168 @@
+{
+  "endpoint": "/fixtures",
+  "params": {
+    "league": 2,
+    "season": 2025,
+    "status": "FT-AET-PEN",
+    "team": 637
+  },
+  "retrieved_at": "2026-09-08T18:55:58Z",
+  "response_hash": "6c3056b8181e28a757a401a2aff4bb9db45e1a904830235714d938cc4c7f696b",
+  "response": {
+    "get": "fixtures",
+    "parameters": {
+      "league": "2",
+      "season": "2025",
+      "status": "FT-AET-PEN",
+      "team": "637"
+    },
+    "errors": [],
+    "results": 2,
+    "paging": {
+      "current": 1,
+      "total": 1
+    },
+    "response": [
+      {
+        "fixture": {
+          "id": 1424397,
+          "referee": "S. Scharer",
+          "timezone": "UTC",
+          "date": "2025-08-20T19:00:00+00:00",
+          "timestamp": 1755716400,
+          "periods": {
+            "first": 1755716400,
+            "second": 1755720000
+          },
+          "venue": {
+            "id": null,
+            "name": "Aspmyra Stadion",
+            "city": "Bodo"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 3
+          }
+        },
+        "league": {
+          "id": 2,
+          "name": "UEFA Champions League",
+          "country": "World",
+          "logo": "https://media.api-sports.io/football/leagues/2.png",
+          "flag": null,
+          "season": 2025,
+          "round": "Play-offs",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 327,
+            "name": "Bodo/Glimt",
+            "logo": "https://media.api-sports.io/football/teams/327.png",
+            "winner": true
+          },
+          "away": {
+            "id": 637,
+            "name": "Sturm Graz",
+            "logo": "https://media.api-sports.io/football/teams/637.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 5,
+          "away": 0
+        },
+        "score": {
+          "halftime": {
+            "home": 3,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 5,
+            "away": 0
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1424398,
+          "referee": "S. Marciniak",
+          "timezone": "UTC",
+          "date": "2025-08-26T19:00:00+00:00",
+          "timestamp": 1756234800,
+          "periods": {
+            "first": 1756234800,
+            "second": 1756238400
+          },
+          "venue": {
+            "id": 19258,
+            "name": "28 Black Arena",
+            "city": "Klagenfurt"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 3
+          }
+        },
+        "league": {
+          "id": 2,
+          "name": "UEFA Champions League",
+          "country": "World",
+          "logo": "https://media.api-sports.io/football/leagues/2.png",
+          "flag": null,
+          "season": 2025,
+          "round": "Play-offs",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 637,
+            "name": "Sturm Graz",
+            "logo": "https://media.api-sports.io/football/teams/637.png",
+            "winner": true
+          },
+          "away": {
+            "id": 327,
+            "name": "Bodo/Glimt",
+            "logo": "https://media.api-sports.io/football/teams/327.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 2,
+          "away": 1
+        },
+        "score": {
+          "halftime": {
+            "home": 1,
+            "away": 1
+          },
+          "fulltime": {
+            "home": 2,
+            "away": 1
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      }
+    ]
+  }
+}

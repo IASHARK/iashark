@@ -1,0 +1,164 @@
+{
+  "endpoint": "/fixtures/headtohead",
+  "params": {
+    "h2h": "646-575",
+    "last": 5
+  },
+  "retrieved_at": "2026-09-08T18:55:28Z",
+  "response_hash": "c392c45cac86ff3602e2abadda89587df593a75aaa5a2551d37a633000461a56",
+  "response": {
+    "get": "fixtures/headtohead",
+    "parameters": {
+      "h2h": "646-575",
+      "last": "5"
+    },
+    "errors": [],
+    "results": 2,
+    "paging": {
+      "current": 1,
+      "total": 1
+    },
+    "response": [
+      {
+        "fixture": {
+          "id": 1622629,
+          "referee": "C. Turpin",
+          "timezone": "UTC",
+          "date": "2026-08-26T19:00:00+00:00",
+          "timestamp": 1787770800,
+          "periods": {
+            "first": 1787770800,
+            "second": 1787774400
+          },
+          "venue": {
+            "id": null,
+            "name": "Allwyn Arena",
+            "city": "Athens"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 4
+          }
+        },
+        "league": {
+          "id": 2,
+          "name": "UEFA Champions League",
+          "country": "World",
+          "logo": "https://media.api-sports.io/football/leagues/2.png",
+          "flag": null,
+          "season": 2026,
+          "round": "Play-offs",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 575,
+            "name": "AEK Athens FC",
+            "logo": "https://media.api-sports.io/football/teams/575.png",
+            "winner": true
+          },
+          "away": {
+            "id": 646,
+            "name": "Levski Sofia",
+            "logo": "https://media.api-sports.io/football/teams/646.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 4,
+          "away": 0
+        },
+        "score": {
+          "halftime": {
+            "home": 3,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 4,
+            "away": 0
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1622622,
+          "referee": "G. Nyberg",
+          "timezone": "UTC",
+          "date": "2026-08-18T19:00:00+00:00",
+          "timestamp": 1787079600,
+          "periods": {
+            "first": 1787079600,
+            "second": 1787083200
+          },
+          "venue": {
+            "id": null,
+            "name": "National Stadium Vasil Levski",
+            "city": "Sofia"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 3
+          }
+        },
+        "league": {
+          "id": 2,
+          "name": "UEFA Champions League",
+          "country": "World",
+          "logo": "https://media.api-sports.io/football/leagues/2.png",
+          "flag": null,
+          "season": 2026,
+          "round": "Play-offs",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 646,
+            "name": "Levski Sofia",
+            "logo": "https://media.api-sports.io/football/teams/646.png",
+            "winner": null
+          },
+          "away": {
+            "id": 575,
+            "name": "AEK Athens FC",
+            "logo": "https://media.api-sports.io/football/teams/575.png",
+            "winner": null
+          }
+        },
+        "goals": {
+          "home": 0,
+          "away": 0
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 0,
+            "away": 0
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,238 @@
+{
+  "endpoint": "/fixtures",
+  "params": {
+    "league": 61,
+    "season": 2026,
+    "status": "FT-AET-PEN",
+    "team": 97
+  },
+  "retrieved_at": "2026-09-08T15:56:36Z",
+  "response_hash": "a897f66379b6775e2e598176357563541ba52715001b6f7ee4e8a3fa815127a1",
+  "response": {
+    "get": "fixtures",
+    "parameters": {
+      "league": "61",
+      "season": "2026",
+      "status": "FT-AET-PEN",
+      "team": "97"
+    },
+    "errors": [],
+    "results": 3,
+    "paging": {
+      "current": 1,
+      "total": 1
+    },
+    "response": [
+      {
+        "fixture": {
+          "id": 1552734,
+          "referee": "Romain Lissorgue, France",
+          "timezone": "UTC",
+          "date": "2026-08-22T18:45:00+00:00",
+          "timestamp": 1787424300,
+          "periods": {
+            "first": 1787424300,
+            "second": 1787427900
+          },
+          "venue": {
+            "id": 663,
+            "name": "Allianz Riviera",
+            "city": "Nice"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 4
+          }
+        },
+        "league": {
+          "id": 61,
+          "name": "Ligue 1",
+          "country": "France",
+          "logo": "https://media.api-sports.io/football/leagues/61.png",
+          "flag": "https://media.api-sports.io/flags/fr.svg",
+          "season": 2026,
+          "round": "Regular Season - 1",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 84,
+            "name": "Nice",
+            "logo": "https://media.api-sports.io/football/teams/84.png",
+            "winner": null
+          },
+          "away": {
+            "id": 97,
+            "name": "Lorient",
+            "logo": "https://media.api-sports.io/football/teams/97.png",
+            "winner": null
+          }
+        },
+        "goals": {
+          "home": 0,
+          "away": 0
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 0,
+            "away": 0
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1552740,
+          "referee": "Azzedine Souifi, France",
+          "timezone": "UTC",
+          "date": "2026-08-29T18:45:00+00:00",
+          "timestamp": 1788029100,
+          "periods": {
+            "first": 1788029100,
+            "second": 1788032700
+          },
+          "venue": {
+            "id": null,
+            "name": "Stade Yves Allainmat-Le Moustoir",
+            "city": "Lorient"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": null
+          }
+        },
+        "league": {
+          "id": 61,
+          "name": "Ligue 1",
+          "country": "France",
+          "logo": "https://media.api-sports.io/football/leagues/61.png",
+          "flag": "https://media.api-sports.io/flags/fr.svg",
+          "season": 2026,
+          "round": "Regular Season - 2",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 97,
+            "name": "Lorient",
+            "logo": "https://media.api-sports.io/football/teams/97.png",
+            "winner": false
+          },
+          "away": {
+            "id": 110,
+            "name": "Estac Troyes",
+            "logo": "https://media.api-sports.io/football/teams/110.png",
+            "winner": true
+          }
+        },
+        "goals": {
+          "home": 1,
+          "away": 2
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 2
+          },
+          "fulltime": {
+            "home": 1,
+            "away": 2
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1552749,
+          "referee": "Eric Wattellier, France",
+          "timezone": "UTC",
+          "date": "2026-09-05T15:15:00+00:00",
+          "timestamp": 1788621300,
+          "periods": {
+            "first": null,
+            "second": null
+          },
+          "venue": {
+            "id": 654,
+            "name": "Stade Bollaert-Delelis",
+            "city": "Lens"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": null
+          }
+        },
+        "league": {
+          "id": 61,
+          "name": "Ligue 1",
+          "country": "France",
+          "logo": "https://media.api-sports.io/football/leagues/61.png",
+          "flag": "https://media.api-sports.io/flags/fr.svg",
+          "season": 2026,
+          "round": "Regular Season - 3",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 116,
+            "name": "Lens",
+            "logo": "https://media.api-sports.io/football/teams/116.png",
+            "winner": false
+          },
+          "away": {
+            "id": 97,
+            "name": "Lorient",
+            "logo": "https://media.api-sports.io/football/teams/97.png",
+            "winner": true
+          }
+        },
+        "goals": {
+          "home": 0,
+          "away": 1
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 0,
+            "away": 1
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      }
+    ]
+  }
+}

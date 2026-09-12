@@ -1,0 +1,316 @@
+{
+  "match": {
+    "fixtureId": 1635654,
+    "date": "2026-09-08T19:00:00+00:00",
+    "venue": {
+      "id": null,
+      "name": null,
+      "city": "Porto"
+    },
+    "league": {
+      "id": 2,
+      "name": "UEFA Champions League",
+      "country": "World",
+      "logo": "https://media.api-sports.io/football/leagues/2.png",
+      "flag": null,
+      "season": 2026,
+      "round": "League Stage - 1",
+      "standings": true
+    },
+    "home": {
+      "id": 212,
+      "name": "FC Porto",
+      "logo": "https://media.api-sports.io/football/teams/212.png",
+      "winner": null
+    },
+    "away": {
+      "id": 50,
+      "name": "Manchester City",
+      "logo": "https://media.api-sports.io/football/teams/50.png",
+      "winner": null
+    }
+  },
+  "realData": {
+    "recentMatches": {
+      "home": 10,
+      "away": 10
+    },
+    "injuries": 20,
+    "lineups": "estimated-or-unavailable"
+  },
+  "model": {
+    "strength": {
+      "homeLambda": 1.0098,
+      "awayLambda": 1.0625600000000002,
+      "evidence": [
+        "Forme récente: 1.60 vs 1.70 buts/match",
+        "Défenses: 0.60 vs 1.10 encaissés/match",
+        "Signal API-Sports Predictions pondéré",
+        "20 absence(s) API détectée(s)"
+      ]
+    },
+    "disclaimer": "Prédiction statistique, pas un résultat réel."
+  },
+  "aggregates": {
+    "simulations": 50000,
+    "homeWin": 33.5,
+    "draw": 30,
+    "awayWin": 36.4,
+    "btts": 41.6,
+    "over25": 34.5,
+    "under25": 65.5,
+    "homeFirst": 42.6,
+    "awayFirst": 44.7,
+    "topScores": [
+      {
+        "score": "0-1",
+        "pct": 13.4
+      },
+      {
+        "score": "1-1",
+        "pct": 13.3
+      },
+      {
+        "score": "0-0",
+        "pct": 12.7
+      },
+      {
+        "score": "1-0",
+        "pct": 12.5
+      },
+      {
+        "score": "1-2",
+        "pct": 7.3
+      }
+    ],
+    "topScorers": [
+      {
+        "player": "E. Haaland",
+        "pct": 12.7
+      },
+      {
+        "player": "N. Pérez",
+        "pct": 12.4
+      },
+      {
+        "player": "S. Giménez",
+        "pct": 11.9
+      },
+      {
+        "player": "Omar Marmoush",
+        "pct": 11.1
+      },
+      {
+        "player": "E. Ferreira",
+        "pct": 9.6
+      }
+    ]
+  },
+  "scenario": {
+    "score": "1-2",
+    "goals": [
+      {
+        "minute": 13,
+        "player": "M. Kovačić",
+        "side": "away"
+      },
+      {
+        "minute": 33,
+        "player": "E. Haaland",
+        "side": "away"
+      },
+      {
+        "minute": 51,
+        "player": "N. Pérez",
+        "side": "home"
+      }
+    ],
+    "timeline": [
+      {
+        "minute": 1,
+        "type": "kickoff",
+        "text": "Coup d’envoi."
+      },
+      {
+        "minute": 8,
+        "type": "domination",
+        "side": "home",
+        "text": "FC Porto installe sa possession dans le camp adverse."
+      },
+      {
+        "minute": 13,
+        "type": "goal",
+        "side": "away",
+        "player": "M. Kovačić",
+        "text": "BUT Manchester City — M. Kovačić."
+      },
+      {
+        "minute": 14,
+        "type": "chance",
+        "side": "away",
+        "text": "Première transition dangereuse de Manchester City, arrêt du gardien."
+      },
+      {
+        "minute": 27,
+        "type": "chance",
+        "side": "home",
+        "text": "Grosse occasion pour FC Porto, frappe repoussée."
+      },
+      {
+        "minute": 33,
+        "type": "goal",
+        "side": "away",
+        "player": "E. Haaland",
+        "text": "BUT Manchester City — E. Haaland."
+      },
+      {
+        "minute": 45,
+        "type": "half-time",
+        "text": "Mi-temps — 0-2."
+      },
+      {
+        "minute": 51,
+        "type": "goal",
+        "side": "home",
+        "player": "N. Pérez",
+        "text": "BUT FC Porto — N. Pérez."
+      },
+      {
+        "minute": 55,
+        "type": "domination",
+        "side": "away",
+        "text": "Manchester City augmente le rythme au retour des vestiaires."
+      },
+      {
+        "minute": 63,
+        "type": "substitution",
+        "text": "Premier changement tactique."
+      },
+      {
+        "minute": 72,
+        "type": "card",
+        "text": "Carton jaune après une transition stoppée."
+      },
+      {
+        "minute": 84,
+        "type": "chance",
+        "text": "Dernière grosse occasion, le gardien intervient."
+      },
+      {
+        "minute": 90,
+        "type": "full-time",
+        "text": "Fin du match — 1-2."
+      }
+    ],
+    "stats": {
+      "possession": {
+        "home": 52,
+        "away": 48
+      },
+      "shots": {
+        "home": 13,
+        "away": 15
+      },
+      "shotsOnTarget": {
+        "home": 4,
+        "away": 4
+      },
+      "bigChances": {
+        "home": 2,
+        "away": 3
+      },
+      "corners": {
+        "home": 6,
+        "away": 5
+      },
+      "xg": {
+        "home": 1.37,
+        "away": 1.86
+      },
+      "fouls": {
+        "home": 11,
+        "away": 13
+      },
+      "yellowCards": {
+        "home": 2,
+        "away": 3
+      }
+    },
+    "manOfTheMatch": "E. Haaland"
+  },
+  "apiAudit": {
+    "retrievedAt": "2026-09-08T06:57:20.907Z",
+    "endpoints": [
+      {
+        "endpoint": "/fixtures?date=2026-09-08",
+        "available": true,
+        "cached": true
+      },
+      {
+        "endpoint": "/predictions?fixture=1635654",
+        "available": true,
+        "cached": true
+      },
+      {
+        "endpoint": "/fixtures/headtohead?h2h=212-50&last=10",
+        "available": true,
+        "cached": true
+      },
+      {
+        "endpoint": "/fixtures?team=212&last=10",
+        "available": true,
+        "cached": true
+      },
+      {
+        "endpoint": "/injuries?fixture=1635654",
+        "available": true,
+        "cached": true
+      },
+      {
+        "endpoint": "/fixtures?team=50&last=10",
+        "available": true,
+        "cached": true
+      },
+      {
+        "endpoint": "/teams/statistics?team=212&league=2&season=2026",
+        "available": false,
+        "cached": true
+      },
+      {
+        "endpoint": "/teams/statistics?team=50&league=2&season=2026",
+        "available": false,
+        "cached": true
+      },
+      {
+        "endpoint": "/fixtures/lineups?fixture=1635654",
+        "available": false,
+        "cached": true
+      },
+      {
+        "endpoint": "/players?team=212&season=2026",
+        "available": true,
+        "cached": true
+      },
+      {
+        "endpoint": "/players/squads?team=212",
+        "available": true,
+        "cached": true
+      },
+      {
+        "endpoint": "/players?team=50&season=2026",
+        "available": true,
+        "cached": true
+      },
+      {
+        "endpoint": "/players/squads?team=50",
+        "available": true,
+        "cached": true
+      },
+      {
+        "endpoint": "/odds?fixture=1635654",
+        "available": true,
+        "cached": true
+      }
+    ]
+  }
+}

@@ -1,0 +1,96 @@
+{
+  "endpoint": "/fixtures",
+  "params": {
+    "last": 1,
+    "status": "FT-AET-PEN",
+    "team": 13976
+  },
+  "retrieved_at": "2026-09-08T15:04:49Z",
+  "response_hash": "a11e1f119826a38c7633bde48d9615d1c880ad75918d53704691ea1cef44e19e",
+  "response": {
+    "get": "fixtures",
+    "parameters": {
+      "last": "1",
+      "status": "FT-AET-PEN",
+      "team": "13976"
+    },
+    "errors": [],
+    "results": 1,
+    "paging": {
+      "current": 1,
+      "total": 1
+    },
+    "response": [
+      {
+        "fixture": {
+          "id": 1601889,
+          "referee": "I. Mammadov",
+          "timezone": "UTC",
+          "date": "2026-09-05T14:30:00+00:00",
+          "timestamp": 1788618600,
+          "periods": {
+            "first": 1788618600,
+            "second": 1788622200
+          },
+          "venue": {
+            "id": null,
+            "name": "Bank Respublika Arena",
+            "city": null
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": null
+          }
+        },
+        "league": {
+          "id": 419,
+          "name": "Premyer Liqa",
+          "country": "Azerbaijan",
+          "logo": "https://media.api-sports.io/football/leagues/419.png",
+          "flag": "https://media.api-sports.io/flags/az.svg",
+          "season": 2026,
+          "round": "Regular Season - 4",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 13976,
+            "name": "Sabah FA",
+            "logo": "https://media.api-sports.io/football/teams/13976.png",
+            "winner": true
+          },
+          "away": {
+            "id": 648,
+            "name": "Zira",
+            "logo": "https://media.api-sports.io/football/teams/648.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 5,
+          "away": 0
+        },
+        "score": {
+          "halftime": {
+            "home": 3,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 5,
+            "away": 0
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      }
+    ]
+  }
+}

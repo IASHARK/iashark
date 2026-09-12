@@ -1,0 +1,168 @@
+{
+  "endpoint": "/fixtures",
+  "params": {
+    "league": 78,
+    "season": 2026,
+    "status": "FT-AET-PEN",
+    "team": 164
+  },
+  "retrieved_at": "2026-09-08T15:26:12Z",
+  "response_hash": "d8cb30d3c86ff55f1550db8039343d0bc762d06f85a63fc2f74895bc2a795bb1",
+  "response": {
+    "get": "fixtures",
+    "parameters": {
+      "league": "78",
+      "season": "2026",
+      "status": "FT-AET-PEN",
+      "team": "164"
+    },
+    "errors": [],
+    "results": 2,
+    "paging": {
+      "current": 1,
+      "total": 1
+    },
+    "response": [
+      {
+        "fixture": {
+          "id": 1575146,
+          "referee": "Tobias Stieler, Germany",
+          "timezone": "UTC",
+          "date": "2026-08-29T13:30:00+00:00",
+          "timestamp": 1788010200,
+          "periods": {
+            "first": 1788010200,
+            "second": 1788013800
+          },
+          "venue": {
+            "id": 0,
+            "name": "Mewa Arena",
+            "city": "Mainz"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": null
+          }
+        },
+        "league": {
+          "id": 78,
+          "name": "Bundesliga",
+          "country": "Germany",
+          "logo": "https://media.api-sports.io/football/leagues/78.png",
+          "flag": "https://media.api-sports.io/flags/de.svg",
+          "season": 2026,
+          "round": "Regular Season - 1",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 164,
+            "name": "FSV Mainz 05",
+            "logo": "https://media.api-sports.io/football/teams/164.png",
+            "winner": null
+          },
+          "away": {
+            "id": 185,
+            "name": "SC Paderborn 07",
+            "logo": "https://media.api-sports.io/football/teams/185.png",
+            "winner": null
+          }
+        },
+        "goals": {
+          "home": 0,
+          "away": 0
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 0,
+            "away": 0
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1575154,
+          "referee": "Tobias Reichel, Germany",
+          "timezone": "UTC",
+          "date": "2026-09-06T13:30:00+00:00",
+          "timestamp": 1788701400,
+          "periods": {
+            "first": null,
+            "second": null
+          },
+          "venue": {
+            "id": 0,
+            "name": "Volksparkstadion",
+            "city": "Hamburg"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": null
+          }
+        },
+        "league": {
+          "id": 78,
+          "name": "Bundesliga",
+          "country": "Germany",
+          "logo": "https://media.api-sports.io/football/leagues/78.png",
+          "flag": "https://media.api-sports.io/flags/de.svg",
+          "season": 2026,
+          "round": "Regular Season - 2",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 175,
+            "name": "Hamburger SV",
+            "logo": "https://media.api-sports.io/football/teams/175.png",
+            "winner": false
+          },
+          "away": {
+            "id": 164,
+            "name": "FSV Mainz 05",
+            "logo": "https://media.api-sports.io/football/teams/164.png",
+            "winner": true
+          }
+        },
+        "goals": {
+          "home": 0,
+          "away": 5
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 2
+          },
+          "fulltime": {
+            "home": 0,
+            "away": 5
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      }
+    ]
+  }
+}

@@ -52,6 +52,13 @@ function main() {
     structural_formula: selection.champion_selected === "M2" ? "prior_equivalents(n)=max(0,8-0.5n) (lib/lab/bayes-early-season.js, transferee de PL sans retuning)" : "N/A",
   };
 
+  // Prospectif (contract.js#buildMarketFamilyContract) : EXPLICITE et
+  // opt-in par appel, jamais une valeur par defaut implicite - une ligue
+  // deja consommee ne doit jamais recevoir ce flag si ce script est
+  // relance pour elle (son holdout est deja ouvert, hors scope de ce
+  // contrat prospectif par construction).
+  const marketFamilyProspective = args["market-family-prospective"] === "true";
+
   const contract = buildProductionValidationContract({
     leagueKey,
     championModelId: selection.champion_selected,
@@ -61,6 +68,7 @@ function main() {
     datasetHashes,
     seedPrefix: `SCORE-LAB-FACTORY-V2-${leagueKey.toUpperCase()}`,
     exactScoreNLL,
+    marketFamilyProspective,
   });
 
   const contractHash = crypto.createHash("sha256").update(JSON.stringify(contract)).digest("hex");

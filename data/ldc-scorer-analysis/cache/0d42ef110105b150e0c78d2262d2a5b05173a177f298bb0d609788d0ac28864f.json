@@ -1,0 +1,119 @@
+{
+  "endpoint": "/players",
+  "params": {
+    "id": 18906,
+    "season": 2026
+  },
+  "retrieved_at": "2026-09-08T13:21:10Z",
+  "response_hash": "c4639de926182905014ffefdf951730c76b5676f79f3361087010017cfd948ae",
+  "response": {
+    "get": "players",
+    "parameters": {
+      "id": "18906",
+      "season": "2026"
+    },
+    "errors": [],
+    "results": 1,
+    "paging": {
+      "current": 1,
+      "total": 1
+    },
+    "response": [
+      {
+        "player": {
+          "id": 18906,
+          "name": "Ayoze P\u00e9rez",
+          "firstname": "Ayoze",
+          "lastname": "P\u00e9rez Guti\u00e9rrez",
+          "age": 32,
+          "birth": {
+            "date": "1993-07-29",
+            "place": "Santa Cruz de Tenerife",
+            "country": "Spain"
+          },
+          "nationality": "Spain",
+          "height": "178",
+          "weight": "66",
+          "injured": false,
+          "photo": "https://media.api-sports.io/football/players/18906.png"
+        },
+        "statistics": [
+          {
+            "team": {
+              "id": 533,
+              "name": "Villarreal",
+              "logo": "https://media.api-sports.io/football/teams/533.png"
+            },
+            "league": {
+              "id": 140,
+              "name": "La Liga",
+              "country": "Spain",
+              "logo": "https://media.api-sports.io/football/leagues/140.png",
+              "flag": "https://media.api-sports.io/flags/es.svg",
+              "season": 2026
+            },
+            "games": {
+              "appearences": 4,
+              "lineups": 3,
+              "minutes": 207,
+              "number": 22,
+              "position": "Attacker",
+              "rating": "6.7",
+              "captain": false
+            },
+            "substitutes": {
+              "in": 1,
+              "out": 3,
+              "bench": 1
+            },
+            "shots": {
+              "total": 4,
+              "on": 3
+            },
+            "goals": {
+              "total": 0,
+              "conceded": 0,
+              "assists": 1,
+              "saves": null
+            },
+            "passes": {
+              "total": 64,
+              "key": 3,
+              "accuracy": 82
+            },
+            "tackles": {
+              "total": 3,
+              "blocks": null,
+              "interceptions": null
+            },
+            "duels": {
+              "total": 28,
+              "won": 11
+            },
+            "dribbles": {
+              "attempts": 6,
+              "success": 1,
+              "past": null
+            },
+            "fouls": {
+              "drawn": 7,
+              "committed": 3
+            },
+            "cards": {
+              "yellow": 0,
+              "yellowred": 0,
+              "red": 0
+            },
+            "penalty": {
+              "won": null,
+              "commited": null,
+              "scored": 0,
+              "missed": 0,
+              "saved": null
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

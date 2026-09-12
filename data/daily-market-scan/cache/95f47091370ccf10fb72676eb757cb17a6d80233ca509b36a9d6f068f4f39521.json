@@ -1,0 +1,866 @@
+{
+  "endpoint": "/fixtures",
+  "params": {
+    "last": 12,
+    "status": "FT-AET-PEN",
+    "team": 1617
+  },
+  "retrieved_at": "2026-09-08T15:26:41Z",
+  "response_hash": "fe1f4384d29dcdfb6c211758bba15ccd2093c0dd3d9249f528b933e169b43d09",
+  "response": {
+    "get": "fixtures",
+    "parameters": {
+      "last": "12",
+      "status": "FT-AET-PEN",
+      "team": "1617"
+    },
+    "errors": [],
+    "results": 12,
+    "paging": {
+      "current": 1,
+      "total": 1
+    },
+    "response": [
+      {
+        "fixture": {
+          "id": 1490450,
+          "referee": "Filip Dujic, Canada",
+          "timezone": "UTC",
+          "date": "2026-09-06T02:30:00+00:00",
+          "timestamp": 1788661800,
+          "periods": {
+            "first": null,
+            "second": null
+          },
+          "venue": {
+            "id": null,
+            "name": "Providence Park",
+            "city": "Portland"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": null
+          }
+        },
+        "league": {
+          "id": 253,
+          "name": "Major League Soccer",
+          "country": "USA",
+          "logo": "https://media.api-sports.io/football/leagues/253.png",
+          "flag": "https://media.api-sports.io/flags/us.svg",
+          "season": 2026,
+          "round": "Regular Season - 23",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 1617,
+            "name": "Portland Timbers",
+            "logo": "https://media.api-sports.io/football/teams/1617.png",
+            "winner": true
+          },
+          "away": {
+            "id": 1612,
+            "name": "Minnesota United FC",
+            "logo": "https://media.api-sports.io/football/teams/1612.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 5,
+          "away": 4
+        },
+        "score": {
+          "halftime": {
+            "home": 3,
+            "away": 2
+          },
+          "fulltime": {
+            "home": 5,
+            "away": 4
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1490434,
+          "referee": "Guido Gonzales Jr, USA",
+          "timezone": "UTC",
+          "date": "2026-08-30T02:30:00+00:00",
+          "timestamp": 1788057000,
+          "periods": {
+            "first": 1788057000,
+            "second": 1788060600
+          },
+          "venue": {
+            "id": null,
+            "name": "Providence Park",
+            "city": "Portland"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 8
+          }
+        },
+        "league": {
+          "id": 253,
+          "name": "Major League Soccer",
+          "country": "USA",
+          "logo": "https://media.api-sports.io/football/leagues/253.png",
+          "flag": "https://media.api-sports.io/flags/us.svg",
+          "season": 2026,
+          "round": "Regular Season - 22",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 1617,
+            "name": "Portland Timbers",
+            "logo": "https://media.api-sports.io/football/teams/1617.png",
+            "winner": false
+          },
+          "away": {
+            "id": 16489,
+            "name": "Austin",
+            "logo": "https://media.api-sports.io/football/teams/16489.png",
+            "winner": true
+          }
+        },
+        "goals": {
+          "home": 1,
+          "away": 2
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 1
+          },
+          "fulltime": {
+            "home": 1,
+            "away": 2
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1490416,
+          "referee": "J. Freemon",
+          "timezone": "UTC",
+          "date": "2026-08-23T02:30:00+00:00",
+          "timestamp": 1787452200,
+          "periods": {
+            "first": 1787452200,
+            "second": 1787455800
+          },
+          "venue": {
+            "id": null,
+            "name": "BMO Stadium",
+            "city": "Los Angeles"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 6
+          }
+        },
+        "league": {
+          "id": 253,
+          "name": "Major League Soccer",
+          "country": "USA",
+          "logo": "https://media.api-sports.io/football/leagues/253.png",
+          "flag": "https://media.api-sports.io/flags/us.svg",
+          "season": 2026,
+          "round": "Regular Season - 21",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 1616,
+            "name": "Los Angeles FC",
+            "logo": "https://media.api-sports.io/football/teams/1616.png",
+            "winner": null
+          },
+          "away": {
+            "id": 1617,
+            "name": "Portland Timbers",
+            "logo": "https://media.api-sports.io/football/teams/1617.png",
+            "winner": null
+          }
+        },
+        "goals": {
+          "home": 1,
+          "away": 1
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 1
+          },
+          "fulltime": {
+            "home": 1,
+            "away": 1
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1490405,
+          "referee": "R. Vazquez",
+          "timezone": "UTC",
+          "date": "2026-08-20T02:30:00+00:00",
+          "timestamp": 1787193000,
+          "periods": {
+            "first": 1787193000,
+            "second": 1787196600
+          },
+          "venue": {
+            "id": null,
+            "name": "Providence Park",
+            "city": "Portland"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 8
+          }
+        },
+        "league": {
+          "id": 253,
+          "name": "Major League Soccer",
+          "country": "USA",
+          "logo": "https://media.api-sports.io/football/leagues/253.png",
+          "flag": "https://media.api-sports.io/flags/us.svg",
+          "season": 2026,
+          "round": "Regular Season - 20",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 1617,
+            "name": "Portland Timbers",
+            "logo": "https://media.api-sports.io/football/teams/1617.png",
+            "winner": true
+          },
+          "away": {
+            "id": 25484,
+            "name": "San Diego",
+            "logo": "https://media.api-sports.io/football/teams/25484.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 3,
+          "away": 1
+        },
+        "score": {
+          "halftime": {
+            "home": 1,
+            "away": 1
+          },
+          "fulltime": {
+            "home": 3,
+            "away": 1
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1490389,
+          "referee": "Chris Penso, USA",
+          "timezone": "UTC",
+          "date": "2026-08-16T22:00:00+00:00",
+          "timestamp": 1786917600,
+          "periods": {
+            "first": 1786917600,
+            "second": 1786921200
+          },
+          "venue": {
+            "id": null,
+            "name": "Soldier Field",
+            "city": "Chicago"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 5
+          }
+        },
+        "league": {
+          "id": 253,
+          "name": "Major League Soccer",
+          "country": "USA",
+          "logo": "https://media.api-sports.io/football/leagues/253.png",
+          "flag": "https://media.api-sports.io/flags/us.svg",
+          "season": 2026,
+          "round": "Regular Season - 19",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 1607,
+            "name": "Chicago Fire",
+            "logo": "https://media.api-sports.io/football/teams/1607.png",
+            "winner": true
+          },
+          "away": {
+            "id": 1617,
+            "name": "Portland Timbers",
+            "logo": "https://media.api-sports.io/football/teams/1617.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 2,
+          "away": 1
+        },
+        "score": {
+          "halftime": {
+            "home": 2,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 2,
+            "away": 1
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1530159,
+          "referee": "Ismael Cornejo, El Salvador",
+          "timezone": "UTC",
+          "date": "2026-08-14T02:30:00+00:00",
+          "timestamp": 1786674600,
+          "periods": {
+            "first": 1786674600,
+            "second": 1786678200
+          },
+          "venue": {
+            "id": null,
+            "name": "Providence Park",
+            "city": "Portland"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 4
+          }
+        },
+        "league": {
+          "id": 772,
+          "name": "Leagues Cup",
+          "country": "World",
+          "logo": "https://media.api-sports.io/football/leagues/772.png",
+          "flag": null,
+          "season": 2026,
+          "round": "Group Stage",
+          "standings": false
+        },
+        "teams": {
+          "home": {
+            "id": 1617,
+            "name": "Portland Timbers",
+            "logo": "https://media.api-sports.io/football/teams/1617.png",
+            "winner": true
+          },
+          "away": {
+            "id": 2280,
+            "name": "Club Tijuana",
+            "logo": "https://media.api-sports.io/football/teams/2280.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 3,
+          "away": 1
+        },
+        "score": {
+          "halftime": {
+            "home": 1,
+            "away": 1
+          },
+          "fulltime": {
+            "home": 3,
+            "away": 1
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1530137,
+          "referee": "Walter Lopez, Guatemala",
+          "timezone": "UTC",
+          "date": "2026-08-10T02:15:00+00:00",
+          "timestamp": 1786328100,
+          "periods": {
+            "first": 1786328100,
+            "second": 1786331700
+          },
+          "venue": {
+            "id": null,
+            "name": "Providence Park",
+            "city": "Portland"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 5
+          }
+        },
+        "league": {
+          "id": 772,
+          "name": "Leagues Cup",
+          "country": "World",
+          "logo": "https://media.api-sports.io/football/leagues/772.png",
+          "flag": null,
+          "season": 2026,
+          "round": "Group Stage",
+          "standings": false
+        },
+        "teams": {
+          "home": {
+            "id": 2287,
+            "name": "Club America",
+            "logo": "https://media.api-sports.io/football/teams/2287.png",
+            "winner": true
+          },
+          "away": {
+            "id": 1617,
+            "name": "Portland Timbers",
+            "logo": "https://media.api-sports.io/football/teams/1617.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 3,
+          "away": 1
+        },
+        "score": {
+          "halftime": {
+            "home": 1,
+            "away": 1
+          },
+          "fulltime": {
+            "home": 3,
+            "away": 1
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1530123,
+          "referee": "V. Rivas",
+          "timezone": "UTC",
+          "date": "2026-08-07T02:30:00+00:00",
+          "timestamp": 1786069800,
+          "periods": {
+            "first": 1786069800,
+            "second": 1786073400
+          },
+          "venue": {
+            "id": null,
+            "name": "Providence Park",
+            "city": "Portland"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 4
+          }
+        },
+        "league": {
+          "id": 772,
+          "name": "Leagues Cup",
+          "country": "World",
+          "logo": "https://media.api-sports.io/football/leagues/772.png",
+          "flag": null,
+          "season": 2026,
+          "round": "Group Stage",
+          "standings": false
+        },
+        "teams": {
+          "home": {
+            "id": 1617,
+            "name": "Portland Timbers",
+            "logo": "https://media.api-sports.io/football/teams/1617.png",
+            "winner": true
+          },
+          "away": {
+            "id": 2291,
+            "name": "Puebla",
+            "logo": "https://media.api-sports.io/football/teams/2291.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 5,
+          "away": 2
+        },
+        "score": {
+          "halftime": {
+            "home": 4,
+            "away": 1
+          },
+          "fulltime": {
+            "home": 5,
+            "away": 2
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1490375,
+          "referee": "Joseph Dickerson, USA",
+          "timezone": "UTC",
+          "date": "2026-08-02T02:45:00+00:00",
+          "timestamp": 1785638700,
+          "periods": {
+            "first": 1785638700,
+            "second": 1785642300
+          },
+          "venue": {
+            "id": null,
+            "name": "Providence Park",
+            "city": "Portland"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 6
+          }
+        },
+        "league": {
+          "id": 253,
+          "name": "Major League Soccer",
+          "country": "USA",
+          "logo": "https://media.api-sports.io/football/leagues/253.png",
+          "flag": "https://media.api-sports.io/flags/us.svg",
+          "season": 2026,
+          "round": "Regular Season - 18",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 1617,
+            "name": "Portland Timbers",
+            "logo": "https://media.api-sports.io/football/teams/1617.png",
+            "winner": true
+          },
+          "away": {
+            "id": 1595,
+            "name": "Seattle Sounders",
+            "logo": "https://media.api-sports.io/football/teams/1595.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 2,
+          "away": 1
+        },
+        "score": {
+          "halftime": {
+            "home": 1,
+            "away": 1
+          },
+          "fulltime": {
+            "home": 2,
+            "away": 1
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1490360,
+          "referee": "Elijio Arreguin, USA",
+          "timezone": "UTC",
+          "date": "2026-07-26T02:30:00+00:00",
+          "timestamp": 1785033000,
+          "periods": {
+            "first": 1785033000,
+            "second": 1785036600
+          },
+          "venue": {
+            "id": null,
+            "name": "Providence Park",
+            "city": "Portland"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 7
+          }
+        },
+        "league": {
+          "id": 253,
+          "name": "Major League Soccer",
+          "country": "USA",
+          "logo": "https://media.api-sports.io/football/leagues/253.png",
+          "flag": "https://media.api-sports.io/flags/us.svg",
+          "season": 2026,
+          "round": "Regular Season - 17",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 1617,
+            "name": "Portland Timbers",
+            "logo": "https://media.api-sports.io/football/teams/1617.png",
+            "winner": true
+          },
+          "away": {
+            "id": 1606,
+            "name": "Real Salt Lake",
+            "logo": "https://media.api-sports.io/football/teams/1606.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 2,
+          "away": 1
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 1
+          },
+          "fulltime": {
+            "home": 2,
+            "away": 1
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1490345,
+          "referee": "Alexis Da Silva, USA",
+          "timezone": "UTC",
+          "date": "2026-07-23T02:30:00+00:00",
+          "timestamp": 1784773800,
+          "periods": {
+            "first": 1784773800,
+            "second": 1784777400
+          },
+          "venue": {
+            "id": null,
+            "name": "Providence Park",
+            "city": "Portland"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 10
+          }
+        },
+        "league": {
+          "id": 253,
+          "name": "Major League Soccer",
+          "country": "USA",
+          "logo": "https://media.api-sports.io/football/leagues/253.png",
+          "flag": "https://media.api-sports.io/flags/us.svg",
+          "season": 2026,
+          "round": "Regular Season - 16",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 1617,
+            "name": "Portland Timbers",
+            "logo": "https://media.api-sports.io/football/teams/1617.png",
+            "winner": null
+          },
+          "away": {
+            "id": 1597,
+            "name": "FC Dallas",
+            "logo": "https://media.api-sports.io/football/teams/1597.png",
+            "winner": null
+          }
+        },
+        "goals": {
+          "home": 2,
+          "away": 2
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 1
+          },
+          "fulltime": {
+            "home": 2,
+            "away": 2
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1490328,
+          "referee": "R. Mendoza",
+          "timezone": "UTC",
+          "date": "2026-07-17T02:30:00+00:00",
+          "timestamp": 1784255400,
+          "periods": {
+            "first": 1784255400,
+            "second": 1784259000
+          },
+          "venue": {
+            "id": null,
+            "name": "Lumen Field",
+            "city": "Seattle"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 11
+          }
+        },
+        "league": {
+          "id": 253,
+          "name": "Major League Soccer",
+          "country": "USA",
+          "logo": "https://media.api-sports.io/football/leagues/253.png",
+          "flag": "https://media.api-sports.io/flags/us.svg",
+          "season": 2026,
+          "round": "Regular Season - 16",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 1595,
+            "name": "Seattle Sounders",
+            "logo": "https://media.api-sports.io/football/teams/1595.png",
+            "winner": false
+          },
+          "away": {
+            "id": 1617,
+            "name": "Portland Timbers",
+            "logo": "https://media.api-sports.io/football/teams/1617.png",
+            "winner": true
+          }
+        },
+        "goals": {
+          "home": 1,
+          "away": 5
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 1
+          },
+          "fulltime": {
+            "home": 1,
+            "away": 5
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,866 @@
+{
+  "endpoint": "/fixtures",
+  "params": {
+    "last": 12,
+    "status": "FT-AET-PEN",
+    "team": 226
+  },
+  "retrieved_at": "2026-09-08T16:00:09Z",
+  "response_hash": "130809e5884b698be8534409c0b1afc606f61a88468d14e4cef3dad4ebeefc26",
+  "response": {
+    "get": "fixtures",
+    "parameters": {
+      "last": "12",
+      "status": "FT-AET-PEN",
+      "team": "226"
+    },
+    "errors": [],
+    "results": 12,
+    "paging": {
+      "current": 1,
+      "total": 1
+    },
+    "response": [
+      {
+        "fixture": {
+          "id": 1575488,
+          "referee": "Anzhony Rodrigues, Portugal",
+          "timezone": "UTC",
+          "date": "2026-09-06T14:30:00+00:00",
+          "timestamp": 1788705000,
+          "periods": {
+            "first": null,
+            "second": null
+          },
+          "venue": {
+            "id": null,
+            "name": "Estadio de S\u00e3o Miguel",
+            "city": "Ponta Delgada"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": null
+          }
+        },
+        "league": {
+          "id": 94,
+          "name": "Primeira Liga",
+          "country": "Portugal",
+          "logo": "https://media.api-sports.io/football/leagues/94.png",
+          "flag": "https://media.api-sports.io/flags/pt.svg",
+          "season": 2026,
+          "round": "Regular Season - 5",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 227,
+            "name": "Santa Clara",
+            "logo": "https://media.api-sports.io/football/teams/227.png",
+            "winner": true
+          },
+          "away": {
+            "id": 226,
+            "name": "Rio Ave",
+            "logo": "https://media.api-sports.io/football/teams/226.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 4,
+          "away": 0
+        },
+        "score": {
+          "halftime": {
+            "home": 1,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 4,
+            "away": 0
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1575481,
+          "referee": "Bruno Jose Ribeiro Pires Costa, Portugal",
+          "timezone": "UTC",
+          "date": "2026-08-28T19:15:00+00:00",
+          "timestamp": 1787944500,
+          "periods": {
+            "first": 1787944500,
+            "second": 1787948100
+          },
+          "venue": {
+            "id": null,
+            "name": "Est\u00e1dio do Rio Ave FC",
+            "city": "Vila do Conde"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 3
+          }
+        },
+        "league": {
+          "id": 94,
+          "name": "Primeira Liga",
+          "country": "Portugal",
+          "logo": "https://media.api-sports.io/football/leagues/94.png",
+          "flag": "https://media.api-sports.io/flags/pt.svg",
+          "season": 2026,
+          "round": "Regular Season - 4",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 226,
+            "name": "Rio Ave",
+            "logo": "https://media.api-sports.io/football/teams/226.png",
+            "winner": false
+          },
+          "away": {
+            "id": 228,
+            "name": "Sporting CP",
+            "logo": "https://media.api-sports.io/football/teams/228.png",
+            "winner": true
+          }
+        },
+        "goals": {
+          "home": 0,
+          "away": 4
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 4
+          },
+          "fulltime": {
+            "home": 0,
+            "away": 4
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1575464,
+          "referee": "Carlos Macedo, Portugal",
+          "timezone": "UTC",
+          "date": "2026-08-22T17:00:00+00:00",
+          "timestamp": 1787418000,
+          "periods": {
+            "first": 1787418000,
+            "second": 1787421600
+          },
+          "venue": {
+            "id": 1274,
+            "name": "Estadio Antonio Coimbra da Mota",
+            "city": "Estoril"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 4
+          }
+        },
+        "league": {
+          "id": 94,
+          "name": "Primeira Liga",
+          "country": "Portugal",
+          "logo": "https://media.api-sports.io/football/leagues/94.png",
+          "flag": "https://media.api-sports.io/flags/pt.svg",
+          "season": 2026,
+          "round": "Regular Season - 3",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 230,
+            "name": "Estoril",
+            "logo": "https://media.api-sports.io/football/teams/230.png",
+            "winner": false
+          },
+          "away": {
+            "id": 226,
+            "name": "Rio Ave",
+            "logo": "https://media.api-sports.io/football/teams/226.png",
+            "winner": true
+          }
+        },
+        "goals": {
+          "home": 0,
+          "away": 2
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 1
+          },
+          "fulltime": {
+            "home": 0,
+            "away": 2
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1575462,
+          "referee": "Miguel Andre Monteiro Fonseca, Portugal",
+          "timezone": "UTC",
+          "date": "2026-08-15T19:30:00+00:00",
+          "timestamp": 1786822200,
+          "periods": {
+            "first": 1786822200,
+            "second": 1786825800
+          },
+          "venue": {
+            "id": null,
+            "name": "Est\u00e1dio do Rio Ave FC",
+            "city": "Vila do Conde"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 2
+          }
+        },
+        "league": {
+          "id": 94,
+          "name": "Primeira Liga",
+          "country": "Portugal",
+          "logo": "https://media.api-sports.io/football/leagues/94.png",
+          "flag": "https://media.api-sports.io/flags/pt.svg",
+          "season": 2026,
+          "round": "Regular Season - 2",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 226,
+            "name": "Rio Ave",
+            "logo": "https://media.api-sports.io/football/teams/226.png",
+            "winner": false
+          },
+          "away": {
+            "id": 212,
+            "name": "FC Porto",
+            "logo": "https://media.api-sports.io/football/teams/212.png",
+            "winner": true
+          }
+        },
+        "goals": {
+          "home": 0,
+          "away": 2
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 1
+          },
+          "fulltime": {
+            "home": 0,
+            "away": 2
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1575450,
+          "referee": "Gustavo Correia, Portugal",
+          "timezone": "UTC",
+          "date": "2026-08-09T19:30:00+00:00",
+          "timestamp": 1786303800,
+          "periods": {
+            "first": 1786303800,
+            "second": 1786307400
+          },
+          "venue": {
+            "id": 2811,
+            "name": "Est\u00e1dio Cidade de Barcelos",
+            "city": "Barcelos"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 9
+          }
+        },
+        "league": {
+          "id": 94,
+          "name": "Primeira Liga",
+          "country": "Portugal",
+          "logo": "https://media.api-sports.io/football/leagues/94.png",
+          "flag": "https://media.api-sports.io/flags/pt.svg",
+          "season": 2026,
+          "round": "Regular Season - 1",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 762,
+            "name": "GIL Vicente",
+            "logo": "https://media.api-sports.io/football/teams/762.png",
+            "winner": true
+          },
+          "away": {
+            "id": 226,
+            "name": "Rio Ave",
+            "logo": "https://media.api-sports.io/football/teams/226.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 1,
+          "away": 0
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 1,
+            "away": 0
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1583534,
+          "referee": null,
+          "timezone": "UTC",
+          "date": "2026-08-01T14:30:00+00:00",
+          "timestamp": 1785594600,
+          "periods": {
+            "first": 1785594600,
+            "second": 1785598200
+          },
+          "venue": {
+            "id": null,
+            "name": null,
+            "city": null
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 5
+          }
+        },
+        "league": {
+          "id": 667,
+          "name": "Friendlies Clubs",
+          "country": "World",
+          "logo": "https://media.api-sports.io/football/leagues/667.png",
+          "flag": null,
+          "season": 2026,
+          "round": "Club Friendlies",
+          "standings": false
+        },
+        "teams": {
+          "home": {
+            "id": 226,
+            "name": "Rio Ave",
+            "logo": "https://media.api-sports.io/football/teams/226.png",
+            "winner": true
+          },
+          "away": {
+            "id": 218,
+            "name": "Tondela",
+            "logo": "https://media.api-sports.io/football/teams/218.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 3,
+          "away": 1
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 1
+          },
+          "fulltime": {
+            "home": 3,
+            "away": 1
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1583390,
+          "referee": null,
+          "timezone": "UTC",
+          "date": "2026-07-19T16:00:00+00:00",
+          "timestamp": 1784476800,
+          "periods": {
+            "first": 1784476800,
+            "second": 1784480400
+          },
+          "venue": {
+            "id": null,
+            "name": null,
+            "city": null
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": null
+          }
+        },
+        "league": {
+          "id": 667,
+          "name": "Friendlies Clubs",
+          "country": "World",
+          "logo": "https://media.api-sports.io/football/leagues/667.png",
+          "flag": null,
+          "season": 2026,
+          "round": "Club Friendlies",
+          "standings": false
+        },
+        "teams": {
+          "home": {
+            "id": 226,
+            "name": "Rio Ave",
+            "logo": "https://media.api-sports.io/football/teams/226.png",
+            "winner": null
+          },
+          "away": {
+            "id": 2929,
+            "name": "Al-Ahli Jeddah",
+            "logo": "https://media.api-sports.io/football/teams/2929.png",
+            "winner": null
+          }
+        },
+        "goals": {
+          "home": 2,
+          "away": 2
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 2
+          },
+          "fulltime": {
+            "home": 2,
+            "away": 2
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1583318,
+          "referee": null,
+          "timezone": "UTC",
+          "date": "2026-07-15T12:00:00+00:00",
+          "timestamp": 1784116800,
+          "periods": {
+            "first": 1784116800,
+            "second": 1784120400
+          },
+          "venue": {
+            "id": null,
+            "name": null,
+            "city": null
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": null
+          }
+        },
+        "league": {
+          "id": 667,
+          "name": "Friendlies Clubs",
+          "country": "World",
+          "logo": "https://media.api-sports.io/football/leagues/667.png",
+          "flag": null,
+          "season": 2026,
+          "round": "Club Friendlies",
+          "standings": false
+        },
+        "teams": {
+          "home": {
+            "id": 216,
+            "name": "Portimonense",
+            "logo": "https://media.api-sports.io/football/teams/216.png",
+            "winner": false
+          },
+          "away": {
+            "id": 226,
+            "name": "Rio Ave",
+            "logo": "https://media.api-sports.io/football/teams/226.png",
+            "winner": true
+          }
+        },
+        "goals": {
+          "home": 0,
+          "away": 3
+        },
+        "score": {
+          "halftime": {
+            "home": null,
+            "away": null
+          },
+          "fulltime": {
+            "home": 0,
+            "away": 3
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1583274,
+          "referee": null,
+          "timezone": "UTC",
+          "date": "2026-07-11T12:00:00+00:00",
+          "timestamp": 1783771200,
+          "periods": {
+            "first": 1783771200,
+            "second": 1783774800
+          },
+          "venue": {
+            "id": null,
+            "name": null,
+            "city": null
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": null
+          }
+        },
+        "league": {
+          "id": 667,
+          "name": "Friendlies Clubs",
+          "country": "World",
+          "logo": "https://media.api-sports.io/football/leagues/667.png",
+          "flag": null,
+          "season": 2026,
+          "round": "Club Friendlies",
+          "standings": false
+        },
+        "teams": {
+          "home": {
+            "id": 226,
+            "name": "Rio Ave",
+            "logo": "https://media.api-sports.io/football/teams/226.png",
+            "winner": true
+          },
+          "away": {
+            "id": 240,
+            "name": "Arouca",
+            "logo": "https://media.api-sports.io/football/teams/240.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 2,
+          "away": 1
+        },
+        "score": {
+          "halftime": {
+            "home": null,
+            "away": null
+          },
+          "fulltime": {
+            "home": 2,
+            "away": 1
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1396536,
+          "referee": "H. Malheiro",
+          "timezone": "UTC",
+          "date": "2026-05-16T17:00:00+00:00",
+          "timestamp": 1778950800,
+          "periods": {
+            "first": 1778950800,
+            "second": 1778954400
+          },
+          "venue": {
+            "id": 3565,
+            "name": "Est\u00e1dio Municipal de Rio Maior",
+            "city": "Rio Maior"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 7
+          }
+        },
+        "league": {
+          "id": 94,
+          "name": "Primeira Liga",
+          "country": "Portugal",
+          "logo": "https://media.api-sports.io/football/leagues/94.png",
+          "flag": "https://media.api-sports.io/flags/pt.svg",
+          "season": 2025,
+          "round": "Regular Season - 34",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 4716,
+            "name": "Casa Pia",
+            "logo": "https://media.api-sports.io/football/teams/4716.png",
+            "winner": null
+          },
+          "away": {
+            "id": 226,
+            "name": "Rio Ave",
+            "logo": "https://media.api-sports.io/football/teams/226.png",
+            "winner": null
+          }
+        },
+        "goals": {
+          "home": 1,
+          "away": 1
+        },
+        "score": {
+          "halftime": {
+            "home": 1,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 1,
+            "away": 1
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1396530,
+          "referee": "J. Goncalves",
+          "timezone": "UTC",
+          "date": "2026-05-11T19:15:00+00:00",
+          "timestamp": 1778526900,
+          "periods": {
+            "first": 1778526900,
+            "second": 1778530500
+          },
+          "venue": {
+            "id": 1288,
+            "name": "Est\u00e1dio do Rio Ave Futebol Clube",
+            "city": "Vila do Conde"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 2
+          }
+        },
+        "league": {
+          "id": 94,
+          "name": "Primeira Liga",
+          "country": "Portugal",
+          "logo": "https://media.api-sports.io/football/leagues/94.png",
+          "flag": "https://media.api-sports.io/flags/pt.svg",
+          "season": 2025,
+          "round": "Regular Season - 33",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 226,
+            "name": "Rio Ave",
+            "logo": "https://media.api-sports.io/football/teams/226.png",
+            "winner": false
+          },
+          "away": {
+            "id": 228,
+            "name": "Sporting CP",
+            "logo": "https://media.api-sports.io/football/teams/228.png",
+            "winner": true
+          }
+        },
+        "goals": {
+          "home": 1,
+          "away": 4
+        },
+        "score": {
+          "halftime": {
+            "home": 1,
+            "away": 2
+          },
+          "fulltime": {
+            "home": 1,
+            "away": 4
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1396523,
+          "referee": "F. Verissimo",
+          "timezone": "UTC",
+          "date": "2026-05-03T19:30:00+00:00",
+          "timestamp": 1777836600,
+          "periods": {
+            "first": 1777836600,
+            "second": 1777840200
+          },
+          "venue": {
+            "id": 1288,
+            "name": "Est\u00e1dio do Rio Ave Futebol Clube",
+            "city": "Vila do Conde"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 5
+          }
+        },
+        "league": {
+          "id": 94,
+          "name": "Primeira Liga",
+          "country": "Portugal",
+          "logo": "https://media.api-sports.io/football/leagues/94.png",
+          "flag": "https://media.api-sports.io/flags/pt.svg",
+          "season": 2025,
+          "round": "Regular Season - 32",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 226,
+            "name": "Rio Ave",
+            "logo": "https://media.api-sports.io/football/teams/226.png",
+            "winner": null
+          },
+          "away": {
+            "id": 762,
+            "name": "GIL Vicente",
+            "logo": "https://media.api-sports.io/football/teams/762.png",
+            "winner": null
+          }
+        },
+        "goals": {
+          "home": 0,
+          "away": 0
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 0,
+            "away": 0
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      }
+    ]
+  }
+}

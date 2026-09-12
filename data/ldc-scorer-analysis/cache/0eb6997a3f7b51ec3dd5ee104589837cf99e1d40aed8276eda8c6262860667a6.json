@@ -1,0 +1,119 @@
+{
+  "endpoint": "/players",
+  "params": {
+    "id": 287923,
+    "season": 2026
+  },
+  "retrieved_at": "2026-09-08T13:20:52Z",
+  "response_hash": "b9639aaa991f681ff8c8a7b9dc5802fd40055c4b878c8b72780679c050ea64be",
+  "response": {
+    "get": "players",
+    "parameters": {
+      "id": "287923",
+      "season": "2026"
+    },
+    "errors": [],
+    "results": 1,
+    "paging": {
+      "current": 1,
+      "total": 1
+    },
+    "response": [
+      {
+        "player": {
+          "id": 287923,
+          "name": "N. Tresoldi",
+          "firstname": "Nicol\u00f2",
+          "lastname": "Tresoldi",
+          "age": 21,
+          "birth": {
+            "date": "2004-08-20",
+            "place": "Cagliari",
+            "country": "Italy"
+          },
+          "nationality": "Germany",
+          "height": "183",
+          "weight": "77",
+          "injured": false,
+          "photo": "https://media.api-sports.io/football/players/287923.png"
+        },
+        "statistics": [
+          {
+            "team": {
+              "id": 569,
+              "name": "Club Brugge KV",
+              "logo": "https://media.api-sports.io/football/teams/569.png"
+            },
+            "league": {
+              "id": 144,
+              "name": "Jupiler Pro League",
+              "country": "Belgium",
+              "logo": "https://media.api-sports.io/football/leagues/144.png",
+              "flag": "https://media.api-sports.io/flags/be.svg",
+              "season": 2026
+            },
+            "games": {
+              "appearences": 5,
+              "lineups": 5,
+              "minutes": 435,
+              "number": 7,
+              "position": "Attacker",
+              "rating": "6.97",
+              "captain": false
+            },
+            "substitutes": {
+              "in": 0,
+              "out": 4,
+              "bench": 0
+            },
+            "shots": {
+              "total": 13,
+              "on": 5
+            },
+            "goals": {
+              "total": 3,
+              "conceded": 0,
+              "assists": 0,
+              "saves": 0
+            },
+            "passes": {
+              "total": 93,
+              "key": 4,
+              "accuracy": 79
+            },
+            "tackles": {
+              "total": 1,
+              "blocks": 1,
+              "interceptions": 1
+            },
+            "duels": {
+              "total": 43,
+              "won": 18
+            },
+            "dribbles": {
+              "attempts": 9,
+              "success": 1,
+              "past": null
+            },
+            "fouls": {
+              "drawn": 8,
+              "committed": 4
+            },
+            "cards": {
+              "yellow": 0,
+              "yellowred": 0,
+              "red": 0
+            },
+            "penalty": {
+              "won": null,
+              "commited": null,
+              "scored": 1,
+              "missed": 0,
+              "saved": null
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

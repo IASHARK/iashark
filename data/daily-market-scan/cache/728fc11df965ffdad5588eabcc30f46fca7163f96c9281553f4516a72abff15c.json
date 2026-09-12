@@ -1,0 +1,168 @@
+{
+  "endpoint": "/fixtures",
+  "params": {
+    "league": 2,
+    "season": 2026,
+    "status": "FT-AET-PEN",
+    "team": 628
+  },
+  "retrieved_at": "2026-09-08T18:55:41Z",
+  "response_hash": "7a0e9d6ebe52cf13c3f7054a3f1a2408b6b142151c0aeed5013892581c9aa9e6",
+  "response": {
+    "get": "fixtures",
+    "parameters": {
+      "league": "2",
+      "season": "2026",
+      "status": "FT-AET-PEN",
+      "team": "628"
+    },
+    "errors": [],
+    "results": 2,
+    "paging": {
+      "current": 1,
+      "total": 1
+    },
+    "response": [
+      {
+        "fixture": {
+          "id": 1598826,
+          "referee": "S. Gozubuyuk",
+          "timezone": "UTC",
+          "date": "2026-08-04T18:00:00+00:00",
+          "timestamp": 1785866400,
+          "periods": {
+            "first": 1785866400,
+            "second": 1785870000
+          },
+          "venue": {
+            "id": null,
+            "name": "epet ARENA",
+            "city": "Prague"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 4
+          }
+        },
+        "league": {
+          "id": 2,
+          "name": "UEFA Champions League",
+          "country": "World",
+          "logo": "https://media.api-sports.io/football/leagues/2.png",
+          "flag": null,
+          "season": 2026,
+          "round": "3rd Qualifying Round",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 628,
+            "name": "Sparta Praha",
+            "logo": "https://media.api-sports.io/football/teams/628.png",
+            "winner": true
+          },
+          "away": {
+            "id": 80,
+            "name": "Lyon",
+            "logo": "https://media.api-sports.io/football/teams/80.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 2,
+          "away": 1
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 1
+          },
+          "fulltime": {
+            "home": 2,
+            "away": 1
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1598828,
+          "referee": "S. Marciniak",
+          "timezone": "UTC",
+          "date": "2026-08-11T19:00:00+00:00",
+          "timestamp": 1786474800,
+          "periods": {
+            "first": 1786474800,
+            "second": 1786478400
+          },
+          "venue": {
+            "id": null,
+            "name": "Parc Olympique Lyonnais",
+            "city": "Lyon"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 4
+          }
+        },
+        "league": {
+          "id": 2,
+          "name": "UEFA Champions League",
+          "country": "World",
+          "logo": "https://media.api-sports.io/football/leagues/2.png",
+          "flag": null,
+          "season": 2026,
+          "round": "3rd Qualifying Round",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 80,
+            "name": "Lyon",
+            "logo": "https://media.api-sports.io/football/teams/80.png",
+            "winner": true
+          },
+          "away": {
+            "id": 628,
+            "name": "Sparta Praha",
+            "logo": "https://media.api-sports.io/football/teams/628.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 3,
+          "away": 0
+        },
+        "score": {
+          "halftime": {
+            "home": 1,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 3,
+            "away": 0
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      }
+    ]
+  }
+}

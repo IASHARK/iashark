@@ -1,0 +1,866 @@
+{
+  "endpoint": "/fixtures",
+  "params": {
+    "last": 12,
+    "status": "FT-AET-PEN",
+    "team": 1346
+  },
+  "retrieved_at": "2026-09-08T15:54:11Z",
+  "response_hash": "b64770802aadc0571e44326d14da6044f679fec9a3a7045a01f17cc1474329bc",
+  "response": {
+    "get": "fixtures",
+    "parameters": {
+      "last": "12",
+      "status": "FT-AET-PEN",
+      "team": "1346"
+    },
+    "errors": [],
+    "results": 12,
+    "paging": {
+      "current": 1,
+      "total": 1
+    },
+    "response": [
+      {
+        "fixture": {
+          "id": 1557394,
+          "referee": "Paul Tierney, England",
+          "timezone": "UTC",
+          "date": "2026-09-05T14:00:00+00:00",
+          "timestamp": 1788616800,
+          "periods": {
+            "first": null,
+            "second": null
+          },
+          "venue": {
+            "id": 555,
+            "name": "Etihad Stadium",
+            "city": "Manchester"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": null
+          }
+        },
+        "league": {
+          "id": 39,
+          "name": "Premier League",
+          "country": "England",
+          "logo": "https://media.api-sports.io/football/leagues/39.png",
+          "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+          "season": 2026,
+          "round": "Regular Season - 3",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 50,
+            "name": "Manchester City",
+            "logo": "https://media.api-sports.io/football/teams/50.png",
+            "winner": true
+          },
+          "away": {
+            "id": 1346,
+            "name": "Coventry",
+            "logo": "https://media.api-sports.io/football/teams/1346.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 1,
+          "away": 0
+        },
+        "score": {
+          "halftime": {
+            "home": 1,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 1,
+            "away": 0
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1557380,
+          "referee": "Josh Smith, England",
+          "timezone": "UTC",
+          "date": "2026-08-29T14:00:00+00:00",
+          "timestamp": 1788012000,
+          "periods": {
+            "first": 1788012000,
+            "second": 1788015600
+          },
+          "venue": {
+            "id": null,
+            "name": "Coventry Building Society Arena",
+            "city": "Coventry"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": null
+          }
+        },
+        "league": {
+          "id": 39,
+          "name": "Premier League",
+          "country": "England",
+          "logo": "https://media.api-sports.io/football/leagues/39.png",
+          "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+          "season": 2026,
+          "round": "Regular Season - 2",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 1346,
+            "name": "Coventry",
+            "logo": "https://media.api-sports.io/football/teams/1346.png",
+            "winner": false
+          },
+          "away": {
+            "id": 64,
+            "name": "Hull City",
+            "logo": "https://media.api-sports.io/football/teams/64.png",
+            "winner": true
+          }
+        },
+        "goals": {
+          "home": 0,
+          "away": 1
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 0,
+            "away": 1
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1623095,
+          "referee": "E. Swallow",
+          "timezone": "UTC",
+          "date": "2026-08-25T18:45:00+00:00",
+          "timestamp": 1787683500,
+          "periods": {
+            "first": 1787683500,
+            "second": 1787687100
+          },
+          "venue": {
+            "id": 571,
+            "name": "Home Park",
+            "city": "Plymouth"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 4
+          }
+        },
+        "league": {
+          "id": 48,
+          "name": "League Cup",
+          "country": "England",
+          "logo": "https://media.api-sports.io/football/leagues/48.png",
+          "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+          "season": 2026,
+          "round": "Round of 64",
+          "standings": false
+        },
+        "teams": {
+          "home": {
+            "id": 1357,
+            "name": "Plymouth",
+            "logo": "https://media.api-sports.io/football/teams/1357.png",
+            "winner": false
+          },
+          "away": {
+            "id": 1346,
+            "name": "Coventry",
+            "logo": "https://media.api-sports.io/football/teams/1346.png",
+            "winner": true
+          }
+        },
+        "goals": {
+          "home": 2,
+          "away": 4
+        },
+        "score": {
+          "halftime": {
+            "home": 1,
+            "away": 2
+          },
+          "fulltime": {
+            "home": 2,
+            "away": 4
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1557367,
+          "referee": "Thomas Bramall, England",
+          "timezone": "UTC",
+          "date": "2026-08-21T19:00:00+00:00",
+          "timestamp": 1787338800,
+          "periods": {
+            "first": 1787338800,
+            "second": 1787342400
+          },
+          "venue": {
+            "id": 494,
+            "name": "Emirates Stadium",
+            "city": "London"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 5
+          }
+        },
+        "league": {
+          "id": 39,
+          "name": "Premier League",
+          "country": "England",
+          "logo": "https://media.api-sports.io/football/leagues/39.png",
+          "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+          "season": 2026,
+          "round": "Regular Season - 1",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 42,
+            "name": "Arsenal",
+            "logo": "https://media.api-sports.io/football/teams/42.png",
+            "winner": true
+          },
+          "away": {
+            "id": 1346,
+            "name": "Coventry",
+            "logo": "https://media.api-sports.io/football/teams/1346.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 3,
+          "away": 0
+        },
+        "score": {
+          "halftime": {
+            "home": 2,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 3,
+            "away": 0
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1598608,
+          "referee": null,
+          "timezone": "UTC",
+          "date": "2026-08-14T18:30:00+00:00",
+          "timestamp": 1786732200,
+          "periods": {
+            "first": 1786732200,
+            "second": 1786735800
+          },
+          "venue": {
+            "id": null,
+            "name": null,
+            "city": null
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 2
+          }
+        },
+        "league": {
+          "id": 667,
+          "name": "Friendlies Clubs",
+          "country": "World",
+          "logo": "https://media.api-sports.io/football/leagues/667.png",
+          "flag": null,
+          "season": 2026,
+          "round": "Club Friendlies",
+          "standings": false
+        },
+        "teams": {
+          "home": {
+            "id": 1346,
+            "name": "Coventry",
+            "logo": "https://media.api-sports.io/football/teams/1346.png",
+            "winner": true
+          },
+          "away": {
+            "id": 91,
+            "name": "Monaco",
+            "logo": "https://media.api-sports.io/football/teams/91.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 2,
+          "away": 0
+        },
+        "score": {
+          "halftime": {
+            "home": 2,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 2,
+            "away": 0
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1585071,
+          "referee": null,
+          "timezone": "UTC",
+          "date": "2026-08-08T16:30:00+00:00",
+          "timestamp": 1786206600,
+          "periods": {
+            "first": 1786206600,
+            "second": 1786210200
+          },
+          "venue": {
+            "id": null,
+            "name": null,
+            "city": null
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 1
+          }
+        },
+        "league": {
+          "id": 667,
+          "name": "Friendlies Clubs",
+          "country": "World",
+          "logo": "https://media.api-sports.io/football/leagues/667.png",
+          "flag": null,
+          "season": 2026,
+          "round": "Club Friendlies",
+          "standings": false
+        },
+        "teams": {
+          "home": {
+            "id": 1346,
+            "name": "Coventry",
+            "logo": "https://media.api-sports.io/football/teams/1346.png",
+            "winner": true
+          },
+          "away": {
+            "id": 540,
+            "name": "Espanyol",
+            "logo": "https://media.api-sports.io/football/teams/540.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 3,
+          "away": 1
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 1
+          },
+          "fulltime": {
+            "home": 3,
+            "away": 1
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1546688,
+          "referee": null,
+          "timezone": "UTC",
+          "date": "2026-07-18T13:00:00+00:00",
+          "timestamp": 1784379600,
+          "periods": {
+            "first": 1784379600,
+            "second": 1784383200
+          },
+          "venue": {
+            "id": null,
+            "name": null,
+            "city": null
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 1
+          }
+        },
+        "league": {
+          "id": 667,
+          "name": "Friendlies Clubs",
+          "country": "World",
+          "logo": "https://media.api-sports.io/football/leagues/667.png",
+          "flag": null,
+          "season": 2026,
+          "round": "Club Friendlies",
+          "standings": false
+        },
+        "teams": {
+          "home": {
+            "id": 1337,
+            "name": "Northampton",
+            "logo": "https://media.api-sports.io/football/teams/1337.png",
+            "winner": null
+          },
+          "away": {
+            "id": 1346,
+            "name": "Coventry",
+            "logo": "https://media.api-sports.io/football/teams/1346.png",
+            "winner": null
+          }
+        },
+        "goals": {
+          "home": 0,
+          "away": 0
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 0,
+            "away": 0
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1387092,
+          "referee": "R. Ricardo",
+          "timezone": "UTC",
+          "date": "2026-05-02T11:30:00+00:00",
+          "timestamp": 1777721400,
+          "periods": {
+            "first": 1777721400,
+            "second": 1777725000
+          },
+          "venue": {
+            "id": 596,
+            "name": "Vicarage Road",
+            "city": "Watford"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 3
+          }
+        },
+        "league": {
+          "id": 40,
+          "name": "Championship",
+          "country": "England",
+          "logo": "https://media.api-sports.io/football/leagues/40.png",
+          "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+          "season": 2025,
+          "round": "Regular Season - 46",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 38,
+            "name": "Watford",
+            "logo": "https://media.api-sports.io/football/teams/38.png",
+            "winner": false
+          },
+          "away": {
+            "id": 1346,
+            "name": "Coventry",
+            "logo": "https://media.api-sports.io/football/teams/1346.png",
+            "winner": true
+          }
+        },
+        "goals": {
+          "home": 0,
+          "away": 4
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 2
+          },
+          "fulltime": {
+            "home": 0,
+            "away": 4
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1387083,
+          "referee": "S. Allison",
+          "timezone": "UTC",
+          "date": "2026-04-26T11:00:00+00:00",
+          "timestamp": 1777201200,
+          "periods": {
+            "first": 1777201200,
+            "second": 1777204800
+          },
+          "venue": {
+            "id": null,
+            "name": "Coventry Building Society Arena",
+            "city": "Coventry"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 5
+          }
+        },
+        "league": {
+          "id": 40,
+          "name": "Championship",
+          "country": "England",
+          "logo": "https://media.api-sports.io/football/leagues/40.png",
+          "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+          "season": 2025,
+          "round": "Regular Season - 45",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 1346,
+            "name": "Coventry",
+            "logo": "https://media.api-sports.io/football/teams/1346.png",
+            "winner": true
+          },
+          "away": {
+            "id": 1837,
+            "name": "Wrexham",
+            "logo": "https://media.api-sports.io/football/teams/1837.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 3,
+          "away": 1
+        },
+        "score": {
+          "halftime": {
+            "home": 1,
+            "away": 1
+          },
+          "fulltime": {
+            "home": 3,
+            "away": 1
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1387069,
+          "referee": "A. Kitchen",
+          "timezone": "UTC",
+          "date": "2026-04-21T18:45:00+00:00",
+          "timestamp": 1776797100,
+          "periods": {
+            "first": 1776797100,
+            "second": 1776800700
+          },
+          "venue": {
+            "id": null,
+            "name": "Coventry Building Society Arena",
+            "city": "Coventry"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 6
+          }
+        },
+        "league": {
+          "id": 40,
+          "name": "Championship",
+          "country": "England",
+          "logo": "https://media.api-sports.io/football/leagues/40.png",
+          "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+          "season": 2025,
+          "round": "Regular Season - 44",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 1346,
+            "name": "Coventry",
+            "logo": "https://media.api-sports.io/football/teams/1346.png",
+            "winner": true
+          },
+          "away": {
+            "id": 1355,
+            "name": "Portsmouth",
+            "logo": "https://media.api-sports.io/football/teams/1355.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 5,
+          "away": 1
+        },
+        "score": {
+          "halftime": {
+            "home": 1,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 5,
+            "away": 1
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1387061,
+          "referee": "L. Smith",
+          "timezone": "UTC",
+          "date": "2026-04-17T19:00:00+00:00",
+          "timestamp": 1776452400,
+          "periods": {
+            "first": 1776452400,
+            "second": 1776456000
+          },
+          "venue": {
+            "id": null,
+            "name": "Ewood Park",
+            "city": "Blackburn"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 6
+          }
+        },
+        "league": {
+          "id": 40,
+          "name": "Championship",
+          "country": "England",
+          "logo": "https://media.api-sports.io/football/leagues/40.png",
+          "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+          "season": 2025,
+          "round": "Regular Season - 43",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 67,
+            "name": "Blackburn",
+            "logo": "https://media.api-sports.io/football/teams/67.png",
+            "winner": null
+          },
+          "away": {
+            "id": 1346,
+            "name": "Coventry",
+            "logo": "https://media.api-sports.io/football/teams/1346.png",
+            "winner": null
+          }
+        },
+        "goals": {
+          "home": 1,
+          "away": 1
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 1,
+            "away": 1
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1387048,
+          "referee": "M. Donohue",
+          "timezone": "UTC",
+          "date": "2026-04-11T11:30:00+00:00",
+          "timestamp": 1775907000,
+          "periods": {
+            "first": 1775907000,
+            "second": 1775910600
+          },
+          "venue": {
+            "id": null,
+            "name": "Coventry Building Society Arena",
+            "city": "Coventry"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 7
+          }
+        },
+        "league": {
+          "id": 40,
+          "name": "Championship",
+          "country": "England",
+          "logo": "https://media.api-sports.io/football/leagues/40.png",
+          "flag": "https://media.api-sports.io/flags/gb-eng.svg",
+          "season": 2025,
+          "round": "Regular Season - 42",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 1346,
+            "name": "Coventry",
+            "logo": "https://media.api-sports.io/football/teams/1346.png",
+            "winner": null
+          },
+          "away": {
+            "id": 74,
+            "name": "Sheffield Wednesday",
+            "logo": "https://media.api-sports.io/football/teams/74.png",
+            "winner": null
+          }
+        },
+        "goals": {
+          "home": 0,
+          "away": 0
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 0,
+            "away": 0
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      }
+    ]
+  }
+}

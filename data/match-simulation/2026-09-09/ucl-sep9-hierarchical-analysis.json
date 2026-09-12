@@ -1,0 +1,1410 @@
+{
+  "generated_at": "2026-09-09T12:41:40.379840+00:00",
+  "prediction_cutoff": "2026-09-09T16:45:00+00:00",
+  "method": {
+    "family": "Dynamic multi-league hierarchical Poisson MAP + Dixon-Coles",
+    "history_seasons": [
+      2024,
+      2025,
+      2026
+    ],
+    "domestic_leagues": [
+      39,
+      61,
+      78,
+      88,
+      94,
+      103,
+      135,
+      140,
+      203,
+      332
+    ],
+    "continental_competitions": [
+      2,
+      3,
+      848
+    ],
+    "n_history_matches": 9047,
+    "n_teams": 496,
+    "variants": [
+      {
+        "half_life_days": 120.0,
+        "team_ridge": 3.0
+      },
+      {
+        "half_life_days": 240.0,
+        "team_ridge": 3.0
+      },
+      {
+        "half_life_days": 480.0,
+        "team_ridge": 3.0
+      },
+      {
+        "half_life_days": 240.0,
+        "team_ridge": 1.5
+      },
+      {
+        "half_life_days": 240.0,
+        "team_ridge": 6.0
+      }
+    ],
+    "rho_values": [
+      -0.04081,
+      0.01579,
+      0.0443,
+      0.01147,
+      0.02024
+    ],
+    "bookmaker_odds_used": false,
+    "api_predictions_used": false,
+    "calibration_status": "NOT_AVAILABLE_FOR_THIS_NEW_MODEL",
+    "implementation_note": "MAP/time-decay approximation; not a full MCMC state-space posterior."
+  },
+  "coverage": [
+    {
+      "competition_id": 39,
+      "matches": 788
+    },
+    {
+      "competition_id": 61,
+      "matches": 637
+    },
+    {
+      "competition_id": 78,
+      "matches": 632
+    },
+    {
+      "competition_id": 88,
+      "matches": 665
+    },
+    {
+      "competition_id": 94,
+      "matches": 651
+    },
+    {
+      "competition_id": 103,
+      "matches": 632
+    },
+    {
+      "competition_id": 135,
+      "matches": 783
+    },
+    {
+      "competition_id": 140,
+      "matches": 794
+    },
+    {
+      "competition_id": 203,
+      "matches": 684
+    },
+    {
+      "competition_id": 332,
+      "matches": 429
+    },
+    {
+      "competition_id": 2,
+      "matches": 656
+    },
+    {
+      "competition_id": 3,
+      "matches": 620
+    },
+    {
+      "competition_id": 848,
+      "matches": 1076
+    }
+  ],
+  "matches": [
+    {
+      "fixture_id": 1635741,
+      "kickoff": "2026-09-09T16:45:00+00:00",
+      "home": {
+        "id": 172,
+        "name": "VfB Stuttgart",
+        "league_id": 78
+      },
+      "away": {
+        "id": 759,
+        "name": "Viking",
+        "league_id": 103
+      },
+      "expected_goals": {
+        "home": 2.266,
+        "away": 1.497
+      },
+      "expected_total_goals": 3.763,
+      "variant_lambdas": [
+        {
+          "half_life_days": 120.0,
+          "team_ridge": 3.0,
+          "home": 2.273,
+          "away": 1.506
+        },
+        {
+          "half_life_days": 240.0,
+          "team_ridge": 3.0,
+          "home": 2.254,
+          "away": 1.497
+        },
+        {
+          "half_life_days": 480.0,
+          "team_ridge": 3.0,
+          "home": 2.298,
+          "away": 1.489
+        },
+        {
+          "half_life_days": 240.0,
+          "team_ridge": 1.5,
+          "home": 2.271,
+          "away": 1.488
+        },
+        {
+          "half_life_days": 240.0,
+          "team_ridge": 6.0,
+          "home": 2.235,
+          "away": 1.505
+        }
+      ],
+      "relative_strength_indices": {
+        "home_attack": 1.736,
+        "home_defence_weakness": 0.843,
+        "away_attack": 1.511,
+        "away_defence_weakness": 0.883
+      },
+      "probabilities": {
+        "home_win": {
+          "central_pct": 55.0,
+          "sensitivity_low_pct": 54.3,
+          "sensitivity_high_pct": 56.1,
+          "conservative_pct": 54.3
+        },
+        "draw": {
+          "central_pct": 19.8,
+          "sensitivity_low_pct": 19.1,
+          "sensitivity_high_pct": 20.6,
+          "conservative_pct": 19.1
+        },
+        "away_win": {
+          "central_pct": 25.1,
+          "sensitivity_low_pct": 24.8,
+          "sensitivity_high_pct": 25.8,
+          "conservative_pct": 24.8
+        },
+        "home_or_draw": {
+          "central_pct": 74.9,
+          "sensitivity_low_pct": 74.2,
+          "sensitivity_high_pct": 75.2,
+          "conservative_pct": 74.2
+        },
+        "away_or_draw": {
+          "central_pct": 45.0,
+          "sensitivity_low_pct": 43.9,
+          "sensitivity_high_pct": 45.7,
+          "conservative_pct": 43.9
+        },
+        "btts": {
+          "central_pct": 69.5,
+          "sensitivity_low_pct": 69.3,
+          "sensitivity_high_pct": 70.1,
+          "conservative_pct": 69.3
+        },
+        "over_1_5": {
+          "central_pct": 88.9,
+          "sensitivity_low_pct": 88.6,
+          "sensitivity_high_pct": 89.4,
+          "conservative_pct": 88.6
+        },
+        "over_2_5": {
+          "central_pct": 72.5,
+          "sensitivity_low_pct": 72.1,
+          "sensitivity_high_pct": 72.9,
+          "conservative_pct": 72.1
+        },
+        "under_2_5": {
+          "central_pct": 27.5,
+          "sensitivity_low_pct": 27.1,
+          "sensitivity_high_pct": 27.9,
+          "conservative_pct": 27.1
+        },
+        "under_3_5": {
+          "central_pct": 48.1,
+          "sensitivity_low_pct": 47.6,
+          "sensitivity_high_pct": 48.6,
+          "conservative_pct": 47.6
+        },
+        "under_4_5": {
+          "central_pct": 67.5,
+          "sensitivity_low_pct": 67.0,
+          "sensitivity_high_pct": 67.9,
+          "conservative_pct": 67.0
+        },
+        "home_over_0_5": {
+          "central_pct": 89.6,
+          "sensitivity_low_pct": 89.3,
+          "sensitivity_high_pct": 90.0,
+          "conservative_pct": 89.3
+        },
+        "home_over_1_5": {
+          "central_pct": 66.1,
+          "sensitivity_low_pct": 65.4,
+          "sensitivity_high_pct": 66.9,
+          "conservative_pct": 65.4
+        },
+        "away_over_0_5": {
+          "central_pct": 77.6,
+          "sensitivity_low_pct": 77.4,
+          "sensitivity_high_pct": 77.8,
+          "conservative_pct": 77.4
+        },
+        "away_over_1_5": {
+          "central_pct": 44.1,
+          "sensitivity_low_pct": 43.8,
+          "sensitivity_high_pct": 44.4,
+          "conservative_pct": 43.8
+        }
+      },
+      "top_scores": [
+        {
+          "score": "2-1",
+          "probability_pct": 8.92
+        },
+        {
+          "score": "1-1",
+          "probability_pct": 7.79
+        },
+        {
+          "score": "3-1",
+          "probability_pct": 6.74
+        },
+        {
+          "score": "2-2",
+          "probability_pct": 6.68
+        },
+        {
+          "score": "2-0",
+          "probability_pct": 5.96
+        },
+        {
+          "score": "1-2",
+          "probability_pct": 5.89
+        },
+        {
+          "score": "1-0",
+          "probability_pct": 5.34
+        },
+        {
+          "score": "3-2",
+          "probability_pct": 5.04
+        }
+      ],
+      "most_likely_score": {
+        "score": "2-1",
+        "probability_pct": 8.92
+      },
+      "workload": {
+        "home": {
+          "rest_days": 5,
+          "matches_last_7_days": 1,
+          "matches_last_14_days": 2,
+          "matches_last_28_days": 2
+        },
+        "away": {
+          "rest_days": 5,
+          "matches_last_7_days": 1,
+          "matches_last_14_days": 3,
+          "matches_last_28_days": 5
+        }
+      },
+      "pre_match_coverage": {
+        "official_lineups_available": false,
+        "lineup_rows": 0,
+        "injury_rows": 26,
+        "lineup_adjustment_applied": false,
+        "shots_model_applied": false
+      },
+      "limitations": [
+        "Pas de cotes ni de /predictions dans les probabilités.",
+        "Couche tirs omise: couverture historique insuffisante sans milliers d'appels par match.",
+        "Effets joueurs omis tant que les compositions officielles et coefficients régularisés ne sont pas disponibles.",
+        "Intervalles = sensibilité aux hyperparamètres, pas intervalles postérieurs calibrés.",
+        "Aucune minute de but dérivée de la matrice de score: un modèle temporel séparé serait requis."
+      ]
+    },
+    {
+      "fixture_id": 1635628,
+      "kickoff": "2026-09-09T16:45:00+00:00",
+      "home": {
+        "id": 529,
+        "name": "Barcelona",
+        "league_id": 140
+      },
+      "away": {
+        "id": 209,
+        "name": "Feyenoord",
+        "league_id": 88
+      },
+      "expected_goals": {
+        "home": 4.379,
+        "away": 1.093
+      },
+      "expected_total_goals": 5.472,
+      "variant_lambdas": [
+        {
+          "half_life_days": 120.0,
+          "team_ridge": 3.0,
+          "home": 4.552,
+          "away": 0.987
+        },
+        {
+          "half_life_days": 240.0,
+          "team_ridge": 3.0,
+          "home": 4.354,
+          "away": 1.099
+        },
+        {
+          "half_life_days": 480.0,
+          "team_ridge": 3.0,
+          "home": 4.304,
+          "away": 1.174
+        },
+        {
+          "half_life_days": 240.0,
+          "team_ridge": 1.5,
+          "home": 4.379,
+          "away": 1.089
+        },
+        {
+          "half_life_days": 240.0,
+          "team_ridge": 6.0,
+          "home": 4.308,
+          "away": 1.116
+        }
+      ],
+      "relative_strength_indices": {
+        "home_attack": 2.848,
+        "home_defence_weakness": 0.65,
+        "away_attack": 1.428,
+        "away_defence_weakness": 1.039
+      },
+      "probabilities": {
+        "home_win": {
+          "central_pct": 89.2,
+          "sensitivity_low_pct": 87.8,
+          "sensitivity_high_pct": 91.3,
+          "conservative_pct": 87.8
+        },
+        "draw": {
+          "central_pct": 6.6,
+          "sensitivity_low_pct": 5.6,
+          "sensitivity_high_pct": 7.1,
+          "conservative_pct": 5.6
+        },
+        "away_win": {
+          "central_pct": 4.3,
+          "sensitivity_low_pct": 3.1,
+          "sensitivity_high_pct": 5.1,
+          "conservative_pct": 3.1
+        },
+        "home_or_draw": {
+          "central_pct": 95.7,
+          "sensitivity_low_pct": 94.9,
+          "sensitivity_high_pct": 96.9,
+          "conservative_pct": 94.9
+        },
+        "away_or_draw": {
+          "central_pct": 10.8,
+          "sensitivity_low_pct": 8.7,
+          "sensitivity_high_pct": 12.2,
+          "conservative_pct": 8.7
+        },
+        "btts": {
+          "central_pct": 65.6,
+          "sensitivity_low_pct": 62.2,
+          "sensitivity_high_pct": 68.1,
+          "conservative_pct": 62.2
+        },
+        "over_1_5": {
+          "central_pct": 97.3,
+          "sensitivity_low_pct": 97.1,
+          "sensitivity_high_pct": 97.5,
+          "conservative_pct": 97.1
+        },
+        "over_2_5": {
+          "central_pct": 91.0,
+          "sensitivity_low_pct": 90.7,
+          "sensitivity_high_pct": 91.4,
+          "conservative_pct": 90.7
+        },
+        "under_2_5": {
+          "central_pct": 9.0,
+          "sensitivity_low_pct": 8.6,
+          "sensitivity_high_pct": 9.3,
+          "conservative_pct": 8.6
+        },
+        "under_3_5": {
+          "central_pct": 20.5,
+          "sensitivity_low_pct": 19.7,
+          "sensitivity_high_pct": 21.1,
+          "conservative_pct": 19.7
+        },
+        "under_4_5": {
+          "central_pct": 36.2,
+          "sensitivity_low_pct": 35.2,
+          "sensitivity_high_pct": 37.0,
+          "conservative_pct": 35.2
+        },
+        "home_over_0_5": {
+          "central_pct": 98.7,
+          "sensitivity_low_pct": 98.6,
+          "sensitivity_high_pct": 98.9,
+          "conservative_pct": 98.6
+        },
+        "home_over_1_5": {
+          "central_pct": 93.2,
+          "sensitivity_low_pct": 92.8,
+          "sensitivity_high_pct": 94.1,
+          "conservative_pct": 92.8
+        },
+        "away_over_0_5": {
+          "central_pct": 66.4,
+          "sensitivity_low_pct": 62.7,
+          "sensitivity_high_pct": 69.1,
+          "conservative_pct": 62.7
+        },
+        "away_over_1_5": {
+          "central_pct": 29.8,
+          "sensitivity_low_pct": 26.0,
+          "sensitivity_high_pct": 32.8,
+          "conservative_pct": 26.0
+        }
+      },
+      "top_scores": [
+        {
+          "score": "4-1",
+          "probability_pct": 7.03
+        },
+        {
+          "score": "4-0",
+          "probability_pct": 6.45
+        },
+        {
+          "score": "3-1",
+          "probability_pct": 6.42
+        },
+        {
+          "score": "5-1",
+          "probability_pct": 6.15
+        },
+        {
+          "score": "3-0",
+          "probability_pct": 5.88
+        },
+        {
+          "score": "5-0",
+          "probability_pct": 5.65
+        },
+        {
+          "score": "6-1",
+          "probability_pct": 4.49
+        },
+        {
+          "score": "2-1",
+          "probability_pct": 4.4
+        }
+      ],
+      "most_likely_score": {
+        "score": "4-1",
+        "probability_pct": 7.03
+      },
+      "workload": {
+        "home": {
+          "rest_days": 9,
+          "matches_last_7_days": 0,
+          "matches_last_14_days": 2,
+          "matches_last_28_days": 3
+        },
+        "away": {
+          "rest_days": 4,
+          "matches_last_7_days": 1,
+          "matches_last_14_days": 2,
+          "matches_last_28_days": 4
+        }
+      },
+      "pre_match_coverage": {
+        "official_lineups_available": false,
+        "lineup_rows": 0,
+        "injury_rows": 18,
+        "lineup_adjustment_applied": false,
+        "shots_model_applied": false
+      },
+      "limitations": [
+        "Pas de cotes ni de /predictions dans les probabilités.",
+        "Couche tirs omise: couverture historique insuffisante sans milliers d'appels par match.",
+        "Effets joueurs omis tant que les compositions officielles et coefficients régularisés ne sont pas disponibles.",
+        "Intervalles = sensibilité aux hyperparamètres, pas intervalles postérieurs calibrés.",
+        "Aucune minute de but dérivée de la matrice de score: un modèle temporel séparé serait requis."
+      ]
+    },
+    {
+      "fixture_id": 1635686,
+      "kickoff": "2026-09-09T19:00:00+00:00",
+      "home": {
+        "id": 40,
+        "name": "Liverpool",
+        "league_id": 39
+      },
+      "away": {
+        "id": 530,
+        "name": "Atletico Madrid",
+        "league_id": 140
+      },
+      "expected_goals": {
+        "home": 2.248,
+        "away": 1.204
+      },
+      "expected_total_goals": 3.452,
+      "variant_lambdas": [
+        {
+          "half_life_days": 120.0,
+          "team_ridge": 3.0,
+          "home": 2.318,
+          "away": 1.225
+        },
+        {
+          "half_life_days": 240.0,
+          "team_ridge": 3.0,
+          "home": 2.239,
+          "away": 1.207
+        },
+        {
+          "half_life_days": 480.0,
+          "team_ridge": 3.0,
+          "home": 2.201,
+          "away": 1.176
+        },
+        {
+          "half_life_days": 240.0,
+          "team_ridge": 1.5,
+          "home": 2.24,
+          "away": 1.208
+        },
+        {
+          "half_life_days": 240.0,
+          "team_ridge": 6.0,
+          "home": 2.241,
+          "away": 1.202
+        }
+      ],
+      "relative_strength_indices": {
+        "home_attack": 2.114,
+        "home_defence_weakness": 0.529,
+        "away_attack": 1.933,
+        "away_defence_weakness": 0.719
+      },
+      "probabilities": {
+        "home_win": {
+          "central_pct": 61.0,
+          "sensitivity_low_pct": 60.8,
+          "sensitivity_high_pct": 61.5,
+          "conservative_pct": 60.8
+        },
+        "draw": {
+          "central_pct": 19.4,
+          "sensitivity_low_pct": 19.1,
+          "sensitivity_high_pct": 19.8,
+          "conservative_pct": 19.1
+        },
+        "away_win": {
+          "central_pct": 19.5,
+          "sensitivity_low_pct": 18.7,
+          "sensitivity_high_pct": 19.9,
+          "conservative_pct": 18.7
+        },
+        "home_or_draw": {
+          "central_pct": 80.5,
+          "sensitivity_low_pct": 80.1,
+          "sensitivity_high_pct": 81.3,
+          "conservative_pct": 80.1
+        },
+        "away_or_draw": {
+          "central_pct": 39.0,
+          "sensitivity_low_pct": 38.5,
+          "sensitivity_high_pct": 39.2,
+          "conservative_pct": 38.5
+        },
+        "btts": {
+          "central_pct": 62.5,
+          "sensitivity_low_pct": 61.1,
+          "sensitivity_high_pct": 64.0,
+          "conservative_pct": 61.1
+        },
+        "over_1_5": {
+          "central_pct": 85.8,
+          "sensitivity_low_pct": 84.7,
+          "sensitivity_high_pct": 87.2,
+          "conservative_pct": 84.7
+        },
+        "over_2_5": {
+          "central_pct": 67.0,
+          "sensitivity_low_pct": 65.6,
+          "sensitivity_high_pct": 68.7,
+          "conservative_pct": 65.6
+        },
+        "under_2_5": {
+          "central_pct": 33.0,
+          "sensitivity_low_pct": 31.3,
+          "sensitivity_high_pct": 34.4,
+          "conservative_pct": 31.3
+        },
+        "under_3_5": {
+          "central_pct": 54.7,
+          "sensitivity_low_pct": 52.7,
+          "sensitivity_high_pct": 56.3,
+          "conservative_pct": 52.7
+        },
+        "under_4_5": {
+          "central_pct": 73.5,
+          "sensitivity_low_pct": 71.7,
+          "sensitivity_high_pct": 74.8,
+          "conservative_pct": 71.7
+        },
+        "home_over_0_5": {
+          "central_pct": 89.4,
+          "sensitivity_low_pct": 88.9,
+          "sensitivity_high_pct": 90.2,
+          "conservative_pct": 88.9
+        },
+        "home_over_1_5": {
+          "central_pct": 65.7,
+          "sensitivity_low_pct": 64.6,
+          "sensitivity_high_pct": 67.3,
+          "conservative_pct": 64.6
+        },
+        "away_over_0_5": {
+          "central_pct": 70.0,
+          "sensitivity_low_pct": 69.2,
+          "sensitivity_high_pct": 70.6,
+          "conservative_pct": 69.2
+        },
+        "away_over_1_5": {
+          "central_pct": 33.9,
+          "sensitivity_low_pct": 32.9,
+          "sensitivity_high_pct": 34.6,
+          "conservative_pct": 32.9
+        }
+      },
+      "top_scores": [
+        {
+          "score": "2-1",
+          "probability_pct": 9.64
+        },
+        {
+          "score": "1-1",
+          "probability_pct": 8.48
+        },
+        {
+          "score": "2-0",
+          "probability_pct": 8.01
+        },
+        {
+          "score": "1-0",
+          "probability_pct": 7.22
+        },
+        {
+          "score": "3-1",
+          "probability_pct": 7.22
+        },
+        {
+          "score": "3-0",
+          "probability_pct": 6.0
+        },
+        {
+          "score": "2-2",
+          "probability_pct": 5.8
+        },
+        {
+          "score": "1-2",
+          "probability_pct": 5.16
+        }
+      ],
+      "most_likely_score": {
+        "score": "2-1",
+        "probability_pct": 9.64
+      },
+      "workload": {
+        "home": {
+          "rest_days": 5,
+          "matches_last_7_days": 1,
+          "matches_last_14_days": 2,
+          "matches_last_28_days": 3
+        },
+        "away": {
+          "rest_days": 4,
+          "matches_last_7_days": 1,
+          "matches_last_14_days": 2,
+          "matches_last_28_days": 4
+        }
+      },
+      "pre_match_coverage": {
+        "official_lineups_available": false,
+        "lineup_rows": 0,
+        "injury_rows": 16,
+        "lineup_adjustment_applied": false,
+        "shots_model_applied": false
+      },
+      "limitations": [
+        "Pas de cotes ni de /predictions dans les probabilités.",
+        "Couche tirs omise: couverture historique insuffisante sans milliers d'appels par match.",
+        "Effets joueurs omis tant que les compositions officielles et coefficients régularisés ne sont pas disponibles.",
+        "Intervalles = sensibilité aux hyperparamètres, pas intervalles postérieurs calibrés.",
+        "Aucune minute de but dérivée de la matrice de score: un modèle temporel séparé serait requis."
+      ]
+    },
+    {
+      "fixture_id": 1635705,
+      "kickoff": "2026-09-09T19:00:00+00:00",
+      "home": {
+        "id": 85,
+        "name": "Paris Saint Germain",
+        "league_id": 61
+      },
+      "away": {
+        "id": 656,
+        "name": "Slovan Bratislava",
+        "league_id": 332
+      },
+      "expected_goals": {
+        "home": 3.804,
+        "away": 0.609
+      },
+      "expected_total_goals": 4.413,
+      "variant_lambdas": [
+        {
+          "half_life_days": 120.0,
+          "team_ridge": 3.0,
+          "home": 3.456,
+          "away": 0.603
+        },
+        {
+          "half_life_days": 240.0,
+          "team_ridge": 3.0,
+          "home": 3.842,
+          "away": 0.607
+        },
+        {
+          "half_life_days": 480.0,
+          "team_ridge": 3.0,
+          "home": 4.051,
+          "away": 0.618
+        },
+        {
+          "half_life_days": 240.0,
+          "team_ridge": 1.5,
+          "home": 3.96,
+          "away": 0.584
+        },
+        {
+          "half_life_days": 240.0,
+          "team_ridge": 6.0,
+          "home": 3.709,
+          "away": 0.633
+        }
+      ],
+      "relative_strength_indices": {
+        "home_attack": 2.307,
+        "home_defence_weakness": 0.557,
+        "away_attack": 0.93,
+        "away_defence_weakness": 1.113
+      },
+      "probabilities": {
+        "home_win": {
+          "central_pct": 91.2,
+          "sensitivity_low_pct": 88.9,
+          "sensitivity_high_pct": 92.7,
+          "conservative_pct": 88.9
+        },
+        "draw": {
+          "central_pct": 6.2,
+          "sensitivity_low_pct": 5.0,
+          "sensitivity_high_pct": 8.0,
+          "conservative_pct": 5.0
+        },
+        "away_win": {
+          "central_pct": 2.6,
+          "sensitivity_low_pct": 2.1,
+          "sensitivity_high_pct": 3.1,
+          "conservative_pct": 2.1
+        },
+        "home_or_draw": {
+          "central_pct": 97.4,
+          "sensitivity_low_pct": 96.9,
+          "sensitivity_high_pct": 97.9,
+          "conservative_pct": 96.9
+        },
+        "away_or_draw": {
+          "central_pct": 8.8,
+          "sensitivity_low_pct": 7.3,
+          "sensitivity_high_pct": 11.1,
+          "conservative_pct": 7.3
+        },
+        "btts": {
+          "central_pct": 44.6,
+          "sensitivity_low_pct": 43.4,
+          "sensitivity_high_pct": 45.7,
+          "conservative_pct": 43.4
+        },
+        "over_1_5": {
+          "central_pct": 93.3,
+          "sensitivity_low_pct": 91.4,
+          "sensitivity_high_pct": 94.6,
+          "conservative_pct": 91.4
+        },
+        "over_2_5": {
+          "central_pct": 81.5,
+          "sensitivity_low_pct": 77.0,
+          "sensitivity_high_pct": 84.4,
+          "conservative_pct": 77.0
+        },
+        "under_2_5": {
+          "central_pct": 18.5,
+          "sensitivity_low_pct": 15.6,
+          "sensitivity_high_pct": 23.0,
+          "conservative_pct": 15.6
+        },
+        "under_3_5": {
+          "central_pct": 35.8,
+          "sensitivity_low_pct": 31.5,
+          "sensitivity_high_pct": 42.2,
+          "conservative_pct": 31.5
+        },
+        "under_4_5": {
+          "central_pct": 54.9,
+          "sensitivity_low_pct": 50.1,
+          "sensitivity_high_pct": 61.7,
+          "conservative_pct": 50.1
+        },
+        "home_over_0_5": {
+          "central_pct": 97.7,
+          "sensitivity_low_pct": 96.8,
+          "sensitivity_high_pct": 98.3,
+          "conservative_pct": 96.8
+        },
+        "home_over_1_5": {
+          "central_pct": 89.2,
+          "sensitivity_low_pct": 85.9,
+          "sensitivity_high_pct": 91.2,
+          "conservative_pct": 85.9
+        },
+        "away_over_0_5": {
+          "central_pct": 45.6,
+          "sensitivity_low_pct": 44.2,
+          "sensitivity_high_pct": 46.9,
+          "conservative_pct": 44.2
+        },
+        "away_over_1_5": {
+          "central_pct": 12.5,
+          "sensitivity_low_pct": 11.7,
+          "sensitivity_high_pct": 13.3,
+          "conservative_pct": 11.7
+        }
+      },
+      "top_scores": [
+        {
+          "score": "3-0",
+          "probability_pct": 11.08
+        },
+        {
+          "score": "4-0",
+          "probability_pct": 10.51
+        },
+        {
+          "score": "2-0",
+          "probability_pct": 8.78
+        },
+        {
+          "score": "5-0",
+          "probability_pct": 8.0
+        },
+        {
+          "score": "3-1",
+          "probability_pct": 6.75
+        },
+        {
+          "score": "4-1",
+          "probability_pct": 6.4
+        },
+        {
+          "score": "2-1",
+          "probability_pct": 5.35
+        },
+        {
+          "score": "6-0",
+          "probability_pct": 5.09
+        }
+      ],
+      "most_likely_score": {
+        "score": "3-0",
+        "probability_pct": 11.08
+      },
+      "workload": {
+        "home": {
+          "rest_days": 5,
+          "matches_last_7_days": 1,
+          "matches_last_14_days": 2,
+          "matches_last_28_days": 3
+        },
+        "away": {
+          "rest_days": 4,
+          "matches_last_7_days": 1,
+          "matches_last_14_days": 3,
+          "matches_last_28_days": 6
+        }
+      },
+      "pre_match_coverage": {
+        "official_lineups_available": false,
+        "lineup_rows": 0,
+        "injury_rows": 8,
+        "lineup_adjustment_applied": false,
+        "shots_model_applied": false
+      },
+      "limitations": [
+        "Pas de cotes ni de /predictions dans les probabilités.",
+        "Couche tirs omise: couverture historique insuffisante sans milliers d'appels par match.",
+        "Effets joueurs omis tant que les compositions officielles et coefficients régularisés ne sont pas disponibles.",
+        "Intervalles = sensibilité aux hyperparamètres, pas intervalles postérieurs calibrés.",
+        "Aucune minute de but dérivée de la matrice de score: un modèle temporel séparé serait requis."
+      ]
+    },
+    {
+      "fixture_id": 1635736,
+      "kickoff": "2026-09-09T19:00:00+00:00",
+      "home": {
+        "id": 228,
+        "name": "Sporting CP",
+        "league_id": 94
+      },
+      "away": {
+        "id": 645,
+        "name": "Galatasaray",
+        "league_id": 203
+      },
+      "expected_goals": {
+        "home": 2.097,
+        "away": 1.017
+      },
+      "expected_total_goals": 3.113,
+      "variant_lambdas": [
+        {
+          "half_life_days": 120.0,
+          "team_ridge": 3.0,
+          "home": 2.055,
+          "away": 0.997
+        },
+        {
+          "half_life_days": 240.0,
+          "team_ridge": 3.0,
+          "home": 2.083,
+          "away": 1.016
+        },
+        {
+          "half_life_days": 480.0,
+          "team_ridge": 3.0,
+          "home": 2.18,
+          "away": 1.039
+        },
+        {
+          "half_life_days": 240.0,
+          "team_ridge": 1.5,
+          "home": 2.087,
+          "away": 1.013
+        },
+        {
+          "half_life_days": 240.0,
+          "team_ridge": 6.0,
+          "home": 2.078,
+          "away": 1.018
+        }
+      ],
+      "relative_strength_indices": {
+        "home_attack": 1.867,
+        "home_defence_weakness": 0.594,
+        "away_attack": 1.455,
+        "away_defence_weakness": 0.759
+      },
+      "probabilities": {
+        "home_win": {
+          "central_pct": 62.3,
+          "sensitivity_low_pct": 61.4,
+          "sensitivity_high_pct": 63.7,
+          "conservative_pct": 61.4
+        },
+        "draw": {
+          "central_pct": 20.2,
+          "sensitivity_low_pct": 18.9,
+          "sensitivity_high_pct": 21.4,
+          "conservative_pct": 18.9
+        },
+        "away_win": {
+          "central_pct": 17.6,
+          "sensitivity_low_pct": 17.2,
+          "sensitivity_high_pct": 17.9,
+          "conservative_pct": 17.2
+        },
+        "home_or_draw": {
+          "central_pct": 82.4,
+          "sensitivity_low_pct": 82.1,
+          "sensitivity_high_pct": 82.8,
+          "conservative_pct": 82.1
+        },
+        "away_or_draw": {
+          "central_pct": 37.7,
+          "sensitivity_low_pct": 36.3,
+          "sensitivity_high_pct": 38.6,
+          "conservative_pct": 36.3
+        },
+        "btts": {
+          "central_pct": 55.9,
+          "sensitivity_low_pct": 55.4,
+          "sensitivity_high_pct": 56.9,
+          "conservative_pct": 55.4
+        },
+        "over_1_5": {
+          "central_pct": 81.6,
+          "sensitivity_low_pct": 81.2,
+          "sensitivity_high_pct": 82.7,
+          "conservative_pct": 81.2
+        },
+        "over_2_5": {
+          "central_pct": 60.2,
+          "sensitivity_low_pct": 58.8,
+          "sensitivity_high_pct": 62.4,
+          "conservative_pct": 58.8
+        },
+        "under_2_5": {
+          "central_pct": 39.8,
+          "sensitivity_low_pct": 37.6,
+          "sensitivity_high_pct": 41.2,
+          "conservative_pct": 37.6
+        },
+        "under_3_5": {
+          "central_pct": 62.2,
+          "sensitivity_low_pct": 59.8,
+          "sensitivity_high_pct": 63.6,
+          "conservative_pct": 59.8
+        },
+        "under_4_5": {
+          "central_pct": 79.6,
+          "sensitivity_low_pct": 77.7,
+          "sensitivity_high_pct": 80.7,
+          "conservative_pct": 77.7
+        },
+        "home_over_0_5": {
+          "central_pct": 87.7,
+          "sensitivity_low_pct": 87.2,
+          "sensitivity_high_pct": 88.7,
+          "conservative_pct": 87.2
+        },
+        "home_over_1_5": {
+          "central_pct": 61.9,
+          "sensitivity_low_pct": 60.9,
+          "sensitivity_high_pct": 64.1,
+          "conservative_pct": 60.9
+        },
+        "away_over_0_5": {
+          "central_pct": 63.8,
+          "sensitivity_low_pct": 63.1,
+          "sensitivity_high_pct": 64.6,
+          "conservative_pct": 63.1
+        },
+        "away_over_1_5": {
+          "central_pct": 27.0,
+          "sensitivity_low_pct": 26.3,
+          "sensitivity_high_pct": 27.9,
+          "conservative_pct": 26.3
+        }
+      },
+      "top_scores": [
+        {
+          "score": "2-1",
+          "probability_pct": 9.93
+        },
+        {
+          "score": "2-0",
+          "probability_pct": 9.77
+        },
+        {
+          "score": "1-0",
+          "probability_pct": 9.42
+        },
+        {
+          "score": "1-1",
+          "probability_pct": 9.38
+        },
+        {
+          "score": "3-1",
+          "probability_pct": 6.94
+        },
+        {
+          "score": "3-0",
+          "probability_pct": 6.82
+        },
+        {
+          "score": "2-2",
+          "probability_pct": 5.05
+        },
+        {
+          "score": "1-2",
+          "probability_pct": 4.82
+        }
+      ],
+      "most_likely_score": {
+        "score": "2-1",
+        "probability_pct": 9.93
+      },
+      "workload": {
+        "home": {
+          "rest_days": 12,
+          "matches_last_7_days": 0,
+          "matches_last_14_days": 1,
+          "matches_last_28_days": 3
+        },
+        "away": {
+          "rest_days": 5,
+          "matches_last_7_days": 1,
+          "matches_last_14_days": 2,
+          "matches_last_28_days": 4
+        }
+      },
+      "pre_match_coverage": {
+        "official_lineups_available": false,
+        "lineup_rows": 0,
+        "injury_rows": 30,
+        "lineup_adjustment_applied": false,
+        "shots_model_applied": false
+      },
+      "limitations": [
+        "Pas de cotes ni de /predictions dans les probabilités.",
+        "Couche tirs omise: couverture historique insuffisante sans milliers d'appels par match.",
+        "Effets joueurs omis tant que les compositions officielles et coefficients régularisés ne sont pas disponibles.",
+        "Intervalles = sensibilité aux hyperparamètres, pas intervalles postérieurs calibrés.",
+        "Aucune minute de but dérivée de la matrice de score: un modèle temporel séparé serait requis."
+      ]
+    },
+    {
+      "fixture_id": 1635698,
+      "kickoff": "2026-09-09T19:00:00+00:00",
+      "home": {
+        "id": 492,
+        "name": "Napoli",
+        "league_id": 135
+      },
+      "away": {
+        "id": 42,
+        "name": "Arsenal",
+        "league_id": 39
+      },
+      "expected_goals": {
+        "home": 0.632,
+        "away": 1.746
+      },
+      "expected_total_goals": 2.378,
+      "variant_lambdas": [
+        {
+          "half_life_days": 120.0,
+          "team_ridge": 3.0,
+          "home": 0.593,
+          "away": 1.838
+        },
+        {
+          "half_life_days": 240.0,
+          "team_ridge": 3.0,
+          "home": 0.635,
+          "away": 1.746
+        },
+        {
+          "half_life_days": 480.0,
+          "team_ridge": 3.0,
+          "home": 0.655,
+          "away": 1.654
+        },
+        {
+          "half_life_days": 240.0,
+          "team_ridge": 1.5,
+          "home": 0.63,
+          "away": 1.753
+        },
+        {
+          "half_life_days": 240.0,
+          "team_ridge": 6.0,
+          "home": 0.646,
+          "away": 1.739
+        }
+      ],
+      "relative_strength_indices": {
+        "home_attack": 1.467,
+        "home_defence_weakness": 0.702,
+        "away_attack": 2.118,
+        "away_defence_weakness": 0.291
+      },
+      "probabilities": {
+        "home_win": {
+          "central_pct": 13.1,
+          "sensitivity_low_pct": 10.9,
+          "sensitivity_high_pct": 14.9,
+          "conservative_pct": 10.9
+        },
+        "draw": {
+          "central_pct": 22.5,
+          "sensitivity_low_pct": 22.1,
+          "sensitivity_high_pct": 23.0,
+          "conservative_pct": 22.1
+        },
+        "away_win": {
+          "central_pct": 64.4,
+          "sensitivity_low_pct": 62.0,
+          "sensitivity_high_pct": 67.0,
+          "conservative_pct": 62.0
+        },
+        "home_or_draw": {
+          "central_pct": 35.6,
+          "sensitivity_low_pct": 33.0,
+          "sensitivity_high_pct": 38.0,
+          "conservative_pct": 33.0
+        },
+        "away_or_draw": {
+          "central_pct": 86.9,
+          "sensitivity_low_pct": 85.1,
+          "sensitivity_high_pct": 89.1,
+          "conservative_pct": 85.1
+        },
+        "btts": {
+          "central_pct": 38.5,
+          "sensitivity_low_pct": 38.0,
+          "sensitivity_high_pct": 39.0,
+          "conservative_pct": 38.0
+        },
+        "over_1_5": {
+          "central_pct": 68.5,
+          "sensitivity_low_pct": 66.6,
+          "sensitivity_high_pct": 70.2,
+          "conservative_pct": 66.6
+        },
+        "over_2_5": {
+          "central_pct": 42.4,
+          "sensitivity_low_pct": 40.6,
+          "sensitivity_high_pct": 43.8,
+          "conservative_pct": 40.6
+        },
+        "under_2_5": {
+          "central_pct": 57.6,
+          "sensitivity_low_pct": 56.2,
+          "sensitivity_high_pct": 59.4,
+          "conservative_pct": 56.2
+        },
+        "under_3_5": {
+          "central_pct": 78.3,
+          "sensitivity_low_pct": 77.2,
+          "sensitivity_high_pct": 79.8,
+          "conservative_pct": 77.2
+        },
+        "under_4_5": {
+          "central_pct": 90.7,
+          "sensitivity_low_pct": 90.0,
+          "sensitivity_high_pct": 91.5,
+          "conservative_pct": 90.0
+        },
+        "home_over_0_5": {
+          "central_pct": 46.8,
+          "sensitivity_low_pct": 44.7,
+          "sensitivity_high_pct": 48.0,
+          "conservative_pct": 44.7
+        },
+        "home_over_1_5": {
+          "central_pct": 13.2,
+          "sensitivity_low_pct": 11.9,
+          "sensitivity_high_pct": 14.0,
+          "conservative_pct": 11.9
+        },
+        "away_over_0_5": {
+          "central_pct": 82.5,
+          "sensitivity_low_pct": 80.9,
+          "sensitivity_high_pct": 84.1,
+          "conservative_pct": 80.9
+        },
+        "away_over_1_5": {
+          "central_pct": 52.1,
+          "sensitivity_low_pct": 49.2,
+          "sensitivity_high_pct": 54.8,
+          "conservative_pct": 49.2
+        }
+      },
+      "top_scores": [
+        {
+          "score": "0-1",
+          "probability_pct": 16.3
+        },
+        {
+          "score": "0-2",
+          "probability_pct": 14.13
+        },
+        {
+          "score": "1-1",
+          "probability_pct": 10.11
+        },
+        {
+          "score": "0-0",
+          "probability_pct": 9.17
+        },
+        {
+          "score": "1-2",
+          "probability_pct": 8.92
+        },
+        {
+          "score": "0-3",
+          "probability_pct": 8.23
+        },
+        {
+          "score": "1-0",
+          "probability_pct": 5.99
+        },
+        {
+          "score": "1-3",
+          "probability_pct": 5.19
+        }
+      ],
+      "most_likely_score": {
+        "score": "0-1",
+        "probability_pct": 16.3
+      },
+      "workload": {
+        "home": {
+          "rest_days": 4,
+          "matches_last_7_days": 1,
+          "matches_last_14_days": 2,
+          "matches_last_28_days": 3
+        },
+        "away": {
+          "rest_days": 9,
+          "matches_last_7_days": 0,
+          "matches_last_14_days": 1,
+          "matches_last_28_days": 2
+        }
+      },
+      "pre_match_coverage": {
+        "official_lineups_available": false,
+        "lineup_rows": 0,
+        "injury_rows": 16,
+        "lineup_adjustment_applied": false,
+        "shots_model_applied": false
+      },
+      "limitations": [
+        "Pas de cotes ni de /predictions dans les probabilités.",
+        "Couche tirs omise: couverture historique insuffisante sans milliers d'appels par match.",
+        "Effets joueurs omis tant que les compositions officielles et coefficients régularisés ne sont pas disponibles.",
+        "Intervalles = sensibilité aux hyperparamètres, pas intervalles postérieurs calibrés.",
+        "Aucune minute de but dérivée de la matrice de score: un modèle temporel séparé serait requis."
+      ]
+    }
+  ]
+}

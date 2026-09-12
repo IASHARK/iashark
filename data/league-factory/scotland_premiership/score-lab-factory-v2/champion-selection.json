@@ -1,0 +1,63 @@
+{
+  "protocol": "SCORE_LAB_FACTORY_V2",
+  "phase": "A_CHAMPION_SELECTION",
+  "league_key": "scotland_premiership",
+  "generated_at": "2026-09-06T19:16:21.295Z",
+  "train_seasons": [
+    2021,
+    2022
+  ],
+  "oos_dev_season": 2023,
+  "rho_frozen": -0.014323492832561804,
+  "league_avg_h": 1.7094017094017093,
+  "league_avg_a": 1.2606837606837606,
+  "candidates": {
+    "B0": {
+      "nll": 2.912945039317447,
+      "secondary": {
+        "ou25_logloss": 0.6884045076515848,
+        "btts_logloss": 0.7088109325173675,
+        "x12_logloss": 0.9628935701165637
+      },
+      "n_oos": 229,
+      "structural": {
+        "convergence_rate": 1,
+        "boundary_hit_rate": 0,
+        "rho_std": 0
+      }
+    },
+    "M0": {
+      "nll": 2.912905015933874,
+      "secondary": {
+        "ou25_logloss": 0.6884045076515848,
+        "btts_logloss": 0.708445268569396,
+        "x12_logloss": 0.9625499707722046
+      },
+      "n_oos": 229,
+      "structural": {
+        "convergence_rate": 1,
+        "boundary_hit_rate": 0,
+        "rho_std": 0.01800375283946343
+      }
+    },
+    "M2": {
+      "nll": 2.903750577528942,
+      "secondary": {
+        "ou25_logloss": 0.6879202304523977,
+        "btts_logloss": 0.7083768863735385,
+        "x12_logloss": 0.9588161091326167
+      },
+      "n_oos": 229,
+      "structural": {
+        "convergence_rate": 1,
+        "boundary_hit_rate": 0,
+        "rho_std": 0.01800375283946343
+      }
+    }
+  },
+  "vetoed": {},
+  "primary_winner_before_secondary_veto": "M2",
+  "secondary_veto": null,
+  "champion_selected": "M2",
+  "champion_selection_reason": "M2 a le meilleur EXACT_SCORE_NLL absolu (2.903751) parmi les candidats non-vetoes structurellement, sans degradation secondaire disqualifiante vs les autres."
+}

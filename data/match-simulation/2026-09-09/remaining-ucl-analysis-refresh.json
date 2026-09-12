@@ -1,0 +1,2156 @@
+{
+  "generated_at": "2026-09-09T12:33:01.938710+00:00",
+  "model": "simulate_match_lean.py — méthode validée en deux étapes",
+  "simulations_per_match": 20000,
+  "matches": [
+    {
+      "fixture_id": 1635741,
+      "homeTeam": "VfB Stuttgart",
+      "awayTeam": "Viking",
+      "homeLogoUrl": "https://media.api-sports.io/football/teams/172.png",
+      "awayLogoUrl": "https://media.api-sports.io/football/teams/759.png",
+      "competition": "UEFA CHAMPIONS LEAGUE - League Stage - 1 (SIMULATION)",
+      "lambda_home": 1.915,
+      "lambda_away": 1.261,
+      "goals": [
+        {
+          "minute": 23,
+          "team": "away"
+        },
+        {
+          "minute": 29,
+          "team": "home"
+        },
+        {
+          "minute": 47,
+          "team": "home"
+        }
+      ],
+      "final_score": {
+        "home": 2,
+        "away": 1
+      },
+      "seed": 26090900,
+      "mean_simulated_score": {
+        "home": 2.1,
+        "away": 1.39
+      },
+      "top_scorelines_pct": [
+        {
+          "score": "2-1",
+          "frequency_pct": 9.62
+        },
+        {
+          "score": "1-1",
+          "frequency_pct": 9.06
+        },
+        {
+          "score": "2-2",
+          "frequency_pct": 7.14
+        },
+        {
+          "score": "2-0",
+          "frequency_pct": 6.93
+        },
+        {
+          "score": "3-1",
+          "frequency_pct": 6.74
+        },
+        {
+          "score": "1-0",
+          "frequency_pct": 6.44
+        },
+        {
+          "score": "1-2",
+          "frequency_pct": 6.28
+        },
+        {
+          "score": "3-2",
+          "frequency_pct": 4.8
+        }
+      ],
+      "market_recalibration": {
+        "applied": true,
+        "blend_weight": 0.35,
+        "model_total_pre": 2.904,
+        "market_implied_total": 3.961,
+        "model_home_share_pre": 0.525,
+        "market_implied_home_share": 0.747,
+        "fair_1x2_pct": [
+          75.9,
+          14.6,
+          9.5
+        ],
+        "fair_over25_pct": 75.6
+      },
+      "h2h": null,
+      "rest_days": {
+        "home": 5,
+        "away": 5
+      },
+      "disclaimer": "Ceci est un SCENARIO statistiquement coherent, pas une prediction du deroule reel du match. Sans buteurs (retires volontairement -- voir le module principal simulate_match.py pour la version complete avec effectifs reels).",
+      "kickoff": "2026-09-09T16:45:00+00:00",
+      "status": "NS",
+      "probabilities_pct": {
+        "home_win": 53.3,
+        "draw": 22.4,
+        "away_win": 24.3,
+        "home_or_draw": 75.7,
+        "away_or_draw": 46.7,
+        "no_draw": 77.6,
+        "btts": 67.2,
+        "btts_no": 32.8,
+        "over_0_5": 96.9,
+        "over_1_5": 86.5,
+        "over_2_5": 67.8,
+        "over_3_5": 46.8,
+        "under_1_5": 13.5,
+        "under_2_5": 32.2,
+        "under_3_5": 53.2,
+        "under_4_5": 72.5,
+        "home_over_0_5": 88.4,
+        "home_over_1_5": 62.9,
+        "home_under_2_5": 65.3,
+        "away_over_0_5": 75.7,
+        "away_over_1_5": 41.0,
+        "away_under_2_5": 83.4,
+        "first_half_over_0_5": 81.4,
+        "first_half_over_1_5": 50.2,
+        "first_half_under_1_5": 49.8,
+        "home_clean_sheet": 24.3,
+        "away_clean_sheet": 11.6,
+        "first_goal_home": 58.5,
+        "first_goal_away": 38.4,
+        "no_goal": 3.1,
+        "home_draw_no_bet": 68.7,
+        "away_draw_no_bet": 31.3
+      },
+      "model_inputs": {
+        "home_league_id": 78,
+        "away_league_id": 103,
+        "home_home_away_rates": {
+          "gf_home_avg": 1.8421052631578947,
+          "ga_home_avg": 0.9473684210526315,
+          "gf_away_avg": 2.263157894736842,
+          "ga_away_avg": 2.0526315789473686
+        },
+        "away_home_away_rates": {
+          "gf_home_avg": 3.111111111111111,
+          "ga_home_avg": 1.1111111111111112,
+          "gf_away_avg": 1.4166666666666667,
+          "ga_away_avg": 0.9166666666666666
+        },
+        "home_recent_form": {
+          "gf90": 3.135578134824225,
+          "ga90": 1.51072678152091,
+          "n_matches": 12
+        },
+        "away_recent_form": {
+          "gf90": 1.9307777892075475,
+          "ga90": 1.108481905159089,
+          "n_matches": 12
+        },
+        "red_card_rate_pct": {
+          "home": 0.5,
+          "away": 5.3
+        },
+        "rest_days": {
+          "home": 5,
+          "away": 5
+        },
+        "h2h": null,
+        "market_recalibration": {
+          "applied": true,
+          "blend_weight": 0.35,
+          "model_total_pre": 2.904,
+          "market_implied_total": 3.961,
+          "model_home_share_pre": 0.525,
+          "market_implied_home_share": 0.747,
+          "fair_1x2_pct": [
+            75.9,
+            14.6,
+            9.5
+          ],
+          "fair_over25_pct": 75.6
+        }
+      },
+      "quality_flags": [
+        "Écart majeur modèle/marché sur domicile: 53.3% contre 75.9% marché juste."
+      ]
+    },
+    {
+      "fixture_id": 1635628,
+      "homeTeam": "Barcelona",
+      "awayTeam": "Feyenoord",
+      "homeLogoUrl": "https://media.api-sports.io/football/teams/529.png",
+      "awayLogoUrl": "https://media.api-sports.io/football/teams/209.png",
+      "competition": "UEFA CHAMPIONS LEAGUE - League Stage - 1 (SIMULATION)",
+      "lambda_home": 2.378,
+      "lambda_away": 1.342,
+      "goals": [
+        {
+          "minute": 32,
+          "team": "away"
+        },
+        {
+          "minute": 45,
+          "team": "home",
+          "minuteLabel": "45+3'"
+        },
+        {
+          "minute": 66,
+          "team": "home"
+        },
+        {
+          "minute": 70,
+          "team": "away"
+        },
+        {
+          "minute": 88,
+          "team": "home"
+        }
+      ],
+      "final_score": {
+        "home": 3,
+        "away": 2
+      },
+      "seed": 26090901,
+      "mean_simulated_score": {
+        "home": 2.55,
+        "away": 1.53
+      },
+      "top_scorelines_pct": [
+        {
+          "score": "2-1",
+          "frequency_pct": 8.52
+        },
+        {
+          "score": "3-1",
+          "frequency_pct": 7.58
+        },
+        {
+          "score": "2-2",
+          "frequency_pct": 7.19
+        },
+        {
+          "score": "1-1",
+          "frequency_pct": 7.09
+        },
+        {
+          "score": "3-2",
+          "frequency_pct": 5.73
+        },
+        {
+          "score": "2-0",
+          "frequency_pct": 5.32
+        },
+        {
+          "score": "1-2",
+          "frequency_pct": 4.86
+        },
+        {
+          "score": "3-0",
+          "frequency_pct": 4.44
+        }
+      ],
+      "market_recalibration": {
+        "applied": true,
+        "blend_weight": 0.35,
+        "model_total_pre": 3.547,
+        "market_implied_total": 4.505,
+        "model_home_share_pre": 0.539,
+        "market_implied_home_share": 0.832,
+        "fair_1x2_pct": [
+          88.9,
+          7.4,
+          3.7
+        ],
+        "fair_over25_pct": 82.7
+      },
+      "h2h": null,
+      "rest_days": {
+        "home": 3,
+        "away": 4
+      },
+      "disclaimer": "Ceci est un SCENARIO statistiquement coherent, pas une prediction du deroule reel du match. Sans buteurs (retires volontairement -- voir le module principal simulate_match.py pour la version complete avec effectifs reels).",
+      "kickoff": "2026-09-09T16:45:00+00:00",
+      "status": "NS",
+      "probabilities_pct": {
+        "home_win": 59.6,
+        "draw": 19.3,
+        "away_win": 21.1,
+        "home_or_draw": 78.9,
+        "away_or_draw": 40.4,
+        "no_draw": 80.7,
+        "btts": 73.2,
+        "btts_no": 26.8,
+        "over_0_5": 98.3,
+        "over_1_5": 91.2,
+        "over_2_5": 76.7,
+        "over_3_5": 57.2,
+        "under_1_5": 8.8,
+        "under_2_5": 23.3,
+        "under_3_5": 42.8,
+        "under_4_5": 62.2,
+        "home_over_0_5": 92.4,
+        "home_over_1_5": 72.2,
+        "home_under_2_5": 54.1,
+        "away_over_0_5": 79.1,
+        "away_over_1_5": 45.3,
+        "away_under_2_5": 80.5,
+        "first_half_over_0_5": 86.1,
+        "first_half_over_1_5": 58.4,
+        "first_half_under_1_5": 41.6,
+        "home_clean_sheet": 20.9,
+        "away_clean_sheet": 7.6,
+        "first_goal_home": 62.3,
+        "first_goal_away": 35.9,
+        "no_goal": 1.7,
+        "home_draw_no_bet": 73.8,
+        "away_draw_no_bet": 26.2
+      },
+      "model_inputs": {
+        "home_league_id": 2,
+        "away_league_id": 88,
+        "home_home_away_rates": {
+          "gf_home_avg": 3.0,
+          "ga_home_avg": 1.4285714285714286,
+          "gf_away_avg": 1.8571428571428572,
+          "ga_away_avg": 1.7142857142857142
+        },
+        "away_home_away_rates": {
+          "gf_home_avg": 2.2,
+          "ga_home_avg": 1.4,
+          "gf_away_avg": 1.9523809523809523,
+          "ga_away_avg": 1.1904761904761905
+        },
+        "home_recent_form": {
+          "gf90": 3.2663025376151893,
+          "ga90": 0.9320202807040116,
+          "n_matches": 12
+        },
+        "away_recent_form": {
+          "gf90": 2.6876346457831226,
+          "ga90": 1.1590277518456293,
+          "n_matches": 12
+        },
+        "red_card_rate_pct": {
+          "home": 25.0,
+          "away": 0.5
+        },
+        "rest_days": {
+          "home": 3,
+          "away": 4
+        },
+        "h2h": null,
+        "market_recalibration": {
+          "applied": true,
+          "blend_weight": 0.35,
+          "model_total_pre": 3.547,
+          "market_implied_total": 4.505,
+          "model_home_share_pre": 0.539,
+          "market_implied_home_share": 0.832,
+          "fair_1x2_pct": [
+            88.9,
+            7.4,
+            3.7
+          ],
+          "fair_over25_pct": 82.7
+        }
+      },
+      "quality_flags": [
+        "Écart majeur modèle/marché sur domicile: 59.6% contre 88.9% marché juste.",
+        "Comparaison inter-championnats instable avant recalibrage marché."
+      ]
+    },
+    {
+      "fixture_id": 1635686,
+      "homeTeam": "Liverpool",
+      "awayTeam": "Atletico Madrid",
+      "homeLogoUrl": "https://media.api-sports.io/football/teams/40.png",
+      "awayLogoUrl": "https://media.api-sports.io/football/teams/530.png",
+      "competition": "UEFA CHAMPIONS LEAGUE - League Stage - 1 (SIMULATION)",
+      "lambda_home": 1.93,
+      "lambda_away": 1.356,
+      "goals": [
+        {
+          "minute": 36,
+          "team": "home"
+        },
+        {
+          "minute": 50,
+          "team": "away"
+        },
+        {
+          "minute": 54,
+          "team": "home"
+        }
+      ],
+      "final_score": {
+        "home": 2,
+        "away": 1
+      },
+      "seed": 26090902,
+      "mean_simulated_score": {
+        "home": 2.11,
+        "away": 1.49
+      },
+      "top_scorelines_pct": [
+        {
+          "score": "2-1",
+          "frequency_pct": 9.41
+        },
+        {
+          "score": "1-1",
+          "frequency_pct": 9.07
+        },
+        {
+          "score": "2-2",
+          "frequency_pct": 7.42
+        },
+        {
+          "score": "1-2",
+          "frequency_pct": 6.35
+        },
+        {
+          "score": "3-1",
+          "frequency_pct": 6.17
+        },
+        {
+          "score": "2-0",
+          "frequency_pct": 6.04
+        },
+        {
+          "score": "1-0",
+          "frequency_pct": 5.85
+        },
+        {
+          "score": "3-2",
+          "frequency_pct": 4.91
+        }
+      ],
+      "market_recalibration": {
+        "applied": true,
+        "blend_weight": 0.35,
+        "model_total_pre": 3.48,
+        "market_implied_total": 3.178,
+        "model_home_share_pre": 0.568,
+        "market_implied_home_share": 0.629,
+        "fair_1x2_pct": [
+          54.7,
+          23.9,
+          21.4
+        ],
+        "fair_over25_pct": 61.6
+      },
+      "h2h": {
+        "gf_avg": 2.0,
+        "ga_avg": 1.6,
+        "n_matches": 5
+      },
+      "rest_days": {
+        "home": 5,
+        "away": 4
+      },
+      "disclaimer": "Ceci est un SCENARIO statistiquement coherent, pas une prediction du deroule reel du match. Sans buteurs (retires volontairement -- voir le module principal simulate_match.py pour la version complete avec effectifs reels).",
+      "kickoff": "2026-09-09T19:00:00+00:00",
+      "status": "NS",
+      "probabilities_pct": {
+        "home_win": 51.1,
+        "draw": 22.9,
+        "away_win": 26.0,
+        "home_or_draw": 74.0,
+        "away_or_draw": 48.9,
+        "no_draw": 77.1,
+        "btts": 70.1,
+        "btts_no": 29.9,
+        "over_0_5": 97.4,
+        "over_1_5": 87.8,
+        "over_2_5": 70.4,
+        "over_3_5": 49.2,
+        "under_1_5": 12.2,
+        "under_2_5": 29.6,
+        "under_3_5": 50.8,
+        "under_4_5": 70.4,
+        "home_over_0_5": 89.0,
+        "home_over_1_5": 63.1,
+        "home_under_2_5": 64.6,
+        "away_over_0_5": 78.5,
+        "away_over_1_5": 44.9,
+        "away_under_2_5": 80.7,
+        "first_half_over_0_5": 82.9,
+        "first_half_over_1_5": 52.3,
+        "first_half_under_1_5": 47.6,
+        "home_clean_sheet": 21.5,
+        "away_clean_sheet": 11.0,
+        "first_goal_home": 57.5,
+        "first_goal_away": 39.9,
+        "no_goal": 2.6,
+        "home_draw_no_bet": 66.3,
+        "away_draw_no_bet": 33.7
+      },
+      "model_inputs": {
+        "home_league_id": 2,
+        "away_league_id": 2,
+        "home_home_away_rates": {
+          "gf_home_avg": 2.2857142857142856,
+          "ga_home_avg": 1.2857142857142858,
+          "gf_away_avg": 1.4285714285714286,
+          "ga_away_avg": 0.8571428571428571
+        },
+        "away_home_away_rates": {
+          "gf_home_avg": 2.5555555555555554,
+          "ga_home_avg": 1.3333333333333333,
+          "gf_away_avg": 1.5555555555555556,
+          "ga_away_avg": 2.0
+        },
+        "home_recent_form": {
+          "gf90": 1.7475912212707148,
+          "ga90": 1.6529271154216296,
+          "n_matches": 12
+        },
+        "away_recent_form": {
+          "gf90": 1.6230815077808305,
+          "ga90": 1.7190361373233527,
+          "n_matches": 12
+        },
+        "red_card_rate_pct": {
+          "home": 0.5,
+          "away": 0.5
+        },
+        "rest_days": {
+          "home": 5,
+          "away": 4
+        },
+        "h2h": {
+          "gf_avg": 2.0,
+          "ga_avg": 1.6,
+          "n_matches": 5
+        },
+        "market_recalibration": {
+          "applied": true,
+          "blend_weight": 0.35,
+          "model_total_pre": 3.48,
+          "market_implied_total": 3.178,
+          "model_home_share_pre": 0.568,
+          "market_implied_home_share": 0.629,
+          "fair_1x2_pct": [
+            54.7,
+            23.9,
+            21.4
+          ],
+          "fair_over25_pct": 61.6
+        }
+      },
+      "quality_flags": []
+    },
+    {
+      "fixture_id": 1635705,
+      "homeTeam": "Paris Saint Germain",
+      "awayTeam": "Slovan Bratislava",
+      "homeLogoUrl": "https://media.api-sports.io/football/teams/85.png",
+      "awayLogoUrl": "https://media.api-sports.io/football/teams/656.png",
+      "competition": "UEFA CHAMPIONS LEAGUE - League Stage - 1 (SIMULATION)",
+      "lambda_home": 2.107,
+      "lambda_away": 1.465,
+      "goals": [
+        {
+          "minute": 9,
+          "team": "away"
+        },
+        {
+          "minute": 28,
+          "team": "away"
+        },
+        {
+          "minute": 37,
+          "team": "home"
+        },
+        {
+          "minute": 40,
+          "team": "home"
+        }
+      ],
+      "final_score": {
+        "home": 2,
+        "away": 2
+      },
+      "seed": 26090903,
+      "mean_simulated_score": {
+        "home": 2.28,
+        "away": 1.65
+      },
+      "top_scorelines_pct": [
+        {
+          "score": "2-1",
+          "frequency_pct": 8.54
+        },
+        {
+          "score": "1-1",
+          "frequency_pct": 7.83
+        },
+        {
+          "score": "2-2",
+          "frequency_pct": 7.58
+        },
+        {
+          "score": "3-1",
+          "frequency_pct": 6.34
+        },
+        {
+          "score": "1-2",
+          "frequency_pct": 6.09
+        },
+        {
+          "score": "3-2",
+          "frequency_pct": 5.67
+        },
+        {
+          "score": "2-0",
+          "frequency_pct": 5.17
+        },
+        {
+          "score": "1-0",
+          "frequency_pct": 4.41
+        }
+      ],
+      "market_recalibration": {
+        "applied": true,
+        "blend_weight": 0.35,
+        "model_total_pre": 3.27,
+        "market_implied_total": 4.476,
+        "model_home_share_pre": 0.435,
+        "market_implied_home_share": 0.873,
+        "fair_1x2_pct": [
+          93.0,
+          4.9,
+          2.1
+        ],
+        "fair_over25_pct": 82.4
+      },
+      "h2h": null,
+      "rest_days": {
+        "home": 5,
+        "away": 4
+      },
+      "disclaimer": "Ceci est un SCENARIO statistiquement coherent, pas une prediction du deroule reel du match. Sans buteurs (retires volontairement -- voir le module principal simulate_match.py pour la version complete avec effectifs reels).",
+      "kickoff": "2026-09-09T19:00:00+00:00",
+      "status": "NS",
+      "probabilities_pct": {
+        "home_win": 52.5,
+        "draw": 21.6,
+        "away_win": 25.9,
+        "home_or_draw": 74.1,
+        "away_or_draw": 47.5,
+        "no_draw": 78.4,
+        "btts": 73.8,
+        "btts_no": 26.2,
+        "over_0_5": 97.8,
+        "over_1_5": 90.0,
+        "over_2_5": 74.9,
+        "over_3_5": 55.1,
+        "under_1_5": 10.0,
+        "under_2_5": 25.1,
+        "under_3_5": 44.9,
+        "under_4_5": 64.5,
+        "home_over_0_5": 90.4,
+        "home_over_1_5": 67.3,
+        "home_under_2_5": 59.8,
+        "away_over_0_5": 81.2,
+        "away_over_1_5": 48.8,
+        "away_under_2_5": 78.0,
+        "first_half_over_0_5": 85.1,
+        "first_half_over_1_5": 56.7,
+        "first_half_under_1_5": 43.3,
+        "home_clean_sheet": 18.9,
+        "away_clean_sheet": 9.6,
+        "first_goal_home": 58.2,
+        "first_goal_away": 39.6,
+        "no_goal": 2.2,
+        "home_draw_no_bet": 66.9,
+        "away_draw_no_bet": 33.1
+      },
+      "model_inputs": {
+        "home_league_id": 2,
+        "away_league_id": 332,
+        "home_home_away_rates": {
+          "gf_home_avg": 2.8,
+          "ga_home_avg": 1.6,
+          "gf_away_avg": 2.2222222222222223,
+          "ga_away_avg": 1.0
+        },
+        "away_home_away_rates": {
+          "gf_home_avg": 2.0,
+          "ga_home_avg": 1.2,
+          "gf_away_avg": 1.95,
+          "ga_away_avg": 1.0
+        },
+        "home_recent_form": {
+          "gf90": 1.2125302249295415,
+          "ga90": 1.4964713260746114,
+          "n_matches": 12
+        },
+        "away_recent_form": {
+          "gf90": 2.5950041932443138,
+          "ga90": 0.901544609728166,
+          "n_matches": 12
+        },
+        "red_card_rate_pct": {
+          "home": 11.8,
+          "away": 0.5
+        },
+        "rest_days": {
+          "home": 5,
+          "away": 4
+        },
+        "h2h": null,
+        "market_recalibration": {
+          "applied": true,
+          "blend_weight": 0.35,
+          "model_total_pre": 3.27,
+          "market_implied_total": 4.476,
+          "model_home_share_pre": 0.435,
+          "market_implied_home_share": 0.873,
+          "fair_1x2_pct": [
+            93.0,
+            4.9,
+            2.1
+          ],
+          "fair_over25_pct": 82.4
+        }
+      },
+      "quality_flags": [
+        "Écart majeur modèle/marché sur domicile: 52.5% contre 93.0% marché juste.",
+        "Comparaison inter-championnats instable avant recalibrage marché."
+      ]
+    },
+    {
+      "fixture_id": 1635736,
+      "homeTeam": "Sporting CP",
+      "awayTeam": "Galatasaray",
+      "homeLogoUrl": "https://media.api-sports.io/football/teams/228.png",
+      "awayLogoUrl": "https://media.api-sports.io/football/teams/645.png",
+      "competition": "UEFA CHAMPIONS LEAGUE - League Stage - 1 (SIMULATION)",
+      "lambda_home": 2.156,
+      "lambda_away": 1.062,
+      "goals": [
+        {
+          "minute": 5,
+          "team": "away"
+        },
+        {
+          "minute": 45,
+          "team": "home"
+        },
+        {
+          "minute": 70,
+          "team": "home"
+        }
+      ],
+      "final_score": {
+        "home": 2,
+        "away": 1
+      },
+      "seed": 26090904,
+      "mean_simulated_score": {
+        "home": 2.37,
+        "away": 1.18
+      },
+      "top_scorelines_pct": [
+        {
+          "score": "2-1",
+          "frequency_pct": 10.09
+        },
+        {
+          "score": "1-1",
+          "frequency_pct": 8.33
+        },
+        {
+          "score": "2-0",
+          "frequency_pct": 8.12
+        },
+        {
+          "score": "3-1",
+          "frequency_pct": 7.4
+        },
+        {
+          "score": "1-0",
+          "frequency_pct": 6.68
+        },
+        {
+          "score": "3-0",
+          "frequency_pct": 6.25
+        },
+        {
+          "score": "2-2",
+          "frequency_pct": 5.85
+        },
+        {
+          "score": "3-2",
+          "frequency_pct": 4.73
+        }
+      ],
+      "market_recalibration": {
+        "applied": true,
+        "blend_weight": 0.35,
+        "model_total_pre": 3.442,
+        "market_implied_total": 3.124,
+        "model_home_share_pre": 0.695,
+        "market_implied_home_share": 0.628,
+        "fair_1x2_pct": [
+          54.5,
+          23.8,
+          21.7
+        ],
+        "fair_over25_pct": 60.4
+      },
+      "h2h": null,
+      "rest_days": {
+        "home": 4,
+        "away": 5
+      },
+      "disclaimer": "Ceci est un SCENARIO statistiquement coherent, pas une prediction du deroule reel du match. Sans buteurs (retires volontairement -- voir le module principal simulate_match.py pour la version complete avec effectifs reels).",
+      "kickoff": "2026-09-09T19:00:00+00:00",
+      "status": "NS",
+      "probabilities_pct": {
+        "home_win": 63.8,
+        "draw": 19.9,
+        "away_win": 16.4,
+        "home_or_draw": 83.6,
+        "away_or_draw": 36.2,
+        "no_draw": 80.2,
+        "btts": 63.7,
+        "btts_no": 36.3,
+        "over_0_5": 97.0,
+        "over_1_5": 87.2,
+        "over_2_5": 69.1,
+        "over_3_5": 46.9,
+        "under_1_5": 12.8,
+        "under_2_5": 30.9,
+        "under_3_5": 53.1,
+        "under_4_5": 71.9,
+        "home_over_0_5": 91.0,
+        "home_over_1_5": 69.3,
+        "home_under_2_5": 57.7,
+        "away_over_0_5": 69.7,
+        "away_over_1_5": 33.1,
+        "away_under_2_5": 88.8,
+        "first_half_over_0_5": 82.5,
+        "first_half_over_1_5": 52.3,
+        "first_half_under_1_5": 47.7,
+        "home_clean_sheet": 30.3,
+        "away_clean_sheet": 9.0,
+        "first_goal_home": 66.1,
+        "first_goal_away": 30.9,
+        "no_goal": 2.9,
+        "home_draw_no_bet": 79.6,
+        "away_draw_no_bet": 20.4
+      },
+      "model_inputs": {
+        "home_league_id": 2,
+        "away_league_id": 2,
+        "home_home_away_rates": {
+          "gf_home_avg": 2.4285714285714284,
+          "ga_home_avg": 0.7142857142857143,
+          "gf_away_avg": 1.0,
+          "ga_away_avg": 1.7142857142857142
+        },
+        "away_home_away_rates": {
+          "gf_home_avg": 1.7142857142857142,
+          "ga_home_avg": 0.8571428571428571,
+          "gf_away_avg": 1.0,
+          "ga_away_avg": 2.2857142857142856
+        },
+        "home_recent_form": {
+          "gf90": 3.1562804070375625,
+          "ga90": 0.7875132316415882,
+          "n_matches": 12
+        },
+        "away_recent_form": {
+          "gf90": 2.342063150172887,
+          "ga90": 1.8959402655010231,
+          "n_matches": 12
+        },
+        "red_card_rate_pct": {
+          "home": 0.5,
+          "away": 8.3
+        },
+        "rest_days": {
+          "home": 4,
+          "away": 5
+        },
+        "h2h": null,
+        "market_recalibration": {
+          "applied": true,
+          "blend_weight": 0.35,
+          "model_total_pre": 3.442,
+          "market_implied_total": 3.124,
+          "model_home_share_pre": 0.695,
+          "market_implied_home_share": 0.628,
+          "fair_1x2_pct": [
+            54.5,
+            23.8,
+            21.7
+          ],
+          "fair_over25_pct": 60.4
+        }
+      },
+      "quality_flags": []
+    },
+    {
+      "fixture_id": 1635698,
+      "homeTeam": "Napoli",
+      "awayTeam": "Arsenal",
+      "homeLogoUrl": "https://media.api-sports.io/football/teams/492.png",
+      "awayLogoUrl": "https://media.api-sports.io/football/teams/42.png",
+      "competition": "UEFA CHAMPIONS LEAGUE - League Stage - 1 (SIMULATION)",
+      "lambda_home": 0.941,
+      "lambda_away": 1.47,
+      "goals": [
+        {
+          "minute": 43,
+          "team": "home"
+        },
+        {
+          "minute": 75,
+          "team": "away"
+        },
+        {
+          "minute": 79,
+          "team": "away"
+        }
+      ],
+      "final_score": {
+        "home": 1,
+        "away": 2
+      },
+      "seed": 26090905,
+      "mean_simulated_score": {
+        "home": 1.02,
+        "away": 1.64
+      },
+      "top_scorelines_pct": [
+        {
+          "score": "1-1",
+          "frequency_pct": 12.0
+        },
+        {
+          "score": "0-1",
+          "frequency_pct": 11.52
+        },
+        {
+          "score": "1-2",
+          "frequency_pct": 10.05
+        },
+        {
+          "score": "0-2",
+          "frequency_pct": 9.28
+        },
+        {
+          "score": "1-0",
+          "frequency_pct": 7.08
+        },
+        {
+          "score": "0-0",
+          "frequency_pct": 6.8
+        },
+        {
+          "score": "2-1",
+          "frequency_pct": 5.99
+        },
+        {
+          "score": "2-2",
+          "frequency_pct": 5.49
+        }
+      ],
+      "market_recalibration": {
+        "applied": true,
+        "blend_weight": 0.35,
+        "model_total_pre": 2.569,
+        "market_implied_total": 2.658,
+        "model_home_share_pre": 0.433,
+        "market_implied_home_share": 0.326,
+        "fair_1x2_pct": [
+          17.4,
+          24.7,
+          57.9
+        ],
+        "fair_over25_pct": 49.6
+      },
+      "h2h": {
+        "gf_avg": 0.5,
+        "ga_avg": 1.25,
+        "n_matches": 4
+      },
+      "rest_days": {
+        "home": 4,
+        "away": 3
+      },
+      "disclaimer": "Ceci est un SCENARIO statistiquement coherent, pas une prediction du deroule reel du match. Sans buteurs (retires volontairement -- voir le module principal simulate_match.py pour la version complete avec effectifs reels).",
+      "kickoff": "2026-09-09T19:00:00+00:00",
+      "status": "NS",
+      "probabilities_pct": {
+        "home_win": 22.7,
+        "draw": 24.8,
+        "away_win": 52.5,
+        "home_or_draw": 47.4,
+        "away_or_draw": 77.3,
+        "no_draw": 75.2,
+        "btts": 53.1,
+        "btts_no": 46.9,
+        "over_0_5": 93.3,
+        "over_1_5": 75.5,
+        "over_2_5": 50.7,
+        "over_3_5": 28.4,
+        "under_1_5": 24.5,
+        "under_2_5": 49.2,
+        "under_3_5": 71.6,
+        "under_4_5": 86.4,
+        "home_over_0_5": 64.5,
+        "home_over_1_5": 27.5,
+        "home_under_2_5": 91.5,
+        "away_over_0_5": 81.9,
+        "away_over_1_5": 49.8,
+        "away_under_2_5": 76.6,
+        "first_half_over_0_5": 73.6,
+        "first_half_over_1_5": 37.6,
+        "first_half_under_1_5": 62.4,
+        "home_clean_sheet": 18.1,
+        "away_clean_sheet": 35.5,
+        "first_goal_home": 36.0,
+        "first_goal_away": 57.4,
+        "no_goal": 6.7,
+        "home_draw_no_bet": 30.1,
+        "away_draw_no_bet": 69.9
+      },
+      "model_inputs": {
+        "home_league_id": 2,
+        "away_league_id": 2,
+        "home_home_away_rates": {
+          "gf_home_avg": 1.4,
+          "ga_home_avg": 1.0,
+          "gf_away_avg": 0.8,
+          "ga_away_avg": 2.4
+        },
+        "away_home_away_rates": {
+          "gf_home_avg": 2.0,
+          "ga_home_avg": 0.5,
+          "gf_away_avg": 1.7777777777777777,
+          "ga_away_avg": 0.6666666666666666
+        },
+        "home_recent_form": {
+          "gf90": 2.0374712899939027,
+          "ga90": 1.4064597423208054,
+          "n_matches": 12
+        },
+        "away_recent_form": {
+          "gf90": 1.9095769659221176,
+          "ga90": 0.8741931660032171,
+          "n_matches": 12
+        },
+        "red_card_rate_pct": {
+          "home": 25.0,
+          "away": 0.5
+        },
+        "rest_days": {
+          "home": 4,
+          "away": 3
+        },
+        "h2h": {
+          "gf_avg": 0.5,
+          "ga_avg": 1.25,
+          "n_matches": 4
+        },
+        "market_recalibration": {
+          "applied": true,
+          "blend_weight": 0.35,
+          "model_total_pre": 2.569,
+          "market_implied_total": 2.658,
+          "model_home_share_pre": 0.433,
+          "market_implied_home_share": 0.326,
+          "fair_1x2_pct": [
+            17.4,
+            24.7,
+            57.9
+          ],
+          "fair_over25_pct": 49.6
+        }
+      },
+      "quality_flags": []
+    },
+    {
+      "fixture_id": 1635659,
+      "homeTeam": "Fenerbahçe",
+      "awayTeam": "AS Roma",
+      "homeLogoUrl": "https://media.api-sports.io/football/teams/611.png",
+      "awayLogoUrl": "https://media.api-sports.io/football/teams/497.png",
+      "competition": "UEFA CHAMPIONS LEAGUE - League Stage - 1 (SIMULATION)",
+      "lambda_home": 1.397,
+      "lambda_away": 1.45,
+      "goals": [
+        {
+          "minute": 16,
+          "team": "home"
+        },
+        {
+          "minute": 38,
+          "team": "away"
+        },
+        {
+          "minute": 54,
+          "team": "home"
+        },
+        {
+          "minute": 84,
+          "team": "away"
+        }
+      ],
+      "final_score": {
+        "home": 2,
+        "away": 2
+      },
+      "seed": 26090906,
+      "mean_simulated_score": {
+        "home": 1.55,
+        "away": 1.61
+      },
+      "top_scorelines_pct": [
+        {
+          "score": "1-1",
+          "frequency_pct": 11.45
+        },
+        {
+          "score": "1-2",
+          "frequency_pct": 8.59
+        },
+        {
+          "score": "2-1",
+          "frequency_pct": 8.5
+        },
+        {
+          "score": "2-2",
+          "frequency_pct": 7.09
+        },
+        {
+          "score": "0-1",
+          "frequency_pct": 6.5
+        },
+        {
+          "score": "1-0",
+          "frequency_pct": 6.48
+        },
+        {
+          "score": "0-2",
+          "frequency_pct": 5.35
+        },
+        {
+          "score": "1-3",
+          "frequency_pct": 4.75
+        }
+      ],
+      "market_recalibration": {
+        "applied": true,
+        "blend_weight": 0.35,
+        "model_total_pre": 2.97,
+        "market_implied_total": 2.869,
+        "model_home_share_pre": 0.518,
+        "market_implied_home_share": 0.441,
+        "fair_1x2_pct": [
+          29.0,
+          27.5,
+          43.5
+        ],
+        "fair_over25_pct": 54.7
+      },
+      "h2h": null,
+      "rest_days": {
+        "home": 5,
+        "away": 5
+      },
+      "disclaimer": "Ceci est un SCENARIO statistiquement coherent, pas une prediction du deroule reel du match. Sans buteurs (retires volontairement -- voir le module principal simulate_match.py pour la version complete avec effectifs reels).",
+      "kickoff": "2026-09-10T16:45:00+00:00",
+      "status": "NS",
+      "probabilities_pct": {
+        "home_win": 36.2,
+        "draw": 25.1,
+        "away_win": 38.6,
+        "home_or_draw": 61.4,
+        "away_or_draw": 63.8,
+        "no_draw": 74.9,
+        "btts": 64.3,
+        "btts_no": 35.7,
+        "over_0_5": 95.6,
+        "over_1_5": 82.2,
+        "over_2_5": 60.8,
+        "over_3_5": 38.4,
+        "under_1_5": 17.8,
+        "under_2_5": 39.2,
+        "under_3_5": 61.6,
+        "under_4_5": 79.2,
+        "home_over_0_5": 79.4,
+        "home_over_1_5": 45.9,
+        "home_under_2_5": 80.2,
+        "away_over_0_5": 80.5,
+        "away_over_1_5": 47.7,
+        "away_under_2_5": 78.9,
+        "first_half_over_0_5": 77.8,
+        "first_half_over_1_5": 44.8,
+        "first_half_under_1_5": 55.2,
+        "home_clean_sheet": 19.5,
+        "away_clean_sheet": 20.6,
+        "first_goal_home": 47.4,
+        "first_goal_away": 48.2,
+        "no_goal": 4.4,
+        "home_draw_no_bet": 48.4,
+        "away_draw_no_bet": 51.6
+      },
+      "model_inputs": {
+        "home_league_id": 203,
+        "away_league_id": 135,
+        "home_home_away_rates": {
+          "gf_home_avg": 2.3,
+          "ga_home_avg": 1.2,
+          "gf_away_avg": 2.05,
+          "ga_away_avg": 1.05
+        },
+        "away_home_away_rates": {
+          "gf_home_avg": 1.8181818181818181,
+          "ga_home_avg": 0.5454545454545454,
+          "gf_away_avg": 1.4761904761904763,
+          "ga_away_avg": 1.0476190476190477
+        },
+        "home_recent_form": {
+          "gf90": 1.7867214511701988,
+          "ga90": 0.970589323856493,
+          "n_matches": 12
+        },
+        "away_recent_form": {
+          "gf90": 2.5896415337744094,
+          "ga90": 1.2847235648230004,
+          "n_matches": 12
+        },
+        "red_card_rate_pct": {
+          "home": 0.5,
+          "away": 0.5
+        },
+        "rest_days": {
+          "home": 5,
+          "away": 5
+        },
+        "h2h": null,
+        "market_recalibration": {
+          "applied": true,
+          "blend_weight": 0.35,
+          "model_total_pre": 2.97,
+          "market_implied_total": 2.869,
+          "model_home_share_pre": 0.518,
+          "market_implied_home_share": 0.441,
+          "fair_1x2_pct": [
+            29.0,
+            27.5,
+            43.5
+          ],
+          "fair_over25_pct": 54.7
+        }
+      },
+      "quality_flags": []
+    },
+    {
+      "fixture_id": 1635708,
+      "homeTeam": "PSV Eindhoven",
+      "awayTeam": "Shakhtar Donetsk",
+      "homeLogoUrl": "https://media.api-sports.io/football/teams/197.png",
+      "awayLogoUrl": "https://media.api-sports.io/football/teams/550.png",
+      "competition": "UEFA CHAMPIONS LEAGUE - League Stage - 1 (SIMULATION)",
+      "lambda_home": 1.78,
+      "lambda_away": 1.61,
+      "goals": [
+        {
+          "minute": 17,
+          "team": "home"
+        },
+        {
+          "minute": 47,
+          "team": "away"
+        },
+        {
+          "minute": 75,
+          "team": "away"
+        },
+        {
+          "minute": 77,
+          "team": "home"
+        }
+      ],
+      "final_score": {
+        "home": 2,
+        "away": 2
+      },
+      "seed": 26090907,
+      "mean_simulated_score": {
+        "home": 1.93,
+        "away": 1.81
+      },
+      "top_scorelines_pct": [
+        {
+          "score": "1-1",
+          "frequency_pct": 8.64
+        },
+        {
+          "score": "2-1",
+          "frequency_pct": 8.05
+        },
+        {
+          "score": "2-2",
+          "frequency_pct": 8.03
+        },
+        {
+          "score": "1-2",
+          "frequency_pct": 7.74
+        },
+        {
+          "score": "3-1",
+          "frequency_pct": 5.24
+        },
+        {
+          "score": "3-2",
+          "frequency_pct": 5.06
+        },
+        {
+          "score": "1-0",
+          "frequency_pct": 4.58
+        },
+        {
+          "score": "0-1",
+          "frequency_pct": 4.38
+        }
+      ],
+      "market_recalibration": {
+        "applied": true,
+        "blend_weight": 0.35,
+        "model_total_pre": 3.3,
+        "market_implied_total": 3.38,
+        "model_home_share_pre": 0.412,
+        "market_implied_home_share": 0.7,
+        "fair_1x2_pct": [
+          66.6,
+          19.0,
+          14.4
+        ],
+        "fair_over25_pct": 65.6
+      },
+      "h2h": {
+        "gf_avg": 3.0,
+        "ga_avg": 2.0,
+        "n_matches": 1
+      },
+      "rest_days": {
+        "home": 5,
+        "away": 5
+      },
+      "disclaimer": "Ceci est un SCENARIO statistiquement coherent, pas une prediction du deroule reel du match. Sans buteurs (retires volontairement -- voir le module principal simulate_match.py pour la version complete avec effectifs reels).",
+      "kickoff": "2026-09-10T16:45:00+00:00",
+      "status": "NS",
+      "probabilities_pct": {
+        "home_win": 40.7,
+        "draw": 22.8,
+        "away_win": 36.5,
+        "home_or_draw": 63.5,
+        "away_or_draw": 59.3,
+        "no_draw": 77.2,
+        "btts": 72.7,
+        "btts_no": 27.3,
+        "over_0_5": 97.6,
+        "over_1_5": 88.9,
+        "over_2_5": 72.1,
+        "over_3_5": 51.2,
+        "under_1_5": 11.1,
+        "under_2_5": 27.9,
+        "under_3_5": 48.8,
+        "under_4_5": 68.5,
+        "home_over_0_5": 85.9,
+        "home_over_1_5": 57.6,
+        "home_under_2_5": 70.1,
+        "away_over_0_5": 84.4,
+        "away_over_1_5": 54.4,
+        "away_under_2_5": 72.8,
+        "first_half_over_0_5": 83.8,
+        "first_half_over_1_5": 54.1,
+        "first_half_under_1_5": 45.9,
+        "home_clean_sheet": 15.6,
+        "away_clean_sheet": 14.1,
+        "first_goal_home": 50.9,
+        "first_goal_away": 46.7,
+        "no_goal": 2.4,
+        "home_draw_no_bet": 52.7,
+        "away_draw_no_bet": 47.3
+      },
+      "model_inputs": {
+        "home_league_id": 2,
+        "away_league_id": 333,
+        "home_home_away_rates": {
+          "gf_home_avg": 2.2,
+          "ga_home_avg": 2.2,
+          "gf_away_avg": 1.4,
+          "ga_away_avg": 1.4
+        },
+        "away_home_away_rates": {
+          "gf_home_avg": 2.388888888888889,
+          "ga_home_avg": 0.7777777777777778,
+          "gf_away_avg": 2.1052631578947367,
+          "ga_away_avg": 0.6842105263157895
+        },
+        "home_recent_form": {
+          "gf90": 3.271605409824939,
+          "ga90": 1.5603159965337685,
+          "n_matches": 12
+        },
+        "away_recent_form": {
+          "gf90": 1.6949872516565931,
+          "ga90": 0.7392222484180049,
+          "n_matches": 12
+        },
+        "red_card_rate_pct": {
+          "home": 12.5,
+          "away": 0.5
+        },
+        "rest_days": {
+          "home": 5,
+          "away": 5
+        },
+        "h2h": {
+          "gf_avg": 3.0,
+          "ga_avg": 2.0,
+          "n_matches": 1
+        },
+        "market_recalibration": {
+          "applied": true,
+          "blend_weight": 0.35,
+          "model_total_pre": 3.3,
+          "market_implied_total": 3.38,
+          "model_home_share_pre": 0.412,
+          "market_implied_home_share": 0.7,
+          "fair_1x2_pct": [
+            66.6,
+            19.0,
+            14.4
+          ],
+          "fair_over25_pct": 65.6
+        }
+      },
+      "quality_flags": [
+        "Écart majeur modèle/marché sur domicile: 40.7% contre 66.6% marché juste.",
+        "Comparaison inter-championnats instable avant recalibrage marché."
+      ]
+    },
+    {
+      "fixture_id": 1635648,
+      "homeTeam": "Como",
+      "awayTeam": "RB Leipzig",
+      "homeLogoUrl": "https://media.api-sports.io/football/teams/895.png",
+      "awayLogoUrl": "https://media.api-sports.io/football/teams/173.png",
+      "competition": "UEFA CHAMPIONS LEAGUE - League Stage - 1 (SIMULATION)",
+      "lambda_home": 1.74,
+      "lambda_away": 1.187,
+      "goals": [
+        {
+          "minute": 32,
+          "team": "home"
+        },
+        {
+          "minute": 51,
+          "team": "home"
+        },
+        {
+          "minute": 89,
+          "team": "away"
+        }
+      ],
+      "final_score": {
+        "home": 2,
+        "away": 1
+      },
+      "seed": 26090908,
+      "mean_simulated_score": {
+        "home": 1.91,
+        "away": 1.32
+      },
+      "top_scorelines_pct": [
+        {
+          "score": "1-1",
+          "frequency_pct": 10.38
+        },
+        {
+          "score": "2-1",
+          "frequency_pct": 9.94
+        },
+        {
+          "score": "1-0",
+          "frequency_pct": 7.42
+        },
+        {
+          "score": "2-0",
+          "frequency_pct": 7.12
+        },
+        {
+          "score": "1-2",
+          "frequency_pct": 6.86
+        },
+        {
+          "score": "2-2",
+          "frequency_pct": 6.46
+        },
+        {
+          "score": "3-1",
+          "frequency_pct": 6.02
+        },
+        {
+          "score": "0-1",
+          "frequency_pct": 5.26
+        }
+      ],
+      "market_recalibration": {
+        "applied": true,
+        "blend_weight": 0.35,
+        "model_total_pre": 2.95,
+        "market_implied_total": 3.118,
+        "model_home_share_pre": 0.588,
+        "market_implied_home_share": 0.604,
+        "fair_1x2_pct": [
+          51.4,
+          24.2,
+          24.4
+        ],
+        "fair_over25_pct": 60.3
+      },
+      "h2h": null,
+      "rest_days": {
+        "home": 6,
+        "away": 5
+      },
+      "disclaimer": "Ceci est un SCENARIO statistiquement coherent, pas une prediction du deroule reel du match. Sans buteurs (retires volontairement -- voir le module principal simulate_match.py pour la version complete avec effectifs reels).",
+      "kickoff": "2026-09-10T19:00:00+00:00",
+      "status": "NS",
+      "probabilities_pct": {
+        "home_win": 51.1,
+        "draw": 24.1,
+        "away_win": 24.8,
+        "home_or_draw": 75.2,
+        "away_or_draw": 48.9,
+        "no_draw": 75.9,
+        "btts": 63.5,
+        "btts_no": 36.5,
+        "over_0_5": 96.1,
+        "over_1_5": 83.4,
+        "over_2_5": 62.2,
+        "over_3_5": 40.5,
+        "under_1_5": 16.6,
+        "under_2_5": 37.8,
+        "under_3_5": 59.5,
+        "under_4_5": 78.2,
+        "home_over_0_5": 86.1,
+        "home_over_1_5": 57.8,
+        "home_under_2_5": 70.1,
+        "away_over_0_5": 73.5,
+        "away_over_1_5": 37.7,
+        "away_under_2_5": 86.0,
+        "first_half_over_0_5": 79.9,
+        "first_half_over_1_5": 46.7,
+        "first_half_under_1_5": 53.3,
+        "home_clean_sheet": 26.5,
+        "away_clean_sheet": 13.9,
+        "first_goal_home": 58.1,
+        "first_goal_away": 38.0,
+        "no_goal": 3.9,
+        "home_draw_no_bet": 67.3,
+        "away_draw_no_bet": 32.7
+      },
+      "model_inputs": {
+        "home_league_id": 135,
+        "away_league_id": 78,
+        "home_home_away_rates": {
+          "gf_home_avg": 1.8,
+          "ga_home_avg": 0.8,
+          "gf_away_avg": 1.6521739130434783,
+          "ga_away_avg": 0.782608695652174
+        },
+        "away_home_away_rates": {
+          "gf_home_avg": 2.3157894736842106,
+          "ga_home_avg": 1.105263157894737,
+          "gf_away_avg": 1.4736842105263157,
+          "ga_away_avg": 1.631578947368421
+        },
+        "home_recent_form": {
+          "gf90": 1.9680430382922212,
+          "ga90": 0.9498685037875112,
+          "n_matches": 12
+        },
+        "away_recent_form": {
+          "gf90": 2.100390035261393,
+          "ga90": 1.5810808537869774,
+          "n_matches": 12
+        },
+        "red_card_rate_pct": {
+          "home": 0.5,
+          "away": 0.5
+        },
+        "rest_days": {
+          "home": 6,
+          "away": 5
+        },
+        "h2h": null,
+        "market_recalibration": {
+          "applied": true,
+          "blend_weight": 0.35,
+          "model_total_pre": 2.95,
+          "market_implied_total": 3.118,
+          "model_home_share_pre": 0.588,
+          "market_implied_home_share": 0.604,
+          "fair_1x2_pct": [
+            51.4,
+            24.2,
+            24.4
+          ],
+          "fair_over25_pct": 60.3
+        }
+      },
+      "quality_flags": []
+    },
+    {
+      "fixture_id": 1635632,
+      "homeTeam": "Bayern München",
+      "awayTeam": "Bodo/Glimt",
+      "homeLogoUrl": "https://media.api-sports.io/football/teams/157.png",
+      "awayLogoUrl": "https://media.api-sports.io/football/teams/327.png",
+      "competition": "UEFA CHAMPIONS LEAGUE - League Stage - 1 (SIMULATION)",
+      "lambda_home": 2.511,
+      "lambda_away": 1.277,
+      "goals": [
+        {
+          "minute": 19,
+          "team": "away"
+        },
+        {
+          "minute": 31,
+          "team": "home"
+        },
+        {
+          "minute": 33,
+          "team": "home"
+        },
+        {
+          "minute": 45,
+          "team": "home"
+        }
+      ],
+      "final_score": {
+        "home": 3,
+        "away": 1
+      },
+      "seed": 26090909,
+      "mean_simulated_score": {
+        "home": 2.69,
+        "away": 1.44
+      },
+      "top_scorelines_pct": [
+        {
+          "score": "2-1",
+          "frequency_pct": 8.55
+        },
+        {
+          "score": "3-1",
+          "frequency_pct": 7.71
+        },
+        {
+          "score": "2-2",
+          "frequency_pct": 6.73
+        },
+        {
+          "score": "1-1",
+          "frequency_pct": 6.49
+        },
+        {
+          "score": "2-0",
+          "frequency_pct": 5.62
+        },
+        {
+          "score": "3-2",
+          "frequency_pct": 5.44
+        },
+        {
+          "score": "3-0",
+          "frequency_pct": 5.24
+        },
+        {
+          "score": "4-1",
+          "frequency_pct": 5.03
+        }
+      ],
+      "market_recalibration": {
+        "applied": true,
+        "blend_weight": 0.35,
+        "model_total_pre": 3.528,
+        "market_implied_total": 4.591,
+        "model_home_share_pre": 0.587,
+        "market_implied_home_share": 0.807,
+        "fair_1x2_pct": [
+          86.5,
+          8.7,
+          4.8
+        ],
+        "fair_over25_pct": 83.6
+      },
+      "h2h": null,
+      "rest_days": {
+        "home": 5,
+        "away": 6
+      },
+      "disclaimer": "Ceci est un SCENARIO statistiquement coherent, pas une prediction du deroule reel du match. Sans buteurs (retires volontairement -- voir le module principal simulate_match.py pour la version complete avec effectifs reels).",
+      "kickoff": "2026-09-10T19:00:00+00:00",
+      "status": "NS",
+      "probabilities_pct": {
+        "home_win": 64.4,
+        "draw": 18.5,
+        "away_win": 17.1,
+        "home_or_draw": 82.9,
+        "away_or_draw": 35.6,
+        "no_draw": 81.5,
+        "btts": 72.5,
+        "btts_no": 27.5,
+        "over_0_5": 98.4,
+        "over_1_5": 91.8,
+        "over_2_5": 78.1,
+        "over_3_5": 59.8,
+        "under_1_5": 8.2,
+        "under_2_5": 21.9,
+        "under_3_5": 40.2,
+        "under_4_5": 59.9,
+        "home_over_0_5": 93.9,
+        "home_over_1_5": 76.2,
+        "home_under_2_5": 49.3,
+        "away_over_0_5": 76.9,
+        "away_over_1_5": 42.7,
+        "away_under_2_5": 82.8,
+        "first_half_over_0_5": 86.8,
+        "first_half_over_1_5": 60.2,
+        "first_half_under_1_5": 39.8,
+        "home_clean_sheet": 23.1,
+        "away_clean_sheet": 6.1,
+        "first_goal_home": 66.0,
+        "first_goal_away": 32.4,
+        "no_goal": 1.6,
+        "home_draw_no_bet": 79.0,
+        "away_draw_no_bet": 21.0
+      },
+      "model_inputs": {
+        "home_league_id": 2,
+        "away_league_id": 2,
+        "home_home_away_rates": {
+          "gf_home_avg": 2.75,
+          "ga_home_avg": 1.0,
+          "gf_away_avg": 2.875,
+          "ga_away_avg": 1.75
+        },
+        "away_home_away_rates": {
+          "gf_home_avg": 2.5,
+          "ga_home_avg": 1.1,
+          "gf_away_avg": 1.7,
+          "ga_away_avg": 2.1
+        },
+        "home_recent_form": {
+          "gf90": 2.6698934340780833,
+          "ga90": 0.9116486015132892,
+          "n_matches": 12
+        },
+        "away_recent_form": {
+          "gf90": 3.1183994762745906,
+          "ga90": 0.9267161925846035,
+          "n_matches": 12
+        },
+        "red_card_rate_pct": {
+          "home": 14.3,
+          "away": 0.5
+        },
+        "rest_days": {
+          "home": 5,
+          "away": 6
+        },
+        "h2h": null,
+        "market_recalibration": {
+          "applied": true,
+          "blend_weight": 0.35,
+          "model_total_pre": 3.528,
+          "market_implied_total": 4.591,
+          "model_home_share_pre": 0.587,
+          "market_implied_home_share": 0.807,
+          "fair_1x2_pct": [
+            86.5,
+            8.7,
+            4.8
+          ],
+          "fair_over25_pct": 83.6
+        }
+      },
+      "quality_flags": [
+        "Écart majeur modèle/marché sur domicile: 64.4% contre 86.5% marché juste."
+      ]
+    },
+    {
+      "fixture_id": 1635697,
+      "homeTeam": "Manchester United",
+      "awayTeam": "Sabah FA",
+      "homeLogoUrl": "https://media.api-sports.io/football/teams/33.png",
+      "awayLogoUrl": "https://media.api-sports.io/football/teams/13976.png",
+      "competition": "UEFA CHAMPIONS LEAGUE - League Stage - 1 (SIMULATION)",
+      "lambda_home": 1.842,
+      "lambda_away": 1.469,
+      "goals": [
+        {
+          "minute": 48,
+          "team": "away"
+        },
+        {
+          "minute": 49,
+          "team": "away"
+        },
+        {
+          "minute": 58,
+          "team": "home"
+        },
+        {
+          "minute": 84,
+          "team": "home"
+        }
+      ],
+      "final_score": {
+        "home": 2,
+        "away": 2
+      },
+      "seed": 26090910,
+      "mean_simulated_score": {
+        "home": 2.01,
+        "away": 1.64
+      },
+      "top_scorelines_pct": [
+        {
+          "score": "2-1",
+          "frequency_pct": 9.0
+        },
+        {
+          "score": "1-1",
+          "frequency_pct": 8.85
+        },
+        {
+          "score": "2-2",
+          "frequency_pct": 7.77
+        },
+        {
+          "score": "1-2",
+          "frequency_pct": 6.82
+        },
+        {
+          "score": "3-1",
+          "frequency_pct": 5.92
+        },
+        {
+          "score": "1-0",
+          "frequency_pct": 5.34
+        },
+        {
+          "score": "2-0",
+          "frequency_pct": 5.23
+        },
+        {
+          "score": "3-2",
+          "frequency_pct": 5.1
+        }
+      ],
+      "market_recalibration": {
+        "applied": true,
+        "blend_weight": 0.35,
+        "model_total_pre": 3.132,
+        "market_implied_total": 3.969,
+        "model_home_share_pre": 0.412,
+        "market_implied_home_share": 0.83,
+        "fair_1x2_pct": [
+          85.0,
+          10.7,
+          4.3
+        ],
+        "fair_over25_pct": 75.7
+      },
+      "h2h": null,
+      "rest_days": {
+        "home": 4,
+        "away": 5
+      },
+      "disclaimer": "Ceci est un SCENARIO statistiquement coherent, pas une prediction du deroule reel du match. Sans buteurs (retires volontairement -- voir le module principal simulate_match.py pour la version complete avec effectifs reels).",
+      "kickoff": "2026-09-10T19:00:00+00:00",
+      "status": "NS",
+      "probabilities_pct": {
+        "home_win": 46.8,
+        "draw": 22.6,
+        "away_win": 30.6,
+        "home_or_draw": 69.4,
+        "away_or_draw": 53.2,
+        "no_draw": 77.4,
+        "btts": 71.1,
+        "btts_no": 28.9,
+        "over_0_5": 97.3,
+        "over_1_5": 88.0,
+        "over_2_5": 70.6,
+        "over_3_5": 50.0,
+        "under_1_5": 12.0,
+        "under_2_5": 29.4,
+        "under_3_5": 50.0,
+        "under_4_5": 69.5,
+        "home_over_0_5": 87.4,
+        "home_over_1_5": 60.9,
+        "home_under_2_5": 67.2,
+        "away_over_0_5": 81.0,
+        "away_over_1_5": 48.9,
+        "away_under_2_5": 77.5,
+        "first_half_over_0_5": 82.9,
+        "first_half_over_1_5": 53.0,
+        "first_half_under_1_5": 47.0,
+        "home_clean_sheet": 19.0,
+        "away_clean_sheet": 12.6,
+        "first_goal_home": 54.5,
+        "first_goal_away": 42.9,
+        "no_goal": 2.7,
+        "home_draw_no_bet": 60.5,
+        "away_draw_no_bet": 39.5
+      },
+      "model_inputs": {
+        "home_league_id": 39,
+        "away_league_id": 419,
+        "home_home_away_rates": {
+          "gf_home_avg": 2.142857142857143,
+          "ga_home_avg": 1.2857142857142858,
+          "gf_away_avg": 1.5,
+          "ga_away_avg": 1.4090909090909092
+        },
+        "away_home_away_rates": {
+          "gf_home_avg": 2.15,
+          "ga_home_avg": 0.65,
+          "gf_away_avg": 2.3333333333333335,
+          "ga_away_avg": 0.7777777777777778
+        },
+        "home_recent_form": {
+          "gf90": 2.0791426129656383,
+          "ga90": 1.5878786688695226,
+          "n_matches": 12
+        },
+        "away_recent_form": {
+          "gf90": 2.542319539306282,
+          "ga90": 0.7968219471492205,
+          "n_matches": 12
+        },
+        "red_card_rate_pct": {
+          "home": 0.5,
+          "away": 0.5
+        },
+        "rest_days": {
+          "home": 4,
+          "away": 5
+        },
+        "h2h": null,
+        "market_recalibration": {
+          "applied": true,
+          "blend_weight": 0.35,
+          "model_total_pre": 3.132,
+          "market_implied_total": 3.969,
+          "model_home_share_pre": 0.412,
+          "market_implied_home_share": 0.83,
+          "fair_1x2_pct": [
+            85.0,
+            10.7,
+            4.3
+          ],
+          "fair_over25_pct": 75.7
+        }
+      },
+      "quality_flags": [
+        "Écart majeur modèle/marché sur domicile: 46.8% contre 85.0% marché juste.",
+        "Comparaison inter-championnats instable avant recalibrage marché."
+      ]
+    },
+    {
+      "fixture_id": 1635729,
+      "homeTeam": "Slavia Praha",
+      "awayTeam": "Lens",
+      "homeLogoUrl": "https://media.api-sports.io/football/teams/560.png",
+      "awayLogoUrl": "https://media.api-sports.io/football/teams/116.png",
+      "competition": "UEFA CHAMPIONS LEAGUE - League Stage - 1 (SIMULATION)",
+      "lambda_home": 1.35,
+      "lambda_away": 1.461,
+      "goals": [
+        {
+          "minute": 5,
+          "team": "home"
+        },
+        {
+          "minute": 41,
+          "team": "away"
+        },
+        {
+          "minute": 80,
+          "team": "home"
+        },
+        {
+          "minute": 87,
+          "team": "away"
+        }
+      ],
+      "final_score": {
+        "home": 2,
+        "away": 2
+      },
+      "seed": 26090911,
+      "mean_simulated_score": {
+        "home": 1.52,
+        "away": 1.54
+      },
+      "top_scorelines_pct": [
+        {
+          "score": "1-1",
+          "frequency_pct": 11.59
+        },
+        {
+          "score": "1-2",
+          "frequency_pct": 8.86
+        },
+        {
+          "score": "2-1",
+          "frequency_pct": 8.46
+        },
+        {
+          "score": "2-2",
+          "frequency_pct": 7.26
+        },
+        {
+          "score": "0-1",
+          "frequency_pct": 6.97
+        },
+        {
+          "score": "1-0",
+          "frequency_pct": 6.87
+        },
+        {
+          "score": "2-0",
+          "frequency_pct": 5.4
+        },
+        {
+          "score": "0-2",
+          "frequency_pct": 5.12
+        }
+      ],
+      "market_recalibration": {
+        "applied": true,
+        "blend_weight": 0.35,
+        "model_total_pre": 2.954,
+        "market_implied_total": 2.793,
+        "model_home_share_pre": 0.464,
+        "market_implied_home_share": 0.511,
+        "fair_1x2_pct": [
+          37.5,
+          27.6,
+          34.9
+        ],
+        "fair_over25_pct": 52.9
+      },
+      "h2h": null,
+      "rest_days": {
+        "home": 5,
+        "away": 5
+      },
+      "disclaimer": "Ceci est un SCENARIO statistiquement coherent, pas une prediction du deroule reel du match. Sans buteurs (retires volontairement -- voir le module principal simulate_match.py pour la version complete avec effectifs reels).",
+      "kickoff": "2026-09-10T19:00:00+00:00",
+      "status": "NS",
+      "probabilities_pct": {
+        "home_win": 36.5,
+        "draw": 25.0,
+        "away_win": 38.5,
+        "home_or_draw": 61.5,
+        "away_or_draw": 63.5,
+        "no_draw": 75.0,
+        "btts": 63.1,
+        "btts_no": 36.9,
+        "over_0_5": 95.4,
+        "over_1_5": 81.1,
+        "over_2_5": 59.7,
+        "over_3_5": 37.5,
+        "under_1_5": 18.9,
+        "under_2_5": 40.3,
+        "under_3_5": 62.5,
+        "under_4_5": 80.2,
+        "home_over_0_5": 78.4,
+        "home_over_1_5": 45.5,
+        "home_under_2_5": 80.9,
+        "away_over_0_5": 80.1,
+        "away_over_1_5": 46.3,
+        "away_under_2_5": 79.9,
+        "first_half_over_0_5": 77.9,
+        "first_half_over_1_5": 44.8,
+        "first_half_under_1_5": 55.2,
+        "home_clean_sheet": 19.9,
+        "away_clean_sheet": 21.6,
+        "first_goal_home": 46.1,
+        "first_goal_away": 49.4,
+        "no_goal": 4.6,
+        "home_draw_no_bet": 48.6,
+        "away_draw_no_bet": 51.4
+      },
+      "model_inputs": {
+        "home_league_id": 2,
+        "away_league_id": 61,
+        "home_home_away_rates": {
+          "gf_home_avg": 1.0,
+          "ga_home_avg": 2.0,
+          "gf_away_avg": 0.4,
+          "ga_away_avg": 2.2
+        },
+        "away_home_away_rates": {
+          "gf_home_avg": 2.05,
+          "ga_home_avg": 0.85,
+          "gf_away_avg": 1.736842105263158,
+          "ga_away_avg": 1.3157894736842106
+        },
+        "home_recent_form": {
+          "gf90": 2.6132047664235145,
+          "ga90": 0.7228633874983839,
+          "n_matches": 12
+        },
+        "away_recent_form": {
+          "gf90": 1.8709947864744034,
+          "ga90": 1.1132090730945516,
+          "n_matches": 12
+        },
+        "red_card_rate_pct": {
+          "home": 12.5,
+          "away": 33.3
+        },
+        "rest_days": {
+          "home": 5,
+          "away": 5
+        },
+        "h2h": null,
+        "market_recalibration": {
+          "applied": true,
+          "blend_weight": 0.35,
+          "model_total_pre": 2.954,
+          "market_implied_total": 2.793,
+          "model_home_share_pre": 0.464,
+          "market_implied_home_share": 0.511,
+          "fair_1x2_pct": [
+            37.5,
+            27.6,
+            34.9
+          ],
+          "fair_over25_pct": 52.9
+        }
+      },
+      "quality_flags": []
+    }
+  ]
+}

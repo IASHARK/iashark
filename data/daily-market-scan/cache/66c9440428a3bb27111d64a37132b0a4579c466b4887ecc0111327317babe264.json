@@ -1,0 +1,378 @@
+{
+  "endpoint": "/fixtures",
+  "params": {
+    "league": 144,
+    "season": 2026,
+    "status": "FT-AET-PEN",
+    "team": 554
+  },
+  "retrieved_at": "2026-09-08T18:36:53Z",
+  "response_hash": "292f475ca92eb04edb8133360a045d9e3f13a65528c7efce0bbe7cd0261d95b8",
+  "response": {
+    "get": "fixtures",
+    "parameters": {
+      "league": "144",
+      "season": "2026",
+      "status": "FT-AET-PEN",
+      "team": "554"
+    },
+    "errors": [],
+    "results": 5,
+    "paging": {
+      "current": 1,
+      "total": 1
+    },
+    "response": [
+      {
+        "fixture": {
+          "id": 1558588,
+          "referee": "Lawrence Visser, Belgium",
+          "timezone": "UTC",
+          "date": "2026-08-09T16:30:00+00:00",
+          "timestamp": 1786293000,
+          "periods": {
+            "first": 1786293000,
+            "second": 1786296600
+          },
+          "venue": {
+            "id": null,
+            "name": "Lotto Park",
+            "city": "Brussels"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 6
+          }
+        },
+        "league": {
+          "id": 144,
+          "name": "Jupiler Pro League",
+          "country": "Belgium",
+          "logo": "https://media.api-sports.io/football/leagues/144.png",
+          "flag": "https://media.api-sports.io/flags/be.svg",
+          "season": 2026,
+          "round": "Regular Season - 1",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 554,
+            "name": "Anderlecht",
+            "logo": "https://media.api-sports.io/football/teams/554.png",
+            "winner": true
+          },
+          "away": {
+            "id": 5902,
+            "name": "RAAL La Louvi\u00e8re",
+            "logo": "https://media.api-sports.io/football/teams/5902.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 2,
+          "away": 1
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 2,
+            "away": 1
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1558595,
+          "referee": "Nathan Verboomen, Belgium",
+          "timezone": "UTC",
+          "date": "2026-08-16T11:30:00+00:00",
+          "timestamp": 1786879800,
+          "periods": {
+            "first": 1786879800,
+            "second": 1786883400
+          },
+          "venue": {
+            "id": 189,
+            "name": "Freethiel Stadion",
+            "city": "Beveren"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 6
+          }
+        },
+        "league": {
+          "id": 144,
+          "name": "Jupiler Pro League",
+          "country": "Belgium",
+          "logo": "https://media.api-sports.io/football/leagues/144.png",
+          "flag": "https://media.api-sports.io/flags/be.svg",
+          "season": 2026,
+          "round": "Regular Season - 2",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 738,
+            "name": "SK Beveren",
+            "logo": "https://media.api-sports.io/football/teams/738.png",
+            "winner": true
+          },
+          "away": {
+            "id": 554,
+            "name": "Anderlecht",
+            "logo": "https://media.api-sports.io/football/teams/554.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 1,
+          "away": 0
+        },
+        "score": {
+          "halftime": {
+            "home": 1,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 1,
+            "away": 0
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1558615,
+          "referee": "Lawrence Visser, Belgium",
+          "timezone": "UTC",
+          "date": "2026-08-30T16:30:00+00:00",
+          "timestamp": 1788107400,
+          "periods": {
+            "first": 1788107400,
+            "second": 1788111000
+          },
+          "venue": {
+            "id": 194,
+            "name": "Stade Joseph Marien",
+            "city": "Brussels"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 3
+          }
+        },
+        "league": {
+          "id": 144,
+          "name": "Jupiler Pro League",
+          "country": "Belgium",
+          "logo": "https://media.api-sports.io/football/leagues/144.png",
+          "flag": "https://media.api-sports.io/flags/be.svg",
+          "season": 2026,
+          "round": "Regular Season - 4",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 1393,
+            "name": "Union St. Gilloise",
+            "logo": "https://media.api-sports.io/football/teams/1393.png",
+            "winner": true
+          },
+          "away": {
+            "id": 554,
+            "name": "Anderlecht",
+            "logo": "https://media.api-sports.io/football/teams/554.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 3,
+          "away": 0
+        },
+        "score": {
+          "halftime": {
+            "home": 2,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 3,
+            "away": 0
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1558604,
+          "referee": "Bert Put, Belgium",
+          "timezone": "UTC",
+          "date": "2026-09-03T18:30:00+00:00",
+          "timestamp": 1788460200,
+          "periods": {
+            "first": null,
+            "second": null
+          },
+          "venue": {
+            "id": null,
+            "name": "Lotto Park",
+            "city": "Brussels"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": null
+          }
+        },
+        "league": {
+          "id": 144,
+          "name": "Jupiler Pro League",
+          "country": "Belgium",
+          "logo": "https://media.api-sports.io/football/leagues/144.png",
+          "flag": "https://media.api-sports.io/flags/be.svg",
+          "season": 2026,
+          "round": "Regular Season - 3",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 554,
+            "name": "Anderlecht",
+            "logo": "https://media.api-sports.io/football/teams/554.png",
+            "winner": true
+          },
+          "away": {
+            "id": 734,
+            "name": "Kortrijk",
+            "logo": "https://media.api-sports.io/football/teams/734.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 1,
+          "away": 0
+        },
+        "score": {
+          "halftime": {
+            "home": 1,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 1,
+            "away": 0
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1558624,
+          "referee": "Jan Boterberg, Belgium",
+          "timezone": "UTC",
+          "date": "2026-09-06T16:30:00+00:00",
+          "timestamp": 1788712200,
+          "periods": {
+            "first": null,
+            "second": null
+          },
+          "venue": {
+            "id": null,
+            "name": "Lotto Park",
+            "city": "Brussels"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": null
+          }
+        },
+        "league": {
+          "id": 144,
+          "name": "Jupiler Pro League",
+          "country": "Belgium",
+          "logo": "https://media.api-sports.io/football/leagues/144.png",
+          "flag": "https://media.api-sports.io/flags/be.svg",
+          "season": 2026,
+          "round": "Regular Season - 5",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 554,
+            "name": "Anderlecht",
+            "logo": "https://media.api-sports.io/football/teams/554.png",
+            "winner": null
+          },
+          "away": {
+            "id": 742,
+            "name": "Genk",
+            "logo": "https://media.api-sports.io/football/teams/742.png",
+            "winner": null
+          }
+        },
+        "goals": {
+          "home": 0,
+          "away": 0
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 0,
+            "away": 0
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,448 @@
+{
+  "endpoint": "/fixtures",
+  "params": {
+    "league": 2,
+    "season": 2025,
+    "status": "FT-AET-PEN",
+    "team": 598
+  },
+  "retrieved_at": "2026-09-08T18:56:46Z",
+  "response_hash": "310eaec4758280d3a0e0216f6a08ba84ca8a042df99f36328fde80ace4fcb7ce",
+  "response": {
+    "get": "fixtures",
+    "parameters": {
+      "league": "2",
+      "season": "2025",
+      "status": "FT-AET-PEN",
+      "team": "598"
+    },
+    "errors": [],
+    "results": 6,
+    "paging": {
+      "current": 1,
+      "total": 1
+    },
+    "response": [
+      {
+        "fixture": {
+          "id": 1405445,
+          "referee": "D. Kos",
+          "timezone": "UTC",
+          "date": "2025-07-22T16:00:00+00:00",
+          "timestamp": 1753200000,
+          "periods": {
+            "first": 1753200000,
+            "second": 1753203600
+          },
+          "venue": {
+            "id": null,
+            "name": "Europa point stadium",
+            "city": "Gibraltar"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 4
+          }
+        },
+        "league": {
+          "id": 2,
+          "name": "UEFA Champions League",
+          "country": "World",
+          "logo": "https://media.api-sports.io/football/leagues/2.png",
+          "flag": null,
+          "season": 2025,
+          "round": "2nd Qualifying Round",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 667,
+            "name": "Lincoln Red Imps FC",
+            "logo": "https://media.api-sports.io/football/teams/667.png",
+            "winner": false
+          },
+          "away": {
+            "id": 598,
+            "name": "FK Crvena Zvezda",
+            "logo": "https://media.api-sports.io/football/teams/598.png",
+            "winner": true
+          }
+        },
+        "goals": {
+          "home": 0,
+          "away": 1
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 1
+          },
+          "fulltime": {
+            "home": 0,
+            "away": 1
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1405459,
+          "referee": "A. Nobre",
+          "timezone": "UTC",
+          "date": "2025-07-29T19:00:00+00:00",
+          "timestamp": 1753815600,
+          "periods": {
+            "first": 1753815600,
+            "second": 1753819200
+          },
+          "venue": {
+            "id": null,
+            "name": "Stadion Rajko Mit",
+            "city": "Belgrade"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 3
+          }
+        },
+        "league": {
+          "id": 2,
+          "name": "UEFA Champions League",
+          "country": "World",
+          "logo": "https://media.api-sports.io/football/leagues/2.png",
+          "flag": null,
+          "season": 2025,
+          "round": "2nd Qualifying Round",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 598,
+            "name": "FK Crvena Zvezda",
+            "logo": "https://media.api-sports.io/football/teams/598.png",
+            "winner": true
+          },
+          "away": {
+            "id": 667,
+            "name": "Lincoln Red Imps FC",
+            "logo": "https://media.api-sports.io/football/teams/667.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 5,
+          "away": 1
+        },
+        "score": {
+          "halftime": {
+            "home": 4,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 5,
+            "away": 1
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1421143,
+          "referee": "T. Stieler",
+          "timezone": "UTC",
+          "date": "2025-08-06T18:30:00+00:00",
+          "timestamp": 1754505000,
+          "periods": {
+            "first": 1754505000,
+            "second": 1754508600
+          },
+          "venue": {
+            "id": null,
+            "name": "Stadion Poznan",
+            "city": "Poznan"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 8
+          }
+        },
+        "league": {
+          "id": 2,
+          "name": "UEFA Champions League",
+          "country": "World",
+          "logo": "https://media.api-sports.io/football/leagues/2.png",
+          "flag": null,
+          "season": 2025,
+          "round": "3rd Qualifying Round",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 347,
+            "name": "Lech Poznan",
+            "logo": "https://media.api-sports.io/football/teams/347.png",
+            "winner": false
+          },
+          "away": {
+            "id": 598,
+            "name": "FK Crvena Zvezda",
+            "logo": "https://media.api-sports.io/football/teams/598.png",
+            "winner": true
+          }
+        },
+        "goals": {
+          "home": 1,
+          "away": 3
+        },
+        "score": {
+          "halftime": {
+            "home": 1,
+            "away": 1
+          },
+          "fulltime": {
+            "home": 1,
+            "away": 3
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1421150,
+          "referee": "F. Letexier",
+          "timezone": "UTC",
+          "date": "2025-08-12T19:00:00+00:00",
+          "timestamp": 1755025200,
+          "periods": {
+            "first": 1755025200,
+            "second": 1755028800
+          },
+          "venue": {
+            "id": null,
+            "name": "Stadion Rajko Mit",
+            "city": "Belgrade"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 5
+          }
+        },
+        "league": {
+          "id": 2,
+          "name": "UEFA Champions League",
+          "country": "World",
+          "logo": "https://media.api-sports.io/football/leagues/2.png",
+          "flag": null,
+          "season": 2025,
+          "round": "3rd Qualifying Round",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 598,
+            "name": "FK Crvena Zvezda",
+            "logo": "https://media.api-sports.io/football/teams/598.png",
+            "winner": null
+          },
+          "away": {
+            "id": 347,
+            "name": "Lech Poznan",
+            "logo": "https://media.api-sports.io/football/teams/347.png",
+            "winner": null
+          }
+        },
+        "goals": {
+          "home": 1,
+          "away": 1
+        },
+        "score": {
+          "halftime": {
+            "home": 1,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 1,
+            "away": 1
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1435546,
+          "referee": "A. Hernandez",
+          "timezone": "UTC",
+          "date": "2025-08-19T19:00:00+00:00",
+          "timestamp": 1755630000,
+          "periods": {
+            "first": 1755630000,
+            "second": 1755633600
+          },
+          "venue": {
+            "id": null,
+            "name": "Stadion Rajko Mit",
+            "city": "Belgrade"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 7
+          }
+        },
+        "league": {
+          "id": 2,
+          "name": "UEFA Champions League",
+          "country": "World",
+          "logo": "https://media.api-sports.io/football/leagues/2.png",
+          "flag": null,
+          "season": 2025,
+          "round": "Play-offs",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 598,
+            "name": "FK Crvena Zvezda",
+            "logo": "https://media.api-sports.io/football/teams/598.png",
+            "winner": false
+          },
+          "away": {
+            "id": 3403,
+            "name": "Pafos",
+            "logo": "https://media.api-sports.io/football/teams/3403.png",
+            "winner": true
+          }
+        },
+        "goals": {
+          "home": 1,
+          "away": 2
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 1
+          },
+          "fulltime": {
+            "home": 1,
+            "away": 2
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1435552,
+          "referee": "M. Oliver",
+          "timezone": "UTC",
+          "date": "2025-08-26T19:00:00+00:00",
+          "timestamp": 1756234800,
+          "periods": {
+            "first": 1756234800,
+            "second": 1756238400
+          },
+          "venue": {
+            "id": null,
+            "name": "Alphamega Stadium",
+            "city": "Limassol"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 10
+          }
+        },
+        "league": {
+          "id": 2,
+          "name": "UEFA Champions League",
+          "country": "World",
+          "logo": "https://media.api-sports.io/football/leagues/2.png",
+          "flag": null,
+          "season": 2025,
+          "round": "Play-offs",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 3403,
+            "name": "Pafos",
+            "logo": "https://media.api-sports.io/football/teams/3403.png",
+            "winner": null
+          },
+          "away": {
+            "id": 598,
+            "name": "FK Crvena Zvezda",
+            "logo": "https://media.api-sports.io/football/teams/598.png",
+            "winner": null
+          }
+        },
+        "goals": {
+          "home": 1,
+          "away": 1
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 1,
+            "away": 1
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      }
+    ]
+  }
+}

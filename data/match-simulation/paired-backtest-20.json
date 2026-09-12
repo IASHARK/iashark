@@ -1,0 +1,1368 @@
+{
+  "limitations": "Retrospective comparison using API data available today; not leakage-free walk-forward.",
+  "frozen_variant": {
+    "h2h_weight": 0.02,
+    "pre_first_goal_home_hazard": 0.93,
+    "team_minute_profile_weight": 0.2
+  },
+  "n_matches": 20,
+  "n_simulations_per_method_per_match": 20000,
+  "official_summary": {
+    "exact_scores": 2,
+    "within_one_each": 14,
+    "mean_goal_mae": 0.95,
+    "mean_minute_mae": 31.31,
+    "first_team_correct": 11
+  },
+  "variant_summary": {
+    "exact_scores": 1,
+    "within_one_each": 14,
+    "mean_goal_mae": 1.0,
+    "mean_minute_mae": 33.46,
+    "first_team_correct": 9
+  },
+  "matches": [
+    {
+      "fixture_id": 1635643,
+      "date": "2026-09-08T16:45:00+00:00",
+      "match": "Club Brugge KV - Aston Villa",
+      "actual": "2-3",
+      "actual_goals": [
+        {
+          "minute": 11,
+          "extra": null,
+          "team_id": 66
+        },
+        {
+          "minute": 19,
+          "extra": null,
+          "team_id": 569
+        },
+        {
+          "minute": 22,
+          "extra": null,
+          "team_id": 66
+        },
+        {
+          "minute": 43,
+          "extra": null,
+          "team_id": 66
+        },
+        {
+          "minute": 61,
+          "extra": null,
+          "team_id": 569
+        }
+      ],
+      "official": {
+        "score": "2-1",
+        "exact": false,
+        "goal_mae": 1.0,
+        "within_one_each": false,
+        "minute_mae": 33.4,
+        "first_team_correct": false,
+        "goals": [
+          {
+            "minute": 39,
+            "team": "home"
+          },
+          {
+            "minute": 42,
+            "team": "home"
+          },
+          {
+            "minute": 48,
+            "team": "away"
+          }
+        ]
+      },
+      "variant": {
+        "score": "2-1",
+        "exact": false,
+        "goal_mae": 1.0,
+        "within_one_each": false,
+        "minute_mae": 33.4,
+        "first_team_correct": false,
+        "goals": [
+          {
+            "minute": 26,
+            "team": "home"
+          },
+          {
+            "minute": 43,
+            "team": "away"
+          },
+          {
+            "minute": 60,
+            "team": "home"
+          }
+        ]
+      }
+    },
+    {
+      "fixture_id": 1635609,
+      "date": "2026-09-08T16:45:00+00:00",
+      "match": "AEK Athens FC - Lask Linz",
+      "actual": "1-0",
+      "actual_goals": [
+        {
+          "minute": 21,
+          "extra": null,
+          "team_id": 575
+        }
+      ],
+      "official": {
+        "score": "2-1",
+        "exact": false,
+        "goal_mae": 1.0,
+        "within_one_each": true,
+        "minute_mae": 31.0,
+        "first_team_correct": true,
+        "goals": [
+          {
+            "minute": 24,
+            "team": "home"
+          },
+          {
+            "minute": 59,
+            "team": "away"
+          },
+          {
+            "minute": 64,
+            "team": "home"
+          }
+        ]
+      },
+      "variant": {
+        "score": "2-1",
+        "exact": false,
+        "goal_mae": 1.0,
+        "within_one_each": true,
+        "minute_mae": 37.33,
+        "first_team_correct": true,
+        "goals": [
+          {
+            "minute": 43,
+            "team": "home"
+          },
+          {
+            "minute": 64,
+            "team": "away"
+          },
+          {
+            "minute": 88,
+            "team": "home"
+          }
+        ]
+      }
+    },
+    {
+      "fixture_id": 1622630,
+      "date": "2026-08-26T19:00:00+00:00",
+      "match": "Lyon - Fenerbahçe",
+      "actual": "1-2",
+      "actual_goals": [
+        {
+          "minute": 24,
+          "extra": null,
+          "team_id": 611
+        },
+        {
+          "minute": 28,
+          "extra": null,
+          "team_id": 611
+        },
+        {
+          "minute": 61,
+          "extra": null,
+          "team_id": 80
+        }
+      ],
+      "official": {
+        "score": "1-2",
+        "exact": true,
+        "goal_mae": 0.0,
+        "within_one_each": true,
+        "minute_mae": 20.0,
+        "first_team_correct": true,
+        "goals": [
+          {
+            "minute": 34,
+            "team": "away"
+          },
+          {
+            "minute": 55,
+            "team": "away"
+          },
+          {
+            "minute": 84,
+            "team": "home"
+          }
+        ]
+      },
+      "variant": {
+        "score": "1-2",
+        "exact": true,
+        "goal_mae": 0.0,
+        "within_one_each": true,
+        "minute_mae": 15.67,
+        "first_team_correct": false,
+        "goals": [
+          {
+            "minute": 41,
+            "team": "home"
+          },
+          {
+            "minute": 45,
+            "team": "away"
+          },
+          {
+            "minute": 74,
+            "team": "away"
+          }
+        ]
+      }
+    },
+    {
+      "fixture_id": 1622629,
+      "date": "2026-08-26T19:00:00+00:00",
+      "match": "AEK Athens FC - Levski Sofia",
+      "actual": "4-0",
+      "actual_goals": [
+        {
+          "minute": 7,
+          "extra": null,
+          "team_id": 575
+        },
+        {
+          "minute": 12,
+          "extra": null,
+          "team_id": 575
+        },
+        {
+          "minute": 29,
+          "extra": null,
+          "team_id": 575
+        },
+        {
+          "minute": 55,
+          "extra": null,
+          "team_id": 575
+        }
+      ],
+      "official": {
+        "score": "2-1",
+        "exact": false,
+        "goal_mae": 1.5,
+        "within_one_each": false,
+        "minute_mae": 35.25,
+        "first_team_correct": false,
+        "goals": [
+          {
+            "minute": 2,
+            "team": "away"
+          },
+          {
+            "minute": 62,
+            "team": "home"
+          },
+          {
+            "minute": 70,
+            "team": "home"
+          }
+        ]
+      },
+      "variant": {
+        "score": "1-1",
+        "exact": false,
+        "goal_mae": 2.0,
+        "within_one_each": false,
+        "minute_mae": 58.5,
+        "first_team_correct": true,
+        "goals": [
+          {
+            "minute": 73,
+            "team": "home"
+          },
+          {
+            "minute": 90,
+            "team": "away",
+            "minuteLabel": "90+3'"
+          }
+        ]
+      }
+    },
+    {
+      "fixture_id": 1622631,
+      "date": "2026-08-26T19:00:00+00:00",
+      "match": "Viking - Dinamo Zagreb",
+      "actual": "3-1",
+      "actual_goals": [
+        {
+          "minute": 10,
+          "extra": null,
+          "team_id": 620
+        },
+        {
+          "minute": 18,
+          "extra": null,
+          "team_id": 759
+        },
+        {
+          "minute": 48,
+          "extra": null,
+          "team_id": 759
+        },
+        {
+          "minute": 50,
+          "extra": null,
+          "team_id": 759
+        }
+      ],
+      "official": {
+        "score": "2-2",
+        "exact": false,
+        "goal_mae": 1.0,
+        "within_one_each": true,
+        "minute_mae": 27.25,
+        "first_team_correct": true,
+        "goals": [
+          {
+            "minute": 24,
+            "team": "away"
+          },
+          {
+            "minute": 45,
+            "team": "home",
+            "minuteLabel": "45+1'"
+          },
+          {
+            "minute": 80,
+            "team": "home"
+          },
+          {
+            "minute": 86,
+            "team": "away"
+          }
+        ]
+      },
+      "variant": {
+        "score": "2-2",
+        "exact": false,
+        "goal_mae": 1.0,
+        "within_one_each": true,
+        "minute_mae": 36.5,
+        "first_team_correct": true,
+        "goals": [
+          {
+            "minute": 54,
+            "team": "away"
+          },
+          {
+            "minute": 60,
+            "team": "home"
+          },
+          {
+            "minute": 75,
+            "team": "away"
+          },
+          {
+            "minute": 83,
+            "team": "home"
+          }
+        ]
+      }
+    },
+    {
+      "fixture_id": 1622627,
+      "date": "2026-08-25T19:00:00+00:00",
+      "match": "Bodo/Glimt - NEC Nijmegen",
+      "actual": "3-0",
+      "actual_goals": [
+        {
+          "minute": 45,
+          "extra": null,
+          "team_id": 327
+        },
+        {
+          "minute": 45,
+          "extra": null,
+          "team_id": 327
+        },
+        {
+          "minute": 73,
+          "extra": null,
+          "team_id": 327
+        }
+      ],
+      "official": {
+        "score": "2-2",
+        "exact": false,
+        "goal_mae": 1.5,
+        "within_one_each": false,
+        "minute_mae": 24.0,
+        "first_team_correct": false,
+        "goals": [
+          {
+            "minute": 13,
+            "team": "away"
+          },
+          {
+            "minute": 45,
+            "team": "home",
+            "minuteLabel": "45+2'"
+          },
+          {
+            "minute": 54,
+            "team": "home"
+          },
+          {
+            "minute": 90,
+            "team": "away",
+            "minuteLabel": "90+2'"
+          }
+        ]
+      },
+      "variant": {
+        "score": "2-2",
+        "exact": false,
+        "goal_mae": 1.5,
+        "within_one_each": false,
+        "minute_mae": 19.25,
+        "first_team_correct": false,
+        "goals": [
+          {
+            "minute": 35,
+            "team": "away"
+          },
+          {
+            "minute": 40,
+            "team": "home"
+          },
+          {
+            "minute": 56,
+            "team": "away"
+          },
+          {
+            "minute": 84,
+            "team": "home"
+          }
+        ]
+      }
+    },
+    {
+      "fixture_id": 1610923,
+      "date": "2026-08-19T19:00:00+00:00",
+      "match": "Celtic - Lask Linz",
+      "actual": "3-0",
+      "actual_goals": [
+        {
+          "minute": 26,
+          "extra": null,
+          "team_id": 247
+        },
+        {
+          "minute": 38,
+          "extra": null,
+          "team_id": 247
+        },
+        {
+          "minute": 67,
+          "extra": null,
+          "team_id": 247
+        }
+      ],
+      "official": {
+        "score": "2-2",
+        "exact": false,
+        "goal_mae": 1.5,
+        "within_one_each": false,
+        "minute_mae": 19.25,
+        "first_team_correct": false,
+        "goals": [
+          {
+            "minute": 18,
+            "team": "away"
+          },
+          {
+            "minute": 50,
+            "team": "away"
+          },
+          {
+            "minute": 79,
+            "team": "home"
+          },
+          {
+            "minute": 81,
+            "team": "home"
+          }
+        ]
+      },
+      "variant": {
+        "score": "2-2",
+        "exact": false,
+        "goal_mae": 1.5,
+        "within_one_each": false,
+        "minute_mae": 21.0,
+        "first_team_correct": false,
+        "goals": [
+          {
+            "minute": 4,
+            "team": "away"
+          },
+          {
+            "minute": 24,
+            "team": "home"
+          },
+          {
+            "minute": 64,
+            "team": "home"
+          },
+          {
+            "minute": 71,
+            "team": "away"
+          }
+        ]
+      }
+    },
+    {
+      "fixture_id": 1622624,
+      "date": "2026-08-19T19:00:00+00:00",
+      "match": "NEC Nijmegen - Bodo/Glimt",
+      "actual": "1-3",
+      "actual_goals": [
+        {
+          "minute": 25,
+          "extra": null,
+          "team_id": 327
+        },
+        {
+          "minute": 44,
+          "extra": null,
+          "team_id": 327
+        },
+        {
+          "minute": 50,
+          "extra": null,
+          "team_id": 327
+        },
+        {
+          "minute": 85,
+          "extra": null,
+          "team_id": 413
+        }
+      ],
+      "official": {
+        "score": "2-2",
+        "exact": false,
+        "goal_mae": 1.0,
+        "within_one_each": true,
+        "minute_mae": 9.5,
+        "first_team_correct": true,
+        "goals": [
+          {
+            "minute": 8,
+            "team": "away"
+          },
+          {
+            "minute": 40,
+            "team": "away"
+          },
+          {
+            "minute": 45,
+            "team": "home",
+            "minuteLabel": "45+5'"
+          },
+          {
+            "minute": 73,
+            "team": "home"
+          }
+        ]
+      },
+      "variant": {
+        "score": "2-2",
+        "exact": false,
+        "goal_mae": 1.0,
+        "within_one_each": true,
+        "minute_mae": 10.5,
+        "first_team_correct": false,
+        "goals": [
+          {
+            "minute": 17,
+            "team": "home"
+          },
+          {
+            "minute": 41,
+            "team": "away"
+          },
+          {
+            "minute": 76,
+            "team": "away"
+          },
+          {
+            "minute": 90,
+            "team": "home",
+            "minuteLabel": "90+1'"
+          }
+        ]
+      }
+    },
+    {
+      "fixture_id": 1622623,
+      "date": "2026-08-19T19:00:00+00:00",
+      "match": "Hapoel Beer Sheva - Sabah FA",
+      "actual": "2-1",
+      "actual_goals": [
+        {
+          "minute": 6,
+          "extra": null,
+          "team_id": 13976
+        },
+        {
+          "minute": 43,
+          "extra": null,
+          "team_id": 563
+        },
+        {
+          "minute": 79,
+          "extra": null,
+          "team_id": 563
+        }
+      ],
+      "official": {
+        "score": "1-2",
+        "exact": false,
+        "goal_mae": 1.0,
+        "within_one_each": true,
+        "minute_mae": 6.67,
+        "first_team_correct": false,
+        "goals": [
+          {
+            "minute": 15,
+            "team": "home"
+          },
+          {
+            "minute": 43,
+            "team": "away"
+          },
+          {
+            "minute": 90,
+            "team": "away"
+          }
+        ]
+      },
+      "variant": {
+        "score": "1-2",
+        "exact": false,
+        "goal_mae": 1.0,
+        "within_one_each": true,
+        "minute_mae": 7.67,
+        "first_team_correct": true,
+        "goals": [
+          {
+            "minute": 22,
+            "team": "away"
+          },
+          {
+            "minute": 42,
+            "team": "away"
+          },
+          {
+            "minute": 85,
+            "team": "home"
+          }
+        ]
+      }
+    },
+    {
+      "fixture_id": 1622625,
+      "date": "2026-08-19T19:00:00+00:00",
+      "match": "Slovan Bratislava - Celje",
+      "actual": "1-1",
+      "actual_goals": [
+        {
+          "minute": 15,
+          "extra": null,
+          "team_id": 656
+        },
+        {
+          "minute": 41,
+          "extra": null,
+          "team_id": 4360
+        }
+      ],
+      "official": {
+        "score": "2-2",
+        "exact": false,
+        "goal_mae": 1.0,
+        "within_one_each": true,
+        "minute_mae": 28.0,
+        "first_team_correct": true,
+        "goals": [
+          {
+            "minute": 28,
+            "team": "home"
+          },
+          {
+            "minute": 32,
+            "team": "away"
+          },
+          {
+            "minute": 84,
+            "team": "away"
+          },
+          {
+            "minute": 89,
+            "team": "home"
+          }
+        ]
+      },
+      "variant": {
+        "score": "2-2",
+        "exact": false,
+        "goal_mae": 1.0,
+        "within_one_each": true,
+        "minute_mae": 32.25,
+        "first_team_correct": false,
+        "goals": [
+          {
+            "minute": 5,
+            "team": "away"
+          },
+          {
+            "minute": 12,
+            "team": "away"
+          },
+          {
+            "minute": 83,
+            "team": "home"
+          },
+          {
+            "minute": 90,
+            "team": "home",
+            "minuteLabel": "90+4'"
+          }
+        ]
+      }
+    },
+    {
+      "fixture_id": 1622621,
+      "date": "2026-08-18T19:00:00+00:00",
+      "match": "Fenerbahçe - Lyon",
+      "actual": "1-1",
+      "actual_goals": [
+        {
+          "minute": 40,
+          "extra": null,
+          "team_id": 80
+        },
+        {
+          "minute": 47,
+          "extra": null,
+          "team_id": 611
+        }
+      ],
+      "official": {
+        "score": "2-1",
+        "exact": false,
+        "goal_mae": 0.5,
+        "within_one_each": true,
+        "minute_mae": 26.0,
+        "first_team_correct": false,
+        "goals": [
+          {
+            "minute": 16,
+            "team": "home"
+          },
+          {
+            "minute": 56,
+            "team": "away"
+          },
+          {
+            "minute": 67,
+            "team": "home"
+          }
+        ]
+      },
+      "variant": {
+        "score": "2-1",
+        "exact": false,
+        "goal_mae": 0.5,
+        "within_one_each": true,
+        "minute_mae": 31.0,
+        "first_team_correct": false,
+        "goals": [
+          {
+            "minute": 27,
+            "team": "home"
+          },
+          {
+            "minute": 82,
+            "team": "away"
+          },
+          {
+            "minute": 84,
+            "team": "home"
+          }
+        ]
+      }
+    },
+    {
+      "fixture_id": 1622620,
+      "date": "2026-08-18T19:00:00+00:00",
+      "match": "Dinamo Zagreb - Viking",
+      "actual": "2-2",
+      "actual_goals": [
+        {
+          "minute": 6,
+          "extra": null,
+          "team_id": 620
+        },
+        {
+          "minute": 10,
+          "extra": null,
+          "team_id": 620
+        },
+        {
+          "minute": 26,
+          "extra": null,
+          "team_id": 759
+        },
+        {
+          "minute": 39,
+          "extra": null,
+          "team_id": 759
+        }
+      ],
+      "official": {
+        "score": "2-1",
+        "exact": false,
+        "goal_mae": 0.5,
+        "within_one_each": true,
+        "minute_mae": 58.0,
+        "first_team_correct": true,
+        "goals": [
+          {
+            "minute": 73,
+            "team": "home"
+          },
+          {
+            "minute": 75,
+            "team": "home"
+          },
+          {
+            "minute": 81,
+            "team": "away"
+          }
+        ]
+      },
+      "variant": {
+        "score": "2-1",
+        "exact": false,
+        "goal_mae": 0.5,
+        "within_one_each": true,
+        "minute_mae": 40.75,
+        "first_team_correct": true,
+        "goals": [
+          {
+            "minute": 32,
+            "team": "home"
+          },
+          {
+            "minute": 45,
+            "team": "home"
+          },
+          {
+            "minute": 83,
+            "team": "away"
+          }
+        ]
+      }
+    },
+    {
+      "fixture_id": 1622622,
+      "date": "2026-08-18T19:00:00+00:00",
+      "match": "Levski Sofia - AEK Athens FC",
+      "actual": "0-0",
+      "actual_goals": [],
+      "official": {
+        "score": "1-1",
+        "exact": false,
+        "goal_mae": 1.0,
+        "within_one_each": true,
+        "minute_mae": 90.0,
+        "first_team_correct": false,
+        "goals": [
+          {
+            "minute": 64,
+            "team": "home"
+          },
+          {
+            "minute": 75,
+            "team": "away"
+          }
+        ]
+      },
+      "variant": {
+        "score": "1-1",
+        "exact": false,
+        "goal_mae": 1.0,
+        "within_one_each": true,
+        "minute_mae": 90.0,
+        "first_team_correct": false,
+        "goals": [
+          {
+            "minute": 12,
+            "team": "away"
+          },
+          {
+            "minute": 47,
+            "team": "home"
+          }
+        ]
+      }
+    },
+    {
+      "fixture_id": 1598828,
+      "date": "2026-08-11T19:00:00+00:00",
+      "match": "Lyon - Sparta Praha",
+      "actual": "3-0",
+      "actual_goals": [
+        {
+          "minute": 20,
+          "extra": null,
+          "team_id": 80
+        },
+        {
+          "minute": 66,
+          "extra": null,
+          "team_id": 80
+        },
+        {
+          "minute": 72,
+          "extra": null,
+          "team_id": 80
+        }
+      ],
+      "official": {
+        "score": "2-1",
+        "exact": false,
+        "goal_mae": 1.0,
+        "within_one_each": true,
+        "minute_mae": 15.67,
+        "first_team_correct": false,
+        "goals": [
+          {
+            "minute": 39,
+            "team": "away"
+          },
+          {
+            "minute": 76,
+            "team": "home"
+          },
+          {
+            "minute": 90,
+            "team": "home"
+          }
+        ]
+      },
+      "variant": {
+        "score": "2-1",
+        "exact": false,
+        "goal_mae": 1.0,
+        "within_one_each": true,
+        "minute_mae": 24.0,
+        "first_team_correct": false,
+        "goals": [
+          {
+            "minute": 50,
+            "team": "away"
+          },
+          {
+            "minute": 90,
+            "team": "home",
+            "minuteLabel": "90+2'"
+          },
+          {
+            "minute": 90,
+            "team": "home",
+            "minuteLabel": "90+3'"
+          }
+        ]
+      }
+    },
+    {
+      "fixture_id": 1607174,
+      "date": "2026-08-11T18:30:00+00:00",
+      "match": "Sturm Graz - Fenerbahçe",
+      "actual": "0-1",
+      "actual_goals": [
+        {
+          "minute": 66,
+          "extra": null,
+          "team_id": 611
+        }
+      ],
+      "official": {
+        "score": "1-2",
+        "exact": false,
+        "goal_mae": 1.0,
+        "within_one_each": true,
+        "minute_mae": 36.0,
+        "first_team_correct": true,
+        "goals": [
+          {
+            "minute": 48,
+            "team": "away"
+          },
+          {
+            "minute": 83,
+            "team": "away"
+          },
+          {
+            "minute": 88,
+            "team": "home"
+          }
+        ]
+      },
+      "variant": {
+        "score": "1-2",
+        "exact": false,
+        "goal_mae": 1.0,
+        "within_one_each": true,
+        "minute_mae": 35.33,
+        "first_team_correct": true,
+        "goals": [
+          {
+            "minute": 50,
+            "team": "away"
+          },
+          {
+            "minute": 64,
+            "team": "home"
+          },
+          {
+            "minute": 83,
+            "team": "away"
+          }
+        ]
+      }
+    },
+    {
+      "fixture_id": 1607173,
+      "date": "2026-08-11T18:15:00+00:00",
+      "match": "Slovan Bratislava - Mjallby AIF",
+      "actual": "2-0",
+      "actual_goals": [
+        {
+          "minute": 47,
+          "extra": null,
+          "team_id": 656
+        },
+        {
+          "minute": 78,
+          "extra": null,
+          "team_id": 656
+        }
+      ],
+      "official": {
+        "score": "2-1",
+        "exact": false,
+        "goal_mae": 0.5,
+        "within_one_each": true,
+        "minute_mae": 36.67,
+        "first_team_correct": true,
+        "goals": [
+          {
+            "minute": 13,
+            "team": "home"
+          },
+          {
+            "minute": 47,
+            "team": "away"
+          },
+          {
+            "minute": 89,
+            "team": "home"
+          }
+        ]
+      },
+      "variant": {
+        "score": "2-1",
+        "exact": false,
+        "goal_mae": 0.5,
+        "within_one_each": true,
+        "minute_mae": 24.0,
+        "first_team_correct": false,
+        "goals": [
+          {
+            "minute": 34,
+            "team": "away"
+          },
+          {
+            "minute": 64,
+            "team": "home"
+          },
+          {
+            "minute": 88,
+            "team": "home"
+          }
+        ]
+      }
+    },
+    {
+      "fixture_id": 1605371,
+      "date": "2026-08-11T18:15:00+00:00",
+      "match": "Celje - Ararat-Armenia",
+      "actual": "2-0",
+      "actual_goals": [
+        {
+          "minute": 83,
+          "extra": null,
+          "team_id": 4360
+        },
+        {
+          "minute": 85,
+          "extra": null,
+          "team_id": 4360
+        }
+      ],
+      "official": {
+        "score": "1-1",
+        "exact": false,
+        "goal_mae": 1.0,
+        "within_one_each": true,
+        "minute_mae": 23.5,
+        "first_team_correct": true,
+        "goals": [
+          {
+            "minute": 37,
+            "team": "home"
+          },
+          {
+            "minute": 84,
+            "team": "away"
+          }
+        ]
+      },
+      "variant": {
+        "score": "1-1",
+        "exact": false,
+        "goal_mae": 1.0,
+        "within_one_each": true,
+        "minute_mae": 31.5,
+        "first_team_correct": true,
+        "goals": [
+          {
+            "minute": 24,
+            "team": "home"
+          },
+          {
+            "minute": 81,
+            "team": "away"
+          }
+        ]
+      }
+    },
+    {
+      "fixture_id": 1607169,
+      "date": "2026-08-11T18:00:00+00:00",
+      "match": "FK Crvena Zvezda - Hapoel Beer Sheva",
+      "actual": "0-2",
+      "actual_goals": [
+        {
+          "minute": 61,
+          "extra": null,
+          "team_id": 563
+        },
+        {
+          "minute": 79,
+          "extra": null,
+          "team_id": 563
+        }
+      ],
+      "official": {
+        "score": "2-1",
+        "exact": false,
+        "goal_mae": 1.5,
+        "within_one_each": false,
+        "minute_mae": 34.0,
+        "first_team_correct": false,
+        "goals": [
+          {
+            "minute": 36,
+            "team": "home"
+          },
+          {
+            "minute": 47,
+            "team": "home"
+          },
+          {
+            "minute": 73,
+            "team": "away"
+          }
+        ]
+      },
+      "variant": {
+        "score": "2-1",
+        "exact": false,
+        "goal_mae": 1.5,
+        "within_one_each": false,
+        "minute_mae": 45.33,
+        "first_team_correct": false,
+        "goals": [
+          {
+            "minute": 6,
+            "team": "home"
+          },
+          {
+            "minute": 43,
+            "team": "away"
+          },
+          {
+            "minute": 90,
+            "team": "home",
+            "minuteLabel": "90+2'"
+          }
+        ]
+      }
+    },
+    {
+      "fixture_id": 1607171,
+      "date": "2026-08-11T17:00:00+00:00",
+      "match": "Kauno Žalgiris - Dinamo Zagreb",
+      "actual": "1-2",
+      "actual_goals": [
+        {
+          "minute": 19,
+          "extra": null,
+          "team_id": 620
+        },
+        {
+          "minute": 30,
+          "extra": null,
+          "team_id": 620
+        },
+        {
+          "minute": 56,
+          "extra": null,
+          "team_id": 3872
+        }
+      ],
+      "official": {
+        "score": "1-2",
+        "exact": true,
+        "goal_mae": 0.0,
+        "within_one_each": true,
+        "minute_mae": 38.0,
+        "first_team_correct": true,
+        "goals": [
+          {
+            "minute": 65,
+            "team": "away"
+          },
+          {
+            "minute": 68,
+            "team": "away"
+          },
+          {
+            "minute": 86,
+            "team": "home"
+          }
+        ]
+      },
+      "variant": {
+        "score": "1-1",
+        "exact": false,
+        "goal_mae": 0.5,
+        "within_one_each": true,
+        "minute_mae": 58.0,
+        "first_team_correct": true,
+        "goals": [
+          {
+            "minute": 88,
+            "team": "away"
+          },
+          {
+            "minute": 90,
+            "team": "home",
+            "minuteLabel": "90+1'"
+          }
+        ]
+      }
+    },
+    {
+      "fixture_id": 1607172,
+      "date": "2026-08-11T16:00:00+00:00",
+      "match": "Sabah FA - Aarhus",
+      "actual": "4-0",
+      "actual_goals": [
+        {
+          "minute": 59,
+          "extra": null,
+          "team_id": 13976
+        },
+        {
+          "minute": 67,
+          "extra": null,
+          "team_id": 13976
+        },
+        {
+          "minute": 78,
+          "extra": null,
+          "team_id": 13976
+        },
+        {
+          "minute": 89,
+          "extra": null,
+          "team_id": 13976
+        }
+      ],
+      "official": {
+        "score": "2-1",
+        "exact": false,
+        "goal_mae": 1.5,
+        "within_one_each": false,
+        "minute_mae": 34.0,
+        "first_team_correct": true,
+        "goals": [
+          {
+            "minute": 5,
+            "team": "home"
+          },
+          {
+            "minute": 42,
+            "team": "home"
+          },
+          {
+            "minute": 90,
+            "team": "away",
+            "minuteLabel": "90+7'"
+          }
+        ]
+      },
+      "variant": {
+        "score": "2-1",
+        "exact": false,
+        "goal_mae": 1.5,
+        "within_one_each": false,
+        "minute_mae": 17.25,
+        "first_team_correct": true,
+        "goals": [
+          {
+            "minute": 50,
+            "team": "home"
+          },
+          {
+            "minute": 79,
+            "team": "away"
+          },
+          {
+            "minute": 81,
+            "team": "home"
+          }
+        ]
+      }
+    }
+  ]
+}

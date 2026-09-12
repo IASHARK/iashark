@@ -1,0 +1,866 @@
+{
+  "endpoint": "/fixtures",
+  "params": {
+    "last": 12,
+    "status": "FT-AET-PEN",
+    "team": 738
+  },
+  "retrieved_at": "2026-09-08T18:36:48Z",
+  "response_hash": "593ab8058d9baaa0729778c6d50f3307de1fe9add0babd1b37dd2fb33e5f3a01",
+  "response": {
+    "get": "fixtures",
+    "parameters": {
+      "last": "12",
+      "status": "FT-AET-PEN",
+      "team": "738"
+    },
+    "errors": [],
+    "results": 12,
+    "paging": {
+      "current": 1,
+      "total": 1
+    },
+    "response": [
+      {
+        "fixture": {
+          "id": 1558625,
+          "referee": "Wim Smet, Belgium",
+          "timezone": "UTC",
+          "date": "2026-09-06T17:15:00+00:00",
+          "timestamp": 1788714900,
+          "periods": {
+            "first": null,
+            "second": null
+          },
+          "venue": {
+            "id": 189,
+            "name": "Freethielstadion",
+            "city": "Beveren"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": null
+          }
+        },
+        "league": {
+          "id": 144,
+          "name": "Jupiler Pro League",
+          "country": "Belgium",
+          "logo": "https://media.api-sports.io/football/leagues/144.png",
+          "flag": "https://media.api-sports.io/flags/be.svg",
+          "season": 2026,
+          "round": "Regular Season - 5",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 738,
+            "name": "SK Beveren",
+            "logo": "https://media.api-sports.io/football/teams/738.png",
+            "winner": true
+          },
+          "away": {
+            "id": 260,
+            "name": "OH Leuven",
+            "logo": "https://media.api-sports.io/football/teams/260.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 3,
+          "away": 0
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 3,
+            "away": 0
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1558608,
+          "referee": "Bert Verbeke, Netherlands",
+          "timezone": "UTC",
+          "date": "2026-08-28T18:45:00+00:00",
+          "timestamp": 1787942700,
+          "periods": {
+            "first": 1787942700,
+            "second": 1787946300
+          },
+          "venue": {
+            "id": 12455,
+            "name": "Cegeka Arena",
+            "city": "Genk"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 2
+          }
+        },
+        "league": {
+          "id": 144,
+          "name": "Jupiler Pro League",
+          "country": "Belgium",
+          "logo": "https://media.api-sports.io/football/leagues/144.png",
+          "flag": "https://media.api-sports.io/flags/be.svg",
+          "season": 2026,
+          "round": "Regular Season - 4",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 742,
+            "name": "Genk",
+            "logo": "https://media.api-sports.io/football/teams/742.png",
+            "winner": true
+          },
+          "away": {
+            "id": 738,
+            "name": "SK Beveren",
+            "logo": "https://media.api-sports.io/football/teams/738.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 4,
+          "away": 0
+        },
+        "score": {
+          "halftime": {
+            "home": 3,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 4,
+            "away": 0
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1558600,
+          "referee": "Michiel Allaerts, Belgium",
+          "timezone": "UTC",
+          "date": "2026-08-22T14:00:00+00:00",
+          "timestamp": 1787407200,
+          "periods": {
+            "first": 1787407200,
+            "second": 1787410800
+          },
+          "venue": {
+            "id": 11891,
+            "name": "Elindus Arena",
+            "city": "Waregem"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 2
+          }
+        },
+        "league": {
+          "id": 144,
+          "name": "Jupiler Pro League",
+          "country": "Belgium",
+          "logo": "https://media.api-sports.io/football/leagues/144.png",
+          "flag": "https://media.api-sports.io/flags/be.svg",
+          "season": 2026,
+          "round": "Regular Season - 3",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 600,
+            "name": "Zulte Waregem",
+            "logo": "https://media.api-sports.io/football/teams/600.png",
+            "winner": true
+          },
+          "away": {
+            "id": 738,
+            "name": "SK Beveren",
+            "logo": "https://media.api-sports.io/football/teams/738.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 4,
+          "away": 0
+        },
+        "score": {
+          "halftime": {
+            "home": 2,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 4,
+            "away": 0
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1558595,
+          "referee": "Nathan Verboomen, Belgium",
+          "timezone": "UTC",
+          "date": "2026-08-16T11:30:00+00:00",
+          "timestamp": 1786879800,
+          "periods": {
+            "first": 1786879800,
+            "second": 1786883400
+          },
+          "venue": {
+            "id": 189,
+            "name": "Freethiel Stadion",
+            "city": "Beveren"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 6
+          }
+        },
+        "league": {
+          "id": 144,
+          "name": "Jupiler Pro League",
+          "country": "Belgium",
+          "logo": "https://media.api-sports.io/football/leagues/144.png",
+          "flag": "https://media.api-sports.io/flags/be.svg",
+          "season": 2026,
+          "round": "Regular Season - 2",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 738,
+            "name": "SK Beveren",
+            "logo": "https://media.api-sports.io/football/teams/738.png",
+            "winner": true
+          },
+          "away": {
+            "id": 554,
+            "name": "Anderlecht",
+            "logo": "https://media.api-sports.io/football/teams/554.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 1,
+          "away": 0
+        },
+        "score": {
+          "halftime": {
+            "home": 1,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 1,
+            "away": 0
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1558589,
+          "referee": "Wesli De Cremer, Belgium",
+          "timezone": "UTC",
+          "date": "2026-08-09T17:15:00+00:00",
+          "timestamp": 1786295700,
+          "periods": {
+            "first": 1786295700,
+            "second": 1786299300
+          },
+          "venue": {
+            "id": 175,
+            "name": "Bosuilstadion",
+            "city": "Deurne"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 6
+          }
+        },
+        "league": {
+          "id": 144,
+          "name": "Jupiler Pro League",
+          "country": "Belgium",
+          "logo": "https://media.api-sports.io/football/leagues/144.png",
+          "flag": "https://media.api-sports.io/flags/be.svg",
+          "season": 2026,
+          "round": "Regular Season - 1",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 740,
+            "name": "Antwerp",
+            "logo": "https://media.api-sports.io/football/teams/740.png",
+            "winner": true
+          },
+          "away": {
+            "id": 738,
+            "name": "SK Beveren",
+            "logo": "https://media.api-sports.io/football/teams/738.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 2,
+          "away": 1
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 1
+          },
+          "fulltime": {
+            "home": 2,
+            "away": 1
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1585024,
+          "referee": null,
+          "timezone": "UTC",
+          "date": "2026-08-01T14:00:00+00:00",
+          "timestamp": 1785592800,
+          "periods": {
+            "first": 1785592800,
+            "second": 1785596400
+          },
+          "venue": {
+            "id": null,
+            "name": null,
+            "city": null
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 5
+          }
+        },
+        "league": {
+          "id": 667,
+          "name": "Friendlies Clubs",
+          "country": "World",
+          "logo": "https://media.api-sports.io/football/leagues/667.png",
+          "flag": null,
+          "season": 2026,
+          "round": "Club Friendlies",
+          "standings": false
+        },
+        "teams": {
+          "home": {
+            "id": 738,
+            "name": "SK Beveren",
+            "logo": "https://media.api-sports.io/football/teams/738.png",
+            "winner": true
+          },
+          "away": {
+            "id": 422,
+            "name": "FC Eindhoven",
+            "logo": "https://media.api-sports.io/football/teams/422.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 1,
+          "away": 0
+        },
+        "score": {
+          "halftime": {
+            "home": 1,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 1,
+            "away": 0
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1563053,
+          "referee": null,
+          "timezone": "UTC",
+          "date": "2026-07-25T09:00:00+00:00",
+          "timestamp": 1784970000,
+          "periods": {
+            "first": 1784970000,
+            "second": 1784973600
+          },
+          "venue": {
+            "id": null,
+            "name": null,
+            "city": null
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": null
+          }
+        },
+        "league": {
+          "id": 667,
+          "name": "Friendlies Clubs",
+          "country": "World",
+          "logo": "https://media.api-sports.io/football/leagues/667.png",
+          "flag": null,
+          "season": 2026,
+          "round": "Club Friendlies",
+          "standings": false
+        },
+        "teams": {
+          "home": {
+            "id": 412,
+            "name": "MVV",
+            "logo": "https://media.api-sports.io/football/teams/412.png",
+            "winner": false
+          },
+          "away": {
+            "id": 738,
+            "name": "SK Beveren",
+            "logo": "https://media.api-sports.io/football/teams/738.png",
+            "winner": true
+          }
+        },
+        "goals": {
+          "home": 3,
+          "away": 4
+        },
+        "score": {
+          "halftime": {
+            "home": 2,
+            "away": 3
+          },
+          "fulltime": {
+            "home": 3,
+            "away": 4
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1560575,
+          "referee": null,
+          "timezone": "UTC",
+          "date": "2026-07-11T12:00:00+00:00",
+          "timestamp": 1783771200,
+          "periods": {
+            "first": 1783771200,
+            "second": 1783774800
+          },
+          "venue": {
+            "id": null,
+            "name": null,
+            "city": null
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": null
+          }
+        },
+        "league": {
+          "id": 667,
+          "name": "Friendlies Clubs",
+          "country": "World",
+          "logo": "https://media.api-sports.io/football/leagues/667.png",
+          "flag": null,
+          "season": 2026,
+          "round": "Club Friendlies",
+          "standings": false
+        },
+        "teams": {
+          "home": {
+            "id": 631,
+            "name": "Gent",
+            "logo": "https://media.api-sports.io/football/teams/631.png",
+            "winner": true
+          },
+          "away": {
+            "id": 738,
+            "name": "SK Beveren",
+            "logo": "https://media.api-sports.io/football/teams/738.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 4,
+          "away": 0
+        },
+        "score": {
+          "halftime": {
+            "home": 1,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 4,
+            "away": 0
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1554787,
+          "referee": null,
+          "timezone": "UTC",
+          "date": "2026-07-08T13:00:00+00:00",
+          "timestamp": 1783515600,
+          "periods": {
+            "first": 1783515600,
+            "second": 1783519200
+          },
+          "venue": {
+            "id": null,
+            "name": null,
+            "city": null
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": null
+          }
+        },
+        "league": {
+          "id": 667,
+          "name": "Friendlies Clubs",
+          "country": "World",
+          "logo": "https://media.api-sports.io/football/leagues/667.png",
+          "flag": null,
+          "season": 2026,
+          "round": "Club Friendlies",
+          "standings": false
+        },
+        "teams": {
+          "home": {
+            "id": 742,
+            "name": "Genk",
+            "logo": "https://media.api-sports.io/football/teams/742.png",
+            "winner": true
+          },
+          "away": {
+            "id": 738,
+            "name": "SK Beveren",
+            "logo": "https://media.api-sports.io/football/teams/738.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 2,
+          "away": 1
+        },
+        "score": {
+          "halftime": {
+            "home": 1,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 2,
+            "away": 1
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1560514,
+          "referee": null,
+          "timezone": "UTC",
+          "date": "2026-07-04T15:00:00+00:00",
+          "timestamp": 1783177200,
+          "periods": {
+            "first": 1783177200,
+            "second": 1783180800
+          },
+          "venue": {
+            "id": null,
+            "name": null,
+            "city": null
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 2
+          }
+        },
+        "league": {
+          "id": 667,
+          "name": "Friendlies Clubs",
+          "country": "World",
+          "logo": "https://media.api-sports.io/football/leagues/667.png",
+          "flag": null,
+          "season": 2026,
+          "round": "Club Friendlies",
+          "standings": false
+        },
+        "teams": {
+          "home": {
+            "id": 19774,
+            "name": "KSK Beveren",
+            "logo": "https://media.api-sports.io/football/teams/19774.png",
+            "winner": false
+          },
+          "away": {
+            "id": 738,
+            "name": "SK Beveren",
+            "logo": "https://media.api-sports.io/football/teams/738.png",
+            "winner": true
+          }
+        },
+        "goals": {
+          "home": 1,
+          "away": 8
+        },
+        "score": {
+          "halftime": {
+            "home": 1,
+            "away": 3
+          },
+          "fulltime": {
+            "home": 1,
+            "away": 8
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1560487,
+          "referee": null,
+          "timezone": "UTC",
+          "date": "2026-07-01T15:00:00+00:00",
+          "timestamp": 1782918000,
+          "periods": {
+            "first": 1782918000,
+            "second": 1782921600
+          },
+          "venue": {
+            "id": null,
+            "name": null,
+            "city": null
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 2
+          }
+        },
+        "league": {
+          "id": 667,
+          "name": "Friendlies Clubs",
+          "country": "World",
+          "logo": "https://media.api-sports.io/football/leagues/667.png",
+          "flag": null,
+          "season": 2026,
+          "round": "Club Friendlies",
+          "standings": false
+        },
+        "teams": {
+          "home": {
+            "id": 619,
+            "name": "PAOK",
+            "logo": "https://media.api-sports.io/football/teams/619.png",
+            "winner": true
+          },
+          "away": {
+            "id": 738,
+            "name": "SK Beveren",
+            "logo": "https://media.api-sports.io/football/teams/738.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 4,
+          "away": 1
+        },
+        "score": {
+          "halftime": {
+            "home": 1,
+            "away": 1
+          },
+          "fulltime": {
+            "home": 4,
+            "away": 1
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1392807,
+          "referee": "J. Vitse",
+          "timezone": "UTC",
+          "date": "2026-04-17T18:00:00+00:00",
+          "timestamp": 1776448800,
+          "periods": {
+            "first": 1776448800,
+            "second": 1776452400
+          },
+          "venue": {
+            "id": 4600,
+            "name": "Stade du Pairay",
+            "city": "Seraing"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 2
+          }
+        },
+        "league": {
+          "id": 145,
+          "name": "Challenger Pro League",
+          "country": "Belgium",
+          "logo": "https://media.api-sports.io/football/leagues/145.png",
+          "flag": "https://media.api-sports.io/flags/be.svg",
+          "season": 2025,
+          "round": "Regular Season - 34",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 10244,
+            "name": "Seraing United",
+            "logo": "https://media.api-sports.io/football/teams/10244.png",
+            "winner": false
+          },
+          "away": {
+            "id": 738,
+            "name": "SK Beveren",
+            "logo": "https://media.api-sports.io/football/teams/738.png",
+            "winner": true
+          }
+        },
+        "goals": {
+          "home": 1,
+          "away": 2
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 1,
+            "away": 2
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      }
+    ]
+  }
+}

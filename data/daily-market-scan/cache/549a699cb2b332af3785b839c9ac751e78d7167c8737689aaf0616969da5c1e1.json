@@ -1,0 +1,96 @@
+{
+  "endpoint": "/fixtures",
+  "params": {
+    "last": 1,
+    "status": "FT-AET-PEN",
+    "team": 4724
+  },
+  "retrieved_at": "2026-09-08T16:00:36Z",
+  "response_hash": "780b0dc4088c1af09a502329378b45daa837a667b2c850485f2578380240713a",
+  "response": {
+    "get": "fixtures",
+    "parameters": {
+      "last": "1",
+      "status": "FT-AET-PEN",
+      "team": "4724"
+    },
+    "errors": [],
+    "results": 1,
+    "paging": {
+      "current": 1,
+      "total": 1
+    },
+    "response": [
+      {
+        "fixture": {
+          "id": 1575482,
+          "referee": "Lu\u00eds Godinho, Portugal",
+          "timezone": "UTC",
+          "date": "2026-09-05T17:00:00+00:00",
+          "timestamp": 1788627600,
+          "periods": {
+            "first": null,
+            "second": null
+          },
+          "venue": {
+            "id": 3572,
+            "name": "Complexo Desportivo FC Alverca",
+            "city": "Alverca do Ribatejo"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": null
+          }
+        },
+        "league": {
+          "id": 94,
+          "name": "Primeira Liga",
+          "country": "Portugal",
+          "logo": "https://media.api-sports.io/football/leagues/94.png",
+          "flag": "https://media.api-sports.io/flags/pt.svg",
+          "season": 2026,
+          "round": "Regular Season - 5",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 4724,
+            "name": "Alverca",
+            "logo": "https://media.api-sports.io/football/teams/4724.png",
+            "winner": false
+          },
+          "away": {
+            "id": 217,
+            "name": "SC Braga",
+            "logo": "https://media.api-sports.io/football/teams/217.png",
+            "winner": true
+          }
+        },
+        "goals": {
+          "home": 1,
+          "away": 2
+        },
+        "score": {
+          "halftime": {
+            "home": 1,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 1,
+            "away": 2
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      }
+    ]
+  }
+}

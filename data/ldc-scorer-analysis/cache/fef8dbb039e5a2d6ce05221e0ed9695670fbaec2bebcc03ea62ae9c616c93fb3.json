@@ -1,0 +1,119 @@
+{
+  "endpoint": "/players",
+  "params": {
+    "id": 180496,
+    "season": 2026
+  },
+  "retrieved_at": "2026-09-08T13:21:08Z",
+  "response_hash": "cedb660e8fb1c14bdd5d944ed19ff97e78c65176b80439d1cb78b542d5b84440",
+  "response": {
+    "get": "players",
+    "parameters": {
+      "id": "180496",
+      "season": "2026"
+    },
+    "errors": [],
+    "results": 1,
+    "paging": {
+      "current": 1,
+      "total": 1
+    },
+    "response": [
+      {
+        "player": {
+          "id": 180496,
+          "name": "G. Mikautadze",
+          "firstname": "Georges",
+          "lastname": "Mikautadze",
+          "age": 25,
+          "birth": {
+            "date": "2000-10-31",
+            "place": "Lyon",
+            "country": "France"
+          },
+          "nationality": "Georgia",
+          "height": "176",
+          "weight": "71",
+          "injured": false,
+          "photo": "https://media.api-sports.io/football/players/180496.png"
+        },
+        "statistics": [
+          {
+            "team": {
+              "id": 533,
+              "name": "Villarreal",
+              "logo": "https://media.api-sports.io/football/teams/533.png"
+            },
+            "league": {
+              "id": 140,
+              "name": "La Liga",
+              "country": "Spain",
+              "logo": "https://media.api-sports.io/football/leagues/140.png",
+              "flag": "https://media.api-sports.io/flags/es.svg",
+              "season": 2026
+            },
+            "games": {
+              "appearences": 4,
+              "lineups": 3,
+              "minutes": 279,
+              "number": 9,
+              "position": "Attacker",
+              "rating": "6.68",
+              "captain": false
+            },
+            "substitutes": {
+              "in": 1,
+              "out": 2,
+              "bench": 1
+            },
+            "shots": {
+              "total": 8,
+              "on": 4
+            },
+            "goals": {
+              "total": 1,
+              "conceded": 0,
+              "assists": 1,
+              "saves": null
+            },
+            "passes": {
+              "total": 87,
+              "key": 4,
+              "accuracy": 85
+            },
+            "tackles": {
+              "total": null,
+              "blocks": null,
+              "interceptions": null
+            },
+            "duels": {
+              "total": 27,
+              "won": 11
+            },
+            "dribbles": {
+              "attempts": 15,
+              "success": 7,
+              "past": null
+            },
+            "fouls": {
+              "drawn": 4,
+              "committed": 2
+            },
+            "cards": {
+              "yellow": 0,
+              "yellowred": 0,
+              "red": 0
+            },
+            "penalty": {
+              "won": 1,
+              "commited": null,
+              "scored": 1,
+              "missed": 0,
+              "saved": null
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

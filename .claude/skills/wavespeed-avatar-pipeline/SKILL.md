@@ -16,10 +16,34 @@ what caused the recurring mistakes (a `pitch` param that isn't in the recipe, a
 `scripts/pipeline.py` as a constant — read it before assuming a parameter, don't
 re-derive the recipe from memory.
 
-**Full narrative history / why each rule exists**: `/Users/clement/Desktop/Shanon avatar/SCRIPTS.md`.
-This skill is the code-level enforcement of that document. If the two ever disagree,
-SCRIPTS.md is more recent — update `pipeline.py`'s constants to match and note the
-change in both places.
+## Source of truth per information type — not "whichever file is newer"
+
+A file being edited more recently than another says nothing about which one
+is *right*. Conflicts are resolved by which file **owns** that category of
+information, full stop — never by comparing timestamps.
+
+| Information type | Owner (authoritative) | Everything else |
+|---|---|---|
+| Locked technical parameters — model IDs, API params, thresholds, constants | `scripts/pipeline.py` | `/Users/clement/Desktop/Shanon avatar/SCRIPTS.md` and any chat history are historical narrative only — read them for *why*, never treat them as overriding a current constant. |
+| Editorial/creative process — research, script writing, priority scoring, photo direction, viral mechanics | `references/*-protocol.md` in this skill | Older process notes in SCRIPTS.md/PIPELINE.md/BENCHMARK.md (Desktop) are historical only. |
+| Bug/fix history | `references/known-issues.md` | — |
+| Persona facts | `/Users/clement/Desktop/Shanon avatar/PERSONA.md` | No other file restates persona facts as independently authoritative — they reference this one. |
+| Governance / when to trigger a skill | `SKILL.md` (this file) | — |
+| Status of any given piece of work (documented vs. coded vs. tested-in-real) | Whatever was actually just verified by running it — see the three-status rule below | A protocol or comment claiming something is "done" is not evidence on its own. |
+
+If a Desktop doc (`SCRIPTS.md`, `PIPELINE.md`, `BENCHMARK.md`, `SHANON.md`)
+ever contradicts one of the owner files above, **the owner file wins,
+regardless of which one was edited more recently** — update the Desktop doc
+to match if it's worth keeping current, but never let it override the owner.
+
+**Three-status rule, always kept separate, never blended into one "done"
+claim**: for any given piece of the system, track whether it is (1)
+**Documented** — written down as intent/process; (2) **Codé** — implemented
+in `pipeline.py` or elsewhere; (3) **Testé et validé en réel** — actually
+executed against the real API/output and confirmed working, with evidence
+(a real output file, a real command result), not just a plausible-sounding
+description. A thing being documented does not make it coded. A thing being
+coded does not make it tested. Never report status by collapsing these.
 
 ## Setup (once per machine)
 
@@ -154,12 +178,25 @@ different `--seed`, don't reuse the same one.
   CGI/airbrushed on identical prompts. `wavespeed-ai/flux-kontext-max` rejects this
   kind of photo outright with a content-sensitivity error. See
   `references/known-issues.md` for the side-by-side comparisons that established this.
-- **Video audio length: keep it under ~14s if you can.** LTX-2.3/lipsync's
-  caption-hallucination and glitch rate rises noticeably above that, even though
-  WaveSpeed's docs claim a 20s ceiling. For a longer script, generate the full
-  narration as ONE continuous take, slice it at silence points (ffmpeg
-  `silencedetect`), generate one video per chunk, then concatenate — don't
-  write the script as separately-voiced short beats (audible seams at the joins).
+- **Video pipeline (default since 2026-08-24): LTX generates the silent
+  performance, `sync/lipsync-2-pro` applies the voice separately.** Real
+  testing found the old single-step `wavespeed-ai/ltx-2.3/lipsync` approach
+  (audio + prompt + image in one call, chunked and concatenated for scripts
+  over ~14s) carries real, recurring risk: progressive framing drift and
+  invented hands, especially on chunked generations. A controlled test
+  splitting the job — `wavespeed-ai/ltx-2.3/image-to-video` (silent, up to
+  20s, no chunking needed) → `sync/lipsync-2-pro` (voice applied after) —
+  passed a full audit clean. **This is now the default pipeline.** Full
+  system, validated parameters, and the reusable method (vs. one-off example)
+  distinction: `references/video-pipeline-architecture.md`. The old
+  single-step chunk-and-concatenate approach is not deleted from `pipeline.py`
+  but is no longer the default path for new production videos.
+- **`wavespeed-ai/infinitetalk` and LongCat Avatar: tested for real, rejected
+  from the normal pipeline.** Both produced a less convincing, more
+  "AI-animated" result than the LTX→lipsync-2-pro chain above, on real
+  generated video, not on paper — see `references/video-tooling-landscape-research.md`
+  (InfiniteTalk) and `references/known-issues.md` (LongCat). Don't retry
+  either as a default; a real, new reason would be needed to revisit them.
 - **`realism` post-process (Solution B) over a second generative pass (Solution C).**
   Re-running a photo through another image model to "make it look more real" risked
   visible identity drift (confirmed once — a full different-looking person came
@@ -272,6 +309,25 @@ pick the skill.
   framing, angle, light — never a vague term), same-day variation rules, and
   a silent pre-send checklist. Same kind of judgment call as the script
   protocol — `pipeline.py` can't verify prompt quality for you.
+- `references/voice-generation-protocol.md` — **read before generating any
+  voice take.** The reproducible method (conversational script writing,
+  multi-take generation, STT gate, ear-based selection), the confirmed full
+  MiniMax parameter surface, and the dead ends already tested so they aren't
+  retried (segment-stitched emotion, post-hoc "humanizing" audio effects,
+  `calm`/`voice_modify`).
+- `references/video-performance-protocol.md` — **read before writing any LTX
+  motion prompt.** Fill out the 4-question performance direction for the
+  specific audio first, fresh every video, never reused mechanically from a
+  past script — never write a generic motion prompt. Includes the standing
+  forbidden-movements block and the LTX narrative-prompt method (now used for
+  the silent step-1 generation, see `video-pipeline-architecture.md`).
+- `references/video-pipeline-architecture.md` — **the default production
+  pipeline since 2026-08-24, read before generating a real video end to end.**
+  Locked source image → silent `ltx-2.3/image-to-video` performance →
+  `sync/lipsync-2-pro` applies the voice. Validated parameters for both steps,
+  what's a reusable method vs. a one-off example, and — now that this chain
+  is validated — how much audit is actually still warranted per video (not
+  the full forensic pass every time anymore; see that file's last section).
 - `references/shanon_profile.json` — identity photos, voice_id, wardrobe style
   pointer to `PERSONA.md`.
 - `references/known-issues.md` — the specific bugs found, what fixed them, what

@@ -1,0 +1,164 @@
+{
+  "endpoint": "/fixtures/headtohead",
+  "params": {
+    "h2h": "450-131",
+    "last": 5
+  },
+  "retrieved_at": "2026-09-08T22:24:19Z",
+  "response_hash": "9a0410cd740d73742c5c4e893fa0f8f3ae26db23ec92f70d6739e4f653b26ce3",
+  "response": {
+    "get": "fixtures/headtohead",
+    "parameters": {
+      "h2h": "450-131",
+      "last": "5"
+    },
+    "errors": [],
+    "results": 2,
+    "paging": {
+      "current": 1,
+      "total": 1
+    },
+    "response": [
+      {
+        "fixture": {
+          "id": 1115595,
+          "referee": "W. Rold\u00e1n",
+          "timezone": "UTC",
+          "date": "2023-08-30T00:30:00+00:00",
+          "timestamp": 1693355400,
+          "periods": {
+            "first": 1693355400,
+            "second": 1693359000
+          },
+          "venue": {
+            "id": null,
+            "name": "Estadio Jorge Luis Hirschi",
+            "city": "La Plata, Provincia de Buenos Aires"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "PEN",
+            "elapsed": 120,
+            "extra": null
+          }
+        },
+        "league": {
+          "id": 11,
+          "name": "CONMEBOL Sudamericana",
+          "country": "World",
+          "logo": "https://media.api-sports.io/football/leagues/11.png",
+          "flag": null,
+          "season": 2023,
+          "round": "Quarter-finals",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 450,
+            "name": "Estudiantes L.P.",
+            "logo": "https://media.api-sports.io/football/teams/450.png",
+            "winner": false
+          },
+          "away": {
+            "id": 131,
+            "name": "Corinthians",
+            "logo": "https://media.api-sports.io/football/teams/131.png",
+            "winner": true
+          }
+        },
+        "goals": {
+          "home": 1,
+          "away": 0
+        },
+        "score": {
+          "halftime": {
+            "home": 1,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 1,
+            "away": 0
+          },
+          "extratime": {
+            "home": 0,
+            "away": 0
+          },
+          "penalty": {
+            "home": 2,
+            "away": 3
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1115594,
+          "referee": "J. Valenzuela",
+          "timezone": "UTC",
+          "date": "2023-08-23T00:30:00+00:00",
+          "timestamp": 1692750600,
+          "periods": {
+            "first": 1692750600,
+            "second": 1692754200
+          },
+          "venue": {
+            "id": 11531,
+            "name": "Neo Qu\u00edmica Arena",
+            "city": "S\u00e3o Paulo, S\u00e3o Paulo"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": null
+          }
+        },
+        "league": {
+          "id": 11,
+          "name": "CONMEBOL Sudamericana",
+          "country": "World",
+          "logo": "https://media.api-sports.io/football/leagues/11.png",
+          "flag": null,
+          "season": 2023,
+          "round": "Quarter-finals",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 131,
+            "name": "Corinthians",
+            "logo": "https://media.api-sports.io/football/teams/131.png",
+            "winner": true
+          },
+          "away": {
+            "id": 450,
+            "name": "Estudiantes L.P.",
+            "logo": "https://media.api-sports.io/football/teams/450.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 1,
+          "away": 0
+        },
+        "score": {
+          "halftime": {
+            "home": 1,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 1,
+            "away": 0
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,96 @@
+{
+  "endpoint": "/fixtures",
+  "params": {
+    "last": 1,
+    "status": "FT-AET-PEN",
+    "team": 266
+  },
+  "retrieved_at": "2026-09-08T18:37:56Z",
+  "response_hash": "185670937c224965f9522f3efa7b2e06dbbd280d82247b567f7c4c4b4615a467",
+  "response": {
+    "get": "fixtures",
+    "parameters": {
+      "last": "1",
+      "status": "FT-AET-PEN",
+      "team": "266"
+    },
+    "errors": [],
+    "results": 1,
+    "paging": {
+      "current": 1,
+      "total": 1
+    },
+    "response": [
+      {
+        "fixture": {
+          "id": 1558619,
+          "referee": "Lothar D'hondt, Belgium",
+          "timezone": "UTC",
+          "date": "2026-09-05T16:15:00+00:00",
+          "timestamp": 1788624900,
+          "periods": {
+            "first": null,
+            "second": null
+          },
+          "venue": {
+            "id": null,
+            "name": "Veoliastadion Achter De Kazerne",
+            "city": "Mechelen"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": null
+          }
+        },
+        "league": {
+          "id": 144,
+          "name": "Jupiler Pro League",
+          "country": "Belgium",
+          "logo": "https://media.api-sports.io/football/leagues/144.png",
+          "flag": "https://media.api-sports.io/flags/be.svg",
+          "season": 2026,
+          "round": "Regular Season - 5",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 266,
+            "name": "KV Mechelen",
+            "logo": "https://media.api-sports.io/football/teams/266.png",
+            "winner": false
+          },
+          "away": {
+            "id": 261,
+            "name": "KVC Westerlo",
+            "logo": "https://media.api-sports.io/football/teams/261.png",
+            "winner": true
+          }
+        },
+        "goals": {
+          "home": 0,
+          "away": 4
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 2
+          },
+          "fulltime": {
+            "home": 0,
+            "away": 4
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,96 @@
+{
+  "endpoint": "/fixtures",
+  "params": {
+    "last": 1,
+    "status": "FT-AET-PEN",
+    "team": 997
+  },
+  "retrieved_at": "2026-09-08T16:02:30Z",
+  "response_hash": "8947b9dee513b7d6b25514a33f1c3281c4f18057963472a9a822ed34fecb6814",
+  "response": {
+    "get": "fixtures",
+    "parameters": {
+      "last": "1",
+      "status": "FT-AET-PEN",
+      "team": "997"
+    },
+    "errors": [],
+    "results": 1,
+    "paging": {
+      "current": 1,
+      "total": 1
+    },
+    "response": [
+      {
+        "fixture": {
+          "id": 1584402,
+          "referee": "Cagdas Altay, T\u00fcrkiye",
+          "timezone": "UTC",
+          "date": "2026-09-06T17:00:00+00:00",
+          "timestamp": 1788714000,
+          "periods": {
+            "first": null,
+            "second": null
+          },
+          "venue": {
+            "id": 20189,
+            "name": "Papara Park",
+            "city": "Trabzon"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": null
+          }
+        },
+        "league": {
+          "id": 203,
+          "name": "S\u00fcper Lig",
+          "country": "Turkey",
+          "logo": "https://media.api-sports.io/football/leagues/203.png",
+          "flag": "https://media.api-sports.io/flags/tr.svg",
+          "season": 2026,
+          "round": "Regular Season - 4",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 998,
+            "name": "Trabzonspor",
+            "logo": "https://media.api-sports.io/football/teams/998.png",
+            "winner": true
+          },
+          "away": {
+            "id": 997,
+            "name": "Gen\u00e7lerbirli\u011fi S.K.",
+            "logo": "https://media.api-sports.io/football/teams/997.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 5,
+          "away": 0
+        },
+        "score": {
+          "halftime": {
+            "home": 3,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 5,
+            "away": 0
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      }
+    ]
+  }
+}

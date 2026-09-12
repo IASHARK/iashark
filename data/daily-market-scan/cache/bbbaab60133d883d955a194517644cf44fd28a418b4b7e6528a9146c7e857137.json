@@ -1,0 +1,308 @@
+{
+  "endpoint": "/fixtures",
+  "params": {
+    "league": 203,
+    "season": 2026,
+    "status": "FT-AET-PEN",
+    "team": 607
+  },
+  "retrieved_at": "2026-09-08T16:03:09Z",
+  "response_hash": "fd22ab09a39d3211ac5b4fa4e10d5106f8ba8d294fc52d2ea3b86b7fb8922ba6",
+  "response": {
+    "get": "fixtures",
+    "parameters": {
+      "league": "203",
+      "season": "2026",
+      "status": "FT-AET-PEN",
+      "team": "607"
+    },
+    "errors": [],
+    "results": 4,
+    "paging": {
+      "current": 1,
+      "total": 1
+    },
+    "response": [
+      {
+        "fixture": {
+          "id": 1584374,
+          "referee": "Cihan Aydin, T\u00fcrkiye",
+          "timezone": "UTC",
+          "date": "2026-08-15T16:00:00+00:00",
+          "timestamp": 1786809600,
+          "periods": {
+            "first": 1786809600,
+            "second": 1786813200
+          },
+          "venue": {
+            "id": null,
+            "name": "Medas Konya B\u00fcy\u00fcksehir Belediyesi Stadium",
+            "city": "Konya"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 10
+          }
+        },
+        "league": {
+          "id": 203,
+          "name": "S\u00fcper Lig",
+          "country": "Turkey",
+          "logo": "https://media.api-sports.io/football/leagues/203.png",
+          "flag": "https://media.api-sports.io/flags/tr.svg",
+          "season": 2026,
+          "round": "Regular Season - 1",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 607,
+            "name": "Konyaspor",
+            "logo": "https://media.api-sports.io/football/teams/607.png",
+            "winner": false
+          },
+          "away": {
+            "id": 1007,
+            "name": "Rizespor",
+            "logo": "https://media.api-sports.io/football/teams/1007.png",
+            "winner": true
+          }
+        },
+        "goals": {
+          "home": 0,
+          "away": 1
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 0,
+            "away": 1
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1584380,
+          "referee": "Atilla Karaoglan, T\u00fcrkiye",
+          "timezone": "UTC",
+          "date": "2026-08-22T18:30:00+00:00",
+          "timestamp": 1787423400,
+          "periods": {
+            "first": 1787423400,
+            "second": 1787427000
+          },
+          "venue": {
+            "id": null,
+            "name": "Chobani Stadium",
+            "city": "Istanbul"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 5
+          }
+        },
+        "league": {
+          "id": 203,
+          "name": "S\u00fcper Lig",
+          "country": "Turkey",
+          "logo": "https://media.api-sports.io/football/leagues/203.png",
+          "flag": "https://media.api-sports.io/flags/tr.svg",
+          "season": 2026,
+          "round": "Regular Season - 2",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 611,
+            "name": "Fenerbah\u00e7e",
+            "logo": "https://media.api-sports.io/football/teams/611.png",
+            "winner": true
+          },
+          "away": {
+            "id": 607,
+            "name": "Konyaspor",
+            "logo": "https://media.api-sports.io/football/teams/607.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 4,
+          "away": 2
+        },
+        "score": {
+          "halftime": {
+            "home": 3,
+            "away": 1
+          },
+          "fulltime": {
+            "home": 4,
+            "away": 2
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1584392,
+          "referee": "Gurcan Hasova, T\u00fcrkiye",
+          "timezone": "UTC",
+          "date": "2026-08-29T16:00:00+00:00",
+          "timestamp": 1788019200,
+          "periods": {
+            "first": 1788019200,
+            "second": 1788022800
+          },
+          "venue": {
+            "id": null,
+            "name": "Medas Konya B\u00fcy\u00fcksehir Belediyesi Stadium",
+            "city": "Konya"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": null
+          }
+        },
+        "league": {
+          "id": 203,
+          "name": "S\u00fcper Lig",
+          "country": "Turkey",
+          "logo": "https://media.api-sports.io/football/leagues/203.png",
+          "flag": "https://media.api-sports.io/flags/tr.svg",
+          "season": 2026,
+          "round": "Regular Season - 3",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 607,
+            "name": "Konyaspor",
+            "logo": "https://media.api-sports.io/football/teams/607.png",
+            "winner": false
+          },
+          "away": {
+            "id": 7411,
+            "name": "Kocaelispor",
+            "logo": "https://media.api-sports.io/football/teams/7411.png",
+            "winner": true
+          }
+        },
+        "goals": {
+          "home": 1,
+          "away": 2
+        },
+        "score": {
+          "halftime": {
+            "home": 1,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 1,
+            "away": 2
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1584396,
+          "referee": "Yasin Kol, T\u00fcrkiye",
+          "timezone": "UTC",
+          "date": "2026-09-05T14:00:00+00:00",
+          "timestamp": 1788616800,
+          "periods": {
+            "first": null,
+            "second": null
+          },
+          "venue": {
+            "id": null,
+            "name": "Kazim Karabekir Stadyumu",
+            "city": "Erzurum"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": null
+          }
+        },
+        "league": {
+          "id": 203,
+          "name": "S\u00fcper Lig",
+          "country": "Turkey",
+          "logo": "https://media.api-sports.io/football/leagues/203.png",
+          "flag": "https://media.api-sports.io/flags/tr.svg",
+          "season": 2026,
+          "round": "Regular Season - 4",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 1009,
+            "name": "Erzurumspor FK",
+            "logo": "https://media.api-sports.io/football/teams/1009.png",
+            "winner": true
+          },
+          "away": {
+            "id": 607,
+            "name": "Konyaspor",
+            "logo": "https://media.api-sports.io/football/teams/607.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 1,
+          "away": 0
+        },
+        "score": {
+          "halftime": {
+            "home": 1,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 1,
+            "away": 0
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      }
+    ]
+  }
+}

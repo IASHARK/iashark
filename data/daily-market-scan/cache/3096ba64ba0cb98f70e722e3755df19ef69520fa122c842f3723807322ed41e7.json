@@ -1,0 +1,308 @@
+{
+  "endpoint": "/fixtures",
+  "params": {
+    "league": 94,
+    "season": 2026,
+    "status": "FT-AET-PEN",
+    "team": 211
+  },
+  "retrieved_at": "2026-09-08T16:00:26Z",
+  "response_hash": "b05aa55593301a729cc1e449f99340c878e0d98e7955fb78bbff73e5795add87",
+  "response": {
+    "get": "fixtures",
+    "parameters": {
+      "league": "94",
+      "season": "2026",
+      "status": "FT-AET-PEN",
+      "team": "211"
+    },
+    "errors": [],
+    "results": 4,
+    "paging": {
+      "current": 1,
+      "total": 1
+    },
+    "response": [
+      {
+        "fixture": {
+          "id": 1575446,
+          "referee": "David Rafael Oliveira da Silva, Portugal",
+          "timezone": "UTC",
+          "date": "2026-08-09T19:30:00+00:00",
+          "timestamp": 1786303800,
+          "periods": {
+            "first": 1786303800,
+            "second": 1786307400
+          },
+          "venue": {
+            "id": 1293,
+            "name": "Est\u00e1dio da Luz",
+            "city": "Lisbon"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 8
+          }
+        },
+        "league": {
+          "id": 94,
+          "name": "Primeira Liga",
+          "country": "Portugal",
+          "logo": "https://media.api-sports.io/football/leagues/94.png",
+          "flag": "https://media.api-sports.io/flags/pt.svg",
+          "season": 2026,
+          "round": "Regular Season - 1",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 211,
+            "name": "Benfica",
+            "logo": "https://media.api-sports.io/football/teams/211.png",
+            "winner": null
+          },
+          "away": {
+            "id": 238,
+            "name": "Academico Viseu",
+            "logo": "https://media.api-sports.io/football/teams/238.png",
+            "winner": null
+          }
+        },
+        "goals": {
+          "home": 2,
+          "away": 2
+        },
+        "score": {
+          "halftime": {
+            "home": 1,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 2,
+            "away": 2
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1575459,
+          "referee": "Joao Pedro Pinheiro, Portugal",
+          "timezone": "UTC",
+          "date": "2026-08-17T19:15:00+00:00",
+          "timestamp": 1786994100,
+          "periods": {
+            "first": 1786994100,
+            "second": 1786997700
+          },
+          "venue": {
+            "id": 3565,
+            "name": "Est\u00e1dio Municipal de Rio Maior",
+            "city": "Rio Maior"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 4
+          }
+        },
+        "league": {
+          "id": 94,
+          "name": "Primeira Liga",
+          "country": "Portugal",
+          "logo": "https://media.api-sports.io/football/leagues/94.png",
+          "flag": "https://media.api-sports.io/flags/pt.svg",
+          "season": 2026,
+          "round": "Regular Season - 2",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 4716,
+            "name": "Casa Pia",
+            "logo": "https://media.api-sports.io/football/teams/4716.png",
+            "winner": false
+          },
+          "away": {
+            "id": 211,
+            "name": "Benfica",
+            "logo": "https://media.api-sports.io/football/teams/211.png",
+            "winner": true
+          }
+        },
+        "goals": {
+          "home": 0,
+          "away": 7
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 2
+          },
+          "fulltime": {
+            "home": 0,
+            "away": 7
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1575476,
+          "referee": "Helder Filipe Claudio Carvalho, Portugal",
+          "timezone": "UTC",
+          "date": "2026-08-31T19:15:00+00:00",
+          "timestamp": 1788203700,
+          "periods": {
+            "first": 1788203700,
+            "second": 1788207300
+          },
+          "venue": {
+            "id": 1293,
+            "name": "Est\u00e1dio da Luz",
+            "city": "Lisbon"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": null
+          }
+        },
+        "league": {
+          "id": 94,
+          "name": "Primeira Liga",
+          "country": "Portugal",
+          "logo": "https://media.api-sports.io/football/leagues/94.png",
+          "flag": "https://media.api-sports.io/flags/pt.svg",
+          "season": 2026,
+          "round": "Regular Season - 4",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 211,
+            "name": "Benfica",
+            "logo": "https://media.api-sports.io/football/teams/211.png",
+            "winner": true
+          },
+          "away": {
+            "id": 230,
+            "name": "Estoril",
+            "logo": "https://media.api-sports.io/football/teams/230.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 2,
+          "away": 1
+        },
+        "score": {
+          "halftime": {
+            "home": 1,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 2,
+            "away": 1
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1575487,
+          "referee": "Sergio Guelho, Portugal",
+          "timezone": "UTC",
+          "date": "2026-09-05T17:00:00+00:00",
+          "timestamp": 1788627600,
+          "periods": {
+            "first": null,
+            "second": null
+          },
+          "venue": {
+            "id": null,
+            "name": "Estadio do Maritimo",
+            "city": "Funchal"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": null
+          }
+        },
+        "league": {
+          "id": 94,
+          "name": "Primeira Liga",
+          "country": "Portugal",
+          "logo": "https://media.api-sports.io/football/leagues/94.png",
+          "flag": "https://media.api-sports.io/flags/pt.svg",
+          "season": 2026,
+          "round": "Regular Season - 5",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 214,
+            "name": "Maritimo",
+            "logo": "https://media.api-sports.io/football/teams/214.png",
+            "winner": false
+          },
+          "away": {
+            "id": 211,
+            "name": "Benfica",
+            "logo": "https://media.api-sports.io/football/teams/211.png",
+            "winner": true
+          }
+        },
+        "goals": {
+          "home": 0,
+          "away": 3
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 1
+          },
+          "fulltime": {
+            "home": 0,
+            "away": 3
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,728 @@
+{
+  "endpoint": "/fixtures",
+  "params": {
+    "league": 2,
+    "season": 2025,
+    "status": "FT-AET-PEN",
+    "team": 505
+  },
+  "retrieved_at": "2026-09-08T17:29:03Z",
+  "response_hash": "93d0e221836c453463ec9446de5b7bb5c1c08918b4af1b5466e958cf33c58bfe",
+  "response": {
+    "get": "fixtures",
+    "parameters": {
+      "league": "2",
+      "season": "2025",
+      "status": "FT-AET-PEN",
+      "team": "505"
+    },
+    "errors": [],
+    "results": 10,
+    "paging": {
+      "current": 1,
+      "total": 1
+    },
+    "response": [
+      {
+        "fixture": {
+          "id": 1451028,
+          "referee": "M. Oliver",
+          "timezone": "UTC",
+          "date": "2025-09-17T19:00:00+00:00",
+          "timestamp": 1758135600,
+          "periods": {
+            "first": 1758135600,
+            "second": 1758139200
+          },
+          "venue": {
+            "id": null,
+            "name": "Johan Cruijff Arena",
+            "city": "Amsterdam"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 4
+          }
+        },
+        "league": {
+          "id": 2,
+          "name": "UEFA Champions League",
+          "country": "World",
+          "logo": "https://media.api-sports.io/football/leagues/2.png",
+          "flag": null,
+          "season": 2025,
+          "round": "League Stage - 1",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 194,
+            "name": "Ajax",
+            "logo": "https://media.api-sports.io/football/teams/194.png",
+            "winner": false
+          },
+          "away": {
+            "id": 505,
+            "name": "Inter",
+            "logo": "https://media.api-sports.io/football/teams/505.png",
+            "winner": true
+          }
+        },
+        "goals": {
+          "home": 0,
+          "away": 2
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 1
+          },
+          "fulltime": {
+            "home": 0,
+            "away": 2
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1451043,
+          "referee": "C. Kavanagh",
+          "timezone": "UTC",
+          "date": "2025-09-30T19:00:00+00:00",
+          "timestamp": 1759258800,
+          "periods": {
+            "first": 1759258800,
+            "second": 1759262400
+          },
+          "venue": {
+            "id": 907,
+            "name": "Stadio Giuseppe Meazza",
+            "city": "Milan"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 3
+          }
+        },
+        "league": {
+          "id": 2,
+          "name": "UEFA Champions League",
+          "country": "World",
+          "logo": "https://media.api-sports.io/football/leagues/2.png",
+          "flag": null,
+          "season": 2025,
+          "round": "League Stage - 2",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 505,
+            "name": "Inter",
+            "logo": "https://media.api-sports.io/football/teams/505.png",
+            "winner": true
+          },
+          "away": {
+            "id": 560,
+            "name": "Slavia Praha",
+            "logo": "https://media.api-sports.io/football/teams/560.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 3,
+          "away": 0
+        },
+        "score": {
+          "halftime": {
+            "home": 2,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 3,
+            "away": 0
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1451058,
+          "referee": "G. Nyberg",
+          "timezone": "UTC",
+          "date": "2025-10-21T19:00:00+00:00",
+          "timestamp": 1761073200,
+          "periods": {
+            "first": 1761073200,
+            "second": 1761076800
+          },
+          "venue": {
+            "id": null,
+            "name": "Lotto Park",
+            "city": "Anderlecht"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 4
+          }
+        },
+        "league": {
+          "id": 2,
+          "name": "UEFA Champions League",
+          "country": "World",
+          "logo": "https://media.api-sports.io/football/leagues/2.png",
+          "flag": null,
+          "season": 2025,
+          "round": "League Stage - 3",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 1393,
+            "name": "Union St. Gilloise",
+            "logo": "https://media.api-sports.io/football/teams/1393.png",
+            "winner": false
+          },
+          "away": {
+            "id": 505,
+            "name": "Inter",
+            "logo": "https://media.api-sports.io/football/teams/505.png",
+            "winner": true
+          }
+        },
+        "goals": {
+          "home": 0,
+          "away": 4
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 2
+          },
+          "fulltime": {
+            "home": 0,
+            "away": 4
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1451090,
+          "referee": "L. M. Branco Godinho",
+          "timezone": "UTC",
+          "date": "2025-11-05T20:00:00+00:00",
+          "timestamp": 1762372800,
+          "periods": {
+            "first": 1762372800,
+            "second": 1762376400
+          },
+          "venue": {
+            "id": 907,
+            "name": "Stadio Giuseppe Meazza",
+            "city": "Milan"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 4
+          }
+        },
+        "league": {
+          "id": 2,
+          "name": "UEFA Champions League",
+          "country": "World",
+          "logo": "https://media.api-sports.io/football/leagues/2.png",
+          "flag": null,
+          "season": 2025,
+          "round": "League Stage - 4",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 505,
+            "name": "Inter",
+            "logo": "https://media.api-sports.io/football/teams/505.png",
+            "winner": true
+          },
+          "away": {
+            "id": 664,
+            "name": "Kairat Almaty",
+            "logo": "https://media.api-sports.io/football/teams/664.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 2,
+          "away": 1
+        },
+        "score": {
+          "halftime": {
+            "home": 1,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 2,
+            "away": 1
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1451104,
+          "referee": "F. Letexier",
+          "timezone": "UTC",
+          "date": "2025-11-26T20:00:00+00:00",
+          "timestamp": 1764187200,
+          "periods": {
+            "first": 1764187200,
+            "second": 1764190800
+          },
+          "venue": {
+            "id": null,
+            "name": "Metropolitano Stadium",
+            "city": "Madrid"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 6
+          }
+        },
+        "league": {
+          "id": 2,
+          "name": "UEFA Champions League",
+          "country": "World",
+          "logo": "https://media.api-sports.io/football/leagues/2.png",
+          "flag": null,
+          "season": 2025,
+          "round": "League Stage - 5",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 530,
+            "name": "Atletico Madrid",
+            "logo": "https://media.api-sports.io/football/teams/530.png",
+            "winner": true
+          },
+          "away": {
+            "id": 505,
+            "name": "Inter",
+            "logo": "https://media.api-sports.io/football/teams/505.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 2,
+          "away": 1
+        },
+        "score": {
+          "halftime": {
+            "home": 1,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 2,
+            "away": 1
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1451113,
+          "referee": "F. Zwayer",
+          "timezone": "UTC",
+          "date": "2025-12-09T20:00:00+00:00",
+          "timestamp": 1765310400,
+          "periods": {
+            "first": 1765310400,
+            "second": 1765314000
+          },
+          "venue": {
+            "id": 907,
+            "name": "Stadio Giuseppe Meazza",
+            "city": "Milan"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 7
+          }
+        },
+        "league": {
+          "id": 2,
+          "name": "UEFA Champions League",
+          "country": "World",
+          "logo": "https://media.api-sports.io/football/leagues/2.png",
+          "flag": null,
+          "season": 2025,
+          "round": "League Stage - 6",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 505,
+            "name": "Inter",
+            "logo": "https://media.api-sports.io/football/teams/505.png",
+            "winner": false
+          },
+          "away": {
+            "id": 40,
+            "name": "Liverpool",
+            "logo": "https://media.api-sports.io/football/teams/40.png",
+            "winner": true
+          }
+        },
+        "goals": {
+          "home": 0,
+          "away": 1
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 0,
+            "away": 1
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1451136,
+          "referee": "J. Pinheiro",
+          "timezone": "UTC",
+          "date": "2026-01-20T20:00:00+00:00",
+          "timestamp": 1768939200,
+          "periods": {
+            "first": 1768939200,
+            "second": 1768942800
+          },
+          "venue": {
+            "id": 907,
+            "name": "Stadio Giuseppe Meazza",
+            "city": "Milan"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 4
+          }
+        },
+        "league": {
+          "id": 2,
+          "name": "UEFA Champions League",
+          "country": "World",
+          "logo": "https://media.api-sports.io/football/leagues/2.png",
+          "flag": null,
+          "season": 2025,
+          "round": "League Stage - 7",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 505,
+            "name": "Inter",
+            "logo": "https://media.api-sports.io/football/teams/505.png",
+            "winner": false
+          },
+          "away": {
+            "id": 42,
+            "name": "Arsenal",
+            "logo": "https://media.api-sports.io/football/teams/42.png",
+            "winner": true
+          }
+        },
+        "goals": {
+          "home": 1,
+          "away": 3
+        },
+        "score": {
+          "halftime": {
+            "home": 1,
+            "away": 2
+          },
+          "fulltime": {
+            "home": 1,
+            "away": 3
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1451147,
+          "referee": "I. Kovacs",
+          "timezone": "UTC",
+          "date": "2026-01-28T20:00:00+00:00",
+          "timestamp": 1769630400,
+          "periods": {
+            "first": 1769630400,
+            "second": 1769634000
+          },
+          "venue": {
+            "id": null,
+            "name": "Signal Iduna Park",
+            "city": "Dortmund"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 6
+          }
+        },
+        "league": {
+          "id": 2,
+          "name": "UEFA Champions League",
+          "country": "World",
+          "logo": "https://media.api-sports.io/football/leagues/2.png",
+          "flag": null,
+          "season": 2025,
+          "round": "League Stage - 8",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 165,
+            "name": "Borussia Dortmund",
+            "logo": "https://media.api-sports.io/football/teams/165.png",
+            "winner": false
+          },
+          "away": {
+            "id": 505,
+            "name": "Inter",
+            "logo": "https://media.api-sports.io/football/teams/505.png",
+            "winner": true
+          }
+        },
+        "goals": {
+          "home": 0,
+          "away": 2
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 0,
+            "away": 2
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1515519,
+          "referee": "D. Siebert",
+          "timezone": "UTC",
+          "date": "2026-02-18T20:00:00+00:00",
+          "timestamp": 1771444800,
+          "periods": {
+            "first": 1771444800,
+            "second": 1771448400
+          },
+          "venue": {
+            "id": null,
+            "name": "Aspmyra Stadion",
+            "city": "Bodo"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 4
+          }
+        },
+        "league": {
+          "id": 2,
+          "name": "UEFA Champions League",
+          "country": "World",
+          "logo": "https://media.api-sports.io/football/leagues/2.png",
+          "flag": null,
+          "season": 2025,
+          "round": "Round of 32",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 327,
+            "name": "Bodo/Glimt",
+            "logo": "https://media.api-sports.io/football/teams/327.png",
+            "winner": true
+          },
+          "away": {
+            "id": 505,
+            "name": "Inter",
+            "logo": "https://media.api-sports.io/football/teams/505.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 3,
+          "away": 1
+        },
+        "score": {
+          "halftime": {
+            "home": 1,
+            "away": 1
+          },
+          "fulltime": {
+            "home": 3,
+            "away": 1
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1515524,
+          "referee": "A. Hernandez",
+          "timezone": "UTC",
+          "date": "2026-02-24T20:00:00+00:00",
+          "timestamp": 1771963200,
+          "periods": {
+            "first": 1771963200,
+            "second": 1771966800
+          },
+          "venue": {
+            "id": null,
+            "name": "San Siro/Giuseppe Meazza",
+            "city": "Milan"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 3
+          }
+        },
+        "league": {
+          "id": 2,
+          "name": "UEFA Champions League",
+          "country": "World",
+          "logo": "https://media.api-sports.io/football/leagues/2.png",
+          "flag": null,
+          "season": 2025,
+          "round": "Round of 32",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 505,
+            "name": "Inter",
+            "logo": "https://media.api-sports.io/football/teams/505.png",
+            "winner": false
+          },
+          "away": {
+            "id": 327,
+            "name": "Bodo/Glimt",
+            "logo": "https://media.api-sports.io/football/teams/327.png",
+            "winner": true
+          }
+        },
+        "goals": {
+          "home": 1,
+          "away": 2
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 1,
+            "away": 2
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      }
+    ]
+  }
+}

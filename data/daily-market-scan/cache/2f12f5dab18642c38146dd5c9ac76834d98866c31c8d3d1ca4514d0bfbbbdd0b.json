@@ -1,0 +1,96 @@
+{
+  "endpoint": "/fixtures",
+  "params": {
+    "last": 1,
+    "status": "FT-AET-PEN",
+    "team": 202
+  },
+  "retrieved_at": "2026-09-08T16:01:30Z",
+  "response_hash": "d697390ec67b31d008f622722736539fdfd5cd0f3433c973acbf8c0aed9b5455",
+  "response": {
+    "get": "fixtures",
+    "parameters": {
+      "last": "1",
+      "status": "FT-AET-PEN",
+      "team": "202"
+    },
+    "errors": [],
+    "results": 1,
+    "paging": {
+      "current": 1,
+      "total": 1
+    },
+    "response": [
+      {
+        "fixture": {
+          "id": 1552158,
+          "referee": "Danny Makkelie, Netherlands",
+          "timezone": "UTC",
+          "date": "2026-09-06T10:15:00+00:00",
+          "timestamp": 1788689700,
+          "periods": {
+            "first": null,
+            "second": null
+          },
+          "venue": {
+            "id": 12276,
+            "name": "Hitachi Capital Mobility Stadion",
+            "city": "Groningen"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": null
+          }
+        },
+        "league": {
+          "id": 88,
+          "name": "Eredivisie",
+          "country": "Netherlands",
+          "logo": "https://media.api-sports.io/football/leagues/88.png",
+          "flag": "https://media.api-sports.io/flags/nl.svg",
+          "season": 2026,
+          "round": "Regular Season - 5",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 202,
+            "name": "Groningen",
+            "logo": "https://media.api-sports.io/football/teams/202.png",
+            "winner": null
+          },
+          "away": {
+            "id": 415,
+            "name": "Twente",
+            "logo": "https://media.api-sports.io/football/teams/415.png",
+            "winner": null
+          }
+        },
+        "goals": {
+          "home": 2,
+          "away": 2
+        },
+        "score": {
+          "halftime": {
+            "home": 2,
+            "away": 2
+          },
+          "fulltime": {
+            "home": 2,
+            "away": 2
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      }
+    ]
+  }
+}

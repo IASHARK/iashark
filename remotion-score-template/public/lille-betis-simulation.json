@@ -1,0 +1,316 @@
+{
+  "match": {
+    "fixtureId": 1635683,
+    "date": "2026-09-08T19:00:00+00:00",
+    "venue": {
+      "id": null,
+      "name": "Stade Pierre-Mauroy",
+      "city": null
+    },
+    "league": {
+      "id": 2,
+      "name": "UEFA Champions League",
+      "country": "World",
+      "logo": "https://media.api-sports.io/football/leagues/2.png",
+      "flag": null,
+      "season": 2026,
+      "round": "League Stage - 1",
+      "standings": true
+    },
+    "home": {
+      "id": 79,
+      "name": "Lille",
+      "logo": "https://media.api-sports.io/football/teams/79.png",
+      "winner": null
+    },
+    "away": {
+      "id": 543,
+      "name": "Real Betis",
+      "logo": "https://media.api-sports.io/football/teams/543.png",
+      "winner": null
+    }
+  },
+  "realData": {
+    "recentMatches": {
+      "home": 10,
+      "away": 10
+    },
+    "injuries": 12,
+    "lineups": "estimated-or-unavailable"
+  },
+  "model": {
+    "strength": {
+      "homeLambda": 1.3968070400000003,
+      "awayLambda": 0.9932510400000001,
+      "evidence": [
+        "Forme récente: 1.90 vs 1.50 buts/match",
+        "Défenses: 1.20 vs 1.00 encaissés/match",
+        "Signal API-Sports Predictions pondéré",
+        "12 absence(s) API détectée(s)"
+      ]
+    },
+    "disclaimer": "Prédiction statistique, pas un résultat réel."
+  },
+  "aggregates": {
+    "simulations": 50000,
+    "homeWin": 46.3,
+    "draw": 27,
+    "awayWin": 26.7,
+    "btts": 47.6,
+    "over25": 42.8,
+    "under25": 57.2,
+    "homeFirst": 53.4,
+    "awayFirst": 37.5,
+    "topScores": [
+      {
+        "score": "1-0",
+        "pct": 12.9
+      },
+      {
+        "score": "1-1",
+        "pct": 12.8
+      },
+      {
+        "score": "0-0",
+        "pct": 9
+      },
+      {
+        "score": "2-1",
+        "pct": 9
+      },
+      {
+        "score": "0-1",
+        "pct": 8.9
+      }
+    ],
+    "topScorers": [
+      {
+        "player": "O. Giroud",
+        "pct": 18.1
+      },
+      {
+        "player": "H. Haraldsson",
+        "pct": 12.5
+      },
+      {
+        "player": "D. Bakwa",
+        "pct": 12.4
+      },
+      {
+        "player": "Rodrigo Riquelme",
+        "pct": 12.2
+      },
+      {
+        "player": "C. Hernández",
+        "pct": 11.4
+      }
+    ]
+  },
+  "scenario": {
+    "score": "2-1",
+    "goals": [
+      {
+        "minute": 15,
+        "player": "Rodrigo Riquelme",
+        "side": "away"
+      },
+      {
+        "minute": 43,
+        "player": "O. Giroud",
+        "side": "home"
+      },
+      {
+        "minute": 69,
+        "player": "O. Giroud",
+        "side": "home"
+      }
+    ],
+    "timeline": [
+      {
+        "minute": 1,
+        "type": "kickoff",
+        "text": "Coup d’envoi."
+      },
+      {
+        "minute": 8,
+        "type": "domination",
+        "side": "home",
+        "text": "Lille installe sa possession dans le camp adverse."
+      },
+      {
+        "minute": 14,
+        "type": "chance",
+        "side": "away",
+        "text": "Première transition dangereuse de Real Betis, arrêt du gardien."
+      },
+      {
+        "minute": 15,
+        "type": "goal",
+        "side": "away",
+        "player": "Rodrigo Riquelme",
+        "text": "BUT Real Betis — Rodrigo Riquelme."
+      },
+      {
+        "minute": 27,
+        "type": "chance",
+        "side": "home",
+        "text": "Grosse occasion pour Lille, frappe repoussée."
+      },
+      {
+        "minute": 43,
+        "type": "goal",
+        "side": "home",
+        "player": "O. Giroud",
+        "text": "BUT Lille — O. Giroud."
+      },
+      {
+        "minute": 45,
+        "type": "half-time",
+        "text": "Mi-temps — 1-1."
+      },
+      {
+        "minute": 55,
+        "type": "domination",
+        "side": "away",
+        "text": "Real Betis augmente le rythme au retour des vestiaires."
+      },
+      {
+        "minute": 63,
+        "type": "substitution",
+        "text": "Premier changement tactique."
+      },
+      {
+        "minute": 69,
+        "type": "goal",
+        "side": "home",
+        "player": "O. Giroud",
+        "text": "BUT Lille — O. Giroud."
+      },
+      {
+        "minute": 72,
+        "type": "card",
+        "text": "Carton jaune après une transition stoppée."
+      },
+      {
+        "minute": 84,
+        "type": "chance",
+        "text": "Dernière grosse occasion, le gardien intervient."
+      },
+      {
+        "minute": 90,
+        "type": "full-time",
+        "text": "Fin du match — 2-1."
+      }
+    ],
+    "stats": {
+      "possession": {
+        "home": 52,
+        "away": 48
+      },
+      "shots": {
+        "home": 16,
+        "away": 12
+      },
+      "shotsOnTarget": {
+        "home": 5,
+        "away": 3
+      },
+      "bigChances": {
+        "home": 3,
+        "away": 2
+      },
+      "corners": {
+        "home": 6,
+        "away": 5
+      },
+      "xg": {
+        "home": 1.99,
+        "away": 1.24
+      },
+      "fouls": {
+        "home": 11,
+        "away": 13
+      },
+      "yellowCards": {
+        "home": 2,
+        "away": 3
+      }
+    },
+    "manOfTheMatch": "O. Giroud"
+  },
+  "apiAudit": {
+    "retrievedAt": "2026-09-08T06:57:20.527Z",
+    "endpoints": [
+      {
+        "endpoint": "/fixtures?date=2026-09-08",
+        "available": true,
+        "cached": true
+      },
+      {
+        "endpoint": "/predictions?fixture=1635683",
+        "available": true,
+        "cached": true
+      },
+      {
+        "endpoint": "/fixtures/headtohead?h2h=79-543&last=10",
+        "available": false,
+        "cached": true
+      },
+      {
+        "endpoint": "/fixtures?team=79&last=10",
+        "available": true,
+        "cached": true
+      },
+      {
+        "endpoint": "/injuries?fixture=1635683",
+        "available": true,
+        "cached": true
+      },
+      {
+        "endpoint": "/fixtures?team=543&last=10",
+        "available": true,
+        "cached": true
+      },
+      {
+        "endpoint": "/teams/statistics?team=79&league=2&season=2026",
+        "available": false,
+        "cached": true
+      },
+      {
+        "endpoint": "/teams/statistics?team=543&league=2&season=2026",
+        "available": false,
+        "cached": true
+      },
+      {
+        "endpoint": "/fixtures/lineups?fixture=1635683",
+        "available": false,
+        "cached": true
+      },
+      {
+        "endpoint": "/players?team=79&season=2026",
+        "available": true,
+        "cached": true
+      },
+      {
+        "endpoint": "/players/squads?team=79",
+        "available": true,
+        "cached": true
+      },
+      {
+        "endpoint": "/players/squads?team=543",
+        "available": true,
+        "cached": true
+      },
+      {
+        "endpoint": "/players?team=543&season=2026",
+        "available": true,
+        "cached": true
+      },
+      {
+        "endpoint": "/odds?fixture=1635683",
+        "available": true,
+        "cached": true
+      }
+    ]
+  }
+}

@@ -1,0 +1,96 @@
+{
+  "endpoint": "/fixtures",
+  "params": {
+    "last": 1,
+    "status": "FT-AET-PEN",
+    "team": 249
+  },
+  "retrieved_at": "2026-09-08T16:05:04Z",
+  "response_hash": "9d6fcf9287b39fdf4a7a94ec68db5dba7827e8c6f601ffb6f4eff6a74d4844fe",
+  "response": {
+    "get": "fixtures",
+    "parameters": {
+      "last": "1",
+      "status": "FT-AET-PEN",
+      "team": "249"
+    },
+    "errors": [],
+    "results": 1,
+    "paging": {
+      "current": 1,
+      "total": 1
+    },
+    "response": [
+      {
+        "fixture": {
+          "id": 1556662,
+          "referee": "S. McLean",
+          "timezone": "UTC",
+          "date": "2026-09-06T14:00:00+00:00",
+          "timestamp": 1788703200,
+          "periods": {
+            "first": 1788703200,
+            "second": 1788706800
+          },
+          "venue": {
+            "id": 1403,
+            "name": "McDiarmid Park",
+            "city": "Perth"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": null
+          }
+        },
+        "league": {
+          "id": 179,
+          "name": "Premiership",
+          "country": "Scotland",
+          "logo": "https://media.api-sports.io/football/leagues/179.png",
+          "flag": "https://media.api-sports.io/flags/gb-sct.svg",
+          "season": 2026,
+          "round": "Regular Season - 6",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 258,
+            "name": "ST Johnstone",
+            "logo": "https://media.api-sports.io/football/teams/258.png",
+            "winner": true
+          },
+          "away": {
+            "id": 249,
+            "name": "Hibernian",
+            "logo": "https://media.api-sports.io/football/teams/249.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 2,
+          "away": 1
+        },
+        "score": {
+          "halftime": {
+            "home": 2,
+            "away": 1
+          },
+          "fulltime": {
+            "home": 2,
+            "away": 1
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      }
+    ]
+  }
+}

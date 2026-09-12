@@ -1,0 +1,168 @@
+{
+  "endpoint": "/fixtures",
+  "params": {
+    "league": 2,
+    "season": 2025,
+    "status": "FT-AET-PEN",
+    "team": 247
+  },
+  "retrieved_at": "2026-09-08T18:54:04Z",
+  "response_hash": "a4963c17cd9255b2015b246d5d1a56113265c1da19fe87427640806e3244f8cb",
+  "response": {
+    "get": "fixtures",
+    "parameters": {
+      "league": "2",
+      "season": "2025",
+      "status": "FT-AET-PEN",
+      "team": "247"
+    },
+    "errors": [],
+    "results": 2,
+    "paging": {
+      "current": 1,
+      "total": 1
+    },
+    "response": [
+      {
+        "fixture": {
+          "id": 1435549,
+          "referee": "E. Eskas",
+          "timezone": "UTC",
+          "date": "2025-08-20T19:00:00+00:00",
+          "timestamp": 1755716400,
+          "periods": {
+            "first": 1755716400,
+            "second": 1755720000
+          },
+          "venue": {
+            "id": null,
+            "name": "Celtic Park",
+            "city": "Glasgow"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 11
+          }
+        },
+        "league": {
+          "id": 2,
+          "name": "UEFA Champions League",
+          "country": "World",
+          "logo": "https://media.api-sports.io/football/leagues/2.png",
+          "flag": null,
+          "season": 2025,
+          "round": "Play-offs",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 247,
+            "name": "Celtic",
+            "logo": "https://media.api-sports.io/football/teams/247.png",
+            "winner": null
+          },
+          "away": {
+            "id": 664,
+            "name": "Kairat Almaty",
+            "logo": "https://media.api-sports.io/football/teams/664.png",
+            "winner": null
+          }
+        },
+        "goals": {
+          "home": 0,
+          "away": 0
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 0,
+            "away": 0
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1435551,
+          "referee": "M. Mariani",
+          "timezone": "UTC",
+          "date": "2025-08-26T16:45:00+00:00",
+          "timestamp": 1756226700,
+          "periods": {
+            "first": 1756226700,
+            "second": 1756230300
+          },
+          "venue": {
+            "id": null,
+            "name": "Almaty Central Stadium",
+            "city": "Almaty"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "PEN",
+            "elapsed": 120,
+            "extra": null
+          }
+        },
+        "league": {
+          "id": 2,
+          "name": "UEFA Champions League",
+          "country": "World",
+          "logo": "https://media.api-sports.io/football/leagues/2.png",
+          "flag": null,
+          "season": 2025,
+          "round": "Play-offs",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 664,
+            "name": "Kairat Almaty",
+            "logo": "https://media.api-sports.io/football/teams/664.png",
+            "winner": true
+          },
+          "away": {
+            "id": 247,
+            "name": "Celtic",
+            "logo": "https://media.api-sports.io/football/teams/247.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 0,
+          "away": 0
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 0,
+            "away": 0
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": 3,
+            "away": 2
+          }
+        }
+      }
+    ]
+  }
+}

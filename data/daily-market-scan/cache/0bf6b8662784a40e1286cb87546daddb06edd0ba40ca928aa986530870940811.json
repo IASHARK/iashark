@@ -1,0 +1,164 @@
+{
+  "endpoint": "/fixtures/headtohead",
+  "params": {
+    "h2h": "259-736",
+    "last": 5
+  },
+  "retrieved_at": "2026-09-08T21:02:56Z",
+  "response_hash": "552a6663eba88d88e937823a25a3cba51015c020b18be244953c2ece4256c098",
+  "response": {
+    "get": "fixtures/headtohead",
+    "parameters": {
+      "h2h": "259-736",
+      "last": "5"
+    },
+    "errors": [],
+    "results": 2,
+    "paging": {
+      "current": 1,
+      "total": 1
+    },
+    "response": [
+      {
+        "fixture": {
+          "id": 1558598,
+          "referee": "Kevin van Damme, Belgium",
+          "timezone": "UTC",
+          "date": "2026-08-16T17:15:00+00:00",
+          "timestamp": 1786900500,
+          "periods": {
+            "first": 1786900500,
+            "second": 1786904100
+          },
+          "venue": {
+            "id": null,
+            "name": "Soevereinstadion",
+            "city": "Lommel"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 4
+          }
+        },
+        "league": {
+          "id": 144,
+          "name": "Jupiler Pro League",
+          "country": "Belgium",
+          "logo": "https://media.api-sports.io/football/leagues/144.png",
+          "flag": "https://media.api-sports.io/flags/be.svg",
+          "season": 2026,
+          "round": "Regular Season - 2",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 259,
+            "name": "Lommel United",
+            "logo": "https://media.api-sports.io/football/teams/259.png",
+            "winner": false
+          },
+          "away": {
+            "id": 736,
+            "name": "Charleroi",
+            "logo": "https://media.api-sports.io/football/teams/736.png",
+            "winner": true
+          }
+        },
+        "goals": {
+          "home": 0,
+          "away": 1
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 0,
+            "away": 1
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 800633,
+          "referee": "J. Boterberg",
+          "timezone": "UTC",
+          "date": "2021-10-27T18:00:00+00:00",
+          "timestamp": 1635357600,
+          "periods": {
+            "first": 1635357600,
+            "second": 1635361200
+          },
+          "venue": {
+            "id": 177,
+            "name": "Stade du Pays de Charleroi",
+            "city": "Charleroi"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "PEN",
+            "elapsed": 120,
+            "extra": null
+          }
+        },
+        "league": {
+          "id": 147,
+          "name": "Cup",
+          "country": "Belgium",
+          "logo": "https://media.api-sports.io/football/leagues/147.png",
+          "flag": "https://media.api-sports.io/flags/be.svg",
+          "season": 2021,
+          "round": "Round of 32",
+          "standings": false
+        },
+        "teams": {
+          "home": {
+            "id": 736,
+            "name": "Charleroi",
+            "logo": "https://media.api-sports.io/football/teams/736.png",
+            "winner": false
+          },
+          "away": {
+            "id": 259,
+            "name": "Lommel United",
+            "logo": "https://media.api-sports.io/football/teams/259.png",
+            "winner": true
+          }
+        },
+        "goals": {
+          "home": 0,
+          "away": 0
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 0,
+            "away": 0
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": 0,
+            "away": 1
+          }
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,866 @@
+{
+  "endpoint": "/fixtures",
+  "params": {
+    "last": 12,
+    "status": "FT-AET-PEN",
+    "team": 20787
+  },
+  "retrieved_at": "2026-09-08T16:03:38Z",
+  "response_hash": "d98d69af62510d4bfbf0d8fefc37df7355f716be24840e351f66f3362eeccf10",
+  "response": {
+    "get": "fixtures",
+    "parameters": {
+      "last": "12",
+      "status": "FT-AET-PEN",
+      "team": "20787"
+    },
+    "errors": [],
+    "results": 12,
+    "paging": {
+      "current": 1,
+      "total": 1
+    },
+    "response": [
+      {
+        "fixture": {
+          "id": 1490449,
+          "referee": null,
+          "timezone": "UTC",
+          "date": "2026-09-06T02:30:00+00:00",
+          "timestamp": 1788661800,
+          "periods": {
+            "first": null,
+            "second": null
+          },
+          "venue": {
+            "id": null,
+            "name": "BC Place",
+            "city": "Vancouver"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": null
+          }
+        },
+        "league": {
+          "id": 253,
+          "name": "Major League Soccer",
+          "country": "USA",
+          "logo": "https://media.api-sports.io/football/leagues/253.png",
+          "flag": "https://media.api-sports.io/flags/us.svg",
+          "season": 2026,
+          "round": "Regular Season - 23",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 1603,
+            "name": "Vancouver Whitecaps",
+            "logo": "https://media.api-sports.io/football/teams/1603.png",
+            "winner": false
+          },
+          "away": {
+            "id": 20787,
+            "name": "St. Louis City",
+            "logo": "https://media.api-sports.io/football/teams/20787.png",
+            "winner": true
+          }
+        },
+        "goals": {
+          "home": 1,
+          "away": 3
+        },
+        "score": {
+          "halftime": {
+            "home": 1,
+            "away": 3
+          },
+          "fulltime": {
+            "home": 1,
+            "away": 3
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1490435,
+          "referee": "Jair Antonio Maruffo, USA",
+          "timezone": "UTC",
+          "date": "2026-08-30T23:00:00+00:00",
+          "timestamp": 1788130800,
+          "periods": {
+            "first": 1788130800,
+            "second": 1788134400
+          },
+          "venue": {
+            "id": null,
+            "name": "Energizer Park",
+            "city": "St. Louis"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 8
+          }
+        },
+        "league": {
+          "id": 253,
+          "name": "Major League Soccer",
+          "country": "USA",
+          "logo": "https://media.api-sports.io/football/leagues/253.png",
+          "flag": "https://media.api-sports.io/flags/us.svg",
+          "season": 2026,
+          "round": "Regular Season - 22",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 20787,
+            "name": "St. Louis City",
+            "logo": "https://media.api-sports.io/football/teams/20787.png",
+            "winner": null
+          },
+          "away": {
+            "id": 1597,
+            "name": "FC Dallas",
+            "logo": "https://media.api-sports.io/football/teams/1597.png",
+            "winner": null
+          }
+        },
+        "goals": {
+          "home": 3,
+          "away": 3
+        },
+        "score": {
+          "halftime": {
+            "home": 2,
+            "away": 1
+          },
+          "fulltime": {
+            "home": 3,
+            "away": 3
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1490414,
+          "referee": "A. Da Silva",
+          "timezone": "UTC",
+          "date": "2026-08-23T00:30:00+00:00",
+          "timestamp": 1787445000,
+          "periods": {
+            "first": 1787445000,
+            "second": 1787448600
+          },
+          "venue": {
+            "id": null,
+            "name": "CITYPARK",
+            "city": "St. Louis"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 10
+          }
+        },
+        "league": {
+          "id": 253,
+          "name": "Major League Soccer",
+          "country": "USA",
+          "logo": "https://media.api-sports.io/football/leagues/253.png",
+          "flag": "https://media.api-sports.io/flags/us.svg",
+          "season": 2026,
+          "round": "Regular Season - 21",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 20787,
+            "name": "St. Louis City",
+            "logo": "https://media.api-sports.io/football/teams/20787.png",
+            "winner": true
+          },
+          "away": {
+            "id": 1600,
+            "name": "Houston Dynamo",
+            "logo": "https://media.api-sports.io/football/teams/1600.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 2,
+          "away": 1
+        },
+        "score": {
+          "halftime": {
+            "home": 1,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 2,
+            "away": 1
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1490398,
+          "referee": "Victor Rivas, USA",
+          "timezone": "UTC",
+          "date": "2026-08-20T00:00:00+00:00",
+          "timestamp": 1787184000,
+          "periods": {
+            "first": 1787184000,
+            "second": 1787187600
+          },
+          "venue": {
+            "id": 0,
+            "name": "Children's Mercy Park",
+            "city": "Kansas City"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 6
+          }
+        },
+        "league": {
+          "id": 253,
+          "name": "Major League Soccer",
+          "country": "USA",
+          "logo": "https://media.api-sports.io/football/leagues/253.png",
+          "flag": "https://media.api-sports.io/flags/us.svg",
+          "season": 2026,
+          "round": "Regular Season - 20",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 1611,
+            "name": "Sporting Kansas City",
+            "logo": "https://media.api-sports.io/football/teams/1611.png",
+            "winner": null
+          },
+          "away": {
+            "id": 20787,
+            "name": "St. Louis City",
+            "logo": "https://media.api-sports.io/football/teams/20787.png",
+            "winner": null
+          }
+        },
+        "goals": {
+          "home": 1,
+          "away": 1
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 1
+          },
+          "fulltime": {
+            "home": 1,
+            "away": 1
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1490387,
+          "referee": "J. Freemon",
+          "timezone": "UTC",
+          "date": "2026-08-16T02:30:00+00:00",
+          "timestamp": 1786847400,
+          "periods": {
+            "first": 1786847400,
+            "second": 1786851000
+          },
+          "venue": {
+            "id": null,
+            "name": "PayPal Park",
+            "city": "San Jose"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 4
+          }
+        },
+        "league": {
+          "id": 253,
+          "name": "Major League Soccer",
+          "country": "USA",
+          "logo": "https://media.api-sports.io/football/leagues/253.png",
+          "flag": "https://media.api-sports.io/flags/us.svg",
+          "season": 2026,
+          "round": "Regular Season - 19",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 1596,
+            "name": "San Jose Earthquakes",
+            "logo": "https://media.api-sports.io/football/teams/1596.png",
+            "winner": false
+          },
+          "away": {
+            "id": 20787,
+            "name": "St. Louis City",
+            "logo": "https://media.api-sports.io/football/teams/20787.png",
+            "winner": true
+          }
+        },
+        "goals": {
+          "home": 1,
+          "away": 3
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 2
+          },
+          "fulltime": {
+            "home": 1,
+            "away": 3
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1490372,
+          "referee": "C. Penso",
+          "timezone": "UTC",
+          "date": "2026-08-02T00:30:00+00:00",
+          "timestamp": 1785630600,
+          "periods": {
+            "first": 1785630600,
+            "second": 1785634200
+          },
+          "venue": {
+            "id": null,
+            "name": "CITYPARK",
+            "city": "St. Louis"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 4
+          }
+        },
+        "league": {
+          "id": 253,
+          "name": "Major League Soccer",
+          "country": "USA",
+          "logo": "https://media.api-sports.io/football/leagues/253.png",
+          "flag": "https://media.api-sports.io/flags/us.svg",
+          "season": 2026,
+          "round": "Regular Season - 18",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 20787,
+            "name": "St. Louis City",
+            "logo": "https://media.api-sports.io/football/teams/20787.png",
+            "winner": null
+          },
+          "away": {
+            "id": 1606,
+            "name": "Real Salt Lake",
+            "logo": "https://media.api-sports.io/football/teams/1606.png",
+            "winner": null
+          }
+        },
+        "goals": {
+          "home": 1,
+          "away": 1
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 1,
+            "away": 1
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1490356,
+          "referee": "Nabil Bensalah, USA",
+          "timezone": "UTC",
+          "date": "2026-07-26T00:30:00+00:00",
+          "timestamp": 1785025800,
+          "periods": {
+            "first": 1785025800,
+            "second": 1785029400
+          },
+          "venue": {
+            "id": null,
+            "name": "Energizer Park",
+            "city": "St. Louis"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 6
+          }
+        },
+        "league": {
+          "id": 253,
+          "name": "Major League Soccer",
+          "country": "USA",
+          "logo": "https://media.api-sports.io/football/leagues/253.png",
+          "flag": "https://media.api-sports.io/flags/us.svg",
+          "season": 2026,
+          "round": "Regular Season - 17",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 20787,
+            "name": "St. Louis City",
+            "logo": "https://media.api-sports.io/football/teams/20787.png",
+            "winner": true
+          },
+          "away": {
+            "id": 1610,
+            "name": "Colorado Rapids",
+            "logo": "https://media.api-sports.io/football/teams/1610.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 1,
+          "away": 0
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 1,
+            "away": 0
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1490343,
+          "referee": "Malik Badawi, USA",
+          "timezone": "UTC",
+          "date": "2026-07-23T02:30:00+00:00",
+          "timestamp": 1784773800,
+          "periods": {
+            "first": 1784773800,
+            "second": 1784777400
+          },
+          "venue": {
+            "id": null,
+            "name": "Dignity Health Sports Park",
+            "city": "Carson"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 5
+          }
+        },
+        "league": {
+          "id": 253,
+          "name": "Major League Soccer",
+          "country": "USA",
+          "logo": "https://media.api-sports.io/football/leagues/253.png",
+          "flag": "https://media.api-sports.io/flags/us.svg",
+          "season": 2026,
+          "round": "Regular Season - 16",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 1605,
+            "name": "Los Angeles Galaxy",
+            "logo": "https://media.api-sports.io/football/teams/1605.png",
+            "winner": false
+          },
+          "away": {
+            "id": 20787,
+            "name": "St. Louis City",
+            "logo": "https://media.api-sports.io/football/teams/20787.png",
+            "winner": true
+          }
+        },
+        "goals": {
+          "home": 1,
+          "away": 3
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 2
+          },
+          "fulltime": {
+            "home": 1,
+            "away": 3
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1490327,
+          "referee": "Allen Chapman, USA",
+          "timezone": "UTC",
+          "date": "2026-07-17T00:30:00+00:00",
+          "timestamp": 1784248200,
+          "periods": {
+            "first": 1784248200,
+            "second": 1784251800
+          },
+          "venue": {
+            "id": null,
+            "name": "Energizer Park",
+            "city": "St. Louis"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 9
+          }
+        },
+        "league": {
+          "id": 253,
+          "name": "Major League Soccer",
+          "country": "USA",
+          "logo": "https://media.api-sports.io/football/leagues/253.png",
+          "flag": "https://media.api-sports.io/flags/us.svg",
+          "season": 2026,
+          "round": "Regular Season - 16",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 20787,
+            "name": "St. Louis City",
+            "logo": "https://media.api-sports.io/football/teams/20787.png",
+            "winner": true
+          },
+          "away": {
+            "id": 1611,
+            "name": "Sporting Kansas City",
+            "logo": "https://media.api-sports.io/football/teams/1611.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 3,
+          "away": 2
+        },
+        "score": {
+          "halftime": {
+            "home": 2,
+            "away": 1
+          },
+          "fulltime": {
+            "home": 3,
+            "away": 2
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1490310,
+          "referee": "Pierre-Luc Lauziere, USA",
+          "timezone": "UTC",
+          "date": "2026-05-23T18:45:00+00:00",
+          "timestamp": 1779561900,
+          "periods": {
+            "first": 1779561900,
+            "second": 1779565500
+          },
+          "venue": {
+            "id": null,
+            "name": "Energizer Park",
+            "city": "St. Louis"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 6
+          }
+        },
+        "league": {
+          "id": 253,
+          "name": "Major League Soccer",
+          "country": "USA",
+          "logo": "https://media.api-sports.io/football/leagues/253.png",
+          "flag": "https://media.api-sports.io/flags/us.svg",
+          "season": 2026,
+          "round": "Regular Season - 15",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 20787,
+            "name": "St. Louis City",
+            "logo": "https://media.api-sports.io/football/teams/20787.png",
+            "winner": true
+          },
+          "away": {
+            "id": 16489,
+            "name": "Austin",
+            "logo": "https://media.api-sports.io/football/teams/16489.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 3,
+          "away": 0
+        },
+        "score": {
+          "halftime": {
+            "home": 1,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 3,
+            "away": 0
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1543867,
+          "referee": "S. Demianchuk",
+          "timezone": "UTC",
+          "date": "2026-05-20T00:00:00+00:00",
+          "timestamp": 1779235200,
+          "periods": {
+            "first": 1779235200,
+            "second": 1779238800
+          },
+          "venue": {
+            "id": null,
+            "name": "CITYPARK",
+            "city": null
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "PEN",
+            "elapsed": 120,
+            "extra": null
+          }
+        },
+        "league": {
+          "id": 257,
+          "name": "US Open Cup",
+          "country": "USA",
+          "logo": "https://media.api-sports.io/football/leagues/257.png",
+          "flag": "https://media.api-sports.io/flags/us.svg",
+          "season": 2026,
+          "round": "Quarter-finals",
+          "standings": false
+        },
+        "teams": {
+          "home": {
+            "id": 20787,
+            "name": "St. Louis City",
+            "logo": "https://media.api-sports.io/football/teams/20787.png",
+            "winner": true
+          },
+          "away": {
+            "id": 1600,
+            "name": "Houston Dynamo",
+            "logo": "https://media.api-sports.io/football/teams/1600.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 2,
+          "away": 2
+        },
+        "score": {
+          "halftime": {
+            "home": 1,
+            "away": 2
+          },
+          "fulltime": {
+            "home": 2,
+            "away": 2
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": 4,
+            "away": 2
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1490301,
+          "referee": "R. Albuquerque",
+          "timezone": "UTC",
+          "date": "2026-05-16T23:30:00+00:00",
+          "timestamp": 1778974200,
+          "periods": {
+            "first": 1778974200,
+            "second": 1778977800
+          },
+          "venue": {
+            "id": null,
+            "name": "Audi Field",
+            "city": "Washington"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 13
+          }
+        },
+        "league": {
+          "id": 253,
+          "name": "Major League Soccer",
+          "country": "USA",
+          "logo": "https://media.api-sports.io/football/leagues/253.png",
+          "flag": "https://media.api-sports.io/flags/us.svg",
+          "season": 2026,
+          "round": "Regular Season - 14",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 1615,
+            "name": "DC United",
+            "logo": "https://media.api-sports.io/football/teams/1615.png",
+            "winner": null
+          },
+          "away": {
+            "id": 20787,
+            "name": "St. Louis City",
+            "logo": "https://media.api-sports.io/football/teams/20787.png",
+            "winner": null
+          }
+        },
+        "goals": {
+          "home": 1,
+          "away": 1
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 1,
+            "away": 1
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      }
+    ]
+  }
+}

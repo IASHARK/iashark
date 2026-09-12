@@ -1,0 +1,238 @@
+{
+  "endpoint": "/fixtures",
+  "params": {
+    "league": 135,
+    "season": 2026,
+    "status": "FT-AET-PEN",
+    "team": 503
+  },
+  "retrieved_at": "2026-09-08T15:58:15Z",
+  "response_hash": "256c035fe1e8cbdb229286725fc6b927b18f3510cad64ce5edf6b1aede9a2369",
+  "response": {
+    "get": "fixtures",
+    "parameters": {
+      "league": "135",
+      "season": "2026",
+      "status": "FT-AET-PEN",
+      "team": "503"
+    },
+    "errors": [],
+    "results": 3,
+    "paging": {
+      "current": 1,
+      "total": 1
+    },
+    "response": [
+      {
+        "fixture": {
+          "id": 1550094,
+          "referee": "Luca Zufferli, Italy",
+          "timezone": "UTC",
+          "date": "2026-08-23T18:45:00+00:00",
+          "timestamp": 1787510700,
+          "periods": {
+            "first": 1787510700,
+            "second": 1787514300
+          },
+          "venue": {
+            "id": null,
+            "name": "Stadio Olimpico Grande Torino",
+            "city": "Turin"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 4
+          }
+        },
+        "league": {
+          "id": 135,
+          "name": "Serie A",
+          "country": "Italy",
+          "logo": "https://media.api-sports.io/football/leagues/135.png",
+          "flag": "https://media.api-sports.io/flags/it.svg",
+          "season": 2026,
+          "round": "Regular Season - 1",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 503,
+            "name": "Torino",
+            "logo": "https://media.api-sports.io/football/teams/503.png",
+            "winner": false
+          },
+          "away": {
+            "id": 489,
+            "name": "AC Milan",
+            "logo": "https://media.api-sports.io/football/teams/489.png",
+            "winner": true
+          }
+        },
+        "goals": {
+          "home": 1,
+          "away": 2
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 1,
+            "away": 2
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1550106,
+          "referee": "Davide Di Marco, Italy",
+          "timezone": "UTC",
+          "date": "2026-08-29T16:30:00+00:00",
+          "timestamp": 1788021000,
+          "periods": {
+            "first": 1788021000,
+            "second": 1788024600
+          },
+          "venue": {
+            "id": null,
+            "name": "Mapei Stadium",
+            "city": "Reggio Emilia"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": null
+          }
+        },
+        "league": {
+          "id": 135,
+          "name": "Serie A",
+          "country": "Italy",
+          "logo": "https://media.api-sports.io/football/leagues/135.png",
+          "flag": "https://media.api-sports.io/flags/it.svg",
+          "season": 2026,
+          "round": "Regular Season - 2",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 488,
+            "name": "Sassuolo",
+            "logo": "https://media.api-sports.io/football/teams/488.png",
+            "winner": true
+          },
+          "away": {
+            "id": 503,
+            "name": "Torino",
+            "logo": "https://media.api-sports.io/football/teams/503.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 2,
+          "away": 1
+        },
+        "score": {
+          "halftime": {
+            "home": 1,
+            "away": 1
+          },
+          "fulltime": {
+            "home": 2,
+            "away": 1
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1550110,
+          "referee": "Davide Massa, Italy",
+          "timezone": "UTC",
+          "date": "2026-09-05T13:00:00+00:00",
+          "timestamp": 1788613200,
+          "periods": {
+            "first": null,
+            "second": null
+          },
+          "venue": {
+            "id": null,
+            "name": "Stadio Artemio Franchi",
+            "city": "Florence"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": null
+          }
+        },
+        "league": {
+          "id": 135,
+          "name": "Serie A",
+          "country": "Italy",
+          "logo": "https://media.api-sports.io/football/leagues/135.png",
+          "flag": "https://media.api-sports.io/flags/it.svg",
+          "season": 2026,
+          "round": "Regular Season - 3",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 502,
+            "name": "Fiorentina",
+            "logo": "https://media.api-sports.io/football/teams/502.png",
+            "winner": false
+          },
+          "away": {
+            "id": 503,
+            "name": "Torino",
+            "logo": "https://media.api-sports.io/football/teams/503.png",
+            "winner": true
+          }
+        },
+        "goals": {
+          "home": 1,
+          "away": 2
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 1,
+            "away": 2
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      }
+    ]
+  }
+}

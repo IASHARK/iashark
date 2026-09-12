@@ -1,0 +1,588 @@
+{
+  "endpoint": "/fixtures",
+  "params": {
+    "league": 2,
+    "season": 2025,
+    "status": "FT-AET-PEN",
+    "team": 492
+  },
+  "retrieved_at": "2026-09-08T21:45:49Z",
+  "response_hash": "0d823ee21938e8efb9af858cbd644836d4d7c7592dc154768c06f7df4ddfc2fe",
+  "response": {
+    "get": "fixtures",
+    "parameters": {
+      "league": "2",
+      "season": "2025",
+      "status": "FT-AET-PEN",
+      "team": "492"
+    },
+    "errors": [],
+    "results": 8,
+    "paging": {
+      "current": 1,
+      "total": 1
+    },
+    "response": [
+      {
+        "fixture": {
+          "id": 1451037,
+          "referee": "F. Zwayer",
+          "timezone": "UTC",
+          "date": "2025-09-18T19:00:00+00:00",
+          "timestamp": 1758222000,
+          "periods": {
+            "first": 1758222000,
+            "second": 1758225600
+          },
+          "venue": {
+            "id": null,
+            "name": "Etihad Stadium",
+            "city": "Manchester"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 3
+          }
+        },
+        "league": {
+          "id": 2,
+          "name": "UEFA Champions League",
+          "country": "World",
+          "logo": "https://media.api-sports.io/football/leagues/2.png",
+          "flag": null,
+          "season": 2025,
+          "round": "League Stage - 1",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 50,
+            "name": "Manchester City",
+            "logo": "https://media.api-sports.io/football/teams/50.png",
+            "winner": true
+          },
+          "away": {
+            "id": 492,
+            "name": "Napoli",
+            "logo": "https://media.api-sports.io/football/teams/492.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 2,
+          "away": 0
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 2,
+            "away": 0
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1451053,
+          "referee": "D. Makkelie",
+          "timezone": "UTC",
+          "date": "2025-10-01T19:00:00+00:00",
+          "timestamp": 1759345200,
+          "periods": {
+            "first": 1759345200,
+            "second": 1759348800
+          },
+          "venue": {
+            "id": null,
+            "name": "Stadio Diego Armando Maradona",
+            "city": "Naples"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 5
+          }
+        },
+        "league": {
+          "id": 2,
+          "name": "UEFA Champions League",
+          "country": "World",
+          "logo": "https://media.api-sports.io/football/leagues/2.png",
+          "flag": null,
+          "season": 2025,
+          "round": "League Stage - 2",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 492,
+            "name": "Napoli",
+            "logo": "https://media.api-sports.io/football/teams/492.png",
+            "winner": true
+          },
+          "away": {
+            "id": 228,
+            "name": "Sporting CP",
+            "logo": "https://media.api-sports.io/football/teams/228.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 2,
+          "away": 1
+        },
+        "score": {
+          "halftime": {
+            "home": 1,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 2,
+            "away": 1
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1451059,
+          "referee": "D. Siebert",
+          "timezone": "UTC",
+          "date": "2025-10-21T19:00:00+00:00",
+          "timestamp": 1761073200,
+          "periods": {
+            "first": 1761073200,
+            "second": 1761076800
+          },
+          "venue": {
+            "id": null,
+            "name": "Philips Stadion",
+            "city": "Eindhoven"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 5
+          }
+        },
+        "league": {
+          "id": 2,
+          "name": "UEFA Champions League",
+          "country": "World",
+          "logo": "https://media.api-sports.io/football/leagues/2.png",
+          "flag": null,
+          "season": 2025,
+          "round": "League Stage - 3",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 197,
+            "name": "PSV Eindhoven",
+            "logo": "https://media.api-sports.io/football/teams/197.png",
+            "winner": true
+          },
+          "away": {
+            "id": 492,
+            "name": "Napoli",
+            "logo": "https://media.api-sports.io/football/teams/492.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 6,
+          "away": 2
+        },
+        "score": {
+          "halftime": {
+            "home": 2,
+            "away": 1
+          },
+          "fulltime": {
+            "home": 6,
+            "away": 2
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1451074,
+          "referee": "J. Pinheiro",
+          "timezone": "UTC",
+          "date": "2025-11-04T17:45:00+00:00",
+          "timestamp": 1762278300,
+          "periods": {
+            "first": 1762278300,
+            "second": 1762281900
+          },
+          "venue": {
+            "id": null,
+            "name": "Stadio Diego Armando Maradona",
+            "city": "Naples"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 7
+          }
+        },
+        "league": {
+          "id": 2,
+          "name": "UEFA Champions League",
+          "country": "World",
+          "logo": "https://media.api-sports.io/football/leagues/2.png",
+          "flag": null,
+          "season": 2025,
+          "round": "League Stage - 4",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 492,
+            "name": "Napoli",
+            "logo": "https://media.api-sports.io/football/teams/492.png",
+            "winner": null
+          },
+          "away": {
+            "id": 169,
+            "name": "Eintracht Frankfurt",
+            "logo": "https://media.api-sports.io/football/teams/169.png",
+            "winner": null
+          }
+        },
+        "goals": {
+          "home": 0,
+          "away": 0
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 0,
+            "away": 0
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1451097,
+          "referee": "S. Marciniak",
+          "timezone": "UTC",
+          "date": "2025-11-25T20:00:00+00:00",
+          "timestamp": 1764100800,
+          "periods": {
+            "first": 1764100800,
+            "second": 1764104400
+          },
+          "venue": {
+            "id": null,
+            "name": "Stadio Diego Armando Maradona",
+            "city": "Naples"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 7
+          }
+        },
+        "league": {
+          "id": 2,
+          "name": "UEFA Champions League",
+          "country": "World",
+          "logo": "https://media.api-sports.io/football/leagues/2.png",
+          "flag": null,
+          "season": 2025,
+          "round": "League Stage - 5",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 492,
+            "name": "Napoli",
+            "logo": "https://media.api-sports.io/football/teams/492.png",
+            "winner": true
+          },
+          "away": {
+            "id": 556,
+            "name": "Qarabag",
+            "logo": "https://media.api-sports.io/football/teams/556.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 2,
+          "away": 0
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 2,
+            "away": 0
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1451127,
+          "referee": "S. Vincic",
+          "timezone": "UTC",
+          "date": "2025-12-10T20:00:00+00:00",
+          "timestamp": 1765396800,
+          "periods": {
+            "first": 1765396800,
+            "second": 1765400400
+          },
+          "venue": {
+            "id": null,
+            "name": "Est\u00e1dio da Luz",
+            "city": "Lisbon"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 9
+          }
+        },
+        "league": {
+          "id": 2,
+          "name": "UEFA Champions League",
+          "country": "World",
+          "logo": "https://media.api-sports.io/football/leagues/2.png",
+          "flag": null,
+          "season": 2025,
+          "round": "League Stage - 6",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 211,
+            "name": "Benfica",
+            "logo": "https://media.api-sports.io/football/teams/211.png",
+            "winner": true
+          },
+          "away": {
+            "id": 492,
+            "name": "Napoli",
+            "logo": "https://media.api-sports.io/football/teams/492.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 2,
+          "away": 0
+        },
+        "score": {
+          "halftime": {
+            "home": 1,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 2,
+            "away": 0
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1451132,
+          "referee": "I. Peljto",
+          "timezone": "UTC",
+          "date": "2026-01-20T20:00:00+00:00",
+          "timestamp": 1768939200,
+          "periods": {
+            "first": 1768939200,
+            "second": 1768942800
+          },
+          "venue": {
+            "id": null,
+            "name": "Parken Stadium",
+            "city": "Copenhagen"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 8
+          }
+        },
+        "league": {
+          "id": 2,
+          "name": "UEFA Champions League",
+          "country": "World",
+          "logo": "https://media.api-sports.io/football/leagues/2.png",
+          "flag": null,
+          "season": 2025,
+          "round": "League Stage - 7",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 400,
+            "name": "FC Copenhagen",
+            "logo": "https://media.api-sports.io/football/teams/400.png",
+            "winner": null
+          },
+          "away": {
+            "id": 492,
+            "name": "Napoli",
+            "logo": "https://media.api-sports.io/football/teams/492.png",
+            "winner": null
+          }
+        },
+        "goals": {
+          "home": 1,
+          "away": 1
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 1
+          },
+          "fulltime": {
+            "home": 1,
+            "away": 1
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1451146,
+          "referee": "C. Turpin",
+          "timezone": "UTC",
+          "date": "2026-01-28T20:00:00+00:00",
+          "timestamp": 1769630400,
+          "periods": {
+            "first": 1769630400,
+            "second": 1769634000
+          },
+          "venue": {
+            "id": null,
+            "name": "Stadio Diego Armando Maradona",
+            "city": "Naples"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 6
+          }
+        },
+        "league": {
+          "id": 2,
+          "name": "UEFA Champions League",
+          "country": "World",
+          "logo": "https://media.api-sports.io/football/leagues/2.png",
+          "flag": null,
+          "season": 2025,
+          "round": "League Stage - 8",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 492,
+            "name": "Napoli",
+            "logo": "https://media.api-sports.io/football/teams/492.png",
+            "winner": false
+          },
+          "away": {
+            "id": 49,
+            "name": "Chelsea",
+            "logo": "https://media.api-sports.io/football/teams/49.png",
+            "winner": true
+          }
+        },
+        "goals": {
+          "home": 2,
+          "away": 3
+        },
+        "score": {
+          "halftime": {
+            "home": 2,
+            "away": 1
+          },
+          "fulltime": {
+            "home": 2,
+            "away": 3
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      }
+    ]
+  }
+}

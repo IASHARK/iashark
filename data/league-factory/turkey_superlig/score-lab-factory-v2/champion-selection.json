@@ -1,0 +1,63 @@
+{
+  "protocol": "SCORE_LAB_FACTORY_V2",
+  "phase": "A_CHAMPION_SELECTION",
+  "league_key": "turkey_superlig",
+  "generated_at": "2026-09-06T19:23:25.110Z",
+  "train_seasons": [
+    2021,
+    2022
+  ],
+  "oos_dev_season": 2023,
+  "rho_frozen": -0.05028700043929102,
+  "league_avg_h": 1.6637426900584795,
+  "league_avg_a": 1.3801169590643274,
+  "candidates": {
+    "B0": {
+      "nll": 2.957878755339819,
+      "secondary": {
+        "ou25_logloss": 0.7005061278020216,
+        "btts_logloss": 0.6934548630897247,
+        "x12_logloss": 0.9867757738930478
+      },
+      "n_oos": 374,
+      "structural": {
+        "convergence_rate": 1,
+        "boundary_hit_rate": 0,
+        "rho_std": 0
+      }
+    },
+    "M0": {
+      "nll": 2.9539282510043305,
+      "secondary": {
+        "ou25_logloss": 0.7005061278020216,
+        "btts_logloss": 0.6927805298475201,
+        "x12_logloss": 0.9854211773713245
+      },
+      "n_oos": 374,
+      "structural": {
+        "convergence_rate": 1,
+        "boundary_hit_rate": 0,
+        "rho_std": 0.015038014143688374
+      }
+    },
+    "M2": {
+      "nll": 2.9490496440074705,
+      "secondary": {
+        "ou25_logloss": 0.6948656447208374,
+        "btts_logloss": 0.6918697912278821,
+        "x12_logloss": 0.9827975496014537
+      },
+      "n_oos": 374,
+      "structural": {
+        "convergence_rate": 1,
+        "boundary_hit_rate": 0,
+        "rho_std": 0.015038014143688374
+      }
+    }
+  },
+  "vetoed": {},
+  "primary_winner_before_secondary_veto": "M2",
+  "secondary_veto": null,
+  "champion_selected": "M2",
+  "champion_selection_reason": "M2 a le meilleur EXACT_SCORE_NLL absolu (2.949050) parmi les candidats non-vetoes structurellement, sans degradation secondaire disqualifiante vs les autres."
+}

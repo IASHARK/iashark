@@ -1,0 +1,588 @@
+{
+  "endpoint": "/fixtures",
+  "params": {
+    "league": 13,
+    "season": 2026,
+    "status": "FT-AET-PEN",
+    "team": 450
+  },
+  "retrieved_at": "2026-09-08T22:24:16Z",
+  "response_hash": "8281422e745d9231c615bcdfc84d430947c226fab3d56585c74a1c7883ec115e",
+  "response": {
+    "get": "fixtures",
+    "parameters": {
+      "league": "13",
+      "season": "2026",
+      "status": "FT-AET-PEN",
+      "team": "450"
+    },
+    "errors": [],
+    "results": 8,
+    "paging": {
+      "current": 1,
+      "total": 1
+    },
+    "response": [
+      {
+        "fixture": {
+          "id": 1535239,
+          "referee": "A. Herrera",
+          "timezone": "UTC",
+          "date": "2026-04-09T00:00:00+00:00",
+          "timestamp": 1775692800,
+          "periods": {
+            "first": 1775692800,
+            "second": 1775696400
+          },
+          "venue": {
+            "id": null,
+            "name": "Estadio Atanasio Girardot",
+            "city": null
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 8
+          }
+        },
+        "league": {
+          "id": 13,
+          "name": "CONMEBOL Libertadores",
+          "country": "World",
+          "logo": "https://media.api-sports.io/football/leagues/13.png",
+          "flag": null,
+          "season": 2026,
+          "round": "Group Stage - 1",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 1128,
+            "name": "Independiente Medellin",
+            "logo": "https://media.api-sports.io/football/teams/1128.png",
+            "winner": null
+          },
+          "away": {
+            "id": 450,
+            "name": "Estudiantes L.P.",
+            "logo": "https://media.api-sports.io/football/teams/450.png",
+            "winner": null
+          }
+        },
+        "goals": {
+          "home": 1,
+          "away": 1
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 1
+          },
+          "fulltime": {
+            "home": 1,
+            "away": 1
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1535255,
+          "referee": "J. Cabero",
+          "timezone": "UTC",
+          "date": "2026-04-14T22:00:00+00:00",
+          "timestamp": 1776204000,
+          "periods": {
+            "first": 1776204000,
+            "second": 1776207600
+          },
+          "venue": {
+            "id": null,
+            "name": "Estadio Jorge Luis Hirschi",
+            "city": "La Plata"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 5
+          }
+        },
+        "league": {
+          "id": 13,
+          "name": "CONMEBOL Libertadores",
+          "country": "World",
+          "logo": "https://media.api-sports.io/football/leagues/13.png",
+          "flag": null,
+          "season": 2026,
+          "round": "Group Stage - 2",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 450,
+            "name": "Estudiantes L.P.",
+            "logo": "https://media.api-sports.io/football/teams/450.png",
+            "winner": true
+          },
+          "away": {
+            "id": 10013,
+            "name": "Cusco",
+            "logo": "https://media.api-sports.io/football/teams/10013.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 2,
+          "away": 1
+        },
+        "score": {
+          "halftime": {
+            "home": 1,
+            "away": 1
+          },
+          "fulltime": {
+            "home": 2,
+            "away": 1
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1535272,
+          "referee": "P. Maza",
+          "timezone": "UTC",
+          "date": "2026-04-30T00:30:00+00:00",
+          "timestamp": 1777509000,
+          "periods": {
+            "first": 1777509000,
+            "second": 1777512600
+          },
+          "venue": {
+            "id": null,
+            "name": "Estadio Jorge Luis Hirschi",
+            "city": "La Plata"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 4
+          }
+        },
+        "league": {
+          "id": 13,
+          "name": "CONMEBOL Libertadores",
+          "country": "World",
+          "logo": "https://media.api-sports.io/football/leagues/13.png",
+          "flag": null,
+          "season": 2026,
+          "round": "Group Stage - 3",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 450,
+            "name": "Estudiantes L.P.",
+            "logo": "https://media.api-sports.io/football/teams/450.png",
+            "winner": null
+          },
+          "away": {
+            "id": 127,
+            "name": "Flamengo",
+            "logo": "https://media.api-sports.io/football/teams/127.png",
+            "winner": null
+          }
+        },
+        "goals": {
+          "home": 1,
+          "away": 1
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 1
+          },
+          "fulltime": {
+            "home": 1,
+            "away": 1
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1535285,
+          "referee": "G. Guerrero",
+          "timezone": "UTC",
+          "date": "2026-05-06T22:00:00+00:00",
+          "timestamp": 1778104800,
+          "periods": {
+            "first": 1778104800,
+            "second": 1778108400
+          },
+          "venue": {
+            "id": null,
+            "name": "Estadio Inca Garcilaso de la Vega",
+            "city": "Cusco"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 6
+          }
+        },
+        "league": {
+          "id": 13,
+          "name": "CONMEBOL Libertadores",
+          "country": "World",
+          "logo": "https://media.api-sports.io/football/leagues/13.png",
+          "flag": null,
+          "season": 2026,
+          "round": "Group Stage - 4",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 10013,
+            "name": "Cusco",
+            "logo": "https://media.api-sports.io/football/teams/10013.png",
+            "winner": null
+          },
+          "away": {
+            "id": 450,
+            "name": "Estudiantes L.P.",
+            "logo": "https://media.api-sports.io/football/teams/450.png",
+            "winner": null
+          }
+        },
+        "goals": {
+          "home": 1,
+          "away": 1
+        },
+        "score": {
+          "halftime": {
+            "home": 1,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 1,
+            "away": 1
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1535302,
+          "referee": "E. Ostojich",
+          "timezone": "UTC",
+          "date": "2026-05-21T00:30:00+00:00",
+          "timestamp": 1779323400,
+          "periods": {
+            "first": 1779323400,
+            "second": 1779327000
+          },
+          "venue": {
+            "id": null,
+            "name": "Est\u00e1dio do Maracan\u00e3",
+            "city": "Rio de Janeiro"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 7
+          }
+        },
+        "league": {
+          "id": 13,
+          "name": "CONMEBOL Libertadores",
+          "country": "World",
+          "logo": "https://media.api-sports.io/football/leagues/13.png",
+          "flag": null,
+          "season": 2026,
+          "round": "Group Stage - 5",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 127,
+            "name": "Flamengo",
+            "logo": "https://media.api-sports.io/football/teams/127.png",
+            "winner": true
+          },
+          "away": {
+            "id": 450,
+            "name": "Estudiantes L.P.",
+            "logo": "https://media.api-sports.io/football/teams/450.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 1,
+          "away": 0
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 1,
+            "away": 0
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1535319,
+          "referee": "J. Benitez",
+          "timezone": "UTC",
+          "date": "2026-05-27T00:30:00+00:00",
+          "timestamp": 1779841800,
+          "periods": {
+            "first": 1779841800,
+            "second": 1779845400
+          },
+          "venue": {
+            "id": null,
+            "name": "Estadio Jorge Luis Hirschi",
+            "city": "La Plata"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 8
+          }
+        },
+        "league": {
+          "id": 13,
+          "name": "CONMEBOL Libertadores",
+          "country": "World",
+          "logo": "https://media.api-sports.io/football/leagues/13.png",
+          "flag": null,
+          "season": 2026,
+          "round": "Group Stage - 6",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 450,
+            "name": "Estudiantes L.P.",
+            "logo": "https://media.api-sports.io/football/teams/450.png",
+            "winner": true
+          },
+          "away": {
+            "id": 1128,
+            "name": "Independiente Medellin",
+            "logo": "https://media.api-sports.io/football/teams/1128.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 1,
+          "away": 0
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 1,
+            "away": 0
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1547759,
+          "referee": "R. Claus",
+          "timezone": "UTC",
+          "date": "2026-08-12T00:30:00+00:00",
+          "timestamp": 1786494600,
+          "periods": {
+            "first": 1786494600,
+            "second": 1786498200
+          },
+          "venue": {
+            "id": null,
+            "name": "Estadio Jorge Luis Hirschi",
+            "city": "La Plata"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 7
+          }
+        },
+        "league": {
+          "id": 13,
+          "name": "CONMEBOL Libertadores",
+          "country": "World",
+          "logo": "https://media.api-sports.io/football/leagues/13.png",
+          "flag": null,
+          "season": 2026,
+          "round": "Round of 16",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 450,
+            "name": "Estudiantes L.P.",
+            "logo": "https://media.api-sports.io/football/teams/450.png",
+            "winner": null
+          },
+          "away": {
+            "id": 2994,
+            "name": "U. Catolica",
+            "logo": "https://media.api-sports.io/football/teams/2994.png",
+            "winner": null
+          }
+        },
+        "goals": {
+          "home": 1,
+          "away": 1
+        },
+        "score": {
+          "halftime": {
+            "home": 1,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 1,
+            "away": 1
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1547772,
+          "referee": "W. Roldan",
+          "timezone": "UTC",
+          "date": "2026-08-19T00:30:00+00:00",
+          "timestamp": 1787099400,
+          "periods": {
+            "first": 1787099400,
+            "second": 1787103000
+          },
+          "venue": {
+            "id": null,
+            "name": "Claro Arena",
+            "city": "Santiago de Chile"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 4
+          }
+        },
+        "league": {
+          "id": 13,
+          "name": "CONMEBOL Libertadores",
+          "country": "World",
+          "logo": "https://media.api-sports.io/football/leagues/13.png",
+          "flag": null,
+          "season": 2026,
+          "round": "Round of 16",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 2994,
+            "name": "U. Catolica",
+            "logo": "https://media.api-sports.io/football/teams/2994.png",
+            "winner": false
+          },
+          "away": {
+            "id": 450,
+            "name": "Estudiantes L.P.",
+            "logo": "https://media.api-sports.io/football/teams/450.png",
+            "winner": true
+          }
+        },
+        "goals": {
+          "home": 0,
+          "away": 3
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 1
+          },
+          "fulltime": {
+            "home": 0,
+            "away": 3
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      }
+    ]
+  }
+}

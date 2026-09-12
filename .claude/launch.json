@@ -6,6 +6,21 @@
       "runtimeExecutable": "node",
       "runtimeArgs": [".claude/static-server.js"],
       "port": 8934
+    },
+    {
+      "name": "aura-markets",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev", "--prefix", "aura-markets"],
+      "port": 3000
+    },
+    {
+      "name": "remotion-match-video",
+      "runtimeExecutable": "sh",
+      "runtimeArgs": [
+        "-c",
+        "cd /private/tmp/claude-501/-Users-clement-Documents-IASHARK-CLAUDE-CODE-iashark/9fd53e60-583f-4d67-a894-95a65b35a979/scratchpad/remotion-match-video && npx remotion studio src/index.ts --port=3335"
+      ],
+      "port": 3335
     }
   ]
 }

@@ -1,0 +1,866 @@
+{
+  "endpoint": "/fixtures",
+  "params": {
+    "last": 12,
+    "status": "FT-AET-PEN",
+    "team": 598
+  },
+  "retrieved_at": "2026-09-08T18:56:48Z",
+  "response_hash": "683639a696247b46838fc99165bbd62b0f0be01601ebc2dab7f0379d04aa9f74",
+  "response": {
+    "get": "fixtures",
+    "parameters": {
+      "last": "12",
+      "status": "FT-AET-PEN",
+      "team": "598"
+    },
+    "errors": [],
+    "results": 12,
+    "paging": {
+      "current": 1,
+      "total": 1
+    },
+    "response": [
+      {
+        "fixture": {
+          "id": 1553857,
+          "referee": "Nenad Minakovi\u0107, Serbia",
+          "timezone": "UTC",
+          "date": "2026-09-06T17:00:00+00:00",
+          "timestamp": 1788714000,
+          "periods": {
+            "first": null,
+            "second": null
+          },
+          "venue": {
+            "id": null,
+            "name": "Rajko Miti\u0107 Stadion",
+            "city": "Belgrade"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": null
+          }
+        },
+        "league": {
+          "id": 286,
+          "name": "Super Liga",
+          "country": "Serbia",
+          "logo": "https://media.api-sports.io/football/leagues/286.png",
+          "flag": "https://media.api-sports.io/flags/rs.svg",
+          "season": 2026,
+          "round": "Regular Season - 8",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 598,
+            "name": "FK Crvena Zvezda",
+            "logo": "https://media.api-sports.io/football/teams/598.png",
+            "winner": true
+          },
+          "away": {
+            "id": 573,
+            "name": "FK Partizan",
+            "logo": "https://media.api-sports.io/football/teams/573.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 2,
+          "away": 1
+        },
+        "score": {
+          "halftime": {
+            "home": 2,
+            "away": 1
+          },
+          "fulltime": {
+            "home": 2,
+            "away": 1
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1553856,
+          "referee": "S. Jeknic",
+          "timezone": "UTC",
+          "date": "2026-08-30T18:00:00+00:00",
+          "timestamp": 1788112800,
+          "periods": {
+            "first": 1788112800,
+            "second": 1788116400
+          },
+          "venue": {
+            "id": null,
+            "name": "Zemun Stadium",
+            "city": "Belgrade"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 4
+          }
+        },
+        "league": {
+          "id": 286,
+          "name": "Super Liga",
+          "country": "Serbia",
+          "logo": "https://media.api-sports.io/football/leagues/286.png",
+          "flag": "https://media.api-sports.io/flags/rs.svg",
+          "season": 2026,
+          "round": "Regular Season - 7",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 2642,
+            "name": "Zemun",
+            "logo": "https://media.api-sports.io/football/teams/2642.png",
+            "winner": false
+          },
+          "away": {
+            "id": 598,
+            "name": "FK Crvena Zvezda",
+            "logo": "https://media.api-sports.io/football/teams/598.png",
+            "winner": true
+          }
+        },
+        "goals": {
+          "home": 0,
+          "away": 2
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 0,
+            "away": 2
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1622633,
+          "referee": "D. Makkelie",
+          "timezone": "UTC",
+          "date": "2026-08-27T17:00:00+00:00",
+          "timestamp": 1787850000,
+          "periods": {
+            "first": 1787850000,
+            "second": 1787853600
+          },
+          "venue": {
+            "id": null,
+            "name": "Doosan Arena",
+            "city": "Plzen"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "AET",
+            "elapsed": 120,
+            "extra": null
+          }
+        },
+        "league": {
+          "id": 3,
+          "name": "UEFA Europa League",
+          "country": "World",
+          "logo": "https://media.api-sports.io/football/leagues/3.png",
+          "flag": null,
+          "season": 2026,
+          "round": "Play-offs",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 567,
+            "name": "Plzen",
+            "logo": "https://media.api-sports.io/football/teams/567.png",
+            "winner": true
+          },
+          "away": {
+            "id": 598,
+            "name": "FK Crvena Zvezda",
+            "logo": "https://media.api-sports.io/football/teams/598.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 5,
+          "away": 1
+        },
+        "score": {
+          "halftime": {
+            "home": 1,
+            "away": 1
+          },
+          "fulltime": {
+            "home": 4,
+            "away": 1
+          },
+          "extratime": {
+            "home": 1,
+            "away": 0
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1553843,
+          "referee": "Pavle Ilic, Serbia",
+          "timezone": "UTC",
+          "date": "2026-08-23T17:00:00+00:00",
+          "timestamp": 1787504400,
+          "periods": {
+            "first": 1787504400,
+            "second": 1787508000
+          },
+          "venue": {
+            "id": null,
+            "name": "Stadion Rajko Mit",
+            "city": "Belgrade"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 1
+          }
+        },
+        "league": {
+          "id": 286,
+          "name": "Super Liga",
+          "country": "Serbia",
+          "logo": "https://media.api-sports.io/football/leagues/286.png",
+          "flag": "https://media.api-sports.io/flags/rs.svg",
+          "season": 2026,
+          "round": "Regular Season - 6",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 598,
+            "name": "FK Crvena Zvezda",
+            "logo": "https://media.api-sports.io/football/teams/598.png",
+            "winner": true
+          },
+          "away": {
+            "id": 2656,
+            "name": "Cukaricki",
+            "logo": "https://media.api-sports.io/football/teams/2656.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 4,
+          "away": 0
+        },
+        "score": {
+          "halftime": {
+            "home": 1,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 4,
+            "away": 0
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1622632,
+          "referee": "E. Eskas",
+          "timezone": "UTC",
+          "date": "2026-08-20T18:00:00+00:00",
+          "timestamp": 1787248800,
+          "periods": {
+            "first": 1787248800,
+            "second": 1787252400
+          },
+          "venue": {
+            "id": null,
+            "name": "Stadion Rajko Mit",
+            "city": "Belgrade"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 7
+          }
+        },
+        "league": {
+          "id": 3,
+          "name": "UEFA Europa League",
+          "country": "World",
+          "logo": "https://media.api-sports.io/football/leagues/3.png",
+          "flag": null,
+          "season": 2026,
+          "round": "Play-offs",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 598,
+            "name": "FK Crvena Zvezda",
+            "logo": "https://media.api-sports.io/football/teams/598.png",
+            "winner": true
+          },
+          "away": {
+            "id": 567,
+            "name": "Plzen",
+            "logo": "https://media.api-sports.io/football/teams/567.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 3,
+          "away": 0
+        },
+        "score": {
+          "halftime": {
+            "home": 1,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 3,
+            "away": 0
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1607169,
+          "referee": "G. Nyberg",
+          "timezone": "UTC",
+          "date": "2026-08-11T18:00:00+00:00",
+          "timestamp": 1786471200,
+          "periods": {
+            "first": 1786471200,
+            "second": 1786474800
+          },
+          "venue": {
+            "id": null,
+            "name": "Stadion Rajko Mit",
+            "city": "Belgrade"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 7
+          }
+        },
+        "league": {
+          "id": 2,
+          "name": "UEFA Champions League",
+          "country": "World",
+          "logo": "https://media.api-sports.io/football/leagues/2.png",
+          "flag": null,
+          "season": 2026,
+          "round": "3rd Qualifying Round",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 598,
+            "name": "FK Crvena Zvezda",
+            "logo": "https://media.api-sports.io/football/teams/598.png",
+            "winner": false
+          },
+          "away": {
+            "id": 563,
+            "name": "Hapoel Beer Sheva",
+            "logo": "https://media.api-sports.io/football/teams/563.png",
+            "winner": true
+          }
+        },
+        "goals": {
+          "home": 0,
+          "away": 2
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 0,
+            "away": 2
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1553829,
+          "referee": "P. Janjus",
+          "timezone": "UTC",
+          "date": "2026-08-08T18:00:00+00:00",
+          "timestamp": 1786212000,
+          "periods": {
+            "first": 1786212000,
+            "second": 1786215600
+          },
+          "venue": {
+            "id": null,
+            "name": "Stadion Rajko Mit",
+            "city": "Belgrade"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 6
+          }
+        },
+        "league": {
+          "id": 286,
+          "name": "Super Liga",
+          "country": "Serbia",
+          "logo": "https://media.api-sports.io/football/leagues/286.png",
+          "flag": "https://media.api-sports.io/flags/rs.svg",
+          "season": 2026,
+          "round": "Regular Season - 4",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 598,
+            "name": "FK Crvena Zvezda",
+            "logo": "https://media.api-sports.io/football/teams/598.png",
+            "winner": true
+          },
+          "away": {
+            "id": 2643,
+            "name": "Novi Pazar",
+            "logo": "https://media.api-sports.io/football/teams/2643.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 2,
+          "away": 0
+        },
+        "score": {
+          "halftime": {
+            "home": 1,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 2,
+            "away": 0
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1607166,
+          "referee": "J. Manzano",
+          "timezone": "UTC",
+          "date": "2026-08-04T17:30:00+00:00",
+          "timestamp": 1785864600,
+          "periods": {
+            "first": 1785864600,
+            "second": 1785868200
+          },
+          "venue": {
+            "id": null,
+            "name": "Halad\u00e1s Sportkomplexum",
+            "city": "Szombathely"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 8
+          }
+        },
+        "league": {
+          "id": 2,
+          "name": "UEFA Champions League",
+          "country": "World",
+          "logo": "https://media.api-sports.io/football/leagues/2.png",
+          "flag": null,
+          "season": 2026,
+          "round": "3rd Qualifying Round",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 563,
+            "name": "Hapoel Beer Sheva",
+            "logo": "https://media.api-sports.io/football/teams/563.png",
+            "winner": true
+          },
+          "away": {
+            "id": 598,
+            "name": "FK Crvena Zvezda",
+            "logo": "https://media.api-sports.io/football/teams/598.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 1,
+          "away": 0
+        },
+        "score": {
+          "halftime": {
+            "home": 1,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 1,
+            "away": 0
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1589421,
+          "referee": "E. Masiyev",
+          "timezone": "UTC",
+          "date": "2026-07-29T18:00:00+00:00",
+          "timestamp": 1785348000,
+          "periods": {
+            "first": 1785348000,
+            "second": 1785351600
+          },
+          "venue": {
+            "id": null,
+            "name": "Stadion Rajko Mit",
+            "city": "Belgrade"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 4
+          }
+        },
+        "league": {
+          "id": 2,
+          "name": "UEFA Champions League",
+          "country": "World",
+          "logo": "https://media.api-sports.io/football/leagues/2.png",
+          "flag": null,
+          "season": 2026,
+          "round": "2nd Qualifying Round",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 598,
+            "name": "FK Crvena Zvezda",
+            "logo": "https://media.api-sports.io/football/teams/598.png",
+            "winner": true
+          },
+          "away": {
+            "id": 5354,
+            "name": "Larne",
+            "logo": "https://media.api-sports.io/football/teams/5354.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 5,
+          "away": 0
+        },
+        "score": {
+          "halftime": {
+            "home": 2,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 5,
+            "away": 0
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1553815,
+          "referee": "M. Milanovic",
+          "timezone": "UTC",
+          "date": "2026-07-26T17:00:00+00:00",
+          "timestamp": 1785085200,
+          "periods": {
+            "first": 1785085200,
+            "second": 1785088800
+          },
+          "venue": {
+            "id": null,
+            "name": "Stadion Rajko Mit",
+            "city": "Belgrade"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 4
+          }
+        },
+        "league": {
+          "id": 286,
+          "name": "Super Liga",
+          "country": "Serbia",
+          "logo": "https://media.api-sports.io/football/leagues/286.png",
+          "flag": "https://media.api-sports.io/flags/rs.svg",
+          "season": 2026,
+          "round": "Regular Season - 2",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 598,
+            "name": "FK Crvena Zvezda",
+            "logo": "https://media.api-sports.io/football/teams/598.png",
+            "winner": true
+          },
+          "away": {
+            "id": 702,
+            "name": "Vojvodina",
+            "logo": "https://media.api-sports.io/football/teams/702.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 3,
+          "away": 1
+        },
+        "score": {
+          "halftime": {
+            "home": 2,
+            "away": 1
+          },
+          "fulltime": {
+            "home": 3,
+            "away": 1
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1589417,
+          "referee": "R. Vidican",
+          "timezone": "UTC",
+          "date": "2026-07-21T19:00:00+00:00",
+          "timestamp": 1784660400,
+          "periods": {
+            "first": 1784660400,
+            "second": 1784664000
+          },
+          "venue": {
+            "id": null,
+            "name": "Inver Park",
+            "city": "Larne"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 3
+          }
+        },
+        "league": {
+          "id": 2,
+          "name": "UEFA Champions League",
+          "country": "World",
+          "logo": "https://media.api-sports.io/football/leagues/2.png",
+          "flag": null,
+          "season": 2026,
+          "round": "2nd Qualifying Round",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 5354,
+            "name": "Larne",
+            "logo": "https://media.api-sports.io/football/teams/5354.png",
+            "winner": false
+          },
+          "away": {
+            "id": 598,
+            "name": "FK Crvena Zvezda",
+            "logo": "https://media.api-sports.io/football/teams/598.png",
+            "winner": true
+          }
+        },
+        "goals": {
+          "home": 0,
+          "away": 4
+        },
+        "score": {
+          "halftime": {
+            "home": 0,
+            "away": 1
+          },
+          "fulltime": {
+            "home": 0,
+            "away": 4
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1553808,
+          "referee": "Milan Stefanovic, Serbia",
+          "timezone": "UTC",
+          "date": "2026-07-17T18:00:00+00:00",
+          "timestamp": 1784311200,
+          "periods": {
+            "first": 1784311200,
+            "second": 1784314800
+          },
+          "venue": {
+            "id": null,
+            "name": "Stadion Rajko Mit",
+            "city": "Belgrade"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 1
+          }
+        },
+        "league": {
+          "id": 286,
+          "name": "Super Liga",
+          "country": "Serbia",
+          "logo": "https://media.api-sports.io/football/leagues/286.png",
+          "flag": "https://media.api-sports.io/flags/rs.svg",
+          "season": 2026,
+          "round": "Regular Season - 1",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 598,
+            "name": "FK Crvena Zvezda",
+            "logo": "https://media.api-sports.io/football/teams/598.png",
+            "winner": true
+          },
+          "away": {
+            "id": 2637,
+            "name": "Macva",
+            "logo": "https://media.api-sports.io/football/teams/2637.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 5,
+          "away": 0
+        },
+        "score": {
+          "halftime": {
+            "home": 3,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 5,
+            "away": 0
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      }
+    ]
+  }
+}

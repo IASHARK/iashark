@@ -1,0 +1,168 @@
+{
+  "endpoint": "/fixtures",
+  "params": {
+    "league": 2,
+    "season": 2026,
+    "status": "FT-AET-PEN",
+    "team": 759
+  },
+  "retrieved_at": "2026-09-08T18:53:28Z",
+  "response_hash": "dbf4ac87eaaeaffbb161d23fc4d9f7c791880f9b0cf1c5bbb2ac9905bcbac767",
+  "response": {
+    "get": "fixtures",
+    "parameters": {
+      "league": "2",
+      "season": "2026",
+      "status": "FT-AET-PEN",
+      "team": "759"
+    },
+    "errors": [],
+    "results": 2,
+    "paging": {
+      "current": 1,
+      "total": 1
+    },
+    "response": [
+      {
+        "fixture": {
+          "id": 1622620,
+          "referee": "S. Gozubuyuk",
+          "timezone": "UTC",
+          "date": "2026-08-18T19:00:00+00:00",
+          "timestamp": 1787079600,
+          "periods": {
+            "first": 1787079600,
+            "second": 1787083200
+          },
+          "venue": {
+            "id": null,
+            "name": "Stadion Maksimir",
+            "city": "Zagreb"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 5
+          }
+        },
+        "league": {
+          "id": 2,
+          "name": "UEFA Champions League",
+          "country": "World",
+          "logo": "https://media.api-sports.io/football/leagues/2.png",
+          "flag": null,
+          "season": 2026,
+          "round": "Play-offs",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 620,
+            "name": "Dinamo Zagreb",
+            "logo": "https://media.api-sports.io/football/teams/620.png",
+            "winner": null
+          },
+          "away": {
+            "id": 759,
+            "name": "Viking",
+            "logo": "https://media.api-sports.io/football/teams/759.png",
+            "winner": null
+          }
+        },
+        "goals": {
+          "home": 2,
+          "away": 2
+        },
+        "score": {
+          "halftime": {
+            "home": 2,
+            "away": 2
+          },
+          "fulltime": {
+            "home": 2,
+            "away": 2
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      },
+      {
+        "fixture": {
+          "id": 1622631,
+          "referee": "J. Sanchez",
+          "timezone": "UTC",
+          "date": "2026-08-26T19:00:00+00:00",
+          "timestamp": 1787770800,
+          "periods": {
+            "first": 1787770800,
+            "second": 1787774400
+          },
+          "venue": {
+            "id": null,
+            "name": "Lyse Arena",
+            "city": "Stavanger"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": 4
+          }
+        },
+        "league": {
+          "id": 2,
+          "name": "UEFA Champions League",
+          "country": "World",
+          "logo": "https://media.api-sports.io/football/leagues/2.png",
+          "flag": null,
+          "season": 2026,
+          "round": "Play-offs",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 759,
+            "name": "Viking",
+            "logo": "https://media.api-sports.io/football/teams/759.png",
+            "winner": true
+          },
+          "away": {
+            "id": 620,
+            "name": "Dinamo Zagreb",
+            "logo": "https://media.api-sports.io/football/teams/620.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 3,
+          "away": 1
+        },
+        "score": {
+          "halftime": {
+            "home": 1,
+            "away": 1
+          },
+          "fulltime": {
+            "home": 3,
+            "away": 1
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      }
+    ]
+  }
+}

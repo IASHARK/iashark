@@ -1,0 +1,96 @@
+{
+  "endpoint": "/fixtures",
+  "params": {
+    "last": 1,
+    "status": "FT-AET-PEN",
+    "team": 490
+  },
+  "retrieved_at": "2026-09-08T15:25:46Z",
+  "response_hash": "689ee5cbc95f767791591e4f697a20822fda07c1cba9924bd194b3f1e556a82a",
+  "response": {
+    "get": "fixtures",
+    "parameters": {
+      "last": "1",
+      "status": "FT-AET-PEN",
+      "team": "490"
+    },
+    "errors": [],
+    "results": 1,
+    "paging": {
+      "current": 1,
+      "total": 1
+    },
+    "response": [
+      {
+        "fixture": {
+          "id": 1550109,
+          "referee": "Juan Luca Sacchi, Italy",
+          "timezone": "UTC",
+          "date": "2026-09-07T16:30:00+00:00",
+          "timestamp": 1788798600,
+          "periods": {
+            "first": null,
+            "second": null
+          },
+          "venue": {
+            "id": 12275,
+            "name": "Unipol Domus",
+            "city": "Cagliari"
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": null
+          }
+        },
+        "league": {
+          "id": 135,
+          "name": "Serie A",
+          "country": "Italy",
+          "logo": "https://media.api-sports.io/football/leagues/135.png",
+          "flag": "https://media.api-sports.io/flags/it.svg",
+          "season": 2026,
+          "round": "Regular Season - 3",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 490,
+            "name": "Cagliari",
+            "logo": "https://media.api-sports.io/football/teams/490.png",
+            "winner": true
+          },
+          "away": {
+            "id": 867,
+            "name": "Lecce",
+            "logo": "https://media.api-sports.io/football/teams/867.png",
+            "winner": false
+          }
+        },
+        "goals": {
+          "home": 1,
+          "away": 0
+        },
+        "score": {
+          "halftime": {
+            "home": 1,
+            "away": 0
+          },
+          "fulltime": {
+            "home": 1,
+            "away": 0
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      }
+    ]
+  }
+}

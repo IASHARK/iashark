@@ -1,0 +1,96 @@
+{
+  "endpoint": "/fixtures",
+  "params": {
+    "last": 1,
+    "status": "FT-AET-PEN",
+    "team": 563
+  },
+  "retrieved_at": "2026-09-08T18:54:33Z",
+  "response_hash": "f614c97529659d32b588b08b4a4c1246568a3ea32f27acd8386bd15e34e23831",
+  "response": {
+    "get": "fixtures",
+    "parameters": {
+      "last": "1",
+      "status": "FT-AET-PEN",
+      "team": "563"
+    },
+    "errors": [],
+    "results": 1,
+    "paging": {
+      "current": 1,
+      "total": 1
+    },
+    "response": [
+      {
+        "fixture": {
+          "id": 1555495,
+          "referee": null,
+          "timezone": "UTC",
+          "date": "2026-09-07T17:30:00+00:00",
+          "timestamp": 1788802200,
+          "periods": {
+            "first": null,
+            "second": null
+          },
+          "venue": {
+            "id": null,
+            "name": "Toto Turner Stadium",
+            "city": null
+          },
+          "status": {
+            "long": "Match Finished",
+            "short": "FT",
+            "elapsed": 90,
+            "extra": null
+          }
+        },
+        "league": {
+          "id": 383,
+          "name": "Ligat Ha'al",
+          "country": "Israel",
+          "logo": "https://media.api-sports.io/football/leagues/383.png",
+          "flag": "https://media.api-sports.io/flags/il.svg",
+          "season": 2026,
+          "round": "Regular Season - 3",
+          "standings": true
+        },
+        "teams": {
+          "home": {
+            "id": 563,
+            "name": "Hapoel Beer Sheva",
+            "logo": "https://media.api-sports.io/football/teams/563.png",
+            "winner": false
+          },
+          "away": {
+            "id": 604,
+            "name": "Maccabi Tel Aviv",
+            "logo": "https://media.api-sports.io/football/teams/604.png",
+            "winner": true
+          }
+        },
+        "goals": {
+          "home": 1,
+          "away": 4
+        },
+        "score": {
+          "halftime": {
+            "home": 1,
+            "away": 2
+          },
+          "fulltime": {
+            "home": 1,
+            "away": 4
+          },
+          "extratime": {
+            "home": null,
+            "away": null
+          },
+          "penalty": {
+            "home": null,
+            "away": null
+          }
+        }
+      }
+    ]
+  }
+}

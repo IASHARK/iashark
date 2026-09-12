@@ -1,0 +1,6252 @@
+{
+  "generated_at": "2026-09-09T11:14:04.780869+00:00",
+  "target_date": "2026-09-09",
+  "method": "separate time-decayed league models, chronological validation, optional SOT ensemble, block bootstrap",
+  "api_calls_network": 148,
+  "api_requests_remaining": "71901",
+  "leagues": [
+    {
+      "league_id": 244,
+      "name": "Veikkausliiga",
+      "country": "Finlande",
+      "historical_matches": 650,
+      "sot_coverage": 0.4153846153846154,
+      "score_law": "Poisson indépendant",
+      "half_life_days": 240.0,
+      "ridge": 0.15,
+      "goal_weight": 1.0,
+      "validation_score_log_loss": 3.0094355785879014,
+      "validation_brier_1n2": 0.6147643503558669,
+      "league_baseline": {
+        "score_log_loss": 3.0968426459116576,
+        "brier_1n2": 0.654105301630274,
+        "n_predictions": 269.0
+      },
+      "challengers": {
+        "dixon_coles": {
+          "half_life": 240.0,
+          "ridge": 0.15,
+          "score_log_loss": 3.0119322213025104,
+          "brier_1n2": 0.6148596251152133,
+          "n_predictions": 269.0
+        },
+        "independent_poisson": {
+          "half_life": 240.0,
+          "ridge": 0.15,
+          "score_log_loss": 3.0094355785879014,
+          "brier_1n2": 0.6147643503558669,
+          "n_predictions": 269.0
+        }
+      },
+      "shot_diagnostics": {
+        "coverage": 0.4153846153846154,
+        "used": false
+      },
+      "bootstrap_samples": 81
+    },
+    {
+      "league_id": 327,
+      "name": "Erovnuli Liga",
+      "country": "Géorgie",
+      "historical_matches": 667,
+      "sot_coverage": 0.010494752623688156,
+      "score_law": "Poisson indépendant",
+      "half_life_days": 540.0,
+      "ridge": 0.15,
+      "goal_weight": 1.0,
+      "validation_score_log_loss": 2.969810360261729,
+      "validation_brier_1n2": 0.6214881228549942,
+      "league_baseline": {
+        "score_log_loss": 2.978539393647975,
+        "brier_1n2": 0.6589326811112352,
+        "n_predictions": 299.0
+      },
+      "challengers": {
+        "dixon_coles": {
+          "half_life": 540.0,
+          "ridge": 0.15,
+          "score_log_loss": 2.9714871261669287,
+          "brier_1n2": 0.6221364877902076,
+          "n_predictions": 299.0
+        },
+        "independent_poisson": {
+          "half_life": 540.0,
+          "ridge": 0.15,
+          "score_log_loss": 2.969810360261729,
+          "brier_1n2": 0.6214881228549942,
+          "n_predictions": 299.0
+        }
+      },
+      "shot_diagnostics": {
+        "coverage": 0.010494752623688156,
+        "used": false
+      },
+      "bootstrap_samples": 81
+    },
+    {
+      "league_id": 345,
+      "name": "Czech Liga",
+      "country": "Tchéquie",
+      "historical_matches": 890,
+      "sot_coverage": 0.9752808988764045,
+      "score_law": "Poisson indépendant",
+      "half_life_days": 540.0,
+      "ridge": 0.015,
+      "goal_weight": 0.7000000000000001,
+      "validation_score_log_loss": 2.9236462083212267,
+      "validation_brier_1n2": 0.5829418048690115,
+      "league_baseline": {
+        "score_log_loss": 3.0244063510873276,
+        "brier_1n2": 0.6431613453700881,
+        "n_predictions": 389.0
+      },
+      "challengers": {
+        "dixon_coles": {
+          "half_life": 540.0,
+          "ridge": 0.015,
+          "score_log_loss": 2.9239491701200406,
+          "brier_1n2": 0.5850772636484443,
+          "n_predictions": 389.0
+        },
+        "independent_poisson": {
+          "half_life": 540.0,
+          "ridge": 0.015,
+          "score_log_loss": 2.9236462083212267,
+          "brier_1n2": 0.5829418048690115,
+          "n_predictions": 389.0
+        }
+      },
+      "shot_diagnostics": {
+        "coverage": 0.9752808988764045,
+        "used": true,
+        "n_predictions": 387,
+        "weights": [
+          {
+            "goal_weight": 0.7000000000000001,
+            "score_log_loss": 2.917705850411024
+          },
+          {
+            "goal_weight": 0.8,
+            "score_log_loss": 2.9180600049309517
+          },
+          {
+            "goal_weight": 0.6000000000000001,
+            "score_log_loss": 2.9181666113161113
+          },
+          {
+            "goal_weight": 0.9,
+            "score_log_loss": 2.9192311546350314
+          },
+          {
+            "goal_weight": 0.5,
+            "score_log_loss": 2.919441175849697
+          },
+          {
+            "goal_weight": 1.0,
+            "score_log_loss": 2.92122234192311
+          },
+          {
+            "goal_weight": 0.4,
+            "score_log_loss": 2.9215294080071113
+          },
+          {
+            "goal_weight": 0.30000000000000004,
+            "score_log_loss": 2.9244321580394828
+          },
+          {
+            "goal_weight": 0.2,
+            "score_log_loss": 2.928151275682401
+          },
+          {
+            "goal_weight": 0.1,
+            "score_log_loss": 2.932689626286415
+          },
+          {
+            "goal_weight": 0.0,
+            "score_log_loss": 2.938051109996932
+          }
+        ]
+      },
+      "bootstrap_samples": 81
+    }
+  ],
+  "fixtures": [
+    {
+      "fixture_id": 1638094,
+      "match": "HJK Helsinki - Inter Turku",
+      "kickoff_utc": "2026-09-09T15:00:00+00:00",
+      "lambda_home": {
+        "mean": 1.303917599897812,
+        "p10": 1.1163899862227873,
+        "p90": 1.491132990054927
+      },
+      "lambda_away": {
+        "mean": 1.2821591004906232,
+        "p10": 1.0516608569640478,
+        "p90": 1.498109400905752
+      },
+      "markets": {
+        "1": {
+          "mean": 0.3729678563542902,
+          "p10": 0.3262032826328391,
+          "p90": 0.4242890648566431
+        },
+        "N": {
+          "mean": 0.26475396618111396,
+          "p10": 0.24518844993840258,
+          "p90": 0.2870211982961733
+        },
+        "2": {
+          "mean": 0.3622781774645959,
+          "p10": 0.29840660598147817,
+          "p90": 0.414602761530283
+        },
+        "1X": {
+          "mean": 0.6377218225354041,
+          "p10": 0.5853972384697168,
+          "p90": 0.7015933940185219
+        },
+        "X2": {
+          "mean": 0.6270321436457098,
+          "p10": 0.575710935143357,
+          "p90": 0.673796717367161
+        },
+        "12": {
+          "mean": 0.7352460338188861,
+          "p10": 0.7129788017038265,
+          "p90": 0.7548115500615974
+        },
+        "BTTS Oui": {
+          "mean": 0.5219730398053013,
+          "p10": 0.45507348184889473,
+          "p90": 0.5872219556975661
+        },
+        "BTTS Non": {
+          "mean": 0.4780269601946985,
+          "p10": 0.41277804430243387,
+          "p90": 0.5449265181511053
+        },
+        "Plus de 0.5 buts": {
+          "mean": 0.92207380135172,
+          "p10": 0.8945102049892497,
+          "p90": 0.9454082779938795
+        },
+        "Moins de 0.5 buts": {
+          "mean": 0.07792619864828006,
+          "p10": 0.0545917220061205,
+          "p90": 0.10548979501075029
+        },
+        "Plus de 1.5 buts": {
+          "mean": 0.725915701228449,
+          "p10": 0.6572487755044818,
+          "p90": 0.7866624818952868
+        },
+        "Moins de 1.5 buts": {
+          "mean": 0.2740842987715511,
+          "p10": 0.21333751810471324,
+          "p90": 0.3427512244955182
+        },
+        "Plus de 2.5 buts": {
+          "mean": 0.47627557385645336,
+          "p10": 0.3904315638707915,
+          "p90": 0.5558561723219185
+        },
+        "Moins de 2.5 buts": {
+          "mean": 0.5237244261435466,
+          "p10": 0.44414382767808147,
+          "p90": 0.6095684361292085
+        },
+        "Plus de 3.5 buts": {
+          "mean": 0.26222253563442344,
+          "p10": 0.19039504837372878,
+          "p90": 0.3321376913789979
+        },
+        "Moins de 3.5 buts": {
+          "mean": 0.7377774643655766,
+          "p10": 0.667862308621002,
+          "p90": 0.8096049516262712
+        },
+        "Plus de 4.5 buts": {
+          "mean": 0.12318240054217855,
+          "p10": 0.07791746319321739,
+          "p90": 0.1695014571012544
+        },
+        "Moins de 4.5 buts": {
+          "mean": 0.8768175994578215,
+          "p10": 0.8304985428987456,
+          "p90": 0.9220825368067826
+        },
+        "Domicile plus de 0.5 but": {
+          "mean": 0.7255126467666958,
+          "p10": 0.6725402021125118,
+          "p90": 0.7748825432012022
+        },
+        "Domicile moins de 0.5 but": {
+          "mean": 0.2744873532333041,
+          "p10": 0.2251174567987978,
+          "p90": 0.32745979788748825
+        },
+        "Domicile plus de 1.5 but": {
+          "mean": 0.37370667002588265,
+          "p10": 0.3069673628603822,
+          "p90": 0.4392024767312512
+        },
+        "Domicile moins de 1.5 but": {
+          "mean": 0.6262933299741172,
+          "p10": 0.5607975232687488,
+          "p90": 0.6930326371396178
+        },
+        "Domicile plus de 2.5 but": {
+          "mean": 0.14516381461676953,
+          "p10": 0.10290643437232705,
+          "p90": 0.1889306661226636
+        },
+        "Domicile moins de 2.5 but": {
+          "mean": 0.8548361853832305,
+          "p10": 0.8110693338773364,
+          "p90": 0.897093565627673
+        },
+        "Extérieur plus de 0.5 but": {
+          "mean": 0.7185341943903256,
+          "p10": 0.6506429650205886,
+          "p90": 0.7764475894280876
+        },
+        "Extérieur moins de 0.5 but": {
+          "mean": 0.28146580560967444,
+          "p10": 0.22355241057191244,
+          "p90": 0.3493570349794114
+        },
+        "Extérieur plus de 1.5 but": {
+          "mean": 0.36575495846436396,
+          "p10": 0.2832378462277219,
+          "p90": 0.44154162155516297
+        },
+        "Extérieur moins de 1.5 but": {
+          "mean": 0.6342450415356361,
+          "p10": 0.558458378444837,
+          "p90": 0.7167621537722781
+        },
+        "Extérieur plus de 2.5 but": {
+          "mean": 0.140644465224742,
+          "p10": 0.09004505518637997,
+          "p90": 0.19067873211022898
+        },
+        "Extérieur moins de 2.5 but": {
+          "mean": 0.859355534775258,
+          "p10": 0.809321267889771,
+          "p90": 0.90995494481362
+        }
+      },
+      "top_raw": [
+        {
+          "market": "Plus de 0.5 buts",
+          "mean": 0.92207380135172,
+          "p10": 0.8945102049892497,
+          "p90": 0.9454082779938795
+        },
+        {
+          "market": "Moins de 4.5 buts",
+          "mean": 0.8768175994578215,
+          "p10": 0.8304985428987456,
+          "p90": 0.9220825368067826
+        },
+        {
+          "market": "Domicile moins de 2.5 but",
+          "mean": 0.8548361853832305,
+          "p10": 0.8110693338773364,
+          "p90": 0.897093565627673
+        },
+        {
+          "market": "Extérieur moins de 2.5 but",
+          "mean": 0.859355534775258,
+          "p10": 0.809321267889771,
+          "p90": 0.90995494481362
+        },
+        {
+          "market": "12",
+          "mean": 0.7352460338188861,
+          "p10": 0.7129788017038265,
+          "p90": 0.7548115500615974
+        },
+        {
+          "market": "Domicile plus de 0.5 but",
+          "mean": 0.7255126467666958,
+          "p10": 0.6725402021125118,
+          "p90": 0.7748825432012022
+        },
+        {
+          "market": "Moins de 3.5 buts",
+          "mean": 0.7377774643655766,
+          "p10": 0.667862308621002,
+          "p90": 0.8096049516262712
+        },
+        {
+          "market": "Plus de 1.5 buts",
+          "mean": 0.725915701228449,
+          "p10": 0.6572487755044818,
+          "p90": 0.7866624818952868
+        }
+      ],
+      "top_standard": [
+        {
+          "market": "12",
+          "mean": 0.7352460338188861,
+          "p10": 0.7129788017038265,
+          "p90": 0.7548115500615974
+        },
+        {
+          "market": "Domicile plus de 0.5 but",
+          "mean": 0.7255126467666958,
+          "p10": 0.6725402021125118,
+          "p90": 0.7748825432012022
+        },
+        {
+          "market": "Moins de 3.5 buts",
+          "mean": 0.7377774643655766,
+          "p10": 0.667862308621002,
+          "p90": 0.8096049516262712
+        },
+        {
+          "market": "Plus de 1.5 buts",
+          "mean": 0.725915701228449,
+          "p10": 0.6572487755044818,
+          "p90": 0.7866624818952868
+        },
+        {
+          "market": "Extérieur plus de 0.5 but",
+          "mean": 0.7185341943903256,
+          "p10": 0.6506429650205886,
+          "p90": 0.7764475894280876
+        },
+        {
+          "market": "1X",
+          "mean": 0.6377218225354041,
+          "p10": 0.5853972384697168,
+          "p90": 0.7015933940185219
+        },
+        {
+          "market": "X2",
+          "mean": 0.6270321436457098,
+          "p10": 0.575710935143357,
+          "p90": 0.673796717367161
+        },
+        {
+          "market": "Domicile moins de 1.5 but",
+          "mean": 0.6262933299741172,
+          "p10": 0.5607975232687488,
+          "p90": 0.6930326371396178
+        }
+      ],
+      "exact_scores": [
+        {
+          "score": "1-1",
+          "probability": 0.12601567826029234
+        },
+        {
+          "score": "0-1",
+          "probability": 0.0982269992786043
+        },
+        {
+          "score": "1-0",
+          "probability": 0.09695590250478325
+        },
+        {
+          "score": "1-2",
+          "probability": 0.08189264787988584
+        },
+        {
+          "score": "2-1",
+          "probability": 0.08083292416558871
+        },
+        {
+          "score": "0-0",
+          "probability": 0.07557541646303781
+        }
+      ],
+      "league_id": 244,
+      "league_name": "Veikkausliiga",
+      "country": "Finlande",
+      "home_team": "HJK Helsinki",
+      "away_team": "Inter Turku",
+      "kickoff_paris": "09/09/2026 17:00 CEST",
+      "rest": {
+        "home": {
+          "days": 4.0,
+          "last_fixture_id": 1576803,
+          "last_opponent": "Inter Turku",
+          "last_competition": "Suomen Cup"
+        },
+        "away": {
+          "days": 4.0,
+          "last_fixture_id": 1576803,
+          "last_opponent": "HJK Helsinki",
+          "last_competition": "Suomen Cup"
+        }
+      },
+      "availability": {
+        "official_lineups_available": false,
+        "lineup_teams": [],
+        "injuries": []
+      },
+      "status_at_analysis": "NS",
+      "profiles": {
+        "home": {
+          "standings": {
+            "played": 22,
+            "points": 37,
+            "gf": 36,
+            "ga": 27,
+            "wins": 11,
+            "draws": 4,
+            "losses": 7,
+            "rank": 3,
+            "goal_difference": 9
+          },
+          "season": {
+            "matches": 22,
+            "wins": 11,
+            "draws": 4,
+            "losses": 7,
+            "gf": 36,
+            "ga": 27,
+            "gf_per_match": 1.6363636363636365,
+            "ga_per_match": 1.2272727272727273,
+            "sot_for_per_match": 4.285714285714286,
+            "sot_against_per_match": 2.7142857142857144,
+            "sot_coverage": 0.3181818181818182
+          },
+          "venue_split": {
+            "matches": 11,
+            "wins": 6,
+            "draws": 2,
+            "losses": 3,
+            "gf": 18,
+            "ga": 14,
+            "gf_per_match": 1.6363636363636365,
+            "ga_per_match": 1.2727272727272727,
+            "sot_for_per_match": 3.8,
+            "sot_against_per_match": 3.0,
+            "sot_coverage": 0.45454545454545453
+          },
+          "recent_8": {
+            "matches": 8,
+            "wins": 5,
+            "draws": 0,
+            "losses": 3,
+            "gf": 11,
+            "ga": 10,
+            "gf_per_match": 1.375,
+            "ga_per_match": 1.25,
+            "sot_for_per_match": 5.0,
+            "sot_against_per_match": 2.0,
+            "sot_coverage": 0.125
+          },
+          "recent_form_newest_first": "WLWWLWWL",
+          "recent_scores": [
+            {
+              "date": "2026-08-31",
+              "opponent": "Ilves",
+              "venue": "A",
+              "score": "2-1",
+              "result": "W"
+            },
+            {
+              "date": "2026-08-23",
+              "opponent": "Gnistan",
+              "venue": "H",
+              "score": "2-3",
+              "result": "L"
+            },
+            {
+              "date": "2026-08-16",
+              "opponent": "FF Jaro",
+              "venue": "H",
+              "score": "3-0",
+              "result": "W"
+            },
+            {
+              "date": "2026-08-09",
+              "opponent": "AC Oulu",
+              "venue": "A",
+              "score": "1-0",
+              "result": "W"
+            },
+            {
+              "date": "2026-08-03",
+              "opponent": "SJK",
+              "venue": "A",
+              "score": "0-3",
+              "result": "L"
+            },
+            {
+              "date": "2026-07-26",
+              "opponent": "Turku PS",
+              "venue": "H",
+              "score": "1-0",
+              "result": "W"
+            },
+            {
+              "date": "2026-07-18",
+              "opponent": "VPS",
+              "venue": "H",
+              "score": "2-1",
+              "result": "W"
+            },
+            {
+              "date": "2026-07-11",
+              "opponent": "Lahti",
+              "venue": "A",
+              "score": "0-2",
+              "result": "L"
+            }
+          ],
+          "model_attack_index": 1.3586786631581398,
+          "model_defensive_weakness_index": 0.9583719363260971
+        },
+        "away": {
+          "standings": {
+            "played": 22,
+            "points": 42,
+            "gf": 29,
+            "ga": 16,
+            "wins": 11,
+            "draws": 9,
+            "losses": 2,
+            "rank": 2,
+            "goal_difference": 13
+          },
+          "season": {
+            "matches": 22,
+            "wins": 11,
+            "draws": 9,
+            "losses": 2,
+            "gf": 29,
+            "ga": 16,
+            "gf_per_match": 1.3181818181818181,
+            "ga_per_match": 0.7272727272727273,
+            "sot_for_per_match": 3.5714285714285716,
+            "sot_against_per_match": 2.4285714285714284,
+            "sot_coverage": 0.3181818181818182
+          },
+          "venue_split": {
+            "matches": 11,
+            "wins": 6,
+            "draws": 4,
+            "losses": 1,
+            "gf": 18,
+            "ga": 10,
+            "gf_per_match": 1.6363636363636365,
+            "ga_per_match": 0.9090909090909091,
+            "sot_for_per_match": 3.75,
+            "sot_against_per_match": 3.0,
+            "sot_coverage": 0.36363636363636365
+          },
+          "recent_8": {
+            "matches": 8,
+            "wins": 4,
+            "draws": 3,
+            "losses": 1,
+            "gf": 8,
+            "ga": 4,
+            "gf_per_match": 1.0,
+            "ga_per_match": 0.5,
+            "sot_for_per_match": 1.0,
+            "sot_against_per_match": 0.0,
+            "sot_coverage": 0.125
+          },
+          "recent_form_newest_first": "WDWDWLDW",
+          "recent_scores": [
+            {
+              "date": "2026-08-31",
+              "opponent": "KuPS",
+              "venue": "H",
+              "score": "1-0",
+              "result": "W"
+            },
+            {
+              "date": "2026-08-23",
+              "opponent": "Turku PS",
+              "venue": "A",
+              "score": "0-0",
+              "result": "D"
+            },
+            {
+              "date": "2026-08-16",
+              "opponent": "AC Oulu",
+              "venue": "A",
+              "score": "3-2",
+              "result": "W"
+            },
+            {
+              "date": "2026-08-09",
+              "opponent": "Lahti",
+              "venue": "H",
+              "score": "0-0",
+              "result": "D"
+            },
+            {
+              "date": "2026-08-02",
+              "opponent": "VPS",
+              "venue": "A",
+              "score": "1-0",
+              "result": "W"
+            },
+            {
+              "date": "2026-07-26",
+              "opponent": "Gnistan",
+              "venue": "H",
+              "score": "1-2",
+              "result": "L"
+            },
+            {
+              "date": "2026-07-19",
+              "opponent": "FF Jaro",
+              "venue": "A",
+              "score": "0-0",
+              "result": "D"
+            },
+            {
+              "date": "2026-06-27",
+              "opponent": "Mariehamn",
+              "venue": "A",
+              "score": "2-0",
+              "result": "W"
+            }
+          ],
+          "model_attack_index": 1.1216593753703679,
+          "model_defensive_weakness_index": 0.6558981739815355
+        }
+      },
+      "h2h": {
+        "matches": 8,
+        "target_home_wins": 2,
+        "draws": 5,
+        "target_away_wins": 1,
+        "target_home_goals": 9,
+        "target_away_goals": 10,
+        "games": [
+          {
+            "date": "2026-06-17",
+            "home": "HJK Helsinki",
+            "away": "Inter Turku",
+            "score": "3-3"
+          },
+          {
+            "date": "2026-04-29",
+            "home": "Inter Turku",
+            "away": "HJK Helsinki",
+            "score": "1-1"
+          },
+          {
+            "date": "2025-10-26",
+            "home": "HJK Helsinki",
+            "away": "Inter Turku",
+            "score": "1-1"
+          },
+          {
+            "date": "2025-09-23",
+            "home": "Inter Turku",
+            "away": "HJK Helsinki",
+            "score": "0-0"
+          },
+          {
+            "date": "2025-08-04",
+            "home": "HJK Helsinki",
+            "away": "Inter Turku",
+            "score": "1-4"
+          },
+          {
+            "date": "2025-05-03",
+            "home": "Inter Turku",
+            "away": "HJK Helsinki",
+            "score": "1-1"
+          },
+          {
+            "date": "2024-08-25",
+            "home": "HJK Helsinki",
+            "away": "Inter Turku",
+            "score": "1-0"
+          },
+          {
+            "date": "2024-05-11",
+            "home": "Inter Turku",
+            "away": "HJK Helsinki",
+            "score": "0-1"
+          }
+        ]
+      },
+      "model_main_market": {
+        "market": "12",
+        "mean": 0.7352460338188861,
+        "p10": 0.7129788017038265,
+        "p90": 0.7548115500615974,
+        "fair_odds": 1.36008894166484
+      },
+      "prices": {
+        "markets": {
+          "1": {
+            "best": 2.78,
+            "best_bookmaker": "Pinnacle",
+            "median": 2.63,
+            "bookmakers": 14
+          },
+          "N": {
+            "best": 3.36,
+            "best_bookmaker": "Pinnacle",
+            "median": 3.2,
+            "bookmakers": 14
+          },
+          "2": {
+            "best": 2.67,
+            "best_bookmaker": "Pinnacle",
+            "median": 2.5599999999999996,
+            "bookmakers": 14
+          },
+          "Plus de 1.5 buts": {
+            "best": 1.36,
+            "best_bookmaker": "Betfair",
+            "median": 1.3,
+            "bookmakers": 11
+          },
+          "Moins de 1.5 buts": {
+            "best": 3.75,
+            "best_bookmaker": "Bet365",
+            "median": 3.2,
+            "bookmakers": 11
+          },
+          "Plus de 2.5 buts": {
+            "best": 2.12,
+            "best_bookmaker": "SBO",
+            "median": 2.01,
+            "bookmakers": 12
+          },
+          "Moins de 2.5 buts": {
+            "best": 1.95,
+            "best_bookmaker": "10Bet",
+            "median": 1.7650000000000001,
+            "bookmakers": 12
+          },
+          "Plus de 3.5 buts": {
+            "best": 3.8,
+            "best_bookmaker": "Betfair",
+            "median": 3.5,
+            "bookmakers": 11
+          },
+          "Moins de 3.5 buts": {
+            "best": 1.36,
+            "best_bookmaker": "10Bet",
+            "median": 1.26,
+            "bookmakers": 11
+          },
+          "Plus de 0.5 buts": {
+            "best": 1.07,
+            "best_bookmaker": "Betano",
+            "median": 1.05,
+            "bookmakers": 9
+          },
+          "Moins de 0.5 buts": {
+            "best": 11.0,
+            "best_bookmaker": "Bet365",
+            "median": 8.7,
+            "bookmakers": 9
+          },
+          "BTTS Oui": {
+            "best": 1.87,
+            "best_bookmaker": "Betfair",
+            "median": 1.74,
+            "bookmakers": 11
+          },
+          "BTTS Non": {
+            "best": 2.1,
+            "best_bookmaker": "10Bet",
+            "median": 2.0,
+            "bookmakers": 11
+          },
+          "1X": {
+            "best": 1.52,
+            "best_bookmaker": "Betano",
+            "median": 1.4449999999999998,
+            "bookmakers": 12
+          },
+          "12": {
+            "best": 1.36,
+            "best_bookmaker": "Bet365",
+            "median": 1.3250000000000002,
+            "bookmakers": 12
+          },
+          "X2": {
+            "best": 1.5,
+            "best_bookmaker": "Bet365",
+            "median": 1.44,
+            "bookmakers": 12
+          },
+          "Domicile plus de 1.5 but": {
+            "best": 2.63,
+            "best_bookmaker": "Betfair",
+            "median": 2.55,
+            "bookmakers": 11
+          },
+          "Domicile moins de 1.5 but": {
+            "best": 1.55,
+            "best_bookmaker": "10Bet",
+            "median": 1.47,
+            "bookmakers": 11
+          },
+          "Domicile plus de 2.5 but": {
+            "best": 6.6,
+            "best_bookmaker": "1xBet",
+            "median": 5.825,
+            "bookmakers": 10
+          },
+          "Domicile moins de 2.5 but": {
+            "best": 1.14,
+            "best_bookmaker": "Bet365",
+            "median": 1.1,
+            "bookmakers": 10
+          },
+          "Domicile plus de 0.5 but": {
+            "best": 1.34,
+            "best_bookmaker": "1xBet",
+            "median": 1.32,
+            "bookmakers": 11
+          },
+          "Domicile moins de 0.5 but": {
+            "best": 3.5,
+            "best_bookmaker": "Bet365",
+            "median": 3.2,
+            "bookmakers": 11
+          },
+          "Extérieur plus de 1.5 but": {
+            "best": 2.63,
+            "best_bookmaker": "Betfair",
+            "median": 2.49,
+            "bookmakers": 11
+          },
+          "Extérieur moins de 1.5 but": {
+            "best": 1.55,
+            "best_bookmaker": "10Bet",
+            "median": 1.5,
+            "bookmakers": 11
+          },
+          "Extérieur plus de 2.5 but": {
+            "best": 6.3,
+            "best_bookmaker": "1xBet",
+            "median": 5.875,
+            "bookmakers": 10
+          },
+          "Extérieur moins de 2.5 but": {
+            "best": 1.14,
+            "best_bookmaker": "Betano",
+            "median": 1.1,
+            "bookmakers": 10
+          },
+          "Extérieur plus de 0.5 but": {
+            "best": 1.33,
+            "best_bookmaker": "Betfair",
+            "median": 1.3,
+            "bookmakers": 11
+          },
+          "Extérieur moins de 0.5 but": {
+            "best": 3.5,
+            "best_bookmaker": "Bet365",
+            "median": 3.26,
+            "bookmakers": 11
+          },
+          "Plus de 4.5 buts": {
+            "best": 8.0,
+            "best_bookmaker": "Betfair",
+            "median": 7.0,
+            "bookmakers": 10
+          },
+          "Moins de 4.5 buts": {
+            "best": 1.12,
+            "best_bookmaker": "Bet365",
+            "median": 1.08,
+            "bookmakers": 10
+          },
+          "Plus de 7.5 buts": {
+            "best": 51.0,
+            "best_bookmaker": "Bet365",
+            "median": 50.5,
+            "bookmakers": 2
+          },
+          "Moins de 7.5 buts": {
+            "best": 1.0,
+            "best_bookmaker": "Bet365",
+            "median": 1.0,
+            "bookmakers": 2
+          },
+          "Plus de 5.5 buts": {
+            "best": 17.0,
+            "best_bookmaker": "Betfair",
+            "median": 14.75,
+            "bookmakers": 6
+          },
+          "Moins de 5.5 buts": {
+            "best": 1.04,
+            "best_bookmaker": "Bet365",
+            "median": 1.025,
+            "bookmakers": 6
+          },
+          "Plus de 6.5 buts": {
+            "best": 29.0,
+            "best_bookmaker": "Superbet",
+            "median": 26.0,
+            "bookmakers": 4
+          },
+          "Moins de 6.5 buts": {
+            "best": 1.01,
+            "best_bookmaker": "Bet365",
+            "median": 1.01,
+            "bookmakers": 4
+          },
+          "Domicile plus de 3.5 but": {
+            "best": 19.0,
+            "best_bookmaker": "888Sport",
+            "median": 13.0,
+            "bookmakers": 7
+          },
+          "Domicile moins de 3.5 but": {
+            "best": 1.03,
+            "best_bookmaker": "Bet365",
+            "median": 1.01,
+            "bookmakers": 7
+          },
+          "Domicile plus de 4.5 but": {
+            "best": 41.0,
+            "best_bookmaker": "Bet365",
+            "median": 40.5,
+            "bookmakers": 2
+          },
+          "Domicile moins de 4.5 but": {
+            "best": 1.0,
+            "best_bookmaker": "Bet365",
+            "median": 1.0,
+            "bookmakers": 2
+          },
+          "Extérieur plus de 3.5 but": {
+            "best": 19.0,
+            "best_bookmaker": "888Sport",
+            "median": 14.0,
+            "bookmakers": 5
+          },
+          "Extérieur moins de 3.5 but": {
+            "best": 1.03,
+            "best_bookmaker": "Betano",
+            "median": 1.02,
+            "bookmakers": 5
+          },
+          "Extérieur plus de 4.5 but": {
+            "best": 41.0,
+            "best_bookmaker": "Bet365",
+            "median": 40.5,
+            "bookmakers": 2
+          },
+          "Extérieur moins de 4.5 but": {
+            "best": 1.0,
+            "best_bookmaker": "Bet365",
+            "median": 1.0,
+            "bookmakers": 2
+          },
+          "Plus de 1.75 buts": {
+            "best": 1.39,
+            "best_bookmaker": "1xBet",
+            "median": 1.37,
+            "bookmakers": 2
+          },
+          "Moins de 1.75 buts": {
+            "best": 2.81,
+            "best_bookmaker": "Marathonbet",
+            "median": 2.755,
+            "bookmakers": 2
+          },
+          "Plus de 2.0 buts": {
+            "best": 1.55,
+            "best_bookmaker": "Pinnacle",
+            "median": 1.5,
+            "bookmakers": 5
+          },
+          "Moins de 2.0 buts": {
+            "best": 2.6,
+            "best_bookmaker": "Betano",
+            "median": 2.44,
+            "bookmakers": 5
+          },
+          "Plus de 2.25 buts": {
+            "best": 1.81,
+            "best_bookmaker": "Pinnacle",
+            "median": 1.73,
+            "bookmakers": 7
+          },
+          "Moins de 2.25 buts": {
+            "best": 2.1,
+            "best_bookmaker": "Betano",
+            "median": 2.03,
+            "bookmakers": 7
+          },
+          "Plus de 2.75 buts": {
+            "best": 2.4,
+            "best_bookmaker": "SBO",
+            "median": 2.25,
+            "bookmakers": 7
+          },
+          "Moins de 2.75 buts": {
+            "best": 1.65,
+            "best_bookmaker": "Betano",
+            "median": 1.58,
+            "bookmakers": 7
+          },
+          "Plus de 0.75 buts": {
+            "best": 1.02,
+            "best_bookmaker": "1xBet",
+            "median": 1.0150000000000001,
+            "bookmakers": 2
+          },
+          "Moins de 0.75 buts": {
+            "best": 8.3,
+            "best_bookmaker": "Marathonbet",
+            "median": 8.100000000000001,
+            "bookmakers": 2
+          },
+          "Plus de 1.0 buts": {
+            "best": 1.03,
+            "best_bookmaker": "Marathonbet",
+            "median": 1.03,
+            "bookmakers": 2
+          },
+          "Moins de 1.0 buts": {
+            "best": 7.6,
+            "best_bookmaker": "Marathonbet",
+            "median": 7.4,
+            "bookmakers": 2
+          },
+          "Plus de 1.25 buts": {
+            "best": 1.16,
+            "best_bookmaker": "1xBet",
+            "median": 1.1549999999999998,
+            "bookmakers": 2
+          },
+          "Moins de 1.25 buts": {
+            "best": 4.3,
+            "best_bookmaker": "Marathonbet",
+            "median": 4.205,
+            "bookmakers": 2
+          },
+          "Plus de 3.0 buts": {
+            "best": 2.94,
+            "best_bookmaker": "Pinnacle",
+            "median": 2.6799999999999997,
+            "bookmakers": 6
+          },
+          "Moins de 3.0 buts": {
+            "best": 1.47,
+            "best_bookmaker": "Betano",
+            "median": 1.415,
+            "bookmakers": 6
+          },
+          "Plus de 3.25 buts": {
+            "best": 3.16,
+            "best_bookmaker": "1xBet",
+            "median": 2.88,
+            "bookmakers": 5
+          },
+          "Moins de 3.25 buts": {
+            "best": 1.49,
+            "best_bookmaker": "Pinnacle",
+            "median": 1.34,
+            "bookmakers": 5
+          },
+          "Plus de 3.75 buts": {
+            "best": 4.45,
+            "best_bookmaker": "1xBet",
+            "median": 4.35,
+            "bookmakers": 2
+          },
+          "Moins de 3.75 buts": {
+            "best": 1.15,
+            "best_bookmaker": "Marathonbet",
+            "median": 1.145,
+            "bookmakers": 2
+          },
+          "Plus de 4.0 buts": {
+            "best": 6.35,
+            "best_bookmaker": "1xBet",
+            "median": 6.175,
+            "bookmakers": 2
+          },
+          "Moins de 4.0 buts": {
+            "best": 1.06,
+            "best_bookmaker": "Marathonbet",
+            "median": 1.06,
+            "bookmakers": 2
+          },
+          "Plus de 4.25 buts": {
+            "best": 6.75,
+            "best_bookmaker": "1xBet",
+            "median": 6.575,
+            "bookmakers": 2
+          },
+          "Moins de 4.25 buts": {
+            "best": 1.05,
+            "best_bookmaker": "Marathonbet",
+            "median": 1.045,
+            "bookmakers": 2
+          },
+          "Plus de 4.75 buts": {
+            "best": 10.2,
+            "best_bookmaker": "1xBet",
+            "median": 8.95,
+            "bookmakers": 2
+          },
+          "Moins de 4.75 buts": {
+            "best": 1.03,
+            "best_bookmaker": "1xBet",
+            "median": 1.025,
+            "bookmakers": 2
+          },
+          "Plus de 5.0 buts": {
+            "best": 12.0,
+            "best_bookmaker": "1xBet",
+            "median": 10.55,
+            "bookmakers": 2
+          },
+          "Moins de 5.0 buts": {
+            "best": 1.01,
+            "best_bookmaker": "1xBet",
+            "median": 1.005,
+            "bookmakers": 2
+          },
+          "Domicile plus de 1 but": {
+            "best": 1.7,
+            "best_bookmaker": "1xBet",
+            "median": 1.6949999999999998,
+            "bookmakers": 2
+          },
+          "Domicile moins de 1 but": {
+            "best": 2.13,
+            "best_bookmaker": "Marathonbet",
+            "median": 2.08,
+            "bookmakers": 2
+          },
+          "Domicile plus de 2 but": {
+            "best": 5.2,
+            "best_bookmaker": "1xBet",
+            "median": 5.15,
+            "bookmakers": 2
+          },
+          "Domicile moins de 2 but": {
+            "best": 1.14,
+            "best_bookmaker": "1xBet",
+            "median": 1.1349999999999998,
+            "bookmakers": 2
+          },
+          "Domicile plus de 3 but": {
+            "best": 11.5,
+            "best_bookmaker": "Marathonbet",
+            "median": 11.5,
+            "bookmakers": 1
+          },
+          "Domicile moins de 3 but": {
+            "best": 1.0,
+            "best_bookmaker": "Marathonbet",
+            "median": 1.0,
+            "bookmakers": 1
+          },
+          "Extérieur plus de 1 but": {
+            "best": 1.65,
+            "best_bookmaker": "Marathonbet",
+            "median": 1.65,
+            "bookmakers": 2
+          },
+          "Extérieur moins de 1 but": {
+            "best": 2.19,
+            "best_bookmaker": "Marathonbet",
+            "median": 2.145,
+            "bookmakers": 2
+          },
+          "Extérieur plus de 2 but": {
+            "best": 4.9,
+            "best_bookmaker": "1xBet",
+            "median": 4.875,
+            "bookmakers": 2
+          },
+          "Extérieur moins de 2 but": {
+            "best": 1.16,
+            "best_bookmaker": "1xBet",
+            "median": 1.15,
+            "bookmakers": 2
+          }
+        },
+        "raw_bet_names": [
+          "1x2 - 15 minutes",
+          "1x2 - 30 minutes",
+          "1x2 - 60 minutes",
+          "1x2 - 75 minutes",
+          "Asian Handicap",
+          "Asian Handicap (2nd Half)",
+          "Asian Handicap First Half",
+          "Away Come From Behind and Win",
+          "Away Corners Over/Under",
+          "Away Highest Scoring Half",
+          "Away Odd/Even",
+          "Away Team Exact Goals Number",
+          "Away Team Score a Goal",
+          "Away Team Score a Goal (1st Half)",
+          "Away Team Score a Goal (2nd Half)",
+          "Away Team Total Goals(1st Half)",
+          "Away Team Total Goals(2nd Half)",
+          "Away Total Corners (1st Half)",
+          "Away Total Corners (2nd Half)",
+          "Away team will score in both halves",
+          "Away win both halves",
+          "Both Teams Score",
+          "Both Teams Score - First Half",
+          "Both Teams To Score - Second Half",
+          "Both Teams To Score in Both Halves",
+          "Clean Sheet - Away",
+          "Clean Sheet - Home",
+          "Corners 1x2",
+          "Corners 1x2 (1st Half)",
+          "Corners 1x2 (2nd Half)",
+          "Corners Asian Handicap",
+          "Corners Asian Handicap (1st Half)",
+          "Corners Asian Handicap (2nd Half)",
+          "Corners Over Under",
+          "Corners Race To",
+          "Corners. Double Chance",
+          "Corners. European Handicap",
+          "Corners. Odd/Even",
+          "Corners. Total (Range)",
+          "Corners. total between 0 and 10m",
+          "Correct Score - First Half",
+          "Correct Score - Second Half",
+          "Double Chance",
+          "Double Chance - First Half",
+          "Double Chance - Second Half",
+          "Draw No Bet (1st Half)",
+          "Draw No Bet (2nd Half)",
+          "European Handicap (2nd Half)",
+          "Exact Goals Number",
+          "Exact Goals Number - First Half",
+          "Exact Score",
+          "First 10 min Winner",
+          "First Half Winner",
+          "First Team to Score (3 way) 1st Half",
+          "Goal Line",
+          "Goal Line (1st Half)",
+          "Goal in 1-15 minutes",
+          "Goal in 16-30 minutes",
+          "Goal in 31-45 minutes",
+          "Goal in 46-60 minutes",
+          "Goal in 61-75 minutes",
+          "Goal in 76-90 minutes",
+          "Goals Over/Under",
+          "Goals Over/Under - Second Half",
+          "Goals Over/Under First Half",
+          "HT/FT Double",
+          "Handicap Result",
+          "Handicap Result - First Half",
+          "Highest Scoring Half",
+          "Home Come From Behind and Win",
+          "Home Corners Over/Under",
+          "Home Highest Scoring Half",
+          "Home Odd/Even",
+          "Home Team Exact Goals Number",
+          "Home Team Score a Goal",
+          "Home Team Score a Goal (1st Half)",
+          "Home Team Score a Goal (2nd Half)",
+          "Home Team Total Goals(1st Half)",
+          "Home Team Total Goals(2nd Half)",
+          "Home Total Corners (1st Half)",
+          "Home Total Corners (2nd Half)",
+          "Home team will score in both halves",
+          "Home win both halves",
+          "Home/Away",
+          "Match Winner",
+          "Multicorners",
+          "Number Of Goals In Match",
+          "Odd/Even",
+          "Odd/Even - First Half",
+          "Odd/Even - Second Half",
+          "Over/Under 15m-30m",
+          "Over/Under 30m-45m",
+          "RTG_H1",
+          "Result/Total Goals",
+          "Results/Both Teams Score",
+          "Scoring Draw",
+          "Second Half Exact Goals Number",
+          "Second Half Winner",
+          "Team To Score First",
+          "Team To Score Last",
+          "To Score In Both Halves By Teams",
+          "To Score in Both Halves",
+          "To Win Either Half",
+          "To Win From Behind",
+          "Total - Away",
+          "Total - Home",
+          "Total Corners (1st Half)",
+          "Total Corners (2nd Half)",
+          "Total Corners (3 way)",
+          "Total Goals/Both Teams To Score",
+          "Win Both Halves",
+          "Win To Nil",
+          "Win to Nil - Away",
+          "Win to Nil - Home",
+          "Winning Margin"
+        ]
+      },
+      "price_comparison": [
+        {
+          "market": "12",
+          "probability": 0.7352460338188861,
+          "p10": 0.7129788017038265,
+          "fair_odds": 1.36008894166484,
+          "best": 1.36,
+          "best_bookmaker": "Bet365",
+          "median": 1.3250000000000002,
+          "bookmakers": 12,
+          "expected_value_best": -6.539400631488945e-05,
+          "conservative_ev_best": -0.03034882968279584
+        },
+        {
+          "market": "Plus de 0.5 buts",
+          "probability": 0.92207380135172,
+          "p10": 0.8945102049892497,
+          "fair_odds": 1.0845118888900689,
+          "best": 1.07,
+          "best_bookmaker": "Betano",
+          "median": 1.05,
+          "bookmakers": 9,
+          "expected_value_best": -0.013381032553659522,
+          "conservative_ev_best": -0.04287408066150278
+        },
+        {
+          "market": "Moins de 4.5 buts",
+          "probability": 0.8768175994578215,
+          "p10": 0.8304985428987456,
+          "fair_odds": 1.1404880566019069,
+          "best": 1.12,
+          "best_bookmaker": "Bet365",
+          "median": 1.08,
+          "bookmakers": 10,
+          "expected_value_best": -0.017964288607239864,
+          "conservative_ev_best": -0.06984163195340487
+        },
+        {
+          "market": "Domicile moins de 2.5 but",
+          "probability": 0.8548361853832305,
+          "p10": 0.8110693338773364,
+          "fair_odds": 1.169814775156823,
+          "best": 1.14,
+          "best_bookmaker": "Bet365",
+          "median": 1.1,
+          "bookmakers": 10,
+          "expected_value_best": -0.025486748663117398,
+          "conservative_ev_best": -0.07538095937983658
+        },
+        {
+          "market": "Extérieur moins de 2.5 but",
+          "probability": 0.859355534775258,
+          "p10": 0.809321267889771,
+          "fair_odds": 1.1636627211128907,
+          "best": 1.14,
+          "best_bookmaker": "Betano",
+          "median": 1.1,
+          "bookmakers": 10,
+          "expected_value_best": -0.020334690356206053,
+          "conservative_ev_best": -0.0773737546056612
+        },
+        {
+          "market": "Moins de 3.5 buts",
+          "probability": 0.7377774643655766,
+          "p10": 0.667862308621002,
+          "fair_odds": 1.3554222625380834,
+          "best": 1.36,
+          "best_bookmaker": "10Bet",
+          "median": 1.26,
+          "bookmakers": 11,
+          "expected_value_best": 0.0033773515371842144,
+          "conservative_ev_best": -0.09170726027543719
+        },
+        {
+          "market": "1",
+          "probability": 0.3729678563542902,
+          "p10": 0.3262032826328391,
+          "fair_odds": 2.6811962022005416,
+          "best": 2.78,
+          "best_bookmaker": "Pinnacle",
+          "median": 2.63,
+          "bookmakers": 14,
+          "expected_value_best": 0.036850640664926715,
+          "conservative_ev_best": -0.09315487428070734
+        },
+        {
+          "market": "Domicile plus de 0.5 but",
+          "probability": 0.7255126467666958,
+          "p10": 0.6725402021125118,
+          "fair_odds": 1.3783357250305404,
+          "best": 1.34,
+          "best_bookmaker": "1xBet",
+          "median": 1.32,
+          "bookmakers": 11,
+          "expected_value_best": -0.027813053332627513,
+          "conservative_ev_best": -0.09879612916923419
+        },
+        {
+          "market": "Plus de 1.5 buts",
+          "probability": 0.725915701228449,
+          "p10": 0.6572487755044818,
+          "fair_odds": 1.3775704235460469,
+          "best": 1.36,
+          "best_bookmaker": "Betfair",
+          "median": 1.3,
+          "bookmakers": 11,
+          "expected_value_best": -0.012754646329309338,
+          "conservative_ev_best": -0.10614166531390468
+        },
+        {
+          "market": "1X",
+          "probability": 0.6377218225354041,
+          "p10": 0.5853972384697168,
+          "fair_odds": 1.5680818260605838,
+          "best": 1.52,
+          "best_bookmaker": "Betano",
+          "median": 1.4449999999999998,
+          "bookmakers": 12,
+          "expected_value_best": -0.030662829746185727,
+          "conservative_ev_best": -0.11019619752603049
+        },
+        {
+          "market": "Domicile moins de 1.5 but",
+          "probability": 0.6262933299741172,
+          "p10": 0.5607975232687488,
+          "fair_odds": 1.596695912506887,
+          "best": 1.55,
+          "best_bookmaker": "10Bet",
+          "median": 1.47,
+          "bookmakers": 11,
+          "expected_value_best": -0.029245338540118238,
+          "conservative_ev_best": -0.13076383893343935
+        },
+        {
+          "market": "BTTS Non",
+          "probability": 0.4780269601946985,
+          "p10": 0.41277804430243387,
+          "fair_odds": 2.0919322198745944,
+          "best": 2.1,
+          "best_bookmaker": "10Bet",
+          "median": 2.0,
+          "bookmakers": 11,
+          "expected_value_best": 0.0038566164088669197,
+          "conservative_ev_best": -0.13316610696488884
+        },
+        {
+          "market": "Moins de 2.5 buts",
+          "probability": 0.5237244261435466,
+          "p10": 0.44414382767808147,
+          "fair_odds": 1.9094011088302991,
+          "best": 1.95,
+          "best_bookmaker": "10Bet",
+          "median": 1.7650000000000001,
+          "bookmakers": 12,
+          "expected_value_best": 0.021262630979915986,
+          "conservative_ev_best": -0.1339195360277412
+        },
+        {
+          "market": "Extérieur moins de 1.5 but",
+          "probability": 0.6342450415356361,
+          "p10": 0.558458378444837,
+          "fair_odds": 1.5766776789910677,
+          "best": 1.55,
+          "best_bookmaker": "10Bet",
+          "median": 1.5,
+          "bookmakers": 11,
+          "expected_value_best": -0.01692018561976405,
+          "conservative_ev_best": -0.13438951341050254
+        },
+        {
+          "market": "Extérieur plus de 0.5 but",
+          "probability": 0.7185341943903256,
+          "p10": 0.6506429650205886,
+          "fair_odds": 1.391722214206517,
+          "best": 1.33,
+          "best_bookmaker": "Betfair",
+          "median": 1.3,
+          "bookmakers": 11,
+          "expected_value_best": -0.0443495214608669,
+          "conservative_ev_best": -0.13464485652261715
+        },
+        {
+          "market": "X2",
+          "probability": 0.6270321436457098,
+          "p10": 0.575710935143357,
+          "fair_odds": 1.5948145723212352,
+          "best": 1.5,
+          "best_bookmaker": "Bet365",
+          "median": 1.44,
+          "bookmakers": 12,
+          "expected_value_best": -0.05945178453143529,
+          "conservative_ev_best": -0.1364335972849644
+        },
+        {
+          "market": "BTTS Oui",
+          "probability": 0.5219730398053013,
+          "p10": 0.45507348184889473,
+          "fair_odds": 1.9158077596747243,
+          "best": 1.87,
+          "best_bookmaker": "Betfair",
+          "median": 1.74,
+          "bookmakers": 11,
+          "expected_value_best": -0.023910415564086462,
+          "conservative_ev_best": -0.14901258894256675
+        },
+        {
+          "market": "Plus de 2.5 buts",
+          "probability": 0.47627557385645336,
+          "p10": 0.3904315638707915,
+          "fair_odds": 2.099624786345634,
+          "best": 2.12,
+          "best_bookmaker": "SBO",
+          "median": 2.01,
+          "bookmakers": 12,
+          "expected_value_best": 0.009704216575681102,
+          "conservative_ev_best": -0.172285084593922
+        },
+        {
+          "market": "N",
+          "probability": 0.26475396618111396,
+          "p10": 0.24518844993840258,
+          "fair_odds": 3.7770916690098457,
+          "best": 3.36,
+          "best_bookmaker": "Pinnacle",
+          "median": 3.2,
+          "bookmakers": 14,
+          "expected_value_best": -0.11042667363145708,
+          "conservative_ev_best": -0.1761668082069674
+        },
+        {
+          "market": "Domicile plus de 1.5 but",
+          "probability": 0.37370667002588265,
+          "p10": 0.3069673628603822,
+          "fair_odds": 2.6758955089850036,
+          "best": 2.63,
+          "best_bookmaker": "Betfair",
+          "median": 2.55,
+          "bookmakers": 11,
+          "expected_value_best": -0.01715145783192873,
+          "conservative_ev_best": -0.19267583567719493
+        },
+        {
+          "market": "Moins de 1.5 buts",
+          "probability": 0.2740842987715511,
+          "p10": 0.21333751810471324,
+          "fair_odds": 3.64851253604096,
+          "best": 3.75,
+          "best_bookmaker": "Bet365",
+          "median": 3.2,
+          "bookmakers": 11,
+          "expected_value_best": 0.027816120393316712,
+          "conservative_ev_best": -0.1999843071073253
+        },
+        {
+          "market": "2",
+          "probability": 0.3622781774645959,
+          "p10": 0.29840660598147817,
+          "fair_odds": 2.7603097901135,
+          "best": 2.67,
+          "best_bookmaker": "Pinnacle",
+          "median": 2.5599999999999996,
+          "bookmakers": 14,
+          "expected_value_best": -0.03271726616952897,
+          "conservative_ev_best": -0.20325436202945335
+        },
+        {
+          "market": "Domicile moins de 0.5 but",
+          "probability": 0.2744873532333041,
+          "p10": 0.2251174567987978,
+          "fair_odds": 3.6431550970220368,
+          "best": 3.5,
+          "best_bookmaker": "Bet365",
+          "median": 3.2,
+          "bookmakers": 11,
+          "expected_value_best": -0.03929426368343569,
+          "conservative_ev_best": -0.21208890120420776
+        },
+        {
+          "market": "Extérieur moins de 0.5 but",
+          "probability": 0.28146580560967444,
+          "p10": 0.22355241057191244,
+          "fair_odds": 3.552829438140561,
+          "best": 3.5,
+          "best_bookmaker": "Bet365",
+          "median": 3.26,
+          "bookmakers": 11,
+          "expected_value_best": -0.014869680366139448,
+          "conservative_ev_best": -0.21756656299830646
+        },
+        {
+          "market": "Extérieur plus de 1.5 but",
+          "probability": 0.36575495846436396,
+          "p10": 0.2832378462277219,
+          "fair_odds": 2.734070931528961,
+          "best": 2.63,
+          "best_bookmaker": "Betfair",
+          "median": 2.49,
+          "bookmakers": 11,
+          "expected_value_best": -0.038064459238722814,
+          "conservative_ev_best": -0.25508446442109145
+        },
+        {
+          "market": "Plus de 3.5 buts",
+          "probability": 0.26222253563442344,
+          "p10": 0.19039504837372878,
+          "fair_odds": 3.813554764012145,
+          "best": 3.8,
+          "best_bookmaker": "Betfair",
+          "median": 3.5,
+          "bookmakers": 11,
+          "expected_value_best": -0.003554364589191006,
+          "conservative_ev_best": -0.27649881617983063
+        },
+        {
+          "market": "Domicile plus de 2.5 but",
+          "probability": 0.14516381461676953,
+          "p10": 0.10290643437232705,
+          "fair_odds": 6.8887690960725045,
+          "best": 6.6,
+          "best_bookmaker": "1xBet",
+          "median": 5.825,
+          "bookmakers": 10,
+          "expected_value_best": -0.04191882352932119,
+          "conservative_ev_best": -0.3208175331426415
+        },
+        {
+          "market": "Plus de 4.5 buts",
+          "probability": 0.12318240054217855,
+          "p10": 0.07791746319321739,
+          "fair_odds": 8.118042801557458,
+          "best": 8.0,
+          "best_bookmaker": "Betfair",
+          "median": 7.0,
+          "bookmakers": 10,
+          "expected_value_best": -0.014540795662571604,
+          "conservative_ev_best": -0.37666029445426086
+        },
+        {
+          "market": "Moins de 0.5 buts",
+          "probability": 0.07792619864828006,
+          "p10": 0.0545917220061205,
+          "fair_odds": 12.832654708508246,
+          "best": 11.0,
+          "best_bookmaker": "Bet365",
+          "median": 8.7,
+          "bookmakers": 9,
+          "expected_value_best": -0.14281181486891936,
+          "conservative_ev_best": -0.3994910579326745
+        },
+        {
+          "market": "Extérieur plus de 2.5 but",
+          "probability": 0.140644465224742,
+          "p10": 0.09004505518637997,
+          "fair_odds": 7.110126931778338,
+          "best": 6.3,
+          "best_bookmaker": "1xBet",
+          "median": 5.875,
+          "bookmakers": 10,
+          "expected_value_best": -0.11393986908412546,
+          "conservative_ev_best": -0.4327161523258062
+        }
+      ],
+      "official_context": {
+        "venue": "Bolt Arena, Helsinki",
+        "absences": [
+          "Alex Ring",
+          "Amara Nallo",
+          "Joona Veteli",
+          "David Ezeh",
+          "Eemil Toivonen"
+        ],
+        "available_again": [
+          "Ville Tikkanen",
+          "Lassi Lappalainen"
+        ],
+        "note": "Informations publiées par HJK ; l’avant-match d’Inter ne donne pas de liste d’absents.",
+        "source_label": "avant-match officiel HJK",
+        "source_url": "https://www.hjk.fi/uutiset/mestaruussarja-kayntiin-revanssi-mielessa"
+      }
+    },
+    {
+      "fixture_id": 1509181,
+      "match": "Samgurali - Dila",
+      "kickoff_utc": "2026-09-09T15:00:00+00:00",
+      "lambda_home": {
+        "mean": 1.1945201997500945,
+        "p10": 0.981348681643476,
+        "p90": 1.4311250866012366
+      },
+      "lambda_away": {
+        "mean": 1.5845084051264862,
+        "p10": 1.3938665633606606,
+        "p90": 1.8003688491675167
+      },
+      "markets": {
+        "1": {
+          "mean": 0.2883106113926918,
+          "p10": 0.2291001408966769,
+          "p90": 0.3451577374105168
+        },
+        "N": {
+          "mean": 0.24780030389627236,
+          "p10": 0.23141440643563987,
+          "p90": 0.265358692678857
+        },
+        "2": {
+          "mean": 0.4638890847110357,
+          "p10": 0.4068700003327845,
+          "p90": 0.5228400194556505
+        },
+        "1X": {
+          "mean": 0.5361109152889642,
+          "p10": 0.4771599805443494,
+          "p90": 0.5931299996672155
+        },
+        "X2": {
+          "mean": 0.7116893886073081,
+          "p10": 0.6548422625894832,
+          "p90": 0.7708998591033229
+        },
+        "12": {
+          "mean": 0.7521996961037276,
+          "p10": 0.7346413073211432,
+          "p90": 0.76858559356436
+        },
+        "BTTS Oui": {
+          "mean": 0.5491581015261536,
+          "p10": 0.4831983873621134,
+          "p90": 0.6189830570952487
+        },
+        "BTTS Non": {
+          "mean": 0.4508418984738464,
+          "p10": 0.3810169429047514,
+          "p90": 0.5168016126378867
+        },
+        "Plus de 0.5 buts": {
+          "mean": 0.9359478627575919,
+          "p10": 0.9141455475760396,
+          "p90": 0.9562138097737922
+        },
+        "Moins de 0.5 buts": {
+          "mean": 0.064052137242408,
+          "p10": 0.04378619022620778,
+          "p90": 0.08585445242396039
+        },
+        "Plus de 1.5 buts": {
+          "mean": 0.761895481495376,
+          "p10": 0.7033641235294819,
+          "p90": 0.8192314794749571
+        },
+        "Moins de 1.5 buts": {
+          "mean": 0.238104518504624,
+          "p10": 0.1807685205250429,
+          "p90": 0.29663587647051814
+        },
+        "Plus de 2.5 buts": {
+          "mean": 0.5234720114719688,
+          "p10": 0.4446191926102349,
+          "p90": 0.6049611956576181
+        },
+        "Moins de 2.5 buts": {
+          "mean": 0.4765279885280312,
+          "p10": 0.3950388043423819,
+          "p90": 0.555380807389765
+        },
+        "Plus de 3.5 buts": {
+          "mean": 0.30396196428898553,
+          "p10": 0.23287080735209162,
+          "p90": 0.3815175129237274
+        },
+        "Moins de 3.5 buts": {
+          "mean": 0.6960380357110144,
+          "p10": 0.6184824870762726,
+          "p90": 0.7671291926479084
+        },
+        "Plus de 4.5 buts": {
+          "mean": 0.15116852766063515,
+          "p10": 0.10290484483022681,
+          "p90": 0.20676015110875842
+        },
+        "Moins de 4.5 buts": {
+          "mean": 0.8488314723393648,
+          "p10": 0.7932398488912416,
+          "p90": 0.8970951551697732
+        },
+        "Domicile plus de 0.5 but": {
+          "mean": 0.6930749256268565,
+          "p10": 0.6251947351380336,
+          "p90": 0.7609601685352232
+        },
+        "Domicile moins de 0.5 but": {
+          "mean": 0.3069250743731434,
+          "p10": 0.2390398314647768,
+          "p90": 0.3748052648619664
+        },
+        "Domicile plus de 1.5 but": {
+          "mean": 0.3346312756150321,
+          "p10": 0.2573800825927091,
+          "p90": 0.41886426902904955
+        },
+        "Domicile moins de 1.5 but": {
+          "mean": 0.665368724384968,
+          "p10": 0.5811357309709504,
+          "p90": 0.7426199174072909
+        },
+        "Domicile plus de 2.5 but": {
+          "mean": 0.12126970149647338,
+          "p10": 0.07690287041045533,
+          "p90": 0.1740732571256992
+        },
+        "Domicile moins de 2.5 but": {
+          "mean": 0.8787302985035268,
+          "p10": 0.8259267428743008,
+          "p90": 0.9230971295895447
+        },
+        "Extérieur plus de 0.5 but": {
+          "mean": 0.792031038656889,
+          "p10": 0.7518859005134181,
+          "p90": 0.8347620604017637
+        },
+        "Extérieur moins de 0.5 but": {
+          "mean": 0.20796896134311094,
+          "p10": 0.1652379395982363,
+          "p90": 0.24811409948658192
+        },
+        "Extérieur plus de 1.5 but": {
+          "mean": 0.46840040759240287,
+          "p10": 0.40604795334073146,
+          "p90": 0.5372728212484754
+        },
+        "Extérieur moins de 1.5 but": {
+          "mean": 0.531599592407597,
+          "p10": 0.4627271787515246,
+          "p90": 0.5939520466592685
+        },
+        "Extérieur plus de 2.5 but": {
+          "mean": 0.2136177420665145,
+          "p10": 0.1650219778880821,
+          "p90": 0.2694776416814125
+        },
+        "Extérieur moins de 2.5 but": {
+          "mean": 0.7863822579334855,
+          "p10": 0.7305223583185875,
+          "p90": 0.8349780221119179
+        }
+      },
+      "top_raw": [
+        {
+          "market": "Plus de 0.5 buts",
+          "mean": 0.9359478627575919,
+          "p10": 0.9141455475760396,
+          "p90": 0.9562138097737922
+        },
+        {
+          "market": "Domicile moins de 2.5 but",
+          "mean": 0.8787302985035268,
+          "p10": 0.8259267428743008,
+          "p90": 0.9230971295895447
+        },
+        {
+          "market": "Moins de 4.5 buts",
+          "mean": 0.8488314723393648,
+          "p10": 0.7932398488912416,
+          "p90": 0.8970951551697732
+        },
+        {
+          "market": "Extérieur plus de 0.5 but",
+          "mean": 0.792031038656889,
+          "p10": 0.7518859005134181,
+          "p90": 0.8347620604017637
+        },
+        {
+          "market": "12",
+          "mean": 0.7521996961037276,
+          "p10": 0.7346413073211432,
+          "p90": 0.76858559356436
+        },
+        {
+          "market": "Extérieur moins de 2.5 but",
+          "mean": 0.7863822579334855,
+          "p10": 0.7305223583185875,
+          "p90": 0.8349780221119179
+        },
+        {
+          "market": "Plus de 1.5 buts",
+          "mean": 0.761895481495376,
+          "p10": 0.7033641235294819,
+          "p90": 0.8192314794749571
+        },
+        {
+          "market": "X2",
+          "mean": 0.7116893886073081,
+          "p10": 0.6548422625894832,
+          "p90": 0.7708998591033229
+        }
+      ],
+      "top_standard": [
+        {
+          "market": "Extérieur plus de 0.5 but",
+          "mean": 0.792031038656889,
+          "p10": 0.7518859005134181,
+          "p90": 0.8347620604017637
+        },
+        {
+          "market": "12",
+          "mean": 0.7521996961037276,
+          "p10": 0.7346413073211432,
+          "p90": 0.76858559356436
+        },
+        {
+          "market": "Plus de 1.5 buts",
+          "mean": 0.761895481495376,
+          "p10": 0.7033641235294819,
+          "p90": 0.8192314794749571
+        },
+        {
+          "market": "X2",
+          "mean": 0.7116893886073081,
+          "p10": 0.6548422625894832,
+          "p90": 0.7708998591033229
+        },
+        {
+          "market": "Domicile plus de 0.5 but",
+          "mean": 0.6930749256268565,
+          "p10": 0.6251947351380336,
+          "p90": 0.7609601685352232
+        },
+        {
+          "market": "Moins de 3.5 buts",
+          "mean": 0.6960380357110144,
+          "p10": 0.6184824870762726,
+          "p90": 0.7671291926479084
+        },
+        {
+          "market": "Domicile moins de 1.5 but",
+          "mean": 0.665368724384968,
+          "p10": 0.5811357309709504,
+          "p90": 0.7426199174072909
+        },
+        {
+          "market": "BTTS Oui",
+          "mean": 0.5491581015261536,
+          "p10": 0.4831983873621134,
+          "p90": 0.6189830570952487
+        }
+      ],
+      "exact_scores": [
+        {
+          "score": "1-1",
+          "probability": 0.11792941633491885
+        },
+        {
+          "score": "0-1",
+          "probability": 0.10037774249011286
+        },
+        {
+          "score": "1-2",
+          "probability": 0.09338599969029841
+        },
+        {
+          "score": "0-2",
+          "probability": 0.07948717224608982
+        },
+        {
+          "score": "1-0",
+          "probability": 0.07446162852684765
+        },
+        {
+          "score": "2-1",
+          "probability": 0.06927505486818697
+        }
+      ],
+      "league_id": 327,
+      "league_name": "Erovnuli Liga",
+      "country": "Géorgie",
+      "home_team": "Samgurali",
+      "away_team": "Dila",
+      "kickoff_paris": "09/09/2026 17:00 CEST",
+      "rest": {
+        "home": {
+          "days": 3.9583333333333335,
+          "last_fixture_id": 1509174,
+          "last_opponent": "FC Iberia 1999",
+          "last_competition": "Erovnuli Liga"
+        },
+        "away": {
+          "days": 4.041666666666667,
+          "last_fixture_id": 1509173,
+          "last_opponent": "Gagra",
+          "last_competition": "Erovnuli Liga"
+        }
+      },
+      "availability": {
+        "official_lineups_available": false,
+        "lineup_teams": [],
+        "injuries": []
+      },
+      "status_at_analysis": "NS",
+      "profiles": {
+        "home": {
+          "standings": {
+            "played": 24,
+            "points": 32,
+            "gf": 33,
+            "ga": 43,
+            "wins": 9,
+            "draws": 5,
+            "losses": 10,
+            "rank": 7,
+            "goal_difference": -10
+          },
+          "season": {
+            "matches": 24,
+            "wins": 9,
+            "draws": 5,
+            "losses": 10,
+            "gf": 33,
+            "ga": 43,
+            "gf_per_match": 1.375,
+            "ga_per_match": 1.7916666666666667,
+            "sot_for_per_match": 4.0,
+            "sot_against_per_match": 7.0,
+            "sot_coverage": 0.041666666666666664
+          },
+          "venue_split": {
+            "matches": 11,
+            "wins": 5,
+            "draws": 3,
+            "losses": 3,
+            "gf": 15,
+            "ga": 14,
+            "gf_per_match": 1.3636363636363635,
+            "ga_per_match": 1.2727272727272727,
+            "sot_for_per_match": null,
+            "sot_against_per_match": null,
+            "sot_coverage": 0.0
+          },
+          "recent_8": {
+            "matches": 8,
+            "wins": 3,
+            "draws": 2,
+            "losses": 3,
+            "gf": 13,
+            "ga": 17,
+            "gf_per_match": 1.625,
+            "ga_per_match": 2.125,
+            "sot_for_per_match": 4.0,
+            "sot_against_per_match": 7.0,
+            "sot_coverage": 0.125
+          },
+          "recent_form_newest_first": "LDWLWDLW",
+          "recent_scores": [
+            {
+              "date": "2026-09-05",
+              "opponent": "FC Iberia 1999",
+              "venue": "A",
+              "score": "1-2",
+              "result": "L"
+            },
+            {
+              "date": "2026-08-30",
+              "opponent": "Rustavi",
+              "venue": "H",
+              "score": "1-1",
+              "result": "D"
+            },
+            {
+              "date": "2026-08-22",
+              "opponent": "Spaeri",
+              "venue": "A",
+              "score": "4-3",
+              "result": "W"
+            },
+            {
+              "date": "2026-08-16",
+              "opponent": "Dinamo Batumi",
+              "venue": "H",
+              "score": "0-4",
+              "result": "L"
+            },
+            {
+              "date": "2026-08-09",
+              "opponent": "Meshakhte",
+              "venue": "A",
+              "score": "2-1",
+              "result": "W"
+            },
+            {
+              "date": "2026-06-24",
+              "opponent": "Gagra",
+              "venue": "A",
+              "score": "0-0",
+              "result": "D"
+            },
+            {
+              "date": "2026-06-18",
+              "opponent": "Dinamo Tbilisi",
+              "venue": "A",
+              "score": "3-5",
+              "result": "L"
+            },
+            {
+              "date": "2026-06-13",
+              "opponent": "Torpedo Kutaisi",
+              "venue": "H",
+              "score": "2-1",
+              "result": "W"
+            }
+          ],
+          "model_attack_index": 1.1628868549966311,
+          "model_defensive_weakness_index": 1.0783641260556713
+        },
+        "away": {
+          "standings": {
+            "played": 23,
+            "points": 33,
+            "gf": 28,
+            "ga": 24,
+            "wins": 10,
+            "draws": 3,
+            "losses": 10,
+            "rank": 5,
+            "goal_difference": 4
+          },
+          "season": {
+            "matches": 23,
+            "wins": 10,
+            "draws": 3,
+            "losses": 10,
+            "gf": 28,
+            "ga": 24,
+            "gf_per_match": 1.2173913043478262,
+            "ga_per_match": 1.0434782608695652,
+            "sot_for_per_match": 5.0,
+            "sot_against_per_match": 4.0,
+            "sot_coverage": 0.043478260869565216
+          },
+          "venue_split": {
+            "matches": 10,
+            "wins": 4,
+            "draws": 0,
+            "losses": 6,
+            "gf": 10,
+            "ga": 12,
+            "gf_per_match": 1.0,
+            "ga_per_match": 1.2,
+            "sot_for_per_match": null,
+            "sot_against_per_match": null,
+            "sot_coverage": 0.0
+          },
+          "recent_8": {
+            "matches": 8,
+            "wins": 4,
+            "draws": 1,
+            "losses": 3,
+            "gf": 17,
+            "ga": 12,
+            "gf_per_match": 2.125,
+            "ga_per_match": 1.5,
+            "sot_for_per_match": 5.0,
+            "sot_against_per_match": 4.0,
+            "sot_coverage": 0.125
+          },
+          "recent_form_newest_first": "WLDWWWLL",
+          "recent_scores": [
+            {
+              "date": "2026-09-05",
+              "opponent": "Gagra",
+              "venue": "H",
+              "score": "1-0",
+              "result": "W"
+            },
+            {
+              "date": "2026-08-31",
+              "opponent": "Dinamo Tbilisi",
+              "venue": "A",
+              "score": "1-2",
+              "result": "L"
+            },
+            {
+              "date": "2026-08-22",
+              "opponent": "Torpedo Kutaisi",
+              "venue": "H",
+              "score": "2-2",
+              "result": "D"
+            },
+            {
+              "date": "2026-08-16",
+              "opponent": "Meshakhte",
+              "venue": "H",
+              "score": "3-1",
+              "result": "W"
+            },
+            {
+              "date": "2026-06-22",
+              "opponent": "Rustavi",
+              "venue": "H",
+              "score": "3-0",
+              "result": "W"
+            },
+            {
+              "date": "2026-06-16",
+              "opponent": "Spaeri",
+              "venue": "H",
+              "score": "3-1",
+              "result": "W"
+            },
+            {
+              "date": "2026-06-12",
+              "opponent": "Dinamo Batumi",
+              "venue": "A",
+              "score": "2-3",
+              "result": "L"
+            },
+            {
+              "date": "2026-05-29",
+              "opponent": "Samgurali",
+              "venue": "H",
+              "score": "2-3",
+              "result": "L"
+            }
+          ],
+          "model_attack_index": 1.174172875022205,
+          "model_defensive_weakness_index": 0.7066707325462337
+        }
+      },
+      "h2h": {
+        "matches": 8,
+        "target_home_wins": 1,
+        "draws": 0,
+        "target_away_wins": 7,
+        "target_home_goals": 9,
+        "target_away_goals": 15,
+        "games": [
+          {
+            "date": "2026-05-29",
+            "home": "Dila",
+            "away": "Samgurali",
+            "score": "2-3"
+          },
+          {
+            "date": "2026-04-17",
+            "home": "Samgurali",
+            "away": "Dila",
+            "score": "0-1"
+          },
+          {
+            "date": "2025-11-26",
+            "home": "Dila",
+            "away": "Samgurali",
+            "score": "2-1"
+          },
+          {
+            "date": "2025-09-19",
+            "home": "Samgurali",
+            "away": "Dila",
+            "score": "1-2"
+          },
+          {
+            "date": "2025-05-20",
+            "home": "Dila",
+            "away": "Samgurali",
+            "score": "4-3"
+          },
+          {
+            "date": "2025-04-09",
+            "home": "Samgurali",
+            "away": "Dila",
+            "score": "0-1"
+          },
+          {
+            "date": "2024-10-20",
+            "home": "Dila",
+            "away": "Samgurali",
+            "score": "2-1"
+          },
+          {
+            "date": "2024-08-11",
+            "home": "Samgurali",
+            "away": "Dila",
+            "score": "0-1"
+          }
+        ]
+      },
+      "model_main_market": {
+        "market": "Extérieur plus de 0.5 but",
+        "mean": 0.792031038656889,
+        "p10": 0.7518859005134181,
+        "p90": 0.8347620604017637,
+        "fair_odds": 1.2625767819601879
+      },
+      "prices": {
+        "markets": {
+          "1": {
+            "best": 3.02,
+            "best_bookmaker": "Pinnacle",
+            "median": 2.76,
+            "bookmakers": 12
+          },
+          "N": {
+            "best": 3.25,
+            "best_bookmaker": "Betfair",
+            "median": 3.0,
+            "bookmakers": 12
+          },
+          "2": {
+            "best": 2.41,
+            "best_bookmaker": "Dafabet",
+            "median": 2.38,
+            "bookmakers": 12
+          },
+          "Plus de 2.5 buts": {
+            "best": 2.13,
+            "best_bookmaker": "Pinnacle",
+            "median": 2.0,
+            "bookmakers": 10
+          },
+          "Moins de 2.5 buts": {
+            "best": 1.81,
+            "best_bookmaker": "SBO",
+            "median": 1.6749999999999998,
+            "bookmakers": 10
+          },
+          "1X": {
+            "best": 1.53,
+            "best_bookmaker": "Bet365",
+            "median": 1.4649999999999999,
+            "bookmakers": 10
+          },
+          "12": {
+            "best": 1.33,
+            "best_bookmaker": "William Hill",
+            "median": 1.295,
+            "bookmakers": 10
+          },
+          "X2": {
+            "best": 1.42,
+            "best_bookmaker": "10Bet",
+            "median": 1.36,
+            "bookmakers": 10
+          },
+          "BTTS Oui": {
+            "best": 1.83,
+            "best_bookmaker": "Betfair",
+            "median": 1.7850000000000001,
+            "bookmakers": 6
+          },
+          "BTTS Non": {
+            "best": 1.92,
+            "best_bookmaker": "Superbet",
+            "median": 1.91,
+            "bookmakers": 6
+          },
+          "Plus de 1.5 buts": {
+            "best": 1.34,
+            "best_bookmaker": "Pinnacle",
+            "median": 1.32,
+            "bookmakers": 6
+          },
+          "Moins de 1.5 buts": {
+            "best": 3.25,
+            "best_bookmaker": "Betfair",
+            "median": 3.0,
+            "bookmakers": 6
+          },
+          "Plus de 1.75 buts": {
+            "best": 1.43,
+            "best_bookmaker": "Pinnacle",
+            "median": 1.41,
+            "bookmakers": 3
+          },
+          "Moins de 1.75 buts": {
+            "best": 2.68,
+            "best_bookmaker": "Pinnacle",
+            "median": 2.52,
+            "bookmakers": 3
+          },
+          "Plus de 2.0 buts": {
+            "best": 1.58,
+            "best_bookmaker": "Pinnacle",
+            "median": 1.54,
+            "bookmakers": 3
+          },
+          "Moins de 2.0 buts": {
+            "best": 2.32,
+            "best_bookmaker": "Pinnacle",
+            "median": 2.19,
+            "bookmakers": 3
+          },
+          "Plus de 2.25 buts": {
+            "best": 1.88,
+            "best_bookmaker": "Pinnacle",
+            "median": 1.8050000000000002,
+            "bookmakers": 4
+          },
+          "Moins de 2.25 buts": {
+            "best": 1.91,
+            "best_bookmaker": "Pinnacle",
+            "median": 1.87,
+            "bookmakers": 4
+          },
+          "Plus de 2.75 buts": {
+            "best": 2.44,
+            "best_bookmaker": "Pinnacle",
+            "median": 2.37,
+            "bookmakers": 3
+          },
+          "Moins de 2.75 buts": {
+            "best": 1.51,
+            "best_bookmaker": "Pinnacle",
+            "median": 1.51,
+            "bookmakers": 3
+          },
+          "Plus de 3.5 buts": {
+            "best": 3.8,
+            "best_bookmaker": "Betfair",
+            "median": 3.5,
+            "bookmakers": 5
+          },
+          "Moins de 3.5 buts": {
+            "best": 1.25,
+            "best_bookmaker": "Betfair",
+            "median": 1.22,
+            "bookmakers": 5
+          },
+          "Plus de 0.5 buts": {
+            "best": 1.06,
+            "best_bookmaker": "Betfair",
+            "median": 1.05,
+            "bookmakers": 4
+          },
+          "Moins de 0.5 buts": {
+            "best": 9.0,
+            "best_bookmaker": "Betfair",
+            "median": 7.55,
+            "bookmakers": 4
+          },
+          "Plus de 0.75 buts": {
+            "best": 1.05,
+            "best_bookmaker": "Marathonbet",
+            "median": 1.05,
+            "bookmakers": 2
+          },
+          "Moins de 0.75 buts": {
+            "best": 6.6,
+            "best_bookmaker": "Marathonbet",
+            "median": 6.574999999999999,
+            "bookmakers": 2
+          },
+          "Plus de 1.0 buts": {
+            "best": 1.06,
+            "best_bookmaker": "Marathonbet",
+            "median": 1.06,
+            "bookmakers": 2
+          },
+          "Moins de 1.0 buts": {
+            "best": 6.05,
+            "best_bookmaker": "Marathonbet",
+            "median": 6.05,
+            "bookmakers": 2
+          },
+          "Plus de 1.25 buts": {
+            "best": 1.19,
+            "best_bookmaker": "Marathonbet",
+            "median": 1.19,
+            "bookmakers": 2
+          },
+          "Moins de 1.25 buts": {
+            "best": 3.76,
+            "best_bookmaker": "Marathonbet",
+            "median": 3.755,
+            "bookmakers": 2
+          },
+          "Plus de 3.0 buts": {
+            "best": 3.02,
+            "best_bookmaker": "Pinnacle",
+            "median": 2.88,
+            "bookmakers": 3
+          },
+          "Moins de 3.0 buts": {
+            "best": 1.34,
+            "best_bookmaker": "Pinnacle",
+            "median": 1.32,
+            "bookmakers": 3
+          },
+          "Plus de 4.5 buts": {
+            "best": 8.0,
+            "best_bookmaker": "Betfair",
+            "median": 6.85,
+            "bookmakers": 4
+          },
+          "Moins de 4.5 buts": {
+            "best": 1.07,
+            "best_bookmaker": "Betfair",
+            "median": 1.0550000000000002,
+            "bookmakers": 4
+          },
+          "Plus de 3.25 buts": {
+            "best": 3.2,
+            "best_bookmaker": "Marathonbet",
+            "median": 3.2,
+            "bookmakers": 3
+          },
+          "Moins de 3.25 buts": {
+            "best": 1.36,
+            "best_bookmaker": "Pinnacle",
+            "median": 1.26,
+            "bookmakers": 3
+          },
+          "Plus de 3.75 buts": {
+            "best": 4.4,
+            "best_bookmaker": "Marathonbet",
+            "median": 4.395,
+            "bookmakers": 2
+          },
+          "Moins de 3.75 buts": {
+            "best": 1.14,
+            "best_bookmaker": "Marathonbet",
+            "median": 1.14,
+            "bookmakers": 2
+          },
+          "Plus de 4.0 buts": {
+            "best": 6.05,
+            "best_bookmaker": "Marathonbet",
+            "median": 6.05,
+            "bookmakers": 2
+          },
+          "Moins de 4.0 buts": {
+            "best": 1.06,
+            "best_bookmaker": "Marathonbet",
+            "median": 1.06,
+            "bookmakers": 2
+          },
+          "Plus de 4.25 buts": {
+            "best": 6.4,
+            "best_bookmaker": "Marathonbet",
+            "median": 6.395,
+            "bookmakers": 2
+          },
+          "Moins de 4.25 buts": {
+            "best": 1.05,
+            "best_bookmaker": "Marathonbet",
+            "median": 1.05,
+            "bookmakers": 2
+          },
+          "Plus de 5.0 buts": {
+            "best": 9.3,
+            "best_bookmaker": "Marathonbet",
+            "median": 9.3,
+            "bookmakers": 2
+          },
+          "Moins de 5.0 buts": {
+            "best": 1.0,
+            "best_bookmaker": "Marathonbet",
+            "median": 1.0,
+            "bookmakers": 2
+          },
+          "Plus de 5.5 buts": {
+            "best": 17.0,
+            "best_bookmaker": "888Sport",
+            "median": 15.0,
+            "bookmakers": 4
+          },
+          "Moins de 5.5 buts": {
+            "best": 1.02,
+            "best_bookmaker": "1xBet",
+            "median": 1.0150000000000001,
+            "bookmakers": 4
+          },
+          "Domicile plus de 1.5 but": {
+            "best": 2.76,
+            "best_bookmaker": "Pinnacle",
+            "median": 2.7,
+            "bookmakers": 5
+          },
+          "Domicile moins de 1.5 but": {
+            "best": 1.42,
+            "best_bookmaker": "Pinnacle",
+            "median": 1.4,
+            "bookmakers": 5
+          },
+          "Domicile plus de 2.5 but": {
+            "best": 6.5,
+            "best_bookmaker": "Betfair",
+            "median": 6.175,
+            "bookmakers": 4
+          },
+          "Domicile moins de 2.5 but": {
+            "best": 1.08,
+            "best_bookmaker": "Betfair",
+            "median": 1.0750000000000002,
+            "bookmakers": 4
+          },
+          "Domicile plus de 1 but": {
+            "best": 1.8,
+            "best_bookmaker": "Marathonbet",
+            "median": 1.8,
+            "bookmakers": 2
+          },
+          "Domicile moins de 1 but": {
+            "best": 1.88,
+            "best_bookmaker": "Marathonbet",
+            "median": 1.88,
+            "bookmakers": 2
+          },
+          "Domicile plus de 2 but": {
+            "best": 5.0,
+            "best_bookmaker": "Marathonbet",
+            "median": 5.0,
+            "bookmakers": 2
+          },
+          "Domicile moins de 2 but": {
+            "best": 1.11,
+            "best_bookmaker": "Marathonbet",
+            "median": 1.11,
+            "bookmakers": 2
+          },
+          "Extérieur plus de 1.5 but": {
+            "best": 2.5,
+            "best_bookmaker": "Betfair",
+            "median": 2.4,
+            "bookmakers": 5
+          },
+          "Extérieur moins de 1.5 but": {
+            "best": 1.53,
+            "best_bookmaker": "Pinnacle",
+            "median": 1.52,
+            "bookmakers": 5
+          },
+          "Extérieur plus de 2.5 but": {
+            "best": 6.0,
+            "best_bookmaker": "Betfair",
+            "median": 5.175,
+            "bookmakers": 4
+          },
+          "Extérieur moins de 2.5 but": {
+            "best": 1.11,
+            "best_bookmaker": "Marathonbet",
+            "median": 1.11,
+            "bookmakers": 4
+          },
+          "Extérieur plus de 1 but": {
+            "best": 1.58,
+            "best_bookmaker": "Marathonbet",
+            "median": 1.58,
+            "bookmakers": 2
+          },
+          "Extérieur moins de 1 but": {
+            "best": 2.21,
+            "best_bookmaker": "Marathonbet",
+            "median": 2.21,
+            "bookmakers": 2
+          },
+          "Extérieur plus de 2 but": {
+            "best": 4.0,
+            "best_bookmaker": "Marathonbet",
+            "median": 4.0,
+            "bookmakers": 2
+          },
+          "Extérieur moins de 2 but": {
+            "best": 1.17,
+            "best_bookmaker": "Marathonbet",
+            "median": 1.17,
+            "bookmakers": 2
+          },
+          "Domicile plus de 0.5 but": {
+            "best": 1.33,
+            "best_bookmaker": "Betfair",
+            "median": 1.33,
+            "bookmakers": 3
+          },
+          "Domicile moins de 0.5 but": {
+            "best": 3.0,
+            "best_bookmaker": "Betfair",
+            "median": 2.9,
+            "bookmakers": 3
+          },
+          "Extérieur plus de 3.5 but": {
+            "best": 15.0,
+            "best_bookmaker": "888Sport",
+            "median": 12.5,
+            "bookmakers": 2
+          },
+          "Extérieur moins de 3.5 but": {
+            "best": 1.03,
+            "best_bookmaker": "Betfair",
+            "median": 1.025,
+            "bookmakers": 2
+          },
+          "Extérieur plus de 0.5 but": {
+            "best": 1.3,
+            "best_bookmaker": "888Sport",
+            "median": 1.29,
+            "bookmakers": 3
+          },
+          "Extérieur moins de 0.5 but": {
+            "best": 3.28,
+            "best_bookmaker": "1xBet",
+            "median": 3.25,
+            "bookmakers": 3
+          },
+          "Domicile plus de 3.5 but": {
+            "best": 21.0,
+            "best_bookmaker": "888Sport",
+            "median": 21.0,
+            "bookmakers": 1
+          },
+          "Domicile moins de 3.5 but": {
+            "best": 1.01,
+            "best_bookmaker": "888Sport",
+            "median": 1.01,
+            "bookmakers": 1
+          }
+        },
+        "raw_bet_names": [
+          "Asian Handicap",
+          "Asian Handicap (2nd Half)",
+          "Asian Handicap First Half",
+          "Away Odd/Even",
+          "Away Team Score a Goal",
+          "Away Team Total Goals(1st Half)",
+          "Away Team Total Goals(2nd Half)",
+          "Away team will score in both halves",
+          "Away win both halves",
+          "Both Teams Score",
+          "Both Teams Score - First Half",
+          "Both Teams To Score - Second Half",
+          "Both Teams To Score in Both Halves",
+          "Corners Over Under",
+          "Correct Score - First Half",
+          "Correct Score - Second Half",
+          "Double Chance",
+          "Double Chance - First Half",
+          "Double Chance - Second Half",
+          "Draw No Bet (1st Half)",
+          "Draw No Bet (2nd Half)",
+          "European Handicap (2nd Half)",
+          "Exact Score",
+          "First Half Winner",
+          "First Team to Score (3 way) 1st Half",
+          "Goal Line",
+          "Goal Line (1st Half)",
+          "Goals Over/Under",
+          "Goals Over/Under - Second Half",
+          "Goals Over/Under First Half",
+          "HT/FT Double",
+          "Handicap Result",
+          "Handicap Result - First Half",
+          "Highest Scoring Half",
+          "Home Odd/Even",
+          "Home Team Score a Goal",
+          "Home Team Total Goals(1st Half)",
+          "Home Team Total Goals(2nd Half)",
+          "Home team will score in both halves",
+          "Home/Away",
+          "Match Winner",
+          "Odd/Even",
+          "Odd/Even - First Half",
+          "Odd/Even - Second Half",
+          "Result/Total Goals",
+          "Results/Both Teams Score",
+          "Scoring Draw",
+          "Second Half Winner",
+          "Team To Score First",
+          "Team To Score Last",
+          "To Score in Both Halves",
+          "To Win Either Half",
+          "Total - Away",
+          "Total - Home",
+          "Total Corners (1st Half)",
+          "Total Corners (3 way)",
+          "Win Both Halves",
+          "Win to Nil - Away",
+          "Win to Nil - Home"
+        ]
+      },
+      "price_comparison": [
+        {
+          "market": "Extérieur plus de 1.5 but",
+          "probability": 0.46840040759240287,
+          "p10": 0.40604795334073146,
+          "fair_odds": 2.1349255546980426,
+          "best": 2.5,
+          "best_bookmaker": "Betfair",
+          "median": 2.4,
+          "bookmakers": 5,
+          "expected_value_best": 0.17100101898100717,
+          "conservative_ev_best": 0.015119883351828678
+        },
+        {
+          "market": "Extérieur plus de 2.5 but",
+          "probability": 0.2136177420665145,
+          "p10": 0.1650219778880821,
+          "fair_odds": 4.681259104820182,
+          "best": 6.0,
+          "best_bookmaker": "Betfair",
+          "median": 5.175,
+          "bookmakers": 4,
+          "expected_value_best": 0.28170645239908687,
+          "conservative_ev_best": -0.009868132671507435
+        },
+        {
+          "market": "2",
+          "probability": 0.4638890847110357,
+          "p10": 0.4068700003327845,
+          "fair_odds": 2.1556877127706437,
+          "best": 2.41,
+          "best_bookmaker": "Dafabet",
+          "median": 2.38,
+          "bookmakers": 12,
+          "expected_value_best": 0.11797269415359612,
+          "conservative_ev_best": -0.019443299197989372
+        },
+        {
+          "market": "Extérieur plus de 0.5 but",
+          "probability": 0.792031038656889,
+          "p10": 0.7518859005134181,
+          "fair_odds": 1.2625767819601879,
+          "best": 1.3,
+          "best_bookmaker": "888Sport",
+          "median": 1.29,
+          "bookmakers": 3,
+          "expected_value_best": 0.029640350253955727,
+          "conservative_ev_best": -0.02254832933255646
+        },
+        {
+          "market": "12",
+          "probability": 0.7521996961037276,
+          "p10": 0.7346413073211432,
+          "fair_odds": 1.3294341983649258,
+          "best": 1.33,
+          "best_bookmaker": "William Hill",
+          "median": 1.295,
+          "bookmakers": 10,
+          "expected_value_best": 0.0004255958179577579,
+          "conservative_ev_best": -0.022927061262879467
+        },
+        {
+          "market": "Plus de 0.5 buts",
+          "probability": 0.9359478627575919,
+          "p10": 0.9141455475760396,
+          "fair_odds": 1.068435582569408,
+          "best": 1.06,
+          "best_bookmaker": "Betfair",
+          "median": 1.05,
+          "bookmakers": 4,
+          "expected_value_best": -0.007895265476952518,
+          "conservative_ev_best": -0.031005719569398016
+        },
+        {
+          "market": "Plus de 2.5 buts",
+          "probability": 0.5234720114719688,
+          "p10": 0.4446191926102349,
+          "fair_odds": 1.9103218091604668,
+          "best": 2.13,
+          "best_bookmaker": "Pinnacle",
+          "median": 2.0,
+          "bookmakers": 10,
+          "expected_value_best": 0.11499538443529334,
+          "conservative_ev_best": -0.05296111974019968
+        },
+        {
+          "market": "Plus de 1.5 buts",
+          "probability": 0.761895481495376,
+          "p10": 0.7033641235294819,
+          "fair_odds": 1.3125159871499632,
+          "best": 1.34,
+          "best_bookmaker": "Pinnacle",
+          "median": 1.32,
+          "bookmakers": 6,
+          "expected_value_best": 0.020939945203803934,
+          "conservative_ev_best": -0.0574920744704942
+        },
+        {
+          "market": "X2",
+          "probability": 0.7116893886073081,
+          "p10": 0.6548422625894832,
+          "fair_odds": 1.405107362857948,
+          "best": 1.42,
+          "best_bookmaker": "10Bet",
+          "median": 1.36,
+          "bookmakers": 10,
+          "expected_value_best": 0.010598931822377589,
+          "conservative_ev_best": -0.07012398712293388
+        },
+        {
+          "market": "Domicile moins de 2.5 but",
+          "probability": 0.8787302985035268,
+          "p10": 0.8259267428743008,
+          "fair_odds": 1.138005599332349,
+          "best": 1.08,
+          "best_bookmaker": "Betfair",
+          "median": 1.0750000000000002,
+          "bookmakers": 4,
+          "expected_value_best": -0.050971277616191024,
+          "conservative_ev_best": -0.1079991176957551
+        },
+        {
+          "market": "Plus de 3.5 buts",
+          "probability": 0.30396196428898553,
+          "p10": 0.23287080735209162,
+          "fair_odds": 3.2898853063381006,
+          "best": 3.8,
+          "best_bookmaker": "Betfair",
+          "median": 3.5,
+          "bookmakers": 5,
+          "expected_value_best": 0.15505546429814498,
+          "conservative_ev_best": -0.1150909320620519
+        },
+        {
+          "market": "BTTS Oui",
+          "probability": 0.5491581015261536,
+          "p10": 0.4831983873621134,
+          "fair_odds": 1.8209692203773762,
+          "best": 1.83,
+          "best_bookmaker": "Betfair",
+          "median": 1.7850000000000001,
+          "bookmakers": 6,
+          "expected_value_best": 0.004959325792861291,
+          "conservative_ev_best": -0.11574695112733246
+        },
+        {
+          "market": "Moins de 4.5 buts",
+          "probability": 0.8488314723393648,
+          "p10": 0.7932398488912416,
+          "fair_odds": 1.1780901540373112,
+          "best": 1.07,
+          "best_bookmaker": "Betfair",
+          "median": 1.0550000000000002,
+          "bookmakers": 4,
+          "expected_value_best": -0.0917503245968796,
+          "conservative_ev_best": -0.15123336168637147
+        },
+        {
+          "market": "Domicile plus de 0.5 but",
+          "probability": 0.6930749256268565,
+          "p10": 0.6251947351380336,
+          "fair_odds": 1.442845445743897,
+          "best": 1.33,
+          "best_bookmaker": "Betfair",
+          "median": 1.33,
+          "bookmakers": 3,
+          "expected_value_best": -0.07821034891628087,
+          "conservative_ev_best": -0.16849100226641534
+        },
+        {
+          "market": "Domicile moins de 1.5 but",
+          "probability": 0.665368724384968,
+          "p10": 0.5811357309709504,
+          "fair_odds": 1.5029260669328088,
+          "best": 1.42,
+          "best_bookmaker": "Pinnacle",
+          "median": 1.4,
+          "bookmakers": 5,
+          "expected_value_best": -0.0551764113733455,
+          "conservative_ev_best": -0.1747872620212505
+        },
+        {
+          "market": "Plus de 4.5 buts",
+          "probability": 0.15116852766063515,
+          "p10": 0.10290484483022681,
+          "fair_odds": 6.615133556403643,
+          "best": 8.0,
+          "best_bookmaker": "Betfair",
+          "median": 6.85,
+          "bookmakers": 4,
+          "expected_value_best": 0.20934822128508124,
+          "conservative_ev_best": -0.1767612413581855
+        },
+        {
+          "market": "Extérieur moins de 2.5 but",
+          "probability": 0.7863822579334855,
+          "p10": 0.7305223583185875,
+          "fair_odds": 1.2716461872218165,
+          "best": 1.11,
+          "best_bookmaker": "Marathonbet",
+          "median": 1.11,
+          "bookmakers": 4,
+          "expected_value_best": -0.12711569369383102,
+          "conservative_ev_best": -0.18912018226636784
+        },
+        {
+          "market": "Moins de 3.5 buts",
+          "probability": 0.6960380357110144,
+          "p10": 0.6184824870762726,
+          "fair_odds": 1.4367030947934956,
+          "best": 1.25,
+          "best_bookmaker": "Betfair",
+          "median": 1.22,
+          "bookmakers": 5,
+          "expected_value_best": -0.129952455361232,
+          "conservative_ev_best": -0.22689689115465916
+        },
+        {
+          "market": "N",
+          "probability": 0.24780030389627236,
+          "p10": 0.23141440643563987,
+          "fair_odds": 4.035507561034282,
+          "best": 3.25,
+          "best_bookmaker": "Betfair",
+          "median": 3.0,
+          "bookmakers": 12,
+          "expected_value_best": -0.19464901233711485,
+          "conservative_ev_best": -0.24790317908417037
+        },
+        {
+          "market": "BTTS Non",
+          "probability": 0.4508418984738464,
+          "p10": 0.3810169429047514,
+          "fair_odds": 2.2180724626196437,
+          "best": 1.92,
+          "best_bookmaker": "Superbet",
+          "median": 1.91,
+          "bookmakers": 6,
+          "expected_value_best": -0.13438355493021492,
+          "conservative_ev_best": -0.26844746962287735
+        },
+        {
+          "market": "1X",
+          "probability": 0.5361109152889642,
+          "p10": 0.4771599805443494,
+          "fair_odds": 1.865285655415166,
+          "best": 1.53,
+          "best_bookmaker": "Bet365",
+          "median": 1.4649999999999999,
+          "bookmakers": 10,
+          "expected_value_best": -0.1797502996078848,
+          "conservative_ev_best": -0.2699452297671454
+        },
+        {
+          "market": "Domicile moins de 0.5 but",
+          "probability": 0.3069250743731434,
+          "p10": 0.2390398314647768,
+          "fair_odds": 3.2581241595929447,
+          "best": 3.0,
+          "best_bookmaker": "Betfair",
+          "median": 2.9,
+          "bookmakers": 3,
+          "expected_value_best": -0.07922477688056973,
+          "conservative_ev_best": -0.2828805056056696
+        },
+        {
+          "market": "Moins de 2.5 buts",
+          "probability": 0.4765279885280312,
+          "p10": 0.3950388043423819,
+          "fair_odds": 2.0985126248070864,
+          "best": 1.81,
+          "best_bookmaker": "SBO",
+          "median": 1.6749999999999998,
+          "bookmakers": 10,
+          "expected_value_best": -0.13748434076426352,
+          "conservative_ev_best": -0.2849797641402887
+        },
+        {
+          "market": "Domicile plus de 1.5 but",
+          "probability": 0.3346312756150321,
+          "p10": 0.2573800825927091,
+          "fair_odds": 2.98836382870089,
+          "best": 2.76,
+          "best_bookmaker": "Pinnacle",
+          "median": 2.7,
+          "bookmakers": 5,
+          "expected_value_best": -0.07641767930251153,
+          "conservative_ev_best": -0.2896309720441229
+        },
+        {
+          "market": "Extérieur moins de 1.5 but",
+          "probability": 0.531599592407597,
+          "p10": 0.4627271787515246,
+          "fair_odds": 1.8811150615654781,
+          "best": 1.53,
+          "best_bookmaker": "Pinnacle",
+          "median": 1.52,
+          "bookmakers": 5,
+          "expected_value_best": -0.18665262361637658,
+          "conservative_ev_best": -0.2920274165101674
+        },
+        {
+          "market": "1",
+          "probability": 0.2883106113926918,
+          "p10": 0.2291001408966769,
+          "fair_odds": 3.4684814241469444,
+          "best": 3.02,
+          "best_bookmaker": "Pinnacle",
+          "median": 2.76,
+          "bookmakers": 12,
+          "expected_value_best": -0.1293019535940707,
+          "conservative_ev_best": -0.3081175744920357
+        },
+        {
+          "market": "Moins de 1.5 buts",
+          "probability": 0.238104518504624,
+          "p10": 0.1807685205250429,
+          "fair_odds": 4.199836299959087,
+          "best": 3.25,
+          "best_bookmaker": "Betfair",
+          "median": 3.0,
+          "bookmakers": 6,
+          "expected_value_best": -0.226160314859972,
+          "conservative_ev_best": -0.41250230829361056
+        },
+        {
+          "market": "Extérieur moins de 0.5 but",
+          "probability": 0.20796896134311094,
+          "p10": 0.1652379395982363,
+          "fair_odds": 4.808409839342238,
+          "best": 3.28,
+          "best_bookmaker": "1xBet",
+          "median": 3.25,
+          "bookmakers": 3,
+          "expected_value_best": -0.3178618067945962,
+          "conservative_ev_best": -0.45801955811778494
+        },
+        {
+          "market": "Domicile plus de 2.5 but",
+          "probability": 0.12126970149647338,
+          "p10": 0.07690287041045533,
+          "fair_odds": 8.246082802711284,
+          "best": 6.5,
+          "best_bookmaker": "Betfair",
+          "median": 6.175,
+          "bookmakers": 4,
+          "expected_value_best": -0.21174694027292296,
+          "conservative_ev_best": -0.5001313423320404
+        },
+        {
+          "market": "Moins de 0.5 buts",
+          "probability": 0.064052137242408,
+          "p10": 0.04378619022620778,
+          "fair_odds": 15.61228154207342,
+          "best": 9.0,
+          "best_bookmaker": "Betfair",
+          "median": 7.55,
+          "bookmakers": 4,
+          "expected_value_best": -0.42353076481832796,
+          "conservative_ev_best": -0.60592428796413
+        }
+      ],
+      "official_context": {
+        "venue": "Football Centre, Tskaltubo (source ligue officielle)",
+        "absences": [],
+        "available_again": [],
+        "note": "Aucune suspension ou blessure affichée ; la section Squads n’est pas un onze officiel.",
+        "source_label": "fiche officielle Erovnuli Liga",
+        "source_url": "https://erovnuliliga.ge/en/game/9292-smg-dil"
+      }
+    },
+    {
+      "fixture_id": 1509182,
+      "match": "Spaeri - Rustavi",
+      "kickoff_utc": "2026-09-09T15:00:00+00:00",
+      "lambda_home": {
+        "mean": 0.9753474611043529,
+        "p10": 0.746953896724318,
+        "p90": 1.2820774317818537
+      },
+      "lambda_away": {
+        "mean": 1.3570031983948339,
+        "p10": 1.0174374650027291,
+        "p90": 1.7034019043803679
+      },
+      "markets": {
+        "1": {
+          "mean": 0.2755637212688959,
+          "p10": 0.1593672887924652,
+          "p90": 0.3814087426045531
+        },
+        "N": {
+          "mean": 0.2699276930099875,
+          "p10": 0.2361651863935222,
+          "p90": 0.29842175476707383
+        },
+        "2": {
+          "mean": 0.4545085857211167,
+          "p10": 0.33632898435922015,
+          "p90": 0.5999707731650125
+        },
+        "1X": {
+          "mean": 0.5454914142788833,
+          "p10": 0.40002922683498743,
+          "p90": 0.6636710156407799
+        },
+        "X2": {
+          "mean": 0.7244362787311042,
+          "p10": 0.6185912573954468,
+          "p90": 0.8406327112075349
+        },
+        "12": {
+          "mean": 0.7300723069900125,
+          "p10": 0.7015782452329261,
+          "p90": 0.7638348136064781
+        },
+        "BTTS Oui": {
+          "mean": 0.447720698692141,
+          "p10": 0.37901677661805977,
+          "p90": 0.5123250762908523
+        },
+        "BTTS Non": {
+          "mean": 0.5522793013078591,
+          "p10": 0.48767492370914794,
+          "p90": 0.6209832233819405
+        },
+        "Plus de 0.5 buts": {
+          "mean": 0.8996225197789645,
+          "p10": 0.8624856618356823,
+          "p90": 0.9316464205598631
+        },
+        "Moins de 0.5 buts": {
+          "mean": 0.10037748022103549,
+          "p10": 0.06835357944013687,
+          "p90": 0.13751433816431768
+        },
+        "Plus de 1.5 buts": {
+          "mean": 0.6720361840281076,
+          "p10": 0.589653488217702,
+          "p90": 0.7482495713759225
+        },
+        "Moins de 1.5 buts": {
+          "mean": 0.32796381597189245,
+          "p10": 0.2517504286240775,
+          "p90": 0.410346511782298
+        },
+        "Plus de 2.5 buts": {
+          "mean": 0.4110476820477883,
+          "p10": 0.3190002750517936,
+          "p90": 0.5022170697418744
+        },
+        "Moins de 2.5 buts": {
+          "mean": 0.5889523179522118,
+          "p10": 0.4977829302581256,
+          "p90": 0.6809997249482064
+        },
+        "Plus de 3.5 buts": {
+          "mean": 0.2091325886870712,
+          "p10": 0.14000583847042533,
+          "p90": 0.28217696861815805
+        },
+        "Moins de 3.5 buts": {
+          "mean": 0.7908674113129287,
+          "p10": 0.7178230313818419,
+          "p90": 0.8599941615295746
+        },
+        "Plus de 4.5 buts": {
+          "mean": 0.09051593064705372,
+          "p10": 0.0512233852187755,
+          "p90": 0.1345816942713794
+        },
+        "Moins de 4.5 buts": {
+          "mean": 0.9094840693529465,
+          "p10": 0.8654183057286207,
+          "p90": 0.9487766147812245
+        },
+        "Domicile plus de 0.5 but": {
+          "mean": 0.6154782196747168,
+          "p10": 0.5261923762432081,
+          "p90": 0.722539703176696
+        },
+        "Domicile moins de 0.5 but": {
+          "mean": 0.38452178032528317,
+          "p10": 0.277460296823304,
+          "p90": 0.47380762375679186
+        },
+        "Domicile plus de 1.5 but": {
+          "mean": 0.2553106844556355,
+          "p10": 0.17227992538038298,
+          "p90": 0.36681411840404343
+        },
+        "Domicile moins de 1.5 but": {
+          "mean": 0.7446893155443645,
+          "p10": 0.6331858815959566,
+          "p90": 0.827720074619617
+        },
+        "Domicile plus de 2.5 but": {
+          "mean": 0.07947439853030494,
+          "p10": 0.040101783244762504,
+          "p90": 0.1387802463318332
+        },
+        "Domicile moins de 2.5 but": {
+          "mean": 0.920525601469695,
+          "p10": 0.8612197536681668,
+          "p90": 0.9598982167552375
+        },
+        "Extérieur plus de 0.5 but": {
+          "mean": 0.7318649987963887,
+          "p10": 0.6384798376938478,
+          "p90": 0.8179368857786045
+        },
+        "Extérieur moins de 0.5 but": {
+          "mean": 0.2681350012036113,
+          "p10": 0.18206311422139554,
+          "p90": 0.36152016230615225
+        },
+        "Extérieur plus de 1.5 but": {
+          "mean": 0.3891372751238298,
+          "p10": 0.27065568020970115,
+          "p90": 0.5078102302964584
+        },
+        "Extérieur moins de 1.5 but": {
+          "mean": 0.6108627248761702,
+          "p10": 0.49218976970354156,
+          "p90": 0.7293443197902989
+        },
+        "Extérieur plus de 2.5 but": {
+          "mean": 0.16052394162744776,
+          "p10": 0.08353664103098375,
+          "p90": 0.2436750625227574
+        },
+        "Extérieur moins de 2.5 but": {
+          "mean": 0.8394760583725521,
+          "p10": 0.7563249374772426,
+          "p90": 0.9164633589690162
+        }
+      },
+      "top_raw": [
+        {
+          "market": "Moins de 4.5 buts",
+          "mean": 0.9094840693529465,
+          "p10": 0.8654183057286207,
+          "p90": 0.9487766147812245
+        },
+        {
+          "market": "Plus de 0.5 buts",
+          "mean": 0.8996225197789645,
+          "p10": 0.8624856618356823,
+          "p90": 0.9316464205598631
+        },
+        {
+          "market": "Domicile moins de 2.5 but",
+          "mean": 0.920525601469695,
+          "p10": 0.8612197536681668,
+          "p90": 0.9598982167552375
+        },
+        {
+          "market": "Extérieur moins de 2.5 but",
+          "mean": 0.8394760583725521,
+          "p10": 0.7563249374772426,
+          "p90": 0.9164633589690162
+        },
+        {
+          "market": "Moins de 3.5 buts",
+          "mean": 0.7908674113129287,
+          "p10": 0.7178230313818419,
+          "p90": 0.8599941615295746
+        },
+        {
+          "market": "12",
+          "mean": 0.7300723069900125,
+          "p10": 0.7015782452329261,
+          "p90": 0.7638348136064781
+        },
+        {
+          "market": "Extérieur plus de 0.5 but",
+          "mean": 0.7318649987963887,
+          "p10": 0.6384798376938478,
+          "p90": 0.8179368857786045
+        },
+        {
+          "market": "Domicile moins de 1.5 but",
+          "mean": 0.7446893155443645,
+          "p10": 0.6331858815959566,
+          "p90": 0.827720074619617
+        }
+      ],
+      "top_standard": [
+        {
+          "market": "Moins de 3.5 buts",
+          "mean": 0.7908674113129287,
+          "p10": 0.7178230313818419,
+          "p90": 0.8599941615295746
+        },
+        {
+          "market": "12",
+          "mean": 0.7300723069900125,
+          "p10": 0.7015782452329261,
+          "p90": 0.7638348136064781
+        },
+        {
+          "market": "Extérieur plus de 0.5 but",
+          "mean": 0.7318649987963887,
+          "p10": 0.6384798376938478,
+          "p90": 0.8179368857786045
+        },
+        {
+          "market": "Domicile moins de 1.5 but",
+          "mean": 0.7446893155443645,
+          "p10": 0.6331858815959566,
+          "p90": 0.827720074619617
+        },
+        {
+          "market": "X2",
+          "mean": 0.7244362787311042,
+          "p10": 0.6185912573954468,
+          "p90": 0.8406327112075349
+        },
+        {
+          "market": "Plus de 1.5 buts",
+          "mean": 0.6720361840281076,
+          "p10": 0.589653488217702,
+          "p90": 0.7482495713759225
+        },
+        {
+          "market": "Domicile plus de 0.5 but",
+          "mean": 0.6154782196747168,
+          "p10": 0.5261923762432081,
+          "p90": 0.722539703176696
+        },
+        {
+          "market": "Extérieur moins de 1.5 but",
+          "mean": 0.6108627248761702,
+          "p10": 0.49218976970354156,
+          "p90": 0.7293443197902989
+        }
+      ],
+      "exact_scores": [
+        {
+          "score": "0-1",
+          "probability": 0.13288131261268013
+        },
+        {
+          "score": "1-1",
+          "probability": 0.12795544184537141
+        },
+        {
+          "score": "0-0",
+          "probability": 0.09694668853092621
+        },
+        {
+          "score": "1-0",
+          "probability": 0.09335290359885064
+        },
+        {
+          "score": "0-2",
+          "probability": 0.09106779978377529
+        },
+        {
+          "score": "1-2",
+          "probability": 0.08769194351039877
+        }
+      ],
+      "league_id": 327,
+      "league_name": "Erovnuli Liga",
+      "country": "Géorgie",
+      "home_team": "Spaeri",
+      "away_team": "Rustavi",
+      "kickoff_paris": "09/09/2026 17:00 CEST",
+      "rest": {
+        "home": {
+          "days": 4.125,
+          "last_fixture_id": 1509175,
+          "last_opponent": "Meshakhte",
+          "last_competition": "Erovnuli Liga"
+        },
+        "away": {
+          "days": 4.958333333333333,
+          "last_fixture_id": 1509176,
+          "last_opponent": "Dinamo Batumi",
+          "last_competition": "Erovnuli Liga"
+        }
+      },
+      "availability": {
+        "official_lineups_available": false,
+        "lineup_teams": [],
+        "injuries": []
+      },
+      "status_at_analysis": "NS",
+      "profiles": {
+        "home": {
+          "standings": {
+            "played": 24,
+            "points": 24,
+            "gf": 32,
+            "ga": 37,
+            "wins": 5,
+            "draws": 9,
+            "losses": 10,
+            "rank": 9,
+            "goal_difference": -5
+          },
+          "season": {
+            "matches": 24,
+            "wins": 5,
+            "draws": 9,
+            "losses": 10,
+            "gf": 32,
+            "ga": 37,
+            "gf_per_match": 1.3333333333333333,
+            "ga_per_match": 1.5416666666666667,
+            "sot_for_per_match": 10.0,
+            "sot_against_per_match": 2.0,
+            "sot_coverage": 0.041666666666666664
+          },
+          "venue_split": {
+            "matches": 11,
+            "wins": 3,
+            "draws": 3,
+            "losses": 5,
+            "gf": 19,
+            "ga": 18,
+            "gf_per_match": 1.7272727272727273,
+            "ga_per_match": 1.6363636363636365,
+            "sot_for_per_match": null,
+            "sot_against_per_match": null,
+            "sot_coverage": 0.0
+          },
+          "recent_8": {
+            "matches": 8,
+            "wins": 0,
+            "draws": 4,
+            "losses": 4,
+            "gf": 9,
+            "ga": 16,
+            "gf_per_match": 1.125,
+            "ga_per_match": 2.0,
+            "sot_for_per_match": 10.0,
+            "sot_against_per_match": 2.0,
+            "sot_coverage": 0.125
+          },
+          "recent_form_newest_first": "DLLDLDLD",
+          "recent_scores": [
+            {
+              "date": "2026-09-05",
+              "opponent": "Meshakhte",
+              "venue": "A",
+              "score": "2-2",
+              "result": "D"
+            },
+            {
+              "date": "2026-08-30",
+              "opponent": "Dinamo Batumi",
+              "venue": "A",
+              "score": "0-3",
+              "result": "L"
+            },
+            {
+              "date": "2026-08-22",
+              "opponent": "Samgurali",
+              "venue": "H",
+              "score": "3-4",
+              "result": "L"
+            },
+            {
+              "date": "2026-08-17",
+              "opponent": "Gagra",
+              "venue": "A",
+              "score": "1-1",
+              "result": "D"
+            },
+            {
+              "date": "2026-08-09",
+              "opponent": "Dinamo Tbilisi",
+              "venue": "H",
+              "score": "1-2",
+              "result": "L"
+            },
+            {
+              "date": "2026-06-22",
+              "opponent": "Torpedo Kutaisi",
+              "venue": "A",
+              "score": "0-0",
+              "result": "D"
+            },
+            {
+              "date": "2026-06-16",
+              "opponent": "Dila",
+              "venue": "A",
+              "score": "1-3",
+              "result": "L"
+            },
+            {
+              "date": "2026-06-12",
+              "opponent": "FC Iberia 1999",
+              "venue": "A",
+              "score": "1-1",
+              "result": "D"
+            }
+          ],
+          "model_attack_index": 1.0260737570051872,
+          "model_defensive_weakness_index": 1.0969454749600664
+        },
+        "away": {
+          "standings": {
+            "played": 24,
+            "points": 42,
+            "gf": 30,
+            "ga": 20,
+            "wins": 12,
+            "draws": 6,
+            "losses": 6,
+            "rank": 1,
+            "goal_difference": 10
+          },
+          "season": {
+            "matches": 24,
+            "wins": 12,
+            "draws": 6,
+            "losses": 6,
+            "gf": 30,
+            "ga": 20,
+            "gf_per_match": 1.25,
+            "ga_per_match": 0.8333333333333334,
+            "sot_for_per_match": 4.0,
+            "sot_against_per_match": 2.0,
+            "sot_coverage": 0.041666666666666664
+          },
+          "venue_split": {
+            "matches": 12,
+            "wins": 3,
+            "draws": 6,
+            "losses": 3,
+            "gf": 12,
+            "ga": 12,
+            "gf_per_match": 1.0,
+            "ga_per_match": 1.0,
+            "sot_for_per_match": null,
+            "sot_against_per_match": null,
+            "sot_coverage": 0.0
+          },
+          "recent_8": {
+            "matches": 8,
+            "wins": 5,
+            "draws": 1,
+            "losses": 2,
+            "gf": 11,
+            "ga": 6,
+            "gf_per_match": 1.375,
+            "ga_per_match": 0.75,
+            "sot_for_per_match": 4.0,
+            "sot_against_per_match": 2.0,
+            "sot_coverage": 0.125
+          },
+          "recent_form_newest_first": "LDWWWLWW",
+          "recent_scores": [
+            {
+              "date": "2026-09-04",
+              "opponent": "Dinamo Batumi",
+              "venue": "H",
+              "score": "0-1",
+              "result": "L"
+            },
+            {
+              "date": "2026-08-30",
+              "opponent": "Samgurali",
+              "venue": "A",
+              "score": "1-1",
+              "result": "D"
+            },
+            {
+              "date": "2026-08-22",
+              "opponent": "Gagra",
+              "venue": "H",
+              "score": "3-0",
+              "result": "W"
+            },
+            {
+              "date": "2026-08-15",
+              "opponent": "Dinamo Tbilisi",
+              "venue": "A",
+              "score": "3-0",
+              "result": "W"
+            },
+            {
+              "date": "2026-08-07",
+              "opponent": "Torpedo Kutaisi",
+              "venue": "H",
+              "score": "1-0",
+              "result": "W"
+            },
+            {
+              "date": "2026-06-22",
+              "opponent": "Dila",
+              "venue": "A",
+              "score": "0-3",
+              "result": "L"
+            },
+            {
+              "date": "2026-06-17",
+              "opponent": "FC Iberia 1999",
+              "venue": "A",
+              "score": "2-1",
+              "result": "W"
+            },
+            {
+              "date": "2026-06-13",
+              "opponent": "Meshakhte",
+              "venue": "H",
+              "score": "1-0",
+              "result": "W"
+            }
+          ],
+          "model_attack_index": 0.9949043966058504,
+          "model_defensive_weakness_index": 0.6591109216603707
+        }
+      },
+      "h2h": {
+        "matches": 2,
+        "target_home_wins": 0,
+        "draws": 1,
+        "target_away_wins": 1,
+        "target_home_goals": 2,
+        "target_away_goals": 3,
+        "games": [
+          {
+            "date": "2026-05-29",
+            "home": "Rustavi",
+            "away": "Spaeri",
+            "score": "2-1"
+          },
+          {
+            "date": "2026-04-18",
+            "home": "Spaeri",
+            "away": "Rustavi",
+            "score": "1-1"
+          }
+        ]
+      },
+      "model_main_market": {
+        "market": "Moins de 3.5 buts",
+        "mean": 0.7908674113129287,
+        "p10": 0.7178230313818419,
+        "p90": 0.8599941615295746,
+        "fair_odds": 1.26443444968846
+      },
+      "prices": {
+        "markets": {
+          "1": {
+            "best": 3.32,
+            "best_bookmaker": "1xBet",
+            "median": 3.2,
+            "bookmakers": 12
+          },
+          "N": {
+            "best": 3.4,
+            "best_bookmaker": "Bet365",
+            "median": 3.25,
+            "bookmakers": 12
+          },
+          "2": {
+            "best": 2.1,
+            "best_bookmaker": "10Bet",
+            "median": 2.04,
+            "bookmakers": 12
+          },
+          "Plus de 2.5 buts": {
+            "best": 1.96,
+            "best_bookmaker": "Pinnacle",
+            "median": 1.91,
+            "bookmakers": 10
+          },
+          "Moins de 2.5 buts": {
+            "best": 1.85,
+            "best_bookmaker": "Bet365",
+            "median": 1.79,
+            "bookmakers": 10
+          },
+          "1X": {
+            "best": 1.7,
+            "best_bookmaker": "Bet365",
+            "median": 1.62,
+            "bookmakers": 10
+          },
+          "12": {
+            "best": 1.33,
+            "best_bookmaker": "William Hill",
+            "median": 1.25,
+            "bookmakers": 10
+          },
+          "X2": {
+            "best": 1.35,
+            "best_bookmaker": "10Bet",
+            "median": 1.26,
+            "bookmakers": 10
+          },
+          "BTTS Oui": {
+            "best": 1.77,
+            "best_bookmaker": "Superbet",
+            "median": 1.73,
+            "bookmakers": 6
+          },
+          "BTTS Non": {
+            "best": 2.0,
+            "best_bookmaker": "Betfair",
+            "median": 1.95,
+            "bookmakers": 6
+          },
+          "Plus de 1.5 buts": {
+            "best": 1.29,
+            "best_bookmaker": "Betfair",
+            "median": 1.26,
+            "bookmakers": 5
+          },
+          "Moins de 1.5 buts": {
+            "best": 3.5,
+            "best_bookmaker": "Betfair",
+            "median": 3.2,
+            "bookmakers": 5
+          },
+          "Plus de 1.75 buts": {
+            "best": 1.36,
+            "best_bookmaker": "Pinnacle",
+            "median": 1.33,
+            "bookmakers": 3
+          },
+          "Moins de 1.75 buts": {
+            "best": 2.95,
+            "best_bookmaker": "Pinnacle",
+            "median": 2.83,
+            "bookmakers": 3
+          },
+          "Plus de 2.0 buts": {
+            "best": 1.46,
+            "best_bookmaker": "Pinnacle",
+            "median": 1.43,
+            "bookmakers": 3
+          },
+          "Moins de 2.0 buts": {
+            "best": 2.56,
+            "best_bookmaker": "Pinnacle",
+            "median": 2.46,
+            "bookmakers": 3
+          },
+          "Plus de 2.25 buts": {
+            "best": 1.71,
+            "best_bookmaker": "Pinnacle",
+            "median": 1.68,
+            "bookmakers": 3
+          },
+          "Moins de 2.25 buts": {
+            "best": 2.08,
+            "best_bookmaker": "Pinnacle",
+            "median": 2.04,
+            "bookmakers": 3
+          },
+          "Plus de 2.75 buts": {
+            "best": 2.22,
+            "best_bookmaker": "Pinnacle",
+            "median": 2.17,
+            "bookmakers": 3
+          },
+          "Moins de 2.75 buts": {
+            "best": 1.63,
+            "best_bookmaker": "Pinnacle",
+            "median": 1.6,
+            "bookmakers": 3
+          },
+          "Plus de 3.5 buts": {
+            "best": 3.4,
+            "best_bookmaker": "Betfair",
+            "median": 3.2,
+            "bookmakers": 5
+          },
+          "Moins de 3.5 buts": {
+            "best": 1.3,
+            "best_bookmaker": "Betfair",
+            "median": 1.26,
+            "bookmakers": 5
+          },
+          "Plus de 0.5 buts": {
+            "best": 1.05,
+            "best_bookmaker": "888Sport",
+            "median": 1.02,
+            "bookmakers": 4
+          },
+          "Moins de 0.5 buts": {
+            "best": 10.0,
+            "best_bookmaker": "Betfair",
+            "median": 9.0,
+            "bookmakers": 4
+          },
+          "Plus de 0.75 buts": {
+            "best": 1.01,
+            "best_bookmaker": "Marathonbet",
+            "median": 1.01,
+            "bookmakers": 2
+          },
+          "Moins de 0.75 buts": {
+            "best": 8.5,
+            "best_bookmaker": "Marathonbet",
+            "median": 8.5,
+            "bookmakers": 2
+          },
+          "Plus de 1.0 buts": {
+            "best": 1.02,
+            "best_bookmaker": "Marathonbet",
+            "median": 1.02,
+            "bookmakers": 2
+          },
+          "Moins de 1.0 buts": {
+            "best": 7.8,
+            "best_bookmaker": "Marathonbet",
+            "median": 7.8,
+            "bookmakers": 2
+          },
+          "Plus de 1.25 buts": {
+            "best": 1.14,
+            "best_bookmaker": "Marathonbet",
+            "median": 1.14,
+            "bookmakers": 2
+          },
+          "Moins de 1.25 buts": {
+            "best": 4.4,
+            "best_bookmaker": "Marathonbet",
+            "median": 4.395,
+            "bookmakers": 2
+          },
+          "Plus de 3.0 buts": {
+            "best": 2.67,
+            "best_bookmaker": "Pinnacle",
+            "median": 2.59,
+            "bookmakers": 3
+          },
+          "Moins de 3.0 buts": {
+            "best": 1.43,
+            "best_bookmaker": "Pinnacle",
+            "median": 1.39,
+            "bookmakers": 3
+          },
+          "Plus de 4.5 buts": {
+            "best": 6.5,
+            "best_bookmaker": "Betfair",
+            "median": 6.375,
+            "bookmakers": 4
+          },
+          "Moins de 4.5 buts": {
+            "best": 1.1,
+            "best_bookmaker": "Betfair",
+            "median": 1.07,
+            "bookmakers": 4
+          },
+          "Plus de 3.25 buts": {
+            "best": 2.99,
+            "best_bookmaker": "Pinnacle",
+            "median": 2.88,
+            "bookmakers": 3
+          },
+          "Moins de 3.25 buts": {
+            "best": 1.35,
+            "best_bookmaker": "Pinnacle",
+            "median": 1.32,
+            "bookmakers": 3
+          },
+          "Plus de 3.75 buts": {
+            "best": 4.0,
+            "best_bookmaker": "Marathonbet",
+            "median": 4.0,
+            "bookmakers": 2
+          },
+          "Moins de 3.75 buts": {
+            "best": 1.17,
+            "best_bookmaker": "Marathonbet",
+            "median": 1.17,
+            "bookmakers": 2
+          },
+          "Plus de 4.0 buts": {
+            "best": 5.5,
+            "best_bookmaker": "Marathonbet",
+            "median": 5.5,
+            "bookmakers": 2
+          },
+          "Moins de 4.0 buts": {
+            "best": 1.08,
+            "best_bookmaker": "Marathonbet",
+            "median": 1.08,
+            "bookmakers": 2
+          },
+          "Plus de 4.25 buts": {
+            "best": 5.9,
+            "best_bookmaker": "Marathonbet",
+            "median": 5.895,
+            "bookmakers": 2
+          },
+          "Moins de 4.25 buts": {
+            "best": 1.07,
+            "best_bookmaker": "Marathonbet",
+            "median": 1.07,
+            "bookmakers": 2
+          },
+          "Domicile plus de 1.5 but": {
+            "best": 3.0,
+            "best_bookmaker": "Betfair",
+            "median": 2.89,
+            "bookmakers": 4
+          },
+          "Domicile moins de 1.5 but": {
+            "best": 1.36,
+            "best_bookmaker": "888Sport",
+            "median": 1.34,
+            "bookmakers": 4
+          },
+          "Domicile plus de 2.5 but": {
+            "best": 7.5,
+            "best_bookmaker": "Betfair",
+            "median": 7.45,
+            "bookmakers": 4
+          },
+          "Domicile moins de 2.5 but": {
+            "best": 1.06,
+            "best_bookmaker": "Betfair",
+            "median": 1.045,
+            "bookmakers": 4
+          },
+          "Domicile plus de 1 but": {
+            "best": 1.9,
+            "best_bookmaker": "Marathonbet",
+            "median": 1.9,
+            "bookmakers": 2
+          },
+          "Domicile moins de 1 but": {
+            "best": 1.79,
+            "best_bookmaker": "Marathonbet",
+            "median": 1.79,
+            "bookmakers": 2
+          },
+          "Domicile plus de 2 but": {
+            "best": 6.15,
+            "best_bookmaker": "Marathonbet",
+            "median": 6.15,
+            "bookmakers": 2
+          },
+          "Domicile moins de 2 but": {
+            "best": 1.06,
+            "best_bookmaker": "Marathonbet",
+            "median": 1.06,
+            "bookmakers": 2
+          },
+          "Extérieur plus de 1.5 but": {
+            "best": 2.15,
+            "best_bookmaker": "888Sport",
+            "median": 2.1,
+            "bookmakers": 5
+          },
+          "Extérieur moins de 1.5 but": {
+            "best": 1.7,
+            "best_bookmaker": "Pinnacle",
+            "median": 1.65,
+            "bookmakers": 5
+          },
+          "Extérieur plus de 2.5 but": {
+            "best": 4.75,
+            "best_bookmaker": "888Sport",
+            "median": 4.475,
+            "bookmakers": 4
+          },
+          "Extérieur moins de 2.5 but": {
+            "best": 1.17,
+            "best_bookmaker": "Betfair",
+            "median": 1.145,
+            "bookmakers": 4
+          },
+          "Extérieur plus de 1 but": {
+            "best": 1.4,
+            "best_bookmaker": "Marathonbet",
+            "median": 1.4,
+            "bookmakers": 2
+          },
+          "Extérieur moins de 1 but": {
+            "best": 2.64,
+            "best_bookmaker": "Marathonbet",
+            "median": 2.64,
+            "bookmakers": 2
+          },
+          "Extérieur plus de 2 but": {
+            "best": 3.42,
+            "best_bookmaker": "Marathonbet",
+            "median": 3.42,
+            "bookmakers": 2
+          },
+          "Extérieur moins de 2 but": {
+            "best": 1.25,
+            "best_bookmaker": "Marathonbet",
+            "median": 1.25,
+            "bookmakers": 2
+          },
+          "Plus de 5.5 buts": {
+            "best": 13.0,
+            "best_bookmaker": "Betfair",
+            "median": 13.0,
+            "bookmakers": 3
+          },
+          "Moins de 5.5 buts": {
+            "best": 1.03,
+            "best_bookmaker": "888Sport",
+            "median": 1.02,
+            "bookmakers": 3
+          },
+          "Domicile plus de 0.5 but": {
+            "best": 1.43,
+            "best_bookmaker": "Pinnacle",
+            "median": 1.3650000000000002,
+            "bookmakers": 4
+          },
+          "Domicile moins de 0.5 but": {
+            "best": 2.88,
+            "best_bookmaker": "Betfair",
+            "median": 2.74,
+            "bookmakers": 4
+          },
+          "Extérieur plus de 3.5 but": {
+            "best": 12.0,
+            "best_bookmaker": "888Sport",
+            "median": 11.0,
+            "bookmakers": 2
+          },
+          "Extérieur moins de 3.5 but": {
+            "best": 1.03,
+            "best_bookmaker": "Betfair",
+            "median": 1.03,
+            "bookmakers": 2
+          },
+          "Extérieur plus de 0.5 but": {
+            "best": 1.22,
+            "best_bookmaker": "888Sport",
+            "median": 1.2,
+            "bookmakers": 3
+          },
+          "Extérieur moins de 0.5 but": {
+            "best": 4.0,
+            "best_bookmaker": "Betfair",
+            "median": 3.85,
+            "bookmakers": 3
+          },
+          "Domicile plus de 3.5 but": {
+            "best": 23.0,
+            "best_bookmaker": "888Sport",
+            "median": 23.0,
+            "bookmakers": 1
+          },
+          "Domicile moins de 3.5 but": {
+            "best": 1.01,
+            "best_bookmaker": "888Sport",
+            "median": 1.01,
+            "bookmakers": 1
+          }
+        },
+        "raw_bet_names": [
+          "Asian Handicap",
+          "Asian Handicap (2nd Half)",
+          "Asian Handicap First Half",
+          "Away Odd/Even",
+          "Away Team Score a Goal",
+          "Away Team Total Goals(1st Half)",
+          "Away Team Total Goals(2nd Half)",
+          "Away team will score in both halves",
+          "Away win both halves",
+          "Both Teams Score",
+          "Both Teams Score - First Half",
+          "Both Teams To Score - Second Half",
+          "Corners Over Under",
+          "Correct Score - First Half",
+          "Correct Score - Second Half",
+          "Double Chance",
+          "Double Chance - First Half",
+          "Double Chance - Second Half",
+          "Draw No Bet (1st Half)",
+          "Draw No Bet (2nd Half)",
+          "European Handicap (2nd Half)",
+          "Exact Score",
+          "First Half Winner",
+          "First Team to Score (3 way) 1st Half",
+          "Goal Line",
+          "Goal Line (1st Half)",
+          "Goals Over/Under",
+          "Goals Over/Under - Second Half",
+          "Goals Over/Under First Half",
+          "HT/FT Double",
+          "Handicap Result",
+          "Handicap Result - First Half",
+          "Highest Scoring Half",
+          "Home Odd/Even",
+          "Home Team Score a Goal",
+          "Home Team Total Goals(1st Half)",
+          "Home Team Total Goals(2nd Half)",
+          "Home team will score in both halves",
+          "Home/Away",
+          "Match Winner",
+          "Odd/Even",
+          "Odd/Even - First Half",
+          "Odd/Even - Second Half",
+          "Result/Total Goals",
+          "Results/Both Teams Score",
+          "Scoring Draw",
+          "Second Half Winner",
+          "Team To Score First",
+          "Team To Score Last",
+          "To Score in Both Halves",
+          "To Win Either Half",
+          "Total - Away",
+          "Total - Home",
+          "Total Corners (1st Half)",
+          "Total Corners (3 way)",
+          "Win Both Halves",
+          "Win to Nil - Away",
+          "Win to Nil - Home"
+        ]
+      },
+      "price_comparison": [
+        {
+          "market": "BTTS Non",
+          "probability": 0.5522793013078591,
+          "p10": 0.48767492370914794,
+          "fair_odds": 1.8106780348854072,
+          "best": 2.0,
+          "best_bookmaker": "Betfair",
+          "median": 1.95,
+          "bookmakers": 6,
+          "expected_value_best": 0.10455860261571814,
+          "conservative_ev_best": -0.02465015258170411
+        },
+        {
+          "market": "Moins de 4.5 buts",
+          "probability": 0.9094840693529465,
+          "p10": 0.8654183057286207,
+          "fair_odds": 1.0995244817333099,
+          "best": 1.1,
+          "best_bookmaker": "Betfair",
+          "median": 1.07,
+          "bookmakers": 4,
+          "expected_value_best": 0.00043247628824127915,
+          "conservative_ev_best": -0.048039863698517205
+        },
+        {
+          "market": "Moins de 3.5 buts",
+          "probability": 0.7908674113129287,
+          "p10": 0.7178230313818419,
+          "fair_odds": 1.26443444968846,
+          "best": 1.3,
+          "best_bookmaker": "Betfair",
+          "median": 1.26,
+          "bookmakers": 5,
+          "expected_value_best": 0.028127634706807347,
+          "conservative_ev_best": -0.06683005920360552
+        },
+        {
+          "market": "12",
+          "probability": 0.7300723069900125,
+          "p10": 0.7015782452329261,
+          "fair_odds": 1.3697273412860465,
+          "best": 1.33,
+          "best_bookmaker": "William Hill",
+          "median": 1.25,
+          "bookmakers": 10,
+          "expected_value_best": -0.029003831703283356,
+          "conservative_ev_best": -0.06690093384020823
+        },
+        {
+          "market": "Moins de 2.5 buts",
+          "probability": 0.5889523179522118,
+          "p10": 0.4977829302581256,
+          "fair_odds": 1.6979303239301302,
+          "best": 1.85,
+          "best_bookmaker": "Bet365",
+          "median": 1.79,
+          "bookmakers": 10,
+          "expected_value_best": 0.089561788211592,
+          "conservative_ev_best": -0.07910157902246762
+        },
+        {
+          "market": "Domicile moins de 2.5 but",
+          "probability": 0.920525601469695,
+          "p10": 0.8612197536681668,
+          "fair_odds": 1.0863358915856525,
+          "best": 1.06,
+          "best_bookmaker": "Betfair",
+          "median": 1.045,
+          "bookmakers": 4,
+          "expected_value_best": -0.02424286244212326,
+          "conservative_ev_best": -0.08710706111174316
+        },
+        {
+          "market": "Plus de 0.5 buts",
+          "probability": 0.8996225197789645,
+          "p10": 0.8624856618356823,
+          "fair_odds": 1.1115773316187083,
+          "best": 1.05,
+          "best_bookmaker": "888Sport",
+          "median": 1.02,
+          "bookmakers": 4,
+          "expected_value_best": -0.05539635423208733,
+          "conservative_ev_best": -0.09439005507253351
+        },
+        {
+          "market": "Extérieur moins de 2.5 but",
+          "probability": 0.8394760583725521,
+          "p10": 0.7563249374772426,
+          "fair_odds": 1.1912192015799083,
+          "best": 1.17,
+          "best_bookmaker": "Betfair",
+          "median": 1.145,
+          "bookmakers": 4,
+          "expected_value_best": -0.01781301170411409,
+          "conservative_ev_best": -0.11509982315162615
+        },
+        {
+          "market": "Moins de 1.5 buts",
+          "probability": 0.32796381597189245,
+          "p10": 0.2517504286240775,
+          "fair_odds": 3.049116857713667,
+          "best": 3.5,
+          "best_bookmaker": "Betfair",
+          "median": 3.2,
+          "bookmakers": 5,
+          "expected_value_best": 0.14787335590162365,
+          "conservative_ev_best": -0.11887349981572881
+        },
+        {
+          "market": "Domicile moins de 1.5 but",
+          "probability": 0.7446893155443645,
+          "p10": 0.6331858815959566,
+          "fair_odds": 1.3428418793265546,
+          "best": 1.36,
+          "best_bookmaker": "888Sport",
+          "median": 1.34,
+          "bookmakers": 4,
+          "expected_value_best": 0.012777469140335729,
+          "conservative_ev_best": -0.138867201029499
+        },
+        {
+          "market": "Extérieur moins de 1.5 but",
+          "probability": 0.6108627248761702,
+          "p10": 0.49218976970354156,
+          "fair_odds": 1.6370290071352986,
+          "best": 1.7,
+          "best_bookmaker": "Pinnacle",
+          "median": 1.65,
+          "bookmakers": 5,
+          "expected_value_best": 0.03846663228948932,
+          "conservative_ev_best": -0.16327739150397935
+        },
+        {
+          "market": "X2",
+          "probability": 0.7244362787311042,
+          "p10": 0.6185912573954468,
+          "fair_odds": 1.3803836574164439,
+          "best": 1.35,
+          "best_bookmaker": "10Bet",
+          "median": 1.26,
+          "bookmakers": 10,
+          "expected_value_best": -0.022011023713009337,
+          "conservative_ev_best": -0.16490180251614672
+        },
+        {
+          "market": "N",
+          "probability": 0.2699276930099875,
+          "p10": 0.2361651863935222,
+          "fair_odds": 3.7046958348323282,
+          "best": 3.4,
+          "best_bookmaker": "Bet365",
+          "median": 3.25,
+          "bookmakers": 12,
+          "expected_value_best": -0.0822458437660426,
+          "conservative_ev_best": -0.19703836626202453
+        },
+        {
+          "market": "Domicile moins de 0.5 but",
+          "probability": 0.38452178032528317,
+          "p10": 0.277460296823304,
+          "fair_odds": 2.600632919035322,
+          "best": 2.88,
+          "best_bookmaker": "Betfair",
+          "median": 2.74,
+          "bookmakers": 4,
+          "expected_value_best": 0.10742272733681557,
+          "conservative_ev_best": -0.20091434514888462
+        },
+        {
+          "market": "Extérieur plus de 0.5 but",
+          "probability": 0.7318649987963887,
+          "p10": 0.6384798376938478,
+          "fair_odds": 1.366372215701777,
+          "best": 1.22,
+          "best_bookmaker": "888Sport",
+          "median": 1.2,
+          "bookmakers": 3,
+          "expected_value_best": -0.1071247014684058,
+          "conservative_ev_best": -0.2210545980135058
+        },
+        {
+          "market": "Plus de 1.5 buts",
+          "probability": 0.6720361840281076,
+          "p10": 0.589653488217702,
+          "fair_odds": 1.4880151155048156,
+          "best": 1.29,
+          "best_bookmaker": "Betfair",
+          "median": 1.26,
+          "bookmakers": 5,
+          "expected_value_best": -0.13307332260374116,
+          "conservative_ev_best": -0.23934700019916433
+        },
+        {
+          "market": "Domicile plus de 0.5 but",
+          "probability": 0.6154782196747168,
+          "p10": 0.5261923762432081,
+          "fair_odds": 1.6247528637625954,
+          "best": 1.43,
+          "best_bookmaker": "Pinnacle",
+          "median": 1.3650000000000002,
+          "bookmakers": 4,
+          "expected_value_best": -0.11986614586515498,
+          "conservative_ev_best": -0.24754490197221235
+        },
+        {
+          "market": "Extérieur moins de 0.5 but",
+          "probability": 0.2681350012036113,
+          "p10": 0.18206311422139554,
+          "fair_odds": 3.729464618610679,
+          "best": 4.0,
+          "best_bookmaker": "Betfair",
+          "median": 3.85,
+          "bookmakers": 3,
+          "expected_value_best": 0.07254000481444511,
+          "conservative_ev_best": -0.27174754311441784
+        },
+        {
+          "market": "2",
+          "probability": 0.4545085857211167,
+          "p10": 0.33632898435922015,
+          "fair_odds": 2.2001784595849045,
+          "best": 2.1,
+          "best_bookmaker": "10Bet",
+          "median": 2.04,
+          "bookmakers": 12,
+          "expected_value_best": -0.045531969985654897,
+          "conservative_ev_best": -0.2937091328456376
+        },
+        {
+          "market": "Moins de 0.5 buts",
+          "probability": 0.10037748022103549,
+          "p10": 0.06835357944013687,
+          "fair_odds": 9.962393933359927,
+          "best": 10.0,
+          "best_bookmaker": "Betfair",
+          "median": 9.0,
+          "bookmakers": 4,
+          "expected_value_best": 0.003774802210354977,
+          "conservative_ev_best": -0.3164642055986313
+        },
+        {
+          "market": "1X",
+          "probability": 0.5454914142788833,
+          "p10": 0.40002922683498743,
+          "fair_odds": 1.8332094214937518,
+          "best": 1.7,
+          "best_bookmaker": "Bet365",
+          "median": 1.62,
+          "bookmakers": 10,
+          "expected_value_best": -0.07266459572589845,
+          "conservative_ev_best": -0.31995031438052135
+        },
+        {
+          "market": "BTTS Oui",
+          "probability": 0.447720698692141,
+          "p10": 0.37901677661805977,
+          "fair_odds": 2.2335353333476635,
+          "best": 1.77,
+          "best_bookmaker": "Superbet",
+          "median": 1.73,
+          "bookmakers": 6,
+          "expected_value_best": -0.20753436331491049,
+          "conservative_ev_best": -0.3291403053860342
+        },
+        {
+          "market": "Plus de 2.5 buts",
+          "probability": 0.4110476820477883,
+          "p10": 0.3190002750517936,
+          "fair_odds": 2.4328077828297796,
+          "best": 1.96,
+          "best_bookmaker": "Pinnacle",
+          "median": 1.91,
+          "bookmakers": 10,
+          "expected_value_best": -0.19434654318633493,
+          "conservative_ev_best": -0.37475946089848455
+        },
+        {
+          "market": "Extérieur plus de 1.5 but",
+          "probability": 0.3891372751238298,
+          "p10": 0.27065568020970115,
+          "fair_odds": 2.569787229151419,
+          "best": 2.15,
+          "best_bookmaker": "888Sport",
+          "median": 2.1,
+          "bookmakers": 5,
+          "expected_value_best": -0.16335485848376596,
+          "conservative_ev_best": -0.41809028754914257
+        },
+        {
+          "market": "1",
+          "probability": 0.2755637212688959,
+          "p10": 0.1593672887924652,
+          "fair_odds": 3.628924719826225,
+          "best": 3.32,
+          "best_bookmaker": "1xBet",
+          "median": 3.2,
+          "bookmakers": 12,
+          "expected_value_best": -0.08512844538726572,
+          "conservative_ev_best": -0.47090060120901556
+        },
+        {
+          "market": "Domicile plus de 1.5 but",
+          "probability": 0.2553106844556355,
+          "p10": 0.17227992538038298,
+          "fair_odds": 3.9167965184542317,
+          "best": 3.0,
+          "best_bookmaker": "Betfair",
+          "median": 2.89,
+          "bookmakers": 4,
+          "expected_value_best": -0.2340679466330935,
+          "conservative_ev_best": -0.48316022385885105
+        },
+        {
+          "market": "Plus de 3.5 buts",
+          "probability": 0.2091325886870712,
+          "p10": 0.14000583847042533,
+          "fair_odds": 4.781655533831304,
+          "best": 3.4,
+          "best_bookmaker": "Betfair",
+          "median": 3.2,
+          "bookmakers": 5,
+          "expected_value_best": -0.28894919846395795,
+          "conservative_ev_best": -0.5239801492005539
+        },
+        {
+          "market": "Extérieur plus de 2.5 but",
+          "probability": 0.16052394162744776,
+          "p10": 0.08353664103098375,
+          "fair_odds": 6.229600331649291,
+          "best": 4.75,
+          "best_bookmaker": "888Sport",
+          "median": 4.475,
+          "bookmakers": 4,
+          "expected_value_best": -0.23751127726962307,
+          "conservative_ev_best": -0.6032009551028272
+        },
+        {
+          "market": "Plus de 4.5 buts",
+          "probability": 0.09051593064705372,
+          "p10": 0.0512233852187755,
+          "fair_odds": 11.047779024658903,
+          "best": 6.5,
+          "best_bookmaker": "Betfair",
+          "median": 6.375,
+          "bookmakers": 4,
+          "expected_value_best": -0.41164645079415074,
+          "conservative_ev_best": -0.6670479960779592
+        },
+        {
+          "market": "Domicile plus de 2.5 but",
+          "probability": 0.07947439853030494,
+          "p10": 0.040101783244762504,
+          "fair_odds": 12.582668362298874,
+          "best": 7.5,
+          "best_bookmaker": "Betfair",
+          "median": 7.45,
+          "bookmakers": 4,
+          "expected_value_best": -0.403942011022713,
+          "conservative_ev_best": -0.6992366256642812
+        }
+      ],
+      "official_context": {
+        "venue": "Mikheil Meskhi 2, Tbilisi (source ligue officielle)",
+        "absences": [
+          "Nikoloz Kenchadze (Spaeri, suspendu)",
+          "Mamuka Kapanadze (Rustavi, suspendu)"
+        ],
+        "available_again": [],
+        "note": "Le Rustavi concerné est l’équipe API 3501, distincte de Metalurgi/Olimpi Rustavi 13846.",
+        "source_label": "fiche officielle Erovnuli Liga",
+        "source_url": "https://erovnuliliga.ge/en/game/9295-spa-rus"
+      }
+    },
+    {
+      "fixture_id": 1559994,
+      "match": "FK Jablonec - Baník Ostrava",
+      "kickoff_utc": "2026-09-09T15:00:00+00:00",
+      "lambda_home": {
+        "mean": 1.5453066136693114,
+        "p10": 1.3571465513388816,
+        "p90": 1.7232025728087348
+      },
+      "lambda_away": {
+        "mean": 1.0806155038874858,
+        "p10": 0.9317072486047578,
+        "p90": 1.2300829362710053
+      },
+      "markets": {
+        "1": {
+          "mean": 0.4798798262074723,
+          "p10": 0.4247845651160018,
+          "p90": 0.5338754912207587
+        },
+        "N": {
+          "mean": 0.2536624486818721,
+          "p10": 0.23791989414212247,
+          "p90": 0.27214892886064196
+        },
+        "2": {
+          "mean": 0.2664577251106556,
+          "p10": 0.22127906656939383,
+          "p90": 0.3184649082089297
+        },
+        "1X": {
+          "mean": 0.7335422748893444,
+          "p10": 0.6815350917910703,
+          "p90": 0.7787209334306061
+        },
+        "X2": {
+          "mean": 0.5201201737925276,
+          "p10": 0.4661245087792413,
+          "p90": 0.5752154348839982
+        },
+        "12": {
+          "mean": 0.7463375513181278,
+          "p10": 0.7278510711393581,
+          "p90": 0.7620801058578776
+        },
+        "BTTS Oui": {
+          "mean": 0.5163570862148888,
+          "p10": 0.46677173810070577,
+          "p90": 0.5618983819682629
+        },
+        "BTTS Non": {
+          "mean": 0.48364291378511115,
+          "p10": 0.4381016180317369,
+          "p90": 0.5332282618992942
+        },
+        "Plus de 0.5 buts": {
+          "mean": 0.9262273072793857,
+          "p10": 0.9073598109337052,
+          "p90": 0.9429323964166582
+        },
+        "Moins de 0.5 buts": {
+          "mean": 0.0737726927206144,
+          "p10": 0.05706760358334184,
+          "p90": 0.09264018906629479
+        },
+        "Plus de 1.5 buts": {
+          "mean": 0.7353231796663304,
+          "p10": 0.6869658155903259,
+          "p90": 0.7795182449637847
+        },
+        "Moins de 1.5 buts": {
+          "mean": 0.26467682033366946,
+          "p10": 0.22048175503621525,
+          "p90": 0.3130341844096741
+        },
+        "Plus de 2.5 buts": {
+          "mean": 0.48692651369917894,
+          "p10": 0.4248036067639954,
+          "p90": 0.5455485036545699
+        },
+        "Moins de 2.5 buts": {
+          "mean": 0.5130734863008211,
+          "p10": 0.45445149634543014,
+          "p90": 0.5751963932360046
+        },
+        "Plus de 3.5 buts": {
+          "mean": 0.270248603424343,
+          "p10": 0.21690615889381867,
+          "p90": 0.32222292521229023
+        },
+        "Moins de 3.5 buts": {
+          "mean": 0.729751396575657,
+          "p10": 0.6777770747877098,
+          "p90": 0.7830938411061813
+        },
+        "Plus de 4.5 buts": {
+          "mean": 0.12770277217176013,
+          "p10": 0.09325747677322474,
+          "p90": 0.16234868130098642
+        },
+        "Moins de 4.5 buts": {
+          "mean": 0.87229722782824,
+          "p10": 0.8376513186990135,
+          "p90": 0.9067425232267753
+        },
+        "Domicile plus de 0.5 but": {
+          "mean": 0.7841900227897964,
+          "p10": 0.742605808190018,
+          "p90": 0.8215064002669367
+        },
+        "Domicile moins de 0.5 but": {
+          "mean": 0.21580997721020365,
+          "p10": 0.17849359973306334,
+          "p90": 0.257394191809982
+        },
+        "Domicile plus de 1.5 but": {
+          "mean": 0.4558227777792954,
+          "p10": 0.39328416844044173,
+          "p90": 0.5139257699770289
+        },
+        "Domicile moins de 1.5 but": {
+          "mean": 0.5441772222207046,
+          "p10": 0.4860742300229711,
+          "p90": 0.6067158315595582
+        },
+        "Domicile plus de 2.5 but": {
+          "mean": 0.20349521894470626,
+          "p10": 0.15624383909335168,
+          "p90": 0.2489139032461783
+        },
+        "Domicile moins de 2.5 but": {
+          "mean": 0.7965047810552937,
+          "p10": 0.7510860967538218,
+          "p90": 0.8437561609066483
+        },
+        "Extérieur plus de 0.5 but": {
+          "mean": 0.658394370704478,
+          "p10": 0.606119316213964,
+          "p90": 0.7077316627484725
+        },
+        "Extérieur moins de 0.5 but": {
+          "mean": 0.34160562929552196,
+          "p10": 0.29226833725152745,
+          "p90": 0.393880683786036
+        },
+        "Extérieur plus de 1.5 but": {
+          "mean": 0.29368744001608155,
+          "p10": 0.2391378280451158,
+          "p90": 0.34821736828306926
+        },
+        "Extérieur moins de 1.5 but": {
+          "mean": 0.7063125599839185,
+          "p10": 0.6517826317169307,
+          "p90": 0.7608621719548843
+        },
+        "Extérieur plus de 2.5 but": {
+          "mean": 0.09680723660159636,
+          "p10": 0.0681781717297773,
+          "p90": 0.12710116879936814
+        },
+        "Extérieur moins de 2.5 but": {
+          "mean": 0.9031927633984035,
+          "p10": 0.8728988312006318,
+          "p90": 0.9318218282702226
+        }
+      },
+      "top_raw": [
+        {
+          "market": "Plus de 0.5 buts",
+          "mean": 0.9262273072793857,
+          "p10": 0.9073598109337052,
+          "p90": 0.9429323964166582
+        },
+        {
+          "market": "Extérieur moins de 2.5 but",
+          "mean": 0.9031927633984035,
+          "p10": 0.8728988312006318,
+          "p90": 0.9318218282702226
+        },
+        {
+          "market": "Moins de 4.5 buts",
+          "mean": 0.87229722782824,
+          "p10": 0.8376513186990135,
+          "p90": 0.9067425232267753
+        },
+        {
+          "market": "Domicile moins de 2.5 but",
+          "mean": 0.7965047810552937,
+          "p10": 0.7510860967538218,
+          "p90": 0.8437561609066483
+        },
+        {
+          "market": "Domicile plus de 0.5 but",
+          "mean": 0.7841900227897964,
+          "p10": 0.742605808190018,
+          "p90": 0.8215064002669367
+        },
+        {
+          "market": "12",
+          "mean": 0.7463375513181278,
+          "p10": 0.7278510711393581,
+          "p90": 0.7620801058578776
+        },
+        {
+          "market": "Plus de 1.5 buts",
+          "mean": 0.7353231796663304,
+          "p10": 0.6869658155903259,
+          "p90": 0.7795182449637847
+        },
+        {
+          "market": "1X",
+          "mean": 0.7335422748893444,
+          "p10": 0.6815350917910703,
+          "p90": 0.7787209334306061
+        }
+      ],
+      "top_standard": [
+        {
+          "market": "Domicile plus de 0.5 but",
+          "mean": 0.7841900227897964,
+          "p10": 0.742605808190018,
+          "p90": 0.8215064002669367
+        },
+        {
+          "market": "12",
+          "mean": 0.7463375513181278,
+          "p10": 0.7278510711393581,
+          "p90": 0.7620801058578776
+        },
+        {
+          "market": "Plus de 1.5 buts",
+          "mean": 0.7353231796663304,
+          "p10": 0.6869658155903259,
+          "p90": 0.7795182449637847
+        },
+        {
+          "market": "1X",
+          "mean": 0.7335422748893444,
+          "p10": 0.6815350917910703,
+          "p90": 0.7787209334306061
+        },
+        {
+          "market": "Moins de 3.5 buts",
+          "mean": 0.729751396575657,
+          "p10": 0.6777770747877098,
+          "p90": 0.7830938411061813
+        },
+        {
+          "market": "Extérieur moins de 1.5 but",
+          "mean": 0.7063125599839185,
+          "p10": 0.6517826317169307,
+          "p90": 0.7608621719548843
+        },
+        {
+          "market": "Extérieur plus de 0.5 but",
+          "mean": 0.658394370704478,
+          "p10": 0.606119316213964,
+          "p90": 0.7077316627484725
+        },
+        {
+          "market": "Domicile moins de 1.5 but",
+          "mean": 0.5441772222207046,
+          "p10": 0.4860742300229711,
+          "p90": 0.6067158315595582
+        }
+      ],
+      "exact_scores": [
+        {
+          "score": "1-1",
+          "probability": 0.12075587438802973
+        },
+        {
+          "score": "1-0",
+          "probability": 0.11184144407922952
+        },
+        {
+          "score": "2-1",
+          "probability": 0.09345326155810932
+        },
+        {
+          "score": "2-0",
+          "probability": 0.08655436250651648
+        },
+        {
+          "score": "0-1",
+          "probability": 0.07801750819660008
+        },
+        {
+          "score": "0-0",
+          "probability": 0.07225810607053852
+        }
+      ],
+      "league_id": 345,
+      "league_name": "Czech Liga",
+      "country": "Tchéquie",
+      "home_team": "FK Jablonec",
+      "away_team": "Baník Ostrava",
+      "kickoff_paris": "09/09/2026 17:00 CEST",
+      "rest": {
+        "home": {
+          "days": 3.0833333333333335,
+          "last_fixture_id": 1560010,
+          "last_opponent": "Slovan Liberec",
+          "last_competition": "Czech Liga"
+        },
+        "away": {
+          "days": 3.1666666666666665,
+          "last_fixture_id": 1560012,
+          "last_opponent": "Mlada Boleslav",
+          "last_competition": "Czech Liga"
+        }
+      },
+      "availability": {
+        "official_lineups_available": false,
+        "lineup_teams": [],
+        "injuries": []
+      },
+      "status_at_analysis": "NS",
+      "profiles": {
+        "home": {
+          "standings": {
+            "played": 6,
+            "points": 10,
+            "gf": 7,
+            "ga": 6,
+            "wins": 3,
+            "draws": 1,
+            "losses": 2,
+            "rank": 7,
+            "goal_difference": 1
+          },
+          "season": {
+            "matches": 6,
+            "wins": 3,
+            "draws": 1,
+            "losses": 2,
+            "gf": 7,
+            "ga": 6,
+            "gf_per_match": 1.1666666666666667,
+            "ga_per_match": 1.0,
+            "sot_for_per_match": 3.5,
+            "sot_against_per_match": 2.8333333333333335,
+            "sot_coverage": 1.0
+          },
+          "venue_split": {
+            "matches": 3,
+            "wins": 2,
+            "draws": 0,
+            "losses": 1,
+            "gf": 4,
+            "ga": 3,
+            "gf_per_match": 1.3333333333333333,
+            "ga_per_match": 1.0,
+            "sot_for_per_match": 5.333333333333333,
+            "sot_against_per_match": 2.3333333333333335,
+            "sot_coverage": 1.0
+          },
+          "recent_8": {
+            "matches": 6,
+            "wins": 3,
+            "draws": 1,
+            "losses": 2,
+            "gf": 7,
+            "ga": 6,
+            "gf_per_match": 1.1666666666666667,
+            "ga_per_match": 1.0,
+            "sot_for_per_match": 3.5,
+            "sot_against_per_match": 2.8333333333333335,
+            "sot_coverage": 1.0
+          },
+          "recent_form_newest_first": "LDLWWW",
+          "recent_scores": [
+            {
+              "date": "2026-09-06",
+              "opponent": "Slovan Liberec",
+              "venue": "H",
+              "score": "1-2",
+              "result": "L"
+            },
+            {
+              "date": "2026-09-02",
+              "opponent": "Bohemians 1905",
+              "venue": "A",
+              "score": "1-1",
+              "result": "D"
+            },
+            {
+              "date": "2026-08-30",
+              "opponent": "Teplice",
+              "venue": "A",
+              "score": "0-2",
+              "result": "L"
+            },
+            {
+              "date": "2026-08-09",
+              "opponent": "Slovácko",
+              "venue": "H",
+              "score": "1-0",
+              "result": "W"
+            },
+            {
+              "date": "2026-08-02",
+              "opponent": "Pardubice",
+              "venue": "A",
+              "score": "2-0",
+              "result": "W"
+            },
+            {
+              "date": "2026-07-26",
+              "opponent": "Sigma Olomouc",
+              "venue": "H",
+              "score": "2-1",
+              "result": "W"
+            }
+          ],
+          "model_attack_index": 1.3132911379267085,
+          "model_defensive_weakness_index": 0.8845038906527551
+        },
+        "away": {
+          "standings": {
+            "played": 6,
+            "points": 9,
+            "gf": 4,
+            "ga": 10,
+            "wins": 3,
+            "draws": 0,
+            "losses": 3,
+            "rank": 11,
+            "goal_difference": -6
+          },
+          "season": {
+            "matches": 6,
+            "wins": 3,
+            "draws": 0,
+            "losses": 3,
+            "gf": 4,
+            "ga": 10,
+            "gf_per_match": 0.6666666666666666,
+            "ga_per_match": 1.6666666666666667,
+            "sot_for_per_match": 3.3333333333333335,
+            "sot_against_per_match": 4.0,
+            "sot_coverage": 1.0
+          },
+          "venue_split": {
+            "matches": 3,
+            "wins": 1,
+            "draws": 0,
+            "losses": 2,
+            "gf": 2,
+            "ga": 6,
+            "gf_per_match": 0.6666666666666666,
+            "ga_per_match": 2.0,
+            "sot_for_per_match": 4.0,
+            "sot_against_per_match": 4.666666666666667,
+            "sot_coverage": 1.0
+          },
+          "recent_8": {
+            "matches": 6,
+            "wins": 3,
+            "draws": 0,
+            "losses": 3,
+            "gf": 4,
+            "ga": 10,
+            "gf_per_match": 0.6666666666666666,
+            "ga_per_match": 1.6666666666666667,
+            "sot_for_per_match": 3.3333333333333335,
+            "sot_against_per_match": 4.0,
+            "sot_coverage": 1.0
+          },
+          "recent_form_newest_first": "LWWLLW",
+          "recent_scores": [
+            {
+              "date": "2026-09-06",
+              "opponent": "Mlada Boleslav",
+              "venue": "A",
+              "score": "0-4",
+              "result": "L"
+            },
+            {
+              "date": "2026-08-29",
+              "opponent": "Sigma Olomouc",
+              "venue": "H",
+              "score": "1-0",
+              "result": "W"
+            },
+            {
+              "date": "2026-08-16",
+              "opponent": "Artis",
+              "venue": "H",
+              "score": "1-0",
+              "result": "W"
+            },
+            {
+              "date": "2026-08-09",
+              "opponent": "Hradec Králové",
+              "venue": "A",
+              "score": "1-2",
+              "result": "L"
+            },
+            {
+              "date": "2026-08-01",
+              "opponent": "Slavia Praha",
+              "venue": "H",
+              "score": "0-4",
+              "result": "L"
+            },
+            {
+              "date": "2026-07-25",
+              "opponent": "Zlin",
+              "venue": "A",
+              "score": "1-0",
+              "result": "W"
+            }
+          ],
+          "model_attack_index": 1.1155857780701826,
+          "model_defensive_weakness_index": 0.9137791283945981
+        }
+      },
+      "h2h": {
+        "matches": 7,
+        "target_home_wins": 5,
+        "draws": 0,
+        "target_away_wins": 2,
+        "target_home_goals": 13,
+        "target_away_goals": 7,
+        "games": [
+          {
+            "date": "2026-04-11",
+            "home": "FK Jablonec",
+            "away": "Baník Ostrava",
+            "score": "4-1"
+          },
+          {
+            "date": "2025-11-08",
+            "home": "Baník Ostrava",
+            "away": "FK Jablonec",
+            "score": "0-1"
+          },
+          {
+            "date": "2025-04-27",
+            "home": "Baník Ostrava",
+            "away": "FK Jablonec",
+            "score": "1-2"
+          },
+          {
+            "date": "2024-11-23",
+            "home": "FK Jablonec",
+            "away": "Baník Ostrava",
+            "score": "3-1"
+          },
+          {
+            "date": "2024-07-28",
+            "home": "Baník Ostrava",
+            "away": "FK Jablonec",
+            "score": "1-0"
+          },
+          {
+            "date": "2024-04-07",
+            "home": "FK Jablonec",
+            "away": "Baník Ostrava",
+            "score": "2-3"
+          },
+          {
+            "date": "2023-10-28",
+            "home": "Baník Ostrava",
+            "away": "FK Jablonec",
+            "score": "0-1"
+          }
+        ]
+      },
+      "model_main_market": {
+        "market": "Domicile plus de 0.5 but",
+        "mean": 0.7841900227897964,
+        "p10": 0.742605808190018,
+        "p90": 0.8215064002669367,
+        "fair_odds": 1.2752011259241076
+      },
+      "prices": {
+        "markets": {
+          "1": {
+            "best": 1.91,
+            "best_bookmaker": "Unibet",
+            "median": 1.8250000000000002,
+            "bookmakers": 14
+          },
+          "N": {
+            "best": 3.73,
+            "best_bookmaker": "Pinnacle",
+            "median": 3.575,
+            "bookmakers": 14
+          },
+          "2": {
+            "best": 4.29,
+            "best_bookmaker": "Pinnacle",
+            "median": 4.0,
+            "bookmakers": 14
+          },
+          "Plus de 1.5 buts": {
+            "best": 1.28,
+            "best_bookmaker": "Betano",
+            "median": 1.24,
+            "bookmakers": 11
+          },
+          "Moins de 1.5 buts": {
+            "best": 4.1,
+            "best_bookmaker": "Betfair",
+            "median": 3.74,
+            "bookmakers": 11
+          },
+          "Plus de 2.5 buts": {
+            "best": 1.83,
+            "best_bookmaker": "Pinnacle",
+            "median": 1.7850000000000001,
+            "bookmakers": 12
+          },
+          "Moins de 2.5 buts": {
+            "best": 2.05,
+            "best_bookmaker": "Marathonbet",
+            "median": 2.0,
+            "bookmakers": 12
+          },
+          "Plus de 3.5 buts": {
+            "best": 3.1,
+            "best_bookmaker": "Betfair",
+            "median": 2.9,
+            "bookmakers": 11
+          },
+          "Moins de 3.5 buts": {
+            "best": 1.42,
+            "best_bookmaker": "Betano",
+            "median": 1.37,
+            "bookmakers": 11
+          },
+          "Plus de 0.5 buts": {
+            "best": 1.06,
+            "best_bookmaker": "Betano",
+            "median": 1.04,
+            "bookmakers": 8
+          },
+          "Moins de 0.5 buts": {
+            "best": 12.0,
+            "best_bookmaker": "1xBet",
+            "median": 10.75,
+            "bookmakers": 8
+          },
+          "BTTS Oui": {
+            "best": 1.75,
+            "best_bookmaker": "Bet365",
+            "median": 1.69,
+            "bookmakers": 11
+          },
+          "BTTS Non": {
+            "best": 2.12,
+            "best_bookmaker": "Unibet",
+            "median": 2.06,
+            "bookmakers": 11
+          },
+          "1X": {
+            "best": 1.25,
+            "best_bookmaker": "Bet365",
+            "median": 1.22,
+            "bookmakers": 12
+          },
+          "12": {
+            "best": 1.29,
+            "best_bookmaker": "William Hill",
+            "median": 1.25,
+            "bookmakers": 12
+          },
+          "X2": {
+            "best": 2.01,
+            "best_bookmaker": "SBO",
+            "median": 1.91,
+            "bookmakers": 12
+          },
+          "Domicile plus de 1.5 but": {
+            "best": 1.85,
+            "best_bookmaker": "888Sport",
+            "median": 1.82,
+            "bookmakers": 11
+          },
+          "Domicile moins de 1.5 but": {
+            "best": 1.98,
+            "best_bookmaker": "Marathonbet",
+            "median": 1.91,
+            "bookmakers": 11
+          },
+          "Domicile plus de 2.5 but": {
+            "best": 3.75,
+            "best_bookmaker": "Bet365",
+            "median": 3.5,
+            "bookmakers": 11
+          },
+          "Domicile moins de 2.5 but": {
+            "best": 1.29,
+            "best_bookmaker": "Betano",
+            "median": 1.25,
+            "bookmakers": 11
+          },
+          "Domicile plus de 0.5 but": {
+            "best": 1.18,
+            "best_bookmaker": "Betano",
+            "median": 1.17,
+            "bookmakers": 9
+          },
+          "Domicile moins de 0.5 but": {
+            "best": 5.0,
+            "best_bookmaker": "Bet365",
+            "median": 4.5,
+            "bookmakers": 9
+          },
+          "Extérieur plus de 1.5 but": {
+            "best": 3.3,
+            "best_bookmaker": "Pinnacle",
+            "median": 3.0,
+            "bookmakers": 11
+          },
+          "Extérieur moins de 1.5 but": {
+            "best": 1.38,
+            "best_bookmaker": "Unibet",
+            "median": 1.33,
+            "bookmakers": 11
+          },
+          "Extérieur plus de 2.5 but": {
+            "best": 10.0,
+            "best_bookmaker": "Bet365",
+            "median": 7.5,
+            "bookmakers": 9
+          },
+          "Extérieur moins de 2.5 but": {
+            "best": 1.08,
+            "best_bookmaker": "Betano",
+            "median": 1.06,
+            "bookmakers": 9
+          },
+          "Extérieur plus de 0.5 but": {
+            "best": 1.46,
+            "best_bookmaker": "Pinnacle",
+            "median": 1.41,
+            "bookmakers": 11
+          },
+          "Extérieur moins de 0.5 but": {
+            "best": 2.85,
+            "best_bookmaker": "Unibet",
+            "median": 2.65,
+            "bookmakers": 11
+          },
+          "Plus de 4.5 buts": {
+            "best": 6.0,
+            "best_bookmaker": "Bet365",
+            "median": 5.575,
+            "bookmakers": 10
+          },
+          "Moins de 4.5 buts": {
+            "best": 1.16,
+            "best_bookmaker": "Betano",
+            "median": 1.125,
+            "bookmakers": 10
+          },
+          "Plus de 7.5 buts": {
+            "best": 51.0,
+            "best_bookmaker": "Bet365",
+            "median": 50.5,
+            "bookmakers": 2
+          },
+          "Moins de 7.5 buts": {
+            "best": 1.0,
+            "best_bookmaker": "Bet365",
+            "median": 1.0,
+            "bookmakers": 2
+          },
+          "Plus de 5.5 buts": {
+            "best": 13.0,
+            "best_bookmaker": "Bet365",
+            "median": 9.8,
+            "bookmakers": 7
+          },
+          "Moins de 5.5 buts": {
+            "best": 1.06,
+            "best_bookmaker": "Betano",
+            "median": 1.04,
+            "bookmakers": 7
+          },
+          "Plus de 6.5 buts": {
+            "best": 26.0,
+            "best_bookmaker": "Bet365",
+            "median": 23.0,
+            "bookmakers": 4
+          },
+          "Moins de 6.5 buts": {
+            "best": 1.02,
+            "best_bookmaker": "Betano",
+            "median": 1.01,
+            "bookmakers": 4
+          },
+          "Domicile plus de 3.5 but": {
+            "best": 9.0,
+            "best_bookmaker": "Bet365",
+            "median": 8.0,
+            "bookmakers": 5
+          },
+          "Domicile moins de 3.5 but": {
+            "best": 1.09,
+            "best_bookmaker": "Betano",
+            "median": 1.06,
+            "bookmakers": 5
+          },
+          "Domicile plus de 4.5 but": {
+            "best": 23.0,
+            "best_bookmaker": "888Sport",
+            "median": 19.5,
+            "bookmakers": 4
+          },
+          "Domicile moins de 4.5 but": {
+            "best": 1.02,
+            "best_bookmaker": "Betano",
+            "median": 1.01,
+            "bookmakers": 4
+          },
+          "Domicile plus de 5.5 but": {
+            "best": 51.0,
+            "best_bookmaker": "Bet365",
+            "median": 51.0,
+            "bookmakers": 1
+          },
+          "Domicile moins de 5.5 but": {
+            "best": 1.0,
+            "best_bookmaker": "Bet365",
+            "median": 1.0,
+            "bookmakers": 1
+          },
+          "Extérieur plus de 3.5 but": {
+            "best": 29.0,
+            "best_bookmaker": "888Sport",
+            "median": 23.0,
+            "bookmakers": 4
+          },
+          "Extérieur moins de 3.5 but": {
+            "best": 1.02,
+            "best_bookmaker": "Betano",
+            "median": 1.01,
+            "bookmakers": 4
+          },
+          "Plus de 1.75 buts": {
+            "best": 1.26,
+            "best_bookmaker": "1xBet",
+            "median": 1.255,
+            "bookmakers": 2
+          },
+          "Moins de 1.75 buts": {
+            "best": 3.34,
+            "best_bookmaker": "1xBet",
+            "median": 3.33,
+            "bookmakers": 2
+          },
+          "Plus de 2.0 buts": {
+            "best": 1.42,
+            "best_bookmaker": "Betano",
+            "median": 1.3599999999999999,
+            "bookmakers": 6
+          },
+          "Moins de 2.0 buts": {
+            "best": 3.03,
+            "best_bookmaker": "Pinnacle",
+            "median": 3.01,
+            "bookmakers": 6
+          },
+          "Plus de 2.25 buts": {
+            "best": 1.62,
+            "best_bookmaker": "Betano",
+            "median": 1.545,
+            "bookmakers": 6
+          },
+          "Moins de 2.25 buts": {
+            "best": 2.39,
+            "best_bookmaker": "1xBet",
+            "median": 2.3449999999999998,
+            "bookmakers": 6
+          },
+          "Plus de 2.75 buts": {
+            "best": 2.05,
+            "best_bookmaker": "Betano",
+            "median": 1.91,
+            "bookmakers": 7
+          },
+          "Moins de 2.75 buts": {
+            "best": 1.82,
+            "best_bookmaker": "SBO",
+            "median": 1.79,
+            "bookmakers": 7
+          },
+          "Plus de 0.75 buts": {
+            "best": 1.01,
+            "best_bookmaker": "1xBet",
+            "median": 1.005,
+            "bookmakers": 2
+          },
+          "Moins de 0.75 buts": {
+            "best": 9.2,
+            "best_bookmaker": "Marathonbet",
+            "median": 8.899999999999999,
+            "bookmakers": 2
+          },
+          "Plus de 1.0 buts": {
+            "best": 1.01,
+            "best_bookmaker": "Marathonbet",
+            "median": 1.01,
+            "bookmakers": 2
+          },
+          "Moins de 1.0 buts": {
+            "best": 8.7,
+            "best_bookmaker": "Marathonbet",
+            "median": 8.7,
+            "bookmakers": 2
+          },
+          "Plus de 1.25 buts": {
+            "best": 1.1,
+            "best_bookmaker": "Marathonbet",
+            "median": 1.1,
+            "bookmakers": 2
+          },
+          "Moins de 1.25 buts": {
+            "best": 5.05,
+            "best_bookmaker": "Marathonbet",
+            "median": 5.045,
+            "bookmakers": 2
+          },
+          "Plus de 3.0 buts": {
+            "best": 2.41,
+            "best_bookmaker": "Pinnacle",
+            "median": 2.2199999999999998,
+            "bookmakers": 6
+          },
+          "Moins de 3.0 buts": {
+            "best": 1.6,
+            "best_bookmaker": "Betano",
+            "median": 1.58,
+            "bookmakers": 6
+          },
+          "Plus de 3.25 buts": {
+            "best": 2.7,
+            "best_bookmaker": "Betano",
+            "median": 2.51,
+            "bookmakers": 6
+          },
+          "Moins de 3.25 buts": {
+            "best": 1.5,
+            "best_bookmaker": "Betano",
+            "median": 1.46,
+            "bookmakers": 6
+          },
+          "Plus de 3.75 buts": {
+            "best": 3.4,
+            "best_bookmaker": "Unibet",
+            "median": 3.14,
+            "bookmakers": 3
+          },
+          "Moins de 3.75 buts": {
+            "best": 1.27,
+            "best_bookmaker": "Marathonbet",
+            "median": 1.27,
+            "bookmakers": 3
+          },
+          "Plus de 4.0 buts": {
+            "best": 4.4,
+            "best_bookmaker": "Unibet",
+            "median": 4.15,
+            "bookmakers": 3
+          },
+          "Moins de 4.0 buts": {
+            "best": 1.16,
+            "best_bookmaker": "Marathonbet",
+            "median": 1.16,
+            "bookmakers": 3
+          },
+          "Plus de 4.25 buts": {
+            "best": 4.75,
+            "best_bookmaker": "Unibet",
+            "median": 4.5,
+            "bookmakers": 3
+          },
+          "Moins de 4.25 buts": {
+            "best": 1.14,
+            "best_bookmaker": "Unibet",
+            "median": 1.13,
+            "bookmakers": 3
+          },
+          "Plus de 4.75 buts": {
+            "best": 6.1,
+            "best_bookmaker": "Unibet",
+            "median": 5.9,
+            "bookmakers": 2
+          },
+          "Moins de 4.75 buts": {
+            "best": 1.08,
+            "best_bookmaker": "Marathonbet",
+            "median": 1.08,
+            "bookmakers": 2
+          },
+          "Plus de 5.0 buts": {
+            "best": 9.0,
+            "best_bookmaker": "Unibet",
+            "median": 8.2,
+            "bookmakers": 3
+          },
+          "Moins de 5.0 buts": {
+            "best": 1.04,
+            "best_bookmaker": "Unibet",
+            "median": 1.02,
+            "bookmakers": 3
+          },
+          "Domicile plus de 1 but": {
+            "best": 1.25,
+            "best_bookmaker": "Marathonbet",
+            "median": 1.25,
+            "bookmakers": 2
+          },
+          "Domicile moins de 1 but": {
+            "best": 3.62,
+            "best_bookmaker": "Marathonbet",
+            "median": 3.62,
+            "bookmakers": 2
+          },
+          "Domicile plus de 2 but": {
+            "best": 2.53,
+            "best_bookmaker": "Marathonbet",
+            "median": 2.53,
+            "bookmakers": 2
+          },
+          "Domicile moins de 2 but": {
+            "best": 1.47,
+            "best_bookmaker": "Marathonbet",
+            "median": 1.47,
+            "bookmakers": 2
+          },
+          "Domicile plus de 3 but": {
+            "best": 5.95,
+            "best_bookmaker": "Marathonbet",
+            "median": 5.95,
+            "bookmakers": 2
+          },
+          "Domicile moins de 3 but": {
+            "best": 1.07,
+            "best_bookmaker": "Marathonbet",
+            "median": 1.07,
+            "bookmakers": 2
+          },
+          "Extérieur plus de 1 but": {
+            "best": 2.0,
+            "best_bookmaker": "Marathonbet",
+            "median": 2.0,
+            "bookmakers": 2
+          },
+          "Extérieur moins de 1 but": {
+            "best": 1.76,
+            "best_bookmaker": "Marathonbet",
+            "median": 1.76,
+            "bookmakers": 2
+          },
+          "Extérieur plus de 2 but": {
+            "best": 6.45,
+            "best_bookmaker": "Marathonbet",
+            "median": 6.45,
+            "bookmakers": 2
+          },
+          "Extérieur moins de 2 but": {
+            "best": 1.07,
+            "best_bookmaker": "Marathonbet",
+            "median": 1.07,
+            "bookmakers": 2
+          },
+          "Extérieur plus de 4.5 but": {
+            "best": 60.0,
+            "best_bookmaker": "Superbet",
+            "median": 60.0,
+            "bookmakers": 1
+          }
+        },
+        "raw_bet_names": [
+          "1x2 - 30 minutes",
+          "1x2 - 60 minutes",
+          "Asian Handicap",
+          "Asian Handicap (2nd Half)",
+          "Asian Handicap First Half",
+          "Away Anytime Goal Scorer",
+          "Away Come From Behind and Win",
+          "Away Corners Over/Under",
+          "Away First Goal Scorer",
+          "Away Goal Method Header",
+          "Away Highest Scoring Half",
+          "Away Last Goal Scorer",
+          "Away Odd/Even",
+          "Away Player Shots On Target Total",
+          "Away Player Shots Total",
+          "Away Team Exact Goals Number",
+          "Away Team Score a Goal",
+          "Away Team Total Cards",
+          "Away Team Total Goals(1st Half)",
+          "Away Team Total Goals(2nd Half)",
+          "Away Total Corners (1st Half)",
+          "Away Total Corners (2nd Half)",
+          "Away team will score in both halves",
+          "Away win both halves",
+          "Both Teams Score",
+          "Both Teams Score - First Half",
+          "Both Teams To Score - Second Half",
+          "Both Teams To Score in Both Halves",
+          "Cards Asian Handicap",
+          "Cards Over/Under",
+          "Clean Sheet - Away",
+          "Clean Sheet - Home",
+          "Corners 1x2",
+          "Corners 1x2 (1st Half)",
+          "Corners 1x2 (2nd Half)",
+          "Corners Asian Handicap",
+          "Corners Asian Handicap (1st Half)",
+          "Corners Asian Handicap (2nd Half)",
+          "Corners Over Under",
+          "Corners Race To",
+          "Corners. Double Chance",
+          "Corners. European Handicap",
+          "Corners. Odd/Even",
+          "Corners. Total (Range)",
+          "Corners. total between 0 and 10m",
+          "Correct Score - First Half",
+          "Correct Score - Second Half",
+          "Double Chance",
+          "Double Chance - First Half",
+          "Double Chance - Second Half",
+          "Draw No Bet (1st Half)",
+          "Draw No Bet (2nd Half)",
+          "European Handicap (2nd Half)",
+          "Exact Goals Number",
+          "Exact Goals Number - First Half",
+          "Exact Score",
+          "First 10 min Winner",
+          "First Half Winner",
+          "First Team to Score (3 way) 1st Half",
+          "Goal Line",
+          "Goal Line (1st Half)",
+          "Goal Method Outside the Box",
+          "Goalkeeper Saves",
+          "Goals Over/Under",
+          "Goals Over/Under - Second Half",
+          "Goals Over/Under First Half",
+          "HT/FT Double",
+          "Handicap Result",
+          "Handicap Result - First Half",
+          "Highest Scoring Half",
+          "Home Anytime Goal Scorer",
+          "Home Come From Behind and Win",
+          "Home Corners Over/Under",
+          "Home First Goal Scorer",
+          "Home Goal Method Header",
+          "Home Highest Scoring Half",
+          "Home Last Goal Scorer",
+          "Home Odd/Even",
+          "Home Team Exact Goals Number",
+          "Home Team Score a Goal",
+          "Home Team Total Cards",
+          "Home Team Total Goals(1st Half)",
+          "Home Team Total Goals(2nd Half)",
+          "Home Total Corners (1st Half)",
+          "Home Total Corners (2nd Half)",
+          "Home team will score in both halves",
+          "Home win both halves",
+          "Home/Away",
+          "Match Winner",
+          "Multicorners",
+          "Number Of Goals In Match",
+          "Odd/Even",
+          "Odd/Even - First Half",
+          "Odd/Even - Second Half",
+          "Offsides Total",
+          "Over/Under 15m-30m",
+          "Over/Under 30m-45m",
+          "Own Goal",
+          "Player Assists",
+          "RTG_H1",
+          "Red Card In The Match (1st Half)",
+          "Result/Total Goals",
+          "Results/Both Teams Score",
+          "Scoring Draw",
+          "Second Half Exact Goals Number",
+          "Second Half Winner",
+          "Team To Score First",
+          "Team To Score Last",
+          "To Miss A Penalty",
+          "To Score A Penalty",
+          "To Score In Both Halves By Teams",
+          "To Score in Both Halves",
+          "To Win Either Half",
+          "To Win From Behind",
+          "Total - Away",
+          "Total - Home",
+          "Total Corners (1st Half)",
+          "Total Corners (2nd Half)",
+          "Total Corners (3 way)",
+          "Total Goals/Both Teams To Score",
+          "Total ShotOnGoal",
+          "Total Shots",
+          "Win Both Halves",
+          "Win To Nil",
+          "Win to Nil - Away",
+          "Win to Nil - Home",
+          "Winning Margin"
+        ]
+      },
+      "price_comparison": [
+        {
+          "market": "Moins de 4.5 buts",
+          "probability": 0.87229722782824,
+          "p10": 0.8376513186990135,
+          "fair_odds": 1.1463982322742234,
+          "best": 1.16,
+          "best_bookmaker": "Betano",
+          "median": 1.125,
+          "bookmakers": 10,
+          "expected_value_best": 0.011864784280758434,
+          "conservative_ev_best": -0.028324470309144312
+        },
+        {
+          "market": "Domicile moins de 2.5 but",
+          "probability": 0.7965047810552937,
+          "p10": 0.7510860967538218,
+          "fair_odds": 1.255485244765379,
+          "best": 1.29,
+          "best_bookmaker": "Betano",
+          "median": 1.25,
+          "bookmakers": 11,
+          "expected_value_best": 0.027491167561328744,
+          "conservative_ev_best": -0.0310989351875699
+        },
+        {
+          "market": "Moins de 3.5 buts",
+          "probability": 0.729751396575657,
+          "p10": 0.6777770747877098,
+          "fair_odds": 1.3703296830845118,
+          "best": 1.42,
+          "best_bookmaker": "Betano",
+          "median": 1.37,
+          "bookmakers": 11,
+          "expected_value_best": 0.03624698313743302,
+          "conservative_ev_best": -0.037556553801452175
+        },
+        {
+          "market": "Domicile moins de 1.5 but",
+          "probability": 0.5441772222207046,
+          "p10": 0.4860742300229711,
+          "fair_odds": 1.8376366359458263,
+          "best": 1.98,
+          "best_bookmaker": "Marathonbet",
+          "median": 1.91,
+          "bookmakers": 11,
+          "expected_value_best": 0.07747089999699508,
+          "conservative_ev_best": -0.037573024554517165
+        },
+        {
+          "market": "Plus de 0.5 buts",
+          "probability": 0.9262273072793857,
+          "p10": 0.9073598109337052,
+          "fair_odds": 1.079648583172642,
+          "best": 1.06,
+          "best_bookmaker": "Betano",
+          "median": 1.04,
+          "bookmakers": 8,
+          "expected_value_best": -0.018199054283851046,
+          "conservative_ev_best": -0.038198600410272454
+        },
+        {
+          "market": "2",
+          "probability": 0.2664577251106556,
+          "p10": 0.22127906656939383,
+          "fair_odds": 3.7529405446388022,
+          "best": 4.29,
+          "best_bookmaker": "Pinnacle",
+          "median": 4.0,
+          "bookmakers": 14,
+          "expected_value_best": 0.14310364072471238,
+          "conservative_ev_best": -0.05071280441730042
+        },
+        {
+          "market": "Extérieur moins de 2.5 but",
+          "probability": 0.9031927633984035,
+          "p10": 0.8728988312006318,
+          "fair_odds": 1.1071833616528814,
+          "best": 1.08,
+          "best_bookmaker": "Betano",
+          "median": 1.06,
+          "bookmakers": 9,
+          "expected_value_best": -0.024551815529724186,
+          "conservative_ev_best": -0.057269262303317525
+        },
+        {
+          "market": "12",
+          "probability": 0.7463375513181278,
+          "p10": 0.7278510711393581,
+          "fair_odds": 1.3398763042726065,
+          "best": 1.29,
+          "best_bookmaker": "William Hill",
+          "median": 1.25,
+          "bookmakers": 12,
+          "expected_value_best": -0.03722455879961506,
+          "conservative_ev_best": -0.06107211823022807
+        },
+        {
+          "market": "X2",
+          "probability": 0.5201201737925276,
+          "p10": 0.4661245087792413,
+          "fair_odds": 1.922632596056336,
+          "best": 2.01,
+          "best_bookmaker": "SBO",
+          "median": 1.91,
+          "bookmakers": 12,
+          "expected_value_best": 0.0454415493229805,
+          "conservative_ev_best": -0.06308973735372514
+        },
+        {
+          "market": "Moins de 2.5 buts",
+          "probability": 0.5130734863008211,
+          "p10": 0.45445149634543014,
+          "fair_odds": 1.949038542626403,
+          "best": 2.05,
+          "best_bookmaker": "Marathonbet",
+          "median": 2.0,
+          "bookmakers": 12,
+          "expected_value_best": 0.05180064691668318,
+          "conservative_ev_best": -0.06837443249186825
+        },
+        {
+          "market": "BTTS Non",
+          "probability": 0.48364291378511115,
+          "p10": 0.4381016180317369,
+          "fair_odds": 2.0676411697501123,
+          "best": 2.12,
+          "best_bookmaker": "Unibet",
+          "median": 2.06,
+          "bookmakers": 11,
+          "expected_value_best": 0.02532297722443566,
+          "conservative_ev_best": -0.07122456977271774
+        },
+        {
+          "market": "Moins de 1.5 buts",
+          "probability": 0.26467682033366946,
+          "p10": 0.22048175503621525,
+          "fair_odds": 3.7781925849771527,
+          "best": 4.1,
+          "best_bookmaker": "Betfair",
+          "median": 3.74,
+          "bookmakers": 11,
+          "expected_value_best": 0.08517496336804475,
+          "conservative_ev_best": -0.0960248043515175
+        },
+        {
+          "market": "Extérieur moins de 1.5 but",
+          "probability": 0.7063125599839185,
+          "p10": 0.6517826317169307,
+          "fair_odds": 1.4158037909205072,
+          "best": 1.38,
+          "best_bookmaker": "Unibet",
+          "median": 1.33,
+          "bookmakers": 11,
+          "expected_value_best": -0.025288667222192585,
+          "conservative_ev_best": -0.1005399682306356
+        },
+        {
+          "market": "Domicile moins de 0.5 but",
+          "probability": 0.21580997721020365,
+          "p10": 0.17849359973306334,
+          "fair_odds": 4.633706063672756,
+          "best": 5.0,
+          "best_bookmaker": "Bet365",
+          "median": 4.5,
+          "bookmakers": 9,
+          "expected_value_best": 0.07904988605101826,
+          "conservative_ev_best": -0.10753200133468332
+        },
+        {
+          "market": "N",
+          "probability": 0.2536624486818721,
+          "p10": 0.23791989414212247,
+          "fair_odds": 3.942246892263264,
+          "best": 3.73,
+          "best_bookmaker": "Pinnacle",
+          "median": 3.575,
+          "bookmakers": 14,
+          "expected_value_best": -0.053839066416617065,
+          "conservative_ev_best": -0.11255879484988318
+        },
+        {
+          "market": "Extérieur plus de 0.5 but",
+          "probability": 0.658394370704478,
+          "p10": 0.606119316213964,
+          "fair_odds": 1.518846521925766,
+          "best": 1.46,
+          "best_bookmaker": "Pinnacle",
+          "median": 1.41,
+          "bookmakers": 11,
+          "expected_value_best": -0.03874421877146206,
+          "conservative_ev_best": -0.11506579832761266
+        },
+        {
+          "market": "Plus de 1.5 buts",
+          "probability": 0.7353231796663304,
+          "p10": 0.6869658155903259,
+          "fair_odds": 1.3599462490136278,
+          "best": 1.28,
+          "best_bookmaker": "Betano",
+          "median": 1.24,
+          "bookmakers": 11,
+          "expected_value_best": -0.05878633002709699,
+          "conservative_ev_best": -0.12068375604438286
+        },
+        {
+          "market": "Domicile plus de 0.5 but",
+          "probability": 0.7841900227897964,
+          "p10": 0.742605808190018,
+          "fair_odds": 1.2752011259241076,
+          "best": 1.18,
+          "best_bookmaker": "Betano",
+          "median": 1.17,
+          "bookmakers": 9,
+          "expected_value_best": -0.07465577310804028,
+          "conservative_ev_best": -0.1237251463357788
+        },
+        {
+          "market": "1X",
+          "probability": 0.7335422748893444,
+          "p10": 0.6815350917910703,
+          "fair_odds": 1.3632479466174612,
+          "best": 1.25,
+          "best_bookmaker": "Bet365",
+          "median": 1.22,
+          "bookmakers": 12,
+          "expected_value_best": -0.08307215638831944,
+          "conservative_ev_best": -0.14808113526116218
+        },
+        {
+          "market": "Extérieur moins de 0.5 but",
+          "probability": 0.34160562929552196,
+          "p10": 0.29226833725152745,
+          "fair_odds": 2.927352227954368,
+          "best": 2.85,
+          "best_bookmaker": "Unibet",
+          "median": 2.65,
+          "bookmakers": 11,
+          "expected_value_best": -0.026423956507762414,
+          "conservative_ev_best": -0.16703523883314675
+        },
+        {
+          "market": "BTTS Oui",
+          "probability": 0.5163570862148888,
+          "p10": 0.46677173810070577,
+          "fair_odds": 1.9366442849277308,
+          "best": 1.75,
+          "best_bookmaker": "Bet365",
+          "median": 1.69,
+          "bookmakers": 11,
+          "expected_value_best": -0.09637509912394449,
+          "conservative_ev_best": -0.18314945832376495
+        },
+        {
+          "market": "1",
+          "probability": 0.4798798262074723,
+          "p10": 0.4247845651160018,
+          "fair_odds": 2.0838550515929746,
+          "best": 1.91,
+          "best_bookmaker": "Unibet",
+          "median": 1.8250000000000002,
+          "bookmakers": 14,
+          "expected_value_best": -0.08342953194372793,
+          "conservative_ev_best": -0.18866148062843657
+        },
+        {
+          "market": "Extérieur plus de 1.5 but",
+          "probability": 0.29368744001608155,
+          "p10": 0.2391378280451158,
+          "fair_odds": 3.4049804783794726,
+          "best": 3.3,
+          "best_bookmaker": "Pinnacle",
+          "median": 3.0,
+          "bookmakers": 11,
+          "expected_value_best": -0.030831447946930934,
+          "conservative_ev_best": -0.21084516745111792
+        },
+        {
+          "market": "Plus de 2.5 buts",
+          "probability": 0.48692651369917894,
+          "p10": 0.4248036067639954,
+          "fair_odds": 2.0536979849443884,
+          "best": 1.83,
+          "best_bookmaker": "Pinnacle",
+          "median": 1.7850000000000001,
+          "bookmakers": 12,
+          "expected_value_best": -0.10892447993050247,
+          "conservative_ev_best": -0.2226093996218883
+        },
+        {
+          "market": "Domicile plus de 1.5 but",
+          "probability": 0.4558227777792954,
+          "p10": 0.39328416844044173,
+          "fair_odds": 2.193835079659379,
+          "best": 1.85,
+          "best_bookmaker": "888Sport",
+          "median": 1.82,
+          "bookmakers": 11,
+          "expected_value_best": -0.1567278611083034,
+          "conservative_ev_best": -0.27242428838518273
+        },
+        {
+          "market": "Moins de 0.5 buts",
+          "probability": 0.0737726927206144,
+          "p10": 0.05706760358334184,
+          "fair_odds": 13.555151142267695,
+          "best": 12.0,
+          "best_bookmaker": "1xBet",
+          "median": 10.75,
+          "bookmakers": 8,
+          "expected_value_best": -0.11472768735262717,
+          "conservative_ev_best": -0.3151887569998979
+        },
+        {
+          "market": "Extérieur plus de 2.5 but",
+          "probability": 0.09680723660159636,
+          "p10": 0.0681781717297773,
+          "fair_odds": 10.329806273837074,
+          "best": 10.0,
+          "best_bookmaker": "Bet365",
+          "median": 7.5,
+          "bookmakers": 9,
+          "expected_value_best": -0.03192763398403642,
+          "conservative_ev_best": -0.31821828270222696
+        },
+        {
+          "market": "Plus de 3.5 buts",
+          "probability": 0.270248603424343,
+          "p10": 0.21690615889381867,
+          "fair_odds": 3.700296642901814,
+          "best": 3.1,
+          "best_bookmaker": "Betfair",
+          "median": 2.9,
+          "bookmakers": 11,
+          "expected_value_best": -0.1622293293845367,
+          "conservative_ev_best": -0.3275909074291621
+        },
+        {
+          "market": "Domicile plus de 2.5 but",
+          "probability": 0.20349521894470626,
+          "p10": 0.15624383909335168,
+          "fair_odds": 4.914120366983758,
+          "best": 3.75,
+          "best_bookmaker": "Bet365",
+          "median": 3.5,
+          "bookmakers": 11,
+          "expected_value_best": -0.23689292895735148,
+          "conservative_ev_best": -0.41408560339993117
+        },
+        {
+          "market": "Plus de 4.5 buts",
+          "probability": 0.12770277217176013,
+          "p10": 0.09325747677322474,
+          "fair_odds": 7.830683570870339,
+          "best": 6.0,
+          "best_bookmaker": "Bet365",
+          "median": 5.575,
+          "bookmakers": 10,
+          "expected_value_best": -0.23378336696943924,
+          "conservative_ev_best": -0.4404551393606515
+        }
+      ],
+      "official_context": {
+        "venue": "Stadion Strelnice, Jablonec nad Nisou",
+        "absences": [
+          "Milla (Jablonec)",
+          "Gning (Baník)",
+          "Vlasiy Sinyavskiy (Baník)",
+          "Michal Kohút (Baník)"
+        ],
+        "available_again": [],
+        "note": "Match de la 5e journée reprogrammé après le parcours européen de Jablonec.",
+        "source_label": "avant-match officiel Baník",
+        "source_url": "https://www.fcb.cz/clanek.asp?id=Preview-Jablonec-Banik-streda-17-00-12333"
+      }
+    }
+  ],
+  "price_mapping_revalidated_at": "2026-09-09T11:16:22.585859+00:00"
+}

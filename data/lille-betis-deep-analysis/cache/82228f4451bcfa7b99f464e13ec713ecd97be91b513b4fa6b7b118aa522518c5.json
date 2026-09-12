@@ -1,0 +1,119 @@
+{
+  "endpoint": "/players",
+  "params": {
+    "id": 745,
+    "season": 2026
+  },
+  "retrieved_at": "2026-09-08T13:37:36Z",
+  "response_hash": "81123aa696432ffdae64d328008e4e51605451f7b8e215f68e7836aab84388f1",
+  "response": {
+    "get": "players",
+    "parameters": {
+      "id": "745",
+      "season": "2026"
+    },
+    "errors": [],
+    "results": 1,
+    "paging": {
+      "current": 1,
+      "total": 1
+    },
+    "response": [
+      {
+        "player": {
+          "id": 745,
+          "name": "Isco",
+          "firstname": "Francisco Rom\u00e1n",
+          "lastname": "Alarc\u00f3n Su\u00e1rez",
+          "age": 33,
+          "birth": {
+            "date": "1992-04-21",
+            "place": "Benalm\u00e1dena",
+            "country": "Spain"
+          },
+          "nationality": "Spain",
+          "height": "176",
+          "weight": "79",
+          "injured": false,
+          "photo": "https://media.api-sports.io/football/players/745.png"
+        },
+        "statistics": [
+          {
+            "team": {
+              "id": 543,
+              "name": "Real Betis",
+              "logo": "https://media.api-sports.io/football/teams/543.png"
+            },
+            "league": {
+              "id": 140,
+              "name": "La Liga",
+              "country": "Spain",
+              "logo": "https://media.api-sports.io/football/leagues/140.png",
+              "flag": "https://media.api-sports.io/flags/es.svg",
+              "season": 2026
+            },
+            "games": {
+              "appearences": 4,
+              "lineups": 2,
+              "minutes": 180,
+              "number": 22,
+              "position": "Midfielder",
+              "rating": "6.58",
+              "captain": false
+            },
+            "substitutes": {
+              "in": 2,
+              "out": 2,
+              "bench": 2
+            },
+            "shots": {
+              "total": 3,
+              "on": 3
+            },
+            "goals": {
+              "total": 0,
+              "conceded": 0,
+              "assists": 0,
+              "saves": null
+            },
+            "passes": {
+              "total": 112,
+              "key": 7,
+              "accuracy": 88
+            },
+            "tackles": {
+              "total": 2,
+              "blocks": null,
+              "interceptions": 2
+            },
+            "duels": {
+              "total": 17,
+              "won": 7
+            },
+            "dribbles": {
+              "attempts": 1,
+              "success": null,
+              "past": null
+            },
+            "fouls": {
+              "drawn": 4,
+              "committed": 4
+            },
+            "cards": {
+              "yellow": 0,
+              "yellowred": 0,
+              "red": 0
+            },
+            "penalty": {
+              "won": null,
+              "commited": null,
+              "scored": 0,
+              "missed": 0,
+              "saved": null
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

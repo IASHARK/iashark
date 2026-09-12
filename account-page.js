@@ -473,12 +473,28 @@
     { id: 'securite', titre: 'Sécurité', rendu: securite },
     { id: 'donnees', titre: 'Données', rendu: donnees }
   ];
+  // Cles i18n des libelles de nav, reutilisant les cles des titres de section
+  // deja definis plus haut (meme texte FR) quand elles existent - seul
+  // "Données" (libelle court de nav) differe du titre complet de la section
+  // ("Données et confidentialité"), d'ou une cle dediee pour lui seul. Calcule
+  // a chaque rendu de navigation() (jamais fige au chargement du script) car
+  // SECTIONS est evalue avant que le dictionnaire i18n ne soit charge.
+  var NAV_LABELS = {
+    apercu: ['compte_page.section_overview_title', 'Vue d’ensemble'],
+    abonnement: ['compte_page.subscription_heading', 'Abonnement'],
+    preferences: ['compte_page.preferences_heading', 'Préférences'],
+    notifications: ['compte_page.notifications_heading', 'Notifications'],
+    securite: ['compte_page.security_heading', 'Sécurité'],
+    donnees: ['compte_page.nav_data', 'Données']
+  };
 
   function navigation() {
     var liens = SECTIONS.map(function (s) {
       var actif = s.id === sectionActive;
+      var cle = NAV_LABELS[s.id] || [null, s.titre];
+      var libelle = tr(cle[0], cle[1]);
       return '<button type="button" class="acc-tab shrink-0 rounded-lg px-3.5 py-2.5 text-left text-[14px] font-medium text-soft transition hover:text-ink lg:w-full"'
-        + (actif ? ' aria-current="page"' : '') + ' data-aller="' + s.id + '">' + esc(s.titre) + '</button>';
+        + (actif ? ' aria-current="page"' : '') + ' data-aller="' + s.id + '">' + esc(libelle) + '</button>';
     }).join('');
     return '<nav aria-label="' + esc(tr('compte_page.nav_aria_label', 'Sections du compte')) + '">'
       + '<div class="-mx-4 flex gap-1 overflow-x-auto border-b border-hairline px-4 pb-2 lg:mx-0 lg:flex-col lg:gap-0.5 lg:border-0 lg:px-0 lg:pb-0">' + liens + '</div>'
@@ -547,14 +563,14 @@
   }
 
   async function enregistrerPreferences() {
-    var relacher = occuper($('enregistrerPrefs'), 'Enregistrement…');
+    var relacher = occuper($('enregistrerPrefs'), tr('compte_page.saving_label', 'Enregistrement…'));
     retour('msgPrefs', '');
     var ligues = [];
     racine.querySelectorAll('[data-ligue]').forEach(function (c) { if (c.checked) ligues.push(c.value); });
     var capitalBrut = $('bankroll').value.trim();
     var capital = capitalBrut === '' ? null : Number(capitalBrut);
     if (capital !== null && !(capital > 0)) {
-      relacher(); retour('msgPrefs', 'La bankroll doit être un montant supérieur à zéro.', 'error'); $('bankroll').focus(); return;
+      relacher(); retour('msgPrefs', tr('compte_page.msg_bankroll_must_be_positive', 'La bankroll doit être un montant supérieur à zéro.'), 'error'); $('bankroll').focus(); return;
     }
     var ligne = {
       user_id: ctx.user.id,
@@ -577,7 +593,7 @@
       }
       Object.assign(prefs, ligne);
       relacher();
-      retour('msgPrefs', 'Préférences enregistrées.', 'success');
+      retour('msgPrefs', tr('compte_page.msg_preferences_saved', 'Préférences enregistrées.'), 'success');
     } catch (e) {
       relacher();
       retour('msgPrefs', lisible(e), 'error');
@@ -585,7 +601,7 @@
   }
 
   async function enregistrerNotifications() {
-    var relacher = occuper($('enregistrerNotifs'), 'Enregistrement…');
+    var relacher = occuper($('enregistrerNotifs'), tr('compte_page.saving_label', 'Enregistrement…'));
     retour('msgNotifs', '');
     var ligne = {
       user_id: ctx.user.id,
@@ -597,7 +613,7 @@
       if (r.error) throw r.error;
       Object.assign(prefs, ligne);
       relacher();
-      retour('msgNotifs', 'Préférences enregistrées.', 'success');
+      retour('msgNotifs', tr('compte_page.msg_preferences_saved', 'Préférences enregistrées.'), 'success');
     } catch (e) {
       relacher();
       retour('msgNotifs', lisible(e), 'error');
@@ -605,7 +621,7 @@
   }
 
   async function facturation(fonction, bouton) {
-    var relacher = occuper(bouton, 'Ouverture…');
+    var relacher = occuper(bouton, tr('compte_page.opening_label', 'Ouverture…'));
     retour('msgFacturation', '');
     try {
       var s = await sb.auth.getSession();
@@ -618,15 +634,15 @@
       var j = await r.json();
       if (j.url) { location.href = j.url; return; }
       relacher();
-      retour('msgFacturation', j.message || 'Le paiement en ligne n’est pas disponible pour le moment.', 'error');
+      retour('msgFacturation', j.message || tr('compte_page.err_billing_unavailable', 'Le paiement en ligne n’est pas disponible pour le moment.'), 'error');
     } catch (e) {
       relacher();
-      retour('msgFacturation', 'Impossible d’ouvrir la page de paiement. Réessayez dans quelques instants.', 'error');
+      retour('msgFacturation', tr('compte_page.err_billing_open_failed', 'Impossible d’ouvrir la page de paiement. Réessayez dans quelques instants.'), 'error');
     }
   }
 
   async function exporter() {
-    var relacher = occuper($('exporter'), 'Préparation…');
+    var relacher = occuper($('exporter'), tr('compte_page.preparing_label', 'Préparation…'));
     retour('msgExport', '');
     try {
       var res = await Promise.all([
@@ -646,7 +662,7 @@
       document.body.appendChild(a); a.click(); a.remove();
       setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
       relacher();
-      retour('msgExport', 'Fichier téléchargé.', 'success');
+      retour('msgExport', tr('compte_page.msg_file_downloaded', 'Fichier téléchargé.'), 'success');
     } catch (e) {
       relacher();
       retour('msgExport', lisible(e), 'error');
@@ -674,11 +690,11 @@
   async function changerMotDePasse(e) {
     e.preventDefault();
     var actuel = $('mdpActuel').value, nouveau = $('mdpNouveau').value, confirme = $('mdpConfirme').value;
-    if (!actuel) { retour('msgMdp', 'Saisissez votre mot de passe actuel.', 'error'); $('mdpActuel').focus(); return; }
-    if (nouveau.length < 8) { retour('msgMdp', '8 caractères minimum pour le nouveau mot de passe.', 'error'); $('mdpNouveau').focus(); return; }
-    if (nouveau !== confirme) { retour('msgMdp', 'Les deux mots de passe ne correspondent pas.', 'error'); $('mdpConfirme').focus(); return; }
+    if (!actuel) { retour('msgMdp', tr('compte_page.msg_enter_current_password', 'Saisissez votre mot de passe actuel.'), 'error'); $('mdpActuel').focus(); return; }
+    if (nouveau.length < 8) { retour('msgMdp', tr('compte_page.msg_new_password_too_short', '8 caractères minimum pour le nouveau mot de passe.'), 'error'); $('mdpNouveau').focus(); return; }
+    if (nouveau !== confirme) { retour('msgMdp', tr('compte_page.msg_new_passwords_mismatch', 'Les deux mots de passe ne correspondent pas.'), 'error'); $('mdpConfirme').focus(); return; }
 
-    var relacher = occuper($('validerMdp'), 'Mise à jour…');
+    var relacher = occuper($('validerMdp'), tr('compte_page.updating_label', 'Mise à jour…'));
     retour('msgMdp', '');
     try {
       var verif = await sb.auth.signInWithPassword({ email: ctx.user.email, password: actuel });
@@ -688,11 +704,11 @@
       relacher();
       $('dlgMdp').close();
       retour('msgExport', '');
-      alerteSection('Mot de passe modifié.');
+      alerteSection(tr('compte_page.msg_password_changed', 'Mot de passe modifié.'));
     } catch (err) {
       relacher();
       retour('msgMdp', err && err.message === 'mot_de_passe_actuel'
-        ? 'Mot de passe actuel incorrect.' : lisible(err), 'error');
+        ? tr('compte_page.err_current_password_incorrect', 'Mot de passe actuel incorrect.') : lisible(err), 'error');
     }
   }
 
@@ -758,12 +774,12 @@
   /* Jamais le message brut de Postgres ou du fournisseur. */
   function lisible(e) {
     var m = String((e && e.message) || '');
-    if (/JWT|not authenticated|invalid claim/i.test(m)) return 'Votre session a expiré. Reconnectez-vous.';
-    if (/row-level security|permission denied/i.test(m)) return 'Cette modification n’est pas autorisée.';
-    if (/Failed to fetch|NetworkError/i.test(m)) return 'Connexion au serveur impossible. Vérifiez votre réseau.';
-    if (/violates check constraint/i.test(m)) return 'Une valeur saisie n’est pas acceptée. Vérifiez le formulaire.';
-    if (/same as the old password/i.test(m)) return 'Ce mot de passe est identique à l’ancien.';
-    return 'Une erreur est survenue. Réessayez dans quelques instants.';
+    if (/JWT|not authenticated|invalid claim/i.test(m)) return tr('compte_page.err_session_expired', 'Votre session a expiré. Reconnectez-vous.');
+    if (/row-level security|permission denied/i.test(m)) return tr('compte_page.err_not_authorized', 'Cette modification n’est pas autorisée.');
+    if (/Failed to fetch|NetworkError/i.test(m)) return tr('compte_page.err_network', 'Connexion au serveur impossible. Vérifiez votre réseau.');
+    if (/violates check constraint/i.test(m)) return tr('compte_page.err_invalid_value', 'Une valeur saisie n’est pas acceptée. Vérifiez le formulaire.');
+    if (/same as the old password/i.test(m)) return tr('compte_page.err_password_same_as_old', 'Ce mot de passe est identique à l’ancien.');
+    return tr('compte_page.err_generic', 'Une erreur est survenue. Réessayez dans quelques instants.');
   }
 
   /* ---------- Demarrage ---------- */
@@ -785,6 +801,13 @@
   }
 
   async function demarrer() {
+    // Le dictionnaire i18n doit etre charge avant le premier rendu : sinon
+    // les libelles de navigation (calcules une seule fois par SECTIONS, voir
+    // plus haut) resteraient figes sur leur repli francais pour toute la
+    // session. window.I18N.init() est idempotent (le dictionnaire est mis en
+    // cache) : l'attendre ici est sans risque meme s'il a deja ete lance par
+    // ailleurs.
+    if (window.I18N && window.I18N.init) { try { await window.I18N.init(); } catch (_e) {} }
     await synchroniserFacturation();
     ctx = await window.IasharkApp.context();
     if (!ctx.user) {
@@ -813,7 +836,7 @@
     afficher();
 
     if (new URLSearchParams(location.search).get('bienvenue') === '1') {
-      alerteSection('Bienvenue. Votre compte est créé.');
+      alerteSection(tr('compte_page.msg_welcome_account_created', 'Bienvenue. Votre compte est créé.'));
     }
 
     window.addEventListener('hashchange', function () {

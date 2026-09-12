@@ -31,6 +31,32 @@ const STRIPE_SECRET_KEY = Deno.env.get("STRIPE_SECRET_KEY");
 const STRIPE_PRICE_ID = Deno.env.get("STRIPE_PRICE_ID");
 const SITE_URL = Deno.env.get("SITE_URL") || "https://iashark.com";
 
+// Expansion GB/MX/ZA (config/markets.json) : un marche = une devise = un
+// Price Stripe distinct (Stripe n'accepte qu'une devise fixe par Price, pas
+// de conversion a la volee). Chaque cle est le nom de la variable d'env lue
+// pour CE marche - les valeurs elles-memes doivent etre creees dans le
+// dashboard Stripe (action externe, hors de portee de ce code) avant que le
+// marche correspondant ne passe reellement "LIVE" dans markets.json.
+// Marche non reconnu ou variable d'env pas encore configuree => on retombe
+// sur STRIPE_PRICE_ID, comportement identique a avant cette fonctionnalite,
+// jamais de rupture pour le flux FR existant.
+const MARKET_STRIPE_PRICE_ENV: Record<string, string> = {
+  gb: "STRIPE_PRICE_ID_GB",
+  mx: "STRIPE_PRICE_ID_MX",
+  za: "STRIPE_PRICE_ID_ZA",
+};
+
+function resolvePriceId(market: unknown): { priceId: string | undefined; usedMarket: string } {
+  const key = typeof market === "string" ? market.toLowerCase() : "";
+  const envName = MARKET_STRIPE_PRICE_ENV[key];
+  if (envName) {
+    const marketPriceId = Deno.env.get(envName);
+    if (marketPriceId) return { priceId: marketPriceId, usedMarket: key };
+    console.log(`[create-checkout-session] marche="${key}" demande mais ${envName} non configure - repli sur STRIPE_PRICE_ID (FR).`);
+  }
+  return { priceId: STRIPE_PRICE_ID, usedMarket: "fr" };
+}
+
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
@@ -52,8 +78,28 @@ Deno.serve(async (req: Request) => {
     });
   }
 
-  if (!STRIPE_SECRET_KEY || !STRIPE_PRICE_ID) {
-    console.error("[create-checkout-session] PAYMENT_PROVIDER=stripe mais STRIPE_SECRET_KEY/STRIPE_PRICE_ID manquants - configuration incoherente, refus de traiter.");
+  if (!STRIPE_SECRET_KEY) {
+    console.error("[create-checkout-session] PAYMENT_PROVIDER=stripe mais STRIPE_SECRET_KEY manquant - configuration incoherente, refus de traiter.");
+    return new Response(JSON.stringify({ error: "billing_misconfigured" }), {
+      status: 500,
+      headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
+    });
+  }
+
+  // market est optionnel (retro-compatible : un appel sans corps ou sans
+  // champ "market" se comporte exactement comme avant, flux FR sur
+  // STRIPE_PRICE_ID). Body JSON invalide/absent = simplement pas de market.
+  let requestedMarket: unknown = undefined;
+  try {
+    const body = await req.clone().json();
+    requestedMarket = body?.market;
+  } catch (_e) {
+    // pas de corps JSON - comportement par defaut (marche FR).
+  }
+  const { priceId: STRIPE_PRICE_ID_RESOLVED, usedMarket } = resolvePriceId(requestedMarket);
+
+  if (!STRIPE_PRICE_ID_RESOLVED) {
+    console.error(`[create-checkout-session] aucun Price Stripe disponible pour le marche resolu="${usedMarket}" (ni prix marche, ni STRIPE_PRICE_ID de repli) - refus de traiter.`);
     return new Response(JSON.stringify({ error: "billing_misconfigured" }), {
       status: 500,
       headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
@@ -91,11 +137,12 @@ Deno.serve(async (req: Request) => {
     // corriges plus tot ce chantier).
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",
-      line_items: [{ price: STRIPE_PRICE_ID, quantity: 1 }],
+      line_items: [{ price: STRIPE_PRICE_ID_RESOLVED, quantity: 1 }],
       client_reference_id: user.id,
       customer_email: user.email,
       success_url: SITE_URL + "/checkout-succes.html?session_id={CHECKOUT_SESSION_ID}",
       cancel_url: SITE_URL + "/checkout-annule.html",
+      metadata: { market: usedMarket },
     });
     return new Response(JSON.stringify({ ok: true, processed: true, url: session.url }), {
       status: 200,

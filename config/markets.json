@@ -1,0 +1,63 @@
+{
+  "_readme": "Source de verite GEO (pays/devise/conformite/feature flags). Ne PAS confondre avec i18n/locales.json (langue d'interface) : un marche pointe vers UNE locale existante, ce fichier ne duplique jamais un dictionnaire de traduction. 'status' et les champs de conformite restent DRAFT_PENDING_LEGAL_REVIEW tant qu'aucune validation juridique reelle n'a eu lieu (cf. 04_IAShark_Compliance_Approval_Pack) - ne jamais faire passer un marche a LIVE sans checklist QA + validation business.",
+  "fr": {
+    "country": "FR",
+    "locale": "fr",
+    "currency": "EUR",
+    "urlPrefix": "/",
+    "stripeEnvKey": "STRIPE_PRICE_ID",
+    "paidAdsEnabled": false,
+    "adsGamblingCertRequired": false,
+    "status": "LIVE",
+    "compliance": {
+      "responsibleGamblingHelpline": "Joueurs Info Service - 09 74 75 13 13 - joueurs-info-service.fr",
+      "legalPagesLocalized": true,
+      "note": "Marche historique, non concerne par le sprint GB/MX/ZA en cours."
+    }
+  },
+  "gb": {
+    "country": "GB",
+    "locale": "en",
+    "currency": "GBP",
+    "urlPrefix": "/gb/",
+    "stripeEnvKey": "STRIPE_PRICE_ID_GB",
+    "paidAdsEnabled": false,
+    "adsGamblingCertRequired": true,
+    "status": "DRAFT_PENDING_LEGAL_REVIEW",
+    "compliance": {
+      "responsibleGamblingHelpline": "GamCare / BeGambleAware - National Gambling Helpline 0808 8020 133 - begambleaware.org",
+      "legalPagesLocalized": false,
+      "note": "A CONFIRMER par validation juridique avant publication (cf. 04_IAShark_Compliance_Approval_Pack + 06_IAShark_UK_Launch_Kit). SIRET/SIREN manquant cote entreprise bloque l'activation PSP/Stripe live - voir BLOCKED_DECISION dans WORK_PROGRESS/plan d'execution. Dossiers TikTok Gambling Information + X pre-authorization non encore soumis."
+    }
+  },
+  "mx": {
+    "country": "MX",
+    "locale": "es-mx",
+    "currency": "MXN",
+    "urlPrefix": "/mx/",
+    "stripeEnvKey": "STRIPE_PRICE_ID_MX",
+    "paidAdsEnabled": false,
+    "adsGamblingCertRequired": true,
+    "status": "DRAFT_PENDING_LEGAL_REVIEW",
+    "compliance": {
+      "responsibleGamblingHelpline": null,
+      "legalPagesLocalized": false,
+      "note": "BLOCKED_DECISION : aucune ressource d'aide au jeu responsable confirmee pour le Mexique dans cette session - ne jamais publier de numero invente. Le 07_IAShark_Mexico_Launch_Kit exige une validation juridique locale du modele (plateforme d'analyse sportive, pas de prise de paris) AVANT tout paiement live. Terminologie : utiliser 'momios' (pas 'cuota') pour les cotes en es-mx."
+    }
+  },
+  "za": {
+    "country": "ZA",
+    "locale": "en",
+    "currency": "ZAR",
+    "urlPrefix": "/za/",
+    "stripeEnvKey": "STRIPE_PRICE_ID_ZA",
+    "paidAdsEnabled": false,
+    "adsGamblingCertRequired": true,
+    "status": "DRAFT_PENDING_LEGAL_REVIEW",
+    "compliance": {
+      "responsibleGamblingHelpline": "National Responsible Gambling Programme (NRGP) - 0800 006 008 - responsiblegambling.org.za",
+      "legalPagesLocalized": false,
+      "note": "A CONFIRMER par validation juridique avant publication (cf. 04_IAShark_Compliance_Approval_Pack + 08_IAShark_South_Africa_Launch_Kit). Pas d'affiliation bookmaker sans approbation prealable."
+    }
+  }
+}

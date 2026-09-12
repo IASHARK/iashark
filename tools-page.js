@@ -24,7 +24,12 @@
       return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
     });
   }
-  function num(v, d) { return Number(v).toLocaleString('fr-FR', { minimumFractionDigits: d, maximumFractionDigits: d }); }
+  // Repli local : si I18N n'est pas charge (ou pas encore pret), on renvoie
+  // toujours le libelle francais d'origine, jamais une erreur. Meme motif
+  // que account-page.js / player-page.js.
+  function t(key, fallback) { return (window.I18N && window.I18N.t) ? window.I18N.t(key, fallback) : fallback; }
+  function localeTag() { return (window.I18N && window.I18N.localeTag) ? window.I18N.localeTag() : 'fr-FR'; }
+  function num(v, d) { return Number(v).toLocaleString(localeTag(), { minimumFractionDigits: d, maximumFractionDigits: d }); }
   function euros(v) { return num(v, 0) + ' €'; }
   function signe(v, d) { return (v >= 0 ? '+' : '') + num(v, d == null ? 1 : d); }
 
@@ -70,9 +75,25 @@
     err: 'mt-1.5 block text-[12.5px] font-medium text-[#ff8f85]'
   };
 
+  // Cle i18n par texte francais plutot que par site d'appel : enTete() reste
+  // appelee avec les DEUX literaux francais d'origine (test
+  // tests/outils-langue.test.js : regex `enTete\('...', '...'\)`, ne doit
+  // jamais voir un appel imbrique comme enTete(t(...), t(...))). La
+  // traduction se fait ici, en interne, par correspondance exacte du texte.
+  var ENTETES = {
+    'Détecteur d’écarts': ['tools_page.scan_title', 'tools_page.scan_sub'],
+    'Cote juste': ['tools_page.fair_title', 'tools_page.fair_sub'],
+    'Calculateur de mise': ['tools_page.stake_title', 'tools_page.stake_sub'],
+    'Simulateur de capital': ['tools_page.bankroll_title', 'tools_page.bankroll_sub'],
+    'Analyse de combiné': ['tools_page.combo_title', 'tools_page.combo_sub'],
+    'Journal des décisions': ['tools_page.journal_title', 'tools_page.journal_sub']
+  };
   function enTete(titre, sous) {
-    return '<header class="mb-6"><h2 class="' + S.titre + '">' + esc(titre) + '</h2>'
-      + '<p class="' + S.sous + '">' + esc(sous) + '</p></header>';
+    var clefs = ENTETES[titre];
+    var titreTxt = clefs ? t(clefs[0], titre) : titre;
+    var sousTxt = clefs ? t(clefs[1], sous) : sous;
+    return '<header class="mb-6"><h2 class="' + S.titre + '">' + esc(titreTxt) + '</h2>'
+      + '<p class="' + S.sous + '">' + esc(sousTxt) + '</p></header>';
   }
 
   function champ(id, label, opts) {
@@ -117,7 +138,7 @@
 
   function bandeauDemo(texte) {
     return '<div class="mb-5 flex flex-wrap items-center gap-x-3 gap-y-1.5 rounded-xl border border-hairline bg-panel/70 px-4 py-3">'
-      + '<span class="rounded-full bg-soft/20 px-2.5 py-1 text-[10px] font-extrabold tracking-[0.12em] text-soft">MODE DÉMONSTRATION</span>'
+      + '<span class="rounded-full bg-soft/20 px-2.5 py-1 text-[10px] font-extrabold tracking-[0.12em] text-soft">' + esc(t('tools_page.badge_demo_mode', 'MODE DÉMONSTRATION')) + '</span>'
       + '<span class="text-[13px] leading-snug text-soft">' + esc(texte) + '</span></div>';
   }
 
@@ -125,10 +146,10 @@
   function panneauPro(titre, sous) {
     if (ctx.isPro) return '';
     return '<div class="mt-6 rounded-2xl border border-cyan/25 bg-cyan/[0.05] p-5 sm:flex sm:items-center sm:gap-6">'
-      + '<div class="min-w-0 flex-1"><div class="text-[10px] font-extrabold tracking-[0.16em] text-cyan">PRO</div>'
+      + '<div class="min-w-0 flex-1"><div class="text-[10px] font-extrabold tracking-[0.16em] text-cyan">' + esc(t('tools_page.pro_badge_label', 'PRO')) + '</div>'
       + '<p class="mt-1.5 text-[14px] font-semibold text-ink">' + esc(titre) + '</p>'
       + '<p class="mt-1 text-[13px] leading-relaxed text-soft">' + esc(sous) + '</p></div>'
-      + '<a href="/abonnement.html" class="mt-4 inline-flex shrink-0 items-center justify-center rounded-xl bg-cyan px-6 py-3 text-[13px] font-extrabold text-page transition hover:brightness-110 sm:mt-0">Débloquer Pro</a>'
+      + '<a href="/abonnement.html" class="mt-4 inline-flex shrink-0 items-center justify-center rounded-xl bg-cyan px-6 py-3 text-[13px] font-extrabold text-page transition hover:brightness-110 sm:mt-0">' + esc(t('tools_page.pro_cta_unlock', 'Débloquer Pro')) + '</a>'
       + '</div>';
   }
 
@@ -160,14 +181,14 @@
       + signe(r.edge, 1) + '<span class="ml-1 text-[10px] font-bold tracking-normal text-soft">pts</span></div>';
     var titre = reel ? esc(r.match) : esc(r.match);
     var action = reel && r.id
-      ? '<a href="/match/' + esc(r.id) + '.html" class="shrink-0 rounded-lg border border-hairline px-3 py-1.5 text-[12.5px] font-semibold text-ink transition hover:border-cyan/40 hover:text-cyan">Voir</a>'
+      ? '<a href="/match/' + esc(r.id) + '.html" class="shrink-0 rounded-lg border border-hairline px-3 py-1.5 text-[12.5px] font-semibold text-ink transition hover:border-cyan/40 hover:text-cyan">' + esc(t('tools_page.scan_view_btn', 'Voir')) + '</a>'
       : '<span class="shrink-0 text-[12.5px] text-soft/60">—</span>';
     return '<li class="flex items-center gap-3 border-t border-hairline px-1 py-3 first:border-t-0 sm:gap-4">'
       + edge
       + '<div class="min-w-0 flex-1"><div class="truncate text-[14px] font-semibold text-ink">' + titre + '</div>'
       + '<div class="truncate text-[12.5px] text-soft">' + esc(marcheLisible(r.market)) + ' · ' + esc(r.league || '') + '</div></div>'
-      + '<div class="hidden w-[76px] shrink-0 text-right sm:block"><div class="text-[14px] font-bold text-ink tabular-nums">' + num(r.modelProbability, 1) + '%</div><div class="text-[11px] text-soft">modèle</div></div>'
-      + '<div class="hidden w-[76px] shrink-0 text-right sm:block"><div class="text-[14px] font-semibold text-soft tabular-nums">' + (r.marketProbability != null ? num(r.marketProbability, 1) + '%' : '—') + '</div><div class="text-[11px] text-soft">marché</div></div>'
+      + '<div class="hidden w-[76px] shrink-0 text-right sm:block"><div class="text-[14px] font-bold text-ink tabular-nums">' + num(r.modelProbability, 1) + '%</div><div class="text-[11px] text-soft">' + esc(t('tools_page.label_model_short', 'modèle')) + '</div></div>'
+      + '<div class="hidden w-[76px] shrink-0 text-right sm:block"><div class="text-[14px] font-semibold text-soft tabular-nums">' + (r.marketProbability != null ? num(r.marketProbability, 1) + '%' : '—') + '</div><div class="text-[11px] text-soft">' + esc(t('tools_page.label_market_short', 'marché')) + '</div></div>'
       + action + '</li>';
   }
 
@@ -175,9 +196,11 @@
   // "DC 12" ou "Over 2.5" n'ont aucun sens pour qui decouvre le site. Les
   // noms d'equipes ne sont pas connus ici, la traduction reste donc generique
   // ("l'equipe a domicile"), ce qui suffit dans une liste de marches.
+  // NOTE i18n : ce module (lib/market-labels.js) n'est pas dans le perimetre
+  // de ce chantier — il reste fixe en francais pour l'instant (marketLabelFr).
   function marcheLisible(libelle) {
-    var t = window.IasharkMarketLabels;
-    return t ? t.marketLabelFr(libelle) : String(libelle == null ? '' : libelle);
+    var labels = window.IasharkMarketLabels;
+    return labels ? labels.marketLabelFr(libelle) : String(libelle == null ? '' : libelle);
   }
 
   function rendreScanner(panneau) {
@@ -186,32 +209,32 @@
     if (!ctx.isPro) {
       // Aucun vrai match n'est charge ni rendu : uniquement la structure et
       // un exemple explicitement fictif.
-      html += bandeauDemo('Ces trois lignes sont fictives et servent uniquement à montrer la structure de l’outil.')
+      html += bandeauDemo(t('tools_page.scan_demo_text', 'Ces trois lignes sont fictives et servent uniquement à montrer la structure de l’outil.'))
         + '<div class="' + S.carte + '"><ul class="list-none p-0">'
         + DEMO_SCAN.map(function (r, i) { return ligneScan(r, i, false); }).join('')
         + '</ul></div>'
         + '<div class="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3">'
-        + kpi('13', 'Championnats analysés chaque jour')
-        + kpi('4', 'Modèles croisés par match')
-        + kpi('1', 'Analyse complète offerte par jour')
+        + kpi('13', t('tools_page.scan_kpi_leagues', 'Championnats analysés chaque jour'))
+        + kpi('4', t('tools_page.scan_kpi_models', 'Modèles croisés par match'))
+        + kpi('1', t('tools_page.scan_kpi_free', 'Analyse complète offerte par jour'))
         + '</div>'
-        + panneauPro('Le scanner classe tous les marchés du jour par écart.',
-            'Les matchs, marchés, probabilités et cotes réels sont servis uniquement aux abonnés.');
+        + panneauPro(t('tools_page.scan_pro_title', 'Le scanner classe tous les marchés du jour par écart.'),
+            t('tools_page.scan_pro_sub', 'Les matchs, marchés, probabilités et cotes réels sont servis uniquement aux abonnés.'));
       panneau.innerHTML = html;
       return;
     }
 
     html += '<div class="mb-4 flex flex-wrap items-end gap-3">'
-      + '<div class="w-[180px]">' + select('scanEdge', 'Écart minimum', [['0', 'Tout afficher'], ['3', '3 points ou plus'], ['5', '5 points ou plus'], ['10', '10 points ou plus']], '3') + '</div>'
-      + '<div class="w-[180px]">' + select('scanTri', 'Trier par', [['edge', 'Écart décroissant'], ['heure', 'Heure du match']], 'edge') + '</div>'
-      + '</div><div id="scanBox" class="' + S.carte + '"><p class="py-8 text-center text-[13.5px] text-soft">Chargement des marchés du jour…</p></div>';
+      + '<div class="w-[180px]">' + select('scanEdge', t('tools_page.scan_filter_edge_label', 'Écart minimum'), [['0', t('tools_page.scan_filter_edge_all', 'Tout afficher')], ['3', t('tools_page.scan_filter_edge_3', '3 points ou plus')], ['5', t('tools_page.scan_filter_edge_5', '5 points ou plus')], ['10', t('tools_page.scan_filter_edge_10', '10 points ou plus')]], '3') + '</div>'
+      + '<div class="w-[180px]">' + select('scanTri', t('tools_page.scan_sort_label', 'Trier par'), [['edge', t('tools_page.scan_sort_edge', 'Écart décroissant')], ['heure', t('tools_page.scan_sort_time', 'Heure du match')]], 'edge') + '</div>'
+      + '</div><div id="scanBox" class="' + S.carte + '"><p class="py-8 text-center text-[13.5px] text-soft">' + esc(t('tools_page.scan_loading', 'Chargement des marchés du jour…')) + '</p></div>';
     panneau.innerHTML = html;
 
     chargerMatchs().then(function (matchs) {
       var box = $('#scanBox', panneau);
       if (!box) return;
       if (!matchs || !matchs.length) {
-        box.innerHTML = vide('Aucune donnée disponible', 'Les analyses du jour ne sont pas encore publiées, ou la connexion a échoué.');
+        box.innerHTML = vide(t('tools_page.scan_empty_title', 'Aucune donnée disponible'), t('tools_page.scan_empty_text', 'Les analyses du jour ne sont pas encore publiées, ou la connexion a échoué.'));
         return;
       }
       function peindre() {
@@ -222,7 +245,7 @@
         rows = rows.slice(0, 15);
         box.innerHTML = rows.length
           ? '<ul class="list-none p-0">' + rows.map(function (r, i) { return ligneScan(r, i, true); }).join('') + '</ul>'
-          : vide('Aucun marché au-dessus de ce seuil', 'C’est une information en soi : aujourd’hui, le marché est aligné sur nos calculs.');
+          : vide(t('tools_page.scan_empty_threshold_title', 'Aucun marché au-dessus de ce seuil'), t('tools_page.scan_empty_threshold_text', 'C’est une information en soi : aujourd’hui, le marché est aligné sur nos calculs.'));
       }
       peindre();
       ['scanEdge', 'scanTri'].forEach(function (id) {
@@ -249,12 +272,12 @@
     panneau.innerHTML = enTete('Cote juste', 'Traduit une probabilité en cote équitable, et la compare au prix réellement proposé.')
       + '<div class="grid grid-cols-1 gap-6 lg:grid-cols-[320px_minmax(0,1fr)]">'
       + '<div class="' + S.carte + ' space-y-4">'
-      + champ('foProb', 'Probabilité estimée', { unit: '%', min: 0.1, max: 99.9, step: 0.1, value: 58, help: 'Ta propre estimation, ou celle d’une analyse IASHARK.' })
-      + champ('foOdds', 'Cote disponible', { min: 1.01, step: 0.01, value: 1.90, help: 'La cote décimale proposée par le bookmaker.' })
+      + champ('foProb', t('tools_page.fair_prob_label', 'Probabilité estimée'), { unit: '%', min: 0.1, max: 99.9, step: 0.1, value: 58, help: t('tools_page.fair_prob_help', 'Ta propre estimation, ou celle d’une analyse IASHARK.') })
+      + champ('foOdds', t('tools_page.fair_odds_label', 'Cote disponible'), { min: 1.01, step: 0.01, value: 1.90, help: t('tools_page.fair_odds_help', 'La cote décimale proposée par le bookmaker.') })
       + '</div>'
       + '<div id="foOut" class="min-w-0"></div></div>'
-      + panneauPro('Utilise les probabilités du modèle plutôt que les tiennes.',
-          'Les abonnés retrouvent la probabilité IASHARK directement dans chaque analyse.');
+      + panneauPro(t('tools_page.fair_pro_title', 'Utilise les probabilités du modèle plutôt que les tiennes.'),
+          t('tools_page.fair_pro_sub', 'Les abonnés retrouvent la probabilité IASHARK directement dans chaque analyse.'));
 
     function calculer() {
       var p = document.getElementById('foProb'), o = document.getElementById('foOdds');
@@ -263,25 +286,25 @@
       erreurChamp('foProb', ''); erreurChamp('foOdds', '');
       var vp = Number(p.value), vo = Number(o.value);
       var ko = false;
-      if (!(vp > 0 && vp < 100)) { erreurChamp('foProb', 'Entre une probabilité entre 0 et 100 %.'); ko = true; }
-      if (!(vo > 1)) { erreurChamp('foOdds', 'La cote décimale doit être supérieure à 1.'); ko = true; }
-      if (ko) { out.innerHTML = vide('Résultat indisponible', 'Corrige les champs signalés pour lancer le calcul.'); return; }
+      if (!(vp > 0 && vp < 100)) { erreurChamp('foProb', t('tools_page.err_probability_range', 'Entre une probabilité entre 0 et 100 %.')); ko = true; }
+      if (!(vo > 1)) { erreurChamp('foOdds', t('tools_page.err_odds_gt_one_decimal', 'La cote décimale doit être supérieure à 1.')); ko = true; }
+      if (ko) { out.innerHTML = vide(t('tools_page.fair_empty_title', 'Résultat indisponible'), t('tools_page.msg_fix_highlighted_fields_calc', 'Corrige les champs signalés pour lancer le calcul.')); return; }
 
       var r = D.fairOdds({ probability: vp, odds: vo });
       var note = r.favourable
-        ? 'La cote proposée est <b class="text-ink">plus généreuse</b> que ta probabilité ne le justifie : c’est un écart en ta faveur.'
-        : 'La cote proposée est <b class="text-ink">moins intéressante</b> que ta probabilité ne le justifie. Le pari est défavorable sur la durée.';
+        ? t('tools_page.fair_note_favourable', 'La cote proposée est <b class="text-ink">plus généreuse</b> que ta probabilité ne le justifie : c’est un écart en ta faveur.')
+        : t('tools_page.fair_note_unfavourable', 'La cote proposée est <b class="text-ink">moins intéressante</b> que ta probabilité ne le justifie. Le pari est défavorable sur la durée.');
       var largeurMax = Math.max(r.estimatedProbability, r.impliedProbability, 1);
-      out.innerHTML = resultat('Écart', signe(r.edgePoints, 1) + ' pts', note, r.favourable ? 'pos' : 'neg')
+      out.innerHTML = resultat(t('tools_page.fair_result_label_gap', 'Écart'), signe(r.edgePoints, 1) + ' pts', note, r.favourable ? 'pos' : 'neg')
         + '<div class="' + S.carte + ' mt-4">'
-        + barreProb('Ta probabilité estimée', r.estimatedProbability, r.estimatedProbability / largeurMax * 100, true)
-        + barreProb('Probabilité implicite de la cote', r.impliedProbability, r.impliedProbability / largeurMax * 100, false)
-        + '<p class="mt-3 border-t border-hairline pt-3 text-[13px] leading-relaxed text-soft">Un écart positif signifie que tu estimes l’événement plus probable que ne le fait le prix affiché.</p>'
+        + barreProb(t('tools_page.fair_bar_your_prob', 'Ta probabilité estimée'), r.estimatedProbability, r.estimatedProbability / largeurMax * 100, true)
+        + barreProb(t('tools_page.fair_bar_implied_prob', 'Probabilité implicite de la cote'), r.impliedProbability, r.impliedProbability / largeurMax * 100, false)
+        + '<p class="mt-3 border-t border-hairline pt-3 text-[13px] leading-relaxed text-soft">' + esc(t('tools_page.fair_note_static', 'Un écart positif signifie que tu estimes l’événement plus probable que ne le fait le prix affiché.')) + '</p>'
         + '</div>'
         + '<div class="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">'
-        + kpi(num(r.fairOdds, 2), 'Cote juste')
-        + kpi(num(r.marketOdds, 2), 'Cote disponible')
-        + kpi(signe(r.expectedValue, 1) + '%', 'Espérance théorique', r.expectedValue >= 0 ? 'pos' : 'neg')
+        + kpi(num(r.fairOdds, 2), t('tools_page.fair_kpi_fair_odds', 'Cote juste'))
+        + kpi(num(r.marketOdds, 2), t('tools_page.fair_odds_label', 'Cote disponible'))
+        + kpi(signe(r.expectedValue, 1) + '%', t('tools_page.fair_kpi_ev', 'Espérance théorique'), r.expectedValue >= 0 ? 'pos' : 'neg')
         + '</div>';
     }
     ['foProb', 'foOdds'].forEach(function (id) {
@@ -303,16 +326,16 @@
     panneau.innerHTML = enTete('Calculateur de mise', 'Calcule la mise à partir du capital, de la cote et du profil de risque choisi.')
       + '<div class="grid grid-cols-1 gap-6 lg:grid-cols-[340px_minmax(0,1fr)]">'
       + '<div class="' + S.carte + ' space-y-4">'
-      + champ('spBank', 'Capital disponible', { unit: '€', min: 1, step: 1, value: bk })
-      + champ('spOdds', 'Cote décimale', { min: 1.01, step: 0.01, value: 2.10 })
-      + champ('spProb', 'Probabilité estimée', { unit: '%', min: 0.1, max: 99.9, step: 0.1, value: 55 })
-      + select('spProfil', 'Profil de risque', [['0.25', 'Prudent · quart de Kelly'], ['0.5', 'Équilibré · demi-Kelly'], ['1', 'Dynamique · Kelly plafonné']], '0.5')
-      + champ('spCap', 'Plafond par décision', { unit: '%', min: 0.5, max: 100, step: 0.5, value: plafondJour, help: 'Ta limite personnelle. Elle plafonne la mise, elle ne change jamais la probabilité.' })
-      + (ctx.user ? '<button id="spSave" type="button" class="w-full rounded-xl border border-hairline px-4 py-2.5 text-[13px] font-semibold text-ink transition hover:border-cyan/40">Enregistrer le capital</button><span id="spMsg" class="block text-[12.5px] text-soft"></span>' : '')
+      + champ('spBank', t('tools_page.stake_bank_label', 'Capital disponible'), { unit: '€', min: 1, step: 1, value: bk })
+      + champ('spOdds', t('tools_page.stake_odds_label', 'Cote décimale'), { min: 1.01, step: 0.01, value: 2.10 })
+      + champ('spProb', t('tools_page.fair_prob_label', 'Probabilité estimée'), { unit: '%', min: 0.1, max: 99.9, step: 0.1, value: 55 })
+      + select('spProfil', t('tools_page.stake_profile_label', 'Profil de risque'), [['0.25', t('tools_page.stake_profile_cautious', 'Prudent · quart de Kelly')], ['0.5', t('tools_page.stake_profile_balanced', 'Équilibré · demi-Kelly')], ['1', t('tools_page.stake_profile_aggressive', 'Dynamique · Kelly plafonné')]], '0.5')
+      + champ('spCap', t('tools_page.stake_cap_label', 'Plafond par décision'), { unit: '%', min: 0.5, max: 100, step: 0.5, value: plafondJour, help: t('tools_page.stake_cap_help', 'Ta limite personnelle. Elle plafonne la mise, elle ne change jamais la probabilité.') })
+      + (ctx.user ? '<button id="spSave" type="button" class="w-full rounded-xl border border-hairline px-4 py-2.5 text-[13px] font-semibold text-ink transition hover:border-cyan/40">' + esc(t('tools_page.stake_save_btn', 'Enregistrer le capital')) + '</button><span id="spMsg" class="block text-[12.5px] text-soft"></span>' : '')
       + '</div>'
       + '<div id="spOut" class="min-w-0"></div></div>'
-      + '<p class="mt-5 text-[12.5px] leading-relaxed text-soft/85">Le critère de Kelly maximise la croissance du capital <b class="text-soft">si</b> la probabilité saisie est juste. Il ne garantit aucun gain : une probabilité surestimée conduit à surmiser.</p>'
-      + (stopLoss ? '<p class="mt-2 text-[12.5px] text-soft/85">Ton seuil d’arrêt personnel est fixé à −' + num(stopLoss, 0) + ' % du capital.</p>' : '');
+      + '<p class="mt-5 text-[12.5px] leading-relaxed text-soft/85">' + t('tools_page.stake_kelly_note', 'Le critère de Kelly maximise la croissance du capital <b class="text-soft">si</b> la probabilité saisie est juste. Il ne garantit aucun gain : une probabilité surestimée conduit à surmiser.') + '</p>'
+      + (stopLoss ? '<p class="mt-2 text-[12.5px] text-soft/85">' + esc(t('tools_page.stake_stoploss_prefix', 'Ton seuil d’arrêt personnel est fixé à −')) + num(stopLoss, 0) + esc(t('tools_page.stake_stoploss_suffix', ' % du capital.')) + '</p>' : '');
 
     function calculer() {
       var out = document.getElementById('spOut'); if (!out) return;
@@ -321,30 +344,30 @@
           p = Number(($('#spProb') || {}).value), f = Number(($('#spProfil') || {}).value),
           cap = Number(($('#spCap') || {}).value);
       var ko = false;
-      if (!(b > 0)) { erreurChamp('spBank', 'Le capital doit être supérieur à 0.'); ko = true; }
-      if (!(o > 1)) { erreurChamp('spOdds', 'La cote doit être supérieure à 1.'); ko = true; }
-      if (!(p > 0 && p < 100)) { erreurChamp('spProb', 'Entre une probabilité entre 0 et 100 %.'); ko = true; }
-      if (!(cap > 0 && cap <= 100)) { erreurChamp('spCap', 'Le plafond doit être entre 0 et 100 %.'); ko = true; }
-      if (ko) { out.innerHTML = vide('Calcul impossible', 'Corrige les champs signalés.'); return; }
+      if (!(b > 0)) { erreurChamp('spBank', t('tools_page.err_capital_gt_zero', 'Le capital doit être supérieur à 0.')); ko = true; }
+      if (!(o > 1)) { erreurChamp('spOdds', t('tools_page.err_odds_gt_one', 'La cote doit être supérieure à 1.')); ko = true; }
+      if (!(p > 0 && p < 100)) { erreurChamp('spProb', t('tools_page.err_probability_range', 'Entre une probabilité entre 0 et 100 %.')); ko = true; }
+      if (!(cap > 0 && cap <= 100)) { erreurChamp('spCap', t('tools_page.stake_cap_range_err', 'Le plafond doit être entre 0 et 100 %.')); ko = true; }
+      if (ko) { out.innerHTML = vide(t('tools_page.title_calc_impossible', 'Calcul impossible'), t('tools_page.msg_fix_highlighted_fields', 'Corrige les champs signalés.')); return; }
 
       var brut = D.calculateStake({ bankroll: b, odds: o, probability: p, fraction: f, cap: 1 });
       var plafonne = D.calculateStake({ bankroll: b, odds: o, probability: p, fraction: f, cap: cap / 100 });
-      if (!brut || !plafonne) { out.innerHTML = vide('Calcul impossible', 'Vérifie les valeurs saisies.'); return; }
+      if (!brut || !plafonne) { out.innerHTML = vide(t('tools_page.title_calc_impossible', 'Calcul impossible'), t('tools_page.msg_check_values', 'Vérifie les valeurs saisies.')); return; }
 
       var limite = brut.bankrollPct > plafonne.bankrollPct + 0.01;
       var note = !plafonne.hasEdge
-        ? 'À cette cote et cette probabilité, le pari n’a <b class="text-ink">aucun avantage mathématique</b> : la mise cohérente est nulle.'
+        ? t('tools_page.stake_no_edge_note', 'À cette cote et cette probabilité, le pari n’a <b class="text-ink">aucun avantage mathématique</b> : la mise cohérente est nulle.')
         : limite
-          ? 'Le calcul brut suggère <b class="text-ink">' + euros(brut.stake) + '</b> (' + num(brut.bankrollPct, 1) + ' % du capital). Ton plafond personnel ramène la mise à ' + euros(plafonne.stake) + '.'
-          : 'Cette mise représente ' + num(plafonne.bankrollPct, 1) + ' % de ton capital et reste sous ton plafond personnel.';
+          ? t('tools_page.stake_limit_prefix', 'Le calcul brut suggère <b class="text-ink">') + euros(brut.stake) + t('tools_page.stake_limit_mid', '</b> (') + num(brut.bankrollPct, 1) + t('tools_page.stake_limit_mid2', ' % du capital). Ton plafond personnel ramène la mise à ') + euros(plafonne.stake) + t('tools_page.stake_limit_suffix', '.')
+          : t('tools_page.stake_under_limit_prefix', 'Cette mise représente ') + num(plafonne.bankrollPct, 1) + t('tools_page.stake_under_limit_suffix', ' % de ton capital et reste sous ton plafond personnel.');
 
-      out.innerHTML = resultat('Mise recommandée', euros(plafonne.stake), note, plafonne.hasEdge ? 'pos' : 'neutre')
+      out.innerHTML = resultat(t('tools_page.stake_result_label', 'Mise recommandée'), euros(plafonne.stake), note, plafonne.hasEdge ? 'pos' : 'neutre')
         + '<div class="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">'
-        + kpi(num(plafonne.bankrollPct, 1) + '%', 'du capital')
-        + kpi(signe(plafonne.expectedValue, 1) + '%', 'Espérance par pari', plafonne.expectedValue >= 0 ? 'pos' : 'neg')
-        + kpi(num(brut.bankrollPct, 1) + '%', 'Kelly avant plafond')
+        + kpi(num(plafonne.bankrollPct, 1) + '%', t('tools_page.stake_kpi_pct_capital', 'du capital'))
+        + kpi(signe(plafonne.expectedValue, 1) + '%', t('tools_page.stake_kpi_ev_per_bet', 'Espérance par pari'), plafonne.expectedValue >= 0 ? 'pos' : 'neg')
+        + kpi(num(brut.bankrollPct, 1) + '%', t('tools_page.stake_kpi_kelly_precap', 'Kelly avant plafond'))
         + '</div>'
-        + (limite ? '<div class="mt-4 rounded-xl border border-[#f5a524]/30 bg-[#f5a524]/[0.07] px-4 py-3 text-[13px] leading-relaxed text-soft"><b class="text-ink">Limite atteinte.</b> Le calcul dépasse ton plafond de ' + num(cap, 1) + ' % par décision. La mise a été réduite, la probabilité n’a pas été touchée.</div>' : '');
+        + (limite ? '<div class="mt-4 rounded-xl border border-[#f5a524]/30 bg-[#f5a524]/[0.07] px-4 py-3 text-[13px] leading-relaxed text-soft">' + t('tools_page.stake_limit_reached_prefix', '<b class="text-ink">Limite atteinte.</b> Le calcul dépasse ton plafond de ') + num(cap, 1) + t('tools_page.stake_limit_reached_suffix', ' % par décision. La mise a été réduite, la probabilité n’a pas été touchée.') + '</div>' : '');
     }
     ['spBank', 'spOdds', 'spProb', 'spProfil', 'spCap'].forEach(function (id) {
       var n = document.getElementById(id);
@@ -354,9 +377,12 @@
     var save = document.getElementById('spSave');
     if (save) save.addEventListener('click', function () {
       var v = Number(($('#spBank') || {}).value), msg = document.getElementById('spMsg');
-      if (!(v > 0)) { if (msg) msg.textContent = 'Montant invalide.'; return; }
+      if (!(v > 0)) { if (msg) msg.textContent = t('tools_page.stake_invalid_amount', 'Montant invalide.'); return; }
       window.IasharkApp.supabase.from('users').update({ capital: v }).eq('id', ctx.user.id).then(function (q) {
-        if (msg) msg.textContent = q.error ? q.error.message : 'Capital enregistré.';
+        // "capital_msg_saved" existe deja dans fr.json (tools_page) avec le
+        // meme texte exact ("Capital enregistré.") : reutilise ici plutot
+        // que d'en dupliquer une variante.
+        if (msg) msg.textContent = q.error ? q.error.message : t('tools_page.capital_msg_saved', 'Capital enregistré.');
         if (!q.error) etat.bankroll = v;
       });
     });
@@ -382,16 +408,16 @@
     var med = courbe.map(function (c, i) { return (i ? 'L' : 'M') + x(i) + ' ' + y(c.p50); }).join(' ');
     var ligneDepart = y(depart);
     return '<figure class="' + S.carte + ' mt-4">'
-      + '<figcaption class="mb-3 text-[13px] text-soft">Trajectoire simulée du capital — <b class="text-ink">médiane</b> et bande couvrant 90 % des scénarios.</figcaption>'
-      + '<svg viewBox="0 0 ' + W + ' ' + H + '" class="h-[200px] w-full" role="img" aria-label="Graphique de simulation du capital : ligne médiane et bande de percentiles.">'
+      + '<figcaption class="mb-3 text-[13px] text-soft">' + t('tools_page.bankroll_caption', 'Trajectoire simulée du capital — <b class="text-ink">médiane</b> et bande couvrant 90 % des scénarios.') + '</figcaption>'
+      + '<svg viewBox="0 0 ' + W + ' ' + H + '" class="h-[200px] w-full" role="img" aria-label="' + esc(t('tools_page.bankroll_svg_aria', 'Graphique de simulation du capital : ligne médiane et bande de percentiles.')) + '">'
       + '<polygon points="' + haut + ' ' + bas + '" fill="rgba(32,213,239,.12)"/>'
       + '<line x1="' + P + '" x2="' + (W - P) + '" y1="' + ligneDepart + '" y2="' + ligneDepart + '" stroke="rgba(166,180,198,.35)" stroke-dasharray="4 4"/>'
       + '<path d="' + med + '" fill="none" stroke="#20d5ef" stroke-width="2" stroke-linejoin="round"/>'
       + '</svg>'
       + '<div class="mt-2 flex flex-wrap gap-x-5 gap-y-1 text-[11.5px] text-soft">'
-      + '<span><span aria-hidden="true" class="mr-1.5 inline-block h-[2px] w-4 align-middle" style="background:#20d5ef"></span>Scénario médian</span>'
-      + '<span><span aria-hidden="true" class="mr-1.5 inline-block h-2.5 w-4 align-middle" style="background:rgba(32,213,239,.2)"></span>5 % – 95 % des cas</span>'
-      + '<span><span aria-hidden="true" class="mr-1.5 inline-block h-[2px] w-4 align-middle" style="background:rgba(166,180,198,.5)"></span>Capital de départ</span>'
+      + '<span><span aria-hidden="true" class="mr-1.5 inline-block h-[2px] w-4 align-middle" style="background:#20d5ef"></span>' + esc(t('tools_page.bankroll_legend_median', 'Scénario médian')) + '</span>'
+      + '<span><span aria-hidden="true" class="mr-1.5 inline-block h-2.5 w-4 align-middle" style="background:rgba(32,213,239,.2)"></span>' + esc(t('tools_page.bankroll_legend_band', '5 % – 95 % des cas')) + '</span>'
+      + '<span><span aria-hidden="true" class="mr-1.5 inline-block h-[2px] w-4 align-middle" style="background:rgba(166,180,198,.5)"></span>' + esc(t('tools_page.capital_start', 'Capital de départ')) + '</span>'
       + '</div></figure>';
   }
 
@@ -399,11 +425,11 @@
     panneau.innerHTML = enTete('Simulateur de capital', 'Rejoue des milliers de séries à partir des hypothèses saisies et montre la dispersion réelle.')
       + '<div class="grid grid-cols-1 gap-6 lg:grid-cols-[320px_minmax(0,1fr)]">'
       + '<div class="' + S.carte + ' space-y-4">'
-      + champ('blBank', 'Capital de départ', { unit: '€', min: 1, step: 1, value: etat.bankroll || 1000 })
-      + champ('blStake', 'Mise par décision', { unit: '%', min: 0.1, max: 20, step: 0.1, value: 3 })
-      + champ('blBets', 'Nombre de décisions', { min: 10, max: 2000, step: 10, value: 300 })
-      + champ('blWin', 'Taux de réussite estimé', { unit: '%', min: 1, max: 99, step: 0.1, value: 54 })
-      + champ('blOdds', 'Cote moyenne', { min: 1.01, step: 0.01, value: 1.80 })
+      + champ('blBank', t('tools_page.capital_start', 'Capital de départ'), { unit: '€', min: 1, step: 1, value: etat.bankroll || 1000 })
+      + champ('blStake', t('tools_page.bankroll_stake_label', 'Mise par décision'), { unit: '%', min: 0.1, max: 20, step: 0.1, value: 3 })
+      + champ('blBets', t('tools_page.bankroll_bets_label', 'Nombre de décisions'), { min: 10, max: 2000, step: 10, value: 300 })
+      + champ('blWin', t('tools_page.bankroll_win_label', 'Taux de réussite estimé'), { unit: '%', min: 1, max: 99, step: 0.1, value: 54 })
+      + champ('blOdds', t('tools_page.bankroll_odds_label', 'Cote moyenne'), { min: 1.01, step: 0.01, value: 1.80 })
       + '</div><div id="blOut" class="min-w-0"></div></div>';
 
     function lancer() {
@@ -413,30 +439,30 @@
           n = Number(($('#blBets') || {}).value), w = Number(($('#blWin') || {}).value),
           o = Number(($('#blOdds') || {}).value);
       var ko = false;
-      if (!(b > 0)) { erreurChamp('blBank', 'Le capital doit être supérieur à 0.'); ko = true; }
-      if (!(s > 0 && s <= 20)) { erreurChamp('blStake', 'La mise doit être entre 0 et 20 %.'); ko = true; }
-      if (!(n >= 10 && n <= 2000)) { erreurChamp('blBets', 'Entre 10 et 2000 décisions.'); ko = true; }
-      if (!(w > 0 && w < 100)) { erreurChamp('blWin', 'Entre un taux entre 0 et 100 %.'); ko = true; }
-      if (!(o > 1)) { erreurChamp('blOdds', 'La cote doit être supérieure à 1.'); ko = true; }
-      if (ko) { out.innerHTML = vide('Simulation impossible', 'Corrige les champs signalés.'); return; }
+      if (!(b > 0)) { erreurChamp('blBank', t('tools_page.err_capital_gt_zero', 'Le capital doit être supérieur à 0.')); ko = true; }
+      if (!(s > 0 && s <= 20)) { erreurChamp('blStake', t('tools_page.bankroll_stake_range_err', 'La mise doit être entre 0 et 20 %.')); ko = true; }
+      if (!(n >= 10 && n <= 2000)) { erreurChamp('blBets', t('tools_page.bankroll_bets_range_err', 'Entre 10 et 2000 décisions.')); ko = true; }
+      if (!(w > 0 && w < 100)) { erreurChamp('blWin', t('tools_page.bankroll_win_range_err', 'Entre un taux entre 0 et 100 %.')); ko = true; }
+      if (!(o > 1)) { erreurChamp('blOdds', t('tools_page.err_odds_gt_one', 'La cote doit être supérieure à 1.')); ko = true; }
+      if (ko) { out.innerHTML = vide(t('tools_page.bankroll_empty_title', 'Simulation impossible'), t('tools_page.msg_fix_highlighted_fields', 'Corrige les champs signalés.')); return; }
 
       out.innerHTML = '<div class="' + S.carte + ' animate-pulse"><div class="h-[42px] w-2/3 rounded bg-panel"></div><div class="mt-4 h-[200px] rounded bg-panel"></div></div>';
       window.requestAnimationFrame(function () {
         var r = D.simulateVariance({ bankroll: b, stakePct: s, bets: n, winRate: w, odds: o, runs: 5000, curve: true });
-        if (!r) { out.innerHTML = vide('Simulation impossible', 'Vérifie les valeurs saisies.'); return; }
+        if (!r) { out.innerHTML = vide(t('tools_page.bankroll_empty_title', 'Simulation impossible'), t('tools_page.msg_check_values', 'Vérifie les valeurs saisies.')); return; }
         var ev = (w / 100) * o - 1;
         var note = ev < 0
-          ? 'Chaque décision a une espérance de <b class="text-ink">' + signe(ev * 100, 1) + ' %</b>. Elle est négative : aucune gestion de mise ne rend cette série gagnante sur la durée.'
-          : 'Chaque décision a une espérance de <b class="text-ink">' + signe(ev * 100, 1) + ' %</b>. La bande montre le creux qu’il faut pouvoir traverser sans dévier.';
-        out.innerHTML = resultat('Capital médian après ' + num(n, 0) + ' décisions', euros(r.median), note, r.median >= b ? 'pos' : 'neg')
+          ? t('tools_page.bankroll_note_prefix', 'Chaque décision a une espérance de <b class="text-ink">') + signe(ev * 100, 1) + t('tools_page.bankroll_note_mid', ' %</b>. Elle est négative : aucune gestion de mise ne rend cette série gagnante sur la durée.')
+          : t('tools_page.bankroll_note_prefix', 'Chaque décision a une espérance de <b class="text-ink">') + signe(ev * 100, 1) + t('tools_page.bankroll_note_positive_mid', ' %</b>. La bande montre le creux qu’il faut pouvoir traverser sans dévier.');
+        out.innerHTML = resultat(t('tools_page.bankroll_result_prefix', 'Capital médian après ') + num(n, 0) + t('tools_page.bankroll_result_suffix', ' décisions'), euros(r.median), note, r.median >= b ? 'pos' : 'neg')
           + graphique(r.curve, b)
           + '<div class="mt-4 grid grid-cols-2 gap-3 lg:grid-cols-4">'
-          + kpi(euros(r.p05), 'Scénario défavorable (5 %)')
-          + kpi(euros(r.p95), 'Scénario favorable (5 %)')
-          + kpi(num(r.drawdown30Probability, 0) + '%', 'Risque de baisse de 30 %', r.drawdown30Probability > 40 ? 'neg' : '')
-          + kpi(num(r.halfBankrollProbability, 0) + '%', 'Risque de perdre la moitié', r.halfBankrollProbability > 20 ? 'neg' : '')
+          + kpi(euros(r.p05), t('tools_page.bankroll_kpi_p05', 'Scénario défavorable (5 %)'))
+          + kpi(euros(r.p95), t('tools_page.bankroll_kpi_p95', 'Scénario favorable (5 %)'))
+          + kpi(num(r.drawdown30Probability, 0) + '%', t('tools_page.bankroll_kpi_drawdown', 'Risque de baisse de 30 %'), r.drawdown30Probability > 40 ? 'neg' : '')
+          + kpi(num(r.halfBankrollProbability, 0) + '%', t('tools_page.bankroll_kpi_half', 'Risque de perdre la moitié'), r.halfBankrollProbability > 20 ? 'neg' : '')
           + '</div>'
-          + '<p class="mt-4 text-[12.5px] leading-relaxed text-soft/85">Simulation de 5 000 séries à partir des hypothèses saisies ci-contre. Ce ne sont pas des résultats observés, mais la dispersion que produirait ce profil de mise.</p>';
+          + '<p class="mt-4 text-[12.5px] leading-relaxed text-soft/85">' + esc(t('tools_page.bankroll_footnote', 'Simulation de 5 000 séries à partir des hypothèses saisies ci-contre. Ce ne sont pas des résultats observés, mais la dispersion que produirait ce profil de mise.')) + '</p>';
       });
     }
     ['blBank', 'blStake', 'blBets', 'blWin', 'blOdds'].forEach(function (id) {
@@ -452,18 +478,18 @@
   function rendreCombo(panneau) {
     var reel = ctx.isPro;
     panneau.innerHTML = enTete('Analyse de combiné', 'Mesure ce qu’un combiné retire réellement à l’espérance de gain.')
-      + (reel ? '' : bandeauDemo('Les trois sélections ci-dessous sont fictives et servent à montrer le fonctionnement de l’outil.'))
+      + (reel ? '' : bandeauDemo(t('tools_page.combo_demo_text', 'Les trois sélections ci-dessous sont fictives et servent à montrer le fonctionnement de l’outil.')))
       + '<div class="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">'
-      + '<div><div id="cbList" class="' + S.carte + '"><p class="py-6 text-center text-[13.5px] text-soft">Chargement…</p></div>'
-      + '<div class="' + S.carte + ' mt-4"><p class="mb-3 text-[13px] font-semibold text-ink">Ajouter une sélection manuelle</p>'
+      + '<div><div id="cbList" class="' + S.carte + '"><p class="py-6 text-center text-[13.5px] text-soft">' + esc(t('tools_page.combo_loading', 'Chargement…')) + '</p></div>'
+      + '<div class="' + S.carte + ' mt-4"><p class="mb-3 text-[13px] font-semibold text-ink">' + esc(t('tools_page.combo_manual_add_title', 'Ajouter une sélection manuelle')) + '</p>'
       + '<div class="grid grid-cols-1 gap-3 sm:grid-cols-3">'
-      + champ('cbMatch', 'Match', { type: 'text', placeholder: 'Équipe A – Équipe B' })
-      + champ('cbProb', 'Probabilité', { unit: '%', min: 0.1, max: 99.9, step: 0.1, value: 60 })
-      + champ('cbOdds', 'Cote', { min: 1.01, step: 0.01, value: 1.80 })
-      + '</div><button id="cbAdd" type="button" class="mt-3 rounded-xl border border-hairline px-4 py-2.5 text-[13px] font-semibold text-ink transition hover:border-cyan/40">Ajouter au combiné</button></div></div>'
+      + champ('cbMatch', t('tools_page.label_match', 'Match'), { type: 'text', placeholder: t('tools_page.combo_match_placeholder', 'Équipe A – Équipe B') })
+      + champ('cbProb', t('tools_page.combo_prob_label', 'Probabilité'), { unit: '%', min: 0.1, max: 99.9, step: 0.1, value: 60 })
+      + champ('cbOdds', t('tools_page.label_odds', 'Cote'), { min: 1.01, step: 0.01, value: 1.80 })
+      + '</div><button id="cbAdd" type="button" class="mt-3 rounded-xl border border-hairline px-4 py-2.5 text-[13px] font-semibold text-ink transition hover:border-cyan/40">' + esc(t('tools_page.combo_add_btn', 'Ajouter au combiné')) + '</button></div></div>'
       + '<div id="cbOut" class="min-w-0"></div></div>'
-      + panneauPro('Compose ton combiné à partir des analyses du jour.',
-          'Les abonnés cochent directement les sélections réelles au lieu de les saisir à la main.');
+      + panneauPro(t('tools_page.combo_pro_title', 'Compose ton combiné à partir des analyses du jour.'),
+          t('tools_page.combo_pro_sub', 'Les abonnés cochent directement les sélections réelles au lieu de les saisir à la main.'));
 
     function sourceListe() {
       if (!reel) return Promise.resolve(DEMO_COMBO);
@@ -483,12 +509,12 @@
     sourceListe().then(function (liste) {
       var box = document.getElementById('cbList');
       if (!box) return;
-      if (!liste.length) { box.innerHTML = vide('Aucune sélection disponible', 'Les analyses du jour ne sont pas encore publiées.'); return; }
+      if (!liste.length) { box.innerHTML = vide(t('tools_page.combo_empty_title', 'Aucune sélection disponible'), t('tools_page.combo_empty_text', 'Les analyses du jour ne sont pas encore publiées.')); return; }
       box.innerHTML = '<ul class="list-none p-0">' + liste.map(function (s, i) {
         return '<li class="border-t border-hairline first:border-t-0"><label class="flex cursor-pointer items-center gap-3 py-3">'
           + '<input type="checkbox" data-cb="' + i + '" class="h-4 w-4 shrink-0 accent-[#20d5ef]">'
           + '<span class="min-w-0 flex-1"><span class="block truncate text-[14px] font-semibold text-ink">' + esc(s.match) + '</span>'
-          + '<span class="block truncate text-[12.5px] text-soft">' + esc(marcheLisible(s.market)) + ' · ' + num(s.probability, 1) + ' % estimés</span></span>'
+          + '<span class="block truncate text-[12.5px] text-soft">' + esc(marcheLisible(s.market)) + ' · ' + num(s.probability, 1) + esc(t('tools_page.combo_estimated_suffix', ' % estimés')) + '</span></span>'
           + '<span class="shrink-0 text-[14px] font-bold text-ink tabular-nums">' + num(s.odds, 2) + '</span></label></li>';
       }).join('') + '</ul>';
       $$('input[data-cb]', box).forEach(function (input) {
@@ -506,24 +532,24 @@
       });
       picks = picks.concat(etat.combo);
       if (picks.length < 2) {
-        out.innerHTML = vide('Sélectionne au moins deux paris', 'Un combiné se juge sur la multiplication des probabilités : il en faut au moins deux.');
+        out.innerHTML = vide(t('tools_page.combo_min_two_title', 'Sélectionne au moins deux paris'), t('tools_page.combo_min_two_text', 'Un combiné se juge sur la multiplication des probabilités : il en faut au moins deux.'));
         return;
       }
       var r = D.combo(picks.map(function (s) { return { probability: s.probability, odds: s.odds, label: s.market }; }));
       var risque = D.comboRisk(picks);
-      if (!r) { out.innerHTML = vide('Calcul impossible', 'Vérifie les probabilités et les cotes.'); return; }
+      if (!r) { out.innerHTML = vide(t('tools_page.title_calc_impossible', 'Calcul impossible'), t('tools_page.combo_calc_impossible_text', 'Vérifie les probabilités et les cotes.')); return; }
       var note = r.worseThanSingle
-        ? 'Ce combiné rapporte <b class="text-ink">moins</b> que le meilleur de ces paris joué seul (' + signe(r.bestSingleEv, 1) + ' % d’espérance).'
-        : 'Espérance du meilleur pari joué seul : ' + signe(r.bestSingleEv, 1) + ' %. Un combiné reste plus volatil : toutes les sélections doivent passer.';
-      out.innerHTML = resultat('Espérance du combiné', signe(r.expectedValue, 1) + '%', note, r.expectedValue >= 0 ? 'pos' : 'neg')
+        ? t('tools_page.combo_worse_prefix', 'Ce combiné rapporte <b class="text-ink">moins</b> que le meilleur de ces paris joué seul (') + signe(r.bestSingleEv, 1) + t('tools_page.combo_worse_suffix', ' % d’espérance).')
+        : t('tools_page.combo_better_prefix', 'Espérance du meilleur pari joué seul : ') + signe(r.bestSingleEv, 1) + t('tools_page.combo_better_suffix', ' %. Un combiné reste plus volatil : toutes les sélections doivent passer.');
+      out.innerHTML = resultat(t('tools_page.combo_result_label', 'Espérance du combiné'), signe(r.expectedValue, 1) + '%', note, r.expectedValue >= 0 ? 'pos' : 'neg')
         + '<div class="mt-4 grid grid-cols-2 gap-3">'
-        + kpi(num(r.probability, 1) + '%', 'Probabilité combinée')
-        + kpi(num(r.fairOdds, 2), 'Cote juste estimée')
-        + kpi(num(r.bookOdds, 2), 'Cote du combiné')
-        + kpi(String(picks.length), 'Sélections')
+        + kpi(num(r.probability, 1) + '%', t('tools_page.combo_kpi_prob', 'Probabilité combinée'))
+        + kpi(num(r.fairOdds, 2), t('tools_page.combo_kpi_fair_odds', 'Cote juste estimée'))
+        + kpi(num(r.bookOdds, 2), t('tools_page.combo_kpi_book_odds', 'Cote du combiné'))
+        + kpi(String(picks.length), t('tools_page.combo_kpi_selections', 'Sélections'))
         + '</div>'
         + (risque.correlated
-          ? '<div class="mt-4 rounded-xl border border-[#f5a524]/30 bg-[#f5a524]/[0.07] px-4 py-3 text-[13px] leading-relaxed text-soft"><b class="text-ink">Ces sélections peuvent être corrélées.</b> Plusieurs portent sur le même match. Le calcul suppose des événements indépendants : il peut surestimer ou sous-estimer la probabilité réelle. Nous ne disposons pas de mesure de dépendance entre marchés.</div>'
+          ? '<div class="mt-4 rounded-xl border border-[#f5a524]/30 bg-[#f5a524]/[0.07] px-4 py-3 text-[13px] leading-relaxed text-soft">' + t('tools_page.combo_correlation_warning', '<b class="text-ink">Ces sélections peuvent être corrélées.</b> Plusieurs portent sur le même match. Le calcul suppose des événements indépendants : il peut surestimer ou sous-estimer la probabilité réelle. Nous ne disposons pas de mesure de dépendance entre marchés.') + '</div>'
           : '');
     }
 
@@ -532,8 +558,8 @@
       var m = ($('#cbMatch') || {}).value, p = Number(($('#cbProb') || {}).value), o = Number(($('#cbOdds') || {}).value);
       erreurChamp('cbProb', ''); erreurChamp('cbOdds', '');
       var ko = false;
-      if (!(p > 0 && p < 100)) { erreurChamp('cbProb', 'Entre une probabilité entre 0 et 100 %.'); ko = true; }
-      if (!(o > 1)) { erreurChamp('cbOdds', 'La cote doit être supérieure à 1.'); ko = true; }
+      if (!(p > 0 && p < 100)) { erreurChamp('cbProb', t('tools_page.err_probability_range', 'Entre une probabilité entre 0 et 100 %.')); ko = true; }
+      if (!(o > 1)) { erreurChamp('cbOdds', t('tools_page.err_odds_gt_one', 'La cote doit être supérieure à 1.')); ko = true; }
       if (ko) return;
       // La cle vient du NOM DU MATCH normalise : deux selections saisies sur
       // le meme match declenchent alors l'alerte de correlation. Avec une cle
@@ -541,7 +567,7 @@
       var cle = (m || '').trim().toLowerCase().replace(/\s+/g, ' ');
       etat.combo.push({
         matchKey: cle || 'manuel-' + etat.combo.length,
-        match: m || 'Sélection manuelle', market: 'Saisie manuelle', probability: p, odds: o
+        match: m || t('tools_page.combo_default_match', 'Sélection manuelle'), market: t('tools_page.combo_default_market', 'Saisie manuelle'), probability: p, odds: o
       });
       activer('combo');
     });
@@ -554,18 +580,18 @@
     var head = enTete('Journal des décisions', 'Mesure les décisions enregistrées dans la durée : rien n’est calculé sur des données de démonstration.');
 
     if (!ctx.user) {
-      panneau.innerHTML = head + vide('Connecte-toi pour ouvrir ton journal',
-        'Le journal enregistre tes décisions et calcule ta performance réelle. Il ne contient que tes propres données.',
-        '<a href="/compte.html" class="mt-5 inline-flex rounded-xl bg-cyan px-6 py-3 text-[13px] font-extrabold text-page transition hover:brightness-110">Créer un compte</a>');
+      panneau.innerHTML = head + vide(t('tools_page.journal_login_title', 'Connecte-toi pour ouvrir ton journal'),
+        t('tools_page.journal_login_text', 'Le journal enregistre tes décisions et calcule ta performance réelle. Il ne contient que tes propres données.'),
+        '<a href="/compte.html" class="mt-5 inline-flex rounded-xl bg-cyan px-6 py-3 text-[13px] font-extrabold text-page transition hover:brightness-110">' + esc(t('tools_page.journal_login_cta', 'Créer un compte')) + '</a>');
       return;
     }
 
     var s = D.summarize(etat.bankroll, etat.decisions);
     var bloc;
     if (!etat.decisions.length) {
-      bloc = vide('Aucune décision enregistrée',
-        'Ajoute ta première décision pour commencer à mesurer ta performance. Aucun chiffre n’est affiché tant qu’il n’y a rien à mesurer.',
-        '<button id="jrAdd" type="button" class="mt-5 inline-flex rounded-xl bg-cyan px-6 py-3 text-[13px] font-extrabold text-page transition hover:brightness-110">Ajouter une décision</button>');
+      bloc = vide(t('tools_page.journal_empty_title', 'Aucune décision enregistrée'),
+        t('tools_page.journal_empty_text', 'Ajoute ta première décision pour commencer à mesurer ta performance. Aucun chiffre n’est affiché tant qu’il n’y a rien à mesurer.'),
+        '<button id="jrAdd" type="button" class="mt-5 inline-flex rounded-xl bg-cyan px-6 py-3 text-[13px] font-extrabold text-page transition hover:brightness-110">' + esc(t('tools_page.journal_add_btn_first', 'Ajouter une décision')) + '</button>');
     } else {
       var lignes = etat.decisions.map(function (d) {
         var pl = d.result_pnl == null ? D.pnl(d) : Number(d.result_pnl);
@@ -578,31 +604,31 @@
           + '<div class="text-right text-[14px] font-bold ' + badge + ' tabular-nums">' + (d.status === 'pending' ? '—' : signe(pl, 0) + ' €') + '</div></li>';
       }).join('');
       bloc = '<div class="mb-5 grid grid-cols-2 gap-3 lg:grid-cols-4">'
-        + kpi(String(s.total), 'Décisions')
-        + kpi(signe(s.roi, 1) + '%', 'ROI', s.roi >= 0 ? 'pos' : 'neg')
-        + kpi(signe(s.profit, 0) + ' €', 'Profit / perte', s.profit >= 0 ? 'pos' : 'neg')
-        + kpi(num(s.winRate, 1) + '%', 'Taux de réussite')
+        + kpi(String(s.total), t('tools_page.journal_kpi_count', 'Décisions'))
+        + kpi(signe(s.roi, 1) + '%', t('tools_page.journal_kpi_roi', 'ROI'), s.roi >= 0 ? 'pos' : 'neg')
+        + kpi(signe(s.profit, 0) + ' €', t('tools_page.journal_kpi_profit', 'Profit / perte'), s.profit >= 0 ? 'pos' : 'neg')
+        + kpi(num(s.winRate, 1) + '%', t('tools_page.journal_kpi_winrate', 'Taux de réussite'))
         + '</div>'
         + '<div class="' + S.carte + '">'
         + '<div class="mb-2 hidden grid-cols-[minmax(0,1fr)_80px_80px_90px] gap-3 border-b border-hairline pb-2 text-[11px] font-bold tracking-[0.1em] text-soft sm:grid">'
-        + '<span>MATCH / MARCHÉ</span><span class="text-right">COTE</span><span class="text-right">MISE</span><span class="text-right">P/L</span></div>'
+        + '<span>' + esc(t('tools_page.journal_th_match_market', 'MATCH / MARCHÉ')) + '</span><span class="text-right">' + esc(t('tools_page.journal_th_odds', 'COTE')) + '</span><span class="text-right">' + esc(t('tools_page.journal_th_stake', 'MISE')) + '</span><span class="text-right">' + esc(t('tools_page.journal_th_pl', 'P/L')) + '</span></div>'
         + '<ul class="list-none p-0">' + lignes + '</ul></div>'
-        + '<button id="jrAdd" type="button" class="mt-4 rounded-xl border border-hairline px-4 py-2.5 text-[13px] font-semibold text-ink transition hover:border-cyan/40">+ Ajouter une décision</button>';
+        + '<button id="jrAdd" type="button" class="mt-4 rounded-xl border border-hairline px-4 py-2.5 text-[13px] font-semibold text-ink transition hover:border-cyan/40">' + esc(t('tools_page.journal_add_btn', '+ Ajouter une décision')) + '</button>';
     }
 
     panneau.innerHTML = head + bloc
-      + '<p class="mt-5 text-[12.5px] leading-relaxed text-soft/85">Le suivi de la <b class="text-soft">closing line value</b> (comparaison entre la cote prise et la cote de clôture) n’est pas encore disponible : les cotes de clôture ne sont pas collectées à ce jour.</p>'
-      + (ctx.isPro ? '' : panneauPro('Le journal synchronisé est réservé aux abonnés.', 'Tes décisions sont conservées et ta performance calculée dans la durée.'))
+      + '<p class="mt-5 text-[12.5px] leading-relaxed text-soft/85">' + t('tools_page.journal_clv_note', 'Le suivi de la <b class="text-soft">closing line value</b> (comparaison entre la cote prise et la cote de clôture) n’est pas encore disponible : les cotes de clôture ne sont pas collectées à ce jour.') + '</p>'
+      + (ctx.isPro ? '' : panneauPro(t('tools_page.journal_pro_title', 'Le journal synchronisé est réservé aux abonnés.'), t('tools_page.journal_pro_sub', 'Tes décisions sont conservées et ta performance calculée dans la durée.')))
       + '<dialog id="jrDlg" class="w-[min(440px,92vw)] rounded-2xl border border-hairline bg-surface p-0 text-ink backdrop:bg-black/60">'
-      + '<form method="dialog" class="p-6"><h3 class="text-[17px] font-bold text-ink">Nouvelle décision</h3>'
+      + '<form method="dialog" class="p-6"><h3 class="text-[17px] font-bold text-ink">' + esc(t('tools_page.journal_dialog_title', 'Nouvelle décision')) + '</h3>'
       + '<div class="mt-4 space-y-3">'
-      + champ('jrMatch', 'Match', { type: 'text', placeholder: 'PSG – Marseille' })
-      + champ('jrMarket', 'Marché', { type: 'text', placeholder: 'Au moins 3 buts dans le match' })
-      + champ('jrOdds', 'Cote', { min: 1.01, step: 0.01, value: 1.90 })
-      + champ('jrStake', 'Mise', { unit: '€', min: 0.01, step: 0.01 })
+      + champ('jrMatch', t('tools_page.label_match', 'Match'), { type: 'text', placeholder: 'PSG – Marseille' })
+      + champ('jrMarket', t('tools_page.journal_market_label', 'Marché'), { type: 'text', placeholder: t('tools_page.journal_market_placeholder', 'Au moins 3 buts dans le match') })
+      + champ('jrOdds', t('tools_page.label_odds', 'Cote'), { min: 1.01, step: 0.01, value: 1.90 })
+      + champ('jrStake', t('tools_page.journal_stake_label', 'Mise'), { unit: '€', min: 0.01, step: 0.01 })
       + '</div><p id="jrMsg" class="mt-3 text-[12.5px] text-soft"></p>'
-      + '<div class="mt-5 flex gap-3"><button value="cancel" class="flex-1 rounded-xl border border-hairline px-4 py-2.5 text-[13px] font-semibold text-ink">Annuler</button>'
-      + '<button id="jrSave" type="button" class="flex-1 rounded-xl bg-cyan px-4 py-2.5 text-[13px] font-extrabold text-page">Enregistrer</button></div>'
+      + '<div class="mt-5 flex gap-3"><button value="cancel" class="flex-1 rounded-xl border border-hairline px-4 py-2.5 text-[13px] font-semibold text-ink">' + esc(t('tools_page.journal_cancel_btn', 'Annuler')) + '</button>'
+      + '<button id="jrSave" type="button" class="flex-1 rounded-xl bg-cyan px-4 py-2.5 text-[13px] font-extrabold text-page">' + esc(t('tools_page.journal_save_btn', 'Enregistrer')) + '</button></div>'
       + '</form></dialog>';
 
     var dlg = document.getElementById('jrDlg');
@@ -611,7 +637,7 @@
     var save = document.getElementById('jrSave');
     if (save) save.addEventListener('click', function () {
       var msg = document.getElementById('jrMsg');
-      if (!ctx.isPro) { if (msg) msg.textContent = 'Le journal synchronisé est réservé au plan Pro.'; return; }
+      if (!ctx.isPro) { if (msg) msg.textContent = t('tools_page.journal_pro_only_msg', 'Le journal synchronisé est réservé au plan Pro.'); return; }
       var row = {
         user_id: ctx.user.id,
         match_label: (($('#jrMatch') || {}).value || '').trim(),
@@ -620,7 +646,7 @@
         stake: Number(($('#jrStake') || {}).value)
       };
       if (!row.match_label || !row.market || !(row.stake > 0) || !(row.odds > 1)) {
-        if (msg) msg.textContent = 'Complète le match, le marché, une cote > 1 et une mise > 0.';
+        if (msg) msg.textContent = t('tools_page.journal_form_incomplete_msg', 'Complète le match, le marché, une cote > 1 et une mise > 0.');
         return;
       }
       window.IasharkApp.supabase.from('betting_decisions').insert(row).select().single().then(function (q) {
@@ -659,7 +685,7 @@
     var el = document.getElementById('sidebarFoot');
     if (!el) return;
     el.innerHTML = etat.bankroll
-      ? '<div class="px-3"><div class="text-[11px] font-bold tracking-[0.14em] text-soft">CAPITAL</div>'
+      ? '<div class="px-3"><div class="text-[11px] font-bold tracking-[0.14em] text-soft">' + esc(t('tools_page.sidebar_capital_label', 'CAPITAL')) + '</div>'
         + '<div class="mt-1 text-[18px] font-extrabold text-ink tabular-nums">' + euros(etat.bankroll) + '</div></div>'
       : '';
   }
@@ -686,7 +712,14 @@
       });
     });
     var depart = (location.hash || '').replace('#', '');
-    window.IasharkApp.context().then(function (c) {
+    // I18N.init() charge le dictionnaire de la locale detectee et resout
+    // avant que la moindre section ne soit rendue (activer() plus bas) :
+    // sans ca, t() renverrait toujours le repli francais meme sur /en/,
+    // /es/, etc. Se degrade sans bruit si window.I18N est absent.
+    var langue = (window.I18N && window.I18N.init) ? window.I18N.init() : Promise.resolve();
+    langue.then(function () {
+      return window.IasharkApp.context();
+    }).then(function (c) {
       ctx = c || ctx;
       if (c && c.profile && c.profile.capital) etat.bankroll = Number(c.profile.capital);
       if (!c || !c.user) return null;

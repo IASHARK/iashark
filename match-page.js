@@ -1,13 +1,18 @@
 (function(){'use strict';
 const root=document.getElementById('matchRoot');
+// i18n : repli local, jamais une erreur si I18N n'est pas charge (ou pas
+// encore pret) - on renvoie alors toujours le libelle francais d'origine.
+// Meme motif que celui deja utilise par player-page.js.
+function t(key,fallback){return (window.I18N&&window.I18N.t)?window.I18N.t(key,fallback):fallback;}
+function localeTag(){return (window.I18N&&window.I18N.localeTag)?window.I18N.localeTag():'fr-FR';}
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const n=v=>Number.isFinite(Number(v))?Number(v):null;
-const fmt=(v,d=1)=>n(v)===null?'—':Number(v).toLocaleString('fr-FR',{maximumFractionDigits:d});
+const fmt=(v,d=1)=>n(v)===null?'—':Number(v).toLocaleString(localeTag(),{maximumFractionDigits:d});
 const pct=v=>n(v)===null?'—':fmt(v)+'%';
-const odds=v=>n(v)===null?'—':Number(v).toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2});
+const odds=v=>n(v)===null?'—':Number(v).toLocaleString(localeTag(),{minimumFractionDigits:2,maximumFractionDigits:2});
 const clamp=v=>Math.max(0,Math.min(100,n(v)||0));
 const img=(src,alt)=>src?`<img src="${esc(src)}" alt="${esc(alt)}" loading="lazy">`:'';
-const empty=t=>`<div class="empty">${esc(t)}</div>`;
+const empty=txt=>`<div class="empty">${esc(txt)}</div>`;
 
 // Selection du "match gratuit du jour" - doit rester identique a getChoc()
 // dans index.html (meme calcul de confiance ovrConf/normEdge/normConf) pour
@@ -68,11 +73,11 @@ function confidenceBadge(label){
   if(!label)return '';
   const l=label.toLowerCase();
   const cls=l.includes('élev')||l.includes('elev')?'b-green':l.includes('moy')?'b-orange':l.includes('faib')?'b-red':'b-cyan';
-  return `<span class="badge ${cls}">Confiance ${esc(label)}</span>`;
+  return `<span class="badge ${cls}">${esc(t('match_page.confidence_prefix','Confiance'))} ${esc(label)}</span>`;
 }
 function riskBadge(code){
   if(!code)return '';
-  const map={FAIBLE:['b-green','Risque faible'],MODERE:['b-orange','Risque modéré'],ELEVE:['b-red','Risque élevé']};
+  const map={FAIBLE:['b-green',t('match_page.risk_low','Risque faible')],MODERE:['b-orange',t('match_page.risk_medium','Risque modéré')],ELEVE:['b-red',t('match_page.risk_high','Risque élevé')]};
   const [cls,label]=map[code]||['b-cyan',code];
   return `<span class="badge ${cls}">${esc(label)}</span>`;
 }
@@ -111,7 +116,7 @@ function probBar(vm){
   };
   return `<div class="hero-probbar">
     <div class="prob-bar">${seg(home,'home')}${seg(draw,'draw')}${seg(away,'away')}</div>
-    <div class="prob-legend"><span>${esc(homeName)}</span><span>Nul</span><span>${esc(awayName)}</span></div>
+    <div class="prob-legend"><span>${esc(homeName)}</span><span>${esc(t('match_page.draw_short','Nul'))}</span><span>${esc(awayName)}</span></div>
   </div>`;
 }
 
@@ -120,7 +125,7 @@ function hero(vm){
   return `<section class="card hero reveal">
     <div class="hero-top">
       <div class="hero-league">${img(i.league.logo,i.league.name)}<span>${esc(i.league.name)}</span></div>
-      <span class="hero-time">${esc(i.date||'Date à confirmer')} · ${esc(i.time||'—')}${vm.model.available?' · <span class="ready"><i></i>Analyse disponible</span>':''}</span>
+      <span class="hero-time">${esc(i.date||t('match_page.date_tbc','Date à confirmer'))} · ${esc(i.time||'—')}${vm.model.available?` · <span class="ready"><i></i>${esc(t('match_page.analysis_available','Analyse disponible'))}</span>`:''}</span>
     </div>
     <div class="hero-teams">
       <div class="hero-team">${img(i.home.logo,i.home.name)}<b>${esc(i.home.name)}</b>${teamMeta(s.home)}</div>
@@ -143,7 +148,7 @@ function leadingSide(p,homeName,awayName){
   if(!p)return null;
   if(p.home>=p.draw&&p.home>=p.away)return{label:homeName,key:'home'};
   if(p.away>=p.draw&&p.away>=p.home)return{label:awayName,key:'away'};
-  return{label:'Le nul',key:'draw'};
+  return{label:t('match_page.draw_label','Le nul'),key:'draw'};
 }
 function findMarket(list,re){return (list||[]).find(m=>re.test(m.market||''))||null;}
 function matchReadingCard(vm){
@@ -154,10 +159,11 @@ function matchReadingCard(vm){
   const matchesLeader=(leading.key==='home'&&(marketLower.includes('domicile')||marketLower===homeName.toLowerCase()))
     ||(leading.key==='away'&&(marketLower.includes('exterieur')||marketLower.includes('extérieur')||marketLower===awayName.toLowerCase()))
     ||(leading.key==='draw'&&marketLower.includes('nul'));
-  const locSuffix=leading.key==='home'?' à domicile':leading.key==='away'?' à l\'extérieur':'';
+  const locSuffix=leading.key==='home'?t('match_page.reading_home_suffix',' à domicile'):leading.key==='away'?t('match_page.reading_away_suffix',' à l\'extérieur'):'';
+  const aLAvantage=t('match_page.reading_has_advantage'," a l'avantage");
   const sentence=matchesLeader
-    ?`${leading.label} a l'avantage${locSuffix}, et c'est le marché que nous recommandons.`
-    :`${leading.label} a l'avantage${locSuffix}, mais ce n'est pas le marché que nous recommandons — nous recommandons plutôt ${marcheFr(vm,r.market)}.`;
+    ?`${leading.label}${aLAvantage}${locSuffix}${t('match_page.reading_matches_recommendation',", et c'est le marché que nous recommandons.")}`
+    :`${leading.label}${aLAvantage}${locSuffix}${t('match_page.reading_differs_recommendation_prefix',", mais ce n'est pas le marché que nous recommandons — nous recommandons plutôt ")}${marcheFr(vm,r.market)}.`;
   const reason=vm.editorial.decisiveFactor;
   // Le marche recommande est deja affiche dans cette rangee. Quand c'est
   // lui-meme un BTTS, la tuile BTTS generique repetait exactement le meme
@@ -170,14 +176,14 @@ function matchReadingCard(vm){
   const risk=vm.editorial.risk;
   const risqueDescriptif=risk&&!['FAIBLE','MODERE','ELEVE'].includes(risk)?risk:null;
   return `<section class="card lecture reveal">
-    <h2>${cardIcon('bulb')}Notre lecture du match</h2>
+    <h2>${cardIcon('bulb')}${esc(t('match_page.reading_title','Notre lecture du match'))}</h2>
     <p class="reading">${esc(texteLisible(vm,sentence))}${reason?' '+esc(texteLisible(vm,reason)):''}</p>
     ${risqueDescriptif?`<div class="risk-note"><b>⚠</b><span>${esc(texteLisible(vm,risqueDescriptif))}</span></div>`:''}
     <div class="lecture-stats">
-      ${totalXg!==null?`<div><small>Buts attendus</small><b>${fmt(totalXg)}</b></div>`:''}
+      ${totalXg!==null?`<div><small>${esc(t('match_page.stat_expected_goals','Buts attendus'))}</small><b>${fmt(totalXg)}</b></div>`:''}
       ${btts?`<div><small>BTTS</small><b>${pct(btts.probability)}</b></div>`:''}
       <div><small>${esc(marcheFr(vm,r.market))}</small><b>${pct(r.probability)}</b></div>
-      ${vm.model.iasharkScore!==null?`<div><small>Confiance analyse</small><b>${fmt(vm.model.iasharkScore/10)}/10</b></div>`:''}
+      ${vm.model.iasharkScore!==null?`<div><small>${esc(t('match_page.stat_analysis_confidence','Confiance analyse'))}</small><b>${fmt(vm.model.iasharkScore/10)}/10</b></div>`:''}
     </div>
   </section>`;
 }
@@ -199,9 +205,9 @@ function matchReadingCard(vm){
 // value negative en signal positif.
 function edgeVerdict(edge){
   if(edge===null)return null;
-  if(edge>=3)return{cls:'pos',text:`Le marché sous-estime ce scénario de ${fmt(Math.abs(edge))} points de probabilité.`};
-  if(edge<=-3)return{cls:'neg',text:`La cote proposée est moins intéressante que notre estimation (${fmt(Math.abs(edge))} points d'écart en défaveur du parieur).`};
-  return{cls:'flat',text:'Le marché est aligné sur notre estimation : l’écart reste dans la marge d’erreur du modèle.'};
+  if(edge>=3)return{cls:'pos',text:`${t('match_page.edge_verdict_positive_prefix','Le marché sous-estime ce scénario de ')}${fmt(Math.abs(edge))}${t('match_page.edge_verdict_positive_suffix',' points de probabilité.')}`};
+  if(edge<=-3)return{cls:'neg',text:`${t('match_page.edge_verdict_negative_prefix','La cote proposée est moins intéressante que notre estimation (')}${fmt(Math.abs(edge))}${t('match_page.edge_verdict_negative_suffix'," points d'écart en défaveur du parieur).")}`};
+  return{cls:'flat',text:t('match_page.edge_verdict_neutral','Le marché est aligné sur notre estimation : l’écart reste dans la marge d’erreur du modèle.')};
 }
 // LE SIGNAL. Le marche recommande domine, et la comparaison modele/marche
 // est lue d'un coup d'oeil sur deux barres. Le bandeau du bas ne reprend PAS
@@ -210,7 +216,7 @@ function edgeVerdict(edge){
 // les deux cotes.
 function signalCard(vm){
   const r=vm.model.recommendation;
-  if(!r)return card('Le signal IASHARK',empty(vm.model.unavailableReason||'Aucun marché ne franchit les seuils de confiance ou de cote minimale pour ce match — IASHARK préfère ne pas se prononcer.'),'signal-card','target');
+  if(!r)return card(t('match_page.signal_title','Le signal IASHARK'),empty(vm.model.unavailableReason||t('match_page.signal_unavailable_fallback','Aucun marché ne franchit les seuils de confiance ou de cote minimale pour ce match — IASHARK préfère ne pas se prononcer.')),'signal-card','target');
   const prob=n(r.probability);
   const fair=prob!==null&&prob>0?100/prob:null;
   const marketOdds=n(vm.model.recommendedOdds);
@@ -220,12 +226,12 @@ function signalCard(vm){
   const kpi=(label,value,accent)=>`<div class="min-w-0 border-l border-white/[.07] pl-4 first:border-l-0 first:pl-0"><span class="block text-xs leading-5 text-soft">${esc(label)}</span><b class="mt-1 block text-xl font-semibold tabular-nums ${accent?'text-cyan':'text-ink'}">${value}</b></div>`;
   const compare=(label,value,isModel)=>value===null?'':`<div><div class="mb-2 flex items-baseline justify-between gap-3 text-sm"><span class="text-soft">${label}</span><b class="tabular-nums ${isModel?'text-cyan':'text-ink'}">${pct(value)}</b></div><div class="h-2 overflow-hidden rounded-full bg-white/[.07]" role="img" aria-label="${label} ${pct(value)}"><span class="block h-full rounded-full ${isModel?'bg-cyan':'bg-white/40'} motion-safe:transition-[width] motion-safe:duration-700" style="width:${clamp(value)}%"></span></div></div>`;
   return `<section class="signal-card reveal overflow-hidden rounded-2xl border border-cyan/20 bg-panel p-5 shadow-2xl shadow-black/30 sm:p-7 lg:p-8">
-    <div class="flex flex-wrap items-center justify-between gap-3"><span class="inline-flex items-center gap-2 text-sm font-semibold text-cyan">${cardIcon('target')}Le signal IASHARK</span><div class="sig-badges flex flex-wrap gap-2">${confidenceBadge(r.reliability)}${riskBadge(vm.editorial.riskCode)}</div></div>
+    <div class="flex flex-wrap items-center justify-between gap-3"><span class="inline-flex items-center gap-2 text-sm font-semibold text-cyan">${cardIcon('target')}${esc(t('match_page.signal_title','Le signal IASHARK'))}</span><div class="sig-badges flex flex-wrap gap-2">${confidenceBadge(r.reliability)}${riskBadge(vm.editorial.riskCode)}</div></div>
     <div class="mt-7 grid gap-7 lg:grid-cols-[minmax(0,1.35fr)_minmax(250px,1fr)] lg:items-end">
-      <div><span class="block text-sm text-soft">Marché recommandé</span><h1 class="mt-2 max-w-3xl text-balance text-3xl font-bold leading-[1.08] tracking-tight text-white sm:text-4xl">${esc(marcheFr(vm,r.market))}</h1></div>
-      <div class="space-y-4 rounded-xl border border-white/[.07] bg-black/15 p-4" aria-label="Comparaison du modèle et du marché">${compare('Probabilité modèle',prob,true)}${compare('Probabilité marché',implied,false)}${edge!==null?`<p class="flex items-center justify-between border-t border-white/[.07] pt-3 text-sm text-soft"><span>Écart détecté</span><b class="tabular-nums text-cyan">${edge>0?'+':''}${fmt(edge)} pts</b></p>`:''}</div>
+      <div><span class="block text-sm text-soft">${esc(t('match_page.recommended_market_label','Marché recommandé'))}</span><h1 class="mt-2 max-w-3xl text-balance text-3xl font-bold leading-[1.08] tracking-tight text-white sm:text-4xl">${esc(marcheFr(vm,r.market))}</h1></div>
+      <div class="space-y-4 rounded-xl border border-white/[.07] bg-black/15 p-4" aria-label="Comparaison du modèle et du marché">${compare(esc(t('match_page.label_model_prob','Probabilité modèle')),prob,true)}${compare(esc(t('match_page.player_engine_market_prob','Probabilité marché')),implied,false)}${edge!==null?`<p class="flex items-center justify-between border-t border-white/[.07] pt-3 text-sm text-soft"><span>${esc(t('match_page.detected_edge_label','Écart détecté'))}</span><b class="tabular-nums text-cyan">${edge>0?'+':''}${fmt(edge)} pts</b></p>`:''}</div>
     </div>
-    <div class="mt-7 grid grid-cols-2 gap-x-4 gap-y-5 border-t border-white/[.07] pt-5">${kpi('Cote juste',odds(fair))}${kpi('Cote marché',odds(marketOdds))}</div>
+    <div class="mt-7 grid grid-cols-2 gap-x-4 gap-y-5 border-t border-white/[.07] pt-5">${kpi(t('match_page.fair_odds_label','Cote juste'),odds(fair))}${kpi(t('match_page.market_odds_label','Cote marché'),odds(marketOdds))}</div>
     ${verdict?`<p class="mt-6 max-w-3xl text-sm leading-6 text-soft">${esc(verdict.text)}</p>`:''}
   </section>`;
 }
@@ -255,15 +261,24 @@ function signalCard(vm){
 // par lib/match-view-model.js) - aucune donnee nouvelle, aucun chiffre
 function threatSample(p){
   const bits=[];
-  if(n(p.appearances)!==null)bits.push(`${p.appearances} match${p.appearances>1?'s':''} joué${p.appearances>1?'s':''}`);
-  if(n(p.starts)!==null)bits.push(p.starts>0?`${p.starts} titularisation${p.starts>1?'s':''}`:'aucune titularisation');
-  if(n(p.minutes)!==null&&p.minutes>0)bits.push(`${Math.round(p.minutes)} minutes jouées`);
+  if(n(p.appearances)!==null)bits.push(`${p.appearances} ${p.appearances>1?t('match_page.matches_played_plural','matchs joués'):t('match_page.matches_played_singular','match joué')}`);
+  if(n(p.starts)!==null)bits.push(p.starts>0?`${p.starts} ${p.starts>1?t('match_page.starts_plural','titularisations'):t('match_page.starts_singular','titularisation')}`:t('match_page.starts_none','aucune titularisation'));
+  if(n(p.minutes)!==null&&p.minutes>0)bits.push(`${Math.round(p.minutes)} ${t('match_page.minutes_played_suffix','minutes jouées')}`);
   return bits.length?bits.join(' · '):'';
 }
 // L'API renvoie le poste en anglais. Repli sur la valeur brute si elle sort
 // de ces quatre cas : mieux vaut un mot anglais qu'un poste efface.
-const POSTES={goalkeeper:'Gardien',defender:'Défenseur',midfielder:'Milieu',attacker:'Attaquant'};
-const poste=v=>{const k=String(v||'').trim();return POSTES[k.toLowerCase()]||k;};
+// Cle francaise -> [cle i18n, repli francais]. La traduction n'est resolue
+// qu'au moment de l'appel (dans poste()), jamais ici : ce module s'evalue
+// au chargement du script, avant que I18N.init() n'ait fini de charger le
+// dictionnaire - figer le texte traduit ici le bloquerait sur le francais.
+const POSTES={
+  goalkeeper:['match_page.position_goalkeeper','Gardien'],
+  defender:['match_page.position_defender','Défenseur'],
+  midfielder:['match_page.position_midfielder','Milieu'],
+  attacker:['match_page.position_forward','Attaquant']
+};
+const poste=v=>{const k=String(v||'').trim();const e=POSTES[k.toLowerCase()];return e?t(e[0],e[1]):k;};
 
 // Le joueur le plus dangereux du match.
 //
@@ -290,34 +305,34 @@ function threatsCard(vm){
   // pleines.
   // Deux decimales fixes sur les moyennes par 90 : "1,30" et non "1,3", pour
   // que les trois colonnes du panneau s'alignent au lieu de danser.
-  const deux=v=>Number(v).toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2});
+  const deux=v=>Number(v).toLocaleString(localeTag(),{minimumFractionDigits:2,maximumFractionDigits:2});
   const stats=[
-    n(p.goals90)!==null&&p.goals90>0?[deux(p.goals90),'Buts / 90 min']:null,
-    n(p.shotsOn90)!==null&&p.shotsOn90>0?[deux(p.shotsOn90),'Tirs cadrés / 90 min']:null,
-    n(p.expectedGoals90)!==null?[deux(p.expectedGoals90),'Buts attendus / 90 min']:null,
-    n(p.assists90)!==null&&p.assists90>0?[deux(p.assists90),'Passes déc. / 90 min']:null,
-    n(p.rating5)!==null?[Number(p.rating5).toLocaleString('fr-FR',{minimumFractionDigits:1,maximumFractionDigits:1}),'Note moyenne']:null
+    n(p.goals90)!==null&&p.goals90>0?[deux(p.goals90),t('match_page.stat_goals_per90','Buts / 90 min')]:null,
+    n(p.shotsOn90)!==null&&p.shotsOn90>0?[deux(p.shotsOn90),t('match_page.stat_shots_on_target_per90','Tirs cadrés / 90 min')]:null,
+    n(p.expectedGoals90)!==null?[deux(p.expectedGoals90),t('match_page.stat_expected_goals_per90','Buts attendus / 90 min')]:null,
+    n(p.assists90)!==null&&p.assists90>0?[deux(p.assists90),t('match_page.stat_assists_per90','Passes déc. / 90 min')]:null,
+    n(p.rating5)!==null?[Number(p.rating5).toLocaleString(localeTag(),{minimumFractionDigits:1,maximumFractionDigits:1}),t('match_page.stat_average_rating','Note moyenne')]:null
   ].filter(Boolean).slice(0,3);
 
   const sample=threatSample(p);
   const largeur=prob===null?null:Math.max(0,Math.min(100,prob));
 
-  return card('Buteur à surveiller',`<${tag} class="threat group"${href}>
+  return card(t('match_page.top_scorer_watch_title','Buteur à surveiller'),`<${tag} class="threat group"${href}>
     <div class="threat-id">
       ${img(p.photo,p.name)}
       <div class="threat-who">
         <b>${esc(p.name)}</b>
         <small>${esc(p.team||'')}${p.position?' · '+esc(poste(p.position)):''}</small>
       </div>
-      ${list.length>1?'<span class="threat-rank">Menace n°1</span>':''}
+      ${list.length>1?`<span class="threat-rank">${esc(t('match_page.top_scorer_rank_badge','Menace n°1'))}</span>`:''}
     </div>
 
     ${prob===null?'':`<div class="threat-prob">
       <div class="threat-prob-tete">
-        <span>Probabilité de marquer</span>
+        <span>${esc(t('match_page.scoring_probability_label','Probabilité de marquer'))}</span>
         <b>${pct(prob)}</b>
       </div>
-      <div class="threat-jauge" role="img" aria-label="Probabilité de marquer : ${pct(prob)}"><i style="width:${largeur}%"></i></div>
+      <div class="threat-jauge" role="img" aria-label="${esc(t('match_page.scoring_probability_label','Probabilité de marquer'))} : ${pct(prob)}"><i style="width:${largeur}%"></i></div>
     </div>`}
 
     ${stats.length?`<div class="threat-panneau">${stats.map(([v,k])=>
@@ -325,9 +340,9 @@ function threatsCard(vm){
 
     <div class="threat-pied">
       ${sample?`<span class="threat-sample${p.thinSample?' is-thin':''}">${esc(sample)}</span>`:'<span></span>'}
-      ${pid!==null?'<span class="threat-lien">Voir la fiche <i aria-hidden="true">→</i></span>':''}
+      ${pid!==null?`<span class="threat-lien">${esc(t('match_page.view_profile_link','Voir la fiche'))} <i aria-hidden="true">→</i></span>`:''}
     </div>
-    ${p.thinSample?'<p class="threat-alerte">Temps de jeu limité sur ce championnat : ces moyennes par 90 minutes reposent sur peu de minutes et restent fragiles.</p>':''}
+    ${p.thinSample?`<p class="threat-alerte">${esc(t('match_page.thin_sample_alert','Temps de jeu limité sur ce championnat : ces moyennes par 90 minutes reposent sur peu de minutes et restent fragiles.'))}</p>`:''}
   </${tag}>`,'threats-card','target2');
 }
 
@@ -342,7 +357,7 @@ const INSIGHT_STYLE={
 function keyInsightsCard(vm){
   const list=vm.keyInsights;
   if(!list.length)return '';
-  return card('Ce qu\'il faut savoir',`<div class="insights-grid">${list.map(item=>{
+  return card(t('match_page.key_insights_title','Ce qu\'il faut savoir'),`<div class="insights-grid">${list.map(item=>{
     const [cls,mark]=INSIGHT_STYLE[item.type]||['b-cyan','·'];
     return `<div class="insight"><div class="insight-head"><span class="insight-mark ${cls}">${mark}</span><b>${esc(texteLisible(vm,item.title))}</b></div><p>${esc(texteLisible(vm,item.text))}</p></div>`;
   }).join('')}</div>`,'','bulb');
@@ -355,7 +370,7 @@ function keyInsightsCard(vm){
 function valuePotentialCard(vm){
   const top=vm.marketsWatch[0];
   if(!top||top.edge===null||Math.abs(top.edge)<4)return '';
-  return card('Value potentielle',`<div class="value-potential"><b>${esc(marcheFr(vm,top.market))}</b><p>${top.edge>=0?`Ce marché présente la plus grosse value selon notre modèle (écart de +${fmt(top.edge)}% avec le marché).`:`Le marché est nettement au-dessus de notre modèle sur ce pari (écart de ${fmt(top.edge)}%) - à interpréter avec prudence.`}</p></div>`,'value-card','trophy');
+  return card(t('match_page.value_potential_title','Value potentielle'),`<div class="value-potential"><b>${esc(marcheFr(vm,top.market))}</b><p>${top.edge>=0?`${t('match_page.value_positive_prefix','Ce marché présente la plus grosse value selon notre modèle (écart de +')}${fmt(top.edge)}${t('match_page.value_positive_suffix','% avec le marché).')}`:`${t('match_page.value_negative_prefix','Le marché est nettement au-dessus de notre modèle sur ce pari (écart de ')}${fmt(top.edge)}${t('match_page.value_negative_suffix','%) - à interpréter avec prudence.')}`}</p></div>`,'value-card','trophy');
 }
 
 // Matchup : vm.matchupScores, categories reellement mesurables (attaque/
@@ -384,7 +399,7 @@ function matchupCard(vm){
     return `<div class="mu-row">
       <span class="mu-val${homeWin?' win':''}">${fmt(c.home)}</span>
       <div class="mu-mid">
-        <b>${esc(c.label)}${c.advantage==='égalité'?' · égalité':''}<em>${esc(c.unit||'')}${c.lowerIsBetter?' · moins = mieux':''}</em></b>
+        <b>${esc(c.label)}${c.advantage==='égalité'?' · '+esc(t('match_page.tie_label','égalité')):''}<em>${esc(c.unit||'')}${c.lowerIsBetter?' · '+esc(t('match_page.lower_is_better_hint','moins = mieux')):''}</em></b>
         <div class="mu-bar"><i class="mu-h${homeWin?' win':''}" style="width:${partHome}%"></i><i class="mu-a${awayWin?' win':''}" style="width:${100-partHome}%"></i></div>
       </div>
       <span class="mu-val${awayWin?' win':''}">${fmt(c.away)}</span>
@@ -393,7 +408,7 @@ function matchupCard(vm){
   const total=(Number(m.globalHome)||0)+(Number(m.globalAway)||0);
   const partGlobal=total?clamp(Number(m.globalHome)/total*100):50;
   const homeMieux=Number(m.globalHome)>=Number(m.globalAway);
-  return card('Matchup : comment les équipes se correspondent',
+  return card(t('match_page.matchup_title','Matchup : comment les équipes se correspondent'),
     `<div class="mu-head"><span>${logoEquipe(vm.identity.home.logo,homeName)}${esc(homeName)}</span><span>${logoEquipe(vm.identity.away.logo,awayName)}${esc(awayName)}</span></div>
      <div class="mu-rows">${rows}</div>
      <div class="mu-global">
@@ -401,7 +416,7 @@ function matchupCard(vm){
        <div class="mu-g-bar"><i style="width:${partGlobal}%"></i></div>
        <div class="mu-g-side right"><b class="${homeMieux?'':'win'}">${fmt(m.globalAway)}<small>/10</small></b></div>
      </div>
-     <p class="mu-foot">Note globale, toutes catégories confondues.</p>`,
+     <p class="mu-foot">${esc(t('match_page.matchup_global_note','Note globale, toutes catégories confondues.'))}</p>`,
     '','scale');
 }
 
@@ -413,8 +428,8 @@ function matchupCard(vm){
 function formNoteCard(vm){
   const home=vm.formNote.home,away=vm.formNote.away;
   if(!home&&!away)return '';
-  const line=(name,note)=>note?`<div class="caveat"><b>!</b><span><b>${esc(name)}</b> : ${note.wins} victoire${note.wins>1?'s':''} sur les ${note.sample} derniers matchs, mais ${note.narrowWins} à un seul but d'écart.</span></div>`:'';
-  return card('Stats à ne pas surinterpréter',`${line(vm.identity.home.name,home)}${line(vm.identity.away.name,away)}`,'','alert');
+  const line=(name,note)=>note?`<div class="caveat"><b>!</b><span><b>${esc(name)}</b> : ${note.wins} ${note.wins>1?t('match_page.form_note_win_plural','victoires'):t('match_page.form_note_win_singular','victoire')}${t('match_page.form_note_middle',' sur les ')}${note.sample}${t('match_page.form_note_matches_suffix',' derniers matchs, mais ')}${note.narrowWins}${t('match_page.form_note_narrow_suffix'," à un seul but d'écart.")}</span></div>`:'';
+  return card(t('match_page.stats_caveat_title','Stats à ne pas surinterpréter'),`${line(vm.identity.home.name,home)}${line(vm.identity.away.name,away)}`,'','alert');
 }
 
 // Forme reelle : vrais resultats recents (form_home/away deja exposes),
@@ -438,17 +453,17 @@ function outputsCard(vm){
   // la carte disparait - une carte vide n'affirme rien d'utile.
   const cols=[],manquant=[];
   if(x){
-    cols.push(`<div class="outputs-col outputs-xg"><small>Buts attendus (xG)</small><div class="xg-row">${img(i.home.logo,i.home.name)}<b>${fmt(x.home)}</b><span>xG</span><b>${fmt(x.away)}</b>${img(i.away.logo,i.away.name)}</div></div>`);
-  } else manquant.push('xG indisponibles');
+    cols.push(`<div class="outputs-col outputs-xg"><small>${esc(t('match_page.stat_expected_goals','Buts attendus'))} (xG)</small><div class="xg-row">${img(i.home.logo,i.home.name)}<b>${fmt(x.home)}</b><span>xG</span><b>${fmt(x.away)}</b>${img(i.away.logo,i.away.name)}</div></div>`);
+  } else manquant.push(t('match_page.xg_unavailable','xG indisponibles'));
   if(s.length){
     // Trois pastilles de largeur egale se cassaient sur deux lignes et ne
     // disaient rien de la hierarchie entre les scores. Des barres classees
     // montrent tout de suite lequel domine, et ne debordent jamais.
     const maxP=Math.max.apply(null,s.map(sc=>Number(sc.probability)||0))||1;
-    cols.push(`<div class="outputs-col"><small>Scores les plus probables</small><div class="score-bars">${s.map(sc=>`<div class="score-bar"><b>${esc(sc.score)}</b><i><span style="width:${clamp(Number(sc.probability)/maxP*100)}%"></span></i><small>${pct(sc.probability)}</small></div>`).join('')}</div></div>`);
-  } else manquant.push('Scores probables indisponibles');
+    cols.push(`<div class="outputs-col"><small>${esc(t('match_page.section_top_scores','Scores les plus probables'))}</small><div class="score-bars">${s.map(sc=>`<div class="score-bar"><b>${esc(sc.score)}</b><i><span style="width:${clamp(Number(sc.probability)/maxP*100)}%"></span></i><small>${pct(sc.probability)}</small></div>`).join('')}</div></div>`);
+  } else manquant.push(t('match_page.scores_unavailable','Scores probables indisponibles'));
   if(!cols.length)return '';
-  return card('Ce que dit le modèle',
+  return card(t('match_page.outputs_title','Ce que dit le modèle'),
     `<div class="outputs${cols.length===1?' outputs-1col':' outputs-2col'}">${cols.join('')}</div>`
     +(manquant.length?`<p class="outputs-missing">${esc(manquant.join(' · '))}.</p>`:''));
 }
@@ -542,10 +557,23 @@ const CMP_GROUPES=[
   ['Discipline',['Fautes','Hors-jeu']]
 ];
 const CMP_UNITE={'Possession':'%'};
+// CMP_SENS/CMP_GROUPES/CMP_UNITE ci-dessus sont des CLES DE CORRESPONDANCE
+// avec vm.comparison.rows[].label, qui vient de lib/match-view-model.js et
+// arrive TOUJOURS en francais (hors de portee de match-page.js) : elles ne
+// doivent jamais etre traduites, sous peine de casser les lookup parLabel[l]
+// pour toutes les locales non francaises (tableau comparatif vide). Seul le
+// TEXTE AFFICHE est traduit, via ces deux tables d'indirection separees.
+const CMP_LABEL_KEYS={
+  'Buts marqués':'stat_goals_scored','Buts concédés':'stat_goals_conceded','Tirs':'stat_shots',
+  'Tirs cadrés':'stat_shots_on_target','Possession':'stat_possession','Corners':'stat_corners',
+  'Fautes':'stat_fouls','Hors-jeu':'stat_offsides','Arrêts':'stat_saves'
+};
+const CMP_GROUP_KEYS={'Attaque':'group_attack','Maîtrise':'group_control','Défense':'group_defense','Discipline':'group_discipline'};
+const cmpLabel=label=>{const k=CMP_LABEL_KEYS[label];return k?t('match_page.'+k,label):label;};
 
 function comparison(vm){
   const c=vm.comparison;
-  if(!c||!c.rows.length)return empty('Statistiques comparatives indisponibles.');
+  if(!c||!c.rows.length)return empty(t('match_page.comparison_unavailable','Statistiques comparatives indisponibles.'));
   const parLabel={};
   c.rows.forEach(r=>{parLabel[r.label]=r;});
   const dom=vm.identity.home.name,ext=vm.identity.away.name;
@@ -554,7 +582,7 @@ function comparison(vm){
   // l'impression d'une mesure moins precise que sa voisine.
   // Une decimale sur les moyennes, aucune sur les pourcentages : "69,0 %"
   // suggere une precision que la possession n'a pas.
-  const un=(v,unite)=>Number(v).toLocaleString('fr-FR',
+  const un=(v,unite)=>Number(v).toLocaleString(localeTag(),
     unite==='%'?{maximumFractionDigits:0}:{minimumFractionDigits:1,maximumFractionDigits:1});
 
   let gagnesDom=0,gagnesExt=0,depart=0;
@@ -571,7 +599,7 @@ function comparison(vm){
   CMP_GROUPES.forEach(([groupe,labels])=>{
     const presentes=labels.map(l=>parLabel[l]).filter(Boolean);
     if(!presentes.length)return;
-    lignes.push(`<tr class="cmp-groupe"><th scope="rowgroup" colspan="4">${esc(groupe)}</th></tr>`);
+    lignes.push(`<tr class="cmp-groupe"><th scope="rowgroup" colspan="4">${esc(CMP_GROUP_KEYS[groupe]?t('match_page.'+CMP_GROUP_KEYS[groupe],groupe):groupe)}</th></tr>`);
     presentes.forEach(r=>{
       const sens=CMP_SENS[r.label]||'neutre';
       const unite=CMP_UNITE[r.label]||'';
@@ -592,7 +620,7 @@ function comparison(vm){
       const signe=ecart>0?'+':ecart<0?'−':'';
       const valeurEcart=Math.abs(ecart)<0.001?'—':signe+un(Math.abs(ecart),unite)+unite;
       lignes.push(`<tr>
-        <th scope="row">${esc(r.label)}</th>
+        <th scope="row">${esc(cmpLabel(r.label))}</th>
         <td class="${devant==='dom'?'gagne':''}">${un(r.home,unite)}${esc(unite)}</td>
         <td class="${devant==='ext'?'gagne':''}">${un(r.away,unite)}${esc(unite)}</td>
         <td class="cmp-ecart">${barre}<span class="cmp-val ${devant||'nul'}">${valeurEcart}</span></td>
@@ -604,9 +632,9 @@ function comparison(vm){
   const rangees=new Set(CMP_GROUPES.flatMap(g=>g[1]));
   const orphelines=c.rows.filter(r=>!rangees.has(r.label));
   if(orphelines.length){
-    lignes.push('<tr class="cmp-groupe"><th scope="rowgroup" colspan="4">Autres</th></tr>');
+    lignes.push(`<tr class="cmp-groupe"><th scope="rowgroup" colspan="4">${esc(t('match_page.group_other','Autres'))}</th></tr>`);
     orphelines.forEach(r=>{
-      lignes.push(`<tr><th scope="row">${esc(r.label)}</th><td>${un(r.home)}</td><td>${un(r.away)}</td><td class="cmp-ecart"><span class="cmp-val nul">—</span></td></tr>`);
+      lignes.push(`<tr><th scope="row">${esc(cmpLabel(r.label))}</th><td>${un(r.home)}</td><td>${un(r.away)}</td><td class="cmp-ecart"><span class="cmp-val nul">—</span></td></tr>`);
     });
   }
 
@@ -616,25 +644,25 @@ function comparison(vm){
     const meneur=gagnesDom>gagnesExt?dom:gagnesExt>gagnesDom?ext:null;
     const compte=Math.max(gagnesDom,gagnesExt);
     conclusion=meneur
-      ? `<b>${esc(meneur)}</b> est devant sur ${compte} des ${total} mesures comparables.`
-      : `Les deux équipes se partagent les ${total} mesures comparables.`;
+      ? `<b>${esc(meneur)}</b>${t('match_page.comparison_leads_middle',' est devant sur ')}${compte}${t('match_page.comparison_leads_of',' des ')}${total}${t('match_page.comparison_leads_suffix',' mesures comparables.')}`
+      : `${t('match_page.comparison_tie_prefix','Les deux équipes se partagent les ')}${total}${t('match_page.comparison_leads_suffix',' mesures comparables.')}`;
   }
 
   const note=n(c.sampleSize)!==null
-    ? `Moyennes par match sur ${c.sampleSize} rencontre${c.sampleSize>1?'s':''}${c.sampleSize<5?' — échantillon encore court':''}.`
-    : 'Moyennes par match.';
+    ? `${t('match_page.comparison_note_with_sample_prefix','Moyennes par match sur ')}${c.sampleSize} ${c.sampleSize>1?t('match_page.comparison_note_match_plural','rencontres'):t('match_page.comparison_note_match_singular','rencontre')}${c.sampleSize<5?t('match_page.comparison_note_thin_sample_suffix',' — échantillon encore court'):''}.`
+    : t('match_page.comparison_note_simple','Moyennes par match.');
 
   return `<div class="cmp-scroll"><table class="cmp-table">
       <thead><tr>
-        <th scope="col">Par match</th>
+        <th scope="col">${esc(t('match_page.comparison_table_header','Par match'))}</th>
         <th scope="col"><span class="cmp-eq">${logoEquipe(vm.identity.home.logo,dom)}${esc(dom)}</span></th>
         <th scope="col"><span class="cmp-eq">${logoEquipe(vm.identity.away.logo,ext)}${esc(ext)}</span></th>
-        <th scope="col">Écart</th>
+        <th scope="col">${esc(t('match_page.comparison_gap_header','Écart'))}</th>
       </tr></thead>
       <tbody>${lignes.join('')}</tbody>
     </table></div>
     ${conclusion?`<p class="cmp-conclusion">${conclusion}</p>`:''}
-    <p class="cmp-note">${note} Hors-jeu et arrêts sont donnés sans verdict&nbsp;: plus d'arrêts signifie surtout plus de tirs subis.</p>`;
+    <p class="cmp-note">${note} ${esc(t('match_page.comparison_note_disclaimer',"Hors-jeu et arrêts sont donnés sans verdict : plus d'arrêts signifie surtout plus de tirs subis."))}</p>`;
 }
 
 // Scenario par tranches de 15 minutes : courbe reliant les 6 vraies valeurs
@@ -660,12 +688,12 @@ function scenarioChart(slots){
 }
 function scenarioCard(vm){
   const g=vm.editorial.goalTiming;
-  if(!g||!g.slots.length)return empty('Pas assez de buts enregistrés pour établir une répartition fiable.');
+  if(!g||!g.slots.length)return empty(t('match_page.scenario_unavailable','Pas assez de buts enregistrés pour établir une répartition fiable.'));
   // Meme forme d'entree que la courbe attendait deja : { t, prob }.
   const slots=g.slots.map(sl=>({t:sl.label,prob:sl.share}));
   return `${scenarioChart(slots)}
-    <div class="scenario-insight"><b>!</b><span>Tranche la plus fournie : <b>${esc(g.peak.label)} min</b> — ${Math.round(g.peak.share)} % des buts des deux équipes y sont tombés.</span></div>
-    <p class="scenario-source">Sur ${g.totalGoals} buts marqués par ${esc(vm.identity.home.name)} et ${esc(vm.identity.away.name)} cette saison. Fréquence observée sur leurs matchs passés, pas une prévision pour celui-ci.</p>`;
+    <div class="scenario-insight"><b>!</b><span>${t('match_page.scenario_peak_prefix','Tranche la plus fournie : ')}<b>${esc(g.peak.label)}${t('match_page.scenario_peak_middle',' min')}</b> — ${Math.round(g.peak.share)}${t('match_page.scenario_peak_suffix',' % des buts des deux équipes y sont tombés.')}</span></div>
+    <p class="scenario-source">${t('match_page.scenario_source_prefix','Sur ')}${g.totalGoals}${t('match_page.scenario_source_middle',' buts marqués par ')}${esc(vm.identity.home.name)}${t('match_page.scenario_source_and',' et ')}${esc(vm.identity.away.name)}${t('match_page.scenario_source_suffix',' cette saison. Fréquence observée sur leurs matchs passés, pas une prévision pour celui-ci.')}</p>`;
 }
 
 
@@ -756,7 +784,7 @@ function faqCard(vm){
   const sims=n(vm.model.simulationCount),quality=n(vm.model.quality);
   if(sims!==null||sources.length||quality!==null){
     const bits=[];
-    if(sims!==null)bits.push(`${sims.toLocaleString('fr-FR')} simulations de Monte-Carlo`);
+    if(sims!==null)bits.push(`${sims.toLocaleString(localeTag())} simulations de Monte-Carlo`);
     if(sources.length)bits.push(`les données ${sources.map(x=>esc(String(x))).join(', ')}`);
     if(quality!==null)bits.push(`un score de qualité des données de ${fmt(quality)}/100`);
     qa.push(['Sur quoi repose cette analyse ?',
@@ -771,7 +799,7 @@ function faqCard(vm){
   }
 
   if(qa.length<2)return '';
-  return card('Questions sur ce match',
+  return card(t('match_page.faq_title','Questions sur ce match'),
     `<div class="faq-list">${qa.map(([q,a])=>`<details><summary>${esc(q)}</summary><p>${a}</p></details>`).join('')}</div>`,
     'faq-card','faq');
 }
@@ -788,7 +816,7 @@ function signalSticky(vm){
   const marketOdds=n(vm.model.recommendedOdds);
   return `<div class="sig-sticky" id="sigSticky" aria-hidden="true">
     <div class="ss-in">
-      <span class="ss-tag">Marché recommandé</span>
+      <span class="ss-tag">${esc(t('match_page.recommended_market_label','Marché recommandé'))}</span>
       <b class="ss-market">${esc(marcheFr(vm,r.market))}</b>
       ${marketOdds!==null?`<span class="ss-odds">${odds(marketOdds)}</span>`:''}
       ${n(r.probability)!==null?`<span class="ss-prob">${pct(r.probability)}</span>`:''}
@@ -818,14 +846,14 @@ function render(raw){
     matchReadingCard(vm),
     keyInsightsCard(vm),
     outputsCard(vm),
-    card('Comparatif des deux équipes',comparison(vm),'compare-card','compare'),
+    card(t('match_page.comparison_title','Comparatif des deux équipes'),comparison(vm),'compare-card','compare'),
     threatsCard(vm),
     matchupCard(vm),
     formNoteCard(vm),
     valuePotentialCard(vm),
     // "Scenario probable du match" : contenu et style geles a la demande de
     // l'utilisateur. Seule sa POSITION change ici.
-    card('Scénario probable du match',scenarioCard(vm),'','chart'),
+    card(t('match_page.scenario_title','Scénario probable du match'),scenarioCard(vm),'','chart'),
     faqCard(vm)
   ];
   // Pas de numerotation : les titres de cartes suffisent a situer la lecture.
@@ -884,10 +912,10 @@ function renderAuthWall(raw){
   const vm=IasharkMatchViewModel.buildMatchViewModel(raw);
   document.title=`${vm.identity.home.name} vs ${vm.identity.away.name} — IASHARK`;
   root.innerHTML=gateCard(vm,{
-    title:'Match gratuit du jour',
-    text:'Ce match est gratuit, mais il faut un compte IASHARK (inscription ou connexion) pour voir l’analyse complete.',
+    title:t('match_page.gate_free_title','Match gratuit du jour'),
+    text:t('match_page.gate_free_text','Ce match est gratuit, mais il faut un compte IASHARK (inscription ou connexion) pour voir l’analyse complete.'),
     href:'/compte.html',
-    cta:'Se connecter / Creer un compte'
+    cta:t('match_page.gate_free_cta','Se connecter / Creer un compte')
   });
   bindMotion();
 }
@@ -895,16 +923,23 @@ function renderProWall(raw){
   const vm=IasharkMatchViewModel.buildMatchViewModel(raw);
   document.title=`${vm.identity.home.name} vs ${vm.identity.away.name} — IASHARK`;
   root.innerHTML=gateCard(vm,{
-    title:'Analyse reservee aux membres Pro',
-    text:'Le marche recommande, la confiance du modele et l’analyse complete de ce match sont reserves aux membres Pro. Le match du jour, lui, reste gratuit.',
+    title:t('match_page.gate_pro_title','Analyse reservee aux membres Pro'),
+    text:t('match_page.gate_pro_text','Le marche recommande, la confiance du modele et l’analyse complete de ce match sont reserves aux membres Pro. Le match du jour, lui, reste gratuit.'),
     href:'/abonnement.html',
-    cta:'Devenir Pro'
+    cta:t('match_page.gate_pro_cta','Devenir Pro')
   });
   bindMotion();
 }
 
 async function init(){
   try{
+    // Dictionnaire i18n charge (et applique aux elements data-i18n de la
+    // coquille HTML) AVANT tout rendu, pour que labels et nombres sortent
+    // deja dans la bonne langue des le premier rendu - jamais un flash en
+    // francais suivi d'un re-rendu. Repli silencieux si I18N n'est pas
+    // charge (page qui n'inclut pas encore i18n.js) : t() et localeTag()
+    // retombent alors sur le francais partout, comme avant ce chantier.
+    if(window.I18N&&window.I18N.init){ try{ await window.I18N.init(); }catch(e){} }
     // MODE DEMO (exemple-analyse.html) : la page de demonstration montre une
     // analyse REELLE et complete, sans compte et sans appel reseau. Aucune
     // logique d'acces n'est contournee ailleurs - le drapeau n'existe que sur
@@ -932,13 +967,13 @@ async function init(){
       list=list||data.matchs||[];
       raw=raw||list.find(x=>String(x.id)===String(id));
     }
-    if(!raw)throw new Error('Match introuvable');
+    if(!raw)throw new Error(t('match_page.match_not_found','Match introuvable'));
     const isFree=String(raw.id)===String(IasharkFreeMatch.pickFreeMatchId(list));
     if(isFree&&!ctx.session){renderAuthWall(raw);return;}
     if(!isFree&&!ctx.isPro){renderProWall(raw);return;}
     render(raw);
   }catch(e){
-    root.innerHTML=`<div class="match-error"><b>${esc(e.message||'Erreur de chargement')}</b><a href="/">Retour à l'accueil</a></div>`;
+    root.innerHTML=`<div class="match-error"><b>${esc(e.message||t('match_page.generic_load_error','Erreur de chargement'))}</b><a href="/">${esc(t('match_page.back_to_home','Retour à l\'accueil'))}</a></div>`;
   }
 }
 init();

@@ -99,8 +99,12 @@ test("le bandeau 'Notre lecture' ne repete pas BTTS quand le pari recommande est
 test("la carte buteur affiche la probabilite de marquer sans ecraser le joueur",()=>{
   assert.match(js,/scoringProbability/);
   assert.match(js,/Probabilité de marquer/);
-  // La probabilite est aussi lisible autrement que par la jauge.
-  assert.match(js,/role="img" aria-label="Probabilité de marquer/);
+  // La probabilite est aussi lisible autrement que par la jauge. Le libelle
+  // passe desormais par t('match_page.scoring_probability_label', ...) (i18n,
+  // 13/09/2026) : on verifie donc que role="img" et aria-label portent
+  // toujours le repli francais "Probabilité de marquer", meme si le texte
+  // n'est plus colle immediatement apres aria-label=" dans le code source.
+  assert.match(js,/role="img" aria-label="[^"]*Probabilité de marquer/);
   assert.match(css,/\.threat-jauge/);
   assert.match(css,/\.threat-panneau/);
 });

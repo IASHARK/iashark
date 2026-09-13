@@ -261,7 +261,7 @@ table.tbl{width:100%;border-collapse:collapse;font-size:13px;}
     </div>
 
     <div class="notice" id="migrationNotice" hidden>
-      <div><b>Migration non appliquée.</b> Les blocs avancés (en direct, trafic, pages, sources, parcours) s'afficheront dès que <code>supabase/migrations/0011_admin_analytics.sql</code> sera appliquée. Les chiffres de base ci-dessous restent disponibles.</div>
+      <div><b>Migration non appliquée.</b> Les blocs avancés (en direct, trafic, pages, sources, parcours) s'afficheront dès que <code>supabase/migrations/0015_admin_analytics.sql</code> sera appliquée. Les chiffres de base ci-dessous restent disponibles.</div>
     </div>
 
     <section class="card live" id="liveCard" aria-live="polite">
@@ -455,7 +455,7 @@ function pathHtml(p) { return p == null ? '<span style="color:var(--muted)">—<
 function empty(text, small) { return '<div class="empty">' + esc(text) + (small ? '<small>' + esc(small) + '</small>' : '') + '</div>'; }
 function unavailable(kind) {
   return kind === 'missing'
-    ? empty('Disponible après application de la migration 0011_admin_analytics.sql.')
+    ? empty('Disponible après application de la migration 0015_admin_analytics.sql.')
     : empty('Impossible de charger ce bloc pour le moment.', 'Réessayez avec « Actualiser ».');
 }
 

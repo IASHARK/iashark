@@ -9,7 +9,7 @@ const path = require("node:path");
 
 const root = path.resolve(__dirname, "..");
 const read = (rel) => fs.readFileSync(path.join(root, rel), "utf8");
-const sql = read("supabase/migrations/0011_admin_analytics.sql");
+const sql = read("supabase/migrations/0015_admin_analytics.sql");
 const admin = read("admin.html");
 
 function fnBlock(name) {
@@ -76,7 +76,7 @@ test("admin.html : garde admin conservee, RPC attendues, migration absente geree
     assert.ok(admin.includes("'" + rpc + "'"), rpc);
   }
   assert.match(admin, /PGRST202/);
-  assert.match(admin, /0011_admin_analytics\.sql/);
+  assert.match(admin, /0015_admin_analytics\.sql/);
   assert.ok(!/fixture|demo|lorem|Math\.random/i.test(admin), "aucune donnee de demonstration dans la page");
   // Toute donnee issue de funnel_events (ecrite par anon) passe par esc().
   assert.match(admin, /function esc\(/);

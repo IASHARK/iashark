@@ -220,7 +220,16 @@ footer{padding:20px 20px 100px;text-align:center;border-top:1px solid var(--bord
     <!-- Hero headline uses hook #6 from doc 07 (07_IAShark_Mexico_Launch_Kit)
          verbatim: "No confíes en nuestra IA: compruébala." -->
     <h1 class="reveal" style="animation-delay:.1s">No confíes en nuestra IA:<br><b>compruébala.</b></h1>
-    <p class="sub reveal" style="animation-delay:.15s">Cuatro modelos estadísticos calculan la probabilidad de cada partido de Liga MX, Champions League, Premier League, LaLiga y MLS, la comparan con el momio del mercado, y mantienen el pronóstico en un historial público después del silbatazo inicial.</p>
+    <!-- Liga MX correction (found and fixed after publish): config/leagues.json
+         (the real live coverage catalogue) does NOT include liga_mx today —
+         only Champions League, Premier League, LaLiga and MLS are actually
+         analyzed live. The original copy claimed all five including Liga MX,
+         which was a real overclaim on a public page. Liga MX stays visible
+         here as the explicitly-flagged upcoming priority (matches doc 07's
+         own #1 content priority for Mexico) rather than removed outright, but
+         never stated as already covered - same honesty bar as the /za page's
+         PSL disclosure ("collection underway, not yet live"). -->
+    <p class="sub reveal" style="animation-delay:.15s">Cuatro modelos estadísticos calculan la probabilidad de cada partido de Champions League, Premier League, LaLiga y MLS, la comparan con el momio del mercado, y mantienen el pronóstico en un historial público después del silbatazo inicial. <b>Liga MX es nuestra prioridad de cobertura para México — próximamente.</b></p>
     <div class="cta-row reveal" style="animation-delay:.2s">
       <div class="cta-pair">
         <!-- Free-trial CTA: same /es/ fallback as the header link above (no
@@ -498,20 +507,14 @@ footer{padding:20px 20px 100px;text-align:center;border-top:1px solid var(--bord
 <script src="/mx/mx-page.js"></script>
 <script src="/site-prefs.js"></script>
 <!--
-  KNOWN GAP, surfaced rather than hidden (found by reading bottom-navigation.js
-  fresh before wiring this page, per instructions): this shared component
-  resolves the market "mx" to interface locale "es-mx" (i18n/i18n.js
-  MARKET_LOCALE) and then routes its "Tools" and "Account" nav items to
-  "/es-mx/pro.html" and "/es-mx/compte.html". Unlike GB's "en" locale (a full
-  /en/ page set backs it), there is NO /es-mx/ directory anywhere in this
-  repo - those two nav links will 404 as shipped. This is a bug in the
-  shared component when applied to the mx market specifically (za is fine:
-  its locale is also "en"). Not fixed here because bottom-navigation.js is a
-  shared file outside this task's scope (new files under mx/ only) and other
-  agents may be touching shared files this session - flagged via spawn_task
-  instead so it gets its own fix (either point mx's bottom nav at /es/ as a
-  fallback, the same choice this page's own links make, or build out a real
-  /es-mx/ page set).
+  FIXED (was a KNOWN GAP flagged in this file): bottom-navigation.js used to
+  resolve the market "mx" to interface locale "es-mx" (i18n/i18n.js
+  MARKET_LOCALE) and route its "Tools"/"Account" nav items to
+  "/es-mx/pro.html" and "/es-mx/compte.html", which don't exist (es-mx is a
+  translation dictionary only, no page directory) - real 404 on every /mx/
+  page. bottom-navigation.js now has a separate MARKET_PAGE_LOCALE map
+  ({gb:'en', mx:'es', za:'en'}) so mx's shared nav links fall back to /es/,
+  the same choice this page's own links make (see GEO_EXPANSION_STATUS.md).
 -->
 <script src="/bottom-navigation.js"></script>
 </body>

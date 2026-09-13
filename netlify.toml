@@ -1,0 +1,6 @@
+# Netlify ne publie QUE dist/, construit par scripts/build-public.js a chaque
+# deploiement (audit QA du 14/09/2026 : la racine du depot etait publique,
+# documents internes, SQL, code des fonctions et donnees brutes compris).
+[build]
+  command = "node scripts/build-public.js"
+  publish = "dist"

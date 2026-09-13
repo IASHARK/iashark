@@ -346,14 +346,23 @@ function redirectsContent() {
   PAGES.forEach(function (p) {
     if (p.file === "index.html" || p.file === "404.html") return;
     out.push(rule("/" + p.file, "/" + X_DEFAULT_DIR + "/" + p.file, "301!"));
+    // Netlify sert aussi /page sans .html : meme redirection (audit QA 14/09/2026).
+    out.push(rule("/" + p.file.replace(/\.html$/, ""), "/" + X_DEFAULT_DIR + "/" + p.file, "301!"));
   });
   LEGAL_FILE_LIST.forEach(function (f) {
-    if (legalExists(X_DEFAULT_DIR, f)) out.push(rule("/" + f, "/" + X_DEFAULT_DIR + "/" + f, "301!"));
+    if (legalExists(X_DEFAULT_DIR, f)) {
+      out.push(rule("/" + f, "/" + X_DEFAULT_DIR + "/" + f, "301!"));
+      out.push(rule("/" + f.replace(/\.html$/, ""), "/" + X_DEFAULT_DIR + "/" + f, "301!"));
+    }
   });
 
   out.push("", "# --- Historique retire du site public : accueil du repertoire.");
   out.push(rule("/historique.html", "/" + X_DEFAULT_DIR + "/", "301!"));
-  DIR_CODES.forEach(function (d) { out.push(rule("/" + d + "/historique.html", "/" + d + "/", "301!")); });
+  out.push(rule("/historique", "/" + X_DEFAULT_DIR + "/", "301!"));
+  DIR_CODES.forEach(function (d) {
+    out.push(rule("/" + d + "/historique.html", "/" + d + "/", "301!"));
+    out.push(rule("/" + d + "/historique", "/" + d + "/", "301!"));
+  });
 
   out.push("", "# --- Sources des pages legales (legal/<dir>/) : jamais servies telles quelles.");
   out.push(rule("/legal/*", "/:splat", "301!"));

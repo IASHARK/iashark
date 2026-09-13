@@ -22,10 +22,21 @@ a{color:inherit}
 .brand img{width:185px;height:68px;object-fit:contain}
 .back-link{display:none}
 #authHeaderSlot{margin-left:auto}
+/* Selecteur langue/pays (assets/lang-switcher.css) avant le bouton compte,
+   comme dans l'en-tete de l'accueil. */
+.site-header .lang-switch-slot{margin-left:auto;margin-right:10px}
+.site-header .lang-switch-slot+#authHeaderSlot{margin-left:0}
 .btn-login{padding:12px 22px;color:var(--text);border:1px solid var(--line2);border-radius:10px;text-decoration:none;background:var(--card);font:700 13px var(--mono)}
 .match-shell{width:min(var(--container),calc(100% - 32px));margin:0 auto}
 .match-shell>div:not(#matchRoot){display:none!important}
-.legal-footer{display:none}
+/* Mention 18+ / jeu responsable : visible sur TOUTES les vues de la page
+   match, y compris le mur de connexion du match gratuit (audit QA
+   14/09/2026 : elle etait masquee). */
+.legal-footer{position:relative;z-index:1;width:min(var(--container),calc(100% - 32px));margin:18px auto 0;padding:14px 0 22px;border-top:1px solid var(--line);color:var(--dim);font-size:12px;line-height:1.6;text-align:center}
+.legal-footer p{margin:3px 0}
+.legal-footer a{color:var(--accent);text-decoration:none}
+.legal-footer a:hover{text-decoration:underline}
+.legal-footer [hidden]{display:none}
 .match-error{min-height:400px;display:grid;place-items:center;text-align:center}
 .match-error a{color:var(--accent)}
 .loading-card{min-height:320px;display:grid;place-items:center;gap:10px;color:var(--muted);font-size:13px}

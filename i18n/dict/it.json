@@ -9,7 +9,7 @@
   },
   "footer": {
     "disclaimer_warning": "IL GIOCO PUÒ ESSERE PERICOLOSO — GIOCA IN MODO RESPONSABILE · VIETATO AI MINORI DI 18 ANNI",
-    "disclaimer_help_label": "Aiuto (Francia):",
+    "disclaimer_help_label": "Aiuto:",
     "disclaimer_help_site": "joueurs-info-service.fr",
     "disclaimer_help_phone": "09 74 75 13 13",
     "mentions_legales": "Note Legali",
@@ -83,7 +83,7 @@
     "login_intro": "Accedi per ritrovare le tue analisi, i tuoi strumenti e il tuo diario.",
     "login_bullet_analyses": "Le analisi del giorno, campionato per campionato",
     "login_bullet_tools": "I sei strumenti di decisione",
-    "login_bullet_journal": "Il tuo diario e il tuo bankroll",
+    "login_bullet_journal": "Il tuo diario e il tuo budget di gioco",
     "login_form_heading": "Accedi",
     "password_placeholder_login": "La tua password",
     "login_submit": "Accedi",
@@ -140,7 +140,7 @@
     "plan_free_status": "Piano Gratuito",
     "plan_free_desc": "Stai usando la versione gratuita di IASHARK — la partita con la probabilità di modello più alta del giorno è disponibile gratuitamente.",
     "plan_pro_status": "Piano Strumenti",
-    "plan_pro_desc": "Il tuo abbonamento Strumenti è attivo — hai accesso a tutte le selezioni ad alta probabilità di modello.",
+    "plan_pro_desc": "Il tuo abbonamento Pro è attivo — hai accesso a tutte le selezioni ad alta probabilità di modello.",
     "security_title": "SICUREZZA",
     "change_password": "Cambia la mia password",
     "change_email": "Cambia la mia email",
@@ -544,7 +544,7 @@
     "scenario_source_suffix": " in questa stagione. Frequenza osservata nelle loro partite passate, non una previsione per questa.",
     "faq_title": "Domande su questa partita",
     "gate_free_title": "Partita gratuita del giorno",
-    "gate_free_text": "Questa partita è gratuita, ma è necessario un account IASHARK (registrazione o accesso) per vedere l'analisi completa.",
+    "gate_free_text": "Questa partita è gratuita, ma serve un account IASHARK gratuito (registrazione o accesso) per vedere l'analisi completa.",
     "gate_free_cta": "Accedi / Crea un account",
     "gate_pro_title": "Analisi riservata ai membri Pro",
     "gate_pro_text": "Il mercato consigliato, l'affidabilità del modello e l'analisi completa di questa partita sono riservati ai membri Pro. La partita del giorno, invece, resta gratuita.",
@@ -1460,7 +1460,7 @@
       },
       "compte": {
         "title": "IASHARK — Il Mio Account",
-        "description": "Gestisci il tuo account, il tuo abbonamento Strumenti e le tue preferenze IASHARK."
+        "description": "Gestisci il tuo account, il tuo abbonamento Pro e le tue preferenze IASHARK."
       },
       "joueur": {
         "title": "Scheda giocatore — IASHARK",
@@ -1500,7 +1500,7 @@
       },
       "checkout-succes": {
         "title": "IASHARK — Pagamento confermato",
-        "description": "Il tuo abbonamento Strumenti IASHARK è in fase di attivazione."
+        "description": "Il tuo abbonamento Pro IASHARK è in fase di attivazione."
       },
       "landing": {
         "title": "IASHARK — Il modello che legge la partita prima del calcio d'inizio",
@@ -1575,7 +1575,8 @@
     "no_signal_label": "Nessun segnale chiaro su questa partita",
     "seo_summary_title": "Analisi IA del giorno",
     "seo_confidence": "fiducia",
-    "seo_ai_pick": "Pronostico IA:"
+    "seo_ai_pick": "Pronostico IA:",
+    "seo_times_paris": "ora di Parigi"
   },
   "site_header": {
     "nav_today": "Analisi del giorno",
@@ -1639,7 +1640,12 @@
     "legal_past_performance": "<b>Performance passate ≠ performance future.</b> Un vantaggio statistico positivo nel lungo periodo non impedisce serie di perdite nel breve periodo. Il modello e la metodologia descritti in questa pagina possono evolvere senza preavviso.",
     "legal_ownership": "<b>Proprietà dei contenuti.</b> Le analisi, i testi e la metodologia presentati su questo sito sono di proprietà di IASHARK e non possono essere riprodotti senza autorizzazione preventiva.",
     "legal_adults": "<b>Riservato ai maggiorenni</b> (18 anni e oltre).",
-    "meta_description": "Come IASHARK analizza il calcio: fonti dei dati, modelli statistici, metodologia, limiti e avvertenze importanti."
+    "meta_description": "Come IASHARK analizza il calcio: fonti dei dati, modelli statistici, metodologia, limiti e avvertenze importanti.",
+    "legal_not_operator_market": {
+      "gb": "<b>IASHARK non è un operatore di gioco.</b> Non accettiamo puntate, non gestiamo conti di gioco e non effettuiamo alcun incasso o pagamento di vincite. Per scommettere realmente in Gran Bretagna occorre rivolgersi a un operatore autorizzato dalla Gambling Commission.",
+      "za": "<b>IASHARK non è un operatore di gioco.</b> Non accettiamo puntate, non gestiamo conti di gioco e non effettuiamo alcun incasso o pagamento di vincite. Per scommettere realmente in Sudafrica occorre rivolgersi a un bookmaker autorizzato dall'autorità di gioco della propria provincia.",
+      "mx": "<b>IASHARK non è un operatore di scommesse sportive.</b> Non accettiamo puntate, non gestiamo conti di gioco e non effettuiamo alcun incasso o pagamento di vincite. Per scommettere realmente in Messico occorre rivolgersi a un operatore con permesso valido del Ministero dell'Interno (SEGOB)."
+    }
   },
   "pricing_page": {
     "meta_title": "Abbonamento Pro — IASHARK",
@@ -1706,15 +1712,15 @@
     "cancel_body": "Non è stato effettuato alcun pagamento. Puoi riprovare quando vuoi, senza vincoli.",
     "cancel_cta_tools": "TORNA ALLO SPAZIO STRUMENTI →",
     "cancel_cta_account": "IL MIO ACCOUNT →",
-    "cancel_meta_description": "Abbonamento Strumenti IASHARK annullato, nessun pagamento effettuato.",
+    "cancel_meta_description": "Abbonamento Pro IASHARK annullato, nessun pagamento effettuato.",
     "success_meta_title": "IASHARK — Pagamento confermato",
     "success_heading": "Pagamento confermato",
-    "success_body": "Grazie! Il tuo abbonamento Strumenti è in fase di attivazione — di solito bastano pochi secondi.",
+    "success_body": "Grazie! Il tuo abbonamento Pro è in fase di attivazione — di solito bastano pochi secondi.",
     "success_checking": "Verifica del tuo accesso...",
     "success_cta_account": "VAI AL MIO ACCOUNT →",
-    "success_meta_description": "Il tuo abbonamento Strumenti IASHARK è in fase di attivazione.",
+    "success_meta_description": "Il tuo abbonamento Pro IASHARK è in fase di attivazione.",
     "success_login_needed": "Accedi per vedere il tuo nuovo accesso.",
-    "success_active": "Accesso Strumenti attivato ✓",
+    "success_active": "Accesso Pro attivato ✓",
     "success_slow": "L'attivazione può richiedere un po' più di tempo — torna sul tuo account tra un minuto."
   },
   "blog_hub": {

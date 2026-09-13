@@ -222,6 +222,16 @@
     }
   }
 
+  /* URL absolue-racine de la page de reinitialisation du repertoire courant.
+     Page sans prefixe : I18N.href si disponible, sinon /fr/ (jamais la racine,
+     qui redirige). */
+  function lienReinitialisation() {
+    var m = location.pathname.match(/^\/(fr|en|es|de|it|pt|gb|za|mx)(?:\/|$)/);
+    if (m) return '/' + m[1] + '/reinitialiser-mot-de-passe.html';
+    var h = localHref('reinitialiser-mot-de-passe.html');
+    return /^\/[a-z]{2}\//.test(h) ? h : '/fr/reinitialiser-mot-de-passe.html';
+  }
+
   /* ---------- Mot de passe oublie ---------- */
   async function oubli(e) {
     if (e) e.preventDefault();
@@ -231,11 +241,15 @@
     if (!EMAIL_RE.test(email)) { champ('email', t('auth.err_enter_valid_email', 'Entrez une adresse email valide.')); $('email').focus(); return; }
 
     var relacher = occuper($('submit'), t('auth.forgot_submit_loading', 'Envoi…'));
-    // Volontairement a la racine : c'est l'URL autorisee cote Supabase Auth
-    // (liste de redirections). Une URL /xx/ non autorisee ferait retomber le
-    // lien du mail sur l'accueil et casserait la reinitialisation. La page
-    // racine reprend la langue memorisee (localStorage iashark_lang).
-    var redirection = new URL('/reinitialiser-mot-de-passe.html', location.origin).href;
+    // Page du repertoire courant (/gb/, /mx/, /en/...) : la racine redirige
+    // desormais en 301 vers /fr/, un visiteur non francais aurait atterri sur
+    // la page francaise (audit QA 14/09/2026).
+    // PREREQUIS COTE SUPABASE (Auth > URL Configuration > Redirect URLs) :
+    // autoriser https://iashark.com/*/reinitialiser-mot-de-passe.html. Sans
+    // cette entree, Supabase ignore redirectTo et renvoie sur la Site URL :
+    // aucun repli n'est possible cote navigateur (la liste est verifiee par
+    // le serveur d'authentification au moment de l'envoi du mail).
+    var redirection = new URL(lienReinitialisation(), location.origin).href;
     try {
       await sb.auth.resetPasswordForEmail(email, { redirectTo: redirection });
     } catch (_e) { /* voir ci-dessous */ }
@@ -252,19 +266,42 @@
      le SDK la consomme tout seul. On attend donc d'avoir une session avant
      d'autoriser la saisie : sans elle, updateUser echouerait. */
   async function preparerReinit() {
-    var abonnement = null;
-    var session = await new Promise(function (resolve) {
-      var fini = false;
-      var terminer = function (valeur) { if (fini) return; fini = true; resolve(valeur); };
-      abonnement = sb.auth.onAuthStateChange(function (evt, s) { if (s) terminer(s); });
-      sb.auth.getSession().then(function (r) { if (r.data && r.data.session) terminer(r.data.session); });
-      setTimeout(function () { terminer(null); }, 2500);
-    });
-    if (abonnement && abonnement.data && abonnement.data.subscription) abonnement.data.subscription.unsubscribe();
-    $('chargement').hidden = true;
-    if (!session) { $('lienInvalide').hidden = false; return; }
-    $('formulaire').hidden = false;
-    $('password').focus();
+    // Jamais bloque sur "Verification du lien..." (audit QA 14/09/2026 : /fr/
+    // restait fige) : sans session apres 2,5 s -> lien invalide ; client
+    // Supabase absent ou SDK en erreur -> lien invalide immediatement. Une
+    // session qui arrive plus tard (reseau lent) reaffiche le formulaire.
+    var etat = 'attente', abonnement = null;
+    function arreterEcoute() {
+      try { if (abonnement && abonnement.data && abonnement.data.subscription) abonnement.data.subscription.unsubscribe(); } catch (_e) {}
+    }
+    function montrer(session) {
+      if (etat === 'formulaire') return;
+      if (!session && etat !== 'attente') return;
+      $('chargement').hidden = true;
+      if (session) {
+        etat = 'formulaire';
+        arreterEcoute();
+        $('lienInvalide').hidden = true;
+        $('formulaire').hidden = false;
+        $('password').focus();
+      } else {
+        etat = 'invalide';
+        $('lienInvalide').hidden = false;
+      }
+    }
+    if (!sb || !sb.auth) { montrer(null); return; }
+    setTimeout(function () { montrer(null); }, 2500);
+    setTimeout(arreterEcoute, 30000);
+    try {
+      abonnement = sb.auth.onAuthStateChange(function (evt, s) { if (s) montrer(s); });
+    } catch (_e) {}
+    try {
+      var r = await Promise.race([
+        sb.auth.getSession(),
+        new Promise(function (resolve) { setTimeout(function () { resolve(null); }, 2500); })
+      ]);
+      if (r && r.data && r.data.session) montrer(r.data.session);
+    } catch (_e) { montrer(null); }
   }
 
   async function reinitialiser(e) {

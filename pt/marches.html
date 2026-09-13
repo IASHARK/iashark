@@ -147,11 +147,13 @@ h1 span{color:var(--cyan);}
 <div style="max-width:720px;margin:24px auto 0;padding:0 20px 20px;text-align:center;">
   <div style="font-family:'Space Mono',monospace;font-size:8px;color:rgba(74,101,128,0.5);line-height:2;letter-spacing:1px;">
     <div>⚠️ APOSTAR PODE SER PERIGOSO — JOGUE COM RESPONSABILIDADE · PROIBIDO A MENORES DE 18 ANOS</div>
-    <div>Ajuda (França): <a href="https://www.joueurs-info-service.fr" style="color:rgba(34,211,238,0.4);text-decoration:none;">joueurs-info-service.fr</a> · 09 74 75 13 13</div>
+    <div>Ajuda: <a data-market-helpline="url" href="https://www.gamblingtherapy.org" style="color:rgba(34,211,238,0.4);text-decoration:none;">gamblingtherapy.org</a><span data-market-helpline-if="phone" hidden> · <span data-market-helpline="phone" hidden></span></span></div>
   </div>
 </div>
 
 <script src="/i18n/i18n.js"></script>
+<script src="/lib/match-time.js"></script>
+<script src="/lib/market-labels.js"></script>
 <script>
 // Catalogue statique - reflete lib/market-registry.js (mis a jour le
 // 2026-08-30 avec l'ajout du Player Engine, voir IASHARK_MARKET_REGISTRY.md
@@ -189,17 +191,29 @@ document.getElementById('registryBody').innerHTML=MARKET_REGISTRY.map(function(m
 
 var DATA_QUALITY_LABELS={'Élevée':'ALTA','Moyenne':'MÉDIA','Faible':'BAIXA'};
 var MARKET_KEY_LABELS={over25:'Mais de 2,5 golos',under25:'Menos de 2,5 golos',btts_oui:'Ambas marcam Sim',btts_non:'Ambas marcam Não',dc1x:'DC 1X',dc_x2:'DC X2',victoire_dom:'Vitória casa',victoire_ext:'Vitória fora'};
-function getMarketKey(pariRec){
-  var s=(pariRec||'').toLowerCase();
-  if(s.includes('under 2.5'))return 'under25';
-  if(s.includes('over 2.5'))return 'over25';
-  if(s.includes('btts non')||s.includes('une équipe ne marque'))return 'btts_non';
-  if(s.includes('btts')||s.includes('les deux équipes'))return 'btts_oui';
-  if(s.includes('1x'))return 'dc1x';
-  if(s.includes('x2'))return 'dc_x2';
-  if(s.includes('domicile'))return 'victoire_dom';
-  if(s.includes('exterieur')||s.includes('extérieur'))return 'victoire_ext';
-  return '';
+// Cle de filtre depuis l'IDENTIFIANT du marche (market_id du moteur), jamais
+// depuis un texte libre : l'ancienne recherche de sous-chaine classait
+// "Exterieur moins de 1.5 but" en victoire exterieure (audit QA 14/09/2026).
+// Repli sur pari_rec uniquement par egalite exacte avec un libelle moteur.
+var MARKET_ID_KEYS={'over-25':'over25','under-25':'under25','btts-yes':'btts_oui','btts-no':'btts_non','dc-1x':'dc1x','dc-x2':'dc_x2','home-win':'victoire_dom','away-win':'victoire_ext'};
+var PARI_REC_KEYS={'over 2.5':'over25','under 2.5':'under25','btts oui':'btts_oui','btts non':'btts_non','dc 1x':'dc1x','dc x2':'dc_x2','victoire domicile':'victoire_dom','victoire exterieur':'victoire_ext','victoire extérieur':'victoire_ext'};
+function getMarketKey(m){
+  if(m&&m.market_id)return MARKET_ID_KEYS[m.market_id]||'';
+  return PARI_REC_KEYS[String(m&&m.pari_rec||'').trim().toLowerCase()]||'';
+}
+// Libelle affiche : lib/market-labels.js dans la langue de la page, avec les
+// noms des equipes ; market_id d'abord (meme source que le filtre).
+function marketLabelFor(m){
+  var ml=window.IasharkMarketLabels, eq={home:m.home&&m.home.n,away:m.away&&m.away.n};
+  if(ml&&m.market_id)return (ml.marketIdLabel||ml.marketIdLabelFr)(m.market_id,eq);
+  if(ml&&m.pari_rec)return (ml.marketLabel||ml.marketLabelFr)(m.pari_rec,eq);
+  return MARKET_KEY_LABELS[getMarketKey(m)]||m.pari_rec||'—';
+}
+// Heure du coup d'envoi dans le fuseau du visiteur (lib/match-time.js).
+function heureLocale(m){
+  var mt=window.IasharkMatchTime, loc=(window.I18N&&window.I18N.localeTag)?window.I18N.localeTag():'fr-FR';
+  var h=mt?mt.formatTime(m,loc):'';
+  return h||((m.date||'').split(' ')[1]||'');
 }
 // i18n runtime (repli francais si i18n/i18n.js absent) pour les codes de
 // donnees du Player Engine, jamais affiches bruts.
@@ -263,7 +277,7 @@ function renderMatchMarkets(){
   var mkt=document.getElementById('filterMarket').value;
   var sortBy=document.getElementById('sortMarket').value;
   if(PLAYER_FILTER_MARKET[mkt]){ renderPlayerMarketsTable(PLAYER_FILTER_MARKET[mkt]); return; }
-  var list=allMatchsData.filter(function(m){ return !mkt||getMarketKey(m.pari_rec)===mkt; });
+  var list=allMatchsData.filter(function(m){ return !mkt||getMarketKey(m)===mkt; });
   list=list.slice().sort(function(a,b){
     if(sortBy==='ecart'){
       var ea=parseFloat((a.edge||'0').replace('%',''))||0, eb=parseFloat((b.edge||'0').replace('%',''))||0;
@@ -272,7 +286,7 @@ function renderMatchMarkets(){
     if(sortBy==='qualite'){
       return (b.data_quality_score||0)-(a.data_quality_score||0);
     }
-    return (a.date||'')<(b.date||'')?-1:1;
+    return window.IasharkMatchTime?window.IasharkMatchTime.compareMatches(a,b):((a.date||'')<(b.date||'')?-1:(a.date||'')>(b.date||'')?1:0);
   });
   var wrap=document.getElementById('matchMarketsWrap');
   if(!list.length){
@@ -282,12 +296,12 @@ function renderMatchMarkets(){
   wrap.innerHTML='<table class="mtable"><thead><tr><th>Jogo</th><th>Hora</th><th>Mercado</th><th>Prob. modelo</th><th>Odd</th><th>Diferença</th><th>Qualidade</th></tr></thead><tbody>'
     +list.map(function(m){
       var hn=(m.home&&m.home.n)||'?', an=(m.away&&m.away.n)||'?';
-      var heure=(m.date||'').split(' ')[1]||'';
+      var heure=heureLocale(m);
       var edgeNum=parseFloat((m.edge||'').replace('%',''));
       var edgeCls=isNaN(edgeNum)?'':(edgeNum>0?'gap-pos':'gap-neg');
       var prob=m.model_probability!=null?Math.round(m.model_probability):'—';
       return '<tr><td>'+esc(hn)+' vs '+esc(an)+'</td><td style="font-family:Space Mono,monospace;">'+esc(heure)+'</td>'
-        +'<td>'+esc(MARKET_KEY_LABELS[getMarketKey(m.pari_rec)]||m.pari_rec)+'</td>'
+        +'<td>'+esc(marketLabelFor(m))+'</td>'
         +'<td class="gap-cell">'+prob+'%</td><td class="gap-cell">'+esc(m.cote_rec||'—')+'</td>'
         +'<td class="gap-cell '+edgeCls+'">'+esc(m.edge||'—')+'</td>'
         +'<td style="font-family:Space Mono,monospace;font-size:9px;color:var(--muted);">'+esc(m.data_quality_label?(DATA_QUALITY_LABELS[m.data_quality_label]||m.data_quality_label):'—')+'</td></tr>';

@@ -105,7 +105,27 @@ function confidenceBadge(label){
 }
 // Libelles de repli du view-model (francais) et meteo OpenWeather (demandee
 // en francais par le pipeline, lang=fr) : traduits a l'affichage.
-function nomLigue(i){return i.league.name==='Compétition'?t('match_page.league_fallback','Compétition'):i.league.name;}
+// Nom de competition : config/leagues.json (lib/league-names.js) d'abord, un
+// seul nom par competition sur tout le site ; sinon nom brut des donnees.
+function nomLigue(i,vm){
+  const officiel=vm&&vm._raw&&window.IasharkLeagueNames?window.IasharkLeagueNames.displayName(vm._raw.league_key):null;
+  if(officiel)return officiel;
+  return i.league.name==='Compétition'?t('match_page.league_fallback','Compétition'):i.league.name;
+}
+// Date et heure du coup d'envoi dans la langue ET le fuseau du visiteur
+// (lib/match-time.js : data.json est en heure de Paris). Nom court du fuseau
+// affiche a cote de l'heure. Repli : valeurs brutes du view-model.
+function dateHeure(vm){
+  const mt=window.IasharkMatchTime,raw=vm._raw;
+  if(mt&&raw&&mt.matchDate(raw))return{date:mt.formatDate(raw,localeTag()),time:mt.formatTime(raw,localeTag(),{zone:true})};
+  return{date:vm.identity.date,time:vm.identity.time};
+}
+// "21C" (OpenWeather via le pipeline) -> "21 °C" au format de la langue.
+function temperature(v){
+  const m=String(v==null?'':v).match(/-?\d+(?:[.,]\d+)?/);
+  if(!m)return String(v==null?'':v);
+  return `${Number(m[0].replace(',','.')).toLocaleString(localeTag(),{maximumFractionDigits:0})} °C`;
+}
 const METEO_CLES={
   'ciel dégagé':'clear_sky','peu nuageux':'few_clouds','partiellement nuageux':'scattered_clouds','nuageux':'broken_clouds',
   'couvert':'overcast','légère pluie':'light_rain','pluie modérée':'moderate_rain','forte pluie':'heavy_rain',
@@ -168,11 +188,11 @@ function probBar(vm){
 }
 
 function hero(vm){
-  const i=vm.identity,s=i.standings||{};
+  const i=vm.identity,s=i.standings||{},dh=dateHeure(vm);
   return `<section class="card hero reveal">
     <div class="hero-top">
-      <div class="hero-league">${img(i.league.logo,nomLigue(i))}<span>${esc(nomLigue(i))}</span></div>
-      <span class="hero-time">${esc(i.date||t('match_page.date_tbc','Date à confirmer'))} · ${esc(i.time||'—')}${vm.model.available?` · <span class="ready"><i></i>${esc(t('match_page.analysis_available','Analyse disponible'))}</span>`:''}</span>
+      <div class="hero-league">${img(i.league.logo,nomLigue(i,vm))}<span>${esc(nomLigue(i,vm))}</span></div>
+      <span class="hero-time">${esc(dh.date||t('match_page.date_tbc','Date à confirmer'))} · ${esc(dh.time||'—')}${vm.model.available?` · <span class="ready"><i></i>${esc(t('match_page.analysis_available','Analyse disponible'))}</span>`:''}</span>
     </div>
     <div class="hero-teams">
       <div class="hero-team">${img(i.home.logo,i.home.name)}<b>${esc(i.home.name)}</b>${teamMeta(s.home)}</div>
@@ -180,7 +200,7 @@ function hero(vm){
       <div class="hero-team">${img(i.away.logo,i.away.name)}<b>${esc(i.away.name)}</b>${teamMeta(s.away)}</div>
     </div>
     ${probBar(vm)}
-    ${vm.conditions.venue||vm.conditions.weather?`<div class="hero-venue">${vm.conditions.venue?`<span><svg viewBox="0 0 24 24"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.4"/></svg>${esc(vm.conditions.venue)}</span>`:''}${vm.conditions.weather?`<span>${cardIcon('cloud')}${esc(vm.conditions.weather.temperature)}${meteo(vm.conditions.weather.description)?' · '+esc(meteo(vm.conditions.weather.description)):''}</span>`:''}</div>`:''}
+    ${vm.conditions.venue||vm.conditions.weather?`<div class="hero-venue">${vm.conditions.venue?`<span><svg viewBox="0 0 24 24"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.4"/></svg>${esc(vm.conditions.venue)}</span>`:''}${vm.conditions.weather?`<span>${cardIcon('cloud')}${esc(temperature(vm.conditions.weather.temperature))}${meteo(vm.conditions.weather.description)?' · '+esc(meteo(vm.conditions.weather.description)):''}</span>`:''}</div>`:''}
   </section>`;
 }
 
@@ -959,6 +979,7 @@ function bindSticky(){
 
 function render(raw){
   const vm=IasharkMatchViewModel.buildMatchViewModel(raw);
+  vm._raw=raw;
   document.title=`${vm.identity.home.name} vs ${vm.identity.away.name} — IASHARK`;
   // ORDRE DE LECTURE, fixe par l'utilisateur le 03/09/2026. Une seule
   // colonne : la page se lit comme un dossier, de haut en bas, au lieu de
@@ -1036,21 +1057,23 @@ function gateCard(vm,opts){
 }
 function renderAuthWall(raw){
   const vm=IasharkMatchViewModel.buildMatchViewModel(raw);
+  vm._raw=raw;
   document.title=`${vm.identity.home.name} vs ${vm.identity.away.name} — IASHARK`;
   root.innerHTML=gateCard(vm,{
     title:t('match_page.gate_free_title','Match gratuit du jour'),
-    text:t('match_page.gate_free_text','Ce match est gratuit, mais il faut un compte IASHARK (inscription ou connexion) pour voir l’analyse complete.'),
+    text:t('match_page.gate_free_text','Ce match est gratuit, mais il faut un compte IASHARK gratuit (inscription ou connexion) pour voir l’analyse complète.'),
     href:lien('compte.html'),
-    cta:t('match_page.gate_free_cta','Se connecter / Creer un compte')
+    cta:t('match_page.gate_free_cta','Se connecter / Créer un compte')
   });
   bindMotion();
 }
 function renderProWall(raw){
   const vm=IasharkMatchViewModel.buildMatchViewModel(raw);
+  vm._raw=raw;
   document.title=`${vm.identity.home.name} vs ${vm.identity.away.name} — IASHARK`;
   root.innerHTML=gateCard(vm,{
-    title:t('match_page.gate_pro_title','Analyse reservee aux membres Pro'),
-    text:t('match_page.gate_pro_text','Le marche recommande, la confiance du modele et l’analyse complete de ce match sont reserves aux membres Pro. Le match du jour, lui, reste gratuit.'),
+    title:t('match_page.gate_pro_title','Analyse réservée aux membres Pro'),
+    text:t('match_page.gate_pro_text','Le marché recommandé, la confiance du modèle et l’analyse complète de ce match sont réservés aux membres Pro. Le match du jour, lui, reste gratuit.'),
     href:lien('abonnement.html'),
     cta:t('match_page.gate_pro_cta','Devenir Pro')
   });
@@ -1067,7 +1090,21 @@ function traduireShellSeo(){
     el.textContent=ml.marketLabel(el.getAttribute('data-market-label'),{home:el.getAttribute('data-home')||undefined,away:el.getAttribute('data-away')||undefined});
   });
 }
+// "← Retour" : retour arriere seulement si le visiteur vient d'une page du
+// site ; arrive par un lien externe (moteur de recherche, partage), il est
+// renvoye vers l'accueil de sa version du site - jamais hors du site.
+function bindBackLink(){
+  document.querySelectorAll('[data-back-link]').forEach(el=>{
+    el.setAttribute('href',lien(''));
+    el.addEventListener('click',ev=>{
+      let memeSite=false;
+      try{memeSite=!!document.referrer&&new URL(document.referrer).origin===location.origin;}catch(e){}
+      if(memeSite&&history.length>1){ev.preventDefault();history.back();}
+    });
+  });
+}
 async function init(){
+  bindBackLink();
   try{
     // Dictionnaire i18n charge (et applique aux elements data-i18n de la
     // coquille HTML) AVANT tout rendu, pour que labels et nombres sortent

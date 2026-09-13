@@ -28,6 +28,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <link rel="stylesheet" href="/assets/tailwind.css">
 <link rel="stylesheet" href="/assets/player-page.css">
+<link rel="stylesheet" href="/assets/lang-switcher.css">
 <link rel="stylesheet" href="/assets/bottom-navigation.css">
 </head>
 <body class="bg-page pb-24 text-ink antialiased">
@@ -35,7 +36,8 @@
 <header class="border-b border-hairline">
   <div class="mx-auto flex h-14 w-full max-w-[1240px] items-center gap-4 px-4 sm:px-6">
     <a href="/gb/" aria-label="IASHARK, home" data-i18n-attr="aria-label:site_header.aria_home"><img src="/assets/iashark-logo.png" alt="IASHARK" class="h-7 w-auto object-contain"></a>
-    <span class="ml-auto" id="authHeaderSlot"><a class="rounded-lg border border-hairline px-3 py-1.5 text-[12.5px] font-semibold transition hover:border-cyan/40" href="/gb/connexion.html" data-i18n="match_page.shell_login">Log in</a></span>
+    <span class="lang-switch-slot ml-auto" id="langSwitchSlot"></span>
+    <span id="authHeaderSlot"><a class="rounded-lg border border-hairline px-3 py-1.5 text-[12.5px] font-semibold transition hover:border-cyan/40" href="/gb/connexion.html" data-i18n="match_page.shell_login">Log in</a></span>
   </div>
 </header>
 
@@ -70,7 +72,7 @@
 </main>
 
 <footer class="mx-auto mt-12 w-full max-w-[1240px] border-t border-hairline px-4 py-8 sm:px-6">
-  <p class="max-w-[80ch] text-[12.5px] leading-relaxed text-soft"><span data-i18n="player_page.footer_disclaimer">Statistical information, never a guaranteed result. Sports betting carries a risk of financial loss and addiction. Over-18s only.</span> <span data-helpline-row><span data-i18n="match_page.shell_help_label">Help:</span> <a data-market-helpline="url" href="https://www.joueurs-info-service.fr" class="text-cyan hover:underline">joueurs-info-service.fr</a> · <span data-market-helpline="phone">09 74 75 13 13</span></span></p>
+  <p class="max-w-[80ch] text-[12.5px] leading-relaxed text-soft"><span data-i18n="player_page.footer_disclaimer">Statistical information, never a guaranteed result. Sports betting carries a risk of financial loss and addiction. Over-18s only.</span> <span data-helpline-row><span data-i18n="match_page.shell_help_label">Help:</span> <a data-market-helpline="url" href="https://www.begambleaware.org" class="text-cyan hover:underline">begambleaware.org</a><span data-market-helpline-if="phone"> · <span data-market-helpline="phone">0808 8020 133</span></span></span></p>
 </footer>
 
 <nav class="bottom-nav" aria-label="Navigation principale"><a href="/gb/"><span>&#8962;</span><b>Accueil</b></a><a href="/gb/pro.html"><span>&#9734;</span><b>Outils</b></a><a href="/en/blog/"><span>&#9636;</span><b>Blog</b></a><a href="/gb/compte.html"><span>&#9817;</span><b>Compte</b></a></nav>
@@ -84,6 +86,8 @@
 <script src="/player-page.js"></script>
 <script src="/auth-header.js"></script>
 <script>IasharkAuthHeader.mount('#authHeaderSlot');</script>
+<script src="/lang-switcher.js"></script>
+<script>IasharkLangSwitcher.mount('#langSwitchSlot');</script>
 <script src="/site-prefs.js"></script>
 <script src="/bottom-navigation.js"></script>
 </body>

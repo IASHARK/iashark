@@ -275,5 +275,37 @@ footer p{font-family:"JetBrains Mono",monospace;font-size:9px;color:var(--muted)
 
 <script src="/site-header.js"></script>
 <script src="/site-prefs.js"></script>
-<script src="/bottom-navigation.js"></script></body>
+<script src="/bottom-navigation.js"></script><script>
+/* gb / za : le blog anglais est partage avec /en/. Les liens vers les pages du
+   site (accueil, abonnement, outils, compte, pages legales) suivent la version
+   memorisee du visiteur (localStorage iashark_dir = gb | za, pose par i18n.js)
+   pour qu'il reste dans son marche (prix, clauses). Les href statiques /en/
+   restent le repli sans JavaScript. Les liens du blog restent en /en/blog/. */
+(function(){
+  var d;try{d=localStorage.getItem('iashark_dir');}catch(e){}
+  if(d!=='gb'&&d!=='za')return;
+  function map(h){
+    if(!h)return null;
+    var abs=h.indexOf('https://iashark.com/en/')===0;
+    if(!abs&&h.indexOf('/en/')!==0)return null;
+    var p=abs?h.slice(19):h;
+    if(/^\/en\/blog(\/|$)/.test(p))return null;
+    return (abs?'https://iashark.com':'')+'/'+d+p.slice(3);
+  }
+  function fix(){
+    var links=document.querySelectorAll('a[href]');
+    for(var i=0;i<links.length;i++){var n=map(links[i].getAttribute('href'));if(n)links[i].setAttribute('href',n);}
+  }
+  fix();
+  document.addEventListener('click',function(ev){
+    var a=ev.target&&ev.target.closest?ev.target.closest('a[href]'):null;
+    var n=a&&map(a.getAttribute('href'));if(n)a.setAttribute('href',n);
+  },true);
+  if(window.MutationObserver&&document.body){
+    var mo=new MutationObserver(fix);mo.observe(document.body,{childList:true,subtree:true});
+    setTimeout(function(){mo.disconnect();},10000);
+  }
+})();
+</script>
+</body>
 </html>

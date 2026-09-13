@@ -77,15 +77,58 @@
     }catch(e){ return ""; }
   }
 
+  // Locale imposee par la page : <meta name="iashark-force-locale" content="fr">
+  // (blog FR racine, pages editoriales sans prefixe). null sinon.
+  function forcedLocale(){
+    try{
+      var doc = global.document;
+      var el = doc && doc.querySelector && doc.querySelector('meta[name="iashark-force-locale"]');
+      var v = el && el.getAttribute("content");
+      return v && SUPPORTED.indexOf(v) !== -1 ? v : null;
+    }catch(e){ return null; }
+  }
+  // <html lang> explicite d'une page statique sans prefixe (blog FR,
+  // /match/<id>.html) : "fr" -> "fr", "es-MX" -> "es-mx". null sinon.
+  function declaredLocale(){
+    try{
+      var doc = global.document;
+      var lang = doc && doc.documentElement && doc.documentElement.getAttribute("lang");
+      if (!lang) return null;
+      var l = String(lang).toLowerCase();
+      if (SUPPORTED.indexOf(l) !== -1) return l;
+      var base = l.split("-")[0];
+      return SUPPORTED.indexOf(base) !== -1 ? base : null;
+    }catch(e){ return null; }
+  }
+  var FORCED_LOCALE = CURRENT_DIR ? null : forcedLocale();
+
   function detectLocale(){
     if (CURRENT_DIR) return DIR_BY_CODE[CURRENT_DIR].locale;
-    // Page sans prefixe (ex: /match/12345.html, /blog/...) : dernier choix
-    // explicite de l'utilisateur, sinon FR par defaut.
+    // Page sans prefixe (ex: /match/12345.html, /blog/...). Ordre (audit QA
+    // 14/09/2026 : le blog FR passait en espagnol apres une visite de /mx/) :
+    //   1. marqueur <meta name="iashark-force-locale"> ;
+    //   2. <html lang> explicite : le contenu statique de la page est redige
+    //      dans cette langue, jamais habille d'une autre interface ;
+    //   3. dernier choix memorise, sinon FR.
+    if (FORCED_LOCALE) return FORCED_LOCALE;
+    var declared = declaredLocale();
+    if (declared) return declared;
     try{
       var saved = global.localStorage.getItem("iashark_lang");
       if (saved && SUPPORTED.indexOf(saved) !== -1) return saved;
     }catch(e){}
     return DEFAULT_LOCALE;
+  }
+
+  // Repertoire cible des liens internes. Page prefixee : son repertoire.
+  // Page sans prefixe (les pages racine redirigent vers /fr/ en production) :
+  // repertoire de la locale imposee (blog FR -> /fr/), sinon la version
+  // memorisee du visiteur (/match/<id>.html -> /gb/ apres une visite de
+  // /gb/), sinon /fr/. Jamais un lien racine qui redirige.
+  function linkDir(){
+    if (CURRENT_DIR) return CURRENT_DIR;
+    if (FORCED_LOCALE) return LOCALE_DIR[FORCED_LOCALE] || DEFAULT_DIR;
+    return savedDir() || DEFAULT_DIR;
   }
 
   function splitSuffix(p){
@@ -153,13 +196,20 @@
     return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
   }
 
+  // Cache de la PROMESSE (pas seulement du resultat) : match-page.js,
+  // bottom-navigation.js et la page appellent init() quasi simultanement ;
+  // sans ce cache, le dictionnaire etait telecharge 3 a 4 fois par page.
+  // Un echec n'est pas memorise (nouvel essai au prochain appel).
   var dictCache = {};
   function loadDict(locale){
-    if (dictCache[locale]) return Promise.resolve(dictCache[locale]);
-    return fetch("/i18n/dict/" + locale + ".json").then(function(r){
+    if (dictCache[locale]) return dictCache[locale];
+    var p = fetch("/i18n/dict/" + locale + ".json").then(function(r){
       if (!r.ok) throw new Error("dict fetch failed: " + r.status);
       return r.json();
-    }).then(function(d){ dictCache[locale] = d; return d; });
+    });
+    dictCache[locale] = p;
+    p.catch(function(){ if (dictCache[locale] === p) delete dictCache[locale]; });
+    return p;
   }
 
   var LOCALE = detectLocale();
@@ -181,11 +231,14 @@
 
     localizePath: localizePath,
 
-    // I18N.href("compte.html#plan") -> "/gb/compte.html#plan" (page /gb/),
-    // "/compte.html" (page racine). Ne depend pas de `this`.
-    href: function(page){ return hrefFor(page, CURRENT_DIR); },
+    // I18N.href("compte.html#plan") -> "/gb/compte.html#plan" (page /gb/) ;
+    // page sans prefixe : repertoire de linkDir() ("/fr/compte.html#plan"
+    // sur le blog FR, "/gb/compte.html#plan" sur /match/<id>.html pour un
+    // visiteur de /gb/). Ne depend pas de `this`.
+    href: function(page){ return hrefFor(page, linkDir()); },
     hrefFor: hrefFor,
-    blogHref: function(){ return hrefFor("blog.html", CURRENT_DIR); },
+    linkDir: linkDir,
+    blogHref: function(){ return hrefFor("blog.html", linkDir()); },
     switchHref: function(targetDir){ return switchHref(targetDir); },
 
     // Options du selecteur, dans l'ordre : Français, English (UK), English
@@ -254,7 +307,11 @@
       root.querySelectorAll("[data-i18n-href-locale]").forEach(function(el){
         var href = el.getAttribute("href");
         if (!href || href.charAt(0) !== "/") return;
-        var dir = CURRENT_DIR || LOCALE_DIR[self.locale] || DEFAULT_DIR;
+        var dir = linkDir();
+        // Lien deja prefixe (/fr/pro.html ecrit en dur dans une page statique
+        // sans prefixe) : on le re-cible vers le repertoire du visiteur.
+        var m = href.match(/^\/([a-z]{2})(\/.*)?$/);
+        if (m && isDir(m[1])) href = m[2] || "/";
         el.setAttribute("href", hrefFor(href, dir));
       });
     },
@@ -282,9 +339,14 @@
       // Memorise la langue (et le repertoire) reellement consultes - la
       // detection pays/navigateur ne sert que sur la racine "/", geree par la
       // redirection statique (_redirects), jamais ici.
+      // Seule une page PREFIXEE memorise : une page sans prefixe (blog FR,
+      // /match/<id>.html) affiche sa propre langue et ne doit jamais ecraser
+      // la version choisie par le visiteur.
       try{
-        global.localStorage.setItem("iashark_lang", this.locale);
-        if (CURRENT_DIR) global.localStorage.setItem("iashark_dir", CURRENT_DIR);
+        if (CURRENT_DIR) {
+          global.localStorage.setItem("iashark_lang", this.locale);
+          global.localStorage.setItem("iashark_dir", CURRENT_DIR);
+        }
       }catch(e){}
       return loadDict(this.locale).then(function(d){
         self.dict = d;

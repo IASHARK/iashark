@@ -63,7 +63,7 @@
       var lib = window.IasharkCheckoutConsent;
       var box = document.getElementById("checkoutConsent");
       resolve(lib && box ? lib.mount(box, {
-        buttons: ["subscribeProBtn", "subscribeEdgeBtn", "subscribeAnnualBtn"].map(function (id) { return document.getElementById(id); })
+        buttons: ["subscribeProBtn"].map(function (id) { return document.getElementById(id); }).filter(Boolean)
       }) : null);
     }
     if (window.IasharkCheckoutConsent) return mountIt();
@@ -92,7 +92,9 @@
         return;
       }
       if (!consent.check()) {
-        show(consent.text("error_required"), true);
+        // Le bloc de consentement affiche deja le message d'erreur : un seul
+        // message a l'ecran (audit QA 14/09/2026).
+        show("", false);
         return;
       }
       if (!window.IasharkApp) {
@@ -144,8 +146,10 @@
           return;
         }
         if (data && data.code === "consent_required") {
-          consent.check();
-          show(data.message || consent.text("error_required"), true);
+          // Cases decochees : le bloc affiche son message. Cases cochees mais
+          // refus serveur (version des CGV...) : message du serveur ici.
+          if (consent.check()) show(data.message || consent.text("error_required"), true);
+          else show("", false);
           btn.disabled = false;
           return;
         }
@@ -168,7 +172,9 @@
     });
   }
 
+  // Seul Pro est propose (audit QA 14/09/2026) : les cartes Edge et Annual
+  // Edge sont retirees de la page tant que create-checkout-session ne connait
+  // qu'un prix Stripe par marche (voir KNOWN LIMITATION ci-dessus). Aucun
+  // bouton Edge/Annual n'est cable : rien ne peut facturer le mauvais plan.
   wireCheckout("subscribeProBtn", "proMsg", "pro");
-  wireCheckout("subscribeEdgeBtn", "edgeMsg", "edge");
-  wireCheckout("subscribeAnnualBtn", "annualMsg", "annual_edge");
 })();

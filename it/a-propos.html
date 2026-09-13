@@ -172,7 +172,7 @@ footer .foot-links a{color:rgba(34,211,238,0.6);}
     <div class="sec-lbl" data-i18n="about_page.legal_label">AVVERTENZE IMPORTANTI</div>
     <h2 data-i18n="about_page.legal_title">Cosa è importante sapere</h2>
     <ul class="legal-list">
-      <li data-i18n-html="about_page.legal_not_operator"><b>IASHARK non è un operatore di scommesse sportive.</b> Non accettiamo puntate, non gestiamo conti di gioco e non effettuiamo alcun incasso o pagamento di vincite. Per scommettere realmente occorre passare da un operatore con regolare licenza: in Francia, un operatore autorizzato dall'ANJ, l'autorità francese del gioco.</li>
+      <li data-i18n-html="about_page.legal_not_operator" data-market-legal-operator><b>IASHARK non è un operatore di scommesse sportive.</b> Non accettiamo puntate, non gestiamo conti di gioco e non effettuiamo alcun incasso o pagamento di vincite. Per scommettere realmente occorre passare da un operatore con regolare licenza: in Francia, un operatore autorizzato dall'ANJ, l'autorità francese del gioco.</li>
       <li data-i18n-html="about_page.legal_not_advisor"><b>Non siamo consulenti finanziari, né trader professionisti abilitati, né professionisti delle scommesse sportive.</b> IASHARK è uno strumento di analisi statistica a scopo informativo ed educativo — in nessun caso un servizio di consulenza in materia di investimenti, trading o scommesse.</li>
       <li data-i18n-html="about_page.legal_informative"><b>Contenuto esclusivamente informativo.</b> Le analisi, le statistiche, le probabilità e gli indicatori di affidabilità pubblicati qui sono forniti a scopo puramente informativo ed educativo. Non costituiscono né una consulenza finanziaria né una garanzia di risultato.</li>
       <li data-i18n-html="about_page.legal_no_liability"><b>Non potrà essere attribuita alcuna responsabilità</b> in caso di perdite finanziarie derivanti da decisioni prese sulla base dei contenuti di questo sito. Ogni utente è l'unico responsabile delle proprie decisioni di gioco e delle relative conseguenze.</li>
@@ -185,8 +185,8 @@ footer .foot-links a{color:rgba(34,211,238,0.6);}
     <div class="help-box">
       <div class="htitle" data-i18n="about_page.help_title">🦈 Giocare deve restare un piacere</div>
       <p data-i18n="about_page.help_text">In caso di difficoltà con il gioco, per sé o per una persona cara, esiste un aiuto gratuito e anonimo.</p>
-      <div class="phone" data-market-helpline="phone">09 74 75 13 13</div>
-      <div class="sub" id="helpNameMarket" data-market-helpline="name" hidden></div>
+      <div class="phone" data-market-helpline="phone" hidden></div>
+      <div class="sub" id="helpNameMarket" data-market-helpline="name">Gambling Therapy</div>
       <div class="sub" id="helpSubFr" data-i18n="about_page.help_sub">JOUEURS-INFO-SERVICE.FR (FRANCIA) · 7 GIORNI SU 7, DALLE 8:00 ALLE 2:00 · CHIAMATA A TARIFFA ORDINARIA</div>
       <p style="margin:12px 0 0"><a href="/it/jeu-responsable.html" data-href="jeu-responsable.html" style="color:inherit;text-decoration:underline" data-i18n="about_page.help_link">Tutte le risorse di aiuto sul gioco responsabile</a></p>
     </div>
@@ -200,11 +200,11 @@ footer .foot-links a{color:rgba(34,211,238,0.6);}
   <p class="foot-links"><a href="/it/mentions-legales.html" data-href="mentions-legales.html" data-i18n="footer.mentions_legales">Note Legali</a> · <a href="/it/cgv.html" data-href="cgv.html" data-i18n="footer.cgv">Termini</a> · <a href="/it/confidentialite.html" data-href="confidentialite.html" data-i18n="footer.confidentialite">Privacy</a> · <a href="/it/cookies.html" data-href="cookies.html" data-i18n="footer.cookies">Cookie</a> · <a href="/it/jeu-responsable.html" data-href="jeu-responsable.html" data-i18n="footer.responsible_gambling">Gioco responsabile</a></p>
 </footer>
 
-<nav class="nav-bottom">
-  <a href="https://iashark.com/it/" class="nav-item"><div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5L12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg></div><div class="nav-lbl">ACCUEIL</div></a>
-  <a href="https://iashark.com/it/pro.html" class="nav-item"><div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.9 6.6L22 9.3l-5 4.9L18.2 22 12 18.3 5.8 22 7 14.2 2 9.3l7.1-.7z"/></svg></div><div class="nav-lbl">OUTILS</div></a>
-  <a href="/it/blog/" class="nav-item"><div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg></div><div class="nav-lbl">BLOG</div></a>
-  <a href="https://iashark.com/it/compte.html" class="nav-item"><div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg></div><div class="nav-lbl">COMPTE</div></a>
+<nav class="nav-bottom" aria-label="Navigazione principale" data-i18n-attr="aria-label:geo.nav.aria_label">
+  <a href="https://iashark.com/it/" class="nav-item"><div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5L12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg></div><div class="nav-lbl" data-i18n="nav.home">HOME</div></a>
+  <a href="https://iashark.com/it/pro.html" class="nav-item"><div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.9 6.6L22 9.3l-5 4.9L18.2 22 12 18.3 5.8 22 7 14.2 2 9.3l7.1-.7z"/></svg></div><div class="nav-lbl" data-i18n="nav.tools">STRUMENTI</div></a>
+  <a href="/it/blog/" class="nav-item"><div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg></div><div class="nav-lbl" data-i18n="nav.guides">BLOG</div></a>
+  <a href="https://iashark.com/it/compte.html" class="nav-item"><div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg></div><div class="nav-lbl" data-i18n="nav.account">ACCOUNT</div></a>
 </nav>
 
 <script src="/i18n/i18n.js"></script>
@@ -214,10 +214,26 @@ footer .foot-links a{color:rgba(34,211,238,0.6);}
   // Le detail "Joueurs Info Service, 7j/7..." est propre au marche FR : sur
   // gb/za/mx, lib/market-config.js affiche le nom et le numero de la ligne
   // d'aide du marche (ou masque le numero s'il n'y en a pas de confirme).
+  // Mention "operateur agree" : l'ANJ ne vaut que pour la France et l'UE.
+  // Sur /gb/ /za/ /mx/, la cle about_page.legal_not_operator_market.<marche>
+  // (Gambling Commission / licence provinciale / permis SEGOB) remplace la cle
+  // generique AVANT que le dictionnaire ne soit applique (site-prefs.js lit
+  // data-i18n-html au chargement du dictionnaire). Le texte fige par le build
+  // reste le texte generique tant que scripts/build-locales.js ne gere pas
+  // [data-market-legal-operator] (demande transmise a F1).
+  (function(){
+    var m=window.IASHARK_MARKET, code=m&&m.code;
+    if(code!=='gb'&&code!=='za'&&code!=='mx')return;
+    var el=document.querySelector('[data-market-legal-operator]');
+    if(el)el.setAttribute('data-i18n-html','about_page.legal_not_operator_market.'+code);
+  })();
   function marche(){
     var m=window.IASHARK_MARKET;
     if(!m)return;
-    var fr=m.code==='fr', sub=document.getElementById('helpSubFr'), name=document.getElementById('helpNameMarket');
+    // "FR" = la ressource affichee est Joueurs Info Service (/fr/). Les
+    // repertoires /en/ /es/ /de/ /it/ /pt/ partagent le marche EUR mais
+    // affichent Gambling Therapy (config/markets.json#_helplines).
+    var h=m.helpline, fr=!!(h&&/joueurs-info-service/.test(h.url||'')), sub=document.getElementById('helpSubFr'), name=document.getElementById('helpNameMarket');
     if(sub)sub.hidden=!fr;
     if(name&&fr)name.hidden=true;
   }

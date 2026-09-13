@@ -210,7 +210,7 @@
       + signe(r.edge, 1) + '<span class="ml-1 text-[10px] font-bold tracking-normal text-soft">' + esc(points()) + '</span></div>';
     var titre = reel ? esc(r.match) : esc(r.match);
     var action = reel && r.id
-      ? '<a href="' + esc(lien('match/' + r.id + '.html')) + '" class="shrink-0 rounded-lg border border-hairline px-3 py-1.5 text-[12.5px] font-semibold text-ink transition hover:border-cyan/40 hover:text-cyan">' + esc(t('tools_page.scan_view_btn', 'Voir')) + '</a>'
+      ? '<a href="' + esc(lien('match.html?id=' + encodeURIComponent(r.id))) + '" class="shrink-0 rounded-lg border border-hairline px-3 py-1.5 text-[12.5px] font-semibold text-ink transition hover:border-cyan/40 hover:text-cyan">' + esc(t('tools_page.scan_view_btn', 'Voir')) + '</a>'
       : '<span class="shrink-0 text-[12.5px] text-soft/60">—</span>';
     return '<li class="flex items-center gap-3 border-t border-hairline px-1 py-3 first:border-t-0 sm:gap-4">'
       + edge

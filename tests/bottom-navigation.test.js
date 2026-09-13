@@ -45,3 +45,32 @@ test('la navigation partagée contient exactement les quatre destinations valid�
   assert.doesNotMatch(js,/label:'Marchés'/);
   assert.match(js,/aria-current/);
 });
+
+// Audit QA 14/09/2026 : sur /en/blog/guides/*, /abonnement et /404 la barre
+// s'affichait en francais quand i18n.js arrivait apres ce script. Les libelles
+// portent data-i18n, le script attend I18N, et le repli par langue est une
+// copie exacte du dictionnaire.
+test('la navigation partagée ne dépend pas de l\'ordre de chargement d\'i18n.js',()=>{
+  const js=fs.readFileSync(path.join(root,'bottom-navigation.js'),'utf8');
+  assert.match(js,/data-i18n="'\+item\.key\+'"/);
+  assert.match(js,/data-i18n-attr','aria-label:geo\.nav\.aria_label'/);
+  assert.match(js,/function waitI18n\(\)/);
+  const m=js.match(/var FALLBACK=(\{[\s\S]*?\n  \});/);
+  assert.ok(m,'table FALLBACK introuvable');
+  const FALLBACK=Function('return '+m[1])();
+  for(const locale of ['en','es','es-mx','de','it','pt']){
+    const dict=JSON.parse(fs.readFileSync(path.join(root,'i18n/dict',locale+'.json'),'utf8'));
+    const fb=FALLBACK[locale];
+    assert.ok(fb,locale+' : repli absent');
+    for(const k of ['home','tools','guides','account'])assert.equal(fb[k],dict.nav[k],locale+' nav.'+k);
+    assert.equal(fb.aria,dict.geo.nav.aria_label,locale+' geo.nav.aria_label');
+  }
+});
+
+test('les barres statiques de repli portent les clés nav.* (traduites par le build)',()=>{
+  for(const file of ['abonnement.html','a-propos.html','compte.html','blog.html']){
+    const html=fs.readFileSync(path.join(root,file),'utf8');
+    for(const key of ['nav.home','nav.tools','nav.guides','nav.account'])assert.match(html,new RegExp('data-i18n="'+key.replace('.','\\.')+'"'),file+' '+key);
+    assert.doesNotMatch(html,/<b>(Accueil|Outils|Compte)<\/b>|nav-lbl">(ACCUEIL|OUTILS|COMPTE)</,file+' : libellé FR sans data-i18n');
+  }
+});

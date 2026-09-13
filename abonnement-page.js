@@ -60,7 +60,8 @@
     if(consent)box.addEventListener('change',function(){if(consent.isValid()&&output.classList.contains('error'))message('',false);});
     button.onclick=async function(){
       if(!consent){message(t('checkout_consent.error_load','Les conditions de paiement n’ont pas pu être chargées. Rechargez la page.'),true);return;}
-      if(!consent.check()){message(consent.text('error_required'),true);return;}
+      // Le bloc de consentement affiche deja son message d'erreur : un seul message a l'ecran.
+      if(!consent.check()){message('',false);return;}
       var current=await IasharkApp.context();
       if(!current.user){location.href=localHref('compte.html#plan');return;}
       button.disabled=true;message(t('pricing_page.checkout_opening','Ouverture du paiement sécurisé…'));
@@ -72,8 +73,7 @@
         var data=await response.json();
         if(data.url){location.href=data.url;return;}
         if(data&&data.code==='consent_required'){
-          consent.check();
-          message(data.message||consent.text('error_required'),true);
+          if(consent.check())message(data.message||consent.text('error_required'),true);else message('',false);
         }else if(data&&data.processed===false&&data.reason==='market_not_configured'){
           message(t('pricing_page.checkout_market_not_configured','Le paiement n’est pas encore ouvert pour ce pays. Aucun montant n’a été prélevé.'),true);
         }else{

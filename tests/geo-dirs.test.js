@@ -108,7 +108,10 @@ test("I18N.href : chaque page publique reste dans le repertoire courant", () => 
 
   var root = loadI18n("/blog/guides/x.html");
   assert.equal(root.dir, "");
-  assert.equal(root.href("compte.html"), "/compte.html");
+  // Page sans prefixe : jamais un lien racine (redirige vers /fr/ en
+  // production) - version memorisee du visiteur, sinon /fr/ (audit QA 14/09/2026).
+  assert.equal(root.href("compte.html"), "/fr/compte.html");
+  assert.equal(loadI18n("/match/123.html", "", { iashark_dir: "gb" }).href("pro.html"), "/gb/pro.html");
 });
 
 test("selecteur langue/pays : 9 options, meme page dans le repertoire cible", () => {
@@ -163,7 +166,22 @@ test("lib/market-config.js : donnees synchronisees depuis config/markets.json, p
   assert.ok(Object.prototype.hasOwnProperty.call(price.attrs, "data-market-price-unavailable"));
   assert.match(pro.textContent, /19[.,]95/);
   assert.equal(cur.textContent, "EUR");
-  assert.equal(help.textContent, "Joueurs Info Service · 09 74 75 13 13");
+  // /en/ /es/ /de/ /it/ /pt/ : ressource internationale (config/markets.json
+  // #_helplines.international), sans numero ; /fr/ : Joueurs Info Service.
+  assert.equal(help.textContent, "Gambling Therapy");
+  var frHelp = fakeEl("SPAN", { "data-market-helpline": "" });
+  var frPhone = fakeEl("SPAN", { "data-market-helpline": "phone" });
+  var frIf = fakeEl("SPAN", { "data-market-helpline-if": "phone" });
+  loadMarket("/fr/").IASHARK_MARKET.apply(fakeRoot([frHelp, frPhone, frIf]));
+  assert.equal(frHelp.textContent, "Joueurs Info Service · 09 74 75 13 13");
+  assert.equal(frPhone.textContent, "09 74 75 13 13");
+  assert.equal(frIf.hidden, false);
+  var enPhone = fakeEl("SPAN", { "data-market-helpline": "phone" });
+  var enIf = fakeEl("SPAN", { "data-market-helpline-if": "phone" });
+  en.apply(fakeRoot([enPhone, enIf]));
+  assert.equal(enPhone.hidden, true, "pas de numero invente pour la ressource internationale");
+  assert.equal(enIf.hidden, true);
+  assert.equal(mx.formatPrice("pro"), "MX$199", "MXN jamais affiche comme un simple $ (ambigu avec l'USD)");
   assert.equal(legal.attrs.href, "/en/cgv.html");
 
   var mxHelp = fakeEl("A", { "data-market-helpline": "phone" });
@@ -254,7 +272,17 @@ test("landings pays gb/za/mx : aucun historique ni 'public record', liens dans l
       assert.ok(h.indexOf("/" + d + "/") === 0 || /^\/(en|es|mx)\/blog\//.test(h), d + "/landing.html : lien hors repertoire " + h);
     });
     assert.match(html, /<script src="\/lib\/market-config\.js"><\/script>/, d);
-    ["free", "pro", "edge", "annual_edge"].forEach(function (k) { assert.match(html, new RegExp('data-market-price="' + k + '"'), d + " " + k); });
+    ["free", "pro"].forEach(function (k) { assert.match(html, new RegExp('data-market-price="' + k + '"'), d + " " + k); });
+    // Audit QA 14/09/2026 : checkout = un seul prix Stripe par marche. Tant que
+    // des prix par plan n'existent pas cote serveur, aucun plan Edge / Annual
+    // Edge (ni prix, ni bouton) n'est propose : rien ne peut facturer le
+    // mauvais plan.
+    ["edge", "annual_edge"].forEach(function (k) { assert.doesNotMatch(visible, new RegExp('data-market-price="' + k + '"'), d + " " + k + " visible"); });
+    assert.doesNotMatch(visible, /subscribe(Edge|Annual)Btn/, d + " : bouton Edge/Annual visible");
+    assert.doesNotMatch(read(d + "/" + d + "-page.js"), /wireCheckout\("subscribe(Edge|Annual)Btn"/, d + " : bouton Edge/Annual encore cable");
+    // Aucune note interne visible (TODO juridique) : commentaire HTML seulement.
+    assert.doesNotMatch(visible, /legal-todo|\[TODO/, d + " : TODO juridique visible");
+    assert.match(html, /<!-- LEGAL REVIEW:/, d + " : information juridique a conserver en commentaire");
     assert.match(html, new RegExp('<meta name="iashark-market" content="' + d + '">'), d);
   });
   assert.match(read("mx/landing.html"), /Liga MX ya está cubierta/);

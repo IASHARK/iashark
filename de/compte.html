@@ -5,7 +5,7 @@
 <meta name="iashark-market" content="fr">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>IASHARK — Mein Konto</title>
-<meta name="description" content="Verwalte dein Konto, dein Tools-Abonnement und deine IASHARK-Einstellungen.">
+<meta name="description" content="Verwalte dein Konto, dein Pro-Abonnement und deine IASHARK-Einstellungen.">
 <meta name="robots" content="noindex,nofollow">
 <link rel="canonical" href="https://iashark.com/de/compte.html">
 <link rel="alternate" hreflang="fr" href="https://iashark.com/fr/compte.html">
@@ -51,9 +51,16 @@
   <span class="sr-only" data-i18n="compte_page.loading_account">Dein Konto wird geladen …</span>
 </div>
 
-<main id="compte" hidden class="mx-auto w-full max-w-[1180px] px-4 pb-28 sm:px-6 lg:pb-16"></main>
+<main id="compte" hidden class="mx-auto w-full max-w-[1180px] px-4 sm:px-6" style="padding-bottom:2rem"></main>
 
-<nav class="bottom-nav"><a href="/de/"><span>⌂</span><b>Accueil</b></a><a href="/de/pro.html"><span>☆</span><b>Outils</b></a><a href="/de/blog/"><span>▤</span><b>Blog</b></a><a class="active" href="/de/compte.html"><span>♙</span><b>Compte</b></a></nav>
+<!-- Avertissement 18+ / jeu responsable, commun a toutes les pages (audit QA
+     14/09/2026). Ligne d'aide du marche remplie par lib/market-config.js
+     ([data-market-helpline]). -->
+<footer class="mx-auto w-full max-w-[1180px] px-4 pb-28 sm:px-6">
+  <p class="text-[12.5px] leading-relaxed text-soft" style="max-width:80ch"><span data-i18n="player_page.footer_disclaimer">Statistische Information, niemals eine Ergebnisgarantie. Sportwetten bergen das Risiko finanzieller Verluste und einer Abhängigkeit. Für Minderjährige verboten.</span> <span data-helpline-row><span data-i18n="match_page.shell_help_label">Hilfe:</span> <a data-market-helpline="url" href="https://www.gamblingtherapy.org" class="text-cyan hover:underline">gamblingtherapy.org</a> · <span data-market-helpline="phone" hidden></span></span></p>
+</footer>
+
+<nav class="bottom-nav" aria-label="Hauptnavigation" data-i18n-attr="aria-label:geo.nav.aria_label"><a href="/de/"><span>⌂</span><b data-i18n="nav.home">START</b></a><a href="/de/pro.html"><span>☆</span><b data-i18n="nav.tools">TOOLS</b></a><a href="/de/blog/"><span>▤</span><b data-i18n="nav.guides">BLOG</b></a><a class="active" href="/de/compte.html"><span>♙</span><b data-i18n="nav.account">KONTO</b></a></nav>
 
 <script src="/app-client.js"></script>
 <script src="/i18n/i18n.js"></script>

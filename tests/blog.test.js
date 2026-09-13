@@ -9,8 +9,11 @@ const lecture = require("../scripts/blog-reading-time.js");
 const RACINE = path.resolve(__dirname, "..");
 const lire = (f) => fs.readFileSync(path.join(RACINE, f), "utf8");
 const blog = lire("blog.html");
-const sitemap = lire("sitemap-fr.xml");
-const workflow = lire(".github/workflows/update-data.yml");
+// Le blog FR est declare avec ses hreflang dans sitemap-fr-i18n.xml
+// (scripts/i18n-sitemaps.js) ; sitemap-fr.xml (pipeline) ne liste plus que les
+// pages match statiques (audit QA 14/09/2026 : doublons retires).
+const sitemap = lire("sitemap-fr-i18n.xml");
+const sitemapsI18n = lire("scripts/i18n-sitemaps.js");
 
 const ARTICLES = fs.readdirSync(path.join(RACINE, "blog", "guides"))
   .filter((f) => f.endsWith(".html") && f !== "index.html");
@@ -59,10 +62,11 @@ test("les articles qui affichent leur duree annoncent la meme que le blog", () =
 test("tous les articles publies et le hub sont dans le sitemap", () => {
   for (const f of ARTICLES) {
     assert.ok(sitemap.includes("/blog/guides/" + f), `${f} manque au sitemap servi`);
-    assert.ok(workflow.includes("/blog/guides/" + f), `${f} manque a la liste du pipeline`);
   }
   assert.ok(sitemap.includes("https://iashark.com/blog.html"), "le hub manque au sitemap servi");
-  assert.ok(workflow.includes("https://iashark.com/blog.html"), "le hub manque a la liste du pipeline");
+  // Le generateur parcourt le blog FR racine (aucune liste figee a maintenir).
+  assert.match(sitemapsI18n, /blog\/guides/, "le generateur de sitemaps i18n ne couvre plus les guides");
+  assert.doesNotMatch(lire(".github/workflows/update-data.yml"), /loc:'https:\/\/iashark\.com\/blog/, "blog en double dans sitemap-fr.xml");
 });
 
 test("le blog reste indexable", () => {

@@ -698,7 +698,8 @@
         return;
       }
       if (!consentement.check()) {
-        retour('msgFacturation', consentement.text('error_required'), 'error');
+        // Le bloc de consentement affiche deja son message : un seul message a l'ecran.
+        retour('msgFacturation', '');
         return;
       }
       consentementPaiement = consentement.payload();
@@ -728,8 +729,8 @@
       if (j.url) { location.href = j.url; return; }
       relacher();
       if (j.code === 'consent_required') {
-        if (consentement) consentement.check();
-        retour('msgFacturation', j.message || tr('checkout_consent.error_required', 'Cochez les cases obligatoires ci-dessus pour continuer vers le paiement.'), 'error');
+        if (consentement && !consentement.check()) retour('msgFacturation', '');
+        else retour('msgFacturation', j.message || tr('checkout_consent.error_required', 'Cochez les cases obligatoires ci-dessus pour continuer vers le paiement.'), 'error');
         return;
       }
       if (j.processed === false && j.reason === 'market_not_configured') {

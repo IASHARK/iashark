@@ -10,17 +10,21 @@
     "cookies": "cookies.html",
     "responsible_gambling": "jeu-responsable.html"
   },
+  "_helplines_readme": "Ressources d'aide au jeu responsable partagees par plusieurs repertoires. Un repertoire de _dirs peut porter \"helpline\": \"<cle>\" pour afficher cette ressource a la place de celle de son marche (lib/market-config.js, scripts/build-locales.js). Utilise par /en/ /es/ /de/ /it/ /pt/ : versions internationales EUR, dont les visiteurs ne sont pas en France - la ligne francaise Joueurs Info Service n'y a pas de sens (audit QA 14/09/2026). phone null = pas de numero : la ligne telephone est masquee, jamais inventee.",
+  "_helplines": {
+    "international": {"name": "Gambling Therapy", "phone": null, "tel": null, "url": "https://www.gamblingtherapy.org", "display": "gamblingtherapy.org", "hours": "free, international (chat, forum)"}
+  },
   "_dirs_readme": "Un repertoire public = une copie complete du site. market = cle de marche ci-dessous (devise/prix/aide/legal), locale = dictionnaire i18n/dict/<locale>.json, htmlLang = <html lang>, hreflang = valeur hreflang, intlLocale = locale Intl pour les prix/dates, blogDir = repertoire du blog traduit (null = blog FR racine), label = libelle du selecteur (ordre des cles = ordre du selecteur), customLanding = landing.html de ce repertoire maintenue a la main (jamais ecrasee par le generateur).",
   "_dirs": {
     "fr": {"market": "fr", "locale": "fr", "htmlLang": "fr", "hreflang": "fr", "intlLocale": "fr-FR", "blogDir": null, "label": "Français"},
     "gb": {"market": "gb", "locale": "en", "htmlLang": "en-GB", "hreflang": "en-GB", "intlLocale": "en-GB", "blogDir": "en", "label": "English (UK)", "customLanding": true},
     "za": {"market": "za", "locale": "en", "htmlLang": "en-ZA", "hreflang": "en-ZA", "intlLocale": "en-ZA", "blogDir": "en", "label": "English (South Africa)", "customLanding": true},
-    "en": {"market": "fr", "locale": "en", "htmlLang": "en", "hreflang": "en", "intlLocale": "en-GB", "blogDir": "en", "label": "English (International)"},
+    "en": {"market": "fr", "locale": "en", "htmlLang": "en", "hreflang": "en", "intlLocale": "en-GB", "blogDir": "en", "label": "English (International)", "helpline": "international"},
     "mx": {"market": "mx", "locale": "es-mx", "htmlLang": "es-MX", "hreflang": "es-MX", "intlLocale": "es-MX", "blogDir": "mx", "label": "Español (México)", "customLanding": true},
-    "es": {"market": "fr", "locale": "es", "htmlLang": "es", "hreflang": "es", "intlLocale": "es-ES", "blogDir": "es", "label": "Español"},
-    "de": {"market": "fr", "locale": "de", "htmlLang": "de", "hreflang": "de", "intlLocale": "de-DE", "blogDir": "de", "label": "Deutsch"},
-    "it": {"market": "fr", "locale": "it", "htmlLang": "it", "hreflang": "it", "intlLocale": "it-IT", "blogDir": "it", "label": "Italiano"},
-    "pt": {"market": "fr", "locale": "pt", "htmlLang": "pt", "hreflang": "pt", "intlLocale": "pt-PT", "blogDir": "pt", "label": "Português"}
+    "es": {"market": "fr", "locale": "es", "htmlLang": "es", "hreflang": "es", "intlLocale": "es-ES", "blogDir": "es", "label": "Español", "helpline": "international"},
+    "de": {"market": "fr", "locale": "de", "htmlLang": "de", "hreflang": "de", "intlLocale": "de-DE", "blogDir": "de", "label": "Deutsch", "helpline": "international"},
+    "it": {"market": "fr", "locale": "it", "htmlLang": "it", "hreflang": "it", "intlLocale": "it-IT", "blogDir": "it", "label": "Italiano", "helpline": "international"},
+    "pt": {"market": "fr", "locale": "pt", "htmlLang": "pt", "hreflang": "pt", "intlLocale": "pt-PT", "blogDir": "pt", "label": "Português", "helpline": "international"}
   },
   "fr": {
     "country": "FR",
@@ -47,7 +51,7 @@
     "compliance": {
       "responsibleGamblingHelpline": "Joueurs Info Service - 09 74 75 13 13 - joueurs-info-service.fr",
       "legalPagesLocalized": true,
-      "note": "Marche EUR par defaut, servi par les repertoires de langue /fr/ /en/ /es/ /de/ /it/ /pt/. BLOCKED_DECISION : /en/ /es/ /de/ /it/ /pt/ affichent la ressource d'aide francaise (Joueurs Info Service) faute de ressource validee pour les visiteurs internationaux de ces repertoires."
+      "note": "Marche EUR par defaut, servi par les repertoires de langue /fr/ /en/ /es/ /de/ /it/ /pt/. /en/ /es/ /de/ /it/ /pt/ affichent la ressource internationale Gambling Therapy (_helplines.international, decision audit QA 14/09/2026) ; seul /fr/ affiche Joueurs Info Service."
     }
   },
   "gb": {

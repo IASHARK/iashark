@@ -40,9 +40,16 @@
   <span class="sr-only" data-i18n="compte_page.loading_account">Chargement de votre compte…</span>
 </div>
 
-<main id="compte" hidden class="mx-auto w-full max-w-[1180px] px-4 pb-28 sm:px-6 lg:pb-16"></main>
+<main id="compte" hidden class="mx-auto w-full max-w-[1180px] px-4 sm:px-6" style="padding-bottom:2rem"></main>
 
-<nav class="bottom-nav"><a href="/"><span>⌂</span><b>Accueil</b></a><a href="/pro.html"><span>☆</span><b>Outils</b></a><a href="/blog.html"><span>▤</span><b>Blog</b></a><a class="active" href="/compte.html"><span>♙</span><b>Compte</b></a></nav>
+<!-- Avertissement 18+ / jeu responsable, commun a toutes les pages (audit QA
+     14/09/2026). Ligne d'aide du marche remplie par lib/market-config.js
+     ([data-market-helpline]). -->
+<footer class="mx-auto w-full max-w-[1180px] px-4 pb-28 sm:px-6">
+  <p class="text-[12.5px] leading-relaxed text-soft" style="max-width:80ch"><span data-i18n="player_page.footer_disclaimer">Information statistique, jamais une garantie de résultat. Les paris sportifs comportent un risque de perte financière et de dépendance. Interdit aux mineurs.</span> <span data-helpline-row><span data-i18n="match_page.shell_help_label">Aide&nbsp;:</span> <a data-market-helpline="url" href="https://www.joueurs-info-service.fr" class="text-cyan hover:underline">joueurs-info-service.fr</a> · <span data-market-helpline="phone">09 74 75 13 13</span></span></p>
+</footer>
+
+<nav class="bottom-nav" aria-label="Navigation principale" data-i18n-attr="aria-label:geo.nav.aria_label"><a href="/"><span>⌂</span><b data-i18n="nav.home">Accueil</b></a><a href="/pro.html"><span>☆</span><b data-i18n="nav.tools">Outils</b></a><a href="/blog.html"><span>▤</span><b data-i18n="nav.guides">Blog</b></a><a class="active" href="/compte.html"><span>♙</span><b data-i18n="nav.account">Compte</b></a></nav>
 
 <script src="/app-client.js"></script>
 <script src="/i18n/i18n.js"></script>

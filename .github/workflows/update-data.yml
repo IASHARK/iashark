@@ -1500,14 +1500,26 @@ jobs:
             var pariTxt=(modelAvailable&&m.pari_rec&&!m.no_signal)?('<p><span data-i18n="match_page.seo_recommended_market">Marché recommandé par le modèle :</span> <strong data-market-label="'+escHtml(m.pari_rec)+'" data-home="'+escHtml(m.home.n)+'" data-away="'+escHtml(m.away.n)+'">'+escHtml(seoMarketLabel(m,'fr'))+'</strong> ('+escHtml(String(m.conf||''))+'/10)</p>'):'';
             return '<div style="padding:24px 16px;font-family:\'DM Sans\',sans-serif;color:#94a3b8;font-size:13px;line-height:1.6">'
               +'<h1 style="font-family:\'Bebas Neue\',sans-serif;font-size:22px;letter-spacing:.5px;color:#e2e8f0;margin-bottom:8px">'+escHtml(m.home.n)+' vs '+escHtml(m.away.n)+'</h1>'
-              +'<p>'+(m.league?escHtml(m.league)+' — ':'')+escHtml(d)+'</p>'
+              +'<p>'+(m.league?escHtml(seoLeagueName(m))+' — ':'')+(d?'<time datetime="'+escHtml(d)+'">'+escHtml(seoDateLabel(d,'fr'))+'</time>':'')+'</p>'
               +pariTxt
               +(modelAvailable?'<p data-i18n="match_page.seo_analysis_available">Analyse statistique IASHARK disponible pour ce match.</p>':'<p data-i18n="match_page.model_unavailable_reason">Les données disponibles ne permettent pas encore une analyse chiffrée fiable.</p>')
               +'</div>';
           }
+          // Liens de navigation des pages statiques /match/<id>.html (audit QA
+          // 14/09/2026) : jamais un lien racine ("/", "/pro.html"...), les pages
+          // racine redirigent vers /fr/. Version FR explicite dans le HTML ;
+          // i18n/i18n.js re-cible ces liens (data-i18n-href-locale) vers la
+          // version du site memorisee pour le visiteur. Le blog FR reste a la racine.
+          function liensVersionFr(html){
+            return html.replace(/href="\/([a-z0-9-]+\.html)?"/g,function(m,f){
+              if(!f) return 'href="/fr/"';
+              if(f==='blog.html') return m;
+              return 'href="/fr/'+f+'"';
+            });
+          }
           function generateMatchPages(matchsData){
             console.log('  Generating match pages (SEO)...');
-            var tpl=fs.readFileSync('match.html','utf8');
+            var tpl=liensVersionFr(fs.readFileSync('match.html','utf8'));
             if(!fs.existsSync('match')) fs.mkdirSync('match');
             var keepFiles={};
             (matchsData||[]).forEach(function(m){
@@ -1564,6 +1576,22 @@ jobs:
             var v=d?key.split('.').reduce(function(o,k){return o==null?o:o[k];},d):null;
             return (typeof v==='string'&&v)?v:fallback;
           }
+          // Nom de competition unique (config/leagues.json via lib/league-names.js).
+          function seoLeagueName(m){
+            if(seoLeagueName.lib===undefined){
+              try{ seoLeagueName.lib=require('./lib/league-names.js'); }catch(e){ seoLeagueName.lib=null; }
+            }
+            var lib=seoLeagueName.lib;
+            return lib?lib.displayName(m.league_key,m.league):m.league;
+          }
+          // Date longue dans la langue du resume ("14 septembre 2026") au lieu
+          // du brut "2026-09-14" ; scripts/build-locales.js la reformate aussi
+          // par repertoire (<time data-seo-date>).
+          var SEO_INTL={fr:'fr-FR',en:'en-GB',es:'es-ES','es-mx':'es-MX',de:'de-DE',it:'it-IT',pt:'pt-PT'};
+          function seoDateLabel(day,loc){
+            try{ return new Intl.DateTimeFormat(SEO_INTL[loc]||'fr-FR',{day:'numeric',month:'long',year:'numeric',timeZone:'UTC'}).format(new Date(day+'T12:00:00Z')); }
+            catch(e){ return day; }
+          }
           function seoMarketLabel(m,loc){
             if(seoMarketLabel.lib===undefined){
               try{ seoMarketLabel.lib=require('./lib/market-labels.js'); }catch(e){ seoMarketLabel.lib=null; console.log('  market-labels indisponible pour le SEO:',e.message); }
@@ -1589,9 +1617,13 @@ jobs:
               var pari=(m.is_free&&m.pari_rec&&!m.no_signal)
                 ?(' — <span data-i18n="home_app.seo_ai_pick">'+escHtml(seoText(loc,'home_app.seo_ai_pick','Pronostic IA :'))+'</span> <span data-market-label="'+escHtml(m.pari_rec)+'" data-home="'+escHtml(m.home.n)+'" data-away="'+escHtml(m.away.n)+'">'+escHtml(seoMarketLabel(m,loc))+'</span> ('+confiance+' '+escHtml(String(m.conf||''))+'/10)')
                 :((m.conf!=null&&!m.no_signal)?(' — '+confiance+' '+escHtml(String(m.conf))+'/10'):'');
-              return '<li>'+escHtml(heure)+' — <strong>'+escHtml(m.home.n)+' vs '+escHtml(m.away.n)+'</strong>'+(m.league?' ('+escHtml(m.league)+')':'')+pari+'</li>';
+              return '<li>'+escHtml(heure)+' — <strong>'+escHtml(m.home.n)+' vs '+escHtml(m.away.n)+'</strong>'+(m.league?' ('+escHtml(seoLeagueName(m))+')':'')+pari+'</li>';
             }).join('');
-            return '<div style="padding:4px 0 12px"><h2 style="font-family:\'Bebas Neue\',sans-serif;font-size:20px;color:#e2e8f0;margin-bottom:10px"><span data-i18n="home_app.seo_summary_title">'+escHtml(seoText(loc,'home_app.seo_summary_title','Analyses IA du jour'))+'</span> — '+escHtml(TODAY)+'</h2><ul style="list-style:none;padding:0;margin:0;color:#94a3b8;font-size:12.5px;line-height:1.8">'+items+'</ul></div>';
+            // Titre : date longue localisee (<time data-seo-date>, reformatee par
+            // repertoire au build) et mention explicite du fuseau des heures
+            // listees (heure de Paris) - le JS de l'accueil remplace ce bloc par
+            // les cartes en heure locale du visiteur.
+            return '<div style="padding:4px 0 12px"><h2 style="font-family:\'Bebas Neue\',sans-serif;font-size:20px;color:#e2e8f0;margin-bottom:10px"><span data-i18n="home_app.seo_summary_title">'+escHtml(seoText(loc,'home_app.seo_summary_title','Analyses IA du jour'))+'</span> — <time data-seo-date datetime="'+escHtml(TODAY)+'">'+escHtml(seoDateLabel(TODAY,loc))+'</time> <small style="font-family:\'DM Sans\',sans-serif;font-size:11px;color:#64748b">(<span data-i18n="home_app.seo_times_paris">'+escHtml(seoText(loc,'home_app.seo_times_paris','heure de Paris'))+'</span>)</small></h2><ul style="list-style:none;padding:0;margin:0;color:#94a3b8;font-size:12.5px;line-height:1.8">'+items+'</ul></div>';
           }
           // Repertoire du site -> dictionnaire (marches gb/za -> en, mx -> es-mx).
           // Seuls les index.html presents ET porteurs du marqueur sont ecrits.
@@ -1615,33 +1647,12 @@ jobs:
           function todaysCountSafe(matchsData){
             return (matchsData||[]).filter(function(m){return (m.date||'').split(' ')[0]===TODAY;}).length;
           }
-          var STATIC_SITEMAP_PAGES=[
-            {loc:'https://iashark.com/fr/',priority:'1.0'},
-            // historique.html retiree du sitemap sur demande explicite (2026-08-30) :
-            // la page reste en ligne (donnees Supabase intactes) mais n'est plus
-            // promue publiquement tant que le moteur V2 n'a pas accumule assez de
-            // donnees reelles - voir IASHARK_V2_RECETTE_VISUELLE.md.
-            {loc:'https://iashark.com/fr/pro.html',priority:'0.8'},
-            {loc:'https://iashark.com/fr/a-propos.html',priority:'0.6'},
-            // Page d'exemple d'analyse : vitrine publique, indexable, sans compte.
-            {loc:'https://iashark.com/fr/exemple-analyse.html',priority:'0.7'},
-            {loc:'https://iashark.com/blog/',priority:'0.6'},
-            // Le hub editorial lui-meme. Il manquait au sitemap alors que
-            // c'est la cible canonique de /blog/guides/ : la page la plus
-            // importante du blog n'etait declaree nulle part.
-            {loc:'https://iashark.com/blog.html',priority:'0.7'},
-            {loc:'https://iashark.com/blog/guides/',priority:'0.6'},
-            {loc:'https://iashark.com/blog/guides/coupe-du-monde-2026-guide-complet.html',priority:'0.6'},
-            {loc:'https://iashark.com/blog/guides/guide-paris-sportifs-debutant-complet.html',priority:'0.6'},
-            {loc:'https://iashark.com/blog/guides/meilleurs-bookmakers-monde-2026.html',priority:'0.6'},
-            {loc:'https://iashark.com/blog/guides/prediction-ia-football-guide-2026.html',priority:'0.6'},
-            {loc:'https://iashark.com/blog/guides/value-bet-guide-complet-2026.html',priority:'0.6'},
-            // Ces deux guides, les plus recents et les plus longs, n'avaient
-            // jamais ete ajoutes ici : ils etaient publies, lies depuis le
-            // blog, mais absents du sitemap depuis leur mise en ligne.
-            {loc:'https://iashark.com/blog/guides/xg-expected-goals-guide-complet.html',priority:'0.6'},
-            {loc:'https://iashark.com/blog/guides/plus-de-2-5-buts-probabilite-methode-poisson.html',priority:'0.6'}
-          ];
+          // sitemap-fr.xml ne liste plus que les pages match statiques (audit
+          // QA 14/09/2026). Les pages /fr/ (accueil, outils, a-propos, exemple
+          // d'analyse) et tout le blog (/blog.html, /blog/, guides) sont declares
+          // avec leurs hreflang dans les sitemaps i18n (scripts/i18n-sitemaps.js,
+          // sitemap-<dir>-i18n.xml) : les repeter ici creait des doublons.
+          var STATIC_SITEMAP_PAGES=[];
           function generateSitemaps(matchsData){
             console.log('  Generating sitemaps...');
             var urls=STATIC_SITEMAP_PAGES.map(function(p){
@@ -3117,6 +3128,29 @@ jobs:
                 matchCibleSafePick.conf=Math.round((safePick.model_probability_pct/10)*10)/10;
                 matchCibleSafePick.no_signal=false;
                 matchCibleSafePick.is_canonical_pick=true;
+                // COHERENCE (audit QA 14/09/2026). pari_rec etait remplace par le
+                // pick canonique mais market_id / marche restaient ceux du moteur
+                // deterministe, et la ligne premium gardait l'ancien pari : data.json
+                // publiait par ex. market_id "total-shots-over-24_5" avec pari_rec
+                // "Exterieur moins de 1.5 but" (Leeds - Newcastle), et le site
+                // affichait un marche different selon la page. Les quatre sources
+                // (pari_rec, market_id, marche, ligne premium) decrivent desormais
+                // le meme pari.
+                var LEGACY_VERS_CANONIQUE=require('./lib/run-output/build-legacy-score-candidates.js').LEGACY_TO_CANONICAL_SCORE_MARKET;
+                matchCibleSafePick.market_id=Object.keys(LEGACY_VERS_CANONIQUE).find(function(k){ return LEGACY_VERS_CANONIQUE[k].market===safePick.market; })||null;
+                matchCibleSafePick.marche=(function(n){
+                  n=String(n||'').toLowerCase();
+                  if(n.includes('over')||n.includes('under')) return 'TOTAL_BUTS';
+                  if(n.includes('btts')) return 'BTTS';
+                  if(n.includes('dc ')||n.includes('handicap')||n.includes('dnb')) return 'DOUBLE_CHANCE';
+                  return 'RESULTAT';
+                })(matchCibleSafePick.pari_rec);
+                var lignePremiumSafePick=premiumRows.find(function(r){ return r && String(r.fixture_id)===String(matchCibleSafePick.id); });
+                if(lignePremiumSafePick){
+                  lignePremiumSafePick.pari_rec=matchCibleSafePick.pari_rec;
+                  lignePremiumSafePick.cote_rec=Number(safePick.decimal_odds);
+                  lignePremiumSafePick.model_probability=Math.round(Number(safePick.model_probability_pct)*10)/10;
+                }
                 console.log('  [RUN_OUTPUT] SAFE_PICK_OF_THE_DAY injectee sur la carte existante du match '+matchCibleSafePick.id+' ('+(matchCibleSafePick.home&&matchCibleSafePick.home.n)+' vs '+(matchCibleSafePick.away&&matchCibleSafePick.away.n)+') : '+matchCibleSafePick.pari_rec+' @ '+matchCibleSafePick.cote_rec);
               } else {
                 console.log('  [RUN_OUTPUT] SAFE_PICK_OF_THE_DAY selectionnee (fixture '+safePick.fixture.fixture_id+') mais match introuvable dans allMatchsData - injection ignoree, aucune carte modifiee.');

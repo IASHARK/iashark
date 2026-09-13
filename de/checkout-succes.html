@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title data-i18n="geo.meta.checkout-succes.title">IASHARK — Zahlung bestätigt</title>
 <meta name="robots" content="noindex, nofollow">
-<meta name="description" content="Dein IASHARK-Tools-Abonnement wird aktiviert." data-i18n-attr="content:geo.meta.checkout-succes.description">
+<meta name="description" content="Dein IASHARK-Pro-Abonnement wird aktiviert." data-i18n-attr="content:geo.meta.checkout-succes.description">
 <link rel="canonical" href="https://iashark.com/de/checkout-succes.html">
 <link rel="alternate" hreflang="fr" href="https://iashark.com/fr/checkout-succes.html">
 <link rel="alternate" hreflang="en-GB" href="https://iashark.com/gb/checkout-succes.html">
@@ -47,7 +47,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
   <div class="card">
     <div class="icon">✅</div>
     <div class="title" data-i18n="checkout_pages.success_heading">Zahlung bestätigt</div>
-    <div class="body" data-i18n="checkout_pages.success_body">Danke! Dein Tools-Abonnement wird gerade aktiviert — das dauert normalerweise nur ein paar Sekunden.</div>
+    <div class="body" data-i18n="checkout_pages.success_body">Danke! Dein Pro-Abonnement wird gerade aktiviert — das dauert normalerweise nur ein paar Sekunden.</div>
     <div class="status" id="statusTxt" data-i18n="checkout_pages.success_checking">Dein Zugang wird überprüft...</div>
     <a href="/de/compte.html" data-href="compte.html" class="cta" data-i18n="checkout_pages.success_cta_account">ZU MEINEM KONTO →</a>
   </div>
@@ -57,11 +57,20 @@ if(window.iasharkTrack) iasharkTrack('checkout_success_view');
 // i18n : cette page est servie a la racine ET sous /<dir>/ (retour Stripe
 // localise). Repli francais si le dictionnaire ne charge pas.
 function t(key,fallback){return (window.I18N&&window.I18N.t)?window.I18N.t(key,fallback):fallback;}
-var i18nReady=(window.I18N&&window.I18N.init)?window.I18N.init():Promise.resolve();
+// Delai maximum sur chaque attente (audit QA 14/09/2026 : /gb/ et /za/ restaient
+// sur "Verification de ton acces..." plus de 10 s sans session) : un
+// dictionnaire ou un SDK qui ne repond pas ne bloque jamais la page.
+function avecDelai(promesse,ms,valeur){
+  return Promise.race([
+    Promise.resolve(promesse).catch(function(){return valeur;}),
+    new Promise(function(r){setTimeout(function(){r(valeur);},ms);})
+  ]);
+}
+var i18nReady=avecDelai((window.I18N&&window.I18N.init)?window.I18N.init():null,3000,null);
 
 var SUPA_URL = 'https://ksvjraqitxouwiabecai.supabase.co';
 var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtzdmpyYXFpdHhvdXdpYWJlY2FpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3ODcwMjMsImV4cCI6MjA4ODM2MzAyM30.Eh3qk4tATM40hoYxdErAllLEo1y8KNt4BSCET_fAgT8';
-var sb = supabase.createClient(SUPA_URL, SUPA_KEY);
+var sb = (window.supabase&&window.supabase.createClient)?window.supabase.createClient(SUPA_URL, SUPA_KEY):null;
 
 // Le webhook Stripe met a jour users.plan de facon asynchrone (evenement
 // customer.subscription.* recu apres le retour sur cette page) - on
@@ -78,8 +87,9 @@ var sb = supabase.createClient(SUPA_URL, SUPA_KEY);
 // supabase/functions/sync-subscription/index.ts.
 async function syncAccess(){
   try{
-    var res = await sb.auth.getSession();
-    if(!res.data || !res.data.session) return;
+    if(!sb) return;
+    var res = await avecDelai(sb.auth.getSession(),4000,null);
+    if(!res || !res.data || !res.data.session) return;
     var sessionId = new URLSearchParams(location.search).get('session_id');
     await fetch(SUPA_URL+'/functions/v1/sync-subscription',{
       method:'POST',
@@ -92,11 +102,11 @@ async function syncAccess(){
 async function pollAccess(attempt){
   var statusEl = document.getElementById('statusTxt');
   try{
-    var res = await sb.auth.getSession();
-    if(!res.data || !res.data.session){ statusEl.textContent = t('checkout_pages.success_login_needed','Connecte-toi pour voir ton nouvel accès.'); return; }
-    var ures = await sb.from('users').select('plan').eq('id', res.data.session.user.id).maybeSingle();
-    if(ures.data && ures.data.plan==='pro'){
-      statusEl.textContent = t('checkout_pages.success_active','Accès Outils activé ✓');
+    var res = sb ? await avecDelai(sb.auth.getSession(),4000,null) : null;
+    if(!res || !res.data || !res.data.session){ statusEl.textContent = t('checkout_pages.success_login_needed','Connecte-toi pour voir ton nouvel accès.'); return; }
+    var ures = await avecDelai(sb.from('users').select('plan').eq('id', res.data.session.user.id).maybeSingle(),5000,null);
+    if(ures && ures.data && ures.data.plan==='pro'){
+      statusEl.textContent = t('checkout_pages.success_active','Accès Pro activé ✓');
       statusEl.classList.add('ready');
       return;
     }
@@ -110,7 +120,9 @@ async function pollAccess(attempt){
     statusEl.textContent = t('checkout_pages.success_slow',"L'activation peut prendre un peu plus de temps — rends-toi sur ton compte dans une minute.");
   }
 }
-i18nReady.then(syncAccess).then(function(){ pollAccess(0); });
+i18nReady
+  .then(function(){ return avecDelai(syncAccess(),6000,null); })
+  .then(function(){ pollAccess(0); }, function(){ pollAccess(0); });
 </script>
 <script src="/site-prefs.js"></script>
 <script src="/bottom-navigation.js"></script></body>

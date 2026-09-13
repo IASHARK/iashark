@@ -5,7 +5,7 @@
 <meta name="iashark-market" content="mx">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>IASHARK — Mi cuenta</title>
-<meta name="description" content="Administra tu cuenta, tu suscripción a Herramientas y tus preferencias de IASHARK.">
+<meta name="description" content="Administra tu cuenta, tu suscripción Pro y tus preferencias de IASHARK.">
 <meta name="robots" content="noindex,nofollow">
 <link rel="canonical" href="https://iashark.com/mx/compte.html">
 <link rel="alternate" hreflang="fr" href="https://iashark.com/fr/compte.html">
@@ -51,9 +51,16 @@
   <span class="sr-only" data-i18n="compte_page.loading_account">Cargando tu cuenta…</span>
 </div>
 
-<main id="compte" hidden class="mx-auto w-full max-w-[1180px] px-4 pb-28 sm:px-6 lg:pb-16"></main>
+<main id="compte" hidden class="mx-auto w-full max-w-[1180px] px-4 sm:px-6" style="padding-bottom:2rem"></main>
 
-<nav class="bottom-nav"><a href="/mx/"><span>⌂</span><b>Accueil</b></a><a href="/mx/pro.html"><span>☆</span><b>Outils</b></a><a href="/mx/blog/"><span>▤</span><b>Blog</b></a><a class="active" href="/mx/compte.html"><span>♙</span><b>Compte</b></a></nav>
+<!-- Avertissement 18+ / jeu responsable, commun a toutes les pages (audit QA
+     14/09/2026). Ligne d'aide du marche remplie par lib/market-config.js
+     ([data-market-helpline]). -->
+<footer class="mx-auto w-full max-w-[1180px] px-4 pb-28 sm:px-6">
+  <p class="text-[12.5px] leading-relaxed text-soft" style="max-width:80ch"><span data-i18n="player_page.footer_disclaimer">Información estadística, nunca una garantía de resultado. Las apuestas deportivas implican riesgo de pérdidas económicas y de adicción. Prohibido para menores de edad.</span> <span data-helpline-row><span data-i18n="match_page.shell_help_label">Ayuda:</span> <a data-market-helpline="url" href="https://www.gob.mx/conasama/articulos/linea-de-la-vida-800-911-2000" class="text-cyan hover:underline">gob.mx/conasama</a> · <span data-market-helpline="phone">800 911 2000</span></span></p>
+</footer>
+
+<nav class="bottom-nav" aria-label="Navegación principal" data-i18n-attr="aria-label:geo.nav.aria_label"><a href="/mx/"><span>⌂</span><b data-i18n="nav.home">INICIO</b></a><a href="/mx/pro.html"><span>☆</span><b data-i18n="nav.tools">HERRAMIENTAS</b></a><a href="/mx/blog/"><span>▤</span><b data-i18n="nav.guides">BLOG</b></a><a class="active" href="/mx/compte.html"><span>♙</span><b data-i18n="nav.account">CUENTA</b></a></nav>
 
 <script src="/app-client.js"></script>
 <script src="/i18n/i18n.js"></script>

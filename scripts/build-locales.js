@@ -75,17 +75,31 @@ function writeIfChanged(file, content) {
 }
 
 // ---------------------------------------------------------------------------
-// Prix (config/markets.json) formates comme au runtime (lib/market-config.js).
+// Prix (config/markets.json) formates EXACTEMENT comme au runtime : meme
+// fonction pure, lue dans lib/market-config.js (MX$199, R 199, £14.99...).
+function marketConfigLib() {
+  if (!marketConfigLib.cache) {
+    var file = path.join(ROOT, "lib/market-config.js");
+    var sandbox = {};
+    new Function("window", fs.readFileSync(file, "utf8"))(sandbox);
+    marketConfigLib.cache = sandbox.IasharkMarketConfig;
+  }
+  return marketConfigLib.cache;
+}
 function formatPrice(dir, planKey) {
   var conf = DIRS[dir];
   var market = MARKETS[conf.market];
   var p = market && market.prices && market.prices[planKey];
   if (!p || typeof p.amount !== "number") return null;
-  var digits = Math.round(p.amount) === p.amount ? 0 : 2;
-  return new Intl.NumberFormat(conf.intlLocale, {
-    style: "currency", currency: market.currency,
-    minimumFractionDigits: digits, maximumFractionDigits: digits
-  }).format(p.amount);
+  return marketConfigLib().formatAmount(p.amount, market.currency, conf.intlLocale);
+}
+// Ressource d'aide d'un repertoire (surcharge _dirs.<dir>.helpline, sinon marche).
+function helplineFor(dir) {
+  var conf = DIRS[dir];
+  var helplines = MARKETS._helplines || {};
+  if (conf.helpline && Object.prototype.hasOwnProperty.call(helplines, conf.helpline)) return helplines[conf.helpline];
+  var market = MARKETS[conf.market];
+  return (market && market.helpline) || null;
 }
 
 // ---------------------------------------------------------------------------
@@ -295,11 +309,12 @@ function marketRuntimeData() {
   var dirs = {};
   DIR_CODES.forEach(function (d) {
     var c = DIRS[d];
-    dirs[d] = { market: c.market, locale: c.locale, htmlLang: c.htmlLang, intlLocale: c.intlLocale, blogDir: c.blogDir || "", label: c.label };
+    dirs[d] = { market: c.market, locale: c.locale, htmlLang: c.htmlLang, intlLocale: c.intlLocale, blogDir: c.blogDir || "", label: c.label, helpline: c.helpline || null };
   });
   return {
     defaultMarket: MARKETS._defaultMarket || "fr", defaultDir: X_DEFAULT_DIR,
-    planKeys: MARKETS._planKeys || [], legalFiles: LEGAL_FILES, dirs: dirs, markets: markets
+    planKeys: MARKETS._planKeys || [], legalFiles: LEGAL_FILES, dirs: dirs, markets: markets,
+    helplines: MARKETS._helplines || {}
   };
 }
 
@@ -311,6 +326,25 @@ function syncMarketConfig() {
   var block = "/*IASHARK_MARKETS_DATA_START*/\n  var DATA = " +
     JSON.stringify(marketRuntimeData(), null, 2).replace(/\n/g, "\n  ") +
     ";\n  /*IASHARK_MARKETS_DATA_END*/";
+  writeIfChanged(file, src.replace(re, function () { return block; }));
+  marketConfigLib.cache = null;
+}
+
+// lib/league-names.js : un nom d'affichage par competition, recopie depuis
+// config/leagues.json (displayName) - seule source des noms de competitions.
+function leagueNamesData() {
+  var out = {};
+  readJson("config/leagues.json").leagues.forEach(function (l) {
+    out[l.key] = { name: l.displayName, id: l.apiFootballId };
+  });
+  return out;
+}
+function syncLeagueNames() {
+  var file = path.join(ROOT, "lib/league-names.js");
+  var src = fs.readFileSync(file, "utf8");
+  var re = /\/\*IASHARK_LEAGUES_DATA_START\*\/[\s\S]*?\/\*IASHARK_LEAGUES_DATA_END\*\//;
+  if (!re.test(src)) throw new Error("lib/league-names.js : marqueurs IASHARK_LEAGUES_DATA_START/END introuvables");
+  var block = "/*IASHARK_LEAGUES_DATA_START*/\nvar LEAGUES = " + JSON.stringify(leagueNamesData(), null, 2) + ";\n/*IASHARK_LEAGUES_DATA_END*/";
   writeIfChanged(file, src.replace(re, function () { return block; }));
 }
 
@@ -393,7 +427,11 @@ function setAttr(tag, name, value) {
   if (re.test(tag)) return tag.replace(re, function (_, p) { return p + "\"" + escAttr(value) + "\""; });
   return tag.replace(/\s*(\/?)>$/, function (_, slash) { return " " + name + "=\"" + escAttr(value) + "\"" + (slash ? " /" : "") + ">"; });
 }
-function bakeI18n(html, dict) {
+// market (optionnel) : cle de marche du repertoire. Les elements marques
+// [data-market-legal-operator] (mention "IASHARK n'est pas un operateur",
+// a-propos.html) recoivent le texte propre au marche pays
+// about_page.legal_not_operator_market.<gb|za|mx> quand il existe.
+function bakeI18n(html, dict, market) {
   var stash = [];
   html = html.replace(/<(script|style)\b[\s\S]*?<\/\1>/gi, function (m) { stash.push(m); return "\u0000STASH" + (stash.length - 1) + "\u0000"; });
   var out = "", pos = 0, tagRe = /<([a-zA-Z][\w-]*)\b[^<>]*>/g, m;
@@ -401,6 +439,10 @@ function bakeI18n(html, dict) {
     var tag = m[0], name = m[1].toLowerCase();
     var textKey = attrValue(tag, "data-i18n"), htmlKey = attrValue(tag, "data-i18n-html"), attrSpec = attrValue(tag, "data-i18n-attr");
     if (textKey == null && htmlKey == null && attrSpec == null) continue;
+    if (market && attrValue(tag, "data-market-legal-operator") != null &&
+        typeof get(dict, "about_page.legal_not_operator_market." + market) === "string") {
+      htmlKey = "about_page.legal_not_operator_market." + market;
+    }
     var newTag = tag;
     if (attrSpec) {
       attrSpec.split(",").forEach(function (pair) {
@@ -430,23 +472,148 @@ function bakeI18n(html, dict) {
   return out.replace(/\u0000STASH(\d+)\u0000/g, function (_, i) { return stash[+i]; });
 }
 
+// ---------------------------------------------------------------------------
+// Donnees marche ecrites dans le HTML genere (audit QA 14/09/2026 : les pages
+// /gb/ /za/ /mx/ affichaient "19,95 €" et la ligne d'aide francaise jusqu'a
+// l'execution de lib/market-config.js - flash visible, et contenu faux pour
+// les moteurs de recherche). Le runtime reapplique les memes valeurs.
+//   [data-market-price="<plan>"]          -> prix du marche (ou attribut
+//                                            data-market-price-unavailable)
+//   [data-market-price-line="<plan>"][data-market-price-tpl="<cle i18n>"]
+//                                         -> gabarit du dictionnaire, {price}
+//   [data-market-helpline="|name|phone|url"] (+ href sur <a>)
+//   [data-market-helpline-if="phone"]     -> hidden sans numero
+//   [data-market-label][data-home][data-away] -> libelle de marche dans la
+//                                            langue du repertoire
+//   <time data-seo-date datetime="YYYY-MM-DD"> -> date longue localisee
+function unescHtml(s) {
+  return String(s).replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&amp;/g, "&");
+}
+function rewriteElements(html, attrs, fn) {
+  var stash = [];
+  html = html.replace(/<(script|style)\b[\s\S]*?<\/\1>/gi, function (m) { stash.push(m); return " STASH" + (stash.length - 1) + " "; });
+  var out = "", pos = 0, tagRe = /<([a-zA-Z][\w-]*)\b[^<>]*>/g, m;
+  while ((m = tagRe.exec(html))) {
+    var tag = m[0], name = m[1].toLowerCase();
+    if (!attrs.some(function (a) { return attrValue(tag, a) != null; })) continue;
+    var res = fn(tag, name);
+    if (!res) continue;
+    out += html.slice(pos, m.index) + res.tag;
+    pos = m.index + tag.length;
+    if (res.inner == null || VOID_TAGS[name] || /\/>$/.test(tag)) continue;
+    var depth = 1, scan = new RegExp("<(\\/?)" + name + "\\b[^<>]*>", "gi"), c, closeStart = -1, closeEnd = -1;
+    scan.lastIndex = pos;
+    while ((c = scan.exec(html))) {
+      if (c[1]) { depth--; if (depth === 0) { closeStart = c.index; closeEnd = c.index + c[0].length; break; } }
+      else if (!/\/>$/.test(c[0])) depth++;
+    }
+    if (closeStart === -1) continue;
+    out += res.inner + html.slice(closeStart, closeEnd);
+    pos = closeEnd;
+    tagRe.lastIndex = closeEnd;
+  }
+  out += html.slice(pos);
+  return out.replace(/ STASH(\d+) /g, function (_, i) { return stash[+i]; });
+}
+function setHidden(tag, hidden) {
+  var has = /\shidden(?=[\s>=\/])/.test(tag);
+  if (hidden && !has) return tag.replace(/\s*(\/?)>$/, function (_, slash) { return " hidden" + (slash ? " /" : "") + ">"; });
+  if (!hidden && has) return tag.replace(/\shidden(="[^"]*")?(?=[\s>\/])/, "");
+  return tag;
+}
+var marketLabelsLib = null;
+function bakeMarket(html, dir) {
+  var conf = DIRS[dir];
+  var dict = DICTS[conf.locale];
+  var help = helplineFor(dir);
+  html = rewriteElements(html, ["data-market-price", "data-market-price-line", "data-market-helpline", "data-market-helpline-if", "data-market-label", "data-seo-date"], function (tag, name) {
+    var plan = attrValue(tag, "data-market-price");
+    if (plan != null) {
+      var price = formatPrice(dir, plan);
+      if (price == null) return { tag: setAttr(tag, "data-market-price-unavailable", ""), inner: null };
+      return { tag: tag.replace(/\sdata-market-price-unavailable(="[^"]*")?/, ""), inner: escText(price) };
+    }
+    var linePlan = attrValue(tag, "data-market-price-line");
+    if (linePlan != null) {
+      var linePrice = formatPrice(dir, linePlan);
+      var tpl = get(dict, attrValue(tag, "data-market-price-tpl") || "");
+      if (linePrice == null || typeof tpl !== "string") return null;
+      return { tag: tag, inner: escText(tpl.replace(/\{price\}/g, linePrice)) };
+    }
+    var part = attrValue(tag, "data-market-helpline");
+    if (part != null) {
+      // Ressource absente, ou sans numero : masque ET vide (jamais le numero
+      // francais du source laisse dans le HTML d'un autre repertoire).
+      if (!help || (part === "phone" && !help.phone)) return { tag: setHidden(tag, true), inner: "" };
+      var isLink = name === "a", t = setHidden(tag, false), inner;
+      if (part === "name") inner = help.name;
+      else if (part === "phone") { inner = help.phone; if (isLink && help.tel) t = setAttr(t, "href", "tel:" + help.tel); }
+      else if (part === "url") { inner = help.display || help.url; if (isLink) t = setAttr(t, "href", help.url); }
+      else inner = marketConfigLib().helplineText(help);
+      return { tag: t, inner: escText(inner) };
+    }
+    var cond = attrValue(tag, "data-market-helpline-if");
+    if (cond != null) return { tag: setHidden(tag, !(help && help[cond])), inner: null };
+    var raw = attrValue(tag, "data-market-label");
+    if (raw != null) {
+      if (conf.locale === "fr") return null; // la source racine est deja en francais
+      if (!marketLabelsLib) marketLabelsLib = require("../lib/market-labels.js");
+      var home = attrValue(tag, "data-home"), away = attrValue(tag, "data-away");
+      var label = marketLabelsLib.marketLabel(unescHtml(raw), { home: home ? unescHtml(home) : undefined, away: away ? unescHtml(away) : undefined }, { locale: conf.locale, dict: dict });
+      return { tag: tag, inner: escText(label) };
+    }
+    if (attrValue(tag, "data-seo-date") != null) {
+      var iso = attrValue(tag, "datetime");
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(iso || "")) return null;
+      var d = new Date(iso + "T12:00:00Z");
+      return { tag: tag, inner: escText(new Intl.DateTimeFormat(conf.intlLocale, { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" }).format(d)) };
+    }
+    return null;
+  });
+  return html;
+}
+
+// Landings pays (gb/za/mx) maintenues a la main : jamais regenerees, mais
+// leur bloc canonical + hreflang est aligne sur celui des landings de langue
+// (audit QA 14/09/2026 : aucun hreflang sur /gb|za|mx/landing, et les
+// landings de langue n'annoncaient ni en-GB, ni en-ZA, ni es-MX).
+function landingAltDirs() {
+  return DIR_CODES.filter(function (d) {
+    return DIRS[d].customLanding ? fs.existsSync(path.join(ROOT, d, "landing.html")) : true;
+  });
+}
+function syncCustomLandingHeads(altDirs) {
+  DIR_CODES.forEach(function (dir) {
+    if (!DIRS[dir].customLanding) return;
+    var file = path.join(ROOT, dir, "landing.html");
+    if (!fs.existsSync(file)) return;
+    var src = fs.readFileSync(file, "utf8");
+    writeIfChanged(file, buildHead(src, dir, "landing.html", null, altDirs));
+  });
+}
+
 function build() {
   syncMarketConfig();
+  syncLeagueNames();
   var report = { stale: {}, pages: 0, legal: 0, missingLegal: [], removed: [] };
 
   PAGES.forEach(function (page) {
     var src = fs.readFileSync(path.join(ROOT, page.file), "utf8");
     var rules = MODULAR_SHELLS.indexOf(page.file) !== -1 ? [] : page.replacements;
-    var altDirs = DIR_CODES.filter(function (d) { return !(page.file === "landing.html" && DIRS[d].customLanding); });
-    altDirs.forEach(function (dir) {
+    var genDirs = DIR_CODES.filter(function (d) { return !(page.file === "landing.html" && DIRS[d].customLanding); });
+    var altDirs = page.file === "landing.html" ? landingAltDirs() : genDirs;
+    genDirs.forEach(function (dir) {
       var html = applyReplacements(src, DIRS[dir].locale, rules, report, page.file);
-      if (DIRS[dir].locale !== "fr") html = bakeI18n(html, DICTS[DIRS[dir].locale]);
+      var countryMarket = ["gb", "za", "mx"].indexOf(DIRS[dir].market) !== -1 ? DIRS[dir].market : null;
+      if (DIRS[dir].locale !== "fr" || countryMarket) html = bakeI18n(html, DICTS[DIRS[dir].locale], countryMarket);
+      html = bakeMarket(html, dir);
       html = rewriteInternalLinks(html, dir);
       html = buildHead(html, dir, page.file, metaFor(page, dir), altDirs);
       html = injectRuntime(html, dir);
       writeIfChanged(path.join(ROOT, dir, page.file), html);
       report.pages++;
     });
+    if (page.file === "landing.html") syncCustomLandingHeads(altDirs);
   });
 
   LEGAL_FILE_LIST.forEach(function (file) {
@@ -454,6 +621,7 @@ function build() {
     DIR_CODES.forEach(function (d) { if (altDirs.indexOf(d) === -1) report.missingLegal.push(d + "/" + file); });
     altDirs.forEach(function (dir) {
       var html = fs.readFileSync(path.join(ROOT, "legal", dir, file), "utf8");
+      html = bakeMarket(html, dir);
       html = rewriteInternalLinks(html, dir);
       html = buildHead(html, dir, file, null, altDirs);
       html = injectRuntime(html, dir, { bottomNav: true });
@@ -486,6 +654,7 @@ function build() {
 module.exports = {
   DIRS: DIRS, DIR_CODES: DIR_CODES, PAGE_FILES: PAGE_FILES, LEGAL_FILE_LIST: LEGAL_FILE_LIST,
   mapPath: mapPath, rewriteInternalLinks: rewriteInternalLinks, bakeI18n: bakeI18n, formatPrice: formatPrice,
+  bakeMarket: bakeMarket, helplineFor: helplineFor, leagueNamesData: leagueNamesData,
   marketRuntimeData: marketRuntimeData, redirectsContent: redirectsContent, build: build
 };
 

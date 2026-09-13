@@ -83,7 +83,7 @@
     "login_intro": "Connectez-vous pour retrouver vos analyses, vos outils et votre journal.",
     "login_bullet_analyses": "Les analyses du jour, championnat par championnat",
     "login_bullet_tools": "Les six outils de décision",
-    "login_bullet_journal": "Votre journal et votre bankroll",
+    "login_bullet_journal": "Votre journal et votre capital de jeu",
     "login_form_heading": "Se connecter",
     "password_placeholder_login": "Votre mot de passe",
     "login_submit": "Se connecter",
@@ -140,7 +140,7 @@
     "plan_free_status": "Plan Gratuit",
     "plan_free_desc": "Tu utilises la version gratuite d'IASHARK — le match à la plus forte probabilité modèle du jour est accessible gratuitement.",
     "plan_pro_status": "Plan Outils",
-    "plan_pro_desc": "Ton abonnement Outils est actif — tu as accès à toutes les sélections à forte probabilité modèle.",
+    "plan_pro_desc": "Ton abonnement Pro est actif — tu as accès à toutes les sélections à forte probabilité modèle.",
     "security_title": "SÉCURITÉ",
     "change_password": "Changer mon mot de passe",
     "change_email": "Changer mon email",
@@ -214,7 +214,7 @@
   "market_catalog": {
     "c1": "Résultat du match (1X2)",
     "c2": "Double Chance (1X / X2 / 12)",
-    "c3": "Draw No Bet",
+    "c3": "Remboursé si match nul",
     "c4": "Total de buts (O/U 0.5 à 6.5)",
     "c5": "Totaux par équipe",
     "c6": "BTTS",
@@ -544,10 +544,10 @@
     "scenario_source_suffix": " cette saison. Fréquence observée sur leurs matchs passés, pas une prévision pour celui-ci.",
     "faq_title": "Questions sur ce match",
     "gate_free_title": "Match gratuit du jour",
-    "gate_free_text": "Ce match est gratuit, mais il faut un compte IASHARK (inscription ou connexion) pour voir l’analyse complete.",
-    "gate_free_cta": "Se connecter / Creer un compte",
-    "gate_pro_title": "Analyse reservee aux membres Pro",
-    "gate_pro_text": "Le marche recommande, la confiance du modele et l’analyse complete de ce match sont reserves aux membres Pro. Le match du jour, lui, reste gratuit.",
+    "gate_free_text": "Ce match est gratuit, mais il faut un compte IASHARK gratuit (inscription ou connexion) pour voir l’analyse complète.",
+    "gate_free_cta": "Se connecter / Créer un compte",
+    "gate_pro_title": "Analyse réservée aux membres Pro",
+    "gate_pro_text": "Le marché recommandé, la confiance du modèle et l’analyse complète de ce match sont réservés aux membres Pro. Le match du jour, lui, reste gratuit.",
     "gate_pro_cta": "Devenir Pro",
     "generic_load_error": "Erreur de chargement",
     "back_to_home": "Retour à l'accueil",
@@ -1460,7 +1460,7 @@
       },
       "compte": {
         "title": "IASHARK — Mon Compte",
-        "description": "Gère ton compte, ton abonnement Outils et tes préférences IASHARK."
+        "description": "Gère ton compte, ton abonnement Pro et tes préférences IASHARK."
       },
       "joueur": {
         "title": "Fiche joueur — IASHARK",
@@ -1500,7 +1500,7 @@
       },
       "checkout-succes": {
         "title": "IASHARK — Paiement confirmé",
-        "description": "Ton abonnement Outils IASHARK est en cours d'activation."
+        "description": "Ton abonnement Pro IASHARK est en cours d'activation."
       },
       "landing": {
         "title": "IASHARK — Le modèle qui lit le match avant qu'il commence",
@@ -1577,7 +1577,12 @@
     "legal_past_performance": "<b>Performances passées ≠ performances futures.</b> Un edge statistique positif à long terme n'empêche pas des séries de pertes à court terme. Le modèle et la méthodologie décrits sur cette page peuvent évoluer sans préavis.",
     "legal_ownership": "<b>Propriété du contenu.</b> Les analyses, textes et méthodologie présentés sur ce site sont la propriété d'IASHARK et ne peuvent être reproduits sans autorisation préalable.",
     "legal_adults": "<b>Réservé aux personnes majeures</b> (18 ans et plus).",
-    "meta_description": "Comment IASHARK analyse le football : sources de données, modèles statistiques, méthodologie, limites et mentions importantes."
+    "meta_description": "Comment IASHARK analyse le football : sources de données, modèles statistiques, méthodologie, limites et mentions importantes.",
+    "legal_not_operator_market": {
+      "gb": "<b>IASHARK n'est pas un opérateur de jeux d'argent.</b> Nous ne prenons aucune mise, ne gérons aucun compte joueur et ne procédons à aucun encaissement de gains. Pour parier réellement en Grande-Bretagne, vous devez passer par un opérateur titulaire d'une licence de la Gambling Commission.",
+      "za": "<b>IASHARK n'est pas un opérateur de jeux d'argent.</b> Nous ne prenons aucune mise, ne gérons aucun compte joueur et ne procédons à aucun encaissement de gains. Pour parier réellement en Afrique du Sud, vous devez passer par un bookmaker agréé par l'autorité des jeux de votre province.",
+      "mx": "<b>IASHARK n'est pas un opérateur de paris sportifs.</b> Nous ne prenons aucune mise, ne gérons aucun compte joueur et ne procédons à aucun encaissement de gains. Pour parier réellement au Mexique, vous devez passer par un opérateur disposant d'un permis en vigueur du ministère de l'Intérieur (SEGOB)."
+    }
   },
   "pricing_page": {
     "meta_title": "Abonnement Pro — IASHARK",
@@ -1644,15 +1649,15 @@
     "cancel_body": "Aucun paiement n'a été effectué. Tu peux réessayer quand tu veux, sans engagement.",
     "cancel_cta_tools": "RETOUR À L'ESPACE OUTILS →",
     "cancel_cta_account": "MON COMPTE →",
-    "cancel_meta_description": "Abonnement Outils IASHARK annulé, aucun paiement effectué.",
+    "cancel_meta_description": "Abonnement Pro IASHARK annulé, aucun paiement effectué.",
     "success_meta_title": "IASHARK — Paiement confirmé",
     "success_heading": "Paiement confirmé",
-    "success_body": "Merci ! Ton abonnement Outils est en cours d'activation — cela prend généralement quelques secondes.",
+    "success_body": "Merci ! Ton abonnement Pro est en cours d'activation — cela prend généralement quelques secondes.",
     "success_checking": "Vérification de ton accès...",
     "success_cta_account": "ALLER À MON COMPTE →",
-    "success_meta_description": "Ton abonnement Outils IASHARK est en cours d'activation.",
+    "success_meta_description": "Ton abonnement Pro IASHARK est en cours d'activation.",
     "success_login_needed": "Connecte-toi pour voir ton nouvel accès.",
-    "success_active": "Accès Outils activé ✓",
+    "success_active": "Accès Pro activé ✓",
     "success_slow": "L'activation peut prendre un peu plus de temps — rends-toi sur ton compte dans une minute."
   },
   "blog_hub": {
@@ -1790,7 +1795,8 @@
     "no_signal_label": "Aucun signal clair sur ce match",
     "seo_summary_title": "Analyses IA du jour",
     "seo_confidence": "confiance",
-    "seo_ai_pick": "Pronostic IA :"
+    "seo_ai_pick": "Pronostic IA :",
+    "seo_times_paris": "heure de Paris"
   },
   "site_header": {
     "nav_today": "Analyses du jour",

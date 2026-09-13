@@ -12,12 +12,15 @@ test("les pages principales partagent la navigation produit à quatre entrées",
     assert.doesNotMatch(nav,/Marchés/i,file);
   }
 });
-test("le bandeau d’accueil expose exactement les 13 compétitions couvertes deux fois",()=>{
+test("le bandeau d’accueil expose exactement les 15 compétitions couvertes deux fois",()=>{
   const html=fs.readFileSync(path.join(root,"index.html"),"utf8");
   // Le bandeau est passe sur Tailwind (piste dupliquee pour une boucle sans
   // couture) : le balisage a change, l'INTENTION verifiee reste la meme.
-  assert.equal((html.match(/league-badge-img/g)||[]).length,26);
+  assert.equal((html.match(/league-badge-img/g)||[]).length,30);
   assert.equal((html.match(/leagues\/61\.png/g)||[]).length,2);
+  // Liga MX (262) et Premier Soccer League (288) : lancement Mexique / Afrique du Sud.
+  assert.equal((html.match(/leagues\/262\.png/g)||[]).length,2);
+  assert.equal((html.match(/leagues\/288\.png/g)||[]).length,2);
   // Les logos de ligue sont des PNG sombres : sans pastille claire derriere,
   // ils sont invisibles sur le fond noir de la page.
   assert.match(html,/league-badge-img[^"]*bg-\[#f4f7fa\]/);

@@ -39,6 +39,14 @@
   function t(key, fallback) { return (window.I18N && window.I18N.t) ? window.I18N.t(key, fallback) : fallback; }
   function localeTag() { return (window.I18N && window.I18N.localeTag) ? window.I18N.localeTag() : 'fr-FR'; }
   function estFr() { return !(window.I18N && window.I18N.locale) || window.I18N.locale === 'fr'; }
+  // Texte redige par le pipeline (francais) : hors FR, uniquement sa
+  // traduction validee par le pipeline (<champ>_i18n, es-mx -> es), sinon
+  // rien - jamais le francais sur une page d'une autre langue.
+  function narratif(fr, i18n) {
+    if (estFr()) return fr || null;
+    var vmLib = window.IasharkMatchViewModel;
+    return vmLib && vmLib.localizedNarrative ? vmLib.localizedNarrative(fr, i18n, window.I18N.locale) : null;
+  }
   // Lien interne dans le repertoire de langue/marche courant (/gb/, /mx/...).
   function lien(p) { return (window.I18N && window.I18N.href) ? window.I18N.href(p) : '/' + p; }
   function esc(v) {
@@ -300,8 +308,9 @@
           + '<span class="min-w-0"><b class="block text-[13.5px] font-semibold">' + esc(f[0]) + '</b>'
           + '<span class="mt-0.5 block text-[13.5px] leading-relaxed text-soft">' + esc(f[1]) + '</span></span></li>';
       }).join('') + '</ol>'
-      // ts.analyse : texte LLM du pipeline, francais uniquement -> FR seulement.
-      + (ts && ts.analyse && estFr() ? '<p class="mt-5 border-t border-hairline pt-4 text-[14px] leading-[1.7] text-soft">' + esc(ts.analyse) + '</p>' : ''));
+      // ts.analyse : texte LLM du pipeline (francais) ; hors FR, sa
+      // traduction validee ts.analyse_i18n, sinon rien.
+      + (ts && narratif(ts.analyse, ts.analyse_i18n) ? '<p class="mt-5 border-t border-hairline pt-4 text-[14px] leading-[1.7] text-soft">' + esc(narratif(ts.analyse, ts.analyse_i18n)) + '</p>' : ''));
   }
 
   /* ---------- 6. Forme recente ---------- */

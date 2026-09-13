@@ -55,7 +55,23 @@
     "cle 'the-odds-api' pour le foot sud-africain trouvee/verifiee dans ce depot - meme TODO (verifier",
     "aupres de The Odds API avant tout ancrage de cotes reelles), meme comportement getPinnacleOdds()",
     "deja documente ci-dessus pour liga_mx (repli vers Champions League, inoffensif car aucun nom",
-    "d'equipe sud-africaine ne matche, mais pas un design propre)."
+    "d'equipe sud-africaine ne matche, mais pas un design propre).",
+    "MISE A JOUR 2026-09-13 (cotes Liga MX / PSL, verification reelle) - REMPLACE les TODO oddsSportKey et",
+    "la remarque 'repli Champions League' ci-dessus :",
+    "(1) The Odds API : le catalogue officiel des sport keys (https://the-odds-api.com/sports-odds-data/sports-apis.html,",
+    "section Soccer) liste 'soccer_mexico_ligamx' (Liga MX, Mexico) et AUCUNE cle sud-africaine. GET /v4/sports",
+    "n'a pas pu etre appele depuis le poste de dev (ODDS_API_KEY n'existe que dans les secrets GitHub, reponse",
+    "401 MISSING_KEY sans cle) : a re-confirmer au premier run pipeline (log getPinnacleOdds). liga_mx recoit donc",
+    "oddsSportKey='soccer_mexico_ligamx' ; south_africa_premiership reste SANS oddsSportKey (jamais invente).",
+    "(2) api-football : /leagues?id=262 et /leagues?id=288 -> saison 2026 current, coverage.odds=true ;",
+    "/odds?league=262&season=2026 (10 resultats, 2 pages) et /odds?league=288&season=2026 (10 resultats) renvoient",
+    "des fixtures avec le bookmaker 'Pinnacle' (Match Winner, Goals Over/Under, Both Teams Score).",
+    "(3) apiFootballPinnacleFallback=true (liga_mx, south_africa_premiership) : quand The Odds API ne renvoie rien",
+    "(pas de cle, pas de sport key, equipe non appariee), le pipeline lit les cotes Pinnacle deja presentes dans la",
+    "reponse api-football /odds?fixture=X (lib/pinnacle-odds.js#pinnacleOddsFromApiFootball), meme forme",
+    "{c1,cn,c2,over25,under25,bttsY,bttsN} que getPinnacleOdds() + source='api-football'. Jamais un autre bookmaker.",
+    "(4) getPinnacleOdds() ne retombe PLUS sur 'soccer_uefa_champs_league' : une ligue sans oddsSportKey",
+    "renvoie null sans appel reseau (lib/pinnacle-odds.js#oddsSportKeyFor). Teste par tests/pinnacle-odds.test.js."
   ],
   "leagues": [
     { "key": "premier",     "displayName": "Premier League",      "country": "Angleterre", "apiFootballId": 39,  "oddsSportKey": "soccer_epl",                              "europeanQualification": true  },
@@ -71,7 +87,7 @@
     { "key": "mls",         "displayName": "MLS",                 "country": "USA/Canada", "apiFootballId": 253, "oddsSportKey": "soccer_usa_mls",                          "europeanQualification": false, "apiNameHint": "Major League Soccer" },
     { "key": "suede",       "displayName": "Allsvenskan",         "country": "Suede",      "apiFootballId": 113, "oddsSportKey": "soccer_sweden_allsvenskan",               "europeanQualification": true  },
     { "key": "jleague",     "displayName": "J1 League",           "country": "Japon",      "apiFootballId": 98,  "oddsSportKey": "soccer_japan_j_league",                   "europeanQualification": false },
-    { "key": "liga_mx",     "displayName": "Liga MX",             "country": "Mexique",    "apiFootballId": 262,                                                             "europeanQualification": false },
-    { "key": "south_africa_premiership", "displayName": "Premier Soccer League", "country": "Afrique du Sud", "apiFootballId": 288,                                            "europeanQualification": false }
+    { "key": "liga_mx",     "displayName": "Liga MX",             "country": "Mexique",    "apiFootballId": 262, "oddsSportKey": "soccer_mexico_ligamx",                    "europeanQualification": false, "apiFootballPinnacleFallback": true },
+    { "key": "south_africa_premiership", "displayName": "Premier Soccer League", "country": "Afrique du Sud", "apiFootballId": 288,                                            "europeanQualification": false, "apiFootballPinnacleFallback": true }
   ]
 }

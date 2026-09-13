@@ -59,10 +59,12 @@
   // Liens hauts : les memes reperes que la barre du bas, pour qu'un visiteur
   // arrive sur un article de blog par Google et retrouve immediatement le
   // produit (c'est le chemin de conversion principal du blog).
+  // Blog de la langue du repertoire (meme regle que i18n.js / bottom-navigation.js).
+  var BLOG_REPLI = {en:'/en/blog/',gb:'/en/blog/',za:'/en/blog/',es:'/es/blog/',mx:'/mx/blog/',de:'/de/blog/',it:'/it/blog/',pt:'/pt/blog/'};
   var NAV = [
     { href: lienSite('', prefix + '/'), label: 'Analyses du jour', key: 'site_header.nav_today', match: function(p){ return p === '/' || p === prefix || p === prefix + '/' || /\/(index|landing)\.html$/.test(p); } },
     { href: lienSite('pro.html', prefix + '/pro.html'), label: 'Outils', key: 'site_header.nav_tools', match: function(p){ return /\/pro\.html$/.test(p); } },
-    { href: '/blog.html', label: 'Blog', key: 'site_header.nav_blog', match: function(p){ return p.indexOf('/blog') === 0; } }
+    { href: lienSite('blog.html', BLOG_REPLI[localeMatch ? localeMatch[1] : ''] || '/blog.html'), label: 'Blog', key: 'site_header.nav_blog', match: function(p){ return /^(\/[a-z]{2})?\/blog(\.html|\/|$)/.test(p); } }
   ];
 
   function injectStyle(){

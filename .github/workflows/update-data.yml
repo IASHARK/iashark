@@ -44,10 +44,12 @@ jobs:
           const { buildSegmentMarkets, estimateFirstHalfShare } = require('./lib/markets/segment-model.js');
           const { buildPlayerMarketOutput, blendPlayerRateAcrossSeasons } = require('./lib/markets/player-engine.js');
           const { pickTopScorerCandidates } = require('./lib/markets/top-scorer-picker.js');
+          const { extractTranslationSource, buildTranslationRequest, parseTranslationResponse, applyNarrativeI18n } = require('./lib/narrative-i18n.js');
           const I18N_LOCALES = require('./i18n/locales.json');
           const I18N_PAGES = require('./scripts/i18n-manifest.js');
           const { generateLocalizedSitemaps } = require('./scripts/i18n-sitemaps.js');
           const LEAGUES_CONFIG = require('./config/leagues.json');
+          const { oddsSportKeyFor, usesApiFootballPinnacleFallback, pinnacleOddsFromApiFootball } = require('./lib/pinnacle-odds.js');
           const { calcFinalProbs, calcLambdas, calcCriteres, calcFatigue } = require('./lib/engine.js');
           const { classifyApiResponse, decideSeasonFallback, decideCurrentSeasonGate, createThrottledFetcher } = require('./lib/api-fetch-policy.js');
           // RUN OUTPUT ENGINE (item unique de ce jalon) : CONSOMMATEUR pur des
@@ -946,10 +948,10 @@ jobs:
             // Derive de config/leagues.json (oddsSportKey) : les cotes restent
             // toujours facultatives (l'analyse fonctionne sans), un mapping absent
             // ou errone renvoie simplement null plus bas sans jamais bloquer le
-            // pipeline.
-            var sportMap = {};
-            LEAGUES_CONFIG.leagues.forEach(function(l){ if (l.oddsSportKey) sportMap[l.key] = l.oddsSportKey; });
-            var sport=sportMap[leagueKey]||'soccer_uefa_champs_league';
+            // pipeline. Ligue sans oddsSportKey -> null, aucun appel : l'ancien
+            // repli interrogeait par erreur le sport Champions League.
+            var sport=oddsSportKeyFor(LEAGUES_CONFIG,leagueKey);
+            if(!sport) return null;
             try {
               var url='https://api.the-odds-api.com/v4/sports/'+sport+'/odds/?apiKey='+ODDS_KEY+'&regions=eu&markets=h2h,totals,btts&bookmakers=pinnacle&oddsFormat=decimal';
               var r=await get(url,{});
@@ -1399,6 +1401,58 @@ jobs:
               return JSON.parse(cleaned);
             }
             catch(e){console.error('  [genAnalyse] JSON illisible :',txt.slice(0,200));return null;}
+          }
+          // TRADUCTION DES TEXTES EDITORIAUX (fr -> en, es, es-mx, de, it, pt).
+          // Un appel par match renvoyant toutes les langues, lance APRES la
+          // boucle des fixtures (parallelisme limite) pour ne pas allonger le
+          // traitement match par match. Prompt, validation stricte et
+          // repartition public/premium : lib/narrative-i18n.js. Une langue ou
+          // un champ invalide reste ABSENT (le site masque alors le bloc) :
+          // jamais de repli sur le francais, jamais de texte fabrique. Le
+          // francais (champs existants) n'est jamais modifie.
+          var TRANSLATION_MODEL=process.env.ANTHROPIC_TRANSLATION_MODEL||'claude-haiku-4-5';
+          async function genTraductions(an,label,usage){
+            var source=extractTranslationSource(an);
+            if(!source) return null;
+            var r=await postJSONWithRetry('api.anthropic.com','/v1/messages',buildTranslationRequest(source,{model:TRANSLATION_MODEL}),{'x-api-key':ANT_KEY,'anthropic-version':'2023-06-01'});
+            usage.calls++;
+            if(r&&r.usage){ usage.input+=r.usage.input_tokens||0; usage.output+=r.usage.output_tokens||0; }
+            if(!r||!Array.isArray(r.content)){
+              console.error('  [traduction] '+label+' reponse inexploitable :',JSON.stringify(r&&r.error?r.error:r).slice(0,300));
+              return null;
+            }
+            if(r.stop_reason==='max_tokens'){
+              console.error('  [traduction] '+label+' reponse tronquee (max_tokens) : aucune traduction retenue.');
+              return null;
+            }
+            var txt=(r.content.find(function(b){return b.type==='text';})||{}).text||'';
+            var parsed=parseTranslationResponse(txt,source);
+            if(parsed.errors.length) console.log('  [traduction] '+label+' '+parsed.errors.length+' element(s) rejete(s) : '+parsed.errors.slice(0,6).join(' ; '));
+            return parsed.translations;
+          }
+          async function translateNarratives(jobs){
+            if(!jobs.length) return;
+            if(!ANT_KEY){
+              console.log('  [traduction] ANTHROPIC_KEY absente : textes editoriaux en francais seulement (masques hors FR).');
+              return;
+            }
+            var usage={calls:0,input:0,output:0}, appliques=0, suivant=0, CONCURRENCE=4;
+            async function ouvrier(){
+              while(suivant<jobs.length){
+                var job=jobs[suivant++];
+                try{
+                  var tr=await genTraductions(job.an,job.label,usage);
+                  if(tr&&Object.keys(tr).length){
+                    applyNarrativeI18n({matchObj:job.matchObj,premiumRow:job.premiumRow},job.an,tr);
+                    appliques++;
+                  }
+                }catch(e){ console.error('  [traduction] '+job.label+' erreur :',e.message); }
+              }
+            }
+            var ouvriers=[];
+            for(var wi=0;wi<Math.min(CONCURRENCE,jobs.length);wi++) ouvriers.push(ouvrier());
+            await Promise.all(ouvriers);
+            console.log('  [traduction] '+appliques+'/'+jobs.length+' matchs traduits ('+usage.calls+' appels '+TRANSLATION_MODEL+', '+usage.input+' tokens entree, '+usage.output+' tokens sortie).');
           }
           // Pages statiques a forte valeur SEO, en plus des matchs du jour.
           function escHtml(s){
@@ -2141,6 +2195,7 @@ jobs:
             console.log('Recalcul actif : chaque fixture est reevaluee avec les dernieres donnees et cotes disponibles');
             var matchsData=[];
             var premiumRows=[];
+            var narrativeJobs=[];
             var snapshotRows=[];
             var standingsCache={};
             for(var fi=0;fi<fixtures.length;fi++){
@@ -2209,6 +2264,13 @@ jobs:
               var oddsRaw=batch2[0],injuryFetch=batch2[1]||{fetch_ok:false,items:[]},injRaw=injuryFetch.items||[],h2hRaw=batch2[2],wx=batch2[3],nH=batch2[4],nA=batch2[5];
               var predictions=batch2[6]||null,lineups=batch2[7]||null,refStats=batch2[8]||null;
               var pinnacleOdds=batch2[9]||null;
+              // Liga MX / PSL (apiFootballPinnacleFallback) : si The Odds API ne
+              // donne rien, cotes Pinnacle deja presentes dans /odds api-football
+              // (meme forme), jamais un autre bookmaker - lib/pinnacle-odds.js.
+              if(!pinnacleOdds&&usesApiFootballPinnacleFallback(LEAGUES_CONFIG,lgKey(lg.id))){
+                pinnacleOdds=pinnacleOddsFromApiFootball(oddsRaw);
+                if(pinnacleOdds) console.log('  [COTES] Pinnacle via api-football /odds (repli '+lgKey(lg.id)+')');
+              }
               var modelFixturesH=(raw10H||[]).concat(rawPrevH||[]).slice(0,20);
               var modelFixturesA=(raw10A||[]).concat(rawPrevA||[]).slice(0,20);
               var last20IdsH=modelFixturesH.map(function(fx){return fx.fixture.id;});
@@ -2967,6 +3029,10 @@ jobs:
                 },
               });
               matchsData.push(matchObj);
+              // Traduction des textes de `an`, differee apres la boucle (voir
+              // translateNarratives). La ligne premium de CE match porte les
+              // traductions premium (facteur_x/verdict_shark).
+              if(an) narrativeJobs.push({an:an,matchObj:matchObj,premiumRow:(premiumRows.length&&premiumRows[premiumRows.length-1].fixture_id===f.id)?premiumRows[premiumRows.length-1]:null,label:String(f.id)});
               // item 5 : 'conf' est l'alias legacy deprecie (model_probability/10,
               // voir commentaire matchObj.conf ci-dessus) - jamais un score de
               // robustesse independant. Le log expose aussi explicitement
@@ -3004,6 +3070,10 @@ jobs:
               if(restaurees)console.log('  [FILET] '+restaurees+' analyse(s) conservee(s) de l\'execution precedente plutot que publiees vides.');
               else console.log('  [FILET] aucune analyse precedente exploitable a conserver.');
             }
+            // Traductions des textes editoriaux : apres le FILET (une analyse
+            // restauree garde ses propres traductions, on ne traduit pas un
+            // match remplace) et avant toute copie publique / ecriture premium.
+            await translateNarratives(narrativeJobs.filter(function(j){ return matchsData.indexOf(j.matchObj)!==-1; }));
             // item 2 : compteurs honnetes de la file d'attente API globale
             // (v3.football.api-sports.io uniquement - voir API_FETCHER) pour
             // que le quota reellement consomme, le cache reellement reutilise
@@ -3113,8 +3183,46 @@ jobs:
                 });
                 if(repli) elus[jourDe(repli)||'repli']=repli;
               }
-              var ids=Object.keys(elus).map(function(k){ return elus[k].id; });
-              allMatchsData.forEach(function(m){ if(m) m.is_free=ids.indexOf(m.id)!==-1; });
+              // Offre PAYS (13/09/2026) : Mexique -> un match Liga MX, Afrique du
+              // Sud -> un match PSL, par jour (aujourd'hui, demain), UNIQUEMENT
+              // parmi les matchs reellement analyses (analysable). Aucun match
+              // de la ligue analyse ce jour-la -> aucune designation pays : le
+              // site (lib/free-match.js) retombe sur l'offre generale.
+              var marchesDe={};
+              var ajouterMarche=function(m,code){
+                var k=String(m.id); marchesDe[k]=marchesDe[k]||[];
+                if(marchesDe[k].indexOf(code)===-1) marchesDe[k].push(code);
+              };
+              Object.keys(elus).forEach(function(k){ ajouterMarche(elus[k],'default'); });
+              var OFFRES_PAYS=[{code:'mx',league_key:'liga_mx'},{code:'za',league_key:'south_africa_premiership'}];
+              var elusPays=[];
+              OFFRES_PAYS.forEach(function(o){
+                var joursLigue=[];
+                allMatchsData.forEach(function(m){
+                  var j=jourDe(m);
+                  if(analysable(m) && m.league_key===o.league_key && j>=TODAY && joursLigue.indexOf(j)===-1) joursLigue.push(j);
+                });
+                joursLigue.sort();
+                joursLigue.slice(0,2).forEach(function(j){
+                  var choisi=null;
+                  allMatchsData.forEach(function(m){
+                    if(!analysable(m) || m.league_key!==o.league_key || jourDe(m)!==j) return;
+                    var c=Number(m.conf)||0;
+                    if(!choisi||c>(Number(choisi.conf)||0)) choisi=m;
+                  });
+                  if(choisi){ ajouterMarche(choisi,o.code); elusPays.push({code:o.code,jour:j,m:choisi}); }
+                });
+                if(!joursLigue.length) console.log('  [ACCES] marche '+o.code+' : aucun match '+o.league_key+' analyse, repli sur l\'offre generale.');
+              });
+              var ids=Object.keys(elus).map(function(k){ return elus[k].id; }).concat(elusPays.map(function(e){ return e.m.id; }));
+              allMatchsData.forEach(function(m){
+                if(!m) return;
+                m.is_free=ids.indexOf(m.id)!==-1;
+                if(m.is_free) m.free_markets=marchesDe[String(m.id)]; else delete m.free_markets;
+              });
+              elusPays.forEach(function(e){
+                console.log('  [ACCES] analyse offerte marche '+e.code+' du '+e.jour+' : '+e.m.id+' ('+(e.m.home&&e.m.home.n)+' vs '+(e.m.away&&e.m.away.n)+')');
+              });
               var cles=Object.keys(elus).sort();
               if(!cles.length) console.log('  [ACCES] aucune analyse exploitable a offrir.');
               cles.forEach(function(k){

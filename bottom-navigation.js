@@ -4,10 +4,10 @@
   // pays /gb/ /za/ /mx/) contient desormais TOUTES les pages publiques
   // (scripts/build-locales.js) : la navigation reste donc toujours dans le
   // repertoire courant (/gb/pro.html, /mx/compte.html...). Blog : /<langue>/blog/,
-  // /en/blog/ pour gb et za, /es/blog/ pour mx, blog FR racine pour fr.
+  // /en/blog/ pour gb et za, /mx/blog/ pour mx, blog FR racine pour fr.
   // I18N.href (i18n/i18n.js) fait foi quand il est charge ; le repli ci-dessous
   // applique exactement la meme regle.
-  var BLOG_DIR={fr:'',en:'en',es:'es',de:'de',it:'it',pt:'pt',gb:'en',za:'en',mx:'es'};
+  var BLOG_DIR={fr:'',en:'en',es:'es',de:'de',it:'it',pt:'pt',gb:'en',za:'en',mx:'mx'};
   var segMatch=location.pathname.match(/^\/([a-z]{2})(?:\/|$)/);
   var dir=(segMatch&&BLOG_DIR.hasOwnProperty(segMatch[1]))?segMatch[1]:'';
   function href(page){

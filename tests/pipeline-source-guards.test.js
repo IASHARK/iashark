@@ -193,9 +193,12 @@ test("pipeline source: SAFE_PICK_OF_THE_DAY canonique est injectee sur la carte 
   assert.match(source, /matchCibleSafePick\.is_canonical_pick=true/);
   // designerMatchGratuit doit verifier is_canonical_pick EN PREMIER, avant
   // toute logique de confiance legacy.
-  const designerBlock = source.slice(source.indexOf("(function designerMatchGratuit(){"), source.indexOf("})();"));
+  const designerStart = source.indexOf("(function designerMatchGratuit(){");
+  const designerBlock = source.slice(designerStart, source.indexOf("})();", designerStart));
   const canoniqueCheckIndex = designerBlock.indexOf("m.is_canonical_pick");
-  const legacyCandidatsIndex = designerBlock.indexOf("var candidats=allMatchsData.filter");
+  // Depuis le 13/09/2026 : une designation par jour (et par pays) ; la
+  // selection legacy par confiance est la boucle jours.slice(0,2).forEach.
+  const legacyCandidatsIndex = designerBlock.indexOf("jours.slice(0,2).forEach");
   assert.ok(canoniqueCheckIndex >= 0 && canoniqueCheckIndex < legacyCandidatsIndex, "la verification is_canonical_pick doit precéder la logique de selection legacy par confiance");
 });
 

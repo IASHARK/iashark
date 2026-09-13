@@ -99,7 +99,8 @@ test("I18N.href : chaque page publique reste dans le repertoire courant", () => 
   var mx = loadI18n("/mx/");
   assert.deepEqual([mx.locale, mx.htmlLang], ["es-mx", "es-MX"]);
   assert.equal(mx.href("pro.html"), "/mx/pro.html");
-  assert.equal(mx.href("blog.html"), "/es/blog/");
+  assert.equal(mx.href("blog.html"), "/mx/blog/");
+  assert.equal(mx.href("blog/guides/x.html"), "/mx/blog/guides/x.html");
   assert.equal(loadI18n("/za/cgv.html").href("blog/guides/x.html"), "/en/blog/guides/x.html");
   assert.equal(loadI18n("/za/").htmlLang, "en-ZA");
   assert.equal(loadI18n("/de/pro.html").href("blog.html"), "/de/blog/");
@@ -121,7 +122,7 @@ test("selecteur langue/pays : 9 options, meme page dans le repertoire cible", ()
   assert.equal(byDir.gb.active, true);
   assert.equal(byDir.za.hreflang, "en-ZA");
   assert.equal(loadI18n("/match/123.html").switchHref("za"), "/za/match.html?id=123");
-  assert.equal(loadI18n("/en/blog/guides/x.html").switchHref("mx"), "/es/blog/");
+  assert.equal(loadI18n("/en/blog/guides/x.html").switchHref("mx"), "/mx/blog/");
   assert.equal(loadI18n("/en/blog/guides/x.html").switchHref("fr"), "/blog.html");
   assert.match(I.switcherHtml(), /English \(South Africa\)/);
 });
@@ -250,7 +251,7 @@ test("landings pays gb/za/mx : aucun historique ni 'public record', liens dans l
     assert.doesNotMatch(visible, /historique|track record|public record|on the record|historial p[uú]blico|pr[oó]ximamente/i, d);
     Array.from(html.matchAll(/href="(\/[^"]*)"/g)).map(function (m) { return m[1]; }).forEach(function (h) {
       if (!/\.html$|\/$/.test(h)) return; // ressources partagees (favicon, assets)
-      assert.ok(h.indexOf("/" + d + "/") === 0 || /^\/(en|es)\/blog\//.test(h), d + "/landing.html : lien hors repertoire " + h);
+      assert.ok(h.indexOf("/" + d + "/") === 0 || /^\/(en|es|mx)\/blog\//.test(h), d + "/landing.html : lien hors repertoire " + h);
     });
     assert.match(html, /<script src="\/lib\/market-config\.js"><\/script>/, d);
     ["free", "pro", "edge", "annual_edge"].forEach(function (k) { assert.match(html, new RegExp('data-market-price="' + k + '"'), d + " " + k); });

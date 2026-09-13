@@ -479,7 +479,7 @@ main a:focus-visible,main button:focus-visible,main summary:focus-visible,
   <nav class="desktop-nav" aria-label="Navegación principal" data-i18n-attr="aria-label:home_app.aria_main_nav">
     <a href="#decisions">Partidos</a>
     <a href="/mx/a-propos.html">Método</a>
-    <a href="/es/blog/">Guías</a>
+    <a href="/mx/blog/">Guías</a>
   </nav>
   <div class="header-actions">
     <span id="langSwitchSlot"></span>
@@ -722,7 +722,7 @@ main a:focus-visible,main button:focus-visible,main summary:focus-visible,
     <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.9 6.6L22 9.3l-5 4.9L18.2 22 12 18.3 5.8 22 7 14.2 2 9.3l7.1-.7z"/></svg></div>
     <div class="nav-lbl">HERRAMIENTAS</div>
   </a>
-  <a href="/es/blog/" class="nav-item">
+  <a href="/mx/blog/" class="nav-item">
     <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg></div>
     <div class="nav-lbl">BLOG</div>
   </a>
@@ -1140,7 +1140,7 @@ function renderMatchs(){
   // La vitrine EST le match gratuit du jour : meme module que la page match
   // (lib/free-match.js). Deux algorithmes separes se contredisaient, et le
   // bouton "Voir le match gratuit du jour" ouvrait un match payant.
-  var featured=IasharkFreeMatch.pickFreeMatch(getSportMatchs());
+  var featured=IasharkFreeMatch.pickFreeMatch(getSportMatchs(),null,(window.IASHARK_MARKET&&window.IASHARK_MARKET.code)||null);
   freeMatchId=featured?featured.id:null;
   if(hero)hero.innerHTML=featured?buildHeroFeature(featured):'<div class="feature-loading">NINGÚN PARTIDO DISPONIBLE</div>';
   // PARCOURS. Le bouton principal promet l'analyse gratuite du jour : il

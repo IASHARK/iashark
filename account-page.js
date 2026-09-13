@@ -341,6 +341,9 @@
         + '<li class="flex gap-2.5 text-[14px]"><span aria-hidden="true" class="text-cyan">✓</span>' + tr('compte_page.benefit_pro_decisions_log', 'Le journal des décisions synchronise') + '</li>'
         + '<li class="flex gap-2.5 text-[14px]"><span aria-hidden="true" class="text-cyan">✓</span>' + tr('compte_page.benefit_pro_bankroll', 'Le suivi de bankroll lié au compte') + '</li>'
         + '</ul>'
+        // Cases CGV + execution immediate (lib/checkout-consent.js), montees
+        // par monterConsentement() depuis brancher().
+        + '<div id="checkoutConsent"></div>'
         + '<div class="mt-6">' + boutonPrimaire('souscrire', tr('compte_page.discover_pro_cta', 'Découvrir Pro'), 'w-full sm:w-auto') + '</div>'
         + '<p id="msgFacturation" hidden aria-live="polite"></p>')
       + '</div>';
@@ -589,7 +592,10 @@
     });
     if ($('enregistrerPrefs')) $('enregistrerPrefs').addEventListener('click', enregistrerPreferences);
     if ($('enregistrerNotifs')) $('enregistrerNotifs').addEventListener('click', enregistrerNotifications);
-    if ($('souscrire')) $('souscrire').addEventListener('click', function () { facturation('create-checkout-session', $('souscrire')); });
+    if ($('souscrire')) {
+      monterConsentement();
+      $('souscrire').addEventListener('click', function () { facturation('create-checkout-session', $('souscrire')); });
+    }
     if ($('portail')) $('portail').addEventListener('click', function () { facturation('create-portal-session', $('portail')); });
     if ($('exporter')) $('exporter').addEventListener('click', exporter);
     brancherDialogues();
@@ -658,7 +664,45 @@
     }
   }
 
+  /* Consentement obligatoire avant paiement (lib/checkout-consent.js) : CGV +
+     demande d'execution immediate selon le marche, cases jamais pre-cochees.
+     create-checkout-session refait la meme verification cote serveur. Le
+     module est charge a la demande si la page generee ne l'inclut pas encore ;
+     s'il ne se charge pas, aucun paiement n'est lance. */
+  var consentement = null;
+  function chargerConsentement() {
+    return new Promise(function (resolve) {
+      if (window.IasharkCheckoutConsent) return resolve(window.IasharkCheckoutConsent);
+      var s = document.createElement('script');
+      s.src = '/lib/checkout-consent.js';
+      s.onload = function () { resolve(window.IasharkCheckoutConsent || null); };
+      s.onerror = function () { resolve(null); };
+      document.head.appendChild(s);
+    });
+  }
+  function monterConsentement() {
+    consentement = null;
+    var bloc = $('checkoutConsent'), bouton = $('souscrire');
+    if (!bloc || !bouton) return;
+    chargerConsentement().then(function (lib) {
+      // La section a pu etre re-rendue entre-temps : on ne monte que sur le bloc courant.
+      if (lib && $('checkoutConsent') === bloc) consentement = lib.mount(bloc, { buttons: [bouton] });
+    });
+  }
+
   async function facturation(fonction, bouton) {
+    var consentementPaiement = null;
+    if (fonction === 'create-checkout-session') {
+      if (!consentement) {
+        retour('msgFacturation', tr('checkout_consent.error_load', 'Les conditions de paiement n’ont pas pu être chargées. Rechargez la page.'), 'error');
+        return;
+      }
+      if (!consentement.check()) {
+        retour('msgFacturation', consentement.text('error_required'), 'error');
+        return;
+      }
+      consentementPaiement = consentement.payload();
+    }
     var relacher = occuper(bouton, tr('compte_page.opening_label', 'Ouverture…'));
     retour('msgFacturation', '');
     try {
@@ -673,6 +717,7 @@
         var code = String((marche() && (marche().checkoutMarket || marche().code)) || dir || '').toLowerCase();
         if (code === 'gb' || code === 'mx' || code === 'za') corps.market = code;
         if (dir) corps.dir = dir;
+        corps.consent = consentementPaiement;
       }
       var r = await fetch(window.IasharkApp.url + '/functions/v1/' + fonction, {
         method: 'POST',
@@ -682,6 +727,11 @@
       var j = await r.json();
       if (j.url) { location.href = j.url; return; }
       relacher();
+      if (j.code === 'consent_required') {
+        if (consentement) consentement.check();
+        retour('msgFacturation', j.message || tr('checkout_consent.error_required', 'Cochez les cases obligatoires ci-dessus pour continuer vers le paiement.'), 'error');
+        return;
+      }
       if (j.processed === false && j.reason === 'market_not_configured') {
         retour('msgFacturation', tr('compte_page.err_market_not_configured', 'Le paiement en ligne n’est pas encore ouvert dans votre pays. Vous pouvez continuer à utiliser IASHARK gratuitement.'), 'error');
         return;

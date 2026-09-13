@@ -21,6 +21,8 @@ const DATA_URL = "https://iashark.com/data.json";
 const PREMIUM_FIELDS = [
   "kelly", "edge", "verdict_shark", "facteur_x", "dropping_odds", "player_markets",
   "pari_rec", "cote_rec", "model_probability", "markets_compared",
+  // Traductions des textes premium (pipeline : lib/narrative-i18n.js).
+  "facteur_x_i18n", "verdict_shark_i18n",
 ];
 
 // Un match marque is_free par le pipeline est l'offre d'appel du jour : ses
@@ -101,7 +103,7 @@ Deno.serve(async (req: Request) => {
   if (fixtureIds.length) {
     const { data: premiumRows, error } = await supabase
       .from("match_premium_data")
-      .select("fixture_id,kelly,edge,verdict_shark,facteur_x,dropping_odds,player_markets,pari_rec,cote_rec,model_probability,markets_compared")
+      .select("fixture_id,kelly,edge,verdict_shark,facteur_x,dropping_odds,player_markets,pari_rec,cote_rec,model_probability,markets_compared,raw_response")
       .in("fixture_id", fixtureIds);
     if (error) {
       console.error("match_premium_data query failed:", error.message);
@@ -119,6 +121,8 @@ Deno.serve(async (req: Request) => {
           edge: premium.edge ?? null,
           verdict_shark: premium.verdict_shark ?? null,
           facteur_x: premium.facteur_x ?? null,
+          facteur_x_i18n: (premium.raw_response as { narrative_i18n?: Record<string, unknown> } | null)?.narrative_i18n?.facteur_x_i18n ?? null,
+          verdict_shark_i18n: (premium.raw_response as { narrative_i18n?: Record<string, unknown> } | null)?.narrative_i18n?.verdict_shark_i18n ?? null,
           dropping_odds: premium.dropping_odds ?? null,
           player_markets: premium.player_markets ?? null,
           // Le pari recommande revient ici, depuis la table protegee, pour un

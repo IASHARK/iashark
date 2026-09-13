@@ -50,6 +50,30 @@
   // reason:"market_not_configured" from the server. That is shown to the
   // visitor honestly below, in Mexican Spanish, never papered over with a
   // fake URL or a fake success state.
+  // ---- Consentimiento antes del pago ------------------------------------
+  // lib/checkout-consent.js muestra en #checkoutConsent la casilla obligatoria
+  // (Términos y condiciones + consentimiento expreso al cobro recurrente, LFPC
+  // art. 76 Bis VIII) y una línea informativa; no se pide ninguna renuncia
+  // (LFPC art. 1, derechos irrenunciables). Los tres botones quedan
+  // aria-disabled hasta marcarla. create-checkout-session vuelve a verificar
+  // el consentimiento en el servidor. Si el módulo no carga, no se llama al
+  // checkout.
+  var consentReady = new Promise(function (resolve) {
+    function mountIt() {
+      var lib = window.IasharkCheckoutConsent;
+      var box = document.getElementById("checkoutConsent");
+      resolve(lib && box ? lib.mount(box, {
+        buttons: ["subscribeProBtn", "subscribeEdgeBtn", "subscribeAnnualBtn"].map(function (id) { return document.getElementById(id); })
+      }) : null);
+    }
+    if (window.IasharkCheckoutConsent) return mountIt();
+    var s = document.createElement("script");
+    s.src = "/lib/checkout-consent.js";
+    s.onload = mountIt;
+    s.onerror = function () { resolve(null); };
+    document.head.appendChild(s);
+  });
+
   function wireCheckout(buttonId, msgId, tierLabel) {
     var btn = document.getElementById(buttonId);
     var msg = document.getElementById(msgId);
@@ -62,6 +86,15 @@
     }
 
     btn.addEventListener("click", async function () {
+      var consent = await consentReady;
+      if (!consent) {
+        show("No pudimos cargar las condiciones de pago. Vuelve a cargar la página.", true);
+        return;
+      }
+      if (!consent.check()) {
+        show(consent.text("error_required"), true);
+        return;
+      }
       if (!window.IasharkApp) {
         show("El checkout todavía se está cargando — inténtalo de nuevo en un momento.", true);
         return;
@@ -103,11 +136,17 @@
         var response = await fetch(window.IasharkApp.url + "/functions/v1/create-checkout-session", {
           method: "POST",
           headers: { apikey: window.IasharkApp.key, Authorization: "Bearer " + token, "Content-Type": "application/json" },
-          body: JSON.stringify({ market: "mx", dir: "mx" })
+          body: JSON.stringify({ market: "mx", dir: "mx", consent: consent.payload() })
         });
         var data = await response.json();
         if (data && data.url) {
           location.href = data.url;
+          return;
+        }
+        if (data && data.code === "consent_required") {
+          consent.check();
+          show(data.message || consent.text("error_required"), true);
+          btn.disabled = false;
           return;
         }
         // Honest "próximamente" - matches the site's existing

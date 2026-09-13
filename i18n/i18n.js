@@ -29,7 +29,7 @@
     {dir:"gb", locale:"en",    htmlLang:"en-GB", intl:"en-GB", market:"gb", blog:"en", label:"English (UK)"},
     {dir:"za", locale:"en",    htmlLang:"en-ZA", intl:"en-ZA", market:"za", blog:"en", label:"English (South Africa)"},
     {dir:"en", locale:"en",    htmlLang:"en",    intl:"en-GB", market:"fr", blog:"en", label:"English (International)"},
-    {dir:"mx", locale:"es-mx", htmlLang:"es-MX", intl:"es-MX", market:"mx", blog:"es", label:"Español (México)"},
+    {dir:"mx", locale:"es-mx", htmlLang:"es-MX", intl:"es-MX", market:"mx", blog:"mx", label:"Español (México)"},
     {dir:"es", locale:"es",    htmlLang:"es",    intl:"es-ES", market:"fr", blog:"es", label:"Español"},
     {dir:"de", locale:"de",    htmlLang:"de",    intl:"de-DE", market:"fr", blog:"de", label:"Deutsch"},
     {dir:"it", locale:"it",    htmlLang:"it",    intl:"it-IT", market:"fr", blog:"it", label:"Italiano"},
@@ -104,7 +104,7 @@
     if (p.indexOf("/") !== -1 && isDir(first)) return "/" + p + suffix; // deja prefixe
     if (p === "blog.html" || p === "blog" || p.indexOf("blog/") === 0){
       // Blog : /<langue>/blog/ pour en es de it pt, /en/blog/ pour gb et za,
-      // /es/blog/ pour mx, blog FR racine pour fr et les pages racine.
+      // /mx/blog/ pour mx (guides es-MX dedies), blog FR racine pour fr et les pages racine.
       var rest = p.indexOf("blog/") === 0 ? p.slice(5) : "";
       if (conf && conf.blog) return "/" + conf.blog + "/blog/" + rest + suffix;
       return (rest ? "/blog/" + rest : "/blog.html") + suffix;

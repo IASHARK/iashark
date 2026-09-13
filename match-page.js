@@ -13,9 +13,15 @@ function tf(key,fallback,vars){const s=String(t(key,fallback));return vars?s.rep
 function lien(p){return (window.I18N&&window.I18N.href)?window.I18N.href(p):'/'+p;}
 function estFr(){return !(window.I18N&&window.I18N.locale)||window.I18N.locale==='fr';}
 // Textes rediges par le pipeline (LLM ou gabarits francais du workflow) :
-// ils n'existent qu'en francais. Hors FR, on ne les affiche pas plutot que
-// de montrer du francais ou d'inventer une traduction.
-function narratif(v){return estFr()?v:null;}
+// rediges en francais. Hors FR, on affiche uniquement leur traduction
+// validee par le pipeline (<champ>_i18n, es-mx -> es, voir
+// lib/match-view-model.js#localizedNarrative) ; sans traduction, rien -
+// jamais du francais, jamais une traduction inventee.
+function narratif(v,i18n){
+  if(estFr())return v;
+  const vmLib=window.IasharkMatchViewModel;
+  return vmLib&&vmLib.localizedNarrative?vmLib.localizedNarrative(v,i18n,window.I18N.locale):null;
+}
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const n=v=>Number.isFinite(Number(v))?Number(v):null;
 const fmt=(v,d=1)=>n(v)===null?'—':Number(v).toLocaleString(localeTag(),{maximumFractionDigits:d});
@@ -205,8 +211,9 @@ function matchReadingCard(vm){
   const sentence=matchesLeader
     ?`${leading.label}${aLAvantage}${locSuffix}${t('match_page.reading_matches_recommendation',", et c'est le marché que nous recommandons.")}`
     :`${leading.label}${aLAvantage}${locSuffix}${t('match_page.reading_differs_recommendation_prefix',", mais ce n'est pas le marché que nous recommandons — nous recommandons plutôt ")}${marcheFr(vm,r.market)}.`;
-  // facteur_x/conseil_public : texte LLM du pipeline, francais uniquement.
-  const reason=narratif(vm.editorial.decisiveFactor);
+  // facteur_x/conseil_public : texte LLM du pipeline ; hors FR, sa traduction
+  // validee (facteur_x_i18n/conseil_public_i18n), sinon masque.
+  const reason=narratif(vm.editorial.decisiveFactor,vm.editorial.decisiveFactorI18n);
   // Le marche recommande est deja affiche dans cette rangee. Quand c'est
   // lui-meme un BTTS, la tuile BTTS generique repetait exactement le meme
   // libelle et le meme pourcentage deux fois cote a cote.
@@ -1101,7 +1108,7 @@ async function init(){
       raw=raw||list.find(x=>String(x.id)===String(id));
     }
     if(!raw)throw new Error(t('match_page.match_not_found','Match introuvable'));
-    const isFree=String(raw.id)===String(IasharkFreeMatch.pickFreeMatchId(list));
+    const isFree=String(raw.id)===String(IasharkFreeMatch.pickFreeMatchId(list,null,(window.IASHARK_MARKET&&window.IASHARK_MARKET.code)||null));
     if(isFree&&!ctx.session){renderAuthWall(raw);return;}
     if(!isFree&&!ctx.isPro){renderProWall(raw);return;}
     render(raw);

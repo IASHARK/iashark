@@ -45,6 +45,28 @@
   // body, and - today, with STRIPE_PRICE_ID_GB unset - all get back
   // processed:false/reason:"market_not_configured" from the server. That is
   // shown to the visitor honestly below, never papered over with a fake URL.
+  // ---- Consent before payment -------------------------------------------
+  // lib/checkout-consent.js renders the required boxes (Terms + UK express
+  // request/acknowledgement, CCR 2013 reg. 36/37) into #checkoutConsent and
+  // keeps the three pay buttons aria-disabled until they are ticked.
+  // create-checkout-session re-checks the same consent server-side. Fails
+  // closed: if the module cannot load, no checkout call is ever made.
+  var consentReady = new Promise(function (resolve) {
+    function mountIt() {
+      var lib = window.IasharkCheckoutConsent;
+      var box = document.getElementById("checkoutConsent");
+      resolve(lib && box ? lib.mount(box, {
+        buttons: ["subscribeProBtn", "subscribeEdgeBtn", "subscribeAnnualBtn"].map(function (id) { return document.getElementById(id); })
+      }) : null);
+    }
+    if (window.IasharkCheckoutConsent) return mountIt();
+    var s = document.createElement("script");
+    s.src = "/lib/checkout-consent.js";
+    s.onload = mountIt;
+    s.onerror = function () { resolve(null); };
+    document.head.appendChild(s);
+  });
+
   function wireCheckout(buttonId, msgId, tierLabel) {
     var btn = document.getElementById(buttonId);
     var msg = document.getElementById(msgId);
@@ -57,6 +79,15 @@
     }
 
     btn.addEventListener("click", async function () {
+      var consent = await consentReady;
+      if (!consent) {
+        show("The payment conditions could not be loaded. Please reload the page.", true);
+        return;
+      }
+      if (!consent.check()) {
+        show(consent.text("error_required"), true);
+        return;
+      }
       if (!window.IasharkApp) {
         show("Checkout is still loading — please try again in a moment.", true);
         return;
@@ -84,11 +115,17 @@
         var response = await fetch(window.IasharkApp.url + "/functions/v1/create-checkout-session", {
           method: "POST",
           headers: { apikey: window.IasharkApp.key, Authorization: "Bearer " + token, "Content-Type": "application/json" },
-          body: JSON.stringify({ market: "gb", dir: "gb" })
+          body: JSON.stringify({ market: "gb", dir: "gb", consent: consent.payload() })
         });
         var data = await response.json();
         if (data && data.url) {
           location.href = data.url;
+          return;
+        }
+        if (data && data.code === "consent_required") {
+          consent.check();
+          show(data.message || consent.text("error_required"), true);
+          btn.disabled = false;
           return;
         }
         // Honest "coming soon" - matches the site's existing

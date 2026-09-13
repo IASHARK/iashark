@@ -93,3 +93,53 @@ test("l'accueil ne repete pas le match gratuit dans la liste et se re-rend a min
   assert.doesNotMatch(accueil, /ordonnee\.unshift\(/);
   assert.match(accueil, /setInterval\(function\(\)\{var j=getTodayStr\(\)/);
 });
+
+// 13/09/2026 : offre gratuite PAR PAYS. Le Mexique voyait un match de Premier
+// League ; il doit voir un match Liga MX (free_markets ["mx"]), l'Afrique du
+// Sud un match PSL (["za"]). Repli sur l'offre generale sinon.
+const general = m(10, "2026-09-02 21:00", { is_free: true, pari_rec: "A", free_markets: ["default"] });
+const mxDuJour = m(11, "2026-09-02 03:00", { is_free: true, pari_rec: "B", free_markets: ["mx"] });
+const mxDemain = m(12, "2026-09-03 03:00", { is_free: true, pari_rec: "C", free_markets: ["mx"] });
+const zaDuJour = m(13, "2026-09-02 15:00", { is_free: true, pari_rec: "D", free_markets: ["za"] });
+
+test("marche pays : prefere la designation du marche pour le jour courant", () => {
+  const list = [general, mxDuJour, mxDemain, zaDuJour];
+  assert.equal(pickFreeMatchId(list, horloge, "mx"), 11);
+  assert.equal(pickFreeMatchId(list, horloge, "za"), 13);
+});
+
+test("marche pays : sans designation du jour, prend la prochaine du marche", () => {
+  const list = [general, mxDemain];
+  assert.equal(pickFreeMatchId(list, horloge, "mx"), 12);
+});
+
+test("marche pays : aucune designation pour ce marche -> offre generale (repli)", () => {
+  const list = [general, mxDuJour];
+  assert.equal(pickFreeMatchId(list, horloge, "za"), 10);
+  assert.equal(pickFreeMatchId(list, horloge, "gb"), 10);
+  assert.equal(pickFreeMatchId(list, horloge, "fr"), 10);
+});
+
+test("sans marche : comportement inchange, une offre reservee a un pays n'est jamais l'offre generale", () => {
+  const list = [mxDuJour, zaDuJour, general];
+  assert.equal(pickFreeMatchId(list, horloge), 10);
+  assert.equal(pickFreeMatchId(list, horloge, null), 10);
+  // un match peut porter plusieurs marches
+  const partage = m(20, "2026-09-02 22:00", { is_free: true, pari_rec: "E", free_markets: ["default", "mx"] });
+  assert.equal(pickFreeMatchId([partage], horloge, "mx"), 20);
+  assert.equal(pickFreeMatchId([partage], horloge), 20);
+  // fichier anterieur sans free_markets : toujours general
+  assert.equal(pickFreeMatchId([m(30, "2026-09-02 20:00", { is_free: true, pari_rec: "F" })], horloge, "mx"), 30);
+  // seules des offres pays existent : on ne montre pas rien pour autant
+  assert.equal(pickFreeMatchId([mxDuJour], horloge), 11);
+});
+
+test("l'accueil et la page match passent le meme marche au module partage", () => {
+  const marche = "(window.IASHARK_MARKET&&window.IASHARK_MARKET.code)||null";
+  const esc = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  assert.match(read("index.html"), new RegExp(esc("IasharkFreeMatch.pickFreeMatch(getSportMatchs(),null," + marche + ")")));
+  assert.match(read("match-page.js"), new RegExp(esc("IasharkFreeMatch.pickFreeMatchId(list,null," + marche + ")")));
+  for (const dir of ["gb", "za", "mx"]) {
+    assert.match(read(dir + "/index.html"), new RegExp(esc("pickFreeMatch(getSportMatchs(),null," + marche + ")")), dir + "/index.html");
+  }
+});

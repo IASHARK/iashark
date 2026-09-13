@@ -593,6 +593,8 @@ main a{text-decoration:none;}
   <div class="mx-auto w-full max-w-[1200px] px-5 sm:px-8 py-16 sm:py-24">
     <div class="mb-4 inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.2em] text-soft"><span aria-hidden="true" class="h-1 w-1 rounded-full bg-cyan"></span>Pricing</div>
     <h2 class="text-[clamp(28px,3.2vw,42px)] font-extrabold leading-[1.12] tracking-[-0.035em] text-ink">Start free. <span class="text-cyan">Go further when you want to.</span></h2>
+    <!-- Required consent before any paid plan (lib/checkout-consent.js, re-checked by create-checkout-session). -->
+    <div class="mt-8 max-w-3xl"><div id="checkoutConsent"></div></div>
     <div class="mt-8 rounded-3xl border border-hairline bg-surface/40 p-1.5">
       <div class="plan-grid">
         <div class="flex flex-1 flex-col p-6 sm:p-7">
@@ -703,6 +705,7 @@ main a{text-decoration:none;}
 <script src="/lib/market-config.js"></script>
 <script src="/funnel-track.js"></script>
 <script src="/app-client.js"></script>
+<script src="/lib/checkout-consent.js"></script>
 <script src="/za/za-page.js"></script>
 <script src="/site-prefs.js"></script>
 <script src="/bottom-navigation.js"></script>

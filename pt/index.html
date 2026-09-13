@@ -1140,7 +1140,7 @@ function renderMatchs(){
   // La vitrine EST le match gratuit du jour : meme module que la page match
   // (lib/free-match.js). Deux algorithmes separes se contredisaient, et le
   // bouton "Voir le match gratuit du jour" ouvrait un match payant.
-  var featured=IasharkFreeMatch.pickFreeMatch(getSportMatchs());
+  var featured=IasharkFreeMatch.pickFreeMatch(getSportMatchs(),null,(window.IASHARK_MARKET&&window.IASHARK_MARKET.code)||null);
   freeMatchId=featured?featured.id:null;
   if(hero)hero.innerHTML=featured?buildHeroFeature(featured):'<div class="feature-loading">NENHUM JOGO DISPONÍVEL</div>';
   // PARCOURS. Le bouton principal promet l'analyse gratuite du jour : il

@@ -10,6 +10,7 @@
 <link rel="alternate" hreflang="fr" href="https://iashark.com/blog.html">
 <link rel="alternate" hreflang="en" href="https://iashark.com/en/blog/">
 <link rel="alternate" hreflang="es" href="https://iashark.com/es/blog/">
+<link rel="alternate" hreflang="es-MX" href="https://iashark.com/mx/blog/">
 <link rel="alternate" hreflang="de" href="https://iashark.com/de/blog/">
 <link rel="alternate" hreflang="it" href="https://iashark.com/it/blog/">
 <link rel="alternate" hreflang="pt" href="https://iashark.com/pt/blog/">
@@ -288,12 +289,12 @@
 <script>
 /* Localisation du hub (servi a la racine et copie sous /<dir>/blog.html).
    Les articles traduits existent en copies statiques sous /<langue>/blog/guides/
-   (en, es, de, it, pt ; es-mx lit la version espagnole) : chaque lien d'article
+   (en, es, de, it, pt ; es-mx sous /mx/blog/guides/) : chaque lien d'article
    est pointe vers la version de la langue affichee. Dates et durees de lecture
    sont formatees dans la langue ; le HTML servi garde la version francaise. */
 (function(){
   if(!window.I18N||!window.I18N.init) return;
-  var BLOG_LANG={en:'en',es:'es','es-mx':'es',de:'de',it:'it',pt:'pt'};
+  var BLOG_LANG={en:'en',es:'es','es-mx':'mx',de:'de',it:'it',pt:'pt'};
   window.I18N.init().then(function(I){
     var pre=BLOG_LANG[I.locale]?'/'+BLOG_LANG[I.locale]:'';
     document.querySelectorAll('a[href*="/blog/guides/"]').forEach(function(a){

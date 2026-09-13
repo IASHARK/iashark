@@ -88,3 +88,26 @@ test("la page d'accueil ne floute plus une donnee premium", () => {
   assert.match(html, /m\.pari_rec\|\|m\.market_id\|\|m\.has_signal/,
     "la carte doit rester juste quand le pari n'est pas servi");
 });
+
+// 13/09/2026 : offres pays (Liga MX pour mx, PSL pour za). Elles sont aussi
+// is_free=true (donc publiques), marquees free_markets, et ne sont designees
+// que parmi les matchs reellement analyses - jamais un pick fabrique.
+test("le pipeline designe les offres pays parmi les matchs analyses, avec free_markets", () => {
+  const wf = read(".github/workflows/update-data.yml");
+  assert.match(wf, /\{code:'mx',league_key:'liga_mx'\},\{code:'za',league_key:'south_africa_premiership'\}/);
+  assert.match(wf, /if\(analysable\(m\) && m\.league_key===o\.league_key && j>=TODAY/);
+  assert.match(wf, /ajouterMarche\(elus\[k\],'default'\)/);
+  assert.match(wf, /if\(m\.is_free\) m\.free_markets=marchesDe\[String\(m\.id\)\]; else delete m\.free_markets;/);
+});
+
+test("une offre pays reste publique cote client pour son marche, l'offre generale ailleurs", () => {
+  const liste = [
+    { id: 1, date: "2026-09-02 21:00", has_signal: true, conf: 9, is_free: true, free_markets: ["default"] },
+    { id: 2, date: "2026-09-02 03:00", pari_rec: "Over 2.5", conf: 5, is_free: true, free_markets: ["mx"] },
+    { id: 3, date: "2026-09-02 20:00", has_signal: true, conf: 8 }
+  ];
+  const h = { day: "2026-09-02", now: "2026-09-02 10:00" };
+  assert.equal(pickFreeMatch(liste, h, "mx").id, 2);
+  assert.equal(pickFreeMatch(liste, h, "za").id, 1, "sans offre PSL, l'Afrique du Sud retombe sur l'offre generale");
+  assert.equal(pickFreeMatch(liste, h).id, 1);
+});

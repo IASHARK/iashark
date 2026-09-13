@@ -35,21 +35,46 @@
     if(MARKETS.indexOf(seg)!==-1)body.market=seg;
     return body;
   }
+  // Consentement obligatoire avant paiement (lib/checkout-consent.js : CGV +
+  // demande d'execution immediate selon le marche), reverifie par
+  // create-checkout-session. Charge a la demande si la page generee ne
+  // l'inclut pas encore ; s'il ne se charge pas, aucun paiement n'est lance.
+  function consentLib(){
+    return new Promise(function(resolve){
+      if(window.IasharkCheckoutConsent)return resolve(window.IasharkCheckoutConsent);
+      var s=document.createElement('script');s.src='/lib/checkout-consent.js';
+      s.onload=function(){resolve(window.IasharkCheckoutConsent||null);};
+      s.onerror=function(){resolve(null);};
+      document.head.appendChild(s);
+    });
+  }
   async function init(){
     if(window.I18N&&window.I18N.init){try{await window.I18N.init();}catch(e){}}
     var ctx=await IasharkApp.context();
-    if(ctx.isPro){button.textContent=t('pricing_page.cta_pro_member','Accéder aux analyses');button.onclick=function(){location.href=localHref('');};return;}
+    var box=document.getElementById('checkoutConsent');
+    if(ctx.isPro){if(box)box.hidden=true;button.textContent=t('pricing_page.cta_pro_member','Accéder aux analyses');button.onclick=function(){location.href=localHref('');};return;}
+    if(!box){box=document.createElement('div');box.id='checkoutConsent';button.parentNode.insertBefore(box,button);}
+    var lib=await consentLib();
+    var consent=lib?lib.mount(box,{buttons:[button]}):null;
+    // Le message d'erreur sous le bouton disparait des que les cases requises sont cochees.
+    if(consent)box.addEventListener('change',function(){if(consent.isValid()&&output.classList.contains('error'))message('',false);});
     button.onclick=async function(){
+      if(!consent){message(t('checkout_consent.error_load','Les conditions de paiement n’ont pas pu être chargées. Rechargez la page.'),true);return;}
+      if(!consent.check()){message(consent.text('error_required'),true);return;}
       var current=await IasharkApp.context();
       if(!current.user){location.href=localHref('compte.html#plan');return;}
       button.disabled=true;message(t('pricing_page.checkout_opening','Ouverture du paiement sécurisé…'));
       try{
         var session=await IasharkApp.supabase.auth.getSession();
         var token=session.data.session&&session.data.session.access_token;
-        var response=await fetch(IasharkApp.url+'/functions/v1/create-checkout-session',{method:'POST',headers:{apikey:IasharkApp.key,Authorization:'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify(payload())});
+        var body=payload();body.consent=consent.payload();
+        var response=await fetch(IasharkApp.url+'/functions/v1/create-checkout-session',{method:'POST',headers:{apikey:IasharkApp.key,Authorization:'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify(body)});
         var data=await response.json();
         if(data.url){location.href=data.url;return;}
-        if(data&&data.processed===false&&data.reason==='market_not_configured'){
+        if(data&&data.code==='consent_required'){
+          consent.check();
+          message(data.message||consent.text('error_required'),true);
+        }else if(data&&data.processed===false&&data.reason==='market_not_configured'){
           message(t('pricing_page.checkout_market_not_configured','Le paiement n’est pas encore ouvert pour ce pays. Aucun montant n’a été prélevé.'),true);
         }else{
           message(t('pricing_page.checkout_unavailable','Le paiement en ligne sera bientôt disponible.'),true);

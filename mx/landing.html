@@ -496,7 +496,7 @@ main a{text-decoration:none;}
   <nav class="desktop-nav" aria-label="Navegación principal">
     <a href="/mx/#decisions">Partidos</a>
     <a href="/mx/a-propos.html">Método</a>
-    <a href="/es/blog/">Guías</a>
+    <a href="/mx/blog/">Guías</a>
   </nav>
   <div class="header-actions">
     <span class="market-badge">MX · MXN</span>
@@ -591,6 +591,8 @@ main a{text-decoration:none;}
   <div class="mx-auto w-full max-w-[1200px] px-5 sm:px-8 py-16 sm:py-24">
     <div class="mb-4 inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.2em] text-soft"><span aria-hidden="true" class="h-1 w-1 rounded-full bg-cyan"></span>Precios</div>
     <h2 class="text-[clamp(28px,3.2vw,42px)] font-extrabold leading-[1.12] tracking-[-0.035em] text-ink">Empieza gratis. <span class="text-cyan">Ve más lejos cuando quieras.</span></h2>
+    <!-- Consentimiento obligatorio antes de un plan de pago (lib/checkout-consent.js, verificado de nuevo por create-checkout-session). -->
+    <div class="mt-8 max-w-3xl"><div id="checkoutConsent"></div></div>
     <div class="mt-8 rounded-3xl border border-hairline bg-surface/40 p-1.5">
       <div class="plan-grid">
         <div class="flex flex-1 flex-col p-6 sm:p-7">
@@ -693,7 +695,7 @@ main a{text-decoration:none;}
       <a href="/mx/confidentialite.html" style="color:rgba(145,160,179,.75);text-decoration:none;margin:0 8px;">Privacidad</a>
       <a href="/mx/cookies.html" style="color:rgba(145,160,179,.75);text-decoration:none;margin:0 8px;">Cookies</a>
       <a href="/mx/jeu-responsable.html" style="color:rgba(145,160,179,.75);text-decoration:none;margin:0 8px;">Juego responsable</a>
-      <a href="/es/blog/" style="color:rgba(145,160,179,.75);text-decoration:none;margin:0 8px;">Blog</a>
+      <a href="/mx/blog/" style="color:rgba(145,160,179,.75);text-decoration:none;margin:0 8px;">Blog</a>
     </div>
   </div>
 </div>
@@ -702,6 +704,7 @@ main a{text-decoration:none;}
 <script src="/lib/market-config.js"></script>
 <script src="/funnel-track.js"></script>
 <script src="/app-client.js"></script>
+<script src="/lib/checkout-consent.js"></script>
 <script src="/mx/mx-page.js"></script>
 <script src="/site-prefs.js"></script>
 <script src="/bottom-navigation.js"></script>

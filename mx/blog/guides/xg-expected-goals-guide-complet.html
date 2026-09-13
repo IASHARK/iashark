@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>xG (expected goals): la guía completa — cálculo, interpretación y puntos ciegos | IASHARK</title>
+<meta name="description" content="Cómo se calcula el xG, cómo interpretarlo sin equivocarse, cuántos partidos hacen falta antes de que signifique algo y por qué dos proveedores dan dos xG distintos para el mismo tiro.">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<link rel="canonical" href="https://iashark.com/mx/blog/guides/xg-expected-goals-guide-complet.html">
+<link rel="alternate" hreflang="fr" href="https://iashark.com/blog/guides/xg-expected-goals-guide-complet.html">
+<link rel="alternate" hreflang="en" href="https://iashark.com/en/blog/guides/xg-expected-goals-guide-complet.html">
+<link rel="alternate" hreflang="es" href="https://iashark.com/es/blog/guides/xg-expected-goals-guide-complet.html">
+<link rel="alternate" hreflang="es-MX" href="https://iashark.com/mx/blog/guides/xg-expected-goals-guide-complet.html">
+<link rel="alternate" hreflang="de" href="https://iashark.com/de/blog/guides/xg-expected-goals-guide-complet.html">
+<link rel="alternate" hreflang="it" href="https://iashark.com/it/blog/guides/xg-expected-goals-guide-complet.html">
+<link rel="alternate" hreflang="pt" href="https://iashark.com/pt/blog/guides/xg-expected-goals-guide-complet.html">
+<link rel="alternate" hreflang="x-default" href="https://iashark.com/blog/guides/xg-expected-goals-guide-complet.html">
+<meta property="og:title" content="xG (expected goals): la guía completa — cálculo, interpretación y puntos ciegos">
+<meta property="og:description" content="Cómo se calcula el xG, cómo interpretarlo sin equivocarse y por qué dos proveedores dan dos xG distintos para el mismo tiro.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://iashark.com/mx/blog/guides/xg-expected-goals-guide-complet.html">
+<meta property="og:image" content="https://iashark.com/assets/blog/xg-shot-map-hero.jpg">
+<meta property="og:locale" content="es_MX">
+<meta property="og:site_name" content="IASHARK">
+<meta property="article:published_time" content="2026-09-02">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="xG (expected goals): la guía completa">
+<meta name="twitter:description" content="Cómo se calcula el xG, cómo interpretarlo sin equivocarse y cuáles son sus puntos ciegos.">
+<meta name="twitter:image" content="https://iashark.com/assets/blog/xg-shot-map-hero.jpg">
+<link rel="icon" href="/favicon.ico">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/article.css">
+<link rel="stylesheet" href="/assets/bottom-navigation.css">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"Article",
+"headline":"xG (expected goals): la guía completa — cálculo, interpretación y puntos ciegos",
+"description":"Cómo se calcula el xG, cómo interpretarlo sin equivocarse, cuántos partidos hacen falta antes de que signifique algo y por qué dos proveedores dan dos xG distintos para el mismo tiro.",
+"image":"https://iashark.com/assets/blog/xg-shot-map-hero.jpg",
+"datePublished":"2026-09-02","dateModified":"2026-09-02",
+"author":{"@type":"Organization","name":"IASHARK","url":"https://iashark.com"},
+"publisher":{"@type":"Organization","name":"IASHARK","url":"https://iashark.com","logo":{"@type":"ImageObject","url":"https://iashark.com/icon-512.png"}},
+"mainEntityOfPage":{"@type":"WebPage","@id":"https://iashark.com/mx/blog/guides/xg-expected-goals-guide-complet.html"},
+"inLanguage":"es-MX"}
+</script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[
+{"@type":"ListItem","position":1,"name":"Inicio","item":"https://iashark.com/mx/"},
+{"@type":"ListItem","position":2,"name":"Blog","item":"https://iashark.com/mx/blog/"},
+{"@type":"ListItem","position":3,"name":"xG (expected goals): la guía completa"}]}
+</script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[
+{"@type":"Question","name":"¿Qué significa xG en el futbol?","acceptedAnswer":{"@type":"Answer","text":"xG significa expected goals, goles esperados. Es la probabilidad de que un tiro determinado acabe en gol, estimada a partir de miles de tiros comparables del pasado. Un tiro de 0.30 xG significa que los tiros realizados en condiciones similares acabaron dentro aproximadamente 30 veces de cada 100. El xG de un equipo en un partido es la suma de los xG de todos sus tiros."}},
+{"@type":"Question","name":"¿Cómo se calcula el xG?","acceptedAnswer":{"@type":"Answer","text":"Un modelo estadístico, normalmente una regresión logística o un modelo de aprendizaje automático, se entrena con una base de varios cientos de miles de tiros cuyo resultado se conoce. Aprende a asociar las características de un tiro (distancia, ángulo, parte del cuerpo, tipo de jugada, presión defensiva) con una probabilidad de gol. Después, cada tiro nuevo pasa por ese modelo, que devuelve un valor entre 0 y 1."}},
+{"@type":"Question","name":"¿Cuántos partidos hacen falta para que el xG sea fiable?","acceptedAnswer":{"@type":"Answer","text":"El xG de un partido aislado no dice casi nada: un equipo acumula entre 10 y 14 tiros por partido, lo que es una muestra minúscula. Hace falta como mínimo una decena de partidos para que la tendencia se distinga del ruido, y lo habitual en el análisis es razonar sobre los últimos 10 a 20 partidos. Por debajo de eso, basta un solo tiro de alto valor para desequilibrar la media."}},
+{"@type":"Question","name":"¿Por qué dos sitios dan xG distintos para el mismo partido?","acceptedAnswer":{"@type":"Answer","text":"Porque no existe un único xG, sino modelos de xG. Cada proveedor entrena el suyo con sus propios datos y sus propias variables. Un modelo que conoce la posición de los defensas y del portero en el momento del tiro no dará el mismo valor que un modelo que solo conoce la distancia y el ángulo. Son habituales diferencias de 0.2 a 0.4 xG en un mismo partido."}},
+{"@type":"Question","name":"¿Un equipo que supera su xG es fuerte o tiene suerte?","acceptedAnswer":{"@type":"Answer","text":"Las dos hipótesis son posibles y hace falta perspectiva para decidir. En pocos partidos, el sobrerrendimiento es casi siempre varianza y tiende a corregirse. A lo largo de una temporada completa y de forma repetida, puede reflejar una calidad de definición real que el modelo no capta. La regla prudente es tratar un sobrerrendimiento breve como ruido, y ver en él una habilidad solo después de comprobar que el fenómeno se repite durante varias temporadas."}}]}
+</script>
+</head>
+<body>
+
+<div class="wrap">
+
+<header class="art-hero">
+  <nav class="crumb"><a href="/mx/">Inicio</a> › <a href="/mx/blog/">Blog</a> › xG expected goals</nav>
+  <span class="tag">Análisis · Datos</span>
+  <h1>xG: lo que la estadística dice de verdad,<br>y <em>dónde miente</em></h1>
+  <p class="chapo">Los expected goals se han convertido en la estadística más citada del futbol moderno — y en la peor utilizada. Aquí verás cómo se construye un xG, cómo interpretarlo sin engañarse y los cuatro puntos ciegos que casi nadie menciona.</p>
+  <div class="meta">
+    <span>Publicado el 2 de septiembre de 2026</span>
+    <span>·</span>
+    <span>9 min de lectura</span>
+    <span>·</span>
+    <span>Nivel: intermedio</span>
+  </div>
+  <figure class="cover">
+    <img src="/assets/blog/xg-shot-map-hero.jpg" width="1344" height="768" alt="Vista táctica de una cancha de futbol en malla alámbrica azul noche, salpicado de puntos luminosos cian de distintos tamaños que representan tiros y su valor xG" fetchpriority="high">
+    <figcaption>Cada tiro de un partido se convierte en un punto, y cada punto lleva asociada una probabilidad de gol. Eso es todo lo que es un xG.</figcaption>
+  </figure>
+</header>
+
+<nav class="toc" aria-label="Índice">
+  <h2>En esta guía</h2>
+  <ol>
+    <li><a href="#definition">El xG en una frase (y solo una)</a></li>
+    <li><a href="#calcul">Cómo se calcula realmente un xG</a></li>
+    <li><a href="#lecture">La trampa n.º 1: xG por tiro frente a xG acumulado</a></li>
+    <li><a href="#echantillon">¿Cuántos partidos antes de confiar en él?</a></li>
+    <li><a href="#fournisseurs">Por qué dos sitios no dan el mismo xG</a></li>
+    <li><a href="#surperformance">Sobrerrendimiento: ¿talento o suerte?</a></li>
+    <li><a href="#usages">Tres usos sólidos y dos usos que conviene evitar</a></li>
+    <li><a href="#faq">Preguntas frecuentes</a></li>
+  </ol>
+</nav>
+
+<main class="body">
+
+<h2 id="definition">1. El xG en una frase <em>(y solo una)</em></h2>
+
+<p><strong>El xG de un tiro es la probabilidad de que ese tiro acabe dentro, estimada a partir de miles de tiros comparables del pasado.</strong> Un tiro valorado en 0.30 xG quiere decir que los tiros realizados en condiciones similares se convirtieron aproximadamente 30 veces de cada 100.</p>
+
+<p>El xG de un equipo en un partido es simplemente la suma de los xG de todos sus tiros. Un equipo con 1.8 xG ha generado, con el conjunto de sus ocasiones, el equivalente a «1.8 goles de media». Perfectamente puede haber marcado 4, o 0.</p>
+
+<div class="box">
+  <div class="box-t">Lo que el xG no es</div>
+  <p><strong>No</strong> es una nota de rendimiento, <strong>no</strong> es una predicción del marcador y <strong>no</strong> es un juicio sobre la calidad de un jugador. Es una medida de la <em>cantidad y la calidad de las ocasiones generadas</em>. Nada más y nada menos.</p>
+</div>
+
+<figure class="fig">
+  <svg viewBox="0 0 640 400" role="img" aria-labelledby="shotmap-title shotmap-desc">
+    <title id="shotmap-title">Mapa de tiros: valor xG según la posición</title>
+    <desc id="shotmap-desc">Esquema de un área de penal que muestra seis posiciones de tiro y el orden de magnitud del xG asociado a cada una, desde 0.02 para un disparo lejano hasta 0.76 para un penal.</desc>
+    <rect x="0" y="0" width="640" height="400" fill="#04121c"/>
+    <!-- área -->
+    <g stroke="#1d4a63" stroke-width="1.6" fill="none">
+      <rect x="150" y="30" width="340" height="200"/>
+      <rect x="250" y="30" width="140" height="76"/>
+      <line x1="60" y1="30" x2="580" y2="30"/>
+      <path d="M 224 230 A 92 92 0 0 0 416 230"/>
+    </g>
+    <rect x="272" y="22" width="96" height="9" fill="none" stroke="#16d6f4" stroke-width="2.4"/>
+    <circle cx="320" cy="160" r="2.6" fill="#1d4a63"/>
+    <!-- tiros: radio proporcional a la raíz cuadrada del xG -->
+    <g font-family="'Space Mono',monospace" font-size="11.5">
+      <circle cx="320" cy="160" r="26" fill="#16d6f4" fill-opacity=".62" stroke="#16d6f4"/>
+      <text x="320" y="205" fill="#16d6f4" text-anchor="middle" font-weight="700">0.76</text>
+      <text x="320" y="222" fill="#58758e" text-anchor="middle" font-size="9.5">PENAL</text>
+
+      <circle cx="320" cy="80" r="22" fill="#16d6f4" fill-opacity=".5" stroke="#16d6f4"/>
+      <text x="320" y="60" fill="#16d6f4" text-anchor="middle" font-weight="700">0.55</text>
+
+      <circle cx="238" cy="86" r="9" fill="#16d6f4" fill-opacity=".3" stroke="#16d6f4"/>
+      <text x="196" y="90" fill="#9baec0" text-anchor="middle" font-weight="700">0.08</text>
+      <text x="196" y="105" fill="#58758e" text-anchor="middle" font-size="9">ÁNGULO CERRADO</text>
+
+      <circle cx="196" cy="180" r="10" fill="#16d6f4" fill-opacity=".3" stroke="#16d6f4"/>
+      <text x="196" y="212" fill="#9baec0" text-anchor="middle" font-weight="700">0.09</text>
+
+      <circle cx="410" cy="196" r="8" fill="#16d6f4" fill-opacity=".28" stroke="#16d6f4"/>
+      <text x="410" y="226" fill="#9baec0" text-anchor="middle" font-weight="700">0.06</text>
+
+      <circle cx="320" cy="300" r="5" fill="#16d6f4" fill-opacity=".22" stroke="#16d6f4"/>
+      <text x="320" y="330" fill="#9baec0" text-anchor="middle" font-weight="700">0.02</text>
+      <text x="320" y="346" fill="#58758e" text-anchor="middle" font-size="9">DISPARO LEJANO</text>
+    </g>
+  </svg>
+  <figcaption>Órdenes de magnitud típicos observados en los modelos xG públicos. Los valores exactos varían de un proveedor a otro — que es precisamente el tema de la sección 5. El tamaño de los círculos es proporcional a la raíz cuadrada del xG.</figcaption>
+</figure>
+
+<h2 id="calcul">2. Cómo se calcula <em>realmente</em> un xG</h2>
+
+<p>Contrariamente a lo que se lee a menudo, no existe una fórmula matemática del xG que se pueda aplicar a mano. Un xG es el resultado de un <strong>modelo entrenado</strong>, normalmente una regresión logística o un modelo de aprendizaje automático basado en árboles.</p>
+
+<p>El principio es sencillo. Se reúne una base de varios cientos de miles de tiros de los que se conocen tres cosas: las características del tiro, y si acabó dentro o no. El modelo aprende a relacionar lo uno con lo otro. Después se le presenta un tiro nuevo y devuelve una probabilidad.</p>
+
+<h3>Las variables que de verdad pesan</h3>
+
+<div class="tw">
+<table>
+  <thead><tr><th>Variable</th><th>Peso</th><th>Por qué</th></tr></thead>
+  <tbody>
+    <tr class="hi"><td>Distancia a la portería</td><td class="num">Muy alto</td><td>El factor dominante: la probabilidad se desploma muy rápido con cada metro.</td></tr>
+    <tr class="hi"><td>Ángulo de tiro</td><td class="num">Muy alto</td><td>Determina la anchura de portería visible. Un ángulo cerrado anula la ventaja de la cercanía.</td></tr>
+    <tr><td>Parte del cuerpo</td><td class="num">Alto</td><td>Un remate de cabeza se convierte peor que uno con el pie a la misma distancia.</td></tr>
+    <tr><td>Tipo de jugada</td><td class="num">Alto</td><td>Contraataque, balón parado, ataque posicional: la defensa no está colocada de la misma manera.</td></tr>
+    <tr><td>Asistencia previa</td><td class="num">Medio</td><td>Un pase atrás no crea la misma situación que un centro por alto.</td></tr>
+    <tr><td>Presión defensiva</td><td class="num">Variable</td><td>Número y posición de los defensas. Solo los modelos más completos la integran.</td></tr>
+  </tbody>
+</table>
+</div>
+
+<div class="box warn">
+  <div class="box-t">El detalle que lo cambia todo</div>
+  <p>La última fila es la que separa unos modelos de otros. Un modelo que ignora la posición de los defensas ve un tiro a 8 metros por el centro como una gran ocasión — <strong>aunque haya tres defensas y el portero en la trayectoria</strong>. Es la principal fuente de diferencias entre proveedores.</p>
+</div>
+
+<h2 id="lecture">3. La trampa n.º 1: xG <em>por tiro</em> frente a xG <em>acumulado</em></h2>
+
+<p>Es el error de interpretación más extendido, y literalmente invierte la conclusión. Dos equipos pueden mostrar el mismo xG en un partido y haber producido dos cosas opuestas.</p>
+
+<div class="tw">
+<table>
+  <thead><tr><th></th><th>Equipo A</th><th>Equipo B</th></tr></thead>
+  <tbody>
+    <tr><td>xG del partido</td><td class="num">1.60</td><td class="num">1.60</td></tr>
+    <tr><td>Número de tiros</td><td class="num">4</td><td class="num">20</td></tr>
+    <tr class="hi"><td>xG medio por tiro</td><td class="num">0.40</td><td class="num">0.08</td></tr>
+    <tr><td>Interpretación</td><td>Pocas ocasiones, pero enormes</td><td>Muchos disparos, todos mediocres</td></tr>
+  </tbody>
+</table>
+</div>
+
+<p>El equipo A se generó cuatro auténticas situaciones de gol. El equipo B tiró veinte veces desde lejos sin llegar nunca a entrar en la zona de peligro. <strong>El total es idéntico; el rendimiento ofensivo no tiene nada que ver.</strong></p>
+
+<p>El hábito que conviene adquirir: no leer nunca un xG de partido sin dividirlo entre el número de tiros. Solo con esa división ya vas por delante de la mitad de los análisis que se leen en internet.</p>
+
+<h2 id="echantillon">4. ¿Cuántos partidos antes de confiar en él?</h2>
+
+<p>Es la pregunta que casi ninguna guía trata en serio, y sin embargo es la que decide si tu análisis vale algo.</p>
+
+<p>Un equipo tira de media entre diez y quince veces por partido. Un xG de partido se basa, por tanto, en una muestra de una docena de acciones, la mayoría de las cuales valen menos de 0.10. <strong>Un solo tiro de 0.7 xG — un penal, un mano a mano — equivale por sí solo a siete u ocho disparos lejanos.</strong> Dicho de otro modo: el xG de un partido aislado está dominado por una o dos acciones.</p>
+
+<div class="keyfig">
+  <div><b>1</b><span>partido: anécdota</span></div>
+  <div><b>5</b><span>partidos: todavía mucho ruido</span></div>
+  <div><b>10-20</b><span>partidos: tendencia aprovechable</span></div>
+</div>
+
+<p>La consecuencia práctica es clara. En un partido, el xG sirve para <em>contar lo que pasó</em> — «dominaron, pero no la metieron». No sirve para predecir nada. Para estimar la fuerza real de un equipo, hace falta una ventana móvil de entre diez y veinte partidos recientes.</p>
+
+<div class="box warn">
+  <div class="box-t">El equilibrio imposible</div>
+  <p>Ampliar la ventana reduce el ruido, pero incorpora partidos que ya no describen al equipo actual: fichajes, cambio de entrenador, lesiones. No existe un número perfecto. Elegir una ventana es arbitrar entre <strong>demasiado ruido</strong> y <strong>demasiado pasado</strong>.</p>
+</div>
+
+<h2 id="fournisseurs">5. Por qué dos sitios no dan el mismo xG</h2>
+
+<p>No existe <em>un</em> xG. Existen modelos de xG, y cada uno tiene el suyo: Opta, StatsBomb, Understat, sin contar los modelos propios de los clubes y de los sitios de análisis. Se entrenan con bases distintas y con variables distintas.</p>
+
+<p>Resultado: para un mismo partido, las diferencias de <strong>0.2 a 0.4 xG</strong> entre dos proveedores son normales. En un partido en el que todo se decide por 0.3 xG, dos fuentes honestas pueden, por tanto, sostener dos conclusiones opuestas.</p>
+
+<h3>Qué conclusiones sacar</h3>
+<ul>
+  <li><strong>No compares nunca dos xG procedentes de fuentes distintas.</strong> Es como comparar temperaturas en Celsius y en Fahrenheit sin convertirlas.</li>
+  <li><strong>Elige una fuente y quédate con ella.</strong> La coherencia interna importa más que la «exactitud» absoluta.</li>
+  <li><strong>Desconfía de las diferencias inferiores a 0.3 xG.</strong> Suelen estar dentro del margen de desacuerdo entre modelos.</li>
+</ul>
+
+<h2 id="surperformance">6. Sobrerrendimiento: ¿talento o suerte?</h2>
+
+<p>Un equipo marca 22 goles con 15 xG. Se enfrentan dos relatos, y ambos son plausibles:</p>
+
+<ul>
+  <li><strong>La suerte.</strong> Ha convertido por encima de la media y eso se corregirá. Es, con diferencia, la explicación más frecuente en un número reducido de partidos.</li>
+  <li><strong>La habilidad.</strong> Tiene rematadores que el modelo no sabe ver, porque no conoce la identidad de quien tira.</li>
+</ul>
+
+<p>La forma de decidir es una cuestión de duración y de repetición. En diez partidos, un sobrerrendimiento es casi siempre ruido. A lo largo de tres temporadas consecutivas y con la misma plantilla ofensiva, empieza a parecerse a una característica real.</p>
+
+<div class="box stop">
+  <div class="box-t">El error que sale caro</div>
+  <p>Apostar sistemáticamente contra un equipo «que supera su xG» suponiendo que va a regresar a la media <strong>ya en el próximo partido</strong>. La regresión a la media es un fenómeno a largo plazo: no dice nada sobre el partido del sábado y no te da ninguna fecha.</p>
+</div>
+
+<h2 id="usages">7. Tres usos sólidos y dos usos que conviene evitar</h2>
+
+<h3>Lo que funciona</h3>
+<ul>
+  <li><strong>Corregir una clasificación engañosa.</strong> Un equipo 6.º en la tabla general pero 2.º en xG acumulado probablemente ha sido más sólido de lo que reflejan sus resultados.</li>
+  <li><strong>Detectar un cambio de dinámica.</strong> Un xG concedido que sube durante cinco partidos señala un problema defensivo antes de que lleguen los goles.</li>
+  <li><strong>Alimentar una estimación del número de goles.</strong> El xG generado y el xG concedido son buenos puntos de partida para estimar cuántos goles debería producir un partido — es exactamente el punto de partida del <a href="/mx/blog/guides/plus-de-2-5-buts-probabilite-methode-poisson.html">método de cálculo del más/menos de 2.5 goles</a>.</li>
+</ul>
+
+<h3>Lo que no funciona</h3>
+<ul>
+  <li><strong>Juzgar a un portero solo con el xG.</strong> El xG mide la calidad de la ocasión, no la parada. La estadística adecuada es el xG post-tiro (PSxG), que tiene en cuenta la trayectoria del balón después del disparo.</li>
+  <li><strong>Sacar conclusiones de un único partido.</strong> Véase la sección 4: la muestra es demasiado pequeña, y punto.</li>
+</ul>
+
+<div class="related">
+  <a href="/mx/blog/guides/value-bet-guide-complet-2026.html"><span>Siguiente paso lógico</span><b>Value bet: comparar una probabilidad con los momios sin equivocarse</b></a>
+  <a href="/mx/blog/guides/prediction-ia-football-guide-2026.html"><span>Lee también</span><b>Predicción de futbol con IA: entender los modelos y sus límites</b></a>
+</div>
+
+<h2 id="faq">8. Preguntas frecuentes</h2>
+
+<div class="faq">
+  <details><summary>¿Qué significa xG en el futbol?</summary><p>xG significa <em>expected goals</em>, goles esperados. Es la probabilidad de que un tiro determinado acabe en gol, estimada a partir de miles de tiros comparables del pasado. Un tiro de 0.30 xG significa que los tiros realizados en condiciones similares acabaron dentro aproximadamente 30 veces de cada 100. El xG de un equipo en un partido es la suma de los xG de todos sus tiros.</p></details>
+  <details><summary>¿Cómo se calcula el xG?</summary><p>Un modelo estadístico — regresión logística o aprendizaje automático — se entrena con una base de varios cientos de miles de tiros cuyo resultado se conoce. Aprende a asociar las características de un tiro (distancia, ángulo, parte del cuerpo, tipo de jugada, presión defensiva) con una probabilidad de gol. Después, cada tiro nuevo pasa por ese modelo, que devuelve un valor entre 0 y 1. No existe una fórmula que pueda aplicarse a mano.</p></details>
+  <details><summary>¿Cuántos partidos hacen falta para que el xG sea fiable?</summary><p>El xG de un partido aislado no dice casi nada: un equipo acumula entre 10 y 14 tiros por partido, lo que es una muestra minúscula dominada por una o dos acciones importantes. Hace falta como mínimo una decena de partidos para que la tendencia se distinga del ruido, y lo habitual es razonar sobre entre 10 y 20 partidos recientes.</p></details>
+  <details><summary>¿Por qué dos sitios dan xG distintos para el mismo partido?</summary><p>Porque no existe un único xG, sino modelos de xG. Cada proveedor entrena el suyo con sus propios datos y sus propias variables. Un modelo que conoce la posición de los defensas y del portero en el momento del tiro no dará el mismo valor que un modelo que solo conoce la distancia y el ángulo. Son habituales diferencias de 0.2 a 0.4 xG en un mismo partido.</p></details>
+  <details><summary>¿Un equipo que supera su xG es fuerte o tiene suerte?</summary><p>Las dos hipótesis son posibles y hace falta perspectiva para decidir. En pocos partidos, el sobrerrendimiento es casi siempre varianza y tiende a corregirse. A lo largo de una temporada completa y de forma repetida, puede reflejar una calidad de definición real que el modelo no capta, porque ignora la identidad de quien tira.</p></details>
+</div>
+
+<div class="cta">
+  <h2>Los xG, aplicados a los partidos del día</h2>
+  <p>Cada mañana, IASHARK calcula probabilidades a partir de datos reales — incluidos los xG generados y concedidos — y explica el razonamiento partido a partido. El partido del día es gratuito, siempre.</p>
+  <a class="btn" href="/mx/">Ver los análisis del día →</a>
+</div>
+
+</main>
+
+<footer class="art-foot">
+  <p>IASHARK — análisis estadísticos de futbol. Las probabilidades publicadas son orientativas y no garantizan ningún resultado. Las apuestas deportivas conllevan un riesgo de pérdida económica y de adicción: no apuestes nunca más de lo que puedas permitirte perder. Prohibido a menores de 18 años. ¿Necesitas ayuda? Línea de la Vida: 800 911 2000 (gratuita, 24/7). Consulta también nuestra página de <a href="/mx/jeu-responsable.html">juego responsable</a>.</p>
+  <p><a href="/mx/mentions-legales.html">Aviso Legal</a> · <a href="/mx/cgv.html">Términos</a> · <a href="/mx/confidentialite.html">Privacidad</a> · <a href="/mx/cookies.html">Cookies</a> · <a href="/mx/jeu-responsable.html">Juego responsable</a></p>
+</footer>
+
+</div>
+
+<script src="/site-header.js"></script>
+<script src="/site-prefs.js"></script>
+<script src="/bottom-navigation.js"></script>
+</body>
+</html>

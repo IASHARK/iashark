@@ -1,5 +1,6 @@
 import { createClient } from "jsr:@supabase/supabase-js@2";
 import Stripe from "npm:stripe@17";
+import { validateConsent } from "./consent.ts";
 
 // Creation de session de paiement — MASTER V2.1 §3.2/§21/§23. Meme
 // discipline "desactive par defaut" que supabase/functions/stripe-webhook/ :
@@ -72,7 +73,48 @@ function resolvePriceId(market: unknown): PriceResolution {
 
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-iashark-locale",
+};
+
+// Langue des messages renvoyes a l'utilisateur. Priorite : champ `locale` du
+// consentement ou du corps (ou `dir` de la page : fr/en/es/de/it/pt/gb/mx/za),
+// en-tete x-iashark-locale, puis Accept-Language du navigateur ; francais par
+// defaut. Meme helper que create-portal-session, delete-account, login-guard.
+// Les codes `code` restent stables pour les clients qui traduisent eux-memes.
+const MSG_LOCALES = ["fr", "en", "es", "es-mx", "de", "it", "pt"];
+const DIR_LOCALE: Record<string, string> = { gb: "en", za: "en", mx: "es-mx" };
+function normLocale(value: unknown): string {
+  const s = String(value || "").trim().toLowerCase().replace("_", "-");
+  if (!s) return "";
+  if (DIR_LOCALE[s]) return DIR_LOCALE[s];
+  if (s.startsWith("es-mx")) return "es-mx";
+  if (MSG_LOCALES.includes(s)) return s;
+  const base = s.split("-")[0];
+  return MSG_LOCALES.includes(base) ? base : "";
+}
+function pickLocale(req: Request, hint?: unknown): string {
+  const direct = normLocale(hint) || normLocale(req.headers.get("x-iashark-locale"));
+  if (direct) return direct;
+  for (const part of (req.headers.get("accept-language") || "").split(",")) {
+    const l = normLocale(part.split(";")[0]);
+    if (l) return l;
+  }
+  return "fr";
+}
+function msg(table: Record<string, Record<string, string>>, key: string, locale: string): string {
+  const row = table[key];
+  return (row && (row[locale] || row[locale.split("-")[0]] || row.fr)) || key;
+}
+const MESSAGES: Record<string, Record<string, string>> = {
+  consent_required: {
+    fr: "Pour continuer, acceptez les conditions générales de vente et cochez les confirmations obligatoires avant le paiement.",
+    en: "To continue, please accept the terms and tick the required confirmations before payment.",
+    es: "Para continuar, acepta las condiciones generales de venta y marca las confirmaciones obligatorias antes del pago.",
+    "es-mx": "Para continuar, acepta los términos y condiciones y marca las confirmaciones obligatorias antes de pagar.",
+    de: "Um fortzufahren, akzeptieren Sie bitte die Allgemeinen Verkaufsbedingungen und setzen Sie die erforderlichen Häkchen vor der Zahlung.",
+    it: "Per continuare, accetta le condizioni generali di vendita e seleziona le conferme obbligatorie prima del pagamento.",
+    pt: "Para continuar, aceite as condições gerais de venda e assinale as confirmações obrigatórias antes do pagamento.",
+  },
 };
 
 Deno.serve(async (req: Request) => {
@@ -104,12 +146,17 @@ Deno.serve(async (req: Request) => {
   // STRIPE_PRICE_ID). Body JSON invalide/absent = simplement pas de market.
   let requestedMarket: unknown = undefined;
   let requestedDir: unknown = undefined;
+  let requestedConsent: unknown = undefined;
+  let requestedLocale: unknown = undefined;
   try {
     const body = await req.clone().json();
     requestedMarket = body?.market;
     requestedDir = body?.dir;
+    requestedConsent = body?.consent;
+    requestedLocale = body?.consent?.locale || body?.locale || body?.dir;
   } catch (_e) {
-    // pas de corps JSON - comportement par defaut (marche FR).
+    // pas de corps JSON - comportement par defaut (marche FR), et donc pas de
+    // consentement : la demande sera refusee plus bas (consent_required).
   }
   const resolution = resolvePriceId(requestedMarket);
 
@@ -122,6 +169,20 @@ Deno.serve(async (req: Request) => {
   }
   const STRIPE_PRICE_ID_RESOLVED = resolution.priceId;
   const usedMarket = resolution.usedMarket;
+
+  // Consentement avant paiement (consent.ts) : acceptation des CGV, et pour
+  // les marches fr/gb/za la demande expresse d'execution immediate (regime
+  // deduit du marche RESOLU cote serveur, jamais d'un champ du navigateur).
+  // Sans lui, aucune session Stripe n'est creee. Verifie avant tout appel
+  // reseau (auth, Stripe).
+  const consent = validateConsent(requestedConsent, usedMarket, new Date().toISOString());
+  if (!consent.ok) {
+    console.log(`[create-checkout-session] marche="${usedMarket}" consentement incomplet (${consent.missing.join(",")}) - refus consent_required.`);
+    return new Response(JSON.stringify({ ok: false, code: consent.code, missing: consent.missing, message: msg(MESSAGES, "consent_required", pickLocale(req, requestedLocale)) }), {
+      status: 400,
+      headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
+    });
+  }
 
   // Authentification reelle du JWT (pas de confiance dans un id envoye par
   // le corps de la requete) - meme pattern que les autres fonctions Edge du
@@ -165,7 +226,11 @@ Deno.serve(async (req: Request) => {
       customer_email: user.email,
       success_url: returnBase + "/checkout-succes.html?session_id={CHECKOUT_SESSION_ID}",
       cancel_url: returnBase + "/checkout-annule.html",
-      metadata: { market: usedMarket },
+      // Trace durable du consentement (CGV, execution immediate, version des
+      // CGV, langue, repertoire, horodatages client et serveur) sur la session
+      // ET sur l'abonnement Stripe, qui survit a la session.
+      metadata: { market: usedMarket, ...consent.metadata },
+      subscription_data: { metadata: { market: usedMarket, ...consent.metadata } },
     });
     return new Response(JSON.stringify({ ok: true, processed: true, url: session.url }), {
       status: 200,

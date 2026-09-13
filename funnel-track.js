@@ -34,7 +34,7 @@
   var isBot = /bot|crawl|spider|slurp|headless|lighthouse|pagespeed|preview|facebookexternalhit/i.test(UA) || nav.webdriver === true;
   var enabled = !!PROD_HOSTS[loc.hostname] && !isBot;
   // Pages internes jamais mesurees (on ne compte pas le proprietaire).
-  var autoTrack = enabled && !/^\/admin\.html$/.test(loc.pathname);
+  var autoTrack = enabled && !/^\/admin(\.html)?$/.test(loc.pathname);
 
   // Nettoyage de l'ancien identifiant persistant (localStorage), remplace par
   // un identifiant de visite non persistant.
@@ -177,9 +177,9 @@
   try { params = new URLSearchParams(loc.search); } catch (e) { params = { get: function () { return null; } }; }
 
   function matchIdFromPath(pathname, search) {
-    var m = pathname.match(/\/match\/(\d{1,12})\.html$/);
+    var m = pathname.match(/\/match\/(\d{1,12})(\.html)?$/);
     if (m) return m[1];
-    if (/\/match\.html$/.test(pathname)) {
+    if (/\/match(\.html)?$/.test(pathname)) {
       var id = search && search.get("id");
       if (id && /^\d{1,12}$/.test(id)) return id;
     }
@@ -223,7 +223,7 @@
     });
 
     // La page d'inscription vue = inscription commencee (toutes versions).
-    if (/\/inscription\.html$/.test(loc.pathname)) window.iasharkTrack("signup_started", {});
+    if (/\/inscription(\.html)?$/.test(loc.pathname)) window.iasharkTrack("signup_started", {});
   } catch (e) {}
 
   // ---------- page_leave : temps actif sur la page + profondeur de scroll ----------
@@ -276,7 +276,7 @@
 
   // ---------- click : actions significatives uniquement ----------
   try {
-    var TARGET_PAGES = /\/(inscription|connexion|abonnement|pro|compte|landing)\.html$/;
+    var TARGET_PAGES = /\/(inscription|connexion|abonnement|pro|compte|landing)(\.html)?$/;
     var clickCount = 0;
     var lastClickKey = "";
     var lastClickAt = 0;
@@ -315,7 +315,7 @@
       try { url = new URL(link.href, loc.href); } catch (e) { return null; }
       if (url.origin !== loc.origin) return null;
       var matchId = matchIdFromPath(url.pathname, url.searchParams);
-      if (matchId || /\/match\.html$/.test(url.pathname)) {
+      if (matchId || /\/match(\.html)?$/.test(url.pathname)) {
         return { kind: "match", label: labelOf(link), target: url.pathname.slice(0, 120), match_id: matchId };
       }
       var page = url.pathname.match(TARGET_PAGES);

@@ -102,9 +102,9 @@ begin
         min(created_at) as first_at, max(created_at) as last_at,
         count(*) filter (where event_type = 'page_view') as pageviews,
         bool_or(event_type = 'signup_completed') as signed_up,
-        bool_or(event_type = 'signup_started' or (event_type = 'page_view' and page ~ '/inscription\.html$')) as saw_signup,
+        bool_or(event_type = 'signup_started' or (event_type = 'page_view' and page ~ '/inscription(\.html)?$')) as saw_signup,
         bool_or(event_type in ('landing_view', 'paywall_view', 'tool_page_view')
-          or (event_type = 'page_view' and page ~ '/(abonnement|pro|landing)\.html$')) as saw_pricing,
+          or (event_type = 'page_view' and page ~ '/(abonnement|pro|landing)(\.html)?$')) as saw_pricing,
         bool_or(event_type = 'checkout_started') as checkout_started,
         bool_or(event_type = 'checkout_success_view') as checkout_success
       from ev

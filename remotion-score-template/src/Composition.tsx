@@ -13,6 +13,7 @@ import {IasharkOrganicAd} from "./IasharkOrganicAd/IasharkOrganicAd";
 import {ORGANIC_AD_DURATION} from "./IasharkOrganicAd/theme";
 import {IasharkCityCampaign} from "./IasharkCityCampaign/IasharkCityCampaign";
 import {CITY_CAMPAIGN_DURATION} from "./IasharkCityCampaign/theme";
+import {IasharkModelVsMarketUK, UK_MVM_DURATION} from "./IasharkModelVsMarketUK";
 
 export type GoalEvent = {minute: number; displayMinute?: string; player: string; side: "home" | "away"};
 export type MatchCardProps = {homeTeam: string; awayTeam: string; homeLogo: string; awayLogo: string; goals: GoalEvent[]; accentColor: string};
@@ -89,6 +90,7 @@ export const MatchCard: React.FC<MatchCardProps> = (props) => {
 };
 
 export const MyComposition=()=> <>
+  <Composition id="IasharkModelVsMarketUK" component={IasharkModelVsMarketUK} durationInFrames={UK_MVM_DURATION} fps={30} width={1080} height={1920}/>
   <Composition id="IasharkCityCampaign" component={IasharkCityCampaign} durationInFrames={CITY_CAMPAIGN_DURATION} fps={30} width={1080} height={1920}/>
   <Composition id="IasharkOrganicAd" component={IasharkOrganicAd} durationInFrames={ORGANIC_AD_DURATION} fps={30} width={1080} height={1920}/>
   <Composition id="IasharkAdConcept" component={IasharkAdConcept} durationInFrames={1} fps={30} width={1080} height={1920}/>

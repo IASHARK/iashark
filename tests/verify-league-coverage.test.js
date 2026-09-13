@@ -7,13 +7,16 @@ const { resolveSeason, computeTier } = require("../scripts/verify-league-coverag
 
 const ROOT = path.join(__dirname, "..");
 
-test("config/leagues.json : contient exactement les 13 competitions de lancement, cles/ids uniques", () => {
+test("config/leagues.json : contient exactement les 14 competitions de lancement, cles/ids uniques", () => {
+  // 13 -> 14 le 2026-09-13 : ajout de liga_mx (decision produit explicite
+  // lancement Mexique, voir config/leagues.json#_readme et
+  // data/league-validation-registry.json#leagues.liga_mx).
   var config = JSON.parse(fs.readFileSync(path.join(ROOT, "config/leagues.json"), "utf8"));
-  assert.equal(config.leagues.length, 13);
+  assert.equal(config.leagues.length, 14);
   var keys = config.leagues.map(function (l) { return l.key; });
   var ids = config.leagues.map(function (l) { return l.apiFootballId; });
-  assert.equal(new Set(keys).size, 13, "cles internes dupliquees");
-  assert.equal(new Set(ids).size, 13, "apiFootballId dupliques");
+  assert.equal(new Set(keys).size, 14, "cles internes dupliquees");
+  assert.equal(new Set(ids).size, 14, "apiFootballId dupliques");
   config.leagues.forEach(function (l) {
     assert.ok(l.key && l.displayName && l.country && typeof l.apiFootballId === "number", JSON.stringify(l) + " incomplet");
     assert.equal(typeof l.europeanQualification, "boolean");

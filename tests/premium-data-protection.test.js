@@ -33,7 +33,7 @@ test("la fonction Edge laisse passer l'analyse offerte du jour", () => {
 
 test("le pipeline retire ces champs du fichier public et des pages match", () => {
   const wf = read(".github/workflows/update-data.yml");
-  assert.match(wf, /var CHAMPS_PREMIUM=\['pari_rec','cote_rec','model_probability','markets_compared'\]/);
+  assert.match(wf, /var CHAMPS_PREMIUM=\['pari_rec','cote_rec','model_probability','markets_compared','market_id','marche'\]/);
   // Depuis le branchement RUN_OUTPUT_ENGINE (2026-09-06), data.json est
   // serialise depuis dataJsonPayload (qui ajoute run_output/legacy_output
   // a cote) plutot qu'un objet litteral inline - mais son champ `matchs`
@@ -112,4 +112,17 @@ test("une offre pays reste publique cote client pour son marche, l'offre general
   assert.equal(pickFreeMatch(liste, h, "mx").id, 2);
   assert.equal(pickFreeMatch(liste, h, "za").id, 1, "sans offre PSL, l'Afrique du Sud retombe sur l'offre generale");
   assert.equal(pickFreeMatch(liste, h).id, 1);
+});
+
+// 14/09/2026 (audit QA) : market_id et marche nomment le marche recommande.
+// Ils etaient publics dans data.json alors que pari_rec etait protege.
+test("market_id et marche sont premium : retires du fichier public, ecrits dans la table protegee, servis aux abonnes", () => {
+  const wf = read(".github/workflows/update-data.yml");
+  assert.match(wf, /var CHAMPS_PREMIUM=\[[^\]]*'market_id'[^\]]*'marche'[^\]]*\];/);
+  assert.match(wf, /market_id:pickedMarket\?pickedMarket\.id:null,\n\s*marche:pickedMarket\?categorizeMarket\(pickedMarket\.market\):null,/);
+  assert.match(wf, /lignePremiumSafePick\.market_id=matchCibleSafePick\.market_id;/);
+  const fn = read("supabase/functions/match-data/index.ts");
+  const bloc = fn.slice(fn.indexOf("const PREMIUM_FIELDS"), fn.indexOf("];", fn.indexOf("const PREMIUM_FIELDS")));
+  assert.match(bloc, /"market_id", "marche"/);
+  assert.match(fn, /market_id: premium\.market_id \?\? m\.market_id \?\? null/);
 });

@@ -2994,6 +2994,10 @@ jobs:
                 // pour tous les matchs sauf l'analyse offerte du jour.
                 pari_rec:pickedMarket?pickedMarket.market:'',
                 cote_rec:(pickedMarket&&pickedMarket.cote!=null&&pickedMarket.cote!=='')?Number(pickedMarket.cote):null,
+                // market_id/marche nomment le marche recommande : premium comme pari_rec
+                // (audit QA 14/09/2026 : ils restaient lisibles dans data.json public).
+                market_id:pickedMarket?pickedMarket.id:null,
+                marche:pickedMarket?categorizeMarket(pickedMarket.market):null,
                 model_probability:pickedMarket?Math.round(pickedMarket.prob*10)/10:null,
                 markets_compared:marketsCompared||null,
                 verdict_shark:an?(an.verdict_shark||''):'',
@@ -3150,6 +3154,8 @@ jobs:
                   lignePremiumSafePick.pari_rec=matchCibleSafePick.pari_rec;
                   lignePremiumSafePick.cote_rec=Number(safePick.decimal_odds);
                   lignePremiumSafePick.model_probability=Math.round(Number(safePick.model_probability_pct)*10)/10;
+                  lignePremiumSafePick.market_id=matchCibleSafePick.market_id;
+                  lignePremiumSafePick.marche=matchCibleSafePick.marche;
                 }
                 console.log('  [RUN_OUTPUT] SAFE_PICK_OF_THE_DAY injectee sur la carte existante du match '+matchCibleSafePick.id+' ('+(matchCibleSafePick.home&&matchCibleSafePick.home.n)+' vs '+(matchCibleSafePick.away&&matchCibleSafePick.away.n)+') : '+matchCibleSafePick.pari_rec+' @ '+matchCibleSafePick.cote_rec);
               } else {
@@ -3166,7 +3172,7 @@ jobs:
             // navigateur) pour que le site, la page match et la fonction Edge
             // parlent tous du meme match. conf reste public : sans le marche,
             // c'est une amorce, pas le produit.
-            var CHAMPS_PREMIUM=['pari_rec','cote_rec','model_probability','markets_compared'];
+            var CHAMPS_PREMIUM=['pari_rec','cote_rec','model_probability','markets_compared','market_id','marche'];
             // GARDE-FOU. Retirer ces champs du fichier public n'est sur QUE si la
             // table protegee peut reellement les recevoir. Sans la cle service
             // role, writePremiumData() n'ecrit rien : on se retrouverait avec des

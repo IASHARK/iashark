@@ -23,6 +23,8 @@ const PREMIUM_FIELDS = [
   "pari_rec", "cote_rec", "model_probability", "markets_compared",
   // Traductions des textes premium (pipeline : lib/narrative-i18n.js).
   "facteur_x_i18n", "verdict_shark_i18n",
+  // Identifiant et categorie du marche recommande : nomment le pari, donc premium.
+  "market_id", "marche",
 ];
 
 // Un match marque is_free par le pipeline est l'offre d'appel du jour : ses
@@ -103,7 +105,7 @@ Deno.serve(async (req: Request) => {
   if (fixtureIds.length) {
     const { data: premiumRows, error } = await supabase
       .from("match_premium_data")
-      .select("fixture_id,kelly,edge,verdict_shark,facteur_x,dropping_odds,player_markets,pari_rec,cote_rec,model_probability,markets_compared,raw_response")
+      .select("fixture_id,kelly,edge,verdict_shark,facteur_x,dropping_odds,player_markets,pari_rec,cote_rec,model_probability,markets_compared,raw_response,market_id,marche")
       .in("fixture_id", fixtureIds);
     if (error) {
       console.error("match_premium_data query failed:", error.message);
@@ -132,6 +134,8 @@ Deno.serve(async (req: Request) => {
           cote_rec: premium.cote_rec ?? m.cote_rec ?? null,
           model_probability: premium.model_probability ?? m.model_probability ?? null,
           markets_compared: premium.markets_compared ?? m.markets_compared ?? null,
+          market_id: premium.market_id ?? m.market_id ?? null,
+          marche: premium.marche ?? m.marche ?? null,
         }
       : m;
   });

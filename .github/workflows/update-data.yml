@@ -3074,31 +3074,53 @@ jobs:
               console.log('  [ACCES] ATTENTION : SUPABASE_SERVICE_ROLE_KEY absente. Les champs premium ne peuvent pas etre persliste ailleurs, ils restent donc dans data.json public. A CORRIGER.');
             }
             (function designerMatchGratuit(){
-              // Priorite absolue : si le moteur canonique (RUN_OUTPUT_ENGINE) a
-              // reellement selectionne une SAFE_PICK_OF_THE_DAY ci-dessus, c'est
-              // TOUJOURS elle l'analyse offerte du jour - jamais un pick legacy
-              // non valide, meme avec une confiance affichee plus haute.
+              // Une analyse offerte PAR JOUR couvert par le fichier (aujourd'hui
+              // et demain), pas une seule par passage. Le pipeline ne tourne
+              // qu'une fois par jour : avec une seule designation, le site
+              // gardait l'offre de la veille jusqu'au passage suivant. Avec une
+              // designation par jour, le site (lib/free-match.js) bascule seul a
+              // minuit sur celle du nouveau jour.
+              var jourDe=function(m){ return (m&&m.date||'').split(' ')[0]; };
+              var analysable=function(m){ return m && m.pari_rec && !m.no_signal; };
+              var elus={};
+              // Priorite absolue : la SAFE_PICK_OF_THE_DAY canonique, si le moteur
+              // (RUN_OUTPUT_ENGINE) en a reellement selectionne une, est l'offre de
+              // SON jour - jamais remplacee par un pick legacy mieux note.
               var matchCanonique=allMatchsData.find(function(m){ return m && m.is_canonical_pick; });
-              if(matchCanonique){
-                allMatchsData.forEach(function(m){ if(m) m.is_free=(m===matchCanonique); });
-                console.log('  [ACCES] analyse offerte du jour (SAFE_PICK_OF_THE_DAY canonique) : '+matchCanonique.id+' ('+(matchCanonique.home&&matchCanonique.home.n)+' vs '+(matchCanonique.away&&matchCanonique.away.n)+')');
-                return;
-              }
-              var candidats=allMatchsData.filter(function(m){
-                return m && m.pari_rec && !m.no_signal && (m.date||'').split(' ')[0]===TODAY;
+              if(matchCanonique) elus[jourDe(matchCanonique)]=matchCanonique;
+              var jours=[];
+              allMatchsData.forEach(function(m){
+                var j=jourDe(m);
+                if(analysable(m) && j>=TODAY && jours.indexOf(j)===-1) jours.push(j);
               });
-              if(!candidats.length){
-                candidats=allMatchsData.filter(function(m){return m && m.pari_rec && !m.no_signal;});
-              }
-              var choisi=null;
-              candidats.forEach(function(m){
-                var c=Number(m.conf)||0;
-                if(!choisi||c>(Number(choisi.conf)||0))choisi=m;
+              jours.sort();
+              jours.slice(0,2).forEach(function(j){
+                if(elus[j]) return;
+                var choisi=null;
+                allMatchsData.forEach(function(m){
+                  if(!analysable(m) || jourDe(m)!==j) return;
+                  var c=Number(m.conf)||0;
+                  if(!choisi||c>(Number(choisi.conf)||0)) choisi=m;
+                });
+                if(choisi) elus[j]=choisi;
               });
-              allMatchsData.forEach(function(m){ if(m) m.is_free=(choisi&&m.id===choisi.id); });
-              console.log(choisi
-                ? '  [ACCES] analyse offerte du jour : '+choisi.id+' ('+(choisi.home&&choisi.home.n)+' vs '+(choisi.away&&choisi.away.n)+')'
-                : '  [ACCES] aucune analyse exploitable a offrir aujourd\'hui.');
+              if(!Object.keys(elus).length){
+                var repli=null;
+                allMatchsData.forEach(function(m){
+                  if(!analysable(m)) return;
+                  var c=Number(m.conf)||0;
+                  if(!repli||c>(Number(repli.conf)||0)) repli=m;
+                });
+                if(repli) elus[jourDe(repli)||'repli']=repli;
+              }
+              var ids=Object.keys(elus).map(function(k){ return elus[k].id; });
+              allMatchsData.forEach(function(m){ if(m) m.is_free=ids.indexOf(m.id)!==-1; });
+              var cles=Object.keys(elus).sort();
+              if(!cles.length) console.log('  [ACCES] aucune analyse exploitable a offrir.');
+              cles.forEach(function(k){
+                var m=elus[k];
+                console.log('  [ACCES] analyse offerte du '+k+(m.is_canonical_pick?' (SAFE_PICK_OF_THE_DAY canonique)':'')+' : '+m.id+' ('+(m.home&&m.home.n)+' vs '+(m.away&&m.away.n)+')');
+              });
             })();
             // Copie assainie pour le fichier public. allMatchsData reste complet :
             // l'historique, les pages match et les lignes premium en ont besoin.

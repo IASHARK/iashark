@@ -73,3 +73,23 @@ test("classe par ecart modele/marche quand il existe, pas par la confiance brute
   ];
   assert.equal(pickFreeMatchId(list, horloge), 2);
 });
+
+// 13/09/2026 : le match offert restait celui de la veille jusqu'au passage
+// suivant du pipeline (08:00). Le pipeline designe desormais une analyse
+// offerte par jour ; a minuit le site prend celle du nouveau jour.
+test("plusieurs matchs designes : prend celui du jour, puis le prochain a venir", () => {
+  const list = [
+    m(1, "2026-09-02 21:00", { is_free: true, pari_rec: "A" }),
+    m(2, "2026-09-03 21:00", { is_free: true, pari_rec: "B" })
+  ];
+  assert.equal(pickFreeMatchId(list, { day: "2026-09-02", now: "2026-09-02 23:59" }), 1);
+  assert.equal(pickFreeMatchId(list, { day: "2026-09-03", now: "2026-09-03 00:01" }), 2);
+  assert.equal(pickFreeMatchId(list, { day: "2026-09-01", now: "2026-09-01 12:00" }), 1);
+});
+
+test("l'accueil ne repete pas le match gratuit dans la liste et se re-rend a minuit", () => {
+  const accueil = read("index.html");
+  assert.match(accueil, /list=list\.filter\(function\(m\)\{return String\(m\.id\)!==String\(freeMatchId\);\}\)/);
+  assert.doesNotMatch(accueil, /ordonnee\.unshift\(/);
+  assert.match(accueil, /setInterval\(function\(\)\{var j=getTodayStr\(\)/);
+});

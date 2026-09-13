@@ -1150,8 +1150,9 @@ function renderMatchs(){
   // pas resolu, le lien reste l'ancre #decisions : jamais de lien mort.
   var ctaHero=document.querySelector('.hero-cta');
   if(ctaHero&&featured)ctaHero.setAttribute('href',lien('match/'+featured.id+'.html'));
-  // On ne retire PLUS le match gratuit de la liste : il en devient la
-  // premiere carte, entierement lisible. C'est la demonstration de valeur.
+  // Le match gratuit est deja affiche en grand dans la vitrine : on ne le
+  // repete pas dans la liste (il apparaissait deux fois sur la page).
+  if(freeMatchId){list=list.filter(function(m){return String(m.id)!==String(freeMatchId);});}
   if(!list.length){
     el.innerHTML='<div class="empty-state"><h3>'+(isDemain?'NENHUM OUTRO JOGO AMANHÃ':'NENHUM OUTRO JOGO ENCONTRADO')+'</h3><p>Experimente outra competição.</p></div>';
     return;
@@ -1161,12 +1162,12 @@ function renderMatchs(){
   la.sort(function(a,b){return(a.date||'')<(b.date||'')?-1:1;});
   lp.sort(function(a,b){return(a.date||'')>(b.date||'')?-1:1;});
   var ordonnee=la.concat(lp);
-  if(freeMatchId){
-    var i=ordonnee.findIndex(function(m){return String(m.id)===String(freeMatchId);});
-    if(i>0)ordonnee.unshift(ordonnee.splice(i,1)[0]);
-  }
   el.innerHTML=ordonnee.map(buildCard).join('');
 }
+
+// A minuit (heure de Paris) le match du jour et les onglets Aujourd'hui /
+// Demain changent : la page se re-rend d'elle-meme, sans rechargement.
+(function(){var jourAffiche=getTodayStr();setInterval(function(){var j=getTodayStr();if(j===jourAffiche)return;jourAffiche=j;try{if(typeof allMatchs!=='undefined'&&allMatchs&&allMatchs.length)renderMatchs();}catch(e){}},60000);})();
 
 async function loadData(){
   try{

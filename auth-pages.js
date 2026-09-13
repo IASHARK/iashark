@@ -24,24 +24,31 @@
 
   var $ = function (id) { return document.getElementById(id); };
 
+  /* i18n : repli local sur le francais d'origine si I18N n'est pas charge (ou
+     pas encore pret) - meme motif que celui deja utilise par match-page.js /
+     tools-page.js / bottom-navigation.js / site-prefs.js. Ne traduit jamais
+     les donnees utilisateur (email saisi) ni les codes d'erreur bruts de
+     Supabase, uniquement le texte d'interface qui les habille. */
+  function t(key, fallback) { return (window.I18N && window.I18N.t) ? window.I18N.t(key, fallback) : fallback; }
+
   /* ---------- Messages ----------
      On ne montre JAMAIS le message brut du fournisseur : il fuite des
      details inutiles ("AuthApiError: Invalid login credentials") et n'est pas
-     en francais. Chaque cas connu est traduit, le reste tombe sur un message
-     generique. */
+     dans la langue de la personne. Chaque cas connu est traduit, le reste
+     tombe sur un message generique. */
   function messageLisible(brut) {
     var m = String(brut || '');
-    if (/Invalid login credentials/i.test(m)) return 'Email ou mot de passe incorrect.';
-    if (/Email not confirmed/i.test(m)) return 'Cette adresse doit encore être confirmée.';
-    if (/User already registered|already been registered/i.test(m)) return 'Un compte existe déjà avec cette adresse.';
-    if (/Password should be at least/i.test(m)) return 'Mot de passe trop court : ' + MIN_PASSWORD + ' caractères minimum.';
-    if (/weak.?password/i.test(m)) return 'Ce mot de passe est trop simple. Choisissez-en un autre.';
-    if (/rate limit|too many|429/i.test(m)) return 'Trop de tentatives. Réessayez dans quelques minutes.';
-    if (/Anonymous sign-ins are disabled/i.test(m)) return 'Saisissez une adresse email valide.';
-    if (/same as the old password/i.test(m)) return 'Ce mot de passe est identique à l’ancien.';
-    if (/Failed to fetch|NetworkError/i.test(m)) return 'Connexion au serveur impossible. Vérifiez votre réseau.';
-    if (/expired|invalid.*token/i.test(m)) return 'Ce lien a expiré. Demandez-en un nouveau.';
-    return 'Une erreur est survenue. Réessayez dans quelques instants.';
+    if (/Invalid login credentials/i.test(m)) return t('auth.err_invalid_credentials', 'Email ou mot de passe incorrect.');
+    if (/Email not confirmed/i.test(m)) return t('auth.err_email_not_confirmed', 'Cette adresse doit encore être confirmée.');
+    if (/User already registered|already been registered/i.test(m)) return t('auth.err_already_registered', 'Un compte existe déjà avec cette adresse.');
+    if (/Password should be at least/i.test(m)) return t('auth.err_password_too_short', 'Mot de passe trop court : ' + MIN_PASSWORD + ' caractères minimum.').replace('{min}', MIN_PASSWORD);
+    if (/weak.?password/i.test(m)) return t('auth.err_weak_password', 'Ce mot de passe est trop simple. Choisissez-en un autre.');
+    if (/rate limit|too many|429/i.test(m)) return t('auth.err_rate_limit', 'Trop de tentatives. Réessayez dans quelques minutes.');
+    if (/Anonymous sign-ins are disabled/i.test(m)) return t('auth.err_invalid_email_generic', 'Saisissez une adresse email valide.');
+    if (/same as the old password/i.test(m)) return t('auth.err_same_as_old_password', 'Ce mot de passe est identique à l’ancien.');
+    if (/Failed to fetch|NetworkError/i.test(m)) return t('auth.err_network', 'Connexion au serveur impossible. Vérifiez votre réseau.');
+    if (/expired|invalid.*token/i.test(m)) return t('auth.err_link_expired', 'Ce lien a expiré. Demandez-en un nouveau.');
+    return t('auth.err_generic', 'Une erreur est survenue. Réessayez dans quelques instants.');
   }
 
   /* Zone de message globale du formulaire. aria-live pour que les lecteurs
@@ -90,7 +97,7 @@
     btn.addEventListener('click', function () {
       var visible = input.type === 'text';
       input.type = visible ? 'password' : 'text';
-      btn.setAttribute('aria-label', visible ? 'Afficher le mot de passe' : 'Masquer le mot de passe');
+      btn.setAttribute('aria-label', visible ? t('auth.show_password', 'Afficher le mot de passe') : t('auth.hide_password', 'Masquer le mot de passe'));
       btn.setAttribute('aria-pressed', visible ? 'false' : 'true');
       btn.innerHTML = visible ? OEIL : OEIL_BARRE;
       input.focus();
@@ -116,11 +123,11 @@
     global('formMsg', '');
     var email = $('email').value.trim(), pwd = $('password').value;
     var faute = null;
-    if (!EMAIL_RE.test(email)) { champ('email', 'Entrez une adresse email valide.'); faute = 'email'; }
-    if (!pwd) { champ('password', 'Entrez votre mot de passe.'); faute = faute || 'password'; }
+    if (!EMAIL_RE.test(email)) { champ('email', t('auth.err_enter_valid_email', 'Entrez une adresse email valide.')); faute = 'email'; }
+    if (!pwd) { champ('password', t('auth.err_enter_password', 'Entrez votre mot de passe.')); faute = faute || 'password'; }
     if (faute) { $(faute).focus(); return; }
 
-    var relacher = occuper($('submit'), 'Connexion…');
+    var relacher = occuper($('submit'), t('auth.login_submit_loading', 'Connexion…'));
     try {
       var passeParGuard = false;
       try {
@@ -162,12 +169,12 @@
     global('formMsg', '');
     var email = $('email').value.trim(), pwd = $('password').value, pwd2 = $('password2').value;
     var faute = null;
-    if (!EMAIL_RE.test(email)) { champ('email', 'Entrez une adresse email valide.'); faute = faute || 'email'; }
-    if (pwd.length < MIN_PASSWORD) { champ('password', MIN_PASSWORD + ' caractères minimum.'); faute = faute || 'password'; }
-    if (pwd2 !== pwd) { champ('password2', 'Les deux mots de passe ne correspondent pas.'); faute = faute || 'password2'; }
+    if (!EMAIL_RE.test(email)) { champ('email', t('auth.err_enter_valid_email', 'Entrez une adresse email valide.')); faute = faute || 'email'; }
+    if (pwd.length < MIN_PASSWORD) { champ('password', t('auth.password_hint_min_chars', MIN_PASSWORD + ' caractères minimum.')); faute = faute || 'password'; }
+    if (pwd2 !== pwd) { champ('password2', t('auth.err_passwords_mismatch', 'Les deux mots de passe ne correspondent pas.')); faute = faute || 'password2'; }
     if (faute) { $(faute).focus(); return; }
 
-    var relacher = occuper($('submit'), 'Création…');
+    var relacher = occuper($('submit'), t('auth.signup_submit_loading', 'Création…'));
     try {
       var res = await sb.auth.signUp({ email: email, password: pwd });
       if (res.error) throw res.error;
@@ -177,12 +184,17 @@
       // laisser l'utilisateur devant un ecran muet.
       if (res.data && res.data.session) { location.href = '/compte.html?bienvenue=1'; return; }
       relacher();
-      global('formMsg', 'Compte créé. Connectez-vous pour continuer.', 'success');
+      global('formMsg', t('auth.signup_success_check_login', 'Compte créé. Connectez-vous pour continuer.'), 'success');
     } catch (err) {
       relacher();
-      var texte = messageLisible(err && err.message);
+      var brut = String((err && err.message) || '');
+      var texte = messageLisible(brut);
       global('formMsg', texte, 'error');
-      if (/existe déjà/.test(texte)) champ('email', texte);
+      // Teste le signal brut (toujours en anglais, cote Supabase), pas le
+      // texte deja traduit : sinon ce marquage du champ email ne se
+      // declenchait qu'en francais (bug reel trouve pendant la
+      // localisation - le texte traduit ne contient plus "existe deja").
+      if (/User already registered|already been registered/i.test(brut)) champ('email', texte);
     }
   }
 
@@ -192,9 +204,9 @@
     viderChamps(['email']);
     global('formMsg', '');
     var email = $('email').value.trim();
-    if (!EMAIL_RE.test(email)) { champ('email', 'Entrez une adresse email valide.'); $('email').focus(); return; }
+    if (!EMAIL_RE.test(email)) { champ('email', t('auth.err_enter_valid_email', 'Entrez une adresse email valide.')); $('email').focus(); return; }
 
-    var relacher = occuper($('submit'), 'Envoi…');
+    var relacher = occuper($('submit'), t('auth.forgot_submit_loading', 'Envoi…'));
     var redirection = new URL('/reinitialiser-mot-de-passe.html', location.origin).href;
     try {
       await sb.auth.resetPasswordForEmail(email, { redirectTo: redirection });
@@ -233,11 +245,11 @@
     global('formMsg', '');
     var pwd = $('password').value, pwd2 = $('password2').value;
     var faute = null;
-    if (pwd.length < MIN_PASSWORD) { champ('password', MIN_PASSWORD + ' caractères minimum.'); faute = 'password'; }
-    else if (pwd2 !== pwd) { champ('password2', 'Les deux mots de passe ne correspondent pas.'); faute = 'password2'; }
+    if (pwd.length < MIN_PASSWORD) { champ('password', t('auth.password_hint_min_chars', MIN_PASSWORD + ' caractères minimum.')); faute = 'password'; }
+    else if (pwd2 !== pwd) { champ('password2', t('auth.err_passwords_mismatch', 'Les deux mots de passe ne correspondent pas.')); faute = 'password2'; }
     if (faute) { $(faute).focus(); return; }
 
-    var relacher = occuper($('submit'), 'Mise à jour…');
+    var relacher = occuper($('submit'), t('auth.reset_submit_loading', 'Mise à jour…'));
     try {
       var res = await sb.auth.updateUser({ password: pwd });
       if (res.error) throw res.error;

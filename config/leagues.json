@@ -40,7 +40,22 @@
     "League ; en pratique cela ne renvoie jamais de cotes pour liga_mx (aucun nom d'equipe mexicaine",
     "ne matche une equipe de C1 dans bestTeamMatch), mais ce n'est pas un design propre. Non corrige",
     "ici (pas un crash, hors du perimetre config-only de cet ajout) - a corriger idealement en",
-    "faisant retourner null directement quand sportMap[leagueKey] est absent."
+    "faisant retourner null directement quand sportMap[leagueKey] est absent.",
+    "Ajout 2026-09-13 : south_africa_premiership (meme decision produit explicite pour le lancement",
+    "Afrique du Sud, cette fois SANS AUCUNE validation SCORE_LAB_FACTORY_V2 ni Score Lab prealable -",
+    "seule la collecte Gate B1 (984 matchs, saisons 2021-2024) a ete faite ; le prerequis",
+    "LEAGUE_EXPANSION_FACTORY_V1 est BLOQUE en amont (statistics_players indisponible a l'API pour",
+    "2021-2022 sur ce championnat specifiquement, cf. config/league-expansion.json#leagues[key=south_africa_premiership].status_note",
+    "pour le detail complet) - decision utilisateur explicite d'ouvrir quand meme sans attendre. Zero",
+    "test de calibration n'a tourne sur ce championnat, contrairement a liga_mx (qui avait au moins un",
+    "verdict INCONCLUSIVE proche du seuil). apiFootballId=288 reutilise tel quel depuis",
+    "config/league-expansion.json (deja verifie en direct contre l'API : league.id=288,",
+    "league.name='Premier Soccer League', code pays ZA, nom commercial 'Betway/DStv Premiership'",
+    "selon le sponsor de la saison). oddsSportKey DELIBEREMENT ABSENT, meme raison que liga_mx : aucune",
+    "cle 'the-odds-api' pour le foot sud-africain trouvee/verifiee dans ce depot - meme TODO (verifier",
+    "aupres de The Odds API avant tout ancrage de cotes reelles), meme comportement getPinnacleOdds()",
+    "deja documente ci-dessus pour liga_mx (repli vers Champions League, inoffensif car aucun nom",
+    "d'equipe sud-africaine ne matche, mais pas un design propre)."
   ],
   "leagues": [
     { "key": "premier",     "displayName": "Premier League",      "country": "Angleterre", "apiFootballId": 39,  "oddsSportKey": "soccer_epl",                              "europeanQualification": true  },
@@ -56,6 +71,7 @@
     { "key": "mls",         "displayName": "MLS",                 "country": "USA/Canada", "apiFootballId": 253, "oddsSportKey": "soccer_usa_mls",                          "europeanQualification": false, "apiNameHint": "Major League Soccer" },
     { "key": "suede",       "displayName": "Allsvenskan",         "country": "Suede",      "apiFootballId": 113, "oddsSportKey": "soccer_sweden_allsvenskan",               "europeanQualification": true  },
     { "key": "jleague",     "displayName": "J1 League",           "country": "Japon",      "apiFootballId": 98,  "oddsSportKey": "soccer_japan_j_league",                   "europeanQualification": false },
-    { "key": "liga_mx",     "displayName": "Liga MX",             "country": "Mexique",    "apiFootballId": 262,                                                             "europeanQualification": false }
+    { "key": "liga_mx",     "displayName": "Liga MX",             "country": "Mexique",    "apiFootballId": 262,                                                             "europeanQualification": false },
+    { "key": "south_africa_premiership", "displayName": "Premier Soccer League", "country": "Afrique du Sud", "apiFootballId": 288,                                            "europeanQualification": false }
   ]
 }

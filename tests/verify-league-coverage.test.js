@@ -7,16 +7,20 @@ const { resolveSeason, computeTier } = require("../scripts/verify-league-coverag
 
 const ROOT = path.join(__dirname, "..");
 
-test("config/leagues.json : contient exactement les 14 competitions de lancement, cles/ids uniques", () => {
+test("config/leagues.json : contient exactement les 15 competitions de lancement, cles/ids uniques", () => {
   // 13 -> 14 le 2026-09-13 : ajout de liga_mx (decision produit explicite
   // lancement Mexique, voir config/leagues.json#_readme et
   // data/league-validation-registry.json#leagues.liga_mx).
+  // 14 -> 15 le 2026-09-13 : ajout de south_africa_premiership (meme decision
+  // produit pour l'Afrique du Sud, SANS AUCUN test Score Lab Factory V2 cette
+  // fois - prerequis bloque par l'API elle-meme, voir config/leagues.json#_readme
+  // et config/league-expansion.json#leagues[key=south_africa_premiership].status_note).
   var config = JSON.parse(fs.readFileSync(path.join(ROOT, "config/leagues.json"), "utf8"));
-  assert.equal(config.leagues.length, 14);
+  assert.equal(config.leagues.length, 15);
   var keys = config.leagues.map(function (l) { return l.key; });
   var ids = config.leagues.map(function (l) { return l.apiFootballId; });
-  assert.equal(new Set(keys).size, 14, "cles internes dupliquees");
-  assert.equal(new Set(ids).size, 14, "apiFootballId dupliques");
+  assert.equal(new Set(keys).size, 15, "cles internes dupliquees");
+  assert.equal(new Set(ids).size, 15, "apiFootballId dupliques");
   config.leagues.forEach(function (l) {
     assert.ok(l.key && l.displayName && l.country && typeof l.apiFootballId === "number", JSON.stringify(l) + " incomplet");
     assert.equal(typeof l.europeanQualification, "boolean");

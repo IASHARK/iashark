@@ -3144,90 +3144,62 @@ jobs:
               console.log('  [ACCES] ATTENTION : SUPABASE_SERVICE_ROLE_KEY absente. Les champs premium ne peuvent pas etre persliste ailleurs, ils restent donc dans data.json public. A CORRIGER.');
             }
             (function designerMatchGratuit(){
-              // Une analyse offerte PAR JOUR couvert par le fichier (aujourd'hui
-              // et demain), pas une seule par passage. Le pipeline ne tourne
-              // qu'une fois par jour : avec une seule designation, le site
-              // gardait l'offre de la veille jusqu'au passage suivant. Avec une
-              // designation par jour, le site (lib/free-match.js) bascule seul a
-              // minuit sur celle du nouveau jour.
+              // Une analyse offerte PAR JOUR (aujourd'hui, demain) : le match qui
+              // presente LE PLUS DE VALEUR, quel que soit le championnat (decision
+              // proprietaire du 14/09/2026, remplace les offres pays Liga MX / PSL).
+              // Valeur = esperance du pari recommande : probabilite modele x cote
+              // reelle - 1. Garde-fou de credibilite : probabilite modele >= 45 %
+              // (sinon meilleure valeur sans garde-fou, puis confiance). A valeur
+              // egale, la SAFE_PICK_OF_THE_DAY canonique l'emporte. Le site
+              // (lib/free-match.js) bascule seul a minuit sur l'offre du nouveau jour.
               var jourDe=function(m){ return (m&&m.date||'').split(' ')[0]; };
               var analysable=function(m){ return m && m.pari_rec && !m.no_signal; };
-              var elus={};
-              // Priorite absolue : la SAFE_PICK_OF_THE_DAY canonique, si le moteur
-              // (RUN_OUTPUT_ENGINE) en a reellement selectionne une, est l'offre de
-              // SON jour - jamais remplacee par un pick legacy mieux note.
-              var matchCanonique=allMatchsData.find(function(m){ return m && m.is_canonical_pick; });
-              if(matchCanonique) elus[jourDe(matchCanonique)]=matchCanonique;
+              var valeurDe=function(m){
+                var p=Number(m&&m.model_probability), o=parseFloat(String(m&&m.cote_rec||'').replace(',','.'));
+                if(!(p>0&&p<=100)||!(o>1)) return null;
+                return (p/100)*o-1;
+              };
+              var PROBA_MIN=45;
+              var meilleur=function(liste){
+                var avecValeur=liste.filter(function(m){ return valeurDe(m)!=null; });
+                var credibles=avecValeur.filter(function(m){ return Number(m.model_probability)>=PROBA_MIN; });
+                var pool=credibles.length?credibles:avecValeur;
+                if(pool.length){
+                  return pool.reduce(function(b,m){
+                    var vb=valeurDe(b), vm=valeurDe(m);
+                    if(vm>vb) return m;
+                    if(vm===vb && m.is_canonical_pick && !b.is_canonical_pick) return m;
+                    return b;
+                  });
+                }
+                return liste.reduce(function(b,m){ return (b===null||(Number(m.conf)||0)>(Number(b.conf)||0))?m:b; }, null);
+              };
               var jours=[];
               allMatchsData.forEach(function(m){
                 var j=jourDe(m);
                 if(analysable(m) && j>=TODAY && jours.indexOf(j)===-1) jours.push(j);
               });
               jours.sort();
+              var elus={};
               jours.slice(0,2).forEach(function(j){
-                if(elus[j]) return;
-                var choisi=null;
-                allMatchsData.forEach(function(m){
-                  if(!analysable(m) || jourDe(m)!==j) return;
-                  var c=Number(m.conf)||0;
-                  if(!choisi||c>(Number(choisi.conf)||0)) choisi=m;
-                });
+                var choisi=meilleur(allMatchsData.filter(function(m){ return analysable(m) && jourDe(m)===j; }));
                 if(choisi) elus[j]=choisi;
               });
               if(!Object.keys(elus).length){
-                var repli=null;
-                allMatchsData.forEach(function(m){
-                  if(!analysable(m)) return;
-                  var c=Number(m.conf)||0;
-                  if(!repli||c>(Number(repli.conf)||0)) repli=m;
-                });
+                var repli=meilleur(allMatchsData.filter(analysable));
                 if(repli) elus[jourDe(repli)||'repli']=repli;
               }
-              // Offre PAYS (13/09/2026) : Mexique -> un match Liga MX, Afrique du
-              // Sud -> un match PSL, par jour (aujourd'hui, demain), UNIQUEMENT
-              // parmi les matchs reellement analyses (analysable). Aucun match
-              // de la ligue analyse ce jour-la -> aucune designation pays : le
-              // site (lib/free-match.js) retombe sur l'offre generale.
-              var marchesDe={};
-              var ajouterMarche=function(m,code){
-                var k=String(m.id); marchesDe[k]=marchesDe[k]||[];
-                if(marchesDe[k].indexOf(code)===-1) marchesDe[k].push(code);
-              };
-              Object.keys(elus).forEach(function(k){ ajouterMarche(elus[k],'default'); });
-              var OFFRES_PAYS=[{code:'mx',league_key:'liga_mx'},{code:'za',league_key:'south_africa_premiership'}];
-              var elusPays=[];
-              OFFRES_PAYS.forEach(function(o){
-                var joursLigue=[];
-                allMatchsData.forEach(function(m){
-                  var j=jourDe(m);
-                  if(analysable(m) && m.league_key===o.league_key && j>=TODAY && joursLigue.indexOf(j)===-1) joursLigue.push(j);
-                });
-                joursLigue.sort();
-                joursLigue.slice(0,2).forEach(function(j){
-                  var choisi=null;
-                  allMatchsData.forEach(function(m){
-                    if(!analysable(m) || m.league_key!==o.league_key || jourDe(m)!==j) return;
-                    var c=Number(m.conf)||0;
-                    if(!choisi||c>(Number(choisi.conf)||0)) choisi=m;
-                  });
-                  if(choisi){ ajouterMarche(choisi,o.code); elusPays.push({code:o.code,jour:j,m:choisi}); }
-                });
-                if(!joursLigue.length) console.log('  [ACCES] marche '+o.code+' : aucun match '+o.league_key+' analyse, repli sur l\'offre generale.');
-              });
-              var ids=Object.keys(elus).map(function(k){ return elus[k].id; }).concat(elusPays.map(function(e){ return e.m.id; }));
+              var ids=Object.keys(elus).map(function(k){ return elus[k].id; });
               allMatchsData.forEach(function(m){
                 if(!m) return;
                 m.is_free=ids.indexOf(m.id)!==-1;
-                if(m.is_free) m.free_markets=marchesDe[String(m.id)]; else delete m.free_markets;
-              });
-              elusPays.forEach(function(e){
-                console.log('  [ACCES] analyse offerte marche '+e.code+' du '+e.jour+' : '+e.m.id+' ('+(e.m.home&&e.m.home.n)+' vs '+(e.m.away&&e.m.away.n)+')');
+                delete m.free_markets;
               });
               var cles=Object.keys(elus).sort();
               if(!cles.length) console.log('  [ACCES] aucune analyse exploitable a offrir.');
               cles.forEach(function(k){
-                var m=elus[k];
-                console.log('  [ACCES] analyse offerte du '+k+(m.is_canonical_pick?' (SAFE_PICK_OF_THE_DAY canonique)':'')+' : '+m.id+' ('+(m.home&&m.home.n)+' vs '+(m.away&&m.away.n)+')');
+                var m=elus[k], v=valeurDe(m);
+                console.log('  [ACCES] analyse offerte du '+k+' (valeur '+(v==null?'n/d':(v*100).toFixed(1)+'%')+(m.is_canonical_pick?', SAFE_PICK canonique':'')+') : '+m.id+' ('+(m.home&&m.home.n)+' vs '+(m.away&&m.away.n)+') '+(m.league||''));
               });
             })();
             // Copie assainie pour le fichier public. allMatchsData reste complet :

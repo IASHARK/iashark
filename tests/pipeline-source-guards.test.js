@@ -191,15 +191,12 @@ test("pipeline source: SAFE_PICK_OF_THE_DAY canonique est injectee sur la carte 
   assert.match(source, /matchCibleSafePick\.cote_rec=safePick\.decimal_odds/);
   assert.match(source, /matchCibleSafePick\.model_probability=safePick\.model_probability_pct/);
   assert.match(source, /matchCibleSafePick\.is_canonical_pick=true/);
-  // designerMatchGratuit doit verifier is_canonical_pick EN PREMIER, avant
-  // toute logique de confiance legacy.
+  // Depuis le 14/09/2026 : l'offre du jour est le match de plus grande valeur ;
+  // la SAFE_PICK canonique participe au classement et gagne a valeur egale.
   const designerStart = source.indexOf("(function designerMatchGratuit(){");
   const designerBlock = source.slice(designerStart, source.indexOf("})();", designerStart));
-  const canoniqueCheckIndex = designerBlock.indexOf("m.is_canonical_pick");
-  // Depuis le 13/09/2026 : une designation par jour (et par pays) ; la
-  // selection legacy par confiance est la boucle jours.slice(0,2).forEach.
-  const legacyCandidatsIndex = designerBlock.indexOf("jours.slice(0,2).forEach");
-  assert.ok(canoniqueCheckIndex >= 0 && canoniqueCheckIndex < legacyCandidatsIndex, "la verification is_canonical_pick doit precéder la logique de selection legacy par confiance");
+  assert.match(designerBlock, /var valeurDe=function\(m\)/);
+  assert.match(designerBlock, /vm===vb && m\.is_canonical_pick && !b\.is_canonical_pick/);
 });
 
 test("pipeline source: l'injection SAFE_PICK a lieu AVANT designerMatchGratuit/matchsPublics, jamais apres", () => {

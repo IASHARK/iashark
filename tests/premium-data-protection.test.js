@@ -89,15 +89,17 @@ test("la page d'accueil ne floute plus une donnee premium", () => {
     "la carte doit rester juste quand le pari n'est pas servi");
 });
 
-// 13/09/2026 : offres pays (Liga MX pour mx, PSL pour za). Elles sont aussi
-// is_free=true (donc publiques), marquees free_markets, et ne sont designees
-// que parmi les matchs reellement analyses - jamais un pick fabrique.
-test("le pipeline designe les offres pays parmi les matchs analyses, avec free_markets", () => {
+// 14/09/2026 : l'analyse offerte du jour est le match qui a le plus de valeur
+// (probabilite modele x cote - 1), quel que soit le championnat. Plus d'offre
+// pays : aucun free_markets n'est publie.
+test("le pipeline designe l'offre du jour par la valeur, sans offre pays", () => {
   const wf = read(".github/workflows/update-data.yml");
-  assert.match(wf, /\{code:'mx',league_key:'liga_mx'\},\{code:'za',league_key:'south_africa_premiership'\}/);
-  assert.match(wf, /if\(analysable\(m\) && m\.league_key===o\.league_key && j>=TODAY/);
-  assert.match(wf, /ajouterMarche\(elus\[k\],'default'\)/);
-  assert.match(wf, /if\(m\.is_free\) m\.free_markets=marchesDe\[String\(m\.id\)\]; else delete m\.free_markets;/);
+  const debut = wf.indexOf("(function designerMatchGratuit(){");
+  const bloc = wf.slice(debut, wf.indexOf("})();", debut));
+  assert.match(bloc, /return \(p\/100\)\*o-1;/, "valeur = probabilite modele x cote - 1");
+  assert.match(bloc, /var PROBA_MIN=45;/);
+  assert.doesNotMatch(bloc, /OFFRES_PAYS|league_key===o\.league_key/, "plus d'offre par championnat");
+  assert.match(bloc, /delete m\.free_markets;/);
 });
 
 test("une offre pays reste publique cote client pour son marche, l'offre generale ailleurs", () => {

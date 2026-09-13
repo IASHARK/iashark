@@ -28,7 +28,7 @@ const STRIPE_SECRET_KEY = Deno.env.get("STRIPE_SECRET_KEY");
 
 const headers = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-iashark-locale",
   "Content-Type": "application/json",
 };
 
@@ -36,25 +36,90 @@ const headers = {
 // prelevement : ce sont les seuls qu'il faut resilier avant d'effacer.
 const VIVANTS = ["active", "trialing", "past_due", "unpaid", "incomplete"];
 
+// Langue des messages renvoyes a l'utilisateur. Priorite : champ `locale`
+// (ou `dir` de la page : fr/en/es/de/it/pt/gb/mx/za) du corps, en-tete
+// x-iashark-locale, puis Accept-Language du navigateur ; francais par defaut.
+// Les codes `error`/`code` restent stables pour les clients qui traduisent
+// eux-memes.
+const MSG_LOCALES = ["fr", "en", "es", "es-mx", "de", "it", "pt"];
+const DIR_LOCALE: Record<string, string> = { gb: "en", za: "en", mx: "es-mx" };
+function normLocale(value: unknown): string {
+  const s = String(value || "").trim().toLowerCase().replace("_", "-");
+  if (!s) return "";
+  if (DIR_LOCALE[s]) return DIR_LOCALE[s];
+  if (s.startsWith("es-mx")) return "es-mx";
+  if (MSG_LOCALES.includes(s)) return s;
+  const base = s.split("-")[0];
+  return MSG_LOCALES.includes(base) ? base : "";
+}
+function pickLocale(req: Request, hint?: unknown): string {
+  const direct = normLocale(hint) || normLocale(req.headers.get("x-iashark-locale"));
+  if (direct) return direct;
+  for (const part of (req.headers.get("accept-language") || "").split(",")) {
+    const l = normLocale(part.split(";")[0]);
+    if (l) return l;
+  }
+  return "fr";
+}
+function msg(table: Record<string, Record<string, string>>, key: string, locale: string): string {
+  const row = table[key];
+  return (row && (row[locale] || row[locale.split("-")[0]] || row.fr)) || key;
+}
+
+const MESSAGES: Record<string, Record<string, string>> = {
+  method_not_allowed: { fr: "Méthode non autorisée.", en: "Method not allowed.", es: "Método no permitido.", de: "Methode nicht erlaubt.", it: "Metodo non consentito.", pt: "Método não permitido." },
+  confirmation_missing: { fr: "Confirmation manquante.", en: "Confirmation missing.", es: "Falta la confirmación.", de: "Bestätigung fehlt.", it: "Conferma mancante.", pt: "Confirmação em falta." },
+  unauthenticated: { fr: "Non authentifié.", en: "Not signed in.", es: "No has iniciado sesión.", de: "Nicht angemeldet.", it: "Accesso non effettuato.", pt: "Sessão não iniciada." },
+  subscription_active: {
+    fr: "Votre abonnement doit être résilié avant la suppression. Écrivez à contact@iashark.com, nous le faisons pour vous.",
+    en: "Your subscription must be cancelled before the account can be deleted. Write to contact@iashark.com and we will do it for you.",
+    es: "Tu suscripción debe cancelarse antes de eliminar la cuenta. Escríbenos a contact@iashark.com y lo hacemos por ti.",
+    "es-mx": "Tu suscripción debe cancelarse antes de eliminar la cuenta. Escríbenos a contact@iashark.com y lo hacemos por ti.",
+    de: "Dein Abonnement muss vor dem Löschen des Kontos gekündigt werden. Schreib an contact@iashark.com, wir erledigen das für dich.",
+    it: "Il tuo abbonamento deve essere disdetto prima di eliminare l'account. Scrivi a contact@iashark.com e lo facciamo noi per te.",
+    pt: "A tua subscrição tem de ser cancelada antes de eliminar a conta. Escreve para contact@iashark.com e tratamos disso por ti.",
+  },
+  cancellation_failed: {
+    fr: "La résiliation de votre abonnement a échoué, le compte n'a donc pas été supprimé. Écrivez à contact@iashark.com.",
+    en: "Cancelling your subscription failed, so the account was not deleted. Write to contact@iashark.com.",
+    es: "No se ha podido cancelar tu suscripción, así que la cuenta no se ha eliminado. Escríbenos a contact@iashark.com.",
+    "es-mx": "No se pudo cancelar tu suscripción, así que la cuenta no se eliminó. Escríbenos a contact@iashark.com.",
+    de: "Die Kündigung deines Abonnements ist fehlgeschlagen, das Konto wurde daher nicht gelöscht. Schreib an contact@iashark.com.",
+    it: "La disdetta del tuo abbonamento non è riuscita, quindi l'account non è stato eliminato. Scrivi a contact@iashark.com.",
+    pt: "O cancelamento da tua subscrição falhou, por isso a conta não foi eliminada. Escreve para contact@iashark.com.",
+  },
+  deletion_failed: {
+    fr: "La suppression n'a pas pu aboutir. Écrivez à contact@iashark.com.",
+    en: "The deletion could not be completed. Write to contact@iashark.com.",
+    es: "No se ha podido completar la eliminación. Escríbenos a contact@iashark.com.",
+    "es-mx": "No se pudo completar la eliminación. Escríbenos a contact@iashark.com.",
+    de: "Die Löschung konnte nicht abgeschlossen werden. Schreib an contact@iashark.com.",
+    it: "Non è stato possibile completare l'eliminazione. Scrivi a contact@iashark.com.",
+    pt: "Não foi possível concluir a eliminação. Escreve para contact@iashark.com.",
+  },
+};
+
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers });
   if (req.method !== "POST") {
-    return new Response(JSON.stringify({ ok: false, message: "Methode non autorisee." }), { status: 405, headers });
+    const loc = pickLocale(req);
+    return new Response(JSON.stringify({ ok: false, code: "method_not_allowed", message: msg(MESSAGES, "method_not_allowed", loc) }), { status: 405, headers });
   }
 
   // Confirmation explicite exigee dans le corps : une requete envoyee par
   // accident (rejeu, prefetch, curl mal copie) ne suffit pas a effacer un
   // compte. Le mot est le meme que celui saisi dans la fenetre de
   // confirmation cote page.
-  let body: { confirmation?: string } = {};
+  let body: { confirmation?: string; locale?: string; dir?: string } = {};
   try { body = await req.json(); } catch { /* corps vide = confirmation absente */ }
+  const loc = pickLocale(req, body.locale || body.dir);
   if (String(body.confirmation || "").trim().toUpperCase() !== "SUPPRIMER") {
-    return new Response(JSON.stringify({ ok: false, message: "Confirmation manquante." }), { status: 400, headers });
+    return new Response(JSON.stringify({ ok: false, code: "confirmation_missing", message: msg(MESSAGES, "confirmation_missing", loc) }), { status: 400, headers });
   }
 
   const authorization = req.headers.get("Authorization");
   if (!authorization) {
-    return new Response(JSON.stringify({ ok: false, message: "Non authentifie." }), { status: 401, headers });
+    return new Response(JSON.stringify({ ok: false, code: "unauthenticated", message: msg(MESSAGES, "unauthenticated", loc) }), { status: 401, headers });
   }
 
   // Le jeton est valide par Supabase lui-meme, jamais decode a la main ici.
@@ -63,7 +128,7 @@ Deno.serve(async (req: Request) => {
   });
   const { data: auth, error: authError } = await commeUtilisateur.auth.getUser();
   if (authError || !auth.user) {
-    return new Response(JSON.stringify({ ok: false, message: "Non authentifie." }), { status: 401, headers });
+    return new Response(JSON.stringify({ ok: false, code: "unauthenticated", message: msg(MESSAGES, "unauthenticated", loc) }), { status: 401, headers });
   }
   const userId = auth.user.id;
 
@@ -85,7 +150,8 @@ Deno.serve(async (req: Request) => {
         console.error("[delete-account] abonnement vivant mais Stripe indisponible", userId);
         return new Response(JSON.stringify({
           ok: false,
-          message: "Votre abonnement doit etre resilie avant la suppression. Ecrivez a contact@iashark.com, nous le faisons pour vous.",
+          code: "subscription_active",
+          message: msg(MESSAGES, "subscription_active", loc),
         }), { status: 409, headers });
       }
       const stripe = new Stripe(STRIPE_SECRET_KEY, { apiVersion: "2026-07-29.dahlia" });
@@ -97,7 +163,8 @@ Deno.serve(async (req: Request) => {
     console.error("[delete-account] resiliation impossible:", (error as Error).message);
     return new Response(JSON.stringify({
       ok: false,
-      message: "La resiliation de votre abonnement a echoue, le compte n'a donc pas ete supprime. Ecrivez a contact@iashark.com.",
+      code: "cancellation_failed",
+      message: msg(MESSAGES, "cancellation_failed", loc),
     }), { status: 502, headers });
   }
 
@@ -110,7 +177,8 @@ Deno.serve(async (req: Request) => {
     console.error("[delete-account] suppression impossible:", deleteError.message);
     return new Response(JSON.stringify({
       ok: false,
-      message: "La suppression n'a pas pu aboutir. Ecrivez a contact@iashark.com.",
+      code: "deletion_failed",
+      message: msg(MESSAGES, "deletion_failed", loc),
     }), { status: 500, headers });
   }
 

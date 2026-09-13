@@ -27,7 +27,7 @@
 
   var SUPABASE_UMD = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js';
 
-  var localeMatch = location.pathname.match(/^\/(fr|en|es|de|it|pt)(?:\/|$)/);
+  var localeMatch = location.pathname.match(/^\/(fr|en|es|de|it|pt|gb|mx|za)(?:\/|$)/);
   var prefix = localeMatch ? '/' + localeMatch[1] : '';
 
   var CSS = ''
@@ -51,13 +51,18 @@
     + '@media(max-width:720px){.site-header{gap:10px;height:58px;padding:0 14px;}'
     + '.site-header__nav{display:none;}.site-header__brand img{width:108px;height:34px;}}';
 
+  // Lien interne (I18N.href garde le visiteur dans /gb/, /mx/...) et libelle
+  // traduit ; replis historiques tant que i18n/i18n.js n'est pas charge.
+  function lienSite(p, repli) { return (window.I18N && window.I18N.href) ? window.I18N.href(p) : repli; }
+  function tSite(key, fallback) { return (window.I18N && window.I18N.t) ? window.I18N.t(key, fallback) : fallback; }
+
   // Liens hauts : les memes reperes que la barre du bas, pour qu'un visiteur
   // arrive sur un article de blog par Google et retrouve immediatement le
   // produit (c'est le chemin de conversion principal du blog).
   var NAV = [
-    { href: prefix + '/',           label: 'Analyses du jour', match: function(p){ return p === '/' || p === prefix || p === prefix + '/' || /\/(index|landing)\.html$/.test(p); } },
-    { href: prefix + '/pro.html',   label: 'Outils',           match: function(p){ return /\/pro\.html$/.test(p); } },
-    { href: '/blog.html',           label: 'Blog',             match: function(p){ return p.indexOf('/blog') === 0; } }
+    { href: lienSite('', prefix + '/'), label: 'Analyses du jour', key: 'site_header.nav_today', match: function(p){ return p === '/' || p === prefix || p === prefix + '/' || /\/(index|landing)\.html$/.test(p); } },
+    { href: lienSite('pro.html', prefix + '/pro.html'), label: 'Outils', key: 'site_header.nav_tools', match: function(p){ return /\/pro\.html$/.test(p); } },
+    { href: '/blog.html', label: 'Blog', key: 'site_header.nav_blog', match: function(p){ return p.indexOf('/blog') === 0; } }
   ];
 
   function injectStyle(){
@@ -73,17 +78,17 @@
     var header = document.createElement('header');
     header.className = 'site-header';
     header.innerHTML = ''
-      + '<a class="site-header__brand" href="' + prefix + '/" aria-label="IASHARK, accueil">'
+      + '<a class="site-header__brand" href="' + prefix + '/" aria-label="IASHARK, accueil" data-sh-aria="site_header.aria_home">'
       +   '<img src="/assets/iashark-logo.png" alt="IASHARK" '
       +   'onerror="this.outerHTML=\'<span>IA</span>SHARK\'">'
       + '</a>'
-      + '<nav class="site-header__nav" aria-label="Navigation du site">'
+      + '<nav class="site-header__nav" aria-label="Navigation du site" data-sh-aria="site_header.aria_nav">'
       +   NAV.map(function(item){
-            return '<a href="' + item.href + '"' + (item.match(path) ? ' aria-current="page"' : '') + '>' + item.label + '</a>';
+            return '<a href="' + item.href + '"' + (item.match(path) ? ' aria-current="page"' : '') + ' data-sh-text="' + item.key + '">' + item.label + '</a>';
           }).join('')
       + '</nav>'
       + '<div class="site-header__actions">'
-      +   '<span id="authHeaderSlot"><a class="btn-login" href="' + prefix + '/compte.html">CONNEXION</a></span>'
+      +   '<span id="authHeaderSlot"><a class="btn-login" href="' + lienSite('compte.html', prefix + '/compte.html') + '" data-sh-text="cta.login">CONNEXION</a></span>'
       + '</div>';
     return header;
   }
@@ -105,6 +110,21 @@
     });
   }
 
+  // Libelles dans la langue active, une fois le dictionnaire charge.
+  // i18n/i18n.js est charge a la demande sur les pages qui ne l'incluent pas
+  // (blog) ; en cas d'echec, les libelles francais restent en place.
+  function traduire(header){
+    var appliquer = function(){
+      header.querySelectorAll('[data-sh-text]').forEach(function(el){ el.textContent = tSite(el.getAttribute('data-sh-text'), el.textContent); });
+      header.querySelectorAll('[data-sh-aria]').forEach(function(el){ el.setAttribute('aria-label', tSite(el.getAttribute('data-sh-aria'), el.getAttribute('aria-label'))); });
+    };
+    Promise.resolve()
+      .then(function(){ return window.I18N ? null : loadScript('/i18n/i18n.js'); })
+      .then(function(){ return (window.I18N && window.I18N.init) ? window.I18N.init() : null; })
+      .then(appliquer)
+      .catch(function(){});
+  }
+
   function mountHeader(){
     injectStyle();
     var header = buildHeader();
@@ -113,6 +133,7 @@
     var legacy = document.querySelector('header.hdr, header.topbar, .topbar');
     if (legacy) legacy.replaceWith(header);
     else document.body.insertBefore(header, document.body.firstChild);
+    traduire(header);
 
     // Etat de connexion : on n'echoue jamais bruyamment. Si supabase ou
     // auth-header.js ne se chargent pas, le bouton CONNEXION deja affiche

@@ -2,8 +2,9 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="iashark-market" content="fr">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>IASHARK — The model that reads the match before kickoff</title>
+<title data-i18n="geo.meta.landing.title">IASHARK — The model that reads the match before kickoff</title>
 <link rel="canonical" href="https://iashark.com/en/landing.html">
 <link rel="alternate" hreflang="fr" href="https://iashark.com/fr/landing.html">
 <link rel="alternate" hreflang="en" href="https://iashark.com/en/landing.html">
@@ -12,7 +13,7 @@
 <link rel="alternate" hreflang="it" href="https://iashark.com/it/landing.html">
 <link rel="alternate" hreflang="pt" href="https://iashark.com/pt/landing.html">
 <link rel="alternate" hreflang="x-default" href="https://iashark.com/fr/landing.html">
-<meta name="description" content="Poisson, Dixon-Coles, Monte Carlo, Elo: IASHARK analyzes every match with real statistical models. One free match every day.">
+<meta name="description" content="Poisson, Dixon-Coles, Monte Carlo, Elo: IASHARK analyses every match with real statistical models. One free match every day." data-i18n-attr="content:geo.meta.landing.description">
 <meta name="robots" content="noindex, follow">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
 <style>
@@ -105,7 +106,7 @@ a{color:inherit;}
 @media(min-width:820px){.plan-grid{grid-template-columns:1fr 1fr;}}
 .plan{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:28px 24px;display:flex;flex-direction:column;gap:16px;}
 .plan.hi{border-color:rgba(34,211,238,0.3);background:linear-gradient(160deg,var(--card2),var(--card));position:relative;}
-.plan.hi::before{content:'RECOMMENDED';position:absolute;top:-1px;right:20px;transform:translateY(-50%);font-family:'Space Mono',monospace;font-size:7px;letter-spacing:1.5px;background:var(--cyan);color:#04141a;padding:4px 10px;border-radius:20px;font-weight:700;}
+.plan.hi::before{content:attr(data-badge);position:absolute;top:-1px;right:20px;transform:translateY(-50%);font-family:'Space Mono',monospace;font-size:7px;letter-spacing:1.5px;background:var(--cyan);color:#04141a;padding:4px 10px;border-radius:20px;font-weight:700;}
 .plan-name{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--muted);}
 .plan.hi .plan-name{color:var(--cyan);}
 .plan-price{font-family:'Bebas Neue',sans-serif;font-size:42px;letter-spacing:.5px;line-height:1;}
@@ -151,10 +152,10 @@ footer{padding:30px 20px 100px;text-align:center;border-top:1px solid var(--bord
 
 <header class="hdr">
   <div class="hdr-in">
-    <a href="https://iashark.com/en/" class="logo"><span>IA</span>SHARK</a>
+    <a href="/en/" data-href="" class="logo"><span>IA</span>SHARK</a>
     <div style="display:flex;align-items:center;gap:8px;">
       <span id="langSwitchSlot"></span>
-      <a href="https://iashark.com/en/" class="btn-nav">VISIT THE SITE →</a>
+      <a href="/en/" data-href="" class="btn-nav" data-i18n="landing_page.nav_cta">VISIT THE SITE →</a>
     </div>
   </div>
 </header>
@@ -162,74 +163,74 @@ footer{padding:30px 20px 100px;text-align:center;border-top:1px solid var(--bord
 <div class="hero">
   <div class="wrap">
     <div class="hero-shark reveal">🦈</div>
-    <div class="eyebrow reveal" style="animation-delay:.05s"><span class="dot"></span> STATISTICAL MODEL · FOOTBALL</div>
-    <h1 class="reveal" style="animation-delay:.1s">No emotion.<br><b>Only probabilities.</b></h1>
-    <p class="sub reveal" style="animation-delay:.15s">IASHARK combines <b>xG, recent form, schedule fatigue and head-to-head</b> to produce a probability signal on every match, before kickoff.</p>
+    <div class="eyebrow reveal" style="animation-delay:.05s"><span class="dot"></span> <span data-i18n="landing_page.eyebrow">STATISTICAL MODEL · FOOTBALL</span></div>
+    <h1 class="reveal" style="animation-delay:.1s" data-i18n-html="landing_v2.hero_title">No emotion.<br><b>Only probabilities.</b></h1>
+    <p class="sub reveal" style="animation-delay:.15s" data-i18n-html="landing_page.hero_sub">IASHARK combines <b>xG, recent form, schedule fatigue and head-to-head</b> to produce a probability signal on every match, before kickoff.</p>
     <div class="cta-row reveal" style="animation-delay:.2s">
-      <a href="https://iashark.com/en/" class="btn-primary">SEE TODAY'S FREE MATCH</a>
-      <div class="cta-note">No credit card · <b>1 free analysis every day</b></div>
+      <a href="/en/" data-href="" class="btn-primary" data-i18n="landing_page.hero_cta">SEE TODAY'S FREE MATCH</a>
+      <div class="cta-note" data-i18n-html="landing_v2.cta_note">No credit card · <b>1 free analysis every day</b></div>
     </div>
   </div>
 
   <div class="signal-strip reveal" style="animation-delay:.3s">
     <div class="track">
-      <span><b>POISSON MODEL</b></span><span><b>DIXON-COLES</b> LOW-SCORE ADJUSTMENT</span><span><b>MONTE CARLO SIMULATION</b></span><span><b>DYNAMIC ELO</b> RANKING</span><span><b>SHIN PROBABILITIES</b></span><span><b>FRACTIONAL KELLY</b></span>
-      <span><b>POISSON MODEL</b></span><span><b>DIXON-COLES</b> LOW-SCORE ADJUSTMENT</span><span><b>MONTE CARLO SIMULATION</b></span><span><b>DYNAMIC ELO</b> RANKING</span><span><b>SHIN PROBABILITIES</b></span><span><b>FRACTIONAL KELLY</b></span>
+      <span data-i18n-html="landing_v2.strip_poisson"><b>POISSON MODEL</b></span><span data-i18n-html="landing_v2.strip_dc"><b>DIXON-COLES</b> LOW-SCORE ADJUSTMENT</span><span data-i18n-html="landing_v2.strip_mc"><b>MONTE CARLO SIMULATION</b></span><span data-i18n-html="landing_v2.strip_elo"><b>DYNAMIC ELO</b> RANKING</span><span data-i18n-html="landing_v2.strip_shin"><b>SHIN PROBABILITIES</b></span><span data-i18n-html="landing_v2.strip_kelly"><b>FRACTIONAL KELLY</b></span>
+      <span data-i18n-html="landing_v2.strip_poisson"><b>POISSON MODEL</b></span><span data-i18n-html="landing_v2.strip_dc"><b>DIXON-COLES</b> LOW-SCORE ADJUSTMENT</span><span data-i18n-html="landing_v2.strip_mc"><b>MONTE CARLO SIMULATION</b></span><span data-i18n-html="landing_v2.strip_elo"><b>DYNAMIC ELO</b> RANKING</span><span data-i18n-html="landing_v2.strip_shin"><b>SHIN PROBABILITIES</b></span><span data-i18n-html="landing_v2.strip_kelly"><b>FRACTIONAL KELLY</b></span>
     </div>
   </div>
 </div>
 
 <section class="methode">
   <div class="wrap">
-    <div class="sec-lbl">THE METHOD</div>
-    <h2 class="sec-title">Four models, <b>one signal</b> per match.</h2>
+    <div class="sec-lbl" data-i18n="landing_page.lbl_method">THE METHOD</div>
+    <h2 class="sec-title" data-i18n-html="landing_v2.title_method">Four models, <b>one signal</b> per match.</h2>
     <div class="model-grid">
-      <div class="model-card"><div class="model-tag">MODEL 1</div><div class="model-name">Poisson</div><div class="model-desc">Distribution of expected goals for each team, home and away.</div></div>
-      <div class="model-card"><div class="model-tag">MODEL 2</div><div class="model-name">Dixon-Coles</div><div class="model-desc">Correction for low scores (0-0, 1-0, 1-1) that pure Poisson underestimates.</div></div>
-      <div class="model-card"><div class="model-tag">MODEL 3</div><div class="model-name">Monte Carlo</div><div class="model-desc">Thousands of match simulations to get a robust distribution of outcomes.</div></div>
-      <div class="model-card"><div class="model-tag">MODEL 4</div><div class="model-name">Elo & Shin</div><div class="model-desc">Real team strength over time, and correction of the implied-probability bias.</div></div>
+      <div class="model-card"><div class="model-tag" data-i18n="landing_page.model1_tag">MODEL 1</div><div class="model-name" data-i18n="landing_page.model1_name">Poisson</div><div class="model-desc" data-i18n="landing_page.model1_desc">Distribution of expected goals for each team, home and away.</div></div>
+      <div class="model-card"><div class="model-tag" data-i18n="landing_page.model2_tag">MODEL 2</div><div class="model-name" data-i18n="landing_page.model2_name">Dixon-Coles</div><div class="model-desc" data-i18n="landing_page.model2_desc">Correction for low scores (0-0, 1-0, 1-1) that pure Poisson underestimates.</div></div>
+      <div class="model-card"><div class="model-tag" data-i18n="landing_page.model3_tag">MODEL 3</div><div class="model-name" data-i18n="landing_page.model3_name">Monte Carlo</div><div class="model-desc" data-i18n="landing_page.model3_desc">Thousands of match simulations to get a robust distribution of outcomes.</div></div>
+      <div class="model-card"><div class="model-tag" data-i18n="landing_page.model4_tag">MODEL 4</div><div class="model-name" data-i18n="landing_page.model4_name">Elo &amp; Shin</div><div class="model-desc" data-i18n="landing_page.model4_desc">Real team strength over time, and correction of the implied-probability bias.</div></div>
     </div>
   </div>
 </section>
 
 <section class="steps">
   <div class="wrap">
-    <div class="sec-lbl">IN PRACTICE</div>
-    <h2 class="sec-title">From raw data to a <b>usable signal.</b></h2>
+    <div class="sec-lbl" data-i18n="landing_page.lbl_practice">IN PRACTICE</div>
+    <h2 class="sec-title" data-i18n-html="landing_v2.title_practice">From raw data to a <b>usable signal.</b></h2>
     <div class="step-list">
-      <div class="step reveal"><div class="step-num">01</div><div><div class="step-title">We ingest the data</div><div class="step-desc">Schedules, probable lineups, head-to-head history and xG stats fed in continuously, league by league.</div></div></div>
-      <div class="step reveal"><div class="step-num">02</div><div><div class="step-title">The model computes</div><div class="step-desc">Poisson, Dixon-Coles and Monte Carlo run in parallel to produce a probability distribution for each market.</div></div></div>
-      <div class="step reveal"><div class="step-num">03</div><div><div class="step-title">You get the signal</div><div class="step-desc">A clear sheet per match: probability, reliability level, and the market where the model detects a gap with the real market.</div></div></div>
+      <div class="step reveal"><div class="step-num">01</div><div><div class="step-title" data-i18n="landing_page.step1_title">We ingest the data</div><div class="step-desc" data-i18n="landing_page.step1_desc">Schedules, probable lineups, head-to-head history and xG stats fed in continuously, league by league.</div></div></div>
+      <div class="step reveal"><div class="step-num">02</div><div><div class="step-title" data-i18n="landing_page.step2_title">The model computes</div><div class="step-desc" data-i18n="landing_page.step2_desc">Poisson, Dixon-Coles and Monte Carlo run in parallel to produce a probability distribution for each market.</div></div></div>
+      <div class="step reveal"><div class="step-num">03</div><div><div class="step-title" data-i18n="landing_page.step3_title">You get the signal</div><div class="step-desc" data-i18n="landing_page.step3_desc">A clear sheet per match: probability, reliability level, and the market where the model detects a gap with the real market.</div></div></div>
     </div>
   </div>
 </section>
 
 <section class="offres">
   <div class="wrap">
-    <div class="sec-lbl">ACCESS</div>
-    <h2 class="sec-title">Start for free. <b>Upgrade to Pro</b> when you want to see everything.</h2>
+    <div class="sec-lbl" data-i18n="landing_page.lbl_access">ACCESS</div>
+    <h2 class="sec-title" data-i18n-html="landing_v2.title_access">Start for free. <b>Upgrade to Pro</b> when you want to see everything.</h2>
     <div class="plan-grid">
       <div class="plan">
-        <div class="plan-name">FREE</div>
-        <div class="plan-price">€0</div>
+        <div class="plan-name" data-i18n="landing_page.plan_free_name">FREE</div>
+        <div class="plan-price"><b data-market-price="free" style="font-weight:inherit">0€</b></div>
         <ul class="plan-feats">
-          <li>1 full analysis offered every day</li>
-          <li>Access to performance history</li>
-          <li>Our method explained in detail</li>
+          <li data-i18n="landing_page.plan_free_feat1">1 full analysis offered every day</li>
+          <li data-i18n="landing_v2.plan_free_feat2">All of today's matches visible</li>
+          <li data-i18n="landing_page.plan_free_feat3">Our method explained in detail</li>
         </ul>
-        <a href="https://iashark.com/en/" class="plan-cta free">GET STARTED</a>
+        <a href="/en/" data-href="" class="plan-cta free" data-i18n="landing_page.plan_free_cta">GET STARTED</a>
       </div>
-      <div class="plan hi">
+      <div class="plan hi" data-badge="RECOMMENDED" data-i18n-attr="data-badge:landing_page.plan_pro_badge">
         <div class="plan-name">PRO</div>
-        <div class="plan-price">Free<span>for the first 3 days</span></div>
-        <div class="plan-trial">Then €19.95/month — cancel anytime</div>
+        <div class="plan-price"><b data-market-price="pro" style="font-weight:inherit">19,95€</b><span data-i18n="landing_v2.per_month">/month</span></div>
+        <div class="plan-trial" data-i18n="landing_v2.plan_pro_commitment">No commitment — cancel anytime</div>
         <ul class="plan-feats">
-          <li>All analyses, all leagues</li>
-          <li>Advanced filters and detailed reliability level</li>
-          <li>Personal tracking of your followed matches</li>
-          <li>Cancel anytime</li>
+          <li data-i18n="landing_page.plan_pro_feat1">All analyses, all leagues</li>
+          <li data-i18n="landing_page.plan_pro_feat2">Advanced filters and detailed reliability level</li>
+          <li data-i18n="landing_page.plan_pro_feat3">Personal tracking of your followed matches</li>
+          <li data-i18n="landing_page.plan_pro_feat4">Cancel anytime</li>
         </ul>
-        <a href="https://iashark.com/en/pro.html" class="plan-cta pro">UNLOCK PRO</a>
+        <a href="/en/pro.html" data-href="pro.html" class="plan-cta pro" data-i18n="landing_page.plan_pro_cta">UNLOCK PRO</a>
       </div>
     </div>
   </div>
@@ -238,24 +239,41 @@ footer{padding:30px 20px 100px;text-align:center;border-top:1px solid var(--bord
 <section class="final-cta">
   <div class="wrap">
     <div class="hero-shark" style="font-size:36px;margin-bottom:14px;">🦈</div>
-    <h2>The next match already has <b>a signal.</b></h2>
-    <p>Go check it out, it's free.</p>
-    <a href="https://iashark.com/en/" class="btn-primary">SEE TODAY'S MATCH</a>
+    <h2 data-i18n-html="landing_v2.final_title">The next match already has <b>a signal.</b></h2>
+    <p data-i18n="landing_page.final_sub">Go check it out, it's free.</p>
+    <a href="/en/" data-href="" class="btn-primary" data-i18n="landing_page.final_cta">SEE TODAY'S MATCH</a>
   </div>
 </section>
 
 <footer>
   <div class="foot-legal">
-    <div>⚠️ INFORMATION FOR STATISTICAL PURPOSES — DOES NOT CONSTITUTE BETTING ADVICE · FORBIDDEN UNDER 18</div>
-    <div>Help: <a href="https://www.joueurs-info-service.fr">joueurs-info-service.fr</a> · 09 74 75 13 13</div>
+    <div>⚠️ <span data-i18n="landing_page.foot_disclaimer">INFORMATION FOR STATISTICAL PURPOSES — DOES NOT CONSTITUTE BETTING ADVICE · FORBIDDEN UNDER 18</span></div>
+    <div id="helpLine"><span data-i18n="landing_page.foot_help_label">Help:</span> <a data-market-helpline="url" href="https://www.joueurs-info-service.fr">joueurs-info-service.fr</a> · <a data-market-helpline="phone" href="tel:0974751313">09 74 75 13 13</a></div>
     <div class="foot-links" style="margin-top:8px;">
-      <a href="https://iashark.com/mentions-legales.html">Legal Notice</a>
-      <a href="https://iashark.com/cgv.html">Terms</a>
-      <a href="https://iashark.com/confidentialite.html">Privacy</a>
+      <a href="/en/mentions-legales.html" data-href="mentions-legales.html" data-i18n="footer.mentions_legales">Legal Notice</a>
+      <a href="/en/cgv.html" data-href="cgv.html" data-i18n="footer.cgv">Terms</a>
+      <a href="/en/confidentialite.html" data-href="confidentialite.html" data-i18n="footer.confidentialite">Privacy</a>
+      <a href="/en/cookies.html" data-href="cookies.html" data-i18n="footer.cookies">Cookies</a>
+      <a href="/en/jeu-responsable.html" data-href="jeu-responsable.html" data-i18n="footer.responsible_gambling">Responsible gambling</a>
     </div>
   </div>
 </footer>
 
+<script src="/i18n/i18n.js"></script>
+<script src="/lib/market-config.js"></script>
+<script>
+(function(){
+  // Ligne d'aide jeu responsable : nom/lien/numero remplis par
+  // lib/market-config.js selon le marche (FR, GB, ZA...). Marche sans
+  // ressource confirmee (mx) : la ligne entiere est masquee, jamais un
+  // numero invente.
+  function marche(){
+    var m=window.IASHARK_MARKET, el=document.getElementById('helpLine');
+    if(m&&el&&!m.helpline)el.hidden=true;
+  }
+  if(window.I18N&&window.I18N.init){window.I18N.init().then(marche,marche);}else{marche();}
+})();
+</script>
 <script src="/funnel-track.js"></script>
 <script>if(window.iasharkTrack) iasharkTrack('landing_view');</script>
 <script src="/lang-switcher.js"></script>

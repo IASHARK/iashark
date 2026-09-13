@@ -139,6 +139,7 @@ h1 span{color:var(--cyan);}
   </div>
 </div>
 
+<script src="/i18n/i18n.js"></script>
 <script>
 // Catalogue statique - reflete lib/market-registry.js (mis a jour le
 // 2026-08-30 avec l'ajout du Player Engine, voir IASHARK_MARKET_REGISTRY.md
@@ -188,8 +189,16 @@ function getMarketKey(pariRec){
   if(s.includes('exterieur')||s.includes('extérieur'))return 'victoire_ext';
   return '';
 }
+// i18n runtime (repli francais si i18n/i18n.js absent) pour les codes de
+// donnees du Player Engine, jamais affiches bruts.
+function t(key,fallback){return (window.I18N&&window.I18N.t)?window.I18N.t(key,fallback):fallback;}
+var STATUT_COMPO={confirmed_starter:['match_page.player_engine_status_confirmed_starter','Titulaire confirmé'],confirmed_bench:['match_page.player_engine_status_confirmed_bench','Remplaçant confirmé'],expected_starter:['match_page.player_engine_status_expected_starter','Titulaire probable'],expected_bench:['match_page.player_engine_status_expected_bench','Remplaçant probable']};
+function statutComposition(s){return STATUT_COMPO[s]?t(STATUT_COMPO[s][0],STATUT_COMPO[s][1]):(s||'');}
+var QUALITE_JOUEUR={high:['match_page.reliability_high','Élevée'],medium:['match_page.reliability_medium','Moyenne'],low:['match_page.reliability_low','Faible']};
+function qualiteJoueur(q){return QUALITE_JOUEUR[q]?t(QUALITE_JOUEUR[q][0],QUALITE_JOUEUR[q][1]):(q||'—');}
 var allMatchsData=[];
 async function loadMatches(){
+  if(window.I18N&&window.I18N.init){try{await window.I18N.init();}catch(e){}}
   try{
     var r=await fetch('/data.json?t='+Date.now());
     var j=await r.json();
@@ -229,10 +238,10 @@ function renderPlayerMarketsTable(marketId){
         ?(out.probability!=null?Math.round(out.probability*100)+'%':'—')
         :(out.over_lines&&out.over_lines['over_0.5']!=null?Math.round(out.over_lines['over_0.5']*100)+'% (over 0.5)':'—');
       return '<tr><td>'+esc(pm.player_name||'')+'</td><td>'+esc(hn)+' vs '+esc(an)+'</td>'
-        +'<td style="font-family:Space Mono,monospace;font-size:9px;color:var(--muted);">'+esc(pm.lineup_status||'')+'</td>'
+        +'<td style="font-family:Space Mono,monospace;font-size:9px;color:var(--muted);">'+esc(statutComposition(pm.lineup_status))+'</td>'
         +'<td class="gap-cell">'+(pm.expected_minutes!=null?pm.expected_minutes:'—')+'</td>'
         +'<td class="gap-cell">'+probTxt+'</td>'
-        +'<td style="font-family:Space Mono,monospace;font-size:9px;color:var(--muted);">'+esc(pm.data_quality||'—')+'</td>'
+        +'<td style="font-family:Space Mono,monospace;font-size:9px;color:var(--muted);">'+esc(qualiteJoueur(pm.data_quality))+'</td>'
         +'<td class="gap-cell">'+(pm.sample_size!=null?pm.sample_size:'—')+'</td></tr>';
     }).join('')
     +'</tbody></table>';

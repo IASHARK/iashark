@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Abonnement Pro — IASHARK</title>
-<meta name="description" content="Découvrez IASHARK Pro à 19,95 € par mois : toutes les analyses et les outils de suivi.">
+<title data-i18n="pricing_page.meta_title">Abonnement Pro — IASHARK</title>
+<meta name="description" content="Découvrez IASHARK Pro : toutes les analyses et les outils de suivi, sans engagement." data-i18n-attr="content:pricing_page.meta_description">
 <link rel="icon" href="/assets/favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -25,27 +25,28 @@
 </style>
 </head>
 <body>
-<header class="topbar"><a class="brand" href="/"><img src="/assets/iashark-logo.png" alt="IASHARK"></a><div class="top-actions"><a class="btn-login" href="/">← Retour aux matchs</a><span id="authHeaderSlot"><a class="btn-login" href="/connexion.html">Connexion</a></span></div></header>
+<header class="topbar"><a class="brand" href="/" data-href=""><img src="/assets/iashark-logo.png" alt="IASHARK"></a><div class="top-actions"><a class="btn-login" href="/" data-href="" data-i18n="pricing_page.back_to_matches">← Retour aux matchs</a><span id="authHeaderSlot"><a class="btn-login" href="/connexion.html" data-href="connexion.html" data-i18n="pricing_page.login">Connexion</a></span></div></header>
 <main class="pricing-page">
-  <section class="pricing-intro"><span class="eyebrow">Abonnement Pro</span><h1>Débloque tout IASHARK</h1><p>Accède à toutes les analyses et aux outils pour suivre tes décisions avec méthode.</p></section>
-  <section class="pricing-layout" aria-label="Comparaison des accès">
+  <section class="pricing-intro"><span class="eyebrow" data-i18n="pricing_page.eyebrow">Abonnement Pro</span><h1 data-i18n="pricing_page.heading">Débloque tout IASHARK</h1><p data-i18n="pricing_page.intro">Accède à toutes les analyses et aux outils pour suivre tes décisions avec méthode.</p></section>
+  <section class="pricing-layout" aria-label="Comparaison des accès" data-i18n-attr="aria-label:pricing_page.compare_aria">
     <article class="pricing-card">
-      <div class="plan-name">IASHARK PRO</div><div class="price">19,95 € <span>/ mois</span></div><div class="commitment">Sans engagement · Résiliable à tout moment</div>
+      <div class="plan-name">IASHARK PRO</div><div class="price"><b data-market-price="pro" style="font-weight:inherit">19,95 €</b> <span data-i18n="pricing_page.per_month">/ mois</span></div><div class="commitment" data-i18n="pricing_page.commitment">Sans engagement · Résiliable à tout moment</div>
       <ul class="feature-list">
-        <li><svg viewBox="0 0 24 24"><path d="M4 19V9M10 19V5M16 19v-7M22 19V3"/></svg><span>Analyse complète sur tous les matchs</span></li>
-        <li><svg viewBox="0 0 24 24"><path d="M4 5h16M4 12h16M4 19h16"/><circle cx="8" cy="5" r="2"/><circle cx="15" cy="12" r="2"/><circle cx="11" cy="19" r="2"/></svg><span>Filtres avancés et fiabilité détaillée</span></li>
-        <li><svg viewBox="0 0 24 24"><path d="M6 3h12v18H6zM9 8h6M9 12h6M9 16h4"/></svg><span>Journal des décisions synchronisé</span></li>
-        <li><svg viewBox="0 0 24 24"><path d="M3 20h18M5 16l4-4 3 2 6-7 2 2"/></svg><span>Suivi de bankroll lié à ton compte</span></li>
+        <li><svg viewBox="0 0 24 24"><path d="M4 19V9M10 19V5M16 19v-7M22 19V3"/></svg><span data-i18n="pricing_page.pro_feat_analyses">Analyse complète sur tous les matchs</span></li>
+        <li><svg viewBox="0 0 24 24"><path d="M4 5h16M4 12h16M4 19h16"/><circle cx="8" cy="5" r="2"/><circle cx="15" cy="12" r="2"/><circle cx="11" cy="19" r="2"/></svg><span data-i18n="pricing_page.pro_feat_filters">Filtres avancés et fiabilité détaillée</span></li>
+        <li><svg viewBox="0 0 24 24"><path d="M6 3h12v18H6zM9 8h6M9 12h6M9 16h4"/></svg><span data-i18n="pricing_page.pro_feat_journal">Journal des décisions synchronisé</span></li>
+        <li><svg viewBox="0 0 24 24"><path d="M3 20h18M5 16l4-4 3 2 6-7 2 2"/></svg><span data-i18n="pricing_page.pro_feat_bankroll">Suivi de bankroll lié à ton compte</span></li>
       </ul>
-      <button class="pricing-cta" id="subscribeButton" type="button">Devenir Pro</button><div id="billingMessage" class="billing-message" aria-live="polite"></div>
+      <button class="pricing-cta" id="subscribeButton" type="button" data-i18n="pricing_page.cta_subscribe">Devenir Pro</button><div id="billingMessage" class="billing-message" aria-live="polite"></div>
     </article>
-    <aside class="free-card"><h2>Ton accès gratuit</h2><ul class="feature-list"><li><svg viewBox="0 0 24 24"><path d="M4 19V9M10 19V5M16 19v-7M22 19V3"/></svg><span>1 match/jour en analyse complète</span></li><li><svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8M8 11h2M14 11h2M8 15h2M14 15h2"/></svg><span>Calculateur de mise</span></li><li><svg viewBox="0 0 24 24"><path d="M5 4h14v16H5zM8 8h8M8 12h8M8 16h5"/></svg><span>Blog</span></li></ul></aside>
+    <aside class="free-card"><h2 data-i18n="pricing_page.free_heading">Ton accès gratuit</h2><ul class="feature-list"><li><svg viewBox="0 0 24 24"><path d="M4 19V9M10 19V5M16 19v-7M22 19V3"/></svg><span data-i18n="pricing_page.free_feat_match">1 match/jour en analyse complète</span></li><li><svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8M8 11h2M14 11h2M8 15h2M14 15h2"/></svg><span data-i18n="pricing_page.free_feat_calculator">Calculateur de mise</span></li><li><svg viewBox="0 0 24 24"><path d="M5 4h14v16H5zM8 8h8M8 12h8M8 16h5"/></svg><span data-i18n="pricing_page.free_feat_blog">Blog</span></li></ul></aside>
   </section>
-  <div class="trust-row"><span>▣ Paiement sécurisé</span><span>◇ Sans engagement</span><span>↻ Résiliable à tout moment</span></div>
-  <h2 class="unlock-title">AVEC PRO, ACCÈDE À TOUS LES OUTILS</h2><section class="unlock-grid"><article class="unlock-card"><b>ANALYSES COMPLÈTES</b><p>Consulte l’analyse détaillée de tous les matchs et championnats disponibles.</p></article><article class="unlock-card"><b>JOURNAL</b><p>Retrouve tes décisions synchronisées sur ton compte.</p></article><article class="unlock-card"><b>BANKROLL</b><p>Suis ton capital et conserve une gestion disciplinée.</p></article></section>
-  <p class="legal-note">Information à visée statistique — Ne constitue pas un conseil de pari · Interdit aux moins de 18 ans</p>
+  <div class="trust-row"><span>▣ <span data-i18n="pricing_page.trust_secure">Paiement sécurisé</span></span><span>◇ <span data-i18n="pricing_page.trust_no_commitment">Sans engagement</span></span><span>↻ <span data-i18n="pricing_page.trust_cancel">Résiliable à tout moment</span></span></div>
+  <h2 class="unlock-title" data-i18n="pricing_page.unlock_title">AVEC PRO, ACCÈDE À TOUS LES OUTILS</h2><section class="unlock-grid"><article class="unlock-card"><b data-i18n="pricing_page.unlock_analyses_title">ANALYSES COMPLÈTES</b><p data-i18n="pricing_page.unlock_analyses_text">Consulte l’analyse détaillée de tous les matchs et championnats disponibles.</p></article><article class="unlock-card"><b data-i18n="pricing_page.unlock_journal_title">JOURNAL</b><p data-i18n="pricing_page.unlock_journal_text">Retrouve tes décisions synchronisées sur ton compte.</p></article><article class="unlock-card"><b data-i18n="pricing_page.unlock_bankroll_title">BANKROLL</b><p data-i18n="pricing_page.unlock_bankroll_text">Suis ton capital et conserve une gestion disciplinée.</p></article></section>
+  <p class="legal-note" data-i18n="pricing_page.legal_note">Information à visée statistique — Ne constitue pas un conseil de pari · Interdit aux moins de 18 ans</p>
+  <p class="legal-note" style="margin-top:10px"><a href="/mentions-legales.html" data-href="mentions-legales.html" data-i18n="footer.mentions_legales">Mentions légales</a> · <a href="/cgv.html" data-href="cgv.html" data-i18n="footer.cgv">CGV</a> · <a href="/confidentialite.html" data-href="confidentialite.html" data-i18n="footer.confidentialite">Confidentialité</a> · <a href="/cookies.html" data-href="cookies.html" data-i18n="footer.cookies">Cookies</a> · <a href="/jeu-responsable.html" data-href="jeu-responsable.html" data-i18n="footer.responsible_gambling">Jeu responsable</a></p>
 </main>
 <nav class="bottom-nav"><a href="/"><span>⌂</span><b>Accueil</b></a><a href="/pro.html"><span>☆</span><b>Outils</b></a><a href="/blog.html"><span>▤</span><b>Blog</b></a><a href="/compte.html"><span>♙</span><b>Compte</b></a></nav>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script><script src="/app-client.js"></script><script src="/auth-header.js"></script><script>IasharkAuthHeader.mount('#authHeaderSlot')</script><script src="/abonnement-page.js"></script><script src="/site-prefs.js"></script>
+<script src="/i18n/i18n.js"></script><script src="/lib/market-config.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script><script src="/app-client.js"></script><script src="/auth-header.js"></script><script>IasharkAuthHeader.mount('#authHeaderSlot')</script><script src="/abonnement-page.js"></script><script src="/site-prefs.js"></script>
 <script src="/bottom-navigation.js"></script>
 </body></html>

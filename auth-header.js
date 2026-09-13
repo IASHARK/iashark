@@ -17,15 +17,27 @@
     too_many_attempts:'Trop de tentatives.', generic_login_error:'Erreur de connexion',
     connected_reloading:'Connecté ! Rechargement...', invalid_login:'Email ou mot de passe incorrect.',
     confirm_email:'Confirme ton email avant de te connecter.',
-    forgot_link:'Mot de passe oublie ?'
+    forgot_link:'Mot de passe oublié ?', free_tag:'GRATUIT', close_aria:'Fermer'
   };
   var T = FALLBACK_T;
 
+  // Meme resolution que i18n/i18n.js : window.I18N s'il est deja la, sinon
+  // prefixe d'URL (marches gb/za -> en, mx -> es-mx), sinon dernier choix
+  // memorise (pages sans prefixe : /match/<id>.html, blog), sinon FR.
   function detectLocale(){
+    if(window.I18N && window.I18N.locale) return window.I18N.locale;
+    var supported = ['fr','en','es','es-mx','de','it','pt'];
+    var marches = {gb:'en', mx:'es-mx', za:'en'};
     var m = location.pathname.match(/^\/([a-z]{2})(\/|$)/);
-    var supported = ['fr','en','es','de','it','pt'];
-    return (m && supported.indexOf(m[1]) !== -1) ? m[1] : 'fr';
+    if(m){
+      if(marches.hasOwnProperty(m[1])) return marches[m[1]];
+      if(supported.indexOf(m[1]) !== -1) return m[1];
+    }
+    try{ var saved = localStorage.getItem('iashark_lang'); if(saved && supported.indexOf(saved) !== -1) return saved; }catch(e){}
+    return 'fr';
   }
+  // Lien interne dans le repertoire de langue/marche courant (/gb/, /mx/...).
+  function lien(p){ return (window.I18N && window.I18N.href) ? window.I18N.href(p) : '/' + p; }
 
   var _dictPromise = null;
   function loadT(){
@@ -69,7 +81,7 @@
   }
 
   function chipLabel(identity, plan, role){
-    var tag = role==='admin' ? 'ADMIN' : (plan==='pro' ? 'PRO' : 'GRATUIT');
+    var tag = role==='admin' ? 'ADMIN' : (plan==='pro' ? 'PRO' : T.free_tag);
     return truncateEmail(identity)+' · '+tag;
   }
 
@@ -78,7 +90,7 @@
   }
 
   function loggedInHtml(identity, plan, role){
-    return '<a href="/compte.html" class="btn-login">'+chipLabel(identity, plan, role)+'</a>';
+    return '<a href="'+lien('compte.html')+'" class="btn-login">'+chipLabel(identity, plan, role)+'</a>';
   }
 
   var POPOVER_CSS = '.iashark-login-pop{position:fixed;top:60px;right:16px;z-index:300;background:#0d1520;'
@@ -102,14 +114,14 @@
     +'.iashark-login-pop .close{position:absolute;top:8px;right:10px;background:none;border:none;color:#4a6580;font-size:14px;cursor:pointer;line-height:1;}';
 
   function popoverHtml(){
-    return '<button type="button" class="close" onclick="IasharkAuthHeader.closePopover()">✕</button>'
+    return '<button type="button" class="close" aria-label="'+T.close_aria+'" onclick="IasharkAuthHeader.closePopover()">✕</button>'
       +'<div class="lbl">'+T.quick_login_title+'</div>'
       +'<input type="email" id="quickLoginEmail" placeholder="'+T.email_placeholder+'" autocomplete="email">'
       +'<input type="password" id="quickLoginPwd" placeholder="'+T.password_placeholder+'" autocomplete="current-password" onkeydown="if(event.key===\'Enter\')IasharkAuthHeader.quickLogin()">'
       +'<button type="button" class="submit" id="quickLoginSubmit" onclick="IasharkAuthHeader.quickLogin()">'+T.submit_login+'</button>'
       +'<div class="qmsg" id="quickLoginMsg"></div>'
-      +'<div class="foot">'+T.no_account_label+' <a href="/inscription.html">'+T.signup_link+'</a>'
-      +'<br><a href="/mot-de-passe-oublie.html">'+T.forgot_link+'</a></div>';
+      +'<div class="foot">'+T.no_account_label+' <a href="'+lien('inscription.html')+'">'+T.signup_link+'</a>'
+      +'<br><a href="'+lien('mot-de-passe-oublie.html')+'">'+T.forgot_link+'</a></div>';
   }
 
   function injectStyle(){

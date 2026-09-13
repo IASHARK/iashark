@@ -1,38 +1,73 @@
-# Maintenance retiree le 2026-08-30 sur feu vert explicite de l'utilisateur,
-# apres la recette produit visuelle A-Z complete sur hotfix-v2-acceptance
-# (voir IASHARK_V2_RECETTE_VISUELLE.md) : correctifs V2 reels, verification
-# des 13 competitions de lancement, audit odds/marches, Player Engine,
-# revue securite dediee (2 problemes reels trouves et corriges), retrait
-# public d'Historique/Archives, i18n 6 langues verifie.
+# GENERE par scripts/build-locales.js depuis config/markets.json et
+# scripts/i18n-manifest.js - ne pas editer a la main (ecrase a chaque build).
+#
+# Netlify evalue les regles de haut en bas et applique la premiere qui
+# correspond (chemin + condition). Le suffixe ! (force) est indispensable :
+# sans lui une regle ne s'applique jamais quand un fichier existe au meme
+# chemin ("shadowing" : la racine a un index.html et les anciennes pages
+# racine restent les sources du generateur).
 
-# --- i18n (MASTER V2.1 SS19) ------------------------------------------
-# IMPORTANT - regle de securite pour ce fichier : n'ajouter une ligne
-# ci-dessous QUE pour une page dont /fr/<page> (et les 5 autres locales)
-# ont ete reellement generes par `npm run build:i18n` et commit. Ajouter
-# une redirection vers une page qui n'existe pas encore produirait un
-# 404 en cascade. Etat actuel (2026-08-30) :
-# les 7 pages coeur du produit sont generees pour les 6 locales
-# (marches/index/match/pro/compte/historique/landing) - voir
-# IASHARK_V2_EXECUTION_STATE.md pour la liste a jour et le detail par page
-# (ex. match.html n'est traduit que sur le chrome, pas le narratif LLM).
+# --- Racine "/" : pays d'abord (Country = code ISO 3166-1 alpha-2 en
+# minuscules, geolocalisation Netlify), puis langue du navigateur
+# (Accept-Language), puis /fr/ par defaut. 302 : aiguillage revisable (le
+# selecteur langue/pays reste disponible), jamais une URL permanente.
+/                                 /gb/                          302!  Country=gb
+/                                 /za/                          302!  Country=za
+/                                 /mx/                          302!  Country=mx
+/                                 /en/                          302!  Country=us,ca,au,ie,nz
+/                                 /en/                          302!  Language=en
+/                                 /es/                          302!  Language=es
+/                                 /de/                          302!  Language=de
+/                                 /it/                          302!  Language=it
+/                                 /pt/                          302!  Language=pt
+/                                 /fr/                          302!
 
-# Suggestion de langue sur la racine "/", basee sur Accept-Language du
-# navigateur (parametre Language de Netlify) - JAMAIS un choix impose :
-# 302 (temporaire) pour rester une suggestion reversible, pas un
-# aiguillage permanent. Toute langue non listee retombe sur /fr/ (FR par
-# defaut, MASTER SS19). Netlify evalue ces regles dans l'ordre et prend
-# la premiere qui matche a la fois le chemin ET la condition Language.
-/  /en/  302  Language=en
-/  /es/  302  Language=es
-/  /de/  302  Language=de
-/  /it/  302  Language=it
-/  /pt/  302  Language=pt
-/  /fr/  302
+# --- Anciennes URLs racine -> version generee du repertoire par defaut (301).
+/index.html                       /fr/                          301!
+/marches.html                     /fr/marches.html              301!
+/match.html                       /fr/match.html                301!
+/pro.html                         /fr/pro.html                  301!
+/compte.html                      /fr/compte.html               301!
+/landing.html                     /fr/landing.html              301!
+/joueur.html                      /fr/joueur.html               301!
+/connexion.html                   /fr/connexion.html            301!
+/inscription.html                 /fr/inscription.html          301!
+/mot-de-passe-oublie.html         /fr/mot-de-passe-oublie.html  301!
+/reinitialiser-mot-de-passe.html  /fr/reinitialiser-mot-de-passe.html  301!
+/a-propos.html                    /fr/a-propos.html             301!
+/abonnement.html                  /fr/abonnement.html           301!
+/exemple-analyse.html             /fr/exemple-analyse.html      301!
+/checkout-annule.html             /fr/checkout-annule.html      301!
+/checkout-succes.html             /fr/checkout-succes.html      301!
+/mentions-legales.html            /fr/mentions-legales.html     301!
+/cgv.html                         /fr/cgv.html                  301!
+/confidentialite.html             /fr/confidentialite.html      301!
+/cookies.html                     /fr/cookies.html              301!
+/jeu-responsable.html             /fr/jeu-responsable.html      301!
 
-/marches.html             /fr/marches.html             301
-/index.html                /fr/                          301
-/match.html               /fr/match.html               301
-/pro.html                 /fr/pro.html                 301
-/compte.html              /fr/compte.html              301
-/historique.html          /fr/historique.html          301
-/landing.html             /fr/landing.html             301
+# --- Historique retire du site public : accueil du repertoire.
+/historique.html                  /fr/                          301!
+/fr/historique.html               /fr/                          301!
+/gb/historique.html               /gb/                          301!
+/za/historique.html               /za/                          301!
+/en/historique.html               /en/                          301!
+/mx/historique.html               /mx/                          301!
+/es/historique.html               /es/                          301!
+/de/historique.html               /de/                          301!
+/it/historique.html               /it/                          301!
+/pt/historique.html               /pt/                          301!
+
+# --- Sources des pages legales (legal/<dir>/) : jamais servies telles quelles.
+/legal/*                          /:splat                       301!
+
+# --- 404 traduite par repertoire. Non forcee : ne s'applique que si aucun
+# fichier n'existe au chemin demande. Toujours en dernier.
+/fr/*                             /fr/404.html                  404
+/gb/*                             /gb/404.html                  404
+/za/*                             /za/404.html                  404
+/en/*                             /en/404.html                  404
+/mx/*                             /mx/404.html                  404
+/es/*                             /es/404.html                  404
+/de/*                             /de/404.html                  404
+/it/*                             /it/404.html                  404
+/pt/*                             /pt/404.html                  404

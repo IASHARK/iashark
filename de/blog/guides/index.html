@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>IASHARK Blog — Guides zu Fußballstatistik, Wahrscheinlichkeiten und Methode</title>
+<meta name="description" content="Guides zur Fußballstatistik: xG, Poisson-Verteilung, Value Bet, Bankroll-Management, Wahl eines Buchmachers, WM 2026. Die Methode und ihre Grenzen, ohne Gewinnversprechen.">
+<meta name="keywords" content="sportwetten guide,sportwetten blog,value bet guide,bester buchmacher,ki fußballprognose,wm 2026">
+<!-- This page lists exactly the same guides as /de/blog.html, the official
+     blog page for this language (the one used in the navigation). Two URLs for
+     the same content cannibalise each other in search results, so
+     /de/blog.html is declared as the canonical version. -->
+<link rel="canonical" href="https://iashark.com/de/blog/">
+<meta property="og:title" content="IASHARK Blog — Guides zu Fußballstatistik, Wahrscheinlichkeiten und Methode">
+<meta property="og:description" content="Guides zur Fußballstatistik: xG, Poisson-Verteilung, Value Bet, Bankroll-Management, Wahl eines Buchmachers, WM 2026. Die Methode und ihre Grenzen, ohne Gewinnversprechen.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://iashark.com/de/blog/">
+<meta property="og:image" content="https://iashark.com/icon-512.png">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">
+{"@context": "https://schema.org", "@type": "Blog", "name": "IASHARK Blog", "description": "Guides zu Fußballstatistik, Wahrscheinlichkeiten und Analysemethode", "url": "https://iashark.com/de/blog/guides/", "publisher": {"@type": "Organization", "name": "IASHARK", "url": "https://iashark.com/de/"}}
+</script>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#060a0c;--card:#0d1820;--cyan:#00e5ff;--amber:#ffab00;--green:#00e676;--text:#e8f0f4;--muted:#4a6878;--border:rgba(255,255,255,0.06);}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:"DM Sans",sans-serif;padding-bottom:70px;}
+a{color:inherit;text-decoration:none;}
+
+/* HEADER — consistent with the other pages */
+.hdr{background:rgba(6,10,12,0.98);border-bottom:1px solid var(--border);padding:0 20px;height:56px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:99;backdrop-filter:blur(10px);}
+.logo{font-family:"Bebas Neue",sans-serif;font-size:22px;letter-spacing:3px;color:var(--text);text-decoration:none;}
+.logo span{color:var(--cyan);}
+.hdr-right{display:flex;gap:8px;align-items:center;}
+.btn-back{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:1px;color:var(--muted);border:1px solid var(--border);padding:5px 12px;border-radius:7px;background:none;cursor:pointer;text-decoration:none;transition:.15s;}
+.btn-back:hover{color:var(--cyan);border-color:rgba(0,229,255,0.3);}
+.btn-login{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:1px;padding:5px 12px;border-radius:7px;border:1px solid rgba(0,229,255,0.25);background:rgba(0,229,255,0.06);color:var(--cyan);text-decoration:none;transition:.15s;}
+.btn-login:hover{background:rgba(0,229,255,0.12);}
+
+/* HERO */
+.hero{background:linear-gradient(135deg,#001220,#002040,#000e1a);border-bottom:1px solid rgba(0,229,255,0.12);padding:60px 24px 48px;text-align:center;}
+.hero h1{font-family:"Bebas Neue",sans-serif;font-size:clamp(32px,6vw,58px);margin-bottom:14px;line-height:1.05;}
+.hero h1 span{color:var(--cyan);}
+.hero p{color:#94a3b8;font-size:15px;max-width:560px;margin:0 auto 24px;line-height:1.7;}
+.hero-stats{display:flex;justify-content:center;gap:32px;flex-wrap:wrap;}
+.hs{text-align:center;}
+.hs-val{font-family:"Bebas Neue",sans-serif;font-size:28px;color:var(--cyan);}
+.hs-lbl{font-family:"Space Mono",monospace;font-size:8px;color:var(--muted);letter-spacing:1px;}
+
+/* BODY */
+.body{max-width:960px;margin:0 auto;padding:48px 24px;}
+.section-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;}
+.section-lbl{font-family:"Space Mono",monospace;font-size:10px;color:var(--cyan);letter-spacing:3px;}
+
+/* GUIDES GRID */
+.guides-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;margin-bottom:48px;}
+.guide-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px;display:flex;flex-direction:column;gap:12px;transition:border-color .2s,transform .2s;}
+.guide-card:hover{border-color:rgba(0,229,255,0.3);transform:translateY(-2px);}
+.gc-icon{color:var(--cyan);}
+.gc-tag{font-family:"Space Mono",monospace;font-size:8px;color:var(--cyan);background:rgba(0,229,255,0.08);border:1px solid rgba(0,229,255,0.2);padding:3px 8px;border-radius:20px;letter-spacing:1px;display:inline-block;}
+.gc-title{font-family:"Bebas Neue",sans-serif;font-size:18px;letter-spacing:0.5px;line-height:1.2;}
+.gc-desc{font-size:13px;color:var(--muted);line-height:1.6;flex:1;}
+.gc-footer{display:flex;align-items:center;justify-content:space-between;margin-top:4px;}
+.gc-read{font-family:"Space Mono",monospace;font-size:9px;color:var(--cyan);letter-spacing:1px;}
+
+/* CTA */
+.divider{border:none;border-top:1px solid var(--border);margin:40px 0;}
+.cta{background:linear-gradient(135deg,rgba(0,229,255,0.08),rgba(0,180,216,0.04));border:1px solid rgba(0,229,255,0.25);border-radius:18px;padding:40px;text-align:center;}
+.cta h2{font-family:"Bebas Neue",sans-serif;font-size:32px;letter-spacing:1px;margin-bottom:10px;}
+.cta p{font-size:14px;color:#94a3b8;max-width:420px;margin:0 auto 20px;}
+.cta-btn{display:inline-block;background:var(--cyan);color:#000;font-family:"Space Mono",monospace;font-size:11px;font-weight:700;letter-spacing:2px;padding:14px 36px;border-radius:10px;}
+
+/* NAV BOTTOM — consistent */
+.nav-bottom{position:fixed;bottom:0;left:0;right:0;background:rgba(6,10,12,0.97);backdrop-filter:blur(14px);border-top:1px solid var(--border);display:flex;z-index:100;height:60px;}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;text-decoration:none;-webkit-tap-highlight-color:transparent;}
+.nav-icon{width:20px;height:20px;display:flex;align-items:center;justify-content:center;}
+.nav-icon svg{width:20px;height:20px;stroke:var(--muted);transition:.2s;}
+.nav-item.active .nav-icon svg{stroke:var(--cyan);filter:drop-shadow(0 0 6px rgba(34,211,238,0.5));}
+.nav-lbl{font-family:'Space Mono',monospace;font-size:7px;color:var(--muted);letter-spacing:1px;}
+.nav-item.active .nav-lbl{color:var(--cyan);}
+
+footer{background:var(--card);border-top:1px solid var(--border);padding:28px 24px;text-align:center;margin-top:48px;}
+footer p{font-family:"Space Mono",monospace;font-size:9px;color:var(--muted);letter-spacing:1px;line-height:1.8;}
+
+@media(max-width:600px){.guides-grid{grid-template-columns:1fr;}.hero-stats{gap:20px;}}
+</style>
+<link rel="stylesheet" href="/assets/bottom-navigation.css"></head>
+<body>
+
+<header class="hdr">
+  <a href="/de/" class="logo"><span>IA</span>SHARK</a>
+  <div class="hdr-right">
+    <a href="/de/" class="btn-back">← START</a>
+    <a href="/de/compte.html" class="btn-login">ANMELDEN</a>
+  </div>
+</header>
+
+<div class="hero">
+  <h1><span>IASHARK</span> Blog</h1>
+  <p>Guides zu Fußballstatistik, Wahrscheinlichkeiten und der Analysemethode von IASHARK. Die Methode und ihre Grenzen, ohne Gewinnversprechen.</p>
+  <div class="hero-stats">
+    <div class="hs"><div class="hs-val">7</div><div class="hs-lbl">GUIDES</div></div>
+    <div class="hs"><div class="hs-val">0</div><div class="hs-lbl">GEWINNVERSPRECHEN</div></div>
+  </div>
+</div>
+
+<div class="body">
+  <div class="section-hdr">
+    <div class="section-lbl">ZEITLOSE GUIDES</div>
+  </div>
+  <div class="guides-grid">
+    <a href="/de/blog/guides/plus-de-2-5-buts-probabilite-methode-poisson.html" class="guide-card">
+      <div class="gc-icon"><svg viewBox="0 0 24 24" width="28" height="28" style="stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg></div>
+      <span class="gc-tag">METHODE</span>
+      <div class="gc-title">Über 2,5 Tore: die Wahrscheinlichkeit berechnen, nicht raten</div>
+      <div class="gc-desc">Die komplette Methode, um Teamstatistiken in einen überprüfbaren Prozentwert zu übersetzen – mit Fehlermarge.</div>
+      <div class="gc-footer"><span class="gc-read">LESEN →</span></div>
+    </a>
+    <a href="/de/blog/guides/xg-expected-goals-guide-complet.html" class="guide-card">
+      <div class="gc-icon"><svg viewBox="0 0 24 24" width="28" height="28" style="stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg></div>
+      <span class="gc-tag">ANALYSE</span>
+      <div class="gc-title">xG: Was die Statistik wirklich aussagt – und wo sie täuscht</div>
+      <div class="gc-desc">Wie ein xG-Wert entsteht, die Falle des kumulierten xG und wie viele Spiele nötig sind, bevor man ihm trauen kann.</div>
+      <div class="gc-footer"><span class="gc-read">LESEN →</span></div>
+    </a>
+    <a href="/de/blog/guides/prediction-ia-football-guide-2026.html" class="guide-card">
+      <div class="gc-icon"><svg viewBox="0 0 24 24" width="28" height="28" style="stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg></div>
+      <span class="gc-tag">ANALYSE</span>
+      <div class="gc-title">Fußballprognosen mit KI: Modelle und ihre Grenzen verstehen</div>
+      <div class="gc-desc">Wie Modelle die Daten eines Spiels in Wahrscheinlichkeiten übersetzen, ohne jemals ein Ergebnis zu garantieren.</div>
+      <div class="gc-footer"><span class="gc-read">LESEN →</span></div>
+    </a>
+    <a href="/de/blog/guides/value-bet-guide-complet-2026.html" class="guide-card">
+      <div class="gc-icon"><svg viewBox="0 0 24 24" width="28" height="28" style="stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg></div>
+      <span class="gc-tag">METHODE</span>
+      <div class="gc-title">Value Bet: eine Wahrscheinlichkeit richtig mit einer Quote vergleichen</div>
+      <div class="gc-desc">Implizite Wahrscheinlichkeit, Buchmachermarge, geschätzter Vorteil und die Grenzen einer Entscheidung auf Basis von Value.</div>
+      <div class="gc-footer"><span class="gc-read">LESEN →</span></div>
+    </a>
+    <a href="/de/blog/guides/guide-paris-sportifs-debutant-complet.html" class="guide-card">
+      <div class="gc-icon"><svg viewBox="0 0 24 24" width="28" height="28" style="stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg></div>
+      <span class="gc-tag">GUIDE</span>
+      <div class="gc-title">Sportwetten: der komplette Guide für einen methodischen Einstieg</div>
+      <div class="gc-desc">Bankroll, Einsatz, Varianz und Disziplin: die unverzichtbaren Grundlagen, noch bevor man einen Markt bewertet.</div>
+      <div class="gc-footer"><span class="gc-read">LESEN →</span></div>
+    </a>
+    <a href="/de/blog/guides/meilleurs-bookmakers-monde-2026.html" class="guide-card">
+      <div class="gc-icon"><svg viewBox="0 0 24 24" width="28" height="28" style="stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg></div>
+      <span class="gc-tag">GUIDE</span>
+      <div class="gc-title">Einen Buchmacher wählen: Sicherheitskriterien, Quoten und Grenzen</div>
+      <div class="gc-desc">Die konkreten Kriterien, die man vor der Nutzung einer Plattform prüfen sollte – ohne irreführende Werbe-Rankings.</div>
+      <div class="gc-footer"><span class="gc-read">LESEN →</span></div>
+    </a>
+    <a href="/de/blog/guides/coupe-du-monde-2026-guide-complet.html" class="guide-card">
+      <div class="gc-icon"><svg viewBox="0 0 24 24" width="28" height="28" style="stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg></div>
+      <span class="gc-tag">FUSSBALL</span>
+      <div class="gc-title">WM 2026: Format, Spielplan und Analysemethode</div>
+      <div class="gc-desc">Die wichtigsten Eckdaten, um das Turnier zu verfolgen und die Spiele in ihrem tatsächlichen Kontext zu analysieren.</div>
+      <div class="gc-footer"><span class="gc-read">LESEN →</span></div>
+    </a>
+  </div>
+
+  <hr class="divider">
+
+  <div class="cta">
+    <h2>Die Methode, angewendet auf die Spiele des Tages</h2>
+    <p>IASHARK berechnet jeden Morgen die Wahrscheinlichkeiten der Spiele auf Basis realer Daten und erklärt die Überlegungen hinter jedem Signal. Die Tagesanalyse ist kostenlos.</p>
+    <a href="/de/" class="cta-btn">ZU DEN ANALYSEN DES TAGES →</a>
+  </div>
+</div>
+
+<footer>
+  <p>IASHARK — Künstliche Intelligenz & Sportwetten<br>
+  Die veröffentlichten Analysen dienen ausschließlich der Orientierung · Wetten sind mit Risiken verbunden · 18+ · Spielen Sie verantwortungsvoll<br>
+  © 2026 IASHARK · Alle Rechte vorbehalten</p>
+  <p><a href="/de/mentions-legales.html" style="color:inherit;text-decoration:underline">Impressum</a> · <a href="/de/cgv.html" style="color:inherit;text-decoration:underline">AGB</a> · <a href="/de/confidentialite.html" style="color:inherit;text-decoration:underline">Datenschutz</a> · <a href="/de/cookies.html" style="color:inherit;text-decoration:underline">Cookies</a> · <a href="/de/jeu-responsable.html" style="color:inherit;text-decoration:underline">Verantwortungsvolles Spielen</a></p>
+</footer>
+
+<nav class="nav-bottom">
+  <a href="/de/" class="nav-item">
+    <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5L12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg></div>
+    <div class="nav-lbl">START</div>
+  </a>
+  <a href="/de/pro.html" class="nav-item">
+    <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.9 6.6L22 9.3l-5 4.9L18.2 22 12 18.3 5.8 22 7 14.2 2 9.3l7.1-.7z"/></svg></div>
+    <div class="nav-lbl">TOOLS</div>
+  </a>
+  <a href="/de/blog/" class="nav-item active">
+    <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg></div>
+    <div class="nav-lbl">BLOG</div>
+  </a>
+  <a href="/de/compte.html" class="nav-item">
+    <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg></div>
+    <div class="nav-lbl">KONTO</div>
+  </a>
+</nav>
+
+<script src="/site-header.js"></script>
+<script src="/site-prefs.js"></script>
+<script src="/bottom-navigation.js"></script></body>
+</html>

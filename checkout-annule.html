@@ -3,13 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>IASHARK — Paiement annulé</title>
+<title data-i18n="geo.meta.checkout-annule.title">IASHARK — Paiement annulé</title>
 <meta name="robots" content="noindex, nofollow">
-<meta name="description" content="Abonnement Outils IASHARK annulé, aucun paiement effectué.">
+<meta name="description" content="Paiement annulé : aucun montant n'a été débité." data-i18n-attr="content:geo.meta.checkout-annule.description">
 <link rel="canonical" href="https://iashark.com/checkout-annule.html">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23080c12'/%3E%3Ctext x='50%25' y='54%25' dominant-baseline='middle' text-anchor='middle' font-size='40' fill='%2322d3ee'%3E🦈%3C/text%3E%3C/svg%3E">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
 <script src="/funnel-track.js"></script>
+<script src="/i18n/i18n.js"></script>
 <style>
 :root{--bg:#080c12;--card:#0d1520;--cyan:#22d3ee;--amber:#f59e0b;--text:#e2e8f0;--muted:#4a6580;--border:rgba(255,255,255,0.06);--bc:rgba(34,211,238,0.18);--ba:rgba(245,158,11,0.2);}
 *{margin:0;padding:0;box-sizing:border-box;}
@@ -28,19 +29,20 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 </style>
 <link rel="stylesheet" href="/assets/bottom-navigation.css"></head>
 <body>
-<header class="hdr"><a href="/" class="logo"><span>IA</span>SHARK</a></header>
+<header class="hdr"><a href="/" data-href="" class="logo"><span>IA</span>SHARK</a></header>
 <div class="wrap">
   <div class="card">
     <div class="icon">↩️</div>
-    <div class="title">Paiement annulé</div>
-    <div class="body">Aucun paiement n'a été effectué. Tu peux réessayer quand tu veux, sans engagement.</div>
+    <div class="title" data-i18n="checkout_pages.cancel_heading">Paiement annulé</div>
+    <div class="body" data-i18n="checkout_pages.cancel_body">Aucun paiement n'a été effectué. Tu peux réessayer quand tu veux, sans engagement.</div>
     <div class="ctas">
-      <a href="/pro.html" class="cta">RETOUR À L'ESPACE OUTILS →</a>
-      <a href="/compte.html" class="cta secondary">MON COMPTE →</a>
+      <a href="/pro.html" data-href="pro.html" class="cta" data-i18n="checkout_pages.cancel_cta_tools">RETOUR À L'ESPACE OUTILS →</a>
+      <a href="/compte.html" data-href="compte.html" class="cta secondary" data-i18n="checkout_pages.cancel_cta_account">MON COMPTE →</a>
     </div>
   </div>
 </div>
-<script>if(window.iasharkTrack) iasharkTrack('checkout_cancel_view');</script>
+<script>if(window.iasharkTrack) iasharkTrack('checkout_cancel_view');
+if(window.I18N&&window.I18N.init){window.I18N.init();}</script>
 <script src="/site-prefs.js"></script>
 <script src="/bottom-navigation.js"></script></body>
 </html>

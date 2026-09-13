@@ -68,6 +68,11 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
   </div>
 
   <div class="dashboard" id="dashboard">
+    <div class="section-title">VISITEURS (SUIVI INTERNE ANONYME)</div>
+    <div class="stat-grid" id="visitorStats"></div>
+    <div class="funnel-table" id="visitorsByDay" style="margin-top:12px"></div>
+    <div class="funnel-table" id="visitorsBySite" style="margin-top:12px"></div>
+
     <div class="section-title">UTILISATEURS</div>
     <div class="stat-grid" id="userStats"></div>
 
@@ -89,6 +94,7 @@ var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJ
 var sb = supabase.createClient(SUPA_URL, SUPA_KEY);
 
 var FUNNEL_LABELS = {
+  page_view: 'Pages vues',
   landing_view: 'Vues page Tarifs',
   signup_started: 'Inscriptions commencées',
   signup_completed: 'Inscriptions terminées',
@@ -130,6 +136,27 @@ async function loadStats(){
     document.getElementById('signupStats').innerHTML =
       statCard('7 DERNIERS JOURS', s.signups_last_7d, 'cyan') +
       statCard('30 DERNIERS JOURS', s.signups_last_30d, 'cyan');
+
+    var SITE_LABELS = {fr:'France', en:'Anglais international', es:'Espagnol', de:'Allemand', it:'Italien', pt:'Portugais', gb:'Royaume-Uni', za:'Afrique du Sud', mx:'Mexique'};
+    if(s.visitors_last_7d === undefined){
+      document.getElementById('visitorStats').innerHTML = '<div class="funnel-empty">Migration 0010 non appliquée : le décompte des visiteurs n\'est pas encore disponible.</div>';
+      document.getElementById('visitorsByDay').innerHTML = '';
+      document.getElementById('visitorsBySite').innerHTML = '';
+    } else {
+      document.getElementById('visitorStats').innerHTML =
+        statCard("AUJOURD'HUI", s.visitors_today, 'cyan') +
+        statCard('7 DERNIERS JOURS', s.visitors_last_7d, 'cyan') +
+        statCard('PAGES VUES 7 J', s.page_views_last_7d);
+      var days = s.visitors_by_day_14d || [];
+      document.getElementById('visitorsByDay').innerHTML = days.length ? days.slice().reverse().map(function(d){
+        return '<div class="funnel-row"><span class="funnel-row-label">' + new Date(d.day + 'T12:00:00').toLocaleDateString('fr-FR', {weekday:'short', day:'numeric', month:'short'}) + '</span><span class="funnel-row-val">' + d.visitors + '</span></div>';
+      }).join('') : '<div class="funnel-empty">Aucune visite enregistrée sur 14 jours.</div>';
+      var sites = s.visitors_by_site_7d || {};
+      var siteKeys = Object.keys(sites).sort(function(a,b){ return sites[b]-sites[a]; });
+      document.getElementById('visitorsBySite').innerHTML = siteKeys.length ? siteKeys.map(function(k){
+        return '<div class="funnel-row"><span class="funnel-row-label">' + (SITE_LABELS[k]||k) + '</span><span class="funnel-row-val">' + sites[k] + '</span></div>';
+      }).join('') : '';
+    }
 
     var funnel = s.funnel_last_7d || {};
     var keys = Object.keys(funnel);

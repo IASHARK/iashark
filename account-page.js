@@ -52,7 +52,45 @@
     // Le tag de locale devient dynamique (separateur decimal, ordre) ; la devise
     // reste EUR volontairement - la conversion multi-devise est un chantier
     // separe en cours en parallele, hors perimetre ici.
-    return isFinite(n) ? n.toLocaleString(localeTag(), { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }) : null;
+    return isFinite(n) ? n.toLocaleString(localeTag(), { style: 'currency', currency: devise(), maximumFractionDigits: 0 }) : null;
+  }
+  // Marche courant (lib/market-config.js -> window.IASHARK_MARKET : code,
+  // devise, prix). Repli : marche FR historique, EUR.
+  function marche() { return window.IASHARK_MARKET || null; }
+  function devise() { return (marche() && marche().currency) || 'EUR'; }
+  function prixGratuit() {
+    var m = marche();
+    if (m && typeof m.formatPrice === 'function') { var f = m.formatPrice('free'); if (f) return f; }
+    try { return (0).toLocaleString(localeTag(), { style: 'currency', currency: devise(), maximumFractionDigits: 0 }); }
+    catch (_e) { return '0 €'; }
+  }
+  // Prix Pro mensuel du marche courant. La forme exacte de
+  // IASHARK_MARKET.prices appartient a lib/market-config.js : on accepte un
+  // nombre ou un libelle deja formate, sinon le prix EUR historique.
+  function prixPro() {
+    var mk = marche();
+    if (mk && typeof mk.formatPrice === 'function') { var f = mk.formatPrice('pro'); if (f) return f; }
+    var p = mk && mk.prices;
+    var v = p && (p.pro_monthly != null ? p.pro_monthly : p.pro != null ? p.pro : p.monthly);
+    if (v && typeof v === 'object') v = v.display != null ? v.display : (v.amount != null ? v.amount : v.value);
+    if (typeof v === 'string' && v.trim()) return v.trim();
+    if (typeof v === 'number' && isFinite(v)) {
+      try { return v.toLocaleString(localeTag(), { style: 'currency', currency: devise() }); } catch (_e) {}
+    }
+    return '19,95 €';
+  }
+  // Lien interne dans le repertoire de langue/marche courant (/gb/, /mx/...).
+  function lien(p) { return (window.I18N && window.I18N.href) ? window.I18N.href(p) : '/' + p; }
+  // Repertoire de site de la page (premier segment d'URL), transmis au
+  // paiement pour revenir sur /<dir>/checkout-succes.html.
+  var REPERTOIRES = ['fr', 'en', 'es', 'de', 'it', 'pt', 'gb', 'za', 'mx'];
+  function repertoire() {
+    var seg = String(location.pathname.split('/')[1] || '').toLowerCase();
+    return REPERTOIRES.indexOf(seg) !== -1 ? seg : null;
+  }
+  // Nom de championnat stocke tel quel en base ; seul l'affichage est traduit.
+  function nomChampionnat(nom) {
+    return nom === 'Ligue des Champions' ? tr('special_competitions.ldc', nom) : nom;
   }
   var $ = function (id) { return document.getElementById(id); };
 
@@ -221,7 +259,7 @@
     } else {
       activite = carte('<h2 class="text-[12px] font-bold uppercase tracking-[0.16em] text-soft">' + tr('compte_page.activity_heading', 'Activité') + '</h2>'
         + '<p class="mt-3 text-[14px] leading-relaxed text-soft">' + tr('compte_page.activity_empty_detail', 'Aucune décision enregistrée. Celles que vous ajoutez depuis les outils apparaîtront ici.') + '</p>'
-        + '<a href="/pro.html" class="mt-4 inline-flex h-10 items-center rounded-lg border border-hairline px-4 text-[13.5px] font-semibold transition hover:border-cyan/40">' + tr('compte_page.activity_empty_cta', 'Voir les outils') + '</a>');
+        + '<a href="' + esc(lien('pro.html')) + '" class="mt-4 inline-flex h-10 items-center rounded-lg border border-hairline px-4 text-[13.5px] font-semibold transition hover:border-cyan/40">' + tr('compte_page.activity_empty_cta', 'Voir les outils') + '</a>');
     }
 
     return titreSection(tr('compte_page.section_overview_title', 'Vue d’ensemble'), tr('compte_page.section_overview_subtitle', 'Un résumé de votre compte. Chaque section porte le détail.'))
@@ -233,7 +271,7 @@
           + ligneResume(tr('compte_page.email_label', 'Email'), esc(ctx.user.email))
           + ligneResume(tr('compte_page.language_label', 'Langue'), esc(langues[prefs.language] || langues.fr), 'preferences')
           + ligneResume(tr('compte_page.timezone_label', 'Fuseau horaire'), esc(prefs.timezone || 'Europe/Paris'), 'preferences')
-          + ligneResume(tr('compte_page.leagues_label', 'Championnats suivis'), ligues.length ? esc(ligues.join(', ')) : '', 'preferences')
+          + ligneResume(tr('compte_page.leagues_label', 'Championnats suivis'), ligues.length ? esc(ligues.map(nomChampionnat).join(', ')) : '', 'preferences')
           + ligneResume(tr('compte_page.bankroll_label', 'Bankroll'), euros(ctx.profile.capital) ? esc(euros(ctx.profile.capital)) : '', 'preferences')
           + '</div>')
       + activite
@@ -285,7 +323,7 @@
         + '<p class="mt-2.5 text-[26px] font-extrabold leading-none tracking-tight">' + tr('compte_page.plan_free_name', 'IASHARK Gratuit') + '</p>'
         // Prix affiche en EUR uniquement : la conversion multi-devise est un
         // chantier separe en cours en parallele, hors perimetre ici.
-        + '<p class="mt-2 text-[14px] text-soft">0 €</p></div>'
+        + '<p class="mt-2 text-[14px] text-soft">' + esc(prixGratuit()) + '</p></div>'
         + '<span class="inline-flex items-center rounded-full border border-hairline bg-white/[.04] px-2.5 py-1 text-[11px] font-bold tracking-wider text-soft">' + tr('compte_page.badge_free', 'GRATUIT') + '</span></div>'
         + '<ul class="mt-5 space-y-2.5">'
         + '<li class="flex gap-2.5 text-[14px] text-soft"><span aria-hidden="true" class="text-soft">✓</span>' + tr('compte_page.benefit_free_analysis', 'L’analyse complète offerte chaque jour') + '</li>'
@@ -295,7 +333,7 @@
         + (etat && etat.ton === 'alerte' ? '<div class="mt-5 rounded-xl border px-4 py-3.5 text-[13.5px] leading-relaxed ' + TON[etat.ton] + '"><b class="font-semibold">' + esc(etat.titre) + '</b><span class="mt-0.5 block opacity-90">' + esc(etat.detail) + '</span></div>' : ''))
       + carte('<h2 class="text-[12px] font-bold uppercase tracking-[0.16em] text-cyan">' + tr('compte_page.with_pro_heading', 'Avec Pro') + '</h2>'
         // Prix affiche en EUR uniquement : voir note ci-dessus, hors perimetre ici.
-        + '<p class="mt-2.5 text-[22px] font-extrabold leading-none tracking-tight">19,95 € / mois</p>'
+        + '<p class="mt-2.5 text-[22px] font-extrabold leading-none tracking-tight"><span data-market-price="pro">' + esc(prixPro()) + '</span> ' + esc(tr('compte_page.per_month', '/ mois')) + '</p>'
         + '<p class="mt-2 text-[13.5px] text-soft">' + tr('compte_page.pro_no_commitment', 'Sans engagement, résiliable à tout moment.') + '</p>'
         + '<ul class="mt-5 space-y-2.5">'
         + '<li class="flex gap-2.5 text-[14px]"><span aria-hidden="true" class="text-cyan">✓</span>' + tr('compte_page.benefit_pro_all_matches', 'L’analyse complète sur tous les matchs') + '</li>'
@@ -359,7 +397,7 @@
         + connues.map(function (nom, i) {
             return '<label class="flex cursor-pointer items-center gap-2.5 text-[14px]">'
               + '<input type="checkbox" class="h-4 w-4 accent-cyan" data-ligue="' + i + '" value="' + esc(nom) + '"'
-              + (ligues.indexOf(nom) !== -1 ? ' checked' : '') + '>' + esc(nom) + '</label>';
+              + (ligues.indexOf(nom) !== -1 ? ' checked' : '') + '>' + esc(nomChampionnat(nom)) + '</label>';
           }).join('')
         + '</div></fieldset>')
       + carte('<h2 class="text-[12px] font-bold uppercase tracking-[0.16em] text-soft">' + tr('compte_page.display_heading', 'Affichage') + '</h2>'
@@ -396,7 +434,7 @@
         + '<div><h2 class="text-[14.5px] font-semibold">' + tr('compte_page.password_heading', 'Mot de passe') + '</h2>'
         + '<p class="mt-1.5 max-w-lg text-[13.5px] leading-relaxed text-soft">' + tr('compte_page.password_change_detail', 'Pour le changer, vous devrez saisir le mot de passe actuel. Si vous l’avez oublié, passez par le lien de réinitialisation.') + '</p></div>'
         + boutonSecondaire('ouvrirMdp', tr('compte_page.change_password_cta', 'Modifier le mot de passe')) + '</div>'
-        + '<p class="mt-3 text-[13px]"><a href="/mot-de-passe-oublie.html" class="text-cyan transition hover:underline">' + tr('compte_page.forgot_password_link', 'J\'ai oublie mon mot de passe') + '</a></p>')
+        + '<p class="mt-3 text-[13px]"><a href="' + esc(lien('mot-de-passe-oublie.html')) + '" class="text-cyan transition hover:underline">' + tr('compte_page.forgot_password_link', 'J\'ai oublie mon mot de passe') + '</a></p>')
       + carte('<div class="flex flex-wrap items-start justify-between gap-4">'
         + '<div><h2 class="text-[14.5px] font-semibold">' + tr('compte_page.logout_label', 'Déconnexion') + '</h2>'
         + '<p class="mt-1.5 text-[13.5px] leading-relaxed text-soft">' + tr('compte_page.logout_detail', 'Ferme la session sur cet appareil.') + '</p></div>'
@@ -559,7 +597,7 @@
 
   async function deconnecter() {
     await sb.auth.signOut();
-    location.href = '/connexion.html';
+    location.href = lien('connexion.html');
   }
 
   async function enregistrerPreferences() {
@@ -626,14 +664,28 @@
     try {
       var s = await sb.auth.getSession();
       var token = s.data.session && s.data.session.access_token;
+      // Paiement : marche (gb/mx/za, sinon absent = marche FR historique) et
+      // repertoire de site (retour sur /<dir>/checkout-succes.html). Le portail
+      // de facturation n'en a pas besoin.
+      var corps = {};
+      if (fonction === 'create-checkout-session') {
+        var dir = repertoire();
+        var code = String((marche() && (marche().checkoutMarket || marche().code)) || dir || '').toLowerCase();
+        if (code === 'gb' || code === 'mx' || code === 'za') corps.market = code;
+        if (dir) corps.dir = dir;
+      }
       var r = await fetch(window.IasharkApp.url + '/functions/v1/' + fonction, {
         method: 'POST',
         headers: { apikey: window.IasharkApp.key, Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
-        body: '{}'
+        body: JSON.stringify(corps)
       });
       var j = await r.json();
       if (j.url) { location.href = j.url; return; }
       relacher();
+      if (j.processed === false && j.reason === 'market_not_configured') {
+        retour('msgFacturation', tr('compte_page.err_market_not_configured', 'Le paiement en ligne n’est pas encore ouvert dans votre pays. Vous pouvez continuer à utiliser IASHARK gratuitement.'), 'error');
+        return;
+      }
       retour('msgFacturation', j.message || tr('compte_page.err_billing_unavailable', 'Le paiement en ligne n’est pas disponible pour le moment.'), 'error');
     } catch (e) {
       relacher();
@@ -658,7 +710,7 @@
       };
       var blob = new Blob([JSON.stringify(contenu, null, 2)], { type: 'application/json' });
       var url = URL.createObjectURL(blob), a = document.createElement('a');
-      a.href = url; a.download = 'iashark-mes-donnees-' + new Date().toISOString().slice(0, 10) + '.json';
+      a.href = url; a.download = tr('compte_page.export_filename_prefix', 'iashark-mes-donnees-') + new Date().toISOString().slice(0, 10) + '.json';
       document.body.appendChild(a); a.click(); a.remove();
       setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
       relacher();
@@ -742,7 +794,7 @@
       var j = await r.json().catch(function () { return {}; });
       if (!r.ok || !j.ok) throw new Error(j.message || 'suppression_impossible');
       await sb.auth.signOut();
-      location.href = '/?compte-supprime=1';
+      location.href = lien('?compte-supprime=1');
     } catch (err) {
       relacher();
       retour('msgSuppr', (err && err.message && err.message !== 'suppression_impossible')
@@ -815,7 +867,7 @@
       // protegees par RLS cote base : sans session, aucune requete ne
       // renvoie quoi que ce soit, cette redirection n'est que le confort.
       var retourVers = encodeURIComponent(location.pathname + location.hash);
-      location.replace('/connexion.html?next=' + retourVers);
+      location.replace(lien('connexion.html?next=' + retourVers));
       return;
     }
     var resultats = await Promise.all([

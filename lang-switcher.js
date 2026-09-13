@@ -1,108 +1,91 @@
 "use strict";
-// Selecteur de langue partage (racine, non duplique par locale - meme
-// patron que funnel-track.js/auth-header.js/site-prefs.js). Monte sur
-// toutes les pages coeur du produit, desktop + mobile (meme composant,
-// juste redimensionne en CSS).
-//
-// Le FR "par defaut" est servi a la racine non prefixee (/pro.html), pas
-// sous /fr/ (qui existe comme copie symetrique pour le hreflang mais n'est
-// pas l'URL canonique reellement en production - voir
-// IASHARK_V2_EXECUTION_STATE.md). Le selecteur pointe donc toujours vers
-// la racine non prefixee pour FR, et vers /xx/<page> pour les 5 autres
-// langues - jamais vers /fr/<page>, pour ne jamais dupliquer une URL FR
-// deja vue par l'utilisateur sous une autre forme.
+// Selecteur langue / pays partage (racine, non duplique par repertoire).
+// Source unique des options : window.I18N.switcherOptions() (i18n/i18n.js),
+// qui couvre les 9 versions du site : Français, English (UK), English (South
+// Africa), English (International), Español (México), Español, Deutsch,
+// Italiano, Português. Chaque option pointe vers la MEME page dans le
+// repertoire cible (/gb/match.html, /mx/compte.html...).
 (function () {
-  var LOCALES = [
-    { code: "fr", name: "Français" },
-    { code: "en", name: "English" },
-    { code: "es", name: "Español" },
-    { code: "de", name: "Deutsch" },
-    { code: "it", name: "Italiano" },
-    { code: "pt", name: "Português" }
+  var FALLBACK = [
+    { dir: "fr", label: "Français" }, { dir: "gb", label: "English (UK)" },
+    { dir: "za", label: "English (South Africa)" }, { dir: "en", label: "English (International)" },
+    { dir: "mx", label: "Español (México)" }, { dir: "es", label: "Español" },
+    { dir: "de", label: "Deutsch" }, { dir: "it", label: "Italiano" }, { dir: "pt", label: "Português" }
   ];
+  var SHORT = { fr: "FR", gb: "UK", za: "ZA", en: "EN", mx: "MX", es: "ES", de: "DE", it: "IT", pt: "PT" };
 
-  function currentLocale() {
-    var m = location.pathname.match(/^\/([a-z]{2})\//);
-    return m && LOCALES.some(function (l) { return l.code === m[1]; }) ? m[1] : "fr";
+  function currentDir() {
+    var m = location.pathname.match(/^\/(fr|en|es|de|it|pt|gb|za|mx)(\/|$)/);
+    return m ? m[1] : "fr";
   }
 
-  // Chemin "nu" de la page courante, sans prefixe de locale - ex.
-  // "/pro.html", "/", "/marches.html".
-  function currentSlug() {
-    var p = location.pathname.replace(/^\/([a-z]{2})(\/|$)/, "/");
-    return p;
+  function options() {
+    if (window.I18N && typeof window.I18N.switcherOptions === "function") {
+      try { return window.I18N.switcherOptions(); } catch (e) {}
+    }
+    var active = currentDir();
+    var slug = location.pathname.replace(/^\/(fr|en|es|de|it|pt|gb|za|mx)(\/|$)/, "/");
+    return FALLBACK.map(function (o) {
+      return { dir: o.dir, label: o.label, href: slug === "/" ? "/" + o.dir + "/" : "/" + o.dir + slug, active: o.dir === active };
+    });
   }
 
-  function urlFor(locale, slug) {
-    if (locale === "fr") return slug;
-    return slug === "/" ? "/" + locale + "/" : "/" + locale + slug;
-  }
-
-  function buildMenu(active, slug) {
-    return LOCALES.map(function (l) {
-      var cls = "lang-switch-item" + (l.code === active ? " active" : "");
-      return '<a class="' + cls + '" href="' + urlFor(l.code, slug) + '" data-lang="' + l.code + '">'
-        + '<span class="lang-switch-code">' + l.code.toUpperCase() + "</span>"
-        + '<span class="lang-switch-name">' + l.name + "</span>"
-        + (l.code === active ? '<span class="lang-switch-check">✓</span>' : "")
-        + "</a>";
-    }).join("");
+  function esc(s) {
+    return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; });
   }
 
   function mount(selector) {
     var host = typeof selector === "string" ? document.querySelector(selector) : selector;
     if (!host) return;
-    var active = currentLocale();
-    var slug = currentSlug();
+    var opts = options();
+    var activeOpt = opts.filter(function (o) { return o.active; })[0] || { dir: currentDir() };
 
     host.innerHTML =
       '<div class="lang-switch">' +
       '<button type="button" class="lang-switch-btn" id="langSwitchBtn" aria-haspopup="true" aria-expanded="false">' +
-      '<span>' + active.toUpperCase() + "</span>" +
+      "<span>" + (SHORT[activeOpt.dir] || activeOpt.dir.toUpperCase()) + "</span>" +
       '<svg viewBox="0 0 24 24" width="10" height="10" style="stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;"><polyline points="6 9 12 15 18 9"/></svg>' +
       "</button>" +
-      '<div class="lang-switch-menu" id="langSwitchMenu">' + buildMenu(active, slug) + "</div>" +
-      "</div>";
+      '<div class="lang-switch-menu" id="langSwitchMenu">' +
+      opts.map(function (o) {
+        return '<a class="lang-switch-item' + (o.active ? " active" : "") + '" href="' + esc(o.href) + '" data-dir="' + o.dir + '">' +
+          '<span class="lang-switch-code">' + (SHORT[o.dir] || o.dir.toUpperCase()) + "</span>" +
+          '<span class="lang-switch-name">' + esc(o.label) + "</span>" +
+          (o.active ? '<span class="lang-switch-check">✓</span>' : "") + "</a>";
+      }).join("") +
+      "</div></div>";
 
     var btn = document.getElementById("langSwitchBtn");
     var menu = document.getElementById("langSwitchMenu");
-    function closeMenu() {
-      menu.classList.remove("open");
-      btn.setAttribute("aria-expanded", "false");
-    }
-    function toggleMenu(ev) {
+    function closeMenu() { menu.classList.remove("open"); btn.setAttribute("aria-expanded", "false"); }
+    btn.addEventListener("click", function (ev) {
       ev.stopPropagation();
       var open = menu.classList.toggle("open");
       btn.setAttribute("aria-expanded", open ? "true" : "false");
-    }
-    btn.addEventListener("click", toggleMenu);
+    });
     document.addEventListener("click", function (ev) {
       if (!menu.contains(ev.target) && ev.target !== btn) closeMenu();
     });
-    menu.querySelectorAll("[data-lang]").forEach(function (a) {
+    menu.querySelectorAll("[data-dir]").forEach(function (a) {
       a.addEventListener("click", function () {
-        try { localStorage.setItem("iashark_lang", a.getAttribute("data-lang")); } catch (e) {}
+        var dir = a.getAttribute("data-dir");
+        if (window.I18N && typeof window.I18N.rememberChoice === "function") window.I18N.rememberChoice(dir);
       });
     });
   }
 
-  // Memoire : si l'utilisateur a deja choisi explicitement une langue
-  // differente de celle affichee, et que la page courante est une URL non
-  // prefixee (donc pas deja un choix explicite de langue via l'URL elle-
-  // meme), propose une seule fois par session de bascule vers la langue
-  // memorisee - jamais impose, jamais repete a chaque page (sinon on
-  // combattrait un visiteur qui navigue volontairement dans une autre
-  // langue que sa preference memorisee).
+  // Pages racine sans prefixe (redirigees vers /fr/ en production) : si le
+  // visiteur a deja choisi une autre version, on l'y renvoie une seule fois
+  // par session, jamais de maniere repetee.
   function applyRememberedChoiceOnce() {
     try {
-      var remembered = localStorage.getItem("iashark_lang");
-      if (!remembered || remembered === "fr") return;
-      if (!LOCALES.some(function (l) { return l.code === remembered; })) return;
-      var isUnprefixed = !/^\/[a-z]{2}\//.test(location.pathname);
-      if (!isUnprefixed) return;
+      if (/^\/(fr|en|es|de|it|pt|gb|za|mx)(\/|$)/.test(location.pathname)) return;
+      var saved = localStorage.getItem("iashark_dir");
+      if (!saved || saved === "fr" || !SHORT[saved]) return;
       if (sessionStorage.getItem("iashark_lang_redirect_done")) return;
       sessionStorage.setItem("iashark_lang_redirect_done", "1");
-      location.href = urlFor(remembered, currentSlug());
+      var target = options().filter(function (o) { return o.dir === saved; })[0];
+      if (target) location.href = target.href;
     } catch (e) {}
   }
 

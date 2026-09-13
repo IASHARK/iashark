@@ -24,6 +24,18 @@
 
   var $ = function (id) { return document.getElementById(id); };
 
+  /* Lien interne qui reste dans le repertoire de langue/marche courant
+     (/gb/, /mx/, /en/...) via I18N.href quand il existe ; sinon chemin
+     racine, comportement historique. */
+  function localHref(p) {
+    var i = p.search(/[?#]/), tail = '';
+    if (i >= 0) { tail = p.slice(i); p = p.slice(0, i); }
+    if (window.I18N && typeof window.I18N.href === 'function') {
+      try { var out = window.I18N.href(p || 'index.html'); if (out) return String(out).replace(/\/index\.html$/, '/') + tail; } catch (_e) {}
+    }
+    return '/' + p + tail;
+  }
+
   /* i18n : repli local sur le francais d'origine si I18N n'est pas charge (ou
      pas encore pret) - meme motif que celui deja utilise par match-page.js /
      tools-page.js / bottom-navigation.js / site-prefs.js. Ne traduit jamais
@@ -112,7 +124,7 @@
      redirection ouverte utilisable pour du hameconnage. */
   function destination() {
     var brut = new URLSearchParams(location.search).get('next') || '';
-    if (!brut || brut.charAt(0) !== '/' || brut.charAt(1) === '/' || brut.indexOf('\\') !== -1) return '/compte.html';
+    if (!brut || brut.charAt(0) !== '/' || brut.charAt(1) === '/' || brut.indexOf('\\') !== -1) return localHref('compte.html');
     return brut;
   }
 
@@ -182,7 +194,7 @@
       // une session directement. Le cas sans session ne devrait pas se
       // produire, mais s'il se produit on le dit honnetement plutot que de
       // laisser l'utilisateur devant un ecran muet.
-      if (res.data && res.data.session) { location.href = '/compte.html?bienvenue=1'; return; }
+      if (res.data && res.data.session) { if (window.iasharkTrack) window.iasharkTrack('signup_completed', {}, res.data.session.user && res.data.session.user.id); location.href = localHref('compte.html?bienvenue=1'); return; }
       relacher();
       global('formMsg', t('auth.signup_success_check_login', 'Compte créé. Connectez-vous pour continuer.'), 'success');
     } catch (err) {
@@ -207,6 +219,10 @@
     if (!EMAIL_RE.test(email)) { champ('email', t('auth.err_enter_valid_email', 'Entrez une adresse email valide.')); $('email').focus(); return; }
 
     var relacher = occuper($('submit'), t('auth.forgot_submit_loading', 'Envoi…'));
+    // Volontairement a la racine : c'est l'URL autorisee cote Supabase Auth
+    // (liste de redirections). Une URL /xx/ non autorisee ferait retomber le
+    // lien du mail sur l'accueil et casserait la reinitialisation. La page
+    // racine reprend la langue memorisee (localStorage iashark_lang).
     var redirection = new URL('/reinitialiser-mot-de-passe.html', location.origin).href;
     try {
       await sb.auth.resetPasswordForEmail(email, { redirectTo: redirection });

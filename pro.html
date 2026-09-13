@@ -17,8 +17,8 @@
 
 <header class="sticky top-0 z-40 border-b border-hairline bg-page/95 backdrop-blur">
   <div class="mx-auto flex h-14 w-full max-w-[1440px] items-center gap-4 px-4 sm:px-6">
-    <a href="/" class="shrink-0" aria-label="IASHARK, accueil"><img src="/assets/iashark-logo.png" alt="IASHARK" class="h-7 w-auto object-contain"></a>
-    <span class="ml-auto" id="authHeaderSlot"><a class="rounded-lg border border-hairline px-3 py-1.5 text-[12.5px] font-semibold text-ink transition hover:border-cyan/40" href="/connexion.html">Connexion</a></span>
+    <a href="/" class="shrink-0" aria-label="IASHARK, accueil" data-i18n-attr="aria-label:site_header.aria_home"><img src="/assets/iashark-logo.png" alt="IASHARK" class="h-7 w-auto object-contain"></a>
+    <span class="ml-auto" id="authHeaderSlot"><a class="rounded-lg border border-hairline px-3 py-1.5 text-[12.5px] font-semibold text-ink transition hover:border-cyan/40" href="/connexion.html" data-i18n="match_page.shell_login">Connexion</a></span>
   </div>
 </header>
 
@@ -34,7 +34,7 @@
 
   <div class="grid grid-cols-1 gap-6 py-6 lg:grid-cols-[248px_minmax(0,1fr)] lg:gap-8">
 
-    <nav aria-label="Outils" class="hidden lg:block">
+    <nav aria-label="Outils" data-i18n-attr="aria-label:site_header.nav_tools" class="hidden lg:block">
       <div class="sticky top-[76px] flex flex-col gap-1" role="tablist" aria-orientation="vertical">
       <button type="button" role="tab" id="tab-scanner" aria-controls="panel-scanner" aria-selected="true" data-tool="scanner" data-active="1"
         class="tool-tab group flex w-full items-start gap-3 rounded-xl border border-transparent px-3 py-3 text-left transition hover:bg-white/[0.04]">
@@ -95,7 +95,7 @@
     </nav>
 
     <div class="-mx-4 overflow-x-auto px-4 lg:hidden">
-      <div class="flex gap-2 pb-1" role="tablist" aria-label="Outils" aria-orientation="horizontal">
+      <div class="flex gap-2 pb-1" role="tablist" aria-label="Outils" data-i18n-attr="aria-label:site_header.nav_tools" aria-orientation="horizontal">
       <button type="button" role="tab" id="mtab-scanner" aria-controls="panel-scanner" aria-selected="true" data-tool="scanner" data-active="1"
         class="tool-tab shrink-0 rounded-full border border-hairline px-4 py-2 text-[13px] font-semibold text-soft transition data-[active=1]:border-cyan/40 data-[active=1]:bg-cyan/[0.08] data-[active=1]:text-cyan" data-i18n="tools_page.scan_title">Détecteur d’écarts</button>
       <button type="button" role="tab" id="mtab-fair" aria-controls="panel-fair" aria-selected="false" data-tool="fair"
@@ -132,7 +132,7 @@
 <script src="/app-client.js"></script>
 <script src="/i18n/i18n.js"></script>
 <script src="/lib/tools-domain.js"></script>
-<script src="/lib/market-labels.js"></script><script src="/tools-page.js"></script>
+<script src="/lib/market-labels.js"></script><script src="/lib/market-config.js"></script><script src="/tools-page.js"></script>
 <script src="/auth-header.js"></script>
 <script>IasharkAuthHeader.mount('#authHeaderSlot')</script>
 <script src="/site-prefs.js"></script>

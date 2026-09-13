@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>xG (expected goals): o guia completo — cálculo, leitura e pontos cegos | IASHARK</title>
+<meta name="description" content="Como se calcula um xG, como lê-lo sem cometer erros, quantos jogos são precisos até que signifique alguma coisa e porque é que dois fornecedores dão dois xG diferentes para o mesmo remate.">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<link rel="canonical" href="https://iashark.com/pt/blog/guides/xg-expected-goals-guide-complet.html">
+<link rel="alternate" hreflang="fr" href="https://iashark.com/blog/guides/xg-expected-goals-guide-complet.html">
+<link rel="alternate" hreflang="en" href="https://iashark.com/en/blog/guides/xg-expected-goals-guide-complet.html">
+<link rel="alternate" hreflang="es" href="https://iashark.com/es/blog/guides/xg-expected-goals-guide-complet.html">
+<link rel="alternate" hreflang="de" href="https://iashark.com/de/blog/guides/xg-expected-goals-guide-complet.html">
+<link rel="alternate" hreflang="it" href="https://iashark.com/it/blog/guides/xg-expected-goals-guide-complet.html">
+<link rel="alternate" hreflang="pt" href="https://iashark.com/pt/blog/guides/xg-expected-goals-guide-complet.html">
+<link rel="alternate" hreflang="x-default" href="https://iashark.com/blog/guides/xg-expected-goals-guide-complet.html">
+<meta property="og:title" content="xG (expected goals): o guia completo — cálculo, leitura e pontos cegos">
+<meta property="og:description" content="Como se calcula um xG, como lê-lo sem cometer erros e porque é que dois fornecedores dão dois xG diferentes para o mesmo remate.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://iashark.com/pt/blog/guides/xg-expected-goals-guide-complet.html">
+<meta property="og:image" content="https://iashark.com/assets/blog/xg-shot-map-hero.jpg">
+<meta property="og:locale" content="pt_PT">
+<meta property="og:site_name" content="IASHARK">
+<meta property="article:published_time" content="2026-09-02">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="xG (expected goals): o guia completo">
+<meta name="twitter:description" content="Como se calcula um xG, como lê-lo sem cometer erros e quais são os seus pontos cegos.">
+<meta name="twitter:image" content="https://iashark.com/assets/blog/xg-shot-map-hero.jpg">
+<link rel="icon" href="/favicon.ico">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/article.css">
+<link rel="stylesheet" href="/assets/bottom-navigation.css">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"Article",
+"headline":"xG (expected goals): o guia completo — cálculo, leitura e pontos cegos",
+"description":"Como se calcula um xG, como lê-lo sem cometer erros, quantos jogos são precisos até que signifique alguma coisa e porque é que dois fornecedores dão dois xG diferentes para o mesmo remate.",
+"image":"https://iashark.com/assets/blog/xg-shot-map-hero.jpg",
+"datePublished":"2026-09-02","dateModified":"2026-09-02",
+"author":{"@type":"Organization","name":"IASHARK","url":"https://iashark.com"},
+"publisher":{"@type":"Organization","name":"IASHARK","url":"https://iashark.com","logo":{"@type":"ImageObject","url":"https://iashark.com/icon-512.png"}},
+"mainEntityOfPage":{"@type":"WebPage","@id":"https://iashark.com/pt/blog/guides/xg-expected-goals-guide-complet.html"},
+"inLanguage":"pt-PT"}
+</script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[
+{"@type":"ListItem","position":1,"name":"Início","item":"https://iashark.com/pt/"},
+{"@type":"ListItem","position":2,"name":"Blog","item":"https://iashark.com/pt/blog/"},
+{"@type":"ListItem","position":3,"name":"xG (expected goals): o guia completo"}]}
+</script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[
+{"@type":"Question","name":"O que significa xG no futebol?","acceptedAnswer":{"@type":"Answer","text":"xG significa expected goals, golos esperados. É a probabilidade de um determinado remate se transformar em golo, estimada a partir de milhares de remates comparáveis do passado. Um remate de 0,30 xG significa que remates feitos em condições semelhantes acabaram dentro da baliza cerca de 30 vezes em cada 100. O xG de uma equipa num jogo é a soma dos xG de todos os seus remates."}},
+{"@type":"Question","name":"Como é calculado o xG?","acceptedAnswer":{"@type":"Answer","text":"Um modelo estatístico, na maioria das vezes uma regressão logística ou um modelo de aprendizagem automática, é treinado com uma base de várias centenas de milhares de remates cujo desfecho é conhecido. Aprende a associar as características de um remate (distância, ângulo, parte do corpo, tipo de jogada, pressão defensiva) a uma probabilidade de golo. Cada novo remate passa depois por esse modelo, que devolve um valor entre 0 e 1."}},
+{"@type":"Question","name":"Quantos jogos são precisos para que o xG seja fiável?","acceptedAnswer":{"@type":"Answer","text":"O xG de um jogo isolado não diz quase nada: uma equipa soma 10 a 14 remates por jogo, o que é uma amostra minúscula. São precisos pelo menos uns dez jogos para que a tendência se destaque do ruído, e a prática corrente na análise é raciocinar sobre os últimos 10 a 20 jogos. Abaixo disso, basta um único remate de valor elevado para fazer oscilar a média."}},
+{"@type":"Question","name":"Porque é que dois sites dão xG diferentes para o mesmo jogo?","acceptedAnswer":{"@type":"Answer","text":"Porque não existe um xG, mas sim modelos de xG. Cada fornecedor treina o seu com os seus próprios dados e as suas próprias variáveis. Um modelo que conhece a posição dos defesas e do guarda-redes no momento do remate não dará o mesmo valor que um modelo que só conhece a distância e o ângulo. Diferenças de 0,2 a 0,4 xG no mesmo jogo são comuns."}},
+{"@type":"Question","name":"Uma equipa que supera o seu xG é forte ou tem sorte?","acceptedAnswer":{"@type":"Answer","text":"As duas hipóteses existem, e é preciso distanciamento para decidir. Em poucos jogos, o sobrerrendimento é quase sempre variância e tende a corrigir-se. Ao longo de uma época inteira e de forma repetida, pode refletir uma qualidade de finalização real que o modelo não capta. A regra prudente é tratar um sobrerrendimento de curta duração como ruído, e só ver nele uma competência depois de o fenómeno se repetir ao longo de várias épocas."}}]}
+</script>
+</head>
+<body>
+
+<div class="wrap">
+
+<header class="art-hero">
+  <nav class="crumb"><a href="/pt/">Início</a> › <a href="/pt/blog/">Blog</a> › xG expected goals</nav>
+  <span class="tag">Análise · Dados</span>
+  <h1>xG: o que a estatística diz realmente,<br>e <em>onde mente</em></h1>
+  <p class="chapo">Os expected goals tornaram-se a estatística mais citada do futebol moderno — e a mais mal utilizada. Eis como se constrói um xG, como lê-lo sem se iludir e os quatro pontos cegos que quase ninguém menciona.</p>
+  <div class="meta">
+    <span>Publicado a 2 de setembro de 2026</span>
+    <span>·</span>
+    <span>9 min de leitura</span>
+    <span>·</span>
+    <span>Nível: intermédio</span>
+  </div>
+  <figure class="cover">
+    <img src="/assets/blog/xg-shot-map-hero.jpg" width="1344" height="768" alt="Vista tática de um campo de futebol em estrutura de arame azul-noite, salpicado de pontos luminosos ciano de diferentes tamanhos que representam remates e o respetivo valor xG" fetchpriority="high">
+    <figcaption>Cada remate de um jogo torna-se um ponto, e cada ponto tem associada uma probabilidade de golo. Um xG não é mais do que isto.</figcaption>
+  </figure>
+</header>
+
+<nav class="toc" aria-label="Índice">
+  <h2>Neste guia</h2>
+  <ol>
+    <li><a href="#definition">O xG numa frase (e só numa)</a></li>
+    <li><a href="#calcul">Como é realmente calculado um xG</a></li>
+    <li><a href="#lecture">A armadilha n.º 1: xG por remate versus xG acumulado</a></li>
+    <li><a href="#echantillon">Quantos jogos até se poder confiar?</a></li>
+    <li><a href="#fournisseurs">Porque é que dois sites não dão o mesmo xG</a></li>
+    <li><a href="#surperformance">Sobrerrendimento: talento ou sorte?</a></li>
+    <li><a href="#usages">Três utilizações sólidas, duas a evitar</a></li>
+    <li><a href="#faq">Perguntas frequentes</a></li>
+  </ol>
+</nav>
+
+<main class="body">
+
+<h2 id="definition">1. O xG numa frase <em>(e só numa)</em></h2>
+
+<p><strong>O xG de um remate é a probabilidade de esse remate acabar dentro da baliza, estimada a partir de milhares de remates comparáveis do passado.</strong> Um remate avaliado em 0,30 xG quer dizer que remates feitos em condições semelhantes foram convertidos cerca de 30 vezes em cada 100.</p>
+
+<p>O xG de uma equipa num jogo é simplesmente a soma dos xG de todos os seus remates. Uma equipa com 1,8 xG criou, no conjunto das suas oportunidades, o equivalente a «1,8 golos médios». Pode muito bem ter marcado 4, ou 0.</p>
+
+<div class="box">
+  <div class="box-t">O que o xG não é</div>
+  <p><strong>Não</strong> é uma nota de desempenho, <strong>não</strong> é uma previsão do resultado e <strong>não</strong> é um juízo sobre a qualidade de um jogador. É uma medida da <em>quantidade e da qualidade das oportunidades criadas</em>. Nada mais, nada menos.</p>
+</div>
+
+<figure class="fig">
+  <svg viewBox="0 0 640 400" role="img" aria-labelledby="shotmap-title shotmap-desc">
+    <title id="shotmap-title">Mapa de remates: valor xG consoante a posição</title>
+    <desc id="shotmap-desc">Esquema de uma grande área que mostra seis posições de remate e a ordem de grandeza do xG associado a cada uma, de 0,02 para um remate de longe a 0,76 para um penálti.</desc>
+    <rect x="0" y="0" width="640" height="400" fill="#04121c"/>
+    <!-- grande área -->
+    <g stroke="#1d4a63" stroke-width="1.6" fill="none">
+      <rect x="150" y="30" width="340" height="200"/>
+      <rect x="250" y="30" width="140" height="76"/>
+      <line x1="60" y1="30" x2="580" y2="30"/>
+      <path d="M 224 230 A 92 92 0 0 0 416 230"/>
+    </g>
+    <rect x="272" y="22" width="96" height="9" fill="none" stroke="#16d6f4" stroke-width="2.4"/>
+    <circle cx="320" cy="160" r="2.6" fill="#1d4a63"/>
+    <!-- remates: raio proporcional à raiz quadrada do xG -->
+    <g font-family="'Space Mono',monospace" font-size="11.5">
+      <circle cx="320" cy="160" r="26" fill="#16d6f4" fill-opacity=".62" stroke="#16d6f4"/>
+      <text x="320" y="205" fill="#16d6f4" text-anchor="middle" font-weight="700">0,76</text>
+      <text x="320" y="222" fill="#58758e" text-anchor="middle" font-size="9.5">PENÁLTI</text>
+
+      <circle cx="320" cy="80" r="22" fill="#16d6f4" fill-opacity=".5" stroke="#16d6f4"/>
+      <text x="320" y="60" fill="#16d6f4" text-anchor="middle" font-weight="700">0,55</text>
+
+      <circle cx="238" cy="86" r="9" fill="#16d6f4" fill-opacity=".3" stroke="#16d6f4"/>
+      <text x="196" y="90" fill="#9baec0" text-anchor="middle" font-weight="700">0,08</text>
+      <text x="196" y="105" fill="#58758e" text-anchor="middle" font-size="9">ÂNGULO FECHADO</text>
+
+      <circle cx="196" cy="180" r="10" fill="#16d6f4" fill-opacity=".3" stroke="#16d6f4"/>
+      <text x="196" y="212" fill="#9baec0" text-anchor="middle" font-weight="700">0,09</text>
+
+      <circle cx="410" cy="196" r="8" fill="#16d6f4" fill-opacity=".28" stroke="#16d6f4"/>
+      <text x="410" y="226" fill="#9baec0" text-anchor="middle" font-weight="700">0,06</text>
+
+      <circle cx="320" cy="300" r="5" fill="#16d6f4" fill-opacity=".22" stroke="#16d6f4"/>
+      <text x="320" y="330" fill="#9baec0" text-anchor="middle" font-weight="700">0,02</text>
+      <text x="320" y="346" fill="#58758e" text-anchor="middle" font-size="9">REMATE DE LONGE</text>
+    </g>
+  </svg>
+  <figcaption>Ordens de grandeza típicas observadas nos modelos xG públicos. Os valores exatos variam de um fornecedor para outro — que é precisamente o tema da secção 5. O tamanho dos círculos é proporcional à raiz quadrada do xG.</figcaption>
+</figure>
+
+<h2 id="calcul">2. Como é <em>realmente</em> calculado um xG</h2>
+
+<p>Ao contrário do que se lê muitas vezes, não existe uma fórmula matemática do xG que se possa aplicar à mão. Um xG é o resultado de um <strong>modelo treinado</strong>, geralmente uma regressão logística ou um modelo de aprendizagem automática baseado em árvores.</p>
+
+<p>O princípio é simples. Reúne-se uma base de várias centenas de milhares de remates dos quais se conhecem três coisas: as características do remate, e se acabou dentro da baliza ou não. O modelo aprende a relacionar as características com o desfecho. Depois, apresenta-se-lhe um remate novo e ele devolve uma probabilidade.</p>
+
+<h3>As variáveis que realmente pesam</h3>
+
+<div class="tw">
+<table>
+  <thead><tr><th>Variável</th><th>Peso</th><th>Porquê</th></tr></thead>
+  <tbody>
+    <tr class="hi"><td>Distância à baliza</td><td class="num">Muito alto</td><td>O fator dominante: a probabilidade cai a pique a cada metro.</td></tr>
+    <tr class="hi"><td>Ângulo de remate</td><td class="num">Muito alto</td><td>Determina a largura de baliza visível. Um ângulo fechado anula a vantagem da proximidade.</td></tr>
+    <tr><td>Parte do corpo</td><td class="num">Alto</td><td>À mesma distância, um cabeceamento resulta em golo menos vezes do que um remate com o pé.</td></tr>
+    <tr><td>Tipo de jogada</td><td class="num">Alto</td><td>Contra-ataque, bola parada, ataque organizado: a defesa não está posicionada da mesma forma.</td></tr>
+    <tr><td>Passe anterior</td><td class="num">Médio</td><td>Um passe atrasado não cria a mesma situação que um cruzamento pelo ar.</td></tr>
+    <tr><td>Pressão defensiva</td><td class="num">Variável</td><td>Número e posição dos defesas. Só os modelos mais completos a integram.</td></tr>
+  </tbody>
+</table>
+</div>
+
+<div class="box warn">
+  <div class="box-t">O pormenor que muda tudo</div>
+  <p>A última linha é a que distingue os modelos. Um modelo que ignora a posição dos defesas vê um remate a 8 metros, em posição central, como uma grande oportunidade — <strong>mesmo que três defesas e o guarda-redes estejam na trajetória</strong>. É a principal origem das diferenças entre fornecedores.</p>
+</div>
+
+<h2 id="lecture">3. A armadilha n.º 1: xG <em>por remate</em> versus xG <em>acumulado</em></h2>
+
+<p>É o erro de leitura mais comum, e inverte literalmente a conclusão. Duas equipas podem apresentar o mesmo xG num jogo e ter produzido duas coisas opostas.</p>
+
+<div class="tw">
+<table>
+  <thead><tr><th></th><th>Equipa A</th><th>Equipa B</th></tr></thead>
+  <tbody>
+    <tr><td>xG do jogo</td><td class="num">1,60</td><td class="num">1,60</td></tr>
+    <tr><td>Número de remates</td><td class="num">4</td><td class="num">20</td></tr>
+    <tr class="hi"><td>xG médio por remate</td><td class="num">0,40</td><td class="num">0,08</td></tr>
+    <tr><td>Leitura</td><td>Poucas oportunidades, mas enormes</td><td>Muitos remates, todos medíocres</td></tr>
+  </tbody>
+</table>
+</div>
+
+<p>A equipa A conseguiu quatro verdadeiras situações de golo. A equipa B rematou vinte vezes de longe sem nunca entrar na zona de perigo. <strong>O total é idêntico, o desempenho ofensivo não tem nada a ver.</strong></p>
+
+<p>O hábito a ganhar: nunca ler um xG de jogo sem o dividir pelo número de remates. Só esta divisão já o coloca à frente de metade das análises que se leem online.</p>
+
+<h2 id="echantillon">4. Quantos jogos até se poder confiar?</h2>
+
+<p>É a pergunta que quase nenhum guia trata a sério, e no entanto é a que decide se a sua análise vale alguma coisa.</p>
+
+<p>Uma equipa remata em média entre dez e quinze vezes por jogo. Um xG de jogo assenta, portanto, numa amostra de uma dúzia de acontecimentos, a maioria dos quais vale menos de 0,10. <strong>Um único remate de 0,7 xG — um penálti, um frente a frente com o guarda-redes — equivale sozinho a sete ou oito remates de longe.</strong> Por outras palavras: o xG de um jogo isolado é dominado por um ou dois acontecimentos.</p>
+
+<div class="keyfig">
+  <div><b>1</b><span>jogo: caso isolado</span></div>
+  <div><b>5</b><span>jogos: ainda muito ruído</span></div>
+  <div><b>10-20</b><span>jogos: tendência aproveitável</span></div>
+</div>
+
+<p>A consequência prática é clara. Num jogo, o xG serve para <em>contar o que aconteceu</em> — «dominaram, mas não concretizaram». Não serve para prever o que quer que seja. Para estimar a verdadeira força de uma equipa, é precisa uma janela móvel de dez a vinte jogos recentes.</p>
+
+<div class="box warn">
+  <div class="box-t">O compromisso impossível</div>
+  <p>Alargar a janela reduz o ruído, mas faz entrar jogos que já não descrevem a equipa atual: transferências, mudança de treinador, lesões. Não existe um número perfeito. Escolher uma janela é arbitrar entre <strong>demasiado ruído</strong> e <strong>demasiado passado</strong>.</p>
+</div>
+
+<h2 id="fournisseurs">5. Porque é que dois sites não dão o mesmo xG</h2>
+
+<p>Não existe <em>um</em> xG. Existem modelos de xG, e cada um tem o seu: Opta, StatsBomb, Understat, sem contar com os modelos próprios dos clubes e dos sites de análise. São treinados com bases diferentes e com variáveis diferentes.</p>
+
+<p>Resultado: para o mesmo jogo, diferenças de <strong>0,2 a 0,4 xG</strong> entre dois fornecedores são normais. Num jogo em que tudo se decide por 0,3 xG, duas fontes honestas podem, portanto, sustentar duas conclusões opostas.</p>
+
+<h3>O que retirar daqui</h3>
+<ul>
+  <li><strong>Nunca compare dois xG provenientes de fontes diferentes.</strong> É como comparar temperaturas em Celsius e em Fahrenheit sem conversão.</li>
+  <li><strong>Escolha uma fonte e mantenha-se fiel a ela.</strong> A coerência interna conta mais do que a «exatidão» absoluta.</li>
+  <li><strong>Desconfie das diferenças inferiores a 0,3 xG.</strong> Estão muitas vezes dentro da margem de desacordo entre modelos.</li>
+</ul>
+
+<h2 id="surperformance">6. Sobrerrendimento: talento ou sorte?</h2>
+
+<p>Uma equipa marca 22 golos para 15 xG. Há duas explicações em confronto, e ambas são plausíveis:</p>
+
+<ul>
+  <li><strong>A sorte.</strong> Converteu acima da média, e isso vai corrigir-se. É, de longe, a explicação mais frequente num número reduzido de jogos.</li>
+  <li><strong>A competência.</strong> Tem finalizadores que o modelo não consegue ver, porque não conhece a identidade de quem remata.</li>
+</ul>
+
+<p>A forma de decidir é uma questão de duração e de repetição. Em dez jogos, um sobrerrendimento é quase sempre ruído. Ao longo de três épocas consecutivas e com o mesmo setor ofensivo, começa a parecer uma característica real.</p>
+
+<div class="box stop">
+  <div class="box-t">O erro que sai caro</div>
+  <p>Apostar sistematicamente contra uma equipa «que supera o seu xG», partindo do princípio de que vai regredir <strong>logo no jogo seguinte</strong>. A regressão à média é um fenómeno de longo prazo: não diz nada sobre o jogo de sábado e não lhe dá nenhuma data.</p>
+</div>
+
+<h2 id="usages">7. Três utilizações sólidas, duas a evitar</h2>
+
+<h3>O que funciona</h3>
+<ul>
+  <li><strong>Corrigir uma classificação enganadora.</strong> Uma equipa em 6.º lugar na classificação, mas em 2.º no xG acumulado, foi provavelmente mais sólida do que os seus resultados indicam.</li>
+  <li><strong>Detetar uma mudança de dinâmica.</strong> Um xG sofrido que sobe durante cinco jogos assinala um problema defensivo antes de os golos chegarem.</li>
+  <li><strong>Alimentar uma estimativa do número de golos.</strong> O xG criado e o xG sofrido são bons pontos de partida para estimar quantos golos um jogo deveria produzir — é exatamente o ponto de partida do <a href="/pt/blog/guides/plus-de-2-5-buts-probabilite-methode-poisson.html">método de cálculo de mais/menos de 2,5 golos</a>.</li>
+</ul>
+
+<h3>O que não funciona</h3>
+<ul>
+  <li><strong>Avaliar um guarda-redes apenas com o xG.</strong> O xG mede a qualidade da oportunidade, não a defesa. A estatística adequada é o xG pós-remate (PSxG), que tem em conta a trajetória da bola depois do remate.</li>
+  <li><strong>Tirar conclusões de um único jogo.</strong> Ver a secção 4: a amostra é demasiado pequena, ponto final.</li>
+</ul>
+
+<div class="related">
+  <a href="/pt/blog/guides/value-bet-guide-complet-2026.html"><span>Continuação lógica</span><b>Value bet: comparar uma probabilidade com uma odd sem se enganar</b></a>
+  <a href="/pt/blog/guides/prediction-ia-football-guide-2026.html"><span>Leia também</span><b>Previsão de futebol com IA: compreender os modelos e os seus limites</b></a>
+</div>
+
+<h2 id="faq">8. Perguntas frequentes</h2>
+
+<div class="faq">
+  <details><summary>O que significa xG no futebol?</summary><p>xG significa <em>expected goals</em>, golos esperados. É a probabilidade de um determinado remate se transformar em golo, estimada a partir de milhares de remates comparáveis do passado. Um remate de 0,30 xG significa que remates feitos em condições semelhantes acabaram dentro da baliza cerca de 30 vezes em cada 100. O xG de uma equipa num jogo é a soma dos xG de todos os seus remates.</p></details>
+  <details><summary>Como é calculado o xG?</summary><p>Um modelo estatístico — regressão logística ou aprendizagem automática — é treinado com uma base de várias centenas de milhares de remates cujo desfecho é conhecido. Aprende a associar as características de um remate (distância, ângulo, parte do corpo, tipo de jogada, pressão defensiva) a uma probabilidade de golo. Cada novo remate passa depois por esse modelo, que devolve um valor entre 0 e 1. Não existe uma fórmula que se possa aplicar à mão.</p></details>
+  <details><summary>Quantos jogos são precisos para que o xG seja fiável?</summary><p>O xG de um jogo isolado não diz quase nada: uma equipa soma 10 a 14 remates por jogo, o que é uma amostra minúscula dominada por um ou dois grandes acontecimentos. São precisos pelo menos uns dez jogos para que a tendência se destaque do ruído, e a prática corrente é raciocinar sobre 10 a 20 jogos recentes.</p></details>
+  <details><summary>Porque é que dois sites dão xG diferentes para o mesmo jogo?</summary><p>Porque não existe um xG, mas sim modelos de xG. Cada fornecedor treina o seu com os seus próprios dados e as suas próprias variáveis. Um modelo que conhece a posição dos defesas e do guarda-redes no momento do remate não dará o mesmo valor que um modelo que só conhece a distância e o ângulo. Diferenças de 0,2 a 0,4 xG no mesmo jogo são comuns.</p></details>
+  <details><summary>Uma equipa que supera o seu xG é forte ou tem sorte?</summary><p>As duas hipóteses existem, e é preciso distanciamento para decidir. Em poucos jogos, o sobrerrendimento é quase sempre variância e tende a corrigir-se. Ao longo de uma época inteira e de forma repetida, pode refletir uma qualidade de finalização real que o modelo não capta, porque ignora a identidade de quem remata.</p></details>
+</div>
+
+<div class="cta">
+  <h2>Os xG aplicados aos jogos do dia</h2>
+  <p>Todas as manhãs, a IASHARK calcula probabilidades a partir de dados reais — incluindo os xG criados e sofridos — e explica o raciocínio jogo a jogo. O jogo do dia é gratuito, sempre.</p>
+  <a class="btn" href="/pt/">Ver as análises do dia →</a>
+</div>
+
+</main>
+
+<footer class="art-foot">
+  <p>IASHARK — análises estatísticas de futebol. As probabilidades publicadas são indicativas e não garantem qualquer resultado. As apostas desportivas comportam um risco de perda financeira e de dependência: nunca aposte mais do que pode permitir-se perder. Proibido a menores de 18 anos. Precisa de ajuda? Consulte a nossa página de <a href="/pt/jeu-responsable.html">jogo responsável</a>.</p>
+  <p><a href="/pt/mentions-legales.html">Aviso Legal</a> · <a href="/pt/cgv.html">Termos</a> · <a href="/pt/confidentialite.html">Privacidade</a> · <a href="/pt/cookies.html">Cookies</a> · <a href="/pt/jeu-responsable.html">Jogo responsável</a></p>
+</footer>
+
+</div>
+
+<script src="/site-header.js"></script>
+<script src="/site-prefs.js"></script>
+<script src="/bottom-navigation.js"></script>
+</body>
+</html>

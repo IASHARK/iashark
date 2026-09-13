@@ -1404,12 +1404,14 @@ jobs:
           function escHtml(s){
             return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
           }
+          // Pages /match/<id>.html : UNE seule page par match pour toutes les
+          // langues et tous les marches (aucune variante /en/match/...). Leur
+          // texte statique est donc neutre (equipes, competition, date, sigles
+          // 1X2/xG/BTTS) ; le texte d'interface y porte data-i18n /
+          // data-market-label et match-page.js le redige dans la langue du
+          // visiteur au chargement.
           function seoTitleFor(m){
-            // Raccourci (etait "Pronostic & Analyse IA", souvent >70
-            // caracteres et tronque dans les resultats Google au-dela de
-            // ~60) - garde le mot-cle "Pronostic" seul, retire "Analyse IA"
-            // redondant avec le nom du site.
-            return m.home.n+' vs '+m.away.n+' — Pronostic IA | IASHARK';
+            return m.home.n+' vs '+m.away.n+(m.league?' · '+m.league:'')+' | IASHARK';
           }
           function seoImageFor(m){
             // Vrai blason de l'equipe a domicile (media.api-sports.io,
@@ -1420,8 +1422,7 @@ jobs:
           function seoDescriptionFor(m){
             var d=(m.date||'').split(' ')[0];
             var comp=m.league||'';
-            var pari=(m.pari_rec&&!m.no_signal)?(' Notre modele recommande : '+m.pari_rec+'.'):'';
-            return 'Analyse IA du match '+m.home.n+' vs '+m.away.n+(comp?' ('+comp+')':'')+(d?' le '+d:'')+'.'+pari+' Probabilites, statistiques et niveau de confiance sur IASHARK.';
+            return m.home.n+' vs '+m.away.n+(comp?' · '+comp:'')+(d?' · '+d:'')+' · 1X2 · xG · BTTS · IASHARK';
           }
           function seoJsonLdFor(m){
             var iso=null;
@@ -1442,12 +1443,12 @@ jobs:
           function seoSummaryHtmlFor(m){
             var d=(m.date||'').split(' ')[0];
             var modelAvailable=m.model_output_available!==false&&Number(m.data_quality_score||0)>0;
-            var pariTxt=(modelAvailable&&m.pari_rec&&!m.no_signal)?('<p>Marché recommandé par le modèle : <strong>'+escHtml(m.pari_rec)+'</strong> (confiance '+escHtml(String(m.conf||''))+'/10).</p>'):'';
+            var pariTxt=(modelAvailable&&m.pari_rec&&!m.no_signal)?('<p><span data-i18n="match_page.seo_recommended_market">Marché recommandé par le modèle :</span> <strong data-market-label="'+escHtml(m.pari_rec)+'" data-home="'+escHtml(m.home.n)+'" data-away="'+escHtml(m.away.n)+'">'+escHtml(seoMarketLabel(m,'fr'))+'</strong> ('+escHtml(String(m.conf||''))+'/10)</p>'):'';
             return '<div style="padding:24px 16px;font-family:\'DM Sans\',sans-serif;color:#94a3b8;font-size:13px;line-height:1.6">'
               +'<h1 style="font-family:\'Bebas Neue\',sans-serif;font-size:22px;letter-spacing:.5px;color:#e2e8f0;margin-bottom:8px">'+escHtml(m.home.n)+' vs '+escHtml(m.away.n)+'</h1>'
               +'<p>'+(m.league?escHtml(m.league)+' — ':'')+escHtml(d)+'</p>'
               +pariTxt
-              +(modelAvailable?'<p>Analyse statistique IASHARK disponible pour ce match.</p>':'<p>Les données disponibles ne permettent pas encore de publier une analyse chiffrée fiable.</p>')
+              +(modelAvailable?'<p data-i18n="match_page.seo_analysis_available">Analyse statistique IASHARK disponible pour ce match.</p>':'<p data-i18n="match_page.model_unavailable_reason">Les données disponibles ne permettent pas encore une analyse chiffrée fiable.</p>')
               +'</div>';
           }
           function generateMatchPages(matchsData){
@@ -1494,44 +1495,82 @@ jobs:
             }catch(e){}
             console.log('  Match pages: '+Object.keys(keepFiles).length+' generees, '+((fs.readdirSync('match')||[]).length)+' au total dans /match');
           }
-          function seoHomeSummaryHtml(matchsData){
+          // i18n du SEO statique. Dictionnaires i18n/dict/<locale>.json et
+          // lib/market-labels.js lus a la demande (caches sur la fonction),
+          // sans dependre de l'ordre d'execution du script.
+          function seoDict(loc){
+            seoDict.cache=seoDict.cache||{};
+            if(!Object.prototype.hasOwnProperty.call(seoDict.cache,loc)){
+              try{ seoDict.cache[loc]=JSON.parse(fs.readFileSync('i18n/dict/'+loc+'.json','utf8')); }catch(e){ seoDict.cache[loc]=null; }
+            }
+            return seoDict.cache[loc];
+          }
+          function seoText(loc,key,fallback){
+            var d=seoDict(loc);
+            var v=d?key.split('.').reduce(function(o,k){return o==null?o:o[k];},d):null;
+            return (typeof v==='string'&&v)?v:fallback;
+          }
+          function seoMarketLabel(m,loc){
+            if(seoMarketLabel.lib===undefined){
+              try{ seoMarketLabel.lib=require('./lib/market-labels.js'); }catch(e){ seoMarketLabel.lib=null; console.log('  market-labels indisponible pour le SEO:',e.message); }
+            }
+            var lib=seoMarketLabel.lib;
+            if(!lib||!lib.marketLabel) return m.pari_rec;
+            return lib.marketLabel(m.pari_rec,{home:m.home.n,away:m.away.n},{locale:loc,dict:seoDict(loc)});
+          }
+          // Resume SEO de l'accueil, redige dans la langue du repertoire
+          // cible. Chaque libelle porte aussi data-i18n / data-market-label :
+          // si un repertoire est regenere depuis la racine (FR) avant le
+          // prochain passage du pipeline, il est retraduit au chargement.
+          function seoHomeSummaryHtml(matchsData,loc){
+            loc=loc||'fr';
             var todays=(matchsData||[]).filter(function(m){return (m.date||'').split(' ')[0]===TODAY;});
             if(!todays.length) return '';
+            var confiance='<span data-i18n="home_app.seo_confidence">'+escHtml(seoText(loc,'home_app.seo_confidence','confiance'))+'</span>';
             var items=todays.map(function(m){
               var heure=(m.date||'').split(' ')[1]||'';
               // Le pari n'est nomme que pour l'analyse offerte du jour. Le
               // nommer pour tous les matchs revenait a publier le produit en
               // clair dans le HTML de la page d'accueil, indexe par Google.
               var pari=(m.is_free&&m.pari_rec&&!m.no_signal)
-                ?(' — Pronostic IA : '+escHtml(m.pari_rec)+' (confiance '+escHtml(String(m.conf||''))+'/10)')
-                :((m.conf!=null&&!m.no_signal)?(' — confiance '+escHtml(String(m.conf))+'/10'):'');
+                ?(' — <span data-i18n="home_app.seo_ai_pick">'+escHtml(seoText(loc,'home_app.seo_ai_pick','Pronostic IA :'))+'</span> <span data-market-label="'+escHtml(m.pari_rec)+'" data-home="'+escHtml(m.home.n)+'" data-away="'+escHtml(m.away.n)+'">'+escHtml(seoMarketLabel(m,loc))+'</span> ('+confiance+' '+escHtml(String(m.conf||''))+'/10)')
+                :((m.conf!=null&&!m.no_signal)?(' — '+confiance+' '+escHtml(String(m.conf))+'/10'):'');
               return '<li>'+escHtml(heure)+' — <strong>'+escHtml(m.home.n)+' vs '+escHtml(m.away.n)+'</strong>'+(m.league?' ('+escHtml(m.league)+')':'')+pari+'</li>';
             }).join('');
-            return '<div style="padding:4px 0 12px"><h2 style="font-family:\'Bebas Neue\',sans-serif;font-size:20px;color:#e2e8f0;margin-bottom:10px">Analyses IA du jour — '+escHtml(TODAY)+'</h2><ul style="list-style:none;padding:0;margin:0;color:#94a3b8;font-size:12.5px;line-height:1.8">'+items+'</ul></div>';
+            return '<div style="padding:4px 0 12px"><h2 style="font-family:\'Bebas Neue\',sans-serif;font-size:20px;color:#e2e8f0;margin-bottom:10px"><span data-i18n="home_app.seo_summary_title">'+escHtml(seoText(loc,'home_app.seo_summary_title','Analyses IA du jour'))+'</span> — '+escHtml(TODAY)+'</h2><ul style="list-style:none;padding:0;margin:0;color:#94a3b8;font-size:12.5px;line-height:1.8">'+items+'</ul></div>';
           }
+          // Repertoire du site -> dictionnaire (marches gb/za -> en, mx -> es-mx).
+          // Seuls les index.html presents ET porteurs du marqueur sont ecrits.
+          var SEO_HOME_DIRS={'':'fr',fr:'fr',en:'en',es:'es',de:'de',it:'it',pt:'pt',gb:'en',mx:'es-mx',za:'en'};
           function injectHomeSeoSummary(matchsData){
-            try{
-              var idxPath='index.html';
-              var tpl=fs.readFileSync(idxPath,'utf8');
-              var summary=seoHomeSummaryHtml(matchsData);
-              var replaced=tpl.replace(/<!--SEO_MATCHES_SUMMARY-->[\s\S]*?<!--\/SEO_MATCHES_SUMMARY-->/, '<!--SEO_MATCHES_SUMMARY-->'+summary+'<!--/SEO_MATCHES_SUMMARY-->');
-              fs.writeFileSync(idxPath, replaced);
-              console.log('  Home SEO summary injectee ('+(todaysCountSafe(matchsData))+' matchs du jour)');
-            }catch(e){console.log('  Erreur injection home SEO:',e.message);}
+            Object.keys(SEO_HOME_DIRS).forEach(function(dir){
+              var idxPath=dir?dir+'/index.html':'index.html';
+              try{
+                if(!fs.existsSync(idxPath)) return;
+                var tpl=fs.readFileSync(idxPath,'utf8');
+                if(tpl.indexOf('<!--SEO_MATCHES_SUMMARY-->')===-1) return;
+                var summary=seoHomeSummaryHtml(matchsData,SEO_HOME_DIRS[dir]);
+                // Remplacement par fonction : un "$" dans un nom d'equipe ne
+                // doit jamais etre interprete comme motif de remplacement.
+                var replaced=tpl.replace(/<!--SEO_MATCHES_SUMMARY-->[\s\S]*?<!--\/SEO_MATCHES_SUMMARY-->/, function(){ return '<!--SEO_MATCHES_SUMMARY-->'+summary+'<!--/SEO_MATCHES_SUMMARY-->'; });
+                if(replaced!==tpl) fs.writeFileSync(idxPath, replaced);
+              }catch(e){console.log('  Erreur injection home SEO ('+idxPath+'):',e.message);}
+            });
+            console.log('  Home SEO summary injectee ('+(todaysCountSafe(matchsData))+' matchs du jour)');
           }
           function todaysCountSafe(matchsData){
             return (matchsData||[]).filter(function(m){return (m.date||'').split(' ')[0]===TODAY;}).length;
           }
           var STATIC_SITEMAP_PAGES=[
-            {loc:'https://iashark.com/',priority:'1.0'},
+            {loc:'https://iashark.com/fr/',priority:'1.0'},
             // historique.html retiree du sitemap sur demande explicite (2026-08-30) :
             // la page reste en ligne (donnees Supabase intactes) mais n'est plus
             // promue publiquement tant que le moteur V2 n'a pas accumule assez de
             // donnees reelles - voir IASHARK_V2_RECETTE_VISUELLE.md.
-            {loc:'https://iashark.com/pro.html',priority:'0.8'},
-            {loc:'https://iashark.com/a-propos.html',priority:'0.6'},
+            {loc:'https://iashark.com/fr/pro.html',priority:'0.8'},
+            {loc:'https://iashark.com/fr/a-propos.html',priority:'0.6'},
             // Page d'exemple d'analyse : vitrine publique, indexable, sans compte.
-            {loc:'https://iashark.com/exemple-analyse.html',priority:'0.7'},
+            {loc:'https://iashark.com/fr/exemple-analyse.html',priority:'0.7'},
             {loc:'https://iashark.com/blog/',priority:'0.6'},
             // Le hub editorial lui-meme. Il manquait au sitemap alors que
             // c'est la cible canonique de /blog/guides/ : la page la plus
@@ -3168,11 +3207,22 @@ jobs:
         run: |
           set -euo pipefail
           OUTPUTS="data.json historique.json transferts.json actus.json sitemap.xml match index.html league-coverage-report.json"
+          # index.html des repertoires de langue/marche : seul leur bloc
+          # SEO_MATCHES_SUMMARY est reecrit (injectHomeSeoSummary, dans la
+          # langue du repertoire). Volontairement HORS de OUTPUTS : la
+          # sauvegarde/restauration ci-dessous copie a plat (cp -R "$f" "$SAVE/"),
+          # ce qui ecraserait index.html racine. En cas de rattrapage apres
+          # reset, la version distante de ces fichiers est conservee (le
+          # resume est alors retraduit au chargement via data-i18n).
+          DIR_INDEXES=""
+          for d in fr en es de it pt gb mx za; do
+            [ -f "$d/index.html" ] && DIR_INDEXES="$DIR_INDEXES $d/index.html"
+          done
 
           git config user.name "IASHARK"
           git config user.email "yaramode81@gmail.com"
 
-          git add $OUTPUTS sitemap-*.xml
+          git add $OUTPUTS $DIR_INDEXES sitemap-*.xml
           if git diff --staged --quiet; then
             echo "Aucun changement a publier."
             exit 0
@@ -3185,7 +3235,7 @@ jobs:
           cp sitemap-*.xml "$SAVE/" 2>/dev/null || true
 
           for attempt in 1 2 3 4 5; do
-            git add $OUTPUTS sitemap-*.xml
+            git add $OUTPUTS $DIR_INDEXES sitemap-*.xml
             git diff --staged --quiet || git commit -m "Daily update - $(date +%Y-%m-%d)"
 
             if git push; then

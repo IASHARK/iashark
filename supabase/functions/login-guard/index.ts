@@ -17,7 +17,40 @@ const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-iashark-locale",
+};
+
+// Langue des messages renvoyes a l'utilisateur. Priorite : champ `locale`
+// (ou `dir` de la page : fr/en/es/de/it/pt/gb/mx/za) du corps, en-tete
+// x-iashark-locale, puis Accept-Language du navigateur ; francais par defaut.
+// Les codes `error`/`code` restent stables pour les clients qui traduisent
+// eux-memes.
+const MSG_LOCALES = ["fr", "en", "es", "es-mx", "de", "it", "pt"];
+const DIR_LOCALE: Record<string, string> = { gb: "en", za: "en", mx: "es-mx" };
+function normLocale(value: unknown): string {
+  const s = String(value || "").trim().toLowerCase().replace("_", "-");
+  if (!s) return "";
+  if (DIR_LOCALE[s]) return DIR_LOCALE[s];
+  if (s.startsWith("es-mx")) return "es-mx";
+  if (MSG_LOCALES.includes(s)) return s;
+  const base = s.split("-")[0];
+  return MSG_LOCALES.includes(base) ? base : "";
+}
+function pickLocale(req: Request, hint?: unknown): string {
+  const direct = normLocale(hint) || normLocale(req.headers.get("x-iashark-locale"));
+  if (direct) return direct;
+  for (const part of (req.headers.get("accept-language") || "").split(",")) {
+    const l = normLocale(part.split(";")[0]);
+    if (l) return l;
+  }
+  return "fr";
+}
+function msg(table: Record<string, Record<string, string>>, key: string, locale: string): string {
+  const row = table[key];
+  return (row && (row[locale] || row[locale.split("-")[0]] || row.fr)) || key;
+}
+const MESSAGES: Record<string, Record<string, string>> = {
+  rate_limited: { fr: "Trop de tentatives. Réessaie dans quelques minutes.", en: "Too many attempts. Try again in a few minutes.", es: "Demasiados intentos. Vuelve a intentarlo en unos minutos.", "es-mx": "Demasiados intentos. Vuelve a intentarlo en unos minutos.", de: "Zu viele Versuche. Versuche es in ein paar Minuten erneut.", it: "Troppi tentativi. Riprova tra qualche minuto.", pt: "Demasiadas tentativas. Tenta novamente dentro de alguns minutos." },
 };
 
 const LIMIT = 10; // tentatives
@@ -34,7 +67,7 @@ Deno.serve(async (req: Request) => {
     });
   }
 
-  let body: { email?: string; password?: string };
+  let body: { email?: string; password?: string; locale?: string; dir?: string };
   try {
     body = await req.json();
   } catch {
@@ -67,7 +100,7 @@ Deno.serve(async (req: Request) => {
     // plutot que de bloquer tout le monde si la table a un probleme.
   } else if (ipOk.data === false || emailOk.data === false) {
     return new Response(
-      JSON.stringify({ error: "rate_limited", message: "Trop de tentatives. Réessaie dans quelques minutes." }),
+      JSON.stringify({ error: "rate_limited", message: msg(MESSAGES, "rate_limited", pickLocale(req, body.locale || body.dir)) }),
       { status: 429, headers: { ...CORS_HEADERS, "Content-Type": "application/json" } },
     );
   }

@@ -103,9 +103,11 @@ Deno.serve(async (req: Request) => {
   // champ "market" se comporte exactement comme avant, flux FR sur
   // STRIPE_PRICE_ID). Body JSON invalide/absent = simplement pas de market.
   let requestedMarket: unknown = undefined;
+  let requestedDir: unknown = undefined;
   try {
     const body = await req.clone().json();
     requestedMarket = body?.market;
+    requestedDir = body?.dir;
   } catch (_e) {
     // pas de corps JSON - comportement par defaut (marche FR).
   }
@@ -145,18 +147,24 @@ Deno.serve(async (req: Request) => {
 
   try {
     const stripe = new Stripe(STRIPE_SECRET_KEY, { apiVersion: "2024-06-20" });
-    // checkout-succes.html/checkout-annule.html n'existent pour l'instant
-    // qu'a la racine (pas encore localisees dans les 6 langues, contenu
-    // utilitaire non indexe) - jamais construire une URL /xx/checkout-...
-    // qui n'existerait pas (meme classe de bug que les liens legaux 404
-    // corriges plus tot ce chantier).
+    // Retour apres paiement dans le repertoire du visiteur (/gb/, /mx/, /en/...) :
+    // checkout-succes.html et checkout-annule.html sont generes dans chaque
+    // repertoire par scripts/build-locales.js. Liste blanche stricte (jamais une
+    // valeur libre du navigateur dans une URL de redirection) ; sinon repli sur
+    // le repertoire du marche, puis sur la racine historique.
+    const ALLOWED_DIRS = ["fr", "en", "es", "de", "it", "pt", "gb", "za", "mx"];
+    const dirKey = typeof requestedDir === "string" ? requestedDir.toLowerCase() : "";
+    const returnDir = ALLOWED_DIRS.includes(dirKey)
+      ? dirKey
+      : (usedMarket !== "fr" && ALLOWED_DIRS.includes(usedMarket) ? usedMarket : "");
+    const returnBase = SITE_URL + (returnDir ? "/" + returnDir : "");
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",
       line_items: [{ price: STRIPE_PRICE_ID_RESOLVED, quantity: 1 }],
       client_reference_id: user.id,
       customer_email: user.email,
-      success_url: SITE_URL + "/checkout-succes.html?session_id={CHECKOUT_SESSION_ID}",
-      cancel_url: SITE_URL + "/checkout-annule.html",
+      success_url: returnBase + "/checkout-succes.html?session_id={CHECKOUT_SESSION_ID}",
+      cancel_url: returnBase + "/checkout-annule.html",
       metadata: { market: usedMarket },
     });
     return new Response(JSON.stringify({ ok: true, processed: true, url: session.url }), {

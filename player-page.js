@@ -38,6 +38,9 @@
   // toujours le libelle francais d'origine, jamais une erreur.
   function t(key, fallback) { return (window.I18N && window.I18N.t) ? window.I18N.t(key, fallback) : fallback; }
   function localeTag() { return (window.I18N && window.I18N.localeTag) ? window.I18N.localeTag() : 'fr-FR'; }
+  function estFr() { return !(window.I18N && window.I18N.locale) || window.I18N.locale === 'fr'; }
+  // Lien interne dans le repertoire de langue/marche courant (/gb/, /mx/...).
+  function lien(p) { return (window.I18N && window.I18N.href) ? window.I18N.href(p) : '/' + p; }
   function esc(v) {
     return String(v == null ? '' : v).replace(/[&<>"']/g, function (c) {
       return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
@@ -105,7 +108,7 @@
       : '<div aria-hidden="true" class="flex h-24 w-24 shrink-0 items-center justify-center rounded-2xl border border-hairline bg-panel text-[26px] font-bold text-cyan sm:h-28 sm:w-28">' + esc(initiales(joueur.name)) + '</div>';
 
     return '<div class="pt-6">'
-      + '<a href="/match.html?id=' + esc(matchId) + '" class="inline-flex items-center gap-2 text-[13px] text-soft transition hover:text-ink">'
+      + '<a href="' + esc(lien('match.html?id=' + encodeURIComponent(matchId))) + '" class="inline-flex items-center gap-2 text-[13px] text-soft transition hover:text-ink">'
       + '<span aria-hidden="true">←</span>' + esc(vm.identity.home.name) + ' — ' + esc(vm.identity.away.name) + '</a>'
       + '<div class="mt-5 flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">'
       + '<div class="flex items-center gap-4 sm:gap-5">' + photo
@@ -143,7 +146,11 @@
     var r = 52, c = 2 * Math.PI * r, borne = Math.max(0, Math.min(100, score));
     return '<div class="shrink-0 lg:pl-8">'
       + '<div class="flex items-center gap-5 rounded-2xl border border-hairline bg-panel px-5 py-4 lg:flex-col lg:gap-3 lg:px-7 lg:py-6">'
-      + '<div class="relative h-[104px] w-[104px] shrink-0" role="img" aria-label="' + esc(t('player_page.aria_goal_threat_score', 'Score de menace de but : {n} sur 100').replace('{n}', score)) + '">'
+      + '<div class="relative h-[104px] w-[104px] shrink-0" '
+      + (estFr()
+        ? 'role="img" aria-label="Score de menace de but : ' + score + ' sur 100"'
+        : 'role="img" aria-label="' + esc(t('player_page.aria_goal_threat_score', 'Score de menace de but : {n} sur 100').replace('{n}', score)) + '"')
+      + '>'
       + '<svg viewBox="0 0 120 120" class="anneau h-full w-full" aria-hidden="true">'
       + '<circle class="piste" cx="60" cy="60" r="' + r + '" fill="none" stroke-width="9"></circle>'
       + '<circle class="trace" cx="60" cy="60" r="' + r + '" fill="none" stroke-width="9"'
@@ -293,7 +300,8 @@
           + '<span class="min-w-0"><b class="block text-[13.5px] font-semibold">' + esc(f[0]) + '</b>'
           + '<span class="mt-0.5 block text-[13.5px] leading-relaxed text-soft">' + esc(f[1]) + '</span></span></li>';
       }).join('') + '</ol>'
-      + (ts && ts.analyse ? '<p class="mt-5 border-t border-hairline pt-4 text-[14px] leading-[1.7] text-soft">' + esc(ts.analyse) + '</p>' : ''));
+      // ts.analyse : texte LLM du pipeline, francais uniquement -> FR seulement.
+      + (ts && ts.analyse && estFr() ? '<p class="mt-5 border-t border-hairline pt-4 text-[14px] leading-[1.7] text-soft">' + esc(ts.analyse) + '</p>' : ''));
   }
 
   /* ---------- 6. Forme recente ---------- */
@@ -481,7 +489,7 @@
       ? Math.round(joueur.minutesRecent / joueur.appearances) : null;
     var gabaritTitularisations = t('player_page.lineups_of_appearances', '{lineups} sur {appearances} apparitions');
     var lignes = [
-      [t('player_page.label_avg_minutes_per_match', 'Minutes moyennes par match joué'), moyenne === null ? null : fmt(moyenne, 0) + ' min'],
+      [t('player_page.label_avg_minutes_per_match', 'Minutes moyennes par match joué'), moyenne === null ? null : fmt(moyenne, 0) + ' ' + esc(t('player_page.unit_minutes_short', 'min'))],
       [t('player_page.stat_lineups', 'Titularisations'), s && n(s.lineups) !== null ? gabaritTitularisations.replace('{lineups}', fmt(s.lineups, 0)).replace('{appearances}', fmt(s.appearances, 0))
         : (n(joueur.starts) !== null ? gabaritTitularisations.replace('{lineups}', fmt(joueur.starts, 0)).replace('{appearances}', fmt(joueur.appearances, 0)) : null)]
     ];
@@ -532,7 +540,7 @@
     if (!autres.length) return '';
     return bloc(titre(t('player_page.other_player_title', 'Autre joueur à surveiller'))
       + '<div class="mt-3 space-y-2">' + autres.map(function (p) {
-        return '<a href="/joueur.html?m=' + esc(matchId) + '&p=' + esc(p.player_id) + '" class="flex items-center gap-3 rounded-xl border border-hairline bg-panel p-3 transition hover:border-cyan/40">'
+        return '<a href="' + esc(lien('joueur.html?m=' + encodeURIComponent(matchId) + '&p=' + encodeURIComponent(p.player_id))) + '" class="flex items-center gap-3 rounded-xl border border-hairline bg-panel p-3 transition hover:border-cyan/40">'
           + (p.photo ? '<img src="' + esc(p.photo) + '" alt="" width="40" height="40" loading="lazy" class="h-10 w-10 shrink-0 rounded-full border border-hairline object-cover">' : '')
           + '<span class="min-w-0 flex-1"><b class="block truncate text-[14px] font-semibold">' + esc(p.name) + '</b>'
           + '<span class="block text-[12.5px] text-soft">' + esc(poste(p.position)) + '</span></span>'
@@ -556,7 +564,7 @@
       + '<div class="space-y-5 lg:col-span-5">' + colonneDroite.join('') + '</div>'
       + '</div>'
       + '<div class="mt-8 border-t border-hairline pt-6">'
-      + '<a href="/match.html?id=' + esc(d.matchId) + '" class="inline-flex h-11 items-center rounded-xl border border-hairline px-5 text-[14px] font-semibold transition hover:border-cyan/40">'
+      + '<a href="' + esc(lien('match.html?id=' + encodeURIComponent(d.matchId))) + '" class="inline-flex h-11 items-center rounded-xl border border-hairline px-5 text-[14px] font-semibold transition hover:border-cyan/40">'
       + '<span aria-hidden="true" class="mr-2">←</span>' + esc(t('player_page.back_to_match_analysis', 'Retour à l’analyse du match')) + '</a></div>';
 
     squelette.hidden = true;
@@ -654,12 +662,21 @@
   // silencieux sur une promesse déjà résolue, comme t() le fait deja au
   // niveau de chaque appel individuel.
   var i18nPret = (window.I18N && window.I18N.init) ? window.I18N.init() : Promise.resolve();
-  i18nPret.then(charger).then(rendre).catch(function (e) {
+  i18nPret.then(function () {
+    // Titre de l'onglet pendant le chargement et en cas d'erreur (rendre()
+    // le remplace par le nom du joueur). Valeur FR identique au <title> statique.
+    document.title = t('player_page.document_title_default', 'Fiche joueur — IASHARK');
+    // Marche sans ressource d'aide au jeu confirmee (ex. mx) : ligne "Aide" masquee.
+    if (window.IASHARK_MARKET && !window.IASHARK_MARKET.helpline) {
+      document.querySelectorAll('[data-helpline-row]').forEach(function (el) { el.hidden = true; });
+    }
+    return charger();
+  }).then(rendre).catch(function (e) {
     squelette.hidden = true;
     root.hidden = false;
     root.innerHTML = '<div class="mx-auto max-w-[520px] py-16 text-center">'
       + '<h1 class="text-[22px] font-bold tracking-tight">' + esc(e && e.message ? e.message : t('player_page.error_default_title', 'Fiche joueur indisponible')) + '</h1>'
       + '<p class="mt-3 text-[14px] leading-relaxed text-soft">' + esc(t('player_page.error_recovery_text', 'Vous pouvez revenir aux analyses du jour et rouvrir la fiche depuis un match.')) + '</p>'
-      + '<a href="/" class="mt-6 inline-flex h-11 items-center rounded-xl bg-cyan px-5 text-[14px] font-bold text-[#04141b] transition hover:bg-cyan/90">' + esc(t('player_page.error_recovery_link', 'Voir les analyses du jour')) + '</a></div>';
+      + '<a href="' + esc(lien('')) + '" class="mt-6 inline-flex h-11 items-center rounded-xl bg-cyan px-5 text-[14px] font-bold text-[#04141b] transition hover:bg-cyan/90">' + esc(t('player_page.error_recovery_link', 'Voir les analyses du jour')) + '</a></div>';
   });
 })();

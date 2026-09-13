@@ -5,6 +5,17 @@ const root=document.getElementById('matchRoot');
 // Meme motif que celui deja utilise par player-page.js.
 function t(key,fallback){return (window.I18N&&window.I18N.t)?window.I18N.t(key,fallback):fallback;}
 function localeTag(){return (window.I18N&&window.I18N.localeTag)?window.I18N.localeTag():'fr-FR';}
+// Gabarit a variables {nom} (remplacement en une passe : une valeur qui
+// contient elle-meme des accolades n'est jamais re-substituee).
+function tf(key,fallback,vars){const s=String(t(key,fallback));return vars?s.replace(/\{(\w+)\}/g,(m,k)=>vars[k]!=null?vars[k]:m):s;}
+// Lien interne qui garde le visiteur dans son repertoire de langue/marche
+// (/gb/, /mx/...). Repli : chemin racine, comportement historique.
+function lien(p){return (window.I18N&&window.I18N.href)?window.I18N.href(p):'/'+p;}
+function estFr(){return !(window.I18N&&window.I18N.locale)||window.I18N.locale==='fr';}
+// Textes rediges par le pipeline (LLM ou gabarits francais du workflow) :
+// ils n'existent qu'en francais. Hors FR, on ne les affiche pas plutot que
+// de montrer du francais ou d'inventer une traduction.
+function narratif(v){return estFr()?v:null;}
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const n=v=>Number.isFinite(Number(v))?Number(v):null;
 const fmt=(v,d=1)=>n(v)===null?'—':Number(v).toLocaleString(localeTag(),{maximumFractionDigits:d});
@@ -64,16 +75,46 @@ function formStrip(form){
   if(!chars.length)return '';
   return `<div class="form-strip">${chars.map(c=>`<i class="f-${c.toLowerCase()}">${esc(c)}</i>`).join('')}</div>`;
 }
+// Rang au classement dans la convention de la langue (1er/2e, 1st/2nd,
+// 1.º, 1.) : categorie ordinale Intl, gabarit par categorie.
+function rangOrdinal(n){
+  let cat='other';
+  try{cat=new Intl.PluralRules(localeTag(),{type:'ordinal'}).select(Number(n));}catch(e){}
+  return tf('match_page.rank_ordinal_'+cat,cat==='one'?'{n}er':'{n}e',{n});
+}
 function teamMeta(s){
   if(!s)return '';
-  return `<small>${s.rank}${s.rank===1?'er':'e'} · ${s.pts} pts</small>${formStrip(s.form)}`;
+  return `<small>${esc(rangOrdinal(s.rank))} · ${s.pts} ${esc(t('match_page.points_short','pts'))}</small>${formStrip(s.form)}`;
 }
 
 function confidenceBadge(label){
   if(!label)return '';
   const l=label.toLowerCase();
-  const cls=l.includes('élev')||l.includes('elev')?'b-green':l.includes('moy')?'b-orange':l.includes('faib')?'b-red':'b-cyan';
-  return `<span class="badge ${cls}">${esc(t('match_page.confidence_prefix','Confiance'))} ${esc(label)}</span>`;
+  const niveau=l.includes('élev')||l.includes('elev')?'high':l.includes('moy')?'medium':l.includes('faib')?'low':null;
+  const cls=niveau==='high'?'b-green':niveau==='medium'?'b-orange':niveau==='low'?'b-red':'b-cyan';
+  // Le libelle vient des donnees ("Élevée"/"Moyenne"/"Faible") : traduit par
+  // niveau, jamais affiche brut hors FR.
+  const texte=niveau?t('match_page.reliability_'+niveau,label):(estFr()?label:'');
+  return `<span class="badge ${cls}">${esc(t('match_page.confidence_prefix','Confiance'))}${texte?' '+esc(texte):''}</span>`;
+}
+// Libelles de repli du view-model (francais) et meteo OpenWeather (demandee
+// en francais par le pipeline, lang=fr) : traduits a l'affichage.
+function nomLigue(i){return i.league.name==='Compétition'?t('match_page.league_fallback','Compétition'):i.league.name;}
+const METEO_CLES={
+  'ciel dégagé':'clear_sky','peu nuageux':'few_clouds','partiellement nuageux':'scattered_clouds','nuageux':'broken_clouds',
+  'couvert':'overcast','légère pluie':'light_rain','pluie modérée':'moderate_rain','forte pluie':'heavy_rain',
+  'très forte pluie':'very_heavy_rain','pluie verglaçante':'freezing_rain','légère averse de pluie':'light_shower_rain',
+  'averse de pluie':'shower_rain','forte averse de pluie':'heavy_shower_rain','bruine légère':'light_drizzle','bruine':'drizzle',
+  'orage':'thunderstorm','orage et pluie fine':'thunderstorm_light_rain','orage et pluie':'thunderstorm_rain',
+  'légère neige':'light_snow','neige':'snow','forte neige':'heavy_snow','brume':'mist','brouillard':'fog','brume sèche':'haze'
+};
+// Description inconnue hors FR : masquee (la temperature reste affichee).
+function meteo(desc){
+  const d=String(desc||'').trim();
+  if(!d)return '';
+  if(estFr())return d;
+  const k=METEO_CLES[d.toLowerCase()];
+  return k?t('match_page.weather_'+k,''):'';
 }
 function riskBadge(code){
   if(!code)return '';
@@ -124,7 +165,7 @@ function hero(vm){
   const i=vm.identity,s=i.standings||{};
   return `<section class="card hero reveal">
     <div class="hero-top">
-      <div class="hero-league">${img(i.league.logo,i.league.name)}<span>${esc(i.league.name)}</span></div>
+      <div class="hero-league">${img(i.league.logo,nomLigue(i))}<span>${esc(nomLigue(i))}</span></div>
       <span class="hero-time">${esc(i.date||t('match_page.date_tbc','Date à confirmer'))} · ${esc(i.time||'—')}${vm.model.available?` · <span class="ready"><i></i>${esc(t('match_page.analysis_available','Analyse disponible'))}</span>`:''}</span>
     </div>
     <div class="hero-teams">
@@ -133,7 +174,7 @@ function hero(vm){
       <div class="hero-team">${img(i.away.logo,i.away.name)}<b>${esc(i.away.name)}</b>${teamMeta(s.away)}</div>
     </div>
     ${probBar(vm)}
-    ${vm.conditions.venue||vm.conditions.weather?`<div class="hero-venue">${vm.conditions.venue?`<span><svg viewBox="0 0 24 24"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.4"/></svg>${esc(vm.conditions.venue)}</span>`:''}${vm.conditions.weather?`<span>${cardIcon('cloud')}${esc(vm.conditions.weather.temperature)} · ${esc(vm.conditions.weather.description)}</span>`:''}</div>`:''}
+    ${vm.conditions.venue||vm.conditions.weather?`<div class="hero-venue">${vm.conditions.venue?`<span><svg viewBox="0 0 24 24"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.4"/></svg>${esc(vm.conditions.venue)}</span>`:''}${vm.conditions.weather?`<span>${cardIcon('cloud')}${esc(vm.conditions.weather.temperature)}${meteo(vm.conditions.weather.description)?' · '+esc(meteo(vm.conditions.weather.description)):''}</span>`:''}</div>`:''}
   </section>`;
 }
 
@@ -164,7 +205,8 @@ function matchReadingCard(vm){
   const sentence=matchesLeader
     ?`${leading.label}${aLAvantage}${locSuffix}${t('match_page.reading_matches_recommendation',", et c'est le marché que nous recommandons.")}`
     :`${leading.label}${aLAvantage}${locSuffix}${t('match_page.reading_differs_recommendation_prefix',", mais ce n'est pas le marché que nous recommandons — nous recommandons plutôt ")}${marcheFr(vm,r.market)}.`;
-  const reason=vm.editorial.decisiveFactor;
+  // facteur_x/conseil_public : texte LLM du pipeline, francais uniquement.
+  const reason=narratif(vm.editorial.decisiveFactor);
   // Le marche recommande est deja affiche dans cette rangee. Quand c'est
   // lui-meme un BTTS, la tuile BTTS generique repetait exactement le meme
   // libelle et le meme pourcentage deux fois cote a cote.
@@ -174,7 +216,7 @@ function matchReadingCard(vm){
   const x=vm.model.expectedGoals;
   const totalXg=x&&n(x.home)!==null&&n(x.away)!==null?x.home+x.away:null;
   const risk=vm.editorial.risk;
-  const risqueDescriptif=risk&&!['FAIBLE','MODERE','ELEVE'].includes(risk)?risk:null;
+  const risqueDescriptif=risk&&!['FAIBLE','MODERE','ELEVE'].includes(risk)?texteRisque(vm,risk):null;
   return `<section class="card lecture reveal">
     <h2>${cardIcon('bulb')}${esc(t('match_page.reading_title','Notre lecture du match'))}</h2>
     <p class="reading">${esc(texteLisible(vm,sentence))}${reason?' '+esc(texteLisible(vm,reason)):''}</p>
@@ -216,7 +258,7 @@ function edgeVerdict(edge){
 // les deux cotes.
 function signalCard(vm){
   const r=vm.model.recommendation;
-  if(!r)return card(t('match_page.signal_title','Le signal IASHARK'),empty(vm.model.unavailableReason||t('match_page.signal_unavailable_fallback','Aucun marché ne franchit les seuils de confiance ou de cote minimale pour ce match — IASHARK préfère ne pas se prononcer.')),'signal-card','target');
+  if(!r)return card(t('match_page.signal_title','Le signal IASHARK'),empty(vm.model.unavailableReason?t('match_page.model_unavailable_reason',vm.model.unavailableReason):t('match_page.signal_unavailable_fallback','Aucun marché ne franchit les seuils de confiance ou de cote minimale pour ce match — IASHARK préfère ne pas se prononcer.')),'signal-card','target');
   const prob=n(r.probability);
   const fair=prob!==null&&prob>0?100/prob:null;
   const marketOdds=n(vm.model.recommendedOdds);
@@ -229,7 +271,7 @@ function signalCard(vm){
     <div class="flex flex-wrap items-center justify-between gap-3"><span class="inline-flex items-center gap-2 text-sm font-semibold text-cyan">${cardIcon('target')}${esc(t('match_page.signal_title','Le signal IASHARK'))}</span><div class="sig-badges flex flex-wrap gap-2">${confidenceBadge(r.reliability)}${riskBadge(vm.editorial.riskCode)}</div></div>
     <div class="mt-7 grid gap-7 lg:grid-cols-[minmax(0,1.35fr)_minmax(250px,1fr)] lg:items-end">
       <div><span class="block text-sm text-soft">${esc(t('match_page.recommended_market_label','Marché recommandé'))}</span><h1 class="mt-2 max-w-3xl text-balance text-3xl font-bold leading-[1.08] tracking-tight text-white sm:text-4xl">${esc(marcheFr(vm,r.market))}</h1></div>
-      <div class="space-y-4 rounded-xl border border-white/[.07] bg-black/15 p-4" aria-label="Comparaison du modèle et du marché">${compare(esc(t('match_page.label_model_prob','Probabilité modèle')),prob,true)}${compare(esc(t('match_page.player_engine_market_prob','Probabilité marché')),implied,false)}${edge!==null?`<p class="flex items-center justify-between border-t border-white/[.07] pt-3 text-sm text-soft"><span>${esc(t('match_page.detected_edge_label','Écart détecté'))}</span><b class="tabular-nums text-cyan">${edge>0?'+':''}${fmt(edge)} pts</b></p>`:''}</div>
+      <div class="space-y-4 rounded-xl border border-white/[.07] bg-black/15 p-4" aria-label="${esc(t('match_page.aria_model_vs_market','Comparaison du modèle et du marché'))}">${compare(esc(t('match_page.label_model_prob','Probabilité modèle')),prob,true)}${compare(esc(t('match_page.player_engine_market_prob','Probabilité marché')),implied,false)}${edge!==null?`<p class="flex items-center justify-between border-t border-white/[.07] pt-3 text-sm text-soft"><span>${esc(t('match_page.detected_edge_label','Écart détecté'))}</span><b class="tabular-nums text-cyan">${edge>0?'+':''}${fmt(edge)} ${esc(t('match_page.points_short','pts'))}</b></p>`:''}</div>
     </div>
     <div class="mt-7 grid grid-cols-2 gap-x-4 gap-y-5 border-t border-white/[.07] pt-5">${kpi(t('match_page.fair_odds_label','Cote juste'),odds(fair))}${kpi(t('match_page.market_odds_label','Cote marché'),odds(marketOdds))}</div>
     ${verdict?`<p class="mt-6 max-w-3xl text-sm leading-6 text-soft">${esc(verdict.text)}</p>`:''}
@@ -296,7 +338,7 @@ function threatsCard(vm){
   if(!list.length)return '';
   const p=list[0];
   const pid=n(p.id);
-  const href=pid!==null?` href="/joueur.html?m=${esc(vm.id)}&p=${pid}"`:'';
+  const href=pid!==null?` href="${esc(lien(`joueur.html?m=${encodeURIComponent(vm.id)}&p=${pid}`))}"`:'';
   const tag=pid!==null?'a':'div';
   const prob=n(p.scoringProbability);
 
@@ -354,8 +396,53 @@ const INSIGHT_STYLE={
   positive_home:['b-green','✓'],positive_away:['b-green','✓'],
   watch:['b-orange','!'],contradiction:['b-orange','⇄']
 };
+// Phrases des matchups (lib/match-view-model.js#matchups) redigees depuis
+// leurs faits structures (key/vars) dans la langue active. Sans faits
+// structures (ancienne donnee), seul le texte francais existe : FR seulement.
+function texteMatchup(m){
+  if(!m||!m.key||!m.vars)return narratif(m&&m.text);
+  const v=m.vars;
+  if(m.key==='shots_volume')return tf('match_page.matchup_shots_volume_text','{home} tente {homeFor} tirs en moyenne, {away} en concède {awayAllowed} — écart réel de {gap} tirs.',{home:v.home,away:v.away,homeFor:fmt(v.homeFor),awayAllowed:fmt(v.awayAllowed),gap:fmt(v.gap)});
+  if(m.key==='shots_accuracy')return tf('match_page.matchup_shots_accuracy_text',"{away} cadre {awayOnFor} tirs en moyenne à l'extérieur, {home} en concède {homeOnAllowed} à domicile.",{home:v.home,away:v.away,awayOnFor:fmt(v.awayOnFor),homeOnAllowed:fmt(v.homeOnAllowed)});
+  if(m.key==='possession')return tf('match_page.matchup_possession_text','Écart de possession réel et net ({homePct}% vs {awayPct}%) en faveur de {leader}.',{homePct:fmt(v.homePct),awayPct:fmt(v.awayPct),leader:v.leader});
+  return narratif(m.text);
+}
+// Alertes d'absence du pipeline (update-data.yml#calcKeyAbsences) : gabarit
+// francais fixe "<GRAVITE>: <joueur> (DOM|EXT) ABSENT", re-redige dans la
+// langue active. Tout autre texte descriptif est du francais redige : FR seul.
+const ALERTES_ABSENCE={'ALERTE ROUGE':'red','ABSENCE MAJEURE':'major','Absence notable':'notable'};
+function texteRisque(vm,texte){
+  const brut=String(texte||'').trim();
+  if(!brut||estFr())return brut||null;
+  const m=/^(ALERTE ROUGE|ABSENCE MAJEURE|Absence notable):\s*(.+?)\s*\((DOM|EXT)\)\s*ABSENT$/.exec(brut);
+  if(!m)return null;
+  return tf('match_page.absence_alert_'+ALERTES_ABSENCE[m[1]],'{player} ({team})',{player:m[2],team:m[3]==='DOM'?vm.identity.home.name:vm.identity.away.name});
+}
+function insightLocalise(vm,item){
+  if(item.type==='positive_home'||item.type==='positive_away'){
+    const text=texteMatchup(item.matchup);
+    if(!text)return null;
+    const title=item.type==='positive_home'
+      ?tf('match_page.insight_home_strong_title','{team} en position de force',{team:vm.identity.home.name})
+      :tf('match_page.insight_away_dangerous_title','{team} dangereux',{team:vm.identity.away.name});
+    return {type:item.type,title,text};
+  }
+  if(item.type==='watch'){
+    const text=texteRisque(vm,item.text);
+    return text?{type:item.type,title:t('match_page.insight_watch_title','Point de vigilance'),text}:null;
+  }
+  if(item.type==='contradiction'&&item.market!=null&&Number.isFinite(item.edge)){
+    const au=item.edge>0;
+    return {type:item.type,title:t('match_page.insight_contradiction_title','Signal contradictoire'),
+      text:tf(au?'match_page.insight_contradiction_model_above':'match_page.insight_contradiction_market_above',
+        au?'Sur {market}, notre modèle est nettement au-dessus du marché (écart de {gap} points) - à interpréter avec prudence.'
+          :'Sur {market}, le marché est nettement au-dessus de notre modèle (écart de {gap} points) - à interpréter avec prudence.',
+        {market:marcheFr(vm,item.market),gap:Math.abs(Math.round(item.edge))})};
+  }
+  return estFr()?item:null;
+}
 function keyInsightsCard(vm){
-  const list=vm.keyInsights;
+  const list=vm.keyInsights.map(item=>insightLocalise(vm,item)).filter(Boolean);
   if(!list.length)return '';
   return card(t('match_page.key_insights_title','Ce qu\'il faut savoir'),`<div class="insights-grid">${list.map(item=>{
     const [cls,mark]=INSIGHT_STYLE[item.type]||['b-cyan','·'];
@@ -378,6 +465,14 @@ function valuePotentialCard(vm){
 // lib/insights.js#computeMatchup). Categories non mesurables avec nos
 // donnees (pressing, transitions, bloc defensif...) volontairement
 // absentes plutot qu'inventees.
+// Unites declarees en francais par lib/insights.js (valeurs de donnees, pas
+// de l'affichage) : traduites ici par correspondance exacte.
+const UNITES_MATCHUP={
+  'xG par match':'unit_xg_per_match','xG encaissés':'unit_xg_conceded','% de possession':'unit_possession_pct',
+  '% de passes réussies':'unit_pass_accuracy_pct','fautes par match':'unit_fouls_per_match',
+  'corners par match':'unit_corners_per_match','tirs par match':'unit_shots_per_match'
+};
+function uniteMatchup(u){const k=UNITES_MATCHUP[u];return k?t('match_page.'+k,u):(estFr()?(u||''):'');}
 function matchupCard(vm){
   const m=vm.matchupScores;
   if(!m)return '';
@@ -399,7 +494,7 @@ function matchupCard(vm){
     return `<div class="mu-row">
       <span class="mu-val${homeWin?' win':''}">${fmt(c.home)}</span>
       <div class="mu-mid">
-        <b>${esc(c.label)}${c.advantage==='égalité'?' · '+esc(t('match_page.tie_label','égalité')):''}<em>${esc(c.unit||'')}${c.lowerIsBetter?' · '+esc(t('match_page.lower_is_better_hint','moins = mieux')):''}</em></b>
+        <b>${esc(t('match_page.matchup_cat_'+c.key,c.label))}${c.advantage==='égalité'?' · '+esc(t('match_page.tie_label','égalité')):''}<em>${esc(uniteMatchup(c.unit))}${c.lowerIsBetter?' · '+esc(t('match_page.lower_is_better_hint','moins = mieux')):''}</em></b>
         <div class="mu-bar"><i class="mu-h${homeWin?' win':''}" style="width:${partHome}%"></i><i class="mu-a${awayWin?' win':''}" style="width:${100-partHome}%"></i></div>
       </div>
       <span class="mu-val${awayWin?' win':''}">${fmt(c.away)}</span>
@@ -428,7 +523,7 @@ function matchupCard(vm){
 function formNoteCard(vm){
   const home=vm.formNote.home,away=vm.formNote.away;
   if(!home&&!away)return '';
-  const line=(name,note)=>note?`<div class="caveat"><b>!</b><span><b>${esc(name)}</b> : ${note.wins} ${note.wins>1?t('match_page.form_note_win_plural','victoires'):t('match_page.form_note_win_singular','victoire')}${t('match_page.form_note_middle',' sur les ')}${note.sample}${t('match_page.form_note_matches_suffix',' derniers matchs, mais ')}${note.narrowWins}${t('match_page.form_note_narrow_suffix'," à un seul but d'écart.")}</span></div>`:'';
+  const line=(name,note)=>note?`<div class="caveat"><b>!</b><span><b>${esc(name)}</b>${esc(t('match_page.label_colon',' :'))} ${note.wins} ${note.wins>1?t('match_page.form_note_win_plural','victoires'):t('match_page.form_note_win_singular','victoire')}${t('match_page.form_note_middle',' sur les ')}${note.sample}${t('match_page.form_note_matches_suffix',' derniers matchs, mais ')}${note.narrowWins}${t('match_page.form_note_narrow_suffix'," à un seul but d'écart.")}</span></div>`:'';
   return card(t('match_page.stats_caveat_title','Stats à ne pas surinterpréter'),`${line(vm.identity.home.name,home)}${line(vm.identity.away.name,away)}`,'','alert');
 }
 
@@ -512,9 +607,11 @@ function keyRowsForMarket(market){
 // gagne, sans match nul", et tous les seuils a virgule disparaissent.
 // Appliquee a l'AFFICHAGE seulement : les donnees gardent les libelles du
 // moteur, dont dependent la selection du marche et le comparatif.
+// Nom historique conserve ; le libelle sort desormais dans la langue active
+// (marketLabel lit I18N, repli francais identique a marketLabelFr).
 function marcheFr(vm,libelle){
-  const t=window.IasharkMarketLabels;
-  return t?t.marketLabelFr(libelle,{home:vm.identity.home.name,away:vm.identity.away.name}):String(libelle||'');
+  const ml=window.IasharkMarketLabels;
+  return ml?(ml.marketLabel||ml.marketLabelFr)(libelle,{home:vm.identity.home.name,away:vm.identity.away.name}):String(libelle||'');
 }
 
 // Nettoyage des textes rediges (editorial, matchups, points de vigilance).
@@ -538,7 +635,21 @@ function texteLisible(vm,texte){
   });
   // Decimales a la francaise, sans toucher aux nombres deja corrects ni aux
   // eventuelles URL.
+  // Langue dont le separateur decimal est le point (anglais) : rien a convertir.
+  if((1.5).toLocaleString(localeTag()).indexOf(',')===-1)return t;
   return t.replace(/(\d),(\d)/g,'$1<VIRG>$2').replace(/(\d)\.(\d)/g,'$1,$2').replace(/<VIRG>/g,',');
+}
+
+// Sources de donnees (lib/display-data.js#sourceLabels, libelles francais) :
+// premier segment traduit, nom de fournisseur conserve.
+const SOURCES_CLES={'Calendrier et équipes':'source_fixtures','Statistiques équipes':'source_team_stats','Événements historiques':'source_events','Blessures et suspensions':'source_injuries','Marché':'source_market'};
+function libelleSource(x){
+  const parts=String(x).split(' · ');
+  const k=SOURCES_CLES[parts[0]];
+  if(!k)return String(x);
+  let reste=parts.slice(1).join(' · ');
+  if(reste==='Cotes moyennes multi-bookmakers')reste=t('match_page.source_avg_odds',reste);
+  return t('match_page.'+k,parts[0])+(reste?' · '+reste:'');
 }
 
 function logoEquipe(src,nom){
@@ -738,10 +849,10 @@ function faqCard(vm){
       // Sur une egalite, on ne designe personne : "X entre plus vite" serait
       // faux a 35 % contre 35 %.
       const verdict=Math.abs(pD-pE)<3
-        ? 'Les deux entrent dans leurs matchs au même rythme.'
-        : `${esc(pD>pE?dom:ext)} entre donc plus vite dans ses matchs.`;
-      qa.push(['Laquelle des deux marque le plus tôt ?',
-        `${esc(dom)} inscrit ${pD} % de ses buts avant la mi-temps, ${esc(ext)} ${pE} %. ${verdict} Le graphique plus haut cumule les deux équipes&nbsp;: ce détail par équipe n’y apparaît pas.`]);
+        ? t('match_page.faq_early_verdict_equal','Les deux entrent dans leurs matchs au même rythme.')
+        : tf('match_page.faq_early_verdict_team','{team} entre donc plus vite dans ses matchs.',{team:esc(pD>pE?dom:ext)});
+      qa.push([t('match_page.faq_q_early','Laquelle des deux marque le plus tôt ?'),
+        tf('match_page.faq_early_answer','{home} inscrit {homePct} % de ses buts avant la mi-temps, {away} {awayPct} %. {verdict} Le graphique plus haut cumule les deux équipes&nbsp;: ce détail par équipe n’y apparaît pas.',{home:esc(dom),away:esc(ext),homePct:pD,awayPct:pE,verdict})]);
     }
   }
 
@@ -749,34 +860,41 @@ function faqCard(vm){
   if(f.encaisseFin){
     const ecartFin=Math.abs(f.encaisseFin.home-f.encaisseFin.away);
     const verdictFin=ecartFin<4
-      ? 'Les deux tiennent la fin de match de la même façon.'
-      : `${esc(plusGrand(f.encaisseFin))} est la plus exposée sur la fin, ce qui compte pour un pari qui se joue au score final.`;
-    qa.push(['Une des deux craque-t-elle en fin de match ?',
-      `${esc(dom)} encaisse ${f.encaisseFin.home} % de ses buts sur la dernière demi-heure, ${esc(ext)} ${f.encaisseFin.away} %. ${verdictFin}`]);
+      ? t('match_page.faq_late_verdict_equal','Les deux tiennent la fin de match de la même façon.')
+      : tf('match_page.faq_late_verdict_team','{team} est la plus exposée sur la fin, ce qui compte pour un pari qui se joue au score final.',{team:esc(plusGrand(f.encaisseFin))});
+    qa.push([t('match_page.faq_q_late','Une des deux craque-t-elle en fin de match ?'),
+      tf('match_page.faq_late_answer','{home} encaisse {homePct} % de ses buts sur la dernière demi-heure, {away} {awayPct} %. {verdict}',{home:esc(dom),away:esc(ext),homePct:f.encaisseFin.home,awayPct:f.encaisseFin.away,verdict:verdictFin})]);
   }
 
   // 3. Cartons : donnee relevee par le pipeline, affichee nulle part.
   if(f.cartons){
     const rugueux=Math.abs(f.cartons.home-f.cartons.away)<0.3?null:plusGrand(f.cartons);
-    const rouges=f.rouges&&(f.rouges.home+f.rouges.away)>0
-      ? ` Sur la période suivie, ${f.rouges.home+f.rouges.away} carton${f.rouges.home+f.rouges.away>1?'s':''} rouge${f.rouges.home+f.rouges.away>1?'s':''} au total.` : '';
-    qa.push(['Combien de cartons dans un match de ces équipes ?',
-      `${esc(dom)} en prend ${fmt(f.cartons.home)} par match et ${esc(ext)} ${fmt(f.cartons.away)}.${rugueux?` ${esc(rugueux)} est la plus sanctionnée des deux.`:' Les deux sont sanctionnées au même rythme.'}${rouges}`]);
+    const nbRouges=f.rouges?f.rouges.home+f.rouges.away:0;
+    // Pluriel : "2 cartons rouges" des 2 en francais, comme avant.
+    const rouges=nbRouges>0
+      ? (nbRouges>1
+        ? tf('match_page.faq_cards_red_other','Sur la période suivie, {n} cartons rouges au total.',{n:nbRouges})
+        : tf('match_page.faq_cards_red_one','Sur la période suivie, {n} carton rouge au total.',{n:nbRouges})) : '';
+    const verdictCartons=rugueux
+      ? tf('match_page.faq_cards_verdict_team','{team} est la plus sanctionnée des deux.',{team:esc(rugueux)})
+      : t('match_page.faq_cards_verdict_equal','Les deux sont sanctionnées au même rythme.');
+    qa.push([t('match_page.faq_q_cards','Combien de cartons dans un match de ces équipes ?'),
+      tf('match_page.faq_cards_answer','{home} en prend {homeCards} par match et {away} {awayCards}. {verdict}',{home:esc(dom),away:esc(ext),homeCards:fmt(f.cartons.home),awayCards:fmt(f.cartons.away),verdict:verdictCartons+(rouges?' '+rouges:'')})]);
   }
 
   // 4. Buts attendus de saison : a ne pas confondre avec les buts attendus
   // DE CE MATCH, affiches plus haut. Ceux-ci decrivent la saison entiere.
   if(f.xg&&f.xga){
     const meilleure=plusGrand(f.xg), solide=plusPetit(f.xga);
-    qa.push(['Ces équipes se créent-elles beaucoup d’occasions ?',
-      `Sur la saison, ${esc(dom)} génère ${fmt(f.xg.home)} buts attendus par match et en concède ${fmt(f.xga.home)}&nbsp;; ${esc(ext)} ${fmt(f.xg.away)} et ${fmt(f.xga.away)}. ${esc(meilleure)} se procure le plus d’occasions, ${esc(solide)} en concède le moins.`]);
+    qa.push([t('match_page.faq_q_chances','Ces équipes se créent-elles beaucoup d’occasions ?'),
+      tf('match_page.faq_chances_answer','Sur la saison, {home} génère {homeXg} buts attendus par match et en concède {homeXga}&nbsp;; {away} {awayXg} et {awayXga}. {best} se procure le plus d’occasions, {solid} en concède le moins.',{home:esc(dom),away:esc(ext),homeXg:fmt(f.xg.home),homeXga:fmt(f.xga.home),awayXg:fmt(f.xg.away),awayXga:fmt(f.xga.away),best:esc(meilleure),solid:esc(solide)})]);
   }
 
   // 5. Precision de passe : jamais affichee non plus.
   if(f.passes&&Math.abs(f.passes.home-f.passes.away)>=2){
     const propre=plusGrand(f.passes);
-    qa.push(['Laquelle joue le plus proprement ?',
-      `${esc(propre)} réussit ${fmt(Math.max(f.passes.home,f.passes.away),0)} % de ses passes, contre ${fmt(Math.min(f.passes.home,f.passes.away),0)} % en face. Une différence de cet ordre se traduit souvent par plus de possession et moins de contres subis.`]);
+    qa.push([t('match_page.faq_q_passing','Laquelle joue le plus proprement ?'),
+      tf('match_page.faq_passing_answer','{team} réussit {best} % de ses passes, contre {other} % en face. Une différence de cet ordre se traduit souvent par plus de possession et moins de contres subis.',{team:esc(propre),best:fmt(Math.max(f.passes.home,f.passes.away),0),other:fmt(Math.min(f.passes.home,f.passes.away),0)})]);
   }
 
   // 6. Methode : sa reponse n'est affichee nulle part.
@@ -784,18 +902,19 @@ function faqCard(vm){
   const sims=n(vm.model.simulationCount),quality=n(vm.model.quality);
   if(sims!==null||sources.length||quality!==null){
     const bits=[];
-    if(sims!==null)bits.push(`${sims.toLocaleString(localeTag())} simulations de Monte-Carlo`);
-    if(sources.length)bits.push(`les données ${sources.map(x=>esc(String(x))).join(', ')}`);
-    if(quality!==null)bits.push(`un score de qualité des données de ${fmt(quality)}/100`);
-    qa.push(['Sur quoi repose cette analyse ?',
-      `L’analyse s’appuie sur ${bits.join(', ')}. Les probabilités décrivent une fréquence attendue sur un grand nombre de matchs semblables, jamais une certitude sur celui-ci.`]);
+    if(sims!==null)bits.push(tf('match_page.faq_basis_sims','{n} simulations de Monte-Carlo',{n:sims.toLocaleString(localeTag())}));
+    if(sources.length)bits.push(tf('match_page.faq_basis_sources','les données {sources}',{sources:sources.map(x=>esc(libelleSource(String(x)))).join(', ')}));
+    if(quality!==null)bits.push(tf('match_page.faq_basis_quality','un score de qualité des données de {score}/100',{score:fmt(quality)}));
+    qa.push([t('match_page.faq_q_basis','Sur quoi repose cette analyse ?'),
+      tf('match_page.faq_basis_answer','L’analyse s’appuie sur {bits}. Les probabilités décrivent une fréquence attendue sur un grand nombre de matchs semblables, jamais une certitude sur celui-ci.',{bits:bits.join(', ')})]);
   }
 
   // 7. Risque : uniquement s'il y a une vraie phrase, pas un simple niveau.
   const NIVEAUX={FAIBLE:1,MODERE:1,ELEVE:1};
   const risque=String(vm.editorial.risk||'').trim();
   if(risque.length>12&&!NIVEAUX[risque.toUpperCase()]){
-    qa.push(['Quel est le principal risque de ce pari ?',esc(risque)]);
+    const risqueTexte=texteRisque(vm,risque);
+    if(risqueTexte)qa.push([t('match_page.faq_q_risk','Quel est le principal risque de ce pari ?'),esc(risqueTexte)]);
   }
 
   if(qa.length<2)return '';
@@ -914,7 +1033,7 @@ function renderAuthWall(raw){
   root.innerHTML=gateCard(vm,{
     title:t('match_page.gate_free_title','Match gratuit du jour'),
     text:t('match_page.gate_free_text','Ce match est gratuit, mais il faut un compte IASHARK (inscription ou connexion) pour voir l’analyse complete.'),
-    href:'/compte.html',
+    href:lien('compte.html'),
     cta:t('match_page.gate_free_cta','Se connecter / Creer un compte')
   });
   bindMotion();
@@ -925,12 +1044,22 @@ function renderProWall(raw){
   root.innerHTML=gateCard(vm,{
     title:t('match_page.gate_pro_title','Analyse reservee aux membres Pro'),
     text:t('match_page.gate_pro_text','Le marche recommande, la confiance du modele et l’analyse complete de ce match sont reserves aux membres Pro. Le match du jour, lui, reste gratuit.'),
-    href:'/abonnement.html',
+    href:lien('abonnement.html'),
     cta:t('match_page.gate_pro_cta','Devenir Pro')
   });
   bindMotion();
 }
 
+// Bloc SEO statique des pages /match/<id>.html (genere par update-data.yml,
+// masque en CSS) : les libelles de marche y sont poses bruts dans
+// data-market-label et rediges ici dans la langue active.
+function traduireShellSeo(){
+  const ml=window.IasharkMarketLabels;
+  if(!ml||!ml.marketLabel)return;
+  document.querySelectorAll('[data-market-label]').forEach(el=>{
+    el.textContent=ml.marketLabel(el.getAttribute('data-market-label'),{home:el.getAttribute('data-home')||undefined,away:el.getAttribute('data-away')||undefined});
+  });
+}
 async function init(){
   try{
     // Dictionnaire i18n charge (et applique aux elements data-i18n de la
@@ -940,6 +1069,10 @@ async function init(){
     // charge (page qui n'inclut pas encore i18n.js) : t() et localeTag()
     // retombent alors sur le francais partout, comme avant ce chantier.
     if(window.I18N&&window.I18N.init){ try{ await window.I18N.init(); }catch(e){} }
+    traduireShellSeo();
+    // Marche sans ressource d'aide au jeu confirmee (ex. mx) : lib/market-config.js
+    // masque le numero et le lien ; la ligne "Aide :" entiere l'est aussi.
+    if(window.IASHARK_MARKET&&!window.IASHARK_MARKET.helpline)document.querySelectorAll('[data-helpline-row]').forEach(el=>{el.hidden=true;});
     // MODE DEMO (exemple-analyse.html) : la page de demonstration montre une
     // analyse REELLE et complete, sans compte et sans appel reseau. Aucune
     // logique d'acces n'est contournee ailleurs - le drapeau n'existe que sur
@@ -973,7 +1106,7 @@ async function init(){
     if(!isFree&&!ctx.isPro){renderProWall(raw);return;}
     render(raw);
   }catch(e){
-    root.innerHTML=`<div class="match-error"><b>${esc(e.message||t('match_page.generic_load_error','Erreur de chargement'))}</b><a href="/">${esc(t('match_page.back_to_home','Retour à l\'accueil'))}</a></div>`;
+    root.innerHTML=`<div class="match-error"><b>${esc(e.message||t('match_page.generic_load_error','Erreur de chargement'))}</b><a href="${esc(lien(''))}">${esc(t('match_page.back_to_home','Retour à l\'accueil'))}</a></div>`;
   }
 }
 init();

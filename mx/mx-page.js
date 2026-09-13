@@ -11,29 +11,11 @@
 // reading resolvePriceId()/MARKET_ENV_KEYS in that function before writing
 // this file).
 (function () {
-  // ---- MXN price display --------------------------------------------------
-  // config/markets.json -> mx.currency = "MXN". This page is MXN-only by
-  // definition, so we format directly with Intl rather than pulling in the
-  // full i18n runtime's currency logic (same choice gb-page.js made for GBP).
-  // The HTML already contains a correct hardcoded value in each span
-  // (progressive enhancement: price is right even if this script fails to
-  // load), this just re-renders it through the real formatter for
-  // correctness/consistency. Amounts match doc 07 (07_IAShark_Mexico_Launch_Kit)
-  // verbatim: Pro MX$199/mo, Edge MX$299/mo, Annual (Edge) MX$1,990/yr.
-  try {
-    var mxn2 = new Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN" });
-    var mxn0 = new Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN", minimumFractionDigits: 0 });
-    var prices = { priceFree: [0, mxn0], pricePro: [199, mxn2], priceEdge: [299, mxn2], priceAnnual: [1990, mxn0] };
-    Object.keys(prices).forEach(function (id) {
-      var el = document.getElementById(id);
-      if (!el) return;
-      var amount = prices[id][0], fmt = prices[id][1];
-      el.textContent = fmt.format(amount);
-    });
-  } catch (e) {
-    // Formatting failure leaves the hardcoded HTML value in place - never
-    // blank, never wrong currency symbol.
-  }
+  // ---- Price display ------------------------------------------------------
+  // Prices come from lib/market-config.js (window.IASHARK_MARKET, built from
+  // config/markets.json), which fills every [data-market-price] element of
+  // this page: no second copy of the MXN amounts lives here any more. The
+  // HTML keeps the same values as a no-JS fallback.
 
   // ---- P0 analytics: landing_view --------------------------------------
   // doc 18 S7 lists country/locale/source/campaign/creative_id as the
@@ -102,10 +84,12 @@
         // (Spain Spanish) is the nearest real, working account page - same
         // "nearest existing locale" fallback this page's own HTML already
         // uses for the Track Record link (see mx/index.html comment next to
-        // that link). Flagged as a follow-up: either build /es-mx/ account
-        // pages or teach bottom-navigation.js the same fallback (see the
-        // spawn_task filed alongside this change).
-        location.href = "/es/compte.html#plan";
+        // that link), and now also the fallback bottom-navigation.js's own
+        // MARKET_PAGE_LOCALE map uses for the shared Tools/Account nav
+        // (fixed - see GEO_EXPANSION_STATUS.md).
+        // Superseded 2026-09-13: /mx/ now has its own generated compte.html
+        // (scripts/build-locales.js), so the /es/ fallback above no longer applies.
+        location.href = "/mx/compte.html#plan";
         return;
       }
 
@@ -119,7 +103,7 @@
         var response = await fetch(window.IasharkApp.url + "/functions/v1/create-checkout-session", {
           method: "POST",
           headers: { apikey: window.IasharkApp.key, Authorization: "Bearer " + token, "Content-Type": "application/json" },
-          body: JSON.stringify({ market: "mx" })
+          body: JSON.stringify({ market: "mx", dir: "mx" })
         });
         var data = await response.json();
         if (data && data.url) {

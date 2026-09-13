@@ -2,8 +2,9 @@
 <html lang="pt">
 <head>
 <meta charset="UTF-8">
+<meta name="iashark-market" content="fr">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>IASHARK — O modelo que lê o jogo antes do apito inicial</title>
+<title data-i18n="geo.meta.landing.title">IASHARK — O modelo que lê o jogo antes do apito inicial</title>
 <link rel="canonical" href="https://iashark.com/pt/landing.html">
 <link rel="alternate" hreflang="fr" href="https://iashark.com/fr/landing.html">
 <link rel="alternate" hreflang="en" href="https://iashark.com/en/landing.html">
@@ -12,7 +13,7 @@
 <link rel="alternate" hreflang="it" href="https://iashark.com/it/landing.html">
 <link rel="alternate" hreflang="pt" href="https://iashark.com/pt/landing.html">
 <link rel="alternate" hreflang="x-default" href="https://iashark.com/fr/landing.html">
-<meta name="description" content="Poisson, Dixon-Coles, Monte Carlo, Elo: o IASHARK analisa cada jogo com modelos estatísticos reais. Um jogo gratuito todos os dias.">
+<meta name="description" content="Poisson, Dixon-Coles, Monte Carlo, Elo: o IASHARK analisa cada jogo com modelos estatísticos reais. Um jogo grátis todos os dias." data-i18n-attr="content:geo.meta.landing.description">
 <meta name="robots" content="noindex, follow">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
 <style>
@@ -105,7 +106,7 @@ a{color:inherit;}
 @media(min-width:820px){.plan-grid{grid-template-columns:1fr 1fr;}}
 .plan{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:28px 24px;display:flex;flex-direction:column;gap:16px;}
 .plan.hi{border-color:rgba(34,211,238,0.3);background:linear-gradient(160deg,var(--card2),var(--card));position:relative;}
-.plan.hi::before{content:'RECOMENDADO';position:absolute;top:-1px;right:20px;transform:translateY(-50%);font-family:'Space Mono',monospace;font-size:7px;letter-spacing:1.5px;background:var(--cyan);color:#04141a;padding:4px 10px;border-radius:20px;font-weight:700;}
+.plan.hi::before{content:attr(data-badge);position:absolute;top:-1px;right:20px;transform:translateY(-50%);font-family:'Space Mono',monospace;font-size:7px;letter-spacing:1.5px;background:var(--cyan);color:#04141a;padding:4px 10px;border-radius:20px;font-weight:700;}
 .plan-name{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--muted);}
 .plan.hi .plan-name{color:var(--cyan);}
 .plan-price{font-family:'Bebas Neue',sans-serif;font-size:42px;letter-spacing:.5px;line-height:1;}
@@ -151,10 +152,10 @@ footer{padding:30px 20px 100px;text-align:center;border-top:1px solid var(--bord
 
 <header class="hdr">
   <div class="hdr-in">
-    <a href="https://iashark.com/pt/" class="logo"><span>IA</span>SHARK</a>
+    <a href="/pt/" data-href="" class="logo"><span>IA</span>SHARK</a>
     <div style="display:flex;align-items:center;gap:8px;">
       <span id="langSwitchSlot"></span>
-      <a href="https://iashark.com/pt/" class="btn-nav">VER O SITE →</a>
+      <a href="/pt/" data-href="" class="btn-nav" data-i18n="landing_page.nav_cta">VER O SITE →</a>
     </div>
   </div>
 </header>
@@ -162,74 +163,74 @@ footer{padding:30px 20px 100px;text-align:center;border-top:1px solid var(--bord
 <div class="hero">
   <div class="wrap">
     <div class="hero-shark reveal">🦈</div>
-    <div class="eyebrow reveal" style="animation-delay:.05s"><span class="dot"></span> MODELO ESTATÍSTICO · FUTEBOL</div>
-    <h1 class="reveal" style="animation-delay:.1s">Zero emoções.<br><b>Só probabilidades.</b></h1>
-    <p class="sub reveal" style="animation-delay:.15s">O IASHARK combina <b>xG, forma recente, desgaste de calendário e confrontos diretos</b> para produzir um sinal de probabilidade em cada jogo, antes do apito inicial.</p>
+    <div class="eyebrow reveal" style="animation-delay:.05s"><span class="dot"></span> <span data-i18n="landing_page.eyebrow">MODELO ESTATÍSTICO · FUTEBOL</span></div>
+    <h1 class="reveal" style="animation-delay:.1s" data-i18n-html="landing_v2.hero_title">Zero emoções.<br><b>Só probabilidades.</b></h1>
+    <p class="sub reveal" style="animation-delay:.15s" data-i18n-html="landing_page.hero_sub">O IASHARK combina <b>xG, forma recente, desgaste de calendário e confrontos diretos</b> para produzir um sinal de probabilidade em cada jogo, antes do apito inicial.</p>
     <div class="cta-row reveal" style="animation-delay:.2s">
-      <a href="https://iashark.com/pt/" class="btn-primary">VER O JOGO GRATUITO DE HOJE</a>
-      <div class="cta-note">Sem cartão de crédito · <b>1 análise oferecida todos os dias</b></div>
+      <a href="/pt/" data-href="" class="btn-primary" data-i18n="landing_page.hero_cta">VER O JOGO GRATUITO DE HOJE</a>
+      <div class="cta-note" data-i18n-html="landing_v2.cta_note">Sem cartão de crédito · <b>1 análise oferecida todos os dias</b></div>
     </div>
   </div>
 
   <div class="signal-strip reveal" style="animation-delay:.3s">
     <div class="track">
-      <span>MODELO <b>POISSON</b></span><span><b>DIXON-COLES</b> AJUSTE DE RESULTADOS BAIXOS</span><span>SIMULAÇÃO <b>MONTE CARLO</b></span><span>CLASSIFICAÇÃO <b>ELO</b> DINÂMICA</span><span>PROBABILIDADES <b>SHIN</b></span><span>KELLY <b>FRACIONADO</b></span>
-      <span>MODELO <b>POISSON</b></span><span><b>DIXON-COLES</b> AJUSTE DE RESULTADOS BAIXOS</span><span>SIMULAÇÃO <b>MONTE CARLO</b></span><span>CLASSIFICAÇÃO <b>ELO</b> DINÂMICA</span><span>PROBABILIDADES <b>SHIN</b></span><span>KELLY <b>FRACIONADO</b></span>
+      <span data-i18n-html="landing_v2.strip_poisson">MODELO <b>POISSON</b></span><span data-i18n-html="landing_v2.strip_dc"><b>DIXON-COLES</b> AJUSTE DE RESULTADOS BAIXOS</span><span data-i18n-html="landing_v2.strip_mc">SIMULAÇÃO <b>MONTE CARLO</b></span><span data-i18n-html="landing_v2.strip_elo">CLASSIFICAÇÃO <b>ELO</b> DINÂMICA</span><span data-i18n-html="landing_v2.strip_shin">PROBABILIDADES <b>SHIN</b></span><span data-i18n-html="landing_v2.strip_kelly">KELLY <b>FRACIONADO</b></span>
+      <span data-i18n-html="landing_v2.strip_poisson">MODELO <b>POISSON</b></span><span data-i18n-html="landing_v2.strip_dc"><b>DIXON-COLES</b> AJUSTE DE RESULTADOS BAIXOS</span><span data-i18n-html="landing_v2.strip_mc">SIMULAÇÃO <b>MONTE CARLO</b></span><span data-i18n-html="landing_v2.strip_elo">CLASSIFICAÇÃO <b>ELO</b> DINÂMICA</span><span data-i18n-html="landing_v2.strip_shin">PROBABILIDADES <b>SHIN</b></span><span data-i18n-html="landing_v2.strip_kelly">KELLY <b>FRACIONADO</b></span>
     </div>
   </div>
 </div>
 
 <section class="methode">
   <div class="wrap">
-    <div class="sec-lbl">O MÉTODO</div>
-    <h2 class="sec-title">Quatro modelos, <b>um único sinal</b> por jogo.</h2>
+    <div class="sec-lbl" data-i18n="landing_page.lbl_method">O MÉTODO</div>
+    <h2 class="sec-title" data-i18n-html="landing_v2.title_method">Quatro modelos, <b>um único sinal</b> por jogo.</h2>
     <div class="model-grid">
-      <div class="model-card"><div class="model-tag">MODELO 1</div><div class="model-name">Poisson</div><div class="model-desc">Distribuição de golos esperados para cada equipa, em casa e fora.</div></div>
-      <div class="model-card"><div class="model-tag">MODELO 2</div><div class="model-name">Dixon-Coles</div><div class="model-desc">Correção de resultados baixos (0-0, 1-0, 1-1) que o Poisson puro subestima.</div></div>
-      <div class="model-card"><div class="model-tag">MODELO 3</div><div class="model-name">Monte Carlo</div><div class="model-desc">Milhares de simulações do jogo para obter uma distribuição de resultados robusta.</div></div>
-      <div class="model-card"><div class="model-tag">MODELO 4</div><div class="model-name">Elo e Shin</div><div class="model-desc">Força real das equipas ao longo do tempo, e correção do viés das probabilidades implícitas.</div></div>
+      <div class="model-card"><div class="model-tag" data-i18n="landing_page.model1_tag">MODELO 1</div><div class="model-name" data-i18n="landing_page.model1_name">Poisson</div><div class="model-desc" data-i18n="landing_page.model1_desc">Distribuição de golos esperados para cada equipa, em casa e fora.</div></div>
+      <div class="model-card"><div class="model-tag" data-i18n="landing_page.model2_tag">MODELO 2</div><div class="model-name" data-i18n="landing_page.model2_name">Dixon-Coles</div><div class="model-desc" data-i18n="landing_page.model2_desc">Correção de resultados baixos (0-0, 1-0, 1-1) que o Poisson puro subestima.</div></div>
+      <div class="model-card"><div class="model-tag" data-i18n="landing_page.model3_tag">MODELO 3</div><div class="model-name" data-i18n="landing_page.model3_name">Monte Carlo</div><div class="model-desc" data-i18n="landing_page.model3_desc">Milhares de simulações do jogo para obter uma distribuição de resultados robusta.</div></div>
+      <div class="model-card"><div class="model-tag" data-i18n="landing_page.model4_tag">MODELO 4</div><div class="model-name" data-i18n="landing_page.model4_name">Elo e Shin</div><div class="model-desc" data-i18n="landing_page.model4_desc">Força real das equipas ao longo do tempo, e correção do viés das probabilidades implícitas.</div></div>
     </div>
   </div>
 </section>
 
 <section class="steps">
   <div class="wrap">
-    <div class="sec-lbl">NA PRÁTICA</div>
-    <h2 class="sec-title">Do dado bruto a um <b>sinal utilizável.</b></h2>
+    <div class="sec-lbl" data-i18n="landing_page.lbl_practice">NA PRÁTICA</div>
+    <h2 class="sec-title" data-i18n-html="landing_v2.title_practice">Do dado bruto a um <b>sinal utilizável.</b></h2>
     <div class="step-list">
-      <div class="step reveal"><div class="step-num">01</div><div><div class="step-title">Recolhemos os dados</div><div class="step-desc">Calendários, alinhamentos prováveis, histórico de confrontos e estatísticas xG atualizados continuamente, liga a liga.</div></div></div>
-      <div class="step reveal"><div class="step-num">02</div><div><div class="step-title">O modelo calcula</div><div class="step-desc">Poisson, Dixon-Coles e Monte Carlo correm em paralelo para produzir uma distribuição de probabilidades para cada mercado.</div></div></div>
-      <div class="step reveal"><div class="step-num">03</div><div><div class="step-title">Recebes o sinal</div><div class="step-desc">Uma ficha clara por jogo: probabilidade, nível de fiabilidade, e o mercado onde o modelo deteta uma diferença com o mercado real.</div></div></div>
+      <div class="step reveal"><div class="step-num">01</div><div><div class="step-title" data-i18n="landing_page.step1_title">Recolhemos os dados</div><div class="step-desc" data-i18n="landing_page.step1_desc">Calendários, alinhamentos prováveis, histórico de confrontos e estatísticas xG atualizados continuamente, liga a liga.</div></div></div>
+      <div class="step reveal"><div class="step-num">02</div><div><div class="step-title" data-i18n="landing_page.step2_title">O modelo calcula</div><div class="step-desc" data-i18n="landing_page.step2_desc">Poisson, Dixon-Coles e Monte Carlo correm em paralelo para produzir uma distribuição de probabilidades para cada mercado.</div></div></div>
+      <div class="step reveal"><div class="step-num">03</div><div><div class="step-title" data-i18n="landing_page.step3_title">Recebes o sinal</div><div class="step-desc" data-i18n="landing_page.step3_desc">Uma ficha clara por jogo: probabilidade, nível de fiabilidade, e o mercado onde o modelo deteta uma diferença com o mercado real.</div></div></div>
     </div>
   </div>
 </section>
 
 <section class="offres">
   <div class="wrap">
-    <div class="sec-lbl">O ACESSO</div>
-    <h2 class="sec-title">Começa grátis. <b>Passa a Pro</b> quando quiseres ver tudo.</h2>
+    <div class="sec-lbl" data-i18n="landing_page.lbl_access">O ACESSO</div>
+    <h2 class="sec-title" data-i18n-html="landing_v2.title_access">Começa grátis. <b>Passa a Pro</b> quando quiseres ver tudo.</h2>
     <div class="plan-grid">
       <div class="plan">
-        <div class="plan-name">GRATUITO</div>
-        <div class="plan-price">0€</div>
+        <div class="plan-name" data-i18n="landing_page.plan_free_name">GRATUITO</div>
+        <div class="plan-price"><b data-market-price="free" style="font-weight:inherit">0€</b></div>
         <ul class="plan-feats">
-          <li>1 análise completa oferecida todos os dias</li>
-          <li>Acesso ao histórico de desempenho</li>
-          <li>O nosso método explicado em detalhe</li>
+          <li data-i18n="landing_page.plan_free_feat1">1 análise completa oferecida todos os dias</li>
+          <li data-i18n="landing_v2.plan_free_feat2">Todos os jogos do dia visíveis</li>
+          <li data-i18n="landing_page.plan_free_feat3">O nosso método explicado em detalhe</li>
         </ul>
-        <a href="https://iashark.com/pt/" class="plan-cta free">COMEÇAR</a>
+        <a href="/pt/" data-href="" class="plan-cta free" data-i18n="landing_page.plan_free_cta">COMEÇAR</a>
       </div>
-      <div class="plan hi">
+      <div class="plan hi" data-badge="RECOMENDADO" data-i18n-attr="data-badge:landing_page.plan_pro_badge">
         <div class="plan-name">PRO</div>
-        <div class="plan-price">Grátis<span>os primeiros 3 dias</span></div>
-        <div class="plan-trial">Depois 19,95€/mês — cancelável a qualquer momento</div>
+        <div class="plan-price"><b data-market-price="pro" style="font-weight:inherit">19,95€</b><span data-i18n="landing_v2.per_month">/mês</span></div>
+        <div class="plan-trial" data-i18n="landing_v2.plan_pro_commitment">Sem compromisso — cancelável a qualquer momento</div>
         <ul class="plan-feats">
-          <li>Todas as análises, todas as ligas</li>
-          <li>Filtros avançados e nível de fiabilidade detalhado</li>
-          <li>Acompanhamento pessoal dos teus jogos seguidos</li>
-          <li>Cancelável a qualquer momento</li>
+          <li data-i18n="landing_page.plan_pro_feat1">Todas as análises, todas as ligas</li>
+          <li data-i18n="landing_page.plan_pro_feat2">Filtros avançados e nível de fiabilidade detalhado</li>
+          <li data-i18n="landing_page.plan_pro_feat3">Acompanhamento pessoal dos teus jogos seguidos</li>
+          <li data-i18n="landing_page.plan_pro_feat4">Cancelável a qualquer momento</li>
         </ul>
-        <a href="https://iashark.com/pt/pro.html" class="plan-cta pro">DESBLOQUEAR PRO</a>
+        <a href="/pt/pro.html" data-href="pro.html" class="plan-cta pro" data-i18n="landing_page.plan_pro_cta">DESBLOQUEAR PRO</a>
       </div>
     </div>
   </div>
@@ -238,24 +239,41 @@ footer{padding:30px 20px 100px;text-align:center;border-top:1px solid var(--bord
 <section class="final-cta">
   <div class="wrap">
     <div class="hero-shark" style="font-size:36px;margin-bottom:14px;">🦈</div>
-    <h2>O próximo jogo já tem <b>um sinal.</b></h2>
-    <p>Vai vê-lo, é grátis.</p>
-    <a href="https://iashark.com/pt/" class="btn-primary">VER O JOGO DE HOJE</a>
+    <h2 data-i18n-html="landing_v2.final_title">O próximo jogo já tem <b>um sinal.</b></h2>
+    <p data-i18n="landing_page.final_sub">Vai vê-lo, é grátis.</p>
+    <a href="/pt/" data-href="" class="btn-primary" data-i18n="landing_page.final_cta">VER O JOGO DE HOJE</a>
   </div>
 </section>
 
 <footer>
   <div class="foot-legal">
-    <div>⚠️ INFORMAÇÃO COM FINALIDADE ESTATÍSTICA — NÃO CONSTITUI UM CONSELHO DE APOSTA · PROIBIDO A MENORES DE 18 ANOS</div>
-    <div>Ajuda: <a href="https://www.joueurs-info-service.fr">joueurs-info-service.fr</a> · 09 74 75 13 13</div>
+    <div>⚠️ <span data-i18n="landing_page.foot_disclaimer">INFORMAÇÃO COM FINALIDADE ESTATÍSTICA — NÃO CONSTITUI UM CONSELHO DE APOSTA · PROIBIDO A MENORES DE 18 ANOS</span></div>
+    <div id="helpLine"><span data-i18n="landing_page.foot_help_label">Ajuda:</span> <a data-market-helpline="url" href="https://www.joueurs-info-service.fr">joueurs-info-service.fr</a> · <a data-market-helpline="phone" href="tel:0974751313">09 74 75 13 13</a></div>
     <div class="foot-links" style="margin-top:8px;">
-      <a href="https://iashark.com/mentions-legales.html">Aviso Legal</a>
-      <a href="https://iashark.com/cgv.html">Termos</a>
-      <a href="https://iashark.com/confidentialite.html">Privacidade</a>
+      <a href="/pt/mentions-legales.html" data-href="mentions-legales.html" data-i18n="footer.mentions_legales">Aviso Legal</a>
+      <a href="/pt/cgv.html" data-href="cgv.html" data-i18n="footer.cgv">Termos</a>
+      <a href="/pt/confidentialite.html" data-href="confidentialite.html" data-i18n="footer.confidentialite">Privacidade</a>
+      <a href="/pt/cookies.html" data-href="cookies.html" data-i18n="footer.cookies">Cookies</a>
+      <a href="/pt/jeu-responsable.html" data-href="jeu-responsable.html" data-i18n="footer.responsible_gambling">Jogo responsável</a>
     </div>
   </div>
 </footer>
 
+<script src="/i18n/i18n.js"></script>
+<script src="/lib/market-config.js"></script>
+<script>
+(function(){
+  // Ligne d'aide jeu responsable : nom/lien/numero remplis par
+  // lib/market-config.js selon le marche (FR, GB, ZA...). Marche sans
+  // ressource confirmee (mx) : la ligne entiere est masquee, jamais un
+  // numero invente.
+  function marche(){
+    var m=window.IASHARK_MARKET, el=document.getElementById('helpLine');
+    if(m&&el&&!m.helpline)el.hidden=true;
+  }
+  if(window.I18N&&window.I18N.init){window.I18N.init().then(marche,marche);}else{marche();}
+})();
+</script>
 <script src="/funnel-track.js"></script>
 <script>if(window.iasharkTrack) iasharkTrack('landing_view');</script>
 <script src="/lang-switcher.js"></script>

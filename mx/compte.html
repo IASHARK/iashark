@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="es-MX">
+<head>
+<meta charset="utf-8">
+<meta name="iashark-market" content="mx">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>IASHARK — Mi cuenta</title>
+<meta name="description" content="Administra tu cuenta, tu suscripción a Herramientas y tus preferencias de IASHARK.">
+<meta name="robots" content="noindex,nofollow">
+<link rel="canonical" href="https://iashark.com/mx/compte.html">
+<link rel="alternate" hreflang="fr" href="https://iashark.com/fr/compte.html">
+<link rel="alternate" hreflang="en-GB" href="https://iashark.com/gb/compte.html">
+<link rel="alternate" hreflang="en-ZA" href="https://iashark.com/za/compte.html">
+<link rel="alternate" hreflang="en" href="https://iashark.com/en/compte.html">
+<link rel="alternate" hreflang="es-MX" href="https://iashark.com/mx/compte.html">
+<link rel="alternate" hreflang="es" href="https://iashark.com/es/compte.html">
+<link rel="alternate" hreflang="de" href="https://iashark.com/de/compte.html">
+<link rel="alternate" hreflang="it" href="https://iashark.com/it/compte.html">
+<link rel="alternate" hreflang="pt" href="https://iashark.com/pt/compte.html">
+<link rel="alternate" hreflang="x-default" href="https://iashark.com/fr/compte.html">
+<link rel="icon" href="/assets/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<link rel="stylesheet" href="/assets/tailwind.css">
+<link rel="stylesheet" href="/assets/account.css">
+<link rel="stylesheet" href="/assets/bottom-navigation.css">
+</head>
+<body class="min-h-[100dvh] bg-page text-ink antialiased">
+
+<header class="border-b border-hairline">
+  <div class="mx-auto flex h-14 w-full max-w-[1180px] items-center gap-4 px-4 sm:px-6">
+    <a href="/mx/" aria-label="IASHARK, inicio" data-i18n-attr="aria-label:site_header.aria_home"><img src="/assets/iashark-logo.png" alt="IASHARK" class="h-7 w-auto object-contain"></a>
+    <a href="/mx/" class="ml-auto text-[13px] text-soft transition hover:text-ink" data-i18n="compte_page.back_to_site">Regresar al sitio</a>
+  </div>
+</header>
+
+<!-- Etat d'attente : la page ne montre JAMAIS un plan avant de le connaitre.
+     Afficher "Gratuit" puis basculer sur "Pro" apres chargement serait un
+     mensonge de 300 ms a chaque ouverture. -->
+<div id="chargement" class="mx-auto w-full max-w-[1180px] px-4 py-12 sm:px-6" aria-busy="true" aria-live="polite">
+  <div class="h-7 w-44 animate-pulse rounded bg-white/[.06]"></div>
+  <div class="mt-8 grid gap-6 lg:grid-cols-[232px_minmax(0,1fr)]">
+    <div class="hidden h-64 animate-pulse rounded-2xl bg-white/[.04] lg:block"></div>
+    <div class="space-y-4">
+      <div class="h-28 animate-pulse rounded-2xl bg-white/[.04]"></div>
+      <div class="h-48 animate-pulse rounded-2xl bg-white/[.04]"></div>
+    </div>
+  </div>
+  <span class="sr-only" data-i18n="compte_page.loading_account">Cargando tu cuenta…</span>
+</div>
+
+<main id="compte" hidden class="mx-auto w-full max-w-[1180px] px-4 pb-28 sm:px-6 lg:pb-16"></main>
+
+<nav class="bottom-nav"><a href="/mx/"><span>⌂</span><b>Accueil</b></a><a href="/mx/pro.html"><span>☆</span><b>Outils</b></a><a href="/es/blog/"><span>▤</span><b>Blog</b></a><a class="active" href="/mx/compte.html"><span>♙</span><b>Compte</b></a></nav>
+
+<script src="/app-client.js"></script>
+<script src="/i18n/i18n.js"></script>
+<script src="/lib/market-config.js"></script>
+<script src="/account-page.js"></script>
+<script src="/site-prefs.js"></script>
+<script src="/bottom-navigation.js"></script>
+</body>
+</html>

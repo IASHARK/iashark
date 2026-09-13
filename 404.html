@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Page introuvable — IASHARK</title>
+<title data-i18n="geo.meta.404.title">Page introuvable — IASHARK</title>
 <meta name="robots" content="noindex, follow">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
 <style>
@@ -23,15 +23,17 @@ a.btn{font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:1px;padd
 <link rel="stylesheet" href="/assets/bottom-navigation.css"></head>
 <body>
 <div class="shark">🦈</div>
-<a href="/" class="logo"><span>IA</span>SHARK</a>
-<h1>Page introuvable</h1>
-<p>Ce match ou cette page n'existe plus, ou l'adresse est incorrecte. Nos analyses du jour t'attendent sur l'accueil.</p>
-<a href="/" class="btn">RETOUR À L'ACCUEIL</a>
+<a href="/" data-href="" class="logo"><span>IA</span>SHARK</a>
+<h1 data-i18n="page_404.heading">Page introuvable</h1>
+<p data-i18n="page_404.text">Ce match ou cette page n'existe plus, ou l'adresse est incorrecte. Nos analyses du jour t'attendent sur l'accueil.</p>
+<a href="/" data-href="" class="btn" data-i18n="page_404.cta_home">RETOUR À L'ACCUEIL</a>
 <div class="links">
-  <a href="/marches.html">Marchés</a>
-  <a href="/pro.html">Outils</a>
-  <a href="/blog/">Blog</a>
+  <a href="/marches.html" data-href="marches.html" data-i18n="page_404.link_markets">Marchés</a>
+  <a href="/pro.html" data-href="pro.html" data-i18n="page_404.link_tools">Outils</a>
+  <a href="/blog.html" data-href="blog.html" data-i18n="page_404.link_blog">Blog</a>
 </div>
+<script src="/i18n/i18n.js"></script>
+<script>if(window.I18N&&window.I18N.init){window.I18N.init();}</script>
 <script src="/site-prefs.js"></script>
 <script src="/bottom-navigation.js"></script></body>
 </html>

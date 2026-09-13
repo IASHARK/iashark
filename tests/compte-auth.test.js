@@ -152,7 +152,15 @@ test("la suppression de compte est reelle, confirmee, et faite cote serveur", ()
   // Plus de mailto: qui promettait une suppression que rien n'executait.
   assert.ok(!/mailto:[^"']*suppression/i.test(compteJs));
   assert.match(compteJs, /functions\/v1\/delete-account/);
-  assert.match(compteJs, /!== 'SUPPRIMER'/);
+  // Le mot attendu est derive de la meme cle i18n que celle affichee en gras
+  // dans le dialogue (compte_page.delete_confirm_word) : il ne peut donc
+  // jamais differer de ce que l'utilisateur voit a l'ecran, quelle que soit
+  // la langue de la page.
+  assert.match(compteJs, /tr\('compte_page\.delete_confirm_word',\s*'SUPPRIMER'\)/);
+  assert.match(compteJs, /!== motAttendu/);
+  // Le contrat d'API envoye au serveur reste 'SUPPRIMER' en dur : ce n'est
+  // pas du texte affiche a l'utilisateur, donc il ne se traduit pas.
+  assert.match(compteJs, /confirmation: 'SUPPRIMER'/);
   // Cote serveur : jeton verifie, confirmation exigee, abonnement resilie
   // AVANT la suppression.
   assert.match(suppression, /auth\.getUser\(\)/);

@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="es-MX">
+<head>
+<meta charset="utf-8">
+<meta name="iashark-market" content="mx">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title data-i18n="geo.meta.connexion.title">Iniciar sesión — IASHARK</title>
+<meta name="description" content="Inicia sesión en IASHARK para ver tus análisis, tus herramientas y tu diario." data-i18n-attr="content:geo.meta.connexion.description">
+<meta name="robots" content="noindex,follow">
+<link rel="canonical" href="https://iashark.com/mx/connexion.html">
+<link rel="alternate" hreflang="fr" href="https://iashark.com/fr/connexion.html">
+<link rel="alternate" hreflang="en-GB" href="https://iashark.com/gb/connexion.html">
+<link rel="alternate" hreflang="en-ZA" href="https://iashark.com/za/connexion.html">
+<link rel="alternate" hreflang="en" href="https://iashark.com/en/connexion.html">
+<link rel="alternate" hreflang="es-MX" href="https://iashark.com/mx/connexion.html">
+<link rel="alternate" hreflang="es" href="https://iashark.com/es/connexion.html">
+<link rel="alternate" hreflang="de" href="https://iashark.com/de/connexion.html">
+<link rel="alternate" hreflang="it" href="https://iashark.com/it/connexion.html">
+<link rel="alternate" hreflang="pt" href="https://iashark.com/pt/connexion.html">
+<link rel="alternate" hreflang="x-default" href="https://iashark.com/fr/connexion.html">
+<link rel="icon" href="/assets/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<link rel="stylesheet" href="/assets/tailwind.css">
+<link rel="stylesheet" href="/assets/account.css">
+<script src="/lib/market-config.js"></script>
+</head>
+<body class="min-h-[100dvh] bg-page text-ink antialiased">
+
+<header class="border-b border-hairline">
+  <div class="mx-auto flex h-14 w-full max-w-[1080px] items-center px-5">
+    <a href="/mx/" data-href="" aria-label="IASHARK, inicio" data-i18n-attr="aria-label:auth.home_aria_label"><img src="/assets/iashark-logo.png" alt="IASHARK" class="h-7 w-auto object-contain"></a>
+    <a href="/mx/" data-href="" class="ml-auto text-[13px] text-soft transition hover:text-ink" data-i18n="auth.back_to_site">Volver al sitio</a>
+  </div>
+</header>
+
+<main class="mx-auto grid w-full max-w-[1080px] items-center gap-12 px-5 py-12 lg:min-h-[calc(100dvh-3.5rem)] lg:grid-cols-[minmax(0,1fr)_minmax(0,420px)] lg:gap-16 lg:py-16">
+
+  <!-- Panneau de gauche : volontairement sobre. Une phrase et trois reperes,
+       pas une page de vente - la personne qui arrive ici a deja un compte. -->
+  <section class="lg:pr-6">
+    <p class="text-[11px] font-bold uppercase tracking-[0.2em] text-cyan" data-i18n="auth.login_eyebrow">Inicia sesión en IASHARK</p>
+    <h1 class="mt-3 text-[38px] font-extrabold leading-[1.05] tracking-tight sm:text-[46px]" data-i18n="auth.login_h1">Bienvenido de nuevo.</h1>
+    <p class="mt-4 max-w-md text-[15px] leading-relaxed text-soft" data-i18n="auth.login_intro">Inicia sesión para volver a tus análisis, tus herramientas y tu diario.</p>
+    <ul class="mt-8 hidden max-w-md space-y-3.5 lg:block">
+      <li class="flex items-start gap-3 text-[14.5px] text-soft"><span aria-hidden="true" class="mt-[3px] text-cyan">✓</span><span data-i18n="auth.login_bullet_analyses">Los análisis del día, liga por liga</span></li>
+      <li class="flex items-start gap-3 text-[14.5px] text-soft"><span aria-hidden="true" class="mt-[3px] text-cyan">✓</span><span data-i18n="auth.login_bullet_tools">Las seis herramientas de decisión</span></li>
+      <li class="flex items-start gap-3 text-[14.5px] text-soft"><span aria-hidden="true" class="mt-[3px] text-cyan">✓</span><span data-i18n="auth.login_bullet_journal">Tu diario y tu bankroll</span></li>
+    </ul>
+  </section>
+
+  <!-- Formulaire -->
+  <section class="rounded-2xl border border-hairline bg-surface p-6 sm:p-7">
+    <h2 class="text-[19px] font-bold tracking-tight" data-i18n="auth.login_form_heading">Iniciar sesión</h2>
+
+    <form id="form" novalidate class="mt-6">
+      <div>
+        <label for="email" class="block text-[13px] font-semibold text-soft" data-i18n="auth.email_label">Email</label>
+        <input id="email" name="email" type="email" inputmode="email" autocomplete="email" autocapitalize="off" spellcheck="false" required
+               class="fld mt-2" placeholder="tu@ejemplo.com" aria-describedby="emailErr" data-i18n-attr="placeholder:auth.email_placeholder">
+        <p id="emailErr" hidden class="mt-1.5 text-[12.5px] text-red-300"></p>
+      </div>
+
+      <div class="mt-4">
+        <div class="flex items-baseline justify-between gap-3">
+          <label for="password" class="block text-[13px] font-semibold text-soft" data-i18n="auth.password_label">Contraseña</label>
+          <a href="/mx/mot-de-passe-oublie.html" data-href="mot-de-passe-oublie.html" class="text-[12.5px] text-cyan transition hover:underline" data-i18n="auth.forgot_password">¿Olvidaste tu contraseña?</a>
+        </div>
+        <div class="relative mt-2">
+          <input id="password" name="password" type="password" autocomplete="current-password" required
+                 class="fld fld-pwd" placeholder="Tu contraseña" aria-describedby="passwordErr" data-i18n-attr="placeholder:auth.password_placeholder_login">
+          <button type="button" id="oeil" aria-label="Mostrar contraseña" aria-pressed="false"
+                  class="absolute right-1 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-lg text-soft transition hover:text-ink" data-i18n-attr="aria-label:auth.show_password">
+            <svg viewBox="0 0 24 24" class="h-[18px] w-[18px]" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+        <p id="passwordErr" hidden class="mt-1.5 text-[12.5px] text-red-300"></p>
+      </div>
+
+      <button type="submit" id="submit"
+              class="mt-6 h-12 w-full rounded-xl bg-cyan text-[15px] font-bold text-[#04141b] transition hover:bg-cyan/90 disabled:cursor-wait disabled:opacity-60" data-i18n="auth.login_submit">Iniciar sesión</button>
+
+      <p id="formMsg" hidden role="alert" aria-live="polite"></p>
+    </form>
+
+    <p class="mt-6 border-t border-hairline pt-5 text-center text-[13.5px] text-soft">
+      <span data-i18n="auth.no_account_prompt">¿Aún no tienes cuenta?</span> <a href="/mx/inscription.html" data-href="inscription.html" class="font-semibold text-cyan transition hover:underline" data-i18n="auth.create_account_link">Crear una cuenta</a>
+    </p>
+  </section>
+
+</main>
+
+<script src="/i18n/i18n.js"></script>
+<script src="/app-client.js"></script>
+<script src="/auth-pages.js"></script>
+<script>
+  if (window.I18N && window.I18N.init) { window.I18N.init(); }
+  IasharkAuth.redirigerSiConnecte();
+  IasharkAuth.brancherOeil('oeil', 'password');
+  document.getElementById('form').addEventListener('submit', IasharkAuth.connexion);
+</script>
+<script src="/site-prefs.js"></script>
+</body>
+</html>

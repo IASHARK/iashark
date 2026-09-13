@@ -30,8 +30,26 @@
   function t(key, fallback) { return (window.I18N && window.I18N.t) ? window.I18N.t(key, fallback) : fallback; }
   function localeTag() { return (window.I18N && window.I18N.localeTag) ? window.I18N.localeTag() : 'fr-FR'; }
   function num(v, d) { return Number(v).toLocaleString(localeTag(), { minimumFractionDigits: d, maximumFractionDigits: d }); }
-  function euros(v) { return num(v, 0) + ' €'; }
+  // Lien interne dans le repertoire de langue/marche courant (/gb/, /mx/...).
+  function lien(p) { return (window.I18N && window.I18N.href) ? window.I18N.href(p) : '/' + p; }
+  function estFr() { return !(window.I18N && window.I18N.locale) || window.I18N.locale === 'fr'; }
+  // Devise du marche courant (lib/market-config.js -> window.IASHARK_MARKET),
+  // EUR par defaut. Les montants saisis ici sont ceux de l'utilisateur.
+  function devise() { return (window.IASHARK_MARKET && window.IASHARK_MARKET.currency) || 'EUR'; }
+  function symboleDevise() {
+    try {
+      var parts = new Intl.NumberFormat(localeTag(), { style: 'currency', currency: devise() }).formatToParts(0);
+      for (var i = 0; i < parts.length; i++) if (parts[i].type === 'currency') return parts[i].value;
+    } catch (e) {}
+    return devise() === 'EUR' ? '€' : devise();
+  }
+  function euros(v) {
+    try { return Number(v).toLocaleString(localeTag(), { style: 'currency', currency: devise(), minimumFractionDigits: 0, maximumFractionDigits: 0 }); }
+    catch (e) { return num(v, 0) + ' ' + symboleDevise(); }
+  }
+  function eurosSigne(v) { return (v >= 0 ? '+' : '') + euros(v); }
   function signe(v, d) { return (v >= 0 ? '+' : '') + num(v, d == null ? 1 : d); }
+  function points() { return t('tools_page.unit_points', 'pts'); }
 
   /* ---------------------------------------------------------------------
      DONNEES DE DEMONSTRATION
@@ -39,15 +57,26 @@
      Elles ne doivent jamais pouvoir etre confondues avec une vraie analyse.
      --------------------------------------------------------------------- */
   var DEMO_SCAN = [
-    { edge: 6.4, match: 'Club A – Club B', market: 'Au plus 1 but en 1re mi-temps', league: 'Championnat 1', modelProbability: 64.2, marketProbability: 57.8, fairOdds: 1.56, risk: 'Faible' },
-    { edge: 4.1, match: 'Club C – Club D', market: 'Les deux équipes marquent', league: 'Championnat 2', modelProbability: 61.0, marketProbability: 56.9, fairOdds: 1.64, risk: 'Modéré' },
-    { edge: 3.2, match: 'Club E – Club F', market: 'Au moins 3 buts dans le match', league: 'Championnat 1', modelProbability: 55.4, marketProbability: 52.2, fairOdds: 1.81, risk: 'Modéré' }
+    // marketId : meme marche en identifiant moteur, pour afficher le libelle
+    // dans la langue de la page (le texte `market` reste le libelle francais).
+    { edge: 6.4, match: 'Club A – Club B', market: 'Au plus 1 but en 1re mi-temps', marketId: 'fh-under-15', league: 'Championnat 1', modelProbability: 64.2, marketProbability: 57.8, fairOdds: 1.56, risk: 'Faible' },
+    { edge: 4.1, match: 'Club C – Club D', market: 'Les deux équipes marquent', marketId: 'btts-yes', league: 'Championnat 2', modelProbability: 61.0, marketProbability: 56.9, fairOdds: 1.64, risk: 'Modéré' },
+    { edge: 3.2, match: 'Club E – Club F', market: 'Au moins 3 buts dans le match', marketId: 'over-25', league: 'Championnat 1', modelProbability: 55.4, marketProbability: 52.2, fairOdds: 1.81, risk: 'Modéré' }
   ];
   var DEMO_COMBO = [
-    { id: 'd1', matchKey: 'd1', match: 'Club A – Club B', market: 'Au plus 1 but en 1re mi-temps', probability: 64.2, odds: 1.73 },
-    { id: 'd2', matchKey: 'd2', match: 'Club C – Club D', market: 'Les deux équipes marquent', probability: 61.0, odds: 1.72 },
-    { id: 'd3', matchKey: 'd3', match: 'Club E – Club F', market: 'Au moins 3 buts dans le match', probability: 55.4, odds: 1.90 }
+    { id: 'd1', matchKey: 'd1', match: 'Club A – Club B', market: 'Au plus 1 but en 1re mi-temps', marketId: 'fh-under-15', probability: 64.2, odds: 1.73 },
+    { id: 'd2', matchKey: 'd2', match: 'Club C – Club D', market: 'Les deux équipes marquent', marketId: 'btts-yes', probability: 61.0, odds: 1.72 },
+    { id: 'd3', matchKey: 'd3', match: 'Club E – Club F', market: 'Au moins 3 buts dans le match', marketId: 'over-25', probability: 55.4, odds: 1.90 }
   ];
+  var DEMO_LEAGUES = { 'Championnat 1': 'tools_page.demo_league_1', 'Championnat 2': 'tools_page.demo_league_2' };
+  function ligueAffichee(nom) { return DEMO_LEAGUES[nom] ? t(DEMO_LEAGUES[nom], nom) : (nom || ''); }
+  // Libelle d'une ligne (demo ou reelle) dans la langue active. En francais,
+  // le texte de demonstration d'origine est garde tel quel.
+  function marcheLigne(r) {
+    var labels = window.IasharkMarketLabels;
+    if (r.marketId && !estFr() && labels && labels.marketIdLabel) return labels.marketIdLabel(r.marketId);
+    return marcheLisible(r.market);
+  }
 
   /* ---------------------------------------------------------------------
      ACCES AUX DONNEES DE MATCH — passage oblige par le serveur.
@@ -149,7 +178,7 @@
       + '<div class="min-w-0 flex-1"><div class="text-[10px] font-extrabold tracking-[0.16em] text-cyan">' + esc(t('tools_page.pro_badge_label', 'PRO')) + '</div>'
       + '<p class="mt-1.5 text-[14px] font-semibold text-ink">' + esc(titre) + '</p>'
       + '<p class="mt-1 text-[13px] leading-relaxed text-soft">' + esc(sous) + '</p></div>'
-      + '<a href="/abonnement.html" class="mt-4 inline-flex shrink-0 items-center justify-center rounded-xl bg-cyan px-6 py-3 text-[13px] font-extrabold text-page transition hover:brightness-110 sm:mt-0">' + esc(t('tools_page.pro_cta_unlock', 'Débloquer Pro')) + '</a>'
+      + '<a href="' + esc(lien('abonnement.html')) + '" class="mt-4 inline-flex shrink-0 items-center justify-center rounded-xl bg-cyan px-6 py-3 text-[13px] font-extrabold text-page transition hover:brightness-110 sm:mt-0">' + esc(t('tools_page.pro_cta_unlock', 'Débloquer Pro')) + '</a>'
       + '</div>';
   }
 
@@ -178,29 +207,28 @@
      ===================================================================== */
   function ligneScan(r, i, reel) {
     var edge = '<div class="w-[74px] shrink-0 text-[17px] font-extrabold leading-none tracking-[-0.03em] text-cyan tabular-nums">'
-      + signe(r.edge, 1) + '<span class="ml-1 text-[10px] font-bold tracking-normal text-soft">pts</span></div>';
+      + signe(r.edge, 1) + '<span class="ml-1 text-[10px] font-bold tracking-normal text-soft">' + esc(points()) + '</span></div>';
     var titre = reel ? esc(r.match) : esc(r.match);
     var action = reel && r.id
-      ? '<a href="/match/' + esc(r.id) + '.html" class="shrink-0 rounded-lg border border-hairline px-3 py-1.5 text-[12.5px] font-semibold text-ink transition hover:border-cyan/40 hover:text-cyan">' + esc(t('tools_page.scan_view_btn', 'Voir')) + '</a>'
+      ? '<a href="' + esc(lien('match/' + r.id + '.html')) + '" class="shrink-0 rounded-lg border border-hairline px-3 py-1.5 text-[12.5px] font-semibold text-ink transition hover:border-cyan/40 hover:text-cyan">' + esc(t('tools_page.scan_view_btn', 'Voir')) + '</a>'
       : '<span class="shrink-0 text-[12.5px] text-soft/60">—</span>';
     return '<li class="flex items-center gap-3 border-t border-hairline px-1 py-3 first:border-t-0 sm:gap-4">'
       + edge
       + '<div class="min-w-0 flex-1"><div class="truncate text-[14px] font-semibold text-ink">' + titre + '</div>'
-      + '<div class="truncate text-[12.5px] text-soft">' + esc(marcheLisible(r.market)) + ' · ' + esc(r.league || '') + '</div></div>'
+      + '<div class="truncate text-[12.5px] text-soft">' + esc(marcheLigne(r)) + ' · ' + esc(ligueAffichee(r.league)) + '</div></div>'
       + '<div class="hidden w-[76px] shrink-0 text-right sm:block"><div class="text-[14px] font-bold text-ink tabular-nums">' + num(r.modelProbability, 1) + '%</div><div class="text-[11px] text-soft">' + esc(t('tools_page.label_model_short', 'modèle')) + '</div></div>'
       + '<div class="hidden w-[76px] shrink-0 text-right sm:block"><div class="text-[14px] font-semibold text-soft tabular-nums">' + (r.marketProbability != null ? num(r.marketProbability, 1) + '%' : '—') + '</div><div class="text-[11px] text-soft">' + esc(t('tools_page.label_market_short', 'marché')) + '</div></div>'
       + action + '</li>';
   }
 
-  // Traduit un libelle de marche en francais courant (lib/market-labels.js) :
-  // "DC 12" ou "Over 2.5" n'ont aucun sens pour qui decouvre le site. Les
-  // noms d'equipes ne sont pas connus ici, la traduction reste donc generique
-  // ("l'equipe a domicile"), ce qui suffit dans une liste de marches.
-  // NOTE i18n : ce module (lib/market-labels.js) n'est pas dans le perimetre
-  // de ce chantier — il reste fixe en francais pour l'instant (marketLabelFr).
+  // Traduit un libelle de marche en langage courant, dans la langue active
+  // (lib/market-labels.js#marketLabel) : "DC 12" ou "Over 2.5" n'ont aucun
+  // sens pour qui decouvre le site. Les noms d'equipes ne sont pas connus
+  // ici, la traduction reste donc generique ("l'equipe a domicile"), ce qui
+  // suffit dans une liste de marches. Un texte libre (journal) ressort tel quel.
   function marcheLisible(libelle) {
     var labels = window.IasharkMarketLabels;
-    return labels ? labels.marketLabelFr(libelle) : String(libelle == null ? '' : libelle);
+    return labels ? (labels.marketLabel || labels.marketLabelFr)(libelle) : String(libelle == null ? '' : libelle);
   }
 
   function rendreScanner(panneau) {
@@ -295,7 +323,7 @@
         ? t('tools_page.fair_note_favourable', 'La cote proposée est <b class="text-ink">plus généreuse</b> que ta probabilité ne le justifie : c’est un écart en ta faveur.')
         : t('tools_page.fair_note_unfavourable', 'La cote proposée est <b class="text-ink">moins intéressante</b> que ta probabilité ne le justifie. Le pari est défavorable sur la durée.');
       var largeurMax = Math.max(r.estimatedProbability, r.impliedProbability, 1);
-      out.innerHTML = resultat(t('tools_page.fair_result_label_gap', 'Écart'), signe(r.edgePoints, 1) + ' pts', note, r.favourable ? 'pos' : 'neg')
+      out.innerHTML = resultat(t('tools_page.fair_result_label_gap', 'Écart'), signe(r.edgePoints, 1) + ' ' + esc(points()), note, r.favourable ? 'pos' : 'neg')
         + '<div class="' + S.carte + ' mt-4">'
         + barreProb(t('tools_page.fair_bar_your_prob', 'Ta probabilité estimée'), r.estimatedProbability, r.estimatedProbability / largeurMax * 100, true)
         + barreProb(t('tools_page.fair_bar_implied_prob', 'Probabilité implicite de la cote'), r.impliedProbability, r.impliedProbability / largeurMax * 100, false)
@@ -326,7 +354,7 @@
     panneau.innerHTML = enTete('Calculateur de mise', 'Calcule la mise à partir du capital, de la cote et du profil de risque choisi.')
       + '<div class="grid grid-cols-1 gap-6 lg:grid-cols-[340px_minmax(0,1fr)]">'
       + '<div class="' + S.carte + ' space-y-4">'
-      + champ('spBank', t('tools_page.stake_bank_label', 'Capital disponible'), { unit: '€', min: 1, step: 1, value: bk })
+      + champ('spBank', t('tools_page.stake_bank_label', 'Capital disponible'), { unit: symboleDevise(), min: 1, step: 1, value: bk })
       + champ('spOdds', t('tools_page.stake_odds_label', 'Cote décimale'), { min: 1.01, step: 0.01, value: 2.10 })
       + champ('spProb', t('tools_page.fair_prob_label', 'Probabilité estimée'), { unit: '%', min: 0.1, max: 99.9, step: 0.1, value: 55 })
       + select('spProfil', t('tools_page.stake_profile_label', 'Profil de risque'), [['0.25', t('tools_page.stake_profile_cautious', 'Prudent · quart de Kelly')], ['0.5', t('tools_page.stake_profile_balanced', 'Équilibré · demi-Kelly')], ['1', t('tools_page.stake_profile_aggressive', 'Dynamique · Kelly plafonné')]], '0.5')
@@ -425,7 +453,7 @@
     panneau.innerHTML = enTete('Simulateur de capital', 'Rejoue des milliers de séries à partir des hypothèses saisies et montre la dispersion réelle.')
       + '<div class="grid grid-cols-1 gap-6 lg:grid-cols-[320px_minmax(0,1fr)]">'
       + '<div class="' + S.carte + ' space-y-4">'
-      + champ('blBank', t('tools_page.capital_start', 'Capital de départ'), { unit: '€', min: 1, step: 1, value: etat.bankroll || 1000 })
+      + champ('blBank', t('tools_page.capital_start', 'Capital de départ'), { unit: symboleDevise(), min: 1, step: 1, value: etat.bankroll || 1000 })
       + champ('blStake', t('tools_page.bankroll_stake_label', 'Mise par décision'), { unit: '%', min: 0.1, max: 20, step: 0.1, value: 3 })
       + champ('blBets', t('tools_page.bankroll_bets_label', 'Nombre de décisions'), { min: 10, max: 2000, step: 10, value: 300 })
       + champ('blWin', t('tools_page.bankroll_win_label', 'Taux de réussite estimé'), { unit: '%', min: 1, max: 99, step: 0.1, value: 54 })
@@ -514,7 +542,7 @@
         return '<li class="border-t border-hairline first:border-t-0"><label class="flex cursor-pointer items-center gap-3 py-3">'
           + '<input type="checkbox" data-cb="' + i + '" class="h-4 w-4 shrink-0 accent-[#20d5ef]">'
           + '<span class="min-w-0 flex-1"><span class="block truncate text-[14px] font-semibold text-ink">' + esc(s.match) + '</span>'
-          + '<span class="block truncate text-[12.5px] text-soft">' + esc(marcheLisible(s.market)) + ' · ' + num(s.probability, 1) + esc(t('tools_page.combo_estimated_suffix', ' % estimés')) + '</span></span>'
+          + '<span class="block truncate text-[12.5px] text-soft">' + esc(marcheLigne(s)) + ' · ' + num(s.probability, 1) + esc(t('tools_page.combo_estimated_suffix', ' % estimés')) + '</span></span>'
           + '<span class="shrink-0 text-[14px] font-bold text-ink tabular-nums">' + num(s.odds, 2) + '</span></label></li>';
       }).join('') + '</ul>';
       $$('input[data-cb]', box).forEach(function (input) {
@@ -582,7 +610,7 @@
     if (!ctx.user) {
       panneau.innerHTML = head + vide(t('tools_page.journal_login_title', 'Connecte-toi pour ouvrir ton journal'),
         t('tools_page.journal_login_text', 'Le journal enregistre tes décisions et calcule ta performance réelle. Il ne contient que tes propres données.'),
-        '<a href="/compte.html" class="mt-5 inline-flex rounded-xl bg-cyan px-6 py-3 text-[13px] font-extrabold text-page transition hover:brightness-110">' + esc(t('tools_page.journal_login_cta', 'Créer un compte')) + '</a>');
+        '<a href="' + esc(lien('compte.html')) + '" class="mt-5 inline-flex rounded-xl bg-cyan px-6 py-3 text-[13px] font-extrabold text-page transition hover:brightness-110">' + esc(t('tools_page.journal_login_cta', 'Créer un compte')) + '</a>');
       return;
     }
 
@@ -601,12 +629,12 @@
           + '<div class="truncate text-[12.5px] text-soft">' + esc(marcheLisible(d.market)) + '</div></div>'
           + '<div class="hidden text-right text-[13.5px] text-soft tabular-nums sm:block">' + num(d.odds, 2) + '</div>'
           + '<div class="hidden text-right text-[13.5px] text-soft tabular-nums sm:block">' + euros(d.stake) + '</div>'
-          + '<div class="text-right text-[14px] font-bold ' + badge + ' tabular-nums">' + (d.status === 'pending' ? '—' : signe(pl, 0) + ' €') + '</div></li>';
+          + '<div class="text-right text-[14px] font-bold ' + badge + ' tabular-nums">' + (d.status === 'pending' ? '—' : eurosSigne(pl)) + '</div></li>';
       }).join('');
       bloc = '<div class="mb-5 grid grid-cols-2 gap-3 lg:grid-cols-4">'
         + kpi(String(s.total), t('tools_page.journal_kpi_count', 'Décisions'))
         + kpi(signe(s.roi, 1) + '%', t('tools_page.journal_kpi_roi', 'ROI'), s.roi >= 0 ? 'pos' : 'neg')
-        + kpi(signe(s.profit, 0) + ' €', t('tools_page.journal_kpi_profit', 'Profit / perte'), s.profit >= 0 ? 'pos' : 'neg')
+        + kpi(eurosSigne(s.profit), t('tools_page.journal_kpi_profit', 'Profit / perte'), s.profit >= 0 ? 'pos' : 'neg')
         + kpi(num(s.winRate, 1) + '%', t('tools_page.journal_kpi_winrate', 'Taux de réussite'))
         + '</div>'
         + '<div class="' + S.carte + '">'
@@ -625,7 +653,7 @@
       + champ('jrMatch', t('tools_page.label_match', 'Match'), { type: 'text', placeholder: 'PSG – Marseille' })
       + champ('jrMarket', t('tools_page.journal_market_label', 'Marché'), { type: 'text', placeholder: t('tools_page.journal_market_placeholder', 'Au moins 3 buts dans le match') })
       + champ('jrOdds', t('tools_page.label_odds', 'Cote'), { min: 1.01, step: 0.01, value: 1.90 })
-      + champ('jrStake', t('tools_page.journal_stake_label', 'Mise'), { unit: '€', min: 0.01, step: 0.01 })
+      + champ('jrStake', t('tools_page.journal_stake_label', 'Mise'), { unit: symboleDevise(), min: 0.01, step: 0.01 })
       + '</div><p id="jrMsg" class="mt-3 text-[12.5px] text-soft"></p>'
       + '<div class="mt-5 flex gap-3"><button value="cancel" class="flex-1 rounded-xl border border-hairline px-4 py-2.5 text-[13px] font-semibold text-ink">' + esc(t('tools_page.journal_cancel_btn', 'Annuler')) + '</button>'
       + '<button id="jrSave" type="button" class="flex-1 rounded-xl bg-cyan px-4 py-2.5 text-[13px] font-extrabold text-page">' + esc(t('tools_page.journal_save_btn', 'Enregistrer')) + '</button></div>'

@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="iashark-market" content="fr">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title data-i18n="geo.meta.inscription.title">Konto erstellen — IASHARK</title>
+<meta name="description" content="Erstelle kostenlos dein IASHARK-Konto und erhalte die kostenlose Analyse des Tages." data-i18n-attr="content:geo.meta.inscription.description">
+<meta name="robots" content="noindex,follow">
+<link rel="canonical" href="https://iashark.com/de/inscription.html">
+<link rel="alternate" hreflang="fr" href="https://iashark.com/fr/inscription.html">
+<link rel="alternate" hreflang="en-GB" href="https://iashark.com/gb/inscription.html">
+<link rel="alternate" hreflang="en-ZA" href="https://iashark.com/za/inscription.html">
+<link rel="alternate" hreflang="en" href="https://iashark.com/en/inscription.html">
+<link rel="alternate" hreflang="es-MX" href="https://iashark.com/mx/inscription.html">
+<link rel="alternate" hreflang="es" href="https://iashark.com/es/inscription.html">
+<link rel="alternate" hreflang="de" href="https://iashark.com/de/inscription.html">
+<link rel="alternate" hreflang="it" href="https://iashark.com/it/inscription.html">
+<link rel="alternate" hreflang="pt" href="https://iashark.com/pt/inscription.html">
+<link rel="alternate" hreflang="x-default" href="https://iashark.com/fr/inscription.html">
+<link rel="icon" href="/assets/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<link rel="stylesheet" href="/assets/tailwind.css">
+<link rel="stylesheet" href="/assets/account.css">
+<script src="/lib/market-config.js"></script>
+</head>
+<body class="min-h-[100dvh] bg-page text-ink antialiased">
+
+<header class="border-b border-hairline">
+  <div class="mx-auto flex h-14 w-full max-w-[1080px] items-center px-5">
+    <a href="/de/" data-href="" aria-label="IASHARK, Startseite" data-i18n-attr="aria-label:auth.home_aria_label"><img src="/assets/iashark-logo.png" alt="IASHARK" class="h-7 w-auto object-contain"></a>
+    <a href="/de/" data-href="" class="ml-auto text-[13px] text-soft transition hover:text-ink" data-i18n="auth.back_to_site">Zurück zur Website</a>
+  </div>
+</header>
+
+<main class="mx-auto grid w-full max-w-[1080px] items-center gap-12 px-5 py-12 lg:min-h-[calc(100dvh-3.5rem)] lg:grid-cols-[minmax(0,1fr)_minmax(0,420px)] lg:gap-16 lg:py-16">
+
+  <!-- Les trois promesses ci-dessous sont verifiees dans le produit :
+       une analyse est bien offerte chaque jour (lib/free-match.js designe le
+       match gratuit), les outils sont bien accessibles en decouverte, et il
+       n'y a aucun engagement puisque le compte gratuit ne demande pas de
+       moyen de paiement. Rien d'autre n'est promis ici. -->
+  <section class="lg:pr-6">
+    <p class="text-[11px] font-bold uppercase tracking-[0.2em] text-cyan" data-i18n="auth.signup_eyebrow">Kostenloses Konto</p>
+    <h1 class="mt-3 text-[38px] font-extrabold leading-[1.05] tracking-tight sm:text-[46px]" data-i18n="auth.signup_h1">Kostenlos starten.</h1>
+    <p class="mt-4 max-w-md text-[15px] leading-relaxed text-soft" data-i18n="auth.signup_intro">Teste IASHARK, bevor du zu Pro wechselst. Das Konto ist in Sekunden erstellt.</p>
+    <ul class="mt-8 hidden max-w-md space-y-3.5 lg:block">
+      <li class="flex items-start gap-3 text-[14.5px] text-soft"><span aria-hidden="true" class="mt-[3px] text-cyan">✓</span><span data-i18n="auth.signup_bullet_analysis">Die vollständige Analyse, jeden Tag kostenlos</span></li>
+      <li class="flex items-start gap-3 text-[14.5px] text-soft"><span aria-hidden="true" class="mt-[3px] text-cyan">✓</span><span data-i18n="auth.signup_bullet_tools">Ein erster Blick auf die Entscheidungstools</span></li>
+      <li class="flex items-start gap-3 text-[14.5px] text-soft"><span aria-hidden="true" class="mt-[3px] text-cyan">✓</span><span data-i18n="auth.signup_bullet_no_commitment">Keine Verpflichtung, keine Karte erforderlich</span></li>
+    </ul>
+  </section>
+
+  <section class="rounded-2xl border border-hairline bg-surface p-6 sm:p-7">
+    <h2 class="text-[19px] font-bold tracking-tight" data-i18n="auth.signup_form_heading">Konto erstellen</h2>
+
+    <form id="form" novalidate class="mt-6">
+      <div>
+        <label for="email" class="block text-[13px] font-semibold text-soft" data-i18n="auth.email_label">E-Mail</label>
+        <input id="email" name="email" type="email" inputmode="email" autocomplete="email" autocapitalize="off" spellcheck="false" required
+               class="fld mt-2" placeholder="du@beispiel.com" aria-describedby="emailErr" data-i18n-attr="placeholder:auth.email_placeholder">
+        <p id="emailErr" hidden class="mt-1.5 text-[12.5px] text-red-300"></p>
+      </div>
+
+      <div class="mt-4">
+        <label for="password" class="block text-[13px] font-semibold text-soft" data-i18n="auth.password_label">Passwort</label>
+        <div class="relative mt-2">
+          <input id="password" name="password" type="password" autocomplete="new-password" minlength="8" required
+                 class="fld fld-pwd" placeholder="mindestens 8 Zeichen" aria-describedby="passwordAide passwordErr" data-i18n-attr="placeholder:auth.password_placeholder_min">
+          <button type="button" id="oeil" aria-label="Passwort anzeigen" aria-pressed="false"
+                  class="absolute right-1 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-lg text-soft transition hover:text-ink" data-i18n-attr="aria-label:auth.show_password">
+            <svg viewBox="0 0 24 24" class="h-[18px] w-[18px]" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+        <!-- L'exigence est annoncee AVANT la soumission, et c'est la seule :
+             elle correspond a ce que le formulaire verifie reellement. -->
+        <p id="passwordAide" class="mt-1.5 text-[12.5px] text-soft" data-i18n="auth.password_hint_min_chars">Mindestens 8 Zeichen.</p>
+        <p id="passwordErr" hidden class="mt-1.5 text-[12.5px] text-red-300"></p>
+      </div>
+
+      <div class="mt-4">
+        <label for="password2" class="block text-[13px] font-semibold text-soft" data-i18n="auth.confirm_password_label">Passwort bestätigen</label>
+        <input id="password2" name="password2" type="password" autocomplete="new-password" required
+               class="fld mt-2" placeholder="Passwort wiederholen" aria-describedby="password2Err" data-i18n-attr="placeholder:auth.repeat_password_placeholder">
+        <p id="password2Err" hidden class="mt-1.5 text-[12.5px] text-red-300"></p>
+      </div>
+
+      <button type="submit" id="submit"
+              class="mt-6 h-12 w-full rounded-xl bg-cyan text-[15px] font-bold text-[#04141b] transition hover:bg-cyan/90 disabled:cursor-wait disabled:opacity-60" data-i18n="auth.signup_submit">Konto erstellen</button>
+
+      <p id="formMsg" hidden role="alert" aria-live="polite"></p>
+
+      <p class="mt-4 text-center text-[12px] leading-relaxed text-soft">
+        <span data-i18n="auth.legal_prefix">Mit der Kontoerstellung akzeptierst du die</span>
+        <a href="/de/cgv.html" data-href="cgv.html" class="text-cyan transition hover:underline" data-i18n="auth.legal_cgv">AGB</a> <span data-i18n="auth.legal_and">und die</span>
+        <a href="/de/confidentialite.html" data-href="confidentialite.html" class="text-cyan transition hover:underline" data-i18n="auth.legal_privacy">Datenschutzrichtlinie</a>.
+      </p>
+    </form>
+
+    <p class="mt-6 border-t border-hairline pt-5 text-center text-[13.5px] text-soft">
+      <span data-i18n="auth.already_member_prompt">Schon Mitglied?</span> <a href="/de/connexion.html" data-href="connexion.html" class="font-semibold text-cyan transition hover:underline" data-i18n="auth.login_link">Anmelden</a>
+    </p>
+  </section>
+
+</main>
+
+<script src="/i18n/i18n.js"></script>
+<script src="/app-client.js"></script>
+<script src="/auth-pages.js"></script>
+<script>
+  if (window.I18N && window.I18N.init) { window.I18N.init(); }
+  IasharkAuth.redirigerSiConnecte();
+  IasharkAuth.brancherOeil('oeil', 'password');
+  document.getElementById('form').addEventListener('submit', IasharkAuth.inscription);
+</script>
+<script src="/site-prefs.js"></script>
+</body>
+</html>

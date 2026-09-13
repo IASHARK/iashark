@@ -11,27 +11,11 @@
 // South African counterpart of gb/gb-page.js - same structure, same honesty
 // discipline, currency and market code swapped.
 (function () {
-  // ---- ZAR price display --------------------------------------------------
-  // config/markets.json -> za.currency = "ZAR". This page is ZAR-only by
-  // definition, so we format directly with Intl rather than pulling in the
-  // full i18n runtime's currency logic. The HTML already contains a correct
-  // hardcoded value in each span (progressive enhancement: price is right
-  // even if this script fails to load), this just re-renders it through the
-  // real formatter for correctness/consistency. South Africa Launch Kit
-  // (doc 08 S1) prices: Pro R199, Edge R299, Annual R1,999 - whole-Rand
-  // amounts, so no fraction digits needed for any tier.
-  try {
-    var zar0 = new Intl.NumberFormat("en-ZA", { style: "currency", currency: "ZAR", minimumFractionDigits: 0 });
-    var prices = { priceFree: 0, pricePro: 199, priceEdge: 299, priceAnnual: 1999 };
-    Object.keys(prices).forEach(function (id) {
-      var el = document.getElementById(id);
-      if (!el) return;
-      el.textContent = zar0.format(prices[id]);
-    });
-  } catch (e) {
-    // Formatting failure leaves the hardcoded HTML value in place - never
-    // blank, never wrong currency symbol.
-  }
+  // ---- Price display ------------------------------------------------------
+  // Prices come from lib/market-config.js (window.IASHARK_MARKET, built from
+  // config/markets.json), which fills every [data-market-price] element of
+  // this page: no second copy of the ZAR amounts lives here any more. The
+  // HTML keeps the same values as a no-JS fallback.
 
   // ---- P0 analytics: landing_view --------------------------------------
   // doc 18 S7 lists country/locale/source/campaign/creative_id as the
@@ -91,10 +75,8 @@
         return;
       }
       if (!ctx.user) {
-        // Same convention as abonnement-page.js's /compte.html#plan redirect,
-        // pointed at the EN account page (a market like "za" has no account
-        // pages of its own - only /en/ compte.html, translated and working).
-        location.href = "/en/compte.html#plan";
+        // /za/ has its own generated account page (scripts/build-locales.js).
+        location.href = "/za/compte.html#plan";
         return;
       }
 
@@ -108,7 +90,7 @@
         var response = await fetch(window.IasharkApp.url + "/functions/v1/create-checkout-session", {
           method: "POST",
           headers: { apikey: window.IasharkApp.key, Authorization: "Bearer " + token, "Content-Type": "application/json" },
-          body: JSON.stringify({ market: "za" })
+          body: JSON.stringify({ market: "za", dir: "za" })
         });
         var data = await response.json();
         if (data && data.url) {

@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Más de 2,5 goles: calcular la probabilidad con la distribución de Poisson | IASHARK</title>
+<meta name="description" content="El método completo para estimar la probabilidad de más de 2,5 goles en un partido: fuerza ofensiva y defensiva, distribución de Poisson, comparación con la cuota y el margen de error que nadie muestra. Calculadora incluida.">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<link rel="canonical" href="https://iashark.com/es/blog/guides/plus-de-2-5-buts-probabilite-methode-poisson.html">
+<link rel="alternate" hreflang="fr" href="https://iashark.com/blog/guides/plus-de-2-5-buts-probabilite-methode-poisson.html">
+<link rel="alternate" hreflang="en" href="https://iashark.com/en/blog/guides/plus-de-2-5-buts-probabilite-methode-poisson.html">
+<link rel="alternate" hreflang="es" href="https://iashark.com/es/blog/guides/plus-de-2-5-buts-probabilite-methode-poisson.html">
+<link rel="alternate" hreflang="de" href="https://iashark.com/de/blog/guides/plus-de-2-5-buts-probabilite-methode-poisson.html">
+<link rel="alternate" hreflang="it" href="https://iashark.com/it/blog/guides/plus-de-2-5-buts-probabilite-methode-poisson.html">
+<link rel="alternate" hreflang="pt" href="https://iashark.com/pt/blog/guides/plus-de-2-5-buts-probabilite-methode-poisson.html">
+<link rel="alternate" hreflang="x-default" href="https://iashark.com/blog/guides/plus-de-2-5-buts-probabilite-methode-poisson.html">
+<meta property="og:title" content="Más de 2,5 goles: calcular la probabilidad en lugar de adivinarla">
+<meta property="og:description" content="Fuerza ofensiva y defensiva, distribución de Poisson, comparación con la cuota y el margen de error que nadie muestra. Calculadora incluida.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://iashark.com/es/blog/guides/plus-de-2-5-buts-probabilite-methode-poisson.html">
+<meta property="og:image" content="https://iashark.com/assets/blog/over-25-goals-hero.jpg">
+<meta property="og:locale" content="es_ES">
+<meta property="og:site_name" content="IASHARK">
+<meta property="article:published_time" content="2026-09-02">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Más de 2,5 goles: calcular la probabilidad en lugar de adivinarla">
+<meta name="twitter:description" content="El método de Poisson paso a paso, con calculadora y margen de error.">
+<meta name="twitter:image" content="https://iashark.com/assets/blog/over-25-goals-hero.jpg">
+<link rel="icon" href="/favicon.ico">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/article.css">
+<link rel="stylesheet" href="/assets/bottom-navigation.css">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"Article",
+"headline":"Más de 2,5 goles: calcular la probabilidad con la distribución de Poisson",
+"description":"El método completo para estimar la probabilidad de más de 2,5 goles en un partido: fuerza ofensiva y defensiva, distribución de Poisson, comparación con la cuota y el margen de error que nadie muestra.",
+"image":"https://iashark.com/assets/blog/over-25-goals-hero.jpg",
+"datePublished":"2026-09-02","dateModified":"2026-09-02",
+"author":{"@type":"Organization","name":"IASHARK","url":"https://iashark.com"},
+"publisher":{"@type":"Organization","name":"IASHARK","url":"https://iashark.com","logo":{"@type":"ImageObject","url":"https://iashark.com/icon-512.png"}},
+"mainEntityOfPage":{"@type":"WebPage","@id":"https://iashark.com/es/blog/guides/plus-de-2-5-buts-probabilite-methode-poisson.html"},
+"inLanguage":"es-ES"}
+</script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[
+{"@type":"ListItem","position":1,"name":"Inicio","item":"https://iashark.com/es/"},
+{"@type":"ListItem","position":2,"name":"Blog","item":"https://iashark.com/es/blog/"},
+{"@type":"ListItem","position":3,"name":"Más de 2,5 goles: el método de Poisson"}]}
+</script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[
+{"@type":"Question","name":"¿Qué significa más de 2,5 goles?","acceptedAnswer":{"@type":"Answer","text":"La apuesta «más de 2,5 goles» se refiere al número total de goles marcados por ambos equipos durante el tiempo reglamentario. Como un partido no puede producir medio gol, el umbral de 2,5 sirve únicamente para eliminar el empate en la apuesta: hacen falta 3 goles o más para ganarla, mientras que con 0, 1 o 2 goles se pierde. La prórroga y la tanda de penaltis no cuentan."}},
+{"@type":"Question","name":"¿Cómo se calcula la probabilidad de más de 2,5 goles?","acceptedAnswer":{"@type":"Answer","text":"Primero se estima el número de goles esperados de cada equipo a partir de su fuerza ofensiva y de la debilidad defensiva del rival, ambas referidas a las medias de la liga. Se suman estos dos valores para obtener el total de goles esperados, llamado lambda. Después se aplica la distribución de Poisson para obtener la probabilidad de 0, 1 y 2 goles, y la probabilidad de más de 2,5 goles es simplemente el 100 % menos la suma de esos tres valores."}},
+{"@type":"Question","name":"¿Cuál es la probabilidad media de más de 2,5 goles en un partido?","acceptedAnswer":{"@type":"Answer","text":"Depende por completo de la liga y de los equipos. Con un total esperado de 2,6 goles, la probabilidad es de aproximadamente el 48 %. Con 2,8 goles esperados, sube aproximadamente al 53 %. Con 3,0 goles esperados, alcanza aproximadamente el 58 %. Una diferencia de solo 0,2 goles esperados desplaza, por tanto, la probabilidad casi 5 puntos."}},
+{"@type":"Question","name":"¿Es fiable la distribución de Poisson para el fútbol?","acceptedAnswer":{"@type":"Answer","text":"Es una buena primera aproximación, pero se basa en hipótesis que en la práctica no se cumplen. Supone que los goles de los dos equipos son independientes, algo que los datos desmienten: los empates a cero son más frecuentes de lo que predice la distribución. También supone una tasa de anotación constante durante los 90 minutos, cuando una tarjeta roja o un gol tardío lo cambian todo. Las correcciones de tipo Dixon-Coles existen precisamente para compensar estas desviaciones."}},
+{"@type":"Question","name":"¿Cómo saber si una cuota de más de 2,5 goles es interesante?","acceptedAnswer":{"@type":"Answer","text":"Convierte la cuota en probabilidad implícita dividiendo 100 entre la cuota. Una cuota de 1,90 corresponde aproximadamente a un 52,6 %. Después compara ese valor con tu propia estimación. Si tu modelo da un 53 % frente a un 52,6 % implícito, la ventaja teórica es inferior a un punto: es menor que tu margen de error y, por tanto, no constituye un motivo suficiente para apostar."}}]}
+</script>
+</head>
+<body>
+
+<div class="wrap">
+
+<header class="art-hero">
+  <nav class="crumb"><a href="/es/">Inicio</a> › <a href="/es/blog/">Blog</a> › Más de 2,5 goles</nav>
+  <span class="tag">Método · Cálculo</span>
+  <h1>Más de 2,5 goles:<br>calcular la probabilidad, <em>no adivinarla</em></h1>
+  <p class="chapo">«Los dos equipos marcan mucho, va a ser un partido con goles». Es una intuición, no una probabilidad. Este es el método completo para convertir las estadísticas de los equipos en un porcentaje verificable — y el margen de error que casi nadie te muestra.</p>
+  <div class="meta">
+    <span>Publicado el 2 de septiembre de 2026</span>
+    <span>·</span>
+    <span>10 min de lectura</span>
+    <span>·</span>
+    <span>Calculadora incluida</span>
+  </div>
+  <figure class="cover">
+    <img src="/assets/blog/over-25-goals-hero.jpg" width="1344" height="768" alt="Balón de fútbol golpeando el fondo de la red durante un partido nocturno, iluminado en azul cian por los focos del estadio" fetchpriority="high">
+    <figcaption>Tres goles o más: más allá de la intuición, la cuestión es con qué frecuencia ocurre en este partido concreto.</figcaption>
+  </figure>
+</header>
+
+<nav class="toc" aria-label="Índice">
+  <h2>Contenido</h2>
+  <ol>
+    <li><a href="#definition">Qué significa exactamente «más de 2,5 goles»</a></li>
+    <li><a href="#moyennes">Por qué las medias de los equipos no bastan</a></li>
+    <li><a href="#lambda">Paso 1: estimar los goles esperados de cada equipo</a></li>
+    <li><a href="#poisson">Paso 2: de lambda a la probabilidad</a></li>
+    <li><a href="#exemple">El ejemplo completo, cifra a cifra</a></li>
+    <li><a href="#cote">Paso 3: comparar con la cuota de la casa de apuestas</a></li>
+    <li><a href="#erreur">El margen de error que nunca te enseñan</a></li>
+    <li><a href="#limites">Los cuatro puntos débiles del método</a></li>
+    <li><a href="#calculateur">La calculadora</a></li>
+    <li><a href="#faq">Preguntas frecuentes</a></li>
+  </ol>
+</nav>
+
+<main class="body">
+
+<h2 id="definition">1. Qué significa «más de 2,5 goles» <em>exactamente</em></h2>
+
+<p>La apuesta se refiere al <strong>número total de goles marcados por ambos equipos</strong> durante el tiempo reglamentario. Como un partido no puede producir medio gol, el umbral de 2,5 sirve únicamente para eliminar cualquier posibilidad de empate en la apuesta:</p>
+
+<ul>
+  <li><strong>3 goles o más</strong> → gana «más de 2,5»</li>
+  <li><strong>0, 1 o 2 goles</strong> → gana «menos de 2,5»</li>
+</ul>
+
+<div class="box">
+  <div class="box-t">Dos detalles que pueden salir caros</div>
+  <p><strong>La prórroga y la tanda de penaltis no cuentan</strong>: solo se tiene en cuenta el resultado en el minuto 90, incluido el tiempo añadido. Y la apuesta ignora por completo <em>quién</em> marca: un 3-0 y un 2-1 dan el mismo resultado.</p>
+</div>
+
+<h2 id="moyennes">2. Por qué las medias de los equipos no bastan</h2>
+
+<p>El razonamiento habitual consiste en sumar las medias: «el equipo A marca 1,8 goles por partido, el equipo B marca 1,3, así que se esperan 3,1 goles, así que es probable que haya más de 2,5». Este cálculo contiene dos errores.</p>
+
+<p><strong>Primer error: ignora las defensas.</strong> Un ataque de 1,8 goles por partido no produce 1,8 goles contra cualquiera. Frente a la mejor defensa de la liga, producirá bastantes menos.</p>
+
+<p><strong>Segundo error, más grave: una media no es una probabilidad.</strong> Un partido en el que se esperan 3,1 goles no produce 3 goles «por lo general». A veces produce 0 goles, a veces 5. Saber cuántos goles se esperan <em>de media</em> todavía no dice con qué frecuencia se superan los 2,5. Convertir una cosa en la otra es precisamente la función de la distribución de Poisson.</p>
+
+<h2 id="lambda">3. Paso 1: estimar los goles esperados de cada equipo</h2>
+
+<p>El objetivo es obtener un número, llamado <strong>lambda (λ)</strong>: el número de goles que un equipo debería marcar en <em>este</em> partido concreto. Se obtiene comparando cada equipo con la media de su liga.</p>
+
+<div class="formula">
+  <i>fuerza ofensiva</i> = goles marcados por partido ÷ media de la liga<br>
+  <i>debilidad defensiva</i> = goles encajados por partido ÷ media de la liga<br>
+  <i>λ</i> = fuerza ofensiva × debilidad defensiva del rival × media de la liga
+  <small>Las estadísticas como local y como visitante se tratan por separado: un equipo no marca al mismo ritmo en ambos contextos, y mezclarlas borra la ventaja de jugar en casa.</small>
+</div>
+
+<h2 id="poisson">4. Paso 2: de lambda a la probabilidad</h2>
+
+<p>Una vez obtenidas las dos lambdas, se suman para obtener el <strong>total de goles esperados en el partido</strong>. La distribución de Poisson transforma entonces ese total en una probabilidad para cada resultado posible: 0 goles, 1 gol, 2 goles, y así sucesivamente.</p>
+
+<div class="formula">
+  P(<i>k</i> goles) = e<sup>−λ</sup> × λ<sup><i>k</i></sup> ÷ <i>k</i>!
+  <small>e es el número de Euler (≈ 2,718) y k! el factorial de k. No hace falta hacer cálculos de cabeza: la calculadora de más abajo hace el trabajo.</small>
+</div>
+
+<p>La probabilidad de más de 2,5 goles es entonces inmediata: se suman las probabilidades de 0, 1 y 2 goles y se resta el resultado del 100 %.</p>
+
+<h2 id="exemple">5. El ejemplo completo, cifra a cifra</h2>
+
+<p>Tomemos un partido entre un equipo A que juega en casa y un equipo B que juega fuera, en una liga en la que los equipos locales marcan de media <strong>1,55 goles</strong> por partido y los visitantes <strong>1,20 goles</strong>.</p>
+
+<div class="tw">
+<table>
+  <thead><tr><th>Dato</th><th>Equipo A (local)</th><th>Equipo B (visitante)</th></tr></thead>
+  <tbody>
+    <tr><td>Goles marcados por partido</td><td class="num">1,80</td><td class="num">1,30</td></tr>
+    <tr><td>Goles encajados por partido</td><td class="num">1,10</td><td class="num">1,40</td></tr>
+    <tr><td>Fuerza ofensiva</td><td class="num">1,80 ÷ 1,55 = 1,161</td><td class="num">1,30 ÷ 1,20 = 1,083</td></tr>
+    <tr><td>Debilidad defensiva</td><td class="num">1,10 ÷ 1,20 = 0,917</td><td class="num">1,40 ÷ 1,55 = 0,903</td></tr>
+    <tr class="hi"><td>Goles esperados (λ)</td><td class="num">1,63</td><td class="num">1,19</td></tr>
+  </tbody>
+</table>
+</div>
+
+<p>El total esperado del partido es, por tanto, <strong>1,63 + 1,19 = 2,82 goles</strong>. Esto es lo que hace con él la distribución de Poisson:</p>
+
+<figure class="fig">
+  <svg viewBox="0 0 640 350" role="img" aria-labelledby="poisson-title poisson-desc">
+    <title id="poisson-title">Distribución de Poisson del número total de goles para un total esperado de 2,82</title>
+    <desc id="poisson-desc">Diagrama de barras: 0 goles 6,0 %, 1 gol 16,8 %, 2 goles 23,7 %, 3 goles 22,3 %, 4 goles 15,7 %, 5 goles 8,8 %, 6 goles 4,2 %, 7 goles 1,7 %. Las tres primeras barras, que suman un 46,5 %, corresponden a menos de 2,5 goles; las siguientes, un 53,5 %, a más de 2,5 goles.</desc>
+    <rect x="0" y="0" width="640" height="350" fill="#04121c"/>
+    <line x1="55" y1="270" x2="600" y2="270" stroke="#1d4a63" stroke-width="1.4"/>
+    <g font-family="'Space Mono',monospace">
+      <!-- menos de 2,5 -->
+      <g fill="#3f6c86">
+        <rect x="69" y="219.6" width="54" height="50.4" rx="2"/>
+        <rect x="133" y="128" width="54" height="142" rx="2"/>
+        <rect x="197" y="70" width="54" height="200" rx="2"/>
+      </g>
+      <!-- más de 2,5 -->
+      <g fill="#16d6f4">
+        <rect x="261" y="82.2" width="54" height="187.8" rx="2"/>
+        <rect x="325" y="137.6" width="54" height="132.4" rx="2"/>
+        <rect x="389" y="195.4" width="54" height="74.6" rx="2"/>
+        <rect x="453" y="235" width="54" height="35" rx="2"/>
+        <rect x="517" y="256" width="54" height="14" rx="2"/>
+      </g>
+      <g font-size="11" font-weight="700" text-anchor="middle" fill="#9baec0">
+        <text x="96" y="211">6,0 %</text>
+        <text x="160" y="119">16,8 %</text>
+        <text x="224" y="61">23,7 %</text>
+      </g>
+      <g font-size="11" font-weight="700" text-anchor="middle" fill="#16d6f4">
+        <text x="288" y="73">22,3 %</text>
+        <text x="352" y="129">15,7 %</text>
+        <text x="416" y="187">8,8 %</text>
+        <text x="480" y="226">4,2 %</text>
+        <text x="544" y="247">1,7 %</text>
+      </g>
+      <g font-size="12" text-anchor="middle" fill="#58758e">
+        <text x="96" y="290">0</text><text x="160" y="290">1</text><text x="224" y="290">2</text>
+        <text x="288" y="290">3</text><text x="352" y="290">4</text><text x="416" y="290">5</text>
+        <text x="480" y="290">6</text><text x="544" y="290">7</text>
+      </g>
+      <text x="320" y="312" font-size="10" text-anchor="middle" fill="#58758e" letter-spacing="1.5">NÚMERO TOTAL DE GOLES EN EL PARTIDO</text>
+      <line x1="256" y1="40" x2="256" y2="278" stroke="#f5b84b" stroke-width="1.3" stroke-dasharray="5 4"/>
+      <text x="250" y="36" font-size="10" text-anchor="end" fill="#f5b84b" font-weight="700">MENOS DE 2,5 · 46,5 %</text>
+      <text x="262" y="36" font-size="10" text-anchor="start" fill="#f5b84b" font-weight="700">MÁS DE 2,5 · 53,5 %</text>
+    </g>
+  </svg>
+  <figcaption>Distribución de Poisson para un total esperado de 2,82 goles. Considerado de forma aislada, el resultado más probable es 2 goles (23,7 %) — pero el conjunto de los resultados con 3 goles o más suma un 53,5 %. Esa es toda la diferencia entre «el resultado más probable» y «el lado más probable».</figcaption>
+</figure>
+
+<div class="keyfig">
+  <div><b>2,82</b><span>goles esperados</span></div>
+  <div><b>53,5 %</b><span>más de 2,5 goles</span></div>
+  <div><b>1,87</b><span>cuota justa</span></div>
+</div>
+
+<p>La <strong>cuota justa</strong> es la inversa de la probabilidad: 1 ÷ 0,535 = 1,87. Con esta cuota, la apuesta tiene un valor esperado nulo a largo plazo. Por debajo de ella, el valor esperado es negativo de media; por encima, es teóricamente positivo — <em>solo si</em> tu estimación es correcta.</p>
+
+<h2 id="cote">6. Paso 3: comparar con la cuota de la casa de apuestas</h2>
+
+<p>Una cuota se convierte en probabilidad implícita dividiendo 100 entre la cuota. Una cuota de 1,90 corresponde a 100 ÷ 1,90 = <strong>52,6 %</strong>. Solo queda comparar.</p>
+
+<div class="tw">
+<table>
+  <thead><tr><th>Total esperado</th><th>Probabilidad del modelo</th><th>Implícita a 1,90</th><th>Valor esperado</th></tr></thead>
+  <tbody>
+    <tr><td class="num">2,6</td><td class="num">48,2 %</td><td class="num">52,6 %</td><td class="num" style="color:#ff625f">−8,5 %</td></tr>
+    <tr class="hi"><td class="num">2,8</td><td class="num">53,1 %</td><td class="num">52,6 %</td><td class="num">+0,8 %</td></tr>
+    <tr><td class="num">3,0</td><td class="num">57,7 %</td><td class="num">52,6 %</td><td class="num" style="color:#25d6a2">+9,6 %</td></tr>
+  </tbody>
+</table>
+</div>
+
+<p>Esta tabla es el núcleo de la cuestión. Muestra que, con la misma cuota, <strong>una diferencia de 0,4 goles esperados hace pasar el valor esperado de la apuesta de claramente negativo a claramente positivo</strong>. La dificultad no está en el cálculo de Poisson — que es mecánico —, sino en la exactitud de la lambda con la que se alimenta. El proceso completo de comparación entre probabilidad y cuota se explica en detalle en nuestra <a href="/es/blog/guides/value-bet-guide-complet-2026.html">guía sobre las value bets</a>.</p>
+
+<h2 id="erreur">7. El margen de error que nunca te enseñan</h2>
+
+<p>Esta es la sección que las webs de pronósticos omiten sistemáticamente. Tu lambda no es un hecho: es una estimación construida sobre un puñado de partidos. Es incierta. Mira lo que produce esa incertidumbre:</p>
+
+<div class="tw">
+<table>
+  <thead><tr><th>Total esperado (λ)</th><th>Más de 2,5 goles</th><th>Cuota justa</th></tr></thead>
+  <tbody>
+    <tr><td class="num">2,0</td><td class="num">32,3 %</td><td class="num">3,09</td></tr>
+    <tr><td class="num">2,2</td><td class="num">37,7 %</td><td class="num">2,65</td></tr>
+    <tr><td class="num">2,4</td><td class="num">43,0 %</td><td class="num">2,32</td></tr>
+    <tr><td class="num">2,6</td><td class="num">48,2 %</td><td class="num">2,08</td></tr>
+    <tr class="hi"><td class="num">2,8</td><td class="num">53,1 %</td><td class="num">1,88</td></tr>
+    <tr><td class="num">3,0</td><td class="num">57,7 %</td><td class="num">1,73</td></tr>
+    <tr><td class="num">3,2</td><td class="num">62,0 %</td><td class="num">1,61</td></tr>
+    <tr><td class="num">3,4</td><td class="num">66,0 %</td><td class="num">1,51</td></tr>
+  </tbody>
+</table>
+</div>
+
+<div class="box warn">
+  <div class="box-t">Lo que esta tabla te dice realmente</div>
+  <p>Un error de <strong>0,2 en la lambda</strong> — algo totalmente habitual cuando se estima a partir de una decena de partidos — desplaza la probabilidad <strong>casi 5 puntos</strong> y la cuota justa de 2,08 a 1,88. Sin embargo, una ventaja teórica de 5 puntos ya se considera enorme. Dicho de otro modo: <strong>tu margen de error es del mismo orden de magnitud que la ventaja que buscas.</strong></p>
+</div>
+
+<p>La conclusión práctica es incómoda, pero honesta. Una diferencia de menos de 3 a 4 puntos entre tu estimación y la probabilidad implícita de la casa de apuestas <strong>no debería desencadenar una apuesta</strong>: es indistinguible del ruido de tu propio método.</p>
+
+<h2 id="limites">8. Los cuatro puntos débiles del método</h2>
+
+<h3>La independencia de los goles es falsa</h3>
+<p>Poisson supone que los goles de A y de B son independientes. Los datos dicen lo contrario: los resultados 0-0 y 1-1 aparecen <strong>con más frecuencia</strong> de lo que prevé la distribución. Un equipo que encaja un gol cambia de comportamiento; un equipo que va ganando se repliega. La corrección de <strong>Dixon-Coles</strong> se ideó exactamente para eso: ajusta al alza la probabilidad de los marcadores bajos.</p>
+
+<h3>La tasa de anotación no es constante</h3>
+<p>Poisson supone una intensidad idéntica del minuto 1 al 90. En realidad, se marcan más goles al final de los partidos. Una tarjeta roja en el minuto 20 deja obsoleta la lambda calculada antes del saque inicial.</p>
+
+<h3>Los datos de entrada son frágiles</h3>
+<p>Diez partidos son pocos. Un 5-0 en la muestra tira de toda la media hacia arriba. Utilizar los <a href="/es/blog/guides/xg-expected-goals-guide-complet.html">xG en lugar de los goles reales</a> como dato de entrada reduce claramente este problema: los xG tienen menos ruido que los goles, porque cuentan las ocasiones y no su conversión.</p>
+
+<h3>El contexto no aparece por ningún lado</h3>
+<p>Bajas, lo que está en juego en el partido, un calendario cargado, la meteorología: nada de esto entra en el cálculo. Un modelo estadístico ofrece un punto de partida riguroso, no una conclusión.</p>
+
+<h2 id="calculateur">9. La calculadora</h2>
+
+<div class="calc">
+  <h3>Probabilidad de más de 2,5 goles</h3>
+  <p class="hint">Introduce los goles esperados de cada equipo (su λ) y, después, la cuota que ofrece la casa de apuestas. Todos los cálculos se realizan en tu navegador.</p>
+  <div class="row"><label for="lh">Goles esperados — equipo local</label><input id="lh" type="number" step="0.05" min="0" max="8" value="1.63"></div>
+  <div class="row"><label for="la">Goles esperados — equipo visitante</label><input id="la" type="number" step="0.05" min="0" max="8" value="1.19"></div>
+  <div class="row"><label for="od">Cuota «más de 2,5 goles»</label><input id="od" type="number" step="0.01" min="1.01" max="50" value="1.90"></div>
+  <div class="out">
+    <div><b id="rTot">2,82</b><span>total esperado</span></div>
+    <div><b id="rOver">53,5 %</b><span>más de 2,5</span></div>
+    <div><b id="rUnder">46,5 %</b><span>menos de 2,5</span></div>
+    <div><b id="rFair">1,87</b><span>cuota justa</span></div>
+  </div>
+  <p class="verdict" id="rVerdict"></p>
+</div>
+
+<div class="related">
+  <a href="/es/blog/guides/xg-expected-goals-guide-complet.html"><span>Paso anterior</span><b>xG: lo que la estadística dice realmente y dónde engaña</b></a>
+  <a href="/es/blog/guides/value-bet-guide-complet-2026.html"><span>Paso siguiente</span><b>Value bet: comparar una probabilidad con una cuota sin equivocarse</b></a>
+</div>
+
+<h2 id="faq">10. Preguntas frecuentes</h2>
+
+<div class="faq">
+  <details><summary>¿Qué significa más de 2,5 goles?</summary><p>La apuesta se refiere al número total de goles marcados por ambos equipos durante el tiempo reglamentario. Como un partido no puede producir medio gol, el umbral de 2,5 sirve únicamente para eliminar el empate: hacen falta 3 goles o más para ganarla, mientras que con 0, 1 o 2 goles se pierde. La prórroga y la tanda de penaltis no cuentan.</p></details>
+  <details><summary>¿Cómo se calcula la probabilidad de más de 2,5 goles?</summary><p>Primero se estiman los goles esperados de cada equipo a partir de su fuerza ofensiva y de la debilidad defensiva del rival, referidas a las medias de la liga. Se suman estos dos valores para obtener el total esperado (lambda). Después se aplica la distribución de Poisson para obtener la probabilidad de 0, 1 y 2 goles: la probabilidad de más de 2,5 goles es el 100 % menos la suma de esos tres valores.</p></details>
+  <details><summary>¿Cuál es la probabilidad media de más de 2,5 goles?</summary><p>Depende por completo de la liga y de los equipos. Con un total esperado de 2,6 goles, es de aproximadamente el 48 %. Con 2,8 goles esperados, en torno al 53 %. Con 3,0 goles esperados, en torno al 58 %. Una diferencia de solo 0,2 goles esperados desplaza la probabilidad casi 5 puntos, lo que explica por qué una estimación aproximada no basta.</p></details>
+  <details><summary>¿Es fiable la distribución de Poisson para el fútbol?</summary><p>Es una buena primera aproximación, pero se basa en hipótesis que en la práctica no se cumplen. Supone que los goles de los dos equipos son independientes, cuando los empates a cero son más frecuentes de lo que predice la distribución. También supone una tasa de anotación constante durante los 90 minutos. Las correcciones de tipo Dixon-Coles existen precisamente para compensar estas desviaciones.</p></details>
+  <details><summary>¿Cómo saber si una cuota de más de 2,5 goles es interesante?</summary><p>Convierte la cuota en probabilidad implícita dividiendo 100 entre la cuota: una cuota de 1,90 corresponde aproximadamente a un 52,6 %. Compárala con tu estimación. Si tu modelo da un 53 % frente a un 52,6 % implícito, la ventaja es inferior a un punto — menor que tu margen de error y, por tanto, insuficiente para justificar una apuesta.</p></details>
+</div>
+
+<div class="cta">
+  <h2>Este cálculo, hecho cada mañana en todos los partidos</h2>
+  <p>IASHARK aplica este tipo de modelo — Poisson, Dixon-Coles, Montecarlo — a los partidos del día, a partir de datos reales, y muestra la probabilidad obtenida junto a la cuota del mercado. El partido del día es gratuito, siempre.</p>
+  <a class="btn" href="/es/">Ver los análisis del día →</a>
+</div>
+
+</main>
+
+<footer class="art-foot">
+  <p>IASHARK — análisis estadísticos de fútbol. Las probabilidades publicadas son orientativas y no garantizan ningún resultado. Las apuestas deportivas conllevan un riesgo de pérdida económica y de adicción: no arriesgues nunca más de lo que puedas permitirte perder. Prohibido a menores de 18 años. ¿Necesitas ayuda? Consulta nuestra <a href="/es/jeu-responsable.html" style="color:inherit;text-decoration:underline">página de juego responsable</a>.</p>
+  <p><a href="/es/mentions-legales.html" style="color:inherit">Aviso Legal</a> · <a href="/es/cgv.html" style="color:inherit">Términos</a> · <a href="/es/confidentialite.html" style="color:inherit">Privacidad</a> · <a href="/es/cookies.html" style="color:inherit">Cookies</a> · <a href="/es/jeu-responsable.html" style="color:inherit">Juego responsable</a></p>
+</footer>
+
+</div>
+
+<script>
+/* Calculadora de Poisson — todo se calcula en el navegador, no se envía ningún dato.
+   P(k goles) = e^-lambda * lambda^k / k!  ;  P(más de 2,5) = 1 - P(0) - P(1) - P(2). */
+(function(){
+  var ids=['lh','la','od'],el={};
+  ids.concat(['rTot','rOver','rUnder','rFair','rVerdict']).forEach(function(i){el[i]=document.getElementById(i);});
+  function pois(k,lam){
+    var f=1; for(var i=2;i<=k;i++) f*=i;
+    return Math.exp(-lam)*Math.pow(lam,k)/f;
+  }
+  function pct(x){ return (x*100).toFixed(1).replace('.',',')+' %'; }
+  function num(x,d){ return x.toFixed(d).replace('.',','); }
+  function update(){
+    var lh=parseFloat(el.lh.value), la=parseFloat(el.la.value), od=parseFloat(el.od.value);
+    if(!isFinite(lh)||!isFinite(la)||lh<0||la<0){ el.rVerdict.textContent='Introduce dos valores válidos de goles esperados.'; return; }
+    var tot=lh+la;
+    var under=pois(0,tot)+pois(1,tot)+pois(2,tot);
+    var over=1-under;
+    el.rTot.textContent=num(tot,2);
+    el.rOver.textContent=pct(over);
+    el.rUnder.textContent=pct(under);
+    el.rFair.textContent=over>0?num(1/over,2):'—';
+    if(!isFinite(od)||od<=1){ el.rVerdict.textContent='Introduce una cuota superior a 1 para comparar.'; return; }
+    var implied=1/od, edge=over-implied, ev=over*od-1;
+    var verdict;
+    if(Math.abs(edge)*100<3){
+      verdict='<b>Diferencia demasiado pequeña para sacar conclusiones.</b> Tu estimación ('+pct(over)+') y la probabilidad implícita de la cuota ('+pct(implied)+') difieren en '+num(Math.abs(edge)*100,1)+' punto(s) — está dentro del margen de error de un modelo de este tipo. Valor esperado teórico: '+num(ev*100,1)+' %.';
+    } else if(edge>0){
+      verdict='<b>Ventaja teórica de '+num(edge*100,1)+' puntos</b> a favor de la apuesta (modelo '+pct(over)+' frente a '+pct(implied)+' implícito). Valor esperado teórico: +'+num(ev*100,1)+' %. Solo debe tenerse en cuenta si confías en tus goles esperados.';
+    } else {
+      verdict='<b>Cuota desfavorable.</b> El mercado estima un '+pct(implied)+' cuando tu modelo da un '+pct(over)+', es decir, '+num(Math.abs(edge)*100,1)+' puntos menos. Valor esperado teórico: '+num(ev*100,1)+' %.';
+    }
+    el.rVerdict.innerHTML=verdict;
+  }
+  ids.forEach(function(i){ el[i].addEventListener('input',update); });
+  update();
+})();
+</script>
+<script src="/site-header.js"></script>
+<script src="/site-prefs.js"></script>
+<script src="/bottom-navigation.js"></script>
+</body>
+</html>

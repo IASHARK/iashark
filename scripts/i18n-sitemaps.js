@@ -3,42 +3,58 @@
 // Sitemaps internationaux (MASTER SS19 - "sitemap international"). Ne liste
 // QUE les pages reellement generees par scripts/build-locales.js (I18N_PAGES,
 // meme source que le build lui-meme, via i18n-manifest.js - jamais de page
-// vide/non traduite indexee). hreflang complet via xhtml:link sur chaque
-// <url>, y compris x-default vers la version FR par defaut.
+// vide/non traduite indexee), et seulement celles qui ne sont pas noindex
+// (noSitemap:true). Un fichier par repertoire public : langues (fr en es de it
+// pt) + marches pays (gb za mx, config/markets.json#_dirs). hreflang complet via
+// xhtml:link sur chaque <url> (fr, en, es, de, it, pt, en-GB, en-ZA, es-MX),
+// y compris x-default vers la version FR par defaut.
 //
 // Module partage entre le pipeline (.github/workflows/update-data.yml, qui
-// l'appelle apres chaque run reel avec des donnees a jour) et cette CLI
-// (pour pouvoir regenerer les sitemaps i18n sans dependre d'un run pipeline
-// complet, puisque cette fonction ne depend d'aucune donnee de match live -
-// seulement de la config de langues/pages, deja stable).
+// l'appelle apres chaque run reel avec I18N_LOCALES = i18n/locales.json) et
+// cette CLI. La signature est inchangee : les repertoires pays sont ajoutes a
+// partir de config/markets.json, le pipeline les recoit donc automatiquement
+// dans la liste de fichiers retournee (et dans son index sitemap.xml).
 const fs = require("fs");
 const path = require("path");
 
 const ROOT = path.join(__dirname, "..");
 const SITE_URL = "https://iashark.com";
+const MARKETS = JSON.parse(fs.readFileSync(path.join(ROOT, "config/markets.json"), "utf8"));
+const DIRS = MARKETS._dirs;
+
+// Repertoires couverts : langues de locales.json d'abord, puis les marches pays.
+function sitemapDirs(locales) {
+  var dirs = ((locales && locales.supported) || []).filter(function (d) { return DIRS.hasOwnProperty(d); });
+  Object.keys(DIRS).forEach(function (d) { if (dirs.indexOf(d) === -1) dirs.push(d); });
+  return dirs;
+}
+
+function pageDirs(page, dirs) {
+  return dirs.filter(function (d) { return !(page.file === "landing.html" && DIRS[d].customLanding); });
+}
 
 function generateLocalizedSitemaps(locales, pages, today, outDir) {
   outDir = outDir || ROOT;
-  // Une page avec noSitemap:true reste generee/traduite normalement (le
-  // fichier existe et fonctionne) mais n'est jamais promue dans les
-  // sitemaps - cas d'usage : une page gardee en ligne pour un usage
-  // interne/admin, jamais pour la decouverte publique/SEO (ex.
-  // historique.html, retiree du produit public le 2026-08-30 - voir
-  // IASHARK_V2_RECETTE_VISUELLE.md).
+  var dirs = sitemapDirs(locales);
+  var xDefault = (locales && locales.default) || MARKETS._xDefaultDir || "fr";
   var sitemapPages = pages.filter(function (p) { return !p.noSitemap; });
   var files = [];
-  locales.supported.forEach(function (locale) {
-    var urls = sitemapPages.map(function (page) {
+  dirs.forEach(function (dir) {
+    var urls = [];
+    sitemapPages.forEach(function (page) {
+      var alt = pageDirs(page, dirs);
+      if (alt.indexOf(dir) === -1) return;
       var slug = page.file === "index.html" ? "" : page.file;
-      var loc = SITE_URL + "/" + locale + "/" + slug;
-      var alternates = locales.supported.map(function (l2) {
-        var altSlug = page.file === "index.html" ? "" : page.file;
-        return '<xhtml:link rel="alternate" hreflang="' + l2 + '" href="' + SITE_URL + "/" + l2 + "/" + altSlug + '"/>';
+      var links = alt.map(function (d) {
+        return '<xhtml:link rel="alternate" hreflang="' + DIRS[d].hreflang + '" href="' + SITE_URL + "/" + d + "/" + slug + '"/>';
       }).join("");
-      alternates += '<xhtml:link rel="alternate" hreflang="x-default" href="' + SITE_URL + "/" + locales.default + "/" + slug + '"/>';
-      return "<url><loc>" + loc + "</loc><lastmod>" + today + "</lastmod><changefreq>weekly</changefreq><priority>0.5</priority>" + alternates + "</url>";
+      if (alt.indexOf(xDefault) !== -1) {
+        links += '<xhtml:link rel="alternate" hreflang="x-default" href="' + SITE_URL + "/" + xDefault + "/" + slug + '"/>';
+      }
+      urls.push("<url><loc>" + SITE_URL + "/" + dir + "/" + slug + "</loc><lastmod>" + today +
+        "</lastmod><changefreq>weekly</changefreq><priority>" + (slug === "" ? "0.8" : "0.5") + "</priority>" + links + "</url>");
     });
-    var fname = "sitemap-" + locale + "-i18n.xml";
+    var fname = "sitemap-" + dir + "-i18n.xml";
     fs.writeFileSync(
       path.join(outDir, fname),
       '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n' + urls.join("\n") + "\n</urlset>"
@@ -48,7 +64,7 @@ function generateLocalizedSitemaps(locales, pages, today, outDir) {
   return files;
 }
 
-module.exports = { generateLocalizedSitemaps: generateLocalizedSitemaps };
+module.exports = { generateLocalizedSitemaps: generateLocalizedSitemaps, sitemapDirs: sitemapDirs };
 
 if (require.main === module) {
   var I18N_LOCALES = require(path.join(ROOT, "i18n/locales.json"));
@@ -56,10 +72,9 @@ if (require.main === module) {
   var TODAY = new Date().toISOString().split("T")[0];
   var files = generateLocalizedSitemaps(I18N_LOCALES, I18N_PAGES, TODAY, ROOT);
 
-  // Regenere l'index sitemap.xml : garde l'entree sitemap-fr.xml existante
-  // (produite par le pipeline reel avec les vraies donnees de match, non
-  // touchee ici) et y ajoute/rafraichit les entrees i18n. N'ecrit PAS
-  // sitemap-fr.xml lui-meme (necessite matchsData, hors scope de ce script).
+  // Regenere l'index sitemap.xml : garde l'entree sitemap-fr.xml (produite par
+  // le pipeline reel avec les vraies donnees de match, non ecrite ici) et y
+  // ajoute/rafraichit les entrees par repertoire.
   var indexPath = path.join(ROOT, "sitemap.xml");
   var frEntry = '<sitemap><loc>' + SITE_URL + '/sitemap-fr.xml</loc><lastmod>' + TODAY + '</lastmod></sitemap>';
   var entries = [frEntry].concat(files.map(function (f) {
@@ -69,5 +84,5 @@ if (require.main === module) {
     indexPath,
     '<?xml version="1.0" encoding="UTF-8"?>\n<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + entries.join("\n") + "\n</sitemapindex>"
   );
-  console.log("Sitemaps i18n generes : " + files.join(", ") + " ; sitemap.xml (index) mis a jour avec " + entries.length + " entree(s).");
+  console.log("Sitemaps generes : " + files.join(", ") + " ; sitemap.xml (index) mis a jour avec " + entries.length + " entree(s).");
 }

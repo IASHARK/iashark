@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>À propos — IASHARK</title>
-<meta name="description" content="Comment IASHARK analyse le football : sources de données, modèles statistiques, méthodologie, résultats vérifiables et mentions légales.">
-<meta property="og:title" content="À propos — IASHARK">
-<meta property="og:description" content="Comment IASHARK analyse le football : sources de données, modèles statistiques, méthodologie, résultats vérifiables et mentions légales.">
+<title data-i18n="geo.meta.a-propos.title">À propos — IASHARK</title>
+<meta name="description" content="Comment IASHARK analyse le football : sources de données, modèles statistiques, méthodologie, limites et mentions légales." data-i18n-attr="content:geo.meta.a-propos.description">
+<meta property="og:title" content="À propos — IASHARK" data-i18n-attr="content:geo.meta.a-propos.title">
+<meta property="og:description" content="Comment IASHARK analyse le football : sources de données, modèles statistiques, méthodologie, limites et mentions légales." data-i18n-attr="content:geo.meta.a-propos.description">
 <meta property="og:type" content="website">
 <link rel="canonical" href="https://iashark.com/a-propos.html">
 <meta property="og:url" content="https://iashark.com/a-propos.html">
@@ -92,6 +92,8 @@ a{color:inherit;text-decoration:none;}
 
 footer{padding:30px 20px;text-align:center;}
 footer p{font-family:'Space Mono',monospace;font-size:8px;color:rgba(74,101,128,0.6);letter-spacing:1px;line-height:2;}
+footer .foot-links{margin-top:10px;}
+footer .foot-links a{color:rgba(34,211,238,0.6);}
 
 .nav-bottom{position:fixed;bottom:0;left:0;right:0;background:rgba(8,12,18,0.97);backdrop-filter:blur(14px);border-top:1px solid var(--border);display:flex;z-index:100;}
 .nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px 4px 8px;gap:5px;text-decoration:none;}
@@ -106,82 +108,85 @@ footer p{font-family:'Space Mono',monospace;font-size:8px;color:rgba(74,101,128,
 <body>
 
 <header class="hdr">
-  <a href="https://iashark.com" class="logo"><span>IA</span>SHARK</a>
-  <a href="https://iashark.com/" class="btn-ghost">← ACCUEIL</a>
+  <a href="/" data-href="" class="logo"><span>IA</span>SHARK</a>
+  <a href="/" data-href="" class="btn-ghost" data-i18n="about_page.back_home">← ACCUEIL</a>
 </header>
 
 <div class="wrap">
 
   <div class="hero">
-    <div class="hero-eyebrow">À PROPOS</div>
-    <h1>Pas de flair.<br>Des <b>données</b>, des années d'historique,<br>un résultat vérifiable.</h1>
-    <p>IASHARK analyse chaque match à partir de données sportives accumulées sur plusieurs saisons et de modèles statistiques rigoureux. Pas de martingale ni de système miracle — une méthode appliquée de façon strictement identique, match après match.</p>
+    <div class="hero-eyebrow" data-i18n="about_page.eyebrow">À PROPOS</div>
+    <h1 data-i18n-html="about_page.hero_title">Pas de flair.<br>Des <b>données</b>, plusieurs saisons de statistiques,<br>une méthode constante.</h1>
+    <p data-i18n="about_page.hero_text">IASHARK analyse chaque match à partir de données sportives accumulées sur plusieurs saisons et de modèles statistiques rigoureux. Pas de martingale ni de système miracle — une méthode appliquée de façon strictement identique, match après match.</p>
   </div>
 
   <!-- ═══ METHODOLOGIE ═══ -->
   <div class="sec">
-    <div class="sec-lbl">MÉTHODOLOGIE</div>
-    <h2>Comment le modèle fonctionne</h2>
-    <p>Pour chaque match, notre système s'appuie sur un large historique de données réelles : résultats et statistiques des équipes et des joueurs sur plusieurs saisons, tendances de forme récente, et éléments de contexte (compositions probables, absences, calendrier). Cet historique alimente plusieurs modèles statistiques complémentaires, dont les résultats sont systématiquement croisés avant qu'une conclusion ne soit retenue — jamais un seul modèle isolé, jamais une intuition.</p>
+    <div class="sec-lbl" data-i18n="about_page.method_label">MÉTHODOLOGIE</div>
+    <h2 data-i18n="about_page.method_title">Comment le modèle fonctionne</h2>
+    <p data-i18n="about_page.method_text">Pour chaque match, notre système s'appuie sur un large historique de données réelles : résultats et statistiques des équipes et des joueurs sur plusieurs saisons, tendances de forme récente, et éléments de contexte (compositions probables, absences, calendrier). Cet historique alimente plusieurs modèles statistiques complémentaires, dont les résultats sont systématiquement croisés avant qu'une conclusion ne soit retenue — jamais un seul modèle isolé, jamais une intuition.</p>
 
     <div class="model-grid">
       <div class="model-card">
-        <div class="mtitle">HISTORIQUE MULTI-SAISONS</div>
-        <div class="mdesc">Chaque calcul s'appuie sur plusieurs saisons de résultats et de statistiques réelles, pas sur un ressenti ponctuel ou l'actualité du moment.</div>
+        <div class="mtitle" data-i18n="about_page.card_history_title">HISTORIQUE MULTI-SAISONS</div>
+        <div class="mdesc" data-i18n="about_page.card_history_text">Chaque calcul s'appuie sur plusieurs saisons de résultats et de statistiques réelles, pas sur un ressenti ponctuel ou l'actualité du moment.</div>
       </div>
       <div class="model-card">
-        <div class="mtitle">MODÈLES CROISÉS</div>
-        <div class="mdesc">Plusieurs modèles statistiques indépendants analysent chaque rencontre en parallèle ; une conclusion n'est retenue que lorsqu'ils convergent.</div>
+        <div class="mtitle" data-i18n="about_page.card_crossed_title">MODÈLES CROISÉS</div>
+        <div class="mdesc" data-i18n="about_page.card_crossed_text">Plusieurs modèles statistiques indépendants analysent chaque rencontre en parallèle ; une conclusion n'est retenue que lorsqu'ils convergent.</div>
       </div>
       <div class="model-card">
-        <div class="mtitle">SIMULATIONS</div>
-        <div class="mdesc">Des milliers de scénarios de match sont simulés pour chaque rencontre, afin de vérifier la cohérence statistique des résultats obtenus.</div>
+        <div class="mtitle" data-i18n="about_page.card_simulations_title">SIMULATIONS</div>
+        <div class="mdesc" data-i18n="about_page.card_simulations_text">Des milliers de scénarios de match sont simulés pour chaque rencontre, afin de vérifier la cohérence statistique des résultats obtenus.</div>
       </div>
       <div class="model-card">
-        <div class="mtitle">SCORE DE FIABILITÉ</div>
-        <div class="mdesc">Un indicateur séparé mesure l'accord entre les modèles et la qualité des données disponibles pour ce match précis — jamais une réécriture de la probabilité elle-même.</div>
+        <div class="mtitle" data-i18n="about_page.card_reliability_title">SCORE DE FIABILITÉ</div>
+        <div class="mdesc" data-i18n="about_page.card_reliability_text">Un indicateur séparé mesure l'accord entre les modèles et la qualité des données disponibles pour ce match précis — jamais une réécriture de la probabilité elle-même.</div>
       </div>
     </div>
 
-    <p>Le marché mis en avant pour chaque match est sélectionné automatiquement selon des critères statistiques déterministes, sans intervention manuelle. La <b>probabilité affichée</b> est directement celle du modèle, jamais modifiée après coup. Un modèle de langage rédige ensuite le texte d'explication qui accompagne ce choix, mais ne calcule, ne choisit ni ne modifie aucun chiffre : les probabilités, cotes, marché retenu et niveau de fiabilité sont entièrement déterminés par notre méthode statistique, jamais par ce texte.</p>
-    <p><b>La notion de value</b> : notre modèle compare sa probabilité calculée à la cote proposée par les bookmakers. Quand notre estimation diverge sensiblement de celle qu'implique la cote, on parle de "value bet" — une cote potentiellement mal évaluée par le marché. Le détail exact de notre méthode de calcul reste propriétaire et n'est pas divulgué publiquement.</p>
+    <p data-i18n-html="about_page.method_selection">Le marché mis en avant pour chaque match est sélectionné automatiquement selon des critères statistiques déterministes, sans intervention manuelle. La <b>probabilité affichée</b> est directement celle du modèle, jamais modifiée après coup. Un modèle de langage rédige ensuite le texte d'explication qui accompagne ce choix, mais ne calcule, ne choisit ni ne modifie aucun chiffre : les probabilités, cotes, marché retenu et niveau de fiabilité sont entièrement déterminés par notre méthode statistique, jamais par ce texte.</p>
+    <p data-i18n-html="about_page.method_value"><b>La notion de value</b> : notre modèle compare sa probabilité calculée à la cote proposée par les bookmakers. Quand notre estimation diverge sensiblement de celle qu'implique la cote, on parle de "value bet" — une cote potentiellement mal évaluée par le marché. Le détail exact de notre méthode de calcul reste propriétaire et n'est pas divulgué publiquement.</p>
   </div>
 
   <!-- ═══ SIMPLE VS COMBINE ═══ -->
   <div class="sec">
-    <div class="sec-lbl">À LIRE AVANT TOUT</div>
-    <h2>Un modèle par match, pas de combinés</h2>
-    <p>Le cœur du système analyse <b>chaque match indépendamment</b> — un pari simple à la fois, jamais des combinaisons de plusieurs paris.</p>
+    <div class="sec-lbl" data-i18n="about_page.single_label">À LIRE AVANT TOUT</div>
+    <h2 data-i18n="about_page.single_title">Un modèle par match, pas de combinés</h2>
+    <p data-i18n-html="about_page.single_text">Le cœur du système analyse <b>chaque match indépendamment</b> — un pari simple à la fois, jamais des combinaisons de plusieurs paris.</p>
   </div>
 
   <!-- ═══ LEGAL ═══ -->
   <div class="sec">
-    <div class="sec-lbl">MENTIONS IMPORTANTES</div>
-    <h2>Ce que vous devez savoir</h2>
+    <div class="sec-lbl" data-i18n="about_page.legal_label">MENTIONS IMPORTANTES</div>
+    <h2 data-i18n="about_page.legal_title">Ce que vous devez savoir</h2>
     <ul class="legal-list">
-      <li><b>IASHARK n'est pas un opérateur de paris sportifs.</b> Nous ne prenons aucune mise, ne gérons aucun compte joueur et ne procédons à aucun encaissement de gains. Pour parier réellement, vous devez passer par un opérateur agréé par l'ANJ (Autorité Nationale des Jeux).</li>
-      <li><b>Nous ne sommes ni conseillers financiers, ni traders professionnels agréés, ni professionnels du pari sportif.</b> IASHARK est un outil d'analyse statistique à but informatif et éducatif — en aucun cas un service de conseil en investissement, en trading ou en paris.</li>
-      <li><b>Contenu informatif uniquement.</b> Les analyses, statistiques, probabilités et indicateurs de fiabilité publiés ici sont fournis à titre purement informatif et éducatif. Ils ne constituent ni un conseil financier, ni une garantie de résultat.</li>
-      <li><b>Aucune responsabilité ne pourra être engagée</b> en cas de perte financière résultant de décisions prises sur la base des contenus de ce site. Vous êtes seul responsable de vos décisions de jeu et de leurs conséquences.</li>
-      <li><b>Le sport est imprévisible.</b> Aucun modèle statistique, aussi rigoureux soit-il, ne peut prédire un résultat sportif avec certitude.</li>
-      <li><b>Performances passées ≠ performances futures.</b> Un edge statistique positif à long terme n'empêche pas des séries de pertes à court terme. Le modèle et la méthodologie décrits sur cette page peuvent évoluer sans préavis.</li>
-      <li><b>Propriété du contenu.</b> Les analyses, textes et méthodologie présentés sur ce site sont la propriété d'IASHARK et ne peuvent être reproduits sans autorisation préalable.</li>
-      <li><b>Réservé aux personnes majeures</b> (18 ans et plus).</li>
+      <li data-i18n-html="about_page.legal_not_operator"><b>IASHARK n'est pas un opérateur de paris sportifs.</b> Nous ne prenons aucune mise, ne gérons aucun compte joueur et ne procédons à aucun encaissement de gains. Pour parier réellement, vous devez passer par un opérateur agréé par l'ANJ (Autorité Nationale des Jeux).</li>
+      <li data-i18n-html="about_page.legal_not_advisor"><b>Nous ne sommes ni conseillers financiers, ni traders professionnels agréés, ni professionnels du pari sportif.</b> IASHARK est un outil d'analyse statistique à but informatif et éducatif — en aucun cas un service de conseil en investissement, en trading ou en paris.</li>
+      <li data-i18n-html="about_page.legal_informative"><b>Contenu informatif uniquement.</b> Les analyses, statistiques, probabilités et indicateurs de fiabilité publiés ici sont fournis à titre purement informatif et éducatif. Ils ne constituent ni un conseil financier, ni une garantie de résultat.</li>
+      <li data-i18n-html="about_page.legal_no_liability"><b>Aucune responsabilité ne pourra être engagée</b> en cas de perte financière résultant de décisions prises sur la base des contenus de ce site. Vous êtes seul responsable de vos décisions de jeu et de leurs conséquences.</li>
+      <li data-i18n-html="about_page.legal_unpredictable"><b>Le sport est imprévisible.</b> Aucun modèle statistique, aussi rigoureux soit-il, ne peut prédire un résultat sportif avec certitude.</li>
+      <li data-i18n-html="about_page.legal_past_performance"><b>Performances passées ≠ performances futures.</b> Un edge statistique positif à long terme n'empêche pas des séries de pertes à court terme. Le modèle et la méthodologie décrits sur cette page peuvent évoluer sans préavis.</li>
+      <li data-i18n-html="about_page.legal_ownership"><b>Propriété du contenu.</b> Les analyses, textes et méthodologie présentés sur ce site sont la propriété d'IASHARK et ne peuvent être reproduits sans autorisation préalable.</li>
+      <li data-i18n-html="about_page.legal_adults"><b>Réservé aux personnes majeures</b> (18 ans et plus).</li>
     </ul>
 
     <div class="help-box">
-      <div class="htitle">🦈 Jouer doit rester un plaisir</div>
-      <p>Si vous ou un proche rencontrez des difficultés avec le jeu, une aide gratuite et anonyme existe.</p>
-      <div class="phone">09 74 75 13 13</div>
-      <div class="sub">JOUEURS-INFO-SERVICE.FR · 7J/7 DE 8H À 2H · APPEL NON SURTAXÉ</div>
+      <div class="htitle" data-i18n="about_page.help_title">🦈 Jouer doit rester un plaisir</div>
+      <p data-i18n="about_page.help_text">Si vous ou un proche rencontrez des difficultés avec le jeu, une aide gratuite et anonyme existe.</p>
+      <div class="phone" data-market-helpline="phone">09 74 75 13 13</div>
+      <div class="sub" id="helpNameMarket" data-market-helpline="name" hidden></div>
+      <div class="sub" id="helpSubFr" data-i18n="about_page.help_sub">JOUEURS-INFO-SERVICE.FR · 7J/7 DE 8H À 2H · APPEL NON SURTAXÉ</div>
+      <p style="margin:12px 0 0"><a href="/jeu-responsable.html" data-href="jeu-responsable.html" style="color:inherit;text-decoration:underline" data-i18n="about_page.help_link">Toutes les ressources d'aide au jeu responsable</a></p>
     </div>
   </div>
 
 </div>
 
 <footer>
-  <p>⚠️ LE JEU PEUT ÊTRE DANGEREUX — JOUEZ RESPONSABLE · INTERDIT AUX MOINS DE 18 ANS<br>
-  IASHARK — Les analyses publiées sont à titre indicatif uniquement</p>
+  <p><span data-i18n="about_page.footer_warning">⚠️ LE JEU PEUT ÊTRE DANGEREUX — JOUEZ RESPONSABLE · INTERDIT AUX MOINS DE 18 ANS</span><br>
+  <span data-i18n="about_page.footer_note">IASHARK — Les analyses publiées sont à titre indicatif uniquement</span></p>
+  <p class="foot-links"><a href="/mentions-legales.html" data-href="mentions-legales.html" data-i18n="footer.mentions_legales">Mentions légales</a> · <a href="/cgv.html" data-href="cgv.html" data-i18n="footer.cgv">CGV</a> · <a href="/confidentialite.html" data-href="confidentialite.html" data-i18n="footer.confidentialite">Confidentialité</a> · <a href="/cookies.html" data-href="cookies.html" data-i18n="footer.cookies">Cookies</a> · <a href="/jeu-responsable.html" data-href="jeu-responsable.html" data-i18n="footer.responsible_gambling">Jeu responsable</a></p>
 </footer>
 
 <nav class="nav-bottom">
@@ -191,6 +196,23 @@ footer p{font-family:'Space Mono',monospace;font-size:8px;color:rgba(74,101,128,
   <a href="https://iashark.com/compte.html" class="nav-item"><div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg></div><div class="nav-lbl">COMPTE</div></a>
 </nav>
 
+<script src="/i18n/i18n.js"></script>
+<script src="/lib/market-config.js"></script>
+<script>
+(function(){
+  // Le detail "Joueurs Info Service, 7j/7..." est propre au marche FR : sur
+  // gb/za/mx, lib/market-config.js affiche le nom et le numero de la ligne
+  // d'aide du marche (ou masque le numero s'il n'y en a pas de confirme).
+  function marche(){
+    var m=window.IASHARK_MARKET;
+    if(!m)return;
+    var fr=m.code==='fr', sub=document.getElementById('helpSubFr'), name=document.getElementById('helpNameMarket');
+    if(sub)sub.hidden=!fr;
+    if(name&&fr)name.hidden=true;
+  }
+  if(window.I18N&&window.I18N.init){window.I18N.init().then(marche,marche);}else{marche();}
+})();
+</script>
 <script src="/site-prefs.js"></script>
 <script src="/bottom-navigation.js"></script></body>
 </html>

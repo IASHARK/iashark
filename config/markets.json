@@ -1,63 +1,137 @@
 {
-  "_readme": "Source de verite GEO (pays/devise/conformite/feature flags). Ne PAS confondre avec i18n/locales.json (langue d'interface) : un marche pointe vers UNE locale existante, ce fichier ne duplique jamais un dictionnaire de traduction. 'status' et les champs de conformite restent DRAFT_PENDING_LEGAL_REVIEW tant qu'aucune validation juridique reelle n'a eu lieu (cf. 04_IAShark_Compliance_Approval_Pack) - ne jamais faire passer un marche a LIVE sans checklist QA + validation business.",
+  "_readme": "Source de verite GEO (pays/devise/prix/conformite/repertoires publics). Ne PAS confondre avec i18n/locales.json (langue d'interface) : un marche pointe vers UNE locale existante, ce fichier ne duplique jamais un dictionnaire de traduction. 'status' et les champs de conformite restent DRAFT_PENDING_LEGAL_REVIEW tant qu'aucune validation juridique reelle n'a eu lieu (cf. 04_IAShark_Compliance_Approval_Pack) - ne jamais faire passer un marche a LIVE sans checklist QA + validation business. Consommateurs : scripts/build-locales.js (genere toutes les pages publiques dans chaque repertoire de _dirs, recopie le bloc de donnees de lib/market-config.js, regenere _redirects) et scripts/i18n-sitemaps.js (sitemaps + hreflang). Apres toute modification ici : node scripts/build-locales.js.",
+  "_defaultMarket": "fr",
+  "_xDefaultDir": "fr",
+  "_planKeys": ["free", "pro", "edge", "annual_edge"],
+  "_legalFiles": {
+    "legal_notice": "mentions-legales.html",
+    "terms": "cgv.html",
+    "privacy": "confidentialite.html",
+    "cookies": "cookies.html",
+    "responsible_gambling": "jeu-responsable.html"
+  },
+  "_dirs_readme": "Un repertoire public = une copie complete du site. market = cle de marche ci-dessous (devise/prix/aide/legal), locale = dictionnaire i18n/dict/<locale>.json, htmlLang = <html lang>, hreflang = valeur hreflang, intlLocale = locale Intl pour les prix/dates, blogDir = repertoire du blog traduit (null = blog FR racine), label = libelle du selecteur (ordre des cles = ordre du selecteur), customLanding = landing.html de ce repertoire maintenue a la main (jamais ecrasee par le generateur).",
+  "_dirs": {
+    "fr": {"market": "fr", "locale": "fr", "htmlLang": "fr", "hreflang": "fr", "intlLocale": "fr-FR", "blogDir": null, "label": "Français"},
+    "gb": {"market": "gb", "locale": "en", "htmlLang": "en-GB", "hreflang": "en-GB", "intlLocale": "en-GB", "blogDir": "en", "label": "English (UK)", "customLanding": true},
+    "za": {"market": "za", "locale": "en", "htmlLang": "en-ZA", "hreflang": "en-ZA", "intlLocale": "en-ZA", "blogDir": "en", "label": "English (South Africa)", "customLanding": true},
+    "en": {"market": "fr", "locale": "en", "htmlLang": "en", "hreflang": "en", "intlLocale": "en-GB", "blogDir": "en", "label": "English (International)"},
+    "mx": {"market": "mx", "locale": "es-mx", "htmlLang": "es-MX", "hreflang": "es-MX", "intlLocale": "es-MX", "blogDir": "es", "label": "Español (México)", "customLanding": true},
+    "es": {"market": "fr", "locale": "es", "htmlLang": "es", "hreflang": "es", "intlLocale": "es-ES", "blogDir": "es", "label": "Español"},
+    "de": {"market": "fr", "locale": "de", "htmlLang": "de", "hreflang": "de", "intlLocale": "de-DE", "blogDir": "de", "label": "Deutsch"},
+    "it": {"market": "fr", "locale": "it", "htmlLang": "it", "hreflang": "it", "intlLocale": "it-IT", "blogDir": "it", "label": "Italiano"},
+    "pt": {"market": "fr", "locale": "pt", "htmlLang": "pt", "hreflang": "pt", "intlLocale": "pt-PT", "blogDir": "pt", "label": "Português"}
+  },
   "fr": {
     "country": "FR",
     "locale": "fr",
+    "htmlLang": "fr",
+    "intlLocale": "fr-FR",
     "currency": "EUR",
-    "urlPrefix": "/",
+    "urlPrefix": "/fr/",
+    "dirs": ["fr", "en", "es", "de", "it", "pt"],
     "stripeEnvKey": "STRIPE_PRICE_ID",
+    "checkoutMarket": null,
     "paidAdsEnabled": false,
     "adsGamblingCertRequired": false,
     "status": "LIVE",
+    "minAge": 18,
+    "prices": {
+      "free": {"amount": 0, "interval": "month"},
+      "pro": {"amount": 19.95, "interval": "month"},
+      "edge": null,
+      "annual_edge": null
+    },
+    "pricesSource": "Aucun des documents 06/07/08/18 ne fixe de prix EUR. pro = 19,95 EUR/mois = prix deja affiche sur le site (abonnement.html, cgv.html, index.html, account-page.js). edge / annual_edge : aucun prix EUR n'existe -> null (BLOCKED_DECISION, jamais invente ; lib/market-config.js pose alors data-market-price-unavailable sans toucher au texte).",
+    "helpline": {"name": "Joueurs Info Service", "phone": "09 74 75 13 13", "tel": "0974751313", "url": "https://www.joueurs-info-service.fr", "display": "joueurs-info-service.fr"},
     "compliance": {
       "responsibleGamblingHelpline": "Joueurs Info Service - 09 74 75 13 13 - joueurs-info-service.fr",
       "legalPagesLocalized": true,
-      "note": "Marche historique, non concerne par le sprint GB/MX/ZA en cours."
+      "note": "Marche EUR par defaut, servi par les repertoires de langue /fr/ /en/ /es/ /de/ /it/ /pt/. BLOCKED_DECISION : /en/ /es/ /de/ /it/ /pt/ affichent la ressource d'aide francaise (Joueurs Info Service) faute de ressource validee pour les visiteurs internationaux de ces repertoires."
     }
   },
   "gb": {
     "country": "GB",
     "locale": "en",
+    "htmlLang": "en-GB",
+    "intlLocale": "en-GB",
     "currency": "GBP",
     "urlPrefix": "/gb/",
+    "dirs": ["gb"],
     "stripeEnvKey": "STRIPE_PRICE_ID_GB",
+    "checkoutMarket": "gb",
     "paidAdsEnabled": false,
     "adsGamblingCertRequired": true,
     "status": "DRAFT_PENDING_LEGAL_REVIEW",
+    "minAge": 18,
+    "prices": {
+      "free": {"amount": 0, "interval": "month"},
+      "pro": {"amount": 14.99, "interval": "month"},
+      "edge": {"amount": 24.99, "interval": "month"},
+      "annual_edge": {"amount": 199, "interval": "year"}
+    },
+    "pricesSource": "06_IAShark_UK_Launch_Kit §1 (identique a doc 18 §5.3) : Pro £14.99, Edge £24.99, Annuel £199. 'Annuel' = Annual Edge : £199 > 12 x £14.99 (179,88), ce ne peut pas etre un Pro annuel.",
+    "helpline": {"name": "National Gambling Helpline (GamCare / BeGambleAware)", "phone": "0808 8020 133", "tel": "08088020133", "url": "https://www.begambleaware.org", "display": "begambleaware.org"},
     "compliance": {
       "responsibleGamblingHelpline": "GamCare / BeGambleAware - National Gambling Helpline 0808 8020 133 - begambleaware.org",
-      "legalPagesLocalized": false,
-      "note": "A CONFIRMER par validation juridique avant publication (cf. 04_IAShark_Compliance_Approval_Pack + 06_IAShark_UK_Launch_Kit). SIRET/SIREN manquant cote entreprise bloque l'activation PSP/Stripe live - voir BLOCKED_DECISION dans WORK_PROGRESS/plan d'execution. Dossiers TikTok Gambling Information + X pre-authorization non encore soumis."
+      "legalPagesLocalized": true,
+      "note": "Pages legales /gb/ en BROUILLON (legal/gb/, non validees par un juriste). A CONFIRMER par validation juridique avant publication (cf. 04_IAShark_Compliance_Approval_Pack + 06_IAShark_UK_Launch_Kit). SIRET/SIREN manquant cote entreprise bloque l'activation PSP/Stripe live - voir BLOCKED_DECISION dans WORK_PROGRESS/plan d'execution. Dossiers TikTok Gambling Information + X pre-authorization non encore soumis."
     }
   },
   "mx": {
     "country": "MX",
     "locale": "es-mx",
+    "htmlLang": "es-MX",
+    "intlLocale": "es-MX",
     "currency": "MXN",
     "urlPrefix": "/mx/",
+    "dirs": ["mx"],
     "stripeEnvKey": "STRIPE_PRICE_ID_MX",
+    "checkoutMarket": "mx",
     "paidAdsEnabled": false,
     "adsGamblingCertRequired": true,
     "status": "DRAFT_PENDING_LEGAL_REVIEW",
+    "minAge": 18,
+    "prices": {
+      "free": {"amount": 0, "interval": "month"},
+      "pro": {"amount": 199, "interval": "month"},
+      "edge": {"amount": 299, "interval": "month"},
+      "annual_edge": {"amount": 1990, "interval": "year"}
+    },
+    "pricesSource": "07_IAShark_Mexico_Launch_Kit §1 : Pro MX$199, Edge MX$299, Annuel MX$1 990. Le doc dit seulement 'Annuel' : libelle 'Edge Anual' repris de la page /mx/ deja publiee (a confirmer cote business).",
+    "helpline": {"name": "Línea de la Vida (CONASAMA)", "phone": "800 911 2000", "tel": "8009112000", "url": "https://www.gob.mx/conasama/articulos/linea-de-la-vida-800-911-2000", "display": "gob.mx/conasama", "hours": "gratuita, 24/7"},
     "compliance": {
-      "responsibleGamblingHelpline": null,
-      "legalPagesLocalized": false,
-      "note": "BLOCKED_DECISION : aucune ressource d'aide au jeu responsable confirmee pour le Mexique dans cette session - ne jamais publier de numero invente. Le 07_IAShark_Mexico_Launch_Kit exige une validation juridique locale du modele (plateforme d'analyse sportive, pas de prise de paris) AVANT tout paiement live. Terminologie : utiliser 'momios' (pas 'cuota') pour les cotes en es-mx."
+      "responsibleGamblingHelpline": "Línea de la Vida (CONASAMA / Secretaría de Salud) - 800 911 2000 - gratuita, 24 h/24, 365 j/an - gob.mx/conasama",
+      "legalPagesLocalized": true,
+      "note": "Ressource d'aide verifiee par l'agent juridique (legal/README.md, §3 Mexique et point 24 : ligne officielle gob.mx ; son orientation sur le trouble lie au jeu vient de communications CONASAMA d'aout 2026, a confirmer directement aupres de la CONASAMA). Pages legales /mx/ en BROUILLON (legal/mx/). Le 07_IAShark_Mexico_Launch_Kit exige une validation juridique locale du modele (plateforme d'analyse sportive, pas de prise de paris) AVANT tout paiement live. Terminologie : utiliser 'momios' (pas 'cuota') pour les cotes en es-mx."
     }
   },
   "za": {
     "country": "ZA",
     "locale": "en",
+    "htmlLang": "en-ZA",
+    "intlLocale": "en-ZA",
     "currency": "ZAR",
     "urlPrefix": "/za/",
+    "dirs": ["za"],
     "stripeEnvKey": "STRIPE_PRICE_ID_ZA",
+    "checkoutMarket": "za",
     "paidAdsEnabled": false,
     "adsGamblingCertRequired": true,
     "status": "DRAFT_PENDING_LEGAL_REVIEW",
+    "minAge": 18,
+    "prices": {
+      "free": {"amount": 0, "interval": "month"},
+      "pro": {"amount": 199, "interval": "month"},
+      "edge": {"amount": 299, "interval": "month"},
+      "annual_edge": {"amount": 1999, "interval": "year"}
+    },
+    "pricesSource": "08_IAShark_South_Africa_Launch_Kit §1 : Pro R199, Edge R299, Annuel R1 999. Le doc dit seulement 'Annuel' : libelle 'Annual Edge' repris de la page /za/ deja publiee (a confirmer cote business).",
+    "helpline": {"name": "National Responsible Gambling Programme (NRGP)", "phone": "0800 006 008", "tel": "0800006008", "url": "https://www.responsiblegambling.org.za", "display": "responsiblegambling.org.za"},
     "compliance": {
       "responsibleGamblingHelpline": "National Responsible Gambling Programme (NRGP) - 0800 006 008 - responsiblegambling.org.za",
-      "legalPagesLocalized": false,
-      "note": "A CONFIRMER par validation juridique avant publication (cf. 04_IAShark_Compliance_Approval_Pack + 08_IAShark_South_Africa_Launch_Kit). Pas d'affiliation bookmaker sans approbation prealable."
+      "legalPagesLocalized": true,
+      "note": "Pages legales /za/ en BROUILLON (legal/za/, non validees par un juriste). A CONFIRMER par validation juridique avant publication (cf. 04_IAShark_Compliance_Approval_Pack + 08_IAShark_South_Africa_Launch_Kit). Pas d'affiliation bookmaker sans approbation prealable."
     }
   }
 }

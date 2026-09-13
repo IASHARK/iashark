@@ -3,14 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>IASHARK — Paiement confirmé</title>
+<title data-i18n="geo.meta.checkout-succes.title">IASHARK — Paiement confirmé</title>
 <meta name="robots" content="noindex, nofollow">
-<meta name="description" content="Ton abonnement Outils IASHARK est en cours d'activation.">
+<meta name="description" content="Ton abonnement Outils IASHARK est en cours d'activation." data-i18n-attr="content:geo.meta.checkout-succes.description">
 <link rel="canonical" href="https://iashark.com/checkout-succes.html">
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23080c12'/%3E%3Ctext x='50%25' y='54%25' dominant-baseline='middle' text-anchor='middle' font-size='40' fill='%2322d3ee'%3E🦈%3C/text%3E%3C/svg%3E">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="/funnel-track.js"></script>
+<script src="/i18n/i18n.js"></script>
 <style>
 :root{--bg:#080c12;--card:#0d1520;--cyan:#22d3ee;--green:#10b981;--amber:#f59e0b;--text:#e2e8f0;--muted:#4a6580;--border:rgba(255,255,255,0.06);--bc:rgba(34,211,238,0.18);}
 *{margin:0;padding:0;box-sizing:border-box;}
@@ -29,18 +30,22 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 </style>
 <link rel="stylesheet" href="/assets/bottom-navigation.css"></head>
 <body>
-<header class="hdr"><a href="/" class="logo"><span>IA</span>SHARK</a></header>
+<header class="hdr"><a href="/" data-href="" class="logo"><span>IA</span>SHARK</a></header>
 <div class="wrap">
   <div class="card">
     <div class="icon">✅</div>
-    <div class="title">Paiement confirmé</div>
-    <div class="body">Merci ! Ton abonnement Outils est en cours d'activation — cela prend généralement quelques secondes.</div>
-    <div class="status" id="statusTxt">Vérification de ton accès...</div>
-    <a href="/compte.html" class="cta">ALLER À MON COMPTE →</a>
+    <div class="title" data-i18n="checkout_pages.success_heading">Paiement confirmé</div>
+    <div class="body" data-i18n="checkout_pages.success_body">Merci ! Ton abonnement Outils est en cours d'activation — cela prend généralement quelques secondes.</div>
+    <div class="status" id="statusTxt" data-i18n="checkout_pages.success_checking">Vérification de ton accès...</div>
+    <a href="/compte.html" data-href="compte.html" class="cta" data-i18n="checkout_pages.success_cta_account">ALLER À MON COMPTE →</a>
   </div>
 </div>
 <script>
 if(window.iasharkTrack) iasharkTrack('checkout_success_view');
+// i18n : cette page est servie a la racine ET sous /<dir>/ (retour Stripe
+// localise). Repli francais si le dictionnaire ne charge pas.
+function t(key,fallback){return (window.I18N&&window.I18N.t)?window.I18N.t(key,fallback):fallback;}
+var i18nReady=(window.I18N&&window.I18N.init)?window.I18N.init():Promise.resolve();
 
 var SUPA_URL = 'https://ksvjraqitxouwiabecai.supabase.co';
 var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtzdmpyYXFpdHhvdXdpYWJlY2FpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3ODcwMjMsImV4cCI6MjA4ODM2MzAyM30.Eh3qk4tATM40hoYxdErAllLEo1y8KNt4BSCET_fAgT8';
@@ -76,10 +81,10 @@ async function pollAccess(attempt){
   var statusEl = document.getElementById('statusTxt');
   try{
     var res = await sb.auth.getSession();
-    if(!res.data || !res.data.session){ statusEl.textContent = 'Connecte-toi pour voir ton nouvel accès.'; return; }
+    if(!res.data || !res.data.session){ statusEl.textContent = t('checkout_pages.success_login_needed','Connecte-toi pour voir ton nouvel accès.'); return; }
     var ures = await sb.from('users').select('plan').eq('id', res.data.session.user.id).maybeSingle();
     if(ures.data && ures.data.plan==='pro'){
-      statusEl.textContent = 'Accès Outils activé ✓';
+      statusEl.textContent = t('checkout_pages.success_active','Accès Outils activé ✓');
       statusEl.classList.add('ready');
       return;
     }
@@ -90,10 +95,10 @@ async function pollAccess(attempt){
     syncAccess();
     setTimeout(function(){ pollAccess(attempt+1); }, 1500);
   } else {
-    statusEl.textContent = "L'activation peut prendre un peu plus de temps — rends-toi sur ton compte dans une minute.";
+    statusEl.textContent = t('checkout_pages.success_slow',"L'activation peut prendre un peu plus de temps — rends-toi sur ton compte dans une minute.");
   }
 }
-syncAccess().then(function(){ pollAccess(0); });
+i18nReady.then(syncAccess).then(function(){ pollAccess(0); });
 </script>
 <script src="/site-prefs.js"></script>
 <script src="/bottom-navigation.js"></script></body>

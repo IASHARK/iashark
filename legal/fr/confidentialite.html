@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Politique de confidentialité — IASHARK</title>
+<meta name="description" content="Politique de confidentialité d&#x27;IASHARK : données collectées, finalités, bases légales, destinataires, durées de conservation et droits RGPD.">
+<meta property="og:title" content="Politique de confidentialité — IASHARK">
+<meta property="og:description" content="Politique de confidentialité d&#x27;IASHARK : données collectées, finalités, bases légales, destinataires, durées de conservation et droits RGPD.">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="fr_FR">
+<link rel="canonical" href="https://iashark.com/fr/confidentialite.html">
+<meta property="og:url" content="https://iashark.com/fr/confidentialite.html">
+<meta property="og:image" content="https://iashark.com/icon-512.png">
+<meta name="twitter:card" content="summary_large_image">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{--bg:#080c12;--card:#0d1520;--cyan:#22d3ee;--amber:#f59e0b;--text:#e2e8f0;--muted:#64748b;--border:rgba(255,255,255,0.06);}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;padding-bottom:90px;}
+.hdr{position:sticky;top:0;z-index:99;background:rgba(8,12,18,0.96);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);padding:0 20px;height:52px;display:flex;align-items:center;gap:16px;}
+.hdr-back{font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);background:none;border:none;cursor:pointer;letter-spacing:1px;}
+.hdr-back:hover{color:var(--cyan);}
+.hdr-logo{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:3px;color:var(--text);text-decoration:none;}
+.hdr-logo span{color:var(--cyan);}
+.hdr-title{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:2px;color:var(--text);margin-left:auto;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.container{max-width:720px;margin:0 auto;padding:28px 20px;}
+.legal-nav{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:26px;}
+.legal-nav a{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);text-decoration:none;border:1px solid var(--border);border-radius:8px;padding:6px 10px;}
+.legal-nav a:hover{color:var(--cyan);border-color:rgba(34,211,238,0.3);}
+.legal-nav a[aria-current="page"]{color:var(--cyan);border-color:rgba(34,211,238,0.35);background:rgba(34,211,238,0.05);}
+.page-title{font-family:'Bebas Neue',sans-serif;font-size:32px;font-weight:400;letter-spacing:2px;color:var(--cyan);margin-bottom:6px;}
+.page-date{font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:1px;margin-bottom:28px;text-transform:uppercase;}
+.section{margin-bottom:28px;}
+.section h2{font-family:'Space Mono',monospace;font-size:11px;font-weight:700;color:var(--amber);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--border);}
+.section h3{font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;color:var(--text);margin:14px 0 6px;}
+.section p,.section li,.section td,.section th{font-family:'DM Sans',sans-serif;font-size:14px;color:rgba(226,232,240,0.72);line-height:1.8;font-weight:300;}
+.section p,.section li{margin-bottom:8px;}
+.section strong{color:var(--text);font-weight:500;}
+.section ul,.section ol{padding-left:18px;}
+.section a{color:var(--cyan);text-decoration:none;word-break:break-word;}
+.section a:hover{text-decoration:underline;}
+.warn-box{background:rgba(245,158,11,0.06);border:1px solid rgba(245,158,11,0.2);border-radius:12px;padding:16px 20px;margin-bottom:28px;}
+.warn-box p{font-family:'Space Mono',monospace;font-size:10px;color:rgba(245,158,11,0.85);line-height:1.8;letter-spacing:0.5px;}
+.warn-box a{color:rgba(245,158,11,0.95);}
+.highlight{background:rgba(34,211,238,0.05);border:1px solid rgba(34,211,238,0.12);border-radius:10px;padding:14px 18px;margin:10px 0 16px;}
+.highlight p{color:rgba(226,232,240,0.9);font-size:13px;margin-bottom:4px;}
+.tbl-wrap{overflow-x:auto;margin:10px 0 16px;border:1px solid var(--border);border-radius:10px;}
+.tbl-wrap table{border-collapse:collapse;width:100%;min-width:560px;}
+.tbl-wrap th{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);text-align:left;background:var(--card);}
+.tbl-wrap th,.tbl-wrap td{padding:9px 12px;border-bottom:1px solid var(--border);vertical-align:top;font-size:13px;}
+.tbl-wrap tr:last-child td{border-bottom:none;}
+.tbl-wrap code,.section code{font-family:'Space Mono',monospace;font-size:11px;color:var(--text);}
+.legal-foot{margin-top:40px;padding-top:18px;border-top:1px solid var(--border);text-align:center;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1px;color:rgba(100,116,139,0.8);line-height:2;}
+.legal-foot a{color:rgba(100,116,139,0.9);text-decoration:none;margin:0 6px;}
+.legal-foot a:hover{color:var(--cyan);}
+@media(max-width:520px){.hdr-title{display:none;}.page-title{font-size:28px;}}
+</style>
+<link rel="stylesheet" href="/assets/bottom-navigation.css"></head>
+<body>
+<!-- LEGAL REVIEW: (1) identité complète du responsable du traitement (nom, adresse) manquante ; (2) durée de conservation des événements de parcours (table funnel_events) et des clés de limitation de connexion contenant l'adresse IP (table rate_limit_buckets) non définie dans le code - aucune purge automatique constatée ; (3) la durée 'compte : fin d'abonnement + 1 an' reprise de la page d'origine n'est appliquée par aucune tâche automatique ; (4) certification DPF des sous-traitants américains à vérifier au cas par cas. -->
+<header class="hdr">
+  <button class="hdr-back" type="button" onclick="history.back()">&larr; RETOUR</button>
+  <a class="hdr-logo" href="./" aria-label="IASHARK"><span>IA</span>SHARK</a>
+  <div class="hdr-title">CONFIDENTIALITÉ</div>
+</header>
+<main class="container">
+  <nav class="legal-nav" aria-label="Pages légales">
+    <a href="mentions-legales.html">Mentions légales</a>
+    <a href="cgv.html">CGV</a>
+    <a href="confidentialite.html" aria-current="page">Confidentialité</a>
+    <a href="cookies.html">Cookies</a>
+    <a href="jeu-responsable.html">Jeu responsable</a>
+  </nav>
+  <h1 class="page-title">Politique de confidentialité</h1>
+  <div class="page-date">Dernière mise à jour : septembre 2026</div>
+
+  <div class="warn-box">
+    <p>⚠️ IASHARK N'EST PAS UN SITE DE PARIS : AUCUNE MISE N'EST PRISE SUR CE SITE. LES ANALYSES SONT DES ESTIMATIONS STATISTIQUES, SANS AUCUNE GARANTIE DE RÉSULTAT.<br>LES JEUX D'ARGENT COMPORTENT DES RISQUES : ENDETTEMENT, DÉPENDANCE. BESOIN D'AIDE ? JOUEURS INFO SERVICE : <a href="tel:+33974751313">09 74 75 13 13</a> (APPEL NON SURTAXÉ).<br>SERVICE RÉSERVÉ AUX PERSONNES ÂGÉES DE 18 ANS ET PLUS.</p>
+  </div>
+
+  <section class="section">
+    <h2>1. Responsable du traitement</h2>
+    <p>IASHARK (auto-entrepreneur, siège social à Paris, France) est responsable du traitement des données personnelles collectées via le site <strong>iashark.com</strong>. Contact : <a href="mailto:contact@iashark.com">contact@iashark.com</a>.</p>
+    <p>IASHARK n'a pas désigné de délégué à la protection des données ; toute demande relative à vos données peut être adressée à l'adresse ci-dessus.</p>
+  </section>
+
+  <section class="section">
+    <h2>2. Données collectées</h2>
+    <p>Nous collectons uniquement les données nécessaires au fonctionnement du service :</p>
+    <ul>
+      <li><strong>Données de compte</strong> — adresse email, mot de passe (géré par notre prestataire d'authentification et jamais stocké en clair), formule (gratuite ou Pro), dates de création et de mise à jour.</li>
+      <li><strong>Préférences (facultatives)</strong> — pseudonyme, championnats favoris, langue, fuseau horaire, préférences de notification, paramètres de gestion (exposition quotidienne, seuil d'arrêt) et capital de départ renseigné volontairement dans l'espace Outils. Ces données restent privées et ne sont jamais partagées.</li>
+      <li><strong>Journal des décisions (abonnés Pro, facultatif)</strong> — les entrées que vous enregistrez : match, marché, cote, probabilité estimée, mise, statut et résultat.</li>
+      <li><strong>Abonnement</strong> — identifiant client chez notre prestataire de paiement, statut et formule de l'abonnement, date de fin de période, événements de paiement. Les données de carte bancaire sont traitées exclusivement par Stripe et ne sont jamais stockées par IASHARK.</li>
+      <li><strong>Mesure interne du parcours</strong> — identifiant de session aléatoire, page consultée, langue, type d'étape (visite, inscription, ouverture du paiement…) et, si vous êtes connecté, l'identifiant de votre compte.</li>
+      <li><strong>Mesure d'audience</strong> — pages visitées et durée de session via Google Analytics, uniquement si vous acceptez les cookies analytiques.</li>
+      <li><strong>Sécurité</strong> — adresse IP utilisée pour limiter les tentatives de connexion abusives, et journaux techniques de nos hébergeurs.</li>
+      <li><strong>Échanges</strong> — le contenu des messages que vous nous adressez.</li>
+    </ul>
+    <div class="highlight"><p>Nous ne collectons aucune donnée sensible. Nous ne vendons aucune donnée à des tiers.</p></div>
+  </section>
+
+  <section class="section">
+    <h2>3. Finalités et bases légales</h2>
+    <div class="tbl-wrap"><table>
+      <tr><th>Finalité</th><th>Base légale (RGPD)</th></tr>
+      <tr><td>Création et gestion du compte, accès aux analyses et aux outils</td><td>Exécution du contrat (art. 6.1.b)</td></tr>
+      <tr><td>Gestion de l'abonnement, paiement, facturation</td><td>Exécution du contrat (art. 6.1.b) et obligations légales comptables (art. 6.1.c)</td></tr>
+      <tr><td>Sauvegarde de vos préférences et de votre journal</td><td>Exécution du contrat (art. 6.1.b)</td></tr>
+      <tr><td>Sécurité du service, prévention de la fraude et des connexions abusives</td><td>Intérêt légitime (art. 6.1.f)</td></tr>
+      <tr><td>Mesure interne du parcours pour améliorer le service</td><td>Intérêt légitime (art. 6.1.f)</td></tr>
+      <tr><td>Mesure d'audience via Google Analytics</td><td>Consentement (art. 6.1.a)</td></tr>
+      <tr><td>Réponse à vos demandes et réclamations</td><td>Exécution du contrat ou intérêt légitime</td></tr>
+    </table></div>
+  </section>
+
+  <section class="section">
+    <h2>4. Destinataires et sous-traitants</h2>
+    <p>Vos données sont accessibles à l'éditeur et à ses prestataires techniques, dans la limite de leurs missions :</p>
+    <ul>
+      <li><strong>Supabase</strong> — base de données, authentification et fonctions serveur ; données hébergées dans l'Union européenne (région Paris).</li>
+      <li><strong>Stripe</strong> — paiement et gestion de l'abonnement ; Stripe agit également comme responsable de traitement distinct pour certaines finalités propres (lutte contre la fraude, obligations réglementaires).</li>
+      <li><strong>Netlify</strong> — hébergement du site et journaux techniques.</li>
+      <li><strong>Google Ireland Limited</strong> — Google Analytics, uniquement avec votre consentement.</li>
+      <li><strong>Fournisseurs de ressources techniques</strong> — polices de caractères (Google Fonts), bibliothèque technique (jsDelivr) et images de logos d'équipes (API-SPORTS) : lors du chargement de ces ressources, votre adresse IP leur est transmise.</li>
+    </ul>
+    <p>Vos données peuvent enfin être communiquées aux autorités lorsque la loi l'impose.</p>
+  </section>
+
+  <section class="section">
+    <h2>5. Transferts hors de l'Union européenne</h2>
+    <p>Certains prestataires (notamment Netlify, Stripe, Google et Supabase, sociétés dont le siège est situé hors de l'Union européenne) peuvent traiter des données en dehors de l'Espace économique européen, en particulier aux États-Unis. Ces transferts sont encadrés par la décision d'adéquation de la Commission européenne relative au cadre de protection des données UE–États-Unis (Data Privacy Framework) lorsque le destinataire y est certifié, ou à défaut par les clauses contractuelles types adoptées par la Commission européenne.</p>
+  </section>
+
+  <section class="section">
+    <h2>6. Durées de conservation</h2>
+    <ul>
+      <li><strong>Données de compte, préférences et journal</strong> — pendant la durée d'utilisation du compte ; en cas d'abonnement, jusqu'à un an après sa fin, sauf suppression anticipée du compte à votre demande. La suppression du compte efface le compte et les données qui y sont rattachées.</li>
+      <li><strong>Données d'abonnement et de paiement</strong> — gérées et conservées par Stripe selon ses propres règles ; les pièces comptables sont conservées pendant la durée légale.</li>
+      <li><strong>Mesure interne du parcours</strong> — pour la durée nécessaire à l'analyse statistique du service ; le lien avec votre compte est supprimé lors de la suppression de celui-ci.</li>
+      <li><strong>Google Analytics</strong> — selon la durée de conservation paramétrée dans Google Analytics (2 ou 14 mois pour les données au niveau de l'utilisateur et des événements).</li>
+      <li><strong>Échanges</strong> — pendant la durée nécessaire au traitement de votre demande.</li>
+    </ul>
+  </section>
+
+  <section class="section">
+    <h2>7. Vos droits</h2>
+    <p>Conformément au RGPD et à la loi Informatique et Libertés, vous disposez des droits suivants :</p>
+    <ul>
+      <li><strong>Accès</strong> — obtenir la copie des données que nous détenons sur vous ;</li>
+      <li><strong>Rectification</strong> — corriger des données inexactes ;</li>
+      <li><strong>Effacement</strong> — demander la suppression de vos données ;</li>
+      <li><strong>Limitation</strong> — demander le gel temporaire d'un traitement ;</li>
+      <li><strong>Portabilité</strong> — recevoir vos données dans un format structuré et lisible par machine ;</li>
+      <li><strong>Opposition</strong> — vous opposer aux traitements fondés sur l'intérêt légitime ;</li>
+      <li><strong>Retrait du consentement</strong> — à tout moment, pour les traitements fondés sur celui-ci ;</li>
+      <li><strong>Directives post-mortem</strong> — définir des directives relatives au sort de vos données après votre décès.</li>
+    </ul>
+    <p>Depuis la page « Mon compte », vous pouvez à tout moment exporter vos données (fichier JSON) et supprimer votre compte.</p>
+    <div class="highlight"><p>Pour exercer vos droits, écrivez à <a href="mailto:contact@iashark.com">contact@iashark.com</a>. Nous répondons dans un délai d'un mois, prolongeable dans les conditions prévues par le RGPD.</p></div>
+    <p>Vous pouvez introduire une réclamation auprès de la <strong>CNIL</strong> (<a href="https://www.cnil.fr" target="_blank" rel="noopener">cnil.fr</a>) ou de l'autorité de protection des données de votre pays de résidence.</p>
+  </section>
+
+  <section class="section">
+    <h2>8. Décisions automatisées</h2>
+    <p>Les modèles statistiques d'IASHARK portent sur des matchs de football, pas sur les personnes. Aucune décision produisant des effets juridiques à votre égard n'est prise sur le seul fondement d'un traitement automatisé.</p>
+  </section>
+
+  <section class="section">
+    <h2>9. Sécurité</h2>
+    <p>Vos données sont stockées via <strong>Supabase</strong> (infrastructure chiffrée, certifiée SOC 2), avec un contrôle d'accès limitant chaque utilisateur à ses propres données. Les paiements sont traités par <strong>Stripe</strong>, certifié prestataire PCI DSS de niveau 1. Nous n'avons jamais accès à vos coordonnées bancaires.</p>
+  </section>
+
+  <section class="section">
+    <h2>10. Mineurs</h2>
+    <p>Le service est réservé aux personnes âgées de 18 ans et plus. Si nous apprenons qu'un compte a été créé par un mineur, nous le supprimons.</p>
+  </section>
+
+  <section class="section">
+    <h2>11. Cookies</h2>
+    <p>Le détail des cookies et traceurs utilisés figure dans notre <a href="cookies.html">Politique cookies</a>.</p>
+  </section>
+
+  <section class="section">
+    <h2>12. Modifications et contact</h2>
+    <p>Cette politique peut être mise à jour ; la date de dernière mise à jour figure en haut de page. Pour toute question relative à la protection de vos données : <a href="mailto:contact@iashark.com">contact@iashark.com</a>.</p>
+  </section>
+
+  <footer class="legal-foot">
+    <div><a href="mentions-legales.html">Mentions légales</a> <a href="cgv.html">CGV</a> <a href="confidentialite.html">Confidentialité</a> <a href="cookies.html">Cookies</a> <a href="jeu-responsable.html">Jeu responsable</a></div>
+    <div>&copy; 2026 IASHARK &middot; <a href="mailto:contact@iashark.com">contact@iashark.com</a> &middot; <a href="./">Accueil</a></div>
+  </footer>
+</main>
+<script src="/i18n/i18n.js"></script>
+<script src="/site-prefs.js"></script>
+<script src="/bottom-navigation.js"></script>
+</body>
+</html>

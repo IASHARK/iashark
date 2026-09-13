@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Connexion — IASHARK</title>
-<meta name="description" content="Connectez-vous à IASHARK pour retrouver vos analyses, vos outils et votre journal.">
+<title data-i18n="geo.meta.connexion.title">Connexion — IASHARK</title>
+<meta name="description" content="Connectez-vous à IASHARK pour retrouver vos analyses, vos outils et votre journal." data-i18n-attr="content:geo.meta.connexion.description">
 <meta name="robots" content="noindex,follow">
 <link rel="canonical" href="https://iashark.com/connexion.html">
 <link rel="icon" href="/assets/favicon.png">
@@ -19,8 +19,8 @@
 
 <header class="border-b border-hairline">
   <div class="mx-auto flex h-14 w-full max-w-[1080px] items-center px-5">
-    <a href="/" aria-label="IASHARK, accueil" data-i18n-attr="aria-label:auth.home_aria_label"><img src="/assets/iashark-logo.png" alt="IASHARK" class="h-7 w-auto object-contain"></a>
-    <a href="/" class="ml-auto text-[13px] text-soft transition hover:text-ink" data-i18n="auth.back_to_site">Retour au site</a>
+    <a href="/" data-href="" aria-label="IASHARK, accueil" data-i18n-attr="aria-label:auth.home_aria_label"><img src="/assets/iashark-logo.png" alt="IASHARK" class="h-7 w-auto object-contain"></a>
+    <a href="/" data-href="" class="ml-auto text-[13px] text-soft transition hover:text-ink" data-i18n="auth.back_to_site">Retour au site</a>
   </div>
 </header>
 
@@ -54,7 +54,7 @@
       <div class="mt-4">
         <div class="flex items-baseline justify-between gap-3">
           <label for="password" class="block text-[13px] font-semibold text-soft" data-i18n="auth.password_label">Mot de passe</label>
-          <a href="/mot-de-passe-oublie.html" class="text-[12.5px] text-cyan transition hover:underline" data-i18n="auth.forgot_password">Mot de passe oublié ?</a>
+          <a href="/mot-de-passe-oublie.html" data-href="mot-de-passe-oublie.html" class="text-[12.5px] text-cyan transition hover:underline" data-i18n="auth.forgot_password">Mot de passe oublié ?</a>
         </div>
         <div class="relative mt-2">
           <input id="password" name="password" type="password" autocomplete="current-password" required
@@ -74,7 +74,7 @@
     </form>
 
     <p class="mt-6 border-t border-hairline pt-5 text-center text-[13.5px] text-soft">
-      <span data-i18n="auth.no_account_prompt">Pas encore de compte ?</span> <a href="/inscription.html" class="font-semibold text-cyan transition hover:underline" data-i18n="auth.create_account_link">Créer un compte</a>
+      <span data-i18n="auth.no_account_prompt">Pas encore de compte ?</span> <a href="/inscription.html" data-href="inscription.html" class="font-semibold text-cyan transition hover:underline" data-i18n="auth.create_account_link">Créer un compte</a>
     </p>
   </section>
 

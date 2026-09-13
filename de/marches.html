@@ -2,12 +2,16 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
+<meta name="iashark-market" content="fr">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Märkte — IASHARK</title>
-<meta name="description" content="Analyse der verfügbaren Märkte: Modellwahrscheinlichkeit, Marktwahrscheinlichkeit (ohne Marge), Differenz, Datenqualität — pro Spiel und vollständiger Marktkatalog.">
+<meta name="description" content="Analyse der verfügbaren Märkte: Modellwahrscheinlichkeit, Marktwahrscheinlichkeit (ohne Marge), Differenz und Datenqualität — pro Spiel und im gesamten Marktkatalog.">
 <link rel="canonical" href="https://iashark.com/de/marches.html">
 <link rel="alternate" hreflang="fr" href="https://iashark.com/fr/marches.html">
+<link rel="alternate" hreflang="en-GB" href="https://iashark.com/gb/marches.html">
+<link rel="alternate" hreflang="en-ZA" href="https://iashark.com/za/marches.html">
 <link rel="alternate" hreflang="en" href="https://iashark.com/en/marches.html">
+<link rel="alternate" hreflang="es-MX" href="https://iashark.com/mx/marches.html">
 <link rel="alternate" hreflang="es" href="https://iashark.com/es/marches.html">
 <link rel="alternate" hreflang="de" href="https://iashark.com/de/marches.html">
 <link rel="alternate" hreflang="it" href="https://iashark.com/it/marches.html">
@@ -69,14 +73,15 @@ h1 span{color:var(--cyan);}
 .lang-switch-check{color:var(--cyan);font-family:'Space Mono',monospace;font-size:10px;}
 @media(max-width:480px){.lang-switch-menu{right:-8px;}}
 </style>
-<link rel="stylesheet" href="/assets/bottom-navigation.css"></head>
+<link rel="stylesheet" href="/assets/bottom-navigation.css"><script src="/lib/market-config.js"></script>
+</head>
 <body>
 
 <header class="hdr">
   <a href="/de/" class="logo"><span>IA</span>SHARK</a>
   <div style="display:flex;align-items:center;gap:8px;">
     <span id="langSwitchSlot"></span>
-    <span id="authHeaderSlot"><a href="/connexion.html" class="btn-login">ANMELDEN</a></span>
+    <span id="authHeaderSlot"><a href="/de/connexion.html" class="btn-login">ANMELDEN</a></span>
   </div>
 </header>
 
@@ -129,7 +134,7 @@ h1 span{color:var(--cyan);}
     <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.9 6.6L22 9.3l-5 4.9L18.2 22 12 18.3 5.8 22 7 14.2 2 9.3l7.1-.7z"/></svg></div>
     <div class="nav-lbl">TOOLS</div>
   </a>
-  <a href="/blog.html" class="nav-item">
+  <a href="/de/blog/" class="nav-item">
     <div class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg></div>
     <div class="nav-lbl">BLOG</div>
   </a>
@@ -146,6 +151,7 @@ h1 span{color:var(--cyan);}
   </div>
 </div>
 
+<script src="/i18n/i18n.js"></script>
 <script>
 // Catalogue statique - reflete lib/market-registry.js (mis a jour le
 // 2026-08-30 avec l'ajout du Player Engine, voir IASHARK_MARKET_REGISTRY.md
@@ -195,8 +201,16 @@ function getMarketKey(pariRec){
   if(s.includes('exterieur')||s.includes('extérieur'))return 'victoire_ext';
   return '';
 }
+// i18n runtime (repli francais si i18n/i18n.js absent) pour les codes de
+// donnees du Player Engine, jamais affiches bruts.
+function t(key,fallback){return (window.I18N&&window.I18N.t)?window.I18N.t(key,fallback):fallback;}
+var STATUT_COMPO={confirmed_starter:['match_page.player_engine_status_confirmed_starter','Titulaire confirmé'],confirmed_bench:['match_page.player_engine_status_confirmed_bench','Remplaçant confirmé'],expected_starter:['match_page.player_engine_status_expected_starter','Titulaire probable'],expected_bench:['match_page.player_engine_status_expected_bench','Remplaçant probable']};
+function statutComposition(s){return STATUT_COMPO[s]?t(STATUT_COMPO[s][0],STATUT_COMPO[s][1]):(s||'');}
+var QUALITE_JOUEUR={high:['match_page.reliability_high','Élevée'],medium:['match_page.reliability_medium','Moyenne'],low:['match_page.reliability_low','Faible']};
+function qualiteJoueur(q){return QUALITE_JOUEUR[q]?t(QUALITE_JOUEUR[q][0],QUALITE_JOUEUR[q][1]):(q||'—');}
 var allMatchsData=[];
 async function loadMatches(){
+  if(window.I18N&&window.I18N.init){try{await window.I18N.init();}catch(e){}}
   try{
     var r=await fetch('/data.json?t='+Date.now());
     var j=await r.json();
@@ -236,10 +250,10 @@ function renderPlayerMarketsTable(marketId){
         ?(out.probability!=null?Math.round(out.probability*100)+'%':'—')
         :(out.over_lines&&out.over_lines['over_0.5']!=null?Math.round(out.over_lines['over_0.5']*100)+'% (over 0.5)':'—');
       return '<tr><td>'+esc(pm.player_name||'')+'</td><td>'+esc(hn)+' vs '+esc(an)+'</td>'
-        +'<td style="font-family:Space Mono,monospace;font-size:9px;color:var(--muted);">'+esc(pm.lineup_status||'')+'</td>'
+        +'<td style="font-family:Space Mono,monospace;font-size:9px;color:var(--muted);">'+esc(statutComposition(pm.lineup_status))+'</td>'
         +'<td class="gap-cell">'+(pm.expected_minutes!=null?pm.expected_minutes:'—')+'</td>'
         +'<td class="gap-cell">'+probTxt+'</td>'
-        +'<td style="font-family:Space Mono,monospace;font-size:9px;color:var(--muted);">'+esc(pm.data_quality||'—')+'</td>'
+        +'<td style="font-family:Space Mono,monospace;font-size:9px;color:var(--muted);">'+esc(qualiteJoueur(pm.data_quality))+'</td>'
         +'<td class="gap-cell">'+(pm.sample_size!=null?pm.sample_size:'—')+'</td></tr>';
     }).join('')
     +'</tbody></table>';

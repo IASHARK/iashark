@@ -52,20 +52,77 @@
   // n'est pas charge sur la page, jamais un texte fige different du repli).
   function t(key,fallback){return (window.I18N && window.I18N.t) ? window.I18N.t(key,fallback) : fallback;}
 
+  // Lien interne localise : garde /gb/, /mx/, /en/... quand la page est servie
+  // sous un repertoire de langue/marche. N'agit QUE si le helper I18N.href
+  // existe - sinon on ne touche a rien (le href statique, deja reecrit par le
+  // generateur pour chaque repertoire, reste la reference).
+  function localHref(p){
+    p = p || '';
+    var i = p.search(/[?#]/), tail = '';
+    if(i >= 0){ tail = p.slice(i); p = p.slice(0, i); }
+    var out = null;
+    if(window.I18N && typeof window.I18N.href === 'function'){
+      try{ out = window.I18N.href(p || 'index.html'); }catch(e){ out = null; }
+    }
+    if(!out) return null;
+    return String(out).replace(/\/index\.html$/, '/') + tail;
+  }
+  window.IasharkLocalHref = localHref;
+
+  // Enrichissements partages, appliques une fois le dictionnaire charge :
+  // - [data-i18n-html="cle"] : contenu avec balisage simple (<b>, <br>, <a>)
+  //   que data-i18n (textContent) ne peut pas porter. Valeurs issues des
+  //   dictionnaires du depot uniquement, jamais de donnees utilisateur.
+  // - a[data-href="page.html"] : lien interne reecrit via I18N.href.
+  var NONE = '\u0000';
+  function enhance(){
+    var I = window.I18N;
+    if(I && I.t){
+      var nodes = document.querySelectorAll('[data-i18n-html]');
+      for(var n = 0; n < nodes.length; n++){
+        var v = I.t(nodes[n].getAttribute('data-i18n-html'), NONE);
+        if(v !== NONE && v != null) nodes[n].innerHTML = v;
+      }
+    }
+    var links = document.querySelectorAll('a[data-href]');
+    for(var k = 0; k < links.length; k++){
+      var href = localHref(links[k].getAttribute('data-href'));
+      if(href) links[k].setAttribute('href', href);
+    }
+  }
+  if(window.I18N && window.I18N.init){
+    window.I18N.init().then(enhance, enhance);
+  } else {
+    enhance();
+  }
+
   function showBanner(){
     injectStyle();
     var bar = document.createElement('div');
     bar.className = 'iashark-notice-bar';
     bar.id = 'iasharkNoticeBar';
     bar.innerHTML = '<p>'+t('cookie_banner.text',"On utilise des cookies essentiels au fonctionnement du site, et des cookies analytiques (Google Analytics) pour comprendre l'usage du site — uniquement avec ton accord.")+' '
-      +'<a href="/confidentialite.html">'+t('cookie_banner.learn_more','En savoir plus')+'</a></p>'
+      +'<a href="'+((window.I18N&&window.I18N.href)?window.I18N.href('cookies.html'):'/confidentialite.html')+'">'+t('cookie_banner.learn_more','En savoir plus')+'</a></p>'
       +'<div class="iashark-notice-actions">'
       +'<button type="button" class="iashark-notice-decline" id="iasharkNoticeDecline">'+t('cookie_banner.decline','REFUSER')+'</button>'
       +'<button type="button" class="iashark-notice-accept" id="iasharkNoticeAccept">'+t('cookie_banner.accept','ACCEPTER')+'</button>'
       +'</div>';
     document.body.appendChild(bar);
-    var nav = document.querySelector('.nav-bottom');
-    if(nav){ bar.style.bottom = nav.getBoundingClientRect().height + 'px'; }
+    // La barre de navigation du bas est montee par bottom-navigation.js, parfois
+    // apres ce bandeau : on remesure plusieurs fois et au redimensionnement pour
+    // que le bandeau (et ses boutons) reste toujours visible au-dessus d'elle.
+    function placeAboveNav(){
+      var nav = document.querySelector('.nav-bottom, nav.bottom-nav, [data-bottom-nav]');
+      var h = 0;
+      if(nav){
+        var r = nav.getBoundingClientRect();
+        if(r.height && r.top < window.innerHeight) h = Math.max(0, window.innerHeight - r.top);
+      }
+      bar.style.bottom = h + 'px';
+    }
+    placeAboveNav();
+    [100, 400, 1200].forEach(function(ms){ setTimeout(placeAboveNav, ms); });
+    window.addEventListener('resize', placeAboveNav);
     document.getElementById('iasharkNoticeAccept').onclick = function(){
       setConsent('accepted');
       loadGA();
@@ -96,4 +153,15 @@
       showBanner();
     }
   }
+})();
+
+/* Suivi interne anonyme des visites (funnel-track.js) charge sur TOUTES les
+   pages depuis ce script partage. Sans cookie ni lien avec un compte : voir
+   l'en-tete de funnel-track.js. */
+(function(){
+  if(window.__iasharkTrackLoaded || document.querySelector('script[src$="funnel-track.js"]')) return;
+  var s = document.createElement('script');
+  s.src = '/funnel-track.js';
+  s.defer = true;
+  document.head.appendChild(s);
 })();

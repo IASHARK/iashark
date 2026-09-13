@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Nouveau mot de passe — IASHARK</title>
-<meta name="description" content="Choisissez un nouveau mot de passe pour votre compte IASHARK.">
+<title data-i18n="geo.meta.reinitialiser-mot-de-passe.title">Nouveau mot de passe — IASHARK</title>
+<meta name="description" content="Choisissez un nouveau mot de passe pour votre compte IASHARK." data-i18n-attr="content:geo.meta.reinitialiser-mot-de-passe.description">
 <meta name="robots" content="noindex,nofollow">
 <link rel="icon" href="/assets/favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -18,7 +18,7 @@
 
 <header class="border-b border-hairline">
   <div class="mx-auto flex h-14 w-full max-w-[1080px] items-center px-5">
-    <a href="/" aria-label="IASHARK, accueil" data-i18n-attr="aria-label:auth.home_aria_label"><img src="/assets/iashark-logo.png" alt="IASHARK" class="h-7 w-auto object-contain"></a>
+    <a href="/" data-href="" aria-label="IASHARK, accueil" data-i18n-attr="aria-label:auth.home_aria_label"><img src="/assets/iashark-logo.png" alt="IASHARK" class="h-7 w-auto object-contain"></a>
   </div>
 </header>
 
@@ -34,7 +34,7 @@
 
   <div id="lienInvalide" hidden class="mt-6 rounded-2xl border border-hairline bg-surface p-6">
     <p class="text-[14.5px] leading-relaxed text-soft" data-i18n="auth.reset_link_invalid">Ce lien n’est plus valide. Les liens de réinitialisation expirent au bout d’une heure et ne servent qu’une fois.</p>
-    <a href="/mot-de-passe-oublie.html" class="mt-5 inline-flex h-11 items-center rounded-xl bg-cyan px-5 text-[14px] font-bold text-[#04141b] transition hover:bg-cyan/90" data-i18n="auth.reset_request_new_link">Demander un nouveau lien</a>
+    <a href="/mot-de-passe-oublie.html" data-href="mot-de-passe-oublie.html" class="mt-5 inline-flex h-11 items-center rounded-xl bg-cyan px-5 text-[14px] font-bold text-[#04141b] transition hover:bg-cyan/90" data-i18n="auth.reset_request_new_link">Demander un nouveau lien</a>
   </div>
 
   <form id="formulaire" hidden novalidate class="mt-6 rounded-2xl border border-hairline bg-surface p-6">
@@ -70,7 +70,7 @@
     </div>
     <h2 class="mt-4 text-[19px] font-bold tracking-tight" data-i18n="auth.reset_success_h1">Mot de passe mis à jour</h2>
     <p class="mt-2 text-[14.5px] leading-relaxed text-soft" data-i18n="auth.reset_success_text">Vous pouvez désormais l’utiliser pour vous connecter.</p>
-    <a href="/compte.html" class="mt-5 inline-flex h-11 items-center rounded-xl bg-cyan px-5 text-[14px] font-bold text-[#04141b] transition hover:bg-cyan/90" data-i18n="auth.reset_go_to_account">Aller sur mon compte</a>
+    <a href="/compte.html" data-href="compte.html" class="mt-5 inline-flex h-11 items-center rounded-xl bg-cyan px-5 text-[14px] font-bold text-[#04141b] transition hover:bg-cyan/90" data-i18n="auth.reset_go_to_account">Aller sur mon compte</a>
   </div>
 
 </main>

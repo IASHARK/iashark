@@ -8,14 +8,47 @@ const STRIPE_SECRET_KEY = Deno.env.get("STRIPE_SECRET_KEY");
 const SITE_URL = Deno.env.get("SITE_URL") || "https://iashark.com";
 const headers = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-iashark-locale",
   "Content-Type": "application/json",
+};
+
+// Langue des messages renvoyes a l'utilisateur. Priorite : champ `locale`
+// (ou `dir` de la page : fr/en/es/de/it/pt/gb/mx/za) du corps, en-tete
+// x-iashark-locale, puis Accept-Language du navigateur ; francais par defaut.
+// Les codes `error`/`code` restent stables pour les clients qui traduisent
+// eux-memes.
+const MSG_LOCALES = ["fr", "en", "es", "es-mx", "de", "it", "pt"];
+const DIR_LOCALE: Record<string, string> = { gb: "en", za: "en", mx: "es-mx" };
+function normLocale(value: unknown): string {
+  const s = String(value || "").trim().toLowerCase().replace("_", "-");
+  if (!s) return "";
+  if (DIR_LOCALE[s]) return DIR_LOCALE[s];
+  if (s.startsWith("es-mx")) return "es-mx";
+  if (MSG_LOCALES.includes(s)) return s;
+  const base = s.split("-")[0];
+  return MSG_LOCALES.includes(base) ? base : "";
+}
+function pickLocale(req: Request, hint?: unknown): string {
+  const direct = normLocale(hint) || normLocale(req.headers.get("x-iashark-locale"));
+  if (direct) return direct;
+  for (const part of (req.headers.get("accept-language") || "").split(",")) {
+    const l = normLocale(part.split(";")[0]);
+    if (l) return l;
+  }
+  return "fr";
+}
+function msg(table: Record<string, Record<string, string>>, key: string, locale: string): string {
+  const row = table[key];
+  return (row && (row[locale] || row[locale.split("-")[0]] || row.fr)) || key;
+}
+const MESSAGES: Record<string, Record<string, string>> = {
+  payment_disabled: { fr: "Le paiement en ligne n’est pas encore activé.", en: "Online payment is not enabled yet.", es: "El pago en línea aún no está activado.", de: "Die Online-Zahlung ist noch nicht aktiviert.", it: "Il pagamento online non è ancora attivo.", pt: "O pagamento online ainda não está ativado." },
 };
 
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers });
   if (PAYMENT_PROVIDER !== "stripe") {
-    return new Response(JSON.stringify({ ok: true, processed: false, message: "Le paiement en ligne n’est pas encore activé." }), { headers });
+    return new Response(JSON.stringify({ ok: true, processed: false, code: "payment_disabled", message: msg(MESSAGES, "payment_disabled", pickLocale(req)) }), { headers });
   }
   if (!STRIPE_SECRET_KEY) return new Response(JSON.stringify({ error: "billing_misconfigured" }), { status: 500, headers });
   const authorization = req.headers.get("Authorization");

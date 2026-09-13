@@ -5,9 +5,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Cookie policy — IASHARK</title>
-<meta name="description" content="IASHARK UK cookie policy under PECR: strictly necessary storage, internal journey measurement, Google Analytics only with your consent, and how to change your choice.">
+<meta name="description" content="IASHARK UK cookie policy under PECR: strictly necessary storage, cookie-free internal visit measurement, Google Analytics and how to turn it off.">
 <meta property="og:title" content="Cookie policy — IASHARK">
-<meta property="og:description" content="IASHARK UK cookie policy under PECR: strictly necessary storage, internal journey measurement, Google Analytics only with your consent, and how to change your choice.">
+<meta property="og:description" content="IASHARK UK cookie policy under PECR: strictly necessary storage, cookie-free internal visit measurement, Google Analytics and how to turn it off.">
 <meta property="og:type" content="website">
 <meta property="og:locale" content="en_GB">
 <link rel="canonical" href="https://iashark.com/gb/cookies.html">
@@ -59,7 +59,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 </style>
 <link rel="stylesheet" href="/assets/bottom-navigation.css"></head>
 <body>
-<!-- LEGAL REVIEW: (1) 'iashark_funnel_sid' is set without consent. PECR as amended by the Data (Use and Access) Act 2025 (in force 5 February 2026) allows storage for statistical purposes to improve a service without consent, but only with clear information AND a simple means to object; no in-product objection mechanism exists yet, and the events can be linked to the logged-in account - to be validated or moved behind consent; (2) the consent choice is stored with no expiry; (3) Google Analytics cookies default to a 2-year lifetime. -->
+<!-- LEGAL REVIEW (UK): Google Analytics now loads for every visitor on arrival without consent (owner decision 2026-09-13). PECR reg. 6 as amended by the Data (Use and Access) Act 2025 (in force 5 February 2026) exempts storage/access used solely to collect statistical information about how the service is used in order to improve it, provided users get clear and comprehensive information and a simple, free means of objecting - this page now gives that information and an opt-out link (data-analytics-optout, handled by site-prefs.js); the page does not claim the exemption applies. To check: whether Google Analytics fits the exemption at all - the ICO indicates consent is still required where analytics data is shared with a third party for its own purposes. Verify in the GA4 admin that data sharing settings (Google products and services, modelling contributions and business insights), Google signals and any Google Ads link / ads personalisation are off, and that Google acts only as processor (data processing terms accepted). If Google uses the data for its own purposes, the exemption probably does not apply and consent is required. Also: _ga cookies default to a 2-year lifetime; the opt-out choice (iashark_cookie_consent) is stored with no time limit; the first-party visit measurement is described from the owner's brief of 2026-09-13, but funnel-track.js as reviewed that day only sends page, site version, referrer host and UTM with page_view (no device/browser/OS, language, time zone, estimated country, time on page, scroll depth or key-button clicks) - check that the deployed script matches this page; journey events other than page_view (e.g. signup_completed) can carry the account id; 13-month retention of funnel_events is stated but no purge job exists in supabase/migrations; the confirmation text shown after clicking the opt-out link uses the i18n key analytics_optout.done, missing from i18n/dict, so it appears in French. -->
 <header class="hdr">
   <button class="hdr-back" type="button" onclick="history.back()">&larr; BACK</button>
   <a class="hdr-logo" href="./" aria-label="IASHARK"><span>IA</span>SHARK</a>
@@ -91,30 +91,47 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
     <div class="tbl-wrap"><table>
       <tr><th>Name</th><th>Type</th><th>Purpose</th><th>Duration</th></tr>
       <tr><td>Supabase authentication session</td><td>Local storage</td><td>Keeps you logged in</td><td>Until you log out</td></tr>
-      <tr><td><code>iashark_cookie_consent</code></td><td>Local storage</td><td>Remembers whether you accepted or refused analytics cookies</td><td>Until you clear your browser data</td></tr>
+      <tr><td><code>iashark_cookie_consent</code></td><td>Local storage</td><td>Remembers that you turned off Google Analytics on this browser (set when you use the opt-out link, or if you refused analytics cookies before)</td><td>Until you clear your browser data</td></tr>
       <tr><td><code>iashark_lang</code></td><td>Local storage</td><td>Remembers your language</td><td>Until you clear your browser data</td></tr>
       <tr><td><code>iashark_lang_redirect_done</code></td><td>Session storage</td><td>Prevents repeated language redirects</td><td>When you close the tab</td></tr>
     </table></div>
   </section>
 
   <section class="section">
-    <h2>3. Internal journey measurement</h2>
-    <p>To understand how IASHARK is used and to improve it, we record the main steps of the journey (for example visiting a key page, signing up or opening checkout) in our own database. We do not use third-party tools, third-party cookies or advertising pixels for this, and it is not used for advertising.</p>
+    <h2>3. Internal visit measurement (no cookies)</h2>
+    <p>To understand how IASHARK is used and to improve it, we measure visits with our own tool and store the data in our own database. We do not use cookies, third-party tools or advertising pixels for this, and it is not used for advertising.</p>
+    <p>For each page viewed, we record:</p>
+    <ul>
+      <li>the page viewed and the site version (language or country);</li>
+      <li>the domain name of the site you came from, if any, and any campaign (UTM) parameters in the address;</li>
+      <li>general categories of device, browser and operating system;</li>
+      <li>your browser's language and time zone, and a country estimated from that time zone;</li>
+      <li>time spent on the page, how far you scroll and clicks on the site's main buttons;</li>
+      <li>a random visit identifier, described in the table below.</li>
+    </ul>
+    <p>We do not store your IP address, and page views are never linked to an account. Some journey steps (for example completing sign-up) may, however, be linked to your account identifier when you are logged in. We keep this data for 13 months.</p>
     <div class="tbl-wrap"><table>
       <tr><th>Name</th><th>Type</th><th>Purpose</th><th>Duration</th></tr>
-      <tr><td><code>iashark_funnel_sid</code></td><td>Local storage</td><td>Random session identifier that links the steps of the same visit, used only to produce statistics about how the service is used</td><td>Until you clear your browser data</td></tr>
+      <tr><td><code>iashark_visit_id</code></td><td>Session storage</td><td>Random visit identifier, specific to each tab, that links the pages of the same visit</td><td>When you close the tab</td></tr>
     </table></div>
-    <p>If you object to this measurement, email <a href="mailto:contact@iashark.com">contact@iashark.com</a>.</p>
+    <p>The old <code>iashark_funnel_sid</code> identifier (local storage) is no longer used and is deleted from your browser automatically. If you object to this measurement, email <a href="mailto:contact@iashark.com">contact@iashark.com</a>.</p>
   </section>
 
-  <section class="section">
-    <h2>4. Analytics cookies — only with your consent</h2>
-    <p><strong>Google Analytics</strong> cookies are only set if you click "Accept" on the banner shown on your first visit. They help us measure traffic (pages viewed, session length).</p>
+  <section class="section" id="google-analytics">
+    <h2>4. Google Analytics</h2>
+    <p>We use <strong>Google Analytics</strong>, a service provided by Google. It loads as soon as you arrive on the site, for every visitor, unless you have turned it off on this browser.</p>
+    <p><strong>Purpose</strong> — to produce statistics about how the site is used so that we can improve it. We do not use this data for advertising.</p>
+    <p><strong>Data collected</strong> — a random identifier stored in the cookies below, the pages viewed, the referring page, the date, length and sequence of visits, device type, browser, operating system, language, screen resolution and an approximate location (country, region, city) that Google works out from your IP address. Depending on how Google Analytics is set up, some interactions may also be measured automatically (scrolling, clicks to other sites, downloads). Your IP address is sent to Google when the service loads.</p>
     <div class="tbl-wrap"><table>
       <tr><th>Name</th><th>Provider</th><th>Purpose</th><th>Duration</th></tr>
       <tr><td><code>_ga</code></td><td>Google Analytics</td><td>Distinguishes visitors</td><td>Up to 2 years</td></tr>
       <tr><td><code>_ga_&lt;ID&gt;</code></td><td>Google Analytics</td><td>Keeps session state</td><td>Up to 2 years</td></tr>
     </table></div>
+    <p><strong>How long</strong> — the cookies above last up to 2 years in your browser; measurement data is kept in Google Analytics for the retention period we have set (2 or 14 months for user-level and event-level data). Google may process this data outside the UK: see our <a href="confidentialite.html">Privacy notice</a>.</p>
+    <div class="highlight">
+      <p><strong>Turning off Google Analytics</strong> — you can object at any time, free of charge, using the link below. It turns off Google Analytics on this browser and deletes its <code>_ga</code> cookies. Your choice is remembered in this browser (<code>iashark_cookie_consent</code>), so you need to repeat it on each browser or device you use, and after clearing your browser data. If you refused analytics cookies before, that choice still applies. Turning off Google Analytics does not affect your access to IASHARK.</p>
+      <p><a href="#" id="ga-optout" role="button" data-analytics-optout style="display:inline-block;margin:4px 0;padding:10px 16px;border:1px solid rgba(34,211,238,0.4);border-radius:8px;background:rgba(34,211,238,0.1);font-family:'Space Mono',monospace;font-size:11px;letter-spacing:0.5px;color:#22d3ee;text-decoration:none;">Turn off Google Analytics statistics on this browser</a></p>
+    </div>
     <p>We do not use advertising cookies.</p>
   </section>
 
@@ -126,9 +143,9 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
   <section class="section">
     <h2>6. Changing your choice</h2>
     <ul>
-      <li><strong>Banner</strong> — accept or refuse analytics cookies on your first visit. Refusing does not affect your access to IASHARK.</li>
-      <li><strong>Change your mind</strong> — clear this site's data in your browser settings; the banner will appear again on your next visit.</li>
-      <li><strong>Browser controls</strong> — you can block or delete cookies and local storage. Blocking strictly necessary storage may stop you logging in.</li>
+      <li><strong>Google Analytics</strong> — use the opt-out link in <a href="#google-analytics">section 4</a>. Turning it off does not affect your access to IASHARK.</li>
+      <li><strong>Internal visit measurement</strong> — email <a href="mailto:contact@iashark.com">contact@iashark.com</a> to object. The visit identifier is deleted when you close the tab.</li>
+      <li><strong>Browser controls</strong> — you can block or delete cookies and local storage. Blocking strictly necessary storage may stop you logging in. If you clear this site's data, your Google Analytics opt-out is cleared too and you need to use the link again.</li>
     </ul>
     <p>Questions: <a href="mailto:contact@iashark.com">contact@iashark.com</a>. See also our <a href="confidentialite.html">Privacy notice</a>.</p>
   </section>

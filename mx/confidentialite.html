@@ -72,6 +72,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 </head>
 <body>
 <!-- LEGAL REVIEW: (1) domicilio completo del responsable faltante (LFPDPPP exige identidad y domicilio del responsable); (2) Reglamento de la nueva LFPDPPP (DOF 20/03/2025) - verificar si ya fue publicado y ajustar el aviso; (3) plazos de respuesta ARCO no citados en cifras por no haber podido consultar el texto oficial - confirmar e incluir; (4) nombre exacto del procedimiento ante la Secretaría Anticorrupción y Buen Gobierno a confirmar; (5) plazos de conservación de eventos de recorrido (funnel_events) y de claves con dirección IP (rate_limit_buckets) no definidos en el código; (6) mecanismo para limitar uso o divulgación (listado de exclusión propio) no implementado. -->
+<!-- LEGAL REVIEW: Google Analytics se carga al llegar al sitio sin consentimiento previo, con un enlace de desactivación (decisión del propietario, 13/09/2026). Confirmar que el mecanismo de negativa para esta finalidad secundaria cumple la LFPDPPP 2025, y revisar la frase 'No realizamos transferencias de tus datos personales que requieran tu consentimiento' si Google usa los datos para fines propios. No modificado aquí: la medición interna del recorrido (secciones 2 y 3) no enumera los datos ahora descritos en la Política de cookies ni la conservación de 13 meses. -->
 <header class="hdr">
   <button class="hdr-back" type="button" onclick="history.back()">&larr; REGRESAR</button>
   <a class="hdr-logo" href="./" aria-label="IASHARK"><span>IA</span>SHARK</a>
@@ -106,7 +107,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
       <li><strong>Diario de decisiones (suscriptores de pago, opcional)</strong> — los registros que captures: partido, mercado, momio, probabilidad estimada, monto, estado y resultado.</li>
       <li><strong>Datos de suscripción</strong> — identificador de cliente en nuestro proveedor de pagos, estado y plan de la suscripción, fecha de fin del periodo y eventos de pago. Los datos de tu tarjeta los trata exclusivamente Stripe; IASHARK nunca los almacena.</li>
       <li><strong>Medición interna del recorrido</strong> — identificador de sesión aleatorio, página visitada, idioma, etapa alcanzada (visita, registro, apertura del pago…) y, si iniciaste sesión, el identificador de tu cuenta.</li>
-      <li><strong>Medición de audiencia</strong> — páginas visitadas y duración de la sesión mediante Google Analytics, solo si aceptas las cookies analíticas.</li>
+      <li><strong>Medición de audiencia</strong> — páginas visitadas, duración y recorrido de las visitas, información técnica de tu dispositivo y navegador y ubicación aproximada, mediante Google Analytics, que se carga en cuanto llegas al sitio; puedes oponerte en cualquier momento desde nuestra <a href="cookies.html">Política de cookies</a>.</li>
       <li><strong>Datos de seguridad</strong> — dirección IP utilizada para limitar intentos de acceso abusivos y registros técnicos de nuestros proveedores de alojamiento.</li>
       <li><strong>Comunicaciones</strong> — el contenido de los mensajes que nos envíes.</li>
     </ul>
@@ -129,7 +130,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
       <li>Medir la audiencia del sitio con Google Analytics.</li>
       <li>Analizar de forma estadística el recorrido de los usuarios para mejorar el servicio.</li>
     </ul>
-    <p><strong>Cómo negarte a las finalidades secundarias:</strong> puedes rechazar las cookies analíticas en el aviso que se muestra en tu primera visita, y puedes escribirnos en cualquier momento a <a href="mailto:contact@iashark.com">contact@iashark.com</a> para oponerte a la medición interna del recorrido. Negarte a las finalidades secundarias no afecta tu acceso al servicio.</p>
+    <p><strong>Cómo negarte a las finalidades secundarias:</strong> puedes desactivar Google Analytics en cualquier momento con el enlace de nuestra <a href="cookies.html">Política de cookies</a>, y puedes escribirnos en cualquier momento a <a href="mailto:contact@iashark.com">contact@iashark.com</a> para oponerte a la medición interna del recorrido. Negarte a las finalidades secundarias no afecta tu acceso al servicio.</p>
   </section>
 
   <section class="section">
@@ -139,7 +140,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
       <li><strong>Supabase</strong> — base de datos, autenticación y funciones de servidor; datos alojados en la Unión Europea (región de París).</li>
       <li><strong>Stripe</strong> — procesamiento de pagos y gestión de suscripciones; Stripe también trata algunos datos para fines propios, como la prevención de fraudes y el cumplimiento regulatorio.</li>
       <li><strong>Netlify</strong> — alojamiento del sitio y registros técnicos.</li>
-      <li><strong>Google</strong> — Google Analytics, solo con tu consentimiento.</li>
+      <li><strong>Google</strong> — Google Analytics (medición de audiencia), salvo que te hayas opuesto.</li>
       <li><strong>Proveedores de recursos técnicos</strong> — tipografías (Google Fonts), una biblioteca de código (jsDelivr) e imágenes de logotipos de equipos (API-SPORTS): al cargar estos recursos se les transmite tu dirección IP.</li>
     </ul>
     <p>IASHARK se opera desde Francia, por lo que tus datos se tratan fuera de México, principalmente en la Unión Europea y, en el caso de algunos proveedores, en Estados Unidos. No realizamos transferencias de tus datos personales que requieran tu consentimiento. Solo comunicaremos tus datos a autoridades cuando la ley lo exija.</p>
@@ -171,7 +172,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 
   <section class="section">
     <h2>7. Uso de cookies y tecnologías de rastreo</h2>
-    <p>Usamos almacenamiento local estrictamente necesario (sesión, idioma, elección sobre cookies), un identificador interno para medir el recorrido y, solo con tu consentimiento, cookies de Google Analytics. Consulta el detalle y cómo desactivarlas en nuestra <a href="cookies.html">Política de cookies</a>.</p>
+    <p>Usamos almacenamiento local estrictamente necesario (sesión, idioma y, si te opusiste, tu oposición a Google Analytics), un identificador de visita temporal para nuestra medición interna, que no usa cookies, y cookies de Google Analytics, que se cargan en cuanto llegas al sitio. Consulta el detalle y cómo desactivarlas en nuestra <a href="cookies.html">Política de cookies</a>.</p>
   </section>
 
   <section class="section">

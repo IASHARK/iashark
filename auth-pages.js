@@ -162,7 +162,12 @@
         if (res.error) throw res.error;
         passeParGuard = true;
       }
-      if (passeParGuard) { location.href = destination(); return; }
+      if (passeParGuard) {
+        // Suivi interne anonyme : la connexion n'est jamais reliee au compte.
+        if (window.iasharkTrack) window.iasharkTrack('login_completed', {});
+        location.href = destination();
+        return;
+      }
     } catch (err) {
       relacher();
       var texte = messageLisible(err && err.message);
@@ -194,7 +199,14 @@
       // une session directement. Le cas sans session ne devrait pas se
       // produire, mais s'il se produit on le dit honnetement plutot que de
       // laisser l'utilisateur devant un ecran muet.
-      if (res.data && res.data.session) { if (window.iasharkTrack) window.iasharkTrack('signup_completed', {}, res.data.session.user && res.data.session.user.id); location.href = localHref('compte.html?bienvenue=1'); return; }
+      if (res.data && res.data.session) {
+        // Jeton du compte cree transmis avec son user_id : sans lui la
+        // politique RLS de funnel_events rejetait l'evenement (cle anon seule).
+        var nouvelleSession = res.data.session;
+        if (window.iasharkTrack) window.iasharkTrack('signup_completed', {}, nouvelleSession.user && nouvelleSession.user.id, nouvelleSession.access_token);
+        location.href = localHref('compte.html?bienvenue=1');
+        return;
+      }
       relacher();
       global('formMsg', t('auth.signup_success_check_login', 'Compte créé. Connectez-vous pour continuer.'), 'success');
     } catch (err) {

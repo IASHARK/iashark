@@ -60,6 +60,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 <link rel="stylesheet" href="/assets/bottom-navigation.css"></head>
 <body>
 <!-- LEGAL REVIEW: (1) Information Officer: name not provided and no registration with the Information Regulator; (2) applicability of POPIA to a responsible party domiciled outside South Africa (POPIA s3) to be confirmed; (3) s72 basis for each cross-border transfer to be documented; (4) full identity/address of the responsible party missing; (5) retention periods for journey events (funnel_events) and login rate-limit keys containing IP addresses (rate_limit_buckets) not defined in code - no automatic purge found; the 'end of subscription + 1 year' period is not enforced by any job. -->
+<!-- LEGAL REVIEW: Google Analytics ground changed from consent to legitimate interests (owner decision 2026-09-13: GA loads on arrival, opt-out link on the cookie policy). Confirm s11(1)(f) is valid for Google Analytics and that the transfer to Google meets s72. Not updated in this change: the internal journey measurement items in sections 2 and 6 do not list the fields now described in the cookie policy nor its 13-month retention. -->
 <header class="hdr">
   <button class="hdr-back" type="button" onclick="history.back()">&larr; BACK</button>
   <a class="hdr-logo" href="./" aria-label="IASHARK"><span>IA</span>SHARK</a>
@@ -97,7 +98,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
       <li><strong>Decision journal (paid subscribers, optional)</strong> — entries you record: match, market, odds, estimated probability, stake, status and result.</li>
       <li><strong>Subscription information</strong> — your customer identifier with our payment provider, subscription status and plan, billing period end date and payment events. Card details are processed only by Stripe; we never store them.</li>
       <li><strong>Internal journey measurement</strong> — a random session identifier, the page viewed, language, the step reached (visit, sign-up, opening checkout…) and, if you are logged in, your account identifier.</li>
-      <li><strong>Analytics</strong> — pages visited and session duration through Google Analytics, only if you accept analytics cookies.</li>
+      <li><strong>Analytics</strong> — pages visited, length and sequence of visits, technical information about your device and browser, and approximate location, through Google Analytics, which loads when you arrive on the site; you can turn it off at any time from our <a href="cookies.html">Cookie policy</a>.</li>
       <li><strong>Security information</strong> — your IP address, used to limit repeated login attempts, and technical logs kept by our hosting providers.</li>
       <li><strong>Correspondence</strong> — the content of messages you send us.</li>
     </ul>
@@ -116,7 +117,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
       <tr><td>Saving your preferences and journal</td><td>Performance of our agreement</td></tr>
       <tr><td>Keeping the service secure, preventing fraud and abusive logins</td><td>Our legitimate interests</td></tr>
       <tr><td>Internal journey measurement to improve the service</td><td>Our legitimate interests</td></tr>
-      <tr><td>Analytics with Google Analytics</td><td>Your consent</td></tr>
+      <tr><td>Analytics with Google Analytics</td><td>Our legitimate interests (you can object at any time)</td></tr>
       <tr><td>Answering your questions and complaints</td><td>Performance of our agreement or our legitimate interests</td></tr>
     </table></div>
     <p>Where we rely on legitimate interests, you may object to the processing at any time (see section 7).</p>
@@ -129,7 +130,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
       <li><strong>Supabase</strong> — database, authentication and server functions; information hosted in the European Union (Paris region).</li>
       <li><strong>Stripe</strong> — payments and subscription management; Stripe also processes some information for its own purposes, such as fraud prevention and regulatory compliance.</li>
       <li><strong>Netlify</strong> — website hosting and technical logs.</li>
-      <li><strong>Google</strong> — Google Analytics, only with your consent.</li>
+      <li><strong>Google</strong> — Google Analytics (analytics), unless you have turned it off.</li>
       <li><strong>Technical resource providers</strong> — fonts (Google Fonts), a code library (jsDelivr) and team logo images (API-SPORTS): your IP address is sent to them when these resources load.</li>
     </ul>
     <p>We may also disclose personal information where the law requires it.</p>

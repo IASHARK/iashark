@@ -4,9 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Politique cookies — IASHARK</title>
-<meta name="description" content="Politique cookies d&#x27;IASHARK : traceurs essentiels, mesure d&#x27;audience, Google Analytics avec consentement et gestion de vos choix.">
+<meta name="description" content="Politique cookies d&#x27;IASHARK : traceurs essentiels, mesure interne des visites sans cookie, Google Analytics et comment vous y opposer.">
 <meta property="og:title" content="Politique cookies — IASHARK">
-<meta property="og:description" content="Politique cookies d&#x27;IASHARK : traceurs essentiels, mesure d&#x27;audience, Google Analytics avec consentement et gestion de vos choix.">
+<meta property="og:description" content="Politique cookies d&#x27;IASHARK : traceurs essentiels, mesure interne des visites sans cookie, Google Analytics et comment vous y opposer.">
 <meta property="og:type" content="website">
 <meta property="og:locale" content="fr_FR">
 <link rel="canonical" href="https://iashark.com/fr/cookies.html">
@@ -58,7 +58,8 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 </style>
 <link rel="stylesheet" href="/assets/bottom-navigation.css"></head>
 <body>
-<!-- LEGAL REVIEW: (1) l'identifiant 'iashark_funnel_sid' est aujourd'hui déposé sans consentement et peut être associé à l'identifiant du compte connecté : l'exemption de consentement de la CNIL pour la mesure d'audience exige des données strictement statistiques et anonymes - à valider ou à soumettre au consentement ; (2) le choix de consentement est conservé sans limite de durée dans le navigateur (la CNIL recommande de conserver le choix pendant une durée limitée) ; (3) cookies _ga : durée par défaut Google de 2 ans, supérieure à la durée de 13 mois recommandée par la CNIL - paramétrage à revoir. -->
+<!-- LEGAL REVIEW: GA loaded without prior consent by owner decision 2026-09-13; CNIL requires prior consent for GA in France/EU -->
+<!-- LEGAL REVIEW: (1) Google Analytics est chargé pour tous les visiteurs dès l'arrivée, avec un simple lien d'opposition (data-analytics-optout, géré par site-prefs.js) ; cette page n'affirme pas que ce fonctionnement est conforme. (2) Cookies _ga : durée par défaut de Google de 2 ans, supérieure aux 13 mois recommandés par la CNIL. (3) Le choix d'opposition (iashark_cookie_consent) est conservé sans limite de durée. (4) La mesure interne des visites est décrite d'après la consigne du propriétaire du 13/09/2026, mais le funnel-track.js relu ce jour-là n'envoie avec page_view que la page, la version du site, le domaine de provenance et les UTM (ni appareil/navigateur/système, ni langue, fuseau horaire, pays estimé, temps passé, défilement ou clics) : vérifier que le script déployé correspond à cette page. Les événements autres que page_view (ex. signup_completed) peuvent porter l'identifiant du compte, ce qui compromet l'exemption CNIL de mesure d'audience. (5) Conservation de 13 mois annoncée pour funnel_events, mais aucune purge automatique n'existe dans supabase/migrations. (6) Le texte de confirmation affiché après le clic sur le lien d'opposition utilise la clé i18n analytics_optout.done, absente de i18n/dict : il s'affiche en français. -->
 <header class="hdr">
   <button class="hdr-back" type="button" onclick="history.back()">&larr; RETOUR</button>
   <a class="hdr-logo" href="./" aria-label="IASHARK"><span>IA</span>SHARK</a>
@@ -90,29 +91,47 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
     <div class="tbl-wrap"><table>
       <tr><th>Nom</th><th>Type</th><th>Finalité</th><th>Durée</th></tr>
       <tr><td>Session d'authentification Supabase</td><td>Stockage local</td><td>Vous maintenir connecté à votre compte</td><td>Jusqu'à la déconnexion</td></tr>
-      <tr><td><code>iashark_cookie_consent</code></td><td>Stockage local</td><td>Mémoriser votre choix concernant les cookies analytiques</td><td>Jusqu'à l'effacement des données du navigateur</td></tr>
+      <tr><td><code>iashark_cookie_consent</code></td><td>Stockage local</td><td>Mémoriser votre opposition à Google Analytics sur ce navigateur (enregistrée lorsque vous cliquez sur le lien de désactivation, ou si vous aviez refusé les cookies analytiques auparavant)</td><td>Jusqu'à l'effacement des données du navigateur</td></tr>
       <tr><td><code>iashark_lang</code></td><td>Stockage local</td><td>Mémoriser la langue choisie</td><td>Jusqu'à l'effacement des données du navigateur</td></tr>
       <tr><td><code>iashark_lang_redirect_done</code></td><td>Stockage de session</td><td>Éviter les redirections de langue répétées</td><td>Fermeture de l'onglet</td></tr>
     </table></div>
   </section>
 
   <section class="section">
-    <h2>3. Mesure interne du parcours</h2>
-    <p>Pour comprendre comment le service est utilisé et l'améliorer, IASHARK enregistre les principales étapes du parcours (visite d'une page clé, inscription, ouverture du paiement…) dans sa propre base de données. Aucun outil tiers, cookie tiers ni pixel publicitaire n'est utilisé pour cette mesure.</p>
+    <h2>3. Mesure interne des visites (sans cookie)</h2>
+    <p>Pour comprendre comment le site est utilisé et l'améliorer, IASHARK mesure les visites avec son propre outil et enregistre les données dans sa propre base de données. Cette mesure n'utilise aucun cookie, aucun outil tiers et aucun pixel publicitaire.</p>
+    <p>Pour chaque page consultée, les informations suivantes sont enregistrées :</p>
+    <ul>
+      <li>la page consultée et la version du site (langue ou pays) ;</li>
+      <li>le nom de domaine du site d'où vous venez, le cas échéant, et les paramètres de campagne (UTM) présents dans l'adresse ;</li>
+      <li>des catégories générales d'appareil, de navigateur et de système d'exploitation ;</li>
+      <li>la langue et le fuseau horaire du navigateur, ainsi qu'un pays estimé à partir de ce fuseau horaire ;</li>
+      <li>le temps passé sur la page, la profondeur de défilement et les clics sur les principaux boutons du site ;</li>
+      <li>un identifiant de visite aléatoire, décrit dans le tableau ci-dessous.</li>
+    </ul>
+    <p>Aucune adresse IP n'est enregistrée et les pages vues ne sont jamais reliées à un compte. Certaines étapes du parcours (par exemple la finalisation de l'inscription) peuvent en revanche être associées à l'identifiant de votre compte lorsque vous êtes connecté. Ces données sont conservées 13 mois.</p>
     <div class="tbl-wrap"><table>
       <tr><th>Nom</th><th>Type</th><th>Finalité</th><th>Durée</th></tr>
-      <tr><td><code>iashark_funnel_sid</code></td><td>Stockage local</td><td>Identifiant de session aléatoire permettant de relier les étapes d'un même parcours</td><td>Jusqu'à l'effacement des données du navigateur</td></tr>
+      <tr><td><code>iashark_visit_id</code></td><td>Stockage de session</td><td>Identifiant de visite aléatoire, propre à chaque onglet, permettant de relier les pages d'une même visite</td><td>Fermeture de l'onglet</td></tr>
     </table></div>
+    <p>L'ancien identifiant <code>iashark_funnel_sid</code> (stockage local) n'est plus utilisé et est effacé automatiquement de votre navigateur. Vous pouvez vous opposer à cette mesure en écrivant à <a href="mailto:contact@iashark.com">contact@iashark.com</a>.</p>
   </section>
 
-  <section class="section">
-    <h2>4. Traceurs soumis à votre consentement</h2>
-    <p>Les cookies de <strong>Google Analytics</strong> (service fourni par Google Ireland Limited) ne sont déposés que si vous cliquez sur « Accepter » dans le bandeau affiché lors de votre première visite. Ils permettent de mesurer la fréquentation du site (pages vues, durée des sessions).</p>
+  <section class="section" id="google-analytics">
+    <h2>4. Mesure d'audience Google Analytics</h2>
+    <p>Le site utilise <strong>Google Analytics</strong>, un service fourni par Google Ireland Limited. Il est chargé dès votre arrivée sur le site, pour tous les visiteurs, sauf si vous vous y êtes opposé sur ce navigateur.</p>
+    <p><strong>Finalité</strong> — mesurer la fréquentation du site et comprendre comment il est utilisé, afin de l'améliorer. IASHARK n'utilise pas ces données à des fins publicitaires.</p>
+    <p><strong>Données collectées</strong> — un identifiant aléatoire enregistré dans les cookies ci-dessous, les pages consultées, la page de provenance, la date, la durée et le déroulé des visites, le type d'appareil, le navigateur, le système d'exploitation, la langue, la résolution d'écran et une localisation approximative (pays, région, ville) que Google déduit de votre adresse IP. Selon le paramétrage de Google Analytics, certaines interactions peuvent aussi être mesurées automatiquement (défilement, clics vers d'autres sites, téléchargements). Votre adresse IP est transmise à Google lors du chargement du service.</p>
     <div class="tbl-wrap"><table>
       <tr><th>Nom</th><th>Émetteur</th><th>Finalité</th><th>Durée</th></tr>
       <tr><td><code>_ga</code></td><td>Google Analytics</td><td>Distinguer les visiteurs</td><td>Jusqu'à 2 ans</td></tr>
       <tr><td><code>_ga_&lt;ID&gt;</code></td><td>Google Analytics</td><td>Conserver l'état de la session</td><td>Jusqu'à 2 ans</td></tr>
     </table></div>
+    <p><strong>Conservation</strong> — les cookies ci-dessus restent jusqu'à 2 ans dans votre navigateur ; les données de mesure sont conservées dans Google Analytics selon la durée paramétrée (2 ou 14 mois pour les données au niveau de l'utilisateur et des événements). Google peut traiter ces données en dehors de l'Union européenne : voir notre <a href="confidentialite.html">Politique de confidentialité</a>.</p>
+    <div class="highlight">
+      <p><strong>Vous opposer à Google Analytics</strong> — vous pouvez vous y opposer à tout moment, gratuitement, en cliquant sur le lien ci-dessous. Google Analytics est alors désactivé sur ce navigateur et ses cookies <code>_ga</code> sont supprimés. Votre choix est mémorisé dans ce navigateur (<code>iashark_cookie_consent</code>) : il faut le renouveler sur chaque navigateur ou appareil utilisé, et après avoir effacé vos données de navigation. Un refus exprimé auparavant reste pris en compte. L'opposition n'a aucune conséquence sur l'accès au service.</p>
+      <p><a href="#" id="ga-optout" role="button" data-analytics-optout style="display:inline-block;margin:4px 0;padding:10px 16px;border:1px solid rgba(34,211,238,0.4);border-radius:8px;background:rgba(34,211,238,0.1);font-family:'Space Mono',monospace;font-size:11px;letter-spacing:0.5px;color:#22d3ee;text-decoration:none;">Désactiver les statistiques Google Analytics sur ce navigateur</a></p>
+    </div>
     <p>Aucun cookie publicitaire n'est utilisé sur IASHARK.</p>
   </section>
 
@@ -124,9 +143,9 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
   <section class="section">
     <h2>6. Gérer vos choix</h2>
     <ul>
-      <li><strong>Bandeau</strong> — lors de votre première visite, vous pouvez accepter ou refuser les cookies analytiques. Le refus n'a aucune conséquence sur l'accès au service.</li>
-      <li><strong>Changer d'avis</strong> — effacez les données de navigation du site dans votre navigateur : le bandeau s'affichera de nouveau lors de votre prochaine visite.</li>
-      <li><strong>Paramètres du navigateur</strong> — vous pouvez bloquer ou supprimer les cookies et le stockage local ; le blocage des traceurs strictement nécessaires peut empêcher la connexion à votre compte.</li>
+      <li><strong>Google Analytics</strong> — cliquez sur le lien de désactivation de la <a href="#google-analytics">section 4</a>. L'opposition n'a aucune conséquence sur l'accès au service.</li>
+      <li><strong>Mesure interne des visites</strong> — écrivez à <a href="mailto:contact@iashark.com">contact@iashark.com</a> pour vous y opposer ; l'identifiant de visite est effacé à la fermeture de l'onglet.</li>
+      <li><strong>Paramètres du navigateur</strong> — vous pouvez bloquer ou supprimer les cookies et le stockage local ; le blocage des traceurs strictement nécessaires peut empêcher la connexion à votre compte. Si vous effacez les données du site, votre opposition à Google Analytics est effacée aussi et doit être renouvelée.</li>
     </ul>
   </section>
 

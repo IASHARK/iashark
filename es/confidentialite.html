@@ -71,6 +71,8 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 </head>
 <body>
 <!-- LEGAL REVIEW: (1) full identity of the controller (name, address) missing; (2) retention period for journey events (funnel_events table) and for login rate-limit keys containing IP addresses (rate_limit_buckets table) not defined in code - no automatic purge found; (3) the 'account: end of subscription + 1 year' period carried over from the original page is not enforced by any automated job; (4) DPF certification of US processors to be checked case by case. -->
+<!-- LEGAL REVIEW: GA loaded without prior consent by owner decision 2026-09-13; CNIL requires prior consent for GA in France/EU -->
+<!-- LEGAL REVIEW: the lawful basis for Google Analytics was changed from consent to legitimate interests to match the opt-out model decided by the owner on 2026-09-13. The consent requirement for storing/reading the cookie (Art. 5(3) ePrivacy Directive and its national transpositions, e.g. Art. 82 French Data Protection Act) applies whatever the GDPR basis, and no legitimate interests assessment is documented. Not updated in this change: the 'internal journey measurement' items in sections 2 and 6 do not list the fields now described in the cookie policy (device, time zone, estimated country, time on page, scroll depth, clicks) nor its 13-month retention. -->
 <header class="hdr">
   <button class="hdr-back" type="button" onclick="history.back()">&larr; VOLVER</button>
   <a class="hdr-logo" href="./" aria-label="IASHARK"><span>IA</span>SHARK</a>
@@ -106,7 +108,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
       <li><strong>Diario de decisiones (suscriptores Pro, opcional)</strong> — las entradas que usted registra: partido, mercado, cuota, probabilidad estimada, importe apostado, estado y resultado.</li>
       <li><strong>Suscripción</strong> — identificador de cliente en nuestro proveedor de pagos, estado y plan de la suscripción, fecha de fin del periodo de facturación, eventos de pago. Los datos de la tarjeta bancaria los trata exclusivamente Stripe y IASHARK nunca los almacena.</li>
       <li><strong>Medición interna del recorrido</strong> — identificador de sesión aleatorio, página consultada, idioma, tipo de etapa (visita, registro, apertura del pago…) y, si ha iniciado sesión, el identificador de su cuenta.</li>
-      <li><strong>Medición de audiencia</strong> — páginas visitadas y duración de la sesión mediante Google Analytics, solo si acepta las cookies analíticas.</li>
+      <li><strong>Medición de audiencia</strong> — páginas visitadas, duración y desarrollo de las visitas, información técnica sobre el dispositivo y el navegador y ubicación aproximada, mediante Google Analytics, que se carga en cuanto llega al sitio; puede oponerse en cualquier momento desde la <a href="cookies.html">Política de cookies</a>.</li>
       <li><strong>Seguridad</strong> — dirección IP utilizada para limitar los intentos abusivos de inicio de sesión, y registros técnicos conservados por nuestros proveedores de alojamiento.</li>
       <li><strong>Comunicaciones</strong> — el contenido de los mensajes que nos envía.</li>
     </ul>
@@ -122,7 +124,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
       <tr><td>Almacenamiento de sus preferencias y de su diario</td><td>Ejecución del contrato (art. 6.1.b)</td></tr>
       <tr><td>Seguridad del servicio, prevención del fraude y de los inicios de sesión abusivos</td><td>Interés legítimo (art. 6.1.f)</td></tr>
       <tr><td>Medición interna del recorrido para mejorar el servicio</td><td>Interés legítimo (art. 6.1.f)</td></tr>
-      <tr><td>Medición de audiencia mediante Google Analytics</td><td>Consentimiento (art. 6.1.a)</td></tr>
+      <tr><td>Medición de audiencia mediante Google Analytics</td><td>Interés legítimo (art. 6.1.f); puede oponerse en cualquier momento</td></tr>
       <tr><td>Respuesta a sus solicitudes y reclamaciones</td><td>Ejecución del contrato o interés legítimo</td></tr>
     </table></div>
   </section>
@@ -134,7 +136,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
       <li><strong>Supabase</strong> — base de datos, autenticación y funciones de servidor; datos alojados en la Unión Europea (región de París).</li>
       <li><strong>Stripe</strong> — pago y gestión de la suscripción; Stripe también actúa como responsable del tratamiento independiente para determinados fines propios (prevención del fraude, obligaciones reglamentarias).</li>
       <li><strong>Netlify</strong> — alojamiento del sitio web y registros técnicos.</li>
-      <li><strong>Google Ireland Limited</strong> — Google Analytics, solo con su consentimiento.</li>
+      <li><strong>Google Ireland Limited</strong> — Google Analytics (medición de audiencia), salvo que se haya opuesto.</li>
       <li><strong>Proveedores de recursos técnicos</strong> — fuentes tipográficas (Google Fonts), una biblioteca técnica (jsDelivr) e imágenes de logotipos de equipos (API-SPORTS): cuando se cargan estos recursos, se les transmite su dirección IP.</li>
     </ul>
     <p>Sus datos también pueden comunicarse a las autoridades públicas cuando la ley así lo exija.</p>

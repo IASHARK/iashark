@@ -111,7 +111,15 @@ if (CHECK_ONLY) {
   for (const rel of files) {
     const dest = path.join(OUT, rel);
     fs.mkdirSync(path.dirname(dest), { recursive: true });
-    fs.copyFileSync(path.join(ROOT, rel), dest);
+    if (/\.html$/.test(rel)) {
+      // Notes internes (revue juridique, brouillons, decisions bloquees) :
+      // utiles dans le depot, jamais publiees dans le HTML servi.
+      const html = fs.readFileSync(path.join(ROOT, rel), "utf8")
+        .replace(/<!--\s*(LEGAL REVIEW|DRAFT|BLOCKED_DECISION|TODO|NOTE INTERNE)[\s\S]*?-->\s*/g, "");
+      fs.writeFileSync(dest, html);
+    } else {
+      fs.copyFileSync(path.join(ROOT, rel), dest);
+    }
   }
   console.log("dist/ : " + files.size + " fichier(s) publics copies.");
 }

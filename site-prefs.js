@@ -134,25 +134,45 @@
     };
   }
 
-  var consent = getConsent();
-  if(consent === 'accepted'){
+  // DECISION PROPRIETAIRE (2026-09-13, confirmee explicitement) : plus de
+  // bandeau de consentement. Google Analytics est charge des l'arrivee pour
+  // tous les visiteurs. Risque signale au proprietaire : en France/UE la CNIL
+  // exige un consentement prealable pour Google Analytics ; au Royaume-Uni,
+  // en Afrique du Sud et au Mexique une information claire + un moyen simple
+  // de s'y opposer suffisent. Opposition : lien [data-analytics-optout] sur
+  // la page cookies, ou window.IasharkAnalyticsOptOut(). Un refus deja
+  // exprime avec l'ancien bandeau reste respecte.
+  window.IasharkAnalyticsOptOut = function(){
+    setConsent('refused');
+    window['ga-disable-' + GA_ID] = true;
+    try{
+      document.cookie.split(';').forEach(function(c){
+        var name = c.split('=')[0].trim();
+        if(/^_ga/.test(name)){
+          document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; domain=.' + location.hostname.replace(/^www\./, '');
+          document.cookie = name + '=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/';
+        }
+      });
+    }catch(e){}
+  };
+
+  if(getConsent() === 'refused'){
+    window['ga-disable-' + GA_ID] = true;
+  } else {
     loadGA();
-  } else if(consent !== 'refused'){
-    // I18N.init() est asynchrone (fetch du dictionnaire) - si on affiche la
-    // banniere avant qu'il resolve, t() retombe sur le repli FR et reste
-    // fige ainsi (contrairement a bottom-navigation.js, ce bandeau n'a pas
-    // de re-etiquetage a chaud). On attend donc I18N avant de l'afficher,
-    // avec un filet de securite (timeout) pour ne jamais bloquer l'affichage
-    // si I18N.init() ne resolvait jamais pour une raison quelconque.
-    if(window.I18N && window.I18N.init){
-      var shown=false;
-      var show=function(){ if(shown)return; shown=true; showBanner(); };
-      window.I18N.init().then(show).catch(show);
-      setTimeout(show, 1500);
-    } else {
-      showBanner();
+  }
+
+  function wireOptOut(){
+    var els = document.querySelectorAll('[data-analytics-optout]');
+    for(var i = 0; i < els.length; i++){
+      els[i].addEventListener('click', function(ev){
+        ev.preventDefault();
+        window.IasharkAnalyticsOptOut();
+        this.textContent = t('analytics_optout.done', 'Statistiques Google Analytics désactivées sur ce navigateur.');
+      });
     }
   }
+  if(document.readyState === 'loading'){ document.addEventListener('DOMContentLoaded', wireOptOut); } else { wireOptOut(); }
 })();
 
 /* Suivi interne anonyme des visites (funnel-track.js) charge sur TOUTES les

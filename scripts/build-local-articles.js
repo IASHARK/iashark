@@ -331,5 +331,8 @@ if (require.main === module) {
     console.log("Articles locaux a jour (" + Object.keys(outputs).length + " fichiers).");
   } else {
     console.log((stale.length ? "Ecrit :\n  " + stale.join("\n  ") : "Rien a ecrire.") + "\n" + Object.keys(outputs).length + " fichiers generes au total.");
+    // Index sitemap.xml : reference sitemap-articles.xml (et tous les
+    // sitemap-*.xml non vides presents), meme fonction que le pipeline.
+    require("./i18n-sitemaps.js").writeSitemapIndex(ROOT, new Date().toISOString().slice(0, 10));
   }
 }

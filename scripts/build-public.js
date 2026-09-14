@@ -29,7 +29,7 @@ const PUBLIC_ROOT_FILES = [
   "index.html", "404.html", "admin.html", "blog.html",
   "robots.txt", "_redirects", "_headers",
   "favicon.ico", "favicon-32x32.png", "favicon-512.png", "icon-192.png", "icon-512.png", "apple-touch-icon.png",
-  "data.json", "actus.json", "transferts.json",
+  "data.json", "data-home.json", "actus.json", "transferts.json",
   "i18n/i18n.js",
 ];
 const ASSET_EXT = /\.(js|json|css|png|jpe?g|svg|webp|gif|ico|woff2?|ttf|txt|xml|webmanifest)$/i;
@@ -103,6 +103,11 @@ if (forbidden.length) {
   console.error("REFUS : fichiers internes references par des pages publiques :\n  " + forbidden.join("\n  "));
   process.exit(1);
 }
+
+// Jamais publies, meme references par une page : historique des paris (depot
+// uniquement, audit fuite du 14/09/2026).
+const NEVER_PUBLISH = /^historique\.json$/;
+Array.from(files).forEach(function (f) { if (NEVER_PUBLISH.test(f)) files.delete(f); });
 
 if (CHECK_ONLY) {
   console.log(files.size + " fichier(s) publics.");

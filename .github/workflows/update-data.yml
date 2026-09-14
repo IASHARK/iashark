@@ -3476,6 +3476,19 @@ jobs:
           TEST_WC_ONLY:       ${{ github.event.inputs.test_wc_only }}
         run: node pipeline.js
 
+      - name: Pages club et derby (SEO local)
+        # Apres le pipeline : lit data-home.json / match/<id>.json fraichement
+        # ecrits. Ecrit <dir>/clubs|equipos/, sitemap-clubs.xml et sitemap.xml.
+        continue-on-error: true
+        env:
+          APISPORTS_KEY: ${{ secrets.APISPORTS_KEY }}
+        run: node scripts/build-club-hubs.js
+
+      - name: Controle sante des fichiers publics
+        # Bloque la publication si un fichier public est perime, vide ou porte
+        # un champ premium (lib/health/checks.js).
+        run: node scripts/health-check.js --local . --gate --max-age-hours 3
+
       - name: Commit and push
         # Le pipeline tourne ~20 minutes. Un simple "git push" echoue des que
         # quiconque pousse sur main pendant ce temps (arrive le 02/09/2026 :
@@ -3492,11 +3505,13 @@ jobs:
           set -euo pipefail
           OUTPUTS="data.json data-home.json historique.json transferts.json actus.json sitemap.xml match index.html league-coverage-report.json seo-lastmod.json"
           # Pages SEO localisees (scripts/seo-pages.js) : <dir>/match/ et
-          # <dir>/leagues/. Sauvegardees AVEC leur chemin (cp --parents) : la
+          # <dir>/leagues/ ; pages club/derby (scripts/build-club-hubs.js) :
+          # <dir>/clubs/ et <dir>/equipos/. Les articles locaux (<dir>/articles|
+          # articulos/) sont des sources versionnees, non regenerees ici. Sauvegardees AVEC leur chemin (cp --parents) : la
           # copie a plat de OUTPUTS confondrait gb/match et za/match.
           SEO_DIRS=""
           for d in fr en es de it pt gb mx za; do
-            for s in match leagues; do
+            for s in match leagues clubs equipos; do
               [ -d "$d/$s" ] && SEO_DIRS="$SEO_DIRS $d/$s"
             done
           done

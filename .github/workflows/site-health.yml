@@ -6,6 +6,9 @@ name: site-health
 #    surveilles sur main, ouvre / met a jour une issue "🚨 ... en échec – date"
 #    (echec, delai depasse, annulation) avec le lien du run, les jobs et
 #    etapes en echec et une explication ; la ferme au prochain succes.
+#    Le pipeline quotidien "Update IASHARK Daily" n'est PAS surveille ici :
+#    son echec est alerte par health-monitor.yml (un seul declencheur
+#    workflow_run sur ce pipeline, pas de double issue).
 #    Les annulations des collecteurs frequents (closing-odds, forward-odds-*)
 #    sont ignorees : leur groupe de concurrence annule normalement les runs en
 #    attente.
@@ -21,7 +24,6 @@ name: site-health
 on:
   workflow_run:
     workflows:
-      - "Update IASHARK Daily"
       - "closing-odds"
       - "forward-odds-broad"
       - "forward-odds-near-kickoff"

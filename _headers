@@ -5,3 +5,17 @@
   Permissions-Policy: geolocation=(), microphone=(), camera=(), payment=()
   Strict-Transport-Security: max-age=31536000; includeSubDomains
   X-Frame-Options: SAMEORIGIN
+
+# Donnees JSON publiques : lues par les pages, jamais indexees comme documents
+# (audit SEO 14/09/2026). Pas de cache long : data-home.json et match/<id>.json
+# sont regeneres a chaque run du pipeline (revalidation ETag cote page).
+/data.json
+  X-Robots-Tag: noindex
+/data-home.json
+  X-Robots-Tag: noindex
+/actus.json
+  X-Robots-Tag: noindex
+/transferts.json
+  X-Robots-Tag: noindex
+/i18n/dict/*
+  X-Robots-Tag: noindex

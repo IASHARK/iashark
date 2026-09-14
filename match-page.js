@@ -933,8 +933,12 @@ async function init(){
       render(PRELOADED_MATCH);
       return;
     }
-    const id=typeof FIXED_MATCH_ID!=='undefined'?String(FIXED_MATCH_ID):new URLSearchParams(location.search).get('id');
     let raw=typeof PRELOADED_MATCH!=='undefined'?PRELOADED_MATCH:null;
+    // match.html ouvert sans ?id= (ou id vide/"null") : aucune requete vers
+    // /match/null.json ni match-data, message "Match introuvable" directement.
+    const idBrut=typeof FIXED_MATCH_ID!=='undefined'&&FIXED_MATCH_ID!=null?String(FIXED_MATCH_ID):new URLSearchParams(location.search).get('id');
+    const id=idBrut&&!/^(null|undefined)$/.test(idBrut.trim())?idBrut.trim():(raw&&raw.id!=null?String(raw.id):null);
+    if(!id)throw new Error(t('match_page.match_not_found','Match introuvable'));
     let list=null;
     let ctx={session:null,isPro:false};
     if(window.IasharkApp){

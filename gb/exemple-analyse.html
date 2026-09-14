@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta name="iashark-market" content="gb">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title data-i18n="geo.meta.exemple-analyse.title">IASHARK example analysis — Paris Saint Germain vs Monaco</title>
-<meta name="description" content="A complete IASHARK analysis example: recommended market, model probability, gap with the market, team comparison and match scenario. No account needed." data-i18n-attr="content:geo.meta.exemple-analyse.description">
+<title>Example Match Analysis: PSG vs Monaco | IASHARK UK</title>
+<meta name="description" content="A complete IASHARK match analysis, free to view: recommended market, model probability, gap with the market, team comparison and match scenario.">
 <link rel="canonical" href="https://iashark.com/gb/exemple-analyse.html">
 <link rel="alternate" hreflang="fr" href="https://iashark.com/fr/exemple-analyse.html">
 <link rel="alternate" hreflang="en-GB" href="https://iashark.com/gb/exemple-analyse.html">
@@ -17,8 +17,8 @@
 <link rel="alternate" hreflang="it" href="https://iashark.com/it/exemple-analyse.html">
 <link rel="alternate" hreflang="pt" href="https://iashark.com/pt/exemple-analyse.html">
 <link rel="alternate" hreflang="x-default" href="https://iashark.com/fr/exemple-analyse.html">
-<meta property="og:title" content="IASHARK example analysis — Paris Saint Germain vs Monaco" data-i18n-attr="content:geo.meta.exemple-analyse.title">
-<meta property="og:description" content="A complete IASHARK analysis example: recommended market, model probability, gap with the market, team comparison and match scenario. No account needed." data-i18n-attr="content:geo.meta.exemple-analyse.description">
+<meta property="og:title" content="Example Match Analysis: PSG vs Monaco | IASHARK UK">
+<meta property="og:description" content="A complete IASHARK match analysis, free to view: recommended market, model probability, gap with the market, team comparison and match scenario.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://iashark.com/gb/exemple-analyse.html">
 <link rel="icon" href="/assets/favicon.png">
@@ -53,15 +53,19 @@
 .demo-foot .demo-cta{display:inline-block;padding:13px 24px;font-size:13.5px}
 /* Avertissement 18+ / jeu responsable : .legal-footer est masque par
    match-page.css (la page match rend le sien), d'ou une classe propre. */
-.demo-legal{width:min(var(--container),calc(100% - 32px));margin:22px auto 0;padding:0 2px;color:var(--muted);font-size:12.5px;line-height:1.6;text-align:center}
+.demo-legal{width:min(var(--container),calc(100% - 32px));margin:22px auto 0;padding-bottom:24px;padding:0 2px;color:var(--muted);font-size:12.5px;line-height:1.6;text-align:center}
 .demo-legal p{margin:0 0 4px}
 .demo-legal a{color:inherit;text-decoration:underline}
 .demo-legal [hidden]{display:none}
 @media(max-width:640px){
   .demo-in{padding:12px 0}
-  .demo-cta{width:100%;text-align:center}
+  .demo-cta{width:100%;text-align:center;min-height:44px;display:flex;align-items:center;justify-content:center}
 }
 </style>
+<meta property="og:site_name" content="IASHARK">
+<meta property="og:locale" content="en_GB">
+<meta property="og:image" content="https://iashark.com/icon-512.png">
+<meta name="twitter:card" content="summary">
 </head>
 <body>
 <header class="site-header">
@@ -116,8 +120,11 @@ var PRELOADED_MATCH = {"id": 1552753, "sport": "football", "league_id": 61, "sea
     put(m,'conseil_public','conseil_public');
     put(m,'analyse_card','analyse_card');
     put(m,'contexte','contexte');
-    put(m,'pari_rec','pari_rec');
-    put(m.paris_safe,'bet','pari_rec');
+    // pari_rec, paris_safe.bet et markets_compared[].market restent les
+    // libelles MOTEUR : match-page.js les redige dans la langue active via
+    // lib/market-labels.js. Y substituer un texte deja traduit le faisait
+    // relire comme un libelle moteur ("Total shots on target: under 11.5"
+    // devenait "Under 11.5 goals in the match", 14/09/2026).
     put(m,'market_source','market_source');
     put(m,'mise','stake');
     if(m.scenario){ put(m.scenario,'phase1','scenario_phase1'); put(m.scenario,'phase2','scenario_phase2'); put(m.scenario,'phase3','scenario_phase3'); }
@@ -126,7 +133,6 @@ var PRELOADED_MATCH = {"id": 1552753, "sport": "football", "league_id": 61, "sea
     put(m.stade,'desc','weather_desc');
     [m.fatigue&&m.fatigue.home, m.fatigue_home].forEach(function(f){ put(f,'info','fatigue_home'); });
     [m.fatigue&&m.fatigue.away, m.fatigue_away].forEach(function(f){ put(f,'info','fatigue_away'); });
-    (m.markets_compared||[]).forEach(function(c){ put(c,'market','market_'+String(c.id).replace(/[^a-z0-9]+/gi,'_')); });
     if(I.locale!=='fr') m.actu=[];
   }
   I.init=function(){
@@ -148,7 +154,7 @@ var PRELOADED_MATCH = {"id": 1552753, "sport": "football", "league_id": 61, "sea
 // l'identifiant via le module partage. Repli sur l'ancre #decisions de
 // l'accueil si data.json ne repond pas : jamais de lien mort.
 (function(){
-  fetch('/data.json?t='+Date.now()).then(function(r){return r.ok?r.json():null;}).then(function(d){
+  fetch('/data-home.json',{cache:'no-cache'}).then(function(r){return r.ok?r.json():null;}).then(function(d){
     if(!d)return;
     var id=window.IasharkFreeMatch&&IasharkFreeMatch.pickFreeMatchId(d.matchs||[]);
     if(!id)return;

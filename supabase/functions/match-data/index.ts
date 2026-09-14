@@ -3,28 +3,103 @@ import { createClient } from "jsr:@supabase/supabase-js@2";
 const SUPA_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const DATA_URL = "https://iashark.com/data.json";
+// Fichiers publics decoupes (lib/public-data-split.js, 14/09/2026) : data.json
+// pese ~25 Mo, surtout player_history. La liste legere suffit a l'accueil ; la
+// page match et la fiche joueur n'ont besoin que du detail de LEUR match.
+// Memes champs que data.json (copie assainie matchsPublics), jamais plus.
+const LIST_URL = "https://iashark.com/data-home.json";
+const SITE_URL = "https://iashark.com";
+function detailUrl(id: string): string {
+  return SITE_URL + "/match/" + id + ".json";
+}
 
-// data.json (public) ne contient plus jamais ces champs depuis que le pipeline
-// les ecrit a la place dans la table match_premium_data (voir
-// supabase/migrations/0002_match_premium_data.sql). Cette liste sert
-// uniquement de garde-fou si un ancien commit de data.json les contenait
-// encore par erreur - on les retire quand meme explicitement pour un
-// visiteur non-pro, en plus de ne jamais les rapporter depuis la table.
-// Le PARI RECOMMANDE fait partie des champs premium depuis le 03/09/2026.
-// Avant, cette liste ne couvrait que des metriques secondaires : le marche
-// recommande, sa cote et la probabilite du modele - c'est-a-dire le produit
-// lui-meme - partaient en clair dans data.json public. La serrure existait,
-// elle etait posee sur la mauvaise porte.
+// Portee demandee : { id } (page match, fiche joueur : liste legere + detail
+// complet de CE match) ou { scope: "list" } (accueil, page Outils : liste
+// legere). Sans parametre (anciens clients en cache) : data.json complet.
+async function lirePortee(req: Request): Promise<{ id: string | null; list: boolean }> {
+  const url = new URL(req.url);
+  let id: unknown = url.searchParams.get("id");
+  let scope: unknown = url.searchParams.get("scope");
+  if (req.method === "POST") {
+    try {
+      const body = await req.json();
+      if (body && typeof body === "object") {
+        if (body.id != null) id = body.id;
+        if (body.scope != null) scope = body.scope;
+      }
+    } catch (_e) {
+      // corps vide ou non JSON : portee par defaut
+    }
+  }
+  const idStr = id == null ? "" : String(id);
+  // Identifiant numerique uniquement : il entre dans une URL.
+  return { id: /^\d{1,12}$/.test(idStr) ? idStr : null, list: scope === "list" };
+}
+
+async function lireJson(url: string): Promise<Record<string, unknown>> {
+  const resp = await fetch(url);
+  if (!resp.ok) throw new Error(url + " fetch failed: " + resp.status);
+  return await resp.json();
+}
+
+async function chargerDonnees(portee: { id: string | null; list: boolean }): Promise<Record<string, unknown>> {
+  if (portee.id || portee.list) {
+    try {
+      const [liste, detail] = await Promise.all([
+        lireJson(LIST_URL),
+        portee.id ? lireJson(detailUrl(portee.id)) : Promise.resolve(null),
+      ]);
+      const matchs = Array.isArray(liste.matchs) ? [...(liste.matchs as Record<string, unknown>[])] : [];
+      if (portee.id && detail) {
+        if (String(detail.id) !== portee.id) throw new Error("detail inattendu pour " + portee.id);
+        const i = matchs.findIndex((m) => String(m.id) === portee.id);
+        if (i === -1) matchs.push(detail);
+        else matchs[i] = detail;
+      }
+      // detail_fields : champs absents des matchs de liste (detail_omitted).
+      // Sert a ne pas regonfler la liste avec les champs premium de detail.
+      return { matchs, generated_at: liste.generated_at ?? null, detail_fields: liste.detail_fields ?? [] };
+    } catch (e) {
+      // Fichiers decoupes absents (deploiement du site pas encore passe) : repli.
+      console.warn("fichiers decoupes indisponibles, repli sur data.json :", String(e));
+    }
+  }
+  // data.json : garde ?t= (comportement historique de ce chemin).
+  return await lireJson(DATA_URL + "?t=" + Date.now());
+}
+
+// COPIE LITTERALE de lib/premium-fields.js (PREMIUM_FIELDS). Deno ne charge
+// pas le module CommonJS du site : tests/premium-fields-sync.test.js verifie
+// que les deux listes sont identiques. Ne jamais modifier l'une sans l'autre.
 //
-// conf (indice 0-10) reste volontairement public : sans le marche recommande,
-// c'est une amorce, pas le produit.
+// Historique : le 03/09/2026 le pari recommande (pari_rec, cote_rec,
+// model_probability, markets_compared) est devenu premium ; le 14/09/2026
+// market_id/marche, puis TOUTE sortie du modele ou de l'analyse (audit fuite :
+// data.json, data-home.json, match/<id>.json et cette fonction servaient a un
+// visiteur anonyme p1/pn/p2, po25, btts, lambda, mc_scores, paris_safe - le
+// pari en clair -, vbet, fiabilite detaillee, textes d'analyse, buteurs
+// probables).
+//
+// conf (indice 0-10), has_signal et no_signal restent volontairement publics :
+// ils disent qu'une analyse existe, sans la donner.
 const PREMIUM_FIELDS = [
+  // Colonnes dediees de match_premium_data.
+  "pari_rec", "cote_rec", "model_probability", "markets_compared", "market_id", "marche",
   "kelly", "edge", "verdict_shark", "facteur_x", "dropping_odds", "player_markets",
-  "pari_rec", "cote_rec", "model_probability", "markets_compared",
-  // Traductions des textes premium (pipeline : lib/narrative-i18n.js).
+  // Traductions premium (raw_response.narrative_i18n).
   "facteur_x_i18n", "verdict_shark_i18n",
-  // Identifiant et categorie du marche recommande : nomment le pari, donc premium.
-  "market_id", "marche",
+  // match_premium_data.premium_fields (migration 0020).
+  "p1", "pn", "p2", "po15", "po25", "btts", "lambda_h", "lambda_a",
+  "market_aware_p1", "market_aware_pN", "market_aware_p2",
+  "market_consensus_p1", "market_consensus_pN", "market_consensus_p2",
+  "mc_scores", "scores", "simulation_count",
+  "paris_safe", "paris_risque", "vbet", "val", "hot", "risque", "mise",
+  "pick_downgrade", "odds_available", "is_canonical_pick",
+  "reliability", "model_agreement", "crit_home", "crit_away", "elo_signal",
+  "analyse_card", "analyse_card_i18n", "conseil_public", "conseil_public_i18n",
+  "contexte", "contexte_i18n", "scenario", "scenario_i18n", "scenario_15min",
+  "decision_factors", "risk_principal",
+  "top_scorers",
 ];
 
 // Un match marque is_free par le pipeline est l'offre d'appel du jour : ses
@@ -34,10 +109,44 @@ function estGratuit(m: Record<string, unknown>): boolean {
   return m && m.is_free === true;
 }
 
+function retirerPremium(m: Record<string, unknown>): Record<string, unknown> {
+  const copy = { ...m };
+  for (const f of PREMIUM_FIELDS) delete copy[f];
+  return copy;
+}
+
+// run_output public (miroir de lib/public-run-output.js) : garde-fou si un
+// data.json ancien portait encore la SAFE_PICK d'un match payant, les joueurs
+// du top buteurs ou les jambes des combines.
+function runOutputPublic(ro: unknown, matchs: Record<string, unknown>[]): unknown {
+  if (!ro || typeof ro !== "object") return ro;
+  const libres = new Set(matchs.filter(estGratuit).map((m) => String(m.id)));
+  const copy = { ...(ro as Record<string, unknown>) };
+  const sp = copy.safe_pick as Record<string, unknown> | null | undefined;
+  if (sp && typeof sp === "object") {
+    const fid = (sp.fixture as { fixture_id?: unknown } | undefined)?.fixture_id;
+    if (!(fid != null && libres.has(String(fid)))) {
+      copy.safe_pick = { generated_at: sp.generated_at ?? null, status: sp.status ?? null, evaluated_count: sp.evaluated_count ?? null, redacted: true };
+    }
+  }
+  const top = copy.top5_scorers as Record<string, unknown> | null | undefined;
+  if (top && typeof top === "object") {
+    copy.top5_scorers = { generated_at: top.generated_at ?? null, eligible_player_count: top.eligible_player_count ?? null, count_returned: top.count_returned ?? null, redacted: true };
+  }
+  const dc = copy.daily_combos as Record<string, unknown> | null | undefined;
+  if (dc && typeof dc === "object") {
+    const combos = Array.isArray(dc.combos) ? (dc.combos as Record<string, unknown>[]) : [];
+    copy.daily_combos = { generated_at: dc.generated_at ?? null, eligible_pool_size: dc.eligible_pool_size ?? null, combos: combos.map((c) => ({ combo_id: c?.combo_id, status: c?.status })), redacted: true };
+  }
+  return copy;
+}
+
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
+
+const PREMIUM_COLUMNS = "fixture_id,kelly,edge,verdict_shark,facteur_x,dropping_odds,player_markets,pari_rec,cote_rec,model_probability,markets_compared,raw_response,market_id,marche";
 
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
@@ -65,15 +174,12 @@ Deno.serve(async (req: Request) => {
     }
   }
   // Pas de bypass "phase de test" ici : cette fonction decide un vrai acces a
-  // des donnees premium, contrairement au mur CSS de pro.html qui, lui,
-  // reste ouvert en phase de test tant que le paiement n'existe pas (voir
-  // FINAL_REMEDIATION_PLAN.md Phase 5). isPro doit refleter la realite.
+  // des donnees premium. isPro doit refleter la realite (plan lu cote serveur,
+  // colonne non modifiable par le client : migration 0001).
 
   let data: Record<string, unknown>;
   try {
-    const resp = await fetch(DATA_URL + "?t=" + Date.now());
-    if (!resp.ok) throw new Error("data.json fetch failed: " + resp.status);
-    data = await resp.json();
+    data = await chargerDonnees(await lirePortee(req));
   } catch (e) {
     return new Response(
       JSON.stringify({ error: "Impossible de charger les donnees", details: String(e) }),
@@ -83,15 +189,14 @@ Deno.serve(async (req: Request) => {
 
   const matchs = Array.isArray(data.matchs) ? (data.matchs as Record<string, unknown>[]) : [];
 
-  // Garde-fou : ne jamais laisser ces champs partir a un non-pro meme s'ils
-  // trainent encore dans data.json (ancien commit, transition).
+  // Non-abonne (anonyme ou compte gratuit) : aucun champ premium, jamais,
+  // meme s'il trainait dans un fichier public (ancien commit, transition).
   if (!isPro) {
     data.matchs = matchs.map((m) => {
       if (estGratuit(m)) return m;              // analyse offerte du jour
-      const copy = { ...m };
-      for (const f of PREMIUM_FIELDS) delete copy[f];
-      return copy;
+      return retirerPremium(m);
     });
+    if (data.run_output) data.run_output = runOutputPublic(data.run_output, matchs);
     return new Response(JSON.stringify({ ...data, isPro }), {
       headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
     });
@@ -103,41 +208,58 @@ Deno.serve(async (req: Request) => {
   const fixtureIds = matchs.map((m) => m.id).filter((id) => id != null);
   let premiumById: Record<string, Record<string, unknown>> = {};
   if (fixtureIds.length) {
-    const { data: premiumRows, error } = await supabase
-      .from("match_premium_data")
-      .select("fixture_id,kelly,edge,verdict_shark,facteur_x,dropping_odds,player_markets,pari_rec,cote_rec,model_probability,markets_compared,raw_response,market_id,marche")
-      .in("fixture_id", fixtureIds);
-    if (error) {
-      console.error("match_premium_data query failed:", error.message);
+    // Type explicite : les deux select() n'ont pas le meme type infere.
+    let q: { data: unknown; error: { message: string } | null } =
+      await supabase.from("match_premium_data").select(PREMIUM_COLUMNS + ",premium_fields").in("fixture_id", fixtureIds);
+    if (q.error) {
+      // Migration 0020 pas encore appliquee : premium_fields est alors lu
+      // dans raw_response.premium_fields (repli du pipeline).
+      console.warn("premium_fields indisponible, lecture sans la colonne :", q.error.message);
+      q = await supabase.from("match_premium_data").select(PREMIUM_COLUMNS).in("fixture_id", fixtureIds);
+    }
+    if (q.error) {
+      console.error("match_premium_data query failed:", q.error.message);
     } else {
-      premiumById = Object.fromEntries((premiumRows ?? []).map((r) => [String(r.fixture_id), r]));
+      premiumById = Object.fromEntries(((q.data ?? []) as Record<string, unknown>[]).map((r) => [String(r.fixture_id), r]));
     }
   }
 
+  const detailFields = new Set(Array.isArray(data.detail_fields) ? (data.detail_fields as string[]) : []);
+
   data.matchs = matchs.map((m) => {
     const premium = premiumById[String(m.id)];
-    return premium
-      ? {
-          ...m,
-          kelly: premium.kelly ?? null,
-          edge: premium.edge ?? null,
-          verdict_shark: premium.verdict_shark ?? null,
-          facteur_x: premium.facteur_x ?? null,
-          facteur_x_i18n: (premium.raw_response as { narrative_i18n?: Record<string, unknown> } | null)?.narrative_i18n?.facteur_x_i18n ?? null,
-          verdict_shark_i18n: (premium.raw_response as { narrative_i18n?: Record<string, unknown> } | null)?.narrative_i18n?.verdict_shark_i18n ?? null,
-          dropping_odds: premium.dropping_odds ?? null,
-          player_markets: premium.player_markets ?? null,
-          // Le pari recommande revient ici, depuis la table protegee, pour un
-          // abonne confirme. On ne fait jamais confiance a ce qui pourrait
-          // trainer dans data.json.
-          pari_rec: premium.pari_rec ?? m.pari_rec ?? null,
-          cote_rec: premium.cote_rec ?? m.cote_rec ?? null,
-          model_probability: premium.model_probability ?? m.model_probability ?? null,
-          markets_compared: premium.markets_compared ?? m.markets_compared ?? null,
-          market_id: premium.market_id ?? m.market_id ?? null,
-          marche: premium.marche ?? m.marche ?? null,
-        }
-      : m;
+    if (!premium) return m;
+    const raw = premium.raw_response as { narrative_i18n?: Record<string, unknown>; premium_fields?: Record<string, unknown> } | null;
+    const etendus = (premium.premium_fields ?? raw?.premium_fields ?? null) as Record<string, unknown> | null;
+    const enrichi: Record<string, unknown> = { ...m };
+    if (etendus && typeof etendus === "object") {
+      for (const f of PREMIUM_FIELDS) {
+        if (!(f in etendus)) continue;
+        // Match de liste (detail_omitted) : on ne regonfle pas les champs de detail.
+        if (m.detail_omitted === true && detailFields.has(f)) continue;
+        enrichi[f] = etendus[f];
+      }
+    }
+    return {
+      ...enrichi,
+      kelly: premium.kelly ?? null,
+      edge: premium.edge ?? null,
+      verdict_shark: premium.verdict_shark ?? null,
+      facteur_x: premium.facteur_x ?? null,
+      facteur_x_i18n: raw?.narrative_i18n?.facteur_x_i18n ?? null,
+      verdict_shark_i18n: raw?.narrative_i18n?.verdict_shark_i18n ?? null,
+      dropping_odds: premium.dropping_odds ?? null,
+      player_markets: premium.player_markets ?? null,
+      // Le pari recommande revient ici, depuis la table protegee, pour un
+      // abonne confirme. On ne fait jamais confiance a ce qui pourrait
+      // trainer dans data.json.
+      pari_rec: premium.pari_rec ?? m.pari_rec ?? null,
+      cote_rec: premium.cote_rec ?? m.cote_rec ?? null,
+      model_probability: premium.model_probability ?? m.model_probability ?? null,
+      markets_compared: premium.markets_compared ?? m.markets_compared ?? null,
+      market_id: premium.market_id ?? m.market_id ?? null,
+      marche: premium.marche ?? m.marche ?? null,
+    };
   });
 
   return new Response(JSON.stringify({ ...data, isPro }), {

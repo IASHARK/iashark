@@ -47,8 +47,10 @@ test("la page Outils expose les six outils sans mur, et sans donnee premium cote
   // explique justement qu'on ne lit jamais data.json.
   assert.doesNotMatch(script, /fetch\([^)]*data\.json/,
     "la page Outils ne doit jamais aller chercher le fichier public data.json");
-  assert.match(script, /functions\.invoke\('match-data'\)/,
-    "les donnees de match doivent passer par la fonction autorisee");
+  // Portee legere { scope: 'list' } (14/09/2026) : la fonction Edge lit
+  // data-home.json et ajoute les champs premium pour un abonne confirme.
+  assert.match(script, /functions\.invoke\('match-data', \{ body: \{ scope: 'list' \} \}\)/,
+    "les donnees de match doivent passer par la fonction autorisee, en portee liste");
   assert.match(script, /if \(!ctx\.isPro\) return Promise\.resolve\(null\)/,
     "un visiteur non-abonne ne doit declencher aucun chargement de match");
 

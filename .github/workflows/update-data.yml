@@ -45,9 +45,10 @@ jobs:
           const { buildPlayerMarketOutput, blendPlayerRateAcrossSeasons } = require('./lib/markets/player-engine.js');
           const { pickTopScorerCandidates } = require('./lib/markets/top-scorer-picker.js');
           const { extractTranslationSource, buildTranslationRequest, parseTranslationResponse, applyNarrativeI18n } = require('./lib/narrative-i18n.js');
+          const { publicSafePick, publicTopScorers, publicDailyCombos } = require('./lib/public-run-output.js');
           const I18N_LOCALES = require('./i18n/locales.json');
           const I18N_PAGES = require('./scripts/i18n-manifest.js');
-          const { generateLocalizedSitemaps } = require('./scripts/i18n-sitemaps.js');
+          const { generateLocalizedSitemaps, writeSitemapIndex } = require('./scripts/i18n-sitemaps.js');
           const LEAGUES_CONFIG = require('./config/leagues.json');
           const { oddsSportKeyFor, usesApiFootballPinnacleFallback, pinnacleOddsFromApiFootball } = require('./lib/pinnacle-odds.js');
           const { calcFinalProbs, calcLambdas, calcCriteres, calcFatigue } = require('./lib/engine.js');
@@ -61,6 +62,15 @@ jobs:
           const { loadRegistry: loadLeagueFactoryRegistry } = require('./lib/league-factory/registry.js');
           const LEAGUE_EXPANSION_CONFIG = require('./config/league-expansion.json');
           const { runOutputForSnapshot, loadCanonicalEligibilityRegistry, leagueKeyForApiFootballId, buildScoreCandidatesFromLegacyMatch, buildPlayerCandidatesFromLegacyMatch, legacyLabelForCanonicalMarket } = require('./lib/run-output/index.js');
+          // Decoupage du fichier public (perf) : data-home.json (liste legere) et
+          // match/<id>.json (detail), ecrits depuis matchsPublics. Voir lib/public-data-split.js.
+          var PUBLIC_SPLIT=require('./lib/public-data-split.js');
+          // Liste UNIQUE des champs premium (audit fuite 14/09/2026) : fichiers
+          // publics, table protegee (premium_fields), pages SEO et fonction Edge.
+          var PREMIUM_FIELDS_LIB=require('./lib/premium-fields.js');
+          // Pages SEO statiques (titres/JSON-LD des pages match, versions
+          // localisees, pages championnat) : scripts/seo-pages.js.
+          var SEO_PAGES=require('./scripts/seo-pages.js');
           const RUN_OUTPUT_ENGINE_VERSION = 'run-output-engine-v1';
           var LEAGUE_COVERAGE_REPORT = null;
           try { LEAGUE_COVERAGE_REPORT = JSON.parse(fs.readFileSync('./league-coverage-report.json', 'utf8')); }
@@ -1458,14 +1468,14 @@ jobs:
           function escHtml(s){
             return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
           }
-          // Pages /match/<id>.html : UNE seule page par match pour toutes les
-          // langues et tous les marches (aucune variante /en/match/...). Leur
-          // texte statique est donc neutre (equipes, competition, date, sigles
-          // 1X2/xG/BTTS) ; le texte d'interface y porte data-i18n /
-          // data-market-label et match-page.js le redige dans la langue du
-          // visiteur au chargement.
+          // Pages /match/<id>.html : version francaise (x-default) de chaque
+          // match. Titre, description, JSON-LD SportsEvent (startDate = instant
+          // reel, les dates du pipeline sont en heure de Paris), hreflang et
+          // bloc d'informations viennent de scripts/seo-pages.js, qui ecrit
+          // aussi les versions /<dir>/match/<id>.html (en es de it pt gb za mx)
+          // et les pages championnat /<dir>/leagues/*.html.
           function seoTitleFor(m){
-            return m.home.n+' vs '+m.away.n+(m.league?' · '+m.league:'')+' | IASHARK';
+            return SEO_PAGES.matchTitle(m,'fr');
           }
           function seoImageFor(m){
             // Vrai blason de l'equipe a domicile (media.api-sports.io,
@@ -1474,30 +1484,15 @@ jobs:
             return m.home&&m.home.id?'https://media.api-sports.io/football/teams/'+m.home.id+'.png':null;
           }
           function seoDescriptionFor(m){
-            var d=(m.date||'').split(' ')[0];
-            var comp=m.league||'';
-            return m.home.n+' vs '+m.away.n+(comp?' · '+comp:'')+(d?' · '+d:'')+' · 1X2 · xG · BTTS · IASHARK';
+            return SEO_PAGES.matchDescription(m,'fr');
           }
           function seoJsonLdFor(m){
-            var iso=null;
-            try{ iso=new Date((m.date||'').replace(' ','T')+':00Z').toISOString(); }catch(e){}
-            var ld={
-              '@context':'https://schema.org',
-              '@type':'SportsEvent',
-              name:m.home.n+' vs '+m.away.n,
-              sport:'Football',
-              homeTeam:{'@type':'SportsTeam',name:m.home.n},
-              awayTeam:{'@type':'SportsTeam',name:m.away.n},
-              url:'https://iashark.com/match/'+m.id+'.html'
-            };
-            if(iso) ld.startDate=iso;
-            if(m.league) ld.superEvent={'@type':'SportsEvent',name:m.league};
-            return JSON.stringify(ld);
+            return SEO_PAGES.matchJsonLd(m,'fr');
           }
           function seoSummaryHtmlFor(m){
             var d=(m.date||'').split(' ')[0];
             var modelAvailable=m.model_output_available!==false&&Number(m.data_quality_score||0)>0;
-            var pariTxt=(modelAvailable&&m.pari_rec&&!m.no_signal)?('<p><span data-i18n="match_page.seo_recommended_market">Marché recommandé par le modèle :</span> <strong data-market-label="'+escHtml(m.pari_rec)+'" data-home="'+escHtml(m.home.n)+'" data-away="'+escHtml(m.away.n)+'">'+escHtml(seoMarketLabel(m,'fr'))+'</strong> ('+escHtml(String(m.conf||''))+'/10)</p>'):'';
+            var pariTxt=(m.is_free&&modelAvailable&&m.pari_rec&&!m.no_signal)?('<p><span data-i18n="match_page.seo_recommended_market">Marché recommandé par le modèle :</span> <strong data-market-label="'+escHtml(m.pari_rec)+'" data-home="'+escHtml(m.home.n)+'" data-away="'+escHtml(m.away.n)+'">'+escHtml(seoMarketLabel(m,'fr'))+'</strong> ('+escHtml(String(m.conf||''))+'/10)</p>'):'';
             return '<div style="padding:24px 16px;font-family:\'DM Sans\',sans-serif;color:#94a3b8;font-size:13px;line-height:1.6">'
               +'<h1 style="font-family:\'Bebas Neue\',sans-serif;font-size:22px;letter-spacing:.5px;color:#e2e8f0;margin-bottom:8px">'+escHtml(m.home.n)+' vs '+escHtml(m.away.n)+'</h1>'
               +'<p>'+(m.league?escHtml(seoLeagueName(m))+' — ':'')+(d?'<time datetime="'+escHtml(d)+'">'+escHtml(seoDateLabel(d,'fr'))+'</time>':'')+'</p>'
@@ -1523,6 +1518,9 @@ jobs:
             if(!fs.existsSync('match')) fs.mkdirSync('match');
             var keepFiles={};
             (matchsData||[]).forEach(function(m){
+              // match/<id>.json (detail public, ecrit par PUBLIC_SPLIT) vit dans le
+              // meme repertoire : conserve pour chaque match courant, purge sinon.
+              if(m&&m.id!=null) keepFiles[String(m.id)+'.json']=true;
               if(!m.id||!m.home||!m.away) return;
               var title=seoTitleFor(m);
               var desc=seoDescriptionFor(m);
@@ -1539,7 +1537,8 @@ jobs:
                 +'<meta name="twitter:title" content="'+escHtml(title)+'">'
                 +'<meta name="twitter:description" content="'+escHtml(desc)+'">'
                 +(image?'<meta name="twitter:image" content="'+escHtml(image)+'">':'')
-                +'<script type="application/ld+json">'+seoJsonLdFor(m)+'</script>';
+                +'<script type="application/ld+json">'+seoJsonLdFor(m)+'</script>'
+                +SEO_PAGES.matchHeadExtras(m,'fr');
               var page=tpl
                 .replace('<title>Analyse Match — IASHARK</title>','<title>'+escHtml(title)+'</title>')
                 // Le shell match.html porte un noindex par defaut (route
@@ -1549,7 +1548,8 @@ jobs:
                 .replace('<!--SEO_META--><!--/SEO_META-->', metaBlock)
                 .replace('<!--SEO_SUMMARY--><!--/SEO_SUMMARY-->', seoSummaryHtmlFor(m))
                 .replace('<!--FIXED_ID_SCRIPT--><!--/FIXED_ID_SCRIPT-->', '<script>var FIXED_MATCH_ID='+JSON.stringify(String(m.id))+';</script>')
-                .replace('<!--PRELOADED_MATCH_SCRIPT--><!--/PRELOADED_MATCH_SCRIPT-->', '<script>var PRELOADED_MATCH='+JSON.stringify(m).replace(/</g,'\\u003c')+';</script>');
+                .replace('<!--PRELOADED_MATCH_SCRIPT--><!--/PRELOADED_MATCH_SCRIPT-->', '<script>var PRELOADED_MATCH='+JSON.stringify(PUBLIC_SPLIT.toListMatch(PREMIUM_FIELDS_LIB.stripPremium(m))).replace(/</g,'\\u003c')+';</script>')
+                .replace('</main>', function(){ return SEO_PAGES.matchFactsHtml(m,'fr')+'</main>'; });
               fs.writeFileSync('match/'+m.id+'.html', page);
               keepFiles[String(m.id)+'.html']=true;
             });
@@ -1560,6 +1560,13 @@ jobs:
               });
             }catch(e){}
             console.log('  Match pages: '+Object.keys(keepFiles).length+' generees, '+((fs.readdirSync('match')||[]).length)+' au total dans /match');
+            // Versions localisees /<dir>/match/<id>.html + pages championnat
+            // (memes matchs assainis, meme PRELOADED_MATCH leger) et leurs
+            // sitemaps. Une erreur ici ne bloque jamais les donnees du jour.
+            try{
+              var seoRep=SEO_PAGES.writeSeoPages(matchsData,{root:'.',today:TODAY,tpl:fs.readFileSync('match.html','utf8')});
+              console.log('  Pages SEO localisees : '+seoRep.matchPages+' pages match, '+seoRep.hubs+' pages championnat ('+seoRep.indexableHubs+' indexables), '+seoRep.removed+' perimees supprimees');
+            }catch(e){ console.log('  Erreur pages SEO localisees :',e.message); }
           }
           // i18n du SEO statique. Dictionnaires i18n/dict/<locale>.json et
           // lib/market-labels.js lus a la demande (caches sur la fonction),
@@ -1604,7 +1611,7 @@ jobs:
           // cible. Chaque libelle porte aussi data-i18n / data-market-label :
           // si un repertoire est regenere depuis la racine (FR) avant le
           // prochain passage du pipeline, il est retraduit au chargement.
-          function seoHomeSummaryHtml(matchsData,loc){
+          function seoHomeSummaryHtml(matchsData,loc,dir){
             loc=loc||'fr';
             var todays=(matchsData||[]).filter(function(m){return (m.date||'').split(' ')[0]===TODAY;});
             if(!todays.length) return '';
@@ -1617,7 +1624,11 @@ jobs:
               var pari=(m.is_free&&m.pari_rec&&!m.no_signal)
                 ?(' — <span data-i18n="home_app.seo_ai_pick">'+escHtml(seoText(loc,'home_app.seo_ai_pick','Pronostic IA :'))+'</span> <span data-market-label="'+escHtml(m.pari_rec)+'" data-home="'+escHtml(m.home.n)+'" data-away="'+escHtml(m.away.n)+'">'+escHtml(seoMarketLabel(m,loc))+'</span> ('+confiance+' '+escHtml(String(m.conf||''))+'/10)')
                 :((m.conf!=null&&!m.no_signal)?(' — '+confiance+' '+escHtml(String(m.conf))+'/10'):'');
-              return '<li>'+escHtml(heure)+' — <strong>'+escHtml(m.home.n)+' vs '+escHtml(m.away.n)+'</strong>'+(m.league?' ('+escHtml(seoLeagueName(m))+')':'')+pari+'</li>';
+              // Lien vers la page match statique du repertoire (maillage
+              // interne : /match/<id>.html pour fr et la racine, sinon
+              // /<dir>/match/<id>.html ecrite par scripts/seo-pages.js).
+              var lienMatch=(!dir||dir==='fr')?'/match/'+m.id+'.html':'/'+dir+'/match/'+m.id+'.html';
+              return '<li>'+escHtml(heure)+' — <strong><a href="'+lienMatch+'" style="color:inherit">'+escHtml(m.home.n)+' vs '+escHtml(m.away.n)+'</a></strong>'+(m.league?' ('+escHtml(seoLeagueName(m))+')':'')+pari+'</li>';
             }).join('');
             // Titre : date longue localisee (<time data-seo-date>, reformatee par
             // repertoire au build) et mention explicite du fuseau des heures
@@ -1635,7 +1646,7 @@ jobs:
                 if(!fs.existsSync(idxPath)) return;
                 var tpl=fs.readFileSync(idxPath,'utf8');
                 if(tpl.indexOf('<!--SEO_MATCHES_SUMMARY-->')===-1) return;
-                var summary=seoHomeSummaryHtml(matchsData,SEO_HOME_DIRS[dir]);
+                var summary=seoHomeSummaryHtml(matchsData,SEO_HOME_DIRS[dir],dir);
                 // Remplacement par fonction : un "$" dans un nom d'equipe ne
                 // doit jamais etre interprete comme motif de remplacement.
                 var replaced=tpl.replace(/<!--SEO_MATCHES_SUMMARY-->[\s\S]*?<!--\/SEO_MATCHES_SUMMARY-->/, function(){ return '<!--SEO_MATCHES_SUMMARY-->'+summary+'<!--/SEO_MATCHES_SUMMARY-->'; });
@@ -1664,16 +1675,42 @@ jobs:
             });
             fs.writeFileSync('sitemap-fr.xml','<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'+urls.join('\n')+'\n</urlset>');
             var sitemapFiles = generateLocalizedSitemaps(I18N_LOCALES, I18N_PAGES, TODAY, '.');
-            var indexEntries = ['<sitemap><loc>https://iashark.com/sitemap-fr.xml</loc><lastmod>'+TODAY+'</lastmod></sitemap>']
-              .concat(sitemapFiles.map(function(f){ return '<sitemap><loc>https://iashark.com/'+f+'</loc><lastmod>'+TODAY+'</lastmod></sitemap>'; }));
-            fs.writeFileSync('sitemap.xml','<?xml version="1.0" encoding="UTF-8"?>\n<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'+indexEntries.join('\n')+'\n</sitemapindex>');
+            // Index : tous les sitemap-*.xml presents (fr, i18n, matches-i18n,
+            // leagues), lastmod = plus recent lastmod de chaque fichier.
+            writeSitemapIndex('.', TODAY);
             console.log('  Sitemap done: '+urls.length+' urls, '+sitemapFiles.length+' sitemap(s) i18n');
+          }
+          // historique.json est commite dans le depot (public) : une prediction en
+          // attente n'y porte plus le pari d'un match payant a venir
+          // (lib/premium-fields.js#redactPendingPredictions). La version complete vit
+          // dans predictions_archive (service role) et est relue avant le reglement.
+          // Sans cle service role, rien n'est masque : le pari ne pourrait plus etre regle.
+          function historiquePublic(h,matchsData){
+            if(!SUPA_URL_PIPELINE||!SUPA_SERVICE_KEY) return h;
+            var libres=(matchsData||[]).filter(function(m){return m&&m.is_free===true;}).map(function(m){return m.id;});
+            return Object.assign({},h,{predictions:PREMIUM_FIELDS_LIB.redactPendingPredictions(h.predictions,libres)});
+          }
+          async function rehydraterPredictionsMasquees(predictions){
+            var masquees=(predictions||[]).filter(function(p){return p&&p.redacted&&p.fixture_id!=null;});
+            if(!masquees.length) return;
+            if(!SUPA_URL_PIPELINE||!SUPA_SERVICE_KEY){ console.log('  [historique] '+masquees.length+' prediction(s) masquee(s), aucune cle service role : non reglables ce run.'); return; }
+            var ids=masquees.map(function(p){return String(p.fixture_id);}).filter(function(v,i,a){return /^\d+$/.test(v)&&a.indexOf(v)===i;});
+            var lignes=[];
+            for(var i=0;i<ids.length;i+=100){
+              var url=SUPA_URL_PIPELINE.replace(/\/$/,'')+'/rest/v1/predictions_archive?select=fixture_id,'+PREMIUM_FIELDS_LIB.PENDING_REDACTED_FIELDS.join(',')+'&fixture_id=in.('+ids.slice(i,i+100).join(',')+')';
+              var rep=await rawHttpGetJson(url,{'apikey':SUPA_SERVICE_KEY,'Authorization':'Bearer '+SUPA_SERVICE_KEY});
+              if(Array.isArray(rep)) lignes=lignes.concat(rep);
+              else console.log('  [historique] lecture predictions_archive impossible : '+JSON.stringify(rep).slice(0,160));
+            }
+            var n=PREMIUM_FIELDS_LIB.rehydratePredictions(predictions,lignes);
+            console.log('  [historique] '+n+'/'+masquees.length+' prediction(s) en attente relue(s) depuis predictions_archive.');
           }
           async function updateHistorique(matchsData){
             console.log('\n=== HISTORIQUE UPDATE ===');
             var histoPath='historique.json';
             var histo={predictions:[],stats:{winrate:0,roi:0,total:0,streak:0,wins:0,losses:0},monthly:[],backtesting:{}};
             try{histo=JSON.parse(fs.readFileSync(histoPath,'utf8'));}catch(e){}
+            await rehydraterPredictionsMasquees(histo.predictions);
             var yesterday=new Date(TODAY+'T12:00:00Z');yesterday.setDate(yesterday.getDate()-1);
             var yDate=yesterday.toISOString().split('T')[0];
             var resolveDates=[];
@@ -1859,7 +1896,7 @@ jobs:
               var parts=k.split('-');var mn=['Jan','Fev','Mar','Avr','Mai','Jun','Jul','Aou','Sep','Oct','Nov','Dec'];
               return{month:k,label:(mn[parseInt(parts[1])-1]||parts[1])+' '+parts[0],wins:mo.wins,losses:mo.losses,total:tot,roi:Math.round(r*10)/10};
             });
-            fs.writeFileSync(histoPath,JSON.stringify(histo,null,2));
+            fs.writeFileSync(histoPath,JSON.stringify(historiquePublic(histo,matchsData),null,2));
             console.log('  Historique: '+total+' paris | Winrate: '+winrate.toFixed(0)+'% | ROI: '+roi.toFixed(1)+'%');
           }
           var TRANSFER_CACHE_DAYS = 5;
@@ -2001,6 +2038,17 @@ jobs:
                 'Authorization': 'Bearer '+SUPA_SERVICE_KEY,
                 'Prefer': 'resolution=merge-duplicates,return=minimal',
               });
+              if(!r.ok&&/premium_fields/.test(String(r.body||''))){
+                // Migration 0020 pas encore appliquee : meme objet range dans
+                // raw_response.premium_fields (relu par match-data), jamais perdu.
+                console.log('  [premium] colonne premium_fields absente (migration 0020) : repli sur raw_response.premium_fields.');
+                batch=batch.map(function(row){ var c=Object.assign({},row); if(c.premium_fields!==undefined){ c.raw_response=Object.assign({},c.raw_response||{},{premium_fields:c.premium_fields}); delete c.premium_fields; } return c; });
+                r = await upsertJSON(u.hostname, '/rest/v1/match_premium_data?on_conflict=fixture_id', batch, {
+                  'apikey': SUPA_SERVICE_KEY,
+                  'Authorization': 'Bearer '+SUPA_SERVICE_KEY,
+                  'Prefer': 'resolution=merge-duplicates,return=minimal',
+                });
+              }
               if(!r.ok) console.log('  [premium] echec upsert batch '+i+': status='+r.status+' '+(r.error||r.body||'').toString().slice(0,200));
               await sleep(100);
             }
@@ -2038,7 +2086,7 @@ jobs:
           // les archiver nulle part. Upsert idempotent sur fixture_id : rejouer ce
           // run n'ecrase que la meme ligne, ne duplique jamais.
           async function writePredictionsArchive(predictions) {
-            var rows=(predictions||[]).filter(function(p){return p.fixture_id!=null&&p.type==='single';}).map(function(p){
+            var rows=(predictions||[]).filter(function(p){return p.fixture_id!=null&&p.type==='single'&&!p.redacted;}).map(function(p){
               return {
                 fixture_id:p.fixture_id,
                 match_label:p.match||null,home:p.home||null,away:p.away||null,
@@ -2091,6 +2139,7 @@ jobs:
             console.log('Football fixtures:', fixtures.length);
             if(!fixtures.length){
               fs.writeFileSync('data.json',JSON.stringify({matchs:[]},null,2));
+              PUBLIC_SPLIT.writePublicSplit(fs,[],{generated_at:new Date().toISOString(),run_id:null});
               generateMatchPages([]);
               generateSitemaps([]);
               injectHomeSeoSummary([]);
@@ -2098,6 +2147,7 @@ jobs:
               var histoPathEarly='historique.json';
               var histoEarly={predictions:[],stats:{winrate:0,roi:0,total:0,streak:0,wins:0,losses:0},monthly:[],backtesting:{}};
               try{histoEarly=JSON.parse(fs.readFileSync(histoPathEarly,'utf8'));}catch(e){}
+              await rehydraterPredictionsMasquees(histoEarly.predictions);
               var resolveDatesEarly=[];
               for(var dbackE=1; dbackE<=4; dbackE++){
                 var ddE=new Date(TODAY+'T12:00:00Z'); ddE.setDate(ddE.getDate()-dbackE);
@@ -2174,7 +2224,7 @@ jobs:
               // faites ci-dessus (jour sans nouveau match) doivent aussi se
               // propager, pas seulement rester dans le cache JSON local.
               await writePredictionsArchive(histoEarly.predictions);
-              fs.writeFileSync(histoPathEarly,JSON.stringify(histoEarly,null,2));
+              fs.writeFileSync(histoPathEarly,JSON.stringify(historiquePublic(histoEarly,[]),null,2));
               return;
             }
             var xgConcededCache={};
@@ -3172,7 +3222,11 @@ jobs:
             // navigateur) pour que le site, la page match et la fonction Edge
             // parlent tous du meme match. conf reste public : sans le marche,
             // c'est une amorce, pas le produit.
-            var CHAMPS_PREMIUM=['pari_rec','cote_rec','model_probability','markets_compared','market_id','marche'];
+            // Depuis le 14/09/2026 : TOUTE sortie du modele ou de l'analyse est premium
+            // (probabilites p1/pn/p2/po25/btts, lambda, mc_scores, paris_safe, vbet/val/hot,
+            // fiabilite detaillee, textes d'analyse, top_scorers...), pas seulement le
+            // pari. Liste de reference : lib/premium-fields.js.
+            var CHAMPS_PREMIUM=PREMIUM_FIELDS_LIB.PREMIUM_FIELDS.slice();
             // GARDE-FOU. Retirer ces champs du fichier public n'est sur QUE si la
             // table protegee peut reellement les recevoir. Sans la cle service
             // role, writePremiumData() n'ecrit rien : on se retrouverait avec des
@@ -3256,6 +3310,12 @@ jobs:
             });
             var retires=allMatchsData.length-matchsPublics.filter(function(m){return m&&m.pari_rec;}).length;
             console.log('  [ACCES] '+retires+' analyse(s) retiree(s) du data.json public.');
+            // Les champs premium sans colonne dediee partent dans
+            // match_premium_data.premium_fields (migration 0020) : match-data les rend
+            // aux abonnes, qui ne les trouvent plus dans les fichiers publics.
+            var lignePremiumParId={};
+            premiumRows.forEach(function(r){ if(r&&r.fixture_id!=null) lignePremiumParId[String(r.fixture_id)]=r; });
+            allMatchsData.forEach(function(m){ var r=m&&lignePremiumParId[String(m.id)]; if(r) r.premium_fields=PREMIUM_FIELDS_LIB.premiumPayload(m); });
             // legacy_output : separation EXPLICITE demandee - matchsPublics
             // (l'ancienne analyse par match, marches shots/1ere-mi-temps inclus)
             // ne doit JAMAIS servir de source a SAFE/Top5/Combos ni a de futurs
@@ -3273,14 +3333,21 @@ jobs:
                 run_id: runOutput.run_id,
                 snapshot: runOutput.snapshot_time,
                 betting_validation_status: runOutput.betting_validation_status,
-                safe_pick: runOutput.SAFE_PICK_OF_THE_DAY,
-                top5_scorers: runOutput.TOP_5_SCORERS_OF_DAY,
-                daily_combos: runOutput.DAILY_COMBOS,
+                // Versions publiques (lib/public-run-output.js) : jamais le pari d un
+                // match payant dans data.json (audit du 14/09/2026).
+                safe_pick: publicSafePick(runOutput.SAFE_PICK_OF_THE_DAY, matchsPublics),
+                top5_scorers: publicTopScorers(runOutput.TOP_5_SCORERS_OF_DAY),
+                daily_combos: publicDailyCombos(runOutput.DAILY_COMBOS),
                 run_output_engine_version: RUN_OUTPUT_ENGINE_VERSION,
                 canonical_registry_hash: CANONICAL_REGISTRY_HASH,
               },
             };
             fs.writeFileSync('data.json',JSON.stringify(dataJsonPayload,null,2));
+            // Fichiers publics legers lus par les pages (data.json reste publie
+            // pour la compatibilite : admin, closing-odds, repli des pages). MEME
+            // copie assainie que data.json : aucun champ premium en plus.
+            var splitStats=PUBLIC_SPLIT.writePublicSplit(fs,matchsPublics,{generated_at:runOutput.snapshot_time||new Date().toISOString(),run_id:runOutput.run_id});
+            console.log('  [PUBLIC] data-home.json '+splitStats.listBytes+' octets, '+splitStats.detailCount+' fichier(s) match/<id>.json ('+splitStats.detailBytes+' octets)');
             // OBSERVABILITE (fin de run) : memes valeurs meme quand elles sont
             // "vides" (NO_SAFE_SELECTION/0/0) - jamais omises, jamais un silence
             // qui masquerait un run degrade.
@@ -3348,7 +3415,16 @@ jobs:
         # quel, les donnees du jour sont celles qui viennent d'etre calculees.
         run: |
           set -euo pipefail
-          OUTPUTS="data.json historique.json transferts.json actus.json sitemap.xml match index.html league-coverage-report.json"
+          OUTPUTS="data.json data-home.json historique.json transferts.json actus.json sitemap.xml match index.html league-coverage-report.json seo-lastmod.json"
+          # Pages SEO localisees (scripts/seo-pages.js) : <dir>/match/ et
+          # <dir>/leagues/. Sauvegardees AVEC leur chemin (cp --parents) : la
+          # copie a plat de OUTPUTS confondrait gb/match et za/match.
+          SEO_DIRS=""
+          for d in fr en es de it pt gb mx za; do
+            for s in match leagues; do
+              [ -d "$d/$s" ] && SEO_DIRS="$SEO_DIRS $d/$s"
+            done
+          done
           # index.html des repertoires de langue/marche : seul leur bloc
           # SEO_MATCHES_SUMMARY est reecrit (injectHomeSeoSummary, dans la
           # langue du repertoire). Volontairement HORS de OUTPUTS : la
@@ -3364,7 +3440,7 @@ jobs:
           git config user.name "IASHARK"
           git config user.email "yaramode81@gmail.com"
 
-          git add $OUTPUTS $DIR_INDEXES sitemap-*.xml
+          git add $OUTPUTS $DIR_INDEXES $SEO_DIRS sitemap-*.xml
           if git diff --staged --quiet; then
             echo "Aucun changement a publier."
             exit 0
@@ -3375,9 +3451,12 @@ jobs:
             [ -e "$f" ] && cp -R "$f" "$SAVE/"
           done
           cp sitemap-*.xml "$SAVE/" 2>/dev/null || true
+          for p in $SEO_DIRS; do
+            cp -R --parents "$p" "$SAVE/"
+          done
 
           for attempt in 1 2 3 4 5; do
-            git add $OUTPUTS $DIR_INDEXES sitemap-*.xml
+            git add $OUTPUTS $DIR_INDEXES $SEO_DIRS sitemap-*.xml
             git diff --staged --quiet || git commit -m "Daily update - $(date +%Y-%m-%d)"
 
             if git push; then
@@ -3393,6 +3472,13 @@ jobs:
               [ -e "$SAVE/$f" ] && cp -R "$SAVE/$f" .
             done
             cp "$SAVE"/sitemap-*.xml . 2>/dev/null || true
+            for p in $SEO_DIRS; do
+              rm -rf "$p"
+              if [ -e "$SAVE/$p" ]; then
+                mkdir -p "$(dirname "$p")"
+                cp -R "$SAVE/$p" "$(dirname "$p")/"
+              fi
+            done
           done
 
           echo "Echec de publication apres 5 tentatives." >&2

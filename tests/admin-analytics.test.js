@@ -70,14 +70,15 @@ test("admin.html : noindex, exclu des robots, des sitemaps et des repertoires ge
 });
 
 test("admin.html : garde admin conservee, RPC attendues, migration absente geree, aucune donnee factice", () => {
-  assert.match(admin, /\.eq\('id', res\.data\.session\.user\.id\)/);
-  assert.match(admin, /role !== 'admin'/);
-  for (const rpc of ["admin_stats", "admin_analytics", "admin_live_view", "admin_recent_sessions", "admin_recent_signups"]) {
-    assert.ok(admin.includes("'" + rpc + "'"), rpc);
+  const page = admin + "\n" + read("admin-dashboard.js");
+  assert.match(page, /\.eq\('id', res\.data\.session\.user\.id\)/);
+  assert.match(page, /role !== 'admin'/);
+  for (const rpc of ["admin_stats", "admin_analytics", "admin_live_view", "admin_recent_sessions", "admin_recent_signups", "admin_business", "admin_exclude_session"]) {
+    assert.ok(page.includes("'" + rpc + "'") || page.includes('"' + rpc + '"'), rpc);
   }
-  assert.match(admin, /PGRST202/);
-  assert.match(admin, /0015_admin_analytics\.sql/);
-  assert.ok(!/fixture|demo|lorem|Math\.random/i.test(admin), "aucune donnee de demonstration dans la page");
+  assert.match(page, /PGRST202/);
+  assert.match(page, /0019_admin_dashboard_v2\.sql/);
+  assert.ok(!/fixture|demo|lorem|Math\.random/i.test(page), "aucune donnee de demonstration dans la page");
   // Toute donnee issue de funnel_events (ecrite par anon) passe par esc().
-  assert.match(admin, /function esc\(/);
+  assert.match(page, /function esc\(/);
 });

@@ -25,6 +25,15 @@ select{-webkit-appearance:none;appearance:none;
   background-repeat:no-repeat;background-position:right 12px center;background-size:11px;padding-right:34px}
 input[type=checkbox]{appearance:auto;-webkit-appearance:auto}
 img,svg{display:block;max-width:100%}
+/* Equivalents du preflight Tailwind absents (QA visuelle 14/09/2026) :
+   - sans border-style, les utilitaires `border` ne dessinaient AUCUN trait :
+     cartes sans contour, bouton "Voir les outils" reduit a un texte ;
+   - sans reset des liens, les <a> sans classe de couleur restaient bleus et
+     soulignes (couleur navigateur), illisibles sur fond sombre.
+   Le selecteur universel a une specificite nulle : toute classe utilitaire
+   (border, border-t, text-cyan, hover:underline...) garde la main. */
+*,*::before,*::after{border-width:0;border-style:solid;border-color:rgba(141,179,211,.14)}
+a{color:inherit;text-decoration:none}
 /* Le navigateur repeint les champs auto-remplis en bleu clair : illisible
    ici. On force le rendu sombre en gelant la transition de fond. */
 input:-webkit-autofill,input:-webkit-autofill:focus{
@@ -90,3 +99,46 @@ input:-webkit-autofill,input:-webkit-autofill:focus{
 dialog::backdrop{background:rgba(3,8,14,.72)}
 dialog[open]{animation:accIn .16s ease-out}
 @media(prefers-reduced-motion:reduce){dialog[open]{animation:none}}
+
+/* ---------- Cibles tactiles (QA visuelle 14/09/2026) ---------- */
+/* Liens d'en-tete (logo, "Retour au site") : 44 px de haut sans changer le
+   rendu, la barre fait deja 56 px. */
+body>header a{display:inline-flex;align-items:center;min-height:44px}
+/* Le PNG du logo n'a pas de canal alpha : sans fusion, son rectangle noir
+   se voit sur le fond de page. `lighten` ne garde que les pixels clairs
+   (meme technique que les pages legales). */
+body>header img[src*="iashark-logo"]{mix-blend-mode:lighten}
+/* Liens d'action en texte du Account Center ("Modifier", "Voir
+   l'abonnement"...) : zone cliquable etendue par padding compense par une
+   marge negative, la mise en page ne bouge pas. */
+#compte button[data-aller]:not(.acc-tab){padding:14px 8px;margin:-14px -8px}
+/* Lien seul dans son paragraphe ("Mot de passe oublie") : meme principe. */
+#panneau p>a.text-cyan:only-child{display:inline-flex;align-items:center;min-height:44px;margin-block:-12px}
+/* Cases de championnats : toute la ligne libellee est cliquable, 40 px. */
+#panneau fieldset label{min-height:40px}
+/* Etat d'attente : au moins la hauteur de l'ecran, pour que le pied de page
+   n'apparaisse pas puis ne saute pas vers le bas au rendu du compte (CLS). */
+#chargement:not([hidden]){min-height:calc(100dvh - 3.5rem)}
+#chargement[hidden]{display:none}
+.acc-tab{min-height:44px}
+/* Valeurs longues (email, liste de championnats) : retour a la ligne
+   plutot qu'un debordement de la carte sur mobile. */
+.acc-val{overflow-wrap:anywhere}
+@media(max-width:1023px){
+  /* Onglets defilants : pas de barre de defilement visible sous les onglets. */
+  .acc-layout nav>div{scrollbar-width:none}
+  .acc-layout nav>div::-webkit-scrollbar{display:none}
+}
+
+/* ---------- Dialogues sur mobile ---------- */
+/* Deux boutons cote a cote dans 310 px : "Supprimer definitivement" passait
+   sur deux lignes dans un bouton de 44 px. En dessous de 480 px, les
+   boutons s'empilent, action principale en haut. */
+@media(max-width:479px){
+  dialog form>div:last-child{flex-direction:column-reverse;align-items:stretch}
+  dialog form>div:last-child>button{width:100%}
+}
+dialog{max-height:calc(100dvh - 2rem);overflow-y:auto}
+/* Blanc sur rouge 500 a 90 % : 4,46:1, sous le seuil AA. Rouge 600 : 4,8:1. */
+#validerSuppr{background-color:#dc2626}
+#validerSuppr:hover{background-color:#b91c1c}

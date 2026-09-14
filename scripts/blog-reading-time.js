@@ -28,6 +28,9 @@ function corpsDeLArticle(html) {
 
 function compterMots(html) {
   const texte = corpsDeLArticle(html)
+    // Bloc "A lire aussi" (liens vers d'autres guides) : navigation, pas
+    // contenu de l'article.
+    .replace(/<!--RELATED_GUIDES-->[\s\S]*?<!--\/RELATED_GUIDES-->/g, " ")
     .replace(/<(script|style)[^>]*>[\s\S]*?<\/\1>/gi, " ")
     .replace(/<[^>]+>/g, " ");
   return texte.split(/\s+/).filter(Boolean).length;

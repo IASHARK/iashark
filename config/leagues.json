@@ -71,7 +71,29 @@
     "reponse api-football /odds?fixture=X (lib/pinnacle-odds.js#pinnacleOddsFromApiFootball), meme forme",
     "{c1,cn,c2,over25,under25,bttsY,bttsN} que getPinnacleOdds() + source='api-football'. Jamais un autre bookmaker.",
     "(4) getPinnacleOdds() ne retombe PLUS sur 'soccer_uefa_champs_league' : une ligue sans oddsSportKey",
-    "renvoie null sans appel reseau (lib/pinnacle-odds.js#oddsSportKeyFor). Teste par tests/pinnacle-odds.test.js."
+    "renvoie null sans appel reseau (lib/pinnacle-odds.js#oddsSportKeyFor). Teste par tests/pinnacle-odds.test.js.",
+    "Ajout 2026-09-14 : ouverture LATAM hispanophone (decision explicite du proprietaire, SANS validation Score Lab /",
+    "SCORE_LAB_FACTORY_V2 - meme precedent que liga_mx/south_africa_premiership ; config/league-expansion.json les liste",
+    "en wave 2 status NOT_STARTED ; cf. data/league-validation-registry.json et LATAM_OPENING_STATUS.md). Verification reelle",
+    "api-football du 2026-09-14 (reponses mises en cache, ~70 requetes au total) :",
+    "(1) /leagues?id=128 -> 'Liga Profesional Argentina' (AR) ; id=239 -> 'Primera A' (CO) ; id=281 -> 'Primera Division' (PE,",
+    "nom commercial Liga 1) ; id=265 -> 'Primera Division' (CL). Les 4 : saison 2026 current=true (calendrier civil ; fin",
+    "08/11 AR et CO, 14/11 PE, 06/12 CL), coverage fixtures.events/lineups/statistics_fixtures/statistics_players=true,",
+    "standings=true, players=true, predictions=true, odds=true, injuries=FALSE (-> STANDARD_ANALYSIS attendu, jamais de",
+    "blessures fabriquees). Controle sur une fixture reelle terminee par ligue (1493129, 1549777, 1549487, 1505523) :",
+    "statistics 2 equipes x 16 types, lineups 2 equipes, injuries 0 resultat (coherent avec coverage.injuries=false).",
+    "(2) Pinnacle sur api-football : /odds?league=X&season=2026 (1re page) -> Pinnacle present sur 8/10 fixtures (128),",
+    "9/10 (239), 10/10 (281), 9/9 (265) ; marches Pinnacle : Match Winner + Goals Over/Under (+ Asian Handicap, corners).",
+    "ATTENTION : aucun marche 'Both Teams Score' Pinnacle vu sur ces 4 ligues -> bttsY/bttsN resteront absents (jamais",
+    "completes par un autre bookmaker). apiFootballPinnacleFallback=true pour les 4.",
+    "(3) The Odds API, catalogue public https://the-odds-api.com/sports-odds-data/sports-apis.html (lu le 2026-09-14) :",
+    "'Primera Division - Argentina' = soccer_argentina_primera_division ; 'Primera Division - Chile' = soccer_chile_campeonato.",
+    "AUCUNE cle pour la Colombie ni le Perou -> oddsSportKey DELIBEREMENT ABSENT pour colombia_primera_a et peru_primera",
+    "(jamais invente). GET /v4/sports non appele (pas de ODDS_API_KEY locale) : a re-confirmer au premier run pipeline.",
+    "(4) displayName uniques : les slugs SEO (scripts/seo-common.js#leagueSlug) derivent du displayName, deux 'Primera",
+    "Division' entreraient en collision. Noms de sponsors bookmakers (Liga BetPlay, Liga 1 Te Apuesto) volontairement evites.",
+    "apiNameHint quand le nom API differe du displayName. Cles alignees sur config/league-expansion.json",
+    "(argentina_liga_profesional, peru_primera, chile_primera) ; colombia_primera_a est nouvelle (absente de league-expansion.json)."
   ],
   "leagues": [
     { "key": "premier",     "displayName": "Premier League",      "country": "Angleterre", "apiFootballId": 39,  "oddsSportKey": "soccer_epl",                              "europeanQualification": true  },
@@ -88,6 +110,10 @@
     { "key": "suede",       "displayName": "Allsvenskan",         "country": "Suede",      "apiFootballId": 113, "oddsSportKey": "soccer_sweden_allsvenskan",               "europeanQualification": true  },
     { "key": "jleague",     "displayName": "J1 League",           "country": "Japon",      "apiFootballId": 98,  "oddsSportKey": "soccer_japan_j_league",                   "europeanQualification": false },
     { "key": "liga_mx",     "displayName": "Liga MX",             "country": "Mexique",    "apiFootballId": 262, "oddsSportKey": "soccer_mexico_ligamx",                    "europeanQualification": false, "apiFootballPinnacleFallback": true },
-    { "key": "south_africa_premiership", "displayName": "Premier Soccer League", "country": "Afrique du Sud", "apiFootballId": 288,                                            "europeanQualification": false, "apiFootballPinnacleFallback": true }
+    { "key": "south_africa_premiership", "displayName": "Premier Soccer League", "country": "Afrique du Sud", "apiFootballId": 288,                                            "europeanQualification": false, "apiFootballPinnacleFallback": true },
+    { "key": "argentina_liga_profesional", "displayName": "Liga Profesional Argentina", "country": "Argentine", "apiFootballId": 128, "oddsSportKey": "soccer_argentina_primera_division", "europeanQualification": false, "apiFootballPinnacleFallback": true },
+    { "key": "colombia_primera_a",         "displayName": "Primera A Colombia",         "country": "Colombie",  "apiFootballId": 239,                                                    "europeanQualification": false, "apiFootballPinnacleFallback": true, "apiNameHint": "Primera A" },
+    { "key": "peru_primera",               "displayName": "Liga 1 Peru",                "country": "Perou",     "apiFootballId": 281,                                                    "europeanQualification": false, "apiFootballPinnacleFallback": true, "apiNameHint": "Primera Division" },
+    { "key": "chile_primera",              "displayName": "Primera Division Chile",     "country": "Chili",     "apiFootballId": 265, "oddsSportKey": "soccer_chile_campeonato",          "europeanQualification": false, "apiFootballPinnacleFallback": true, "apiNameHint": "Primera Division" }
   ]
 }

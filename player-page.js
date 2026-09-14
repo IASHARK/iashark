@@ -639,14 +639,24 @@
 
     var raw = null;
     try {
-      var reponse = await window.IasharkApp.supabase.functions.invoke('match-data');
+      var reponse = await window.IasharkApp.supabase.functions.invoke('match-data', { body: { id: String(matchId) } });
       if (reponse.data && !reponse.error) {
         raw = (reponse.data.matchs || []).find(function (x) { return String(x.id) === String(matchId); });
       }
     } catch (_e) { /* repli ci-dessous */ }
-    if (!raw) {
-      var data = await fetch('/data.json?t=' + Date.now()).then(function (r) { return r.json(); });
-      raw = (data.matchs || []).find(function (x) { return String(x.id) === String(matchId); });
+    // Repli : detail public de CE match (match/<id>.json, lib/public-data-split.js),
+    // puis seulement l'ancien data.json complet (~25 Mo). Pas de ?t=Date.now().
+    var fusion = function (complet, partiel) { var m = Object.assign({}, complet, partiel || {}); delete m.detail_omitted; return m; };
+    if (!raw || raw.detail_omitted) {
+      var detail = await fetch('/match/' + encodeURIComponent(matchId) + '.json', { cache: 'no-cache' })
+        .then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; });
+      if (detail && String(detail.id) === String(matchId)) raw = fusion(detail, raw);
+    }
+    if (!raw || raw.detail_omitted) {
+      var data = await fetch('/data.json', { cache: 'no-cache' }).then(function (r) { return r.json(); });
+      var complet = (data.matchs || []).find(function (x) { return String(x.id) === String(matchId); });
+      if (complet) raw = fusion(complet, raw);
+      else if (raw) raw = fusion({}, raw);
     }
     if (!raw) throw new Error(t('player_page.error_match_not_found', 'Match introuvable.'));
 

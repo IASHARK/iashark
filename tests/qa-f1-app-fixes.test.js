@@ -165,11 +165,11 @@ test("prix : MX$ pour le peso, prix du marche ecrit dans le HTML genere", () => 
   assert.doesNotMatch(read("gb/index.html"), /id="heroPrice"[^>]*>[^<]*€/);
 });
 
-test("accueil : 15 competitions partout, analyse gratuite honnete (compte gratuit)", () => {
+test("accueil : 19 competitions partout, analyse gratuite honnete (compte gratuit)", () => {
   ["fr", "gb", "za", "en", "mx", "es", "de", "it", "pt"].forEach((d) => {
     const visible = read(d + "/index.html").replace(/<script[\s\S]*?<\/script>/g, "").replace(/<style[\s\S]*?<\/style>/g, "");
     assert.doesNotMatch(visible, /\b13\b[^<]{0,3}(championnats|compet|Wettbewerbe|competizioni|competições|competiciones)|Treize|Thirteen|Trece|Dreizehn|Tredici/i, d);
-    assert.match(visible, /tabular-nums">15<\/b>/, d);
+    assert.match(visible, /tabular-nums">19<\/b>/, d);
   });
   assert.match(read("gb/index.html"), /with a free account/);
   assert.match(read("fr/index.html"), /avec un compte gratuit/);

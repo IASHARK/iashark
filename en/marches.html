@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta name="iashark-market" content="fr">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Markets — IASHARK</title>
-<meta name="description" content="Analysis of available markets: model probability, market probability (margin removed), gap and data quality — per match and across the full market catalogue.">
+<title>Football Markets: Model Probability vs Odds | IASHARK</title>
+<meta name="description" content="Every market IASHARK analyses, from match result to goals and BTTS: model probability, margin-free market probability, the gap between them and data quality.">
 <link rel="canonical" href="https://iashark.com/en/marches.html">
 <link rel="alternate" hreflang="fr" href="https://iashark.com/fr/marches.html">
 <link rel="alternate" hreflang="en-GB" href="https://iashark.com/gb/marches.html">
@@ -17,6 +17,8 @@
 <link rel="alternate" hreflang="it" href="https://iashark.com/it/marches.html">
 <link rel="alternate" hreflang="pt" href="https://iashark.com/pt/marches.html">
 <link rel="alternate" hreflang="x-default" href="https://iashark.com/fr/marches.html">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#080c12;--card:#0d1520;--card2:#0f1a28;--cyan:#22d3ee;--cyan2:#06b6d4;--amber:#f59e0b;--green:#10b981;--red:#ef4444;--text:#e2e8f0;--muted:#4a6580;--border:rgba(255,255,255,0.06);--border-cyan:rgba(34,211,238,0.18);}
@@ -60,7 +62,7 @@ h1 span{color:var(--cyan);}
 .nav-item.active .nav-icon svg{stroke:var(--cyan);filter:drop-shadow(0 0 6px rgba(34,211,238,0.5));}
 @media(max-width:600px){.mtable{display:block;overflow-x:auto;white-space:nowrap;}}
 .lang-switch{position:relative;}
-.lang-switch-btn{display:flex;align-items:center;gap:5px;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1px;color:var(--muted);background:transparent;border:1px solid var(--border);padding:6px 9px;border-radius:8px;cursor:pointer;transition:.2s;}
+.lang-switch-btn{display:flex;align-items:center;gap:5px;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1px;color:#8fa3b8;background:transparent;border:1px solid var(--border);padding:6px 9px;border-radius:8px;cursor:pointer;transition:.2s;}
 .lang-switch-btn:hover{border-color:rgba(34,211,238,0.3);color:var(--cyan);}
 .lang-switch-menu{display:none;position:absolute;top:calc(100% + 6px);right:0;background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:6px;min-width:170px;z-index:200;box-shadow:0 10px 30px rgba(0,0,0,0.45);}
 .lang-switch-menu.open{display:block;}
@@ -72,8 +74,19 @@ h1 span{color:var(--cyan);}
 .lang-switch-name{flex:1;}
 .lang-switch-check{color:var(--cyan);font-family:'Space Mono',monospace;font-size:10px;}
 @media(max-width:480px){.lang-switch-menu{right:-8px;}}
+/* QA mobile 14/09/2026 : cibles tactiles >= 44 px (en-tete et filtres). */
+@media(max-width:600px){.logo{display:inline-flex;align-items:center;min-height:44px}.btn-login,.fsel{min-height:44px}.lang-switch-btn{min-height:44px;min-width:44px;justify-content:center}}
 </style>
-<link rel="stylesheet" href="/assets/bottom-navigation.css"><script src="/lib/market-config.js"></script>
+<link rel="stylesheet" href="/assets/bottom-navigation.css">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="IASHARK">
+<meta property="og:locale" content="en">
+<meta property="og:title" content="Football Markets: Model Probability vs Odds | IASHARK">
+<meta property="og:description" content="Every market IASHARK analyses, from match result to goals and BTTS: model probability, margin-free market probability, the gap between them and data quality.">
+<meta property="og:url" content="https://iashark.com/en/marches.html">
+<meta property="og:image" content="https://iashark.com/icon-512.png">
+<meta name="twitter:card" content="summary">
+<script src="/lib/market-config.js"></script>
 </head>
 <body>
 
@@ -145,9 +158,9 @@ h1 span{color:var(--cyan);}
 </nav>
 
 <div style="max-width:720px;margin:24px auto 0;padding:0 20px 20px;text-align:center;">
-  <div style="font-family:'Space Mono',monospace;font-size:8px;color:rgba(74,101,128,0.5);line-height:2;letter-spacing:1px;">
+  <div style="font-family:'Space Mono',monospace;font-size:8px;color:#8a9bb0;line-height:2;letter-spacing:1px;">
     <div>⚠️ GAMBLING CAN BE DANGEROUS — PLAY RESPONSIBLY · FORBIDDEN UNDER 18</div>
-    <div>Help: <a data-market-helpline="url" href="https://www.gamblingtherapy.org" style="color:rgba(34,211,238,0.4);text-decoration:none;">gamblingtherapy.org</a><span data-market-helpline-if="phone" hidden> · <span data-market-helpline="phone" hidden></span></span></div>
+    <div>Help: <a data-market-helpline="url" href="https://www.gamblingtherapy.org" style="color:#22d3ee;text-decoration:none;">gamblingtherapy.org</a><span data-market-helpline-if="phone" hidden> · <span data-market-helpline="phone" hidden></span></span></div>
   </div>
 </div>
 
@@ -226,7 +239,9 @@ var allMatchsData=[];
 async function loadMatches(){
   if(window.I18N&&window.I18N.init){try{await window.I18N.init();}catch(e){}}
   try{
-    var r=await fetch('/data.json?t='+Date.now());
+    // Liste legere (data-home.json) : memes champs de carte que data.json, sans le detail.
+    var r=await fetch('/data-home.json',{cache:'no-cache'});
+    if(!r.ok)r=await fetch('/data.json',{cache:'no-cache'});
     var j=await r.json();
     allMatchsData=(j.matchs||[]).filter(function(m){return !m.no_signal&&m.pari_rec;});
   }catch(e){ allMatchsData=[]; }

@@ -1,0 +1,64 @@
+Subject: Confirmation de votre abonnement {{planName}}
+{{! Version texte de purchase-confirmation.fr.html : meme contenu, aucune information en moins. }}IASHARK
+
+VOTRE ABONNEMENT EST CONFIRMÉ
+
+Bonjour,
+
+Merci pour votre souscription. Cet email confirme votre contrat sur un support durable : nous vous conseillons de le conserver.
+
+RÉCAPITULATIF
+- Offre : {{planName}}
+- Prix : {{amount}} TTC ({{currencyCode}})
+{{#amountPaid}}- Montant payé aujourd’hui : {{amountPaid}} TTC
+{{/amountPaid}}- Périodicité : {{periodicity}}
+- Date de début : {{startDate}}
+- Prochain prélèvement : {{#nextBillingDate}}{{nextBillingDate}} ({{amount}} TTC){{/nextBillingDate}}{{^nextBillingDate}}Aucun : résiliation déjà programmée{{/nextBillingDate}}
+- Compte : {{customerEmail}}
+{{#reference}}- Référence : {{reference}}
+{{/reference}}
+L’abonnement est sans engagement de durée. Il se renouvelle automatiquement à chaque échéance, au prix alors en vigueur, jusqu’à sa résiliation. Toute modification de prix vous sera notifiée avant de s’appliquer, et vous pourrez résilier avant cette date.
+
+Mon compte : {{accountUrl}}
+
+RÉSILIER EN LIGNE
+Vous pouvez résilier à tout moment, gratuitement et en ligne : dans Mon compte ({{accountUrl}}), cliquez sur « Gérer mon abonnement ». Cela ouvre l’espace de facturation sécurisé de notre prestataire de paiement (Stripe), où vous choisissez l’annulation. Vous pouvez aussi écrire à {{supportEmail}}.
+{{#portalUrl}}Accès direct à l’espace de facturation : {{portalUrl}}
+{{/portalUrl}}
+La résiliation prend effet à la fin de la période en cours : vous gardez l’accès jusqu’à cette date et aucun nouveau prélèvement n’est effectué.
+
+DROIT DE RÉTRACTATION : 14 JOURS
+Vous disposez de 14 jours à compter de la souscription pour vous rétracter sans avoir à donner de motif (Code de la consommation, art. L221-18), soit jusqu’au {{withdrawalDeadline}} inclus.
+
+{{#immediateStart}}Lors du paiement, vous avez demandé expressément que l’abonnement commence immédiatement, avant la fin de ce délai (art. L221-25). Cette demande ne vous fait pas perdre votre droit de rétractation : si vous vous rétractez pendant le délai, nous vous remboursons au plus tard 14 jours après votre demande, déduction faite d’un montant proportionnel au service fourni jusqu’à la communication de votre décision, calculé au prorata de la durée d’accès sur la période payée.{{/immediateStart}}{{^immediateStart}}Aucune demande d’exécution immédiate n’est enregistrée pour cet abonnement : si vous vous rétractez pendant le délai, aucune somme n’est due et nous vous remboursons intégralement au plus tard 14 jours après votre demande.{{/immediateStart}}
+
+Pour vous rétracter, envoyez avant la fin du délai une déclaration sans ambiguïté à {{supportEmail}}, par exemple avec le modèle ci-dessous. Le remboursement est effectué avec le moyen de paiement utilisé lors de la souscription.
+
+  Modèle de formulaire de rétractation
+  | À l’attention d’IASHARK, {{supportEmail}} :
+  | Je vous notifie par la présente ma rétractation du contrat portant sur l’abonnement {{planName}} souscrit le {{startDate}}.
+  | Nom : ………… · Adresse email du compte : ………… · Date : …………
+  | Signature (uniquement en cas d’envoi sur papier) : …………
+
+CONDITIONS GÉNÉRALES DE VENTE
+{{#termsVersion}}Vous avez accepté les conditions générales de vente dans leur version du {{termsVersion}}{{#consentRecordedAt}} (consentement enregistré le {{consentRecordedAt}}){{/consentRecordedAt}}. {{/termsVersion}}Elles sont consultables ici : {{cgvUrl}}
+
+VENDEUR
+- Nom commercial : IASHARK (auto-entrepreneur)
+- Raison sociale / exploitant : {{companyOperatorName}}
+- Adresse : {{companyAddress}}
+- SIREN / SIRET : {{companyRegistration}}
+- TVA : {{companyVat}}
+- Téléphone : {{companyPhone}}
+- Email : {{supportEmail}}
+- Médiateur de la consommation : {{companyMediator}}
+
+JEU RESPONSABLE · 18+
+IASHARK publie des analyses statistiques : ce n’est pas un site de paris, aucune mise n’est prise et aucun gain n’est garanti. IASHARK n’est pas un opérateur agréé par l’Autorité nationale des jeux (ANJ). Les jeux d’argent sont interdits aux mineurs.
+Jouer comporte des risques : endettement, dépendance. Appelez le {{helplinePhone}} ({{helplineName}}, appel non surtaxé) ou consultez {{helplineUrl}}. Nos ressources : {{responsibleUrl}}
+
+--
+Email envoyé automatiquement à {{customerEmail}} à la suite de votre souscription. Question ou réclamation : {{supportEmail}}.
+CGV : {{cgvUrl}}
+Confidentialité : {{privacyUrl}}
+Mentions légales : {{legalUrl}}

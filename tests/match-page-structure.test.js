@@ -17,7 +17,10 @@ test("la page simple expose une seule colonne de sections réelles, sans onglets
   // "Absents & incertains" supprimee (n'affichait le plus souvent que
   // "aucune absence" pour les deux equipes) ;
   // "Questions sur ce match" ajoutee.
-  for(const value of ['Le signal IASHARK','Notre lecture du match','Buts attendus','Comparatif des deux équipes','Scores probables','Scénario probable du match','Buteur à surveiller','Questions sur ce match'])assert.match(js,new RegExp(value));
+  // Refonte du 14/09/2026 (demande du proprietaire) : le signal au centre,
+  // "Probabilites et cotes", "Forme et face-a-face", "Absences" et "Marches
+  // joueurs" ; "Notre lecture du match" est fondue dans le signal.
+  for(const value of ['Le signal IASHARK','Pari recommandé','Probabilités et cotes','Forme et face-à-face','Absences','Buts attendus','Comparatif des deux équipes','Scores les plus probables','Marchés joueurs','Scénario probable du match','Questions sur ce match'])assert.match(js,new RegExp(value));
 });
 test("la page est responsive",()=>{
   assert.match(css,/@media\(max-width:640px\)/);
@@ -35,18 +38,19 @@ test("le workflow alimente les blocs comparatifs sans valeur de secours",()=>{
   assert.doesNotMatch(workflow,/markets_compared:\s*\[/);
   assert.match(workflow,/lineups:lineups\?/);
   assert.match(html,/app-client\.js/);
-  assert.match(js,/functions\.invoke\('match-data'\)/);
+  assert.match(js,/functions\.invoke\('match-data'[,)]/);
 });
 
-// ORDRE DE LECTURE fixe par l'utilisateur le 03/09/2026. Il a ete demande
-// explicitement, section par section : ce n'est pas un detail cosmetique,
-// donc il est verrouille ici plutot que laisse a la relecture.
+// ORDRE DE LECTURE revu le 14/09/2026 a la demande du proprietaire (fixture
+// mise a jour deliberement) : signal au centre, probabilites et cotes, forme
+// et face-a-face, absences, statistiques, scores, marches joueurs, repartition
+// des buts, FAQ en dernier. L'en-tete (hero) precede les sections.
 test("la page match assemble les sections dans l'ordre demande",()=>{
   const bloc=js.slice(js.indexOf("const sections=["),js.indexOf("];",js.indexOf("const sections=[")));
   const attendu=[
-    "signalCard","matchReadingCard","keyInsightsCard","outputsCard",
-    "Comparatif des deux équipes","threatsCard","matchupCard",
-    "formNoteCard","valuePotentialCard","Scénario probable du match","faqCard"
+    "signalCard","marketsCard","formH2HCard","absencesCard",
+    "Comparatif des deux équipes","outputsCard","threatsCard",
+    "Scénario probable du match","faqCard"
   ];
   let curseur=-1;
   for(const jalon of attendu){
@@ -75,21 +79,71 @@ test("les sections ne sont plus numerotees",()=>{
   assert.doesNotMatch(js,/padStart\(2,'0'\)/);
 });
 
-// Bug remonte par l'utilisateur : sur un match dont le pari recommande est un
-// BTTS, la rangee "Notre lecture du match" affichait DEUX tuiles BTTS cote a
-// cote, avec le meme libelle et le meme pourcentage.
-test("le bandeau 'Notre lecture' ne repete pas BTTS quand le pari recommande est deja un BTTS",()=>{
-  // On evalue la condition REELLEMENT ecrite dans la page, pas une copie.
-  const m=js.match(/const btts=(\/[^\n]*?\/i)\n?\s*\.test\(marketLower\)|const btts=(\/[^\n]*?\/i)\.test\(marketLower\)/);
-  assert.ok(m,"le garde-fou BTTS a disparu de matchReadingCard");
-  const litteral=m[1]||m[2];
-  const re=new RegExp(litteral.slice(1,-2),"i");
-  for(const marche of ["BTTS Oui","BTTS Non","Les deux équipes marquent Oui","Les deux equipes marquent Non"]){
-    assert.ok(re.test(marche.toLowerCase()),`la tuile BTTS devrait etre masquee pour "${marche}"`);
+// Le bandeau "Notre lecture du match" (et son doublon BTTS) a disparu le
+// 14/09/2026 : le pari recommande n'apparait plus qu'une fois dans le tableau
+// des marches, signale comme tel, jamais en double ligne.
+test("le tableau des marches ne duplique pas le pari du signal",()=>{
+  const {buildMatchViewModel}=require("../lib/match-view-model.js");
+  const raw={id:1,home:{id:1,n:"PSG"},away:{id:2,n:"Monaco"},model_output_available:true,data_quality_score:70,
+    p1:55,pn:25,p2:20,market_consensus_p1:52,market_consensus_pN:26,market_consensus_p2:22,c1:"1.80",cn:"3.60",c2:"4.20",
+    btts:61,cbtts:"1.70",cbtts_non:"2.10",pari_rec:"BTTS Oui",model_probability:61,cote_rec:1.7,
+    markets_compared:[{id:"btts-yes",market:"BTTS Oui",probability:61,consensus:55,edge:6}]};
+  const rows=buildMatchViewModel(raw).model.marketTable;
+  const btts=rows.filter(r=>r.family&&r.family.family==="btts");
+  assert.equal(btts.length,1,"une seule ligne BTTS");
+  assert.equal(btts[0].recommended,true,"la ligne BTTS est signalee comme le pari du signal");
+  assert.equal(rows.filter(r=>r.recommended).length,1);
+});
+
+// LE SIGNAL IASHARK : tout ce que le proprietaire a demande est rendu, et la
+// mention 18+ / estimation statistique figure DANS le bloc.
+test("le signal IASHARK montre pari, jauge, cote, probabilite implicite, ecart, fiabilite, raisons, risques et 18+",()=>{
+  const bloc=js.slice(js.indexOf("function signalCard(vm)"),js.indexOf("function marketsCard"));
+  for(const attendu of ["sig-market","sig-bar","sig-bar-market","Cote utilisée","Probabilité implicite","Écart (value)",
+    "Le modèle voit {model} contre {market} pour le marché ({gap}).","relBadge(info)","Pourquoi ce pari","À surveiller",
+    "18+ · Estimation statistique, pas une garantie."]){
+    assert.ok(bloc.includes(attendu),`element du signal manquant : ${attendu}`);
   }
-  for(const marche of ["Over 2.5","Domicile plus de 1.5 but","DC 12","Premiere mi-temps moins de 1.5 but","Tirs du match over 22.5"]){
-    assert.ok(!re.test(marche.toLowerCase()),`la tuile BTTS reste utile pour "${marche}"`);
+  // Une probabilite nulle ou absente n'est jamais affichee "0 %".
+  assert.match(bloc,/r\.probability>0/);
+  // Revue du 14/09/2026 : ticket du pari (libelle + cote), indice de
+  // confiance 0-10 en visuel, niveau de risque, "pourquoi" en 3 puces maximum.
+  for(const attendu of ["sig-slip","sig-odds-box","confMeter(r.confidence)","riskStat(vm.editorial.riskCode)","raisons.slice(0,3)"]){
+    assert.ok(bloc.includes(attendu),`element du signal manquant : ${attendu}`);
   }
+  assert.match(js,/function confMeter\(conf\)[\s\S]*role="meter"[\s\S]*aria-valuemax="10"/);
+  // Analyse annoncee mais champs premium absents : jamais "aucun marche".
+  assert.match(bloc,/raw\.has_signal===true&&raw\.no_signal!==true/);
+});
+
+// PREMIUM : le mur d'acces n'affiche aucune donnee du modele, et l'en-tete
+// commun (hero) ne montre plus les probabilites 1N2 du modele.
+test("le mur d'acces et l'en-tete n'exposent ni pari, ni probabilite du modele",()=>{
+  const gate=js.slice(js.indexOf("function gateCard(vm,opts)"),js.indexOf("function renderAuthWall"));
+  for(const interdit of ["recommendation","probabilities","marketTable","recommendedOdds","recommendedEdge","scoringProbability","signalReasons"]){
+    assert.ok(!gate.includes(interdit),`le mur d'acces lit ${interdit}`);
+  }
+  assert.match(gate,/oddsCount/);
+  assert.match(gate,/sig-ghost/);
+  // Teaser : "une analyse existe" et indice de confiance (champs publics),
+  // jamais pari, cote ni probabilite.
+  assert.match(gate,/confMeter\(pub\.conf\)/);
+  assert.match(gate,/sig_teaser_exists/);
+  for(const interdit of ["pari_rec","cote_rec","model_probability","market_id","riskCode","odds(","pct("]){
+    assert.ok(!gate.includes(interdit),`le mur d'acces lit ${interdit}`);
+  }
+  const hero=js.slice(js.indexOf("function hero(vm)"),js.indexOf("const REL_NIVEAUX"));
+  assert.ok(!/probabilities|probBar|recommendation/.test(hero),"l'en-tete ne doit montrer aucune probabilite du modele");
+  assert.doesNotMatch(js,/function probBar\(/);
+});
+
+// SEO : le resume statique des pages match n'est plus masque en CSS (texte
+// cache) ; l'application le remplace par son en-tete, qui porte le seul h1.
+test("le resume SEO n'est pas masque et la page garde un seul h1",()=>{
+  assert.doesNotMatch(css,/\.match-shell>div:not\(#matchRoot\)\{[^}]*display:none/);
+  assert.match(js,/function remplacerResumeSeo\(\)/);
+  assert.equal((js.match(/<h1\b/g)||[]).length,1,"un seul h1 genere par la page");
+  assert.match(js,/<h1 class="hero-teams">/);
 });
 
 // La carte buteur menait avec un tableau plat de quatre lignes, puis avec la
@@ -122,7 +176,7 @@ test("la carte buteur ne comporte plus de tres gros caracteres",()=>{
 
 // Le panneau ne doit jamais reprendre un chiffre deja donne juste au-dessus.
 test("la carte buteur ne repete pas la probabilite dans son panneau",()=>{
-  const bloc=js.slice(js.indexOf("function threatsCard"),js.indexOf("function keyInsightsCard"));
+  const bloc=js.slice(js.indexOf("function threatsCard"),js.indexOf("const ALERTES_ABSENCE"));
   const panneau=bloc.slice(bloc.indexOf("const stats=["),bloc.indexOf("].filter(Boolean)"));
   assert.ok(!/scoringProbability/.test(panneau),
     "la probabilite de marquer est repetee dans le panneau de chiffres");
@@ -136,40 +190,63 @@ test("la carte buteur ne repete pas la probabilite dans son panneau",()=>{
 
 // "DC 12" ou "Over 2.5" ne veulent rien dire pour qui decouvre le site, et
 // c'est la premiere chose qu'il lit.
-test("les libelles de marches sont traduits en francais courant",()=>{
+// Fixtures revues DELIBEREMENT le 14/09/2026 : la ligne du bookmaker est
+// conservee avec la virgule decimale ("1,5 but"), accents, accord et
+// majuscule initiale (retour QA : "Exterieur moins de 1.5 but" sur l'accueil).
+const NB=" ";
+// Revues a nouveau DELIBEREMENT (regle du proprietaire, 14/09/2026) : un pari
+// s'ecrit comme chez un bookmaker, court et standard - "Monaco : moins de
+// 1,5 but", jamais "L'equipe a l'exterieur ne marque pas plus d'un but".
+test("les libelles de marches sont ecrits dans la forme standard des bookmakers",()=>{
   const {marketLabelFr}=require("../lib/market-labels.js");
   const eq={home:"PSG",away:"Monaco"};
   const cas=[
-    ["DC 12","PSG ou Monaco gagne, sans match nul"],
-    ["DC 1X","PSG gagne ou match nul"],
-    ["DC X2","Monaco gagne ou match nul"],
-    ["BTTS Oui","Les deux équipes marquent"],
-    ["BTTS Non","Au moins une équipe ne marque pas"],
-    ["Over 2.5","Au moins 3 buts dans le match"],
-    ["Under 3.5","Au plus 3 buts dans le match"],
-    ["Premiere mi-temps moins de 1.5 but","Au plus 1 but en première mi-temps"],
-    ["Premiere mi-temps plus de 0.5 but","Au moins 1 but en première mi-temps"],
-    ["Tirs du match over 22.5","Au moins 23 tirs dans le match"],
-    ["Tirs cadres du match over 7.5","Au moins 8 tirs cadrés dans le match"],
-    ["Domicile plus de 1.5 but","PSG marque au moins 2 buts"],
-    ["Exterieur moins de 1.5 but","Monaco marque au plus 1 but"],
-    ["Domicile clean sheet","PSG n’encaisse aucun but"]
+    ["DC 12","PSG ou Monaco (double chance)"],
+    ["DC 1X","PSG ou nul (double chance)"],
+    ["DC X2","Nul ou Monaco (double chance)"],
+    ["Victoire domicile","Victoire PSG"],
+    ["Match nul","Match nul"],
+    ["BTTS Oui","Les deux équipes marquent"+NB+": Oui"],
+    ["BTTS Non","Les deux équipes marquent"+NB+": Non"],
+    ["Over 2.5","Plus de 2,5 buts"],
+    ["Under 3.5","Moins de 3,5 buts"],
+    ["Over 1.5","Plus de 1,5 but"],
+    ["Premiere mi-temps moins de 1.5 but","1re mi-temps"+NB+": moins de 1,5 but"],
+    ["Premiere mi-temps plus de 0.5 but","1re mi-temps"+NB+": plus de 0,5 but"],
+    ["Tirs du match over 22.5","Plus de 22,5 tirs"],
+    ["Tirs cadres du match over 7.5","Plus de 7,5 tirs cadrés"],
+    ["Domicile plus de 1.5 but","PSG"+NB+": plus de 1,5 but"],
+    ["Exterieur moins de 1.5 but","Monaco"+NB+": moins de 1,5 but"],
+    ["Domicile gagne + plus de 2.5 buts","Victoire PSG et plus de 2,5 buts"],
+    ["Domicile clean sheet","PSG"+NB+": clean sheet"],
+    ["DNB Exterieur","Monaco (remboursé si nul)"],
+    ["Handicap Domicile -1","PSG -1 (handicap)"]
   ];
   for(const [brut,attendu] of cas)assert.equal(marketLabelFr(brut,eq),attendu,`traduction incorrecte pour "${brut}"`);
+  // Sans noms d'equipes : "Extérieur : moins de 1,5 but".
+  assert.equal(marketLabelFr("Exterieur moins de 1.5 but"),"Extérieur"+NB+": moins de 1,5 but");
+  assert.equal(marketLabelFr("DC 1X"),"Domicile ou nul (double chance)");
+  // Jamais une phrase a la place d'un pari.
+  for(const [brut] of cas)assert.ok(!/l’équipe|dans le match|n’encaisse aucun/.test(marketLabelFr(brut)),`phrase au lieu d'un pari pour "${brut}"`);
   // Un marche non prevu doit ressortir tel quel plutot que reformule au hasard.
   assert.equal(marketLabelFr("Marché jamais vu",eq),"Marché jamais vu");
 });
 
-// Aucun seuil a virgule ne doit survivre a la traduction : le ".5" des
-// bookmakers sert a exclure l'egalite, il n'a pas de sens pour un lecteur.
-test("aucun seuil a virgule ne subsiste dans les libelles traduits",()=>{
-  const {marketLabelFr}=require("../lib/market-labels.js");
+// Un libelle affiche ne garde jamais le point decimal ni l'orthographe du
+// moteur ("Exterieur", "Premiere", "cadres") : virgule decimale en francais.
+test("les libelles traduits ecrivent la ligne a la francaise",()=>{
+  const {marketLabelFr,marketIdLabelFr}=require("../lib/market-labels.js");
   const bruts=["Over 1.5","Over 2.5","Over 3.5","Under 2.5","Under 3.5",
-    "Premiere mi-temps plus de 1.5 but","Tirs du match under 21.5",
+    "Premiere mi-temps plus de 1.5 but","Tirs du match under 21.5","Tirs cadres du match under 10.5",
     "Domicile gagne + plus de 2.5 buts","Exterieur plus de 1.5 but"];
   for(const b of bruts){
     const t=marketLabelFr(b,{home:"A",away:"B"});
-    assert.ok(!/\d[.,]\d/.test(t),`"${b}" traduit en "${t}", qui contient encore un seuil a virgule`);
+    assert.ok(/\d,5\b/.test(t),`"${b}" traduit en "${t}" : ligne absente ou mal ecrite`);
+    assert.ok(!/\d\.\d|Exterieur|Premiere|cadres\b/.test(t),`"${b}" traduit en "${t}" : point decimal ou accent manquant`);
+  }
+  for(const id of ["over-25","fh-under-15","home-team-over-15","away-win-under-35","total-shots-on-target-over-7_5"]){
+    const t=marketIdLabelFr(id,{home:"A",away:"B"});
+    assert.ok(/\d,5\b/.test(t)&&!/\d\.\d/.test(t),`"${id}" traduit en "${t}"`);
   }
 });
 

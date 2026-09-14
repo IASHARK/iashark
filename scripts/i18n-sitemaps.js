@@ -29,6 +29,7 @@ const path = require("path");
 
 const ROOT = path.join(__dirname, "..");
 const SITE_URL = "https://iashark.com";
+const LASTMOD = require("./seo-lastmod.js");
 const MARKETS = JSON.parse(fs.readFileSync(path.join(ROOT, "config/markets.json"), "utf8"));
 const DIRS = MARKETS._dirs;
 const LEGAL_FILES = MARKETS._legalFiles || {};
@@ -124,7 +125,8 @@ function blogEntries(dir) {
       return !!f && isFile(f);
     });
     var hub = rel.indexOf("/guides/") === -1 && rel.indexOf("guides/") !== 0;
-    entries.push({ loc: loc, alternates: alternates, priority: hub ? "0.7" : "0.6", changefreq: "weekly" });
+    entries.push({ loc: loc, alternates: alternates, priority: hub ? "0.7" : "0.6", changefreq: "weekly",
+      file: rel, modified: articleModified(readFile(rel) || ""), image: pageImage(readFile(rel) || "") });
   });
   return entries;
 }
@@ -138,17 +140,56 @@ function legalEntries(dir, dirs, xDefault) {
     var alt = dirs.filter(function (d) { return legalExists(d, file); });
     var alternates = alt.map(function (d) { return { hreflang: DIRS[d].hreflang, href: SITE_URL + "/" + d + "/" + file }; });
     if (alt.indexOf(xDefault) !== -1) alternates.push({ hreflang: "x-default", href: SITE_URL + "/" + xDefault + "/" + file });
-    entries.push({ loc: SITE_URL + "/" + dir + "/" + file, alternates: alternates, priority: "0.3", changefreq: "monthly" });
+    entries.push({ loc: SITE_URL + "/" + dir + "/" + file, alternates: alternates, priority: "0.3", changefreq: "monthly", file: dir + "/" + file });
   });
   return entries;
 }
 
+// Date de modification declaree par un article (JSON-LD dateModified, sinon
+// article:modified_time / article:published_time) : premiere valeur du
+// registre lastmod pour les guides.
+function articleModified(html) {
+  var m = html.match(/"dateModified"\s*:\s*"(\d{4}-\d{2}-\d{2})/) ||
+    html.match(/property="article:modified_time" content="(\d{4}-\d{2}-\d{2})/) ||
+    html.match(/property="article:published_time" content="(\d{4}-\d{2}-\d{2})/);
+  return m ? m[1] : null;
+}
+// Image principale d'une page du site (og:image hebergee sur iashark.com,
+// hors icone generique) pour l'extension image des sitemaps.
+function pageImage(html) {
+  var m = html.split(/<\/head>/i)[0].match(/<meta property="og:image" content="([^"]+)"/);
+  if (!m || m[1].indexOf(SITE_URL + "/assets/") !== 0) return null;
+  return m[1];
+}
+
+// Google ignore <changefreq> et <priority> (Search Central, "Build and submit
+// a sitemap") : conserves pour les autres moteurs. <lastmod> vient du registre
+// scripts/seo-lastmod.js (date du dernier changement reel du fichier servi).
 function urlXml(entry, today) {
   var links = entry.alternates.map(function (a) {
     return '<xhtml:link rel="alternate" hreflang="' + a.hreflang + '" href="' + a.href + '"/>';
   }).join("");
-  return "<url><loc>" + entry.loc + "</loc><lastmod>" + today + "</lastmod><changefreq>" + entry.changefreq +
-    "</changefreq><priority>" + entry.priority + "</priority>" + links + "</url>";
+  var image = entry.image ? "<image:image><image:loc>" + entry.image + "</image:loc></image:image>" : "";
+  return "<url><loc>" + entry.loc + "</loc><lastmod>" + (entry.lastmod || today) + "</lastmod><changefreq>" + entry.changefreq +
+    "</changefreq><priority>" + entry.priority + "</priority>" + links + image + "</url>";
+}
+
+// Index sitemap.xml : chaque sitemap-*.xml present et non vide dans outDir
+// (fr = pages match FR du pipeline, <dir>-i18n, matches-i18n, leagues), avec
+// pour lastmod le plus recent <lastmod> qu'il contient.
+function writeSitemapIndex(outDir, today) {
+  outDir = outDir || ROOT;
+  var rank = function (f) { return f === "sitemap-fr.xml" ? 0 : (/-i18n\.xml$/.test(f) && f !== "sitemap-matches-i18n.xml") ? 1 : 2; };
+  var files = fs.readdirSync(outDir).filter(function (f) { return /^sitemap-[a-z0-9-]+\.xml$/.test(f); })
+    .filter(function (f) { return /<url>/.test(fs.readFileSync(path.join(outDir, f), "utf8")); })
+    .sort(function (a, b) { return rank(a) - rank(b) || (a < b ? -1 : a > b ? 1 : 0); });
+  var entries = files.map(function (f) {
+    var dates = (fs.readFileSync(path.join(outDir, f), "utf8").match(/<lastmod>\d{4}-\d{2}-\d{2}/g) || []).map(function (s) { return s.slice(9); }).sort();
+    return "<sitemap><loc>" + SITE_URL + "/" + f + "</loc><lastmod>" + (dates.pop() || today) + "</lastmod></sitemap>";
+  });
+  fs.writeFileSync(path.join(outDir, "sitemap.xml"),
+    '<?xml version="1.0" encoding="UTF-8"?>\n<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + entries.join("\n") + "\n</sitemapindex>\n");
+  return files;
 }
 
 function generateLocalizedSitemaps(locales, pages, today, outDir) {
@@ -165,13 +206,18 @@ function generateLocalizedSitemaps(locales, pages, today, outDir) {
       var slug = page.file === "index.html" ? "" : page.file;
       var alternates = alt.map(function (d) { return { hreflang: DIRS[d].hreflang, href: SITE_URL + "/" + d + "/" + slug }; });
       if (alt.indexOf(xDefault) !== -1) alternates.push({ hreflang: "x-default", href: SITE_URL + "/" + xDefault + "/" + slug });
-      entries.push({ loc: SITE_URL + "/" + dir + "/" + slug, alternates: alternates, priority: slug === "" ? "0.8" : "0.5", changefreq: "weekly" });
+      entries.push({ loc: SITE_URL + "/" + dir + "/" + slug, alternates: alternates, priority: slug === "" ? "0.8" : "0.5", changefreq: "weekly", file: dir + "/" + page.file });
     });
     entries = entries.concat(legalEntries(dir, dirs, xDefault), blogEntries(dir));
+    var tracker = LASTMOD.tracker(outDir, "i18n-" + dir, today);
+    entries.forEach(function (e) {
+      e.lastmod = tracker.lastmod(e.loc, (e.file && readFile(e.file)) || e.loc, e.modified || null);
+    });
+    tracker.save();
     var fname = "sitemap-" + dir + "-i18n.xml";
     fs.writeFileSync(
       path.join(outDir, fname),
-      '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n' +
+      '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">\n' +
         entries.map(function (e) { return urlXml(e, today); }).join("\n") + "\n</urlset>"
     );
     files.push(fname);
@@ -181,6 +227,8 @@ function generateLocalizedSitemaps(locales, pages, today, outDir) {
 
 module.exports = {
   generateLocalizedSitemaps: generateLocalizedSitemaps,
+  writeSitemapIndex: writeSitemapIndex,
+  articleModified: articleModified,
   sitemapDirs: sitemapDirs,
   blogEntries: blogEntries,
   legalEntries: legalEntries,
@@ -195,17 +243,25 @@ if (require.main === module) {
   var TODAY = new Date().toISOString().split("T")[0];
   var files = generateLocalizedSitemaps(I18N_LOCALES, I18N_PAGES, TODAY, ROOT);
 
-  // Regenere l'index sitemap.xml : garde l'entree sitemap-fr.xml (produite par
-  // le pipeline reel avec les vraies donnees de match, non ecrite ici) et y
-  // ajoute/rafraichit les entrees par repertoire.
-  var indexPath = path.join(ROOT, "sitemap.xml");
-  var frEntry = '<sitemap><loc>' + SITE_URL + '/sitemap-fr.xml</loc><lastmod>' + TODAY + '</lastmod></sitemap>';
-  var entries = [frEntry].concat(files.map(function (f) {
-    return '<sitemap><loc>' + SITE_URL + '/' + f + '</loc><lastmod>' + TODAY + '</lastmod></sitemap>';
-  }));
-  fs.writeFileSync(
-    indexPath,
-    '<?xml version="1.0" encoding="UTF-8"?>\n<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + entries.join("\n") + "\n</sitemapindex>"
-  );
-  console.log("Sitemaps generes : " + files.join(", ") + " ; sitemap.xml (index) mis a jour avec " + entries.length + " entree(s).");
+  // sitemap-fr.xml (ecrit par le pipeline) ne contient plus que les pages match
+  // statiques (.github/workflows/update-data.yml#generateSitemaps). Une copie
+  // plus ancienne peut encore lister le blog (/blog/ qui redirige vers /blog,
+  // /blog.html deja dans sitemap-fr-i18n.xml) : on retire ces entrees perimees
+  // sans toucher aux pages match - meme contenu que le prochain run du pipeline.
+  var frPath = path.join(ROOT, "sitemap-fr.xml");
+  if (fs.existsSync(frPath)) {
+    var frXml = fs.readFileSync(frPath, "utf8");
+    var pruned = frXml.replace(/<url><loc>([^<]+)<\/loc>[\s\S]*?<\/url>\n?/g, function (m, loc) {
+      return /^https:\/\/iashark\.com\/match\/\d+\.html$/.test(loc) ? m : "";
+    });
+    if (pruned !== frXml) {
+      fs.writeFileSync(frPath, pruned);
+      console.log("sitemap-fr.xml : entrees hors pages match retirees (deja declarees dans les sitemaps i18n).");
+    }
+  }
+
+  // Regenere l'index sitemap.xml : sitemap-fr.xml (pages match FR du pipeline),
+  // les sitemaps i18n ci-dessus et ceux de scripts/seo-pages.js s'ils existent.
+  var indexed = writeSitemapIndex(ROOT, TODAY);
+  console.log("Sitemaps generes : " + files.join(", ") + " ; sitemap.xml (index) mis a jour avec " + indexed.length + " entree(s).");
 }

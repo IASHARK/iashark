@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="iashark-market" content="fr">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title data-i18n="geo.meta.landing.title">IASHARK — Das Modell, das das Spiel vor dem Anpfiff liest</title>
+<title>IASHARK — Das Modell, das das Spiel vor dem Anpfiff liest</title>
 <link rel="canonical" href="https://iashark.com/de/landing.html">
 <link rel="alternate" hreflang="fr" href="https://iashark.com/fr/landing.html">
 <link rel="alternate" hreflang="en-GB" href="https://iashark.com/gb/landing.html">
@@ -16,14 +16,16 @@
 <link rel="alternate" hreflang="it" href="https://iashark.com/it/landing.html">
 <link rel="alternate" hreflang="pt" href="https://iashark.com/pt/landing.html">
 <link rel="alternate" hreflang="x-default" href="https://iashark.com/fr/landing.html">
-<meta name="description" content="Poisson, Dixon-Coles, Monte Carlo, Elo: IASHARK analysiert jedes Spiel mit echten statistischen Modellen. Ein kostenloses Spiel jeden Tag." data-i18n-attr="content:geo.meta.landing.description">
+<meta name="description" content="Poisson, Dixon-Coles, Monte Carlo, Elo: IASHARK analysiert jedes Spiel mit echten statistischen Modellen. Ein kostenloses Spiel jeden Tag.">
 <meta name="robots" content="noindex, follow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
 <style>
 :root{
   --bg:#080c12;--card:#0d1520;--card2:#0f1a28;
   --cyan:#22d3ee;--cyan2:#06b6d4;--amber:#f59e0b;--green:#10b981;--red:#ef4444;
-  --text:#e2e8f0;--muted:#4a6580;--border:rgba(255,255,255,0.06);--border-cyan:rgba(34,211,238,0.18);
+  --text:#e2e8f0;--muted:#7089a1;--border:rgba(255,255,255,0.06);--border-cyan:rgba(34,211,238,0.18);
 }
 *{margin:0;padding:0;box-sizing:border-box;}
 html{scroll-behavior:smooth;}
@@ -44,6 +46,9 @@ a{color:inherit;}
 .hdr-in{max-width:1100px;margin:0 auto;padding:0 20px;height:56px;display:flex;align-items:center;justify-content:space-between;}
 .logo{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:3px;text-decoration:none;}
 .logo span{color:var(--cyan);}
+/* Logo image, comme les autres en-tetes (QA 14/09/2026). PNG sans alpha : lighten efface son fond noir. */
+.logo{display:inline-flex;align-items:center;min-height:44px;}
+.logo img{display:block;height:28px;width:auto;mix-blend-mode:lighten;}
 .btn-nav{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1px;padding:8px 16px;border-radius:8px;border:1px solid rgba(34,211,238,0.3);background:rgba(34,211,238,0.08);color:var(--cyan);text-decoration:none;transition:.2s;}
 .btn-nav:hover{background:rgba(34,211,238,0.16);}
 
@@ -137,7 +142,7 @@ footer{padding:30px 20px 100px;text-align:center;border-top:1px solid var(--bord
 .foot-legal a{color:rgba(34,211,238,0.5);text-decoration:none;}
 .foot-links a{color:rgba(74,101,128,0.7);text-decoration:none;margin:0 8px;}
 .lang-switch{position:relative;}
-.lang-switch-btn{display:flex;align-items:center;gap:5px;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1px;color:var(--muted);background:transparent;border:1px solid var(--border);padding:6px 9px;border-radius:8px;cursor:pointer;transition:.2s;}
+.lang-switch-btn{display:flex;align-items:center;gap:5px;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1px;color:#8fa3b8;background:transparent;border:1px solid var(--border);padding:6px 9px;border-radius:8px;cursor:pointer;transition:.2s;}
 .lang-switch-btn:hover{border-color:rgba(34,211,238,0.3);color:var(--cyan);}
 .lang-switch-menu{display:none;position:absolute;top:calc(100% + 6px);right:0;background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:6px;min-width:170px;z-index:200;box-shadow:0 10px 30px rgba(0,0,0,0.45);}
 .lang-switch-menu.open{display:block;}
@@ -150,12 +155,21 @@ footer{padding:30px 20px 100px;text-align:center;border-top:1px solid var(--bord
 .lang-switch-check{color:var(--cyan);font-family:'Space Mono',monospace;font-size:10px;}
 @media(max-width:480px){.lang-switch-menu{right:-8px;}}
 </style>
-<link rel="stylesheet" href="/assets/bottom-navigation.css"></head>
+<link rel="stylesheet" href="/assets/bottom-navigation.css">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="IASHARK">
+<meta property="og:locale" content="de_DE">
+<meta property="og:title" content="IASHARK — Das Modell, das das Spiel vor dem Anpfiff liest">
+<meta property="og:description" content="Poisson, Dixon-Coles, Monte Carlo, Elo: IASHARK analysiert jedes Spiel mit echten statistischen Modellen. Ein kostenloses Spiel jeden Tag.">
+<meta property="og:url" content="https://iashark.com/de/landing.html">
+<meta property="og:image" content="https://iashark.com/icon-512.png">
+<meta name="twitter:card" content="summary">
+</head>
 <body>
 
 <header class="hdr">
   <div class="hdr-in">
-    <a href="/de/" data-href="" class="logo"><span>IA</span>SHARK</a>
+    <a href="/de/" data-href="" class="logo"><img src="/assets/iashark-logo.png" alt="IASHARK" width="105" height="28"></a>
     <div style="display:flex;align-items:center;gap:8px;">
       <span id="langSwitchSlot"></span>
       <a href="/de/" data-href="" class="btn-nav" data-i18n="landing_page.nav_cta">ZUR WEBSITE →</a>

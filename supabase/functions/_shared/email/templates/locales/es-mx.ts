@@ -1,0 +1,90 @@
+// Correos transaccionales — espanol de Mexico. Clausulas tomadas de
+// legal/mx/cgv.html (apartados 6 a 8 y 12, version 13/09/2026) y del
+// art. 76 Bis fracc. VIII y IX LFPC (DOF 12/12/2025). ESTADO: REVIEW
+// (validacion juridica local pendiente, ver EMAILS.md).
+import type { EmailStrings } from "../types.ts";
+
+export const esMx: EmailStrings = {
+  locale: "es-mx",
+  htmlLang: "es-MX",
+  common: {
+    greeting: "Hola:",
+    signature: "El equipo de IASHARK",
+    autoNotice: "Este correo se envía automáticamente por una operación en tu suscripción. Para cualquier aclaración o reclamación: {email}.",
+    placeholder: "[pendiente]",
+    companyTitle: "Datos del proveedor",
+    company: {
+      tradingName: "Nombre comercial",
+      legalStatus: "Régimen",
+      operatorName: "Titular",
+      address: "Domicilio",
+      registration: "Número de registro (SIREN / SIRET, Francia)",
+      vat: "Impuestos (IVA)",
+      phone: "Teléfono",
+      email: "Correo electrónico",
+      mediator: "Mediación",
+    },
+    helplineTitle: "Juego responsable",
+    helplineText: "IASHARK no es una casa de apuestas: no recibimos ni colocamos apuestas y no garantizamos ganancias. Las apuestas pueden generar adicción. Prohibido para menores de 18 años. Orientación gratuita:",
+    accountLabel: "Mi cuenta",
+    periodMonth: "mensual (cada mes)",
+    periodYear: "anual (cada año)",
+    periodMonths: "cada {n} meses",
+    periodYears: "cada {n} años",
+  },
+  purchase: {
+    subject: "Confirmación de tu suscripción {plan}",
+    title: "Confirmación de tu suscripción",
+    intro: "Gracias por contratar. Este correo es el comprobante de tu contratación: te recomendamos conservarlo.",
+    orderTitle: "Resumen",
+    plan: "Plan",
+    amountPaid: "Monto total pagado",
+    recurringPrice: "Precio de la suscripción",
+    billingPeriod: "Periodicidad del cobro",
+    startDate: "Fecha de contratación",
+    nextRenewal: "Próxima renovación y fecha de cobro",
+    account: "Cuenta",
+    renewalTerms: "Tu suscripción implica un cobro automático recurrente: se renueva automáticamente al final de cada periodo, por el monto y con la periodicidad indicados arriba, hasta que la canceles. Te avisaremos por correo con al menos 5 días naturales de anticipación antes de cada renovación, con el monto y la fecha del cobro. Si cambiamos el precio, te avisaremos antes y podrás cancelar antes de que aplique.",
+    cancelTitle: "Cancelación",
+    cancelTerms: "Puedes cancelar de forma inmediata en cualquier momento y sin costo desde «Mi cuenta» ({accountUrl}) o escribiéndonos a {email}. La cancelación surte efecto al final del periodo de facturación en curso: conservas el acceso de pago hasta esa fecha y no se te volverá a cobrar.",
+    consentTitle: "Tu consentimiento al pagar",
+    consentIntro: "Antes de pagar, marcaste la siguiente casilla:",
+    consentInfoShown: "También se te mostró la siguiente información:",
+    consentRecordedAt: "Consentimiento registrado el {date} (versión de los términos: {version}; idioma: {locale}).",
+    consentNotRecorded: "No hay ningún consentimiento registrado para esta suscripción en nuestros datos de pago. Escríbenos a {email} si crees que es un error.",
+    termsTitle: "Términos y condiciones",
+    termsText: "Términos aplicables a tu suscripción (versión del {version}): {termsUrl}",
+  },
+  reminder: {
+    subject: "Tu suscripción a IASHARK se renovará el {date}",
+    title: "Aviso de renovación automática",
+    intro: "Tu suscripción {plan} se renovará automáticamente el {date}.",
+    amount: "Monto que se cobrará",
+    date: "Fecha del cobro",
+    period: "Periodicidad",
+    cancelText: "Puedes cancelar de inmediato y sin penalización desde tu cuenta: {accountUrl}",
+    noCharge: "Si cancelas antes de esa fecha, no se realizará un nuevo cobro.",
+    legalNote: "Aviso previo de renovación automática conforme al artículo 76 Bis de la Ley Federal de Protección al Consumidor. PROFECO, Teléfono del Consumidor: 800 468 8722.",
+  },
+  paymentFailed: {
+    subject: "No pudimos cobrar tu suscripción a IASHARK",
+    title: "El pago de tu suscripción no se completó",
+    intro: "El pago de {amount} para renovar tu suscripción {plan} no se completó.",
+    retryText: "Nuestro proveedor de pagos puede intentarlo de nuevo automáticamente.",
+    graceText: "Tu acceso de pago se mantiene durante {days} días después del final del periodo pagado. Si el pago no se realiza, tu cuenta volverá al plan gratuito, a partir del {date} como mínimo.",
+    updateText: "Para actualizar tu método de pago o administrar tu suscripción: {accountUrl}",
+  },
+  withdrawal: {
+    mx: {
+      title: "Cobro recurrente, cancelación y revocación",
+      intro: [
+        "Al marcar la casilla de aceptación diste tu consentimiento expreso e informado al cobro automático recurrente de tu suscripción (art. 76 Bis, fracc. VIII LFPC).",
+        "Puedes cancelar de forma inmediata en cualquier momento desde tu cuenta (fracc. IX): {accountUrl}",
+      ],
+      howTo: [
+        "Cuando resulte aplicable el art. 56 LFPC, podrás revocar tu consentimiento dentro de los 5 días hábiles siguientes a la contratación ({startDate}), sin responsabilidad, mediante aviso a {email} indicando que revocas la contratación, con el correo de tu cuenta y la fecha en que contrataste. Tus derechos conforme a la LFPC son irrenunciables.",
+        "También puedes acudir a la Procuraduría Federal del Consumidor (PROFECO): Teléfono del Consumidor 800 468 8722 (lada sin costo) · 55 5568 8722 (Ciudad de México y área metropolitana) · https://www.gob.mx/profeco",
+      ],
+    },
+  },
+};

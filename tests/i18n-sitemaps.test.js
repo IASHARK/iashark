@@ -64,9 +64,10 @@ test("i18n sitemaps: fichiers valides, hreflang complet (dont en-GB/en-ZA/es-MX)
     });
     var legal = LEGAL_FILE_LIST.filter(function (f) { return legalExists(dir, f); });
     var prefix = blogPrefix(dir);
-    // Blog : accueil (+ /blog.html et /blog/ pour le FR racine) et chaque guide ;
-    // /blog/guides/ (canonical = accueil du blog) jamais.
-    var blog = prefix == null ? [] : (prefix === "" ? ["/blog.html", "/blog/"] : [prefix + "/blog/"])
+    // Blog : accueil (/blog.html pour le FR racine) et chaque guide ;
+    // /blog/guides/ (canonical = accueil du blog) jamais ; /blog/ jamais
+    // (Netlify le redirige vers /blog ; blog/index.html est noindex).
+    var blog = prefix == null ? [] : (prefix === "" ? ["/blog.html"] : [prefix + "/blog/"])
       .concat(GUIDES.map(function (f) { return prefix + "/blog/guides/" + f; }));
 
     // Une <url> par page promue dans le sitemap, pas une de plus/moins.

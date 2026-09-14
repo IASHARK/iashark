@@ -1,0 +1,1525 @@
+{
+  "_readme": [
+    "Pages club et derby (scripts/build-club-hubs.js). Contenu editorial ecrit UNE fois ici ; les blocs de donnees (prochains matchs, classement, forme, confrontations) sont regeneres chaque jour.",
+    "teamId = identifiant api-football verifie le 2026-09-14 par GET /teams?id=X (ou /teams?league=L&season=2026 pour Liga MX et PSL, /teams?search=... pour l'Amerique latine). Les noms api-football sont notes dans apiName.",
+    "active=true ne suffit pas : le generateur n'ecrit une page que si la competition (leagueKey) existe dans config/leagues.json, et un derby seulement si ses deux clubs sont dans le meme groupe de classement de la saison courante.",
+    "Faits editoriaux (fondation, stade, palmares) : uniquement ceux verifies sur les sources listees dans sources[] de chaque entree, consultees le 2026-09-14. Aucun nombre de titres susceptible d'avoir change n'est cite.",
+    "Clubs d'Amerique latine (maj 2026-09-14) : les 4 competitions (argentina_liga_profesional 128, colombia_primera_a 239, peru_primera 281, chile_primera 265) sont desormais dans config/leagues.json. 12 clubs actifs dans /es/ avec intro sourcee (sources[] consultees le 2026-09-14) et fuseau propre a la page (pages.es.tz / tz_label). San Lorenzo et Junior restent inactifs (hors perimetre editorial, aucune intro). Derbies argentins : splitStandings=true car Boca/River et Racing/Independiente sont dans des zones differentes ; chaque club est alors montre dans son propre groupe.",
+    "facts (optionnel) : surcharge des donnees club api-football, dont certaines sont perimees (ex. America : venue Estadio Azteca, city D.F., capacite d avant renovation ; Monaco founded 1919 alors que la fondation documentee est 1924). Valeurs verifiees sur les sources de l entree. null masque le champ. La capacite n est affichee que si elle est renseignee ici (verifiee).",
+    "Page FR 'Joueurs africains en Europe' : NON construite. api-football ne fournit qu'un champ nationality unique qui n'est pas documente comme nationalite sportive (ex. verifies 2026-09-14 : Ansu Fati 'Spain', ne en Guinee-Bissau ; B. Embolo 'Switzerland', ne au Cameroun). Classer un joueur 'africain' depuis ce champ produirait des erreurs factuelles.",
+    "Afrique francophone : aucune competition CAF (Ligue des champions CAF) ni championnat africain francophone dans config/leagues.json au 2026-09-14 -> aucune page (a ouvrir quand la competition sera ajoutee)."
+  ],
+  "versions": {
+    "mx": {
+      "hubSlug": "equipos",
+      "locale": "es-mx",
+      "hub": {
+        "title": "Equipos y clásicos de la Liga MX: partidos, tabla y estadísticas",
+        "description": "América, Chivas, Cruz Azul, Pumas, Tigres y Monterrey: próximos partidos en horario del centro de México, tabla, forma e historial de los clásicos. +18",
+        "h1": "Equipos y clásicos de la Liga MX",
+        "intro": "Páginas de seguimiento de los clubes de la Liga MX con más partidos analizados en IASHARK y de sus clásicos. Cada página se actualiza a diario con datos reales: próximos partidos en horario del centro de México, posición en la tabla del torneo, resultados recientes, historial de enfrentamientos en los clásicos y enlace al análisis estadístico cuando ya está publicado. Son estimaciones de probabilidad, no garantías."
+      },
+      "labels": {}
+    },
+    "za": {
+      "hubSlug": "clubs",
+      "locale": "en",
+      "hub": {
+        "title": "PSL clubs and the Soweto Derby: fixtures, log and stats",
+        "description": "Kaizer Chiefs, Orlando Pirates and Mamelodi Sundowns: upcoming fixtures with SAST kick-off times, PSL log, recent form and Soweto Derby head-to-head. 18+",
+        "h1": "PSL clubs and the Soweto Derby",
+        "intro": "Follow South Africa's best-supported clubs with data rather than guesswork. Each page is refreshed every day from real match data: upcoming fixtures with kick-off times in SAST, the current PSL log, recent results, Soweto Derby head-to-head records and a link to IASHARK's statistical match analysis when one has been published. Figures are estimates, not guarantees."
+      },
+      "labels": {
+        "table_title": "{league} log",
+        "table_none": "The {league} log is not available right now.",
+        "table_position": "{team} are {rank} of {total} on the log with {points} points after {played} matches."
+      }
+    },
+    "gb": {
+      "hubSlug": "clubs",
+      "locale": "en",
+      "hub": {
+        "title": "Premier League clubs and derbies: fixtures, form and stats",
+        "description": "Arsenal, Chelsea, Liverpool, Man City, Man United, Spurs, Newcastle and Aston Villa: fixtures in UK time, table, form and derby head-to-heads. 18+",
+        "h1": "Premier League clubs and derbies",
+        "intro": "Club pages for eight Premier League sides and the North London, Manchester and Merseyside derbies. Every page is rebuilt daily from real match data: upcoming fixtures in all competitions with UK kick-off times, the current Premier League table, recent results, derby head-to-heads and a link to IASHARK's statistical analysis when a match has one. Probabilities are estimates, never guarantees."
+      },
+      "labels": {}
+    },
+    "fr": {
+      "hubSlug": "clubs",
+      "locale": "fr",
+      "hub": {
+        "title": "Clubs de Ligue 1, Classique et derby du Nord : calendrier et statistiques",
+        "description": "PSG, OM, OL, Monaco, LOSC et RC Lens : prochains matchs à l'heure de Paris, classement de Ligue 1, forme récente, Classique et derby du Nord.",
+        "h1": "Clubs de Ligue 1, Classique et derby du Nord",
+        "intro": "Des pages de suivi pour six clubs de Ligue 1 et pour deux affiches : le Classique entre le PSG et l'OM, et le derby du Nord entre Lens et Lille. Chaque page est mise à jour quotidiennement à partir de données réelles : prochains matchs toutes compétitions à l'heure de Paris, classement de Ligue 1, derniers résultats, confrontations directes et lien vers l'analyse statistique IASHARK lorsqu'elle est publiée. Ce sont des estimations, pas des garanties."
+      },
+      "labels": {}
+    },
+    "en": {
+      "hubSlug": "clubs",
+      "locale": "en",
+      "hub": {
+        "title": "Real Madrid, Barcelona, Bayern and Europe's big clubs: fixtures and stats",
+        "description": "Real Madrid, Barcelona, Bayern Munich, Inter and Juventus: upcoming fixtures in UTC, league tables, recent form and El Clásico head-to-head. 18+",
+        "h1": "Europe's big clubs and El Clásico",
+        "intro": "Club pages for readers following Europe's biggest sides from anywhere in the world. Each page is refreshed daily from real match data: upcoming fixtures in the league, the Champions League and the cups with kick-off times in UTC, the current league table, recent results, El Clásico head-to-heads and a link to IASHARK's statistical analysis when a match has one. Figures are estimates, not guarantees."
+      },
+      "labels": {}
+    },
+    "es": {
+      "hubSlug": "equipos",
+      "locale": "es",
+      "hub": {
+        "title": "Equipos y clásicos de España y Sudamérica: partidos y estadísticas",
+        "description": "Real Madrid, Barcelona, Boca, River, Nacional, Alianza Lima, Colo-Colo y más: próximos partidos, clasificación, forma y clásicos. +18",
+        "h1": "Equipos y clásicos de España y Sudamérica",
+        "intro": "Páginas de seguimiento del Real Madrid y del FC Barcelona, de grandes clubes de Argentina, Colombia, Perú y Chile, y de sus clásicos. Se actualizan cada día con datos reales: próximos partidos en todas las competiciones con la hora local de cada país, clasificación, últimos resultados, enfrentamientos directos y enlace al análisis estadístico de IASHARK cuando el partido ya lo tiene. Son estimaciones, no garantías."
+      },
+      "labels": {
+        "hub_link": "Todos los equipos y clásicos"
+      }
+    }
+  },
+  "clubs": [
+    {
+      "key": "america",
+      "teamId": 2287,
+      "apiName": "Club America",
+      "facts": {
+        "stadium": "Estadio Banorte (Estadio Azteca)",
+        "city": "Ciudad de México"
+      },
+      "leagueKey": "liga_mx",
+      "active": true,
+      "sources": [
+        "https://en.wikipedia.org/wiki/Club_América",
+        "https://en.wikipedia.org/wiki/Clásico_Joven",
+        "https://en.wikipedia.org/wiki/Clásico_Capitalino",
+        "api-football GET /teams?id=2287, /fixtures?team=2287&next=5 (venue Estadio Banorte)"
+      ],
+      "pages": {
+        "mx": {
+          "slug": "club-america",
+          "name": "América",
+          "title": "América: próximos partidos, estadísticas y pronósticos de probabilidad",
+          "description": "Club América en la Liga MX: próximos partidos en horario del centro de México, posición en la tabla, forma reciente y análisis estadístico IASHARK. +18",
+          "h1": "Club América: próximos partidos y estadísticas",
+          "intro": "El Club América nació el 12 de octubre de 1916 en la Ciudad de México, cuando dos equipos escolares decidieron fusionarse para competir mejor. Se le conoce como Las Águilas, apodo que se consolidó con una campaña de imagen de Televisa en 1981. Juega como local en el Estadio Azteca, inaugurado el 29 de mayo de 1966 con un partido entre América y Torino y hoy llamado Estadio Banorte. Protagoniza tres clásicos con nombre propio: el Clásico Nacional contra Chivas, el Clásico Capitalino contra Pumas y el Clásico Joven contra Cruz Azul. En esta página IASHARK reúne cada día lo que conviene revisar antes de un partido de las Águilas: los próximos encuentros en todas las competiciones con fecha y hora del centro de México, su lugar en la tabla del torneo en curso, sus últimos resultados y, cuando el partido ya está analizado, el índice de confianza público del modelo con el enlace al análisis completo. Las cifras salen de datos de partidos reales y de modelos estadísticos: son estimaciones de probabilidad, no promesas de resultado. IASHARK no es una casa de apuestas."
+        }
+      }
+    },
+    {
+      "key": "chivas",
+      "teamId": 2278,
+      "apiName": "Guadalajara Chivas",
+      "facts": {
+        "stadium": "Estadio Akron",
+        "city": "Zapopan, Jalisco",
+        "capacity": 48071
+      },
+      "leagueKey": "liga_mx",
+      "active": true,
+      "sources": [
+        "https://en.wikipedia.org/wiki/C.D._Guadalajara",
+        "https://es.wikipedia.org/wiki/Clásico_del_fútbol_mexicano",
+        "api-football GET /teams?id=2278"
+      ],
+      "pages": {
+        "mx": {
+          "slug": "chivas-guadalajara",
+          "name": "Chivas",
+          "title": "Chivas: próximos partidos, estadísticas y pronósticos de probabilidad",
+          "description": "Chivas de Guadalajara en la Liga MX: próximos partidos en horario del centro de México, tabla, forma reciente y análisis estadístico IASHARK. +18",
+          "h1": "Chivas de Guadalajara: próximos partidos y estadísticas",
+          "intro": "El Club Deportivo Guadalajara se fundó el 8 de mayo de 1906 como Unión Football Club y adoptó su nombre actual en 1908. Su rasgo más conocido es de identidad: Chivas es el único club de México que no ficha futbolistas extranjeros ni naturalizados, salvo que tengan ascendencia mexicana, una política que se hizo oficial en 1943. El Rebaño juega como local en el Estadio Akron, inaugurado en 2010 en Zapopan, Jalisco, y su partido más esperado es el Clásico Nacional frente al América, cuyo primer enfrentamiento registrado data de 1926. Esta página de IASHARK se actualiza todos los días con datos reales: los próximos partidos de Chivas con fecha y hora del centro de México, la posición en la tabla del torneo en curso, la racha de resultados recientes y, para los partidos que ya tienen análisis, el índice de confianza público del modelo con el enlace a la página del encuentro. Todo lo que ves aquí son estimaciones estadísticas, no garantías de resultado; IASHARK no es una casa de apuestas."
+        }
+      }
+    },
+    {
+      "key": "cruz-azul",
+      "teamId": 2295,
+      "apiName": "Cruz Azul",
+      "facts": {
+        "stadium": "Estadio Banorte (Estadio Azteca)",
+        "city": "Ciudad de México"
+      },
+      "leagueKey": "liga_mx",
+      "active": true,
+      "sources": [
+        "https://en.wikipedia.org/wiki/Cruz_Azul",
+        "https://en.wikipedia.org/wiki/Clásico_Joven",
+        "api-football GET /teams?id=2295"
+      ],
+      "pages": {
+        "mx": {
+          "slug": "cruz-azul",
+          "name": "Cruz Azul",
+          "title": "Cruz Azul: próximos partidos, estadísticas y pronósticos de probabilidad",
+          "description": "Cruz Azul en la Liga MX: próximos partidos en horario del centro de México, posición en la tabla, resultados recientes y análisis estadístico IASHARK. +18",
+          "h1": "Cruz Azul: próximos partidos y estadísticas",
+          "intro": "Cruz Azul se fundó el 22 de mayo de 1927 en Jasso, Hidalgo, alrededor de la cooperativa cementera La Cruz Azul, cuyos trabajadores formaron el primer equipo; de ahí viene la identidad obrera que el club conserva. En 1971 trasladó su actividad a la Ciudad de México. Después de jugar en el Estadio Cuauhtémoc de Puebla, el club confirmó su regreso al Estadio Azteca, hoy Estadio Banorte, a partir del Apertura 2026. Su rivalidad con el América tiene nombre propio, el Clásico Joven, término que el periodista Gerardo Peña Kegel usó en 1980 por la cantidad de jugadores jóvenes de ambos planteles, y que ya había vivido la final de 1972. En IASHARK, esta página reúne los próximos partidos de Cruz Azul con horario del centro de México, su posición en la tabla, sus últimos resultados y, cuando el partido ya tiene análisis, el índice de confianza público del modelo con el enlace directo. Los datos se actualizan cada día. Son probabilidades estimadas por modelos estadísticos, no promesas; IASHARK no es una casa de apuestas."
+        }
+      }
+    },
+    {
+      "key": "pumas",
+      "teamId": 2286,
+      "apiName": "U.N.A.M. - Pumas",
+      "facts": {
+        "stadium": "Estadio Olímpico Universitario",
+        "city": "Ciudad de México",
+        "capacity": 72000
+      },
+      "leagueKey": "liga_mx",
+      "active": true,
+      "sources": [
+        "https://en.wikipedia.org/wiki/Club_Universidad_Nacional",
+        "https://en.wikipedia.org/wiki/Clásico_Capitalino",
+        "api-football GET /teams?id=2286"
+      ],
+      "pages": {
+        "mx": {
+          "slug": "pumas-unam",
+          "name": "Pumas",
+          "title": "Pumas UNAM: próximos partidos, estadísticas y pronósticos de probabilidad",
+          "description": "Pumas UNAM en la Liga MX: próximos partidos en horario del centro de México, tabla, forma reciente y análisis estadístico IASHARK. +18",
+          "h1": "Pumas UNAM: próximos partidos y estadísticas",
+          "intro": "Pumas se fundó en 1954 como Club Deportivo Universidad y representa a la Universidad Nacional Autónoma de México. Juega en el Estadio Olímpico Universitario, sede principal de los Juegos Olímpicos de 1968, y es reconocido por su trabajo de formación: sus instalaciones de entrenamiento están dentro del campus y su complejo principal se conoce como la Cantera. Forma parte de los llamados cuatro grandes del futbol mexicano. Su duelo con el América es el Clásico Capitalino, una rivalidad que también se lee en clave de identidad, entre el club de la universidad y el club asociado al poder económico, y que se intensificó en los años ochenta, cuando ambos equipos se enfrentaron en tres finales. Aquí IASHARK actualiza cada día los próximos partidos de Pumas con horario del centro de México, su lugar en la tabla, sus resultados recientes y, cuando existe, el análisis estadístico del partido con su índice de confianza público. Todas las cifras son estimaciones, no garantías; IASHARK no es una casa de apuestas."
+        }
+      }
+    },
+    {
+      "key": "tigres",
+      "teamId": 2279,
+      "apiName": "Tigres UANL",
+      "facts": {
+        "stadium": "Estadio Universitario (El Volcán)",
+        "capacity": 41615
+      },
+      "leagueKey": "liga_mx",
+      "active": true,
+      "sources": [
+        "https://en.wikipedia.org/wiki/Tigres_UANL",
+        "https://en.wikipedia.org/wiki/Clásico_Regiomontano",
+        "api-football GET /teams?id=2279"
+      ],
+      "pages": {
+        "mx": {
+          "slug": "tigres-uanl",
+          "name": "Tigres",
+          "title": "Tigres UANL: próximos partidos, estadísticas y pronósticos de probabilidad",
+          "description": "Tigres UANL en la Liga MX: próximos partidos en horario del centro de México, posición en la tabla, forma y análisis estadístico IASHARK. +18",
+          "h1": "Tigres UANL: próximos partidos y estadísticas",
+          "intro": "Tigres UANL se fundó el 7 de marzo de 1960 como Club Deportivo Universitario de Nuevo León y adoptó su nombre actual en 1967. Representa a la Universidad Autónoma de Nuevo León y tiene su casa en San Nicolás de los Garza, municipio del área metropolitana de Monterrey. Juega en el Estadio Universitario, conocido como El Volcán, y a sus jugadores también se les llama Los Auriazules. Comparte área metropolitana y rivalidad con Rayados de Monterrey en el Clásico Regio, cuyo primer enfrentamiento documentado se jugó el 13 de marzo de 1960, en la Segunda División. Para seguir a Tigres con datos, esta página de IASHARK se actualiza diariamente: próximos partidos con fecha y hora del centro de México, posición en la tabla del torneo, racha de resultados y, cuando el partido ya está analizado, el índice de confianza público del modelo con enlace al análisis completo. Las probabilidades de IASHARK son estimaciones de modelos estadísticos, no promesas de resultado, e IASHARK no es una casa de apuestas."
+        }
+      }
+    },
+    {
+      "key": "monterrey",
+      "teamId": 2282,
+      "apiName": "Monterrey",
+      "facts": {
+        "city": "Guadalupe, Nuevo León",
+        "capacity": 53500
+      },
+      "leagueKey": "liga_mx",
+      "active": true,
+      "sources": [
+        "https://en.wikipedia.org/wiki/C.F._Monterrey",
+        "https://en.wikipedia.org/wiki/Clásico_Regiomontano",
+        "api-football GET /teams?id=2282"
+      ],
+      "pages": {
+        "mx": {
+          "slug": "rayados-monterrey",
+          "name": "Monterrey",
+          "title": "Rayados de Monterrey: próximos partidos, estadísticas y pronósticos de probabilidad",
+          "description": "Rayados de Monterrey en la Liga MX: próximos partidos en horario del centro de México, tabla, resultados recientes y análisis estadístico IASHARK. +18",
+          "h1": "Rayados de Monterrey: próximos partidos y estadísticas",
+          "intro": "El Club de Futbol Monterrey se fundó el 28 de junio de 1945, impulsado por empresarios industriales de la ciudad. Su apodo, Rayados, viene del uniforme tradicional blanco con franjas verticales azul marino. Desde julio de 2015 juega en el Estadio BBVA, en Guadalupe, Nuevo León, con capacidad para 53,500 personas. En el plano internacional, Monterrey ganó cinco veces la Liga de Campeones de la CONCACAF, en 2010-11, 2011-12, 2012-13, 2018-19 y 2020-21; las tres primeras de forma consecutiva, con Víctor Manuel Vucetich en el banco. Su gran rival es Tigres, con quien disputa el Clásico Regio en el área metropolitana de Monterrey. En IASHARK, esta página se actualiza cada día con los próximos partidos de Rayados en horario del centro de México, su posición en la tabla, sus últimos resultados y, cuando corresponde, el índice de confianza público del análisis estadístico con el enlace al partido. Las cifras son estimaciones de probabilidad, nunca garantías; IASHARK no es una casa de apuestas."
+        }
+      }
+    },
+    {
+      "key": "kaizer-chiefs",
+      "teamId": 2691,
+      "apiName": "Kaizer Chiefs",
+      "facts": {
+        "city": "Johannesburg",
+        "capacity": 94797
+      },
+      "leagueKey": "south_africa_premiership",
+      "active": true,
+      "sources": [
+        "https://en.wikipedia.org/wiki/Kaizer_Chiefs_F.C.",
+        "https://en.wikipedia.org/wiki/Soweto_derby",
+        "api-football GET /teams?id=2691"
+      ],
+      "pages": {
+        "za": {
+          "slug": "kaizer-chiefs",
+          "name": "Kaizer Chiefs",
+          "title": "Kaizer Chiefs fixtures, stats and match analysis",
+          "description": "Kaizer Chiefs in the PSL: upcoming fixtures with SAST kick-off times, log position, recent form and IASHARK's statistical match analysis. 18+",
+          "h1": "Kaizer Chiefs: fixtures, stats and analysis",
+          "intro": "Kaizer Chiefs were founded on 7 January 1970 by Kaizer Motaung, a former Orlando Pirates player who had played in the North American Soccer League for the Atlanta Chiefs and combined his own first name with that club's to name the new team. Known as Amakhosi, a Zulu word for kings or chiefs, the club is based in Naturena, Johannesburg South, and plays its home matches at FNB Stadium. That origin story is also why the Soweto Derby against Orlando Pirates, first played on 24 January 1970, carries so much weight. This page is refreshed every day from real match data. It lists Chiefs' next fixtures with kick-off times in SAST, their current position on the PSL log, their latest results and, when IASHARK has already published the match analysis, the model's public confidence index with a link to the full breakdown. Everything here is a statistical estimate built from past matches, not a promise about the next one. IASHARK is not a bookmaker and does not take bets."
+        }
+      }
+    },
+    {
+      "key": "orlando-pirates",
+      "teamId": 2700,
+      "apiName": "Orlando Pirates",
+      "facts": {
+        "city": "Soweto, Johannesburg",
+        "capacity": 37313
+      },
+      "leagueKey": "south_africa_premiership",
+      "active": true,
+      "sources": [
+        "https://en.wikipedia.org/wiki/Orlando_Pirates_F.C.",
+        "https://en.wikipedia.org/wiki/Soweto_derby",
+        "api-football GET /teams?id=2700"
+      ],
+      "pages": {
+        "za": {
+          "slug": "orlando-pirates",
+          "name": "Orlando Pirates",
+          "title": "Orlando Pirates fixtures, stats and match analysis",
+          "description": "Orlando Pirates in the PSL: upcoming fixtures with SAST kick-off times, log position, recent results and IASHARK's statistical match analysis. 18+",
+          "h1": "Orlando Pirates: fixtures, stats and analysis",
+          "intro": "Orlando Pirates were founded in 1937 in Orlando, Soweto, and play their home matches at Orlando Stadium in the township where the club began. Supporters know them as the Buccaneers or simply the Bucs, as well as The Sea Robbers and The Happy People. On the continental stage, Pirates won the African Champions Cup, today's CAF Champions League, in 1995. At home, their defining fixture is the Soweto Derby against Kaizer Chiefs, a club formed by former Pirates player Kaizer Motaung; the two sides first met on 24 January 1970. IASHARK updates this page daily with the Bucs' upcoming fixtures and SAST kick-off times, their position on the PSL log, their recent results and, where a match analysis already exists, the public confidence index of the model with a direct link to it. The numbers come from real match data and statistical models: they describe probabilities, not certainties, and IASHARK is not a bookmaker."
+        }
+      }
+    },
+    {
+      "key": "mamelodi-sundowns",
+      "teamId": 2699,
+      "apiName": "Mamelodi Sundowns",
+      "facts": {
+        "city": "Mamelodi, Pretoria"
+      },
+      "leagueKey": "south_africa_premiership",
+      "active": true,
+      "sources": [
+        "https://en.wikipedia.org/wiki/Mamelodi_Sundowns_F.C.",
+        "api-football GET /teams?id=2699"
+      ],
+      "pages": {
+        "za": {
+          "slug": "mamelodi-sundowns",
+          "name": "Mamelodi Sundowns",
+          "title": "Mamelodi Sundowns fixtures, stats and match analysis",
+          "description": "Mamelodi Sundowns in the PSL: upcoming fixtures with SAST kick-off times, log position, recent form and IASHARK's statistical match analysis. 18+",
+          "h1": "Mamelodi Sundowns: fixtures, stats and analysis",
+          "intro": "Mamelodi Sundowns took their current name in 1970 and are based in Mamelodi, Pretoria, in Gauteng. They play home games at Loftus Versfeld Stadium and are nicknamed Masandawana and The Brazilians, the second after the club changed its kit to resemble that of Brazil's national team. In 2016 Sundowns beat Egypt's Zamalek 3–1 on aggregate to win the CAF Champions League, their first continental title, and became only the second South African club to be crowned champions of Africa. This page gathers the information that changes from one week to the next: Sundowns' upcoming matches with SAST kick-off times, their current position on the PSL log, their recent results and, for matches IASHARK has analysed, the public confidence index with a link to the full analysis. The data is refreshed daily from real fixtures and results. These are statistical estimates, never guarantees, and IASHARK is not a bookmaker."
+        }
+      }
+    },
+    {
+      "key": "arsenal",
+      "teamId": 42,
+      "apiName": "Arsenal",
+      "leagueKey": "premier",
+      "active": true,
+      "sources": [
+        "https://en.wikipedia.org/wiki/Arsenal_F.C.",
+        "https://en.wikipedia.org/wiki/North_London_derby",
+        "api-football GET /teams?id=42"
+      ],
+      "pages": {
+        "gb": {
+          "slug": "arsenal",
+          "name": "Arsenal",
+          "title": "Arsenal fixtures, form and statistical match analysis",
+          "description": "Arsenal fixtures with UK kick-off times, Premier League table position, recent results and IASHARK's statistical match analysis. 18+",
+          "h1": "Arsenal: fixtures, form and match stats",
+          "intro": "Arsenal were formed in October 1886, when David Danskin and fifteen fellow munitions workers in Woolwich set up Dial Square, renamed Royal Arsenal by early 1887; the Gunners nickname and the cannon on the crest still point back to those origins. The club crossed the river to Highbury in 1913, a move that made Tottenham their nearest neighbours and started the North London derby, and has played at Emirates Stadium since 2006. Arsenal's best-known modern landmark is the 2003–04 Premier League season, completed unbeaten by the side remembered as the Invincibles. This page is rebuilt every day from live data: Arsenal's next fixtures in every competition with UK kick-off times, the current Premier League table, the latest results and, when IASHARK has published an analysis for the match, the model's public confidence index with a link to the match page. It is a statistics page, not a tipster sheet: probabilities are estimates from past data, never guarantees, and IASHARK is not a bookmaker."
+        }
+      }
+    },
+    {
+      "key": "chelsea",
+      "teamId": 49,
+      "apiName": "Chelsea",
+      "leagueKey": "premier",
+      "active": true,
+      "sources": [
+        "https://en.wikipedia.org/wiki/Chelsea_F.C.",
+        "api-football GET /teams?id=49"
+      ],
+      "pages": {
+        "gb": {
+          "slug": "chelsea",
+          "name": "Chelsea",
+          "title": "Chelsea fixtures, form and statistical match analysis",
+          "description": "Chelsea fixtures with UK kick-off times, Premier League table position, recent form and IASHARK's statistical match analysis. 18+",
+          "h1": "Chelsea: fixtures, form and match stats",
+          "intro": "Chelsea were founded on 10 March 1905 at The Rising Sun pub and have played at the same ground for their whole history: Stamford Bridge, in Fulham, west London. The club took the Chelsea name from the neighbouring area after an offer to lease the stadium to an existing local side was turned down. Known as the Blues for their royal blue home kit, Chelsea won their first UEFA Champions League in 2012 under Roberto Di Matteo, beating Bayern Munich on penalties in the final. IASHARK refreshes this page daily. You will find Chelsea's upcoming fixtures with kick-off times in UK time, where they sit in the Premier League table, their recent results in all competitions and, for matches that already have an IASHARK analysis, the public confidence index of the model plus a link to the full match page. Figures come from real match data processed by statistical models: they describe likelihoods, not certainties, and IASHARK is not a bookmaker."
+        }
+      }
+    },
+    {
+      "key": "liverpool",
+      "teamId": 40,
+      "apiName": "Liverpool",
+      "leagueKey": "premier",
+      "active": true,
+      "sources": [
+        "https://en.wikipedia.org/wiki/Liverpool_F.C.",
+        "https://en.wikipedia.org/wiki/Merseyside_derby",
+        "api-football GET /teams?id=40"
+      ],
+      "pages": {
+        "gb": {
+          "slug": "liverpool",
+          "name": "Liverpool",
+          "title": "Liverpool fixtures, form and statistical match analysis",
+          "description": "Liverpool fixtures with UK kick-off times, Premier League table position, latest results and IASHARK's statistical match analysis. 18+",
+          "h1": "Liverpool: fixtures, form and match stats",
+          "intro": "Liverpool Football Club was founded in 1892, after a dispute led Everton to leave Anfield; the new club took over the ground and has played there ever since. That shared beginning is the root of the Merseyside derby, first played as a league fixture on 13 October 1894. Known as the Reds, a name that stuck for good when the team switched to an all-red home kit in 1964, Liverpool won the European Cup for the first time in 1977 under Bob Paisley, and You'll Never Walk Alone has been part of the Anfield atmosphere since the Bill Shankly era. Every day this page pulls together Liverpool's next fixtures with UK kick-off times, their Premier League position, their latest results and, when a match has already been analysed by IASHARK, the public confidence index of the model with a link to the analysis. Nothing here is a promise about a result: the numbers are statistical estimates, and IASHARK is not a bookmaker."
+        }
+      }
+    },
+    {
+      "key": "manchester-city",
+      "teamId": 50,
+      "apiName": "Manchester City",
+      "leagueKey": "premier",
+      "active": true,
+      "sources": [
+        "https://en.wikipedia.org/wiki/Manchester_City_F.C.",
+        "https://en.wikipedia.org/wiki/Manchester_derby",
+        "api-football GET /teams?id=50"
+      ],
+      "pages": {
+        "gb": {
+          "slug": "manchester-city",
+          "name": "Manchester City",
+          "title": "Manchester City fixtures, form and statistical match analysis",
+          "description": "Man City fixtures with UK kick-off times, Premier League table position, recent form and IASHARK's statistical match analysis. 18+",
+          "h1": "Manchester City: fixtures, form and match stats",
+          "intro": "Manchester City were founded in 1880 as St. Mark's (West Gorton), became Ardwick in 1887 and took the Manchester City name on 16 April 1894, the year from which the club has worn sky blue at home. After playing at Maine Road from 1923, City moved to the City of Manchester Stadium in east Manchester in 2003, now known as the Etihad Stadium. Their 2022–23 season brought a continental treble of Premier League, FA Cup and Champions League, and they won four consecutive league titles from 2020–21 to 2023–24, an English record. Their oldest rivalry is the Manchester derby against United, whose first meeting dates back to 1881. On this page IASHARK updates, every day, City's upcoming fixtures with UK kick-off times, the live Premier League table, their recent results and, where an IASHARK match analysis exists, the model's public confidence index with a direct link. All figures are statistical estimates from real data, not guarantees, and IASHARK is not a bookmaker."
+        }
+      }
+    },
+    {
+      "key": "manchester-united",
+      "teamId": 33,
+      "apiName": "Manchester United",
+      "leagueKey": "premier",
+      "active": true,
+      "sources": [
+        "https://en.wikipedia.org/wiki/Manchester_United_F.C.",
+        "https://en.wikipedia.org/wiki/Manchester_derby",
+        "api-football GET /teams?id=33"
+      ],
+      "pages": {
+        "gb": {
+          "slug": "manchester-united",
+          "name": "Manchester United",
+          "title": "Manchester United fixtures, form and statistical match analysis",
+          "description": "Man United fixtures with UK kick-off times, Premier League table position, latest results and IASHARK's statistical match analysis. 18+",
+          "h1": "Manchester United: fixtures, form and match stats",
+          "intro": "Manchester United began in 1878 as Newton Heath LYR Football Club, formed by the Carriage and Wagon department of the Lancashire and Yorkshire Railway, and became Manchester United on 24 April 1902. Old Trafford has been home since 1910. The club's history carries both tragedy and landmark wins: the Munich air disaster of 6 February 1958 killed 23 people, including eight players, and ten years later United became the first English club to win the European Cup, beating Benfica 4–1 in the 1968 final. In 1998–99 the Red Devils became the first team to win the Premier League, FA Cup and Champions League in the same season. This page brings together, each day, United's next fixtures with UK kick-off times, their Premier League position, their recent results and, if IASHARK has analysed the match, the public confidence index with a link to the full analysis. The data describes probabilities, not certainties; IASHARK is not a bookmaker."
+        }
+      }
+    },
+    {
+      "key": "tottenham",
+      "teamId": 47,
+      "apiName": "Tottenham",
+      "facts": {
+        "capacity": 62850
+      },
+      "leagueKey": "premier",
+      "active": true,
+      "sources": [
+        "https://en.wikipedia.org/wiki/Tottenham_Hotspur_F.C.",
+        "https://en.wikipedia.org/wiki/North_London_derby",
+        "api-football GET /teams?id=47"
+      ],
+      "pages": {
+        "gb": {
+          "slug": "tottenham-hotspur",
+          "name": "Tottenham Hotspur",
+          "title": "Tottenham Hotspur fixtures, form and statistical match analysis",
+          "description": "Spurs fixtures with UK kick-off times, Premier League table position, recent results and IASHARK's statistical match analysis. 18+",
+          "h1": "Tottenham Hotspur: fixtures, form and match stats",
+          "intro": "Tottenham Hotspur were founded on 5 September 1882 as Hotspur F.C. and spent well over a century at White Hart Lane, from 1899 until the ground was demolished in 2017. The club moved into Tottenham Hotspur Stadium on 3 April 2019. Spurs achieved the first league and FA Cup Double of the 20th century in 1960–61 and, in 1963, became the first British team to win a European trophy, beating Atlético Madrid 5–1 in the Cup Winners' Cup final. Their rivalry with Arsenal took shape after Arsenal moved to Highbury, four miles away, in 1913. IASHARK refreshes this page every day with Tottenham's upcoming matches and UK kick-off times, the current Premier League table, their latest results and, for fixtures with a published IASHARK analysis, the model's public confidence index and a link to the match page. These are statistical estimates built from real match data, never guarantees, and IASHARK is not a bookmaker."
+        }
+      }
+    },
+    {
+      "key": "newcastle",
+      "teamId": 34,
+      "apiName": "Newcastle",
+      "facts": {
+        "capacity": 52729
+      },
+      "leagueKey": "premier",
+      "active": true,
+      "sources": [
+        "https://en.wikipedia.org/wiki/Newcastle_United_F.C.",
+        "api-football GET /teams?id=34"
+      ],
+      "pages": {
+        "gb": {
+          "slug": "newcastle-united",
+          "name": "Newcastle United",
+          "title": "Newcastle United fixtures, form and statistical match analysis",
+          "description": "Newcastle fixtures with UK kick-off times, Premier League table position, recent form and IASHARK's statistical match analysis. 18+",
+          "h1": "Newcastle United: fixtures, form and match stats",
+          "intro": "The name Newcastle United was agreed on 9 December 1892 to mark the union of the city's two clubs, after Newcastle East End took over the assets of Newcastle West End. Home is St James' Park, the oldest and largest football stadium in North East England, and the magpie on the crest gives the club its nickname, the Magpies. Newcastle's fiercest local fixture is the Tyne–Wear derby against Sunderland. In March 2025 the club won its first major domestic trophy since 1955, beating Liverpool 2–1 in the EFL Cup final. This page is updated daily with the Magpies' next fixtures in all competitions, shown in UK time, their position in the Premier League table, their recent results and, where IASHARK has already published a match analysis, the public confidence index of the model with a link to it. Everything shown is based on real match data and statistical models: these are probabilities, not promises, and IASHARK is not a bookmaker."
+        }
+      }
+    },
+    {
+      "key": "aston-villa",
+      "teamId": 66,
+      "apiName": "Aston Villa",
+      "leagueKey": "premier",
+      "active": true,
+      "sources": [
+        "https://en.wikipedia.org/wiki/Aston_Villa_F.C.",
+        "api-football GET /teams?id=66"
+      ],
+      "pages": {
+        "gb": {
+          "slug": "aston-villa",
+          "name": "Aston Villa",
+          "title": "Aston Villa fixtures, form and statistical match analysis",
+          "description": "Aston Villa fixtures with UK kick-off times, Premier League table position, latest results and IASHARK's statistical match analysis. 18+",
+          "h1": "Aston Villa: fixtures, form and match stats",
+          "intro": "Aston Villa were founded in 1874 by members of the Aston Villa Wesleyan Chapel and played a pioneering role in the professional game: Villa director William McGregor set up the Football League in 1888, with Villa among its twelve founder members. The club has played at Villa Park since 1897, the largest football stadium in the English Midlands. Its greatest European night came in the 1982 European Cup final, a 1–0 win over Bayern Munich. Villa's local rivalries are the Second City derby with Birmingham City, contested since 1879, and the West Midlands derby with West Bromwich Albion. Every day IASHARK updates this page with the Villans' next fixtures and UK kick-off times, the current Premier League table, their recent results and, for matches with a published IASHARK analysis, the public confidence index and a link to the full page. The numbers are statistical estimates drawn from real match data, not guarantees; IASHARK is not a bookmaker."
+        }
+      }
+    },
+    {
+      "key": "psg",
+      "teamId": 85,
+      "apiName": "Paris Saint Germain",
+      "leagueKey": "ligue1",
+      "active": true,
+      "sources": [
+        "https://fr.wikipedia.org/wiki/Paris_Saint-Germain_Football_Club",
+        "https://en.wikipedia.org/wiki/Le_Classique",
+        "api-football GET /teams?id=85"
+      ],
+      "pages": {
+        "fr": {
+          "slug": "paris-saint-germain",
+          "name": "Paris Saint-Germain",
+          "title": "PSG : calendrier, classement, forme et analyses statistiques",
+          "description": "Paris Saint-Germain : prochains matchs à l'heure de Paris, classement de Ligue 1, forme récente et analyses statistiques IASHARK des rencontres.",
+          "h1": "Paris Saint-Germain : calendrier, forme et statistiques",
+          "intro": "Le Paris Saint-Germain est né en 1970 : après le vote de la fusion le 21 mai, la Fédération française de football publie le 30 mai la liste des clubs de deuxième division, où le club figure pour la première fois sous ce nom. Monté en première division, le PSG s'installe au Parc des Princes en 1974 et n'en est plus parti. Racheté en 2011 par Qatar Sports Investments, il remporte en 2025 sa première Ligue des champions en battant l'Inter Milan 5-0 en finale, la plus large victoire jamais enregistrée à ce stade de la compétition. Son grand rendez-vous national reste le Classique contre l'Olympique de Marseille, disputé pour la première fois en 1971. Cette page IASHARK est reconstruite chaque jour à partir de données réelles : prochains matchs du PSG toutes compétitions confondues, à l'heure de Paris, classement de Ligue 1, derniers résultats et, lorsque le match a déjà été analysé, l'indice de confiance public du modèle avec le lien vers l'analyse. Les chiffres sont des estimations statistiques, jamais des garanties : IASHARK n'est pas un bookmaker."
+        }
+      }
+    },
+    {
+      "key": "marseille",
+      "teamId": 81,
+      "apiName": "Marseille",
+      "facts": {
+        "founded": null,
+        "stadium": "Stade Vélodrome"
+      },
+      "leagueKey": "ligue1",
+      "active": true,
+      "sources": [
+        "https://fr.wikipedia.org/wiki/Olympique_de_Marseille",
+        "https://en.wikipedia.org/wiki/Le_Classique",
+        "api-football GET /teams?id=81"
+      ],
+      "pages": {
+        "fr": {
+          "slug": "olympique-de-marseille",
+          "name": "Olympique de Marseille",
+          "title": "OM : calendrier, classement, forme et analyses statistiques",
+          "description": "Olympique de Marseille : prochains matchs à l'heure de Paris, classement de Ligue 1, résultats récents et analyses statistiques IASHARK.",
+          "h1": "Olympique de Marseille : calendrier, forme et statistiques",
+          "intro": "L'Olympique de Marseille joue au Stade Vélodrome, inauguré le 13 juin 1937 lors d'un match amical contre le Torino. Sa date de fondation fait débat : longtemps fixée à 1899, elle est aujourd'hui rapportée par des recherches historiques à 1897, sous le nom de Football Club de Marseille, devenu Olympique de Marseille en janvier 1900. En 1993, l'OM est devenu le premier club français à remporter la Ligue des champions, en battant l'AC Milan en finale. On parle des Olympiens ou des Phocéens, et le match le plus attendu de la saison reste le Classique face au Paris Saint-Germain, dont la première édition, le 12 décembre 1971 au Vélodrome, s'est conclue par une victoire marseillaise 4-2. IASHARK met à jour cette page chaque jour : prochains matchs de l'OM à l'heure de Paris, position au classement de Ligue 1, forme récente et, pour les matchs déjà analysés, indice de confiance public et lien vers l'analyse. Ce sont des estimations statistiques, pas des promesses ; IASHARK n'est pas un bookmaker."
+        }
+      }
+    },
+    {
+      "key": "lyon",
+      "teamId": 80,
+      "apiName": "Lyon",
+      "facts": {
+        "capacity": 59186
+      },
+      "leagueKey": "ligue1",
+      "active": true,
+      "sources": [
+        "https://fr.wikipedia.org/wiki/Olympique_lyonnais",
+        "api-football GET /teams?id=80"
+      ],
+      "pages": {
+        "fr": {
+          "slug": "olympique-lyonnais",
+          "name": "Olympique lyonnais",
+          "title": "OL : calendrier, classement, forme et analyses statistiques",
+          "description": "Olympique lyonnais : prochains matchs à l'heure de Paris, classement de Ligue 1, forme récente et analyses statistiques IASHARK des matchs.",
+          "h1": "Olympique lyonnais : calendrier, forme et statistiques",
+          "intro": "L'Olympique lyonnais a été fondé le 3 août 1950, après la séparation des sections football et rugby du Lyon olympique universitaire. Le club a marqué le football français au début des années 2000 avec une série de sept titres consécutifs de champion de France, de 2002 à 2008, un record national. Depuis janvier 2016, l'OL joue au Groupama Stadium, à Décines-Charpieu, dans la métropole lyonnaise, une enceinte de près de 60 000 places. Sa grande rivalité régionale est le derby du Rhône contre l'AS Saint-Étienne. Sur cette page, IASHARK réunit chaque jour ce qui change d'une semaine à l'autre : les prochains matchs de Lyon avec l'heure de Paris, sa place au classement de Ligue 1, ses derniers résultats toutes compétitions et, lorsque IASHARK a publié l'analyse du match, l'indice de confiance public du modèle avec un lien direct. Les données proviennent de matchs réels et de modèles statistiques : elles décrivent des probabilités, pas des certitudes, et IASHARK n'est pas un bookmaker."
+        }
+      }
+    },
+    {
+      "key": "monaco",
+      "teamId": 91,
+      "apiName": "Monaco",
+      "facts": {
+        "founded": 1924
+      },
+      "leagueKey": "ligue1",
+      "active": true,
+      "sources": [
+        "https://fr.wikipedia.org/wiki/Association_sportive_de_Monaco_football_club",
+        "api-football GET /teams?id=91"
+      ],
+      "pages": {
+        "fr": {
+          "slug": "as-monaco",
+          "name": "AS Monaco",
+          "title": "AS Monaco : calendrier, classement, forme et analyses statistiques",
+          "description": "AS Monaco : prochains matchs à l'heure de Paris, classement de Ligue 1, derniers résultats et analyses statistiques IASHARK des rencontres.",
+          "h1": "AS Monaco : calendrier, forme et statistiques",
+          "intro": "L'AS Monaco a été fondée en 1924 par la fusion de quatre clubs de Monaco et de Beausoleil. Club monégasque, il est affilié à la Fédération française de football et dispute les compétitions françaises, dont la Ligue 1. Il joue au Stade Louis-II, dans la Principauté. Monaco a atteint la finale de la Ligue des champions en 2004, perdue 3-0 contre le FC Porto à Gelsenkirchen après avoir éliminé le Real Madrid et Chelsea, et a remporté en 2017 le huitième titre de champion de France de son histoire. Pour suivre l'ASM avec des données plutôt qu'avec des impressions, cette page IASHARK est mise à jour quotidiennement : prochains matchs à l'heure de Paris, classement de Ligue 1, résultats récents toutes compétitions et, lorsqu'une analyse IASHARK existe pour la rencontre, indice de confiance public du modèle et lien vers la page du match. Toutes ces valeurs sont des estimations statistiques et non des garanties ; IASHARK n'est pas un bookmaker."
+        }
+      }
+    },
+    {
+      "key": "lille",
+      "teamId": 79,
+      "apiName": "Lille",
+      "facts": {
+        "stadium": "Stade Pierre-Mauroy (Decathlon Arena)",
+        "city": "Villeneuve-d'Ascq",
+        "capacity": 50187
+      },
+      "leagueKey": "ligue1",
+      "active": true,
+      "sources": [
+        "https://fr.wikipedia.org/wiki/Lille_OSC",
+        "https://fr.wikipedia.org/wiki/Racing_Club_de_Lens",
+        "api-football GET /teams?id=79"
+      ],
+      "pages": {
+        "fr": {
+          "slug": "losc-lille",
+          "name": "LOSC Lille",
+          "title": "LOSC Lille : calendrier, classement, forme et analyses statistiques",
+          "description": "LOSC Lille : prochains matchs à l'heure de Paris, classement de Ligue 1, forme récente et analyses statistiques IASHARK des matchs.",
+          "h1": "LOSC Lille : calendrier, forme et statistiques",
+          "intro": "Le LOSC Lille est né le 23 septembre 1944 de la fusion entre l'Olympique lillois et le SC Fives. Surnommés les Dogues, les Lillois jouent depuis la saison 2012-2013 au stade Pierre-Mauroy, à Villeneuve-d'Ascq, aujourd'hui appelé Decathlon Arena. Le club a été sacré champion de France en 2011, puis en 2021, quatrième titre de son histoire. Sa rivalité régionale avec le RC Lens, autre club du Nord, fait partie des affiches les plus suivies de la région. IASHARK actualise cette page chaque jour à partir de données réelles : prochains matchs du LOSC toutes compétitions, à l'heure de Paris, position au classement de Ligue 1, derniers résultats et, pour les rencontres déjà analysées, l'indice de confiance public du modèle avec le lien vers l'analyse complète. Vous y trouvez aussi les informations pratiques du club et les liens vers les autres clubs suivis et la page de la Ligue 1. Les chiffres sont des estimations statistiques, jamais des garanties de résultat ; IASHARK n'est pas un bookmaker."
+        }
+      }
+    },
+    {
+      "key": "lens",
+      "teamId": 116,
+      "apiName": "Lens",
+      "facts": {
+        "capacity": 38223
+      },
+      "leagueKey": "ligue1",
+      "active": true,
+      "sources": [
+        "https://fr.wikipedia.org/wiki/Racing_Club_de_Lens",
+        "api-football GET /teams?id=116"
+      ],
+      "pages": {
+        "fr": {
+          "slug": "rc-lens",
+          "name": "RC Lens",
+          "title": "RC Lens : calendrier, classement, forme et analyses statistiques",
+          "description": "RC Lens : prochains matchs à l'heure de Paris, classement de Ligue 1, derniers résultats et analyses statistiques IASHARK des rencontres.",
+          "h1": "RC Lens : calendrier, forme et statistiques",
+          "intro": "Le Racing Club de Lens a été fondé en 1906. Ses couleurs sang et or, adoptées en 1924, lui ont donné son surnom, les Sang et Or. Né parmi des commerçants et des notables plutôt que chez les mineurs, le club a trouvé à partir du début des années 1930 un protecteur puissant avec la Compagnie des mines de Lens, ce qui a durablement lié son histoire au bassin minier. Il joue au stade Bollaert-Delelis et a remporté le premier titre de champion de France de son histoire lors de la saison 1997-1998, le 9 mai 1998. Sa grande rivalité régionale l'oppose au LOSC Lille. Cette page IASHARK est mise à jour quotidiennement : prochains matchs du RC Lens à l'heure de Paris, classement de Ligue 1, derniers résultats et, lorsque la rencontre a déjà une analyse IASHARK, l'indice de confiance public du modèle avec un lien vers le match. Il s'agit d'estimations statistiques, pas de promesses ; IASHARK n'est pas un bookmaker."
+        }
+      }
+    },
+    {
+      "key": "real-madrid",
+      "teamId": 541,
+      "apiName": "Real Madrid",
+      "leagueKey": "laliga",
+      "active": true,
+      "sources": [
+        "https://en.wikipedia.org/wiki/Real_Madrid_CF",
+        "https://en.wikipedia.org/wiki/El_Clásico",
+        "api-football GET /teams?id=541"
+      ],
+      "pages": {
+        "en": {
+          "slug": "real-madrid",
+          "name": "Real Madrid",
+          "title": "Real Madrid fixtures, form and match statistics",
+          "description": "Real Madrid fixtures with kick-off times in UTC, La Liga table position, recent results and IASHARK's statistical match analysis. 18+",
+          "h1": "Real Madrid: fixtures, form and match statistics",
+          "intro": "Real Madrid were founded as Madrid Football Club and officially established on 6 March 1902. The club has played its home matches at the Bernabéu since 1947 and is known as Los Blancos, after the white home kit worn since its early days. Real Madrid shaped the early history of the European Cup by winning five consecutive editions from 1956 to 1960, and in 2014 became the first team to reach ten European titles, the win known in Spain as La Décima. Their defining domestic fixture is El Clásico against Barcelona, first played in 1902. This page is refreshed daily for readers following Real Madrid from anywhere: upcoming fixtures in all competitions with kick-off times in UTC, the current La Liga table, recent results and, for matches with a published IASHARK analysis, the model's public confidence index with a link to the match page. Probabilities shown across IASHARK are statistical estimates, never guarantees, and IASHARK is not a bookmaker."
+        },
+        "es": {
+          "slug": "real-madrid",
+          "name": "Real Madrid",
+          "title": "Real Madrid: próximos partidos, clasificación y estadísticas",
+          "description": "Real Madrid: próximos partidos en hora peninsular, clasificación de LaLiga, resultados recientes y análisis estadístico de IASHARK. +18",
+          "h1": "Real Madrid: próximos partidos y estadísticas",
+          "intro": "El Real Madrid nació como Madrid Football Club y quedó constituido oficialmente el 6 de marzo de 1902. Juega en el Santiago Bernabéu desde 1947 y se le conoce como Los Blancos por la equipación blanca que viste desde sus primeros años. Marcó los inicios de la Copa de Europa al ganar cinco ediciones consecutivas, entre 1956 y 1960, y en 2014 se convirtió en el primer club con diez títulos europeos, la llamada Décima. Su gran rival es el FC Barcelona, con el que disputa El Clásico desde 1902. En IASHARK, esta página se actualiza a diario con datos reales: próximos partidos del Real Madrid en todas las competiciones, con la hora peninsular, clasificación de LaLiga, últimos resultados y, cuando el partido ya está analizado, el índice de confianza público del modelo con el enlace al análisis completo. Las probabilidades son estimaciones estadísticas, nunca garantías, e IASHARK no es una casa de apuestas."
+        }
+      }
+    },
+    {
+      "key": "barcelona",
+      "teamId": 529,
+      "apiName": "Barcelona",
+      "leagueKey": "laliga",
+      "active": true,
+      "sources": [
+        "https://en.wikipedia.org/wiki/FC_Barcelona",
+        "https://en.wikipedia.org/wiki/El_Clásico",
+        "api-football GET /teams?id=529"
+      ],
+      "pages": {
+        "en": {
+          "slug": "barcelona",
+          "name": "Barcelona",
+          "title": "Barcelona fixtures, form and match statistics",
+          "description": "FC Barcelona fixtures with kick-off times in UTC, La Liga table position, recent form and IASHARK's statistical match analysis. 18+",
+          "h1": "FC Barcelona: fixtures, form and match statistics",
+          "intro": "FC Barcelona were founded on 29 November 1899 by Swiss-born Joan Gamper and a group of football enthusiasts who answered an advertisement he had placed. The club's motto, Més que un club (more than a club), reflects the role it plays in Catalan culture and identity, and Barcelona is owned and run by its members rather than by an individual owner. Its La Masia academy, set up in 1979 in a historic farmhouse used as a residence for young players, produced players such as Xavi, Andrés Iniesta and Lionel Messi. In 2009 Barcelona became the first Spanish club to win the treble of La Liga, Copa del Rey and Champions League in the same season. Every day IASHARK refreshes Barcelona's upcoming fixtures with UTC kick-off times, the La Liga table, recent results and, when a match has been analysed, the public confidence index with a link to the analysis. These figures are statistical estimates, not guarantees; IASHARK is not a bookmaker."
+        },
+        "es": {
+          "slug": "fc-barcelona",
+          "name": "FC Barcelona",
+          "title": "FC Barcelona: próximos partidos, clasificación y estadísticas",
+          "description": "FC Barcelona: próximos partidos en hora peninsular, clasificación de LaLiga, forma reciente y análisis estadístico de IASHARK. +18",
+          "h1": "FC Barcelona: próximos partidos y estadísticas",
+          "intro": "El FC Barcelona se fundó el 29 de noviembre de 1899 por iniciativa del suizo Joan Gamper, que había publicado un anuncio buscando aficionados al fútbol. Su lema, Més que un club, resume el papel del club en la cultura y la identidad catalanas, y su propiedad pertenece a sus socios, no a un dueño individual. La Masia, creada en 1979 en una antigua masía convertida en residencia para jóvenes jugadores, formó a futbolistas como Xavi, Andrés Iniesta y Lionel Messi. En 2009 el Barça fue el primer club español en ganar el triplete de Liga, Copa del Rey y Liga de Campeones en una misma temporada. Esta página de IASHARK se renueva cada día: próximos partidos del Barcelona con la hora peninsular, clasificación de LaLiga, forma reciente y, para los partidos con análisis publicado, el índice de confianza público del modelo y el enlace al partido. Son estimaciones estadísticas, no garantías; IASHARK no es una casa de apuestas."
+        }
+      }
+    },
+    {
+      "key": "bayern",
+      "teamId": 157,
+      "apiName": "Bayern München",
+      "leagueKey": "bundesliga",
+      "active": true,
+      "sources": [
+        "https://en.wikipedia.org/wiki/FC_Bayern_Munich",
+        "api-football GET /teams?id=157"
+      ],
+      "pages": {
+        "en": {
+          "slug": "bayern-munich",
+          "name": "Bayern Munich",
+          "title": "Bayern Munich fixtures, form and match statistics",
+          "description": "Bayern Munich fixtures with kick-off times in UTC, Bundesliga table position, latest results and IASHARK's statistical match analysis. 18+",
+          "h1": "Bayern Munich: fixtures, form and match statistics",
+          "intro": "FC Bayern Munich were founded on 27 February 1900 by eleven players and have played at the Allianz Arena since the start of the 2005–06 season, after leaving Munich's Olympiastadion. Bayern hold the record for German championships, a run that includes eleven consecutive titles from 2013 to 2023. In Europe, the club won the European Cup three times in a row between 1974 and 1976 and completed trebles in 2012–13 and again in 2020. Their best-known domestic rivalry is Der Klassiker against Borussia Dortmund. This page follows Bayern with data refreshed every day: upcoming matches in the Bundesliga, the Champions League and the cups with kick-off times in UTC, the current Bundesliga table, recent results and, where IASHARK has published a match analysis, the model's public confidence index with a link to it. The numbers are statistical estimates based on real match data; they are not promises about results, and IASHARK is not a bookmaker."
+        }
+      }
+    },
+    {
+      "key": "inter",
+      "teamId": 505,
+      "apiName": "Inter",
+      "leagueKey": "seriea",
+      "active": true,
+      "sources": [
+        "https://en.wikipedia.org/wiki/Inter_Milan",
+        "api-football GET /teams?id=505"
+      ],
+      "pages": {
+        "en": {
+          "slug": "inter-milan",
+          "name": "Inter",
+          "title": "Inter Milan fixtures, form and match statistics",
+          "description": "Inter fixtures with kick-off times in UTC, Serie A table position, recent form and IASHARK's statistical match analysis. 18+",
+          "h1": "Inter Milan: fixtures, form and match statistics",
+          "intro": "Inter were founded on 9 March 1908 after a split within the Milan Foot-Ball and Cricket Club, driven by members who wanted to accept foreign players. Known as the Nerazzurri for their black and blue colours, Inter have shared the San Siro, officially the Stadio Giuseppe Meazza, with AC Milan since 1947, and the two clubs contest the Derby della Madonnina. Inter have been in Italy's top division without interruption since 1909 and have never been relegated to Serie B; in 2010 they became the first Italian club to win the league, the cup and the European Cup in the same season. Their long-running rivalry with Juventus is known as the Derby d'Italia. Updated every day, this page lists Inter's upcoming fixtures with UTC kick-off times, the current Serie A table, recent results and, for fixtures with a published IASHARK analysis, the public confidence index and a link to the match page. All figures are statistical estimates, not guarantees; IASHARK is not a bookmaker."
+        }
+      }
+    },
+    {
+      "key": "juventus",
+      "teamId": 496,
+      "apiName": "Juventus",
+      "leagueKey": "seriea",
+      "active": true,
+      "sources": [
+        "https://en.wikipedia.org/wiki/Juventus_FC",
+        "api-football GET /teams?id=496"
+      ],
+      "pages": {
+        "en": {
+          "slug": "juventus",
+          "name": "Juventus",
+          "title": "Juventus fixtures, form and match statistics",
+          "description": "Juventus fixtures with kick-off times in UTC, Serie A table position, latest results and IASHARK's statistical match analysis. 18+",
+          "h1": "Juventus: fixtures, form and match statistics",
+          "intro": "Juventus were founded in Turin on 1 November 1897 by students, as Sport-Club Juventus. The club has played at its own stadium since 2011, known commercially since 2017 as Allianz Stadium. Juventus hold the record for Italian league titles and are known as the Bianconeri, the white and blacks, and as la Vecchia Signora, the Old Lady, a play on a Latin name that means youth. Their city rivalry, the Derby della Mole, goes back to 1906, when Torino were founded by players and staff who had broken away from Juventus, while the Derby d'Italia against Inter is their most high-profile rivalry. IASHARK updates this page every day with Juventus' next fixtures and UTC kick-off times, the current Serie A table, recent results and, where the match has already been analysed, the model's public confidence index with a link to the analysis. These are statistical estimates drawn from real data, never guarantees, and IASHARK is not a bookmaker."
+        }
+      }
+    },
+    {
+      "key": "boca-juniors",
+      "teamId": 451,
+      "apiName": "Boca Juniors",
+      "apiLeagueId": 128,
+      "leagueKey": "argentina_liga_profesional",
+      "active": true,
+      "sources": [
+        "https://en.wikipedia.org/wiki/Boca_Juniors",
+        "https://en.wikipedia.org/wiki/Superclásico",
+        "api-football GET /teams?id=451 (verifie le 2026-09-14 : Boca Juniors)"
+      ],
+      "pages": {
+        "es": {
+          "slug": "boca-juniors",
+          "name": "Boca Juniors",
+          "tz": "America/Argentina/Buenos_Aires",
+          "tz_label": "hora de Argentina",
+          "title": "Boca Juniors: próximos partidos, posiciones y estadísticas",
+          "description": "Boca Juniors: próximos partidos con la hora de Argentina, posición en la Liga Profesional, últimos resultados y análisis estadístico de IASHARK. +18",
+          "h1": "Boca Juniors: próximos partidos y estadísticas",
+          "intro": "El Club Atlético Boca Juniors fue fundado el 3 de abril de 1905 en el barrio de La Boca, en Buenos Aires, por un grupo de jóvenes hijos de inmigrantes genoveses; de ahí el apodo de Xeneizes. Sus colores azul y oro se tomaron de la bandera sueca del primer barco que entró en el puerto de La Boca. Juega en el Estadio Alberto J. Armando, conocido como La Bombonera, terminado el 25 de mayo de 1940. Su gran rival es River Plate, también nacido en La Boca, con el que disputa el Superclásico. En IASHARK, esta página se actualiza cada día con datos reales: próximos partidos de Boca Juniors en todas las competiciones con la hora de Argentina, posición en la Liga Profesional Argentina, últimos resultados y, cuando el partido ya tiene un análisis publicado, el índice de confianza público del modelo con el enlace al partido. Son estimaciones estadísticas, nunca garantías, e IASHARK no es una casa de apuestas."
+        }
+      }
+    },
+    {
+      "key": "river-plate",
+      "teamId": 435,
+      "apiName": "River Plate",
+      "apiLeagueId": 128,
+      "leagueKey": "argentina_liga_profesional",
+      "active": true,
+      "sources": [
+        "https://en.wikipedia.org/wiki/Club_Atlético_River_Plate",
+        "https://en.wikipedia.org/wiki/Superclásico",
+        "api-football GET /teams?id=435 (verifie le 2026-09-14 : River Plate)"
+      ],
+      "pages": {
+        "es": {
+          "slug": "river-plate",
+          "name": "River Plate",
+          "tz": "America/Argentina/Buenos_Aires",
+          "tz_label": "hora de Argentina",
+          "title": "River Plate: próximos partidos, posiciones y estadísticas",
+          "description": "River Plate: próximos partidos con la hora de Argentina, posición en la Liga Profesional, últimos resultados y análisis estadístico de IASHARK. +18",
+          "h1": "River Plate: próximos partidos y estadísticas",
+          "intro": "El Club Atlético River Plate fue fundado el 25 de mayo de 1901 cerca del barrio de La Boca, en Buenos Aires, y más tarde se trasladó al norte de la ciudad. Se le conoce como Los Millonarios y como La Banda, por la franja roja de su camiseta blanca. Juega en el Estadio Monumental, inaugurado el 25 de mayo de 1938. Su clásico rival es Boca Juniors: el primer Superclásico oficial se jugó el 24 de agosto de 1913 y terminó con victoria de River por 2-1. En IASHARK, esta página se actualiza cada día con datos reales: próximos partidos de River Plate en todas las competiciones con la hora de Argentina, posición en la Liga Profesional Argentina, últimos resultados y, cuando el partido ya tiene un análisis publicado, el índice de confianza público del modelo con el enlace al partido. Son estimaciones estadísticas, nunca garantías, e IASHARK no es una casa de apuestas."
+        }
+      },
+      "facts": {
+        "stadium": "Estadio Monumental"
+      }
+    },
+    {
+      "key": "racing-club",
+      "teamId": 436,
+      "apiName": "Racing Club",
+      "apiLeagueId": 128,
+      "leagueKey": "argentina_liga_profesional",
+      "active": true,
+      "sources": [
+        "https://es.wikipedia.org/wiki/Racing_Club",
+        "api-football GET /teams?id=436 (verifie le 2026-09-14 : Racing Club)"
+      ],
+      "pages": {
+        "es": {
+          "slug": "racing-club",
+          "name": "Racing Club",
+          "tz": "America/Argentina/Buenos_Aires",
+          "tz_label": "hora de Argentina",
+          "title": "Racing Club: próximos partidos, posiciones y estadísticas",
+          "description": "Racing Club: próximos partidos con la hora de Argentina, posición en la Liga Profesional, últimos resultados y análisis estadístico de IASHARK. +18",
+          "h1": "Racing Club: próximos partidos y estadísticas",
+          "intro": "Racing Club fue fundado el 25 de marzo de 1903 en Avellaneda, en la provincia de Buenos Aires. Se le conoce como La Academia y viste de celeste y blanco, colores elegidos en homenaje a la bandera argentina. Juega en el Estadio Presidente Perón, apodado El Cilindro por su forma circular e inaugurado el 3 de septiembre de 1950. En 1967 ganó la Copa Libertadores y la Copa Intercontinental, y fue así el primer club argentino campeón del mundo. Su rival de siempre es Independiente, el otro grande de Avellaneda. En IASHARK, esta página se actualiza cada día con datos reales: próximos partidos de Racing Club en todas las competiciones con la hora de Argentina, posición en la Liga Profesional Argentina, últimos resultados y, cuando el partido ya tiene un análisis publicado, el índice de confianza público del modelo con el enlace al partido. Son estimaciones estadísticas, nunca garantías, e IASHARK no es una casa de apuestas."
+        }
+      }
+    },
+    {
+      "key": "independiente",
+      "teamId": 453,
+      "apiName": "Independiente",
+      "apiLeagueId": 128,
+      "leagueKey": "argentina_liga_profesional",
+      "active": true,
+      "sources": [
+        "https://es.wikipedia.org/wiki/Club_Atlético_Independiente",
+        "api-football GET /teams?id=453 (verifie le 2026-09-14 : Independiente)"
+      ],
+      "pages": {
+        "es": {
+          "slug": "independiente",
+          "name": "Independiente",
+          "tz": "America/Argentina/Buenos_Aires",
+          "tz_label": "hora de Argentina",
+          "title": "Independiente: próximos partidos, posiciones y estadísticas",
+          "description": "Independiente: próximos partidos con la hora de Argentina, posición en la Liga Profesional, últimos resultados y análisis estadístico de IASHARK. +18",
+          "h1": "Independiente: próximos partidos y estadísticas",
+          "intro": "El Club Atlético Independiente tiene como fecha oficial de fundación el 1 de enero de 1905 y es uno de los grandes clubes de Avellaneda, en la provincia de Buenos Aires. Viste de rojo y blanco y se le conoce como El Rojo y como los Diablos Rojos, apodo que el periodista Hugo Marini le dio en 1926 por su juego de ataque; sus éxitos internacionales le valieron también el de Rey de Copas. Su estadio es el Libertadores de América-Ricardo Enrique Bochini, inaugurado el 28 de octubre de 2009. Comparte ciudad y rivalidad con Racing Club. En IASHARK, esta página se actualiza cada día con datos reales: próximos partidos de Independiente en todas las competiciones con la hora de Argentina, posición en la Liga Profesional Argentina, últimos resultados y, cuando el partido ya tiene un análisis publicado, el índice de confianza público del modelo con el enlace al partido. Son estimaciones estadísticas, nunca garantías, e IASHARK no es una casa de apuestas."
+        }
+      }
+    },
+    {
+      "key": "san-lorenzo",
+      "teamId": 460,
+      "apiName": "San Lorenzo",
+      "apiLeagueId": 128,
+      "leagueKey": null,
+      "active": false,
+      "inactiveReason": "Liga Profesional Argentina ouverte dans config/leagues.json le 2026-09-14, mais club hors du perimetre editorial de cette vague : aucune intro redigee, pas de page.",
+      "sources": [
+        "api-football GET /teams?search=San Lorenzo"
+      ],
+      "pages": {}
+    },
+    {
+      "key": "atletico-nacional",
+      "teamId": 1137,
+      "apiName": "Atletico Nacional",
+      "apiLeagueId": 239,
+      "leagueKey": "colombia_primera_a",
+      "active": true,
+      "sources": [
+        "https://en.wikipedia.org/wiki/Atlético_Nacional",
+        "api-football GET /teams?id=1137 (verifie le 2026-09-14 : Atletico Nacional)"
+      ],
+      "pages": {
+        "es": {
+          "slug": "atletico-nacional",
+          "name": "Atlético Nacional",
+          "tz": "America/Bogota",
+          "tz_label": "hora de Colombia",
+          "title": "Atlético Nacional: próximos partidos, posiciones y estadísticas",
+          "description": "Atlético Nacional: próximos partidos con la hora de Colombia, posición en la Primera A, últimos resultados y análisis estadístico de IASHARK. +18",
+          "h1": "Atlético Nacional: próximos partidos y estadísticas",
+          "intro": "Atlético Nacional fue fundado el 7 de marzo de 1947 en Medellín con el nombre de Club Atlético Municipal de Medellín. Sus colores verde y blanco provienen de la bandera de Antioquia, y sus hinchas lo llaman el Verde o los Verdolagas. Juega como local en el Estadio Atanasio Girardot. En 1989 ganó su primera Copa Libertadores, tras vencer a Olimpia de Paraguay en la tanda de penaltis, y se convirtió en el primer club colombiano campeón de ese torneo. En IASHARK, esta página se actualiza cada día con datos reales: próximos partidos de Atlético Nacional en todas las competiciones con la hora de Colombia, posición en la Primera A de Colombia, últimos resultados y, cuando el partido ya tiene un análisis publicado, el índice de confianza público del modelo con el enlace al partido. Son estimaciones estadísticas, nunca garantías, e IASHARK no es una casa de apuestas."
+        }
+      }
+    },
+    {
+      "key": "millonarios",
+      "teamId": 1125,
+      "apiName": "Millonarios",
+      "apiLeagueId": 239,
+      "leagueKey": "colombia_primera_a",
+      "active": true,
+      "sources": [
+        "https://es.wikipedia.org/wiki/Millonarios_Fútbol_Club",
+        "api-football GET /teams?id=1125 (verifie le 2026-09-14 : Millonarios)"
+      ],
+      "pages": {
+        "es": {
+          "slug": "millonarios",
+          "name": "Millonarios",
+          "tz": "America/Bogota",
+          "tz_label": "hora de Colombia",
+          "title": "Millonarios: próximos partidos, posiciones y estadísticas",
+          "description": "Millonarios: próximos partidos con la hora de Colombia, posición en la Primera A, últimos resultados y análisis estadístico de IASHARK. +18",
+          "h1": "Millonarios: próximos partidos y estadísticas",
+          "intro": "Millonarios quedó constituido legalmente el 18 de junio de 1946 en Bogotá con el nombre de Club Deportivo Los Millonarios. Juega en el Estadio Nemesio Camacho El Campín, y sus seguidores lo llaman Millos, el Ballet Azul o los Embajadores. Su época más recordada es la de El Dorado del fútbol colombiano, entre 1949 y 1953, cuando llegaron Adolfo Pedernera, Alfredo Di Stéfano y Néstor Raúl Rossi. En 1952 ganó en Madrid el torneo del cincuentenario del Real Madrid tras vencer al anfitrión por 4-2. En IASHARK, esta página se actualiza cada día con datos reales: próximos partidos de Millonarios en todas las competiciones con la hora de Colombia, posición en la Primera A de Colombia, últimos resultados y, cuando el partido ya tiene un análisis publicado, el índice de confianza público del modelo con el enlace al partido. Son estimaciones estadísticas, nunca garantías, e IASHARK no es una casa de apuestas."
+        }
+      }
+    },
+    {
+      "key": "america-de-cali",
+      "teamId": 1138,
+      "apiName": "America de Cali",
+      "apiLeagueId": 239,
+      "leagueKey": "colombia_primera_a",
+      "active": true,
+      "sources": [
+        "https://es.wikipedia.org/wiki/América_de_Cali",
+        "api-football GET /teams?id=1138 (verifie le 2026-09-14 : America de Cali)"
+      ],
+      "pages": {
+        "es": {
+          "slug": "america-de-cali",
+          "name": "América de Cali",
+          "tz": "America/Bogota",
+          "tz_label": "hora de Colombia",
+          "title": "América de Cali: próximos partidos, posiciones y estadísticas",
+          "description": "América de Cali: próximos partidos con la hora de Colombia, posición en la Primera A, últimos resultados y análisis estadístico de IASHARK. +18",
+          "h1": "América de Cali: próximos partidos y estadísticas",
+          "intro": "América de Cali fue fundado el 13 de febrero de 1927 en Cali. Viste de rojo escarlata y se le conoce como La Mechita, los Diablos Rojos o El Rojo. Juega en el Estadio Olímpico Pascual Guerrero, inaugurado el 20 de julio de 1937. En la Copa Libertadores disputó las finales de 1985, 1986, 1987 y 1996, una etapa que marcó la historia del club en el continente. En IASHARK, esta página se actualiza cada día con datos reales: próximos partidos de América de Cali en todas las competiciones con la hora de Colombia, posición en la Primera A de Colombia, últimos resultados y, cuando el partido ya tiene un análisis publicado, el índice de confianza público del modelo con el enlace al partido. Son estimaciones estadísticas, nunca garantías, e IASHARK no es una casa de apuestas."
+        }
+      }
+    },
+    {
+      "key": "junior",
+      "teamId": 1135,
+      "apiName": "Junior",
+      "apiLeagueId": 239,
+      "leagueKey": null,
+      "active": false,
+      "inactiveReason": "Primera A Colombia ouverte dans config/leagues.json le 2026-09-14, mais club hors du perimetre editorial de cette vague : aucune intro redigee, pas de page.",
+      "sources": [
+        "api-football GET /teams?search=Junior"
+      ],
+      "pages": {}
+    },
+    {
+      "key": "universitario",
+      "teamId": 2540,
+      "apiName": "Universitario",
+      "apiLeagueId": 281,
+      "leagueKey": "peru_primera",
+      "active": true,
+      "sources": [
+        "https://en.wikipedia.org/wiki/Club_Universitario_de_Deportes",
+        "https://es.wikipedia.org/wiki/Clásico_del_fútbol_peruano",
+        "api-football GET /teams?id=2540 (verifie le 2026-09-14 : Universitario)"
+      ],
+      "pages": {
+        "es": {
+          "slug": "universitario-de-deportes",
+          "name": "Universitario",
+          "tz": "America/Lima",
+          "tz_label": "hora de Perú",
+          "title": "Universitario: próximos partidos, posiciones y estadísticas",
+          "description": "Universitario: próximos partidos con la hora de Perú, posición en la Liga 1, últimos resultados y análisis estadístico de IASHARK. +18",
+          "h1": "Universitario: próximos partidos y estadísticas",
+          "intro": "El Club Universitario de Deportes fue fundado el 7 de agosto de 1924 con el nombre de Federación Universitaria y adoptó su nombre actual en 1931. Sus hinchas lo llaman los Cremas o los Merengues. Juega en el Estadio Monumental, inaugurado el 2 de julio de 2000 con capacidad para 80 093 espectadores. Su clásico rival es Alianza Lima: el primer enfrentamiento se jugó el 23 de septiembre de 1928 y lo ganó la entonces Federación Universitaria por 1-0. En IASHARK, esta página se actualiza cada día con datos reales: próximos partidos de Universitario en todas las competiciones con la hora de Perú, posición en la Liga 1 de Perú, últimos resultados y, cuando el partido ya tiene un análisis publicado, el índice de confianza público del modelo con el enlace al partido. Son estimaciones estadísticas, nunca garantías, e IASHARK no es una casa de apuestas."
+        }
+      }
+    },
+    {
+      "key": "alianza-lima",
+      "teamId": 2553,
+      "apiName": "Alianza Lima",
+      "apiLeagueId": 281,
+      "leagueKey": "peru_primera",
+      "active": true,
+      "sources": [
+        "https://en.wikipedia.org/wiki/Club_Alianza_Lima",
+        "api-football GET /teams?id=2553 (verifie le 2026-09-14 : Alianza Lima)"
+      ],
+      "pages": {
+        "es": {
+          "slug": "alianza-lima",
+          "name": "Alianza Lima",
+          "tz": "America/Lima",
+          "tz_label": "hora de Perú",
+          "title": "Alianza Lima: próximos partidos, posiciones y estadísticas",
+          "description": "Alianza Lima: próximos partidos con la hora de Perú, posición en la Liga 1, últimos resultados y análisis estadístico de IASHARK. +18",
+          "h1": "Alianza Lima: próximos partidos y estadísticas",
+          "intro": "Alianza Lima fue fundado el 15 de febrero de 1901 con el nombre de Sport Alianza, por jóvenes trabajadores del barrio de Chacaritas, en Lima. Tiene su sede en el distrito de La Victoria y juega en el Estadio Alejandro Villanueva, conocido popularmente como Matute por el barrio donde se encuentra. Su camiseta a rayas verticales azules y blancas cambia en octubre a morado y blanco en homenaje al Señor de los Milagros. Se le conoce como los Íntimos o los Blanquiazules, y su gran rival es Universitario de Deportes. En IASHARK, esta página se actualiza cada día con datos reales: próximos partidos de Alianza Lima en todas las competiciones con la hora de Perú, posición en la Liga 1 de Perú, últimos resultados y, cuando el partido ya tiene un análisis publicado, el índice de confianza público del modelo con el enlace al partido. Son estimaciones estadísticas, nunca garantías, e IASHARK no es una casa de apuestas."
+        }
+      }
+    },
+    {
+      "key": "sporting-cristal",
+      "teamId": 2546,
+      "apiName": "Sporting Cristal",
+      "apiLeagueId": 281,
+      "leagueKey": "peru_primera",
+      "active": true,
+      "sources": [
+        "https://es.wikipedia.org/wiki/Club_Sporting_Cristal",
+        "api-football GET /teams?id=2546 (verifie le 2026-09-14 : Sporting Cristal)"
+      ],
+      "pages": {
+        "es": {
+          "slug": "sporting-cristal",
+          "name": "Sporting Cristal",
+          "tz": "America/Lima",
+          "tz_label": "hora de Perú",
+          "title": "Sporting Cristal: próximos partidos, posiciones y estadísticas",
+          "description": "Sporting Cristal: próximos partidos con la hora de Perú, posición en la Liga 1, últimos resultados y análisis estadístico de IASHARK. +18",
+          "h1": "Sporting Cristal: próximos partidos y estadísticas",
+          "intro": "Sporting Cristal fue fundado el 13 de diciembre de 1955 por Ricardo Bentín Mujica y nació en el distrito del Rímac, en Lima. Viste de celeste y blanco y se le conoce como la Máquina Celeste o los Rimenses. Ganó el Campeonato Peruano de 1956 en su primera participación, por lo que se le llama el club que nació campeón. Juega en el Estadio Alberto Gallardo y en 1997 fue subcampeón de la Copa Libertadores, ante Cruzeiro de Brasil. En IASHARK, esta página se actualiza cada día con datos reales: próximos partidos de Sporting Cristal en todas las competiciones con la hora de Perú, posición en la Liga 1 de Perú, últimos resultados y, cuando el partido ya tiene un análisis publicado, el índice de confianza público del modelo con el enlace al partido. Son estimaciones estadísticas, nunca garantías, e IASHARK no es una casa de apuestas."
+        }
+      }
+    },
+    {
+      "key": "colo-colo",
+      "teamId": 2315,
+      "apiName": "Colo Colo",
+      "apiLeagueId": 265,
+      "leagueKey": "chile_primera",
+      "active": true,
+      "sources": [
+        "https://es.wikipedia.org/wiki/Club_Social_y_Deportivo_Colo-Colo",
+        "api-football GET /teams?id=2315 (verifie le 2026-09-14 : Colo Colo)"
+      ],
+      "pages": {
+        "es": {
+          "slug": "colo-colo",
+          "name": "Colo-Colo",
+          "tz": "America/Santiago",
+          "tz_label": "hora de Chile",
+          "title": "Colo-Colo: próximos partidos, posiciones y estadísticas",
+          "description": "Colo-Colo: próximos partidos con la hora de Chile, posición en la Primera División, últimos resultados y análisis estadístico de IASHARK. +18",
+          "h1": "Colo-Colo: próximos partidos y estadísticas",
+          "intro": "Colo-Colo fue fundado el 19 de abril de 1925 en Santiago por un grupo de jugadores procedentes de Magallanes y encabezados por David Arellano. Se le conoce como el Cacique, los Albos o el Popular, y juega en el Estadio Monumental David Arellano, en la comuna de Macul. El 5 de junio de 1991 conquistó la Copa Libertadores tras derrotar a Olimpia de Paraguay por 3-0, y se convirtió en el primer club chileno en ganar un torneo internacional oficial. Su gran rival es Universidad de Chile. En IASHARK, esta página se actualiza cada día con datos reales: próximos partidos de Colo-Colo en todas las competiciones con la hora de Chile, posición en la Primera División de Chile, últimos resultados y, cuando el partido ya tiene un análisis publicado, el índice de confianza público del modelo con el enlace al partido. Son estimaciones estadísticas, nunca garantías, e IASHARK no es una casa de apuestas."
+        }
+      }
+    },
+    {
+      "key": "universidad-de-chile",
+      "teamId": 2323,
+      "apiName": "Universidad de Chile",
+      "apiLeagueId": 265,
+      "leagueKey": "chile_primera",
+      "active": true,
+      "sources": [
+        "https://en.wikipedia.org/wiki/Club_Universidad_de_Chile",
+        "api-football GET /teams?id=2323 (verifie le 2026-09-14 : Universidad de Chile)"
+      ],
+      "pages": {
+        "es": {
+          "slug": "universidad-de-chile",
+          "name": "Universidad de Chile",
+          "tz": "America/Santiago",
+          "tz_label": "hora de Chile",
+          "title": "Universidad de Chile: próximos partidos, posiciones y estadísticas",
+          "description": "Universidad de Chile: próximos partidos con la hora de Chile, posición en la Primera División, últimos resultados y análisis estadístico de IASHARK. +18",
+          "h1": "Universidad de Chile: próximos partidos y estadísticas",
+          "intro": "El Club Universidad de Chile fue fundado el 24 de mayo de 1927 como Club Deportivo Universitario, a partir de la fusión de Internado FC y Club Universitario de Deportes. Se le conoce como la U, los Azules, el Chuncho o el Ballet Azul. El club no es propietario de un estadio y juega como local en recintos arrendados de Santiago. El 14 de diciembre de 2011 ganó la Copa Sudamericana al vencer 3-0 a Liga de Quito, 4-0 en el marcador global. Su clásico rival es Colo-Colo. En IASHARK, esta página se actualiza cada día con datos reales: próximos partidos de Universidad de Chile en todas las competiciones con la hora de Chile, posición en la Primera División de Chile, últimos resultados y, cuando el partido ya tiene un análisis publicado, el índice de confianza público del modelo con el enlace al partido. Son estimaciones estadísticas, nunca garantías, e IASHARK no es una casa de apuestas."
+        }
+      },
+      "facts": {
+        "stadium": null
+      }
+    }
+  ],
+  "derbies": [
+    {
+      "key": "clasico-nacional",
+      "leagueKey": "liga_mx",
+      "active": true,
+      "teams": [
+        {
+          "club": "america"
+        },
+        {
+          "club": "chivas"
+        }
+      ],
+      "sources": [
+        "https://es.wikipedia.org/wiki/Clásico_del_fútbol_mexicano",
+        "https://en.wikipedia.org/wiki/C.D._Guadalajara"
+      ],
+      "pages": {
+        "mx": {
+          "slug": "clasico-nacional-america-chivas",
+          "name": "Clásico Nacional",
+          "title": "América vs Chivas, Clásico Nacional: historial, próximo partido y estadísticas",
+          "description": "Clásico Nacional América vs Chivas: próximo partido en horario del centro de México, últimos enfrentamientos, tabla y forma de ambos equipos. +18",
+          "h1": "Clásico Nacional: América vs Chivas",
+          "intro": "El Clásico Nacional enfrenta al Club América, de la Ciudad de México, y a Chivas de Guadalajara. El primer partido entre ambos se jugó el 10 de octubre de 1926 en el campo Guadalajara y terminó empatado a un gol. En competencia oficial se vieron por primera vez el 1 de agosto de 1943, en la Copa México, y en liga el 16 de enero de 1944, durante la temporada 1943-44. La rivalidad como tal suele fecharse el 12 de noviembre de 1959, en un partido disputado en el Estadio Olímpico de Ciudad Universitaria. El contraste entre los dos clubes sigue siendo visible: Chivas no ficha futbolistas extranjeros ni naturalizados salvo que tengan ascendencia mexicana, una política oficial desde 1943. En IASHARK, esta página se actualiza a diario: el próximo Clásico Nacional cuando ya está programado, el historial reciente de enfrentamientos, la posición y la forma de los dos equipos y, cuando el partido ya tiene análisis, el índice de confianza público del modelo con el enlace. Son estimaciones estadísticas, no garantías; IASHARK no es una casa de apuestas."
+        }
+      }
+    },
+    {
+      "key": "clasico-regio",
+      "leagueKey": "liga_mx",
+      "active": true,
+      "teams": [
+        {
+          "club": "tigres"
+        },
+        {
+          "club": "monterrey"
+        }
+      ],
+      "sources": [
+        "https://en.wikipedia.org/wiki/Clásico_Regiomontano",
+        "https://en.wikipedia.org/wiki/Tigres_UANL",
+        "https://en.wikipedia.org/wiki/C.F._Monterrey"
+      ],
+      "pages": {
+        "mx": {
+          "slug": "clasico-regio-tigres-monterrey",
+          "name": "Clásico Regio",
+          "title": "Tigres vs Monterrey, Clásico Regio: historial, próximo partido y estadísticas",
+          "description": "Clásico Regio Tigres vs Rayados: próximo partido en horario del centro de México, últimos enfrentamientos, tabla y forma de ambos equipos. +18",
+          "h1": "Clásico Regio: Tigres vs Monterrey",
+          "intro": "El Clásico Regio enfrenta a Tigres UANL y a Rayados de Monterrey, dos clubes del área metropolitana de Monterrey, en Nuevo León. El primer choque documentado se jugó el 13 de marzo de 1960, en la Segunda División, con victoria de Monterrey por 2-0; los dos equipos no volvieron a verse hasta 1974, ya en Primera División, en un empate 3-3. Tigres, fundado en 1960 y ligado a la Universidad Autónoma de Nuevo León, juega en el Estadio Universitario, conocido como El Volcán, en San Nicolás de los Garza. Monterrey, fundado en 1945, es local desde 2015 en el Estadio BBVA de Guadalupe. En esta página IASHARK reúne, con datos actualizados a diario, lo que cambia antes de cada clásico: el próximo enfrentamiento cuando ya tiene fecha, los últimos partidos entre ambos, la posición de Tigres y Monterrey en la tabla y su forma reciente, además del índice de confianza público y el enlace al análisis cuando el partido ya fue analizado. Son estimaciones estadísticas, no promesas; IASHARK no es una casa de apuestas."
+        }
+      }
+    },
+    {
+      "key": "clasico-capitalino",
+      "leagueKey": "liga_mx",
+      "active": true,
+      "teams": [
+        {
+          "club": "america"
+        },
+        {
+          "club": "pumas"
+        }
+      ],
+      "sources": [
+        "https://en.wikipedia.org/wiki/Clásico_Capitalino",
+        "https://en.wikipedia.org/wiki/Club_Universidad_Nacional",
+        "api-football GET /fixtures?team=2287&next=5 (venue Estadio Banorte)"
+      ],
+      "pages": {
+        "mx": {
+          "slug": "clasico-capitalino-america-pumas",
+          "name": "Clásico Capitalino",
+          "title": "América vs Pumas, Clásico Capitalino: historial, próximo partido y estadísticas",
+          "description": "Clásico Capitalino América vs Pumas: próximo partido en horario del centro de México, últimos enfrentamientos, tabla y forma de ambos. +18",
+          "h1": "Clásico Capitalino: América vs Pumas",
+          "intro": "El Clásico Capitalino enfrenta a dos clubes de la Ciudad de México: el Club América y Pumas UNAM. Su primer partido se jugó el 1 de julio de 1962, en la primera temporada de Pumas como equipo recién ascendido, y terminó con victoria del América por 2-0. La rivalidad tiene también una lectura de identidad: al América se le ha visto históricamente como el club del poder y del dinero, mientras que Pumas, que representa a la Universidad Nacional Autónoma de México, se identifica como el club de los universitarios y de la clase media. El duelo se intensificó en los años ochenta, cuando ambos se enfrentaron en tres finales. Hoy América juega en el Estadio Banorte y Pumas en el Estadio Olímpico Universitario. IASHARK actualiza esta página cada día con el próximo clásico cuando ya está programado, los últimos enfrentamientos, la posición de ambos equipos en la tabla y su forma reciente, y el índice de confianza público con enlace cuando existe análisis. Son estimaciones estadísticas, no garantías; IASHARK no es una casa de apuestas."
+        }
+      }
+    },
+    {
+      "key": "clasico-joven",
+      "leagueKey": "liga_mx",
+      "active": true,
+      "teams": [
+        {
+          "club": "america"
+        },
+        {
+          "club": "cruz-azul"
+        }
+      ],
+      "sources": [
+        "https://en.wikipedia.org/wiki/Clásico_Joven"
+      ],
+      "pages": {
+        "mx": {
+          "slug": "clasico-joven-america-cruz-azul",
+          "name": "Clásico Joven",
+          "title": "América vs Cruz Azul, Clásico Joven: historial, próximo partido y estadísticas",
+          "description": "Clásico Joven América vs Cruz Azul: próximo partido en horario del centro de México, últimos enfrentamientos, tabla y forma de ambos. +18",
+          "h1": "Clásico Joven: América vs Cruz Azul",
+          "intro": "El Clásico Joven enfrenta al Club América y a Cruz Azul, dos clubes con sede en la Ciudad de México. El nombre lo acuñó el periodista Gerardo Peña Kegel el 24 de mayo de 1980, al notar que ambos planteles tenían muchos jugadores jóvenes, como Rafael Toribio y Guillermo Mendizábal en Cruz Azul o Héctor Zelada y Mario Trejo en América. Antes de tener nombre, la rivalidad ya había vivido la final de 1972, que Cruz Azul ganó 4-1. Después llegaron finales como la del Clausura 2013, en la que América, con diez jugadores, empató el global con un gol de cabeza del portero Moisés Muñoz y ganó en penales, y la del Apertura 2018, resuelta con dos goles de Edson Álvarez. Esta página se actualiza a diario con el próximo Clásico Joven cuando ya tiene fecha, los últimos enfrentamientos, la tabla y la forma de los dos equipos y, si IASHARK ya analizó el partido, el índice de confianza público con su enlace. Son estimaciones estadísticas, no promesas; IASHARK no es una casa de apuestas."
+        }
+      }
+    },
+    {
+      "key": "soweto-derby",
+      "leagueKey": "south_africa_premiership",
+      "active": true,
+      "teams": [
+        {
+          "club": "kaizer-chiefs"
+        },
+        {
+          "club": "orlando-pirates"
+        }
+      ],
+      "sources": [
+        "https://en.wikipedia.org/wiki/Soweto_derby"
+      ],
+      "pages": {
+        "za": {
+          "slug": "soweto-derby",
+          "name": "Soweto Derby",
+          "title": "Soweto Derby: Chiefs vs Pirates head-to-head, fixtures and stats",
+          "description": "Soweto Derby, Kaizer Chiefs vs Orlando Pirates: next meeting in SAST, latest head-to-head results, PSL log and form of both clubs. 18+",
+          "h1": "Soweto Derby: Kaizer Chiefs vs Orlando Pirates",
+          "intro": "The Soweto Derby is the meeting of Kaizer Chiefs and Orlando Pirates, two Premiership clubs based in Soweto, Johannesburg. It was first contested on 24 January 1970. The rivalry comes from the way Chiefs were born: Kaizer Motaung, a former Orlando Pirates star, returned from playing for the Atlanta Chiefs in the North American Soccer League, found infighting in the Pirates hierarchy and formed a Kaizer XI that played friendlies before evolving into Kaizer Chiefs. Chiefs use FNB Stadium for home matches, while Pirates play at Orlando Stadium. On this page IASHARK tracks the derby with data that is refreshed every day: the next scheduled meeting when the fixture is known, the most recent head-to-head results, where both clubs sit on the PSL log and their current form. When the derby has a published IASHARK analysis, you will also find the model's public confidence index and a link to the match page. Figures are statistical estimates, not guarantees, and IASHARK is not a bookmaker."
+        }
+      }
+    },
+    {
+      "key": "north-london-derby",
+      "leagueKey": "premier",
+      "active": true,
+      "teams": [
+        {
+          "club": "arsenal"
+        },
+        {
+          "club": "tottenham"
+        }
+      ],
+      "sources": [
+        "https://en.wikipedia.org/wiki/North_London_derby"
+      ],
+      "pages": {
+        "gb": {
+          "slug": "north-london-derby",
+          "name": "North London derby",
+          "title": "North London derby: Arsenal vs Tottenham head-to-head and stats",
+          "description": "Arsenal vs Tottenham: next North London derby in UK time, latest head-to-head results, Premier League table and form of both clubs. 18+",
+          "h1": "North London derby: Arsenal vs Tottenham",
+          "intro": "The North London derby is the meeting of Arsenal and Tottenham Hotspur. The two clubs first played each other in a friendly on 19 November 1887, when Arsenal were still based in Plumstead. A proper rivalry only began in 1913, when Arsenal moved from the Manor Ground to Highbury, just four miles from Tottenham's White Hart Lane, a move Tottenham resented because they considered the area their territory. Feelings sharpened again in 1919, when a Football League vote elected Arsenal to the First Division ahead of Tottenham. Today Arsenal play at Emirates Stadium and Tottenham at Tottenham Hotspur Stadium. IASHARK keeps this page current with data refreshed every day: the next derby date when it is scheduled, the most recent head-to-head results, both clubs' positions in the Premier League table and their current form. When the fixture has a published IASHARK analysis, the model's public confidence index and the match link appear here. These are statistical estimates, not guarantees, and IASHARK is not a bookmaker."
+        }
+      }
+    },
+    {
+      "key": "manchester-derby",
+      "leagueKey": "premier",
+      "active": true,
+      "teams": [
+        {
+          "club": "manchester-united"
+        },
+        {
+          "club": "manchester-city"
+        }
+      ],
+      "sources": [
+        "https://en.wikipedia.org/wiki/Manchester_derby"
+      ],
+      "pages": {
+        "gb": {
+          "slug": "manchester-derby",
+          "name": "Manchester derby",
+          "title": "Manchester derby: United vs City head-to-head and stats",
+          "description": "Manchester United vs Manchester City: next derby in UK time, latest head-to-head results, Premier League table and form of both clubs. 18+",
+          "h1": "Manchester derby: United vs City",
+          "intro": "The Manchester derby between Manchester United and Manchester City is older than both clubs' current names. The first meeting took place on 12 November 1881, when St. Mark's (West Gorton), the club that became Manchester City, hosted Newton Heath LYR, the forerunner of Manchester United; Newton Heath won 3–0 in what the Ashton Reporter described as a pleasant game. The first Football League meeting followed in the 1894–95 season, a 5–2 win for Newton Heath at Hyde Road. At the time the fixture had no special significance, and the clubs were two of many young sides in the area. Today United play at Old Trafford and City at the Etihad Stadium. This page is refreshed daily with the next derby date when known, the latest head-to-head results, where United and City stand in the Premier League table and their recent form, plus the public confidence index and match link when IASHARK has analysed the game. Figures are statistical estimates, never guarantees; IASHARK is not a bookmaker."
+        }
+      }
+    },
+    {
+      "key": "merseyside-derby",
+      "leagueKey": "premier",
+      "active": true,
+      "teams": [
+        {
+          "club": "liverpool"
+        },
+        {
+          "teamId": 45,
+          "apiName": "Everton",
+          "names": {
+            "gb": "Everton"
+          }
+        }
+      ],
+      "sources": [
+        "https://en.wikipedia.org/wiki/Merseyside_derby",
+        "api-football GET /teams?id=45 (venue Hill Dickinson Stadium)"
+      ],
+      "pages": {
+        "gb": {
+          "slug": "merseyside-derby",
+          "name": "Merseyside derby",
+          "title": "Merseyside derby: Liverpool vs Everton head-to-head and stats",
+          "description": "Liverpool vs Everton: next Merseyside derby in UK time, latest head-to-head results, Premier League table and form of both clubs. 18+",
+          "h1": "Merseyside derby: Liverpool vs Everton",
+          "intro": "The Merseyside derby between Liverpool and Everton grew out of a split. Everton, founded in 1878, played at Anfield from 1884, a ground owned by club chairman John Houlding; after disagreements over how the club was run, Everton moved out in 1892 and Houlding created Liverpool Football Club to use Anfield. The first league derby was played on 13 October 1894 and finished Everton 3–0 Liverpool. For decades it was known as the friendly derby, because so many families in the city included supporters of both clubs, and it was one of the few derbies without total fan segregation. The two old grounds sat less than a mile apart across Stanley Park, until Everton moved to Hill Dickinson Stadium in Vauxhall. This page follows the fixture with data refreshed every day: the next meeting when scheduled, recent head-to-head results, both clubs' Premier League positions and form, and the public confidence index with a match link when IASHARK has published an analysis. These are statistical estimates, not guarantees, and IASHARK is not a bookmaker."
+        }
+      }
+    },
+    {
+      "key": "le-classique",
+      "leagueKey": "ligue1",
+      "active": true,
+      "teams": [
+        {
+          "club": "psg"
+        },
+        {
+          "club": "marseille"
+        }
+      ],
+      "sources": [
+        "https://en.wikipedia.org/wiki/Le_Classique"
+      ],
+      "pages": {
+        "fr": {
+          "slug": "classique-psg-om",
+          "name": "Le Classique",
+          "title": "Classique PSG-OM : confrontations, prochain match et statistiques",
+          "description": "Le Classique PSG-OM : prochain match à l'heure de Paris, dernières confrontations directes, classement de Ligue 1 et forme des deux clubs.",
+          "h1": "Le Classique : Paris Saint-Germain - Olympique de Marseille",
+          "intro": "Le Classique oppose le Paris Saint-Germain et l'Olympique de Marseille ; son nom s'inspire d'El Clásico entre le Real Madrid et le FC Barcelone. La première rencontre a eu lieu le 12 décembre 1971 au Stade Vélodrome, avec une victoire de Marseille 4-2 face à un PSG tout juste créé. La rivalité ne s'est vraiment installée qu'à partir de 1986, quand le PSG a remporté son premier titre de champion et que Bernard Tapie a repris l'OM, avant de s'intensifier en 1991 avec le rachat du PSG par Canal+, en partie pour contester la domination marseillaise. Le match est souvent raconté comme Paris contre Marseille, la capitale contre la province, le nord contre le sud. Cette page suit le Classique avec des données actualisées chaque jour : date de la prochaine rencontre lorsqu'elle est programmée, dernières confrontations directes, classement et forme des deux clubs et, si IASHARK a publié l'analyse du match, l'indice de confiance public avec le lien. Ce sont des estimations statistiques, pas des garanties ; IASHARK n'est pas un bookmaker."
+        }
+      }
+    },
+    {
+      "key": "derby-du-nord",
+      "leagueKey": "ligue1",
+      "active": true,
+      "teams": [
+        {
+          "club": "lens"
+        },
+        {
+          "club": "lille"
+        }
+      ],
+      "sources": [
+        "https://fr.wikipedia.org/wiki/Derby_du_Nord",
+        "https://fr.wikipedia.org/wiki/Lille_OSC",
+        "https://fr.wikipedia.org/wiki/Racing_Club_de_Lens"
+      ],
+      "pages": {
+        "fr": {
+          "slug": "derby-du-nord-lens-lille",
+          "name": "Derby du Nord",
+          "title": "Derby du Nord Lens-Lille : confrontations, prochain match et statistiques",
+          "description": "RC Lens - LOSC Lille : prochain derby du Nord à l'heure de Paris, dernières confrontations directes, classement de Ligue 1 et forme des deux clubs.",
+          "h1": "Derby du Nord : RC Lens - LOSC Lille",
+          "intro": "Le derby du Nord oppose le RC Lens et le LOSC Lille, deux clubs dont les villes ne sont distantes que de 36 kilomètres. Avant la création du LOSC en 1944, Lens affrontait déjà en première division l'Olympique lillois et le SC Fives, entre 1937 et 1939, dans des rencontres attendues par les supporters. Le premier derby officiel face au LOSC a eu lieu le 11 mars 1945, lors de la 12e journée de la zone Nord de la Division 1 1944-1945, et s'est conclu par une victoire lilloise 4-0 au stade Henri-Jooris. Lens joue au stade Bollaert-Delelis, Lille au stade Pierre-Mauroy de Villeneuve-d'Ascq. Cette page suit le derby avec des données actualisées chaque jour : date du prochain match lorsqu'il est programmé, dernières confrontations directes, classement de Ligue 1 et forme des deux clubs et, si IASHARK a publié l'analyse du match, l'indice de confiance public avec le lien. Ce sont des estimations statistiques, pas des garanties ; IASHARK n'est pas un bookmaker."
+        }
+      }
+    },
+    {
+      "key": "el-clasico",
+      "leagueKey": "laliga",
+      "active": true,
+      "teams": [
+        {
+          "club": "real-madrid"
+        },
+        {
+          "club": "barcelona"
+        }
+      ],
+      "sources": [
+        "https://en.wikipedia.org/wiki/El_Clásico",
+        "https://en.wikipedia.org/wiki/Real_Madrid_CF",
+        "https://en.wikipedia.org/wiki/FC_Barcelona"
+      ],
+      "pages": {
+        "en": {
+          "slug": "el-clasico",
+          "name": "El Clásico",
+          "title": "El Clásico: Real Madrid vs Barcelona head-to-head and stats",
+          "description": "El Clásico, Real Madrid vs Barcelona: next meeting in UTC, latest head-to-head results, La Liga table and current form of both clubs. 18+",
+          "h1": "El Clásico: Real Madrid vs Barcelona",
+          "intro": "El Clásico is the name given to any match between Barcelona and Real Madrid, whether it is played in La Liga, the Champions League, the Copa del Rey or the Supercopa de España; in Catalan it is El Clàssic. The first meeting took place on 13 May 1902 in the semi-final round of the Copa de la Coronación, at Madrid's Hipódromo de la Castellana, and Barcelona won 3–1. Real Madrid, officially established that same year, have played at the Bernabéu since 1947. Barcelona, founded in 1899 by Joan Gamper, are owned and run by their members. This page is refreshed every day with the next Clásico date once the fixture is scheduled, the most recent head-to-head results, both clubs' positions in the La Liga table and their current form. When IASHARK publishes an analysis for the match, you will also find the model's public confidence index and a link to the full match page. All kick-off times are shown in UTC. The figures are statistical estimates, not guarantees, and IASHARK is not a bookmaker."
+        },
+        "es": {
+          "slug": "el-clasico-real-madrid-barcelona",
+          "name": "El Clásico",
+          "title": "El Clásico Real Madrid vs Barcelona: historial y estadísticas",
+          "description": "El Clásico Real Madrid vs FC Barcelona: próximo partido en hora peninsular, últimos enfrentamientos, clasificación y forma de ambos. +18",
+          "h1": "El Clásico: Real Madrid vs FC Barcelona",
+          "intro": "El Clásico es el nombre que recibe cualquier partido entre el FC Barcelona y el Real Madrid, ya sea en LaLiga, la Liga de Campeones, la Copa del Rey o la Supercopa de España; en catalán se le llama El Clàssic. El primer enfrentamiento se jugó el 13 de mayo de 1902, en la ronda semifinal de la Copa de la Coronación, en el Hipódromo de la Castellana de Madrid, y terminó con victoria del Barcelona por 3-1. El Real Madrid juega en el Santiago Bernabéu desde 1947; el Barcelona, fundado en 1899 por Joan Gamper, es propiedad de sus socios. Esta página sigue el partido con datos actualizados cada día: la fecha del próximo Clásico cuando ya está programado, los últimos enfrentamientos directos, la posición de ambos equipos en la clasificación y su forma reciente. Si IASHARK ha publicado el análisis del partido, aquí aparecen el índice de confianza público del modelo y el enlace. Las horas se muestran en hora peninsular. Son estimaciones estadísticas, no garantías; IASHARK no es una casa de apuestas."
+        }
+      }
+    },
+    {
+      "key": "superclasico-argentino",
+      "leagueKey": "argentina_liga_profesional",
+      "active": true,
+      "splitStandings": true,
+      "teams": [
+        {
+          "club": "boca-juniors"
+        },
+        {
+          "club": "river-plate"
+        }
+      ],
+      "sources": [
+        "https://en.wikipedia.org/wiki/Superclásico",
+        "https://en.wikipedia.org/wiki/Boca_Juniors",
+        "https://en.wikipedia.org/wiki/Club_Atlético_River_Plate"
+      ],
+      "pages": {
+        "es": {
+          "slug": "superclasico-boca-river",
+          "name": "Superclásico",
+          "title": "Superclásico Boca-River: historial, próximo partido y estadísticas",
+          "description": "Superclásico Boca Juniors-River Plate: próximo partido con la hora de Argentina, últimos enfrentamientos, posiciones y forma de los dos equipos. +18",
+          "h1": "Superclásico: Boca Juniors - River Plate",
+          "intro": "El Superclásico enfrenta a Boca Juniors y River Plate, dos de los clubes con más hinchas de Argentina. Los dos tienen su origen en La Boca, el barrio portuario de Buenos Aires: River fue fundado en 1901 y Boca en 1905. River se trasladó después al norte de la ciudad, mientras Boca sigue en La Boca, donde juega en La Bombonera. El primer Superclásico oficial se disputó el 24 de agosto de 1913 en el estadio de Racing Club, ante unos 7000 espectadores, y terminó con victoria de River por 2-1. Cuando el torneo argentino reparte a los equipos en zonas distintas, la página muestra la posición de cada club en su propia zona. Esta página sigue el clásico con datos actualizados cada día: el próximo partido cuando está programado, con la hora de Argentina, los últimos enfrentamientos oficiales, la posición y la forma de los dos equipos y, si IASHARK ya publicó el análisis del partido, el índice de confianza público con el enlace. Son estimaciones estadísticas, no garantías; IASHARK no es una casa de apuestas.",
+          "tz": "America/Argentina/Buenos_Aires",
+          "tz_label": "hora de Argentina"
+        }
+      }
+    },
+    {
+      "key": "clasico-de-avellaneda",
+      "leagueKey": "argentina_liga_profesional",
+      "active": true,
+      "splitStandings": true,
+      "teams": [
+        {
+          "club": "racing-club"
+        },
+        {
+          "club": "independiente"
+        }
+      ],
+      "sources": [
+        "https://es.wikipedia.org/wiki/Racing_Club",
+        "https://es.wikipedia.org/wiki/Club_Atlético_Independiente"
+      ],
+      "pages": {
+        "es": {
+          "slug": "clasico-de-avellaneda-racing-independiente",
+          "name": "Clásico de Avellaneda",
+          "title": "Clásico de Avellaneda Racing-Independiente: historial y estadísticas",
+          "description": "Racing Club-Independiente: próximo clásico de Avellaneda con la hora de Argentina, últimos enfrentamientos, posiciones y forma de los dos equipos. +18",
+          "h1": "Clásico de Avellaneda: Racing Club - Independiente",
+          "intro": "El clásico de Avellaneda enfrenta a Racing Club e Independiente, los dos grandes clubes de esa ciudad de la provincia de Buenos Aires. Racing fue fundado el 25 de marzo de 1903 y juega en el Estadio Presidente Perón, El Cilindro; Independiente tiene como fecha oficial de fundación el 1 de enero de 1905 y juega en el Estadio Libertadores de América-Ricardo Enrique Bochini. Los dos conquistaron la Copa Intercontinental: Racing en 1967 e Independiente en 1984, ante Liverpool. Cuando el torneo argentino reparte a los equipos en zonas distintas, la página muestra la posición de cada club en su propia zona. Esta página sigue el clásico con datos actualizados cada día: el próximo partido cuando está programado, con la hora de Argentina, los últimos enfrentamientos oficiales, la posición y la forma de los dos equipos y, si IASHARK ya publicó el análisis del partido, el índice de confianza público con el enlace. Son estimaciones estadísticas, no garantías; IASHARK no es una casa de apuestas.",
+          "tz": "America/Argentina/Buenos_Aires",
+          "tz_label": "hora de Argentina"
+        }
+      }
+    },
+    {
+      "key": "clasico-peruano",
+      "leagueKey": "peru_primera",
+      "active": true,
+      "teams": [
+        {
+          "club": "alianza-lima"
+        },
+        {
+          "club": "universitario"
+        }
+      ],
+      "sources": [
+        "https://es.wikipedia.org/wiki/Clásico_del_fútbol_peruano",
+        "https://en.wikipedia.org/wiki/Club_Alianza_Lima",
+        "https://en.wikipedia.org/wiki/Club_Universitario_de_Deportes"
+      ],
+      "pages": {
+        "es": {
+          "slug": "clasico-alianza-lima-universitario",
+          "name": "Clásico del fútbol peruano",
+          "title": "Clásico Alianza Lima-Universitario: historial, próximo partido y estadísticas",
+          "description": "Alianza Lima-Universitario: próximo clásico con la hora de Perú, últimos enfrentamientos, posiciones en la Liga 1 y forma de los dos equipos. +18",
+          "h1": "Clásico del fútbol peruano: Alianza Lima - Universitario",
+          "intro": "El clásico del fútbol peruano, también llamado Superclásico, enfrenta en Lima a Alianza Lima y Universitario de Deportes. El primer partido se jugó el 23 de septiembre de 1928 en el antiguo Estadio Nacional y lo ganó por 1-0 la Federación Universitaria, nombre original de Universitario. Aquel encuentro se recuerda como el clásico de los bastonazos: el árbitro uruguayo Julio Borelli lo suspendió antes del final tras la expulsión de cinco jugadores de Alianza. Alianza, fundado en 1901, juega en Matute, en La Victoria; Universitario, fundado en 1924, en el Estadio Monumental. Esta página sigue el clásico con datos actualizados cada día: el próximo partido cuando está programado, con la hora de Perú, los últimos enfrentamientos oficiales, la posición y la forma de los dos equipos y, si IASHARK ya publicó el análisis del partido, el índice de confianza público con el enlace. Son estimaciones estadísticas, no garantías; IASHARK no es una casa de apuestas.",
+          "tz": "America/Lima",
+          "tz_label": "hora de Perú"
+        }
+      }
+    },
+    {
+      "key": "superclasico-chileno",
+      "leagueKey": "chile_primera",
+      "active": true,
+      "teams": [
+        {
+          "club": "colo-colo"
+        },
+        {
+          "club": "universidad-de-chile"
+        }
+      ],
+      "sources": [
+        "https://es.wikipedia.org/wiki/Superclásico_del_fútbol_chileno",
+        "https://es.wikipedia.org/wiki/Club_Social_y_Deportivo_Colo-Colo"
+      ],
+      "pages": {
+        "es": {
+          "slug": "superclasico-colo-colo-universidad-de-chile",
+          "name": "Superclásico del fútbol chileno",
+          "title": "Superclásico Colo-Colo-Universidad de Chile: historial y estadísticas",
+          "description": "Colo-Colo-Universidad de Chile: próximo superclásico con la hora de Chile, últimos enfrentamientos, posiciones y forma de los dos equipos. +18",
+          "h1": "Superclásico chileno: Colo-Colo - Universidad de Chile",
+          "intro": "El clásico del fútbol chileno, también conocido como Superclásico, enfrenta en Santiago a Colo-Colo y Universidad de Chile. El primer partido oficial se jugó el 7 de agosto de 1938 en los Campos de Sports de Ñuñoa y terminó con victoria de Colo-Colo por 6-0. La rivalidad moderna suele situarse a finales de los años cincuenta: el 11 de noviembre de 1959, en la definición del campeonato nacional, la U se impuso por 2-1. Colo-Colo, fundado en 1925, juega en el Estadio Monumental David Arellano; Universidad de Chile nació en 1927. Esta página sigue el clásico con datos actualizados cada día: el próximo partido cuando está programado, con la hora de Chile, los últimos enfrentamientos oficiales, la posición y la forma de los dos equipos y, si IASHARK ya publicó el análisis del partido, el índice de confianza público con el enlace. Son estimaciones estadísticas, no garantías; IASHARK no es una casa de apuestas.",
+          "tz": "America/Santiago",
+          "tz_label": "hora de Chile"
+        }
+      }
+    }
+  ]
+}

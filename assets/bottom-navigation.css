@@ -7,7 +7,11 @@
   z-index:1000;
   display:grid;
   grid-template-columns:repeat(4,minmax(0,1fr));
-  height:84px;
+  box-sizing:border-box;
+  /* La zone de securite iPhone s'AJOUTE a la hauteur : avec box-sizing
+     border-box (pages Tailwind), un padding pris sur 72 px ecrasait les
+     icones contre le bord sur iPhone (QA 14/09/2026). */
+  height:calc(84px + env(safe-area-inset-bottom));
   padding-bottom:env(safe-area-inset-bottom);
   border-top:1px solid rgba(96,125,151,.18);
   background:rgba(6,11,17,.97);
@@ -16,24 +20,34 @@
   -webkit-backdrop-filter:blur(18px);
 }
 .site-bottom-nav__item{
+  box-sizing:border-box;
   display:flex;
   min-width:0;
   flex-direction:column;
   align-items:center;
   justify-content:center;
   gap:7px;
-  color:#4f6b83;
+  /* Audit axe 14/09/2026 : #4f6b83 donnait 3,53:1 pour un libelle de 9-10px.
+     #8196aa depasse 4,5:1 sur le fond de la barre. */
+  color:#8196aa;
   text-decoration:none;
   transition:color .18s ease,background-color .18s ease;
 }
-.site-bottom-nav__item:hover,.site-bottom-nav__item:focus-visible{color:#8aa1b5;background:rgba(24,211,239,.025);outline:0}
+.site-bottom-nav__item:hover{color:#c3d0dc;background:rgba(24,211,239,.025)}
+/* Focus clavier visible (l'ancien outline:0 le rendait invisible). */
+.site-bottom-nav__item:focus-visible{color:#c3d0dc;background:rgba(24,211,239,.06);outline:2px solid #18d3ef;outline-offset:-4px;border-radius:10px}
 .site-bottom-nav__item[aria-current="page"]{color:#18d3ef}
 .site-bottom-nav__icon{display:block;width:28px;height:28px;stroke:currentColor}
 .site-bottom-nav__label{font:700 10px/1 "Space Mono",ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.18em;text-transform:uppercase}
 body{padding-bottom:calc(84px + env(safe-area-inset-bottom))!important}
+/* Un element qui recoit le focus (Tab jusqu'au bouton de paiement, cases de
+   consentement) ou vers lequel on defile ne doit jamais finir sous la barre
+   fixe : marge de defilement egale a sa hauteur. */
+html{scroll-padding-bottom:calc(96px + env(safe-area-inset-bottom))}
 @media(max-width:700px){
-  .site-bottom-nav{height:72px}
+  .site-bottom-nav{height:calc(72px + env(safe-area-inset-bottom))}
   .site-bottom-nav__icon{width:25px;height:25px}
   .site-bottom-nav__label{font-size:9px}
   body{padding-bottom:calc(72px + env(safe-area-inset-bottom))!important}
+  html{scroll-padding-bottom:calc(84px + env(safe-area-inset-bottom))}
 }

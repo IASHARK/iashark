@@ -40,6 +40,9 @@ const DICT_LOCALES = ["fr", "en", "es", "es-mx", "de", "it", "pt"];
 const DICTS = {};
 DICT_LOCALES.forEach(function (l) { DICTS[l] = readJson("i18n/dict/" + l + ".json"); });
 const PAGES = require("./i18n-manifest.js");
+// Textes SEO par repertoire (i18n/seo/<dir>.json) et aides partagees avec
+// scripts/seo-pages.js (pages championnat et pages match localisees).
+const SEO = require("./seo-common.js");
 const PAGE_FILES = PAGES.map(function (p) { return p.file; });
 // Pages retirees du site public : jamais generees, supprimees des repertoires
 // generes, redirigees vers l'accueil du repertoire (_redirects).
@@ -184,9 +187,15 @@ function fillPlaceholders(s, dir) {
 function metaFor(page, dir) {
   var locale = DIRS[dir].locale;
   var key = page.file.replace(/\.html$/, "");
+  // 1. i18n/seo/<dir>.json#meta : titre/description rediges pour le marche de
+  //    recherche du repertoire (gb "Premier League", za "PSL", mx "Liga MX"...),
+  //    distincts entre en/gb/za qui partagent le dictionnaire "en".
+  var seoMeta = SEO.seoConf(dir).meta && SEO.seoConf(dir).meta[key];
+  // 2. dictionnaire geo.meta (pages sans intention de recherche : compte...).
   var geo = DICTS[locale] && DICTS[locale].geo;
   var fromDict = geo && geo.meta && geo.meta[key];
-  var m = (fromDict && fromDict.title) ? fromDict
+  var m = (seoMeta && seoMeta.title) ? seoMeta
+    : (fromDict && fromDict.title) ? fromDict
     : (page.metas && (page.metas[locale] || page.metas[locale.split("-")[0]]));
   if (!m || !m.title) {
     throw new Error("Pas de titre pour " + page.file + " (" + dir + ") : ajouter geo.meta." + key +
@@ -200,11 +209,13 @@ function buildHead(html, dir, file, meta, altDirs) {
   var canonicalUrl = dirUrl(dir, file);
   html = html.replace(/[ \t]*<link rel="alternate" hreflang="[^"]*" href="[^"]*"\s*\/?>\r?\n?/g, "");
   if (meta) {
-    var title = escText(meta.title);
+    // Texte d'element pour <title>, valeur d'attribut (guillemets echappes)
+    // pour les balises meta : un " dans un titre cassait l'attribut.
+    var title = escText(meta.title), titleAttr = escAttr(meta.title);
     html = html.replace(/<title\b([^>]*)>[^<]*<\/title>/, function (m, attrs) { return "<title" + attrs + ">" + title + "</title>"; });
-    html = html.replace(/(<meta property="og:title" content=")[^"]*(")/, function (m, a, b) { return a + title + b; });
+    html = html.replace(/(<meta property="og:title" content=")[^"]*(")/, function (m, a, b) { return a + titleAttr + b; });
     if (meta.description) {
-      var desc = escText(meta.description);
+      var desc = escAttr(meta.description);
       html = html.replace(/(<meta name="description" content=")[^"]*(")/, function (m, a, b) { return a + desc + b; });
       html = html.replace(/(<meta property="og:description" content=")[^"]*(")/, function (m, a, b) { return a + desc + b; });
     }
@@ -225,12 +236,112 @@ function buildHead(html, dir, file, meta, altDirs) {
     html = html.replace(/<\/head>/i, function () { return block + "\n</head>"; });
   }
   html = html.replace(/(<meta property="og:url" content=")[^"]*(")/, function (m, a, b) { return a + canonicalUrl + b; });
+  html = setHtmlLang(html, conf.htmlLang);
+  return completeHead(html, dir, canonicalUrl);
+}
+
+function setHtmlLang(html, lang) {
   if (/<html\b[^>]*\slang="[^"]*"/i.test(html)) {
-    html = html.replace(/(<html\b[^>]*\s)lang="[^"]*"/i, function (m, a) { return a + 'lang="' + conf.htmlLang + '"'; });
-  } else {
-    html = html.replace(/<html\b/i, function () { return '<html lang="' + conf.htmlLang + '"'; });
+    return html.replace(/(<html\b[^>]*\s)lang="[^"]*"/i, function (m, a) { return a + 'lang="' + lang + '"'; });
   }
-  return html;
+  return html.replace(/<html\b/i, function () { return '<html lang="' + lang + '"'; });
+}
+
+// Complete le <head> (audit SEO 14/09/2026) :
+// - title/description/og/twitter sont le texte statique du repertoire : leurs
+//   data-i18n/data-i18n-attr sont retires, sinon i18n.js les remplacait au
+//   chargement par le texte generique du dictionnaire (en/gb/za identiques) ;
+// - Open Graph minimal present partout (og:type, og:site_name, og:locale,
+//   og:title, og:description, og:url, og:image) + twitter:card ;
+// - preconnect vers Google Fonts quand la page charge une feuille de polices.
+function completeHead(html, dir, canonicalUrl) {
+  var idx = html.search(/<\/head>/i);
+  if (idx === -1) return html;
+  var head = html.slice(0, idx), rest = html.slice(idx);
+  head = head.replace(/<(title|meta)\b[^>]*>/gi, function (tag) {
+    if (!/^<title|name="description"|property="og:(title|description)"|name="twitter:(title|description)"/i.test(tag)) return tag;
+    return tag.replace(/\sdata-i18n(-attr)?="[^"]*"/g, "");
+  });
+  var titleText = (head.match(/<title\b[^>]*>([^<]*)<\/title>/i) || [])[1];
+  var descText = (head.match(/<meta name="description" content="([^"]*)"/i) || [])[1];
+  var add = [];
+  function has(re) { return re.test(head); }
+  if (!has(/property="og:type"/)) add.push('<meta property="og:type" content="website">');
+  if (!has(/property="og:site_name"/)) add.push('<meta property="og:site_name" content="IASHARK">');
+  if (!has(/property="og:locale"/)) add.push('<meta property="og:locale" content="' + SEO.ogLocale(dir) + '">');
+  if (!has(/property="og:title"/) && titleText) add.push('<meta property="og:title" content="' + escAttr(unescHtml(titleText)) + '">');
+  if (!has(/property="og:description"/) && descText) add.push('<meta property="og:description" content="' + descText + '">');
+  if (!has(/property="og:url"/)) add.push('<meta property="og:url" content="' + canonicalUrl + '">');
+  if (!has(/property="og:image"/)) add.push('<meta property="og:image" content="' + SITE_URL + '/icon-512.png">');
+  if (!has(/name="twitter:card"/)) add.push('<meta name="twitter:card" content="summary">');
+  if (add.length) head = head.replace(/\s*$/, "\n") + add.join("\n") + "\n";
+  if (/href="https:\/\/fonts\.googleapis\.com\/css/.test(head) && !/rel="preconnect" href="https:\/\/fonts\.gstatic\.com"/.test(head)) {
+    head = head.replace(/<link\b[^>]*href="https:\/\/fonts\.googleapis\.com\/css[^>]*>/, function (m) {
+      return '<link rel="preconnect" href="https://fonts.googleapis.com">\n<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>\n' + m;
+    });
+  }
+  return head + rest;
+}
+
+// Accueil de chaque repertoire : JSON-LD Organization + WebSite + WebPage
+// localise (la source racine portait une description francaise recopiee dans
+// les 9 repertoires) et bloc SEO visible <!--SEO_INTRO--> (methode, liens vers
+// les pages championnat et les guides), redige depuis i18n/seo/<dir>.json.
+function homeJsonLd(dir, meta) {
+  var s = SEO.seoConf(dir), canonical = dirUrl(dir, "index.html");
+  var org = SITE_URL + "/#organization", site = SITE_URL + "/#website";
+  return {
+    "@context": "https://schema.org",
+    "@graph": [
+      { "@type": "Organization", "@id": org, name: "IASHARK", url: SITE_URL + "/",
+        logo: { "@type": "ImageObject", url: SITE_URL + "/icon-512.png", width: 512, height: 512 },
+        description: s.org_description },
+      { "@type": "WebSite", "@id": site, name: "IASHARK", url: SITE_URL + "/", publisher: { "@id": org },
+        inLanguage: DIR_CODES.map(function (d) { return DIRS[d].htmlLang; }) },
+      { "@type": "WebPage", "@id": canonical + "#webpage", url: canonical, name: meta.title, description: meta.description,
+        inLanguage: DIRS[dir].htmlLang, isPartOf: { "@id": site }, about: { "@id": org } }
+    ]
+  };
+}
+var SEO_LINK_STYLE = ' style="color:#20d5ef;text-decoration:underline;text-underline-offset:3px"';
+function homeSeoBlock(dir) {
+  var h = SEO.seoConf(dir).home;
+  var prio = h.priority_leagues || [];
+  var keys = prio.concat(SEO.LEAGUES.map(function (l) { return l.key; }).filter(function (k) { return prio.indexOf(k) === -1; }));
+  var leagues = keys.filter(function (k) { return SEO.leagueByKey(k); }).map(function (k) {
+    return '<li><a href="' + SEO.leagueHubPath(dir, k) + '"' + SEO_LINK_STYLE + ">" + escText(SEO.leagueByKey(k).displayName) + "</a></li>";
+  }).join("");
+  var guides = ["prediction-ia-football-guide-2026.html", "plus-de-2-5-buts-probabilite-methode-poisson.html", "xg-expected-goals-guide-complet.html", "value-bet-guide-complet-2026.html"].map(function (g) {
+    return '<li><a href="' + SEO.guidePath(dir, g) + '"' + SEO_LINK_STYLE + ">" + escText(SEO.guideLabel(dir, g)) + "</a></li>";
+  }).join("");
+  return '<section class="relative border-t border-hairline" aria-labelledby="seo-intro-title">' +
+    '<div class="mx-auto w-full max-w-[1200px] px-5 sm:px-8 py-16 sm:py-20">' +
+    '<div class="mb-4 inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.2em] text-soft"><span aria-hidden="true" class="h-1 w-1 rounded-full bg-cyan"></span>' + escText(h.eyebrow) + "</div>" +
+    '<h2 id="seo-intro-title" class="text-[clamp(28px,3.2vw,42px)] font-extrabold leading-[1.12] tracking-[-0.035em] text-ink">' + escText(h.title) + "</h2>" +
+    '<div class="mt-6 max-w-3xl">' + h.paragraphs.map(function (p) { return '<p class="mt-4 text-[14px] leading-relaxed text-soft">' + escText(p) + "</p>"; }).join("") + "</div>" +
+    '<h3 class="mt-8 text-[15.5px] font-bold text-ink">' + escText(h.leagues_title) + "</h3>" +
+    '<ul class="mt-3 flex flex-wrap gap-x-5 gap-y-2 text-[14px]" style="list-style:none;padding:0">' + leagues + "</ul>" +
+    '<h3 class="mt-8 text-[15.5px] font-bold text-ink">' + escText(h.guides_title) + "</h3>" +
+    '<ul class="mt-3 grid gap-2 text-[14px]" style="list-style:none;padding:0">' + guides + "</ul>" +
+    "</div></section>";
+}
+function injectHomeSeo(html, dir, meta) {
+  html = html.replace(/<script type="application\/ld\+json">\s*\{"@context":"https:\/\/schema\.org","@(type":"(Organization|WebSite)"|graph")[\s\S]*?<\/script>\n?/g, "");
+  html = html.replace(/<\/head>/i, function () { return SEO.ldScript(homeJsonLd(dir, meta)) + "\n</head>"; });
+  return html.replace(/<!--SEO_INTRO-->[\s\S]*?<!--\/SEO_INTRO-->/, function () { return "<!--SEO_INTRO-->" + homeSeoBlock(dir) + "<!--/SEO_INTRO-->"; });
+}
+
+// Pages legales : fil d'Ariane JSON-LD (Accueil > titre h1 de la page).
+function injectLegalBreadcrumb(html, dir, file) {
+  if (/"@type":\s*"BreadcrumbList"/.test(html)) return html;
+  var h1 = (html.match(/<h1\b[^>]*>([\s\S]*?)<\/h1>/i) || [])[1];
+  var name = h1 ? unescHtml(h1.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim()) : "";
+  if (!name) return html;
+  var ld = SEO.breadcrumbLd([
+    { name: SEO.seoConf(dir).breadcrumb.home, url: dirUrl(dir, "index.html") },
+    { name: name, url: dirUrl(dir, file) }
+  ]);
+  return html.replace(/<\/head>/i, function () { return SEO.ldScript(ld) + "\n</head>"; });
 }
 
 // Meta marche + scripts runtime (i18n.js pour I18N.href, market-config.js).
@@ -401,6 +512,22 @@ function redirectsContent() {
   out.push("", "# --- Sources des pages legales (legal/<dir>/) : jamais servies telles quelles.");
   out.push(rule("/legal/*", "/:splat", "301!"));
 
+  // Blog : /gb/blog/, /za/blog/ et /fr/blog/ repondaient 404 (audit 14/09/2026).
+  // Cible = URL servie en 200 sans redirection : /<blogDir>/blog/ ou, pour fr
+  // (blog FR racine), /blog.html - jamais /blog/, que Netlify redirige vers
+  // /blog (blog.html et blog/index.html coexistent).
+  out.push("", "# --- Blog : repertoires sans blog propre -> blog servi (gb, za -> /en/blog/ ;",
+    "# fr -> blog FR racine). Cibles = URL finales en 200, jamais une redirection.");
+  DIR_CODES.forEach(function (d) {
+    var b = DIRS[d].blogDir;
+    var hub = b ? "/" + b + "/blog/" : "/blog.html";
+    if (!fs.existsSync(path.join(ROOT, d, "blog.html"))) out.push(rule("/" + d + "/blog.html", hub, "301!"));
+    if (b === d) return; // blog propre : /<dir>/blog/ existe
+    out.push(rule("/" + d + "/blog", hub, "301!"));
+    out.push(rule("/" + d + "/blog/", hub, "301!"));
+    out.push(rule("/" + d + "/blog/*", (b ? "/" + b + "/blog/" : "/blog/") + ":splat", "301!"));
+  });
+
   out.push("", "# --- 404 traduite par repertoire. Non forcee : ne s'applique que si aucun",
     "# fichier n'existe au chemin demande. Toujours en dernier.");
   DIR_CODES.forEach(function (d) { out.push(rule("/" + d + "/*", "/" + d + "/404.html", "404")); });
@@ -422,6 +549,9 @@ function attrValue(tag, name) {
   var m = tag.match(new RegExp("\\s" + name + "=\"([^\"]*)\""));
   return m ? m[1] : null;
 }
+function hasAttr(tag, name) {
+  return new RegExp("\\s" + name + "(?=[\\s=>/])").test(tag);
+}
 function setAttr(tag, name, value) {
   var re = new RegExp("(\\s" + name + "=)\"[^\"]*\"");
   if (re.test(tag)) return tag.replace(re, function (_, p) { return p + "\"" + escAttr(value) + "\""; });
@@ -439,7 +569,10 @@ function bakeI18n(html, dict, market) {
     var tag = m[0], name = m[1].toLowerCase();
     var textKey = attrValue(tag, "data-i18n"), htmlKey = attrValue(tag, "data-i18n-html"), attrSpec = attrValue(tag, "data-i18n-attr");
     if (textKey == null && htmlKey == null && attrSpec == null) continue;
-    if (market && attrValue(tag, "data-market-legal-operator") != null &&
+    // Attribut booleen nu dans la source (<li ... data-market-legal-operator>) :
+    // attrValue() ne voit que attr="..." -> test de presence dedie (bug : les
+    // a-propos /gb/ /za/ /mx/ gardaient le texte ANJ dans le HTML statique).
+    if (market && hasAttr(tag, "data-market-legal-operator") &&
         typeof get(dict, "about_page.legal_not_operator_market." + market) === "string") {
       htmlKey = "about_page.legal_not_operator_market." + market;
     }
@@ -495,7 +628,9 @@ function rewriteElements(html, attrs, fn) {
   var out = "", pos = 0, tagRe = /<([a-zA-Z][\w-]*)\b[^<>]*>/g, m;
   while ((m = tagRe.exec(html))) {
     var tag = m[0], name = m[1].toLowerCase();
-    if (!attrs.some(function (a) { return attrValue(tag, a) != null; })) continue;
+    // Attribut avec valeur OU booleen nu (<time data-seo-date datetime=...> :
+    // attrValue seul ne le voyait pas, la date restait en francais).
+    if (!attrs.some(function (a) { return attrValue(tag, a) != null || hasAttr(tag, a); })) continue;
     var res = fn(tag, name);
     if (!res) continue;
     out += html.slice(pos, m.index) + res.tag;
@@ -562,7 +697,7 @@ function bakeMarket(html, dir) {
       var label = marketLabelsLib.marketLabel(unescHtml(raw), { home: home ? unescHtml(home) : undefined, away: away ? unescHtml(away) : undefined }, { locale: conf.locale, dict: dict });
       return { tag: tag, inner: escText(label) };
     }
-    if (attrValue(tag, "data-seo-date") != null) {
+    if (attrValue(tag, "data-seo-date") != null || hasAttr(tag, "data-seo-date")) {
       var iso = attrValue(tag, "datetime");
       if (!/^\d{4}-\d{2}-\d{2}$/.test(iso || "")) return null;
       var d = new Date(iso + "T12:00:00Z");
@@ -608,7 +743,9 @@ function build() {
       if (DIRS[dir].locale !== "fr" || countryMarket) html = bakeI18n(html, DICTS[DIRS[dir].locale], countryMarket);
       html = bakeMarket(html, dir);
       html = rewriteInternalLinks(html, dir);
-      html = buildHead(html, dir, page.file, metaFor(page, dir), altDirs);
+      var meta = metaFor(page, dir);
+      html = buildHead(html, dir, page.file, meta, altDirs);
+      if (page.file === "index.html") html = injectHomeSeo(html, dir, meta);
       html = injectRuntime(html, dir);
       writeIfChanged(path.join(ROOT, dir, page.file), html);
       report.pages++;
@@ -624,6 +761,7 @@ function build() {
       html = bakeMarket(html, dir);
       html = rewriteInternalLinks(html, dir);
       html = buildHead(html, dir, file, null, altDirs);
+      html = injectLegalBreadcrumb(html, dir, file);
       html = injectRuntime(html, dir, { bottomNav: true });
       writeIfChanged(path.join(ROOT, dir, file), html);
       report.legal++;
@@ -655,7 +793,9 @@ module.exports = {
   DIRS: DIRS, DIR_CODES: DIR_CODES, PAGE_FILES: PAGE_FILES, LEGAL_FILE_LIST: LEGAL_FILE_LIST,
   mapPath: mapPath, rewriteInternalLinks: rewriteInternalLinks, bakeI18n: bakeI18n, formatPrice: formatPrice,
   bakeMarket: bakeMarket, helplineFor: helplineFor, leagueNamesData: leagueNamesData,
-  marketRuntimeData: marketRuntimeData, redirectsContent: redirectsContent, build: build
+  marketRuntimeData: marketRuntimeData, redirectsContent: redirectsContent, build: build,
+  buildHead: buildHead, setHtmlLang: setHtmlLang, injectRuntime: injectRuntime, metaFor: metaFor,
+  homeJsonLd: homeJsonLd, homeSeoBlock: homeSeoBlock
 };
 
 if (require.main === module) build();

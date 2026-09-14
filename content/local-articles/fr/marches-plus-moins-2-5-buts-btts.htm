@@ -1,0 +1,76 @@
+<h2 id="deux-questions">1. Deux marchés, deux questions</h2>
+
+<p>Parmi les marchés de buts, deux reviennent sur presque tous les matchs : <strong>plus ou moins de 2,5 buts</strong> et <strong>les deux équipes marquent</strong>, souvent abrégé en BTTS (de l'anglais <em>both teams to score</em>). On les confond volontiers, parce qu'ils parlent tous les deux de buts. Ils posent pourtant des questions différentes.</p>
+
+<ul>
+  <li>Le marché <strong>plus/moins de 2,5 buts</strong> demande : combien de buts au total, toutes équipes confondues ?</li>
+  <li>Le marché <strong>BTTS</strong> demande : chacune des deux équipes marque-t-elle au moins une fois ?</li>
+</ul>
+
+<p>Un 3-0 fait gagner « plus de 2,5 buts » mais perdre « les deux équipes marquent ». Un 1-1 fait exactement l'inverse. Comprendre cette différence est la base de toute lecture sérieuse de ces marchés.</p>
+
+<h2 id="plus-moins">2. Plus/moins de X buts : les lignes</h2>
+
+<p>La ligne de 2,5 est la plus courante, mais le principe est le même pour toutes les lignes en demi-but. Comme un match ne peut pas produire un demi-but, la demi-unité sert uniquement à exclure l'égalité :</p>
+
+<ul>
+  <li><strong>Plus de 0,5 but</strong> : il faut au moins un but dans le match.</li>
+  <li><strong>Plus de 1,5 but</strong> : au moins deux buts.</li>
+  <li><strong>Plus de 2,5 buts</strong> : au moins trois buts.</li>
+  <li><strong>Plus de 3,5 buts</strong> : au moins quatre buts.</li>
+</ul>
+
+<p>En règle générale, seul compte le score à la fin du temps réglementaire, arrêts de jeu compris : les prolongations et les tirs au but sont exclus. Les règlements varient toutefois d'un opérateur à l'autre, il faut donc toujours vérifier comment un marché est réglé.</p>
+
+<h2 id="btts">3. « Les deux équipes marquent »</h2>
+
+<p>Le BTTS « oui » est gagnant dès que chaque équipe a marqué au moins un but dans le temps réglementaire, quel que soit le score final : 1-1, 2-1 ou 4-3 donnent le même résultat. Le BTTS « non » est gagnant si au moins une des deux équipes ne marque pas, y compris sur un 0-0.</p>
+
+<p>Ce marché dépend donc de la capacité de <em>chaque</em> équipe à marquer, pas du total. Un match attendu très offensif mais déséquilibré, où une seule équipe domine, peut produire beaucoup de buts sans que le BTTS soit gagnant.</p>
+
+<h2 id="calcul">4. De l'estimation des buts aux probabilités</h2>
+
+<p>La méthode classique part d'une estimation du nombre de buts attendus pour chaque équipe, puis applique la loi de Poisson. Notre <a href="/blog/guides/plus-de-2-5-buts-probabilite-methode-poisson.html">guide sur la méthode de Poisson</a> détaille le calcul pas à pas. Prenons un exemple illustratif : l'équipe à domicile attend 1,5 but, l'équipe à l'extérieur 1,1 but, soit 2,6 buts attendus au total.</p>
+
+<div class="formula">P(0 but au total) = e<sup>−2,6</sup> ≈ 7,4 %<br>P(1 but) ≈ 19,3 % · P(2 buts) ≈ 25,1 % · P(3 buts) ≈ 21,8 %</div>
+
+<p>On en déduit les probabilités des différentes lignes :</p>
+
+<ul>
+  <li><strong>Plus de 1,5 but</strong> : 100 % − 7,4 % − 19,3 % ≈ <strong>73,3 %</strong></li>
+  <li><strong>Plus de 2,5 buts</strong> : 73,3 % − 25,1 % ≈ <strong>48,2 %</strong></li>
+  <li><strong>Plus de 3,5 buts</strong> : 48,2 % − 21,8 % ≈ <strong>26,4 %</strong></li>
+</ul>
+
+<p>Pour le BTTS, on raisonne équipe par équipe. La probabilité que l'équipe à domicile ne marque pas est e<sup>−1,5</sup>, environ 22,3 % ; pour l'équipe à l'extérieur, e<sup>−1,1</sup>, environ 33,3 %. La probabilité que les deux marquent vaut donc (1 − 0,223) × (1 − 0,333), soit environ <strong>51,8 %</strong>.</p>
+
+<h2 id="differences">5. Pourquoi les deux marchés divergent</h2>
+
+<p>Dans cet exemple, « plus de 2,5 buts » et « les deux équipes marquent » ont des probabilités proches, mais ils ne gagnent pas sur les mêmes scores. Le cas le plus parlant est le 1-1 : avec les mêmes hypothèses, sa probabilité est d'environ 12,3 % (1,5 × e<sup>−1,5</sup> multiplié par 1,1 × e<sup>−1,1</sup>). Sur ce seul score, le BTTS « oui » gagne tandis que « plus de 2,5 buts » perd.</p>
+
+<p>À l'inverse, les victoires nettes sans but encaissé, comme 3-0 ou 4-0, font gagner « plus de 2,5 buts » et perdre le BTTS « oui ». Plus un match est déséquilibré, plus ces scénarios pèsent, et plus les deux marchés s'éloignent l'un de l'autre. Retenir une seule intuition du type « match ouvert, donc les deux marquent » revient à ignorer cette différence.</p>
+
+<h2 id="cote">6. Lire la cote et sa marge</h2>
+
+<p>Pour comparer une cote à une estimation, on la convertit en probabilité implicite : 1 divisé par la cote. Prenons des cotes illustratives de 1,85 sur « plus de 2,5 buts » et 1,95 sur « moins de 2,5 buts ».</p>
+
+<ul>
+  <li>1 ÷ 1,85 ≈ 54,1 %</li>
+  <li>1 ÷ 1,95 ≈ 51,3 %</li>
+</ul>
+
+<p>La somme atteint environ 105,3 % : les 5,3 points au-delà de 100 % correspondent à la marge de l'opérateur. En divisant chaque valeur par ce total, on obtient les probabilités « équitables » exprimées par le marché : environ 51,3 % pour plus de 2,5 buts et 48,7 % pour moins. Ce sont ces chiffres, et non les probabilités brutes, qu'il faut comparer à une estimation.</p>
+
+<p>Dans notre exemple, le modèle donne 48,2 % pour plus de 2,5 buts, contre 51,3 % pour le marché. Un écart de quelques points de ce type n'est pas une certitude : il reste souvent du même ordre que la marge d'erreur d'un modèle.</p>
+
+<h2 id="limites">7. Les limites de ce calcul</h2>
+
+<ul>
+  <li><strong>L'indépendance des équipes.</strong> La loi de Poisson traite les buts des deux équipes comme indépendants. Dans la réalité, les petits scores comme 0-0 et 1-1 sont plus fréquents que ce qu'elle prédit, d'où les corrections de type Dixon-Coles.</li>
+  <li><strong>Le scénario du match.</strong> Un but précoce ou un carton rouge change le rythme d'une rencontre, ce qu'un calcul d'avant-match ne peut pas anticiper.</li>
+  <li><strong>La qualité de l'estimation de départ.</strong> Tout repose sur les buts attendus de chaque équipe. Un écart de 0,2 but attendu modifie sensiblement toutes les probabilités ci-dessus.</li>
+</ul>
+
+<h2 id="iashark">8. Ces marchés sur IASHARK</h2>
+
+<p>IASHARK applique ce type de modèle aux matchs analysés et affiche les probabilités obtenues à côté des cotes du marché. La page <a href="/fr/marches.html">marchés</a> présente les marchés couverts, et notre article sur la <a href="/fr/articles/ligue-1-format-enjeux-saison.html">Ligue 1</a> donne le contexte du championnat. Une probabilité reste une estimation : elle décrit l'incertitude d'un match, elle ne la supprime jamais.</p>

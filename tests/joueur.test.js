@@ -105,10 +105,13 @@ test("le titre 'pourquoi il est a surveiller' n'apparait que pour un joueur reel
 });
 
 test("la page passe par match-data, qui decide ce qu'un visiteur recoit", () => {
-  assert.match(js, /functions\.invoke\('match-data'\)/);
+  assert.match(js, /functions\.invoke\('match-data'[,)]/);
   // Le repli direct sur le fichier public n'existe que si la fonction est
   // injoignable, jamais comme chemin normal pour un visiteur sans session.
-  const bloc = js.slice(js.indexOf("async function charger"), js.indexOf("async function charger") + 1200);
+  const bloc = js.slice(js.indexOf("async function charger"), js.indexOf("return { vm: vm", js.indexOf("async function charger")));
+  assert.ok(bloc.indexOf("functions.invoke") > 0);
+  assert.ok(bloc.indexOf("functions.invoke") < bloc.indexOf("fetch('/match/"),
+    "le fichier public est lu avant la fonction protegee");
   assert.ok(bloc.indexOf("functions.invoke") < bloc.indexOf("fetch('/data.json"),
     "le fichier public est lu avant la fonction protegee");
 });

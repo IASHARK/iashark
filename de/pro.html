@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="iashark-market" content="fr">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>IASHARK TOOLS</title>
-<meta name="description" content="Tipps mit hoher Modellwahrscheinlichkeit, automatisches Wett-Tracking und Quotenprüfung mit einem Klick — der IASHARK-Tools-Bereich.">
+<title>IASHARK Tools: Modell-Tipps und Wett-Tracking</title>
+<meta name="description" content="Tipps mit hoher Modellwahrscheinlichkeit, automatisches Wett-Tracking und Quotenprüfung mit einem Klick: der Tools-Bereich von IASHARK.">
 <link rel="canonical" href="https://iashark.com/de/pro.html">
 <link rel="alternate" hreflang="fr" href="https://iashark.com/fr/pro.html">
 <link rel="alternate" hreflang="en-GB" href="https://iashark.com/gb/pro.html">
@@ -18,12 +18,22 @@
 <link rel="alternate" hreflang="pt" href="https://iashark.com/pt/pro.html">
 <link rel="alternate" hreflang="x-default" href="https://iashark.com/fr/pro.html">
 <link rel="icon" href="/assets/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <link rel="stylesheet" href="/assets/tailwind.css">
 <link rel="stylesheet" href="/assets/tools-page.css">
 <link rel="stylesheet" href="/assets/lang-switcher.css">
 <link rel="stylesheet" href="/assets/bottom-navigation.css">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="IASHARK">
+<meta property="og:locale" content="de_DE">
+<meta property="og:title" content="IASHARK Tools: Modell-Tipps und Wett-Tracking">
+<meta property="og:description" content="Tipps mit hoher Modellwahrscheinlichkeit, automatisches Wett-Tracking und Quotenprüfung mit einem Klick: der Tools-Bereich von IASHARK.">
+<meta property="og:url" content="https://iashark.com/de/pro.html">
+<meta property="og:image" content="https://iashark.com/icon-512.png">
+<meta name="twitter:card" content="summary">
 </head>
 <body class="min-h-screen bg-page text-ink antialiased">
 
@@ -53,7 +63,7 @@
         class="tool-tab group flex w-full items-start gap-3 rounded-xl border border-transparent px-3 py-3 text-left transition hover:bg-white/[0.04]">
         <svg viewBox="0 0 24 24" aria-hidden="true" class="mt-0.5 h-[18px] w-[18px] shrink-0 fill-none stroke-current stroke-[1.7] text-soft transition group-data-[active=1]:text-cyan"><path d="M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14Z"/><path d="m16.5 16.5 4 4"/></svg>
         <span class="min-w-0">
-          <span class="block text-[9.5px] font-bold tracking-[0.16em] text-soft/70" data-i18n="tools_page.static_cat_scan">ERKENNEN</span>
+          <span class="block text-[9.5px] font-bold tracking-[0.16em] text-soft" data-i18n="tools_page.static_cat_scan">ERKENNEN</span>
           <span class="block text-[14px] font-semibold leading-tight text-ink" data-i18n="tools_page.scan_title">Vorteils-Scanner</span>
           <span data-i18n="tools_page.static_desc_scan" class="mt-0.5 block text-[12px] leading-snug text-soft">Wo der Markt am stärksten von unseren Wahrscheinlichkeiten abweicht.</span>
         </span>
@@ -62,7 +72,7 @@
         class="tool-tab group flex w-full items-start gap-3 rounded-xl border border-transparent px-3 py-3 text-left transition hover:bg-white/[0.04]">
         <svg viewBox="0 0 24 24" aria-hidden="true" class="mt-0.5 h-[18px] w-[18px] shrink-0 fill-none stroke-current stroke-[1.7] text-soft transition group-data-[active=1]:text-cyan"><path d="M12 4v16"/><path d="M5 8h14"/><path d="m5 8-2.5 6h5L5 8Z"/><path d="m19 8-2.5 6h5L19 8Z"/></svg>
         <span class="min-w-0">
-          <span class="block text-[9.5px] font-bold tracking-[0.16em] text-soft/70" data-i18n="tools_page.static_cat_fair">BEWERTEN</span>
+          <span class="block text-[9.5px] font-bold tracking-[0.16em] text-soft" data-i18n="tools_page.static_cat_fair">BEWERTEN</span>
           <span class="block text-[14px] font-semibold leading-tight text-ink" data-i18n="tools_page.fair_title">Faire Quote</span>
           <span data-i18n="tools_page.static_desc_fair" class="mt-0.5 block text-[12px] leading-snug text-soft">Die Quote, die eine Wahrscheinlichkeit verdient, im Vergleich zum angebotenen Preis.</span>
         </span>
@@ -71,7 +81,7 @@
         class="tool-tab group flex w-full items-start gap-3 rounded-xl border border-transparent px-3 py-3 text-left transition hover:bg-white/[0.04]">
         <svg viewBox="0 0 24 24" aria-hidden="true" class="mt-0.5 h-[18px] w-[18px] shrink-0 fill-none stroke-current stroke-[1.7] text-soft transition group-data-[active=1]:text-cyan"><path d="M3 17V7"/><path d="M9 17V11"/><path d="M15 17V9"/><path d="M21 17V5"/></svg>
         <span class="min-w-0">
-          <span class="block text-[9.5px] font-bold tracking-[0.16em] text-soft/70" data-i18n="tools_page.static_cat_stake">DIMENSIONIEREN</span>
+          <span class="block text-[9.5px] font-bold tracking-[0.16em] text-soft" data-i18n="tools_page.static_cat_stake">DIMENSIONIEREN</span>
           <span class="block text-[14px] font-semibold leading-tight text-ink" data-i18n="tools_page.stake_title">Einsatzrechner</span>
           <span data-i18n="tools_page.static_desc_stake" class="mt-0.5 block text-[12px] leading-snug text-soft">Wie viel je nach Kapital und Quote gesetzt werden sollte.</span>
         </span>
@@ -80,7 +90,7 @@
         class="tool-tab group flex w-full items-start gap-3 rounded-xl border border-transparent px-3 py-3 text-left transition hover:bg-white/[0.04]">
         <svg viewBox="0 0 24 24" aria-hidden="true" class="mt-0.5 h-[18px] w-[18px] shrink-0 fill-none stroke-current stroke-[1.7] text-soft transition group-data-[active=1]:text-cyan"><path d="M3 15c3-8 6 4 9-2s6 3 9-5"/><path d="M3 20h18"/></svg>
         <span class="min-w-0">
-          <span class="block text-[9.5px] font-bold tracking-[0.16em] text-soft/70" data-i18n="tools_page.static_cat_bankroll">SIMULIEREN</span>
+          <span class="block text-[9.5px] font-bold tracking-[0.16em] text-soft" data-i18n="tools_page.static_cat_bankroll">SIMULIEREN</span>
           <span class="block text-[14px] font-semibold leading-tight text-ink" data-i18n="tools_page.bankroll_title">Kapitalsimulator</span>
           <span data-i18n="tools_page.static_desc_bankroll" class="mt-0.5 block text-[12px] leading-snug text-soft">Wie tief das Kapital fallen kann, bevor es sich erholt.</span>
         </span>
@@ -89,7 +99,7 @@
         class="tool-tab group flex w-full items-start gap-3 rounded-xl border border-transparent px-3 py-3 text-left transition hover:bg-white/[0.04]">
         <svg viewBox="0 0 24 24" aria-hidden="true" class="mt-0.5 h-[18px] w-[18px] shrink-0 fill-none stroke-current stroke-[1.7] text-soft transition group-data-[active=1]:text-cyan"><path d="M7 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z"/><path d="M17 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z"/><path d="M11 12h2"/></svg>
         <span class="min-w-0">
-          <span class="block text-[9.5px] font-bold tracking-[0.16em] text-soft/70" data-i18n="tools_page.static_cat_combo">KOMBINIEREN</span>
+          <span class="block text-[9.5px] font-bold tracking-[0.16em] text-soft" data-i18n="tools_page.static_cat_combo">KOMBINIEREN</span>
           <span class="block text-[14px] font-semibold leading-tight text-ink" data-i18n="tools_page.combo_title">Kombiwetten-Analyse</span>
           <span data-i18n="tools_page.static_desc_combo" class="mt-0.5 block text-[12px] leading-snug text-soft">Was eine Kombiwette dem Erwartungswert wirklich nimmt.</span>
         </span>
@@ -98,7 +108,7 @@
         class="tool-tab group flex w-full items-start gap-3 rounded-xl border border-transparent px-3 py-3 text-left transition hover:bg-white/[0.04]">
         <svg viewBox="0 0 24 24" aria-hidden="true" class="mt-0.5 h-[18px] w-[18px] shrink-0 fill-none stroke-current stroke-[1.7] text-soft transition group-data-[active=1]:text-cyan"><path d="M5 4h11l3 3v13H5z"/><path d="M9 10h6"/><path d="M9 14h6"/></svg>
         <span class="min-w-0">
-          <span class="block text-[9.5px] font-bold tracking-[0.16em] text-soft/70" data-i18n="tools_page.static_cat_journal">MESSEN</span>
+          <span class="block text-[9.5px] font-bold tracking-[0.16em] text-soft" data-i18n="tools_page.static_cat_journal">MESSEN</span>
           <span class="block text-[14px] font-semibold leading-tight text-ink" data-i18n="tools_page.journal_title">Entscheidungsjournal</span>
           <span data-i18n="tools_page.static_desc_journal" class="mt-0.5 block text-[12px] leading-snug text-soft">Was die erfassten Wetten tatsächlich eingebracht haben.</span>
         </span>

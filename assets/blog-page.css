@@ -60,3 +60,7 @@ img,svg{display:block;max-width:100%}
 .fleche{display:inline-block;transition:transform .18s ease}
 .groupe-lire:hover .fleche,.carte:hover .fleche{transform:translateX(3px)}
 @media(prefers-reduced-motion:reduce){.fleche{transition:none}}
+
+/* Cible tactile des filtres de sujet : 21 px de haut mesures sur mobile
+   (QA visuelle 14/09/2026). */
+.sujet{min-height:36px;display:inline-flex;align-items:center}

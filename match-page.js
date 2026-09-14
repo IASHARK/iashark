@@ -2,119 +2,101 @@
 const root=document.getElementById('matchRoot');
 // i18n : repli local, jamais une erreur si I18N n'est pas charge (ou pas
 // encore pret) - on renvoie alors toujours le libelle francais d'origine.
-// Meme motif que celui deja utilise par player-page.js.
 function t(key,fallback){return (window.I18N&&window.I18N.t)?window.I18N.t(key,fallback):fallback;}
 function localeTag(){return (window.I18N&&window.I18N.localeTag)?window.I18N.localeTag():'fr-FR';}
 // Gabarit a variables {nom} (remplacement en une passe : une valeur qui
 // contient elle-meme des accolades n'est jamais re-substituee).
 function tf(key,fallback,vars){const s=String(t(key,fallback));return vars?s.replace(/\{(\w+)\}/g,(m,k)=>vars[k]!=null?vars[k]:m):s;}
-// Lien interne qui garde le visiteur dans son repertoire de langue/marche
-// (/gb/, /mx/...). Repli : chemin racine, comportement historique.
+// Lien interne qui garde le visiteur dans son repertoire de langue/marche.
 function lien(p){return (window.I18N&&window.I18N.href)?window.I18N.href(p):'/'+p;}
 function estFr(){return !(window.I18N&&window.I18N.locale)||window.I18N.locale==='fr';}
-// Textes rediges par le pipeline (LLM ou gabarits francais du workflow) :
-// rediges en francais. Hors FR, on affiche uniquement leur traduction
-// validee par le pipeline (<champ>_i18n, es-mx -> es, voir
-// lib/match-view-model.js#localizedNarrative) ; sans traduction, rien -
-// jamais du francais, jamais une traduction inventee.
+// Textes rediges par le pipeline : francais d'origine ; hors FR, uniquement
+// leur traduction validee (<champ>_i18n, es-mx -> es) ; sans traduction,
+// rien - jamais du francais, jamais une traduction inventee.
 function narratif(v,i18n){
   if(estFr())return v;
   const vmLib=window.IasharkMatchViewModel;
   return vmLib&&vmLib.localizedNarrative?vmLib.localizedNarrative(v,i18n,window.I18N.locale):null;
 }
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const n=v=>Number.isFinite(Number(v))?Number(v):null;
+const n=v=>v!==null&&v!==undefined&&v!==''&&Number.isFinite(Number(v))?Number(v):null;
 const fmt=(v,d=1)=>n(v)===null?'—':Number(v).toLocaleString(localeTag(),{maximumFractionDigits:d});
-const pct=v=>n(v)===null?'—':fmt(v)+'%';
+// Pourcentage au format de la langue ("70 %" en francais, "70%" en anglais).
+const pct=(v,d=1)=>n(v)===null?'—':(Number(v)/100).toLocaleString(localeTag(),{style:'percent',maximumFractionDigits:d});
 const odds=v=>n(v)===null?'—':Number(v).toLocaleString(localeTag(),{minimumFractionDigits:2,maximumFractionDigits:2});
+// Ecart en points : toujours signe ("+4,4 pts", "−2,1 pts").
+const pts=v=>n(v)===null?'—':`${v>0?'+':v<0?'−':''}${fmt(Math.abs(v))} ${t('match_page.points_short','pts')}`;
 const clamp=v=>Math.max(0,Math.min(100,n(v)||0));
 const img=(src,alt)=>src?`<img src="${esc(src)}" alt="${esc(alt)}" loading="lazy">`:'';
 const empty=txt=>`<div class="empty">${esc(txt)}</div>`;
 
-// Selection du "match gratuit du jour" - doit rester identique a getChoc()
-// dans index.html (meme calcul de confiance ovrConf/normEdge/normConf) pour
-// que ce soit toujours EXACTEMENT le match mis en avant sur l'accueil qui
-// reste accessible sans Pro, jamais un autre. m.hot n'est PAS ce signal
-// (plusieurs matchs peuvent etre "hot" le meme jour - ecart trouve en test
-// reel : 7 matchs hot sur 13, alors qu'un seul doit rester gratuit).
-function normConf_(c){c=parseFloat(c)||0;return c<=1?c*10:c;}
-function parseEdge_(m){if(m==null||m.edge==null||m.edge==='')return null;const v=parseFloat(String(m.edge).replace(',','.'));return isNaN(v)?null:v;}
-function normEdge_(e){if(e==null||isNaN(e))return null;if(e<=1)return e*100;if(e<=10)return e*10;return Math.min(e,100);}
-function ovrConf_(m){const e=normEdge_(parseEdge_(m));return e!=null?e:Math.min(normConf_(m.conf)*10,100);}
-function todayParis_(){
-  const f=new Intl.DateTimeFormat('fr-FR',{timeZone:'Europe/Paris',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false}).formatToParts(new Date()),r={};
-  f.forEach(x=>{r[x.type]=x.value;});
-  return {day:`${r.year}-${r.month}-${r.day}`,now:`${r.year}-${r.month}-${r.day} ${r.hour}:${r.minute}`};
-}
-
-// Icones : purement decoratives, memes tokens de couleur, aucune emoticone.
+// Icones : purement decoratives (aria-hidden), memes tokens de couleur.
 const ICONS={
-  h2h:'<path d="M8 3v4M16 3v4M4 9h16M5 5h14a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Z"/>',
   compare:'<path d="M6 20V10M12 20V4M18 20v-7"/>',
   target:'<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r=".6" fill="currentColor"/>',
-  whistle:'<path d="M4 12a5 5 0 0 1 5-5h6.5A4.5 4.5 0 0 1 20 11.5a4.5 4.5 0 0 1-4.5 4.5H12l-3 3v-3a5 5 0 0 1-5-4Z"/><circle cx="8.5" cy="12" r="1.4"/>',
-  reasons:'<path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1.4" fill="currentColor" stroke="none"/><circle cx="4.5" cy="12" r="1.4" fill="currentColor" stroke="none"/><circle cx="4.5" cy="18" r="1.4" fill="currentColor" stroke="none"/>',
   target2:'<path d="M13 2 3 14h7l-1 8 10-12h-7l1-8Z"/>',
   chart:'<path d="M4 19V5M4 19h16M8 15l3-4 3 2 4-6"/>',
-  trophy:'<path d="M8 3h8v4a4 4 0 0 1-8 0V3Z"/><path d="M8 4H5a3 3 0 0 0 3 5M16 4h3a3 3 0 0 1-3 5"/><path d="M12 11v3M9.5 18h5M10 15h4l.5 3h-5l.5-3Z"/>',
-  leaf:'<path d="M5 19c8 0 14-6 14-14-8 0-14 6-14 14Z"/><path d="M5 19c2-4 5-7 9-9"/>',
   cloud:'<path d="M7 18a4 4 0 0 1-.5-7.97A5 5 0 0 1 16 8.5 4.5 4.5 0 0 1 15.5 18H7Z"/>',
-  bulb:'<path d="M9 18h6M10 21h4M7 9a5 5 0 1 1 10 0c0 2-1 3-2 4.2-.5.6-.8 1.1-.8 1.8H9.8c0-.7-.3-1.2-.8-1.8C8 12 7 11 7 9Z"/>',
   scale:'<path d="M12 3v18M7 7 4 13a3 3 0 0 0 6 0L7 7ZM17 7l-3 6a3 3 0 0 0 6 0l-3-6ZM4 7h6M14 7h6"/>',
   alert:'<path d="M12 3 2 20h20L12 3Z"/><path d="M12 10v4M12 17v.01"/>',
   trend:'<path d="M4 17 10 11l4 4 6-8"/><path d="M16 6h4v4"/>',
   faq:'<circle cx="12" cy="12" r="9"/><path d="M9.2 9.3a2.8 2.8 0 0 1 5.5.8c0 1.9-2.7 2.2-2.7 4"/><circle cx="12" cy="17.4" r=".9" fill="currentColor" stroke="none"/>',
-  lock:'<rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>'
+  lock:'<rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',
+  table:'<path d="M4 5h16v14H4zM4 10h16M4 15h16M10 5v14"/>',
+  cross:'<path d="M12 5v14M5 12h14"/><circle cx="12" cy="12" r="9"/>',
+  pin:'<path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.4"/>'
 };
-const cardIcon=key=>ICONS[key]?`<svg viewBox="0 0 24 24" class="card-icon">${ICONS[key]}</svg>`:'';
+const cardIcon=key=>ICONS[key]?`<svg viewBox="0 0 24 24" class="card-icon" aria-hidden="true" focusable="false">${ICONS[key]}</svg>`:'';
 const card=(title,body,cls='',icon='')=>`<section class="card reveal ${cls}"><h2>${cardIcon(icon)}${esc(title)}</h2>${body}</section>`;
 
-function probRing(value,big){
-  if(n(value)===null)return '';
-  const r=big?46:20,c=2*Math.PI*r,offset=c*(1-clamp(value)/100),size=big?104:48,cx=size/2;
-  return `<div class="prob-ring${big?' big':''}"><svg viewBox="0 0 ${size} ${size}"><circle class="track" cx="${cx}" cy="${cx}" r="${r}"></circle><circle class="fill" cx="${cx}" cy="${cx}" r="${r}" stroke-dasharray="${c.toFixed(1)}" stroke-dashoffset="${c.toFixed(1)}" data-target="${offset.toFixed(1)}"></circle></svg><div class="val">${Math.round(value)}<small>%</small></div></div>`;
+// Traduction d'un libelle de marche du moteur dans la forme standard des
+// bookmakers, avec les noms des equipes (lib/market-labels.js) : "DC 1X" ->
+// "Double chance : Leeds ou nul". Appliquee a l'AFFICHAGE seulement.
+// Nom historique conserve ; le libelle sort dans la langue active.
+function marcheFr(vm,libelle){
+  const ml=window.IasharkMarketLabels;
+  return ml?(ml.marketLabel||ml.marketLabelFr)(libelle,{home:vm.identity.home.name,away:vm.identity.away.name}):String(libelle||'');
+}
+// Ligne du tableau des marches : l'identifiant moteur quand il est connu
+// (plus fiable), sinon le libelle.
+function libelleLigne(vm,row){
+  const ml=window.IasharkMarketLabels,eq={home:vm.identity.home.name,away:vm.identity.away.name};
+  if(ml&&row.id&&ml.marketIdLabel){const s=ml.marketIdLabel(row.id,eq);if(s&&s!==row.id)return s;}
+  return marcheFr(vm,row.label);
 }
 
-function formStrip(form){
-  if(!form)return '';
-  const chars=String(form).slice(-5).split('').filter(c=>'WDL'.includes(c.toUpperCase()));
-  if(!chars.length)return '';
-  return `<div class="form-strip">${chars.map(c=>`<i class="f-${c.toLowerCase()}">${esc(c)}</i>`).join('')}</div>`;
-}
-// Rang au classement dans la convention de la langue (1er/2e, 1st/2nd,
-// 1.º, 1.) : categorie ordinale Intl, gabarit par categorie.
-function rangOrdinal(n){
+// Rang au classement dans la convention de la langue (1er/2e, 1st/2nd...).
+function rangOrdinal(v){
   let cat='other';
-  try{cat=new Intl.PluralRules(localeTag(),{type:'ordinal'}).select(Number(n));}catch(e){}
-  return tf('match_page.rank_ordinal_'+cat,cat==='one'?'{n}er':'{n}e',{n});
+  try{cat=new Intl.PluralRules(localeTag(),{type:'ordinal'}).select(Number(v));}catch(e){}
+  return tf('match_page.rank_ordinal_'+cat,cat==='one'?'{n}er':'{n}e',{n:v});
 }
-function teamMeta(s){
-  if(!s)return '';
-  return `<small>${esc(rangOrdinal(s.rank))} · ${s.pts} ${esc(t('match_page.points_short','pts'))}</small>${formStrip(s.form)}`;
+// Forme : lettres de la langue (V/N/D en francais, W/D/L en anglais).
+const FORM_LETTRES={W:['match_page.form_letter_w','V'],D:['match_page.form_letter_d','N'],L:['match_page.form_letter_l','D']};
+const FORM_ISSUES={W:['match_page.form_result_w','Victoire'],D:['match_page.form_result_d','Nul'],L:['match_page.form_result_l','Défaite']};
+const lettre=r=>FORM_LETTRES[r]?t(FORM_LETTRES[r][0],FORM_LETTRES[r][1]):r;
+function formStrip(rows,standingsForm){
+  // Du plus ancien au plus recent : le dernier match est a droite.
+  const list=rows&&rows.length?rows.slice().reverse():String(standingsForm||'').slice(-5).split('').filter(c=>'WDL'.includes(c)).map(c=>({result:c}));
+  if(!list.length)return '';
+  return `<ol class="form-strip" aria-label="${esc(t('match_page.form_aria','Forme récente, du plus ancien au plus récent'))}">${list.map(r=>{
+    const issue=FORM_ISSUES[r.result]?t(FORM_ISSUES[r.result][0],FORM_ISSUES[r.result][1]):r.result;
+    const detail=r.score?`${issue} ${r.score}${r.opponent?' · '+r.opponent:''}`:issue;
+    return `<li class="f-${r.result.toLowerCase()}" title="${esc(detail)}"><span aria-hidden="true">${esc(lettre(r.result))}</span><span class="sr-only">${esc(detail)}</span></li>`;
+  }).join('')}</ol>`;
 }
-
-function confidenceBadge(label){
-  if(!label)return '';
-  const l=label.toLowerCase();
-  const niveau=l.includes('élev')||l.includes('elev')?'high':l.includes('moy')?'medium':l.includes('faib')?'low':null;
-  const cls=niveau==='high'?'b-green':niveau==='medium'?'b-orange':niveau==='low'?'b-red':'b-cyan';
-  // Le libelle vient des donnees ("Élevée"/"Moyenne"/"Faible") : traduit par
-  // niveau, jamais affiche brut hors FR.
-  const texte=niveau?t('match_page.reliability_'+niveau,label):(estFr()?label:'');
-  return `<span class="badge ${cls}">${esc(t('match_page.confidence_prefix','Confiance'))}${texte?' '+esc(texte):''}</span>`;
+function teamMeta(s,rows){
+  const bits=s?`<small>${esc(rangOrdinal(s.rank))} · ${esc(s.pts)} ${esc(t('match_page.points_short','pts'))}</small>`:'';
+  return `${bits}${formStrip(rows,s&&s.form)}`;
 }
-// Libelles de repli du view-model (francais) et meteo OpenWeather (demandee
-// en francais par le pipeline, lang=fr) : traduits a l'affichage.
-// Nom de competition : config/leagues.json (lib/league-names.js) d'abord, un
-// seul nom par competition sur tout le site ; sinon nom brut des donnees.
+// Nom de competition : config/leagues.json (lib/league-names.js) d'abord.
 function nomLigue(i,vm){
   const officiel=vm&&vm._raw&&window.IasharkLeagueNames?window.IasharkLeagueNames.displayName(vm._raw.league_key):null;
   if(officiel)return officiel;
   return i.league.name==='Compétition'?t('match_page.league_fallback','Compétition'):i.league.name;
 }
-// Date et heure du coup d'envoi dans la langue ET le fuseau du visiteur
-// (lib/match-time.js : data.json est en heure de Paris). Nom court du fuseau
-// affiche a cote de l'heure. Repli : valeurs brutes du view-model.
+// Date et heure du coup d'envoi dans la langue ET le fuseau du visiteur, nom
+// court du fuseau a cote de l'heure (lib/match-time.js).
 function dateHeure(vm){
   const mt=window.IasharkMatchTime,raw=vm._raw;
   if(mt&&raw&&mt.matchDate(raw))return{date:mt.formatDate(raw,localeTag()),time:mt.formatTime(raw,localeTag(),{zone:true})};
@@ -142,192 +124,286 @@ function meteo(desc){
   const k=METEO_CLES[d.toLowerCase()];
   return k?t('match_page.weather_'+k,''):'';
 }
-function riskBadge(code){
-  if(!code)return '';
-  const map={FAIBLE:['b-green',t('match_page.risk_low','Risque faible')],MODERE:['b-orange',t('match_page.risk_medium','Risque modéré')],ELEVE:['b-red',t('match_page.risk_high','Risque élevé')]};
-  const [cls,label]=map[code]||['b-cyan',code];
-  return `<span class="badge ${cls}">${esc(label)}</span>`;
-}
 
-// Rangee de tags "enjeu" : uniquement des signaux 100% reels et calcules -
-// nom de competition (reel), meteo (reel, OpenWeather deja branche), et un
-// seul tag derive d'un vrai seuil xG combine (jamais une categorie inventee
-// type "derby" qui demanderait une liste de rivalites maintenue a la main).
-// tagsRow() a ete supprimee de la page : elle affichait le nom de la
-// competition (deja dans l'en-tete) et un tag "match offensif attendu"
-// redondant avec les buts attendus. Sa seule information propre, la meteo,
-// a rejoint la ligne du stade ci-dessous.
-
-// Barre 1X2 : une seule bande divisee en 3 (domicile/nul/exterieur), sous
-// les series de forme des deux equipes dans la carte d'en-tete - remplace
-// l'ancien affichage en 3 chiffres empiles dans "Notre lecture du match"
-// (retire de la, le pari recommande y reste seul narratif). Meme donnee
-// (vm.model.probabilities), juste deplacee et reformattee en bande.
-function probBar(vm){
-  const p=vm.model.probabilities;
-  if(!p)return '';
-  const homeName=vm.identity.home.name,awayName=vm.identity.away.name;
-  const home=n(p.home)||0,draw=n(p.draw)||0,away=n(p.away)||0,total=home+draw+away;
-  if(total<=0)return '';
-  // La barre 1X2 etait vert / gris / rouge : le vert et le rouge y
-  // designaient simplement "domicile" et "exterieur", ce qui suggere a tort
-  // "bon" et "mauvais", et faisait du plus gros bloc de la page un aplat
-  // multicolore. Elle passe en degrade de gris avec le CYAN sur l'issue la
-  // plus probable - la couleur porte enfin une information (le favori du
-  // modele) au lieu d'une identite d'equipe.
-  const top=Math.max(home,draw,away);
-  const seg=(v,cls,label)=>{
-    const w=v/total*100;
-    const lead=v===top?' is-lead':'';
-    return `<span class="${cls}${lead}" style="width:${w.toFixed(2)}%">${w>=13?pct(v):''}</span>`;
-  };
-  return `<div class="hero-probbar">
-    <div class="prob-bar">${seg(home,'home')}${seg(draw,'draw')}${seg(away,'away')}</div>
-    <div class="prob-legend"><span>${esc(homeName)}</span><span>${esc(t('match_page.draw_short','Nul'))}</span><span>${esc(awayName)}</span></div>
-  </div>`;
-}
-
+// EN-TETE. Le h1 unique de la page : les deux equipes. Competition, heure
+// locale avec fuseau, stade, meteo, rang et forme. AUCUNE probabilite du
+// modele : l'en-tete est aussi celui des murs d'acces (match payant sans Pro).
 function hero(vm){
-  const i=vm.identity,s=i.standings||{},dh=dateHeure(vm);
-  return `<section class="card hero reveal">
+  const i=vm.identity,s=i.standings||{},dh=dateHeure(vm),ln=nomLigue(i,vm),f=vm.form||{};
+  const c=vm.conditions;
+  const lieu=c.venue||c.weather?`<div class="hero-venue">${c.venue?`<span>${cardIcon('pin')}${esc(c.venue)}</span>`:''}${c.weather?`<span>${cardIcon('cloud')}${esc(temperature(c.weather.temperature))}${meteo(c.weather.description)?' · '+esc(meteo(c.weather.description)):''}</span>`:''}</div>`:'';
+  return `<header class="card hero reveal">
     <div class="hero-top">
-      <div class="hero-league">${img(i.league.logo,nomLigue(i,vm))}<span>${esc(nomLigue(i,vm))}</span></div>
-      <span class="hero-time">${esc(dh.date||t('match_page.date_tbc','Date à confirmer'))} · ${esc(dh.time||'—')}${vm.model.available?` · <span class="ready"><i></i>${esc(t('match_page.analysis_available','Analyse disponible'))}</span>`:''}</span>
+      <span class="hero-league">${img(i.league.logo,'')}<span>${esc(ln)}</span></span>
+      <span class="hero-time">${esc(dh.date||t('match_page.date_tbc','Date à confirmer'))} · <b>${esc(dh.time||'—')}</b></span>
     </div>
-    <div class="hero-teams">
-      <div class="hero-team">${img(i.home.logo,i.home.name)}<b>${esc(i.home.name)}</b>${teamMeta(s.home)}</div>
-      <div class="hero-vs">VS</div>
-      <div class="hero-team">${img(i.away.logo,i.away.name)}<b>${esc(i.away.name)}</b>${teamMeta(s.away)}</div>
-    </div>
-    ${probBar(vm)}
-    ${vm.conditions.venue||vm.conditions.weather?`<div class="hero-venue">${vm.conditions.venue?`<span><svg viewBox="0 0 24 24"><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.4"/></svg>${esc(vm.conditions.venue)}</span>`:''}${vm.conditions.weather?`<span>${cardIcon('cloud')}${esc(temperature(vm.conditions.weather.temperature))}${meteo(vm.conditions.weather.description)?' · '+esc(meteo(vm.conditions.weather.description)):''}</span>`:''}</div>`:''}
-  </section>`;
+    <h1 class="hero-teams">
+      <span class="hero-team">${img(i.home.logo,'')}<span class="hero-name">${esc(i.home.name)}</span></span>
+      <span class="hero-vs">${esc(t('match_page.vs_label','vs'))}</span>
+      <span class="hero-team">${img(i.away.logo,'')}<span class="hero-name">${esc(i.away.name)}</span></span>
+    </h1>
+    <div class="hero-meta"><div>${teamMeta(s.home,f.home)}</div><div>${teamMeta(s.away,f.away)}</div></div>
+    ${lieu}
+  </header>`;
 }
 
-// Recommandation : ring + Score IASHARK + Cote juste + Cote marche + Value -
-// tous deja calcules cote pipeline/view-model, aucune nouvelle donnee.
-// Notre lecture du match : phrase deterministe (jamais un nouvel appel
-// LLM) qui distingue l'equipe en tete au 1X2 du marche reellement
-// recommande quand ils different, en reutilisant le texte de raison DEJA
-// genere (facteur_x) - jamais un nouveau texte invente ici, juste un
-// gabarit autour de donnees et de textes deja reels.
-function leadingSide(p,homeName,awayName){
-  if(!p)return null;
-  if(p.home>=p.draw&&p.home>=p.away)return{label:homeName,key:'home'};
-  if(p.away>=p.draw&&p.away>=p.home)return{label:awayName,key:'away'};
-  return{label:t('match_page.draw_label','Le nul'),key:'draw'};
+// ---------------------------------------------------------------------------
+// LE SIGNAL IASHARK — centre de la page, juste sous l'en-tete.
+// Dans l'ordre de lecture d'un parieur : le pari (forme standard, en grand),
+// la fiabilite en une ligne, la probabilite du modele sur une jauge ou le
+// marche est pose en repere, la cote utilisee et sa probabilite implicite,
+// l'ecart dit simplement, deux ou trois raisons tirees des donnees reelles,
+// les points a surveiller, et la mention 18+.
+// L'ecart est affiche HONNETEMENT, y compris quand il est defavorable.
+// ---------------------------------------------------------------------------
+const REL_NIVEAUX={high:['match_page.sig_rel_high','Fiabilité élevée'],medium:['match_page.sig_rel_medium','Fiabilité moyenne'],low:['match_page.sig_rel_low','Fiabilité faible']};
+function relBadge(info){
+  if(!info||!REL_NIVEAUX[info.level])return '';
+  return `<span class="sig-rel sig-rel--${info.level}"><i aria-hidden="true"></i>${esc(t(REL_NIVEAUX[info.level][0],REL_NIVEAUX[info.level][1]))}</span>`;
 }
-function findMarket(list,re){return (list||[]).find(m=>re.test(m.market||''))||null;}
-function matchReadingCard(vm){
-  const p=vm.model.probabilities,r=vm.model.recommendation,homeName=vm.identity.home.name,awayName=vm.identity.away.name;
-  if(!p||!r)return '';
-  const leading=leadingSide(p,homeName,awayName);
-  const marketLower=(r.market||'').toLowerCase();
-  const matchesLeader=(leading.key==='home'&&(marketLower.includes('domicile')||marketLower===homeName.toLowerCase()))
-    ||(leading.key==='away'&&(marketLower.includes('exterieur')||marketLower.includes('extérieur')||marketLower===awayName.toLowerCase()))
-    ||(leading.key==='draw'&&marketLower.includes('nul'));
-  const locSuffix=leading.key==='home'?t('match_page.reading_home_suffix',' à domicile'):leading.key==='away'?t('match_page.reading_away_suffix',' à l\'extérieur'):'';
-  const aLAvantage=t('match_page.reading_has_advantage'," a l'avantage");
-  const sentence=matchesLeader
-    ?`${leading.label}${aLAvantage}${locSuffix}${t('match_page.reading_matches_recommendation',", et c'est le marché que nous recommandons.")}`
-    :`${leading.label}${aLAvantage}${locSuffix}${t('match_page.reading_differs_recommendation_prefix',", mais ce n'est pas le marché que nous recommandons — nous recommandons plutôt ")}${marcheFr(vm,r.market)}.`;
-  // facteur_x/conseil_public : texte LLM du pipeline ; hors FR, sa traduction
-  // validee (facteur_x_i18n/conseil_public_i18n), sinon masque.
-  const reason=narratif(vm.editorial.decisiveFactor,vm.editorial.decisiveFactorI18n);
-  // Le marche recommande est deja affiche dans cette rangee. Quand c'est
-  // lui-meme un BTTS, la tuile BTTS generique repetait exactement le meme
-  // libelle et le meme pourcentage deux fois cote a cote.
-  const btts=/btts|deux [eé]quipes marquent/i.test(marketLower)
-    ?null
-    :findMarket(vm.model.marketsCompared,/btts/i);
-  const x=vm.model.expectedGoals;
-  const totalXg=x&&n(x.home)!==null&&n(x.away)!==null?x.home+x.away:null;
-  const risk=vm.editorial.risk;
-  const risqueDescriptif=risk&&!['FAIBLE','MODERE','ELEVE'].includes(risk)?texteRisque(vm,risk):null;
-  return `<section class="card lecture reveal">
-    <h2>${cardIcon('bulb')}${esc(t('match_page.reading_title','Notre lecture du match'))}</h2>
-    <p class="reading">${esc(texteLisible(vm,sentence))}${reason?' '+esc(texteLisible(vm,reason)):''}</p>
-    ${risqueDescriptif?`<div class="risk-note"><b>⚠</b><span>${esc(texteLisible(vm,risqueDescriptif))}</span></div>`:''}
-    <div class="lecture-stats">
-      ${totalXg!==null?`<div><small>${esc(t('match_page.stat_expected_goals','Buts attendus'))}</small><b>${fmt(totalXg)}</b></div>`:''}
-      ${btts?`<div><small>BTTS</small><b>${pct(btts.probability)}</b></div>`:''}
-      <div><small>${esc(marcheFr(vm,r.market))}</small><b>${pct(r.probability)}</b></div>
-      ${vm.model.iasharkScore!==null?`<div><small>${esc(t('match_page.stat_analysis_confidence','Confiance analyse'))}</small><b>${fmt(vm.model.iasharkScore/10)}/10</b></div>`:''}
-    </div>
-  </section>`;
+function relRaison(info){
+  if(!info)return '';
+  if(info.reason==='thin_sample')return n(info.sampleSize)!==null
+    ?tf('match_page.sig_rel_reason_thin_sample','peu de données récentes ({n} matchs cette saison)',{n:info.sampleSize})
+    :t('match_page.sig_rel_reason_thin_sample_nonum','peu de données récentes');
+  const map={models_disagree:'les modèles ne sont pas d’accord entre eux',weak_data:'données incomplètes sur ce match',solid:'modèles d’accord et données complètes',mixed:'signaux partagés entre les modèles et les données'};
+  return map[info.reason]?t('match_page.sig_rel_reason_'+info.reason,map[info.reason]):'';
+}
+function relLigne(info){
+  if(!info||!REL_NIVEAUX[info.level])return '';
+  const raison=relRaison(info);
+  return `${t(REL_NIVEAUX[info.level][0],REL_NIVEAUX[info.level][1])}${raison?t('match_page.label_colon',' :')+' '+raison:''}.`;
 }
 
-// Tient sur une seule ligne (desktop) : marche + probabilite (ring
-// compact) + cotes + value + badges, plus de rangee separee "Score
-// IASHARK" (retire, redondant avec la confiance deja affichee dans
-// "Notre lecture du match").
-// LE SIGNAL — carte-ancre de la page, placee juste sous l'en-tete.
-// Un parieur qui arrive doit voir immediatement CE QU'ON RECOMMANDE, A
-// QUELLE COTE, et SI LE MARCHE EST D'ACCORD. Avant, cette carte arrivait en
-// 4e position, apres l'editorial : le produit vendu n'etait pas visible sans
-// defiler. Aucune donnee nouvelle - marche, probabilite, cote et badges
-// viennent tous du view-model, comme avant.
-//
-// L'ecart modele/marche est affiche HONNETEMENT, y compris quand il est
-// defavorable : si la cote proposee est moins interessante que notre propre
-// cote equitable, on l'ecrit. Un produit payant ne doit jamais maquiller une
-// value negative en signal positif.
-function edgeVerdict(edge){
-  if(edge===null)return null;
-  if(edge>=3)return{cls:'pos',text:`${t('match_page.edge_verdict_positive_prefix','Le marché sous-estime ce scénario de ')}${fmt(Math.abs(edge))}${t('match_page.edge_verdict_positive_suffix',' points de probabilité.')}`};
-  if(edge<=-3)return{cls:'neg',text:`${t('match_page.edge_verdict_negative_prefix','La cote proposée est moins intéressante que notre estimation (')}${fmt(Math.abs(edge))}${t('match_page.edge_verdict_negative_suffix'," points d'écart en défaveur du parieur).")}`};
-  return{cls:'flat',text:t('match_page.edge_verdict_neutral','Le marché est aligné sur notre estimation : l’écart reste dans la marge d’erreur du modèle.')};
+const RAISONS={
+  xg:'Buts attendus par le modèle : {home} {homeXg} – {awayXg} {away}.',
+  goals_avg:'Cette saison par match : {home} marque {homeFor} et encaisse {homeAgainst}, {away} marque {awayFor} et encaisse {awayAgainst}.',
+  h2h_hits:'Ce pari serait passé dans {wins} des {sample} derniers face-à-face.',
+  absences:'{team} privé de {n} joueurs : {names}.',
+  form_wins:'Victoires récentes : {home} {homeWins} sur {homeN}, {away} {awayWins} sur {awayN}.',
+  count_shots:'Tirs par match : {home} {homeValue}, {away} {awayValue} (total {total}).',
+  count_shots_on:'Tirs cadrés par match : {home} {homeValue}, {away} {awayValue} (total {total}).',
+  count_corners:'Corners par match : {home} {homeValue}, {away} {awayValue} (total {total}).',
+  count_cards:'Cartons jaunes par match : {home} {homeValue}, {away} {awayValue} (total {total}).'
+};
+const NUM_VARS=['homeXg','awayXg','totalXg','homeFor','homeAgainst','awayFor','awayAgainst','homeValue','awayValue','total'];
+function texteRaison(item){
+  if(!item||!RAISONS[item.key])return null;
+  const v=Object.assign({},item.vars);
+  NUM_VARS.forEach(k=>{if(v[k]!=null)v[k]=fmt(v[k]);});
+  return tf('match_page.sig_reason_'+item.key,RAISONS[item.key],v);
 }
-// LE SIGNAL. Le marche recommande domine, et la comparaison modele/marche
-// est lue d'un coup d'oeil sur deux barres. Le bandeau du bas ne reprend PAS
-// la probabilite modele, la probabilite marche ni l'ecart : ils sont deja
-// dans le tableau au-dessus. Il ne porte que ce que le tableau ne dit pas,
-// les deux cotes.
+const RISQUES={
+  negative_edge:'cote moins intéressante que notre estimation ({gap} pts en défaveur)',
+  small_edge:'écart faible avec le marché ({gap} pts)',
+  models_disagree:'les modèles divergent sur ce match',
+  backed_absences:'{team} privé de {n} joueurs',
+  low_odds:'cote basse ({odds}) : gain limité'
+};
+function texteRisqueSignal(item){
+  if(!item||!RISQUES[item.key])return null;
+  const v=Object.assign({},item.vars);
+  if(v.gap!=null)v.gap=fmt(v.gap);
+  if(v.odds!=null)v.odds=odds(v.odds);
+  return tf('match_page.sig_risk_'+item.key,RISQUES[item.key],v);
+}
+
+// Indice de confiance : conf 0-10, champ PUBLIC (teaser, lib/premium-fields.js)
+// - le seul chiffre du modele montre aussi sur les murs d'acces. 10 segments.
+function confMeter(conf){
+  const c=n(conf);
+  if(c===null||c<0||c>10)return '';
+  const v=Math.round(c*10)/10,pleins=Math.round(v);
+  const txt=v.toLocaleString(localeTag(),{maximumFractionDigits:1});
+  const aria=tf('match_page.sig_conf_aria','Indice de confiance : {value} sur 10',{value:txt});
+  return `<div class="sig-stat sig-conf">
+      <span class="sig-stat-label">${esc(t('match_page.sig_conf_label','Indice de confiance'))}</span>
+      <div class="sig-stat-row"><b class="sig-conf-val">${esc(txt)}<small>/10</small></b><span class="sig-conf-bar" role="meter" aria-valuemin="0" aria-valuemax="10" aria-valuenow="${v}" aria-valuetext="${esc(txt)}/10" aria-label="${esc(aria)}">${Array.from({length:10},(_,i)=>`<i${i<pleins?' class="on"':''}></i>`).join('')}</span></div>
+    </div>`;
+}
+// Niveau de risque : code deterministe du pipeline (risque = FAIBLE/MODERE/
+// ELEVE, lib/decision.js#computeRiskLabel), champ premium. Absent : rien.
+const RISQUE_NIVEAUX={FAIBLE:['low','Faible',1],MODERE:['medium','Modéré',2],ELEVE:['high','Élevé',3]};
+function riskStat(code){
+  const r=RISQUE_NIVEAUX[code];
+  if(!r)return '';
+  return `<div class="sig-stat sig-risk sig-risk--${r[0]}">
+      <span class="sig-stat-label">${esc(t('match_page.sig_risk_label','Niveau de risque'))}</span>
+      <div class="sig-stat-row"><b>${esc(t('match_page.sig_risk_level_'+r[0],r[1]))}</b><span class="sig-risk-steps" aria-hidden="true">${[1,2,3].map(i=>`<i${i<=r[2]?' class="on"':''}></i>`).join('')}</span></div>
+    </div>`;
+}
+
 function signalCard(vm){
-  const r=vm.model.recommendation;
-  if(!r)return card(t('match_page.signal_title','Le signal IASHARK'),empty(vm.model.unavailableReason?t('match_page.model_unavailable_reason',vm.model.unavailableReason):t('match_page.signal_unavailable_fallback','Aucun marché ne franchit les seuils de confiance ou de cote minimale pour ce match — IASHARK préfère ne pas se prononcer.')),'signal-card','target');
-  const prob=n(r.probability);
-  const fair=prob!==null&&prob>0?100/prob:null;
-  const marketOdds=n(vm.model.recommendedOdds);
-  const implied=marketOdds!==null&&marketOdds>0?100/marketOdds:null;
-  const edge=(prob!==null&&implied!==null)?Math.round((prob-implied)*10)/10:null;
-  const verdict=edgeVerdict(edge);
-  const kpi=(label,value,accent)=>`<div class="min-w-0 border-l border-white/[.07] pl-4 first:border-l-0 first:pl-0"><span class="block text-xs leading-5 text-soft">${esc(label)}</span><b class="mt-1 block text-xl font-semibold tabular-nums ${accent?'text-cyan':'text-ink'}">${value}</b></div>`;
-  const compare=(label,value,isModel)=>value===null?'':`<div><div class="mb-2 flex items-baseline justify-between gap-3 text-sm"><span class="text-soft">${label}</span><b class="tabular-nums ${isModel?'text-cyan':'text-ink'}">${pct(value)}</b></div><div class="h-2 overflow-hidden rounded-full bg-white/[.07]" role="img" aria-label="${label} ${pct(value)}"><span class="block h-full rounded-full ${isModel?'bg-cyan':'bg-white/40'} motion-safe:transition-[width] motion-safe:duration-700" style="width:${clamp(value)}%"></span></div></div>`;
-  return `<section class="signal-card reveal overflow-hidden rounded-2xl border border-cyan/20 bg-panel p-5 shadow-2xl shadow-black/30 sm:p-7 lg:p-8">
-    <div class="flex flex-wrap items-center justify-between gap-3"><span class="inline-flex items-center gap-2 text-sm font-semibold text-cyan">${cardIcon('target')}${esc(t('match_page.signal_title','Le signal IASHARK'))}</span><div class="sig-badges flex flex-wrap gap-2">${confidenceBadge(r.reliability)}${riskBadge(vm.editorial.riskCode)}</div></div>
-    <div class="mt-7 grid gap-7 lg:grid-cols-[minmax(0,1.35fr)_minmax(250px,1fr)] lg:items-end">
-      <div><span class="block text-sm text-soft">${esc(t('match_page.recommended_market_label','Marché recommandé'))}</span><h1 class="mt-2 max-w-3xl text-balance text-3xl font-bold leading-[1.08] tracking-tight text-white sm:text-4xl">${esc(marcheFr(vm,r.market))}</h1></div>
-      <div class="space-y-4 rounded-xl border border-white/[.07] bg-black/15 p-4" aria-label="${esc(t('match_page.aria_model_vs_market','Comparaison du modèle et du marché'))}">${compare(esc(t('match_page.label_model_prob','Probabilité modèle')),prob,true)}${compare(esc(t('match_page.player_engine_market_prob','Probabilité marché')),implied,false)}${edge!==null?`<p class="flex items-center justify-between border-t border-white/[.07] pt-3 text-sm text-soft"><span>${esc(t('match_page.detected_edge_label','Écart détecté'))}</span><b class="tabular-nums text-cyan">${edge>0?'+':''}${fmt(edge)} ${esc(t('match_page.points_short','pts'))}</b></p>`:''}</div>
+  const r=vm.model.recommendation,raw=vm._raw||{};
+  if(!r){
+    // Une analyse est annoncee (teaser public) mais ses champs premium ne sont
+    // pas arrives : on ne pretend jamais qu'aucun marche n'a ete retenu.
+    if(raw.has_signal===true&&raw.no_signal!==true)return card(t('match_page.signal_title','Le signal IASHARK'),empty(t('match_page.sig_premium_missing','Une analyse existe pour ce match, mais son détail n’a pas pu être chargé. Réessayez dans un instant.')),'signal-card','target');
+    return card(t('match_page.signal_title','Le signal IASHARK'),empty(vm.model.unavailableReason?t('match_page.model_unavailable_reason',vm.model.unavailableReason):t('match_page.signal_unavailable_fallback','Aucun marché ne franchit les seuils de confiance ou de cote minimale pour ce match — IASHARK préfère ne pas se prononcer.')),'signal-card','target');
+  }
+  // Une probabilite nulle ou absente n'est jamais affichee "0 %" : elle
+  // n'existe pas (constate en ligne sur un match servi sans le champ).
+  const prob=n(r.probability)!==null&&r.probability>0?n(r.probability):null;
+  const cote=n(vm.model.recommendedOdds);
+  const implied=n(vm.model.recommendedImplied);
+  const edge=prob!==null?n(vm.model.recommendedEdge):null;
+  const info=vm.model.reliabilityInfo;
+  const edgeCls=edge===null?'':edge>=3?'pos':edge<0?'neg':'flat';
+  const marche=marcheFr(vm,r.market);
+
+  const jauge=prob===null?'':`<div class="sig-gauge">
+      <div class="sig-prob"><b>${pct(prob,0)}</b><span>${esc(t('match_page.sig_model_prob','Probabilité du modèle'))}</span></div>
+      <div class="sig-bar" role="img" aria-label="${esc(tf('match_page.sig_gauge_aria','Modèle {model}, marché {market}',{model:pct(prob),market:pct(implied)}))}">
+        <i class="sig-bar-model" style="--w:${clamp(prob)}%"></i>
+        ${implied!==null?`<em class="sig-bar-market" style="left:${clamp(implied)}%"><span>${esc(t('match_page.sig_market_marker','Marché'))}</span></em>`:''}
+      </div>
+      <div class="sig-scale" aria-hidden="true"><span>0</span><span>50</span><span>100</span></div>
+    </div>`;
+  const chiffres=`<dl class="sig-figures">
+      <div><dt>${esc(t('match_page.sig_implied','Probabilité implicite'))}</dt><dd>${pct(implied)}</dd></div>
+      <div><dt>${esc(t('match_page.sig_edge','Écart (value)'))}</dt><dd class="sig-edge ${edgeCls}">${pts(edge)}</dd></div>
+    </dl>`;
+  const verdict=prob!==null&&implied!==null
+    ?`<p class="sig-verdict">${esc(tf('match_page.sig_verdict','Le modèle voit {model} contre {market} pour le marché ({gap}).',{model:pct(prob),market:pct(implied),gap:pts(edge)}))}</p>`:'';
+
+  const raisons=(vm.editorial.signalReasons||[]).map(texteRaison).filter(Boolean);
+  // facteur_x/conseil_public : texte du pipeline ; hors FR, sa traduction
+  // validee, sinon masque. Cite tel quel, en complement des raisons chiffrees.
+  const lecture=narratif(vm.editorial.decisiveFactor,vm.editorial.decisiveFactorI18n);
+  const risques=(vm.editorial.signalRisks||[]).map(texteRisqueSignal).filter(Boolean);
+  const alerte=vm.editorial.risk&&!['FAIBLE','MODERE','ELEVE'].includes(vm.editorial.risk)?texteRisque(vm,vm.editorial.risk):null;
+  if(alerte)risques.unshift(texteLisible(vm,alerte));
+  const aSurveiller=risques.length?risques.slice(0,2).join(' · '):t('match_page.sig_risk_default','un seul match reste très aléatoire, même avec un écart favorable');
+  // "Pourquoi" : 2 a 3 puces. Raisons chiffrees d'abord, puis la lecture du
+  // pipeline si une place reste.
+  const puces=raisons.slice(0,3);
+  if(puces.length<3&&lecture)puces.push(texteLisible(vm,lecture));
+  const stats=[confMeter(r.confidence),riskStat(vm.editorial.riskCode)].filter(Boolean);
+
+  return `<section class="signal-card reveal" aria-labelledby="sigMarket">
+    <div class="sig-head">
+      <span class="sig-eyebrow">${cardIcon('target')}${esc(t('match_page.signal_title','Le signal IASHARK'))}</span>
+      ${relBadge(info)}
     </div>
-    <div class="mt-7 grid grid-cols-2 gap-x-4 gap-y-5 border-t border-white/[.07] pt-5">${kpi(t('match_page.fair_odds_label','Cote juste'),odds(fair))}${kpi(t('match_page.market_odds_label','Cote marché'),odds(marketOdds))}</div>
-    ${verdict?`<p class="mt-6 max-w-3xl text-sm leading-6 text-soft">${esc(verdict.text)}</p>`:''}
+    <div class="sig-slip">
+      <div class="sig-slip-main">
+        <p class="sig-kicker">${esc(t('match_page.sig_bet_label','Pari recommandé'))}</p>
+        <h2 class="sig-market" id="sigMarket">${esc(marche)}</h2>
+        <p class="sig-fixture">${esc(tf('match_page.sig_match_line','{home} – {away}',{home:vm.identity.home.name,away:vm.identity.away.name}))}</p>
+      </div>
+      ${cote!==null?`<div class="sig-odds-box"><span>${esc(t('match_page.sig_odds_used','Cote utilisée'))}</span><b>${odds(cote)}</b></div>`:''}
+    </div>
+    ${stats.length?`<div class="sig-stats${stats.length===1?' is-single':''}">${stats.join('')}</div>`:''}
+    ${info?`<p class="sig-rel-note">${esc(relLigne(info))}</p>`:''}
+    <div class="sig-grid">${jauge}${chiffres}</div>
+    ${verdict}
+    ${puces.length?`<div class="sig-why"><h3>${esc(t('match_page.sig_why_title','Pourquoi ce pari'))}</h3><ul>${puces.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>`:''}
+    <p class="sig-watch"><b>${esc(t('match_page.sig_watch_title','À surveiller'))}</b> ${esc(aSurveiller)}</p>
+    <p class="sig-legal">${esc(t('match_page.sig_legal','18+ · Estimation statistique, pas une garantie. Jouez responsable.'))}</p>
   </section>`;
 }
 
+// ---------------------------------------------------------------------------
+// PROBABILITES ET COTES : modele / marche / ecart / cote, pari en forme
+// standard, value mise en evidence (+3 pts et plus). Donnees : 1N2 et
+// consensus sans marge du pipeline, plus de 2,5 buts et les deux equipes
+// marquent (cotes des deux cotes), marches compares par le pipeline
+// (lib/match-view-model.js#marketTable). Le pari du signal ouvre le tableau.
+// ---------------------------------------------------------------------------
+const GROUPES_MARCHES=[['result','Résultat'],['goals','Buts'],['stats','Tirs, corners, cartons'],['other','Autres marchés']];
+function marketsCard(vm){
+  const rows=vm.model.marketTable||[];
+  if(rows.length<2)return '';
+  const col=(k,fr)=>t('match_page.markets_col_'+k,fr);
+  const ligne=r=>{
+    const e=n(r.edge),cls=e===null?'':e>=3?'pos':e<=-3?'neg':'flat';
+    const tags=`${r.recommended?`<span class="mk-tag mk-tag--signal">${esc(t('match_page.markets_tag_signal','Signal'))}</span>`:''}${e!==null&&e>=3?`<span class="mk-tag mk-tag--value">${esc(t('match_page.markets_tag_value','Value'))}</span>`:''}`;
+    return `<tr class="${r.recommended?'is-signal ':''}${e!==null&&e>=3?'is-value':''}">
+      <th scope="row"><span class="mk-label">${esc(libelleLigne(vm,r))}</span>${tags}</th>
+      <td data-label="${esc(col('model','Modèle'))}" class="mk-model">${pct(r.model)}</td>
+      <td data-label="${esc(col('market','Marché'))}">${pct(r.market)}</td>
+      <td data-label="${esc(col('gap','Écart'))}" class="mk-gap ${cls}">${pts(e)}</td>
+      <td data-label="${esc(col('odds','Cote'))}">${odds(r.odds)}</td>
+    </tr>`;
+  };
+  const signal=rows.filter(r=>r.recommended);
+  let corps=signal.map(ligne).join('');
+  GROUPES_MARCHES.forEach(([g,fr])=>{
+    const list=rows.filter(r=>!r.recommended&&r.group===g);
+    if(!list.length)return;
+    corps+=`<tr class="mk-group"><th scope="rowgroup" colspan="5">${esc(t('match_page.markets_group_'+g,fr))}</th></tr>${list.map(ligne).join('')}`;
+  });
+  return card(t('match_page.markets_title','Probabilités et cotes'),
+    `<div class="mk-scroll"><table class="mk-table">
+      <thead><tr><th scope="col">${esc(col('bet','Pari'))}</th><th scope="col">${esc(col('model','Modèle'))}</th><th scope="col">${esc(col('market','Marché'))}</th><th scope="col">${esc(col('gap','Écart'))}</th><th scope="col">${esc(col('odds','Cote'))}</th></tr></thead>
+      <tbody>${corps}</tbody>
+    </table></div>
+    <p class="mk-note">${esc(t('match_page.markets_note','Marché : probabilité tirée des cotes, marge du bookmaker retirée quand les deux issues sont cotées. Écart en points ; value à partir de +3 pts.'))}</p>`,
+    'markets-card','table');
+}
 
-// Buteur a surveiller : vm.players.scoringThreat, classe cote view-model
-// (saison en cours uniquement, score pilote par les tirs cadres).
-// La carte n'affiche QUE des statistiques mesurees. La "probabilite de
-// marquer" et la "cote equitable" du joueur ont ete retirees : elles
-// n'avaient pas ete demandees, et la seconde n'etait que l'inverse de la
-// premiere - jamais une cote reellement proposee par un operateur pour ce
-// joueur. Sur un produit payant, mieux vaut ne rien afficher qu'un prix
-// qui n'existe nulle part.
-// Justification "pourquoi ce joueur" : phrase deterministe (jamais un
-// nouvel appel LLM), assemblee uniquement a partir des vraies stats deja
-// calculees pour ce candidat (goals90/shotsOn90/minutes, cf
-// scoringThreatRanking). Rien n'est invente, juste mis en phrase.
-// Buteur a surveiller. AVANT : la carte affichait "Titulaire 8%" a cote
-// d'un discours sur "le profil le plus dangereux de la rencontre" - une
-// contradiction qui detruisait la credibilite, et un chiffre qui n'aide pas
-// a decider. REMPLACE par un vrai tableau de statistiques, avec surtout
-// l'ECHANTILLON sur lequel elles sont calculees : "2,9 buts/90" ne veut
-// rien dire sans savoir que c'est mesure sur 62 minutes. Rendre
-// l'echantillon visible est ce qui rend la stat credible, pas ce qui
-// l'affaiblit.
-// Toutes les valeurs viennent de vm.players.scoringThreat (deja calculees
-// par lib/match-view-model.js) - aucune donnee nouvelle, aucun chiffre
+// ---------------------------------------------------------------------------
+// FORME ET FACE-A-FACE : pastilles des derniers resultats reels (score au
+// survol et pour les lecteurs d'ecran) et les cinq dernieres confrontations,
+// resumees par une barre victoires/nuls/victoires.
+// ---------------------------------------------------------------------------
+function formH2HCard(vm){
+  const f=vm.form||{},h=vm.h2h||[],i=vm.identity;
+  const ligneForme=(team,rows)=>rows&&rows.length?`<div class="fh-row"><span class="fh-team">${logoEquipe(team.logo,team.name)}<span>${esc(team.name)}</span></span>${formStrip(rows)}<span class="fh-scores" aria-hidden="true">${rows.slice().reverse().map(r=>`<i>${esc(r.score||'')}</i>`).join('')}</span></div>`:'';
+  const forme=ligneForme(i.home,f.home)+ligneForme(i.away,f.away);
+  let confrontations='';
+  if(h.length){
+    const dom=h.filter(r=>r.winner==='1').length,nul=h.filter(r=>r.winner==='N').length,ext=h.filter(r=>r.winner==='2').length,tot=dom+nul+ext||1;
+    const annee=d=>{const x=new Date(String(d)+'T12:00:00Z');return isNaN(x)?String(d):x.toLocaleDateString(localeTag(),{month:'short',year:'numeric',timeZone:'UTC'});};
+    confrontations=`<div class="h2h">
+      <p class="h2h-sum">${esc(tf('match_page.h2h_summary','{home} {homeWins} V · {draws} N · {away} {awayWins} V',{home:i.home.name,away:i.away.name,homeWins:dom,draws:nul,awayWins:ext}))}</p>
+      <div class="h2h-bar" aria-hidden="true"><i class="h" style="width:${(dom/tot*100).toFixed(1)}%"></i><i class="d" style="width:${(nul/tot*100).toFixed(1)}%"></i><i class="a" style="width:${(ext/tot*100).toFixed(1)}%"></i></div>
+      <ul class="h2h-list">${h.slice(0,5).map(r=>`<li><time>${esc(annee(r.date))}</time><span class="h2h-m"><span class="${r.winner==='1'&&r.home===i.home.name||r.winner==='2'&&r.home===i.away.name?'w':''}">${esc(r.home)}</span><b>${esc(r.score)}</b><span class="${r.winner==='2'&&r.away===i.away.name||r.winner==='1'&&r.away===i.home.name?'w':''}">${esc(r.away)}</span></span></li>`).join('')}</ul>
+    </div>`;
+  }
+  if(!forme&&!confrontations)return '';
+  return card(t('match_page.formh2h_title','Forme et face-à-face'),
+    `<div class="fh-grid">${forme?`<div><h3 class="sub">${esc(t('match_page.form_label','Derniers matchs'))}</h3>${forme}</div>`:''}${confrontations?`<div><h3 class="sub">${esc(t('match_page.h2h_label','Derniers face-à-face'))}</h3>${confrontations}</div>`:''}</div>`,
+    'formh2h-card','trend');
+}
+
+// ---------------------------------------------------------------------------
+// ABSENCES : joueurs reellement signales absents ou incertains (API), avec
+// leur part de production offensive recente quand le joueur est retrouve
+// (lib/insights.js#computeOutputShare). Section masquee s'il n'y en a aucune.
+// ---------------------------------------------------------------------------
+function categorieAbsence(reason){
+  const r=String(reason||'').toLowerCase();
+  if(/suspen|red card|yellow card|card/.test(r))return 'suspension';
+  if(/illness|sick|virus/.test(r))return 'illness';
+  if(/injur|knock|strain|fracture|surgery|muscle|knee|ankle|hamstring|thigh|calf|groin|back|shoulder|foot|hip/.test(r))return 'injury';
+  return 'other';
+}
+function absencesCard(vm){
+  const a=vm.players.absences||{home:[],away:[]};
+  if(!a.home.length&&!a.away.length)return '';
+  const CAT={injury:'Blessure',suspension:'Suspension',illness:'Maladie',other:'Raison non précisée'};
+  const colonne=(team,list)=>`<div class="abs-col"><h3>${logoEquipe(team.logo,team.name)}<span>${esc(team.name)}</span><em>${list.length}</em></h3>${list.length?`<ul>${list.map(p=>{
+    const cat=categorieAbsence(p.reason),doute=/question|doubt/i.test(String(p.status||''));
+    const part=n(p.outputShare)!==null&&p.outputShare>=5?`<small>${esc(tf('match_page.absence_share','{pct} de la production offensive récente',{pct:pct(p.outputShare,0)}))}</small>`:'';
+    return `<li><span class="abs-name">${esc(p.name)}</span><span class="abs-why${doute?' is-doubt':''}">${esc(doute?t('match_page.absence_status_doubtful','Incertain'):t('match_page.absence_reason_'+cat,CAT[cat]))}</span>${part}</li>`;
+  }).join('')}</ul>`:`<p class="abs-none">${esc(t('match_page.absences_none','Aucune absence signalée'))}</p>`}</div>`;
+  return card(t('match_page.absences_title','Absences'),`<div class="abs-grid">${colonne(vm.identity.home,a.home)}${colonne(vm.identity.away,a.away)}</div>`,'absences-card','cross');
+}
+
+// Logo d'equipe accole a son nom. SANS pastille ronde : un ecusson a sa propre
+// forme, un masque circulaire lui rogne les angles.
+function logoEquipe(src,nom){
+  return src?`<img class="logo-eq" src="${esc(src)}" alt="" width="16" height="16" loading="lazy">`:'';
+}
+
+// ---------------------------------------------------------------------------
+// MARCHES JOUEURS. Le joueur le plus dangereux du match, ecrit comme un pari
+// ("A. Elanga buteur"), avec sa probabilite estimee (Poisson sur ses vrais
+// buts/90, lib/insights.js) et les statistiques mesurees, ECHANTILLON
+// compris : "2,9 buts/90" ne veut rien dire sans savoir sur combien de
+// minutes. Les projections du Player Engine, quand elles existent, suivent.
+// ---------------------------------------------------------------------------
 function threatSample(p){
   const bits=[];
   if(n(p.appearances)!==null)bits.push(`${p.appearances} ${p.appearances>1?t('match_page.matches_played_plural','matchs joués'):t('match_page.matches_played_singular','match joué')}`);
@@ -335,12 +411,8 @@ function threatSample(p){
   if(n(p.minutes)!==null&&p.minutes>0)bits.push(`${Math.round(p.minutes)} ${t('match_page.minutes_played_suffix','minutes jouées')}`);
   return bits.length?bits.join(' · '):'';
 }
-// L'API renvoie le poste en anglais. Repli sur la valeur brute si elle sort
-// de ces quatre cas : mieux vaut un mot anglais qu'un poste efface.
-// Cle francaise -> [cle i18n, repli francais]. La traduction n'est resolue
-// qu'au moment de l'appel (dans poste()), jamais ici : ce module s'evalue
-// au chargement du script, avant que I18N.init() n'ait fini de charger le
-// dictionnaire - figer le texte traduit ici le bloquerait sur le francais.
+// Cle francaise -> [cle i18n, repli francais], resolue a l'appel (le
+// dictionnaire n'est pas encore charge quand ce module s'evalue).
 const POSTES={
   goalkeeper:['match_page.position_goalkeeper','Gardien'],
   defender:['match_page.position_defender','Défenseur'],
@@ -348,92 +420,66 @@ const POSTES={
   attacker:['match_page.position_forward','Attaquant']
 };
 const poste=v=>{const k=String(v||'').trim();const e=POSTES[k.toLowerCase()];return e?t(e[0],e[1]):k;};
+const buteur=name=>{const ml=window.IasharkMarketLabels;return ml&&ml.playerMarketLabelFor?ml.playerMarketLabelFor('ANYTIME_GOALSCORER',name):name;};
+const CODES_JOUEUR={'Buteur':'ANYTIME_GOALSCORER','Tirs':'PLAYER_SHOTS','Tirs cadrés':'PLAYER_SHOTS_ON_TARGET'};
 
-// Le joueur le plus dangereux du match.
-//
-// La carte menait avec sa probabilite de marquer en 42px cyan. Le chiffre
-// etait juste, mais il criait plus fort que le nom du joueur - or on vient
-// d'abord savoir DE QUI on parle. Reprise plus sobre : rien au-dessus de
-// 20px, une seule couleur d'accent, et les chiffres secondaires regroupes
-// dans un panneau encastre plutot qu'en tableau borde.
-//
-// Aucune donnee nouvelle : ce sont exactement les memes valeurs qu'avant,
-// toutes deja calculees (probabilite de marquer par lib/insights.js, le
-// reste par playerAnalytics).
 function threatsCard(vm){
   const list=vm.players.scoringThreat;
-  if(!list.length)return '';
-  const p=list[0];
-  const pid=n(p.id);
-  const href=pid!==null?` href="${esc(lien(`joueur.html?m=${encodeURIComponent(vm.id)}&p=${pid}`))}"`:'';
-  const tag=pid!==null?'a':'div';
-  const prob=n(p.scoringProbability);
-
-  // Trois chiffres au maximum dans le panneau, et seulement ceux qui
-  // existent vraiment : une colonne vide vaut moins que deux colonnes
-  // pleines.
-  // Deux decimales fixes sur les moyennes par 90 : "1,30" et non "1,3", pour
-  // que les trois colonnes du panneau s'alignent au lieu de danser.
-  const deux=v=>Number(v).toLocaleString(localeTag(),{minimumFractionDigits:2,maximumFractionDigits:2});
-  const stats=[
-    n(p.goals90)!==null&&p.goals90>0?[deux(p.goals90),t('match_page.stat_goals_per90','Buts / 90 min')]:null,
-    n(p.shotsOn90)!==null&&p.shotsOn90>0?[deux(p.shotsOn90),t('match_page.stat_shots_on_target_per90','Tirs cadrés / 90 min')]:null,
-    n(p.expectedGoals90)!==null?[deux(p.expectedGoals90),t('match_page.stat_expected_goals_per90','Buts attendus / 90 min')]:null,
-    n(p.assists90)!==null&&p.assists90>0?[deux(p.assists90),t('match_page.stat_assists_per90','Passes déc. / 90 min')]:null,
-    n(p.rating5)!==null?[Number(p.rating5).toLocaleString(localeTag(),{minimumFractionDigits:1,maximumFractionDigits:1}),t('match_page.stat_average_rating','Note moyenne')]:null
-  ].filter(Boolean).slice(0,3);
-
-  const sample=threatSample(p);
-  const largeur=prob===null?null:Math.max(0,Math.min(100,prob));
-
-  return card(t('match_page.top_scorer_watch_title','Buteur à surveiller'),`<${tag} class="threat group"${href}>
-    <div class="threat-id">
-      ${img(p.photo,p.name)}
-      <div class="threat-who">
-        <b>${esc(p.name)}</b>
-        <small>${esc(p.team||'')}${p.position?' · '+esc(poste(p.position)):''}</small>
+  const projections=(vm.players.projections||[]).filter(p=>n(p.probability)!==null);
+  if(!list.length&&!projections.length)return '';
+  let corps='';
+  if(list.length){
+    const p=list[0];
+    const pid=n(p.id);
+    const href=pid!==null?` href="${esc(lien(`joueur.html?m=${encodeURIComponent(vm.id)}&p=${pid}`))}"`:'';
+    const tag=pid!==null?'a':'div';
+    const prob=n(p.scoringProbability);
+    // Deux decimales fixes sur les moyennes par 90, pour que les colonnes
+    // du panneau s'alignent.
+    const deux=v=>Number(v).toLocaleString(localeTag(),{minimumFractionDigits:2,maximumFractionDigits:2});
+    const stats=[
+      n(p.goals90)!==null&&p.goals90>0?[deux(p.goals90),t('match_page.stat_goals_per90','Buts / 90 min')]:null,
+      n(p.shotsOn90)!==null&&p.shotsOn90>0?[deux(p.shotsOn90),t('match_page.stat_shots_on_target_per90','Tirs cadrés / 90 min')]:null,
+      n(p.expectedGoals90)!==null?[deux(p.expectedGoals90),t('match_page.stat_expected_goals_per90','Buts attendus / 90 min')]:null,
+      n(p.assists90)!==null&&p.assists90>0?[deux(p.assists90),t('match_page.stat_assists_per90','Passes déc. / 90 min')]:null,
+      n(p.rating5)!==null?[Number(p.rating5).toLocaleString(localeTag(),{minimumFractionDigits:1,maximumFractionDigits:1}),t('match_page.stat_average_rating','Note moyenne')]:null
+    ].filter(Boolean).slice(0,3);
+    const sample=threatSample(p);
+    const largeur=prob===null?null:clamp(prob);
+    corps+=`<${tag} class="threat group"${href}>
+      <div class="threat-id">
+        ${img(p.photo,'')}
+        <div class="threat-who">
+          <b>${esc(buteur(p.name))}</b>
+          <small>${esc(p.team||'')}${p.position?' · '+esc(poste(p.position)):''}</small>
+        </div>
       </div>
-      ${list.length>1?`<span class="threat-rank">${esc(t('match_page.top_scorer_rank_badge','Menace n°1'))}</span>`:''}
-    </div>
-
-    ${prob===null?'':`<div class="threat-prob">
-      <div class="threat-prob-tete">
-        <span>${esc(t('match_page.scoring_probability_label','Probabilité de marquer'))}</span>
-        <b>${pct(prob)}</b>
+      ${prob===null?'':`<div class="threat-prob">
+        <div class="threat-prob-tete"><span>${esc(t('match_page.scoring_probability_label','Probabilité de marquer'))}</span><b>${pct(prob)}</b></div>
+        <div class="threat-jauge" role="img" aria-label="${esc(t('match_page.scoring_probability_label','Probabilité de marquer'))} : ${pct(prob)}"><i style="width:${largeur}%"></i></div>
+      </div>`}
+      ${stats.length?`<div class="threat-panneau">${stats.map(([v,k])=>`<div><b>${v}</b><span>${esc(k)}</span></div>`).join('')}</div>`:''}
+      <div class="threat-pied">
+        ${sample?`<span class="threat-sample${p.thinSample?' is-thin':''}">${esc(sample)}</span>`:'<span></span>'}
+        ${pid!==null?`<span class="threat-lien">${esc(t('match_page.view_profile_link','Voir la fiche'))} <i aria-hidden="true">→</i></span>`:''}
       </div>
-      <div class="threat-jauge" role="img" aria-label="${esc(t('match_page.scoring_probability_label','Probabilité de marquer'))} : ${pct(prob)}"><i style="width:${largeur}%"></i></div>
-    </div>`}
-
-    ${stats.length?`<div class="threat-panneau">${stats.map(([v,k])=>
-      `<div><b>${v}</b><span>${esc(k)}</span></div>`).join('')}</div>`:''}
-
-    <div class="threat-pied">
-      ${sample?`<span class="threat-sample${p.thinSample?' is-thin':''}">${esc(sample)}</span>`:'<span></span>'}
-      ${pid!==null?`<span class="threat-lien">${esc(t('match_page.view_profile_link','Voir la fiche'))} <i aria-hidden="true">→</i></span>`:''}
-    </div>
-    ${p.thinSample?`<p class="threat-alerte">${esc(t('match_page.thin_sample_alert','Temps de jeu limité sur ce championnat : ces moyennes par 90 minutes reposent sur peu de minutes et restent fragiles.'))}</p>`:''}
-  </${tag}>`,'threats-card','target2');
+      ${p.thinSample?`<p class="threat-alerte">${esc(t('match_page.thin_sample_alert','Temps de jeu limité sur ce championnat : ces moyennes par 90 minutes reposent sur peu de minutes et restent fragiles.'))}</p>`:''}
+    </${tag}>`;
+    const autres=list.slice(1,4).filter(x=>n(x.scoringProbability)!==null);
+    if(autres.length)corps+=`<ul class="pm-list">${autres.map(x=>`<li><span>${esc(buteur(x.name))}<small>${esc(x.team||'')}</small></span><b>${pct(x.scoringProbability)}</b></li>`).join('')}</ul>`;
+  }
+  if(projections.length){
+    const ml=window.IasharkMarketLabels;
+    corps+=`<ul class="pm-list">${projections.slice(0,6).map(x=>{
+      const code=CODES_JOUEUR[x.market];
+      const label=code&&ml&&ml.playerMarketLabelFor?ml.playerMarketLabelFor(code,x.player):`${x.player} · ${x.market}`;
+      return `<li><span>${esc(label)}</span><b>${pct(x.probability)}</b></li>`;
+    }).join('')}</ul>`;
+  }
+  corps+=`<p class="pm-note">${esc(t('match_page.players_note','Probabilités estimées à partir des statistiques réelles des joueurs, sans cote de bookmaker.'))}</p>`;
+  return card(t('match_page.player_markets_title','Marchés joueurs'),corps,'threats-card','target2');
 }
 
-// "Ce qu'il faut savoir" : classification deja faite par
-// lib/insights.js#classifyKeyInsights a partir de signaux DEJA reels
-// (matchups a cibler, absences cles, ecart modele/marche) - simple
-// affichage ici, aucune nouvelle donnee.
-const INSIGHT_STYLE={
-  positive_home:['b-green','✓'],positive_away:['b-green','✓'],
-  watch:['b-orange','!'],contradiction:['b-orange','⇄']
-};
-// Phrases des matchups (lib/match-view-model.js#matchups) redigees depuis
-// leurs faits structures (key/vars) dans la langue active. Sans faits
-// structures (ancienne donnee), seul le texte francais existe : FR seulement.
-function texteMatchup(m){
-  if(!m||!m.key||!m.vars)return narratif(m&&m.text);
-  const v=m.vars;
-  if(m.key==='shots_volume')return tf('match_page.matchup_shots_volume_text','{home} tente {homeFor} tirs en moyenne, {away} en concède {awayAllowed} — écart réel de {gap} tirs.',{home:v.home,away:v.away,homeFor:fmt(v.homeFor),awayAllowed:fmt(v.awayAllowed),gap:fmt(v.gap)});
-  if(m.key==='shots_accuracy')return tf('match_page.matchup_shots_accuracy_text',"{away} cadre {awayOnFor} tirs en moyenne à l'extérieur, {home} en concède {homeOnAllowed} à domicile.",{home:v.home,away:v.away,awayOnFor:fmt(v.awayOnFor),homeOnAllowed:fmt(v.homeOnAllowed)});
-  if(m.key==='possession')return tf('match_page.matchup_possession_text','Écart de possession réel et net ({homePct}% vs {awayPct}%) en faveur de {leader}.',{homePct:fmt(v.homePct),awayPct:fmt(v.awayPct),leader:v.leader});
-  return narratif(m.text);
-}
 // Alertes d'absence du pipeline (update-data.yml#calcKeyAbsences) : gabarit
 // francais fixe "<GRAVITE>: <joueur> (DOM|EXT) ABSENT", re-redige dans la
 // langue active. Tout autre texte descriptif est du francais redige : FR seul.
@@ -445,212 +491,34 @@ function texteRisque(vm,texte){
   if(!m)return null;
   return tf('match_page.absence_alert_'+ALERTES_ABSENCE[m[1]],'{player} ({team})',{player:m[2],team:m[3]==='DOM'?vm.identity.home.name:vm.identity.away.name});
 }
-function insightLocalise(vm,item){
-  if(item.type==='positive_home'||item.type==='positive_away'){
-    const text=texteMatchup(item.matchup);
-    if(!text)return null;
-    const title=item.type==='positive_home'
-      ?tf('match_page.insight_home_strong_title','{team} en position de force',{team:vm.identity.home.name})
-      :tf('match_page.insight_away_dangerous_title','{team} dangereux',{team:vm.identity.away.name});
-    return {type:item.type,title,text};
-  }
-  if(item.type==='watch'){
-    const text=texteRisque(vm,item.text);
-    return text?{type:item.type,title:t('match_page.insight_watch_title','Point de vigilance'),text}:null;
-  }
-  if(item.type==='contradiction'&&item.market!=null&&Number.isFinite(item.edge)){
-    const au=item.edge>0;
-    return {type:item.type,title:t('match_page.insight_contradiction_title','Signal contradictoire'),
-      text:tf(au?'match_page.insight_contradiction_model_above':'match_page.insight_contradiction_market_above',
-        au?'Sur {market}, notre modèle est nettement au-dessus du marché (écart de {gap} points) - à interpréter avec prudence.'
-          :'Sur {market}, le marché est nettement au-dessus de notre modèle (écart de {gap} points) - à interpréter avec prudence.',
-        {market:marcheFr(vm,item.market),gap:Math.abs(Math.round(item.edge))})};
-  }
-  return estFr()?item:null;
-}
-function keyInsightsCard(vm){
-  const list=vm.keyInsights.map(item=>insightLocalise(vm,item)).filter(Boolean);
-  if(!list.length)return '';
-  return card(t('match_page.key_insights_title','Ce qu\'il faut savoir'),`<div class="insights-grid">${list.map(item=>{
-    const [cls,mark]=INSIGHT_STYLE[item.type]||['b-cyan','·'];
-    return `<div class="insight"><div class="insight-head"><span class="insight-mark ${cls}">${mark}</span><b>${esc(texteLisible(vm,item.title))}</b></div><p>${esc(texteLisible(vm,item.text))}</p></div>`;
-  }).join('')}</div>`,'','bulb');
-}
 
-
-// Value potentielle : le marche du plus gros ecart absolu deja identifie
-// par vm.marketsWatch (lui-meme derive de markets_compared reel) - jamais
-// un nouveau calcul, juste la mise en avant du 1er de la liste deja triee.
-function valuePotentialCard(vm){
-  const top=vm.marketsWatch[0];
-  if(!top||top.edge===null||Math.abs(top.edge)<4)return '';
-  return card(t('match_page.value_potential_title','Value potentielle'),`<div class="value-potential"><b>${esc(marcheFr(vm,top.market))}</b><p>${top.edge>=0?`${t('match_page.value_positive_prefix','Ce marché présente la plus grosse value selon notre modèle (écart de +')}${fmt(top.edge)}${t('match_page.value_positive_suffix','% avec le marché).')}`:`${t('match_page.value_negative_prefix','Le marché est nettement au-dessus de notre modèle sur ce pari (écart de ')}${fmt(top.edge)}${t('match_page.value_negative_suffix','%) - à interpréter avec prudence.')}`}</p></div>`,'value-card','trophy');
-}
-
-// Matchup : vm.matchupScores, categories reellement mesurables (attaque/
-// defense/possession/discipline/coups de pied arretes - cf
-// lib/insights.js#computeMatchup). Categories non mesurables avec nos
-// donnees (pressing, transitions, bloc defensif...) volontairement
-// absentes plutot qu'inventees.
-// Unites declarees en francais par lib/insights.js (valeurs de donnees, pas
-// de l'affichage) : traduites ici par correspondance exacte.
-const UNITES_MATCHUP={
-  'xG par match':'unit_xg_per_match','xG encaissés':'unit_xg_conceded','% de possession':'unit_possession_pct',
-  '% de passes réussies':'unit_pass_accuracy_pct','fautes par match':'unit_fouls_per_match',
-  'corners par match':'unit_corners_per_match','tirs par match':'unit_shots_per_match'
-};
-function uniteMatchup(u){const k=UNITES_MATCHUP[u];return k?t('match_page.'+k,u):(estFr()?(u||''):'');}
-function matchupCard(vm){
-  const m=vm.matchupScores;
-  if(!m)return '';
-  const homeName=vm.identity.home.name,awayName=vm.identity.away.name;
-  // AVANT : le nom des deux equipes etait repete a CHAQUE ligne, en 10px,
-  // ce qui remplissait la carte de bruit et masquait la seule information
-  // utile - qui domine, et de combien. Desormais les noms n'apparaissent
-  // qu'une fois en en-tete, et chaque categorie devient une barre centree
-  // dont l'inclinaison montre l'ecart reel.
-  // L'avantage vient de c.advantage, deja calcule dans lib/insights.js :
-  // on ne le recalcule pas ici, car il tient compte du sens de la mesure
-  // (encaisser MOINS de buts est un avantage, pas un desavantage).
-  const rows=m.categories.map(c=>{
-    const h=Math.abs(Number(c.home)||0),a=Math.abs(Number(c.away)||0),tot=h+a;
-    const ecart=tot?Math.abs(h-a)/tot:0;
-    const pente=clamp(50+ecart*50);
-    const homeWin=c.advantage==='home',awayWin=c.advantage==='away';
-    const partHome=homeWin?pente:awayWin?100-pente:50;
-    return `<div class="mu-row">
-      <span class="mu-val${homeWin?' win':''}">${fmt(c.home)}</span>
-      <div class="mu-mid">
-        <b>${esc(t('match_page.matchup_cat_'+c.key,c.label))}${c.advantage==='égalité'?' · '+esc(t('match_page.tie_label','égalité')):''}<em>${esc(uniteMatchup(c.unit))}${c.lowerIsBetter?' · '+esc(t('match_page.lower_is_better_hint','moins = mieux')):''}</em></b>
-        <div class="mu-bar"><i class="mu-h${homeWin?' win':''}" style="width:${partHome}%"></i><i class="mu-a${awayWin?' win':''}" style="width:${100-partHome}%"></i></div>
-      </div>
-      <span class="mu-val${awayWin?' win':''}">${fmt(c.away)}</span>
-    </div>`;
-  }).join('');
-  const total=(Number(m.globalHome)||0)+(Number(m.globalAway)||0);
-  const partGlobal=total?clamp(Number(m.globalHome)/total*100):50;
-  const homeMieux=Number(m.globalHome)>=Number(m.globalAway);
-  return card(t('match_page.matchup_title','Matchup : comment les équipes se correspondent'),
-    `<div class="mu-head"><span>${logoEquipe(vm.identity.home.logo,homeName)}${esc(homeName)}</span><span>${logoEquipe(vm.identity.away.logo,awayName)}${esc(awayName)}</span></div>
-     <div class="mu-rows">${rows}</div>
-     <div class="mu-global">
-       <div class="mu-g-side"><b class="${homeMieux?'win':''}">${fmt(m.globalHome)}<small>/10</small></b></div>
-       <div class="mu-g-bar"><i style="width:${partGlobal}%"></i></div>
-       <div class="mu-g-side right"><b class="${homeMieux?'':'win'}">${fmt(m.globalAway)}<small>/10</small></b></div>
-     </div>
-     <p class="mu-foot">${esc(t('match_page.matchup_global_note','Note globale, toutes catégories confondues.'))}</p>`,
-    '','scale');
-}
-
-// "Stats a ne pas surinterpreter" : signale les victoires a marge etroite
-// dans le vrai historique recent (vm.formNote, cf
-// lib/insights.js#formMarginNote) - repli honnete a la place d'un indice
-// de force des adversaires recents qu'on ne peut pas calculer sans appel
-// API supplementaire par adversaire.
-function formNoteCard(vm){
-  const home=vm.formNote.home,away=vm.formNote.away;
-  if(!home&&!away)return '';
-  const line=(name,note)=>note?`<div class="caveat"><b>!</b><span><b>${esc(name)}</b>${esc(t('match_page.label_colon',' :'))} ${note.wins} ${note.wins>1?t('match_page.form_note_win_plural','victoires'):t('match_page.form_note_win_singular','victoire')}${t('match_page.form_note_middle',' sur les ')}${note.sample}${t('match_page.form_note_matches_suffix',' derniers matchs, mais ')}${note.narrowWins}${t('match_page.form_note_narrow_suffix'," à un seul but d'écart.")}</span></div>`:'';
-  return card(t('match_page.stats_caveat_title','Stats à ne pas surinterpréter'),`${line(vm.identity.home.name,home)}${line(vm.identity.away.name,away)}`,'','alert');
-}
-
-// Forme reelle : vrais resultats recents (form_home/away deja exposes),
-// tendance reelle (vm.formTrend, points W/D/L des vrais resultats - cf
-// lib/insights.js#computeFormTrend). Jamais une note de forme fabriquee.
-// formReelleCard() a ete supprimee : elle re-affichait la serie WDL des deux
-// equipes, deja presente dans l'en-tete de la page (formStrip dans hero()).
-// Pure duplication, retiree a la demande de l'utilisateur.
-
-
-// Sorties modele : xG (avec les logos des 2 equipes) + Scores probables -
-// les probabilites 1X2 sont retirees d'ici (deja dans "Notre lecture du
-// match" juste au-dessus, redondant).
+// Sorties modele : buts attendus et scores exacts les plus probables, ecrits
+// comme au bookmaker ("Score exact : 1-1").
 function outputsCard(vm){
   const x=vm.model.expectedGoals,s=vm.model.scores,i=vm.identity;
-  // Une colonne qui n'affiche que "indisponible" occupait la moitie de la
-  // carte pour ne rien dire. Mais taire completement l'absence serait pire :
-  // le lecteur ne sait plus si la donnee manque ou si elle n'existe pas.
-  // Compromis : on n'affiche que les colonnes qui ont du contenu, et ce qui
-  // manque est signale en une ligne discrete sous la carte. Si TOUT manque,
-  // la carte disparait - une carte vide n'affirme rien d'utile.
+  // Seules les colonnes qui ont du contenu ; ce qui manque est dit en une
+  // ligne discrete. Si TOUT manque, la carte disparait.
   const cols=[],manquant=[];
   if(x){
-    cols.push(`<div class="outputs-col outputs-xg"><small>${esc(t('match_page.stat_expected_goals','Buts attendus'))} (xG)</small><div class="xg-row">${img(i.home.logo,i.home.name)}<b>${fmt(x.home)}</b><span>xG</span><b>${fmt(x.away)}</b>${img(i.away.logo,i.away.name)}</div></div>`);
+    cols.push(`<div class="outputs-col outputs-xg"><small>${esc(t('match_page.stat_expected_goals','Buts attendus'))} (xG)</small><div class="xg-row">${img(i.home.logo,'')}<b>${fmt(x.home)}</b><span>${esc(i.home.name)} – ${esc(i.away.name)}</span><b>${fmt(x.away)}</b>${img(i.away.logo,'')}</div></div>`);
   } else manquant.push(t('match_page.xg_unavailable','xG indisponibles'));
   if(s.length){
-    // Trois pastilles de largeur egale se cassaient sur deux lignes et ne
-    // disaient rien de la hierarchie entre les scores. Des barres classees
-    // montrent tout de suite lequel domine, et ne debordent jamais.
+    const ml=window.IasharkMarketLabels;
     const maxP=Math.max.apply(null,s.map(sc=>Number(sc.probability)||0))||1;
-    cols.push(`<div class="outputs-col"><small>${esc(t('match_page.section_top_scores','Scores les plus probables'))}</small><div class="score-bars">${s.map(sc=>`<div class="score-bar"><b>${esc(sc.score)}</b><i><span style="width:${clamp(Number(sc.probability)/maxP*100)}%"></span></i><small>${pct(sc.probability)}</small></div>`).join('')}</div></div>`);
+    cols.push(`<div class="outputs-col"><small>${esc(t('match_page.scores_title','Scores les plus probables'))}</small><div class="score-bars">${s.map(sc=>`<div class="score-bar"><b>${esc(ml&&ml.exactScoreLabel?ml.exactScoreLabel(sc.score):sc.score)}</b><i><span style="width:${clamp(Number(sc.probability)/maxP*100)}%"></span></i><small>${pct(sc.probability,0)}</small></div>`).join('')}</div></div>`);
   } else manquant.push(t('match_page.scores_unavailable','Scores probables indisponibles'));
   if(!cols.length)return '';
   return card(t('match_page.outputs_title','Ce que dit le modèle'),
     `<div class="outputs${cols.length===1?' outputs-1col':' outputs-2col'}">${cols.join('')}</div>`
-    +(manquant.length?`<p class="outputs-missing">${esc(manquant.join(' · '))}.</p>`:''));
+    +(manquant.length?`<p class="outputs-missing">${esc(manquant.join(' · '))}.</p>`:''),'','chart');
 }
 
-// Comparatif des deux equipes. AVANT : ce tableau etait titre "Pourquoi le
-// pari ressort ?" alors qu'il ne contient qu'une comparaison generique
-// (tirs, possession, corners, fautes...) qui n'explique rien du marche
-// recommande. Le titre promettait une justification que le contenu ne
-// donnait pas. CORRIGE de deux facons : le titre dit desormais ce que le
-// tableau est reellement, ET les lignes qui pesent vraiment sur le marche
-// recommande sont mises en avant, ce qui cree le lien qui manquait.
-// La correspondance marche -> lignes est deterministe, jamais un texte
-// genere : on lit le libelle du marche deja recommande.
-const MARKET_KEY_ROWS=[
-  [/btts|deux[\s-]?equipes|both/i,['Buts marqués','Buts concédés'],'les deux équipes marquent'],
-  [/corner/i,['Corners'],'le nombre de corners'],
-  [/carton|card/i,['Fautes'],'le nombre de cartons'],
-  [/over|under|plus de|moins de|\bbut/i,['Buts marqués','Buts concédés','Tirs cadrés'],'le nombre de buts'],
-  [/./,['Buts marqués','Buts concédés','Possession'],'l’issue du match']
-];
-function keyRowsForMarket(market){
-  const label=String(market||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'');
-  for(const [re,rows,topic] of MARKET_KEY_ROWS){ if(re.test(label))return{rows,topic}; }
-  return{rows:[],topic:null};
-}
-// Comparatif des deux equipes.
-//
-// Un vrai tableau, plus une seule barre pleine largeur. Trois idees reprises
-// de tableaux de donnees sombres examines sur 21st.dev, adaptees :
-//   - le repere visuel vit DANS la ligne, minuscule, et ne remplace jamais le
-//     nombre : une micro-barre centree qui penche du cote de l'equipe devant ;
-//   - les lignes sont regroupees par theme, sinon neuf rangees se lisent
-//     comme une liste sans relief ;
-//   - un pied conclut, au lieu de laisser le lecteur compter lui-meme.
-//
-// Le sens compte : sur "Buts concedes" et "Fautes", le plus petit gagne.
-// Sur "Hors-jeu" et "Arrets", aucun des deux ne gagne - plus d'arrets veut
-// surtout dire plus de tirs subis. Ces deux-la n'ont donc pas de verdict et
-// ne comptent pas dans le total du pied.
-// Logo d'equipe accole a son nom. Volontairement SANS pastille ronde ni
-// fond : les ecussons de club ont leur propre forme (bouclier, cercle,
-// blason) et un masque circulaire leur rogne les angles. On les pose tels
-// qu'ils sont, sur le fond de la carte.
-// Traduction d'un libelle de marche en francais courant, avec les noms des
-// deux equipes. Voir lib/market-labels.js : "DC 12" devient "PSG ou Monaco
-// gagne, sans match nul", et tous les seuils a virgule disparaissent.
-// Appliquee a l'AFFICHAGE seulement : les donnees gardent les libelles du
-// moteur, dont dependent la selection du marche et le comparatif.
-// Nom historique conserve ; le libelle sort desormais dans la langue active
-// (marketLabel lit I18N, repli francais identique a marketLabelFr).
-function marcheFr(vm,libelle){
-  const ml=window.IasharkMarketLabels;
-  return ml?(ml.marketLabel||ml.marketLabelFr)(libelle,{home:vm.identity.home.name,away:vm.identity.away.name}):String(libelle||'');
-}
-
-// Nettoyage des textes rediges (editorial, matchups, points de vigilance).
-// Ils citent parfois le libelle brut d'un marche - "Miser sur Premiere
-// mi-temps moins de 1.5 but..." - et ecrivent les decimales avec un point.
-//
-// On remplace donc, DANS le texte, tout libelle de marche connu par sa
-// version francaise, puis on passe les decimales a la virgule. Le texte
-// lui-meme n'est jamais reecrit : seuls ces deux motifs sont touches.
+// Nettoyage des textes rediges (editorial, points de vigilance) : tout
+// libelle de marche connu y est remplace par sa forme standard, puis les
+// decimales passent au separateur de la langue. Le texte n'est jamais reecrit.
 function texteLisible(vm,texte){
-  var t=String(texte==null?'':texte);
-  if(!t)return t;
+  var s=String(texte==null?'':texte);
+  if(!s)return s;
   var libelles=[];
   if(vm.model.recommendation&&vm.model.recommendation.market)libelles.push(vm.model.recommendation.market);
   (vm.marketsWatch||[]).forEach(function(m){if(m&&m.market)libelles.push(m.market);});
@@ -658,13 +526,10 @@ function texteLisible(vm,texte){
   // d'un libelle plus complet.
   libelles.sort(function(a,b){return b.length-a.length;}).forEach(function(brut){
     var lisible=marcheFr(vm,brut);
-    if(lisible&&lisible!==brut)t=t.split(brut).join(lisible);
+    if(lisible&&lisible!==brut)s=s.split(brut).join(lisible);
   });
-  // Decimales a la francaise, sans toucher aux nombres deja corrects ni aux
-  // eventuelles URL.
-  // Langue dont le separateur decimal est le point (anglais) : rien a convertir.
-  if((1.5).toLocaleString(localeTag()).indexOf(',')===-1)return t;
-  return t.replace(/(\d),(\d)/g,'$1<VIRG>$2').replace(/(\d)\.(\d)/g,'$1,$2').replace(/<VIRG>/g,',');
+  if((1.5).toLocaleString(localeTag()).indexOf(',')===-1)return s;
+  return s.replace(/(\d),(\d)/g,'$1<VIRG>$2').replace(/(\d)\.(\d)/g,'$1,$2').replace(/<VIRG>/g,',');
 }
 
 // Sources de donnees (lib/display-data.js#sourceLabels, libelles francais) :
@@ -679,10 +544,13 @@ function libelleSource(x){
   return t('match_page.'+k,parts[0])+(reste?' · '+reste:'');
 }
 
-function logoEquipe(src,nom){
-  return src?`<img class="logo-eq" src="${esc(src)}" alt="" width="16" height="16" loading="lazy">`:'';
-}
-
+// ---------------------------------------------------------------------------
+// COMPARATIF DES DEUX EQUIPES : vrai tableau groupe par theme, micro-barre
+// d'ecart dans la ligne, pied qui conclut. Sur "Buts concedes" et "Fautes",
+// le plus petit gagne ; "Hors-jeu" et "Arrets" n'ont pas de verdict.
+// CMP_* sont des CLES DE CORRESPONDANCE avec vm.comparison.rows[].label
+// (toujours en francais) : jamais traduites, seul le texte affiche l'est.
+// ---------------------------------------------------------------------------
 const CMP_SENS={
   'Buts marqués':'haut','Tirs':'haut','Tirs cadrés':'haut','Possession':'haut','Corners':'haut',
   'Buts concédés':'bas','Fautes':'bas',
@@ -695,12 +563,6 @@ const CMP_GROUPES=[
   ['Discipline',['Fautes','Hors-jeu']]
 ];
 const CMP_UNITE={'Possession':'%'};
-// CMP_SENS/CMP_GROUPES/CMP_UNITE ci-dessus sont des CLES DE CORRESPONDANCE
-// avec vm.comparison.rows[].label, qui vient de lib/match-view-model.js et
-// arrive TOUJOURS en francais (hors de portee de match-page.js) : elles ne
-// doivent jamais etre traduites, sous peine de casser les lookup parLabel[l]
-// pour toutes les locales non francaises (tableau comparatif vide). Seul le
-// TEXTE AFFICHE est traduit, via ces deux tables d'indirection separees.
 const CMP_LABEL_KEYS={
   'Buts marqués':'stat_goals_scored','Buts concédés':'stat_goals_conceded','Tirs':'stat_shots',
   'Tirs cadrés':'stat_shots_on_target','Possession':'stat_possession','Corners':'stat_corners',
@@ -715,21 +577,12 @@ function comparison(vm){
   const parLabel={};
   c.rows.forEach(r=>{parLabel[r.label]=r;});
   const dom=vm.identity.home.name,ext=vm.identity.away.name;
-
-  // Une decimale partout dans les colonnes : "1" a cote de "1,4" donne
-  // l'impression d'une mesure moins precise que sa voisine.
-  // Une decimale sur les moyennes, aucune sur les pourcentages : "69,0 %"
-  // suggere une precision que la possession n'a pas.
+  // Une decimale sur les moyennes, aucune sur les pourcentages.
   const un=(v,unite)=>Number(v).toLocaleString(localeTag(),
     unite==='%'?{maximumFractionDigits:0}:{minimumFractionDigits:1,maximumFractionDigits:1});
-
   let gagnesDom=0,gagnesExt=0,depart=0;
   const lignes=[];
-
-  // Les barres sont mises a l'echelle du plus grand ecart relatif du tableau :
-  // rapportees dans l'absolu, un +0,3 sur 2,2 buts donnait un trait de 4px,
-  // illisible. Le plus grand ecart remplit la demi-largeur, les autres
-  // suivent proportionnellement.
+  // Barres a l'echelle du plus grand ecart relatif du tableau.
   const relatif=r=>Math.abs(r.home-r.away)/Math.max(Math.abs(r.home),Math.abs(r.away),0.0001);
   const comparables=c.rows.filter(r=>(CMP_SENS[r.label]||'neutre')!=='neutre');
   const ecartMax=comparables.length?Math.max(...comparables.map(relatif),0.0001):1;
@@ -742,14 +595,9 @@ function comparison(vm){
       const sens=CMP_SENS[r.label]||'neutre';
       const unite=CMP_UNITE[r.label]||'';
       const ecart=r.home-r.away;
-      // Qui est devant, selon le sens de la mesure. Sur une egalite parfaite,
-      // personne.
       let devant=null;
       if(sens!=='neutre'&&Math.abs(ecart)>0.001) devant=(sens==='haut')===(ecart>0)?'dom':'ext';
       if(devant==='dom')gagnesDom++; else if(devant==='ext')gagnesExt++; else if(sens!=='neutre')depart++;
-      // Longueur de la micro-barre : l'ecart rapporte a la plus grande des
-      // deux valeurs. Un +15 de possession et un +0,3 de buts deviennent
-      // comparables, parce que c'est l'ecart RELATIF qu'on montre.
       const part=Math.min(100,Math.round(relatif(r)/ecartMax*100));
       const cote=ecart>0?'g':'d';
       const barre=devant===null
@@ -765,8 +613,6 @@ function comparison(vm){
       </tr>`);
     });
   });
-
-  // Les mesures qu'on n'a pas su ranger dans un theme ne sont pas perdues.
   const rangees=new Set(CMP_GROUPES.flatMap(g=>g[1]));
   const orphelines=c.rows.filter(r=>!rangees.has(r.label));
   if(orphelines.length){
@@ -775,21 +621,18 @@ function comparison(vm){
       lignes.push(`<tr><th scope="row">${esc(cmpLabel(r.label))}</th><td>${un(r.home)}</td><td>${un(r.away)}</td><td class="cmp-ecart"><span class="cmp-val nul">—</span></td></tr>`);
     });
   }
-
   const total=gagnesDom+gagnesExt+depart;
   let conclusion='';
   if(total){
     const meneur=gagnesDom>gagnesExt?dom:gagnesExt>gagnesDom?ext:null;
     const compte=Math.max(gagnesDom,gagnesExt);
     conclusion=meneur
-      ? `<b>${esc(meneur)}</b>${t('match_page.comparison_leads_middle',' est devant sur ')}${compte}${t('match_page.comparison_leads_of',' des ')}${total}${t('match_page.comparison_leads_suffix',' mesures comparables.')}`
-      : `${t('match_page.comparison_tie_prefix','Les deux équipes se partagent les ')}${total}${t('match_page.comparison_leads_suffix',' mesures comparables.')}`;
+      ? `<b>${esc(meneur)}</b>${esc(t('match_page.comparison_leads_middle',' est devant sur '))}${compte}${esc(t('match_page.comparison_leads_of',' des '))}${total}${esc(t('match_page.comparison_leads_suffix',' mesures comparables.'))}`
+      : `${esc(t('match_page.comparison_tie_prefix','Les deux équipes se partagent les '))}${total}${esc(t('match_page.comparison_leads_suffix',' mesures comparables.'))}`;
   }
-
   const note=n(c.sampleSize)!==null
     ? `${t('match_page.comparison_note_with_sample_prefix','Moyennes par match sur ')}${c.sampleSize} ${c.sampleSize>1?t('match_page.comparison_note_match_plural','rencontres'):t('match_page.comparison_note_match_singular','rencontre')}${c.sampleSize<5?t('match_page.comparison_note_thin_sample_suffix',' — échantillon encore court'):''}.`
     : t('match_page.comparison_note_simple','Moyennes par match.');
-
   return `<div class="cmp-scroll"><table class="cmp-table">
       <thead><tr>
         <th scope="col">${esc(t('match_page.comparison_table_header','Par match'))}</th>
@@ -800,20 +643,11 @@ function comparison(vm){
       <tbody>${lignes.join('')}</tbody>
     </table></div>
     ${conclusion?`<p class="cmp-conclusion">${conclusion}</p>`:''}
-    <p class="cmp-note">${note} ${esc(t('match_page.comparison_note_disclaimer',"Hors-jeu et arrêts sont donnés sans verdict : plus d'arrêts signifie surtout plus de tirs subis."))}</p>`;
+    <p class="cmp-note">${esc(note)} ${esc(t('match_page.comparison_note_disclaimer',"Hors-jeu et arrêts sont donnés sans verdict : plus d'arrêts signifie surtout plus de tirs subis."))}</p>`;
 }
 
-// Scenario par tranches de 15 minutes : courbe reliant les 6 vraies valeurs
-// par tranche - une ligne plutot que des barres, et toujours les 6 memes
-// points reels, jamais une interpolation minute par minute qui laisserait
-// croire a une precision qu'on n'a pas.
-//
-// La courbe est inchangee. Ce qui change, c'est CE QU'ELLE TRACE. Elle lisait
-// scenario_15min, un texte redige par le modele de langage : il n'existait
-// que sur 1 des 46 matchs publies, la section annoncait donc "indisponible"
-// partout ailleurs. Elle trace desormais les buts REELLEMENT comptes par
-// tranche pour les deux equipes (vm.editorial.goalTiming), disponibles sur
-// 43 matchs sur 46. Aucun texte n'est requis pour l'afficher.
+// Repartition des buts par tranche de 15 minutes : buts REELLEMENT comptes
+// pour les deux equipes (vm.editorial.goalTiming), 6 vrais points.
 function scenarioChart(slots){
   const W=460,H=140,pad=22,top=18,base=H-20;
   const max=Math.max(...slots.map(s=>n(s.prob)||0),1);
@@ -822,42 +656,21 @@ function scenarioChart(slots){
   const path=slots.map((s,i)=>`${i===0?'M':'L'}${x(i).toFixed(1)},${y(n(s.prob)||0).toFixed(1)}`).join(' ');
   const area=`${path} L${x(slots.length-1).toFixed(1)},${base} L${x(0).toFixed(1)},${base} Z`;
   const dots=slots.map((s,i)=>`<circle cx="${x(i).toFixed(1)}" cy="${y(n(s.prob)||0).toFixed(1)}" r="3" fill="var(--accent)"></circle><text x="${x(i).toFixed(1)}" y="${(y(n(s.prob)||0)-9).toFixed(1)}" text-anchor="middle" font-size="9" fill="var(--accent)" font-weight="700">${Math.round(n(s.prob)||0)}%</text><text x="${x(i).toFixed(1)}" y="${H-4}" text-anchor="middle" font-size="8" fill="var(--muted)">${esc((s.t||'').replace('min',''))}</text>`).join('');
-  return `<svg class="scenario-chart" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none"><line x1="${pad}" y1="${base}" x2="${W-pad}" y2="${base}" stroke="var(--line)"></line><path d="${area}" fill="url(#scGrad)" class="sc-area"></path><path d="${path}" fill="none" stroke="var(--accent)" stroke-width="2" class="sc-line"></path>${dots}<defs><linearGradient id="scGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--accent)" stop-opacity=".2"/><stop offset="100%" stop-color="var(--accent)" stop-opacity="0"/></linearGradient></defs></svg>`;
+  return `<svg class="scenario-chart" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-hidden="true" focusable="false"><line x1="${pad}" y1="${base}" x2="${W-pad}" y2="${base}" stroke="var(--line)"></line><path d="${area}" fill="url(#scGrad)" class="sc-area"></path><path d="${path}" fill="none" stroke="var(--accent)" stroke-width="2" class="sc-line"></path>${dots}<defs><linearGradient id="scGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="var(--accent)" stop-opacity=".2"/><stop offset="100%" stop-color="var(--accent)" stop-opacity="0"/></linearGradient></defs></svg>`;
 }
 function scenarioCard(vm){
   const g=vm.editorial.goalTiming;
   if(!g||!g.slots.length)return empty(t('match_page.scenario_unavailable','Pas assez de buts enregistrés pour établir une répartition fiable.'));
-  // Meme forme d'entree que la courbe attendait deja : { t, prob }.
   const slots=g.slots.map(sl=>({t:sl.label,prob:sl.share}));
   return `${scenarioChart(slots)}
-    <div class="scenario-insight"><b>!</b><span>${t('match_page.scenario_peak_prefix','Tranche la plus fournie : ')}<b>${esc(g.peak.label)}${t('match_page.scenario_peak_middle',' min')}</b> — ${Math.round(g.peak.share)}${t('match_page.scenario_peak_suffix',' % des buts des deux équipes y sont tombés.')}</span></div>
-    <p class="scenario-source">${t('match_page.scenario_source_prefix','Sur ')}${g.totalGoals}${t('match_page.scenario_source_middle',' buts marqués par ')}${esc(vm.identity.home.name)}${t('match_page.scenario_source_and',' et ')}${esc(vm.identity.away.name)}${t('match_page.scenario_source_suffix',' cette saison. Fréquence observée sur leurs matchs passés, pas une prévision pour celui-ci.')}</p>`;
+    <div class="scenario-insight"><b aria-hidden="true">!</b><span>${esc(t('match_page.scenario_peak_prefix','Tranche la plus fournie : '))}<b>${esc(g.peak.label)}${esc(t('match_page.scenario_peak_middle',' min'))}</b> — ${Math.round(g.peak.share)}${esc(t('match_page.scenario_peak_suffix',' % des buts des deux équipes y sont tombés.'))}</span></div>
+    <p class="scenario-source">${esc(t('match_page.scenario_source_prefix','Sur '))}${g.totalGoals}${esc(t('match_page.scenario_source_middle',' buts marqués par '))}${esc(vm.identity.home.name)}${esc(t('match_page.scenario_source_and',' et '))}${esc(vm.identity.away.name)}${esc(t('match_page.scenario_source_suffix',' cette saison. Fréquence observée sur leurs matchs passés, pas une prévision pour celui-ci.'))}</p>`;
 }
 
-
-// outputShare (vm.players.absences[].outputShare) : part reelle du joueur
-// dans les buts+passes decisives+passes cles recents de son equipe (cf
-// lib/insights.js#computeOutputShare) - une estimation, jamais un modele
-// causal "l'equipe perd X% sans lui". N'apparait que si le joueur absent a
-// ete retrouve dans l'historique recent (sinon aucun chiffre affiche).
-// absences() a ete supprimee : sur la majorite des matchs elle n'affichait
-// que "Aucune absence signalee" pour les deux equipes, occupant une carte
-// entiere pour zero information. Retiree a la demande de l'utilisateur.
-// Les absences reelles restent prises en compte par le modele en amont
-// (lib/match-view-model.js) et dans "Ce qu'il faut savoir".
-
-// FAQ.
-//
-// Regle posee par l'utilisateur : "il faut se poser des questions dont les
-// gens n'ont pas la reponse dans la page". Les anciennes questions - qui est
-// favori, quel pari est retenu, le modele est-il d'accord avec le marche,
-// quel niveau de risque - reprenaient toutes une information deja affichee
-// en grand plus haut. Elles sont retirees.
-//
-// Ne restent que des questions dont la reponse n'existe nulle part ailleurs,
-// nourries par vm.editorial.exclusiveFacts : cartons, buts attendus de
-// saison, precision de passe, tranches d'encaissement. Ces donnees etaient
-// relevees par le pipeline sans etre affichees par aucune carte.
+// FAQ — en dernier. Regle posee par l'utilisateur : uniquement des questions
+// dont la reponse n'est affichee nulle part ailleurs, nourries par
+// vm.editorial.exclusiveFacts (cartons, buts attendus de saison, precision de
+// passe, tranches d'encaissement).
 function faqCard(vm){
   const qa=[];
   const id=vm.identity, f=vm.editorial.exclusiveFacts||{}, g=vm.editorial.goalTiming;
@@ -865,16 +678,13 @@ function faqCard(vm){
   const plusGrand=(p)=>p.home>=p.away?dom:ext;
   const plusPetit=(p)=>p.home<=p.away?dom:ext;
 
-  // 1. Qui ouvre le score le plus tot. Le graphique du scenario cumule les
-  // deux equipes : la repartition equipe par equipe n'est visible nulle part.
+  // 1. Qui marque le plus tot : le graphique cumule les deux equipes.
   if(g&&g.slots.length>=6){
     const totD=g.slots.reduce((a,x)=>a+x.home,0),totE=g.slots.reduce((a,x)=>a+x.away,0);
     const avD=g.slots.slice(0,3).reduce((a,x)=>a+x.home,0);
     const avE=g.slots.slice(0,3).reduce((a,x)=>a+x.away,0);
     if(totD>0&&totE>0){
       const pD=Math.round(avD/totD*100),pE=Math.round(avE/totE*100);
-      // Sur une egalite, on ne designe personne : "X entre plus vite" serait
-      // faux a 35 % contre 35 %.
       const verdict=Math.abs(pD-pE)<3
         ? t('match_page.faq_early_verdict_equal','Les deux entrent dans leurs matchs au même rythme.')
         : tf('match_page.faq_early_verdict_team','{team} entre donc plus vite dans ses matchs.',{team:esc(pD>pE?dom:ext)});
@@ -882,8 +692,7 @@ function faqCard(vm){
         tf('match_page.faq_early_answer','{home} inscrit {homePct} % de ses buts avant la mi-temps, {away} {awayPct} %. {verdict} Le graphique plus haut cumule les deux équipes&nbsp;: ce détail par équipe n’y apparaît pas.',{home:esc(dom),away:esc(ext),homePct:pD,awayPct:pE,verdict})]);
     }
   }
-
-  // 2. Encaissement en fin de match : releve, jamais affiche.
+  // 2. Encaissement en fin de match.
   if(f.encaisseFin){
     const ecartFin=Math.abs(f.encaisseFin.home-f.encaisseFin.away);
     const verdictFin=ecartFin<4
@@ -892,12 +701,10 @@ function faqCard(vm){
     qa.push([t('match_page.faq_q_late','Une des deux craque-t-elle en fin de match ?'),
       tf('match_page.faq_late_answer','{home} encaisse {homePct} % de ses buts sur la dernière demi-heure, {away} {awayPct} %. {verdict}',{home:esc(dom),away:esc(ext),homePct:f.encaisseFin.home,awayPct:f.encaisseFin.away,verdict:verdictFin})]);
   }
-
-  // 3. Cartons : donnee relevee par le pipeline, affichee nulle part.
+  // 3. Cartons.
   if(f.cartons){
     const rugueux=Math.abs(f.cartons.home-f.cartons.away)<0.3?null:plusGrand(f.cartons);
     const nbRouges=f.rouges?f.rouges.home+f.rouges.away:0;
-    // Pluriel : "2 cartons rouges" des 2 en francais, comme avant.
     const rouges=nbRouges>0
       ? (nbRouges>1
         ? tf('match_page.faq_cards_red_other','Sur la période suivie, {n} cartons rouges au total.',{n:nbRouges})
@@ -908,23 +715,19 @@ function faqCard(vm){
     qa.push([t('match_page.faq_q_cards','Combien de cartons dans un match de ces équipes ?'),
       tf('match_page.faq_cards_answer','{home} en prend {homeCards} par match et {away} {awayCards}. {verdict}',{home:esc(dom),away:esc(ext),homeCards:fmt(f.cartons.home),awayCards:fmt(f.cartons.away),verdict:verdictCartons+(rouges?' '+rouges:'')})]);
   }
-
-  // 4. Buts attendus de saison : a ne pas confondre avec les buts attendus
-  // DE CE MATCH, affiches plus haut. Ceux-ci decrivent la saison entiere.
+  // 4. Buts attendus de saison (pas ceux DE CE MATCH, affiches plus haut).
   if(f.xg&&f.xga){
     const meilleure=plusGrand(f.xg), solide=plusPetit(f.xga);
     qa.push([t('match_page.faq_q_chances','Ces équipes se créent-elles beaucoup d’occasions ?'),
       tf('match_page.faq_chances_answer','Sur la saison, {home} génère {homeXg} buts attendus par match et en concède {homeXga}&nbsp;; {away} {awayXg} et {awayXga}. {best} se procure le plus d’occasions, {solid} en concède le moins.',{home:esc(dom),away:esc(ext),homeXg:fmt(f.xg.home),homeXga:fmt(f.xga.home),awayXg:fmt(f.xg.away),awayXga:fmt(f.xga.away),best:esc(meilleure),solid:esc(solide)})]);
   }
-
-  // 5. Precision de passe : jamais affichee non plus.
+  // 5. Precision de passe.
   if(f.passes&&Math.abs(f.passes.home-f.passes.away)>=2){
     const propre=plusGrand(f.passes);
     qa.push([t('match_page.faq_q_passing','Laquelle joue le plus proprement ?'),
       tf('match_page.faq_passing_answer','{team} réussit {best} % de ses passes, contre {other} % en face. Une différence de cet ordre se traduit souvent par plus de possession et moins de contres subis.',{team:esc(propre),best:fmt(Math.max(f.passes.home,f.passes.away),0),other:fmt(Math.min(f.passes.home,f.passes.away),0)})]);
   }
-
-  // 6. Methode : sa reponse n'est affichee nulle part.
+  // 6. Methode.
   const sources=Array.isArray(vm.model.sources)?vm.model.sources.filter(Boolean):[];
   const sims=n(vm.model.simulationCount),quality=n(vm.model.quality);
   if(sims!==null||sources.length||quality!==null){
@@ -935,37 +738,25 @@ function faqCard(vm){
     qa.push([t('match_page.faq_q_basis','Sur quoi repose cette analyse ?'),
       tf('match_page.faq_basis_answer','L’analyse s’appuie sur {bits}. Les probabilités décrivent une fréquence attendue sur un grand nombre de matchs semblables, jamais une certitude sur celui-ci.',{bits:bits.join(', ')})]);
   }
-
-  // 7. Risque : uniquement s'il y a une vraie phrase, pas un simple niveau.
-  const NIVEAUX={FAIBLE:1,MODERE:1,ELEVE:1};
-  const risque=String(vm.editorial.risk||'').trim();
-  if(risque.length>12&&!NIVEAUX[risque.toUpperCase()]){
-    const risqueTexte=texteRisque(vm,risque);
-    if(risqueTexte)qa.push([t('match_page.faq_q_risk','Quel est le principal risque de ce pari ?'),esc(risqueTexte)]);
-  }
-
   if(qa.length<2)return '';
   return card(t('match_page.faq_title','Questions sur ce match'),
     `<div class="faq-list">${qa.map(([q,a])=>`<details><summary>${esc(q)}</summary><p>${a}</p></details>`).join('')}</div>`,
     'faq-card','faq');
 }
 
-
-
-// Une fois le signal depasse, le parieur lit 10 sections sans plus voir CE
-// QU'ON LUI RECOMMANDE ni A QUELLE COTE. Cette barre le garde sous les yeux
-// pendant toute la lecture. Elle ne calcule rien : elle recopie le signal
-// deja affiche, et disparait tant qu'il est visible.
+// Barre collante : garde le pari et sa cote sous les yeux une fois le signal
+// sorti de l'ecran par le haut. Elle recopie le signal, ne calcule rien.
 function signalSticky(vm){
   const r=vm.model.recommendation;
   if(!r)return '';
   const marketOdds=n(vm.model.recommendedOdds);
+  const prob=n(r.probability)!==null&&r.probability>0?r.probability:null;
   return `<div class="sig-sticky" id="sigSticky" aria-hidden="true">
     <div class="ss-in">
-      <span class="ss-tag">${esc(t('match_page.recommended_market_label','Marché recommandé'))}</span>
+      <span class="ss-tag">${esc(t('match_page.sig_bet_label','Pari recommandé'))}</span>
       <b class="ss-market">${esc(marcheFr(vm,r.market))}</b>
       ${marketOdds!==null?`<span class="ss-odds">${odds(marketOdds)}</span>`:''}
-      ${n(r.probability)!==null?`<span class="ss-prob">${pct(r.probability)}</span>`:''}
+      ${prob!==null?`<span class="ss-prob">${pct(prob)}</span>`:''}
     </div>
   </div>`;
 }
@@ -977,45 +768,48 @@ function bindSticky(){
   },{threshold:0}).observe(anchor);
 }
 
-function render(raw){
+// Bloc SEO statique des pages /match/<id>.html (h1 + resume) : VISIBLE tant
+// que l'analyse charge, puis remplace par l'en-tete de l'application, qui
+// porte le seul h1 de la page. Jamais de texte masque en CSS.
+function remplacerResumeSeo(){
+  document.querySelectorAll('.match-shell>div:not(#matchRoot)').forEach(el=>el.remove());
+}
+
+function viewModel(raw){
   const vm=IasharkMatchViewModel.buildMatchViewModel(raw);
   vm._raw=raw;
   document.title=`${vm.identity.home.name} vs ${vm.identity.away.name} — IASHARK`;
-  // ORDRE DE LECTURE, fixe par l'utilisateur le 03/09/2026. Une seule
-  // colonne : la page se lit comme un dossier, de haut en bas, au lieu de
-  // deux colonnes ou l'oeil ne sait pas laquelle lire en premier.
-  // On sort le signal, puis on l'interprete, puis on l'etaye par les
-  // donnees, puis le scenario, puis les questions restantes.
-  // Retires a la meme occasion : "Pourquoi ce pari ?", "Modele vs marche",
-  // "Marches a surveiller", "Face a face" et "Arbitre".
+  return vm;
+}
+
+function render(raw){
+  const vm=viewModel(raw);
+  // ORDRE DE LECTURE (14/09/2026, demande du proprietaire) : en-tete, le
+  // signal au centre, les probabilites et cotes, la forme et les
+  // face-a-face, les absences, les statistiques, les scores, les marches
+  // joueurs, la repartition des buts, et la FAQ en dernier.
+  // Retires a la meme occasion (doublons du signal ou du tableau) : "Notre
+  // lecture du match", "Ce qu'il faut savoir", "Matchup", "Stats a ne pas
+  // surinterpreter", "Value potentielle".
   const sections=[
     signalCard(vm),
-    matchReadingCard(vm),
-    keyInsightsCard(vm),
-    outputsCard(vm),
+    marketsCard(vm),
+    formH2HCard(vm),
+    absencesCard(vm),
     card(t('match_page.comparison_title','Comparatif des deux équipes'),comparison(vm),'compare-card','compare'),
+    outputsCard(vm),
     threatsCard(vm),
-    matchupCard(vm),
-    formNoteCard(vm),
-    valuePotentialCard(vm),
-    // "Scenario probable du match" : contenu et style geles a la demande de
-    // l'utilisateur. Seule sa POSITION change ici.
     card(t('match_page.scenario_title','Scénario probable du match'),scenarioCard(vm),'','chart'),
     faqCard(vm)
   ];
-  // Pas de numerotation : les titres de cartes suffisent a situer la lecture.
-  // La colonne de chiffres ajoutait un repere que personne ne suit et volait
-  // de la largeur a la carte sur grand ecran.
   const corps=sections.filter(Boolean).map(node=>`<div class="sec">${node}</div>`).join('');
+  remplacerResumeSeo();
   root.innerHTML=`<div class="page">${hero(vm)}<div class="secs">${corps}</div></div>${signalSticky(vm)}`;
   bindMotion();
   bindSticky();
 }
 
 function bindMotion(){
-  requestAnimationFrame(()=>requestAnimationFrame(()=>{
-    root.querySelectorAll('.prob-ring .fill').forEach(c=>{c.style.strokeDashoffset=c.dataset.target;});
-  }));
   const reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   if(!reduce&&'IntersectionObserver' in window){
     const items=root.querySelectorAll('.reveal');
@@ -1037,28 +831,55 @@ function bindMotion(){
   }
 }
 
-// Mur d'acces : le match du jour choisi par pickFreeMatchId() (identique au
-// choix de la carte "Analyse gratuite" sur l'accueil) reste gratuit mais
-// exige un compte (inscription ou connexion) ; tous les autres necessitent
-// Pro. Rendu cote client uniquement (comme le reste du site) - une vraie
-// protection cote serveur existe deja separement sur les champs premium via
-// la fonction match-data (voir supabase/functions/match-data).
+// MURS D'ACCES. Le match du jour (pickFreeMatchId, meme choix que l'accueil)
+// reste gratuit mais exige un compte ; les autres necessitent Pro. La vraie
+// protection est cote serveur (fonction match-data). Le teaser n'affiche
+// AUCUNE donnee du modele : ni pari, ni probabilite, ni ecart - seulement le
+// nombre de cotes de bookmaker comparees, le niveau de fiabilite publie et un
+// gabarit flou sans texte.
 function gateCard(vm,opts){
-  const homeName=vm.identity.home.name,awayName=vm.identity.away.name;
+  const tz=vm.teaser||{},pub=vm._raw||{};
+  // Champs PUBLICS du teaser uniquement (lib/premium-fields.js) : no_signal,
+  // has_signal et conf disent "une analyse existe" et sa confiance, sans la
+  // donner.
+  const annonce=pub.no_signal===true?t('match_page.sig_teaser_no_signal','Aucun pari retenu par le modèle sur ce match.')
+    :(pub.has_signal===true||pub.no_signal===false)?t('match_page.sig_teaser_exists','Une analyse IASHARK existe pour ce match.'):'';
+  const indice=pub.no_signal===true?'':confMeter(pub.conf);
+  const faits=[
+    n(tz.oddsCount)!==null&&tz.oddsCount>0?tf('match_page.gate_teaser_odds','{n} cotes de marché comparées au modèle',{n:tz.oddsCount}):null,
+    tz.reliability?relLigne(tz.reliability):null,
+    t('match_page.gate_teaser_content','Pari recommandé, probabilité du modèle, value et raisons chiffrées')
+  ].filter(Boolean);
   return `<div class="page">
     ${hero(vm)}
-    <section class="card gate reveal">
-      ${cardIcon('lock')}
-      <h2>${esc(opts.title)}</h2>
-      <p>${esc(opts.text)}</p>
-      <a class="btn-gate" href="${opts.href}">${esc(opts.cta)}</a>
+    <section class="signal-card is-locked gate reveal" aria-labelledby="gateTitle">
+      <div class="sig-head">
+        <span class="sig-eyebrow">${cardIcon('target')}${esc(t('match_page.signal_title','Le signal IASHARK'))}</span>
+        ${relBadge(tz.reliability)}
+      </div>
+      ${annonce?`<p class="sig-teaser-line">${esc(annonce)}</p>`:''}
+      ${indice?`<div class="sig-stats is-single">${indice}</div>`:''}
+      <div class="sig-slip is-locked">
+        <div class="sig-slip-main">
+          <p class="sig-kicker">${esc(t('match_page.sig_bet_label','Pari recommandé'))}</p>
+          <div class="sig-ghost" aria-hidden="true"><span class="g1"></span><span class="g2"></span></div>
+        </div>
+        <div class="sig-odds-box is-locked" aria-hidden="true">${cardIcon('lock')}</div>
+      </div>
+      <div class="gate-body">
+        ${cardIcon('lock')}
+        <h2 id="gateTitle">${esc(opts.title)}</h2>
+        <p>${esc(opts.text)}</p>
+        <ul class="gate-facts">${faits.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>
+        <a class="btn-gate" href="${esc(opts.href)}">${esc(opts.cta)}</a>
+      </div>
+      <p class="sig-legal">${esc(t('match_page.sig_legal','18+ · Estimation statistique, pas une garantie. Jouez responsable.'))}</p>
     </section>
   </div>`;
 }
 function renderAuthWall(raw){
-  const vm=IasharkMatchViewModel.buildMatchViewModel(raw);
-  vm._raw=raw;
-  document.title=`${vm.identity.home.name} vs ${vm.identity.away.name} — IASHARK`;
+  const vm=viewModel(raw);
+  remplacerResumeSeo();
   root.innerHTML=gateCard(vm,{
     title:t('match_page.gate_free_title','Match gratuit du jour'),
     text:t('match_page.gate_free_text','Ce match est gratuit, mais il faut un compte IASHARK gratuit (inscription ou connexion) pour voir l’analyse complète.'),
@@ -1068,9 +889,8 @@ function renderAuthWall(raw){
   bindMotion();
 }
 function renderProWall(raw){
-  const vm=IasharkMatchViewModel.buildMatchViewModel(raw);
-  vm._raw=raw;
-  document.title=`${vm.identity.home.name} vs ${vm.identity.away.name} — IASHARK`;
+  const vm=viewModel(raw);
+  remplacerResumeSeo();
   root.innerHTML=gateCard(vm,{
     title:t('match_page.gate_pro_title','Analyse réservée aux membres Pro'),
     text:t('match_page.gate_pro_text','Le marché recommandé, la confiance du modèle et l’analyse complète de ce match sont réservés aux membres Pro. Le match du jour, lui, reste gratuit.'),
@@ -1080,9 +900,8 @@ function renderProWall(raw){
   bindMotion();
 }
 
-// Bloc SEO statique des pages /match/<id>.html (genere par update-data.yml,
-// masque en CSS) : les libelles de marche y sont poses bruts dans
-// data-market-label et rediges ici dans la langue active.
+// Bloc SEO statique : libelles de marche poses bruts dans data-market-label,
+// rediges ici dans la langue active.
 function traduireShellSeo(){
   const ml=window.IasharkMarketLabels;
   if(!ml||!ml.marketLabel)return;
@@ -1090,9 +909,8 @@ function traduireShellSeo(){
     el.textContent=ml.marketLabel(el.getAttribute('data-market-label'),{home:el.getAttribute('data-home')||undefined,away:el.getAttribute('data-away')||undefined});
   });
 }
-// "← Retour" : retour arriere seulement si le visiteur vient d'une page du
-// site ; arrive par un lien externe (moteur de recherche, partage), il est
-// renvoye vers l'accueil de sa version du site - jamais hors du site.
+// "← Retour" : retour arriere seulement si le visiteur vient du site ; sinon
+// l'accueil de sa version du site.
 function bindBackLink(){
   document.querySelectorAll('[data-back-link]').forEach(el=>{
     el.setAttribute('href',lien(''));
@@ -1106,21 +924,12 @@ function bindBackLink(){
 async function init(){
   bindBackLink();
   try{
-    // Dictionnaire i18n charge (et applique aux elements data-i18n de la
-    // coquille HTML) AVANT tout rendu, pour que labels et nombres sortent
-    // deja dans la bonne langue des le premier rendu - jamais un flash en
-    // francais suivi d'un re-rendu. Repli silencieux si I18N n'est pas
-    // charge (page qui n'inclut pas encore i18n.js) : t() et localeTag()
-    // retombent alors sur le francais partout, comme avant ce chantier.
+    // Dictionnaire charge AVANT tout rendu : jamais un flash en francais.
     if(window.I18N&&window.I18N.init){ try{ await window.I18N.init(); }catch(e){} }
     traduireShellSeo();
-    // Marche sans ressource d'aide au jeu confirmee (ex. mx) : lib/market-config.js
-    // masque le numero et le lien ; la ligne "Aide :" entiere l'est aussi.
+    // Marche sans ressource d'aide au jeu confirmee : ligne "Aide :" masquee.
     if(window.IASHARK_MARKET&&!window.IASHARK_MARKET.helpline)document.querySelectorAll('[data-helpline-row]').forEach(el=>{el.hidden=true;});
-    // MODE DEMO (exemple-analyse.html) : la page de demonstration montre une
-    // analyse REELLE et complete, sans compte et sans appel reseau. Aucune
-    // logique d'acces n'est contournee ailleurs - le drapeau n'existe que sur
-    // cette page marketing, et le match y est fige dans le HTML.
+    // MODE DEMO (exemple-analyse.html) : analyse reelle figee dans le HTML.
     if(typeof IASHARK_DEMO!=='undefined'&&IASHARK_DEMO&&typeof PRELOADED_MATCH!=='undefined'){
       render(PRELOADED_MATCH);
       return;
@@ -1132,17 +941,31 @@ async function init(){
     if(window.IasharkApp){
       ctx=await window.IasharkApp.context();
       if(ctx.session){
-        const result=await window.IasharkApp.supabase.functions.invoke('match-data');
+        const result=await window.IasharkApp.supabase.functions.invoke('match-data',{body:{id:String(id)}});
         if(result.data&&!result.error){
           list=result.data.matchs||[];
           raw=list.find(x=>String(x.id)===String(id))||raw;
         }
       }
     }
-    if(!raw||!list){
-      const data=await fetch(`/data.json?t=${Date.now()}`).then(r=>r.json());
+    // Sans session : liste legere data-home.json et detail match/<id>.json en
+    // parallele (lib/public-data-split.js). cache:'no-cache' revalide (ETag).
+    const lire=u=>fetch(u,{cache:'no-cache'}).then(r=>r.ok?r.json():null).catch(()=>null);
+    const fusion=(complet,partiel)=>{const m=Object.assign({},complet,partiel||{});delete m.detail_omitted;return m;};
+    if(!list||!raw||raw.detail_omitted){
+      const [liste,detail]=await Promise.all([
+        list?null:lire('/data-home.json'),
+        raw&&!raw.detail_omitted?null:lire('/match/'+encodeURIComponent(id)+'.json')
+      ]);
+      if(!list&&liste&&Array.isArray(liste.matchs))list=liste.matchs;
+      if(detail&&String(detail.id)===String(id))raw=fusion(detail,raw);
+    }
+    if(!list||!raw||raw.detail_omitted){
+      const data=await fetch('/data.json',{cache:'no-cache'}).then(r=>r.json());
       list=list||data.matchs||[];
-      raw=raw||list.find(x=>String(x.id)===String(id));
+      const complet=(data.matchs||[]).find(x=>String(x.id)===String(id));
+      if(complet)raw=fusion(complet,raw);
+      else if(raw)raw=fusion({},raw);
     }
     if(!raw)throw new Error(t('match_page.match_not_found','Match introuvable'));
     const isFree=String(raw.id)===String(IasharkFreeMatch.pickFreeMatchId(list,null,(window.IASHARK_MARKET&&window.IASHARK_MARKET.code)||null));

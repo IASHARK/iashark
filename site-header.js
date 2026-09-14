@@ -37,7 +37,7 @@
     + '.site-header__brand{display:flex;align-items:center;text-decoration:none;font-family:"Bebas Neue",Impact,sans-serif;'
     + 'font-size:23px;letter-spacing:2.5px;color:#f4f7fa;line-height:1;}'
     + '.site-header__brand span{color:#16d6f4;}'
-    + '.site-header__brand img{width:132px;height:40px;object-fit:contain;object-position:left center;}'
+    + '.site-header__brand img{width:132px;height:40px;object-fit:contain;object-position:left center;mix-blend-mode:lighten;}'
     + '.site-header__nav{display:flex;align-items:center;gap:6px;margin-left:6px;}'
     + '.site-header__nav a{font-family:"Space Mono",ui-monospace,monospace;font-size:9.5px;letter-spacing:1.4px;'
     + 'text-transform:uppercase;color:#9baec0;text-decoration:none;padding:7px 11px;border-radius:8px;transition:.18s;}'

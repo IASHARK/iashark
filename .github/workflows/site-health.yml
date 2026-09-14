@@ -1,0 +1,120 @@
+name: site-health
+
+# SURVEILLANCE AUTOMATIQUE (guide proprietaire : MONITORING.md).
+#
+# A. Alerte d'echec de workflow : a la fin de chaque run des workflows
+#    surveilles sur main, ouvre / met a jour une issue "🚨 ... en échec – date"
+#    (echec, delai depasse, annulation) avec le lien du run, les jobs et
+#    etapes en echec et une explication ; la ferme au prochain succes.
+#    Les annulations des collecteurs frequents (closing-odds, forward-odds-*)
+#    sont ignorees : leur groupe de concurrence annule normalement les runs en
+#    attente.
+# B. Controle de sante de la production toutes les 2 heures (et a la demande) :
+#    scripts/site-health-check.js. Issue "🚨 Santé du site – date" si un
+#    controle critique echoue, fermee quand tout repasse. Avertissements dans
+#    le resume du job uniquement.
+#
+# N'ecrit JAMAIS dans le depot (contents: read). Ne declenche aucun
+# deploiement. workflow_run et schedule ne fonctionnent que lorsque ce fichier
+# est sur la branche par defaut (main).
+
+on:
+  workflow_run:
+    workflows:
+      - "Update IASHARK Daily"
+      - "closing-odds"
+      - "forward-odds-broad"
+      - "forward-odds-near-kickoff"
+      - "tests"
+    types: [completed]
+    branches: [main]
+  schedule:
+    - cron: '15 */2 * * *'
+  workflow_dispatch:
+    inputs:
+      data_json:
+        description: "Telecharger data.json (~25 Mo) : auto (08h/20h UTC ou si data-home.json absent), always, never"
+        required: false
+        default: 'always'
+        type: choice
+        options: ['auto', 'always', 'never']
+
+permissions:
+  issues: write
+  contents: read
+  actions: read
+
+jobs:
+  workflow-alert:
+    if: >-
+      github.event_name == 'workflow_run' &&
+      contains(fromJSON('["failure","timed_out","cancelled","startup_failure","success"]'), github.event.workflow_run.conclusion)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    concurrency:
+      group: site-health-alert-${{ github.event.workflow_run.workflow_id }}
+      cancel-in-progress: false
+    steps:
+      - name: Checkout (scripts de surveillance uniquement)
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            scripts/site-health-check.js
+            lib/health
+          sparse-checkout-cone-mode: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+
+      - name: Ouvrir, mettre a jour ou fermer l'issue d'alerte
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node scripts/site-health-check.js --workflow-run
+
+  checks:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    concurrency:
+      group: site-health-checks
+      cancel-in-progress: false
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+
+      - name: Controler la production (https://iashark.com)
+        id: health
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Optionnels : controle ignore (skip) si le secret n'existe pas.
+          APISPORTS_KEY: ${{ secrets.APISPORTS_KEY }}
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          DATA_JSON_MODE: ${{ inputs.data_json || 'auto' }}
+        run: node scripts/site-health-check.js --data-json "$DATA_JSON_MODE" --out health-results.json > /dev/null
+
+      - name: Ouvrir, mettre a jour ou fermer l'issue "Santé du site"
+        if: always()
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node scripts/site-health-check.js --sync-issue health-results.json
+
+      - name: Archiver les resultats
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: site-health-results
+          path: health-results.json
+          retention-days: 14
+          if-no-files-found: ignore
+
+      - name: Marquer le job en echec si un controle critique a echoue
+        if: steps.health.outcome == 'failure'
+        run: |
+          echo "Au moins un controle critique a echoue : voir l'issue \"Santé du site\" et le resume du job."
+          exit 1

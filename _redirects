@@ -90,6 +90,27 @@
 # --- Sources des pages legales (legal/<dir>/) : jamais servies telles quelles.
 /legal/*                          /:splat                       301!
 
+# --- Blog : repertoires sans blog propre -> blog servi (gb, za -> /en/blog/ ;
+# fr -> blog FR racine). Cibles = URL finales en 200, jamais une redirection.
+/fr/blog.html                     /blog.html                    301!
+/fr/blog                          /blog.html                    301!
+/fr/blog/                         /blog.html                    301!
+/fr/blog/*                        /blog/:splat                  301!
+/gb/blog.html                     /en/blog/                     301!
+/gb/blog                          /en/blog/                     301!
+/gb/blog/                         /en/blog/                     301!
+/gb/blog/*                        /en/blog/:splat               301!
+/za/blog.html                     /en/blog/                     301!
+/za/blog                          /en/blog/                     301!
+/za/blog/                         /en/blog/                     301!
+/za/blog/*                        /en/blog/:splat               301!
+/en/blog.html                     /en/blog/                     301!
+/mx/blog.html                     /mx/blog/                     301!
+/es/blog.html                     /es/blog/                     301!
+/de/blog.html                     /de/blog/                     301!
+/it/blog.html                     /it/blog/                     301!
+/pt/blog.html                     /pt/blog/                     301!
+
 # --- 404 traduite par repertoire. Non forcee : ne s'applique que si aucun
 # fichier n'existe au chemin demande. Toujours en dernier.
 /fr/*                             /fr/404.html                  404

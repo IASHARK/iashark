@@ -4,14 +4,19 @@
    les pages dont les tokens CSS different. */
 .lang-switch-slot{display:inline-flex;align-items:center;min-width:48px;min-height:27px}
 .lang-switch{position:relative}
-.lang-switch-btn{display:flex;align-items:center;gap:5px;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1px;color:var(--muted,#8193a8);background:transparent;border:1px solid var(--border,rgba(255,255,255,.08));padding:6px 9px;border-radius:8px;cursor:pointer;transition:.2s}
+/* Accessibilite (audit axe 14/09/2026) : --muted vaut #4a6580 sur plusieurs
+   pages, soit un contraste de 3,25:1 pour un texte de 9px. Couleur fixe a
+   plus de 4,5:1 sur les fonds sombres du site, cible tactile de 32px et
+   focus clavier visible. */
+.lang-switch-btn{display:flex;align-items:center;gap:5px;min-height:32px;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1px;color:#8fa3b8;background:transparent;border:1px solid var(--border,rgba(255,255,255,.08));padding:6px 9px;border-radius:8px;cursor:pointer;transition:.2s}
 .lang-switch-btn:hover{border-color:rgba(34,211,238,.3);color:var(--cyan,#22d3ee)}
+.lang-switch-btn:focus-visible,.lang-switch-item:focus-visible{outline:2px solid var(--cyan,#22d3ee);outline-offset:2px}
 .lang-switch-menu{display:none;position:absolute;top:calc(100% + 6px);right:0;background:var(--card2,#0f1a28);border:1px solid var(--border,rgba(255,255,255,.08));border-radius:10px;padding:6px;min-width:190px;z-index:200;box-shadow:0 10px 30px rgba(0,0,0,.45)}
 .lang-switch-menu.open{display:block}
 .lang-switch-item{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;color:var(--text,#e2e8f0);text-decoration:none;font-size:13px;font-family:'DM Sans','Inter',sans-serif;transition:.15s}
 .lang-switch-item:hover{background:rgba(34,211,238,.08)}
 .lang-switch-item.active,.lang-switch-item.active .lang-switch-code{color:var(--cyan,#22d3ee)}
-.lang-switch-code{font-family:'Space Mono',monospace;font-size:9px;color:var(--muted,#8193a8);width:22px;flex-shrink:0}
+.lang-switch-code{font-family:'Space Mono',monospace;font-size:9px;color:#8fa3b8;width:22px;flex-shrink:0}
 .lang-switch-name{flex:1}
 .lang-switch-check{color:var(--cyan,#22d3ee);font-family:'Space Mono',monospace;font-size:10px}
 @media(max-width:480px){.lang-switch-menu{right:-8px}}

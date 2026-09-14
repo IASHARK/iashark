@@ -1,0 +1,95 @@
+name: health-monitor
+
+# SURVEILLANCE DES DONNEES PUBLIQUES (data-home.json, data.json en repli,
+# echantillon match/<id>.json) : fraicheur de generated_at, matchs publies,
+# match offert du jour, ligues attendues, cotes brutes, fuite de champs
+# premium (critique). Controles : lib/health/checks.js ; alertes :
+# lib/health/alerts.js.
+#
+# Declencheurs :
+#   - 08:30 UTC (apres le pipeline de 06:00 et le deploiement Netlify) et 18:00 UTC ;
+#   - fin d'un run "Update IASHARK Daily" qui n'a PAS reussi ;
+#   - a la demande (Run workflow).
+#
+# Alertes (chaque canal ignore proprement si son secret est absent) :
+#   - issue GitHub "🚨 Données publiques IAShark – date" (GITHUB_TOKEN, automatique),
+#     mise a jour tant que le probleme dure, fermee quand tout repasse ;
+#   - e-mail Resend : secrets RESEND_API_KEY + ALERT_EMAIL (ALERT_EMAIL_FROM optionnel) ;
+#   - webhook (Slack, Discord...) : secret ALERT_WEBHOOK_URL.
+#
+# Droits minimaux : lecture du code, ecriture des issues. Aucun commit, aucun
+# deploiement. schedule et workflow_run ne s'executent que depuis la branche
+# par defaut (main).
+
+on:
+  schedule:
+    - cron: '30 8 * * *'
+    - cron: '0 18 * * *'
+  workflow_run:
+    workflows: ["Update IASHARK Daily"]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: health-monitor
+  cancel-in-progress: false
+
+jobs:
+  monitor:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion != 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout (scripts de surveillance uniquement)
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            lib/health
+            lib/premium-fields.js
+            config/leagues.json
+            league-coverage-report.json
+            scripts/health-check.js
+            scripts/health-alert.js
+          sparse-checkout-cone-mode: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Controler les donnees publiques (https://iashark.com)
+        id: check
+        continue-on-error: true
+        run: node scripts/health-check.js --out health-report.json
+
+      - name: Alerter (issue, e-mail, webhook)
+        if: always()
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          ALERT_EMAIL: ${{ secrets.ALERT_EMAIL }}
+          ALERT_EMAIL_FROM: ${{ secrets.ALERT_EMAIL_FROM }}
+          ALERT_WEBHOOK_URL: ${{ secrets.ALERT_WEBHOOK_URL }}
+          # Valeurs fournies par GitHub (jamais interpolees dans le script shell).
+          PIPELINE_CONCLUSION: ${{ github.event.workflow_run.conclusion }}
+          PIPELINE_RUN_URL: ${{ github.event.workflow_run.html_url }}
+        run: node scripts/health-alert.js --report health-report.json
+
+      - name: Archiver le rapport
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: health-report
+          path: health-report.json
+          retention-days: 14
+          if-no-files-found: ignore
+
+      - name: Job en echec si un controle critique a echoue
+        if: steps.check.outcome == 'failure' || github.event_name == 'workflow_run'
+        run: |
+          echo "Controle critique en echec ou pipeline quotidien en echec : voir l'issue \"Données publiques IAShark\" et le resume du job."
+          exit 1

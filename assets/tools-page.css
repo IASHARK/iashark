@@ -31,6 +31,13 @@ img,svg{display:block;max-width:100%}
 }
 .tool-tab:focus-visible{outline:2px solid #20d5ef;outline-offset:2px}
 
+/* Bouton "Connexion" / pastille compte injecte par auth-header.js : le reset
+   ci-dessus lui retirait tout (54x20 px, cible tactile trop petite, audit
+   14/09/2026). Meme rendu que le lien statique de l'en-tete. */
+.btn-login{display:inline-flex;align-items:center;min-height:36px;padding:6px 12px;border:1px solid rgba(141,179,211,.14);border-radius:8px;color:#f4f7fb;font-size:12.5px;font-weight:600;text-decoration:none;white-space:nowrap;transition:border-color .15s}
+.btn-login:hover{border-color:rgba(32,213,239,.4)}
+.btn-login:focus-visible{outline:2px solid #20d5ef;outline-offset:2px}
+
 /* Transition sobre a l'ouverture d'un outil : le contenu arrive, il ne
    glisse pas. Coupee si l'utilisateur demande moins de mouvement. */
 .tool-panel{animation:toolIn .22s ease-out}

@@ -1,0 +1,114 @@
+{
+  "_readme": "Textes SEO du repertoire /fr/ (et des pages statiques /match/<id>.html, version x-default). Lu par scripts/build-locales.js (meta, intro de l'accueil, JSON-LD) et scripts/seo-pages.js (pages championnat, pages match statiques). Un fichier par REPERTOIRE public, pas par dictionnaire : gb, za et en partagent le dictionnaire 'en' mais visent des marches de recherche differents. Vocabulaire honnete uniquement : estimations statistiques, 18+, IASHARK n'est pas un bookmaker.",
+  "tz": "Europe/Paris",
+  "tz_label": "heure de Paris",
+  "sport": "Football",
+  "org_description": "IASHARK analyse les matchs de football avec des modèles statistiques et compare les probabilités estimées aux cotes du marché. IASHARK n'est pas un bookmaker.",
+  "meta": {
+    "index": {
+      "title": "Pronostics foot : probabilités et stats par modèle | IASHARK",
+      "description": "Pronostics football calculés par des modèles statistiques : probabilités 1X2, buts et BTTS comparées aux cotes du marché. Une analyse offerte chaque jour. 18+"
+    },
+    "marches": {
+      "title": "Marchés analysés : probabilité du modèle vs cotes | IASHARK",
+      "description": "Tous les marchés analysés par IASHARK, du résultat aux buts et BTTS : probabilité du modèle, probabilité du marché sans marge, écart et qualité des données."
+    },
+    "a-propos": {
+      "title": "À propos d'IASHARK : méthode, données et limites",
+      "description": "Comment IASHARK analyse le football : sources de données, modèles de Poisson et Dixon-Coles, Elo, simulation Monte Carlo, limites connues et mentions légales."
+    },
+    "abonnement": {
+      "title": "Abonnement IASHARK Pro : toutes les analyses de match",
+      "description": "IASHARK Pro à {pro_price} par mois : toutes les analyses de match et les outils de suivi, sans engagement. Estimations statistiques, aucun gain garanti. 18+"
+    },
+    "exemple-analyse": {
+      "title": "Exemple d'analyse de match : PSG vs Monaco | IASHARK",
+      "description": "Une analyse IASHARK complète, en accès libre : marché recommandé, probabilité du modèle, écart avec le marché, comparatif des équipes et scénario du match."
+    },
+    "pro": {
+      "title": "Outils IASHARK : sélections du modèle et suivi des paris",
+      "description": "Sélections à forte probabilité modèle, suivi automatique des paris et vérification de cote en un clic : l'espace Outils d'IASHARK, fondé sur les mêmes modèles."
+    }
+  },
+  "home": {
+    "eyebrow": "LA MÉTHODE EN BREF",
+    "title": "Des pronostics foot fondés sur des probabilités, pas sur des intuitions",
+    "paragraphs": [
+      "IASHARK calcule ses pronostics de football avec des modèles statistiques (loi de Poisson, Dixon-Coles, classement Elo et simulation Monte Carlo). Pour chaque match de Ligue 1, de Premier League, de Liga, de Ligue des champions et des autres compétitions couvertes, le modèle estime la probabilité de chaque résultat, du nombre de buts et que les deux équipes marquent, puis la compare à la probabilité implicite des cotes du marché.",
+      "Ce sont des estimations statistiques : le football reste incertain, aucun résultat n'est garanti et IASHARK n'est pas un opérateur de paris. La qualité des données varie selon les championnats, c'est pourquoi chaque analyse affiche son niveau de fiabilité. Réservé aux plus de 18 ans."
+    ],
+    "leagues_title": "Pronostics par championnat",
+    "guides_title": "Comprendre la méthode",
+    "priority_leagues": [
+      "ligue1",
+      "ldc",
+      "premier",
+      "laliga",
+      "seriea",
+      "bundesliga",
+      "el",
+      "ecl"
+    ]
+  },
+  "breadcrumb": {
+    "home": "Accueil",
+    "blog": "Blog"
+  },
+  "league": {
+    "title": "Pronostics {league} : probabilités des matchs | IASHARK",
+    "description": "Pronostics {league} calculés par des modèles statistiques : matchs analysés, heure de Paris, stade et lien vers chaque analyse. Estimations, 18+",
+    "h1": "Pronostics {league} et analyses de match",
+    "intro_generic": "Les prochains matchs de la compétition {league} ({country}) analysés par IASHARK. Chaque analyse estime avec des modèles statistiques les probabilités du résultat, des buts et que les deux équipes marquent, puis les compare aux cotes du marché.",
+    "fixtures_title": "Matchs analysés",
+    "none": "Aucun match de la compétition {league} n'est analysé pour le moment. Les matchs sont ajoutés automatiquement dès que leurs données sont disponibles.",
+    "kickoff_note": "Horaires à l'heure de Paris.",
+    "method_title": "Comment lire ces analyses",
+    "method": "Une probabilité est une estimation, pas une promesse : une issue estimée à 60 % échoue quand même quatre fois sur dix. Chaque analyse IASHARK note aussi la qualité de ses données : un échantillon trop faible est signalé plutôt que caché.",
+    "free_link": "L'analyse offerte du jour",
+    "others_title": "Autres compétitions",
+    "disclaimer": "Information statistique, pas une garantie de résultat. IASHARK n'est pas un bookmaker. Interdit aux moins de 18 ans.",
+    "help": "Aide :",
+    "countries": {
+      "premier": "Angleterre",
+      "laliga": "Espagne",
+      "seriea": "Italie",
+      "bundesliga": "Allemagne",
+      "ligue1": "France",
+      "ldc": "UEFA",
+      "el": "UEFA",
+      "ecl": "UEFA",
+      "eredivisie": "Pays-Bas",
+      "primeira": "Portugal",
+      "mls": "États-Unis et Canada",
+      "suede": "Suède",
+      "jleague": "Japon",
+      "liga_mx": "Mexique",
+      "south_africa_premiership": "Afrique du Sud",
+      "argentina_liga_profesional": "Argentine",
+      "colombia_primera_a": "Colombie",
+      "peru_primera": "Pérou",
+      "chile_primera": "Chili"
+    },
+    "overrides": {
+      "ligue1": {
+        "title": "Pronostics Ligue 1 : probabilités des matchs | IASHARK",
+        "h1": "Pronostics Ligue 1 et analyses de match",
+        "intro": "La Ligue 1 est l'élite du football français : 18 clubs et 34 journées d'août à mai. IASHARK analyse ses matchs avec des modèles statistiques et compare les probabilités estimées aux cotes du marché."
+      }
+    }
+  },
+  "match": {
+    "title": "{home} vs {away} : pronostic et stats ({league}) | IASHARK",
+    "description": "{home} vs {away}, {league}, {date} : horaire, stade et analyse statistique IASHARK : résultat, buts, les deux équipes marquent. 18+",
+    "facts_title": "Informations du match",
+    "competition": "Compétition",
+    "kickoff": "Coup d'envoi",
+    "venue": "Stade",
+    "about": "IASHARK analyse ce match avec des modèles statistiques (résultat, buts, les deux équipes marquent) et compare ces estimations aux cotes du marché. Une analyse est offerte chaque jour ; les autres font partie d'IASHARK Pro.",
+    "free_link": "L'analyse offerte du jour",
+    "hub_link": "Tous les matchs analysés : {league}",
+    "guide_link": "Comment lire une probabilité de match",
+    "disclaimer": "Information statistique, pas une garantie de résultat. IASHARK n'est pas un bookmaker. Interdit aux moins de 18 ans.",
+    "breadcrumb_aria": "Fil d'Ariane"
+  }
+}

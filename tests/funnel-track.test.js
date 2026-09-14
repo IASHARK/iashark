@@ -41,7 +41,7 @@ function fakeElement({ tag = "a", href = null, text = "", attrs = {}, className 
   return el;
 }
 
-function run({ hostname = "iashark.com", pathname = "/", search = "", referrer = "", ua = IPHONE_UA, timeZone = "Europe/Paris", webdriver = false } = {}) {
+function run({ hostname = "iashark.com", pathname = "/", search = "", referrer = "", ua = IPHONE_UA, timeZone = "Europe/Paris", webdriver = false, screenW = 390, maxTouchPoints = 5, local = {}, extraGlobals = {} } = {}) {
   const sent = [];
   const docListeners = {};
   const winListeners = {};
@@ -55,13 +55,13 @@ function run({ hostname = "iashark.com", pathname = "/", search = "", referrer =
   };
   const ctx = {
     location: { hostname, pathname, search, origin, href: origin + pathname + search },
-    navigator: { userAgent: ua, language: "fr-FR", maxTouchPoints: 5, webdriver },
-    screen: { width: 390 },
+    navigator: { userAgent: ua, language: "fr-FR", maxTouchPoints, webdriver },
+    screen: { width: screenW },
     innerHeight: 800,
     pageYOffset: 0,
     document,
     sessionStorage: storage(),
-    localStorage: storage(),
+    localStorage: (() => { const st = storage(); Object.keys(local).forEach((k) => st.setItem(k, local[k])); return st; })(),
     URL,
     URLSearchParams,
     Intl: { DateTimeFormat: () => ({ resolvedOptions: () => ({ timeZone }) }) },
@@ -74,6 +74,7 @@ function run({ hostname = "iashark.com", pathname = "/", search = "", referrer =
     fetch: (url, opts) => { sent.push({ url, opts, body: JSON.parse(opts.body) }); return Promise.resolve({ ok: true }); },
     addEventListener: (type, fn) => { (winListeners[type] = winListeners[type] || []).push(fn); },
   };
+  Object.assign(ctx, extraGlobals);
   ctx.window = ctx;
   vm.createContext(ctx);
   vm.runInContext(code, ctx);
@@ -129,11 +130,56 @@ test("match.html?id= et fuseau inconnu : match_id lu, country_guess null", () =>
   assert.equal(pv.metadata.os, "Windows");
 });
 
-test("rien n'est envoye hors production, sur admin.html ou pour un robot", () => {
+test("rien n'est envoye hors production, sur admin.html ou pour un robot d'indexation", () => {
   assert.equal(run({ hostname: "localhost" }).sent.length, 0);
   assert.equal(run({ pathname: "/admin.html" }).sent.length, 0);
   assert.equal(run({ ua: "Mozilla/5.0 (compatible; Googlebot/2.1)" }).sent.length, 0);
-  assert.equal(run({ webdriver: true }).sent.length, 0);
+});
+
+test("visiteur reel : aucun marqueur interne, qa ou bot", () => {
+  const md = run({ search: "?utm_source=tiktok" }).events()[0].metadata;
+  assert.equal(md.internal, undefined);
+  assert.equal(md.qa, undefined);
+  assert.equal(md.bot, undefined);
+  const desktop = run({ ua: DESKTOP_CHROME_UA, screenW: 1920, maxTouchPoints: 0 }).events()[0].metadata;
+  assert.equal(desktop.bot, undefined);
+});
+
+test("navigateur pilote : suivi mais marque bot:true (webdriver, headless, Playwright, ecran emule)", () => {
+  for (const opts of [
+    { webdriver: true },
+    { ua: DESKTOP_CHROME_UA.replace("Chrome/", "HeadlessChrome/") },
+    { extraGlobals: { __playwright__binding__: {} } },
+    { ua: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36", screenW: 390, maxTouchPoints: 0 },
+  ]) {
+    const events = run(opts).events();
+    assert.ok(events.length > 0, "toujours envoye");
+    assert.ok(events.every((e) => e.metadata.bot === true), JSON.stringify(opts));
+  }
+});
+
+test("trafic interne : localStorage iashark_internal, ?internal=1 le pose, ?internal=0 l'efface", () => {
+  const marked = run({ local: { iashark_internal: "1" } });
+  assert.ok(marked.events().every((e) => e.metadata.internal === true));
+  marked.ctx.iasharkTrack("signup_completed", { a: 1 });
+  assert.equal(marked.events().at(-1).metadata.internal, true);
+  assert.equal(marked.events().at(-1).metadata.a, 1);
+  const set = run({ search: "?internal=1" });
+  assert.equal(set.ctx.localStorage.getItem("iashark_internal"), "1");
+  assert.equal(set.events()[0].metadata.internal, true);
+  const cleared = run({ search: "?internal=0", local: { iashark_internal: "1" } });
+  assert.equal(cleared.ctx.localStorage.getItem("iashark_internal"), null);
+  assert.equal(cleared.events()[0].metadata.internal, undefined);
+});
+
+test("QA : utm_source commencant par qa => qa:true sur tous les evenements de l'onglet", () => {
+  const b = run({ pathname: "/gb/", search: "?utm_source=qa_lead_check" });
+  assert.equal(b.events()[0].metadata.qa, true);
+  assert.equal(b.ctx.sessionStorage.getItem("iashark_visit_qa"), "1");
+  b.ctx.document.visibilityState = "hidden";
+  b.fireDoc("visibilitychange");
+  assert.ok(b.events().every((e) => e.metadata.qa === true));
+  assert.equal(run({ search: "?utm_source=QA-diag" }).events()[0].metadata.qa, true);
 });
 
 test("signup_started automatique sur la page d'inscription de chaque version", () => {

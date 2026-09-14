@@ -13,6 +13,8 @@ ul,ol{list-style:none;padding:0}
 button{background:transparent;border:0;padding:0;cursor:pointer;font:inherit;color:inherit}
 a{color:inherit;text-decoration:none}
 img,svg{display:block;max-width:100%}
+/* Logo PNG sans alpha : rectangle noir visible sans fusion (QA 14/09/2026). */
+header img[src*="iashark-logo"]{mix-blend-mode:lighten}
 table{border-collapse:collapse;width:100%}
 
 /* Les chiffres doivent s'aligner en colonne : sans cela une note de 10,0
@@ -20,6 +22,12 @@ table{border-collapse:collapse;width:100%}
 .chiffres{font-variant-numeric:tabular-nums}
 
 :where(a,button,summary,[tabindex]):focus-visible{outline:2px solid #20d5ef;outline-offset:2px;border-radius:6px}
+
+/* Bouton "Connexion" / pastille compte injecte par auth-header.js : le reset
+   ci-dessus le laissait en texte brut de 16px, different des autres en-tetes
+   (QA visuelle 14/09/2026). Meme rendu que sur la page outils. */
+.btn-login{display:inline-flex;align-items:center;min-height:36px;padding:6px 12px;border:1px solid rgba(141,179,211,.14);border-radius:8px;color:#f4f7fb;font-size:12.5px;font-weight:600;white-space:nowrap;transition:border-color .15s}
+.btn-login:hover{border-color:rgba(32,213,239,.4)}
 
 /* ---------- Anneau du score ---------- */
 /* Le trace part du haut et tourne dans le sens horaire. La valeur est aussi
@@ -64,6 +72,19 @@ table{border-collapse:collapse;width:100%}
   box-shadow:0 14px 34px rgba(0,0,0,.5)}
 /* Pres du bord droit, l'info-bulle s'ancre a droite pour ne pas deborder. */
 .infobulle-fin .infobulle-texte{left:auto;right:0}
+/* Cible tactile de 44 px autour de la pastille "i" de 16 px (QA 14/09/2026). */
+.infobulle>summary{position:relative}
+.infobulle>summary::after{content:"";position:absolute;inset:-14px}
+/* Mobile : ancree au bouton, la bulle de 280 px sortait de l'ecran a droite
+   (jusqu'a 517 px sur 390) ou a gauche. Elle devient un panneau fixe au-dessus
+   de la barre de navigation, toujours entierement visible. */
+@media(max-width:640px){
+  .infobulle-texte,.infobulle-fin .infobulle-texte{position:fixed;left:16px;right:16px;top:auto;
+    bottom:calc(88px + env(safe-area-inset-bottom));width:auto;max-width:none;z-index:1100}
+}
+/* Squelette : au moins la hauteur de l'ecran, sinon le pied de page visible
+   pendant le chargement saute vers le bas au rendu (CLS 0,15 mesure). */
+#squelette:not([hidden]){min-height:calc(100dvh - 3.5rem)}
 
 /* ---------- Courbe de forme ---------- */
 .courbe{stroke:#20d5ef;fill:none;stroke-width:2;stroke-linejoin:round;stroke-linecap:round}

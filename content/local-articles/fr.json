@@ -1,0 +1,183 @@
+{
+  "_readme": "Manifeste des articles locaux /fr/ (France + Afrique francophone). Corps : content/local-articles/fr/<slug>.html. Generer : node scripts/build-local-articles.js. Aucun prix ici (config/markets.json). Le bloc injecte dans blog.html ne lie que des articles (jamais /abonnement.html : tests/blog.test.js). Statut editorial : REVIEW (faits verifies le 2026-09-14).",
+  "dir": "fr",
+  "folder": "articles",
+  "htmlLang": "fr",
+  "ogLocale": "fr_FR",
+  "intlLocale": "fr-FR",
+  "labels": {
+    "home": "Accueil",
+    "hub": "Articles",
+    "breadcrumbAria": "Fil d'Ariane",
+    "toc": "Dans cet article",
+    "published": "Publié le",
+    "minRead": "min de lecture",
+    "sources": "Sources vérifiées",
+    "sourcesNote": "Les faits cités dans cet article ont été vérifiés auprès de ces références publiques le 14 septembre 2026. Les formats et les règlements évoluent : vérifiez auprès de l'organisateur avant de vous appuyer sur un détail.",
+    "related": "Pour aller plus loin",
+    "rgTitle": "18+ · Jouer comporte des risques",
+    "hubTitle": "Articles football : Ligue 1, Classique et football africain",
+    "hubDescription": "Articles de fond sur la Ligue 1, le Classique PSG-OM, les marchés plus/moins de buts et BTTS, la Ligue des champions de la CAF, la CAN et les joueurs africains en Europe.",
+    "hubTag": "Articles",
+    "hubH1": "Ligue 1, Classique et football africain",
+    "hubIntro": "Des articles vérifiés pour comprendre les championnats, les grandes affiches et les marchés. Ni pronostic miracle ni promesse de gain : le contexte derrière les chiffres.",
+    "hubListTitle": "Tous les articles",
+    "hubAll": "Tous les articles →"
+  },
+  "responsibleHtml": "Les jeux d'argent et de hasard sont interdits aux mineurs (18+). IASHARK publie des estimations statistiques, n'est pas un opérateur de paris et ne recommande aucun site. En France, seuls les opérateurs agréés par l'Autorité nationale des jeux (ANJ) sont autorisés ; hors de France, renseignez-vous auprès du régulateur de votre pays. Besoin d'aide ? Joueurs Info Service : 09 74 75 13 13 (appel non surtaxé). Voir aussi notre <a href=\"/fr/jeu-responsable.html\">page jeu responsable</a>.",
+  "footerHtml": "<p>IASHARK — analyses statistiques de football. Les probabilités publiées sont indicatives et ne garantissent aucun résultat. IASHARK n'est pas un opérateur de paris. Interdit aux mineurs. Besoin d'aide ? Joueurs Info Service : 09 74 75 13 13 (appel non surtaxé).</p>\n<p class=\"legal-links\"><a href=\"/fr/mentions-legales.html\" style=\"color:inherit;text-decoration:underline\">Mentions légales</a> · <a href=\"/fr/cgv.html\" style=\"color:inherit;text-decoration:underline\">CGV</a> · <a href=\"/fr/confidentialite.html\" style=\"color:inherit;text-decoration:underline\">Confidentialité</a> · <a href=\"/fr/cookies.html\" style=\"color:inherit;text-decoration:underline\">Cookies</a> · <a href=\"/fr/jeu-responsable.html\" style=\"color:inherit;text-decoration:underline\">Jeu responsable</a></p>",
+  "cta": {
+    "title": "Des analyses fondées sur les données",
+    "text": "IASHARK publie une probabilité calculée par modèle pour une sélection de matchs, à côté de la cote du marché, avec les limites de l'estimation. Le match du jour est gratuit, en permanence.",
+    "href": "/fr/",
+    "label": "Voir les analyses du jour →"
+  },
+  "blogHub": {
+    "file": "blog.html",
+    "insertBefore": "<section class=\"rounded-2xl border border-hairline bg-surface",
+    "title": "Articles : Ligue 1, Classique et football africain",
+    "intro": "Des articles de fond pour comprendre la Ligue 1, ses grandes affiches, les marchés de buts et le football africain."
+  },
+  "articles": [
+    {
+      "slug": "ligue-1-format-enjeux-saison",
+      "title": "Ligue 1 : format, calendrier et enjeux de la saison",
+      "description": "Comment fonctionne la Ligue 1 : 18 clubs et 34 journées, relégation et barrage, places européennes, calendrier, et comment lire un match avec des données.",
+      "crumb": "Ligue 1 : format et enjeux",
+      "tag": "Ligue 1 · Format",
+      "h1": "La Ligue 1 :<br>format, calendrier <em>et enjeux</em>",
+      "h1Text": "La Ligue 1 : format, calendrier et enjeux",
+      "chapo": "Dix-huit clubs, 34 journées, un barrage pour le 16e et des places européennes qui dépendent du coefficient de la France. Voici comment se construit une saison de Ligue 1, et ce que cela change pour analyser un match.",
+      "datePublished": "2026-09-14",
+      "dateModified": "2026-09-14",
+      "sources": [
+        {"label": "Les qualifiés en Ligue des champions, les relégués : tout savoir sur le format de la Ligue 1 (Flashscore.fr)", "url": "https://www.flashscore.fr/actualites/les-qualifies-en-ligue-des-champions-les-relegues-tout-savoir-sur-le-format-de-la-ligue-1/SlqRbP0L/"},
+        {"label": "Championnat de France de football 2026-2027 (Wikipédia)", "url": "https://fr.wikipedia.org/wiki/Championnat_de_France_de_football_2026-2027"},
+        {"label": "Finale de la Ligue des champions de l'UEFA 2025-2026 (Wikipédia)", "url": "https://fr.wikipedia.org/wiki/Finale_de_la_Ligue_des_champions_de_l'UEFA_2025-2026"}
+      ],
+      "related": [
+        {"href": "/fr/leagues/ligue-1.html", "label": "Ligue 1 : les matchs analysés"},
+        {"href": "/fr/clubs/", "label": "Clubs de Ligue 1 : calendrier, classement et forme"},
+        {"href": "/fr/articles/classique-psg-om-histoire-analyse.html", "label": "Le Classique PSG-OM : histoire et analyse"},
+        {"href": "/fr/articles/marches-plus-moins-2-5-buts-btts.html", "label": "Plus/moins de 2,5 buts et BTTS expliqués"}
+      ]
+    },
+    {
+      "slug": "classique-psg-om-histoire-analyse",
+      "title": "Le Classique PSG-OM : histoire d'une rivalité et analyse",
+      "description": "Le Classique entre le Paris Saint-Germain et l'Olympique de Marseille : naissance de la rivalité, stades, titres européens, et comment analyser le match avec des données.",
+      "crumb": "Le Classique PSG-OM",
+      "tag": "Ligue 1 · Classique",
+      "h1": "Le Classique PSG-OM :<br>une rivalité, <em>sans passion aveugle</em>",
+      "h1Text": "Le Classique PSG-OM : une rivalité, sans passion aveugle",
+      "chapo": "Paris contre Marseille, le match qui divise la France du football. D'où vient cette rivalité, ce que l'on sait vraiment de son histoire, et comment regarder le Classique avec des chiffres plutôt qu'avec des certitudes.",
+      "datePublished": "2026-09-14",
+      "dateModified": "2026-09-14",
+      "sources": [
+        {"label": "OM-PSG : à l'origine du Classique, un arrangement entre amis pour devenir les meilleurs ennemis (franceinfo)", "url": "https://www.franceinfo.fr/sports/foot/psg/psg-om-a-lorigine-du-classico-un-arrangement-entre-amis-pour-devenir-les-meilleurs-ennemis_4817829.html"},
+        {"label": "Olympique de Marseille - Paris Saint-Germain en football (Wikipédia)", "url": "https://fr.wikipedia.org/wiki/Olympique_de_Marseille_-_Paris_Saint-Germain_en_football"},
+        {"label": "Finale de la Ligue des champions de l'UEFA 2025-2026 (Wikipédia)", "url": "https://fr.wikipedia.org/wiki/Finale_de_la_Ligue_des_champions_de_l'UEFA_2025-2026"}
+      ],
+      "related": [
+        {"href": "/fr/clubs/classique-psg-om.html", "label": "PSG-OM : prochain match, confrontations et forme"},
+        {"href": "/fr/clubs/paris-saint-germain.html", "label": "Paris Saint-Germain : calendrier et forme"},
+        {"href": "/fr/clubs/olympique-de-marseille.html", "label": "Olympique de Marseille : calendrier et forme"},
+        {"href": "/fr/articles/ligue-1-format-enjeux-saison.html", "label": "La Ligue 1 : format et enjeux"}
+      ]
+    },
+    {
+      "slug": "marches-plus-moins-2-5-buts-btts",
+      "title": "Plus/moins de 2,5 buts et BTTS : comprendre les marchés",
+      "description": "Plus ou moins de 2,5 buts et « les deux équipes marquent » (BTTS) : règles, calcul des probabilités, lien entre les deux marchés, marge des cotes et limites.",
+      "crumb": "Marchés de buts et BTTS",
+      "tag": "Méthode · Marchés",
+      "h1": "Plus/moins de 2,5 buts et BTTS :<br><em>deux questions différentes</em>",
+      "h1Text": "Plus/moins de 2,5 buts et BTTS : deux questions différentes",
+      "chapo": "Un 1-1 fait gagner « les deux équipes marquent » mais perdre « plus de 2,5 buts ». Voici ce que mesure vraiment chaque marché, comment passer d'une estimation de buts à une probabilité, et comment lire la cote qui va avec.",
+      "datePublished": "2026-09-14",
+      "dateModified": "2026-09-14",
+      "sources": [],
+      "related": [
+        {"href": "/blog/guides/plus-de-2-5-buts-probabilite-methode-poisson.html", "label": "Plus de 2,5 buts : la méthode de Poisson pas à pas"},
+        {"href": "/blog/guides/xg-expected-goals-guide-complet.html", "label": "xG : ce que la statistique dit vraiment"},
+        {"href": "/fr/marches.html", "label": "Les marchés analysés par IASHARK"},
+        {"href": "/fr/abonnement.html", "label": "Ce que comprennent les offres gratuite et payante"}
+      ]
+    },
+    {
+      "slug": "ligue-des-champions-caf-guide",
+      "title": "Ligue des champions de la CAF : format, palmarès et repères",
+      "description": "Comment fonctionne la Ligue des champions de la CAF : qualification, tours préliminaires, phase de groupes, élimination directe, palmarès et clés pour analyser un match.",
+      "crumb": "Ligue des champions CAF",
+      "tag": "Afrique · CAF",
+      "h1": "La Ligue des champions de la CAF :<br><em>format, palmarès, repères</em>",
+      "h1Text": "La Ligue des champions de la CAF : format, palmarès, repères",
+      "chapo": "La plus prestigieuse compétition de clubs du continent africain a plus de soixante ans d'histoire. Voici comment on s'y qualifie, comment elle se déroule et quels clubs ont marqué son palmarès, faits vérifiés à l'appui.",
+      "datePublished": "2026-09-14",
+      "dateModified": "2026-09-14",
+      "sources": [
+        {"label": "Everything you need to know about the 2025/26 TotalEnergies CAF Champions League (CAF)", "url": "https://www.cafonline.com/caf-champions-league/news/everything-you-need-to-know-about-the-202526-totalenergies-caf-champions-league/"},
+        {"label": "Draw procedures for the CAF Champions League 2025/26 group stage (CAF)", "url": "https://www.cafonline.com/caf-champions-league/news/draw-procedures-announced-for-totalenergies-caf-champions-league-202526-group-stage/"},
+        {"label": "CAF Champions League : historique, format, palmarès (Wikipedia)", "url": "https://en.wikipedia.org/wiki/CAF_Champions_League"},
+        {"label": "2025–26 CAF Champions League group stage (Wikipedia)", "url": "https://en.wikipedia.org/wiki/2025%E2%80%9326_CAF_Champions_League_group_stage"},
+        {"label": "Orlando Pirates, vainqueur de la Coupe d'Afrique des clubs champions 1995 (South African History Online)", "url": "https://sahistory.org.za/dated-event/pirates-win-african-champions-cup"}
+      ],
+      "related": [
+        {"href": "/fr/articles/joueurs-africains-europe-reperes.html", "label": "Joueurs africains en Europe : repères vérifiés"},
+        {"href": "/fr/articles/can-calendrier-clubs-europeens.html", "label": "La CAN et le calendrier des clubs européens"},
+        {"href": "/fr/leagues/premier-soccer-league.html", "label": "Premier Soccer League (Afrique du Sud) : matchs analysés"},
+        {"href": "/fr/leagues/champions-league.html", "label": "Ligue des champions UEFA : matchs analysés"}
+      ]
+    },
+    {
+      "slug": "joueurs-africains-europe-reperes",
+      "title": "Joueurs africains en Europe : repères vérifiés et analyse",
+      "description": "Weah, Eto'o, Drogba, Salah, Hakimi : des repères vérifiés sur les joueurs africains en Europe, et ce que les sélections changent pour analyser les matchs des clubs.",
+      "crumb": "Joueurs africains en Europe",
+      "tag": "Afrique · Europe",
+      "h1": "Joueurs africains en Europe :<br><em>des repères, pas des légendes</em>",
+      "h1Text": "Joueurs africains en Europe : des repères, pas des légendes",
+      "chapo": "Du Ballon d'Or de George Weah aux Souliers d'or de Mohamed Salah, les joueurs africains ont écrit une partie de l'histoire du football européen. Voici des repères vérifiés, et ce qu'ils impliquent pour lire les matchs des clubs.",
+      "datePublished": "2026-09-14",
+      "dateModified": "2026-09-14",
+      "sources": [
+        {"label": "1995 Ballon d'Or : George Weah, seul lauréat africain (Wikipedia)", "url": "https://en.wikipedia.org/wiki/1995_Ballon_d'Or"},
+        {"label": "Samuel Eto'o, l'homme des finales de Ligue des champions (Jeune Afrique)", "url": "https://www.jeuneafrique.com/depeches/88862/politique/samuel-etoo-lhomme-des-finales-de-ligue-des-champions/"},
+        {"label": "2012 UEFA Champions League final (Wikipedia)", "url": "https://en.wikipedia.org/wiki/2012_UEFA_Champions_League_final"},
+        {"label": "Mohamed Salah wins fourth Golden Boot, tying Thierry Henry (NBC Sports)", "url": "https://www.nbcsports.com/soccer/news/premier-league-2024-25-goals-leaders-who-will-win-the-golden-boot"},
+        {"label": "CAF Awards 2025 : Achraf Hakimi joueur africain de l'année (Olympics.com)", "url": "https://www.olympics.com/en/news/caf-awards-2025-hakimi-and-ghizlane-chebbak"}
+      ],
+      "related": [
+        {"href": "/fr/articles/can-calendrier-clubs-europeens.html", "label": "La CAN et le calendrier des clubs européens"},
+        {"href": "/fr/articles/ligue-des-champions-caf-guide.html", "label": "La Ligue des champions de la CAF expliquée"},
+        {"href": "/fr/leagues/premier-league.html", "label": "Premier League : matchs analysés"},
+        {"href": "/fr/leagues/ligue-1.html", "label": "Ligue 1 : matchs analysés"}
+      ]
+    },
+    {
+      "slug": "can-calendrier-clubs-europeens",
+      "title": "La CAN et le calendrier des clubs européens : ce qui change",
+      "description": "CAN 2023, CAN 2025, passage à un rythme de quatre ans et Ligue des nations africaine : ce que le calendrier des sélections africaines change pour les clubs européens.",
+      "crumb": "CAN et clubs européens",
+      "tag": "Afrique · CAN",
+      "h1": "La CAN et les clubs européens :<br><em>un calendrier qui change</em>",
+      "h1Text": "La CAN et les clubs européens : un calendrier qui change",
+      "chapo": "Pendant des années, la Coupe d'Afrique des nations a vidé une partie des effectifs européens en plein hiver. Ce calendrier est en train d'évoluer. Voici les faits vérifiés, et comment en tenir compte pour analyser un match.",
+      "datePublished": "2026-09-14",
+      "dateModified": "2026-09-14",
+      "sources": [
+        {"label": "La Côte d'Ivoire renverse le Nigeria et remporte la CAN (Eurosport)", "url": "https://www.eurosport.fr/football/coupe-d-afrique-des-nations/2024/la-cote-d-ivoire-renverse-le-nigeria-et-remporte-la-can-2024_sto10019097/story.shtml"},
+        {"label": "Senegal beat hosts Morocco to win AFCON 2025 (Al Jazeera)", "url": "https://aljazeera.com/sports/2026/1/18/senegal-beat-hosts-morocco-to-win-afcon-2025-after-farcical-walk-off"},
+        {"label": "Morocco declared AFCON 2025 winners after CAF overturns final (Euronews)", "url": "https://www.euronews.com/2026/03/18/morocco-declared-afcon-2025-winners-after-caf-overturns-final-defeat-to-senegal"},
+        {"label": "CAF move AFCON to every four years, launch new African Nations League (ESPN)", "url": "https://www.espn.com/espn/story/_/id/47367241/caf-move-afcon-every-four-years-launch-new-african-nations-league-patrice-motsepe"},
+        {"label": "AFCON to only take place every four years from 2028 (Flashscore)", "url": "https://www.flashscore.com/news/soccer-africa-cup-of-nations-afcon-to-only-take-place-every-four-years-from-2028-new-nations-league-to-fill-gap/zPFo9id3"}
+      ],
+      "related": [
+        {"href": "/fr/articles/joueurs-africains-europe-reperes.html", "label": "Joueurs africains en Europe : repères vérifiés"},
+        {"href": "/fr/articles/ligue-des-champions-caf-guide.html", "label": "La Ligue des champions de la CAF expliquée"},
+        {"href": "/fr/leagues/ligue-1.html", "label": "Ligue 1 : matchs analysés"},
+        {"href": "/fr/leagues/premier-league.html", "label": "Premier League : matchs analysés"}
+      ]
+    }
+  ]
+}

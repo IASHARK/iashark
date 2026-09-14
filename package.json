@@ -9,9 +9,19 @@
     "build:i18n": "node scripts/build-locales.js",
     "build:i18n-sitemaps": "node scripts/i18n-sitemaps.js",
     "build:css": "npx tailwindcss@3 -c tailwind.config.js -i assets/src/tailwind.css -o assets/tailwind.css --minify",
-    "lab:exp001": "node scripts/run_exp001.js"
+    "lab:exp001": "node scripts/run_exp001.js",
+    "build:site": "node scripts/build-locales.js && node scripts/build-public.js",
+    "build:public": "node scripts/build-public.js",
+    "test:e2e": "playwright test",
+    "test:e2e:local": "node scripts/build-public.js && playwright test",
+    "test:e2e:prod": "E2E_BASE_URL=https://iashark.com playwright test",
+    "test:e2e:install": "playwright install --with-deps chromium",
+    "test:e2e:report": "playwright show-report tests/e2e/output/report"
   },
   "engines": {
     "node": ">=20"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.63.0"
   }
 }

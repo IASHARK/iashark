@@ -57,24 +57,26 @@
      Elles ne doivent jamais pouvoir etre confondues avec une vraie analyse.
      --------------------------------------------------------------------- */
   var DEMO_SCAN = [
-    // marketId : meme marche en identifiant moteur, pour afficher le libelle
-    // dans la langue de la page (le texte `market` reste le libelle francais).
-    { edge: 6.4, match: 'Club A – Club B', market: 'Au plus 1 but en 1re mi-temps', marketId: 'fh-under-15', league: 'Championnat 1', modelProbability: 64.2, marketProbability: 57.8, fairOdds: 1.56, risk: 'Faible' },
-    { edge: 4.1, match: 'Club C – Club D', market: 'Les deux équipes marquent', marketId: 'btts-yes', league: 'Championnat 2', modelProbability: 61.0, marketProbability: 56.9, fairOdds: 1.64, risk: 'Modéré' },
-    { edge: 3.2, match: 'Club E – Club F', market: 'Au moins 3 buts dans le match', marketId: 'over-25', league: 'Championnat 1', modelProbability: 55.4, marketProbability: 52.2, fairOdds: 1.81, risk: 'Modéré' }
+    // marketId : meme marche en identifiant moteur, source du libelle affiche
+    // dans la langue de la page (y compris en francais). Le texte `market` est
+    // le repli si lib/market-labels.js n'est pas charge.
+    { edge: 6.4, match: 'Club A – Club B', market: '1re mi-temps : moins de 1,5 but', marketId: 'fh-under-15', league: 'Championnat 1', modelProbability: 64.2, marketProbability: 57.8, fairOdds: 1.56, risk: 'Faible' },
+    { edge: 4.1, match: 'Club C – Club D', market: 'Les deux équipes marquent : Oui', marketId: 'btts-yes', league: 'Championnat 2', modelProbability: 61.0, marketProbability: 56.9, fairOdds: 1.64, risk: 'Modéré' },
+    { edge: 3.2, match: 'Club E – Club F', market: 'Plus de 2,5 buts', marketId: 'over-25', league: 'Championnat 1', modelProbability: 55.4, marketProbability: 52.2, fairOdds: 1.81, risk: 'Modéré' }
   ];
   var DEMO_COMBO = [
-    { id: 'd1', matchKey: 'd1', match: 'Club A – Club B', market: 'Au plus 1 but en 1re mi-temps', marketId: 'fh-under-15', probability: 64.2, odds: 1.73 },
-    { id: 'd2', matchKey: 'd2', match: 'Club C – Club D', market: 'Les deux équipes marquent', marketId: 'btts-yes', probability: 61.0, odds: 1.72 },
-    { id: 'd3', matchKey: 'd3', match: 'Club E – Club F', market: 'Au moins 3 buts dans le match', marketId: 'over-25', probability: 55.4, odds: 1.90 }
+    { id: 'd1', matchKey: 'd1', match: 'Club A – Club B', market: '1re mi-temps : moins de 1,5 but', marketId: 'fh-under-15', probability: 64.2, odds: 1.73 },
+    { id: 'd2', matchKey: 'd2', match: 'Club C – Club D', market: 'Les deux équipes marquent : Oui', marketId: 'btts-yes', probability: 61.0, odds: 1.72 },
+    { id: 'd3', matchKey: 'd3', match: 'Club E – Club F', market: 'Plus de 2,5 buts', marketId: 'over-25', probability: 55.4, odds: 1.90 }
   ];
   var DEMO_LEAGUES = { 'Championnat 1': 'tools_page.demo_league_1', 'Championnat 2': 'tools_page.demo_league_2' };
   function ligueAffichee(nom) { return DEMO_LEAGUES[nom] ? t(DEMO_LEAGUES[nom], nom) : (nom || ''); }
-  // Libelle d'une ligne (demo ou reelle) dans la langue active. En francais,
-  // le texte de demonstration d'origine est garde tel quel.
+  // Libelle d'une ligne (demo ou reelle) dans la langue active, francais
+  // compris : l'identifiant moteur est plus sur qu'un texte deja redige
+  // (relire "... 1,5 but" comme un libelle moteur le deformerait).
   function marcheLigne(r) {
     var labels = window.IasharkMarketLabels;
-    if (r.marketId && !estFr() && labels && labels.marketIdLabel) return labels.marketIdLabel(r.marketId);
+    if (r.marketId && labels && labels.marketIdLabel) return labels.marketIdLabel(r.marketId);
     return marcheLisible(r.market);
   }
 
@@ -84,8 +86,16 @@
   function chargerMatchs() {
     if (!ctx.isPro) return Promise.resolve(null);      // aucun appel pour un non-abonne
     if (etat.matchs) return Promise.resolve(etat.matchs);
-    return window.IasharkApp.supabase.functions.invoke('match-data').then(function (r) {
-      if (r.error || !r.data) return null;
+    // scope 'list' : liste legere (data-home.json) enrichie cote serveur des
+    // champs premium pour un abonne. Les outils n'utilisent que des champs de
+    // liste (id, equipes, no_signal, pari_rec, cote_rec, model_probability) :
+    // inutile de faire lire les ~25 Mo de data.json a la fonction Edge.
+    return window.IasharkApp.supabase.functions.invoke('match-data', { body: { scope: 'list' } }).then(function (r) {
+      // Le serveur decide : sans isPro confirme par match-data (plan lu cote
+      // serveur), aucune donnee de match n est utilisee, meme si le client se
+      // croit abonne. match-data ne sert de toute facon aucun champ premium a un
+      // non-abonne.
+      if (r.error || !r.data || r.data.isPro !== true) return null;
       etat.matchs = (r.data.matchs || []).filter(function (m) { return m && m.pari_rec && !m.no_signal; });
       return etat.matchs;
     }).catch(function () { return null; });
@@ -651,7 +661,7 @@
       + '<form method="dialog" class="p-6"><h3 class="text-[17px] font-bold text-ink">' + esc(t('tools_page.journal_dialog_title', 'Nouvelle décision')) + '</h3>'
       + '<div class="mt-4 space-y-3">'
       + champ('jrMatch', t('tools_page.label_match', 'Match'), { type: 'text', placeholder: 'PSG – Marseille' })
-      + champ('jrMarket', t('tools_page.journal_market_label', 'Marché'), { type: 'text', placeholder: t('tools_page.journal_market_placeholder', 'Au moins 3 buts dans le match') })
+      + champ('jrMarket', t('tools_page.journal_market_label', 'Marché'), { type: 'text', placeholder: t('tools_page.journal_market_placeholder', 'Plus de 2,5 buts') })
       + champ('jrOdds', t('tools_page.label_odds', 'Cote'), { min: 1.01, step: 0.01, value: 1.90 })
       + champ('jrStake', t('tools_page.journal_stake_label', 'Mise'), { unit: symboleDevise(), min: 0.01, step: 0.01 })
       + '</div><p id="jrMsg" class="mt-3 text-[12.5px] text-soft"></p>'

@@ -49,7 +49,7 @@ h1 span{color:var(--cyan);}
 .nav-item.active .nav-icon svg{stroke:var(--cyan);filter:drop-shadow(0 0 6px rgba(34,211,238,0.5));}
 @media(max-width:600px){.mtable{display:block;overflow-x:auto;white-space:nowrap;}}
 .lang-switch{position:relative;}
-.lang-switch-btn{display:flex;align-items:center;gap:5px;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1px;color:var(--muted);background:transparent;border:1px solid var(--border);padding:6px 9px;border-radius:8px;cursor:pointer;transition:.2s;}
+.lang-switch-btn{display:flex;align-items:center;gap:5px;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1px;color:#8fa3b8;background:transparent;border:1px solid var(--border);padding:6px 9px;border-radius:8px;cursor:pointer;transition:.2s;}
 .lang-switch-btn:hover{border-color:rgba(34,211,238,0.3);color:var(--cyan);}
 .lang-switch-menu{display:none;position:absolute;top:calc(100% + 6px);right:0;background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:6px;min-width:170px;z-index:200;box-shadow:0 10px 30px rgba(0,0,0,0.45);}
 .lang-switch-menu.open{display:block;}
@@ -61,6 +61,8 @@ h1 span{color:var(--cyan);}
 .lang-switch-name{flex:1;}
 .lang-switch-check{color:var(--cyan);font-family:'Space Mono',monospace;font-size:10px;}
 @media(max-width:480px){.lang-switch-menu{right:-8px;}}
+/* QA mobile 14/09/2026 : cibles tactiles >= 44 px (en-tete et filtres). */
+@media(max-width:600px){.logo{display:inline-flex;align-items:center;min-height:44px}.btn-login,.fsel{min-height:44px}.lang-switch-btn{min-height:44px;min-width:44px;justify-content:center}}
 </style>
 <link rel="stylesheet" href="/assets/bottom-navigation.css"></head>
 <body>
@@ -133,9 +135,9 @@ h1 span{color:var(--cyan);}
 </nav>
 
 <div style="max-width:720px;margin:24px auto 0;padding:0 20px 20px;text-align:center;">
-  <div style="font-family:'Space Mono',monospace;font-size:8px;color:rgba(74,101,128,0.5);line-height:2;letter-spacing:1px;">
+  <div style="font-family:'Space Mono',monospace;font-size:8px;color:#8a9bb0;line-height:2;letter-spacing:1px;">
     <div>⚠️ LE JEU PEUT ÊTRE DANGEREUX — JOUEZ RESPONSABLE · INTERDIT AUX MOINS DE 18 ANS</div>
-    <div>Aide : <a data-market-helpline="url" href="https://www.joueurs-info-service.fr" style="color:rgba(34,211,238,0.4);text-decoration:none;">joueurs-info-service.fr</a><span data-market-helpline-if="phone"> · <span data-market-helpline="phone">09 74 75 13 13</span></span></div>
+    <div>Aide : <a data-market-helpline="url" href="https://www.joueurs-info-service.fr" style="color:#22d3ee;text-decoration:none;">joueurs-info-service.fr</a><span data-market-helpline-if="phone"> · <span data-market-helpline="phone">09 74 75 13 13</span></span></div>
   </div>
 </div>
 
@@ -214,7 +216,9 @@ var allMatchsData=[];
 async function loadMatches(){
   if(window.I18N&&window.I18N.init){try{await window.I18N.init();}catch(e){}}
   try{
-    var r=await fetch('/data.json?t='+Date.now());
+    // Liste legere (data-home.json) : memes champs de carte que data.json, sans le detail.
+    var r=await fetch('/data-home.json',{cache:'no-cache'});
+    if(!r.ok)r=await fetch('/data.json',{cache:'no-cache'});
     var j=await r.json();
     allMatchsData=(j.matchs||[]).filter(function(m){return !m.no_signal&&m.pari_rec;});
   }catch(e){ allMatchsData=[]; }

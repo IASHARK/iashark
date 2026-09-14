@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Über 2,5 Tore: die Wahrscheinlichkeit mit der Poisson-Verteilung berechnen | IASHARK</title>
+<title>Über 2,5 Tore: Wahrscheinlichkeit mit Poisson berechnen | IASHARK</title>
 <meta name="description" content="Die komplette Methode, um die Wahrscheinlichkeit für über 2,5 Tore in einem Spiel zu schätzen: Offensiv- und Defensivstärke, Poisson-Verteilung, Vergleich mit der Quote und die Fehlermarge, die niemand zeigt. Mit Rechner.">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <link rel="canonical" href="https://iashark.com/de/blog/guides/plus-de-2-5-buts-probabilite-methode-poisson.html">
@@ -15,7 +15,7 @@
 <link rel="alternate" hreflang="it" href="https://iashark.com/it/blog/guides/plus-de-2-5-buts-probabilite-methode-poisson.html">
 <link rel="alternate" hreflang="pt" href="https://iashark.com/pt/blog/guides/plus-de-2-5-buts-probabilite-methode-poisson.html">
 <link rel="alternate" hreflang="x-default" href="https://iashark.com/blog/guides/plus-de-2-5-buts-probabilite-methode-poisson.html">
-<meta property="og:title" content="Über 2,5 Tore: die Wahrscheinlichkeit berechnen statt raten">
+<meta property="og:title" content="Über 2,5 Tore: Wahrscheinlichkeit mit Poisson berechnen">
 <meta property="og:description" content="Offensiv- und Defensivstärke, Poisson-Verteilung, Vergleich mit der Quote und die Fehlermarge, die niemand zeigt. Mit Rechner.">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://iashark.com/de/blog/guides/plus-de-2-5-buts-probabilite-methode-poisson.html">
@@ -28,19 +28,13 @@
 <meta name="twitter:description" content="Die Poisson-Methode Schritt für Schritt, mit Rechner und Fehlermarge.">
 <meta name="twitter:image" content="https://iashark.com/assets/blog/over-25-goals-hero.jpg">
 <link rel="icon" href="/favicon.ico">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/article.css">
 <link rel="stylesheet" href="/assets/bottom-navigation.css">
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"Article",
-"headline":"Über 2,5 Tore: die Wahrscheinlichkeit mit der Poisson-Verteilung berechnen",
-"description":"Die komplette Methode, um die Wahrscheinlichkeit für über 2,5 Tore in einem Spiel zu schätzen: Offensiv- und Defensivstärke, Poisson-Verteilung, Vergleich mit der Quote und die Fehlermarge, die niemand zeigt.",
-"image":"https://iashark.com/assets/blog/over-25-goals-hero.jpg",
-"datePublished":"2026-09-02","dateModified":"2026-09-02",
-"author":{"@type":"Organization","name":"IASHARK","url":"https://iashark.com"},
-"publisher":{"@type":"Organization","name":"IASHARK","url":"https://iashark.com","logo":{"@type":"ImageObject","url":"https://iashark.com/icon-512.png"}},
-"mainEntityOfPage":{"@type":"WebPage","@id":"https://iashark.com/de/blog/guides/plus-de-2-5-buts-probabilite-methode-poisson.html"},
-"inLanguage":"de-DE"}
+{"@context":"https://schema.org","@type":"Article","headline":"Über 2,5 Tore: die Wahrscheinlichkeit mit der Poisson-Verteilung berechnen","description":"Die komplette Methode, um die Wahrscheinlichkeit für über 2,5 Tore in einem Spiel zu schätzen: Offensiv- und Defensivstärke, Poisson-Verteilung, Vergleich mit der Quote und die Fehlermarge, die niemand zeigt.","image":"https://iashark.com/assets/blog/over-25-goals-hero.jpg","datePublished":"2026-09-02","dateModified":"2026-09-02","author":{"@type":"Organization","name":"IASHARK","url":"https://iashark.com/"},"publisher":{"@type":"Organization","name":"IASHARK","url":"https://iashark.com/","logo":{"@type":"ImageObject","url":"https://iashark.com/icon-512.png","width":512,"height":512}},"mainEntityOfPage":{"@type":"WebPage","@id":"https://iashark.com/de/blog/guides/plus-de-2-5-buts-probabilite-methode-poisson.html"},"inLanguage":"de-DE"}
 </script>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[
@@ -313,6 +307,7 @@
 
 </main>
 
+<!--RELATED_GUIDES--><nav aria-labelledby="related-guides-title" style="max-width:760px;margin:32px auto;padding:0 20px"><h2 id="related-guides-title" style="font-size:18px;margin:0 0 8px">Weitere Guides</h2><ul style="list-style:none;padding:0;margin:0"><li style="margin:6px 0"><a href="/de/blog/guides/prediction-ia-football-guide-2026.html" style="color:#22d3ee">KI-Fußballprognose: die Modelle und ihre Grenzen verstehen</a></li><li style="margin:6px 0"><a href="/de/blog/guides/guide-paris-sportifs-debutant-complet.html" style="color:#22d3ee">Sportwetten: der komplette Ratgeber für einen methodischen Einstieg</a></li><li style="margin:6px 0"><a href="/de/blog/guides/meilleurs-bookmakers-monde-2026.html" style="color:#22d3ee">Einen Buchmacher wählen: Sicherheitskriterien, Quoten und Limits</a></li><li style="margin:6px 0"><a href="/de/blog/guides/coupe-du-monde-2026-guide-complet.html" style="color:#22d3ee">WM 2026: Format, Spielplan und Analysemethode</a></li><li style="margin:6px 0"><a href="/de/leagues/bundesliga.html" style="color:#22d3ee">Bundesliga Prognosen: analysierte Spiele</a></li></ul></nav><!--/RELATED_GUIDES-->
 <footer class="art-foot">
   <p>IASHARK — statistische Fußballanalysen. Die veröffentlichten Wahrscheinlichkeiten dienen nur zur Orientierung und garantieren kein Ergebnis. Sportwetten sind mit dem Risiko finanzieller Verluste und der Abhängigkeit verbunden: Setze nie mehr ein, als du dir leisten kannst zu verlieren. Für Minderjährige verboten. Brauchst du Hilfe? Besuche unsere <a href="/de/jeu-responsable.html" style="color:inherit;text-decoration:underline">Seite zum verantwortungsvollen Spielen</a>.</p>
   <p><a href="/de/mentions-legales.html" style="color:inherit">Impressum</a> · <a href="/de/cgv.html" style="color:inherit">AGB</a> · <a href="/de/confidentialite.html" style="color:inherit">Datenschutz</a> · <a href="/de/cookies.html" style="color:inherit">Cookies</a> · <a href="/de/jeu-responsable.html" style="color:inherit">Verantwortungsvolles Spielen</a></p>

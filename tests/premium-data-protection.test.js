@@ -33,7 +33,11 @@ test("la fonction Edge laisse passer l'analyse offerte du jour", () => {
 
 test("le pipeline retire ces champs du fichier public et des pages match", () => {
   const wf = read(".github/workflows/update-data.yml");
-  assert.match(wf, /var CHAMPS_PREMIUM=\['pari_rec','cote_rec','model_probability','markets_compared','market_id','marche'\]/);
+  // Depuis le 14/09/2026 : liste unique lib/premium-fields.js (toutes les sorties du modele).
+  assert.match(wf, /var PREMIUM_FIELDS_LIB=require\('\.\/lib\/premium-fields\.js'\);/);
+  assert.match(wf, /var CHAMPS_PREMIUM=PREMIUM_FIELDS_LIB\.PREMIUM_FIELDS\.slice\(\);/);
+  const { PREMIUM_FIELDS } = require("../lib/premium-fields.js");
+  for (const c of ["pari_rec", "cote_rec", "model_probability", "markets_compared", "market_id", "marche"]) assert.ok(PREMIUM_FIELDS.includes(c), c);
   // Depuis le branchement RUN_OUTPUT_ENGINE (2026-09-06), data.json est
   // serialise depuis dataJsonPayload (qui ajoute run_output/legacy_output
   // a cote) plutot qu'un objet litteral inline - mais son champ `matchs`
@@ -118,7 +122,9 @@ test("une offre pays reste publique cote client pour son marche, l'offre general
 // Ils etaient publics dans data.json alors que pari_rec etait protege.
 test("market_id et marche sont premium : retires du fichier public, ecrits dans la table protegee, servis aux abonnes", () => {
   const wf = read(".github/workflows/update-data.yml");
-  assert.match(wf, /var CHAMPS_PREMIUM=\[[^\]]*'market_id'[^\]]*'marche'[^\]]*\];/);
+  assert.match(wf, /var CHAMPS_PREMIUM=PREMIUM_FIELDS_LIB\.PREMIUM_FIELDS\.slice\(\);/);
+  const LISTE = require("../lib/premium-fields.js").PREMIUM_FIELDS;
+  assert.ok(LISTE.includes("market_id") && LISTE.includes("marche"));
   assert.match(wf, /market_id:pickedMarket\?pickedMarket\.id:null,\n\s*marche:pickedMarket\?categorizeMarket\(pickedMarket\.market\):null,/);
   assert.match(wf, /lignePremiumSafePick\.market_id=matchCibleSafePick\.market_id;/);
   const fn = read("supabase/functions/match-data/index.ts");

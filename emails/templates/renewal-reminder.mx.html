@@ -1,0 +1,114 @@
+{{! Aviso previo de renovacion automatica - Mexico (mx, es-MX). LFPC art. 76 Bis (informacion clara del cobro recurrente y cancelacion inmediata en linea) ; datos de PROFECO tomados de legal/mx/cgv.html (apartados 6 a 8 y 12, 13/09/2026). Enviado N dias antes de la renovacion (por defecto 7). ESTADO: REVIEW. CSS en linea ; el bloque <style> solo sirve para el modo oscuro y movil. }}<!DOCTYPE html>
+<html lang="es-MX" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="x-apple-disable-message-reformatting">
+<meta name="format-detection" content="telephone=no, date=no, address=no, email=no">
+<meta name="color-scheme" content="light dark">
+<meta name="supported-color-schemes" content="light dark">
+<title>{{subject}}</title>
+<style>
+:root { color-scheme: light dark; supported-color-schemes: light dark; }
+@media (prefers-color-scheme: dark) {
+  .bg-page { background-color: #0b1118 !important; }
+  .bg-card { background-color: #131c27 !important; border-color: #263444 !important; }
+  .bg-soft { background-color: #18232f !important; border-color: #2f6f86 !important; }
+  .bg-warn { background-color: #2a2213 !important; border-color: #6b5320 !important; }
+  .tx { color: #e9eef4 !important; }
+  .tx-soft { color: #a9b6c4 !important; }
+  .bd { border-color: #263444 !important; }
+  .lnk { color: #62d6ec !important; }
+}
+[data-ogsc] .bg-page { background-color: #0b1118 !important; }
+[data-ogsc] .bg-card { background-color: #131c27 !important; }
+[data-ogsc] .bg-soft { background-color: #18232f !important; }
+[data-ogsc] .bg-warn { background-color: #2a2213 !important; }
+[data-ogsc] .tx { color: #e9eef4 !important; }
+[data-ogsc] .tx-soft { color: #a9b6c4 !important; }
+[data-ogsc] .lnk { color: #62d6ec !important; }
+@media only screen and (max-width: 620px) {
+  .container { width: 100% !important; }
+  .pad { padding: 20px !important; }
+}
+</style>
+</head>
+<body class="bg-page" style="margin:0;padding:0;background-color:#f2f4f7;-webkit-text-size-adjust:100%;">
+<div style="display:none;max-height:0;max-width:0;overflow:hidden;opacity:0;mso-hide:all;font-size:1px;line-height:1px;color:#f2f4f7;">El {{renewalDate}} se cobrarán {{amount}}. Si no quieres renovar, puedes cancelar en línea antes de esa fecha.</div>
+<table role="presentation" class="bg-page" width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%;background-color:#f2f4f7;border-collapse:collapse;">
+<tr>
+<td align="center" style="padding:24px 12px;">
+<table role="presentation" class="container" width="600" cellpadding="0" cellspacing="0" border="0" style="width:600px;max-width:600px;border-collapse:collapse;">
+<tr>
+<td class="tx" style="padding:4px 4px 16px;font-family:Arial,Helvetica,sans-serif;font-size:20px;line-height:24px;font-weight:bold;letter-spacing:3px;color:#0b1a2a;">IASHARK</td>
+</tr>
+<tr>
+<td class="bg-card pad" style="padding:32px;background-color:#ffffff;border:1px solid #dfe4ea;border-radius:12px;font-family:Arial,Helvetica,sans-serif;">
+
+<h1 class="tx" style="margin:0 0 14px;font-family:Arial,Helvetica,sans-serif;font-size:24px;line-height:31px;font-weight:bold;color:#0b1a2a;">Tu suscripción se renueva en {{daysUntilLabel}}</h1>
+<p class="tx" style="margin:0 0 14px;font-size:15px;line-height:24px;color:#1f2d3a;">Hola:</p>
+<p class="tx" style="margin:0 0 20px;font-size:15px;line-height:24px;color:#1f2d3a;">Te avisamos con anticipación que tu suscripción {{planName}} se renovará automáticamente el <strong style="font-weight:bold;">{{renewalDate}}</strong> y que ese día se hará el cargo a tu método de pago.</p>
+
+<h2 class="tx" style="margin:0 0 8px;font-family:Arial,Helvetica,sans-serif;font-size:17px;line-height:24px;font-weight:bold;color:#0b1a2a;">Detalle del próximo cobro</h2>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%;border-collapse:collapse;margin:0 0 18px;">
+<tr><th scope="row" class="tx-soft bd" style="text-align:left;vertical-align:top;width:44%;padding:10px 12px 10px 0;font-size:14px;line-height:20px;font-weight:normal;color:#4b5a69;border-bottom:1px solid #e6eaef;">Plan</th><td class="tx bd" style="padding:10px 0;font-size:15px;line-height:20px;font-weight:bold;color:#0b1a2a;border-bottom:1px solid #e6eaef;">{{planName}}</td></tr>
+<tr><th scope="row" class="tx-soft bd" style="text-align:left;vertical-align:top;width:44%;padding:10px 12px 10px 0;font-size:14px;line-height:20px;font-weight:normal;color:#4b5a69;border-bottom:1px solid #e6eaef;">Monto que se cobrará</th><td class="tx bd" style="padding:10px 0;font-size:15px;line-height:20px;font-weight:bold;color:#0b1a2a;border-bottom:1px solid #e6eaef;">{{amount}} (pesos mexicanos, impuestos aplicables incluidos)</td></tr>
+<tr><th scope="row" class="tx-soft bd" style="text-align:left;vertical-align:top;width:44%;padding:10px 12px 10px 0;font-size:14px;line-height:20px;font-weight:normal;color:#4b5a69;border-bottom:1px solid #e6eaef;">Fecha del cobro</th><td class="tx bd" style="padding:10px 0;font-size:15px;line-height:20px;font-weight:bold;color:#0b1a2a;border-bottom:1px solid #e6eaef;">{{renewalDate}}</td></tr>
+<tr><th scope="row" class="tx-soft bd" style="text-align:left;vertical-align:top;width:44%;padding:10px 12px 10px 0;font-size:14px;line-height:20px;font-weight:normal;color:#4b5a69;border-bottom:1px solid #e6eaef;">Periodicidad</th><td class="tx bd" style="padding:10px 0;font-size:15px;line-height:20px;font-weight:bold;color:#0b1a2a;border-bottom:1px solid #e6eaef;">{{periodicity}}</td></tr>
+<tr><th scope="row" class="tx-soft bd" style="text-align:left;vertical-align:top;width:44%;padding:10px 12px 10px 0;font-size:14px;line-height:20px;font-weight:normal;color:#4b5a69;border-bottom:1px solid #e6eaef;">Cuenta</th><td class="tx bd" style="padding:10px 0;font-size:15px;line-height:20px;font-weight:bold;color:#0b1a2a;border-bottom:1px solid #e6eaef;">{{customerEmail}}</td></tr>
+{{#reference}}<tr><th scope="row" class="tx-soft bd" style="text-align:left;vertical-align:top;width:44%;padding:10px 12px 10px 0;font-size:14px;line-height:20px;font-weight:normal;color:#4b5a69;border-bottom:1px solid #e6eaef;">Referencia</th><td class="tx bd" style="padding:10px 0;font-size:13px;line-height:20px;color:#0b1a2a;border-bottom:1px solid #e6eaef;">{{reference}}</td></tr>{{/reference}}
+</table>
+<p class="tx" style="margin:0 0 26px;font-size:15px;line-height:24px;color:#1f2d3a;">Si quieres seguir usando {{planName}}, no tienes que hacer nada.</p>
+
+<h2 class="tx" style="margin:0 0 8px;font-family:Arial,Helvetica,sans-serif;font-size:17px;line-height:24px;font-weight:bold;color:#0b1a2a;">Cómo cancelar en línea</h2>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%;border-collapse:collapse;margin:0 0 14px;">
+<tr><td class="bg-soft" style="padding:14px 16px;background-color:#f4f7fa;border-left:4px solid #0a6d8f;font-family:Arial,Helvetica,sans-serif;">
+<p class="tx" style="margin:0 0 8px;font-size:15px;line-height:23px;color:#1f2d3a;">1. Entra a <a class="lnk" href="{{accountUrl}}" target="_blank" style="color:#0a6d8f;text-decoration:underline;">Mi cuenta</a> con tu correo {{customerEmail}}.</p>
+<p class="tx" style="margin:0 0 8px;font-size:15px;line-height:23px;color:#1f2d3a;">2. Haz clic en «Gestionar mi suscripción». Se abre el área de facturación segura de nuestro proveedor de pagos (Stripe).</p>
+<p class="tx" style="margin:0;font-size:15px;line-height:23px;color:#1f2d3a;">3. Elige cancelar la suscripción. La cancelación es inmediata, sin costo y sin penalización.</p>
+</td></tr>
+</table>
+{{#portalUrl}}<p class="tx" style="margin:0 0 14px;font-size:15px;line-height:24px;color:#1f2d3a;">Acceso directo al área de facturación: <a class="lnk" href="{{portalUrl}}" target="_blank" style="color:#0a6d8f;text-decoration:underline;">{{portalUrl}}</a></p>{{/portalUrl}}
+<p class="tx" style="margin:0 0 20px;font-size:15px;line-height:24px;color:#1f2d3a;">Si cancelas antes del {{renewalDate}}, no se hará este cobro. Conservas el acceso de pago hasta el final del periodo que ya pagaste. También puedes pedir la cancelación escribiendo a <a class="lnk" href="mailto:{{supportEmail}}" style="color:#0a6d8f;text-decoration:underline;">{{supportEmail}}</a>.</p>
+
+<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="border-collapse:separate;margin:0 0 26px;">
+<tr><td align="center" bgcolor="#0a6d8f" style="background-color:#0a6d8f;border-radius:8px;"><a href="{{accountUrl}}" target="_blank" style="display:inline-block;padding:13px 24px;font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:20px;font-weight:bold;color:#ffffff;text-decoration:none;border-radius:8px;">Ir a Mi cuenta</a></td></tr>
+</table>
+
+<h2 class="tx" style="margin:0 0 8px;font-family:Arial,Helvetica,sans-serif;font-size:17px;line-height:24px;font-weight:bold;color:#0b1a2a;">Tus derechos</h2>
+<p class="tx" style="margin:0 0 14px;font-size:15px;line-height:24px;color:#1f2d3a;">Nada de este aviso limita los derechos que te otorga la Ley Federal de Protección al Consumidor, que son irrenunciables. Para cualquier aclaración o reclamación, escríbenos a <a class="lnk" href="mailto:{{supportEmail}}" style="color:#0a6d8f;text-decoration:underline;">{{supportEmail}}</a>.</p>
+<p class="tx" style="margin:0 0 14px;font-size:15px;line-height:24px;color:#1f2d3a;">También puedes acudir a la Procuraduría Federal del Consumidor (PROFECO): Teléfono del Consumidor 800 468 8722 (lada sin costo) o 55 5568 8722 (Ciudad de México y área metropolitana), <a class="lnk" href="https://www.gob.mx/profeco" target="_blank" style="color:#0a6d8f;text-decoration:underline;">gob.mx/profeco</a>.</p>
+<p class="tx" style="margin:0 0 26px;font-size:15px;line-height:24px;color:#1f2d3a;">Términos y condiciones: <a class="lnk" href="{{cgvUrl}}" target="_blank" style="color:#0a6d8f;text-decoration:underline;">{{cgvUrl}}</a></p>
+
+<h2 class="tx" style="margin:0 0 8px;font-family:Arial,Helvetica,sans-serif;font-size:17px;line-height:24px;font-weight:bold;color:#0b1a2a;">Datos del proveedor</h2>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%;border-collapse:collapse;margin:0 0 26px;">
+<tr><th scope="row" class="tx-soft bd" style="text-align:left;vertical-align:top;width:44%;padding:8px 12px 8px 0;font-size:13px;line-height:19px;font-weight:normal;color:#4b5a69;border-bottom:1px solid #e6eaef;">Nombre comercial</th><td class="tx bd" style="padding:8px 0;font-size:14px;line-height:19px;color:#0b1a2a;border-bottom:1px solid #e6eaef;">IASHARK (empresario individual establecido en Francia)</td></tr>
+<tr><th scope="row" class="tx-soft bd" style="text-align:left;vertical-align:top;width:44%;padding:8px 12px 8px 0;font-size:13px;line-height:19px;font-weight:normal;color:#4b5a69;border-bottom:1px solid #e6eaef;">Titular</th><td class="tx bd" style="padding:8px 0;font-size:14px;line-height:19px;color:#0b1a2a;border-bottom:1px solid #e6eaef;">{{companyOperatorName}}</td></tr>
+<tr><th scope="row" class="tx-soft bd" style="text-align:left;vertical-align:top;width:44%;padding:8px 12px 8px 0;font-size:13px;line-height:19px;font-weight:normal;color:#4b5a69;border-bottom:1px solid #e6eaef;">Domicilio</th><td class="tx bd" style="padding:8px 0;font-size:14px;line-height:19px;color:#0b1a2a;border-bottom:1px solid #e6eaef;">{{companyAddress}}</td></tr>
+<tr><th scope="row" class="tx-soft bd" style="text-align:left;vertical-align:top;width:44%;padding:8px 12px 8px 0;font-size:13px;line-height:19px;font-weight:normal;color:#4b5a69;border-bottom:1px solid #e6eaef;">Número de registro (SIREN / SIRET, Francia)</th><td class="tx bd" style="padding:8px 0;font-size:14px;line-height:19px;color:#0b1a2a;border-bottom:1px solid #e6eaef;">{{companyRegistration}}</td></tr>
+<tr><th scope="row" class="tx-soft bd" style="text-align:left;vertical-align:top;width:44%;padding:8px 12px 8px 0;font-size:13px;line-height:19px;font-weight:normal;color:#4b5a69;border-bottom:1px solid #e6eaef;">Teléfono</th><td class="tx bd" style="padding:8px 0;font-size:14px;line-height:19px;color:#0b1a2a;border-bottom:1px solid #e6eaef;">{{companyPhone}}</td></tr>
+<tr><th scope="row" class="tx-soft bd" style="text-align:left;vertical-align:top;width:44%;padding:8px 12px 8px 0;font-size:13px;line-height:19px;font-weight:normal;color:#4b5a69;border-bottom:1px solid #e6eaef;">Correo electrónico</th><td class="tx bd" style="padding:8px 0;font-size:14px;line-height:19px;color:#0b1a2a;border-bottom:1px solid #e6eaef;"><a class="lnk" href="mailto:{{supportEmail}}" style="color:#0a6d8f;text-decoration:underline;">{{supportEmail}}</a></td></tr>
+</table>
+
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%;border-collapse:collapse;margin:0;">
+<tr><td class="bg-warn" style="padding:16px 18px;background-color:#fff8eb;border:1px solid #f0d49c;border-radius:8px;font-family:Arial,Helvetica,sans-serif;">
+<p class="tx" style="margin:0 0 8px;font-size:14px;line-height:21px;font-weight:bold;color:#3a2a0c;">Juego responsable · 18+</p>
+<p class="tx" style="margin:0 0 8px;font-size:14px;line-height:21px;color:#3a2a0c;">IASHARK ofrece análisis estadísticos: no es una casa de apuestas, no recibe apuestas y no garantiza ganancias. Prohibido para menores de 18 años.</p>
+<p class="tx" style="margin:0;font-size:14px;line-height:21px;color:#3a2a0c;">Las apuestas pueden generar adicción. Orientación gratuita las 24 horas: {{helplineName}}, {{helplinePhone}} (<a class="lnk" href="{{helplineUrl}}" target="_blank" style="color:#0a6d8f;text-decoration:underline;">{{helplineDisplay}}</a>). Más información: <a class="lnk" href="{{responsibleUrl}}" target="_blank" style="color:#0a6d8f;text-decoration:underline;">Juego responsable</a>.</p>
+</td></tr>
+</table>
+
+</td>
+</tr>
+<tr>
+<td class="tx-soft" style="padding:18px 8px 6px;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:18px;color:#5d6b79;">
+Aviso de renovación enviado automáticamente a {{customerEmail}} porque tienes una suscripción activa con cobro recurrente. Aclaraciones: <a class="lnk" href="mailto:{{supportEmail}}" style="color:#0a6d8f;text-decoration:underline;">{{supportEmail}}</a>.<br>
+<a class="lnk" href="{{cgvUrl}}" target="_blank" style="color:#0a6d8f;text-decoration:underline;">Términos</a> · <a class="lnk" href="{{privacyUrl}}" target="_blank" style="color:#0a6d8f;text-decoration:underline;">Aviso de privacidad</a> · <a class="lnk" href="{{legalUrl}}" target="_blank" style="color:#0a6d8f;text-decoration:underline;">Aviso legal</a> · <a class="lnk" href="{{homeUrl}}" target="_blank" style="color:#0a6d8f;text-decoration:underline;">iashark.com</a>
+</td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+</body>
+</html>

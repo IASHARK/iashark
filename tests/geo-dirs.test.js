@@ -216,6 +216,51 @@ test("_redirects : pays puis langue puis /fr/ sur la racine, anciennes URLs, his
     DIR_CODES.map(function (d) { return "/" + d + "/* /" + d + "/404.html 404"; }));
 });
 
+test("_redirects : blog des repertoires sans blog propre (gb, za, fr) -> blog servi, jamais une 404", () => {
+  var rules = read("_redirects").split("\n")
+    .filter(function (l) { return l.trim() && l.trim().charAt(0) !== "#"; })
+    .map(function (l) { return l.trim().split(/\s+/); });
+  function idx(from, to, status) {
+    return rules.findIndex(function (r) { return r[0] === from && r[1] === to && r[2] === status; });
+  }
+  var first404 = rules.findIndex(function (r) { return r[2] === "404"; });
+  [["gb", "/en/blog/", "/en/blog/:splat"], ["za", "/en/blog/", "/en/blog/:splat"], ["fr", "/blog.html", "/blog/:splat"]].forEach(function (c) {
+    ["/" + c[0] + "/blog", "/" + c[0] + "/blog/", "/" + c[0] + "/blog.html"].forEach(function (from) {
+      var i = idx(from, c[1], "301!");
+      assert.ok(i !== -1 && i < first404, from + " -> " + c[1]);
+    });
+    var s = idx("/" + c[0] + "/blog/*", c[2], "301!");
+    assert.ok(s !== -1 && s < first404, "/" + c[0] + "/blog/* -> " + c[2]);
+  });
+  // Aucune cible vers /blog/ racine (Netlify la redirige vers /blog).
+  assert.ok(!rules.some(function (r) { return r[1] === "/blog/"; }));
+});
+
+test("a-propos gb/za/mx : mention 'pas un operateur' du marche ecrite dans le HTML statique (plus d'ANJ)", () => {
+  var expected = { gb: /Gambling Commission/, za: /gambling board of your province/, mx: /SEGOB/ };
+  Object.keys(expected).forEach(function (d) {
+    var html = read(d + "/a-propos.html").replace(/<script[\s\S]*?<\/script>/g, "");
+    var li = html.match(/<li\b[^>]*data-market-legal-operator[^>]*>[\s\S]*?<\/li>/);
+    assert.ok(li, d + " : element data-market-legal-operator absent");
+    assert.match(li[0], expected[d], d);
+    assert.doesNotMatch(html, /ANJ/, d + " : ANJ encore present");
+  });
+  assert.match(read("fr/a-propos.html"), /ANJ/, "fr garde la mention ANJ");
+  var dict = { about_page: { legal_not_operator: "FR", legal_not_operator_market: { gb: "<b>GB</b>" } } };
+  var out = builder.bakeI18n('<ul><li data-i18n-html="about_page.legal_not_operator" data-market-legal-operator>x</li></ul>', dict, "gb");
+  assert.match(out, /<b>GB<\/b><\/li>/);
+});
+
+test("blog/index.html (fil transferts) : noindex, canonical auto-referent servi en 200, hors sitemaps", () => {
+  var html = read("blog/index.html");
+  assert.match(html, /<meta name="robots" content="noindex, follow">/);
+  assert.match(html, /<link rel="canonical" href="https:\/\/iashark\.com\/blog\/index\.html">/);
+  assert.doesNotMatch(html, /https:\/\/iashark\.com\/blog\/"/);
+  fs.readdirSync(ROOT).filter(function (f) { return /^sitemap.*\.xml$/.test(f); }).forEach(function (f) {
+    assert.doesNotMatch(read(f), /<loc>https:\/\/iashark\.com\/blog\/(index\.html)?<\/loc>/, f);
+  });
+});
+
 test("historique retire du site public", () => {
   assert.ok(!fs.existsSync(path.join(ROOT, "historique.html")));
   DIR_CODES.forEach(function (d) { assert.ok(!fs.existsSync(path.join(ROOT, d, "historique.html")), d + "/historique.html"); });

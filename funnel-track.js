@@ -12,7 +12,18 @@
 //   grossiers (type d'appareil, navigateur, OS, largeur d'ecran, langue,
 //   fuseau horaire et un pays ESTIME depuis ce fuseau, `country_guess`) ;
 // - uniquement sur le domaine de production (les tests locaux ne polluent
-//   pas les statistiques), jamais sur admin.html, jamais pour les robots.
+//   pas les statistiques), jamais sur admin.html, jamais pour les robots
+//   d'indexation (Googlebot...).
+// Trafic interne et tests : JAMAIS bloques, seulement MARQUES dans metadata
+// pour etre exclus par defaut du tableau de bord (migration 0019) :
+// - internal:true : navigateur du proprietaire (localStorage
+//   iashark_internal="1", pose par admin.html apres controle admin, ou par
+//   ?internal=1 sur n'importe quelle page ; ?internal=0 l'efface) ;
+// - qa:true : visite arrivee avec un utm_source commencant par "qa"
+//   (memorise pour tout l'onglet en sessionStorage) ;
+// - bot:true : navigateur pilote (navigator.webdriver, HeadlessChrome,
+//   Playwright/Puppeteer/PhantomJS) ou ordinateur annoncant un ecran de
+//   telephone (emulation de viewport des tests mobiles).
 // Exception documentee : signup_completed peut porter le user_id du compte
 // qui vient d'etre cree, UNIQUEMENT avec le jeton de ce compte (la politique
 // RLS funnel_events_insert_own refuse tout autre user_id). Sans jeton,
@@ -30,9 +41,65 @@
   var nav = window.navigator || {};
   var UA = String(nav.userAgent || "");
 
-  // Robots et navigateurs pilotes : jamais comptes comme visiteurs.
-  var isBot = /bot|crawl|spider|slurp|headless|lighthouse|pagespeed|preview|facebookexternalhit/i.test(UA) || nav.webdriver === true;
-  var enabled = !!PROD_HOSTS[loc.hostname] && !isBot;
+  var params;
+  try { params = new URLSearchParams(loc.search); } catch (e) { params = { get: function () { return null; } }; }
+  function param(name) {
+    try { return params.get(name); } catch (e) { return null; }
+  }
+
+  // Robots d'indexation et apercus de liens : aucun envoi.
+  var isCrawler = /bot|crawl|spider|slurp|lighthouse|pagespeed|preview|facebookexternalhit/i.test(UA);
+  var enabled = !!PROD_HOSTS[loc.hostname] && !isCrawler;
+
+  // ---------- Marquage du trafic interne / de test (jamais bloquant) ----------
+  var internalParam = param("internal");
+  try {
+    if (internalParam === "1") localStorage.setItem("iashark_internal", "1");
+    else if (internalParam === "0") localStorage.removeItem("iashark_internal");
+  } catch (e) {}
+
+  function readInternal() {
+    try { return localStorage.getItem("iashark_internal") === "1"; } catch (e) { return internalParam === "1"; }
+  }
+
+  function readQa() {
+    var fromUrl = /^qa/i.test(String(param("utm_source") || ""));
+    try {
+      if (fromUrl) sessionStorage.setItem("iashark_visit_qa", "1");
+      return sessionStorage.getItem("iashark_visit_qa") === "1";
+    } catch (e) {
+      return fromUrl;
+    }
+  }
+
+  function looksAutomated() {
+    try {
+      if (nav.webdriver === true) return true;
+      if (/HeadlessChrome|PhantomJS|Puppeteer|Playwright/i.test(UA)) return true;
+      if (window.__playwright__binding__ || window.__pwInitScripts || window._phantom || window.callPhantom ||
+          window.__nightmare || window.domAutomation || window.domAutomationController) return true;
+      // Un ordinateur (Windows/Mac sans ecran tactile) n'a jamais un ecran de
+      // moins de 600 px : signature d'un test mobile emule.
+      var w = window.screen && window.screen.width;
+      if (w && w < 600 && /Windows NT|Macintosh/.test(UA) && !(nav.maxTouchPoints > 1)) return true;
+    } catch (e) {}
+    return false;
+  }
+
+  var FLAGS = { internal: readInternal(), qa: readQa(), bot: looksAutomated() };
+
+  function withFlags(metadata) {
+    var md = {};
+    if (metadata && typeof metadata === "object") {
+      for (var key in metadata) {
+        if (Object.prototype.hasOwnProperty.call(metadata, key)) md[key] = metadata[key];
+      }
+    }
+    if (FLAGS.internal) md.internal = true;
+    if (FLAGS.qa) md.qa = true;
+    if (FLAGS.bot) md.bot = true;
+    return md;
+  }
   // Pages internes jamais mesurees (on ne compte pas le proprietaire).
   var autoTrack = enabled && !/^\/admin(\.html)?$/.test(loc.pathname);
 
@@ -91,7 +158,7 @@
       locale: currentSite(),
       session_id: getSessionId(),
       user_id: uid,
-      metadata: metadata || {},
+      metadata: withFlags(metadata),
     }, uid ? authToken : null);
   };
 
@@ -172,9 +239,6 @@
   function timeZone() {
     try { return Intl.DateTimeFormat().resolvedOptions().timeZone || null; } catch (e) { return null; }
   }
-
-  var params;
-  try { params = new URLSearchParams(loc.search); } catch (e) { params = { get: function () { return null; } }; }
 
   function matchIdFromPath(pathname, search) {
     var m = pathname.match(/\/match\/(\d{1,12})(\.html)?$/);

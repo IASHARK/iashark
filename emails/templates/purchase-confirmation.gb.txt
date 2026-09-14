@@ -1,0 +1,63 @@
+Subject: Your {{planName}} subscription is confirmed
+{{! Plain-text version of purchase-confirmation.gb.html: same content, nothing left out. }}IASHARK
+
+YOUR SUBSCRIPTION IS CONFIRMED
+
+Hello,
+
+Thank you for subscribing. This email confirms your contract on a durable medium, so please keep it for your records.
+
+SUMMARY
+- Plan: {{planName}}
+- Price: {{amount}} ({{currencyCode}}, total price including any applicable taxes)
+{{#amountPaid}}- Amount paid today: {{amountPaid}}
+{{/amountPaid}}- Billing frequency: {{periodicity}}
+- Start date: {{startDate}}
+- Next payment: {{#nextBillingDate}}{{nextBillingDate}} ({{amount}}){{/nextBillingDate}}{{^nextBillingDate}}None: cancellation already scheduled{{/nextBillingDate}}
+- Account: {{customerEmail}}
+{{#reference}}- Reference: {{reference}}
+{{/reference}}
+Your subscription has no minimum term. It renews automatically at the end of each billing period, at the price then in force, until you cancel it. If we change the price, we will tell you in advance and you can cancel before the new price applies.
+
+My account: {{accountUrl}}
+
+CANCEL ONLINE AT ANY TIME
+You can stop your subscription at any time, free of charge: in My account ({{accountUrl}}), click “Manage my subscription”. This opens our payment provider’s (Stripe) secure billing area, where you can cancel. You can also email {{supportEmail}}.
+{{#portalUrl}}Direct link to the billing area: {{portalUrl}}
+{{/portalUrl}}
+Cancellation takes effect at the end of your current billing period. You keep paid access until then and you will not be charged again.
+
+YOUR RIGHT TO CANCEL WITHIN 14 DAYS
+Under the Consumer Contracts (Information, Cancellation and Additional Charges) Regulations 2013, you may cancel within 14 days of subscribing without giving a reason. The cancellation period ends on {{withdrawalDeadline}}.
+
+{{#immediateStart}}At checkout you gave your express consent for your subscription to start immediately, and you acknowledged that you lose the right to cancel once you get access to the digital content (regulation 37). If any part of the subscription is treated as a service and you cancel within 14 days, you pay a proportionate amount for what was supplied until you told us (regulation 36), and we refund the rest within 14 days. Your rights under the Consumer Rights Act 2015 are not affected.{{/immediateStart}}{{^immediateStart}}No express consent to an immediate start is recorded for this subscription: if you cancel within the 14 days, you bear no cost and we refund you in full within 14 days.{{/immediateStart}}
+
+How to cancel: before the 14 days end, email {{supportEmail}} with a clear statement that you are cancelling. You can use the model form below, but you do not have to. Any refund is made without undue delay, and no later than 14 days after we are told of your decision, using the payment method you used.
+
+  Model cancellation form
+  | To: IASHARK, {{supportEmail}}
+  | I hereby give notice that I cancel my contract for the supply of the following service: IASHARK subscription {{planName}}, ordered on {{startDate}}.
+  | Name: ………… · Account email address: ………… · Date: …………
+  | Signature (only if this form is sent on paper): …………
+
+TERMS AND CONDITIONS
+{{#termsVersion}}You accepted our terms dated {{termsVersion}}{{#consentRecordedAt}} (consent recorded on {{consentRecordedAt}}){{/consentRecordedAt}}. {{/termsVersion}}You can read them here: {{cgvUrl}}
+
+WHO WE ARE
+- Trading name: IASHARK (sole trader established in France)
+- Legal name: {{companyOperatorName}}
+- Geographic address: {{companyAddress}}
+- Registration number (SIREN / SIRET, France): {{companyRegistration}}
+- VAT number: {{companyVat}}
+- Telephone: {{companyPhone}}
+- Email: {{supportEmail}}
+
+SAFER GAMBLING · 18+
+IASHARK publishes statistical analysis only. We are not a bookmaker, we do not take bets and no winnings are guaranteed. You must be 18 or over to use IASHARK.
+Gambling can cause harm. For free, confidential support, visit {{helplineDisplay}} ({{helplineUrl}}) or call the {{helplineName}} on {{helplinePhone}} (24/7). More: {{responsibleUrl}}
+
+--
+This email was sent automatically to {{customerEmail}} following your subscription. Questions or complaints: {{supportEmail}}.
+Terms: {{cgvUrl}}
+Privacy: {{privacyUrl}}
+Legal notice: {{legalUrl}}

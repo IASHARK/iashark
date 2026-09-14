@@ -1,0 +1,87 @@
+<h2 id="two-formats">1. Two ways of writing the same price</h2>
+
+<p>Walk past a high-street betting shop or watch horse racing on British television and you will see prices such as 5/2, 11/10 or 4/6. Open many betting apps or an exchange and the same prices may appear as 3.50, 2.10 and 1.67. These are not different prices. They are the same information written in two formats: <strong>fractional odds</strong>, the traditional British style, and <strong>decimal odds</strong>, common across Europe and much of the rest of the world.</p>
+
+<p>Knowing how to move between them is not a betting skill as such. It is a reading skill, and it is the first step towards understanding what a price is really saying about a match.</p>
+
+<h2 id="fractional">2. How fractional odds work</h2>
+
+<p>A fractional price tells you the <strong>profit</strong> relative to the stake. The number on the left is what you would win; the number on the right is what you would need to stake to win it.</p>
+
+<ul>
+  <li><strong>5/2</strong> ("five to two"): a stake of 2 units returns a profit of 5 units, plus the 2 units staked.</li>
+  <li><strong>1/1</strong>, known as <strong>evens</strong>: the profit equals the stake.</li>
+  <li><strong>4/6</strong> ("four to six"): a stake of 6 units returns a profit of 4 units. When the left-hand number is smaller than the right-hand one, the price is <em>odds-on</em> and the profit is smaller than the stake.</li>
+</ul>
+
+<p>Fractional odds therefore describe profit only. The returned stake is implied rather than shown, and that is the most common source of confusion for newcomers.</p>
+
+<h2 id="decimal">3. How decimal odds work</h2>
+
+<p>A decimal price tells you the <strong>total return</strong> for each unit staked, stake included. At 3.50, one unit returns 3.50 units in total: 2.50 of profit and the unit you put down. At 2.00, one unit returns two, which is exactly the same as evens. Any decimal price below 2.00 is odds-on.</p>
+
+<p>Because the stake is built in, decimal odds are easier to compare and much easier to use in calculations. That is why statistical models, including ours, work in decimals and probabilities rather than fractions.</p>
+
+<h2 id="convert">4. Converting between the two</h2>
+
+<div class="formula">Decimal = (left number ÷ right number) + 1<br><small>Fractional = decimal − 1, written as a fraction</small></div>
+
+<p>Some everyday examples, with the probability each price implies (explained in the next section):</p>
+
+<div class="tw"><table>
+  <thead><tr><th>Fractional</th><th>Decimal</th><th>Implied probability</th></tr></thead>
+  <tbody>
+    <tr><td>1/2</td><td>1.50</td><td>66.7%</td></tr>
+    <tr><td>4/6</td><td>1.67</td><td>60.0%</td></tr>
+    <tr><td>10/11</td><td>1.91</td><td>52.4%</td></tr>
+    <tr><td>1/1 (evens)</td><td>2.00</td><td>50.0%</td></tr>
+    <tr><td>11/10</td><td>2.10</td><td>47.6%</td></tr>
+    <tr><td>6/4</td><td>2.50</td><td>40.0%</td></tr>
+    <tr><td>2/1</td><td>3.00</td><td>33.3%</td></tr>
+    <tr><td>5/2</td><td>3.50</td><td>28.6%</td></tr>
+    <tr><td>4/1</td><td>5.00</td><td>20.0%</td></tr>
+    <tr><td>10/1</td><td>11.00</td><td>9.1%</td></tr>
+  </tbody>
+</table></div>
+
+<p>Going the other way, 1.80 becomes 0.80, which is 4/5, and 2.75 becomes 1.75, which is 7/4. Not every decimal has a tidy fraction, which is why fractional prices move in fixed steps while decimal prices can be quoted more finely. A rounded decimal such as 1.67 is shorthand for 4/6, which is really 1.666…</p>
+
+<h2 id="implied-probability">5. What a price says: implied probability</h2>
+
+<p>Every price can be turned into a probability, and this is where odds become genuinely informative rather than just a payout table.</p>
+
+<div class="formula">Implied probability = 1 ÷ decimal odds<br><small>or, from a fraction a/b: b ÷ (a + b)</small></div>
+
+<p>At 5/2, the implied probability is 2 ÷ (5 + 2), about 28.6%. At 4/6, it is 6 ÷ (4 + 6), exactly 60%. At evens, 50%. Put simply, a price is the market's view of how likely something is, wrapped together with a margin.</p>
+
+<h2 id="american">6. American odds, briefly</h2>
+
+<p>You may also come across American (moneyline) prices on international sites. A plus sign shows the profit on a stake of 100: +150 means 150 of profit, which is 2.50 in decimal or 6/4. A minus sign shows the stake needed to make 100 of profit: −200 means staking 200 to win 100, which is 1.50 in decimal or 1/2. Whatever the format, converting to decimal first keeps every comparison consistent.</p>
+
+<h2 id="margin">7. The margin hidden in every market</h2>
+
+<p>Add up the implied probabilities of every outcome in a market and you will almost always get more than 100%. The excess is the bookmaker's margin, sometimes called the overround. Take an illustrative three-way match market (these prices are an example, not a real fixture):</p>
+
+<ul>
+  <li>Home win 6/5 (2.20): 45.5%</li>
+  <li>Draw 12/5 (3.40): 29.4%</li>
+  <li>Away win 5/2 (3.50): 28.6%</li>
+</ul>
+
+<p>The total is about 103.4%, so roughly 3.4 points of margin are built in. To estimate the probabilities the prices really express, divide each one by the total: home about 43.9%, draw about 28.4%, away about 27.6%. Those "fair" figures are the ones worth comparing with any estimate of your own.</p>
+
+<h2 id="mistakes">8. Common mistakes</h2>
+
+<ul>
+  <li><strong>Forgetting the stake.</strong> 2/1 and 2.00 are not the same price: 2/1 equals 3.00. Mixing up the two formats is the classic error.</li>
+  <li><strong>Comparing fractions by eye.</strong> Is 8/13 shorter than 4/6? Convert both: 8/13 is about 1.62 and 4/6 about 1.67, so 8/13 is the shorter price. Decimals make the comparison immediate.</li>
+  <li><strong>Reading probability as certainty.</strong> A 60% chance means the other outcome happens roughly four times in ten. Short prices lose regularly.</li>
+  <li><strong>Ignoring the margin.</strong> Implied probabilities taken from a single price list are slightly inflated. Remove the margin before comparing them with anything else.</li>
+  <li><strong>Treating a price as advice.</strong> A price is an estimate plus a margin, not a recommendation, and no conversion turns it into a sure thing.</li>
+</ul>
+
+<h2 id="use">9. Putting it to use</h2>
+
+<p>Once you can turn prices into probabilities, a match becomes a comparison between two estimates: the market's and one built from data. IASHARK publishes a model probability for selected fixtures, including the <a href="/gb/leagues/premier-league.html">Premier League</a>, next to the market price, and shows how uncertain that estimate is. Our guide to <a href="/en/blog/guides/value-bet-guide-complet-2026.html">value and probability</a> explains why a gap of a point or two is usually noise rather than an opportunity. The <a href="/gb/marches.html">markets page</a> sets out which markets we analyse.</p>
+
+<p>Whichever format you prefer, the arithmetic is the same, and so is the underlying truth: prices describe uncertainty, they never remove it.</p>

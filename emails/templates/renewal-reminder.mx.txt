@@ -1,0 +1,50 @@
+Subject: Tu suscripción {{planName}} se renueva el {{renewalDate}}
+{{! Version de texto de renewal-reminder.mx.html: mismo contenido, sin omitir nada. }}IASHARK
+
+Tu suscripción se renueva en {{daysUntilLabel}}
+===============================================
+
+Hola:
+
+Te avisamos con anticipación que tu suscripción {{planName}} se renovará automáticamente el {{renewalDate}} y que ese día se hará el cargo a tu método de pago.
+
+DETALLE DEL PRÓXIMO COBRO
+- Plan: {{planName}}
+- Monto que se cobrará: {{amount}} (pesos mexicanos, impuestos aplicables incluidos)
+- Fecha del cobro: {{renewalDate}}
+- Periodicidad: {{periodicity}}
+- Cuenta: {{customerEmail}}
+{{#reference}}- Referencia: {{reference}}
+{{/reference}}
+Si quieres seguir usando {{planName}}, no tienes que hacer nada.
+
+CÓMO CANCELAR EN LÍNEA
+1. Entra a Mi cuenta con tu correo {{customerEmail}}: {{accountUrl}}
+2. Haz clic en «Gestionar mi suscripción». Se abre el área de facturación segura de nuestro proveedor de pagos (Stripe).
+3. Elige cancelar la suscripción. La cancelación es inmediata, sin costo y sin penalización.
+{{#portalUrl}}Acceso directo al área de facturación: {{portalUrl}}
+{{/portalUrl}}
+Si cancelas antes del {{renewalDate}}, no se hará este cobro. Conservas el acceso de pago hasta el final del periodo que ya pagaste. También puedes pedir la cancelación escribiendo a {{supportEmail}}.
+
+TUS DERECHOS
+Nada de este aviso limita los derechos que te otorga la Ley Federal de Protección al Consumidor, que son irrenunciables. Para cualquier aclaración o reclamación, escríbenos a {{supportEmail}}.
+También puedes acudir a la Procuraduría Federal del Consumidor (PROFECO): Teléfono del Consumidor 800 468 8722 (lada sin costo) o 55 5568 8722 (Ciudad de México y área metropolitana), https://www.gob.mx/profeco
+Términos y condiciones: {{cgvUrl}}
+
+DATOS DEL PROVEEDOR
+- Nombre comercial: IASHARK (empresario individual establecido en Francia)
+- Titular: {{companyOperatorName}}
+- Domicilio: {{companyAddress}}
+- Número de registro (SIREN / SIRET, Francia): {{companyRegistration}}
+- Teléfono: {{companyPhone}}
+- Correo electrónico: {{supportEmail}}
+
+JUEGO RESPONSABLE · 18+
+IASHARK ofrece análisis estadísticos: no es una casa de apuestas, no recibe apuestas y no garantiza ganancias. Prohibido para menores de 18 años.
+Las apuestas pueden generar adicción. Orientación gratuita las 24 horas: {{helplineName}}, {{helplinePhone}} ({{helplineUrl}}). Más información: {{responsibleUrl}}
+
+--
+Aviso de renovación enviado automáticamente a {{customerEmail}} porque tienes una suscripción activa con cobro recurrente. Aclaraciones: {{supportEmail}}.
+Términos: {{cgvUrl}}
+Aviso de privacidad: {{privacyUrl}}
+Aviso legal: {{legalUrl}}

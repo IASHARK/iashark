@@ -42,10 +42,15 @@ test("chaque outil est accompagne d'une phrase qui dit a quoi il sert", () => {
 test("les marches affiches par les outils sont traduits", () => {
   assert.match(js, /function marcheLisible/);
   assert.match(html, /lib\/market-labels\.js/);
-  // Les exemples de demonstration ne portent plus de seuil a virgule.
+  // Les exemples de demonstration suivent le format des libelles traduits
+  // (lib/market-labels.js, 14/09/2026) : ligne a la francaise ("1,5"), jamais
+  // le point decimal du moteur.
   const demos = [...js.matchAll(/market: '([^']+)'/g)].map((m) => m[1]);
   assert.ok(demos.length >= 3);
-  for (const d of demos) assert.ok(!/\d[.,]\d/.test(d), `exemple avec un seuil a virgule : "${d}"`);
+  for (const d of demos) assert.ok(!/\d\.\d/.test(d), `exemple avec un point decimal : "${d}"`);
+  // Chaque exemple porte son identifiant moteur et s'affiche via marketIdLabel.
+  assert.ok((js.match(/marketId: '/g) || []).length >= demos.length, "marketId manquant sur un exemple");
+  assert.match(js, /if \(r\.marketId && labels && labels\.marketIdLabel\) return labels\.marketIdLabel\(r\.marketId\);/);
 });
 
 test("les titres de la page outils sont accentues", () => {

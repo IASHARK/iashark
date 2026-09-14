@@ -1,0 +1,178 @@
+name: e2e
+
+# Suite E2E Playwright (tests/e2e/, voir tests/e2e/README.md). Chromium seulement.
+#  - job "local"      : push et pull request sur main. Construit dist/ comme
+#                       Netlify (node scripts/build-public.js), le sert avec
+#                       tests/e2e/helpers/static-server.js et rejoue les 9 versions.
+#  - job "production" : push sur main (ou lancement manuel). Attend le
+#                       deploiement Netlify du commit puis teste https://iashark.com.
+# Supabase, Stripe et analytics sont toujours simules par interception reseau :
+# aucun compte reel, aucun paiement reel. Echec : rapport en artefact (+ issue
+# GitHub sur push). tests.yml (tests unitaires) reste le gate independant.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      target:
+        description: "local, production ou both"
+        default: local
+        required: false
+
+permissions:
+  contents: read
+  issues: write
+  statuses: read
+  checks: read
+
+concurrency:
+  group: e2e-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  CI: "true"
+
+jobs:
+  local:
+    if: github.event_name != 'workflow_dispatch' || inputs.target != 'production'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: package-lock.json
+      - name: Install dependencies
+        run: npm ci
+      - name: Build dist/ (identique a Netlify)
+        run: node scripts/build-public.js
+      - name: Playwright version
+        id: pw
+        run: echo "version=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
+      - name: Cache Playwright browsers
+        id: pw-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.pw.outputs.version }}-chromium
+      - name: Install Chromium
+        if: steps.pw-cache.outputs.cache-hit != 'true'
+        run: npx playwright install --with-deps chromium
+      - name: Install Chromium system deps (cache hit)
+        if: steps.pw-cache.outputs.cache-hit == 'true'
+        run: npx playwright install-deps chromium
+      - name: Run E2E suite against local dist/
+        run: npx playwright test
+      - name: Upload report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-report-local-${{ github.run_id }}
+          path: tests/e2e/output/
+          retention-days: 14
+      - name: Open issue on failure
+        if: failure() && github.event_name == 'push'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const run = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+            let failed = [];
+            try {
+              const r = JSON.parse(fs.readFileSync('tests/e2e/output/results.json', 'utf8'));
+              const walk = (s, path) => {
+                (s.suites || []).forEach((x) => walk(x, path.concat(x.title)));
+                (s.specs || []).forEach((sp) => sp.tests.forEach((t) => {
+                  if (t.status === 'unexpected') failed.push(`- [${t.projectName}] ${path.concat(sp.title).filter(Boolean).join(' > ')}`);
+                }));
+              };
+              r.suites.forEach((s) => walk(s, [s.title]));
+            } catch (e) { failed = ['(results.json illisible : voir le rapport)']; }
+            const title = `E2E local en echec sur ${context.sha.slice(0, 7)}`;
+            const body = [
+              `La suite E2E **locale** (dist/ construit) a echoue sur le commit ${context.sha}.`,
+              '', `Run : ${run}`, 'Rapport HTML, captures et traces : artefact `e2e-report-local-' + context.runId + '` (ouvrir `report/index.html`).',
+              '', `Tests en echec (${failed.length}) :`, ...failed.slice(0, 60),
+            ].join('\n');
+            await github.rest.issues.create({ ...context.repo, title, body, labels: ['e2e'] }).catch(async () => {
+              await github.rest.issues.create({ ...context.repo, title, body });
+            });
+
+  production:
+    if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.target != 'local')
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      E2E_BASE_URL: https://iashark.com
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: package-lock.json
+      - name: Install dependencies
+        run: npm ci
+      - name: Wait for Netlify deploy of this commit
+        if: github.event_name == 'push'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DEPLOY_TIMEOUT_MINUTES: "20"
+          DEPLOY_FALLBACK_WAIT_SECONDS: "240"
+        run: node tests/e2e/helpers/wait-for-deploy.js
+      - name: Playwright version
+        id: pw
+        run: echo "version=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
+      - name: Cache Playwright browsers
+        id: pw-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.pw.outputs.version }}-chromium
+      - name: Install Chromium
+        if: steps.pw-cache.outputs.cache-hit != 'true'
+        run: npx playwright install --with-deps chromium
+      - name: Install Chromium system deps (cache hit)
+        if: steps.pw-cache.outputs.cache-hit == 'true'
+        run: npx playwright install-deps chromium
+      - name: Run E2E suite against production
+        run: npx playwright test
+      - name: Upload report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-report-production-${{ github.run_id }}
+          path: tests/e2e/output/
+          retention-days: 14
+      - name: Open issue on failure
+        if: failure() && github.event_name == 'push'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const run = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+            let failed = [];
+            try {
+              const r = JSON.parse(fs.readFileSync('tests/e2e/output/results.json', 'utf8'));
+              const walk = (s, path) => {
+                (s.suites || []).forEach((x) => walk(x, path.concat(x.title)));
+                (s.specs || []).forEach((sp) => sp.tests.forEach((t) => {
+                  if (t.status === 'unexpected') failed.push(`- [${t.projectName}] ${path.concat(sp.title).filter(Boolean).join(' > ')}`);
+                }));
+              };
+              r.suites.forEach((s) => walk(s, [s.title]));
+            } catch (e) { failed = ['(results.json illisible : voir le rapport)']; }
+            const title = `E2E production (iashark.com) en echec apres ${context.sha.slice(0, 7)}`;
+            const body = [
+              `La suite E2E **production** (https://iashark.com) a echoue apres le deploiement du commit ${context.sha}.`,
+              '', `Run : ${run}`, 'Rapport HTML, captures et traces : artefact `e2e-report-production-' + context.runId + '` (ouvrir `report/index.html`).',
+              '', `Tests en echec (${failed.length}) :`, ...failed.slice(0, 60),
+            ].join('\n');
+            await github.rest.issues.create({ ...context.repo, title, body, labels: ['e2e'] }).catch(async () => {
+              await github.rest.issues.create({ ...context.repo, title, body });
+            });

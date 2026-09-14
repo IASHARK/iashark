@@ -23,11 +23,21 @@ test("mapping cotes : ligue sans cle ou inconnue -> null, JAMAIS la Champions Le
   assert.equal(oddsSportKeyFor({ leagues: [{ key: "x" }] }, "x"), null);
 });
 
-test("repli api-football Pinnacle : active uniquement pour Liga MX et PSL", () => {
+// 2026-09-14 : ouverture LATAM. Catalogue public The Odds API : Argentine et
+// Chili ont une cle, Colombie et Perou aucune. Pinnacle present sur
+// api-football /odds?league=128|239|281|265&season=2026 pour les 4.
+test("mapping cotes LATAM : Argentine/Chili avec cle verifiee, Colombie/Perou sans cle (jamais inventee)", () => {
+  assert.equal(oddsSportKeyFor(LEAGUES, "argentina_liga_profesional"), "soccer_argentina_primera_division");
+  assert.equal(oddsSportKeyFor(LEAGUES, "chile_primera"), "soccer_chile_campeonato");
+  assert.equal(oddsSportKeyFor(LEAGUES, "colombia_primera_a"), null);
+  assert.equal(oddsSportKeyFor(LEAGUES, "peru_primera"), null);
+});
+
+test("repli api-football Pinnacle : active uniquement pour Liga MX, PSL et les 4 ligues LATAM", () => {
   assert.equal(usesApiFootballPinnacleFallback(LEAGUES, "liga_mx"), true);
   assert.equal(usesApiFootballPinnacleFallback(LEAGUES, "south_africa_premiership"), true);
   const autres = LEAGUES.leagues.filter((l) => l.apiFootballPinnacleFallback === true).map((l) => l.key).sort();
-  assert.deepEqual(autres, ["liga_mx", "south_africa_premiership"]);
+  assert.deepEqual(autres, ["argentina_liga_profesional", "chile_primera", "colombia_primera_a", "liga_mx", "peru_primera", "south_africa_premiership"]);
   assert.equal(usesApiFootballPinnacleFallback(LEAGUES, "premier"), false);
 });
 

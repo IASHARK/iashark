@@ -198,7 +198,7 @@
   function ligneResume(libelle, valeur, lien, texteLien) {
     return '<div class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-t border-hairline py-3.5 first:border-t-0 first:pt-0">'
       + '<span class="text-[13.5px] text-soft">' + esc(libelle) + '</span>'
-      + '<span class="flex items-baseline gap-3"><b class="text-[14.5px] font-semibold">' + (valeur || '<span class="font-normal text-soft">' + tr('compte_page.not_provided', 'Non renseigné') + '</span>') + '</b>'
+      + '<span class="flex min-w-0 items-baseline gap-3"><b class="acc-val min-w-0 text-[14.5px] font-semibold">' + (valeur || '<span class="font-normal text-soft">' + tr('compte_page.not_provided', 'Non renseigné') + '</span>') + '</b>'
       + (lien ? '<button type="button" data-aller="' + lien + '" class="text-[13px] text-cyan transition hover:underline">' + esc(texteLien || tr('compte_page.edit_link', 'Modifier')) + '</button>' : '')
       + '</span></div>';
   }
@@ -559,8 +559,11 @@
   function afficher() {
     var section = SECTIONS.filter(function (s) { return s.id === sectionActive; })[0] || SECTIONS[0];
     racine.innerHTML = enTete()
-      + '<div class="grid gap-7 pt-7 lg:grid-cols-[212px_minmax(0,1fr)] lg:gap-10">'
-      + '<div class="lg:sticky lg:top-6 lg:self-start">' + navigation() + '</div>'
+      // grid-cols-1 = minmax(0,1fr) : sans colonne explicite, la piste unique
+      // mobile prenait la largeur min-content des onglets (nowrap) et d'un
+      // email long, et la page debordait a 664 px sur un ecran de 390 px.
+      + '<div class="acc-layout grid grid-cols-1 gap-7 pt-7 lg:grid-cols-[212px_minmax(0,1fr)] lg:gap-10">'
+      + '<div class="min-w-0 lg:sticky lg:top-6 lg:self-start">' + navigation() + '</div>'
       + '<div class="acc-panel min-w-0" id="panneau">' + section.rendu() + '</div>'
       + '</div>';
     brancher();

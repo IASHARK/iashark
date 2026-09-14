@@ -24,6 +24,8 @@
 <meta property="og:url" content="https://iashark.com/fr/mentions-legales.html">
 <meta property="og:image" content="https://iashark.com/icon-512.png">
 <meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
 /* IASHARK legal pages - shared style block (identical in every legal/<dir>/*.html). */
@@ -92,13 +94,16 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offse
   .container>*{max-width:none;}
   .legal-nav{position:static;flex-direction:row;gap:8px;margin:0 -18px 26px;padding:2px 18px 6px;overflow-x:auto;border:0;border-radius:0;background:none;box-shadow:none;scrollbar-width:none;-webkit-overflow-scrolling:touch;}
   .legal-nav::-webkit-scrollbar{display:none;}
-  .legal-nav a{flex:none;padding:8px 14px;border:1px solid var(--line);border-radius:999px;background:rgba(255,255,255,.02);font-size:13px;white-space:nowrap;}
+  .legal-nav a{flex:none;display:inline-flex;align-items:center;min-height:44px;padding:8px 14px;border:1px solid var(--line);border-radius:999px;background:rgba(255,255,255,.02);font-size:13px;white-space:nowrap;}
   .legal-nav a[aria-current="page"]{box-shadow:none;border-color:rgba(32,213,239,.55);}
   .page-title{font-size:clamp(28px,8vw,38px);}
   .page-date{margin-bottom:22px;}
 }
 @media(max-width:640px){
-  .hdr-back{height:34px;padding:0 12px;font-size:11px;}
+  .hdr-back{height:44px;padding:0 12px;font-size:11px;}
+  .brand-logo{height:44px;}
+  .legal-foot>div:first-child a{display:inline-flex;align-items:center;min-height:44px;}
+  .legal-foot>div+div a{display:inline-block;padding:14px 2px;margin:-14px 0;}
   .warn-box{padding:15px 16px 15px 18px;}
   .warn-box p{font-size:12px;}
   .section{padding:26px 0 24px;}
@@ -127,7 +132,10 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offse
   .warn-box,.highlight,.tbl-wrap,.legal-foot{background:none;box-shadow:none;border-color:#999;}
 }
 </style>
-<link rel="stylesheet" href="/assets/bottom-navigation.css"><script src="/lib/market-config.js"></script>
+<link rel="stylesheet" href="/assets/bottom-navigation.css">
+<meta property="og:site_name" content="IASHARK">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Accueil","item":"https://iashark.com/fr/"},{"@type":"ListItem","position":2,"name":"Mentions légales","item":"https://iashark.com/fr/mentions-legales.html"}]}</script>
+<script src="/lib/market-config.js"></script>
 </head>
 <body>
 <!-- LEGAL REVIEW: missing nom et prénom de l'entrepreneur individuel, numéro SIREN/SIRET, adresse postale complète du siège, numéro de téléphone, régime de TVA (numéro de TVA intracommunautaire ou mention d'exonération) - non renseignés dans les pages d'origine, à compléter avec des données réelles. -->

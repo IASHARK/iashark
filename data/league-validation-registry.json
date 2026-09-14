@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-13T23:40:41.260Z",
+  "generated_at": "2026-09-14T04:22:44.250Z",
   "leagues": {
     "laliga": {
       "league_key": "laliga",
@@ -742,6 +742,114 @@
         "exact_score_nll_threshold": 3.132660717176439,
         "note": "Holdout 2025 CONSOMME (une seule fois). INCONCLUSIVE : POINT_IN_TIME_INTEGRITY/DATA_COVERAGE/EXACT_SCORE_NLL/MARKET_MARGINALS/TEMPORAL_STABILITY/NO_CATASTROPHIC_SECONDARY_DEGRADATION/REPRODUCIBILITY tous PASS, seul CALIBRATION echoue (ECE 0.019894 > seuil 0.018465, depassement marginal ~7.7% relatif ; slope=1.086, intercept=0.056, converged=true). Aucun forcage, aucun retuning, aucune deuxieme tentative. Ne remplace pas score_status/score_champion existants (protocole V1 historique different)."
       }
+    },
+    "argentina_liga_profesional": {
+      "league_key": "argentina_liga_profesional",
+      "league_id": 128,
+      "calendar_type": "CALENDAR_YEAR_SEASON",
+      "dataset_versions": {},
+      "score_champion": null,
+      "score_status": "NOT_STARTED",
+      "player_champion": null,
+      "player_status": "NOT_STARTED",
+      "market_status": "NO_DATA",
+      "oos_report_hashes": {},
+      "score_runnable": false,
+      "player_runnable": false,
+      "live_eligible": false,
+      "updated_at": "2026-09-14T06:00:00.000Z",
+      "catalogue_status": "OPENED_WITHOUT_SCORE_LAB_VALIDATION",
+      "catalogue_decision": {
+        "decided_by": "owner",
+        "reason": "LATAM expansion (Spanish-speaking Latin America)",
+        "date": "2026-09-14",
+        "catalogue_file": "config/leagues.json",
+        "validation_claimed": false
+      },
+      "expansion_status": "config/league-expansion.json#argentina_liga_profesional (wave 2, NOT_STARTED)",
+      "odds_sources": "The Odds API soccer_argentina_primera_division (catalogue public) + Pinnacle api-football",
+      "note": "OUVERT AU CATALOGUE SANS VALIDATION SCORE LAB (ni V1 OOS_DEV/OOS_FINAL, ni SCORE_LAB_FACTORY_V2). Decision explicite du proprietaire pour l'expansion LATAM hispanophone (2026-09-14), meme precedent que liga_mx/south_africa_premiership. Aucun champion Score/Player, aucune calibration mesuree sur ce championnat : score_status/player_status restent NOT_STARTED, *_runnable=false, live_eligible=false -> exclu de TOP_5_SCORERS_OF_DAY / DAILY_COMBOS / SAFE_PICK_OF_THE_DAY (lib/run-output/eligibility.js). Les analyses publiees le sont par le moteur generique (non valide sur cette ligue). Couverture verifiee en direct le 2026-09-14 (league-coverage-report.json) : saison 2026 current, injuries=false."
+    },
+    "colombia_primera_a": {
+      "league_key": "colombia_primera_a",
+      "league_id": 239,
+      "calendar_type": "CALENDAR_YEAR_SEASON",
+      "dataset_versions": {},
+      "score_champion": null,
+      "score_status": "NOT_STARTED",
+      "player_champion": null,
+      "player_status": "NOT_STARTED",
+      "market_status": "NO_DATA",
+      "oos_report_hashes": {},
+      "score_runnable": false,
+      "player_runnable": false,
+      "live_eligible": false,
+      "updated_at": "2026-09-14T06:00:00.000Z",
+      "catalogue_status": "OPENED_WITHOUT_SCORE_LAB_VALIDATION",
+      "catalogue_decision": {
+        "decided_by": "owner",
+        "reason": "LATAM expansion (Spanish-speaking Latin America)",
+        "date": "2026-09-14",
+        "catalogue_file": "config/leagues.json",
+        "validation_claimed": false
+      },
+      "expansion_status": "absente de config/league-expansion.json (aucune collecte Gate B1)",
+      "odds_sources": "Pinnacle api-football uniquement (aucune cle The Odds API)",
+      "note": "OUVERT AU CATALOGUE SANS VALIDATION SCORE LAB (ni V1 OOS_DEV/OOS_FINAL, ni SCORE_LAB_FACTORY_V2). Decision explicite du proprietaire pour l'expansion LATAM hispanophone (2026-09-14), meme precedent que liga_mx/south_africa_premiership. Aucun champion Score/Player, aucune calibration mesuree sur ce championnat : score_status/player_status restent NOT_STARTED, *_runnable=false, live_eligible=false -> exclu de TOP_5_SCORERS_OF_DAY / DAILY_COMBOS / SAFE_PICK_OF_THE_DAY (lib/run-output/eligibility.js). Les analyses publiees le sont par le moteur generique (non valide sur cette ligue). Couverture verifiee en direct le 2026-09-14 (league-coverage-report.json) : saison 2026 current, injuries=false."
+    },
+    "peru_primera": {
+      "league_key": "peru_primera",
+      "league_id": 281,
+      "calendar_type": "CALENDAR_YEAR_SEASON",
+      "dataset_versions": {},
+      "score_champion": null,
+      "score_status": "NOT_STARTED",
+      "player_champion": null,
+      "player_status": "NOT_STARTED",
+      "market_status": "NO_DATA",
+      "oos_report_hashes": {},
+      "score_runnable": false,
+      "player_runnable": false,
+      "live_eligible": false,
+      "updated_at": "2026-09-14T06:00:00.000Z",
+      "catalogue_status": "OPENED_WITHOUT_SCORE_LAB_VALIDATION",
+      "catalogue_decision": {
+        "decided_by": "owner",
+        "reason": "LATAM expansion (Spanish-speaking Latin America)",
+        "date": "2026-09-14",
+        "catalogue_file": "config/leagues.json",
+        "validation_claimed": false
+      },
+      "expansion_status": "config/league-expansion.json#peru_primera (wave 2, NOT_STARTED)",
+      "odds_sources": "Pinnacle api-football uniquement (aucune cle The Odds API)",
+      "note": "OUVERT AU CATALOGUE SANS VALIDATION SCORE LAB (ni V1 OOS_DEV/OOS_FINAL, ni SCORE_LAB_FACTORY_V2). Decision explicite du proprietaire pour l'expansion LATAM hispanophone (2026-09-14), meme precedent que liga_mx/south_africa_premiership. Aucun champion Score/Player, aucune calibration mesuree sur ce championnat : score_status/player_status restent NOT_STARTED, *_runnable=false, live_eligible=false -> exclu de TOP_5_SCORERS_OF_DAY / DAILY_COMBOS / SAFE_PICK_OF_THE_DAY (lib/run-output/eligibility.js). Les analyses publiees le sont par le moteur generique (non valide sur cette ligue). Couverture verifiee en direct le 2026-09-14 (league-coverage-report.json) : saison 2026 current, injuries=false."
+    },
+    "chile_primera": {
+      "league_key": "chile_primera",
+      "league_id": 265,
+      "calendar_type": "CALENDAR_YEAR_SEASON",
+      "dataset_versions": {},
+      "score_champion": null,
+      "score_status": "NOT_STARTED",
+      "player_champion": null,
+      "player_status": "NOT_STARTED",
+      "market_status": "NO_DATA",
+      "oos_report_hashes": {},
+      "score_runnable": false,
+      "player_runnable": false,
+      "live_eligible": false,
+      "updated_at": "2026-09-14T06:00:00.000Z",
+      "catalogue_status": "OPENED_WITHOUT_SCORE_LAB_VALIDATION",
+      "catalogue_decision": {
+        "decided_by": "owner",
+        "reason": "LATAM expansion (Spanish-speaking Latin America)",
+        "date": "2026-09-14",
+        "catalogue_file": "config/leagues.json",
+        "validation_claimed": false
+      },
+      "expansion_status": "config/league-expansion.json#chile_primera (wave 2, NOT_STARTED)",
+      "odds_sources": "The Odds API soccer_chile_campeonato (catalogue public) + Pinnacle api-football",
+      "note": "OUVERT AU CATALOGUE SANS VALIDATION SCORE LAB (ni V1 OOS_DEV/OOS_FINAL, ni SCORE_LAB_FACTORY_V2). Decision explicite du proprietaire pour l'expansion LATAM hispanophone (2026-09-14), meme precedent que liga_mx/south_africa_premiership. Aucun champion Score/Player, aucune calibration mesuree sur ce championnat : score_status/player_status restent NOT_STARTED, *_runnable=false, live_eligible=false -> exclu de TOP_5_SCORERS_OF_DAY / DAILY_COMBOS / SAFE_PICK_OF_THE_DAY (lib/run-output/eligibility.js). Les analyses publiees le sont par le moteur generique (non valide sur cette ligue). Couverture verifiee en direct le 2026-09-14 (league-coverage-report.json) : saison 2026 current, injuries=false."
     }
   }
 }

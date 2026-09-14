@@ -1,38 +1,45 @@
 @import url('./tailwind.css');
 
-/* Memes tokens que le reste du site (cf :root dans index.html) - la page
-   match/joueur doit rester en adequation avec le theme sombre/cyan du
-   site, rien ne doit differer. --cyan/--cyan2 sont repris tels quels car
-   player-page.css les reference directement (var(--cyan)). */
-:root{--bg:#080c12;--card:#0d1520;--card2:#0f1a28;--line:rgba(255,255,255,.08);--line2:rgba(255,255,255,.16);--accent:#22d3ee;--cyan:#22d3ee;--cyan2:#06b6d4;--accent-bg:rgba(34,211,238,.08);--accent-border:rgba(34,211,238,.18);--green:#10b981;--green-bg:rgba(16,185,129,.08);--orange:#f59e0b;--orange-bg:rgba(245,158,11,.08);--red:#ef4444;--red-bg:rgba(239,68,68,.08);--text:#e2e8f0;--muted:#4a6580;--dim:#64748b;--mono:"Space Mono",monospace;--body:"DM Sans",sans-serif;--display:"Bebas Neue",sans-serif;--radius:10px;--gap:10px;--container:840px}
+/* ==========================================================================
+   PAGE MATCH — V6 (14/09/2026)
+   Demande du proprietaire : le « Signal IASHARK » au centre de la page, les
+   paris ecrits comme chez un bookmaker, et une lecture plus claire.
+   Ordre : en-tete -> signal -> probabilites et cotes -> forme et face-a-face
+   -> absences -> comparatif -> scores -> marches joueurs -> repartition des
+   buts -> FAQ. Palette inchangee : sombre + cyan ; vert et rouge reserves a
+   l'ecart chiffre et aux pastilles de forme.
+   Contraste : --muted et --dim releves (audit axe, 4,5:1 minimum sur les
+   cartes).
+   ========================================================================== */
+:root{--bg:#080c12;--card:#0d1520;--card2:#0f1a28;--line:rgba(255,255,255,.08);--line2:rgba(255,255,255,.16);--accent:#22d3ee;--cyan:#22d3ee;--cyan2:#06b6d4;--accent-bg:rgba(34,211,238,.08);--accent-border:rgba(34,211,238,.22);--green:#34d399;--red:#f87171;--orange:#fbbf24;--text:#e2e8f0;--soft:#c3d1de;--muted:#8fa1b5;--dim:#8796a8;--mono:"Space Mono",monospace;--body:"DM Sans",system-ui,sans-serif;--display:"Bebas Neue",sans-serif;--radius:14px;--container:880px}
 *{box-sizing:border-box}
 html,body{margin:0;background:var(--bg);color:var(--text);font-family:var(--body);min-height:100%}
 body{padding-bottom:96px;position:relative}
 body:before{content:"";position:fixed;top:-300px;left:50%;transform:translateX(-50%);width:900px;height:600px;background:radial-gradient(ellipse,rgba(34,211,238,.05) 0%,transparent 65%);pointer-events:none;z-index:0}
-.page{position:relative;z-index:1}
 button{font:inherit}
 a{color:inherit}
+.sr-only{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 
-/* chrome commun (header/footer/nav) */
-/* fond plein largeur via un pseudo-element (le conteneur lui-meme reste
-   limite en largeur pour aligner logo/bouton) - meme couleur que le fond
-   de page, la page entiere etant deja sombre. */
-.site-header{position:relative;height:84px;display:flex;align-items:center;width:min(var(--container) + 200px,calc(100% - 48px));margin:auto}
+/* ---------- chrome commun (header/footer/nav) ---------- */
+.site-header{position:relative;height:84px;display:flex;align-items:center;width:min(var(--container) + 160px,calc(100% - 48px));margin:auto}
 .site-header:before{content:"";position:absolute;top:0;bottom:0;left:50%;right:50%;margin-left:-50vw;margin-right:-50vw;background:var(--bg);z-index:-1}
 .brand img{width:185px;height:68px;object-fit:contain}
 .back-link{display:none}
 #authHeaderSlot{margin-left:auto}
-/* Selecteur langue/pays (assets/lang-switcher.css) avant le bouton compte,
-   comme dans l'en-tete de l'accueil. */
 .site-header .lang-switch-slot{margin-left:auto;margin-right:10px}
 .site-header .lang-switch-slot+#authHeaderSlot{margin-left:0}
 .btn-login{padding:12px 22px;color:var(--text);border:1px solid var(--line2);border-radius:10px;text-decoration:none;background:var(--card);font:700 13px var(--mono)}
-.match-shell{width:min(var(--container),calc(100% - 32px));margin:0 auto}
-.match-shell>div:not(#matchRoot){display:none!important}
-/* Mention 18+ / jeu responsable : visible sur TOUTES les vues de la page
-   match, y compris le mur de connexion du match gratuit (audit QA
-   14/09/2026 : elle etait masquee). */
-.legal-footer{position:relative;z-index:1;width:min(var(--container),calc(100% - 32px));margin:18px auto 0;padding:14px 0 22px;border-top:1px solid var(--line);color:var(--dim);font-size:12px;line-height:1.6;text-align:center}
+.match-shell{position:relative;z-index:1;width:min(var(--container),calc(100% - 32px));margin:0 auto}
+/* Resume SEO statique (h1 + competition + date) : VISIBLE pendant le
+   chargement, style comme une vraie introduction. L'application le remplace
+   par son en-tete au rendu (match-page.js#remplacerResumeSeo) : jamais de
+   texte masque en CSS. Styles en ligne du generateur neutralises ici. */
+.match-shell>div:not(#matchRoot){padding:18px 4px 4px!important;font:400 14px/1.6 var(--body)!important;color:var(--muted)!important}
+.match-shell>div:not(#matchRoot) h1{margin:0 0 6px!important;font:700 28px/1.15 var(--body)!important;letter-spacing:-.01em!important;color:#f4f7fb!important}
+.match-shell>div:not(#matchRoot) p{margin:3px 0!important}
+.match-shell>div:not(#matchRoot) strong{color:var(--text)}
+/* Mention 18+ / jeu responsable : visible sur TOUTES les vues de la page. */
+.legal-footer{position:relative;z-index:1;width:min(var(--container),calc(100% - 32px));margin:18px auto 0;padding:14px 0 22px;border-top:1px solid var(--line);color:#8a9bb0;font-size:12px;line-height:1.6;text-align:center}
 .legal-footer p{margin:3px 0}
 .legal-footer a{color:var(--accent);text-decoration:none}
 .legal-footer a:hover{text-decoration:underline}
@@ -46,707 +53,365 @@ a{color:inherit}
 .bottom-nav span{font-size:29px}
 .bottom-nav b{font:10px var(--mono);text-transform:uppercase}
 
-/* squelette de page - grille dense, cartes serrees (proche de la maquette
-   de reference : peu d'espace perdu, beaucoup d'info visible d'un coup) */
-.page{display:flex;flex-direction:column;gap:var(--gap);padding:14px 0}
-.card{padding:14px 16px;border:1px solid var(--line);border-radius:var(--radius);background:var(--card);transition:border-color .2s}
-.card:hover{border-color:var(--line2)}
-.card>h2{display:flex;align-items:center;gap:6px;margin:0 0 10px;color:var(--accent);font:700 11.5px var(--mono);letter-spacing:.06em;text-transform:uppercase}
-.card-icon{width:13px;height:13px;flex-shrink:0;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-.empty{min-height:56px;display:grid;place-items:center;padding:12px;color:var(--muted);text-align:center;font-size:12.5px;line-height:1.5}
-
-/* min-width:0 sur les items : sans ca, un enfant large (SVG scenario,
-   tableau...) force sa colonne a la taille du contenu malgre les
-   overflow:auto internes, ce qui fait deborder toute la page horizontalement
-   - piege CSS classique (grid item min-width:auto par defaut). */
-/* mise en page principale : colonne large (analyse) + rail etroit
-   (donnees d'appoint), comme la maquette de reference */
-
-.reveal{opacity:0;transform:translateY(12px);transition:opacity .45s cubic-bezier(.16,1,.3,1),transform .45s cubic-bezier(.16,1,.3,1)}
+/* ---------- squelette ---------- */
+.page{position:relative;z-index:1;display:flex;flex-direction:column;gap:14px;padding:14px 0}
+.secs{display:flex;flex-direction:column;gap:18px}
+.sec{min-width:0}
+.card{padding:18px 20px;border:1px solid var(--line);border-radius:var(--radius);background:var(--card);box-shadow:inset 0 1px 0 rgba(255,255,255,.03)}
+.card>h2{display:flex;align-items:center;gap:8px;margin:0 0 14px;color:var(--text);font:600 16px/1.3 var(--body);letter-spacing:-.005em}
+.card-icon{width:15px;height:15px;flex-shrink:0;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.card>h2 .card-icon{color:var(--accent)}
+.sub{margin:0 0 10px;color:var(--muted);font:600 11.5px var(--body);letter-spacing:.08em;text-transform:uppercase}
+.empty{min-height:56px;display:grid;place-items:center;padding:12px;color:var(--muted);text-align:center;font-size:13.5px;line-height:1.5}
+.reveal{opacity:0;transform:translateY(10px);transition:opacity .45s cubic-bezier(.16,1,.3,1),transform .45s cubic-bezier(.16,1,.3,1)}
 .reveal.in{opacity:1;transform:none}
 @media(prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;transition:none}}
 
-/* tags "enjeu" */
-.tags-row{display:flex;flex-wrap:wrap;gap:7px}
-.tag{display:inline-flex;align-items:center;gap:6px;padding:6px 11px;border:1px solid var(--line);border-radius:16px;background:var(--card);color:var(--muted);font:700 10.5px var(--mono);letter-spacing:.02em;text-transform:uppercase}
-.tag .card-icon{color:var(--accent)}
-
-/* hero */
-.hero{display:flex;flex-direction:column;gap:11px}
-.hero-top{display:flex;justify-content:space-between;align-items:center;font:700 11.5px var(--mono);letter-spacing:.06em;text-transform:uppercase}
-.hero-league{display:flex;align-items:center;gap:7px;color:var(--muted)}
+/* ==================== En-tete ==================== */
+.card.hero{padding:18px 20px 16px;background:radial-gradient(90% 120% at 50% -30%,rgba(34,211,238,.08),transparent 62%),var(--card)}
+.hero-top{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:6px 14px;font-size:13px;color:var(--muted)}
+.hero-league{display:inline-flex;align-items:center;gap:7px;color:var(--soft);font-weight:600}
 .hero-league img{width:18px;height:18px;object-fit:contain}
-.hero-time{color:var(--muted);font-weight:400;letter-spacing:0;text-transform:none}
-.hero-teams{display:grid;grid-template-columns:1fr 56px 1fr;align-items:center;gap:6px}
-.hero-team{display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;min-width:0}
-.hero-team img{width:46px;height:46px;object-fit:contain}
-.hero-team b{font:700 18px var(--display);letter-spacing:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
-.hero-team small{display:block;margin-top:-4px;color:var(--muted);font-size:11px}
-.form-strip{display:flex;gap:3px;margin-top:-1px}
-.form-strip i{width:15px;height:15px;display:grid;place-items:center;border-radius:4px;font:9.5px var(--mono);font-style:normal;font-weight:700;color:#fff}
-.form-strip .f-w{background:var(--green)}
-.form-strip .f-d{background:var(--dim);color:#fff}
-.form-strip .f-l{background:var(--red)}
-.hero-vs{text-align:center;color:var(--dim);font:700 14px var(--display)}
-.hero-probbar{padding-top:2px}
-.prob-bar{display:flex;height:22px;border-radius:6px;overflow:hidden;background:var(--line)}
-.prob-bar span{display:flex;align-items:center;justify-content:center;font:700 10.5px var(--mono);color:#fff;transition:width .6s cubic-bezier(.16,1,.3,1)}
-.prob-bar .home{background:var(--green)}
-.prob-bar .draw{background:var(--dim)}
-.prob-bar .away{background:var(--red)}
-.prob-legend{display:flex;justify-content:space-between;margin-top:6px;color:var(--muted);font-size:10px;font-family:var(--mono);text-transform:uppercase;letter-spacing:.02em}
-.hero-venue{display:flex;align-items:center;justify-content:center;gap:7px;padding-top:9px;border-top:1px solid var(--line);color:var(--muted);font-size:11.5px}
-.hero-venue svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:1.8;flex-shrink:0}
-.ready{color:var(--green);display:inline-flex;align-items:center;gap:6px}
-.ready i{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 0 0 rgba(22,163,74,.4);animation:pulse 1.8s ease-out infinite}
-@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(22,163,74,.4)}70%{box-shadow:0 0 0 7px rgba(22,163,74,0)}100%{box-shadow:0 0 0 0 rgba(22,163,74,0)}}
-@media(prefers-reduced-motion:reduce){.ready i{animation:none}}
+.hero-time b{color:var(--text);font-weight:600}
+.hero-teams{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:12px;margin:16px 0 0;font:inherit}
+.hero-team{display:flex;flex-direction:column;align-items:center;gap:9px;min-width:0;text-align:center}
+.hero-team img{width:60px;height:60px;object-fit:contain;filter:drop-shadow(0 8px 18px rgba(0,0,0,.55))}
+.hero-name{font:700 24px/1.1 var(--body);letter-spacing:-.015em;color:#f4f7fb;overflow-wrap:anywhere}
+.hero-vs{color:var(--muted);font:600 12px var(--body);letter-spacing:.16em;text-transform:uppercase}
+.hero-meta{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:8px}
+.hero-meta>div{display:flex;flex-direction:column;align-items:center;gap:6px}
+.hero-meta small{color:var(--muted);font-size:12.5px}
+.form-strip{display:flex;gap:4px;margin:0;padding:0;list-style:none}
+.form-strip li{width:20px;height:20px;display:grid;place-items:center;border-radius:5px;font:700 11px var(--body)}
+.form-strip .f-w{background:rgba(52,211,153,.18);color:#6ee7b7}
+.form-strip .f-d{background:rgba(255,255,255,.09);color:#d3dde7}
+.form-strip .f-l{background:rgba(248,113,113,.15);color:#fca5a5}
+.hero-venue{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 20px;margin-top:14px;padding-top:12px;border-top:1px solid var(--line);color:var(--muted);font-size:12.5px}
+.hero-venue span{display:inline-flex;align-items:center;gap:6px}
+.hero-venue .card-icon{width:13px;height:13px}
 
-/* notre lecture du match */
-.lecture-stats{display:flex;flex-wrap:wrap;justify-content:center;gap:10px 22px;margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}
-.lecture-stats>div{text-align:center}
-.lecture-stats small{display:block;color:var(--muted);font:10px var(--mono);text-transform:uppercase;letter-spacing:.03em;white-space:nowrap}
-.lecture-stats b{display:block;margin-top:5px;font-size:16px;font-weight:700;color:var(--text)}
+/* ==================== LE SIGNAL IASHARK ==================== */
+.signal-card{position:relative;overflow:hidden;padding:22px 24px 18px;border-radius:18px;border:1px solid rgba(34,211,238,.3);
+  background:radial-gradient(120% 90% at 100% 0%,rgba(34,211,238,.11),transparent 55%),linear-gradient(180deg,#0f1c2a,#0b131d);
+  box-shadow:0 26px 60px -32px rgba(0,0,0,.85),inset 0 1px 0 rgba(255,255,255,.05)}
+.sig-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:10px}
+.sig-eyebrow{display:inline-flex;align-items:center;gap:7px;color:var(--accent);font:700 12px var(--body);letter-spacing:.09em;text-transform:uppercase}
+.sig-rel{display:inline-flex;align-items:center;gap:7px;padding:5px 12px;border-radius:999px;border:1px solid;font:600 12.5px var(--body)}
+.sig-rel i{width:8px;height:8px;border-radius:50%;background:currentColor}
+.sig-rel--high{color:#6ee7b7;border-color:rgba(52,211,153,.4);background:rgba(52,211,153,.08)}
+.sig-rel--medium{color:#fcd34d;border-color:rgba(251,191,36,.4);background:rgba(251,191,36,.08)}
+.sig-rel--low{color:#fca5a5;border-color:rgba(248,113,113,.4);background:rgba(248,113,113,.08)}
+/* Ticket du pari : le libelle bookmaker en grand, la cote a droite. */
+.sig-slip{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:14px 18px;margin-top:16px;padding:16px 18px;border:1px solid var(--accent-border);border-radius:14px;background:rgba(3,10,17,.45)}
+.sig-slip-main{min-width:0}
+.sig-kicker{margin:0 0 4px;color:var(--muted);font-size:13px}
+.sig-market{margin:0;color:#fff;font:700 clamp(24px,4vw,34px)/1.12 var(--body);letter-spacing:-.02em;text-wrap:balance;overflow-wrap:anywhere}
+.sig-fixture{margin:6px 0 0;color:var(--muted);font-size:13px}
+.sig-odds-box{display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:96px;min-height:72px;padding:10px 14px;border-radius:12px;background:var(--accent);color:#04222b;text-align:center}
+.sig-odds-box span{font:600 11.5px/1.2 var(--body)}
+.sig-odds-box b{margin-top:2px;font:700 30px/1 var(--body);letter-spacing:-.01em;font-variant-numeric:tabular-nums}
+.sig-odds-box.is-locked{background:rgba(34,211,238,.1);color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent-border)}
+.sig-odds-box.is-locked .card-icon{width:24px;height:24px}
+/* Indice de confiance (10 segments) et niveau de risque (3 crans). */
+.sig-stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:10px}
+.sig-stats.is-single{grid-template-columns:minmax(0,1fr)}
+.sig-stat{min-width:0;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.03)}
+.sig-stat-label{display:block;color:var(--muted);font-size:12px;line-height:1.3}
+.sig-stat-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:6px}
+.sig-stat-row b{color:var(--text);font:700 19px/1.1 var(--body);font-variant-numeric:tabular-nums;white-space:nowrap}
+.sig-conf-val small{margin-left:1px;color:var(--muted);font:600 12px var(--body)}
+.sig-conf-bar{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:3px;flex:1;max-width:220px}
+.sig-conf-bar i{height:9px;border-radius:2px;background:rgba(255,255,255,.1)}
+.sig-conf-bar i.on{background:linear-gradient(180deg,var(--accent),var(--cyan2))}
+.sig-risk-steps{display:flex;gap:4px}
+.sig-risk-steps i{width:16px;height:9px;border-radius:2px;background:rgba(255,255,255,.1)}
+.sig-risk--low .sig-risk-steps i.on{background:var(--green)}
+.sig-risk--medium .sig-risk-steps i.on{background:var(--orange)}
+.sig-risk--high .sig-risk-steps i.on{background:var(--red)}
+.sig-risk--low b{color:#6ee7b7}
+.sig-risk--medium b{color:#fcd34d}
+.sig-risk--high b{color:#fca5a5}
+.sig-teaser-line{margin:14px 0 0;color:#e6edf3;font:600 15px/1.45 var(--body)}
+.sig-rel-note{margin:12px 0 0;color:var(--soft);font-size:14px;line-height:1.5}
+.sig-grid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:18px 30px;align-items:end;margin-top:22px}
+.sig-prob{display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 10px}
+.sig-prob b{color:var(--accent);font:700 46px/1 var(--body);letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.sig-prob span{color:var(--soft);font-size:13.5px}
+/* Jauge : la part du modele en cyan, le marche pose en repere blanc. */
+.sig-bar{position:relative;height:12px;margin-top:34px;border-radius:99px;background:rgba(255,255,255,.08)}
+.sig-bar-model{position:absolute;top:0;bottom:0;left:0;width:var(--w);border-radius:99px;background:linear-gradient(90deg,#0891b2,var(--accent));animation:sigGrow .9s cubic-bezier(.16,1,.3,1) both}
+@keyframes sigGrow{from{width:0}}
+@media(prefers-reduced-motion:reduce){.sig-bar-model{animation:none}}
+.sig-bar-market{position:absolute;top:-6px;bottom:-6px;width:2px;margin-left:-1px;border-radius:2px;background:#f4f7fb;font-style:normal}
+.sig-bar-market span{position:absolute;bottom:calc(100% + 4px);left:50%;transform:translateX(-50%);white-space:nowrap;color:#e6edf3;font:600 11.5px var(--body)}
+.sig-scale{display:flex;justify-content:space-between;margin-top:6px;color:var(--muted);font-size:11px;font-variant-numeric:tabular-nums}
+.sig-figures{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));margin:0;border:1px solid var(--line);border-radius:12px;background:rgba(0,0,0,.2)}
+.sig-figures>div{min-width:0;padding:12px 14px}
+.sig-figures>div+div{border-left:1px solid var(--line)}
+.sig-figures dt{color:var(--muted);font-size:12px;line-height:1.3}
+.sig-figures dd{margin:5px 0 0;color:var(--text);font:700 21px var(--body);font-variant-numeric:tabular-nums;white-space:nowrap}
+.sig-edge.pos{color:#6ee7b7}
+.sig-edge.neg{color:#fca5a5}
+.sig-verdict{margin:16px 0 0;padding:12px 14px;border-radius:10px;background:rgba(34,211,238,.07);color:#e6edf3;font-size:15px;line-height:1.5}
+.sig-why{margin-top:18px}
+.sig-why h3{margin:0 0 9px;color:var(--text);font:600 14.5px var(--body)}
+.sig-why ul{display:grid;gap:8px;margin:0;padding:0;list-style:none}
+.sig-why li{position:relative;padding-left:18px;color:var(--soft);font-size:14.5px;line-height:1.5}
+.sig-why li:before{content:"";position:absolute;left:2px;top:.55em;width:7px;height:7px;border-radius:2px;background:var(--accent)}
+.sig-quote{margin:10px 0 0;padding-left:12px;border-left:2px solid var(--line2);color:var(--muted);font-size:14px;line-height:1.6}
+.sig-watch{margin:16px 0 0;padding-top:14px;border-top:1px solid var(--line);color:var(--soft);font-size:14px;line-height:1.5}
+.sig-watch b{margin-right:6px;color:#fcd34d;font-weight:700}
+.sig-legal{margin:12px 0 0;color:var(--muted);font-size:12.5px}
 
-/* recommandation - tient sur une seule ligne (desktop) */
-/* carte hero de la page - seule carte a se detacher visuellement du
-   reste (fond degrade + glow cyan), le contenu le plus important de la
-   page (le pari recommande) doit attirer l'oeil en premier. */
-.reco{padding:14px 16px;position:relative;overflow:hidden;border-color:var(--accent-border);background:linear-gradient(135deg,var(--accent-bg),var(--card) 60%)}
-.reco:hover{border-color:var(--accent-border)}
-.reco:before{content:"";position:absolute;top:-50%;right:-8%;width:280px;height:280px;background:radial-gradient(circle,rgba(34,211,238,.14),transparent 70%);pointer-events:none}
-.reco-eyebrow{position:relative;display:block;color:var(--accent);font:700 11px var(--mono);letter-spacing:.08em;text-transform:uppercase}
-.reco-line{position:relative;display:flex;flex-wrap:wrap;align-items:center;gap:14px;margin-top:8px}
-.reco-market{margin:0;font:700 21px var(--display);letter-spacing:0;text-wrap:balance;color:var(--text);flex-shrink:0}
-.reco-mini{text-align:center;flex-shrink:0}
-.reco-mini small{display:block;color:var(--muted);font:10px var(--mono);text-transform:uppercase;letter-spacing:.03em;white-space:nowrap}
-.reco-mini b{display:block;margin-top:3px;font-size:15px;font-weight:700;color:var(--text)}
-.reco-mini b.pos{color:var(--green)}
-.reco-mini b.neg{color:var(--red)}
-.reco-badges{display:flex;gap:6px;align-items:center;flex-shrink:0}
-.badge{display:inline-flex;align-items:center;gap:5px;padding:4px 9px;border-radius:20px;font:700 10.5px var(--mono);letter-spacing:.03em;text-transform:uppercase;white-space:nowrap;border:1px solid transparent}
-.badge:before{content:"";width:5px;height:5px;border-radius:50%;background:currentColor}
-.badge.b-green{color:var(--green);background:var(--green-bg);border-color:rgba(16,185,129,.35)}
-.badge.b-orange{color:var(--orange);background:var(--orange-bg);border-color:rgba(245,158,11,.35)}
-.badge.b-red{color:var(--red);background:var(--red-bg);border-color:rgba(239,68,68,.35)}
-.badge.b-cyan{color:var(--accent);background:var(--accent-bg);border-color:var(--accent-border)}
+/* Mur d'acces : meme bloc, contenu verrouille. Gabarit flou SANS texte. */
+.sig-ghost{display:grid;gap:10px;margin:6px 0 2px;filter:blur(6px);opacity:.75}
+.sig-ghost span{display:block;height:14px;border-radius:8px;background:linear-gradient(90deg,rgba(255,255,255,.16),rgba(34,211,238,.28))}
+.sig-ghost .g1{width:70%;height:32px}
+.sig-ghost .g2{width:100%}
+.sig-ghost .g3{width:46%}
+.gate-body{display:flex;flex-direction:column;align-items:center;gap:10px;padding:18px 6px 4px;border-top:1px solid var(--line);text-align:center}
+.gate-body>.card-icon{width:28px;height:28px;color:var(--accent)}
+.gate-body h2{margin:0;color:#fff;font:700 22px/1.2 var(--body)}
+.gate-body p{margin:0;max-width:54ch;color:var(--soft);font-size:14px;line-height:1.6}
+.gate-facts{display:grid;gap:7px;margin:6px 0 8px;padding:0;list-style:none;text-align:left}
+.gate-facts li{position:relative;padding-left:22px;color:#e6edf3;font-size:14px;line-height:1.45}
+.gate-facts li:before{content:"";position:absolute;left:3px;top:.3em;width:9px;height:5px;border-left:2px solid var(--accent);border-bottom:2px solid var(--accent);transform:rotate(-45deg)}
+.btn-gate{margin-top:4px;padding:13px 28px;border-radius:10px;background:var(--accent);color:#04222b;font:700 14px var(--body);letter-spacing:.01em;text-decoration:none;transition:opacity .15s}
+.btn-gate:hover{opacity:.88}
+.btn-gate:focus-visible{outline:2px solid #fff;outline-offset:3px}
 
-.prob-ring{position:relative;width:44px;height:44px;flex-shrink:0}
-.prob-ring.big{width:76px;height:76px;margin-top:2px}
-.prob-ring svg{width:100%;height:100%;transform:rotate(-90deg)}
-.prob-ring circle{fill:none;stroke-width:4}
-.prob-ring.big circle{stroke-width:5}
-.prob-ring .track{stroke:var(--line)}
-.prob-ring .fill{stroke:var(--accent);stroke-linecap:round;transition:stroke-dashoffset 1s cubic-bezier(.16,1,.3,1)}
-@media(prefers-reduced-motion:reduce){.prob-ring .fill{transition:none}}
-.prob-ring .val{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font:700 13px var(--display);color:var(--text)}
-.prob-ring.big .val{font-size:22px}
-.prob-ring .val small{font-size:9px;margin-left:1px;color:var(--muted);font-weight:400}
-.prob-ring.big .val small{font-size:11px}
+/* ==================== Probabilites et cotes ==================== */
+.mk-scroll{overflow-x:auto;margin:0 -4px}
+.mk-table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+.mk-table thead th{padding:0 10px 10px;text-align:right;color:var(--muted);font:600 11px var(--body);letter-spacing:.08em;text-transform:uppercase;white-space:nowrap}
+.mk-table thead th:first-child{text-align:left}
+.mk-table tbody th{padding:10px;text-align:left;color:var(--text);font:500 14.5px/1.35 var(--body)}
+.mk-table td{padding:10px;text-align:right;color:var(--soft);font:500 14.5px var(--body);white-space:nowrap}
+.mk-table tbody tr+tr>*{border-top:1px solid rgba(255,255,255,.05)}
+.mk-table td.mk-model{color:var(--text);font-weight:700}
+.mk-gap.pos{color:#6ee7b7;font-weight:700}
+.mk-gap.neg{color:#fca5a5}
+.mk-table tr.mk-group>th{padding:16px 10px 6px;color:var(--accent);font:600 11px var(--body);letter-spacing:.12em;text-transform:uppercase}
+.mk-table tr.is-signal{background:rgba(34,211,238,.09)}
+.mk-table tr.is-signal>th{box-shadow:inset 3px 0 0 var(--accent)}
+.mk-table tr.is-value:not(.is-signal){background:rgba(52,211,153,.05)}
+.mk-tag{display:inline-block;margin:2px 0 0 8px;padding:1px 8px;border-radius:99px;font:700 10.5px/1.5 var(--body);letter-spacing:.03em;vertical-align:1px}
+.mk-tag--signal{background:var(--accent);color:#04222b}
+.mk-tag--value{border:1px solid rgba(52,211,153,.45);color:#6ee7b7}
+.mk-note{margin:12px 0 0;color:var(--muted);font-size:12.5px;line-height:1.55}
 
-/* pourquoi ce pari */
+/* ==================== Forme et face-a-face ==================== */
+.fh-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px 30px}
+.fh-row{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:3px 10px;padding:8px 0}
+.fh-row+.fh-row{border-top:1px solid var(--line)}
+.fh-team{display:inline-flex;align-items:center;gap:7px;min-width:0;color:var(--text);font:600 14px var(--body)}
+.fh-team>span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fh-row .form-strip li{width:30px;height:22px}
+.fh-scores{grid-column:2;display:flex;gap:4px}
+.fh-scores i{width:30px;color:var(--muted);font:500 11px var(--body);font-style:normal;text-align:center;font-variant-numeric:tabular-nums}
+.h2h-sum{margin:0 0 8px;color:var(--soft);font-size:14px}
+.h2h-bar{display:flex;height:8px;overflow:hidden;border-radius:99px;background:rgba(255,255,255,.06)}
+.h2h-bar .h{background:var(--accent)}
+.h2h-bar .d{background:#51647a}
+.h2h-bar .a{background:#a3b3c4}
+.h2h-list{margin:10px 0 0;padding:0;list-style:none}
+.h2h-list li{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:7px 0;border-top:1px solid var(--line);font-size:13.5px}
+.h2h-list time{flex:none;min-width:74px;color:var(--muted);font-size:12.5px}
+.h2h-m{display:flex;align-items:center;justify-content:flex-end;gap:8px;min-width:0;color:var(--muted);text-align:right}
+.h2h-m b{padding:1px 8px;border-radius:5px;background:rgba(255,255,255,.07);color:var(--text);font-variant-numeric:tabular-nums}
+.h2h-m .w{color:var(--text);font-weight:600}
 
-/* buteur a surveiller */
+/* ==================== Absences ==================== */
+.abs-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px 30px}
+.abs-col h3{display:flex;align-items:center;gap:7px;margin:0 0 6px;color:var(--text);font:600 14px var(--body)}
+.abs-col h3 em{margin-left:auto;padding:1px 9px;border-radius:99px;background:rgba(255,255,255,.07);color:var(--soft);font:600 12px var(--body);font-style:normal}
+.abs-col ul{margin:0;padding:0;list-style:none}
+.abs-col li{display:flex;flex-wrap:wrap;justify-content:space-between;gap:2px 10px;padding:7px 0;border-top:1px solid var(--line);font-size:14px}
+.abs-name{color:var(--text)}
+.abs-why{color:var(--muted);font-size:12.5px}
+.abs-why.is-doubt{color:#fcd34d}
+.abs-col li small{flex-basis:100%;color:var(--muted);font-size:12px}
+.abs-none{margin:0;color:var(--muted);font-size:13.5px}
 
-/* sorties modele : xg (avec logos) + scores dans une seule carte */
-.outputs{display:grid;grid-template-columns:1.3fr 1fr 1.3fr;gap:16px;align-items:center}
-.outputs-2col{grid-template-columns:1fr 1fr}
-/* quand une moitie n'a qu'un etat vide (donnee reellement indisponible),
-   elle ne doit pas peser autant visuellement qu'une moitie avec du vrai
-   contenu - jamais masquee (etat honnete conserve), juste plus discrete. */
-.outputs-2col:has(.outputs-col:last-child .empty){grid-template-columns:2fr 1fr}
-.outputs-2col:has(.outputs-col:last-child .empty) .empty{min-height:auto;padding:0;font-size:11px}
+/* ==================== Ce que dit le modele ==================== */
+.outputs{display:grid;gap:18px;align-items:center}
+.outputs-2col{grid-template-columns:1fr 1.2fr}
+.outputs-1col{display:block}
 .outputs-col{min-width:0}
-.outputs-col>small{display:block;margin-bottom:8px;text-align:center;color:var(--muted);font:10px var(--mono);text-transform:uppercase;letter-spacing:.03em}
-.outputs-xg .xg-row{display:flex;align-items:center;justify-content:center;gap:10px;height:32px}
-.outputs-xg .xg-row img{width:26px;height:26px;border-radius:50%;object-fit:contain;background:var(--card2);flex-shrink:0}
-.outputs-xg .xg-row b{font:700 20px var(--display);color:var(--text)}
-.outputs-xg .xg-row span{color:var(--dim);font:11.5px var(--mono)}
+.outputs-col>small{display:block;margin-bottom:10px;color:var(--muted);font:400 13px var(--body)}
+.outputs-xg .xg-row{display:grid;grid-template-columns:auto auto minmax(0,1fr) auto auto;align-items:center;gap:10px}
+.outputs-xg .xg-row img{width:26px;height:26px;object-fit:contain}
+.outputs-xg .xg-row b{color:var(--text);font:700 24px var(--body);font-variant-numeric:tabular-nums}
+.outputs-xg .xg-row span{overflow:hidden;color:var(--muted);font-size:12.5px;text-align:center;text-overflow:ellipsis;white-space:nowrap}
+.outputs-missing{margin:12px 0 0;padding-top:11px;border-top:1px solid var(--line);color:var(--muted);font:400 12.5px/1.55 var(--body)}
+.score-bars{display:flex;flex-direction:column;gap:8px}
+.score-bar{display:grid;grid-template-columns:minmax(0,150px) 1fr 44px;align-items:center;gap:10px}
+.score-bar b{color:var(--text);font:600 13.5px var(--body);white-space:nowrap}
+.score-bar i{display:block;height:8px;overflow:hidden;border-radius:4px;background:var(--card2);box-shadow:inset 0 0 0 1px var(--line)}
+.score-bar i span{display:block;height:100%;border-radius:4px;background:linear-gradient(90deg,var(--cyan2),var(--cyan))}
+.score-bar small{color:var(--soft);font-size:12.5px;text-align:right;font-variant-numeric:tabular-nums}
 
-/* comparatif */
+/* ==================== Buteur ==================== */
+/* Marches joueurs. Hierarchie : le pari ("X buteur") d'abord, rien au-dessus
+   de 20px, une seule couleur d'accent. */
+.threat{display:block;padding:0;border:0;background:none;color:inherit;text-decoration:none}
+.threat-id{display:flex;align-items:center;gap:13px}
+.threat-id img{width:54px;height:54px;flex-shrink:0;border-radius:50%;object-fit:cover;background:var(--line);box-shadow:0 0 0 1px rgba(255,255,255,.08),0 0 0 4px rgba(34,211,238,.10)}
+.threat-who{flex:1;min-width:0}
+.threat-id b{display:block;overflow:hidden;color:var(--text);font:600 17px var(--body);letter-spacing:-.01em;text-overflow:ellipsis;white-space:nowrap}
+.threat-id small{color:var(--muted);font-size:12.5px}
+.threat-prob{margin-top:16px}
+.threat-prob-tete{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.threat-prob-tete span{color:var(--soft);font:400 13px var(--body)}
+.threat-prob-tete b{color:var(--accent);font:700 20px var(--body);letter-spacing:-.01em;font-variant-numeric:tabular-nums}
+.threat-jauge{height:5px;margin-top:7px;overflow:hidden;border-radius:99px;background:rgba(255,255,255,.07)}
+.threat-jauge>i{display:block;height:100%;border-radius:99px;background:var(--accent)}
+.threat-panneau{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:16px;padding:14px 16px;border-radius:10px;background:rgba(255,255,255,.03)}
+.threat-panneau b{display:block;color:var(--text);font:600 17px var(--body);font-variant-numeric:tabular-nums}
+.threat-panneau span{display:block;margin-top:3px;color:var(--muted);font:400 12px/1.35 var(--body)}
+@media(max-width:520px){.threat-panneau{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.threat-pied{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 14px;margin-top:14px;padding-top:12px;border-top:1px solid rgba(255,255,255,.07)}
+.threat-sample{color:var(--muted);font:400 12.5px var(--body)}
+.threat-sample.is-thin{color:#d8b98a}
+.threat-lien{color:var(--accent);font:600 12.5px var(--body);white-space:nowrap}
+.threat-lien i{display:inline-block;font-style:normal;transition:transform .18s ease}
+.threat:hover .threat-lien i{transform:translateX(3px)}
+@media(prefers-reduced-motion:reduce){.threat-lien i{transition:none}}
+.threat-alerte{margin:11px 0 0;color:#d8b98a;font:400 12px/1.55 var(--body)}
+.pm-list{margin:14px 0 0;padding:0;list-style:none}
+.pm-list li{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 0;border-top:1px solid var(--line);color:var(--text);font-size:14px}
+.pm-list small{display:block;color:var(--muted);font-size:12px}
+.pm-list b{color:var(--accent);font-variant-numeric:tabular-nums}
+.pm-note{margin:12px 0 0;color:var(--muted);font-size:12px;line-height:1.5}
+/* Logo d'equipe accole au nom : JAMAIS masque en rond. */
+.logo-eq{width:16px;height:16px;flex:none;object-fit:contain;background:none;border-radius:0}
 
-/* scenario du match */
-.scenario-chart{width:100%;height:auto;display:block}
+/* ==================== Comparatif ==================== */
+.cmp-scroll{overflow-x:auto;margin:0 -2px}
+.cmp-table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+.cmp-table thead th{max-width:120px;padding:0 0 10px;color:var(--muted);font:600 10.5px/1.35 var(--body);letter-spacing:.1em;text-align:right;text-transform:uppercase;vertical-align:bottom}
+.cmp-table thead th:first-child{text-align:left}
+.cmp-eq{display:inline-flex;align-items:center;gap:6px;text-align:left}
+.cmp-table thead th:last-child{width:140px}
+.cmp-groupe th{padding:16px 0 6px;color:var(--accent);font:600 10.5px var(--body);letter-spacing:.14em;text-align:left;text-transform:uppercase}
+.cmp-table tbody tr.cmp-groupe:first-child th{padding-top:0}
+.cmp-table th[scope=row]{padding:8px 12px 8px 0;color:var(--soft);font:400 14px var(--body);text-align:left;white-space:nowrap}
+.cmp-table td{padding:8px 0 8px 14px;color:var(--muted);font:500 14px var(--body);text-align:right;white-space:nowrap}
+.cmp-table td.gagne{color:var(--text);font-weight:700}
+.cmp-table tbody tr:not(.cmp-groupe)+tr:not(.cmp-groupe) th,
+.cmp-table tbody tr:not(.cmp-groupe)+tr:not(.cmp-groupe) td{border-top:1px solid rgba(255,255,255,.05)}
+.cmp-ecart{display:flex;align-items:center;justify-content:flex-end;gap:10px}
+.cmp-jauge{position:relative;flex:none;width:64px;height:14px}
+.cmp-jauge .axe{position:absolute;left:50%;top:2px;width:1px;height:10px;background:rgba(141,179,211,.28)}
+.cmp-jauge .trait{position:absolute;top:5px;height:4px;min-width:3px;border-radius:2px}
+.cmp-jauge .trait.g{right:50%}
+.cmp-jauge .trait.d{left:50%}
+.cmp-jauge .trait.dom{background:var(--accent)}
+.cmp-jauge .trait.ext{background:rgba(159,182,201,.75)}
+.cmp-val{display:inline-block;min-width:52px;font-weight:600;text-align:right}
+.cmp-val.dom{color:var(--accent)}
+.cmp-val.ext{color:#b3c5d4}
+.cmp-val.nul{color:var(--muted);font-weight:400}
+.cmp-conclusion{margin:16px 0 0;padding-top:13px;border-top:1px solid rgba(255,255,255,.07);color:var(--soft);font:400 14px/1.6 var(--body)}
+.cmp-conclusion b{color:var(--text);font-weight:700}
+.cmp-note{margin:7px 0 0;color:var(--muted);font-size:12.5px;line-height:1.55}
+
+/* ==================== Repartition des buts ==================== */
+.scenario-chart{display:block;width:100%;height:auto}
 .scenario-chart .sc-line{stroke-dasharray:600;stroke-dashoffset:600;animation:scDraw 1.1s cubic-bezier(.16,1,.3,1) forwards}
 .scenario-chart .sc-area{opacity:0;animation:scFade .6s ease .5s forwards}
 @keyframes scDraw{to{stroke-dashoffset:0}}
 @keyframes scFade{to{opacity:1}}
 @media(prefers-reduced-motion:reduce){.scenario-chart .sc-line{animation:none;stroke-dashoffset:0}.scenario-chart .sc-area{animation:none;opacity:1}}
-.scenario-insight{display:flex;gap:8px;align-items:flex-start;margin-top:10px;padding:10px 12px;border:1px solid var(--accent-border);border-left:3px solid var(--accent);border-radius:8px;background:var(--accent-bg);font-size:11.5px;line-height:1.5;color:var(--muted)}
-.scenario-insight b{color:var(--accent);flex-shrink:0}
+.scenario-insight{display:flex;align-items:flex-start;gap:8px;margin-top:10px;padding:10px 12px;border:1px solid var(--accent-border);border-left:3px solid var(--accent);border-radius:8px;background:var(--accent-bg);color:var(--soft);font-size:13px;line-height:1.5}
+.scenario-insight b{flex-shrink:0;color:var(--accent)}
+.scenario-source{margin:9px 0 0;color:var(--muted);font-size:12.5px;line-height:1.55}
 
-/* mur d'acces (compte requis / Pro requis) */
-.gate{display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;padding:32px 20px;background:linear-gradient(135deg,var(--accent-bg),var(--card) 60%);border-color:var(--accent-border)}
-.gate .card-icon{width:30px;height:30px;color:var(--accent)}
-.gate h2{margin:0;color:var(--text);font:24px var(--display);letter-spacing:0;text-transform:none}
-.gate p{margin:0;max-width:44ch;color:var(--muted);font-size:13px;line-height:1.6}
-.btn-gate{margin-top:6px;padding:13px 26px;border-radius:10px;background:var(--accent);color:#04222b;font:700 13px var(--mono);letter-spacing:.03em;text-decoration:none;transition:opacity .15s}
-.btn-gate:hover{opacity:.88}
+/* ==================== FAQ ==================== */
+.faq-list details{margin:0;border-bottom:1px solid rgba(255,255,255,.07)}
+.faq-list details:last-child{border-bottom:0}
+.faq-list summary{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;min-height:44px;padding:14px 0;color:var(--text);font:500 15px/1.45 var(--body);cursor:pointer;list-style:none}
+.faq-list summary::-webkit-details-marker{display:none}
+.faq-list summary:after{content:"";flex-shrink:0;width:9px;height:9px;margin-top:6px;border-right:1.6px solid var(--accent);border-bottom:1.6px solid var(--accent);opacity:.85;transform:rotate(45deg);transition:transform .18s ease}
+.faq-list details[open] summary:after{transform:rotate(-135deg)}
+.faq-list summary:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:4px}
+.faq-list p{max-width:64ch;margin:0;padding:0 0 16px;color:var(--soft);font:400 14.5px/1.7 var(--body)}
+@media(prefers-reduced-motion:reduce){.faq-list summary:after{transition:none}}
 
-/* lecture */
-.reading{margin:0;max-width:58ch;color:var(--text);line-height:1.65;font-size:13px}
-.risk-note{display:flex;gap:8px;align-items:flex-start;margin-top:12px;padding:11px 13px;border:1px solid rgba(245,158,11,.3);border-radius:9px;background:var(--orange-bg);color:var(--muted);font-size:12px;line-height:1.5}
-.risk-note b{color:var(--orange);flex-shrink:0}
+/* ==================== Barre collante du pari ==================== */
+.sig-sticky{position:fixed;top:0;left:0;right:0;z-index:30;transform:translateY(-102%);opacity:0;pointer-events:none;transition:transform .28s cubic-bezier(.16,1,.3,1),opacity .2s;background:rgba(10,17,26,.93);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border-bottom:1px solid rgba(34,211,238,.18);box-shadow:0 14px 34px -24px rgba(0,0,0,.95)}
+.sig-sticky.on{transform:none;opacity:1}
+.ss-in{display:flex;align-items:center;gap:12px;width:min(var(--container),calc(100% - 32px));height:52px;margin:0 auto}
+.ss-tag{flex:none;color:var(--muted);font:400 12px var(--body);white-space:nowrap}
+.ss-market{min-width:0;overflow:hidden;color:var(--text);font:600 14.5px var(--body);letter-spacing:-.01em;text-overflow:ellipsis;white-space:nowrap}
+.ss-odds,.ss-prob{flex:none;margin-left:auto;padding:4px 10px;border-radius:7px;font:700 13px var(--body);font-variant-numeric:tabular-nums}
+.ss-odds{background:rgba(34,211,238,.12);color:var(--accent);box-shadow:inset 0 0 0 1px rgba(34,211,238,.2)}
+.ss-prob{margin-left:0;background:rgba(255,255,255,.06);color:var(--soft)}
+@media(prefers-reduced-motion:reduce){.sig-sticky{transition:opacity .2s}}
 
-
-/* ce qu'il faut savoir */
-.insights-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.insight{padding:11px;border:1px solid var(--line);border-radius:9px;background:var(--card2)}
-.insight-head{display:flex;align-items:center;gap:8px;margin-bottom:5px}
-.insight-mark{flex-shrink:0;width:18px;height:18px;display:grid;place-items:center;border-radius:50%;font:700 11px var(--mono)}
-.insight-mark.b-green{color:var(--green);background:var(--green-bg)}
-.insight-mark.b-orange{color:var(--orange);background:var(--orange-bg)}
-.insight-mark.b-cyan{color:var(--accent);background:var(--accent-bg)}
-.insight-head b{font-size:12px;color:var(--text)}
-.insight p{margin:0;color:var(--muted);font-size:11.5px;line-height:1.5}
-
-/* modele vs marche / marches a surveiller */
-
-/* value potentielle */
-.value-card{border-color:rgba(16,185,129,.3);background:var(--green-bg)}
-.value-card>h2{color:var(--green)}
-.value-potential b{display:block;color:var(--green);font-size:13px;margin-bottom:4px}
-.value-potential p{margin:0;color:var(--muted);font-size:11.5px;line-height:1.5}
-
-/* matchup */
-
-/* stats a ne pas surinterpreter */
-.caveat{display:flex;gap:8px;align-items:flex-start;padding:10px 0;border-top:1px solid var(--line);font-size:11.5px;line-height:1.5;color:var(--muted)}
-.caveat:first-child{border-top:0}
-.caveat b{color:var(--orange);flex-shrink:0}
-
-/* forme reelle */
-.form-reelle{display:flex;flex-direction:column;gap:12px}
-.form-side{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.form-side b{font-size:12.5px;color:var(--text)}
-.form-side .trend-up{color:var(--green);font-weight:700}
-.form-side .trend-down{color:var(--red);font-weight:700}
-
-/* absences */
-.absences{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--line);border-radius:9px;overflow:hidden}
-.absences>div{padding:10px}
-.absences>div+div{border-left:1px solid var(--line)}
-.absences h3{display:flex;align-items:center;gap:7px;margin:0 0 8px;font:10px var(--mono);text-transform:uppercase;color:var(--muted)}
-.absences h3 img{width:16px;height:16px;object-fit:contain}
-.abs-row{padding:6px 0;border-top:1px solid var(--line);font-size:11.5px}
-.abs-row:first-of-type{border-top:0}
-.abs-row-head{display:flex;justify-content:space-between;gap:8px}
-.abs-row-head b{font-weight:600;color:var(--text)}
-.abs-row-head span{color:var(--orange);flex-shrink:0;font-size:10px}
-.abs-impact{display:block;margin-top:3px;color:var(--muted);font-size:10.5px;line-height:1.4}
-.abs-none{color:var(--green);font-size:11.5px}
-
-
+/* ==================== Mobile d'abord : le signal visible sans defiler loin ==================== */
 @media(max-width:640px){
-  :root{--gap:8px;--radius:10px}
   body{padding-bottom:72px}
   .site-header{height:58px;width:calc(100% - 20px)}
   .brand img{width:128px;height:50px}
   .btn-login{padding:8px 11px;font-size:9.5px}
   .match-shell{width:calc(100% - 16px)}
-  .card{padding:12px 13px}
-  .outputs{grid-template-columns:1fr}
-  .absences{grid-template-columns:1fr}
-  .absences>div+div{border-left:0;border-top:1px solid var(--line)}
+  .match-shell>div:not(#matchRoot) h1{font-size:22px!important}
+  .page{gap:10px;padding:8px 0}
+  .secs{gap:12px}
+  .card{padding:16px}
+  .card.hero{padding:14px 14px 12px}
+  .hero-top{font-size:12px}
+  .hero-teams{gap:8px;margin-top:12px}
+  .hero-team{gap:6px}
   .hero-team img{width:40px;height:40px}
-  .hero-team b{font-size:14px}
-  .hero-teams{grid-template-columns:1fr 40px 1fr}
-  .reco-market{font-size:19px}
-  .insights-grid{grid-template-columns:1fr}
-  .compare-row{grid-template-columns:36px 1fr 64px 1fr 36px;font-size:11px}
+  .hero-name{font-size:18px}
+  .hero-meta small{font-size:11.5px}
+  .form-strip li{width:18px;height:18px;font-size:10px}
+  .hero-venue{margin-top:10px;padding-top:9px;font-size:12px}
+  .signal-card{padding:16px 14px 14px;border-radius:16px}
+  .sig-slip{gap:12px;padding:14px}
+  .sig-market{font-size:23px}
+  .sig-odds-box{min-width:78px;min-height:64px;padding:8px 10px}
+  .sig-odds-box b{font-size:25px}
+  .sig-stat{padding:10px 12px}
+  .sig-stat-row b{font-size:17px}
+  .sig-grid{grid-template-columns:1fr;gap:16px;margin-top:16px}
+  .sig-prob b{font-size:40px}
+  .sig-figures dt{font-size:11.5px}
+  .sig-figures dd{font-size:17px}
+  .sig-figures>div{padding:10px}
+  .sig-verdict{font-size:14px}
+  .sig-why li{font-size:14px}
+  /* Tableau des marches : une carte par pari, les chiffres en rangee. */
+  .mk-scroll{margin:0}
+  .mk-table thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
+  .mk-table tbody tr{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px 8px;padding:10px 8px}
+  .mk-table tbody tr+tr>*{border-top:0}
+  .mk-table tbody tr+tr{border-top:1px solid rgba(255,255,255,.06)}
+  .mk-table tbody th{grid-column:1/-1;padding:0}
+  .mk-table td{display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:0;text-align:left;font-size:14px}
+  .mk-table td:before{content:attr(data-label);color:var(--muted);font:500 11px var(--body)}
+  .mk-table tr.mk-group{display:block;padding:14px 8px 2px}
+  .mk-table tr.mk-group>th{display:block;padding:0}
+  .fh-grid,.abs-grid{grid-template-columns:1fr}
+  .outputs-2col{grid-template-columns:1fr}
+  .score-bar{grid-template-columns:minmax(0,130px) 1fr 40px}
   .bottom-nav{height:65px;gap:0;justify-content:space-around}
   .bottom-nav a{width:25%}
   .bottom-nav span{font-size:20px}
   .bottom-nav b{font-size:8px}
 }
-
-
-/* ==========================================================================
-   REFONTE V3 — « pas un site généré », une page qui donne envie de payer
-   --------------------------------------------------------------------------
-   Retour utilisateur sur la V2 : « ça fait trop site généré statique »,
-   « trop de couleurs différentes en même temps », « ça ne donne pas envie
-   de s'abonner ».
-   Ce qui produisait cet effet, et ce qui change :
-
-   1. TOUT ÉTAIT UNE BOÎTE IDENTIQUE. Même bordure, même rayon, même fond,
-      même padding sur les 9 cartes : aucun relief, aucune hiérarchie — la
-      signature visuelle d'une page générée. On passe à une hiérarchie de
-      SURFACES : une seule surface haute (le signal), des surfaces basses
-      sans bordure pour le reste, et du texte éditorial pas encadré du tout.
-      La profondeur remplace les traits.
-
-   2. ÉTIQUETTES EN MONOSPACE MAJUSCULE PARTOUT. « PROBABILITÉ MODÈLE »,
-      « MARCHÉ RECOMMANDÉ », « COTE ÉQUITABLE » : de la sortie machine, pas
-      un produit éditorial. Le monospace est désormais réservé aux CHIFFRES
-      (alignement tabulaire), et les libellés repassent en DM Sans casse
-      normale.
-
-   3. QUATRE COULEURS EN CONCURRENCE (cyan + vert + orange + rouge dans le
-      même bloc). Décision explicite de l'utilisateur : cyan et gris
-      uniquement ; le vert et le rouge ne servent plus QUE sur la valeur
-      chiffrée de l'écart. Plus aucun bandeau ni badge coloré.
-
-   NOTE : la carte « Scénario probable du match » n'est pas touchée — ni son
-   graphique, ni son texte, ni ses couleurs. Seul le style commun des TITRES
-   de carte change, sinon elle serait la seule en majuscules monospace au
-   milieu d'une page qui n'en a plus.
-   ========================================================================== */
-
-/* ---------- Titres de carte : éditoriaux, plus des en-têtes de tableau ---------- */
-.card>h2{
-  margin:0 0 14px;
-  color:var(--text);
-  font:600 15.5px/1.3 var(--body);
-  letter-spacing:-.005em;
-  text-transform:none;
-  gap:8px;
+@media(max-width:380px){
+  .sig-stats{grid-template-columns:minmax(0,1fr)}
+  .sig-market{font-size:21px}
 }
-.card>h2 .card-icon{width:15px;height:15px;color:var(--accent);opacity:.85}
-
-/* ---------- Hiérarchie de surfaces (la profondeur remplace les bordures) ---------- */
-.card{
-  padding:18px 20px;
-  border-color:transparent;
-  background:var(--card);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.035);
-}
-.card:hover{border-color:transparent;background:#0e1724}
-.empty{font-size:13.5px}
-
-/* Le texte éditorial n'est pas une donnée : il n'est pas encadré. */
-.card.lecture{background:transparent;box-shadow:none;padding:6px 2px 10px}
-.card.lecture p{font-size:15.5px;line-height:1.72;color:#c3d1de}
-.card.lecture>h2{color:var(--accent);font-size:12.5px;font-weight:600;letter-spacing:.02em}
-
-/* ==================== LE SIGNAL — la seule surface « haute » ==================== */
-.sig-badges{display:flex;gap:7px;align-items:center}
-
-/* Le marché recommandé : gros, mais en casse normale et en DM Sans.
-   Le Bebas Neue condensé tout en majuscules lisait « template appli de
-   paris » — c'est précisément ce que l'utilisateur n'aimait pas. */
-
-/* Les chiffres : une rangée aérée séparée par des filets, plus une grille
-   de cases. Moins de traits = plus de tenue. */
-/* Vert et rouge UNIQUEMENT ici, sur la valeur chiffrée de l'écart. */
-
-/* Le verdict est une phrase, plus un bandeau coloré. */
-
-/* Badges confiance / risque : contour neutre, un simple point coloré. */
-.signal-card .badge{border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.03);
-  color:#a8bccd;font:500 12px var(--body);letter-spacing:0;text-transform:none;
-  padding:5px 11px;border-radius:20px}
-
-/* ==================== Comparatif ==================== */
-/* La ligne clé se distingue par un filet et la couleur du libellé,
-   pas par un pavé coloré de plus. */
-
-/* ==================== Buteur ==================== */
-/* Hierarchie voulue : le NOM d'abord, le reste ensuite. Rien au-dessus de
-   20px, une seule couleur d'accent. La version precedente menait avec la
-   probabilite en 42px cyan, qui ecrasait le joueur dont on parle. */
-.threat{display:block;padding:0;border:0;background:none;color:inherit;text-decoration:none}
-.threat:hover{border:0;background:none}
-
-/* --- Identite --- */
-.threat-id{display:flex;align-items:center;gap:13px}
-.threat-id img{width:54px;height:54px;border-radius:50%;object-fit:cover;
-  background:var(--line);flex-shrink:0;
-  box-shadow:0 0 0 1px rgba(255,255,255,.08),0 0 0 4px rgba(34,211,238,.10)}
-.threat-who{min-width:0;flex:1}
-.threat-id b{display:block;font:600 17px var(--body);color:var(--text);letter-spacing:-.01em;
-  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.threat-id small{color:var(--muted);font-size:12.5px}
-/* Rang honnete : ce joueur est le 1er d'un classement reel, il n'apparait
-   que s'il y a bien plusieurs joueurs classes. */
-.threat-rank{flex-shrink:0;align-self:flex-start;
-  border:1px solid rgba(34,211,238,.24);border-radius:20px;padding:3px 9px;
-  color:var(--accent);font:600 11px var(--body);
-  background:rgba(34,211,238,.06)}
-
-/* --- Probabilite : une ligne et une jauge fine, pas un chiffre geant --- */
-.threat-prob{margin-top:18px}
-.threat-prob-tete{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
-.threat-prob-tete span{color:#9fb3c4;font:400 13px var(--body)}
-.threat-prob-tete b{font:700 20px var(--body);color:var(--accent);
-  font-variant-numeric:tabular-nums;letter-spacing:-.01em}
-.threat-jauge{margin-top:7px;height:5px;border-radius:99px;
-  background:rgba(255,255,255,.07);overflow:hidden}
-.threat-jauge>i{display:block;height:100%;border-radius:99px;background:var(--accent)}
-
-/* --- Panneau encastre : regroupe les chiffres secondaires sans multiplier
-       les cadres. Le tableau borde precedent decoupait la carte en lignes. */
-.threat-panneau{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));
-  gap:14px;margin-top:16px;padding:14px 16px;
-  border-radius:10px;background:rgba(255,255,255,.03)}
-.threat-panneau b{display:block;font:600 17px var(--body);color:var(--text);
-  font-variant-numeric:tabular-nums}
-.threat-panneau span{display:block;margin-top:3px;color:var(--muted);
-  font:400 11.5px/1.35 var(--body)}
-@media(max-width:520px){
-  /* Trois colonnes deviennent illisibles sous 520px : on passe a deux, la
-     troisieme valeur prend la ligne suivante. */
-  .threat-panneau{grid-template-columns:repeat(2,minmax(0,1fr))}
-}
-
-/* --- Pied : echantillon a gauche, lien a droite --- */
-.threat-pied{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;
-  gap:8px 14px;margin-top:16px;padding-top:13px;
-  border-top:1px solid rgba(255,255,255,.07)}
-.threat-sample{color:var(--muted);font:400 12.5px var(--body)}
-.threat-sample.is-thin{color:#c8a97a}
-.threat-lien{color:var(--accent);font:600 12.5px var(--body);white-space:nowrap}
-.threat-lien i{display:inline-block;font-style:normal;transition:transform .18s ease}
-.threat:hover .threat-lien i{transform:translateX(3px)}
-@media(prefers-reduced-motion:reduce){.threat-lien i{transition:none}}
-.threat-alerte{margin:11px 0 0;color:#c8a97a;font:400 12px/1.55 var(--body)}
-/* Source de la repartition des buts : sur quoi elle repose, et ce qu'elle
-   n'est pas. */
-.scenario-source{margin:9px 0 0;color:var(--muted);font-size:12px;line-height:1.55}
-
-/* Logo d'equipe accole au nom : a la hauteur du texte, et JAMAIS masque en
-   rond. Un ecusson a sa propre forme, un cercle lui coupe les angles. */
-.logo-eq{width:16px;height:16px;flex:none;object-fit:contain;background:none;border-radius:0}
-
-/* ==================== Comparatif : tableau d'ecart ==================== */
-/* Un vrai tableau. Le repere visuel vit DANS la ligne - une micro-barre
-   centree qui penche du cote de l'equipe devant - et ne remplace jamais le
-   nombre. Les lignes sont groupees par theme, sinon neuf rangees se lisent
-   comme une liste sans relief. */
-.cmp-scroll{overflow-x:auto;margin:0 -2px}
-.cmp-table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
-.cmp-table thead th{
-  padding:0 0 10px;text-align:right;color:var(--muted);
-  font:600 10.5px/1.35 var(--body);letter-spacing:.1em;text-transform:uppercase;
-  vertical-align:bottom;max-width:120px;
-}
-.cmp-table thead th:first-child{text-align:left}
-.cmp-eq{display:inline-flex;align-items:center;gap:6px;text-align:left}
-.cmp-table thead th:last-child{width:140px}
-
-/* Le titre de groupe : un simple libelle en retrait, pas une ligne de plus a
-   encadrer. */
-.cmp-groupe th{
-  padding:16px 0 6px;text-align:left;color:var(--accent);
-  font:600 10px var(--body);letter-spacing:.16em;text-transform:uppercase;
-}
-.cmp-table tbody tr:first-child .cmp-groupe th,
-.cmp-table tbody tr.cmp-groupe:first-child th{padding-top:0}
-
-.cmp-table th[scope=row]{
-  text-align:left;padding:8px 12px 8px 0;color:#9fb3c4;
-  font:400 13.5px var(--body);white-space:nowrap;
-}
-.cmp-table td{
-  text-align:right;padding:8px 0 8px 14px;color:#8ba0b3;
-  font:500 14px var(--body);white-space:nowrap;
-}
-/* Seul le meilleur des deux est mis en avant : deux valeurs en gras ne
-   designent plus rien. */
-.cmp-table td.gagne{color:var(--text);font-weight:700}
-.cmp-table tbody tr:not(.cmp-groupe)+tr:not(.cmp-groupe) th,
-.cmp-table tbody tr:not(.cmp-groupe)+tr:not(.cmp-groupe) td{
-  border-top:1px solid rgba(255,255,255,.05);
-}
-
-/* Colonne d'ecart : micro-barre + valeur signee. */
-.cmp-ecart{display:flex;align-items:center;justify-content:flex-end;gap:10px}
-.cmp-jauge{position:relative;flex:none;width:64px;height:14px}
-.cmp-jauge .axe{
-  position:absolute;left:50%;top:2px;width:1px;height:10px;
-  background:rgba(141,179,211,.28);
-}
-.cmp-jauge .trait{position:absolute;top:5px;height:4px;border-radius:2px;min-width:3px}
-/* Penche a gauche pour l'equipe a domicile, a droite pour l'exterieur. */
-.cmp-jauge .trait.g{right:50%}
-.cmp-jauge .trait.d{left:50%}
-.cmp-jauge .trait.dom{background:var(--accent)}
-.cmp-jauge .trait.ext{background:rgba(159,182,201,.75)}
-.cmp-val{display:inline-block;min-width:52px;text-align:right;font-weight:600}
-.cmp-val.dom{color:var(--accent)}
-.cmp-val.ext{color:#b3c5d4}
-.cmp-val.nul{color:var(--muted);font-weight:400}
-
-/* Le pied conclut, au lieu de laisser le lecteur compter lui-meme. */
-.cmp-conclusion{
-  margin:16px 0 0;padding-top:13px;border-top:1px solid rgba(255,255,255,.07);
-  color:#9fb3c4;font:400 14px/1.6 var(--body);
-}
-.cmp-conclusion b{color:var(--text);font-weight:700}
-.cmp-note{margin:7px 0 0;color:var(--muted);font-size:12px;line-height:1.55}
-
 @media(max-width:560px){
   .cmp-table thead th:last-child{width:104px}
   .cmp-jauge{width:34px}
   .cmp-val{min-width:46px}
   .cmp-table th[scope=row]{white-space:normal}
-}
-
-/* ==================== FAQ ==================== */
-.faq-list details{border:0;border-radius:0;background:none;margin:0;
-  border-bottom:1px solid rgba(255,255,255,.07)}
-.faq-list details:last-child{border-bottom:0}
-.faq-list summary{cursor:pointer;list-style:none;padding:15px 0;
-  color:var(--text);font:500 15px/1.45 var(--body);
-  display:flex;align-items:flex-start;justify-content:space-between;gap:14px;min-height:44px}
-.faq-list summary::-webkit-details-marker{display:none}
-.faq-list summary:after{content:"";flex-shrink:0;width:9px;height:9px;margin-top:6px;
-  border-right:1.6px solid var(--accent);border-bottom:1.6px solid var(--accent);
-  transform:rotate(45deg);transition:transform .18s ease;opacity:.8}
-.faq-list details[open] summary:after{transform:rotate(-135deg)}
-.faq-list summary:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:4px}
-.faq-list p{margin:0;padding:0 0 16px;color:#9fb3c4;font:400 14.5px/1.7 var(--body);max-width:62ch}
-
-/* ==================== En-tête : stade + météo ==================== */
-.hero-venue{flex-wrap:wrap;gap:6px 20px}
-.hero-venue span{display:inline-flex;align-items:center;gap:6px}
-
-@media(min-width:900px){ .sig-body{flex-wrap:nowrap} }
-@media(max-width:640px){
-  .card{padding:16px}
-  .signal-card{padding:22px 18px 18px}
-  .sig-kpis{gap:16px 0}
-  .sig-kpi{flex:1 1 44%;min-width:0;padding:0 0 0 16px}
-  .sig-kpi:nth-child(odd){padding-left:0;border-left:0}
-  .hero-top{flex-wrap:wrap;gap:4px 12px}
-  .hero-league,.hero-time{flex:1 1 100%}
-}
-@media(prefers-reduced-motion:reduce){ .faq-list summary:after{transition:none} }
-/* Les pastilles colorées des badges sont retirées du signal : la consigne
-   est vert/rouge UNIQUEMENT sur la valeur chiffrée de l'écart. Le texte
-   « Confiance moyenne » / « Risque faible » se suffit à lui-même. */
-.signal-card .badge:before{display:none}
-.signal-card .badge{gap:0}
-
-/* ---------- En-tête : même langage typographique que le reste ---------- */
-.hero-top{font:400 13px var(--body);letter-spacing:0;text-transform:none}
-.hero-league{color:#9fb3c4;font-weight:500}
-.hero-time{color:var(--muted)}
-.hero-team small{font-size:12px}
-.hero-venue{font-size:12.5px;padding-top:12px;border-top-color:rgba(255,255,255,.07)}
-.prob-legend{font-family:var(--body);font-size:12px;text-transform:none;letter-spacing:0;color:var(--muted)}
-.prob-bar{height:26px;border-radius:7px}
-.prob-bar span{font:600 12px var(--body);color:#0a121c;font-variant-numeric:tabular-nums}
-/* Gris pour les issues, cyan pour la plus probable. */
-.prob-bar .home,.prob-bar .draw,.prob-bar .away{background:#24374a;color:#c3d1de}
-.prob-bar .draw{background:#1c2b3a}
-.prob-bar .is-lead{background:var(--accent);color:#06121a}
-/* Pastilles de forme (V/N/D) : versions désaturées. Elles restent
-   distinguables mais ne crient plus — c'est de la donnée de contexte, pas
-   une alerte. Seul l'écart chiffré du signal garde une couleur forte. */
-.form-strip i{font-family:var(--body);font-size:10px;width:16px;height:16px;border-radius:4px}
-.form-strip .f-w{background:rgba(16,185,129,.22);color:#7ee0bd}
-.form-strip .f-d{background:rgba(255,255,255,.08);color:#9fb3c4}
-.form-strip .f-l{background:rgba(255,255,255,.05);color:#7b8fa1}
-
-/* ---------- Comparatif : deux tons neutres, plus de vert/rouge ---------- */
-/* Les barres opposaient du vert (domicile) au rouge (extérieur) : deux
-   couleurs fortes qui ne veulent rien dire d'autre que « équipe A / équipe
-   B », et le plus gros aplat coloré de la page. Cyan contre ardoise. */
-
-/* ---------- Chiffres sous la lecture ---------- */
-.lecture-stats{border-top-color:rgba(255,255,255,.07);gap:10px 30px}
-.lecture-stats small{font:400 12.5px var(--body);text-transform:none;letter-spacing:0}
-.lecture-stats b{font:600 19px var(--body);font-variant-numeric:tabular-nums;letter-spacing:-.015em}
-
-/* ---------- Ce que dit le modèle ---------- */
-.outputs-col>small{font:400 12.5px var(--body);text-transform:none;letter-spacing:0}
-.outputs-1col{display:block}
-.outputs-xg .xg-row b{font:600 22px var(--body);font-variant-numeric:tabular-nums}
-.outputs-xg .xg-row span{font:400 12.5px var(--body);color:var(--muted)}
-/* Ce qui manque est dit, mais discretement : une ligne sous la carte plutot
-   qu'une demi-carte occupee a annoncer une absence. */
-.outputs-missing{margin:12px 0 0;padding-top:11px;border-top:1px solid rgba(255,255,255,.07);
-  color:var(--muted);font:400 12.5px/1.55 var(--body)}
-
-/* =========================================================================
-   GRAPHIQUES V4 — Modele vs marche / scores / matchup
-   Cyan + gris uniquement. Le vert et le rouge restent reserves aux ecarts
-   chiffres (colonne "ecart"), jamais a la decoration.
-   ========================================================================= */
-
-/* --- Graphe haltere : modele vs marche ---------------------------------- */
-.db-lede{margin:0 0 12px;color:var(--dim);font-size:12px;line-height:1.5}
-.dumbbell{display:flex;flex-direction:column;gap:2px}
-.db-row{display:grid;grid-template-columns:minmax(0,116px) 1fr 46px;align-items:center;
-  gap:10px;padding:9px 0;border-top:1px solid var(--line)}
-.db-row:first-child{border-top:0}
-.db-name{min-width:0;font-size:11.5px;color:var(--text);line-height:1.3}
-.db-track{position:relative;height:16px;border-radius:8px;background:var(--card2);
-  box-shadow:inset 0 0 0 1px var(--line)}
-/* Le segment EST l'ecart : sa longueur porte l'information. */
-.db-seg{position:absolute;top:50%;transform:translateY(-50%);height:3px;border-radius:2px;
-  background:linear-gradient(90deg,var(--muted),var(--cyan))}
-.db-seg.down{background:linear-gradient(90deg,var(--cyan),var(--muted))}
-.db-dot{position:absolute;top:50%;width:9px;height:9px;margin-left:-4.5px;border-radius:50%;
-  transform:translateY(-50%)}
-.db-mkt{background:var(--muted);box-shadow:0 0 0 2px var(--card)}
-.db-model{background:var(--cyan);box-shadow:0 0 0 2px var(--card),0 0 8px rgba(34,211,238,.5)}
-.db-edge{text-align:right;font:700 12px var(--body);font-variant-numeric:tabular-nums}
-.db-edge.pos{color:var(--green)}
-.db-edge.neg{color:var(--red)}
-.db-legend{display:flex;align-items:center;gap:14px;margin-top:12px;padding-top:10px;
-  border-top:1px solid var(--line);color:var(--dim);font-size:10.5px}
-.db-legend span{display:flex;align-items:center;gap:5px}
-.db-key{width:8px;height:8px;border-radius:50%;display:inline-block}
-.db-key.db-mkt{background:var(--muted);box-shadow:none}
-.db-key.db-model{background:var(--cyan);box-shadow:none}
-.db-scale{margin-left:auto;font-family:var(--mono);font-size:10px}
-
-/* --- Scores les plus probables ------------------------------------------ */
-.score-bars{display:flex;flex-direction:column;gap:7px}
-.score-bar{display:grid;grid-template-columns:34px 1fr 38px;align-items:center;gap:9px}
-.score-bar b{font:700 13px var(--body);color:var(--text);font-variant-numeric:tabular-nums}
-.score-bar i{display:block;height:8px;border-radius:4px;background:var(--card2);
-  box-shadow:inset 0 0 0 1px var(--line);overflow:hidden}
-.score-bar i span{display:block;height:100%;border-radius:4px;
-  background:linear-gradient(90deg,var(--cyan2),var(--cyan))}
-.score-bar small{text-align:right;color:var(--dim);font-size:11px;font-variant-numeric:tabular-nums}
-
-/* --- Matchup ------------------------------------------------------------ */
-.mu-head{display:flex;justify-content:space-between;gap:12px;padding-bottom:9px;
-  margin-bottom:4px;border-bottom:1px solid var(--line)}
-.mu-head span{display:inline-flex;align-items:center;gap:6px;min-width:0;
-  color:var(--text);font-size:11.5px;font-weight:600;white-space:nowrap}
-.mu-head span>:not(.logo-eq){overflow:hidden;text-overflow:ellipsis}
-/* Cote exterieur, le logo passe apres le nom pour rester au bord. */
-.mu-head span:last-child{flex-direction:row-reverse}
-.mu-rows{display:flex;flex-direction:column}
-.mu-row{display:grid;grid-template-columns:38px 1fr 38px;align-items:center;gap:10px;padding:8px 0}
-.mu-val{color:var(--dim);font-size:12px;font-variant-numeric:tabular-nums;text-align:left}
-.mu-row>.mu-val:last-child{text-align:right}
-.mu-val.win{color:var(--cyan);font-weight:700}
-.mu-mid{min-width:0}
-.mu-mid b{display:block;margin-bottom:5px;text-align:center;color:var(--dim);
-  font-size:10.5px;font-weight:500}
-/* L'unite dit ce que le chiffre mesure et dans quel sens le lire. */
-.mu-mid b em{display:block;margin-top:1px;color:var(--muted);font-style:normal;
-  font-size:9.5px;font-weight:400;letter-spacing:.01em}
-.mu-bar{display:flex;height:6px;border-radius:3px;overflow:hidden;background:var(--card2)}
-.mu-bar i{display:block;height:100%;background:var(--line2)}
-.mu-bar i.win{background:var(--cyan)}
-.mu-bar .mu-h{border-radius:3px 0 0 3px}
-.mu-bar .mu-a{border-radius:0 3px 3px 0}
-.mu-global{display:flex;align-items:center;gap:12px;margin-top:12px;padding-top:12px;
-  border-top:1px solid var(--line)}
-.mu-g-side b{font:700 19px var(--display);color:var(--dim)}
-.mu-g-side b.win{color:var(--cyan)}
-.mu-g-side b small{font:400 10px var(--mono);color:var(--muted)}
-.mu-g-bar{flex:1;height:6px;border-radius:3px;background:var(--line2);overflow:hidden}
-.mu-g-bar i{display:block;height:100%;border-radius:3px;
-  background:linear-gradient(90deg,var(--cyan2),var(--cyan))}
-.mu-foot{margin:8px 0 0;color:var(--muted);font-size:10.5px;text-align:center}
-
-@media(max-width:520px){
-  .db-row{grid-template-columns:minmax(0,88px) 1fr 42px;gap:8px}
-  .db-name{font-size:11px}
-}
-
-/* =========================================================================
-   V5 — LECTURE EN DOSSIER
-   Une seule colonne, un ordre fixe, chaque section numerotee. Le but est
-   qu'on sache toujours ou on en est et ce qui reste a lire.
-   Palette inchangee : sombre + cyan. Aucune couleur nouvelle.
-   ========================================================================= */
-
-.secs{display:flex;flex-direction:column;gap:26px}
-.sec{min-width:0}
-@media(min-width:900px){.secs{gap:30px}}
-
-/* ---------- Barre collante du pari ---------- */
-/* Elle n'apparait qu'une fois le signal sorti de l'ecran par le HAUT :
-   pendant qu'il est visible, elle ferait doublon. */
-.sig-sticky{
-  position:fixed;top:0;left:0;right:0;z-index:30;
-  transform:translateY(-102%);opacity:0;pointer-events:none;
-  transition:transform .28s cubic-bezier(.16,1,.3,1),opacity .2s;
-  background:rgba(10,17,26,.92);
-  -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
-  border-bottom:1px solid rgba(34,211,238,.18);
-  box-shadow:0 14px 34px -24px rgba(0,0,0,.95);
-}
-.sig-sticky.on{transform:none;opacity:1}
-.ss-in{
-  width:min(var(--container),calc(100% - 32px));margin:0 auto;
-  display:flex;align-items:center;gap:12px;height:52px;
-}
-.ss-tag{
-  flex:none;color:var(--muted);font:400 11.5px var(--body);
-  white-space:nowrap;
-}
-.ss-market{
-  min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
-  color:var(--text);font:600 14.5px var(--body);letter-spacing:-.01em;
-}
-.ss-odds,.ss-prob{
-  flex:none;margin-left:auto;padding:4px 10px;border-radius:7px;
-  font:700 13px var(--body);font-variant-numeric:tabular-nums;
-}
-.ss-odds{background:rgba(34,211,238,.12);color:var(--accent);
-  box-shadow:inset 0 0 0 1px rgba(34,211,238,.2)}
-.ss-prob{margin-left:0;background:rgba(255,255,255,.05);color:var(--dim)}
-@media(max-width:560px){
   .ss-tag{display:none}
   .ss-in{height:48px;gap:9px}
   .ss-market{font-size:13.5px}
-}
-@media(prefers-reduced-motion:reduce){
-  .sig-sticky{transition:opacity .2s}
-}
-
-/* ---------- En-tete : la premiere impression ---------- */
-/* Elle etait aussi discrete qu'une ligne de tableau : 46px d'ecusson et un
-   nom d'equipe en 18px. C'est la premiere chose que voit un abonne, elle a
-   maintenant l'echelle d'une affiche. HTML inchange, uniquement du CSS. */
-.card.hero{
-  position:relative;overflow:hidden;
-  padding:22px 22px 20px;gap:16px;
-  background:
-    radial-gradient(90% 120% at 50% -30%,rgba(34,211,238,.09),transparent 62%),
-    var(--card);
-}
-.hero-teams{grid-template-columns:1fr 72px 1fr;gap:10px;align-items:start}
-.hero-team{gap:11px}
-/* Le disque reste visible meme si l'ecusson distant ne charge pas : un trou
-   de 64px au milieu de l'en-tete ressemble a une page cassee, un disque
-   sobre ressemble a un choix. */
-.hero-team img{
-  width:64px;height:64px;
-  background:rgba(255,255,255,.035);border-radius:50%;
-  filter:drop-shadow(0 8px 18px rgba(0,0,0,.55));
-}
-.hero-team b{
-  font-size:26px;line-height:1.05;letter-spacing:.01em;
-  white-space:normal;overflow:visible;text-overflow:clip;
-}
-/* Le VS s'aligne sur les ECUSSONS, pas sur le centre de la colonne : sinon
-   il derive des qu'un nom d'equipe passe sur deux lignes, et son filet vient
-   toucher le nom d'en face. */
-.hero-vs{
-  align-self:start;margin-top:24px;
-  font-size:12px;letter-spacing:.18em;color:var(--muted);
-  position:relative;
-}
-/* Deux filets fins de part et d'autre du VS : la separation se voit sans
-   ajouter d'element dans le HTML. */
-.hero-vs:before,.hero-vs:after{
-  content:"";position:absolute;top:50%;width:18px;height:1px;
-  background:var(--line2);
-}
-.hero-vs:before{right:calc(100% + 6px)}
-.hero-vs:after{left:calc(100% + 6px)}
-
-/* ---------- Le signal : le bloc qu'on doit voir en premier ---------- */
-/* La cote est ce que le parieur cherche en premier apres le marche :
-   elle ne doit plus se confondre avec les autres chiffres de la rangee. */
-
-@media(max-width:640px){
-  .card.hero{padding:18px 16px 16px}
-  .hero-teams{grid-template-columns:1fr 46px 1fr}
-  .hero-team img{width:52px;height:52px}
-  .hero-team b{font-size:19px}
-  .hero-vs{margin-top:18px}
-  /* Trop etroit pour des filets : ils viendraient mordre sur les noms. */
-  .hero-vs:before,.hero-vs:after{display:none}
-  .signal-card{padding:22px 18px 18px}
 }

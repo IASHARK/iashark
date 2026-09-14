@@ -179,6 +179,18 @@ function matchSummaryHtml(m, dir) {
 // fuseau explicite, stade, liens internes, avertissement. Aucune donnee
 // reservee (ni probabilite, ni pari, ni cote).
 var LINK = ' style="color:#20d5ef;text-decoration:underline"';
+// Affiche fixe du grand match (derby) de la meme version, si elle existe :
+// data/derby-index.json, ecrit par scripts/build-club-hubs.js (paire d'ids
+// api-football triee -> page par repertoire). Lu au build, jamais publie.
+var DERBY_INDEX = null;
+function derbyPageFor(m, dir) {
+  if (DERBY_INDEX === null) {
+    try { DERBY_INDEX = JSON.parse(fs.readFileSync(path.join(C.ROOT, "data/derby-index.json"), "utf8")).pairs || {}; } catch (e) { DERBY_INDEX = {}; }
+  }
+  if (!m || !m.home || !m.away || m.home.id == null || m.away.id == null) return null;
+  var e = DERBY_INDEX[[Number(m.home.id), Number(m.away.id)].sort(function (a, b) { return a - b; }).join("-")];
+  return e && e.pages && e.pages[dir] ? e.pages[dir] : null;
+}
 function matchFactsHtml(m, dir) {
   var s = C.seoConf(dir), ms = s.match;
   var d = kickoff(m), ln = leagueName(m), k = hubKey(m), v = venue(m);
@@ -198,6 +210,8 @@ function matchFactsHtml(m, dir) {
   if (v) rows += row(ms.venue, esc(v));
   var links = ['<a href="' + C.homePath(dir) + '"' + LINK + ">" + esc(ms.free_link) + "</a>"];
   if (hub) links.push('<a href="' + hub + '"' + LINK + ">" + esc(C.fill(ms.hub_link, { league: ln })) + "</a>");
+  var derby = derbyPageFor(m, dir);
+  if (derby) links.push('<a href="' + esc(derby.path) + '"' + LINK + ">" + esc(derby.name) + "</a>");
   links.push('<a href="' + C.guidePath(dir, MATCH_GUIDE) + '"' + LINK + ">" + esc(ms.guide_link) + "</a>");
   return '<section class="match-facts" aria-labelledby="match-facts-title" style="width:100%;max-width:960px;margin:28px auto 0;padding:18px 16px 8px;border-top:1px solid rgba(141,179,211,.18);font-family:\'DM Sans\',system-ui,sans-serif;color:#c3ccd8;font-size:14px;line-height:1.6">' +
     '<nav aria-label="' + esc(ms.breadcrumb_aria) + '" style="font-size:12.5px;color:#91a0b3;margin:0 0 12px">' + nav + "</nav>" +
@@ -292,7 +306,7 @@ function renderLeagueHub(key, dir, matches) {
     return '<li><a href="' + C.guidePath(dir, g) + '">' + esc(C.guideLabel(dir, g)) + "</a></li>";
   }).join("");
   var legal = B().LEGAL_FILE_LIST.filter(function (f) { return fs.existsSync(path.join(C.ROOT, "legal", dir, f)); }).map(function (f) {
-    var labelKey = { "mentions-legales.html": "footer.mentions_legales", "cgv.html": "footer.cgv", "confidentialite.html": "footer.confidentialite", "cookies.html": "footer.cookies", "jeu-responsable.html": "footer.responsible_gambling" }[f];
+    var labelKey = { "mentions-legales.html": "footer.mentions_legales", "cgv.html": "footer.cgv", "confidentialite.html": "footer.confidentialite", "cookies.html": "footer.cookies", "jeu-responsable.html": "footer.responsible_gambling", "methodologie.html": "footer.methodology" }[f];
     var label = labelKey ? C.get(dict, labelKey) : null;
     return '<a href="/' + dir + "/" + f + '">' + esc(typeof label === "string" ? label : f) + "</a>";
   }).join(" · ");

@@ -218,7 +218,14 @@ async function buildClubHubs(opts) {
         if (cp) clubLinks[c.teamId] = cp.path;
       }
     });
-    (cfg.derbies || []).forEach(function (d) { d.teams.forEach(function (t) { if (!t.club && t.names && t.names[dir]) names[t.teamId] = t.names[dir]; }); });
+    // Nom d'equipe par version : club sans page dans cette version (ex. PSG et OM
+    // dans /en/, affiche Le Classique) ou equipe hors config (Everton).
+    (cfg.derbies || []).forEach(function (d) {
+      d.teams.forEach(function (t) {
+        var id = derbyTeamId(t, clubsByKey);
+        if (t.names && t.names[dir] && !names[id]) names[id] = t.names[dir];
+      });
+    });
     var league = leagues[p.leagueKey];
     var group = DATA.groupFor(league.table, p.teamIds);
     var groups = p.kind === "derby" && group && !group.containsAll
@@ -288,6 +295,19 @@ async function buildClubHubs(opts) {
     report.pages.push({ kind: "hub", key: "index", dir: dir, path: ctx.path, title: version.hub.title, noindex: ctx.noindex, bytes: Buffer.byteLength(html) });
   });
 
+  // Index des affiches derby par paire d'ids api-football (tries) : une page
+  // match retrouve ainsi l'affiche de SA version (lien retour). Fichier interne
+  // data/derby-index.json : data/ n'est jamais publie, il est lu au build.
+  var derbyIndex = { _readme: DERBY_INDEX_README, pairs: {} };
+  plan.filter(function (p) { return p.kind === "derby"; }).forEach(function (p) {
+    var pair = pairKey(p.teamIds[0], p.teamIds[1]);
+    var e = derbyIndex.pairs[pair] = derbyIndex.pairs[pair] || { key: p.key, teams: p.teamIds.slice(), pages: {} };
+    if (e.key !== p.key) return; // une seule affiche par paire : la premiere de la configuration
+    var info = report.pages.filter(function (r) { return r.kind === "derby" && r.path === p.path; })[0];
+    e.pages[p.dir] = { path: p.path, name: p.text.name, noindex: !!(info && info.noindex) };
+  });
+  report.derbyIndex = derbyIndex;
+
   report.outputs = outputs;
   if (!write) return report;
 
@@ -301,6 +321,7 @@ async function buildClubHubs(opts) {
       if (!outputs[rel]) { fs.unlinkSync(path.join(folder, f)); report.removed++; }
     });
   });
+  report.derbyIndexFile = writeDerbyIndex(outRoot, derbyIndex, dirs);
   report.sitemap = writeSitemap(outRoot, cfg, today);
   // Index sitemap.xml : reference sitemap-clubs.xml (et tous les sitemap-*.xml
   // non vides presents), meme fonction que le pipeline.
@@ -309,6 +330,41 @@ async function buildClubHubs(opts) {
 }
 
 function fill(tpl, vars) { return C.fill(tpl, vars); }
+
+// ---------------------------------------------------------------------------
+// data/derby-index.json : { pairs: { "<idMin>-<idMax>": { key, teams, pages: { <dir>: { path, name, noindex } } } } }
+const DERBY_INDEX_FILE = "data/derby-index.json";
+const DERBY_INDEX_README = "Genere par scripts/build-club-hubs.js. Cle = ids api-football des deux equipes tries et joints par '-'. pages.<dir>.path = affiche derby de cette version (fichier present sur disque). Fichier interne (data/ jamais publie) : a lire au build des pages match.";
+
+function pairKey(a, b) { return [Number(a), Number(b)].sort(function (x, y) { return x - y; }).join("-"); }
+
+// Fusion avec l'index existant : les versions non reconstruites (--dirs) sont
+// conservees, seules les pages presentes sur disque sont gardees ; ordre stable.
+function writeDerbyIndex(outRoot, next, dirs) {
+  var file = path.join(outRoot, DERBY_INDEX_FILE);
+  var prev = null;
+  try { prev = JSON.parse(fs.readFileSync(file, "utf8")); } catch (e) { prev = null; }
+  var merged = {};
+  function add(pair, e, keepDir) {
+    Object.keys(e.pages || {}).forEach(function (d) {
+      if (!keepDir(d)) return;
+      if (!fs.existsSync(path.join(outRoot, e.pages[d].path.slice(1)))) return;
+      var o = merged[pair] = merged[pair] || { key: e.key, teams: e.teams, pages: {} };
+      if (o.key !== e.key) return;
+      o.pages[d] = e.pages[d];
+    });
+  }
+  Object.keys(next.pairs).forEach(function (pair) { add(pair, next.pairs[pair], function () { return true; }); });
+  if (prev && prev.pairs) Object.keys(prev.pairs).forEach(function (pair) { add(pair, prev.pairs[pair], function (d) { return dirs.indexOf(d) === -1 && !(merged[pair] && merged[pair].pages[d]); }); });
+  var out = { _readme: DERBY_INDEX_README, pairs: {} };
+  Object.keys(merged).sort().forEach(function (pair) {
+    var e = merged[pair], pages = {};
+    Object.keys(e.pages).sort().forEach(function (d) { pages[d] = e.pages[d]; });
+    out.pairs[pair] = { key: e.key, teams: e.teams, pages: pages };
+  });
+  writeIfChanged(file, JSON.stringify(out, null, 2) + "\n");
+  return { file: DERBY_INDEX_FILE, pairs: Object.keys(out.pairs).length };
+}
 
 // Fiche club : donnees api-football, surchargees par config/club-hubs.json#facts
 // (valeurs verifiees ; null masque le champ). Certaines donnees api-football

@@ -67,7 +67,9 @@ test("donnees : upcomingFor fusionne api-football et IASHARK, h2h exclut les ami
     DATA.normalizeFixture({ fixture: { id: 11, date: "2026-09-01T03:00:00+00:00", status: { short: "FT" } }, league: { name: "Liga MX" }, teams: { home: { id: 2287 }, away: { id: 2278 } }, goals: { home: 2, away: 1 } }),
     DATA.normalizeFixture({ fixture: { id: 12, date: "2026-08-01T03:00:00+00:00", status: { short: "FT" } }, league: { name: "Friendlies Clubs" }, teams: { home: { id: 2278 }, away: { id: 2287 } }, goals: { home: 0, away: 0 } })
   ];
-  var pub = [DATA.publicMatch({ id: 10, date: "2026-09-20 05:00", league: "Liga MX", home: { n: "Club America", id: 2287 }, away: { n: "Guadalajara Chivas", id: 2278 }, conf: 6.4 })];
+  var pub = [DATA.publicMatch({ id: 10, date: "2026-09-20 05:00", league: "Liga MX", home: { n: "Club America", id: 2287 }, away: { n: "Guadalajara Chivas", id: 2278 }, conf: 6.4, is_free: true })];
+  assert.equal(DATA.publicMatch({ id: 11, date: "2026-09-20 05:00", home: { n: "A", id: 1 }, away: { n: "B", id: 2 }, conf: 6.4, is_free: false }).conf, null, "conf jamais lu pour un match non offert");
+  assert.equal(DATA.publicMatch({ id: 12, date: "2026-09-20 05:00", home: { n: "A", id: 1 }, away: { n: "B", id: 2 }, conf: 6.4 }).conf, null, "is_free absent = non offert");
   var up = DATA.upcomingFor([2287, 2278], api, pub, now, { both: true });
   assert.equal(up.length, 1);
   assert.equal(up[0].analysis.conf, 6.4);
@@ -145,7 +147,11 @@ function gbOnlyConfig() {
         assert.equal(RENDER.findPremiumLeak(html), null, p);
       });
       var arsenal = rep.outputs["/gb/clubs/arsenal.html"];
-      assert.match(arsenal, /Confidence index 7\.4\/10/);
+      if (isFree) assert.match(arsenal, /<span class="conf">[^<]*7\.4\/10<\/span>/, "match offert : probabilite estimee affichee");
+      else {
+        assert.doesNotMatch(arsenal, /class="conf"/, "match payant : aucun chiffre du modele");
+        assert.ok(arsenal.indexOf("7.4") === -1 && arsenal.indexOf("7,4") === -1, "match payant : valeur conf absente");
+      }
       assert.match(arsenal, /href="\/gb\/match\.html\?id=999001"/);
       assert.match(arsenal, /"@type":"SportsEvent"/);
       var derby = rep.outputs["/gb/clubs/north-london-derby.html"];

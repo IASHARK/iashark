@@ -136,37 +136,37 @@ footer .foot-links a{color:#22d3ee;}
 
   <div class="hero">
     <div class="hero-eyebrow" data-i18n="about_page.eyebrow">SOBRE NÓS</div>
-    <h1 data-i18n-html="about_page.hero_title">Nada de palpites.<br><b>Dados</b>, várias épocas de estatísticas,<br>um método constante.</h1>
-    <p data-i18n="about_page.hero_text">O IASHARK analisa cada jogo a partir de dados desportivos acumulados ao longo de várias épocas e de modelos estatísticos rigorosos. Sem martingalas nem sistemas milagrosos — um método aplicado de forma rigorosamente idêntica, jogo após jogo.</p>
+    <h1 data-i18n-html="about_page.hero_title">Nada de palpites.<br><b>Dados</b>, um modelo estatístico,<br>um método constante.</h1>
+    <p data-i18n="about_page.hero_text">A IASHARK analisa cada jogo com dados desportivos reais da época atual e da anterior e com um modelo estatístico de resultados. Sem martingalas nem sistemas milagrosos: o mesmo método, aplicado de forma idêntica, jogo após jogo.</p>
   </div>
 
   <!-- ═══ METHODOLOGIE ═══ -->
   <div class="sec">
     <div class="sec-lbl" data-i18n="about_page.method_label">METODOLOGIA</div>
     <h2 data-i18n="about_page.method_title">Como funciona o modelo</h2>
-    <p data-i18n="about_page.method_text">Para cada jogo, o nosso sistema baseia-se num amplo histórico de dados reais: resultados e estatísticas das equipas e dos jogadores ao longo de várias épocas, tendências de forma recente e elementos de contexto (alinhamentos prováveis, ausências, calendário). Este histórico alimenta vários modelos estatísticos complementares, cujos resultados são sistematicamente cruzados antes de se chegar a uma conclusão — nunca um único modelo isolado, nunca uma intuição.</p>
+    <p data-i18n="about_page.method_text">Para cada jogo, o sistema parte das estatísticas reais das duas equipas na época atual e na anterior: golos marcados e sofridos, e xG e remates recentes quando disponíveis. A partir delas estima os golos esperados de cada equipa e depois, com um modelo de Dixon-Coles, a probabilidade de cada resultado. Nos mercados 1X2, mais/menos de 2,5 golos e ambas as equipas marcam, estas probabilidades são corrigidas por uma calibração aprendida com épocas anteriores. As odds nunca entram neste cálculo.</p>
 
     <div class="model-grid">
       <div class="model-card">
-        <div class="mtitle" data-i18n="about_page.card_history_title">HISTÓRICO DE VÁRIAS ÉPOCAS</div>
-        <div class="mdesc" data-i18n="about_page.card_history_text">Cada cálculo assenta em várias épocas de resultados e estatísticas reais, e não numa impressão pontual ou na atualidade do momento.</div>
+        <div class="mtitle" data-i18n="about_page.card_history_title">ÉPOCA ATUAL E ANTERIOR</div>
+        <div class="mdesc" data-i18n="about_page.card_history_text">O cálculo usa a época atual e a anterior. No início da época, a época anterior e uma média de referência pesam mais, e depois cada vez menos à medida que os jogos são disputados.</div>
       </div>
       <div class="model-card">
-        <div class="mtitle" data-i18n="about_page.card_crossed_title">MODELOS CRUZADOS</div>
-        <div class="mdesc" data-i18n="about_page.card_crossed_text">Vários modelos estatísticos independentes analisam cada jogo em paralelo; uma conclusão só é adotada quando convergem.</div>
+        <div class="mtitle" data-i18n="about_page.card_crossed_title">UM MODELO DE RESULTADOS</div>
+        <div class="mdesc" data-i18n="about_page.card_crossed_text">As probabilidades vêm de um único modelo de resultados (Dixon-Coles), calibrado em três mercados. Não é uma votação entre modelos: o cálculo de Poisson e a simulação servem apenas para medir a concordância mostrada na fiabilidade.</div>
       </div>
       <div class="model-card">
         <div class="mtitle" data-i18n="about_page.card_simulations_title">SIMULAÇÕES</div>
-        <div class="mdesc" data-i18n="about_page.card_simulations_text">São simulados milhares de cenários para cada jogo, de forma a verificar a coerência estatística dos resultados obtidos.</div>
+        <div class="mdesc" data-i18n="about_page.card_simulations_text">Cada jogo é simulado 5.000 vezes (método de Monte Carlo) para mostrar os resultados mais prováveis. Estas simulações não servem para escolher a aposta.</div>
       </div>
       <div class="model-card">
         <div class="mtitle" data-i18n="about_page.card_reliability_title">PONTUAÇÃO DE FIABILIDADE</div>
-        <div class="mdesc" data-i18n="about_page.card_reliability_text">Um indicador separado mede o acordo entre os modelos e a qualidade dos dados disponíveis para esse jogo em concreto — nunca uma reescrita da própria probabilidade.</div>
+        <div class="mdesc" data-i18n="about_page.card_reliability_text">Um indicador separado combina a concordância entre os cálculos, a qualidade dos dados disponíveis e o número de jogos disputados, para esse jogo concreto — nunca altera a probabilidade.</div>
       </div>
     </div>
 
-    <p data-i18n-html="about_page.method_selection">O mercado destacado para cada jogo é selecionado automaticamente segundo critérios estatísticos determinísticos, sem intervenção manual. A <b>probabilidade apresentada</b> é diretamente a do modelo, nunca alterada posteriormente. Um modelo de linguagem redige depois o texto explicativo que acompanha essa escolha, mas não calcula, não escolhe nem altera nenhum número: as probabilidades, as odds, o mercado selecionado e o nível de fiabilidade são inteiramente determinados pelo nosso método estatístico, nunca por esse texto.</p>
-    <p data-i18n-html="about_page.method_value"><b>O conceito de value</b>: o nosso modelo compara a probabilidade calculada com a odd proposta pelas casas de apostas. Quando a nossa estimativa diverge sensivelmente da que a odd implica, fala-se de "value bet" — uma odd potencialmente mal avaliada pelo mercado. O detalhe exato do nosso método de cálculo é proprietário e não é divulgado publicamente.</p>
+    <p data-i18n-html="about_page.method_selection">O mercado em destaque é escolhido automaticamente por uma regra fixa: entre os mercados calculados pelo modelo e realmente cotados por uma casa de apostas, o que tem a <b>probabilidade estimada</b> mais alta, com prioridade para os que atingem uma odd mínima, e abaixo de um teto de probabilidade. Um jogo já iniciado, ou prestes a começar no momento do cálculo, não recebe nenhuma aposta. A probabilidade mostrada é a do modelo, nunca alterada depois. Um modelo de linguagem redige depois o texto explicativo, mas não calcula, não escolhe nem altera nenhum número.</p>
+    <p data-i18n-html="about_page.method_value"><b>A diferença face ao mercado</b>: o modelo compara depois a sua probabilidade com a implícita na odd, retirada a margem da casa de apostas (método de Shin quando possível). Esta diferença é mostrada a título informativo: não serve para escolher o mercado e não garante qualquer ganho.</p>
   </div>
 
   <!-- ═══ SIMPLE VS COMBINE ═══ -->
@@ -186,7 +186,7 @@ footer .foot-links a{color:#22d3ee;}
       <li data-i18n-html="about_page.legal_informative"><b>Conteúdo exclusivamente informativo.</b> As análises, estatísticas, probabilidades e indicadores de fiabilidade aqui publicados são fornecidos a título puramente informativo e educativo. Não constituem aconselhamento financeiro nem garantia de resultado.</li>
       <li data-i18n-html="about_page.legal_no_liability"><b>Não poderá ser imputada qualquer responsabilidade</b> em caso de perda financeira resultante de decisões tomadas com base nos conteúdos deste site. O utilizador é o único responsável pelas suas decisões de jogo e pelas respetivas consequências.</li>
       <li data-i18n-html="about_page.legal_unpredictable"><b>O desporto é imprevisível.</b> Nenhum modelo estatístico, por mais rigoroso que seja, consegue prever um resultado desportivo com certeza.</li>
-      <li data-i18n-html="about_page.legal_past_performance"><b>Desempenho passado ≠ desempenho futuro.</b> Uma vantagem estatística positiva a longo prazo não impede séries de perdas a curto prazo. O modelo e a metodologia descritos nesta página podem evoluir sem aviso prévio.</li>
+      <li data-i18n-html="about_page.legal_past_performance"><b>Resultados passados ≠ resultados futuros.</b> Mesmo estimativas corretas não evitam séries de perdas. O modelo e a metodologia descritos nesta página podem mudar.</li>
       <li data-i18n-html="about_page.legal_ownership"><b>Propriedade do conteúdo.</b> As análises, textos e metodologia apresentados neste site são propriedade do IASHARK e não podem ser reproduzidos sem autorização prévia.</li>
       <li data-i18n-html="about_page.legal_adults"><b>Reservado a maiores de idade</b> (18 anos ou mais).</li>
     </ul>

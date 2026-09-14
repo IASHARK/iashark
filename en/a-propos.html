@@ -136,37 +136,38 @@ footer .foot-links a{color:#22d3ee;}
 
   <div class="hero">
     <div class="hero-eyebrow" data-i18n="about_page.eyebrow">ABOUT</div>
-    <h1 data-i18n-html="about_page.hero_title">No gut feeling.<br>Just <b>data</b>, several seasons of statistics,<br>one consistent method.</h1>
-    <p data-i18n="about_page.hero_text">IASHARK analyses every match using sports data built up over several seasons and rigorous statistical models. No martingale, no miracle system — one method, applied in exactly the same way, match after match.</p>
+    <h1 data-i18n-html="about_page.hero_title">No gut feeling.<br>Just <b>data</b>, a statistical model,<br>one consistent method.</h1>
+    <p data-i18n="about_page.hero_text">IASHARK analyses every match using real sports data from the current and previous seasons and a statistical score model. No martingale, no miracle system — the same method, applied in exactly the same way, match after match.</p>
   </div>
 
   <!-- ═══ METHODOLOGIE ═══ -->
   <div class="sec">
     <div class="sec-lbl" data-i18n="about_page.method_label">METHODOLOGY</div>
     <h2 data-i18n="about_page.method_title">How the model works</h2>
-    <p data-i18n="about_page.method_text">For each match, our system draws on an extensive history of real data: team and player results and statistics across several seasons, recent form trends, and contextual factors (probable line-ups, absences, fixture schedule). This history feeds several complementary statistical models, whose results are systematically cross-checked before any conclusion is drawn — never a single model in isolation, never a hunch.</p>
+    <p data-i18n="about_page.method_text">For each match, the system starts from both teams' real statistics over the current and previous seasons: goals scored and conceded, plus recent xG and shots when available. From these it estimates each team's expected goals, then the probability of every score with a Dixon-Coles model. For the 1X2, over/under 2.5 goals and both-teams-to-score markets, these probabilities are corrected by a calibration learnt from past seasons. Odds never enter this calculation.</p>
 
     <div class="model-grid">
       <div class="model-card">
-        <div class="mtitle" data-i18n="about_page.card_history_title">MULTI-SEASON HISTORY</div>
-        <div class="mdesc" data-i18n="about_page.card_history_text">Every calculation is based on several seasons of real results and statistics, not on a one-off impression or the latest headlines.</div>
+        <div class="mtitle" data-i18n="about_page.card_history_title">CURRENT AND PREVIOUS SEASON</div>
+        <div class="mdesc" data-i18n="about_page.card_history_text">The calculation uses the current season and the previous one. Early in the season, the previous season and a reference average carry more weight, then less and less as matches are played.</div>
       </div>
       <div class="model-card">
-        <div class="mtitle" data-i18n="about_page.card_crossed_title">CROSS-CHECKED MODELS</div>
-        <div class="mdesc" data-i18n="about_page.card_crossed_text">Several independent statistical models analyse each fixture in parallel; a conclusion is only kept when they converge.</div>
+        <div class="mtitle" data-i18n="about_page.card_crossed_title">ONE SCORE MODEL</div>
+        <div class="mdesc" data-i18n="about_page.card_crossed_text">Probabilities come from a single score model (Dixon-Coles), calibrated on three markets. It is not a vote between models: the Poisson calculation and the simulation are only used to measure the agreement shown in the reliability indicator.</div>
       </div>
       <div class="model-card">
         <div class="mtitle" data-i18n="about_page.card_simulations_title">SIMULATIONS</div>
-        <div class="mdesc" data-i18n="about_page.card_simulations_text">Thousands of match scenarios are simulated for each fixture, to check that the results obtained are statistically consistent.</div>
+        <div class="mdesc" data-i18n="about_page.card_simulations_text">Each match is simulated 5,000 times (Monte Carlo method) to show the most likely scores. These simulations are not used to choose the bet.</div>
       </div>
       <div class="model-card">
         <div class="mtitle" data-i18n="about_page.card_reliability_title">RELIABILITY SCORE</div>
-        <div class="mdesc" data-i18n="about_page.card_reliability_text">A separate indicator measures how closely the models agree and the quality of the data available for that specific match — it never rewrites the probability itself.</div>
+        <div class="mdesc" data-i18n="about_page.card_reliability_text">A separate indicator combines agreement between the calculations, the quality of the available data and the number of matches played, for that specific match — it never changes the probability.</div>
       </div>
     </div>
 
-    <p data-i18n-html="about_page.method_selection">The market highlighted for each match is selected automatically according to deterministic statistical criteria, with no manual intervention. The <b>probability shown</b> is the model's own, never adjusted after the fact. A language model then writes the explanatory text that accompanies this choice, but it does not calculate, choose or modify any figure: the probabilities, odds, selected market and reliability level are determined entirely by our statistical method, never by that text.</p>
-    <p data-i18n-html="about_page.method_value"><b>The concept of value</b>: our model compares its calculated probability with the odds offered by bookmakers. When our estimate differs significantly from the one implied by the odds, this is called a "value bet" — odds that the market may have mispriced. The exact details of our calculation method are proprietary and are not publicly disclosed.</p>
+    <p data-i18n-html="about_page.method_selection">The highlighted market is chosen automatically by a fixed rule: among the markets the model calculates and a bookmaker actually prices, the one with the highest <b>estimated probability</b>, preferably among those reaching a minimum price, and below a probability cap. A match that has already started, or is about to start when the calculation runs, gets no bet. The probability shown is the model's own, never adjusted afterwards. A language model then writes the explanatory text, but it does not calculate, choose or change any figure.</p>
+    <p data-i18n-html="about_page.method_value"><b>The gap with the market</b>: the model then compares its probability with the one implied by the odds, once the bookmaker's margin is removed (Shin's method where possible). This gap is shown for information: it is not used to choose the market and guarantees no winnings.</p>
+    <p data-requires-page="methodologie.html" style="margin-top:6px"><a href="/en/methodologie.html" data-href="methodologie.html" style="color:var(--cyan);text-decoration:underline" data-i18n="about_page.method_link">Read the full methodology: data, calculations, limits</a></p>
   </div>
 
   <!-- ═══ SIMPLE VS COMBINE ═══ -->
@@ -186,7 +187,7 @@ footer .foot-links a{color:#22d3ee;}
       <li data-i18n-html="about_page.legal_informative"><b>For information only.</b> The analyses, statistics, probabilities and reliability indicators published here are provided purely for informational and educational purposes. They constitute neither financial advice nor a guarantee of results.</li>
       <li data-i18n-html="about_page.legal_no_liability"><b>No liability can be accepted</b> for any financial loss resulting from decisions made on the basis of this site's content. You alone are responsible for your gambling decisions and their consequences.</li>
       <li data-i18n-html="about_page.legal_unpredictable"><b>Sport is unpredictable.</b> No statistical model, however rigorous, can predict a sporting outcome with certainty.</li>
-      <li data-i18n-html="about_page.legal_past_performance"><b>Past performance ≠ future performance.</b> A positive long-term statistical edge does not prevent short-term losing streaks. The model and methodology described on this page may change without notice.</li>
+      <li data-i18n-html="about_page.legal_past_performance"><b>Past performance ≠ future performance.</b> Even sound estimates do not prevent losing streaks. The model and methodology described on this page may change.</li>
       <li data-i18n-html="about_page.legal_ownership"><b>Content ownership.</b> The analyses, texts and methodology presented on this site are the property of IASHARK and may not be reproduced without prior permission.</li>
       <li data-i18n-html="about_page.legal_adults"><b>Adults only</b> (18 and over).</li>
     </ul>
@@ -206,7 +207,7 @@ footer .foot-links a{color:#22d3ee;}
 <footer>
   <p><span data-i18n="about_page.footer_warning">⚠️ GAMBLING CAN BE DANGEROUS — PLAY RESPONSIBLY · PROHIBITED FOR UNDER-18s</span><br>
   <span data-i18n="about_page.footer_note">IASHARK — Published analyses are for information purposes only</span></p>
-  <p class="foot-links"><a href="/en/mentions-legales.html" data-href="mentions-legales.html" data-i18n="footer.mentions_legales">Legal Notice</a> · <a href="/en/cgv.html" data-href="cgv.html" data-i18n="footer.cgv">Terms</a> · <a href="/en/confidentialite.html" data-href="confidentialite.html" data-i18n="footer.confidentialite">Privacy</a> · <a href="/en/cookies.html" data-href="cookies.html" data-i18n="footer.cookies">Cookies</a> · <a href="/en/jeu-responsable.html" data-href="jeu-responsable.html" data-i18n="footer.responsible_gambling">Responsible gambling</a></p>
+  <p class="foot-links"><a href="/en/mentions-legales.html" data-href="mentions-legales.html" data-i18n="footer.mentions_legales">Legal Notice</a> · <a href="/en/cgv.html" data-href="cgv.html" data-i18n="footer.cgv">Terms</a> · <a href="/en/confidentialite.html" data-href="confidentialite.html" data-i18n="footer.confidentialite">Privacy</a> · <a href="/en/cookies.html" data-href="cookies.html" data-i18n="footer.cookies">Cookies</a> · <a href="/en/jeu-responsable.html" data-href="jeu-responsable.html" data-i18n="footer.responsible_gambling">Responsible gambling</a><span data-requires-page="methodologie.html"> · <a href="/en/methodologie.html" data-href="methodologie.html" data-i18n="footer.methodology">Methodology</a></span></p>
 </footer>
 
 <nav class="nav-bottom" aria-label="Main navigation" data-i18n-attr="aria-label:geo.nav.aria_label">

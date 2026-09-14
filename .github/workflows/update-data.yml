@@ -68,6 +68,10 @@ jobs:
           // Decoupage du fichier public (perf) : data-home.json (liste legere) et
           // match/<id>.json (detail), ecrits depuis matchsPublics. Voir lib/public-data-split.js.
           var PUBLIC_SPLIT=require('./lib/public-data-split.js');
+          // GARDE COUP D'ENVOI (lib/kickoff-guard.js) : aucun pari, aucune analyse
+          // publiee, jamais offert ni candidat canonique pour un match deja commence,
+          // imminent (<= maintenant + 15 min) ou dont le statut API n'est pas NS/TBD.
+          const { kickoffGate, closeMatchForPick, filterOpenCandidates, KICKOFF_MARGIN_MINUTES } = require('./lib/kickoff-guard.js');
           // Pages SEO statiques (titres/JSON-LD des pages match, versions
           // localisees, pages championnat) : scripts/seo-pages.js.
           var SEO_PAGES=require('./scripts/seo-pages.js');
@@ -1245,6 +1249,8 @@ jobs:
             return result;
           }
           async function genAnalyse(d) {
+            // Match commence ou imminent (lib/kickoff-guard.js) : aucun texte d'analyse.
+            if(d&&d.skip_kickoff_closed) return null;
             var isWorldCup=(d.leagueId===1);
             var moyBmHdom=d.bmHdom&&d.mdHdom?(d.bmHdom/d.mdHdom).toFixed(2):'?';
             var moyBeHdom=d.beHdom&&d.mdHdom?(d.beHdom/d.mdHdom).toFixed(2):'?';
@@ -1303,21 +1309,20 @@ jobs:
               +'Dixon-Coles: DOM '+d.dixon_p1+'% | Nul '+d.dixon_pN+'% | EXT '+d.dixon_p2+'%\n'
               +'Monte-Carlo: DOM '+d.mc_p1+'% | Nul '+d.mc_pN+'% | EXT '+d.mc_p2+'%\n'
               +(d.mc_scores&&d.mc_scores.length?'Top scores MC: '+d.mc_scores.map(function(s){return s.score+'('+s.pct+'%)';}).join(', ')+'\n':'')
-              +'Probabilite PURE IASHARK (ensemble Poisson+Dixon-Coles+Monte-Carlo+Elo, jamais influencee par une cote): DOM '+d.final_p1+'% | Nul '+d.final_pN+'% | EXT '+d.final_p2+'%\n'
+              +'Probabilite PURE IASHARK (matrice de scores Dixon-Coles, calibree sur 1X2 / plus de 2.5 buts / BTTS ; Poisson et Monte-Carlo ci-dessus ne sont que des controles, Elo non utilise ; jamais influencee par une cote): DOM '+d.final_p1+'% | Nul '+d.final_pN+'% | EXT '+d.final_p2+'%\n'
               +(d.pinnacle_p1?'Probabilite marche ('+(d.market_source||'Marche')+', retrait de marge): DOM '+d.pinnacle_p1+'% | Nul '+d.pinnacle_pN+'% | EXT '+d.pinnacle_p2+'%\n':'Marche: non disponible\n')
               +'-> Ces deux probabilites sont deja calculees et NE DOIVENT PAS etre modifiees ni recalculees. Utilise-les uniquement pour REDIGER TON TEXTE (elles ne font pas partie du JSON que tu dois renvoyer).\n'
               +(d.all_markets&&d.all_markets.length
-                ?'\n=== MARCHES DISPONIBLES (cote >= 1.50) ===\n'
-                 +'(probas calculees independamment par le modele Poisson + Dixon-Coles + Monte-Carlo)\n'
+                ?'\n=== MARCHES MODELISES ET COTES ===\n'
+                 +'(probabilites de la matrice Dixon-Coles, calibrees sur 1X2 / plus de 2.5 buts / BTTS ; cotes collectees, pas forcement >= 1.50)\n'
                  +d.all_markets.map(function(m){
                    return m.market+' | Proba modele: '+m.prob+'% | Cote: '+m.cote;
                  }).join('\n')+'\n'
-                :'Aucun marche jouable - toutes les cotes sont < 1.50 ou absentes.\n')
+                :'Aucun marche a la fois modelise et cote pour ce match.\n')
               +(d.mc_scores&&d.mc_scores.length
                 ?'\n=== SCORES MONTE-CARLO (5000 simulations) ===\n'
                  +'Top scores: '+d.mc_scores.map(function(s){return s.score+'('+s.pct+'%)';}).join(', ')+'\n'
-                 +'-> Utilise ces scores pour verifier la coherence du marche que tu choisis.\n'
-                 +'-> Ex: si Over 2.5 mais top scores = 0-0, 1-0, 0-1 -> incoherent -> choisis autre marche\n'
+                 +'-> Contexte uniquement : le marche est deja choisi par le systeme (voir plus bas). Ne propose jamais un autre marche a partir de ces scores.\n'
                 :'')
               +(d.slotSummary&&d.slotSummary.length
                 ?'\n=== BUTS PAR TRANCHE (donnees reelles) ===\n'
@@ -1336,8 +1341,8 @@ jobs:
                 :'')
               +'\n=== DECISION DEJA PRISE PAR LE SYSTEME (ne pas la remettre en cause) ===\n'
               +(d.no_signal
-                ?'Aucun marche exploitable (pas de cote fiable >= 1.50 disponible pour ce match). N\'invente ni marche ni cote : explique factuellement, en 1-2 phrases, pourquoi ce match manque de signal exploitable aujourd\'hui.\n'
-                :'Marche retenu : '+d.picked_market.market+' (cote '+d.picked_market.cote+', probabilite modele '+Math.round(d.picked_market.prob)+'%). C\'est mathematiquement le marche de plus haute probabilite modele parmi ceux disponibles avec une cote exploitable - deja calcule par le systeme. Ne le remets JAMAIS en cause, n\'en propose jamais un autre, ne cite jamais un autre marche comme "meilleur choix".\n')
+                ?'Aucun marche retenu : le modele n\'a pas pu calculer de facon fiable pour ce match (historique insuffisant ou donnees de la saison en cours indisponibles). N\'invente ni marche ni cote : explique factuellement, en 1-2 phrases, pourquoi aucun marche n\'est retenu aujourd\'hui.\n'
+                :'Marche retenu : '+d.picked_market.market+' ('+(d.picked_market.cote!=null&&d.picked_market.cote!==''?'cote '+d.picked_market.cote:'sans cote disponible')+', probabilite modele '+Math.round(d.picked_market.prob)+'%). C\'est le marche de plus haute probabilite modele parmi les marches cotes au moins 1.50 (a defaut parmi tous les marches cotes, ou sans cote si aucune n\'existe) - deja calcule par le systeme. Ne le remets JAMAIS en cause, n\'en propose jamais un autre, ne cite jamais un autre marche comme "meilleur choix".\n')
               +'\n=== TON ROLE (STRICT) ===\n'
               +'Tu es un analyste sportif professionnel. Tu ne calcules RIEN : le marche, la cote, la probabilite, l\'edge, le niveau de risque ET les buteurs probables sont deja decides ci-dessus par du code deterministe, pas par toi. Tu ne renvoies AUCUN nombre de probabilite, AUCUNE cote, AUCUN marche choisi, AUCUN score de confiance, AUCUN autre buteur que ceux listes ci-dessus - uniquement du texte qui EXPLIQUE les decisions deja prises, en citant les donnees reelles fournies plus haut.\n'
               +'ANCRAGE OBLIGATOIRE DES TEXTES : contexte et facteur_x doivent citer un chiffre EXACT tire des donnees ci-dessus (classement #X, forme 5 derniers, xG, ecart ELO, % de buts par tranche, etc.). N\'invente jamais un enjeu ou un classement qui n\'apparait pas dans les donnees fournies - si aucune donnee d\'enjeu n\'est disponible (pas de ligne "Enjeu DOM/EXT"), ne mentionne pas d\'enjeu du tout plutot que d\'en inventer un vague. Une phrase sans chiffre precis est invalide.\n\n';
@@ -1615,7 +1620,7 @@ jobs:
             loc=loc||'fr';
             var todays=(matchsData||[]).filter(function(m){return (m.date||'').split(' ')[0]===TODAY;});
             if(!todays.length) return '';
-            var confiance='<span data-i18n="home_app.seo_confidence">'+escHtml(seoText(loc,'home_app.seo_confidence','confiance'))+'</span>';
+            var confiance='<span data-i18n="home_app.seo_confidence">'+escHtml(seoText(loc,'home_app.seo_confidence','probabilité estimée'))+'</span>';
             var items=todays.map(function(m){
               var heure=(m.date||'').split(' ')[1]||'';
               // Le pari n'est nomme que pour l'analyse offerte du jour. Le
@@ -1623,7 +1628,7 @@ jobs:
               // clair dans le HTML de la page d'accueil, indexe par Google.
               var pari=(m.is_free&&m.pari_rec&&!m.no_signal)
                 ?(' — <span data-i18n="home_app.seo_ai_pick">'+escHtml(seoText(loc,'home_app.seo_ai_pick','Pronostic IA :'))+'</span> <span data-market-label="'+escHtml(m.pari_rec)+'" data-home="'+escHtml(m.home.n)+'" data-away="'+escHtml(m.away.n)+'">'+escHtml(seoMarketLabel(m,loc))+'</span> ('+confiance+' '+escHtml(String(m.conf||''))+'/10)')
-                :((m.conf!=null&&!m.no_signal)?(' — '+confiance+' '+escHtml(String(m.conf))+'/10'):'');
+                :''; // conf = probabilite du modele / 10 : jamais publiee pour un match non offert
               // Lien vers la page match statique du repertoire (maillage
               // interne : /match/<id>.html pour fr et la racine, sinon
               // /<dir>/match/<id>.html ecrite par scripts/seo-pages.js).
@@ -2200,6 +2205,9 @@ jobs:
             var RUN_OUTPUT_CANDIDATES = [];
             var fixtures = await getFixtures();
             console.log('Football fixtures:', fixtures.length);
+            // Index des fixtures brutes (statut + coup d'envoi) pour la garde coup d'envoi.
+            var FIXTURE_BY_ID={};
+            fixtures.forEach(function(fx){ if(fx&&fx.fixture&&fx.fixture.id!=null) FIXTURE_BY_ID[String(fx.fixture.id)]=fx; });
             if(!fixtures.length){
               fs.writeFileSync('data.json',JSON.stringify({matchs:[]},null,2));
               PUBLIC_SPLIT.writePublicSplit(fs,[],{generated_at:new Date().toISOString(),run_id:null});
@@ -2328,6 +2336,11 @@ jobs:
               var lg=fix.league;
               var home=fix.teams.home;
               var away=fix.teams.away;
+              // Garde coup d'envoi evaluee a l'heure reelle de traitement de CETTE
+              // fixture (le run dure ~20 min) : si fermee, le match reste une fiche
+              // d'information (donnees, forme, classement) sans pari ni analyse.
+              var kickoffGateFix=kickoffGate(fix,Date.now(),{marginMinutes:KICKOFF_MARGIN_MINUTES});
+              if(!kickoffGateFix.open) console.log('  [KICKOFF] '+home.name+' vs '+away.name+' : '+kickoffGateFix.reason+' (statut '+(kickoffGateFix.status||'?')+', coup d\'envoi '+(f.date||'?')+') - aucun pari, aucune analyse publiee.');
               var isWorldCupMatch=(lg.id===1);
               var wcRound=(lg.round||'').toLowerCase();
               var isKnockout=isWorldCupMatch&&(
@@ -2719,7 +2732,7 @@ jobs:
               // L'eligibilite reelle (SCORE_STATUS=VALIDATED, score_runnable)
               // est verifiee plus tard par runOutputForSnapshot lui-meme,
               // jamais ici.
-              RUN_OUTPUT_CANDIDATES.push.apply(RUN_OUTPUT_CANDIDATES, buildScoreCandidatesFromLegacyMatch({
+              if(kickoffGateFix.open) RUN_OUTPUT_CANDIDATES.push.apply(RUN_OUTPUT_CANDIDATES, buildScoreCandidatesFromLegacyMatch({
                 allMarkets: allMarkets, leagueId: lg.id, leagueExpansionConfig: LEAGUE_EXPANSION_CONFIG,
                 fixtureId: f.id, kickoff: f.date, homeTeam: home.name, awayTeam: away.name,
                 scoreModelVersion: MODEL_VERSION,
@@ -2770,6 +2783,8 @@ jobs:
                   pickDowngrade='NO_ODDS';
                 }
               }
+              // Match commence/imminent : aucun marche retenu, quel que soit le palier.
+              if(!kickoffGateFix.open){ pickedMarket=null; pickDowngrade=null; }
               var eligibleMarkets=allMarkets.filter(function(m){return parseFloat(m.cote)>=1.50;});
               // Score(s) le(s) plus probable(s) affiches a l'utilisateur : filtres
               // pour rester coherents avec le marche recommande (ex: pas de "1-0"
@@ -2793,6 +2808,7 @@ jobs:
               // repli") - permet a l'operateur/au monitoring de distinguer un
               // vrai debut de saison d'un run degrade par le quota API.
               var noSignalReason=!currentSeasonGate.dataQualityOk?currentSeasonGate.reason:(!modelDataAvailable?'INSUFFICIENT_MODEL_DATA':(!supportedQuoteCount?'NO_REAL_ODDS':(!allMarkets.length?'NO_RELIABLE_MODEL_FOR_QUOTED_MARKETS':(!eligibleMarkets.length?'NO_ODDS_AT_OR_ABOVE_1_50':null))));
+              if(!kickoffGateFix.open) noSignalReason=kickoffGateFix.reason;
               console.log('  [SELECTION] modeles='+allMarketCandidates.filter(function(m){return Number.isFinite(Number(m.prob));}).length+' cotes_supportees='+supportedQuoteCount+' modeles_et_cotes='+allMarkets.length+' eligibles_1.50='+eligibleMarkets.length+' top='+eligibleMarkets.slice().sort(function(a,b){return b.prob-a.prob;}).slice(0,3).map(function(m){return m.id+':'+m.prob.toFixed(1)+'%@'+m.cote;}).join(', ')+(noSignalReason?' raison='+noSignalReason:''));
               var riskLabelCode=pickedMarket?computeRiskLabel(pickedMarket.cote):'MODERE';
               var kellyVal='0';
@@ -2840,6 +2856,7 @@ jobs:
               var meteoStr=wx?wx.desc+' '+wx.emoji+' '+wx.temp+' | Vent: '+wx.wind:'N/A';
               var bestMarket=null;
               var an=await genAnalyse({
+                skip_kickoff_closed:!kickoffGateFix.open,
                 leagueId:lg.id,home:home.name,away:away.name,homeId:home.id,awayId:away.id,
                 league:lg.name,date:TODAY+' '+heure,stade:(f.venue&&f.venue.name)||'',meteo:meteoStr,
                 rkH,rkA,totalH,totalA,mdH,meA,
@@ -2957,8 +2974,8 @@ jobs:
                 val:!noSignal&&kellyVal!=='0',
                 hot:!noSignal&&modelAgreement.label==='Fort'&&kellyVal!=='0',
                 // model_probability : PURE_IASHARK_PROBABILITY (§10.2) pour le marche
-                // retenu (0-100, deterministe) - ensemble Poisson/Dixon-Coles/Monte-Carlo
-                // (+Elo), et RIEN d'autre : aucune cote n'entre dans ce calcul, jamais,
+                // retenu (0-100, deterministe) - matrice Dixon-Coles calibree (1X2/O2.5/
+                // BTTS, lib/engine.js#calcFinalProbs ; Elo non utilise), et RIEN d'autre : aucune cote n'entre dans ce calcul, jamais,
                 // pour aucun marche (1X2/DC inclus - corrige ce jalon, ils etaient
                 // auparavant ancres au marche via un blend Shin, cf MODEL_ARCHITECTURE.md
                 // et tests/pure-probability.test.js). C'est le meme nombre utilise pour
@@ -3157,6 +3174,9 @@ jobs:
                   elo_home:eloH||null,elo_away:eloA||null,
                 },
               });
+              // Garde coup d'envoi : fiche d'information sans pari (champs premium
+              // retires, ligne premium videe). Jamais offert ni candidat canonique.
+              if(!kickoffGateFix.open) closeMatchForPick(matchObj, premiumRows.length&&premiumRows[premiumRows.length-1].fixture_id===f.id?premiumRows[premiumRows.length-1]:null, PREMIUM_FIELDS_LIB.PREMIUM_FIELDS, kickoffGateFix.reason);
               matchsData.push(matchObj);
               // Traduction des textes de `an`, differee apres la boucle (voir
               // translateNarratives). La ligne premium de CE match porte les
@@ -3224,6 +3244,22 @@ jobs:
             // registry League Expansion Factory avec le statut canonique Premier
             // League (lib/run-output/canonical-registry.js) : aucune ligue n'est
             // jamais eligible ici sans etre passee par cette meme porte.
+            // GARDE COUP D'ENVOI, SECOND PASSAGE (le run dure ~20 min, et le FILET
+            // ci-dessus peut restaurer une analyse precedente) : juste avant la
+            // selection canonique, la designation du match offert, les fichiers
+            // publics, les lignes premium et l'historique, tout match desormais
+            // commence/imminent ou sorti du statut NS/TBD perd son pari.
+            var KICKOFF_CHECK_MS=Date.now();
+            var fermesKickoff=0;
+            allMatchsData.forEach(function(m){
+              if(!m||m.id==null) return;
+              var g=kickoffGate(FIXTURE_BY_ID[String(m.id)],KICKOFF_CHECK_MS,{marginMinutes:KICKOFF_MARGIN_MINUTES});
+              if(g.open) return;
+              if(m.pari_rec||m.no_signal_reason!==g.reason) fermesKickoff++;
+              closeMatchForPick(m, premiumRows.find(function(r){ return r&&String(r.fixture_id)===String(m.id); })||null, PREMIUM_FIELDS_LIB.PREMIUM_FIELDS, g.reason);
+            });
+            RUN_OUTPUT_CANDIDATES=filterOpenCandidates(RUN_OUTPUT_CANDIDATES,FIXTURE_BY_ID,KICKOFF_CHECK_MS,{marginMinutes:KICKOFF_MARGIN_MINUTES});
+            console.log('  [KICKOFF] second passage : '+fermesKickoff+' match(s) ferme(s) au pronostic (commence, imminent ou statut non NS/TBD).');
             var RUN_OUTPUT_SNAPSHOT_TIME = new Date().toISOString();
             var runOutput = runOutputForSnapshot({
               candidates: RUN_OUTPUT_CANDIDATES,

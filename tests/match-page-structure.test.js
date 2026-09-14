@@ -112,6 +112,9 @@ test("le signal IASHARK montre pari, jauge, cote, probabilite implicite, ecart, 
     assert.ok(bloc.includes(attendu),`element du signal manquant : ${attendu}`);
   }
   assert.match(js,/function confMeter\(conf\)[\s\S]*role="meter"[\s\S]*aria-valuemax="10"/);
+  // Libelle honnete : "probabilite estimee" (conf = probabilite / 10), et lien Methodologie.
+  assert.match(js,/t\('match_page\.sig_conf_label','Probabilité estimée'\)/);
+  assert.ok(bloc.includes("methodLink()"),"lien Methodologie absent du signal");
   // Analyse annoncee mais champs premium absents : jamais "aucun marche".
   assert.match(bloc,/raw\.has_signal===true&&raw\.no_signal!==true/);
 });
@@ -125,9 +128,10 @@ test("le mur d'acces et l'en-tete n'exposent ni pari, ni probabilite du modele",
   }
   assert.match(gate,/oddsCount/);
   assert.match(gate,/sig-ghost/);
-  // Teaser : "une analyse existe" et indice de confiance (champs publics),
-  // jamais pari, cote ni probabilite.
-  assert.match(gate,/confMeter\(pub\.conf\)/);
+  // Teaser : "une analyse existe" (champ public), jamais pari, cote ni
+  // probabilite. conf = probabilite du modele / 10 : plus affiche sur le mur.
+  assert.doesNotMatch(gate,/confMeter|pub\.conf/);
+  assert.match(gate,/methodLink\(\)/);
   assert.match(gate,/sig_teaser_exists/);
   for(const interdit of ["pari_rec","cote_rec","model_probability","market_id","riskCode","odds(","pct("]){
     assert.ok(!gate.includes(interdit),`le mur d'acces lit ${interdit}`);

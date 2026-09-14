@@ -208,16 +208,17 @@ function texteRisqueSignal(item){
   return tf('match_page.sig_risk_'+item.key,RISQUES[item.key],v);
 }
 
-// Indice de confiance : conf 0-10, champ PUBLIC (teaser, lib/premium-fields.js)
-// - le seul chiffre du modele montre aussi sur les murs d'acces. 10 segments.
+// Probabilite estimee : conf 0-10 = probabilite du modele pour le marche retenu
+// divisee par 10 (pipeline). C'est une probabilite : affichee uniquement dans le
+// signal servi (match offert ou abonne), jamais sur un mur d'acces. 10 segments.
 function confMeter(conf){
   const c=n(conf);
   if(c===null||c<0||c>10)return '';
   const v=Math.round(c*10)/10,pleins=Math.round(v);
   const txt=v.toLocaleString(localeTag(),{maximumFractionDigits:1});
-  const aria=tf('match_page.sig_conf_aria','Indice de confiance : {value} sur 10',{value:txt});
+  const aria=tf('match_page.sig_conf_aria','Probabilité estimée : {value} sur 10',{value:txt});
   return `<div class="sig-stat sig-conf">
-      <span class="sig-stat-label">${esc(t('match_page.sig_conf_label','Indice de confiance'))}</span>
+      <span class="sig-stat-label">${esc(t('match_page.sig_conf_label','Probabilité estimée'))}</span>
       <div class="sig-stat-row"><b class="sig-conf-val">${esc(txt)}<small>/10</small></b><span class="sig-conf-bar" role="meter" aria-valuemin="0" aria-valuemax="10" aria-valuenow="${v}" aria-valuetext="${esc(txt)}/10" aria-label="${esc(aria)}">${Array.from({length:10},(_,i)=>`<i${i<pleins?' class="on"':''}></i>`).join('')}</span></div>
     </div>`;
 }
@@ -231,6 +232,19 @@ function riskStat(code){
       <span class="sig-stat-label">${esc(t('match_page.sig_risk_label','Niveau de risque'))}</span>
       <div class="sig-stat-row"><b>${esc(t('match_page.sig_risk_level_'+r[0],r[1]))}</b><span class="sig-risk-steps" aria-hidden="true">${[1,2,3].map(i=>`<i${i<=r[2]?' class="on"':''}></i>`).join('')}</span></div>
     </div>`;
+}
+
+// Lien vers la page Methodologie du repertoire courant. Pages disponibles :
+// config/markets.json#_legalFiles.methodology, sources legal/<dir>/ (fr, gb, za,
+// en, mx, es) ; les autres repertoires renvoient vers la version anglaise.
+const METHODOLOGY_DIRS=['fr','gb','za','en','mx','es'];
+function methodologyHref(){
+  const dir=(window.I18N&&window.I18N.dir)||'';
+  if(METHODOLOGY_DIRS.includes(dir))return '/'+dir+'/methodologie.html';
+  return dir?'/en/methodologie.html':'/fr/methodologie.html';
+}
+function methodLink(){
+  return `<p class="sig-method"><a href="${esc(methodologyHref())}">${esc(t('match_page.sig_method_link','Comment ce chiffre est calculé : méthodologie'))}</a></p>`;
 }
 
 function signalCard(vm){
@@ -298,6 +312,7 @@ function signalCard(vm){
     ${verdict}
     ${puces.length?`<div class="sig-why"><h3>${esc(t('match_page.sig_why_title','Pourquoi ce pari'))}</h3><ul>${puces.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>`:''}
     <p class="sig-watch"><b>${esc(t('match_page.sig_watch_title','À surveiller'))}</b> ${esc(aSurveiller)}</p>
+    ${methodLink()}
     <p class="sig-legal">${esc(t('match_page.sig_legal','18+ · Estimation statistique, pas une garantie. Jouez responsable.'))}</p>
   </section>`;
 }
@@ -838,12 +853,12 @@ function bindMotion(){
 // gabarit flou sans texte.
 function gateCard(vm,opts){
   const tz=vm.teaser||{},pub=vm._raw||{};
-  // Champs PUBLICS du teaser uniquement (lib/premium-fields.js) : no_signal,
-  // has_signal et conf disent "une analyse existe" et sa confiance, sans la
-  // donner.
+  // Champs PUBLICS du teaser uniquement (lib/premium-fields.js) : no_signal et
+  // has_signal disent "une analyse existe", sans la donner. conf (probabilite du
+  // modele / 10) n'est plus affiche ici : une probabilite ne s'affiche jamais
+  // sur un match non offert.
   const annonce=pub.no_signal===true?t('match_page.sig_teaser_no_signal','Aucun pari retenu par le modèle sur ce match.')
     :(pub.has_signal===true||pub.no_signal===false)?t('match_page.sig_teaser_exists','Une analyse IASHARK existe pour ce match.'):'';
-  const indice=pub.no_signal===true?'':confMeter(pub.conf);
   const faits=[
     n(tz.oddsCount)!==null&&tz.oddsCount>0?tf('match_page.gate_teaser_odds','{n} cotes de marché comparées au modèle',{n:tz.oddsCount}):null,
     tz.reliability?relLigne(tz.reliability):null,
@@ -857,7 +872,6 @@ function gateCard(vm,opts){
         ${relBadge(tz.reliability)}
       </div>
       ${annonce?`<p class="sig-teaser-line">${esc(annonce)}</p>`:''}
-      ${indice?`<div class="sig-stats is-single">${indice}</div>`:''}
       <div class="sig-slip is-locked">
         <div class="sig-slip-main">
           <p class="sig-kicker">${esc(t('match_page.sig_bet_label','Pari recommandé'))}</p>
@@ -872,6 +886,7 @@ function gateCard(vm,opts){
         <ul class="gate-facts">${faits.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>
         <a class="btn-gate" href="${esc(opts.href)}">${esc(opts.cta)}</a>
       </div>
+      ${methodLink()}
       <p class="sig-legal">${esc(t('match_page.sig_legal','18+ · Estimation statistique, pas une garantie. Jouez responsable.'))}</p>
     </section>
   </div>`;

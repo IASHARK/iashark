@@ -55,7 +55,8 @@
     "connexion.html","inscription.html","mot-de-passe-oublie.html","reinitialiser-mot-de-passe.html",
     "a-propos.html","abonnement.html","exemple-analyse.html","checkout-annule.html",
     "checkout-succes.html","404.html","landing.html",
-    "mentions-legales.html","cgv.html","confidentialite.html","cookies.html","jeu-responsable.html"
+    "mentions-legales.html","cgv.html","confidentialite.html","cookies.html","jeu-responsable.html",
+    "methodologie.html"
   ].forEach(function(p){ LOCALIZED_PAGES[p] = true; });
 
   var DIR_PREFIX_RE = /^\/([a-z]{2})(\/.*)?$/;

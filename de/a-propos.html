@@ -136,37 +136,37 @@ footer .foot-links a{color:#22d3ee;}
 
   <div class="hero">
     <div class="hero-eyebrow" data-i18n="about_page.eyebrow">ÜBER UNS</div>
-    <h1 data-i18n-html="about_page.hero_title">Kein Bauchgefühl.<br>Sondern <b>Daten</b>, mehrere Saisons Statistik,<br>eine gleichbleibende Methode.</h1>
-    <p data-i18n="about_page.hero_text">IASHARK analysiert jedes Spiel auf Basis von Sportdaten aus mehreren Saisons und strengen statistischen Modellen. Keine Martingale, kein Wundersystem — eine Methode, die Spiel für Spiel exakt gleich angewendet wird.</p>
+    <h1 data-i18n-html="about_page.hero_title">Kein Bauchgefühl.<br>Sondern <b>Daten</b>, ein statistisches Modell,<br>eine gleichbleibende Methode.</h1>
+    <p data-i18n="about_page.hero_text">IASHARK analysiert jedes Spiel mit echten Sportdaten der laufenden und der vorherigen Saison und einem statistischen Ergebnismodell. Keine Martingale, kein Wundersystem – dieselbe Methode, genau gleich angewendet, Spiel für Spiel.</p>
   </div>
 
   <!-- ═══ METHODOLOGIE ═══ -->
   <div class="sec">
     <div class="sec-lbl" data-i18n="about_page.method_label">METHODIK</div>
     <h2 data-i18n="about_page.method_title">So funktioniert das Modell</h2>
-    <p data-i18n="about_page.method_text">Für jedes Spiel stützt sich unser System auf eine umfangreiche Historie realer Daten: Ergebnisse und Statistiken von Mannschaften und Spielern über mehrere Saisons, aktuelle Formtrends sowie Kontextfaktoren (voraussichtliche Aufstellungen, Ausfälle, Spielplan). Diese Historie speist mehrere sich ergänzende statistische Modelle, deren Ergebnisse systematisch abgeglichen werden, bevor eine Schlussfolgerung gezogen wird — nie ein einzelnes Modell für sich allein, nie ein Bauchgefühl.</p>
+    <p data-i18n="about_page.method_text">Für jedes Spiel geht das System von den echten Statistiken beider Mannschaften in der laufenden und der vorherigen Saison aus: erzielte und kassierte Tore sowie aktuelle xG- und Schusswerte, sofern verfügbar. Daraus schätzt es die erwarteten Tore jeder Mannschaft und anschließend mit einem Dixon-Coles-Modell die Wahrscheinlichkeit jedes Ergebnisses. Für die Märkte 1X2, über/unter 2,5 Tore und beide Teams treffen werden diese Wahrscheinlichkeiten durch eine aus früheren Saisons gelernte Kalibrierung korrigiert. Quoten fließen nie in diese Berechnung ein.</p>
 
     <div class="model-grid">
       <div class="model-card">
-        <div class="mtitle" data-i18n="about_page.card_history_title">SAISONÜBERGREIFENDE HISTORIE</div>
-        <div class="mdesc" data-i18n="about_page.card_history_text">Jede Berechnung stützt sich auf mehrere Saisons realer Ergebnisse und Statistiken, nicht auf einen spontanen Eindruck oder die aktuellen Schlagzeilen.</div>
+        <div class="mtitle" data-i18n="about_page.card_history_title">LAUFENDE UND VORHERIGE SAISON</div>
+        <div class="mdesc" data-i18n="about_page.card_history_text">Die Berechnung nutzt die laufende und die vorherige Saison. Zu Saisonbeginn zählen die Vorsaison und ein Referenzdurchschnitt stärker, danach mit jedem gespielten Spiel weniger.</div>
       </div>
       <div class="model-card">
-        <div class="mtitle" data-i18n="about_page.card_crossed_title">ABGEGLICHENE MODELLE</div>
-        <div class="mdesc" data-i18n="about_page.card_crossed_text">Mehrere unabhängige statistische Modelle analysieren jede Begegnung parallel; eine Schlussfolgerung wird nur übernommen, wenn sie übereinstimmen.</div>
+        <div class="mtitle" data-i18n="about_page.card_crossed_title">EIN ERGEBNISMODELL</div>
+        <div class="mdesc" data-i18n="about_page.card_crossed_text">Die Wahrscheinlichkeiten stammen aus einem einzigen Ergebnismodell (Dixon-Coles), kalibriert für drei Märkte. Es ist keine Abstimmung zwischen Modellen: Die Poisson-Berechnung und die Simulation dienen nur dazu, die in der Zuverlässigkeit angezeigte Übereinstimmung zu messen.</div>
       </div>
       <div class="model-card">
         <div class="mtitle" data-i18n="about_page.card_simulations_title">SIMULATIONEN</div>
-        <div class="mdesc" data-i18n="about_page.card_simulations_text">Für jede Begegnung werden Tausende Spielszenarien simuliert, um die statistische Konsistenz der erzielten Ergebnisse zu prüfen.</div>
+        <div class="mdesc" data-i18n="about_page.card_simulations_text">Jedes Spiel wird 5.000-mal simuliert (Monte-Carlo-Methode), um die wahrscheinlichsten Ergebnisse anzuzeigen. Diese Simulationen dienen nicht zur Auswahl der Wette.</div>
       </div>
       <div class="model-card">
         <div class="mtitle" data-i18n="about_page.card_reliability_title">ZUVERLÄSSIGKEITSSCORE</div>
-        <div class="mdesc" data-i18n="about_page.card_reliability_text">Ein separater Indikator misst die Übereinstimmung der Modelle und die Qualität der für dieses konkrete Spiel verfügbaren Daten — er verändert nie die Wahrscheinlichkeit selbst.</div>
+        <div class="mdesc" data-i18n="about_page.card_reliability_text">Ein separater Indikator kombiniert die Übereinstimmung der Berechnungen, die Qualität der verfügbaren Daten und die Zahl der gespielten Spiele für genau dieses Spiel – er verändert nie die Wahrscheinlichkeit.</div>
       </div>
     </div>
 
-    <p data-i18n-html="about_page.method_selection">Der für jedes Spiel hervorgehobene Markt wird automatisch nach deterministischen statistischen Kriterien ausgewählt, ohne manuellen Eingriff. Die <b>angezeigte Wahrscheinlichkeit</b> ist direkt die des Modells und wird nachträglich nie verändert. Ein Sprachmodell verfasst anschließend den Erklärungstext zu dieser Auswahl, berechnet, wählt oder verändert jedoch keine einzige Zahl: Wahrscheinlichkeiten, Quoten, ausgewählter Markt und Zuverlässigkeitsstufe werden vollständig durch unsere statistische Methode bestimmt, nie durch diesen Text.</p>
-    <p data-i18n-html="about_page.method_value"><b>Das Konzept Value</b>: Unser Modell vergleicht seine berechnete Wahrscheinlichkeit mit der von den Buchmachern angebotenen Quote. Weicht unsere Schätzung deutlich von der durch die Quote implizierten ab, spricht man von einer „Value Bet“ — einer Quote, die der Markt möglicherweise falsch bewertet hat. Die genauen Details unserer Berechnungsmethode sind proprietär und werden nicht öffentlich bekanntgegeben.</p>
+    <p data-i18n-html="about_page.method_selection">Der hervorgehobene Markt wird automatisch nach einer festen Regel gewählt: unter den Märkten, die das Modell berechnet und die ein Buchmacher tatsächlich anbietet, derjenige mit der höchsten <b>geschätzten Wahrscheinlichkeit</b>, vorrangig unter denen mit einer Mindestquote und unterhalb einer Wahrscheinlichkeitsobergrenze. Ein Spiel, das zum Zeitpunkt der Berechnung bereits begonnen hat oder kurz vor dem Anpfiff steht, erhält keine Wette. Die angezeigte Wahrscheinlichkeit ist die des Modells und wird nie nachträglich geändert. Ein Sprachmodell schreibt anschließend den Erklärtext, berechnet, wählt oder ändert aber keine Zahl.</p>
+    <p data-i18n-html="about_page.method_value"><b>Der Abstand zum Markt</b>: Das Modell vergleicht seine Wahrscheinlichkeit anschließend mit der von der Quote implizierten, nach Abzug der Buchmachermarge (Shin-Methode, wo möglich). Dieser Abstand dient nur der Information: Er wird nicht zur Wahl des Marktes verwendet und garantiert keinen Gewinn.</p>
   </div>
 
   <!-- ═══ SIMPLE VS COMBINE ═══ -->
@@ -186,7 +186,7 @@ footer .foot-links a{color:#22d3ee;}
       <li data-i18n-html="about_page.legal_informative"><b>Ausschließlich informative Inhalte.</b> Die hier veröffentlichten Analysen, Statistiken, Wahrscheinlichkeiten und Zuverlässigkeitsindikatoren dienen rein informativen und edukativen Zwecken. Sie stellen weder eine Finanzberatung noch eine Ergebnisgarantie dar.</li>
       <li data-i18n-html="about_page.legal_no_liability"><b>Es wird keinerlei Haftung übernommen</b> für finanzielle Verluste, die aus Entscheidungen auf Grundlage der Inhalte dieser Website entstehen. Sie allein sind für Ihre Spielentscheidungen und deren Folgen verantwortlich.</li>
       <li data-i18n-html="about_page.legal_unpredictable"><b>Sport ist unvorhersehbar.</b> Kein statistisches Modell, so streng es auch sein mag, kann ein Sportergebnis mit Sicherheit vorhersagen.</li>
-      <li data-i18n-html="about_page.legal_past_performance"><b>Vergangene Ergebnisse ≠ zukünftige Ergebnisse.</b> Ein langfristig positiver statistischer Vorteil verhindert keine kurzfristigen Verlustserien. Das auf dieser Seite beschriebene Modell und die Methodik können sich ohne Vorankündigung ändern.</li>
+      <li data-i18n-html="about_page.legal_past_performance"><b>Vergangene Ergebnisse ≠ zukünftige Ergebnisse.</b> Auch zutreffende Schätzungen verhindern keine Verlustserien. Das auf dieser Seite beschriebene Modell und die Methodik können sich ändern.</li>
       <li data-i18n-html="about_page.legal_ownership"><b>Eigentum an den Inhalten.</b> Die auf dieser Website dargestellten Analysen, Texte und Methodik sind Eigentum von IASHARK und dürfen ohne vorherige Genehmigung nicht vervielfältigt werden.</li>
       <li data-i18n-html="about_page.legal_adults"><b>Nur für Volljährige</b> (ab 18 Jahren).</li>
     </ul>

@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Méthodologie IAShark : données, modèle, limites</title>
+<meta name="description" content="Qui publie IAShark, d&#x27;où viennent les données, comment le modèle calcule et retient un pari, ses limites et le jeu responsable. Réservé aux 18+.">
+<meta property="og:title" content="Méthodologie IAShark : données, modèle, limites">
+<meta property="og:description" content="Qui publie IAShark, d&#x27;où viennent les données, comment le modèle calcule et retient un pari, ses limites et le jeu responsable. Réservé aux 18+.">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="fr_FR">
+<link rel="canonical" href="https://iashark.com/fr/methodologie.html">
+<meta property="og:url" content="https://iashark.com/fr/methodologie.html">
+<meta property="og:image" content="https://iashark.com/icon-512.png">
+<meta name="twitter:card" content="summary_large_image">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* IASHARK legal pages - shared style block (identical in every legal/<dir>/*.html). */
+:root{--page:#060b12;--surface:#0a1420;--surface-2:#0d1926;--cyan:#20d5ef;--amber:#f59e0b;--text:#f4f7fb;--body:#c3ccd8;--soft:#91a0b3;--muted:#6d7d90;--line:rgba(141,179,211,.14);--line-cyan:rgba(32,213,239,.28);}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%;scroll-padding-top:96px;}
+body{background:var(--page);color:var(--text);font-family:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;min-height:100vh;padding-bottom:90px;-webkit-font-smoothing:antialiased;}
+body::before{content:'';position:fixed;top:-200px;left:0;right:0;height:640px;background:radial-gradient(ellipse 60% 100% at 50% 0,rgba(18,123,171,.14),transparent 70%);pointer-events:none;z-index:0;}
+a:focus-visible,button:focus-visible{outline:2px solid var(--cyan);outline-offset:2px;border-radius:6px;}
+.hdr{position:sticky;top:0;z-index:99;height:72px;display:flex;align-items:center;gap:18px;padding:0 max(28px,calc((100vw - 1180px)/2));background:rgba(6,11,18,.9);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border-bottom:1px solid var(--line);}
+.brand-logo{display:flex;align-items:center;flex:none;width:154px;height:48px;text-decoration:none;overflow:hidden;}
+.brand-logo img{display:block;width:154px;height:auto;mix-blend-mode:lighten;}
+.hdr-title{min-width:0;padding-left:18px;border-left:1px solid var(--line);font-family:'Space Mono',ui-monospace,Menlo,monospace;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.hdr-back{order:3;margin-left:auto;flex:none;height:38px;padding:0 16px;border:1px solid rgba(32,213,239,.5);border-radius:8px;background:transparent;color:var(--cyan);font-family:'Inter',system-ui,sans-serif;font-size:12px;font-weight:700;letter-spacing:.02em;cursor:pointer;transition:background .2s,border-color .2s;}
+.hdr-back:hover{background:rgba(32,213,239,.08);border-color:var(--cyan);}
+.container{position:relative;z-index:1;max-width:1180px;margin:0 auto;padding:52px 28px 40px;display:grid;grid-template-columns:232px minmax(0,1fr);column-gap:64px;align-content:start;}
+.container>*{grid-column:2;min-width:0;max-width:780px;}
+.legal-nav{grid-column:1;grid-row:1/span 80;align-self:start;position:sticky;top:104px;display:flex;flex-direction:column;gap:2px;padding:10px;border:1px solid var(--line);border-radius:16px;background:linear-gradient(145deg,rgba(13,25,38,.92),rgba(10,20,32,.92));box-shadow:0 18px 50px rgba(0,0,0,.25);}
+.legal-nav a{display:block;padding:10px 14px;border-radius:10px;color:var(--soft);font-size:13.5px;font-weight:500;line-height:1.35;text-decoration:none;transition:color .2s,background .2s;}
+.legal-nav a:hover{color:var(--text);background:rgba(255,255,255,.04);}
+.legal-nav a[aria-current="page"]{color:var(--cyan);font-weight:600;background:rgba(32,213,239,.08);box-shadow:inset 3px 0 0 var(--cyan);}
+.page-title{font-size:clamp(32px,4.2vw,50px);font-weight:800;line-height:1.06;letter-spacing:-.035em;color:var(--text);margin-bottom:16px;overflow-wrap:break-word;hyphens:auto;}
+.page-date{justify-self:start;display:inline-flex;align-items:center;gap:9px;margin-bottom:30px;padding:6px 13px;border:1px solid var(--line);border-radius:999px;background:rgba(255,255,255,.03);font-family:'Space Mono',ui-monospace,Menlo,monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--soft);}
+.page-date::before{content:'';flex:none;width:6px;height:6px;border-radius:50%;background:var(--cyan);box-shadow:0 0 8px rgba(32,213,239,.7);}
+.warn-box{margin-bottom:12px;padding:18px 20px 18px 22px;border:1px solid rgba(245,158,11,.3);border-radius:14px;background:linear-gradient(145deg,rgba(245,158,11,.1),rgba(245,158,11,.03));box-shadow:inset 3px 0 0 var(--amber);}
+.warn-box p{font-size:12.5px;line-height:1.75;font-weight:600;letter-spacing:.02em;color:#f3c77a;overflow-wrap:break-word;}
+.warn-box a{color:#fde3a7;text-decoration:underline;text-decoration-color:rgba(253,227,167,.45);text-underline-offset:3px;white-space:nowrap;}
+.section{padding:32px 0 30px;border-bottom:1px solid var(--line);}
+.section h2{display:flex;gap:12px;margin-bottom:16px;font-size:20px;font-weight:700;line-height:1.35;letter-spacing:-.015em;color:var(--text);}
+.section h2::before{content:'';flex:none;width:3px;height:1.05em;margin-top:.17em;border-radius:3px;background:var(--cyan);}
+.section h3{margin:22px 0 10px;font-size:16px;font-weight:600;line-height:1.4;color:var(--text);}
+.section p,.section li{font-size:15.5px;line-height:1.78;color:var(--body);overflow-wrap:break-word;}
+.section p{margin-bottom:14px;}
+.section li{margin-bottom:9px;padding-left:4px;}
+.section li::marker{color:var(--cyan);}
+.section ul,.section ol{margin:4px 0 16px;padding-left:22px;}
+.section>:last-child,.section li:last-child,.highlight>:last-child{margin-bottom:0;}
+.section strong{color:var(--text);font-weight:600;}
+.section a,.legal-foot a{overflow-wrap:anywhere;}
+.section a{color:var(--cyan);text-decoration:underline;text-decoration-color:rgba(32,213,239,.35);text-underline-offset:3px;transition:text-decoration-color .2s;}
+.section a:hover{text-decoration-color:var(--cyan);}
+.section code{padding:1px 6px;border:1px solid var(--line);border-radius:6px;background:rgba(255,255,255,.05);font-family:'Space Mono',ui-monospace,Menlo,monospace;font-size:.8em;color:var(--text);overflow-wrap:anywhere;}
+.highlight{margin:18px 0 20px;padding:18px 20px 18px 22px;border:1px solid var(--line-cyan);border-radius:14px;background:linear-gradient(145deg,rgba(14,29,44,.97),rgba(7,16,26,.98));box-shadow:inset 3px 0 0 var(--cyan),0 18px 44px rgba(0,0,0,.22);}
+.highlight p{font-size:14.5px;line-height:1.75;color:#dce3eb;margin-bottom:8px;}
+.section [data-analytics-optout]{display:inline-flex!important;align-items:center;min-height:44px;margin:6px 0!important;padding:0 18px!important;border:1px solid rgba(32,213,239,.6)!important;border-radius:8px!important;background:rgba(32,213,239,.08)!important;color:var(--cyan)!important;font-family:'Inter',system-ui,sans-serif!important;font-size:13px!important;font-weight:700;letter-spacing:.01em!important;line-height:1.3;text-decoration:none!important;}
+.section [data-analytics-optout]:hover{background:rgba(32,213,239,.14)!important;}
+.tbl-wrap{margin:18px 0 22px;overflow-x:auto;border:1px solid var(--line);border-radius:14px;background:rgba(10,20,32,.7);}
+.tbl-wrap table{width:100%;border-collapse:collapse;}
+.tbl-wrap th{padding:12px 16px;background:var(--surface-2);border-bottom:1px solid var(--line);font-family:'Space Mono',ui-monospace,Menlo,monospace;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--soft);text-align:left;vertical-align:bottom;}
+.tbl-wrap td{padding:13px 16px;border-bottom:1px solid var(--line);font-size:14px;line-height:1.65;color:var(--body);vertical-align:top;overflow-wrap:break-word;}
+.tbl-wrap tr:last-child td{border-bottom:0;}
+.tbl-wrap tr:hover td{background:rgba(255,255,255,.02);}
+.tbl-wrap td:first-child{color:var(--text);font-weight:500;}
+.legal-foot{margin-top:44px;padding:26px 24px;border:1px solid var(--line);border-radius:18px;background:linear-gradient(145deg,rgba(13,25,38,.9),rgba(7,16,26,.95));text-align:center;}
+.legal-foot>div:first-child{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;}
+.legal-foot>div:first-child a{padding:8px 14px;border:1px solid var(--line);border-radius:999px;color:var(--body);font-size:13px;font-weight:600;text-decoration:none;transition:color .2s,border-color .2s;}
+.legal-foot>div:first-child a:hover{color:var(--cyan);border-color:rgba(32,213,239,.4);}
+.legal-foot>div+div{margin-top:18px;font-family:'Space Mono',ui-monospace,Menlo,monospace;font-size:10px;letter-spacing:.08em;line-height:1.9;color:var(--muted);}
+.legal-foot>div+div a{color:var(--soft);text-decoration:none;}
+.legal-foot>div+div a:hover{color:var(--cyan);}
+@media(max-width:900px){
+  .hdr{height:62px;padding:0 18px;gap:14px;}
+  .brand-logo{width:118px;height:40px;}.brand-logo img{width:118px;}
+  .hdr-title{padding-left:14px;}
+  .container{display:block;padding:26px 18px 32px;}
+  .container>*{max-width:none;}
+  .legal-nav{position:static;flex-direction:row;gap:8px;margin:0 -18px 26px;padding:2px 18px 6px;overflow-x:auto;border:0;border-radius:0;background:none;box-shadow:none;scrollbar-width:none;-webkit-overflow-scrolling:touch;}
+  .legal-nav::-webkit-scrollbar{display:none;}
+  .legal-nav a{flex:none;display:inline-flex;align-items:center;min-height:44px;padding:8px 14px;border:1px solid var(--line);border-radius:999px;background:rgba(255,255,255,.02);font-size:13px;white-space:nowrap;}
+  .legal-nav a[aria-current="page"]{box-shadow:none;border-color:rgba(32,213,239,.55);}
+  .page-title{font-size:clamp(28px,8vw,38px);}
+  .page-date{margin-bottom:22px;}
+}
+@media(max-width:640px){
+  .hdr-back{height:44px;padding:0 12px;font-size:11px;}
+  .brand-logo{height:44px;}
+  .legal-foot>div:first-child a{display:inline-flex;align-items:center;min-height:44px;}
+  .legal-foot>div+div a{display:inline-block;padding:14px 2px;margin:-14px 0;}
+  .warn-box{padding:15px 16px 15px 18px;}
+  .warn-box p{font-size:12px;}
+  .section{padding:26px 0 24px;}
+  .section h2{font-size:18px;gap:10px;}
+  .section p,.section li{font-size:15px;line-height:1.72;}
+  .highlight{padding:15px 16px 15px 18px;}
+  .highlight p{font-size:14px;}
+  .tbl-wrap{overflow:visible;border:0;border-radius:0;background:none;}
+  .tbl-wrap table,.tbl-wrap tbody,.tbl-wrap tr,.tbl-wrap td{display:block;width:100%;}
+  .tbl-wrap tr.tbl-head{display:none;}
+  .tbl-wrap tr{margin-bottom:10px;padding:4px 16px;border:1px solid var(--line);border-radius:12px;background:linear-gradient(145deg,rgba(13,25,38,.9),rgba(10,20,32,.9));}
+  .tbl-wrap tr:last-child{margin-bottom:0;}
+  .tbl-wrap td,.tbl-wrap tr:last-child td{padding:10px 0;border-bottom:1px solid var(--line);}
+  .tbl-wrap td:last-child,.tbl-wrap tr:last-child td:last-child{border-bottom:0;}
+  .tbl-wrap tr:hover td{background:none;}
+  .tbl-wrap td[data-label]::before{content:attr(data-label);display:block;margin-bottom:3px;font-family:'Space Mono',ui-monospace,Menlo,monospace;font-size:9.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);}
+  .legal-foot{padding:22px 16px;}
+}
+@media(max-width:460px){.hdr-title{display:none;}}
+@media print{
+  body{background:#fff;color:#000;padding:0;}
+  body::before,.hdr,.legal-nav,.site-bottom-nav{display:none!important;}
+  .container{display:block;padding:0;max-width:none;}
+  .page-title,.section h2,.section h3,.section strong{color:#000;}
+  .section p,.section li,.tbl-wrap td,.highlight p,.warn-box p{color:#222;}
+  .warn-box,.highlight,.tbl-wrap,.legal-foot{background:none;box-shadow:none;border-color:#999;}
+}
+</style>
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://iashark.com/#organization","name":"IAShark","alternateName":"IASHARK","url":"https://iashark.com/","logo":{"@type":"ImageObject","url":"https://iashark.com/icon-512.png","width":512,"height":512},"email":"contact@iashark.com","contactPoint":{"@type":"ContactPoint","contactType":"customer support","email":"contact@iashark.com"}},{"@type":"AboutPage","@id":"https://iashark.com/fr/methodologie.html#page","url":"https://iashark.com/fr/methodologie.html","name":"Méthodologie IAShark : données, modèle, limites","description":"Qui publie IAShark, d'où viennent les données, comment le modèle calcule et retient un pari, ses limites et le jeu responsable. Réservé aux 18+.","inLanguage":"fr","about":{"@id":"https://iashark.com/#organization"},"publisher":{"@id":"https://iashark.com/#organization"},"author":{"@id":"https://iashark.com/#organization"},"dateModified":"2026-09-14"}]}</script>
+<link rel="stylesheet" href="/assets/bottom-navigation.css"></head>
+<body>
+<!-- BLOCKED_DECISION: IDENTITE_LEGALE. Raison sociale, forme, SIREN/SIRET, adresse et TVA de l'éditeur non publiées (legal/README.md). Affiché en attendant : « IAShark » et l'adresse de contact existante. Pas de legalName dans le JSON-LD. -->
+<!-- BLOCKED_DECISION: NOM_RESPONSABLE_EDITORIAL. Nom du responsable éditorial non décidé. Aucun nœud Person dans le JSON-LD tant que la décision n'est pas prise. -->
+<!-- BLOCKED_DECISION: NIVEAU_DE_DIVULGATION. Publier ou non les valeurs exactes des seuils (cote minimale, plafond de probabilité, seuils de la sélection renforcée et du match offert, paliers du niveau de risque et de la fiabilité, paramètres du modèle). En attendant, la logique est décrite en langage simple, sans valeurs. Valeurs réelles : lib/decision.js, lib/kickoff-guard.js, lib/run-output/safe-pick.js, .github/workflows/update-data.yml. -->
+<!-- LEGAL REVIEW: contenu en REVIEW, non APPROVED. Points à valider : mention nominative d'Anthropic / Claude et formulation « aucune analyse n'est relue par une personne » (AI Act), vocabulaire « valeur estimée » et « sélection renforcée », messages de prévention par marché. Section « publication des résultats » volontairement absente (décision propriétaire : pas de bilan public pour l'instant). -->
+<header class="hdr">
+  <button class="hdr-back" type="button" onclick="history.back()">&larr; RETOUR</button>
+  <a class="brand-logo" href="./" aria-label="IASHARK"><img src="/assets/iashark-logo.png" alt="IASHARK" width="154" height="41"></a>
+  <div class="hdr-title">MÉTHODOLOGIE</div>
+</header>
+<main class="container">
+  <nav class="legal-nav" aria-label="Pages légales">
+
+    <a href="mentions-legales.html">Mentions légales</a>
+    <a href="cgv.html">CGV</a>
+    <a href="confidentialite.html">Confidentialité</a>
+    <a href="cookies.html">Cookies</a>
+    <a href="jeu-responsable.html">Jeu responsable</a>
+    <a href="methodologie.html" aria-current="page">Méthodologie</a>
+  </nav>
+  <h1 class="page-title">Méthodologie</h1>
+  <div class="page-date">Dernière mise à jour : 14 septembre 2026</div>
+
+  <div class="warn-box">
+    <p>⚠️ IASHARK N'EST PAS UN SITE DE PARIS : AUCUNE MISE N'EST PRISE SUR CE SITE. LES ANALYSES SONT DES ESTIMATIONS STATISTIQUES, SANS AUCUNE GARANTIE DE RÉSULTAT.<br>LES JEUX D'ARGENT COMPORTENT DES RISQUES : ENDETTEMENT, DÉPENDANCE. BESOIN D'AIDE ? JOUEURS INFO SERVICE : <a href="tel:+33974751313">09 74 75 13 13</a> (APPEL NON SURTAXÉ).<br>SERVICE RÉSERVÉ AUX PERSONNES ÂGÉES DE 18 ANS ET PLUS.</p>
+  </div>
+
+  <section class="section">
+    <p>IAShark publie des analyses statistiques de matchs de football produites automatiquement. Cette page explique qui les publie, d'où viennent les données, comment les chiffres sont calculés, comment un pari est retenu ou écarté, et ce que le modèle ne sait pas faire. Elle décrit le fonctionnement réel du système à la date indiquée en haut de page.</p>
+    <p><strong>Contenu informatif.</strong> Service réservé aux personnes de 18 ans et plus. Parier comporte des risques financiers et de dépendance.</p>
+  </section>
+  <section class="section">
+    <h2>1. Qui publie IAShark</h2>
+    <ul><li><strong>Site :</strong> iashark.com</li><li><strong>Éditeur :</strong> IAShark</li><li><strong>Contact :</strong> <a href="mailto:contact@iashark.com">contact@iashark.com</a></li><li><strong>Informations légales :</strong> <a href="mentions-legales.html">Mentions légales</a></li></ul>
+    <p>IAShark n'est pas un opérateur de paris ni un bookmaker. Le site ne prend aucune mise, ne gère aucun compte joueur et ne verse aucun gain. IAShark ne détient aucune licence ni aucun agrément de jeu (en France, aucun agrément de l'Autorité nationale des jeux). Les analyses sont des estimations statistiques publiées à titre informatif. Elles ne constituent ni un conseil financier ni une incitation à parier.</p>
+  </section>
+  <section class="section">
+    <h2>2. D'où viennent les données</h2>
+    <div class="tbl-wrap"><table><tbody><tr class="tbl-head"><th>Source</th><th>Données utilisées</th><th>Rôle dans l'analyse</th></tr><tr><td data-label="Source">API-Football (API-SPORTS)</td><td data-label="Données utilisées">Calendrier et statut des matchs, classements, statistiques des équipes (saison en cours et saison précédente), derniers matchs terminés, statistiques de match (tirs, tirs cadrés, buts attendus « xG » quand ils sont fournis), minute des buts, blessures et suspensions, confrontations directes, compositions officielles, statistiques des joueurs, cotes de plusieurs bookmakers</td><td data-label="Rôle dans l&#x27;analyse">Base du calcul</td></tr><tr><td data-label="Source">The Odds API</td><td data-label="Données utilisées">Cotes du bookmaker Pinnacle (résultat 1X2, nombre de buts, les deux équipes marquent) pour les compétitions référencées</td><td data-label="Rôle dans l&#x27;analyse">Référence de marché</td></tr><tr><td data-label="Source">Pinnacle via API-Football</td><td data-label="Données utilisées">Pour la Liga MX, la Premier Soccer League et les championnats d'Argentine, de Colombie, du Pérou et du Chili : si The Odds API ne renvoie rien, les cotes Pinnacle présentes dans API-Football sont lues. Aucun autre bookmaker n'est utilisé en remplacement.</td><td data-label="Rôle dans l&#x27;analyse">Référence de marché</td></tr><tr><td data-label="Source">ClubElo</td><td data-label="Données utilisées">Classement Elo des clubs</td><td data-label="Rôle dans l&#x27;analyse">Affiché et pris en compte dans la note de qualité des données. N'entre pas dans le calcul des probabilités.</td></tr><tr><td data-label="Source">OpenWeatherMap</td><td data-label="Données utilisées">Météo prévue, seulement si une prévision proche du coup d'envoi existe</td><td data-label="Rôle dans l&#x27;analyse">Affichage</td></tr><tr><td data-label="Source">NewsAPI et flux RSS (L'Équipe, Foot01, RMC Sport, Foot Mercato)</td><td data-label="Données utilisées">Actualités et transferts</td><td data-label="Rôle dans l&#x27;analyse">Affichage. N'entrent pas dans le calcul.</td></tr><tr><td data-label="Source">Anthropic (Claude)</td><td data-label="Données utilisées">Rédaction et traduction des textes d'analyse</td><td data-label="Rôle dans l&#x27;analyse">Voir la section 7</td></tr></tbody></table></div>
+    <p><strong>Compétitions couvertes :</strong> Premier League, LaLiga, Serie A, Bundesliga, Ligue 1, Ligue des champions, Ligue Europa, Ligue Conférence, Eredivisie, Liga Portugal, MLS, Allsvenskan, J1 League, Liga MX, Premier Soccer League (Afrique du Sud), Liga Profesional (Argentine), Primera A (Colombie), Liga 1 (Pérou) et Primera División (Chili). Le niveau de détail disponible varie selon la compétition.</p>
+    <h3>Fréquence de mise à jour</h3>
+    <ul><li>Le calcul est lancé automatiquement une fois par jour, à <strong>06:00 UTC</strong> (08:00 à Paris en été, 07:00 en hiver). La publication intervient après la fin du calcul.</li><li>Chaque passage couvre les matchs du jour, du lendemain et du surlendemain, et recalcule tout. Un même match peut donc être analysé jusqu'à trois fois : la version la plus récente remplace la précédente.</li><li>Un match déjà commencé, sur le point de commencer au moment du calcul, ou dont le statut n'est plus « à venir » (reporté, annulé, en cours, terminé) ne reçoit ni pari ni analyse. Il peut rester affiché comme fiche d'information.</li><li>Aucun recalcul automatique n'est programmé dans les heures qui précèdent le coup d'envoi. Des tâches séparées enregistrent régulièrement l'évolution des cotes et la cote de clôture : elles servent au suivi et ne modifient pas les analyses publiées.</li></ul>
+  </section>
+  <section class="section">
+    <h2>3. Comment le modèle calcule</h2>
+    <p><strong>En clair :</strong></p>
+    <ol><li><strong>Estimer les buts attendus de chaque équipe.</strong> Le système part des buts marqués et encaissés par l'équipe à domicile quand elle joue à domicile, et par l'équipe visiteuse quand elle joue à l'extérieur. Il les compare à la moyenne de la compétition.</li><li><strong>Éviter les conclusions hâtives en début de saison.</strong> Quand peu de matchs ont été joués, la saison en cours est mélangée avec la saison précédente et avec une moyenne de référence. Le poids de la saison précédente diminue à mesure que les matchs s'accumulent.</li><li><strong>Ajuster avec la qualité des occasions.</strong> Si assez de matchs récents sont disponibles, les buts attendus sont corrigés par les xG récents et par la précision des tirs.</li><li><strong>Calculer la probabilité de chaque score.</strong> À partir des deux nombres de buts attendus, le modèle calcule la probabilité de chaque score (0-0, 1-0, 2-1, etc.). Il en déduit la probabilité de chaque marché : résultat 1X2, double chance, nombre de buts, les deux équipes marquent, buts par équipe, première mi-temps, etc.</li><li><strong>Corriger les excès de confiance.</strong> Sur les saisons passées, le modèle brut était trop confiant sur les probabilités élevées et pas assez sur les faibles. Une correction apprise sur l'historique est appliquée aux marchés 1X2, plus/moins de 2,5 buts et « les deux équipes marquent ».</li><li><strong>Simuler le match.</strong> Le match est simulé 5 000 fois pour afficher les scores les plus probables.</li></ol>
+    <p><strong>Lire une probabilité :</strong> 60 % signifie que, sur un grand nombre de matchs comparables, l'issue devrait se produire environ 6 fois sur 10, et donc ne pas se produire environ 4 fois sur 10. Cela suppose un modèle bien calibré, ce qui reste à mesurer en conditions réelles.</p>
+    <p>La probabilité du modèle est calculée <strong>sans jamais utiliser les cotes</strong>. Les cotes servent seulement ensuite, pour comparer l'estimation du modèle à celle du marché.</p>
+    <div class="highlight"><p><strong>Détail technique</strong></p><ul><li><strong>Buts attendus :</strong> taux de buts pour et contre de l'équipe à domicile (à domicile) et de l'équipe visiteuse (à l'extérieur), lissés en début de saison avec la saison précédente et un a priori de ligue, puis bornés pour éviter les valeurs extrêmes.</li><li><strong>Corrections :</strong> buts attendus (xG) récents et facteur de précision des tirs, uniquement avec un nombre suffisant de matchs récents pour chaque équipe.</li><li><strong>Matrice des scores :</strong> modèle de Dixon-Coles, avec une troncature adaptative du nombre de buts.</li><li><strong>Calibration :</strong> régression isotone appliquée au 1X2, au plus de 2,5 buts et à « les deux équipes marquent : oui », ajustée sur des saisons passées et contrôlée sur des saisons qui n'avaient pas servi à l'ajustement. Les autres marchés ne sont pas calibrés.</li><li><strong>Monte-Carlo :</strong> 5 000 simulations avec une graine dérivée des buts attendus, donc des résultats reproductibles. Elles servent à afficher les scores les plus probables, filtrés pour rester cohérents avec le marché retenu. Elles ne servent pas à choisir le pari.</li><li><strong>Probabilité du marché :</strong> cotes Pinnacle quand le 1X2 est complet, sinon cotes collectées via API-Football. La marge du bookmaker est retirée par la <strong>méthode de Shin</strong> pour le 1X2 et pour les paires plus/moins de 2,5 buts et oui/non « les deux équipes marquent ». Pour les autres marchés, la probabilité est 1 ÷ cote, marge incluse.</li><li><strong>Écart :</strong> probabilité du modèle moins probabilité du marché, en points.</li><li><strong>Elo :</strong> affiché, mais non utilisé dans les probabilités.</li><li><strong>Version du modèle :</strong> <code>score-matrix-dc-early-season-v2</code>.</li></ul></div>
+  </section>
+  <section class="section">
+    <h2>4. Comment un pari est retenu, ou non</h2>
+    <p><strong>La règle.</strong> Parmi les marchés à la fois calculés par le modèle et réellement cotés par un bookmaker, le système retient celui dont la <strong>probabilité estimée est la plus élevée</strong>, avec deux garde-fous :</p>
+    <ul><li>une <strong>cote minimale</strong> ;</li><li>un <strong>plafond de probabilité</strong> : au-delà, la probabilité et la cote ne peuvent pas décrire le même événement, et le marché est écarté.</li></ul>
+    <p>Le marché retenu est donc le plus probable selon le modèle, <strong>pas</strong> celui qui présente le plus grand écart avec le marché. L'écart est calculé ensuite et affiché séparément.</p>
+    <p><strong>Quand aucun marché n'atteint la cote minimale :</strong></p>
+    <ul><li>si des marchés sont cotés mais tous sous la cote minimale, le plus probable est retenu malgré tout et signalé comme sous le seuil ;</li><li>si aucune cote n'est disponible mais que le modèle a pu calculer, son marché le plus probable est publié sans cote et sans écart.</li></ul>
+    <p><strong>Niveau de risque affiché.</strong> Il dépend uniquement de la cote du marché retenu, en trois paliers (faible, modéré, élevé) : plus la cote est haute, plus le niveau affiché est élevé.</p>
+    <p><strong>Pourquoi « aucun pari retenu » sur certains matchs :</strong></p>
+    <ul><li><strong>Match commencé ou imminent</strong> au moment du calcul, ou statut qui n'est plus « à venir » : aucun pronostic n'est produit après le coup d'envoi.</li><li><strong>Données de la saison en cours indisponibles</strong> parce que le fournisseur a refusé ou raté l'appel (quota, erreur). Le système s'abstient plutôt que de s'appuyer sur des données dont il ignore l'état.</li><li><strong>Historique insuffisant :</strong> l'équipe à domicile n'a joué aucun match à domicile, ou l'équipe visiteuse aucun match à l'extérieur, ni cette saison ni la précédente dans la compétition.</li></ul>
+    <p>Si le fournisseur refuse des appels pendant un calcul et qu'une analyse valide existait déjà pour ce match, l'analyse précédente est conservée et marquée comme issue du calcul précédent, sauf si le match a commencé entre-temps.</p>
+    <p><strong>Sélection renforcée.</strong> Dans les compétitions où le modèle de score a passé une validation spécifique (à ce jour, <strong>uniquement la Premier League</strong>), une sélection plus stricte peut remplacer le marché retenu sur un match par calcul. Elle exige une cote minimale, une probabilité minimale, une avance nette sur la deuxième issue du même marché et un écart limité avec la probabilité du marché. Les candidats sont ensuite classés par un score de robustesse. Ce dispositif est en phase d'observation : sa validation sur les paris n'est pas terminée.</p>
+    <p><strong>Choix de l'analyse offerte du jour.</strong> Une analyse est offerte pour chacune des deux prochaines journées qui comportent des analyses (en pratique aujourd'hui et demain). Le système la choisit parmi les matchs dont le marché retenu a une cote réelle, et prend celle dont la <strong>valeur estimée</strong> (probabilité du modèle × cote − 1) est la plus haute, en privilégiant les probabilités au-dessus d'un plancher quand il en existe. Cette valeur est un calcul du modèle, pas une promesse de résultat.</p>
+  </section>
+  <section class="section">
+    <h2>5. Lire la probabilité estimée et la fiabilité</h2>
+    <p><strong>Probabilité estimée (sur 10).</strong> C'est la <strong>probabilité du modèle pour le marché retenu, divisée par 10</strong> : 64 % s'affiche 6,4/10. Ce n'est pas une mesure indépendante et elle ne tient pas compte de la qualité des données. Elle n'est affichée que lorsqu'un marché est retenu, sur l'analyse offerte du jour et pour les abonnés.</p>
+    <p><strong>Fiabilité (Élevée, Moyenne, Faible).</strong> Elle est calculée séparément de la probabilité, à partir de trois signaux mesurables, chacun classé en trois niveaux puis combinés :</p>
+    <div class="tbl-wrap"><table><tbody><tr class="tbl-head"><th>Signal</th><th>Ce qui est mesuré</th></tr><tr><td data-label="Signal">Accord des calculs</td><td data-label="Ce qui est mesuré">Écart entre les probabilités de victoire à domicile selon trois calculs : Poisson, Dixon-Coles et simulation</td></tr><tr><td data-label="Signal">Qualité des données</td><td data-label="Ce qui est mesuré">Présence des statistiques des deux équipes, des cotes, des blessures, des confrontations directes, de l'Elo et des compositions (note sur 100)</td></tr><tr><td data-label="Signal">Échantillon</td><td data-label="Ce qui est mesuré">Nombre de matchs joués cette saison par l'équipe qui en a joué le moins</td></tr></tbody></table></div>
+    <p><strong>Comment l'utiliser :</strong></p>
+    <ul><li>Une fiabilité élevée signifie que le calcul a été fait dans de bonnes conditions. Elle <strong>n'augmente pas</strong> la probabilité que le pari passe.</li><li>Les trois calculs de l'accord partagent les mêmes buts attendus. Un accord « fort » est donc fréquent et ne constitue pas une confirmation indépendante.</li><li>Une liste de blessures vide compte comme une donnée absente. Les compositions officielles sont rarement connues au moment du calcul quotidien.</li><li>La fiabilité n'intègre pas la calibration du modèle mesurée en conditions réelles.</li></ul>
+  </section>
+  <section class="section">
+    <h2>6. Limites du modèle</h2>
+    <ul><li><strong>Informations de dernière minute.</strong> Le calcul a lieu une fois par jour. Une blessure à l'échauffement, une rotation, un changement d'entraîneur ou une composition inattendue survenus après ne sont pas pris en compte. Les absences connues sont affichées mais ne modifient pas les probabilités.</li><li><strong>Début de saison et petits échantillons.</strong> Avec peu de matchs, le modèle s'appuie davantage sur la saison précédente et sur une moyenne de référence. Une équipe promue n'a pas d'historique dans la compétition. Les transferts ne sont pas intégrés dans la force des équipes.</li><li><strong>Compétitions moins couvertes.</strong> Certaines données manquent selon la compétition (blessures, Elo, cotes Pinnacle), ce qui abaisse la note de qualité. À ce jour, seule la Premier League a passé la validation spécifique du modèle de score. Ailleurs, le même modèle générique est appliqué sans validation propre à la compétition.</li><li><strong>Ce que le modèle ignore.</strong> Enjeu du match, derby, fatigue, météo, arbitre et absences sont affichés à titre de contexte. Ils n'entrent pas dans le calcul des probabilités.</li><li><strong>Calibration partielle.</strong> Seuls trois marchés sont corrigés par calibration, et cette correction a été apprise sur un nombre limité de championnats.</li><li><strong>Variance.</strong> Le football produit peu de buts et beaucoup d'aléa. Une issue estimée à 70 % ne se produit pas environ 3 fois sur 10. Des séries de pertes arrivent même avec des estimations correctes. Ne misez jamais d'argent dont vous avez besoin.</li><li><strong>Textes rédigés par IA.</strong> Les commentaires peuvent contenir des erreurs d'interprétation. En cas de différence, ce sont les chiffres calculés qui font foi.</li></ul>
+  </section>
+  <section class="section">
+    <h2>7. Rôle de l'IA et contrôle humain</h2>
+    <p><strong>Ce qui est automatisé, sans intervention humaine match par match :</strong></p>
+    <ul><li>collecte des données et calculs ;</li><li>choix du marché retenu et de l'analyse offerte du jour ;</li><li>rédaction des textes d'analyse par un modèle de langage (Claude Sonnet, Anthropic), à partir des chiffres déjà calculés ;</li><li>traduction de ces textes par un autre modèle (Claude Haiku) en anglais, espagnol, espagnol du Mexique, allemand, italien et portugais ;</li><li>publication sur le site.</li></ul>
+    <p><strong>Ce que l'IA ne fait pas.</strong> Le modèle de langage ne calcule, ne choisit et ne modifie aucune probabilité, cote, marché retenu ou niveau de risque, ni la sélection des buteurs. Ces éléments sont fixés par le calcul avant qu'il intervienne, et il reçoit la consigne de ne citer que les données fournies.</p>
+    <ul><li>Si sa réponse est inexploitable, l'analyse est publiée sans texte et la sélection reste identique.</li><li>Si une traduction est invalide, le texte est masqué plutôt qu'affiché dans une autre langue.</li></ul>
+    <p><strong>Ce qui n'est pas vérifié automatiquement :</strong> la concordance entre chaque chiffre cité dans un texte et les données. Aucune analyse n'est relue par une personne avant sa publication.</p>
+    <p><strong>Ce qui relève de décisions humaines :</strong></p>
+    <ul><li>le choix des compétitions couvertes ;</li><li>la conception du modèle et de ses seuils, et leurs modifications ;</li><li>l'ajustement et la validation hors ligne de la calibration ;</li><li>les tests du code ;</li><li>la surveillance : des contrôles automatiques bloquent la publication si les fichiers publics sont périmés ou vides, et signalent les incidents à l'équipe.</li></ul>
+    <p>Une erreur à signaler ou une question sur cette méthode : <a href="mailto:contact@iashark.com">contact@iashark.com</a>.</p>
+  </section>
+  <section class="section">
+    <h2>8. Jeu responsable</h2>
+    <p>Les paris sportifs sont interdits aux mineurs. Ils comportent des risques : endettement, isolement, dépendance. Fixez-vous des limites de temps et d'argent, ne cherchez pas à « vous refaire » après une perte, et arrêtez si le jeu cesse d'être un loisir.</p>
+    <p><strong>France (18+)</strong> : Joueurs Info Service, <a href="tel:+33974751313">09 74 75 13 13</a> (appel non surtaxé, de 8 h à 2 h, 7 jours sur 7), <a href="https://www.joueurs-info-service.fr" target="_blank" rel="noopener">joueurs-info-service.fr</a>. Interdiction volontaire de jeux auprès de l'ANJ.</p>
+    <p><strong>Royaume-Uni (18+)</strong> : National Gambling Helpline, <a href="tel:+448088020133">0808 8020 133</a> (gratuit, 24 h/24, 7 j/7, géré par GamCare). Informations sur <a href="https://www.gambleaware.org" target="_blank" rel="noopener">gambleaware.org</a>. Auto-exclusion avec GAMSTOP.</p>
+    <p><strong>Afrique du Sud (18+)</strong> : National Responsible Gambling Programme, <a href="tel:0800006008">0800 006 008</a> (24 h/24), <a href="https://responsiblegambling.org.za" target="_blank" rel="noopener">responsiblegambling.org.za</a>.</p>
+    <p><strong>Mexique (18+)</strong> : prohibido a menores de edad. Línea de la Vida, <a href="tel:8009112000">800 911 2000</a> (gratuit, 24 h/24).</p>
+    <p><strong>Autres pays</strong> : Gambling Therapy, <a href="https://www.gamblingtherapy.org" target="_blank" rel="noopener">gamblingtherapy.org</a> (gratuit, international).</p>
+    <p>Toutes les ressources : <a href="jeu-responsable.html">Jeu responsable</a>.</p>
+  </section>
+  <section class="section">
+    <h2>9. Dernière mise à jour et questions fréquentes</h2>
+    <p><strong>Dernière mise à jour :</strong> 14 septembre 2026. Cette page décrit le fonctionnement du système à cette date.</p>
+    <h3>L'IA choisit-elle les paris ?</h3>
+    <p>Non. Le marché retenu est choisi par une règle de calcul fixe. Le modèle de langage rédige seulement le texte qui l'accompagne, sans pouvoir modifier aucun chiffre.</p>
+    <h3>Pourquoi aucun pari n'est retenu sur certains matchs ?</h3>
+    <p>Parce que le match avait déjà commencé ou allait commencer au moment du calcul, ou parce que le modèle n'a pas pu calculer honnêtement : historique insuffisant, ou données de la saison en cours indisponibles. Le système préfère s'abstenir.</p>
+    <h3>Une fiabilité « Élevée » signifie-t-elle que le pari va passer ?</h3>
+    <p>Non. Elle indique que les données étaient complètes et le calcul cohérent. La probabilité reste une probabilité : une issue à 65 % ne se produit pas environ une fois sur trois.</p>
+    <h3>L'analyse change-t-elle si un joueur se blesse le jour du match ?</h3>
+    <p>Non. Le calcul a lieu une fois par jour et n'est pas refait avant le coup d'envoi. Vérifiez toujours les compositions officielles.</p>
+  </section>
+
+  <footer class="legal-foot">
+    <div><a href="mentions-legales.html">Mentions légales</a> <a href="cgv.html">CGV</a> <a href="confidentialite.html">Confidentialité</a> <a href="cookies.html">Cookies</a> <a href="jeu-responsable.html">Jeu responsable</a> <a href="methodologie.html">Méthodologie</a></div>
+    <div>&copy; 2026 IASHARK &middot; <a href="mailto:contact@iashark.com">contact@iashark.com</a> &middot; <a href="./">Accueil</a></div>
+  </footer>
+</main>
+<script src="/i18n/i18n.js"></script>
+<script src="/site-prefs.js"></script>
+<script src="/bottom-navigation.js"></script>
+</body>
+</html>

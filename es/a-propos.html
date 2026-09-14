@@ -136,37 +136,38 @@ footer .foot-links a{color:#22d3ee;}
 
   <div class="hero">
     <div class="hero-eyebrow" data-i18n="about_page.eyebrow">SOBRE NOSOTROS</div>
-    <h1 data-i18n-html="about_page.hero_title">Nada de olfato.<br><b>Datos</b>, varias temporadas de estadísticas,<br>un método constante.</h1>
-    <p data-i18n="about_page.hero_text">IASHARK analiza cada partido a partir de datos deportivos acumulados durante varias temporadas y de modelos estadísticos rigurosos. Sin martingalas ni sistemas milagrosos — un método aplicado exactamente de la misma forma, partido tras partido.</p>
+    <h1 data-i18n-html="about_page.hero_title">Nada de olfato.<br><b>Datos</b>, un modelo estadístico,<br>un método constante.</h1>
+    <p data-i18n="about_page.hero_text">IASHARK analiza cada partido con datos deportivos reales de la temporada actual y de la anterior, y con un modelo estadístico de marcadores. Sin martingalas ni sistemas milagro: el mismo método, aplicado de forma idéntica, partido tras partido.</p>
   </div>
 
   <!-- ═══ METHODOLOGIE ═══ -->
   <div class="sec">
     <div class="sec-lbl" data-i18n="about_page.method_label">METODOLOGÍA</div>
     <h2 data-i18n="about_page.method_title">Cómo funciona el modelo</h2>
-    <p data-i18n="about_page.method_text">Para cada partido, nuestro sistema se apoya en un amplio historial de datos reales: resultados y estadísticas de equipos y jugadores durante varias temporadas, tendencias de forma reciente y elementos de contexto (alineaciones probables, bajas, calendario). Este historial alimenta varios modelos estadísticos complementarios, cuyos resultados se contrastan sistemáticamente antes de dar por buena una conclusión — nunca un único modelo aislado, nunca una intuición.</p>
+    <p data-i18n="about_page.method_text">Para cada partido, el sistema parte de las estadísticas reales de ambos equipos en la temporada actual y la anterior: goles marcados y recibidos, y xG y tiros recientes cuando están disponibles. Con ellas estima los goles esperados de cada equipo y, después, la probabilidad de cada marcador con un modelo de Dixon-Coles. En los mercados 1X2, más/menos de 2,5 goles y ambos equipos marcan, esas probabilidades se corrigen con una calibración aprendida de temporadas pasadas. Las cuotas nunca entran en este cálculo.</p>
 
     <div class="model-grid">
       <div class="model-card">
-        <div class="mtitle" data-i18n="about_page.card_history_title">HISTORIAL DE VARIAS TEMPORADAS</div>
-        <div class="mdesc" data-i18n="about_page.card_history_text">Cada cálculo se basa en varias temporadas de resultados y estadísticas reales, no en una impresión puntual ni en la actualidad del momento.</div>
+        <div class="mtitle" data-i18n="about_page.card_history_title">TEMPORADA ACTUAL Y ANTERIOR</div>
+        <div class="mdesc" data-i18n="about_page.card_history_text">El cálculo usa la temporada actual y la anterior. A principio de temporada, la anterior y una media de referencia pesan más, y luego cada vez menos a medida que se juegan partidos.</div>
       </div>
       <div class="model-card">
-        <div class="mtitle" data-i18n="about_page.card_crossed_title">MODELOS CRUZADOS</div>
-        <div class="mdesc" data-i18n="about_page.card_crossed_text">Varios modelos estadísticos independientes analizan cada partido en paralelo; solo se da por buena una conclusión cuando coinciden.</div>
+        <div class="mtitle" data-i18n="about_page.card_crossed_title">UN MODELO DE MARCADORES</div>
+        <div class="mdesc" data-i18n="about_page.card_crossed_text">Las probabilidades salen de un único modelo de marcadores (Dixon-Coles), calibrado en tres mercados. No es una votación entre modelos: el cálculo de Poisson y la simulación solo sirven para medir el acuerdo que se muestra en la fiabilidad.</div>
       </div>
       <div class="model-card">
         <div class="mtitle" data-i18n="about_page.card_simulations_title">SIMULACIONES</div>
-        <div class="mdesc" data-i18n="about_page.card_simulations_text">Para cada partido se simulan miles de escenarios, con el fin de comprobar la coherencia estadística de los resultados obtenidos.</div>
+        <div class="mdesc" data-i18n="about_page.card_simulations_text">Cada partido se simula 5.000 veces (método de Monte Carlo) para mostrar los marcadores más probables. Estas simulaciones no sirven para elegir la apuesta.</div>
       </div>
       <div class="model-card">
         <div class="mtitle" data-i18n="about_page.card_reliability_title">PUNTUACIÓN DE FIABILIDAD</div>
-        <div class="mdesc" data-i18n="about_page.card_reliability_text">Un indicador independiente mide el grado de acuerdo entre los modelos y la calidad de los datos disponibles para ese partido concreto — nunca una reescritura de la propia probabilidad.</div>
+        <div class="mdesc" data-i18n="about_page.card_reliability_text">Un indicador aparte combina el acuerdo entre los cálculos, la calidad de los datos disponibles y el número de partidos jugados, para ese partido concreto; nunca modifica la probabilidad.</div>
       </div>
     </div>
 
-    <p data-i18n-html="about_page.method_selection">El mercado destacado en cada partido se selecciona automáticamente según criterios estadísticos deterministas, sin intervención manual. La <b>probabilidad mostrada</b> es directamente la del modelo y nunca se modifica a posteriori. A continuación, un modelo de lenguaje redacta el texto explicativo que acompaña esa elección, pero no calcula, no elige ni modifica ninguna cifra: las probabilidades, las cuotas, el mercado elegido y el nivel de fiabilidad los determina íntegramente nuestro método estadístico, nunca ese texto.</p>
-    <p data-i18n-html="about_page.method_value"><b>El concepto de value</b>: nuestro modelo compara la probabilidad que calcula con la cuota que ofrecen las casas de apuestas. Cuando nuestra estimación difiere de forma notable de la que implica la cuota, se habla de «value bet» — una cuota que el mercado podría estar valorando mal. El detalle exacto de nuestro método de cálculo es propiedad de IASHARK y no se divulga públicamente.</p>
+    <p data-i18n-html="about_page.method_selection">El mercado destacado se elige automáticamente con una regla fija: entre los mercados que calcula el modelo y que una casa de apuestas cotiza realmente, el de mayor <b>probabilidad estimada</b>, con prioridad para los que alcanzan una cuota mínima, y por debajo de un tope de probabilidad. Un partido ya empezado, o a punto de empezar en el momento del cálculo, no recibe ninguna apuesta. La probabilidad mostrada es la del modelo, nunca modificada después. Un modelo de lenguaje redacta luego el texto explicativo, pero no calcula, no elige y no modifica ninguna cifra.</p>
+    <p data-i18n-html="about_page.method_value"><b>La diferencia con el mercado</b>: el modelo compara después su probabilidad con la que implica la cuota, una vez retirado el margen de la casa (método de Shin cuando es posible). Esta diferencia se muestra a título informativo: no sirve para elegir el mercado y no garantiza ninguna ganancia.</p>
+    <p data-requires-page="methodologie.html" style="margin-top:6px"><a href="/es/methodologie.html" data-href="methodologie.html" style="color:var(--cyan);text-decoration:underline" data-i18n="about_page.method_link">Leer la metodología completa: datos, cálculos, límites</a></p>
   </div>
 
   <!-- ═══ SIMPLE VS COMBINE ═══ -->
@@ -186,7 +187,7 @@ footer .foot-links a{color:#22d3ee;}
       <li data-i18n-html="about_page.legal_informative"><b>Contenido exclusivamente informativo.</b> Los análisis, estadísticas, probabilidades e indicadores de fiabilidad publicados aquí se ofrecen con fines puramente informativos y educativos. No constituyen ni un consejo financiero ni una garantía de resultado.</li>
       <li data-i18n-html="about_page.legal_no_liability"><b>No se asumirá ninguna responsabilidad</b> por pérdidas económicas derivadas de decisiones tomadas a partir de los contenidos de este sitio. Eres el único responsable de tus decisiones de juego y de sus consecuencias.</li>
       <li data-i18n-html="about_page.legal_unpredictable"><b>El deporte es impredecible.</b> Ningún modelo estadístico, por riguroso que sea, puede predecir un resultado deportivo con certeza.</li>
-      <li data-i18n-html="about_page.legal_past_performance"><b>Rendimientos pasados ≠ rendimientos futuros.</b> Una ventaja estadística positiva a largo plazo no impide rachas de pérdidas a corto plazo. El modelo y la metodología descritos en esta página pueden cambiar sin previo aviso.</li>
+      <li data-i18n-html="about_page.legal_past_performance"><b>Resultados pasados ≠ resultados futuros.</b> Incluso unas estimaciones correctas no evitan rachas de pérdidas. El modelo y la metodología descritos en esta página pueden cambiar.</li>
       <li data-i18n-html="about_page.legal_ownership"><b>Propiedad del contenido.</b> Los análisis, textos y metodología presentados en este sitio son propiedad de IASHARK y no pueden reproducirse sin autorización previa.</li>
       <li data-i18n-html="about_page.legal_adults"><b>Reservado a mayores de edad</b> (18 años o más).</li>
     </ul>
@@ -206,7 +207,7 @@ footer .foot-links a{color:#22d3ee;}
 <footer>
   <p><span data-i18n="about_page.footer_warning">⚠️ APOSTAR PUEDE SER PELIGROSO — JUEGA CON RESPONSABILIDAD · PROHIBIDO A MENORES DE 18 AÑOS</span><br>
   <span data-i18n="about_page.footer_note">IASHARK — Los análisis publicados tienen un carácter meramente orientativo</span></p>
-  <p class="foot-links"><a href="/es/mentions-legales.html" data-href="mentions-legales.html" data-i18n="footer.mentions_legales">Aviso Legal</a> · <a href="/es/cgv.html" data-href="cgv.html" data-i18n="footer.cgv">Términos</a> · <a href="/es/confidentialite.html" data-href="confidentialite.html" data-i18n="footer.confidentialite">Privacidad</a> · <a href="/es/cookies.html" data-href="cookies.html" data-i18n="footer.cookies">Cookies</a> · <a href="/es/jeu-responsable.html" data-href="jeu-responsable.html" data-i18n="footer.responsible_gambling">Juego responsable</a></p>
+  <p class="foot-links"><a href="/es/mentions-legales.html" data-href="mentions-legales.html" data-i18n="footer.mentions_legales">Aviso Legal</a> · <a href="/es/cgv.html" data-href="cgv.html" data-i18n="footer.cgv">Términos</a> · <a href="/es/confidentialite.html" data-href="confidentialite.html" data-i18n="footer.confidentialite">Privacidad</a> · <a href="/es/cookies.html" data-href="cookies.html" data-i18n="footer.cookies">Cookies</a> · <a href="/es/jeu-responsable.html" data-href="jeu-responsable.html" data-i18n="footer.responsible_gambling">Juego responsable</a><span data-requires-page="methodologie.html"> · <a href="/es/methodologie.html" data-href="methodologie.html" data-i18n="footer.methodology">Metodología</a></span></p>
 </footer>
 
 <nav class="nav-bottom" aria-label="Navegación principal" data-i18n-attr="aria-label:geo.nav.aria_label">

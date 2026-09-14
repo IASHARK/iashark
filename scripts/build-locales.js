@@ -70,6 +70,16 @@ function slugOf(file) { return file === "index.html" ? "" : file; }
 function dirUrl(dir, file) { return SITE_URL + "/" + dir + "/" + slugOf(file); }
 function legalExists(dir, file) { return fs.existsSync(path.join(ROOT, "legal", dir, file)); }
 
+// Elements [data-requires-page="<fichier>"] (lien Methodologie des pieds de
+// page, de a-propos...) : retires du HTML genere quand la page cible n'existe
+// pas dans le repertoire (legal/<dir>/<fichier> absent), plutot que de laisser
+// un lien racine redirige vers une autre langue.
+function stripUnavailablePageLinks(html, dir) {
+  return html.replace(/[ \t]*<(a|p|span|li|div)\b[^>]*\sdata-requires-page="([^"]+)"[^>]*>[\s\S]*?<\/\1>(\r?\n)?/g, function (m, tag, file) {
+    return legalExists(dir, file) ? m : "";
+  });
+}
+
 function writeIfChanged(file, content) {
   if (fs.existsSync(file) && fs.readFileSync(file, "utf8") === content) return false;
   fs.mkdirSync(path.dirname(file), { recursive: true });
@@ -742,6 +752,7 @@ function build() {
       var countryMarket = ["gb", "za", "mx"].indexOf(DIRS[dir].market) !== -1 ? DIRS[dir].market : null;
       if (DIRS[dir].locale !== "fr" || countryMarket) html = bakeI18n(html, DICTS[DIRS[dir].locale], countryMarket);
       html = bakeMarket(html, dir);
+      html = stripUnavailablePageLinks(html, dir);
       html = rewriteInternalLinks(html, dir);
       var meta = metaFor(page, dir);
       html = buildHead(html, dir, page.file, meta, altDirs);
@@ -794,6 +805,7 @@ module.exports = {
   mapPath: mapPath, rewriteInternalLinks: rewriteInternalLinks, bakeI18n: bakeI18n, formatPrice: formatPrice,
   bakeMarket: bakeMarket, helplineFor: helplineFor, leagueNamesData: leagueNamesData,
   marketRuntimeData: marketRuntimeData, redirectsContent: redirectsContent, build: build,
+  stripUnavailablePageLinks: stripUnavailablePageLinks,
   buildHead: buildHead, setHtmlLang: setHtmlLang, injectRuntime: injectRuntime, metaFor: metaFor,
   homeJsonLd: homeJsonLd, homeSeoBlock: homeSeoBlock
 };

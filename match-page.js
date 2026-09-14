@@ -284,7 +284,11 @@ function edgeVerdict(edge){
 // dans le tableau au-dessus. Il ne porte que ce que le tableau ne dit pas,
 // les deux cotes.
 function signalCard(vm){
-  const r=vm.model.recommendation;
+  const r=vm.model.recommendation,raw=vm._raw||{};
+  // Une analyse existe (has_signal, amorce publique) mais son detail premium
+  // n'est pas servi par match-data (abonne Pro avant la prochaine mise a jour
+  // de match_premium_data) : etat neutre, jamais "aucun marche".
+  if(!r&&raw.has_signal===true&&raw.no_signal!==true)return card(t('match_page.signal_title','Le signal IASHARK'),empty(t('match_page.sig_premium_updating','Analyse détaillée en cours de mise à jour. Le marché recommandé et les probabilités s’afficheront dès la prochaine actualisation.')),'signal-card','target');
   if(!r)return card(t('match_page.signal_title','Le signal IASHARK'),empty(vm.model.unavailableReason?t('match_page.model_unavailable_reason',vm.model.unavailableReason):t('match_page.signal_unavailable_fallback','Aucun marché ne franchit les seuils de confiance ou de cote minimale pour ce match — IASHARK préfère ne pas se prononcer.')),'signal-card','target');
   const prob=n(r.probability);
   const fair=prob!==null&&prob>0?100/prob:null;

@@ -11,6 +11,10 @@
 // - aucune adresse IP, aucun email, aucune empreinte : seulement des champs
 //   grossiers (type d'appareil, navigateur, OS, largeur d'ecran, langue,
 //   fuseau horaire et un pays ESTIME depuis ce fuseau, `country_guess`) ;
+// - localisation APPROXIMATIVE deduite du reseau par Netlify (/api/geo,
+//   netlify/edge-functions/geo.ts) : `geo_country`, `geo_region`,
+//   `geo_city` sur la page_view. L'adresse IP n'est ni recue par ce script,
+//   ni envoyee, ni stockee ;
 // - uniquement sur le domaine de production (les tests locaux ne polluent
 //   pas les statistiques), jamais sur admin.html, jamais pour les robots
 //   d'indexation (Googlebot...).
@@ -252,6 +256,77 @@
 
   var PAGE_VIEW_ID = randomId("p_");
 
+  // ---------- Localisation approximative (pays / region / ville) ----------
+  // /api/geo (Netlify Edge Function, netlify/edge-functions/geo.ts) renvoie
+  // la localisation APPROXIMATIVE deduite du reseau, jamais l'adresse IP.
+  // Appel UNE fois par onglet (resultat en sessionStorage, echec compris),
+  // en tache de fond. La page_view attend au plus GEO_WAIT_MS, puis part
+  // sans ville ; un depart de la page l'envoie immediatement. Tout echec est
+  // silencieux : la page et le suivi continuent normalement.
+  var GEO_KEY = "iashark_geo_v1";
+  var GEO_WAIT_MS = 1200;
+
+  function cleanGeo(o) {
+    if (!o || typeof o !== "object") return null;
+    var text = function (v) {
+      if (typeof v !== "string") return null;
+      var s = v.replace(/[ -<>"`]/g, "").replace(/\s+/g, " ").trim();
+      return s ? s.slice(0, 60) : null;
+    };
+    var country = typeof o.country === "string" && /^[A-Z]{2}$/.test(o.country) ? o.country : null;
+    var g = { country: country, region: text(o.region), city: text(o.city) };
+    return g.country || g.region || g.city ? g : null;
+  }
+
+  // undefined = jamais demande dans cet onglet ; null = inconnu ou echec.
+  function readGeoCache() {
+    try {
+      var raw = sessionStorage.getItem(GEO_KEY);
+      if (raw === null) return undefined;
+      return raw === "none" ? null : cleanGeo(JSON.parse(raw));
+    } catch (e) {
+      return undefined;
+    }
+  }
+
+  function fetchGeo(done) {
+    var finished = false;
+    var finish = function (g) {
+      if (finished) return;
+      finished = true;
+      try { sessionStorage.setItem(GEO_KEY, g ? JSON.stringify(g) : "none"); } catch (e) {}
+      done(g);
+    };
+    try {
+      if (typeof fetch !== "function") { finish(null); return; }
+      fetch("/api/geo", { method: "GET", credentials: "omit", cache: "no-store" })
+        .then(function (r) { return r && r.ok ? r.json() : null; })
+        .then(function (d) {
+          finish(d ? cleanGeo({ country: d.country, region: d.subdivision, city: d.city }) : null);
+        }, function () { finish(null); });
+    } catch (e) {
+      finish(null);
+    }
+  }
+
+  var pageViewMeta = null;
+  var pageViewSent = false;
+
+  function sendPageView(geo) {
+    if (pageViewSent || !pageViewMeta) return;
+    pageViewSent = true;
+    try {
+      if (geo) {
+        if (geo.country) pageViewMeta.geo_country = geo.country;
+        if (geo.region) pageViewMeta.geo_region = geo.region;
+        if (geo.city) pageViewMeta.geo_city = geo.city;
+      }
+      window.iasharkTrack("page_view", pageViewMeta);
+      // La page d'inscription vue = inscription commencee (toutes versions).
+      if (/\/inscription(\.html)?$/.test(loc.pathname)) window.iasharkTrack("signup_started", {});
+    } catch (e) {}
+  }
+
   // ---------- page_view ----------
   try {
     var refHost = "";
@@ -268,7 +343,7 @@
     var tz = timeZone();
     var screenW = window.screen && window.screen.width ? Math.round(window.screen.width) : null;
 
-    window.iasharkTrack("page_view", {
+    pageViewMeta = {
       pv: PAGE_VIEW_ID,
       seq: seq,
       landing: landing,
@@ -284,11 +359,18 @@
       tz: clip(tz, 48),
       country_guess: (tz && TZ_COUNTRY[tz]) || null,
       match_id: matchIdFromPath(loc.pathname, params),
-    });
+    };
 
-    // La page d'inscription vue = inscription commencee (toutes versions).
-    if (/\/inscription(\.html)?$/.test(loc.pathname)) window.iasharkTrack("signup_started", {});
-  } catch (e) {}
+    var cachedGeo = readGeoCache();
+    if (cachedGeo !== undefined) {
+      sendPageView(cachedGeo);
+    } else {
+      setTimeout(function () { sendPageView(null); }, GEO_WAIT_MS);
+      fetchGeo(sendPageView);
+    }
+  } catch (e) {
+    sendPageView(null);
+  }
 
   // ---------- page_leave : temps actif sur la page + profondeur de scroll ----------
   try {
@@ -318,6 +400,8 @@
     window.addEventListener("load", function () { setTimeout(measureScroll, 1500); });
 
     var flushLeave = function () {
+      // Depart avant la reponse de /api/geo : la page_view part d'abord.
+      sendPageView(null);
       if (visibleSince !== null) { engagedMs += Date.now() - visibleSince; visibleSince = null; }
       // pagehide suit souvent visibilitychange : pas de doublon si rien n'a change.
       if (engagedMs === lastSentMs || leaveCount >= 20) return;

@@ -41,8 +41,10 @@ function fakeElement({ tag = "a", href = null, text = "", attrs = {}, className 
   return el;
 }
 
-function run({ hostname = "iashark.com", pathname = "/", search = "", referrer = "", ua = IPHONE_UA, timeZone = "Europe/Paris", webdriver = false, screenW = 390, maxTouchPoints = 5, local = {}, extraGlobals = {} } = {}) {
+function run({ hostname = "iashark.com", pathname = "/", search = "", referrer = "", ua = IPHONE_UA, timeZone = "Europe/Paris", webdriver = false, screenW = 390, maxTouchPoints = 5, local = {}, extraGlobals = {}, session = {}, geo = () => Promise.resolve({ ok: false }), manualTimers = false } = {}) {
   const sent = [];
+  const geoCalls = [];
+  const timers = [];
   const docListeners = {};
   const winListeners = {};
   const origin = "https://" + hostname;
@@ -60,18 +62,22 @@ function run({ hostname = "iashark.com", pathname = "/", search = "", referrer =
     innerHeight: 800,
     pageYOffset: 0,
     document,
-    sessionStorage: storage(),
+    sessionStorage: (() => { const st = storage(); Object.keys(session).forEach((k) => st.setItem(k, session[k])); return st; })(),
     localStorage: (() => { const st = storage(); Object.keys(local).forEach((k) => st.setItem(k, local[k])); return st; })(),
     URL,
     URLSearchParams,
     Intl: { DateTimeFormat: () => ({ resolvedOptions: () => ({ timeZone }) }) },
-    setTimeout: (fn) => { fn(); return 0; },
+    setTimeout: (fn) => { if (manualTimers) timers.push(fn); else fn(); return 0; },
     Date,
     Math,
     JSON,
     String,
     parseInt,
-    fetch: (url, opts) => { sent.push({ url, opts, body: JSON.parse(opts.body) }); return Promise.resolve({ ok: true }); },
+    fetch: (url, opts) => {
+      if (url === "/api/geo") { geoCalls.push(opts); return geo(); }
+      sent.push({ url, opts, body: JSON.parse(opts.body) });
+      return Promise.resolve({ ok: true });
+    },
     addEventListener: (type, fn) => { (winListeners[type] = winListeners[type] || []).push(fn); },
   };
   Object.assign(ctx, extraGlobals);
@@ -81,6 +87,8 @@ function run({ hostname = "iashark.com", pathname = "/", search = "", referrer =
   return {
     ctx,
     sent,
+    geoCalls,
+    runTimers: () => timers.splice(0).forEach((fn) => fn()),
     events: () => sent.map((s) => s.body),
     fireDoc: (type, event) => (docListeners[type] || []).forEach((fn) => fn(event || {})),
     fireWin: (type, event) => (winListeners[type] || []).forEach((fn) => fn(event || {})),
@@ -247,4 +255,59 @@ test("auth-pages.js : login_completed anonyme, signup_completed avec le jeton du
   const auth = fs.readFileSync(path.join(root, "auth-pages.js"), "utf8");
   assert.match(auth, /iasharkTrack\('login_completed', \{\}\)/);
   assert.match(auth, /iasharkTrack\('signup_completed', \{\}, nouvelleSession\.user && nouvelleSession\.user\.id, nouvelleSession\.access_token\)/);
+});
+
+const tick = () => new Promise((resolve) => setImmediate(resolve));
+const geoOk = (body) => () => Promise.resolve({ ok: true, json: () => Promise.resolve(body) });
+
+test("ville approximative : /api/geo appele une fois, geo_country/region/city ajoutes a la page_view, jamais d'IP", async () => {
+  const b = run({ pathname: "/gb/", manualTimers: true, geo: geoOk({ country: "GB", countryName: "United Kingdom", subdivision: "England", city: "Leeds", timezone: "Europe/London", ip: "203.0.113.9" }) });
+  assert.equal(b.geoCalls.length, 1);
+  assert.equal(b.geoCalls[0].credentials, "omit");
+  assert.equal(b.events().length, 0, "la page_view attend la reponse (au plus 1,2 s)");
+  await tick(); await tick(); await tick();
+  const pv = b.events().find((e) => e.event_type === "page_view");
+  assert.ok(pv, "page_view envoyee apres la reponse");
+  assert.equal(pv.metadata.geo_country, "GB");
+  assert.equal(pv.metadata.geo_region, "England");
+  assert.equal(pv.metadata.geo_city, "Leeds");
+  assert.ok(!JSON.stringify(pv).includes("203.0.113.9"), "aucune IP");
+  assert.deepEqual(JSON.parse(b.ctx.sessionStorage.getItem("iashark_geo_v1")), { country: "GB", region: "England", city: "Leeds" });
+  b.runTimers();
+  assert.equal(b.events().filter((e) => e.event_type === "page_view").length, 1, "jamais deux page_view");
+});
+
+test("ville approximative : deja connue dans l'onglet => aucun nouvel appel, page_view immediate", () => {
+  const b = run({ session: { iashark_geo_v1: JSON.stringify({ country: "MX", region: "Jalisco", city: "Guadalajara" }) } });
+  assert.equal(b.geoCalls.length, 0);
+  const md = b.events()[0].metadata;
+  assert.deepEqual([md.geo_country, md.geo_region, md.geo_city], ["MX", "Jalisco", "Guadalajara"]);
+  const none = run({ session: { iashark_geo_v1: "none" } });
+  assert.equal(none.geoCalls.length, 0, "un echec n'est pas retente dans le meme onglet");
+  assert.equal(none.events()[0].metadata.geo_city, undefined);
+  const hostile = run({ session: { iashark_geo_v1: JSON.stringify({ country: "fr<", city: "<b>Lille</b>" }) } });
+  assert.equal(hostile.events()[0].metadata.geo_country, undefined);
+  assert.equal(hostile.events()[0].metadata.geo_city, "bLille/b");
+});
+
+test("ville approximative : echec, lenteur ou depart de la page => rien ne casse, page_view sans ville", async () => {
+  const failed = run({ manualTimers: true, geo: () => Promise.reject(new Error("offline")) });
+  await tick(); await tick();
+  assert.equal(failed.events()[0].event_type, "page_view");
+  assert.equal(failed.events()[0].metadata.geo_city, undefined);
+  assert.equal(failed.ctx.sessionStorage.getItem("iashark_geo_v1"), "none");
+
+  const slow = run({ manualTimers: true, geo: () => new Promise(() => {}) });
+  assert.equal(slow.events().length, 0);
+  slow.runTimers();
+  assert.equal(slow.events()[0].event_type, "page_view", "delai depasse : envoyee sans ville");
+
+  const leaving = run({ pathname: "/mx/inscription.html", manualTimers: true, geo: () => new Promise(() => {}) });
+  leaving.ctx.document.visibilityState = "hidden";
+  leaving.fireDoc("visibilitychange");
+  assert.deepEqual(leaving.events().map((e) => e.event_type), ["page_view", "signup_started", "page_leave"], "page_view toujours avant page_leave");
+
+  const thrower = run({ geo: () => { throw new Error("boom"); } });
+  assert.equal(thrower.events()[0].event_type, "page_view");
+  assert.equal(run({ hostname: "localhost" }).geoCalls.length, 0, "jamais hors production");
 });

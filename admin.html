@@ -3,14 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>IASHARK — Tableau de bord</title>
+<title>IASHARK — Mon tableau de bord</title>
 <meta name="robots" content="noindex,nofollow">
-<meta name="theme-color" content="#080c12">
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23080c12'/%3E%3Ctext x='50%25' y='54%25' dominant-baseline='middle' text-anchor='middle' font-size='40' fill='%2322d3ee'%3E🦈%3C/text%3E%3C/svg%3E">
+<meta name="theme-color" content="#070b12">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23070b12'/%3E%3Ctext x='50%25' y='54%25' dominant-baseline='middle' text-anchor='middle' font-size='40' fill='%2322d3ee'%3E🦈%3C/text%3E%3C/svg%3E">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/admin.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" defer></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
 <script src="/admin-dashboard.js" defer></script>
 </head>
 <body>
@@ -18,9 +17,9 @@
 
 <header class="hdr">
   <a href="/" class="logo" aria-label="IASHARK, accueil du site"><span>IA</span>SHARK</a>
-  <span class="pill">ADMIN</span>
+  <span class="pill">Mon tableau de bord</span>
   <div class="hdr-right">
-    <a class="live-chip" id="liveChip" href="#direct" data-goto="direct" hidden><span class="dot" id="liveChipDot" aria-hidden="true"></span><span id="liveChipText">—</span></a>
+    <a class="live-chip" id="liveChip" href="#maintenant" hidden><span class="dot" id="liveChipDot" aria-hidden="true"></span><span id="liveChipText">—</span></a>
     <a class="hdr-link" href="/">Voir le site</a>
   </div>
 </header>
@@ -29,20 +28,20 @@
 
   <section class="state" id="stateLoading" aria-busy="true">
     <div class="state-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
-    <h1>Vérification de l'accès</h1>
-    <p>Contrôle de votre compte administrateur en cours…</p>
+    <h1>Vérification de ton accès</h1>
+    <p>On vérifie que tu es bien connecté avec le compte administrateur…</p>
   </section>
 
   <section class="state" id="stateDenied" hidden>
     <div class="state-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 018 0v3"/></svg></div>
-    <h1>Accès réservé</h1>
-    <p>Cette page est réservée au compte administrateur. Connectez-vous avec ce compte puis revenez ici.</p>
+    <h1>Page réservée</h1>
+    <p>Ce tableau de bord est réservé au compte administrateur. Connecte-toi avec ce compte, puis reviens sur cette page.</p>
     <a class="btn" href="/connexion.html">Se connecter</a>
   </section>
 
   <section class="state" id="stateError" hidden>
     <div class="state-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 8v5M12 16.5h.01"/><circle cx="12" cy="12" r="9"/></svg></div>
-    <h1>Chargement impossible</h1>
+    <h1>Le tableau de bord ne s'ouvre pas</h1>
     <p id="stateErrorMsg">Le tableau de bord n'a pas pu démarrer.</p>
     <button type="button" class="btn" id="stateErrorRetry">Recharger la page</button>
   </section>
@@ -50,390 +49,229 @@
   <div id="dash" hidden>
 
     <div class="topline">
-      <div>
-        <p class="eyebrow">Tableau de bord interne</p>
-        <h1 class="title">Qui visite IAShark&nbsp;?</h1>
-        <p class="subtitle">Visiteurs, pages, sources, inscriptions et paiements · heures de Paris · sans cookie</p>
+      <div class="topline-text">
+        <p class="eyebrow">Heures affichées : Paris</p>
+        <h1 class="title">Ton site en un coup d'œil</h1>
       </div>
-      <div class="top-actions">
-        <span class="updated" id="updatedAt" aria-live="polite"></span>
-        <button type="button" class="btn" id="refreshBtn"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a9 9 0 11-2.64-6.36"/><path d="M21 3v6h-6"/></svg><span>Actualiser</span></button>
+      <div class="toolbar">
+        <div class="seg" role="group" aria-label="Période des chiffres" id="periodSeg">
+          <button type="button" data-period="today" aria-pressed="true">Aujourd'hui</button>
+          <button type="button" data-period="7" aria-pressed="false">7 jours</button>
+          <button type="button" data-period="30" aria-pressed="false">30 jours</button>
+        </div>
+        <button type="button" class="btn btn-ghost" id="refreshBtn"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a9 9 0 11-2.64-6.36"/><path d="M21 3v6h-6"/></svg><span>Actualiser</span></button>
       </div>
     </div>
-
-    <section class="filters" aria-label="Filtres">
-      <div class="filters-row">
-        <div class="field">
-          <span id="periodLabelTxt">Période</span>
-          <div class="seg" role="group" aria-labelledby="periodLabelTxt" id="periodSeg">
-            <button type="button" data-period="today" aria-pressed="false">Aujourd'hui</button>
-            <button type="button" data-period="yesterday" aria-pressed="false">Hier</button>
-            <button type="button" data-period="7" aria-pressed="true">7 jours</button>
-            <button type="button" data-period="30" aria-pressed="false">30 jours</button>
-            <button type="button" data-period="90" aria-pressed="false">90 jours</button>
-            <button type="button" data-period="custom" aria-pressed="false" aria-controls="customRange">Personnalisé</button>
-          </div>
-        </div>
-        <div class="custom-range" id="customRange" hidden>
-          <label class="field"><span>Du</span><input type="date" id="fromDate"></label>
-          <label class="field"><span>Au</span><input type="date" id="toDate"></label>
-          <button type="button" class="btn btn-sm" id="applyRange">Appliquer</button>
-        </div>
-      </div>
-      <div class="filters-row">
-        <label class="field"><span>Version du site</span>
-          <select id="siteFilter">
-            <option value="">Toutes les versions</option>
-            <option value="fr">🇫🇷 France (fr)</option>
-            <option value="gb">🇬🇧 Royaume-Uni (gb)</option>
-            <option value="za">🇿🇦 Afrique du Sud (za)</option>
-            <option value="mx">🇲🇽 Mexique (mx)</option>
-            <option value="intl">🌐 International (toutes)</option>
-            <option value="en">🌐 International anglais (en)</option>
-            <option value="es">🌐 International espagnol (es)</option>
-            <option value="de">🌐 International allemand (de)</option>
-            <option value="it">🌐 International italien (it)</option>
-            <option value="pt">🌐 International portugais (pt)</option>
-          </select>
-        </label>
-        <label class="field"><span>Appareil</span>
-          <select id="deviceFilter">
-            <option value="">Tous les appareils</option>
-            <option value="mobile">Mobile</option>
-            <option value="desktop">Ordinateur</option>
-            <option value="tablet">Tablette</option>
-          </select>
-        </label>
-        <label class="field"><span>Source</span>
-          <select id="sourceFilter">
-            <option value="">Toutes les sources</option>
-            <option value="tiktok">TikTok</option>
-            <option value="instagram">Instagram</option>
-            <option value="facebook">Facebook</option>
-            <option value="google">Google</option>
-            <option value="bing">Bing</option>
-            <option value="x">X / Twitter</option>
-            <option value="whatsapp">WhatsApp</option>
-            <option value="direct">Direct</option>
-            <option value="other">Autres sites</option>
-          </select>
-        </label>
-        <label class="switch">
-          <input type="checkbox" id="internalToggle" role="switch">
-          <span class="switch-ui" aria-hidden="true"></span>
-          <span>Inclure mon trafic / tests</span>
-        </label>
-        <button type="button" class="btn btn-ghost btn-sm" id="resetFilters" hidden>Réinitialiser les filtres</button>
-      </div>
-      <p class="filter-note" id="filterNote" hidden></p>
-    </section>
+    <p class="updated" id="updatedAt" aria-live="polite"></p>
 
     <div class="notices">
-      <div class="notice warn" id="noticePipeline" hidden>
-        <p id="noticePipelineText"></p>
-        <button type="button" class="btn btn-ghost btn-sm" data-goto="sante">Voir la santé du site</button>
+      <div class="notice warn" id="noticeFilters" hidden>
+        <p id="noticeFiltersText"></p>
+        <button type="button" class="btn btn-ghost btn-sm" id="noticeFiltersReset">Tout afficher</button>
       </div>
-      <div class="notice info" id="noticeLaunch">
-        <p id="noticeLaunchText">Les statistiques commencent au lancement du suivi, le 13 septembre 2026 à 21 h (heure de Paris). Avant, il s'agissait presque uniquement de tests.</p>
-        <button type="button" class="btn btn-ghost btn-sm" id="testPeriodBtn" aria-pressed="false">Afficher la période de test</button>
-      </div>
-      <div class="notice ok" id="noticeInternal" hidden>
-        <p id="noticeInternalText"></p>
-        <button type="button" class="btn btn-ghost btn-sm" id="noticeInternalBtn"></button>
-      </div>
-      <div class="notice warn" id="noticeMigration" hidden>
-        <p><b>Migration 0019 non appliquée.</b> Le tableau de bord affiche les anciens chiffres, <strong>tests et visites internes compris</strong>. Filtres, période « Hier » ou personnalisée, heures d'affluence, pages de sortie, tunnel accueil → match, santé du suivi et exclusion de visites seront disponibles dès que <code>supabase/migrations/0019_admin_dashboard_v2.sql</code> sera appliquée.</p>
-      </div>
-      <div class="notice info" id="noticeDevice" hidden>
-        <p>Ce navigateur est reconnu comme le vôtre : vos visites sur le site y sont exclues des statistiques. Sur votre téléphone, ouvrez une fois <code>iashark.com/?internal=1</code> dans le navigateur que vous utilisez (<code>?internal=0</code> pour annuler).</p>
+      <div class="notice tip" id="noticeDevice" hidden>
+        <p>Cet appareil vient d'être <b>exclu des chiffres</b> : quand tu visites ton site depuis ce navigateur, tu n'es pas compté. Sur ton téléphone, ouvre une fois ce tableau de bord (ou <code>iashark.com/?internal=1</code>).</p>
         <button type="button" class="btn btn-ghost btn-sm" id="noticeDeviceClose">Compris</button>
+      </div>
+      <div class="notice warn" id="noticeError" hidden>
+        <p id="noticeErrorText"></p>
+        <button type="button" class="btn btn-ghost btn-sm" data-retry="1">Réessayer</button>
       </div>
     </div>
 
-    <nav class="tabs" aria-label="Sections du tableau de bord">
-      <div class="tablist" role="tablist" id="tablist">
-        <button type="button" role="tab" id="tabbtn-apercu" data-tab="apercu" aria-controls="tab-apercu" aria-selected="true">Vue d'ensemble</button>
-        <button type="button" role="tab" id="tabbtn-direct" data-tab="direct" aria-controls="tab-direct" aria-selected="false" tabindex="-1">En direct</button>
-        <button type="button" role="tab" id="tabbtn-audience" data-tab="audience" aria-controls="tab-audience" aria-selected="false" tabindex="-1">Audience</button>
-        <button type="button" role="tab" id="tabbtn-pages" data-tab="pages" aria-controls="tab-pages" aria-selected="false" tabindex="-1">Pages et matchs</button>
-        <button type="button" role="tab" id="tabbtn-conversion" data-tab="conversion" aria-controls="tab-conversion" aria-selected="false" tabindex="-1">Conversion et revenus</button>
-        <button type="button" role="tab" id="tabbtn-visites" data-tab="visites" aria-controls="tab-visites" aria-selected="false" tabindex="-1">Dernières visites</button>
-        <button type="button" role="tab" id="tabbtn-inscrits" data-tab="inscrits" aria-controls="tab-inscrits" aria-selected="false" tabindex="-1">Inscrits</button>
-        <button type="button" role="tab" id="tabbtn-sante" data-tab="sante" aria-controls="tab-sante" aria-selected="false" tabindex="-1">Santé<span class="tab-dot" id="healthDot" hidden aria-hidden="true"></span></button>
-      </div>
-    </nav>
+    <!-- 1. Aujourd'hui en une phrase -->
+    <section class="hero" aria-labelledby="heroLabel">
+      <div class="hero-glow" aria-hidden="true"></div>
+      <h2 class="micro" id="heroLabel">Aujourd'hui en une phrase</h2>
+      <p class="hero-text" id="heroText"><span class="skel skel-line" style="display:block;width:78%"></span></p>
+      <ul class="hero-compare" id="heroCompare"></ul>
+    </section>
 
-    <!-- ===================== Vue d'ensemble ===================== -->
-    <section class="panel" role="tabpanel" id="tab-apercu" aria-labelledby="tabbtn-apercu" tabindex="0">
-      <section class="summary" aria-labelledby="summaryLabel">
-        <div class="summary-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 19h16M7 16V9M12 16V5M17 16v-4"/></svg></div>
-        <div>
-          <h2 class="summary-label" id="summaryLabel">Résumé · <span id="periodLabel">7 derniers jours</span></h2>
-          <p class="summary-text" id="summaryText"><span class="skel skel-line" style="display:block;width:70%"></span></p>
+    <!-- 2. Grandes cartes -->
+    <section class="section" aria-labelledby="cardsTitle">
+      <div class="section-head">
+        <h2 class="section-title" id="cardsTitle">L'essentiel · <span id="periodLabel">aujourd'hui</span></h2>
+        <p class="section-sub" id="cardsSub">Uniquement de vrais visiteurs : robots, tests et ton appareil sont retirés.</p>
+      </div>
+      <div class="cards" id="cards">
+        <div class="skel skel-card"></div><div class="skel skel-card"></div><div class="skel skel-card"></div><div class="skel skel-card"></div><div class="skel skel-card"></div>
+      </div>
+    </section>
+
+    <!-- 3. Sante + 4. Parcours -->
+    <div class="grid g-health section">
+      <section class="card" aria-labelledby="healthTitle">
+        <div class="card-head">
+          <div><h2 class="card-title" id="healthTitle">Santé du site</h2><p class="card-sub">Est-ce que tout tourne normalement ?</p></div>
+          <button type="button" class="info" aria-expanded="false" aria-controls="helpHealth" aria-label="Aide : santé du site">i</button>
         </div>
+        <p class="help" id="helpHealth" hidden>Trois vérifications automatiques : les pronostics du jour ont-ils été mis à jour ce matin ? Le site reçoit-il encore des visites ? Les paiements arrivent-ils ? Vert = tout va bien. Orange = à surveiller. Rouge = il faut agir (le texte dit quoi faire).</p>
+        <div id="health"><div class="skel skel-block"></div></div>
       </section>
 
-      <div class="section">
-        <div class="section-head">
-          <h2 class="section-title">L'essentiel</h2>
-          <p class="section-sub" id="overviewSub">Visiteurs, inscriptions, abonnés Pro et encaissements</p>
+      <section class="card" aria-labelledby="funnelTitle">
+        <div class="card-head">
+          <div><h2 class="card-title" id="funnelTitle">Du visiteur au client</h2><p class="card-sub" id="funnelSub">Combien de personnes passent chaque étape</p></div>
+          <button type="button" class="info" aria-expanded="false" aria-controls="helpFunnel" aria-label="Aide : du visiteur au client">i</button>
         </div>
-        <div class="kpis" id="kpiOverview">
-          <div class="skel skel-kpi"></div><div class="skel skel-kpi"></div><div class="skel skel-kpi"></div><div class="skel skel-kpi"></div>
-        </div>
-        <p class="note" id="overviewNote"></p>
-      </div>
+        <p class="help" id="helpFunnel" hidden>Chaque ligne compte les personnes qui ont atteint l'étape. Le pourcentage indique la part de tous les visiteurs. Quelqu'un peut arriver directement sur une page match ou sur la page abonnement, c'est pourquoi une étape peut parfois dépasser la précédente. « Paiement commencé » = clic sur le bouton de paiement. « Abonné » = paiement confirmé.</p>
+        <div id="funnel"><div class="skel skel-block"></div></div>
+      </section>
+    </div>
 
-      <div class="grid g-main section">
-        <div class="card">
-          <div class="card-head">
-            <div><h3 class="card-title">Évolution des visiteurs et des pages vues</h3><p class="card-sub" id="trendSub">Par jour</p></div>
-            <div class="card-actions"><button type="button" class="btn btn-ghost btn-sm" id="trendCsv">Exporter CSV</button></div>
-          </div>
-          <div class="chart-box h-trend" id="trendBox"><canvas id="trendChart" role="img" aria-label="Évolution des visiteurs et des pages vues"></canvas></div>
+    <!-- 5. Sources + pays / villes -->
+    <div class="grid g2 section">
+      <section class="card" aria-labelledby="sourcesTitle">
+        <div class="card-head">
+          <div><h2 class="card-title" id="sourcesTitle">D'où viennent les gens</h2><p class="card-sub">Le site ou l'application qui les a amenés</p></div>
+          <button type="button" class="info" aria-expanded="false" aria-controls="helpSources" aria-label="Aide : d'où viennent les gens">i</button>
         </div>
-        <div class="card mini-live">
-          <div class="card-head"><div><h3 class="card-title"><span class="dot" id="miniLiveDot" aria-hidden="true"></span> En ce moment</h3><p class="card-sub">Visiteurs actifs sur 5 minutes</p></div></div>
-          <div class="live-big tnum" id="miniLiveCount">—</div>
-          <p class="live-extra" id="miniLiveText"></p>
-          <button type="button" class="btn btn-ghost btn-sm" data-goto="direct">Voir qui est sur le site</button>
-          <hr class="sep">
-          <h3 class="card-title">Mise à jour des pronostics</h3>
-          <p class="health-line" id="miniPipeline"><span class="skel skel-line" style="display:block;width:80%"></span></p>
-        </div>
-      </div>
-    </section>
+        <p class="help" id="helpSources" hidden>« Direct » = la personne a tapé l'adresse, utilisé un favori, ou vient d'une application qui ne dit pas d'où elle arrive (souvent WhatsApp ou un e-mail). Pour savoir quelle publication marche, ajoute par exemple <code>?utm_source=tiktok</code> à tes liens.</p>
+        <div id="sources"><div class="skel skel-block"></div></div>
+      </section>
 
-    <!-- ===================== En direct ===================== -->
-    <section class="panel" role="tabpanel" id="tab-direct" aria-labelledby="tabbtn-direct" tabindex="0" hidden>
-      <div class="card live">
+      <section class="card" aria-labelledby="placesTitle">
+        <div class="card-head">
+          <div><h2 class="card-title" id="placesTitle">Dans quels pays, quelles villes</h2><p class="card-sub">Position approximative, jamais l'adresse exacte</p></div>
+          <button type="button" class="info" aria-expanded="false" aria-controls="helpPlaces" aria-label="Aide : pays et villes">i</button>
+        </div>
+        <p class="help" id="helpPlaces" hidden>Le pays et la ville sont estimés à partir du réseau Internet de la personne. C'est approximatif : un opérateur mobile ou un VPN peut indiquer une ville voisine, ou un autre pays. Aucune adresse IP n'est conservée.</p>
+        <div class="places">
+          <div><h3 class="micro">Pays</h3><div id="countries"><div class="skel skel-block"></div></div></div>
+          <div><h3 class="micro">Villes</h3><div id="cities"><div class="skel skel-block"></div></div></div>
+        </div>
+      </section>
+    </div>
+
+    <!-- 6. Qui est la maintenant -->
+    <section class="card section" id="maintenant" aria-labelledby="liveTitle">
+      <div class="card-head">
         <div>
-          <h2 class="live-title" id="liveTitle"><span class="dot" id="liveDot" aria-hidden="true"></span>En direct maintenant</h2>
-          <div class="live-big tnum" id="liveCount">—</div>
-          <p class="live-cap">visiteurs actifs sur les 5 dernières minutes</p>
-          <p class="live-extra" id="liveExtra"></p>
-          <div class="live-chart" id="liveChartBox"><canvas id="liveChart" role="img" aria-label="Pages vues par minute sur les 30 dernières minutes"></canvas></div>
-          <p class="live-extra" id="liveUpdated">Actualisation automatique toutes les 15 secondes.</p>
-          <p class="sr-only" id="liveAnnounce" aria-live="polite"></p>
+          <h2 class="card-title" id="liveTitle"><span class="dot" id="liveDot" aria-hidden="true"></span> Qui est là maintenant</h2>
+          <p class="card-sub" id="liveSub">Personnes actives dans les 5 dernières minutes · mis à jour toutes les 30 secondes</p>
         </div>
-        <div>
-          <div class="card-head">
-            <div><h3 class="card-title">Qui est sur le site ?</h3><p class="card-sub">Page en cours, pays estimé, version, appareil et source</p></div>
-            <div class="card-actions"><button type="button" class="btn btn-ghost btn-sm" id="liveCsv">Exporter CSV</button></div>
-          </div>
-          <div id="liveList"><div class="skel skel-block"></div></div>
-        </div>
+        <button type="button" class="info" aria-expanded="false" aria-controls="helpLive" aria-label="Aide : qui est là maintenant">i</button>
       </div>
+      <p class="help" id="helpLive" hidden>Chaque ligne est une personne (un onglet ouvert sur le site). Badge <b>Humain</b> : visite normale, comptée dans tes chiffres. Badge <b>Robot / test</b> : robot, test automatique, écran simulé ou ton propre appareil ; affiché pour information mais jamais compté. L'heure « chez la personne » s'affiche quand son fuseau horaire est connu.</p>
+      <div id="live"><div class="skel skel-block"></div></div>
+      <p class="sr-only" id="liveAnnounce" aria-live="polite"></p>
     </section>
 
-    <!-- ===================== Audience ===================== -->
-    <section class="panel" role="tabpanel" id="tab-audience" aria-labelledby="tabbtn-audience" tabindex="0" hidden>
-      <div class="section-head">
-        <h2 class="section-title" id="kpiTitle">Trafic en détail</h2>
-        <p class="section-sub" id="compareLabel"></p>
-      </div>
-      <div class="kpis" id="kpis">
-        <div class="skel skel-kpi"></div><div class="skel skel-kpi"></div><div class="skel skel-kpi"></div><div class="skel skel-kpi"></div>
-      </div>
-
-      <div class="grid g2 section">
-        <div class="card">
-          <div class="card-head">
-            <div><h3 class="card-title">Pays estimés</h3><p class="card-sub">Déduits du fuseau horaire, jamais de l'adresse IP</p></div>
-            <div class="card-actions"><button type="button" class="btn btn-ghost btn-sm" id="countryCsv">Exporter CSV</button></div>
-          </div>
-          <div class="chart-box h-bars" id="countryBox"><canvas id="countryChart" role="img" aria-label="Visiteurs par pays estimé"></canvas></div>
-        </div>
-        <div class="card">
-          <div class="card-head">
-            <div><h3 class="card-title">Versions du site</h3><p class="card-sub">fr, en, es, de, it, pt, gb, za, mx · version où la visite a commencé</p></div>
-            <div class="card-actions"><button type="button" class="btn btn-ghost btn-sm" id="siteCsv">Exporter CSV</button></div>
-          </div>
-          <div class="chart-box h-bars" id="siteBox"><canvas id="siteChart" role="img" aria-label="Visiteurs par version du site"></canvas></div>
-        </div>
-      </div>
-
-      <div class="grid g2 section-sm">
-        <div class="card">
-          <div class="card-head">
-            <div><h3 class="card-title">Sources</h3><p class="card-sub">Par où les visiteurs arrivent</p></div>
-            <div class="card-actions"><button type="button" class="btn btn-ghost btn-sm" id="sourceCsv">Exporter CSV</button></div>
-          </div>
-          <div class="donut-wrap">
-            <div class="chart-box h-donut" id="sourceBox"><canvas id="sourceChart" role="img" aria-label="Répartition des visiteurs par source"></canvas></div>
-            <ul class="legend" id="sourceLegend"></ul>
-          </div>
-        </div>
-        <div class="card">
-          <div class="card-head">
-            <div><h3 class="card-title">Appareils</h3><p class="card-sub">Visiteurs par type d'appareil</p></div>
-            <div class="card-actions"><button type="button" class="btn btn-ghost btn-sm" id="deviceCsv">Exporter CSV</button></div>
-          </div>
-          <div class="donut-wrap">
-            <div class="chart-box h-donut" id="deviceBox"><canvas id="deviceChart" role="img" aria-label="Répartition des visiteurs par appareil"></canvas></div>
-            <ul class="legend" id="deviceLegend"></ul>
-          </div>
-        </div>
-      </div>
-
-      <div class="grid g2 section-sm">
-        <div class="card">
-          <div class="card-head"><div><h3 class="card-title">Sources de trafic et sites référents</h3><p class="card-sub">Sites exacts d'où viennent les visiteurs (referrers)</p></div></div>
-          <div id="tblSources"><div class="skel skel-block"></div></div>
-        </div>
-        <div class="card">
-          <div class="card-head"><div><h3 class="card-title">Pays</h3><p class="card-sub">Pays estimé depuis le fuseau horaire du navigateur</p></div></div>
-          <div id="tblCountries"><div class="skel skel-block"></div></div>
-        </div>
-      </div>
-
-      <div class="card section-sm">
-        <div class="card-head"><div><h3 class="card-title">Campagnes (liens UTM)</h3><p class="card-sub">Liens suivis avec utm_source / utm_medium / utm_campaign</p></div></div>
-        <div id="tblCampaigns"><div class="skel skel-block"></div></div>
-      </div>
-
-      <div class="card section-sm">
+    <!-- 7. Pages et matchs -->
+    <div class="grid g2 section">
+      <section class="card" aria-labelledby="pagesTitle">
         <div class="card-head">
-          <div><h3 class="card-title">Heures d'affluence</h3><p class="card-sub">Visiteurs par jour de la semaine et par heure (Paris)</p></div>
-          <div class="card-actions"><button type="button" class="btn btn-ghost btn-sm" id="heatmapCsv">Exporter CSV</button></div>
+          <div><h2 class="card-title" id="pagesTitle">Pages les plus vues</h2><p class="card-sub">Nombre de fois où la page a été ouverte</p></div>
         </div>
-        <div id="heatmap"><div class="skel skel-block"></div></div>
-      </div>
-    </section>
-
-    <!-- ===================== Pages et matchs ===================== -->
-    <section class="panel" role="tabpanel" id="tab-pages" aria-labelledby="tabbtn-pages" tabindex="0" hidden>
-      <div class="card">
-        <div class="card-head"><div><h3 class="card-title">Pages les plus vues</h3><p class="card-sub">Vues, visiteurs, temps moyen passé et profondeur de lecture</p></div></div>
-        <div id="tblPages"><div class="skel skel-block"></div></div>
-      </div>
-      <div class="grid g2 section-sm">
-        <div class="card">
-          <div class="card-head"><div><h3 class="card-title">Pages d'arrivée</h3><p class="card-sub">Première page vue par chaque visiteur</p></div></div>
-          <div id="tblEntry"><div class="skel skel-block"></div></div>
-        </div>
-        <div class="card">
-          <div class="card-head"><div><h3 class="card-title">Pages de sortie</h3><p class="card-sub">Dernière page vue avant de quitter le site</p></div></div>
-          <div id="tblExit"><div class="skel skel-block"></div></div>
-        </div>
-      </div>
-      <div class="grid g2 section-sm">
-        <div class="card">
-          <div class="card-head"><div><h3 class="card-title">Matchs les plus consultés</h3><p class="card-sub">Pages match, toutes versions du site</p></div></div>
-          <div id="tblMatches"><div class="skel skel-block"></div></div>
-        </div>
-        <div class="card">
-          <div class="card-head"><div><h3 class="card-title">Ligues les plus suivies</h3><p class="card-sub">Vues des pages match regroupées par compétition</p></div></div>
-          <div id="tblLeagues"><div class="skel skel-block"></div></div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ===================== Conversion et revenus ===================== -->
-    <section class="panel" role="tabpanel" id="tab-conversion" aria-labelledby="tabbtn-conversion" tabindex="0" hidden>
-      <div class="grid g2">
-        <div class="card">
-          <div class="card-head">
-            <div><h3 class="card-title">Tunnel d'achat</h3><p class="card-sub">Accueil → match → abonnement → paiement</p></div>
-            <div class="card-actions"><button type="button" class="btn btn-ghost btn-sm" id="funnelCsv">Exporter CSV</button></div>
-          </div>
-          <div id="funnel"><div class="skel skel-block"></div></div>
-        </div>
-        <div class="card">
-          <div class="card-head">
-            <div><h3 class="card-title">Tunnel d'inscription</h3><p class="card-sub">Visite → page inscription → compte créé</p></div>
-            <div class="card-actions"><button type="button" class="btn btn-ghost btn-sm" id="funnelSignupCsv">Exporter CSV</button></div>
-          </div>
-          <div id="funnelSignup"><div class="skel skel-block"></div></div>
-        </div>
-      </div>
-
-      <div class="section">
-        <div class="section-head">
-          <h2 class="section-title" id="bizTitle">Comptes, abonnements et revenus</h2>
-          <p class="section-sub">Données réelles des comptes et de Stripe, en lecture seule · comptes admin et de test exclus</p>
-        </div>
-        <div class="kpis" id="bizKpis"><div class="skel skel-kpi"></div><div class="skel skel-kpi"></div><div class="skel skel-kpi"></div></div>
-        <p class="note" id="bizNote"></p>
-      </div>
-
-      <div class="grid g2 section-sm">
-        <div class="card">
-          <div class="card-head"><div><h3 class="card-title">Inscriptions par version du site</h3><p class="card-sub">Visiteurs, inscrits et taux d'inscription</p></div></div>
-          <div id="tblSignSite"><div class="skel skel-block"></div></div>
-        </div>
-        <div class="card">
-          <div class="card-head"><div><h3 class="card-title">Inscriptions par source</h3><p class="card-sub">D'où viennent les visiteurs qui s'inscrivent</p></div></div>
-          <div id="tblSignSource"><div class="skel skel-block"></div></div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ===================== Dernieres visites ===================== -->
-    <section class="panel" role="tabpanel" id="tab-visites" aria-labelledby="tabbtn-visites" tabindex="0" hidden>
-      <div class="section-head">
-        <h2 class="section-title" id="journeyTitle">Dernières visites</h2>
-        <p class="section-sub">Cliquez une visite pour voir chaque page, le temps passé et les clics</p>
-      </div>
-      <div class="card">
+        <div id="pages"><div class="skel skel-block"></div></div>
+      </section>
+      <section class="card" aria-labelledby="matchesTitle">
         <div class="card-head">
-          <div class="seg" role="group" aria-label="Filtrer les visites" id="journeyFilter">
-            <button type="button" data-jf="all" aria-pressed="true">Toutes</button>
-            <button type="button" data-jf="signed" aria-pressed="false">Inscriptions</button>
-            <button type="button" data-jf="paid" aria-pressed="false">Paiements</button>
-            <button type="button" data-jf="long" aria-pressed="false">3 pages et +</button>
-          </div>
-          <div class="card-actions"><button type="button" class="btn btn-ghost btn-sm" id="journeysCsv">Exporter CSV</button></div>
+          <div><h2 class="card-title" id="matchesTitle">Matchs les plus regardés</h2><p class="card-sub">Analyses de match ouvertes, toutes langues confondues</p></div>
         </div>
-        <div id="journeys"><div class="skel skel-block"></div></div>
-      </div>
-    </section>
+        <div id="matches"><div class="skel skel-block"></div></div>
+      </section>
+    </div>
 
-    <!-- ===================== Inscrits ===================== -->
-    <section class="panel" role="tabpanel" id="tab-inscrits" aria-labelledby="tabbtn-inscrits" tabindex="0" hidden>
-      <div class="section-head">
-        <h2 class="section-title" id="signupsTitle">Dernières inscriptions</h2>
-        <p class="section-sub" id="accountsLine"></p>
-      </div>
-      <div class="card">
-        <div id="tblSignups"><div class="skel skel-block"></div></div>
-      </div>
-    </section>
-
-    <!-- ===================== Sante ===================== -->
-    <section class="panel" role="tabpanel" id="tab-sante" aria-labelledby="tabbtn-sante" tabindex="0" hidden>
-      <div class="section-head">
-        <h2 class="section-title">Santé du site</h2>
-        <p class="section-sub">Mise à jour quotidienne des pronostics, suivi des visites, paiements et base de données</p>
-      </div>
-      <div class="health-grid" id="healthCards"><div class="skel skel-kpi"></div><div class="skel skel-kpi"></div><div class="skel skel-kpi"></div></div>
-
-      <div class="card section">
+    <!-- 8. Robots et tests filtres + appareil -->
+    <div class="grid g2 section" id="filtres">
+      <section class="card" aria-labelledby="botsTitle">
         <div class="card-head">
-          <div><h3 class="card-title">Exclure cet appareil des statistiques</h3><p class="card-sub">Vos propres visites ne doivent pas gonfler les chiffres</p></div>
+          <div><h2 class="card-title" id="botsTitle">Robots et tests filtrés</h2><p class="card-sub">Visites retirées de tes chiffres</p></div>
+          <button type="button" class="info" aria-expanded="false" aria-controls="helpBots" aria-label="Aide : robots et tests filtrés">i</button>
+        </div>
+        <p class="help" id="helpBots" hidden>Des robots (moteurs, outils automatiques), les tests du site et tes propres visites passent aussi sur IAShark. Ils sont reconnus automatiquement et retirés de tous les chiffres de cette page : ce qui reste, ce sont de vrais visiteurs. Rien n'est supprimé, ces visites sont simplement mises de côté.</p>
+        <div id="bots"><div class="skel skel-block"></div></div>
+      </section>
+
+      <section class="card device-card" aria-labelledby="deviceTitle">
+        <div class="card-head">
+          <div><h2 class="card-title" id="deviceTitle">Exclure cet appareil</h2><p class="card-sub">Pour ne pas te compter toi-même</p></div>
         </div>
         <p class="device-state" id="deviceState"></p>
-        <div class="card-actions">
-          <button type="button" class="btn" id="deviceBtn">Exclure cet appareil</button>
-        </div>
-        <p class="note">Le réglage est mémorisé dans ce navigateur uniquement (sans cookie). Sur un autre appareil ou un autre navigateur, ouvrez une fois <code>iashark.com/?internal=1</code> (et <code>?internal=0</code> pour annuler). Sont aussi exclus d'office : les visites liées à un compte administrateur ou de test, les tests automatisés (robots, Playwright, E2E), les liens <code>utm_source=qa…</code>. Les copies locales et les prévisualisations Netlify n'envoient jamais de statistiques.</p>
-      </div>
+        <p class="note">Quand tu regardes ton propre site, tu ne dois pas gonfler les chiffres. Ce bouton retient ce navigateur comme « le tien » (réglage gardé sur cet appareil seulement, sans cookie). Fais-le une fois sur chaque téléphone ou ordinateur que tu utilises : ouvre ce tableau de bord dessus, ou ouvre <code>iashark.com/?internal=1</code>.</p>
+        <div class="card-actions"><button type="button" class="btn" id="deviceBtn">Exclure cet appareil</button></div>
+      </section>
+    </div>
 
-      <footer class="foot">
-        <p><b>Définitions.</b> Visiteur = un onglet de navigateur ayant vu au moins une page (identifiant effacé à la fermeture de l'onglet, aucun cookie). Visite = période d'activité ; une nouvelle visite commence après 30 minutes d'inactivité. Durée = temps passé avec l'onglet au premier plan (30 min maximum par page). Rebond = visiteur n'ayant vu qu'une page. Pays = estimation depuis le fuseau horaire du navigateur. Sans cookie, un visiteur qui revient un autre jour est compté comme nouveau.</p>
-        <p><b>Trafic exclu par défaut.</b> Vos propres visites (appareil exclu), les comptes admin et de test, les tests QA (liens utm_source commençant par « qa »), les navigateurs pilotés (robots, tests automatisés, écrans émulés) et les visites exclues à la main. Activez « Inclure mon trafic / tests » pour les voir.</p>
-        <p id="footCoverage"></p>
-      </footer>
-    </section>
+    <!-- 9. Details -->
+    <details class="details section" id="details">
+      <summary><span class="summary-title">Détails</span><span class="summary-sub">Dernières visites, inscrits, filtres, période personnalisée</span><svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></summary>
+
+      <div class="details-body">
+        <section class="card" aria-labelledby="filtersTitle">
+          <h3 class="card-title" id="filtersTitle">Filtres</h3>
+          <p class="card-sub">Ils s'appliquent à tous les chiffres de la page. Un bandeau orange te le rappelle en haut.</p>
+          <div class="filters">
+            <div class="custom-range">
+              <label class="field"><span>Du</span><input type="date" id="fromDate"></label>
+              <label class="field"><span>Au</span><input type="date" id="toDate"></label>
+              <button type="button" class="btn btn-sm" id="applyRange">Voir cette période</button>
+            </div>
+            <label class="field"><span>Version du site</span>
+              <select id="siteFilter">
+                <option value="">Toutes les versions</option>
+                <option value="fr">France (fr)</option>
+                <option value="gb">Royaume-Uni (gb)</option>
+                <option value="za">Afrique du Sud (za)</option>
+                <option value="mx">Mexique (mx)</option>
+                <option value="intl">International (en, es, de, it, pt)</option>
+              </select>
+            </label>
+            <label class="field"><span>Appareil</span>
+              <select id="deviceFilter">
+                <option value="">Tous les appareils</option>
+                <option value="mobile">Téléphone</option>
+                <option value="desktop">Ordinateur</option>
+                <option value="tablet">Tablette</option>
+              </select>
+            </label>
+            <label class="field"><span>Source</span>
+              <select id="sourceFilter">
+                <option value="">Toutes les sources</option>
+                <option value="google">Google</option>
+                <option value="tiktok">TikTok</option>
+                <option value="instagram">Instagram</option>
+                <option value="facebook">Facebook</option>
+                <option value="x">X / Twitter</option>
+                <option value="whatsapp">WhatsApp</option>
+                <option value="bing">Bing</option>
+                <option value="direct">Direct</option>
+                <option value="other">Autres sites</option>
+              </select>
+            </label>
+          </div>
+        </section>
+
+        <section class="card" aria-labelledby="visitsTitle">
+          <div class="card-head">
+            <div><h3 class="card-title" id="visitsTitle">Dernières visites</h3><p class="card-sub">Touche une visite pour voir son parcours page par page</p></div>
+          </div>
+          <div id="visits"><div class="skel skel-block"></div></div>
+        </section>
+
+        <section class="card" aria-labelledby="signupsTitle">
+          <div class="card-head">
+            <div><h3 class="card-title" id="signupsTitle">Derniers inscrits</h3><p class="card-sub" id="signupsSub">Comptes créés sur le site (comptes admin et de test masqués)</p></div>
+          </div>
+          <div id="signups"><div class="skel skel-block"></div></div>
+        </section>
+      </div>
+    </details>
+
+    <footer class="foot">
+      <p><b>Comment c'est compté.</b> Visiteur = une personne (un onglet de navigateur) qui a vu au moins une page, sans cookie : si elle revient un autre jour, elle compte à nouveau. Inscriptions et abonnés viennent directement des comptes et de Stripe. Pays et villes sont approximatifs.</p>
+      <p id="footCoverage"></p>
+    </footer>
   </div>
 </main>
 
 <dialog class="confirm" id="confirmDialog" aria-labelledby="confirmTitle">
-  <h2 id="confirmTitle">Exclure cette visite ?</h2>
+  <h2 id="confirmTitle">Retirer cette visite des chiffres ?</h2>
   <p id="confirmText"></p>
   <div class="dialog-actions">
     <button type="button" class="btn btn-ghost" id="confirmCancel">Annuler</button>
-    <button type="button" class="btn btn-danger" id="confirmOk">Exclure</button>
+    <button type="button" class="btn btn-danger" id="confirmOk">Retirer</button>
   </div>
 </dialog>
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>

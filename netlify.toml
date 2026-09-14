@@ -4,3 +4,11 @@
 [build]
   command = "node scripts/build-public.js"
   publish = "dist"
+
+# /api/geo : pays / region / ville APPROXIMATIFS deduits du reseau par Netlify
+# pour les statistiques anonymes (funnel-track.js). Aucune adresse IP n'est
+# renvoyee ni stockee. Code : netlify/edge-functions/geo.ts (hors dist/).
+# Meme origine que le site : couvert par connect-src 'self' de _headers.
+[[edge_functions]]
+  path = "/api/geo"
+  function = "geo"

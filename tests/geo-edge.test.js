@@ -73,6 +73,14 @@ test("geo.ts : utilise la logique pure, aucun journal, aucune IP lue", () => {
   assert.ok(!/\.ip\b|latitude|longitude|postalCode|console\./.test(lib), "la logique ne lit jamais ip / coordonnees / code postal");
 });
 
+test("sources lisibles : aucun caractere de controle brut (NUL...) dans les fichiers du suivi et du tableau de bord", () => {
+  const c = (n) => String.fromCharCode(n);
+  const raw = new RegExp("[" + c(0) + "-" + c(8) + c(11) + c(12) + c(14) + "-" + c(31) + c(127) + "]");
+  for (const rel of ["funnel-track.js", "netlify/edge-functions/lib/geo-payload.mjs", "netlify/edge-functions/geo.ts", "admin-dashboard.js", "admin.html", "assets/admin.css", "supabase/migrations/0022_admin_geo_city.sql"]) {
+    assert.ok(!raw.test(read(rel)), rel + " : ecrire \\u0000 en toutes lettres, jamais le caractere brut");
+  }
+});
+
 test("netlify.toml declare /api/geo ; connect-src 'self' couvre l'appel ; hors dist/", () => {
   const toml = read("netlify.toml");
   assert.match(toml, /\[\[edge_functions\]\]\s+path = "\/api\/geo"\s+function = "geo"/);

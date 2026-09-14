@@ -270,7 +270,7 @@
     if (!o || typeof o !== "object") return null;
     var text = function (v) {
       if (typeof v !== "string") return null;
-      var s = v.replace(/[ -<>"`]/g, "").replace(/\s+/g, " ").trim();
+      var s = v.replace(/[\u0000-\u001f\u007f<>"`]/g, "").replace(/\s+/g, " ").trim();
       return s ? s.slice(0, 60) : null;
     };
     var country = typeof o.country === "string" && /^[A-Z]{2}$/.test(o.country) ? o.country : null;

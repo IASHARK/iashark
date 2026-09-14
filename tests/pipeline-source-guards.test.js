@@ -171,9 +171,10 @@ test("pipeline source: run_output et legacy_output sont deux blocs separes dans 
   const payloadBlock = source.slice(source.indexOf("var dataJsonPayload = {"), source.indexOf("fs.writeFileSync('data.json',JSON.stringify(dataJsonPayload"));
   assert.match(payloadBlock, /legacy_output:/);
   assert.match(payloadBlock, /run_output:/);
-  assert.match(payloadBlock, /safe_pick: runOutput\.SAFE_PICK_OF_THE_DAY/);
-  assert.match(payloadBlock, /top5_scorers: runOutput\.TOP_5_SCORERS_OF_DAY/);
-  assert.match(payloadBlock, /daily_combos: runOutput\.DAILY_COMBOS/);
+  // Depuis le 14/09/2026 : versions publiques (lib/public-run-output.js).
+  assert.match(payloadBlock, /safe_pick: publicSafePick\(runOutput\.SAFE_PICK_OF_THE_DAY, matchsPublics\)/);
+  assert.match(payloadBlock, /top5_scorers: publicTopScorers\(runOutput\.TOP_5_SCORERS_OF_DAY\)/);
+  assert.match(payloadBlock, /daily_combos: publicDailyCombos\(runOutput\.DAILY_COMBOS\)/);
   assert.match(payloadBlock, /betting_validation_status: runOutput\.betting_validation_status/);
 });
 

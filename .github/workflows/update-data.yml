@@ -45,6 +45,7 @@ jobs:
           const { buildPlayerMarketOutput, blendPlayerRateAcrossSeasons } = require('./lib/markets/player-engine.js');
           const { pickTopScorerCandidates } = require('./lib/markets/top-scorer-picker.js');
           const { extractTranslationSource, buildTranslationRequest, parseTranslationResponse, applyNarrativeI18n } = require('./lib/narrative-i18n.js');
+          const { publicSafePick, publicTopScorers, publicDailyCombos } = require('./lib/public-run-output.js');
           const I18N_LOCALES = require('./i18n/locales.json');
           const I18N_PAGES = require('./scripts/i18n-manifest.js');
           const { generateLocalizedSitemaps } = require('./scripts/i18n-sitemaps.js');
@@ -3273,9 +3274,11 @@ jobs:
                 run_id: runOutput.run_id,
                 snapshot: runOutput.snapshot_time,
                 betting_validation_status: runOutput.betting_validation_status,
-                safe_pick: runOutput.SAFE_PICK_OF_THE_DAY,
-                top5_scorers: runOutput.TOP_5_SCORERS_OF_DAY,
-                daily_combos: runOutput.DAILY_COMBOS,
+                // Versions publiques (lib/public-run-output.js) : jamais le pari d un
+                // match payant dans data.json (audit du 14/09/2026).
+                safe_pick: publicSafePick(runOutput.SAFE_PICK_OF_THE_DAY, matchsPublics),
+                top5_scorers: publicTopScorers(runOutput.TOP_5_SCORERS_OF_DAY),
+                daily_combos: publicDailyCombos(runOutput.DAILY_COMBOS),
                 run_output_engine_version: RUN_OUTPUT_ENGINE_VERSION,
                 canonical_registry_hash: CANONICAL_REGISTRY_HASH,
               },

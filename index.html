@@ -872,15 +872,9 @@ function updateCounts(){
 // The "yesterday" tab (won/lost picks and hit rate) was removed: no track
 // record or performance history is published on the public site. Only the
 // COUNT of published analyses is kept (a volume, never a result).
-async function loadPublishedCount(){
-  try{
-    var r=await fetch('/historique.json?t='+Date.now());
-    if(!r.ok)return;
-    var d=await r.json();
-    var totalAnalyses=(d.predictions||[]).length;
-    if(totalAnalyses)setKpi('kpiAnalyses',totalAnalyses);
-  }catch(e){}
-}
+// historique.json n'est plus publie (scripts/build-public.js) : il contient
+// l'historique des paris. L'accueil ne le demande donc plus (evite un 404 et
+// une erreur console a chaque visite) ; le KPI garde sa valeur statique.
 
 function leagueKey(m){return(m.league_key||'').toLowerCase();}
 
@@ -1085,7 +1079,10 @@ function buildCard(m){
   var gratuit=authCtx.isPro||String(m.id)===String(freeMatchId);
   var locked=!gratuit;
   var css='mc'+(isWC?' worldcup':'')+(locked?' locked':'')+(gratuit&&!authCtx.isPro?' mc-free':'');
-  var pariLabel=m.pari_rec?translateMarket(m.pari_rec):(marketIdLabel(m)||m.no_signal_label||'Analyse en cours — aucun marché prioritaire.');
+  // Abonne Pro dont match-data ne sert pas (encore) le detail premium : une
+  // analyse existe (has_signal), on n'annonce jamais "aucun marche prioritaire".
+  var detailEnAttente=!m.pari_rec&&!marketIdLabel(m)&&m.has_signal===true&&!m.no_signal;
+  var pariLabel=m.pari_rec?translateMarket(m.pari_rec):(marketIdLabel(m)||(detailEnAttente?t('home_app.premium_detail_updating','Analyse détaillée en cours de mise à jour'):'')||m.no_signal_label||'Analyse en cours — aucun marché prioritaire.');
 
   var badge=(gratuit&&!authCtx.isPro)?'<span class="mc-badge-free">Analyse gratuite</span>':'';
   // La confiance reste visible meme verrouillee : c'est ce qui donne envie
@@ -1235,7 +1232,6 @@ async function loadData(){
     // laisse la methode, la transparence et la FAQ, qui restent utiles.
     if(authCtx.isPro)document.querySelectorAll('[data-vente]').forEach(function(el){el.hidden=true;});
     updateCounts();
-    loadPublishedCount();
     buildLeagueBtns(getSportMatchs());
     setupFilters();
     renderMatchs();

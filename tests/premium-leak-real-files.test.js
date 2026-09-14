@@ -1,9 +1,9 @@
 "use strict";
-// FUITE DE DONNEES (audit du 14/09/2026). Controle des fichiers publics
+// FUITE DE DONNEES (audit du 14/09/2026, hotfix main + branche). Controle des fichiers publics
 // REELLEMENT generes, pas d'une copie de test : data.json, data-home.json,
 // match/<id>.json, PRELOADED_MATCH et resume SEO des pages match (FR et
-// localisees), pages championnat, blocs SEO des accueils, et dist/ (ce que
-// Netlify publie) s'il est construit.
+// localisees), pages championnat, blocs SEO des accueils, historique.json
+// (depot GitHub public), et dist/ (ce que Netlify publie) s'il est construit.
 //
 // Regle : aucun champ de lib/premium-fields.js, a aucune profondeur, sur un
 // match non offert. Avant ce test, data-home.json et match/<id>.json portaient
@@ -113,12 +113,26 @@ test("accueils : le bloc SEO_MATCHES_SUMMARY ne nomme le pari que pour le match 
   }
 });
 
+test("historique.json (depot public) : aucun pari en attente en clair hors match offert", () => {
+  const { free } = accessMap();
+  const h = JSON.parse(read("historique.json"));
+  for (const p of h.predictions || []) {
+    if ((p.result === "scheduled" || p.result === "pending") && p.fixture_id != null && !free.has(String(p.fixture_id))) {
+      for (const k of PREMIUM.PENDING_REDACTED_FIELDS) assert.equal(p[k], undefined, "historique.json : " + k + " en clair pour " + p.fixture_id);
+      assert.equal(p.redacted, true, "prediction en attente non marquee redacted : " + p.fixture_id);
+    }
+  }
+});
+
 test("l'analyse offerte reste complete, les amorces publiques restent presentes", () => {
   const d = JSON.parse(read("data-home.json"));
   for (const m of d.matchs.filter((x) => x.is_free === true && x.pari_rec)) {
     const detail = JSON.parse(read("match/" + m.id + ".json"));
     assert.equal(detail.pari_rec, m.pari_rec, "le match offert garde son pari");
     for (const k of ["p1", "pn", "p2"]) if (k in (JSON.parse(read("data.json")).matchs.find((x) => x.id === m.id) || {})) assert.ok(k in detail, k + " doit rester sur le match offert");
+  }
+  for (const m of JSON.parse(read("data.json")).matchs.filter((x) => x.is_free === true)) {
+    assert.deepEqual(PREMIUM.stripPremium(m), m, "le match offert n'est jamais retire de data.json");
   }
   const avecSignal = d.matchs.filter((m) => m.is_free !== true && m.has_signal === true);
   for (const m of avecSignal) {

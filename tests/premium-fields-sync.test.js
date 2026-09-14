@@ -1,7 +1,8 @@
 "use strict";
 // Liste UNIQUE des champs premium (lib/premium-fields.js) et ses copies :
-// fonction Edge match-data (Deno, copie litterale), pipeline, decoupage des
-// fichiers publics, pages SEO, page Outils. Audit fuite du 14/09/2026.
+// fonction Edge match-data (Deno, copie litterale), pipeline, historique.json,
+// decoupage des fichiers publics, pages SEO, page Outils, affichage Pro.
+// Audit fuite du 14/09/2026 (hotfix main + branche geo-expansion).
 const test = require("node:test");
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
@@ -56,8 +57,7 @@ test("stripPremium : tout retire hors match offert, has_signal conserve l'amorce
   assert.deepEqual(pub.fatigue, complet.fatigue, "fatigue.val est un fait, pas la cle premium val");
   const offert = Object.assign({}, complet, { is_free: true });
   assert.equal(PREMIUM.stripPremium(offert), offert, "le match offert reste complet");
-  const payload = PREMIUM.premiumPayload(complet);
-  assert.deepEqual(Object.keys(payload).sort(), ["btts", "p1", "paris_safe", "top_scorers"]);
+  assert.deepEqual(Object.keys(PREMIUM.premiumPayload(complet)).sort(), ["btts", "p1", "paris_safe", "top_scorers"]);
 });
 
 test("deepPremiumLeaks detecte un champ premium imbrique ou de premier niveau", () => {
@@ -94,20 +94,45 @@ test("historique : pari en attente masque hors match offert, relu depuis l'archi
   assert.equal(pub[3].redacted, true, "sans ligne d'archive, reste masquee");
 });
 
-test("pipeline : liste unique, premium_fields persistes, pages et historique assainis", () => {
+test("pipeline : liste unique, premium_fields persistes, data.json, pages et historique assainis", () => {
   const wf = read(".github/workflows/update-data.yml");
   assert.match(wf, /var PREMIUM_FIELDS_LIB=require\('\.\/lib\/premium-fields\.js'\);/);
+  assert.equal((wf.match(/var PREMIUM_FIELDS_LIB=require\(/g) || []).length, 1, "une seule declaration");
   assert.match(wf, /var CHAMPS_PREMIUM=PREMIUM_FIELDS_LIB\.PREMIUM_FIELDS\.slice\(\);/);
   assert.doesNotMatch(wf, /var CHAMPS_PREMIUM=\[/, "plus de liste litterale divergente");
-  assert.match(wf, /r\.premium_fields=PREMIUM_FIELDS_LIB\.premiumPayload\(m\)/);
-  const iPayload = wf.indexOf("r.premium_fields=PREMIUM_FIELDS_LIB.premiumPayload(m)");
+  const iPayload = wf.indexOf("r.premium_fields=Object.keys(charge).length?charge:null;");
+  assert.ok(iPayload !== -1, "premium_fields pose sur chaque ligne premium");
+  assert.match(wf, /var charge=PREMIUM_FIELDS_LIB\.premiumPayload\(matchParId\[String\(r\.fixture_id\)\]\);/);
   assert.ok(iPayload > wf.indexOf("(function designerMatchGratuit(){") && iPayload < wf.indexOf("await writePremiumData(premiumRows);"), "premium_fields calcule apres la designation et avant l'ecriture");
-  assert.match(wf, /c\.raw_response=Object\.assign\(\{\},c\.raw_response\|\|\{\},\{premium_fields:c\.premium_fields\}\)/, "repli si la migration 0020 n'est pas appliquee");
+  assert.match(wf, /generateMatchPages\(matchsPublics\)/, "pages match depuis la copie assainie");
   assert.match(wf, /PRELOADED_MATCH='\+JSON\.stringify\(PUBLIC_SPLIT\.toListMatch\(PREMIUM_FIELDS_LIB\.stripPremium\(m\)\)\)/);
   assert.match(wf, /fs\.writeFileSync\(histoPath,JSON\.stringify\(historiquePublic\(histo,matchsData\),null,2\)\);/);
   assert.match(wf, /fs\.writeFileSync\(histoPathEarly,JSON\.stringify\(historiquePublic\(histoEarly,\[\]\),null,2\)\);/);
   assert.equal((wf.match(/await rehydraterPredictionsMasquees\(/g) || []).length, 2, "rehydratation avant chaque reglement");
+  assert.equal((wf.match(/if\(!found\|\|found\.redacted\)(continue|return);/g) || []).length, 2, "un pari masque n'est jamais regle a l'aveugle");
   assert.match(wf, /p\.fixture_id!=null&&p\.type==='single'&&!p\.redacted;/, "une prediction masquee n'ecrase jamais l'archive");
+});
+
+// Cause de l'arret silencieux des ecritures (constatee le 14/09/2026) :
+// explanation_status n'est pas une colonne de match_premium_data (lot entier
+// rejete depuis le 06/09) et des fixture_id en double faisaient echouer le lot
+// recent de predictions_archive (depuis le 09/09). Le job restait vert.
+test("pipeline : ecritures Supabase jamais en echec silencieux", () => {
+  const wf = read(".github/workflows/update-data.yml");
+  assert.doesNotMatch(wf, /^\s*explanation_status:an\?'OK':'FAILED',$/m, "explanation_status n'est pas une colonne de match_premium_data");
+  assert.match(wf, /raw_response:Object\.assign\(\{\},an\|\|\{\},\{explanation_status:an\?'OK':'FAILED'\}\),/);
+  assert.match(wf, /Could not find the '\(\[A-Za-z0-9_\]\+\)' column/, "colonne inconnue rangee dans raw_response puis lot renvoye");
+  assert.match(wf, /c\.raw_response=Object\.assign\(\{\},c\.raw_response\|\|\{\},extra\);/);
+  assert.match(wf, /rows=dedoublonnerParFixture\(rows,'dernier'\);/);
+  assert.match(wf, /var rows=dedoublonnerParFixture\(candidates,'premier'\)/);
+  for (const zone of ["premium", "archive", "snapshots"]) {
+    assert.match(wf, new RegExp("signalerEchecPersistance\\('" + zone + "','echec upsert"), zone + " : echec signale");
+  }
+  assert.doesNotMatch(wf, /if\(!r\.ok\) console\.log\('  \[(premium|archive|snapshots)\] echec upsert/, "plus d'echec en simple ligne de log");
+  assert.doesNotMatch(wf, /console\.log\('  \[premium\] '\+rows\.length\+' lignes premium ecrites/, "plus de faux message de succes");
+  assert.match(wf, /console\.log\('::error title=Ecriture Supabase '\+zone\+'::'\+ligne\);/);
+  assert.match(wf, /- name: Verifier les ecritures Supabase \(premium, archive, snapshots\)\n(\s*#.*\n)*\s*if: always\(\)\n\s*run: \|\n\s*F="\$RUNNER_TEMP\/iashark-persist-errors\.txt"/);
+  assert.ok(wf.indexOf("- name: Verifier les ecritures Supabase") > wf.indexOf("- name: Commit and push"), "verification apres publication");
 });
 
 test("decoupage, script local et pages SEO utilisent la liste unique", () => {
@@ -127,11 +152,37 @@ test("fonction Edge : non-abonne sans champ premium ni run_output detaille, abon
   assert.doesNotMatch(fn, /isPro\s*=\s*true/, "aucun bypass");
 });
 
-test("page Outils : donnees de match seulement si le serveur confirme l'abonnement", () => {
+test("page Outils : donnees de match seulement via match-data, si le serveur confirme l'abonnement", () => {
   const js = read("tools-page.js");
   assert.match(js, /if \(!ctx\.isPro\) return Promise\.resolve\(null\)/);
+  assert.match(js, /functions\.invoke\('match-data'/);
   assert.match(js, /r\.data\.isPro !== true\) return null;/);
-  assert.doesNotMatch(js, /fetch\(['"]\/?(data|data-home)\.json/, "la page Outils ne lit jamais un fichier public de matchs");
+  assert.doesNotMatch(js, /fetch\(['"`]\/?(data|data-home)\.json/, "la page Outils ne lit jamais un fichier public de matchs");
+});
+
+// Abonne Pro dont match-data ne sert pas encore le detail premium (table pas
+// encore remplie) : etat neutre, jamais "aucun marche" ni erreur.
+test("affichage Pro sans detail premium : etat neutre sur l'accueil et la page match", () => {
+  const html = read("index.html");
+  assert.match(html, /var detailEnAttente=!m\.pari_rec&&!marketIdLabel\(m\)&&m\.has_signal===true&&!m\.no_signal;/);
+  assert.match(html, /detailEnAttente\?t\('home_app\.premium_detail_updating'/);
+  const js = read("match-page.js");
+  assert.match(js, /if\(!r&&raw\.has_signal===true&&raw\.no_signal!==true\)return card\(t\('match_page\.signal_title','Le signal IASHARK'\),empty\(t\('match_page\.sig_premium_updating'/);
+  assert.ok(js.indexOf("match_page.sig_premium_updating") < js.indexOf("match_page.signal_unavailable_fallback"), "l'etat neutre passe avant \"aucun marche\"");
+  for (const loc of ["fr", "en", "es", "es-mx", "de", "it", "pt"]) {
+    const d = JSON.parse(read("i18n/dict/" + loc + ".json"));
+    assert.ok(d.home_app.premium_detail_updating, loc + " home_app.premium_detail_updating");
+    assert.ok(d.match_page.sig_premium_updating, loc + " match_page.sig_premium_updating");
+  }
+});
+
+// historique.json n'est pas publie par scripts/build-public.js : l'accueil le
+// demandait quand meme (404 + erreur console en production, 14/09/2026).
+test("accueils : ne demandent plus historique.json", () => {
+  for (const f of ["index.html", "fr/index.html", "gb/index.html", "mx/index.html", "za/index.html", "en/index.html", "es/index.html", "de/index.html", "it/index.html", "pt/index.html"]) {
+    assert.doesNotMatch(read(f), /fetch\(['"]\/historique\.json/, f);
+  }
+  assert.doesNotMatch(read("scripts/build-public.js"), /"historique\.json"/, "historique.json reste hors de dist/");
 });
 
 test("migrations : colonne premium_fields et archive sans pari en attente pour anon", () => {

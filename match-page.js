@@ -235,12 +235,11 @@ function riskStat(code){
 
 function signalCard(vm){
   const r=vm.model.recommendation,raw=vm._raw||{};
-  if(!r){
-    // Une analyse est annoncee (teaser public) mais ses champs premium ne sont
-    // pas arrives : on ne pretend jamais qu'aucun marche n'a ete retenu.
-    if(raw.has_signal===true&&raw.no_signal!==true)return card(t('match_page.signal_title','Le signal IASHARK'),empty(t('match_page.sig_premium_missing','Une analyse existe pour ce match, mais son détail n’a pas pu être chargé. Réessayez dans un instant.')),'signal-card','target');
-    return card(t('match_page.signal_title','Le signal IASHARK'),empty(vm.model.unavailableReason?t('match_page.model_unavailable_reason',vm.model.unavailableReason):t('match_page.signal_unavailable_fallback','Aucun marché ne franchit les seuils de confiance ou de cote minimale pour ce match — IASHARK préfère ne pas se prononcer.')),'signal-card','target');
-  }
+  // Une analyse existe (has_signal, amorce publique) mais son detail premium
+  // n est pas servi par match-data (abonne Pro avant la prochaine mise a jour
+  // de match_premium_data) : etat neutre, jamais "aucun marche".
+  if(!r&&raw.has_signal===true&&raw.no_signal!==true)return card(t('match_page.signal_title','Le signal IASHARK'),empty(t('match_page.sig_premium_updating','Analyse détaillée en cours de mise à jour. Le marché recommandé et les probabilités s’afficheront dès la prochaine actualisation.')),'signal-card','target');
+  if(!r)return card(t('match_page.signal_title','Le signal IASHARK'),empty(vm.model.unavailableReason?t('match_page.model_unavailable_reason',vm.model.unavailableReason):t('match_page.signal_unavailable_fallback','Aucun marché ne franchit les seuils de confiance ou de cote minimale pour ce match — IASHARK préfère ne pas se prononcer.')),'signal-card','target');
   // Une probabilite nulle ou absente n'est jamais affichee "0 %" : elle
   // n'existe pas (constate en ligne sur un match servi sans le champ).
   const prob=n(r.probability)!==null&&r.probability>0?n(r.probability):null;

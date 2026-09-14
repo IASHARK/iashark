@@ -46,6 +46,9 @@ jobs:
           const { pickTopScorerCandidates } = require('./lib/markets/top-scorer-picker.js');
           const { extractTranslationSource, buildTranslationRequest, parseTranslationResponse, applyNarrativeI18n } = require('./lib/narrative-i18n.js');
           const { publicSafePick, publicTopScorers, publicDailyCombos } = require('./lib/public-run-output.js');
+          // Liste UNIQUE des champs premium (audit fuite 14/09/2026) : data.json,
+          // pages match, table protegee (premium_fields) et historique.json.
+          var PREMIUM_FIELDS_LIB=require('./lib/premium-fields.js');
           const I18N_LOCALES = require('./i18n/locales.json');
           const I18N_PAGES = require('./scripts/i18n-manifest.js');
           const { generateLocalizedSitemaps, writeSitemapIndex } = require('./scripts/i18n-sitemaps.js');
@@ -65,9 +68,6 @@ jobs:
           // Decoupage du fichier public (perf) : data-home.json (liste legere) et
           // match/<id>.json (detail), ecrits depuis matchsPublics. Voir lib/public-data-split.js.
           var PUBLIC_SPLIT=require('./lib/public-data-split.js');
-          // Liste UNIQUE des champs premium (audit fuite 14/09/2026) : fichiers
-          // publics, table protegee (premium_fields), pages SEO et fonction Edge.
-          var PREMIUM_FIELDS_LIB=require('./lib/premium-fields.js');
           // Pages SEO statiques (titres/JSON-LD des pages match, versions
           // localisees, pages championnat) : scripts/seo-pages.js.
           var SEO_PAGES=require('./scripts/seo-pages.js');
@@ -1680,8 +1680,8 @@ jobs:
             writeSitemapIndex('.', TODAY);
             console.log('  Sitemap done: '+urls.length+' urls, '+sitemapFiles.length+' sitemap(s) i18n');
           }
-          // historique.json est commite dans le depot (public) : une prediction en
-          // attente n'y porte plus le pari d'un match payant a venir
+          // historique.json est commite dans le depot GitHub, qui est PUBLIC : une
+          // prediction en attente n'y porte plus le pari d'un match payant
           // (lib/premium-fields.js#redactPendingPredictions). La version complete vit
           // dans predictions_archive (service role) et est relue avant le reglement.
           // Sans cle service role, rien n'est masque : le pari ne pourrait plus etre regle.
@@ -1690,20 +1690,38 @@ jobs:
             var libres=(matchsData||[]).filter(function(m){return m&&m.is_free===true;}).map(function(m){return m.id;});
             return Object.assign({},h,{predictions:PREMIUM_FIELDS_LIB.redactPendingPredictions(h.predictions,libres)});
           }
+          // Hotfix du 14/09/2026 : historique.json a ete masque a la main alors que
+          // predictions_archive ne recevait plus de nouvelle prediction depuis le
+          // 09/09 (voir writePredictionsArchive). Une prediction masquee absente de
+          // l'archive est relue depuis la derniere version complete du fichier
+          // (commit ci-dessous, produite par ce meme pipeline ; meme fixture, memes
+          // equipes, meme date), puis archivee au meme run. Jamais de pari invente.
+          var HISTORIQUE_COMPLET_URL='https://raw.githubusercontent.com/IASHARK/iashark/403802257108c83278d0f71e2b0ff6767833b064/historique.json';
           async function rehydraterPredictionsMasquees(predictions){
-            var masquees=(predictions||[]).filter(function(p){return p&&p.redacted&&p.fixture_id!=null;});
-            if(!masquees.length) return;
-            if(!SUPA_URL_PIPELINE||!SUPA_SERVICE_KEY){ console.log('  [historique] '+masquees.length+' prediction(s) masquee(s), aucune cle service role : non reglables ce run.'); return; }
-            var ids=masquees.map(function(p){return String(p.fixture_id);}).filter(function(v,i,a){return /^\d+$/.test(v)&&a.indexOf(v)===i;});
+            var masquees=function(){ return (predictions||[]).filter(function(p){return p&&p.redacted&&p.fixture_id!=null;}); };
+            var total=masquees().length;
+            if(!total) return;
+            if(!SUPA_URL_PIPELINE||!SUPA_SERVICE_KEY){ console.log('::warning title=historique::'+total+' prediction(s) masquee(s), aucune cle service role : non reglables ce run.'); return; }
+            var ids=masquees().map(function(p){return String(p.fixture_id);}).filter(function(v,i,a){return /^\d+$/.test(v)&&a.indexOf(v)===i;});
             var lignes=[];
             for(var i=0;i<ids.length;i+=100){
               var url=SUPA_URL_PIPELINE.replace(/\/$/,'')+'/rest/v1/predictions_archive?select=fixture_id,'+PREMIUM_FIELDS_LIB.PENDING_REDACTED_FIELDS.join(',')+'&fixture_id=in.('+ids.slice(i,i+100).join(',')+')';
               var rep=await rawHttpGetJson(url,{'apikey':SUPA_SERVICE_KEY,'Authorization':'Bearer '+SUPA_SERVICE_KEY});
               if(Array.isArray(rep)) lignes=lignes.concat(rep);
-              else console.log('  [historique] lecture predictions_archive impossible : '+JSON.stringify(rep).slice(0,160));
+              else signalerEchecPersistance('historique','lecture predictions_archive impossible : '+JSON.stringify(rep).slice(0,160));
             }
             var n=PREMIUM_FIELDS_LIB.rehydratePredictions(predictions,lignes);
-            console.log('  [historique] '+n+'/'+masquees.length+' prediction(s) en attente relue(s) depuis predictions_archive.');
+            var nGit=0;
+            if(masquees().length){
+              var complet=await rawHttpGetJson(HISTORIQUE_COMPLET_URL);
+              var parCle={};
+              ((complet&&complet.predictions)||[]).forEach(function(p){ if(p&&p.fixture_id!=null&&p.prediction&&!p.redacted) parCle[String(p.fixture_id)+'|'+p.home+'|'+p.away+'|'+p.date]=p; });
+              var lignesGit=masquees().map(function(p){ return parCle[String(p.fixture_id)+'|'+p.home+'|'+p.away+'|'+p.date]||null; }).filter(Boolean);
+              nGit=PREMIUM_FIELDS_LIB.rehydratePredictions(predictions,lignesGit);
+            }
+            var reste=masquees().length;
+            console.log('  [historique] '+total+' prediction(s) masquee(s) : '+n+' relue(s) depuis predictions_archive, '+nGit+' depuis la version complete du 14/09, '+reste+' non relue(s).');
+            if(reste) console.log('::warning title=historique::'+reste+' prediction(s) en attente masquee(s) sans source complete : non reglees ce run (jamais reglees a l aveugle).');
           }
           async function updateHistorique(matchsData){
             console.log('\n=== HISTORIQUE UPDATE ===');
@@ -1770,7 +1788,8 @@ jobs:
                 if(!isVoidStatus&&(gh===null||ga===null))continue;
                 var found=histo.predictions.find(function(p){return (p.result==='scheduled'||p.result==='pending')&&p.fixture_id===fid;});
                 if(!found)found=histo.predictions.find(function(p){return (p.result==='scheduled'||p.result==='pending')&&p.type==='single'&&p.date&&resolveDates.indexOf(p.date.substring(0,10))!==-1&&levenshtein((p.home||'').toLowerCase(),homeN.toLowerCase())<=3&&levenshtein((p.away||'').toLowerCase(),awayN.toLowerCase())<=3;});
-                if(!found)continue;
+                // Pari masque non relu (historique.json public) : jamais regle a l'aveugle.
+                if(!found||found.redacted)continue;
                 if(isVoidStatus){
                   found.result='void';found.score=null;found.fixture_id=fid;found.resolved_date=TODAY;
                   console.log('  VOID (match '+status+'): '+found.match);
@@ -2001,6 +2020,27 @@ jobs:
           // SUPABASE_SERVICE_ROLE_KEY n'est pas ajoute comme secret GitHub Actions
           // (voir supabase/migrations/0002_match_premium_data.sql pour la migration
           // a appliquer sur le projet Supabase avant d'ajouter ce secret).
+          // Ecritures Supabase : tout echec est une annotation ::error:: (resume du
+          // job) ET une ligne dans $RUNNER_TEMP/iashark-persist-errors.txt, qui fait
+          // echouer le job apres publication (etape "Verifier les ecritures Supabase").
+          // Du 06/09 au 14/09/2026, les echecs n'etaient qu'une ligne de log noyee et
+          // le job restait vert.
+          var PERSIST_ERRORS=[];
+          function signalerEchecPersistance(zone,message){
+            var ligne='['+zone+'] '+String(message).replace(/\r?\n/g,' ');
+            PERSIST_ERRORS.push(ligne);
+            console.log('::error title=Ecriture Supabase '+zone+'::'+ligne);
+            try{ fs.appendFileSync((process.env.RUNNER_TEMP||'.')+'/iashark-persist-errors.txt', ligne+'\n'); }catch(e){ console.log('  [persistance] fichier d erreurs non ecrit : '+e.message); }
+          }
+          // Un meme fixture_id deux fois dans un lot fait echouer TOUT l'upsert
+          // (Postgres : ON CONFLICT DO UPDATE command cannot affect row a second time).
+          function dedoublonnerParFixture(rows,garder){
+            var vus={}, out=[];
+            var liste=garder==='dernier'?rows.slice().reverse():rows;
+            liste.forEach(function(row){ var k=String(row&&row.fixture_id); if(vus[k])return; vus[k]=true; out.push(row); });
+            if(out.length<rows.length) console.log('  [persistance] '+(rows.length-out.length)+' doublon(s) de fixture_id ignore(s) avant upsert.');
+            return garder==='dernier'?out.reverse():out;
+          }
           function upsertJSON(host, path, body, headers) {
             return new Promise(function(resolve) {
               var data = JSON.stringify(body);
@@ -2023,36 +2063,48 @@ jobs:
               req.write(data); req.end();
             });
           }
+          // ARRET SILENCIEUX DU 06/09 AU 14/09/2026 (cause constatee le 14/09).
+          // explanation_status (ajoute le 06/09, commit 76d215083) n'est pas une
+          // colonne de match_premium_data : PostgREST rejetait TOUT le lot (400,
+          // PGRST204 "Could not find the 'explanation_status' column"). Le log
+          // affichait une ligne d'echec puis "N lignes premium ecrites" : plus aucune
+          // ligne premium depuis, job vert. Desormais explanation_status est range
+          // dans raw_response ; une colonne inconnue restante est deplacee dans
+          // raw_response.<colonne> (dont premium_fields si la migration 0020 manque,
+          // relu par match-data) et le lot est renvoye ; tout echec final est signale.
           async function writePremiumData(rows) {
             if(!rows||!rows.length) return;
             if(!SUPA_URL_PIPELINE||!SUPA_SERVICE_KEY){
-              console.log('  [premium] SUPABASE_SERVICE_ROLE_KEY non configure - '+rows.length+' lignes premium NON persistees (ni publiques ni privees). A corriger avant mise en prod du plan Pro.');
+              signalerEchecPersistance('premium','SUPABASE_SERVICE_ROLE_KEY non configure - '+rows.length+' lignes premium NON persistees (ni publiques ni privees).');
               return;
             }
+            rows=dedoublonnerParFixture(rows,'dernier');
             var u = new URL(SUPA_URL_PIPELINE);
-            var batchSize = 200;
+            var batchSize = 200, ecrites = 0;
             for(var i=0;i<rows.length;i+=batchSize){
               var batch = rows.slice(i,i+batchSize);
-              var r = await upsertJSON(u.hostname, '/rest/v1/match_premium_data?on_conflict=fixture_id', batch, {
-                'apikey': SUPA_SERVICE_KEY,
-                'Authorization': 'Bearer '+SUPA_SERVICE_KEY,
-                'Prefer': 'resolution=merge-duplicates,return=minimal',
-              });
-              if(!r.ok&&/premium_fields/.test(String(r.body||''))){
-                // Migration 0020 pas encore appliquee : meme objet range dans
-                // raw_response.premium_fields (relu par match-data), jamais perdu.
-                console.log('  [premium] colonne premium_fields absente (migration 0020) : repli sur raw_response.premium_fields.');
-                batch=batch.map(function(row){ var c=Object.assign({},row); if(c.premium_fields!==undefined){ c.raw_response=Object.assign({},c.raw_response||{},{premium_fields:c.premium_fields}); delete c.premium_fields; } return c; });
+              var r = null;
+              for(var essai=0;essai<8;essai++){
                 r = await upsertJSON(u.hostname, '/rest/v1/match_premium_data?on_conflict=fixture_id', batch, {
                   'apikey': SUPA_SERVICE_KEY,
                   'Authorization': 'Bearer '+SUPA_SERVICE_KEY,
                   'Prefer': 'resolution=merge-duplicates,return=minimal',
                 });
+                if(r.ok) break;
+                var colonne=(String(r.body||'').match(/Could not find the '([A-Za-z0-9_]+)' column/)||[])[1];
+                if(!colonne||colonne==='fixture_id'||colonne==='raw_response') break;
+                console.log('::warning title=match_premium_data::colonne '+colonne+' absente de la table : valeur rangee dans raw_response.'+colonne+' (lot '+i+').');
+                batch=batch.map(function(row){
+                  var c=Object.assign({},row);
+                  if(Object.prototype.hasOwnProperty.call(c,colonne)){ var extra={}; extra[colonne]=c[colonne]; c.raw_response=Object.assign({},c.raw_response||{},extra); delete c[colonne]; }
+                  return c;
+                });
               }
-              if(!r.ok) console.log('  [premium] echec upsert batch '+i+': status='+r.status+' '+(r.error||r.body||'').toString().slice(0,200));
+              if(r.ok) ecrites+=batch.length;
+              else signalerEchecPersistance('premium','echec upsert match_premium_data lot '+i+' ('+batch.length+' lignes) : status='+r.status+' '+(r.error||r.body||'').toString().slice(0,300));
               await sleep(100);
             }
-            console.log('  [premium] '+rows.length+' lignes premium ecrites dans Supabase (match_premium_data).');
+            console.log('  [premium] '+ecrites+'/'+rows.length+' lignes premium ecrites dans Supabase (match_premium_data).');
           }
           // Snapshot 'prediction' : capture les inputs bruts disponibles au moment de
           // la generation, pour permettre plus tard (walk-forward reel, pas invente)
@@ -2074,7 +2126,7 @@ jobs:
                 'Authorization': 'Bearer '+SUPA_SERVICE_KEY,
                 'Prefer': 'resolution=merge-duplicates,return=minimal',
               });
-              if(!r.ok) console.log('  [snapshots] echec upsert batch '+i+': status='+r.status+' '+(r.error||r.body||'').toString().slice(0,200));
+              if(!r.ok) signalerEchecPersistance('snapshots','echec upsert match_snapshots lot '+i+' : status='+r.status+' '+(r.error||r.body||'').toString().slice(0,300));
               await sleep(100);
             }
             console.log('  [snapshots] '+rows.length+' snapshots ecrits dans Supabase (match_snapshots).');
@@ -2085,8 +2137,18 @@ jobs:
           // prediction au-dela des 300 plus recentes, a chaque run, sans jamais
           // les archiver nulle part. Upsert idempotent sur fixture_id : rejouer ce
           // run n'ecrase que la meme ligne, ne duplique jamais.
+          // ARRET DU 09/09/2026 (constate le 14/09) : historique.json contient
+          // plusieurs predictions pour un meme fixture_id (1507427, 1541651,
+          // 1554982). Dans un meme lot, Postgres refuse tout l'upsert (ON CONFLICT
+          // DO UPDATE command cannot affect row a second time) : le lot des 200
+          // predictions les plus recentes echouait a chaque run, aucune nouvelle
+          // prediction n'etait archivee (derniere creation le 09/09). Desormais :
+          // doublons retires (la plus recente, en tete de liste, est gardee),
+          // predictions masquees jamais ecrites (elles effaceraient le pari archive),
+          // tout echec signale.
           async function writePredictionsArchive(predictions) {
-            var rows=(predictions||[]).filter(function(p){return p.fixture_id!=null&&p.type==='single'&&!p.redacted;}).map(function(p){
+            var candidates=(predictions||[]).filter(function(p){return p.fixture_id!=null&&p.type==='single'&&!p.redacted;});
+            var rows=dedoublonnerParFixture(candidates,'premier').map(function(p){
               return {
                 fixture_id:p.fixture_id,
                 match_label:p.match||null,home:p.home||null,away:p.away||null,
@@ -2105,11 +2167,11 @@ jobs:
             });
             if(!rows.length) return;
             if(!SUPA_URL_PIPELINE||!SUPA_SERVICE_KEY){
-              console.log('  [archive] SUPABASE_SERVICE_ROLE_KEY non configure - '+rows.length+' predictions NON archivees (risque de perte definitive au prochain troncage du cache JSON local).');
+              signalerEchecPersistance('archive','SUPABASE_SERVICE_ROLE_KEY non configure - '+rows.length+' predictions NON archivees (risque de perte definitive au prochain troncage du cache JSON local).');
               return;
             }
             var u = new URL(SUPA_URL_PIPELINE);
-            var batchSize = 200;
+            var batchSize = 200, ecrites = 0;
             for(var i=0;i<rows.length;i+=batchSize){
               var batch = rows.slice(i,i+batchSize);
               var r = await upsertJSON(u.hostname, '/rest/v1/predictions_archive?on_conflict=fixture_id', batch, {
@@ -2117,10 +2179,11 @@ jobs:
                 'Authorization': 'Bearer '+SUPA_SERVICE_KEY,
                 'Prefer': 'resolution=merge-duplicates,return=minimal',
               });
-              if(!r.ok) console.log('  [archive] echec upsert batch '+i+': status='+r.status+' '+(r.error||r.body||'').toString().slice(0,200));
+              if(r.ok) ecrites+=batch.length;
+              else signalerEchecPersistance('archive','echec upsert predictions_archive lot '+i+' ('+batch.length+' lignes) : status='+r.status+' '+(r.error||r.body||'').toString().slice(0,300));
               await sleep(100);
             }
-            console.log('  [archive] '+rows.length+' predictions archivees dans Supabase (predictions_archive, sans plafond).');
+            console.log('  [archive] '+ecrites+'/'+rows.length+' predictions archivees dans Supabase (predictions_archive, sans plafond).');
           }
           async function main(){
             console.log('=== IASHARK',TODAY,'===');
@@ -2179,7 +2242,7 @@ jobs:
                   if(!isVoidStatusE&&(gh===null||ga===null))return;
                   var found=histoEarly.predictions.find(function(p){return (p.result==='scheduled'||p.result==='pending')&&p.fixture_id===fid;});
                   if(!found)found=histoEarly.predictions.find(function(p){return (p.result==='scheduled'||p.result==='pending')&&p.type==='single'&&p.date&&resolveDatesEarly.indexOf(p.date.substring(0,10))!==-1&&levenshtein((p.home||'').toLowerCase(),homeN.toLowerCase())<=3&&levenshtein((p.away||'').toLowerCase(),awayN.toLowerCase())<=3;});
-                  if(!found)return;
+                  if(!found||found.redacted)return;
                   if(isVoidStatusE){
                     found.result='void';found.score=null;found.fixture_id=fid;found.resolved_date=TODAY;
                     return;
@@ -3061,7 +3124,8 @@ jobs:
                 // d'echec (voir genAnalyse ci-dessus), la selection
                 // (pari_rec/cote_rec/model_probability ci-dessus) reste
                 // strictement inchangee que an soit present ou non.
-                explanation_status:an?'OK':'FAILED',
+                // explanation_status n'est PAS une colonne de match_premium_data : il
+                // est range dans raw_response ci-dessous (cause de l'arret du 06/09).
                 dropping_odds:droppingOdds||null,
                 // player_markets (Player Engine) : meme traitement que
                 // kelly/edge/verdict_shark - analyse premium, jamais ecrite
@@ -3071,7 +3135,7 @@ jobs:
                 // initialement ecrit dans data.json en clair, accessible a
                 // tout visiteur non-pro via https://iashark.com/data.json.
                 player_markets:playerMarkets&&playerMarkets.length?playerMarkets:null,
-                raw_response:an||null,
+                raw_response:Object.assign({},an||{},{explanation_status:an?'OK':'FAILED'}),
                 pipeline_sha:process.env.GITHUB_SHA||null,
               });
               snapshotRows.push({
@@ -3310,12 +3374,21 @@ jobs:
             });
             var retires=allMatchsData.length-matchsPublics.filter(function(m){return m&&m.pari_rec;}).length;
             console.log('  [ACCES] '+retires+' analyse(s) retiree(s) du data.json public.');
-            // Les champs premium sans colonne dediee partent dans
-            // match_premium_data.premium_fields (migration 0020) : match-data les rend
-            // aux abonnes, qui ne les trouvent plus dans les fichiers publics.
-            var lignePremiumParId={};
-            premiumRows.forEach(function(r){ if(r&&r.fixture_id!=null) lignePremiumParId[String(r.fixture_id)]=r; });
-            allMatchsData.forEach(function(m){ var r=m&&lignePremiumParId[String(m.id)]; if(r) r.premium_fields=PREMIUM_FIELDS_LIB.premiumPayload(m); });
+            // Les champs premium sans colonne dediee (probabilites, paris_safe, textes
+            // d'analyse...) partent dans match_premium_data.premium_fields (migration
+            // 0020) : match-data les rend aux abonnes Pro. La cle est posee sur TOUTES
+            // les lignes (PostgREST refuse un lot dont les objets n'ont pas les memes cles).
+            var matchParId={};
+            allMatchsData.forEach(function(m){ if(m&&m.id!=null) matchParId[String(m.id)]=m; });
+            premiumRows.forEach(function(r){
+              if(!r) return;
+              var charge=PREMIUM_FIELDS_LIB.premiumPayload(matchParId[String(r.fixture_id)]);
+              r.premium_fields=Object.keys(charge).length?charge:null;
+            });
+            if(PEUT_PROTEGER){
+              var fuitesPubliques=PREMIUM_FIELDS_LIB.deepPremiumLeaks(matchsPublics);
+              if(fuitesPubliques.length) console.log('::error title=Fuite premium::'+fuitesPubliques.length+' champ(s) premium dans data.json public, ex. '+fuitesPubliques.slice(0,5).join(', '));
+            }
             // legacy_output : separation EXPLICITE demandee - matchsPublics
             // (l'ancienne analyse par match, marches shots/1ere-mi-temps inclus)
             // ne doit JAMAIS servir de source a SAFE/Top5/Combos ni a de futurs
@@ -3367,6 +3440,8 @@ jobs:
             generateMatchPages(matchsPublics);
             generateSitemaps(allMatchsData);
             injectHomeSeoSummary(allMatchsData);
+            if(PERSIST_ERRORS.length) console.log('::error title=Ecritures Supabase::'+PERSIST_ERRORS.length+' ecriture(s) en echec ce run (detail ci-dessus) : le job echouera a l etape Verifier les ecritures Supabase.');
+            else console.log('  [persistance] aucune ecriture Supabase en echec.');
           }
           main().catch(function(e){console.error('FATAL:',e.message,e.stack);process.exit(1);});
           JSEOF
@@ -3483,3 +3558,18 @@ jobs:
 
           echo "Echec de publication apres 5 tentatives." >&2
           exit 1
+
+      - name: Verifier les ecritures Supabase (premium, archive, snapshots)
+        # APRES la publication : un echec d'ecriture ne bloque pas les donnees
+        # publiques du jour, mais le job passe au rouge (notification GitHub) au
+        # lieu de rester vert en silence (match_premium_data vide du 06/09 au
+        # 14/09/2026, predictions_archive sans nouvelle ligne depuis le 09/09).
+        if: always()
+        run: |
+          F="$RUNNER_TEMP/iashark-persist-errors.txt"
+          if [ -s "$F" ]; then
+            echo "::error::Ecritures Supabase en echec pendant le pipeline :"
+            cat "$F"
+            exit 1
+          fi
+          echo "Ecritures Supabase : aucun echec signale."

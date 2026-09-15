@@ -16,7 +16,7 @@
 <link rel="alternate" hreflang="de" href="https://iashark.com/de/exemple-analyse.html">
 <link rel="alternate" hreflang="it" href="https://iashark.com/it/exemple-analyse.html">
 <link rel="alternate" hreflang="pt" href="https://iashark.com/pt/exemple-analyse.html">
-<link rel="alternate" hreflang="x-default" href="https://iashark.com/fr/exemple-analyse.html">
+<link rel="alternate" hreflang="x-default" href="https://iashark.com/en/exemple-analyse.html">
 <meta property="og:title" content="Example Soccer Match Analysis | IASHARK South Africa">
 <meta property="og:description" content="A complete IASHARK match analysis (PSG vs Monaco), free to view: recommended market, model probability, gap with the market and team comparison.">
 <meta property="og:type" content="website">
@@ -38,6 +38,9 @@
   padding:4px 11px;font:800 10px var(--body);letter-spacing:.1em;text-transform:uppercase}
 .demo-txt{min-width:0;flex:1 1 260px;margin:0;color:var(--text);font-size:13.5px;line-height:1.5}
 .demo-txt b{color:#fff;font-weight:600}
+/* H1 statique (audit SEO 15/09/2026 : aucune H1 dans le HTML servi) ; la
+   carte d'en-tete rendue par match-page.js passe en h2 sur cette page. */
+.demo-h1{flex:1 1 100%;margin:0;color:#fff;font:800 clamp(20px,2.4vw,26px)/1.2 var(--body);letter-spacing:-.02em}
 .demo-cta{flex:none;border-radius:10px;background:var(--accent);color:#04121a;
   padding:10px 18px;font:800 12.5px var(--body);text-decoration:none;
   transition:filter .18s;white-space:nowrap}
@@ -75,6 +78,7 @@
 
 <div class="demo-bar">
   <div class="demo-in">
+    <h1 class="demo-h1" data-i18n="demo_page.h1">Example match analysis: PSG vs Monaco</h1>
     <span class="demo-tag" data-i18n="demo_page.tag">Example</span>
     <p class="demo-txt" data-i18n-html="demo_page.bar_text">Here is a <b>full</b> IASHARK analysis.<br>Today's analysis is free.</p>
     <a class="demo-cta" href="/za/#decisions" data-href="#decisions" data-i18n="demo_page.cta">See today's free analysis</a>
@@ -90,6 +94,7 @@
   </div>
   <!-- Avertissement 18+ / jeu responsable (audit QA 14/09/2026), meme bloc que les pages match. -->
   <footer class="demo-legal"><p data-i18n="match_page.shell_disclaimer">Statistical information, not a guaranteed result. Please gamble responsibly · 18+</p><p data-helpline-row><span data-i18n="match_page.shell_help_label">Help:</span> <a data-market-helpline="url" href="https://www.responsiblegambling.org.za">responsiblegambling.org.za</a> · <span data-market-helpline="phone">0800 006 008</span></p></footer>
+<!--SEO_FOOTER_NAV--><nav class="seo-foot-nav" aria-label="Site navigation" style="max-width:1100px;margin:16px auto 0;padding:14px 20px 22px;border-top:1px solid rgba(141,179,211,.14);font:12.5px/1.8 system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;color:#91a0b3;text-align:center"><p style="margin:0 0 4px"><span style="color:#c3ccd8">Leagues:</span> <a href="/za/leagues/premier-soccer-league.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Premier Soccer League</a> · <a href="/za/leagues/premier-league.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Premier League</a> · <a href="/za/leagues/champions-league.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Champions League</a> · <a href="/za/leagues/europa-league.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Europa League</a> · <a href="/za/leagues/conference-league.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Conference League</a></p><p style="margin:0"><a href="/za/clubs/" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">PSL clubs and derby</a> · <a href="/za/articles/" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">South African articles</a> · <a href="/en/blog/" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Blog and guides</a> · <a href="/za/marches.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Markets analysed</a> · <a href="/za/methodologie.html" style="color:#91a0b3;text-decoration:underline;text-underline-offset:2px">Methodology</a></p></nav><!--/SEO_FOOTER_NAV-->
 </main>
 
 <script>

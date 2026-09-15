@@ -181,7 +181,8 @@ test("build : hreflang reciproques entre /en/ et /es/ pour un meme club, rien ve
   try {
     var rep = await BUILD.buildClubHubs({ root: ROOT, dataRoot: tmp, outRoot: tmp, config: subsetConfig(["real-madrid", "barcelona"], []), dirs: ["en", "es"], client: fakeClient(), now: new Date("2098-12-01T00:00:00Z"), today: "2098-12-01", write: false });
     var en = rep.outputs["/en/clubs/real-madrid.html"], es = rep.outputs["/es/equipos/real-madrid.html"];
-    assert.deepEqual(alternatesOf(en), { en: "https://iashark.com/en/clubs/real-madrid.html", es: "https://iashark.com/es/equipos/real-madrid.html" });
+    // x-default vers /en/ (config/markets.json#_hreflangXDefault).
+    assert.deepEqual(alternatesOf(en), { en: "https://iashark.com/en/clubs/real-madrid.html", es: "https://iashark.com/es/equipos/real-madrid.html", "x-default": "https://iashark.com/en/clubs/real-madrid.html" });
     assert.deepEqual(alternatesOf(es), alternatesOf(en));
     assert.deepEqual(alternatesOf(rep.outputs["/es/equipos/index.html"]), {}, "hubs de contenu different : pas de hreflang");
     assert.equal(canonicalOf(rep.outputs["/es/equipos/index.html"]), "https://iashark.com/es/equipos/");

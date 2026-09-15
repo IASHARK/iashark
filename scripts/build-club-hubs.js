@@ -191,10 +191,19 @@ async function buildClubHubs(opts) {
     return fs.existsSync(path.join(root, f.slice(1))) || fs.existsSync(path.join(outRoot, f.slice(1)));
   }
 
-  // Equivalents (meme cle dans plusieurs versions) -> hreflang.
+  // Equivalents (meme cle dans plusieurs versions) -> hreflang reciproques +
+  // x-default (config/markets.json#_hreflangXDefault : en, puis fr ; sinon le
+  // premier equivalent, un groupe sans x-default etant signale par les audits).
+  // Page presente dans une seule version : aucun hreflang (pas d'equivalent reel).
   function alternatesFor(p) {
     var same = plan.filter(function (q) { return q.kind === p.kind && q.key === p.key; });
-    return same.map(function (q) { return { hreflang: C.DIRS[q.dir].hreflang, href: R.abs(q.path) }; });
+    var out = same.map(function (q) { return { hreflang: C.DIRS[q.dir].hreflang, href: R.abs(q.path) }; });
+    if (same.length > 1) {
+      var xd = C.xDefaultDir(same.map(function (q) { return q.dir; }));
+      var target = same.filter(function (q) { return q.dir === xd; })[0] || same[0];
+      out.push({ hreflang: "x-default", href: R.abs(target.path) });
+    }
+    return out;
   }
 
   function teamBundle(id, dir, limitForm) {

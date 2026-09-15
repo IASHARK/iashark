@@ -7,7 +7,7 @@
   "meta": {
     "index": {
       "title": "Pronostici calcio con modelli statistici | IASHARK",
-      "description": "Pronostici di Serie A e calcio europeo basati su modelli statistici: probabilità 1X2, gol e goal/no goal confrontate con le quote. Analisi gratis ogni giorno. 18+"
+      "description": "Pronostici di Serie A e calcio europeo da modelli statistici: probabilità 1X2, gol e goal/no goal confrontate con le quote. Analisi gratis ogni giorno. 18+"
     },
     "marches": {
       "title": "Mercati calcio: probabilità del modello vs quote",
@@ -19,11 +19,11 @@
     },
     "abonnement": {
       "title": "Abbonamento IASHARK Pro: tutte le analisi",
-      "description": "IASHARK Pro a {pro_price} al mese: tutte le analisi delle partite e gli strumenti di monitoraggio, senza vincoli. Stime statistiche, nessun risultato garantito. 18+"
+      "description": "IASHARK Pro a {pro_price} al mese: tutte le analisi delle partite e gli strumenti di monitoraggio, senza vincoli. Stime statistiche, non certezze. 18+"
     },
     "exemple-analyse": {
       "title": "Esempio di analisi partita: PSG vs Monaco | IASHARK",
-      "description": "Un'analisi completa di IASHARK, gratis: mercato consigliato, probabilità del modello, differenza con il mercato, confronto tra squadre e scenario della partita."
+      "description": "Un'analisi completa di IASHARK, gratis: mercato consigliato, probabilità del modello, differenza con il mercato, confronto tra squadre e scenario."
     },
     "pro": {
       "title": "Strumenti IASHARK: selezioni del modello e monitoraggio",
@@ -55,13 +55,44 @@
     "blog": "Blog"
   },
   "league": {
-    "title": "Pronostici {league}: probabilità delle partite | IASHARK",
-    "description": "Pronostici {league} da modelli statistici: partite analizzate, orario italiano, stadio e link a ogni analisi. Vietato ai minori di 18 anni.",
-    "h1": "Pronostici {league} e analisi delle partite",
-    "intro_generic": "Le prossime partite della competizione {league} ({country}) analizzate da IASHARK. Ogni analisi stima con modelli statistici le probabilità di risultato, gol e goal/no goal e le confronta con le quote dei bookmaker.",
-    "fixtures_title": "Partite analizzate",
-    "none": "Al momento nessuna partita della competizione {league} è in analisi. Le partite vengono aggiunte automaticamente quando i dati sono disponibili.",
+    "title": "Pronostici {league}: partite e classifica | IASHARK",
+    "title_short": "{league}: pronostici e classifica",
+    "description": "Pronostici {league} da modelli statistici: partite dei prossimi 14 giorni in ora italiana, ultimi risultati e classifica. Vietato ai minori di 18.",
+    "description_short": "{league}: partite dei prossimi 14 giorni, risultati recenti e classifica con analisi statistica. 18+",
+    "h1": "Pronostici {league}: partite, risultati e classifica",
+    "about": {
+      "national": "{league}: la massima serie del calcio {adjective}. IASHARK analizza le partite con modelli statistici e confronta le probabilità stimate con le quote dei bookmaker.",
+      "ucl": "{league}: la principale competizione per club organizzata dalla UEFA. IASHARK analizza le partite con modelli statistici e confronta le probabilità stimate con le quote dei bookmaker.",
+      "uel": "{league}: la seconda competizione europea per club della UEFA, dopo la Champions League. IASHARK analizza le partite con modelli statistici e confronta le probabilità stimate con le quote dei bookmaker.",
+      "uecl": "{league}: la terza competizione europea per club della UEFA. IASHARK analizza le partite con modelli statistici e confronta le probabilità stimate con le quote dei bookmaker.",
+      "mls": "{league} (Major League Soccer): il massimo campionato professionistico di Stati Uniti e Canada. IASHARK analizza le partite con modelli statistici e confronta le probabilità stimate con le quote dei bookmaker."
+    },
+    "adjectives": {
+      "premier": "inglese",
+      "laliga": "spagnolo",
+      "seriea": "italiano",
+      "bundesliga": "tedesco",
+      "ligue1": "francese",
+      "eredivisie": "olandese",
+      "primeira": "portoghese",
+      "suede": "svedese",
+      "jleague": "giapponese",
+      "liga_mx": "messicano",
+      "south_africa_premiership": "sudafricano",
+      "argentina_liga_profesional": "argentino",
+      "colombia_primera_a": "colombiano",
+      "peru_primera": "peruviano",
+      "chile_primera": "cileno"
+    },
+    "scope": "Questa pagina raccoglie le partite dei prossimi 14 giorni, gli ultimi risultati e la classifica, da dati pubblici aggiornati ogni giorno. Orari in {tz}.",
+    "fixtures_title": "Partite dei prossimi 14 giorni",
+    "none": "Secondo i dati disponibili, nessuna partita di {league} è in programma nei prossimi 14 giorni.",
     "kickoff_note": "Orari espressi in ora italiana.",
+    "results_title": "Ultimi risultati",
+    "standings_title": "Classifica {league}",
+    "standings_asof": "Classifica al {date}, da dati pubblici.",
+    "standings_partial": "Estratto pubblicato con le ultime partite analizzate.",
+    "clubs_title": "Club e derby",
     "method_title": "Come leggere queste analisi",
     "method": "Una probabilità è una stima, non una promessa: un esito dato al 60% non si verifica comunque quattro volte su dieci. Ogni analisi IASHARK valuta anche la qualità dei propri dati, così un campione ridotto viene segnalato invece di essere nascosto.",
     "free_link": "L'analisi gratuita del giorno",
@@ -98,8 +129,11 @@
     }
   },
   "match": {
-    "title": "{home} vs {away}: pronostico e statistiche ({league}) | IASHARK",
-    "description": "{home} vs {away}, {league}, {date}: orario, stadio e analisi statistica IASHARK di risultato, gol e goal/no goal. Vietato ai minori di 18.",
+    "title": "{home} vs {away}: pronostico e statistiche ({league})",
+    "title_short": "{home} vs {away}: pronostico e statistiche",
+    "title_min": "Pronostico {home} vs {away}",
+    "description": "Partita di {league} del {date}: {home} vs {away}. Orario, stadio, forma recente e analisi statistica IASHARK. Vietato ai minori di 18.",
+    "description_short": "{home} vs {away} ({league}), {date}: orario, stadio e analisi statistica IASHARK. 18+",
     "facts_title": "Informazioni sulla partita",
     "competition": "Competizione",
     "kickoff": "Calcio d'inizio",
@@ -129,5 +163,15 @@
     "h2h_row": "{date}: {home} {score} {away}",
     "lineups_title": "Formazioni iniziali",
     "lineup_row": "{team} ({formation}): {players}"
+  },
+  "nav": {
+    "aria": "Navigazione del sito",
+    "leagues": "Competizioni:",
+    "explore": "Da esplorare",
+    "clubs": "Club e derby",
+    "articles": "Articoli",
+    "blog": "Blog e guide",
+    "markets": "Mercati analizzati",
+    "methodology": "Metodologia"
   }
 }

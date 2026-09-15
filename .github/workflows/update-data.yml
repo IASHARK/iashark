@@ -1660,16 +1660,15 @@ jobs:
               var pari=(m.is_free&&m.pari_rec&&!m.no_signal)
                 ?(' — <span data-i18n="home_app.seo_ai_pick">'+escHtml(seoText(loc,'home_app.seo_ai_pick','Pronostic IA :'))+'</span> <span data-market-label="'+escHtml(m.pari_rec)+'" data-home="'+escHtml(m.home.n)+'" data-away="'+escHtml(m.away.n)+'">'+escHtml(seoMarketLabel(m,loc))+'</span> ('+confiance+' '+escHtml(String(m.conf||''))+'/10)')
                 :''; // conf = probabilite du modele / 10 : jamais publiee pour un match non offert
-              // Lien vers la page match statique du repertoire (maillage
-              // interne : /match/<id>.html pour fr et la racine, sinon
-              // /<dir>/match/<id>.html ecrite par scripts/seo-pages.js).
-              var lienMatch=(!dir||dir==='fr')?'/match/'+m.id+'.html':'/'+dir+'/match/'+m.id+'.html';
-              // Pas de version de ce match dans ce repertoire (perimetre
-              // config/leagues.json#seoMatchDirs) : nom sans lien, jamais un lien
-              // vers une page inexistante ni vers une autre langue.
+              // Lien vers la page match statique : celle du repertoire si elle
+              // existe, sinon la version la plus proche reellement generee dans
+              // le perimetre de la competition (meme langue, puis en, puis fr) ;
+              // aucune page : nom sans lien. Meme fonction que
+              // scripts/build-locales.js (rewriteHomeMatchSummary) : un rebuild
+              // local donne exactement le meme bloc que le pipeline.
+              var lienMatch=MATCH_LIFECYCLE.versionMatchHref(m.id,m.league_key,dir||'fr','.');
               var nomMatch=escHtml(m.home.n)+' vs '+escHtml(m.away.n);
-              var versionMatch=(!dir||dir==='fr')||SEO_PAGES.hasMatchVersion(m,dir);
-              return '<li>'+escHtml(heure)+' — <strong>'+(versionMatch?'<a href="'+lienMatch+'" style="color:inherit">'+nomMatch+'</a>':nomMatch)+'</strong>'+(m.league?' ('+escHtml(seoLeagueName(m))+')':'')+pari+'</li>';
+              return '<li>'+escHtml(heure)+' — <strong>'+(lienMatch?'<a href="'+lienMatch+'" style="color:inherit">'+nomMatch+'</a>':nomMatch)+'</strong>'+(m.league?' ('+escHtml(seoLeagueName(m))+')':'')+pari+'</li>';
             }).join('');
             // Titre : date longue localisee (<time data-seo-date>, reformatee par
             // repertoire au build) et mention explicite du fuseau des heures
@@ -3574,7 +3573,9 @@ jobs:
           OUTPUTS="data.json data-home.json historique.json transferts.json actus.json sitemap.xml match index.html league-coverage-report.json seo-lastmod.json"
           # Registre du cycle de vie des pages match (scripts/match-lifecycle.js) :
           # chemin imbrique, sauvegarde et restauration AVEC son chemin.
-          LIFECYCLE_FILES="data/match-pages-registry.json"
+          # Classements conserves des pages championnat (scripts/league-hub-data.js) :
+          # contenu stable des hubs d'un run a l'autre, meme traitement.
+          LIFECYCLE_FILES="data/match-pages-registry.json data/league-hubs-registry.json"
           # _redirects : seul son bloc "Pages match retirees" est une sortie du run.
           # Commite, mais jamais restaure a plat apres un reset (une regle poussee
           # entre-temps serait ecrasee) : le bloc est reapplique depuis le registre.

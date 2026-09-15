@@ -30,6 +30,8 @@ const path = require("path");
 const ROOT = path.join(__dirname, "..");
 const SITE_URL = "https://iashark.com";
 const LASTMOD = require("./seo-lastmod.js");
+// x-default : config/markets.json#_hreflangXDefault (seo-common.js#xDefaultDir).
+const SEO_COMMON = require("./seo-common.js");
 const MARKETS = JSON.parse(fs.readFileSync(path.join(ROOT, "config/markets.json"), "utf8"));
 const DIRS = MARKETS._dirs;
 const LEGAL_FILES = MARKETS._legalFiles || {};
@@ -139,7 +141,8 @@ function legalEntries(dir, dirs, xDefault) {
     if (pageSeo(readFile(path.join("legal", dir, file)) || "").noindex) return;
     var alt = dirs.filter(function (d) { return legalExists(d, file); });
     var alternates = alt.map(function (d) { return { hreflang: DIRS[d].hreflang, href: SITE_URL + "/" + d + "/" + file }; });
-    if (alt.indexOf(xDefault) !== -1) alternates.push({ hreflang: "x-default", href: SITE_URL + "/" + xDefault + "/" + file });
+    var xd = alt.length > 1 ? SEO_COMMON.xDefaultDir(alt) : null;
+    if (xd) alternates.push({ hreflang: "x-default", href: SITE_URL + "/" + xd + "/" + file });
     entries.push({ loc: SITE_URL + "/" + dir + "/" + file, alternates: alternates, priority: "0.3", changefreq: "monthly", file: dir + "/" + file });
   });
   return entries;
@@ -205,7 +208,8 @@ function generateLocalizedSitemaps(locales, pages, today, outDir) {
       if (alt.indexOf(dir) === -1) return;
       var slug = page.file === "index.html" ? "" : page.file;
       var alternates = alt.map(function (d) { return { hreflang: DIRS[d].hreflang, href: SITE_URL + "/" + d + "/" + slug }; });
-      if (alt.indexOf(xDefault) !== -1) alternates.push({ hreflang: "x-default", href: SITE_URL + "/" + xDefault + "/" + slug });
+      var xd = alt.length > 1 ? SEO_COMMON.xDefaultDir(alt) : null;
+      if (xd) alternates.push({ hreflang: "x-default", href: SITE_URL + "/" + xd + "/" + slug });
       entries.push({ loc: SITE_URL + "/" + dir + "/" + slug, alternates: alternates, priority: slug === "" ? "0.8" : "0.5", changefreq: "weekly", file: dir + "/" + page.file });
     });
     entries = entries.concat(legalEntries(dir, dirs, xDefault), blogEntries(dir));

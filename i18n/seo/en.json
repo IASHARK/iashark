@@ -11,7 +11,7 @@
     },
     "marches": {
       "title": "Football Markets: Model Probability vs Odds | IASHARK",
-      "description": "Every market IASHARK analyses, from match result to goals and BTTS: model probability, margin-free market probability, the gap between them and data quality."
+      "description": "Every market IASHARK analyses, from match result to goals and BTTS: model probability, margin-free market probability, the gap and data quality."
     },
     "a-propos": {
       "title": "About IASHARK: Methodology, Data Sources and Limits",
@@ -55,13 +55,44 @@
     "blog": "Blog"
   },
   "league": {
-    "title": "{league} Predictions & Match Probabilities | IASHARK",
-    "description": "{league} predictions from statistical models: analysed fixtures with kick-off times (UTC), venues and a link to each match analysis. Estimates only, 18+",
-    "h1": "{league} predictions and match analysis",
-    "intro_generic": "Upcoming {league} ({country}) fixtures analysed by IASHARK. Each match analysis estimates result, goals and both-teams-to-score probabilities with statistical models and compares them with bookmaker odds.",
-    "fixtures_title": "Analysed fixtures",
-    "none": "No {league} fixture is being analysed right now. Fixtures are added automatically once their data is available.",
+    "title": "{league} Predictions, Fixtures and Table | IASHARK",
+    "title_short": "{league} predictions and table",
+    "description": "{league} predictions from statistical models: fixtures for the next 14 days, recent results and the latest table, with IASHARK match analysis. 18+",
+    "description_short": "{league}: fixtures for the next 14 days, recent results and the table, with statistical match analysis. 18+",
+    "h1": "{league} predictions: fixtures, results and table",
+    "about": {
+      "national": "{league}: the top division of {adjective} football. IASHARK analyses its fixtures with statistical models and compares the estimated probabilities with bookmaker odds.",
+      "ucl": "{league}: the leading club competition organised by UEFA. IASHARK analyses its fixtures with statistical models and compares the estimated probabilities with bookmaker odds.",
+      "uel": "{league}: UEFA's second-tier European club competition, below the Champions League. IASHARK analyses its fixtures with statistical models and compares the estimated probabilities with bookmaker odds.",
+      "uecl": "{league}: UEFA's third-tier European club competition. IASHARK analyses its fixtures with statistical models and compares the estimated probabilities with bookmaker odds.",
+      "mls": "{league} (Major League Soccer): the top professional league in the United States and Canada. IASHARK analyses its fixtures with statistical models and compares the estimated probabilities with bookmaker odds."
+    },
+    "adjectives": {
+      "premier": "English",
+      "laliga": "Spanish",
+      "seriea": "Italian",
+      "bundesliga": "German",
+      "ligue1": "French",
+      "eredivisie": "Dutch",
+      "primeira": "Portuguese",
+      "suede": "Swedish",
+      "jleague": "Japanese",
+      "liga_mx": "Mexican",
+      "south_africa_premiership": "South African",
+      "argentina_liga_profesional": "Argentine",
+      "colombia_primera_a": "Colombian",
+      "peru_primera": "Peruvian",
+      "chile_primera": "Chilean"
+    },
+    "scope": "This page brings together the next 14 days of fixtures, recent results and the table, drawn from public data and refreshed daily. Times are shown in {tz}.",
+    "fixtures_title": "Fixtures in the next 14 days",
+    "none": "No {league} fixture is scheduled in the next 14 days in the data available.",
     "kickoff_note": "Kick-off times are shown in UTC.",
+    "results_title": "Latest results",
+    "standings_title": "{league} table",
+    "standings_asof": "Table as of {date}, from public data.",
+    "standings_partial": "Extract published with the latest analysed matches.",
+    "clubs_title": "Clubs and derbies",
     "method_title": "How to read these analyses",
     "method": "A probability is an estimate, not a promise: an outcome given a 60% chance still fails four times in ten. Every IASHARK analysis also rates its data quality, so a thin sample is flagged rather than hidden.",
     "free_link": "Today's free match analysis",
@@ -96,8 +127,11 @@
     }
   },
   "match": {
-    "title": "{home} vs {away}: prediction & stats ({league}) | IASHARK",
-    "description": "{home} vs {away}, {league}, {date}: kick-off, venue and IASHARK's statistical analysis of result, goals and both teams to score. 18+",
+    "title": "{home} vs {away} prediction and stats ({league})",
+    "title_short": "{home} vs {away}: prediction and stats",
+    "title_min": "{home} vs {away} prediction",
+    "description": "{league} match on {date}: {home} vs {away}. Kick-off time, venue, recent form, table and IASHARK's statistical analysis. 18+",
+    "description_short": "{home} vs {away} ({league}), {date}: kick-off, venue and IASHARK's statistical analysis. 18+",
     "facts_title": "Match information",
     "competition": "Competition",
     "kickoff": "Kick-off",
@@ -127,5 +161,15 @@
     "h2h_row": "{date}: {home} {score} {away}",
     "lineups_title": "Starting line-ups",
     "lineup_row": "{team} ({formation}): {players}"
+  },
+  "nav": {
+    "aria": "Site navigation",
+    "leagues": "Leagues:",
+    "explore": "Explore",
+    "clubs": "Clubs and derbies",
+    "articles": "Articles",
+    "blog": "Blog and guides",
+    "markets": "Markets analysed",
+    "methodology": "Methodology"
   }
 }

@@ -419,13 +419,14 @@ test("pipeline et publication : registre commite avec son chemin, jamais publie,
   assert.match(wf, /MATCH_LIFECYCLE\.saveRegistry\('\.',registreLc\)/);
   assert.match(wf, /MATCH_LIFECYCLE\.writeRedirects\('\.',registreLc\)/);
   assert.match(wf, /SEO_PAGES\.matchRobotsMeta\(m,'fr',\{now:maintenantLc\}\)/);
-  assert.match(wf, /SEO_PAGES\.hasMatchVersion\(m,dir\)/);
+  // Lien d'accueil : page de la version, sinon version la plus proche generee (meme fonction que build-locales).
+  assert.match(wf, /MATCH_LIFECYCLE\.versionMatchHref\(m\.id,m\.league_key,dir\|\|'fr','\.'\)/);
   // _redirects commite (301 des pages retirees) mais jamais restaure a plat
   // apres un reset : le bloc est reapplique depuis le registre restaure.
   const outputs = wf.match(/OUTPUTS="([^"]*)"/)[1].split(/\s+/);
   assert.ok(!outputs.includes("_redirects"), "_redirects ne doit pas etre restaure a plat");
   assert.match(wf, /LIFECYCLE_DERIVED="_redirects"/);
-  assert.match(wf, /LIFECYCLE_FILES="data\/match-pages-registry\.json"/);
+  assert.match(wf, /LIFECYCLE_FILES="data\/match-pages-registry\.json data\/league-hubs-registry\.json"/);
   assert.equal((wf.match(/git add \$OUTPUTS \$DIR_INDEXES \$SEO_DIRS sitemap-\*\.xml \$LIFECYCLE_FILES \$LIFECYCLE_DERIVED/g) || []).length, 2);
   assert.match(wf, /if \[ -e "\$p" \]; then cp --parents "\$p" "\$SAVE\/"; fi/);
   assert.match(wf, /cp "\$SAVE\/\$p" "\$p"/);

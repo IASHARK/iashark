@@ -7,19 +7,19 @@
   "meta": {
     "index": {
       "title": "Fußball-Prognosen mit statistischen Modellen | IASHARK",
-      "description": "Bundesliga- und Fußball-Prognosen aus statistischen Modellen: Wahrscheinlichkeiten für Sieg, Tore und beide Teams treffen im Vergleich zu den Quoten. Ab 18."
+      "description": "Bundesliga- und Fußball-Prognosen aus statistischen Modellen: Wahrscheinlichkeiten für Sieg, Tore und beide Teams treffen im Vergleich zu Quoten. Ab 18."
     },
     "marches": {
       "title": "Fußball-Märkte: Modellwahrscheinlichkeit vs. Quoten",
-      "description": "Alle Märkte, die IASHARK analysiert, vom Spielausgang bis zu Toren: Modellwahrscheinlichkeit, Marktwahrscheinlichkeit ohne Marge, Abweichung und Datenqualität."
+      "description": "Alle Märkte, die IASHARK analysiert, vom Spielausgang bis zu Toren: Modellwahrscheinlichkeit, Marktwahrscheinlichkeit ohne Marge und Datenqualität."
     },
     "a-propos": {
       "title": "Über IASHARK: Methodik, Datenquellen und Grenzen",
-      "description": "Wie IASHARK Fußball analysiert: Datenquellen, Poisson- und Dixon-Coles-Modelle, Elo-Wertungen, Monte-Carlo-Simulation, bekannte Grenzen und rechtliche Hinweise."
+      "description": "Wie IASHARK Fußball analysiert: Datenquellen, Poisson- und Dixon-Coles-Modelle, Elo-Wertungen, Monte-Carlo-Simulation, Grenzen und rechtliche Hinweise."
     },
     "abonnement": {
       "title": "IASHARK Pro Abo: alle Spielanalysen",
-      "description": "IASHARK Pro für {pro_price} pro Monat: alle Spielanalysen und die Tracking-Tools, jederzeit kündbar. Statistische Schätzungen, keine garantierten Ergebnisse. Ab 18."
+      "description": "IASHARK Pro für {pro_price} pro Monat: alle Spielanalysen und die Tracking-Tools, jederzeit kündbar. Statistische Schätzungen, keine Gewissheiten. Ab 18."
     },
     "exemple-analyse": {
       "title": "Beispiel einer Spielanalyse: PSG vs Monaco | IASHARK",
@@ -55,13 +55,44 @@
     "blog": "Blog"
   },
   "league": {
-    "title": "{league} Prognosen: Spielwahrscheinlichkeiten | IASHARK",
-    "description": "{league} Prognosen aus statistischen Modellen: analysierte Spiele, Anstoßzeit (deutsche Zeit), Stadion und Link zu jeder Analyse. Ab 18.",
-    "h1": "{league} Prognosen und Spielanalysen",
-    "intro_generic": "Kommende Spiele des Wettbewerbs {league} ({country}), analysiert von IASHARK. Jede Spielanalyse schätzt mit statistischen Modellen die Wahrscheinlichkeiten für Ausgang, Tore und beide Teams treffen und vergleicht sie mit den Buchmacherquoten.",
-    "fixtures_title": "Analysierte Spiele",
-    "none": "Derzeit wird kein Spiel des Wettbewerbs {league} analysiert. Neue Spiele kommen automatisch hinzu, sobald ihre Daten verfügbar sind.",
+    "title": "{league} Prognosen, Spielplan & Tabelle | IASHARK",
+    "title_short": "{league}: Prognosen und Tabelle",
+    "description": "{league} Prognosen aus statistischen Modellen: Spiele der nächsten 14 Tage in deutscher Zeit, aktuelle Ergebnisse und Tabelle. Ab 18.",
+    "description_short": "{league}: Spiele der nächsten 14 Tage, Ergebnisse und Tabelle mit statistischer Analyse. Ab 18.",
+    "h1": "{league} Prognosen: Spielplan, Ergebnisse und Tabelle",
+    "about": {
+      "national": "{league}: die höchste Spielklasse des {adjective} Fußballs. IASHARK analysiert die Spiele mit statistischen Modellen und vergleicht die geschätzten Wahrscheinlichkeiten mit den Buchmacherquoten.",
+      "ucl": "{league}: der wichtigste Klubwettbewerb der UEFA. IASHARK analysiert die Spiele mit statistischen Modellen und vergleicht die geschätzten Wahrscheinlichkeiten mit den Buchmacherquoten.",
+      "uel": "{league}: der zweithöchste europäische Klubwettbewerb der UEFA, nach der Champions League. IASHARK analysiert die Spiele mit statistischen Modellen und vergleicht die geschätzten Wahrscheinlichkeiten mit den Buchmacherquoten.",
+      "uecl": "{league}: der dritthöchste europäische Klubwettbewerb der UEFA. IASHARK analysiert die Spiele mit statistischen Modellen und vergleicht die geschätzten Wahrscheinlichkeiten mit den Buchmacherquoten.",
+      "mls": "{league} (Major League Soccer): die höchste Profiliga in den USA und Kanada. IASHARK analysiert die Spiele mit statistischen Modellen und vergleicht die geschätzten Wahrscheinlichkeiten mit den Buchmacherquoten."
+    },
+    "adjectives": {
+      "premier": "englischen",
+      "laliga": "spanischen",
+      "seriea": "italienischen",
+      "bundesliga": "deutschen",
+      "ligue1": "französischen",
+      "eredivisie": "niederländischen",
+      "primeira": "portugiesischen",
+      "suede": "schwedischen",
+      "jleague": "japanischen",
+      "liga_mx": "mexikanischen",
+      "south_africa_premiership": "südafrikanischen",
+      "argentina_liga_profesional": "argentinischen",
+      "colombia_primera_a": "kolumbianischen",
+      "peru_primera": "peruanischen",
+      "chile_primera": "chilenischen"
+    },
+    "scope": "Diese Seite bündelt die Spiele der nächsten 14 Tage, die letzten Ergebnisse und die Tabelle aus öffentlichen Daten, täglich aktualisiert. Uhrzeiten in {tz}.",
+    "fixtures_title": "Spiele der nächsten 14 Tage",
+    "none": "Laut den verfügbaren Daten ist in den nächsten 14 Tagen kein Spiel des Wettbewerbs {league} angesetzt.",
     "kickoff_note": "Anstoßzeiten nach deutscher Zeit.",
+    "results_title": "Letzte Ergebnisse",
+    "standings_title": "Tabelle {league}",
+    "standings_asof": "Tabelle vom {date}, aus öffentlichen Daten.",
+    "standings_partial": "Auszug, veröffentlicht mit den zuletzt analysierten Spielen.",
+    "clubs_title": "Vereine und Derbys",
     "method_title": "So liest du diese Analysen",
     "method": "Eine Wahrscheinlichkeit ist eine Schätzung, kein Versprechen: Ein Ausgang mit 60 % Wahrscheinlichkeit tritt in vier von zehn Fällen trotzdem nicht ein. Jede IASHARK-Analyse bewertet außerdem ihre Datenqualität, damit eine dünne Datenbasis sichtbar bleibt.",
     "free_link": "Die kostenlose Spielanalyse des Tages",
@@ -98,8 +129,11 @@
     }
   },
   "match": {
-    "title": "{home} vs {away}: Prognose & Statistik ({league}) | IASHARK",
-    "description": "{home} vs {away}, {league}, {date}: Anstoß, Stadion und statistische IASHARK-Analyse zu Ausgang, Toren und beide Teams treffen. Ab 18.",
+    "title": "{home} vs {away}: Prognose & Statistik ({league})",
+    "title_short": "{home} vs {away}: Prognose und Statistik",
+    "title_min": "{home} vs {away} Prognose",
+    "description": "{home} gegen {away} ({league}) am {date}: Anstoßzeit, Stadion, aktuelle Form und statistische Analyse von IASHARK. Ab 18.",
+    "description_short": "{home} vs {away} ({league}), {date}: Anstoß, Stadion und statistische Analyse. Ab 18.",
     "facts_title": "Spielinformationen",
     "competition": "Wettbewerb",
     "kickoff": "Anstoß",
@@ -129,5 +163,15 @@
     "h2h_row": "{date}: {home} {score} {away}",
     "lineups_title": "Startaufstellungen",
     "lineup_row": "{team} ({formation}): {players}"
+  },
+  "nav": {
+    "aria": "Seitennavigation",
+    "leagues": "Wettbewerbe:",
+    "explore": "Mehr entdecken",
+    "clubs": "Vereine und Derbys",
+    "articles": "Artikel",
+    "blog": "Blog und Ratgeber",
+    "markets": "Analysierte Märkte",
+    "methodology": "Methodik"
   }
 }

@@ -2,6 +2,8 @@
   "_readme": "Source de verite GEO (pays/devise/prix/conformite/repertoires publics). Ne PAS confondre avec i18n/locales.json (langue d'interface) : un marche pointe vers UNE locale existante, ce fichier ne duplique jamais un dictionnaire de traduction. 'status' et les champs de conformite restent DRAFT_PENDING_LEGAL_REVIEW tant qu'aucune validation juridique reelle n'a eu lieu (cf. 04_IAShark_Compliance_Approval_Pack) - ne jamais faire passer un marche a LIVE sans checklist QA + validation business. Consommateurs : scripts/build-locales.js (genere toutes les pages publiques dans chaque repertoire de _dirs, recopie le bloc de donnees de lib/market-config.js, regenere _redirects) et scripts/i18n-sitemaps.js (sitemaps + hreflang). Apres toute modification ici : node scripts/build-locales.js.",
   "_defaultMarket": "fr",
   "_xDefaultDir": "fr",
+  "_hreflangXDefault_readme": "Cible hreflang x-default (audit SEO 15/09/2026) : premiere version de cette liste presente dans le groupe d'equivalents de la page. /en/ (anglais international) sert mieux qu'un /fr/ les visiteurs dont la langue n'a pas de version (nl, sv, ja...), et c'est deja la page que la racine / (302 geolocalisee) renvoie a Googlebot (Country=us). _xDefaultDir reste 'fr' : il ne designe PAS le x-default mais le repertoire historique servi a la racine (/match/<id>.html, /blog/, 301 des anciennes URLs racine) ; le changer deplacerait toutes les pages match FR indexees. Groupe sans /en/ (ex. Liga MX : fr, mx, es) : x-default vers /fr/.",
+  "_hreflangXDefault": ["en", "fr"],
   "_planKeys": ["free", "pro", "edge", "annual_edge"],
   "_legalFiles": {
     "legal_notice": "mentions-legales.html",

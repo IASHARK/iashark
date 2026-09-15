@@ -7,15 +7,15 @@
   "meta": {
     "index": {
       "title": "Pronósticos de fútbol con modelos estadísticos | IASHARK",
-      "description": "Pronósticos de LaLiga y del fútbol europeo basados en modelos estadísticos: probabilidades 1X2, goles y ambos marcan frente a las cuotas. Análisis gratis cada día. +18"
+      "description": "Pronósticos de LaLiga y fútbol europeo con modelos estadísticos: probabilidades 1X2, goles y ambos marcan frente a las cuotas. Análisis gratis diario. +18"
     },
     "marches": {
       "title": "Mercados de fútbol: probabilidad del modelo vs cuotas",
-      "description": "Todos los mercados que analiza IASHARK, del resultado a goles y ambos marcan: probabilidad del modelo, del mercado sin margen, diferencia y calidad de datos."
+      "description": "Los mercados que analiza IASHARK, del resultado a goles y ambos marcan: probabilidad del modelo, del mercado sin margen, diferencia y calidad de datos."
     },
     "a-propos": {
       "title": "Sobre IASHARK: metodología, datos y límites",
-      "description": "Cómo analiza IASHARK el fútbol: fuentes de datos, modelos de Poisson y Dixon-Coles, ratings Elo, simulación Monte Carlo, límites conocidos e información legal."
+      "description": "Cómo analiza IASHARK el fútbol: fuentes de datos, modelos de Poisson y Dixon-Coles, ratings Elo, simulación Monte Carlo, límites e información legal."
     },
     "abonnement": {
       "title": "Suscripción IASHARK Pro: todos los análisis",
@@ -55,13 +55,44 @@
     "blog": "Blog"
   },
   "league": {
-    "title": "Pronósticos {league}: probabilidades | IASHARK",
-    "description": "Pronósticos de {league} con modelos estadísticos: partidos analizados, horario peninsular, estadio y enlace a cada análisis. +18",
-    "h1": "Pronósticos {league} y análisis de partidos",
-    "intro_generic": "Próximos partidos de {league} ({country}) analizados por IASHARK. Cada análisis estima con modelos estadísticos las probabilidades del resultado, de los goles y de que ambos equipos marquen, y las compara con las cuotas.",
-    "fixtures_title": "Partidos analizados",
-    "none": "Ahora mismo no hay partidos de {league} en análisis. Se añaden automáticamente cuando sus datos están disponibles.",
+    "title": "Pronósticos {league} y clasificación | IASHARK",
+    "title_short": "{league}: pronósticos y clasificación",
+    "description": "Pronósticos {league} con modelos estadísticos: partidos de los próximos 14 días en hora peninsular, últimos resultados y clasificación. +18",
+    "description_short": "{league}: partidos de los próximos 14 días, últimos resultados y clasificación, con análisis estadístico. +18",
+    "h1": "Pronósticos {league}: partidos, resultados y clasificación",
+    "about": {
+      "national": "{league}: la primera división del fútbol {adjective}. IASHARK analiza sus partidos con modelos estadísticos y compara las probabilidades estimadas con las cuotas del mercado.",
+      "ucl": "{league}: la principal competición de clubes organizada por la UEFA. IASHARK analiza sus partidos con modelos estadísticos y compara las probabilidades estimadas con las cuotas del mercado.",
+      "uel": "{league}: la segunda competición europea de clubes de la UEFA, por detrás de la Champions League. IASHARK analiza sus partidos con modelos estadísticos y compara las probabilidades estimadas con las cuotas del mercado.",
+      "uecl": "{league}: la tercera competición europea de clubes de la UEFA. IASHARK analiza sus partidos con modelos estadísticos y compara las probabilidades estimadas con las cuotas del mercado.",
+      "mls": "{league} (Major League Soccer): la liga profesional de Estados Unidos y Canadá. IASHARK analiza sus partidos con modelos estadísticos y compara las probabilidades estimadas con las cuotas del mercado."
+    },
+    "adjectives": {
+      "premier": "inglés",
+      "laliga": "español",
+      "seriea": "italiano",
+      "bundesliga": "alemán",
+      "ligue1": "francés",
+      "eredivisie": "neerlandés",
+      "primeira": "portugués",
+      "suede": "sueco",
+      "jleague": "japonés",
+      "liga_mx": "mexicano",
+      "south_africa_premiership": "sudafricano",
+      "argentina_liga_profesional": "argentino",
+      "colombia_primera_a": "colombiano",
+      "peru_primera": "peruano",
+      "chile_primera": "chileno"
+    },
+    "scope": "Esta página reúne los partidos de los próximos 14 días, los últimos resultados y la clasificación, a partir de datos públicos actualizados cada día. Horarios en {tz}.",
+    "fixtures_title": "Partidos de los próximos 14 días",
+    "none": "No hay partidos de {league} programados en los próximos 14 días según los datos disponibles.",
     "kickoff_note": "Horarios en hora peninsular española.",
+    "results_title": "Últimos resultados",
+    "standings_title": "Clasificación de {league}",
+    "standings_asof": "Clasificación a {date}, según datos públicos.",
+    "standings_partial": "Extracto publicado con los últimos partidos analizados.",
+    "clubs_title": "Equipos y clásicos",
     "method_title": "Cómo leer estos análisis",
     "method": "Una probabilidad es una estimación, no una promesa: un resultado con un 60 % de probabilidad sigue sin darse cuatro veces de cada diez. Cada análisis de IASHARK también califica la calidad de sus datos, de modo que una muestra escasa se señala en lugar de ocultarse.",
     "free_link": "El análisis gratis del día",
@@ -98,8 +129,11 @@
     }
   },
   "match": {
-    "title": "{home} vs {away}: pronóstico y estadísticas ({league}) | IASHARK",
-    "description": "{home} vs {away}, {league}, {date}: horario, estadio y análisis estadístico de IASHARK: resultado, goles y ambos marcan. +18",
+    "title": "{home} vs {away}: pronóstico y estadísticas ({league})",
+    "title_short": "{home} vs {away}: pronóstico y estadísticas",
+    "title_min": "Pronóstico {home} vs {away}",
+    "description": "Partido de {league} del {date}: {home} vs {away}. Horario, estadio, forma reciente y análisis estadístico de IASHARK. +18",
+    "description_short": "{home} vs {away} ({league}), {date}: horario, estadio y análisis estadístico de IASHARK. +18",
     "facts_title": "Información del partido",
     "competition": "Competición",
     "kickoff": "Horario",
@@ -129,5 +163,15 @@
     "h2h_row": "{date}: {home} {score} {away}",
     "lineups_title": "Alineaciones iniciales",
     "lineup_row": "{team} ({formation}): {players}"
+  },
+  "nav": {
+    "aria": "Navegación del sitio",
+    "leagues": "Competiciones:",
+    "explore": "Explorar",
+    "clubs": "Equipos y clásicos",
+    "articles": "Artículos",
+    "blog": "Blog y guías",
+    "markets": "Mercados analizados",
+    "methodology": "Metodología"
   }
 }

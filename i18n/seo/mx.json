@@ -11,18 +11,18 @@
     },
     "marches": {
       "title": "Mercados de futbol: probabilidad del modelo vs momios",
-      "description": "Todos los mercados que analiza IASHARK, del resultado a goles y ambos anotan: probabilidad del modelo, del mercado sin margen, diferencia y calidad de datos."
+      "description": "Los mercados que analiza IASHARK, del resultado a goles y ambos anotan: probabilidad del modelo, del mercado sin margen, diferencia y calidad de datos."
     },
     "a-propos": {
       "title": "Acerca de IASHARK México: método, datos y límites",
-      "description": "Cómo analiza IASHARK el futbol: fuentes de datos, modelos de Poisson y Dixon-Coles, ratings Elo, simulación Monte Carlo, límites conocidos e información legal."
+      "description": "Cómo analiza IASHARK el futbol: fuentes de datos, modelos de Poisson y Dixon-Coles, ratings Elo, simulación Monte Carlo, límites e información legal."
     },
     "abonnement": {
       "title": "IASHARK Pro México: {pro_price} al mes",
       "description": "IASHARK Pro por {pro_price} al mes: todos los análisis y las herramientas de seguimiento. Cancela cuando quieras. Sin resultados garantizados. +18"
     },
     "exemple-analyse": {
-      "title": "Ejemplo de análisis de partido: PSG vs Monaco | IASHARK",
+      "title": "Ejemplo de análisis: PSG vs Monaco | IASHARK México",
       "description": "Un análisis completo de IASHARK, gratis: mercado recomendado, probabilidad del modelo, diferencia con los momios y comparativa de equipos."
     },
     "pro": {
@@ -55,13 +55,44 @@
     "blog": "Blog"
   },
   "league": {
-    "title": "Pronósticos {league}: probabilidades y momios | IASHARK",
-    "description": "Pronósticos de la {league} con modelos estadísticos: partidos analizados, horario del centro de México y enlace a cada análisis. +18",
-    "h1": "Pronósticos {league} y análisis de partidos",
-    "intro_generic": "Próximos partidos de la competencia {league} ({country}) analizados por IASHARK. Cada análisis estima con modelos estadísticos las probabilidades del resultado, de los goles y de que ambos anoten, y las compara con los momios.",
-    "fixtures_title": "Partidos analizados",
-    "none": "Por ahora no hay partidos de la competencia {league} en análisis. Se agregan automáticamente cuando sus datos están disponibles.",
+    "title": "Pronósticos {league}: partidos y tabla | IASHARK",
+    "title_short": "{league}: pronósticos, partidos y tabla",
+    "description": "Pronósticos {league} con modelos estadísticos: partidos de los próximos 14 días en tiempo del centro de México, resultados y tabla. +18",
+    "description_short": "{league}: partidos de los próximos 14 días, resultados recientes y tabla, con análisis estadístico. +18",
+    "h1": "Pronósticos {league}: partidos, resultados y tabla",
+    "about": {
+      "national": "{league}: la primera división del futbol {adjective}. IASHARK analiza sus partidos con modelos estadísticos y compara las probabilidades estimadas con los momios del mercado.",
+      "ucl": "{league}: la principal competencia de clubes organizada por la UEFA. IASHARK analiza sus partidos con modelos estadísticos y compara las probabilidades estimadas con los momios del mercado.",
+      "uel": "{league}: la segunda competencia europea de clubes de la UEFA, por debajo de la Champions League. IASHARK analiza sus partidos con modelos estadísticos y compara las probabilidades estimadas con los momios del mercado.",
+      "uecl": "{league}: la tercera competencia europea de clubes de la UEFA. IASHARK analiza sus partidos con modelos estadísticos y compara las probabilidades estimadas con los momios del mercado.",
+      "mls": "{league} (Major League Soccer): la liga profesional de Estados Unidos y Canadá. IASHARK analiza sus partidos con modelos estadísticos y compara las probabilidades estimadas con los momios del mercado."
+    },
+    "adjectives": {
+      "premier": "inglés",
+      "laliga": "español",
+      "seriea": "italiano",
+      "bundesliga": "alemán",
+      "ligue1": "francés",
+      "eredivisie": "neerlandés",
+      "primeira": "portugués",
+      "suede": "sueco",
+      "jleague": "japonés",
+      "liga_mx": "mexicano",
+      "south_africa_premiership": "sudafricano",
+      "argentina_liga_profesional": "argentino",
+      "colombia_primera_a": "colombiano",
+      "peru_primera": "peruano",
+      "chile_primera": "chileno"
+    },
+    "scope": "Esta página reúne los partidos de los próximos 14 días, los resultados recientes y la tabla, con datos públicos actualizados a diario. Horarios en {tz}.",
+    "fixtures_title": "Partidos de los próximos 14 días",
+    "none": "No hay partidos de {league} programados en los próximos 14 días según los datos disponibles.",
     "kickoff_note": "Horarios en tiempo del centro de México.",
+    "results_title": "Resultados recientes",
+    "standings_title": "Tabla de {league}",
+    "standings_asof": "Tabla al {date}, con datos públicos.",
+    "standings_partial": "Extracto publicado con los últimos partidos analizados.",
+    "clubs_title": "Equipos y clásicos",
     "method_title": "Cómo leer estos análisis",
     "method": "Una probabilidad es una estimación, no una promesa: un resultado con 60 % de probabilidad sigue sin darse cuatro veces de cada diez. Cada análisis de IASHARK también califica la calidad de sus datos, así que una muestra pequeña se señala en lugar de ocultarse.",
     "free_link": "El análisis gratis del día",
@@ -91,16 +122,19 @@
     },
     "overrides": {
       "liga_mx": {
-        "title": "Pronósticos Liga MX: probabilidades y momios | IASHARK",
-        "description": "Pronósticos de la Liga MX con modelos estadísticos: partidos analizados, horario del centro de México y enlace a cada análisis. +18",
-        "h1": "Pronósticos Liga MX y análisis de partidos",
+        "title": "Pronósticos Liga MX: partidos, tabla y momios | IASHARK",
+        "description": "Pronósticos Liga MX con modelos estadísticos: partidos de los próximos 14 días en tiempo del centro de México, resultados recientes y tabla. +18",
+        "h1": "Pronósticos Liga MX: partidos, resultados y tabla",
         "intro": "La Liga MX es la primera división del futbol mexicano y se juega en dos torneos cortos, Apertura y Clausura. IASHARK analiza sus partidos con modelos estadísticos y compara las probabilidades estimadas con los momios del mercado."
       }
     }
   },
   "match": {
-    "title": "{home} vs {away}: pronóstico y momios ({league}) | IASHARK",
-    "description": "{home} vs {away}, {league}, {date}: horario, estadio y análisis estadístico de IASHARK: resultado, goles y ambos anotan. +18",
+    "title": "Pronóstico {home} vs {away} ({league}): momios y datos",
+    "title_short": "Pronóstico {home} vs {away}: momios y datos",
+    "title_min": "{home} vs {away}: pronóstico",
+    "description": "{home} vs {away} ({league}), {date}: horario del centro de México, estadio, racha reciente y análisis estadístico. +18",
+    "description_short": "{home} vs {away} ({league}), {date}: horario del centro de México y análisis de IASHARK. +18",
     "facts_title": "Información del partido",
     "competition": "Competencia",
     "kickoff": "Horario",
@@ -130,5 +164,15 @@
     "h2h_row": "{date}: {home} {score} {away}",
     "lineups_title": "Alineaciones iniciales",
     "lineup_row": "{team} ({formation}): {players}"
+  },
+  "nav": {
+    "aria": "Navegación del sitio",
+    "leagues": "Ligas:",
+    "explore": "Explora",
+    "clubs": "Equipos y clásicos",
+    "articles": "Artículos de futbol mexicano",
+    "blog": "Blog y guías",
+    "markets": "Mercados analizados",
+    "methodology": "Metodología"
   }
 }

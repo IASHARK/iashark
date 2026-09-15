@@ -286,7 +286,12 @@ test("pages generees : tous les liens internes restent dans le repertoire", () =
         var bare = p.replace(/^\/+/, "");
         assert.ok(!(p === "/" || localized.has(bare) || bare === "historique.html"), d + "/" + file + " : lien racine " + p);
         var other = p.match(/^\/(fr|en|es|de|it|pt|gb|za|mx)\//);
-        if (other) assert.ok(other[1] === d || /^\/[a-z]{2}\/blog\//.test(p), d + "/" + file + " : lien vers un autre repertoire " + p);
+        // Exception unique : resume des matchs de l'accueil, lien vers la version la
+        // plus proche d'une page match quand celle du repertoire n'existe pas
+        // (scripts/match-lifecycle.js#versionMatchHref, tests/home-match-links.test.js).
+        var nearestMatch = file === "index.html" && /^\/[a-z]{2}\/match\/\d+\.html$/.test(p) &&
+          !fs.existsSync(path.join(ROOT, d, "match", path.basename(p))) && fs.existsSync(path.join(ROOT, p.slice(1)));
+        if (other) assert.ok(other[1] === d || /^\/[a-z]{2}\/blog\//.test(p) || nearestMatch, d + "/" + file + " : lien vers un autre repertoire " + p);
       }
       if (d !== "fr") assert.doesNotMatch(html, /\/match\/['"]\s*\+/, d + "/" + file + " : lien vers une page match statique FR");
     });

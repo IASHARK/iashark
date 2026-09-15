@@ -81,7 +81,8 @@ test("i18n: build-locales.js s'execute sans erreur et produit un JS valide par r
         var hl = MARKETS._dirs[l2].hreflang;
         assert.match(html, new RegExp('hreflang="' + hl + '"'), "hreflang " + hl + " manquant dans " + filePath);
       });
-      assert.match(html, /hreflang="x-default" href="https:\/\/iashark\.com\/fr\//, "hreflang x-default manquant dans " + filePath);
+      // x-default -> /en/ (config/markets.json#_hreflangXDefault).
+      assert.match(html, /hreflang="x-default" href="https:\/\/iashark\.com\/en\//, "hreflang x-default manquant dans " + filePath);
       assert.match(html, new RegExp('<link rel="canonical" href="https://iashark\\.com/' + loc + '/'), "canonical manquant/incorrect dans " + filePath);
       assert.match(html, new RegExp('<html[^>]*\\slang="' + MARKETS._dirs[loc].htmlLang + '"'), "html lang incorrect dans " + filePath);
       assert.match(html, new RegExp('<meta name="iashark-market" content="' + MARKETS._dirs[loc].market + '">'), "meta iashark-market manquante dans " + filePath);

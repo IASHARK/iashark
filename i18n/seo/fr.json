@@ -7,19 +7,19 @@
   "meta": {
     "index": {
       "title": "Pronostics foot : probabilités et stats par modèle | IASHARK",
-      "description": "Pronostics football calculés par des modèles statistiques : probabilités 1X2, buts et BTTS comparées aux cotes du marché. Une analyse offerte chaque jour. 18+"
+      "description": "Pronostics football calculés par des modèles statistiques : probabilités 1X2, buts et BTTS comparées aux cotes du marché. Une analyse offerte par jour. 18+"
     },
     "marches": {
       "title": "Marchés analysés : probabilité du modèle vs cotes | IASHARK",
-      "description": "Tous les marchés analysés par IASHARK, du résultat aux buts et BTTS : probabilité du modèle, probabilité du marché sans marge, écart et qualité des données."
+      "description": "Les marchés analysés par IASHARK, du résultat aux buts et BTTS : probabilité du modèle, probabilité du marché sans marge, écart et qualité des données."
     },
     "a-propos": {
       "title": "À propos d'IASHARK : méthode, données et limites",
-      "description": "Comment IASHARK analyse le football : sources de données, modèles de Poisson et Dixon-Coles, Elo, simulation Monte Carlo, limites connues et mentions légales."
+      "description": "Comment IASHARK analyse le football : sources de données, modèles de Poisson et Dixon-Coles, Elo, simulation Monte Carlo, limites et mentions légales."
     },
     "abonnement": {
       "title": "Abonnement IASHARK Pro : toutes les analyses de match",
-      "description": "IASHARK Pro à {pro_price} par mois : toutes les analyses de match et les outils de suivi, sans engagement. Estimations statistiques, aucun gain garanti. 18+"
+      "description": "IASHARK Pro à {pro_price} par mois : toutes les analyses de match et les outils de suivi, sans engagement. Des estimations, pas des certitudes. 18+"
     },
     "exemple-analyse": {
       "title": "Exemple d'analyse de match : PSG vs Monaco | IASHARK",
@@ -27,7 +27,7 @@
     },
     "pro": {
       "title": "Outils IASHARK : sélections du modèle et suivi des paris",
-      "description": "Sélections à forte probabilité modèle, suivi automatique des paris et vérification de cote en un clic : l'espace Outils d'IASHARK, fondé sur les mêmes modèles."
+      "description": "Sélections à forte probabilité modèle, suivi automatique des paris et vérification de cote en un clic : l'espace Outils d'IASHARK."
     }
   },
   "home": {
@@ -55,13 +55,44 @@
     "blog": "Blog"
   },
   "league": {
-    "title": "Pronostics {league} : probabilités des matchs | IASHARK",
-    "description": "Pronostics {league} calculés par des modèles statistiques : matchs analysés, heure de Paris, stade et lien vers chaque analyse. Estimations, 18+",
-    "h1": "Pronostics {league} et analyses de match",
-    "intro_generic": "Les prochains matchs de la compétition {league} ({country}) analysés par IASHARK. Chaque analyse estime avec des modèles statistiques les probabilités du résultat, des buts et que les deux équipes marquent, puis les compare aux cotes du marché.",
-    "fixtures_title": "Matchs analysés",
-    "none": "Aucun match de la compétition {league} n'est analysé pour le moment. Les matchs sont ajoutés automatiquement dès que leurs données sont disponibles.",
+    "title": "Pronostics {league} : matchs et classement | IASHARK",
+    "title_short": "{league} : pronostics et classement",
+    "description": "Pronostics {league} par modèles statistiques : matchs des 14 prochains jours à l'heure de Paris, derniers résultats et classement. 18+",
+    "description_short": "{league} : matchs des 14 prochains jours, résultats récents et classement, avec l'analyse statistique IASHARK. 18+",
+    "h1": "Pronostics {league} : calendrier, résultats et classement",
+    "about": {
+      "national": "{league} : la première division du football {adjective}. IASHARK analyse ses matchs avec des modèles statistiques et compare les probabilités estimées aux cotes du marché.",
+      "ucl": "{league} : la principale compétition de clubs organisée par l'UEFA. IASHARK analyse ses matchs avec des modèles statistiques et compare les probabilités estimées aux cotes du marché.",
+      "uel": "{league} : la deuxième compétition européenne de clubs de l'UEFA, derrière la Champions League. IASHARK analyse ses matchs avec des modèles statistiques et compare les probabilités estimées aux cotes du marché.",
+      "uecl": "{league} : la troisième compétition européenne de clubs de l'UEFA. IASHARK analyse ses matchs avec des modèles statistiques et compare les probabilités estimées aux cotes du marché.",
+      "mls": "{league} (Major League Soccer) : le championnat professionnel des États-Unis et du Canada. IASHARK analyse ses matchs avec des modèles statistiques et compare les probabilités estimées aux cotes du marché."
+    },
+    "adjectives": {
+      "premier": "anglais",
+      "laliga": "espagnol",
+      "seriea": "italien",
+      "bundesliga": "allemand",
+      "ligue1": "français",
+      "eredivisie": "néerlandais",
+      "primeira": "portugais",
+      "suede": "suédois",
+      "jleague": "japonais",
+      "liga_mx": "mexicain",
+      "south_africa_premiership": "sud-africain",
+      "argentina_liga_profesional": "argentin",
+      "colombia_primera_a": "colombien",
+      "peru_primera": "péruvien",
+      "chile_primera": "chilien"
+    },
+    "scope": "Cette page réunit les matchs des 14 prochains jours, les derniers résultats et le classement, tirés des données publiques et mis à jour chaque jour. Horaires : {tz}.",
+    "fixtures_title": "Matchs des 14 prochains jours",
+    "none": "Aucun match de la compétition {league} n'est programmé dans les 14 prochains jours d'après les données disponibles.",
     "kickoff_note": "Horaires à l'heure de Paris.",
+    "results_title": "Derniers résultats",
+    "standings_title": "Classement {league}",
+    "standings_asof": "Classement au {date}, d'après les données publiques.",
+    "standings_partial": "Extrait publié avec les derniers matchs analysés.",
+    "clubs_title": "Clubs et derbies",
     "method_title": "Comment lire ces analyses",
     "method": "Une probabilité est une estimation, pas une promesse : une issue estimée à 60 % échoue quand même quatre fois sur dix. Chaque analyse IASHARK note aussi la qualité de ses données : un échantillon trop faible est signalé plutôt que caché.",
     "free_link": "L'analyse offerte du jour",
@@ -98,8 +129,11 @@
     }
   },
   "match": {
-    "title": "{home} vs {away} : pronostic et stats ({league}) | IASHARK",
-    "description": "{home} vs {away}, {league}, {date} : horaire, stade et analyse statistique IASHARK : résultat, buts, les deux équipes marquent. 18+",
+    "title": "{home} vs {away} : pronostic et stats ({league})",
+    "title_short": "{home} vs {away} : pronostic et stats",
+    "title_min": "{home} - {away} : pronostic",
+    "description": "{home} reçoit {away} ({league}) le {date} : horaire à l'heure de Paris, stade, forme récente et analyse statistique IASHARK. 18+",
+    "description_short": "{home} vs {away} ({league}), {date} : horaire, stade, forme et analyse statistique IASHARK. 18+",
     "facts_title": "Informations du match",
     "competition": "Compétition",
     "kickoff": "Coup d'envoi",
@@ -129,5 +163,15 @@
     "h2h_row": "{date} : {home} {score} {away}",
     "lineups_title": "Compositions de départ",
     "lineup_row": "{team} ({formation}) : {players}"
+  },
+  "nav": {
+    "aria": "Navigation du site",
+    "leagues": "Championnats :",
+    "explore": "À explorer",
+    "clubs": "Clubs et derbies",
+    "articles": "Articles",
+    "blog": "Blog et guides",
+    "markets": "Marchés analysés",
+    "methodology": "Méthodologie"
   }
 }

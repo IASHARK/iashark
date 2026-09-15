@@ -50,7 +50,7 @@ test("i18n sitemaps: un sitemap par repertoire public (langues, puis marches pay
   assert.ok(!PAGES.some(function (p) { return p.file === "historique.html"; }), "historique.html ne doit plus etre une page publique");
 });
 
-test("i18n sitemaps: fichiers valides, hreflang complet (dont en-GB/en-ZA/es-MX) + x-default vers /fr/", () => {
+test("i18n sitemaps: fichiers valides, hreflang complet (dont en-GB/en-ZA/es-MX) + x-default vers /en/", () => {
   var g = generate();
   var dirs = sitemapDirs(LOCALES);
   assert.equal(g.files.length, dirs.length);
@@ -96,7 +96,7 @@ test("i18n sitemaps: fichiers valides, hreflang complet (dont en-GB/en-ZA/es-MX)
       var hl = MARKETS._dirs[d2].hreflang;
       assert.match(xml, new RegExp('hreflang="' + hl + '" href="https://iashark\\.com/' + d2 + '/'), fname + " : hreflang " + hl + " manquant");
     });
-    assert.match(xml, /hreflang="x-default" href="https:\/\/iashark\.com\/fr\//, fname + " : hreflang x-default manquant");
+    assert.match(xml, /hreflang="x-default" href="https:\/\/iashark\.com\/en\//, fname + " : hreflang x-default manquant");
 
     ["url", "urlset"].forEach(function (tag) {
       var opens = (xml.match(new RegExp("<" + tag + "(?:\\s|>)", "g")) || []).length;
@@ -130,7 +130,8 @@ test("i18n sitemaps: blog et pages legales = URLs finales (fichier servi, non no
       } else {
         var dirs = DIRS.filter(function (d) { return legalExists(d, legalMatch[2]); });
         assert.equal(u.alternates.length, dirs.length + 1, u.loc + " : hreflang legaux incomplets");
-        assert.ok(u.alternates.indexOf("x-default https://iashark.com/fr/" + legalMatch[2]) !== -1, u.loc + " : x-default manquant");
+        var xd = dirs.indexOf("en") !== -1 ? "en" : "fr";
+        assert.ok(u.alternates.indexOf("x-default https://iashark.com/" + xd + "/" + legalMatch[2]) !== -1, u.loc + " : x-default manquant");
       }
       u.alternates.forEach(function (a) {
         var href = a.split(" ")[1];

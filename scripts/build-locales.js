@@ -235,9 +235,9 @@ function buildHead(html, dir, file, meta, altDirs) {
   var links = altDirs.map(function (d) {
     return '<link rel="alternate" hreflang="' + DIRS[d].hreflang + '" href="' + dirUrl(d, file) + '">';
   });
-  if (altDirs.indexOf(X_DEFAULT_DIR) !== -1) {
-    links.push('<link rel="alternate" hreflang="x-default" href="' + dirUrl(X_DEFAULT_DIR, file) + '">');
-  }
+  // x-default : config/markets.json#_hreflangXDefault (en, puis fr).
+  var xd = altDirs.length > 1 ? SEO.xDefaultDir(altDirs) : null;
+  if (xd) links.push('<link rel="alternate" hreflang="x-default" href="' + dirUrl(xd, file) + '">');
   var block = '<link rel="canonical" href="' + canonicalUrl + '">' + (links.length ? "\n" + links.join("\n") : "");
   var canonicalRe = /<link rel="canonical" href="[^"]*"\s*\/?>/;
   if (canonicalRe.test(html)) {
@@ -318,10 +318,14 @@ function homeJsonLd(dir, meta) {
 var SEO_LINK_STYLE = ' style="color:#20d5ef;text-decoration:underline;text-underline-offset:3px"';
 function homeSeoBlock(dir) {
   var h = SEO.seoConf(dir).home;
-  var prio = h.priority_leagues || [];
-  var keys = prio.concat(SEO.LEAGUES.map(function (l) { return l.key; }).filter(function (k) { return prio.indexOf(k) === -1; }));
-  var leagues = keys.filter(function (k) { return SEO.leagueByKey(k); }).map(function (k) {
-    return '<li><a href="' + SEO.leagueHubPath(dir, k) + '"' + SEO_LINK_STYLE + ">" + escText(SEO.leagueByKey(k).displayName) + "</a></li>";
+  // Hubs ligue du perimetre de la version seulement (config/leagues.json#seoMatchDirs) :
+  // un hub hors perimetre est noindex, il n'est pas mis en avant depuis l'accueil.
+  var nav = SEO.versionNav(dir);
+  var leagues = nav.leagues.map(function (x) {
+    return '<li><a href="' + x.href + '"' + SEO_LINK_STYLE + ">" + escText(x.label) + "</a></li>";
+  }).join("");
+  var sections = nav.sections.map(function (x) {
+    return '<li><a href="' + x.href + '"' + SEO_LINK_STYLE + ">" + escText(x.label) + "</a></li>";
   }).join("");
   var guides = ["prediction-ia-football-guide-2026.html", "plus-de-2-5-buts-probabilite-methode-poisson.html", "xg-expected-goals-guide-complet.html", "value-bet-guide-complet-2026.html"].map(function (g) {
     return '<li><a href="' + SEO.guidePath(dir, g) + '"' + SEO_LINK_STYLE + ">" + escText(SEO.guideLabel(dir, g)) + "</a></li>";
@@ -333,10 +337,27 @@ function homeSeoBlock(dir) {
     '<div class="mt-6 max-w-3xl">' + h.paragraphs.map(function (p) { return '<p class="mt-4 text-[14px] leading-relaxed text-soft">' + escText(p) + "</p>"; }).join("") + "</div>" +
     '<h3 class="mt-8 text-[15.5px] font-bold text-ink">' + escText(h.leagues_title) + "</h3>" +
     '<ul class="mt-3 flex flex-wrap gap-x-5 gap-y-2 text-[14px]" style="list-style:none;padding:0">' + leagues + "</ul>" +
+    '<h3 class="mt-8 text-[15.5px] font-bold text-ink">' + escText(nav.labels.explore) + "</h3>" +
+    '<ul class="mt-3 flex flex-wrap gap-x-5 gap-y-2 text-[14px]" style="list-style:none;padding:0">' + sections + "</ul>" +
     '<h3 class="mt-8 text-[15.5px] font-bold text-ink">' + escText(h.guides_title) + "</h3>" +
     '<ul class="mt-3 grid gap-2 text-[14px]" style="list-style:none;padding:0">' + guides + "</ul>" +
     "</div></section>";
 }
+// Resume des matchs du jour (<!--SEO_MATCHES_SUMMARY-->, ecrit par le pipeline
+// dans index.html racine avec des liens FR /match/<id>.html) : chaque lien vise
+// la page de la version si elle existe, sinon la version la plus proche
+// reellement generee dans le perimetre de la competition
+// (scripts/match-lifecycle.js#versionMatchHref, meme fonction que
+// injectHomeSeoSummary du pipeline) ; aucune page : nom sans lien.
+function rewriteHomeMatchSummary(html, dir, root) {
+  return html.replace(/<!--SEO_MATCHES_SUMMARY-->[\s\S]*?<!--\/SEO_MATCHES_SUMMARY-->/, function (block) {
+    return block.replace(/<a href="(?:\/[a-z]{2})?\/match\/(\d{1,12})\.html"([^>]*)>([\s\S]*?)<\/a>/g, function (m, id, attrs, inner) {
+      var href = MATCH_LIFECYCLE.versionMatchHref(id, null, dir, root || ROOT);
+      return href ? '<a href="' + href + '"' + attrs + ">" + inner + "</a>" : inner;
+    });
+  });
+}
+
 function injectHomeSeo(html, dir, meta) {
   html = html.replace(/<script type="application\/ld\+json">\s*\{"@context":"https:\/\/schema\.org","@(type":"(Organization|WebSite)"|graph")[\s\S]*?<\/script>\n?/g, "");
   html = html.replace(/<\/head>/i, function () { return SEO.ldScript(homeJsonLd(dir, meta)) + "\n</head>"; });
@@ -764,7 +785,10 @@ function build() {
       html = rewriteInternalLinks(html, dir);
       var meta = metaFor(page, dir);
       html = buildHead(html, dir, page.file, meta, altDirs);
-      if (page.file === "index.html") html = injectHomeSeo(html, dir, meta);
+      if (page.file === "index.html") html = rewriteHomeMatchSummary(injectHomeSeo(html, dir, meta), dir);
+      // Pied de page : hubs ligue du perimetre, clubs, articles, blog, marches,
+      // methodologie de la version (scripts/seo-common.js#injectFooterNav).
+      html = SEO.injectFooterNav(html, dir);
       html = injectRuntime(html, dir);
       writeIfChanged(path.join(ROOT, dir, page.file), html);
       report.pages++;
@@ -781,6 +805,7 @@ function build() {
       html = rewriteInternalLinks(html, dir);
       html = buildHead(html, dir, file, null, altDirs);
       html = injectLegalBreadcrumb(html, dir, file);
+      html = SEO.injectFooterNav(html, dir);
       html = injectRuntime(html, dir, { bottomNav: true });
       writeIfChanged(path.join(ROOT, dir, file), html);
       report.legal++;
@@ -815,7 +840,7 @@ module.exports = {
   marketRuntimeData: marketRuntimeData, redirectsContent: redirectsContent, build: build,
   stripUnavailablePageLinks: stripUnavailablePageLinks,
   buildHead: buildHead, setHtmlLang: setHtmlLang, injectRuntime: injectRuntime, metaFor: metaFor,
-  homeJsonLd: homeJsonLd, homeSeoBlock: homeSeoBlock
+  homeJsonLd: homeJsonLd, homeSeoBlock: homeSeoBlock, rewriteHomeMatchSummary: rewriteHomeMatchSummary
 };
 
 if (require.main === module) build();

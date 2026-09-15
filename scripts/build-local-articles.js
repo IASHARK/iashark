@@ -30,6 +30,8 @@ const MIN_INDEXABLE = 3;
 const WORDS_PER_MINUTE = 200;
 const MARK_OPEN = "<!--LOCAL_ARTICLES-->";
 const MARK_CLOSE = "<!--/LOCAL_ARTICLES-->";
+const TITLE_MAX = 60;
+const SEO = require("./seo-common.js");
 
 function esc(s) {
   return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
@@ -112,8 +114,15 @@ function head(m, o) {
   ].filter(function (x) { return x != null; }).join("\n");
 }
 
+// Pied de page du manifeste + navigation de la version (hubs ligue du
+// perimetre, clubs, articles, blog, marches, methodologie).
 function footer(m) {
-  return '<footer class="art-foot">\n' + m.footerHtml + "\n</footer>";
+  return '<footer class="art-foot">\n' + m.footerHtml + "\n</footer>\n" + SEO.footerNavHtml(m.dir);
+}
+// Title <= 60 caracteres : la marque n'est ajoutee que si elle tient.
+function pageTitle(t) {
+  var withBrand = t + " | IASHARK";
+  return Array.from(withBrand).length <= TITLE_MAX ? withBrand : t;
 }
 
 var SCRIPTS = '<script src="/site-header.js"></script>\n<script src="/site-prefs.js"></script>\n<script src="/bottom-navigation.js"></script>';
@@ -147,7 +156,7 @@ function renderArticle(m, a) {
     return '<li><a href="' + esc(s.url) + '" rel="noopener nofollow">' + esc(s.label) + "</a></li>";
   }).join("");
   return [
-    head(m, { title: a.title + " | IASHARK", ogTitle: a.title, description: a.description, path: p, article: a, jsonld: [article, breadcrumb(m, { name: a.crumb, path: p })] }),
+    head(m, { title: pageTitle(a.title), ogTitle: a.title, description: a.description, path: p, article: a, jsonld: [article, breadcrumb(m, { name: a.crumb, path: p })] }),
     "<body>",
     "",
     '<div class="wrap">',
@@ -219,7 +228,7 @@ function renderHub(m) {
   }).join("\n");
   var bc = breadcrumb(m, null);
   return [
-    head(m, { title: L.hubTitle + " | IASHARK", ogTitle: L.hubTitle, description: L.hubDescription, path: p, noindex: noindex, jsonld: [collection, bc] }),
+    head(m, { title: pageTitle(L.hubTitle), ogTitle: L.hubTitle, description: L.hubDescription, path: p, noindex: noindex, jsonld: [collection, bc] }),
     "<body>",
     "",
     '<div class="wrap">',
@@ -304,7 +313,7 @@ function buildOutputs(manifests) {
 }
 
 module.exports = {
-  loadManifests: loadManifests, buildOutputs: buildOutputs, wordCount: wordCount, readingMinutes: readingMinutes,
+  loadManifests: loadManifests, buildOutputs: buildOutputs, wordCount: wordCount, readingMinutes: readingMinutes, pageTitle: pageTitle,
   bodyText: bodyText, hubPath: hubPath, articlePath: articlePath, indexable: indexable,
   MIN_INDEXABLE: MIN_INDEXABLE, SITEMAP_FILE: SITEMAP_FILE, MARK_OPEN: MARK_OPEN, MARK_CLOSE: MARK_CLOSE, SRC: SRC
 };

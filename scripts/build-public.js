@@ -19,7 +19,8 @@ const path = require("path");
 
 const ROOT = path.join(__dirname, "..");
 const args = process.argv.slice(2);
-const OUT = path.join(ROOT, args.includes("--out") ? args[args.indexOf("--out") + 1] : "dist");
+// --out relatif a la racine du depot, ou absolu (tests : repertoire temporaire).
+const OUT = path.resolve(ROOT, args.includes("--out") ? args[args.indexOf("--out") + 1] : "dist");
 const CHECK_ONLY = args.includes("--check");
 
 // Repertoires publics copies en entier.

@@ -69,7 +69,8 @@ test("page match localisee : langue, canonical, hreflang des versions generees, 
   assert.equal(alts.length, gen.length + 1);
   for (const d of gen) assert.ok(alts.some((a) => a.hl === C.DIRS[d].hreflang && a.href === "https://iashark.com" + C.matchPath(d, 424242)), d);
   for (const d of DIRS.filter((x) => !gen.includes(x))) assert.ok(!alts.some((a) => a.hl === C.DIRS[d].hreflang), d + " : hreflang vers une version non generee");
-  assert.ok(alts.some((a) => a.hl === "x-default" && a.href === "https://iashark.com/match/424242.html"));
+  // x-default : config/markets.json#_hreflangXDefault (en, puis fr).
+  assert.ok(alts.some((a) => a.hl === "x-default" && a.href === "https://iashark.com/en/match/424242.html"));
   const ld = ldBlocks(html);
   const ev = ld.find((b) => b["@type"] === "SportsEvent");
   // 21:00 heure de Paris (heure d'ete, UTC+2) = 19:00 UTC.
@@ -116,20 +117,49 @@ test("pages match localisees reelles : PRELOADED_MATCH sans fuite, hreflang reci
   }
 });
 
-test("page championnat : noindex sous le seuil, liens vers les pages match, JSON-LD valide, aucune probabilite", () => {
-  const few = SEO.renderLeagueHub("liga_mx", "mx", [Object.assign({}, MATCH, { league_key: "liga_mx" })]);
-  assert.equal(few.indexable, false);
-  assert.match(few.html, /<meta name="robots" content="noindex,follow">/);
+const EMPTY_HUB = { upcoming: [], results: [], standings: null, clubs: [] };
+test("page championnat : sans contenu stable noindex, liens vers les pages match, JSON-LD valide, aucune probabilite", () => {
+  const thin = SEO.renderLeagueHub("eredivisie", "en", [Object.assign({}, MATCH, { league_key: "eredivisie" })], { data: { results: [], standings: null, clubs: [] } });
+  assert.equal(thin.indexable, false, "un seul match, ni classement ni club : contenu trop mince");
+  assert.match(thin.html, /<meta name="robots" content="noindex,follow">/);
   const many = SEO.renderLeagueHub("premier", "gb", [MATCH, Object.assign({}, MATCH, { id: 424243 })]);
   assert.equal(many.indexable, true);
   assert.doesNotMatch(many.html, /noindex/);
-  assert.match(many.html, /<h1>Premier League predictions and match analysis<\/h1>/);
+  assert.match(many.html, /<h1>Premier League predictions: fixtures, results and table<\/h1>/);
   assert.match(many.html, /href="\/gb\/match\/424242\.html"/);
-  assert.doesNotMatch(many.html, /51 ?%|\bp1\b|pari_rec/);
+  assert.doesNotMatch(many.html, /51 ?%|\bp1\b|pari_rec|"conf"|kelly/);
   const ld = ldBlocks(many.html);
   assert.ok(ld.some((b) => b["@type"] === "BreadcrumbList"));
-  assert.equal(ld.find((b) => b["@type"] === "CollectionPage").mainEntity.itemListElement.length, 2);
+  assert.ok(ld.find((b) => b["@type"] === "CollectionPage").mainEntity.itemListElement.some((i) => i.url === "https://iashark.com/gb/match/424242.html"));
   assert.equal((many.html.match(/<h1[\s>]/g) || []).length, 1);
+});
+
+test("page championnat : indexable sur contenu stable (classement, clubs, 14 jours), sans aucun match du jour", () => {
+  const rows = Array.from({ length: 18 }, (_, i) => ({ rank: i + 1, team_id: 9000 + i, name: "Club " + (i + 1), played: 8, won: 4, drawn: 2, lost: 2, gd: 18 - 2 * i, pts: 30 - i }));
+  const standings = { as_of: "2026-09-14", source: "api-football", season: 2026, groups: [{ name: "Liga MX: Apertura", rows: rows }] };
+  // Liga MX /mx/ un jour sans match : classement seul -> indexable.
+  const mx = SEO.renderLeagueHub("liga_mx", "mx", [], { data: Object.assign({}, EMPTY_HUB, { standings: standings }) });
+  assert.equal(mx.indexable, true);
+  assert.doesNotMatch(head(mx.html), /noindex/);
+  assert.match(mx.html, /<table>/);
+  assert.match(mx.html, /Tabla de Liga MX/);
+  assert.match(mx.html, /Liga MX: la primera división del futbol mexicano|La Liga MX es la primera división/);
+  // PSL /za/ : pages club seules -> indexable, liens vers les clubs.
+  const za = SEO.renderLeagueHub("south_africa_premiership", "za", [], { data: Object.assign({}, EMPTY_HUB, { clubs: [{ kind: "club", name: "Kaizer Chiefs", path: "/za/clubs/kaizer-chiefs.html" }] }) });
+  assert.equal(za.indexable, true);
+  assert.match(za.html, /href="\/za\/clubs\/kaizer-chiefs\.html"/);
+  // Rencontres des 14 jours et resultats (registre, cache) : 3 suffisent.
+  const fx = (id, t, score) => ({ id: String(id), t: Date.parse(t), home: { n: "Ajax" }, away: { n: "PSV" }, venue: null, score: score || null, href: null });
+  const ere = SEO.renderLeagueHub("eredivisie", "en", [], { data: Object.assign({}, EMPTY_HUB, { upcoming: [fx(1, "2099-01-02T18:00:00Z"), fx(2, "2099-01-05T18:00:00Z")], results: [fx(3, "2098-12-20T18:00:00Z", { home: 2, away: 1 })] }) });
+  assert.equal(ere.indexable, true);
+  assert.match(ere.html, /Ajax 2–1 PSV/);
+  // Hors perimetre : jamais indexable, meme avec du contenu stable.
+  const de = SEO.renderLeagueHub("liga_mx", "de", [], { data: Object.assign({}, EMPTY_HUB, { standings: standings }) });
+  assert.equal(de.indexable, false);
+  // Sans rien : noindex, message explicite.
+  const none = SEO.renderLeagueHub("jleague", "en", [], { data: EMPTY_HUB });
+  assert.equal(none.indexable, false);
+  assert.match(none.html, /No J1 League fixture is scheduled in the next 14 days/);
 });
 
 test("sitemaps SEO : uniquement des fichiers existants et indexables", () => {

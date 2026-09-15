@@ -11,13 +11,15 @@
 //    reciproques entre les 9 versions, JSON-LD SportsEvent + BreadcrumbList.
 //    Pourquoi : la page FR (lang="fr") ne pouvait pas repondre a
 //    "Arsenal vs Chelsea prediction" ou "pronóstico América vs Chivas".
-// 2. Pages championnat /<dir>/leagues/<slug>.html (15 competitions de
-//    config/leagues.json x 9 repertoires) : introduction factuelle, matchs
-//    analyses (lien, date, heure dans le fuseau du marche, stade), methode,
-//    liens vers les guides. Jamais de probabilite ni de pari : ce sont des
-//    donnees reservees (mur Pro de match-page.js). Une page avec moins de
-//    MIN_INDEXABLE_FIXTURES matchs est noindex,follow et hors sitemap
-//    (contenu trop mince pour etre propose a l'index).
+// 2. Pages championnat /<dir>/leagues/<slug>.html (competitions de
+//    config/leagues.json x 9 repertoires) : presentation factuelle, matchs des
+//    14 prochains jours, derniers resultats, classement, pages club et derby,
+//    methode, guides (contenu STABLE : scripts/league-hub-data.js). Jamais de
+//    probabilite ni de pari : ce sont des donnees reservees (mur Pro de
+//    match-page.js). Indexable si la version est dans le perimetre de la
+//    competition ET si ce contenu stable existe (classement d'au moins
+//    MIN_HUB_STANDING_ROWS lignes, une page club, ou MIN_HUB_FIXTURES
+//    rencontres a venir ou jouees) - plus jamais selon les seuls matchs du jour.
 // 3. sitemap-matches-i18n.xml et sitemap-leagues.xml, lastmod exact
 //    (scripts/seo-lastmod.js).
 //
@@ -37,10 +39,14 @@ const LEAGUE_NAMES = require("../lib/league-names.js");
 const LASTMOD = require("./seo-lastmod.js");
 // Cycle de vie des pages match (registre, perimetre des versions, 301).
 const LIFECYCLE = require("./match-lifecycle.js");
+// Contenu stable des pages championnat (calendrier 14 jours, resultats, classement, clubs).
+const HUBDATA = require("./league-hub-data.js");
 
 const SITE_URL = C.SITE_URL, DIRS = C.DIRS, DIR_CODES = C.DIR_CODES, X_DEFAULT_DIR = C.X_DEFAULT_DIR;
 const esc = C.escHtml;
-const MIN_INDEXABLE_FIXTURES = 2;
+const MIN_HUB_FIXTURES = 3;
+const MIN_HUB_STANDING_ROWS = 4;
+const DESCRIPTION_MAX = 155;
 // Contenu PROPRE d'une page match (faits specifiques : equipes, competition,
 // horaire, stade, forme, classement, confrontations directes, compositions)
 // sous ce nombre de mots -> noindex,follow et hors sitemap. Le texte generique
@@ -75,7 +81,9 @@ function shortDate(d, dir) { return fmt(d, dir, { day: "numeric", month: "long",
 function clock(d, dir) { return fmt(d, dir, { hour: "2-digit", minute: "2-digit" }); }
 function leagueName(m) { return (LEAGUE_NAMES.displayName(m.league_key, m.league) || "").trim(); }
 function hubKey(m) { return C.leagueByKey(m.league_key) ? m.league_key : null; }
-function venue(m) { return m.stade && typeof m.stade.nom === "string" && m.stade.nom.trim() ? m.stade.nom.trim() : null; }
+// "<equipe> (domicile)" = repli du pipeline quand api-football ne donne pas de
+// stade : texte francais, jamais un vrai lieu -> stade inconnu.
+function venue(m) { return m.stade && typeof m.stade.nom === "string" && m.stade.nom.trim() && !/\(domicile\)\s*$/i.test(m.stade.nom) ? m.stade.nom.trim() : null; }
 function teams(m) { return m.home.n + " vs " + m.away.n; }
 
 function cleanTpl(s) {
@@ -86,14 +94,19 @@ function matchVars(m, dir) {
   var d = kickoff(m);
   return { home: m.home.n, away: m.away.n, league: leagueName(m), date: d ? shortDate(d, dir) : "" };
 }
-// Titre long (noms d'equipes a rallonge) : la marque saute en premier, Google
-// affiche deja le nom du site au-dessus du lien (Search Central, "title links").
+// Titre <= 60 caracteres : gabarit complet + marque, sans la marque (Google
+// affiche deja le nom du site au-dessus du lien), gabarit court, puis minimal
+// (noms d'equipes a rallonge). Description <= 155 : complete, puis courte.
 var TITLE_SOFT_MAX = 60;
 function matchTitle(m, dir) {
-  var t = cleanTpl(C.fill(C.seoConf(dir).match.title, matchVars(m, dir)));
-  return t.length > TITLE_SOFT_MAX ? t.replace(/\s*\|\s*IASHARK$/, "") : t;
+  var ms = C.seoConf(dir).match, v = matchVars(m, dir);
+  var t = cleanTpl(C.fill(ms.title, v));
+  return C.fitText([t + " | IASHARK", t, cleanTpl(C.fill(ms.title_short, v)), cleanTpl(C.fill(ms.title_min, v))], TITLE_SOFT_MAX);
 }
-function matchDescription(m, dir) { return cleanTpl(C.fill(C.seoConf(dir).match.description, matchVars(m, dir))); }
+function matchDescription(m, dir) {
+  var ms = C.seoConf(dir).match, v = matchVars(m, dir);
+  return C.fitText([cleanTpl(C.fill(ms.description, v)), cleanTpl(C.fill(ms.description_short, v))], DESCRIPTION_MAX);
+}
 function matchImage(m) { return m.home && m.home.id ? "https://media.api-sports.io/football/teams/" + m.home.id + ".png" : null; }
 
 function matchCrumbs(m, dir) {
@@ -302,6 +315,11 @@ function matchFactsHtml(m, dir, opts) {
   }).join(' <span aria-hidden="true">›</span> ');
   var links = ['<a href="' + C.homePath(dir) + '"' + LINK + ">" + esc(ms.free_link) + "</a>"];
   if (hub) links.push('<a href="' + hub + '"' + LINK + ">" + esc(C.fill(ms.hub_link, { league: ln })) + "</a>");
+  // Pages club des deux equipes et affiche derby de la version, quand elles existent.
+  [m.home, m.away].forEach(function (t) {
+    var club = t && t.id != null ? C.clubPageFor(t.id, dir) : null;
+    if (club) links.push('<a href="' + esc(club.path) + '"' + LINK + ">" + esc(club.name) + "</a>");
+  });
   var derby = derbyPageFor(m, dir);
   if (derby) links.push('<a href="' + esc(derby.path) + '"' + LINK + ">" + esc(derby.name) + "</a>");
   links.push('<a href="' + C.guidePath(dir, MATCH_GUIDE) + '"' + LINK + ">" + esc(ms.guide_link) + "</a>");
@@ -391,51 +409,91 @@ var HUB_CSS = "*{box-sizing:border-box}body{margin:0;background:#060b12;color:#c
   ".fx .meta{display:block;font-size:13px;color:#91a0b3}.others{display:flex;flex-wrap:wrap;gap:0 16px;font-size:14px}.others a{display:inline-flex;align-items:center;min-height:44px}" +
   ".foot{max-width:960px;margin:24px auto 0;padding:18px;border-top:1px solid rgba(141,179,211,.14);font-size:12.5px;color:#91a0b3}.foot a{color:#91a0b3}";
 
-function fallbackMatchDir(dir, scope) {
-  var base = DIRS[dir].locale.split("-")[0];
-  for (var i = 0; i < scope.length; i++) {
-    if (scope[i] !== X_DEFAULT_DIR && DIRS[scope[i]].locale.split("-")[0] === base) return scope[i];
-  }
-  return X_DEFAULT_DIR;
-}
 function hubVars(key, dir) {
   var L = C.seoConf(dir).league;
-  return { league: C.leagueByKey(key).displayName, country: (L.countries || {})[key] || "" };
+  return { league: C.leagueByKey(key).displayName, country: (L.countries || {})[key] || "", adjective: (L.adjectives || {})[key] || "", tz: C.seoConf(dir).tz_label };
 }
-function hubText(key, dir, field, genericField) {
-  var L = C.seoConf(dir).league;
-  var ov = (L.overrides && L.overrides[key]) || {};
-  return C.fill(ov[field] || L[genericField || field], hubVars(key, dir));
+// Title <= 60 / description <= 155 : surcharge de la competition, gabarit, gabarit court.
+function hubMeta(key, dir) {
+  var L = C.seoConf(dir).league, ov = (L.overrides && L.overrides[key]) || {}, v = hubVars(key, dir);
+  var f = function (s) { return s ? C.fill(s, v) : null; };
+  return {
+    title: C.fitText([f(ov.title), f(L.title), f(L.title_short)], TITLE_SOFT_MAX),
+    description: C.fitText([f(ov.description), f(L.description), f(L.description_short)], DESCRIPTION_MAX),
+    h1: f(ov.h1) || f(L.h1)
+  };
+}
+// Presentation factuelle : texte propre a la competition s'il existe, sinon
+// phrase selon sa nature (championnat national, competitions UEFA, MLS), sans
+// chiffre invérifiable.
+function hubAbout(key, dir) {
+  var L = C.seoConf(dir).league, ov = (L.overrides && L.overrides[key]) || {};
+  return C.fill(ov.intro || L.about[C.leagueKind(key)], hubVars(key, dir));
+}
+function teamLabel(t) { return t && (t.n || t.name) ? String(t.n || t.name) : ""; }
+var HUB_TABLE_CSS = ".tbl{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:14px;margin:0 0 8px}caption{caption-side:top;text-align:left;font-size:13px;color:#91a0b3;padding:0 0 6px}" +
+  "th,td{padding:6px 8px;text-align:right;border-bottom:1px solid rgba(141,179,211,.14);white-space:nowrap}th{color:#91a0b3;font-weight:600;font-size:12.5px}td.t,th.t{text-align:left;white-space:normal}" +
+  ".fx .tm{font-weight:700;color:#f4f7fb}.clubs{display:flex;flex-wrap:wrap;gap:0 16px;font-size:14px}.clubs a{display:inline-flex;align-items:center;min-height:44px}";
+
+function hubMatchItem(e, dir, played, ms) {
+  var d = new Date(e.t), v = e.venue;
+  var name = esc(teamLabel(e.home)) + (e.score ? " " + e.score.home + "–" + e.score.away + " " : " vs ") + esc(teamLabel(e.away));
+  var meta = ['<time datetime="' + isoInstant(d) + '">' + esc(played ? shortDate(d, dir) : longDate(d, dir) + " · " + clock(d, dir)) + "</time>"];
+  if (v) meta.push(esc(v));
+  if (played && !e.score) meta.push(esc(ms.finished));
+  return "<li>" + (e.href ? '<a href="' + e.href + '">' + name + "</a>" : '<span class="tm">' + name + "</span>") + '<span class="meta">' + meta.join(" · ") + "</span></li>";
+}
+function hubStandingsHtml(key, dir, st, L, dict, name) {
+  var lab = function (k, fb) { var x = C.get(dict, "clubs." + k); return esc(typeof x === "string" ? x : fb); };
+  var tables = st.groups.map(function (g) {
+    var rows = g.rows.map(function (r) {
+      var club = r.team_id != null ? C.clubPageFor(r.team_id, dir) : null;
+      var team = club ? '<a href="' + club.path + '">' + esc(r.name) + "</a>" : esc(r.name);
+      var wdl = [r.won, r.drawn, r.lost].map(function (x) { return x != null ? x : "?"; }).join("-");
+      return "<tr><td>" + r.rank + '</td><td class="t">' + team + "</td><td>" + (r.played != null ? r.played : "") + "</td><td>" + wdl + "</td><td>" + (r.gd != null ? signed(r.gd) : "") + "</td><td>" + r.pts + "</td></tr>";
+    }).join("");
+    return '<div class="tbl"><table><caption>' + esc([g.name || name, st.season ? String(st.season) : null].filter(Boolean).join(" · ")) + "</caption><thead><tr><th>" + lab("col_rank", "#") + '</th><th class="t">' + lab("col_team", "Club") +
+      "</th><th>" + lab("col_played", "P") + "</th><th>" + lab("col_wdl", "W-D-L") + "</th><th>" + lab("col_gd", "GD") + "</th><th>" + lab("col_pts", "Pts") + "</th></tr></thead><tbody>" + rows + "</tbody></table></div>";
+  }).join("\n");
+  var asOf = st.as_of ? shortDate(new Date(st.as_of + "T12:00:00Z"), dir) : "";
+  return tables + '\n<p class="note">' + esc(C.fill(L.standings_asof, { date: asOf })) + (st.source === "matchs" ? " " + esc(L.standings_partial) : "") + "</p>";
 }
 
-function renderLeagueHub(key, dir, matches) {
+// renderLeagueHub(key, dir, matches, opts) : matches = matchs du run de la
+// competition ; opts = { root, now, registry, store, data } ; opts.data
+// (facultatif) remplace une partie des donnees collectees (tests).
+function renderLeagueHub(key, dir, matches, opts) {
+  opts = opts || {};
   var s = C.seoConf(dir), L = s.league, conf = DIRS[dir], dict = C.dictFor(dir);
   var name = C.leagueByKey(key).displayName;
-  var title = hubText(key, dir, "title"), desc = hubText(key, dir, "description"), h1 = hubText(key, dir, "h1");
-  var intro = hubText(key, dir, "intro", "intro_generic");
+  var meta = hubMeta(key, dir), title = meta.title, desc = meta.description, h1 = meta.h1;
   // Hub hors du perimetre des pages match de la competition (ex. Liga MX en
   // allemand) : noindex,follow, sans hreflang, liens vers la version la plus
-  // proche reellement generee (meme langue, sinon fr).
+  // proche reellement generee (meme langue, puis en, puis fr).
   var scope = LIFECYCLE.matchDirsFor(key), inScope = scope.indexOf(dir) !== -1;
-  var linkDir = inScope ? dir : fallbackMatchDir(dir, scope);
-  var indexable = inScope && matches.length >= MIN_INDEXABLE_FIXTURES;
+  var linkDir = inScope ? dir : C.nearestDir(dir, scope);
+  var data = Object.assign(HUBDATA.collect(key, dir, { root: opts.root, now: opts.now, runMatches: matches || [], registry: opts.registry, store: opts.store, linkDir: linkDir }), opts.data || {});
+  var standingRows = data.standings && data.standings.groups ? data.standings.groups.reduce(function (n, g) { return n + g.rows.length; }, 0) : 0;
+  var stable = standingRows >= MIN_HUB_STANDING_ROWS || data.clubs.length > 0 || data.upcoming.length + data.results.length >= MIN_HUB_FIXTURES;
+  var indexable = inScope && stable;
   var canonical = SITE_URL + C.leagueHubPath(dir, key);
   var crumbs = [{ name: s.breadcrumb.home, url: SITE_URL + C.homePath(dir) }, { name: name, url: canonical }];
   var help = B().helplineFor(dir);
 
-  var items = matches.map(function (m) {
-    var d = kickoff(m), v = venue(m);
-    var meta = [];
-    if (d) meta.push('<time datetime="' + isoInstant(d) + '">' + esc(longDate(d, dir)) + " · " + esc(clock(d, dir)) + "</time>");
-    if (v) meta.push(esc(v));
-    return '<li><a href="' + C.matchPath(linkDir, m.id) + '">' + esc(teams(m)) + '</a><span class="meta">' + meta.join(" · ") + "</span></li>";
-  }).join("");
-  var fixtures = matches.length
-    ? '<p class="note">' + esc(L.kickoff_note) + '</p><ul class="fx">' + items + "</ul>"
+  var fixtures = data.upcoming.length
+    ? '<p class="note">' + esc(L.kickoff_note) + '</p><ul class="fx">' + data.upcoming.map(function (e) { return hubMatchItem(e, dir, false, s.match); }).join("") + "</ul>"
     : "<p>" + esc(C.fill(L.none, { league: name })) + "</p>";
-  var others = C.LEAGUES.filter(function (l) { return l.key !== key; }).map(function (l) {
+  var results = data.results.length
+    ? "<h2>" + esc(L.results_title) + '</h2>\n<ul class="fx">' + data.results.map(function (e) { return hubMatchItem(e, dir, true, s.match); }).join("") + "</ul>\n"
+    : "";
+  var standings = standingRows ? "<h2>" + esc(C.fill(L.standings_title, { league: name })) + "</h2>\n" + hubStandingsHtml(key, dir, data.standings, L, dict, name) + "\n" : "";
+  var clubs = data.clubs.length
+    ? "<h2>" + esc(L.clubs_title) + '</h2>\n<p class="clubs">' + data.clubs.map(function (c) { return '<a href="' + c.path + '">' + esc(c.name) + "</a>"; }).join("") + "</p>\n"
+    : "";
+  var others = C.leaguesInScope(dir).filter(function (l) { return l.key !== key; }).map(function (l) {
     return '<a href="' + C.leagueHubPath(dir, l.key) + '">' + esc(l.displayName) + "</a>";
   }).join("");
+  var clubsHub = C.clubsHubPath(dir, opts.root);
   var guides = HUB_GUIDES.map(function (g) {
     return '<li><a href="' + C.guidePath(dir, g) + '">' + esc(C.guideLabel(dir, g)) + "</a></li>";
   }).join("");
@@ -457,10 +515,11 @@ function renderLeagueHub(key, dir, matches) {
     isPartOf: { "@id": SITE_URL + "/#website" },
     about: { "@type": "SportsOrganization", name: name }
   };
-  if (matches.length) {
+  var listed = data.upcoming.filter(function (e) { return e.href; });
+  if (listed.length) {
     page.mainEntity = {
       "@type": "ItemList",
-      itemListElement: matches.map(function (m, i) { return { "@type": "ListItem", position: i + 1, url: SITE_URL + C.matchPath(linkDir, m.id), name: teams(m) }; })
+      itemListElement: listed.map(function (e, i) { return { "@type": "ListItem", position: i + 1, url: SITE_URL + e.href, name: teamLabel(e.home) + " vs " + teamLabel(e.away) }; })
     };
   }
   var nav = function (k, fb) { var v = C.get(dict, k); return esc(typeof v === "string" ? v : fb); };
@@ -480,24 +539,27 @@ function renderLeagueHub(key, dir, matches) {
     '<meta name="twitter:card" content="summary">\n' +
     '<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">\n' +
     C.ldScript(C.breadcrumbLd(crumbs)) + "\n" + C.ldScript(page) + "\n" +
-    "<style>" + HUB_CSS + "</style>\n" +
+    "<style>" + HUB_CSS + HUB_TABLE_CSS + "</style>\n" +
     '<link rel="stylesheet" href="/assets/bottom-navigation.css">\n' +
     "</head>\n<body>\n" +
     '<header class="hdr"><a href="' + C.homePath(dir) + '" aria-label="IASHARK"><img src="/assets/iashark-logo.png" width="1648" height="440" alt="IASHARK"></a>' +
-    '<nav><a href="' + C.homePath(dir) + '">' + nav("nav.home", "Home") + '</a><a href="' + C.blogHubPath(dir) + '">' + nav("nav.guides", "Blog") + "</a></nav></header>\n" +
+    '<nav><a href="' + C.homePath(dir) + '">' + nav("nav.home", "Home") + "</a>" + (clubsHub ? '<a href="' + clubsHub + '">' + esc(s.nav.clubs) + "</a>" : "") + '<a href="' + C.blogHubPath(dir) + '">' + nav("nav.guides", "Blog") + "</a></nav></header>\n" +
     "<main>\n" +
     '<nav class="crumbs" aria-label="' + esc(s.match.breadcrumb_aria) + '"><a href="' + C.homePath(dir) + '">' + esc(s.breadcrumb.home) + '</a> <span aria-hidden="true">›</span> <span aria-current="page">' + esc(name) + "</span></nav>\n" +
     "<h1>" + esc(h1) + "</h1>\n" +
-    '<p class="intro">' + esc(intro) + "</p>\n" +
+    '<p class="intro">' + esc(hubAbout(key, dir)) + "</p>\n" +
+    '<p class="intro">' + esc(C.fill(L.scope, hubVars(key, dir))) + "</p>\n" +
     "<h2>" + esc(L.fixtures_title) + "</h2>\n" + fixtures + "\n" +
+    results + standings + clubs +
     "<h2>" + esc(L.method_title) + "</h2>\n<p class=\"intro\">" + esc(L.method) + "</p>\n" +
     "<ul>" + guides + '</ul>\n<p><a href="' + C.homePath(dir) + '">' + esc(L.free_link) + "</a></p>\n" +
-    "<h2>" + esc(L.others_title) + '</h2>\n<p class="others">' + others + "</p>\n" +
+    (others ? "<h2>" + esc(L.others_title) + '</h2>\n<p class="others">' + others + "</p>\n" : "") +
     "</main>\n" +
     '<footer class="foot"><p>' + esc(L.disclaimer) + "</p>" + helpHtml + (legal ? "<p>" + legal + "</p>" : "") + "</footer>\n" +
+    C.footerNavHtml(dir, opts.root) + "\n" +
     '<script defer src="/i18n/i18n.js"></script>\n<script defer src="/lib/market-config.js"></script>\n<script defer src="/bottom-navigation.js"></script>\n' +
     "</body>\n</html>\n";
-  return { html: html, indexable: indexable, count: matches.length };
+  return { html: html, indexable: indexable, count: data.upcoming.length, data: data };
 }
 
 // ---------------------------------------------------------------------------
@@ -563,13 +625,16 @@ function writeSeoPages(matchs, opts) {
     });
   });
 
+  // Classements conserves d'un run a l'autre (data/league-hubs-registry.json).
+  var store = HUBDATA.loadStore(root);
+  HUBDATA.updateStore(store, list, now, { root: root });
   var hubDirs = opts.hubDirs || DIR_CODES;
   hubDirs.forEach(function (dir) {
     var out = path.join(root, dir, "leagues");
     fs.mkdirSync(out, { recursive: true });
     var keep = {};
     C.LEAGUES.forEach(function (l) {
-      var r = renderLeagueHub(l.key, dir, list.filter(function (m) { return m.league_key === l.key; }));
+      var r = renderLeagueHub(l.key, dir, list.filter(function (m) { return m.league_key === l.key; }), { root: root, now: now, registry: reg, store: store });
       var f = C.leagueSlug(l.key) + ".html";
       writeIfChanged(path.join(out, f), r.html);
       keep[f] = true;
@@ -581,6 +646,7 @@ function writeSeoPages(matchs, opts) {
     });
   });
 
+  HUBDATA.saveStore(root, store);
   report.sitemaps = writeSeoSitemaps(root, today, now);
   return report;
 }
@@ -654,7 +720,7 @@ function writeFrMatchSitemap(root, today, now) {
 }
 
 module.exports = {
-  MIN_INDEXABLE_FIXTURES: MIN_INDEXABLE_FIXTURES, MIN_INDEXABLE_WORDS: MIN_INDEXABLE_WORDS,
+  MIN_HUB_FIXTURES: MIN_HUB_FIXTURES, MIN_HUB_STANDING_ROWS: MIN_HUB_STANDING_ROWS, MIN_INDEXABLE_WORDS: MIN_INDEXABLE_WORDS,
   matchTitle: matchTitle, matchDescription: matchDescription, matchJsonLd: matchJsonLd, matchEvent: matchEvent,
   matchHeadExtras: matchHeadExtras, matchFactsHtml: matchFactsHtml, matchSummaryHtml: matchSummaryHtml, matchMetaBlock: matchMetaBlock,
   matchAlternates: matchAlternates, matchDirs: matchDirs, hasMatchVersion: hasMatchVersion,

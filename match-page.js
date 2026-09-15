@@ -132,16 +132,19 @@ function hero(vm){
   const i=vm.identity,s=i.standings||{},dh=dateHeure(vm),ln=nomLigue(i,vm),f=vm.form||{};
   const c=vm.conditions;
   const lieu=c.venue||c.weather?`<div class="hero-venue">${c.venue?`<span>${cardIcon('pin')}${esc(c.venue)}</span>`:''}${c.weather?`<span>${cardIcon('cloud')}${esc(temperature(c.weather.temperature))}${meteo(c.weather.description)?' · '+esc(meteo(c.weather.description)):''}</span>`:''}</div>`:'';
+  // Page exemple-analyse : son H1 est statique (bandeau), l'en-tete y passe en h2.
+  const demo=typeof IASHARK_DEMO!=='undefined'&&IASHARK_DEMO;
+  const titreOuvrant=demo?'<h2 class="hero-teams">':'<h1 class="hero-teams">',titreFermant=demo?'</h2>':'</h1>';
   return `<header class="card hero reveal">
     <div class="hero-top">
       <span class="hero-league">${img(i.league.logo,'')}<span>${esc(ln)}</span></span>
       <span class="hero-time">${esc(dh.date||t('match_page.date_tbc','Date à confirmer'))} · <b>${esc(dh.time||'—')}</b></span>
     </div>
-    <h1 class="hero-teams">
+    ${titreOuvrant}
       <span class="hero-team">${img(i.home.logo,'')}<span class="hero-name">${esc(i.home.name)}</span></span>
       <span class="hero-vs">${esc(t('match_page.vs_label','vs'))}</span>
       <span class="hero-team">${img(i.away.logo,'')}<span class="hero-name">${esc(i.away.name)}</span></span>
-    </h1>
+    ${titreFermant}
     <div class="hero-meta"><div>${teamMeta(s.home,f.home)}</div><div>${teamMeta(s.away,f.away)}</div></div>
     ${lieu}
   </header>`;

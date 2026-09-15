@@ -119,7 +119,8 @@ test("toutes les affiches derby actives d'une version construite existent sur di
   ].forEach(function (rel) { assert.ok(disk[rel], rel); });
   var fr = fs.readFileSync(path.join(ROOT, "fr/clubs/classique-psg-om.html"), "utf8");
   var en = fs.readFileSync(path.join(ROOT, "en/clubs/le-classique.html"), "utf8");
-  var both = { fr: SITE + "/fr/clubs/classique-psg-om.html", en: SITE + "/en/clubs/le-classique.html" };
+  // Groupe fr + en : x-default vers /en/ (config/markets.json#_hreflangXDefault).
+  var both = { fr: SITE + "/fr/clubs/classique-psg-om.html", en: SITE + "/en/clubs/le-classique.html", "x-default": SITE + "/en/clubs/le-classique.html" };
   assert.deepEqual(alternatesOf(fr), both, "hreflang fr");
   assert.deepEqual(alternatesOf(en), both, "hreflang en");
   assert.match(en, /<html lang="en">/);
@@ -267,7 +268,7 @@ test("build : Classique fr+en, un seul SportsEvent pour la prochaine confrontati
       assert.ok(html.indexOf("6.2") === -1 && html.indexOf("6,2") === -1, "match non offert : valeur conf absente");
     });
     assert.match(en, /Paris Saint-Germain won 1, Marseille won 0, 0 drawn/, "noms de la version en (et non le nom api-football)");
-    assert.deepEqual(alternatesOf(en), { fr: SITE + "/fr/clubs/classique-psg-om.html", en: SITE + "/en/clubs/le-classique.html" });
+    assert.deepEqual(alternatesOf(en), { fr: SITE + "/fr/clubs/classique-psg-om.html", en: SITE + "/en/clubs/le-classique.html", "x-default": SITE + "/en/clubs/le-classique.html" });
     assert.deepEqual(alternatesOf(fr), alternatesOf(en));
     Object.keys(rep.outputs).forEach(function (p) { assertNoPremium(rep.outputs[p], p); });
     var idx = JSON.parse(fs.readFileSync(path.join(tmp, "data/derby-index.json"), "utf8"));

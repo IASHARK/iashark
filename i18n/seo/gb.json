@@ -11,7 +11,7 @@
     },
     "marches": {
       "title": "Football Markets: Model Probability vs Odds | IASHARK UK",
-      "description": "Every market IASHARK analyses, from match result to goals and BTTS: model probability, margin-free market probability, the gap between them and data quality."
+      "description": "The football markets IASHARK analyses, from match result to goals and BTTS: model probability, margin-free odds probability, the gap and data quality."
     },
     "a-propos": {
       "title": "About IASHARK UK: How Our Football Models Work",
@@ -26,7 +26,7 @@
       "description": "A complete IASHARK match analysis, free to view: recommended market, model probability, gap with the market, team comparison and match scenario."
     },
     "pro": {
-      "title": "IASHARK Tools: Model Selections and Bet Tracking",
+      "title": "IASHARK Tools UK: Model Selections and Bet Tracking",
       "description": "High model-probability selections, automatic bet tracking and a one-click odds check: the IASHARK Tools space for Premier League and European football."
     }
   },
@@ -55,13 +55,44 @@
     "blog": "Blog"
   },
   "league": {
-    "title": "{league} Predictions & Match Probabilities | IASHARK UK",
-    "description": "{league} predictions from statistical models: analysed fixtures, kick-off times in UK time, venues and links to each match analysis. 18+",
-    "h1": "{league} predictions and match analysis",
-    "intro_generic": "Upcoming {league} ({country}) fixtures analysed by IASHARK. Each match analysis estimates result, goals and both-teams-to-score probabilities with statistical models and compares them with bookmaker odds.",
-    "fixtures_title": "Analysed fixtures",
-    "none": "No {league} fixture is being analysed right now. Fixtures are added automatically once their data is available.",
+    "title": "{league} Predictions & Fixtures in UK Time | IASHARK",
+    "title_short": "{league} predictions: fixtures in UK time",
+    "description": "{league} predictions for UK fans: the next 14 days of fixtures in UK time, recent results and the table, with statistical match analysis. 18+",
+    "description_short": "{league}: next 14 days of fixtures in UK time, recent results and the table. Statistical estimates only. 18+",
+    "h1": "{league} predictions: fixtures, results and table (UK time)",
+    "about": {
+      "national": "{league}: the top division of {adjective} football. IASHARK analyses its fixtures with statistical models and compares the estimated probabilities with bookmaker odds.",
+      "ucl": "{league}: the leading club competition organised by UEFA. IASHARK analyses its fixtures with statistical models and compares the estimated probabilities with bookmaker odds.",
+      "uel": "{league}: UEFA's second-tier European club competition, below the Champions League. IASHARK analyses its fixtures with statistical models and compares the estimated probabilities with bookmaker odds.",
+      "uecl": "{league}: UEFA's third-tier European club competition. IASHARK analyses its fixtures with statistical models and compares the estimated probabilities with bookmaker odds.",
+      "mls": "{league} (Major League Soccer): the top professional league in the United States and Canada. IASHARK analyses its fixtures with statistical models and compares the estimated probabilities with bookmaker odds."
+    },
+    "adjectives": {
+      "premier": "English",
+      "laliga": "Spanish",
+      "seriea": "Italian",
+      "bundesliga": "German",
+      "ligue1": "French",
+      "eredivisie": "Dutch",
+      "primeira": "Portuguese",
+      "suede": "Swedish",
+      "jleague": "Japanese",
+      "liga_mx": "Mexican",
+      "south_africa_premiership": "South African",
+      "argentina_liga_profesional": "Argentine",
+      "colombia_primera_a": "Colombian",
+      "peru_primera": "Peruvian",
+      "chile_primera": "Chilean"
+    },
+    "scope": "This page brings together the next 14 days of fixtures, recent results and the table, drawn from public data and refreshed daily. Kick-off times are in {tz}.",
+    "fixtures_title": "Fixtures in the next 14 days",
+    "none": "No {league} fixture is scheduled in the next 14 days in the data available.",
     "kickoff_note": "Kick-off times are shown in UK time.",
+    "results_title": "Latest results",
+    "standings_title": "{league} table",
+    "standings_asof": "Table as of {date}, from public data.",
+    "standings_partial": "Extract published with the latest analysed matches.",
+    "clubs_title": "Clubs and derbies",
     "method_title": "How to read these analyses",
     "method": "A probability is an estimate, not a promise: an outcome given a 60% chance still fails four times in ten. Every IASHARK analysis also rates its data quality, so a thin sample is flagged rather than hidden.",
     "free_link": "Today's free match analysis",
@@ -91,16 +122,19 @@
     },
     "overrides": {
       "premier": {
-        "title": "Premier League Predictions & Stats | IASHARK UK",
-        "description": "Premier League predictions from statistical models: analysed fixtures, kick-off times in UK time, venues and links to each match analysis. Estimates only, 18+",
-        "h1": "Premier League predictions and match analysis",
+        "title": "Premier League Predictions & Table | IASHARK UK",
+        "description": "Premier League predictions for UK fans: fixtures for the next 14 days in UK time, recent results and the table, with statistical analysis. 18+",
+        "h1": "Premier League predictions: fixtures, results and table",
         "intro": "The Premier League is the top division of English football: 20 clubs, 38 matchdays from August to May. IASHARK analyses its fixtures with statistical models and compares the estimated probabilities with bookmaker odds."
       }
     }
   },
   "match": {
-    "title": "{home} vs {away}: prediction & stats ({league}) | IASHARK",
-    "description": "{home} vs {away}, {league}, {date}: kick-off, venue and IASHARK's statistical analysis of result, goals and both teams to score. 18+",
+    "title": "{home} v {away} predictions & stats ({league})",
+    "title_short": "{home} v {away}: predictions and stats",
+    "title_min": "{home} v {away} predictions",
+    "description": "{home} v {away} ({league}), {date}: kick-off in UK time, venue, recent form and a statistical view of the result and goals. 18+",
+    "description_short": "{home} v {away} ({league}), {date}: UK kick-off time, venue and statistical analysis. 18+",
     "facts_title": "Match information",
     "competition": "Competition",
     "kickoff": "Kick-off",
@@ -130,5 +164,15 @@
     "h2h_row": "{date}: {home} {score} {away}",
     "lineups_title": "Starting line-ups",
     "lineup_row": "{team} ({formation}): {players}"
+  },
+  "nav": {
+    "aria": "Site navigation",
+    "leagues": "Leagues:",
+    "explore": "Explore",
+    "clubs": "Clubs and derbies",
+    "articles": "UK articles",
+    "blog": "Blog and guides",
+    "markets": "Markets analysed",
+    "methodology": "Methodology"
   }
 }

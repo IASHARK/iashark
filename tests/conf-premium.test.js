@@ -90,27 +90,20 @@ test("pages match FR et <dir>/match : PRELOADED_MATCH sans note hors match offer
   assert.ok(n > 0, "aucune page match controlee");
 });
 
-test("resumes SEO des accueils : note sur 10 seulement avec le pari du match offert", () => {
-  const free = freeIds();
+test("resumes SEO des accueils : jamais de note sur 10 ni de pari, meme pour le match offert", () => {
   const indexes = ["index.html"].concat(C.DIR_CODES.map((d) => d + "/index.html")).filter(exists);
   for (const f of indexes) {
     const bloc = (read(f).match(/<!--SEO_MATCHES_SUMMARY-->([\s\S]*?)<!--\/SEO_MATCHES_SUMMARY-->/) || [])[1] || "";
-    for (const li of bloc.match(/<li>[\s\S]*?<\/li>/g) || []) {
-      if (!/\/10\b|seo_confidence/.test(li)) continue;
-      assert.match(li, /data-market-label="/, f + " : note sans pari offert");
-      const id = (li.match(/\/match\/(\d+)\.html/) || [])[1];
-      if (id) assert.ok(free.has(id), f + " : note publiee pour le match non offert " + id);
-      assert.doesNotMatch(li, /\(\s*<span[^>]*>[^<]*<\/span>\s*\/10\)|NaN/, f + " : note vide");
-    }
+    assert.doesNotMatch(bloc, /\/10\b|seo_confidence|seo_ai_pick|data-market-label="|NaN/, f + " : pari ou note dans le resume statique");
   }
 });
 
 test("pipeline et accueil : la note n'est rendue que si elle existe, jamais d'apres l'ecart", () => {
   const wf = read(".github/workflows/update-data.yml");
   const resume = wf.slice(wf.indexOf("function seoHomeSummaryHtml("), wf.indexOf("function injectHomeSeoSummary("));
-  assert.match(resume, /var pari=\(m\.is_free&&m\.pari_rec&&!m\.no_signal\)/);
-  assert.match(resume, /m\.conf!=null&&m\.conf!==''\?/);
-  assert.equal((resume.match(/m\.conf/g) || []).length, 3, "conf lue uniquement dans la branche du match offert");
+  // 16/09/2026 : le resume statique ne nomme plus aucun pari, meme offert, ni aucune note.
+  assert.match(resume, /var pari='';/);
+  assert.equal((resume.match(/m\.conf|m\.pari_rec/g) || []).length, 0, "ni conf ni pari lus dans le resume");
   const home = read("index.html");
   assert.doesNotMatch(home, /ovrConf|normEdge|parseEdge/, "couleur/palier/tri jamais d'apres l'ecart");
   assert.match(home, /function probConf\(m\)\{var c=normConf\(m&&m\.conf\);return c==null\?null:/);

@@ -447,7 +447,7 @@
     "position_defender": "Defender",
     "position_midfielder": "Midfielder",
     "position_forward": "Forward",
-    "confidence_prefix": "Confidence",
+    "confidence_prefix": "Estimated probability",
     "date_tbc": "Date to be confirmed",
     "analysis_available": "Analysis available",
     "draw_short": "Draw",
@@ -468,9 +468,9 @@
     "reading_matches_recommendation": ", and that's the market we recommend.",
     "reading_differs_recommendation_prefix": ", but that's not the market we recommend — we recommend instead ",
     "stat_expected_goals": "Expected goals",
-    "stat_analysis_confidence": "Analysis confidence",
+    "stat_analysis_confidence": "Estimated probability",
     "signal_title": "The IASHARK signal",
-    "signal_unavailable_fallback": "No market clears the confidence or minimum-odds thresholds for this match — IASHARK prefers not to call it.",
+    "signal_unavailable_fallback": "No market clears the estimated-probability or minimum-odds thresholds for this match — IASHARK prefers not to call it.",
     "edge_verdict_positive_prefix": "The market underestimates this scenario by ",
     "edge_verdict_positive_suffix": " probability points.",
     "edge_verdict_negative_prefix": "The odds on offer are less attractive than our estimate (",
@@ -548,7 +548,7 @@
     "gate_free_text": "This match is free, but you need a free IASHARK account (sign up or log in) to see the full analysis.",
     "gate_free_cta": "Log in / Create an account",
     "gate_pro_title": "Analysis reserved for Pro members",
-    "gate_pro_text": "The recommended market, the model's confidence and the full analysis of this match are reserved for Pro members. The match of the day, however, stays free.",
+    "gate_pro_text": "The recommended market, the model's estimated probability and the full analysis of this match are reserved for Pro members. The match of the day stays free with an account.",
     "gate_pro_cta": "Become Pro",
     "generic_load_error": "Loading error",
     "back_to_home": "Back to home",
@@ -850,7 +850,8 @@
     "standings_col_played": "P",
     "standings_col_won": "W",
     "standings_col_drawn": "D",
-    "standings_col_lost": "L"
+    "standings_col_lost": "L",
+    "sig_method_in_english": " (in English)"
   },
   "player_page": {
     "value_unavailable": "Data unavailable",
@@ -1804,7 +1805,9 @@
     "seo_confidence": "estimated probability",
     "seo_ai_pick": "AI pick:",
     "seo_times_paris": "Paris time",
-    "premium_detail_updating": "Detailed analysis being updated"
+    "premium_detail_updating": "Detailed analysis being updated",
+    "free_gate_label": "Free analysis",
+    "free_gate_text": "Create a free account to see the free analysis"
   },
   "site_header": {
     "nav_today": "Today's analyses",
@@ -2231,6 +2234,9 @@
       "colombia_primera_a": "Colombia",
       "peru_primera": "Peru",
       "chile_primera": "Chile"
-    }
+    },
+    "free_gated": "Free analysis",
+    "free_gated_cta": "Free account",
+    "aria_free_gated": "Free analysis with a free account."
   }
 }

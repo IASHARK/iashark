@@ -16,7 +16,10 @@
    data_quality_label, derby et prob_band (niveau grossier high/good/moderate,
    calcule cote serveur, lib/public-data-split.js#probBand).
    Droit d'ouvrir une analyse : abonne Pro CONFIRME (reponse match-data) ou
-   match offert du jour (lib/free-match.js, meme choix que la vitrine).
+   match offert du jour (lib/free-match.js, meme choix que la vitrine) AVEC un
+   compte (meme regle que la page match, match-page.js#renderAuthWall) : sans
+   compte, la ligne du match offert dit « Analyse offerte · Compte gratuit »
+   sans lire le pari ni la note.
    ========================================================================= */
 (function(root,factory){
   var api=factory(root||{});
@@ -149,6 +152,9 @@ function bandNote(){return t('home_list.band_note','Estimation du modèle, pas u
 function analysisFor(m,ctx,H){
   var free=isFree(m,ctx);
   if(!hasSignal(m))return {state:'none',free:free,label:m.no_signal_label||t('home_app.no_signal_label','Aucun signal clair sur ce match')};
+  // Match offert sans compte : la page match exige un compte gratuit ; ici non
+  // plus, aucun champ payant n'est lu.
+  if(free&&!ctx.isPro&&!ctx.hasAccount)return {state:'gated',free:true};
   // Verrou : on sort ICI, avant de lire conf / pari_rec / market_id. Seul le
   // niveau public prob_band est repris.
   if(!ctx.isPro&&!free)return {state:'locked',band:probBandOf(m)};
@@ -240,6 +246,9 @@ function renderMatchRow(m,ctx,H,index){
           +'<span class="hl-gauge" aria-hidden="true"><i style="--p:'+Math.round(a.probNum*10)+'%"></i></span>'
         :'<span class="hl-prelim">'+esc(t('home_list.preliminary','Analyse préliminaire'))+'</span>')
       +'<span class="hl-market"><span class="hl-market-lbl">'+esc(t('home_list.market_short','Marché :'))+'</span><span class="hl-market-txt">'+esc(a.market)+'</span></span></span>';
+  }else if(a.state==='gated'){
+    zone='<span class="hl-zone"><span class="hl-ready"><i class="hl-dot" aria-hidden="true"></i>'+esc(t('home_list.free_gated','Analyse offerte'))+'</span>'
+      +'<span class="hl-freepill">'+esc(t('home_list.free_gated_cta','Compte gratuit'))+'</span></span>';
   }else if(a.state==='pending'){
     zone='<span class="hl-zone hl-zone-none"><span class="hl-none-t">'+esc(t('home_app.analysis_in_progress','Analyse en cours'))+'</span></span>';
   }else{
@@ -250,6 +259,7 @@ function renderMatchRow(m,ctx,H,index){
   var anaAria=a.state==='locked'?t('home_list.aria_locked','Analyse prête, réservée aux abonnés Pro.')+(a.band?' '+bandLabel(a.band)+'. '+bandNote():'')
     :a.state==='open'?(a.prob!=null?tf('home_list.aria_prob','Probabilité estimée {p} sur 10.',{p:a.prob})+' ':'')+tf('home_list.aria_market','Marché conseillé : {market}.',{market:a.market})
       +(a.free?' '+t('home_list.aria_free','Analyse offerte.'):'')
+    :a.state==='gated'?t('home_list.aria_free_gated','Analyse offerte avec un compte gratuit.')
     :a.state==='pending'?t('home_app.analysis_in_progress','Analyse en cours')+'.':a.label+'.';
   var extra=[derby?tf('home_list.aria_derby','Derby : {name}',{name:derby}):'',cd?cd.text+(cd.estimated?' ('+t('home_list.estimated','estimé')+')':''):'',q?q.text:''].filter(Boolean).join(', ');
   var aria=tf('home_list.row_aria','{home} contre {away}, {time}. {extra}. {analysis}',{home:home.n||'',away:away.n||'',time:heure,extra:extra,analysis:anaAria}).replace(/\.\s\./g,'.');
@@ -337,7 +347,7 @@ function mount(rootEl,options){
   var favMatches=options.favMatches||(FL?FL.createStore({kind:'matches'}):null)||NO_FAVS;
   var collapsed={};
   try{collapsed=JSON.parse(root.sessionStorage.getItem(DEFAULTS.collapsedKey)||'{}')||{};}catch(e){collapsed={};}
-  var ctx={isPro:!!options.isPro,freeMatchId:null,lockedHref:options.lockedHref||DEFAULTS.lockedHref,
+  var ctx={isPro:!!options.isPro,hasAccount:!!options.hasAccount,freeMatchId:null,lockedHref:options.lockedHref||DEFAULTS.lockedHref,
     upsellAfter:options.upsellAfter||DEFAULTS.upsellAfter,simulations:options.simulations||DEFAULTS.simulations,
     favorites:favorites,favMatches:favMatches,collapsed:collapsed,nowTs:Date.now()};
   var state={status:'loading',matches:[],days:[],day:null,clock:H.localClock(),onRetry:null};
@@ -484,6 +494,7 @@ function mount(rootEl,options){
     setData:function(matches,opts){
       opts=opts||{};
       if(opts.isPro!==undefined)ctx.isPro=!!opts.isPro;
+      if(opts.hasAccount!==undefined)ctx.hasAccount=!!opts.hasAccount;
       matches=Array.isArray(matches)?matches:[];
       pruneFavMatches(matches,Date.now());
       state.status='ready';state.matches=matches;state.clock=H.localClock();
@@ -493,7 +504,7 @@ function mount(rootEl,options){
       renderAll(true);
     },
     setContext:function(patch){Object.assign(ctx,patch||{});if(state.status==='ready')renderBody(false);},
-    getState:function(){return {day:state.day,days:state.days.slice(),freeMatchId:ctx.freeMatchId,isPro:ctx.isPro};},
+    getState:function(){return {day:state.day,days:state.days.slice(),freeMatchId:ctx.freeMatchId,isPro:ctx.isPro,hasAccount:ctx.hasAccount};},
     destroy:function(){unsub();unsubM();clearInterval(tick);rootEl.innerHTML='';}
   };
 }

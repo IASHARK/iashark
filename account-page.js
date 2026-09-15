@@ -230,7 +230,7 @@
   function apercu() {
     var t = typeDeCompte();
     var langues = {
-      fr: tr('compte_page.lang_name_fr', 'Francais'), en: tr('compte_page.lang_name_en', 'English'),
+      fr: tr('compte_page.lang_name_fr', 'Français'), en: tr('compte_page.lang_name_en', 'English'),
       es: tr('compte_page.lang_name_es', 'Espanol'), de: tr('compte_page.lang_name_de', 'Deutsch'),
       it: tr('compte_page.lang_name_it', 'Italiano'), pt: tr('compte_page.lang_name_pt', 'Portugues')
     };
@@ -274,7 +274,6 @@
           + ligneResume(tr('compte_page.email_label', 'Email'), esc(ctx.user.email))
           + ligneResume(tr('compte_page.language_label', 'Langue'), esc(langues[prefs.language] || langues.fr), 'preferences')
           + ligneResume(tr('compte_page.timezone_label', 'Fuseau horaire'), esc(prefs.timezone || 'Europe/Paris'), 'preferences')
-          + ligneResume(tr('compte_page.leagues_label', 'Championnats suivis'), ligues.length ? esc(ligues.map(nomChampionnat).join(', ')) : '', 'preferences')
           + ligneResume(tr('compte_page.fav_leagues_label', 'Compétitions préférées'), favoris().length ? esc(favoris().map(nomCompetition).join(', ')) : '', 'competitions')
           + ligneResume(tr('compte_page.bankroll_label', 'Bankroll'), euros(ctx.profile.capital) ? esc(euros(ctx.profile.capital)) : '', 'preferences')
           + '</div>')
@@ -342,7 +341,7 @@
         + '<ul class="mt-5 space-y-2.5">'
         + '<li class="flex gap-2.5 text-[14px]"><span aria-hidden="true" class="text-cyan">✓</span>' + tr('compte_page.benefit_pro_all_matches', 'L’analyse complète sur tous les matchs') + '</li>'
         + '<li class="flex gap-2.5 text-[14px]"><span aria-hidden="true" class="text-cyan">✓</span>' + tr('compte_page.benefit_pro_six_tools', 'Les six outils branchés sur les probabilités du modèle') + '</li>'
-        + '<li class="flex gap-2.5 text-[14px]"><span aria-hidden="true" class="text-cyan">✓</span>' + tr('compte_page.benefit_pro_decisions_log', 'Le journal des décisions synchronise') + '</li>'
+        + '<li class="flex gap-2.5 text-[14px]"><span aria-hidden="true" class="text-cyan">✓</span>' + tr('compte_page.benefit_pro_decisions_log', 'Le journal des décisions synchronisé') + '</li>'
         + '<li class="flex gap-2.5 text-[14px]"><span aria-hidden="true" class="text-cyan">✓</span>' + tr('compte_page.benefit_pro_bankroll', 'Le suivi de bankroll lié au compte') + '</li>'
         + '</ul>'
         // Cases CGV + execution immediate (lib/checkout-consent.js), montees
@@ -376,7 +375,7 @@
     var connues = CHAMPIONNATS.slice();
     ligues.forEach(function (l) { if (connues.indexOf(l) === -1) connues.push(l); });
     var langues = [
-      ['fr', tr('compte_page.lang_name_fr', 'Francais')], ['en', tr('compte_page.lang_name_en', 'English')],
+      ['fr', tr('compte_page.lang_name_fr', 'Français')], ['en', tr('compte_page.lang_name_en', 'English')],
       ['es', tr('compte_page.lang_name_es', 'Espanol')], ['de', tr('compte_page.lang_name_de', 'Deutsch')],
       ['it', tr('compte_page.lang_name_it', 'Italiano')], ['pt', tr('compte_page.lang_name_pt', 'Portugues')]
     ];

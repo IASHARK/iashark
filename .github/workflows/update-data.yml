@@ -71,7 +71,7 @@ jobs:
           // GARDE COUP D'ENVOI (lib/kickoff-guard.js) : aucun pari, aucune analyse
           // publiee, jamais offert ni candidat canonique pour un match deja commence,
           // imminent (<= maintenant + 15 min) ou dont le statut API n'est pas NS/TBD.
-          const { kickoffGate, closeMatchForPick, filterOpenCandidates, KICKOFF_MARGIN_MINUTES } = require('./lib/kickoff-guard.js');
+          const { kickoffGate, closeMatchForPick, filterOpenCandidates, KICKOFF_MARGIN_MINUTES, eligibleForFree, reasonableParisSlot } = require('./lib/kickoff-guard.js');
           // Pages SEO statiques (titres/JSON-LD des pages match, versions
           // localisees, pages championnat) : scripts/seo-pages.js.
           var SEO_PAGES=require('./scripts/seo-pages.js');
@@ -1651,22 +1651,20 @@ jobs:
             loc=loc||'fr';
             var todays=(matchsData||[]).filter(function(m){return (m.date||'').split(' ')[0]===TODAY;});
             if(!todays.length) return '';
-            var confiance='<span data-i18n="home_app.seo_confidence">'+escHtml(seoText(loc,'home_app.seo_confidence','probabilité estimée'))+'</span>';
             var items=todays.map(function(m){
               var heure=(m.date||'').split(' ')[1]||'';
-              // Le pari n'est nomme que pour l'analyse offerte du jour. Le
-              // nommer pour tous les matchs revenait a publier le produit en
-              // clair dans le HTML de la page d'accueil, indexe par Google.
-              var pari=(m.is_free&&m.pari_rec&&!m.no_signal)
-                ?(' — <span data-i18n="home_app.seo_ai_pick">'+escHtml(seoText(loc,'home_app.seo_ai_pick','Pronostic IA :'))+'</span> <span data-market-label="'+escHtml(m.pari_rec)+'" data-home="'+escHtml(m.home.n)+'" data-away="'+escHtml(m.away.n)+'">'+escHtml(seoMarketLabel(m,loc))+'</span>'+(m.conf!=null&&m.conf!==''?(' ('+confiance+' '+escHtml(String(m.conf))+'/10)'):''))
-                :''; // conf = note sur 10 (probabilite du modele / 10), champ premium : jamais publiee pour un match non offert, ni chiffre vide
+              // Le pari n'est JAMAIS nomme, meme pour l'analyse offerte du jour
+              // (audit du 16/09/2026) : le HTML statique de l'accueil est lu sans
+              // compte, alors que l'analyse offerte exige un compte gratuit. Ni
+              // pari, ni note sur 10 (conf, champ premium) dans ce resume.
+              var pari='';
               // Lien vers la page match statique : celle du repertoire si elle
               // existe, sinon la version la plus proche reellement generee dans
               // le perimetre de la competition (meme langue, puis en, puis fr) ;
               // aucune page : nom sans lien. Meme fonction que
               // scripts/build-locales.js (rewriteHomeMatchSummary) : un rebuild
               // local donne exactement le meme bloc que le pipeline.
-              var lienMatch=MATCH_LIFECYCLE.versionMatchHref(m.id,m.league_key,dir||'fr','.');
+              var lienMatch=MATCH_LIFECYCLE.homeSummaryHref(m.id,m.league_key,dir||'fr','.');
               var nomMatch=escHtml(m.home.n)+' vs '+escHtml(m.away.n);
               return '<li>'+escHtml(heure)+' — <strong>'+(lienMatch?'<a href="'+lienMatch+'" style="color:inherit">'+nomMatch+'</a>':nomMatch)+'</strong>'+(m.league?' ('+escHtml(seoLeagueName(m))+')':'')+pari+'</li>';
             }).join('');
@@ -3382,7 +3380,10 @@ jobs:
               // egale, la SAFE_PICK_OF_THE_DAY canonique l'emporte. Le site
               // (lib/free-match.js) bascule seul a minuit sur l'offre du nouveau jour.
               var jourDe=function(m){ return (m&&m.date||'').split(' ')[0]; };
-              var analysable=function(m){ return m && m.pari_rec && !m.no_signal; };
+              // Jamais un match qui commence avant l'heure du run + marge
+              // (lib/kickoff-guard.js#eligibleForFree, fixture api-football exigee).
+              var OFFRE_MS=Date.now();
+              var analysable=function(m){ return m && m.pari_rec && !m.no_signal && eligibleForFree(FIXTURE_BY_ID[String(m.id)],OFFRE_MS); };
               var valeurDe=function(m){
                 var p=Number(m&&m.model_probability), o=parseFloat(String(m&&m.cote_rec||'').replace(',','.'));
                 if(!(p>0&&p<=100)||!(o>1)) return null;
@@ -3411,7 +3412,10 @@ jobs:
               jours.sort();
               var elus={};
               jours.slice(0,2).forEach(function(j){
-                var choisi=meilleur(allMatchsData.filter(function(m){ return analysable(m) && jourDe(m)===j; }));
+                var duJour=allMatchsData.filter(function(m){ return analysable(m) && jourDe(m)===j; });
+                // Creneau raisonnable en heure de Paris (12:00-22:59) de preference.
+                var creneau=duJour.filter(function(m){ return reasonableParisSlot(m); });
+                var choisi=meilleur(creneau.length?creneau:duJour);
                 if(choisi) elus[j]=choisi;
               });
               if(!Object.keys(elus).length){

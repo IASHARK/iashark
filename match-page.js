@@ -368,7 +368,11 @@ function methodologyHref(){
   return dir?'/en/methodologie.html':'/fr/methodologie.html';
 }
 function methodLink(){
-  return `<p class="sig-method"><a href="${esc(methodologyHref())}">${esc(t('match_page.sig_method_link','Comment ce chiffre est calculé : méthodologie'))}</a></p>`;
+  // Version sans page Methodologie (de, it, pt) : le lien vise la version
+  // anglaise, et le dit (audit du 16/09/2026).
+  const dir=(window.I18N&&window.I18N.dir)||'';
+  const anglais=!!dir&&!METHODOLOGY_DIRS.includes(dir);
+  return `<p class="sig-method"><a href="${esc(methodologyHref())}"${anglais?' hreflang="en"':''}>${esc(t('match_page.sig_method_link','Comment ce chiffre est calculé : méthodologie'))}${anglais?esc(t('match_page.sig_method_in_english',' (en anglais)')):''}</a></p>`;
 }
 
 // L'AVIS IASHARK (abonne Pro ou match offert connecte) : le pari et sa cote,

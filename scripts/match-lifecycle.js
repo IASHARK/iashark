@@ -72,6 +72,33 @@ function versionMatchHref(id, leagueKey, dir, root) {
   return null;
 }
 
+// Lien d'un match dans le resume « Analyses IA du jour » de l'accueil d'une
+// version (pipeline injectHomeSeoSummary, scripts/build-locales.js
+// rewriteHomeMatchSummary). Versions pays gb, za, mx (marche propre,
+// config/markets.json#_dirs.<dir>.market != "fr") : page match de la version si
+// elle existe, sinon page championnat DE LA VERSION (jamais la page francaise ni
+// une autre version, audit du 16/09/2026) ; sinon nom sans lien. Autres
+// versions : versionMatchHref (version la plus proche).
+function countryDir(dir) { return !!(C.DIRS[dir] && C.DIRS[dir].market && C.DIRS[dir].market !== "fr"); }
+function leagueKeyOf(id, root) {
+  try { var e = loadRegistry(root).matches[String(id)]; if (e && e.league_key) return e.league_key; } catch (err) {}
+  try { return JSON.parse(fs.readFileSync(path.join(root, "match", id + ".json"), "utf8")).league_key || null; } catch (err) {}
+  return null;
+}
+function homeSummaryHref(id, leagueKey, dir, root) {
+  root = root || C.ROOT;
+  if (!/^\d{1,12}$/.test(String(id))) return null;
+  if (!countryDir(dir)) return versionMatchHref(id, leagueKey, dir, root);
+  var key = leagueKey || leagueKeyOf(id, root);
+  var known = !!(key && C.leagueByKey(key));
+  var own = C.matchPath(dir, id);
+  // Page de la version : seulement dans le perimetre de la competition.
+  if ((!known || matchDirsFor(key).indexOf(dir) !== -1) && fs.existsSync(path.join(root, own.slice(1)))) return own;
+  if (!known) return null;
+  var hub = C.leagueHubPath(dir, key);
+  return fs.existsSync(path.join(root, hub.slice(1))) ? hub : null;
+}
+
 // ---------------------------------------------------------------------------
 function validMatch(m) {
   return !!(m && m.id != null && /^\d{1,12}$/.test(String(m.id)) && m.home && m.away && m.home.n && m.away.n);
@@ -420,7 +447,7 @@ module.exports = {
   REGISTRY_FILE: REGISTRY_FILE, SITEMAP_MAX_AGE_HOURS: SITEMAP_MAX_AGE_HOURS, NOINDEX_AFTER_DAYS: NOINDEX_AFTER_DAYS,
   REMOVE_AFTER_DAYS: REMOVE_AFTER_DAYS, REDIRECT_RETENTION_DAYS: REDIRECT_RETENTION_DAYS, FINISHED_AFTER_MINUTES: FINISHED_AFTER_MINUTES,
   REDIRECTS_BEGIN: REDIRECTS_BEGIN, REDIRECTS_END: REDIRECTS_END,
-  matchDirsFor: matchDirsFor, versionMatchHref: versionMatchHref, stageFor: stageFor, kickoffIso: kickoffIso, validMatch: validMatch,
+  matchDirsFor: matchDirsFor, versionMatchHref: versionMatchHref, homeSummaryHref: homeSummaryHref, stageFor: stageFor, kickoffIso: kickoffIso, validMatch: validMatch,
   publicSnapshot: publicSnapshot, parseScore: parseScore, findFinalScore: findFinalScore,
   emptyRegistry: emptyRegistry, loadRegistry: loadRegistry, saveRegistry: saveRegistry, serializeRegistry: serializeRegistry,
   updateRegistry: updateRegistry, archivedEntries: archivedEntries, archivedState: archivedState,

@@ -447,7 +447,7 @@
     "position_defender": "Verteidiger",
     "position_midfielder": "Mittelfeldspieler",
     "position_forward": "Stürmer",
-    "confidence_prefix": "Vertrauen",
+    "confidence_prefix": "Geschätzte Wahrscheinlichkeit",
     "date_tbc": "Datum noch zu bestätigen",
     "analysis_available": "Analyse verfügbar",
     "draw_short": "Unentschieden",
@@ -468,9 +468,9 @@
     "reading_matches_recommendation": ", und das ist der Markt, den wir empfehlen.",
     "reading_differs_recommendation_prefix": ", aber das ist nicht der Markt, den wir empfehlen — wir empfehlen stattdessen ",
     "stat_expected_goals": "Erwartete Tore",
-    "stat_analysis_confidence": "Analyse-Vertrauen",
+    "stat_analysis_confidence": "Geschätzte Wahrscheinlichkeit",
     "signal_title": "Das IASHARK-Signal",
-    "signal_unavailable_fallback": "Kein Markt erreicht die Vertrauens- oder Mindestquoten-Schwellen für dieses Spiel — IASHARK äußert sich lieber nicht.",
+    "signal_unavailable_fallback": "Kein Markt erreicht die Schwellen für geschätzte Wahrscheinlichkeit oder Mindestquote für dieses Spiel — IASHARK äußert sich lieber nicht.",
     "edge_verdict_positive_prefix": "Der Markt unterschätzt dieses Szenario um ",
     "edge_verdict_positive_suffix": " Wahrscheinlichkeitspunkte.",
     "edge_verdict_negative_prefix": "Die angebotene Quote ist weniger attraktiv als unsere Schätzung (",
@@ -548,7 +548,7 @@
     "gate_free_text": "Dieses Spiel ist kostenlos, aber du brauchst ein kostenloses IASHARK-Konto (Registrierung oder Anmeldung), um die vollständige Analyse zu sehen.",
     "gate_free_cta": "Anmelden / Konto erstellen",
     "gate_pro_title": "Analyse nur für Pro-Mitglieder",
-    "gate_pro_text": "Der empfohlene Markt, das Vertrauen des Modells und die vollständige Analyse dieses Spiels sind Pro-Mitgliedern vorbehalten. Das Spiel des Tages bleibt jedoch kostenlos.",
+    "gate_pro_text": "Der empfohlene Markt, die geschätzte Wahrscheinlichkeit des Modells und die vollständige Analyse dieses Spiels sind Pro-Mitgliedern vorbehalten. Das Spiel des Tages bleibt mit einem Konto kostenlos.",
     "gate_pro_cta": "Pro werden",
     "generic_load_error": "Ladefehler",
     "back_to_home": "Zurück zur Startseite",
@@ -850,7 +850,8 @@
     "standings_col_played": "Sp",
     "standings_col_won": "S",
     "standings_col_drawn": "U",
-    "standings_col_lost": "N"
+    "standings_col_lost": "N",
+    "sig_method_in_english": " (auf Englisch)"
   },
   "player_page": {
     "value_unavailable": "Daten nicht verfügbar",
@@ -1430,7 +1431,7 @@
     "bankroll_detail": "Das Referenzkapital für die Einsatzberechnungen. Es ist privat und wird nur von deinen Tools verwendet.",
     "bankroll_placeholder": "Z. B. 500",
     "save_btn": "Speichern",
-    "notifications_heading": "Notifications",
+    "notifications_heading": "Benachrichtigungen",
     "notifications_subtitle": "Was IASHARK dir per E-Mail schickt.",
     "notif_new_analysis_title": "Neue Analyse",
     "notif_new_analysis_detail": "Eine E-Mail erhalten, wenn eine neue Analyse veröffentlicht wird.",
@@ -1804,7 +1805,9 @@
     "seo_confidence": "geschätzte Wahrscheinlichkeit",
     "seo_ai_pick": "KI-Tipp:",
     "seo_times_paris": "Pariser Zeit",
-    "premium_detail_updating": "Detaillierte Analyse wird aktualisiert"
+    "premium_detail_updating": "Detaillierte Analyse wird aktualisiert",
+    "free_gate_label": "Gratis-Analyse",
+    "free_gate_text": "Erstelle ein kostenloses Konto, um die Gratis-Analyse zu sehen"
   },
   "site_header": {
     "nav_today": "Heutige Analysen",
@@ -2231,6 +2234,9 @@
       "colombia_primera_a": "Kolumbien",
       "peru_primera": "Peru",
       "chile_primera": "Chile"
-    }
+    },
+    "free_gated": "Gratis-Analyse",
+    "free_gated_cta": "Kostenloses Konto",
+    "aria_free_gated": "Gratis-Analyse mit kostenlosem Konto."
   }
 }

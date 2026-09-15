@@ -120,12 +120,21 @@ for (const v of VERSIONS.filter((x) => ['fr', 'gb', 'mx'].includes(x.dir))) {
       const upsell = page.locator('#homeList .hl-upsell');
       expect(await upsell.count()).toBeLessThanOrEqual(1);
       if (await upsell.count()) expect(await upsell.innerText()).not.toMatch(/[€£$]|MX\$|\bR\s?\d/);
-      // Match offert du jour : dans sa competition, puce « Offert », analyse ouverte.
+      // Match offert du jour : dans sa competition, puce « Offert ». Sans compte (regle
+      // de la page match) : « Analyse offerte · Compte gratuit », ni pari ni note, et
+      // la vitrine invite a creer un compte gratuit.
       const freeId = await page.evaluate(() => window.freeMatchId);
       const freeRow = page.locator(`#homeList a.hl-row[href$="match.html?id=${freeId}"]`);
       if (await freeRow.count()) {
         await expect(freeRow.first()).toHaveClass(/is-free/);
+        await expect(freeRow.first()).toHaveClass(/is-gated/);
         await expect(freeRow.first().locator('.hl-tag-free')).toHaveText(tr(dict, 'home_list.free_chip'));
+        await expect(freeRow.first().locator('.hl-freepill')).toHaveText(tr(dict, 'home_list.free_gated_cta'));
+        expect(await freeRow.first().locator('.hl-zone').innerText()).not.toMatch(/\d/);
+      }
+      if (freeId) {
+        await expect(page.locator('#heroFeature .feature-gate .signal-gate')).toHaveText(tr(dict, 'home_app.free_gate_text'));
+        await expect(page.locator('#heroFeature .signal-stat')).toHaveCount(0);
       }
     });
 
@@ -204,6 +213,9 @@ for (const v of VERSIONS.filter((x) => ['fr', 'gb', 'mx'].includes(x.dir))) {
       await expect(page.locator('#homeList a.hl-row').first()).toBeVisible();
       await expectLockedRowsClean(page);
       await expect(page.locator('#homeList .hl-row.is-open:not(.is-free)')).toHaveCount(0);
+      // Compte gratuit : le match offert s'ouvre (plus de « Compte gratuit »), vitrine sans invitation.
+      await expect(page.locator('#homeList .hl-row.is-gated')).toHaveCount(0);
+      await expect(page.locator('#heroFeature .feature-gate')).toHaveCount(0);
     });
 
     test('favoris : competition en tete de la liste, visiteur (localStorage) puis compte (user_metadata), persistants', async ({ page, supa }) => {

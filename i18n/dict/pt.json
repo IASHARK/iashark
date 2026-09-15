@@ -447,7 +447,7 @@
     "position_defender": "Defesa",
     "position_midfielder": "Médio",
     "position_forward": "Avançado",
-    "confidence_prefix": "Confiança",
+    "confidence_prefix": "Probabilidade estimada",
     "date_tbc": "Data a confirmar",
     "analysis_available": "Análise disponível",
     "draw_short": "Empate",
@@ -468,9 +468,9 @@
     "reading_matches_recommendation": ", e é o mercado que recomendamos.",
     "reading_differs_recommendation_prefix": ", mas não é o mercado que recomendamos — recomendamos antes ",
     "stat_expected_goals": "Golos esperados",
-    "stat_analysis_confidence": "Confiança da análise",
+    "stat_analysis_confidence": "Probabilidade estimada",
     "signal_title": "O sinal IASHARK",
-    "signal_unavailable_fallback": "Nenhum mercado ultrapassa os limiares de confiança ou de odd mínima para este jogo — a IASHARK prefere não se pronunciar.",
+    "signal_unavailable_fallback": "Nenhum mercado ultrapassa os limiares de probabilidade estimada ou de odd mínima para este jogo — a IASHARK prefere não se pronunciar.",
     "edge_verdict_positive_prefix": "O mercado subestima este cenário em ",
     "edge_verdict_positive_suffix": " pontos de probabilidade.",
     "edge_verdict_negative_prefix": "A odd proposta é menos interessante do que a nossa estimativa (",
@@ -548,7 +548,7 @@
     "gate_free_text": "Este jogo é gratuito, mas precisas de uma conta IASHARK gratuita (registo ou início de sessão) para ver a análise completa.",
     "gate_free_cta": "Iniciar sessão / Criar conta",
     "gate_pro_title": "Análise reservada a membros Pro",
-    "gate_pro_text": "O mercado recomendado, a confiança do modelo e a análise completa deste jogo estão reservados aos membros Pro. O jogo do dia, esse, continua gratuito.",
+    "gate_pro_text": "O mercado recomendado, a probabilidade estimada do modelo e a análise completa deste jogo estão reservados aos membros Pro. O jogo do dia continua grátis com uma conta.",
     "gate_pro_cta": "Tornar-se Pro",
     "generic_load_error": "Erro de carregamento",
     "back_to_home": "Voltar ao início",
@@ -752,7 +752,7 @@
     "proba_aria": "A nossa estimativa: {model}. O que diz a odd: {market}.",
     "proba_model_label": "A nossa estimativa",
     "proba_market_na": "não disponível",
-    "avis_title": "O prognóstico IASHARK",
+    "avis_title": "A opinião da IASHARK",
     "avis_no_signal": "Nenhuma aposta selecionada pelo modelo para este jogo",
     "sig2_plain": "Em 100 jogos como este, o nosso modelo espera que esta aposta se confirme cerca de {model} vezes; a odd pressupõe {market}.",
     "sig2_compare_title": "As nossas hipóteses face à odd",
@@ -788,7 +788,7 @@
     "faq_q_h2h": "Quem ganhou os últimos confrontos diretos?",
     "faq_h2h_answer": "Nos últimos {n} confrontos diretos: {home} {hw} V · {draws} E · {away} {aw} V. Último jogo: {lastHome} {lastScore} {lastAway}.",
     "faq_early_answer_plain": "{home} marca {homePct}% dos golos antes do intervalo, {away} {awayPct}%. {verdict}",
-    "faq_q_pick": "Qual é o prognóstico do IASHARK para este jogo?",
+    "faq_q_pick": "Qual é a opinião da IASHARK sobre este jogo?",
     "faq_pick_none": "O modelo não selecionou nenhuma aposta para este jogo.",
     "faq_q_first15": "O que pode acontecer nos primeiros 15 minutos?",
     "faq_q_outcomes": "Que hipóteses dá o modelo a cada equipa?",
@@ -843,14 +843,15 @@
     "lineup_pos_d": "D",
     "lineup_pos_m": "M",
     "lineup_pos_f": "A",
-    "nav_avis": "Prognóstico",
+    "nav_avis": "Opinião",
     "nav_stats": "Dados",
     "nav_analysis": "Análise",
     "nav_questions": "Perguntas",
     "standings_col_played": "J",
     "standings_col_won": "V",
     "standings_col_drawn": "E",
-    "standings_col_lost": "D"
+    "standings_col_lost": "D",
+    "sig_method_in_english": " (em inglês)"
   },
   "player_page": {
     "value_unavailable": "Dado indisponível",
@@ -1430,7 +1431,7 @@
     "bankroll_detail": "O capital de referência dos cálculos de aposta. É privado e só é utilizado pelas tuas ferramentas.",
     "bankroll_placeholder": "Ex. 500",
     "save_btn": "Guardar",
-    "notifications_heading": "Notifications",
+    "notifications_heading": "Notificações",
     "notifications_subtitle": "O que o IASHARK te envia por email.",
     "notif_new_analysis_title": "Nova análise",
     "notif_new_analysis_detail": "Receber um email quando é publicada uma nova análise.",
@@ -1804,7 +1805,9 @@
     "seo_confidence": "probabilidade estimada",
     "seo_ai_pick": "Prognóstico IA:",
     "seo_times_paris": "hora de Paris",
-    "premium_detail_updating": "Análise detalhada em atualização"
+    "premium_detail_updating": "Análise detalhada em atualização",
+    "free_gate_label": "Análise grátis",
+    "free_gate_text": "Crie uma conta gratuita para ver a análise grátis"
   },
   "site_header": {
     "nav_today": "Análises do dia",
@@ -2231,6 +2234,9 @@
       "colombia_primera_a": "Colômbia",
       "peru_primera": "Peru",
       "chile_primera": "Chile"
-    }
+    },
+    "free_gated": "Análise grátis",
+    "free_gated_cta": "Conta gratuita",
+    "aria_free_gated": "Análise grátis com uma conta gratuita."
   }
 }

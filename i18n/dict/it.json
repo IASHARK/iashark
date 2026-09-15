@@ -447,7 +447,7 @@
     "position_defender": "Difensore",
     "position_midfielder": "Centrocampista",
     "position_forward": "Attaccante",
-    "confidence_prefix": "Fiducia",
+    "confidence_prefix": "Probabilità stimata",
     "date_tbc": "Data da confermare",
     "analysis_available": "Analisi disponibile",
     "draw_short": "Pareggio",
@@ -468,9 +468,9 @@
     "reading_matches_recommendation": ", ed è il mercato che consigliamo.",
     "reading_differs_recommendation_prefix": ", ma non è il mercato che consigliamo — consigliamo piuttosto ",
     "stat_expected_goals": "Gol attesi",
-    "stat_analysis_confidence": "Fiducia nell'analisi",
+    "stat_analysis_confidence": "Probabilità stimata",
     "signal_title": "Il segnale IASHARK",
-    "signal_unavailable_fallback": "Nessun mercato supera le soglie di affidabilità o di quota minima per questa partita — IASHARK preferisce non esprimersi.",
+    "signal_unavailable_fallback": "Nessun mercato supera le soglie di probabilità stimata o di quota minima per questa partita — IASHARK preferisce non pronunciarsi.",
     "edge_verdict_positive_prefix": "Il mercato sottostima questo scenario di ",
     "edge_verdict_positive_suffix": " punti di probabilità.",
     "edge_verdict_negative_prefix": "La quota proposta è meno interessante della nostra stima (",
@@ -548,7 +548,7 @@
     "gate_free_text": "Questa partita è gratuita, ma serve un account IASHARK gratuito (registrazione o accesso) per vedere l'analisi completa.",
     "gate_free_cta": "Accedi / Crea un account",
     "gate_pro_title": "Analisi riservata ai membri Pro",
-    "gate_pro_text": "Il mercato consigliato, l'affidabilità del modello e l'analisi completa di questa partita sono riservati ai membri Pro. La partita del giorno, invece, resta gratuita.",
+    "gate_pro_text": "Il mercato consigliato, la probabilità stimata del modello e l’analisi completa di questa partita sono riservati ai membri Pro. La partita del giorno resta gratuita con un account.",
     "gate_pro_cta": "Diventa Pro",
     "generic_load_error": "Errore di caricamento",
     "back_to_home": "Torna alla home",
@@ -752,7 +752,7 @@
     "proba_aria": "La nostra stima: {model}. Cosa dice la quota: {market}.",
     "proba_model_label": "La nostra stima",
     "proba_market_na": "non disponibile",
-    "avis_title": "Il pronostico IASHARK",
+    "avis_title": "Il parere di IASHARK",
     "avis_no_signal": "Nessuna scommessa selezionata dal modello per questa partita",
     "sig2_plain": "Su 100 partite come questa, il nostro modello si aspetta che questa scommessa vada a segno circa {model} volte; la quota ne presuppone {market}.",
     "sig2_compare_title": "Le nostre probabilità a confronto con la quota",
@@ -788,7 +788,7 @@
     "faq_q_h2h": "Chi ha vinto gli ultimi scontri diretti?",
     "faq_h2h_answer": "Negli ultimi {n} scontri diretti: {home} {hw} V · {draws} N · {away} {aw} V. Ultima sfida: {lastHome} {lastScore} {lastAway}.",
     "faq_early_answer_plain": "{home} segna il {homePct}% dei suoi gol prima dell’intervallo, {away} il {awayPct}%. {verdict}",
-    "faq_q_pick": "Qual è il pronostico IASHARK per questa partita?",
+    "faq_q_pick": "Qual è il parere di IASHARK su questa partita?",
     "faq_pick_none": "Il modello non ha selezionato alcuna scommessa per questa partita.",
     "faq_q_first15": "Che cosa può succedere nei primi 15 minuti?",
     "faq_q_outcomes": "Quali probabilità dà il modello a ciascuna squadra?",
@@ -843,14 +843,15 @@
     "lineup_pos_d": "D",
     "lineup_pos_m": "C",
     "lineup_pos_f": "A",
-    "nav_avis": "Pronostico",
+    "nav_avis": "Parere",
     "nav_stats": "Statistiche",
     "nav_analysis": "Analisi",
     "nav_questions": "Domande",
     "standings_col_played": "G",
     "standings_col_won": "V",
     "standings_col_drawn": "N",
-    "standings_col_lost": "P"
+    "standings_col_lost": "P",
+    "sig_method_in_english": " (in inglese)"
   },
   "player_page": {
     "value_unavailable": "Dato non disponibile",
@@ -1430,7 +1431,7 @@
     "bankroll_detail": "Il capitale di riferimento per i calcoli delle puntate. È privato e viene usato solo dai tuoi strumenti.",
     "bankroll_placeholder": "Es. 500",
     "save_btn": "Salva",
-    "notifications_heading": "Notifications",
+    "notifications_heading": "Notifiche",
     "notifications_subtitle": "Cosa ti invia IASHARK via email.",
     "notif_new_analysis_title": "Nuova analisi",
     "notif_new_analysis_detail": "Ricevi un'email quando viene pubblicata una nuova analisi.",
@@ -1804,7 +1805,9 @@
     "seo_confidence": "probabilità stimata",
     "seo_ai_pick": "Pronostico IA:",
     "seo_times_paris": "ora di Parigi",
-    "premium_detail_updating": "Analisi dettagliata in aggiornamento"
+    "premium_detail_updating": "Analisi dettagliata in aggiornamento",
+    "free_gate_label": "Analisi gratuita",
+    "free_gate_text": "Crea un account gratuito per vedere l’analisi gratuita"
   },
   "site_header": {
     "nav_today": "Analisi del giorno",
@@ -2231,6 +2234,9 @@
       "colombia_primera_a": "Colombia",
       "peru_primera": "Perù",
       "chile_primera": "Cile"
-    }
+    },
+    "free_gated": "Analisi gratuita",
+    "free_gated_cta": "Account gratuito",
+    "aria_free_gated": "Analisi gratuita con un account gratuito."
   }
 }

@@ -21,3 +21,5 @@
 }
 /* QA mobile 14/09/2026 : cibles tactiles >= 44 px dans l'en-tete. */
 @media(max-width:850px){.btn-login,.account-chip{min-height:44px}}
+/* Mobile etroit (audit 16/09/2026, /mx/abonnement.html) : le bouton retour passe sur deux lignes au lieu d'etre coupe (« ← Volver a los p »). */
+@media(max-width:430px){.topbar .brand img{width:104px}.top-actions>.btn-login{white-space:normal;text-overflow:clip;overflow:visible;line-height:1.2;max-width:150px;padding:6px 10px}}

@@ -352,7 +352,7 @@ function homeSeoBlock(dir) {
 function rewriteHomeMatchSummary(html, dir, root) {
   return html.replace(/<!--SEO_MATCHES_SUMMARY-->[\s\S]*?<!--\/SEO_MATCHES_SUMMARY-->/, function (block) {
     return block.replace(/<a href="(?:\/[a-z]{2})?\/match\/(\d{1,12})\.html"([^>]*)>([\s\S]*?)<\/a>/g, function (m, id, attrs, inner) {
-      var href = MATCH_LIFECYCLE.versionMatchHref(id, null, dir, root || ROOT);
+      var href = MATCH_LIFECYCLE.homeSummaryHref(id, null, dir, root || ROOT);
       return href ? '<a href="' + href + '"' + attrs + ">" + inner + "</a>" : inner;
     });
   });

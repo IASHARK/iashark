@@ -447,7 +447,7 @@
     "position_defender": "Défenseur",
     "position_midfielder": "Milieu",
     "position_forward": "Attaquant",
-    "confidence_prefix": "Confiance",
+    "confidence_prefix": "Probabilité estimée",
     "date_tbc": "Date à confirmer",
     "analysis_available": "Analyse disponible",
     "draw_short": "Nul",
@@ -468,9 +468,9 @@
     "reading_matches_recommendation": ", et c'est le marché que nous recommandons.",
     "reading_differs_recommendation_prefix": ", mais ce n'est pas le marché que nous recommandons — nous recommandons plutôt ",
     "stat_expected_goals": "Buts attendus",
-    "stat_analysis_confidence": "Confiance analyse",
+    "stat_analysis_confidence": "Probabilité estimée",
     "signal_title": "Le signal IASHARK",
-    "signal_unavailable_fallback": "Aucun marché ne franchit les seuils de confiance ou de cote minimale pour ce match — IASHARK préfère ne pas se prononcer.",
+    "signal_unavailable_fallback": "Aucun marché ne franchit les seuils de probabilité estimée ou de cote minimale pour ce match — IASHARK préfère ne pas se prononcer.",
     "edge_verdict_positive_prefix": "Le marché sous-estime ce scénario de ",
     "edge_verdict_positive_suffix": " points de probabilité.",
     "edge_verdict_negative_prefix": "La cote proposée est moins intéressante que notre estimation (",
@@ -548,7 +548,7 @@
     "gate_free_text": "Ce match est gratuit, mais il faut un compte IASHARK gratuit (inscription ou connexion) pour voir l’analyse complète.",
     "gate_free_cta": "Se connecter / Créer un compte",
     "gate_pro_title": "Analyse réservée aux membres Pro",
-    "gate_pro_text": "Le marché recommandé, la confiance du modèle et l’analyse complète de ce match sont réservés aux membres Pro. Le match du jour, lui, reste gratuit.",
+    "gate_pro_text": "Le marché recommandé, la probabilité estimée du modèle et l’analyse complète de ce match sont réservés aux membres Pro. Le match du jour, lui, reste gratuit avec un compte.",
     "gate_pro_cta": "Devenir Pro",
     "generic_load_error": "Erreur de chargement",
     "back_to_home": "Retour à l'accueil",
@@ -850,7 +850,8 @@
     "standings_col_played": "J",
     "standings_col_won": "V",
     "standings_col_drawn": "N",
-    "standings_col_lost": "D"
+    "standings_col_lost": "D",
+    "sig_method_in_english": " (en anglais)"
   },
   "player_page": {
     "value_unavailable": "Donnée indisponible",
@@ -1370,7 +1371,7 @@
     "sub_status_incomplete_detail": "Le paiement n’a jamais été confirmé. Reprenez la souscription pour activer Pro.",
     "not_provided": "Non renseigné",
     "edit_link": "Modifier",
-    "lang_name_fr": "Francais",
+    "lang_name_fr": "Français",
     "lang_name_en": "English",
     "lang_name_es": "Espanol",
     "lang_name_de": "Deutsch",
@@ -1416,7 +1417,7 @@
     "pro_no_commitment": "Sans engagement, résiliable à tout moment.",
     "benefit_pro_all_matches": "L’analyse complète sur tous les matchs",
     "benefit_pro_six_tools": "Les six outils branchés sur les probabilités du modèle",
-    "benefit_pro_decisions_log": "Le journal des décisions synchronise",
+    "benefit_pro_decisions_log": "Le journal des décisions synchronisé",
     "benefit_pro_bankroll": "Le suivi de bankroll lié au compte",
     "discover_pro_cta": "Découvrir Pro",
     "preferences_heading": "Préférences",
@@ -2026,7 +2027,9 @@
     "seo_confidence": "probabilité estimée",
     "seo_ai_pick": "Pronostic IA :",
     "seo_times_paris": "heure de Paris",
-    "premium_detail_updating": "Analyse détaillée en cours de mise à jour"
+    "premium_detail_updating": "Analyse détaillée en cours de mise à jour",
+    "free_gate_label": "Analyse offerte",
+    "free_gate_text": "Créer un compte gratuit pour voir l’analyse offerte"
   },
   "site_header": {
     "nav_today": "Analyses du jour",
@@ -2231,6 +2234,9 @@
       "colombia_primera_a": "Colombie",
       "peru_primera": "Pérou",
       "chile_primera": "Chili"
-    }
+    },
+    "free_gated": "Analyse offerte",
+    "free_gated_cta": "Compte gratuit",
+    "aria_free_gated": "Analyse offerte avec un compte gratuit."
   }
 }

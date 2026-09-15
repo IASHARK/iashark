@@ -84,7 +84,7 @@ test("Pro confirme ou match offert : Proba. x/10, jauge, marche ; sans signal : 
   assert.match(pro, /hl-gauge/);
   assert.match(pro, /Plus de 2,5 buts/);
   assert.doesNotMatch(pro, /hl-band|hl-lockpill/, "le Pro garde la note exacte, pas la pastille");
-  const free = HL.renderMatchRow(Object.assign(base({ is_free: true }), SECRET), ctx({ freeMatchId: 1570383 }), helpers(), 0);
+  const free = HL.renderMatchRow(Object.assign(base({ is_free: true }), SECRET), ctx({ freeMatchId: 1570383, hasAccount: true }), helpers(), 0);
   assert.match(free, /is-open is-free/);
   assert.match(free, /hl-tag-free">Offert</);
   const none = HL.renderMatchRow(base({ has_signal: false, no_signal: true }), ctx(), helpers(), 0);
@@ -250,4 +250,17 @@ test("i18n : cles home_list dans les 7 langues, memes placeholders, vocabulaire 
     assert.ok(d.compte_page.fav_leagues_heading, loc + " : compte_page.fav_leagues_heading");
   }
   assert.equal(Object.keys(fr.country).sort().join(), Object.keys(require("../lib/league-names.js").LEAGUES).sort().join(), "un pays par competition couverte");
+});
+
+test("match offert sans compte : « Analyse offerte · Compte gratuit », aucun champ premium lu ; avec compte : ouvert", () => {
+  const { m, reads } = spyMatch({ is_free: true });
+  const html = HL.renderMatchRow(m, ctx({ freeMatchId: 1570383, hasAccount: false }), helpers(), 0);
+  assert.deepEqual(reads, [], "aucun champ premium lu sans compte");
+  assert.match(html, /is-gated is-free/);
+  assert.match(html, /hl-tag-free">Offert</);
+  assert.match(html, /Analyse offerte<\/span><span class="hl-freepill">Compte gratuit<\/span>/);
+  assert.doesNotMatch(html, /\/10|hl-gauge|hl-market|Over|7[,.]7/);
+  assert.match(html, /href="\/gb\/match\.html\?id=1570383"/);
+  const open = HL.renderMatchRow(Object.assign(base({ is_free: true }), SECRET), ctx({ freeMatchId: 1570383, hasAccount: true }), helpers(), 0);
+  assert.match(open, /is-open is-free/);
 });

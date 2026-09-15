@@ -133,5 +133,24 @@ test("pipeline : second passage juste avant la selection canonique, le match off
   assert.ok(filter > recheck && runOutput > filter && gratuit > runOutput && publics > gratuit && histo > publics);
   assert.match(source.slice(recheck, filter), /closeMatchForPick\(m, premiumRows\.find\(/);
   // Le match offert exige un pari : un match ferme (pari_rec vide) ne peut pas l'etre.
-  assert.match(source, /var analysable=function\(m\)\{ return m && m\.pari_rec && !m\.no_signal; \};/);
+  assert.match(source, /var analysable=function\(m\)\{ return m && m\.pari_rec && !m\.no_signal && eligibleForFree\(FIXTURE_BY_ID\[String\(m\.id\)\],OFFRE_MS\); \};/);
+  assert.match(source, /var creneau=duJour\.filter\(function\(m\)\{ return reasonableParisSlot\(m\); \}\);/);
+});
+
+// 16/09/2026 : match offert du jour jamais commence, creneau raisonnable prefere.
+test("match offert : eligible seulement si la fixture ouvre apres le run + marge, jamais sans fixture", () => {
+  const G = require("../lib/kickoff-guard.js");
+  const now = Date.parse("2026-09-16T06:00:00Z");
+  const fx = (iso, st) => ({ fixture: { date: iso, timestamp: Date.parse(iso) / 1000, status: { short: st || "NS" } } });
+  assert.equal(G.eligibleForFree(fx("2026-09-16T19:00:00Z"), now), true);
+  assert.equal(G.eligibleForFree(fx("2026-09-16T07:00:00Z"), now), false, "dans moins de 90 min");
+  assert.equal(G.eligibleForFree(fx("2026-09-15T22:00:00Z"), now), false, "match de la nuit deja joue");
+  assert.equal(G.eligibleForFree(fx("2026-09-16T19:00:00Z", "1H"), now), false, "statut non NS/TBD");
+  assert.equal(G.eligibleForFree(undefined, now), false, "fixture inconnue");
+  assert.equal(G.eligibleForFree(fx("2026-09-16T06:30:00Z"), now, { marginMinutes: 15 }), true);
+  assert.equal(G.reasonableParisSlot({ date: "2026-09-16 21:00" }), true);
+  assert.equal(G.reasonableParisSlot({ date: "2026-09-16 12:00" }), true);
+  assert.equal(G.reasonableParisSlot({ date: "2026-09-16 00:00" }), false);
+  assert.equal(G.reasonableParisSlot({ date: "2026-09-16 23:30" }), false);
+  assert.equal(G.reasonableParisSlot({}), false);
 });

@@ -101,15 +101,11 @@ test("pages championnat : aucune donnee du modele", () => {
   }
 });
 
-test("accueils : le bloc SEO_MATCHES_SUMMARY ne nomme le pari que pour le match offert", () => {
-  const { nonFree } = accessMap();
+test("accueils : le bloc SEO_MATCHES_SUMMARY ne nomme jamais le pari (le HTML statique est lu sans compte)", () => {
   const indexes = ["index.html"].concat(C.DIR_CODES.map((d) => d + "/index.html")).filter(exists);
   for (const f of indexes) {
     const bloc = (read(f).match(/<!--SEO_MATCHES_SUMMARY-->([\s\S]*?)<!--\/SEO_MATCHES_SUMMARY-->/) || [])[1] || "";
-    for (const li of bloc.match(/<li>[\s\S]*?<\/li>/g) || []) {
-      const id = (li.match(/\/match\/(\d+)\.html/) || [])[1];
-      if (id && nonFree.has(id)) assert.doesNotMatch(li, /data-market-label="/, f + " : pari du match payant " + id);
-    }
+    assert.doesNotMatch(bloc, /data-market-label="|seo_ai_pick/, f + " : pari nomme dans le resume");
   }
 });
 

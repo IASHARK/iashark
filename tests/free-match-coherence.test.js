@@ -85,7 +85,9 @@ test("plusieurs matchs designes : prend celui du jour, puis le prochain a venir"
     m(1, "2026-09-02 21:00", { is_free: true, pari_rec: "A" }),
     m(2, "2026-09-03 21:00", { is_free: true, pari_rec: "B" })
   ];
-  assert.equal(pickFreeMatchId(list, { day: "2026-09-02", now: "2026-09-02 23:59" }), 1);
+  assert.equal(pickFreeMatchId(list, { day: "2026-09-02", now: "2026-09-02 20:59" }), 1);
+  // 16/09/2026 : match du jour commence -> jamais offert, on passe a la designation suivante.
+  assert.equal(pickFreeMatchId(list, { day: "2026-09-02", now: "2026-09-02 23:59" }), 2);
   assert.equal(pickFreeMatchId(list, { day: "2026-09-03", now: "2026-09-03 00:01" }), 2);
   assert.equal(pickFreeMatchId(list, { day: "2026-09-01", now: "2026-09-01 12:00" }), 1);
 });
@@ -95,7 +97,7 @@ test("plusieurs matchs designes : prend celui du jour, puis le prochain a venir"
 test("l'accueil laisse le match offert dans sa competition (puce Offert) et se re-rend a minuit", () => {
   const accueil = read("index.html");
   assert.doesNotMatch(accueil, /list=list\.filter\(function\(m\)\{return String\(m\.id\)!==String\(freeMatchId\);\}\)/);
-  assert.match(accueil, /homeList\.setData\(getSportMatchs\(\),\{freeMatchId:freeMatchId,isPro:proConfirme\}\)/);
+  assert.match(accueil, /homeList\.setData\(getSportMatchs\(\),\{freeMatchId:freeMatchId,isPro:proConfirme,hasAccount:!!\(authCtx&&authCtx\.session\)\}\)/);
   assert.doesNotMatch(accueil, /ordonnee\.unshift\(/);
   assert.match(accueil, /setInterval\(function\(\)\{var j=getTodayStr\(\)/);
   assert.match(read("home-list.js"), /if\(a\.free\)tags\.push\('<span class="hl-tag hl-tag-free">'/);
@@ -105,7 +107,8 @@ test("l'accueil laisse le match offert dans sa competition (puce Offert) et se r
 // League ; il doit voir un match Liga MX (free_markets ["mx"]), l'Afrique du
 // Sud un match PSL (["za"]). Repli sur l'offre generale sinon.
 const general = m(10, "2026-09-02 21:00", { is_free: true, pari_rec: "A", free_markets: ["default"] });
-const mxDuJour = m(11, "2026-09-02 03:00", { is_free: true, pari_rec: "B", free_markets: ["mx"] });
+// 22:30 (et non 03:00) : a 10:00, un match de 03:00 est deja joue et ne peut plus etre offert (16/09/2026).
+const mxDuJour = m(11, "2026-09-02 22:30", { is_free: true, pari_rec: "B", free_markets: ["mx"] });
 const mxDemain = m(12, "2026-09-03 03:00", { is_free: true, pari_rec: "C", free_markets: ["mx"] });
 const zaDuJour = m(13, "2026-09-02 15:00", { is_free: true, pari_rec: "D", free_markets: ["za"] });
 
@@ -149,4 +152,22 @@ test("l'accueil et la page match passent le meme marche au module partage", () =
   for (const dir of ["gb", "za", "mx"]) {
     assert.match(read(dir + "/index.html"), new RegExp(esc("pickFreeMatch(getSportMatchs(),null," + marche + ")")), dir + "/index.html");
   }
+});
+
+// 16/09/2026 (audit du site en ligne) : le match offert n'est jamais un match
+// deja commence ou termine, sur l'accueil comme sur la page match.
+test("match offert : jamais un match commence ou termine (designation ou repli)", () => {
+  const h = { day: "2026-09-02", now: "2026-09-02 21:30" };
+  assert.equal(pickFreeMatchId([m(1, "2026-09-02 00:00", { is_free: true, pari_rec: "A" })], h), null, "seule designation deja jouee : aucun match offert");
+  assert.equal(pickFreeMatchId([m(1, "2026-09-02 00:00", { is_free: true, pari_rec: "A" }), m(3, "2026-09-02 22:00", { pari_rec: "C", data_quality_score: 99 })], h), null, "jamais un match non designe a la place");
+  assert.equal(pickFreeMatchId([m(1, "2026-09-02 21:00", { pari_rec: "A", data_quality_score: 90 }), m(2, "2026-09-02 22:00", { pari_rec: "B", data_quality_score: 10 })], h), 2, "repli : match a venir seulement");
+  assert.equal(pickFreeMatchId([m(1, "2026-09-02 21:00", { pari_rec: "A" })], h), null);
+});
+
+test("match offert sans compte : l'accueil suit la regle de la page match (compte gratuit exige)", () => {
+  const accueil = read("index.html");
+  assert.match(read("match-page.js"), /if\(isFree&&!ctx\.session\)\{renderAuthWall\(raw\);return;\}/);
+  assert.match(accueil, /var ouvert=!!\(authCtx&&authCtx\.session\);/);
+  assert.match(accueil, /home_app\.free_gate_text/);
+  assert.match(read("home-list.js"), /if\(free&&!ctx\.isPro&&!ctx\.hasAccount\)return \{state:'gated',free:true\};/);
 });

@@ -25,7 +25,10 @@ const ROOT = path.join(__dirname, "..");
 const DATA = path.join(ROOT, "data.json");
 const data = JSON.parse(fs.readFileSync(DATA, "utf8"));
 
-const matchsPublics = (data.matchs || []).map(PREMIUM.stripPremium);
+// prob_band (niveau grossier, public) calcule AVANT le retrait des champs
+// premium d'un match non offert, comme dans le pipeline ; une copie deja
+// assainie garde le sien.
+const matchsPublics = (data.matchs || []).map(function (m) { return m && m.is_free !== true ? split.withProbBand(m) : m; }).map(PREMIUM.stripPremium);
 
 // data.json : meme forme que dataJsonPayload du pipeline.
 const ro = data.run_output;

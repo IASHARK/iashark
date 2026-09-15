@@ -111,3 +111,36 @@ for (const v of VERSIONS) {
     });
   });
 }
+
+// « Mes compétitions préférées » (16/09/2026) : user_metadata.fav_leagues,
+// enregistrement immediat, confirmation, meme liste que l'accueil.
+for (const v of VERSIONS.filter((x) => ['fr', 'gb', 'mx'].includes(x.dir))) {
+  test.describe(`compte /${v.dir}/ : compétitions préférées`, () => {
+    test('étoiles des compétitions couvertes, enregistrement immédiat et persistant @mobile', async ({ page, supa, dictFor, consoleErrors }) => {
+      const dict = await dictFor(v.locale);
+      await supa.as('free');
+      await page.goto(`/${v.dir}/compte.html#competitions`);
+      await expect(page.locator('#panneau')).toContainText(tr(dict, 'compte_page.fav_leagues_heading'));
+      const buttons = page.locator('#listeFavoris [data-fav-ligue]');
+      await expect(buttons).toHaveCount(19);
+      const laliga = page.locator('#listeFavoris [data-fav-ligue="laliga"]');
+      await expect(laliga).toHaveAttribute('aria-pressed', 'false');
+      const box = await laliga.boundingBox();
+      expect(box.height).toBeGreaterThanOrEqual(44);
+      await laliga.click();
+      await expect(page.locator('#listeFavoris [data-fav-ligue="laliga"]')).toHaveAttribute('aria-pressed', 'true');
+      await expect(page.locator('#msgFavoris')).toBeVisible();
+      await expect(page.locator('#msgFavoris')).toContainText('La Liga');
+      await expect.poll(() => supa.calls.filter((c) => c.kind === 'auth' && c.method === 'PUT' && c.path === '/auth/v1/user').map((c) => c.body.data.fav_leagues).pop()).toEqual(['laliga']);
+      await expectNoHorizontalScroll(page);
+      // Persistant cote compte : sans liste locale, apres rechargement.
+      await page.evaluate(() => localStorage.removeItem('iashark.favLeagues.v1'));
+      await page.reload();
+      await expect(page.locator('#listeFavoris [data-fav-ligue="laliga"]')).toHaveAttribute('aria-pressed', 'true');
+      // Retrait : meme chemin, liste vide enregistree.
+      await page.locator('#listeFavoris [data-fav-ligue="laliga"]').click();
+      await expect.poll(() => supa.calls.filter((c) => c.kind === 'auth' && c.method === 'PUT' && c.path === '/auth/v1/user').map((c) => c.body.data.fav_leagues).pop()).toEqual([]);
+      expect(consoleErrors).toEqual([]);
+    });
+  });
+}

@@ -60,6 +60,7 @@ class SupabaseMock {
     this.calls = [];
     this.unmocked = [];
     this.fnHandlers = {};
+    this.userMetadata = {};       // user_metadata par persona (auth.updateUser)
     this._waiters = [];
   }
 
@@ -142,10 +143,19 @@ class SupabaseMock {
     // ---------------- Auth ----------------
     if (p.startsWith('/auth/v1/')) {
       this._record(Object.assign({ kind: 'auth' }, call));
-      if (p === '/auth/v1/user') return caller ? json(200, userOf(caller)) : json(401, { code: 401, error_code: 'bad_jwt', msg: 'invalid JWT' });
+      if (p === '/auth/v1/user') {
+        if (!caller) return json(401, { code: 401, error_code: 'bad_jwt', msg: 'invalid JWT' });
+        // updateUser({ data }) : user_metadata conserve pour la duree du test
+        // (favoris « Mes compétitions », lib/fav-leagues.js).
+        if (req.method() === 'PUT' && body && body.data && typeof body.data === 'object') {
+          this.userMetadata[caller.key] = Object.assign({}, this.userMetadata[caller.key] || {}, body.data);
+        }
+        return json(200, Object.assign(userOf(caller), { user_metadata: Object.assign({}, this.userMetadata[caller.key] || {}) }));
+      }
       if (p === '/auth/v1/token') {
         const who = caller || this.persona || this.loginPersona;
-        return who ? json(200, sessionOf(who)) : json(400, { error: 'invalid_grant', error_description: 'Invalid Refresh Token' });
+        if (who) { const sess = sessionOf(who); sess.user.user_metadata = Object.assign({}, this.userMetadata[who.key] || {}); return json(200, sess); }
+        return json(400, { error: 'invalid_grant', error_description: 'Invalid Refresh Token' });
       }
       if (p === '/auth/v1/logout') return route.fulfill({ status: 204, headers: cors });
       if (p === '/auth/v1/recover') return json(200, {});

@@ -113,11 +113,14 @@ test("pipeline et accueil : la note n'est rendue que si elle existe, jamais d'ap
   assert.equal((resume.match(/m\.conf/g) || []).length, 3, "conf lue uniquement dans la branche du match offert");
   const home = read("index.html");
   assert.doesNotMatch(home, /ovrConf|normEdge|parseEdge/, "couleur/palier/tri jamais d'apres l'ecart");
-  assert.match(home, /function confClass\(m\)\{var c=probConf\(m\);/);
-  assert.match(home, /function confTier\(m\)\{var c=probConf\(m\);/);
   assert.match(home, /function probConf\(m\)\{var c=normConf\(m&&m\.conf\);return c==null\?null:/);
-  assert.match(home, /\?\(probConf\(m\)!=null\?'<div class="mc-conf /, "aucun bloc chiffre sans note");
-  assert.match(home, /function fmtConf\(m\)\{\n  var p=probConf\(m\);\n  if\(p==null\)return '';/);
+  // Liste des matchs (home-list.js, 16/09/2026) : verrou AVANT toute lecture de
+  // conf, note rendue seulement si elle existe, jamais d'apres l'ecart.
+  const list = read("home-list.js");
+  assert.doesNotMatch(list, /ovrConf|normEdge|parseEdge|m\.edge\b/, "liste : jamais d'apres l'ecart");
+  assert.match(list, /if\(!ctx\.isPro&&!free\)return \{state:'locked',band:probBandOf\(m\)\};/);
+  assert.ok(list.indexOf("state:'locked'") < list.indexOf("m.conf"), "verrou avant la lecture de conf");
+  assert.match(list, /m\.conf!=null&&m\.conf!==''\)\?normConf\(m\.conf\):null/, "aucun chiffre sans note");
   const fm = read("lib/free-match.js");
   assert.doesNotMatch(fm, /\bm(?:&&m)?\.(?:conf|edge)\b/, "repli du match offert : critere public uniquement");
   const kg = read("lib/kickoff-guard.js");

@@ -119,3 +119,56 @@ test("la fonction Edge lit les fichiers decoupes, valide l'identifiant et garde 
   assert.match(fn, /\/\^\\d\{1,12\}\$\/\.test\(/);
   assert.match(fn, /https:\/\/iashark\.com\/data\.json/, "repli sur data.json si les fichiers decoupes manquent");
 });
+
+// 16/09/2026 : champs publics derives de la liste d'accueil.
+test("prob_band : 3 niveaux seulement, calcules depuis la probabilite du pari retenu, jamais sans analyse", () => {
+  assert.deepEqual(split.PROB_BANDS, ["high", "good", "moderate"]);
+  const b = (extra) => split.probBand(Object.assign({ id: 1, pari_rec: "Over 2.5" }, extra));
+  assert.equal(b({ model_probability: 75 }), "high");
+  assert.equal(b({ model_probability: 74.9 }), "good");
+  assert.equal(b({ model_probability: 65 }), "good");
+  assert.equal(b({ model_probability: 64.9 }), "moderate");
+  assert.equal(b({ model_probability: null, conf: 7.6 }), "high", "repli sur conf (= probabilite / 10)");
+  assert.equal(b({ model_probability: 80, no_signal: true }), null, "no_signal : aucun niveau");
+  assert.equal(split.probBand({ id: 2, model_probability: 80 }), null, "sans pari : aucun niveau");
+  assert.equal(split.probBand({ id: 3, has_signal: true, prob_band: "good" }), "good", "copie assainie : garde son niveau");
+  assert.equal(split.probBand({ id: 4, has_signal: true, prob_band: "76" }), null, "valeur hors liste ignoree");
+  const pub = require("../lib/premium-fields.js").stripPremium(split.withProbBand({ id: 5, home: { n: "A" }, away: { n: "B" }, pari_rec: "Over 2.5", model_probability: 71.3, conf: 7.13 }));
+  assert.equal(pub.prob_band, "good");
+  assert.equal(pub.model_probability, undefined);
+  assert.equal(pub.conf, undefined);
+  assert.deepEqual(require("../lib/premium-fields.js").deepPremiumLeaks([pub]), [], "prob_band n'est pas un champ premium");
+  assert.ok(!require("../lib/premium-fields.js").PREMIUM_FIELDS.includes("prob_band"));
+});
+
+test("fichier reel data-home.json : prob_band dans la liste fermee, aucune probabilite chiffree derivable", () => {
+  const d = JSON.parse(read(split.LIST_FILE));
+  for (const m of d.matchs) {
+    if (m.prob_band !== undefined) assert.ok(split.PROB_BANDS.includes(m.prob_band), "prob_band invalide, match " + m.id);
+    if (m.is_free === true) continue;
+    for (const k of ["model_probability", "conf", "conf_bucket", "p1", "pn", "p2", "po25", "btts", "edge"]) assert.equal(m[k], undefined, k + " sur le match " + m.id);
+    if (m.prob_band !== undefined) assert.equal(m.has_signal, true, "niveau sans analyse, match " + m.id);
+  }
+});
+
+test("derby : { key, name } depuis data/derby-index.json, ajoute a la liste seulement", () => {
+  const index = { pairs: { "2278-2287": { key: "clasico-nacional", pages: { mx: { name: "Clásico Nacional" } } } } };
+  const derby = { id: 9, home: { n: "America", id: 2287 }, away: { n: "Guadalajara Chivas", id: 2278 } };
+  const autre = { id: 10, home: { n: "A", id: 1 }, away: { n: "B", id: 2 } };
+  const s = split.buildPublicSplit([derby, autre], { derbyIndex: index });
+  assert.deepEqual(s.list.matchs[0].derby, { key: "clasico-nacional", name: "Clásico Nacional" });
+  assert.equal(s.list.matchs[1].derby, undefined);
+  assert.equal(s.details[0].match, derby, "le detail reste la copie assainie telle quelle");
+  assert.equal(split.derbyKeyOf(derby), "2278-2287");
+  const fs2 = require("node:fs");
+  const real = split.loadDerbyIndex(fs2, root);
+  assert.ok(real && real.pairs && Object.keys(real.pairs).length > 0, "data/derby-index.json lisible");
+});
+
+test("pipeline : prob_band pose avant le retrait des champs premium, statut API public", () => {
+  const wf = read(".github/workflows/update-data.yml");
+  const bloc = wf.slice(wf.indexOf("var matchsPublics=allMatchsData.map(function(m){"), wf.indexOf("var retires=allMatchsData.length"));
+  assert.match(bloc, /if\(!m\|\|m\.is_free\|\|!PEUT_PROTEGER\)return m;\s*m=PUBLIC_SPLIT\.withProbBand\(m\);\s*var copie=\{\};/);
+  assert.match(wf, /status:\(f\.status&&f\.status\.short\)\|\|null,/);
+  assert.match(read("scripts/split-public-data.js"), /m && m\.is_free !== true \? split\.withProbBand\(m\) : m; \}\)\.map\(PREMIUM\.stripPremium\)/);
+});

@@ -163,9 +163,11 @@ test("page Outils : donnees de match seulement via match-data, si le serveur con
 // Abonne Pro dont match-data ne sert pas encore le detail premium (table pas
 // encore remplie) : etat neutre, jamais "aucun marche" ni erreur.
 test("affichage Pro sans detail premium : etat neutre sur l'accueil et la page match", () => {
-  const html = read("index.html");
-  assert.match(html, /var detailEnAttente=!m\.pari_rec&&!marketIdLabel\(m\)&&m\.has_signal===true&&!m\.no_signal;/);
-  assert.match(html, /detailEnAttente\?t\('home_app\.premium_detail_updating'/);
+  // Accueil (home-list.js, 16/09/2026) : analyse ouverte sans marche servi -> etat
+  // neutre « Analyse en cours », jamais « aucun marche prioritaire ».
+  const list = read("home-list.js");
+  assert.match(list, /if\(!market\)return \{state:'pending'/);
+  assert.match(list, /state==='pending'\)\{\s*zone='<span class="hl-zone hl-zone-none"><span class="hl-none-t">'\+esc\(t\('home_app\.analysis_in_progress'/);
   const js = read("match-page.js");
   assert.match(js, /if\(!r&&raw\.has_signal===true&&raw\.no_signal!==true\)return card\(t\('match_page\.signal_title','Le signal IASHARK'\),empty\(t\('match_page\.sig_premium_updating'/);
   assert.ok(js.indexOf("match_page.sig_premium_updating") < js.indexOf("match_page.signal_unavailable_fallback"), "l'etat neutre passe avant \"aucun marche\"");

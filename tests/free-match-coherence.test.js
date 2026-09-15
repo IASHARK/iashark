@@ -90,11 +90,15 @@ test("plusieurs matchs designes : prend celui du jour, puis le prochain a venir"
   assert.equal(pickFreeMatchId(list, { day: "2026-09-01", now: "2026-09-01 12:00" }), 1);
 });
 
-test("l'accueil ne repete pas le match gratuit dans la liste et se re-rend a minuit", () => {
+// 16/09/2026 (maquette v2 validee) : le match offert reste dans sa competition,
+// avec la puce « Offert », et la liste recoit le MEME identifiant que la vitrine.
+test("l'accueil laisse le match offert dans sa competition (puce Offert) et se re-rend a minuit", () => {
   const accueil = read("index.html");
-  assert.match(accueil, /list=list\.filter\(function\(m\)\{return String\(m\.id\)!==String\(freeMatchId\);\}\)/);
+  assert.doesNotMatch(accueil, /list=list\.filter\(function\(m\)\{return String\(m\.id\)!==String\(freeMatchId\);\}\)/);
+  assert.match(accueil, /homeList\.setData\(getSportMatchs\(\),\{freeMatchId:freeMatchId,isPro:proConfirme\}\)/);
   assert.doesNotMatch(accueil, /ordonnee\.unshift\(/);
   assert.match(accueil, /setInterval\(function\(\)\{var j=getTodayStr\(\)/);
+  assert.match(read("home-list.js"), /if\(a\.free\)tags\.push\('<span class="hl-tag hl-tag-free">'/);
 });
 
 // 13/09/2026 : offre gratuite PAR PAYS. Le Mexique voyait un match de Premier

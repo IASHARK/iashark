@@ -142,3 +142,17 @@ dialog{max-height:calc(100dvh - 2rem);overflow-y:auto}
 /* Blanc sur rouge 500 a 90 % : 4,46:1, sous le seuil AA. Rouge 600 : 4,8:1. */
 #validerSuppr{background-color:#dc2626}
 #validerSuppr:hover{background-color:#b91c1c}
+
+/* Mes compétitions préférées (account-page.js#competitions) : une cible
+   tactile de 48 px par competition, etoile ambre quand elle est choisie
+   (meme code couleur que la liste de l'accueil, assets/home-list.css). */
+.acc-fav{display:flex;align-items:center;gap:12px;width:100%;min-height:48px;padding:0 14px;border:1px solid rgba(141,179,211,.14);border-radius:12px;
+  text-align:left;font-size:14.5px;font-weight:500;color:#a6b4c6;transition:border-color .15s,background .15s,color .15s}
+.acc-fav:hover{border-color:rgba(32,213,239,.3);color:#f4f7fb}
+.acc-fav:focus-visible{outline:2px solid #20d5ef;outline-offset:2px}
+.acc-fav.is-on{border-color:rgba(245,158,11,.4);background:rgba(245,158,11,.06);color:#f4f7fb}
+.acc-fav-ico{flex:none;color:#a6b4c6}
+.acc-fav-ico svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linejoin:round}
+.acc-fav.is-on .acc-fav-ico{color:#f59e0b}
+.acc-fav.is-on .acc-fav-ico svg{fill:currentColor}
+.acc-fav>span:last-child{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}

@@ -162,7 +162,10 @@ test("libelle probabilite estimee dans les 7 dictionnaires, et jamais de chiffre
   const pipeline = read(".github/workflows/update-data.yml");
   assert.doesNotMatch(pipeline, /\(m\.conf!=null&&!m\.no_signal\)\?\(' — '\+confiance/, "resume SEO accueil : conf d'un match non offert");
   const home = read("index.html");
-  assert.match(home, /var confBlock=\(!aSignal\|\|locked\)\?'':/);
+  // Liste des matchs (home-list.js, 16/09/2026) : verrou avant toute lecture de conf.
+  const list = read("home-list.js");
+  assert.match(list, /if\(!ctx\.isPro&&!free\)return \{state:'locked',band:probBandOf\(m\)\};/);
+  assert.match(list, /tf\('home_list\.aria_prob','Probabilité estimée \{p\} sur 10\.'/);
   assert.doesNotMatch(home, /home_app\.seo_confidence">[^<]*<\/span> [0-9.,]+\/10<\/li>/, "resume SEO statique : conf d'un match non offert");
 });
 

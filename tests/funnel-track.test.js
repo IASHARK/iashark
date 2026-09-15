@@ -235,6 +235,26 @@ test("click : seulement les actions significatives, libelles sans email, anti-ra
   assert.ok(b.events().filter((e) => e.event_type === "click").every((e) => e.user_id === null));
 });
 
+// 16/09/2026 : liste des matchs de l'accueil (home-list.js). Kinds dedies,
+// liste fermee, sans donnee personnelle (libelle fixe ou cle de competition).
+test("click : kinds dedies de l'accueil (banniere, cadenas, rappel, favori), liste fermee", () => {
+  const b = run({ pathname: "/gb/" });
+  const click = (spec) => b.fireDoc("click", { target: b.el(spec) });
+  click({ tag: "a", href: "/gb/abonnement.html", attrs: { "data-track": "home_banner_ready", "data-track-kind": "home_banner_ready" }, text: "See plans" });
+  click({ tag: "a", href: "/gb/match.html?id=1570383", attrs: { "data-track": "home_row_lock", "data-track-kind": "home_row_lock" }, text: "Alaves Valencia" });
+  click({ tag: "a", href: "/gb/abonnement.html", attrs: { "data-track": "home_list_upsell", "data-track-kind": "home_list_upsell" }, text: "See plans" });
+  click({ tag: "button", attrs: { "data-track": "laliga", "data-track-kind": "home_fav_add" }, text: "" });
+  click({ tag: "a", href: "/gb/", attrs: { "data-track": "x", "data-track-kind": "user_email" }, text: "x" });
+  const clicks = b.events().filter((e) => e.event_type === "click").map((e) => e.metadata);
+  assert.deepEqual(clicks.map((c) => c.kind), ["home_banner_ready", "home_row_lock", "home_list_upsell", "home_fav_add", "cta"]);
+  assert.equal(clicks[0].target, "/gb/abonnement.html");
+  assert.equal(clicks[1].match_id, "1570383");
+  assert.equal(clicks[1].label, "home_row_lock");
+  assert.equal(clicks[3].label, "laliga");
+  assert.equal(clicks[3].target, undefined);
+  assert.ok(b.events().filter((e) => e.event_type === "click").every((e) => e.user_id === null));
+});
+
 test("user_id transmis uniquement avec le jeton du compte, jamais sur les evenements de navigation", () => {
   const b = run({ hostname: "iashark.com", pathname: "/inscription.html" });
   const track = b.ctx.iasharkTrack;

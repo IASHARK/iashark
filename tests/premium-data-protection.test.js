@@ -88,9 +88,16 @@ test("la page d'accueil ne floute plus une donnee premium", () => {
   const html = read("index.html");
   assert.doesNotMatch(html, /filter:blur\(7px\)/,
     "flouter une vraie donnee en CSS n'est pas une protection : elle reste lisible dans le DOM");
-  assert.match(html, /mc-pari-locked-label/, "une mention honnete remplace le faux flou");
-  assert.match(html, /m\.pari_rec\|\|m\.market_id\|\|m\.has_signal/,
-    "la carte doit rester juste quand le pari n'est pas servi");
+  // Liste des matchs (home-list.js) : la pilule floutee de la ligne verrouillee
+  // est faite de barres CSS abstraites, identiques sur toutes les lignes, sans
+  // aucun texte ni chiffre (ni vrai ni faux).
+  const list = read("home-list.js");
+  assert.match(list, /<span class="hl-ghost"><i class="g1"><\/i><i class="g2"><\/i><i class="g3"><\/i><i class="g4"><\/i><\/span>/);
+  const css = read("assets/home-list.css");
+  const blurred = css.match(/[^{}]+\{[^}]*filter:blur\([^)]*\)[^}]*\}/g) || [];
+  blurred.forEach((rule) => assert.match(rule, /^\s*\.hl-ghost\{/, "flou reserve aux barres abstraites : " + rule.trim()));
+  assert.match(list, /m\.has_signal\|\|m\.pari_rec\|\|m\.market_id/,
+    "la ligne doit rester juste quand le pari n'est pas servi");
 });
 
 // 14/09/2026 : l'analyse offerte du jour est le match qui a le plus de valeur

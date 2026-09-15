@@ -475,6 +475,7 @@ main a:focus-visible,main button:focus-visible,main summary:focus-visible,
 .btn-login:hover{color:var(--cyan);background:transparent;}
 </style>
 <link rel="stylesheet" href="/assets/bottom-navigation.css">
+<link rel="stylesheet" href="/assets/home-list.css">
 <meta property="og:site_name" content="IASHARK">
 <meta property="og:locale" content="en_ZA">
 <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://iashark.com/#organization","name":"IASHARK","url":"https://iashark.com/","logo":{"@type":"ImageObject","url":"https://iashark.com/icon-512.png","width":512,"height":512},"description":"IASHARK analyses soccer matches with statistical models and compares the estimated probabilities with bookmaker odds. It is not a bookmaker."},{"@type":"WebSite","@id":"https://iashark.com/#website","name":"IASHARK","url":"https://iashark.com/","publisher":{"@id":"https://iashark.com/#organization"},"inLanguage":["fr","en-GB","en-ZA","en","es-MX","es","de","it","pt"]},{"@type":"WebPage","@id":"https://iashark.com/za/#webpage","url":"https://iashark.com/za/","name":"Soccer Predictions & PSL Stats | IASHARK South Africa","description":"PSL and international soccer predictions from statistical models: win, draw, goals and BTTS probabilities against bookmaker odds. Free daily analysis. 18+","inLanguage":"en-ZA","isPartOf":{"@id":"https://iashark.com/#website"},"about":{"@id":"https://iashark.com/#organization"}}]}</script>
@@ -539,24 +540,10 @@ main a:focus-visible,main button:focus-visible,main summary:focus-visible,
 </section>
 
 <section class="decisions" id="decisions">
-  <div class="decisions-head">
-    <div class="decisions-title"><h2 data-i18n="home_app.decisions_title">Today's decisions</h2><p>Today's matches where the model and the market disagree enough to matter.</p></div>
-    <div class="decision-controls">
-      <div class="day-tabs">
-        <button class="day-tab active" id="tabToday" onclick="setDayTab('today')">TODAY <span class="tab-count" id="countToday">—</span></button>
-        <button class="day-tab" id="tabTomorrow" onclick="setDayTab('tomorrow')">TOMORROW <span class="tab-count" id="countTomorrow">—</span></button>
-      </div>
-      <div class="filters" id="filters">
-        <input type="hidden" id="teamSearch" value="">
-        <div class="champ-dropdown">
-          <button class="champ-dropdown-btn" id="champDropdownBtn" onclick="toggleChampDropdown()"><span id="champDropdownLabel">All leagues</span><span>▾</span></button>
-          <div class="champ-dropdown-panel" id="champDropdownPanel"></div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div id="cardsList" class="cards-list">
+  <!-- Liste des matchs (home-list.js, maquette v2 validee le 15/09/2026) :
+       bande de dates, « Mes compétitions » puis A→Z, lignes par competition.
+       Le resume SEO et l'etat de chargement ci-dessous sont remplaces au montage. -->
+  <div id="homeList">
   <!--SEO_MATCHES_SUMMARY--><div style="padding:4px 0 12px"><h2 style="font-family:'Bebas Neue',sans-serif;font-size:20px;color:#e2e8f0;margin-bottom:10px"><span data-i18n="home_app.seo_summary_title">Today's AI analyses</span> — <time data-seo-date datetime="2026-09-15">15 September 2026</time> <small style="font-family:'DM Sans',sans-serif;font-size:11px;color:#64748b">(<span data-i18n="home_app.seo_times_paris">Paris time</span>)</small></h2><ul style="list-style:none;padding:0;margin:0;color:#94a3b8;font-size:12.5px;line-height:1.8"><li>00:00 — <strong><a href="/en/match/1493124.html" style="color:inherit">Banfield vs Barracas Central</a></strong> (Liga Profesional Argentina)</li><li>00:00 — <strong><a href="/en/match/1493127.html" style="color:inherit">Deportivo Riestra vs Lanus</a></strong> (Liga Profesional Argentina) — <span data-i18n="home_app.seo_ai_pick">AI pick:</span> <span data-market-label="Tirs du match over 22.5" data-home="Deportivo Riestra" data-away="Lanus">Over 22.5 shots</span> (<span data-i18n="home_app.seo_confidence">estimated probability</span> 7.7/10)</li><li>01:30 — <strong><a href="/en/match/1505530.html" style="color:inherit">Union La Calera vs Deportes Limache</a></strong> (Primera Division Chile)</li><li>02:15 — <strong><a href="/en/match/1493132.html" style="color:inherit">Instituto Cordoba vs Estudiantes de Rio Cuarto</a></strong> (Liga Profesional Argentina)</li><li>03:00 — <strong><a href="/match/1550960.html" style="color:inherit">Leon vs Atletico San Luis</a></strong> (Liga MX)</li><li>03:00 — <strong><a href="/en/match/1549774.html" style="color:inherit">America de Cali vs Deportivo Pasto</a></strong> (Primera A Colombia)</li><li>19:00 — <strong><a href="/en/match/1570391.html" style="color:inherit">Rayo Vallecano vs Espanyol</a></strong> (La Liga)</li><li>20:00 — <strong><a href="/en/match/1570383.html" style="color:inherit">Alaves vs Valencia</a></strong> (La Liga)</li><li>20:00 — <strong><a href="/en/match/1552143.html" style="color:inherit">Ajax vs Willem II</a></strong> (Eredivisie)</li><li>21:30 — <strong><a href="/en/match/1570388.html" style="color:inherit">Elche vs Real Madrid</a></strong> (La Liga)</li></ul></div><!--/SEO_MATCHES_SUMMARY-->
   <div class="loading-state">
     <div class="loading-spinner"></div>
@@ -753,9 +740,14 @@ main a:focus-visible,main button:focus-visible,main summary:focus-visible,
 <script src="/lib/league-names.js"></script>
 <script src="/lib/free-match.js"></script>
 <script src="/lib/market-labels.js"></script>
+<script src="/lib/fav-leagues.js"></script>
+<script src="/home-list.js"></script>
 <script src="/app-client.js" defer></script>
 <script>
-var allMatchs=[],currentFilter='all',currentDayFilter='today',currentSport='football',currentSearch='';
+var allMatchs=[],currentSport='football';
+// Liste des matchs (home-list.js) et favoris (lib/fav-leagues.js). proConfirme :
+// abonne Pro CONFIRME par la reponse de match-data ; aucun chiffre avant.
+var homeList=null,homeFavorites=null,proConfirme=false;
 var freeMatchId=null;
 var authCtx={session:null,isPro:false};
 
@@ -838,20 +830,6 @@ function traduireLibellesMarche(){
   });
 }
 
-var WC_TROPHY_EMOJI = '🏆';
-var leagueList = [];
-
-function setSport(s){
-  currentSport=s;
-  document.getElementById('btnFoot').className='sport-btn active-foot';
-  currentFilter='all';
-  currentSearch='';
-  document.getElementById('teamSearch').value='';
-  document.getElementById('champDropdownLabel').textContent='ALL LEAGUES';
-  updateCounts();
-  buildLeagueBtns(getSportMatchs());
-  renderMatchs();
-}
 function getSportMatchs(){return allMatchs.filter(function(m){return(m.sport||'football')===currentSport;});}
 
 // Jour et heure du VISITEUR (lib/match-time.js) : data.json ecrit les dates en
@@ -861,30 +839,13 @@ function MT(){return window.IasharkMatchTime||null;}
 function parisDayStr(offsetDays){var d=new Date(Date.now()+(offsetDays||0)*86400000);var p=new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Paris',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(d);return p.map(function(x){return x.value;}).join('');}
 function getTodayStr(){var mt=MT();return mt?mt.localClock().day:parisDayStr(0);}
 function getTomorrowStr(){var mt=MT();return mt?mt.localClock().tomorrow:parisDayStr(1);}
-function nowClockStr(){var mt=MT();if(mt)return mt.localClock().now;var f=new Intl.DateTimeFormat('fr-FR',{timeZone:'Europe/Paris',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false}).formatToParts(new Date()),r={};f.forEach(function(x){r[x.type]=x.value;});return r.year+'-'+r.month+'-'+r.day+' '+r.hour+':'+r.minute;}
 function matchDayStr(m){var mt=MT();return mt?mt.matchDay(m):String(m&&m.date||'').slice(0,10);}
-function matchClockStr(m){var mt=MT();return mt?mt.matchClock(m):String(m&&m.date||'');}
 function heureLocale(m){var mt=MT();var h=mt?mt.formatTime(m,localeTag()):'';return h||((m&&m.date||'').split(' ')[1]||'');}
 function isToday(m){return matchDayStr(m)===getTodayStr();}
 function isTomorrow(m){return matchDayStr(m)===getTomorrowStr();}
 // Ordre stable (coup d'envoi, competition, equipes, id) : l'ancien
 // comparateur ne renvoyait jamais 0 et l'ordre changait entre deux onglets.
 function compareMatchs(a,b){var mt=MT();if(mt)return mt.compareMatches(a,b);var da=a.date||'',db=b.date||'';if(da!==db)return da<db?-1:1;return String(a.id)<String(b.id)?-1:String(a.id)>String(b.id)?1:0;}
-function setDayTab(day){
-  currentDayFilter=day;
-  ['tabToday','tabTomorrow'].forEach(function(id,i){
-    var el=document.getElementById(id);
-    if(el)el.classList.toggle('active',day===['today','tomorrow'][i]);
-  });
-  renderMatchs();
-}
-function applyDayFilter(list){if(currentDayFilter==='today')return list.filter(isToday);if(currentDayFilter==='tomorrow')return list.filter(isTomorrow);return list;}
-function updateCounts(){
-  var sl=getSportMatchs();var ct=sl.filter(isToday).length,cm=sl.filter(isTomorrow).length;
-  var et=document.getElementById('countToday'),em=document.getElementById('countTomorrow');
-  if(et)et.textContent=ct;if(em)em.textContent=cm;
-  if(ct===0&&cm>0)setDayTab('tomorrow');
-}
 
 // The "yesterday" tab (won/lost picks and hit rate) was removed: no track
 // record or performance history is published on the public site. Only the
@@ -900,20 +861,6 @@ function isWorldCup(m){
   var ln=(m.league||'').toLowerCase();
   return lk==='wc'||ln.includes('world cup')||ln.includes('coupe du monde');
 }
-
-function filterMatchs(list,f){if(f==='all')return list;if(f==='value')return list.filter(function(m){return m.val||m.vbet==='OUI';});return list.filter(function(m){return leagueKey(m)===f;});}
-
-function applySearchFilter(list){
-  if(!currentSearch) return list;
-  return list.filter(function(m){
-    var hn=(m.home&&m.home.n?m.home.n:'').toLowerCase();
-    var an=(m.away&&m.away.n?m.away.n:'').toLowerCase();
-    var ln=(m.league||'').toLowerCase();
-    return hn.includes(currentSearch)||an.includes(currentSearch)||ln.includes(currentSearch);
-  });
-}
-
-function setupFilters(){document.querySelectorAll('.filter-btn').forEach(function(btn){btn.addEventListener('click',function(){document.querySelectorAll('.filter-btn').forEach(function(b){b.classList.remove('active');});btn.classList.add('active');currentFilter=btn.dataset.filter;renderMatchs();});});}
 
 var LEAGUE_LABELS={
   'premier':{flag:'🏴󠁧󠁢󠁥󠁮󠁧󠁿',name:'Premier League',country:'England'},
@@ -960,72 +907,15 @@ var LEAGUE_LABELS={
 // UN nom par competition : config/leagues.json (lib/league-names.js), puis
 // LEAGUE_LABELS, puis le nom brut des donnees. ligue_icon ("FB") n'est
 // jamais un drapeau.
-var LEAGUE_FLAGS_EXTRA={jleague:'🇯🇵',ecl:'🏆',liga_mx:'🇲🇽',south_africa_premiership:'🇿🇦'};
+var LEAGUE_FLAGS_EXTRA={jleague:'🇯🇵',ecl:'🏆',liga_mx:'🇲🇽',south_africa_premiership:'🇿🇦',argentina_liga_profesional:'🇦🇷',colombia_primera_a:'🇨🇴',peru_primera:'🇵🇪',chile_primera:'🇨🇱'};
 function leagueName(m){
   var k=leagueKey(m),l=LEAGUE_LABELS[k];
   var officiel=window.IasharkLeagueNames?IasharkLeagueNames.displayName(k):null;
   return officiel||(l?l.name:(m.league||k));
 }
 function leagueFlag(k){var l=LEAGUE_LABELS[k];return l?l.flag:(LEAGUE_FLAGS_EXTRA[k]||'🏆');}
-function buildLeagueBtns(matchs){
-  var seen={};
-  matchs.forEach(function(m){var k=leagueKey(m);if(!k)return;if(!seen[k]){seen[k]={key:k,isWC:isWorldCup(m)||k==='wc',flag:leagueFlag(k),name:leagueName(m)};}});
-  leagueList = Object.keys(seen).map(function(k){return seen[k];}).sort(function(a,b){return a.name.localeCompare(b.name);});
-  renderChampDropdown(document.getElementById('teamSearch')?document.getElementById('teamSearch').value:'');
-}
-
-function renderChampDropdown(q){
-  var panel=document.getElementById('champDropdownPanel');
-  if(!panel) return;
-  var query=(q||'').toLowerCase();
-  var filtered=leagueList.filter(function(i){return i.name.toLowerCase().includes(query);});
-  var html='<div class="champ-item'+(currentFilter==='all'?' active':'')+'" onclick="selectChampionnat(\'all\')">🌐 All leagues</div>';
-  filtered.forEach(function(i){
-    var icon=i.isWC?WC_TROPHY_EMOJI:i.flag;
-    html+='<div class="champ-item'+(currentFilter===i.key?' active':'')+'" onclick="selectChampionnat(\''+esc(i.key)+'\')">'+icon+' '+esc(i.name)+'</div>';
-  });
-  panel.innerHTML=html;
-}
-
-function selectChampionnat(key){
-  currentFilter=key;
-  document.querySelectorAll('.league-link').forEach(function(link){link.classList.toggle('active',link.dataset.league===key);});
-  if(key==='all'){
-    document.getElementById('champDropdownLabel').textContent='ALL LEAGUES';
-  }else{
-    var item=leagueList.filter(function(i){return i.key===key;})[0];
-    if(item){
-      var icon=item.isWC?WC_TROPHY_EMOJI:item.flag;
-      document.getElementById('champDropdownLabel').textContent=(icon+' '+item.name).toUpperCase();
-    }
-  }
-  document.getElementById('champDropdownPanel').style.display='none';
-  renderChampDropdown('');
-  renderMatchs();
-}
-
-function toggleChampDropdown(){
-  var panel=document.getElementById('champDropdownPanel');
-  var open=panel.style.display==='block';
-  panel.style.display=open?'none':'block';
-  if(!open) renderChampDropdown(document.getElementById('teamSearch').value);
-}
-
-document.addEventListener('click', function(e){
-  var dd=document.querySelector('.champ-dropdown');
-  if(dd && !dd.contains(e.target)){
-    var panel=document.getElementById('champDropdownPanel');
-    if(panel) panel.style.display='none';
-  }
-});
-
-function onSearchInput(v){
-  currentSearch=(v||'').toLowerCase();
-  document.getElementById('champDropdownPanel').style.display='block';
-  renderChampDropdown(v);
-  renderMatchs();
-}
-
+// Pays (ou zone) de la competition, traduit : home_list.country.<league_key>, repli LEAGUE_LABELS.
+function leagueCountry(m){var k=leagueKey(m),l=LEAGUE_LABELS[k];return t('home_list.country.'+k,(l&&l.country)||'')||'';}
 // Note sur 10 (conf = probabilite du modele pour le pari recommande / 10) :
 // champ PREMIUM (lib/premium-fields.js, 15/09/2026). Il n'existe que sur le
 // match offert du jour et dans la reponse match-data d'un abonne Pro. Absent :
@@ -1033,9 +923,6 @@ function onSearchInput(v){
 // Couleurs et paliers se basent sur cette PROBABILITE, jamais sur l'ecart (edge).
 function normConf(c){var x=parseFloat(c);if(isNaN(x)||x<0)return null;return x<=1?x*10:x;}
 function probConf(m){var c=normConf(m&&m.conf);return c==null?null:Math.min(c*10,100);}
-function confClass(m){var c=probConf(m);return c==null?'':c>=75?'high':c>=60?'med':'low';}
-function confTier(m){var c=probConf(m);return c==null?'':c>=80?'tier-red':c>=70?'tier-orange':'tier-blue';}
-function teamLogo(t){if(!t)return'';var altN=String(tf('home_app.logo_alt','Logo {team}',{team:(t.n||'')})).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');if(t.photo)return'<img class="mc-team-logo" width="38" height="38" src="'+t.photo+'" onerror="this.style.display=\'none\'" alt="'+altN+'">';if(t.logo)return'<img class="mc-team-logo" width="38" height="38" src="'+t.logo+'" onerror="this.style.display=\'none\'" alt="'+altN+'">';if(t.id)return'<img class="mc-team-logo" width="38" height="38" src="https://media.api-sports.io/football/teams/'+t.id+'.png" onerror="this.outerHTML=\'<div class=mc-team-logo-placeholder>\'+(this.getAttribute(\'data-ini\')||\'?\')+\'</div>\'" data-ini="'+(t.n||'').slice(0,2).toUpperCase()+'" alt="'+altN+'">';return'<div class="mc-team-logo-placeholder">'+(t.n||'?').slice(0,2).toUpperCase()+'</div>';}
 function translateMarket(r){if(!r)return r;if(window.IasharkMarketLabels&&window.IasharkMarketLabels.marketLabel){var lib=window.IasharkMarketLabels.marketLabel(r);if(lib&&lib!==r)return lib;}var s=String(r).toLowerCase();if(s.includes('over 2.5'))return'Over 2.5 goals';if(s.includes('under 2.5'))return'Under 2.5 goals';if(s.includes('over 1.5'))return'Over 1.5 goals';if(s.includes('btts non')||s.includes('une équipe ne marque'))return'A team fails to score';if(s.includes('btts')||s.includes('les deux équipes'))return'Both teams to score';if(s.includes('dc 1x')||s==='1x')return'DC 1X';if(s.includes('dc x2')||s==='x2')return'DC X2';return r;}
 
 var LEAGUE_IDS={premier:39,champ:40,ligue1:61,ligue2:62,laliga:140,laliga2:141,seriea:135,bundesliga:78,ldc:2,el:3,eredivisie:88,primeira:94,superlig:203,mls:253,saudi:307};
@@ -1045,92 +932,16 @@ function leagueHeader(m){
   var name=esc((isWorldCup(m)?'FIFA World Cup 2026':leagueName(m)).toUpperCase());
   return(url?'<img class="league-icon" width="19" height="19" src="'+url+'" alt="" onerror="this.style.display=\'none\'">':'')+name;
 }
-function marketInsight(){return'Open the analysis to see the factors, limitations and risks behind this selection.';}
 
 // Le pipeline recent choisit le marche via market_id/marche (voir
 // lib/decision.js#pickMarketDeterministic) - pari_rec n'est plus jamais
-// renseigne. Sans ce repli, buildCard/buildHeroFeature affichaient
+// renseigne. Sans ce repli, les cartes et buildHeroFeature affichaient
 // "Analyse en cours - aucun marche prioritaire" pour des matchs dont le
 // pick etait deja calcule, invisible pour les abonnes payants.
 function marketIdLabel(m){
   return (m.market_id&&window.IasharkMarketLabels)
     ?(window.IasharkMarketLabels.marketIdLabel||window.IasharkMarketLabels.marketIdLabelFr)(m.market_id,{home:m.home&&m.home.n,away:m.away&&m.away.n})
     :null;
-}
-function buildCard(m){
-  var heure=esc(heureLocale(m));
-  var isWC=isWorldCup(m);
-  // Le pari recommande n'est plus servi pour les matchs payants. has_signal
-  // dit qu'une analyse existe, sans la reveler : la carte verrouillee reste
-  // donc juste, au lieu d'annoncer a tort "aucun marche prioritaire".
-  //
-  // hasReliableModelOutput ne conditionne plus l'affichage du marche
-  // (retour utilisateur : deux cartes CL avec un vrai pick, l'une avec le
-  // badge "MARCHE RECOMMANDE" et l'autre sans, ca lit comme un bug). Il
-  // ne conditionne plus que le CHIFFRE de confiance : sous le seuil de
-  // qualite de donnees, on garde le pick visible mais on remplace le
-  // chiffre par une mention honnete plutot que de l'inventer.
-  var fiable=window.IasharkDisplayData?IasharkDisplayData.hasReliableModelOutput(m):true;
-  var aSignal=!!(m.pari_rec||m.market_id||m.has_signal)&&!m.no_signal;
-  // TROIS ETATS, pas deux. Avant, un visiteur voyait trois cartes
-  // integralement verrouillees : le mur payant sans jamais la preuve. Le
-  // match gratuit du jour est desormais entierement lisible, et les autres
-  // sont PARTIELLEMENT reveles - equipes, heure et niveau de confiance
-  // visibles, seul le marche recommande est masque. Montrer la valeur, puis
-  // le paywall ; jamais le paywall seul.
-  var gratuit=authCtx.isPro||String(m.id)===String(freeMatchId);
-  var locked=!gratuit;
-  var css='mc'+(isWC?' worldcup':'')+(locked?' locked':'')+(gratuit&&!authCtx.isPro?' mc-free':'');
-  // Abonne Pro dont match-data ne sert pas (encore) le detail premium : une
-  // analyse existe (has_signal), on n'annonce jamais "aucun marche prioritaire".
-  var detailEnAttente=!m.pari_rec&&!marketIdLabel(m)&&m.has_signal===true&&!m.no_signal;
-  var pariLabel=m.pari_rec?translateMarket(m.pari_rec):(marketIdLabel(m)||(detailEnAttente?t('home_app.premium_detail_updating','Analyse détaillée en cours de mise à jour'):'')||m.no_signal_label||'Analyse en cours — aucun marché prioritaire.');
-
-  var badge=(gratuit&&!authCtx.isPro)?'<span class="mc-badge-free">Free analysis</span>':'';
-  // conf = probabilite du modele pour le marche retenu / 10 : c'est une
-  // probabilite, donc jamais affichee sur une carte verrouillee (match non
-  // offert) - uniquement sur le match offert du jour ou pour un abonne Pro.
-  // conf absent (abonne dont match-data n'a pas encore la note) : aucun chiffre.
-  var confBlock=(!aSignal||locked)?'':(fiable
-    ?(probConf(m)!=null?'<div class="mc-conf '+confClass(m)+'"><span class="mc-conf-lbl">ESTIMATED PROBABILITY</span><b class="mc-conf-val">'+fmtConf(m)+'</b><span class="mc-conf-max">/10</span></div>':'')
-    :'<div class="mc-conf mc-conf-preliminary"><span class="mc-conf-lbl">Preliminary analysis</span></div>');
-  // Avant, on floutait le vrai marche en CSS - une protection de facade, la
-  // donnee etant lisible dans le DOM. Le serveur ne l'envoie plus du tout :
-  // on affiche donc une mention honnete plutot qu'un faux flou.
-  var pariRest=locked
-    ?'<span class="mc-pari-bet mc-pari-locked-label">Reserved for Pro members</span>'
-    :'<span class="mc-pari-bet">'+esc(pariLabel)+'</span>';
-  var pariBlock=aSignal
-    ?'<div class="mc-pari'+(locked?' mc-pari-locked':'')+'"><span class="mc-pari-label">RECOMMENDED MARKET</span>'+pariRest+'</div>'
-    :'<div class="mc-pari mc-pari-none"><span class="mc-pari-bet">'+esc(pariLabel)+'</span></div>';
-  var raison=(!locked&&aSignal)?'<p class="mc-insight">'+marketInsight(m)+'</p>':'';
-
-  // Page match du REPERTOIRE (/gb/match.html?id=...), jamais la page statique
-  // FR /match/<id>.html : le visiteur ne doit pas quitter sa version du site.
-  var href=locked?lien('abonnement.html'):lien('match.html?id='+encodeURIComponent(m.id));
-  var cta=locked
-    ?'<span class="mc-cta mc-cta-locked">Unlock with Pro</span>'
-    :'<span class="mc-cta">See the full analysis</span>';
-  var libelle=locked
-    ?tf('home_app.card_aria_unlock','Débloquer l\'analyse {home} contre {away}',{home:esc((m.home&&m.home.n||'')),away:esc((m.away&&m.away.n||''))})
-    :tf('home_app.card_aria_view','Voir l\'analyse {home} contre {away}',{home:esc((m.home&&m.home.n||'')),away:esc((m.away&&m.away.n||''))});
-
-  return'<a class="'+css+'" href="'+href+'" aria-label="'+libelle+'">'
-    +'<div class="mc-top"><div class="mc-league">'+leagueHeader(m)+' <span class="mc-league-country">· '+heure+'</span></div>'+badge+'</div>'
-    +'<div class="mc-teams">'
-    +'<div class="mc-team home">'+teamLogo(m.home)+'<div class="mc-team-name">'+esc((m.home&&m.home.n||''))+'</div></div>'
-    +'<div class="mc-teams-sep"><div class="mc-vs">VS</div></div>'
-    +'<div class="mc-team away">'+teamLogo(m.away)+'<div class="mc-team-name">'+esc((m.away&&m.away.n||''))+'</div></div>'
-    +'</div>'
-    +pariBlock+confBlock+raison
-    +'<div class="mc-foot">'+cta+'</div>'
-    +'</a>';
-}
-function fmtConf(m){
-  var p=probConf(m);
-  if(p==null)return '';
-  var v=p/10;
-  return (Math.round(v*10)/10).toLocaleString(localeTag(),{minimumFractionDigits:1,maximumFractionDigits:1});
 }
 
 var DAY_LABELS={today:'Today',tomorrow:'Tomorrow'};
@@ -1166,8 +977,7 @@ function buildHeroFeature(m){
 // date, que le vide.
 
 function renderMatchs(){
-  var sl=getSportMatchs(),dayList=applyDayFilter(sl),list=applySearchFilter(filterMatchs(dayList,currentFilter)),isDemain=currentDayFilter==='tomorrow',el=document.getElementById('cardsList'),hero=document.getElementById('heroFeature');
-  var nowStr=nowClockStr();
+  var hero=document.getElementById('heroFeature');
   // La vitrine EST le match gratuit du jour : meme module que la page match
   // (lib/free-match.js). Deux algorithmes separes se contredisaient, et le
   // bouton "Voir le match gratuit du jour" ouvrait un match payant.
@@ -1175,25 +985,30 @@ function renderMatchs(){
   freeMatchId=featured?featured.id:null;
   if(hero)hero.innerHTML=featured?buildHeroFeature(featured):'<div class="feature-loading">NO MATCH AVAILABLE</div>';
   // PARCOURS. Le bouton principal promet l'analyse gratuite du jour : il
-  // l'ouvre vraiment. Le visiteur hesitant a, juste a cote, "Voir un exemple
-  // d'analyse" qui montre une analyse complete SANS compte - la friction est
-  // donc sur le second bouton, pas sur le premier. Tant que le match n'est
-  // pas resolu, le lien reste l'ancre #decisions : jamais de lien mort.
+  // l'ouvre vraiment. Tant que le match n'est pas resolu, le lien reste
+  // l'ancre #decisions : jamais de lien mort.
   var ctaHero=document.querySelector('.hero-cta');
   if(ctaHero&&featured)ctaHero.setAttribute('href',lien('match.html?id='+encodeURIComponent(featured.id)));
-  // Le match gratuit est deja affiche en grand dans la vitrine : on ne le
-  // repete pas dans la liste (il apparaissait deux fois sur la page).
-  if(freeMatchId){list=list.filter(function(m){return String(m.id)!==String(freeMatchId);});}
-  if(!list.length){
-    el.innerHTML='<div class="empty-state"><h3>'+(isDemain?'NO OTHER MATCH TOMORROW':'NO OTHER MATCH FOUND')+'</h3><p>Try another competition.</p></div>';
-    return;
-  }
-  var la=[],lp=[];
-  list.forEach(function(m){if(matchClockStr(m)<nowStr)lp.push(m);else la.push(m);});
-  la.sort(compareMatchs);
-  lp.sort(function(a,b){return compareMatchs(b,a);});
-  var ordonnee=la.concat(lp);
-  el.innerHTML=ordonnee.map(buildCard).join('');
+  // Liste des matchs : le match offert RESTE dans sa competition, avec la puce
+  // « Offert » (decision validee le 15/09/2026). Meme identifiant que la vitrine.
+  if(homeList)homeList.setData(getSportMatchs(),{freeMatchId:freeMatchId,isPro:proConfirme});
+}
+
+// « 5 000 simulations » : meme source que le chiffre cle de la methode (#kpiModeles).
+function simulationsParMatch(){var el=document.getElementById('kpiModeles');var n=el?parseInt(String(el.textContent).replace(/\D/g,''),10):NaN;return n>0?n:5000;}
+function monterListe(){
+  if(homeList||!window.IasharkHomeList)return;
+  homeFavorites=window.IasharkFavLeagues?IasharkFavLeagues.createStore():null;
+  homeList=IasharkHomeList.mount(document.getElementById('homeList'),{
+    isPro:false,favorites:homeFavorites,simulations:simulationsParMatch(),
+    helpers:{
+      heure:heureLocale,matchDay:matchDayStr,compareMatches:compareMatchs,
+      leagueName:leagueName,leagueFlag:leagueFlag,leagueLogoUrl:leagueLogoUrl,leagueCountry:leagueCountry,
+      translateMarket:translateMarket,marketIdLabel:marketIdLabel,lien:lien,
+      pickFreeMatch:function(list){return IasharkFreeMatch.pickFreeMatch(list,null,(window.IASHARK_MARKET&&window.IASHARK_MARKET.code)||null);}
+    }
+  });
+  homeList.setLoading();
 }
 
 // A minuit (heure du visiteur) le match du jour et les onglets Aujourd'hui /
@@ -1206,6 +1021,7 @@ async function loadData(){
     if(window.I18N&&window.I18N.init){try{await window.I18N.init();}catch(e){}}
     appliquerMarche();
     traduireLibellesMarche();
+    monterListe();
     if(window.IasharkApp){try{authCtx=await IasharkApp.context();}catch(e){}}
     // Meme source que la page match (match-page.js) : un abonne connecte lit
     // la fonction Edge 'match-data', qui renvoie les champs premium
@@ -1214,10 +1030,17 @@ async function loadData(){
     // un abonne Pro : les cartes affichaient "aucun marche prioritaire" alors
     // que la page du meme match, elle, montrait l'analyse complete.
     allMatchs=null;
+    proConfirme=false;
     if(authCtx.session){
+      // Favoris du compte (user_metadata.fav_leagues) fusionnes avec la liste locale.
+      if(homeFavorites&&window.IasharkFavLeagues)homeFavorites.connectRemote(IasharkFavLeagues.supabaseAdapter(IasharkApp.supabase));
       try{
         var res=await IasharkApp.supabase.functions.invoke('match-data',{body:{scope:'list'}});
-        if(res.data&&!res.error)allMatchs=res.data.matchs||[];
+        if(res.data&&!res.error){
+          allMatchs=res.data.matchs||[];
+          // Chiffres Pro seulement si le SERVEUR confirme le plan (reponse match-data).
+          proConfirme=authCtx.isPro===true&&res.data.isPro===true;
+        }
       }catch(e){}
     }
     if(!allMatchs){
@@ -1236,13 +1059,11 @@ async function loadData(){
     // visite : il paie deja. On retire les blocs purement commerciaux et on
     // laisse la methode, la transparence et la FAQ, qui restent utiles.
     if(authCtx.isPro)document.querySelectorAll('[data-vente]').forEach(function(el){el.hidden=true;});
-    updateCounts();
-    buildLeagueBtns(getSportMatchs());
-    setupFilters();
     renderMatchs();
   }catch(e){
     console.error(e);
-    var el=document.getElementById('cardsList');
+    if(homeList){homeList.setError(function(){loadData();});return;}
+    var el=document.getElementById('homeList');
     if(el)el.innerHTML='<div class="empty-state"><h3>LOADING ERROR</h3><p>Try again in a moment.</p></div>';
   }
 }
@@ -1251,7 +1072,7 @@ async function loadData(){
 (function(){
   if(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;
   document.addEventListener('pointermove',function(e){
-    var c=e.target.closest&&e.target.closest('.mc,.spot');
+    var c=e.target.closest&&e.target.closest('.spot');
     if(!c)return;
     var r=c.getBoundingClientRect();
     c.style.setProperty('--mx',(e.clientX-r.left)+'px');
@@ -1259,7 +1080,6 @@ async function loadData(){
   },{passive:true});
 })();
 
-setupFilters();
 // supabase-js et app-client.js sont charges en defer (audit perf 15/09/2026) :
 // la session est lue une fois ces scripts executes, avant DOMContentLoaded.
 document.addEventListener('DOMContentLoaded',loadData);

@@ -3003,6 +3003,9 @@ jobs:
                 home:{n:home.name,id:home.id},away:{n:away.name,id:away.id},
                 league:lg.name,ligue_icon:lgIcon(lg.name),league_key:lgKey(lg.id),
                 date:(dateVraieParis+' '+heure).trim(),cat:['all'],
+                // Statut API-Football au moment du run (NS, 1H, HT, 2H, FT, PST...) :
+                // donnee publique, lue par la liste de l'accueil (home-list.js).
+                status:(f.status&&f.status.short)||null,
                 val:!noSignal&&kellyVal!=='0',
                 hot:!noSignal&&modelAgreement.label==='Fort'&&kellyVal!=='0',
                 // model_probability : PURE_IASHARK_PROBABILITY (§10.2) pour le marche
@@ -3430,8 +3433,13 @@ jobs:
             })();
             // Copie assainie pour le fichier public. allMatchsData reste complet :
             // l'historique, les pages match et les lignes premium en ont besoin.
+            // prob_band : niveau GROSSIER (high/good/moderate) de la probabilite du
+            // pari retenu, pose sur la copie publique d'un match NON offert juste
+            // avant le retrait des champs premium (lib/public-data-split.js#probBand).
+            // Jamais la valeur, jamais le marche. Le match offert garde sa note exacte.
             var matchsPublics=allMatchsData.map(function(m){
               if(!m||m.is_free||!PEUT_PROTEGER)return m;
+              m=PUBLIC_SPLIT.withProbBand(m);
               var copie={};
               Object.keys(m).forEach(function(k){ if(CHAMPS_PREMIUM.indexOf(k)===-1)copie[k]=m[k]; });
               // Le site doit pouvoir dire "une analyse existe sur ce match"

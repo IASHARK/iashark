@@ -277,7 +277,6 @@ var PAGES = [
       {find: "Voir l'analyse gratuite du jour", build: function(d,l){ return HOME_V4[l].cta1; }},
       {find: "Voir un exemple d'analyse", build: function(d,l){ return HOME_V4[l].cta2; }},
       {find: "Essayer gratuitement · Pro à 19,95 € par mois, sans engagement", build: function(d,l){ return HOME_V4[l].price; }},
-      {find: "Les matchs présentant aujourd’hui un écart exploitable entre le modèle et le marché.", build: function(d,l){ return HOME_V4[l].decSub; }},
       {find: "text-ink\">Le signal</h3>", build: function(d,l){ return HOME_V4[l].b1t; }},
       {find: "Le marché où le modèle détecte l’écart le plus intéressant avec le prix affiché par les bookmakers.", build: function(d,l){ return HOME_V4[l].b1d; }},
       {find: "L’explication", build: function(d,l){ return HOME_V4[l].b2t; }},
@@ -322,11 +321,6 @@ var PAGES = [
       {find: "Dix-neuf compétitions, dont la Ligue 1, la Premier League, la Liga, la Serie A, la Bundesliga, la Champions League, la Liga MX, la Premier Soccer League et les championnats d’Argentine, de Colombie, du Pérou et du Chili. La liste complète défile en haut de cette page.", build: function(d,l){ return HOME_V4[l].a5; }},
       {find: "À quelle fréquence les analyses sont-elles mises à jour ?", build: function(d,l){ return HOME_V4[l].q7; }},
       {find: "Chaque jour, avant le coup d’envoi des matchs. Une analyse publiée n’est jamais réécrite après coup.", build: function(d,l){ return HOME_V4[l].a7; }},
-      {find: "mc-cta\">Voir l\\'analyse complète<", build: function(d,l){ return HOME_V4[l].cCta1; }},
-      {find: "Débloquer avec Pro", build: function(d,l){ return HOME_V4[l].cCta2; }},
-      {find: "mc-badge-free\">Analyse gratuite</span>", build: function(d,l){ return HOME_V4[l].cFree; }},
-      {find: "PROBABILITÉ ESTIMÉE", build: function(d,l){ return HOME_V4[l].cConf; }},
-      {find: "Réservé aux membres Pro", build: function(d,l){ return HOME_V4[l].cLockSr; }},
       {find: 'Comprenez le match.<br>', build: function(d,l){ return HOME_V2[l].title1 + '<br>'; }},
       {find: 'IASHARK transforme des millions de données sportives en une décision claire, expliquée et mesurable.', build: function(d,l){ return HOME_V2[l].sub; }},
       // --- Tunnel de vente. La copie reutilise landing_page.*, deja traduit
@@ -369,9 +363,6 @@ var PAGES = [
       
       
       {find: 'SÉLECTION DU MATCH À SUIVRE…', build: function(d,l){ return HOME_V2[l].featureLoading; }},
-      {find: '<span id="champDropdownLabel">Tous les championnats</span>', build: function(d){ return '<span id="champDropdownLabel">' + d.home_page.all_leagues_item + '</span>'; }},
-      {find: '>Aujourd\'hui <span class="tab-count" id="countToday">—</span>', build: function(d){ return '>' + d.home_page.today + ' <span class="tab-count" id="countToday">—</span>'; }},
-      {find: '>Demain <span class="tab-count" id="countTomorrow">—</span>', build: function(d){ return '>' + d.home_page.tomorrow + ' <span class="tab-count" id="countTomorrow">—</span>'; }},
       {find:
         '    <div>⚠️ LE JEU PEUT ÊTRE DANGEREUX — JOUEZ RESPONSABLE · INTERDIT AUX MOINS DE 18 ANS</div>\n' +
         '    <div>Aide : <a data-market-helpline="url" href="https://www.joueurs-info-service.fr" style="color:#22d3ee;text-decoration:none;">joueurs-info-service.fr</a><span data-market-helpline-if="phone"> · <span data-market-helpline="phone">09 74 75 13 13</span></span></div>\n' +
@@ -402,20 +393,12 @@ var PAGES = [
         var n = d.market_names, nat = d.market_names_natural;
         return "return'" + esc(n.over25) + "';if(s.includes('under 2.5'))return'" + esc(n.under25) + "';if(s.includes('over 1.5'))return'" + esc(n.over15) + "';if(s.includes('btts non')||s.includes('une équipe ne marque'))return'" + esc(nat.btts_non_natural) + "';if(s.includes('btts')||s.includes('les deux équipes'))return'" + esc(nat.btts_oui_natural) + "';if(s.includes('dc 1x')||s==='1x')return'" + esc(n.dc1x) + "';if(s.includes('dc x2')||s==='x2')return'" + esc(n.dc_x2) + "';return r;}";
       }},
-      {find: "function marketInsight(m){\n  var rel=m&&m.reliability||{};\n  if(rel.model_agreement||m.model_agreement)return'Accord des modèles : '+esc(rel.model_agreement||m.model_agreement)+' · Qualité des données : '+esc(rel.data_quality||m.data_quality_label||'à vérifier')+'.';\n  if(m&&m.stade&&m.stade.desc)return'Contexte intégré : '+esc(m.stade.desc)+(m.stade.temp?' · '+esc(m.stade.temp):'')+'.';\n  return'Ouvrez l\\'analyse pour voir les facteurs, limites et risques de cette sélection.';\n}", build: function(d,l,esc){ return "function marketInsight(){return'" + esc(HOME_V2[l].insight) + "';}"; }},
-      {find: '<span class="mc-pari-label">MARCHÉ RECOMMANDÉ</span>', build: function(d,l){ return '<span class="mc-pari-label">' + HOME_V2[l].recommended + '</span>'; }},
-      {find: '<span class="mc-conf-lbl">Analyse préliminaire</span>', build: function(d,l){ return '<span class="mc-conf-lbl">' + HOME_V2[l].preliminary + '</span>'; }},
       {find: 'var DAY_LABELS={today:"Aujourd\'hui",tomorrow:\'Demain\'};', build: function(d,l,esc){ return 'var DAY_LABELS={today:\'' + esc(HOME_V2[l].today) + '\',tomorrow:\'' + esc(HOME_V2[l].tomorrow) + '\'};'; }},
       {find: "<div class=\"feature-meta-right\"><span class=\"feature-free\">Analyse gratuite</span><span>'+dayLabel(m)+' · '+heure+'</span></div>", build: function(d,l,esc){ var free={fr:'Analyse gratuite',en:'Free analysis',es:'Análisis gratuito',de:'Kostenlose Analyse',it:'Analisi gratuita',pt:'Análise gratuita'}; return '<div class="feature-meta-right"><span class="feature-free">'+free[l]+"</span><span>'+dayLabel(m)+' · '+heure+'</span></div>"; }},
       {find: '<div class="signal-label">Marché recommandé</div>', build: function(d,l){ return '<div class="signal-label">' + HOME_V2[l].recommended + '</div>'; }},
       {find: '<span>Probabilité estimée</span>', build: function(d,l,esc){ return '<span>' + esc(HOME_V2[l].modelConfidence) + '</span>'; }},
       {find: '<span class="evidence-chip">Forme récente</span><span class="evidence-chip">Données avancées</span><span class="evidence-chip">Contexte du match</span>', build: function(d,l){ var h=HOME_V2[l]; return '<span class="evidence-chip">' + h.recent + '</span><span class="evidence-chip">' + h.advanced + '</span><span class="evidence-chip">' + h.context + '</span>'; }},
       {find: "'<div class=\"feature-loading\">AUCUN MATCH DISPONIBLE</div>'", build: function(d,l,esc){ return "'<div class=\"feature-loading\">" + esc(HOME_V2[l].noHero) + "</div>'"; }},
-      {find: "el.innerHTML='<div class=\"empty-state\"><h3>'+(isDemain?'AUCUN AUTRE MATCH DEMAIN':'AUCUN AUTRE MATCH TROUVÉ')+'</h3><p>'+(isDemain?'Reviens ce soir pour les analyses de demain.':'Essaie un autre championnat.')+'</p></div>';", build: function(d,l,esc){ var h=HOME_V2[l]; return "el.innerHTML='<div class=\"empty-state\"><h3>'+(isDemain?'" + esc(h.noOtherTomorrow) + "':'" + esc(h.noOtherToday) + "')+'</h3><p>" + esc(h.otherLeague) + "</p></div>';"; }},
-      {find: "var pariLabel=m.pari_rec?translateMarket(m.pari_rec):(marketIdLabel(m)||m.no_signal_label||'Analyse en cours — aucun marché prioritaire.');", build: function(d, l, esc){ return "var pariLabel=m.pari_rec?translateMarket(m.pari_rec):(marketIdLabel(m)||m.no_signal_label||'" + esc(d.home_page.no_signal_fallback) + "');"; }},
-      {find: "document.getElementById('champDropdownLabel').textContent='TOUS LES CHAMPIONNATS';", count: 2, build: function(d, l, esc){ return "document.getElementById('champDropdownLabel').textContent='" + esc(d.home_page.all_leagues_upper) + "';"; }},
-      {find: "'<div class=\"champ-item'+(currentFilter==='all'?' active':'')+'\" onclick=\"selectChampionnat(\\'all\\')\">🌐 Tous les championnats</div>'",
-       build: function(d, l, esc){ return "'<div class=\"champ-item'+(currentFilter==='all'?' active':'')+'\" onclick=\"selectChampionnat(\\'all\\')\">🌐 " + esc(d.home_page.all_leagues_item) + "</div>'"; }},
       {find: "if(el)el.innerHTML='<div class=\"empty-state\"><h3>ERREUR CHARGEMENT</h3><p>Réessaie dans un instant.</p></div>';",
        build: function(d, l, esc){
         var h = d.home_page;

@@ -437,10 +437,29 @@
       return text || fallback || null;
     };
 
+    var TRACK_KINDS = { home_banner_ready: true, home_row_lock: true, home_list_upsell: true, home_fav_add: true };
     var classify = function (target) {
       if (!target || typeof target.closest !== "function") return null;
       var tracked = target.closest("[data-track]");
-      if (tracked) return { kind: "cta", label: labelOf(tracked) };
+      if (tracked) {
+        // kind dedie (liste fermee) : accueil (home-list.js) - banniere "analyses
+        // pretes", cadenas d'une ligne verrouillee, rappel de la liste, favori
+        // ajoute. Jamais de donnee personnelle : libelle fixe ou cle de competition.
+        var kindAttr = tracked.getAttribute("data-track-kind");
+        var info = { kind: TRACK_KINDS[kindAttr] ? kindAttr : "cta", label: labelOf(tracked) };
+        var trackedHref = tracked.getAttribute("href");
+        if (trackedHref && trackedHref.charAt(0) !== "#") {
+          try {
+            var tu = new URL(tracked.href, loc.href);
+            if (tu.origin === loc.origin) {
+              info.target = tu.pathname.slice(0, 120);
+              var tid = matchIdFromPath(tu.pathname, tu.searchParams);
+              if (tid) info.match_id = tid;
+            }
+          } catch (e) {}
+        }
+        return info;
+      }
 
       var lang = target.closest(".lang-switch-item");
       if (lang) return { kind: "lang_switch", label: clip(lang.getAttribute("data-dir"), 8) };

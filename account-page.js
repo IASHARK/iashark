@@ -30,6 +30,9 @@
   var chargement = document.getElementById('chargement');
 
   var ctx = null, prefs = {}, abo = null, nbDecisions = 0;
+  // « Mes compétitions préférées » : user_metadata.fav_leagues (Supabase Auth),
+  // meme store que la liste des matchs de l'accueil (lib/fav-leagues.js).
+  var favStore = null;
   var sectionActive = 'apercu';
 
   /* ---------- Utilitaires ---------- */
@@ -272,6 +275,7 @@
           + ligneResume(tr('compte_page.language_label', 'Langue'), esc(langues[prefs.language] || langues.fr), 'preferences')
           + ligneResume(tr('compte_page.timezone_label', 'Fuseau horaire'), esc(prefs.timezone || 'Europe/Paris'), 'preferences')
           + ligneResume(tr('compte_page.leagues_label', 'Championnats suivis'), ligues.length ? esc(ligues.map(nomChampionnat).join(', ')) : '', 'preferences')
+          + ligneResume(tr('compte_page.fav_leagues_label', 'Compétitions préférées'), favoris().length ? esc(favoris().map(nomCompetition).join(', ')) : '', 'competitions')
           + ligneResume(tr('compte_page.bankroll_label', 'Bankroll'), euros(ctx.profile.capital) ? esc(euros(ctx.profile.capital)) : '', 'preferences')
           + '</div>')
       + activite
@@ -422,6 +426,55 @@
       + '</div>';
   }
 
+  /* Mes compétitions préférées : les competitions couvertes (config/leagues.json,
+     noms via lib/league-names.js), une etoile chacune, enregistrement immediat. */
+  var ICONE_ETOILE = '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" class="acc-fav-star"><path d="M12 2.8l2.8 5.8 6.4.9-4.6 4.5 1.1 6.3L12 17.3l-5.7 3 1.1-6.3L2.8 9.5l6.4-.9z"/></svg>';
+  function favoris() { return favStore ? favStore.list() : []; }
+  function competitionsCouvertes() {
+    var LN = window.IasharkLeagueNames;
+    var ligues = LN && LN.LEAGUES ? LN.LEAGUES : {};
+    return Object.keys(ligues).map(function (k) { return { key: k, name: ligues[k].name }; })
+      .sort(function (a, b) { return a.name.localeCompare(b.name, localeTag(), { sensitivity: 'base' }); });
+  }
+  function nomCompetition(key) {
+    var LN = window.IasharkLeagueNames;
+    return (LN && LN.displayName(key)) || key;
+  }
+  function boutonFavori(c) {
+    var actif = favoris().indexOf(c.key) !== -1;
+    var libelle = (actif ? tr('compte_page.fav_remove_aria', 'Retirer {league} de vos compétitions préférées') : tr('compte_page.fav_add_aria', 'Ajouter {league} à vos compétitions préférées')).replace('{league}', c.name);
+    return '<button type="button" data-fav-ligue="' + esc(c.key) + '" aria-pressed="' + actif + '" aria-label="' + esc(libelle) + '"'
+      + ' class="acc-fav' + (actif ? ' is-on' : '') + '">'
+      + '<span class="acc-fav-ico">' + ICONE_ETOILE + '</span>'
+      + '<span class="min-w-0 flex-1 truncate">' + esc(c.name) + '</span></button>';
+  }
+  function competitions() {
+    var liste = competitionsCouvertes();
+    return titreSection(tr('compte_page.fav_leagues_heading', 'Mes compétitions préférées'), tr('compte_page.fav_leagues_subtitle', 'Elles s’affichent en premier dans la liste des matchs de l’accueil, sur tous vos appareils.'))
+      + carte('<p class="text-[13.5px] leading-relaxed text-soft">' + tr('compte_page.fav_leagues_hint', 'Touchez l’étoile d’une compétition : le choix est enregistré tout de suite.') + '</p>'
+        + '<div class="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2" id="listeFavoris">' + liste.map(boutonFavori).join('') + '</div>'
+        + '<p id="msgFavoris" hidden aria-live="polite"></p>');
+  }
+  async function basculerFavori(bouton) {
+    var key = bouton.getAttribute('data-fav-ligue');
+    if (!favStore || !key) return;
+    var nom = nomCompetition(key);
+    var ajoute = favStore.toggle(key);
+    var c = { key: key, name: nom };
+    var tmp = document.createElement('div');
+    tmp.innerHTML = boutonFavori(c);
+    var neuf = tmp.firstChild;
+    bouton.replaceWith(neuf);
+    neuf.addEventListener('click', function () { basculerFavori(neuf); });
+    neuf.focus({ preventScroll: true });
+    try {
+      await favStore.lastSave;
+      retour('msgFavoris', (ajoute ? tr('compte_page.fav_added', '{league} ajoutée à vos compétitions préférées.') : tr('compte_page.fav_removed', '{league} retirée de vos compétitions préférées.')).replace('{league}', nom), 'success');
+    } catch (e) {
+      retour('msgFavoris', tr('compte_page.fav_error', 'Enregistrement impossible. Vérifiez votre connexion puis réessayez.'), 'error');
+    }
+  }
+
   function notifications() {
     return titreSection(tr('compte_page.notifications_heading', 'Notifications'), tr('compte_page.notifications_subtitle', 'Ce que IASHARK vous envoie par email.'))
       + carte(interrupteur('notifMatch', tr('compte_page.notif_new_analysis_title', 'Nouvelle analyse'), tr('compte_page.notif_new_analysis_detail', 'Recevoir un email quand une nouvelle analyse est publiée.'), prefs.notify_match_analysis !== false)
@@ -510,6 +563,7 @@
     { id: 'apercu', titre: 'Vue d’ensemble', rendu: apercu },
     { id: 'abonnement', titre: 'Abonnement', rendu: abonnement },
     { id: 'preferences', titre: 'Préférences', rendu: preferences },
+    { id: 'competitions', titre: 'Mes compétitions préférées', rendu: competitions },
     { id: 'notifications', titre: 'Notifications', rendu: notifications },
     { id: 'securite', titre: 'Sécurité', rendu: securite },
     { id: 'donnees', titre: 'Données', rendu: donnees }
@@ -524,6 +578,7 @@
     apercu: ['compte_page.section_overview_title', 'Vue d’ensemble'],
     abonnement: ['compte_page.subscription_heading', 'Abonnement'],
     preferences: ['compte_page.preferences_heading', 'Préférences'],
+    competitions: ['compte_page.fav_leagues_nav', 'Compétitions'],
     notifications: ['compte_page.notifications_heading', 'Notifications'],
     securite: ['compte_page.security_heading', 'Sécurité'],
     donnees: ['compte_page.nav_data', 'Données']
@@ -601,6 +656,9 @@
     }
     if ($('portail')) $('portail').addEventListener('click', function () { facturation('create-portal-session', $('portail')); });
     if ($('exporter')) $('exporter').addEventListener('click', exporter);
+    racine.querySelectorAll('[data-fav-ligue]').forEach(function (b) {
+      b.addEventListener('click', function () { basculerFavori(b); });
+    });
     brancherDialogues();
   }
 
@@ -931,6 +989,11 @@
       sb.from('betting_decisions').select('id', { count: 'exact', head: true }).eq('user_id', ctx.user.id)
     ]);
     prefs = resultats[0].data || {};
+    // Favoris : liste locale (visiteur) fusionnee avec celle du compte.
+    if (window.IasharkFavLeagues) {
+      favStore = window.IasharkFavLeagues.createStore();
+      try { await favStore.connectRemote(window.IasharkFavLeagues.supabaseAdapter(sb)); } catch (_e) {}
+    }
     abo = resultats[1].data || null;
     nbDecisions = resultats[2].count || 0;
 

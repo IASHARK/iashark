@@ -104,8 +104,12 @@ test("pages match localisees reelles : PRELOADED_MATCH sans fuite, hreflang reci
     for (const f of fs.readdirSync(dir)) {
       const html = read(d + "/match/" + f);
       const mm = html.match(/<script>var PRELOADED_MATCH=([\s\S]*?);<\/script>/);
-      assert.ok(mm, d + "/match/" + f);
-      assert.deepEqual(SPLIT.premiumLeaks(JSON.parse(mm[1])), [], "fuite premium " + d + "/match/" + f);
+      // Page conservee (match sorti du run, scripts/match-lifecycle.js) : rendue
+      // depuis l'instantane public, volontairement sans PRELOADED_MATCH ni FIXED_MATCH_ID.
+      const archivee = /class="match-archived"/.test(html);
+      assert.ok(mm || archivee, d + "/match/" + f);
+      if (archivee) assert.ok(!mm && !/FIXED_MATCH_ID/.test(html), "page conservee avec donnees de match " + d + "/match/" + f);
+      if (mm) assert.deepEqual(SPLIT.premiumLeaks(JSON.parse(mm[1])), [], "fuite premium " + d + "/match/" + f);
       ldBlocks(html);
       for (const a of alternates(html)) {
         const rel = a.href.replace("https://iashark.com/", "");

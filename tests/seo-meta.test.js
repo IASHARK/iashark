@@ -114,3 +114,16 @@ test("config/club-hubs.json et manifestes d'articles : longueurs, unicite, vocab
     });
   }
 });
+
+// 15/09/2026 : /es/ et /mx/ publiaient 158 caracteres pour Instituto Cordoba vs
+// Estudiantes de Rio Cuarto (Liga Profesional Argentina) : gabarit court sans competition.
+test("description match <= 155 avec des noms d'equipes et une competition a rallonge, dans toutes les versions", () => {
+  const m = { id: 1493132, league_key: "argentina_liga_profesional", league: "Liga Profesional Argentina", date: "2026-09-15 23:30",
+    home: { n: "Instituto Cordoba", id: 1 }, away: { n: "Estudiantes de Rio Cuarto", id: 2 } };
+  for (const dir of C.DIR_CODES) {
+    const d = SEO.matchDescription(m, dir);
+    assert.ok(len(d) <= 155, dir + " (" + len(d) + ") " + d);
+    assert.match(d, /Instituto Cordoba/);
+    assert.doesNotMatch(d, /\(\s*\)|,\s*,/, dir + " : ponctuation orpheline");
+  }
+});

@@ -79,6 +79,14 @@ test("toutes les pages SEO de match utilisent la nouvelle structure sans mur PRO
   for (const file of files) {
     const source = read(path.join("match", file));
     assert.match(source, /id="matchRoot"/);
+    // Page conservee (match sorti du run, scripts/match-lifecycle.js) : fiche
+    // statique depuis l'instantane public, sans script de page ni donnees de match.
+    if (/class="match-archived"/.test(source)) {
+      assert.doesNotMatch(source, /PRELOADED_MATCH|FIXED_MATCH_ID/);
+      assert.match(source, /<script type="application\/ld\+json">/);
+      assert.doesNotMatch(source, /var proWall=/);
+      continue;
+    }
     assert.match(source, /match-page\.js/);
     assert.match(source, /match-view-model\.js/);
     assert.match(source, /<script type="application\/ld\+json">/);

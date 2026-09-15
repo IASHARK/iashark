@@ -96,7 +96,7 @@ function matchVars(m, dir) {
 }
 // Titre <= 60 caracteres : gabarit complet + marque, sans la marque (Google
 // affiche deja le nom du site au-dessus du lien), gabarit court, puis minimal
-// (noms d'equipes a rallonge). Description <= 155 : complete, puis courte.
+// (noms d'equipes a rallonge). Description <= 155 : complete, courte, puis courte sans competition.
 var TITLE_SOFT_MAX = 60;
 function matchTitle(m, dir) {
   var ms = C.seoConf(dir).match, v = matchVars(m, dir);
@@ -105,7 +105,11 @@ function matchTitle(m, dir) {
 }
 function matchDescription(m, dir) {
   var ms = C.seoConf(dir).match, v = matchVars(m, dir);
-  return C.fitText([cleanTpl(C.fill(ms.description, v)), cleanTpl(C.fill(ms.description_short, v))], DESCRIPTION_MAX);
+  // Dernier recours (noms d'equipes ET competition a rallonge, ex. Instituto
+  // Cordoba vs Estudiantes de Rio Cuarto, Liga Profesional Argentina) : gabarit
+  // court sans la competition (cleanTpl retire les parentheses vides).
+  return C.fitText([cleanTpl(C.fill(ms.description, v)), cleanTpl(C.fill(ms.description_short, v)),
+    cleanTpl(C.fill(ms.description_short, Object.assign({}, v, { league: "" })))], DESCRIPTION_MAX);
 }
 function matchImage(m) { return m.home && m.home.id ? "https://media.api-sports.io/football/teams/" + m.home.id + ".png" : null; }
 

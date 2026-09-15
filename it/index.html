@@ -557,7 +557,7 @@ main a:focus-visible,main button:focus-visible,main summary:focus-visible,
   </div>
 
   <div id="cardsList" class="cards-list">
-  <!--SEO_MATCHES_SUMMARY--><div style="padding:4px 0 12px"><h2 style="font-family:'Bebas Neue',sans-serif;font-size:20px;color:#e2e8f0;margin-bottom:10px"><span data-i18n="home_app.seo_summary_title">Analisi IA del giorno</span> — <time data-seo-date datetime="2026-09-15">15 settembre 2026</time> <small style="font-family:'DM Sans',sans-serif;font-size:11px;color:#64748b">(<span data-i18n="home_app.seo_times_paris">ora di Parigi</span>)</small></h2><ul style="list-style:none;padding:0;margin:0;color:#94a3b8;font-size:12.5px;line-height:1.8"><li>03:00 — <strong><a href="/match/1550960.html" style="color:inherit">Leon vs Atletico San Luis</a></strong> (Liga MX)</li><li>19:00 — <strong><a href="/en/match/1570391.html" style="color:inherit">Rayo Vallecano vs Espanyol</a></strong> (La Liga) — <span data-i18n="home_app.seo_ai_pick">Pronostico IA:</span> <span data-market-label="Tirs cadres du match over 8.5" data-home="Rayo Vallecano" data-away="Espanyol">Over 8,5 tiri in porta</span> (<span data-i18n="home_app.seo_confidence">probabilità stimata</span> 6.9/10)</li><li>20:00 — <strong><a href="/en/match/1570383.html" style="color:inherit">Alaves vs Valencia</a></strong> (La Liga)</li><li>20:00 — <strong><a href="/en/match/1552143.html" style="color:inherit">Ajax vs Willem II</a></strong> (Eredivisie)</li><li>21:30 — <strong><a href="/en/match/1570388.html" style="color:inherit">Elche vs Real Madrid</a></strong> (La Liga)</li></ul></div><!--/SEO_MATCHES_SUMMARY-->
+  <!--SEO_MATCHES_SUMMARY--><div style="padding:4px 0 12px"><h2 style="font-family:'Bebas Neue',sans-serif;font-size:20px;color:#e2e8f0;margin-bottom:10px"><span data-i18n="home_app.seo_summary_title">Analisi IA del giorno</span> — <time data-seo-date datetime="2026-09-15">15 settembre 2026</time> <small style="font-family:'DM Sans',sans-serif;font-size:11px;color:#64748b">(<span data-i18n="home_app.seo_times_paris">ora di Parigi</span>)</small></h2><ul style="list-style:none;padding:0;margin:0;color:#94a3b8;font-size:12.5px;line-height:1.8"><li>00:00 — <strong><a href="/en/match/1493124.html" style="color:inherit">Banfield vs Barracas Central</a></strong> (Liga Profesional Argentina)</li><li>00:00 — <strong><a href="/en/match/1493127.html" style="color:inherit">Deportivo Riestra vs Lanus</a></strong> (Liga Profesional Argentina) — <span data-i18n="home_app.seo_ai_pick">Pronostico IA:</span> <span data-market-label="Tirs du match over 22.5" data-home="Deportivo Riestra" data-away="Lanus">Over 22,5 tiri</span> (<span data-i18n="home_app.seo_confidence">probabilità stimata</span> 7.7/10)</li><li>01:30 — <strong><a href="/en/match/1505530.html" style="color:inherit">Union La Calera vs Deportes Limache</a></strong> (Primera Division Chile)</li><li>02:15 — <strong><a href="/en/match/1493132.html" style="color:inherit">Instituto Cordoba vs Estudiantes de Rio Cuarto</a></strong> (Liga Profesional Argentina)</li><li>03:00 — <strong><a href="/match/1550960.html" style="color:inherit">Leon vs Atletico San Luis</a></strong> (Liga MX)</li><li>03:00 — <strong><a href="/en/match/1549774.html" style="color:inherit">America de Cali vs Deportivo Pasto</a></strong> (Primera A Colombia)</li><li>19:00 — <strong><a href="/en/match/1570391.html" style="color:inherit">Rayo Vallecano vs Espanyol</a></strong> (La Liga)</li><li>20:00 — <strong><a href="/en/match/1570383.html" style="color:inherit">Alaves vs Valencia</a></strong> (La Liga)</li><li>20:00 — <strong><a href="/en/match/1552143.html" style="color:inherit">Ajax vs Willem II</a></strong> (Eredivisie)</li><li>21:30 — <strong><a href="/en/match/1570388.html" style="color:inherit">Elche vs Real Madrid</a></strong> (La Liga)</li></ul></div><!--/SEO_MATCHES_SUMMARY-->
   <div class="loading-state">
     <div class="loading-spinner"></div>
     <div class="loading-text" data-i18n="home_page.loading_analyses">CARICAMENTO ANALISI...</div>
@@ -1025,28 +1025,15 @@ function onSearchInput(v){
   renderMatchs();
 }
 
-function normConf(c){c=parseFloat(c)||0;return c<=1?c*10:c;}
-function parseEdge(m){if(m==null||m.edge==null||m.edge==='')return null;var n=parseFloat(String(m.edge).replace(',','.'));return isNaN(n)?null:n;}
-
-/* FIX: l'edge peut arriver dans 3 échelles différentes selon la source (0-1, 0-10 ou 0-100).
-   On normalise systématiquement sur une échelle 0-100 avant tout calcul, pour ne plus jamais
-   dépasser un score de 10/10 à l'affichage. */
-function normEdge(e){
-  if(e==null||isNaN(e))return null;
-  if(e<=1)return e*100;   // ex: 0.74 -> 74
-  if(e<=10)return e*10;   // ex: 7.4  -> 74
-  return Math.min(e,100); // ex: 74   -> 74 (déjà sur 0-100, on plafonne par sécurité)
-}
-function ovrConf(m){
-  var e=normEdge(parseEdge(m));
-  if(e!=null)return e;
-  return Math.min(normConf(m.conf)*10,100);
-}
-// Probabilite estimee affichee : conf (probabilite du modele / 10) uniquement,
-// jamais l'ecart (edge) qu'ovrConf() privilegie pour le tri.
-function probConf(m){return Math.min(normConf(m.conf)*10,100);}
-function confClass(m){var c=ovrConf(m);return c>=75?'high':c>=60?'med':'low';}
-function confTier(m){var v=ovrConf(m)/10;return v>=8?'tier-red':v>=7?'tier-orange':'tier-blue';}
+// Note sur 10 (conf = probabilite du modele pour le pari recommande / 10) :
+// champ PREMIUM (lib/premium-fields.js, 15/09/2026). Il n'existe que sur le
+// match offert du jour et dans la reponse match-data d'un abonne Pro. Absent :
+// null, et rien de chiffre n'est affiche (ni NaN, ni 0,0, ni "/10" vide).
+// Couleurs et paliers se basent sur cette PROBABILITE, jamais sur l'ecart (edge).
+function normConf(c){var x=parseFloat(c);if(isNaN(x)||x<0)return null;return x<=1?x*10:x;}
+function probConf(m){var c=normConf(m&&m.conf);return c==null?null:Math.min(c*10,100);}
+function confClass(m){var c=probConf(m);return c==null?'':c>=75?'high':c>=60?'med':'low';}
+function confTier(m){var c=probConf(m);return c==null?'':c>=80?'tier-red':c>=70?'tier-orange':'tier-blue';}
 function teamLogo(t){if(!t)return'';var altN=String(tf('home_app.logo_alt','Logo {team}',{team:(t.n||'')})).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');if(t.photo)return'<img class="mc-team-logo" width="38" height="38" src="'+t.photo+'" onerror="this.style.display=\'none\'" alt="'+altN+'">';if(t.logo)return'<img class="mc-team-logo" width="38" height="38" src="'+t.logo+'" onerror="this.style.display=\'none\'" alt="'+altN+'">';if(t.id)return'<img class="mc-team-logo" width="38" height="38" src="https://media.api-sports.io/football/teams/'+t.id+'.png" onerror="this.outerHTML=\'<div class=mc-team-logo-placeholder>\'+(this.getAttribute(\'data-ini\')||\'?\')+\'</div>\'" data-ini="'+(t.n||'').slice(0,2).toUpperCase()+'" alt="'+altN+'">';return'<div class="mc-team-logo-placeholder">'+(t.n||'?').slice(0,2).toUpperCase()+'</div>';}
 function translateMarket(r){if(!r)return r;if(window.IasharkMarketLabels&&window.IasharkMarketLabels.marketLabel){var lib=window.IasharkMarketLabels.marketLabel(r);if(lib&&lib!==r)return lib;}var s=String(r).toLowerCase();if(s.includes('over 2.5'))return'Over 2,5 gol';if(s.includes('under 2.5'))return'Under 2,5 gol';if(s.includes('over 1.5'))return'Over 1,5 gol';if(s.includes('btts non')||s.includes('une équipe ne marque'))return'Una squadra non segna';if(s.includes('btts')||s.includes('les deux équipes'))return'Entrambe le squadre segnano';if(s.includes('dc 1x')||s==='1x')return'DC 1X';if(s.includes('dc x2')||s==='x2')return'DC X2';return r;}
 
@@ -1102,8 +1089,9 @@ function buildCard(m){
   // conf = probabilite du modele pour le marche retenu / 10 : c'est une
   // probabilite, donc jamais affichee sur une carte verrouillee (match non
   // offert) - uniquement sur le match offert du jour ou pour un abonne Pro.
+  // conf absent (abonne dont match-data n'a pas encore la note) : aucun chiffre.
   var confBlock=(!aSignal||locked)?'':(fiable
-    ?'<div class="mc-conf"><span class="mc-conf-lbl">PROBABILITÀ STIMATA</span><b class="mc-conf-val">'+fmtConf(m)+'</b><span class="mc-conf-max">/10</span></div>'
+    ?(probConf(m)!=null?'<div class="mc-conf '+confClass(m)+'"><span class="mc-conf-lbl">PROBABILITÀ STIMATA</span><b class="mc-conf-val">'+fmtConf(m)+'</b><span class="mc-conf-max">/10</span></div>':'')
     :'<div class="mc-conf mc-conf-preliminary"><span class="mc-conf-lbl">Analisi preliminare</span></div>');
   // Avant, on floutait le vrai marche en CSS - une protection de facade, la
   // donnee etant lisible dans le DOM. Le serveur ne l'envoie plus du tout :
@@ -1138,7 +1126,9 @@ function buildCard(m){
     +'</a>';
 }
 function fmtConf(m){
-  var v=probConf(m)/10;
+  var p=probConf(m);
+  if(p==null)return '';
+  var v=p/10;
   return (Math.round(v*10)/10).toLocaleString(localeTag(),{minimumFractionDigits:1,maximumFractionDigits:1});
 }
 
@@ -1164,7 +1154,7 @@ function buildHeroFeature(m){
     +'<div class="feature-meta"><div class="feature-league">'+leagueHeader(m)+'</div><div class="feature-meta-right"><span class="feature-free">Analisi gratuita</span><span>'+dayLabel(m)+' · '+heure+'</span></div></div>'
     +'<div class="feature-teams"><div class="feature-team">'+heroLogo(m.home,hn)+esc(hn)+'</div><div class="feature-vs">VS</div><div class="feature-team">'+heroLogo(m.away,an)+esc(an)+'</div></div>'
     +'<div class="feature-signal"><div class="signal-label">MERCATO CONSIGLIATO</div><div class="signal-market">'+market+'</div>'
-    +'<div class="signal-data"><div class="signal-stat"><span>Probabilità stimata</span><strong>'+Math.round(probConf(m))+' %</strong></div></div>'
+    +(probConf(m)!=null?'<div class="signal-data"><div class="signal-stat"><span>Probabilità stimata</span><strong>'+Math.round(probConf(m))+' %</strong></div></div>':'')
     +'<div class="feature-evidence"><span class="evidence-chip">Forma recente</span><span class="evidence-chip">Dati avanzati</span><span class="evidence-chip">Contesto partita</span></div></div></a>';
 }
 

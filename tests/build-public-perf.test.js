@@ -14,7 +14,10 @@ let site;
 before(() => { site = buildSite(); });
 after(() => { if (site) site.cleanup(); });
 const read = (rel) => fs.readFileSync(path.join(site.dir, rel), "utf8");
-const firstFile = (dir) => fs.readdirSync(path.join(site.dir, dir)).filter((f) => f.endsWith(".html")).sort()[0];
+// Premiere page match ACTIVE : une page conservee (match sorti du run,
+// scripts/match-lifecycle.js, class="match-archived") n'a pas la coquille match-shell.
+const firstFile = (dir) => fs.readdirSync(path.join(site.dir, dir)).filter((f) => f.endsWith(".html")).sort()
+  .filter((f) => !/class="match-archived"/.test(fs.readFileSync(path.join(site.dir, dir, f), "utf8")))[0];
 
 test("supabase-js : version exacte et defer sur toutes les pages sources qui le chargent", () => {
   const pages = ["match.html", "index.html", "abonnement.html", "compte.html", "connexion.html", "inscription.html",

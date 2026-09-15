@@ -900,7 +900,10 @@
         // Droit d'acces : visites liees au compte (funnel_events, politique
         // RLS funnel_events_select_own de 0025). Lecture seule de SES lignes.
         sb.from('funnel_events').select('created_at,event_type,page,locale,session_id,metadata')
-          .eq('user_id', ctx.user.id).order('created_at', { ascending: false }).limit(5000)
+          .eq('user_id', ctx.user.id).order('created_at', { ascending: false }).limit(5000),
+        // Preferences d'emails (migration 0024, lecture de SA ligne via RLS).
+        sb.from('email_preferences').select('marketing_opt_in,opt_in_at,opt_in_source,opt_in_text_version,unsubscribed_at,unsubscribe_source,locale,market,created_at,updated_at')
+          .eq('user_id', ctx.user.id).maybeSingle()
       ]);
       var contenu = {
         exporte_le: new Date().toISOString(),
@@ -908,7 +911,10 @@
         décisions: res[2].data || [], abonnements: res[3].data || [],
         // Si la lecture est refusee (mise a jour de la base pas encore
         // appliquee), on le dit au lieu d'exporter une liste vide trompeuse.
-        visites_liees_au_compte: res[4].error ? 'indisponible pour le moment' : (res[4].data || [])
+        visites_liees_au_compte: res[4].error ? 'indisponible pour le moment' : (res[4].data || []),
+        // Table absente (0024 pas encore appliquee) ou lecture refusee : cle
+        // simplement omise (undefined n'est pas ecrit par JSON.stringify).
+        preferences_emails: res[5].error ? undefined : (res[5].data || null)
       };
       var blob = new Blob([JSON.stringify(contenu, null, 2)], { type: 'application/json' });
       var url = URL.createObjectURL(blob), a = document.createElement('a');

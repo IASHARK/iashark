@@ -2633,7 +2633,7 @@ jobs:
                   var lambdaA_wc=(wcStatsA.xg_for+(wcStatsH.xg_against||wcStatsH.xg_for))/2;
                   lambdas.lambdaH=parseFloat(Math.max(0.90,(lambdas.lambdaH*0.3+lambdaH_wc*0.7)).toFixed(3));
                   lambdas.lambdaA=parseFloat(Math.max(0.80,(lambdas.lambdaA*0.3+lambdaA_wc*0.7)).toFixed(3));
-                  console.log('  [WC lambdas qualifs] '+home.name+': '+lambdas.lambdaH+' | '+away.name+': '+lambdas.lambdaA+' (source: '+wcStatsH.source+'/'+wcStatsA.source+')');
+                  console.log('  [WC lambdas qualifs] '+home.name+' vs '+away.name+' (source: '+wcStatsH.source+'/'+wcStatsA.source+')');
                 } else {
                   console.log('  [WC lambdas] Pas de stats qualifs disponibles pour '+home.name+' ou '+away.name+' - repli sur stats tournoi/floor');
                 }
@@ -2840,7 +2840,8 @@ jobs:
               // vrai debut de saison d'un run degrade par le quota API.
               var noSignalReason=!currentSeasonGate.dataQualityOk?currentSeasonGate.reason:(!modelDataAvailable?'INSUFFICIENT_MODEL_DATA':(!supportedQuoteCount?'NO_REAL_ODDS':(!allMarkets.length?'NO_RELIABLE_MODEL_FOR_QUOTED_MARKETS':(!eligibleMarkets.length?'NO_ODDS_AT_OR_ABOVE_1_50':null))));
               if(!kickoffGateFix.open) noSignalReason=kickoffGateFix.reason;
-              console.log('  [SELECTION] modeles='+allMarketCandidates.filter(function(m){return Number.isFinite(Number(m.prob));}).length+' cotes_supportees='+supportedQuoteCount+' modeles_et_cotes='+allMarkets.length+' eligibles_1.50='+eligibleMarkets.length+' top='+eligibleMarkets.slice().sort(function(a,b){return b.prob-a.prob;}).slice(0,3).map(function(m){return m.id+':'+m.prob.toFixed(1)+'%@'+m.cote;}).join(', ')+(noSignalReason?' raison='+noSignalReason:''));
+              var nbModelesChiffres=allMarketCandidates.filter(function(m){return Number.isFinite(Number(m.prob));}).length;
+              console.log('  [SELECTION] modeles='+nbModelesChiffres+' cotes_supportees='+supportedQuoteCount+' modeles_et_cotes='+allMarkets.length+' eligibles_1.50='+eligibleMarkets.length+(noSignalReason?' raison='+noSignalReason:''));
               var riskLabelCode=pickedMarket?computeRiskLabel(pickedMarket.cote):'MODERE';
               var kellyVal='0';
               var edgeVal='';
@@ -3215,13 +3216,10 @@ jobs:
               // translateNarratives). La ligne premium de CE match porte les
               // traductions premium (facteur_x/verdict_shark).
               if(an) narrativeJobs.push({an:an,matchObj:matchObj,premiumRow:(premiumRows.length&&premiumRows[premiumRows.length-1].fixture_id===f.id)?premiumRows[premiumRows.length-1]:null,label:String(f.id)});
-              // item 5 : 'conf' est l'alias legacy deprecie (model_probability/10,
-              // voir commentaire matchObj.conf ci-dessus) - jamais un score de
-              // robustesse independant. Le log expose aussi explicitement
-              // model_probability et reliability.label (les vraies mesures
-              // separees) pour qu'un operateur lisant les journaux ne confonde
-              // jamais les deux.
-              console.log('  OK conf(legacy,=model_probability/10)='+matchObj.conf+' model_probability='+matchObj.model_probability+' reliability='+(reliability&&reliability.label)+' edge='+edgeVal+' pari='+matchObj.pari_rec);
+              // Journaux GitHub Actions PUBLICS (depot public) : jamais le pari, la
+              // cote, la probabilite, conf, l'ecart ni la mise d'un match (16/09/2026,
+              // tests/pipeline-log-leak.test.js). Seulement l'etat de l'analyse.
+              console.log('  OK fixture '+f.id+' analyse='+(matchObj.no_signal?'sans_signal':'signal')+' marches_compares='+(Array.isArray(matchObj.markets_compared)?matchObj.markets_compared.length:0));
             }
             // FILET DE PROTECTION DE L'ABONNE.
             // Le 02/09/2026, un quota d'API epuise a fait publier 14 matchs en
@@ -3340,9 +3338,10 @@ jobs:
                   lignePremiumSafePick.market_id=matchCibleSafePick.market_id;
                   lignePremiumSafePick.marche=matchCibleSafePick.marche;
                 }
-                console.log('  [RUN_OUTPUT] SAFE_PICK_OF_THE_DAY injectee sur la carte existante du match '+matchCibleSafePick.id+' ('+(matchCibleSafePick.home&&matchCibleSafePick.home.n)+' vs '+(matchCibleSafePick.away&&matchCibleSafePick.away.n)+') : '+matchCibleSafePick.pari_rec+' @ '+matchCibleSafePick.cote_rec);
+                console.log('  [RUN_OUTPUT] SAFE_PICK_OF_THE_DAY injectee sur la carte existante du match '+matchCibleSafePick.id+' ('+(matchCibleSafePick.home&&matchCibleSafePick.home.n)+' vs '+(matchCibleSafePick.away&&matchCibleSafePick.away.n)+')');
               } else {
-                console.log('  [RUN_OUTPUT] SAFE_PICK_OF_THE_DAY selectionnee (fixture '+safePick.fixture.fixture_id+') mais match introuvable dans allMatchsData - injection ignoree, aucune carte modifiee.');
+                var fixtureSafePickIntrouvable=safePick.fixture.fixture_id;
+                console.log('  [RUN_OUTPUT] SAFE_PICK_OF_THE_DAY selectionnee (fixture '+fixtureSafePickIntrouvable+') mais match introuvable dans allMatchsData - injection ignoree, aucune carte modifiee.');
               }
             }
             // ================= PROTECTION DU FICHIER PUBLIC =================
@@ -3425,8 +3424,8 @@ jobs:
               var cles=Object.keys(elus).sort();
               if(!cles.length) console.log('  [ACCES] aucune analyse exploitable a offrir.');
               cles.forEach(function(k){
-                var m=elus[k], v=valeurDe(m);
-                console.log('  [ACCES] analyse offerte du '+k+' (valeur '+(v==null?'n/d':(v*100).toFixed(1)+'%')+(m.is_canonical_pick?', SAFE_PICK canonique':'')+') : '+m.id+' ('+(m.home&&m.home.n)+' vs '+(m.away&&m.away.n)+') '+(m.league||''));
+                var m=elus[k];
+                console.log('  [ACCES] analyse offerte du '+k+(m.is_canonical_pick?' (SAFE_PICK canonique)':'')+' : '+m.id+' ('+(m.home&&m.home.n)+' vs '+(m.away&&m.away.n)+') '+(m.league||''));
               });
             })();
             // Copie assainie pour le fichier public. allMatchsData reste complet :
@@ -3493,7 +3492,8 @@ jobs:
             // OBSERVABILITE (fin de run) : memes valeurs meme quand elles sont
             // "vides" (NO_SAFE_SELECTION/0/0) - jamais omises, jamais un silence
             // qui masquerait un run degrade.
-            console.log('SAFE_PICK_OF_THE_DAY='+(runOutput.SAFE_PICK_OF_THE_DAY.status==='SELECTED'?(runOutput.SAFE_PICK_OF_THE_DAY.league+'/'+runOutput.SAFE_PICK_OF_THE_DAY.selection):runOutput.SAFE_PICK_OF_THE_DAY.status));
+            // Statut seulement : la selection (le pari) n'apparait jamais dans les journaux publics.
+            console.log('SAFE_PICK_OF_THE_DAY='+runOutput.SAFE_PICK_OF_THE_DAY.status);
             console.log('TOP_5_SCORERS_COUNT='+runOutput.TOP_5_SCORERS_OF_DAY.count_returned);
             console.log('DAILY_COMBOS_COUNT='+runOutput.DAILY_COMBOS.combos.filter(function(c){return c.status==='GENERATED';}).length);
             console.log('\n=== DONE: '+allMatchsData.length+' matchs total ===');

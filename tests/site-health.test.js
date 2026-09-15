@@ -61,6 +61,20 @@ test("checkPremiumLeaks : fail avec les champs, ok sans fuite", () => {
   assert.equal(checks.checkPremiumLeaks("x", "data.json", null, FIELDS).status, "skip");
 });
 
+// Fausse alerte du 15/09 (issue #2) : le script passait premium.fields (liste
+// simple, tout cherche en profondeur) et signalait fatigue.home.val, donnee
+// publique. Il doit passer la specification { fields, deepFields }.
+test("controle en ligne : fatigue.*.val n'est pas une fuite, un vrai champ premium si", () => {
+  const spec = checks.loadPremiumFields(path.join(__dirname, ".."));
+  const pub = match(7, { fatigue: { home: { val: 70, info: "3j" }, away: { val: 15 } }, fatigue_home: { val: 70 }, fatigue_away: { val: 15 } });
+  delete pub.odds_available; // premium depuis le 14/09 : absent des fichiers publics
+  assert.equal(checks.checkPremiumLeaks("x", "match/<id>.json", [pub], spec).status, "ok");
+  assert.equal(checks.checkPremiumLeaks("x", "match/<id>.json", [match(8, { paris_safe: { bet: "x" } })], spec).status, "fail");
+  const src = fs.readFileSync(path.join(__dirname, "..", "scripts", "site-health-check.js"), "utf8");
+  assert.doesNotMatch(src, /checkPremiumLeaks\([^)]*premium\.fields\)/);
+  assert.doesNotMatch(src, /checkMatchDataFunction\([^)]*premium\.fields\)/);
+});
+
 test("loadPremiumFields fusionne les listes partagees et tolere un module absent", () => {
   const fake = (p) => {
     if (p.endsWith("premium-fields.js")) return { PREMIUM_FIELDS: ["dropping_odds"], PREMIUM_I18N: ["facteur_x_i18n"], OTHER: ["pas_premium"] };

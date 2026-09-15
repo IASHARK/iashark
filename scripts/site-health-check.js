@@ -174,8 +174,8 @@ async function runChecks(args) {
   // --- Contenu -----------------------------------------------------------------
   results.push(checks.checkFreeMatch(matches));
   results.push(checks.checkOdds(matches));
-  if (home) results.push(checks.checkPremiumLeaks("fuite-data-home", "data-home.json", home.matchs, premium.fields));
-  if (data) results.push(checks.checkPremiumLeaks("fuite-data-json", "data.json", data.matchs, premium.fields));
+  if (home) results.push(checks.checkPremiumLeaks("fuite-data-home", "data-home.json", home.matchs, premium));
+  if (data) results.push(checks.checkPremiumLeaks("fuite-data-json", "data.json", data.matchs, premium));
   results.push(data ? checks.checkSafePick(data.run_output, data.matchs)
     : R("fuite-safe-pick", "fuite", "run_output (safe_pick, combines, buteurs) masque hors match offert", "skip", "data.json non lu a ce passage"));
 
@@ -202,7 +202,7 @@ async function runChecks(args) {
       results.push(R("source-match-detail", "deploiement", "Fichiers match/<id>.json publies", missing.length ? "warn" : "ok",
         details.length + "/" + sample.length + " fichier(s) en ligne" + (missing.length ? ", manquants : " + missing.join(", ") : ""),
         missing.length ? "Un match liste dans data-home.json n'a pas de fichier detail : la page match sera vide pour lui. Verifier le log du pipeline (generateMatchPages)." : undefined));
-      results.push(checks.checkPremiumLeaks("fuite-match-detail", "echantillon match/<id>.json", details, premium.fields));
+      results.push(checks.checkPremiumLeaks("fuite-match-detail", "echantillon match/<id>.json", details, premium));
     }
   }
   const textSource = data ? { list: data.matchs, label: "data.json" } : details.length ? { list: details, label: "echantillon match/<id>.json" } : null;
@@ -243,7 +243,7 @@ async function runChecks(args) {
       http(fn("create-checkout-session"), { method: "POST", headers: headers, body: JSON.stringify({}), timeoutMs: 60000 }),
       http(fn("login-guard"), { method: "POST", headers: headers, body: "{ceci n'est pas du json", timeoutMs: 60000 }),
     ]);
-    results.push(checks.checkMatchDataFunction(md, premium.fields));
+    results.push(checks.checkMatchDataFunction(md, premium));
     results.push(checks.checkCheckoutFunction(co));
     results.push(checks.checkLoginGuardFunction(lg));
 

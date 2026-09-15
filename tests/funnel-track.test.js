@@ -255,6 +255,23 @@ test("click : kinds dedies de l'accueil (banniere, cadenas, rappel, favori), lis
   assert.ok(b.events().filter((e) => e.event_type === "click").every((e) => e.user_id === null));
 });
 
+// 16/09/2026 : page match V8 (match-page.js, visiteur). Un kind par bouton
+// « Debloquer » : avis, rappel apres les stats, analyse fermee, FAQ, barre mobile.
+test("click : kinds dedies de la page match (boutons Debloquer), liste fermee", () => {
+  const b = run({ pathname: "/gb/match.html", search: "?id=1570383" });
+  const click = (spec) => b.fireDoc("click", { target: b.el(spec) });
+  const kinds = ["match_avis_unlock", "match_recall_unlock", "match_analysis_unlock", "match_faq_unlock", "match_bar_unlock"];
+  for (const k of kinds) {
+    click({ tag: "a", href: "/gb/abonnement.html", attrs: { "data-track": k, "data-track-kind": k }, text: "Unlock" });
+  }
+  click({ tag: "a", href: "/gb/abonnement.html", attrs: { "data-track": "match_x", "data-track-kind": "match_other_unlock" }, text: "Unlock" });
+  const clicks = b.events().filter((e) => e.event_type === "click").map((e) => e.metadata);
+  assert.deepEqual(clicks.map((c) => c.kind), kinds.concat(["cta"]), "kind hors liste => cta");
+  assert.ok(clicks.slice(0, 5).every((c) => c.target === "/gb/abonnement.html" && c.label === c.kind));
+  const js = fs.readFileSync(path.join(root, "match-page.js"), "utf8");
+  for (const k of kinds) assert.match(js, new RegExp("suivi\\('" + k + "'\\)"), k + " absent de match-page.js");
+});
+
 test("user_id transmis uniquement avec le jeton du compte, jamais sur les evenements de navigation", () => {
   const b = run({ hostname: "iashark.com", pathname: "/inscription.html" });
   const track = b.ctx.iasharkTrack;

@@ -724,7 +724,9 @@
   };
   var MEMBER_CLICK_KINDS = {
     inscription: "inscription", connexion: "connexion", abonnement: "abonnement", pro: "offre Pro", compte: "compte", landing: "offre",
-    match: "match", checkout: "bouton de paiement", lang_switch: "changement de langue", cta: "bouton"
+    match: "match", checkout: "bouton de paiement", lang_switch: "changement de langue", cta: "bouton",
+    match_avis_unlock: "« Débloquer » (avis de l'IA)", match_recall_unlock: "« Débloquer » (rappel après les stats)",
+    match_analysis_unlock: "« Débloquer » (analyse fermée)", match_faq_unlock: "« Débloquer » (FAQ)", match_bar_unlock: "« Débloquer » (barre du bas)"
   };
   function dayTitle(ymd, now) {
     var today = parisToday(now ? new Date(now) : new Date());
@@ -756,7 +758,7 @@
       } else if (it.type === "click") {
         g.clicks += 1;
         e.kind = "click";
-        e.text = "Clic sur " + (MEMBER_CLICK_KINDS[it.kind] || "bouton") + (it.label ? " : « " + String(it.label).slice(0, 80) + " »" : "");
+        e.text = "Clic sur " + (MEMBER_CLICK_KINDS[it.kind] || "bouton") + (it.label && it.label !== it.kind ? " : « " + String(it.label).slice(0, 80) + " »" : "");
         if (it.kind === "match" && it.match_id) { var nm = matchName(it.match_id, names); if (nm) e.text += " → " + nm; }
       } else {
         e.kind = "event";
@@ -779,7 +781,35 @@
     });
   }
 
+  // ---------- Clics « Debloquer » de la page match (admin_unlock_clicks, 0025) ----------
+  // Cles = kinds emis par match-page.js et acceptes par funnel-track.js.
+  var UNLOCK_PLACES = [
+    ["match_avis_unlock", "Avis de l'IA", "bouton sous l'avis, en haut de la page match"],
+    ["match_recall_unlock", "Rappel après les stats", "bouton du rappel placé après les statistiques"],
+    ["match_analysis_unlock", "Analyse fermée", "bouton posé sur l'analyse complète verrouillée"],
+    ["match_faq_unlock", "Réponses de la FAQ", "lien « Débloquer » d'une réponse réservée aux abonnés"],
+    ["match_bar_unlock", "Barre en bas de l'écran", "bouton de la barre fixe sur téléphone"]
+  ];
+  function unlockRows(data) {
+    var byKind = {};
+    ((data && data.rows) || []).forEach(function (r) { if (r && r.kind) byKind[r.kind] = r; });
+    var rows = UNLOCK_PLACES.map(function (p) {
+      var r = byKind[p[0]] || {};
+      return { kind: p[0], label: p[1], help: p[2], clicks: num(r.clicks) || 0, visitors: num(r.visitors) || 0 };
+    });
+    var total = rows.reduce(function (n, r) { return n + r.clicks; }, 0);
+    rows.forEach(function (r) { r.pct = total ? (r.clicks / total) * 100 : 0; });
+    var best = null;
+    rows.forEach(function (r) { if (r.clicks > 0 && (!best || r.clicks > best.clicks)) best = r; });
+    return {
+      rows: rows, total: total,
+      sentence: !best ? "Aucun clic sur un bouton « Débloquer » de la page match sur cette période."
+        : "Le bouton le plus cliqué : « " + best.label + " » (" + fmtInt(best.clicks) + " clic" + (best.clicks > 1 ? "s" : "") + " sur " + fmtInt(total) + ")."
+    };
+  }
+
   return {
+    UNLOCK_PLACES: UNLOCK_PLACES, unlockRows: unlockRows,
     MEMBER_STATUS: MEMBER_STATUS, MEMBER_STATUS_ORDER: MEMBER_STATUS_ORDER, maskEmail: maskEmail, memberLastActivity: memberLastActivity,
     memberStatus: memberStatus, memberCounts: memberCounts, daysAgo: daysAgo, activityBar: activityBar, shortDay: shortDay,
     retentionCell: retentionCell, retentionRate: retentionRate, retentionSentence: retentionSentence, journeyDays: journeyDays,
@@ -822,7 +852,8 @@
     sessions: null, sessionsError: null, botSample: null, signups: null, health: null, healthError: false, live: null, liveError: null,
     home: undefined, names: {}, loading: false, liveLoading: false, liveTimer: null, fullTimer: null,
     openHelp: {}, openVisit: null, visitLimit: 20, signupLimit: 15, lastLiveCount: null,
-    members: null, retention: null, membersLoading: false, showEmails: false, openMember: null, journeys: {}, memberLimit: 25
+    members: null, retention: null, membersLoading: false, showEmails: false, openMember: null, journeys: {}, memberLimit: 25,
+    unlocks: null
   };
 
   function $(id) { return document.getElementById(id); }
@@ -1371,7 +1402,10 @@
     checkout_started: "Paiement commencé", checkout_unavailable: "Paiement indisponible",
     checkout_success_view: "Paiement réussi", checkout_cancel_view: "Paiement annulé", onboarding_dismissed: "A fermé l'accueil"
   };
-  var CLICK_KINDS = { inscription: "inscription", connexion: "connexion", abonnement: "abonnement", pro: "offre Pro", compte: "compte", landing: "offre", match: "match", checkout: "paiement", lang_switch: "changement de langue", cta: "bouton" };
+  // Boutons « Debloquer » de la page match. admin_recent_sessions (0022) coupe
+  // kind a 20 caracteres : « match_analysis_unloc » est la meme valeur.
+  var CLICK_KINDS = { inscription: "inscription", connexion: "connexion", abonnement: "abonnement", pro: "offre Pro", compte: "compte", landing: "offre", match: "match", checkout: "paiement", lang_switch: "changement de langue", cta: "bouton",
+    match_avis_unlock: "Débloquer (avis)", match_recall_unlock: "Débloquer (rappel)", match_analysis_unlock: "Débloquer (analyse)", match_analysis_unloc: "Débloquer (analyse)", match_faq_unlock: "Débloquer (FAQ)", match_bar_unlock: "Débloquer (barre du bas)" };
   function visitKey(s, i) { return String(s.session_id || s.first_at + "|" + i); }
   function visitDetail(s) {
     var items = [];
@@ -1383,7 +1417,7 @@
     (s.events || []).forEach(function (e) {
       var label, cls = "ev";
       if (e.type === "click") {
-        label = "Clic " + (CLICK_KINDS[e.kind] || "") + (e.label ? " : « " + String(e.label) + " »" : "");
+        label = "Clic " + (CLICK_KINDS[e.kind] || "") + (e.label && !/^match_\w+_unlock$/.test(String(e.label)) ? " : « " + String(e.label) + " »" : "");
         if (e.kind === "match" && e.match_id) { var nm = H.matchName(e.match_id, S.names); if (nm) label += " → " + nm; }
       } else {
         label = EVENT_LABELS[e.type] || String(e.type || "Événement");
@@ -1675,6 +1709,33 @@
       + (cohorts.length > 8 ? '<p class="note">Les 8 dernières semaines sont affichées.</p>' : "");
   }
 
+  // ---------- Clics « Debloquer » par emplacement (carte du tunnel) ----------
+  function loadUnlocks() {
+    if (!sb || !S.range) return Promise.resolve();
+    var r = S.range;
+    return rpc("admin_unlock_clicks", { p_from: r.from, p_to: r.to, p_include_internal: false, p_since: H.LAUNCH_AT }).then(function (x) {
+      if (x.kind === "denied") { showState("denied"); return; }
+      S.unlocks = x;
+      renderUnlocks();
+    });
+  }
+  function renderUnlocks() {
+    var el = $("unlockClicks");
+    if (!el || !S.unlocks) return;
+    var title = '<h3 class="micro unlock-title">Clics « Débloquer » par emplacement (page match)</h3>';
+    if (S.unlocks.kind === "missing") {
+      el.innerHTML = title + '<p class="soft-msg"><b>À activer</b>Les clics sur chaque bouton « Débloquer » s\'afficheront ici quand ton développeur aura appliqué la mise à jour ' + esc(MEMBERS_FILE) + ".</p>";
+      return;
+    }
+    if (!S.unlocks.data) { el.innerHTML = title; el.innerHTML += '<div class="block-error" role="alert"><p>' + esc(errorText(S.unlocks.kind, S.unlocks.error, "Clics « Débloquer »")) + "</p></div>"; return; }
+    var u = H.unlockRows(S.unlocks.data);
+    el.innerHTML = title
+      + (u.total ? barsHtml(u.rows.map(function (row) {
+        return { nameHtml: esc(row.label) + '<span class="reason-help">' + esc(row.help) + "</span>", value: row.clicks, extra: H.fmtPct(row.pct, 0), cls: "warm" };
+      })) : "")
+      + '<p class="note">' + esc(u.sentence) + " Comptés sur la période choisie, robots, tests et ton appareil exclus.</p>";
+  }
+
   // ---------- Bandeaux ----------
   function renderNotices() {
     var bits = [];
@@ -1780,6 +1841,7 @@
       setBusy(false);
       refreshNames();
       loadMembers();
+      loadUnlocks();
       if (!opts.silent) return loadLive().then(startTimers);
     }).catch(function (e) {
       setBusy(false);

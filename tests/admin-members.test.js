@@ -218,6 +218,9 @@ function handler(withMembers) {
       case "admin_live_view": return { data: { visitors: [] } };
       case "admin_members": return withMembers ? { data: members } : { error: { code: "PGRST202", message: "Could not find the function" } };
       case "admin_retention": return withMembers ? { data: retention } : { error: { code: "PGRST202", message: "Could not find the function" } };
+      case "admin_unlock_clicks": return withMembers
+        ? { data: { total_clicks: 4, rows: [{ kind: "match_avis_unlock", clicks: 3, visitors: 3 }, { kind: "match_bar_unlock", clicks: 1, visitors: 1 }] } }
+        : { error: { code: "PGRST202", message: "Could not find the function" } };
       default: return { error: { code: "PGRST202", message: "Could not find the function" } };
     }
   };
@@ -280,6 +283,14 @@ test("rendu AVEC 0025 : cartes, liste (email masque, statut colore, derniere vis
   assert.equal(d.els.membersBody.hidden, false);
   assert.equal(d.els.membersNote.hidden, false);
   assert.match(d.els.membersNote.textContent, /Visites des inscrits suivies depuis le .*rien n'est reconstitué/);
+
+  const unlock = nb(d.text("unlockClicks"));
+  assert.match(unlock, /Clics « Débloquer » par emplacement/);
+  assert.match(unlock, /Avis de l&#39;IA/);
+  assert.match(unlock, /Barre en bas de l&#39;écran/);
+  assert.match(unlock, /Le bouton le plus cliqué : « Avis de l&#39;IA » \(3 clics sur 4\)/);
+  const uc = d.calls.find((c) => c[0] === "admin_unlock_clicks");
+  assert.ok(uc && uc[1].p_include_internal === false && /^\d{4}-\d{2}-\d{2}$/.test(uc[1].p_from), "periode choisie, trafic interne exclu");
 });
 
 test("rendu SANS 0025 : message « a activer », le reste du tableau de bord fonctionne", async () => {
@@ -291,6 +302,44 @@ test("rendu SANS 0025 : message « a activer », le reste du tableau de bord fon
   assert.match(cards, /0025_admin_members\.sql/);
   assert.equal(d.els.membersBody.hidden, true);
   assert.match(d.text("cards"), /class="kcard /, "les cartes principales s'affichent toujours");
+  assert.match(d.text("unlockClicks"), /À activer/);
+});
+
+// ---------------------------------------------------------------------------
+// Clics « Debloquer » de la page match par emplacement
+// ---------------------------------------------------------------------------
+const UNLOCK_KINDS = ["match_avis_unlock", "match_recall_unlock", "match_analysis_unlock", "match_faq_unlock", "match_bar_unlock"];
+
+test("unlockRows : 5 emplacements toujours presents, parts, phrase du bouton le plus clique", () => {
+  const u = H.unlockRows({ rows: [{ kind: "match_bar_unlock", clicks: 6, visitors: 5 }, { kind: "match_avis_unlock", clicks: 2, visitors: 2 }, { kind: "inconnu", clicks: 99 }] });
+  assert.deepEqual(u.rows.map((r) => r.kind), UNLOCK_KINDS);
+  assert.equal(u.total, 8, "kind inconnu ignore");
+  assert.equal(u.rows[4].pct, 75);
+  assert.equal(u.sentence, "Le bouton le plus cliqué : « Barre en bas de l'écran » (6 clics sur 8).");
+  assert.equal(H.unlockRows(null).sentence, "Aucun clic sur un bouton « Débloquer » de la page match sur cette période.");
+  assert.deepEqual(H.UNLOCK_PLACES.map((p) => p[0]), UNLOCK_KINDS);
+  const tracker = read("funnel-track.js");
+  const matchPage = read("match-page.js");
+  for (const k of UNLOCK_KINDS) {
+    assert.match(tracker, new RegExp("\\b" + k + ": true"), k + " accepte par funnel-track.js");
+    assert.match(matchPage, new RegExp("suivi\\('" + k + "'\\)"), k + " emis par match-page.js");
+  }
+  const journey = H.journeyDays([{ type: "click", at: NOW, kind: "match_faq_unlock", label: "match_faq_unlock" }], {}, NOW);
+  assert.equal(journey[0].entries[0].text, "Clic sur « Débloquer » (FAQ)", "libelle technique jamais affiche");
+});
+
+test("0025 : admin_unlock_clicks admin seulement, lecture seule, 5 emplacements, trafic interne exclu", () => {
+  const block = fnBlock("admin_unlock_clicks");
+  assert.match(block, /returns json\s+language plpgsql\s+stable\s+security definer\s+set search_path = public/);
+  assert.match(block, /if not public\.admin_is_admin\(\) then\s+raise exception 'access_denied' using errcode = '42501';/);
+  assert.match(block, /p_include_internal boolean default false/);
+  assert.ok(sql.includes("revoke all on function public.admin_unlock_clicks(date, date, boolean, timestamptz) from public, anon;"));
+  assert.ok(sql.includes("grant execute on function public.admin_unlock_clicks(date, date, boolean, timestamptz) to authenticated;"));
+  const kinds = [...block.matchAll(/\('(match_\w+_unlock)', \d\)/g)].map((m) => m[1]);
+  assert.deepEqual(kinds, UNLOCK_KINDS);
+  assert.match(block, /public\.admin_internal_reason\(e\.metadata\) is not null or e\.session_id ilike 'qa%'/);
+  assert.match(block, /public\.admin_internal_account\(u\.email, u\.role\)/);
+  assert.ok(!/\b(insert|update|delete|truncate|alter|drop)\b/i.test(block.replace(/--.*$/gm, "")));
 });
 
 test("admin.html : section « Mes inscrits » apres « Qui est la maintenant », ids relies, aide repliee", () => {

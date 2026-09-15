@@ -280,7 +280,7 @@ async function buildClubHubs(opts) {
     report.pages.push({ kind: p.kind, key: p.key, dir: dir, path: p.path, title: p.text.title, noindex: ctx.noindex, upcoming: ctx.upcoming.length, bytes: Buffer.byteLength(html) });
     hubData[dir] = hubData[dir] || { clubs: [], derbies: [], labels: labels };
     var nextFx = ctx.upcoming[0] ? ctx.upcoming[0].date : null;
-    hubData[dir][p.kind === "club" ? "clubs" : "derbies"].push({ name: p.text.name, href: p.path, league: league.conf.displayName, next: nextFx, noindex: ctx.noindex, leagueKey: p.leagueKey, tz: ctx.tz, tzLabel: ctx.tzLabel });
+    hubData[dir][p.kind === "club" ? "clubs" : "derbies"].push({ name: p.text.name, href: p.path, league: league.conf.displayName, next: nextFx, noindex: ctx.noindex, leagueKey: p.leagueKey, tz: ctx.tz, tzLabel: ctx.tzLabel, teamIds: p.teamIds.slice() });
   });
 
   // 5. Index par version.

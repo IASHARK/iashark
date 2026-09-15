@@ -135,7 +135,9 @@ test("page championnat : sans contenu stable noindex, liens vers les pages match
   assert.doesNotMatch(many.html, /noindex/);
   assert.match(many.html, /<h1>Premier League predictions: fixtures, results and table<\/h1>/);
   assert.match(many.html, /href="\/gb\/match\/424242\.html"/);
-  assert.doesNotMatch(many.html, /51 ?%|\bp1\b|pari_rec|"conf"|kelly/);
+  assert.doesNotMatch(many.html, /51 ?%|\bp1\b|pari_rec|"conf"|class="conf"|\/10\b|kelly/);
+  assert.match(many.html, /<a class="fxc" href="\/gb\/match\/424242\.html">[\s\S]*?Analysis available/, "match analyse : carte liee et pastille, sans chiffre");
+  assert.match(many.html, /<link rel="stylesheet" href="\/assets\/league-hub\.v1\.css">/);
   const ld = ldBlocks(many.html);
   assert.ok(ld.some((b) => b["@type"] === "BreadcrumbList"));
   assert.ok(ld.find((b) => b["@type"] === "CollectionPage").mainEntity.itemListElement.some((i) => i.url === "https://iashark.com/gb/match/424242.html"));

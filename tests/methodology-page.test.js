@@ -156,7 +156,8 @@ test("libelle probabilite estimee dans les 7 dictionnaires, et jamais de chiffre
   Object.keys(expected).forEach(function (loc) {
     const dict = JSON.parse(read("i18n/dict/" + loc + ".json"));
     assert.match(dict.match_page.sig_conf_label, expected[loc], loc);
-    assert.match(dict.clubs.conf_label, expected[loc], loc);
+    // Pages club/derby (16/09/2026) : plus aucune probabilite, meme pour le match offert.
+    assert.equal(dict.clubs.conf_label, undefined, loc + " : libelle de probabilite sur les pages club");
     assert.doesNotMatch(JSON.stringify(dict.match_page) + JSON.stringify(dict.clubs), /indice de confiance|confidence index|índice de confianza|indice di fiducia|Vertrauensindex|índice de confiança/i, loc);
   });
   const pipeline = read(".github/workflows/update-data.yml");

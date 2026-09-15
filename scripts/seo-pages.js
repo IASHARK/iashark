@@ -41,6 +41,8 @@ const LASTMOD = require("./seo-lastmod.js");
 const LIFECYCLE = require("./match-lifecycle.js");
 // Contenu stable des pages championnat (calendrier 14 jours, resultats, classement, clubs).
 const HUBDATA = require("./league-hub-data.js");
+// Composants partages des pages championnat / club / derby (presentation v2).
+const HUBUI = require("../lib/hub-ui.js");
 
 const SITE_URL = C.SITE_URL, DIRS = C.DIRS, DIR_CODES = C.DIR_CODES, X_DEFAULT_DIR = C.X_DEFAULT_DIR;
 const esc = C.escHtml;
@@ -393,18 +395,9 @@ function renderArchivedPage(tpl, e, dir, now) {
 }
 
 // ---------------------------------------------------------------------------
-// Pages championnat.
-var HUB_CSS = "*{box-sizing:border-box}body{margin:0;background:#060b12;color:#c3ccd8;font:15px/1.65 system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;padding-bottom:96px}" +
-  "a{color:#20d5ef}a:focus-visible{outline:2px solid #20d5ef;outline-offset:2px}" +
-  ".hdr{display:flex;align-items:center;gap:16px;max-width:960px;margin:0 auto;padding:14px 18px;border-bottom:1px solid rgba(141,179,211,.14)}" +
-  ".hdr img{display:block;width:132px;height:auto}.hdr nav{margin-left:auto;display:flex;gap:14px;font-size:13px;font-weight:600}.hdr nav a{text-decoration:none;display:inline-flex;align-items:center;min-height:44px}" +
-  "main{max-width:960px;margin:0 auto;padding:18px}.crumbs{font-size:12.5px;color:#91a0b3;margin:6px 0 14px}.crumbs a{color:#91a0b3}" +
-  "h1{color:#f4f7fb;font-size:clamp(26px,4vw,38px);line-height:1.15;margin:0 0 12px}h2{color:#f4f7fb;font-size:19px;margin:30px 0 10px}" +
-  ".intro{max-width:760px}.note{font-size:13px;color:#91a0b3}.fx{list-style:none;padding:0;margin:0;border-top:1px solid rgba(141,179,211,.14)}" +
-  ".fx li{padding:12px 0;border-bottom:1px solid rgba(141,179,211,.14)}.fx a{font-weight:700;color:#f4f7fb;text-decoration:none}.fx a:hover{color:#20d5ef}" +
-  ".fx .meta{display:block;font-size:13px;color:#91a0b3}.others{display:flex;flex-wrap:wrap;gap:0 16px;font-size:14px}.others a{display:inline-flex;align-items:center;min-height:44px}" +
-  ".foot{max-width:960px;margin:24px auto 0;padding:18px;border-top:1px solid rgba(141,179,211,.14);font-size:12.5px;color:#91a0b3}.foot a{color:#91a0b3}";
-
+// Pages championnat. Presentation v2 validee par le proprietaire (15/09/2026) :
+// composants lib/hub-ui.js, feuille /assets/league-hub.v1.css. Jamais de
+// probabilite ni de note : un match analyse porte « Analyse disponible » + lien.
 function hubVars(key, dir) {
   var L = C.seoConf(dir).league;
   return { league: C.leagueByKey(key).displayName, country: (L.countries || {})[key] || "", adjective: (L.adjectives || {})[key] || "", tz: C.seoConf(dir).tz_label };
@@ -427,32 +420,56 @@ function hubAbout(key, dir) {
   return C.fill(ov.intro || L.about[C.leagueKind(key)], hubVars(key, dir));
 }
 function teamLabel(t) { return t && (t.n || t.name) ? String(t.n || t.name) : ""; }
-var HUB_TABLE_CSS = ".tbl{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:14px;margin:0 0 8px}caption{caption-side:top;text-align:left;font-size:13px;color:#91a0b3;padding:0 0 6px}" +
-  "th,td{padding:6px 8px;text-align:right;border-bottom:1px solid rgba(141,179,211,.14);white-space:nowrap}th{color:#91a0b3;font-weight:600;font-size:12.5px}td.t,th.t{text-align:left;white-space:normal}" +
-  ".fx .tm{font-weight:700;color:#f4f7fb}.clubs{display:flex;flex-wrap:wrap;gap:0 16px;font-size:14px}.clubs a{display:inline-flex;align-items:center;min-height:44px}";
-
-function hubMatchItem(e, dir, played, ms) {
-  var d = new Date(e.t), v = e.venue;
-  var name = esc(teamLabel(e.home)) + (e.score ? " " + e.score.home + "–" + e.score.away + " " : " vs ") + esc(teamLabel(e.away));
-  var meta = ['<time datetime="' + isoInstant(d) + '">' + esc(played ? shortDate(d, dir) : longDate(d, dir) + " · " + clock(d, dir)) + "</time>"];
-  if (v) meta.push(esc(v));
-  if (played && !e.score) meta.push(esc(ms.finished));
-  return "<li>" + (e.href ? '<a href="' + e.href + '">' + name + "</a>" : '<span class="tm">' + name + "</span>") + '<span class="meta">' + meta.join(" · ") + "</span></li>";
+function hubUi(dir, L, dict) {
+  var cl = function (k, fb) { var x = C.get(dict, "clubs." + k); return x != null ? x : fb; };
+  return {
+    result: cl("result", { W: "W", D: "D", L: "L" }), result_long: cl("result_long", { W: "Win", D: "Draw", L: "Loss" }), form: L.form_title, colon: cl("colon", ": "),
+    analysis_available: L.analysis_available, vs: "vs", zones: L.zones || {}, club_label: L.club_label, derby_label: L.derby_label
+  };
 }
-function hubStandingsHtml(key, dir, st, L, dict, name) {
-  var lab = function (k, fb) { var x = C.get(dict, "clubs." + k); return esc(typeof x === "string" ? x : fb); };
+function hubDay(d, dir) { return fmt(d, dir, { weekday: "short", day: "numeric", month: "short" }); }
+function hubFixture(e, dir) {
+  var d = new Date(e.t);
+  return { iso: isoInstant(d), day: hubDay(d, dir), clock: clock(d, dir), home: { id: e.home && e.home.id, name: teamLabel(e.home) }, away: { id: e.away && e.away.id, name: teamLabel(e.away) }, meta: e.venue || "", href: e.href || null };
+}
+function hubResult(e, dir, ms) {
+  var d = new Date(e.t);
+  return {
+    home: { id: e.home && e.home.id, name: teamLabel(e.home) }, away: { id: e.away && e.away.id, name: teamLabel(e.away) },
+    gh: e.score ? e.score.home : null, ga: e.score ? e.score.away : null, iso: isoInstant(d), date: fmt(d, dir, { day: "numeric", month: "short" }),
+    meta: [e.venue, e.score ? null : ms.finished].filter(Boolean).join(" · "), href: e.href || null
+  };
+}
+function hubStandingsHtml(key, dir, st, L, dict, name, UI) {
+  var lab = function (k, fb) { var x = C.get(dict, "clubs." + k); return typeof x === "string" ? x : fb; };
+  var anyForm = false;
   var tables = st.groups.map(function (g) {
     var rows = g.rows.map(function (r) {
       var club = r.team_id != null ? C.clubPageFor(r.team_id, dir) : null;
-      var team = club ? '<a href="' + club.path + '">' + esc(r.name) + "</a>" : esc(r.name);
-      var wdl = [r.won, r.drawn, r.lost].map(function (x) { return x != null ? x : "?"; }).join("-");
-      return "<tr><td>" + r.rank + '</td><td class="t">' + team + "</td><td>" + (r.played != null ? r.played : "") + "</td><td>" + wdl + "</td><td>" + (r.gd != null ? signed(r.gd) : "") + "</td><td>" + r.pts + "</td></tr>";
-    }).join("");
-    return '<div class="tbl"><table><caption>' + esc([g.name || name, st.season ? String(st.season) : null].filter(Boolean).join(" · ")) + "</caption><thead><tr><th>" + lab("col_rank", "#") + '</th><th class="t">' + lab("col_team", "Club") +
-      "</th><th>" + lab("col_played", "P") + "</th><th>" + lab("col_wdl", "W-D-L") + "</th><th>" + lab("col_gd", "GD") + "</th><th>" + lab("col_pts", "Pts") + "</th></tr></thead><tbody>" + rows + "</tbody></table></div>";
+      var form = HUBUI.formSeq(r.form);
+      if (form.length) anyForm = true;
+      return {
+        rank: r.rank, id: r.team_id, name: r.name, href: club ? club.path : null, played: r.played != null ? r.played : "",
+        wdl: [r.won, r.drawn, r.lost].map(function (x) { return x != null ? x : "?"; }).join("-"), gd: r.gd != null ? signed(r.gd) : "", pts: r.pts,
+        form: form, zone: HUBUI.zoneOf(r.zone)
+      };
+    });
+    return HUBUI.standingsTable({
+      caption: [g.name || name, st.season ? String(st.season) : null].filter(Boolean).join(" · "),
+      ths: [lab("col_rank", "#"), lab("col_team", "Club"), lab("col_played", "P"), lab("col_wdl", "W-D-L"), lab("col_gd", "GD"), lab("col_pts", "Pts")], rows: rows
+    }, UI);
   }).join("\n");
   var asOf = st.as_of ? shortDate(new Date(st.as_of + "T12:00:00Z"), dir) : "";
-  return tables + '\n<p class="note">' + esc(C.fill(L.standings_asof, { date: asOf })) + (st.source === "matchs" ? " " + esc(L.standings_partial) : "") + "</p>";
+  return tables + '\n<p class="note">' + esc(C.fill(L.standings_asof, { date: asOf })) + (st.source === "matchs" ? " " + esc(L.standings_partial) : "") + "</p>" +
+    (anyForm ? '<p class="note">' + esc(L.form_note) + "</p>" : "");
+}
+// Saison : uniquement ce que donne le classement (annee api-football, phase du
+// groupe « Liga MX: Apertura ») ; rien sans classement.
+function hubSeason(st, L) {
+  if (!st || !st.groups || !st.groups.length) return null;
+  var g = st.groups[0].name || "", phase = g.indexOf(": ") !== -1 ? g.split(": ").slice(1).join(": ") : null;
+  if (st.season) return phase ? phase + " " + st.season : L.season + " " + st.season;
+  return phase;
 }
 
 // renderLeagueHub(key, dir, matches, opts) : matches = matchs du run de la
@@ -461,7 +478,7 @@ function hubStandingsHtml(key, dir, st, L, dict, name) {
 function renderLeagueHub(key, dir, matches, opts) {
   opts = opts || {};
   var s = C.seoConf(dir), L = s.league, conf = DIRS[dir], dict = C.dictFor(dir);
-  var name = C.leagueByKey(key).displayName;
+  var lg = C.leagueByKey(key), name = lg.displayName;
   var meta = hubMeta(key, dir), title = meta.title, desc = meta.description, h1 = meta.h1;
   // Hub hors du perimetre des pages match de la competition (ex. Liga MX en
   // allemand) : noindex,follow, sans hreflang, liens vers la version la plus
@@ -475,16 +492,35 @@ function renderLeagueHub(key, dir, matches, opts) {
   var canonical = SITE_URL + C.leagueHubPath(dir, key);
   var crumbs = [{ name: s.breadcrumb.home, url: SITE_URL + C.homePath(dir) }, { name: name, url: canonical }];
   var help = B().helplineFor(dir);
+  var UI = hubUi(dir, L, dict);
+
+  // En-tete : logo, pays, saison, 18+, h1, presentation, indicateurs (chacun omis sans donnee).
+  var rgPath = fs.existsSync(path.join(C.ROOT, "legal", dir, "jeu-responsable.html")) ? "/" + dir + "/jeu-responsable.html" : null;
+  var country = (L.countries || {})[key] || "", season = standingRows ? hubSeason(data.standings, L) : null;
+  var groups = standingRows ? data.standings.groups : [];
+  var leader = groups.length === 1 && groups[0].rows[0] ? groups[0].rows[0] : null;
+  var next = data.upcoming[0] ? new Date(data.upcoming[0].t) : null;
+  var hero = '<div class="hero"><div class="hero-top">' + HUBUI.leagueLogo(lg.apiFootballId) +
+    '<div class="chips">' + (country ? HUBUI.chip(country) : "") + (season ? HUBUI.chip(season) : "") + HUBUI.chip("18+", rgPath, "chip-18") + "</div></div>\n" +
+    "<h1>" + esc(h1) + "</h1>\n" +
+    '<p class="intro">' + esc(hubAbout(key, dir)) + "</p>\n" +
+    '<p class="intro">' + esc(C.fill(L.scope, hubVars(key, dir))) + "</p>\n" +
+    HUBUI.kpis([
+      [L.kpi.leader, leader ? esc(leader.name + " · " + leader.pts + " " + L.pts) : null],
+      [L.kpi.clubs, standingRows || null],
+      [L.kpi.upcoming, data.upcoming.length || null],
+      [L.kpi.next, next ? '<time datetime="' + isoInstant(next) + '">' + esc(hubDay(next, dir)) + "</time>" : null]
+    ]) + "</div>\n";
 
   var fixtures = data.upcoming.length
-    ? '<p class="note">' + esc(L.kickoff_note) + '</p><ul class="fx">' + data.upcoming.map(function (e) { return hubMatchItem(e, dir, false, s.match); }).join("") + "</ul>"
+    ? HUBUI.rail(data.upcoming.map(function (e) { return hubFixture(e, dir); }), UI, L.fixtures_title)
     : "<p>" + esc(C.fill(L.none, { league: name })) + "</p>";
   var results = data.results.length
-    ? "<h2>" + esc(L.results_title) + '</h2>\n<ul class="fx">' + data.results.map(function (e) { return hubMatchItem(e, dir, true, s.match); }).join("") + "</ul>\n"
+    ? HUBUI.section("results", L.results_title, '<ul class="res">' + data.results.map(function (e) { return HUBUI.resultRow(hubResult(e, dir, s.match), UI); }).join("") + "</ul>")
     : "";
-  var standings = standingRows ? "<h2>" + esc(C.fill(L.standings_title, { league: name })) + "</h2>\n" + hubStandingsHtml(key, dir, data.standings, L, dict, name) + "\n" : "";
+  var standings = standingRows ? HUBUI.section("table", C.fill(L.standings_title, { league: name }), hubStandingsHtml(key, dir, data.standings, L, dict, name, UI)) : "";
   var clubs = data.clubs.length
-    ? "<h2>" + esc(L.clubs_title) + '</h2>\n<p class="clubs">' + data.clubs.map(function (c) { return '<a href="' + c.path + '">' + esc(c.name) + "</a>"; }).join("") + "</p>\n"
+    ? HUBUI.section("clubs", L.clubs_title, HUBUI.clubGrid(data.clubs.map(function (c) { return { href: c.path, name: c.name, kind: c.kind, ids: c.teamIds || [] }; }), UI))
     : "";
   var others = C.leaguesInScope(dir).filter(function (l) { return l.key !== key; }).map(function (l) {
     return '<a href="' + C.leagueHubPath(dir, l.key) + '">' + esc(l.displayName) + "</a>";
@@ -498,7 +534,12 @@ function renderLeagueHub(key, dir, matches, opts) {
     var label = labelKey ? C.get(dict, labelKey) : null;
     return '<a href="/' + dir + "/" + f + '">' + esc(typeof label === "string" ? label : f) + "</a>";
   }).join(" · ");
-  var helpHtml = help ? "<p>" + esc(L.help) + ' <a href="' + esc(help.url) + '" rel="noopener">' + esc(help.name) + "</a>" + (help.phone ? " · " + esc(help.phone) : "") + "</p>" : "";
+  var helpHtml = help ? "<p>" + esc(L.help) + ' <a href="' + esc(help.url) + '" rel="noopener" data-market-helpline="name">' + esc(help.name) + "</a>" + (help.phone ? ' · <span data-market-helpline="phone">' + esc(help.phone) + "</span>" : "") + "</p>" : "";
+  var jump = [["fixtures", L.jump.fixtures]];
+  if (standings) jump.push(["table", L.jump.table]);
+  if (results) jump.push(["results", L.jump.results]);
+  if (clubs) jump.push(["clubs", L.jump.clubs]);
+  jump.push(["method", L.jump.method]);
 
   var page = {
     "@context": "https://schema.org",
@@ -535,21 +576,20 @@ function renderLeagueHub(key, dir, matches, opts) {
     '<meta name="twitter:card" content="summary">\n' +
     '<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">\n' +
     C.ldScript(C.breadcrumbLd(crumbs)) + "\n" + C.ldScript(page) + "\n" +
-    "<style>" + HUB_CSS + HUB_TABLE_CSS + "</style>\n" +
+    '<link rel="stylesheet" href="' + HUBUI.CSS_HREF + '">\n' +
     '<link rel="stylesheet" href="/assets/bottom-navigation.css">\n' +
     "</head>\n<body>\n" +
-    '<header class="hdr"><a href="' + C.homePath(dir) + '" aria-label="IASHARK"><img src="/assets/iashark-logo.png" width="1648" height="440" alt="IASHARK"></a>' +
+    '<header class="hdr"><a href="' + C.homePath(dir) + '" aria-label="IASHARK"><img src="/assets/iashark-logo.webp" width="1648" height="440" alt="IASHARK"></a>' +
     '<nav><a href="' + C.homePath(dir) + '">' + nav("nav.home", "Home") + "</a>" + (clubsHub ? '<a href="' + clubsHub + '">' + esc(s.nav.clubs) + "</a>" : "") + '<a href="' + C.blogHubPath(dir) + '">' + nav("nav.guides", "Blog") + "</a></nav></header>\n" +
     "<main>\n" +
     '<nav class="crumbs" aria-label="' + esc(s.match.breadcrumb_aria) + '"><a href="' + C.homePath(dir) + '">' + esc(s.breadcrumb.home) + '</a> <span aria-hidden="true">›</span> <span aria-current="page">' + esc(name) + "</span></nav>\n" +
-    "<h1>" + esc(h1) + "</h1>\n" +
-    '<p class="intro">' + esc(hubAbout(key, dir)) + "</p>\n" +
-    '<p class="intro">' + esc(C.fill(L.scope, hubVars(key, dir))) + "</p>\n" +
-    "<h2>" + esc(L.fixtures_title) + "</h2>\n" + fixtures + "\n" +
-    results + standings + clubs +
-    "<h2>" + esc(L.method_title) + "</h2>\n<p class=\"intro\">" + esc(L.method) + "</p>\n" +
-    "<ul>" + guides + '</ul>\n<p><a href="' + C.homePath(dir) + '">' + esc(L.free_link) + "</a></p>\n" +
-    (others ? "<h2>" + esc(L.others_title) + '</h2>\n<p class="others">' + others + "</p>\n" : "") +
+    hero + HUBUI.jumpNav(jump, L.jump_aria) +
+    HUBUI.section("fixtures", L.fixtures_title, fixtures, data.upcoming.length ? L.kickoff_note : null) +
+    (standings || results ? '<div class="cols">' + standings + results + "</div>\n" : "") +
+    clubs +
+    '<section class="sec"><div class="panel"><h2 id="method">' + esc(L.method_title) + '</h2>\n<p class="intro">' + esc(L.method) + "</p>\n" +
+    '<ul class="links">' + guides + '</ul>\n<a class="btn" href="' + C.homePath(dir) + '">' + esc(L.free_link) + "</a></div></section>\n" +
+    (others ? HUBUI.section("others", L.others_title, '<p class="others">' + others + "</p>") : "") +
     "</main>\n" +
     '<footer class="foot"><p>' + esc(L.disclaimer) + "</p>" + helpHtml + (legal ? "<p>" + legal + "</p>" : "") + "</footer>\n" +
     C.footerNavHtml(dir, opts.root) + "\n" +

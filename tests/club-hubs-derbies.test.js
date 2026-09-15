@@ -163,18 +163,15 @@ test("pages club/derby sur disque : title et meta sans formulation interdite", (
   });
 });
 
-test("pages club/derby sur disque : probabilite estimee (conf) seulement pour le match offert de data-home.json", () => {
-  var free = {};
-  try { (JSON.parse(fs.readFileSync(path.join(ROOT, "data-home.json"), "utf8")).matchs || []).forEach(function (m) { if (m && m.is_free === true) free[String(m.id)] = true; }); } catch (e) { /* pas de donnees : aucun match offert */ }
+test("pages club/derby sur disque : jamais de note sur 10 ni de probabilite, meme pour le match offert", () => {
   Object.keys(CFG.versions).forEach(function (dir) {
     var folder = path.join(ROOT, dir, CFG.versions[dir].hubSlug);
     if (!fs.existsSync(folder)) return;
     fs.readdirSync(folder).filter(function (f) { return /\.html$/.test(f); }).forEach(function (f) {
-      var html = fs.readFileSync(path.join(folder, f), "utf8"), re = /<li>((?:(?!<\/li>)[\s\S])*?class="conf"(?:(?!<\/li>)[\s\S])*?)<\/li>/g, m;
-      while ((m = re.exec(html))) {
-        var id = (m[1].match(/match(?:\.html\?id=|\/)(\d+)/) || [])[1];
-        assert.ok(id && free[id], dir + "/" + f + " : probabilite estimee affichee pour un match non offert (" + id + ")");
-      }
+      var html = fs.readFileSync(path.join(folder, f), "utf8");
+      assert.doesNotMatch(html, /class="conf"|"conf"\s*:|\d[.,]\d\/10\b/, dir + "/" + f + " : note ou probabilite du modele");
+      // Tout lien vers une page match d'un match analyse porte la pastille « Analyse disponible ».
+      assert.doesNotMatch(html, /<span class="act">/, dir + "/" + f + " : ancien gabarit");
     });
   });
 });

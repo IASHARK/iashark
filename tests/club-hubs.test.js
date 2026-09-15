@@ -136,7 +136,7 @@ function gbOnlyConfig() {
 }
 
 [false, true].forEach(function (isFree) {
-  test("build : aucune fuite premium dans les pages (match " + (isFree ? "offert" : "payant") + "), conf public affiche", async () => {
+  test("build : aucune fuite premium dans les pages (match " + (isFree ? "offert" : "payant") + "), aucune note ni probabilite", async () => {
     var tmp = tmpRootWithPremiumData(isFree);
     try {
       var rep = await BUILD.buildClubHubs({ root: ROOT, dataRoot: tmp, outRoot: tmp, config: gbOnlyConfig(), dirs: ["gb"], client: fakeClient(), now: new Date("2098-12-01T00:00:00Z"), today: "2098-12-01", write: true });
@@ -149,11 +149,11 @@ function gbOnlyConfig() {
         assert.equal(RENDER.findPremiumLeak(html), null, p);
       });
       var arsenal = rep.outputs["/gb/clubs/arsenal.html"];
-      if (isFree) assert.match(arsenal, /<span class="conf">[^<]*7\.4\/10<\/span>/, "match offert : probabilite estimee affichee");
-      else {
-        assert.doesNotMatch(arsenal, /class="conf"/, "match payant : aucun chiffre du modele");
-        assert.ok(arsenal.indexOf("7.4") === -1 && arsenal.indexOf("7,4") === -1, "match payant : valeur conf absente");
-      }
+      // Decision du 16/09/2026 : aucune note sur 10 ni probabilite sur ces pages, meme
+      // pour le match offert. Un match analyse porte seulement « Analysis available » + lien.
+      assert.doesNotMatch(arsenal, /class="conf"|\/10\b/, "aucun chiffre du modele (match " + (isFree ? "offert" : "payant") + ")");
+      assert.ok(arsenal.indexOf("7.4") === -1 && arsenal.indexOf("7,4") === -1, "valeur conf absente (match " + (isFree ? "offert" : "payant") + ")");
+      assert.match(arsenal, /<a class="fxc" href="\/gb\/match\.html\?id=999001">[\s\S]*?<span class="pill-ok">Analysis available<\/span>/, "match analyse : pastille « Analysis available » dans la carte liee");
       assert.match(arsenal, /href="\/gb\/match\.html\?id=999001"/);
       assert.match(arsenal, /"@type":"SportsEvent"/);
       var derby = rep.outputs["/gb/clubs/north-london-derby.html"];

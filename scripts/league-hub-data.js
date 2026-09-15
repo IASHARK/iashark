@@ -18,7 +18,7 @@
 //     celui publie avec les matchs analyses ; retire apres 45 jours ;
 //   - pages club et derby de la competition dans la version.
 // Aucun champ premium, ni conf, ni cote, ni pari : equipes, dates, stades,
-// scores et classement uniquement.
+// scores, classement, forme et zones de classement uniquement.
 const fs = require("fs");
 const path = require("path");
 const C = require("./seo-common.js");
@@ -79,6 +79,12 @@ function row(r) {
   var o = { rank: num(r.rank), team_id: num(r.team_id != null ? r.team_id : r.teamId), name: str(r.name), played: num(r.played),
     won: num(r.won != null ? r.won : r.win), drawn: num(r.drawn != null ? r.drawn : r.draw), lost: num(r.lost != null ? r.lost : r.lose),
     gd: num(r.gd), pts: num(r.pts != null ? r.pts : r.points) };
+  // Forme (api-football : plus recent en premier) et zone de classement
+  // (description publique, ex. "Promotion - Champions League") : facultatives.
+  var form = typeof r.form === "string" ? r.form.toUpperCase().replace(/[^WDL]/g, "").slice(0, 5) : "";
+  if (form) o.form = form;
+  var zone = str(r.zone != null ? r.zone : r.description, 80);
+  if (zone) o.zone = zone;
   return o.name && o.rank != null && o.pts != null ? o : null;
 }
 
@@ -107,7 +113,7 @@ function cacheStandings(root, apiId) {
     var lg = j.response[0] && j.response[0].league;
     if (!lg || Number(lg.id != null ? lg.id : j.params && j.params.league) !== apiId || !Array.isArray(lg.standings)) return;
     var groups = lg.standings.filter(function (g) { return Array.isArray(g) && g.length; }).map(function (g) {
-      return { name: str(g[0].group), rows: g.map(function (r) { var a = r.all || {}; return row({ rank: r.rank, team_id: r.team && r.team.id, name: r.team && r.team.name, played: a.played, win: a.win, draw: a.draw, lose: a.lose, gd: r.goalsDiff, points: r.points }); }).filter(Boolean) };
+      return { name: str(g[0].group), rows: g.map(function (r) { var a = r.all || {}; return row({ rank: r.rank, team_id: r.team && r.team.id, name: r.team && r.team.name, played: a.played, win: a.win, draw: a.draw, lose: a.lose, gd: r.goalsDiff, points: r.points, form: r.form, description: r.description }); }).filter(Boolean) };
     }).filter(function (g) { return g.rows.length; });
     if (!groups.length) return;
     var at = str(j.fetched_at, 30);
@@ -123,9 +129,11 @@ function updateStore(store, runMatches, now, opts) {
   C.LEAGUES.forEach(function (l) {
     var cur = store.leagues[l.key] && store.leagues[l.key].standings || null;
     var candidates = [];
-    if (cur && cur.as_of) candidates.push(cur);
+    // Cache d'abord : a date egale (tri stable), le classement relu du cache
+    // (avec forme et zones) remplace celui du registre.
     var cached = cacheStandings(opts.root, l.apiFootballId);
     if (cached) candidates.push(cached);
+    if (cur && cur.as_of) candidates.push(cur);
     // Classement publie avec les matchs analyses du run (le plus long).
     var fromRun = null;
     (runMatches || []).forEach(function (m) {

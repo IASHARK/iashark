@@ -191,25 +191,17 @@ function matchMetaBlock(m, dir, opts) {
     matchHeadExtras(m, dir);
 }
 
-// Resume statique historique (div masquee par assets/match-page.css, meme
-// contenu que le rendu JS). Le pari n'y est nomme que pour le match offert.
-function marketLabelFr(m) {
-  try {
-    var lib = require("../lib/market-labels.js");
-    return lib.marketLabel(m.pari_rec, { home: m.home.n, away: m.away.n }, { locale: "fr", dict: C.dictFor("fr") });
-  } catch (e) { return m.pari_rec; }
-}
+// Resume statique (h1 + competition + date + annonce publique). Page match V8
+// (16/09/2026) : le HTML statique ne contient que des parties publiques - le
+// pari n'y est plus nomme, meme pour le match offert (un visiteur sans compte y
+// voit l'avis ferme).
 function matchSummaryHtml(m, dir) {
   var day = (m.date || "").split(" ")[0];
   var modelAvailable = m.model_output_available !== false && Number(m.data_quality_score || 0) > 0;
-  var pari = (m.is_free && modelAvailable && m.pari_rec && !m.no_signal)
-    ? '<p><span data-i18n="match_page.seo_recommended_market">Marché recommandé par le modèle :</span> <strong data-market-label="' + esc(m.pari_rec) + '" data-home="' + esc(m.home.n) + '" data-away="' + esc(m.away.n) + '">' + esc(marketLabelFr(m)) + "</strong> (" + esc(String(m.conf || "")) + "/10)</p>"
-    : "";
   var dateLabel = day ? new Intl.DateTimeFormat("fr-FR", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" }).format(new Date(day + "T12:00:00Z")) : "";
   return '<div style="padding:24px 16px;font-family:\'DM Sans\',sans-serif;color:#94a3b8;font-size:13px;line-height:1.6">' +
     '<h1 style="font-family:\'Bebas Neue\',sans-serif;font-size:22px;letter-spacing:.5px;color:#e2e8f0;margin-bottom:8px">' + esc(m.home.n) + " vs " + esc(m.away.n) + "</h1>" +
     "<p>" + (leagueName(m) ? esc(leagueName(m)) + " — " : "") + (day ? '<time data-seo-date datetime="' + esc(day) + '">' + esc(dateLabel) + "</time>" : "") + "</p>" +
-    pari +
     (modelAvailable ? '<p data-i18n="match_page.seo_analysis_available">Analyse statistique IASHARK disponible pour ce match.</p>' : '<p data-i18n="match_page.model_unavailable_reason">Les données disponibles ne permettent pas encore une analyse chiffrée fiable.</p>') +
     "</div>";
 }
@@ -379,7 +371,7 @@ function renderMatchPage(rawTpl, m, dir, opts) {
     .replace("<!--SEO_META--><!--/SEO_META-->", function () { return matchMetaBlock(m, dir, opts); })
     .replace("<!--SEO_SUMMARY--><!--/SEO_SUMMARY-->", function () { return archived ? "" : matchSummaryHtml(m, dir); })
     .replace("<!--FIXED_ID_SCRIPT--><!--/FIXED_ID_SCRIPT-->", function () { return archived ? "" : "<script>var FIXED_MATCH_ID=" + JSON.stringify(String(m.id)) + ";</script>"; })
-    .replace("<!--PRELOADED_MATCH_SCRIPT--><!--/PRELOADED_MATCH_SCRIPT-->", function () { return archived ? "" : "<script>var PRELOADED_MATCH=" + JSON.stringify(PUBLIC_SPLIT.toListMatch(PREMIUM.stripPremium(m))).replace(/</g, "\\u003c") + ";</script>"; })
+    .replace("<!--PRELOADED_MATCH_SCRIPT--><!--/PRELOADED_MATCH_SCRIPT-->", function () { return archived ? "" : "<script>var PRELOADED_MATCH=" + JSON.stringify(PUBLIC_SPLIT.preloadedMatch(m)).replace(/</g, "\\u003c") + ";</script>"; })
     .replace("</main>", function () { return matchFactsHtml(m, dir, opts) + "</main>"; });
   if (archived) {
     html = html

@@ -105,7 +105,9 @@ test("pipeline : liste unique, premium_fields persistes, data.json, pages et his
   assert.match(wf, /var charge=PREMIUM_FIELDS_LIB\.premiumPayload\(matchParId\[String\(r\.fixture_id\)\]\);/);
   assert.ok(iPayload > wf.indexOf("(function designerMatchGratuit(){") && iPayload < wf.indexOf("await writePremiumData(premiumRows);"), "premium_fields calcule apres la designation et avant l'ecriture");
   assert.match(wf, /generateMatchPages\(matchsPublics\)/, "pages match depuis la copie assainie");
-  assert.match(wf, /PRELOADED_MATCH='\+JSON\.stringify\(PUBLIC_SPLIT\.toListMatch\(PREMIUM_FIELDS_LIB\.stripPremium\(m\)\)\)/);
+  // PUBLIC_SPLIT.preloadedMatch (16/09/2026) = toListMatch(stripPremium(...)) + niveau prob_band.
+  assert.match(wf, /PRELOADED_MATCH='\+JSON\.stringify\(PUBLIC_SPLIT\.preloadedMatch\(m\)\)/);
+  assert.match(read("lib/public-data-split.js"), /return toListMatch\(PREMIUM\.stripPremium\(m\.is_free === true \? m : withProbBand\(m\)\)\);/);
   assert.match(wf, /fs\.writeFileSync\(histoPath,JSON\.stringify\(historiquePublic\(histo,matchsData\),null,2\)\);/);
   assert.match(wf, /fs\.writeFileSync\(histoPathEarly,JSON\.stringify\(historiquePublic\(histoEarly,\[\]\),null,2\)\);/);
   assert.equal((wf.match(/await rehydraterPredictionsMasquees\(/g) || []).length, 2, "rehydratation avant chaque reglement");
@@ -138,7 +140,7 @@ test("pipeline : ecritures Supabase jamais en echec silencieux", () => {
 test("decoupage, script local et pages SEO utilisent la liste unique", () => {
   assert.equal(require("../lib/public-data-split.js").PREMIUM_FIELDS, PREMIUM.PREMIUM_FIELDS);
   assert.match(read("scripts/split-public-data.js"), /\.map\(PREMIUM\.stripPremium\)/);
-  assert.match(read("scripts/seo-pages.js"), /PUBLIC_SPLIT\.toListMatch\(PREMIUM\.stripPremium\(m\)\)/);
+  assert.match(read("scripts/seo-pages.js"), /PUBLIC_SPLIT\.preloadedMatch\(m\)/);
 });
 
 test("fonction Edge : non-abonne sans champ premium ni run_output detaille, abonne servi depuis la table", () => {
@@ -169,7 +171,8 @@ test("affichage Pro sans detail premium : etat neutre sur l'accueil et la page m
   assert.match(list, /if\(!market\)return \{state:'pending'/);
   assert.match(list, /state==='pending'\)\{\s*zone='<span class="hl-zone hl-zone-none"><span class="hl-none-t">'\+esc\(t\('home_app\.analysis_in_progress'/);
   const js = read("match-page.js");
-  assert.match(js, /if\(!r&&raw\.has_signal===true&&raw\.no_signal!==true\)return card\(t\('match_page\.signal_title','Le signal IASHARK'\),empty\(t\('match_page\.sig_premium_updating'/);
+  // Page match V8 (16/09/2026) : « L'avis IASHARK », meme etat neutre en tete des cas sans pari.
+  assert.match(js, /if\(!r\)\{[\s\S]{0,400}const msg=raw\.has_signal===true&&raw\.no_signal!==true\s*\?t\('match_page\.sig_premium_updating'/);
   assert.ok(js.indexOf("match_page.sig_premium_updating") < js.indexOf("match_page.signal_unavailable_fallback"), "l'etat neutre passe avant \"aucun marche\"");
   for (const loc of ["fr", "en", "es", "es-mx", "de", "it", "pt"]) {
     const d = JSON.parse(read("i18n/dict/" + loc + ".json"));

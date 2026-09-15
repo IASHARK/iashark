@@ -54,6 +54,9 @@ console.log("match/<id>.json : " + stats.detailCount + " fichiers, " + stats.det
 
 // PRELOADED_MATCH des pages statiques : allege si le detail existe, et
 // champs premium retires pour tout match non offert (pages perimees comprises).
+// prob_band (niveau public) recopie depuis la copie publique du jour.
+const bandeParId = {};
+matchsPublics.forEach(function (m) { if (m && m.id != null) bandeParId[String(m.id)] = split.PROB_BANDS.indexOf(m.prob_band) !== -1 ? m.prob_band : null; });
 const RE = /<script>var PRELOADED_MATCH=([\s\S]*?);<\/script>/;
 let pages = 0, avant = 0, apres = 0;
 fs.readdirSync(path.join(ROOT, "match")).filter(function (f) { return /^\d+\.html$/.test(f); }).forEach(function (f) {
@@ -64,6 +67,10 @@ fs.readdirSync(path.join(ROOT, "match")).filter(function (f) { return /^\d+\.htm
   let m;
   try { m = JSON.parse(mm[1]); } catch (e) { console.warn("PRELOADED_MATCH illisible : " + f); return; }
   m = PREMIUM.stripPremium(m);
+  if (m && m.is_free !== true && Object.prototype.hasOwnProperty.call(bandeParId, String(m.id))) {
+    m = Object.assign({}, m);
+    if (bandeParId[String(m.id)]) m.prob_band = bandeParId[String(m.id)]; else delete m.prob_band;
+  }
   if (m && fs.existsSync(path.join(ROOT, split.detailPath(m.id)))) m = split.toListMatch(m);
   const out = html.replace(RE, function () {
     return "<script>var PRELOADED_MATCH=" + JSON.stringify(m).replace(/</g, "\\u003c") + ";</script>";

@@ -90,6 +90,10 @@ test("page match : aucun champ premium ni pari nomme hors match offert", () => {
     const html = SEO.renderMatchPage(TPL, leaky, d);
     assert.doesNotMatch(html.replace(/<script>var PRELOADED_MATCH=[\s\S]*?<\/script>/, ""), /Over 2\.5|data-market-label="/, d + " : pari nomme dans le HTML");
   }
+  // Page match V8 (16/09/2026) : meme le match offert n'est plus nomme dans le
+  // HTML statique (un visiteur sans compte y voit l'avis ferme).
+  const offert = Object.assign({}, MATCH, { is_free: true, pari_rec: "Over 2.5", conf: 7 });
+  assert.doesNotMatch(SEO.renderMatchPage(TPL, offert, "fr").replace(/<script>var PRELOADED_MATCH=[\s\S]*?<\/script>/, ""), /Over 2\.5|Plus de 2,5 buts|data-market-label="|seo_recommended_market/, "match offert : pari nomme dans le HTML statique");
   // PRELOADED_MATCH = version legere de la copie assainie, jamais plus.
   const html = SEO.renderMatchPage(TPL, MATCH, "za");
   const pre = JSON.parse(html.match(/<script>var PRELOADED_MATCH=([\s\S]*?);<\/script>/)[1]);
@@ -227,7 +231,10 @@ test("pipeline : pages SEO depuis la copie assainie, publiees avec leur chemin",
   assert.match(wf, /SEO_PAGES\.writeSeoPages\(matchsData,/);
   assert.match(wf, /generateMatchPages\(matchsPublics\)/);
   assert.match(wf, /\+SEO_PAGES\.matchHeadExtras\(m,'fr'\)/);
-  assert.match(wf, /var pariTxt=\(m\.is_free&&modelAvailable&&m\.pari_rec&&!m\.no_signal\)/);
+  // Page match V8 (16/09/2026) : resume statique sans pari, meme pour le match offert.
+  const resume = wf.slice(wf.indexOf("function seoSummaryHtmlFor(m){"), wf.indexOf("function liensVersionFr(html){"));
+  assert.ok(resume.length > 100, "seoSummaryHtmlFor introuvable");
+  assert.doesNotMatch(resume, /pari_rec|m\.conf|seo_recommended_market/);
   assert.match(wf, /writeSitemapIndex\('\.', TODAY\)/);
   assert.match(wf, /OUTPUTS="[^"]*seo-lastmod\.json/);
   assert.match(wf, /cp -R --parents "\$p" "\$SAVE\/"/);

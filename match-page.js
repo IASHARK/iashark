@@ -50,11 +50,120 @@ const ICONS={
   faq:'<circle cx="12" cy="12" r="9"/><path d="M9.2 9.3a2.8 2.8 0 0 1 5.5.8c0 1.9-2.7 2.2-2.7 4"/><circle cx="12" cy="17.4" r=".9" fill="currentColor" stroke="none"/>',
   lock:'<rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',
   table:'<path d="M4 5h16v14H4zM4 10h16M4 15h16M10 5v14"/>',
-  cross:'<path d="M12 5v14M5 12h14"/><circle cx="12" cy="12" r="9"/>',
   pin:'<path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.4"/>'
 };
 const cardIcon=key=>ICONS[key]?`<svg viewBox="0 0 24 24" class="card-icon" aria-hidden="true" focusable="false">${ICONS[key]}</svg>`:'';
-const card=(title,body,cls='',icon='')=>`<section class="card reveal ${cls}"><h2>${cardIcon(icon)}${esc(title)}</h2>${body}</section>`;
+// Carte. opts.fold : la meme carte en version repliable (le titre est le
+// bouton, une ligne de resume reste visible) : { key, summary, open }.
+const card=(title,body,cls='',icon='',opts)=>opts&&opts.fold
+  ?fold(Object.assign({title,icon,body},opts.fold))
+  :`<section class="card reveal ${cls}"><h2>${cardIcon(icon)}${esc(title)}</h2>${body}</section>`;
+
+// ---------------------------------------------------------------------------
+// COMPOSANTS DE LA PAGE (maquette V8 validee par le proprietaire, 16/09/2026).
+// Regle : tout ce que l'IA donne est FERME pour le visiteur ; toutes les stats
+// brutes sont OUVERTES. Mobile 375 px d'abord.
+// ---------------------------------------------------------------------------
+const reduceMotion=()=>!!(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+let seq=0;
+const uid=p=>`${p}${++seq}`;
+// Suivi funnel-track.js : kind dedie (liste fermee), libelle fixe.
+const suivi=kind=>` data-track="${kind}" data-track-kind="${kind}"`;
+
+// Bulle "?" (position absolue dans .tip-host : l'ouvrir ne decale rien).
+function aide(texte,label){
+  const id=uid('tip');
+  return `<span class="tip"><button type="button" class="tip-btn" aria-expanded="false" aria-controls="${id}" aria-label="${esc(label)}">?</button><span class="tip-pop" id="${id}" role="note" hidden>${esc(texte)}</span></span>`;
+}
+const texteAideCote=()=>t('match_page.proba_help_implied','« Ce que dit la cote » : la chance de réussite que suppose la cote du bookmaker, soit 1 ÷ cote (une cote de 2,00 correspond à 50 %). Quand les deux issues sont cotées, sa marge est retirée.');
+const labelAideCote=()=>t('match_page.proba_help_label','Que veut dire « ce que dit la cote » ?');
+
+// Bouton + panneau repliable (grid-template-rows 0fr -> 1fr ; ferme = inert).
+function repliable(o){
+  const id=uid('rep'),ouvert=!!o.open;
+  return `<div class="rep${ouvert?' is-open':''}${o.cls?' '+o.cls:''}">
+    <button type="button" class="rep-btn" aria-expanded="${ouvert}" aria-controls="${id}" data-label-open="${esc(o.labelOpen||o.label)}" data-label-closed="${esc(o.label)}"><span>${esc(ouvert?(o.labelOpen||o.label):o.label)}</span><i aria-hidden="true"></i></button>
+    <div class="rep-panel" id="${id}"${ouvert?'':' inert'}><div class="rep-inner">${o.body}</div></div>
+  </div>`;
+}
+// Carte repliable : le titre EST le bouton, une ligne de resume reste visible.
+// o : { key, title, icon, summary (HTML deja echappe), body (HTML), open }
+function fold(o){
+  const id=uid('fold'),ouvert=!!o.open;
+  return `<section class="card fold rep${ouvert?' is-open':''} reveal"${o.key?` data-fold="${esc(o.key)}"`:''}>
+    <h3 class="fold-h"><button type="button" class="rep-btn fold-btn" aria-expanded="${ouvert}" aria-controls="${id}">${cardIcon(o.icon)}<span class="fold-t">${esc(o.title)}</span>${o.summary?`<span class="fold-s">${o.summary}</span>`:''}<i aria-hidden="true"></i></button></h3>
+    <div class="rep-panel" id="${id}"${ouvert?'':' inert'}><div class="rep-inner">${o.body}</div></div>
+  </section>`;
+}
+// Groupe de blocs sous un grand titre (Les stats du match / L'analyse IASHARK).
+function groupe(o){
+  return `<div class="grp">
+    <div class="grp-head"><h2 class="grp-title">${esc(o.title)}${o.pill?`<span class="lock-pill">${cardIcon('lock')}${esc(o.pill)}</span>`:''}</h2>${o.sub?`<p class="grp-sub">${esc(o.sub)}</p>`:''}</div>
+    <div class="grp-body">${o.body}</div>
+  </div>`;
+}
+
+// ---- Deux barres "Notre estimation" / "Ce que dit la cote" + ecart en mots ----
+// Probabilite de marche exploitable : > 0. Une donnee ABSENTE n'est jamais
+// "0 %" (lib/match-view-model.js#marketTable la laisse a null).
+const marcheValide=v=>n(v)!==null&&n(v)>0?n(v):null;
+function ecart(model,market,edge){
+  const m=n(model),k=n(market);
+  if(m===null||k===null)return{cls:'none',text:t('match_page.proba_gap_none','Pas de cote comparable pour ce pari.'),gap:''};
+  const e=n(edge)!==null?n(edge):Math.round((m-k)*10)/10;
+  const r=Math.round(Math.abs(e));
+  if(r===0)return{cls:'flat',text:t('match_page.proba_gap_flat','Notre estimation et la cote disent la même chose.'),gap:''};
+  const gap=`${e>0?'+':'−'}${r} ${r===1?t('match_page.proba_point_one','point'):t('match_page.proba_point_other','points')}`;
+  return e>0
+    ?{cls:'pos',text:t('match_page.proba_gap_pos','Le modèle voit plus de chances que le bookmaker'),gap}
+    :{cls:'neg',text:t('match_page.proba_gap_neg','Le modèle voit moins de chances que le bookmaker'),gap};
+}
+function duoBars(o){
+  const m=n(o.model),k=marcheValide(o.market),c=n(o.odds);
+  const g=ecart(m,k,k===null?null:o.edge);
+  const kLabel=o.kind==='consensus'&&c===null?t('match_page.proba_market_consensus','Ce que disent les cotes'):t('match_page.proba_market_label','Ce que dit la cote');
+  const coteTxt=c!==null&&!o.compact?` <em>${esc(odds(c))} →</em>`:'';
+  const aria=k===null
+    ?tf('match_page.proba_aria_model_only','Notre estimation : {model}',{model:pct(m,0)})
+    :tf('match_page.proba_aria','Notre estimation : {model}. Ce que dit la cote : {market}.',{model:pct(m,0),market:pct(k,0)});
+  const ligne=(cls,label,val,part)=>`<div class="duo-line ${cls}"><span class="duo-k">${label}</span><b class="duo-v">${esc(val)}</b><span class="duo-track" aria-hidden="true"><i style="--s:${(part/100).toFixed(3)}"></i></span></div>`;
+  return `<div class="duo${o.compact?' duo--compact':''}" role="group" aria-label="${esc(aria)}">
+    ${ligne('is-model',esc(t('match_page.proba_model_label','Notre estimation')),pct(m,0),clamp(m))}
+    ${k!==null?ligne('is-market',esc(kLabel)+coteTxt,pct(k,0),clamp(k))
+      :`<div class="duo-line is-market is-na"><span class="duo-k">${esc(kLabel)}</span><span class="duo-na">${esc(t('match_page.proba_market_na','non disponible'))}</span></div>`}
+    <p class="duo-gap is-${g.cls}"><i aria-hidden="true"></i><span>${esc(g.text)}${g.gap?`${esc(t('match_page.label_colon',' :'))} <b>${esc(g.gap)}</b>`:''}</span></p>
+  </div>`;
+}
+
+// ---- Niveau public prob_band (lib/public-data-split.js#probBand) ----
+// 3 niveaux, 3 barres, JAMAIS un chiffre. Libelles partages avec l'accueil.
+const BANDES={high:['home_list.band_high','Probabilité élevée',3],good:['home_list.band_good','Bonne probabilité',2],moderate:['home_list.band_moderate','Probabilité modérée',1]};
+const BANDES_COURTES={high:'Proba. élevée',good:'Bonne proba.',moderate:'Proba. modérée'};
+const bandeDe=m=>m&&Object.prototype.hasOwnProperty.call(BANDES,m.prob_band)?m.prob_band:null;
+function bandBadge(b,court){
+  if(!BANDES[b])return '';
+  const [k,fb,niveau]=BANDES[b];
+  const label=court?t(k+'_short',BANDES_COURTES[b]):t(k,fb);
+  return `<span class="band is-${b}"><span class="band-bars" aria-hidden="true">${[1,2,3].map(i=>`<i${i<=niveau?' class="on"':''}></i>`).join('')}</span><b>${esc(label)}</b></span>`;
+}
+// Etat PUBLIC de l'analyse : 'ready' (has_signal / no_signal:false), 'none'
+// (no_signal:true), 'unknown'.
+function etatAnalyse(raw){
+  if(!raw)return 'unknown';
+  if(raw.no_signal===true)return 'none';
+  if(raw.has_signal===true||raw.no_signal===false)return 'ready';
+  return 'unknown';
+}
+
+// Defense en profondeur (vue visiteur) : copie de lib/premium-fields.js#PREMIUM_FIELDS
+// (tests/match-page-structure.test.js verifie que les deux listes sont
+// identiques). prob_band, has_signal et no_signal restent : ils sont publics.
+const CHAMPS_PREMIUM=["pari_rec","cote_rec","model_probability","markets_compared","market_id","marche","kelly","edge","verdict_shark","facteur_x","dropping_odds","player_markets","facteur_x_i18n","verdict_shark_i18n","conf","p1","pn","p2","po15","po25","btts","lambda_h","lambda_a","market_aware_p1","market_aware_pN","market_aware_p2","market_consensus_p1","market_consensus_pN","market_consensus_p2","mc_scores","scores","simulation_count","paris_safe","paris_risque","vbet","val","hot","risque","mise","pick_downgrade","odds_available","is_canonical_pick","reliability","model_agreement","crit_home","crit_away","elo_signal","analyse_card","analyse_card_i18n","conseil_public","conseil_public_i18n","contexte","contexte_i18n","scenario","scenario_i18n","scenario_15min","decision_factors","risk_principal","top_scorers"];
+function publicCopy(raw){
+  const copie={};
+  Object.keys(raw||{}).forEach(k=>{if(CHAMPS_PREMIUM.indexOf(k)===-1)copie[k]=raw[k];});
+  return copie;
+}
 
 // Traduction d'un libelle de marche du moteur dans la forme standard des
 // bookmakers, avec les noms des equipes (lib/market-labels.js) : "DC 1X" ->
@@ -262,38 +371,31 @@ function methodLink(){
   return `<p class="sig-method"><a href="${esc(methodologyHref())}">${esc(t('match_page.sig_method_link','Comment ce chiffre est calculé : méthodologie'))}</a></p>`;
 }
 
+// L'AVIS IASHARK (abonne Pro ou match offert connecte) : le pari et sa cote,
+// « Nos chances face a la cote » en deux barres avec l'ecart dit en mots, sur
+// 100 matchs, pourquoi, a surveiller, risque et fiabilite, puis le detail des
+// chiffres replie (note /10, probabilite implicite, ecart exact).
+// L'ecart est affiche HONNETEMENT, y compris quand il est defavorable.
 function signalCard(vm){
   const r=vm.model.recommendation,raw=vm._raw||{};
-  // Une analyse existe (has_signal, amorce publique) mais son detail premium
-  // n est pas servi par match-data (abonne Pro avant la prochaine mise a jour
-  // de match_premium_data) : etat neutre, jamais "aucun marche".
-  if(!r&&raw.has_signal===true&&raw.no_signal!==true)return card(t('match_page.signal_title','Le signal IASHARK'),empty(t('match_page.sig_premium_updating','Analyse détaillée en cours de mise à jour. Le marché recommandé et les probabilités s’afficheront dès la prochaine actualisation.')),'signal-card','target');
-  if(!r)return card(t('match_page.signal_title','Le signal IASHARK'),empty(vm.model.unavailableReason?t('match_page.model_unavailable_reason',vm.model.unavailableReason):t('match_page.signal_unavailable_fallback','Aucun marché ne franchit les seuils de confiance ou de cote minimale pour ce match — IASHARK préfère ne pas se prononcer.')),'signal-card','target');
+  const titre=t('match_page.avis_title','L’avis IASHARK');
+  if(!r){
+    // Une analyse existe (has_signal, amorce publique) mais son detail premium
+    // n est pas servi par match-data (abonne Pro avant la prochaine mise a jour
+    // de match_premium_data) : etat neutre, jamais "aucun marche".
+    const msg=raw.has_signal===true&&raw.no_signal!==true
+      ?t('match_page.sig_premium_updating','Analyse détaillée en cours de mise à jour. Le marché recommandé et les probabilités s’afficheront dès la prochaine actualisation.')
+      :raw.no_signal===true?t('match_page.avis_no_signal','Pas de pari retenu par le modèle sur ce match')
+      :vm.model.unavailableReason?t('match_page.model_unavailable_reason',vm.model.unavailableReason)
+      :t('match_page.signal_unavailable_fallback','Aucun marché ne franchit les seuils de confiance ou de cote minimale pour ce match — IASHARK préfère ne pas se prononcer.');
+    return card(titre,empty(msg),'signal-card avis','target');
+  }
   // Une probabilite nulle ou absente n'est jamais affichee "0 %" : elle
   // n'existe pas (constate en ligne sur un match servi sans le champ).
   const prob=n(r.probability)!==null&&r.probability>0?n(r.probability):null;
-  const cote=n(vm.model.recommendedOdds);
-  const implied=n(vm.model.recommendedImplied);
+  const cote=n(vm.model.recommendedOdds),implied=n(vm.model.recommendedImplied);
   const edge=prob!==null?n(vm.model.recommendedEdge):null;
   const info=vm.model.reliabilityInfo;
-  const edgeCls=edge===null?'':edge>=3?'pos':edge<0?'neg':'flat';
-  const marche=marcheFr(vm,r.market);
-
-  const jauge=prob===null?'':`<div class="sig-gauge">
-      <div class="sig-prob"><b>${pct(prob,0)}</b><span>${esc(t('match_page.sig_model_prob','Probabilité du modèle'))}</span></div>
-      <div class="sig-bar" role="img" aria-label="${esc(tf('match_page.sig_gauge_aria','Modèle {model}, marché {market}',{model:pct(prob),market:pct(implied)}))}">
-        <i class="sig-bar-model" style="--w:${clamp(prob)}%"></i>
-        ${implied!==null?`<em class="sig-bar-market" style="left:${clamp(implied)}%"><span>${esc(t('match_page.sig_market_marker','Marché'))}</span></em>`:''}
-      </div>
-      <div class="sig-scale" aria-hidden="true"><span>0</span><span>50</span><span>100</span></div>
-    </div>`;
-  const chiffres=`<dl class="sig-figures">
-      <div><dt>${esc(t('match_page.sig_implied','Probabilité implicite'))}</dt><dd>${pct(implied)}</dd></div>
-      <div><dt>${esc(t('match_page.sig_edge','Écart (value)'))}</dt><dd class="sig-edge ${edgeCls}">${pts(edge)}</dd></div>
-    </dl>`;
-  const verdict=prob!==null&&implied!==null
-    ?`<p class="sig-verdict">${esc(tf('match_page.sig_verdict','Le modèle voit {model} contre {market} pour le marché ({gap}).',{model:pct(prob),market:pct(implied),gap:pts(edge)}))}</p>`:'';
-
   const raisons=(vm.editorial.signalReasons||[]).map(texteRaison).filter(Boolean);
   // facteur_x/conseil_public : texte du pipeline ; hors FR, sa traduction
   // validee, sinon masque. Cite tel quel, en complement des raisons chiffrees.
@@ -306,118 +408,150 @@ function signalCard(vm){
   // pipeline si une place reste.
   const puces=raisons.slice(0,3);
   if(puces.length<3&&lecture)puces.push(texteLisible(vm,lecture));
-  const stats=[confMeter(r.confidence),riskStat(vm.editorial.riskCode)].filter(Boolean);
-
-  return `<section class="signal-card reveal" aria-labelledby="sigMarket">
-    <div class="sig-head">
-      <span class="sig-eyebrow">${cardIcon('target')}${esc(t('match_page.signal_title','Le signal IASHARK'))}</span>
-      ${relBadge(info)}
-    </div>
+  const plain=prob!==null&&implied!==null
+    ?tf('match_page.sig2_plain','Sur 100 matchs comme celui-ci, notre modèle s’attend à voir ce pari passer environ {model} fois ; la cote en suppose {market}.',{model:Math.round(prob),market:Math.round(implied)}):'';
+  const compare=prob===null?'':`<div class="sig2-cmp tip-host">
+      <div class="sig2-cmp-head"><h3>${esc(t('match_page.sig2_compare_title','Nos chances face à la cote'))}</h3>${aide(texteAideCote(),labelAideCote())}</div>
+      ${duoBars({model:prob,market:implied,odds:cote,edge,kind:'odds'})}
+      ${plain?`<p class="sig2-plain">${esc(plain)} <span>${esc(t('match_page.sig2_not_guarantee','Estimation statistique, pas une garantie.'))}</span></p>`:''}
+    </div>`;
+  const detail=repliable({
+    label:t('match_page.sig2_details_show','Détail des chiffres'),labelOpen:t('match_page.sig2_details_hide','Masquer le détail'),cls:'sig2-detail',
+    body:`${confMeter(r.confidence)}<dl class="sig-figures sig2-figures">
+      <div><dt>${esc(t('match_page.sig2_model_exact','Notre estimation (précise)'))}</dt><dd>${pct(prob)}</dd></div>
+      <div><dt>${esc(t('match_page.sig2_implied_exact','Probabilité selon la cote (implicite)'))}</dt><dd>${pct(implied)}</dd></div>
+      <div><dt>${esc(t('match_page.sig2_edge_exact','Écart exact'))}</dt><dd class="sig-edge">${pts(edge)}</dd></div>
+    </dl>`
+  });
+  const risque=riskStat(vm.editorial.riskCode);
+  return `<section class="signal-card avis sig2 reveal" aria-labelledby="sigMarket">
+    <div class="sig-head"><span class="sig-eyebrow">${cardIcon('target')}${esc(titre)}</span>${relBadge(info)}</div>
     <div class="sig-slip">
       <div class="sig-slip-main">
         <p class="sig-kicker">${esc(t('match_page.sig_bet_label','Pari recommandé'))}</p>
-        <h2 class="sig-market" id="sigMarket">${esc(marche)}</h2>
+        <h2 class="sig-market" id="sigMarket">${esc(marcheFr(vm,r.market))}</h2>
         <p class="sig-fixture">${esc(tf('match_page.sig_match_line','{home} – {away}',{home:vm.identity.home.name,away:vm.identity.away.name}))}</p>
       </div>
       ${cote!==null?`<div class="sig-odds-box"><span>${esc(t('match_page.sig_odds_used','Cote utilisée'))}</span><b>${odds(cote)}</b></div>`:''}
     </div>
-    ${stats.length?`<div class="sig-stats${stats.length===1?' is-single':''}">${stats.join('')}</div>`:''}
-    ${info?`<p class="sig-rel-note">${esc(relLigne(info))}</p>`:''}
-    <div class="sig-grid">${jauge}${chiffres}</div>
-    ${verdict}
+    ${compare}
     ${puces.length?`<div class="sig-why"><h3>${esc(t('match_page.sig_why_title','Pourquoi ce pari'))}</h3><ul>${puces.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>`:''}
     <p class="sig-watch"><b>${esc(t('match_page.sig_watch_title','À surveiller'))}</b> ${esc(aSurveiller)}</p>
+    ${risque||info?`<div class="sig2-meta">${risque}${info?`<p class="sig-rel-note">${esc(relLigne(info))}</p>`:''}</div>`:''}
+    ${detail}
     ${methodLink()}
     <p class="sig-legal">${esc(t('match_page.sig_legal','18+ · Estimation statistique, pas une garantie. Jouez responsable.'))}</p>
   </section>`;
 }
 
 // ---------------------------------------------------------------------------
-// PROBABILITES ET COTES : modele / marche / ecart / cote, pari en forme
-// standard, value mise en evidence (+3 pts et plus). Donnees : 1N2 et
-// consensus sans marge du pipeline, plus de 2,5 buts et les deux equipes
-// marquent (cotes des deux cotes), marches compares par le pipeline
-// (lib/match-view-model.js#marketTable). Le pari du signal ouvre le tableau.
+// PROBABILITES ET COTES (abonne / match offert) : deux barres par pari
+// (« Notre estimation » / « Ce que dit la cote »), ecart dit en mots, bulle
+// « ? ». Le pari conseille ouvre la liste, 4 lignes visibles, le reste replie.
+// Donnees : lib/match-view-model.js#marketTable (marche absent = non
+// disponible, jamais 0 %).
 // ---------------------------------------------------------------------------
 const GROUPES_MARCHES=[['result','Résultat'],['goals','Buts'],['stats','Tirs, corners, cartons'],['other','Autres marchés']];
 function marketsCard(vm){
   const rows=vm.model.marketTable||[];
   if(rows.length<2)return '';
-  const col=(k,fr)=>t('match_page.markets_col_'+k,fr);
-  const ligne=r=>{
-    const e=n(r.edge),cls=e===null?'':e>=3?'pos':e<=-3?'neg':'flat';
-    const tags=`${r.recommended?`<span class="mk-tag mk-tag--signal">${esc(t('match_page.markets_tag_signal','Signal'))}</span>`:''}${e!==null&&e>=3?`<span class="mk-tag mk-tag--value">${esc(t('match_page.markets_tag_value','Value'))}</span>`:''}`;
-    return `<tr class="${r.recommended?'is-signal ':''}${e!==null&&e>=3?'is-value':''}">
-      <th scope="row"><span class="mk-label">${esc(libelleLigne(vm,r))}</span>${tags}</th>
-      <td data-label="${esc(col('model','Modèle'))}" class="mk-model">${pct(r.model)}</td>
-      <td data-label="${esc(col('market','Marché'))}">${pct(r.market)}</td>
-      <td data-label="${esc(col('gap','Écart'))}" class="mk-gap ${cls}">${pts(e)}</td>
-      <td data-label="${esc(col('odds','Cote'))}">${odds(r.odds)}</td>
-    </tr>`;
+  const ordre=rows.filter(r=>r.recommended).map(r=>({r,g:'signal'}));
+  GROUPES_MARCHES.forEach(([g])=>rows.filter(r=>!r.recommended&&r.group===g).forEach(r=>ordre.push({r,g})));
+  const nomGroupe=g=>{const x=GROUPES_MARCHES.find(y=>y[0]===g);return x?t('match_page.markets_group_'+g,x[1]):'';};
+  const ligne=({r})=>{
+    const e=marcheValide(r.market)===null?null:n(r.edge),c=n(r.odds);
+    const tags=`${r.recommended?`<span class="mk-tag mk-tag--signal">${esc(t('match_page.proba_tag_signal','Pari conseillé'))}</span>`:''}${!r.recommended&&e!==null&&e>=3?`<span class="mk-tag mk-tag--value">${esc(t('match_page.proba_tag_favorable','Écart favorable'))}</span>`:''}`;
+    return `<li class="pr-row${r.recommended?' is-signal':''}">
+      <div class="pr-head"><span class="pr-label">${esc(libelleLigne(vm,r))}</span>${tags}${c!==null?`<span class="pr-odds">${esc(t('match_page.proba_odds_short','cote'))} <b>${odds(c)}</b></span>`:''}</div>
+      ${duoBars({model:r.model,market:r.market,odds:c,edge:r.edge,kind:c!==null?'odds':'consensus',compact:true})}
+    </li>`;
   };
-  const signal=rows.filter(r=>r.recommended);
-  let corps=signal.map(ligne).join('');
-  GROUPES_MARCHES.forEach(([g,fr])=>{
-    const list=rows.filter(r=>!r.recommended&&r.group===g);
-    if(!list.length)return;
-    corps+=`<tr class="mk-group"><th scope="rowgroup" colspan="5">${esc(t('match_page.markets_group_'+g,fr))}</th></tr>${list.map(ligne).join('')}`;
-  });
-  return card(t('match_page.markets_title','Probabilités et cotes'),
-    `<div class="mk-scroll"><table class="mk-table">
-      <thead><tr><th scope="col">${esc(col('bet','Pari'))}</th><th scope="col">${esc(col('model','Modèle'))}</th><th scope="col">${esc(col('market','Marché'))}</th><th scope="col">${esc(col('gap','Écart'))}</th><th scope="col">${esc(col('odds','Cote'))}</th></tr></thead>
-      <tbody>${corps}</tbody>
+  const liste=(part,avant)=>{let g0=avant;return part.map(x=>{const h=x.g!=='signal'&&x.g!==g0?`<li class="pr-group"><h4>${esc(nomGroupe(x.g))}</h4></li>`:'';g0=x.g;return h+ligne(x);}).join('');};
+  const tete=ordre.slice(0,4),reste=ordre.slice(4);
+  return `<div class="pr-legend tip-host"><span class="pr-key is-model" aria-hidden="true"></span>${esc(t('match_page.proba_model_label','Notre estimation'))}<span class="pr-key is-market" aria-hidden="true"></span>${esc(t('match_page.proba_market_label','Ce que dit la cote'))}${aide(texteAideCote(),labelAideCote())}</div>
+    <ul class="pr-list">${liste(tete,null)}</ul>
+    ${reste.length?repliable({label:tf('match_page.proba_more','Voir les {n} autres paris',{n:reste.length}),labelOpen:t('match_page.proba_less','Masquer les autres paris'),body:`<ul class="pr-list">${liste(reste,tete.length?tete[tete.length-1].g:null)}</ul>`}):''}
+    <p class="mk-note">${esc(t('match_page.proba_note','« Ce que dit la cote » : probabilité tirée des cotes, marge du bookmaker retirée quand les deux issues sont cotées. Écart en points de pourcentage. Estimation statistique, pas une garantie.'))}</p>`;
+}
+
+// ---------------------------------------------------------------------------
+// LES STATS DU MATCH : ouvertes a tous, donnees brutes publiques uniquement
+// (forme, classement, confrontations directes, comparatif, compositions
+// publiees). Chaque bloc est repliable avec une ligne de resume.
+// ---------------------------------------------------------------------------
+function formeFold(vm){
+  const f=vm.form||{},i=vm.identity;
+  const ligne=(team,rows)=>rows&&rows.length?`<div class="fh-row"><span class="fh-team">${logoEquipe(team.logo,team.name)}<span>${esc(team.name)}</span></span>${formStrip(rows)}<span class="fh-scores" aria-hidden="true">${rows.slice().reverse().map(r=>`<i>${esc(r.score||'')}</i>`).join('')}</span></div>`:'';
+  const corps=ligne(i.home,f.home)+ligne(i.away,f.away);
+  if(!corps)return '';
+  const bilan=rows=>['W','D','L'].map(k=>`${rows.filter(r=>r.result===k).length} ${lettre(k)}`).join(' · ');
+  const resume=[[i.home,f.home],[i.away,f.away]].filter(x=>x[1]&&x[1].length).map(([tm,rows])=>`<b>${esc(tm.name)}</b> ${esc(bilan(rows))}`).join(' — ');
+  return fold({key:'forme',title:t('match_page.stats_form_title','Forme récente'),icon:'trend',summary:resume,body:corps,open:true});
+}
+function classementFold(vm){
+  const c=(vm._raw||{}).classement;
+  if(!c||typeof c!=='object')return '';
+  const i=vm.identity;
+  const ligneDe=(team,cote)=>{
+    const st=Array.isArray(c.standings)?c.standings.find(s=>s&&team.id!=null&&Number(s.team_id)===Number(team.id)):null;
+    return st||(c[cote]&&typeof c[cote]==='object'?c[cote]:null);
+  };
+  const lignes=[[i.home,ligneDe(i.home,'home')],[i.away,ligneDe(i.away,'away')]].filter(x=>x[1]);
+  if(!lignes.length)return '';
+  lignes.sort((a,b)=>(n(a[1].rank)===null?99:n(a[1].rank))-(n(b[1].rank)===null?99:n(b[1].rank)));
+  const v=x=>n(x)===null?'—':esc(n(x));
+  const diff=x=>n(x)===null?'—':`${x>0?'+':x<0?'−':''}${Math.abs(n(x))}`;
+  const COLS=[['played','J'],['won','V'],['drawn','N'],['lost','D']];
+  const resume=lignes.filter(x=>n(x[1].rank)!==null).map(([tm,s])=>`<b>${esc(tm.name)}</b> ${esc(rangOrdinal(s.rank))}`).join(' · ');
+  const corps=`<div class="st-scroll"><table class="st-table">
+      <thead><tr><th scope="col">${esc(t('match_page.standings_col_rank','#'))}</th><th scope="col" class="st-team">${esc(t('match_page.standings_col_team','Équipe'))}</th>${COLS.map(([k,fb])=>`<th scope="col">${esc(t('match_page.standings_col_'+k,fb))}</th>`).join('')}<th scope="col">${esc(t('match_page.standings_col_gd','Diff.'))}</th><th scope="col">${esc(t('match_page.standings_col_pts','Pts'))}</th></tr></thead>
+      <tbody>${lignes.map(([tm,s])=>`<tr><td>${v(s.rank)}</td><th scope="row" class="st-team"><span>${logoEquipe(tm.logo,tm.name)}${esc(tm.name)}</span></th>${COLS.map(([k])=>`<td>${v(s[k])}</td>`).join('')}<td>${diff(s.gd)}</td><td class="st-pts">${v(s.pts)}</td></tr>`).join('')}</tbody>
     </table></div>
-    <p class="mk-note">${esc(t('match_page.markets_note','Marché : probabilité tirée des cotes, marge du bookmaker retirée quand les deux issues sont cotées. Écart en points ; value à partir de +3 pts.'))}</p>`,
-    'markets-card','table');
+    ${c.league_name?`<p class="st-note">${esc(c.league_name)} · ${esc(t('match_page.standings_note','classement actuel'))}</p>`:''}`;
+  return fold({key:'classement',title:t('match_page.standings_title','Classement'),icon:'table',summary:resume,body:corps,open:true});
 }
-
-// ---------------------------------------------------------------------------
-// FORME ET FACE-A-FACE : pastilles des derniers resultats reels (score au
-// survol et pour les lecteurs d'ecran) et les cinq dernieres confrontations,
-// resumees par une barre victoires/nuls/victoires.
-// ---------------------------------------------------------------------------
-function formH2HCard(vm){
-  const f=vm.form||{},h=vm.h2h||[],i=vm.identity;
-  const ligneForme=(team,rows)=>rows&&rows.length?`<div class="fh-row"><span class="fh-team">${logoEquipe(team.logo,team.name)}<span>${esc(team.name)}</span></span>${formStrip(rows)}<span class="fh-scores" aria-hidden="true">${rows.slice().reverse().map(r=>`<i>${esc(r.score||'')}</i>`).join('')}</span></div>`:'';
-  const forme=ligneForme(i.home,f.home)+ligneForme(i.away,f.away);
-  let confrontations='';
-  if(h.length){
-    const dom=h.filter(r=>r.winner==='1').length,nul=h.filter(r=>r.winner==='N').length,ext=h.filter(r=>r.winner==='2').length,tot=dom+nul+ext||1;
-    const annee=d=>{const x=new Date(String(d)+'T12:00:00Z');return isNaN(x)?String(d):x.toLocaleDateString(localeTag(),{month:'short',year:'numeric',timeZone:'UTC'});};
-    confrontations=`<div class="h2h">
-      <p class="h2h-sum">${esc(tf('match_page.h2h_summary','{home} {homeWins} V · {draws} N · {away} {awayWins} V',{home:i.home.name,away:i.away.name,homeWins:dom,draws:nul,awayWins:ext}))}</p>
-      <div class="h2h-bar" aria-hidden="true"><i class="h" style="width:${(dom/tot*100).toFixed(1)}%"></i><i class="d" style="width:${(nul/tot*100).toFixed(1)}%"></i><i class="a" style="width:${(ext/tot*100).toFixed(1)}%"></i></div>
-      <ul class="h2h-list">${h.slice(0,5).map(r=>`<li><time>${esc(annee(r.date))}</time><span class="h2h-m"><span class="${r.winner==='1'&&r.home===i.home.name||r.winner==='2'&&r.home===i.away.name?'w':''}">${esc(r.home)}</span><b>${esc(r.score)}</b><span class="${r.winner==='2'&&r.away===i.away.name||r.winner==='1'&&r.away===i.home.name?'w':''}">${esc(r.away)}</span></span></li>`).join('')}</ul>
+function h2hFold(vm){
+  const h=vm.h2h||[],i=vm.identity;
+  if(!h.length)return '';
+  const dom=h.filter(r=>r.winner==='1').length,nul=h.filter(r=>r.winner==='N').length,ext=h.filter(r=>r.winner==='2').length,tot=dom+nul+ext||1;
+  const mois=d=>{const x=new Date(String(d)+'T12:00:00Z');return isNaN(x)?String(d):x.toLocaleDateString(localeTag(),{month:'short',year:'numeric',timeZone:'UTC'});};
+  const resume=esc(tf('match_page.h2h_summary','{home} {homeWins} V · {draws} N · {away} {awayWins} V',{home:i.home.name,away:i.away.name,homeWins:dom,draws:nul,awayWins:ext}));
+  const corps=`<div class="h2h">
+    <div class="h2h-bar" aria-hidden="true"><i class="h" style="width:${(dom/tot*100).toFixed(1)}%"></i><i class="d" style="width:${(nul/tot*100).toFixed(1)}%"></i><i class="a" style="width:${(ext/tot*100).toFixed(1)}%"></i></div>
+    <ul class="h2h-list">${h.slice(0,5).map(r=>`<li><time>${esc(mois(r.date))}</time><span class="h2h-m"><span class="${r.winner==='1'&&r.home===i.home.name||r.winner==='2'&&r.home===i.away.name?'w':''}">${esc(r.home)}</span><b>${esc(r.score)}</b><span class="${r.winner==='2'&&r.away===i.away.name||r.winner==='1'&&r.away===i.home.name?'w':''}">${esc(r.away)}</span></span></li>`).join('')}</ul>
+  </div>`;
+  return fold({key:'h2h',title:t('match_page.h2h_title','Confrontations directes'),icon:'scale',summary:resume,body:corps});
+}
+function comparatifFold(vm){
+  const c=vm.comparison;
+  if(!c||!c.rows.length)return '';
+  const cmp=comparison(vm);
+  return fold({key:'comparatif',title:t('match_page.comparison_title','Comparatif des deux équipes'),icon:'compare',summary:cmp.conclusion,body:cmp.table});
+}
+// Compositions : champ public lineups (/fixtures/lineups), rendu seulement
+// quand un onze existe. Jamais une composition devinee.
+const POSTES_COURTS={G:['match_page.lineup_pos_g','G'],D:['match_page.lineup_pos_d','D'],M:['match_page.lineup_pos_m','M'],F:['match_page.lineup_pos_f','A']};
+function compoFold(vm){
+  const l=vm.players&&vm.players.lineups,i=vm.identity;
+  if(!l)return '';
+  const joueur=p=>p&&p.player?p.player:p||{};
+  const colonne=(team,x)=>{
+    if(!x||!Array.isArray(x.startXI)||!x.startXI.length)return '';
+    const subs=Array.isArray(x.substitutes)?x.substitutes.map(joueur).filter(p=>p.name):[];
+    return `<div class="lu-col">
+      <h4>${logoEquipe(team.logo,team.name)}<span>${esc(team.name)}</span>${x.formation?`<em>${esc(x.formation)}</em>`:''}</h4>
+      <ol class="lu-list">${x.startXI.map(joueur).map(p=>{const pos=POSTES_COURTS[p.pos];return `<li><span class="lu-pos">${esc(pos?t(pos[0],pos[1]):(p.pos||'·'))}</span>${esc(p.name||'')}</li>`;}).join('')}</ol>
+      ${x.coach?`<p class="lu-coach">${esc(t('match_page.lineup_coach','Entraîneur'))}${esc(t('match_page.label_colon',' :'))} ${esc(x.coach)}</p>`:''}
+      ${subs.length?`<p class="lu-subs"><b>${esc(t('match_page.lineup_subs','Remplaçants'))}</b> ${subs.map(p=>esc(p.name)).join(', ')}</p>`:''}
     </div>`;
-  }
-  if(!forme&&!confrontations)return '';
-  return card(t('match_page.formh2h_title','Forme et face-à-face'),
-    `<div class="fh-grid">${forme?`<div><h3 class="sub">${esc(t('match_page.form_label','Derniers matchs'))}</h3>${forme}</div>`:''}${confrontations?`<div><h3 class="sub">${esc(t('match_page.h2h_label','Derniers face-à-face'))}</h3>${confrontations}</div>`:''}</div>`,
-    'formh2h-card','trend');
+  };
+  const cols=colonne(i.home,l.home)+colonne(i.away,l.away);
+  if(!cols)return '';
+  const forms=[l.home&&l.home.formation,l.away&&l.away.formation].filter(Boolean).map(esc).join(' · ');
+  return fold({key:'compos',title:t('match_page.lineups_title','Compositions'),icon:'pin',summary:`${esc(t('match_page.lineups_official','Compositions officielles'))}${forms?' · '+forms:''}`,body:`<div class="lu-grid">${cols}</div>`});
 }
-
-// ---------------------------------------------------------------------------
-// ABSENCES : joueurs reellement signales absents ou incertains (API), avec
-// leur part de production offensive recente quand le joueur est retrouve
-// (lib/insights.js#computeOutputShare). Section masquee s'il n'y en a aucune.
-// ---------------------------------------------------------------------------
-function categorieAbsence(reason){
-  const r=String(reason||'').toLowerCase();
-  if(/suspen|red card|yellow card|card/.test(r))return 'suspension';
-  if(/illness|sick|virus/.test(r))return 'illness';
-  if(/injur|knock|strain|fracture|surgery|muscle|knee|ankle|hamstring|thigh|calf|groin|back|shoulder|foot|hip/.test(r))return 'injury';
-  return 'other';
-}
-function absencesCard(vm){
-  const a=vm.players.absences||{home:[],away:[]};
-  if(!a.home.length&&!a.away.length)return '';
-  const CAT={injury:'Blessure',suspension:'Suspension',illness:'Maladie',other:'Raison non précisée'};
-  const colonne=(team,list)=>`<div class="abs-col"><h3>${logoEquipe(team.logo,team.name)}<span>${esc(team.name)}</span><em>${list.length}</em></h3>${list.length?`<ul>${list.map(p=>{
-    const cat=categorieAbsence(p.reason),doute=/question|doubt/i.test(String(p.status||''));
-    const part=n(p.outputShare)!==null&&p.outputShare>=5?`<small>${esc(tf('match_page.absence_share','{pct} de la production offensive récente',{pct:pct(p.outputShare,0)}))}</small>`:'';
-    return `<li><span class="abs-name">${esc(p.name)}</span><span class="abs-why${doute?' is-doubt':''}">${esc(doute?t('match_page.absence_status_doubtful','Incertain'):t('match_page.absence_reason_'+cat,CAT[cat]))}</span>${part}</li>`;
-  }).join('')}</ul>`:`<p class="abs-none">${esc(t('match_page.absences_none','Aucune absence signalée'))}</p>`}</div>`;
-  return card(t('match_page.absences_title','Absences'),`<div class="abs-grid">${colonne(vm.identity.home,a.home)}${colonne(vm.identity.away,a.away)}</div>`,'absences-card','cross');
+function statsBlocs(vm){
+  return [formeFold(vm),classementFold(vm),h2hFold(vm),comparatifFold(vm),compoFold(vm)].join('');
 }
 
 // Logo d'equipe accole a son nom. SANS pastille ronde : un ecusson a sa propre
@@ -452,7 +586,7 @@ const poste=v=>{const k=String(v||'').trim();const e=POSTES[k.toLowerCase()];ret
 const buteur=name=>{const ml=window.IasharkMarketLabels;return ml&&ml.playerMarketLabelFor?ml.playerMarketLabelFor('ANYTIME_GOALSCORER',name):name;};
 const CODES_JOUEUR={'Buteur':'ANYTIME_GOALSCORER','Tirs':'PLAYER_SHOTS','Tirs cadrés':'PLAYER_SHOTS_ON_TARGET'};
 
-function threatsCard(vm){
+function threatsCard(vm,opts){
   const list=vm.players.scoringThreat;
   const projections=(vm.players.projections||[]).filter(p=>n(p.probability)!==null);
   if(!list.length&&!projections.length)return '';
@@ -506,7 +640,7 @@ function threatsCard(vm){
     }).join('')}</ul>`;
   }
   corps+=`<p class="pm-note">${esc(t('match_page.players_note','Probabilités estimées à partir des statistiques réelles des joueurs, sans cote de bookmaker.'))}</p>`;
-  return card(t('match_page.player_markets_title','Marchés joueurs'),corps,'threats-card','target2');
+  return card(t('match_page.player_markets_title','Marchés joueurs'),corps,'threats-card','target2',opts);
 }
 
 // Alertes d'absence du pipeline (update-data.yml#calcKeyAbsences) : gabarit
@@ -523,7 +657,7 @@ function texteRisque(vm,texte){
 
 // Sorties modele : buts attendus et scores exacts les plus probables, ecrits
 // comme au bookmaker ("Score exact : 1-1").
-function outputsCard(vm){
+function outputsCard(vm,opts){
   const x=vm.model.expectedGoals,s=vm.model.scores,i=vm.identity;
   // Seules les colonnes qui ont du contenu ; ce qui manque est dit en une
   // ligne discrete. Si TOUT manque, la carte disparait.
@@ -539,7 +673,7 @@ function outputsCard(vm){
   if(!cols.length)return '';
   return card(t('match_page.outputs_title','Ce que dit le modèle'),
     `<div class="outputs${cols.length===1?' outputs-1col':' outputs-2col'}">${cols.join('')}</div>`
-    +(manquant.length?`<p class="outputs-missing">${esc(manquant.join(' · '))}.</p>`:''),'','chart');
+    +(manquant.length?`<p class="outputs-missing">${esc(manquant.join(' · '))}.</p>`:''),'','chart',opts);
 }
 
 // Nettoyage des textes rediges (editorial, points de vigilance) : tout
@@ -600,9 +734,10 @@ const CMP_LABEL_KEYS={
 const CMP_GROUP_KEYS={'Attaque':'group_attack','Maîtrise':'group_control','Défense':'group_defense','Discipline':'group_discipline'};
 const cmpLabel=label=>{const k=CMP_LABEL_KEYS[label];return k?t('match_page.'+k,label):label;};
 
+// Renvoie { table (HTML), conclusion (HTML, ligne de resume du bloc repliable) }.
 function comparison(vm){
   const c=vm.comparison;
-  if(!c||!c.rows.length)return empty(t('match_page.comparison_unavailable','Statistiques comparatives indisponibles.'));
+  if(!c||!c.rows.length)return {table:empty(t('match_page.comparison_unavailable','Statistiques comparatives indisponibles.')),conclusion:''};
   const parLabel={};
   c.rows.forEach(r=>{parLabel[r.label]=r;});
   const dom=vm.identity.home.name,ext=vm.identity.away.name;
@@ -662,7 +797,7 @@ function comparison(vm){
   const note=n(c.sampleSize)!==null
     ? `${t('match_page.comparison_note_with_sample_prefix','Moyennes par match sur ')}${c.sampleSize} ${c.sampleSize>1?t('match_page.comparison_note_match_plural','rencontres'):t('match_page.comparison_note_match_singular','rencontre')}${c.sampleSize<5?t('match_page.comparison_note_thin_sample_suffix',' — échantillon encore court'):''}.`
     : t('match_page.comparison_note_simple','Moyennes par match.');
-  return `<div class="cmp-scroll"><table class="cmp-table">
+  const table=`<div class="cmp-scroll"><table class="cmp-table">
       <thead><tr>
         <th scope="col">${esc(t('match_page.comparison_table_header','Par match'))}</th>
         <th scope="col"><span class="cmp-eq">${logoEquipe(vm.identity.home.logo,dom)}${esc(dom)}</span></th>
@@ -671,8 +806,8 @@ function comparison(vm){
       </tr></thead>
       <tbody>${lignes.join('')}</tbody>
     </table></div>
-    ${conclusion?`<p class="cmp-conclusion">${conclusion}</p>`:''}
     <p class="cmp-note">${esc(note)} ${esc(t('match_page.comparison_note_disclaimer',"Hors-jeu et arrêts sont donnés sans verdict : plus d'arrêts signifie surtout plus de tirs subis."))}</p>`;
+  return {table,conclusion};
 }
 
 // Repartition des buts par tranche de 15 minutes : buts REELLEMENT comptes
@@ -696,80 +831,98 @@ function scenarioCard(vm){
     <p class="scenario-source">${esc(t('match_page.scenario_source_prefix','Sur '))}${g.totalGoals}${esc(t('match_page.scenario_source_middle',' buts marqués par '))}${esc(vm.identity.home.name)}${esc(t('match_page.scenario_source_and',' et '))}${esc(vm.identity.away.name)}${esc(t('match_page.scenario_source_suffix',' cette saison. Fréquence observée sur leurs matchs passés, pas une prévision pour celui-ci.'))}</p>`;
 }
 
-// FAQ — en dernier. Regle posee par l'utilisateur : uniquement des questions
-// dont la reponse n'est affichee nulle part ailleurs, nourries par
-// vm.editorial.exclusiveFacts (cartons, buts attendus de saison, precision de
-// passe, tranches d'encaissement).
-function faqCard(vm){
-  const qa=[];
-  const id=vm.identity, f=vm.editorial.exclusiveFacts||{}, g=vm.editorial.goalTiming;
-  const dom=id.home.name, ext=id.away.name;
-  const plusGrand=(p)=>p.home>=p.away?dom:ext;
-  const plusPetit=(p)=>p.home<=p.away?dom:ext;
-
-  // 1. Qui marque le plus tot : le graphique cumule les deux equipes.
+// QUESTIONS FREQUENTES — en dernier. Faits publics (quand/ou, forme,
+// face-a-face) et statistiques brutes (vm.editorial.exclusiveFacts : buts avant
+// la mi-temps, fin de match, cartons, occasions, passes) : reponses ouvertes.
+// Reponses qui viennent du modele (pronostic, 15 premieres minutes, chances de
+// chaque equipe, sur quoi repose l'analyse) : fermees au visiteur
+// (o.locked) - leur texte n'est meme pas construit.
+// o : { locked, href, lockText, linkText, pill }
+function faqCard(vm,o){
+  o=o||{};
+  const ferme=!!o.locked,raw=vm._raw||{},etat=etatAnalyse(raw);
+  const id=vm.identity,f=vm.editorial.exclusiveFacts||{},g=vm.editorial.goalTiming;
+  const dom=id.home.name,ext=id.away.name;
+  const plusGrand=p=>p.home>=p.away?dom:ext,plusPetit=p=>p.home<=p.away?dom:ext;
+  const faits=[],stats=[],modele=[],fin=[];
+  // 1. Faits publics.
+  const dh=dateHeure(vm),lieu=vm.conditions&&vm.conditions.venue;
+  if(dh.date&&dh.time)faits.push([tf('match_page.faq_q_when','Quand et où se joue {home} – {away} ?',{home:dom,away:ext}),
+    tf('match_page.faq_when_answer','Coup d’envoi le {date} à {time} (heure locale).',{date:esc(dh.date),time:esc(dh.time)})+(lieu?' '+tf('match_page.faq_when_venue','Stade : {venue}.',{venue:esc(lieu)}):'')]);
+  const fm=vm.form||{};
+  const bilan=rows=>({w:rows.filter(r=>r.result==='W').length,d:rows.filter(r=>r.result==='D').length,l:rows.filter(r=>r.result==='L').length,n:rows.length});
+  if(fm.home&&fm.home.length&&fm.away&&fm.away.length){
+    const a=bilan(fm.home),b=bilan(fm.away);
+    faits.push([t('match_page.faq_q_form','Quelle est la forme récente des deux équipes ?'),
+      tf('match_page.faq_form_answer','{home} : {hw} V · {hd} N · {hl} D sur ses {hn} derniers matchs. {away} : {aw} V · {ad} N · {al} D sur ses {an} derniers matchs.',{home:esc(dom),away:esc(ext),hw:a.w,hd:a.d,hl:a.l,hn:a.n,aw:b.w,ad:b.d,al:b.l,an:b.n})]);
+  }
+  const h=vm.h2h||[];
+  if(h.length){
+    const hw=h.filter(r=>r.winner==='1').length,dr=h.filter(r=>r.winner==='N').length,aw=h.filter(r=>r.winner==='2').length,der=h[0];
+    faits.push([t('match_page.faq_q_h2h','Qui a gagné les derniers face-à-face ?'),
+      tf('match_page.faq_h2h_answer','Sur les {n} dernières confrontations : {home} {hw} V · {draws} N · {away} {aw} V. Dernière rencontre : {lastHome} {lastScore} {lastAway}.',{n:h.length,home:esc(dom),away:esc(ext),hw,draws:dr,aw,lastHome:esc(der.home),lastScore:esc(der.score),lastAway:esc(der.away)})]);
+  }
+  // 2. Statistiques brutes des deux equipes.
   if(g&&g.slots.length>=6){
-    const totD=g.slots.reduce((a,x)=>a+x.home,0),totE=g.slots.reduce((a,x)=>a+x.away,0);
-    const avD=g.slots.slice(0,3).reduce((a,x)=>a+x.home,0);
-    const avE=g.slots.slice(0,3).reduce((a,x)=>a+x.away,0);
+    const totD=g.slots.reduce((s,x)=>s+x.home,0),totE=g.slots.reduce((s,x)=>s+x.away,0);
     if(totD>0&&totE>0){
-      const pD=Math.round(avD/totD*100),pE=Math.round(avE/totE*100);
-      const verdict=Math.abs(pD-pE)<3
-        ? t('match_page.faq_early_verdict_equal','Les deux entrent dans leurs matchs au même rythme.')
-        : tf('match_page.faq_early_verdict_team','{team} entre donc plus vite dans ses matchs.',{team:esc(pD>pE?dom:ext)});
-      qa.push([t('match_page.faq_q_early','Laquelle des deux marque le plus tôt ?'),
-        tf('match_page.faq_early_answer','{home} inscrit {homePct} % de ses buts avant la mi-temps, {away} {awayPct} %. {verdict} Le graphique plus haut cumule les deux équipes&nbsp;: ce détail par équipe n’y apparaît pas.',{home:esc(dom),away:esc(ext),homePct:pD,awayPct:pE,verdict})]);
+      const pD=Math.round(g.slots.slice(0,3).reduce((s,x)=>s+x.home,0)/totD*100),pE=Math.round(g.slots.slice(0,3).reduce((s,x)=>s+x.away,0)/totE*100);
+      const verdict=Math.abs(pD-pE)<3?t('match_page.faq_early_verdict_equal','Les deux entrent dans leurs matchs au même rythme.'):tf('match_page.faq_early_verdict_team','{team} entre donc plus vite dans ses matchs.',{team:esc(pD>pE?dom:ext)});
+      stats.push([t('match_page.faq_q_early','Laquelle des deux marque le plus tôt ?'),tf('match_page.faq_early_answer_plain','{home} inscrit {homePct} % de ses buts avant la mi-temps, {away} {awayPct} %. {verdict}',{home:esc(dom),away:esc(ext),homePct:pD,awayPct:pE,verdict})]);
     }
   }
-  // 2. Encaissement en fin de match.
   if(f.encaisseFin){
-    const ecartFin=Math.abs(f.encaisseFin.home-f.encaisseFin.away);
-    const verdictFin=ecartFin<4
-      ? t('match_page.faq_late_verdict_equal','Les deux tiennent la fin de match de la même façon.')
-      : tf('match_page.faq_late_verdict_team','{team} est la plus exposée sur la fin, ce qui compte pour un pari qui se joue au score final.',{team:esc(plusGrand(f.encaisseFin))});
-    qa.push([t('match_page.faq_q_late','Une des deux craque-t-elle en fin de match ?'),
-      tf('match_page.faq_late_answer','{home} encaisse {homePct} % de ses buts sur la dernière demi-heure, {away} {awayPct} %. {verdict}',{home:esc(dom),away:esc(ext),homePct:f.encaisseFin.home,awayPct:f.encaisseFin.away,verdict:verdictFin})]);
+    const verdictFin=Math.abs(f.encaisseFin.home-f.encaisseFin.away)<4?t('match_page.faq_late_verdict_equal','Les deux tiennent la fin de match de la même façon.'):tf('match_page.faq_late_verdict_team','{team} est la plus exposée sur la fin, ce qui compte pour un pari qui se joue au score final.',{team:esc(plusGrand(f.encaisseFin))});
+    stats.push([t('match_page.faq_q_late','Une des deux craque-t-elle en fin de match ?'),tf('match_page.faq_late_answer','{home} encaisse {homePct} % de ses buts sur la dernière demi-heure, {away} {awayPct} %. {verdict}',{home:esc(dom),away:esc(ext),homePct:f.encaisseFin.home,awayPct:f.encaisseFin.away,verdict:verdictFin})]);
   }
-  // 3. Cartons.
   if(f.cartons){
     const rugueux=Math.abs(f.cartons.home-f.cartons.away)<0.3?null:plusGrand(f.cartons);
     const nbRouges=f.rouges?f.rouges.home+f.rouges.away:0;
-    const rouges=nbRouges>0
-      ? (nbRouges>1
-        ? tf('match_page.faq_cards_red_other','Sur la période suivie, {n} cartons rouges au total.',{n:nbRouges})
-        : tf('match_page.faq_cards_red_one','Sur la période suivie, {n} carton rouge au total.',{n:nbRouges})) : '';
-    const verdictCartons=rugueux
-      ? tf('match_page.faq_cards_verdict_team','{team} est la plus sanctionnée des deux.',{team:esc(rugueux)})
-      : t('match_page.faq_cards_verdict_equal','Les deux sont sanctionnées au même rythme.');
-    qa.push([t('match_page.faq_q_cards','Combien de cartons dans un match de ces équipes ?'),
-      tf('match_page.faq_cards_answer','{home} en prend {homeCards} par match et {away} {awayCards}. {verdict}',{home:esc(dom),away:esc(ext),homeCards:fmt(f.cartons.home),awayCards:fmt(f.cartons.away),verdict:verdictCartons+(rouges?' '+rouges:'')})]);
+    const rouges=nbRouges>0?(nbRouges>1?tf('match_page.faq_cards_red_other','Sur la période suivie, {n} cartons rouges au total.',{n:nbRouges}):tf('match_page.faq_cards_red_one','Sur la période suivie, {n} carton rouge au total.',{n:nbRouges})):'';
+    const verdict=rugueux?tf('match_page.faq_cards_verdict_team','{team} est la plus sanctionnée des deux.',{team:esc(rugueux)}):t('match_page.faq_cards_verdict_equal','Les deux sont sanctionnées au même rythme.');
+    stats.push([t('match_page.faq_q_cards','Combien de cartons dans un match de ces équipes ?'),tf('match_page.faq_cards_answer','{home} en prend {homeCards} par match et {away} {awayCards}. {verdict}',{home:esc(dom),away:esc(ext),homeCards:fmt(f.cartons.home),awayCards:fmt(f.cartons.away),verdict:verdict+(rouges?' '+rouges:'')})]);
   }
-  // 4. Buts attendus de saison (pas ceux DE CE MATCH, affiches plus haut).
   if(f.xg&&f.xga){
-    const meilleure=plusGrand(f.xg), solide=plusPetit(f.xga);
-    qa.push([t('match_page.faq_q_chances','Ces équipes se créent-elles beaucoup d’occasions ?'),
-      tf('match_page.faq_chances_answer','Sur la saison, {home} génère {homeXg} buts attendus par match et en concède {homeXga}&nbsp;; {away} {awayXg} et {awayXga}. {best} se procure le plus d’occasions, {solid} en concède le moins.',{home:esc(dom),away:esc(ext),homeXg:fmt(f.xg.home),homeXga:fmt(f.xga.home),awayXg:fmt(f.xg.away),awayXga:fmt(f.xga.away),best:esc(meilleure),solid:esc(solide)})]);
+    stats.push([t('match_page.faq_q_chances','Ces équipes se créent-elles beaucoup d’occasions ?'),tf('match_page.faq_chances_answer','Sur la saison, {home} génère {homeXg} buts attendus par match et en concède {homeXga}&nbsp;; {away} {awayXg} et {awayXga}. {best} se procure le plus d’occasions, {solid} en concède le moins.',{home:esc(dom),away:esc(ext),homeXg:fmt(f.xg.home),homeXga:fmt(f.xga.home),awayXg:fmt(f.xg.away),awayXga:fmt(f.xga.away),best:esc(plusGrand(f.xg)),solid:esc(plusPetit(f.xga))})]);
   }
-  // 5. Precision de passe.
   if(f.passes&&Math.abs(f.passes.home-f.passes.away)>=2){
-    const propre=plusGrand(f.passes);
-    qa.push([t('match_page.faq_q_passing','Laquelle joue le plus proprement ?'),
-      tf('match_page.faq_passing_answer','{team} réussit {best} % de ses passes, contre {other} % en face. Une différence de cet ordre se traduit souvent par plus de possession et moins de contres subis.',{team:esc(propre),best:fmt(Math.max(f.passes.home,f.passes.away),0),other:fmt(Math.min(f.passes.home,f.passes.away),0)})]);
+    stats.push([t('match_page.faq_q_passing','Laquelle joue le plus proprement ?'),tf('match_page.faq_passing_answer','{team} réussit {best} % de ses passes, contre {other} % en face. Une différence de cet ordre se traduit souvent par plus de possession et moins de contres subis.',{team:esc(plusGrand(f.passes)),best:fmt(Math.max(f.passes.home,f.passes.away),0),other:fmt(Math.min(f.passes.home,f.passes.away),0)})]);
   }
-  // 6. Methode.
-  const sources=Array.isArray(vm.model.sources)?vm.model.sources.filter(Boolean):[];
-  const sims=n(vm.model.simulationCount),quality=n(vm.model.quality);
-  if(sims!==null||sources.length||quality!==null){
-    const bits=[];
-    if(sims!==null)bits.push(tf('match_page.faq_basis_sims','{n} simulations de Monte-Carlo',{n:sims.toLocaleString(localeTag())}));
-    if(sources.length)bits.push(tf('match_page.faq_basis_sources','les données {sources}',{sources:sources.map(x=>esc(libelleSource(String(x)))).join(', ')}));
-    if(quality!==null)bits.push(tf('match_page.faq_basis_quality','un score de qualité des données de {score}/100',{score:fmt(quality)}));
-    qa.push([t('match_page.faq_q_basis','Sur quoi repose cette analyse ?'),
-      tf('match_page.faq_basis_answer','L’analyse s’appuie sur {bits}. Les probabilités décrivent une fréquence attendue sur un grand nombre de matchs semblables, jamais une certitude sur celui-ci.',{bits:bits.join(', ')})]);
+  // 3. Reponses du modele : jamais construites pour le visiteur (null).
+  // « Pas de pari retenu » (no_signal) est une information publique.
+  if(ferme){
+    if(etat==='none')faits.push([t('match_page.faq_q_pick','Quel est le pronostic IASHARK pour ce match ?'),esc(t('match_page.faq_pick_none','Le modèle n’a retenu aucun pari sur ce match.'))]);
+    else if(etat==='ready')modele.push([t('match_page.faq_q_pick','Quel est le pronostic IASHARK pour ce match ?'),null]);
+    if(g&&g.slots.length)modele.push([t('match_page.faq_q_first15','Que peut-il se passer dans les 15 premières minutes ?'),null]);
+    if(etat!=='unknown'){
+      modele.push([t('match_page.faq_q_outcomes','Quelles chances le modèle donne-t-il à chaque équipe ?'),null]);
+      fin.push([t('match_page.faq_q_basis','Sur quoi repose cette analyse ?'),null]);
+    }
+  }else{
+    const r=vm.model.recommendation,pr=vm.model.probabilities;
+    if(r||etat==='none')modele.push([t('match_page.faq_q_pick','Quel est le pronostic IASHARK pour ce match ?'),r
+      ?tf('match_page.faq_pick_answer','Pari conseillé : {market}, cote {odds}, probabilité estimée {prob}. Estimation statistique, pas une garantie.',{market:esc(marcheFr(vm,r.market)),odds:esc(odds(vm.model.recommendedOdds)),prob:esc(pct(r.probability,0))})
+      :esc(t('match_page.faq_pick_none','Le modèle n’a retenu aucun pari sur ce match.'))]);
+    if(g&&g.slots.length&&g.totalGoals)modele.push([t('match_page.faq_q_first15','Que peut-il se passer dans les 15 premières minutes ?'),
+      tf('match_page.faq_first15_answer','Sur les matchs de la saison de ces deux équipes, {share} % des buts sont tombés dans le premier quart d’heure ({n} sur {total}). Fréquence observée, pas une prévision.',{share:Math.round(g.slots[0].share),n:g.slots[0].home+g.slots[0].away,total:g.totalGoals})]);
+    if(pr)modele.push([t('match_page.faq_q_outcomes','Quelles chances le modèle donne-t-il à chaque équipe ?'),
+      tf('match_page.faq_outcomes_answer','Victoire {home} : {p1} · match nul : {pn} · victoire {away} : {p2}. Estimation statistique, pas une garantie.',{home:esc(dom),away:esc(ext),p1:esc(pct(pr.home,0)),pn:esc(pct(pr.draw,0)),p2:esc(pct(pr.away,0))})]);
+    const sources=Array.isArray(vm.model.sources)?vm.model.sources.filter(Boolean):[];
+    const sims=n(vm.model.simulationCount),qualite=n(vm.model.quality);
+    if(sims!==null||sources.length||qualite!==null){
+      const bits=[];
+      if(sims!==null)bits.push(tf('match_page.faq_basis_sims','{n} simulations de Monte-Carlo',{n:sims.toLocaleString(localeTag())}));
+      if(sources.length)bits.push(tf('match_page.faq_basis_sources','les données {sources}',{sources:sources.map(x=>esc(libelleSource(String(x)))).join(', ')}));
+      if(qualite!==null)bits.push(tf('match_page.faq_basis_quality','un score de qualité des données de {score}/100',{score:fmt(qualite)}));
+      fin.push([t('match_page.faq_q_basis','Sur quoi repose cette analyse ?'),tf('match_page.faq_basis_answer','L’analyse s’appuie sur {bits}. Les probabilités décrivent une fréquence attendue sur un grand nombre de matchs semblables, jamais une certitude sur celui-ci.',{bits:bits.join(', ')})]);
+    }
   }
-  if(qa.length<2)return '';
-  return card(t('match_page.faq_title','Questions sur ce match'),
-    `<div class="faq-list">${qa.map(([q,a])=>`<details><summary>${esc(q)}</summary><p>${a}</p></details>`).join('')}</div>`,
+  const toutes=[...faits.map(x=>[...x,false]),...modele.map(x=>[...x,true]),...stats.map(x=>[...x,false]),...fin.map(x=>[...x,true])];
+  if(toutes.length<2)return '';
+  const verrou=`<p class="faq-lock">${cardIcon('lock')}<span>${esc(o.lockText||t('match_page.faq_locked','Réponse réservée aux abonnés.'))}</span><a href="${esc(o.href||'#')}"${suivi('match_faq_unlock')}>${esc(o.linkText||t('match_page.faq_unlock','Débloquer'))}</a></p>`;
+  const pastille=`<span class="faq-pro">${cardIcon('lock')}${esc(o.pill||t('match_page.lock_pill','Pro'))}</span>`;
+  return card(t('match_page.faq_section_title','Questions fréquentes'),
+    `<div class="faq-list">${toutes.map(([q,a,ia])=>`<details${ia?' class="faq-ia"':''}><summary><span>${esc(q)}${ia&&a===null?pastille:''}</span></summary>${a===null?verrou:`<p>${a}</p>`}</details>`).join('')}</div>`,
     'faq-card','faq');
 }
 
@@ -797,6 +950,126 @@ function bindSticky(){
   },{threshold:0}).observe(anchor);
 }
 
+// ---------------------------------------------------------------------------
+// SOMMAIRE COLLANT (Avis IASHARK · Stats · Analyse · Questions), BARRE
+// D'APPEL A L'ACTION MOBILE (visiteur) ET INTERACTIONS (repliables, bulles).
+// ---------------------------------------------------------------------------
+const NAV=[
+  {key:'avis',secs:['avis'],label:['match_page.nav_avis','Avis IASHARK']},
+  {key:'stats',secs:['stats','rappel'],label:['match_page.nav_stats','Stats']},
+  {key:'analyse',secs:['analyse'],label:['match_page.nav_analysis','Analyse']},
+  {key:'questions',secs:['questions'],label:['match_page.nav_questions','Questions']}
+];
+function navChips(presents,verrouilles,apres){
+  const items=NAV.map(x=>Object.assign({},x,{cible:x.secs.find(s=>presents.includes(s))})).filter(x=>x.cible);
+  if(items.length<2)return '';
+  return `<nav class="mnav" id="matchNav" aria-label="${esc(t('match_page.nav_aria','Sommaire du match'))}">
+    <ul class="mnav-chips">${items.map(x=>{
+      const lock=x.secs.filter(s=>presents.includes(s)).every(s=>verrouilles.includes(s));
+      return `<li><a class="mnav-chip" href="#sec-${x.cible}" data-nav="${x.key}">${esc(t(x.label[0],x.label[1]))}${lock?cardIcon('lock'):''}</a></li>`;
+    }).join('')}</ul>
+    ${apres||''}
+  </nav>`;
+}
+let navSurDefilement=null,navSurRedim=null;
+function bindNav(){
+  if(navSurDefilement)window.removeEventListener('scroll',navSurDefilement);
+  if(navSurRedim)window.removeEventListener('resize',navSurRedim);
+  navSurDefilement=navSurRedim=null;
+  const nav=root.querySelector('#matchNav');
+  if(!nav)return;
+  const bar=nav.querySelector('.mnav-chips'),chips=[...nav.querySelectorAll('.mnav-chip')];
+  const secVersPuce={};
+  NAV.forEach(x=>x.secs.forEach(s=>{secVersPuce[s]=x.key;}));
+  const secs=[...root.querySelectorAll('.sec[data-sec]')];
+  let actif,attente=false;
+  const maj=()=>{
+    attente=false;
+    const seuil=Math.max(nav.getBoundingClientRect().bottom+96,window.innerHeight*0.4);
+    let cur=null;
+    for(const s of secs){if(s.getBoundingClientRect().top<=seuil)cur=s;else break;}
+    if(secs.length&&window.innerHeight+window.scrollY>=document.documentElement.scrollHeight-4)cur=secs[secs.length-1];
+    const key=cur?secVersPuce[cur.dataset.sec]:null;
+    if(key===actif)return;
+    actif=key;
+    chips.forEach(c=>{const on=c.dataset.nav===key;c.classList.toggle('is-active',on);if(on)c.setAttribute('aria-current','true');else c.removeAttribute('aria-current');});
+    const chip=chips.find(c=>c.dataset.nav===key);
+    if(chip&&bar.scrollWidth>bar.clientWidth)bar.scrollTo({left:Math.max(0,chip.offsetLeft-(bar.clientWidth-chip.offsetWidth)/2),behavior:reduceMotion()?'auto':'smooth'});
+  };
+  navSurDefilement=()=>{if(!attente){attente=true;requestAnimationFrame(maj);}};
+  navSurRedim=()=>{actif=undefined;maj();};
+  window.addEventListener('scroll',navSurDefilement,{passive:true});
+  window.addEventListener('resize',navSurRedim,{passive:true});
+  chips.forEach(c=>c.addEventListener('click',ev=>{
+    const cible=document.getElementById(c.getAttribute('href').slice(1));
+    if(!cible)return;
+    ev.preventDefault();
+    cible.scrollIntoView({behavior:reduceMotion()?'auto':'smooth',block:'start'});
+    try{history.replaceState(null,'',c.getAttribute('href'));}catch(e){}
+  }));
+  maj();
+}
+// Barre mobile (visiteur) : masquee tant qu'un appel a l'action est deja a
+// l'ecran (avis, rappel, bloc analyse). Le corps reserve sa hauteur en bas.
+function bindCtaBar(){
+  const bar=document.getElementById('ctaBar');
+  if(!bar)return;
+  if(!('IntersectionObserver' in window)){bar.classList.remove('is-hidden');return;}
+  const vus=new Set();
+  const io=new IntersectionObserver(es=>{
+    es.forEach(e=>{if(e.isIntersecting)vus.add(e.target);else vus.delete(e.target);});
+    bar.classList.toggle('is-hidden',vus.size>0);
+  },{threshold:0.2});
+  root.querySelectorAll('.avis--lock,.cta-recall,.lock-card--analyse').forEach(c=>io.observe(c));
+}
+let uiLie=false;
+function bindUi(){
+  if(uiLie)return;
+  uiLie=true;
+  const fermerBulles=sauf=>root.querySelectorAll('.tip-btn[aria-expanded="true"]').forEach(b=>{
+    if(b===sauf)return;
+    b.setAttribute('aria-expanded','false');
+    const p=document.getElementById(b.getAttribute('aria-controls'));if(p)p.hidden=true;
+  });
+  root.addEventListener('click',ev=>{
+    const rep=ev.target.closest('.rep-btn');
+    if(rep){
+      const box=rep.closest('.rep'),panel=document.getElementById(rep.getAttribute('aria-controls'));
+      const ouvert=!box.classList.contains('is-open');
+      box.classList.toggle('is-open',ouvert);
+      rep.setAttribute('aria-expanded',String(ouvert));
+      if(panel){if(ouvert)panel.removeAttribute('inert');else panel.setAttribute('inert','');}
+      if(rep.dataset.labelOpen)rep.querySelector('span').textContent=ouvert?rep.dataset.labelOpen:rep.dataset.labelClosed;
+      return;
+    }
+    const tip=ev.target.closest('.tip-btn');
+    if(tip){
+      const pop=document.getElementById(tip.getAttribute('aria-controls')),ouvrir=tip.getAttribute('aria-expanded')!=='true';
+      fermerBulles(tip);
+      tip.setAttribute('aria-expanded',String(ouvrir));
+      if(pop)pop.hidden=!ouvrir;
+      return;
+    }
+    if(!ev.target.closest('.tip-pop'))fermerBulles(null);
+  });
+  document.addEventListener('keydown',ev=>{if(ev.key==='Escape')fermerBulles(null);});
+}
+
+// Assemble la page : sections [cle, html, verrouillee] ; seules les sections
+// non vides sont rendues (sections.filter(x=>x&&x[1])).
+function paint(vm,sections,apresNav,apresPage){
+  const S=sections.filter(x=>x&&x[1]);
+  const presents=S.map(x=>x[0]),verrouilles=S.filter(x=>x[2]).map(x=>x[0]);
+  const corps=S.map(([k,html,lock])=>`<div class="sec" id="sec-${k}" data-sec="${k}"${lock?' data-locked="true"':''}>${html}</div>`).join('');
+  document.body.classList.toggle('has-cta-bar',!!apresPage);
+  root.innerHTML=`<div class="page">${hero(vm)}${navChips(presents,verrouilles,apresNav)}<div class="secs">${corps}</div></div>${apresPage||''}`;
+  bindMotion();
+  bindUi();
+  bindNav();
+  bindSticky();
+  bindCtaBar();
+}
+
 // Bloc SEO statique des pages /match/<id>.html (h1 + resume). Il RESTE en
 // place apres le rendu (audit perf 15/09/2026 : sa suppression decalait toute
 // la page, CLS 0,7) et garde le seul h1 ; l'en-tete de l'application passe
@@ -812,30 +1085,33 @@ function viewModel(raw){
   return vm;
 }
 
+// L'ANALYSE IASHARK (abonne / match offert) : 4 blocs repliables, dans l'ordre
+// scenario (15 minutes), ce que dit le modele, probabilites et cotes, marches
+// joueurs.
+function analyseAbonne(vm){
+  const blocs=[
+    fold({key:'scenario',title:t('match_page.scenario_title','Scénario probable du match'),icon:'chart',summary:esc(t('match_page.scenario_sub','Quand les buts tombent, par tranche de 15 minutes')),body:scenarioCard(vm),open:true}),
+    outputsCard(vm,{fold:{key:'modele',summary:esc(t('match_page.outputs_sub','Buts attendus et scores les plus probables')),open:true}})
+  ];
+  const probas=marketsCard(vm);
+  if(probas)blocs.push(fold({key:'probas',title:t('match_page.markets_title','Probabilités et cotes'),icon:'table',summary:esc(t('match_page.proba_sub','Nos chances face à la cote, pari par pari')),body:probas,open:true}));
+  blocs.push(threatsCard(vm,{fold:{key:'joueurs',summary:esc(t('match_page.players_sub','Les buteurs les plus probables'))}}));
+  return blocs.filter(Boolean).join('');
+}
+
 function render(raw){
   const vm=viewModel(raw);
-  // ORDRE DE LECTURE (14/09/2026, demande du proprietaire) : en-tete, le
-  // signal au centre, les probabilites et cotes, la forme et les
-  // face-a-face, les absences, les statistiques, les scores, les marches
-  // joueurs, la repartition des buts, et la FAQ en dernier.
-  // Retires a la meme occasion (doublons du signal ou du tableau) : "Notre
-  // lecture du match", "Ce qu'il faut savoir", "Matchup", "Stats a ne pas
-  // surinterpreter", "Value potentielle".
+  // ORDRE DE LECTURE (16/09/2026, maquette V8 validee par le proprietaire) :
+  // en-tete, l'avis IASHARK, les stats du match (ouvertes), l'analyse
+  // IASHARK, les questions frequentes a la fin. Section Absences retiree.
+  const stats=statsBlocs(vm),analyse=analyseAbonne(vm);
   const sections=[
-    signalCard(vm),
-    marketsCard(vm),
-    formH2HCard(vm),
-    absencesCard(vm),
-    card(t('match_page.comparison_title','Comparatif des deux équipes'),comparison(vm),'compare-card','compare'),
-    outputsCard(vm),
-    threatsCard(vm),
-    card(t('match_page.scenario_title','Scénario probable du match'),scenarioCard(vm),'','chart'),
-    faqCard(vm)
+    ['avis',signalCard(vm)],
+    ['stats',stats?groupe({title:t('match_page.stats_group_title','Les stats du match'),sub:t('match_page.stats_group_sub','Données brutes des deux équipes.'),body:stats}):''],
+    ['analyse',analyse?groupe({title:t('match_page.analysis_group_title','L’analyse IASHARK'),sub:t('match_page.analysis_group_sub','Ce que calcule notre modèle pour ce match.'),body:analyse}):''],
+    ['questions',faqCard(vm,{locked:false})]
   ];
-  const corps=sections.filter(Boolean).map(node=>`<div class="sec">${node}</div>`).join('');
-  root.innerHTML=`<div class="page">${hero(vm)}<div class="secs">${corps}</div></div>${signalSticky(vm)}`;
-  bindMotion();
-  bindSticky();
+  paint(vm,sections,signalSticky(vm),'');
 }
 
 function bindMotion(){
@@ -860,71 +1136,113 @@ function bindMotion(){
   }
 }
 
-// MURS D'ACCES. Le match du jour (pickFreeMatchId, meme choix que l'accueil)
-// reste gratuit mais exige un compte ; les autres necessitent Pro. La vraie
-// protection est cote serveur (fonction match-data). Le teaser n'affiche
-// AUCUNE donnee du modele : ni pari, ni probabilite, ni ecart - seulement le
-// nombre de cotes de bookmaker comparees, le niveau de fiabilite publie et un
-// gabarit flou sans texte.
+// VUE VISITEUR (match payant sans Pro, ou match offert sans compte). Le match
+// du jour (pickFreeMatchId, meme choix que l'accueil) reste gratuit mais exige
+// un compte ; les autres necessitent Pro. La vraie protection est cote serveur
+// (fonction match-data, fichiers publics sans champ premium).
+// Regle du proprietaire : tout ce que l'IA donne est FERME, les stats brutes
+// sont OUVERTES. Les blocs fermes ne lisent que des champs PUBLICS
+// (has_signal, no_signal, prob_band) : aucun chiffre, aucune sortie du modele.
+// opts : { free, title, href, cta, ctaShort }
 function gateCard(vm,opts){
-  const tz=vm.teaser||{},pub=vm._raw||{};
-  // Champs PUBLICS du teaser uniquement (lib/premium-fields.js) : no_signal et
-  // has_signal disent "une analyse existe", sans la donner. conf (probabilite du
-  // modele / 10) n'est plus affiche ici : une probabilite ne s'affiche jamais
-  // sur un match non offert.
-  const annonce=pub.no_signal===true?t('match_page.sig_teaser_no_signal','Aucun pari retenu par le modèle sur ce match.')
-    :(pub.has_signal===true||pub.no_signal===false)?t('match_page.sig_teaser_exists','Une analyse IASHARK existe pour ce match.'):'';
-  const faits=[
-    n(tz.oddsCount)!==null&&tz.oddsCount>0?tf('match_page.gate_teaser_odds','{n} cotes de marché comparées au modèle',{n:tz.oddsCount}):null,
-    tz.reliability?relLigne(tz.reliability):null,
-    t('match_page.gate_teaser_content','Pari recommandé, probabilité du modèle, value et raisons chiffrées')
-  ].filter(Boolean);
-  return `<div class="page">
-    ${hero(vm)}
-    <section class="signal-card is-locked gate reveal" aria-labelledby="gateTitle">
-      <div class="sig-head">
-        <span class="sig-eyebrow">${cardIcon('target')}${esc(t('match_page.signal_title','Le signal IASHARK'))}</span>
-        ${relBadge(tz.reliability)}
-      </div>
-      ${annonce?`<p class="sig-teaser-line">${esc(annonce)}</p>`:''}
-      <div class="sig-slip is-locked">
-        <div class="sig-slip-main">
-          <p class="sig-kicker">${esc(t('match_page.sig_bet_label','Pari recommandé'))}</p>
-          <div class="sig-ghost" aria-hidden="true"><span class="g1"></span><span class="g2"></span></div>
-        </div>
-        <div class="sig-odds-box is-locked" aria-hidden="true">${cardIcon('lock')}</div>
-      </div>
-      <div class="gate-body">
-        ${cardIcon('lock')}
-        <h2 id="gateTitle">${esc(opts.title)}</h2>
-        <p>${esc(opts.text)}</p>
-        <ul class="gate-facts">${faits.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>
-        <a class="btn-gate" href="${esc(opts.href)}">${esc(opts.cta)}</a>
-      </div>
-      ${methodLink()}
-      <p class="sig-legal">${esc(t('match_page.sig_legal','18+ · Estimation statistique, pas une garantie. Jouez responsable.'))}</p>
-    </section>
+  const o=opts,raw=vm._raw||{},etat=etatAnalyse(raw),bande=etat==='ready'?bandeDe(raw):null;
+  const contenu=[
+    ['avis_item_bet','Le pari conseillé et sa cote'],
+    ['avis_item_prob','La probabilité estimée par le modèle'],
+    ['avis_item_scenario','Le scénario des 15 premières minutes'],
+    ['avis_item_model','L’avis du modèle sur le match'],
+    ['avis_item_players','Les marchés joueurs et buteurs']
+  ].filter((x,i)=>etat!=='none'||i>1);
+  const titre=etat==='none'?t('match_page.avis_no_signal','Pas de pari retenu par le modèle sur ce match'):o.title;
+  return `<section class="signal-card is-locked gate avis avis--lock reveal" aria-labelledby="gateTitle">
+    <div class="sig-head">
+      <span class="sig-eyebrow">${cardIcon('target')}${esc(t('match_page.avis_title','L’avis IASHARK'))}</span>
+      ${etat==='ready'?`<span class="avis-ready"><i aria-hidden="true"></i>${esc(t('match_page.avis_ready','Analyse prête'))}</span>`:''}
+    </div>
+    <h2 id="gateTitle" class="avis-h">${esc(titre)}</h2>
+    ${o.free?`<p class="avis-free">${esc(t('match_page.gate_free_text','Ce match est gratuit, mais il faut un compte IASHARK gratuit (inscription ou connexion) pour voir l’analyse complète.'))}</p>`:''}
+    ${bande?`<div class="avis-band"><span>${esc(t('match_page.avis_band_label','Niveau du pari conseillé'))}</span>${bandBadge(bande)}</div>`:''}
+    ${etat!=='none'?`<div class="sig-slip is-locked">
+      <div class="sig-slip-main"><p class="sig-kicker">${esc(t('match_page.sig_bet_label','Pari recommandé'))}</p><div class="sig-ghost" aria-hidden="true"><span class="g1"></span><span class="g2"></span></div></div>
+      <div class="sig-odds-box is-locked" aria-hidden="true">${cardIcon('lock')}</div>
+    </div>`:''}
+    <div class="avis-inc"><p>${esc(t('match_page.avis_includes','Ce que contient l’analyse'))}</p><ul class="gate-facts">${contenu.map(([k,fb])=>`<li>${esc(t('match_page.'+k,fb))}</li>`).join('')}</ul></div>
+    <a class="btn-gate avis-cta" href="${esc(o.href)}"${suivi('match_avis_unlock')}>${cardIcon('lock')}<span>${esc(o.cta)}</span></a>
+    <p class="sig-legal">${esc(t('match_page.avis_legal','Estimation, pas une garantie · 18+ · Jouez responsable.'))}</p>
+    ${methodLink()}
+  </section>`;
+}
+// L'analyse fermee : UN bloc qui liste les 4 contenus, apercu flou abstrait
+// (formes CSS, aucune valeur, aucun texte).
+const FANTOME=`<div class="lk-g">${[1,2,3].map(i=>`<div class="lk-pair"><span class="lk-t w${i}"></span><span class="lk-b a${i}"></span><span class="lk-b b${i}"></span></div>`).join('')}</div>`;
+function analyseVisiteur(o){
+  const items=[
+    ['chart','scenario_title','Scénario probable du match','lock_scenario_text','Ce qui peut se passer dans les 15 premières minutes'],
+    ['chart','outputs_title','Ce que dit le modèle','lock_model_text','Les scores les plus probables selon notre modèle'],
+    ['table','markets_title','Probabilités et cotes','lock_probas_text','Nos chances face à la cote, pari par pari, écart expliqué en mots'],
+    ['target2','player_markets_title','Marchés joueurs','lock_players_text','Les joueurs les plus susceptibles de marquer']
+  ];
+  const titre=o.free?t('match_page.lock_free_title','Offert avec un compte gratuit'):t('match_page.lock_analysis_title','Réservé aux abonnés');
+  return `<section class="card lock-card lock-card--analyse reveal" aria-labelledby="lkAnalyse">
+    <h3 id="lkAnalyse" class="lock-h">${cardIcon('lock')}${esc(titre)}</h3>
+    <ul class="lock-list">${items.map(([ic,k,fb,k2,fb2])=>`<li>${cardIcon(ic)}<div><b>${esc(t('match_page.'+k,fb))}</b><span>${esc(t('match_page.'+k2,fb2))}</span></div></li>`).join('')}</ul>
+    <div class="lock-wrap">
+      <div class="lock-ghost" aria-hidden="true">${FANTOME}</div>
+      <div class="lock-over"><p>${esc(t('match_page.lock_analysis_text','Tout ce que calcule notre modèle pour ce match.'))}</p><a class="lock-cta" href="${esc(o.href)}"${suivi('match_analysis_unlock')}>${esc(o.cta)}</a></div>
+    </div>
+  </section>`;
+}
+// Rappel visiteur, une seule fois, apres les stats.
+function rappelCta(vm,o){
+  const raw=vm._raw||{},etat=etatAnalyse(raw),bande=etat==='ready'?bandeDe(raw):null;
+  const phrase=o.free?t('match_page.cta_recall_free','Vous avez vu les stats. L’analyse complète de ce match est offerte avec un compte gratuit.')
+    :etat==='none'?t('match_page.cta_recall_none','Vous avez vu les stats. Le modèle n’a pas retenu de pari, mais son analyse du match reste disponible.')
+    :bande?t('match_page.cta_recall_band','Vous avez vu les stats. L’avis du modèle sur ce match :')
+    :t('match_page.cta_recall_ready','Vous avez vu les stats. L’avis du modèle sur ce match est prêt.');
+  return `<aside class="cta-recall reveal" aria-label="${esc(t('match_page.cta_recall_aria','Avis du modèle sur ce match'))}">
+    <p>${esc(phrase)}${bande?` ${bandBadge(bande)}`:''}</p>
+    <a class="cta-recall-btn" href="${esc(o.href)}"${suivi('match_recall_unlock')}>${esc(o.ctaShort)}</a>
+  </aside>`;
+}
+// Barre mobile collante « Analyse prête · niveau · Débloquer ».
+function ctaBar(vm,o){
+  const etat=etatAnalyse(vm._raw),bande=etat==='ready'?bandeDe(vm._raw):null;
+  const libelle=o.free?t('match_page.cta_bar_free','Analyse offerte'):etat==='ready'?t('match_page.avis_ready','Analyse prête'):t('match_page.cta_bar_analysis','Analyse du match');
+  return `<div class="cta-bar is-hidden" id="ctaBar">
+    <div class="cta-bar-in"><span class="cta-bar-txt"><b>${esc(libelle)}</b>${bande?bandBadge(bande,true):''}</span><a class="cta-bar-btn" href="${esc(o.href)}"${suivi('match_bar_unlock')}>${cardIcon('lock')}${esc(o.ctaShort)}</a></div>
   </div>`;
 }
+function renderVisitor(raw,opts){
+  const o=Object.assign({
+    free:false,
+    title:t('match_page.avis_lock_title','Notre modèle a analysé ce match'),
+    href:lien('abonnement.html'),
+    cta:t('match_page.avis_unlock','Débloquer l’analyse'),
+    ctaShort:t('match_page.cta_unlock_short','Débloquer')
+  },opts||{});
+  // Defense en profondeur : copie sans aucun champ premium AVANT tout calcul.
+  const vm=viewModel(publicCopy(raw));
+  const stats=statsBlocs(vm);
+  const pill=o.free?t('match_page.lock_pill_free','Gratuit'):t('match_page.lock_pill','Pro');
+  paint(vm,[
+    ['avis',gateCard(vm,o),true],
+    ['stats',stats?groupe({title:t('match_page.stats_group_title','Les stats du match'),sub:t('match_page.stats_group_sub_open','Données brutes des deux équipes, ouvertes à tous.'),body:stats}):''],
+    ['rappel',stats?rappelCta(vm,o):''],
+    ['analyse',groupe({title:t('match_page.analysis_group_title','L’analyse IASHARK'),sub:t('match_page.analysis_group_sub','Ce que calcule notre modèle pour ce match.'),body:analyseVisiteur(o),pill}),true],
+    ['questions',faqCard(vm,{locked:true,href:o.href,linkText:o.ctaShort,pill,lockText:o.free?t('match_page.faq_locked_free','Réponse offerte avec un compte gratuit.'):t('match_page.faq_locked','Réponse réservée aux abonnés.')})]
+  ],'',ctaBar(vm,o));
+}
 function renderAuthWall(raw){
-  const vm=viewModel(raw);
-  root.innerHTML=gateCard(vm,{
+  renderVisitor(raw,{
+    free:true,
     title:t('match_page.gate_free_title','Match gratuit du jour'),
-    text:t('match_page.gate_free_text','Ce match est gratuit, mais il faut un compte IASHARK gratuit (inscription ou connexion) pour voir l’analyse complète.'),
     href:lien('compte.html'),
-    cta:t('match_page.gate_free_cta','Se connecter / Créer un compte')
+    cta:t('match_page.free_cta','Créer un compte gratuit / Se connecter'),
+    ctaShort:t('match_page.free_cta_short','Créer un compte gratuit')
   });
-  bindMotion();
 }
 function renderProWall(raw){
-  const vm=viewModel(raw);
-  root.innerHTML=gateCard(vm,{
-    title:t('match_page.gate_pro_title','Analyse réservée aux membres Pro'),
-    text:t('match_page.gate_pro_text','Le marché recommandé, la confiance du modèle et l’analyse complète de ce match sont réservés aux membres Pro. Le match du jour, lui, reste gratuit.'),
-    href:lien('abonnement.html'),
-    cta:t('match_page.gate_pro_cta','Devenir Pro')
-  });
-  bindMotion();
+  renderVisitor(raw,{href:lien('abonnement.html')});
 }
 
 // Apercu : en-tete du match (donnees publiques, aucune sortie du modele) et
@@ -997,6 +1315,13 @@ async function init(){
     if(!id)throw new Error(t('match_page.match_not_found','Match introuvable'));
     const [liste,detail]=await publiques;
     if(detail&&String(detail.id)===String(id))raw=fusion(detail,raw);
+    // prob_band (niveau public high/good/moderate, jamais un chiffre) : porte par
+    // match/<id>.json et PRELOADED_MATCH ; repli sur la liste d'accueil. Recopie
+    // sur la version servie par match-data si elle ne l'a pas.
+    const ligneListe=liste&&Array.isArray(liste.matchs)?liste.matchs.find(m=>m&&String(m.id)===String(id)):null;
+    const bandePublique=bandeDe(raw)||bandeDe(ligneListe);
+    const avecBande=m=>m&&bandePublique&&!bandeDe(m)?Object.assign({},m,{prob_band:bandePublique}):m;
+    raw=avecBande(raw);
     if(raw&&!raw.detail_omitted)renderApercu(raw);
     // Session : app-client.js et supabase-js (defer) sont executes avant DOMContentLoaded.
     await new Promise(ok=>{if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',ok,{once:true});else ok();});
@@ -1008,7 +1333,7 @@ async function init(){
         const result=await window.IasharkApp.supabase.functions.invoke('match-data',{body:{id:String(id)}});
         if(result.data&&!result.error){
           list=result.data.matchs||[];
-          raw=list.find(x=>String(x.id)===String(id))||raw;
+          raw=avecBande(list.find(x=>String(x.id)===String(id))||raw);
         }
       }
     }

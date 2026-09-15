@@ -1501,11 +1501,11 @@ jobs:
           function seoSummaryHtmlFor(m){
             var d=(m.date||'').split(' ')[0];
             var modelAvailable=m.model_output_available!==false&&Number(m.data_quality_score||0)>0;
-            var pariTxt=(m.is_free&&modelAvailable&&m.pari_rec&&!m.no_signal)?('<p><span data-i18n="match_page.seo_recommended_market">Marché recommandé par le modèle :</span> <strong data-market-label="'+escHtml(m.pari_rec)+'" data-home="'+escHtml(m.home.n)+'" data-away="'+escHtml(m.away.n)+'">'+escHtml(seoMarketLabel(m,'fr'))+'</strong> ('+escHtml(String(m.conf||''))+'/10)</p>'):'';
+            // Page match V8 (16/09/2026) : HTML statique = parties publiques
+            // seulement ; le pari n'est plus nomme, meme pour le match offert.
             return '<div style="padding:24px 16px;font-family:\'DM Sans\',sans-serif;color:#94a3b8;font-size:13px;line-height:1.6">'
               +'<h1 style="font-family:\'Bebas Neue\',sans-serif;font-size:22px;letter-spacing:.5px;color:#e2e8f0;margin-bottom:8px">'+escHtml(m.home.n)+' vs '+escHtml(m.away.n)+'</h1>'
               +'<p>'+(m.league?escHtml(seoLeagueName(m))+' — ':'')+(d?'<time datetime="'+escHtml(d)+'">'+escHtml(seoDateLabel(d,'fr'))+'</time>':'')+'</p>'
-              +pariTxt
               +(modelAvailable?'<p data-i18n="match_page.seo_analysis_available">Analyse statistique IASHARK disponible pour ce match.</p>':'<p data-i18n="match_page.model_unavailable_reason">Les données disponibles ne permettent pas encore une analyse chiffrée fiable.</p>')
               +'</div>';
           }
@@ -1573,7 +1573,7 @@ jobs:
                 .replace('<!--SEO_META--><!--/SEO_META-->', metaBlock)
                 .replace('<!--SEO_SUMMARY--><!--/SEO_SUMMARY-->', seoSummaryHtmlFor(m))
                 .replace('<!--FIXED_ID_SCRIPT--><!--/FIXED_ID_SCRIPT-->', '<script>var FIXED_MATCH_ID='+JSON.stringify(String(m.id))+';</script>')
-                .replace('<!--PRELOADED_MATCH_SCRIPT--><!--/PRELOADED_MATCH_SCRIPT-->', '<script>var PRELOADED_MATCH='+JSON.stringify(PUBLIC_SPLIT.toListMatch(PREMIUM_FIELDS_LIB.stripPremium(m))).replace(/</g,'\\u003c')+';</script>')
+                .replace('<!--PRELOADED_MATCH_SCRIPT--><!--/PRELOADED_MATCH_SCRIPT-->', '<script>var PRELOADED_MATCH='+JSON.stringify(PUBLIC_SPLIT.preloadedMatch(m)).replace(/</g,'\\u003c')+';</script>')
                 .replace('</main>', function(){ return SEO_PAGES.matchFactsHtml(m,'fr')+'</main>'; });
               fs.writeFileSync('match/'+m.id+'.html', page);
               keepFiles[String(m.id)+'.html']=true;

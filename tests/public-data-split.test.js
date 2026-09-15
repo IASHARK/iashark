@@ -89,7 +89,8 @@ test("le pipeline ecrit les fichiers decoupes depuis matchsPublics et les publie
     "les fichiers publics decoupes doivent venir de la copie assainie");
   assert.doesNotMatch(wf, /writePublicSplit\(fs,allMatchsData/);
   assert.match(wf, /PUBLIC_SPLIT\.writePublicSplit\(fs,\[\],/, "jour sans matchs : liste videe aussi");
-  assert.match(wf, /PRELOADED_MATCH='\+JSON\.stringify\(PUBLIC_SPLIT\.toListMatch\(PREMIUM_FIELDS_LIB\.stripPremium\(m\)\)\)/,
+  // PUBLIC_SPLIT.preloadedMatch = toListMatch(stripPremium(withProbBand(m))) (16/09/2026).
+  assert.match(wf, /PRELOADED_MATCH='\+JSON\.stringify\(PUBLIC_SPLIT\.preloadedMatch\(m\)\)/,
     "PRELOADED_MATCH est la version legere du match assaini");
   assert.match(wf, /keepFiles\[String\(m\.id\)\+'\.json'\]=true;/);
   const outputs = wf.match(/OUTPUTS="([^"]*)"/)[1].split(/\s+/);
@@ -150,6 +151,40 @@ test("fichier reel data-home.json : prob_band dans la liste fermee, aucune proba
     if (m.is_free === true) continue;
     for (const k of ["model_probability", "conf", "conf_bucket", "p1", "pn", "p2", "po25", "btts", "edge"]) assert.equal(m[k], undefined, k + " sur le match " + m.id);
     if (m.prob_band !== undefined) assert.equal(m.has_signal, true, "niveau sans analyse, match " + m.id);
+  }
+});
+
+// Page match V8 (16/09/2026) : le niveau public est lu par la page match du
+// visiteur. Il est porte par match/<id>.json (copie publique) et PRELOADED_MATCH.
+test("prob_band : dans match/<id>.json et PRELOADED_MATCH, jamais la valeur exacte", () => {
+  const PREM = require("../lib/premium-fields.js");
+  const brut = { id: 77, home: { n: "A" }, away: { n: "B" }, date: "2026-09-16 21:00", pari_rec: "Over 2.5", model_probability: 76.2, conf: 7.6, p1: 50, h2h: [{ s: "1-0" }] };
+  const pub = PREM.stripPremium(split.withProbBand(brut));
+  const s = split.buildPublicSplit([pub], {});
+  assert.equal(s.list.matchs[0].prob_band, "high");
+  assert.equal(s.details[0].match.prob_band, "high", "detail match/<id>.json");
+  const pre = split.preloadedMatch(brut);
+  assert.equal(pre.prob_band, "high", "PRELOADED_MATCH depuis le match complet");
+  assert.equal(split.preloadedMatch(pub).prob_band, "high", "PRELOADED_MATCH depuis la copie assainie");
+  assert.equal(pre.detail_omitted, true);
+  assert.equal(pre.h2h, undefined, "version legere");
+  for (const k of ["model_probability", "conf", "p1", "pari_rec"]) assert.equal(pre[k], undefined, k);
+  assert.deepEqual(PREM.deepPremiumLeaks([pre, s.details[0].match]), []);
+  assert.doesNotMatch(JSON.stringify(pre), /76/);
+  assert.equal(split.preloadedMatch({ id: 78, home: { n: "A" }, away: { n: "B" }, no_signal: true, model_probability: 80 }).prob_band, undefined, "pas d'analyse : aucun niveau");
+  const offert = split.preloadedMatch({ id: 79, is_free: true, home: { n: "A" }, away: { n: "B" }, pari_rec: "Over 2.5", model_probability: 70 });
+  assert.equal(offert.pari_rec, "Over 2.5", "match offert : inchange");
+  // Meme fonction dans le pipeline, les pages localisees et la regeneration locale.
+  assert.match(read(".github/workflows/update-data.yml"), /'<script>var PRELOADED_MATCH='\+JSON\.stringify\(PUBLIC_SPLIT\.preloadedMatch\(m\)\)/);
+  assert.match(read("scripts/seo-pages.js"), /JSON\.stringify\(PUBLIC_SPLIT\.preloadedMatch\(m\)\)/);
+  assert.match(read("scripts/split-public-data.js"), /m\.prob_band = bandeParId\[String\(m\.id\)\]/);
+  // Fichiers reels : un match/<id>.json porte le meme niveau que la liste.
+  const liste = JSON.parse(read(split.LIST_FILE)).matchs;
+  for (const m of liste) {
+    const f = path.join(root, split.detailPath(m.id));
+    if (!fs.existsSync(f)) continue;
+    const d = JSON.parse(fs.readFileSync(f, "utf8"));
+    assert.equal(d.prob_band, m.prob_band, "prob_band liste/detail, match " + m.id);
   }
 });
 

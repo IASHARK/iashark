@@ -59,6 +59,32 @@ test("vue du match reel 1557402 : signal, tableau modele/marche et raisons coher
   for (const row of vm.model.marketTable) assert.ok(row.model > 0 && row.model < 100, "probabilite modele reelle sur chaque ligne");
 });
 
+// Bug « Marche 0 % » (16/09/2026, match offert 1570385) : finite(null) vaut 0.
+// Une probabilite de marche, une probabilite du modele ou une cote ABSENTE est
+// non disponible (null), jamais 0, et ne produit aucun ecart.
+test("marketTable : donnee absente = non disponible, jamais 0 % ni fausse value", () => {
+  const raw = { id: 11, home: { id: 1, n: "Barcelona" }, away: { id: 2, n: "Racing" }, model_output_available: true, data_quality_score: 80,
+    p1: 62.4, pn: 22.1, p2: 15.5, market_consensus_p1: null, market_consensus_pN: "", c1: "1.06", cn: "14.50", c2: null,
+    po25: null, markets_compared: [{ id: "under-35", market: "Under 3.5", probability: 58, consensus: null, edge: null }] };
+  const rows = buildMatchViewModel(raw).model.marketTable;
+  const byId = Object.fromEntries(rows.map((r) => [r.id, r]));
+  assert.equal(byId["home-win"].market, null, "consensus absent : null, pas 0");
+  assert.equal(byId["home-win"].edge, null, "aucun ecart sans marche");
+  assert.equal(byId["draw"].market, null);
+  assert.equal(byId["away-win"].odds, null, "cote absente : null, pas 0");
+  assert.equal(byId["home-win"].odds, 1.06);
+  assert.equal(byId["over-25"], undefined, "probabilite du modele absente : pas de ligne a 0 %");
+  assert.equal(byId["under-35"].market, null);
+  assert.equal(byId["under-35"].edge, null);
+  // Une vraie valeur 0 reste 0 (donnee presente).
+  const zero = buildMatchViewModel(Object.assign({}, raw, { market_consensus_p2: 0 })).model.marketTable.find((r) => r.id === "away-win");
+  assert.equal(zero.market, 0);
+  // Affichage : match-page.js ne montre jamais un marche <= 0 comme une probabilite.
+  const js = fs.readFileSync(path.join(__dirname, "..", "match-page.js"), "utf8");
+  assert.match(js, /const marcheValide=v=>n\(v\)!==null&&n\(v\)>0\?n\(v\):null;/);
+  assert.match(js, /proba_market_na','non disponible'/);
+});
+
 test("mur d'acces : le teaser ne contient aucune donnee du modele", () => {
   const vm = buildMatchViewModel({ id: 9, home: { id: 1, n: "A" }, away: { id: 2, n: "B" }, c1: "2.10", cn: "3.30", c2: "3.60", co25: "1.90", reliability: { label: "Moyenne", sample_size: 3 } });
   assert.deepEqual(Object.keys(vm.teaser).sort(), ["oddsCount", "reliability"]);

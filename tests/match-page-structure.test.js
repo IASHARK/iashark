@@ -12,15 +12,19 @@ test("la page simple expose une seule colonne de sections réelles, sans onglets
   assert.doesNotMatch(js,/data-tab=/);assert.doesNotMatch(js,/role="tablist"/);
   // Libelles mis a jour le 02/09/2026 apres decisions produit explicites :
   // "Recommandation IASHARK" -> "Le signal IASHARK" (remontee en tete de page) ;
-  // "Pourquoi le pari ressort" -> "Comparatif des deux equipes" (l'ancien titre
-  // promettait une justification que le tableau ne donnait pas) ;
-  // "Absents & incertains" supprimee (n'affichait le plus souvent que
-  // "aucune absence" pour les deux equipes) ;
+  // "Pourquoi le pari ressort" -> "Comparatif des deux equipes" ;
   // "Questions sur ce match" ajoutee.
-  // Refonte du 14/09/2026 (demande du proprietaire) : le signal au centre,
-  // "Probabilites et cotes", "Forme et face-a-face", "Absences" et "Marches
-  // joueurs" ; "Notre lecture du match" est fondue dans le signal.
-  for(const value of ['Le signal IASHARK','Pari recommandé','Probabilités et cotes','Forme et face-à-face','Absences','Buts attendus','Comparatif des deux équipes','Scores les plus probables','Marchés joueurs','Scénario probable du match','Questions sur ce match'])assert.match(js,new RegExp(value));
+  // Refonte du 14/09/2026 (demande du proprietaire) : le signal au centre.
+  // Page match V8 (16/09/2026, maquette validee par le proprietaire, fixture
+  // mise a jour deliberement) : "L'avis IASHARK", "Les stats du match" (forme,
+  // classement, confrontations, comparatif, compositions), "L'analyse IASHARK"
+  // (scenario, ce que dit le modele, probabilites et cotes, marches joueurs),
+  // "Questions frequentes". "Absences" et "Forme et face-a-face" retirees.
+  for(const value of ['L’avis IASHARK','Pari recommandé','Les stats du match','Forme récente','Classement','Confrontations directes','Comparatif des deux équipes','Compositions','L’analyse IASHARK','Scénario probable du match','Ce que dit le modèle','Buts attendus','Scores les plus probables','Probabilités et cotes','Marchés joueurs','Questions fréquentes'])assert.match(js,new RegExp(value));
+  assert.doesNotMatch(js,/function absencesCard|absences_title|abs-grid|formh2h_title/);
+  assert.doesNotMatch(css,/\.abs-|\.mk-table|\.mk-scroll/);
+  // Marque ecrite comme sur le reste du site.
+  assert.doesNotMatch(js,/IAShark/);
 });
 test("la page est responsive",()=>{
   assert.match(css,/@media\(max-width:640px\)/);
@@ -41,34 +45,53 @@ test("le workflow alimente les blocs comparatifs sans valeur de secours",()=>{
   assert.match(js,/functions\.invoke\('match-data'[,)]/);
 });
 
-// ORDRE DE LECTURE revu le 14/09/2026 a la demande du proprietaire (fixture
-// mise a jour deliberement) : signal au centre, probabilites et cotes, forme
-// et face-a-face, absences, statistiques, scores, marches joueurs, repartition
-// des buts, FAQ en dernier. L'en-tete (hero) precede les sections.
-test("la page match assemble les sections dans l'ordre demande",()=>{
-  const bloc=js.slice(js.indexOf("const sections=["),js.indexOf("];",js.indexOf("const sections=[")));
-  const attendu=[
-    "signalCard","marketsCard","formH2HCard","absencesCard",
-    "Comparatif des deux équipes","outputsCard","threatsCard",
-    "Scénario probable du match","faqCard"
-  ];
+// ORDRE DE LECTURE revu le 16/09/2026 (maquette V8 validee par le proprietaire,
+// fixture mise a jour deliberement) : en-tete, l'avis IASHARK, les stats du
+// match (ouvertes), l'analyse IASHARK, les questions frequentes A LA FIN. Vue
+// visiteur : un rappel unique entre les stats et l'analyse fermee.
+const blocDe=(debut,fin)=>js.slice(js.indexOf(debut),js.indexOf(fin,js.indexOf(debut)));
+function dansLOrdre(bloc,attendu,nom){
   let curseur=-1;
   for(const jalon of attendu){
     const i=bloc.indexOf(jalon);
-    assert.ok(i>curseur,`"${jalon}" n'est pas a sa place dans l'ordre de lecture`);
+    assert.ok(i>curseur,`${nom} : "${jalon}" n'est pas a sa place dans l'ordre de lecture`);
     curseur=i;
   }
+}
+test("la page match assemble les sections dans l'ordre demande",()=>{
+  dansLOrdre(blocDe("const sections=[","];"),["['avis',signalCard","'Les stats du match'","['analyse',","['questions',faqCard"],"abonne");
+  assert.match(blocDe("function render(raw)","const sections=["),/analyse=analyseAbonne\(vm\)/);
+  dansLOrdre(blocDe("function analyseAbonne(vm)","function render(raw)"),["scenarioCard(vm)","outputsCard(vm,","marketsCard(vm)","threatsCard(vm,"],"analyse abonne");
+  dansLOrdre(blocDe("function statsBlocs(vm)","}"),["formeFold","classementFold","h2hFold","comparatifFold","compoFold"],"stats");
+  const visiteur=blocDe("function renderVisitor(raw,opts)","function renderAuthWall");
+  dansLOrdre(visiteur,["['avis',gateCard","'Les stats du match'","['rappel',","rappelCta(vm,o)","['analyse',","analyseVisiteur(o)","['questions',faqCard"],"visiteur");
+  assert.equal((visiteur.match(/rappelCta\(/g)||[]).length,1,"un seul rappel visiteur");
+  // Questions frequentes a la fin, dans les deux vues.
+  assert.ok(visiteur.lastIndexOf("['questions',")>visiteur.lastIndexOf("['analyse',"));
+  // Sommaire collant et barre mobile visiteur.
+  assert.match(js,/nav_avis','Avis IASHARK'[\s\S]*nav_stats','Stats'[\s\S]*nav_analysis','Analyse'[\s\S]*nav_questions','Questions'/);
+  assert.match(visiteur,/ctaBar\(vm,o\)/);
+  assert.doesNotMatch(blocDe("function render(raw)","function bindMotion"),/ctaBar\(/);
 });
 
 test("les blocs retires a la demande de l'utilisateur ne reviennent pas",()=>{
-  for(const parti of ["reasonsCard","marketsVsMarketCard","marketsWatchCard","h2hCard","refereeCard"]){
+  for(const parti of ["reasonsCard","marketsVsMarketCard","marketsWatchCard","h2hCard","refereeCard","absencesCard","categorieAbsence","formH2HCard"]){
     assert.doesNotMatch(js,new RegExp("function\\s+"+parti+"\\s*\\("),`${parti} a ete reintroduit`);
+  }
+});
+
+// Suivi (funnel-track.js) : un identifiant distinct par bouton « Debloquer »
+// (avis, rappel, analyse, FAQ, barre mobile), libelle fixe sans donnee personnelle.
+test("vue visiteur : chaque bouton Debloquer porte son propre identifiant de suivi",()=>{
+  assert.match(js,/const suivi=kind=>` data-track="\$\{kind\}" data-track-kind="\$\{kind\}"`;/);
+  for(const k of ["match_avis_unlock","match_recall_unlock","match_analysis_unlock","match_faq_unlock","match_bar_unlock"]){
+    assert.equal((js.match(new RegExp("suivi\\('"+k+"'\\)","g"))||[]).length,1,k);
   }
 });
 
 // Les sections vides ne doivent toujours pas laisser de trou dans la page.
 test("seules les sections non vides sont rendues",()=>{
-  assert.match(js,/sections\.filter\(Boolean\)/);
+  assert.match(js,/const S=sections\.filter\(x=>x&&x\[1\]\);/);
 });
 
 // Numerotation "01 02 03..." retiree a la demande de l'utilisateur : les
@@ -95,47 +118,60 @@ test("le tableau des marches ne duplique pas le pari du signal",()=>{
   assert.equal(rows.filter(r=>r.recommended).length,1);
 });
 
-// LE SIGNAL IASHARK : tout ce que le proprietaire a demande est rendu, et la
-// mention 18+ / estimation statistique figure DANS le bloc.
-test("le signal IASHARK montre pari, jauge, cote, probabilite implicite, ecart, fiabilite, raisons, risques et 18+",()=>{
+// L'AVIS IASHARK (abonne / match offert) : tout ce que le proprietaire a
+// demande est rendu, et la mention 18+ / estimation statistique figure DANS le
+// bloc. V8 : « Nos chances face a la cote » en deux barres, detail replie.
+test("l'avis IASHARK montre pari, cote, deux barres, ecart, fiabilite, raisons, risques et 18+",()=>{
   const bloc=js.slice(js.indexOf("function signalCard(vm)"),js.indexOf("function marketsCard"));
-  for(const attendu of ["sig-market","sig-bar","sig-bar-market","Cote utilisée","Probabilité implicite","Écart (value)",
-    "Le modèle voit {model} contre {market} pour le marché ({gap}).","relBadge(info)","Pourquoi ce pari","À surveiller",
+  for(const attendu of ["sig-market","Cote utilisée","duoBars(","sig2-cmp","Nos chances face à la cote","Détail des chiffres","relBadge(info)","Pourquoi ce pari","À surveiller",
     "18+ · Estimation statistique, pas une garantie."]){
-    assert.ok(bloc.includes(attendu),`element du signal manquant : ${attendu}`);
+    assert.ok(bloc.includes(attendu),`element de l'avis manquant : ${attendu}`);
   }
   // Une probabilite nulle ou absente n'est jamais affichee "0 %".
   assert.match(bloc,/r\.probability>0/);
-  // Revue du 14/09/2026 : ticket du pari (libelle + cote), indice de
-  // confiance 0-10 en visuel, niveau de risque, "pourquoi" en 3 puces maximum.
   for(const attendu of ["sig-slip","sig-odds-box","confMeter(r.confidence)","riskStat(vm.editorial.riskCode)","raisons.slice(0,3)"]){
-    assert.ok(bloc.includes(attendu),`element du signal manquant : ${attendu}`);
+    assert.ok(bloc.includes(attendu),`element de l'avis manquant : ${attendu}`);
   }
   assert.match(js,/function confMeter\(conf\)[\s\S]*role="meter"[\s\S]*aria-valuemax="10"/);
-  // Libelle honnete : "probabilite estimee" (conf = probabilite / 10), et lien Methodologie.
   assert.match(js,/t\('match_page\.sig_conf_label','Probabilité estimée'\)/);
-  assert.ok(bloc.includes("methodLink()"),"lien Methodologie absent du signal");
+  assert.ok(bloc.includes("methodLink()"),"lien Methodologie absent de l'avis");
   // Analyse annoncee mais champs premium absents : jamais "aucun marche".
   assert.match(bloc,/raw\.has_signal===true&&raw\.no_signal!==true/);
+  // Deux barres par pari dans « Probabilites et cotes », marche absent = non disponible.
+  const marches=js.slice(js.indexOf("function marketsCard"),js.indexOf("function formeFold"));
+  assert.match(marches,/duoBars\(\{model:r\.model,market:r\.market/);
+  assert.match(marches,/aide\(texteAideCote\(\),labelAideCote\(\)\)/);
 });
 
-// PREMIUM : le mur d'acces n'affiche aucune donnee du modele, et l'en-tete
-// commun (hero) ne montre plus les probabilites 1N2 du modele.
-test("le mur d'acces et l'en-tete n'exposent ni pari, ni probabilite du modele",()=>{
+// REGLE DU PROPRIETAIRE (16/09/2026) : tout ce que l'IA donne est FERME pour le
+// visiteur, toutes les stats brutes sont OUVERTES. Les blocs fermes (avis,
+// analyse, rappel, barre mobile) et la vue visiteur ne lisent aucune sortie du
+// modele ; l'en-tete commun (hero) ne montre aucune probabilite.
+test("vue visiteur : blocs fermes sans aucune donnee du modele, copie publique avant tout calcul",()=>{
   const gate=js.slice(js.indexOf("function gateCard(vm,opts)"),js.indexOf("function renderAuthWall"));
-  for(const interdit of ["recommendation","probabilities","marketTable","recommendedOdds","recommendedEdge","scoringProbability","signalReasons"]){
-    assert.ok(!gate.includes(interdit),`le mur d'acces lit ${interdit}`);
+  assert.ok(gate.length>2000,"vue visiteur introuvable");
+  for(const fn of ["function gateCard","function analyseVisiteur","function rappelCta","function ctaBar","function renderVisitor"])assert.ok(gate.includes(fn),fn+" hors de la tranche controlee");
+  for(const interdit of ["recommendation","probabilities","marketTable","recommendedOdds","recommendedEdge","recommendedImplied","scoringProbability","signalReasons","expectedGoals","goalTiming","simulationCount","pari_rec","cote_rec","model_probability","market_id","riskCode","odds(","pct(","pts(","confMeter","signalCard(","marketsCard(","outputsCard(","threatsCard(","scenarioCard(","analyseAbonne(","signalSticky("]){
+    assert.ok(!gate.includes(interdit),`la vue visiteur lit ${interdit}`);
   }
-  assert.match(gate,/oddsCount/);
+  assert.doesNotMatch(gate,/\.conf\b/);
   assert.match(gate,/sig-ghost/);
-  // Teaser : "une analyse existe" (champ public), jamais pari, cote ni
-  // probabilite. conf = probabilite du modele / 10 : plus affiche sur le mur.
-  assert.doesNotMatch(gate,/confMeter|pub\.conf/);
   assert.match(gate,/methodLink\(\)/);
-  assert.match(gate,/sig_teaser_exists/);
-  for(const interdit of ["pari_rec","cote_rec","model_probability","market_id","riskCode","odds(","pct("]){
-    assert.ok(!gate.includes(interdit),`le mur d'acces lit ${interdit}`);
-  }
+  assert.match(gate,/const vm=viewModel\(publicCopy\(raw\)\);/);
+  assert.match(gate,/faqCard\(vm,\{locked:true,/);
+  // Champs publics seulement : etat de l'analyse et niveau prob_band.
+  assert.match(gate,/etatAnalyse\(raw\)/);
+  assert.match(gate,/bandeDe\(raw\)/);
+  assert.match(js,/const bandeDe=m=>m&&Object\.prototype\.hasOwnProperty\.call\(BANDES,m\.prob_band\)\?m\.prob_band:null;/);
+  // Copie locale de la liste premium = lib/premium-fields.js, a l'identique.
+  const copie=JSON.parse(js.match(/const CHAMPS_PREMIUM=(\[[^\]]*\]);/)[1]);
+  assert.deepEqual(copie,require("../lib/premium-fields.js").PREMIUM_FIELDS);
+  // Match payant : mur Pro ; match offert sans compte : meme page, CTA compte gratuit.
+  assert.match(js,/function renderProWall\(raw\)\{\s*renderVisitor\(raw,\{href:lien\('abonnement\.html'\)\}\);/);
+  const auth=js.slice(js.indexOf("function renderAuthWall"),js.indexOf("function renderProWall"));
+  assert.match(auth,/renderVisitor\(raw,\{\s*free:true,/);
+  assert.match(auth,/lien\('compte\.html'\)/);
+  assert.match(auth,/Créer un compte gratuit \/ Se connecter/);
   const hero=js.slice(js.indexOf("function hero(vm)"),js.indexOf("const REL_NIVEAUX"));
   assert.ok(!/probabilities|probBar|recommendation/.test(hero),"l'en-tete ne doit montrer aucune probabilite du modele");
   assert.doesNotMatch(js,/function probBar\(/);
@@ -280,17 +316,35 @@ test("la page match affiche les marches traduits, jamais le libelle brut",()=>{
 });
 
 // La FAQ ne doit reposer aucune question dont la reponse est deja affichee.
+// V8 (16/09/2026, decision du proprietaire, fixture mise a jour deliberement) :
+// « Quel est le pronostic IASHARK pour ce match ? » est posee, reponse fermee
+// au visiteur.
 test("la FAQ ne repose pas les questions deja traitees dans la page",()=>{
-  const bloc=js.slice(js.indexOf("function faqCard(vm)"));
+  const bloc=js.slice(js.indexOf("function faqCard(vm,o)"));
   for(const deja of ["Qui est favori","Combien de buts sont attendus","Quel pari IASHARK retient",
                      "d’accord avec le marché","niveau de risque de ce pari"]){
     assert.ok(!bloc.includes(deja),`la FAQ repose une question deja traitee : "${deja}"`);
   }
-  // Elle s'appuie sur des donnees qu'aucune carte n'affiche.
   assert.match(bloc,/exclusiveFacts/);
   for(const attendu of ["marque le plus tôt","craque-t-elle en fin de match","cartons","occasions"]){
     assert.ok(bloc.includes(attendu),`question exclusive manquante : "${attendu}"`);
   }
+});
+
+// Questions frequentes : faits publics ouverts ; reponses du modele (pronostic,
+// 15 premieres minutes, chances de chaque equipe, sur quoi repose l'analyse)
+// FERMEES au visiteur, texte jamais construit.
+test("FAQ visiteur : les reponses du modele sont fermees et jamais construites",()=>{
+  const faq=js.slice(js.indexOf("function faqCard(vm,o)"),js.indexOf("\n}\n",js.indexOf("function faqCard(vm,o)")));
+  const ferme=faq.slice(faq.indexOf("if(ferme){"),faq.indexOf("}else{",faq.indexOf("if(ferme){")));
+  assert.ok(ferme.length>200,"branche fermee introuvable");
+  for(const q of ["faq_q_pick","faq_q_first15","faq_q_outcomes","faq_q_basis"])assert.ok(ferme.includes(q),q+" absente de la branche fermee");
+  for(const interdit of ["vm.model","tf(","pct(","odds(","faq_pick_answer","faq_first15_answer","faq_outcomes_answer","faq_basis_answer","simulationCount","sources"]){
+    assert.ok(!ferme.includes(interdit),`FAQ fermee : ${interdit}`);
+  }
+  assert.equal((ferme.match(/,null\]/g)||[]).length,4,"4 reponses du modele fermees (null)");
+  assert.match(faq,/a===null\?verrou:/);
+  assert.match(faq,/faq_section_title','Questions fréquentes'/);
 });
 
 // Les logos d'equipe ne doivent jamais etre masques en rond : un ecusson a sa

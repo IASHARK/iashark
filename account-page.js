@@ -896,12 +896,19 @@
         sb.from('users').select('email,plan,role,capital,created_at,updated_at').eq('id', ctx.user.id).maybeSingle(),
         sb.from('user_preferences').select('*').eq('user_id', ctx.user.id).maybeSingle(),
         sb.from('betting_decisions').select('*').eq('user_id', ctx.user.id),
-        sb.from('subscriptions').select('status,current_period_end,cancel_at_period_end,created_at').eq('user_id', ctx.user.id)
+        sb.from('subscriptions').select('status,current_period_end,cancel_at_period_end,created_at').eq('user_id', ctx.user.id),
+        // Droit d'acces : visites liees au compte (funnel_events, politique
+        // RLS funnel_events_select_own de 0025). Lecture seule de SES lignes.
+        sb.from('funnel_events').select('created_at,event_type,page,locale,session_id,metadata')
+          .eq('user_id', ctx.user.id).order('created_at', { ascending: false }).limit(5000)
       ]);
       var contenu = {
         exporte_le: new Date().toISOString(),
         compte: res[0].data, preferences: res[1].data,
-        décisions: res[2].data || [], abonnements: res[3].data || []
+        décisions: res[2].data || [], abonnements: res[3].data || [],
+        // Si la lecture est refusee (mise a jour de la base pas encore
+        // appliquee), on le dit au lieu d'exporter une liste vide trompeuse.
+        visites_liees_au_compte: res[4].error ? 'indisponible pour le moment' : (res[4].data || [])
       };
       var blob = new Blob([JSON.stringify(contenu, null, 2)], { type: 'application/json' });
       var url = URL.createObjectURL(blob), a = document.createElement('a');

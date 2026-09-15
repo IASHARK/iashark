@@ -523,5 +523,19 @@ $$;
 revoke all on function public.admin_unlock_clicks(date, date, boolean, timestamptz) from public, anon;
 grant execute on function public.admin_unlock_clicks(date, date, boolean, timestamptz) to authenticated;
 
+-- ---------------------------------------------------------------------------
+-- 3) Droit d'acces : un inscrit peut LIRE ses propres evenements lies a son
+--    compte (export « Exporter mes donnees » de compte.html, account-page.js).
+--    Lecture uniquement, seulement les lignes dont user_id = son compte :
+--    jamais les lignes anonymes ni celles d'un autre compte. anon n'a
+--    toujours aucun droit de lecture (0008) ; update et delete restent
+--    revoques.
+-- ---------------------------------------------------------------------------
+grant select on public.funnel_events to authenticated;
+drop policy if exists funnel_events_select_own on public.funnel_events;
+create policy funnel_events_select_own on public.funnel_events
+  for select to authenticated
+  using (user_id is not null and user_id = (select auth.uid()));
+
 -- Recharge du cache de schema PostgREST.
 notify pgrst, 'reload schema';

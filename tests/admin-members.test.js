@@ -140,8 +140,13 @@ test("0025 : fonctions admin SECURITY DEFINER, refus explicite, lecture seule, j
     assert.ok(!/security definer/.test(block), name + " : helper sans privilege propre");
     assert.ok(sql.includes("revoke all on function public." + name + "(" + sig + ") from public, anon, authenticated;"), name + " non expose");
   }
-  const body = code.replace(/create or replace function/g, "");
+  // Seule exception attendue : la politique de LECTURE de ses propres
+  // evenements (droit d'acces, export du compte), verifiee a part.
+  const OWN_READ = /grant select on public\.funnel_events to authenticated;\s*drop policy if exists funnel_events_select_own on public\.funnel_events;\s*create policy funnel_events_select_own on public\.funnel_events\s+for select to authenticated\s+using \(user_id is not null and user_id = \(select auth\.uid\(\)\)\);/;
+  assert.match(code, OWN_READ, "lecture de ses propres evenements uniquement");
+  const body = code.replace(OWN_READ, "").replace(/create or replace function/g, "");
   assert.ok(!/\b(insert|update|delete|truncate|alter|drop|create)\b/i.test(body), "aucune ecriture ni DDL hors create or replace function");
+  assert.equal((code.match(/\bgrant\b[^;]*funnel_events/gi) || []).length, 1, "un seul droit ajoute sur la table : select");
   assert.ok(!/grant[^;]*\banon\b/i.test(code), "rien n'est accorde a anon");
   assert.ok(!/\bip\b|ip_address|x-forwarded/i.test(code), "aucune adresse IP");
   assert.match(sql, /notify pgrst, 'reload schema';/);

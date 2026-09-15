@@ -133,6 +133,28 @@ test("chaque point d'entree du checkout verifie le consentement avant d'appeler 
   assert.match(read("abonnement-page.js"), /checkoutConsent/);
 });
 
+test("abonnement : bouton verrouille des le rendu, chargements paralleles, dictionnaire partage avec l'en-tete", () => {
+  const html = read("abonnement.html");
+  const btn = (html.match(/<button[^>]*id="subscribeButton"[^>]*>/) || [""])[0];
+  assert.match(btn, /aria-disabled="true"/, "bouton actif avant le chargement du consentement");
+  assert.match(btn, /class="[^"]*\biash-consent-locked\b/);
+  assert.match(btn, /data-i18n-attr="title:common\.loading"/, "infobulle de chargement localisee");
+  assert.ok(html.indexOf('id="checkoutConsent"') !== -1 && html.indexOf('id="checkoutConsent"') < html.indexOf('id="subscribeButton"'), "emplacement du consentement reserve avant le bouton");
+  assert.match(html, /#checkoutConsent:not\(\.iash-consent\)\{[^}]*min-height:/, "hauteur du bloc de consentement non reservee");
+  for (const d of ["fr", "gb", "za", "en", "mx", "es", "de", "it", "pt"]) {
+    const page = read(d + "/abonnement.html");
+    assert.match((page.match(/<button[^>]*id="subscribeButton"[^>]*>/) || [""])[0], /aria-disabled="true"/, d + "/abonnement.html non regenere");
+  }
+  const js = read("abonnement-page.js");
+  assert.match(js, /Promise\.all\(\[i18n,IasharkApp\.context\(\)\]\)/, "dictionnaire et session charges l'un apres l'autre");
+  // Pro : bouton deverrouille (aucun consentement monte).
+  const pro = js.slice(js.indexOf("if(ctx.isPro)"), js.indexOf("return;}", js.indexOf("if(ctx.isPro)")));
+  assert.match(pro, /unlock\(\)/, "Pro : bouton laisse verrouille");
+  const i18n = read("i18n/i18n.js");
+  assert.match(i18n, /loadDict: loadDict/, "cache du dictionnaire non expose");
+  assert.match(read("auth-header.js"), /I\.loadDict\(locale\)/, "auth-header.js retelecharge le dictionnaire");
+});
+
 test("serveur : refuse sans CGV, refuse sans 2e case hors MX, accepte MX sans renonciation", async () => {
   const srv = await serverConsent();
   const ts = "2026-09-13T12:00:00.000Z";

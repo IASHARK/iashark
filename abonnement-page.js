@@ -48,14 +48,25 @@
       document.head.appendChild(s);
     });
   }
+  // abonnement.html rend le bouton verrouille (aria-disabled="true", classe
+  // iash-consent-locked, title "Chargement…") : aucun clic sans effet pendant
+  // le chargement. Il ne s'active qu'une fois le consentement monte et coche
+  // (lib/checkout-consent.js#syncButtons), ou tout de suite pour un Pro.
+  function loaded(){button.removeAttribute('data-loading');button.removeAttribute('data-i18n-attr');button.removeAttribute('title');}
+  function unlock(){button.classList.remove('iash-consent-locked');button.setAttribute('aria-disabled','false');}
   async function init(){
-    if(window.I18N&&window.I18N.init){try{await window.I18N.init();}catch(e){}}
-    var ctx=await IasharkApp.context();
+    // Dictionnaire et session sont independants : charges en parallele.
+    var i18n=(window.I18N&&window.I18N.init)?Promise.resolve().then(function(){return window.I18N.init();}).catch(function(){}):null;
+    var ctx=(await Promise.all([i18n,IasharkApp.context()]))[1];
     var box=document.getElementById('checkoutConsent');
-    if(ctx.isPro){if(box)box.hidden=true;button.textContent=t('pricing_page.cta_pro_member','Accéder aux analyses');button.onclick=function(){location.href=localHref('');};return;}
+    if(ctx.isPro){if(box)box.hidden=true;loaded();unlock();button.textContent=t('pricing_page.cta_pro_member','Accéder aux analyses');button.onclick=function(){location.href=localHref('');};return;}
     if(!box){box=document.createElement('div');box.id='checkoutConsent';button.parentNode.insertBefore(box,button);}
     var lib=await consentLib();
     var consent=lib?lib.mount(box,{buttons:[button]}):null;
+    loaded();
+    // Module de consentement indisponible : bouton actif, le clic affiche
+    // l'erreur de chargement et aucun paiement n'est lance.
+    if(!consent)unlock();
     // Le message d'erreur sous le bouton disparait des que les cases requises sont cochees.
     if(consent)box.addEventListener('change',function(){if(consent.isValid()&&output.classList.contains('error'))message('',false);});
     button.onclick=async function(){

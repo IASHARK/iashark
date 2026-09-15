@@ -39,7 +39,7 @@ const REDIRECT_RETENTION_DAYS = 90;
 const FINISHED_AFTER_MINUTES = 120;
 
 const REDIRECTS_BEGIN = "# --- Pages match retirees (J+30 apres le coup d'envoi) : 301 vers le hub ligue de la version.";
-const REDIRECTS_NOTE = "# Genere depuis data/match-pages-registry.json (scripts/match-lifecycle.js). Non force : ne s'applique que si la page n'existe plus.";
+const REDIRECTS_NOTE = "# Genere depuis data/match-pages-registry.json (scripts/match-lifecycle.js), versions sorties du perimetre comprises (retired_dirs). Non force : ne s'applique que si la page n'existe plus.";
 const REDIRECTS_END = "# --- Fin des pages match retirees.";
 
 // ---------------------------------------------------------------------------
@@ -195,7 +195,8 @@ var README = [
   "(.github/workflows/update-data.yml#generateMatchPages) et par node scripts/seo-pages.js. Jamais publie.",
   "status : active (dans le run) | archived (page conservee) | archived_noindex (J+7, noindex,follow) |",
   "redirected (J+30 : pages supprimees, 301 vers le hub ligue de chaque version, cf. _redirects).",
-  "snapshot = faits publics uniquement (liste blanche de publicSnapshot : jamais de champ premium, de conf ni de cote)."
+  "snapshot = faits publics uniquement (liste blanche de publicSnapshot : jamais de champ premium, de conf ni de cote).",
+  "retired_dirs = {dir: date} des versions sorties du perimetre (seoMatchDirs reduit) : 301 vers le hub ligue de la version s'il est dans le perimetre, sinon vers la version FR du match, pendant 90 jours."
 ];
 function emptyRegistry() { return { _readme: README.slice(), version: 1, matches: {} }; }
 function loadRegistry(root) {
@@ -240,7 +241,9 @@ function updateRegistry(reg, runMatchs, now, ctx) {
     if (e.kickoff && k && e.kickoff !== k) e.previous_kickoff = e.kickoff;
     e.kickoff = k;
     e.league_key = m.league_key || null;
+    var previousDirs = Array.isArray(e.dirs) ? e.dirs : [];
     e.dirs = matchDirsFor(m.league_key);
+    retireDirs(e, previousDirs, today);
     e.last_seen = today;
     e.in_run = true;
     delete e.left_run_at; delete e.left_run_before_kickoff; delete e.removed_at;
@@ -249,6 +252,7 @@ function updateRegistry(reg, runMatchs, now, ctx) {
   });
   Object.keys(reg.matches).forEach(function (id) {
     var e = reg.matches[id];
+    pruneRetiredDirs(e, t);
     if (!seen[id]) {
       if (e.in_run !== false) {
         e.in_run = false;
@@ -298,15 +302,59 @@ function archivedState(e, now) {
 function redirectTarget(e, dir) {
   return e.league_key && C.leagueByKey(e.league_key) ? C.leagueHubPath(dir, e.league_key) : C.homePath(dir);
 }
+// Versions retirees du perimetre (config/leagues.json#seoMatchDirs reduit,
+// cf. commit 07fc2b081 : 145 pages /<dir>/match/<id>.html supprimees alors
+// qu'elles etaient au sitemap). e.retired_dirs = {dir: "AAAA-MM-JJ"} (date du
+// retrait). Ordre stable (C.DIR_CODES) ; une version revenue dans e.dirs
+// n'est plus retiree ; une date deja connue n'est jamais repoussee.
+function retireDirs(e, dirs, day) {
+  var cur = e.retired_dirs && typeof e.retired_dirs === "object" ? e.retired_dirs : {};
+  var current = Array.isArray(e.dirs) ? e.dirs : [];
+  var add = Array.isArray(dirs) ? dirs : [];
+  var out = {};
+  C.DIR_CODES.forEach(function (d) {
+    if (d === C.X_DEFAULT_DIR || current.indexOf(d) !== -1) return;
+    if (Object.prototype.hasOwnProperty.call(cur, d) && /^\d{4}-\d{2}-\d{2}$/.test(cur[d])) out[d] = cur[d];
+    else if (add.indexOf(d) !== -1) out[d] = day;
+  });
+  if (Object.keys(out).length) e.retired_dirs = out; else delete e.retired_dirs;
+  return e;
+}
+// Meme retention que les pages retirees a J+30 : regle retiree 90 jours apres.
+function pruneRetiredDirs(e, now) {
+  if (!e || !e.retired_dirs || typeof e.retired_dirs !== "object") return;
+  var t = typeof now === "number" ? now : (now || new Date()).getTime();
+  Object.keys(e.retired_dirs).forEach(function (d) {
+    var since = Date.parse(String(e.retired_dirs[d]) + "T00:00:00Z");
+    if (!isFinite(since) || t - since > REDIRECT_RETENTION_DAYS * DAY) delete e.retired_dirs[d];
+  });
+  if (!Object.keys(e.retired_dirs).length) delete e.retired_dirs;
+}
+// Cible d'une version retiree : hub ligue de la version s'il est dans le
+// perimetre (indexable) ; sinon version FR du match, toujours generee ; une
+// fois celle-ci retiree (J+30), directement son hub FR (jamais de chaine 301).
+function retiredDirTarget(e, dir, id) {
+  if (e.league_key && C.leagueByKey(e.league_key) && matchDirsFor(e.league_key).indexOf(dir) !== -1) return C.leagueHubPath(dir, e.league_key);
+  return e.status === "redirected" ? redirectTarget(e, C.X_DEFAULT_DIR) : C.matchPath(C.X_DEFAULT_DIR, id);
+}
 function redirectRules(reg) {
   var rules = [];
   Object.keys(reg.matches).sort(function (a, b) { return Number(a) - Number(b); }).forEach(function (id) {
     var e = reg.matches[id];
-    if (!e || e.status !== "redirected" || !/^\d{1,12}$/.test(id)) return;
-    (Array.isArray(e.dirs) && e.dirs.length ? e.dirs : [C.X_DEFAULT_DIR]).forEach(function (dir) {
-      if (!C.DIRS[dir]) return;
-      rules.push([C.matchPath(dir, id), redirectTarget(e, dir), "301"]);
-    });
+    if (!e || !/^\d{1,12}$/.test(id)) return;
+    var dirs = Array.isArray(e.dirs) && e.dirs.length ? e.dirs : [C.X_DEFAULT_DIR];
+    if (e.status === "redirected") {
+      dirs.forEach(function (dir) {
+        if (!C.DIRS[dir]) return;
+        rules.push([C.matchPath(dir, id), redirectTarget(e, dir), "301"]);
+      });
+    }
+    if (e.retired_dirs && typeof e.retired_dirs === "object") {
+      C.DIR_CODES.forEach(function (dir) {
+        if (dir === C.X_DEFAULT_DIR || dirs.indexOf(dir) !== -1 || !Object.prototype.hasOwnProperty.call(e.retired_dirs, dir)) return;
+        rules.push([C.matchPath(dir, id), retiredDirTarget(e, dir, id), "301"]);
+      });
+    }
   });
   return rules;
 }
@@ -354,6 +402,7 @@ module.exports = {
   publicSnapshot: publicSnapshot, parseScore: parseScore, findFinalScore: findFinalScore,
   emptyRegistry: emptyRegistry, loadRegistry: loadRegistry, saveRegistry: saveRegistry, serializeRegistry: serializeRegistry,
   updateRegistry: updateRegistry, archivedEntries: archivedEntries, archivedState: archivedState,
+  retireDirs: retireDirs, pruneRetiredDirs: pruneRetiredDirs, retiredDirTarget: retiredDirTarget,
   redirectTarget: redirectTarget, redirectRules: redirectRules, redirectsBlockLines: redirectsBlockLines,
   applyRedirectsBlock: applyRedirectsBlock, writeRedirects: writeRedirects
 };

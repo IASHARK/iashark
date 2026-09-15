@@ -44,8 +44,14 @@
     if(_dictPromise) return _dictPromise;
     var locale = detectLocale();
     if(locale === 'fr'){ _dictPromise = Promise.resolve(FALLBACK_T); return _dictPromise; }
-    _dictPromise = fetch('/i18n/dict/'+locale+'.json')
-      .then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
+    // Page avec i18n/i18n.js : meme promesse (cache partage) que I18N.init(),
+    // un seul telechargement du dictionnaire. Sinon (pages racine sans
+    // i18n.js) : telechargement direct.
+    var I = window.I18N;
+    var source = (I && typeof I.loadDict === 'function' && I.locale === locale)
+      ? I.loadDict(locale)
+      : fetch('/i18n/dict/'+locale+'.json').then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); });
+    _dictPromise = source
       .then(function(d){
         var distant = (d && d.auth_header) ? d.auth_header : {};
         // Fusion avec le repli : une cle ajoutee ici et pas encore traduite

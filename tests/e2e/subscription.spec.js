@@ -6,9 +6,14 @@ const { VERSIONS, CONSENT_BOXES, CURRENCY_SYMBOLS, currencyOfCheckoutMarket } = 
 const { STRIPE_CHECKOUT_URL } = require('./helpers/supabase-mock');
 const { tr } = require('./helpers/site-data');
 
+// Attend le bloc de consentement monte (le bouton est verrouille jusque-la),
+// coche toutes les cases puis attend le deverrouillage du bouton.
 async function tickAll(page) {
   const boxes = page.locator('#checkoutConsent input[data-consent]');
-  for (let i = 0; i < await boxes.count(); i++) await boxes.nth(i).check();
+  await expect(boxes.first()).toBeVisible();
+  const n = await boxes.count();
+  for (let i = 0; i < n; i++) await boxes.nth(i).check();
+  await expect(page.locator('#subscribeButton')).toHaveAttribute('aria-disabled', 'false');
 }
 
 // "19.95" -> /19[.,]95/ ; "199" -> 199 non suivi d'un chiffre (espaces de groupe tolérés).

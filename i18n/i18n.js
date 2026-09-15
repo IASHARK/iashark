@@ -232,6 +232,11 @@
 
     localizePath: localizePath,
 
+    // Dictionnaire brut d'une locale, SANS effet sur le DOM, via le meme cache
+    // de promesse que init() : auth-header.js le reutilise au lieu de
+    // retelecharger /i18n/dict/<locale>.json.
+    loadDict: loadDict,
+
     // I18N.href("compte.html#plan") -> "/gb/compte.html#plan" (page /gb/) ;
     // page sans prefixe : repertoire de linkDir() ("/fr/compte.html#plan"
     // sur le blog FR, "/gb/compte.html#plan" sur /match/<id>.html pour un

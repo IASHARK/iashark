@@ -137,9 +137,16 @@ begin
   if v_locale is null or v_locale not in ('fr', 'en', 'es', 'es-mx', 'de', 'it', 'pt') then v_locale := 'fr'; end if;
   if v_market is null or v_market not in ('fr', 'en', 'es', 'de', 'it', 'pt', 'gb', 'za', 'mx') then v_market := 'fr'; end if;
   if v_version is null or v_version !~ '^[0-9]{4}-[0-9]{2}-[0-9]{2}$' then v_version := null; end if;
-  insert into public.email_preferences (user_id, marketing_opt_in, opt_in_source, opt_in_text_version, locale, market)
-  values (new.id, v_opt, case when v_opt then 'signup' else null end, case when v_opt then v_version else null end, v_locale, v_market)
-  on conflict (user_id) do nothing;
+  -- Ne jamais bloquer une inscription a cause d'une preference email : en cas
+  -- d'erreur, avertissement dans les logs et compte cree sans ligne (= pas de
+  -- consentement enregistre ; la case reste lisible dans raw_user_meta_data).
+  begin
+    insert into public.email_preferences (user_id, marketing_opt_in, opt_in_source, opt_in_text_version, locale, market)
+    values (new.id, v_opt, case when v_opt then 'signup' else null end, case when v_opt then v_version else null end, v_locale, v_market)
+    on conflict (user_id) do nothing;
+  exception when others then
+    raise warning 'handle_new_user_email_preferences: % (%)', sqlerrm, sqlstate;
+  end;
   return new;
 end;
 $$;

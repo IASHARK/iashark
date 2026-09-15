@@ -507,6 +507,13 @@
         + '<p class="mt-1.5 max-w-lg text-[13.5px] leading-relaxed text-soft">' + tr('compte_page.export_data_detail', 'Téléchargez un fichier JSON contenant votre compte, vos préférences, votre journal de décisions et l’état de votre abonnement.') + '</p></div>'
         + boutonSecondaire('exporter', tr('compte_page.export_cta', 'Exporter')) + '</div>'
         + '<p id="msgExport" hidden aria-live="polite"></p>')
+      // Confidentialite : refus du lien entre les visites et le compte
+      // (basculerSuivi, lu par funnel-track.js).
+      + carte('<h2 class="text-[12px] font-bold uppercase tracking-[0.16em] text-soft">' + tr('compte_page.privacy_heading', 'Confidentialité') + '</h2>'
+        + '<div class="mt-4">' + interrupteur('refusSuivi', tr('compte_page.privacy_opt_out_title', 'Ne pas lier mes visites à mon compte'),
+            tr('compte_page.privacy_opt_out_detail', 'Quand vous êtes connecté, les pages que vous consultez sont associées à votre compte pour nous aider à améliorer le service. Activez cette option pour qu’elles restent anonymes. Rien d’autre ne change.'), refusSuivi()) + '</div>'
+        + '<p class="text-[12.5px] text-soft"><a href="' + esc(lien('confidentialite.html')) + '" class="text-cyan transition hover:underline">' + tr('compte_page.privacy_policy_link', 'Politique de confidentialité') + '</a></p>'
+        + '<p id="msgSuivi" hidden aria-live="polite"></p>')
       // Zone dangereuse en bas de la derniere section, jamais sur la vue
       // d'ensemble : on ne met pas un bouton de suppression sous les yeux de
       // quelqu'un venu changer sa langue.
@@ -656,6 +663,7 @@
     }
     if ($('portail')) $('portail').addEventListener('click', function () { facturation('create-portal-session', $('portail')); });
     if ($('exporter')) $('exporter').addEventListener('click', exporter);
+    if ($('refusSuivi')) $('refusSuivi').addEventListener('click', basculerSuivi);
     racine.querySelectorAll('[data-fav-ligue]').forEach(function (b) {
       b.addEventListener('click', function () { basculerFavori(b); });
     });
@@ -803,6 +811,44 @@
       relacher();
       retour('msgFacturation', tr('compte_page.err_billing_open_failed', 'Impossible d’ouvrir la page de paiement. Réessayez dans quelques instants.'), 'error');
     }
+  }
+
+  /* Confidentialite : « Ne pas lier mes visites a mon compte ». Choix garde
+     sur le compte (user_metadata.tracking_opt_out, lu par funnel-track.js sur
+     tous les appareils) et sur cet appareil (localStorage
+     iashark_tracking_opt_out, applique tout de suite, meme si l'enregistrement
+     en ligne echoue). Aucune autre donnee n'est ecrite. */
+  var CLE_REFUS_SUIVI = 'iashark_tracking_opt_out';
+  function refusSuivi() {
+    var meta = (ctx.user && ctx.user.user_metadata) || {};
+    if (meta.tracking_opt_out === true) return true;
+    try { return localStorage.getItem(CLE_REFUS_SUIVI) === '1'; } catch (_e) { return false; }
+  }
+  async function basculerSuivi() {
+    var bouton = $('refusSuivi');
+    if (!bouton) return;
+    // aria-checked vient d'etre bascule par le gestionnaire commun des interrupteurs.
+    var refus = bouton.getAttribute('aria-checked') === 'true';
+    bouton.disabled = true;
+    retour('msgSuivi', '');
+    if (refus) { try { localStorage.setItem(CLE_REFUS_SUIVI, '1'); } catch (_e) {} }
+    try {
+      var r = await sb.auth.updateUser({ data: { tracking_opt_out: refus } });
+      if (r.error) throw r.error;
+      if (r.data && r.data.user) ctx.user = r.data.user;
+      if (!refus) { try { localStorage.removeItem(CLE_REFUS_SUIVI); } catch (_e) {} }
+      retour('msgSuivi', refus
+        ? tr('compte_page.privacy_opt_out_saved', 'C’est noté : vos visites ne sont plus liées à votre compte.')
+        : tr('compte_page.privacy_opt_in_saved', 'Vos visites sont de nouveau liées à votre compte.'), 'success');
+    } catch (e) {
+      if (refus) {
+        retour('msgSuivi', tr('compte_page.privacy_opt_out_device_only', 'Enregistré sur cet appareil. L’enregistrement sur votre compte a échoué : réessayez plus tard pour l’appliquer à vos autres appareils.'), 'error');
+      } else {
+        bouton.setAttribute('aria-checked', 'true');
+        retour('msgSuivi', lisible(e), 'error');
+      }
+    }
+    bouton.disabled = false;
   }
 
   async function exporter() {

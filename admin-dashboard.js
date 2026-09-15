@@ -614,7 +614,175 @@
     return cur.length ? cur.map(function (c) { return fmtMoney(revenue[c], c); }).join(" + ") : fmtMoney(0, "eur");
   }
 
+  // ---------- Mes inscrits (migration 0025_admin_members.sql) ----------
+  // MEMES seuils et meme ordre que le statut calcule par admin_members (SQL).
+  var MEMBER_NEW_DAYS = 7, MEMBER_IDLE_DAYS = 7, MEMBER_GONE_DAYS = 30;
+  var MEMBER_STATUS = {
+    pro: { label: "Pro", cls: "pro", help: "Paie l'abonnement Pro." },
+    "new": { label: "Nouveau", cls: "new", help: "Inscrit depuis moins de 7 jours." },
+    active: { label: "Actif", cls: "active", help: "Venu sur le site dans les 7 derniers jours." },
+    to_nudge: { label: "À relancer", cls: "nudge", help: "Plus venu depuis 7 jours ou plus : un petit message peut le faire revenir." },
+    gone: { label: "Parti", cls: "gone", help: "Plus venu depuis 30 jours ou plus." }
+  };
+  var MEMBER_STATUS_ORDER = ["pro", "new", "active", "to_nudge", "gone"];
+  function msOf(iso) {
+    if (iso === null || iso === undefined || iso === "") return null;
+    var t = new Date(iso).getTime();
+    return isNaN(t) ? null : t;
+  }
+  function latestMs(list) {
+    var best = null;
+    list.forEach(function (v) { var t = msOf(v); if (t !== null && (best === null || t > best)) best = t; });
+    return best;
+  }
+  // « le***@gmail.com » : MEMES regles que public.admin_mask_email (SQL).
+  function maskEmail(email) {
+    var s = String(email == null ? "" : email).replace(/^ +| +$/g, "");
+    var at = s.indexOf("@");
+    if (at < 1) return null;
+    var local = s.slice(0, at);
+    return local.slice(0, local.length <= 2 ? 1 : 2) + "***@" + s.slice(at + 1).split("@")[0];
+  }
+  function memberLastActivity(m) {
+    m = m || {};
+    var t = latestMs([m.last_seen_at, m.last_sign_in_at]);
+    return t === null ? null : new Date(t).toISOString();
+  }
+  // Ordre : Pro, Nouveau (< 7 j d'inscription), Actif (< 7 j sans activite),
+  // A relancer (7 a 29 j), Parti (30 j et plus). Activite = derniere visite
+  // vue, derniere connexion ou inscription.
+  function memberStatus(m, now) {
+    m = m || {};
+    var t = now ? new Date(now).getTime() : Date.now();
+    var created = msOf(m.created_at);
+    var base = latestMs([m.created_at, m.last_seen_at, m.last_sign_in_at]);
+    var key;
+    if (m.plan === "pro") key = "pro";
+    else if (created !== null && t - created < MEMBER_NEW_DAYS * 864e5) key = "new";
+    else if (base !== null && t - base < MEMBER_IDLE_DAYS * 864e5) key = "active";
+    else if (base !== null && t - base < MEMBER_GONE_DAYS * 864e5) key = "to_nudge";
+    else key = "gone";
+    var s = MEMBER_STATUS[key];
+    return { key: key, label: s.label, cls: s.cls, help: s.help, idleDays: base === null ? null : Math.max(0, Math.floor((t - base) / 864e5)) };
+  }
+  function memberCounts(members, now) {
+    var c = { total: 0, pro: 0, "new": 0, active: 0, to_nudge: 0, gone: 0 };
+    (members || []).forEach(function (m) { if (!m) return; c.total += 1; c[memberStatus(m, now).key] += 1; });
+    return c;
+  }
+  // Jours calendaires de Paris : « aujourd'hui », « hier », « il y a 2 jours ».
+  function daysAgo(iso, now) {
+    var t = msOf(iso);
+    if (t === null) return "jamais";
+    var d = daysBetween(parisToday(new Date(t)), parisToday(now ? new Date(now) : new Date()));
+    if (d <= 0) return "aujourd'hui";
+    if (d === 1) return "hier";
+    if (d < 60) return "il y a " + d + " jours";
+    return "il y a " + Math.floor(d / 30) + " mois";
+  }
+  // n derniers jours (du plus ancien a aujourd'hui), actif ou non.
+  function activityBar(dates, now, n) {
+    n = n || 7;
+    var set = {};
+    (dates || []).forEach(function (d) { var s = String(d == null ? "" : d).slice(0, 10); if (ymdOk(s)) set[s] = true; });
+    var today = parisToday(now ? new Date(now) : new Date()), out = [];
+    for (var i = n - 1; i >= 0; i--) { var day = addDays(today, -i); out.push({ day: day, active: !!set[day] }); }
+    return out;
+  }
+  function shortDay(ymd) {
+    return ymdOk(ymd) ? Number(ymd.slice(8, 10)) + "/" + ymd.slice(5, 7) : "?";
+  }
+  // Revenus apres N jours : seuls les inscrits depuis au moins N jours comptent.
+  function retentionCell(c, days) {
+    c = c || {};
+    var el = num(c["eligible_d" + days]) || 0, r = num(c["returned_d" + days]) || 0;
+    if (!el) return { state: "early", eligible: 0, returned: 0, pct: null, text: "trop tôt" };
+    return { state: "ok", eligible: el, returned: r, pct: (r / el) * 100, text: fmtInt(r) + " sur " + fmtInt(el) };
+  }
+  function retentionRate(c, days) {
+    var cell = retentionCell(c, days);
+    return cell.state === "ok" ? cell.pct : null;
+  }
+  function retentionSentence(c, days) {
+    c = c || {};
+    var s = num(c.signups) || 0, cell = retentionCell(c, days);
+    var when = days === 1 ? "le lendemain ou plus tard" : "après " + days + " jours";
+    var week = "de la semaine du " + shortDay(String(c.week_start || "").slice(0, 10));
+    if (cell.state === "early") return "Inscrits " + week + " : trop tôt pour savoir s'ils reviennent " + when + ".";
+    var head = "Sur " + fmtInt(cell.eligible) + " inscrit" + (cell.eligible > 1 ? "s" : "") + " " + week + ", ";
+    var body = cell.returned === 0 ? (cell.eligible > 1 ? "aucun n'est revenu " : "il n'est pas revenu ")
+      : fmtInt(cell.returned) + " " + (cell.returned > 1 ? "sont revenus " : "est revenu ");
+    var others = s - cell.eligible;
+    var rest = others > 0 ? " (" + fmtInt(others) + " autre" + (others > 1 ? "s" : "") + " inscrit" + (others > 1 ? "s" : "") + " depuis moins de " + days + " jour" + (days > 1 ? "s" : "") + ")" : "";
+    return head + body + when + rest + ".";
+  }
+  var MEMBER_EVENT_LABELS = {
+    signup_started: "A ouvert l'inscription", signup_completed: "Inscription terminée", login_completed: "Connexion",
+    landing_view: "A vu l'offre Pro", paywall_view: "A vu un contenu réservé Pro", tool_page_view: "A vu les outils",
+    checkout_started: "Paiement commencé", checkout_unavailable: "Paiement indisponible",
+    checkout_success_view: "Paiement réussi", checkout_cancel_view: "Paiement annulé", onboarding_dismissed: "A fermé l'accueil"
+  };
+  var MEMBER_CLICK_KINDS = {
+    inscription: "inscription", connexion: "connexion", abonnement: "abonnement", pro: "offre Pro", compte: "compte", landing: "offre",
+    match: "match", checkout: "bouton de paiement", lang_switch: "changement de langue", cta: "bouton"
+  };
+  function dayTitle(ymd, now) {
+    var today = parisToday(now ? new Date(now) : new Date());
+    if (ymd === today) return "Aujourd'hui";
+    if (ymd === addDays(today, -1)) return "Hier";
+    var s = new Date(Date.parse(ymd + "T12:00:00Z")).toLocaleDateString("fr-FR", { timeZone: "UTC", weekday: "long", day: "numeric", month: "long" });
+    return s.charAt(0).toUpperCase() + s.slice(1);
+  }
+  // Parcours d'un inscrit (admin_member_journey.items) regroupe par jour de
+  // Paris, jour le plus recent en premier, actions dans l'ordre de la journee.
+  function journeyDays(items, names, now) {
+    var byDay = {}, order = [];
+    (items || []).forEach(function (it) {
+      var t = msOf(it && it.at);
+      if (t === null) return;
+      var day = parisToday(new Date(t));
+      if (!byDay[day]) {
+        byDay[day] = { day: day, title: dayTitle(day, now), pages: 0, clicks: 0, sec: 0, secKnown: false, matchIds: {}, entries: [] };
+        order.push(day);
+      }
+      var g = byDay[day], e = { at: new Date(t).toISOString(), beforeSignup: it.before_signup === true };
+      if (it.type === "page_view") {
+        var info = pageInfo(it.page, it.match_id, names);
+        var sec = num(it.sec);
+        g.pages += 1;
+        if (info.matchId) g.matchIds[info.matchId] = 1;
+        if (sec !== null) { g.sec += Math.max(0, sec); g.secKnown = true; }
+        e.kind = "page"; e.text = info.name; e.title = info.title; e.sec = sec; e.matchId = info.matchId;
+      } else if (it.type === "click") {
+        g.clicks += 1;
+        e.kind = "click";
+        e.text = "Clic sur " + (MEMBER_CLICK_KINDS[it.kind] || "bouton") + (it.label ? " : « " + String(it.label).slice(0, 80) + " »" : "");
+        if (it.kind === "match" && it.match_id) { var nm = matchName(it.match_id, names); if (nm) e.text += " → " + nm; }
+      } else {
+        e.kind = "event";
+        e.text = MEMBER_EVENT_LABELS[it.type] || "Autre action";
+        e.win = it.type === "signup_completed" || it.type === "checkout_success_view";
+      }
+      g.entries.push(e);
+    });
+    return order.sort().reverse().map(function (d) {
+      var g = byDay[d];
+      g.entries.sort(function (a, b) { return a.at < b.at ? -1 : a.at > b.at ? 1 : 0; });
+      g.matches = Object.keys(g.matchIds).length;
+      delete g.matchIds;
+      var parts = [g.pages + " page" + (g.pages > 1 ? "s" : "")];
+      if (g.matches) parts.push(g.matches + " match" + (g.matches > 1 ? "s" : ""));
+      if (g.clicks) parts.push(g.clicks + " clic" + (g.clicks > 1 ? "s" : ""));
+      if (g.secKnown) parts.push(fmtDur(g.sec));
+      g.summary = parts.join(" · ");
+      return g;
+    });
+  }
+
   return {
+    MEMBER_STATUS: MEMBER_STATUS, MEMBER_STATUS_ORDER: MEMBER_STATUS_ORDER, maskEmail: maskEmail, memberLastActivity: memberLastActivity,
+    memberStatus: memberStatus, memberCounts: memberCounts, daysAgo: daysAgo, activityBar: activityBar, shortDay: shortDay,
+    retentionCell: retentionCell, retentionRate: retentionRate, retentionSentence: retentionSentence, journeyDays: journeyDays,
     TZ: TZ, LAUNCH_AT: LAUNCH_AT, SITES: SITES, SOURCE_RULES: SOURCE_RULES, SOURCE_LABELS: SOURCE_LABELS, REASONS: REASONS,
     esc: esc, num: num, fmtInt: fmtInt, fmtPct: fmtPct, fmtDur: fmtDur, fmtMoney: fmtMoney, fmtDelta: fmtDelta,
     isCountry: isCountry, flagEmoji: flagEmoji, siteLabel: siteLabel, countryName: countryName, inCountry: inCountry, deviceLabel: deviceLabel,
@@ -653,7 +821,8 @@
     range: null, today: null, week: null, analytics: null, bizToday: null, business: null, bizError: null, stats: null,
     sessions: null, sessionsError: null, botSample: null, signups: null, health: null, healthError: false, live: null, liveError: null,
     home: undefined, names: {}, loading: false, liveLoading: false, liveTimer: null, fullTimer: null,
-    openHelp: {}, openVisit: null, visitLimit: 20, signupLimit: 15, lastLiveCount: null
+    openHelp: {}, openVisit: null, visitLimit: 20, signupLimit: 15, lastLiveCount: null,
+    members: null, retention: null, membersLoading: false, showEmails: false, openMember: null, journeys: {}, memberLimit: 25
   };
 
   function $(id) { return document.getElementById(id); }
@@ -1279,6 +1448,233 @@
       + (list.length > shown.length ? '<div class="more"><button type="button" class="btn btn-ghost btn-sm" id="signupsMore">Voir plus d\'inscrits (' + esc(H.fmtInt(list.length - shown.length)) + ")</button></div>" : "");
   }
 
+  // ---------- Mes inscrits (migration 0025_admin_members.sql) ----------
+  // Sans la migration : message « a activer », le reste du tableau de bord
+  // ne change pas. Donnees passees : jamais reconstituees (tracking_since).
+  var MEMBERS_FILE = "0025_admin_members.sql";
+  var UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  function loadMembers() {
+    if (!sb || S.membersLoading) return Promise.resolve();
+    S.membersLoading = true;
+    return Promise.all([
+      rpc("admin_members", { p_days: 30, p_include_internal: false }),
+      rpc("admin_retention", { p_include_internal: false })
+    ]).then(function (res) {
+      S.membersLoading = false;
+      if (res.some(function (x) { return x && x.kind === "denied"; })) { showState("denied"); return; }
+      S.members = res[0];
+      S.retention = res[1];
+      renderMembers();
+    });
+  }
+  function trackingNote(since) {
+    if (!since) return "Le suivi des visites par inscrit démarre avec la mise en ligne de la mise à jour du site. Pour l'instant, seules la date d'inscription et la dernière connexion sont connues : rien n'est reconstitué pour les jours d'avant.";
+    return "Visites des inscrits suivies depuis le " + fmtDateTime(since) + " (heure de Paris). Avant, seules l'inscription et la dernière connexion sont connues : rien n'est reconstitué.";
+  }
+  function renderMembers() {
+    if (!S.members && !S.retention) return;
+    var missing = (S.members && S.members.kind === "missing") || (S.retention && S.retention.kind === "missing");
+    if (missing) {
+      $("membersBody").hidden = true;
+      $("membersNote").hidden = true;
+      $("memberCards").innerHTML = '<p class="soft-msg"><b>Suivi des inscrits à activer</b>Cette partie s\'affichera quand ton développeur aura appliqué la mise à jour de la base ' + esc(MEMBERS_FILE)
+        + '. En attendant, la liste « Derniers inscrits » reste disponible dans « Détails », en bas de page.</p>';
+      return;
+    }
+    var m = S.members && S.members.data, r = S.retention && S.retention.data;
+    $("membersBody").hidden = false;
+    $("membersNote").hidden = !(m || r);
+    $("membersNote").textContent = trackingNote((m && m.tracking_since) || (r && r.tracking_since) || null);
+    renderMemberCards(m, r);
+    renderMemberList(m);
+    renderRetention(r);
+  }
+  function renderMemberCards(m, r) {
+    var el = $("memberCards");
+    if (!m && !r) { blockError(el, S.members, "Mes inscrits"); return; }
+    var list = m && Array.isArray(m.members) ? m.members : null;
+    var counts = list ? H.memberCounts(list) : null;
+    var act = r && r.active ? r.active : null;
+    var total = r ? H.num(r.members_total) : list ? list.length : null;
+    var d7 = r ? H.retentionCell(r.overall, 7) : null;
+    var na = "Chiffre indisponible pour le moment.";
+    var cards = [
+      {
+        id: "mtoday", label: "Actifs aujourd'hui", icon: ICONS.users, cls: "green", value: H.fmtInt(act ? act.today : null),
+        mean: !act ? na : Number(act.today) === 0 ? "Aucun inscrit n'est venu aujourd'hui pour l'instant." : H.fmtInt(act.today) + " " + plural(act.today, "inscrit est venu", "inscrits sont venus") + " aujourd'hui (visite ou connexion).",
+        help: "Inscrits qui ont ouvert une page en étant connectés, ou qui se sont connectés, aujourd'hui (heure de Paris). Comptes admin et de test exclus."
+      },
+      {
+        id: "mweek", label: "Actifs cette semaine", icon: ICONS.pulse, value: H.fmtInt(act ? act.week : null),
+        mean: !act ? na : H.fmtInt(act.week) + " sur " + H.fmtInt(total) + " " + plural(total, "inscrit", "inscrits") + " " + plural(act.week, "est venu", "sont venus") + " au moins une fois ces 7 derniers jours.",
+        help: "Inscrits venus au moins un jour sur les 7 derniers jours, aujourd'hui compris."
+      },
+      {
+        id: "mnudge", label: "À relancer", icon: ICONS.signup, cls: "amber", value: H.fmtInt(counts ? counts.to_nudge : null),
+        mean: !counts ? na : counts.to_nudge === 0 ? "Personne à relancer pour l'instant." : H.fmtInt(counts.to_nudge) + " " + plural(counts.to_nudge, "inscrit n'est plus venu", "inscrits ne sont plus venus") + " depuis au moins 7 jours. Un petit message peut les faire revenir.",
+        help: "Inscrits gratuits, inscrits depuis plus de 7 jours, sans visite ni connexion depuis 7 à 29 jours. Au-delà de 30 jours, ils passent en « Parti »."
+      },
+      {
+        id: "mback", label: "Reviennent après 7 jours", icon: ICONS.star, cls: "violet", value: d7 && d7.state === "ok" ? H.fmtPct(d7.pct, 0) : "—",
+        mean: !d7 ? na : d7.state !== "ok" ? "Trop tôt pour le dire : aucun inscrit ne l'est depuis au moins 7 jours."
+          : d7.returned === 0 ? "Aucun des " + H.fmtInt(d7.eligible) + " inscrits depuis au moins 7 jours n'est revenu après son premier jour."
+          : H.fmtInt(d7.returned) + " " + plural(d7.returned, "inscrit", "inscrits") + " sur " + H.fmtInt(d7.eligible) + " " + plural(d7.returned, "est revenu", "sont revenus") + " 7 jours ou plus après l'inscription.",
+        help: "Parmi les inscrits depuis au moins 7 jours : part de ceux venus (visite ou connexion) au moins une fois 7 jours ou plus après leur inscription. Avant le suivi par inscrit, seule la dernière connexion est connue : le chiffre peut être sous-estimé, jamais gonflé."
+      }
+    ];
+    el.innerHTML = cards.map(function (c) {
+      var hid = "help-card-" + c.id;
+      return '<article class="kcard ' + (c.cls || "") + '" aria-labelledby="lbl-' + c.id + '">'
+        + '<div class="kcard-top"><span class="kcard-icon" aria-hidden="true">' + c.icon + '</span><h3 class="kcard-label" id="lbl-' + c.id + '">' + esc(c.label) + "</h3>" + infoButton(hid, c.label) + "</div>"
+        + '<div class="kcard-value tnum">' + esc(c.value) + "</div>"
+        + helpPara(hid, c.help)
+        + '<p class="kcard-mean"><span class="micro">Ce que ça veut dire</span>' + esc(c.mean) + "</p></article>";
+    }).join("");
+  }
+  function statusBadge(st) {
+    return '<span class="mstatus st-' + esc(st.cls) + '" title="' + esc(st.help) + '">' + esc(st.label) + '<span class="sr-only"> : ' + esc(st.help) + "</span></span>";
+  }
+  function renderMemberList(m) {
+    var el = $("members"), btn = $("membersEmails");
+    if (!m) { blockError(el, S.members, "Liste des inscrits"); btn.hidden = true; return; }
+    var list = (Array.isArray(m.members) ? m.members : []).filter(Boolean);
+    btn.hidden = !list.length;
+    btn.textContent = S.showEmails ? "Masquer les emails" : "Afficher les emails complets";
+    btn.setAttribute("aria-pressed", String(!!S.showEmails));
+    if (!list.length) { el.innerHTML = emptyHtml("Aucun inscrit pour le moment", "Les comptes créés sur le site apparaîtront ici, avec leur activité."); return; }
+    var now = Date.now(), counts = H.memberCounts(list, now);
+    var summary = H.MEMBER_STATUS_ORDER.filter(function (k) { return counts[k] > 0; }).map(function (k) {
+      return "<span>" + statusBadge(H.MEMBER_STATUS[k]) + " " + esc(H.fmtInt(counts[k])) + "</span>";
+    }).join("");
+    var shown = list.slice(0, S.memberLimit);
+    el.innerHTML = '<p class="m-summary"><b>' + esc(H.fmtInt(counts.total) + " inscrit" + (counts.total > 1 ? "s" : "")) + "</b>" + summary + "</p>"
+      + '<ul class="members">' + shown.map(function (u, i) {
+        var st = H.memberStatus(u, now);
+        var last = H.memberLastActivity(u);
+        var open = !!u.user_id && S.openMember === u.user_id;
+        var mail = S.showEmails ? (u.email || "Adresse inconnue") : (u.email_masked || H.maskEmail(u.email) || "Adresse inconnue");
+        var bar = H.activityBar(u.active_dates, now, 7);
+        var n7 = H.num(u.active_days_7);
+        if (n7 === null) n7 = bar.filter(function (b) { return b.active; }).length;
+        var n30 = H.num(u.active_days_30);
+        var meta = [
+          "Dernière visite : " + (last ? H.daysAgo(last, now) : "jamais vue"),
+          "inscrit " + H.daysAgo(u.created_at, now),
+          u.source_group ? (u.source_group === "direct" ? "venu en direct" : "via " + H.sourceLabel(u.source_group)) : null,
+          H.isCountry(u.country) ? H.countryName(u.country) : null,
+          st.key === "pro" && st.idleDays >= 7 ? "absent depuis " + st.idleDays + " jours" : null,
+          u.tracking_opt_out ? "a refusé le suivi de ses visites" : null
+        ].filter(Boolean).join(" · ");
+        return '<li class="member"><button type="button" class="m-row" data-m="' + i + '" aria-expanded="' + open + '" aria-controls="md' + i + '">'
+          + '<span class="m-main"><span class="m-top"><span class="m-mail">' + esc(mail) + "</span>" + statusBadge(st) + "</span>"
+          + '<span class="m-meta">' + esc(meta) + "</span></span>"
+          + '<span class="m-act"><span class="m-bar" role="img" aria-label="' + esc("Venu " + n7 + " jour" + (n7 > 1 ? "s" : "") + " sur les 7 derniers") + '">'
+          + bar.map(function (b) { return '<i class="' + (b.active ? "on" : "") + '" title="' + esc(H.fmtYmd(b.day)) + '"></i>'; }).join("")
+          + '</span><span class="m-act-txt tnum">' + esc(n7 + " j sur 7" + (n30 !== null ? " · " + n30 + " j sur 30" : "")) + "</span></span>"
+          + '<svg class="v-chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>'
+          + '<div class="m-detail" id="md' + i + '"' + (open ? "" : " hidden") + ">" + (open ? memberDetail(u, i) : "") + "</div></li>";
+      }).join("") + "</ul>"
+      + (list.length > shown.length ? '<div class="more"><button type="button" class="btn btn-ghost btn-sm" id="membersMore">Voir plus d\'inscrits (' + esc(H.fmtInt(list.length - shown.length)) + ")</button></div>" : "");
+  }
+  function memberDetail(u, i) {
+    var facts = [
+      "Inscrit le " + fmtDateTime(u.created_at),
+      "Dernière connexion : " + (u.last_sign_in_at ? fmtDateTime(u.last_sign_in_at) : "inconnue")
+    ];
+    if (u.tracking_opt_out) {
+      facts.push("A choisi « Ne pas lier mes visites à mon compte » : ses visites ne sont pas affichées ici.");
+    } else {
+      facts.push(H.fmtInt(u.page_views) + " page" + (Number(u.page_views) > 1 ? "s" : "") + " vue" + (Number(u.page_views) > 1 ? "s" : "") + " et " + H.fmtInt(u.matches_viewed) + " match" + (Number(u.matches_viewed) > 1 ? "s" : "") + " consulté" + (Number(u.matches_viewed) > 1 ? "s" : "") + " sur 30 jours (visites suivies)");
+      facts.push(u.saw_pricing ? "A vu la page abonnement" : "N'a pas vu la page abonnement (visites suivies)");
+      facts.push(u.clicked_pay ? "A cliqué sur le bouton de paiement" : "N'a jamais cliqué sur le bouton de paiement (visites suivies)");
+    }
+    facts.push(u.origin_basis === "signup" ? "Origine : première page vue lors de l'inscription"
+      : u.origin_basis === "first_tracked_visit" ? "Origine : première visite suivie (la visite d'inscription n'est pas connue)"
+      : "Origine inconnue (inscrit avant le suivi)");
+    if (u.device) facts.push("Appareil d'origine : " + H.deviceLabel(u.device));
+    if (u.site) facts.push("Version du site : " + H.siteLabel(u.site));
+    return '<ul class="m-facts">' + facts.map(function (f) { return "<li>" + esc(f) + "</li>"; }).join("") + "</ul>"
+      + '<h4 class="micro">Son parcours, jour par jour</h4><div class="m-journey" id="mj' + i + '">' + journeyHtml(u) + "</div>";
+  }
+  function journeyHtml(u) {
+    var j = S.journeys[u.user_id];
+    if (!j || j.loading) return '<div class="skel skel-line" style="width:60%"></div><p class="note">Chargement du parcours…</p>';
+    if (!j.data) {
+      return '<div class="block-error" role="alert"><p>' + esc(j.kind === "missing" ? "Parcours indisponible : la mise à jour " + MEMBERS_FILE + " n'est pas appliquée." : errorText(j.kind, j.error, "Parcours de l'inscrit")) + "</p></div>";
+    }
+    var d = j.data;
+    if (d.member && d.member.tracking_opt_out) {
+      return '<p class="soft-msg"><b>Parcours non suivi</b>Cet inscrit a choisi « Ne pas lier mes visites à mon compte ». Ses visites restent comptées anonymement dans les chiffres généraux.</p>';
+    }
+    var days = H.journeyDays(d.items, S.names);
+    if (!days.length) {
+      return '<p class="soft-msg"><b>Aucune visite enregistrée pour cet inscrit</b>' + esc(d.tracking_since
+        ? "Il n'est pas revenu connecté depuis le début du suivi par inscrit."
+        : "Le suivi par inscrit n'a pas encore démarré : ses prochaines visites connectées apparaîtront ici.") + "</p>";
+    }
+    var html = days.map(function (g) {
+      return '<div class="j-day"><h5 class="j-title">' + esc(g.title) + "<small>" + esc(g.summary) + '</small></h5><ol class="timeline">'
+        + g.entries.map(function (e) {
+          var meta = fmtTime(e.at) + (e.kind === "page" ? " · " + (e.sec === null || e.sec === undefined ? "durée inconnue" : "resté " + H.fmtDur(e.sec)) : "") + (e.beforeSignup ? " · avant l'inscription" : "");
+          var cls = e.kind === "page" ? "" : e.win ? "ev win" : "ev";
+          return "<li" + (cls ? ' class="' + cls + '"' : "") + '><span class="tl-main"' + (e.title ? ' title="' + esc(e.title) + '"' : "") + ">" + esc(e.text) + '</span><span class="tl-meta">' + esc(meta) + "</span></li>";
+        }).join("") + "</ol></div>";
+    }).join("");
+    var lim = H.num(d.limit) || 200;
+    if ((d.items || []).length >= lim) html += '<p class="note">' + esc("Seules les " + H.fmtInt(lim) + " dernières actions sont affichées.") + "</p>";
+    return html;
+  }
+  function toggleMember(row) {
+    var i = Number(row.getAttribute("data-m"));
+    var list = (S.members && S.members.data && S.members.data.members) || [];
+    var u = list[i];
+    if (!u) return;
+    var detail = document.getElementById("md" + i), open = row.getAttribute("aria-expanded") !== "true";
+    row.setAttribute("aria-expanded", String(open));
+    detail.hidden = !open;
+    S.openMember = open ? u.user_id : null;
+    if (open && !S.journeys[u.user_id]) {
+      if (UUID_RE.test(String(u.user_id || ""))) loadJourney(u, i);
+      else S.journeys[u.user_id] = { kind: "invalid", error: null };
+    }
+    detail.innerHTML = open ? memberDetail(u, i) : "";
+  }
+  function loadJourney(u, i) {
+    S.journeys[u.user_id] = { loading: true };
+    rpc("admin_member_journey", { p_user_id: u.user_id, p_limit: 200 }).then(function (r) {
+      if (r.kind === "denied") { showState("denied"); return; }
+      S.journeys[u.user_id] = r;
+      var paint = function () {
+        var box = document.getElementById("mj" + i);
+        if (box && S.openMember === u.user_id) box.innerHTML = journeyHtml(u);
+      };
+      paint();
+      var ids = ((r.data && r.data.items) || []).map(function (x) { return x && x.match_id; }).filter(Boolean);
+      if (ids.some(function (id) { return !S.names[id]; })) loadMissingNames(ids).then(function (changed) { if (changed) paint(); });
+    });
+  }
+  function renderRetention(r) {
+    var el = $("retention");
+    if (!r) { blockError(el, S.retention, "Est-ce qu'ils reviennent ?"); return; }
+    var a = r.active || {};
+    var head = '<p class="ret-active">' + esc("Inscrits venus : " + H.fmtInt(a.today) + " aujourd'hui · " + H.fmtInt(a.week) + " sur 7 jours · " + H.fmtInt(a.month) + " sur 30 jours") + "</p>";
+    var cohorts = (r.cohorts || []).filter(function (c) { return c && Number(c.signups) > 0; });
+    if (!cohorts.length) { el.innerHTML = head + emptyHtml("Aucun inscrit pour le moment", "Les semaines d'inscription apparaîtront ici."); return; }
+    var steps = [[1, "Le lendemain ou après"], [7, "Après 7 jours"], [30, "Après 30 jours"]];
+    el.innerHTML = head + '<ul class="ret-list">' + cohorts.slice(0, 8).map(function (c) {
+      var n = Number(c.signups) || 0;
+      return '<li class="ret"><div class="ret-head"><b>Semaine du ' + esc(H.shortDay(String(c.week_start || "").slice(0, 10))) + "</b><span>" + esc(H.fmtInt(n) + " inscrit" + (n > 1 ? "s" : "")) + "</span></div>"
+        + '<p class="ret-sentence">' + esc(H.retentionSentence(c, 7)) + "</p>"
+        + '<ul class="bars">' + steps.map(function (s) {
+          var cell = H.retentionCell(c, s[0]);
+          var ok = cell.state === "ok";
+          return '<li class="bar-row"><span class="bar-name">' + esc(s[1]) + '</span><span class="bar-val tnum">' + esc(ok ? cell.text : "trop tôt")
+            + (ok ? "<small>" + esc(H.fmtPct(cell.pct, 0)) + "</small>" : "") + '</span><span class="bar-track" aria-hidden="true"><i class="alt' + (ok && cell.returned ? "" : " none") + '" style="width:' + (ok ? cell.pct : 0).toFixed(1) + '%"></i></span></li>';
+        }).join("") + "</ul></li>";
+    }).join("") + "</ul>"
+      + (cohorts.length > 8 ? '<p class="note">Les 8 dernières semaines sont affichées.</p>' : "");
+  }
+
   // ---------- Bandeaux ----------
   function renderNotices() {
     var bits = [];
@@ -1383,6 +1779,7 @@
       $("footCoverage").textContent = "Suivi des visites démarré le " + fmtDateTime((c && c.launch_at) || H.LAUNCH_AT) + " (heure de Paris). Les données sont gardées 13 mois.";
       setBusy(false);
       refreshNames();
+      loadMembers();
       if (!opts.silent) return loadLive().then(startTimers);
     }).catch(function (e) {
       setBusy(false);
@@ -1508,6 +1905,10 @@
       if (ex) { askExclusion(ex.getAttribute("data-exclude")); return; }
       if (t.closest("#visitsMore")) { S.visitLimit += 20; renderVisits(); return; }
       if (t.closest("#signupsMore")) { S.signupLimit += 15; renderSignups(); return; }
+      if (t.closest("#membersEmails")) { S.showEmails = !S.showEmails; renderMemberList(S.members && S.members.data); return; }
+      if (t.closest("#membersMore")) { S.memberLimit += 25; renderMemberList(S.members && S.members.data); return; }
+      var mrow = t.closest("button.m-row");
+      if (mrow) { toggleMember(mrow); return; }
       var row = t.closest("button.v-row");
       if (row) {
         var i = Number(row.getAttribute("data-v")), s = (S.sessions || [])[i];

@@ -299,11 +299,56 @@ dialog.confirm p{color:var(--soft);font-size:14.5px}
 .dialog-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:18px;flex-wrap:wrap}
 .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:300;background:var(--card3);border:1px solid var(--line2);border-radius:12px;padding:12px 16px;font-size:14px;box-shadow:0 18px 40px -16px rgba(0,0,0,.8);width:max-content;max-width:calc(100% - 32px)}
 
+/* Mes inscrits */
+.cards.m-cards{grid-template-columns:repeat(4,minmax(0,1fr))}
+.cards.m-cards>.soft-msg{grid-column:1 / -1}
+.m-note{font-size:13.5px;color:var(--soft);background:rgba(34,211,238,.06);border:1px solid rgba(34,211,238,.2);border-radius:var(--r-sm);padding:10px 14px;margin-bottom:12px;line-height:1.55}
+.g-members{grid-template-columns:minmax(0,7fr) minmax(0,5fr);margin-top:14px}
+.m-tools{display:flex;justify-content:flex-end;margin:-6px 0 8px}
+.m-summary{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;font-size:13.5px;color:var(--soft);margin-bottom:6px}
+.m-summary b{color:var(--text)}
+.members{list-style:none;display:flex;flex-direction:column}
+.member{border-top:1px solid var(--line)}
+.member:first-child{border-top:0}
+.m-row{display:grid;grid-template-columns:minmax(0,1fr) auto 18px;gap:12px;align-items:center;width:100%;text-align:left;background:transparent;border:0;padding:12px 6px;border-radius:12px;cursor:pointer;min-height:44px}
+.m-row:hover,.m-row[aria-expanded="true"]{background:rgba(255,255,255,.03)}
+.m-row[aria-expanded="true"] .v-chev{transform:rotate(180deg)}
+.m-main{min-width:0}
+.m-top{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px}
+.m-mail{font-weight:650;min-width:0;overflow-wrap:anywhere}
+.m-meta{display:block;font-size:13px;color:var(--soft);margin-top:3px}
+.m-act{display:flex;flex-direction:column;align-items:flex-end;gap:5px}
+.m-bar{display:inline-flex;gap:3px}
+.m-bar i{display:block;width:11px;height:18px;border-radius:4px;background:rgba(255,255,255,.06);border:1px solid var(--line2)}
+.m-bar i.on{background:var(--green);border-color:transparent}
+.m-act-txt{font-size:12px;color:var(--muted);white-space:nowrap}
+.m-detail{padding:4px 8px 16px}
+.m-facts{list-style:none;display:flex;flex-direction:column;gap:3px;font-size:13.5px;color:var(--soft);margin:2px 0 14px}
+.m-journey{margin-top:8px}
+.mstatus{display:inline-flex;align-items:center;font-size:12px;font-weight:700;padding:2px 9px;border-radius:999px;white-space:nowrap;background:rgba(255,255,255,.07);color:var(--soft)}
+.mstatus.st-pro{background:var(--violet-wash);color:var(--violet)}
+.mstatus.st-new{background:var(--cyan-wash);color:var(--cyan)}
+.mstatus.st-active{background:var(--green-wash);color:var(--green)}
+.mstatus.st-nudge{background:var(--amber-wash);color:var(--amber)}
+.mstatus.st-gone{background:rgba(148,163,184,.14);color:#c5d0dd}
+.j-day+.j-day{margin-top:12px}
+.j-title{font-size:14px;font-weight:700;display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 10px}
+.j-title small{font-size:12.5px;font-weight:500;color:var(--muted)}
+.ret-active{font-size:13.5px;color:var(--soft);margin-bottom:12px}
+.ret-list{list-style:none;display:flex;flex-direction:column;gap:14px}
+.ret{border-top:1px solid var(--line);padding-top:12px}
+.ret:first-child{border-top:0;padding-top:0}
+.ret-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px;font-size:14.5px}
+.ret-head span{color:var(--muted);font-size:13px}
+.ret-sentence{font-size:13.5px;color:var(--soft);margin:4px 0 10px}
+.bar-track i.none{display:none}
+
 @media (max-width:1100px){
   .cards{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .cards.m-cards{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
 @media (max-width:900px){
-  .g2,.g-health{grid-template-columns:minmax(0,1fr)}
+  .g2,.g-health,.g-members{grid-template-columns:minmax(0,1fr)}
 }
 @media (max-width:640px){
   body{font-size:15px}
@@ -346,6 +391,10 @@ dialog.confirm p{color:var(--soft);font-size:14.5px}
   .custom-range{width:100%}
   .custom-range .field{flex:1 1 130px}
   .light{gap:12px;padding:12px}
+  .m-row{grid-template-columns:minmax(0,1fr);gap:8px}
+  .m-act{flex-direction:row;align-items:center;gap:10px}
+  .m-detail{padding:4px 4px 14px}
+  .m-tools{justify-content:flex-start}
 }
 @media (prefers-reduced-motion:reduce){
   *{animation:none!important;transition:none!important;scroll-behavior:auto!important}

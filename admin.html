@@ -157,6 +157,37 @@
       <p class="sr-only" id="liveAnnounce" aria-live="polite"></p>
     </section>
 
+    <!-- 6 bis. Mes inscrits (migration 0025_admin_members.sql ; sans elle : « a activer ») -->
+    <section class="section" id="inscrits" aria-labelledby="membersTitle">
+      <div class="section-head">
+        <h2 class="section-title" id="membersTitle">Mes inscrits</h2>
+        <p class="section-sub">Ce que font les personnes qui ont créé un compte (comptes admin et de test masqués)</p>
+      </div>
+      <p class="m-note" id="membersNote" hidden></p>
+      <div class="cards m-cards" id="memberCards">
+        <div class="skel skel-card"></div><div class="skel skel-card"></div><div class="skel skel-card"></div><div class="skel skel-card"></div>
+      </div>
+      <div class="grid g-members" id="membersBody">
+        <section class="card" aria-labelledby="memberListTitle">
+          <div class="card-head">
+            <div><h3 class="card-title" id="memberListTitle">Liste des inscrits</h3><p class="card-sub">Touche un inscrit pour voir son parcours jour par jour</p></div>
+            <button type="button" class="info" aria-expanded="false" aria-controls="helpMembers" aria-label="Aide : liste des inscrits">i</button>
+          </div>
+          <p class="help" id="helpMembers" hidden><b>Pro</b> : paie l'abonnement. <b>Nouveau</b> : inscrit depuis moins de 7 jours. <b>Actif</b> : venu dans les 7 derniers jours. <b>À relancer</b> : plus venu depuis 7 à 29 jours. <b>Parti</b> : plus venu depuis 30 jours ou plus. « Venu » = une page ouverte en étant connecté, ou une connexion. Les 7 petites cases = les 7 derniers jours (case verte = jour où la personne est venue). Les emails sont masqués à l'écran ; le bouton les affiche en entier.</p>
+          <div class="m-tools"><button type="button" class="btn btn-ghost btn-sm" id="membersEmails" aria-pressed="false" hidden>Afficher les emails complets</button></div>
+          <div id="members"><div class="skel skel-block"></div></div>
+        </section>
+        <section class="card" aria-labelledby="retentionTitle">
+          <div class="card-head">
+            <div><h3 class="card-title" id="retentionTitle">Est-ce qu'ils reviennent ?</h3><p class="card-sub">Par semaine d'inscription (du lundi au dimanche)</p></div>
+            <button type="button" class="info" aria-expanded="false" aria-controls="helpRetention" aria-label="Aide : est-ce qu'ils reviennent">i</button>
+          </div>
+          <p class="help" id="helpRetention" hidden>« Revenu après 7 jours » = venu (page ouverte en étant connecté, ou connexion) au moins une fois 7 jours ou plus après le jour de son inscription. Un inscrit ne compte qu'une fois ce délai passé : avant, c'est « trop tôt ». Avant la mise en ligne du suivi par inscrit, seule la dernière connexion est connue : les chiffres des premières semaines peuvent être plus bas que la réalité.</p>
+          <div id="retention"><div class="skel skel-block"></div></div>
+        </section>
+      </div>
+    </section>
+
     <!-- 7. Pages et matchs -->
     <div class="grid g2 section">
       <section class="card" aria-labelledby="pagesTitle">

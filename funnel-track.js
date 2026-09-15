@@ -4,10 +4,23 @@
 // funnel_events (supabase/migrations/0008_funnel_events.sql + 0010 + 0011),
 // lue uniquement par les fonctions admin (admin.html).
 //
-// Mesure d'audience exemptable de consentement (lignes directrices CNIL) :
+// Visiteur NON connecte : mesure d'audience (lignes directrices CNIL) :
 // - identifiant de visite aleatoire en sessionStorage (efface a la fermeture
 //   de l'onglet, jamais persistant, jamais un identifiant publicitaire) ;
-// - page_view / page_leave / click ne portent JAMAIS de user_id ;
+// - page_view / page_leave / click ne portent aucun user_id ;
+// Inscrit CONNECTE (session Supabase deja presente dans ce navigateur, lue
+// dans le stockage du client supabase-js de la page, sans dependance
+// ajoutee) : page_view / page_leave / click portent son user_id et partent
+// avec SON jeton (politique RLS funnel_events_insert_own), pour que le
+// proprietaire suive l'usage de ses inscrits (admin.html, « Mes inscrits »,
+// migration 0025_admin_members.sql). Aucune donnee du compte (email...)
+// n'est jamais ajoutee a metadata. Jeton expire : attente breve du
+// renouvellement par window.IasharkApp.supabase (app-client.js), sinon
+// l'evenement part anonyme. Refus respecte (« Ne pas lier mes visites a mon
+// compte », compte.html) : localStorage iashark_tracking_opt_out="1" sur cet
+// appareil OU user_metadata.tracking_opt_out=true sur le compte => aucun
+// user_id. Base legale proposee : interet legitime avec opposition (a
+// faire relire).
 // - aucune adresse IP, aucun email, aucune empreinte : seulement des champs
 //   grossiers (type d'appareil, navigateur, OS, largeur d'ecran, langue,
 //   fuseau horaire et un pays ESTIME depuis ce fuseau, `country_guess`) ;
@@ -149,13 +162,102 @@
     }
   }
 
-  // Evenements de navigation : toujours anonymes, quel que soit l'appelant.
-  var ANONYMOUS_EVENTS = { page_view: true, page_leave: true, click: true };
+  // ---------- Inscrit connecte ----------
+  // Cle de stockage par defaut de supabase-js v2 pour ce projet
+  // (sb-<ref>-auth-token), partagee par app-client.js et auth-header.js.
+  var AUTH_STORAGE_KEY = "sb-ksvjraqitxouwiabecai-auth-token";
+  var OPT_OUT_KEY = "iashark_tracking_opt_out";
+  var UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  var TOKEN_MARGIN_MS = 60000;
+  var liveSession = null;
+
+  function readStoredSession() {
+    try {
+      var raw = localStorage.getItem(AUTH_STORAGE_KEY);
+      if (!raw) return null;
+      var s = JSON.parse(raw);
+      if (s && s.currentSession) s = s.currentSession;
+      return s && typeof s === "object" ? s : null;
+    } catch (e) {
+      return null;
+    }
+  }
+  function sessionUser(s) {
+    var u = s && s.user;
+    return u && typeof u.id === "string" && UUID_RE.test(u.id) ? u : null;
+  }
+  function freshToken(s) {
+    var exp = Number(s && s.expires_at);
+    return s && typeof s.access_token === "string" && s.access_token.length > 20 && exp * 1000 > Date.now() + TOKEN_MARGIN_MS
+      ? s.access_token : null;
+  }
+  function optedOut(user) {
+    try { if (localStorage.getItem(OPT_OUT_KEY) === "1") return true; } catch (e) {}
+    var meta = user && user.user_metadata;
+    return !!meta && (meta.tracking_opt_out === true || meta.tracking_opt_out === "true");
+  }
+  // { id, token } ou null (evenement anonyme). La session stockee fait foi :
+  // deconnecte => anonyme, meme si une session a ete lue plus tot.
+  function memberIdentity() {
+    var stored = readStoredSession();
+    var user = sessionUser(stored);
+    if (!user) return null;
+    var token = freshToken(stored);
+    var live = sessionUser(liveSession);
+    if (!token && live && live.id === user.id) {
+      token = freshToken(liveSession);
+      user = live;
+    }
+    if (!token || optedOut(user)) return null;
+    return { id: user.id, token: token };
+  }
+  function sessionState() {
+    var stored = readStoredSession();
+    if (!sessionUser(stored)) return "none";
+    return freshToken(stored) ? "fresh" : "stale";
+  }
+  // Jeton expire : le client deja charge par la page le renouvelle
+  // (getSession). 6 essais x 200 ms au plus pour le trouver, jamais bloquant.
+  function refreshIdentity(done) {
+    var tries = 0, finished = false;
+    var finish = function () { if (!finished) { finished = true; done(); } };
+    var attempt = function () {
+      try {
+        var app = window.IasharkApp;
+        var auth = app && app.supabase && app.supabase.auth;
+        if (auth && typeof auth.getSession === "function") {
+          Promise.resolve(auth.getSession()).then(function (r) {
+            var s = r && r.data && r.data.session;
+            if (s) liveSession = s;
+            finish();
+          }, finish);
+          return;
+        }
+      } catch (e) {
+        finish();
+        return;
+      }
+      if (++tries >= 6) { finish(); return; }
+      setTimeout(attempt, 200);
+    };
+    attempt();
+  }
+
+  // Evenements de navigation : user_id uniquement celui de la session
+  // connectee de ce navigateur (jamais celui passe par l'appelant).
+  var NAVIGATION_EVENTS = { page_view: true, page_leave: true, click: true };
 
   // eventType : liste fermee (check constraint funnel_events_event_type_check).
   // userId n'est transmis qu'accompagne du jeton de CE compte (authToken).
   window.iasharkTrack = function (eventType, metadata, userId, authToken) {
-    var uid = !ANONYMOUS_EVENTS[eventType] && authToken && userId ? userId : null;
+    var uid = null, token = null;
+    if (NAVIGATION_EVENTS[eventType]) {
+      var member = enabled ? memberIdentity() : null;
+      if (member) { uid = member.id; token = member.token; }
+    } else if (authToken && userId) {
+      uid = userId;
+      token = authToken;
+    }
     send({
       event_type: eventType,
       page: loc.pathname.slice(0, 300),
@@ -163,7 +265,7 @@
       session_id: getSessionId(),
       user_id: uid,
       metadata: withFlags(metadata),
-    }, uid ? authToken : null);
+    }, token);
   };
 
   if (!autoTrack) return;
@@ -361,13 +463,17 @@
       match_id: matchIdFromPath(loc.pathname, params),
     };
 
+    // La page_view attend (au plus GEO_WAIT_MS) la localisation et, pour un
+    // inscrit dont le jeton a expire, son renouvellement par le client.
     var cachedGeo = readGeoCache();
-    if (cachedGeo !== undefined) {
-      sendPageView(cachedGeo);
-    } else {
-      setTimeout(function () { sendPageView(null); }, GEO_WAIT_MS);
-      fetchGeo(sendPageView);
-    }
+    var geoReady = cachedGeo !== undefined;
+    var geoValue = geoReady ? cachedGeo : null;
+    var idReady = sessionState() !== "stale";
+    var sendWhenReady = function () { if (geoReady && idReady) sendPageView(geoValue); };
+    if (!geoReady || !idReady) setTimeout(function () { sendPageView(geoValue); }, GEO_WAIT_MS);
+    if (!geoReady) fetchGeo(function (g) { geoReady = true; geoValue = g; sendWhenReady(); });
+    if (!idReady) refreshIdentity(function () { idReady = true; sendWhenReady(); });
+    sendWhenReady();
   } catch (e) {
     sendPageView(null);
   }

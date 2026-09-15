@@ -250,10 +250,16 @@ for (const v of VERSIONS.filter((x) => ['fr', 'gb', 'mx'].includes(x.dir))) {
       const leagues = page.locator('#homeList .hl-leagues .hl-league');
       await expect(leagues.first()).toBeVisible();
       await expect(page.locator('#homeList .hl-mine')).toHaveCount(0);
-      // Dernier match de la premiere competition qui en a au moins deux (sinon le premier).
-      const league = leagues.filter({ has: page.locator('.hl-item:nth-child(2)') }).first();
-      const scope = (await league.count()) ? league : leagues.first();
-      const item = scope.locator('.hl-item').last();
+      // Un match A VENIR (un favori termine est nettoye au rechargement, par conception) :
+      // premier jour qui en a, dans l'ordre des onglets.
+      const upcoming = '.hl-item:has(a.hl-row:not(.cd-finished):not(.cd-live):not(.cd-postponed))';
+      for (const tab of await page.locator('#homeList .hl-day:not([disabled])').all()) {
+        if (await page.locator('#homeList .hl-leagues ' + upcoming).count()) break;
+        await tab.click();
+      }
+      test.skip(!(await page.locator('#homeList .hl-leagues ' + upcoming).count()), 'Aucun match a venir dans les donnees');
+      const scope = leagues.filter({ has: page.locator(upcoming) }).first();
+      const item = scope.locator(upcoming).last();
       const mstar = item.locator('.hl-mstar');
       const id = await mstar.getAttribute('data-hl-mfav');
       await expect(mstar).toHaveAttribute('aria-pressed', 'false');
@@ -273,16 +279,21 @@ for (const v of VERSIONS.filter((x) => ['fr', 'gb', 'mx'].includes(x.dir))) {
       expect(stored.map((e) => e.id)).toEqual([id]);
       expect(stored[0].ko).toBeGreaterThan(0);
       await expectNoHorizontalScroll(page);
+      const jour = await page.locator('#homeList .hl-day[aria-selected="true"]').getAttribute('data-hl-day');
+      const memeJour = async () => { const t = page.locator(`#homeList .hl-day[data-hl-day="${jour}"]`); await expect(t).toBeVisible(); if ((await t.getAttribute('aria-selected')) !== 'true') await t.click(); };
       await page.reload();
+      await memeJour();
       await expect(page.locator('#homeList .hl-mine a.hl-row')).toHaveCount(1);
 
       // Compte : fusion dans user_metadata.fav_matches, sans toucher fav_leagues.
       await supa.as('free');
       await page.goto(`/${v.dir}/`);
       await expect(page.locator('#homeList a.hl-row').first()).toBeVisible();
+      await memeJour();
       await expect.poll(() => supa.calls.filter((c) => c.kind === 'auth' && c.method === 'PUT' && c.path === '/auth/v1/user' && c.body.data.fav_matches).map((c) => c.body.data.fav_matches.map((e) => e.id)).pop()).toEqual([id]);
       await page.evaluate((k) => localStorage.removeItem(k), FAV_MATCHES_KEY);
       await page.reload();
+      await memeJour();
       await expect(page.locator('#homeList .hl-mine a.hl-row')).toHaveCount(1);
       // Retrait : la section disparait.
       await page.locator('#homeList .hl-mine .hl-mstar').click();

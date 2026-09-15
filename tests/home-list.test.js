@@ -41,7 +41,8 @@ function spyMatch(extra) {
   const m = new Proxy(target, { get(t, k) { if (typeof k === "string" && PREMIUM.PREMIUM_FIELDS.includes(k)) reads.push(k); return t[k]; } });
   return { m, reads };
 }
-const zoneOf = (html) => (html.match(/<span class="hl-zone[^"]*">([\s\S]*)<\/span><\/a><\/li>$/) || [])[1] || "";
+const zoneOf = (html) => (html.match(/<span class="hl-zone[^"]*">([\s\S]*)<\/span><\/a>/) || [])[1] || "";
+const setStore = (ids) => ({ has: (k) => ids.map(String).includes(String(k)), list: () => ids.map(String) });
 const strip = (html) => html.replace(/<svg[\s\S]*?<\/svg>/g, "").replace(/<[^>]+>/g, " ");
 
 test("ligne verrouillee : aucun champ premium lu, aucun chiffre ni pari dans le HTML", () => {
@@ -111,6 +112,82 @@ test("derby : puce depuis le champ public derby", () => {
   const html = HL.renderMatchRow(base({ derby: { key: "clasico-nacional", name: "Clásico Nacional" } }), ctx(), helpers(), 0);
   assert.match(html, /hl-tag-derby" title="Clásico Nacional">Derby</);
   assert.doesNotMatch(HL.renderMatchRow(base(), ctx(), helpers(), 0), /hl-tag-derby/);
+});
+
+test("jours : Aujourd'hui / Demain / Apres-demain, onglet sans match desactive « aucun match »", () => {
+  const H = Object.assign(helpers(), { matchDay: (m) => m.date.slice(0, 10) });
+  const clock = { day: "2026-09-16", tomorrow: "2026-09-17" };
+  const days = HL.buildDays([base({ date: "2026-09-16 20:00" }), base({ id: 2, date: "2026-09-16 21:00" }), base({ id: 3, date: "2026-09-18 18:00" }), base({ id: 4, date: "2026-09-20 18:00" })], H, clock);
+  assert.deepEqual(days.map((d) => [d.day, d.count]), [["2026-09-16", 2], ["2026-09-17", 0], ["2026-09-18", 1]]);
+  const strip = HL.renderDateStrip(days, "2026-09-16");
+  assert.equal((strip.match(/role="tab"/g) || []).length, 3);
+  assert.match(strip, /<span class="hl-day-name">Aujourd’hui<\/span><span class="hl-day-sub">2 matchs<\/span>/);
+  assert.match(strip, /data-hl-day="2026-09-17"[^>]*disabled aria-disabled="true"[^>]*><span class="hl-day-name">Demain<\/span><span class="hl-day-sub">aucun match<\/span>/);
+  assert.match(strip, /<span class="hl-day-name">Après-demain<\/span><span class="hl-day-sub">1 match<\/span>/);
+  assert.doesNotMatch(strip, /Auj\.|Dem\.|\bJE\b|hl-dates-nav/);
+});
+
+test("accueil simplifie : ni banniere, ni recherche, ni filtres, ni bloc « Mes compétitions » separe", () => {
+  const src = fs.readFileSync(path.join(root, "home-list.js"), "utf8");
+  assert.doesNotMatch(src, /hl-banner|hl-search|hl-chip|data-hl-filter|home_banner_ready|hl-block"|fav_title|all_title/);
+  const html = HL.renderDayBody([base(), base({ id: 2, league_key: "el", league: "Europa League" })], ctx({ upsellAfter: 3 }), helpers());
+  assert.doesNotMatch(html, /hl-banner|hl-summary|hl-mine/, "pas de section « Mes matchs » sans match favori");
+  assert.equal((html.match(/class="hl-upsell"/g) || []).length, 1, "un seul rappel Pro");
+  assert.doesNotMatch(html.match(/<aside class="hl-upsell"[\s\S]*?<\/aside>/)[0], /[€£$]|MX\$|\bR\s?\d/, "rappel sans prix");
+});
+
+test("favoris : competitions favorites en tete de la meme liste, matchs favoris en tete de leur competition + « Mes matchs »", () => {
+  const H = Object.assign(helpers(), { compareMatches: (a, b) => a.id - b.id });
+  const list = [base({ id: 1 }), base({ id: 2 }), base({ id: 3, league_key: "el", league: "Europa League" }), base({ id: 4, league_key: "premier", league: "Premier League" })];
+  const favL = setStore(["premier"]);
+  const favM = setStore([2, 999]);
+  const groups = HL.groupByLeague(list, H, favL, favM);
+  assert.deepEqual(groups.map((g) => g.key), ["premier", "el", "laliga"], "favorite d'abord, puis A->Z");
+  assert.deepEqual(groups[2].matches.map((m) => m.id), [2, 1], "match favori en tete de sa competition");
+  const html = HL.renderDayBody(list, ctx({ favorites: favL, favMatches: favM }), H);
+  const mine = html.match(/<section class="hl-mine"[\s\S]*?<\/section>/);
+  assert.ok(mine, "section « Mes matchs »");
+  assert.ok(html.indexOf("hl-mine") < html.indexOf("hl-leagues"), "« Mes matchs » en haut");
+  assert.match(mine[0], /Mes matchs<\/span> <span class="hl-mine-n">1<\/span>/);
+  assert.equal((mine[0].match(/class="hl-item/g) || []).length, 1);
+  assert.match(html, /<section class="hl-league is-fav" data-league="premier">/);
+  // Etoile du match : bouton frere du lien, jamais dans le <a>.
+  const row = HL.renderMatchRow(base({ id: 2 }), ctx({ favMatches: favM }), H, 0);
+  assert.match(row, /<\/a><button type="button" class="hl-mstar is-on" data-hl-mfav="2" aria-pressed="true" aria-label="Retirer Alaves – Valencia de mes matchs"/);
+  assert.doesNotMatch(row.match(/<a [\s\S]*?<\/a>/)[0], /<button/);
+  const off = HL.renderMatchRow(base({ id: 5 }), ctx({ favMatches: favM }), H, 0);
+  assert.match(off, /class="hl-mstar" data-hl-mfav="5" aria-pressed="false" aria-label="Ajouter Alaves – Valencia à mes matchs"/);
+  // Ligne verrouillee dans « Mes matchs » : memes regles, aucun champ premium lu.
+  const { m, reads } = spyMatch({ id: 2, prob_band: "high" });
+  const lockedMine = HL.renderMine([m], ctx({ favMatches: favM }), H, 0);
+  assert.deepEqual(reads, []);
+  assert.match(lockedMine, /is-locked/);
+  assert.match(lockedMine, /hl-lockpill/);
+  assert.match(lockedMine, /hl-band is-high/);
+});
+
+test("matchs favoris : store {id, ko}, nettoyage des matchs passes, fusion avec user_metadata.fav_matches", async () => {
+  const now = Date.now();
+  const store = FL.createStore({ kind: "matches", storageKey: "tm" });
+  assert.equal(store.toggle(1570383, now + 3600e3), true);
+  assert.equal(store.toggle("42", now - 5 * 3600e3), true, "ajout accepte, retire au prochain nettoyage");
+  assert.equal(store.has(1570383), true);
+  assert.equal(store.prune(), true, "match commence il y a 5 h : nettoye");
+  assert.deepEqual(store.list(), ["1570383"]);
+  assert.equal(store.prune((e) => e.id === "1570383"), true, "match termine d'apres son statut : nettoye");
+  assert.deepEqual(store.list(), []);
+  store.toggle("7", now + 7200e3);
+  const saved = [];
+  const merged = await store.connectRemote({ load: () => Promise.resolve([{ id: "8", ko: now + 3600e3 }, { id: "9", ko: now - 10 * 3600e3 }, { id: "<x>" }]), save: (a) => { saved.push(a); return Promise.resolve(); } });
+  assert.deepEqual(merged, ["8", "7"]);
+  assert.equal(saved.length, 1, "match passe retire et favori local ajoute : ecriture sur le compte");
+  assert.deepEqual(saved[0].map((e) => e.id), ["8", "7"]);
+  assert.deepEqual(FL.cleanMatches([{ id: 1, ko: now - 4 * 3600e3 }, { id: 2, ko: null }, { id: 2 }], now).map((e) => e.id), ["2"]);
+  const calls = [];
+  const sb = { auth: { getUser: () => Promise.resolve({ data: { user: { user_metadata: { fav_leagues: ["el"], fav_matches: [{ id: "8", ko: now + 1e6 }] } } } }), updateUser: (p) => { calls.push(p); return Promise.resolve({ data: {} }); } } };
+  assert.deepEqual(await FL.supabaseAdapter(sb, "fav_matches").load(), [{ id: "8", ko: now + 1e6 }]);
+  await FL.supabaseAdapter(sb, "fav_matches").save([{ id: "8", ko: now + 1e6 }]);
+  assert.deepEqual(calls, [{ data: { fav_matches: [{ id: "8", ko: now + 1e6 }] } }], "seul fav_matches est ecrit (fav_leagues intact)");
 });
 
 test("competition : favoris puis A->Z, en-tete « N matchs · M analyses pretes », ajout aux favoris suivi", () => {

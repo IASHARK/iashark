@@ -1,13 +1,14 @@
 'use strict';
 // Accueil : vitrine du match offert + liste des matchs (home-list.js, maquette v2
 // validee le 15/09/2026). Anonyme pour les 9 versions ; comportements de la liste
-// (lignes verrouillees, Pro, favoris, bande de dates, banniere, niveau de
+// (lignes verrouillees, Pro, favoris competitions et matchs, jours, niveau de
 // probabilite) sur fr / gb / mx.
 const { test, expect, expectNoHorizontalScroll, pathOf } = require('./helpers/fixtures');
 const { VERSIONS, ALL_DIRS } = require('./helpers/versions');
 const { tr } = require('./helpers/site-data');
 
 const FAV_KEY = 'iashark.favLeagues.v1';
+const FAV_MATCHES_KEY = 'iashark.favMatches.v1';
 
 // Ligne verrouillee : aucun chiffre, aucune jauge, aucun marche, aucune note.
 async function expectLockedRowsClean(page) {
@@ -99,7 +100,7 @@ for (const v of VERSIONS) {
 
 for (const v of VERSIONS.filter((x) => ['fr', 'gb', 'mx'].includes(x.dir))) {
   test.describe(`liste des matchs /${v.dir}/`, () => {
-    test('anonyme : lignes verrouillees sans chiffre, banniere, match offert dans sa competition', async ({ page, dictFor, baseURL }) => {
+    test('anonyme : lignes verrouillees sans chiffre, accueil simplifie, match offert dans sa competition', async ({ page, dictFor, baseURL }) => {
       const dict = await dictFor(v.locale);
       await page.goto(`/${v.dir}/`);
       await expect(page.locator('#homeList a.hl-row').first()).toBeVisible();
@@ -110,10 +111,11 @@ for (const v of VERSIONS.filter((x) => ['fr', 'gb', 'mx'].includes(x.dir))) {
       await expect(row.locator('.hl-lockpill')).toBeAttached();
       await expect(row).toHaveAttribute('data-track-kind', 'home_row_lock');
       expect(pathOf(await row.getAttribute('href'), baseURL), 'ligne verrouillee -> page match (mur Pro)').toMatch(new RegExp(`^/${v.dir}/match\\.html\\?id=\\d+$`));
-      const banner = page.locator('#homeList .hl-banner');
-      await expect(banner).toBeVisible();
-      await expect(banner.locator('a.hl-banner-cta')).toHaveAttribute('href', new RegExp(`^/${v.dir}/abonnement\\.html$`));
-      await expect(banner.locator('a.hl-banner-cta')).toHaveAttribute('data-track-kind', 'home_banner_ready');
+      // Accueil simplifie : ni banniere « X analyses pretes », ni recherche, ni filtres, ni bloc favoris separe.
+      await expect(page.locator('#homeList .hl-banner, #homeList .hl-search, #homeList .hl-chips, #homeList .hl-block')).toHaveCount(0);
+      // Etoile sur chaque competition et sur chaque match.
+      expect(await page.locator('#homeList .hl-leagues .hl-star').count()).toBe(await page.locator('#homeList .hl-leagues .hl-league').count());
+      expect(await page.locator('#homeList .hl-leagues .hl-mstar').count()).toBe(await page.locator('#homeList .hl-leagues a.hl-row').count());
       // Rappel Pro : un seul, sans prix.
       const upsell = page.locator('#homeList .hl-upsell');
       expect(await upsell.count()).toBeLessThanOrEqual(1);
@@ -127,15 +129,22 @@ for (const v of VERSIONS.filter((x) => ['fr', 'gb', 'mx'].includes(x.dir))) {
       }
     });
 
-    test('bande de dates : changer de jour met a jour la liste et l\'onglet actif', async ({ page }) => {
+    test('jours : Aujourd\'hui / Demain / Apres-demain, changer de jour met a jour la liste @mobile', async ({ page, dictFor }) => {
+      const dict = await dictFor(v.locale);
       await page.goto(`/${v.dir}/`);
       const days = page.locator('#homeList .hl-day');
       await expect(days.first()).toBeVisible();
-      expect(await days.count()).toBeGreaterThanOrEqual(2);
+      await expect(days).toHaveCount(3);
+      expect(await days.locator('.hl-day-name').allInnerTexts()).toEqual([tr(dict, 'home_list.day_today'), tr(dict, 'home_list.day_tomorrow'), tr(dict, 'home_list.day_after')]);
+      // Jour sans match : onglet desactive « aucun match ».
+      for (const empty of await page.locator('#homeList .hl-day.is-empty').all()) {
+        await expect(empty).toBeDisabled();
+        await expect(empty.locator('.hl-day-sub')).toHaveText(tr(dict, 'home_list.day_none'));
+      }
       const active = page.locator('#homeList .hl-day[aria-selected="true"]');
       await expect(active).toHaveCount(1);
       const before = await active.getAttribute('data-hl-day');
-      const target = page.locator('#homeList .hl-day[aria-selected="false"]:not(.is-empty)').first();
+      const target = page.locator('#homeList .hl-day[aria-selected="false"]:not([disabled])').first();
       test.skip(!(await target.count()), 'Un seul jour avec des matchs');
       const day = await target.getAttribute('data-hl-day');
       await target.click();
@@ -172,7 +181,7 @@ for (const v of VERSIONS.filter((x) => ['fr', 'gb', 'mx'].includes(x.dir))) {
       await expect(page.locator('#homeList .hl-band-note')).toContainText(tr(dict, 'home_list.band_note'));
     });
 
-    test('Pro simule : probabilite /10 visible, banniere masquee, aucun cadenas', async ({ page, supa }) => {
+    test('Pro simule : probabilite /10 visible, aucun cadenas ni rappel Pro', async ({ page, supa }) => {
       await supa.as('pro');
       // Attente creee AVANT la navigation : l'appel part des DOMContentLoaded
       // (scripts defer), souvent avant la fin de page.goto().
@@ -181,9 +190,8 @@ for (const v of VERSIONS.filter((x) => ['fr', 'gb', 'mx'].includes(x.dir))) {
       expect((await call).body).toEqual({ scope: 'list' });
       await expect(page.locator('#homeList a.hl-row').first()).toBeVisible();
       await expect(page.locator('#homeList .hl-row.is-open .hl-prob').first()).toContainText('/10');
-      await expect(page.locator('#homeList .hl-banner')).toHaveCount(0);
       await expect(page.locator('#homeList .hl-lockpill')).toHaveCount(0);
-      await expect(page.locator('#homeList .hl-summary')).toBeVisible();
+      await expect(page.locator('#homeList .hl-upsell')).toHaveCount(0);
     });
 
     test('compte gratuit : aucun chiffre avant confirmation Pro (match-data isPro=false)', async ({ page, supa }) => {
@@ -198,29 +206,87 @@ for (const v of VERSIONS.filter((x) => ['fr', 'gb', 'mx'].includes(x.dir))) {
       await expect(page.locator('#homeList .hl-row.is-open:not(.is-free)')).toHaveCount(0);
     });
 
-    test('favoris : visiteur (localStorage) puis compte (user_metadata), persistants', async ({ page, supa }) => {
+    test('favoris : competition en tete de la liste, visiteur (localStorage) puis compte (user_metadata), persistants', async ({ page, supa }) => {
       await page.goto(`/${v.dir}/`);
-      const star = page.locator('#homeList .hl-block').nth(1).locator('.hl-star').first();
-      await expect(star).toBeVisible();
+      const leagues = page.locator('#homeList .hl-leagues .hl-league');
+      await expect(leagues.first()).toBeVisible();
+      const star = leagues.last().locator('.hl-star');
       const key = await star.getAttribute('data-hl-fav');
       await expect(star).toHaveAttribute('data-track-kind', 'home_fav_add');
       await star.click();
-      const favBlock = page.locator('#homeList .hl-block').first();
-      await expect(favBlock.locator(`.hl-league[data-league="${key}"]`)).toBeVisible();
-      await expect(favBlock.locator(`.hl-star[data-hl-fav="${key}"]`)).toHaveAttribute('aria-pressed', 'true');
+      // Meme liste, competition favorite en premier (pas de bloc separe).
+      await expect(leagues.first()).toHaveAttribute('data-league', key);
+      await expect(leagues.first().locator('.hl-star')).toHaveAttribute('aria-pressed', 'true');
       expect(await page.evaluate((k) => JSON.parse(localStorage.getItem(k) || '[]'), FAV_KEY)).toEqual([key]);
       await page.reload();
-      await expect(page.locator('#homeList .hl-block').first().locator(`.hl-league[data-league="${key}"]`)).toBeVisible();
+      await expect(page.locator('#homeList .hl-leagues .hl-league').first()).toHaveAttribute('data-league', key);
 
       // Connexion : le favori local est fusionne dans user_metadata.fav_leagues...
       await supa.as('free');
       await page.goto(`/${v.dir}/`);
       await expect(page.locator('#homeList a.hl-row').first()).toBeVisible();
-      await expect.poll(() => supa.calls.filter((c) => c.kind === 'auth' && c.method === 'PUT' && c.path === '/auth/v1/user').map((c) => c.body.data.fav_leagues).pop()).toEqual([key]);
+      await expect.poll(() => supa.calls.filter((c) => c.kind === 'auth' && c.method === 'PUT' && c.path === '/auth/v1/user' && c.body.data.fav_leagues).map((c) => c.body.data.fav_leagues).pop()).toEqual([key]);
       // ... et reste la sur un navigateur sans liste locale.
       await page.evaluate((k) => localStorage.removeItem(k), FAV_KEY);
       await page.reload();
-      await expect(page.locator('#homeList .hl-block').first().locator(`.hl-league[data-league="${key}"]`)).toBeVisible();
+      await expect(page.locator('#homeList .hl-leagues .hl-league').first()).toHaveAttribute('data-league', key);
+    });
+
+    test('matchs favoris : etoile sur le match, « Mes matchs » en haut, en tete de sa competition, compte (user_metadata.fav_matches) @mobile', async ({ page, supa, dictFor }) => {
+      const dict = await dictFor(v.locale);
+      await page.goto(`/${v.dir}/`);
+      const leagues = page.locator('#homeList .hl-leagues .hl-league');
+      await expect(leagues.first()).toBeVisible();
+      await expect(page.locator('#homeList .hl-mine')).toHaveCount(0);
+      // Dernier match de la premiere competition qui en a au moins deux (sinon le premier).
+      const league = leagues.filter({ has: page.locator('.hl-item:nth-child(2)') }).first();
+      const scope = (await league.count()) ? league : leagues.first();
+      const item = scope.locator('.hl-item').last();
+      const mstar = item.locator('.hl-mstar');
+      const id = await mstar.getAttribute('data-hl-mfav');
+      await expect(mstar).toHaveAttribute('aria-pressed', 'false');
+      await mstar.click();
+      const mine = page.locator('#homeList .hl-mine');
+      await expect(mine).toBeVisible();
+      await expect(mine.locator('.hl-block-title')).toContainText(tr(dict, 'home_list.mine_title'));
+      await expect(mine.locator('a.hl-row')).toHaveCount(1);
+      await expect(mine.locator(`.hl-mstar[data-hl-mfav="${id}"]`)).toHaveAttribute('aria-pressed', 'true');
+      // En tete de sa competition.
+      const leagueKey = await scope.getAttribute('data-league');
+      await expect(page.locator(`#homeList .hl-leagues .hl-league[data-league="${leagueKey}"] .hl-item`).first().locator('.hl-mstar')).toHaveAttribute('data-hl-mfav', id);
+      // Le lien reste une ligne complete (l'etoile est hors du <a>), memes regles de verrou.
+      expect(await mine.locator('a.hl-row button').count()).toBe(0);
+      await expectLockedRowsClean(page);
+      const stored = await page.evaluate((k) => JSON.parse(localStorage.getItem(k) || '[]'), FAV_MATCHES_KEY);
+      expect(stored.map((e) => e.id)).toEqual([id]);
+      expect(stored[0].ko).toBeGreaterThan(0);
+      await expectNoHorizontalScroll(page);
+      await page.reload();
+      await expect(page.locator('#homeList .hl-mine a.hl-row')).toHaveCount(1);
+
+      // Compte : fusion dans user_metadata.fav_matches, sans toucher fav_leagues.
+      await supa.as('free');
+      await page.goto(`/${v.dir}/`);
+      await expect(page.locator('#homeList a.hl-row').first()).toBeVisible();
+      await expect.poll(() => supa.calls.filter((c) => c.kind === 'auth' && c.method === 'PUT' && c.path === '/auth/v1/user' && c.body.data.fav_matches).map((c) => c.body.data.fav_matches.map((e) => e.id)).pop()).toEqual([id]);
+      await page.evaluate((k) => localStorage.removeItem(k), FAV_MATCHES_KEY);
+      await page.reload();
+      await expect(page.locator('#homeList .hl-mine a.hl-row')).toHaveCount(1);
+      // Retrait : la section disparait.
+      await page.locator('#homeList .hl-mine .hl-mstar').click();
+      await expect(page.locator('#homeList .hl-mine')).toHaveCount(0);
+    });
+
+    test('matchs favoris passes : nettoyes automatiquement', async ({ page }) => {
+      await page.addInitScript((k) => {
+        if (!sessionStorage.getItem('seeded')) {
+          localStorage.setItem(k, JSON.stringify([{ id: '999000111', ko: Date.now() - 6 * 3600e3 }, { id: '999000222', ko: Date.now() + 3600e3 }]));
+          sessionStorage.setItem('seeded', '1');
+        }
+      }, FAV_MATCHES_KEY);
+      await page.goto(`/${v.dir}/`);
+      await expect(page.locator('#homeList a.hl-row').first()).toBeVisible();
+      await expect.poll(() => page.evaluate((k) => JSON.parse(localStorage.getItem(k) || '[]').map((e) => e.id), FAV_MATCHES_KEY)).toEqual(['999000222']);
     });
   });
 }

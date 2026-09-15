@@ -747,7 +747,7 @@ main a:focus-visible,main button:focus-visible,main summary:focus-visible,
 var allMatchs=[],currentSport='football';
 // Liste des matchs (home-list.js) et favoris (lib/fav-leagues.js). proConfirme :
 // abonne Pro CONFIRME par la reponse de match-data ; aucun chiffre avant.
-var homeList=null,homeFavorites=null,proConfirme=false;
+var homeList=null,homeFavorites=null,homeFavMatches=null,proConfirme=false;
 var freeMatchId=null;
 var authCtx={session:null,isPro:false};
 
@@ -999,8 +999,9 @@ function simulationsParMatch(){var el=document.getElementById('kpiModeles');var 
 function monterListe(){
   if(homeList||!window.IasharkHomeList)return;
   homeFavorites=window.IasharkFavLeagues?IasharkFavLeagues.createStore():null;
+  homeFavMatches=window.IasharkFavLeagues?IasharkFavLeagues.createStore({kind:'matches'}):null;
   homeList=IasharkHomeList.mount(document.getElementById('homeList'),{
-    isPro:false,favorites:homeFavorites,simulations:simulationsParMatch(),
+    isPro:false,favorites:homeFavorites,favMatches:homeFavMatches,simulations:simulationsParMatch(),
     helpers:{
       heure:heureLocale,matchDay:matchDayStr,compareMatches:compareMatchs,
       leagueName:leagueName,leagueFlag:leagueFlag,leagueLogoUrl:leagueLogoUrl,leagueCountry:leagueCountry,
@@ -1034,6 +1035,8 @@ async function loadData(){
     if(authCtx.session){
       // Favoris du compte (user_metadata.fav_leagues) fusionnes avec la liste locale.
       if(homeFavorites&&window.IasharkFavLeagues)homeFavorites.connectRemote(IasharkFavLeagues.supabaseAdapter(IasharkApp.supabase));
+      // Matchs suivis (user_metadata.fav_matches) : meme fusion.
+      if(homeFavMatches&&window.IasharkFavLeagues)homeFavMatches.connectRemote(IasharkFavLeagues.supabaseAdapter(IasharkApp.supabase,'fav_matches'));
       try{
         var res=await IasharkApp.supabase.functions.invoke('match-data',{body:{scope:'list'}});
         if(res.data&&!res.error){

@@ -62,10 +62,14 @@ test("le pipeline ne retire rien s'il ne peut pas persister ailleurs", () => {
     "sans table protegee accessible, le fichier public reste inchange");
 });
 
-test("le pari n'est nomme dans le HTML SEO que pour l'analyse offerte", () => {
+// 16/09/2026 (audit du site en ligne) : plus aucun pari nomme dans le resume SEO
+// statique, meme pour l'analyse offerte (le HTML est lu sans compte, alors que
+// l'analyse offerte exige un compte gratuit).
+test("le pari n'est jamais nomme dans le HTML SEO de l'accueil, meme offert", () => {
   const wf = read(".github/workflows/update-data.yml");
-  assert.match(wf, /var pari=\(m\.is_free&&m\.pari_rec&&!m\.no_signal\)/,
-    "nommer le pari de tous les matchs revenait a le publier dans un HTML indexe");
+  const resume = wf.slice(wf.indexOf("function seoHomeSummaryHtml("), wf.indexOf("function injectHomeSeoSummary("));
+  assert.match(resume, /var pari='';/, "nommer le pari revenait a le publier dans un HTML indexe");
+  assert.doesNotMatch(resume, /seo_ai_pick|data-market-label|m\.pari_rec|m\.conf/);
 });
 
 // Le site, la page match et la fonction Edge doivent designer LE MEME match.
@@ -116,7 +120,8 @@ test("le pipeline designe l'offre du jour par la valeur, sans offre pays", () =>
 test("une offre pays reste publique cote client pour son marche, l'offre generale ailleurs", () => {
   const liste = [
     { id: 1, date: "2026-09-02 21:00", has_signal: true, conf: 9, is_free: true, free_markets: ["default"] },
-    { id: 2, date: "2026-09-02 03:00", pari_rec: "Over 2.5", conf: 5, is_free: true, free_markets: ["mx"] },
+    // 23:00 : a 10:00 un match de 03:00 est deja joue et n'est plus jamais offert (16/09/2026).
+    { id: 2, date: "2026-09-02 23:00", pari_rec: "Over 2.5", conf: 5, is_free: true, free_markets: ["mx"] },
     { id: 3, date: "2026-09-02 20:00", has_signal: true, conf: 8 }
   ];
   const h = { day: "2026-09-02", now: "2026-09-02 10:00" };

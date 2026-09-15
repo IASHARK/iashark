@@ -94,7 +94,9 @@ function homeSummaryHref(id, leagueKey, dir, root) {
   var own = C.matchPath(dir, id);
   // Page de la version : seulement dans le perimetre de la competition.
   if ((!known || matchDirsFor(key).indexOf(dir) !== -1) && fs.existsSync(path.join(root, own.slice(1)))) return own;
-  if (!known) return null;
+  // Page championnat de la version : seulement si la version est dans le
+  // perimetre de la competition (hub indexable), sinon nom sans lien.
+  if (!known || matchDirsFor(key).indexOf(dir) === -1) return null;
   var hub = C.leagueHubPath(dir, key);
   return fs.existsSync(path.join(root, hub.slice(1))) ? hub : null;
 }

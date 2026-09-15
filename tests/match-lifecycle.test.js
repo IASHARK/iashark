@@ -419,8 +419,9 @@ test("pipeline et publication : registre commite avec son chemin, jamais publie,
   assert.match(wf, /MATCH_LIFECYCLE\.saveRegistry\('\.',registreLc\)/);
   assert.match(wf, /MATCH_LIFECYCLE\.writeRedirects\('\.',registreLc\)/);
   assert.match(wf, /SEO_PAGES\.matchRobotsMeta\(m,'fr',\{now:maintenantLc\}\)/);
-  // Lien d'accueil : page de la version, sinon version la plus proche generee (meme fonction que build-locales).
-  assert.match(wf, /MATCH_LIFECYCLE\.versionMatchHref\(m\.id,m\.league_key,dir\|\|'fr','\.'\)/);
+  // Lien d'accueil : page de la version, sinon version la plus proche generee ; versions
+  // pays (gb, za, mx) : page championnat de la version (meme fonction que build-locales, 16/09/2026).
+  assert.match(wf, /MATCH_LIFECYCLE\.homeSummaryHref\(m\.id,m\.league_key,dir\|\|'fr','\.'\)/);
   // _redirects commite (301 des pages retirees) mais jamais restaure a plat
   // apres un reset : le bloc est reapplique depuis le registre restaure.
   const outputs = wf.match(/OUTPUTS="([^"]*)"/)[1].split(/\s+/);

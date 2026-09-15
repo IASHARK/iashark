@@ -24,6 +24,8 @@ a.btn{font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:1px;padd
 .links{margin-top:22px;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1px;color:var(--muted);}
 .links a{color:var(--muted);text-decoration:none;margin:0 8px;}
 .links a:hover{color:var(--cyan);}
+.rg-foot{margin-top:22px;max-width:420px;font-size:11px;line-height:1.7;color:var(--muted);}
+.rg-foot a{color:var(--cyan);text-decoration:none;overflow-wrap:anywhere;}
 </style>
 <link rel="stylesheet" href="/assets/bottom-navigation.css"></head>
 <body>
@@ -37,7 +39,11 @@ a.btn{font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:1px;padd
   <a href="/pro.html" data-href="pro.html" data-i18n="page_404.link_tools">Outils</a>
   <a href="/blog.html" data-href="blog.html" data-i18n="page_404.link_blog">Blog</a>
 </div>
+<!-- Avertissement 18+ / jeu responsable (audit 15/09/2026) : ligne d'aide du
+     marche remplie par lib/market-config.js. -->
+<footer class="rg-foot"><span data-i18n="rg_footer.age_line">18+ · Interdit aux mineurs · Jouez responsable</span><br><span data-i18n="match_page.shell_help_label">Aide :</span> <a data-market-helpline="url" href="https://www.joueurs-info-service.fr">joueurs-info-service.fr</a><span data-market-helpline-if="phone"> · <span data-market-helpline="phone">09 74 75 13 13</span></span></footer>
 <script src="/i18n/i18n.js"></script>
+<script src="/lib/market-config.js"></script>
 <script>if(window.I18N&&window.I18N.init){window.I18N.init();}</script>
 <script src="/site-prefs.js"></script>
 <script src="/bottom-navigation.js"></script></body>

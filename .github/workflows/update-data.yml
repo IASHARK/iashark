@@ -75,6 +75,10 @@ jobs:
           // Pages SEO statiques (titres/JSON-LD des pages match, versions
           // localisees, pages championnat) : scripts/seo-pages.js.
           var SEO_PAGES=require('./scripts/seo-pages.js');
+          // Cycle de vie des pages match (registre data/match-pages-registry.json,
+          // pages conservees, noindex a J+7, 301 vers le hub a J+30) et perimetre
+          // des versions (config/leagues.json#seoMatchDirs) : scripts/match-lifecycle.js.
+          var MATCH_LIFECYCLE=require('./scripts/match-lifecycle.js');
           const RUN_OUTPUT_ENGINE_VERSION = 'run-output-engine-v1';
           var LEAGUE_COVERAGE_REPORT = null;
           try { LEAGUE_COVERAGE_REPORT = JSON.parse(fs.readFileSync('./league-coverage-report.json', 'utf8')); }
@@ -1491,8 +1495,8 @@ jobs:
           function seoDescriptionFor(m){
             return SEO_PAGES.matchDescription(m,'fr');
           }
-          function seoJsonLdFor(m){
-            return SEO_PAGES.matchJsonLd(m,'fr');
+          function seoJsonLdFor(m,entree){
+            return SEO_PAGES.matchJsonLd(m,'fr',{entry:entree||null});
           }
           function seoSummaryHtmlFor(m){
             var d=(m.date||'').split(' ')[0];
@@ -1520,13 +1524,28 @@ jobs:
           function generateMatchPages(matchsData){
             console.log('  Generating match pages (SEO)...');
             var tpl=liensVersionFr(fs.readFileSync('match.html','utf8'));
+            // Gabarit brut (sans reecriture des liens) pour scripts/seo-pages.js, qui
+            // applique lui-meme liensVersionFr a la version fr.
+            var tplBrut=fs.readFileSync('match.html','utf8');
             if(!fs.existsSync('match')) fs.mkdirSync('match');
             var keepFiles={};
+            // Registre du cycle de vie : un match sorti du run garde sa page (score
+            // final si connu dans les donnees publiques), hors sitemap a 48 h,
+            // noindex a J+7, supprimee et redirigee (301) vers le hub a J+30.
+            var maintenantLc=new Date();
+            var registreLc=MATCH_LIFECYCLE.loadRegistry('.');
+            var histLc=null;
+            try{ histLc=JSON.parse(fs.readFileSync('historique.json','utf8')); }catch(e){}
+            var resumeLc=MATCH_LIFECYCLE.updateRegistry(registreLc,matchsData,maintenantLc,{historique:histLc});
+            console.log('  Cycle de vie pages match : '+JSON.stringify(resumeLc));
+            var idsRunLc={};
             (matchsData||[]).forEach(function(m){
               // match/<id>.json (detail public, ecrit par PUBLIC_SPLIT) vit dans le
               // meme repertoire : conserve pour chaque match courant, purge sinon.
               if(m&&m.id!=null) keepFiles[String(m.id)+'.json']=true;
               if(!m.id||!m.home||!m.away) return;
+              idsRunLc[String(m.id)]=true;
+              var entreeLc=registreLc.matches[String(m.id)]||null;
               var title=seoTitleFor(m);
               var desc=seoDescriptionFor(m);
               var canonical='https://iashark.com/match/'+m.id+'.html';
@@ -1542,14 +1561,15 @@ jobs:
                 +'<meta name="twitter:title" content="'+escHtml(title)+'">'
                 +'<meta name="twitter:description" content="'+escHtml(desc)+'">'
                 +(image?'<meta name="twitter:image" content="'+escHtml(image)+'">':'')
-                +'<script type="application/ld+json">'+seoJsonLdFor(m)+'</script>'
+                +'<script type="application/ld+json">'+seoJsonLdFor(m,entreeLc)+'</script>'
                 +SEO_PAGES.matchHeadExtras(m,'fr');
               var page=tpl
                 .replace('<title>Analyse Match — IASHARK</title>','<title>'+escHtml(title)+'</title>')
                 // Le shell match.html porte un noindex par defaut (route
-                // dynamique orpheline ?id=) - retire pour ces pages
-                // statiques reelles, qui doivent etre indexees.
-                .replace('<meta name="robots" content="noindex,follow">', '')
+                // dynamique orpheline ?id=) - retire pour ces pages statiques
+                // reelles, SAUF contenu propre trop mince (MIN_INDEXABLE_WORDS)
+                // ou coup d'envoi passe depuis 7 jours : noindex,follow garde.
+                .replace('<meta name="robots" content="noindex,follow">', SEO_PAGES.matchRobotsMeta(m,'fr',{now:maintenantLc}))
                 .replace('<!--SEO_META--><!--/SEO_META-->', metaBlock)
                 .replace('<!--SEO_SUMMARY--><!--/SEO_SUMMARY-->', seoSummaryHtmlFor(m))
                 .replace('<!--FIXED_ID_SCRIPT--><!--/FIXED_ID_SCRIPT-->', '<script>var FIXED_MATCH_ID='+JSON.stringify(String(m.id))+';</script>')
@@ -1558,6 +1578,11 @@ jobs:
               fs.writeFileSync('match/'+m.id+'.html', page);
               keepFiles[String(m.id)+'.html']=true;
             });
+            // Pages FR conservees (matchs sortis du run, avant J+30) : rendues depuis
+            // l'instantane public du registre, jamais depuis le detail premium.
+            try{
+              SEO_PAGES.writeArchivedMatchPages(registreLc,{root:'.',dirs:['fr'],tpl:tplBrut,now:maintenantLc,skipIds:idsRunLc}).forEach(function(rel){ keepFiles[rel.split('/').pop()]=true; });
+            }catch(e){ console.log('  Erreur pages match conservees :',e.message); }
             try{
               var existing=fs.readdirSync('match');
               existing.forEach(function(f){
@@ -1569,9 +1594,15 @@ jobs:
             // (memes matchs assainis, meme PRELOADED_MATCH leger) et leurs
             // sitemaps. Une erreur ici ne bloque jamais les donnees du jour.
             try{
-              var seoRep=SEO_PAGES.writeSeoPages(matchsData,{root:'.',today:TODAY,tpl:fs.readFileSync('match.html','utf8')});
-              console.log('  Pages SEO localisees : '+seoRep.matchPages+' pages match, '+seoRep.hubs+' pages championnat ('+seoRep.indexableHubs+' indexables), '+seoRep.removed+' perimees supprimees');
+              var seoRep=SEO_PAGES.writeSeoPages(matchsData,{root:'.',today:TODAY,tpl:tplBrut,registry:registreLc,now:maintenantLc});
+              console.log('  Pages SEO localisees : '+seoRep.matchPages+' pages match, '+seoRep.archivedPages+' conservees, '+seoRep.hubs+' pages championnat ('+seoRep.indexableHubs+' indexables), '+seoRep.removed+' perimees supprimees');
             }catch(e){ console.log('  Erreur pages SEO localisees :',e.message); }
+            // Registre versionne + bloc 301 des pages retirees dans _redirects
+            // (scripts/build-locales.js reecrit le meme bloc depuis le registre).
+            try{
+              MATCH_LIFECYCLE.saveRegistry('.',registreLc);
+              if(MATCH_LIFECYCLE.writeRedirects('.',registreLc)) console.log('  _redirects : bloc des pages match retirees mis a jour');
+            }catch(e){ console.log('  Erreur registre/redirections pages match :',e.message); }
           }
           // i18n du SEO statique. Dictionnaires i18n/dict/<locale>.json et
           // lib/market-labels.js lus a la demande (caches sur la fonction),
@@ -1633,7 +1664,12 @@ jobs:
               // interne : /match/<id>.html pour fr et la racine, sinon
               // /<dir>/match/<id>.html ecrite par scripts/seo-pages.js).
               var lienMatch=(!dir||dir==='fr')?'/match/'+m.id+'.html':'/'+dir+'/match/'+m.id+'.html';
-              return '<li>'+escHtml(heure)+' — <strong><a href="'+lienMatch+'" style="color:inherit">'+escHtml(m.home.n)+' vs '+escHtml(m.away.n)+'</a></strong>'+(m.league?' ('+escHtml(seoLeagueName(m))+')':'')+pari+'</li>';
+              // Pas de version de ce match dans ce repertoire (perimetre
+              // config/leagues.json#seoMatchDirs) : nom sans lien, jamais un lien
+              // vers une page inexistante ni vers une autre langue.
+              var nomMatch=escHtml(m.home.n)+' vs '+escHtml(m.away.n);
+              var versionMatch=(!dir||dir==='fr')||SEO_PAGES.hasMatchVersion(m,dir);
+              return '<li>'+escHtml(heure)+' — <strong>'+(versionMatch?'<a href="'+lienMatch+'" style="color:inherit">'+nomMatch+'</a>':nomMatch)+'</strong>'+(m.league?' ('+escHtml(seoLeagueName(m))+')':'')+pari+'</li>';
             }).join('');
             // Titre : date longue localisee (<time data-seo-date>, reformatee par
             // repertoire au build) et mention explicite du fuseau des heures
@@ -1671,19 +1707,15 @@ jobs:
           var STATIC_SITEMAP_PAGES=[];
           function generateSitemaps(matchsData){
             console.log('  Generating sitemaps...');
-            var urls=STATIC_SITEMAP_PAGES.map(function(p){
-              return '<url><loc>'+p.loc+'</loc><lastmod>'+TODAY+'</lastmod><changefreq>daily</changefreq><priority>'+p.priority+'</priority></url>';
-            });
-            (matchsData||[]).forEach(function(m){
-              if(!m.id)return;
-              urls.push('<url><loc>https://iashark.com/match/'+m.id+'.html</loc><lastmod>'+TODAY+'</lastmod><changefreq>daily</changefreq><priority>0.9</priority></url>');
-            });
-            fs.writeFileSync('sitemap-fr.xml','<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'+urls.join('\n')+'\n</urlset>');
+            // sitemap-fr.xml : pages match FR presentes (actives et conservees),
+            // indexables, coup d'envoi de moins de 48 h ; lastmod exact
+            // (scripts/seo-lastmod.js, groupe matches-fr), plus la date du jour.
+            var nbMatchsFr=SEO_PAGES.writeFrMatchSitemap('.',TODAY,new Date());
             var sitemapFiles = generateLocalizedSitemaps(I18N_LOCALES, I18N_PAGES, TODAY, '.');
             // Index : tous les sitemap-*.xml presents (fr, i18n, matches-i18n,
             // leagues), lastmod = plus recent lastmod de chaque fichier.
             writeSitemapIndex('.', TODAY);
-            console.log('  Sitemap done: '+urls.length+' urls, '+sitemapFiles.length+' sitemap(s) i18n');
+            console.log('  Sitemap done: '+(STATIC_SITEMAP_PAGES.length+nbMatchsFr)+' urls FR, '+sitemapFiles.length+' sitemap(s) i18n');
           }
           // historique.json est commite dans le depot GitHub, qui est PUBLIC : une
           // prediction en attente n'y porte plus le pari d'un match payant
@@ -3540,6 +3572,13 @@ jobs:
         run: |
           set -euo pipefail
           OUTPUTS="data.json data-home.json historique.json transferts.json actus.json sitemap.xml match index.html league-coverage-report.json seo-lastmod.json"
+          # Registre du cycle de vie des pages match (scripts/match-lifecycle.js) :
+          # chemin imbrique, sauvegarde et restauration AVEC son chemin.
+          LIFECYCLE_FILES="data/match-pages-registry.json"
+          # _redirects : seul son bloc "Pages match retirees" est une sortie du run.
+          # Commite, mais jamais restaure a plat apres un reset (une regle poussee
+          # entre-temps serait ecrasee) : le bloc est reapplique depuis le registre.
+          LIFECYCLE_DERIVED="_redirects"
           # Pages SEO localisees (scripts/seo-pages.js) : <dir>/match/ et
           # <dir>/leagues/ ; pages club/derby (scripts/build-club-hubs.js) :
           # <dir>/clubs/ et <dir>/equipos/. Les articles locaux (<dir>/articles|
@@ -3566,7 +3605,7 @@ jobs:
           git config user.name "IASHARK"
           git config user.email "yaramode81@gmail.com"
 
-          git add $OUTPUTS $DIR_INDEXES $SEO_DIRS sitemap-*.xml
+          git add $OUTPUTS $DIR_INDEXES $SEO_DIRS sitemap-*.xml $LIFECYCLE_FILES $LIFECYCLE_DERIVED
           if git diff --staged --quiet; then
             echo "Aucun changement a publier."
             exit 0
@@ -3580,9 +3619,12 @@ jobs:
           for p in $SEO_DIRS; do
             cp -R --parents "$p" "$SAVE/"
           done
+          for p in $LIFECYCLE_FILES; do
+            if [ -e "$p" ]; then cp --parents "$p" "$SAVE/"; fi
+          done
 
           for attempt in 1 2 3 4 5; do
-            git add $OUTPUTS $DIR_INDEXES $SEO_DIRS sitemap-*.xml
+            git add $OUTPUTS $DIR_INDEXES $SEO_DIRS sitemap-*.xml $LIFECYCLE_FILES $LIFECYCLE_DERIVED
             git diff --staged --quiet || git commit -m "Daily update - $(date +%Y-%m-%d)"
 
             if git push; then
@@ -3605,6 +3647,13 @@ jobs:
                 cp -R "$SAVE/$p" "$(dirname "$p")/"
               fi
             done
+            for p in $LIFECYCLE_FILES; do
+              if [ -e "$SAVE/$p" ]; then
+                mkdir -p "$(dirname "$p")"
+                cp "$SAVE/$p" "$p"
+              fi
+            done
+            node -e "var L=require('./scripts/match-lifecycle.js'); L.writeRedirects('.', L.loadRegistry('.'));"
           done
 
           echo "Echec de publication apres 5 tentatives." >&2

@@ -43,6 +43,8 @@ const PAGES = require("./i18n-manifest.js");
 // Textes SEO par repertoire (i18n/seo/<dir>.json) et aides partagees avec
 // scripts/seo-pages.js (pages championnat et pages match localisees).
 const SEO = require("./seo-common.js");
+// Pages match retirees a J+30 : regles 301 tirees du registre versionne.
+const MATCH_LIFECYCLE = require("./match-lifecycle.js");
 const PAGE_FILES = PAGES.map(function (p) { return p.file; });
 // Pages retirees du site public : jamais generees, supprimees des repertoires
 // generes, redirigees vers l'accueil du repertoire (_redirects).
@@ -537,6 +539,12 @@ function redirectsContent() {
     out.push(rule("/" + d + "/blog/", hub, "301!"));
     out.push(rule("/" + d + "/blog/*", (b ? "/" + b + "/blog/" : "/blog/") + ":splat", "301!"));
   });
+
+  // Pages match retirees a J+30 (scripts/match-lifecycle.js) : le bloc suit
+  // data/match-pages-registry.json et survit donc a chaque regeneration.
+  var retiredMatches = MATCH_LIFECYCLE.redirectsBlockLines(MATCH_LIFECYCLE.loadRegistry(ROOT));
+  if (retiredMatches.length) out.push("");
+  retiredMatches.forEach(function (l) { out.push(l); });
 
   out.push("", "# --- 404 traduite par repertoire. Non forcee : ne s'applique que si aucun",
     "# fichier n'existe au chemin demande. Toujours en dernier.");

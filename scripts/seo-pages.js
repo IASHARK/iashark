@@ -35,10 +35,17 @@ const PREMIUM = require("../lib/premium-fields.js");
 const MATCH_TIME = require("../lib/match-time.js");
 const LEAGUE_NAMES = require("../lib/league-names.js");
 const LASTMOD = require("./seo-lastmod.js");
+// Cycle de vie des pages match (registre, perimetre des versions, 301).
+const LIFECYCLE = require("./match-lifecycle.js");
 
 const SITE_URL = C.SITE_URL, DIRS = C.DIRS, DIR_CODES = C.DIR_CODES, X_DEFAULT_DIR = C.X_DEFAULT_DIR;
 const esc = C.escHtml;
 const MIN_INDEXABLE_FIXTURES = 2;
+// Contenu PROPRE d'une page match (faits specifiques : equipes, competition,
+// horaire, stade, forme, classement, confrontations directes, compositions)
+// sous ce nombre de mots -> noindex,follow et hors sitemap. Le texte generique
+// (presentation IASHARK, liens, avertissement) n'est pas compte.
+const MIN_INDEXABLE_WORDS = 80;
 const MATCH_GUIDE = "prediction-ia-football-guide-2026.html";
 const HUB_GUIDES = ["plus-de-2-5-buts-probabilite-methode-poisson.html", "xg-expected-goals-guide-complet.html"];
 
@@ -101,8 +108,8 @@ function matchCrumbs(m, dir) {
 // JSON-LD SportsEvent : uniquement ce qui est reellement connu et affiche.
 // startDate = instant reel avec fuseau (les dates du pipeline sont en heure de
 // Paris : l'ancien gabarit y collait "Z", une a deux heures d'erreur).
-function matchEvent(m, dir) {
-  var d = kickoff(m), v = venue(m), ln = leagueName(m);
+function matchEvent(m, dir, opts) {
+  var d = kickoff(m), v = venue(m), ln = leagueName(m), entry = opts && opts.entry;
   var url = SITE_URL + C.matchPath(dir, m.id);
   var ev = {
     "@context": "https://schema.org",
@@ -119,23 +126,38 @@ function matchEvent(m, dir) {
     eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode"
   };
   if (d) ev.startDate = isoInstant(d);
+  // schema.org n'a pas de statut "termine" : un match joue comme prevu garde
+  // EventScheduled. Un coup d'envoi deplace entre deux runs (registre
+  // data/match-pages-registry.json) est declare EventRescheduled.
+  if (entry && entry.previous_kickoff && entry.kickoff && entry.previous_kickoff !== entry.kickoff) {
+    ev.eventStatus = "https://schema.org/EventRescheduled";
+    ev.previousStartDate = entry.previous_kickoff;
+  }
   if (v) ev.location = { "@type": "Place", name: v };
   if (ln) ev.superEvent = { "@type": "SportsEvent", name: ln };
   return ev;
 }
-function matchJsonLd(m, dir) { return JSON.stringify(matchEvent(m, dir)).replace(/</g, "\\u003c"); }
-function matchAlternates(id) { return C.alternatesFor(function (d) { return C.matchPath(d, id); }); }
+function matchJsonLd(m, dir, opts) { return JSON.stringify(matchEvent(m, dir, opts)).replace(/</g, "\\u003c"); }
+// Versions reellement generees pour ce match (config/leagues.json#seoMatchDirs,
+// fr toujours). hreflang, sitemaps et liens internes ne visent qu'elles.
+function matchDirs(m) { return LIFECYCLE.matchDirsFor(m && m.league_key); }
+function hasMatchVersion(m, dir) { return matchDirs(m).indexOf(dir) !== -1; }
+function matchAlternates(m) {
+  var isObj = !!m && typeof m === "object";
+  var id = isObj ? m.id : m;
+  return C.alternatesFor(function (d) { return C.matchPath(d, id); }, isObj ? matchDirs(m) : [X_DEFAULT_DIR]);
+}
 
 // Complements du <head> ajoutes apres le bloc meta historique : hreflang des
 // 9 versions, og:site_name/og:locale, fil d'Ariane.
 function matchHeadExtras(m, dir) {
-  return C.hreflangLinks(matchAlternates(m.id)) +
+  return C.hreflangLinks(matchAlternates(m)) +
     '<meta property="og:site_name" content="IASHARK"><meta property="og:locale" content="' + C.ogLocale(dir) + '">' +
     C.ldScript(C.breadcrumbLd(matchCrumbs(m, dir)));
 }
 
 // Bloc meta complet (meme composition que generateMatchPages du pipeline).
-function matchMetaBlock(m, dir) {
+function matchMetaBlock(m, dir, opts) {
   var title = matchTitle(m, dir), desc = matchDescription(m, dir), canonical = SITE_URL + C.matchPath(dir, m.id), image = matchImage(m);
   return '<meta name="description" content="' + esc(desc) + '">' +
     '<link rel="canonical" href="' + canonical + '">' +
@@ -148,7 +170,7 @@ function matchMetaBlock(m, dir) {
     '<meta name="twitter:title" content="' + esc(title) + '">' +
     '<meta name="twitter:description" content="' + esc(desc) + '">' +
     (image ? '<meta name="twitter:image" content="' + esc(image) + '">' : "") +
-    '<script type="application/ld+json">' + matchJsonLd(m, dir) + "</script>" +
+    '<script type="application/ld+json">' + matchJsonLd(m, dir, opts) + "</script>" +
     matchHeadExtras(m, dir);
 }
 
@@ -191,16 +213,54 @@ function derbyPageFor(m, dir) {
   var e = DERBY_INDEX[[Number(m.home.id), Number(m.away.id)].sort(function (a, b) { return a - b; }).join("-")];
   return e && e.pages && e.pages[dir] ? e.pages[dir] : null;
 }
-function matchFactsHtml(m, dir) {
+// Jour calendaire (AAAA-MM-JJ, sans heure) ; la forme utilise date_full, l instant
+// reel, formate dans le fuseau de la version.
+function dayLabel(day, dir) {
+  var t = Date.parse(String(day || "") + "T12:00:00Z");
+  return isFinite(t) ? fmt(new Date(t), dir, { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" }) : "";
+}
+function signed(n) { return n > 0 ? "+" + n : String(n); }
+var H3 = ' style="font-size:15px;font-weight:700;color:#f4f7fb;margin:16px 0 6px"';
+function listHtml(items) {
+  return '<ul style="margin:0 0 8px;padding-left:18px">' + items.map(function (i) { return "<li>" + esc(i) + "</li>"; }).join("") + "</ul>";
+}
+// Faits publics specifiques au match, rendus depuis l'instantane en liste
+// blanche (scripts/match-lifecycle.js#publicSnapshot) : meme rendu pour la page
+// active et la page conservee ; jamais un champ premium, ni conf, ni cote.
+function matchFactSections(f, dir) {
+  var ms = C.seoConf(dir).match, out = "";
+  var forms = [[f.home, f.form_home], [f.away, f.form_away]].filter(function (x) { return x[0] && x[1] && x[1].length; });
+  if (forms.length) {
+    out += "<h3" + H3 + ">" + esc(ms.form_title) + "</h3>" + forms.map(function (x) {
+      return '<p style="margin:6px 0 2px;color:#e2e8f0">' + esc(x[0].n) + "</p>" + listHtml(x[1].map(function (e) {
+        return cleanTpl(C.fill(ms.form_row, { date: e.date_full && isFinite(Date.parse(e.date_full)) ? fmt(new Date(e.date_full), dir, { day: "numeric", month: "short", year: "numeric" }) : dayLabel(e.d, dir), result: e.result ? ms["result_" + e.result] : "", score: e.score, opponent: e.opponent, side: e.home === true ? ms.side_home : e.home === false ? ms.side_away : "" }));
+      }));
+    }).join("");
+  }
+  var rows = f.classement && Array.isArray(f.classement.standings) ? f.classement.standings.filter(function (r) {
+    return r && typeof r.name === "string" && ["rank", "pts", "played", "won", "drawn", "lost", "gd"].every(function (k) { return typeof r[k] === "number"; });
+  }).sort(function (a, b) { return a.rank - b.rank; }) : [];
+  if (rows.length) {
+    out += "<h3" + H3 + ">" + esc(ms.standings_title) + "</h3>" + listHtml(rows.map(function (r) {
+      return C.fill(ms.standings_row, { rank: r.rank, team: r.name, pts: r.pts, played: r.played, won: r.won, drawn: r.drawn, lost: r.lost, gd: signed(r.gd) });
+    }));
+  }
+  if (Array.isArray(f.h2h) && f.h2h.length) {
+    out += "<h3" + H3 + ">" + esc(ms.h2h_title) + "</h3>" + listHtml(f.h2h.map(function (e) {
+      return cleanTpl(C.fill(ms.h2h_row, { date: dayLabel(e.d, dir), home: e.home, score: e.s, away: e.away }));
+    }));
+  }
+  if (f.lineups && f.lineups.home && f.lineups.away) {
+    out += "<h3" + H3 + ">" + esc(ms.lineups_title) + "</h3>" + [[f.home, f.lineups.home], [f.away, f.lineups.away]].map(function (x) {
+      return '<p style="margin:0 0 6px">' + esc(cleanTpl(C.fill(ms.lineup_row, { team: x[0].n, formation: x[1].formation || "", players: x[1].startXI.join(", ") }))) + "</p>";
+    }).join("");
+  }
+  return out;
+}
+function factRowsHtml(m, dir) {
   var s = C.seoConf(dir), ms = s.match;
   var d = kickoff(m), ln = leagueName(m), k = hubKey(m), v = venue(m);
   var hub = k ? C.leagueHubPath(dir, k) : null;
-  var crumbs = matchCrumbs(m, dir);
-  var nav = crumbs.map(function (c, i) {
-    return i < crumbs.length - 1
-      ? '<a href="' + esc(c.url.slice(SITE_URL.length)) + '"' + LINK + ">" + esc(c.name) + "</a>"
-      : '<span aria-current="page">' + esc(c.name) + "</span>";
-  }).join(' <span aria-hidden="true">›</span> ');
   function row(label, value) {
     return '<div style="display:flex;flex-wrap:wrap;gap:4px 12px;margin:0 0 4px"><dt style="min-width:120px;color:#91a0b3">' + esc(label) + '</dt><dd style="margin:0;color:#e2e8f0">' + value + "</dd></div>";
   }
@@ -208,6 +268,38 @@ function matchFactsHtml(m, dir) {
   if (ln) rows += row(ms.competition, hub ? '<a href="' + hub + '"' + LINK + ">" + esc(ln) + "</a>" : esc(ln));
   if (d) rows += row(ms.kickoff, '<time datetime="' + isoInstant(d) + '">' + esc(longDate(d, dir)) + ", " + esc(clock(d, dir)) + " (" + esc(s.tz_label) + ")</time>");
   if (v) rows += row(ms.venue, esc(v));
+  return rows;
+}
+function snapshotOf(m) { return LIFECYCLE.publicSnapshot(m) || { home: m.home, away: m.away }; }
+// Mots du contenu propre (seuil MIN_INDEXABLE_WORDS).
+function countWords(html) {
+  return String(html).replace(/<[^>]+>/g, " ").replace(/&[#a-z0-9]+;/gi, " ").split(/\s+/).filter(function (w) { return /[\p{L}\p{N}]/u.test(w); }).length;
+}
+function matchContentWords(m, dir) {
+  return countWords(esc(teams(m)) + " " + factRowsHtml(m, dir) + " " + matchFactSections(snapshotOf(m), dir));
+}
+// Mesure sur la version x-default (fr) : toutes les versions d un meme match
+// partagent la meme decision (jamais un groupe hreflang mi-indexable, mi-noindex).
+function isThinMatch(m) { return matchContentWords(m, X_DEFAULT_DIR) < MIN_INDEXABLE_WORDS; }
+// <meta robots> d'une page match : noindex,follow si contenu propre trop
+// mince, si le registre le demande (J+7) ou si le coup d'envoi date de 7 jours.
+function matchRobotsMeta(m, dir, opts) {
+  opts = opts || {};
+  var noindex = !!opts.noindex || isThinMatch(m, dir);
+  if (!noindex && opts.now) noindex = LIFECYCLE.stageFor(LIFECYCLE.kickoffIso(m), opts.now, !opts.archived).noindex;
+  return noindex ? '<meta name="robots" content="noindex,follow">' : "";
+}
+function matchFactsHtml(m, dir, opts) {
+  opts = opts || {};
+  var s = C.seoConf(dir), ms = s.match;
+  var ln = leagueName(m), k = hubKey(m);
+  var hub = k ? C.leagueHubPath(dir, k) : null;
+  var crumbs = matchCrumbs(m, dir);
+  var nav = crumbs.map(function (c, i) {
+    return i < crumbs.length - 1
+      ? '<a href="' + esc(c.url.slice(SITE_URL.length)) + '"' + LINK + ">" + esc(c.name) + "</a>"
+      : '<span aria-current="page">' + esc(c.name) + "</span>";
+  }).join(' <span aria-hidden="true">›</span> ');
   var links = ['<a href="' + C.homePath(dir) + '"' + LINK + ">" + esc(ms.free_link) + "</a>"];
   if (hub) links.push('<a href="' + hub + '"' + LINK + ">" + esc(C.fill(ms.hub_link, { league: ln })) + "</a>");
   var derby = derbyPageFor(m, dir);
@@ -216,10 +308,26 @@ function matchFactsHtml(m, dir) {
   return '<section class="match-facts" aria-labelledby="match-facts-title" style="width:100%;max-width:960px;margin:28px auto 0;padding:18px 16px 8px;border-top:1px solid rgba(141,179,211,.18);font-family:\'DM Sans\',system-ui,sans-serif;color:#c3ccd8;font-size:14px;line-height:1.6">' +
     '<nav aria-label="' + esc(ms.breadcrumb_aria) + '" style="font-size:12.5px;color:#91a0b3;margin:0 0 12px">' + nav + "</nav>" +
     '<h2 id="match-facts-title" style="font-size:17px;font-weight:700;color:#f4f7fb;margin:0 0 10px">' + esc(ms.facts_title) + "</h2>" +
-    '<dl style="margin:0 0 12px">' + rows + "</dl>" +
-    '<p style="margin:0 0 10px">' + esc(ms.about) + "</p>" +
-    '<p style="margin:0 0 10px">' + links.join(" · ") + "</p>" +
+    '<dl style="margin:0 0 12px">' + factRowsHtml(m, dir) + "</dl>" +
+    matchFactSections(snapshotOf(m), dir) +
+    (opts.archived ? "" : '<p style="margin:12px 0 10px">' + esc(ms.about) + "</p>") +
+    '<p style="margin:12px 0 10px">' + links.join(" · ") + "</p>" +
     '<p style="margin:0;font-size:12.5px;color:#91a0b3">' + esc(ms.disclaimer) + "</p>" +
+    "</section>";
+}
+// Page conservee (match sorti du run) : titre visible, score final ou statut,
+// lien vers le hub ligue de la version. Aucun script d'analyse.
+function archivedCardHtml(m, dir, st) {
+  var ms = C.seoConf(dir).match, k = hubKey(m), ln = leagueName(m);
+  var hub = k ? C.leagueHubPath(dir, k) : C.homePath(dir);
+  var status = st.final_score
+    ? '<span style="display:block;font-size:12.5px;color:#91a0b3;text-transform:uppercase;letter-spacing:.06em">' + esc(ms.final_score) + '</span><strong style="font-size:24px;color:#f4f7fb">' + esc(m.home.n) + " " + st.final_score.home + "–" + st.final_score.away + " " + esc(m.away.n) + "</strong>"
+    : '<strong style="font-size:20px;color:#f4f7fb">' + esc(st.finished ? ms.finished : ms.not_tracked) + "</strong>";
+  return '<section class="match-archived" aria-labelledby="match-archived-title" style="max-width:960px;margin:24px auto 0;padding:20px 16px;font-family:\'DM Sans\',system-ui,sans-serif;color:#c3ccd8;font-size:14px;line-height:1.6">' +
+    '<h1 id="match-archived-title" style="font-family:\'Bebas Neue\',sans-serif;font-size:30px;letter-spacing:.5px;color:#f4f7fb;margin:0 0 10px">' + esc(teams(m)) + "</h1>" +
+    '<p style="margin:0 0 12px">' + status + "</p>" +
+    (k ? '<p style="margin:0 0 8px">' + esc(C.fill(ms.archived_note, { league: ln })) + "</p>" : "") +
+    '<p style="margin:0"><a href="' + hub + '"' + LINK + ">" + esc(k ? C.fill(ms.hub_cta, { league: ln }) : ms.free_link) + "</a></p>" +
     "</section>";
 }
 
@@ -234,17 +342,28 @@ function liensVersionFr(html) {
 }
 
 // Page match complete. rawTpl = match.html tel quel.
-function renderMatchPage(rawTpl, m, dir) {
+// opts : { now, entry (registre), archived ({final_score, finished}), noindex }.
+// Page conservee (opts.archived) : ni FIXED_MATCH_ID, ni PRELOADED_MATCH, ni
+// match-page.js - uniquement les faits publics de l'instantane.
+function renderMatchPage(rawTpl, m, dir, opts) {
+  opts = opts || {};
+  var archived = opts.archived || null;
   var fr = dir === X_DEFAULT_DIR;
   var html = fr ? liensVersionFr(rawTpl) : rawTpl;
+  var robots = matchRobotsMeta(m, dir, opts);
   html = html
     .replace(/<title>[^<]*<\/title>/, function () { return "<title>" + esc(matchTitle(m, dir)) + "</title>"; })
-    .replace('<meta name="robots" content="noindex,follow">', "")
-    .replace("<!--SEO_META--><!--/SEO_META-->", function () { return matchMetaBlock(m, dir); })
-    .replace("<!--SEO_SUMMARY--><!--/SEO_SUMMARY-->", function () { return matchSummaryHtml(m, dir); })
-    .replace("<!--FIXED_ID_SCRIPT--><!--/FIXED_ID_SCRIPT-->", function () { return "<script>var FIXED_MATCH_ID=" + JSON.stringify(String(m.id)) + ";</script>"; })
-    .replace("<!--PRELOADED_MATCH_SCRIPT--><!--/PRELOADED_MATCH_SCRIPT-->", function () { return "<script>var PRELOADED_MATCH=" + JSON.stringify(PUBLIC_SPLIT.toListMatch(PREMIUM.stripPremium(m))).replace(/</g, "\\u003c") + ";</script>"; })
-    .replace("</main>", function () { return matchFactsHtml(m, dir) + "</main>"; });
+    .replace('<meta name="robots" content="noindex,follow">', function () { return robots; })
+    .replace("<!--SEO_META--><!--/SEO_META-->", function () { return matchMetaBlock(m, dir, opts); })
+    .replace("<!--SEO_SUMMARY--><!--/SEO_SUMMARY-->", function () { return archived ? "" : matchSummaryHtml(m, dir); })
+    .replace("<!--FIXED_ID_SCRIPT--><!--/FIXED_ID_SCRIPT-->", function () { return archived ? "" : "<script>var FIXED_MATCH_ID=" + JSON.stringify(String(m.id)) + ";</script>"; })
+    .replace("<!--PRELOADED_MATCH_SCRIPT--><!--/PRELOADED_MATCH_SCRIPT-->", function () { return archived ? "" : "<script>var PRELOADED_MATCH=" + JSON.stringify(PUBLIC_SPLIT.toListMatch(PREMIUM.stripPremium(m))).replace(/</g, "\\u003c") + ";</script>"; })
+    .replace("</main>", function () { return matchFactsHtml(m, dir, opts) + "</main>"; });
+  if (archived) {
+    html = html
+      .replace(/<div id="matchRoot"[^>]*><div class="loading-card">[\s\S]*?<\/div><\/div>/, function () { return '<div id="matchRoot">' + archivedCardHtml(m, dir, archived) + "</div>"; })
+      .replace('<script src="/match-page.js"></script>', "");
+  }
   if (fr) return html;
   var conf = DIRS[dir];
   var countryMarket = ["gb", "za", "mx"].indexOf(conf.market) !== -1 ? conf.market : null;
@@ -254,6 +373,9 @@ function renderMatchPage(rawTpl, m, dir) {
   html = B().setHtmlLang(html, conf.htmlLang);
   html = B().injectRuntime(html, dir);
   return html;
+}
+function renderArchivedPage(tpl, e, dir, now) {
+  return renderMatchPage(tpl, e.snapshot, dir, { archived: LIFECYCLE.archivedState(e, now), entry: e, now: now, noindex: e.status === "archived_noindex" });
 }
 
 // ---------------------------------------------------------------------------
@@ -269,6 +391,13 @@ var HUB_CSS = "*{box-sizing:border-box}body{margin:0;background:#060b12;color:#c
   ".fx .meta{display:block;font-size:13px;color:#91a0b3}.others{display:flex;flex-wrap:wrap;gap:0 16px;font-size:14px}.others a{display:inline-flex;align-items:center;min-height:44px}" +
   ".foot{max-width:960px;margin:24px auto 0;padding:18px;border-top:1px solid rgba(141,179,211,.14);font-size:12.5px;color:#91a0b3}.foot a{color:#91a0b3}";
 
+function fallbackMatchDir(dir, scope) {
+  var base = DIRS[dir].locale.split("-")[0];
+  for (var i = 0; i < scope.length; i++) {
+    if (scope[i] !== X_DEFAULT_DIR && DIRS[scope[i]].locale.split("-")[0] === base) return scope[i];
+  }
+  return X_DEFAULT_DIR;
+}
 function hubVars(key, dir) {
   var L = C.seoConf(dir).league;
   return { league: C.leagueByKey(key).displayName, country: (L.countries || {})[key] || "" };
@@ -284,7 +413,12 @@ function renderLeagueHub(key, dir, matches) {
   var name = C.leagueByKey(key).displayName;
   var title = hubText(key, dir, "title"), desc = hubText(key, dir, "description"), h1 = hubText(key, dir, "h1");
   var intro = hubText(key, dir, "intro", "intro_generic");
-  var indexable = matches.length >= MIN_INDEXABLE_FIXTURES;
+  // Hub hors du perimetre des pages match de la competition (ex. Liga MX en
+  // allemand) : noindex,follow, sans hreflang, liens vers la version la plus
+  // proche reellement generee (meme langue, sinon fr).
+  var scope = LIFECYCLE.matchDirsFor(key), inScope = scope.indexOf(dir) !== -1;
+  var linkDir = inScope ? dir : fallbackMatchDir(dir, scope);
+  var indexable = inScope && matches.length >= MIN_INDEXABLE_FIXTURES;
   var canonical = SITE_URL + C.leagueHubPath(dir, key);
   var crumbs = [{ name: s.breadcrumb.home, url: SITE_URL + C.homePath(dir) }, { name: name, url: canonical }];
   var help = B().helplineFor(dir);
@@ -294,7 +428,7 @@ function renderLeagueHub(key, dir, matches) {
     var meta = [];
     if (d) meta.push('<time datetime="' + isoInstant(d) + '">' + esc(longDate(d, dir)) + " · " + esc(clock(d, dir)) + "</time>");
     if (v) meta.push(esc(v));
-    return '<li><a href="' + C.matchPath(dir, m.id) + '">' + esc(teams(m)) + '</a><span class="meta">' + meta.join(" · ") + "</span></li>";
+    return '<li><a href="' + C.matchPath(linkDir, m.id) + '">' + esc(teams(m)) + '</a><span class="meta">' + meta.join(" · ") + "</span></li>";
   }).join("");
   var fixtures = matches.length
     ? '<p class="note">' + esc(L.kickoff_note) + '</p><ul class="fx">' + items + "</ul>"
@@ -326,7 +460,7 @@ function renderLeagueHub(key, dir, matches) {
   if (matches.length) {
     page.mainEntity = {
       "@type": "ItemList",
-      itemListElement: matches.map(function (m, i) { return { "@type": "ListItem", position: i + 1, url: SITE_URL + C.matchPath(dir, m.id), name: teams(m) }; })
+      itemListElement: matches.map(function (m, i) { return { "@type": "ListItem", position: i + 1, url: SITE_URL + C.matchPath(linkDir, m.id), name: teams(m) }; })
     };
   }
   var nav = function (k, fb) { var v = C.get(dict, k); return esc(typeof v === "string" ? v : fb); };
@@ -338,7 +472,7 @@ function renderLeagueHub(key, dir, matches) {
     '<meta name="description" content="' + esc(desc) + '">\n' +
     (indexable ? "" : '<meta name="robots" content="noindex,follow">\n') +
     '<link rel="canonical" href="' + canonical + '">\n' +
-    C.hreflangLinks(C.alternatesFor(function (d) { return C.leagueHubPath(d, key); })).replace(/></g, ">\n<") + "\n" +
+    (inScope ? C.hreflangLinks(C.alternatesFor(function (d) { return C.leagueHubPath(d, key); }, scope)).replace(/></g, ">\n<") + "\n" : "") +
     '<meta property="og:type" content="website">\n<meta property="og:site_name" content="IASHARK">\n' +
     '<meta property="og:locale" content="' + C.ogLocale(dir) + '">\n' +
     '<meta property="og:title" content="' + esc(title) + '">\n<meta property="og:description" content="' + esc(desc) + '">\n' +
@@ -370,25 +504,60 @@ function renderLeagueHub(key, dir, matches) {
 // Ecriture + sitemaps.
 function sortMatches(list) { return list.slice().sort(MATCH_TIME.compareMatches); }
 
+function matchOutDir(root, dir) { return dir === X_DEFAULT_DIR ? path.join(root, "match") : path.join(root, dir, "match"); }
+// Pages conservees (matchs sortis du run, avant J+30) des repertoires demandes.
+// Renvoie les chemins relatifs ecrits.
+function writeArchivedMatchPages(reg, opts) {
+  opts = opts || {};
+  var root = opts.root || C.ROOT, now = opts.now || new Date();
+  var tpl = opts.tpl != null ? opts.tpl : fs.readFileSync(path.join(root, "match.html"), "utf8");
+  var dirs = opts.dirs || [X_DEFAULT_DIR], skip = opts.skipIds || {};
+  var written = [];
+  LIFECYCLE.archivedEntries(reg).forEach(function (e) {
+    if (skip[e.id]) return;
+    dirs.forEach(function (dir) {
+      if ((e.dirs || []).indexOf(dir) === -1) return;
+      var file = path.join(matchOutDir(root, dir), e.id + ".html");
+      writeIfChanged(file, renderArchivedPage(tpl, e, dir, now));
+      written.push(path.relative(root, file).split(path.sep).join("/"));
+    });
+  });
+  return written;
+}
+
+// opts : { root, today, now, tpl, registry (data/match-pages-registry.json deja
+// mis a jour par l'appelant), matchDirs, hubDirs }. Sans registre : aucune page
+// conservee (les pages hors run sont supprimees, comportement historique).
 function writeSeoPages(matchs, opts) {
   opts = opts || {};
   var root = opts.root || C.ROOT;
   var today = opts.today || new Date().toISOString().slice(0, 10);
+  var now = opts.now || new Date();
+  var reg = opts.registry || null;
   var tpl = opts.tpl != null ? opts.tpl : fs.readFileSync(path.join(root, "match.html"), "utf8");
   var list = sortMatches((matchs || []).filter(validMatch));
-  var report = { matchPages: 0, hubs: 0, indexableHubs: 0, removed: 0 };
+  var report = { matchPages: 0, archivedPages: 0, hubs: 0, indexableHubs: 0, removed: 0 };
+  var inRun = {};
+  list.forEach(function (m) { inRun[String(m.id)] = true; });
 
-  var matchDirs = opts.matchDirs || DIR_CODES.filter(function (d) { return d !== X_DEFAULT_DIR; });
-  matchDirs.forEach(function (dir) {
+  var matchDirList = opts.matchDirs || DIR_CODES.filter(function (d) { return d !== X_DEFAULT_DIR; });
+  matchDirList.forEach(function (dir) {
     var out = path.join(root, dir, "match");
     fs.mkdirSync(out, { recursive: true });
     var keep = {};
     list.forEach(function (m) {
+      if (!hasMatchVersion(m, dir)) return;
       var f = String(m.id) + ".html";
-      writeIfChanged(path.join(out, f), renderMatchPage(tpl, m, dir));
+      writeIfChanged(path.join(out, f), renderMatchPage(tpl, m, dir, { now: now, entry: reg ? reg.matches[String(m.id)] || null : null }));
       keep[f] = true;
       report.matchPages++;
     });
+    if (reg) {
+      writeArchivedMatchPages(reg, { root: root, tpl: tpl, now: now, dirs: [dir], skipIds: inRun }).forEach(function (rel) {
+        keep[rel.split("/").pop()] = true;
+        report.archivedPages++;
+      });
+    }
     fs.readdirSync(out).forEach(function (f) {
       if (!keep[f]) { fs.unlinkSync(path.join(out, f)); report.removed++; }
     });
@@ -412,7 +581,7 @@ function writeSeoPages(matchs, opts) {
     });
   });
 
-  report.sitemaps = writeSeoSitemaps(root, today);
+  report.sitemaps = writeSeoSitemaps(root, today, now);
   return report;
 }
 
@@ -425,10 +594,23 @@ function urlset(entries) {
     entries.map(function (e) { return "<url><loc>" + e.loc + "</loc><lastmod>" + e.lastmod + "</lastmod></url>"; }).join("\n") +
     "\n</urlset>\n";
 }
+// Coup d'envoi declare dans le JSON-LD SportsEvent d'une page match.
+function eventStart(html) {
+  var mm = /"@type":"SportsEvent"[^<]*?"startDate":"([^"]+)"/.exec(html);
+  return mm ? Date.parse(mm[1]) : NaN;
+}
+// Une page n'entre au sitemap que si elle est indexable et, pour une page match,
+// si son coup d'envoi date de moins de 48 h (scripts/match-lifecycle.js).
+function sitemapEligible(html, now) {
+  if (isNoindex(html)) return false;
+  var k = eventStart(html), t = (now || new Date()).getTime();
+  return !(isFinite(k) && t - k >= LIFECYCLE.SITEMAP_MAX_AGE_HOURS * 3600 * 1000);
+}
 // Sitemaps construits depuis les fichiers REELLEMENT presents (jamais une URL
-// sans page, jamais une page noindex).
-function writeSeoSitemaps(root, today) {
+// sans page, jamais une page noindex, jamais un match joue depuis plus de 48 h).
+function writeSeoSitemaps(root, today, now) {
   var files = [];
+  now = now || new Date();
   function collect(group, sub, fname, dirs) {
     var t = LASTMOD.tracker(root, group, today);
     var entries = [];
@@ -437,7 +619,7 @@ function writeSeoSitemaps(root, today) {
       if (!fs.existsSync(abs)) return;
       fs.readdirSync(abs).filter(function (f) { return /\.html$/.test(f); }).sort().forEach(function (f) {
         var html = fs.readFileSync(path.join(abs, f), "utf8");
-        if (isNoindex(html)) return;
+        if (!sitemapEligible(html, now)) return;
         var loc = SITE_URL + "/" + dir + "/" + sub + "/" + f;
         entries.push({ loc: loc, lastmod: t.lastmod(loc, html) });
       });
@@ -450,18 +632,42 @@ function writeSeoSitemaps(root, today) {
   collect("leagues", "leagues", "sitemap-leagues.xml", DIR_CODES);
   return files;
 }
+// sitemap-fr.xml : pages match FR /match/<id>.html presentes, memes regles,
+// lastmod exact (scripts/seo-lastmod.js, groupe matches-fr) au lieu de la date
+// du jour systematique.
+function writeFrMatchSitemap(root, today, now) {
+  root = root || C.ROOT;
+  now = now || new Date();
+  var t = LASTMOD.tracker(root, "matches-fr", today);
+  var abs = path.join(root, "match"), entries = [];
+  if (fs.existsSync(abs)) {
+    fs.readdirSync(abs).filter(function (f) { return /^\d+\.html$/.test(f); }).sort().forEach(function (f) {
+      var html = fs.readFileSync(path.join(abs, f), "utf8");
+      if (!sitemapEligible(html, now)) return;
+      var loc = SITE_URL + "/match/" + f;
+      entries.push({ loc: loc, lastmod: t.lastmod(loc, html) });
+    });
+  }
+  t.save();
+  writeIfChanged(path.join(root, "sitemap-fr.xml"), urlset(entries));
+  return entries.length;
+}
 
 module.exports = {
-  MIN_INDEXABLE_FIXTURES: MIN_INDEXABLE_FIXTURES,
+  MIN_INDEXABLE_FIXTURES: MIN_INDEXABLE_FIXTURES, MIN_INDEXABLE_WORDS: MIN_INDEXABLE_WORDS,
   matchTitle: matchTitle, matchDescription: matchDescription, matchJsonLd: matchJsonLd, matchEvent: matchEvent,
   matchHeadExtras: matchHeadExtras, matchFactsHtml: matchFactsHtml, matchSummaryHtml: matchSummaryHtml, matchMetaBlock: matchMetaBlock,
-  matchAlternates: matchAlternates, renderMatchPage: renderMatchPage, renderLeagueHub: renderLeagueHub,
-  writeSeoPages: writeSeoPages, writeSeoSitemaps: writeSeoSitemaps, liensVersionFr: liensVersionFr
+  matchAlternates: matchAlternates, matchDirs: matchDirs, hasMatchVersion: hasMatchVersion,
+  matchContentWords: matchContentWords, isThinMatch: isThinMatch, matchRobotsMeta: matchRobotsMeta,
+  renderMatchPage: renderMatchPage, renderArchivedPage: renderArchivedPage, renderLeagueHub: renderLeagueHub,
+  writeSeoPages: writeSeoPages, writeArchivedMatchPages: writeArchivedMatchPages, writeSeoSitemaps: writeSeoSitemaps,
+  writeFrMatchSitemap: writeFrMatchSitemap, sitemapEligible: sitemapEligible, liensVersionFr: liensVersionFr
 };
 
 if (require.main === module) {
   var root = C.ROOT;
-  var today = new Date().toISOString().slice(0, 10);
+  var now = new Date();
+  var today = now.toISOString().slice(0, 10);
   // Source locale = copie assainie deja publiee : match/<id>.json pour chaque
   // page match/<id>.html existante (memes donnees que matchsPublics).
   var matchDir = path.join(root, "match");
@@ -469,9 +675,24 @@ if (require.main === module) {
     try { return JSON.parse(fs.readFileSync(path.join(matchDir, f), "utf8")); } catch (e) { return null; }
   }).filter(function (m) { return validMatch(m) && fs.existsSync(path.join(matchDir, m.id + ".html")); }) : [];
   var tpl = fs.readFileSync(path.join(root, "match.html"), "utf8");
+  // Meme cycle de vie que le pipeline (registre, pages conservees, 301).
+  var reg = LIFECYCLE.loadRegistry(root);
+  var hist = null;
+  try { hist = JSON.parse(fs.readFileSync(path.join(root, "historique.json"), "utf8")); } catch (e) {}
+  var lc = LIFECYCLE.updateRegistry(reg, matchs, now, { historique: hist });
   if (process.argv.indexOf("--no-fr") === -1) {
-    matchs.forEach(function (m) { writeIfChanged(path.join(matchDir, m.id + ".html"), renderMatchPage(tpl, m, X_DEFAULT_DIR)); });
+    var keepFr = {}, runIds = {};
+    matchs.forEach(function (m) {
+      writeIfChanged(path.join(matchDir, m.id + ".html"), renderMatchPage(tpl, m, X_DEFAULT_DIR, { now: now, entry: reg.matches[String(m.id)] || null }));
+      keepFr[m.id + ".html"] = true;
+      runIds[String(m.id)] = true;
+    });
+    writeArchivedMatchPages(reg, { root: root, tpl: tpl, now: now, dirs: [X_DEFAULT_DIR], skipIds: runIds }).forEach(function (rel) { keepFr[rel.split("/").pop()] = true; });
+    if (fs.existsSync(matchDir)) fs.readdirSync(matchDir).filter(function (f) { return /^\d+\.html$/.test(f) && !keepFr[f]; }).forEach(function (f) { fs.unlinkSync(path.join(matchDir, f)); });
+    writeFrMatchSitemap(root, today, now);
   }
-  var rep = writeSeoPages(matchs, { root: root, today: today, tpl: tpl });
-  console.log("SEO pages : " + matchs.length + " match(s) ; " + rep.matchPages + " page(s) match localisee(s), " + rep.hubs + " page(s) championnat (" + rep.indexableHubs + " indexable(s)), " + rep.removed + " fichier(s) perime(s) supprime(s) ; sitemaps : " + rep.sitemaps.join(", "));
+  var rep = writeSeoPages(matchs, { root: root, today: today, tpl: tpl, registry: reg, now: now });
+  LIFECYCLE.saveRegistry(root, reg);
+  LIFECYCLE.writeRedirects(root, reg);
+  console.log("SEO pages : " + matchs.length + " match(s) ; " + rep.matchPages + " page(s) match localisee(s), " + rep.archivedPages + " conservee(s), " + rep.hubs + " page(s) championnat (" + rep.indexableHubs + " indexable(s)), " + rep.removed + " fichier(s) perime(s) supprime(s) ; sitemaps : " + rep.sitemaps.join(", ") + " ; cycle de vie : " + JSON.stringify(lc));
 }

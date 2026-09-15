@@ -30,7 +30,12 @@ const MATCH = {
   id: 424242, league_key: "premier", league: "Premier League", date: "2026-09-19 21:00",
   home: { n: "Arsenal", id: 42 }, away: { n: "Chelsea", id: 49 },
   stade: { nom: "Emirates Stadium" }, model_output_available: true, data_quality_score: 80, conf: 7,
-  p1: 51, pn: 25, p2: 24, is_free: false
+  p1: 51, pn: 25, p2: 24, is_free: false,
+  // Faits publics (forme, confrontations) : contenu propre au-dessus de
+  // SEO.MIN_INDEXABLE_WORDS, page indexable.
+  form_home: [1, 2, 3, 4, 5].map((i) => ({ d: "2026-09-0" + i, opponent: "Opponent " + i, score: "2-1", result: "W", home: true })),
+  form_away: [1, 2, 3, 4, 5].map((i) => ({ d: "2026-09-0" + i, opponent: "Rival " + i, score: "0-1", result: "L", home: false })),
+  h2h: ["2026-03-01", "2025-10-04", "2025-03-15", "2024-09-21", "2024-04-06"].map((d, i) => ({ d, home: i % 2 ? "Arsenal" : "Chelsea", away: i % 2 ? "Chelsea" : "Arsenal", s: "1-" + i }))
 };
 
 test("i18n/seo : un fichier par repertoire public, memes cles, meta des pages du sitemap", () => {
@@ -52,14 +57,18 @@ test("i18n/seo : aucune promesse de gain ni incitation a parier", () => {
   for (const d of DIRS) assert.doesNotMatch(read("i18n/seo/" + d + ".json"), banned, d);
 });
 
-test("page match localisee : langue, canonical, hreflang des 9 versions, JSON-LD valide", () => {
+test("page match localisee : langue, canonical, hreflang des versions generees, JSON-LD valide", () => {
   const html = SEO.renderMatchPage(TPL, MATCH, "gb");
   assert.match(html, /<html[^>]*\slang="en-GB"/);
   assert.match(head(html), /<link rel="canonical" href="https:\/\/iashark\.com\/gb\/match\/424242\.html">/);
   assert.doesNotMatch(head(html), /name="robots" content="noindex/);
   const alts = alternates(html);
-  assert.equal(alts.length, DIRS.length + 1);
-  for (const d of DIRS) assert.ok(alts.some((a) => a.hl === C.DIRS[d].hreflang && a.href === "https://iashark.com" + C.matchPath(d, 424242)), d);
+  // Premier League : fr, gb, za, en (config/leagues.json#seoMatchDirs) + x-default.
+  const gen = SEO.matchDirs(MATCH);
+  assert.deepEqual(gen.slice().sort(), ["en", "fr", "gb", "za"]);
+  assert.equal(alts.length, gen.length + 1);
+  for (const d of gen) assert.ok(alts.some((a) => a.hl === C.DIRS[d].hreflang && a.href === "https://iashark.com" + C.matchPath(d, 424242)), d);
+  for (const d of DIRS.filter((x) => !gen.includes(x))) assert.ok(!alts.some((a) => a.hl === C.DIRS[d].hreflang), d + " : hreflang vers une version non generee");
   assert.ok(alts.some((a) => a.hl === "x-default" && a.href === "https://iashark.com/match/424242.html"));
   const ld = ldBlocks(html);
   const ev = ld.find((b) => b["@type"] === "SportsEvent");

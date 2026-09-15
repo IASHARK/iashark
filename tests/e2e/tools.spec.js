@@ -31,8 +31,11 @@ for (const v of VERSIONS) {
     test('Pro simule : le scanner affiche les marches reels', async ({ page, supa, siteData, dictFor }) => {
       const dict = await dictFor(v.locale);
       await supa.as('pro');
+      // Attente creee AVANT la navigation : l'appel peut partir avant la fin de
+      // page.goto() (scripts defer + pre-chargement), l'attente ne doit pas le rater.
+      const pending = supa.waitForCall('match-data');
       await page.goto(`/${v.dir}/pro.html`);
-      const call = await supa.waitForCall('match-data');
+      const call = await pending;
       expect(call.body).toEqual({ scope: 'list' });
       const rows = page.locator('#scanBox li');
       await expect(rows.first()).toBeVisible();

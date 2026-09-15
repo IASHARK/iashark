@@ -86,11 +86,14 @@
   function chargerMatchs() {
     if (!ctx.isPro) return Promise.resolve(null);      // aucun appel pour un non-abonne
     if (etat.matchs) return Promise.resolve(etat.matchs);
+    // Un seul appel en vol : le pre-chargement de init() et le rendu du scanner
+    // partagent la meme promesse (16/09/2026).
+    if (etat.matchsEnCours) return etat.matchsEnCours;
     // scope 'list' : liste legere (data-home.json) enrichie cote serveur des
     // champs premium pour un abonne. Les outils n'utilisent que des champs de
     // liste (id, equipes, no_signal, pari_rec, cote_rec, model_probability) :
     // inutile de faire lire les ~25 Mo de data.json a la fonction Edge.
-    return window.IasharkApp.supabase.functions.invoke('match-data', { body: { scope: 'list' } }).then(function (r) {
+    etat.matchsEnCours = window.IasharkApp.supabase.functions.invoke('match-data', { body: { scope: 'list' } }).then(function (r) {
       // Le serveur decide : sans isPro confirme par match-data (plan lu cote
       // serveur), aucune donnee de match n est utilisee, meme si le client se
       // croit abonne. match-data ne sert de toute facon aucun champ premium a un
@@ -98,7 +101,8 @@
       if (r.error || !r.data || r.data.isPro !== true) return null;
       etat.matchs = (r.data.matchs || []).filter(function (m) { return m && m.pari_rec && !m.no_signal; });
       return etat.matchs;
-    }).catch(function () { return null; });
+    }).catch(function () { return null; }).then(function (res) { etat.matchsEnCours = null; return res; });
+    return etat.matchsEnCours;
   }
 
   /* ---------------------------------------------------------------------
@@ -755,12 +759,18 @@
     // sans ca, t() renverrait toujours le repli francais meme sur /en/,
     // /es/, etc. Se degrade sans bruit si window.I18N est absent.
     var langue = (window.I18N && window.I18N.init) ? window.I18N.init() : Promise.resolve();
-    langue.then(function () {
-      return window.IasharkApp.context();
-    }).then(function (c) {
+    // Dictionnaire et session en PARALLELE (16/09/2026) : la session ne depend
+    // pas de la langue. Avant, l'abonne attendait dictionnaire -> session ->
+    // preferences/journal avant le premier appel match-data.
+    var contexte = Promise.resolve().then(function () { return window.IasharkApp.context(); });
+    Promise.all([langue.catch(function () {}), contexte]).then(function (res) {
+      var c = res[1];
       ctx = c || ctx;
       if (c && c.profile && c.profile.capital) etat.bankroll = Number(c.profile.capital);
       if (!c || !c.user) return null;
+      // Abonne confirme cote client : la liste de matchs part tout de suite, en
+      // parallele des preferences et du journal (le serveur tranche via isPro).
+      chargerMatchs();
       return Promise.all([
         window.IasharkApp.supabase.from('user_preferences').select('daily_exposure_pct,stop_loss_pct').eq('user_id', c.user.id).maybeSingle(),
         window.IasharkApp.supabase.from('betting_decisions').select('*').eq('user_id', c.user.id).order('created_at', { ascending: false }).limit(100)

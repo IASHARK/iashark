@@ -64,14 +64,9 @@ async function fetchJson(url) {
 // Charge (une fois par worker) le jeu de donnees d'un run.
 async function loadSiteData(baseURL) {
   let home;
-  let fullData = null; // data.json, repli production tant que les fichiers decoupes ne sont pas deployes
-  if (IS_PROD) {
-    try { home = await fetchJson(baseURL.replace(/\/$/, '') + '/data-home.json'); } catch (e) {
-      // Meme repli que le site (index.html, match-page.js) : data.json complet.
-      fullData = await fetchJson(baseURL.replace(/\/$/, '') + '/data.json');
-      home = fullData;
-    }
-  } else home = JSON.parse(fs.readFileSync(path.join(DIST, 'data-home.json'), 'utf8'));
+  // data.json n'est plus publie (16/09/2026) : aucun repli, meme en production.
+  if (IS_PROD) home = await fetchJson(baseURL.replace(/\/$/, '') + '/data-home.json');
+  else home = JSON.parse(fs.readFileSync(path.join(DIST, 'data-home.json'), 'utf8'));
   const raw = Array.isArray(home.matchs) ? home.matchs : [];
 
   const free = raw.find((m) => m && m.is_free === true) || null;
@@ -104,13 +99,8 @@ async function loadSiteData(baseURL) {
     const key = String(id);
     if (detailCache.has(key)) return detailCache.get(key);
     let d;
-    if (IS_PROD) {
-      try { d = await fetchJson(baseURL.replace(/\/$/, '') + '/match/' + key + '.json'); } catch (e) {
-        if (!fullData) fullData = await fetchJson(baseURL.replace(/\/$/, '') + '/data.json');
-        d = (fullData.matchs || []).find((m) => String(m.id) === key);
-        if (!d) throw e;
-      }
-    } else d = JSON.parse(fs.readFileSync(path.join(DIST, 'match', key + '.json'), 'utf8'));
+    if (IS_PROD) d = await fetchJson(baseURL.replace(/\/$/, '') + '/match/' + key + '.json');
+    else d = JSON.parse(fs.readFileSync(path.join(DIST, 'match', key + '.json'), 'utf8'));
     d = shiftMatch(d, shiftDays);
     detailCache.set(key, d);
     return d;
@@ -139,7 +129,7 @@ async function loadSiteData(baseURL) {
   }
 
   return {
-    isProd: IS_PROD, splitDeployed: !fullData, shiftDays, home: shiftedHome, matchs, free, paid, template,
+    isProd: IS_PROD, splitDeployed: true, shiftDays, home: shiftedHome, matchs, free, paid, template,
     detail, withPremium, matchDataResponse,
   };
 }

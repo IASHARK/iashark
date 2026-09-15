@@ -4,6 +4,11 @@
 [build]
   command = "node scripts/build-public.js"
   publish = "dist"
+  # Saute le deploiement quand le commit ne touche aucun fichier publie ni la
+  # configuration du build (docs, tests, workflows, raw_api/...). Toujours un
+  # build sans commit de reference. Voir scripts/netlify-ignore.sh (16/09/2026,
+  # compte coupe pour « usage_exceeded » le 15/09).
+  ignore = "bash scripts/netlify-ignore.sh"
 
 # /api/geo : pays / region / ville APPROXIMATIFS deduits du reseau par Netlify
 # pour les statistiques anonymes (funnel-track.js). Aucune adresse IP n'est

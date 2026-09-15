@@ -4,7 +4,7 @@
 // Node pur, aucune dependance (fetch natif, Node >= 20).
 //
 // Trois modes :
-//   node scripts/site-health-check.js [--base https://iashark.com] [--out resultats.json] [--data-json auto|always|never]
+//   node scripts/site-health-check.js [--base https://iashark.com] [--out resultats.json]
 //       Controle la production. Imprime le rapport JSON sur stdout, un resume
 //       lisible sur stderr, ajoute un tableau au resume du job GitHub
 //       (GITHUB_STEP_SUMMARY). Code de sortie 1 si un controle CRITIQUE echoue.
@@ -33,9 +33,12 @@ const ROOT = path.join(__dirname, "..");
 const DEFAULT_BASE = "https://iashark.com";
 const API_FOOTBALL_STATUS_URL = "https://v3.football.api-sports.io/status";
 
+// 16/09/2026 (quota Netlify « usage_exceeded » le 15/09) : echantillon reduit,
+// une page par regime (FR/UE, UK, MX) + une page match et une page legale ;
+// plus aucun telechargement de data.json (n'est plus publie).
 const PAGES = [
-  ["/fr/", "fr"], ["/gb/", "en-GB"], ["/za/", "en-ZA"], ["/mx/", "es-MX"], ["/en/", "en"],
-  ["/gb/match.html", "en-GB"], ["/mx/abonnement.html", "es-MX"], ["/fr/cgv.html", "fr"],
+  ["/fr/", "fr"], ["/gb/", "en-GB"], ["/mx/", "es-MX"],
+  ["/gb/match.html", "en-GB"], ["/fr/cgv.html", "fr"],
 ];
 const TEXT_FILES = [
   ["/sitemap.xml", /<(urlset|sitemapindex)\b/i, "ne ressemble pas a un sitemap XML"],
@@ -54,7 +57,7 @@ const REDIRECTS = [
   ["/gb/blog.html", 301, "/en/blog/"],
   ["/historique.html", 301, "/fr/"],
 ];
-const DETAIL_SAMPLE_SIZE = 6;
+const DETAIL_SAMPLE_SIZE = 3;
 
 // ---------------------------------------------------------------------------
 function parseArgs(argv) {
@@ -138,20 +141,14 @@ async function runChecks(args) {
     results.push(R("source-data-home", "deploiement", "Fichier data-home.json publie", "ok", home.matchs.length + " match(s), genere le " + (home.generated_at || "?")));
   } else {
     results.push(R("source-data-home", "deploiement", "Fichier data-home.json publie", "warn",
-      "HTTP " + ((homeRes && (homeRes.status || homeRes.error)) || "?") + " : fichiers decoupes pas encore en ligne, repli sur data.json",
-      "Normal tant qu'un run \"Update IASHARK Daily\" utilisant lib/public-data-split.js n'a pas ete deploye. Si cela persiste apres un Daily update, verifier que data-home.json est copie dans dist/ par scripts/build-public.js."));
+      "HTTP " + ((homeRes && (homeRes.status || homeRes.error)) || "?") + " : la liste des matchs n'est pas en ligne",
+      "Verifier le dernier deploiement Netlify et que data-home.json est copie dans dist/ par scripts/build-public.js."));
   }
-  const utcHour = now.getUTCHours();
-  const wantData = args.dataJson === "always" || (args.dataJson === "auto" && (!home || utcHour === 8 || utcHour === 20));
-  let data = null;
-  if (wantData) {
-    const dataRes = await http(base + "/data.json", { timeoutMs: 180000, keepBody: false });
-    data = dataRes && dataRes.status === 200 && dataRes.json && Array.isArray(dataRes.json.matchs) ? dataRes.json : null;
-    if (!data) notes.push("data.json illisible : HTTP " + ((dataRes && (dataRes.status || dataRes.error)) || "?"));
-    else notes.push("data.json lu (" + (dataRes.bytes / 1e6).toFixed(1) + " Mo, " + data.matchs.length + " matchs).");
-  } else {
-    notes.push("data.json (~25 Mo) non telecharge a ce passage : controle complet a 08h et 20h UTC ou via --data-json always.");
-  }
+  // data.json n'est plus publie (16/09/2026) : --data-json est accepte pour
+  // compatibilite mais ignore. run_output (safe_pick) est controle sur les
+  // fichiers du depot par tests/premium-leak-real-files.test.js.
+  const data = null;
+  notes.push("data.json n'est plus publie : liste data-home.json + echantillon de " + DETAIL_SAMPLE_SIZE + " match/<id>.json.");
   const matches = home ? home.matchs : data ? data.matchs : null;
 
   results.push(checks.checkUpcomingMatches(matches, now));
@@ -177,7 +174,7 @@ async function runChecks(args) {
   if (home) results.push(checks.checkPremiumLeaks("fuite-data-home", "data-home.json", home.matchs, premium));
   if (data) results.push(checks.checkPremiumLeaks("fuite-data-json", "data.json", data.matchs, premium));
   results.push(data ? checks.checkSafePick(data.run_output, data.matchs)
-    : R("fuite-safe-pick", "fuite", "run_output (safe_pick, combines, buteurs) masque hors match offert", "skip", "data.json non lu a ce passage"));
+    : R("fuite-safe-pick", "fuite", "run_output (safe_pick, combines, buteurs) masque hors match offert", "skip", "data.json n'est plus publie : controle sur le depot (tests/premium-leak-real-files.test.js)"));
 
   // Echantillon match/<id>.json : matchs offerts + prochains matchs payants.
   let details = [];

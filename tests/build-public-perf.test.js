@@ -71,10 +71,14 @@ test("site construit : empreinte ?v= sur les JS/CSS/images locaux et cache long 
   assert.match(headers, /\n\/assets\/\*\n  Cache-Control: public, max-age=31536000, immutable\n/);
   assert.match(headers, /\n\/app-client\.js\n  Cache-Control: public, max-age=31536000, immutable\n/);
   assert.match(headers, /\n\/i18n\/dict\/\*\n  X-Robots-Tag: noindex\n  Cache-Control: public, max-age=300, stale-while-revalidate=86400\n/);
-  // Jamais de Cache-Control global (Netlify fusionnerait les valeurs) ni sur HTML/JSON de donnees.
+  // Jamais de Cache-Control global (Netlify fusionnerait les valeurs). Donnees
+  // regenerees par le pipeline : cache COURT seulement (16/09/2026, quota Netlify).
   const globalBlock = headers.split(/\n(?=\S)/)[0];
   assert.doesNotMatch(globalBlock, /Cache-Control/);
-  assert.doesNotMatch(headers, /\n\/(data-home|data)\.json\n(  [^\n]*\n)*  Cache-Control/);
+  assert.match(headers, /\n\/data-home\.json\n  X-Robots-Tag: noindex\n  Cache-Control: public, max-age=120, stale-while-revalidate=600\n/);
+  assert.match(headers, /\n\/match\/\*\n  Cache-Control: public, max-age=120, stale-while-revalidate=600\n/);
+  assert.doesNotMatch(headers, /\n\/(data-home\.json|match\/\*)\n(  [^\n]*\n)*  Cache-Control:[^\n]*immutable/);
+  assert.ok(!fs.existsSync(path.join(site.dir, "data.json")), "data.json ne doit plus etre publie");
   // La CSP autorise toujours supabase-js (jsdelivr) et les logos (api-sports).
   assert.match(globalBlock, /script-src[^;]*https:\/\/cdn\.jsdelivr\.net/);
   assert.match(globalBlock, /img-src[^;]*https:\/\/media\.api-sports\.io/);

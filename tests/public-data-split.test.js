@@ -112,12 +112,14 @@ test("les pages lisent les fichiers legers, sans casser le cache avec Date.now()
   assert.match(pages["match-page.js"], /functions\.invoke\('match-data',\{body:\{id:String\(id\)\}\}\)/);
 });
 
-test("la fonction Edge lit les fichiers decoupes, valide l'identifiant et garde data.json en repli", () => {
+// 16/09/2026 (quota Netlify depasse le 15/09) : la fonction ne telecharge plus
+// jamais data.json (~13 Mo par appel), meme sans portee ; data.json n'est plus publie.
+test("la fonction Edge lit uniquement les fichiers decoupes et valide l'identifiant", () => {
   const fn = read("supabase/functions/match-data/index.ts");
   assert.match(fn, /\/data-home\.json/);
   assert.match(fn, /"\/match\/" \+ id \+ "\.json"/);
   assert.match(fn, /\/\^\\d\{1,12\}\$\/\.test\(/);
-  assert.match(fn, /https:\/\/iashark\.com\/data\.json/, "repli sur data.json si les fichiers decoupes manquent");
+  assert.doesNotMatch(fn.replace(/\/\/.*$/gm, ""), /data\.json"/, "aucun telechargement de data.json");
 });
 
 // 16/09/2026 : champs publics derives de la liste d'accueil.

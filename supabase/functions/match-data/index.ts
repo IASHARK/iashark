@@ -2,11 +2,13 @@ import { createClient } from "jsr:@supabase/supabase-js@2";
 
 const SUPA_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-const DATA_URL = "https://iashark.com/data.json";
-// Fichiers publics decoupes (lib/public-data-split.js, 14/09/2026) : data.json
-// pese ~25 Mo, surtout player_history. La liste legere suffit a l'accueil ; la
-// page match et la fiche joueur n'ont besoin que du detail de LEUR match.
-// Memes champs que data.json (copie assainie matchsPublics), jamais plus.
+// Fichiers publics decoupes (lib/public-data-split.js, 14/09/2026) : la liste
+// legere suffit a l'accueil ; la page match et la fiche joueur n'ont besoin que
+// du detail de LEUR match. Memes champs que la copie assainie matchsPublics,
+// jamais plus.
+// 16/09/2026 (quota Netlify « usage_exceeded » du 15/09) : plus AUCUN
+// telechargement de data.json (~13 Mo par appel). Sans portee (anciens clients
+// en cache), la fonction sert la liste legere ; data.json n'est plus publie.
 const LIST_URL = "https://iashark.com/data-home.json";
 const SITE_URL = "https://iashark.com";
 function detailUrl(id: string): string {
@@ -15,7 +17,7 @@ function detailUrl(id: string): string {
 
 // Portee demandee : { id } (page match, fiche joueur : liste legere + detail
 // complet de CE match) ou { scope: "list" } (accueil, page Outils : liste
-// legere). Sans parametre (anciens clients en cache) : data.json complet.
+// legere). Sans parametre (anciens clients en cache) : liste legere aussi.
 async function lirePortee(req: Request): Promise<{ id: string | null; list: boolean }> {
   const url = new URL(req.url);
   let id: unknown = url.searchParams.get("id");
@@ -43,29 +45,22 @@ async function lireJson(url: string): Promise<Record<string, unknown>> {
 }
 
 async function chargerDonnees(portee: { id: string | null; list: boolean }): Promise<Record<string, unknown>> {
-  if (portee.id || portee.list) {
-    try {
-      const [liste, detail] = await Promise.all([
-        lireJson(LIST_URL),
-        portee.id ? lireJson(detailUrl(portee.id)) : Promise.resolve(null),
-      ]);
-      const matchs = Array.isArray(liste.matchs) ? [...(liste.matchs as Record<string, unknown>[])] : [];
-      if (portee.id && detail) {
-        if (String(detail.id) !== portee.id) throw new Error("detail inattendu pour " + portee.id);
-        const i = matchs.findIndex((m) => String(m.id) === portee.id);
-        if (i === -1) matchs.push(detail);
-        else matchs[i] = detail;
-      }
-      // detail_fields : champs absents des matchs de liste (detail_omitted).
-      // Sert a ne pas regonfler la liste avec les champs premium de detail.
-      return { matchs, generated_at: liste.generated_at ?? null, detail_fields: liste.detail_fields ?? [] };
-    } catch (e) {
-      // Fichiers decoupes absents (deploiement du site pas encore passe) : repli.
-      console.warn("fichiers decoupes indisponibles, repli sur data.json :", String(e));
-    }
+  // Liste legere dans tous les cas ; detail de CE match si un id est demande.
+  // Fichier indisponible : erreur (500), jamais de repli sur un fichier lourd.
+  const [liste, detail] = await Promise.all([
+    lireJson(LIST_URL),
+    portee.id ? lireJson(detailUrl(portee.id)) : Promise.resolve(null),
+  ]);
+  const matchs = Array.isArray(liste.matchs) ? [...(liste.matchs as Record<string, unknown>[])] : [];
+  if (portee.id && detail) {
+    if (String(detail.id) !== portee.id) throw new Error("detail inattendu pour " + portee.id);
+    const i = matchs.findIndex((m) => String(m.id) === portee.id);
+    if (i === -1) matchs.push(detail);
+    else matchs[i] = detail;
   }
-  // data.json : garde ?t= (comportement historique de ce chemin).
-  return await lireJson(DATA_URL + "?t=" + Date.now());
+  // detail_fields : champs absents des matchs de liste (detail_omitted).
+  // Sert a ne pas regonfler la liste avec les champs premium de detail.
+  return { matchs, generated_at: liste.generated_at ?? null, detail_fields: liste.detail_fields ?? [] };
 }
 
 // COPIE LITTERALE de lib/premium-fields.js (PREMIUM_FIELDS). Deno ne charge

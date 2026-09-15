@@ -18,7 +18,7 @@
 //   --data FICHIER        data.json local explicite
 //   --data-json MODE      fallback (defaut : seulement si data-home.json est
 //                         illisible ; en local : lu s'il existe) | always | never
-//   --details N           nombre de match/<id>.json controles (defaut 6)
+//   --details N           nombre de match/<id>.json controles (defaut 3)
 //   --max-age-hours H     fraicheur maximale de generated_at (defaut 30)
 //   --out FICHIER         ecrit le rapport JSON (pour scripts/health-alert.js)
 //   --gate                code 1 seulement pour fichier illisible, liste vide
@@ -39,7 +39,7 @@ const DEFAULT_BASE = "https://iashark.com";
 const USAGE = "Usage : node scripts/health-check.js [--base URL | --local DIR | --home F --data F] [--data-json fallback|always|never] [--details N] [--max-age-hours H] [--out rapport.json] [--gate] [--now ISO]";
 
 function parseArgs(argv) {
-  const a = { base: DEFAULT_BASE, local: null, home: null, data: null, dataJson: "fallback", details: 6, maxAgeHours: 30, out: null, gate: false, now: null, help: false, errors: [] };
+  const a = { base: DEFAULT_BASE, local: null, home: null, data: null, dataJson: "fallback", details: 3, maxAgeHours: 30, out: null, gate: false, now: null, help: false, errors: [] };
   for (let i = 0; i < argv.length; i++) {
     const k = argv[i];
     const next = () => argv[++i];
@@ -57,7 +57,7 @@ function parseArgs(argv) {
     else a.errors.push("option inconnue : " + k);
   }
   if (["fallback", "always", "never"].indexOf(a.dataJson) === -1) { a.errors.push("--data-json invalide : " + a.dataJson); a.dataJson = "fallback"; }
-  if (!Number.isInteger(a.details) || a.details < 0) { a.errors.push("--details invalide"); a.details = 6; }
+  if (!Number.isInteger(a.details) || a.details < 0) { a.errors.push("--details invalide"); a.details = 3; }
   if (!(a.maxAgeHours > 0)) { a.errors.push("--max-age-hours invalide"); a.maxAgeHours = 30; }
   if (a.now && isNaN(new Date(a.now).getTime())) { a.errors.push("--now invalide : " + a.now); a.now = null; }
   a.base = String(a.base || DEFAULT_BASE).replace(/\/+$/, "");
@@ -145,16 +145,12 @@ async function runHealthCheck(args, deps) {
     }
   } else {
     input.homeLabel = args.base + "/data-home.json";
-    input.dataLabel = args.base + "/data.json";
     const h = await fetchJson(input.homeLabel, d, 60000);
     input.home = h.json; input.homeError = h.error;
     const homeOk = input.home && Array.isArray(input.home.matchs);
-    if (args.dataJson === "always" || (args.dataJson === "fallback" && !homeOk)) {
-      const r = await fetchJson(input.dataLabel, d, 180000);
-      input.data = r.json; input.dataError = r.error;
-    } else if (!homeOk) {
-      input.dataError = "non téléchargé (--data-json never)";
-    }
+    // data.json n'est plus publie (16/09/2026, quota Netlify depasse le 15/09) :
+    // jamais telecharge en ligne, quel que soit --data-json (fichiers locaux seulement).
+    if (!homeOk) input.dataError = "data.json n'est plus publié";
   }
 
   const list = input.home && Array.isArray(input.home.matchs) ? input.home.matchs

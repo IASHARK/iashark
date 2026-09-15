@@ -131,18 +131,20 @@ test("reseau : lit data-home.json, echantillon match/<id>.json, pas data.json", 
   assert.ok(!report.results.some((x) => x.status === "fail"), JSON.stringify(report.results.filter((x) => x.status === "fail")));
 });
 
-test("reseau : data-home.json en 5xx (reessaye) -> repli data.json ; tout en panne -> echec", async () => {
+// 16/09/2026 : data.json n'est plus publie (quota Netlify) : jamais telecharge en ligne.
+test("reseau : data-home.json en 5xx (reessaye) -> echec, jamais de repli data.json ; tout en panne -> echec", async () => {
   const calls = [];
   const data = { matchs: FRESH().matchs, run_output: { snapshot: "2026-09-14T06:25:00Z" } };
   const routes = { "https://iashark.com/data-home.json": { status: 503, body: "" }, "https://iashark.com/data.json": { body: data } };
-  const report = await hc.runHealthCheck(hc.parseArgs(["--now", NOW_ISO, "--details", "0"]), { fetchImpl: fakeFetch(routes, calls), retryDelayMs: 0 });
+  const report = await hc.runHealthCheck(hc.parseArgs(["--now", NOW_ISO, "--details", "0", "--data-json", "always"]), { fetchImpl: fakeFetch(routes, calls), retryDelayMs: 0 });
   assert.equal(calls.filter((u) => u.endsWith("/data-home.json")).length, 2);
-  assert.equal(report.results.find((x) => x.id === "source-publique").status, "warn");
-  assert.equal(report.results.find((x) => x.id === "fuite-data-json").status, "ok");
+  assert.ok(!calls.some((u) => /\/data\.json$/.test(u)), "data.json telecharge en ligne");
+  assert.equal(report.summary.status, "fail");
 
   const down = await hc.runHealthCheck(hc.parseArgs(["--now", NOW_ISO]), { fetchImpl: fakeFetch({ "https://iashark.com/data-home.json": new Error("ECONNRESET") }, []), retryDelayMs: 0 });
   assert.equal(down.summary.status, "fail");
-  assert.match(down.results[0].detail, /ECONNRESET.*HTTP 404/);
+  assert.match(down.results[0].detail, /ECONNRESET/);
+  assert.ok(!JSON.stringify(down).includes("https://iashark.com/data.json"), "aucune URL data.json en ligne");
   assert.equal(hc.exitCodeFor(down, true), 1);
 });
 

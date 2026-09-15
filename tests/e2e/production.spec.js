@@ -40,11 +40,10 @@ test.describe('production', () => {
     const leaks = [];
     const home = await request.get('/data-home.json');
     const homeIsJson = home.status() === 200 && /json/.test(home.headers()['content-type'] || '');
-    // Liste publique effectivement lue par le site : data-home.json, sinon data.json (repli du site).
-    const listUrl = homeIsJson ? '/data-home.json' : '/data.json';
-    const listRes = homeIsJson ? home : await request.get('/data.json');
-    expect(listRes.status(), listUrl).toBe(200);
-    const data = await listRes.json();
+    // Liste publique lue par le site. data.json n'est plus publie (16/09/2026) : aucun repli.
+    const listUrl = '/data-home.json';
+    expect(homeIsJson, '/data-home.json absent (HTTP ' + home.status() + ')').toBe(true);
+    const data = await home.json();
     expect(Array.isArray(data.matchs) && data.matchs.length, listUrl + ' sans matchs').toBeTruthy();
     for (const m of data.matchs) { const l = premiumLeaks(m); if (l.length) leaks.push(`${listUrl} match ${m.id} : ${l.join(', ')}`); }
     const sample = data.matchs.filter((m) => m.is_free !== true).slice(0, 8);
@@ -56,7 +55,5 @@ test.describe('production', () => {
       if (l.length) leaks.push(`match/${m.id}.json : ${l.join(', ')}`);
     }
     expect(leaks).toEqual([]);
-    // Separe du controle de fuite : le decoupage public (lib/public-data-split.js) doit etre en ligne.
-    expect(homeIsJson, '/data-home.json absent (HTTP ' + home.status() + ') : fichiers publics decoupes non deployes, le site retombe sur data.json (~25 Mo)').toBe(true);
   });
 });

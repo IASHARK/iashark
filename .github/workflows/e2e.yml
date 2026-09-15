@@ -4,8 +4,10 @@ name: e2e
 #  - job "local"      : push et pull request sur main. Construit dist/ comme
 #                       Netlify (node scripts/build-public.js), le sert avec
 #                       tests/e2e/helpers/static-server.js et rejoue les 9 versions.
-#  - job "production" : push sur main (ou lancement manuel). Attend le
-#                       deploiement Netlify du commit puis teste https://iashark.com.
+#  - job "production" : lancement manuel + une fois par semaine (dimanche). Plus
+#                       au push (16/09/2026 : quota Netlify « usage_exceeded »
+#                       le 15/09, ~318 tests contre https://iashark.com a chaque
+#                       push sur main). Teste https://iashark.com tel que deploye.
 # Supabase, Stripe et analytics sont toujours simules par interception reseau :
 # aucun compte reel, aucun paiement reel. Echec : rapport en artefact (+ issue
 # GitHub sur push). tests.yml (tests unitaires) reste le gate independant.
@@ -15,6 +17,9 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+  schedule:
+    # Production : dimanche 06:40 UTC (hors run quotidien du pipeline).
+    - cron: '40 6 * * 0'
   workflow_dispatch:
     inputs:
       target:
@@ -37,7 +42,7 @@ env:
 
 jobs:
   local:
-    if: github.event_name != 'workflow_dispatch' || inputs.target != 'production'
+    if: github.event_name == 'push' || github.event_name == 'pull_request' || (github.event_name == 'workflow_dispatch' && inputs.target != 'production')
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
@@ -104,7 +109,7 @@ jobs:
             });
 
   production:
-    if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.target != 'local')
+    if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.target != 'local')
     runs-on: ubuntu-latest
     timeout-minutes: 60
     env:
@@ -118,13 +123,6 @@ jobs:
           cache-dependency-path: package-lock.json
       - name: Install dependencies
         run: npm ci
-      - name: Wait for Netlify deploy of this commit
-        if: github.event_name == 'push'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          DEPLOY_TIMEOUT_MINUTES: "20"
-          DEPLOY_FALLBACK_WAIT_SECONDS: "240"
-        run: node tests/e2e/helpers/wait-for-deploy.js
       - name: Playwright version
         id: pw
         run: echo "version=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
@@ -150,7 +148,7 @@ jobs:
           path: tests/e2e/output/
           retention-days: 14
       - name: Open issue on failure
-        if: failure() && github.event_name == 'push'
+        if: failure() && github.event_name == 'schedule'
         uses: actions/github-script@v7
         with:
           script: |

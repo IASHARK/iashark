@@ -12,7 +12,7 @@ name: site-health
 #    Les annulations des collecteurs frequents (closing-odds, forward-odds-*)
 #    sont ignorees : leur groupe de concurrence annule normalement les runs en
 #    attente.
-# B. Controle de sante de la production toutes les 2 heures (et a la demande) :
+# B. Controle de sante de la production toutes les 6 heures (et a la demande) :
 #    scripts/site-health-check.js. Issue "🚨 Santé du site – date" si un
 #    controle critique echoue, fermee quand tout repasse. Avertissements dans
 #    le resume du job uniquement.
@@ -31,15 +31,9 @@ on:
     types: [completed]
     branches: [main]
   schedule:
-    - cron: '15 */2 * * *'
+    # Toutes les 6 h (16/09/2026 : quota Netlify depasse le 15/09 ; etait 2 h).
+    - cron: '15 */6 * * *'
   workflow_dispatch:
-    inputs:
-      data_json:
-        description: "Telecharger data.json (~25 Mo) : auto (08h/20h UTC ou si data-home.json absent), always, never"
-        required: false
-        default: 'always'
-        type: choice
-        options: ['auto', 'always', 'never']
 
 permissions:
   issues: write
@@ -97,8 +91,7 @@ jobs:
           # Optionnels : controle ignore (skip) si le secret n'existe pas.
           APISPORTS_KEY: ${{ secrets.APISPORTS_KEY }}
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-          DATA_JSON_MODE: ${{ inputs.data_json || 'auto' }}
-        run: node scripts/site-health-check.js --data-json "$DATA_JSON_MODE" --out health-results.json > /dev/null
+        run: node scripts/site-health-check.js --out health-results.json > /dev/null
 
       - name: Ouvrir, mettre a jour ou fermer l'issue "Santé du site"
         if: always()

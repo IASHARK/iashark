@@ -30,7 +30,11 @@ const PUBLIC_ROOT_FILES = [
   "index.html", "404.html", "admin.html", "blog.html",
   "robots.txt", "_redirects", "_headers",
   "favicon.ico", "favicon-32x32.png", "favicon-512.png", "icon-192.png", "icon-512.png", "apple-touch-icon.png",
-  "data.json", "data-home.json", "actus.json", "transferts.json",
+  // data.json (~13 Mo) n'est plus publie (16/09/2026, quota Netlify depasse le
+  // 15/09) : aucune page, aucun script, aucune fonction ne le lit en ligne
+  // (tests/netlify-usage.test.js). Il reste dans le depot pour le pipeline.
+  // actus.json et transferts.json restent : lus par blog/index.html.
+  "data-home.json", "actus.json", "transferts.json",
   "i18n/i18n.js",
 ];
 const ASSET_EXT = /\.(js|json|css|png|jpe?g|svg|webp|gif|ico|woff2?|ttf|txt|xml|webmanifest)$/i;
@@ -106,8 +110,8 @@ if (forbidden.length) {
 }
 
 // Jamais publies, meme references par une page : historique des paris (depot
-// uniquement, audit fuite du 14/09/2026).
-const NEVER_PUBLISH = /^historique\.json$/;
+// uniquement, audit fuite du 14/09/2026) et data.json (16/09/2026, bande passante).
+const NEVER_PUBLISH = /^(historique|data)\.json$/;
 Array.from(files).forEach(function (f) { if (NEVER_PUBLISH.test(f)) files.delete(f); });
 
 if (CHECK_ONLY) {

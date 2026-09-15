@@ -8,8 +8,9 @@
 
 # CACHE (audit perf 15/09/2026). Aucun Cache-Control dans le bloc /* : Netlify
 # fusionnerait ses valeurs avec celles des regles ci-dessous.
-# - HTML et donnees JSON (data-home.json, match/<id>.json, data.json) : cache
-#   par defaut de Netlify (max-age=0, must-revalidate, ETag) ;
+# - HTML : cache par defaut de Netlify (max-age=0, must-revalidate, ETag) ;
+# - data-home.json et match/* (pages et JSON regeneres par le pipeline) :
+#   max-age=120, stale-while-revalidate=600 ;
 # - /assets/* : immutable. Chaque reference locale publiee porte ?v=<empreinte
 #   du contenu> (scripts/build-public.js) ; un asset reference par un chemin
 #   construit en JS doit changer de nom s'il change de contenu ;
@@ -21,12 +22,15 @@
   Cache-Control: public, max-age=31536000, immutable
 
 # Donnees JSON publiques : lues par les pages, jamais indexees comme documents
-# (audit SEO 14/09/2026). Pas de cache long : data-home.json et match/<id>.json
-# sont regeneres a chaque run du pipeline (revalidation ETag cote page).
-/data.json
-  X-Robots-Tag: noindex
+# (audit SEO 14/09/2026). Cache court (16/09/2026, quota Netlify depasse le
+# 15/09) : 2 min, puis 10 min de revalidation en arriere-plan. Regeneres a
+# chaque run du pipeline : jamais plus de quelques minutes de retard.
+# data.json n'est plus publie (scripts/build-public.js).
 /data-home.json
   X-Robots-Tag: noindex
+  Cache-Control: public, max-age=120, stale-while-revalidate=600
+/match/*
+  Cache-Control: public, max-age=120, stale-while-revalidate=600
 /actus.json
   X-Robots-Tag: noindex
 /transferts.json
